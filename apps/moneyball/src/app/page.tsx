@@ -1,6 +1,6 @@
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
-import type { TeamCode } from "@moneyball/shared";
+import { toKSTDisplayString, type TeamCode } from "@moneyball/shared";
 import Link from "next/link";
 
 // Phase 1: 정적 샘플 데이터 (Phase 2에서 Supabase 연동)
@@ -72,20 +72,8 @@ const SAMPLE_PREDICTIONS = [
   },
 ];
 
-function getTodayString() {
-  return new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
-    .format(new Date())
-    .replace(/\. /g, "-")
-    .replace(/\./g, "");
-}
-
 export default function HomePage() {
-  const today = getTodayString();
+  const today = toKSTDisplayString();
 
   return (
     <div className="space-y-8">

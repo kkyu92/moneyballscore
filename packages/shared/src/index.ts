@@ -33,3 +33,35 @@ export const DEFAULT_WEIGHTS = {
 
 // 홈팀 어드밴티지
 export const HOME_ADVANTAGE = 0.03;
+
+// 신뢰도 → Tailwind 색상 클래스
+export function getConfidenceColor(pct: number): string {
+  if (pct >= 65) return 'text-green-600';
+  if (pct >= 55) return 'text-yellow-600';
+  return 'text-gray-600';
+}
+
+// 적중률 → Tailwind 색상 클래스 (낮은 값에 빨간색)
+export function getAccuracyColor(pct: number): string {
+  if (pct >= 65) return 'text-green-600';
+  if (pct >= 55) return 'text-yellow-600';
+  return 'text-red-600';
+}
+
+// KST 기준 YYYY-MM-DD 문자열 생성
+export function toKSTDateString(date: Date = new Date()): string {
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const year = kst.getUTCFullYear();
+  const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(kst.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// KST 기준 한국어 날짜 표시 (예: 2026년 04월 14일)
+export function toKSTDisplayString(date: Date = new Date()): string {
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const year = kst.getUTCFullYear();
+  const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(kst.getUTCDate()).padStart(2, '0');
+  return `${year}년 ${month}월 ${day}일`;
+}

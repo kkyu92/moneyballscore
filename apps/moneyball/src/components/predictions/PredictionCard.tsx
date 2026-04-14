@@ -1,4 +1,4 @@
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, getConfidenceColor, type TeamCode } from "@moneyball/shared";
 
 interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -74,13 +74,7 @@ export function PredictionCard({
           <span className="text-xs text-gray-400">VS</span>
           <div className="mt-1">
             <span
-              className={`text-lg font-bold ${
-                confidencePct >= 65
-                  ? "text-green-600"
-                  : confidencePct >= 55
-                    ? "text-yellow-600"
-                    : "text-gray-600"
-              }`}
+              className={`text-lg font-bold ${getConfidenceColor(confidencePct)}`}
             >
               {confidencePct}%
             </span>

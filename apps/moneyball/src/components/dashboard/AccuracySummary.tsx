@@ -1,3 +1,5 @@
+import { getAccuracyColor } from "@moneyball/shared";
+
 interface AccuracySummaryProps {
   total: number;
   correct: number;
@@ -18,13 +20,7 @@ export function AccuracySummary({
       <h3 className="text-sm font-medium text-gray-500 mb-4">시즌 적중률</h3>
       <div className="flex items-end gap-2 mb-4">
         <span
-          className={`text-4xl font-bold ${
-            ratePct >= 65
-              ? "text-green-600"
-              : ratePct >= 55
-                ? "text-yellow-600"
-                : "text-red-600"
-          }`}
+          className={`text-4xl font-bold ${getAccuracyColor(ratePct)}`}
         >
           {ratePct}%
         </span>
