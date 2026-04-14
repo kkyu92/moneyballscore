@@ -70,10 +70,11 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       {/* 히어로 섹션 */}
-      <section>
-        <h1 className="text-3xl font-bold mb-2">오늘의 승부예측</h1>
-        <p className="text-gray-500">
-          {today} KBO 경기 세이버메트릭스 기반 분석
+      <section className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
+        <p className="text-brand-300 text-sm mb-1">{today}</p>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</h1>
+        <p className="text-brand-200">
+          KBO {games.length}경기 세이버메트릭스 기반 분석
         </p>
       </section>
 
@@ -149,36 +150,45 @@ export default async function HomePage() {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
-            <p className="text-lg">오늘 예측 데이터가 아직 없습니다.</p>
-            <p className="text-sm mt-2">
-              매일 KST 15:00에 선발 확정 후 예측이 생성됩니다.
+          <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center">
+            <span className="text-5xl block mb-4">⚾</span>
+            <p className="text-lg font-medium text-gray-600">오늘 예측 데이터가 아직 없습니다</p>
+            <p className="text-sm text-gray-400 mt-2">
+              매일 KST 15:00에 선발 확정 후 예측이 생성됩니다
             </p>
+            <Link href="/predictions" className="inline-block mt-4 text-sm text-brand-600 hover:underline">
+              지난 예측 보기 →
+            </Link>
           </div>
         )}
       </section>
 
       {/* 방법론 소개 v1.5 */}
-      <section className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-bold mb-3">분석 방법론 v1.5</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+      <section className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">분석 방법론</h2>
+          <Link href="/about" className="text-xs text-brand-600 hover:underline">
+            자세히 보기 →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: "선발 FIP", weight: "15%", desc: "투수 실력" },
-            { label: "타선 wOBA", weight: "15%", desc: "타격 생산성" },
-            { label: "불펜 FIP", weight: "10%", desc: "중계/마무리" },
-            { label: "최근 폼", weight: "10%", desc: "최근 10경기" },
-            { label: "Elo + WAR", weight: "16%", desc: "종합 전력" },
+            { label: "선발 FIP + xFIP", weight: "20%", icon: "🎯" },
+            { label: "타선 wOBA", weight: "15%", icon: "💪" },
+            { label: "불펜 + 수비", weight: "15%", icon: "🛡" },
+            { label: "최근 폼 + 상대전적", weight: "15%", icon: "📈" },
+            { label: "Elo + WAR", weight: "16%", icon: "⚡" },
+            { label: "구장 + 홈어드밴티지", weight: "7%", icon: "🏟" },
           ].map((item) => (
-            <div key={item.label} className="p-3">
-              <p className="text-2xl font-bold text-blue-600">{item.weight}</p>
-              <p className="text-sm font-medium mt-1">{item.label}</p>
-              <p className="text-xs text-gray-500">{item.desc}</p>
+            <div key={item.label} className="flex items-center gap-3 p-3 bg-surface rounded-lg">
+              <span className="text-lg">{item.icon}</span>
+              <div>
+                <p className="text-sm font-medium">{item.label}</p>
+                <p className="text-xs text-brand-600 font-bold">{item.weight}</p>
+              </div>
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-400 mt-4 text-center">
-          + 선발xFIP 5% / 상대전적 5% / 수비SFR 5% / 구장보정 4% / 홈어드밴티지 3%
-        </p>
       </section>
     </div>
   );
