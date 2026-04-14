@@ -1,0 +1,33 @@
+name: Live Game Update
+
+on:
+  schedule:
+    # 경기 시간대 10분 간격 (KST 18:00~22:30 = UTC 09:00~13:30)
+    - cron: '*/10 9-13 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Update live games
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          LIVE_URL="${{ secrets.PRODUCTION_URL }}/api/live"
+
+          echo "Updating live games..."
+          RESPONSE=$(curl -sf -X POST "$LIVE_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -d '{}' 2>&1) || true
+
+          echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
+
+          # 활성 경기가 없으면 조기 종료 (정상)
+          LIVE=$(echo "$RESPONSE" | jq -r '.liveGames // 0' 2>/dev/null)
+          if [ "$LIVE" = "0" ]; then
+            echo "No active games. Done."
+          fi

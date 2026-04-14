@@ -22,6 +22,10 @@ export { predict } from './engine/predictor';
 
 // 파이프라인
 export { runDailyPipeline } from './pipeline/daily';
+export { runLiveUpdate } from './pipeline/live';
+
+// 라이브
+export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
 
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
