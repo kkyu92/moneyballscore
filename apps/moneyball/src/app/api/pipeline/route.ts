@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { runDailyPipeline } from '@moneyball/kbo-data';
+import { runDailyPipeline, notifyError } from '@moneyball/kbo-data';
 
 export async function POST(request: NextRequest) {
   // CRON_SECRET 인증
@@ -13,9 +13,10 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const date = body.date as string | undefined;
   const mode = (body.mode as 'predict' | 'verify') || 'predict';
+  const triggeredBy = (body.triggeredBy as 'cron' | 'manual' | 'api') || 'api';
 
   try {
-    const result = await runDailyPipeline(date, mode);
+    const result = await runDailyPipeline(date, mode, triggeredBy);
 
     // 예측 생성 후 ISR revalidation 트리거
     if (mode === 'predict' && result.predictionsGenerated > 0) {
@@ -34,6 +35,10 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error('[Pipeline API]', message);
+
+    // 에러 알림
+    try { await notifyError('Pipeline API', message); } catch {}
+
     return Response.json({ error: message }, { status: 500 });
   }
 }

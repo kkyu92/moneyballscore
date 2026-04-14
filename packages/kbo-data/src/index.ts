@@ -23,5 +23,8 @@ export { predict } from './engine/predictor';
 // 파이프라인
 export { runDailyPipeline } from './pipeline/daily';
 
+// 알림
+export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
+
 // 공유 re-export
 export { KBO_TEAMS, DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';

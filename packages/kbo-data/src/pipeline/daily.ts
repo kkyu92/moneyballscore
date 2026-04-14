@@ -5,7 +5,8 @@ import { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS } fr
 import { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from '../scrapers/fancy-stats';
 import { fetchBatterLeaders } from '../scrapers/fangraphs';
 import { predict } from '../engine/predictor';
-import type { PredictionInput, PipelineResult, ScrapedGame } from '../types';
+import { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from '../notify/telegram';
+import type { PredictionInput, PredictionResult, PipelineResult, ScrapedGame } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -79,11 +80,17 @@ async function getOrCreatePlayerId(
  */
 export async function runDailyPipeline(
   date?: string,
-  mode: 'predict' | 'verify' = 'predict'
+  mode: 'predict' | 'verify' = 'predict',
+  triggeredBy: 'cron' | 'manual' | 'api' = 'api'
 ): Promise<PipelineResult> {
+  const startTime = Date.now();
   const targetDate = date || toKSTDateString();
   const db = createAdminClient();
   const errors: string[] = [];
+  const predictionSummaries: Array<{
+    homeTeam: string; awayTeam: string;
+    predictedWinner: string; confidence: number; homeWinProb: number;
+  }> = [];
 
   console.log(`[Pipeline] ${mode} mode for ${targetDate}`);
 
@@ -135,15 +142,33 @@ export async function runDailyPipeline(
 
   // verify 모드면 결과만 업데이트하고 끝
   if (mode === 'verify') {
-    // 적중률 업데이트
     await updateAccuracy(db, leagueId, targetDate);
-    return {
-      date: targetDate,
-      gamesFound: games.length,
-      predictionsGenerated: 0,
-      gamesSkipped: 0,
-      errors,
+
+    // 결과 알림용 데이터 수집
+    const verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
+    const durationMs = Date.now() - startTime;
+    const verifyResult: PipelineResult = {
+      date: targetDate, gamesFound: games.length,
+      predictionsGenerated: 0, gamesSkipped: 0, errors,
     };
+
+    // 실행 히스토리 기록
+    await db.from('pipeline_runs').insert({
+      run_date: targetDate, mode, status: 'success',
+      games_found: games.length, predictions: 0, games_skipped: 0,
+      errors: '[]', duration_ms: durationMs, triggered_by: triggeredBy,
+    }).then(null, (e: unknown) => console.error('[Pipeline] Failed to log run:', e));
+
+    // Telegram 결과 알림
+    try {
+      if (verifyResults.length > 0) {
+        await notifyResults(targetDate, verifyResults as any);
+      }
+    } catch (e) {
+      console.error('[Pipeline] Telegram notification failed:', e);
+    }
+
+    return verifyResult;
   }
 
   // 2. Fancy Stats에서 통계 수집
@@ -299,21 +324,110 @@ export async function runDailyPipeline(
       );
 
       predictionsGenerated++;
+      predictionSummaries.push({
+        homeTeam: game.homeTeam,
+        awayTeam: game.awayTeam,
+        predictedWinner: result.predictedWinner,
+        confidence: result.confidence,
+        homeWinProb: result.homeWinProb,
+      });
       console.log(
         `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`
       );
     }
   }
 
-  console.log(`[Pipeline] Done: ${predictionsGenerated} predictions, ${gamesSkipped} skipped, ${errors.length} errors`);
-
-  return {
+  const durationMs = Date.now() - startTime;
+  const pipelineResult: PipelineResult = {
     date: targetDate,
     gamesFound: games.length,
     predictionsGenerated,
     gamesSkipped,
     errors,
   };
+
+  console.log(`[Pipeline] Done in ${(durationMs / 1000).toFixed(1)}s: ${predictionsGenerated} predictions, ${gamesSkipped} skipped, ${errors.length} errors`);
+
+  // 실행 히스토리 기록
+  await db.from('pipeline_runs').insert({
+    run_date: targetDate,
+    mode,
+    status: errors.length > 0 ? (predictionsGenerated > 0 ? 'partial' : 'error') : 'success',
+    games_found: games.length,
+    predictions: predictionsGenerated,
+    games_skipped: gamesSkipped,
+    errors: errors.length > 0 ? JSON.stringify(errors) : '[]',
+    duration_ms: durationMs,
+    triggered_by: triggeredBy,
+  }).then(null, (e: unknown) => console.error('[Pipeline] Failed to log run:', e));
+
+  // Telegram 알림
+  try {
+    if (predictionsGenerated > 0) {
+      await notifyPredictions(pipelineResult, predictionSummaries as any);
+    }
+    await notifyPipelineStatus(pipelineResult, durationMs);
+  } catch (e) {
+    console.error('[Pipeline] Telegram notification failed:', e);
+  }
+
+  return pipelineResult;
+}
+
+// teamId → TeamCode 역매핑
+function reverseTeamMap(teamIdMap: Record<string, number>): Record<number, string> {
+  const reverse: Record<number, string> = {};
+  for (const [code, id] of Object.entries(teamIdMap)) {
+    reverse[id] = code;
+  }
+  return reverse;
+}
+
+/**
+ * verify 모드 결과 수집 (Telegram 알림용)
+ */
+async function getVerifyResults(
+  db: DB,
+  leagueId: number,
+  date: string,
+  teamIdMap: Record<string, number>
+) {
+  const idToCode = reverseTeamMap(teamIdMap);
+
+  const { data: gamesData } = await db
+    .from('games')
+    .select('id, home_team_id, away_team_id, home_score, away_score, winner_team_id')
+    .eq('league_id', leagueId)
+    .eq('game_date', date)
+    .eq('status', 'final');
+
+  if (!gamesData) return [];
+
+  const results = [];
+  for (const game of gamesData) {
+    if (!game.winner_team_id) continue;
+
+    const { data: pred } = await db
+      .from('predictions')
+      .select('predicted_winner, is_correct')
+      .eq('game_id', game.id)
+      .eq('prediction_type', 'pre_game')
+      .single();
+
+    if (pred) {
+      results.push({
+        homeTeam: idToCode[game.home_team_id] || 'UNK',
+        awayTeam: idToCode[game.away_team_id] || 'UNK',
+        predictedWinner: idToCode[pred.predicted_winner] || 'UNK',
+        actualWinner: idToCode[game.winner_team_id] || 'UNK',
+        isCorrect: pred.is_correct ?? false,
+        homeScore: game.home_score ?? 0,
+        awayScore: game.away_score ?? 0,
+      });
+    }
+  }
+
+  return results;
 }
 
 /**

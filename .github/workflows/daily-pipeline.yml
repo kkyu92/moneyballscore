@@ -65,7 +65,7 @@ jobs:
           MODE="${{ steps.mode.outputs.mode }}"
           DATE="${{ steps.mode.outputs.date }}"
 
-          BODY="{\"mode\":\"${MODE}\""
+          BODY="{\"mode\":\"${MODE}\",\"triggeredBy\":\"cron\""
           if [ -n "$DATE" ]; then
             BODY="${BODY},\"date\":\"${DATE}\""
           fi
