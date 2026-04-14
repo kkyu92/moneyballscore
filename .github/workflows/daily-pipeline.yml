@@ -41,10 +41,14 @@ jobs:
 
       - name: Determine mode
         id: mode
+        env:
+          INPUT_MODE: ${{ github.event.inputs.mode }}
+          INPUT_DATE: ${{ github.event.inputs.date }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
-            echo "date=${{ github.event.inputs.date }}" >> $GITHUB_OUTPUT
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "mode=$INPUT_MODE" >> $GITHUB_OUTPUT
+            echo "date=$INPUT_DATE" >> $GITHUB_OUTPUT
           else
             HOUR=$(date -u +%H)
             if [ "$HOUR" -lt 10 ]; then

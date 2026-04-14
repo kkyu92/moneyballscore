@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const paths = (body.paths as string[]) || ['/', '/predictions'];
+  const rawPaths = Array.isArray(body.paths) ? body.paths : ['/', '/predictions'];
+  const paths = rawPaths.filter((p: unknown): p is string => typeof p === 'string' && p.startsWith('/')).slice(0, 10);
 
   for (const path of paths) {
     revalidatePath(path);

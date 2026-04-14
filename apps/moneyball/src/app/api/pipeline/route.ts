@@ -11,8 +11,9 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const date = body.date as string | undefined;
-  const mode = (body.mode as 'predict' | 'verify') || 'predict';
+  const rawDate = body.date as string | undefined;
+  const date = rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : undefined;
+  const mode = body.mode === 'verify' ? 'verify' as const : 'predict' as const;
   const triggeredBy = (body.triggeredBy as 'cron' | 'manual' | 'api') || 'api';
 
   try {
