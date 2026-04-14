@@ -40,8 +40,18 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     throw new Error(`KBO live API error: ${res.status}`);
   }
 
-  const json = await res.json();
-  const rawGames = JSON.parse(json.d);
+  const text = await res.text();
+  const jsonEnd = text.indexOf('}<') !== -1 ? text.indexOf('}<') + 1 : text.length;
+  const cleanJson = text.slice(0, jsonEnd);
+
+  let json: any;
+  try {
+    json = JSON.parse(cleanJson);
+  } catch {
+    throw new Error(`KBO live API parse error: ${cleanJson.slice(0, 100)}`);
+  }
+
+  const rawGames = json.d ? JSON.parse(json.d) : (json.game || []);
 
   const liveGames: LiveGameState[] = [];
   for (const raw of rawGames) {

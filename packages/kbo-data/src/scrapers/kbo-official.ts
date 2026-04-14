@@ -59,8 +59,27 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     throw new Error(`KBO API error: ${res.status} ${res.statusText}`);
   }
 
-  const json = await res.json();
-  const rawGames: KBOGameRaw[] = JSON.parse(json.d);
+  // KBO API 응답은 JSON 뒤에 HTML 에러 페이지가 붙을 수 있음
+  const text = await res.text();
+  const jsonEnd = text.indexOf('}<') !== -1 ? text.indexOf('}<') + 1 : text.length;
+  const cleanJson = text.slice(0, jsonEnd);
+
+  let json: any;
+  try {
+    json = JSON.parse(cleanJson);
+  } catch {
+    throw new Error(`KBO API parse error: ${cleanJson.slice(0, 100)}`);
+  }
+
+  // 응답 형식: { "d": "JSON string" } 또는 { "game": [], "code": "100" }
+  let rawGames: KBOGameRaw[];
+  if (json.d) {
+    rawGames = JSON.parse(json.d);
+  } else if (json.game) {
+    rawGames = json.game;
+  } else {
+    return [];
+  }
 
   const games: ScrapedGame[] = [];
   for (const raw of rawGames) {
