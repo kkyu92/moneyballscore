@@ -8,6 +8,7 @@ import { predict } from '../engine/predictor';
 import { runDebate } from '../agents/debate';
 import type { GameContext } from '../agents/types';
 import type { PredictionHistory } from '../agents/calibration-agent';
+import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from '../notify/telegram';
 import type { PredictionInput, PredictionResult, PipelineResult, ScrapedGame } from '../types';
 
@@ -146,6 +147,15 @@ export async function runDailyPipeline(
   // verify 모드면 결과만 업데이트하고 끝
   if (mode === 'verify') {
     await updateAccuracy(db, leagueId, targetDate);
+
+    // Compound 루프: Calibration + Agent Memory
+    try {
+      await updateCalibration();
+      await generateAgentMemories(targetDate);
+      console.log('[Pipeline] Calibration + Agent memories updated');
+    } catch (e) {
+      console.error('[Pipeline] Compound loop failed:', e);
+    }
 
     // 결과 알림용 데이터 수집
     const verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
