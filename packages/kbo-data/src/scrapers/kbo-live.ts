@@ -1,5 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
-import { TEAM_NAME_MAP } from '../types';
+import { TEAM_NAME_MAP, KBO_API_CODE_MAP } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 
@@ -28,12 +28,12 @@ export interface LiveGameState {
  * KBO 공식 AJAX API에서 진행 중인 경기 라이브 상태 수집
  */
 export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
-  const yymmdd = date.replace(/-/g, '').slice(2);
+  const yyyymmdd = date.replace(/-/g, '');
 
   const res = await fetch(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
-    body: JSON.stringify({ leId: 1, srId: 0, date: yymmdd }),
+    body: JSON.stringify({ leId: '1', srId: '0', date: yyyymmdd }),
   });
 
   if (!res.ok) {
@@ -55,22 +55,23 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
 
   const liveGames: LiveGameState[] = [];
   for (const raw of rawGames) {
-    const homeTeam = resolveTeamCode(raw.T_NM_H);
-    const awayTeam = resolveTeamCode(raw.T_NM_A);
+    const homeTeam = KBO_API_CODE_MAP[raw.HOME_ID] || resolveTeamCode(raw.HOME_NM);
+    const awayTeam = KBO_API_CODE_MAP[raw.AWAY_ID] || resolveTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 판단
+    const statusText = raw.GAME_SC_HEADER_NM || raw.G_ST || '';
     let status: LiveGameState['status'] = 'scheduled';
-    if (raw.G_ST === '경기종료' || raw.G_ST === '종료') {
+    if (statusText.includes('종료') || statusText === 'Final') {
       status = 'final';
-    } else if (raw.G_ST === '경기중' || raw.G_ST === '진행' || (raw.SC_H && raw.G_ST !== '취소')) {
+    } else if (statusText.includes('회') || statusText.includes('진행') || raw.HOME_SCORE != null) {
       status = 'live';
     }
 
-    // 이닝 정보 파싱 (G_ST에서 "5회초" 같은 형태)
+    // 이닝 정보 파싱 (예: "5회초", "9회말")
     let inning = 0;
     let isTop = true;
-    const inningMatch = raw.G_ST?.match(/(\d+)회(초|말)?/);
+    const inningMatch = statusText.match(/(\d+)회(초|말)?/);
     if (inningMatch) {
       inning = parseInt(inningMatch[1], 10);
       isTop = inningMatch[2] !== '말';
@@ -80,8 +81,8 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
       externalGameId: raw.G_ID,
       homeTeam,
       awayTeam,
-      homeScore: parseInt(raw.SC_H || '0', 10),
-      awayScore: parseInt(raw.SC_A || '0', 10),
+      homeScore: raw.HOME_SCORE ?? 0,
+      awayScore: raw.AWAY_SCORE ?? 0,
       inning,
       isTop,
       outs: 0,      // 상세 정보 추후 추가 가능

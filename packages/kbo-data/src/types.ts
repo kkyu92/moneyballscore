@@ -94,15 +94,18 @@ export interface KBOGameListResponse {
 export interface KBOGameRaw {
   G_ID: string;
   G_DT: string;        // YYYYMMDD
-  G_TM: string;        // HHmm
+  G_TM: string;        // HH:mm
   S_NM: string;        // 구장명
-  T_NM_H: string;      // 홈팀명 (한글)
-  T_NM_A: string;      // 원정팀명 (한글)
-  P_NM_H?: string;     // 홈 선발투수
-  P_NM_A?: string;     // 원정 선발투수
-  SC_H?: string;       // 홈 점수
-  SC_A?: string;       // 원정 점수
-  G_ST: string;         // 경기 상태
+  HOME_NM: string;     // 홈팀명 (한글)
+  AWAY_NM: string;     // 원정팀명 (한글)
+  HOME_ID: string;     // 홈팀 코드
+  AWAY_ID: string;     // 원정팀 코드
+  B_PIT_P_NM?: string; // 홈 선발투수
+  T_PIT_P_NM?: string; // 원정 선발투수
+  HOME_SCORE?: number;  // 홈 점수
+  AWAY_SCORE?: number;  // 원정 점수
+  GAME_SC_HEADER_NM?: string; // 경기 상태 텍스트
+  G_ST?: string;        // 경기 상태 (legacy)
 }
 
 // 팀 한글명 → TeamCode 매핑
@@ -117,4 +120,18 @@ export const TEAM_NAME_MAP: Record<string, TeamCode> = {
   '한화': 'HHE',
   'NC': 'NCB',
   '키움': 'KIW',
+};
+
+// KBO API 팀 코드 → 내부 TeamCode 매핑
+export const KBO_API_CODE_MAP: Record<string, TeamCode> = {
+  'SK': 'SSG',   // SSG (구 SK)
+  'HT': 'KIA',   // KIA
+  'LG': 'LGT',   // LG
+  'OB': 'DSB',   // 두산 (구 OB)
+  'KT': 'KTW',   // KT
+  'SS': 'SSA',   // 삼성
+  'LT': 'LOT',   // 롯데
+  'HH': 'HHE',   // 한화
+  'NC': 'NCB',   // NC
+  'WO': 'KIW',   // 키움 (구 현대)
 };

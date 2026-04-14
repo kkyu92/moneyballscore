@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { TEAM_NAME_MAP } from '../types';
+import { TEAM_NAME_MAP, KBO_API_CODE_MAP } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 const DELAY_MS = 2000;
@@ -44,15 +44,15 @@ function parseGameStatus(status: string): ScrapedGame['status'] {
  * AJAX API: /ws/Main.asmx/GetKboGameList
  */
 export async function fetchGames(date: string): Promise<ScrapedGame[]> {
-  // date: YYYY-MM-DD → yymmdd (KBO API 포맷)
-  const yymmdd = date.replace(/-/g, '').slice(2);
+  // date: YYYY-MM-DD → YYYYMMDD (KBO API 포맷)
+  const yyyymmdd = date.replace(/-/g, '');
 
   const res = await fetch(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
     },
-    body: JSON.stringify({ leId: 1, srId: 0, date: yymmdd }),
+    body: JSON.stringify({ leId: '1', srId: '0', date: yyyymmdd }),
   });
 
   if (!res.ok) {
@@ -83,21 +83,24 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
 
   const games: ScrapedGame[] = [];
   for (const raw of rawGames) {
-    const homeTeam = resolveTeamCode(raw.T_NM_H);
-    const awayTeam = resolveTeamCode(raw.T_NM_A);
+    // API 팀 코드로 매핑 (HOME_ID/AWAY_ID), 없으면 한글명으로 fallback
+    const homeTeam = KBO_API_CODE_MAP[raw.HOME_ID] || resolveTeamCode(raw.HOME_NM);
+    const awayTeam = KBO_API_CODE_MAP[raw.AWAY_ID] || resolveTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
+
+    const statusText = raw.GAME_SC_HEADER_NM || raw.G_ST || '';
 
     games.push({
       date: formatDate(raw.G_DT),
       homeTeam,
       awayTeam,
-      gameTime: formatTime(raw.G_TM),
+      gameTime: raw.G_TM || '18:30',
       stadium: raw.S_NM,
-      homeSP: raw.P_NM_H || undefined,
-      awaySP: raw.P_NM_A || undefined,
-      status: parseGameStatus(raw.G_ST),
-      homeScore: raw.SC_H ? parseInt(raw.SC_H, 10) : undefined,
-      awayScore: raw.SC_A ? parseInt(raw.SC_A, 10) : undefined,
+      homeSP: raw.B_PIT_P_NM?.trim() || undefined,
+      awaySP: raw.T_PIT_P_NM?.trim() || undefined,
+      status: parseGameStatus(statusText),
+      homeScore: raw.HOME_SCORE ?? undefined,
+      awayScore: raw.AWAY_SCORE ?? undefined,
       externalGameId: raw.G_ID,
     });
   }
