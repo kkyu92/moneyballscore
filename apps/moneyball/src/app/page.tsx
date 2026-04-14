@@ -21,7 +21,7 @@ async function getTodayPredictions() {
       home_sp:players!games_home_sp_id_fkey(name_ko),
       away_sp:players!games_away_sp_id_fkey(name_ko),
       predictions!inner(
-        predicted_winner, confidence, prediction_type,
+        predicted_winner, confidence, prediction_type, reasoning,
         home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
         is_correct, actual_winner, factors, model_version,
         winner:teams!predictions_predicted_winner_fkey(code)
@@ -105,7 +105,7 @@ export default async function HomePage() {
           <h2 className="text-xl font-bold">경기별 예측</h2>
           <Link
             href="/predictions"
-            className="text-sm text-blue-600 hover:underline"
+            className="text-sm text-brand-600 hover:text-brand-800 hover:underline"
           >
             전체 보기 →
           </Link>
@@ -138,6 +138,11 @@ export default async function HomePage() {
                     isCorrect={pred.is_correct}
                     homeScore={game.home_score}
                     awayScore={game.away_score}
+                    winProb={(pred.reasoning as any)?.homeWinProb != null
+                      ? (pred.winner?.code === homeCode
+                        ? (pred.reasoning as any).homeWinProb
+                        : 1 - (pred.reasoning as any).homeWinProb)
+                      : undefined}
                   />
                 </Link>
               );

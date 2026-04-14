@@ -5,6 +5,7 @@ interface PredictionCardProps {
   awayTeam: TeamCode;
   confidence: number;
   predictedWinner: TeamCode;
+  winProb?: number; // 예측 승자의 승리 확률 (0-1)
   homeSPName?: string;
   awaySPName?: string;
   homeSPFip?: number;
@@ -32,10 +33,15 @@ export function PredictionCard({
   isCorrect,
   homeScore,
   awayScore,
+  winProb,
 }: PredictionCardProps) {
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
-  const confidencePct = Math.round(confidence * 100);
+  // winProb이 있으면 승리확률 표시, 없으면 confidence fallback
+  const displayPct = winProb
+    ? Math.round(winProb * 100)
+    : Math.round((0.5 + confidence / 2) * 100);
+  const confidencePct = displayPct;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
@@ -80,7 +86,7 @@ export function PredictionCard({
             </span>
           </div>
           <p className="text-xs text-gray-500 mt-0.5">
-            {KBO_TEAMS[predictedWinner].name.split(" ")[0]} 승
+            {KBO_TEAMS[predictedWinner].name.split(" ")[0]} 승 예측
           </p>
         </div>
 
