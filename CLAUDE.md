@@ -13,7 +13,7 @@
 - Supabase (PostgreSQL, RLS) — 프로젝트별 분리
 - TypeScript (strict mode)
 - Tailwind CSS 4
-- Cheerio (스크래핑, Phase 2)
+- Cheerio (스크래핑, Phase 2) — 3소스: KBO 공식 + KBO Fancy Stats + FanGraphs
 - Vercel (호스팅) + GitHub Actions (Cron)
 
 ## 주요 규칙
@@ -51,6 +51,14 @@ Key routing rules:
 - Save progress, checkpoint, resume → suggest checkpoint
 - Code quality, health check → suggest health
 
-## 예측 엔진 가중치 (v1.0)
-- 선발FIP 25% / 타선wOBA 20% / 불펜FIP 15% / 최근폼 15% / WAR 10% / 상대전적 8% / 구장보정 7%
+## 예측 엔진 가중치 (v1.5 — 10팩터, 3소스)
+- 선발FIP 15% / 선발xFIP 5% / 타선wOBA 15% / 불펜FIP 10% / 최근폼 10% / WAR 8% / 상대전적 5% / 구장보정 4% / Elo레이팅 8% / 수비SFR 5%
 - 홈팀 어드밴티지: +3%
+- Elo baseline: KBO Fancy Stats Elo 예측과 비교하여 모델 성능 측정
+- v2.0 업그레이드: 운영 2주차 (50경기 축적 후 오차분석 기반)
+
+## 데이터 소스
+- **KBO 공식** (koreabaseball.com): 경기일정, 선발확정, 결과, 최근폼, 상대전적, 구장별 기록
+- **KBO Fancy Stats** (kbofancystats.com): FIP, xFIP, WAR, wOBA, SFR, Elo (robots.txt 없음)
+- **FanGraphs** (fangraphs.com/leaders/international/kbo): wRC+, ISO, BB%/K% (보조/검증)
+- ~~statiz.co.kr~~: robots.txt 전체 차단 → 사용 불가

@@ -2,11 +2,12 @@
 
 ## Phase 2a 시작 전
 
-### Statiz 스크래핑 법적 리스크 확인
-- **What:** statiz.co.kr 이용약관에서 스크래핑 금지 여부 확인
-- **Why:** 법적 리스크 없이 데이터 파이프라인을 운영해야 함
-- **금지 시 대안:** MyKBO Stats, KBO Fancy Stats, Baseball Reference, KBO 공식 API
-- **우선순위:** CRITICAL (스크래퍼 구현 전 반드시 확인)
+### ~~Statiz 스크래핑 법적 리스크 확인~~ ✓ 완료 (2026-04-14)
+- **결과:** statiz.co.kr robots.txt에서 `User-agent: * / Disallow: /` — 전체 차단
+- **대안 확정:** 3소스 조합
+  - KBO 공식 (koreabaseball.com): 경기일정, 선발확정, 결과, 최근폼, 상대전적
+  - KBO Fancy Stats (kbofancystats.com): FIP, xFIP, WAR, wOBA, SFR, Elo (robots.txt 없음)
+  - FanGraphs (fangraphs.com): wRC+, ISO, BB%/K% (보조/검증)
 
 ## KBO Daily 개발 전
 
