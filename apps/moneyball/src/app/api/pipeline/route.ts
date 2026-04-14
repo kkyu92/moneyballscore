@@ -32,7 +32,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return Response.json(result);
+    return Response.json({
+      ...result,
+      _debug: {
+        hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+        keyPrefix: process.env.ANTHROPIC_API_KEY?.slice(0, 10) || 'none',
+      },
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error('[Pipeline API]', message);
