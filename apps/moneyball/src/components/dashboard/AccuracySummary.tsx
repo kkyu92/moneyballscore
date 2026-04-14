@@ -31,7 +31,7 @@ export function AccuracySummary({
       {/* 바 차트 */}
       <div className="w-full bg-gray-100 rounded-full h-2 mb-3">
         <div
-          className="bg-green-500 h-2 rounded-full transition-all"
+          className="bg-brand-500 h-2 rounded-full transition-all"
           style={{ width: `${ratePct}%` }}
         />
       </div>

@@ -11,7 +11,7 @@ export function MobileNav() {
     <div className="md:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 text-gray-600"
+        className="p-2 text-brand-200 hover:text-white"
         aria-label="메뉴"
       >
         <svg
@@ -38,13 +38,13 @@ export function MobileNav() {
         </svg>
       </button>
       {open && (
-        <nav className="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50">
+        <nav className="absolute top-16 left-0 right-0 bg-brand-800 border-b border-brand-700 shadow-lg z-50">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className="block px-6 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className="block px-6 py-3 text-sm text-brand-200 hover:bg-brand-700 hover:text-white"
             >
               {item.label}
             </Link>
