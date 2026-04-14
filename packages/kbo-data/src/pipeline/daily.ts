@@ -304,6 +304,9 @@ export async function runDailyPipeline(
         const history = await getPredictionHistory(db, leagueId, game.homeTeam, game.awayTeam);
         const debate = await runDebate(gameContext, quantResult.homeWinProb, history);
 
+        // 디버그: 토론 결과 로그
+        errors.push(`[DEBUG] Debate ${game.homeTeam}v${game.awayTeam}: tokens=${debate.totalTokens}, verdict=${debate.verdict.predictedWinner} ${Math.round(debate.verdict.homeWinProb*100)}%`);
+
         finalWinner = debate.verdict.predictedWinner;
         finalHomeProb = debate.verdict.homeWinProb;
         finalConfidence = debate.verdict.confidence;
