@@ -32,6 +32,25 @@
 ## 커밋 메시지
 - feat: 새 기능 / fix: 버그 수정 / data: 데이터 / content: 콘텐츠 / refactor: 리팩토링
 
+## Skill routing
+
+When the user's request matches an available skill, suggest it before acting.
+Say "I think /skillname might help here, want me to run it?" and wait for confirmation.
+
+Key routing rules:
+- Product ideas, "is this worth building", brainstorming → suggest office-hours
+- Bugs, errors, "why is this broken", 500 errors → suggest investigate
+- Ship, deploy, push, create PR → suggest ship
+- QA, test the site, find bugs → suggest qa
+- Code review, check my diff → suggest review
+- Update docs after shipping → suggest document-release
+- Weekly retro → suggest retro
+- Design system, brand → suggest design-consultation
+- Visual audit, design polish → suggest design-review
+- Architecture review → suggest plan-eng-review
+- Save progress, checkpoint, resume → suggest checkpoint
+- Code quality, health check → suggest health
+
 ## 예측 엔진 가중치 (v1.0)
 - 선발FIP 25% / 타선wOBA 20% / 불펜FIP 15% / 최근폼 15% / WAR 10% / 상대전적 8% / 구장보정 7%
 - 홈팀 어드밴티지: +3%

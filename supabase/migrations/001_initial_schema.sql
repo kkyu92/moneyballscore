@@ -219,21 +219,54 @@ CREATE INDEX idx_batter_stats_season ON batter_stats(player_id, season);
 
 -- ============================================
 -- RLS (Row Level Security)
+-- 읽기: 공개 / 쓰기: service_role 전용
 -- ============================================
-ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public read posts" ON posts FOR SELECT USING (status = 'published');
-CREATE POLICY "Service write posts" ON posts FOR ALL USING (true);
-
-ALTER TABLE predictions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public read predictions" ON predictions FOR SELECT USING (true);
-CREATE POLICY "Service write predictions" ON predictions FOR ALL USING (true);
-
-ALTER TABLE games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public read games" ON games FOR SELECT USING (true);
-CREATE POLICY "Service write games" ON games FOR ALL USING (true);
+ALTER TABLE leagues ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read leagues" ON leagues FOR SELECT USING (true);
+CREATE POLICY "Service write leagues" ON leagues FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
 
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read teams" ON teams FOR SELECT USING (true);
+CREATE POLICY "Service write teams" ON teams FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE players ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read players" ON players FOR SELECT USING (true);
+CREATE POLICY "Service write players" ON players FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE pitcher_stats ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read pitcher_stats" ON pitcher_stats FOR SELECT USING (true);
+CREATE POLICY "Service write pitcher_stats" ON pitcher_stats FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE batter_stats ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read batter_stats" ON batter_stats FOR SELECT USING (true);
+CREATE POLICY "Service write batter_stats" ON batter_stats FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE games ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read games" ON games FOR SELECT USING (true);
+CREATE POLICY "Service write games" ON games FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE predictions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read predictions" ON predictions FOR SELECT USING (true);
+CREATE POLICY "Service write predictions" ON predictions FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read posts" ON posts FOR SELECT USING (status = 'published');
+CREATE POLICY "Service write posts" ON posts FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
 
 ALTER TABLE accuracy_tracking ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read accuracy" ON accuracy_tracking FOR SELECT USING (true);
+CREATE POLICY "Service write accuracy" ON accuracy_tracking FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');
+
+ALTER TABLE model_weights ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read model_weights" ON model_weights FOR SELECT USING (true);
+CREATE POLICY "Service write model_weights" ON model_weights FOR ALL
+  USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');

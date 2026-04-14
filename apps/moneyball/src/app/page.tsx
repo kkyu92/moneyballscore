@@ -73,9 +73,15 @@ const SAMPLE_PREDICTIONS = [
 ];
 
 function getTodayString() {
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().split("T")[0];
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(new Date())
+    .replace(/\. /g, "-")
+    .replace(/\./g, "");
 }
 
 export default function HomePage() {

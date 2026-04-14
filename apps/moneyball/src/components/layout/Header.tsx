@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MobileNav } from "./MobileNav";
 
 const NAV_ITEMS = [
   { href: "/", label: "오늘의 예측" },
@@ -7,6 +8,8 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "대시보드" },
   { href: "/about", label: "소개" },
 ];
+
+export { NAV_ITEMS };
 
 export function Header() {
   return (
@@ -28,6 +31,7 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        <MobileNav />
       </div>
     </header>
   );
