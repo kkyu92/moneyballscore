@@ -20,16 +20,21 @@ export type GameStatus = 'scheduled' | 'live' | 'final' | 'postponed';
 // 포스트 타입
 export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 
-// 예측 엔진 가중치 기본값
+// 예측 엔진 가중치 v1.5 (10팩터, 3소스)
 export const DEFAULT_WEIGHTS = {
-  sp_fip: 0.25,
-  lineup_woba: 0.20,
-  bullpen_fip: 0.15,
-  recent_form: 0.15,
-  war: 0.10,
-  head_to_head: 0.08,
-  park_factor: 0.07,
+  sp_fip: 0.15,
+  sp_xfip: 0.05,
+  lineup_woba: 0.15,
+  bullpen_fip: 0.10,
+  recent_form: 0.10,
+  war: 0.08,
+  head_to_head: 0.05,
+  park_factor: 0.04,
+  elo: 0.08,
+  sfr: 0.05,
 } as const;
+
+export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 
 // 홈팀 어드밴티지
 export const HOME_ADVANTAGE = 0.03;

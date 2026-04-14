@@ -1,4 +1,27 @@
-// KBO 데이터 수집 모듈
-// Phase 2에서 statiz + KBO 공식 스크래퍼 구현 예정
+// KBO 데이터 수집 + 예측 엔진 모듈
 
-export { KBO_TEAMS } from '@moneyball/shared';
+// 타입
+export type {
+  ScrapedGame,
+  PitcherStats,
+  TeamStats,
+  EloRating,
+  PredictionInput,
+  PredictionResult,
+  PipelineResult,
+} from './types';
+export { TEAM_NAME_MAP } from './types';
+
+// 스크래퍼
+export { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS } from './scrapers/kbo-official';
+export { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from './scrapers/fancy-stats';
+export { fetchBatterLeaders } from './scrapers/fangraphs';
+
+// 예측 엔진
+export { predict } from './engine/predictor';
+
+// 파이프라인
+export { runDailyPipeline } from './pipeline/daily';
+
+// 공유 re-export
+export { KBO_TEAMS, DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';

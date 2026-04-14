@@ -6,10 +6,12 @@
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "lint": "echo 'no lint configured yet'"
   },
   "dependencies": {
     "@moneyball/shared": "workspace:*",
+    "@supabase/supabase-js": "^2",
     "cheerio": "^1"
   },
   "devDependencies": {

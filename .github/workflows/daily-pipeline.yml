@@ -1,0 +1,78 @@
+name: Daily KBO Pipeline
+
+on:
+  schedule:
+    # KST 15:00 = UTC 06:00 — 선발 확정 + 예측 생성
+    - cron: '0 6 * * *'
+    # KST 23:00 = UTC 14:00 — 경기 결과 + 적중률 업데이트
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Target date (YYYY-MM-DD, default: today KST)'
+        required: false
+      mode:
+        description: 'Pipeline mode'
+        required: false
+        default: 'predict'
+        type: choice
+        options:
+          - predict
+          - verify
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+            echo "date=${{ github.event.inputs.date }}" >> $GITHUB_OUTPUT
+          else
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" -lt 10 ]; then
+              echo "mode=predict" >> $GITHUB_OUTPUT
+            else
+              echo "mode=verify" >> $GITHUB_OUTPUT
+            fi
+            echo "date=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run pipeline
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          PIPELINE_URL="${{ secrets.PRODUCTION_URL }}/api/pipeline"
+          MODE="${{ steps.mode.outputs.mode }}"
+          DATE="${{ steps.mode.outputs.date }}"
+
+          BODY="{\"mode\":\"${MODE}\""
+          if [ -n "$DATE" ]; then
+            BODY="${BODY},\"date\":\"${DATE}\""
+          fi
+          BODY="${BODY}}"
+
+          echo "Calling pipeline: mode=$MODE date=$DATE"
+          curl -sf -X POST "$PIPELINE_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -d "$BODY" | jq .
