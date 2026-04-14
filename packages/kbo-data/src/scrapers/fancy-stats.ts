@@ -10,12 +10,26 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Fancy Stats 영문 팀명 → TeamCode
+const FS_TEAM_MAP: Record<string, TeamCode> = {
+  'SSG Landers': 'SK',
+  'KIA Tigers': 'HT',
+  'LG Twins': 'LG',
+  'Doosan Bears': 'OB',
+  'KT Wiz': 'KT',
+  'Samsung Lions': 'SS',
+  'Lotte Giants': 'LT',
+  'Hanwha Eagles': 'HH',
+  'NC Dinos': 'NC',
+  'Kiwoom Heroes': 'WO',
+};
+
 function resolveTeamCode(name: string): TeamCode | null {
-  if (TEAM_NAME_MAP[name]) return TEAM_NAME_MAP[name];
-  for (const [key, code] of Object.entries(TEAM_NAME_MAP)) {
-    if (name.includes(key)) return code;
+  if (FS_TEAM_MAP[name]) return FS_TEAM_MAP[name];
+  for (const [key, code] of Object.entries(FS_TEAM_MAP)) {
+    if (name.includes(key) || key.includes(name)) return code;
   }
-  return null;
+  return TEAM_NAME_MAP[name] || null;
 }
 
 function parseNum(text: string): number {
@@ -25,140 +39,113 @@ function parseNum(text: string): number {
 }
 
 /**
- * 투수 리더보드에서 개별 투수 스탯 수집
- * FIP, xFIP, WAR, K/9, ERA, IP
+ * /leaders/ 페이지에서 투수 스탯 수집
+ * 단일 페이지에 모든 테이블이 있는 Hugo 정적 사이트
+ * T5: 투수 WAR, T6: FIP, T7: xFIP, T8: K/9
  */
 export async function fetchPitcherStats(season: number): Promise<PitcherStats[]> {
-  const url = `${BASE_URL}/leaders/pitcher?season=${season}&stat=fip`;
+  const url = `${BASE_URL}/leaders/`;
   const res = await fetch(url, {
     headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
   });
 
   if (!res.ok) {
-    throw new Error(`Fancy Stats pitcher error: ${res.status}`);
+    throw new Error(`Fancy Stats leaders error: ${res.status}`);
   }
 
   const html = await res.text();
   const $ = cheerio.load(html);
-  const pitchers: PitcherStats[] = [];
 
-  $('table tbody tr').each((_, row) => {
+  // FIP 테이블 (6번째 테이블, 0-indexed = 5)
+  // 헤더: Name | Team | Age | FIP
+  const fipMap = new Map<string, { team: string; fip: number }>();
+  $('table').eq(5).find('tbody tr').each((_, row) => {
     const cells = $(row).find('td');
-    if (cells.length < 6) return;
+    if (cells.length < 5) return;
+    // 행: rank | eng_name | kor_name | team | age | FIP
+    const korName = cells.eq(2).text().trim();
+    const team = cells.eq(3).text().trim();
+    const fip = parseNum(cells.eq(5).text());
+    if (korName && team) fipMap.set(`${korName}@${team}`, { team, fip });
+  });
 
-    const name = cells.eq(0).text().trim();
-    const teamName = cells.eq(1).text().trim();
-    const team = resolveTeamCode(teamName);
-    if (!team) return;
+  // xFIP 테이블 (7번째, 0-indexed = 6)
+  const xfipMap = new Map<string, number>();
+  $('table').eq(6).find('tbody tr').each((_, row) => {
+    const cells = $(row).find('td');
+    if (cells.length < 5) return;
+    const korName = cells.eq(2).text().trim();
+    const team = cells.eq(3).text().trim();
+    const xfip = parseNum(cells.eq(5).text());
+    if (korName && team) xfipMap.set(`${korName}@${team}`, xfip);
+  });
+
+  // 투수 WAR 테이블 (5번째, 0-indexed = 4)
+  const warMap = new Map<string, number>();
+  $('table').eq(4).find('tbody tr').each((_, row) => {
+    const cells = $(row).find('td');
+    if (cells.length < 5) return;
+    const korName = cells.eq(2).text().trim();
+    const team = cells.eq(3).text().trim();
+    const war = parseNum(cells.eq(5).text());
+    if (korName && team) warMap.set(`${korName}@${team}`, war);
+  });
+
+  // K/9 테이블 (8번째, 0-indexed = 7)
+  const kMap = new Map<string, number>();
+  $('table').eq(7).find('tbody tr').each((_, row) => {
+    const cells = $(row).find('td');
+    if (cells.length < 5) return;
+    const korName = cells.eq(2).text().trim();
+    const team = cells.eq(3).text().trim();
+    const k9 = parseNum(cells.eq(5).text());
+    if (korName && team) kMap.set(`${korName}@${team}`, k9);
+  });
+
+  // 합치기
+  const pitchers: PitcherStats[] = [];
+  for (const [key, { team, fip }] of fipMap) {
+    const [name] = key.split('@');
+    const teamCode = resolveTeamCode(team);
+    if (!teamCode) continue;
 
     pitchers.push({
       name,
-      team,
-      era: parseNum(cells.eq(2).text()),
-      fip: parseNum(cells.eq(3).text()),
-      xfip: parseNum(cells.eq(4).text()),
-      war: parseNum(cells.eq(5).text()),
-      innings: parseNum(cells.eq(6).text()),
-      kPer9: parseNum(cells.eq(7).text()),
+      team: teamCode,
+      fip,
+      xfip: xfipMap.get(key) ?? fip,
+      era: 0, // leaders 페이지에 ERA 없음
+      innings: 0,
+      war: warMap.get(key) ?? 0,
+      kPer9: kMap.get(key) ?? 0,
     });
-  });
+  }
 
   await sleep(DELAY_MS);
   return pitchers;
 }
 
 /**
- * 팀별 집계 통계: wOBA, 불펜FIP, WAR, SFR
+ * /elo/ 페이지에서 팀별 통계 수집
+ * 테이블: Team | Elo | wOBA | FIP | SFR | 1st | 2nd | ...
  */
 export async function fetchTeamStats(season: number): Promise<TeamStats[]> {
-  const teams: TeamStats[] = [];
-
-  // 팀 타격 — wOBA
-  const battingUrl = `${BASE_URL}/leaders/team-batting?season=${season}`;
-  const battingRes = await fetch(battingUrl, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
-  });
-
-  if (battingRes.ok) {
-    const html = await battingRes.text();
-    const $ = cheerio.load(html);
-
-    $('table tbody tr').each((_, row) => {
-      const cells = $(row).find('td');
-      const teamName = cells.eq(0).text().trim();
-      const team = resolveTeamCode(teamName);
-      if (!team) return;
-
-      teams.push({
-        team,
-        woba: parseNum(cells.eq(1).text()) || 0.320,
-        bullpenFip: 0, // 별도 수집
-        totalWar: 0,
-        sfr: 0,
-      });
-    });
-  }
-
-  await sleep(DELAY_MS);
-
-  // 팀 투수 — 불펜 FIP
-  const pitchingUrl = `${BASE_URL}/leaders/team-pitching?season=${season}`;
-  const pitchingRes = await fetch(pitchingUrl, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
-  });
-
-  if (pitchingRes.ok) {
-    const html = await pitchingRes.text();
-    const $ = cheerio.load(html);
-
-    $('table tbody tr').each((_, row) => {
-      const cells = $(row).find('td');
-      const teamName = cells.eq(0).text().trim();
-      const team = resolveTeamCode(teamName);
-      if (!team) return;
-
-      const existing = teams.find((t) => t.team === team);
-      if (existing) {
-        existing.bullpenFip = parseNum(cells.eq(3).text()) || 4.00;
-        existing.totalWar = parseNum(cells.eq(5).text()) || 0;
-      }
-    });
-  }
-
-  await sleep(DELAY_MS);
-
-  // 수비 — SFR
-  const defenseUrl = `${BASE_URL}/leaders/team-defense?season=${season}`;
-  const defenseRes = await fetch(defenseUrl, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
-  });
-
-  if (defenseRes.ok) {
-    const html = await defenseRes.text();
-    const $ = cheerio.load(html);
-
-    $('table tbody tr').each((_, row) => {
-      const cells = $(row).find('td');
-      const teamName = cells.eq(0).text().trim();
-      const team = resolveTeamCode(teamName);
-      if (!team) return;
-
-      const existing = teams.find((t) => t.team === team);
-      if (existing) {
-        existing.sfr = parseNum(cells.eq(1).text()) || 0;
-      }
-    });
-  }
-
-  await sleep(DELAY_MS);
-  return teams;
+  const eloData = await fetchEloRatings(season);
+  // Elo 페이지에 wOBA, FIP, SFR이 다 있음
+  return eloData.map((e) => ({
+    team: e.team,
+    woba: e.woba,
+    bullpenFip: e.fip, // 팀 전체 FIP (불펜 별도 구분 불가)
+    totalWar: 0, // leaders에서 별도 수집 필요
+    sfr: e.sfr,
+  }));
 }
 
 /**
- * Elo 레이팅 수집
+ * /elo/ 페이지에서 Elo 레이팅 + 팀 통계 수집
  */
-export async function fetchEloRatings(season: number): Promise<EloRating[]> {
-  const url = `${BASE_URL}/elo?season=${season}`;
+export async function fetchEloRatings(season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
+  const url = `${BASE_URL}/elo/`;
   const res = await fetch(url, {
     headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
   });
@@ -169,18 +156,30 @@ export async function fetchEloRatings(season: number): Promise<EloRating[]> {
 
   const html = await res.text();
   const $ = cheerio.load(html);
-  const ratings: EloRating[] = [];
+  const ratings: (EloRating & { woba: number; fip: number; sfr: number })[] = [];
 
-  $('table tbody tr').each((_, row) => {
+  // 첫 번째 테이블: rank | Team | Elo | wOBA | FIP | SFR | 1st | 2nd | ...
+  $('table').eq(0).find('tbody tr').each((_, row) => {
     const cells = $(row).find('td');
-    const teamName = cells.eq(0).text().trim();
+    if (cells.length < 6) return;
+
+    const rank = cells.eq(0).text().trim();
+    const teamName = cells.eq(1).text().trim();
+    const elo = parseNum(cells.eq(2).text());
+    const woba = parseNum(cells.eq(3).text());
+    const fip = parseNum(cells.eq(4).text());
+    const sfr = parseNum(cells.eq(5).text());
+
     const team = resolveTeamCode(teamName);
     if (!team) return;
 
     ratings.push({
       team,
-      elo: parseNum(cells.eq(1).text()) || 1500,
-      winPct: parseNum(cells.eq(2).text()) || 0.5,
+      elo: elo || 1500,
+      winPct: 0.5, // Elo 페이지에 승률 없음, 순위 기반 추정
+      woba: woba || 0.320,
+      fip: fip || 4.00,
+      sfr: sfr || 0,
     });
   });
 
@@ -196,11 +195,8 @@ export function findPitcher(
   name: string,
   team: TeamCode
 ): PitcherStats | null {
-  // 정확한 이름 + 팀 매칭
   const exact = pitchers.find((p) => p.name === name && p.team === team);
   if (exact) return exact;
-
-  // 이름만 매칭 (트레이드 등)
   const byName = pitchers.find((p) => p.name === name);
   return byName || null;
 }
