@@ -319,7 +319,9 @@ export async function runDailyPipeline(
           },
         };
       } catch (e) {
-        console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, e);
+        const debateErr = e instanceof Error ? e.message : String(e);
+        console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, debateErr);
+        errors.push(`Debate ${game.homeTeam}v${game.awayTeam}: ${debateErr}`);
         // fallback: 정량 모델 결과 사용
       }
     }
