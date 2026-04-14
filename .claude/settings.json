@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$TOOL_INPUT\" in *'git commit'*) cd \"$(git rev-parse --show-toplevel)\" && pnpm run type-check 2>&1 | tail -5 || echo 'TYPE_CHECK_FAILED: 커밋 전 타입 체크 실패. 에러를 수정하세요.' ;; esac",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$TOOL_INPUT\" in *'git push'*) echo '✅ Push 완료. /compound 실행하여 회고 + CHANGELOG + 메모리를 업데이트하세요.' ;; esac",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
