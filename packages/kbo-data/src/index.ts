@@ -27,6 +27,10 @@ export { runLiveUpdate } from './pipeline/live';
 // 라이브
 export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
 
+// 에이전트
+export { runDebate } from './agents/debate';
+export type { DebateResult, GameContext, TeamArgument, JudgeVerdict, CalibrationHint } from './agents/types';
+
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
 
