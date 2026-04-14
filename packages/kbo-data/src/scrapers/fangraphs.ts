@@ -17,16 +17,16 @@ function parseNum(text: string): number {
 
 // FanGraphs는 영문 팀명 사용
 const FG_TEAM_MAP: Record<string, TeamCode> = {
-  'SSG Landers': 'SSG',
-  'KIA Tigers': 'KIA',
-  'LG Twins': 'LGT',
-  'Doosan Bears': 'DSB',
-  'KT Wiz': 'KTW',
-  'Samsung Lions': 'SSA',
-  'Lotte Giants': 'LOT',
-  'Hanwha Eagles': 'HHE',
-  'NC Dinos': 'NCB',
-  'Kiwoom Heroes': 'KIW',
+  'SSG Landers': 'SK',
+  'KIA Tigers': 'HT',
+  'LG Twins': 'LG',
+  'Doosan Bears': 'OB',
+  'KT Wiz': 'KT',
+  'Samsung Lions': 'SS',
+  'Lotte Giants': 'LT',
+  'Hanwha Eagles': 'HH',
+  'NC Dinos': 'NC',
+  'Kiwoom Heroes': 'WO',
 };
 
 function resolveTeamCode(name: string): TeamCode | null {

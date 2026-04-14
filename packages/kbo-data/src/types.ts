@@ -110,28 +110,14 @@ export interface KBOGameRaw {
 
 // 팀 한글명 → TeamCode 매핑
 export const TEAM_NAME_MAP: Record<string, TeamCode> = {
-  'SSG': 'SSG',
-  'KIA': 'KIA',
-  'LG': 'LGT',
-  '두산': 'DSB',
-  'KT': 'KTW',
-  '삼성': 'SSA',
-  '롯데': 'LOT',
-  '한화': 'HHE',
-  'NC': 'NCB',
-  '키움': 'KIW',
-};
-
-// KBO API 팀 코드 → 내부 TeamCode 매핑
-export const KBO_API_CODE_MAP: Record<string, TeamCode> = {
-  'SK': 'SSG',   // SSG (구 SK)
-  'HT': 'KIA',   // KIA
-  'LG': 'LGT',   // LG
-  'OB': 'DSB',   // 두산 (구 OB)
-  'KT': 'KTW',   // KT
-  'SS': 'SSA',   // 삼성
-  'LT': 'LOT',   // 롯데
-  'HH': 'HHE',   // 한화
-  'NC': 'NCB',   // NC
-  'WO': 'KIW',   // 키움 (구 현대)
+  'SSG': 'SK',
+  'KIA': 'HT',
+  'LG': 'LG',
+  '두산': 'OB',
+  'KT': 'KT',
+  '삼성': 'SS',
+  '롯데': 'LT',
+  '한화': 'HH',
+  'NC': 'NC',
+  '키움': 'WO',
 };

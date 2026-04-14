@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { TEAM_NAME_MAP, KBO_API_CODE_MAP } from '../types';
+import { TEAM_NAME_MAP } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 const DELAY_MS = 2000;
@@ -83,9 +83,9 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
 
   const games: ScrapedGame[] = [];
   for (const raw of rawGames) {
-    // API 팀 코드로 매핑 (HOME_ID/AWAY_ID), 없으면 한글명으로 fallback
-    const homeTeam = KBO_API_CODE_MAP[raw.HOME_ID] || resolveTeamCode(raw.HOME_NM);
-    const awayTeam = KBO_API_CODE_MAP[raw.AWAY_ID] || resolveTeamCode(raw.AWAY_NM);
+    // API 팀 코드를 직접 사용, 없으면 한글명으로 fallback
+    const homeTeam = (raw.HOME_ID as TeamCode) || resolveTeamCode(raw.HOME_NM);
+    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
     const statusText = raw.GAME_SC_HEADER_NM || raw.G_ST || '';

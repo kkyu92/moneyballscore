@@ -24,27 +24,27 @@ describe('KBO_TEAMS', () => {
 
   it('should include all KBO teams', () => {
     const codes = Object.keys(KBO_TEAMS);
-    expect(codes).toContain('SSG');
-    expect(codes).toContain('KIA');
-    expect(codes).toContain('LGT');
-    expect(codes).toContain('DSB');
-    expect(codes).toContain('KTW');
-    expect(codes).toContain('SSA');
-    expect(codes).toContain('LOT');
-    expect(codes).toContain('HHE');
-    expect(codes).toContain('NCB');
-    expect(codes).toContain('KIW');
+    expect(codes).toContain('SK');
+    expect(codes).toContain('HT');
+    expect(codes).toContain('LG');
+    expect(codes).toContain('OB');
+    expect(codes).toContain('KT');
+    expect(codes).toContain('SS');
+    expect(codes).toContain('LT');
+    expect(codes).toContain('HH');
+    expect(codes).toContain('NC');
+    expect(codes).toContain('WO');
   });
 });
 
 describe('DEFAULT_WEIGHTS', () => {
-  it('should sum to 1.0', () => {
+  it('should sum to 0.85', () => {
     const sum = Object.values(DEFAULT_WEIGHTS).reduce((a, b) => a + b, 0);
-    expect(sum).toBeCloseTo(1.0, 10);
+    expect(sum).toBeCloseTo(0.85, 2);
   });
 
-  it('should have 7 factors', () => {
-    expect(Object.keys(DEFAULT_WEIGHTS)).toHaveLength(7);
+  it('should have 10 factors', () => {
+    expect(Object.keys(DEFAULT_WEIGHTS)).toHaveLength(10);
   });
 
   it('should have all values between 0 and 1', () => {

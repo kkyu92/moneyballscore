@@ -1,5 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
-import { TEAM_NAME_MAP, KBO_API_CODE_MAP } from '../types';
+import { TEAM_NAME_MAP } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 
@@ -55,8 +55,8 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
 
   const liveGames: LiveGameState[] = [];
   for (const raw of rawGames) {
-    const homeTeam = KBO_API_CODE_MAP[raw.HOME_ID] || resolveTeamCode(raw.HOME_NM);
-    const awayTeam = KBO_API_CODE_MAP[raw.AWAY_ID] || resolveTeamCode(raw.AWAY_NM);
+    const homeTeam = (raw.HOME_ID as TeamCode) || resolveTeamCode(raw.HOME_NM);
+    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 판단
