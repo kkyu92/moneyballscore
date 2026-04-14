@@ -3,4 +3,23 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* MoneyBall 다크 그린 컬러 시스템 */
+  --color-brand-900: #0a1f12;
+  --color-brand-800: #132d1a;
+  --color-brand-700: #1a3d24;
+  --color-brand-600: #245232;
+  --color-brand-500: #2d6b3f;
+  --color-brand-400: #3d8b54;
+  --color-brand-300: #5aad70;
+  --color-brand-200: #8dcea0;
+  --color-brand-100: #c4e8cf;
+  --color-brand-50: #edf7f0;
+
+  --color-accent: #c5a23e;      /* 골드 악센트 */
+  --color-accent-light: #e2c96b;
+
+  --color-surface: #f8faf9;     /* 살짝 그린 틴트 배경 */
+  --color-surface-card: #ffffff;
+  --color-surface-dark: #0f2318;
 }
