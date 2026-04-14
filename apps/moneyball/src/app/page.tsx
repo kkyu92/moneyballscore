@@ -1,79 +1,71 @@
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
-import { toKSTDisplayString, type TeamCode } from "@moneyball/shared";
+import { toKSTDateString, toKSTDisplayString, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-// Phase 1: 정적 샘플 데이터 (Phase 2에서 Supabase 연동)
-const SAMPLE_PREDICTIONS = [
-  {
-    homeTeam: "LGT" as TeamCode,
-    awayTeam: "DSB" as TeamCode,
-    confidence: 0.68,
-    predictedWinner: "LGT" as TeamCode,
-    homeSPName: "임찬규",
-    awaySPName: "곽빈",
-    homeSPFip: 3.12,
-    awaySPFip: 4.45,
-    homeWoba: 0.345,
-    awayWoba: 0.298,
-    gameTime: "18:30",
-  },
-  {
-    homeTeam: "KIA" as TeamCode,
-    awayTeam: "SSG" as TeamCode,
-    confidence: 0.62,
-    predictedWinner: "KIA" as TeamCode,
-    homeSPName: "양현종",
-    awaySPName: "김광현",
-    homeSPFip: 3.45,
-    awaySPFip: 3.78,
-    homeWoba: 0.332,
-    awayWoba: 0.31,
-    gameTime: "18:30",
-  },
-  {
-    homeTeam: "SSA" as TeamCode,
-    awayTeam: "HHE" as TeamCode,
-    confidence: 0.55,
-    predictedWinner: "SSA" as TeamCode,
-    homeSPName: "원태인",
-    awaySPName: "문동주",
-    homeSPFip: 3.65,
-    awaySPFip: 3.82,
-    homeWoba: 0.315,
-    awayWoba: 0.305,
-    gameTime: "18:30",
-  },
-  {
-    homeTeam: "NCB" as TeamCode,
-    awayTeam: "KTW" as TeamCode,
-    confidence: 0.58,
-    predictedWinner: "NCB" as TeamCode,
-    homeSPName: "루친스키",
-    awaySPName: "소형준",
-    homeSPFip: 3.2,
-    awaySPFip: 4.1,
-    homeWoba: 0.328,
-    awayWoba: 0.312,
-    gameTime: "18:30",
-  },
-  {
-    homeTeam: "LOT" as TeamCode,
-    awayTeam: "KIW" as TeamCode,
-    confidence: 0.52,
-    predictedWinner: "KIW" as TeamCode,
-    homeSPName: "나균안",
-    awaySPName: "안우진",
-    homeSPFip: 4.32,
-    awaySPFip: 2.95,
-    homeWoba: 0.308,
-    awayWoba: 0.34,
-    gameTime: "18:30",
-  },
-];
+export const revalidate = 300; // 5분 ISR
 
-export default function HomePage() {
+async function getTodayPredictions() {
+  const supabase = await createClient();
+  const today = toKSTDateString();
+
+  // 오늘 경기 + 예측 조인
+  const { data: games } = await supabase
+    .from('games')
+    .select(`
+      id, game_date, game_time, stadium, status,
+      home_score, away_score, external_game_id,
+      home_team:teams!games_home_team_id_fkey(code, name_ko),
+      away_team:teams!games_away_team_id_fkey(code, name_ko),
+      home_sp:players!games_home_sp_id_fkey(name_ko),
+      away_sp:players!games_away_sp_id_fkey(name_ko),
+      predictions!inner(
+        predicted_winner, confidence, prediction_type,
+        home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
+        is_correct, actual_winner, factors, model_version,
+        winner:teams!predictions_predicted_winner_fkey(code)
+      )
+    `)
+    .eq('game_date', today)
+    .eq('predictions.prediction_type', 'pre_game')
+    .order('game_time');
+
+  return games || [];
+}
+
+async function getSeasonAccuracy() {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from('predictions')
+    .select('is_correct, confidence')
+    .eq('prediction_type', 'pre_game')
+    .not('is_correct', 'is', null);
+
+  if (!data || data.length === 0) {
+    return { total: 0, correct: 0, rate: 0, highConfRate: 0 };
+  }
+
+  const total = data.length;
+  const correct = data.filter((p) => p.is_correct).length;
+  const highConf = data.filter((p) => p.confidence >= 0.4); // 70%+ 승리확률
+  const highConfCorrect = highConf.filter((p) => p.is_correct).length;
+
+  return {
+    total,
+    correct,
+    rate: total > 0 ? correct / total : 0,
+    highConfRate: highConf.length > 0 ? highConfCorrect / highConf.length : 0,
+  };
+}
+
+export default async function HomePage() {
   const today = toKSTDisplayString();
+  const [games, accuracy] = await Promise.all([
+    getTodayPredictions(),
+    getSeasonAccuracy(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -87,20 +79,23 @@ export default function HomePage() {
 
       {/* 적중률 요약 */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <AccuracySummary total={0} correct={0} rate={0} highConfRate={0} />
+        <AccuracySummary
+          total={accuracy.total}
+          correct={accuracy.correct}
+          rate={accuracy.rate}
+          highConfRate={accuracy.highConfRate}
+        />
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-sm font-medium text-gray-500 mb-4">
             오늘 경기 수
           </h3>
-          <span className="text-4xl font-bold">
-            {SAMPLE_PREDICTIONS.length}
-          </span>
+          <span className="text-4xl font-bold">{games.length}</span>
           <span className="text-sm text-gray-500 ml-1">경기</span>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-sm font-medium text-gray-500 mb-4">모델 버전</h3>
-          <span className="text-4xl font-bold">v1.0</span>
-          <p className="text-xs text-gray-500 mt-2">7팩터 가중합산</p>
+          <span className="text-4xl font-bold">v1.5</span>
+          <p className="text-xs text-gray-500 mt-2">10팩터 3소스 가중합산</p>
         </div>
       </section>
 
@@ -115,22 +110,59 @@ export default function HomePage() {
             전체 보기 →
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SAMPLE_PREDICTIONS.map((pred, i) => (
-            <PredictionCard key={i} {...pred} />
-          ))}
-        </div>
+
+        {games.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {games.map((game: any) => {
+              const pred = game.predictions?.[0];
+              if (!pred) return null;
+              const homeCode = game.home_team?.code as TeamCode;
+              const awayCode = game.away_team?.code as TeamCode;
+              return (
+                <Link
+                  key={game.id}
+                  href={`/predictions/${game.game_date}?game=${game.id}`}
+                >
+                  <PredictionCard
+                    homeTeam={homeCode}
+                    awayTeam={awayCode}
+                    confidence={pred.confidence}
+                    predictedWinner={pred.winner?.code as TeamCode}
+                    homeSPName={game.home_sp?.name_ko}
+                    awaySPName={game.away_sp?.name_ko}
+                    homeSPFip={pred.home_sp_fip}
+                    awaySPFip={pred.away_sp_fip}
+                    homeWoba={pred.home_lineup_woba}
+                    awayWoba={pred.away_lineup_woba}
+                    gameTime={game.game_time?.slice(0, 5)}
+                    isCorrect={pred.is_correct}
+                    homeScore={game.home_score}
+                    awayScore={game.away_score}
+                  />
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+            <p className="text-lg">오늘 예측 데이터가 아직 없습니다.</p>
+            <p className="text-sm mt-2">
+              매일 KST 15:00에 선발 확정 후 예측이 생성됩니다.
+            </p>
+          </div>
+        )}
       </section>
 
-      {/* 방법론 소개 */}
+      {/* 방법론 소개 v1.5 */}
       <section className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-bold mb-3">분석 방법론</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <h2 className="text-lg font-bold mb-3">분석 방법론 v1.5</h2>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
           {[
-            { label: "선발 FIP", weight: "25%", desc: "투수 실력 지표" },
-            { label: "타선 wOBA", weight: "20%", desc: "타격 생산성" },
-            { label: "불펜 FIP", weight: "15%", desc: "중계/마무리" },
-            { label: "최근 폼", weight: "15%", desc: "최근 10경기" },
+            { label: "선발 FIP", weight: "15%", desc: "투수 실력" },
+            { label: "타선 wOBA", weight: "15%", desc: "타격 생산성" },
+            { label: "불펜 FIP", weight: "10%", desc: "중계/마무리" },
+            { label: "최근 폼", weight: "10%", desc: "최근 10경기" },
+            { label: "Elo + WAR", weight: "16%", desc: "종합 전력" },
           ].map((item) => (
             <div key={item.label} className="p-3">
               <p className="text-2xl font-bold text-blue-600">{item.weight}</p>
@@ -139,6 +171,9 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        <p className="text-xs text-gray-400 mt-4 text-center">
+          + 선발xFIP 5% / 상대전적 5% / 수비SFR 5% / 구장보정 4% / 홈어드밴티지 3%
+        </p>
       </section>
     </div>
   );

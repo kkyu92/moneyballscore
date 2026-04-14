@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { runDailyPipeline } from '@moneyball/kbo-data/pipeline/daily';
+import { runDailyPipeline } from '@moneyball/kbo-data';
 
 export async function POST(request: NextRequest) {
   // CRON_SECRET 인증
