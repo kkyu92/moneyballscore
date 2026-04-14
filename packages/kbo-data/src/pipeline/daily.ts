@@ -5,6 +5,9 @@ import { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS } fr
 import { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from '../scrapers/fancy-stats';
 import { fetchBatterLeaders } from '../scrapers/fangraphs';
 import { predict } from '../engine/predictor';
+import { runDebate } from '../agents/debate';
+import type { GameContext } from '../agents/types';
+import type { PredictionHistory } from '../agents/calibration-agent';
 import { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from '../notify/telegram';
 import type { PredictionInput, PredictionResult, PipelineResult, ScrapedGame } from '../types';
 
@@ -265,7 +268,53 @@ export async function runDailyPipeline(
       parkFactor: DEFAULT_PARK_FACTORS[game.stadium] ?? 1.0,
     };
 
-    const result = predict(input);
+    const quantResult = predict(input);
+
+    // 에이전트 토론 (ANTHROPIC_API_KEY가 있으면 실행)
+    let finalWinner = quantResult.predictedWinner;
+    let finalHomeProb = quantResult.homeWinProb;
+    let finalConfidence = quantResult.confidence;
+    let finalReasoning: any = quantResult;
+
+    if (process.env.ANTHROPIC_API_KEY) {
+      try {
+        const gameContext: GameContext = {
+          game: input.game,
+          homeSPStats: input.homeSPStats,
+          awaySPStats: input.awaySPStats,
+          homeTeamStats: input.homeTeamStats,
+          awayTeamStats: input.awayTeamStats,
+          homeElo: input.homeElo,
+          awayElo: input.awayElo,
+          homeRecentForm: input.homeRecentForm,
+          awayRecentForm: input.awayRecentForm,
+          headToHead: input.headToHead,
+          parkFactor: input.parkFactor,
+        };
+        const history = await getPredictionHistory(db, leagueId, game.homeTeam, game.awayTeam);
+        const debate = await runDebate(gameContext, quantResult.homeWinProb, history);
+
+        finalWinner = debate.verdict.predictedWinner;
+        finalHomeProb = debate.verdict.homeWinProb;
+        finalConfidence = debate.verdict.confidence;
+        finalReasoning = {
+          ...quantResult,
+          debate: {
+            homeArgument: debate.homeArgument,
+            awayArgument: debate.awayArgument,
+            calibration: debate.calibration,
+            verdict: debate.verdict,
+            quantitativeProb: debate.quantitativeProb,
+            totalTokens: debate.totalTokens,
+          },
+        };
+      } catch (e) {
+        console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, e);
+        // fallback: 정량 모델 결과 사용
+      }
+    }
+
+    const result = { ...quantResult, predictedWinner: finalWinner, homeWinProb: finalHomeProb, confidence: finalConfidence };
 
     // DB에 저장
     const homeTeamId = teamIdMap[game.homeTeam];
@@ -316,8 +365,8 @@ export async function runDailyPipeline(
           away_elo: input.awayElo.elo,
           home_sfr: input.homeTeamStats.sfr,
           away_sfr: input.awayTeamStats.sfr,
-          model_version: 'v1.5',
-          reasoning: result,
+          model_version: process.env.ANTHROPIC_API_KEY ? 'v2.0-debate' : 'v1.5',
+          reasoning: finalReasoning,
           factors: result.factors,
         },
         { onConflict: 'game_id,prediction_type' }
@@ -372,6 +421,41 @@ export async function runDailyPipeline(
   }
 
   return pipelineResult;
+}
+
+/**
+ * 회고 에이전트용 과거 예측 히스토리 수집
+ */
+async function getPredictionHistory(
+  db: DB,
+  leagueId: number,
+  homeTeam: string,
+  awayTeam: string
+): Promise<PredictionHistory> {
+  const { data: predictions } = await db
+    .from('predictions')
+    .select('predicted_winner, confidence, is_correct, game:games!predictions_game_id_fkey(game_date, home_team_id, away_team_id)')
+    .eq('prediction_type', 'pre_game')
+    .not('is_correct', 'is', null)
+    .order('game_id', { ascending: false })
+    .limit(50);
+
+  if (!predictions || predictions.length === 0) {
+    return { totalPredictions: 0, correctPredictions: 0, recentResults: [], homeTeamAccuracy: null, awayTeamAccuracy: null, teamAccuracy: {} };
+  }
+
+  const total = predictions.length;
+  const correct = predictions.filter((p: any) => p.is_correct).length;
+
+  // 간소화: 상세 히스토리는 DB 조인이 복잡하므로 요약만
+  return {
+    totalPredictions: total,
+    correctPredictions: correct,
+    recentResults: [],
+    homeTeamAccuracy: total >= 10 ? correct / total : null,
+    awayTeamAccuracy: null,
+    teamAccuracy: {},
+  };
 }
 
 // teamId → TeamCode 역매핑
