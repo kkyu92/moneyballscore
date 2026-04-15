@@ -62,30 +62,9 @@ export function PostviewPanel({
         <FactorErrorsBars errors={factorErrors} />
       </div>
 
-      {/* 양팀 postview */}
+      {/* 양팀 postview — 관례: away 왼쪽 / home 오른쪽 */}
       {(homePostview || awayPostview) && (
         <div className="grid md:grid-cols-2 gap-4 mb-6">
-          {homePostview && (
-            <div className="bg-white rounded-xl border border-brand-200 p-4">
-              <h4 className="text-sm font-semibold text-brand-700 mb-2">
-                {homeName} 사후 의견
-              </h4>
-              <p className="text-xs text-gray-600 mb-2 line-clamp-4">
-                {homePostview.summary}
-              </p>
-              {homePostview.keyFactor && (
-                <p className="text-xs text-gray-500">
-                  <span className="font-medium">핵심:</span>{' '}
-                  {homePostview.keyFactor}
-                </p>
-              )}
-              {homePostview.missedBy && (
-                <p className="text-xs text-gray-500 italic border-t border-gray-100 pt-2 mt-2">
-                  놓친 것: {homePostview.missedBy}
-                </p>
-              )}
-            </div>
-          )}
           {awayPostview && (
             <div className="bg-white rounded-xl border-2 border-[var(--color-away)]/40 p-4">
               <h4 className="text-sm font-semibold text-[var(--color-away)] mb-2">
@@ -103,6 +82,27 @@ export function PostviewPanel({
               {awayPostview.missedBy && (
                 <p className="text-xs text-gray-500 italic border-t border-gray-100 pt-2 mt-2">
                   놓친 것: {awayPostview.missedBy}
+                </p>
+              )}
+            </div>
+          )}
+          {homePostview && (
+            <div className="bg-white rounded-xl border border-brand-200 p-4">
+              <h4 className="text-sm font-semibold text-brand-700 mb-2">
+                {homeName} 사후 의견
+              </h4>
+              <p className="text-xs text-gray-600 mb-2 line-clamp-4">
+                {homePostview.summary}
+              </p>
+              {homePostview.keyFactor && (
+                <p className="text-xs text-gray-500">
+                  <span className="font-medium">핵심:</span>{' '}
+                  {homePostview.keyFactor}
+                </p>
+              )}
+              {homePostview.missedBy && (
+                <p className="text-xs text-gray-500 italic border-t border-gray-100 pt-2 mt-2">
+                  놓친 것: {homePostview.missedBy}
                 </p>
               )}
             </div>

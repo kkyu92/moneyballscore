@@ -148,23 +148,13 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* 2. 양팀 에이전트 논거 */}
+      {/* 2. 양팀 에이전트 논거 — 관례: away 왼쪽 / home 오른쪽 */}
       {homeArg && awayArg && (
         <section aria-labelledby="agent-debate-title" className="space-y-3">
           <h2 id="agent-debate-title" className="text-lg font-bold">
             양팀 에이전트 논거
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <AgentArgumentBox
-              team={homeTeam}
-              role="home"
-              confidence={homeArg.confidence}
-              keyFactor={homeArg.keyFactor}
-              strengths={homeArg.strengths ?? []}
-              opponentWeaknesses={homeArg.opponentWeaknesses ?? []}
-              reasoning={homeArg.reasoning}
-              emphasized={homeArg.confidence > awayArg.confidence}
-            />
             <AgentArgumentBox
               team={awayTeam}
               role="away"
@@ -174,6 +164,16 @@ export default async function GameAnalysisPage({ params }: PageProps) {
               opponentWeaknesses={awayArg.opponentWeaknesses ?? []}
               reasoning={awayArg.reasoning}
               emphasized={awayArg.confidence > homeArg.confidence}
+            />
+            <AgentArgumentBox
+              team={homeTeam}
+              role="home"
+              confidence={homeArg.confidence}
+              keyFactor={homeArg.keyFactor}
+              strengths={homeArg.strengths ?? []}
+              opponentWeaknesses={homeArg.opponentWeaknesses ?? []}
+              reasoning={homeArg.reasoning}
+              emphasized={homeArg.confidence > awayArg.confidence}
             />
           </div>
         </section>
