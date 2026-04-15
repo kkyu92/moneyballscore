@@ -19,6 +19,9 @@ describe('KBO_TEAMS', () => {
       expect(team.name).toBeTruthy();
       expect(team.stadium).toBeTruthy();
       expect(team.color).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      expect(team.parkPf).toBeGreaterThan(0);
+      expect(team.parkPf).toBeLessThan(200);
+      expect(team.parkNote).toBeTruthy();
     }
   });
 

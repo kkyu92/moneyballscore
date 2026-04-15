@@ -381,6 +381,8 @@ export async function runDailyPipeline(
           home_sfr: input.homeTeamStats.sfr,
           away_sfr: input.awayTeamStats.sfr,
           model_version: process.env.ANTHROPIC_API_KEY ? 'v2.0-debate' : 'v1.5',
+          debate_version: process.env.ANTHROPIC_API_KEY ? 'v2-persona4' : null,
+          scoring_rule: 'v1.5',
           reasoning: finalReasoning,
           factors: result.factors,
         },

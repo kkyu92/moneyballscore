@@ -1,15 +1,16 @@
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
+// parkPf / parkNote: Phase v4-2에서 추가. ~/moneyball_debate/personas/teams.yaml 기반.
 export const KBO_TEAMS = {
-  SK: { name: 'SSG 랜더스', stadium: '인천SSG랜더스필드', color: '#CE0E2D' },
-  HT: { name: 'KIA 타이거즈', stadium: '광주-기아 챔피언스 필드', color: '#EA0029' },
-  LG: { name: 'LG 트윈스', stadium: '서울종합운동장 야구장', color: '#C30452' },
-  OB: { name: '두산 베어스', stadium: '서울종합운동장 야구장', color: '#131230' },
-  KT: { name: 'KT 위즈', stadium: '수원KT위즈파크', color: '#000000' },
-  SS: { name: '삼성 라이온즈', stadium: '대구삼성라이온즈파크', color: '#074CA1' },
-  LT: { name: '롯데 자이언츠', stadium: '부산사직야구장', color: '#002B5C' },
-  HH: { name: '한화 이글스', stadium: '대전한화생명이글스파크', color: '#FF6600' },
-  NC: { name: 'NC 다이노스', stadium: '창원NC파크', color: '#315288' },
-  WO: { name: '키움 히어로즈', stadium: '서울고척스카이돔', color: '#570514' },
+  SK: { name: 'SSG 랜더스', stadium: '인천SSG랜더스필드', color: '#CE0E2D', parkPf: 105, parkNote: '타자 친화 (짧은 펜스)' },
+  HT: { name: 'KIA 타이거즈', stadium: '광주-기아 챔피언스 필드', color: '#EA0029', parkPf: 100, parkNote: '중립' },
+  LG: { name: 'LG 트윈스', stadium: '서울종합운동장 야구장', color: '#C30452', parkPf: 95, parkNote: '투수 친화 (장타 억제)' },
+  OB: { name: '두산 베어스', stadium: '서울종합운동장 야구장', color: '#131230', parkPf: 95, parkNote: '투수 친화 (LG와 공유)' },
+  KT: { name: 'KT 위즈', stadium: '수원KT위즈파크', color: '#000000', parkPf: 98, parkNote: '중립~약 투수 친화' },
+  SS: { name: '삼성 라이온즈', stadium: '대구삼성라이온즈파크', color: '#074CA1', parkPf: 108, parkNote: '극단적 타자 친화 (홈런↑)' },
+  LT: { name: '롯데 자이언츠', stadium: '부산사직야구장', color: '#002B5C', parkPf: 103, parkNote: '약 타자 친화' },
+  HH: { name: '한화 이글스', stadium: '대전한화생명이글스파크', color: '#FF6600', parkPf: 101, parkNote: '중립~약 타자 친화 (2025 신축, 표본 좁음)' },
+  NC: { name: 'NC 다이노스', stadium: '창원NC파크', color: '#315288', parkPf: 100, parkNote: '중립' },
+  WO: { name: '키움 히어로즈', stadium: '서울고척스카이돔', color: '#570514', parkPf: 92, parkNote: '극단적 투수 친화 (KBO 유일 돔)' },
 } as const;
 
 export type TeamCode = keyof typeof KBO_TEAMS;
