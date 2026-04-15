@@ -3,6 +3,7 @@ import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
 import { validateTeamArgument, resolveValidationMode } from './validator';
+import { getRivalryBlock } from './rivalry-memory';
 import type { GameContext, TeamArgument, AgentResult } from './types';
 
 function buildSystemPrompt(team: TeamCode, role: 'home' | 'away'): string {
@@ -23,7 +24,11 @@ function buildSystemPrompt(team: TeamCode, role: 'home' | 'away'): string {
   ].join('\n\n');
 }
 
-function buildUserMessage(team: TeamCode, context: GameContext): string {
+export function buildUserMessage(
+  team: TeamCode,
+  context: GameContext,
+  rivalryBlock?: string
+): string {
   const isHome = context.game.homeTeam === team;
   const myTeam = isHome ? context.game.homeTeam : context.game.awayTeam;
   const opponent = isHome ? context.game.awayTeam : context.game.homeTeam;
@@ -52,7 +57,7 @@ ${isHome ? '홈' : '원정'} 경기입니다.
 
 상대전적: ${context.headToHead.wins}승 ${context.headToHead.losses}패
 파크팩터: ${context.parkFactor}
-
+${rivalryBlock && rivalryBlock.trim().length > 0 ? '\n' + rivalryBlock + '\n' : ''}
 ${KBO_TEAMS[myTeam].name}의 관점에서 분석하세요.`;
 }
 
@@ -98,11 +103,19 @@ export async function runTeamAgent(
 ): Promise<AgentResult<TeamArgument>> {
   const role: 'home' | 'away' = context.game.homeTeam === team ? 'home' : 'away';
 
+  // v4-3 Task 2: rivalry-memory 주입 (Compound 루프 읽기 경로)
+  // 실패 시 빈 블록 반환하도록 구현됨 → throw 가능성 없음
+  const rivalry = await getRivalryBlock({
+    homeTeam: context.game.homeTeam,
+    awayTeam: context.game.awayTeam,
+    date: context.game.date,
+  });
+
   const result = await callLLM<TeamArgument>(
     {
       model: 'haiku',
       systemPrompt: buildSystemPrompt(team, role),
-      userMessage: buildUserMessage(team, context),
+      userMessage: buildUserMessage(team, context, rivalry.promptBlock),
       maxTokens: 800,
     },
     (text) => parseResponse(text, team)
