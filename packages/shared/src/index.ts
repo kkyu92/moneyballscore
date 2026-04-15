@@ -1,3 +1,6 @@
+// Phase v4-4: 라이벌리 정의 re-export
+export { KBO_RIVALRIES, isRivalry } from './rivalries';
+
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
 // parkPf / parkNote: Phase v4-2에서 추가. ~/moneyball_debate/personas/teams.yaml 기반.
 export const KBO_TEAMS = {

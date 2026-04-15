@@ -26,6 +26,15 @@ export { runLiveUpdate } from './pipeline/live';
 export { runPostviewDaily } from './pipeline/postview-daily';
 export type { PostviewDailyResult } from './pipeline/postview-daily';
 
+// 빅매치 선정 (v4-4)
+export {
+  selectBigMatch,
+  scoreGame,
+  WEIGHTS as BIG_MATCH_WEIGHTS,
+  BIG_MATCH_THRESHOLD,
+} from './big-match';
+export type { BigMatchCandidate, BigMatchResult, BigMatchMode } from './big-match';
+
 // 라이브
 export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
 
