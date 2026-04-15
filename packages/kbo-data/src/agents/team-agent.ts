@@ -1,48 +1,26 @@
 import { KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
+import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
+import { validateTeamArgument } from './validator';
 import type { GameContext, TeamArgument, AgentResult } from './types';
 
-// 팀별 특화 컨텍스트 (축적 가능한 메모리)
-const TEAM_PROFILES: Record<TeamCode, string> = {
-  SK: 'SSG 랜더스. 인천 문학 홈. 강력한 수비(SFR 상위). 좌투 에이스 보유.',
-  HT: 'KIA 타이거즈. 광주 홈. 양현종 등 베테랑 투수진. 타선 폭발력.',
-  LG: 'LG 트윈스. 잠실 홈(두산과 공유). 균형잡힌 전력. 홈 성적 강세.',
-  OB: '두산 베어스. 잠실 홈. 젊은 타선. 불펜 깊이.',
-  KT: 'KT 위즈. 수원 홈. 안타 제조기 타선. 투수 안정성.',
-  SS: '삼성 라이온즈. 대구 홈. 파크팩터 높음(타자 유리). 외국인 타자 핵심.',
-  LT: '롯데 자이언츠. 사직 홈. 팬 열기. 투수진 재건 중.',
-  HH: '한화 이글스. 대전 홈. 젊은 유망주. 문동주 등 선발진 성장.',
-  NC: 'NC 다이노스. 창원 홈. 안정적 운영. 중위권 전력.',
-  WO: '키움 히어로즈. 고척돔 홈(파크팩터 낮음). 안우진 등 선발 에이스급.',
-};
-
-function buildSystemPrompt(team: TeamCode): string {
+function buildSystemPrompt(team: TeamCode, role: 'home' | 'away'): string {
   const teamInfo = KBO_TEAMS[team];
-  const profile = TEAM_PROFILES[team];
+  const roleBlock = role === 'home' ? HOME_ROLE : AWAY_ROLE;
 
-  return `당신은 ${teamInfo.name}의 전문 분석가입니다.
-${profile}
-
-당신의 역할:
-1. 자기 팀(${teamInfo.name})의 강점을 데이터로 강조하세요.
-2. 상대 팀의 약점을 구체적으로 지적하세요.
-3. 가장 결정적인 팩터 하나를 선택하세요.
-4. 자기 팀 승리 확신도를 0~1로 평가하세요.
-
-반드시 JSON 형식으로 응답하세요:
-{
-  "strengths": ["강점1", "강점2", "강점3"],
-  "opponentWeaknesses": ["약점1", "약점2"],
-  "keyFactor": "가장 결정적 팩터",
-  "confidence": 0.65,
-  "reasoning": "200자 이내 종합 논거"
-}
-
-규칙:
-- 데이터에 근거하세요. 감정이 아닌 숫자로 주장.
-- 상대 팀 에이전트가 반박할 것입니다. 가장 강한 논거를 제시하세요.
-- confidence는 데이터가 뒷받침하는 만큼만. 과대평가 금지.`;
+  return [
+    BASE_PROMPT,
+    roleBlock,
+    [
+      '## 할당',
+      `팀: ${teamInfo.name} (${team})`,
+      `구장: ${teamInfo.stadium}`,
+      `파크팩터: ${teamInfo.parkPf} (${teamInfo.parkNote})`,
+      `역할: ${role === 'home' ? '홈팀' : '원정팀'}`,
+    ].join('\n'),
+    RESPONSE_FORMAT,
+  ].join('\n\n');
 }
 
 function buildUserMessage(team: TeamCode, context: GameContext): string {
@@ -80,7 +58,6 @@ ${KBO_TEAMS[myTeam].name}의 관점에서 분석하세요.`;
 
 function parseResponse(text: string, team: TeamCode): TeamArgument {
   try {
-    // JSON 추출 (텍스트에 JSON이 포함된 경우)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found');
     const parsed = JSON.parse(jsonMatch[0]);
@@ -94,7 +71,6 @@ function parseResponse(text: string, team: TeamCode): TeamArgument {
       reasoning: String(parsed.reasoning || '').slice(0, 500),
     };
   } catch {
-    // 파싱 실패 시 기본값
     return {
       team,
       strengths: ['데이터 분석 중'],
@@ -107,19 +83,45 @@ function parseResponse(text: string, team: TeamCode): TeamArgument {
 }
 
 /**
- * 특정 팀의 에이전트를 실행하여 논거를 생성
+ * 특정 팀의 에이전트를 실행하여 논거를 생성 (v4-2 리팩터)
+ *
+ * 변경점 (v1-narrative → v2-persona4):
+ * - TEAM_PROFILES 내러티브 dict 제거
+ * - BASE_PROMPT + HOME_ROLE/AWAY_ROLE 주입 (데이터 역할 중심)
+ * - parseResponse 성공 후 validateTeamArgument 호출
+ * - 위반(hard > 0 또는 warn > 2) 시 AgentResult.success=false로 전환
+ *   → debate.ts의 기존 fallback 로직이 그대로 처리 (호환성 유지)
  */
 export async function runTeamAgent(
   team: TeamCode,
   context: GameContext
 ): Promise<AgentResult<TeamArgument>> {
-  return callLLM<TeamArgument>(
+  const role: 'home' | 'away' = context.game.homeTeam === team ? 'home' : 'away';
+
+  const result = await callLLM<TeamArgument>(
     {
       model: 'haiku',
-      systemPrompt: buildSystemPrompt(team),
+      systemPrompt: buildSystemPrompt(team, role),
       userMessage: buildUserMessage(team, context),
       maxTokens: 800,
     },
     (text) => parseResponse(text, team)
   );
+
+  // Validator Layer 1 — 성공 응답에만 적용
+  if (result.success && result.data) {
+    const validation = validateTeamArgument(result.data, context);
+    if (!validation.ok) {
+      const summary = validation.violations.map((v) => `${v.type}:${v.severity}`).join(', ');
+      console.warn(`[Validator] ${team} reject: ${summary}`);
+      return {
+        ...result,
+        success: false,
+        data: null,
+        error: `validator: ${summary}`,
+      };
+    }
+  }
+
+  return result;
 }
