@@ -72,22 +72,131 @@ export async function updateCalibration(season: number = new Date().getFullYear(
   return { buckets, monotonic };
 }
 
+// ============================================
+// v4-3 Task 3: memory_type 분류 + home/away 양쪽 row
+// ============================================
+
+export type MemoryType = 'strength' | 'weakness' | 'pattern' | 'matchup';
+
+export interface MemoryClassification {
+  type: MemoryType;
+  content: string;
+  confidence: number;
+}
+
 /**
- * 경기 결과 기반 팀 에이전트 메모리 생성
- * 틀린 예측에서 "왜 틀렸는지" 패턴을 추출하여 메모리에 저장
+ * 팀 관점에서 factor 편향을 memory_type으로 분류 (순수 함수, 테스트 용이)
+ *
+ * 규칙:
+ *   - h2h 팩터(head_to_head) → matchup
+ *   - 편향 크기 ≤ 0.05 → pattern (변동 없음)
+ *   - 편향 방향이 예측 결과와 일치 → strength (해당 팀의 강점이 반영됨)
+ *   - 편향 방향이 예측 결과와 반대 → weakness (해당 팀의 약점이 덜 반영됨)
+ *
+ * factor value convention: 0.5 중립, >0.5이면 홈팀 유리, <0.5이면 원정팀 유리
+ */
+export function classifyMemoryType(params: {
+  factorKey: string;
+  factorValue: number;
+  teamSide: 'home' | 'away';
+  teamWon: boolean;
+}): MemoryType {
+  const { factorKey, factorValue, teamSide, teamWon } = params;
+
+  if (factorKey.includes('head_to_head') || factorKey.includes('h2h')) {
+    return 'matchup';
+  }
+
+  const bias = Math.abs(factorValue - 0.5);
+  if (bias <= 0.05) return 'pattern';
+
+  // 팀에게 유리했던 팩터인지 판단
+  const favorsTeam = teamSide === 'home' ? factorValue > 0.5 : factorValue < 0.5;
+
+  // 이 팀이 이겼고 factor도 유리했으면 → strength (반영 잘됨)
+  // 이 팀이 졌는데 factor가 유리했으면 → weakness (반영 부족)
+  // 이 팀이 이겼는데 factor가 불리했으면 → weakness (factor가 틀림)
+  // 이 팀이 졌고 factor도 불리했으면 → strength (상대 강점)
+  if (teamWon && favorsTeam) return 'strength';
+  if (!teamWon && !favorsTeam) return 'strength';
+  return 'weakness';
+}
+
+/**
+ * 7일 뒤 날짜 문자열 (YYYY-MM-DD). valid_until 계산용.
+ */
+export function addDays(date: string, days: number): string {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * 팀 관점의 maxBias factor → memory row 생성 (순수 함수)
+ * factors가 비어있거나 모든 bias ≤ 0 이면 null 반환.
+ */
+export function buildMemoryForTeam(params: {
+  factors: Record<string, number>;
+  teamCode: string;
+  teamSide: 'home' | 'away';
+  teamWon: boolean;
+  date: string;
+  opponentCode: string;
+}): MemoryClassification | null {
+  const { factors, teamCode, teamSide, teamWon, date, opponentCode } = params;
+
+  let maxBias = '';
+  let maxBiasVal = 0;
+  for (const [key, val] of Object.entries(factors)) {
+    const bias = Math.abs(val - 0.5);
+    if (bias > maxBiasVal) {
+      maxBiasVal = bias;
+      maxBias = key;
+    }
+  }
+  if (!maxBias || maxBiasVal === 0) return null;
+
+  const factorValue = factors[maxBias];
+  const type = classifyMemoryType({
+    factorKey: maxBias,
+    factorValue,
+    teamSide,
+    teamWon,
+  });
+
+  const sign = factorValue > 0.5 ? '+' : '';
+  const content = `${teamCode}: ${maxBias} ${sign}${(factorValue - 0.5).toFixed(2)} (${type}, vs ${opponentCode} ${date})`;
+
+  return {
+    type,
+    content,
+    confidence: 0.6,
+  };
+}
+
+/**
+ * 경기 결과 기반 팀 에이전트 메모리 생성 (v4-3 Task 3 개선)
+ *
+ * 변경점 (v4-2 → v4-3):
+ * - 🔴 BUG FIX: home 팀만 insert → home/away **양쪽** insert (eng-review C1)
+ * - memory_type: 'pattern' 하드코딩 → strength/weakness/pattern/matchup 분류
+ * - valid_until: null → date + 7일
+ * - source_game_id: 누락 → FK로 저장
+ * - insert → upsert (onConflict) — UNIQUE(team_code, memory_type, content)와 짝,
+ *   동일 내용 재발생 시 valid_until만 연장 (중복 row 방지)
  */
 export async function generateAgentMemories(date: string) {
   const db = createAdminClient();
 
-  // 해당 날짜의 검증된 예측 중 틀린 것
   const { data: wrongPredictions } = await db
     .from('predictions')
     .select(`
-      predicted_winner, confidence, reasoning, factors,
+      game_id, predicted_winner, confidence, reasoning, factors,
       game:games!predictions_game_id_fkey(
-        game_date, home_score, away_score, winner_team_id,
+        id, game_date, home_score, away_score,
         home_team:teams!games_home_team_id_fkey(code),
-        away_team:teams!games_away_team_id_fkey(code)
+        away_team:teams!games_away_team_id_fkey(code),
+        winner:teams!games_winner_team_id_fkey(code)
       )
     `)
     .eq('prediction_type', 'pre_game')
@@ -95,39 +204,53 @@ export async function generateAgentMemories(date: string) {
 
   if (!wrongPredictions || wrongPredictions.length === 0) return;
 
+  const newValidUntil = addDays(date, 7);
+
   for (const pred of wrongPredictions) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const game = pred.game as any;
     if (!game || game.game_date !== date) continue;
 
     const homeCode = game.home_team?.code;
     const awayCode = game.away_team?.code;
+    const winnerCode = game.winner?.code;
     if (!homeCode || !awayCode) continue;
 
-    // 어떤 팩터가 가장 크게 기여했는데 틀렸는지 분석
     const factors = pred.factors as Record<string, number> | null;
     if (!factors) continue;
 
-    // 가장 편향된 팩터 찾기 (0.5에서 가장 먼 것)
-    let maxBias = '';
-    let maxBiasVal = 0;
-    for (const [key, val] of Object.entries(factors)) {
-      const bias = Math.abs((val as number) - 0.5);
-      if (bias > maxBiasVal) {
-        maxBiasVal = bias;
-        maxBias = key;
-      }
-    }
+    // 🔴 home/away 양쪽 각각의 관점에서 memory 생성
+    const teams: Array<{ code: string; side: 'home' | 'away'; opponent: string }> = [
+      { code: homeCode, side: 'home', opponent: awayCode },
+      { code: awayCode, side: 'away', opponent: homeCode },
+    ];
 
-    if (maxBias) {
-      const memoryContent = `${date} ${homeCode} vs ${awayCode}: ${maxBias} 팩터가 가장 큰 편향(${Math.round(maxBiasVal * 100)}%)을 보였으나 예측 실패. 이 팩터의 신뢰도를 재검토 필요.`;
-
-      await db.from('agent_memories').insert({
-        team_code: homeCode,
-        memory_type: 'pattern',
-        content: memoryContent,
-        confidence: 0.6,
-        valid_until: null,
+    for (const t of teams) {
+      const memory = buildMemoryForTeam({
+        factors,
+        teamCode: t.code,
+        teamSide: t.side,
+        teamWon: winnerCode === t.code,
+        date,
+        opponentCode: t.opponent,
       });
+      if (!memory) continue;
+
+      // upsert: 동일 (team_code, memory_type, content) 존재 시 valid_until 연장만
+      const { error } = await db.from('agent_memories').upsert(
+        {
+          team_code: t.code,
+          memory_type: memory.type,
+          content: memory.content,
+          confidence: memory.confidence,
+          source_game_id: game.id,
+          valid_until: newValidUntil,
+        },
+        { onConflict: 'team_code,memory_type,content' }
+      );
+      if (error) {
+        console.warn(`[retro] agent_memories upsert failed for ${t.code}:`, error.message);
+      }
     }
   }
 }
