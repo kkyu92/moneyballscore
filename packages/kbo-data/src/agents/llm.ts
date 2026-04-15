@@ -1,5 +1,6 @@
 import type { AgentResult } from './types';
 import { callOllama } from './llm-ollama';
+import { callDeepSeek } from './llm-deepseek';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -16,11 +17,35 @@ export interface LLMCallOptions {
   maxTokens: number;
 }
 
-export type LLMBackend = 'claude' | 'ollama';
+export type LLMBackend = 'claude' | 'ollama' | 'deepseek';
 
-function getBackend(): LLMBackend {
-  const raw = process.env.LLM_BACKEND?.toLowerCase();
-  return raw === 'ollama' ? 'ollama' : 'claude';
+/**
+ * 역할별 백엔드 선택 (v4-4 Hybrid 지원)
+ *
+ * 우선순위:
+ *   1. 역할별 env var 직접 지정 (LLM_BACKEND_HAIKU / LLM_BACKEND_SONNET)
+ *   2. 전역 LLM_BACKEND (전부 한 backend)
+ *   3. 기본값 'claude' (프로덕션 안전)
+ *
+ * 프로덕션 Hybrid 권장 설정:
+ *   LLM_BACKEND_HAIKU=deepseek  (팀/회고/postview team: 저렴)
+ *   LLM_BACKEND_SONNET=claude   (심판: 블로그 reasoning 고품질)
+ *
+ * 개발 드라이런:
+ *   LLM_BACKEND=ollama          (모든 역할 로컬, $0)
+ *   LLM_BACKEND=deepseek        (모든 역할 DeepSeek, ~$0.02/경기)
+ */
+function getBackend(role: 'haiku' | 'sonnet'): LLMBackend {
+  const roleKey = role === 'haiku' ? 'LLM_BACKEND_HAIKU' : 'LLM_BACKEND_SONNET';
+  const roleRaw = process.env[roleKey]?.toLowerCase();
+  if (roleRaw === 'ollama') return 'ollama';
+  if (roleRaw === 'deepseek') return 'deepseek';
+  if (roleRaw === 'claude') return 'claude';
+
+  const globalRaw = process.env.LLM_BACKEND?.toLowerCase();
+  if (globalRaw === 'ollama') return 'ollama';
+  if (globalRaw === 'deepseek') return 'deepseek';
+  return 'claude';
 }
 
 function getModelId(model: 'haiku' | 'sonnet'): string {
@@ -54,9 +79,12 @@ export async function callLLM<T>(
   options: LLMCallOptions,
   parseResponse: (text: string) => T
 ): Promise<AgentResult<T>> {
-  const backend = getBackend();
+  const backend = getBackend(options.model);
   if (backend === 'ollama') {
     return callOllama(options, parseResponse);
+  }
+  if (backend === 'deepseek') {
+    return callDeepSeek(options, parseResponse);
   }
   return callClaude(options, parseResponse);
 }
