@@ -1,4 +1,5 @@
 import { KBO_TEAMS, getConfidenceColor, type TeamCode } from "@moneyball/shared";
+import { AnalysisLink } from "../shared/AnalysisLink";
 
 interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -16,6 +17,7 @@ interface PredictionCardProps {
   isCorrect?: boolean | null;
   homeScore?: number | null;
   awayScore?: number | null;
+  gameId?: number; // v4-4: AnalysisLink 용
 }
 
 export function PredictionCard({
@@ -34,6 +36,7 @@ export function PredictionCard({
   homeScore,
   awayScore,
   winProb,
+  gameId,
 }: PredictionCardProps) {
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
@@ -133,6 +136,13 @@ export function PredictionCard({
           </div>
         )}
       </div>
+
+      {/* v4-4: 상세 분석 링크 */}
+      {gameId != null && (
+        <div className="border-t border-gray-100 pt-3 mt-3 text-center">
+          <AnalysisLink gameId={gameId} label="AI 분석 보기" variant="subtle" />
+        </div>
+      )}
     </div>
   );
 }
