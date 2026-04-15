@@ -127,7 +127,9 @@ export async function runTeamAgent(
     const mode = resolveValidationMode();
     const validation = validateTeamArgument(result.data, context, mode);
     if (!validation.ok) {
-      const summary = validation.violations.map((v) => `${v.type}:${v.severity}`).join(', ');
+      const summary = validation.violations
+        .map((v) => `${v.type}:${v.severity} (${v.detail})`)
+        .join(' | ');
       console.warn(`[Validator] ${team} reject: ${summary}`);
       return {
         ...result,

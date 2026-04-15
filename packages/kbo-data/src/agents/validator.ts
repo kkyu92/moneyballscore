@@ -90,11 +90,11 @@ const NUMERIC_EPSILON = 0.0001;
 function computeArithmeticDerivatives(injectedNums: number[]): Set<string> {
   const derived = new Set<string>();
 
-  // 1. 각 수치의 percent 변환 (0.65 → 65, 0.45 → 45 등)
+  // 1. 각 수치의 percent 변환 — 범위 제약 없이 × 100
+  //    0.7 → 70, 0.34 → 34, 1.02 → 102 (parkFactor), 3.42 → 342 등
   for (const n of injectedNums) {
-    if (n > 0 && n < 1) {
-      const pct = Math.round(n * 100);
-      derived.add(String(pct));
+    if (n > 0) {
+      derived.add(String(Math.round(n * 100)));
     }
     // 백분율 수치 → 소수 변환 (65 → 0.65)
     if (Number.isInteger(n) && n >= 1 && n <= 100) {
@@ -133,12 +133,22 @@ const COMMON_KOREAN_NOUNS = new Set([
   '가능성', '생산성', '경쟁력', '창출력', '주도권', '신뢰도', '안정성',
   '효율성', '영향력', '확실성', '우월성', '기대치', '위험도', '균형감',
   '유연성', '변동성', '지속성', '일관성', '적응력', '회복력',
+  // -적 접미사 형용사 (자주 등장, 선수명 아님)
+  '생산적', '중립적', '효율적', '전략적', '결정적', '상대적', '절대적',
+  '압도적', '긍정적', '부정적', '기본적', '구체적', '일반적', '본질적',
+  '실질적', '지속적', '합리적', '이성적', '기술적', '통계적', '논리적',
+  '공격적', '방어적', '현실적', '이상적', '직접적', '간접적', '점진적',
+  '혁신적', '적극적', '소극적', '능동적', '수동적', '자동적', '수치적',
   // 야구 용어 (3자)
   '득점권', '출루율', '장타율', '도루율', '피안타', '피홈런', '삼진율',
   '실점률', '방어율', '자책점', '타격률', '볼넷률', '피칭률',
   // 상황 서술
   '선취점', '결정타', '역전승', '패전처', '경기력', '집중력',
-  '기동력', '수비력', '타격력', '투구력',
+  '기동력', '수비력', '타격력', '투구력', '공격력', '방어력',
+  '득점력', '돌파력', '파워력',
+  // 외래어·일반 명사
+  '데이터', '시스템', '밸런스', '페이스', '모멘텀', '컨디션',
+  '스타트', '매치업',
   // 동사 활용형 (3자)
   '어준다', '어간다', '어내다', '어주다', '어가다', '어오다',
   '여진다', '여낸다', '여내다', '여준다', '여간다',
@@ -147,12 +157,24 @@ const COMMON_KOREAN_NOUNS = new Set([
   '수치가', '모델이', '지표가', '결과가', '분석이',
 ]);
 
+// 3자 단어가 "-적"으로 끝나면 파생형용사 — 선수명이 아닐 확률 매우 높음
+// 한국어 파생접미사 -적은 adjective 생성용. 모든 -적 3자 단어 자동 제외.
+function isKoreanAdjectivalSuffix(word: string): boolean {
+  return word.length === 3 && word.endsWith('적');
+}
+
 // 야구 선수 맥락 동사 (이게 뒤에 오면 진짜 선수명일 가능성 높음)
 // 주의: 일반 단어("선발", "마운드", "교체")는 제외. 진짜 "선수+동사" 구조만.
 const PLAYER_CONTEXT_VERBS = [
   '등판', '선발로', '투수로', '타자로', '출전', '결장',
   '타격', '삼진', '홈런', '피칭', '완투', '세이브',
 ];
+
+// 한국 성씨 상위 ~50개. 실제 이름 패턴 매칭에 사용.
+// v4-4 hotfix: 일반 3자 단어를 "(1성) + (2이름)"으로 오분류하던 버그 해결.
+// 이 성씨로 시작하지 않는 3자 단어는 이름이 아닐 확률 매우 높음.
+const KOREAN_FAMILY_NAMES =
+  '김이박최정강조윤장임한오서신권황안송전홍유고문손양배백허남심노하곽성차주우구민유';
 
 // 금칙어 — 내러티브·심리·성격 관련
 const BANNED_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
@@ -258,18 +280,22 @@ export function checkInventedPlayerNames(
   if (context.homeSPStats?.name) allowed.add(context.homeSPStats.name);
   if (context.awaySPStats?.name) allowed.add(context.awaySPStats.name);
 
-  // v4-4 hotfix: 두 단계 매칭으로 false positive 줄임
+  // v4-4 hotfix: 한국 성씨 기반 매칭으로 false positive 제거
   //
-  // 1단계: 야구 선수 맥락 동사(등판/선발/출전/타격 등)가 뒤따르는 3자 이름 — 신뢰도 높음
-  // 2단계: 주격조사(이/가/은/는)만 뒤따르는 경우 — 일반 명사 화이트리스트 배제 후 검사
+  // 1단계: 야구 선수 맥락 동사(등판/선발로/출전/타격 등)가 뒤따르는 3자 이름 — 신뢰도 높음
+  // 2단계: 한국 성씨로 시작하는 3자 + 주격조사(이/가/은/는) 매칭 — 진짜 이름 패턴만
   //
-  // CEO 리뷰 empirical 발견: "가능성이", "창출력을" 같은 활용형이 원래 regex로 잘못 잡힘.
+  // CEO 리뷰 empirical 발견: 일반 3자 단어(과대평가/가능성/창출력) + 조사 조합이 원래
+  // regex에 잘못 잡히던 버그. 성씨 접두 매칭으로 근본 해결.
   const verbAlternation = PLAYER_CONTEXT_VERBS.join('|');
   const highConfidencePattern = new RegExp(
-    `([가-힣]{3})(?=\\s*(?:${verbAlternation}))`,
+    `(?<![가-힣])([가-힣]{3})(?=\\s*(?:${verbAlternation}))`,
     'g'
   );
-  const subjectMarkerPattern = /([가-힣]{3})(?=[이가은는])/g;
+  const subjectMarkerPattern = new RegExp(
+    `(?<![가-힣])([${KOREAN_FAMILY_NAMES}][가-힣]{2})(?=[이가은는])`,
+    'g'
+  );
 
   const candidates = new Set<string>();
 
@@ -278,10 +304,11 @@ export function checkInventedPlayerNames(
     candidates.add(m[1]);
   }
 
-  // 2단계: 조사 뒤 이름 (일반 명사 화이트리스트 필터링 후)
+  // 2단계: 조사 뒤 이름 (일반 명사 화이트리스트 + 파생형용사 접미사 필터링)
   for (const m of outputText.matchAll(subjectMarkerPattern)) {
     const word = m[1];
     if (COMMON_KOREAN_NOUNS.has(word)) continue;
+    if (isKoreanAdjectivalSuffix(word)) continue;
     candidates.add(word);
   }
 
