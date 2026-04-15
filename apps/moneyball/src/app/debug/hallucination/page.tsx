@@ -1,10 +1,22 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 // v4-4 Task 6: /debug/hallucination 대시보드
 // middleware.ts BASIC auth로 보호됨
 // Eng 리뷰 A3 validator_logs 테이블 (migration 011)
+//
+// Service role 직접 사용: validator_logs는 RLS로 service role만 접근 가능.
+// 일반 anon key로는 권한 없음. middleware BASIC auth가 이미 페이지 보호 중.
 
 export const dynamic = 'force-dynamic'; // 항상 최신 데이터
+
+function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('Supabase credentials required');
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 interface ValidatorLog {
   id: number;
@@ -18,7 +30,7 @@ interface ValidatorLog {
 }
 
 async function getStats() {
-  const supabase = await createClient();
+  const supabase = getAdminClient();
 
   // 최근 7일 전체 건수
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
