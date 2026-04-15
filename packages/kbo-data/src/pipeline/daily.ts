@@ -9,6 +9,7 @@ import { runDebate } from '../agents/debate';
 import type { GameContext } from '../agents/types';
 import type { PredictionHistory } from '../agents/calibration-agent';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
+import { runPostviewDaily } from './postview-daily';
 import { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from '../notify/telegram';
 import type { PredictionInput, PredictionResult, PipelineResult, ScrapedGame } from '../types';
 
@@ -27,6 +28,13 @@ function createAdminClient(): DB {
 }
 
 const CURRENT_SEASON = new Date().getFullYear();
+
+// YYYY-MM-DD 문자열에서 하루 뺀 날짜
+function getYesterdayKST(date: string): string {
+  const d = new Date(date + 'T00:00:00+09:00');
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
 
 // KBO 리그 ID (leagues 테이블)
 async function getKBOLeagueId(db: DB): Promise<number> {
@@ -100,6 +108,20 @@ export async function runDailyPipeline(
 
   const leagueId = await getKBOLeagueId(db);
   const teamIdMap = await getTeamIdMap(db, leagueId);
+
+  // v4-3 Task 4 fallback: 아침 predict run이 전날 누락된 postview cleanup
+  // live-update.yml이 00:50 KST 이후 종료된 경기(연 1~2회 극단)를 커버 못할 때 마지막 보험
+  if (mode === 'predict') {
+    try {
+      const yesterday = getYesterdayKST(targetDate);
+      const cleanup = await runPostviewDaily(yesterday);
+      if (cleanup.processed > 0) {
+        console.log(`[Pipeline] Morning postview cleanup: ${yesterday} processed=${cleanup.processed} tokens=${cleanup.totalTokens}`);
+      }
+    } catch (e) {
+      console.warn('[Pipeline] Morning postview cleanup failed, continuing:', e);
+    }
+  }
 
   // 1. KBO 공식에서 경기 목록 수집
   let games: ScrapedGame[];

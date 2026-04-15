@@ -23,6 +23,8 @@ export { predict } from './engine/predictor';
 // 파이프라인
 export { runDailyPipeline } from './pipeline/daily';
 export { runLiveUpdate } from './pipeline/live';
+export { runPostviewDaily } from './pipeline/postview-daily';
+export type { PostviewDailyResult } from './pipeline/postview-daily';
 
 // 라이브
 export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
