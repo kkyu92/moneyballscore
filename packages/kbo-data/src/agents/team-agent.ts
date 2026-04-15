@@ -2,9 +2,44 @@ import { KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
-import { validateTeamArgument, resolveValidationMode } from './validator';
+import { validateTeamArgument, resolveValidationMode, type Violation } from './validator';
 import { getRivalryBlock } from './rivalry-memory';
 import type { GameContext, TeamArgument, AgentResult } from './types';
+
+// v4-4 Task 6: validator_logs fire-and-forget insert (Eng 리뷰 A3)
+// Supabase insert는 hot path를 블로킹하지 않음. 실패해도 team-agent 진행.
+async function logValidatorRejection(
+  gameId: number | null,
+  team: TeamCode,
+  backend: string,
+  violations: Violation[]
+): Promise<void> {
+  if (violations.length === 0) return;
+
+  // lazy import (서버리스 cold start 최소화)
+  const { createClient } = await import('@supabase/supabase-js');
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+
+  const db = createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  for (const v of violations) {
+    const { error } = await db.from('validator_logs').insert({
+      game_id: gameId,
+      team_code: team,
+      backend: backend.slice(0, 50),
+      severity: v.severity,
+      violation_type: v.type,
+      detail: v.detail.slice(0, 500),
+    });
+    if (error) {
+      console.warn(`[validator_logs] insert failed (non-blocking): ${error.message}`);
+    }
+  }
+}
 
 function buildSystemPrompt(team: TeamCode, role: 'home' | 'away'): string {
   const teamInfo = KBO_TEAMS[team];
@@ -131,6 +166,15 @@ export async function runTeamAgent(
         .map((v) => `${v.type}:${v.severity} (${v.detail})`)
         .join(' | ');
       console.warn(`[Validator] ${team} reject: ${summary}`);
+
+      // v4-4 Task 6: fire-and-forget insert to validator_logs
+      // Hot path 영향 0: await 없이 promise 던짐. Supabase 장애 시 team-agent 블로킹 안 됨.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gameId = (context.game as any).id ?? null;
+      logValidatorRejection(gameId, team, result.model, validation.violations).catch(
+        (e) => console.warn('[validator_logs] unexpected error:', e)
+      );
+
       return {
         ...result,
         success: false,
