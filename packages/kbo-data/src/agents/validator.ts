@@ -92,12 +92,23 @@ function extractNumbers(text: string): string[] {
   return matches ?? [];
 }
 
+// "4.20" ↔ "4.2", "0.340" ↔ "0.34" 같은 trailing-zero 차이를 정규화.
+// parseFloat로 숫자 비교, 고정 소수 4자리까지 keying.
+function normalizeNum(s: string): string {
+  const n = parseFloat(s);
+  if (!Number.isFinite(n)) return s;
+  // 정수 우선, 그 외엔 trailing zero 제거
+  if (Number.isInteger(n)) return String(n);
+  // toFixed(4) 후 trailing zero 제거
+  return n.toFixed(4).replace(/\.?0+$/, '');
+}
+
 export function checkHallucinatedNumbers(
   outputText: string,
   injectionText: string
 ): Violation[] {
-  const outputNums = new Set(extractNumbers(outputText));
-  const injectedNums = new Set(extractNumbers(injectionText));
+  const outputNums = new Set(extractNumbers(outputText).map(normalizeNum));
+  const injectedNums = new Set(extractNumbers(injectionText).map(normalizeNum));
 
   const hallucinated: string[] = [];
   for (const n of outputNums) {
@@ -124,31 +135,19 @@ export function checkInventedPlayerNames(
   outputText: string,
   context: GameContext
 ): Violation[] {
-  // 주입 블록에 포함된 선수명 (2~4자 한글)
+  // 주입 블록에 포함된 선수명
   const allowed = new Set<string>();
   if (context.homeSPStats?.name) allowed.add(context.homeSPStats.name);
   if (context.awaySPStats?.name) allowed.add(context.awaySPStats.name);
 
-  // 출력에서 2~4자 한글 이름 후보 추출
-  const candidates = outputText.match(/[가-힣]{2,4}/g) ?? [];
-  const invented: string[] = [];
+  // 3자 이름 후보: 뒤에 주격/소유격 조사(이/가/은/는) 또는 선수 맥락 동사가 와야 함
+  // 이 제약 덕분에 "결정적", "매치업" 같은 일반 3자 명사는 제외됨
+  const namePattern = /([가-힣]{3})(?=[이가은는]|\s*(?:등판|선발로|투수로|출전|결장|타격|삼진|홈런))/g;
+  const matches = [...outputText.matchAll(namePattern)];
 
-  // 한국어 일반 명사 제외용 최소 불용어 (이름으로 오탐하면 곤란한 단어)
-  const nonNameTokens = new Set([
-    '선발', '투수', '타자', '불펜', '타선', '팀', '경기', '승리', '패배',
-    '홈팀', '원정', '파크팩터', '상대전적', '최근', '수비', '공격', '반박',
-    '주장', '약점', '강점', '논거', '화이트', '데이터', '분석', '수치',
-    '예측', '모델', '확률', '가능성', '결론', '근거', '편향',
-  ]);
-
-  for (const c of candidates) {
-    if (allowed.has(c)) continue;
-    if (nonNameTokens.has(c)) continue;
-    // 한국어 이름 패턴 휴리스틱: 2~3자는 엄격히 이름 후보로 간주. 4자는 일반 명사 많음 → 제외
-    if (c.length === 4) continue;
-    // 2자 이름은 false positive 위험 → 3자만 강력 체크
-    if (c.length === 3) invented.push(c);
-  }
+  const invented = matches
+    .map((m) => m[1])
+    .filter((n) => !allowed.has(n));
 
   if (invented.length === 0) return [];
   return [
@@ -182,37 +181,36 @@ export function checkBannedPhrases(outputText: string): Violation[] {
 // 서브체크: claim-type 분류
 // ============================================
 
-function classifySentence(sentence: string): string | null {
-  for (const { type, patterns } of CLAIM_TYPE_SIGNALS) {
-    if (patterns.some((p) => p.test(sentence))) return type;
-  }
-  return null;
-}
-
+/**
+ * claim-type 검증 (v4-2 단순화 버전)
+ *
+ * 문장 분할 기반은 소수점 숫자("3.2")를 잘못 끊는 문제가 있어 폐기.
+ * 대신 **텍스트 전체에 통계 언어 신호가 충분한지**를 본다:
+ *  - 소수점 숫자 개수 (통계 수치 사용 증거)
+ *  - claim-type 5개 중 매치되는 유형 개수
+ * 합산 ≥ 2이면 통과. 그 미만이면 경고(warn).
+ *
+ * 이 방식은 문장 수준 분류 정확도는 떨어지지만, v4-2 초기 dry-run에서
+ * false positive를 최소화하는 것이 우선. v4-3에서 정교화.
+ */
 export function checkClaimTypes(outputText: string): Violation[] {
-  // 문장 분할 (마침표/느낌표/물음표/쉼표)
-  const sentences = outputText
-    .split(/[.!?,]|\n/)
-    .map((s) => s.trim())
-    .filter((s) => s.length >= 5); // 너무 짧은 조각은 제외
+  const decimalCount = (outputText.match(/\d+\.\d+/g) ?? []).length;
 
-  let unclassified = 0;
-  for (const s of sentences) {
-    if (classifySentence(s) === null) unclassified++;
+  let signalCount = 0;
+  for (const { patterns } of CLAIM_TYPE_SIGNALS) {
+    if (patterns.some((p) => p.test(outputText))) signalCount++;
   }
 
-  // 문장 수 대비 분류 불가 비율 체크
-  // 전체 문장 중 50% 이상 분류 불가면 warning
-  if (sentences.length > 0 && unclassified / sentences.length > 0.5) {
-    return [
-      {
-        type: 'unclassified_claim',
-        severity: 'warn',
-        detail: `${sentences.length}문장 중 ${unclassified}개가 허용 claim-type 5개 중 어느 것에도 분류 안 됨`,
-      },
-    ];
-  }
-  return [];
+  const total = decimalCount + signalCount;
+  if (total >= 2) return [];
+
+  return [
+    {
+      type: 'unclassified_claim',
+      severity: 'warn',
+      detail: `통계 수치 ${decimalCount}개 + claim-type 신호 ${signalCount}개 = ${total} (최소 2 필요)`,
+    },
+  ];
 }
 
 // ============================================
