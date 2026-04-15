@@ -16,9 +16,12 @@ interface LLMCallOptions {
 }
 
 function getModelId(model: 'haiku' | 'sonnet'): string {
+  // Anthropic Claude 4.x 모델 ID
+  // Haiku 4.5: 'claude-haiku-4-5-20251001' (2025-10-01 릴리즈, 팀/회고 에이전트용)
+  // Sonnet 4.6: 'claude-sonnet-4-6' (심판용 — 이전 버전 'claude-sonnet-4-6-20250514'는 오타. 20250514는 구 Sonnet 4.0 날짜였음. 2026-04-15 v4-2 프로덕션 검증 중 judge 실패로 발견)
   return model === 'haiku'
     ? 'claude-haiku-4-5-20251001'
-    : 'claude-sonnet-4-6-20250514';
+    : 'claude-sonnet-4-6';
 }
 
 function isRetryableStatus(status: number): boolean {
