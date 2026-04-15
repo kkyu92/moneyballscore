@@ -354,7 +354,7 @@ export async function runDailyPipeline(
         await db.from('games').update({ away_sp_id: spId }).eq('id', dbGame.id);
       }
 
-      await db.from('predictions').upsert(
+      const upsertResult = await db.from('predictions').upsert(
         {
           game_id: dbGame.id,
           prediction_type: 'pre_game',
@@ -388,6 +388,16 @@ export async function runDailyPipeline(
         },
         { onConflict: 'game_id,prediction_type' }
       );
+
+      // Silent fail 방지: upsert 에러를 errors 배열에 surface
+      // 이전 사고: model_version VARCHAR(10) overflow가 무성무 무시되어
+      // Phase C/D 이후 prediction row 생성 실패. Migration 008 + 이 체크로 재발 차단.
+      if (upsertResult.error) {
+        const errMsg = `Upsert failed for ${game.homeTeam}v${game.awayTeam} (game_id=${dbGame.id}): ${upsertResult.error.message}`;
+        console.error(`[Pipeline] ${errMsg}`);
+        errors.push(errMsg);
+        continue;
+      }
 
       predictionsGenerated++;
       predictionSummaries.push({
