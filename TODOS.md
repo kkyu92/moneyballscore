@@ -92,6 +92,26 @@ HAVING count(*) > 1;
 
 ---
 
+## 🎨 v5 이후 — Design 리뷰 deferred 항목
+
+### DESIGN.md 작성 (`/design-consultation` 실행)
+- **What**: 프로젝트 디자인 시스템 문서 작성. 컬러 팔레트, 타이포 스케일, 스페이싱, 컴포넌트 vocabulary, 모션 가이드
+- **Why**: v4-4 Design 리뷰 score 상한이 7.5/10인 이유 — DESIGN.md 부재. 일관된 디자인 결정을 위한 source of truth
+- **Pros**: 신규 컴포넌트 결정 빠름, 다른 페이지 일관성, 브랜드 정체성 명확
+- **Cons**: `/design-consultation` 1~2시간 소요, v4-4 구현 후에 해도 늦지 않음
+- **Context**: v4-4는 기존 `globals.css` 다크 그린 토큰 준수로 최소 일관성 확보. v5 UI 확장(사용자 설정, 알림 등) 전에 작성 필요
+- **우선순위**: MEDIUM (v5 시작 전)
+
+### 사용자 리텐션 기능 (북마크·RSS·알림)
+- **What**: 사용자가 특정 경기 팔로우, 즐겨찾기, 결과 알림 수신
+- **Why**: v4-4 Design 리뷰 User Journey Pass에서 발견 — Step 7 "경기 종료 후 재방문"이 현재 설계에 없음
+- **Pros**: 재방문 유도, AdSense 수익 증가, RSS로 검색엔진 추가 유입
+- **Cons**: 사용자 모델·세션·이메일 인프라 필요. v4-4 범위 초과
+- **Context**: v4-4는 URL 공유만 가능. 실제 "다시 오게 만드는" 메커니즘 없음
+- **우선순위**: LOW (v5 후반 또는 v6)
+
+---
+
 ## Phase 2a 시작 전
 
 ### ~~Statiz 스크래핑 법적 리스크 확인~~ ✓ 완료 (2026-04-14)
