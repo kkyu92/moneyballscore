@@ -4,12 +4,16 @@
  * Phase v4-2 신규. 환각·편향·금칙어·선수명 발명을 차단.
  * 위반 시 AgentResult.success=false로 전환되어 debate.ts의 기존 fallback 경로 사용.
  *
- * 초기 정책 (Q2 결정):
- *   - 하드 위반(환각, 선수명 발명) 1건 이상 → reject
- *   - 경고(금칙어, claim-type 분류 불가) 3건 이상 → reject
- *   - 그 외 통과
+ * 정책 (Q2 + v4-3 mode 도입):
+ *   strict (프로덕션/Claude 기본):
+ *     - 하드 위반(환각, 선수명 발명) 1건 이상 → reject
+ *     - 경고(금칙어, claim-type 분류 불가) 3건 이상 → reject
+ *   lenient (로컬 Ollama 개발 전용):
+ *     - 선수명 발명은 hard→warn으로 강등 (exaone 환각 허용치)
+ *     - 환각 숫자 hard는 유지
+ *     - 경고 6건 이상 → reject (WARN_LIMIT_LENIENT=5)
  *
- * 한국어 수치 표기("약 3할") 미지원은 의도된 한계. v4-3에서 개선.
+ * 호출부는 NODE_ENV=production이면 무조건 strict. v4-3 eng-review A4.
  */
 
 import type { TeamCode } from '@moneyball/shared';
@@ -45,7 +49,21 @@ export interface ValidationResult {
 
 // Q2 임계값 — 운영 1주 dry-run 결과 기반 재조정 가능
 export const HARD_LIMIT = 0;
-export const WARN_LIMIT = 2; // 3건 이상이면 reject
+export const WARN_LIMIT = 2; // strict: 3건 이상이면 reject
+export const WARN_LIMIT_LENIENT = 5; // lenient: 6건 이상이면 reject
+
+export type ValidationMode = 'strict' | 'lenient';
+
+/**
+ * 호출부 mode 결정 헬퍼.
+ * 프로덕션에서는 무조건 strict. LLM_BACKEND가 실수로 ollama로 설정돼도 차단.
+ * v4-3 eng-review A4 — 블로그 환각 leak 방어.
+ */
+export function resolveValidationMode(env: NodeJS.ProcessEnv = process.env): ValidationMode {
+  if (env.NODE_ENV === 'production') return 'strict';
+  if (env.LLM_BACKEND === 'ollama') return 'lenient';
+  return 'strict';
+}
 
 // 화이트리스트 — 환각 검사에서 제외할 일반 숫자
 // (단일 digit, 일반적 이닝·아웃카운트·스트라이크·볼 숫자)
@@ -240,7 +258,8 @@ export function buildInjectionText(context: GameContext): string {
 
 export function validateTeamArgument(
   arg: TeamArgument,
-  context: GameContext
+  context: GameContext,
+  mode: ValidationMode = 'strict'
 ): ValidationResult {
   const outputText = [
     arg.reasoning,
@@ -251,16 +270,25 @@ export function validateTeamArgument(
 
   const injectionText = buildInjectionText(context);
 
-  const violations: Violation[] = [
+  const rawViolations: Violation[] = [
     ...checkHallucinatedNumbers(outputText, injectionText),
     ...checkInventedPlayerNames(outputText, context),
     ...checkBannedPhrases(outputText),
     ...checkClaimTypes(outputText),
   ];
 
+  // lenient: 선수명 발명 hard → warn 강등 (exaone 환각 허용)
+  // strict: 원본 severity 유지
+  const violations: Violation[] = mode === 'lenient'
+    ? rawViolations.map((v) =>
+        v.type === 'invented_player_name' ? { ...v, severity: 'warn' as const } : v
+      )
+    : rawViolations;
+
   const hardCount = violations.filter((v) => v.severity === 'hard').length;
   const warnCount = violations.filter((v) => v.severity === 'warn').length;
 
-  const ok = hardCount <= HARD_LIMIT && warnCount <= WARN_LIMIT;
+  const warnLimit = mode === 'lenient' ? WARN_LIMIT_LENIENT : WARN_LIMIT;
+  const ok = hardCount <= HARD_LIMIT && warnCount <= warnLimit;
   return { ok, violations };
 }

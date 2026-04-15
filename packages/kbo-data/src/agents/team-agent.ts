@@ -2,7 +2,7 @@ import { KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
-import { validateTeamArgument } from './validator';
+import { validateTeamArgument, resolveValidationMode } from './validator';
 import type { GameContext, TeamArgument, AgentResult } from './types';
 
 function buildSystemPrompt(team: TeamCode, role: 'home' | 'away'): string {
@@ -109,8 +109,10 @@ export async function runTeamAgent(
   );
 
   // Validator Layer 1 — 성공 응답에만 적용
+  // mode: NODE_ENV=production이면 무조건 strict (env leak 차단)
   if (result.success && result.data) {
-    const validation = validateTeamArgument(result.data, context);
+    const mode = resolveValidationMode();
+    const validation = validateTeamArgument(result.data, context, mode);
     if (!validation.ok) {
       const summary = validation.violations.map((v) => `${v.type}:${v.severity}`).join(', ');
       console.warn(`[Validator] ${team} reject: ${summary}`);

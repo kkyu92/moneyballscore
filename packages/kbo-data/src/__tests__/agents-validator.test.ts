@@ -7,8 +7,10 @@ import {
   checkBannedPhrases,
   checkClaimTypes,
   buildInjectionText,
+  resolveValidationMode,
   HARD_LIMIT,
   WARN_LIMIT,
+  WARN_LIMIT_LENIENT,
 } from '../agents/validator';
 
 function makeContext(): GameContext {
@@ -191,9 +193,95 @@ describe('validateTeamArgument 통합', () => {
     expect(result.ok).toBe(false);
   });
 
-  it('HARD_LIMIT=0, WARN_LIMIT=2 상수 노출 검증', () => {
+  it('HARD_LIMIT=0, WARN_LIMIT=2, WARN_LIMIT_LENIENT=5 상수 노출 검증', () => {
     expect(HARD_LIMIT).toBe(0);
     expect(WARN_LIMIT).toBe(2);
+    expect(WARN_LIMIT_LENIENT).toBe(5);
+  });
+});
+
+// ============================================
+// v4-3 Task 0: lenient 모드 + NODE_ENV 가드
+// ============================================
+describe('validateTeamArgument lenient mode', () => {
+  const ctx = makeContext();
+
+  it('strict: 선수명 발명 1건 → reject (hard 유지)', () => {
+    const arg = makeArg({
+      reasoning: '박선수가 등판 FIP 3.2 기록. wOBA 0.340 우세.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((v) => v.type === 'invented_player_name' && v.severity === 'hard')).toBe(true);
+  });
+
+  it('lenient: 선수명 발명 1건 → warn으로 강등, ok=true (warn 1개는 limit 내)', () => {
+    const arg = makeArg({
+      reasoning: '박선수가 등판 FIP 3.2 기록. wOBA 0.340 우세.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'lenient');
+    expect(result.ok).toBe(true);
+    expect(result.violations.some((v) => v.type === 'invented_player_name' && v.severity === 'warn')).toBe(true);
+  });
+
+  it('lenient: 환각 숫자는 여전히 hard → reject', () => {
+    const arg = makeArg({
+      reasoning: '임찬규 FIP 9.99 xFIP 8.88 압도. wOBA 0.777 격차.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'lenient');
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((v) => v.type === 'hallucinated_number' && v.severity === 'hard')).toBe(true);
+  });
+
+  it('lenient: 경고 5건 통과, 6건 reject (WARN_LIMIT_LENIENT 경계)', () => {
+    // 5개 금칙어 포함
+    const arg5 = makeArg({
+      reasoning: '왕조 팬심 멘탈 전통적으로 자신감. FIP 3.2 우세. wOBA 0.340.',
+    });
+    const r5 = validateTeamArgument(arg5, ctx, 'lenient');
+    // warn 카운트는 금칙어 + (선수명 발명 있을 시) + (claim-type) — 이 케이스는 금칙어 5건만
+    const warnCount5 = r5.violations.filter((v) => v.severity === 'warn').length;
+    expect(warnCount5).toBeLessThanOrEqual(WARN_LIMIT_LENIENT);
+    expect(r5.ok).toBe(true);
+
+    // 6건 이상 (금칙어 5 + 선수명 발명 1 = 6). 주격조사 "가" 필수
+    const arg6 = makeArg({
+      reasoning: '왕조 팬심 멘탈 전통적으로 자신감. 박선수가 등판 FIP 3.2.',
+    });
+    const r6 = validateTeamArgument(arg6, ctx, 'lenient');
+    const warnCount6 = r6.violations.filter((v) => v.severity === 'warn').length;
+    expect(warnCount6).toBeGreaterThan(WARN_LIMIT_LENIENT);
+    expect(r6.ok).toBe(false);
+  });
+
+  it('기본 mode 미지정 시 strict (후방 호환)', () => {
+    const arg = makeArg({
+      reasoning: '박선수가 등판 FIP 3.2.',
+    });
+    const result = validateTeamArgument(arg, ctx);
+    expect(result.ok).toBe(false); // strict 기본 — 선수명 발명 hard
+  });
+});
+
+describe('resolveValidationMode (NODE_ENV 가드)', () => {
+  it('NODE_ENV=production + LLM_BACKEND=ollama → strict (env leak 방어)', () => {
+    expect(resolveValidationMode({ NODE_ENV: 'production', LLM_BACKEND: 'ollama' } as NodeJS.ProcessEnv)).toBe('strict');
+  });
+
+  it('NODE_ENV=production 단독 → strict', () => {
+    expect(resolveValidationMode({ NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toBe('strict');
+  });
+
+  it('NODE_ENV=development + LLM_BACKEND=ollama → lenient', () => {
+    expect(resolveValidationMode({ NODE_ENV: 'development', LLM_BACKEND: 'ollama' } as NodeJS.ProcessEnv)).toBe('lenient');
+  });
+
+  it('NODE_ENV=development + LLM_BACKEND=claude → strict', () => {
+    expect(resolveValidationMode({ NODE_ENV: 'development', LLM_BACKEND: 'claude' } as NodeJS.ProcessEnv)).toBe('strict');
+  });
+
+  it('환경변수 전부 미설정 → strict (안전 기본)', () => {
+    expect(resolveValidationMode({} as NodeJS.ProcessEnv)).toBe('strict');
   });
 });
 
