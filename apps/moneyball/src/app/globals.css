@@ -22,4 +22,12 @@
   --color-surface: #f8faf9;     /* 살짝 그린 틴트 배경 */
   --color-surface-card: #ffffff;
   --color-surface-dark: #0f2318;
+
+  /* v4-4 추가 토큰 — 토론 UI + factor 시각화 */
+  --color-away: #c5872a;         /* 원정팀 오렌지 (홈 다크그린과 대비) */
+  --color-away-light: #e2a55c;
+  --color-factor-favor: var(--color-brand-500);     /* 홈팀 유리 편향 */
+  --color-factor-against: var(--color-away);        /* 원정팀 유리 편향 */
+  --color-bg-hero-start: var(--color-brand-800);    /* hero 그라데이션 시작 */
+  --color-bg-hero-end: var(--color-brand-700);      /* hero 그라데이션 끝 */
 }
