@@ -40,26 +40,45 @@ Phase C/D는 main에 머지된 상태였지만 **실제로는 3개 사전 버그
 
 **교훈**: `git log`에 `feat:` 커밋이 있고 main에 머지됐다고 해서 **실제로 동작한다는 뜻이 아님**. "통합됐다"와 "돌아간다"는 다름. 프로덕션 검증 없는 feat 커밋은 잠재적으로 죽어 있는 코드일 수 있음. v4-2 작업이 이 3건 전부 드러내고 수정함.
 
-### 이미 구현된 주요 모듈 (2026-04-15 v4-2 이후 기준)
+### 드리프트 사례 4 — v4-2 머지 이후 retro.ts `homeCode` 하드코딩 숨은 버그 (2026-04-15 v4-3 eng-review)
 
-- `packages/kbo-data/src/agents/` — 에이전트 토론 시스템 (Phase C/D 통합 + Phase v4-2 리팩터)
-  - `debate.ts`: 오케스트레이터 (홈/원정/회고 병렬 → 심판 순차, fallback 경로)
-  - `team-agent.ts`: Haiku. `TEAM_PROFILES` 제거 → 페르소나 4파일 주입 (v4-2)
+v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: homeCode`만 insert하고 `awayCode`를 완전히 무시 → **Phase D Compound 루프가 실질적으로 50% 반쪽만 작동**한 상태. Phase C/D가 머지된 2026-04-14 이후 away 팀 agent_memory는 단 한 건도 생성된 적 없음.
+
+이 버그는 debug 커밋 3건(사례 3)과 **다른 종류**: 사례 3은 "코드가 아예 안 돌았음", 이 버그는 "코드가 반만 돌고 있었음". git log `feat:` 커밋이 있어도 eng-review의 코드 독해가 있어야 발견 가능.
+
+**교훈**: plan-eng-review의 "read through the code" 단계가 체크포인트·메모리·드리프트 스캔으로 안 잡히는 세 번째 종류의 버그(silent 반쪽 작동)를 잡을 수 있음. 머지 전 필수.
+
+### 이미 구현된 주요 모듈 (2026-04-15 v4-3 이후 기준)
+
+- `packages/kbo-data/src/agents/` — 에이전트 토론 + 포스트뷰 시스템
+  - `debate.ts`: pre-game 오케스트레이터 (홈/원정/회고 병렬 → 심판 순차, fallback 경로)
+  - `postview.ts`: **post-game 오케스트레이터** (v4-3 신규) — 양팀 사후 분석 + 심판 factor-level attribution
+  - `team-agent.ts`: Haiku. 페르소나 4파일 주입 (v4-2) + rivalry 블록 주입 경로 (v4-3)
   - `judge-agent.ts`: Sonnet, Steelman 원칙, 0.15~0.85 clamp
   - `calibration-agent.ts`: Haiku, ±5% 보정
-  - `retro.ts`: Phase D Compound 루프 (단 `agent_memories` 읽기 경로 **미연결** — v4-3에서 완성 예정)
-  - `llm.ts`: Claude API wrapper. 3x exponential backoff (v4-1). Sonnet ID 오타 수정 (v4-2)
-  - `personas.ts`: BASE_PROMPT + HOME_ROLE + AWAY_ROLE + RESPONSE_FORMAT (v4-2 신규)
-  - `validator.ts`: Layer 1 — 환각·선수명·금칙어·claim-type 검증 (v4-2 신규)
+  - `retro.ts`: Phase D Compound 루프 + **home/away 양쪽 row 생성** (v4-3 버그 수정) + memory_type 4종 분류 + valid_until 7일 + upsert
+  - `rivalry-memory.ts`: **(v4-3 신규)** 과거 h2h 5경기 + agent_memories select → 프롬프트 블록. Compound 루프 읽기 경로 완성.
+  - `llm.ts`: Claude API wrapper + Ollama dispatcher (v4-2.5). 3x exponential backoff
+  - `llm-ollama.ts`: 로컬 Ollama 백엔드 (v4-2.5). exaone3.5 ↔ haiku, qwen2.5:14b ↔ sonnet
+  - `personas.ts`: BASE_PROMPT + HOME_ROLE + AWAY_ROLE + RESPONSE_FORMAT (v4-2)
+  - `validator.ts`: Layer 1 검증 (v4-2) + **mode: strict | lenient** + **NODE_ENV=production strict 강제** (v4-3)
   - `types.ts`: 공통 타입
+- `packages/kbo-data/src/pipeline/`:
+  - `daily.ts`: predict/verify 모드 + **아침 run fallback postview cleanup** (v4-3)
+  - `live.ts`: live-update + **경기 종료 감지 시 postview 자동 트리거** (v4-3)
+  - `postview-daily.ts`: **(v4-3 신규)** 멱등성 postview runner. live-update/daily morning 둘 다에서 호출 가능.
 - Migrations:
   - `006_agent_memory_calibration.sql` — `agent_memories`, `calibration_buckets` 테이블
   - `007_v4_debate_metadata.sql` — `predictions.debate_version` + `scoring_rule`
   - `008_widen_model_version.sql` — `model_version VARCHAR(10) → VARCHAR(20)` (사전 버그 수정)
-- 파이프라인: daily.ts → runDebate → DB 저장 (v4-2 이후 정상 작동 확인)
-- CI: `.github/workflows/ci.yml` (PR/push@main type-check + test)
+  - `009_proposals_memories_constraints.sql` — **(v4-3)** `agent_memories` TRUNCATE + `UNIQUE(team_code, memory_type, content)` + `idx_agent_memories_read` + `proposals` 테이블 + RLS
+- CI:
+  - `.github/workflows/ci.yml` (PR/push@main type-check + test, 현재 129 tests)
+  - `.github/workflows/live-update.yml` (**v4-3**: cron `*/10 9-15 UTC` = 18:00~00:50 KST, 2h 확장)
+  - `.github/workflows/daily-pipeline.yml` (15 KST predict + 23 KST verify)
+- 파이프라인: daily.ts → runDebate → DB 저장. postview는 live-update가 자동 트리거.
 
-**v4-3 착수 조건**: rivalry-memory.ts 신규 + team-agent buildUserMessage에 agent_memories 주입 경로 추가 + postview.ts + migration 009 (proposals 스키마)
+**v4-4 착수 조건**: `/analysis/game/[id]` UI + 빅매치 자동 선정 + A/B flag + `/debug/hallucination` 대시보드. 사용자 노출 Phase이므로 `/plan-ceo-review` + `/plan-design-review` 권장.
 
 이 구조 위에 **리팩터·보강 관점**으로 접근해야 하며 "새로 만든다" 접근 금지.
 
