@@ -72,7 +72,7 @@ describe('getRivalryBlock', () => {
           game_date: '2026-04-10',
           home_score: 5,
           away_score: 3,
-          status: 'completed',
+          status: 'final',
           home: { code: 'LG' },
           away: { code: 'OB' },
           winner: { code: 'LG' },

@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { toKSTDateString } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
+import { runPostviewDaily } from './postview-daily';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -22,6 +23,9 @@ export interface LiveUpdateResult {
   liveGames: number;
   updated: number;
   errors: string[];
+  postviewsProcessed?: number;
+  postviewsSkipped?: number;
+  postviewTokens?: number;
 }
 
 /**
@@ -49,11 +53,23 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
   console.log(`[Live] ${activeGames.length} active games`);
 
   if (activeGames.length === 0) {
-    // 모든 경기 종료 시 스코어만 업데이트
+    // 모든 경기 종료 시 스코어 업데이트 + postview trigger (v4-3 Task 4)
     for (const game of liveGames.filter((g) => g.status === 'final')) {
       await updateGameScore(db, game);
     }
-    return { date: targetDate, liveGames: 0, updated: 0, errors: [] };
+
+    // 경기 종료 감지 → postview-daily 호출 (멱등성으로 중복 안전)
+    const postview = await runPostviewDailySafe(targetDate);
+
+    return {
+      date: targetDate,
+      liveGames: 0,
+      updated: 0,
+      errors: postview.errors,
+      postviewsProcessed: postview.processed,
+      postviewsSkipped: postview.skipped,
+      postviewTokens: postview.totalTokens,
+    };
   }
 
   // KBO 리그 ID
@@ -153,7 +169,43 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
     }
   }
 
-  return { date: targetDate, liveGames: activeGames.length, updated, errors };
+  // 활성 경기 처리 끝난 뒤에도 postview-daily 호출 — 일부 경기만 종료된 상태 커버
+  // (예: 6경기 중 2경기 종료, 4경기 진행 중 → 종료된 2경기 postview 생성)
+  const postview = await runPostviewDailySafe(targetDate);
+
+  return {
+    date: targetDate,
+    liveGames: activeGames.length,
+    updated,
+    errors: [...errors, ...postview.errors],
+    postviewsProcessed: postview.processed,
+    postviewsSkipped: postview.skipped,
+    postviewTokens: postview.totalTokens,
+  };
+}
+
+/**
+ * runPostviewDaily 호출 래퍼. 실패 시 throw 금지 — live 파이프라인이 막히면 안 됨.
+ */
+async function runPostviewDailySafe(date: string): Promise<{
+  processed: number;
+  skipped: number;
+  errors: string[];
+  totalTokens: number;
+}> {
+  try {
+    const result = await runPostviewDaily(date);
+    return {
+      processed: result.processed,
+      skipped: result.skipped,
+      errors: result.errors,
+      totalTokens: result.totalTokens,
+    };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn('[Live] runPostviewDaily failed, continuing:', msg);
+    return { processed: 0, skipped: 0, errors: [`postview-daily: ${msg}`], totalTokens: 0 };
+  }
 }
 
 async function updateGameScore(db: DB, game: LiveGameState) {

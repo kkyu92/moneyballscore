@@ -99,7 +99,7 @@ async function fetchRecentH2H(
       winner:teams!games_winner_team_id_fkey(code)
     `)
     .lt('game_date', date)
-    .eq('status', 'completed')
+    .eq('status', 'final')
     .or(
       `and(home.code.eq.${home},away.code.eq.${away}),and(home.code.eq.${away},away.code.eq.${home})`
     )
