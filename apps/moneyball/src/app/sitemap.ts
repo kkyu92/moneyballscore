@@ -1,21 +1,46 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
+import { createClient } from '@/lib/supabase/server';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://moneyball-kbo.vercel.app";
+// v4-4 Task 1: 모든 /analysis/game/[id] URL 포함 (Eng 리뷰 A6)
+// 과거 경기까지 SEO 크롤러에 노출해 AdSense 콘텐츠 양 확보.
 
-  return [
-    { url: baseUrl, changeFrequency: "daily", priority: 1.0 },
-    {
-      url: `${baseUrl}/predictions`,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    { url: `${baseUrl}/reviews`, changeFrequency: "daily", priority: 0.8 },
-    {
-      url: `${baseUrl}/dashboard`,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    { url: `${baseUrl}/about`, changeFrequency: "monthly", priority: 0.5 },
+export const revalidate = 3600; // 1시간 캐싱
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = 'https://moneyballscore.vercel.app';
+
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: baseUrl, changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/predictions`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/analysis`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/reviews`, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${baseUrl}/dashboard`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.5 },
   ];
+
+  // 모든 past + 오늘 경기 /analysis/game/[id] URL
+  const analysisRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = await createClient();
+    const { data: games } = await supabase
+      .from('games')
+      .select('id, game_date, updated_at')
+      .order('game_date', { ascending: false })
+      .limit(5000); // 연 ~700 경기 × 7시즌 여유
+
+    if (games) {
+      for (const g of games) {
+        analysisRoutes.push({
+          url: `${baseUrl}/analysis/game/${g.id}`,
+          lastModified: g.updated_at ? new Date(g.updated_at) : undefined,
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[sitemap] games query failed, serving static routes only:', e);
+  }
+
+  return [...staticRoutes, ...analysisRoutes];
 }
