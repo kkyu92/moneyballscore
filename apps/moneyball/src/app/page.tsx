@@ -1,10 +1,14 @@
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
+import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { toKSTDateString, toKSTDisplayString, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { selectBigMatch, type BigMatchCandidate } from "@moneyball/kbo-data";
+import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-export const revalidate = 300; // 5분 ISR
+// v4-4: 10분 ISR (Eng 리뷰 P3)
+export const revalidate = 600;
 
 async function getTodayPredictions() {
   const supabase = await createClient();
@@ -60,6 +64,34 @@ async function getSeasonAccuracy() {
   };
 }
 
+// v4-4: 빅매치 선정 (flag enabled 시에만)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function selectBigMatchFromGames(games: any[]) {
+  if (!isBigMatchEnabled()) return { bigMatch: null, result: null };
+
+  const candidates: BigMatchCandidate[] = [];
+  for (const game of games) {
+    const pred = game.predictions?.[0];
+    if (!pred) continue;
+    candidates.push({
+      gameId: game.id,
+      homeTeam: game.home_team?.code,
+      awayTeam: game.away_team?.code,
+      homeElo: pred.home_elo ?? 1500,
+      awayElo: pred.away_elo ?? 1500,
+      homeRecentForm: pred.home_recent_form ?? 0.5,
+      awayRecentForm: pred.away_recent_form ?? 0.5,
+      confidence: pred.confidence ?? 0.5,
+    });
+  }
+
+  const result = selectBigMatch(candidates);
+  const bigMatch = result.bigMatchGameId
+    ? games.find((g) => g.id === result.bigMatchGameId)
+    : null;
+  return { bigMatch, result };
+}
+
 export default async function HomePage() {
   const today = toKSTDisplayString();
   const [games, accuracy] = await Promise.all([
@@ -67,16 +99,42 @@ export default async function HomePage() {
     getSeasonAccuracy(),
   ]);
 
+  // v4-4: 빅매치 선정 (flag enabled 시)
+  const { bigMatch } = selectBigMatchFromGames(games);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bigMatchPred = (bigMatch as any)?.predictions?.[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bigMatchDebate = (bigMatchPred?.reasoning as any)?.debate;
+  const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
+
   return (
     <div className="space-y-8">
-      {/* 히어로 섹션 */}
-      <section className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
-        <p className="text-brand-300 text-sm mb-1">{today}</p>
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</h1>
-        <p className="text-brand-200">
-          KBO {games.length}경기 세이버메트릭스 기반 분석
-        </p>
-      </section>
+      {/* v4-4 빅매치 Hero (flag enabled + 데이터 있을 때) */}
+      {hasBigMatchHero ? (
+        <BigMatchDebateCard
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          gameId={(bigMatch as any).id}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          homeTeam={(bigMatch as any).home_team?.code as TeamCode}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          awayTeam={(bigMatch as any).away_team?.code as TeamCode}
+          homeWinProb={bigMatchDebate.verdict.homeWinProb ?? 0.5}
+          predictedWinner={bigMatchDebate.verdict.predictedWinner as TeamCode}
+          reasoning={bigMatchDebate.verdict.reasoning ?? ''}
+          homeConfidence={bigMatchDebate.homeArgument?.confidence}
+          awayConfidence={bigMatchDebate.awayArgument?.confidence}
+          homeKeyFactor={bigMatchDebate.homeArgument?.keyFactor}
+          awayKeyFactor={bigMatchDebate.awayArgument?.keyFactor}
+        />
+      ) : (
+        <section className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
+          <p className="text-brand-300 text-sm mb-1">{today}</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</h1>
+          <p className="text-brand-200">
+            KBO {games.length}경기 세이버메트릭스 기반 분석
+          </p>
+        </section>
+      )}
 
       {/* 적중률 요약 */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -120,10 +178,7 @@ export default async function HomePage() {
               const homeCode = game.home_team?.code as TeamCode;
               const awayCode = game.away_team?.code as TeamCode;
               return (
-                <Link
-                  key={game.id}
-                  href={`/predictions/${game.game_date}?game=${game.id}`}
-                >
+                <div key={game.id}>
                   <PredictionCard
                     homeTeam={homeCode}
                     awayTeam={awayCode}
@@ -144,8 +199,9 @@ export default async function HomePage() {
                         ? (pred.reasoning as any).homeWinProb
                         : 1 - (pred.reasoning as any).homeWinProb)
                       : undefined}
+                    gameId={game.id}
                   />
-                </Link>
+                </div>
               );
             })}
           </div>
