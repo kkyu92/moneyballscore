@@ -25,13 +25,18 @@ CREATE POLICY "Service validator_logs insert" ON validator_logs
 CREATE POLICY "Service validator_logs select" ON validator_logs
   FOR SELECT USING (auth.role() = 'service_role');
 
--- 30일 retention (Eng 리뷰 A4) — pg_cron
--- 매일 03:00 UTC (12:00 KST 아침) 에 30일 지난 row 자동 삭제.
-SELECT cron.schedule(
-  'validator_logs_cleanup',
-  '0 3 * * *',
-  $$ DELETE FROM validator_logs WHERE created_at < now() - INTERVAL '30 days' $$
-);
+-- 30일 retention (Eng 리뷰 A4)
+-- 주의: pg_cron 스키마는 Supabase에서 Database > Extensions에서 수동으로 enable 필요.
+-- pg_cron enable 이후 다음 SQL을 Supabase SQL Editor에서 별도 실행:
+--
+--   SELECT cron.schedule(
+--     'validator_logs_cleanup',
+--     '0 3 * * *',
+--     $$ DELETE FROM validator_logs WHERE created_at < now() - INTERVAL '30 days' $$
+--   );
+--
+-- 또는 대안으로 daily-pipeline.ts 내부에서 주기적 DELETE 실행 가능.
+-- 마이그레이션 011은 테이블과 인덱스만 생성. retention은 TODOS.md에 기록.
 
 COMMENT ON TABLE validator_logs IS
-  'v4-4 Task 6: validator reject 이벤트 로그. /debug/hallucination 대시보드 데이터. 30일 retention via pg_cron.';
+  'v4-4 Task 6: validator reject 이벤트 로그. /debug/hallucination 대시보드 데이터. 30일 retention은 pg_cron enable 후 별도 설정 필요.';
