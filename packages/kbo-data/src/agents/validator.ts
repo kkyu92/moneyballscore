@@ -70,7 +70,89 @@ export function resolveValidationMode(env: NodeJS.ProcessEnv = process.env): Val
 const NUMERIC_WHITELIST = new Set([
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
   '10', '100', // 100% 같은 표현
+  // v4-4 hotfix: 이닝 수, 아웃 카운트 등 단일 digit은 이미 포함.
+  // 일반 % 수치 (50, 60 등)도 false positive 방지
+  '50', '20', '30', '40', '60', '70', '80', '90',
 ]);
+
+// 부동소수점 비교 허용 오차 — 4자리 소수까지 일치로 판단
+const NUMERIC_EPSILON = 0.0001;
+
+/**
+ * v4-4 hotfix: 주입된 수치들의 산술 파생값(차이·합·비율·percent 변환)을 허용.
+ *
+ * 문제: LLM이 합리적으로 계산한 차이값(예: FIP 4.1 - 3.42 = 0.68)을 환각으로 분류하던 버그.
+ * 해결: 주입 수치 pairwise로 |a-b|, a+b, a/b, a*100 등을 미리 계산해 허용 set에 추가.
+ *
+ * CEO 리뷰 empirical 발견: Claude와 DeepSeek 둘 다 합리적 파생값을 출력했으나
+ * validator가 잘못 reject. 프로덕션에서도 silent 문제 가능성.
+ */
+function computeArithmeticDerivatives(injectedNums: number[]): Set<string> {
+  const derived = new Set<string>();
+
+  // 1. 각 수치의 percent 변환 (0.65 → 65, 0.45 → 45 등)
+  for (const n of injectedNums) {
+    if (n > 0 && n < 1) {
+      const pct = Math.round(n * 100);
+      derived.add(String(pct));
+    }
+    // 백분율 수치 → 소수 변환 (65 → 0.65)
+    if (Number.isInteger(n) && n >= 1 && n <= 100) {
+      derived.add(normalizeNum(String(n / 100)));
+    }
+  }
+
+  // 2. Pairwise 차이·합 (중복 제거는 Set이 처리)
+  for (let i = 0; i < injectedNums.length; i++) {
+    for (let j = i + 1; j < injectedNums.length; j++) {
+      const a = injectedNums[i];
+      const b = injectedNums[j];
+      derived.add(normalizeNum(String(Math.abs(a - b))));
+      derived.add(normalizeNum(String(a + b)));
+      // 비율 — 소수 4자리까지
+      if (b !== 0) {
+        derived.add(normalizeNum((a / b).toFixed(4)));
+      }
+      if (a !== 0) {
+        derived.add(normalizeNum((b / a).toFixed(4)));
+      }
+    }
+  }
+
+  return derived;
+}
+
+// ============================================
+// 일반 한국어 3자 명사 화이트리스트 (선수명 false positive 방지)
+// ============================================
+// v4-4 hotfix: 선수명 regex가 일반 명사를 잘못 잡는 문제 해결.
+// 이 집합은 야구 분석 맥락에서 자주 등장하지만 선수명이 아닌 3자 단어들.
+// CEO 리뷰 empirical 발견: "가능성이", "창출력을", "경쟁력이" 등이 false positive로 reject됨.
+const COMMON_KOREAN_NOUNS = new Set([
+  // 일반 분석 어휘
+  '가능성', '생산성', '경쟁력', '창출력', '주도권', '신뢰도', '안정성',
+  '효율성', '영향력', '확실성', '우월성', '기대치', '위험도', '균형감',
+  '유연성', '변동성', '지속성', '일관성', '적응력', '회복력',
+  // 야구 용어 (3자)
+  '득점권', '출루율', '장타율', '도루율', '피안타', '피홈런', '삼진율',
+  '실점률', '방어율', '자책점', '타격률', '볼넷률', '피칭률',
+  // 상황 서술
+  '선취점', '결정타', '역전승', '패전처', '경기력', '집중력',
+  '기동력', '수비력', '타격력', '투구력',
+  // 동사 활용형 (3자)
+  '어준다', '어간다', '어내다', '어주다', '어가다', '어오다',
+  '여진다', '여낸다', '여내다', '여준다', '여간다',
+  '해진다', '해낸다', '해본다', '해가다',
+  // 조사 접미사 혼동
+  '수치가', '모델이', '지표가', '결과가', '분석이',
+]);
+
+// 야구 선수 맥락 동사 (이게 뒤에 오면 진짜 선수명일 가능성 높음)
+// 주의: 일반 단어("선발", "마운드", "교체")는 제외. 진짜 "선수+동사" 구조만.
+const PLAYER_CONTEXT_VERBS = [
+  '등판', '선발로', '투수로', '타자로', '출전', '결장',
+  '타격', '삼진', '홈런', '피칭', '완투', '세이브',
+];
 
 // 금칙어 — 내러티브·심리·성격 관련
 const BANNED_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
@@ -126,12 +208,30 @@ export function checkHallucinatedNumbers(
   injectionText: string
 ): Violation[] {
   const outputNums = new Set(extractNumbers(outputText).map(normalizeNum));
-  const injectedNums = new Set(extractNumbers(injectionText).map(normalizeNum));
+  const injectedRaw = extractNumbers(injectionText);
+  const injectedNums = new Set(injectedRaw.map(normalizeNum));
+
+  // v4-4 hotfix: 주입 수치의 산술 파생값(차이·합·비율·percent) 허용
+  const injectedFloats = injectedRaw
+    .map((s) => parseFloat(s))
+    .filter((n) => Number.isFinite(n));
+  const derivedNums = computeArithmeticDerivatives(injectedFloats);
 
   const hallucinated: string[] = [];
   for (const n of outputNums) {
     if (injectedNums.has(n)) continue;
     if (NUMERIC_WHITELIST.has(n)) continue;
+    if (derivedNums.has(n)) continue;
+
+    // 부동소수점 근사 일치 체크 (0.0001 이내 차이면 동일 취급)
+    const nFloat = parseFloat(n);
+    if (Number.isFinite(nFloat)) {
+      const closeMatch = injectedFloats.some(
+        (inj) => Math.abs(inj - nFloat) < NUMERIC_EPSILON
+      );
+      if (closeMatch) continue;
+    }
+
     hallucinated.push(n);
   }
 
@@ -158,14 +258,34 @@ export function checkInventedPlayerNames(
   if (context.homeSPStats?.name) allowed.add(context.homeSPStats.name);
   if (context.awaySPStats?.name) allowed.add(context.awaySPStats.name);
 
-  // 3자 이름 후보: 뒤에 주격/소유격 조사(이/가/은/는) 또는 선수 맥락 동사가 와야 함
-  // 이 제약 덕분에 "결정적", "매치업" 같은 일반 3자 명사는 제외됨
-  const namePattern = /([가-힣]{3})(?=[이가은는]|\s*(?:등판|선발로|투수로|출전|결장|타격|삼진|홈런))/g;
-  const matches = [...outputText.matchAll(namePattern)];
+  // v4-4 hotfix: 두 단계 매칭으로 false positive 줄임
+  //
+  // 1단계: 야구 선수 맥락 동사(등판/선발/출전/타격 등)가 뒤따르는 3자 이름 — 신뢰도 높음
+  // 2단계: 주격조사(이/가/은/는)만 뒤따르는 경우 — 일반 명사 화이트리스트 배제 후 검사
+  //
+  // CEO 리뷰 empirical 발견: "가능성이", "창출력을" 같은 활용형이 원래 regex로 잘못 잡힘.
+  const verbAlternation = PLAYER_CONTEXT_VERBS.join('|');
+  const highConfidencePattern = new RegExp(
+    `([가-힣]{3})(?=\\s*(?:${verbAlternation}))`,
+    'g'
+  );
+  const subjectMarkerPattern = /([가-힣]{3})(?=[이가은는])/g;
 
-  const invented = matches
-    .map((m) => m[1])
-    .filter((n) => !allowed.has(n));
+  const candidates = new Set<string>();
+
+  // 1단계: 동사 뒤 이름 (high confidence)
+  for (const m of outputText.matchAll(highConfidencePattern)) {
+    candidates.add(m[1]);
+  }
+
+  // 2단계: 조사 뒤 이름 (일반 명사 화이트리스트 필터링 후)
+  for (const m of outputText.matchAll(subjectMarkerPattern)) {
+    const word = m[1];
+    if (COMMON_KOREAN_NOUNS.has(word)) continue;
+    candidates.add(word);
+  }
+
+  const invented = Array.from(candidates).filter((n) => !allowed.has(n));
 
   if (invented.length === 0) return [];
   return [
