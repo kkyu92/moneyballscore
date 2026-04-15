@@ -1,4 +1,5 @@
 import type { AgentResult } from './types';
+import { callOllama } from './llm-ollama';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -8,11 +9,18 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 export const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
 export const MAX_ATTEMPTS = RETRY_BACKOFF_MS.length;
 
-interface LLMCallOptions {
+export interface LLMCallOptions {
   model: 'haiku' | 'sonnet';
   systemPrompt: string;
   userMessage: string;
   maxTokens: number;
+}
+
+export type LLMBackend = 'claude' | 'ollama';
+
+function getBackend(): LLMBackend {
+  const raw = process.env.LLM_BACKEND?.toLowerCase();
+  return raw === 'ollama' ? 'ollama' : 'claude';
 }
 
 function getModelId(model: 'haiku' | 'sonnet'): string {
@@ -33,6 +41,27 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * LLM 호출 디스패처 (Phase v4-2.5)
+ *
+ * LLM_BACKEND 환경변수로 백엔드 선택:
+ *   - 'claude' (기본값, 프로덕션 안전): Anthropic API 호출
+ *   - 'ollama': 로컬 Ollama 서비스 호출 (exaone3.5:7.8b / qwen2.5:14b)
+ *
+ * 로컬 개발에서 LLM_BACKEND=ollama로 비용 0원 테스트 가능.
+ * Vercel 프로덕션은 LLM_BACKEND 설정 안 하면 자동으로 claude 사용.
+ */
+export async function callLLM<T>(
+  options: LLMCallOptions,
+  parseResponse: (text: string) => T
+): Promise<AgentResult<T>> {
+  const backend = getBackend();
+  if (backend === 'ollama') {
+    return callOllama(options, parseResponse);
+  }
+  return callClaude(options, parseResponse);
+}
+
+/**
  * Claude API 호출 (에이전트용)
  * Haiku: 팀 에이전트/회고 에이전트 (저비용, 빠름)
  * Sonnet: 심판 에이전트 (고품질 판단)
@@ -40,7 +69,7 @@ function sleep(ms: number): Promise<void> {
  * 재시도: 네트워크 에러 + 5xx + 429에 대해 최대 3회(500/1000/2000ms backoff).
  * 4xx는 즉시 실패(요청 자체가 잘못된 것이라 재시도해도 무의미).
  */
-export async function callLLM<T>(
+export async function callClaude<T>(
   options: LLMCallOptions,
   parseResponse: (text: string) => T
 ): Promise<AgentResult<T>> {
