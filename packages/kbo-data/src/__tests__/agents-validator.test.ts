@@ -286,6 +286,95 @@ describe('resolveValidationMode (NODE_ENV 가드)', () => {
 });
 
 // ============================================
+// v4-4 hotfix: false positive 방어
+// ============================================
+describe('v4-4 hotfix — false positive 방어', () => {
+  const ctx = makeContext();
+
+  // === 산술 파생값 허용 ===
+
+  it('주입 수치 차이 계산값 허용 (FIP 4.1 - 3.2 = 0.9)', () => {
+    const arg = makeArg({
+      reasoning: '임찬규 FIP 3.2, 곽빈 FIP 4.1. 차이 0.9로 임찬규 우위. wOBA 0.34 vs 0.32.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    expect(result.violations.filter((v) => v.type === 'hallucinated_number')).toHaveLength(0);
+  });
+
+  it('Elo 차이 계산값 허용 (1550 - 1480 = 70)', () => {
+    const arg = makeArg({
+      reasoning: 'Elo 1550 vs 1480으로 70 격차. FIP 3.2 우위도 겹침.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    expect(result.violations.filter((v) => v.type === 'hallucinated_number')).toHaveLength(0);
+  });
+
+  it('백분율 변환 허용 (0.7 → 70, 0.4 → 40)', () => {
+    const arg = makeArg({
+      reasoning: '최근폼 70% vs 40% 격차. FIP 3.2 vs 4.1 매치업 우세.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    expect(result.violations.filter((v) => v.type === 'hallucinated_number')).toHaveLength(0);
+  });
+
+  it('여전히 환각 숫자는 잡음 (주입에 없는 9.99)', () => {
+    const arg = makeArg({
+      reasoning: '임찬규 FIP 9.99로 압도적. 3.2는 틀린 수치.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    const hallucinated = result.violations.filter((v) => v.type === 'hallucinated_number');
+    expect(hallucinated.length).toBeGreaterThan(0);
+  });
+
+  // === 일반 명사 화이트리스트 ===
+
+  it('"가능성이" false positive 방어', () => {
+    const arg = makeArg({
+      reasoning: '임찬규 FIP 3.2 우위. 승리 가능성이 높아진다. wOBA 0.34.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    const invented = result.violations.filter((v) => v.type === 'invented_player_name');
+    expect(invented).toHaveLength(0);
+  });
+
+  it('"창출력을" false positive 방어', () => {
+    const arg = makeArg({
+      reasoning: 'wOBA 0.34로 타선 창출력을 활용. FIP 3.2 기반.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    const invented = result.violations.filter((v) => v.type === 'invented_player_name');
+    expect(invented).toHaveLength(0);
+  });
+
+  it('"어준다" 동사 활용형 false positive 방어', () => {
+    const arg = makeArg({
+      reasoning: 'wOBA 0.34가 득점 기회를 열어준다. FIP 3.2 매치업 유리.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    const invented = result.violations.filter((v) => v.type === 'invented_player_name');
+    expect(invented).toHaveLength(0);
+  });
+
+  it('여전히 진짜 선수명 발명은 잡음 ("박선수가 등판")', () => {
+    const arg = makeArg({
+      reasoning: '박선수가 등판하여 FIP 3.2. wOBA 0.34.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    const invented = result.violations.filter((v) => v.type === 'invented_player_name');
+    expect(invented.length).toBeGreaterThan(0);
+  });
+
+  it('"선발" 단독은 verb 아님 ("조건에서 선발 미확정") false positive 방어', () => {
+    const arg = makeArg({
+      reasoning: '파크팩터 1.02 조건에서 선발 미확정 우위. 팀 wOBA 0.34 > 상대 0.32.',
+    });
+    const result = validateTeamArgument(arg, ctx, 'strict');
+    const invented = result.violations.filter((v) => v.type === 'invented_player_name');
+    expect(invented).toHaveLength(0);
+  });
+});
+
+// ============================================
 // buildInjectionText
 // ============================================
 describe('buildInjectionText', () => {
