@@ -1,16 +1,29 @@
 import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode } from "@moneyball/shared";
 
 const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
+  sp_fip: "선발 투수력",
+  sp_xfip: "선발 잠재력",
+  lineup_woba: "타선 화력",
+  bullpen_fip: "불펜 안정성",
   recent_form: "최근 폼",
-  war: "WAR",
+  war: "팀 기여도",
   head_to_head: "상대전적",
-  park_factor: "구장보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
+  park_factor: "구장 특성",
+  elo: "팀 전력",
+  sfr: "수비력",
+};
+
+const FACTOR_TIPS: Record<string, string> = {
+  sp_fip: "선발투수의 순수 실력 (낮을수록 좋음)",
+  sp_xfip: "운 요소를 제거한 선발투수 잠재력",
+  lineup_woba: "타선의 종합 공격 생산성 (높을수록 강함)",
+  bullpen_fip: "중계/마무리 투수진의 안정성",
+  recent_form: "최근 10경기 승률",
+  war: "대체선수 대비 팀 승리 기여도 합산",
+  head_to_head: "올 시즌 두 팀 간 직접 대결 승률",
+  park_factor: "홈구장이 타자/투수 중 누구에게 유리한지",
+  elo: "상대적 팀 전력 수치 (강팀 이기면 크게 오름)",
+  sfr: "수비가 실점 방어에 기여하는 정도",
 };
 
 interface FactorBreakdownProps {
@@ -94,21 +107,29 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
           const barPct = Math.round(value * 100);
           const favorable = value > 0.55 ? "home" : value < 0.45 ? "away" : "neutral";
 
+          const favorLabel =
+            favorable === "home" ? `${homeName} 우위` :
+            favorable === "away" ? `${awayName} 우위` : "비슷";
+          const favorColor =
+            favorable === "home" ? "text-brand-500" :
+            favorable === "away" ? "text-[var(--color-away)]" : "text-gray-400 dark:text-gray-500";
+
           return (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-sm text-gray-600 dark:text-gray-300 w-20 shrink-0 text-right">
+              <span
+                className="text-sm text-gray-600 dark:text-gray-300 w-20 shrink-0 text-right cursor-help"
+                title={FACTOR_TIPS[key] || ''}
+              >
                 {FACTOR_LABELS[key] || key}
               </span>
               <span className="text-sm text-gray-400 dark:text-gray-500 w-8 shrink-0 text-right">
                 {pct}%
               </span>
               <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
-                {/* 중심선 */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-400 dark:bg-gray-500 z-10" />
-                {/* 바 */}
                 {barPct >= 50 ? (
                   <div
-                    className="absolute top-0 bottom-0 bg-blue-500 rounded-r-full"
+                    className="absolute top-0 bottom-0 bg-brand-500 rounded-r-full"
                     style={{
                       left: "50%",
                       width: `${barPct - 50}%`,
@@ -116,7 +137,7 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
                   />
                 ) : (
                   <div
-                    className="absolute top-0 bottom-0 bg-red-400 rounded-l-full"
+                    className="absolute top-0 bottom-0 bg-[var(--color-away)] rounded-l-full"
                     style={{
                       right: "50%",
                       width: `${50 - barPct}%`,
@@ -124,8 +145,8 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
                   />
                 )}
               </div>
-              <span className="text-sm text-gray-500 dark:text-gray-400 w-28 shrink-0">
-                {formatDetail(key, details)}
+              <span className={`text-sm font-medium w-28 shrink-0 ${favorColor}`}>
+                {favorLabel}
               </span>
             </div>
           );

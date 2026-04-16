@@ -9,25 +9,25 @@ export const metadata: Metadata = {
 
 const FACTORS = [
   {
-    name: "선발투수 FIP",
+    name: "선발 투수력 (FIP)",
     key: "sp_fip" as const,
     desc: "Fielding Independent Pitching. 수비와 무관한 투수 순수 실력 지표. ERA보다 미래 성적 예측에 정확.",
     source: "Fancy Stats",
   },
   {
-    name: "선발투수 xFIP",
+    name: "선발 잠재력 (xFIP)",
     key: "sp_xfip" as const,
     desc: "Expected FIP. 홈런율을 리그 평균으로 정규화한 FIP. 운의 영향을 제거.",
     source: "Fancy Stats",
   },
   {
-    name: "타선 wOBA",
+    name: "타선 화력 (wOBA)",
     key: "lineup_woba" as const,
     desc: "weighted On-Base Average. 단타/2루타/홈런 등 각 출루 방식에 가중치를 부여한 종합 타격 생산성.",
     source: "Fancy Stats",
   },
   {
-    name: "불펜 FIP",
+    name: "불펜 안정성 (FIP)",
     key: "bullpen_fip" as const,
     desc: "중계/마무리 투수진의 종합 FIP. 선발 강판 후 경기 결과에 큰 영향.",
     source: "Fancy Stats",
@@ -39,7 +39,7 @@ const FACTORS = [
     source: "KBO 공식",
   },
   {
-    name: "Elo 레이팅",
+    name: "팀 전력 (Elo)",
     key: "elo" as const,
     desc: "체스에서 유래한 상대적 전력 수치. 강팀을 이기면 많이 오르고, 약팀에 지면 많이 내려감.",
     source: "Fancy Stats",
@@ -51,7 +51,7 @@ const FACTORS = [
     source: "Fancy Stats",
   },
   {
-    name: "수비 SFR",
+    name: "수비력 (SFR)",
     key: "sfr" as const,
     desc: "Statcast Fielding Runs. 포지션별 수비 기여도 합산. 수비력이 실점에 미치는 영향.",
     source: "Fancy Stats",
