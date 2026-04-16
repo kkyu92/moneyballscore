@@ -88,7 +88,20 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     const awayTeam = (raw.AWAY_ID as TeamCode) || resolveTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
-    const statusText = raw.GAME_SC_HEADER_NM || raw.G_ST || '';
+    // 경기 상태 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
+    const stateCode = String(raw.GAME_STATE_SC || '');
+    let status: ScrapedGame['status'] = 'scheduled';
+    if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
+      status = 'final';
+    } else if (stateCode === '2' || Number(raw.GAME_INN_NO) > 0) {
+      status = 'live';
+    } else if (raw.CANCEL_SC_ID === '1' || raw.CANCEL_SC_ID === '2') {
+      status = 'postponed';
+    }
+
+    // 점수 — T_SCORE_CN=원정(Top), B_SCORE_CN=홈(Bottom)
+    const homeScore = raw.B_SCORE_CN != null ? Number(raw.B_SCORE_CN) : undefined;
+    const awayScore = raw.T_SCORE_CN != null ? Number(raw.T_SCORE_CN) : undefined;
 
     games.push({
       date: formatDate(raw.G_DT),
@@ -98,9 +111,9 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
       stadium: raw.S_NM,
       homeSP: raw.B_PIT_P_NM?.trim() || undefined,
       awaySP: raw.T_PIT_P_NM?.trim() || undefined,
-      status: parseGameStatus(statusText),
-      homeScore: raw.HOME_SCORE ?? undefined,
-      awayScore: raw.AWAY_SCORE ?? undefined,
+      status,
+      homeScore,
+      awayScore,
       externalGameId: raw.G_ID,
     });
   }

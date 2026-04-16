@@ -102,10 +102,20 @@ export interface KBOGameRaw {
   AWAY_ID: string;     // 원정팀 코드
   B_PIT_P_NM?: string; // 홈 선발투수
   T_PIT_P_NM?: string; // 원정 선발투수
-  HOME_SCORE?: number;  // 홈 점수
-  AWAY_SCORE?: number;  // 원정 점수
-  GAME_SC_HEADER_NM?: string; // 경기 상태 텍스트
-  G_ST?: string;        // 경기 상태 (legacy)
+  // 점수 — T=원정(Top), B=홈(Bottom)
+  T_SCORE_CN?: string;  // 원정 점수 (문자열)
+  B_SCORE_CN?: string;  // 홈 점수 (문자열)
+  // 경기 상태
+  GAME_STATE_SC?: string;  // "1"=경기전, "2"=진행중, "3"=종료
+  GAME_RESULT_CK?: number; // 1=결과 확정
+  GAME_INN_NO?: number;    // 현재 이닝
+  GAME_TB_SC?: string;     // "T"=초, "B"=말
+  CANCEL_SC_ID?: string;   // "0"=정상, "1"/"2"=취소
+  // deprecated — 실제 API에 없음, 호환성 유지
+  HOME_SCORE?: number;
+  AWAY_SCORE?: number;
+  GAME_SC_HEADER_NM?: string;
+  G_ST?: string;
 }
 
 // 팀 한글명 → TeamCode 매핑
