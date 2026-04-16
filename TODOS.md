@@ -92,21 +92,10 @@ HAVING count(*) > 1;
 
 ---
 
-## 🔧 v4-4 후속 — pg_cron 설정
+## ✅ v4-4 후속 — 30일 retention (완료)
 
-### validator_logs 30일 retention
-- **What**: Supabase 대시보드 Database > Extensions에서 `pg_cron` enable 후 아래 SQL 실행
-- **Why**: 현재 validator_logs는 영구 누적. 30일 retention 없이는 리그 확장 시 인덱스 bloat
-- **SQL**:
-  ```sql
-  SELECT cron.schedule(
-    'validator_logs_cleanup',
-    '0 3 * * *',
-    $$ DELETE FROM validator_logs WHERE created_at < now() - INTERVAL '30 days' $$
-  );
-  ```
-- **대안**: `packages/kbo-data/src/pipeline/daily.ts`에 주기적 DELETE 추가 (pg_cron 없이)
-- **우선순위**: LOW (validator_logs 행 수가 많아지기 전)
+- **구현**: `daily.ts` predict 모드 시작 시 `agent_memories` + `validator_logs` 30일 초과 row 자동 삭제
+- **pg_cron 불필요**: 기존 daily-pipeline cron이 매일 실행하므로 별도 DB extension 없이 해결
 
 ## 🎨 v5 이후 — Design 리뷰 deferred 항목
 

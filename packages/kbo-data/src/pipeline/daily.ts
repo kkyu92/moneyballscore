@@ -109,6 +109,26 @@ export async function runDailyPipeline(
   const leagueId = await getKBOLeagueId(db);
   const teamIdMap = await getTeamIdMap(db, leagueId);
 
+  // 30일 지난 row 자동 정리 (predict 모드에서 하루 1회)
+  if (mode === 'predict') {
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { count: memCount } = await db
+        .from('agent_memories')
+        .delete({ count: 'exact' })
+        .lt('created_at', thirtyDaysAgo);
+      const { count: logCount } = await db
+        .from('validator_logs')
+        .delete({ count: 'exact' })
+        .lt('created_at', thirtyDaysAgo);
+      if ((memCount ?? 0) > 0 || (logCount ?? 0) > 0) {
+        console.log(`[Pipeline] Retention cleanup: agent_memories=${memCount ?? 0}, validator_logs=${logCount ?? 0}`);
+      }
+    } catch (e) {
+      console.warn('[Pipeline] Retention cleanup failed, continuing:', e);
+    }
+  }
+
   // v4-3 Task 4 fallback: 아침 predict run이 전날 누락된 postview cleanup
   // live-update.yml이 00:50 KST 이후 종료된 경기(연 1~2회 극단)를 커버 못할 때 마지막 보험
   if (mode === 'predict') {
