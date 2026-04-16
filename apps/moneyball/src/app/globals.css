@@ -34,9 +34,9 @@
   --color-bg-hero-end: var(--color-brand-700);      /* hero 그라데이션 끝 */
 }
 
-/* 다크모드 시맨틱 토큰 오버라이드 */
+/* 다크모드 시맨틱 토큰 오버라이드 — Hybrid C: 뉴트럴 배경 + 그린 틴트 카드 */
 .dark {
-  --color-surface: #0f1a13;
-  --color-surface-card: #162420;
+  --color-surface: #0c0e0d;
+  --color-surface-card: #151d18;
   color-scheme: dark;
 }
