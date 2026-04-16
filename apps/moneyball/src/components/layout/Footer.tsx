@@ -16,8 +16,8 @@ export function Footer() {
             <Link href="/predictions" className="hover:text-white transition-colors">
               예측
             </Link>
-            <Link href="/reviews" className="hover:text-white transition-colors">
-              리뷰
+            <Link href="/analysis" className="hover:text-white transition-colors">
+              AI 분석
             </Link>
             <Link href="/dashboard" className="hover:text-white transition-colors">
               대시보드

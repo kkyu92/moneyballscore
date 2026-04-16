@@ -137,7 +137,37 @@ export default function AboutPage() {
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
-          + 홈어드밴티지 3%. v2.0은 50경기 축적 후 오차분석 기반으로 업그레이드 예정.
+          + 홈어드밴티지 3%.
+        </p>
+      </section>
+
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold">AI 에이전트 토론 v2.0</h2>
+          <span className="text-xs px-2 py-1 bg-accent/20 text-accent rounded-full font-medium">
+            debate
+          </span>
+        </div>
+        <p className="text-gray-600 dark:text-gray-300">
+          정량 모델 결과를 AI 에이전트들이 토론을 통해 보정합니다.
+          각 에이전트는 팀 성격에 맞는 페르소나를 가지고, 데이터를 해석하며 논쟁합니다.
+        </p>
+        <div className="space-y-3 mt-4">
+          <div className="p-4 bg-brand-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-brand-100 dark:border-[var(--color-border)]">
+            <h3 className="font-semibold text-brand-700 dark:text-brand-300">홈팀 에이전트</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">홈팀 관점에서 유리한 근거를 제시. 팀 페르소나 + 라이벌 기억 활용.</p>
+          </div>
+          <div className="p-4 bg-orange-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-orange-100 dark:border-[var(--color-border)]">
+            <h3 className="font-semibold text-[var(--color-away)]">원정팀 에이전트</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">원정팀 관점에서 반론 제시. 홈팀 약점과 원정팀 강점을 강조.</p>
+          </div>
+          <div className="p-4 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)]">
+            <h3 className="font-semibold">심판 에이전트 (Sonnet)</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">양측 논거를 평가하고, 정량 모델 결과와 종합하여 최종 승리 확률 결정. Steelman 원칙 적용.</p>
+          </div>
+        </div>
+        <p className="text-sm text-gray-400 dark:text-gray-500">
+          경기 종료 후 사후 분석(Postview) 에이전트가 어떤 팩터가 틀렸는지 자동 진단하고, Compound 루프로 다음 예측에 반영합니다.
         </p>
       </section>
 
@@ -169,12 +199,12 @@ export default function AboutPage() {
             <p className="text-gray-500 dark:text-gray-400">경기 결과 + 적중률 업데이트</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
-            <p className="font-medium">경기 중 10분 간격</p>
-            <p className="text-gray-500 dark:text-gray-400">이닝별 승리확률 보정</p>
+            <p className="font-medium">경기 중 30초 간격</p>
+            <p className="text-gray-500 dark:text-gray-400">실시간 스코어 (네이버 API)</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
-            <p className="font-medium">Telegram 알림</p>
-            <p className="text-gray-500 dark:text-gray-400">예측 생성 + 결과 자동 발송</p>
+            <p className="font-medium">경기 종료 자동</p>
+            <p className="text-gray-500 dark:text-gray-400">사후분석 + Compound 루프</p>
           </div>
         </div>
       </section>

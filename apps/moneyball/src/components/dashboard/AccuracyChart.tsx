@@ -24,8 +24,10 @@ interface AccuracyChartProps {
 export function AccuracyChart({ data }: AccuracyChartProps) {
   if (data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-gray-400 dark:text-gray-500">
-        데이터 축적 후 차트가 표시됩니다.
+      <div className="h-64 flex flex-col items-center justify-center text-center">
+        <span className="text-4xl mb-3">📈</span>
+        <p className="text-sm text-gray-500 dark:text-gray-400">경기 결과가 검증되면 누적 적중률 차트가 표시됩니다.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">매일 KST 23:00 자동 업데이트</p>
       </div>
     );
   }
