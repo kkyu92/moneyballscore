@@ -1,6 +1,7 @@
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
+import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import { toKSTDateString, toKSTDisplayString, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 import { selectBigMatch, type BigMatchCandidate } from "@moneyball/kbo-data";
 import { isBigMatchEnabled } from "@/lib/feature-flags";
@@ -111,6 +112,9 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      {/* 실시간 스코어 */}
+      <LiveScoreboard />
+
       {/* v4-4 빅매치 Hero (flag enabled + 데이터 있을 때) */}
       {hasBigMatchHero ? (
         <BigMatchDebateCard
