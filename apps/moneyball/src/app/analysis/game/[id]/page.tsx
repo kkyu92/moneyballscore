@@ -134,7 +134,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     headline: `${awayName} vs ${homeName} AI 승부예측 분석`,
     datePublished: gameDate,
     description: `${gameDate} ${awayName} vs ${homeName} 세이버메트릭스 기반 AI 분석`,
-    publisher: { "@type": "Organization", name: "MoneyBall KBO" },
+    publisher: { "@type": "Organization", name: "MoneyBall Score" },
     mainEntityOfPage: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
   };
 

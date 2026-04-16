@@ -48,7 +48,7 @@ export async function notifyPredictions(
   }>
 ) {
   const lines = [
-    `<b>⚾ ${result.date} KBO 승부예측</b>`,
+    `<b>⚾ ${result.date} 승부예측</b>`,
     `경기 ${result.gamesFound}개 | 예측 ${result.predictionsGenerated}개 | 스킵 ${result.gamesSkipped}개`,
     '',
   ];

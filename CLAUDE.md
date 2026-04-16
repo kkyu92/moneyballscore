@@ -1,4 +1,4 @@
-# MoneyBall KBO
+# MoneyBall Score
 
 ## ⚠️ AI 에이전트 필수 지시사항 (READ FIRST)
 
@@ -84,7 +84,7 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
 
 ## 프로젝트 구조
 - 모노레포 (pnpm + turborepo)
-- `apps/moneyball`: KBO 승부예측 블로그 (Next.js 16 + App Router)
+- `apps/moneyball`: 승부예측 블로그 (Next.js 16 + App Router)
 - PlayBook (`kyusikkim/playbook`): 별도 레포. 개인 지식 허브 + 관제탑 (Next.js 16, MDX, Gemini). 이 리포와 독립.
 - `packages/shared`: 공유 타입, 유틸, 상수 (KBO_TEAMS, DEFAULT_WEIGHTS)
 - `packages/kbo-data`: 스크래핑 + 파싱 모듈 (Phase 2에서 구현)

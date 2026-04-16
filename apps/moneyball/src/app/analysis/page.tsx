@@ -91,7 +91,7 @@ export default async function AnalysisIndexPage() {
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">
-          KBO 승부예측 AI의 오늘 빅매치와 시즌 누적 성과
+          승부예측 AI의 오늘 빅매치와 시즌 누적 성과
         </p>
       </header>
 

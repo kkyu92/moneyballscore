@@ -3,7 +3,7 @@ import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import type { TeamArgument, CalibrationHint, JudgeVerdict, AgentResult } from './types';
 
-const SYSTEM_PROMPT = `당신은 KBO 승부예측의 심판 분석가입니다.
+const SYSTEM_PROMPT = `당신은 승부예측의 심판 분석가입니다.
 두 팀 에이전트의 논거와 정량적 모델 결과를 종합하여 최종 확률을 결정합니다.
 
 역할:

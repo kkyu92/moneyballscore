@@ -59,7 +59,7 @@ for team, count in sorted(teams.items()):
 # D) GitHub Actions live-update 확인
 echo ""
 echo "[D] live-update.yml: Check GitHub Actions manually"
-echo "  https://github.com/kkyu92/moneyball-ecosystem/actions/workflows/live-update.yml"
+echo "  https://github.com/kkyu92/moneyballscore/actions/workflows/live-update.yml"
 
 # E) UNIQUE 제약 중복 체크
 echo ""

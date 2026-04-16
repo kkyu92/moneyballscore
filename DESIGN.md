@@ -1,4 +1,4 @@
-# Design System — MoneyBall KBO
+# Design System — MoneyBall Score
 
 ## Product Context
 - **What this is:** KBO 세이버메트릭스 기반 승부예측 블로그. AI 에이전트 토론 + 정량 모델 10팩터 합산.

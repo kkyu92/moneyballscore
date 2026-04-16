@@ -4,7 +4,7 @@ import { DEFAULT_WEIGHTS } from "@moneyball/shared";
 export const metadata: Metadata = {
   title: "소개",
   description:
-    "MoneyBall KBO 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 모델 v1.5.",
+    "MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 모델 v1.5.",
 };
 
 const FACTORS = [
@@ -95,9 +95,9 @@ export default function AboutPage() {
   return (
     <div className="space-y-8 max-w-3xl">
       <section>
-        <h1 className="text-3xl font-bold mb-2">MoneyBall KBO</h1>
+        <h1 className="text-3xl font-bold mb-2">MoneyBall Score</h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg">
-          세이버메트릭스 기반 KBO 프로야구 승부예측
+          세이버메트릭스 기반 프로야구 승부예측
         </p>
       </section>
 

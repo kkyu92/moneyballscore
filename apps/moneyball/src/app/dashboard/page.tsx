@@ -7,7 +7,7 @@ import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
 export const metadata: Metadata = {
   title: "대시보드",
-  description: "KBO 승부예측 시즌 적중률, 팀별 분석, 모델 성과 대시보드.",
+  description: "승부예측 시즌 적중률, 팀별 분석, 모델 성과 대시보드.",
 };
 
 export const revalidate = 300;

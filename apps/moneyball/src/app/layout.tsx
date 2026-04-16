@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://moneyballscore.vercel.app"),
   title: {
-    template: "%s | MoneyBall KBO",
-    default: "MoneyBall KBO - 세이버메트릭스 기반 KBO 승부예측",
+    template: "%s | MoneyBall Score",
+    default: "MoneyBall Score - 세이버메트릭스 기반 승부예측",
   },
   description:
     "wOBA, FIP, WAR 등 세이버메트릭스 지표를 활용한 KBO 프로야구 승부예측. AI 에이전트 토론 + 10팩터 정량 모델. 매일 업데이트.",
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    siteName: "MoneyBall KBO",
-    title: "MoneyBall KBO - 세이버메트릭스 기반 KBO 승부예측",
+    siteName: "MoneyBall Score",
+    title: "MoneyBall Score - 세이버메트릭스 기반 승부예측",
     description: "AI 에이전트 토론 + 10팩터 정량 모델 기반 KBO 매일 승부예측. 실시간 스코어, 적중률 트래킹.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MoneyBall KBO",
-    description: "세이버메트릭스 기반 KBO 승부예측",
+    title: "MoneyBall Score",
+    description: "세이버메트릭스 기반 승부예측",
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -85,13 +85,13 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "MoneyBall KBO",
+              name: "MoneyBall Score",
               url: "https://moneyballscore.vercel.app",
-              description: "세이버메트릭스 기반 KBO 프로야구 승부예측",
+              description: "세이버메트릭스 기반 프로야구 승부예측",
               inLanguage: "ko",
               publisher: {
                 "@type": "Organization",
-                name: "MoneyBall KBO",
+                name: "MoneyBall Score",
                 url: "https://moneyballscore.vercel.app",
               },
             }),

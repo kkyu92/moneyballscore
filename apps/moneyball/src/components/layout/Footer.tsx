@@ -7,7 +7,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">⚾</span>
-            <span className="font-semibold text-white">MoneyBall KBO</span>
+            <span className="font-semibold text-white">MoneyBall Score</span>
           </div>
           <nav className="flex items-center gap-6 text-sm">
             <Link href="/" className="hover:text-white transition-colors">
@@ -28,7 +28,7 @@ export function Footer() {
           </nav>
         </div>
         <p className="text-center text-xs text-brand-400 mt-6">
-          세이버메트릭스 기반 KBO 승부예측. 본 서비스는 정보 제공 목적이며 도박을
+          세이버메트릭스 기반 승부예측. 본 서비스는 정보 제공 목적이며 도박을
           권장하지 않습니다.
         </p>
       </div>

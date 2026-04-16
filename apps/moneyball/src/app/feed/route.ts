@@ -70,9 +70,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>MoneyBall KBO — 세이버메트릭스 승부예측</title>
+    <title>MoneyBall Score — 세이버메트릭스 승부예측</title>
     <link>${SITE_URL}</link>
-    <description>wOBA, FIP, WAR 등 세이버메트릭스 지표 기반 KBO 프로야구 매일 승부예측</description>
+    <description>wOBA, FIP, WAR 등 세이버메트릭스 지표 기반 프로야구 매일 승부예측</description>
     <language>ko</language>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <atom:link href="${SITE_URL}/feed" rel="self" type="application/rss+xml"/>
