@@ -36,7 +36,7 @@ export function AccuracySummary({
         />
       </div>
       {highConfRate != null && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           고확신(70%+) 적중률:{" "}
           <span className="font-semibold text-gray-700 dark:text-gray-200">
             {Math.round(highConfRate * 100)}%

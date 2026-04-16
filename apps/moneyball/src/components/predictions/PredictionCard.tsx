@@ -116,7 +116,7 @@ export function PredictionCard({
       </div>
 
       {/* 핵심 지표 */}
-      <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 grid grid-cols-2 gap-2 text-xs">
+      <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 grid grid-cols-2 gap-2 text-sm">
         {homeSPName && awaySPName && (
           <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">
             <span>

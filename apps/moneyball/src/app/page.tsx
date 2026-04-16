@@ -247,7 +247,7 @@ export default async function HomePage() {
               <span className="text-lg">{item.icon}</span>
               <div>
                 <p className="text-sm font-medium">{item.label}</p>
-                <p className="text-xs text-brand-600 dark:text-brand-400 font-bold">{item.weight}</p>
+                <p className="text-sm text-brand-600 dark:text-brand-400 font-bold">{item.weight}</p>
               </div>
             </div>
           ))}

@@ -96,10 +96,10 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
 
           return (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-xs text-gray-600 dark:text-gray-300 w-20 shrink-0 text-right">
+              <span className="text-sm text-gray-600 dark:text-gray-300 w-20 shrink-0 text-right">
                 {FACTOR_LABELS[key] || key}
               </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500 w-8 shrink-0 text-right">
+              <span className="text-sm text-gray-400 dark:text-gray-500 w-8 shrink-0 text-right">
                 {pct}%
               </span>
               <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
@@ -124,7 +124,7 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
                   />
                 )}
               </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 w-28 shrink-0">
+              <span className="text-sm text-gray-500 dark:text-gray-400 w-28 shrink-0">
                 {formatDetail(key, details)}
               </span>
             </div>

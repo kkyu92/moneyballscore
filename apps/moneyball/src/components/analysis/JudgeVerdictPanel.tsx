@@ -51,7 +51,7 @@ export function JudgeVerdictPanel({
           <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/30 bg-white/5">
             <TeamLogo team={awayTeam} size={64} className="w-full h-full" />
           </div>
-          <p className="text-xs text-brand-200">{KBO_TEAMS[awayTeam].name}</p>
+          <p className="text-sm text-brand-200">{KBO_TEAMS[awayTeam].name}</p>
           <p
             className="text-2xl md:text-3xl font-bold mt-1"
             aria-label={`${KBO_TEAMS[awayTeam].name} 승리 확률 ${awayPct}%`}
@@ -66,7 +66,7 @@ export function JudgeVerdictPanel({
           <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/30 bg-white/5">
             <TeamLogo team={homeTeam} size={64} className="w-full h-full" />
           </div>
-          <p className="text-xs text-brand-200">{KBO_TEAMS[homeTeam].name}</p>
+          <p className="text-sm text-brand-200">{KBO_TEAMS[homeTeam].name}</p>
           <p
             className="text-2xl md:text-3xl font-bold mt-1"
             aria-label={`${KBO_TEAMS[homeTeam].name} 승리 확률 ${homePct}%`}
@@ -78,7 +78,7 @@ export function JudgeVerdictPanel({
 
       <div className="text-center mb-4">
         <div className="inline-block bg-white/10 rounded-full px-4 py-1">
-          <p className="text-xs text-brand-200">
+          <p className="text-sm text-brand-200">
             예측 승자: <span className="font-bold text-white">{winnerTeam.name}</span>
             {isHomeWinner ? ' (홈)' : ' (원정)'}
           </p>

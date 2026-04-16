@@ -70,7 +70,7 @@ export function PostviewPanel({
               <h4 className="text-sm font-semibold text-[var(--color-away)] mb-2">
                 {awayName} 사후 의견
               </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
                 {awayPostview.summary}
               </p>
               {awayPostview.keyFactor && (
@@ -91,7 +91,7 @@ export function PostviewPanel({
               <h4 className="text-sm font-semibold text-brand-700 mb-2">
                 {homeName} 사후 의견
               </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
                 {homePostview.summary}
               </p>
               {homePostview.keyFactor && (

@@ -9,22 +9,22 @@ function StatusBadge({ score }: { score: LiveScore }) {
   switch (score.status) {
     case 'live':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600">
+        <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600">
           <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
           {score.statusText}
         </span>
       );
     case 'final':
       return (
-        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">종료</span>
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">종료</span>
       );
     case 'cancelled':
       return (
-        <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">취소</span>
+        <span className="text-xs font-medium text-gray-400 dark:text-gray-500">취소</span>
       );
     default:
       return (
-        <span className="text-[10px] text-gray-400 dark:text-gray-500">{score.gameTime}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{score.gameTime}</span>
       );
   }
 }
@@ -45,7 +45,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
       }`}
     >
       <div className="flex justify-between items-center mb-2">
-        <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[60px]">
+        <span className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[60px]">
           {score.stadium}
         </span>
         <StatusBadge score={score} />
@@ -55,7 +55,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5 min-w-0">
           <TeamLogo team={score.awayTeam as TeamCode} size={20} />
-          <span className="text-xs font-medium truncate">
+          <span className="text-sm font-medium truncate">
             {awayTeam?.name.split(' ')[0] ?? score.awayTeamName}
           </span>
         </div>
@@ -72,7 +72,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 min-w-0">
           <TeamLogo team={score.homeTeam as TeamCode} size={20} />
-          <span className="text-xs font-medium truncate">
+          <span className="text-sm font-medium truncate">
             {homeTeam?.name.split(' ')[0] ?? score.homeTeamName}
           </span>
         </div>
@@ -112,14 +112,14 @@ export function LiveScoreboard() {
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200">실시간 스코어</h2>
           {hasLiveGames && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
               LIVE
             </span>
           )}
         </div>
         {updatedAt && (
-          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
             {new Date(updatedAt).toLocaleTimeString('ko-KR', {
               hour: '2-digit',
               minute: '2-digit',

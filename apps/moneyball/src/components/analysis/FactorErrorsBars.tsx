@@ -42,7 +42,7 @@ export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
         const biasLabel = bias >= 0 ? `+${bias.toFixed(2)}` : bias.toFixed(2);
 
         return (
-          <div key={err.factor} className="text-xs">
+          <div key={err.factor} className="text-sm">
             <div className="flex justify-between items-baseline mb-1">
               <span className="font-mono font-medium text-gray-700 dark:text-gray-200">
                 {err.factor}
