@@ -99,6 +99,12 @@ export default async function PredictionDatePage({ params }: Props) {
                   isCorrect={pred.is_correct}
                   homeScore={game.home_score}
                   awayScore={game.away_score}
+                  winProb={(pred.reasoning as any)?.homeWinProb != null
+                    ? (pred.winner?.code === homeCode
+                      ? (pred.reasoning as any).homeWinProb
+                      : 1 - (pred.reasoning as any).homeWinProb)
+                    : undefined}
+                  gameId={game.id}
                 />
 
                 {/* 팩터 투명성 */}
