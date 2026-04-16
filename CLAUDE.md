@@ -48,7 +48,13 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
 
 **교훈**: plan-eng-review의 "read through the code" 단계가 체크포인트·메모리·드리프트 스캔으로 안 잡히는 세 번째 종류의 버그(silent 반쪽 작동)를 잡을 수 있음. 머지 전 필수.
 
-### 이미 구현된 주요 모듈 (2026-04-15 v4-3 이후 기준)
+### 드리프트 사례 5 — KBO API 필드 불일치로 live-update 완전 사망 (2026-04-16 자연 발화 관찰)
+
+`kbo-live.ts`가 `GAME_SC_HEADER_NM`, `G_ST`, `HOME_SCORE` 등 **실제 API에 존재하지 않는 필드**를 참조. `statusText`가 항상 빈 문자열 → 모든 경기 `status: 'scheduled'` → `liveGames: 0`. v4-3 구현 이후 live-update가 **단 한 번도 경기를 감지한 적 없었음**. 실제 필드는 `GAME_STATE_SC`("2"=진행), `B_SCORE_CN`(홈점수), `GAME_INN_NO`(이닝) 등.
+
+**교훈**: 외부 API 연동 코드는 구현 시점에 **실제 API 응답과 대조** 필수. 테스트에서 mock만 사용하면 필드 불일치를 절대 못 잡음. curl로 실제 호출해보는 게 가장 확실.
+
+### 이미 구현된 주요 모듈 (2026-04-16 QA 이후 기준)
 
 - `packages/kbo-data/src/agents/` — 에이전트 토론 + 포스트뷰 시스템
   - `debate.ts`: pre-game 오케스트레이터 (홈/원정/회고 병렬 → 심판 순차, fallback 경로)
@@ -60,6 +66,7 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
   - `rivalry-memory.ts`: **(v4-3 신규)** 과거 h2h 5경기 + agent_memories select → 프롬프트 블록. Compound 루프 읽기 경로 완성.
   - `llm.ts`: Claude API wrapper + Ollama dispatcher (v4-2.5). 3x exponential backoff
   - `llm-ollama.ts`: 로컬 Ollama 백엔드 (v4-2.5). exaone3.5 ↔ haiku, qwen2.5:14b ↔ sonnet
+  - `llm-deepseek.ts`: DeepSeek 백엔드 (v4-4 테스트용). OpenAI 호환 API wrapper
   - `personas.ts`: BASE_PROMPT + HOME_ROLE + AWAY_ROLE + RESPONSE_FORMAT (v4-2)
   - `validator.ts`: Layer 1 검증 (v4-2) + **mode: strict | lenient** + **NODE_ENV=production strict 강제** (v4-3)
   - `types.ts`: 공통 타입
@@ -72,10 +79,14 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
   - `007_v4_debate_metadata.sql` — `predictions.debate_version` + `scoring_rule`
   - `008_widen_model_version.sql` — `model_version VARCHAR(10) → VARCHAR(20)` (사전 버그 수정)
   - `009_proposals_memories_constraints.sql` — **(v4-3)** `agent_memories` TRUNCATE + `UNIQUE(team_code, memory_type, content)` + `idx_agent_memories_read` + `proposals` 테이블 + RLS
+  - `010_factor_error_view.sql` — 팩터별 오차 분석 뷰
+  - `011_validator_logs.sql` — validator 검증 로그 테이블
 - CI:
-  - `.github/workflows/ci.yml` (PR/push@main type-check + test, 현재 129 tests)
+  - `.github/workflows/ci.yml` (PR/push@main type-check + test, 현재 185 tests)
   - `.github/workflows/live-update.yml` (**v4-3**: cron `*/10 9-15 UTC` = 18:00~00:50 KST, 2h 확장)
   - `.github/workflows/daily-pipeline.yml` (15 KST predict + 23 KST verify)
+- Scrapers:
+  - `kbo-live.ts`: KBO 공식 AJAX API 라이브 스코어 수집 + 이닝별 승리확률 보정 (v4-3, 필드 매핑 수정 2026-04-16)
 - 파이프라인: daily.ts → runDebate → DB 저장. postview는 live-update가 자동 트리거.
 
 **v4-4 착수 조건**: `/analysis/game/[id]` UI + 빅매치 자동 선정 + A/B flag + `/debug/hallucination` 대시보드. 사용자 노출 Phase이므로 `/plan-ceo-review` + `/plan-design-review` 권장.
