@@ -6,4 +6,4 @@
 2. 실패한 예측 식별
 3. 각 팩터별 기여도 분석 (어떤 팩터가 오차를 만들었는지)
 4. 근본 원인 진단 (데이터 부족? 모델 한계? 예외 상황?)
-5. 개선 제안 → anti_pattern으로 PlayBook에 기록
+5. 개선 제안 → CHANGELOG.md 또는 gstack learnings에 기록
