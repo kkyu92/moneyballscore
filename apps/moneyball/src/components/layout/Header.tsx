@@ -19,7 +19,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <span className="text-2xl">⚾</span>
           <span className="font-bold text-xl tracking-tight text-white">MoneyBall</span>
-          <span className="text-xs text-brand-300 font-medium">KBO</span>
+          <span className="text-xs text-brand-300 font-medium">Score</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6">
           {NAV_ITEMS.map((item) => (
