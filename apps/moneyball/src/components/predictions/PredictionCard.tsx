@@ -44,8 +44,13 @@ export function PredictionCard({
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
   // winProb이 있으면 승리확률 표시, 없으면 confidence fallback
+  // 토론 결과로 확률이 50% 미만이면 반대팀이 실질 승자
+  const debateFlipped = winProb != null && winProb < 0.5;
+  const effectiveWinner = debateFlipped
+    ? (predictedWinner === homeTeam ? awayTeam : homeTeam)
+    : predictedWinner;
   const displayPct = winProb
-    ? Math.round(winProb * 100)
+    ? Math.round((debateFlipped ? 1 - winProb : winProb) * 100)
     : Math.round((0.5 + confidence / 2) * 100);
   const confidencePct = displayPct;
 
@@ -100,7 +105,7 @@ export function PredictionCard({
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {KBO_TEAMS[predictedWinner].name.split(" ")[0]} 승 예측
+            {KBO_TEAMS[effectiveWinner].name.split(" ")[0]} 승 예측
           </p>
         </div>
 
