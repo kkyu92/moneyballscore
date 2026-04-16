@@ -19,8 +19,8 @@ KBO 10팀 로고 SVG 파일.
 
 ## 현재 상태
 
-각 SVG는 **임시 플레이스홀더** — 팀 공식 컬러 + 약어 텍스트의 단순 원형.
-실제 구단 로고가 아닙니다.
+각 PNG는 네이버 스포츠 CDN(`sports-phinf.pstatic.net/team/kbo/default/`)에서
+받아온 KBO 공식 엠블럼. 분석·보도 목적 fair use 범위.
 
 ## 실제 공식 로고 교체 절차
 

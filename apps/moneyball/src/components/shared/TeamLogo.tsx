@@ -21,12 +21,11 @@ export function TeamLogo({ team, size = 48, className = '' }: TeamLogoProps) {
 
   return (
     <Image
-      src={`/logos/${team}.svg`}
+      src={`/logos/${team}.png`}
       alt={alt}
       width={size}
       height={size}
       className={className}
-      unoptimized
       priority={false}
     />
   );
