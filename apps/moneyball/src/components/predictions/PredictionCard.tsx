@@ -50,8 +50,8 @@ export function PredictionCard({
   const confidencePct = displayPct;
 
   const cardClass = isBigMatch
-    ? "bg-white rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
-    : "bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow";
+    ? "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
+    : "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow";
 
   return (
     <div className={cardClass}>
@@ -64,13 +64,13 @@ export function PredictionCard({
 
       {/* 상단: 경기 시간 + 적중 결과 */}
       <div className="flex justify-between items-center mb-4">
-        <span className="text-xs text-gray-500">{gameTime ?? "18:30"}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? "18:30"}</span>
         {isCorrect !== null && isCorrect !== undefined && (
           <span
             className={`text-xs font-bold px-2 py-0.5 rounded-full ${
               isCorrect
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                ? "bg-green-100 dark:bg-green-900/30 text-green-700"
+                : "bg-red-100 dark:bg-red-900/30 text-red-700"
             }`}
           >
             {isCorrect ? "적중" : "실패"}
@@ -91,7 +91,7 @@ export function PredictionCard({
         </div>
 
         <div className="px-4 text-center">
-          <span className="text-xs text-gray-400">VS</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">VS</span>
           <div className="mt-1">
             <span
               className={`text-lg font-bold ${getConfidenceColor(confidencePct)}`}
@@ -99,7 +99,7 @@ export function PredictionCard({
               {confidencePct}%
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {KBO_TEAMS[predictedWinner].name.split(" ")[0]} 승 예측
           </p>
         </div>
@@ -116,25 +116,25 @@ export function PredictionCard({
       </div>
 
       {/* 핵심 지표 */}
-      <div className="border-t border-gray-100 pt-3 grid grid-cols-2 gap-2 text-xs">
+      <div className="border-t border-gray-100 dark:border-gray-700 pt-3 grid grid-cols-2 gap-2 text-xs">
         {homeSPName && awaySPName && (
-          <div className="col-span-2 flex justify-between text-gray-600">
+          <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">
             <span>
               선발: {awaySPName}
               {awaySPFip != null && (
-                <span className="text-gray-400"> FIP {awaySPFip}</span>
+                <span className="text-gray-400 dark:text-gray-500"> FIP {awaySPFip}</span>
               )}
             </span>
             <span>
               {homeSPName}
               {homeSPFip != null && (
-                <span className="text-gray-400"> FIP {homeSPFip}</span>
+                <span className="text-gray-400 dark:text-gray-500"> FIP {homeSPFip}</span>
               )}
             </span>
           </div>
         )}
         {homeWoba != null && awayWoba != null && (
-          <div className="col-span-2 flex justify-between text-gray-600">
+          <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">
             <span>
               타선 wOBA <span className="font-mono">{awayWoba.toFixed(3)}</span>
             </span>
@@ -147,7 +147,7 @@ export function PredictionCard({
 
       {/* v4-4: 상세 분석 링크 */}
       {gameId != null && (
-        <div className="border-t border-gray-100 pt-3 mt-3 text-center">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-3 text-center">
           <AnalysisLink gameId={gameId} label="AI 분석 보기" variant="subtle" />
         </div>
       )}

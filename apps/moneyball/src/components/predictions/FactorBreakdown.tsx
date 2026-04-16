@@ -80,9 +80,9 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
     });
 
   return (
-    <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-      <h4 className="text-sm font-bold text-gray-600 mb-3">예측 근거 (팩터별 분석)</h4>
-      <div className="text-xs text-gray-400 mb-2 flex justify-between">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+      <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">예측 근거 (팩터별 분석)</h4>
+      <div className="text-xs text-gray-400 dark:text-gray-500 mb-2 flex justify-between">
         <span>← {awayName} 유리</span>
         <span>{homeName} 유리 →</span>
       </div>
@@ -96,15 +96,15 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
 
           return (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-xs text-gray-600 w-20 shrink-0 text-right">
+              <span className="text-xs text-gray-600 dark:text-gray-300 w-20 shrink-0 text-right">
                 {FACTOR_LABELS[key] || key}
               </span>
-              <span className="text-xs text-gray-400 w-8 shrink-0 text-right">
+              <span className="text-xs text-gray-400 dark:text-gray-500 w-8 shrink-0 text-right">
                 {pct}%
               </span>
-              <div className="flex-1 h-4 bg-gray-200 rounded-full relative overflow-hidden">
+              <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
                 {/* 중심선 */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-400 z-10" />
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-400 dark:bg-gray-500 z-10" />
                 {/* 바 */}
                 {barPct >= 50 ? (
                   <div
@@ -124,7 +124,7 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
                   />
                 )}
               </div>
-              <span className="text-xs text-gray-500 w-28 shrink-0">
+              <span className="text-xs text-gray-500 dark:text-gray-400 w-28 shrink-0">
                 {formatDetail(key, details)}
               </span>
             </div>

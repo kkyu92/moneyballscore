@@ -88,9 +88,9 @@ export default async function AnalysisIndexPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
-      <header className="border-b border-gray-200 pb-4">
+      <header className="border-b border-gray-200 dark:border-gray-700 pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           KBO 승부예측 AI의 오늘 빅매치와 시즌 누적 성과
         </p>
       </header>
@@ -111,7 +111,7 @@ export default async function AnalysisIndexPage() {
             <p className="text-2xl font-bold">상세 분석 보기 →</p>
           </Link>
         ) : (
-          <div className="bg-gray-50 rounded-2xl p-8 text-center text-gray-500">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center text-gray-500 dark:text-gray-400">
             {bigMatch.mode === 'no-games' ? (
               <>
                 <p className="text-4xl mb-2">😴</p>
@@ -146,8 +146,8 @@ export default async function AnalysisIndexPage() {
 
         <div className="grid md:grid-cols-2 gap-4">
           {/* 누적 적중률 */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-sm text-gray-500 mb-2">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2">
               토론 기반 예측 누적 적중률 (v2-persona4)
             </h3>
             {stats.total >= 10 ? (
@@ -155,20 +155,20 @@ export default async function AnalysisIndexPage() {
                 <p className="text-4xl font-bold text-brand-600 mb-1">
                   {Math.round(stats.rate * 100)}%
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {stats.correct} / {stats.total} 경기
                 </p>
               </>
             ) : (
-              <p className="text-gray-500 italic">
+              <p className="text-gray-500 dark:text-gray-400 italic">
                 시즌 시작 전 — 데이터 부족 ({stats.total} 경기)
               </p>
             )}
           </div>
 
           {/* Factor 오답률 top 3 */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-sm text-gray-500 mb-3">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-3">
               가장 자주 틀린 Factor Top 3
             </h3>
             {stats.topFactorErrors.length > 0 ? (
@@ -179,17 +179,17 @@ export default async function AnalysisIndexPage() {
                     className="flex justify-between text-sm font-mono"
                   >
                     <span>
-                      <span className="text-gray-400 mr-2">{i + 1}.</span>
+                      <span className="text-gray-400 dark:text-gray-500 mr-2">{i + 1}.</span>
                       {f.factor}
                     </span>
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-gray-400">
                       {f.error_count}회
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500 italic">
+              <p className="text-gray-500 dark:text-gray-400 italic">
                 집계 부족 — 사후 분석 경기가 쌓이면 표시됩니다
               </p>
             )}

@@ -40,7 +40,7 @@ export function AgentArgumentBox({
   return (
     <section
       aria-labelledby={titleId}
-      className={`bg-white rounded-xl border-2 ${borderColor} p-4 md:p-5 transition-transform ${emphasisClass}`}
+      className={`bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 ${borderColor} p-4 md:p-5 transition-transform ${emphasisClass}`}
     >
       <header className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -59,13 +59,13 @@ export function AgentArgumentBox({
         </span>
       </header>
 
-      <p className="text-xs text-gray-500 mb-2">
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
         핵심 팩터:{' '}
-        <span className="font-medium text-gray-700">{keyFactor || '—'}</span>
+        <span className="font-medium text-gray-700 dark:text-gray-200">{keyFactor || '—'}</span>
       </p>
 
       {strengths.length > 0 && (
-        <ul className="text-xs space-y-1 mb-2 list-disc list-inside text-gray-700">
+        <ul className="text-xs space-y-1 mb-2 list-disc list-inside text-gray-700 dark:text-gray-200">
           {strengths.slice(0, 3).map((s, i) => (
             <li key={`s-${i}`}>{s}</li>
           ))}
@@ -73,7 +73,7 @@ export function AgentArgumentBox({
       )}
 
       {opponentWeaknesses.length > 0 && (
-        <div className="text-xs text-gray-500 mb-2 border-t border-gray-100 pt-2">
+        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 border-t border-gray-100 dark:border-gray-700 pt-2">
           <p className="font-medium mb-1">상대 약점:</p>
           <ul className="list-disc list-inside space-y-0.5">
             {opponentWeaknesses.slice(0, 2).map((w, i) => (
@@ -84,7 +84,7 @@ export function AgentArgumentBox({
       )}
 
       {reasoning && (
-        <p className="text-xs text-gray-600 border-t border-gray-100 pt-2 line-clamp-3">
+        <p className="text-xs text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-2 line-clamp-3">
           {reasoning}
         </p>
       )}

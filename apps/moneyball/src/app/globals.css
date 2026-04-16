@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -30,4 +32,11 @@
   --color-factor-against: var(--color-away);        /* 원정팀 유리 편향 */
   --color-bg-hero-start: var(--color-brand-800);    /* hero 그라데이션 시작 */
   --color-bg-hero-end: var(--color-brand-700);      /* hero 그라데이션 끝 */
+}
+
+/* 다크모드 시맨틱 토큰 오버라이드 */
+.dark {
+  --color-surface: #0f1a13;
+  --color-surface-card: #162420;
+  color-scheme: dark;
 }

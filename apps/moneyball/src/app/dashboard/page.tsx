@@ -102,36 +102,36 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <section>
         <h1 className="text-3xl font-bold mb-2">대시보드</h1>
-        <p className="text-gray-500">2026 시즌 예측 성과 종합</p>
+        <p className="text-gray-500 dark:text-gray-400">2026 시즌 예측 성과 종합</p>
       </section>
 
       {/* 요약 카드 */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <AccuracySummary total={total} correct={correct} rate={rate} highConfRate={highConfRate} />
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">총 예측</h3>
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">총 예측</h3>
           <span className="text-4xl font-bold">{total}</span>
-          <span className="text-sm text-gray-500 ml-1">경기</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">고확신 적중</h3>
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">고확신 적중</h3>
           <span className="text-4xl font-bold">
             {highConf.length > 0 ? Math.round(highConfRate * 100) : 0}%
           </span>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             70%+ 확신 예측 ({highConfCorrect}/{highConf.length})
           </p>
         </div>
       </section>
 
       {/* 적중률 추이 */}
-      <section className="bg-white rounded-xl border border-gray-200 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h2 className="text-lg font-bold mb-4">누적 적중률 추이</h2>
         <AccuracyChart data={accuracyData} />
       </section>
 
       {/* 팀별 성과 */}
-      <section className="bg-white rounded-xl border border-gray-200 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h2 className="text-lg font-bold mb-4">팀별 예측 적중률</h2>
         <TeamPerformanceChart data={teamData} />
       </section>

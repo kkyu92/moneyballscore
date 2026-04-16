@@ -62,7 +62,7 @@ export default async function PredictionDatePage({ params }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{date} 승부예측</h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             {games.length}경기
             {verified.length > 0 && (
               <span className="ml-2">
@@ -134,7 +134,7 @@ export default async function PredictionDatePage({ params }: Props) {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500">
           <p className="text-lg">{date}의 예측 데이터가 없습니다.</p>
         </div>
       )}

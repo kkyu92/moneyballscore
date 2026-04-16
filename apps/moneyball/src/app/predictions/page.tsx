@@ -50,7 +50,7 @@ export default async function PredictionsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">예측 기록</h1>
-      <p className="text-gray-500">날짜별 승부예측 기록입니다.</p>
+      <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
 
       {dates.length > 0 ? (
         <div className="space-y-2">
@@ -58,12 +58,12 @@ export default async function PredictionsPage() {
             <Link
               key={d.date}
               href={`/predictions/${d.date}`}
-              className="block bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow"
+              className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <span className="font-bold text-lg">{d.date}</span>
-                  <span className="text-sm text-gray-500 ml-3">
+                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-3">
                     {d.total}경기 예측
                   </span>
                 </div>
@@ -82,16 +82,16 @@ export default async function PredictionsPage() {
                       {Math.round((d.correct / d.verified) * 100)}%)
                     </span>
                   ) : (
-                    <span className="text-sm text-gray-400">결과 대기</span>
+                    <span className="text-sm text-gray-400 dark:text-gray-500">결과 대기</span>
                   )}
-                  <span className="text-gray-400">→</span>
+                  <span className="text-gray-400 dark:text-gray-500">→</span>
                 </div>
               </div>
             </Link>
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500">
           <p className="text-lg">예측 기록이 아직 없습니다.</p>
           <p className="text-sm mt-2">
             파이프라인이 실행되면 자동으로 데이터가 채워집니다.

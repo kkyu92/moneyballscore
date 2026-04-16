@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MobileNav } from "./MobileNav";
+import { ThemeToggle } from "./ThemeToggle";
 
 const NAV_ITEMS = [
   { href: "/", label: "오늘의 예측" },
@@ -30,8 +31,12 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <ThemeToggle />
         </nav>
-        <MobileNav />
+        <div className="flex items-center md:hidden">
+          <ThemeToggle />
+          <MobileNav />
+        </div>
       </div>
     </header>
   );

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,11 @@ export const metadata: Metadata = {
     siteName: "MoneyBall KBO",
   },
   robots: { index: true, follow: true },
+  alternates: {
+    types: {
+      "application/rss+xml": "https://moneyballscore.vercel.app/feed",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -49,13 +55,23 @@ export default function RootLayout({
     <html
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-surface text-gray-900">
-        <Header />
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
-          {children}
-        </main>
-        <Footer />
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-surface text-gray-900 dark:text-gray-100">
+        <ThemeProvider>
+          <Header />
+          <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
+            {children}
+          </main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

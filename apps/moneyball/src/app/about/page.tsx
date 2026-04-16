@@ -96,19 +96,19 @@ export default function AboutPage() {
     <div className="space-y-8 max-w-3xl">
       <section>
         <h1 className="text-3xl font-bold mb-2">MoneyBall KBO</h1>
-        <p className="text-gray-500 text-lg">
+        <p className="text-gray-500 dark:text-gray-400 text-lg">
           세이버메트릭스 기반 KBO 프로야구 승부예측
         </p>
       </section>
 
-      <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">예측 모델 v1.5</h2>
           <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
             10팩터 3소스
           </span>
         </div>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-300">
           10개의 세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
           홈팀 어드밴티지(+3%)를 추가 반영하며, 각 팩터를 상대 비교로 정규화한 후
           최종 승리 확률을 산출합니다.
@@ -128,20 +128,20 @@ export default function AboutPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{factor.name}</h3>
-                  <span className="text-xs text-gray-400">{factor.source}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{factor.source}</span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{factor.desc}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{factor.desc}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <p className="text-sm text-gray-400 mt-4">
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
           + 홈어드밴티지 3%. v2.0은 50경기 축적 후 오차분석 기반으로 업그레이드 예정.
         </p>
       </section>
 
-      <section className="bg-white rounded-xl border border-gray-200 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h2 className="text-xl font-bold mb-4">데이터 소스</h2>
         <div className="space-y-3">
           {DATA_SOURCES.map((source) => (
@@ -149,32 +149,32 @@ export default function AboutPage() {
               <span className={`w-2 h-2 mt-2 ${source.color} rounded-full shrink-0`} />
               <div>
                 <span className="font-medium">{source.name}</span>
-                <span className="text-sm text-gray-400 ml-2">({source.url})</span>
-                <p className="text-sm text-gray-600">{source.desc}</p>
+                <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">({source.url})</span>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{source.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-white rounded-xl border border-gray-200 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h2 className="text-xl font-bold mb-3">업데이트 주기</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">매일 15:00 KST</p>
-            <p className="text-gray-500">선발 확정 + 예측 생성</p>
+            <p className="text-gray-500 dark:text-gray-400">선발 확정 + 예측 생성</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">매일 23:00 KST</p>
-            <p className="text-gray-500">경기 결과 + 적중률 업데이트</p>
+            <p className="text-gray-500 dark:text-gray-400">경기 결과 + 적중률 업데이트</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">경기 중 10분 간격</p>
-            <p className="text-gray-500">이닝별 승리확률 보정</p>
+            <p className="text-gray-500 dark:text-gray-400">이닝별 승리확률 보정</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">Telegram 알림</p>
-            <p className="text-gray-500">예측 생성 + 결과 자동 발송</p>
+            <p className="text-gray-500 dark:text-gray-400">예측 생성 + 결과 자동 발송</p>
           </div>
         </div>
       </section>

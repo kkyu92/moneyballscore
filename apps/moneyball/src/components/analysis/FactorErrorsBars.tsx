@@ -20,7 +20,7 @@ interface FactorErrorsBarsProps {
 export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
   if (errors.length === 0) {
     return (
-      <p className="text-xs text-gray-500 italic">factor 분석 데이터 없음</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 italic">factor 분석 데이터 없음</p>
     );
   }
 
@@ -44,7 +44,7 @@ export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
         return (
           <div key={err.factor} className="text-xs">
             <div className="flex justify-between items-baseline mb-1">
-              <span className="font-mono font-medium text-gray-700">
+              <span className="font-mono font-medium text-gray-700 dark:text-gray-200">
                 {err.factor}
               </span>
               <span
@@ -58,7 +58,7 @@ export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
               </span>
             </div>
             <div
-              className="bg-gray-100 rounded-full h-2 overflow-hidden"
+              className="bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden"
               role="img"
               aria-label={`${err.factor} 편향 ${biasLabel}, ${
                 isHomeFavor ? '홈팀 유리' : '원정팀 유리'
@@ -70,7 +70,7 @@ export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
               />
             </div>
             {err.diagnosis && (
-              <p className="text-gray-500 mt-1">{err.diagnosis}</p>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">{err.diagnosis}</p>
             )}
           </div>
         );

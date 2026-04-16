@@ -24,7 +24,7 @@ interface AccuracyChartProps {
 export function AccuracyChart({ data }: AccuracyChartProps) {
   if (data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-gray-400">
+      <div className="h-64 flex items-center justify-center text-gray-400 dark:text-gray-500">
         데이터 축적 후 차트가 표시됩니다.
       </div>
     );

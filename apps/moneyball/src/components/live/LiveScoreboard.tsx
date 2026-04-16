@@ -16,15 +16,15 @@ function StatusBadge({ score }: { score: LiveScore }) {
       );
     case 'final':
       return (
-        <span className="text-[10px] font-medium text-gray-500">종료</span>
+        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">종료</span>
       );
     case 'cancelled':
       return (
-        <span className="text-[10px] font-medium text-gray-400">취소</span>
+        <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">취소</span>
       );
     default:
       return (
-        <span className="text-[10px] text-gray-400">{score.gameTime}</span>
+        <span className="text-[10px] text-gray-400 dark:text-gray-500">{score.gameTime}</span>
       );
   }
 }
@@ -41,11 +41,11 @@ function ScoreCard({ score }: { score: LiveScore }) {
       className={`flex-shrink-0 w-[160px] rounded-lg border p-3 ${
         isLive
           ? 'border-red-200 bg-red-50/50'
-          : 'border-gray-200 bg-white'
+          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--color-surface-card)]'
       }`}
     >
       <div className="flex justify-between items-center mb-2">
-        <span className="text-[10px] text-gray-400 truncate max-w-[60px]">
+        <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[60px]">
           {score.stadium}
         </span>
         <StatusBadge score={score} />
@@ -97,7 +97,7 @@ export function LiveScoreboard() {
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-[160px] h-[88px] rounded-lg border border-gray-200 bg-gray-50 animate-pulse"
+            className="flex-shrink-0 w-[160px] h-[88px] rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 animate-pulse"
           />
         ))}
       </div>
@@ -110,7 +110,7 @@ export function LiveScoreboard() {
     <section>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-gray-700">실시간 스코어</h2>
+          <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200">실시간 스코어</h2>
           {hasLiveGames && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
@@ -119,7 +119,7 @@ export function LiveScoreboard() {
           )}
         </div>
         {updatedAt && (
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-gray-400 dark:text-gray-500">
             {new Date(updatedAt).toLocaleTimeString('ko-KR', {
               hour: '2-digit',
               minute: '2-digit',

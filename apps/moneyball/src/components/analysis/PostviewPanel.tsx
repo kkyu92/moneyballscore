@@ -49,14 +49,14 @@ export function PostviewPanel({
         >
           ⚡ 사후 분석
         </h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
           경기 종료 후 AI가 "무엇을 틀렸나" 진단
         </p>
       </header>
 
       {/* Factor 편향 차트 */}
       <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
           Factor 편향 Top {factorErrors.length || 0}
         </h3>
         <FactorErrorsBars errors={factorErrors} />
@@ -66,42 +66,42 @@ export function PostviewPanel({
       {(homePostview || awayPostview) && (
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           {awayPostview && (
-            <div className="bg-white rounded-xl border-2 border-[var(--color-away)]/40 p-4">
+            <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-[var(--color-away)]/40 p-4">
               <h4 className="text-sm font-semibold text-[var(--color-away)] mb-2">
                 {awayName} 사후 의견
               </h4>
-              <p className="text-xs text-gray-600 mb-2 line-clamp-4">
+              <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
                 {awayPostview.summary}
               </p>
               {awayPostview.keyFactor && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="font-medium">핵심:</span>{' '}
                   {awayPostview.keyFactor}
                 </p>
               )}
               {awayPostview.missedBy && (
-                <p className="text-xs text-gray-500 italic border-t border-gray-100 pt-2 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
                   놓친 것: {awayPostview.missedBy}
                 </p>
               )}
             </div>
           )}
           {homePostview && (
-            <div className="bg-white rounded-xl border border-brand-200 p-4">
+            <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-200 p-4">
               <h4 className="text-sm font-semibold text-brand-700 mb-2">
                 {homeName} 사후 의견
               </h4>
-              <p className="text-xs text-gray-600 mb-2 line-clamp-4">
+              <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 line-clamp-4">
                 {homePostview.summary}
               </p>
               {homePostview.keyFactor && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="font-medium">핵심:</span>{' '}
                   {homePostview.keyFactor}
                 </p>
               )}
               {homePostview.missedBy && (
-                <p className="text-xs text-gray-500 italic border-t border-gray-100 pt-2 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
                   놓친 것: {homePostview.missedBy}
                 </p>
               )}
@@ -112,11 +112,11 @@ export function PostviewPanel({
 
       {/* 심판 사후 reasoning */}
       {judgeReasoning && (
-        <div className="bg-white rounded-xl border border-brand-200 p-4">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-200 p-4">
           <h3 className="text-sm font-semibold text-brand-700 mb-2">
             AI 심판 종합 분석
           </h3>
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
             {judgeReasoning}
           </p>
         </div>

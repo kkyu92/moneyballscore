@@ -77,7 +77,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     return (
       <div className="max-w-4xl mx-auto py-12 text-center">
         <h1 className="text-2xl font-bold mb-4">분석 데이터 없음</h1>
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           이 경기는 아직 AI 분석이 생성되지 않았습니다.
         </p>
       </div>
@@ -108,13 +108,13 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-6">
       {/* 헤더 */}
-      <header className="border-b border-gray-200 pb-4">
+      <header className="border-b border-gray-200 dark:border-gray-700 pb-4">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {gameDate} · {game.stadium ?? '구장 미정'}
           </p>
           {isPast && (
-            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+            <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded-full">
               과거 경기
             </span>
           )}
@@ -123,7 +123,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           {KBO_TEAMS[awayTeam].name} vs {KBO_TEAMS[homeTeam].name}
         </h1>
         {isPast && homeScore !== null && awayScore !== null && (
-          <p className="text-lg font-mono mt-2 text-gray-700">
+          <p className="text-lg font-mono mt-2 text-gray-700 dark:text-gray-200">
             최종: {KBO_TEAMS[awayTeam].name.split(' ')[0]} {awayScore} -{' '}
             {homeScore} {KBO_TEAMS[homeTeam].name.split(' ')[0]}
             {game.winner?.code && ` · 승리 ${KBO_TEAMS[game.winner.code as TeamCode].name.split(' ')[0]}`}
@@ -143,7 +143,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           calibrationApplied={verdict.calibrationApplied}
         />
       ) : (
-        <div className="bg-gray-50 rounded-xl p-6 text-center text-gray-500">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
           심판 판정 데이터가 아직 없습니다.
         </div>
       )}
@@ -181,12 +181,12 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 3. 정량 모델 (접기/기본 expanded) */}
       {preGame.factors && (
-        <details className="bg-white rounded-xl border border-gray-200 p-5" open>
+        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-5" open>
           <summary className="text-lg font-bold cursor-pointer">
             📊 정량 모델 v1.5 결과
           </summary>
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               모델 버전: <span className="font-mono">{preGame.model_version}</span>
               {preGame.debate_version && (
                 <>
@@ -200,9 +200,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                 ([key, value]) => (
                   <div
                     key={key}
-                    className="bg-gray-50 rounded p-2 font-mono flex justify-between"
+                    className="bg-gray-50 dark:bg-gray-800 rounded p-2 font-mono flex justify-between"
                   >
-                    <span className="text-gray-600">{key}</span>
+                    <span className="text-gray-600 dark:text-gray-300">{key}</span>
                     <span className="text-gray-900">{value.toFixed(3)}</span>
                   </div>
                 )
@@ -214,11 +214,11 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 4. 회고 보정 (접기) */}
       {debate?.calibration && (
-        <details className="bg-white rounded-xl border border-gray-200 p-5">
+        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <summary className="text-lg font-bold cursor-pointer">
             🔄 회고 보정
           </summary>
-          <div className="mt-4 space-y-2 text-sm text-gray-700">
+          <div className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-200">
             {debate.calibration.recentBias && (
               <p>
                 <span className="font-medium">최근 편향:</span>{' '}

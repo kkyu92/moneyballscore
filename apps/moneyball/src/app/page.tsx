@@ -150,17 +150,17 @@ export default async function HomePage() {
           rate={accuracy.rate}
           highConfRate={accuracy.highConfRate}
         />
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
             오늘 경기 수
           </h3>
           <span className="text-4xl font-bold">{games.length}</span>
-          <span className="text-sm text-gray-500 ml-1">경기</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">모델 버전</h3>
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">모델 버전</h3>
           <span className="text-4xl font-bold">v1.5</span>
-          <p className="text-xs text-gray-500 mt-2">10팩터 3소스 가중합산</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">10팩터 3소스 가중합산</p>
         </div>
       </section>
 
@@ -213,10 +213,10 @@ export default async function HomePage() {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-gray-700 p-10 text-center">
             <span className="text-5xl block mb-4">⚾</span>
-            <p className="text-lg font-medium text-gray-600">오늘 예측 데이터가 아직 없습니다</p>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">오늘 예측 데이터가 아직 없습니다</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
               매일 KST 15:00에 선발 확정 후 예측이 생성됩니다
             </p>
             <Link href="/predictions" className="inline-block mt-4 text-sm text-brand-600 hover:underline">
@@ -227,7 +227,7 @@ export default async function HomePage() {
       </section>
 
       {/* 방법론 소개 v1.5 */}
-      <section className="bg-white rounded-2xl border border-gray-200 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">분석 방법론</h2>
           <Link href="/about" className="text-xs text-brand-600 hover:underline">
