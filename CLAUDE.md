@@ -7,7 +7,7 @@
 ### 세션 시작 시 필수 스캔
 
 ```bash
-cd ~/projects/moneyball-ecosystem
+cd ~/projects/moneyballscore
 git log --oneline -20                       # 최근 20개 커밋
 git status                                  # 미커밋 변경
 ls supabase/migrations/ | sort -n           # 최신 마이그레이션 번호

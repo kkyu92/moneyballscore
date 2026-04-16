@@ -69,7 +69,7 @@ export async function notifyPredictions(
   }
 
   lines.push('');
-  lines.push(`🔗 <a href="https://moneyball-kbo.vercel.app/predictions/${result.date}">상세 보기</a>`);
+  lines.push(`🔗 <a href="https://moneyballscore.vercel.app/predictions/${result.date}">상세 보기</a>`);
 
   await sendMessage(lines.join('\n'));
 }
@@ -109,7 +109,7 @@ export async function notifyResults(
   }
 
   lines.push('');
-  lines.push(`🔗 <a href="https://moneyball-kbo.vercel.app/dashboard">대시보드</a>`);
+  lines.push(`🔗 <a href="https://moneyballscore.vercel.app/dashboard">대시보드</a>`);
 
   await sendMessage(lines.join('\n'));
 }

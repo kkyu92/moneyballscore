@@ -1,5 +1,5 @@
 {
-  "name": "moneyball-ecosystem",
+  "name": "moneyballscore",
   "private": true,
   "scripts": {
     "dev": "turbo dev",
