@@ -106,6 +106,8 @@ export default async function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bigMatchDebate = (bigMatchPred?.reasoning as any)?.debate;
   const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bigMatchId = (bigMatch as any)?.id;
 
   return (
     <div className="space-y-8">
@@ -200,6 +202,7 @@ export default async function HomePage() {
                         : 1 - (pred.reasoning as any).homeWinProb)
                       : undefined}
                     gameId={game.id}
+                    isBigMatch={game.id === bigMatchId}
                   />
                 </div>
               );

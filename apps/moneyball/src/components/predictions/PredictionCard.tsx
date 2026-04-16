@@ -1,5 +1,6 @@
 import { KBO_TEAMS, getConfidenceColor, type TeamCode } from "@moneyball/shared";
 import { AnalysisLink } from "../shared/AnalysisLink";
+import { TeamLogo } from "../shared/TeamLogo";
 
 interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -18,6 +19,7 @@ interface PredictionCardProps {
   homeScore?: number | null;
   awayScore?: number | null;
   gameId?: number; // v4-4: AnalysisLink 용
+  isBigMatch?: boolean; // v4-4: 빅매치 뱃지 + 금색 테두리 강조
 }
 
 export function PredictionCard({
@@ -37,6 +39,7 @@ export function PredictionCard({
   awayScore,
   winProb,
   gameId,
+  isBigMatch = false,
 }: PredictionCardProps) {
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
@@ -46,8 +49,19 @@ export function PredictionCard({
     : Math.round((0.5 + confidence / 2) * 100);
   const confidencePct = displayPct;
 
+  const cardClass = isBigMatch
+    ? "bg-white rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
+    : "bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow";
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div className={cardClass}>
+      {/* v4-4 빅매치 뱃지 */}
+      {isBigMatch && (
+        <div className="absolute -top-2.5 left-4 bg-[var(--color-accent)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+          ⭐ 오늘의 빅매치
+        </div>
+      )}
+
       {/* 상단: 경기 시간 + 적중 결과 */}
       <div className="flex justify-between items-center mb-4">
         <span className="text-xs text-gray-500">{gameTime ?? "18:30"}</span>
@@ -64,14 +78,11 @@ export function PredictionCard({
         )}
       </div>
 
-      {/* 팀 매치업 */}
+      {/* 팀 매치업 — away 왼쪽, home 오른쪽 (KBO 관례) */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-center flex-1">
-          <div
-            className="w-10 h-10 rounded-full mx-auto mb-1 flex items-center justify-center text-white font-bold text-xs"
-            style={{ backgroundColor: away.color }}
-          >
-            {awayTeam}
+          <div className="flex justify-center mb-1">
+            <TeamLogo team={awayTeam} size={40} />
           </div>
           <p className="text-sm font-medium">{away.name.split(" ")[0]}</p>
           {awayScore !== null && awayScore !== undefined && (
@@ -94,11 +105,8 @@ export function PredictionCard({
         </div>
 
         <div className="text-center flex-1">
-          <div
-            className="w-10 h-10 rounded-full mx-auto mb-1 flex items-center justify-center text-white font-bold text-xs"
-            style={{ backgroundColor: home.color }}
-          >
-            {homeTeam}
+          <div className="flex justify-center mb-1">
+            <TeamLogo team={homeTeam} size={40} />
           </div>
           <p className="text-sm font-medium">{home.name.split(" ")[0]}</p>
           {homeScore !== null && homeScore !== undefined && (

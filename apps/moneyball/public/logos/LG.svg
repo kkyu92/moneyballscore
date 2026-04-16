@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-LG" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#C30452" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#C30452" stop-opacity="0.82"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#g-LG)" stroke="#C30452" stroke-width="1.5"/>
+  <text x="32" y="40" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-1">LG</text>
+</svg>

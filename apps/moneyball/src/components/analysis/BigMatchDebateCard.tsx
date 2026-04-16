@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { TeamLogo } from '../shared/TeamLogo';
 
 interface BigMatchDebateCardProps {
   gameId: number;
@@ -66,26 +67,49 @@ export function BigMatchDebateCard({
     >
       {/* Title */}
       <header className="mb-6">
-        <p className="text-brand-300 text-xs md:text-sm font-medium mb-1">
-          ⭐ 오늘의 빅매치
-        </p>
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-brand-300 text-xs md:text-sm font-medium">
+            ⭐ 오늘의 빅매치
+          </p>
+          <span
+            className="group relative inline-flex"
+            tabIndex={0}
+            aria-label="빅매치 선정 기준 설명"
+          >
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-brand-300 text-brand-300 text-[10px] font-bold cursor-help">
+              ?
+            </span>
+            <span
+              role="tooltip"
+              className="absolute left-0 top-full mt-2 z-20 hidden group-hover:block group-focus:block bg-white text-gray-900 text-xs rounded-lg shadow-xl border border-gray-200 p-3 w-64"
+            >
+              <strong className="block mb-1 text-brand-700">
+                빅매치 선정 기준
+              </strong>
+              AI가 다음 4가지 팩터로 오늘 가장 흥미로운 경기를 선정합니다:
+              <br />· Elo 접전성 35%
+              <br />· 라이벌 매치업 25%
+              <br />· 양팀 폼 유사도 20%
+              <br />· 모델 자체 불확실성 20%
+            </span>
+          </span>
+        </div>
         <h2
           id="big-match-hero-title"
           className="text-xl md:text-2xl font-bold"
         >
           AI 에이전트 토론 대상 경기
         </h2>
+        <p className="text-brand-200 text-xs md:text-sm mt-1">
+          AI가 접전성·라이벌리·폼으로 선정한 오늘의 주목 경기
+        </p>
       </header>
 
-      {/* 팀 vs 팀 */}
+      {/* 팀 vs 팀 — away 왼쪽, home 오른쪽 */}
       <div className="flex items-center justify-center gap-4 md:gap-8 mb-6">
         <div className="text-center">
-          <div
-            className="w-16 h-16 md:w-24 md:h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold text-sm md:text-base border-4 border-white/20"
-            style={{ backgroundColor: away.color }}
-            aria-hidden="true"
-          >
-            {awayTeam}
+          <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-2 rounded-full overflow-hidden border-4 border-white/20 bg-white/5">
+            <TeamLogo team={awayTeam} size={96} className="w-full h-full" />
           </div>
           <p className="text-xs md:text-sm text-brand-200">{away.name}</p>
         </div>
@@ -93,12 +117,8 @@ export function BigMatchDebateCard({
         <div className="text-xl md:text-3xl font-bold text-brand-300">VS</div>
 
         <div className="text-center">
-          <div
-            className="w-16 h-16 md:w-24 md:h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold text-sm md:text-base border-4 border-white/20"
-            style={{ backgroundColor: home.color }}
-            aria-hidden="true"
-          >
-            {homeTeam}
+          <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-2 rounded-full overflow-hidden border-4 border-white/20 bg-white/5">
+            <TeamLogo team={homeTeam} size={96} className="w-full h-full" />
           </div>
           <p className="text-xs md:text-sm text-brand-200">{home.name}</p>
         </div>

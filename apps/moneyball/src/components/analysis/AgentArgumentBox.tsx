@@ -1,4 +1,5 @@
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { TeamLogo } from '../shared/TeamLogo';
 
 interface AgentArgumentBoxProps {
   team: TeamCode;
@@ -43,12 +44,8 @@ export function AgentArgumentBox({
     >
       <header className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-            style={{ backgroundColor: teamInfo.color }}
-            aria-hidden="true"
-          >
-            {team}
+          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+            <TeamLogo team={team} size={32} className="w-full h-full" />
           </div>
           <h3 id={titleId} className="text-sm font-semibold">
             {teamInfo.name} 에이전트

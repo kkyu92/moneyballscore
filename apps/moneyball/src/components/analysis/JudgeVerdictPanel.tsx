@@ -1,4 +1,5 @@
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { TeamLogo } from '../shared/TeamLogo';
 
 interface JudgeVerdictPanelProps {
   homeTeam: TeamCode;
@@ -47,12 +48,8 @@ export function JudgeVerdictPanel({
 
       <div className="flex items-center justify-center gap-3 md:gap-6 mb-6">
         <div className="text-center flex-1 max-w-[30%]">
-          <div
-            className="w-12 h-12 md:w-16 md:h-16 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold text-sm border-2 border-white/30"
-            style={{ backgroundColor: KBO_TEAMS[awayTeam].color }}
-            aria-hidden="true"
-          >
-            {awayTeam}
+          <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/30 bg-white/5">
+            <TeamLogo team={awayTeam} size={64} className="w-full h-full" />
           </div>
           <p className="text-xs text-brand-200">{KBO_TEAMS[awayTeam].name}</p>
           <p
@@ -66,12 +63,8 @@ export function JudgeVerdictPanel({
         <div className="text-2xl md:text-3xl font-bold text-brand-300">vs</div>
 
         <div className="text-center flex-1 max-w-[30%]">
-          <div
-            className="w-12 h-12 md:w-16 md:h-16 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold text-sm border-2 border-white/30"
-            style={{ backgroundColor: KBO_TEAMS[homeTeam].color }}
-            aria-hidden="true"
-          >
-            {homeTeam}
+          <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/30 bg-white/5">
+            <TeamLogo team={homeTeam} size={64} className="w-full h-full" />
           </div>
           <p className="text-xs text-brand-200">{KBO_TEAMS[homeTeam].name}</p>
           <p
