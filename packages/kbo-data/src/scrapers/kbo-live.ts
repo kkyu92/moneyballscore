@@ -59,34 +59,41 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     const awayTeam = (raw.AWAY_ID as TeamCode) || resolveTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
-    // 경기 상태 판단
-    const statusText = raw.GAME_SC_HEADER_NM || raw.G_ST || '';
+    // 경기 상태 판단 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
+    const stateCode = String(raw.GAME_STATE_SC || '');
     let status: LiveGameState['status'] = 'scheduled';
-    if (statusText.includes('종료') || statusText === 'Final') {
+    if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
       status = 'final';
-    } else if (statusText.includes('회') || statusText.includes('진행') || raw.HOME_SCORE != null) {
+    } else if (stateCode === '2' || Number(raw.GAME_INN_NO) > 0) {
       status = 'live';
     }
 
-    // 이닝 정보 파싱 (예: "5회초", "9회말")
-    let inning = 0;
-    let isTop = true;
-    const inningMatch = statusText.match(/(\d+)회(초|말)?/);
-    if (inningMatch) {
-      inning = parseInt(inningMatch[1], 10);
-      isTop = inningMatch[2] !== '말';
-    }
+    // 이닝 정보 — GAME_INN_NO: 숫자, GAME_TB_SC: "T"=초, "B"=말
+    const inning = Number(raw.GAME_INN_NO) || 0;
+    const isTop = raw.GAME_TB_SC !== 'B';
+
+    // 점수 — T_SCORE_CN=원정(Top), B_SCORE_CN=홈(Bottom)
+    const homeScore = Number(raw.B_SCORE_CN) || 0;
+    const awayScore = Number(raw.T_SCORE_CN) || 0;
+
+    // 주자/아웃 정보
+    const outs = Number(raw.OUT_CN) || 0;
+    const runners = [
+      raw.B1_BAT_ORDER_NO > 0 ? '1루' : '',
+      raw.B2_BAT_ORDER_NO > 0 ? '2루' : '',
+      raw.B3_BAT_ORDER_NO > 0 ? '3루' : '',
+    ].filter(Boolean).join(',');
 
     liveGames.push({
       externalGameId: raw.G_ID,
       homeTeam,
       awayTeam,
-      homeScore: raw.HOME_SCORE ?? 0,
-      awayScore: raw.AWAY_SCORE ?? 0,
+      homeScore,
+      awayScore,
       inning,
       isTop,
-      outs: 0,      // 상세 정보 추후 추가 가능
-      runners: '',
+      outs,
+      runners,
       status,
     });
   }
