@@ -3,6 +3,6 @@ import type { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: "https://moneyball-kbo.vercel.app/sitemap.xml",
+    sitemap: "https://moneyballscore.vercel.app/sitemap.xml",
   };
 }

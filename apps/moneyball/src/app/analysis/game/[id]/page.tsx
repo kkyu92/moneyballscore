@@ -1,17 +1,37 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
 
-// v4-4 Task 1: 경기 상세 분석 페이지
-// Design 리뷰 Pass 1: 섹션 순서 — 심판 → 양팀 에이전트 → 정량 모델 → 사후분석
-
-export const revalidate = 600; // 10분 ISR
+export const revalidate = 600;
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const gameId = parseInt(id, 10);
+  if (!Number.isFinite(gameId)) return {};
+
+  const game = await getGameAnalysis(gameId);
+  if (!game) return {};
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const g = game as any;
+  const home = KBO_TEAMS[g.home_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
+  const away = KBO_TEAMS[g.away_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
+  const title = `${away} vs ${home} AI 분석 — ${g.game_date}`;
+  const description = `${g.game_date} ${away} vs ${home} 세이버메트릭스 기반 AI 승부예측 분석. FIP, wOBA, Elo 등 10팩터 정량 모델 + 에이전트 토론.`;
+
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+  };
 }
 
 async function getGameAnalysis(gameId: number) {
@@ -105,8 +125,25 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       }
     | null;
 
+  const homeName = KBO_TEAMS[homeTeam].name.split(' ')[0];
+  const awayName = KBO_TEAMS[awayTeam].name.split(' ')[0];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `${awayName} vs ${homeName} AI 승부예측 분석`,
+    datePublished: gameDate,
+    description: `${gameDate} ${awayName} vs ${homeName} 세이버메트릭스 기반 AI 분석`,
+    publisher: { "@type": "Organization", name: "MoneyBall KBO" },
+    mainEntityOfPage: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+  };
+
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* 헤더 */}
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <div className="flex items-center justify-between mb-2">

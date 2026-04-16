@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://moneyball-kbo.vercel.app"),
+  metadataBase: new URL("https://moneyballscore.vercel.app"),
   title: {
     template: "%s | MoneyBall KBO",
     default: "MoneyBall KBO - 세이버메트릭스 기반 KBO 승부예측",
   },
   description:
-    "wOBA, FIP, WAR 등 세이버메트릭스 지표를 활용한 KBO 프로야구 승부예측. 매일 업데이트되는 경기 프리뷰와 적중률 트래킹.",
+    "wOBA, FIP, WAR 등 세이버메트릭스 지표를 활용한 KBO 프로야구 승부예측. AI 에이전트 토론 + 10팩터 정량 모델. 매일 업데이트.",
   keywords: [
     "KBO",
     "승부예측",
@@ -32,11 +32,20 @@ export const metadata: Metadata = {
     "WAR",
     "프로야구",
     "야구분석",
+    "AI 야구 예측",
+    "KBO 승률",
   ],
   openGraph: {
     type: "website",
     locale: "ko_KR",
     siteName: "MoneyBall KBO",
+    title: "MoneyBall KBO - 세이버메트릭스 기반 KBO 승부예측",
+    description: "AI 에이전트 토론 + 10팩터 정량 모델 기반 KBO 매일 승부예측. 실시간 스코어, 적중률 트래킹.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MoneyBall KBO",
+    description: "세이버메트릭스 기반 KBO 승부예측",
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -70,6 +79,24 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-surface text-gray-900 dark:text-gray-100">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "MoneyBall KBO",
+              url: "https://moneyballscore.vercel.app",
+              description: "세이버메트릭스 기반 KBO 프로야구 승부예측",
+              inLanguage: "ko",
+              publisher: {
+                "@type": "Organization",
+                name: "MoneyBall KBO",
+                url: "https://moneyballscore.vercel.app",
+              },
+            }),
+          }}
+        />
         <ThemeProvider>
           <Header />
           <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
