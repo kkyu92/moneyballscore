@@ -101,7 +101,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">예측 모델 v1.5</h2>
           <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
@@ -141,7 +141,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-xl font-bold mb-4">데이터 소스</h2>
         <div className="space-y-3">
           {DATA_SOURCES.map((source) => (
@@ -157,7 +157,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-xl font-bold mb-3">업데이트 주기</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-surface rounded-lg">

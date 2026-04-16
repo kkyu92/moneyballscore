@@ -88,7 +88,7 @@ export default async function AnalysisIndexPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
-      <header className="border-b border-gray-200 dark:border-gray-700 pb-4">
+      <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">
           KBO 승부예측 AI의 오늘 빅매치와 시즌 누적 성과
@@ -146,7 +146,7 @@ export default async function AnalysisIndexPage() {
 
         <div className="grid md:grid-cols-2 gap-4">
           {/* 누적 적중률 */}
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
             <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2">
               토론 기반 예측 누적 적중률 (v2-persona4)
             </h3>
@@ -167,7 +167,7 @@ export default async function AnalysisIndexPage() {
           </div>
 
           {/* Factor 오답률 top 3 */}
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
             <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-3">
               가장 자주 틀린 Factor Top 3
             </h3>

@@ -80,7 +80,7 @@ export function PostviewPanel({
                 </p>
               )}
               {awayPostview.missedBy && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-100 dark:border-[var(--color-border)] pt-2 mt-2">
                   놓친 것: {awayPostview.missedBy}
                 </p>
               )}
@@ -101,7 +101,7 @@ export function PostviewPanel({
                 </p>
               )}
               {homePostview.missedBy && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-100 dark:border-[var(--color-border)] pt-2 mt-2">
                   놓친 것: {homePostview.missedBy}
                 </p>
               )}

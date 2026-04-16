@@ -108,7 +108,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-6">
       {/* 헤더 */}
-      <header className="border-b border-gray-200 dark:border-gray-700 pb-4">
+      <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {gameDate} · {game.stadium ?? '구장 미정'}
@@ -181,7 +181,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 3. 정량 모델 (접기/기본 expanded) */}
       {preGame.factors && (
-        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-5" open>
+        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5" open>
           <summary className="text-lg font-bold cursor-pointer">
             📊 정량 모델 v1.5 결과
           </summary>
@@ -214,7 +214,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 4. 회고 보정 (접기) */}
       {debate?.calibration && (
-        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
           <summary className="text-lg font-bold cursor-pointer">
             🔄 회고 보정
           </summary>

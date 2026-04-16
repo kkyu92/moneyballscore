@@ -58,7 +58,7 @@ export default async function PredictionsPage() {
             <Link
               key={d.date}
               href={`/predictions/${d.date}`}
-              className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow"
+              className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -91,7 +91,7 @@ export default async function PredictionsPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-8 text-center text-gray-400 dark:text-gray-500">
           <p className="text-lg">예측 기록이 아직 없습니다.</p>
           <p className="text-sm mt-2">
             파이프라인이 실행되면 자동으로 데이터가 채워집니다.

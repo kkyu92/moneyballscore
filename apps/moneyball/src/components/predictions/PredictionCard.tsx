@@ -51,7 +51,7 @@ export function PredictionCard({
 
   const cardClass = isBigMatch
     ? "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
-    : "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow";
+    : "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:shadow-md transition-shadow";
 
   return (
     <div className={cardClass}>
@@ -116,7 +116,7 @@ export function PredictionCard({
       </div>
 
       {/* 핵심 지표 */}
-      <div className="border-t border-gray-100 dark:border-gray-700 pt-3 grid grid-cols-2 gap-2 text-xs">
+      <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 grid grid-cols-2 gap-2 text-xs">
         {homeSPName && awaySPName && (
           <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">
             <span>
@@ -147,7 +147,7 @@ export function PredictionCard({
 
       {/* v4-4: 상세 분석 링크 */}
       {gameId != null && (
-        <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-3 text-center">
+        <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 mt-3 text-center">
           <AnalysisLink gameId={gameId} label="AI 분석 보기" variant="subtle" />
         </div>
       )}

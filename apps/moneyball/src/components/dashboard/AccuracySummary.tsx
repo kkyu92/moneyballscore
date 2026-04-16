@@ -16,7 +16,7 @@ export function AccuracySummary({
   const ratePct = Math.round(rate * 100);
 
   return (
-    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">시즌 적중률</h3>
       <div className="flex items-end gap-2 mb-4">
         <span

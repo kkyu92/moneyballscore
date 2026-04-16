@@ -81,7 +81,7 @@ export function BigMatchDebateCard({
             </span>
             <span
               role="tooltip"
-              className="absolute left-0 top-full mt-2 z-20 hidden group-hover:block group-focus:block bg-white dark:bg-[var(--color-surface-card)] text-gray-900 text-xs rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3 w-64"
+              className="absolute left-0 top-full mt-2 z-20 hidden group-hover:block group-focus:block bg-white dark:bg-[var(--color-surface-card)] text-gray-900 text-xs rounded-lg shadow-xl border border-gray-200 dark:border-[var(--color-border)] p-3 w-64"
             >
               <strong className="block mb-1 text-brand-700">
                 빅매치 선정 기준

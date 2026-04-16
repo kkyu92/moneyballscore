@@ -108,12 +108,12 @@ export default async function DashboardPage() {
       {/* 요약 카드 */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <AccuracySummary total={total} correct={correct} rate={rate} highConfRate={highConfRate} />
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">총 예측</h3>
           <span className="text-4xl font-bold">{total}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
         </div>
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">고확신 적중</h3>
           <span className="text-4xl font-bold">
             {highConf.length > 0 ? Math.round(highConfRate * 100) : 0}%
@@ -125,13 +125,13 @@ export default async function DashboardPage() {
       </section>
 
       {/* 적중률 추이 */}
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-lg font-bold mb-4">누적 적중률 추이</h2>
         <AccuracyChart data={accuracyData} />
       </section>
 
       {/* 팀별 성과 */}
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-lg font-bold mb-4">팀별 예측 적중률</h2>
         <TeamPerformanceChart data={teamData} />
       </section>

@@ -150,14 +150,14 @@ export default async function HomePage() {
           rate={accuracy.rate}
           highConfRate={accuracy.highConfRate}
         />
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
             오늘 경기 수
           </h3>
           <span className="text-4xl font-bold">{games.length}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
         </div>
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">모델 버전</h3>
           <span className="text-4xl font-bold">v1.5</span>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">10팩터 3소스 가중합산</p>
@@ -213,7 +213,7 @@ export default async function HomePage() {
             })}
           </div>
         ) : (
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-gray-700 p-10 text-center">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
             <span className="text-5xl block mb-4">⚾</span>
             <p className="text-lg font-medium text-gray-600 dark:text-gray-300">오늘 예측 데이터가 아직 없습니다</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
@@ -227,14 +227,14 @@ export default async function HomePage() {
       </section>
 
       {/* 방법론 소개 v1.5 */}
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">분석 방법론</h2>
           <Link href="/about" className="text-xs text-brand-600 hover:underline">
             자세히 보기 →
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: "선발 FIP + xFIP", weight: "20%", icon: "🎯" },
             { label: "타선 wOBA", weight: "15%", icon: "💪" },
@@ -243,11 +243,11 @@ export default async function HomePage() {
             { label: "Elo + WAR", weight: "16%", icon: "⚡" },
             { label: "구장 + 홈어드밴티지", weight: "7%", icon: "🏟" },
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-3 p-3 bg-surface rounded-lg">
+            <div key={item.label} className="flex items-center gap-3 p-3 bg-brand-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-brand-100 dark:border-[var(--color-border)]">
               <span className="text-lg">{item.icon}</span>
               <div>
                 <p className="text-sm font-medium">{item.label}</p>
-                <p className="text-xs text-brand-600 font-bold">{item.weight}</p>
+                <p className="text-xs text-brand-600 dark:text-brand-400 font-bold">{item.weight}</p>
               </div>
             </div>
           ))}

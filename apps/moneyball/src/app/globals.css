@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Pretendard Variable', 'Pretendard', var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 
   /* MoneyBall 다크 그린 컬러 시스템 */
@@ -38,5 +38,6 @@
 .dark {
   --color-surface: #0c0e0d;
   --color-surface-card: #151d18;
+  --color-border: #1e2b23;
   color-scheme: dark;
 }

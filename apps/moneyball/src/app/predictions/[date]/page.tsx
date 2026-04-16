@@ -134,7 +134,7 @@ export default async function PredictionDatePage({ params }: Props) {
           })}
         </div>
       ) : (
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-8 text-center text-gray-400 dark:text-gray-500">
           <p className="text-lg">{date}의 예측 데이터가 없습니다.</p>
         </div>
       )}

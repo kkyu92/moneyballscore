@@ -73,7 +73,7 @@ export function AgentArgumentBox({
       )}
 
       {opponentWeaknesses.length > 0 && (
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 border-t border-gray-100 dark:border-gray-700 pt-2">
+        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 border-t border-gray-100 dark:border-[var(--color-border)] pt-2">
           <p className="font-medium mb-1">상대 약점:</p>
           <ul className="list-disc list-inside space-y-0.5">
             {opponentWeaknesses.slice(0, 2).map((w, i) => (
@@ -84,7 +84,7 @@ export function AgentArgumentBox({
       )}
 
       {reasoning && (
-        <p className="text-xs text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700 pt-2 line-clamp-3">
+        <p className="text-xs text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-[var(--color-border)] pt-2 line-clamp-3">
           {reasoning}
         </p>
       )}

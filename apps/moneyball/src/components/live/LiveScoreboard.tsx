@@ -40,8 +40,8 @@ function ScoreCard({ score }: { score: LiveScore }) {
     <div
       className={`flex-shrink-0 w-[160px] rounded-lg border p-3 ${
         isLive
-          ? 'border-red-200 bg-red-50/50'
-          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--color-surface-card)]'
+          ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30'
+          : 'border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)]'
       }`}
     >
       <div className="flex justify-between items-center mb-2">
@@ -97,7 +97,7 @@ export function LiveScoreboard() {
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-[160px] h-[88px] rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 animate-pulse"
+            className="flex-shrink-0 w-[160px] h-[88px] rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-gray-800 animate-pulse"
           />
         ))}
       </div>
