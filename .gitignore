@@ -38,6 +38,9 @@ pnpm-debug.log*
 .vercel/
 .gstack/
 
+# gstack local metadata
+.context/
+
 # supabase local cache
 supabase/.temp/
 .vercel
