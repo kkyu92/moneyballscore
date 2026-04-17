@@ -6,8 +6,10 @@ import { DailyAccuracyChart } from "@/components/dashboard/DailyAccuracyChart";
 import { ConfidenceBucketChart } from "@/components/dashboard/ConfidenceBucketChart";
 import { TeamPerformanceChart } from "@/components/dashboard/TeamPerformanceChart";
 import { FactorErrorTable, type FactorErrorRow } from "@/components/dashboard/FactorErrorTable";
+import { ModelTuningInsights } from "@/components/dashboard/ModelTuningInsights";
 import { buildDailyAccuracy } from "@/lib/dashboard/buildDailyAccuracy";
 import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
+import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
@@ -71,11 +73,13 @@ async function getTotalPredCount(): Promise<number> {
 }
 
 export default async function DashboardPage() {
-  const [overview, factorErrors, totalPredCount] = await Promise.all([
-    getOverview(),
-    getFactorErrors(),
-    getTotalPredCount(),
-  ]);
+  const [overview, factorErrors, totalPredCount, tuningReport] =
+    await Promise.all([
+      getOverview(),
+      getFactorErrors(),
+      getTotalPredCount(),
+      buildModelTuningInsights(),
+    ]);
 
   const total = overview.length;
   const correct = overview.filter((p) => p.is_correct).length;
@@ -213,6 +217,16 @@ export default async function DashboardPage() {
           사후 분석에서 편향이 컸던 팩터 Top 5 · 막대 길이는 평균 편향 크기
         </p>
         <FactorErrorTable rows={factorErrors} />
+      </section>
+
+      {/* 모델 v2.0 튜닝 진단 */}
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+        <h2 className="text-lg font-bold mb-1">모델 v2.0 튜닝 진단</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          각 팩터가 실제 결과와 얼마나 일치했는지 정량 오차분석 · 샘플 누적 후
+          가중치 재보정 근거로 사용
+        </p>
+        <ModelTuningInsights report={tuningReport} />
       </section>
     </div>
   );
