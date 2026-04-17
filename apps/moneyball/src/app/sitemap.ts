@@ -20,6 +20,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 모든 past + 오늘 경기 /analysis/game/[id] URL
   const analysisRoutes: MetadataRoute.Sitemap = [];
+  // 일자별 /predictions/[date] URL — 각 날짜는 포스트 역할
+  const predictionDateRoutes: MetadataRoute.Sitemap = [];
+
   try {
     const supabase = await createClient();
     const { data: games } = await supabase
@@ -29,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .limit(5000); // 연 ~700 경기 × 7시즌 여유
 
     if (games) {
+      const seenDates = new Set<string>();
       for (const g of games) {
         analysisRoutes.push({
           url: `${baseUrl}/analysis/game/${g.id}`,
@@ -36,11 +40,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           changeFrequency: 'weekly',
           priority: 0.7,
         });
+
+        if (g.game_date && !seenDates.has(g.game_date)) {
+          seenDates.add(g.game_date);
+          predictionDateRoutes.push({
+            url: `${baseUrl}/predictions/${g.game_date}`,
+            lastModified: g.updated_at ? new Date(g.updated_at) : undefined,
+            changeFrequency: 'weekly',
+            priority: 0.75,
+          });
+        }
       }
     }
   } catch (e) {
     console.warn('[sitemap] games query failed, serving static routes only:', e);
   }
 
-  return [...staticRoutes, ...analysisRoutes];
+  return [...staticRoutes, ...predictionDateRoutes, ...analysisRoutes];
 }
