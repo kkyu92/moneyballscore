@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     description: "세이버메트릭스 기반 승부예측",
   },
   robots: { index: true, follow: true },
+  verification: {
+    google: "KHDQrWaTIhknJ7pTsiGuEHz-uJMal-8b9bCyw2QL89w",
+  },
   alternates: {
     types: {
       "application/rss+xml": "https://moneyballscore.vercel.app/feed",
