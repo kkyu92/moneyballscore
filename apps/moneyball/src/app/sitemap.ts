@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/reviews/weekly`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/players`, changeFrequency: 'daily', priority: 0.7 },
   ];
 
   // 최근 12주 주간 리뷰 URL — 시즌 누적에 따라 매주 +1개
@@ -31,6 +32,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }),
   );
+
+  // Top N 투수 프로필 URL — leaderboard 동일 집계 재사용
+  const pitcherProfileRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { buildPitcherLeaderboard } = await import(
+      '@/lib/players/buildPitcherLeaderboard'
+    );
+    const pitchers = await buildPitcherLeaderboard({ limit: 10, minAppearances: 1 });
+    for (const p of pitchers) {
+      pitcherProfileRoutes.push({
+        url: `${baseUrl}/players/${p.playerId}`,
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    }
+  } catch (e) {
+    console.warn('[sitemap] pitcher leaderboard failed:', e);
+  }
 
   // 모든 past + 오늘 경기 /analysis/game/[id] URL
   const analysisRoutes: MetadataRoute.Sitemap = [];
@@ -73,6 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...weeklyReviewRoutes,
+    ...pitcherProfileRoutes,
     ...predictionDateRoutes,
     ...analysisRoutes,
   ];

@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: "/", label: "오늘의 예측" },
   { href: "/predictions", label: "예측 기록" },
   { href: "/analysis", label: "AI 분석" },
+  { href: "/players", label: "선수" },
   { href: "/dashboard", label: "대시보드" },
   { href: "/about", label: "소개" },
 ];
