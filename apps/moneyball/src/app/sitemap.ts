@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 
 // v4-4 Task 1: 모든 /analysis/game/[id] URL 포함 (Eng 리뷰 A6)
 // 과거 경기까지 SEO 크롤러에 노출해 AdSense 콘텐츠 양 확보.
@@ -19,7 +20,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/reviews/weekly`, changeFrequency: 'weekly', priority: 0.8 },
   ];
+
+  // 최근 12주 주간 리뷰 URL — 시즌 누적에 따라 매주 +1개
+  const weeklyReviewRoutes: MetadataRoute.Sitemap = getRecentWeeks(12).map(
+    (w) => ({
+      url: `${baseUrl}/reviews/weekly/${w.weekId}`,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }),
+  );
 
   // 모든 past + 오늘 경기 /analysis/game/[id] URL
   const analysisRoutes: MetadataRoute.Sitemap = [];
@@ -59,5 +70,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn('[sitemap] games query failed, serving static routes only:', e);
   }
 
-  return [...staticRoutes, ...predictionDateRoutes, ...analysisRoutes];
+  return [
+    ...staticRoutes,
+    ...weeklyReviewRoutes,
+    ...predictionDateRoutes,
+    ...analysisRoutes,
+  ];
 }

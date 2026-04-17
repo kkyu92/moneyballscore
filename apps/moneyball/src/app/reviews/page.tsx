@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 import Link from "next/link";
+import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -34,6 +35,7 @@ async function getVerifiedPredictions() {
 
 export default async function ReviewsPage() {
   const predictions = await getVerifiedPredictions();
+  const recentWeeks = getRecentWeeks(4);
 
   const total = predictions.length;
   const correct = predictions.filter((p) => p.is_correct).length;
@@ -47,6 +49,36 @@ export default async function ReviewsPage() {
           AI 예측의 적중과 실패를 경기별로 추적합니다.
         </p>
       </div>
+
+      <section className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-5 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+              📅 주간 리뷰
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              매주 자동 집계되는 하이라이트 · 팀별 성과 · 팩터 인사이트
+            </p>
+          </div>
+          <Link
+            href={`/reviews/weekly/${recentWeeks[recentWeeks.length - 1].weekId}`}
+            className="text-sm font-medium text-brand-600 hover:underline"
+          >
+            이번 주 리뷰 →
+          </Link>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {recentWeeks.map((w) => (
+            <Link
+              key={w.weekId}
+              href={`/reviews/weekly/${w.weekId}`}
+              className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+            >
+              {w.label}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {total > 0 ? (
         <>
