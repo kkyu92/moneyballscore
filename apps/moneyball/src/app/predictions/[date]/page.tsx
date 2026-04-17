@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
+import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
 interface Props {
@@ -344,6 +345,14 @@ export default async function PredictionDatePage({ params }: Props) {
                     }}
                   />
                 )}
+
+                <div className="flex items-center justify-end pt-1">
+                  <AnalysisLink
+                    gameId={game.id}
+                    label="팩터별 심층 해설 · 에이전트 토론 전문 보기"
+                    variant="primary"
+                  />
+                </div>
               </div>
             );
           })}

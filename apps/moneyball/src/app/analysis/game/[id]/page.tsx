@@ -5,6 +5,10 @@ import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
+import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnalysis';
+import { GameOverview } from '@/components/analysis/GameOverview';
+import { buildGameOverview } from '@/lib/analysis/factor-explanations';
+import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 
 export const revalidate = 600;
 
@@ -46,7 +50,15 @@ async function getGameAnalysis(gameId: number) {
       winner:teams!games_winner_team_id_fkey(code),
       predictions(
         prediction_type, predicted_winner, confidence, reasoning, factors,
-        is_correct, model_version, debate_version
+        is_correct, model_version, debate_version,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba,
+        home_bullpen_fip, away_bullpen_fip,
+        home_war_total, away_war_total,
+        home_recent_form, away_recent_form,
+        head_to_head_rate, park_factor,
+        home_elo, away_elo,
+        home_sfr, away_sfr
       )
     `)
     .eq('id', gameId)
@@ -128,12 +140,54 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   const homeName = KBO_TEAMS[homeTeam].name.split(' ')[0];
   const awayName = KBO_TEAMS[awayTeam].name.split(' ')[0];
 
+  // 정량 팩터 원본값 — DetailedFactorAnalysis에 주입
+  const factorDetails: FactorRawDetails = {
+    homeSPFip: preGame.home_sp_fip,
+    awaySPFip: preGame.away_sp_fip,
+    homeSPxFip: preGame.home_sp_xfip,
+    awaySPxFip: preGame.away_sp_xfip,
+    homeWoba: preGame.home_lineup_woba,
+    awayWoba: preGame.away_lineup_woba,
+    homeBullpenFip: preGame.home_bullpen_fip,
+    awayBullpenFip: preGame.away_bullpen_fip,
+    homeWar: preGame.home_war_total,
+    awayWar: preGame.away_war_total,
+    homeForm: preGame.home_recent_form,
+    awayForm: preGame.away_recent_form,
+    h2hRate: preGame.head_to_head_rate,
+    parkFactor: preGame.park_factor,
+    homeElo: preGame.home_elo,
+    awayElo: preGame.away_elo,
+    homeSfr: preGame.home_sfr,
+    awaySfr: preGame.away_sfr,
+  };
+
+  const homeWinProbForOverview = verdict?.homeWinProb ?? 0.5;
+  const overview = buildGameOverview({
+    homeWinProb: homeWinProbForOverview,
+    homeSPFip: preGame.home_sp_fip,
+    awaySPFip: preGame.away_sp_fip,
+    homeWoba: preGame.home_lineup_woba,
+    awayWoba: preGame.away_lineup_woba,
+    h2hRate: preGame.head_to_head_rate,
+    homeTeamName: homeName,
+    awayTeamName: awayName,
+  });
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: `${awayName} vs ${homeName} AI 승부예측 분석`,
     datePublished: gameDate,
     description: `${gameDate} ${awayName} vs ${homeName} 세이버메트릭스 기반 AI 분석`,
+    articleBody: [
+      overview.summary,
+      verdict?.reasoning,
+      homeArg?.reasoning,
+      awayArg?.reasoning,
+    ]
+      .filter(Boolean)
+      .join(' '),
     publisher: { "@type": "Organization", name: "MoneyBall Score" },
     mainEntityOfPage: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
   };
@@ -167,6 +221,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           </p>
         )}
       </header>
+
+      {/* 0. 경기 개요 — 태그 + 1-2줄 요약 */}
+      <GameOverview tags={overview.tags} summary={overview.summary} />
 
       {/* 1. 심판 판정 (최상단, Design 리뷰 Pass 1) */}
       {verdict ? (
@@ -216,31 +273,38 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* 3. 정량 모델 (접기/기본 expanded) */}
+      {/* 3. 팩터별 정량 해설 — 가중치 순 10팩터 × 1-2줄 한국어 서술 */}
       {preGame.factors && (
-        <details className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5" open>
-          <summary className="text-lg font-bold cursor-pointer">
-            📊 정량 모델 v1.5 결과
+        <DetailedFactorAnalysis
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          factors={preGame.factors as Record<string, number>}
+          details={factorDetails}
+        />
+      )}
+
+      {/* 3b. 모델 메타 (접기) */}
+      {preGame.factors && (
+        <details className="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2 text-xs">
+          <summary className="cursor-pointer text-gray-500 dark:text-gray-400">
+            모델 메타 정보
           </summary>
-          <div className="mt-4 space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              모델 버전: <span className="font-mono">{preGame.model_version}</span>
+          <div className="mt-2 space-y-1 text-gray-600 dark:text-gray-300">
+            <p>
+              정량 모델: <span className="font-mono">{preGame.model_version}</span>
               {preGame.debate_version && (
                 <>
-                  {' · 토론 버전: '}
+                  {' · 토론 버전 '}
                   <span className="font-mono">{preGame.debate_version}</span>
                 </>
               )}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-1 font-mono">
               {Object.entries(preGame.factors as Record<string, number>).map(
                 ([key, value]) => (
-                  <div
-                    key={key}
-                    className="bg-gray-50 dark:bg-gray-800 rounded p-2 font-mono flex justify-between"
-                  >
-                    <span className="text-gray-600 dark:text-gray-300">{key}</span>
-                    <span className="text-gray-900">{value.toFixed(3)}</span>
+                  <div key={key} className="flex justify-between">
+                    <span>{key}</span>
+                    <span>{value.toFixed(3)}</span>
                   </div>
                 )
               )}
