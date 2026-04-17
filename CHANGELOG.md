@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.3] - 2026-04-17
+
+### v4-4 Phase 1-3 후속: GA4 + GSC 연결
+
+- **Google Analytics 4**: `@next/third-parties/google` 설치 + `<GoogleAnalytics gaId="G-2886XKWG4Y" />` layout.tsx 통합. 기존 Vercel Analytics와 병렬 수집(역할 분담 — Vercel은 퍼포먼스/실시간, GA4는 AdSense 심사·장기 퍼널·사용자 속성). 서비스 측정 ID 하드코딩 (public 값 — 추후 도메인 이전 시 `NEXT_PUBLIC_SITE_URL`과 함께 env 추출 예정).
+- **Google Search Console**: `metadata.verification.google` 필드로 소유권 확인 meta 태그 렌더. property `https://moneyballscore.vercel.app` 등록 + sitemap.xml 제출 완료.
+
+### 검증 결과
+
+- Test suite: 33/33 · 160/160 · type-check 3/3 통과.
+- dev server smoke: `/` HTML에 `G-2886XKWG4Y` gtag + `googletagmanager` 스크립트 + GSC verification meta 모두 렌더 확인.
+
+### 다음 단계 (퀄리티 확보)
+
+콘텐츠 본문 확장 → 모델 v2.0 오차분석 → 특집 콘텐츠(주간 리뷰·프로필) 순으로 품질 올린 뒤 자체 도메인 + AdSense 심사 일괄 진행.
+
 ## [0.5.2] - 2026-04-17
 
 ### v4-4 Phase 1-3: AdSense 심사용 법적 페이지 3종
