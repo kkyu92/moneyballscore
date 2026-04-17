@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { KBO_TEAMS, toKSTDateString, type TeamCode } from '@moneyball/shared';
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 
-// v4-4 Task 4: /analysis 인덱스 + 시즌 AI 리더보드
+// v4-4 Phase 1-1: /analysis 는 '오늘 빅매치' 전용. 시즌 누적 성과는 /dashboard 에 통합.
 
 export const revalidate = 3600; // 1시간 ISR
 
@@ -49,49 +49,15 @@ async function getTodayBigMatch() {
   return { bigMatchId: result.bigMatchGameId, mode: result.mode, candidates: candidates.length };
 }
 
-async function getSeasonStats() {
-  const supabase = await createClient();
-
-  // v2-persona4 (v4-2 이후 토론 기반) 누적 적중률
-  const { data: debatePreds } = await supabase
-    .from('predictions')
-    .select('is_correct, confidence')
-    .eq('prediction_type', 'pre_game')
-    .eq('debate_version', 'v2-persona4')
-    .not('is_correct', 'is', null);
-
-  const total = debatePreds?.length ?? 0;
-  const correct = debatePreds?.filter((p) => p.is_correct).length ?? 0;
-  const rate = total > 0 ? correct / total : 0;
-
-  // factor 오답률 top 3 (migration 010 view)
-  const { data: factorErrors } = await supabase
-    .from('factor_error_summary')
-    .select('factor, error_count, avg_bias')
-    .order('error_count', { ascending: false })
-    .limit(3);
-
-  return {
-    total,
-    correct,
-    rate,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    topFactorErrors: (factorErrors ?? []) as Array<{ factor: string; error_count: number; avg_bias: number }>,
-  };
-}
-
 export default async function AnalysisIndexPage() {
-  const [bigMatch, stats] = await Promise.all([
-    getTodayBigMatch(),
-    getSeasonStats(),
-  ]);
+  const bigMatch = await getTodayBigMatch();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">
-          승부예측 AI의 오늘 빅매치와 시즌 누적 성과
+          오늘의 빅매치 AI 에이전트 토론
         </p>
       </header>
 
@@ -138,63 +104,25 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 시즌 AI 리더보드 */}
-      <section aria-labelledby="leaderboard-title">
-        <h2 id="leaderboard-title" className="text-xl font-bold mb-4">
-          📊 시즌 AI 리더보드
-        </h2>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* 누적 적중률 */}
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
-            <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              토론 기반 예측 누적 적중률 (v2-persona4)
-            </h3>
-            {stats.total >= 10 ? (
-              <>
-                <p className="text-4xl font-bold text-brand-600 mb-1">
-                  {Math.round(stats.rate * 100)}%
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {stats.correct} / {stats.total} 경기
-                </p>
-              </>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic">
-                시즌 시작 전 — 데이터 부족 ({stats.total} 경기)
+      {/* 시즌 성과 CTA → /dashboard */}
+      <section aria-labelledby="season-stats-title">
+        <h2 id="season-stats-title" className="sr-only">시즌 성과</h2>
+        <Link
+          href="/dashboard"
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 hover:border-brand-500 dark:hover:border-brand-500 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-3xl shrink-0">📊</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                전체 성과 대시보드 →
               </p>
-            )}
-          </div>
-
-          {/* Factor 오답률 top 3 */}
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
-            <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              가장 자주 틀린 Factor Top 3
-            </h3>
-            {stats.topFactorErrors.length > 0 ? (
-              <ul className="space-y-2">
-                {stats.topFactorErrors.map((f, i) => (
-                  <li
-                    key={f.factor}
-                    className="flex justify-between text-sm font-mono"
-                  >
-                    <span>
-                      <span className="text-gray-400 dark:text-gray-500 mr-2">{i + 1}.</span>
-                      {f.factor}
-                    </span>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      {f.error_count}회
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic">
-                집계 부족 — 사후 분석 경기가 쌓이면 표시됩니다
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                누적 적중률, 일자별 추이, 확신 구간, 팀별 성과, 팩터 분석까지 한 곳에서
               </p>
-            )}
+            </div>
           </div>
-        </div>
+        </Link>
       </section>
     </div>
   );

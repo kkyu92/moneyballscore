@@ -2,78 +2,115 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { AccuracyChart } from "@/components/dashboard/AccuracyChart";
+import { DailyAccuracyChart } from "@/components/dashboard/DailyAccuracyChart";
+import { ConfidenceBucketChart } from "@/components/dashboard/ConfidenceBucketChart";
 import { TeamPerformanceChart } from "@/components/dashboard/TeamPerformanceChart";
+import { FactorErrorTable, type FactorErrorRow } from "@/components/dashboard/FactorErrorTable";
+import { buildDailyAccuracy } from "@/lib/dashboard/buildDailyAccuracy";
+import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
+import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
 export const metadata: Metadata = {
   title: "대시보드",
-  description: "승부예측 시즌 적중률, 팀별 분석, 모델 성과 대시보드.",
+  description: "승부예측 시즌 적중률, 팩터별 편향, 확신 구간 분석 종합 대시보드.",
 };
 
-export const revalidate = 300;
+// verify는 매일 23:00 KST 1회 돌아서 5분 TTL은 과잉. /analysis와 맞춰 1시간으로.
+export const revalidate = 3600;
 
-async function getDashboardData() {
+const HIGH_CONF_THRESHOLD = 0.6;
+
+interface OverviewRow {
+  confidence: number;
+  is_correct: boolean;
+  game: { game_date: string } | null;
+  winner: { code: string; color_primary: string | null } | null;
+}
+
+async function getOverview(): Promise<OverviewRow[]> {
   const supabase = await createClient();
+  const { data } = await supabase
+    .from("predictions")
+    .select(
+      `
+        confidence, is_correct,
+        game:games!predictions_game_id_fkey(game_date),
+        winner:teams!predictions_predicted_winner_fkey(code, color_primary)
+      `,
+    )
+    .eq("prediction_type", "pre_game")
+    .match(CURRENT_MODEL_FILTER)
+    .not("is_correct", "is", null)
+    .order("game_id", { ascending: true });
 
-  // 검증된 예측 전체 가져오기
-  const { data: predictions } = await supabase
-    .from('predictions')
-    .select(`
-      is_correct, confidence, prediction_type,
-      game:games!predictions_game_id_fkey(
-        game_date,
-        home_team:teams!games_home_team_id_fkey(code, color_primary),
-        away_team:teams!games_away_team_id_fkey(code, color_primary)
-      ),
-      winner:teams!predictions_predicted_winner_fkey(code)
-    `)
-    .eq('prediction_type', 'pre_game')
-    .not('is_correct', 'is', null)
-    .order('game_id', { ascending: true });
+  return (data ?? []) as unknown as OverviewRow[];
+}
 
-  return predictions || [];
+async function getFactorErrors(): Promise<FactorErrorRow[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("factor_error_summary")
+    .select("factor, error_count, avg_bias")
+    .gte("error_count", 2)
+    .order("error_count", { ascending: false })
+    .limit(5);
+
+  return (data ?? []) as FactorErrorRow[];
+}
+
+async function getTotalPredCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("predictions")
+    .select("id", { count: "exact", head: true })
+    .eq("prediction_type", "pre_game")
+    .match(CURRENT_MODEL_FILTER);
+
+  return count ?? 0;
 }
 
 export default async function DashboardPage() {
-  const predictions = await getDashboardData();
+  const [overview, factorErrors, totalPredCount] = await Promise.all([
+    getOverview(),
+    getFactorErrors(),
+    getTotalPredCount(),
+  ]);
 
-  // 시즌 전체 통계
-  const total = predictions.length;
-  const correct = predictions.filter((p: any) => p.is_correct).length;
+  const total = overview.length;
+  const correct = overview.filter((p) => p.is_correct).length;
   const rate = total > 0 ? correct / total : 0;
-  const highConf = predictions.filter((p: any) => p.confidence >= 0.4);
-  const highConfCorrect = highConf.filter((p: any) => p.is_correct).length;
+
+  const highConf = overview.filter((p) => p.confidence >= HIGH_CONF_THRESHOLD);
+  const highConfCorrect = highConf.filter((p) => p.is_correct).length;
   const highConfRate = highConf.length > 0 ? highConfCorrect / highConf.length : 0;
 
-  // 날짜별 적중률 (누적)
-  const dateMap = new Map<string, { correct: number; total: number }>();
-  for (const pred of predictions) {
-    const date = (pred as any).game?.game_date;
-    if (!date) continue;
-    if (!dateMap.has(date)) dateMap.set(date, { correct: 0, total: 0 });
-    const entry = dateMap.get(date)!;
-    entry.total++;
-    if ((pred as any).is_correct) entry.correct++;
-  }
+  // 누적 + 일자별 — 같은 {date, is_correct} 소스에서 파생
+  const dailyInputs = overview
+    .filter((p): p is OverviewRow & { game: { game_date: string } } => !!p.game)
+    .map((p) => ({ game_date: p.game.game_date, is_correct: p.is_correct }));
+  const dailyPoints = buildDailyAccuracy(dailyInputs);
 
   let cumCorrect = 0;
   let cumTotal = 0;
-  const accuracyData = Array.from(dateMap.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, stats]) => {
-      cumCorrect += stats.correct;
-      cumTotal += stats.total;
-      return {
-        date,
-        accuracy: Math.round((cumCorrect / cumTotal) * 1000) / 10,
-        total: cumTotal,
-      };
-    });
+  const cumulativeData = dailyPoints.map((pt) => {
+    cumCorrect += pt.correct;
+    cumTotal += pt.total;
+    return {
+      date: pt.date,
+      accuracy: Math.round((cumCorrect / cumTotal) * 1000) / 10,
+      total: cumTotal,
+    };
+  });
 
-  // 팀별 예측 적중률 (예측 승자 팀 기준)
+  const bucketResult = buildConfidenceBuckets(
+    overview.map((p) => ({ confidence: p.confidence, is_correct: p.is_correct })),
+  );
+
+  // 팀별 집계
   const teamMap = new Map<string, { correct: number; total: number; color: string }>();
-  for (const pred of predictions) {
-    const winnerCode = (pred as any).winner?.code as string;
+  for (const pred of overview) {
+    const winnerCode = pred.winner?.code;
     if (!winnerCode) continue;
 
     if (!teamMap.has(winnerCode)) {
@@ -81,16 +118,16 @@ export default async function DashboardPage() {
       teamMap.set(winnerCode, {
         correct: 0,
         total: 0,
-        color: teamInfo?.color || "#6b7280",
+        color: teamInfo?.color || pred.winner?.color_primary || "#6b7280",
       });
     }
     const entry = teamMap.get(winnerCode)!;
     entry.total++;
-    if ((pred as any).is_correct) entry.correct++;
+    if (pred.is_correct) entry.correct++;
   }
 
   const teamData = Array.from(teamMap.entries())
-    .filter(([_, stats]) => stats.total >= 3)
+    .filter(([, stats]) => stats.total >= 3)
     .map(([team, stats]) => ({
       team,
       accuracy: Math.round((stats.correct / stats.total) * 1000) / 10,
@@ -105,13 +142,28 @@ export default async function DashboardPage() {
         <p className="text-gray-500 dark:text-gray-400">2026 시즌 예측 성과 종합</p>
       </section>
 
+      {/* 모수 캡션 */}
+      <aside
+        className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-surface-card)] px-4 py-3 text-xs text-gray-600 dark:text-gray-400"
+        aria-label="성과 집계 모수 안내"
+      >
+        이 페이지의 모든 지표는{" "}
+        <span className="font-mono text-gray-700 dark:text-gray-200">
+          {CURRENT_DEBATE_VERSION}
+        </span>{" "}
+        토론 기반 예측만 집계합니다. 예측 총 {totalPredCount}경기 · 검증 완료 {total}경기.
+      </aside>
+
       {/* 요약 카드 */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <AccuracySummary total={total} correct={correct} rate={rate} highConfRate={highConfRate} />
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">총 예측</h3>
-          <span className="text-4xl font-bold">{total}</span>
+          <span className="text-4xl font-bold">{totalPredCount}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            검증 완료 {total}경기 · 대기 {Math.max(totalPredCount - total, 0)}경기
+          </p>
         </div>
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">고확신 적중</h3>
@@ -119,7 +171,7 @@ export default async function DashboardPage() {
             {highConf.length > 0 ? Math.round(highConfRate * 100) : 0}%
           </span>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            70%+ 확신 예측 ({highConfCorrect}/{highConf.length})
+            60%+ 확신 예측 ({highConfCorrect}/{highConf.length})
           </p>
         </div>
       </section>
@@ -127,13 +179,40 @@ export default async function DashboardPage() {
       {/* 적중률 추이 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-lg font-bold mb-4">누적 적중률 추이</h2>
-        <AccuracyChart data={accuracyData} />
+        <AccuracyChart data={cumulativeData} />
+      </section>
+
+      {/* 일자별 적중률 (비누적) */}
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+        <h2 className="text-lg font-bold mb-1">일자별 적중률</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          날짜별 그 날의 적중률만 집계 (누적 아님)
+        </p>
+        <DailyAccuracyChart data={dailyPoints} />
+      </section>
+
+      {/* 확신 구간별 */}
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+        <h2 className="text-lg font-bold mb-1">확신 구간별 적중률</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          AI가 더 자신 있게 예측한 구간이 실제로 잘 맞히는지 — 캘리브레이션 증거
+        </p>
+        <ConfidenceBucketChart result={bucketResult} />
       </section>
 
       {/* 팀별 성과 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-lg font-bold mb-4">팀별 예측 적중률</h2>
         <TeamPerformanceChart data={teamData} />
+      </section>
+
+      {/* 팩터 오답 Top 5 */}
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+        <h2 className="text-lg font-bold mb-1">가장 자주 틀린 팩터</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          사후 분석에서 편향이 컸던 팩터 Top 5 · 막대 길이는 평균 편향 크기
+        </p>
+        <FactorErrorTable rows={factorErrors} />
       </section>
     </div>
   );
