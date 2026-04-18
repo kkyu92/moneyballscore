@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.5.12] - 2026-04-18
+
+### Core Web Vitals 최적화 1단계
+
+**배경**: AdSense 심사 기술 요건 + SEO·체류시간에 CWV 직접 영향. 도메인 이전 전에 70+ 페이지 전체 자산에 적용해두어 기반 마련.
+
+**변경**:
+
+1. **Vercel Speed Insights 추가**: `@vercel/speed-insights` 설치 후 `layout.tsx`에 `<SpeedInsights />` 통합. 기존 `@vercel/analytics`와 병렬로 LCP/CLS/INP/FCP/TTFB 실시간 측정 + Vercel 대시보드에 자동 기록. 심사 대기 기간 동안 regression 감시 기반 마련.
+
+2. **Pretendard 폰트 self-hosting 전환**: 기존 `https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/...` 외부 CDN `<link>` 제거. `pretendard` npm 패키지 설치 + `globals.css`에서 `@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css"`. 효과:
+   - 외부 도메인 DNS 조회 + TLS handshake 제거 (LCP -100~300ms 예상)
+   - `as="style"` + `rel="stylesheet"` 잘못된 조합 제거
+   - 빌드 시 CSS 번들에 포함되어 FOUT/FOIT 감소
+   - 외부 CDN 장애에서 독립
+
+**미적용 (다음 단계 후보)**:
+
+- `next build` 번들 사이즈 세부 점검 → recharts 등 차트 라이브러리 dynamic import (현재는 'use client' 컴포넌트 5개만 사용 중이라 우선순위 낮음)
+- 큰 JSON-LD 인라인 (`/analysis/game/[id]` articleBody) 크기 최적화
+- a11y WCAG AA 보강
+
+### 검증
+
+- Test suite: 65/65 + kbo-data 173/173 · type-check 3/3 통과.
+- Dev server smoke: `/` HTML에서 CDN jsdelivr 링크 제거 확인, `speed-insights` 스크립트 주입 확인. `Ready in 233ms`.
+- `pnpm build` 28개 라우트 모두 성공.
+
 ## [0.5.11] - 2026-04-18
 
 ### 스크래퍼 안정성 (드리프트 사례 6 예방)
