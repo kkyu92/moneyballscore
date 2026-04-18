@@ -40,7 +40,7 @@ export default function SentryTestPage() {
   const triggerServerError = async () => {
     setServerStatus('서버 API 호출...');
     try {
-      const res = await fetch('/api/debug/sentry-test');
+      const res = await fetch('/api/sentry-test');
       if (res.ok) {
         const data = await res.json();
         setServerStatus(`서버 응답: ${JSON.stringify(data)}`);
