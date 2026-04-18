@@ -139,7 +139,8 @@ export async function syncBatterStats(
           player_id: playerId,
           season,
           war: b.war,
-          wrc_plus: b.wrcPlus,
+          // migration 001: wrc_plus INT. Fancy Stats는 소수점(178.2) 반환하므로 반올림.
+          wrc_plus: b.wrcPlus > 0 ? Math.round(b.wrcPlus) : null,
           ops: b.ops,
           last_synced: new Date().toISOString(),
         },
