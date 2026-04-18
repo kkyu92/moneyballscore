@@ -6,6 +6,7 @@ import { toKSTDateString, toKSTDisplayString, type TeamCode } from "@moneyball/s
 import { selectBigMatch, type BigMatchCandidate } from "@moneyball/kbo-data";
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
+import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import Link from "next/link";
 
 interface HomePrediction {
@@ -207,8 +208,8 @@ export default async function HomePage() {
       </section>
 
       {/* 예측 카드 목록 */}
-      <section>
-        <div className="flex justify-between items-center mb-4">
+      <section className="space-y-4">
+        <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">경기별 예측</h2>
           <Link
             href="/predictions"
@@ -217,6 +218,16 @@ export default async function HomePage() {
             전체 보기 →
           </Link>
         </div>
+
+        {games.length > 0 && (
+          <FavoriteTeamFilter
+            games={games.map((g) => ({
+              gameId: g.id,
+              homeCode: (g.home_team?.code as TeamCode) ?? null,
+              awayCode: (g.away_team?.code as TeamCode) ?? null,
+            }))}
+          />
+        )}
 
         {games.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -233,7 +244,7 @@ export default async function HomePage() {
                     : 1 - homeWinProbRaw
                   : undefined;
               return (
-                <div key={game.id}>
+                <div key={game.id} data-game-id={game.id}>
                   <PredictionCard
                     homeTeam={homeCode}
                     awayTeam={awayCode}
