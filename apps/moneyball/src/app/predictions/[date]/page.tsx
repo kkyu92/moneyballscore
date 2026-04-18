@@ -63,7 +63,52 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-async function getGamePredictions(date: string) {
+interface DatePrediction {
+  predicted_winner: number | null;
+  confidence: number;
+  prediction_type: string;
+  home_sp_fip: number | null;
+  away_sp_fip: number | null;
+  home_sp_xfip: number | null;
+  away_sp_xfip: number | null;
+  home_lineup_woba: number | null;
+  away_lineup_woba: number | null;
+  home_bullpen_fip: number | null;
+  away_bullpen_fip: number | null;
+  home_war_total: number | null;
+  away_war_total: number | null;
+  home_recent_form: number | null;
+  away_recent_form: number | null;
+  head_to_head_rate: number | null;
+  park_factor: number | null;
+  home_elo: number | null;
+  away_elo: number | null;
+  home_sfr: number | null;
+  away_sfr: number | null;
+  is_correct: boolean | null;
+  actual_winner: number | null;
+  factors: Record<string, number> | null;
+  model_version: string | null;
+  reasoning: { debate?: { verdict?: Verdict } } | null;
+  winner: { code: string | null } | null;
+}
+
+interface DateGame {
+  id: number;
+  game_date: string;
+  game_time: string | null;
+  stadium: string | null;
+  status: string | null;
+  home_score: number | null;
+  away_score: number | null;
+  home_team: { code: string | null; name_ko: string | null } | null;
+  away_team: { code: string | null; name_ko: string | null } | null;
+  home_sp: { name_ko: string | null } | null;
+  away_sp: { name_ko: string | null } | null;
+  predictions: DatePrediction[];
+}
+
+async function getGamePredictions(date: string): Promise<DateGame[]> {
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -94,7 +139,7 @@ async function getGamePredictions(date: string) {
     .eq("predictions.prediction_type", "pre_game")
     .order("game_time");
 
-  return data || [];
+  return (data ?? []) as unknown as DateGame[];
 }
 
 export const revalidate = 300;
@@ -108,8 +153,13 @@ function formatTeamName(code: TeamCode | undefined): string {
  * 페이지 상단에 노출되는 AI 자동 생성 intro 한 줄.
  * 검증 완료 vs 예정 상태를 구분해서 적절한 프레이밍 제공.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildIntro(date: string, games: any[], predicted: any[], verified: any[], correct: any[]): string {
+function buildIntro(
+  date: string,
+  games: DateGame[],
+  predicted: DateGame[],
+  verified: DateGame[],
+  correct: DateGame[],
+): string {
   const n = games.length;
   if (n === 0) return `${date} KBO 예측 데이터가 없습니다.`;
 
@@ -146,8 +196,13 @@ function buildIntro(date: string, games: any[], predicted: any[], verified: any[
   return `${date} KBO ${predicted.length}경기 승부예측${tightestPhrase ? `. AI가 꼽은 가장 박빙 매치업은 ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}. 각 경기마다 10개 팩터 분석과 심판 에이전트 reasoning을 제공합니다.`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildArticleJsonLd(date: string, games: any[], predicted: any[], verified: any[], correct: any[]) {
+function buildArticleJsonLd(
+  date: string,
+  games: DateGame[],
+  predicted: DateGame[],
+  verified: DateGame[],
+  correct: DateGame[],
+) {
   const url = `${SITE_URL}/predictions/${date}`;
   const rate = verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : null;
   const n = games.length;
@@ -186,8 +241,7 @@ function buildArticleJsonLd(date: string, games: any[], predicted: any[], verifi
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildSportsEventJsonLd(game: any, date: string) {
+function buildSportsEventJsonLd(game: DateGame, date: string) {
   const homeTeam = formatTeamName(game.home_team?.code as TeamCode);
   const awayTeam = formatTeamName(game.away_team?.code as TeamCode);
   const gameTime = game.game_time ?? "18:30";
@@ -224,12 +278,9 @@ export default async function PredictionDatePage({ params }: Props) {
 
   // predictions 배열이 비어 있으면 is_correct 값이 undefined → !== null 로는 걸러지지 않음.
   // pred 존재 + is_correct 값이 명시적으로 true/false 인 경우만 verified.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const predicted = games.filter((g: any) => !!g.predictions?.[0]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const verified = predicted.filter((g: any) => g.predictions[0].is_correct != null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const correct = verified.filter((g: any) => g.predictions[0].is_correct === true);
+  const predicted = games.filter((g) => !!g.predictions?.[0]);
+  const verified = predicted.filter((g) => g.predictions[0].is_correct != null);
+  const correct = verified.filter((g) => g.predictions[0].is_correct === true);
 
   const intro = buildIntro(date, games, predicted, verified, correct);
   const articleJsonLd = buildArticleJsonLd(date, games, predicted, verified, correct);
@@ -267,8 +318,7 @@ export default async function PredictionDatePage({ params }: Props) {
 
       {games.length > 0 ? (
         <div className="space-y-6">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {games.map((game: any) => {
+          {games.map((game) => {
             const pred = game.predictions?.[0];
             if (!pred) return null;
             const homeCode = game.home_team?.code as TeamCode;
@@ -295,12 +345,12 @@ export default async function PredictionDatePage({ params }: Props) {
                   awayTeam={awayCode}
                   confidence={pred.confidence}
                   predictedWinner={pred.winner?.code as TeamCode}
-                  homeSPName={game.home_sp?.name_ko}
-                  awaySPName={game.away_sp?.name_ko}
-                  homeSPFip={pred.home_sp_fip}
-                  awaySPFip={pred.away_sp_fip}
-                  homeWoba={pred.home_lineup_woba}
-                  awayWoba={pred.away_lineup_woba}
+                  homeSPName={game.home_sp?.name_ko ?? undefined}
+                  awaySPName={game.away_sp?.name_ko ?? undefined}
+                  homeSPFip={pred.home_sp_fip ?? undefined}
+                  awaySPFip={pred.away_sp_fip ?? undefined}
+                  homeWoba={pred.home_lineup_woba ?? undefined}
+                  awayWoba={pred.away_lineup_woba ?? undefined}
                   gameTime={game.game_time?.slice(0, 5)}
                   isCorrect={pred.is_correct}
                   homeScore={game.home_score}
@@ -325,24 +375,24 @@ export default async function PredictionDatePage({ params }: Props) {
                     homeTeam={homeCode}
                     awayTeam={awayCode}
                     details={{
-                      homeSPFip: pred.home_sp_fip,
-                      awaySPFip: pred.away_sp_fip,
-                      homeSPxFip: pred.home_sp_xfip,
-                      awaySPxFip: pred.away_sp_xfip,
-                      homeWoba: pred.home_lineup_woba,
-                      awayWoba: pred.away_lineup_woba,
-                      homeBullpenFip: pred.home_bullpen_fip,
-                      awayBullpenFip: pred.away_bullpen_fip,
-                      homeWar: pred.home_war_total,
-                      awayWar: pred.away_war_total,
-                      homeForm: pred.home_recent_form,
-                      awayForm: pred.away_recent_form,
-                      h2hRate: pred.head_to_head_rate,
-                      parkFactor: pred.park_factor,
-                      homeElo: pred.home_elo,
-                      awayElo: pred.away_elo,
-                      homeSfr: pred.home_sfr,
-                      awaySfr: pred.away_sfr,
+                      homeSPFip: pred.home_sp_fip ?? undefined,
+                      awaySPFip: pred.away_sp_fip ?? undefined,
+                      homeSPxFip: pred.home_sp_xfip ?? undefined,
+                      awaySPxFip: pred.away_sp_xfip ?? undefined,
+                      homeWoba: pred.home_lineup_woba ?? undefined,
+                      awayWoba: pred.away_lineup_woba ?? undefined,
+                      homeBullpenFip: pred.home_bullpen_fip ?? undefined,
+                      awayBullpenFip: pred.away_bullpen_fip ?? undefined,
+                      homeWar: pred.home_war_total ?? undefined,
+                      awayWar: pred.away_war_total ?? undefined,
+                      homeForm: pred.home_recent_form ?? undefined,
+                      awayForm: pred.away_recent_form ?? undefined,
+                      h2hRate: pred.head_to_head_rate ?? undefined,
+                      parkFactor: pred.park_factor ?? undefined,
+                      homeElo: pred.home_elo ?? undefined,
+                      awayElo: pred.away_elo ?? undefined,
+                      homeSfr: pred.home_sfr ?? undefined,
+                      awaySfr: pred.away_sfr ?? undefined,
                     }}
                   />
                 )}

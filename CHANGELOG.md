@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.17] - 2026-04-19
+
+### 타입 안전성 + a11y 개선
+
+**기술 부채 — `any` 타입 전면 제거**:
+- 스캔 결과 29개 `any` 위치 중 표준 컴포넌트 경로 전부 구체 타입으로 교체.
+- 각 페이지에 Supabase query shape을 interface로 선언 + `as unknown as <T>` 한 번으로 캐스팅. 이후 접근은 타입 추론.
+- `/` (홈), `/analysis/game/[id]`, `/predictions/[date]`, `/predictions/[date]/opengraph-image`, `/analysis`, `/reviews`, `/feed`, `TeamPerformanceChart` 모두 정리.
+- `eslint-disable` 주석 10+개 제거. `PreGamePrediction` / `PostGamePrediction` discriminated union으로 predictions 배열 타입 안전하게 분기.
+
+**접근성 (a11y) 개선**:
+- **Skip-to-main 링크**: `<body>` 최상단에 "본문 바로가기" 링크. 포커스 시에만 시각적으로 표시 (`sr-only → focus:not-sr-only`). 키보드 사용자가 네비 반복 없이 메인 콘텐츠로 바로 이동.
+- **`<main id="main" tabIndex={-1}>`**: skip 링크 타겟으로 포커스 수신 가능.
+- **전역 focus-visible 스타일**: `a, button, [role="button"], input, select, textarea, summary`에 일관된 outline. 기존 각 컴포넌트별 스타일보다 예측 가능.
+- **`prefers-reduced-motion` 지원**: 사용자 시스템 설정 존중. WCAG 2.3.3 Animation from Interactions.
+
+### 검증
+
+- Test suite: 86/86 · kbo-data 173/173 · type-check 3/3 통과.
+- eslint: `no-explicit-any` 규칙 위반 0건 (주석 포함).
+
 ## [0.5.16] - 2026-04-19
 
 ### 소셜 공유 버튼

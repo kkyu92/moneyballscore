@@ -17,6 +17,84 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+interface DebateVerdict {
+  homeWinProb: number;
+  confidence: number;
+  predictedWinner: TeamCode;
+  reasoning: string;
+  calibrationApplied: string | null;
+}
+
+interface DebateArgument {
+  confidence: number;
+  keyFactor: string;
+  strengths?: string[];
+  opponentWeaknesses?: string[];
+  reasoning: string;
+}
+
+interface DebateCalibration {
+  recentBias: string | null;
+  teamSpecific: string | null;
+  modelWeakness: string | null;
+  adjustmentSuggestion: number;
+}
+
+interface PreGamePrediction {
+  prediction_type: 'pre_game';
+  predicted_winner: number | null;
+  confidence: number;
+  reasoning: { debate?: { verdict?: DebateVerdict; homeArgument?: DebateArgument; awayArgument?: DebateArgument; calibration?: DebateCalibration } } | null;
+  factors: Record<string, number> | null;
+  is_correct: boolean | null;
+  model_version: string | null;
+  debate_version: string | null;
+  home_sp_fip: number | null;
+  away_sp_fip: number | null;
+  home_sp_xfip: number | null;
+  away_sp_xfip: number | null;
+  home_lineup_woba: number | null;
+  away_lineup_woba: number | null;
+  home_bullpen_fip: number | null;
+  away_bullpen_fip: number | null;
+  home_war_total: number | null;
+  away_war_total: number | null;
+  home_recent_form: number | null;
+  away_recent_form: number | null;
+  head_to_head_rate: number | null;
+  park_factor: number | null;
+  home_elo: number | null;
+  away_elo: number | null;
+  home_sfr: number | null;
+  away_sfr: number | null;
+}
+
+interface PostGamePrediction {
+  prediction_type: 'post_game';
+  reasoning: {
+    judgeReasoning?: string;
+    factorErrors?: Array<{ factor: string; predictedBias: number; diagnosis?: string }>;
+    homePostview?: { summary: string; keyFactor: string; missedBy: string };
+    awayPostview?: { summary: string; keyFactor: string; missedBy: string };
+  } | null;
+}
+
+type AnyPrediction = PreGamePrediction | PostGamePrediction;
+
+interface GameAnalysisRow {
+  id: number;
+  game_date: string;
+  game_time: string | null;
+  stadium: string | null;
+  status: string | null;
+  home_score: number | null;
+  away_score: number | null;
+  home_team: { code: string | null; name_ko: string | null } | null;
+  away_team: { code: string | null; name_ko: string | null } | null;
+  winner: { code: string | null } | null;
+  predictions: AnyPrediction[] | null;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const gameId = parseInt(id, 10);
@@ -25,12 +103,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const game = await getGameAnalysis(gameId);
   if (!game) return {};
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const g = game as any;
-  const home = KBO_TEAMS[g.home_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
-  const away = KBO_TEAMS[g.away_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
-  const title = `${away} vs ${home} AI 분석 — ${g.game_date}`;
-  const description = `${g.game_date} ${away} vs ${home} 세이버메트릭스 기반 AI 승부예측 분석. FIP, wOBA, Elo 등 10팩터 정량 모델 + 에이전트 토론.`;
+  const home = KBO_TEAMS[game.home_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
+  const away = KBO_TEAMS[game.away_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
+  const title = `${away} vs ${home} AI 분석 — ${game.game_date}`;
+  const description = `${game.game_date} ${away} vs ${home} 세이버메트릭스 기반 AI 승부예측 분석. FIP, wOBA, Elo 등 10팩터 정량 모델 + 에이전트 토론.`;
 
   return {
     title,
@@ -39,7 +115,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-async function getGameAnalysis(gameId: number) {
+async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> {
   const supabase = await createClient();
 
   const { data: game } = await supabase
@@ -65,20 +141,7 @@ async function getGameAnalysis(gameId: number) {
     .eq('id', gameId)
     .maybeSingle();
 
-  return game;
-}
-
-// Shape of reasoning.debate JSONB (v4-2 이후 구조)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseDebate(reasoning: any) {
-  const debate = reasoning?.debate;
-  if (!debate) return null;
-  return {
-    homeArgument: debate.homeArgument,
-    awayArgument: debate.awayArgument,
-    calibration: debate.calibration,
-    verdict: debate.verdict,
-  };
+  return (game ?? null) as unknown as GameAnalysisRow | null;
 }
 
 export default async function GameAnalysisPage({ params }: PageProps) {
@@ -88,8 +151,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     notFound();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const game = (await getGameAnalysis(gameId)) as any;
+  const game = await getGameAnalysis(gameId);
   if (!game) {
     notFound();
   }
@@ -100,11 +162,12 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     notFound();
   }
 
-  // pre_game / post_game 분리
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const preGame = game.predictions?.find((p: any) => p.prediction_type === 'pre_game');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postGame = game.predictions?.find((p: any) => p.prediction_type === 'post_game');
+  const preGame = game.predictions?.find(
+    (p): p is PreGamePrediction => p.prediction_type === 'pre_game',
+  );
+  const postGame = game.predictions?.find(
+    (p): p is PostGamePrediction => p.prediction_type === 'post_game',
+  );
 
   if (!preGame) {
     return (
@@ -117,7 +180,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     );
   }
 
-  const debate = parseDebate(preGame.reasoning);
+  const debate = preGame.reasoning?.debate ?? null;
   const verdict = debate?.verdict;
   const homeArg = debate?.homeArgument;
   const awayArg = debate?.awayArgument;
@@ -128,15 +191,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   const homeScore = game.home_score;
   const awayScore = game.away_score;
 
-  // Postview 데이터 파싱
-  const postReasoning = postGame?.reasoning as
-    | {
-        judgeReasoning?: string;
-        factorErrors?: Array<{ factor: string; predictedBias: number; diagnosis?: string }>;
-        homePostview?: { summary: string; keyFactor: string; missedBy: string };
-        awayPostview?: { summary: string; keyFactor: string; missedBy: string };
-      }
-    | null;
+  const postReasoning = postGame?.reasoning ?? null;
 
   const homeName = KBO_TEAMS[homeTeam].name.split(' ')[0];
   const awayName = KBO_TEAMS[awayTeam].name.split(' ')[0];

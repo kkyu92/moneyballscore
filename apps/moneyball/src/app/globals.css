@@ -42,3 +42,22 @@
   --color-border: #1e2b23;
   color-scheme: dark;
 }
+
+/* a11y — 일관된 focus-visible 스타일. 키보드 사용자에게 명확한 시각 피드백. */
+:where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* a11y — reduced motion 지원 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -12,7 +12,24 @@ export const metadata: Metadata = {
 
 export const revalidate = 600;
 
-async function getVerifiedPredictions() {
+interface VerifiedPredictionRow {
+  confidence: number;
+  is_correct: boolean | null;
+  prediction_type: string;
+  predicted_winner_team: { code: string | null; name_ko: string | null } | null;
+  game: {
+    id: number;
+    game_date: string;
+    game_time: string | null;
+    home_score: number | null;
+    away_score: number | null;
+    status: string | null;
+    home_team: { code: string | null; name_ko: string | null } | null;
+    away_team: { code: string | null; name_ko: string | null } | null;
+  } | null;
+}
+
+async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -31,7 +48,7 @@ async function getVerifiedPredictions() {
     .order('created_at', { ascending: false })
     .limit(100);
 
-  return data ?? [];
+  return (data ?? []) as unknown as VerifiedPredictionRow[];
 }
 
 export default async function ReviewsPage() {
@@ -153,7 +170,7 @@ export default async function ReviewsPage() {
 
           {/* 경기 목록 */}
           <div className="space-y-3">
-            {predictions.map((pred: any, i: number) => {
+            {predictions.map((pred, i) => {
               const game = pred.game;
               if (!game) return null;
               const homeCode = game.home_team?.code as TeamCode;

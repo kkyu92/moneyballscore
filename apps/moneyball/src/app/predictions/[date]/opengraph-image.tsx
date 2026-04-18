@@ -23,12 +23,22 @@ async function getStats(date: string) {
       .eq("game_date", date)
       .eq("predictions.prediction_type", "pre_game");
 
-    const games = data ?? [];
+    interface StatsRow {
+      id: number;
+      predictions: Array<{
+        confidence: number;
+        is_correct: boolean | null;
+        prediction_type: string;
+      }>;
+    }
+    const games = (data ?? []) as unknown as StatsRow[];
     const n = games.length;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const verified = games.filter((g: any) => g.predictions?.[0]?.is_correct !== null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const correct = verified.filter((g: any) => g.predictions?.[0]?.is_correct);
+    const verified = games.filter(
+      (g) => g.predictions?.[0]?.is_correct !== null,
+    );
+    const correct = verified.filter(
+      (g) => g.predictions?.[0]?.is_correct === true,
+    );
     const rate = verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : null;
 
     return { n, verifiedN: verified.length, correctN: correct.length, rate };

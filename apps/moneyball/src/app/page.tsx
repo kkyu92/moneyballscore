@@ -2,20 +2,65 @@ import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
-import { toKSTDateString, toKSTDisplayString, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { toKSTDateString, toKSTDisplayString, type TeamCode } from "@moneyball/shared";
 import { selectBigMatch, type BigMatchCandidate } from "@moneyball/kbo-data";
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
+interface HomePrediction {
+  predicted_winner: number | null;
+  confidence: number;
+  prediction_type: string;
+  reasoning: { debate?: HomeDebate; homeWinProb?: number } | null;
+  home_sp_fip: number | null;
+  away_sp_fip: number | null;
+  home_lineup_woba: number | null;
+  away_lineup_woba: number | null;
+  home_elo?: number | null;
+  away_elo?: number | null;
+  home_recent_form?: number | null;
+  away_recent_form?: number | null;
+  is_correct: boolean | null;
+  actual_winner: number | null;
+  factors: Record<string, number> | null;
+  model_version: string | null;
+  winner: { code: string | null } | null;
+}
+
+interface HomeDebate {
+  verdict?: {
+    homeWinProb?: number;
+    predictedWinner?: string;
+    reasoning?: string;
+  };
+  homeArgument?: { confidence?: number; keyFactor?: string };
+  awayArgument?: { confidence?: number; keyFactor?: string };
+}
+
+interface HomeGame {
+  id: number;
+  game_date: string;
+  game_time: string | null;
+  stadium: string | null;
+  status: string | null;
+  home_score: number | null;
+  away_score: number | null;
+  external_game_id: string | null;
+  home_team: { code: string | null; name_ko: string | null } | null;
+  away_team: { code: string | null; name_ko: string | null } | null;
+  home_sp: { name_ko: string | null } | null;
+  away_sp: { name_ko: string | null } | null;
+  predictions: HomePrediction[];
+}
+
 // v4-4: 10분 ISR (Eng 리뷰 P3)
 export const revalidate = 600;
 
-async function getTodayPredictions() {
+async function getTodayPredictions(): Promise<HomeGame[]> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  // 오늘 경기 + 예측 조인
   const { data: games } = await supabase
     .from('games')
     .select(`
@@ -36,7 +81,7 @@ async function getTodayPredictions() {
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_time');
 
-  return games || [];
+  return (games ?? []) as unknown as HomeGame[];
 }
 
 async function getSeasonAccuracy() {
@@ -65,19 +110,23 @@ async function getSeasonAccuracy() {
   };
 }
 
-// v4-4: 빅매치 선정 (flag enabled 시에만)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function selectBigMatchFromGames(games: any[]) {
+function selectBigMatchFromGames(games: HomeGame[]): {
+  bigMatch: HomeGame | null;
+  result: ReturnType<typeof selectBigMatch> | null;
+} {
   if (!isBigMatchEnabled()) return { bigMatch: null, result: null };
 
   const candidates: BigMatchCandidate[] = [];
   for (const game of games) {
     const pred = game.predictions?.[0];
     if (!pred) continue;
+    const homeCode = game.home_team?.code as TeamCode | undefined;
+    const awayCode = game.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
     candidates.push({
       gameId: game.id,
-      homeTeam: game.home_team?.code,
-      awayTeam: game.away_team?.code,
+      homeTeam: homeCode,
+      awayTeam: awayCode,
       homeElo: pred.home_elo ?? 1500,
       awayElo: pred.away_elo ?? 1500,
       homeRecentForm: pred.home_recent_form ?? 0.5,
@@ -88,7 +137,7 @@ function selectBigMatchFromGames(games: any[]) {
 
   const result = selectBigMatch(candidates);
   const bigMatch = result.bigMatchGameId
-    ? games.find((g) => g.id === result.bigMatchGameId)
+    ? (games.find((g) => g.id === result.bigMatchGameId) ?? null)
     : null;
   return { bigMatch, result };
 }
@@ -100,15 +149,11 @@ export default async function HomePage() {
     getSeasonAccuracy(),
   ]);
 
-  // v4-4: 빅매치 선정 (flag enabled 시)
   const { bigMatch } = selectBigMatchFromGames(games);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bigMatchPred = (bigMatch as any)?.predictions?.[0];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bigMatchDebate = (bigMatchPred?.reasoning as any)?.debate;
+  const bigMatchPred = bigMatch?.predictions?.[0];
+  const bigMatchDebate = bigMatchPred?.reasoning?.debate;
   const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bigMatchId = (bigMatch as any)?.id;
+  const bigMatchId = bigMatch?.id;
 
   return (
     <div className="space-y-8">
@@ -118,15 +163,12 @@ export default async function HomePage() {
       {/* v4-4 빅매치 Hero (flag enabled + 데이터 있을 때) */}
       {hasBigMatchHero ? (
         <BigMatchDebateCard
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          gameId={(bigMatch as any).id}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          homeTeam={(bigMatch as any).home_team?.code as TeamCode}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          awayTeam={(bigMatch as any).away_team?.code as TeamCode}
-          homeWinProb={bigMatchDebate.verdict.homeWinProb ?? 0.5}
-          predictedWinner={bigMatchDebate.verdict.predictedWinner as TeamCode}
-          reasoning={bigMatchDebate.verdict.reasoning ?? ''}
+          gameId={bigMatch.id}
+          homeTeam={bigMatch.home_team?.code as TeamCode}
+          awayTeam={bigMatch.away_team?.code as TeamCode}
+          homeWinProb={bigMatchDebate.verdict?.homeWinProb ?? 0.5}
+          predictedWinner={bigMatchDebate.verdict?.predictedWinner as TeamCode}
+          reasoning={bigMatchDebate.verdict?.reasoning ?? ''}
           homeConfidence={bigMatchDebate.homeArgument?.confidence}
           awayConfidence={bigMatchDebate.awayArgument?.confidence}
           homeKeyFactor={bigMatchDebate.homeArgument?.keyFactor}
@@ -178,11 +220,18 @@ export default async function HomePage() {
 
         {games.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {games.map((game: any) => {
+            {games.map((game) => {
               const pred = game.predictions?.[0];
               if (!pred) return null;
               const homeCode = game.home_team?.code as TeamCode;
               const awayCode = game.away_team?.code as TeamCode;
+              const homeWinProbRaw = pred.reasoning?.homeWinProb;
+              const winProb =
+                homeWinProbRaw != null
+                  ? pred.winner?.code === homeCode
+                    ? homeWinProbRaw
+                    : 1 - homeWinProbRaw
+                  : undefined;
               return (
                 <div key={game.id}>
                   <PredictionCard
@@ -190,21 +239,17 @@ export default async function HomePage() {
                     awayTeam={awayCode}
                     confidence={pred.confidence}
                     predictedWinner={pred.winner?.code as TeamCode}
-                    homeSPName={game.home_sp?.name_ko}
-                    awaySPName={game.away_sp?.name_ko}
-                    homeSPFip={pred.home_sp_fip}
-                    awaySPFip={pred.away_sp_fip}
-                    homeWoba={pred.home_lineup_woba}
-                    awayWoba={pred.away_lineup_woba}
+                    homeSPName={game.home_sp?.name_ko ?? undefined}
+                    awaySPName={game.away_sp?.name_ko ?? undefined}
+                    homeSPFip={pred.home_sp_fip ?? undefined}
+                    awaySPFip={pred.away_sp_fip ?? undefined}
+                    homeWoba={pred.home_lineup_woba ?? undefined}
+                    awayWoba={pred.away_lineup_woba ?? undefined}
                     gameTime={game.game_time?.slice(0, 5)}
                     isCorrect={pred.is_correct}
                     homeScore={game.home_score}
                     awayScore={game.away_score}
-                    winProb={(pred.reasoning as any)?.homeWinProb != null
-                      ? (pred.winner?.code === homeCode
-                        ? (pred.reasoning as any).homeWinProb
-                        : 1 - (pred.reasoning as any).homeWinProb)
-                      : undefined}
+                    winProb={winProb}
                     gameId={game.id}
                     isBigMatch={game.id === bigMatchId}
                   />

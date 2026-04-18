@@ -50,10 +50,13 @@ export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          formatter={(value, _name, props) => [
-            `${Number(value).toFixed(1)}% (${(props as any).payload?.total ?? 0}경기)`,
-            "적중률",
-          ]}
+          formatter={(value, _name, props) => {
+            const payload = (props as { payload?: { total?: number } }).payload;
+            return [
+              `${Number(value).toFixed(1)}% (${payload?.total ?? 0}경기)`,
+              "적중률",
+            ];
+          }}
         />
         <ReferenceLine y={50} stroke="#ef4444" strokeDasharray="4 4" />
         <Bar dataKey="accuracy" radius={[4, 4, 0, 0]}>

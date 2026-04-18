@@ -70,7 +70,26 @@ export async function GET() {
       <pubDate>${missesPubDate}</pubDate>
     </item>`);
 
-  const items = (games ?? []).map((game: any) => {
+  interface FeedGameRow {
+    id: number;
+    game_date: string;
+    game_time: string | null;
+    status: string | null;
+    home_score: number | null;
+    away_score: number | null;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+    predictions: Array<{
+      predicted_winner: number | null;
+      confidence: number;
+      prediction_type: string;
+      is_correct: boolean | null;
+      winner: { code: string | null; name_ko: string | null } | null;
+    }>;
+  }
+  const feedGames = (games ?? []) as unknown as FeedGameRow[];
+
+  const items = feedGames.map((game) => {
     const pred = game.predictions?.[0];
     if (!pred) return null;
 

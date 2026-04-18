@@ -27,16 +27,32 @@ async function getTodayBigMatch() {
 
   if (!games) return { bigMatchId: null, candidates: 0 };
 
+  interface BigMatchRow {
+    id: number;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+    predictions: Array<{
+      confidence: number;
+      home_elo: number | null;
+      away_elo: number | null;
+      home_recent_form: number | null;
+      away_recent_form: number | null;
+      prediction_type: string;
+    }>;
+  }
+
+  const rows = games as unknown as BigMatchRow[];
   const candidates: BigMatchCandidate[] = [];
-  for (const g of games) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const game = g as any;
+  for (const game of rows) {
     const pred = game.predictions?.[0];
     if (!pred) continue;
+    const homeCode = game.home_team?.code as TeamCode | undefined;
+    const awayCode = game.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
     candidates.push({
       gameId: game.id,
-      homeTeam: game.home_team?.code,
-      awayTeam: game.away_team?.code,
+      homeTeam: homeCode,
+      awayTeam: awayCode,
       homeElo: pred.home_elo ?? 1500,
       awayElo: pred.away_elo ?? 1500,
       homeRecentForm: pred.home_recent_form ?? 0.5,

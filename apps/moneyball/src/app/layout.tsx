@@ -82,6 +82,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-surface text-gray-900 dark:text-gray-100">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-md focus:shadow-lg"
+        >
+          본문 바로가기
+        </a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -102,7 +108,11 @@ export default function RootLayout({
         />
         <ThemeProvider>
           <Header />
-          <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
+          <main
+            id="main"
+            tabIndex={-1}
+            className="flex-1 w-full max-w-6xl mx-auto px-4 py-8 focus:outline-none"
+          >
             {children}
           </main>
           <Footer />
