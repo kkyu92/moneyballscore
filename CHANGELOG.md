@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.16] - 2026-04-19
+
+### 소셜 공유 버튼
+
+**변경**:
+- **`ShareButtons` 컴포넌트** (client): Web Share API (모바일 네이티브) + Twitter / Facebook intent + 링크 복사. 사용자 취소(AbortError) 무시 + clipboard 실패 방어. 아이콘 inline SVG (외부 아이콘 라이브러리 의존성 없음).
+- **6개 콘텐츠 페이지 footer 통합**: `/analysis/game/[id]`, `/predictions/[date]`, `/reviews/weekly/[week]`, `/reviews/monthly/[month]`, `/reviews/misses`, `/matchup/[a]/[b]`. 각 페이지마다 제목·설명 자동 생성 (자동 요약·날짜·팀명 기반).
+
+**의도**: 독자가 쉽게 공유할 경로 확보. AdSense 심사엔 직접 영향 없지만 유기적 유입 경로 확장.
+
+### 검증
+
+- Test suite: 86/86 · kbo-data 173/173 · type-check 3/3 통과.
+
 ## [0.5.15] - 2026-04-19
 
 ### Head-to-head 매치업 페이지 — +45 엔티티 페이지

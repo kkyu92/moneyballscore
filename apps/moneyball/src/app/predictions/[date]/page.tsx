@@ -4,6 +4,7 @@ import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
+import { ShareButtons } from "@/components/share/ShareButtons";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
 interface Props {
@@ -361,6 +362,16 @@ export default async function PredictionDatePage({ params }: Props) {
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-8 text-center text-gray-400 dark:text-gray-500">
           <p className="text-lg">{date}의 예측 데이터가 없습니다.</p>
         </div>
+      )}
+
+      {predicted.length > 0 && (
+        <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+          <ShareButtons
+            url={`${SITE_URL}/predictions/${date}`}
+            title={`${date} KBO 승부예측`}
+            text={`${date} ${predicted.length}경기 AI 예측 — 적중률 ${verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : "집계중"}${verified.length > 0 ? "%" : ""}`}
+          />
+        </footer>
       )}
     </article>
   );

@@ -7,6 +7,7 @@ import {
   buildWeeklyReview,
   type WeeklyHighlight,
 } from "@/lib/reviews/buildWeeklyReview";
+import { ShareButtons } from "@/components/share/ShareButtons";
 
 export const revalidate = 1800;
 
@@ -306,6 +307,14 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={url}
+          title={`${range.label} 주간 리뷰`}
+          text={review.summary}
+        />
+      </footer>
     </article>
   );
 }

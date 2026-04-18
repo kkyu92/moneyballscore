@@ -7,6 +7,7 @@ import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
 import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnalysis';
 import { GameOverview } from '@/components/analysis/GameOverview';
+import { ShareButtons } from '@/components/share/ShareButtons';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 
@@ -358,6 +359,14 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           judgeReasoning={postReasoning.judgeReasoning ?? ''}
         />
       )}
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={`https://moneyballscore.vercel.app/analysis/game/${gameId}`}
+          title={`${awayName} vs ${homeName} AI 승부예측 분석`}
+          text={`${gameDate} ${awayName} vs ${homeName} 세이버메트릭스 기반 AI 분석`}
+        />
+      </footer>
     </article>
   );
 }

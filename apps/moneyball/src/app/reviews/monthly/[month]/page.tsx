@@ -8,6 +8,7 @@ import {
 } from "@/lib/reviews/computeMonthRange";
 import { buildMonthlyReview } from "@/lib/reviews/buildMonthlyReview";
 import type { WeeklyHighlight } from "@/lib/reviews/buildWeeklyReview";
+import { ShareButtons } from "@/components/share/ShareButtons";
 
 export const revalidate = 3600;
 
@@ -346,6 +347,14 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={url}
+          title={`${range.label} 월간 리뷰`}
+          text={review.summary}
+        />
+      </footer>
     </article>
   );
 }

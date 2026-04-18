@@ -7,6 +7,7 @@ import {
   pairsForTeam,
 } from "@/lib/matchup/canonicalPair";
 import { buildMatchupProfile } from "@/lib/matchup/buildMatchupProfile";
+import { ShareButtons } from "@/components/share/ShareButtons";
 
 export const revalidate = 3600;
 
@@ -306,6 +307,14 @@ export default async function MatchupPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={`${SITE_URL}${pair.path}`}
+          title={`${tA.shortName} vs ${tB.shortName} 상대전적 & 예측 성과`}
+          text={profile.summary}
+        />
+      </footer>
     </article>
   );
 }

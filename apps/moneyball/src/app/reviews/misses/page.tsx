@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KBO_TEAMS } from "@moneyball/shared";
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
+import { ShareButtons } from "@/components/share/ShareButtons";
 
 export const metadata: Metadata = {
   title: "회고: 크게 빗나간 예측",
@@ -209,6 +210,14 @@ export default async function MissesReviewPage() {
           })}
         </div>
       )}
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={`${SITE_URL}/reviews/misses`}
+          title="회고: 크게 빗나간 예측 Top 10"
+          text="MoneyBall Score가 고확신으로 틀렸던 예측들의 사후 분석"
+        />
+      </footer>
     </article>
   );
 }
