@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.15] - 2026-04-19
+
+### Head-to-head 매치업 페이지 — +45 엔티티 페이지
+
+**배경**: 팀 × 팀 교차점이 공백. 10팀 조합 45개를 개별 페이지로 만들면 엔티티 그래프 크게 확장 + 내부 링크 풍부화 + AdSense 심사 콘텐츠 깊이 시그널.
+
+**변경**:
+- **`canonicalPair.ts` + 테스트 10건**: `canonicalPair(a, b)` 두 팀 코드를 알파벳 순 정렬된 쌍으로 정규화. 같은 팀/유효하지 않은 코드는 null. `pairsForTeam(code)` 특정 팀의 9 상대, `allPairs()` 전체 45. 중복 없음·canonical 동등성 테스트.
+- **`buildMatchupProfile.ts`**: `predictions × games` 조인 → 두 팀이 맞붙은 경기만 필터링. 각 팀의 승수(홈/원정 분리), AI 예측 지목·적중 카운트, 예측 정확도, 경기 리스트(최신순), 자동 요약 문장.
+- **`/matchup/[teamA]/[teamB]` 페이지**: 헤더(팀 컬러 vs) → 요약 → 팀별 성과 카드 2개 → 예측 정확도 → 경기 리스트 → 다른 매치업 네비(양 팀 각 8개). 비-canonical URL은 canonical로 301 redirect. SportsEvent JSON-LD.
+- **`/matchup` 인덱스**: 10×10 격자 (대각선 제외)로 45개 조합 한 눈에 + 팀별 바로가기.
+- **`/teams/[code]` 연동**: "주요 매치업" 섹션 추가 — 9 상대 팀을 컬러 닷 + 칩으로 네비.
+- **sitemap**: `/matchup` 정적 + 45 canonical URL 자동 편입.
+
+**결과**: 45 신규 엔티티 페이지 + 팀 프로필 ↔ 매치업 ↔ 경기 분석 3단 링크 그래프 완성.
+
+### 검증
+
+- Test suite: **86/86** (기존 76 + 신규 `canonicalPair` 10) · kbo-data 173/173 · type-check 3/3 통과.
+
 ## [0.5.14] - 2026-04-19
 
 ### AdSense 심사 대비 작은 정리들

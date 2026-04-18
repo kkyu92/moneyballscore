@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
+import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 
 export const revalidate = 1800;
 
@@ -252,6 +253,34 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <section aria-labelledby="team-matchups-title" className="space-y-3">
+        <h2 id="team-matchups-title" className="text-lg font-bold">
+          주요 매치업
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {pairsForTeam(profile.code).map((p) => {
+            const other =
+              p.codeA === profile.code ? p.codeB : p.codeA;
+            const otherName = KBO_TEAMS[other]?.name.split(" ")[0] ?? other;
+            const otherColor = KBO_TEAMS[other]?.color ?? "#888";
+            return (
+              <Link
+                key={p.path}
+                href={p.path}
+                className="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+              >
+                <span
+                  aria-hidden
+                  className="inline-block w-2 h-2 rounded-full"
+                  style={{ backgroundColor: otherColor }}
+                />
+                vs {otherName}
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       {profile.recentGames.length > 0 && (
         <section

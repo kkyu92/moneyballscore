@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
+import { allPairs } from '@/lib/matchup/canonicalPair';
 
 // v4-4 Task 1: 모든 /analysis/game/[id] URL 포함 (Eng 리뷰 A6)
 // 과거 경기까지 SEO 크롤러에 노출해 AdSense 콘텐츠 양 확보.
@@ -26,7 +27,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/reviews/misses`, changeFrequency: 'daily', priority: 0.75 },
     { url: `${baseUrl}/players`, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/teams`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${baseUrl}/matchup`, changeFrequency: 'weekly', priority: 0.7 },
   ];
+
+  // 45개 canonical 팀 매치업 URL
+  const matchupRoutes: MetadataRoute.Sitemap = allPairs().map((p) => ({
+    url: `${baseUrl}${p.path}`,
+    changeFrequency: 'weekly',
+    priority: 0.65,
+  }));
 
   // 10팀 프로필 URL — KBO_TEAMS 키 기반 정적
   const teamProfileRoutes: MetadataRoute.Sitemap = Object.keys(
@@ -116,6 +125,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...weeklyReviewRoutes,
     ...monthlyReviewRoutes,
     ...teamProfileRoutes,
+    ...matchupRoutes,
     ...pitcherProfileRoutes,
     ...predictionDateRoutes,
     ...analysisRoutes,
