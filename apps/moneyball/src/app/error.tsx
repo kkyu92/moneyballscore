@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 
 export default function ErrorBoundary({
   error,
@@ -11,12 +12,13 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Vercel logs 로 자동 전송 — Sentry 가입 시 init 추가만 하면 동일 경로로 자동 수집.
+    // Vercel logs + Sentry (DSN 있을 때) 동시 수집
     console.error('[error.tsx]', {
       message: error.message,
       digest: error.digest,
       stack: error.stack,
     });
+    Sentry.captureException(error);
   }, [error]);
 
   return (

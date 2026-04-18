@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 // global-error.tsx 는 root layout 자체의 렌더링 실패를 잡는다.
 // 여기서는 layout 도 못 쓰므로 자체 <html>/<body>가 필요.
@@ -15,6 +16,7 @@ export default function GlobalError({
       digest: error.digest,
       stack: error.stack,
     });
+    Sentry.captureException(error);
   }, [error]);
 
   return (
