@@ -39,6 +39,18 @@ function parseNum(text: string): number {
 }
 
 /**
+ * Fancy Stats 이름 셀 파싱. 현재 구조는 "Eng Name | 한글명" 단일 셀.
+ * 한글 이름만 추출 (팀 매칭·DB 저장에 사용).
+ */
+function parseNameCell(raw: string): string {
+  const parts = raw.split('|').map((s) => s.trim());
+  for (const p of parts) {
+    if (/[가-힣]/.test(p)) return p;
+  }
+  return parts[parts.length - 1] ?? '';
+}
+
+/**
  * /leaders/ 페이지에서 투수 스탯 수집
  * 단일 페이지에 모든 테이블이 있는 Hugo 정적 사이트
  * T5: 투수 WAR, T6: FIP, T7: xFIP, T8: K/9
@@ -56,51 +68,34 @@ export async function fetchPitcherStats(season: number): Promise<PitcherStats[]>
   const html = await res.text();
   const $ = cheerio.load(html);
 
-  // FIP 테이블 (6번째 테이블, 0-indexed = 5)
-  // 헤더: Name | Team | Age | FIP
+  // 투수 테이블 공통 행 구조 (2026-04 확인):
+  //   cells[0]=rank, cells[1]="Eng | 한글", cells[2]=team, cells[3]=age, cells[4]=stat
+  const readPitcherTable = (idx: number): Map<string, { team: string; stat: number }> => {
+    const m = new Map<string, { team: string; stat: number }>();
+    $('table').eq(idx).find('tbody tr').each((_, row) => {
+      const cells = $(row).find('td');
+      if (cells.length < 5) return;
+      const korName = parseNameCell(cells.eq(1).text());
+      const team = cells.eq(2).text().trim();
+      const stat = parseNum(cells.eq(4).text());
+      if (korName && team) m.set(`${korName}@${team}`, { team, stat });
+    });
+    return m;
+  };
+
+  // 투수 WAR (4), FIP (5), xFIP (6), K/9 (7)
+  const warMapT = readPitcherTable(4);
   const fipMap = new Map<string, { team: string; fip: number }>();
-  $('table').eq(5).find('tbody tr').each((_, row) => {
-    const cells = $(row).find('td');
-    if (cells.length < 5) return;
-    // 행: rank | eng_name | kor_name | team | age | FIP
-    const korName = cells.eq(2).text().trim();
-    const team = cells.eq(3).text().trim();
-    const fip = parseNum(cells.eq(5).text());
-    if (korName && team) fipMap.set(`${korName}@${team}`, { team, fip });
-  });
+  for (const [k, v] of readPitcherTable(5)) fipMap.set(k, { team: v.team, fip: v.stat });
 
-  // xFIP 테이블 (7번째, 0-indexed = 6)
   const xfipMap = new Map<string, number>();
-  $('table').eq(6).find('tbody tr').each((_, row) => {
-    const cells = $(row).find('td');
-    if (cells.length < 5) return;
-    const korName = cells.eq(2).text().trim();
-    const team = cells.eq(3).text().trim();
-    const xfip = parseNum(cells.eq(5).text());
-    if (korName && team) xfipMap.set(`${korName}@${team}`, xfip);
-  });
+  for (const [k, v] of readPitcherTable(6)) xfipMap.set(k, v.stat);
 
-  // 투수 WAR 테이블 (5번째, 0-indexed = 4)
   const warMap = new Map<string, number>();
-  $('table').eq(4).find('tbody tr').each((_, row) => {
-    const cells = $(row).find('td');
-    if (cells.length < 5) return;
-    const korName = cells.eq(2).text().trim();
-    const team = cells.eq(3).text().trim();
-    const war = parseNum(cells.eq(5).text());
-    if (korName && team) warMap.set(`${korName}@${team}`, war);
-  });
+  for (const [k, v] of warMapT) warMap.set(k, v.stat);
 
-  // K/9 테이블 (8번째, 0-indexed = 7)
   const kMap = new Map<string, number>();
-  $('table').eq(7).find('tbody tr').each((_, row) => {
-    const cells = $(row).find('td');
-    if (cells.length < 5) return;
-    const korName = cells.eq(2).text().trim();
-    const team = cells.eq(3).text().trim();
-    const k9 = parseNum(cells.eq(5).text());
-    if (korName && team) kMap.set(`${korName}@${team}`, k9);
-  });
+  for (const [k, v] of readPitcherTable(7)) kMap.set(k, v.stat);
 
   // 합치기
   const pitchers: PitcherStats[] = [];
@@ -128,8 +123,9 @@ export async function fetchPitcherStats(season: number): Promise<PitcherStats[]>
 /**
  * Phase v4-4 C2-B: 타자 스탯 수집.
  * 동일한 /leaders/ 페이지의 상단 4개 테이블(WAR/wRC+/OPS/ISO).
- * 타자 행 컬럼: rank | eng_name | kor_name | team | age | position | stat
- * 투수 행(5컬럼)과 달리 position이 있어 cells.eq(6)에 stat.
+ * 타자 행 컬럼 (2026-04 확인):
+ *   cells[0]=rank, cells[1]="Eng | 한글", cells[2]=team,
+ *   cells[3]=age, cells[4]=position, cells[5]=stat
  */
 export async function fetchBatterStats(season: number): Promise<BatterStats[]> {
   const url = `${BASE_URL}/leaders/`;
@@ -164,12 +160,12 @@ export async function fetchBatterStats(season: number): Promise<BatterStats[]> {
       .find('tbody tr')
       .each((_, row) => {
         const cells = $(row).find('td');
-        if (cells.length < 7) return;
-        const korName = cells.eq(2).text().trim();
-        const team = cells.eq(3).text().trim();
-        const age = parseNum(cells.eq(4).text());
-        const position = cells.eq(5).text().trim();
-        const stat = parseNum(cells.eq(6).text());
+        if (cells.length < 6) return;
+        const korName = parseNameCell(cells.eq(1).text());
+        const team = cells.eq(2).text().trim();
+        const age = parseNum(cells.eq(3).text());
+        const position = cells.eq(4).text().trim();
+        const stat = parseNum(cells.eq(5).text());
         if (!korName || !team) return;
         const key = `${korName}@${team}`;
         const existing = acc.get(key) ?? {
@@ -182,7 +178,6 @@ export async function fetchBatterStats(season: number): Promise<BatterStats[]> {
           iso: 0,
         };
         existing[statKey] = stat;
-        // 첫 테이블에서 position·age 저장
         if (!existing.position && position) existing.position = position;
         if (!existing.age && age) existing.age = age;
         acc.set(key, existing);
