@@ -4,6 +4,7 @@ import Link from "next/link";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 1800;
 
@@ -96,14 +97,14 @@ export default async function TeamPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <Breadcrumb
+        items={[
+          { href: '/teams', label: '팀 프로필' },
+          { label: profile.name },
+        ]}
+      />
+
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <Link href="/teams" className="hover:text-brand-500">
-            팀 프로필
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="font-mono">{profile.code}</span>
-        </div>
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
           <span

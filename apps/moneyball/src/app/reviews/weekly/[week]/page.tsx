@@ -8,6 +8,7 @@ import {
   type WeeklyHighlight,
 } from "@/lib/reviews/buildWeeklyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 1800;
 
@@ -117,6 +118,14 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <Breadcrumb
+        items={[
+          { href: '/reviews', label: '리뷰' },
+          { href: '/reviews/weekly', label: '주간' },
+          { label: range.label },
+        ]}
       />
 
       <header className="space-y-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-4">

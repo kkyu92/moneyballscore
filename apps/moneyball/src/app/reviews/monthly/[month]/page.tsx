@@ -9,6 +9,7 @@ import {
 import { buildMonthlyReview } from "@/lib/reviews/buildMonthlyReview";
 import type { WeeklyHighlight } from "@/lib/reviews/buildWeeklyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 3600;
 
@@ -127,16 +128,15 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <Breadcrumb
+        items={[
+          { href: '/reviews', label: '리뷰' },
+          { href: '/reviews/monthly', label: '월간' },
+          { label: range.label },
+        ]}
+      />
+
       <header className="space-y-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <Link href="/reviews" className="hover:text-brand-500">
-            리뷰
-          </Link>
-          <span aria-hidden>/</span>
-          <span>월간</span>
-          <span aria-hidden>/</span>
-          <span className="font-mono">{range.monthId}</span>
-        </div>
         <h1 className="text-3xl md:text-4xl font-bold">
           {range.label} 월간 리뷰
         </h1>

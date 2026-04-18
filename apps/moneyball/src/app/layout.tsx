@@ -7,6 +7,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { CookieConsent } from "@/components/layout/CookieConsent";
 
 const GA_ID = "G-2886XKWG4Y";
 
@@ -116,6 +117,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <CookieConsent />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

@@ -91,9 +91,57 @@ const DATA_SOURCES = [
   },
 ];
 
+const FAQS = [
+  {
+    q: "MoneyBall Score는 어떻게 KBO 경기를 예측하나요?",
+    a: "FIP, xFIP, wOBA, WAR, Elo 등 10개 세이버메트릭스 팩터를 가중합산한 정량 모델 v1.5와, 홈/원정/심판 3명의 AI 에이전트가 토론으로 보정하는 v2.0 시스템을 결합합니다. 매일 15:00 KST에 선발 확정 후 자동 생성됩니다.",
+  },
+  {
+    q: "예측 적중률은 얼마인가요?",
+    a: "정량 모델 v1.5는 시즌 누적 검증 경기 기준 적중률을 매일 업데이트해 대시보드에 공개합니다. 모든 예측이 사후 검증되며, 적중·오차 데이터는 모델 개선과 회고 분석에 다시 투입됩니다.",
+  },
+  {
+    q: "데이터는 어디서 가져오나요?",
+    a: "KBO 공식 사이트(koreabaseball.com), KBO Fancy Stats(kbofancystats.com), FanGraphs(fangraphs.com/leaders/international/kbo) 3개 소스를 매일 정해진 시각에 자동 수집합니다. 각 사이트의 robots.txt와 rate limit을 준수합니다.",
+  },
+  {
+    q: "유료인가요? 가입이 필요한가요?",
+    a: "전부 무료이며 가입 없이 모든 페이지를 열람할 수 있습니다. 운영 비용은 광고 수익으로 충당합니다.",
+  },
+  {
+    q: "예측이 틀렸을 때는 어떻게 되나요?",
+    a: "경기 종료 직후 사후분석(Postview) 에이전트가 어떤 팩터의 예측이 빗나갔는지 자동으로 진단하고, 그 결과를 Compound 루프로 다음 예측에 반영합니다. 주간/월간 리뷰 페이지에서 팀별·팩터별 적중률 변화를 확인할 수 있습니다.",
+  },
+  {
+    q: "이 사이트의 예측을 도박에 사용해도 되나요?",
+    a: "MoneyBall Score는 데이터 분석 콘텐츠로, 어떤 형태의 도박이나 베팅도 권장하지 않습니다. 예측은 통계적 추정에 불과하며, 실제 경기 결과는 다를 수 있습니다.",
+  },
+  {
+    q: "AI 에이전트 토론은 무엇을 기반으로 하나요?",
+    a: "Anthropic Claude 모델(Haiku + Sonnet)을 사용합니다. 홈/원정 에이전트는 정량 데이터와 팀 페르소나를 입력받아 각자 입장에서 논거를 제시하고, 심판 에이전트가 양측 논거를 평가해 최종 확률을 결정합니다(Steelman 원칙).",
+  },
+];
+
 export default function AboutPage() {
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.a,
+      },
+    })),
+  };
+
   return (
     <div className="space-y-8 max-w-3xl">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <section>
         <h1 className="text-3xl font-bold mb-2">MoneyBall Score</h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg">
@@ -183,6 +231,33 @@ export default function AboutPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-300">{source.desc}</p>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="faq-title"
+        className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6"
+      >
+        <h2 id="faq-title" className="text-xl font-bold mb-4">
+          자주 묻는 질문 (FAQ)
+        </h2>
+        <div className="space-y-2">
+          {FAQS.map((f, idx) => (
+            <details
+              key={idx}
+              className="border-b border-gray-100 dark:border-gray-800 last:border-0 py-3"
+            >
+              <summary className="font-medium cursor-pointer text-gray-800 dark:text-gray-100 hover:text-brand-600 dark:hover:text-brand-300 list-none flex items-start gap-2">
+                <span className="text-brand-500 mt-0.5" aria-hidden>
+                  Q.
+                </span>
+                <span className="flex-1">{f.q}</span>
+              </summary>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 pl-6 leading-relaxed">
+                {f.a}
+              </p>
+            </details>
           ))}
         </div>
       </section>

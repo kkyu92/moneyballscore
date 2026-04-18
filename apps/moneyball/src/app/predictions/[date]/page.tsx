@@ -5,6 +5,7 @@ import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
 interface Props {
@@ -290,6 +291,13 @@ export default async function PredictionDatePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+
+      <Breadcrumb
+        items={[
+          { href: '/predictions', label: '예측 기록' },
+          { label: date },
+        ]}
       />
 
       <header className="space-y-2">

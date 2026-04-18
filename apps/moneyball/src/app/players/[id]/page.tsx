@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 1800;
 
@@ -89,14 +90,14 @@ export default async function PlayerProfilePage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <Breadcrumb
+        items={[
+          { href: '/players', label: '선수 리더보드' },
+          { label: profile.nameKo },
+        ]}
+      />
+
       <header className="space-y-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <Link href="/players" className="hover:text-brand-500">
-            선수 리더보드
-          </Link>
-          <span aria-hidden>/</span>
-          <span>{profile.teamName ?? "KBO"}</span>
-        </div>
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-3xl md:text-4xl font-bold">{profile.nameKo}</h1>
           {profile.teamName && profile.teamColor && (

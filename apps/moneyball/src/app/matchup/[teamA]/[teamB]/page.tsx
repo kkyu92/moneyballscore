@@ -8,6 +8,7 @@ import {
 } from "@/lib/matchup/canonicalPair";
 import { buildMatchupProfile } from "@/lib/matchup/buildMatchupProfile";
 import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 3600;
 
@@ -78,16 +79,14 @@ export default async function MatchupPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <Breadcrumb
+        items={[
+          { href: '/matchup', label: '팀 간 매치업' },
+          { label: `${tA.shortName} vs ${tB.shortName}` },
+        ]}
+      />
+
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <Link href="/matchup" className="hover:text-brand-500">
-            팀 간 매치업
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="font-mono">
-            {tA.code} vs {tB.code}
-          </span>
-        </div>
         <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3 flex-wrap">
           <span style={{ color: tA.color }}>{tA.shortName}</span>
           <span className="text-gray-400 dark:text-gray-500">vs</span>

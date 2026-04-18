@@ -8,6 +8,7 @@ import { PostviewPanel } from '@/components/analysis/PostviewPanel';
 import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnalysis';
 import { GameOverview } from '@/components/analysis/GameOverview';
 import { ShareButtons } from '@/components/share/ShareButtons';
+import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 
@@ -253,6 +254,12 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Breadcrumb
+        items={[
+          { href: '/analysis', label: 'AI 분석' },
+          { label: `${awayName} vs ${homeName} (${gameDate})` },
+        ]}
       />
       {/* 헤더 */}
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
