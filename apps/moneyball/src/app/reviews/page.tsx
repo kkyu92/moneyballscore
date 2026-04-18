@@ -50,34 +50,53 @@ export default async function ReviewsPage() {
         </p>
       </div>
 
-      <section className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-5 space-y-3">
-        <div className="flex items-center justify-between flex-wrap gap-2">
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-5 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                📅 주간 리뷰
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                매주 자동 집계되는 하이라이트 · 팀별 성과 · 팩터 인사이트
+              </p>
+            </div>
+            <Link
+              href={`/reviews/weekly/${recentWeeks[recentWeeks.length - 1].weekId}`}
+              className="text-sm font-medium text-brand-600 hover:underline"
+            >
+              이번 주 →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentWeeks.map((w) => (
+              <Link
+                key={w.weekId}
+                href={`/reviews/weekly/${w.weekId}`}
+                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+              >
+                {w.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <Link
+          href="/reviews/misses"
+          className="group bg-gradient-to-r from-red-500/5 to-orange-500/5 dark:from-red-500/10 dark:to-orange-500/10 rounded-xl border border-red-500/20 p-5 flex flex-col justify-between hover:border-red-500/50 transition-colors"
+        >
           <div>
             <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-              📅 주간 리뷰
+              🧭 회고 · 크게 빗나간 예측
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              매주 자동 집계되는 하이라이트 · 팀별 성과 · 팩터 인사이트
+              고확신 실패 사례의 사후 분석. 편향 지목 팩터와 놓친 것 공개.
             </p>
           </div>
-          <Link
-            href={`/reviews/weekly/${recentWeeks[recentWeeks.length - 1].weekId}`}
-            className="text-sm font-medium text-brand-600 hover:underline"
-          >
-            이번 주 리뷰 →
-          </Link>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {recentWeeks.map((w) => (
-            <Link
-              key={w.weekId}
-              href={`/reviews/weekly/${w.weekId}`}
-              className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
-            >
-              {w.label}
-            </Link>
-          ))}
-        </div>
+          <span className="text-sm font-medium text-red-600 dark:text-red-400 mt-3 group-hover:underline self-start">
+            회고 보기 →
+          </span>
+        </Link>
       </section>
 
       {total > 0 ? (
