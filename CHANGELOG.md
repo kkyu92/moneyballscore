@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.5.13] - 2026-04-18
+
+### 월간 리뷰 라우트 (퀄리티 C1 확장)
+
+**배경**: 주간 리뷰(v0.5.6)에 이어 월 단위 집계 페이지 추가. 시즌 누적 콘텐츠 타입 +1 — 심사 관점에서 "주간·월간·회고" 3가지 리뷰 형태로 다양성 확보.
+
+**변경**:
+- **`computeMonthRange.ts` + 테스트 11건**: `parseMonthId("2026-04")`, `getMonthRangeFromDate`, `getRecentMonths(n)`, `getPreviousMonth`. 윤년 2월(2/29), 평년 2월(2/28), 12월 경계 검증. 연도 경계 (2026-01 → 이전 2025-12) 테스트.
+- **`buildMonthlyReview.ts`**: 주간 빌더 패턴 재사용 + 월간 특성 반영:
+  - `pickHighlights`는 박빙 적중 2 + 고확신 적중 2 + 대역전 실패 2 (주간은 각 1개)
+  - 전월 대비 적중률 diff (`previousAccuracyRate`, 최소 5경기 충족 시)
+  - `factorInsights` minSamples 5 (주간은 3)
+  - 팀별 성과는 적중률 DESC로 정렬 (주간은 예측 수 DESC)
+- **`/reviews/monthly/[month]` 페이지**: 4 지표 카드 (검증·적중·적중률·전월대비), 하이라이트 6개 3열 그리드, 팀별 바, 팩터 best/worst, 최근 4개월 네비.
+- **`/reviews/monthly`**: 현재 월 redirect.
+- **`/reviews` 허브 3단 그리드**: 주간 + 월간 + 회고 카드. 월간 카드는 accent(골드) 컬러로 구분.
+- **sitemap**: `/reviews/monthly` 정적 + 최근 6개월 `/reviews/monthly/[yyyy-mm]` 동적 URL.
+
+### 검증
+
+- Test suite: apps/moneyball **76/76** (기존 65 + 신규 `computeMonthRange` 11) · kbo-data 173/173 · type-check 3/3 통과.
+
 ## [0.5.12] - 2026-04-18
 
 ### Core Web Vitals 최적화 1단계

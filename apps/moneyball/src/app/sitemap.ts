@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
+import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 
 // v4-4 Task 1: 모든 /analysis/game/[id] URL 포함 (Eng 리뷰 A6)
 // 과거 경기까지 SEO 크롤러에 노출해 AdSense 콘텐츠 양 확보.
@@ -21,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/reviews/weekly`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/reviews/monthly`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/reviews/misses`, changeFrequency: 'daily', priority: 0.75 },
     { url: `${baseUrl}/players`, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/teams`, changeFrequency: 'weekly', priority: 0.7 },
@@ -40,6 +42,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     (w) => ({
       url: `${baseUrl}/reviews/weekly/${w.weekId}`,
       changeFrequency: 'weekly',
+      priority: 0.7,
+    }),
+  );
+
+  // 최근 6개월 월간 리뷰 URL
+  const monthlyReviewRoutes: MetadataRoute.Sitemap = getRecentMonths(6).map(
+    (m) => ({
+      url: `${baseUrl}/reviews/monthly/${m.monthId}`,
+      changeFrequency: 'monthly',
       priority: 0.7,
     }),
   );
@@ -103,6 +114,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...weeklyReviewRoutes,
+    ...monthlyReviewRoutes,
     ...teamProfileRoutes,
     ...pitcherProfileRoutes,
     ...predictionDateRoutes,
