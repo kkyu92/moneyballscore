@@ -202,25 +202,77 @@ export async function buildMatchupProfile(
     };
   }
 
-  // 두 팀이 맞붙은 경기의 pre_game predictions 전부
+  // 두 팀이 맞붙은 경기만 SQL 레벨로 필터링.
+  // 이전엔 전체 pre_game 예측 풀스캔 → JS에서 pair 필터.
+  // 이제 (home=A,away=B) OR (home=B,away=A) 만 select → 매치업당 ~1-20 row.
+  const orFilter =
+    `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
+    `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
+
   const { data } = await supabase
-    .from("predictions")
+    .from("games")
     .select(
       `
-        confidence, is_correct, predicted_winner,
-        predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
-        game:games!predictions_game_id_fkey(
-          id, game_date, status, home_score, away_score,
-          home_team_id, away_team_id, winner_team_id,
-          home_team:teams!games_home_team_id_fkey(id, code),
-          away_team:teams!games_away_team_id_fkey(id, code),
-          winner:teams!games_winner_team_id_fkey(code)
+        id, game_date, status, home_score, away_score,
+        home_team_id, away_team_id, winner_team_id,
+        home_team:teams!games_home_team_id_fkey(id, code),
+        away_team:teams!games_away_team_id_fkey(id, code),
+        winner:teams!games_winner_team_id_fkey(code),
+        predictions!inner(
+          confidence, is_correct, predicted_winner,
+          predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
+          prediction_type
         )
       `,
     )
-    .eq("prediction_type", "pre_game");
+    .or(orFilter)
+    .eq("predictions.prediction_type", "pre_game");
 
-  const rows = (data ?? []) as unknown as Row[];
+  type GameRow = {
+    id: number;
+    game_date: string;
+    status: string | null;
+    home_score: number | null;
+    away_score: number | null;
+    home_team_id: number | null;
+    away_team_id: number | null;
+    winner_team_id: number | null;
+    home_team: { id: number; code: string | null } | null;
+    away_team: { id: number; code: string | null } | null;
+    winner: { code: string | null } | null;
+    predictions: Array<{
+      confidence: number | null;
+      is_correct: boolean | null;
+      predicted_winner: number | null;
+      predicted_winner_team: { code: string | null } | null;
+    }>;
+  };
+
+  const gameRows = (data ?? []) as unknown as GameRow[];
+  const rows: Row[] = [];
+  for (const g of gameRows) {
+    const pred = g.predictions?.[0];
+    if (!pred) continue;
+    rows.push({
+      confidence: pred.confidence,
+      is_correct: pred.is_correct,
+      predicted_winner: pred.predicted_winner,
+      predicted_winner_team: pred.predicted_winner_team,
+      game: {
+        id: g.id,
+        game_date: g.game_date,
+        status: g.status,
+        home_score: g.home_score,
+        away_score: g.away_score,
+        home_team_id: g.home_team_id,
+        away_team_id: g.away_team_id,
+        winner_team_id: g.winner_team_id,
+        home_team: g.home_team,
+        away_team: g.away_team,
+        winner: g.winner,
+      },
+    });
+  }
   const games: MatchupGame[] = [];
   const sideA = makeSideStat(teamA.code, teamA.shortName, teamA.color);
   const sideB = makeSideStat(teamB.code, teamB.shortName, teamB.color);

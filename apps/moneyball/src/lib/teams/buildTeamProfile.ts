@@ -127,29 +127,88 @@ export async function buildTeamProfile(
     };
   }
 
+  // 이 팀이 home 또는 away 인 게임만 SQL 레벨로 필터링.
+  // 이전엔 전체 pre_game predictions 풀스캔 후 JS 필터 → 매번 수천 row 가져옴.
+  // 이제 games 테이블에서 (home_team_id=teamId OR away_team_id=teamId) 만 select.
   const { data } = await supabase
-    .from("predictions")
+    .from("games")
     .select(
       `
-        confidence, is_correct, predicted_winner,
-        home_sp_fip, away_sp_fip,
-        home_lineup_woba, away_lineup_woba,
-        home_bullpen_fip, away_bullpen_fip,
-        home_recent_form, away_recent_form,
-        home_elo, away_elo,
-        game:games!predictions_game_id_fkey(
-          id, game_date, status, home_score, away_score,
-          home_team_id, away_team_id, home_sp_id, away_sp_id,
-          home_sp:players!games_home_sp_id_fkey(id, name_ko),
-          away_sp:players!games_away_sp_id_fkey(id, name_ko),
-          home_team:teams!games_home_team_id_fkey(code),
-          away_team:teams!games_away_team_id_fkey(code)
+        id, game_date, status, home_score, away_score,
+        home_team_id, away_team_id, home_sp_id, away_sp_id,
+        home_sp:players!games_home_sp_id_fkey(id, name_ko),
+        away_sp:players!games_away_sp_id_fkey(id, name_ko),
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code),
+        predictions!inner(
+          confidence, is_correct, predicted_winner,
+          home_sp_fip, away_sp_fip,
+          home_lineup_woba, away_lineup_woba,
+          home_bullpen_fip, away_bullpen_fip,
+          home_recent_form, away_recent_form,
+          home_elo, away_elo,
+          prediction_type
         )
       `,
     )
-    .eq("prediction_type", "pre_game");
+    .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+    .eq("predictions.prediction_type", "pre_game");
 
-  const rows = (data ?? []) as unknown as PredRow[];
+  type GameRow = NonNullable<PredRow["game"]> & {
+    predictions: Array<{
+      confidence: number | null;
+      is_correct: boolean | null;
+      predicted_winner: number | null;
+      home_sp_fip: number | null;
+      away_sp_fip: number | null;
+      home_lineup_woba: number | null;
+      away_lineup_woba: number | null;
+      home_bullpen_fip: number | null;
+      away_bullpen_fip: number | null;
+      home_recent_form: number | null;
+      away_recent_form: number | null;
+      home_elo: number | null;
+      away_elo: number | null;
+    }>;
+  };
+
+  // games rows → PredRow shape 변환 (downstream 코드 변경 최소화)
+  const gamesRows = (data ?? []) as unknown as GameRow[];
+  const rows: PredRow[] = [];
+  for (const g of gamesRows) {
+    const pred = g.predictions?.[0];
+    if (!pred) continue;
+    rows.push({
+      confidence: pred.confidence,
+      is_correct: pred.is_correct,
+      predicted_winner: pred.predicted_winner,
+      home_sp_fip: pred.home_sp_fip,
+      away_sp_fip: pred.away_sp_fip,
+      home_lineup_woba: pred.home_lineup_woba,
+      away_lineup_woba: pred.away_lineup_woba,
+      home_bullpen_fip: pred.home_bullpen_fip,
+      away_bullpen_fip: pred.away_bullpen_fip,
+      home_recent_form: pred.home_recent_form,
+      away_recent_form: pred.away_recent_form,
+      home_elo: pred.home_elo,
+      away_elo: pred.away_elo,
+      game: {
+        id: g.id,
+        game_date: g.game_date,
+        status: g.status,
+        home_score: g.home_score,
+        away_score: g.away_score,
+        home_team_id: g.home_team_id,
+        away_team_id: g.away_team_id,
+        home_sp_id: g.home_sp_id,
+        away_sp_id: g.away_sp_id,
+        home_sp: g.home_sp,
+        away_sp: g.away_sp,
+        home_team: g.home_team,
+        away_team: g.away_team,
+      },
+    });
+  }
 
   let predictedGames = 0;
   let predictedWins = 0;
