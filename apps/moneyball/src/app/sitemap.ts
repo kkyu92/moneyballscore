@@ -22,7 +22,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/reviews/weekly`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/players`, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${baseUrl}/teams`, changeFrequency: 'weekly', priority: 0.7 },
   ];
+
+  // 10팀 프로필 URL — KBO_TEAMS 키 기반 정적
+  const teamProfileRoutes: MetadataRoute.Sitemap = Object.keys(
+    (await import('@moneyball/shared')).KBO_TEAMS,
+  ).map((code) => ({
+    url: `${baseUrl}/teams/${code}`,
+    changeFrequency: 'weekly',
+    priority: 0.65,
+  }));
 
   // 최근 12주 주간 리뷰 URL — 시즌 누적에 따라 매주 +1개
   const weeklyReviewRoutes: MetadataRoute.Sitemap = getRecentWeeks(12).map(
@@ -92,6 +102,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...weeklyReviewRoutes,
+    ...teamProfileRoutes,
     ...pitcherProfileRoutes,
     ...predictionDateRoutes,
     ...analysisRoutes,

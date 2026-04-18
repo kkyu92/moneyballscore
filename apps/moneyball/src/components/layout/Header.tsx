@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/predictions", label: "예측 기록" },
   { href: "/analysis", label: "AI 분석" },
   { href: "/players", label: "선수" },
+  { href: "/teams", label: "팀" },
   { href: "/dashboard", label: "대시보드" },
   { href: "/about", label: "소개" },
 ];
