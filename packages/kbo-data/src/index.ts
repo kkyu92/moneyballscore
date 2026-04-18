@@ -4,6 +4,7 @@
 export type {
   ScrapedGame,
   PitcherStats,
+  BatterStats,
   TeamStats,
   EloRating,
   PredictionInput,
@@ -14,7 +15,7 @@ export { TEAM_NAME_MAP } from './types';
 
 // 스크래퍼
 export { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS } from './scrapers/kbo-official';
-export { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from './scrapers/fancy-stats';
+export { fetchPitcherStats, fetchTeamStats, fetchEloRatings, fetchBatterStats, findPitcher } from './scrapers/fancy-stats';
 export { fetchBatterLeaders } from './scrapers/fangraphs';
 
 // 예측 엔진
@@ -25,6 +26,8 @@ export { runDailyPipeline } from './pipeline/daily';
 export { runLiveUpdate } from './pipeline/live';
 export { runPostviewDaily } from './pipeline/postview-daily';
 export type { PostviewDailyResult } from './pipeline/postview-daily';
+export { syncBatterStats } from './pipeline/sync-batter-stats';
+export type { SyncBatterStatsResult } from './pipeline/sync-batter-stats';
 
 // 빅매치 선정 (v4-4)
 export {

@@ -1,0 +1,164 @@
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { fetchBatterStats } from '../scrapers/fancy-stats';
+import type { BatterStats } from '../types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DB = SupabaseClient<any, any, any>;
+
+function createAdminClient(): DB {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
+  }
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+async function getKBOLeagueId(db: DB): Promise<number> {
+  const { data } = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  if (!data) throw new Error('KBO league not found in DB');
+  return data.id;
+}
+
+async function getTeamIdMap(db: DB, leagueId: number): Promise<Record<string, number>> {
+  const { data } = await db.from('teams').select('id, code').eq('league_id', leagueId);
+  if (!data) return {};
+  const map: Record<string, number> = {};
+  for (const t of data) map[t.code] = t.id;
+  return map;
+}
+
+async function upsertPlayerId(
+  db: DB,
+  leagueId: number,
+  name: string,
+  teamId: number,
+  position: string | null,
+): Promise<number | null> {
+  // 같은 league_id + name_ko + team_id로 기존 player 조회
+  const { data: existing } = await db
+    .from('players')
+    .select('id, position')
+    .eq('league_id', leagueId)
+    .eq('name_ko', name)
+    .eq('team_id', teamId)
+    .maybeSingle();
+
+  if (existing) {
+    // position 비어 있으면 업데이트
+    if (!existing.position && position) {
+      await db.from('players').update({ position }).eq('id', existing.id);
+    }
+    return existing.id;
+  }
+
+  const { data: created, error } = await db
+    .from('players')
+    .insert({
+      league_id: leagueId,
+      name_ko: name,
+      team_id: teamId,
+      position: position ?? 'B',
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.warn(`[sync-batter] failed to insert player ${name}: ${error.message}`);
+    return null;
+  }
+  return created?.id ?? null;
+}
+
+export interface SyncBatterStatsResult {
+  season: number;
+  fetched: number;
+  upsertedPlayers: number;
+  upsertedStats: number;
+  errors: string[];
+  durationMs: number;
+}
+
+/**
+ * Fancy Stats /leaders/ → batter_stats 테이블 적재.
+ *
+ * - `players` 테이블에 없는 선수는 새로 insert (position 채움)
+ * - `batter_stats`는 (player_id, season) unique → upsert
+ */
+export async function syncBatterStats(
+  season: number = new Date().getFullYear(),
+): Promise<SyncBatterStatsResult> {
+  const startedAt = Date.now();
+  const db = createAdminClient();
+  const errors: string[] = [];
+  let upsertedPlayers = 0;
+  let upsertedStats = 0;
+
+  const batters: BatterStats[] = await fetchBatterStats(season);
+
+  if (batters.length === 0) {
+    return {
+      season,
+      fetched: 0,
+      upsertedPlayers: 0,
+      upsertedStats: 0,
+      errors: ['fetchBatterStats returned 0 rows — 셀렉터 깨졌을 가능성'],
+      durationMs: Date.now() - startedAt,
+    };
+  }
+
+  const leagueId = await getKBOLeagueId(db);
+  const teamIdMap = await getTeamIdMap(db, leagueId);
+
+  for (const b of batters) {
+    const teamId = teamIdMap[b.team];
+    if (!teamId) {
+      errors.push(`team ${b.team} not found for ${b.name}`);
+      continue;
+    }
+
+    const playerId = await upsertPlayerId(
+      db,
+      leagueId,
+      b.name,
+      teamId,
+      b.position,
+    );
+    if (!playerId) {
+      errors.push(`player upsert failed: ${b.name}`);
+      continue;
+    }
+    upsertedPlayers += 1;
+
+    const { error: statErr } = await db
+      .from('batter_stats')
+      .upsert(
+        {
+          player_id: playerId,
+          season,
+          war: b.war,
+          wrc_plus: b.wrcPlus,
+          ops: b.ops,
+          last_synced: new Date().toISOString(),
+        },
+        { onConflict: 'player_id,season' },
+      );
+
+    if (statErr) {
+      errors.push(`stat upsert failed for ${b.name}: ${statErr.message}`);
+    } else {
+      upsertedStats += 1;
+    }
+  }
+
+  return {
+    season,
+    fetched: batters.length,
+    upsertedPlayers,
+    upsertedStats,
+    errors,
+    durationMs: Date.now() - startedAt,
+  };
+}

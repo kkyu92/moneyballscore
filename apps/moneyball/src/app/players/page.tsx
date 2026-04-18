@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
+import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 
 export const metadata: Metadata = {
   title: "선수 리더보드",
   description:
-    "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP 기준) · 타자 섹션은 데이터 수집 후 공개 예정.",
+    "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
 };
 
 export const revalidate = 1800;
@@ -19,11 +20,19 @@ function fmtPct(v: number | null): string {
   return `${Math.round(v * 100)}%`;
 }
 
+function fmtDec(v: number, digits = 3): string {
+  return v.toFixed(digits);
+}
+
+function fmtWar(v: number): string {
+  return v.toFixed(1);
+}
+
 export default async function PlayersIndexPage() {
-  const pitchers = await buildPitcherLeaderboard({
-    limit: 10,
-    minAppearances: 1,
-  });
+  const [pitchers, batters] = await Promise.all([
+    buildPitcherLeaderboard({ limit: 10, minAppearances: 1 }),
+    buildBatterLeaderboard({ limit: 10 }),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -135,22 +144,92 @@ export default async function PlayersIndexPage() {
       </section>
 
       <section
-        aria-labelledby="batter-placeholder-title"
-        className="bg-gradient-to-r from-gray-500/5 to-gray-600/5 dark:from-gray-500/10 dark:to-gray-600/10 rounded-xl border border-gray-300/30 dark:border-gray-600/30 p-6 space-y-2"
+        aria-labelledby="batter-leaderboard-title"
+        className="space-y-4"
       >
-        <h2
-          id="batter-placeholder-title"
-          className="text-xl font-bold flex items-center gap-2"
-        >
-          타자 Top 10
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-            준비 중
-          </span>
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          개별 타자 스탯 수집 파이프라인이 추가되면 여기에 공개됩니다.
-          KBO Fancy Stats의 wOBA · wRC+ · WAR 기반 예정.
-        </p>
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h2
+              id="batter-leaderboard-title"
+              className="text-xl font-bold"
+            >
+              타자 Top {batters.length}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              시즌 WAR 높은 순 · KBO Fancy Stats `/leaders/` 기준
+            </p>
+          </div>
+          {batters[0]?.lastSynced && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+              최종 동기화 {batters[0].lastSynced.slice(0, 10)}
+            </span>
+          )}
+        </div>
+
+        {batters.length === 0 ? (
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
+            <span className="text-5xl block mb-4">🏏</span>
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
+              타자 스탯이 아직 동기화되지 않았습니다
+            </p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+              매일 KST 12:00에 KBO Fancy Stats에서 자동 업데이트됩니다.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
+                  <th className="py-3 pl-4 pr-3 font-medium w-8">#</th>
+                  <th className="py-3 pr-3 font-medium">선수</th>
+                  <th className="py-3 pr-3 font-medium">팀</th>
+                  <th className="py-3 pr-3 font-medium">포지션</th>
+                  <th className="py-3 pr-3 font-medium text-right">WAR</th>
+                  <th className="py-3 pr-3 font-medium text-right">wRC+</th>
+                  <th className="py-3 pl-3 pr-4 font-medium text-right">OPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {batters.map((b, idx) => (
+                  <tr
+                    key={b.playerId}
+                    className="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
+                  >
+                    <td className="py-3 pl-4 pr-3 text-gray-400 dark:text-gray-500 font-mono">
+                      {idx + 1}
+                    </td>
+                    <td className="py-3 pr-3 font-semibold">{b.nameKo}</td>
+                    <td className="py-3 pr-3 text-gray-600 dark:text-gray-300">
+                      <span className="inline-flex items-center gap-2">
+                        {b.teamColor && (
+                          <span
+                            aria-hidden
+                            className="inline-block w-2 h-2 rounded-full"
+                            style={{ backgroundColor: b.teamColor }}
+                          />
+                        )}
+                        {b.teamName ?? "-"}
+                      </span>
+                    </td>
+                    <td className="py-3 pr-3 text-xs text-gray-600 dark:text-gray-300">
+                      {b.position ?? "-"}
+                    </td>
+                    <td className="py-3 pr-3 text-right font-mono font-semibold">
+                      {fmtWar(b.war)}
+                    </td>
+                    <td className="py-3 pr-3 text-right font-mono text-gray-700 dark:text-gray-200">
+                      {b.wrcPlus ? b.wrcPlus.toFixed(1) : "-"}
+                    </td>
+                    <td className="py-3 pl-3 pr-4 text-right font-mono text-gray-700 dark:text-gray-200">
+                      {b.ops ? fmtDec(b.ops, 3) : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );

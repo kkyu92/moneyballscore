@@ -29,6 +29,18 @@ export interface PitcherStats {
   kPer9: number;
 }
 
+// Phase v4-4 C2-B: 타자 시즌 스탯 (KBO Fancy Stats /leaders/ 파싱)
+export interface BatterStats {
+  name: string;
+  team: TeamCode;
+  position: string | null;
+  age: number | null;
+  war: number;      // WAR, Batters 테이블
+  wrcPlus: number;  // wRC+ 테이블
+  ops: number;      // OPS 테이블
+  iso: number;      // ISO 테이블
+}
+
 export interface TeamStats {
   team: TeamCode;
   woba: number;

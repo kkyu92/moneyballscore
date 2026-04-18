@@ -1,0 +1,34 @@
+name: Sync Batter Stats
+
+on:
+  schedule:
+    # KST 12:00 = UTC 03:00 — 매일 daily-pipeline predict(15 KST) 전에 타자 스탯 갱신
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Season year (default: current)'
+        required: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Call sync API
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+          INPUT_SEASON: ${{ github.event.inputs.season }}
+        run: |
+          BODY="{}"
+          if [ -n "$INPUT_SEASON" ]; then
+            BODY="{\"season\":${INPUT_SEASON}}"
+          fi
+
+          echo "Calling sync-batter-stats: $BODY"
+          curl -sf -X POST "${PRODUCTION_URL}/api/sync-batter-stats" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -d "$BODY"

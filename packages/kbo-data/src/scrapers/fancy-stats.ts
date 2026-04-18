@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
-import type { PitcherStats, TeamStats, EloRating } from '../types';
+import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
 import { TEAM_NAME_MAP } from '../types';
 
 const BASE_URL = 'https://www.kbofancystats.com';
@@ -123,6 +123,96 @@ export async function fetchPitcherStats(season: number): Promise<PitcherStats[]>
 
   await sleep(DELAY_MS);
   return pitchers;
+}
+
+/**
+ * Phase v4-4 C2-B: 타자 스탯 수집.
+ * 동일한 /leaders/ 페이지의 상단 4개 테이블(WAR/wRC+/OPS/ISO).
+ * 타자 행 컬럼: rank | eng_name | kor_name | team | age | position | stat
+ * 투수 행(5컬럼)과 달리 position이 있어 cells.eq(6)에 stat.
+ */
+export async function fetchBatterStats(season: number): Promise<BatterStats[]> {
+  const url = `${BASE_URL}/leaders/`;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Fancy Stats leaders (batter) error: ${res.status}`);
+  }
+
+  const html = await res.text();
+  const $ = cheerio.load(html);
+
+  interface BatterRow {
+    team: string;
+    position: string;
+    age: number;
+    war: number;
+    wrcPlus: number;
+    ops: number;
+    iso: number;
+  }
+  const acc = new Map<string, BatterRow>();
+
+  const readTable = (
+    idx: number,
+    statKey: 'war' | 'wrcPlus' | 'ops' | 'iso',
+  ) => {
+    $('table')
+      .eq(idx)
+      .find('tbody tr')
+      .each((_, row) => {
+        const cells = $(row).find('td');
+        if (cells.length < 7) return;
+        const korName = cells.eq(2).text().trim();
+        const team = cells.eq(3).text().trim();
+        const age = parseNum(cells.eq(4).text());
+        const position = cells.eq(5).text().trim();
+        const stat = parseNum(cells.eq(6).text());
+        if (!korName || !team) return;
+        const key = `${korName}@${team}`;
+        const existing = acc.get(key) ?? {
+          team,
+          position,
+          age,
+          war: 0,
+          wrcPlus: 0,
+          ops: 0,
+          iso: 0,
+        };
+        existing[statKey] = stat;
+        // 첫 테이블에서 position·age 저장
+        if (!existing.position && position) existing.position = position;
+        if (!existing.age && age) existing.age = age;
+        acc.set(key, existing);
+      });
+  };
+
+  readTable(0, 'war');
+  readTable(1, 'wrcPlus');
+  readTable(2, 'ops');
+  readTable(3, 'iso');
+
+  const batters: BatterStats[] = [];
+  for (const [key, row] of acc) {
+    const [name] = key.split('@');
+    const teamCode = resolveTeamCode(row.team);
+    if (!teamCode) continue;
+    batters.push({
+      name,
+      team: teamCode,
+      position: row.position || null,
+      age: row.age || null,
+      war: row.war,
+      wrcPlus: row.wrcPlus,
+      ops: row.ops,
+      iso: row.iso,
+    });
+  }
+
+  await sleep(DELAY_MS);
+  return batters;
 }
 
 /**
