@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.14] - 2026-04-19
+
+### AdSense 심사 대비 작은 정리들
+
+- **ads.txt 동적 라우트**: `/app/ads.txt/route.ts`. `ADSENSE_PUBLISHER_ID` env 있으면 `google.com, pub-xxxxxxxxxxxxxxxx, DIRECT, f08c47fec0942fa0` 자동 서빙, 없으면 placeholder 주석. 승인 후 Vercel env 변수만 추가하면 즉시 적용. `pub-` + 16자리 검증.
+- **Footer 서비스 네비 확장**: 기존 5개 (홈·예측·AI 분석·대시보드·소개)에 `/reviews`·`/players`·`/teams` 3개 추가하여 총 8개. 모바일 `flex-wrap` 정리.
+- **RSS 피드 확장** (`/feed`): 기존 게임별 50개 items에 리뷰 페이지 items 6개 추가:
+  - 최근 3 주간 리뷰
+  - 최근 2 월간 리뷰
+  - 회고 페이지 1개
+  - 각 item에 pubDate, title, description, guid 포함.
+- **MobileNav는 NAV_ITEMS 재사용 확인** — Header에서 `/teams` 이미 추가했으므로 자동 동기화됨 (별도 수정 불요).
+
+### 검증
+
+- Test suite: 76/76 · kbo-data 173/173 · type-check 3/3 통과.
+
 ## [0.5.13] - 2026-04-18
 
 ### 월간 리뷰 라우트 (퀄리티 C1 확장)

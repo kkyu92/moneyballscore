@@ -11,7 +11,7 @@ export function Footer() {
           </div>
           <nav
             aria-label="서비스"
-            className="flex items-center gap-6 text-sm flex-wrap justify-center"
+            className="flex items-center gap-x-6 gap-y-2 text-sm flex-wrap justify-center"
           >
             <Link href="/" className="hover:text-white transition-colors">
               홈
@@ -21,6 +21,15 @@ export function Footer() {
             </Link>
             <Link href="/analysis" className="hover:text-white transition-colors">
               AI 분석
+            </Link>
+            <Link href="/reviews" className="hover:text-white transition-colors">
+              리뷰
+            </Link>
+            <Link href="/players" className="hover:text-white transition-colors">
+              선수
+            </Link>
+            <Link href="/teams" className="hover:text-white transition-colors">
+              팀
             </Link>
             <Link href="/dashboard" className="hover:text-white transition-colors">
               대시보드

@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, toKSTDateString, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
+import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 
 export const revalidate = 3600;
 
@@ -32,6 +34,41 @@ export async function GET() {
     .order('game_date', { ascending: false })
     .order('game_time', { ascending: true })
     .limit(50);
+
+  const reviewItems: string[] = [];
+
+  const recentWeeks = getRecentWeeks(3);
+  for (const w of recentWeeks) {
+    const pubDate = new Date(`${w.endDate}T23:59:00+09:00`).toUTCString();
+    reviewItems.push(`    <item>
+      <title>${escapeXml(`${w.label} 주간 리뷰`)}</title>
+      <link>${SITE_URL}/reviews/weekly/${w.weekId}</link>
+      <guid isPermaLink="true">${SITE_URL}/reviews/weekly/${w.weekId}</guid>
+      <description>${escapeXml(`${w.label} 주간 예측 적중률·하이라이트·팀별 성과·팩터 인사이트`)}</description>
+      <pubDate>${pubDate}</pubDate>
+    </item>`);
+  }
+
+  const recentMonths = getRecentMonths(2);
+  for (const m of recentMonths) {
+    const pubDate = new Date(`${m.endDate}T23:59:00+09:00`).toUTCString();
+    reviewItems.push(`    <item>
+      <title>${escapeXml(`${m.label} 월간 리뷰`)}</title>
+      <link>${SITE_URL}/reviews/monthly/${m.monthId}</link>
+      <guid isPermaLink="true">${SITE_URL}/reviews/monthly/${m.monthId}</guid>
+      <description>${escapeXml(`${m.label} 월간 예측 성과 · 전월 대비 diff · 팀 순위 · 팩터 장기 트렌드`)}</description>
+      <pubDate>${pubDate}</pubDate>
+    </item>`);
+  }
+
+  const missesPubDate = new Date().toUTCString();
+  reviewItems.push(`    <item>
+      <title>${escapeXml("회고: 크게 빗나간 예측")}</title>
+      <link>${SITE_URL}/reviews/misses</link>
+      <guid isPermaLink="false">${SITE_URL}/reviews/misses</guid>
+      <description>${escapeXml("고확신으로 틀린 예측의 사후 분석 — 편향 지목 팩터와 놓친 것을 투명하게 공개")}</description>
+      <pubDate>${missesPubDate}</pubDate>
+    </item>`);
 
   const items = (games ?? []).map((game: any) => {
     const pred = game.predictions?.[0];
@@ -76,6 +113,7 @@ export async function GET() {
     <language>ko</language>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <atom:link href="${SITE_URL}/feed" rel="self" type="application/rss+xml"/>
+${reviewItems.join('\n')}
 ${items.join('\n')}
   </channel>
 </rss>`;
