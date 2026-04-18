@@ -51,25 +51,15 @@ function parseNameCell(raw: string): string {
 }
 
 /**
- * /leaders/ 페이지에서 투수 스탯 수집
- * 단일 페이지에 모든 테이블이 있는 Hugo 정적 사이트
- * T5: 투수 WAR, T6: FIP, T7: xFIP, T8: K/9
+ * /leaders/ HTML에서 투수 스탯 파싱 (순수 함수).
+ *
+ * 테이블 4 WAR, 5 FIP, 6 xFIP, 7 K/9.
+ * 행 구조 (2026-04 확인):
+ *   cells[0]=rank, cells[1]="Eng | 한글", cells[2]=team, cells[3]=age, cells[4]=stat
  */
-export async function fetchPitcherStats(season: number): Promise<PitcherStats[]> {
-  const url = `${BASE_URL}/leaders/`;
-  const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Fancy Stats leaders error: ${res.status}`);
-  }
-
-  const html = await res.text();
+export function parsePitchersFromHtml(html: string): PitcherStats[] {
   const $ = cheerio.load(html);
 
-  // 투수 테이블 공통 행 구조 (2026-04 확인):
-  //   cells[0]=rank, cells[1]="Eng | 한글", cells[2]=team, cells[3]=age, cells[4]=stat
   const readPitcherTable = (idx: number): Map<string, { team: string; stat: number }> => {
     const m = new Map<string, { team: string; stat: number }>();
     $('table').eq(idx).find('tbody tr').each((_, row) => {
@@ -83,7 +73,6 @@ export async function fetchPitcherStats(season: number): Promise<PitcherStats[]>
     return m;
   };
 
-  // 투수 WAR (4), FIP (5), xFIP (6), K/9 (7)
   const warMapT = readPitcherTable(4);
   const fipMap = new Map<string, { team: string; fip: number }>();
   for (const [k, v] of readPitcherTable(5)) fipMap.set(k, { team: v.team, fip: v.stat });
@@ -97,7 +86,6 @@ export async function fetchPitcherStats(season: number): Promise<PitcherStats[]>
   const kMap = new Map<string, number>();
   for (const [k, v] of readPitcherTable(7)) kMap.set(k, v.stat);
 
-  // 합치기
   const pitchers: PitcherStats[] = [];
   for (const [key, { team, fip }] of fipMap) {
     const [name] = key.split('@');
@@ -109,35 +97,45 @@ export async function fetchPitcherStats(season: number): Promise<PitcherStats[]>
       team: teamCode,
       fip,
       xfip: xfipMap.get(key) ?? fip,
-      era: 0, // leaders 페이지에 ERA 없음
+      era: 0,
       innings: 0,
       war: warMap.get(key) ?? 0,
       kPer9: kMap.get(key) ?? 0,
     });
   }
 
-  await sleep(DELAY_MS);
   return pitchers;
 }
 
 /**
- * Phase v4-4 C2-B: 타자 스탯 수집.
- * 동일한 /leaders/ 페이지의 상단 4개 테이블(WAR/wRC+/OPS/ISO).
- * 타자 행 컬럼 (2026-04 확인):
- *   cells[0]=rank, cells[1]="Eng | 한글", cells[2]=team,
- *   cells[3]=age, cells[4]=position, cells[5]=stat
+ * /leaders/ 페이지에서 투수 스탯 수집 (fetch → parse).
  */
-export async function fetchBatterStats(season: number): Promise<BatterStats[]> {
+export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]> {
   const url = `${BASE_URL}/leaders/`;
   const res = await fetch(url, {
     headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
   });
 
   if (!res.ok) {
-    throw new Error(`Fancy Stats leaders (batter) error: ${res.status}`);
+    throw new Error(`Fancy Stats leaders error: ${res.status}`);
   }
 
   const html = await res.text();
+  const pitchers = parsePitchersFromHtml(html);
+
+  await sleep(DELAY_MS);
+  return pitchers;
+}
+
+/**
+ * /leaders/ HTML에서 타자 스탯 파싱 (순수 함수).
+ *
+ * 테이블 0 WAR, 1 wRC+, 2 OPS, 3 ISO.
+ * 행 구조:
+ *   cells[0]=rank, cells[1]="Eng | 한글", cells[2]=team,
+ *   cells[3]=age, cells[4]=position, cells[5]=stat
+ */
+export function parseBattersFromHtml(html: string): BatterStats[] {
   const $ = cheerio.load(html);
 
   interface BatterRow {
@@ -206,6 +204,24 @@ export async function fetchBatterStats(season: number): Promise<BatterStats[]> {
     });
   }
 
+  return batters;
+}
+
+/**
+ * /leaders/ 페이지에서 타자 스탯 수집 (fetch → parse).
+ */
+export async function fetchBatterStats(_season: number): Promise<BatterStats[]> {
+  const url = `${BASE_URL}/leaders/`;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Fancy Stats leaders (batter) error: ${res.status}`);
+  }
+
+  const html = await res.text();
+  const batters = parseBattersFromHtml(html);
   await sleep(DELAY_MS);
   return batters;
 }

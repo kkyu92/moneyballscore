@@ -234,6 +234,26 @@ export async function runDailyPipeline(
     fetchEloRatings(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats elo: ${e}`); return []; }),
   ]);
 
+  // 스크래퍼 헬스 체크 — 기대치 미만이면 errors + 즉시 Telegram 알림.
+  // 투수 리더 페이지는 보통 5-10명, 팀은 항상 10팀, Elo는 항상 10팀.
+  const scraperIssues: string[] = [];
+  if (pitcherStats.length === 0) {
+    scraperIssues.push('Fancy Stats pitcher 0명');
+  }
+  if (teamStats.length < 10) {
+    scraperIssues.push(`Fancy Stats team ${teamStats.length}팀 (기대 10)`);
+  }
+  if (eloRatings.length < 10) {
+    scraperIssues.push(`Fancy Stats Elo ${eloRatings.length}팀 (기대 10)`);
+  }
+  if (scraperIssues.length > 0) {
+    const msg = `셀렉터 드리프트 의심: ${scraperIssues.join(', ')}`;
+    errors.push(msg);
+    try {
+      await notifyError('daily-pipeline SCRAPER', msg);
+    } catch {}
+  }
+
   // 3. FanGraphs 보조 데이터
   console.log('[Pipeline] Fetching FanGraphs...');
   const fgBatters = await fetchBatterLeaders(CURRENT_SEASON).catch((e) => {

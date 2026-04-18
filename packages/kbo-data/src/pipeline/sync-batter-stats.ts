@@ -1,6 +1,11 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchBatterStats } from '../scrapers/fancy-stats';
+import { notifyError } from '../notify/telegram';
 import type { BatterStats } from '../types';
+
+// 시즌 중 Fancy Stats /leaders/가 노출하는 최소 타자 수.
+// 4 테이블 union 기준 관찰값은 보통 10-20명. 아래로 떨어지면 셀렉터 깨졌을 가능성 강함.
+const MIN_EXPECTED_BATTERS = 8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -78,6 +83,7 @@ export interface SyncBatterStatsResult {
   upsertedPlayers: number;
   upsertedStats: number;
   errors: string[];
+  warnings: string[];
   durationMs: number;
 }
 
@@ -93,20 +99,37 @@ export async function syncBatterStats(
   const startedAt = Date.now();
   const db = createAdminClient();
   const errors: string[] = [];
+  const warnings: string[] = [];
   let upsertedPlayers = 0;
   let upsertedStats = 0;
 
   const batters: BatterStats[] = await fetchBatterStats(season);
 
   if (batters.length === 0) {
+    const msg =
+      'fetchBatterStats returned 0 rows — Fancy Stats /leaders/ 셀렉터 드리프트 의심';
+    try {
+      await notifyError('sync-batter-stats', msg);
+    } catch {
+      // 알림 실패는 치명적이지 않음
+    }
     return {
       season,
       fetched: 0,
       upsertedPlayers: 0,
       upsertedStats: 0,
-      errors: ['fetchBatterStats returned 0 rows — 셀렉터 깨졌을 가능성'],
+      errors: [msg],
+      warnings: [],
       durationMs: Date.now() - startedAt,
     };
+  }
+
+  if (batters.length < MIN_EXPECTED_BATTERS) {
+    const warn = `fetched ${batters.length} 명 (기대치 ${MIN_EXPECTED_BATTERS}+). 부분적 셀렉터 실패 가능성.`;
+    warnings.push(warn);
+    try {
+      await notifyError('sync-batter-stats WARNING', warn);
+    } catch {}
   }
 
   const leagueId = await getKBOLeagueId(db);
@@ -154,12 +177,21 @@ export async function syncBatterStats(
     }
   }
 
+  // upsertedStats=0인데 fetched>0이면 전부 DB 실패 → 심각한 상황
+  if (upsertedStats === 0 && batters.length > 0) {
+    const msg = `fetched ${batters.length}건인데 DB upsert 전부 실패. errors: ${errors.slice(0, 3).join(' | ')}`;
+    try {
+      await notifyError('sync-batter-stats CRITICAL', msg);
+    } catch {}
+  }
+
   return {
     season,
     fetched: batters.length,
     upsertedPlayers,
     upsertedStats,
     errors,
+    warnings,
     durationMs: Date.now() - startedAt,
   };
 }
