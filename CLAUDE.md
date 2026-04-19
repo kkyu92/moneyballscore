@@ -54,7 +54,7 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
 
 **교훈**: 외부 API 연동 코드는 구현 시점에 **실제 API 응답과 대조** 필수. 테스트에서 mock만 사용하면 필드 불일치를 절대 못 잡음. curl로 실제 호출해보는 게 가장 확실.
 
-### 이미 구현된 주요 모듈 (2026-04-16 QA 이후 기준)
+### 이미 구현된 주요 모듈 (2026-04-19 v0.5.21 기준)
 
 - `packages/kbo-data/src/agents/` — 에이전트 토론 + 포스트뷰 시스템
   - `debate.ts`: pre-game 오케스트레이터 (홈/원정/회고 병렬 → 심판 순차, fallback 경로)
@@ -81,6 +81,7 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
   - `009_proposals_memories_constraints.sql` — **(v4-3)** `agent_memories` TRUNCATE + `UNIQUE(team_code, memory_type, content)` + `idx_agent_memories_read` + `proposals` 테이블 + RLS
   - `010_factor_error_view.sql` — 팩터별 오차 분석 뷰
   - `011_validator_logs.sql` — validator 검증 로그 테이블
+  - `012_search_and_query_indexes.sql` — **(v0.5.20)** `idx_games_date` / `idx_games_home_team` / `idx_games_away_team` / `idx_players_team` + `pg_trgm` GIN on `players(name_ko, name_en)` (검색 ILIKE 가속). prod 적용 완료.
 - CI:
   - `.github/workflows/ci.yml` (PR/push@main type-check + test, 현재 185 tests)
   - `.github/workflows/live-update.yml` (**v4-3**: cron `*/10 9-15 UTC` = 18:00~00:50 KST, 2h 확장)
@@ -89,7 +90,17 @@ v4-3 플래닝 중 `/plan-eng-review`가 발견. `retro.ts:121`이 `team_code: h
   - `kbo-live.ts`: KBO 공식 AJAX API 라이브 스코어 수집 + 이닝별 승리확률 보정 (v4-3, 필드 매핑 수정 2026-04-16)
 - 파이프라인: daily.ts → runDebate → DB 저장. postview는 live-update가 자동 트리거.
 
-**v4-4 착수 조건**: `/analysis/game/[id]` UI + 빅매치 자동 선정 + A/B flag + `/debug/hallucination` 대시보드. 사용자 노출 Phase이므로 `/plan-ceo-review` + `/plan-design-review` 권장.
+- **v0.5.18-21 추가** (2026-04-19, AdSense 심사 대비 + 사용자 리텐션 + 운영 안정):
+  - `apps/moneyball/src/components/shared/Breadcrumb.tsx` — 시각 + `BreadcrumbList` JSON-LD 동시 출력. 7개 동적 라우트(analysis/matchup/players/teams/reviews/predictions)에 통합.
+  - `apps/moneyball/src/app/not-found.tsx` — 디자인 시스템 컬러 + 빠른 링크 6종. `metadata.robots index: false`.
+  - `apps/moneyball/src/components/layout/CookieConsent.tsx` — localStorage 1회 dismiss, PIPA-compliant 안내.
+  - `apps/moneyball/src/app/about/page.tsx` — FAQ 7개 + `FAQPage` JSON-LD.
+  - `apps/moneyball/src/components/shared/FavoriteTeamFilter.tsx` — 홈 페이지 칩 바, localStorage `mb_favorite_teams_v1`. 인라인 `<style>`로 `data-game-id` 카드 숨김.
+  - `apps/moneyball/src/app/search/page.tsx` + `SearchForm.tsx` — `/search?q=` 통합 검색 (팀/선수/일자). 헤더 컴팩트 입력 + 모바일 아이콘.
+  - `apps/moneyball/src/app/error.tsx` / `global-error.tsx` — 에러 바운더리 + Vercel logs + Sentry.captureException.
+  - `apps/moneyball/{instrumentation,sentry.server.config,sentry.edge.config,instrumentation-client}.ts` + `next.config.ts withSentryConfig` — Sentry SDK v10 통합. `NEXT_PUBLIC_SENTRY_DSN` 활성. Onboarding 검증 완료.
+
+**v4-4 착수 조건**: 충족됨 (`/analysis/game/[id]` UI · 빅매치 자동 선정 · A/B flag · `/debug/hallucination` 대시보드 모두 구현). 다음 큰 방향은 사용자 자연 발화 관찰 + AdSense 심사 (사용자 타이밍).
 
 이 구조 위에 **리팩터·보강 관점**으로 접근해야 하며 "새로 만든다" 접근 금지.
 

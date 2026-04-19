@@ -68,27 +68,43 @@ HAVING count(*) > 1;
 
 ---
 
-## 🚀 Phase v4-4 (사용자 UI 노출) — 착수 가능
+## ✅ Phase v4-4 (사용자 UI 노출) — 구현 완료 (2026-04-16~17)
 
-### v4-4 플래닝 (지금 가능)
-- [ ] `/plan-ceo-review` 재실행 — 빅매치 1개 전략, 리더보드 유무, 파일럿 기간 재검토
-- [ ] `/plan-design-review` — 빅매치 hero 섹션 레이아웃, 카드 구조, 다크모드 호환
-- [ ] `PLAN_v4.md §3 Phase v4-4` 상세 보강 (현재 골격만)
-- [ ] `/plan-eng-review` — 라우트 구조, 빅매치 자동 선정 휴리스틱, A/B flag 설계
+전체 항목 구현 완료. 운영/검증은 자연 발화 관찰 섹션으로 이관.
 
-### v4-4 구현 (경기 종료 없이 가능)
-- [ ] `/analysis/game/[id]` 페이지 — 토론 렌더 (홈/원정 에이전트 박스 + 심판 reasoning + factor 분해)
-- [ ] `/analysis` 인덱스 + 시즌 AI 리더보드
-- [ ] 빅매치 자동 선정 휴리스틱 (Elo 격차 가장 작은 1경기, SCOPE_LOCK 4.7)
-- [ ] `BigMatchDebateCard.tsx` 컴포넌트 (hero 섹션)
-- [ ] A/B flag: 빅매치 1개 hero + 나머지 4경기 기존 카드
-- [ ] `/debug/hallucination` 대시보드 (validator 로그, BASIC auth)
-- [ ] `docs/defamation-ir.md` 명예훼손 IR 절차 문서
+- ✅ `/analysis/game/[id]` 페이지 — 홈/원정 에이전트 박스 + 심판 reasoning + factor 분해
+- ✅ `/analysis` 인덱스 + 시즌 AI 리더보드 (`/dashboard` 이전)
+- ✅ 빅매치 자동 선정 휴리스틱 — `packages/kbo-data/src/big-match/selectBigMatch.ts`
+- ✅ `BigMatchDebateCard.tsx` hero 섹션 컴포넌트
+- ✅ A/B flag — `apps/moneyball/src/lib/feature-flags.ts isBigMatchEnabled`
+- ✅ `/debug/hallucination` 대시보드 + middleware BASIC auth (validator 로그)
+- ✅ `docs/defamation-ir.md` 명예훼손 IR 절차 문서
 
-### v4-4 구현 (실제 post_game 데이터 필요)
-- [ ] post_game 데이터 UI 렌더링 최종 QA
-- [ ] 빅매치 자동 선정이 실제 경기에서 의미 있는 선택 하는지 확인
-- [ ] 1경기 내부 QA → 사용자 1인 파일럿 1주 → 전체 공개
+남은 검증 (자연 발화):
+- post_game 데이터 UI 렌더링 — Phase v4-3 자연 발화 관찰 섹션 A,B,C 항목으로 검증
+- 빅매치 자동 선정 결과 의미 있는지 — 운영 데이터 축적 후 후속 회고
+
+---
+
+## 🛠 v0.5.18-21 후속 운영 (2026-04-19)
+
+### Sentry 모니터링 정기 점검
+- **What**: Sentry Issues 탭 주 1회 점검. 같은 에러 패턴 반복 시 fix.
+- **Where**: https://sentry.io 본인 계정, 프로젝트 `moneyballscore`
+- **When**: 주말 retro 시 함께
+- **Free plan 한도**: 월 5K errors. 80% 도달 시 이메일 알림 자동.
+
+### Migration 012 적용 검증
+- **Done**: `supabase migration list --linked` — 001~012 모두 동기화 완료 (2026-04-19).
+- 남은 검증: prod에서 `/search` 한글 선수 ILIKE 응답 시간이 빠른지 (수동 1회).
+
+### 사용자 리텐션 기능 — 부분 구현 진행도
+- ✅ 관심 팀 필터 (`FavoriteTeamFilter.tsx`) — localStorage 기반
+- ✅ RSS feed (`/feed`) — 이전 구현
+- ⏸ 북마크 (특정 경기 팔로우)
+- ⏸ 결과 알림 (이메일/푸시)
+- ⏸ 사용자 계정 / 세션
+- 우선순위: LOW (트래픽 발생 후 재평가)
 
 ---
 
@@ -97,23 +113,10 @@ HAVING count(*) > 1;
 - **구현**: `daily.ts` predict 모드 시작 시 `agent_memories` + `validator_logs` 30일 초과 row 자동 삭제
 - **pg_cron 불필요**: 기존 daily-pipeline cron이 매일 실행하므로 별도 DB extension 없이 해결
 
-## 🎨 v5 이후 — Design 리뷰 deferred 항목
+## ✅ v5 이후 deferred — DESIGN.md 작성 (완료)
 
-### DESIGN.md 작성 (`/design-consultation` 실행)
-- **What**: 프로젝트 디자인 시스템 문서 작성. 컬러 팔레트, 타이포 스케일, 스페이싱, 컴포넌트 vocabulary, 모션 가이드
-- **Why**: v4-4 Design 리뷰 score 상한이 7.5/10인 이유 — DESIGN.md 부재. 일관된 디자인 결정을 위한 source of truth
-- **Pros**: 신규 컴포넌트 결정 빠름, 다른 페이지 일관성, 브랜드 정체성 명확
-- **Cons**: `/design-consultation` 1~2시간 소요, v4-4 구현 후에 해도 늦지 않음
-- **Context**: v4-4는 기존 `globals.css` 다크 그린 토큰 준수로 최소 일관성 확보. v5 UI 확장(사용자 설정, 알림 등) 전에 작성 필요
-- **우선순위**: MEDIUM (v5 시작 전)
-
-### 사용자 리텐션 기능 (북마크·RSS·알림)
-- **What**: 사용자가 특정 경기 팔로우, 즐겨찾기, 결과 알림 수신
-- **Why**: v4-4 Design 리뷰 User Journey Pass에서 발견 — Step 7 "경기 종료 후 재방문"이 현재 설계에 없음
-- **Pros**: 재방문 유도, AdSense 수익 증가, RSS로 검색엔진 추가 유입
-- **Cons**: 사용자 모델·세션·이메일 인프라 필요. v4-4 범위 초과
-- **Context**: v4-4는 URL 공유만 가능. 실제 "다시 오게 만드는" 메커니즘 없음
-- **우선순위**: LOW (v5 후반 또는 v6)
+- DESIGN.md 작성 완료 (2026-04-16, `/design-consultation` 실행).
+- 다크 그린 + 골드 팔레트 + Pretendard 타이포 + 8px 스페이싱 시스템 + Decisions Log 포함.
 
 ---
 

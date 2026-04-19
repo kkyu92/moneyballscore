@@ -1,5 +1,95 @@
 # Changelog
 
+## [0.5.21] - 2026-04-19
+
+### Sentry 에러 모니터링 통합
+
+**변경**:
+- **`@sentry/nextjs` v10 통합**: 클라이언트(`instrumentation-client.ts`) + 서버(`sentry.server.config.ts`) + edge(`sentry.edge.config.ts`) + `instrumentation.ts` register hook + `next.config.ts` `withSentryConfig` wrapper.
+- **에러 바운더리 자동 캡처**: `error.tsx` / `global-error.tsx` 가 `Sentry.captureException` 호출. 클라이언트 React 에러, 서버 RSC 에러, layout 자체 실패 모두 수집.
+- **`onRouterTransitionStart`**: App Router 페이지 전환 트레이스 자동 수집 (v10 권장 패턴).
+- **DSN 없으면 no-op**: `NEXT_PUBLIC_SENTRY_DSN` env 비어 있으면 init 자체를 안 부르므로 빌드/런타임 영향 0. Sentry 가입 → DSN env 추가 → 자동 활성.
+- **Vercel 프로젝트 정리**: 빈 `moneyballscore` 프로젝트 제거 + 진짜 prod 프로젝트를 `moneyball-ecosystem-moneyball` → `moneyballscore` 로 rename. CLI · dashboard 표기 통일.
+
+### 검증
+
+- 라이브 배포에서 client `captureException` → Sentry Issues 탭 도착 확인.
+- 무료 Developer Plan 한도(월 5K errors) 충분.
+
+---
+
+## [0.5.20] - 2026-04-19
+
+### 에러 바운더리 + Supabase 풀스캔 제거 + 검색 인덱스
+
+**에러 처리 강화**:
+- **`error.tsx`**: 세그먼트 단위 에러 화면. 디자인 시스템 컬러 + "다시 시도" / "홈으로" 버튼 + 오류 ID 표시. Vercel logs 자동 전송.
+- **`global-error.tsx`**: layout 자체 실패 fallback. layout 못 쓰는 환경이라 인라인 스타일로 디자인 시스템 컬러만 살림.
+
+**Supabase 페이지 쿼리 최적화 (가장 큰 perf win)**:
+- **`buildTeamProfile` / `buildMatchupProfile`**: 매 페이지 hit 시 전체 `pre_game` predictions 풀스캔 후 JS 필터하던 패턴 제거. `from('games')` + `.or()` SQL 필터 + `!inner predictions` 로 전환 → 페이지당 수천 row → 수~수십 row.
+- 기존 type shape 유지 → downstream 컴포넌트 코드 변경 0.
+
+**Migration 012 (prod 적용 완료)**:
+- `idx_games_date` (단일 컬럼) — 기존 `(league_id, game_date)` 복합 인덱스가 league_id 없이 검색 시 못 잡던 문제 해결.
+- `idx_games_home_team` / `idx_games_away_team` — `buildTeamProfile`/`buildMatchupProfile` SQL 필터 인덱스 활용.
+- `idx_players_team` — 팀 프로필 투수 leaderboard.
+- **`pg_trgm` 확장 + GIN 인덱스 on `players(name_ko, name_en)`** — `/search` 한글/영문 ILIKE 부분 검색 가속.
+
+### 검증
+
+- 스키마: 011 → 012, prod Supabase remote 동기화 (`supabase migration list --linked`).
+- 페이지 응답: 정상 (HTTP 200, MoneyBall Score 헤더 응답 확인).
+
+---
+
+## [0.5.19] - 2026-04-19
+
+### 관심 팀 필터 + 통합 검색
+
+**관심 팀 필터** (`FavoriteTeamFilter.tsx`, client):
+- 홈 페이지 상단 칩 바. 팀 다중 선택 → localStorage `mb_favorite_teams_v1`.
+- "관심 팀만 보기" 토글 → 인라인 `<style>`로 `data-game-id` 카드 숨김. SSR friendly (hydration 후 mount).
+- 팀 색상 inline (KBO 공식 컬러 칩).
+
+**통합 검색** (`/search?q=…`):
+- 결과 그룹 3종: 팀(in-memory match), 선수(Supabase ILIKE on `name_ko`/`name_en`), 일자(`YYYY-MM-DD` prefix).
+- 정확 일자 입력 시 `/predictions/[date]` 직접 링크 표시.
+- `SearchForm.tsx` (client): 헤더 데스크톱 컴팩트 입력 + 모바일 검색 아이콘 → `/search` 페이지.
+- 검색 페이지에 검색 팁 (팀명 / 선수명 / 날짜 패턴 예시) + Breadcrumb 적용.
+
+### 검증
+
+- 65/65 + 173/173 + 87/87 tests · type-check 3/3 통과.
+
+---
+
+## [0.5.18] - 2026-04-19
+
+### AdSense 심사 대비 — Breadcrumb · 404 · FAQ · 쿠키 안내
+
+**SEO 신호 강화**:
+- **`Breadcrumb` 컴포넌트** (`components/shared/Breadcrumb.tsx`): 시각 + `BreadcrumbList` JSON-LD 동시 출력. Server Component (no 'use client').
+- **7개 동적 라우트 적용**: `/analysis/game/[id]`, `/matchup/[a]/[b]`, `/players/[id]`, `/teams/[code]`, `/reviews/weekly/[w]`, `/reviews/monthly/[m]`, `/predictions/[date]`. 기존 ad-hoc breadcrumb 4개 통합.
+
+**404 페이지** (`app/not-found.tsx`):
+- 디자인 시스템 컬러 + 빠른 링크 6종 (홈/오늘/AI 분석/팀/선수/대시보드) + URL 패턴 힌트.
+- `metadata.robots: { index: false }` 로 색인 방지.
+
+**쿠키 동의 배너** (`CookieConsent.tsx`):
+- localStorage `mb_cookie_notice_v1` 기반 1회 dismiss. PIPA-compliant 안내 톤 (GA + 광고 식별자 사용 명시 + 개인정보처리방침 링크).
+- 반응형 (모바일 column / 데스크톱 row) + 다크모드 호환.
+
+**FAQ schema** (about 페이지):
+- 7개 FAQ 추가 + `FAQPage` JSON-LD: 예측 방법론 / 적중률 / 데이터 출처 / 무료 여부 / 사후분석 / 도박 금지 안내 / AI 모델.
+- Q/A 펼치기/접기 (`<details>`) UI.
+
+### 검증
+
+- 65/65 + 173/173 + 87/87 tests · type-check 3/3 통과.
+
+---
+
 ## [0.5.17] - 2026-04-19
 
 ### 타입 안전성 + a11y 개선
