@@ -68,14 +68,38 @@ async function searchPlayers(q: string): Promise<PlayerHit[]> {
 
 async function searchDates(q: string): Promise<DateHit[]> {
   if (!PARTIAL_DATE_RE.test(q)) return [];
+  // games.game_date 는 Postgres date 컬럼 → ILIKE 미지원.
+  // 입력 길이에 따라 정확/월/연 범위로 .gte+.lt 사용.
+  let from: string;
+  let to: string;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(q)) {
+    // 정확 일자 — equality
+    from = q;
+    to = q;
+  } else if (/^\d{4}-\d{2}$/.test(q)) {
+    // YYYY-MM — 해당 월 1일 ~ 다음 월 1일 미만
+    const [y, m] = q.split('-').map(Number);
+    const firstOfNext = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`;
+    from = `${q}-01`;
+    to = firstOfNext;
+  } else if (/^\d{4}$/.test(q)) {
+    // YYYY — 해당 년 1월 1일 ~ 다음 년 1월 1일 미만
+    from = `${q}-01-01`;
+    to = `${Number(q) + 1}-01-01`;
+  } else {
+    return [];
+  }
+
   const supabase = await createClient();
-  const pattern = `${q}%`;
-  const { data: games } = await supabase
+  const query = supabase
     .from('games')
     .select('game_date')
-    .ilike('game_date', pattern)
     .order('game_date', { ascending: false })
     .limit(60);
+  const { data: games } =
+    from === to
+      ? await query.eq('game_date', from)
+      : await query.gte('game_date', from).lt('game_date', to);
   if (!games) return [];
   const counts = new Map<string, number>();
   for (const g of games as Array<{ game_date: string }>) {
