@@ -1,8 +1,8 @@
 // Sentry SDK v10 서버 사이드 진입점.
-// 이전 패턴 (register() → dynamic import ./sentry.server.config) 이 Vercel/Turbopack
-// 조합에서 실제로 호출되지 않는 드리프트 발견 → 모듈스코프 + register() 양쪽에
-// Sentry.init 직접 호출. 중복 init 은 SDK 가 no-op.
+// 드리프트 사례 6: Next.js 16 + src/app 구조에선 이 파일이 src/ 내부에 있어야 Next 가
+// 자동 감지·로드. 이전 패턴 (register → dynamic import) + 위치 루트 두 문제 동시 해결.
 import * as Sentry from '@sentry/nextjs';
+import { scrubSentryEvent } from './sentry-scrub';
 
 function initSentry() {
   const dsn = process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN;
@@ -12,6 +12,9 @@ function initSentry() {
     dsn,
     environment: process.env.VERCEL_ENV ?? 'development',
     tracesSampleRate: 0.1,
+    // 대시보드 Sensitive Fields 가 user/contexts/tags/extras 깊이 매칭 못함 (가드 B 테스트 확인).
+    // beforeSend 훅이 모든 이벤트에 대해 코드 레벨 스크럽 강제.
+    beforeSend: scrubSentryEvent,
   });
 }
 

@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { scrubSentryEvent } from './sentry-scrub';
 
 // Sentry SDK v10+ 클라이언트 진입점.
 // 이전 패턴(sentry.client.config.ts)은 v8부터 deprecated → instrumentation-client.ts 가 자동 로드.
@@ -19,6 +20,8 @@ if (dsn) {
       'NetworkError',
       'Failed to fetch',
     ],
+    // 코드 레벨 PII 스크럽 — 대시보드 Sensitive Fields 의 key 매칭 한계 커버 (가드 B 반영).
+    beforeSend: scrubSentryEvent,
   });
 }
 
