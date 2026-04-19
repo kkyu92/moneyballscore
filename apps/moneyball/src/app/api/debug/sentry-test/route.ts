@@ -76,7 +76,10 @@ export async function GET(request: NextRequest) {
       scope.setTag('member_id', 'member_99999');
       scope.setTag('subscriber_id', 'sub_99999');
 
-      Sentry.captureException(new Error(`PII scrubbing guard B — ${stamp}`));
+      // beforeSend 배선 이후 새 이슈로 분리되도록 fingerprint 강제.
+      // 이전 raw 유출 이슈와 섞이지 않게 v2 마커.
+      scope.setFingerprint(['pii-guard-b-v2-beforeSend']);
+      Sentry.captureException(new Error(`PII scrubbing guard B v2 [beforeSend] — ${stamp}`));
     });
 
     // Vercel 서버리스는 response 반환 즉시 function 종료 → Sentry 백그라운드 send 유실.
