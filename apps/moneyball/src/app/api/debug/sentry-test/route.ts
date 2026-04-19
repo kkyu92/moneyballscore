@@ -1,6 +1,17 @@
 import { NextRequest } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 
+// 진단: instrumentation.ts 가 register() 를 호출 안 해서 Sentry.init 이 안 돌 가능성.
+// 모듈 로드 시 직접 init 해서 그 가설 검증. 동일한 DSN 이라 중복 init 은 no-op.
+const directDsn = process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN;
+if (directDsn && !Sentry.getClient()) {
+  Sentry.init({
+    dsn: directDsn,
+    environment: process.env.VERCEL_ENV ?? 'development',
+    tracesSampleRate: 0.1,
+  });
+}
+
 /**
  * 임시 테스트 라우트 — Sentry → playbook 허브 dispatch 체인 E2E 검증용.
  *
@@ -24,6 +35,7 @@ export async function GET(request: NextRequest) {
     dsnPrefix: dsn?.slice(0, 30),
     clientInitialized: !!client,
     clientDsn: client?.getDsn() ? 'set' : 'unset',
+    directInitTriggered: !!directDsn,
     nextRuntime: process.env.NEXT_RUNTIME,
     vercelEnv: process.env.VERCEL_ENV,
   };
