@@ -16,22 +16,57 @@ export async function GET(request: NextRequest) {
   const mode = request.nextUrl.searchParams.get('mode') || 'e2e';
   const stamp = Date.now();
 
-  const err =
-    mode === 'pii'
-      ? new Error(
-          `PII scrubbing test — email=fake@test.local user_id=99999 jwt=fake.jwt.xxx session_id=sess_fake_${stamp}`
-        )
-      : new Error(`E2E sentry-dispatch trigger — ${stamp}`);
+  if (mode === 'pii') {
+    // 가드 B — Sensitive Fields 스크러버 실 동작 검증.
+    // Sentry 스크러버는 freeform 메시지가 아닌 **구조화된 키 이름** 을 매칭.
+    // 따라서 user / contexts / extras 에 가짜 PII 필드명을 실어야 제대로 테스트됨.
+    Sentry.withScope((scope) => {
+      scope.setUser({
+        email: 'fake@test.local',
+        id: '99999',
+        username: 'fake_user_test',
+        ip_address: '1.2.3.4',
+      });
+      scope.setContext('auth', {
+        jwt: `fake.jwt.xxx.${stamp}`,
+        refresh_token: `rt_fake_${stamp}`,
+        session_id: `sess_fake_${stamp}`,
+        authorization: 'Bearer fake_token_xxx',
+        cookie: 'sessionid=fake; user_id=99999',
+      });
+      scope.setContext('profile', {
+        phone: '010-1234-5678',
+        phone_number: '010-1234-5678',
+        email_verified: true,
+        display_name: '가짜유저',
+        avatar_url: 'https://example.com/fake.png',
+      });
+      scope.setContext('payment', {
+        stripe: 'sk_fake_xxx',
+        customer_id: 'cus_fake',
+        payment_method: 'pm_fake',
+        charge: 'ch_fake',
+      });
+      scope.setContext('integration', {
+        discord_id: 'fake_discord_99999',
+        slack_user_id: 'U_FAKE_99999',
+        webhook_url: 'https://discord.com/api/webhooks/fake',
+      });
+      scope.setExtra('supabase.auth', { jwt: 'fake-supabase-jwt' });
+      scope.setExtra('supabase.user', { email: 'fake@supabase.test', id: 'user_99999' });
+      scope.setExtra('oauth', { refresh_token: 'oauth_rt_fake' });
+      scope.setExtra('referrer', 'https://evil.example.com/?user_id=99999');
+      scope.setExtra('query_string', 'email=fake@test.local&token=fake_xxx');
+      scope.setTag('member_id', 'member_99999');
+      scope.setTag('subscriber_id', 'sub_99999');
 
-  // captureException 으로 명시적으로 Sentry 에 보내고 JSON 응답 반환.
-  // (route handler 에서 throw 하면 Next 에러 바운더리가 먼저 잡을 수 있어서,
-  //  Sentry 포착 확실성을 위해 explicit capture 사용)
-  Sentry.captureException(err);
+      Sentry.captureException(new Error(`PII scrubbing guard B — ${stamp}`));
+    });
 
-  return Response.json({
-    triggered: true,
-    mode,
-    stamp,
-    message: err.message,
-  });
+    return Response.json({ triggered: true, mode: 'pii', stamp });
+  }
+
+  // mode=e2e — 가드 D: 전체 체인 도달 검증용 안전 페이로드
+  Sentry.captureException(new Error(`E2E sentry-dispatch trigger — ${stamp}`));
+  return Response.json({ triggered: true, mode: 'e2e', stamp });
 }
