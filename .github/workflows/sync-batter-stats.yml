@@ -32,3 +32,25 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $CRON_SECRET" \
             -d "$BODY"
+
+      - name: Notify playbook on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          TITLE="${WORKFLOW_NAME} 실패"
+          BODY="Workflow: ${WORKFLOW_NAME}
+          Run: ${RUN_URL}
+          Branch: ${BRANCH}
+          Commit: ${COMMIT_SHA}"
+          gh api repos/kkyu92/playbook/dispatches \
+            -f event_type=worker-error \
+            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[title]=${TITLE}" \
+            -f "client_payload[body]=${BODY}" \
+            -f "client_payload[type]=error-log"
