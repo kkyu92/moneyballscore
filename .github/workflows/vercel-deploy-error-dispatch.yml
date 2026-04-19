@@ -1,0 +1,44 @@
+name: Vercel Deploy Failure Dispatch
+
+on:
+  deployment_status:
+
+jobs:
+  dispatch:
+    # Vercel 이 만드는 deployment_status 이벤트의 state 가 실패류일 때만 dispatch.
+    # 성공 이벤트는 조용히 무시해서 허브 노이즈 차단.
+    if: github.event.deployment_status.state == 'failure' || github.event.deployment_status.state == 'error'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Dispatch failure to playbook
+        env:
+          GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
+          SHA: ${{ github.event.deployment.sha }}
+          REF: ${{ github.event.deployment.ref }}
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
+          STATE: ${{ github.event.deployment_status.state }}
+          TARGET_URL: ${{ github.event.deployment_status.target_url }}
+          DESCRIPTION: ${{ github.event.deployment_status.description }}
+          CREATOR: ${{ github.event.deployment_status.creator.login }}
+        run: |
+          set -e
+          SHORT="${SHA:0:7}"
+          TITLE="Vercel 배포 실패: ${SHORT} (${ENVIRONMENT})"
+          BODY=$(cat <<EOF
+          Commit: ${SHA}
+          Ref: ${REF}
+          Environment: ${ENVIRONMENT}
+          State: ${STATE}
+          Deploy URL: ${TARGET_URL}
+          Creator: ${CREATOR}
+          Description: ${DESCRIPTION}
+          EOF
+          )
+
+          gh api repos/kkyu92/playbook/dispatches \
+            -f event_type=worker-error \
+            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[title]=${TITLE}" \
+            -f "client_payload[body]=${BODY}" \
+            -f "client_payload[type]=vercel-deploy-error"
