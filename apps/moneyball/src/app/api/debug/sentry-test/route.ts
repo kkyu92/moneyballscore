@@ -16,6 +16,22 @@ export async function GET(request: NextRequest) {
   const mode = request.nextUrl.searchParams.get('mode') || 'e2e';
   const stamp = Date.now();
 
+  // 진단: DSN/클라이언트 초기화 상태를 response 에 실어서 Vercel 로그 없이 확인.
+  const dsn = process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN;
+  const client = Sentry.getClient();
+  const diagnostic = {
+    dsnPresent: !!dsn,
+    dsnPrefix: dsn?.slice(0, 30),
+    clientInitialized: !!client,
+    clientDsn: client?.getDsn() ? 'set' : 'unset',
+    nextRuntime: process.env.NEXT_RUNTIME,
+    vercelEnv: process.env.VERCEL_ENV,
+  };
+
+  if (mode === 'diag') {
+    return Response.json({ triggered: false, mode: 'diag', diagnostic });
+  }
+
   if (mode === 'pii') {
     // 가드 B — Sensitive Fields 스크러버 실 동작 검증.
     // Sentry 스크러버는 freeform 메시지가 아닌 **구조화된 키 이름** 을 매칭.
@@ -65,12 +81,12 @@ export async function GET(request: NextRequest) {
 
     // Vercel 서버리스는 response 반환 즉시 function 종료 → Sentry 백그라운드 send 유실.
     // flush 로 전송 완료까지 블록.
-    await Sentry.flush(2000);
-    return Response.json({ triggered: true, mode: 'pii', stamp });
+    const flushed = await Sentry.flush(3000);
+    return Response.json({ triggered: true, mode: 'pii', stamp, flushed, diagnostic });
   }
 
   // mode=e2e — 가드 D: 전체 체인 도달 검증용 안전 페이로드
   Sentry.captureException(new Error(`E2E sentry-dispatch trigger — ${stamp}`));
-  await Sentry.flush(2000);
-  return Response.json({ triggered: true, mode: 'e2e', stamp });
+  const flushed = await Sentry.flush(3000);
+  return Response.json({ triggered: true, mode: 'e2e', stamp, flushed, diagnostic });
 }
