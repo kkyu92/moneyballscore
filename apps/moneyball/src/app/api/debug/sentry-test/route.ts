@@ -63,10 +63,14 @@ export async function GET(request: NextRequest) {
       Sentry.captureException(new Error(`PII scrubbing guard B — ${stamp}`));
     });
 
+    // Vercel 서버리스는 response 반환 즉시 function 종료 → Sentry 백그라운드 send 유실.
+    // flush 로 전송 완료까지 블록.
+    await Sentry.flush(2000);
     return Response.json({ triggered: true, mode: 'pii', stamp });
   }
 
   // mode=e2e — 가드 D: 전체 체인 도달 검증용 안전 페이로드
   Sentry.captureException(new Error(`E2E sentry-dispatch trigger — ${stamp}`));
+  await Sentry.flush(2000);
   return Response.json({ triggered: true, mode: 'e2e', stamp });
 }
