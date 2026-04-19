@@ -61,3 +61,14 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* CookieConsent 배너가 떠있는 동안 main 콘텐츠가 가리지 않도록 padding 추가.
+   CookieConsent.tsx 가 mount/dismiss 시 body[data-cookie-shown] 토글. */
+body[data-cookie-shown="true"] main {
+  padding-bottom: 6rem;
+}
+@media (min-width: 640px) {
+  body[data-cookie-shown="true"] main {
+    padding-bottom: 5rem;
+  }
+}

@@ -18,6 +18,19 @@ export function CookieConsent() {
     }
   }, []);
 
+  // 배너가 떠있는 동안 main에 padding-bottom 추가 → 콘텐츠 가림 방지.
+  // body[data-cookie-shown="true"] main 셀렉터를 globals.css 에서 매칭.
+  useEffect(() => {
+    if (visible) {
+      document.body.dataset.cookieShown = 'true';
+    } else {
+      delete document.body.dataset.cookieShown;
+    }
+    return () => {
+      delete document.body.dataset.cookieShown;
+    };
+  }, [visible]);
+
   const dismiss = () => {
     try {
       localStorage.setItem(STORAGE_KEY, '1');
