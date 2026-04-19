@@ -11,23 +11,67 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Check PLAYBOOK_PAT expiry and dispatch on ≤14 days
+      - name: Check PLAYBOOK_PAT expiry and dispatch outcome
         env:
           GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
           PAT: ${{ secrets.PLAYBOOK_PAT }}
         run: |
           set -e
 
+          dispatch() {
+            local title="$1"
+            local body="$2"
+            local type="$3"
+            gh api repos/kkyu92/playbook/dispatches \
+              -f event_type=worker-error \
+              -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+              -f "client_payload[title]=${title}" \
+              -f "client_payload[body]=${body}" \
+              -f "client_payload[type]=${type}"
+          }
+
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
           HEADER=$(curl -sI -H "Authorization: Bearer $PAT" https://api.github.com/user \
             | awk -F': ' 'tolower($1)=="github-authentication-token-expiration"{sub(/\r$/, "", $2); print $2}')
 
+          # 가드 — 헤더 미존재: silent 실패 대신 허브에 명시적 알림
           if [ -z "$HEADER" ]; then
-            echo "No expiry header returned — PAT is likely classic without expiration. Nothing to warn."
+            echo "No expiry header returned"
+            BODY=$(cat <<EOF
+          PLAYBOOK_PAT 로 GET /user 호출은 성공했으나 github-authentication-token-expiration 헤더가 없음.
+
+          원인 후보:
+          - Classic PAT (만료 없음) — fine-grained 로 마이그레이션 권장
+          - GitHub API 헤더 네이밍 변경
+
+          조치: https://github.com/settings/tokens 에서 fine-grained PAT 재발급 + Repository secrets 갱신.
+
+          Run: ${RUN_URL}
+          EOF
+          )
+            dispatch "PLAYBOOK_PAT: 만료 헤더 미존재 (fine-grained 확인 필요)" "$BODY" "pat-header-missing"
             exit 0
           fi
 
           echo "Raw expiry: $HEADER"
-          EXPIRY_EPOCH=$(date -u -d "$HEADER" +%s)
+
+          # 가드 — 파싱 실패: 실 헤더 값을 body 에 싣고 dispatch
+          EXPIRY_EPOCH=$(date -u -d "$HEADER" +%s 2>/dev/null || true)
+          if [ -z "$EXPIRY_EPOCH" ] || [ "$EXPIRY_EPOCH" = "0" ]; then
+            BODY=$(cat <<EOF
+          github-authentication-token-expiration 헤더 값을 GNU date 로 파싱 실패.
+
+          Raw header: ${HEADER}
+
+          포맷 확인 후 워크플로 파서 수정 필요.
+          Run: ${RUN_URL}
+          EOF
+          )
+            dispatch "PLAYBOOK_PAT: 만료일 파싱 실패" "$BODY" "pat-parse-error"
+            exit 0
+          fi
+
           NOW_EPOCH=$(date -u +%s)
           DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
           EXPIRY_DATE=$(date -u -d "$HEADER" +%Y-%m-%d)
@@ -47,18 +91,12 @@ jobs:
           1. https://github.com/settings/tokens 에서 PAT 재발급 (만료 연장 또는 신규)
           2. moneyballscore Repository secrets → PLAYBOOK_PAT 값 갱신
 
-          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Run: ${RUN_URL}
           EOF
           )
+          dispatch "$TITLE" "$BODY" "pat-expiry"
 
-          gh api repos/kkyu92/playbook/dispatches \
-            -f event_type=worker-error \
-            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
-            -f "client_payload[title]=${TITLE}" \
-            -f "client_payload[body]=${BODY}" \
-            -f "client_payload[type]=pat-expiry"
-
-      - name: Notify playbook on failure
+      - name: Notify playbook on workflow-level failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
@@ -66,10 +104,10 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -e
-          TITLE="${WORKFLOW_NAME} 실패"
+          TITLE="${WORKFLOW_NAME} 워크플로 자체 실패"
           BODY="Workflow: ${WORKFLOW_NAME}
           Run: ${RUN_URL}
-          (PAT 만료 체크 자체가 실패했다면 이미 PAT이 죽었을 가능성 있음)"
+          (체크 스텝 내부 dispatch 실패 또는 unexpected 종료 — PAT 자체가 invalid 할 가능성 포함)"
           gh api repos/kkyu92/playbook/dispatches \
             -f event_type=worker-error \
             -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
