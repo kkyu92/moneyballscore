@@ -121,8 +121,8 @@ export default function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
+        <GoogleAnalytics gaId={GA_ID} />
       </body>
-      <GoogleAnalytics gaId={GA_ID} />
     </html>
   );
 }
