@@ -122,9 +122,11 @@ async function getNextScheduledDate(): Promise<{
 }
 
 function formatKoreanWeekday(dateStr: string): string {
-  const d = new Date(`${dateStr}T00:00:00+09:00`);
+  // 서버 timezone (Vercel UTC) 무관하게 날짜 문자열 그대로의 요일.
+  // UTC 정오 앵커 + getUTCDay 로 하루 밀리지 않음.
+  const d = new Date(`${dateStr}T12:00:00Z`);
   const days = ['일', '월', '화', '수', '목', '금', '토'];
-  return days[d.getDay()];
+  return days[d.getUTCDay()];
 }
 
 async function getSeasonAccuracy() {
