@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import {
   parseBattersFromHtml,
   parsePitchersFromHtml,
+  resolveTeamCode,
 } from '../scrapers/fancy-stats';
 
 const FIXTURE_PATH = join(
@@ -136,5 +137,49 @@ describe('회귀 감지 — 셀렉터 드리프트 알림', () => {
   it('타자 0명 반환 시 fail', () => {
     const batters = parseBattersFromHtml(fixtureHtml);
     expect(batters.length).toBeGreaterThan(0);
+  });
+});
+
+describe('resolveTeamCode — case-insensitive 매칭', () => {
+  it('표준 대소문자 ("KIA Tigers") → HT', () => {
+    expect(resolveTeamCode('KIA Tigers')).toBe('HT');
+  });
+
+  it('Fancy Stats drift 표기 ("Kia Tigers", K 만 대문자) → HT', () => {
+    // 4/19 prod 사고 재현: Fancy Stats 가 "Kia Tigers" 로 drift → 10팀 중 9팀만
+    // 매칭 → 1팀 default stat 으로 fallback → 예측 정확도 저하. 이 testcase 가
+    // 미래 동일 drift 패턴 (대소문자·공백 변형) 을 가드.
+    expect(resolveTeamCode('Kia Tigers')).toBe('HT');
+  });
+
+  it('전부 소문자 ("hanwha eagles") → HH', () => {
+    expect(resolveTeamCode('hanwha eagles')).toBe('HH');
+  });
+
+  it('10팀 전부 case-insensitive 로 매칭', () => {
+    const cases: Array<[string, string]> = [
+      ['ssg landers', 'SK'],
+      ['KIA TIGERS', 'HT'],
+      ['Kia Tigers', 'HT'],
+      ['lg twins', 'LG'],
+      ['Doosan Bears', 'OB'],
+      ['kt wiz', 'KT'],
+      ['samsung lions', 'SS'],
+      ['LOTTE GIANTS', 'LT'],
+      ['Hanwha Eagles', 'HH'],
+      ['nc dinos', 'NC'],
+      ['Kiwoom Heroes', 'WO'],
+    ];
+    for (const [input, expected] of cases) {
+      expect(resolveTeamCode(input)).toBe(expected);
+    }
+  });
+
+  it('한글 팀명 폴백 ("두산") → OB', () => {
+    expect(resolveTeamCode('두산')).toBe('OB');
+  });
+
+  it('미지 팀명 → null', () => {
+    expect(resolveTeamCode('Unknown Team')).toBeNull();
   });
 });

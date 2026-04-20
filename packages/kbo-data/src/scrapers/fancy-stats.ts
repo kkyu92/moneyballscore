@@ -10,7 +10,9 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Fancy Stats 영문 팀명 → TeamCode
+// Fancy Stats 영문 팀명 → TeamCode.
+// 매칭은 case-insensitive — Fancy Stats 가 종종 대소문자 표기 변경
+// (2026-04: "KIA Tigers" → "Kia Tigers" drift 로 HT 1팀 누락 사고 발생).
 const FS_TEAM_MAP: Record<string, TeamCode> = {
   'SSG Landers': 'SK',
   'KIA Tigers': 'HT',
@@ -24,11 +26,18 @@ const FS_TEAM_MAP: Record<string, TeamCode> = {
   'Kiwoom Heroes': 'WO',
 };
 
-function resolveTeamCode(name: string): TeamCode | null {
-  if (FS_TEAM_MAP[name]) return FS_TEAM_MAP[name];
+export function resolveTeamCode(name: string): TeamCode | null {
+  const lower = name.toLowerCase();
+  // 1) case-insensitive 직접 매칭
   for (const [key, code] of Object.entries(FS_TEAM_MAP)) {
-    if (name.includes(key) || key.includes(name)) return code;
+    if (key.toLowerCase() === lower) return code;
   }
+  // 2) case-insensitive 부분 매칭 (양방향 includes)
+  for (const [key, code] of Object.entries(FS_TEAM_MAP)) {
+    const lowerKey = key.toLowerCase();
+    if (lower.includes(lowerKey) || lowerKey.includes(lower)) return code;
+  }
+  // 3) 한글 팀명 폴백
   return TEAM_NAME_MAP[name] || null;
 }
 
