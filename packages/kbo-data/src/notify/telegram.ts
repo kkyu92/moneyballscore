@@ -164,6 +164,7 @@ export async function notifyAnnounce(
   lines.push('');
   if (active.length > 0) {
     lines.push(`🔔 예측 알림: ${estimatedTime} 전체 ${active.length}경기 한번에 전송`);
+    lines.push('<i>※ 선발투수 확정 시 순차 예측. 경기 시작까지 미확정이면 해당 경기는 "예측 기록 없음" 으로 표시.</i>');
     lines.push('');
   }
   lines.push(`🔗 <a href="https://moneyballscore.vercel.app/">자세히</a>`);

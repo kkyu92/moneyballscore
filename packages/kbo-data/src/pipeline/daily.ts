@@ -23,7 +23,7 @@ import {
   notifyPipelineStatus, notifyAnnounce,
 } from '../notify/telegram';
 import type {
-  PredictionInput, PipelineResult, ScrapedGame,
+  PredictionInput, PipelineResult, ScrapedGame, SkippedGame,
   PitcherStats, TeamStats, EloRating,
 } from '../types';
 
@@ -121,6 +121,10 @@ export async function runDailyPipeline(
         predictions: result.predictionsGenerated,
         games_skipped: result.gamesSkipped,
         errors: result.errors.length > 0 ? JSON.stringify(result.errors) : '[]',
+        skipped_detail:
+          result.skippedDetail && result.skippedDetail.length > 0
+            ? JSON.stringify(result.skippedDetail)
+            : null,
         duration_ms: durationMs, triggered_by: triggeredBy,
       });
     } catch (e) {
@@ -272,12 +276,23 @@ export async function runDailyPipeline(
     (existing ?? []).map((e: { game_id: number }) => e.game_id),
   );
 
-  // windowTargets 계산 (각 경기 시작 3h 이내 + SP 확정 + scheduled + 미예측)
+  // windowTargets 계산 + 스킵 사유 수집. reason 버리지 말고 pipeline_runs 에
+  // 보존 → 사후 "왜 이 경기가 예측 안 됐나" 즉각 판독 가능.
   const nowMs = Date.now();
-  const windowTargets = games.filter((g) => {
+  const windowTargets: ScrapedGame[] = [];
+  const skippedDetail: SkippedGame[] = [];
+  for (const g of games) {
     const dbId = gameIdMap.get(g.externalGameId) ?? null;
-    return shouldPredictGame(g, existingSet, dbId, nowMs).shouldPredict;
-  });
+    const decision = shouldPredictGame(g, existingSet, dbId, nowMs);
+    if (decision.shouldPredict) {
+      windowTargets.push(g);
+    } else {
+      skippedDetail.push({
+        game: `${g.awayTeam}v${g.homeTeam}@${g.gameTime}`,
+        reason: decision.reason,
+      });
+    }
+  }
 
   let predictionsGenerated = 0;
 
@@ -286,7 +301,7 @@ export async function runDailyPipeline(
   if (windowTargets.length === 0 && mode === 'predict') {
     return finish({
       date: targetDate, gamesFound: games.length,
-      predictionsGenerated: 0, gamesSkipped: games.length, errors,
+      predictionsGenerated: 0, gamesSkipped: games.length, errors, skippedDetail,
     });
   }
 
@@ -530,13 +545,31 @@ export async function runDailyPipeline(
       errors.push(`[GAP] ${msg}`);
       try { await notifyError('daily-pipeline GAP', msg); } catch {}
     }
+
+    // SP 미확정 경기 전용 경고 — expected 계산에서 빠지지만 사용자 관점에선
+    // 편성된 경기라 "왜 예측 없지?" 의문 유발. 운영자에게 명시 통보.
+    const unconfirmed = games.filter(
+      (g) =>
+        g.status !== 'final' &&
+        g.status !== 'postponed' &&
+        (!g.homeSP || !g.awaySP),
+    );
+    if (unconfirmed.length > 0) {
+      const list = unconfirmed
+        .map((g) => `${g.awayTeam}v${g.homeTeam}@${g.gameTime}`)
+        .join(', ');
+      const msg =
+        `선발 미확정 ${unconfirmed.length}경기 — 예측 생성 불가 (${list})`;
+      errors.push(`[SP_UNCONFIRMED] ${msg}`);
+      try { await notifyError('daily-pipeline SP_UNCONFIRMED', msg); } catch {}
+    }
   }
 
   return finish({
     date: targetDate, gamesFound: games.length,
     predictionsGenerated,
     gamesSkipped: games.length - predictionsGenerated,
-    errors,
+    errors, skippedDetail,
   });
 }
 

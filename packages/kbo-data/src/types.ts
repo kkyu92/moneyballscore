@@ -87,12 +87,22 @@ export interface PredictionResult {
 // 파이프라인 결과
 // ============================================
 
+/**
+ * 경기 단위 스킵 사유 — shouldPredictGame 의 reason 을 보존.
+ * pipeline_runs.skipped_detail 로 저장되어 사후 분석 가능.
+ */
+export interface SkippedGame {
+  game: string;    // "LTvHH@17:00" — 판독 편의용 포맷
+  reason: string;  // 'window_too_early' | 'window_too_late' | 'not_scheduled' | 'sp_unconfirmed' | 'already_predicted'
+}
+
 export interface PipelineResult {
   date: string;
   gamesFound: number;
   predictionsGenerated: number;
   gamesSkipped: number;    // 선발 미확정 등
   errors: string[];
+  skippedDetail?: SkippedGame[];
 }
 
 // ============================================

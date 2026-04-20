@@ -417,6 +417,44 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       expect(runLog).toBeDefined();
     });
 
+    it('스킵 사유 (window_too_early / sp_unconfirmed) 수집 → result.skippedDetail', async () => {
+      const tables = baseTables();
+      // predictions 기존 row 두 개로 채워 windowTargets 0. early-return 경로에서도
+      // skippedDetail 는 채워져 있어야 함 (수집 타이밍이 early-return 앞).
+      tables.predictions = {
+        selectData: [{ game_id: 101 }, { game_id: 102 }],
+      };
+
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T06:30:00Z'));
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({ gameTime: '18:30' }),
+          makeGame({
+            homeTeam: 'LG', awayTeam: 'SS',
+            externalGameId: '20260422SSLG0', gameTime: '18:30',
+          }),
+        ]);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
+
+        expect(result.skippedDetail).toBeDefined();
+        expect(result.skippedDetail!.length).toBe(2);
+        // already_predicted — existingSet 매치
+        expect(result.skippedDetail!.every((s) => s.reason === 'already_predicted'))
+          .toBe(true);
+        // 경기 식별자 포맷 확인
+        expect(result.skippedDetail![0].game).toMatch(/^[A-Z]+v[A-Z]+@\d{2}:\d{2}$/);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('setup 단계 실패 (leagues not found) → finish() 로 에러 로그', async () => {
       const tables = baseTables();
       tables.leagues = { single: { data: null, error: null } };
@@ -506,6 +544,47 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
           expect.stringContaining('GAP'),
           expect.anything(),
         );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('SP 미확정 경기 존재 → notifyError("SP_UNCONFIRMED") + errors 마커', async () => {
+      const tables = baseTables();
+      tables.predictions = {
+        selectData: [{ game_id: 101 }, { game_id: 102 }],
+        count: 2,
+      };
+
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T06:30:00Z'));
+
+      try {
+        // 1경기는 SP 확정, 1경기는 homeSP 없음 → 미확정.
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({ gameTime: '18:30' }),
+          makeGame({
+            homeTeam: 'LG', awayTeam: 'SS',
+            externalGameId: '20260422SSLG0', gameTime: '18:30',
+            homeSP: undefined,
+          }),
+        ]);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline(
+          '2026-04-22', 'predict_final', 'cron',
+        );
+
+        expect(result.errors.some((e) => e.includes('[SP_UNCONFIRMED]')))
+          .toBe(true);
+        const spCall = vi.mocked(notifyError).mock.calls.find(
+          (c) => typeof c[0] === 'string' && c[0].includes('SP_UNCONFIRMED'),
+        );
+        expect(spCall).toBeDefined();
+        expect(spCall![1]).toMatch(/선발 미확정 1경기/);
       } finally {
         vi.useRealTimers();
       }

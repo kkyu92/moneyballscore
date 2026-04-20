@@ -26,9 +26,33 @@ interface PipelineRun {
   predictions: number;
   games_skipped: number;
   errors: string;
+  skipped_detail: string | null;
   duration_ms: number;
   triggered_by: string;
   created_at: string;
+}
+
+interface SkippedEntry {
+  game: string;
+  reason: string;
+}
+
+function parseSkippedDetail(raw: string | null): SkippedEntry[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed as SkippedEntry[];
+  } catch {}
+  return [];
+}
+
+function summarizeReasons(entries: SkippedEntry[]): string {
+  if (entries.length === 0) return '';
+  const counts = new Map<string, number>();
+  for (const e of entries) counts.set(e.reason, (counts.get(e.reason) ?? 0) + 1);
+  return Array.from(counts.entries())
+    .map(([r, n]) => `${r}:${n}`)
+    .join(', ');
 }
 
 interface ModeSubtotal {
@@ -82,8 +106,9 @@ async function getPipelineStats() {
     byMode[key].avgDurationMs = Math.round(byMode[key].avgDurationMs / byMode[key].runs);
   }
 
-  // 이번 주 GAP 이벤트 추출 — errors JSONB 안에 "[GAP]" 마커
+  // 이번 주 GAP / SP_UNCONFIRMED 이벤트 추출 — errors JSONB 마커 기반
   const gapEventsWeek: Array<{ run_date: string; mode: string; gap_msg: string; created_at: string }> = [];
+  const spEventsWeek: Array<{ run_date: string; mode: string; sp_msg: string; created_at: string }> = [];
   for (const run of runs) {
     if (run.created_at < sevenDaysAgo) continue;
     let errs: string[] = [];
@@ -93,10 +118,16 @@ async function getPipelineStats() {
       continue;
     }
     for (const e of errs) {
-      if (typeof e === 'string' && e.includes('[GAP]')) {
+      if (typeof e !== 'string') continue;
+      if (e.includes('[GAP]')) {
         gapEventsWeek.push({
           run_date: run.run_date, mode: run.mode,
           gap_msg: e, created_at: run.created_at,
+        });
+      } else if (e.includes('[SP_UNCONFIRMED]')) {
+        spEventsWeek.push({
+          run_date: run.run_date, mode: run.mode,
+          sp_msg: e, created_at: run.created_at,
         });
       }
     }
@@ -104,7 +135,7 @@ async function getPipelineStats() {
 
   return {
     runs: runs.slice(0, 50),
-    byMode, gapEventsWeek,
+    byMode, gapEventsWeek, spEventsWeek,
     totalRuns: runs.length, error: null,
   };
 }
@@ -232,6 +263,42 @@ export default async function PipelineDashboard() {
             </div>
           </section>
 
+          {/* 이번 주 SP 미확정 이벤트 */}
+          {stats.spEventsWeek && stats.spEventsWeek.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold mb-3 text-amber-700">⚠️ 이번 주 선발 미확정 이벤트</h2>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-amber-100 text-xs text-amber-800">
+                    <tr>
+                      <th className="px-3 py-2 text-left">시각</th>
+                      <th className="px-3 py-2 text-left">Run date</th>
+                      <th className="px-3 py-2 text-left">Mode</th>
+                      <th className="px-3 py-2 text-left">Message</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-amber-100">
+                    {stats.spEventsWeek.map((s, i) => (
+                      <tr key={i}>
+                        <td className="px-3 py-2 text-xs text-gray-700 font-mono">
+                          {new Date(s.created_at).toLocaleString('ko-KR', {
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                        <td className="px-3 py-2 font-mono">{s.run_date}</td>
+                        <td className="px-3 py-2 font-mono text-xs">{s.mode}</td>
+                        <td className="px-3 py-2 text-xs text-amber-700">{s.sp_msg}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
           {/* 이번 주 GAP 이벤트 */}
           {stats.gapEventsWeek.length > 0 && (
             <section>
@@ -323,7 +390,21 @@ export default async function PipelineDashboard() {
                           <td className="px-3 py-2 text-right font-mono">{run.games_found}</td>
                           <td className="px-3 py-2 text-right font-mono">{run.predictions}</td>
                           <td className="px-3 py-2 text-right font-mono text-gray-500">
-                            {run.games_skipped}
+                            <div>{run.games_skipped}</div>
+                            {(() => {
+                              const entries = parseSkippedDetail(run.skipped_detail);
+                              const summary = summarizeReasons(entries);
+                              return summary ? (
+                                <div
+                                  className="text-[10px] text-gray-400 mt-0.5"
+                                  title={entries
+                                    .map((e) => `${e.game} — ${e.reason}`)
+                                    .join('\n')}
+                                >
+                                  {summary}
+                                </div>
+                              ) : null;
+                            })()}
                           </td>
                           <td className="px-3 py-2 text-right font-mono text-xs text-gray-600">
                             {formatDuration(run.duration_ms)}
