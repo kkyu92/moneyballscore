@@ -30,6 +30,26 @@ export const KBO_STADIUM_SHORT: Record<TeamCode, string> = {
 };
 
 /**
+ * 팀 단축 이름 — 모든 UI 에서 일관 사용. `KBO_TEAMS[code].name.split(' ')[0]`
+ * 로 흩어져 있던 패턴을 중앙 상수로 대체. split 실패 / undefined team code /
+ * 한글 공백 등 엣지케이스 방지.
+ * 이미지 기준 (사용자 요구): 한화 / 두산 / SSG / KIA / NC / LG / 롯데 / 삼성 / KT / 키움
+ */
+export const KBO_TEAM_SHORT_NAME: Record<TeamCode, string> = {
+  SK: 'SSG', HT: 'KIA', LG: 'LG', OB: '두산', KT: 'KT',
+  SS: '삼성', LT: '롯데', HH: '한화', NC: 'NC', WO: '키움',
+};
+
+/**
+ * 팀 단축 이름 안전 조회. 미지 / null code 는 그대로 문자열 반환 (crash 방지).
+ */
+export function shortTeamName(code: TeamCode | string | null | undefined): string {
+  if (!code) return '';
+  if (code in KBO_TEAM_SHORT_NAME) return KBO_TEAM_SHORT_NAME[code as TeamCode];
+  return String(code);
+}
+
+/**
  * 구장 좌표 — 날씨 API (Open-Meteo) 조회용.
  * 키는 TeamCode (홈팀). 실측 위도/경도 (소수점 4자리 = ~11m 정확).
  */

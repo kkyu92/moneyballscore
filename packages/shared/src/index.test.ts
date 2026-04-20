@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
   KBO_TEAMS,
+  KBO_TEAM_SHORT_NAME,
   DEFAULT_WEIGHTS,
   HOME_ADVANTAGE,
   getConfidenceColor,
   getAccuracyColor,
+  shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
 } from './index';
@@ -127,5 +129,34 @@ describe('toKSTDisplayString', () => {
   it('should handle KST timezone', () => {
     const result = toKSTDisplayString(new Date('2026-04-13T20:00:00Z'));
     expect(result).toBe('2026년 04월 14일');
+  });
+});
+
+describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
+  it('10팀 모두 이미지 기준 단축명 정확히 매핑', () => {
+    // 사용자 요구 (2026-04-20 홈 UI 표기 통일):
+    // 한화/두산/SSG/KIA/NC (원정 row), LG/롯데/삼성/KT/키움 (홈 row)
+    expect(KBO_TEAM_SHORT_NAME.HH).toBe('한화');
+    expect(KBO_TEAM_SHORT_NAME.OB).toBe('두산');
+    expect(KBO_TEAM_SHORT_NAME.SK).toBe('SSG');
+    expect(KBO_TEAM_SHORT_NAME.HT).toBe('KIA');
+    expect(KBO_TEAM_SHORT_NAME.NC).toBe('NC');
+    expect(KBO_TEAM_SHORT_NAME.LG).toBe('LG');
+    expect(KBO_TEAM_SHORT_NAME.LT).toBe('롯데');
+    expect(KBO_TEAM_SHORT_NAME.SS).toBe('삼성');
+    expect(KBO_TEAM_SHORT_NAME.KT).toBe('KT');
+    expect(KBO_TEAM_SHORT_NAME.WO).toBe('키움');
+  });
+
+  it('shortTeamName helper — 유효 코드', () => {
+    expect(shortTeamName('HT')).toBe('KIA');
+    expect(shortTeamName('OB')).toBe('두산');
+  });
+
+  it('shortTeamName helper — null/undefined/unknown 은 crash 없이 fallback', () => {
+    expect(shortTeamName(null)).toBe('');
+    expect(shortTeamName(undefined)).toBe('');
+    expect(shortTeamName('')).toBe('');
+    expect(shortTeamName('UNKNOWN')).toBe('UNKNOWN');
   });
 });

@@ -1,4 +1,4 @@
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { shortTeamName, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from './TeamLogo';
 import type { WeatherSlot } from '@/lib/weather';
 
@@ -22,9 +22,6 @@ export function MiniGameCard({
   stadium,
   weather,
 }: MiniGameCardProps) {
-  const home = KBO_TEAMS[homeTeam];
-  const away = KBO_TEAMS[awayTeam];
-
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
       <div className="flex items-center justify-between mb-2">
@@ -42,15 +39,22 @@ export function MiniGameCard({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <TeamLogo team={awayTeam} size={32} />
           <span className="text-sm font-medium truncate">
-            {away.name.split(' ')[0]}
+            {shortTeamName(awayTeam)}
           </span>
         </div>
 
         <span className="text-xs text-gray-400 dark:text-gray-500 px-2">vs</span>
 
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-          <span className="text-sm font-medium truncate text-right">
-            {home.name.split(' ')[0]}
+          <span className="text-sm font-medium truncate text-right inline-flex items-center gap-1">
+            {shortTeamName(homeTeam)}
+            <span
+              aria-label="홈팀"
+              title="홈팀"
+              className="text-xs text-gray-400 dark:text-gray-500"
+            >
+              🏠
+            </span>
           </span>
           <TeamLogo team={homeTeam} size={32} />
         </div>

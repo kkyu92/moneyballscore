@@ -1,4 +1,8 @@
-import { KBO_TEAMS, getConfidenceColor, type TeamCode } from "@moneyball/shared";
+import {
+  getConfidenceColor,
+  shortTeamName,
+  type TeamCode,
+} from "@moneyball/shared";
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
 import type { WeatherSlot } from "@/lib/weather";
@@ -46,8 +50,6 @@ export function PredictionCard({
   stadium,
   weather,
 }: PredictionCardProps) {
-  const home = KBO_TEAMS[homeTeam];
-  const away = KBO_TEAMS[awayTeam];
   // winProb = 예측 승자의 승리 확률. DB predicted_winner 기준으로 표시.
   // debate가 50% 미만으로 낮춰도 predicted_winner는 유지 (적중 판정 일관성)
   const displayPct = winProb
@@ -109,7 +111,7 @@ export function PredictionCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={awayTeam} size={40} />
           </div>
-          <p className="text-sm font-medium">{away.name.split(" ")[0]}</p>
+          <p className="text-sm font-medium">{shortTeamName(awayTeam)}</p>
           {awayScore !== null && awayScore !== undefined && (
             <p className="text-2xl font-bold mt-1">{awayScore}</p>
           )}
@@ -125,7 +127,7 @@ export function PredictionCard({
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {KBO_TEAMS[predictedWinner].name.split(" ")[0]} 승 예측
+            {shortTeamName(predictedWinner)} 승 예측
           </p>
         </div>
 
@@ -133,7 +135,16 @@ export function PredictionCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={homeTeam} size={40} />
           </div>
-          <p className="text-sm font-medium">{home.name.split(" ")[0]}</p>
+          <p className="text-sm font-medium inline-flex items-center gap-1 justify-center">
+            {shortTeamName(homeTeam)}
+            <span
+              aria-label="홈팀"
+              title="홈팀"
+              className="text-xs text-gray-400 dark:text-gray-500"
+            >
+              🏠
+            </span>
+          </p>
           {homeScore !== null && homeScore !== undefined && (
             <p className="text-2xl font-bold mt-1">{homeScore}</p>
           )}

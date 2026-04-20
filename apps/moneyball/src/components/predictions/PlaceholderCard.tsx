@@ -1,4 +1,4 @@
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { shortTeamName, type TeamCode } from "@moneyball/shared";
 import { TeamLogo } from "../shared/TeamLogo";
 import { estimatePredictionTime } from "@/lib/predictions/estimateTime";
 
@@ -19,9 +19,6 @@ export function PlaceholderCard({
   homeSPName,
   awaySPName,
 }: PlaceholderCardProps) {
-  const home = KBO_TEAMS[homeTeam];
-  const away = KBO_TEAMS[awayTeam];
-
   let statusMsg: string;
   let statusIcon = "⏳";
   if (status === "postponed") {
@@ -57,7 +54,7 @@ export function PlaceholderCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={awayTeam} size={40} />
           </div>
-          <p className="text-sm font-medium">{away.name.split(" ")[0]}</p>
+          <p className="text-sm font-medium">{shortTeamName(awayTeam)}</p>
         </div>
 
         <div className="px-4 text-center">
@@ -70,7 +67,16 @@ export function PlaceholderCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={homeTeam} size={40} />
           </div>
-          <p className="text-sm font-medium">{home.name.split(" ")[0]}</p>
+          <p className="text-sm font-medium inline-flex items-center gap-1 justify-center">
+            {shortTeamName(homeTeam)}
+            <span
+              aria-label="홈팀"
+              title="홈팀"
+              className="text-xs text-gray-400 dark:text-gray-500"
+            >
+              🏠
+            </span>
+          </p>
         </div>
       </div>
 
