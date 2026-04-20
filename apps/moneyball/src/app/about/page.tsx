@@ -169,7 +169,7 @@ export default function AboutPage() {
               className="flex items-start gap-4 p-4 bg-surface rounded-lg"
             >
               <div className="text-right min-w-[50px]">
-                <span className="text-xl font-bold text-brand-600">
+                <span className="text-xl font-bold font-mono text-brand-600">
                   {Math.round(DEFAULT_WEIGHTS[factor.key] * 100)}%
                 </span>
               </div>
