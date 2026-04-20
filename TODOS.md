@@ -1,5 +1,27 @@
 # TODOS
 
+## 🚧 PLAN_v5 Phase 3-4 (2026-04-20 착수, 다음 세션)
+
+**Phase 1-2 완료**: UI LEFT JOIN + PlaceholderCard · 매시간 cron + shouldPredictGame + first-write-wins + announce + gap 감지 전부 ship. 상세는 CHANGELOG v0.5.22.
+
+**Phase 3 — 관측성 대시보드**:
+- `/debug/pipeline` 페이지 — `pipeline_runs` 최근 30일 테이블. `/debug/*` BASIC auth 자동. ~150줄.
+
+**Phase 4 — 가드 테스트**:
+- Fixture 11개 (weekend-mixed / rain-cancellation / all-finished / scheduled-normal / sp-unconfirmed / time-windows / first-write-wins-race / sp-late-confirm / announce-5games / announce-zero-games / ui-left-join).
+- Unit test 5 파일: `pipeline-schedule` (✅ 완료), `pipeline-daily`, `scrapers-kbo-official`, `ui-homepage`, `notify-telegram`.
+- REGRESSION 5건 (status 스킵 변경 / notifyPredictions 조건 / INNER→LEFT JOIN / asOfDate 필터 / ON CONFLICT race).
+
+**Phase 2.5 — asOfDate 실 구현** (Codex #2):
+- KBO TeamRankDaily ASP.NET postback 대응 또는 대체 URL 발굴.
+- 현재 시그니처만 배선, 실 필터링 미구현. 주말 낮+저녁 혼합 편성에서 stat 누수 잔존.
+
+**배포 체크리스트**:
+1. Supabase 에 `013_predictions_metadata.sql` 수동 적용 필수. 미적용 상태에서 cron 돌면 `predicted_at` 컬럼 / `daily_notifications` 테이블 없어 insert 실패.
+2. `/debug/pipeline` 에서 다음 정시 cron 기록 확인.
+
+---
+
 ## 🔍 Phase v4-3 자연 발화 관찰 (2026-04-16 이후)
 
 **목적**: v4-3에서 신규 추가한 자동 postview 트리거·Compound 루프가 실제 KBO 경기 종료 시 작동하는지 확인. 프로덕션 재트리거 1회로는 scheduled 상태만 검증됐고, `post_game` row·`agent_memories` row 생성은 실제 완료 경기가 있어야 검증 가능.

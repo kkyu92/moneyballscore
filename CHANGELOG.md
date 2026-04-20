@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.5.22] - 2026-04-20
+
+### PLAN_v5 Phase 1-2 — 파이프라인 신뢰성 복원 + UI 리질리언스
+
+**배경**: 4/17-19 사흘 연속 홈페이지 5경기 편성에도 2-3경기만 노출. 원인은 15 KST predict cron 1회 실행이 주말 낮경기 14:00 (이미 live 상태) 스킵. 이중 방어선 (Path C) 설계: UI 리질리언스 + 파이프라인 재설계.
+
+**변경 (Phase 1 — UI)**:
+- `PlaceholderCard` 컴포넌트 + `estimatePredictionTime` 헬퍼 신규 (`apps/moneyball/src/{components/predictions,lib/predictions}/`).
+- 홈 `page.tsx` `predictions!inner` → `predictions` (LEFT JOIN). 예측 없는 경기는 PlaceholderCard 로 "예측 준비중 · 약 HH:MM KST 생성" 표시. games source of truth 보장.
+
+**변경 (Phase 2 — 파이프라인)**:
+- **매시간 cron 재설계**: `daily-pipeline.yml` cron 2회/일 → 15회/일. `UTC 00` announce (KST 09) + `UTC 01-12` predict (매시간) + `UTC 13` predict_final + `UTC 14` verify. 각 경기 시작 3시간 이내에만 해당 경기 predict.
+- **`shouldPredictGame` 함수 분리** (`packages/kbo-data/src/pipeline/schedule.ts`): 윈도우 필터 (0-3h) + status + SP 확정 + first-write-wins. 24 unit tests.
+- **INSERT with UNIQUE 제약** (Codex #1): upsert 덮어쓰기 → INSERT + 23505 catch. first-write-wins 구조적 보장. `concurrency: daily-pipeline` (cancel-in-progress: false) 추가 방어선.
+- **`daily_notifications` 테이블 + flag** (Codex #6): 하루 요약 Telegram 알림 idempotent.
+- **`notifyAnnounce`** 신규 + 09:00 KST 하루 예고 (`packages/kbo-data/src/notify/telegram.ts`).
+- **`finish()` helper**: 모든 exit 경로 `pipeline_runs` 로그 보장 (Codex #7). Telegram status 는 의미 있는 run 에만.
+- **`gameIdMap` 배치 조회** (Codex #10): games upsert 응답에서 직접 id Map.
+- **Retention/postview cleanup** → `UTC 01` 첫 cron 에만 (Codex #5).
+- **revalidate 범위 확장** (Codex #4): `/predictions/[date]`, `/analysis`, `/feed` 추가.
+- **사용자-facing "15:00" 문구 4곳 일괄 수정** (Codex #8): about / page / predictions[date].
+
+**Migration 필요** (수동 적용):
+- `supabase/migrations/013_predictions_metadata.sql`:
+  - `predictions.predicted_at TIMESTAMPTZ` 컬럼
+  - `daily_notifications` 테이블 + RLS
+
+**미구현 (별도 스코프)**:
+- `fetchRecentForm` / `fetchHeadToHead` `asOfDate` 필터 (Codex #2): KBO TeamRankDaily 가 ASP.NET postback 기반이라 단순 GET 불가. 시그니처·호출부 배선만 완료, 실 필터링은 Phase 2.5.
+- `/debug/pipeline` 대시보드 (Phase 3): 다음 세션.
+- Fixtures + unit tests 11개 + regression 5건 (Phase 4): 다음 세션.
+
+**검증**: tsc pass · vitest 197 tests pass (24 신규 + 173 기존).
+
+---
+
 ## [0.5.21] - 2026-04-19
 
 ### Sentry 에러 모니터링 통합
