@@ -2,10 +2,11 @@ name: Daily KBO Pipeline
 
 on:
   schedule:
-    # KST 15:00 = UTC 06:00 — 선발 확정 + 예측 생성
-    - cron: '0 6 * * *'
-    # KST 23:00 = UTC 14:00 — 경기 결과 + 적중률 업데이트
-    - cron: '0 14 * * *'
+    # PLAN_v5 Phase 2E — 매시간 cron + announce + predict_final + verify
+    - cron: '0 0 * * *'     # UTC 00 = KST 09 announce
+    - cron: '0 1-12 * * *'  # UTC 01-12 = KST 10-21 predict (매시간 12회)
+    - cron: '0 13 * * *'    # UTC 13 = KST 22 predict_final (gap 체크)
+    - cron: '0 14 * * *'    # UTC 14 = KST 23 verify (accuracy + compound)
   workflow_dispatch:
     inputs:
       date:
@@ -17,8 +18,16 @@ on:
         default: 'predict'
         type: choice
         options:
+          - announce
           - predict
+          - predict_final
           - verify
+
+# Codex #1 — 중복 실행 방지. cron 재시도·수동·지연 실행이 겹칠 때
+# 기존 run 유지 + 새 run 큐 대기. first-write-wins 구조의 race 차단.
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
 
 jobs:
   run-pipeline:
@@ -49,11 +58,19 @@ jobs:
             echo "date=$INPUT_DATE" >> $GITHUB_OUTPUT
           else
             HOUR=$(date -u +%H)
-            if [ "$HOUR" -lt 10 ]; then
-              echo "mode=predict" >> $GITHUB_OUTPUT
+            # UTC 00 → announce / 01-12 → predict / 13 → predict_final / 14 → verify
+            if [ "$HOUR" = "00" ]; then
+              MODE="announce"
+            elif [ "$HOUR" -ge 1 ] && [ "$HOUR" -le 12 ]; then
+              MODE="predict"
+            elif [ "$HOUR" = "13" ]; then
+              MODE="predict_final"
+            elif [ "$HOUR" = "14" ]; then
+              MODE="verify"
             else
-              echo "mode=verify" >> $GITHUB_OUTPUT
+              MODE="predict"
             fi
+            echo "mode=$MODE" >> $GITHUB_OUTPUT
             echo "date=" >> $GITHUB_OUTPUT
           fi
 
