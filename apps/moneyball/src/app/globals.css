@@ -43,6 +43,15 @@
   color-scheme: dark;
 }
 
+/* body/html 배경 — CSS 변수 직접 참조. Tailwind v4 `@theme inline` 은 토큰
+   을 literal 로 컴파일해서 `bg-surface` 유틸이 다크모드 override 를 반영
+   못 함. body 에 명시적 var 규칙으로 런타임 재평가 강제. DESIGN.md
+   Dark mode (Hybrid C): surface #0c0e0d (뉴트럴), card #151d18 (그린 틴트). */
+html,
+body {
+  background-color: var(--color-surface);
+}
+
 /* a11y — 일관된 focus-visible 스타일. 키보드 사용자에게 명확한 시각 피드백. */
 :where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
   outline: 2px solid var(--color-brand-500);
