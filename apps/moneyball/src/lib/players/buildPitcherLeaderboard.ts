@@ -7,8 +7,16 @@ export interface PitcherLeaderboardRow {
   teamCode: TeamCode | null;
   teamName: string | null;
   teamColor: string | null;
+  /** 전체 등판 수 (FIP null 경기 포함) */
   appearances: number;
-  avgFip: number;
+  /** FIP 수치가 있는 등판 수. avgFip 계산 표본. */
+  fipSampleN: number;
+  /**
+   * 평균 FIP. null = 이 투수의 모든 등판이 Fancy Stats 매칭 실패. UI "-" 표기.
+   * findPitcher 가 외국인 음차 / 셀렉터 드리프트 등으로 실패 시 predictions
+   * 에 FIP null 저장됨.
+   */
+  avgFip: number | null;
   avgXFip: number | null;
   predictedWinRate: number | null;
   verifiedN: number;
@@ -41,7 +49,8 @@ interface Accumulator {
   nameKo: string;
   teamCode: TeamCode | null;
   fipSum: number;
-  fipN: number;
+  fipN: number;          // FIP 있는 등판만 카운트 (avgFip 표본 크기)
+  appearancesN: number;  // 전체 등판 (FIP null 포함)
   xfipSum: number;
   xfipN: number;
   predictedWin: number;
@@ -59,7 +68,9 @@ function addPitcherObservation(
   isCorrect: boolean | null,
 ) {
   if (!player) return;
-  if (fip == null) return;
+  // FIP null 이어도 등판 기록은 유지 — findPitcher 가 외국인 음차 등으로
+  // 매칭 실패해도 리더보드에 이름 자체는 노출돼야 사용자가 "왜 이 투수
+  // 안 나오지?" 의문 없음. avgFip 계산만 FIP 있는 등판으로 한정.
 
   const existing: Accumulator = acc.get(player.id) ?? {
     playerId: player.id,
@@ -67,14 +78,18 @@ function addPitcherObservation(
     teamCode,
     fipSum: 0,
     fipN: 0,
+    appearancesN: 0,
     xfipSum: 0,
     xfipN: 0,
     predictedWin: 0,
     verifiedN: 0,
     correctN: 0,
   };
-  existing.fipSum += fip;
-  existing.fipN += 1;
+  existing.appearancesN += 1;
+  if (fip != null) {
+    existing.fipSum += fip;
+    existing.fipN += 1;
+  }
   if (xfip != null) {
     existing.xfipSum += xfip;
     existing.xfipN += 1;
@@ -152,7 +167,7 @@ export async function buildPitcherLeaderboard(options: {
   }
 
   const result: PitcherLeaderboardRow[] = Array.from(acc.values())
-    .filter((a) => a.fipN >= minAppearances)
+    .filter((a) => a.appearancesN >= minAppearances)
     .map((a) => {
       const team = a.teamCode ? KBO_TEAMS[a.teamCode] : null;
       return {
@@ -161,16 +176,25 @@ export async function buildPitcherLeaderboard(options: {
         teamCode: a.teamCode,
         teamName: team?.name.split(" ")[0] ?? null,
         teamColor: team?.color ?? null,
-        appearances: a.fipN,
-        avgFip: a.fipSum / a.fipN,
+        appearances: a.appearancesN,
+        fipSampleN: a.fipN,
+        avgFip: a.fipN > 0 ? a.fipSum / a.fipN : null,
         avgXFip: a.xfipN > 0 ? a.xfipSum / a.xfipN : null,
-        predictedWinRate: a.fipN > 0 ? a.predictedWin / a.fipN : null,
+        predictedWinRate:
+          a.appearancesN > 0 ? a.predictedWin / a.appearancesN : null,
         verifiedN: a.verifiedN,
         accuracyRate: a.verifiedN > 0 ? a.correctN / a.verifiedN : null,
       };
     })
     .sort((a, b) => {
-      if (a.avgFip !== b.avgFip) return a.avgFip - b.avgFip;
+      // FIP 있는 투수 먼저 (낮은 FIP 우선), FIP 없는 투수는 뒤로 (등판 많은 순).
+      const aHas = a.avgFip != null;
+      const bHas = b.avgFip != null;
+      if (aHas && !bHas) return -1;
+      if (!aHas && bHas) return 1;
+      if (aHas && bHas && a.avgFip !== b.avgFip) {
+        return (a.avgFip as number) - (b.avgFip as number);
+      }
       return b.appearances - a.appearances;
     })
     .slice(0, limit);

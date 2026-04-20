@@ -61,7 +61,13 @@ export default async function PlayersIndexPage() {
           </div>
           <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
             {pitchers.length > 0
-              ? `샘플 ${pitchers.reduce((a, p) => a + p.appearances, 0)} 등판`
+              ? (() => {
+                  const total = pitchers.reduce((a, p) => a + p.appearances, 0);
+                  const withFip = pitchers.reduce((a, p) => a + p.fipSampleN, 0);
+                  return withFip === total
+                    ? `샘플 ${total} 등판`
+                    : `샘플 ${total} 등판 · FIP ${withFip}건`;
+                })()
               : "샘플 없음"}
           </span>
         </div>
