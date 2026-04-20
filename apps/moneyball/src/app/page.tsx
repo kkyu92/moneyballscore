@@ -287,7 +287,7 @@ export default async function HomePage() {
             <span className="text-5xl block mb-4">⚾</span>
             <p className="text-lg font-medium text-gray-600 dark:text-gray-300">오늘 예측 데이터가 아직 없습니다</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-              매일 KST 15:00에 선발 확정 후 예측이 생성됩니다
+              각 경기 시작 3시간 전 최신 데이터로 예측이 자동 생성됩니다
             </p>
             <Link href="/predictions" className="inline-block mt-4 text-sm text-brand-600 hover:underline">
               지난 예측 보기 →

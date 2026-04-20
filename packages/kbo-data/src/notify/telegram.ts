@@ -1,6 +1,6 @@
 import { KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
-import type { PipelineResult } from '../types';
+import type { PipelineResult, ScrapedGame } from '../types';
 
 const TELEGRAM_API = 'https://api.telegram.org/bot';
 
@@ -121,6 +121,54 @@ export async function notifyError(context: string, error: string) {
   await sendMessage(
     `<b>🚨 MoneyBall 에러</b>\n\n<b>Context:</b> ${context}\n<b>Error:</b> <code>${error}</code>`
   );
+}
+
+/**
+ * PLAN_v5 §4.4 — 하루 시작 09:00 KST 예고 알림.
+ * 오늘 편성 + 예측 생성 예상 시각 안내.
+ */
+export async function notifyAnnounce(
+  date: string,
+  games: ScrapedGame[],
+  estimatedTime: string,
+) {
+  if (games.length === 0) {
+    await sendMessage(`<b>⚾ ${date} KBO</b>\n\n오늘 편성된 경기가 없습니다.`);
+    return;
+  }
+
+  const active = games.filter((g) => g.status !== 'postponed');
+  const cancelled = games.filter((g) => g.status === 'postponed');
+
+  const lines = [
+    `<b>⚾ ${date} KBO 오늘의 경기</b>`,
+    '',
+    `편성 ${games.length}경기${cancelled.length > 0 ? ` (우천취소 ${cancelled.length})` : ''}:`,
+  ];
+
+  for (const g of active) {
+    const home = KBO_TEAMS[g.homeTeam]?.name.split(' ')[0] ?? g.homeTeam;
+    const away = KBO_TEAMS[g.awayTeam]?.name.split(' ')[0] ?? g.awayTeam;
+    lines.push(`• ${g.gameTime} ${away} vs ${home} (${g.stadium})`);
+  }
+
+  if (cancelled.length > 0) {
+    lines.push('');
+    for (const g of cancelled) {
+      const home = KBO_TEAMS[g.homeTeam]?.name.split(' ')[0] ?? g.homeTeam;
+      const away = KBO_TEAMS[g.awayTeam]?.name.split(' ')[0] ?? g.awayTeam;
+      lines.push(`🌧 ${g.gameTime} ${away} vs ${home} — 우천취소`);
+    }
+  }
+
+  lines.push('');
+  if (active.length > 0) {
+    lines.push(`🔔 예측 알림: ${estimatedTime} 전체 ${active.length}경기 한번에 전송`);
+    lines.push('');
+  }
+  lines.push(`🔗 <a href="https://moneyballscore.vercel.app/">자세히</a>`);
+
+  await sendMessage(lines.join('\n'));
 }
 
 /**

@@ -164,9 +164,9 @@ function buildIntro(
   const n = games.length;
   if (n === 0) return `${date} KBO 예측 데이터가 없습니다.`;
 
-  // 경기는 있는데 예측이 아직 없음 (보통 당일 오전, 15:00 KST daily-pipeline 전)
+  // 경기는 있는데 예측이 아직 없음 (보통 경기 시작 3시간 이전 시점)
   if (predicted.length === 0) {
-    return `${date} KBO ${n}경기 예정. 매일 15:00 KST 승부예측 자동 생성 후 이 페이지에 공개됩니다.`;
+    return `${date} KBO ${n}경기 예정. 각 경기 시작 3시간 전 승부예측이 자동 생성되어 이 페이지에 공개됩니다.`;
   }
 
   const allVerified = verified.length === predicted.length && predicted.length > 0;

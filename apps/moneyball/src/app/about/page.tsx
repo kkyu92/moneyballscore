@@ -94,7 +94,7 @@ const DATA_SOURCES = [
 const FAQS = [
   {
     q: "MoneyBall Score는 어떻게 KBO 경기를 예측하나요?",
-    a: "FIP, xFIP, wOBA, WAR, Elo 등 10개 세이버메트릭스 팩터를 가중합산한 정량 모델 v1.5와, 홈/원정/심판 3명의 AI 에이전트가 토론으로 보정하는 v2.0 시스템을 결합합니다. 매일 15:00 KST에 선발 확정 후 자동 생성됩니다.",
+    a: "FIP, xFIP, wOBA, WAR, Elo 등 10개 세이버메트릭스 팩터를 가중합산한 정량 모델 v1.5와, 홈/원정/심판 3명의 AI 에이전트가 토론으로 보정하는 v2.0 시스템을 결합합니다. 각 경기 시작 3시간 전 최신 데이터로 개별 예측이 자동 생성됩니다.",
   },
   {
     q: "예측 적중률은 얼마인가요?",
@@ -266,8 +266,12 @@ export default function AboutPage() {
         <h2 className="text-xl font-bold mb-3">업데이트 주기</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-surface rounded-lg">
-            <p className="font-medium">매일 15:00 KST</p>
-            <p className="text-gray-500 dark:text-gray-400">선발 확정 + 예측 생성</p>
+            <p className="font-medium">매일 09:00 KST</p>
+            <p className="text-gray-500 dark:text-gray-400">오늘 경기 + 예측 예고 (Telegram)</p>
+          </div>
+          <div className="p-3 bg-surface rounded-lg">
+            <p className="font-medium">경기 시작 3h 전</p>
+            <p className="text-gray-500 dark:text-gray-400">개별 예측 생성 (매 정시)</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">매일 23:00 KST</p>
