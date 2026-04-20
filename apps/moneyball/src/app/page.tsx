@@ -86,6 +86,47 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
   return (games ?? []) as unknown as HomeGame[];
 }
 
+/**
+ * 오늘 이후 가장 빠른 편성 경기 날짜 + 개요. 홈 empty-state 에서 사용.
+ * 오늘 경기가 없는 날 (KBO 월요일 휴식 / 시즌오프) 에 "다음 경기 일정" 노출.
+ * status 가 scheduled/live 인 것만 — postponed/final 은 미래 일정이라도 제외.
+ */
+async function getNextScheduledDate(): Promise<{
+  date: string;
+  count: number;
+  firstGameTime: string | null;
+} | null> {
+  const supabase = await createClient();
+  const today = toKSTDateString();
+
+  const { data } = await supabase
+    .from('games')
+    .select('game_date, game_time, status')
+    .gt('game_date', today)
+    .in('status', ['scheduled', 'live'])
+    .order('game_date', { ascending: true })
+    .order('game_time', { ascending: true })
+    .limit(30);
+
+  if (!data || data.length === 0) return null;
+
+  const firstDate = data[0].game_date as string;
+  const sameDate = data.filter((g) => g.game_date === firstDate);
+  const firstGameTime = (sameDate[0].game_time as string | null)?.slice(0, 5) ?? null;
+
+  return {
+    date: firstDate,
+    count: sameDate.length,
+    firstGameTime,
+  };
+}
+
+function formatKoreanWeekday(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00+09:00`);
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  return days[d.getDay()];
+}
+
 async function getSeasonAccuracy() {
   const supabase = await createClient();
 
@@ -150,6 +191,10 @@ export default async function HomePage() {
     getTodayPredictions(),
     getSeasonAccuracy(),
   ]);
+
+  // 오늘 편성 없을 때만 다음 일정 조회 (추가 쿼리 비용 최소화).
+  const nextSchedule =
+    games.length === 0 ? await getNextScheduledDate() : null;
 
   const { bigMatch } = selectBigMatchFromGames(games);
   const bigMatchPred = bigMatch?.predictions?.[0];
@@ -285,13 +330,47 @@ export default async function HomePage() {
         ) : (
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
             <span className="text-5xl block mb-4">⚾</span>
-            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">오늘 예측 데이터가 아직 없습니다</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-              각 경기 시작 3시간 전 최신 데이터로 예측이 자동 생성됩니다
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
+              오늘은 편성된 경기가 없습니다
             </p>
-            <Link href="/predictions" className="inline-block mt-4 text-sm text-brand-600 hover:underline">
-              지난 예측 보기 →
-            </Link>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+              KBO 리그 휴식일이거나 시즌 오프입니다.
+            </p>
+
+            {nextSchedule ? (
+              <div className="mt-6 inline-block text-left bg-brand-50 dark:bg-[var(--color-surface-raised)] border border-brand-200 dark:border-[var(--color-border)] rounded-xl px-5 py-4">
+                <p className="text-xs uppercase tracking-wider text-brand-700 dark:text-brand-300 font-semibold mb-1">
+                  다음 경기 일정
+                </p>
+                <p className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                  {nextSchedule.date}
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-2">
+                    ({formatKoreanWeekday(nextSchedule.date)})
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  {nextSchedule.count}경기 편성
+                  {nextSchedule.firstGameTime && (
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {' · '}첫 경기 {nextSchedule.firstGameTime}
+                    </span>
+                  )}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-4 text-xs text-gray-400 dark:text-gray-500">
+                아직 다음 경기 일정이 공개되지 않았습니다.
+              </p>
+            )}
+
+            <div className="mt-6">
+              <Link
+                href="/predictions"
+                className="inline-block text-sm text-brand-600 hover:underline"
+              >
+                지난 예측 보기 →
+              </Link>
+            </div>
           </div>
         )}
       </section>
