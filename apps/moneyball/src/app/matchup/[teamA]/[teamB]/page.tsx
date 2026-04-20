@@ -168,7 +168,7 @@ export default async function MatchupPage({ params }: PageProps) {
         </section>
       )}
 
-      {games.length > 0 ? (
+      {games.length > 0 && (
         <section
           aria-labelledby="matchup-games-title"
           className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
@@ -248,16 +248,6 @@ export default async function MatchupPage({ params }: PageProps) {
               </tbody>
             </table>
           </div>
-        </section>
-      ) : (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
-          <span className="text-5xl block mb-4">⚾</span>
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
-            올 시즌 맞대결 기록이 아직 없습니다
-          </p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-            두 팀이 맞붙는 경기가 진행되면 여기에 축적됩니다.
-          </p>
         </section>
       )}
 

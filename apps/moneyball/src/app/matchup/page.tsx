@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 export const metadata: Metadata = {
   title: "팀 간 매치업",
@@ -104,13 +105,9 @@ export default function MatchupIndexPage() {
             <Link
               key={code}
               href={`/teams/${code}`}
-              className="bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 text-center hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 flex items-center justify-center gap-2 hover:shadow-md transition-shadow"
             >
-              <span
-                aria-hidden
-                className="inline-block w-3 h-3 rounded-full mr-1 align-middle"
-                style={{ backgroundColor: KBO_TEAMS[code].color }}
-              />
+              <TeamLogo team={code} size={24} />
               <span className="text-sm font-medium">
                 {shortTeamName(code)}
               </span>
