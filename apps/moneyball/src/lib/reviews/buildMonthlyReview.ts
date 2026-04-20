@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { MonthRange } from "./computeMonthRange";
 import { getPreviousMonth } from "./computeMonthRange";
@@ -102,8 +102,8 @@ function pickHighlights(rows: Row[], limit = 6): WeeklyHighlight[] {
       gameDate: g.game_date,
       homeCode,
       awayCode,
-      homeName: homeCode ? (KBO_TEAMS[homeCode]?.name.split(" ")[0] ?? homeCode) : "홈",
-      awayName: awayCode ? (KBO_TEAMS[awayCode]?.name.split(" ")[0] ?? awayCode) : "원정",
+      homeName: homeCode ? (shortTeamName(homeCode)) : "홈",
+      awayName: awayCode ? (shortTeamName(awayCode)) : "원정",
       homeScore: g.home_score,
       awayScore: g.away_score,
       predictedWinnerCode: predictedCode,
@@ -160,7 +160,7 @@ function buildTeamStats(rows: Row[]): WeeklyTeamStat[] {
   return Array.from(byTeam.entries())
     .map(([code, s]) => ({
       teamCode: code,
-      teamName: KBO_TEAMS[code]?.name.split(" ")[0] ?? code,
+      teamName: shortTeamName(code),
       predicted: s.predicted,
       correct: s.correct,
       accuracy: s.predicted > 0 ? s.correct / s.predicted : 0,

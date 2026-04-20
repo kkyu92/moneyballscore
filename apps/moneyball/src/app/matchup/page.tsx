@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
 
 export const metadata: Metadata = {
@@ -112,7 +112,7 @@ export default function MatchupIndexPage() {
                 style={{ backgroundColor: KBO_TEAMS[code].color }}
               />
               <span className="text-sm font-medium">
-                {KBO_TEAMS[code].name.split(" ")[0]}
+                {shortTeamName(code)}
               </span>
             </Link>
           ))}

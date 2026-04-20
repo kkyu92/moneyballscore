@@ -1,4 +1,4 @@
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import type { CalibrationHint, AgentResult } from './types';
@@ -77,7 +77,7 @@ function buildUserMessage(
     msg += '\n\n[최근 예측 결과]\n';
     for (const r of history.recentResults.slice(0, 5)) {
       const mark = r.isCorrect ? 'O' : r.isCorrect === false ? 'X' : '?';
-      msg += `${mark} ${r.date} ${KBO_TEAMS[r.awayTeam].name.split(' ')[0]}@${KBO_TEAMS[r.homeTeam].name.split(' ')[0]} → ${KBO_TEAMS[r.predictedWinner].name.split(' ')[0]} ${Math.round(r.homeWinProb * 100)}%\n`;
+      msg += `${mark} ${r.date} ${shortTeamName(r.awayTeam)}@${shortTeamName(r.homeTeam)} → ${shortTeamName(r.predictedWinner)} ${Math.round(r.homeWinProb * 100)}%\n`;
     }
   }
 

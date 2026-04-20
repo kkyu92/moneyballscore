@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
 import { TEAM_NAME_MAP } from '../types';
 
@@ -190,8 +190,8 @@ export async function fetchHeadToHead(
   const html = await res.text();
   const $ = cheerio.load(html);
 
-  const homeName = KBO_TEAMS[homeTeam].name.split(' ')[0];
-  const awayName = KBO_TEAMS[awayTeam].name.split(' ')[0];
+  const homeName = shortTeamName(homeTeam);
+  const awayName = shortTeamName(awayTeam);
 
   let wins = 0;
   let losses = 0;

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 
 export interface FactorErrorItem {
   factor: string;
@@ -155,8 +155,8 @@ export async function buildMissReport(options: {
       gameDate: g.game_date,
       homeCode,
       awayCode,
-      homeName: KBO_TEAMS[homeCode]?.name.split(" ")[0] ?? homeCode,
-      awayName: KBO_TEAMS[awayCode]?.name.split(" ")[0] ?? awayCode,
+      homeName: shortTeamName(homeCode),
+      awayName: shortTeamName(awayCode),
       homeScore: g.home_score,
       awayScore: g.away_score,
       predictedWinnerCode:

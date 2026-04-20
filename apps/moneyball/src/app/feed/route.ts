@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 
@@ -95,9 +95,9 @@ export async function GET() {
 
     const homeCode = game.home_team?.code as TeamCode;
     const awayCode = game.away_team?.code as TeamCode;
-    const homeName = KBO_TEAMS[homeCode]?.name.split(' ')[0] ?? homeCode;
-    const awayName = KBO_TEAMS[awayCode]?.name.split(' ')[0] ?? awayCode;
-    const winnerName = KBO_TEAMS[pred.winner?.code as TeamCode]?.name.split(' ')[0] ?? '';
+    const homeName = shortTeamName(homeCode);
+    const awayName = shortTeamName(awayCode);
+    const winnerName = shortTeamName(pred.winner?.code as TeamCode);
     const pct = Math.round((0.5 + pred.confidence / 2) * 100);
 
     const isFinal = game.status === 'final';

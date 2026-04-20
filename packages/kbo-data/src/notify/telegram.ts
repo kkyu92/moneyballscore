@@ -1,4 +1,4 @@
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { PipelineResult, ScrapedGame } from '../types';
 
@@ -54,9 +54,9 @@ export async function notifyPredictions(
   ];
 
   for (const pred of predictions) {
-    const home = KBO_TEAMS[pred.homeTeam].name.split(' ')[0];
-    const away = KBO_TEAMS[pred.awayTeam].name.split(' ')[0];
-    const winner = KBO_TEAMS[pred.predictedWinner].name.split(' ')[0];
+    const home = shortTeamName(pred.homeTeam);
+    const away = shortTeamName(pred.awayTeam);
+    const winner = shortTeamName(pred.predictedWinner);
     const pct = Math.round(pred.homeWinProb * 100);
     const conf = pred.confidence >= 0.3 ? '🔥' : pred.confidence >= 0.15 ? '📊' : '⚖️';
 
@@ -102,8 +102,8 @@ export async function notifyResults(
   ];
 
   for (const r of results) {
-    const home = KBO_TEAMS[r.homeTeam].name.split(' ')[0];
-    const away = KBO_TEAMS[r.awayTeam].name.split(' ')[0];
+    const home = shortTeamName(r.homeTeam);
+    const away = shortTeamName(r.awayTeam);
     const mark = r.isCorrect ? '✅' : '❌';
     lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home}`);
   }
@@ -147,16 +147,16 @@ export async function notifyAnnounce(
   ];
 
   for (const g of active) {
-    const home = KBO_TEAMS[g.homeTeam]?.name.split(' ')[0] ?? g.homeTeam;
-    const away = KBO_TEAMS[g.awayTeam]?.name.split(' ')[0] ?? g.awayTeam;
+    const home = shortTeamName(g.homeTeam);
+    const away = shortTeamName(g.awayTeam);
     lines.push(`• ${g.gameTime} ${away} vs ${home} (${g.stadium})`);
   }
 
   if (cancelled.length > 0) {
     lines.push('');
     for (const g of cancelled) {
-      const home = KBO_TEAMS[g.homeTeam]?.name.split(' ')[0] ?? g.homeTeam;
-      const away = KBO_TEAMS[g.awayTeam]?.name.split(' ')[0] ?? g.awayTeam;
+      const home = shortTeamName(g.homeTeam);
+      const away = shortTeamName(g.awayTeam);
       lines.push(`🚫 ${g.gameTime} ${away} vs ${home} — 경기 취소`);
     }
   }

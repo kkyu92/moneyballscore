@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 
 export interface TeamPitcherRow {
   playerId: number;
@@ -301,7 +301,7 @@ export async function buildTeamProfile(
       isHome,
       opponentCode,
       opponentName: opponentCode
-        ? (KBO_TEAMS[opponentCode]?.name.split(" ")[0] ?? null)
+        ? (shortTeamName(opponentCode))
         : null,
       predictedAsWinner: predictedThisTeam,
       confidence: r.confidence,

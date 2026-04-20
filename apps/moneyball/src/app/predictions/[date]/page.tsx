@@ -7,7 +7,7 @@ import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard"
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -148,7 +148,7 @@ export const revalidate = 300;
 
 function formatTeamName(code: TeamCode | undefined): string {
   if (!code) return "";
-  return KBO_TEAMS[code]?.name.split(" ")[0] ?? code;
+  return shortTeamName(code);
 }
 
 /**

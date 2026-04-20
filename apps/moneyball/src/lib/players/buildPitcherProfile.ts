@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 
 export interface PitcherAppearance {
   gameId: number;
@@ -136,7 +136,7 @@ export async function buildPitcherProfile(
       ? (g.away_team?.code as TeamCode | null)
       : (g.home_team?.code as TeamCode | null);
     const opponentName = opponentCode
-      ? (KBO_TEAMS[opponentCode]?.name.split(" ")[0] ?? null)
+      ? (shortTeamName(opponentCode))
       : null;
 
     const ourTeamId = isHome ? g.home_team_id : g.away_team_id;

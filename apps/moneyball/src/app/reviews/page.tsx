@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
@@ -175,10 +175,10 @@ export default async function ReviewsPage() {
               if (!game) return null;
               const homeCode = game.home_team?.code as TeamCode;
               const awayCode = game.away_team?.code as TeamCode;
-              const homeName = KBO_TEAMS[homeCode]?.name.split(' ')[0] ?? homeCode;
-              const awayName = KBO_TEAMS[awayCode]?.name.split(' ')[0] ?? awayCode;
+              const homeName = shortTeamName(homeCode);
+              const awayName = shortTeamName(awayCode);
               const winnerCode = pred.predicted_winner_team?.code as TeamCode;
-              const winnerName = KBO_TEAMS[winnerCode]?.name.split(' ')[0] ?? '';
+              const winnerName = shortTeamName(winnerCode);
               const pct = Math.round((0.5 + pred.confidence / 2) * 100);
 
               return (

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,
@@ -9,6 +9,7 @@ import {
 import { buildMatchupProfile } from "@/lib/matchup/buildMatchupProfile";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 export const revalidate = 3600;
 
@@ -24,8 +25,8 @@ export async function generateMetadata({
   const { teamA, teamB } = await params;
   const pair = canonicalPair(teamA, teamB);
   if (!pair) return {};
-  const a = KBO_TEAMS[pair.codeA].name.split(" ")[0];
-  const b = KBO_TEAMS[pair.codeB].name.split(" ")[0];
+  const a = shortTeamName(pair.codeA);
+  const b = shortTeamName(pair.codeB);
   const title = `${a} vs ${b} — 상대전적 & 예측 성과`;
   const description = `${a}과 ${b}의 올 시즌 맞대결 기록 · AI 예측 적중률 · 경기 리스트. KBO 세이버메트릭스 기반 매치업 분석.`;
   return {
@@ -109,12 +110,14 @@ export default async function MatchupPage({ params }: PageProps) {
             {[sideStats.a, sideStats.b].map((s) => (
               <div
                 key={s.teamCode}
-                className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl p-5 border-l-4"
-                style={{ borderLeftColor: s.teamColor }}
+                className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl p-5 border border-gray-200 dark:border-[var(--color-border)]"
               >
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {s.teamName}
-                </p>
+                <div className="flex items-center gap-2">
+                  <TeamLogo team={s.teamCode as TeamCode} size={24} />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {s.teamName}
+                  </p>
+                </div>
                 <p className="text-3xl font-bold mt-1">
                   {s.wins}
                   <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
@@ -186,10 +189,10 @@ export default async function MatchupPage({ params }: PageProps) {
               </thead>
               <tbody>
                 {games.map((g) => {
-                  const homeName = KBO_TEAMS[g.homeCode]?.name.split(" ")[0];
-                  const awayName = KBO_TEAMS[g.awayCode]?.name.split(" ")[0];
+                  const homeName = shortTeamName(g.homeCode);
+                  const awayName = shortTeamName(g.awayCode);
                   const predName = g.predictedWinnerCode
-                    ? KBO_TEAMS[g.predictedWinnerCode]?.name.split(" ")[0]
+                    ? shortTeamName(g.predictedWinnerCode)
                     : null;
                   const resultLabel =
                     g.isCorrect == null
@@ -272,11 +275,9 @@ export default async function MatchupPage({ params }: PageProps) {
               >
                 vs{" "}
                 {
-                  KBO_TEAMS[
-                    (p.codeA === tA.code
+                  shortTeamName((p.codeA === tA.code
                       ? p.codeB
-                      : p.codeA) as TeamCode
-                  ]?.name.split(" ")[0]
+                      : p.codeA) as TeamCode)
                 }
               </Link>
             ))}
@@ -295,11 +296,9 @@ export default async function MatchupPage({ params }: PageProps) {
               >
                 vs{" "}
                 {
-                  KBO_TEAMS[
-                    (p.codeA === tB.code
+                  shortTeamName((p.codeA === tB.code
                       ? p.codeB
-                      : p.codeA) as TeamCode
-                  ]?.name.split(" ")[0]
+                      : p.codeA) as TeamCode)
                 }
               </Link>
             ))}

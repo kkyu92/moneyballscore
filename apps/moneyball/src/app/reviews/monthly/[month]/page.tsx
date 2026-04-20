@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { KBO_TEAMS } from "@moneyball/shared";
+import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,
@@ -10,6 +10,7 @@ import { buildMonthlyReview } from "@/lib/reviews/buildMonthlyReview";
 import type { WeeklyHighlight } from "@/lib/reviews/buildWeeklyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 export const revalidate = 3600;
 
@@ -47,7 +48,7 @@ export async function generateMetadata({
 
 function HighlightCard({ h }: { h: WeeklyHighlight }) {
   const winnerName = h.predictedWinnerCode
-    ? KBO_TEAMS[h.predictedWinnerCode]?.name.split(" ")[0]
+    ? shortTeamName(h.predictedWinnerCode)
     : null;
   const badgeClass =
     h.badge === "박빙 적중"
@@ -246,11 +247,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                   key={t.teamCode}
                   className="flex items-center gap-3 text-sm"
                 >
-                  <span
-                    className="inline-block w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: t.color }}
-                    aria-hidden
-                  />
+                  <TeamLogo team={t.teamCode} size={20} className="shrink-0" />
                   <span className="w-24 shrink-0 font-medium">
                     {t.teamName}
                   </span>

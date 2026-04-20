@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
@@ -104,8 +104,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const game = await getGameAnalysis(gameId);
   if (!game) return {};
 
-  const home = KBO_TEAMS[game.home_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
-  const away = KBO_TEAMS[game.away_team?.code as TeamCode]?.name.split(' ')[0] ?? '';
+  const home = shortTeamName(game.home_team?.code as TeamCode);
+  const away = shortTeamName(game.away_team?.code as TeamCode);
   const title = `${away} vs ${home} AI 분석 — ${game.game_date}`;
   const description = `${game.game_date} ${away} vs ${home} 세이버메트릭스 기반 AI 승부예측 분석. FIP, wOBA, Elo 등 10팩터 정량 모델 + 에이전트 토론.`;
 
@@ -194,8 +194,8 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
   const postReasoning = postGame?.reasoning ?? null;
 
-  const homeName = KBO_TEAMS[homeTeam].name.split(' ')[0];
-  const awayName = KBO_TEAMS[awayTeam].name.split(' ')[0];
+  const homeName = shortTeamName(homeTeam);
+  const awayName = shortTeamName(awayTeam);
 
   // 정량 팩터 원본값 — DetailedFactorAnalysis에 주입
   const factorDetails: FactorRawDetails = {
@@ -278,9 +278,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         </h1>
         {isPast && homeScore !== null && awayScore !== null && (
           <p className="text-lg font-mono mt-2 text-gray-700 dark:text-gray-200">
-            최종: {KBO_TEAMS[awayTeam].name.split(' ')[0]} {awayScore} -{' '}
-            {homeScore} {KBO_TEAMS[homeTeam].name.split(' ')[0]}
-            {game.winner?.code && ` · 승리 ${KBO_TEAMS[game.winner.code as TeamCode].name.split(' ')[0]}`}
+            최종: {shortTeamName(awayTeam)} {awayScore} -{' '}
+            {homeScore} {shortTeamName(homeTeam)}
+            {game.winner?.code && ` · 승리 ${shortTeamName(game.winner.code as TeamCode)}`}
           </p>
         )}
       </header>

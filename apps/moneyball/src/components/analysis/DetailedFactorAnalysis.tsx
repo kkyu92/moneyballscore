@@ -1,4 +1,4 @@
-import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import {
   explainFactor,
   type FactorRawDetails,
@@ -26,8 +26,8 @@ export function DetailedFactorAnalysis({
   factors,
   details,
 }: DetailedFactorAnalysisProps) {
-  const homeName = KBO_TEAMS[homeTeam].name.split(" ")[0];
-  const awayName = KBO_TEAMS[awayTeam].name.split(" ")[0];
+  const homeName = shortTeamName(homeTeam);
+  const awayName = shortTeamName(awayTeam);
 
   const rows = Object.entries(factors)
     .filter(([key]) => key in DEFAULT_WEIGHTS)

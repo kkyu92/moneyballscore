@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { SearchForm } from '@/components/shared/SearchForm';
+import { TeamLogo } from '@/components/shared/TeamLogo';
 
 export const revalidate = 0;
 
@@ -169,11 +170,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                   href={`/teams/${code}`}
                   className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-600 transition-colors"
                 >
-                  <span
-                    aria-hidden
-                    className="inline-block w-2 h-2 rounded-full"
-                    style={{ backgroundColor: t.color }}
-                  />
+                  <TeamLogo team={code} size={20} />
                   <span className="font-medium">{t.name}</span>
                   <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                     {code}

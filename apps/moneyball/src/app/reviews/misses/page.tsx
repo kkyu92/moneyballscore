@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS } from "@moneyball/shared";
+import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 
@@ -98,10 +98,10 @@ export default async function MissesReviewPage() {
         <div className="space-y-5">
           {items.map((item) => {
             const predName = item.predictedWinnerCode
-              ? KBO_TEAMS[item.predictedWinnerCode]?.name.split(" ")[0]
+              ? shortTeamName(item.predictedWinnerCode)
               : null;
             const actualName = item.actualWinnerCode
-              ? KBO_TEAMS[item.actualWinnerCode]?.name.split(" ")[0]
+              ? shortTeamName(item.actualWinnerCode)
               : null;
             const confPct = Math.round((0.5 + item.confidence / 2) * 100);
 
