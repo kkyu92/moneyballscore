@@ -1,6 +1,7 @@
 import { KBO_TEAMS, getConfidenceColor, type TeamCode } from "@moneyball/shared";
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
+import type { WeatherSlot } from "@/lib/weather";
 
 interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -20,6 +21,8 @@ interface PredictionCardProps {
   awayScore?: number | null;
   gameId?: number; // v4-4: AnalysisLink 용
   isBigMatch?: boolean; // v4-4: 빅매치 뱃지 + 금색 테두리 강조
+  stadium?: string | null;
+  weather?: WeatherSlot | null;
 }
 
 export function PredictionCard({
@@ -40,6 +43,8 @@ export function PredictionCard({
   winProb,
   gameId,
   isBigMatch = false,
+  stadium,
+  weather,
 }: PredictionCardProps) {
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
@@ -63,8 +68,8 @@ export function PredictionCard({
         </div>
       )}
 
-      {/* 상단: 경기 시간 + 적중 결과 */}
-      <div className="flex justify-between items-center mb-4">
+      {/* 상단: 경기 시간 + 구장 + 날씨 + 적중 결과 */}
+      <div className="flex justify-between items-center mb-1">
         <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? "18:30"}</span>
         {isCorrect !== null && isCorrect !== undefined && (
           <span
@@ -78,6 +83,25 @@ export function PredictionCard({
           </span>
         )}
       </div>
+      {(stadium || weather) && (
+        <div className="flex items-center gap-2 mb-3 text-xs text-gray-500 dark:text-gray-400">
+          {stadium && <span>{stadium}</span>}
+          {stadium && weather && (
+            <span className="text-gray-300 dark:text-gray-600">·</span>
+          )}
+          {weather && (
+            <span className="flex items-center gap-1">
+              <span aria-hidden="true">{weather.icon}</span>
+              <span>{weather.tempC}°C</span>
+              {weather.precipPct > 0 && (
+                <span className="text-gray-400 dark:text-gray-500">
+                  · 강수 {weather.precipPct}%
+                </span>
+              )}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* 팀 매치업 — away 왼쪽, home 오른쪽 (KBO 관례) */}
       <div className="flex items-center justify-between mb-4">

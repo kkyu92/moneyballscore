@@ -267,6 +267,27 @@ export default async function HomePage() {
         )
       : [];
 
+  // 오늘 경기 날씨 — predictions/placeholders 카드에 구장+날씨 노출용.
+  // 게임 시작 시간 기준 hour 매칭. 실패 경기는 null fallback.
+  const todayWeather: Map<number, Awaited<ReturnType<typeof fetchStadiumWeather>>> =
+    new Map();
+  if (games.length > 0) {
+    const results = await Promise.all(
+      games.map(async (g) => {
+        const homeCode = g.home_team?.code as TeamCode | undefined;
+        if (!homeCode) return [g.id, null] as const;
+        const coords = KBO_STADIUM_COORDS[homeCode];
+        if (!coords) return [g.id, null] as const;
+        const hour = Number((g.game_time ?? '18:30').slice(0, 2));
+        const w = await fetchStadiumWeather(
+          coords.lat, coords.lng, todayKST, hour,
+        );
+        return [g.id, w] as const;
+      }),
+    );
+    for (const [id, w] of results) todayWeather.set(id, w);
+  }
+
   const { bigMatch } = selectBigMatchFromGames(games);
   const bigMatchPred = bigMatch?.predictions?.[0];
   const bigMatchDebate = bigMatchPred?.reasoning?.debate;
@@ -393,6 +414,8 @@ export default async function HomePage() {
                     winProb={winProb}
                     gameId={game.id}
                     isBigMatch={game.id === bigMatchId}
+                    stadium={game.stadium}
+                    weather={todayWeather.get(game.id)}
                   />
                 </div>
               );
@@ -448,7 +471,6 @@ export default async function HomePage() {
                       gameTime={g.gameTime}
                       stadium={g.stadium}
                       weather={nextWeather[i]}
-                      isDome={g.homeTeam === 'WO'}
                     />
                   ))}
                 </div>

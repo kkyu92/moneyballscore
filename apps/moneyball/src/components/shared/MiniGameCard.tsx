@@ -8,15 +8,12 @@ interface MiniGameCardProps {
   gameTime: string;       // "HH:MM"
   stadium?: string | null;
   weather?: WeatherSlot | null;
-  /**
-   * 돔구장 여부. 날씨 표기 억제용 — 고척(WO) 홈경기는 기후 무관.
-   */
-  isDome?: boolean;
 }
 
 /**
  * 홈 empty-state "다음 경기 일정" 에서 사용하는 컴팩트 카드.
  * PredictionCard 와 달리 예측 지표 없이 기본 정보만.
+ * 돔구장(WO 고척)이어도 외부 기온 관람객 정보로 유용 → 날씨 표시 유지.
  */
 export function MiniGameCard({
   homeTeam,
@@ -24,7 +21,6 @@ export function MiniGameCard({
   gameTime,
   stadium,
   weather,
-  isDome,
 }: MiniGameCardProps) {
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
@@ -60,8 +56,8 @@ export function MiniGameCard({
         </div>
       </div>
 
-      {/* 날씨 — 돔구장은 기후 무관, 날씨 데이터 없으면 줄 생략 */}
-      {!isDome && weather && (
+      {/* 날씨 — 돔구장 포함 일관 표시. 데이터 없으면 줄 생략. */}
+      {weather && (
         <div className="mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)] text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
           <span aria-hidden="true">{weather.icon}</span>
           <span className="font-medium">{weather.tempC}°C</span>
@@ -73,12 +69,6 @@ export function MiniGameCard({
               <span>강수 {weather.precipPct}%</span>
             </>
           )}
-        </div>
-      )}
-
-      {isDome && (
-        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)] text-xs text-gray-500 dark:text-gray-400">
-          🏟 돔구장 (기후 영향 없음)
         </div>
       )}
     </div>
