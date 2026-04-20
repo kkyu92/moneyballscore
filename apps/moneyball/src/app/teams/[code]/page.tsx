@@ -107,12 +107,8 @@ export default async function TeamPage({ params }: PageProps) {
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">
+          <TeamLogo team={profile.code} size={40} className="shrink-0" />
           <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
-          <span
-            aria-hidden
-            className="w-5 h-5 rounded-full"
-            style={{ backgroundColor: profile.color }}
-          />
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-300">
           홈구장 <span className="font-medium">{profile.stadium}</span>

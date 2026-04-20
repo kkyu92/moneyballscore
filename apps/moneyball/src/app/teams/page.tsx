@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 export const metadata: Metadata = {
   title: "팀 프로필",
@@ -47,11 +48,7 @@ export default function TeamsIndexPage() {
               className="group bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:shadow-md hover:border-brand-500/50 transition-all space-y-2"
             >
               <div className="flex items-center gap-3">
-                <span
-                  aria-hidden
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: team.color }}
-                />
+                <TeamLogo team={code} size={32} className="shrink-0" />
                 <h2 className="text-lg font-bold group-hover:text-brand-500 transition-colors">
                   {team.name}
                 </h2>
