@@ -211,10 +211,16 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-2">
             {review.teamStats.map((t) => {
               const pct = Math.round(t.accuracy * 100);
+              const smallSample = t.predicted < 5;
               return (
                 <div
                   key={t.teamCode}
                   className="flex items-center gap-3 text-sm"
+                  title={
+                    smallSample
+                      ? `표본 작음 (N=${t.predicted} < 5) — 해석 주의`
+                      : undefined
+                  }
                 >
                   <TeamLogo team={t.teamCode} size={20} className="shrink-0" />
                   <span className="w-24 shrink-0 font-medium">
@@ -225,11 +231,17 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                       className="h-full"
                       style={{
                         width: `${Math.min(100, pct)}%`,
-                        backgroundColor: t.color,
+                        backgroundColor: smallSample ? "#9ca3af" : t.color,
                       }}
                     />
                   </div>
-                  <span className="text-xs font-mono text-gray-600 dark:text-gray-300 w-20 text-right">
+                  <span
+                    className={`text-xs font-mono w-20 text-right ${
+                      smallSample
+                        ? "text-gray-400 dark:text-gray-500"
+                        : "text-gray-600 dark:text-gray-300"
+                    }`}
+                  >
                     {pct}% ({t.correct}/{t.predicted})
                   </span>
                 </div>
