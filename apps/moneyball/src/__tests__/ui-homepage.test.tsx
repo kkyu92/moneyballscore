@@ -33,7 +33,7 @@ vi.mock('next/image', () => ({
 }));
 
 describe('PlaceholderCard — status 분기', () => {
-  it('status="postponed" → 우천취소 + 🌧 + SP 라인 숨김', () => {
+  it('status="postponed" → 경기 취소 + 🚫 + SP 라인 숨김', () => {
     render(
       <PlaceholderCard
         homeTeam="OB"
@@ -45,8 +45,8 @@ describe('PlaceholderCard — status 분기', () => {
       />,
     );
 
-    expect(screen.getByText('우천취소')).toBeInTheDocument();
-    expect(screen.getByText('🌧')).toBeInTheDocument();
+    expect(screen.getByText('경기 취소')).toBeInTheDocument();
+    expect(screen.getByText('🚫')).toBeInTheDocument();
     // postponed 면 SP 라인 숨김 (데이터 없는 것처럼 보이도록)
     expect(screen.queryByText(/양현종.*최민석/)).not.toBeInTheDocument();
   });
@@ -411,7 +411,7 @@ describe('홈 게임 목록 렌더 (R3 — LEFT JOIN 가드)', () => {
     expect(screen.getByText(/오늘 예측 데이터가 아직 없습니다/)).toBeInTheDocument();
   });
 
-  it('우천취소 1 + 정상 4 → 5개 카드 모두 목록에 남음 (INNER JOIN regression 방지)', () => {
+  it('경기 취소 1 + 정상 4 → 5개 카드 모두 목록에 남음 (INNER JOIN regression 방지)', () => {
     const games: StubGame[] = [
       makeStubGame({ id: 101, predictions: [makePrediction('OB')] }),
       makeStubGame({
@@ -442,6 +442,6 @@ describe('홈 게임 목록 렌더 (R3 — LEFT JOIN 가드)', () => {
     const cancelled = container.querySelector('[data-game-id="105"]');
     expect(cancelled).not.toBeNull();
     expect(cancelled?.getAttribute('data-kind')).toBe('placeholder');
-    expect(within(cancelled as HTMLElement).getByText('우천취소')).toBeInTheDocument();
+    expect(within(cancelled as HTMLElement).getByText('경기 취소')).toBeInTheDocument();
   });
 });

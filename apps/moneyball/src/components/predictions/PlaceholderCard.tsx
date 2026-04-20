@@ -25,8 +25,10 @@ export function PlaceholderCard({
   let statusMsg: string;
   let statusIcon = "⏳";
   if (status === "postponed") {
-    statusMsg = "우천취소";
-    statusIcon = "🌧";
+    // KBO API 가 CANCEL_SC_ID="1"/"2" 두 값만 노출하고 사유 (우천/미세먼지/
+    // 구장·감염병 등) 를 구분하지 않음. 중립 표기로 통일.
+    statusMsg = "경기 취소";
+    statusIcon = "🚫";
   } else if (status === "live") {
     statusMsg = "경기 진행중";
     statusIcon = "🔴";

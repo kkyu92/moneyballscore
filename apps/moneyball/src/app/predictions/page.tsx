@@ -14,22 +14,28 @@ async function getPredictionDates() {
 
   const { data } = await supabase
     .from('games')
-    .select('game_date, predictions!inner(id, is_correct, prediction_type)')
+    .select('game_date, status, predictions!inner(id, is_correct, prediction_type)')
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
     .limit(200);
 
   if (!data) return [];
 
-  // 날짜별 그룹핑
-  const dateMap = new Map<string, { total: number; correct: number; verified: number }>();
+  // 날짜별 그룹핑 — 취소 경기는 verified 에서 빠지므로 별도 count.
+  const dateMap = new Map<
+    string,
+    { total: number; correct: number; verified: number; cancelled: number }
+  >();
   for (const game of data) {
     const date = game.game_date;
     if (!dateMap.has(date)) {
-      dateMap.set(date, { total: 0, correct: 0, verified: 0 });
+      dateMap.set(date, { total: 0, correct: 0, verified: 0, cancelled: 0 });
     }
     const entry = dateMap.get(date)!;
     entry.total += game.predictions.length;
+    if (game.status === 'postponed') {
+      entry.cancelled += game.predictions.length;
+    }
     for (const pred of game.predictions) {
       if (pred.is_correct !== null) {
         entry.verified++;
@@ -65,6 +71,11 @@ export default async function PredictionsPage() {
                   <span className="font-bold text-lg">{d.date}</span>
                   <span className="text-sm text-gray-500 dark:text-gray-400 ml-3">
                     {d.total}경기 예측
+                    {d.cancelled > 0 && (
+                      <span className="ml-1 text-gray-400 dark:text-gray-500">
+                        (취소 {d.cancelled})
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">

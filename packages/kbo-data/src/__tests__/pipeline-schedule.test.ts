@@ -188,7 +188,7 @@ describe('estimateNotificationTime', () => {
     expect(estimateNotificationTime(games)).toBe('16:00 KST 경');
   });
 
-  it('낮경기 + 우천취소 혼합 → postponed 제외하고 계산', () => {
+  it('낮경기 + 취소 혼합 → postponed 제외하고 계산', () => {
     const games = [
       makeGame({ gameTime: '18:30', status: 'postponed', externalGameId: 'a' }),
       makeGame({ gameTime: '14:00', externalGameId: 'b' }),

@@ -66,14 +66,14 @@ describe('fetchGames — status 파싱 regression 보호 (PLAN_v5 Phase 4)', () 
     });
   });
 
-  describe('rain-cancellation: 1 우천취소 + 4 scheduled', () => {
+  describe('rain-cancellation: 1 취소 + 4 scheduled', () => {
     it('5경기 전부 파싱 (취소 포함)', async () => {
       mockKboApi(rainCancellation);
       const games = await fetchGames('2026-04-17');
       expect(games).toHaveLength(5);
     });
 
-    it('우천취소 경기는 status=postponed', async () => {
+    it('취소 경기는 status=postponed', async () => {
       mockKboApi(rainCancellation);
       const games = await fetchGames('2026-04-17');
       const postponed = games.filter((g) => g.status === 'postponed');

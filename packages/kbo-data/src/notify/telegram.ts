@@ -143,7 +143,7 @@ export async function notifyAnnounce(
   const lines = [
     `<b>⚾ ${date} KBO 오늘의 경기</b>`,
     '',
-    `편성 ${games.length}경기${cancelled.length > 0 ? ` (우천취소 ${cancelled.length})` : ''}:`,
+    `편성 ${games.length}경기${cancelled.length > 0 ? ` (취소 ${cancelled.length})` : ''}:`,
   ];
 
   for (const g of active) {
@@ -157,7 +157,7 @@ export async function notifyAnnounce(
     for (const g of cancelled) {
       const home = KBO_TEAMS[g.homeTeam]?.name.split(' ')[0] ?? g.homeTeam;
       const away = KBO_TEAMS[g.awayTeam]?.name.split(' ')[0] ?? g.awayTeam;
-      lines.push(`🌧 ${g.gameTime} ${away} vs ${home} — 우천취소`);
+      lines.push(`🚫 ${g.gameTime} ${away} vs ${home} — 경기 취소`);
     }
   }
 

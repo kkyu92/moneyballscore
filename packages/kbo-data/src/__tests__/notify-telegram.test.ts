@@ -89,7 +89,7 @@ describe('notifyAnnounce', () => {
     expect(calls[0].text).not.toContain('편성 0경기');
   });
 
-  it('우천취소 1 + 정상 4 → "편성 5경기 (우천취소 1)" + 취소 표시 분리', async () => {
+  it('취소 1 + 정상 4 → "편성 5경기 (취소 1)" + 취소 표시 분리', async () => {
     const calls = captureTelegramCalls();
     const games = [
       makeGame({ externalGameId: 'a' }),
@@ -104,14 +104,14 @@ describe('notifyAnnounce', () => {
 
     await notifyAnnounce('2026-04-22', games, '16:00 KST 경');
     const msg = calls[0].text;
-    expect(msg).toContain('편성 5경기 (우천취소 1)');
-    expect(msg).toContain('🌧');
-    expect(msg).toContain('우천취소');
+    expect(msg).toContain('편성 5경기 (취소 1)');
+    expect(msg).toContain('🚫');
+    expect(msg).toContain('경기 취소');
     // 예측 알림 줄은 active 4경기 기준
     expect(msg).toContain('전체 4경기');
   });
 
-  it('모두 우천취소 → 알림 줄 생략 (active=0)', async () => {
+  it('모두 취소 → 알림 줄 생략 (active=0)', async () => {
     const calls = captureTelegramCalls();
     const games = [
       makeGame({ externalGameId: 'a', status: 'postponed' }),
