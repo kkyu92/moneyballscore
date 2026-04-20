@@ -1,30 +1,21 @@
 # TODOS
 
-## 🚧 PLAN_v5 잔여 작업 (2026-04-20 기준)
+## ✅ PLAN_v5 완료 (v0.5.23, 2026-04-20)
 
-**완료 상태** (CHANGELOG v0.5.22 상세):
-- ✅ Phase 1 UI (LEFT JOIN + PlaceholderCard + estimateTime)
-- ✅ Phase 2 Pipeline (매시간 cron · shouldPredictGame · ON CONFLICT · daily_notifications · 4-mode)
-- ✅ Phase 3 `/debug/pipeline` 대시보드
-- 🟡 Phase 4 가드 테스트 — **scrapers + schedule + notify-telegram 완료 (51 tests)**. pipeline-daily 통합 테스트 + ui-homepage 테스트 미완.
-- 🟡 Phase 2.5 asOfDate 실 필터 — 시그니처만 배선, 실제 필터링 미구현.
+**전체 Phase 완료**:
+- ✅ Phase 1 UI (LEFT JOIN + PlaceholderCard + estimateTime) — v0.5.22
+- ✅ Phase 2 Pipeline (매시간 cron · shouldPredictGame · ON CONFLICT · daily_notifications · 4-mode) — v0.5.22
+- ✅ Phase 2.5 DB 기반 form/h2h (asOfDate 실 필터 구조적 해결) — v0.5.22
+- ✅ Phase 3 `/debug/pipeline` 대시보드 — v0.5.22
+- ✅ Phase 4 가드 테스트 (382 tests: schedule 24 + scrapers 16 + notify 11 + pipeline-daily 15 + ui-homepage 16 + 기존) — v0.5.23
 
-**Phase 4 잔여**:
-- `pipeline-daily.test.ts` — runDailyPipeline 4-mode 통합 테스트. Supabase client chainable mock 복잡도 높음. production 관측 (`/debug/pipeline`) 으로 보완 중이나 가드 있으면 안전.
-- `ui-homepage.test.ts` — `apps/moneyball` 에 vitest 설정 없음. 설정 + React Testing Library 도입 필요. Playwright/Cypress E2E 쪽 고려.
-- Fixtures 잔여: time-windows / first-write-wins-race / sp-late-confirm / announce-5games / announce-zero-games / ui-left-join. schedule.ts + scraper 단위 테스트가 핵심 분기 이미 커버.
-- REGRESSION: R1 (status 스킵 변경) + R5 (ON CONFLICT race) 는 schedule + scraper 에서 간접 커버됨. R3 (INNER→LEFT JOIN) 만 UI 테스트 필요.
-
-**Phase 2.5 — asOfDate 실 구현** (Codex #2):
-- KBO TeamRankDaily ASP.NET postback 대응: `hfSearchDate` hidden field + `__EVENTTARGET`/`__VIEWSTATE` 재생성 필요. 아니면 다른 스크래핑 소스 (KBO 팀 일정 페이지 + asOfDate 이전 10경기 필터링).
-- 현재 시그니처만 배선, 실 필터링 미구현. 주말 낮+저녁 혼합 편성에서 저녁 예측에 당일 낮경기 결과 stat 포함 가능성 잔존.
-- 우선순위: 낮음 (현재 매시간 cron + 3h 윈도우가 평일엔 완전 해결, 주말 혼합편성만 제한적 영향).
-
-**자연 발화 관찰** (다음 정시 cron 부터):
-- UTC 00 (KST 09) announce → Telegram 수신
-- UTC 01 (KST 10) 첫 predict → `/debug/pipeline` 기록 + early return
-- UTC 13 (KST 22) predict_final → gap 감지 유효성
-- UTC 14 (KST 23) verify → accuracy update 기존 동작
+**다음 단계** — PLAN_v5 후속:
+- **자연 발화 관찰** (KST 09:00 부터 첫 사이클):
+  - UTC 00 (KST 09) announce → Telegram 수신 + `/debug/pipeline` 기록
+  - UTC 01-12 predict 매시간 → 각 경기 시작 3h 이내 처음 cron 에만 row 1건 생성
+  - UTC 13 predict_final → gap=0 확인
+  - UTC 14 verify → accuracy update + notifyResults
+- **Phase 5 v2.0 튜닝** (2주 운영 후): stat 누수 차단된 데이터셋 기반 오차분석. ~50경기 축적 시점부터 별도 세션 플래닝.
 
 ---
 

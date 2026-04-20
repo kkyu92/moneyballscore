@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.23] - 2026-04-20
+
+### PLAN_v5 Phase 4 완료 — 가드 테스트 잔여 2종
+
+**배경**: v0.5.22 시점 Phase 4 잔여 2건 (pipeline-daily + ui-homepage). ROI 낮다고 판단해 운영 관측으로 보완 중이었으나, PLAN_v5 100% 완료 선언 위해 이번 세션에 마저 작성.
+
+**변경**:
+- `packages/kbo-data/src/__tests__/pipeline-daily.test.ts` 신규 (15 tests). `runDailyPipeline` 4-mode 분기 + `finish()` helper 보장 + R2 (notifyPredictions 조건) + 예측 0건 시 `notifyPipelineStatus` 스킵 + setup 실패 에러 경로 전부 커버. 재사용 가능한 Supabase chainable proxy mock builder 를 함께 추가.
+- `apps/moneyball/src/__tests__/ui-homepage.test.tsx` 신규 (16 tests). `PlaceholderCard` 5개 status 분기 + SP 미확정 + gameTime fallback + 팀명·SP 라인 표시. R3 (INNER→LEFT JOIN) 가드: mixed LEFT JOIN 결과 (predictions=[] + predictions=[{...}] 혼합) 에서 모든 카드가 목록에 남고, 각각 PlaceholderCard / PredictionCard 로 분기.
+
+**PLAN_v5 최종 상태** (2026-04-20 세션 종료):
+- ✅ Phase 1 UI (v0.5.22)
+- ✅ Phase 2 Pipeline (v0.5.22)
+- ✅ Phase 2.5 DB 기반 form/h2h (v0.5.22)
+- ✅ Phase 3 `/debug/pipeline` (v0.5.22)
+- ✅ Phase 4 가드 테스트 (v0.5.23, 이번 릴리스)
+
+**검증**: tsc pass · vitest 전체 382 tests pass (shared 26 + kbo-data 253 + moneyball 103). 이번 릴리스 +31 tests.
+
+---
+
 ## [0.5.22] - 2026-04-20
 
 ### PLAN_v5 Phase 1-2 — 파이프라인 신뢰성 복원 + UI 리질리언스
