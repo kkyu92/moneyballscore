@@ -13,14 +13,22 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const rawDate = body.date as string | undefined;
   const date = rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : undefined;
-  const mode = body.mode === 'verify' ? 'verify' as const : 'predict' as const;
+  const validModes = ['announce', 'predict', 'predict_final', 'verify'] as const;
+  type Mode = (typeof validModes)[number];
+  const rawMode = body.mode as string | undefined;
+  const mode: Mode = (validModes as readonly string[]).includes(rawMode ?? '')
+    ? (rawMode as Mode)
+    : 'predict';
   const triggeredBy = (body.triggeredBy as 'cron' | 'manual' | 'api') || 'api';
 
   try {
     const result = await runDailyPipeline(date, mode, triggeredBy);
 
-    // 예측 생성 후 ISR revalidation 트리거
-    if (mode === 'predict' && result.predictionsGenerated > 0) {
+    // 예측 생성 후 ISR revalidation 트리거 (Codex #4: 범위 확장)
+    if (
+      (mode === 'predict' || mode === 'predict_final') &&
+      result.predictionsGenerated > 0
+    ) {
       const revalidateUrl = new URL('/api/revalidate', request.url);
       await fetch(revalidateUrl.toString(), {
         method: 'POST',
@@ -28,7 +36,15 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${cronSecret}`,
         },
-        body: JSON.stringify({ paths: ['/', '/predictions'] }),
+        body: JSON.stringify({
+          paths: [
+            '/',
+            '/predictions',
+            `/predictions/${result.date}`,
+            '/analysis',
+            '/feed',
+          ],
+        }),
       });
     }
 

@@ -1,8 +1,12 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { KBO_TEAMS, toKSTDateString } from '@moneyball/shared';
+import { toKSTDateString } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
-import { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
-import { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from '../scrapers/fancy-stats';
+import {
+  fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS,
+} from '../scrapers/kbo-official';
+import {
+  fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher,
+} from '../scrapers/fancy-stats';
 import { fetchBatterLeaders } from '../scrapers/fangraphs';
 import { predict } from '../engine/predictor';
 import { runDebate } from '../agents/debate';
@@ -10,8 +14,15 @@ import type { GameContext } from '../agents/types';
 import type { PredictionHistory } from '../agents/calibration-agent';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { runPostviewDaily } from './postview-daily';
-import { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from '../notify/telegram';
-import type { PredictionInput, PredictionResult, PipelineResult, ScrapedGame } from '../types';
+import { shouldPredictGame, estimateNotificationTime } from './schedule';
+import {
+  notifyPredictions, notifyResults, notifyError,
+  notifyPipelineStatus, notifyAnnounce,
+} from '../notify/telegram';
+import type {
+  PredictionInput, PipelineResult, ScrapedGame,
+  PitcherStats, TeamStats, EloRating,
+} from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -20,7 +31,9 @@ function createAdminClient(): DB {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
+    throw new Error(
+      'NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required',
+    );
   }
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -29,307 +42,325 @@ function createAdminClient(): DB {
 
 const CURRENT_SEASON = new Date().getFullYear();
 
-// YYYY-MM-DD 문자열에서 하루 뺀 날짜
 function getYesterdayKST(date: string): string {
   const d = new Date(date + 'T00:00:00+09:00');
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 }
 
-// KBO 리그 ID (leagues 테이블)
 async function getKBOLeagueId(db: DB): Promise<number> {
   const { data } = await db.from('leagues').select('id').eq('code', 'KBO').single();
   if (!data) throw new Error('KBO league not found in DB');
   return data.id;
 }
 
-// 팀 코드 → teams.id 매핑
 async function getTeamIdMap(
-  db: DB,
-  leagueId: number
+  db: DB, leagueId: number,
 ): Promise<Record<TeamCode, number>> {
   const { data } = await db.from('teams').select('id, code').eq('league_id', leagueId);
   if (!data) return {} as Record<TeamCode, number>;
-
   const map: Partial<Record<TeamCode, number>> = {};
-  for (const team of data) {
-    map[team.code as TeamCode] = team.id;
-  }
+  for (const team of data) map[team.code as TeamCode] = team.id;
   return map as Record<TeamCode, number>;
 }
 
-// 선수 이름 → players.id (없으면 생성)
 async function getOrCreatePlayerId(
-  db: DB,
-  leagueId: number,
-  name: string,
-  teamId: number,
-  position: string
+  db: DB, leagueId: number, name: string, teamId: number, position: string,
 ): Promise<number> {
   const { data: existing } = await db
-    .from('players')
-    .select('id')
-    .eq('league_id', leagueId)
-    .eq('name_ko', name)
-    .eq('team_id', teamId)
-    .single();
-
+    .from('players').select('id')
+    .eq('league_id', leagueId).eq('name_ko', name).eq('team_id', teamId).single();
   if (existing) return existing.id;
-
   const { data: created } = await db
     .from('players')
     .insert({ league_id: leagueId, name_ko: name, team_id: teamId, position })
-    .select('id')
-    .single();
-
+    .select('id').single();
   if (!created) throw new Error(`Failed to create player: ${name}`);
   return created.id;
 }
 
+export type PipelineMode = 'announce' | 'predict' | 'predict_final' | 'verify';
+
 /**
- * 일일 파이프라인 메인 함수
- * mode: 'predict' (KST 15:00) | 'verify' (KST 23:00)
+ * PLAN_v5 Phase 2C — 통합 파이프라인 엔트리.
+ *
+ * 모드:
+ * - announce (UTC 00 = KST 09): 오늘 편성 + 예상 알림 시각 Telegram
+ * - predict (UTC 01-12 = KST 10-21): 매시간, 각 경기 시작 3h 전 개별 예측
+ * - predict_final (UTC 13 = KST 22): 마지막 predict + gap 체크
+ * - verify (UTC 14 = KST 23): accuracy 업데이트 + compound 루프
+ *
+ * 모든 exit 경로는 finish() helper 로 통과 — pipeline_runs 로그 보장.
  */
 export async function runDailyPipeline(
   date?: string,
-  mode: 'predict' | 'verify' = 'predict',
-  triggeredBy: 'cron' | 'manual' | 'api' = 'api'
+  mode: PipelineMode = 'predict',
+  triggeredBy: 'cron' | 'manual' | 'api' = 'api',
 ): Promise<PipelineResult> {
   const startTime = Date.now();
   const targetDate = date || toKSTDateString();
   const db = createAdminClient();
   const errors: string[] = [];
-  const predictionSummaries: Array<{
-    homeTeam: string; awayTeam: string;
-    predictedWinner: string; confidence: number; homeWinProb: number;
-  }> = [];
 
   console.log(`[Pipeline] ${mode} mode for ${targetDate}`);
 
-  const leagueId = await getKBOLeagueId(db);
-  const teamIdMap = await getTeamIdMap(db, leagueId);
+  // 모든 exit 경로가 통과 — pipeline_runs 로그 + (조건부) Telegram status (Codex #7)
+  const finish = async (result: PipelineResult): Promise<PipelineResult> => {
+    const durationMs = Date.now() - startTime;
+    const status =
+      result.errors.length > 0
+        ? result.predictionsGenerated > 0 ? 'partial' : 'error'
+        : 'success';
+    try {
+      await db.from('pipeline_runs').insert({
+        run_date: targetDate, mode, status,
+        games_found: result.gamesFound,
+        predictions: result.predictionsGenerated,
+        games_skipped: result.gamesSkipped,
+        errors: result.errors.length > 0 ? JSON.stringify(result.errors) : '[]',
+        duration_ms: durationMs, triggered_by: triggeredBy,
+      });
+    } catch (e) {
+      console.error('[Pipeline] pipeline_runs insert failed:', e);
+    }
 
-  // 30일 지난 row 자동 정리 (predict 모드에서 하루 1회)
-  if (mode === 'predict') {
+    // Telegram status 는 의미 있는 run 에만 — 매시간 spam 방지
+    const shouldNotifyStatus =
+      (mode === 'predict' && result.predictionsGenerated > 0) ||
+      mode === 'predict_final' ||
+      mode === 'verify';
+    if (shouldNotifyStatus) {
+      try { await notifyPipelineStatus(result, durationMs); }
+      catch (e) { console.error('[Pipeline] notifyPipelineStatus failed:', e); }
+    }
+    return result;
+  };
+
+  // === announce mode (KST 09:00) ===
+  if (mode === 'announce') {
+    let games: ScrapedGame[] = [];
+    try { games = await fetchGames(targetDate); }
+    catch (e) {
+      errors.push(`fetchGames: ${e instanceof Error ? e.message : String(e)}`);
+      return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
+    }
+    try {
+      await notifyAnnounce(targetDate, games, estimateNotificationTime(games));
+    } catch (e) {
+      errors.push(`notifyAnnounce: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
+  }
+
+  // predict / predict_final / verify 공통 setup
+  let leagueId: number;
+  let teamIdMap: Record<TeamCode, number>;
+  try {
+    leagueId = await getKBOLeagueId(db);
+    teamIdMap = await getTeamIdMap(db, leagueId);
+  } catch (e) {
+    errors.push(`setup: ${e instanceof Error ? e.message : String(e)}`);
+    return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
+  }
+
+  // 첫 predict cron 전용 cleanup (Codex #5) — UTC 01 = KST 10
+  const isFirstPredictRun = mode === 'predict' && new Date().getUTCHours() === 1;
+  if (isFirstPredictRun) {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { count: memCount } = await db
-        .from('agent_memories')
-        .delete({ count: 'exact' })
-        .lt('created_at', thirtyDaysAgo);
-      const { count: logCount } = await db
-        .from('validator_logs')
-        .delete({ count: 'exact' })
-        .lt('created_at', thirtyDaysAgo);
+      const { count: memCount } = await db.from('agent_memories')
+        .delete({ count: 'exact' }).lt('created_at', thirtyDaysAgo);
+      const { count: logCount } = await db.from('validator_logs')
+        .delete({ count: 'exact' }).lt('created_at', thirtyDaysAgo);
       if ((memCount ?? 0) > 0 || (logCount ?? 0) > 0) {
         console.log(`[Pipeline] Retention cleanup: agent_memories=${memCount ?? 0}, validator_logs=${logCount ?? 0}`);
       }
-    } catch (e) {
-      console.warn('[Pipeline] Retention cleanup failed, continuing:', e);
-    }
-  }
+    } catch (e) { console.warn('[Pipeline] Retention cleanup failed:', e); }
 
-  // v4-3 Task 4 fallback: 아침 predict run이 전날 누락된 postview cleanup
-  // live-update.yml이 00:50 KST 이후 종료된 경기(연 1~2회 극단)를 커버 못할 때 마지막 보험
-  if (mode === 'predict') {
     try {
       const yesterday = getYesterdayKST(targetDate);
       const cleanup = await runPostviewDaily(yesterday);
       if (cleanup.processed > 0) {
-        console.log(`[Pipeline] Morning postview cleanup: ${yesterday} processed=${cleanup.processed} tokens=${cleanup.totalTokens}`);
+        console.log(`[Pipeline] Morning postview cleanup: ${yesterday} processed=${cleanup.processed}`);
       }
-    } catch (e) {
-      console.warn('[Pipeline] Morning postview cleanup failed, continuing:', e);
-    }
+    } catch (e) { console.warn('[Pipeline] Morning postview cleanup failed:', e); }
   }
 
-  // 1. KBO 공식에서 경기 목록 수집
+  // fetchGames
   let games: ScrapedGame[];
   try {
     games = await fetchGames(targetDate);
     console.log(`[Pipeline] ${games.length} games found`);
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors: [msg] };
+    errors.push(`fetchGames: ${e instanceof Error ? e.message : String(e)}`);
+    return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
   if (games.length === 0) {
-    return { date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors: [] };
+    return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
-  // games 테이블에 upsert
-  for (const game of games) {
-    const homeTeamId = teamIdMap[game.homeTeam];
-    const awayTeamId = teamIdMap[game.awayTeam];
-    if (!homeTeamId || !awayTeamId) {
-      errors.push(`Unknown team: ${game.homeTeam} or ${game.awayTeam}`);
-      continue;
-    }
-
-    await db.from('games').upsert(
-      {
-        league_id: leagueId,
-        game_date: game.date,
-        game_time: game.gameTime,
-        home_team_id: homeTeamId,
-        away_team_id: awayTeamId,
-        stadium: game.stadium,
-        status: game.status,
-        home_score: game.homeScore ?? null,
-        away_score: game.awayScore ?? null,
-        winner_team_id: game.status === 'final' && game.homeScore != null && game.awayScore != null
-          ? (game.homeScore > game.awayScore ? homeTeamId : awayTeamId)
-          : null,
+  // games upsert + gameIdMap 배치 (Codex #10)
+  const gamesPayload = games
+    .map((game) => {
+      const homeTeamId = teamIdMap[game.homeTeam];
+      const awayTeamId = teamIdMap[game.awayTeam];
+      if (!homeTeamId || !awayTeamId) {
+        errors.push(`Unknown team: ${game.homeTeam} or ${game.awayTeam}`);
+        return null;
+      }
+      return {
+        league_id: leagueId, game_date: game.date, game_time: game.gameTime,
+        home_team_id: homeTeamId, away_team_id: awayTeamId,
+        stadium: game.stadium, status: game.status,
+        home_score: game.homeScore ?? null, away_score: game.awayScore ?? null,
+        winner_team_id:
+          game.status === 'final' && game.homeScore != null && game.awayScore != null
+            ? game.homeScore > game.awayScore ? homeTeamId : awayTeamId
+            : null,
         external_game_id: game.externalGameId,
-      },
-      { onConflict: 'league_id,external_game_id' }
-    );
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+
+  const { data: upserted, error: upsertErr } = await db
+    .from('games')
+    .upsert(gamesPayload, { onConflict: 'league_id,external_game_id' })
+    .select('id, external_game_id');
+
+  if (upsertErr) {
+    errors.push(`games upsert: ${upsertErr.message}`);
+    return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: games.length, errors });
   }
 
-  // verify 모드면 결과만 업데이트하고 끝
+  const gameIdMap = new Map<string, number>(
+    (upserted ?? []).map((g: { id: number; external_game_id: string }) => [g.external_game_id, g.id]),
+  );
+  const dbGameIds = Array.from(gameIdMap.values());
+
+  // === verify mode (KST 23:00) ===
   if (mode === 'verify') {
     await updateAccuracy(db, leagueId, targetDate);
 
-    // Compound 루프: Calibration + Agent Memory
     try {
       await updateCalibration();
       await generateAgentMemories(targetDate);
       console.log('[Pipeline] Calibration + Agent memories updated');
     } catch (e) {
-      console.error('[Pipeline] Compound loop failed:', e);
+      errors.push(`compound: ${e instanceof Error ? e.message : String(e)}`);
     }
 
-    // 결과 알림용 데이터 수집
     const verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
-    const durationMs = Date.now() - startTime;
-    const verifyResult: PipelineResult = {
-      date: targetDate, gamesFound: games.length,
-      predictionsGenerated: 0, gamesSkipped: 0, errors,
-    };
-
-    // 실행 히스토리 기록
-    await db.from('pipeline_runs').insert({
-      run_date: targetDate, mode, status: 'success',
-      games_found: games.length, predictions: 0, games_skipped: 0,
-      errors: '[]', duration_ms: durationMs, triggered_by: triggeredBy,
-    }).then(null, (e: unknown) => console.error('[Pipeline] Failed to log run:', e));
-
-    // Telegram 결과 알림
     try {
       if (verifyResults.length > 0) {
-        await notifyResults(targetDate, verifyResults as any);
+        await notifyResults(targetDate, verifyResults);
       }
-    } catch (e) {
-      console.error('[Pipeline] Telegram notification failed:', e);
-    }
+    } catch (e) { console.error('[Pipeline] notifyResults failed:', e); }
 
-    return verifyResult;
+    return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
-  // 2. Fancy Stats에서 통계 수집
-  console.log('[Pipeline] Fetching Fancy Stats...');
-  const [pitcherStats, teamStats, eloRatings] = await Promise.all([
-    fetchPitcherStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats pitchers: ${e}`); return []; }),
-    fetchTeamStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats teams: ${e}`); return []; }),
-    fetchEloRatings(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats elo: ${e}`); return []; }),
-  ]);
+  // === predict / predict_final ===
+  // existing pre_game predictions 배치 조회
+  const { data: existing } = await db
+    .from('predictions').select('game_id')
+    .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
+  const existingSet = new Set(
+    (existing ?? []).map((e: { game_id: number }) => e.game_id),
+  );
 
-  // 스크래퍼 헬스 체크 — 기대치 미만이면 errors + 즉시 Telegram 알림.
-  // 투수 리더 페이지는 보통 5-10명, 팀은 항상 10팀, Elo는 항상 10팀.
-  const scraperIssues: string[] = [];
-  if (pitcherStats.length === 0) {
-    scraperIssues.push('Fancy Stats pitcher 0명');
-  }
-  if (teamStats.length < 10) {
-    scraperIssues.push(`Fancy Stats team ${teamStats.length}팀 (기대 10)`);
-  }
-  if (eloRatings.length < 10) {
-    scraperIssues.push(`Fancy Stats Elo ${eloRatings.length}팀 (기대 10)`);
-  }
-  if (scraperIssues.length > 0) {
-    const msg = `셀렉터 드리프트 의심: ${scraperIssues.join(', ')}`;
-    errors.push(msg);
-    try {
-      await notifyError('daily-pipeline SCRAPER', msg);
-    } catch {}
-  }
-
-  // 3. FanGraphs 보조 데이터
-  console.log('[Pipeline] Fetching FanGraphs...');
-  const fgBatters = await fetchBatterLeaders(CURRENT_SEASON).catch((e) => {
-    errors.push(`FanGraphs: ${e}`);
-    return [];
+  // windowTargets 계산 (각 경기 시작 3h 이내 + SP 확정 + scheduled + 미예측)
+  const nowMs = Date.now();
+  const windowTargets = games.filter((g) => {
+    const dbId = gameIdMap.get(g.externalGameId) ?? null;
+    return shouldPredictGame(g, existingSet, dbId, nowMs).shouldPredict;
   });
 
-  // FanGraphs 데이터로 TeamStats 보강
-  for (const fg of fgBatters) {
-    const ts = teamStats.find((t) => t.team === fg.team);
-    if (ts) {
-      ts.wrcPlus = fg.wrcPlus;
-      ts.iso = fg.iso;
-    }
-  }
-
-  // team_season_stats upsert
-  for (const ts of teamStats) {
-    const teamId = teamIdMap[ts.team];
-    if (!teamId) continue;
-    const elo = eloRatings.find((e) => e.team === ts.team);
-
-    await db.from('team_season_stats').upsert(
-      {
-        team_id: teamId,
-        season: CURRENT_SEASON,
-        team_woba: ts.woba,
-        team_wrc_plus: ts.wrcPlus ?? null,
-        bullpen_fip: ts.bullpenFip,
-        sfr: ts.sfr,
-        elo_rating: elo?.elo ?? null,
-        elo_win_pct: elo?.winPct ?? null,
-        total_war: ts.totalWar,
-        last_synced: new Date().toISOString(),
-      },
-      { onConflict: 'team_id,season' }
-    );
-  }
-
-  // 4. 각 경기에 대해 예측 실행
   let predictionsGenerated = 0;
-  let gamesSkipped = 0;
 
-  for (const game of games) {
-    if (game.status !== 'scheduled') {
-      gamesSkipped++;
-      continue;
+  // windowTargets 0 + predict mode → early return (Fancy Stats 불필요)
+  // predict_final 은 gap 체크 위해 계속 진행
+  if (windowTargets.length === 0 && mode === 'predict') {
+    return finish({
+      date: targetDate, gamesFound: games.length,
+      predictionsGenerated: 0, gamesSkipped: games.length, errors,
+    });
+  }
+
+  // Fancy Stats / FanGraphs — windowTargets 있을 때만
+  let pitcherStats: PitcherStats[] = [];
+  let teamStats: TeamStats[] = [];
+  let eloRatings: EloRating[] = [];
+
+  if (windowTargets.length > 0) {
+    console.log('[Pipeline] Fetching Fancy Stats...');
+    [pitcherStats, teamStats, eloRatings] = await Promise.all([
+      fetchPitcherStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats pitchers: ${e}`); return []; }),
+      fetchTeamStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats teams: ${e}`); return []; }),
+      fetchEloRatings(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats elo: ${e}`); return []; }),
+    ]);
+
+    const scraperIssues: string[] = [];
+    if (pitcherStats.length === 0) scraperIssues.push('Fancy Stats pitcher 0명');
+    if (teamStats.length < 10) scraperIssues.push(`Fancy Stats team ${teamStats.length}팀 (기대 10)`);
+    if (eloRatings.length < 10) scraperIssues.push(`Fancy Stats Elo ${eloRatings.length}팀 (기대 10)`);
+    if (scraperIssues.length > 0) {
+      const msg = `셀렉터 드리프트 의심: ${scraperIssues.join(', ')}`;
+      errors.push(msg);
+      try { await notifyError('daily-pipeline SCRAPER', msg); } catch {}
     }
 
-    // 선발투수 미확정이면 스킵
-    if (!game.homeSP || !game.awaySP) {
-      console.log(`[Pipeline] Skipping ${game.homeTeam} vs ${game.awayTeam}: SP not confirmed`);
-      gamesSkipped++;
-      continue;
+    console.log('[Pipeline] Fetching FanGraphs...');
+    const fgBatters = await fetchBatterLeaders(CURRENT_SEASON).catch((e) => {
+      errors.push(`FanGraphs: ${e}`); return [];
+    });
+    for (const fg of fgBatters) {
+      const ts = teamStats.find((t) => t.team === fg.team);
+      if (ts) { ts.wrcPlus = fg.wrcPlus; ts.iso = fg.iso; }
     }
+
+    for (const ts of teamStats) {
+      const teamId = teamIdMap[ts.team];
+      if (!teamId) continue;
+      const elo = eloRatings.find((e) => e.team === ts.team);
+      await db.from('team_season_stats').upsert({
+        team_id: teamId, season: CURRENT_SEASON,
+        team_woba: ts.woba, team_wrc_plus: ts.wrcPlus ?? null,
+        bullpen_fip: ts.bullpenFip, sfr: ts.sfr,
+        elo_rating: elo?.elo ?? null, elo_win_pct: elo?.winPct ?? null,
+        total_war: ts.totalWar, last_synced: new Date().toISOString(),
+      }, { onConflict: 'team_id,season' });
+    }
+  }
+
+  // windowTargets predict 루프
+  const yesterday = getYesterdayKST(targetDate);
+  for (const game of windowTargets) {
+    const dbGameId = gameIdMap.get(game.externalGameId);
+    if (!dbGameId) continue;
 
     const homeTeamStat = teamStats.find((t) => t.team === game.homeTeam);
     const awayTeamStat = teamStats.find((t) => t.team === game.awayTeam);
     const homeElo = eloRatings.find((e) => e.team === game.homeTeam);
     const awayElo = eloRatings.find((e) => e.team === game.awayTeam);
 
-    // fallback 값
-    const defaultTeamStats = { team: game.homeTeam as TeamCode, woba: 0.320, bullpenFip: 4.00, totalWar: 12, sfr: 0 };
+    const defaultTeamStats = {
+      team: game.homeTeam as TeamCode, woba: 0.320, bullpenFip: 4.00, totalWar: 12, sfr: 0,
+    };
     const defaultElo = { team: game.homeTeam as TeamCode, elo: 1500, winPct: 0.5 };
 
-    // 최근폼, 상대전적 수집
+    // asOfDate = 어제 (Batch D 시그니처 배선, 실 필터링 미구현)
     const [homeForm, awayForm, h2h] = await Promise.all([
-      fetchRecentForm(game.homeTeam, CURRENT_SEASON).catch(() => 0.5),
-      fetchRecentForm(game.awayTeam, CURRENT_SEASON).catch(() => 0.5),
-      fetchHeadToHead(game.homeTeam, game.awayTeam, CURRENT_SEASON).catch(() => ({ wins: 0, losses: 0 })),
+      fetchRecentForm(game.homeTeam, CURRENT_SEASON, 10, yesterday).catch(() => 0.5),
+      fetchRecentForm(game.awayTeam, CURRENT_SEASON, 10, yesterday).catch(() => 0.5),
+      fetchHeadToHead(game.homeTeam, game.awayTeam, CURRENT_SEASON, yesterday)
+        .catch(() => ({ wins: 0, losses: 0 })),
     ]);
 
     const input: PredictionInput = {
       game,
-      homeSPStats: findPitcher(pitcherStats, game.homeSP, game.homeTeam),
-      awaySPStats: findPitcher(pitcherStats, game.awaySP, game.awayTeam),
+      homeSPStats: findPitcher(pitcherStats, game.homeSP!, game.homeTeam),
+      awaySPStats: findPitcher(pitcherStats, game.awaySP!, game.awayTeam),
       homeTeamStats: homeTeamStat || { ...defaultTeamStats, team: game.homeTeam },
       awayTeamStats: awayTeamStat || { ...defaultTeamStats, team: game.awayTeam },
       homeElo: homeElo || { ...defaultElo, team: game.homeTeam },
@@ -342,32 +373,24 @@ export async function runDailyPipeline(
 
     const quantResult = predict(input);
 
-    // 에이전트 토론 (ANTHROPIC_API_KEY가 있으면 실행)
     let finalWinner = quantResult.predictedWinner;
     let finalHomeProb = quantResult.homeWinProb;
     let finalConfidence = quantResult.confidence;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let finalReasoning: any = quantResult;
 
     if (process.env.ANTHROPIC_API_KEY) {
       try {
         const gameContext: GameContext = {
           game: input.game,
-          homeSPStats: input.homeSPStats,
-          awaySPStats: input.awaySPStats,
-          homeTeamStats: input.homeTeamStats,
-          awayTeamStats: input.awayTeamStats,
-          homeElo: input.homeElo,
-          awayElo: input.awayElo,
-          homeRecentForm: input.homeRecentForm,
-          awayRecentForm: input.awayRecentForm,
-          headToHead: input.headToHead,
-          parkFactor: input.parkFactor,
+          homeSPStats: input.homeSPStats, awaySPStats: input.awaySPStats,
+          homeTeamStats: input.homeTeamStats, awayTeamStats: input.awayTeamStats,
+          homeElo: input.homeElo, awayElo: input.awayElo,
+          homeRecentForm: input.homeRecentForm, awayRecentForm: input.awayRecentForm,
+          headToHead: input.headToHead, parkFactor: input.parkFactor,
         };
-        const history = await getPredictionHistory(db, leagueId, game.homeTeam, game.awayTeam);
+        const history = await getPredictionHistory(db);
         const debate = await runDebate(gameContext, quantResult.homeWinProb, history);
-
-        // 디버그: 토론 결과 로그
-        errors.push(`[DEBUG] Debate ${game.homeTeam}v${game.awayTeam}: tokens=${debate.totalTokens}, verdict=${debate.verdict.predictedWinner} ${Math.round(debate.verdict.homeWinProb*100)}%`);
 
         finalWinner = debate.verdict.predictedWinner;
         finalHomeProb = debate.verdict.homeWinProb;
@@ -375,271 +398,282 @@ export async function runDailyPipeline(
         finalReasoning = {
           ...quantResult,
           debate: {
-            homeArgument: debate.homeArgument,
-            awayArgument: debate.awayArgument,
-            calibration: debate.calibration,
-            verdict: debate.verdict,
-            quantitativeProb: debate.quantitativeProb,
-            totalTokens: debate.totalTokens,
+            homeArgument: debate.homeArgument, awayArgument: debate.awayArgument,
+            calibration: debate.calibration, verdict: debate.verdict,
+            quantitativeProb: debate.quantitativeProb, totalTokens: debate.totalTokens,
           },
         };
       } catch (e) {
         const debateErr = e instanceof Error ? e.message : String(e);
         console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, debateErr);
         errors.push(`Debate ${game.homeTeam}v${game.awayTeam}: ${debateErr}`);
-        // fallback: 정량 모델 결과 사용
       }
     }
 
-    const result = { ...quantResult, predictedWinner: finalWinner, homeWinProb: finalHomeProb, confidence: finalConfidence };
+    const result = {
+      ...quantResult,
+      predictedWinner: finalWinner, homeWinProb: finalHomeProb, confidence: finalConfidence,
+    };
 
-    // DB에 저장
     const homeTeamId = teamIdMap[game.homeTeam];
     const awayTeamId = teamIdMap[game.awayTeam];
+    if (game.homeSP && homeTeamId) {
+      const spId = await getOrCreatePlayerId(db, leagueId, game.homeSP, homeTeamId, 'P');
+      await db.from('games').update({ home_sp_id: spId }).eq('id', dbGameId);
+    }
+    if (game.awaySP && awayTeamId) {
+      const spId = await getOrCreatePlayerId(db, leagueId, game.awaySP, awayTeamId, 'P');
+      await db.from('games').update({ away_sp_id: spId }).eq('id', dbGameId);
+    }
 
-    // game ID 조회
-    const { data: dbGame } = await db
-      .from('games')
-      .select('id')
-      .eq('external_game_id', game.externalGameId)
-      .eq('league_id', leagueId)
-      .single();
+    const payload = {
+      game_id: dbGameId,
+      prediction_type: 'pre_game',
+      predicted_winner: teamIdMap[result.predictedWinner],
+      confidence: result.confidence,
+      home_sp_fip: input.homeSPStats?.fip ?? null,
+      away_sp_fip: input.awaySPStats?.fip ?? null,
+      home_sp_xfip: input.homeSPStats?.xfip ?? null,
+      away_sp_xfip: input.awaySPStats?.xfip ?? null,
+      home_lineup_woba: input.homeTeamStats.woba,
+      away_lineup_woba: input.awayTeamStats.woba,
+      home_bullpen_fip: input.homeTeamStats.bullpenFip,
+      away_bullpen_fip: input.awayTeamStats.bullpenFip,
+      home_war_total: input.homeTeamStats.totalWar,
+      away_war_total: input.awayTeamStats.totalWar,
+      home_recent_form: input.homeRecentForm,
+      away_recent_form: input.awayRecentForm,
+      head_to_head_rate:
+        h2h.wins + h2h.losses > 0 ? h2h.wins / (h2h.wins + h2h.losses) : null,
+      park_factor: input.parkFactor,
+      home_elo: input.homeElo.elo,
+      away_elo: input.awayElo.elo,
+      home_sfr: input.homeTeamStats.sfr,
+      away_sfr: input.awayTeamStats.sfr,
+      model_version: process.env.ANTHROPIC_API_KEY ? 'v2.0-debate' : 'v1.5',
+      debate_version: process.env.ANTHROPIC_API_KEY ? 'v2-persona4' : null,
+      scoring_rule: 'v1.5',
+      reasoning: finalReasoning,
+      factors: result.factors,
+      predicted_at: new Date().toISOString(),
+    };
 
-    if (dbGame) {
-      // 선발투수 ID 저장
-      if (game.homeSP && homeTeamId) {
-        const spId = await getOrCreatePlayerId(db, leagueId, game.homeSP, homeTeamId, 'P');
-        await db.from('games').update({ home_sp_id: spId }).eq('id', dbGame.id);
-      }
-      if (game.awaySP && awayTeamId) {
-        const spId = await getOrCreatePlayerId(db, leagueId, game.awaySP, awayTeamId, 'P');
-        await db.from('games').update({ away_sp_id: spId }).eq('id', dbGame.id);
-      }
+    // INSERT with UNIQUE(game_id, prediction_type) — race 시 23505 catch (Codex #1)
+    const insertResult = await db.from('predictions').insert(payload).select('id');
 
-      const upsertResult = await db.from('predictions').upsert(
-        {
-          game_id: dbGame.id,
-          prediction_type: 'pre_game',
-          predicted_winner: teamIdMap[result.predictedWinner],
-          confidence: result.confidence,
-          home_sp_fip: input.homeSPStats?.fip ?? null,
-          away_sp_fip: input.awaySPStats?.fip ?? null,
-          home_sp_xfip: input.homeSPStats?.xfip ?? null,
-          away_sp_xfip: input.awaySPStats?.xfip ?? null,
-          home_lineup_woba: input.homeTeamStats.woba,
-          away_lineup_woba: input.awayTeamStats.woba,
-          home_bullpen_fip: input.homeTeamStats.bullpenFip,
-          away_bullpen_fip: input.awayTeamStats.bullpenFip,
-          home_war_total: input.homeTeamStats.totalWar,
-          away_war_total: input.awayTeamStats.totalWar,
-          home_recent_form: input.homeRecentForm,
-          away_recent_form: input.awayRecentForm,
-          head_to_head_rate: h2h.wins + h2h.losses > 0
-            ? h2h.wins / (h2h.wins + h2h.losses)
-            : null,
-          park_factor: input.parkFactor,
-          home_elo: input.homeElo.elo,
-          away_elo: input.awayElo.elo,
-          home_sfr: input.homeTeamStats.sfr,
-          away_sfr: input.awayTeamStats.sfr,
-          model_version: process.env.ANTHROPIC_API_KEY ? 'v2.0-debate' : 'v1.5',
-          debate_version: process.env.ANTHROPIC_API_KEY ? 'v2-persona4' : null,
-          scoring_rule: 'v1.5',
-          reasoning: finalReasoning,
-          factors: result.factors,
-        },
-        { onConflict: 'game_id,prediction_type' }
-      );
-
-      // Silent fail 방지: upsert 에러를 errors 배열에 surface
-      // 이전 사고: model_version VARCHAR(10) overflow가 무성무 무시되어
-      // Phase C/D 이후 prediction row 생성 실패. Migration 008 + 이 체크로 재발 차단.
-      if (upsertResult.error) {
-        const errMsg = `Upsert failed for ${game.homeTeam}v${game.awayTeam} (game_id=${dbGame.id}): ${upsertResult.error.message}`;
-        console.error(`[Pipeline] ${errMsg}`);
-        errors.push(errMsg);
+    if (insertResult.error) {
+      if (insertResult.error.code === '23505') {
+        // 다른 cron 이 먼저 저장 — first-write-wins 성공
         continue;
       }
+      const errMsg = `predictions insert ${game.homeTeam}v${game.awayTeam}: ${insertResult.error.message}`;
+      console.error(`[Pipeline] ${errMsg}`);
+      errors.push(errMsg);
+      continue;
+    }
 
-      predictionsGenerated++;
-      predictionSummaries.push({
-        homeTeam: game.homeTeam,
-        awayTeam: game.awayTeam,
-        predictedWinner: result.predictedWinner,
-        confidence: result.confidence,
-        homeWinProb: result.homeWinProb,
-      });
-      console.log(
-        `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`
-      );
+    predictionsGenerated++;
+    console.log(
+      `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`,
+    );
+  }
+
+  // 하루 요약 알림 — daily_notifications flag 로 idempotent (Codex #6)
+  if (predictionsGenerated > 0) {
+    await handleDailySummaryNotification(db, dbGameIds, targetDate, games);
+  }
+
+  // gap 감지 (predict_final mode 전용, Codex #9)
+  if (mode === 'predict_final') {
+    const expected = games.filter(
+      (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
+    ).length;
+    const { count: totalToday } = await db
+      .from('predictions')
+      .select('*', { count: 'exact', head: true })
+      .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
+    const gap = expected - (totalToday ?? 0);
+    if (gap > 0) {
+      const msg =
+        `예측 누락 ${gap}경기 (expected=${expected}, total=${totalToday})`;
+      errors.push(`[GAP] ${msg}`);
+      try { await notifyError('daily-pipeline GAP', msg); } catch {}
     }
   }
 
-  const durationMs = Date.now() - startTime;
-  const pipelineResult: PipelineResult = {
-    date: targetDate,
-    gamesFound: games.length,
+  return finish({
+    date: targetDate, gamesFound: games.length,
     predictionsGenerated,
-    gamesSkipped,
+    gamesSkipped: games.length - predictionsGenerated,
     errors,
-  };
-
-  console.log(`[Pipeline] Done in ${(durationMs / 1000).toFixed(1)}s: ${predictionsGenerated} predictions, ${gamesSkipped} skipped, ${errors.length} errors`);
-
-  // 실행 히스토리 기록
-  await db.from('pipeline_runs').insert({
-    run_date: targetDate,
-    mode,
-    status: errors.length > 0 ? (predictionsGenerated > 0 ? 'partial' : 'error') : 'success',
-    games_found: games.length,
-    predictions: predictionsGenerated,
-    games_skipped: gamesSkipped,
-    errors: errors.length > 0 ? JSON.stringify(errors) : '[]',
-    duration_ms: durationMs,
-    triggered_by: triggeredBy,
-  }).then(null, (e: unknown) => console.error('[Pipeline] Failed to log run:', e));
-
-  // Telegram 알림
-  try {
-    if (predictionsGenerated > 0) {
-      await notifyPredictions(pipelineResult, predictionSummaries as any);
-    }
-    await notifyPipelineStatus(pipelineResult, durationMs);
-  } catch (e) {
-    console.error('[Pipeline] Telegram notification failed:', e);
-  }
-
-  return pipelineResult;
+  });
 }
 
 /**
- * 회고 에이전트용 과거 예측 히스토리 수집
+ * 하루 요약 Telegram 알림 idempotent 처리 (daily_notifications flag).
+ * 마지막 조각 저장 시점에 전체 예측을 한 번에 전송. SP 늦확정으로 expected 가
+ * 늘어도 summary_sent=true 면 재전송 차단.
  */
-async function getPredictionHistory(
-  db: DB,
-  leagueId: number,
-  homeTeam: string,
-  awayTeam: string
-): Promise<PredictionHistory> {
+async function handleDailySummaryNotification(
+  db: DB, dbGameIds: number[], date: string, games: ScrapedGame[],
+) {
+  try {
+    const expected = games.filter(
+      (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
+    ).length;
+    if (expected === 0) return;
+
+    const { count: todayTotal } = await db
+      .from('predictions')
+      .select('*', { count: 'exact', head: true })
+      .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
+
+    if ((todayTotal ?? 0) < expected) return;
+
+    const { data: marker } = await db
+      .from('daily_notifications')
+      .select('summary_sent').eq('run_date', date).maybeSingle();
+    if (marker?.summary_sent) return;
+
+    const summary = await buildDailySummary(db, dbGameIds);
+    await notifyPredictions(
+      {
+        date, gamesFound: games.length,
+        predictionsGenerated: todayTotal ?? 0,
+        gamesSkipped: 0, errors: [],
+      },
+      summary,
+    );
+
+    await db.from('daily_notifications').upsert({
+      run_date: date, summary_sent: true,
+      sent_at: new Date().toISOString(),
+      prediction_count: todayTotal,
+    });
+  } catch (e) {
+    console.error('[Pipeline] daily summary notification failed:', e);
+  }
+}
+
+/**
+ * notifyPredictions 에 넘길 predictions 배열 구성 (DB 조회).
+ */
+async function buildDailySummary(db: DB, dbGameIds: number[]) {
+  const { data } = await db
+    .from('predictions')
+    .select(`
+      confidence, reasoning,
+      winner:teams!predictions_predicted_winner_fkey(code),
+      game:games!predictions_game_id_fkey(
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      )
+    `)
+    .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []).map((p: any) => ({
+    homeTeam: p.game?.home_team?.code as TeamCode,
+    awayTeam: p.game?.away_team?.code as TeamCode,
+    predictedWinner: p.winner?.code as TeamCode,
+    confidence: p.confidence,
+    homeWinProb: p.reasoning?.homeWinProb ?? 0.5,
+  }));
+}
+
+async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
   const { data: predictions } = await db
     .from('predictions')
-    .select('predicted_winner, confidence, is_correct, game:games!predictions_game_id_fkey(game_date, home_team_id, away_team_id)')
+    .select('predicted_winner, confidence, is_correct')
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null)
     .order('game_id', { ascending: false })
     .limit(50);
 
   if (!predictions || predictions.length === 0) {
-    return { totalPredictions: 0, correctPredictions: 0, recentResults: [], homeTeamAccuracy: null, awayTeamAccuracy: null, teamAccuracy: {} };
+    return {
+      totalPredictions: 0, correctPredictions: 0, recentResults: [],
+      homeTeamAccuracy: null, awayTeamAccuracy: null, teamAccuracy: {},
+    };
   }
 
   const total = predictions.length;
-  const correct = predictions.filter((p: any) => p.is_correct).length;
+  const correct = predictions.filter(
+    (p: { is_correct: boolean | null }) => p.is_correct,
+  ).length;
 
-  // 간소화: 상세 히스토리는 DB 조인이 복잡하므로 요약만
   return {
-    totalPredictions: total,
-    correctPredictions: correct,
-    recentResults: [],
+    totalPredictions: total, correctPredictions: correct, recentResults: [],
     homeTeamAccuracy: total >= 10 ? correct / total : null,
-    awayTeamAccuracy: null,
-    teamAccuracy: {},
+    awayTeamAccuracy: null, teamAccuracy: {},
   };
 }
 
-// teamId → TeamCode 역매핑
 function reverseTeamMap(teamIdMap: Record<string, number>): Record<number, string> {
   const reverse: Record<number, string> = {};
-  for (const [code, id] of Object.entries(teamIdMap)) {
-    reverse[id] = code;
-  }
+  for (const [code, id] of Object.entries(teamIdMap)) reverse[id] = code;
   return reverse;
 }
 
-/**
- * verify 모드 결과 수집 (Telegram 알림용)
- */
 async function getVerifyResults(
-  db: DB,
-  leagueId: number,
-  date: string,
-  teamIdMap: Record<string, number>
+  db: DB, leagueId: number, date: string, teamIdMap: Record<string, number>,
 ) {
   const idToCode = reverseTeamMap(teamIdMap);
 
   const { data: gamesData } = await db
     .from('games')
     .select('id, home_team_id, away_team_id, home_score, away_score, winner_team_id')
-    .eq('league_id', leagueId)
-    .eq('game_date', date)
-    .eq('status', 'final');
+    .eq('league_id', leagueId).eq('game_date', date).eq('status', 'final');
 
   if (!gamesData) return [];
 
-  const results = [];
+  interface PredRow { predicted_winner: number; is_correct: boolean | null; }
+  interface VerifyResult {
+    homeTeam: TeamCode; awayTeam: TeamCode;
+    predictedWinner: TeamCode; actualWinner: TeamCode;
+    isCorrect: boolean; homeScore: number; awayScore: number;
+  }
+
+  const results: VerifyResult[] = [];
   for (const game of gamesData) {
     if (!game.winner_team_id) continue;
-
     const { data: pred } = await db
       .from('predictions')
       .select('predicted_winner, is_correct')
-      .eq('game_id', game.id)
-      .eq('prediction_type', 'pre_game')
-      .single();
-
+      .eq('game_id', game.id).eq('prediction_type', 'pre_game')
+      .single<PredRow>();
     if (pred) {
       results.push({
-        homeTeam: idToCode[game.home_team_id] || 'UNK',
-        awayTeam: idToCode[game.away_team_id] || 'UNK',
-        predictedWinner: idToCode[pred.predicted_winner] || 'UNK',
-        actualWinner: idToCode[game.winner_team_id] || 'UNK',
+        homeTeam: (idToCode[game.home_team_id] || 'UNK') as TeamCode,
+        awayTeam: (idToCode[game.away_team_id] || 'UNK') as TeamCode,
+        predictedWinner: (idToCode[pred.predicted_winner] || 'UNK') as TeamCode,
+        actualWinner: (idToCode[game.winner_team_id] || 'UNK') as TeamCode,
         isCorrect: pred.is_correct ?? false,
         homeScore: game.home_score ?? 0,
         awayScore: game.away_score ?? 0,
       });
     }
   }
-
   return results;
 }
 
-/**
- * 경기 결과 기반 적중률 업데이트
- */
-async function updateAccuracy(
-  db: DB,
-  leagueId: number,
-  date: string
-) {
-  // 해당 날짜 종료된 경기의 예측 검증
+async function updateAccuracy(db: DB, leagueId: number, date: string) {
   const { data: gamesData } = await db
-    .from('games')
-    .select('id, winner_team_id')
-    .eq('league_id', leagueId)
-    .eq('game_date', date)
-    .eq('status', 'final');
-
+    .from('games').select('id, winner_team_id')
+    .eq('league_id', leagueId).eq('game_date', date).eq('status', 'final');
   if (!gamesData) return;
 
   for (const game of gamesData) {
     if (!game.winner_team_id) continue;
-
     const { data: pred } = await db
-      .from('predictions')
-      .select('id, predicted_winner')
-      .eq('game_id', game.id)
-      .eq('prediction_type', 'pre_game')
-      .single();
-
+      .from('predictions').select('id, predicted_winner')
+      .eq('game_id', game.id).eq('prediction_type', 'pre_game').single();
     if (pred) {
-      await db
-        .from('predictions')
-        .update({
-          is_correct: pred.predicted_winner === game.winner_team_id,
-          actual_winner: game.winner_team_id,
-          verified_at: new Date().toISOString(),
-        })
-        .eq('id', pred.id);
+      await db.from('predictions').update({
+        is_correct: pred.predicted_winner === game.winner_team_id,
+        actual_winner: game.winner_team_id,
+        verified_at: new Date().toISOString(),
+      }).eq('id', pred.id);
     }
   }
 }
