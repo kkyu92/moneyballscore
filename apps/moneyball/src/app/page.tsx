@@ -1,4 +1,5 @@
 import { PredictionCard } from "@/components/predictions/PredictionCard";
+import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
@@ -71,7 +72,7 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
       away_team:teams!games_away_team_id_fkey(code, name_ko),
       home_sp:players!games_home_sp_id_fkey(name_ko),
       away_sp:players!games_away_sp_id_fkey(name_ko),
-      predictions!inner(
+      predictions(
         predicted_winner, confidence, prediction_type, reasoning,
         home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
         is_correct, actual_winner, factors, model_version,
@@ -233,9 +234,22 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {games.map((game) => {
               const pred = game.predictions?.[0];
-              if (!pred) return null;
               const homeCode = game.home_team?.code as TeamCode;
               const awayCode = game.away_team?.code as TeamCode;
+              if (!pred) {
+                return (
+                  <div key={game.id} data-game-id={game.id}>
+                    <PlaceholderCard
+                      homeTeam={homeCode}
+                      awayTeam={awayCode}
+                      gameTime={game.game_time?.slice(0, 5)}
+                      status={game.status}
+                      homeSPName={game.home_sp?.name_ko ?? undefined}
+                      awaySPName={game.away_sp?.name_ko ?? undefined}
+                    />
+                  </div>
+                );
+              }
               const homeWinProbRaw = pred.reasoning?.homeWinProb;
               const winProb =
                 homeWinProbRaw != null
