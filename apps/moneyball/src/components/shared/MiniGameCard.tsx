@@ -23,7 +23,7 @@ export function MiniGameCard({
   weather,
 }: MiniGameCardProps) {
   return (
-    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
+    <div className="bg-white dark:bg-[var(--color-surface)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
           {gameTime}
