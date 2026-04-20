@@ -9,6 +9,9 @@ import {
 } from '../scrapers/fancy-stats';
 import { fetchBatterLeaders } from '../scrapers/fangraphs';
 import { predict } from '../engine/predictor';
+import {
+  calculateRecentForm, calculateHeadToHead, type FinishedGame,
+} from '../engine/form';
 import { runDebate } from '../agents/debate';
 import type { GameContext } from '../agents/types';
 import type { PredictionHistory } from '../agents/calibration-agent';
@@ -349,13 +352,41 @@ export async function runDailyPipeline(
     };
     const defaultElo = { team: game.homeTeam as TeamCode, elo: 1500, winPct: 0.5 };
 
-    // asOfDate = 어제 (Batch D 시그니처 배선, 실 필터링 미구현)
-    const [homeForm, awayForm, h2h] = await Promise.all([
-      fetchRecentForm(game.homeTeam, CURRENT_SEASON, 10, yesterday).catch(() => 0.5),
-      fetchRecentForm(game.awayTeam, CURRENT_SEASON, 10, yesterday).catch(() => 0.5),
-      fetchHeadToHead(game.homeTeam, game.awayTeam, CURRENT_SEASON, yesterday)
-        .catch(() => ({ wins: 0, losses: 0 })),
-    ]);
+    // Phase 2.5 — DB 기반 recent form + h2h (asOfDate 이전 final 경기만).
+    // 당일 낮경기 결과는 status='final' 되어도 game_date=오늘 이라 yesterday
+    // 필터에서 자동 제외. KBO 스크래핑 대비 구조적으로 누수 없음.
+    const homeTeamIdForForm = teamIdMap[game.homeTeam];
+    const awayTeamIdForForm = teamIdMap[game.awayTeam];
+    const { data: recentFinalGames } = await db
+      .from('games')
+      .select('home_team_id, away_team_id, winner_team_id')
+      .eq('status', 'final')
+      .lt('game_date', yesterday)
+      .or(
+        `home_team_id.eq.${homeTeamIdForForm},` +
+        `away_team_id.eq.${homeTeamIdForForm},` +
+        `home_team_id.eq.${awayTeamIdForForm},` +
+        `away_team_id.eq.${awayTeamIdForForm}`,
+      )
+      .order('game_date', { ascending: false })
+      .limit(50);
+
+    const finished: FinishedGame[] = (recentFinalGames ?? []) as FinishedGame[];
+    let homeForm = calculateRecentForm(finished, homeTeamIdForForm, 10);
+    let awayForm = calculateRecentForm(finished, awayTeamIdForForm, 10);
+    let h2h = calculateHeadToHead(finished, homeTeamIdForForm, awayTeamIdForForm);
+
+    // DB 데이터 부족 시 (시즌 초기 / 운영 첫 주) KBO 스크래핑 fallback
+    if (homeForm === null) {
+      homeForm = await fetchRecentForm(game.homeTeam, CURRENT_SEASON, 10).catch(() => 0.5);
+    }
+    if (awayForm === null) {
+      awayForm = await fetchRecentForm(game.awayTeam, CURRENT_SEASON, 10).catch(() => 0.5);
+    }
+    if (h2h.wins + h2h.losses === 0) {
+      h2h = await fetchHeadToHead(game.homeTeam, game.awayTeam, CURRENT_SEASON)
+        .catch(() => ({ wins: 0, losses: 0 }));
+    }
 
     const input: PredictionInput = {
       game,

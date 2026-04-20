@@ -122,22 +122,18 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
 }
 
 /**
- * 팀의 최근 N경기 성적 (승률) 계산
- * 최근 경기 결과를 역순으로 가져와서 승률 반환
+ * 팀의 최근 N경기 성적 (승률) 계산 — KBO 공식 TeamRankDaily 페이지 스크래핑.
  *
- * @param asOfDate - (선택) "YYYY-MM-DD" 이전까지만 집계. 현재 미구현 — KBO 공식
- *   TeamRankDaily 페이지가 ASP.NET postback 기반이라 단순 GET 로는 date 필터
- *   적용 불가. 호출부는 preparing (daily.ts 에서 어제 날짜 전달) 되어 있고
- *   실제 필터링은 별도 스코프 (PLAN_v5 §5.4) 에서 구현 예정.
- *   그때까지 주말 낮경기 결과가 같은 날 저녁경기 stat 에 포함될 가능성 있음.
+ * v0.5.22 이후 daily.ts 는 DB `games` 테이블 기반 `calculateRecentForm`
+ * (engine/form.ts) 을 우선 사용. 이 함수는 DB 데이터 부족 시 fallback
+ * 으로만 호출됨 (시즌 초기 / 운영 첫 주). TeamRankDaily 컬럼은 "최근
+ * 10경기" 로 고정이라 asOfDate 필터링 불가 — fallback 에서만 허용.
  */
 export async function fetchRecentForm(
   teamCode: TeamCode,
   season: number,
   lastNGames = 10,
-  asOfDate?: string,
 ): Promise<number> {
-  void asOfDate; // PLAN_v5 §5.4 — 호출부 preparing, 실 필터링 별도 스코프
   // KBO 공식 팀 기록 페이지에서 최근 경기 결과 수집
   const teamName = KBO_TEAMS[teamCode].name;
 
@@ -173,18 +169,16 @@ export async function fetchRecentForm(
 }
 
 /**
- * 시즌 팀 간 상대전적 (홈팀 기준)
+ * 시즌 팀 간 상대전적 (홈팀 기준) — KBO 공식 TeamRankVs 페이지 스크래핑.
  *
- * @param asOfDate - (선택) "YYYY-MM-DD" 이전까지만 집계. fetchRecentForm 과
- *   동일하게 현재 미구현. PLAN_v5 §5.4 별도 스코프.
+ * v0.5.22 이후 daily.ts 는 DB 기반 `calculateHeadToHead` 를 우선 사용.
+ * 이 함수는 DB 에 h2h 데이터 0건일 때 fallback 으로만 호출됨.
  */
 export async function fetchHeadToHead(
   homeTeam: TeamCode,
   awayTeam: TeamCode,
   season: number,
-  asOfDate?: string,
 ): Promise<{ wins: number; losses: number }> {
-  void asOfDate;
   // KBO 공식 상대전적 페이지
   const url = `${BASE_URL}/Record/TeamRank/TeamRankVs.aspx`;
   const res = await fetch(url, {
