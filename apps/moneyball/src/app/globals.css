@@ -52,6 +52,13 @@ body {
   background-color: var(--color-surface);
 }
 
+/* 숫자 정렬 — font-mono 유틸 전부에 tabular-nums 기본 적용. DESIGN.md:
+   "Geist Mono (tabular-nums) — 숫자 정렬, FIP/wOBA 등 지표 가독성". 테이블
+   컬럼과 stat 카드 대형 숫자가 폭 맞춰 정렬돼 세이버메트릭스 지표 비교 직관화. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
 /* a11y — 일관된 focus-visible 스타일. 키보드 사용자에게 명확한 시각 피드백. */
 :where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
   outline: 2px solid var(--color-brand-500);
