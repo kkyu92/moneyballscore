@@ -1,24 +1,30 @@
 # TODOS
 
-## 🚧 PLAN_v5 Phase 3-4 (2026-04-20 착수, 다음 세션)
+## 🚧 PLAN_v5 잔여 작업 (2026-04-20 기준)
 
-**Phase 1-2 완료**: UI LEFT JOIN + PlaceholderCard · 매시간 cron + shouldPredictGame + first-write-wins + announce + gap 감지 전부 ship. 상세는 CHANGELOG v0.5.22.
+**완료 상태** (CHANGELOG v0.5.22 상세):
+- ✅ Phase 1 UI (LEFT JOIN + PlaceholderCard + estimateTime)
+- ✅ Phase 2 Pipeline (매시간 cron · shouldPredictGame · ON CONFLICT · daily_notifications · 4-mode)
+- ✅ Phase 3 `/debug/pipeline` 대시보드
+- 🟡 Phase 4 가드 테스트 — **scrapers + schedule + notify-telegram 완료 (51 tests)**. pipeline-daily 통합 테스트 + ui-homepage 테스트 미완.
+- 🟡 Phase 2.5 asOfDate 실 필터 — 시그니처만 배선, 실제 필터링 미구현.
 
-**Phase 3 — 관측성 대시보드**:
-- `/debug/pipeline` 페이지 — `pipeline_runs` 최근 30일 테이블. `/debug/*` BASIC auth 자동. ~150줄.
-
-**Phase 4 — 가드 테스트**:
-- Fixture 11개 (weekend-mixed / rain-cancellation / all-finished / scheduled-normal / sp-unconfirmed / time-windows / first-write-wins-race / sp-late-confirm / announce-5games / announce-zero-games / ui-left-join).
-- Unit test 5 파일: `pipeline-schedule` (✅ 완료), `pipeline-daily`, `scrapers-kbo-official`, `ui-homepage`, `notify-telegram`.
-- REGRESSION 5건 (status 스킵 변경 / notifyPredictions 조건 / INNER→LEFT JOIN / asOfDate 필터 / ON CONFLICT race).
+**Phase 4 잔여**:
+- `pipeline-daily.test.ts` — runDailyPipeline 4-mode 통합 테스트. Supabase client chainable mock 복잡도 높음. production 관측 (`/debug/pipeline`) 으로 보완 중이나 가드 있으면 안전.
+- `ui-homepage.test.ts` — `apps/moneyball` 에 vitest 설정 없음. 설정 + React Testing Library 도입 필요. Playwright/Cypress E2E 쪽 고려.
+- Fixtures 잔여: time-windows / first-write-wins-race / sp-late-confirm / announce-5games / announce-zero-games / ui-left-join. schedule.ts + scraper 단위 테스트가 핵심 분기 이미 커버.
+- REGRESSION: R1 (status 스킵 변경) + R5 (ON CONFLICT race) 는 schedule + scraper 에서 간접 커버됨. R3 (INNER→LEFT JOIN) 만 UI 테스트 필요.
 
 **Phase 2.5 — asOfDate 실 구현** (Codex #2):
-- KBO TeamRankDaily ASP.NET postback 대응 또는 대체 URL 발굴.
-- 현재 시그니처만 배선, 실 필터링 미구현. 주말 낮+저녁 혼합 편성에서 stat 누수 잔존.
+- KBO TeamRankDaily ASP.NET postback 대응: `hfSearchDate` hidden field + `__EVENTTARGET`/`__VIEWSTATE` 재생성 필요. 아니면 다른 스크래핑 소스 (KBO 팀 일정 페이지 + asOfDate 이전 10경기 필터링).
+- 현재 시그니처만 배선, 실 필터링 미구현. 주말 낮+저녁 혼합 편성에서 저녁 예측에 당일 낮경기 결과 stat 포함 가능성 잔존.
+- 우선순위: 낮음 (현재 매시간 cron + 3h 윈도우가 평일엔 완전 해결, 주말 혼합편성만 제한적 영향).
 
-**배포 체크리스트**:
-1. Supabase 에 `013_predictions_metadata.sql` 수동 적용 필수. 미적용 상태에서 cron 돌면 `predicted_at` 컬럼 / `daily_notifications` 테이블 없어 insert 실패.
-2. `/debug/pipeline` 에서 다음 정시 cron 기록 확인.
+**자연 발화 관찰** (다음 정시 cron 부터):
+- UTC 00 (KST 09) announce → Telegram 수신
+- UTC 01 (KST 10) 첫 predict → `/debug/pipeline` 기록 + early return
+- UTC 13 (KST 22) predict_final → gap 감지 유효성
+- UTC 14 (KST 23) verify → accuracy update 기존 동작
 
 ---
 
