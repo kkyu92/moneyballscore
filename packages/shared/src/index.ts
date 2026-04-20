@@ -18,6 +18,23 @@ export const KBO_TEAMS = {
 
 export type TeamCode = keyof typeof KBO_TEAMS;
 
+/**
+ * 구장 좌표 — 날씨 API (Open-Meteo) 조회용.
+ * 키는 TeamCode (홈팀). 실측 위도/경도 (소수점 4자리 = ~11m 정확).
+ */
+export const KBO_STADIUM_COORDS: Record<TeamCode, { lat: number; lng: number }> = {
+  SK: { lat: 37.4372, lng: 126.6932 }, // 인천SSG랜더스필드
+  HT: { lat: 35.1682, lng: 126.8887 }, // 광주-기아 챔피언스 필드
+  LG: { lat: 37.5121, lng: 127.0719 }, // 잠실
+  OB: { lat: 37.5121, lng: 127.0719 }, // 잠실 (LG/OB 공유)
+  KT: { lat: 37.2997, lng: 127.0097 }, // 수원KT위즈파크
+  SS: { lat: 35.8414, lng: 128.6811 }, // 대구삼성라이온즈파크
+  LT: { lat: 35.1942, lng: 129.0615 }, // 부산사직야구장
+  HH: { lat: 36.3172, lng: 127.4292 }, // 대전한화생명이글스파크
+  NC: { lat: 35.2225, lng: 128.5827 }, // 창원NC파크
+  WO: { lat: 37.4982, lng: 126.8670 }, // 서울고척스카이돔 (돔구장 — 날씨 영향 없음 주의)
+};
+
 // 경기 상태
 export type GameStatus = 'scheduled' | 'live' | 'final' | 'postponed';
 

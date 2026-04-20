@@ -1,5 +1,8 @@
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
+import { MiniGameCard } from "@/components/shared/MiniGameCard";
+import { fetchStadiumWeather } from "@/lib/weather";
+import { KBO_STADIUM_COORDS } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
@@ -86,22 +89,40 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
   return (games ?? []) as unknown as HomeGame[];
 }
 
-/**
- * 오늘 이후 가장 빠른 편성 경기 날짜 + 개요. 홈 empty-state 에서 사용.
- * 오늘 경기가 없는 날 (KBO 월요일 휴식 / 시즌오프) 에 "다음 경기 일정" 노출.
- * status 가 scheduled/live 인 것만 — postponed/final 은 미래 일정이라도 제외.
- */
-async function getNextScheduledDate(): Promise<{
+interface NextGameRow {
+  id: number;
+  game_time: string | null;
+  stadium: string | null;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
+}
+
+interface NextSchedule {
   date: string;
-  count: number;
-  firstGameTime: string | null;
-} | null> {
+  games: Array<{
+    id: number;
+    gameTime: string;   // "HH:MM"
+    stadium: string | null;
+    homeTeam: TeamCode;
+    awayTeam: TeamCode;
+  }>;
+}
+
+/**
+ * 오늘 이후 가장 빠른 편성 날짜 + 그 날의 경기 풀 리스트. 홈 empty-state 에서
+ * 휴식/오프 구분 + 5경기 미니카드 + 구장 날씨 조회에 사용.
+ */
+async function getNextScheduledGames(): Promise<NextSchedule | null> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
   const { data } = await supabase
     .from('games')
-    .select('game_date, game_time, status')
+    .select(`
+      id, game_date, game_time, stadium,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code)
+    `)
     .gt('game_date', today)
     .in('status', ['scheduled', 'live'])
     .order('game_date', { ascending: true })
@@ -111,14 +132,46 @@ async function getNextScheduledDate(): Promise<{
   if (!data || data.length === 0) return null;
 
   const firstDate = data[0].game_date as string;
-  const sameDate = data.filter((g) => g.game_date === firstDate);
-  const firstGameTime = (sameDate[0].game_time as string | null)?.slice(0, 5) ?? null;
+  const sameDate = (data as unknown as Array<NextGameRow & { game_date: string }>)
+    .filter((g) => g.game_date === firstDate);
 
   return {
     date: firstDate,
-    count: sameDate.length,
-    firstGameTime,
+    games: sameDate
+      .map((g) => ({
+        id: g.id,
+        gameTime: (g.game_time ?? '').slice(0, 5) || '18:30',
+        stadium: g.stadium,
+        homeTeam: g.home_team?.code as TeamCode,
+        awayTeam: g.away_team?.code as TeamCode,
+      }))
+      .filter((g) => g.homeTeam && g.awayTeam),
   };
+}
+
+/**
+ * 다음 경기 날짜 + 오늘 사이 gap 과 요일로 휴식일/시즌오프 구분.
+ * - null (다음 경기 전혀 없음) → 시즌오프 또는 시즌 종료
+ * - gap > 7일 → 시즌오프/포스트시즌 간격 (올스타 브레이크 포함)
+ * - 월요일 + gap ≤ 2일 → 정기 월요일 휴식
+ * - 그 외 → 비정기 경기 없음
+ */
+function classifyNoGameReason(
+  today: string,
+  next: NextSchedule | null,
+): 'offseason' | 'monday_rest' | 'break' | 'unknown' {
+  if (!next) return 'offseason';
+
+  const todayAnchor = new Date(`${today}T12:00:00Z`);
+  const nextAnchor = new Date(`${next.date}T12:00:00Z`);
+  const daysGap = Math.round(
+    (nextAnchor.getTime() - todayAnchor.getTime()) / (24 * 60 * 60 * 1000),
+  );
+  const dayOfWeek = todayAnchor.getUTCDay(); // 0=일, 1=월
+
+  if (daysGap > 7) return 'break';
+  if (dayOfWeek === 1 && daysGap <= 2) return 'monday_rest';
+  return 'unknown';
 }
 
 function formatKoreanWeekday(dateStr: string): string {
@@ -194,9 +247,25 @@ export default async function HomePage() {
     getSeasonAccuracy(),
   ]);
 
-  // 오늘 편성 없을 때만 다음 일정 조회 (추가 쿼리 비용 최소화).
+  // 오늘 편성 없을 때만 다음 일정·날씨 조회 (추가 쿼리 비용 최소화).
   const nextSchedule =
-    games.length === 0 ? await getNextScheduledDate() : null;
+    games.length === 0 ? await getNextScheduledGames() : null;
+  const todayKST = toKSTDateString();
+  const noGameReason = classifyNoGameReason(todayKST, nextSchedule);
+
+  // 다음 경기 각 구장 날씨 병렬 조회. 실패해도 null fallback.
+  const nextWeather: Array<Awaited<ReturnType<typeof fetchStadiumWeather>>> =
+    nextSchedule
+      ? await Promise.all(
+          nextSchedule.games.map((g) => {
+            const coords = KBO_STADIUM_COORDS[g.homeTeam];
+            if (!coords) return Promise.resolve(null);
+            const [hStr] = g.gameTime.split(':');
+            const hour = Number(hStr);
+            return fetchStadiumWeather(coords.lat, coords.lng, nextSchedule.date, hour);
+          }),
+        )
+      : [];
 
   const { bigMatch } = selectBigMatchFromGames(games);
   const bigMatchPred = bigMatch?.predictions?.[0];
@@ -330,42 +399,67 @@ export default async function HomePage() {
             })}
           </div>
         ) : (
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
-            <span className="text-5xl block mb-4">⚾</span>
-            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
-              오늘은 편성된 경기가 없습니다
-            </p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-              KBO 리그 휴식일이거나 시즌 오프입니다.
-            </p>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6 md:p-8">
+            <div className="text-center mb-6">
+              <span className="text-5xl block mb-3">⚾</span>
+              <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                {noGameReason === 'monday_rest'
+                  ? '오늘은 KBO 휴식일입니다'
+                  : noGameReason === 'break'
+                    ? '시즌 브레이크 기간입니다'
+                    : noGameReason === 'offseason'
+                      ? '시즌 오프 기간입니다'
+                      : '오늘은 편성된 경기가 없습니다'}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {noGameReason === 'monday_rest'
+                  ? 'KBO 리그는 매주 월요일 정기 휴식.'
+                  : noGameReason === 'break'
+                    ? '올스타 브레이크 또는 포스트시즌 간격일 수 있습니다.'
+                    : noGameReason === 'offseason'
+                      ? '정규시즌 개막 전이거나 시즌이 종료되었습니다.'
+                      : '비정기 휴식일입니다.'}
+              </p>
+            </div>
 
             {nextSchedule ? (
-              <div className="mt-6 inline-block text-left bg-brand-50 dark:bg-[var(--color-surface-raised)] border border-brand-200 dark:border-[var(--color-border)] rounded-xl px-5 py-4">
-                <p className="text-xs uppercase tracking-wider text-brand-700 dark:text-brand-300 font-semibold mb-1">
-                  다음 경기 일정
-                </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                  {nextSchedule.date}
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400 ml-2">
-                    ({formatKoreanWeekday(nextSchedule.date)})
-                  </span>
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  {nextSchedule.count}경기 편성
-                  {nextSchedule.firstGameTime && (
-                    <span className="text-gray-500 dark:text-gray-400">
-                      {' · '}첫 경기 {nextSchedule.firstGameTime}
+              <div>
+                <div className="flex items-baseline justify-between mb-3 px-1">
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    다음 경기 일정
+                  </h3>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {nextSchedule.date}
+                    <span className="ml-1.5 text-xs text-gray-400 dark:text-gray-500">
+                      ({formatKoreanWeekday(nextSchedule.date)})
                     </span>
-                  )}
-                </p>
+                    <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">
+                      · {nextSchedule.games.length}경기
+                    </span>
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {nextSchedule.games.map((g, i) => (
+                    <MiniGameCard
+                      key={g.id}
+                      homeTeam={g.homeTeam}
+                      awayTeam={g.awayTeam}
+                      gameTime={g.gameTime}
+                      stadium={g.stadium}
+                      weather={nextWeather[i]}
+                      isDome={g.homeTeam === 'WO'}
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
-              <p className="mt-4 text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-center mt-4 text-xs text-gray-400 dark:text-gray-500">
                 아직 다음 경기 일정이 공개되지 않았습니다.
               </p>
             )}
 
-            <div className="mt-6">
+            <div className="mt-6 text-center">
               <Link
                 href="/predictions"
                 className="inline-block text-sm text-brand-600 hover:underline"
