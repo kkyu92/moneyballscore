@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, shortTeamName, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from '../shared/TeamLogo';
 
 interface BigMatchDebateCardProps {
@@ -132,7 +132,7 @@ export function BigMatchDebateCard({
             className="text-4xl md:text-6xl font-bold"
             aria-label={`${winner.name} 승리 확률 ${winnerPct}%`}
           >
-            {winner.name.split(' ')[0]}{' '}
+            {shortTeamName(predictedWinner)}{' '}
             <span className="text-brand-300">{winnerPct}%</span>
           </p>
         </div>

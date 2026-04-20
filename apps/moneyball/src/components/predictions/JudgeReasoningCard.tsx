@@ -1,4 +1,4 @@
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, shortTeamName, type TeamCode } from "@moneyball/shared";
 
 interface JudgeReasoningCardProps {
   homeTeam: TeamCode;
@@ -21,8 +21,8 @@ export function JudgeReasoningCard({
   homeArgSummary,
   awayArgSummary,
 }: JudgeReasoningCardProps) {
-  const homeName = KBO_TEAMS[homeTeam]?.name.split(" ")[0] ?? homeTeam;
-  const awayName = KBO_TEAMS[awayTeam]?.name.split(" ")[0] ?? awayTeam;
+  const homeName = shortTeamName(homeTeam);
+  const awayName = shortTeamName(awayTeam);
   const homeColor = KBO_TEAMS[homeTeam]?.color;
   const awayColor = KBO_TEAMS[awayTeam]?.color;
 

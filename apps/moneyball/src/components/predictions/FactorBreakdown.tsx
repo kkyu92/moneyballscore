@@ -1,4 +1,4 @@
-import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, shortTeamName, type TeamCode } from "@moneyball/shared";
 
 const FACTOR_LABELS: Record<string, string> = {
   sp_fip: "선발 투수력",
@@ -80,8 +80,8 @@ function formatDetail(key: string, details: FactorBreakdownProps["details"]): st
 }
 
 export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: FactorBreakdownProps) {
-  const homeName = KBO_TEAMS[homeTeam].name.split(" ")[0];
-  const awayName = KBO_TEAMS[awayTeam].name.split(" ")[0];
+  const homeName = shortTeamName(homeTeam);
+  const awayName = shortTeamName(awayTeam);
 
   // 팩터를 가중치 순으로 정렬
   const sortedFactors = Object.entries(factors)

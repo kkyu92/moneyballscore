@@ -135,14 +135,14 @@ export function PredictionCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={homeTeam} size={40} />
           </div>
-          <p className="text-sm font-medium inline-flex items-center gap-1 justify-center">
+          <p className="text-sm font-semibold inline-flex items-center gap-1.5 justify-center">
             {shortTeamName(homeTeam)}
             <span
               aria-label="홈팀"
               title="홈팀"
-              className="text-xs text-gray-400 dark:text-gray-500"
+              className="text-[9px] font-bold px-1 py-0.5 rounded text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/40"
             >
-              🏠
+              홈
             </span>
           </p>
           {homeScore !== null && homeScore !== undefined && (

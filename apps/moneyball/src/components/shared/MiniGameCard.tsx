@@ -46,15 +46,15 @@ export function MiniGameCard({
         <span className="text-xs text-gray-400 dark:text-gray-500 px-2">vs</span>
 
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-          <span className="text-sm font-medium truncate text-right inline-flex items-center gap-1">
+          <span className="text-sm font-semibold truncate text-right">
             {shortTeamName(homeTeam)}
-            <span
-              aria-label="홈팀"
-              title="홈팀"
-              className="text-xs text-gray-400 dark:text-gray-500"
-            >
-              🏠
-            </span>
+          </span>
+          <span
+            aria-label="홈팀"
+            title="홈팀"
+            className="text-[9px] font-bold px-1 py-0.5 rounded text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/40"
+          >
+            홈
           </span>
           <TeamLogo team={homeTeam} size={32} />
         </div>

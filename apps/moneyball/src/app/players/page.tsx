@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { TeamCode } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 export const metadata: Metadata = {
   title: "선수 리더보드",
@@ -117,12 +119,8 @@ export default async function PlayersIndexPage() {
                     </td>
                     <td className="py-3 pr-3 text-gray-600 dark:text-gray-300">
                       <span className="inline-flex items-center gap-2">
-                        {p.teamColor && (
-                          <span
-                            aria-hidden
-                            className="inline-block w-2 h-2 rounded-full"
-                            style={{ backgroundColor: p.teamColor }}
-                          />
+                        {p.teamCode && (
+                          <TeamLogo team={p.teamCode as TeamCode} size={20} />
                         )}
                         {p.teamName ?? "-"}
                       </span>
@@ -208,12 +206,8 @@ export default async function PlayersIndexPage() {
                     <td className="py-3 pr-3 font-semibold">{b.nameKo}</td>
                     <td className="py-3 pr-3 text-gray-600 dark:text-gray-300">
                       <span className="inline-flex items-center gap-2">
-                        {b.teamColor && (
-                          <span
-                            aria-hidden
-                            className="inline-block w-2 h-2 rounded-full"
-                            style={{ backgroundColor: b.teamColor }}
-                          />
+                        {b.teamCode && (
+                          <TeamLogo team={b.teamCode as TeamCode} size={20} />
                         )}
                         {b.teamName ?? "-"}
                       </span>

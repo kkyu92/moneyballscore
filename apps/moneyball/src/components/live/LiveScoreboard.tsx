@@ -1,7 +1,7 @@
 'use client';
 
 import { useKboScores } from '@/hooks/use-kbo-scores';
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { shortTeamName, type TeamCode } from '@moneyball/shared';
 import type { LiveScore } from '@/app/api/kbo-scores/route';
 import { TeamLogo } from '../shared/TeamLogo';
 
@@ -33,8 +33,6 @@ function ScoreCard({ score }: { score: LiveScore }) {
   const isLive = score.status === 'live';
   const isFinal = score.status === 'final';
   const showScore = isLive || isFinal;
-  const homeTeam = KBO_TEAMS[score.homeTeam as TeamCode];
-  const awayTeam = KBO_TEAMS[score.awayTeam as TeamCode];
 
   return (
     <div
@@ -56,7 +54,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
         <div className="flex items-center gap-1.5 min-w-0">
           <TeamLogo team={score.awayTeam as TeamCode} size={20} />
           <span className="text-sm font-medium truncate">
-            {awayTeam?.name.split(' ')[0] ?? score.awayTeamName}
+            {shortTeamName(score.awayTeam as TeamCode) || score.awayTeamName}
           </span>
         </div>
         {showScore && (
@@ -73,7 +71,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
         <div className="flex items-center gap-1.5 min-w-0">
           <TeamLogo team={score.homeTeam as TeamCode} size={20} />
           <span className="text-sm font-medium truncate">
-            {homeTeam?.name.split(' ')[0] ?? score.homeTeamName}
+            {shortTeamName(score.homeTeam as TeamCode) || score.homeTeamName}
           </span>
         </div>
         {showScore && (
