@@ -30,6 +30,8 @@ function fmtWar(v: number): string {
   return v.toFixed(1);
 }
 
+const SMALL_SAMPLE_N = 5;
+
 export default async function PlayersIndexPage() {
   const [pitchers, batters] = await Promise.all([
     buildPitcherLeaderboard({ limit: 10, minAppearances: 1 }),
@@ -134,7 +136,18 @@ export default async function PlayersIndexPage() {
                     <td className="py-3 pr-3 text-right font-mono text-gray-600 dark:text-gray-300">
                       {fmtFip(p.avgXFip)}
                     </td>
-                    <td className="py-3 pl-3 pr-4 text-right font-mono text-gray-700 dark:text-gray-200">
+                    <td
+                      className={`py-3 pl-3 pr-4 text-right font-mono ${
+                        p.verifiedN > 0 && p.verifiedN < SMALL_SAMPLE_N
+                          ? "text-gray-400 dark:text-gray-500"
+                          : "text-gray-700 dark:text-gray-200"
+                      }`}
+                      title={
+                        p.verifiedN > 0 && p.verifiedN < SMALL_SAMPLE_N
+                          ? `표본 작음 (N=${p.verifiedN} < ${SMALL_SAMPLE_N}) — 해석 주의`
+                          : undefined
+                      }
+                    >
                       {p.verifiedN > 0
                         ? `${fmtPct(p.accuracyRate)} (${p.verifiedN})`
                         : "-"}

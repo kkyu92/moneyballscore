@@ -144,17 +144,29 @@ export default async function TeamPage({ params }: PageProps) {
             <p className="text-xs text-gray-500 dark:text-gray-400">적중률</p>
             <p
               className={`text-2xl font-bold mt-1 font-mono ${
-                (profile.accuracyRate ?? 0) >= 0.6
-                  ? "text-green-600"
-                  : (profile.accuracyRate ?? 0) >= 0.5
-                    ? "text-yellow-600"
-                    : "text-red-600"
+                profile.verifiedN > 0 && profile.verifiedN < 5
+                  ? "text-gray-400 dark:text-gray-500"
+                  : (profile.accuracyRate ?? 0) >= 0.6
+                    ? "text-green-600"
+                    : (profile.accuracyRate ?? 0) >= 0.5
+                      ? "text-yellow-600"
+                      : "text-red-600"
               }`}
+              title={
+                profile.verifiedN > 0 && profile.verifiedN < 5
+                  ? `표본 작음 (N=${profile.verifiedN} < 5) — 해석 주의`
+                  : undefined
+              }
             >
               {fmtPct(profile.accuracyRate)}
             </p>
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
               검증 {profile.verifiedN}경기
+              {profile.verifiedN > 0 && profile.verifiedN < 5 && (
+                <span className="ml-1 text-gray-400 dark:text-gray-500">
+                  · 표본 작음
+                </span>
+              )}
             </p>
           </div>
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
