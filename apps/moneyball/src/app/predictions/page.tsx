@@ -12,35 +12,51 @@ export const revalidate = 300;
 async function getPredictionDates() {
   const supabase = await createClient();
 
+  // LEFT JOIN: prediction 없는 편성 경기도 포함. pre_game 타입만 붙여서
+  // post_game row 가 있어도 예측 카운트 이중집계 방지.
   const { data } = await supabase
     .from('games')
-    .select('game_date, status, predictions!inner(id, is_correct, prediction_type)')
+    .select('game_date, status, predictions(id, is_correct, prediction_type)')
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
     .limit(200);
 
   if (!data) return [];
 
-  // 날짜별 그룹핑 — 취소 경기는 verified 에서 빠지므로 별도 count.
+  // 날짜별 그룹핑. total = 편성 경기 (LEFT JOIN 총 game row).
+  // predicted = prediction row 있는 경기. missing = total - predicted.
+  // cancelled = postponed 경기. verified = is_correct 명시된 경기 (취소 제외).
   const dateMap = new Map<
     string,
-    { total: number; correct: number; verified: number; cancelled: number }
+    {
+      total: number;
+      predicted: number;
+      missing: number;
+      cancelled: number;
+      verified: number;
+      correct: number;
+    }
   >();
   for (const game of data) {
     const date = game.game_date;
     if (!dateMap.has(date)) {
-      dateMap.set(date, { total: 0, correct: 0, verified: 0, cancelled: 0 });
+      dateMap.set(date, {
+        total: 0, predicted: 0, missing: 0,
+        cancelled: 0, verified: 0, correct: 0,
+      });
     }
     const entry = dateMap.get(date)!;
-    entry.total += game.predictions.length;
-    if (game.status === 'postponed') {
-      entry.cancelled += game.predictions.length;
-    }
-    for (const pred of game.predictions) {
-      if (pred.is_correct !== null) {
-        entry.verified++;
-        if (pred.is_correct) entry.correct++;
+    entry.total += 1;
+    if (game.status === 'postponed') entry.cancelled += 1;
+    const pred = game.predictions?.[0];
+    if (pred) {
+      entry.predicted += 1;
+      if (game.status !== 'postponed' && pred.is_correct !== null) {
+        entry.verified += 1;
+        if (pred.is_correct) entry.correct += 1;
       }
+    } else {
+      entry.missing += 1;
     }
   }
 
@@ -68,15 +84,25 @@ export default async function PredictionsPage() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-bold text-lg">{d.date}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-3">
-                    {d.total}경기 예측
+                  <div>
+                    <span className="font-bold text-lg">{d.date}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-3">
+                      {d.total}경기 편성
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-2">
+                    <span>예측 {d.predicted}</span>
                     {d.cancelled > 0 && (
-                      <span className="ml-1 text-gray-400 dark:text-gray-500">
-                        (취소 {d.cancelled})
+                      <span className="text-gray-400 dark:text-gray-500">
+                        · 취소 {d.cancelled}
                       </span>
                     )}
-                  </span>
+                    {d.missing > 0 && (
+                      <span className="text-gray-400 dark:text-gray-500">
+                        · 기록 없음 {d.missing}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
                   {d.verified > 0 ? (

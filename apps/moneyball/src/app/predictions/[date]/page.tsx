@@ -162,15 +162,19 @@ function buildIntro(
   verified: DateGame[],
   correct: DateGame[],
   cancelled: DateGame[],
+  missing: DateGame[],
 ): string {
   const n = games.length;
   if (n === 0) return `${date} KBO 예측 데이터가 없습니다.`;
 
-  const cancelSuffix = cancelled.length > 0 ? ` · 취소 ${cancelled.length}경기` : "";
+  const suffixParts: string[] = [];
+  if (cancelled.length > 0) suffixParts.push(`취소 ${cancelled.length}경기`);
+  if (missing.length > 0) suffixParts.push(`예측 기록 없음 ${missing.length}경기`);
+  const suffix = suffixParts.length > 0 ? ` · ${suffixParts.join(' · ')}` : '';
 
   // 경기는 있는데 예측이 아직 없음 (보통 경기 시작 3시간 이전 시점)
   if (predicted.length === 0) {
-    return `${date} KBO ${n}경기 예정${cancelSuffix}. 각 경기 시작 3시간 전 승부예측이 자동 생성되어 이 페이지에 공개됩니다.`;
+    return `${date} KBO ${n}경기 예정${suffix}. 각 경기 시작 3시간 전 승부예측이 자동 생성되어 이 페이지에 공개됩니다.`;
   }
 
   // "검증 대상" 은 예측 있는 경기 중 취소 제외 (취소는 is_correct 영구 null).
@@ -194,14 +198,14 @@ function buildIntro(
   const tightestPhrase = tAway && tHome ? `${tAway} vs ${tHome}` : "";
 
   if (allVerified && rate !== null) {
-    return `${date} KBO ${predicted.length}경기 최종 결과${cancelSuffix} — AI 적중률 ${rate}% (${correct.length}/${verified.length})${tightestPhrase ? `. 가장 박빙이었던 경기: ${tightestPhrase}` : ""}.`;
+    return `${date} KBO ${predicted.length}경기 최종 결과${suffix} — AI 적중률 ${rate}% (${correct.length}/${verified.length})${tightestPhrase ? `. 가장 박빙이었던 경기: ${tightestPhrase}` : ""}.`;
   }
 
   if (verified.length > 0 && rate !== null) {
-    return `${date} KBO ${predicted.length}경기 승부예측${cancelSuffix} — 현재까지 ${verified.length}경기 검증 완료, 적중 ${correct.length}${tightestPhrase ? `. 가장 박빙 매치업: ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}.`;
+    return `${date} KBO ${predicted.length}경기 승부예측${suffix} — 현재까지 ${verified.length}경기 검증 완료, 적중 ${correct.length}${tightestPhrase ? `. 가장 박빙 매치업: ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}.`;
   }
 
-  return `${date} KBO ${predicted.length}경기 승부예측${cancelSuffix}${tightestPhrase ? `. AI가 꼽은 가장 박빙 매치업은 ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}. 각 경기마다 10개 팩터 분석과 심판 에이전트 reasoning을 제공합니다.`;
+  return `${date} KBO ${predicted.length}경기 승부예측${suffix}${tightestPhrase ? `. AI가 꼽은 가장 박빙 매치업은 ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}. 각 경기마다 10개 팩터 분석과 심판 에이전트 reasoning을 제공합니다.`;
 }
 
 function buildArticleJsonLd(
@@ -211,13 +215,17 @@ function buildArticleJsonLd(
   verified: DateGame[],
   correct: DateGame[],
   cancelled: DateGame[],
+  missing: DateGame[],
 ) {
   const url = `${SITE_URL}/predictions/${date}`;
   const rate = verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : null;
   const n = games.length;
   const predN = predicted.length;
-  const cancelSuffix =
-    cancelled.length > 0 ? ` (취소 ${cancelled.length}경기 제외)` : "";
+  const excludeParts: string[] = [];
+  if (cancelled.length > 0) excludeParts.push(`취소 ${cancelled.length}경기`);
+  if (missing.length > 0) excludeParts.push(`기록 없음 ${missing.length}경기`);
+  const excludeSuffix =
+    excludeParts.length > 0 ? ` (${excludeParts.join(', ')} 제외)` : '';
 
   return {
     "@context": "https://schema.org",
@@ -225,8 +233,8 @@ function buildArticleJsonLd(
     headline: `${date} KBO ${n}경기 승부예측 — AI 분석`,
     description:
       rate !== null
-        ? `${date} KBO ${predN}경기 승부예측${cancelSuffix}. 현재 적중률 ${rate}% (${correct.length}/${verified.length}). 세이버메트릭스 기반 AI 분석.`
-        : `${date} KBO ${n}경기 승부예측${cancelSuffix}과 팩터별 분석.`,
+        ? `${date} KBO ${predN}경기 승부예측${excludeSuffix}. 현재 적중률 ${rate}% (${correct.length}/${verified.length}). 세이버메트릭스 기반 AI 분석.`
+        : `${date} KBO ${n}경기 승부예측${excludeSuffix}과 팩터별 분석.`,
     datePublished: `${date}T09:00:00+09:00`,
     dateModified: new Date().toISOString(),
     author: {
@@ -291,17 +299,22 @@ export default async function PredictionDatePage({ params }: Props) {
   // pred 존재 + is_correct 값이 명시적으로 true/false 인 경우만 verified.
   const predicted = games.filter((g) => !!g.predictions?.[0]);
   const cancelled = predicted.filter((g) => g.status === 'postponed');
+  // PLAN_v5 이전 cron 이 놓친 경기 — final 인데 prediction row 없음.
+  // UI 에서 "예측 기록 없음" 명시, backfill 은 하지 않음 (결과 알면서
+  // 예측 추가하면 데이터 오염).
+  const missing = games.filter((g) => !g.predictions?.[0]);
   // verified 는 취소 제외 (postponed 는 is_correct 영구 null).
   const verified = predicted.filter(
     (g) => g.status !== 'postponed' && g.predictions[0].is_correct != null,
   );
   const correct = verified.filter((g) => g.predictions[0].is_correct === true);
 
-  // 카드 정렬: 검증완료 → 검증대기 → 취소. 정렬 안에서는 game_time 순.
+  // 카드 정렬: 검증완료 → 검증대기 → 기록없음 → 취소. 정렬 안에서는 game_time.
   const sortedGames = [...games].sort((a, b) => {
     const rank = (g: DateGame) => {
-      if (g.status === 'postponed') return 2;
-      if (g.predictions?.[0]?.is_correct != null) return 0;
+      if (g.status === 'postponed') return 3;
+      if (!g.predictions?.[0]) return 2;
+      if (g.predictions[0].is_correct != null) return 0;
       return 1;
     };
     const r = rank(a) - rank(b);
@@ -309,8 +322,10 @@ export default async function PredictionDatePage({ params }: Props) {
     return (a.game_time ?? '').localeCompare(b.game_time ?? '');
   });
 
-  const intro = buildIntro(date, games, predicted, verified, correct, cancelled);
-  const articleJsonLd = buildArticleJsonLd(date, games, predicted, verified, correct, cancelled);
+  const intro = buildIntro(date, games, predicted, verified, correct, cancelled, missing);
+  const articleJsonLd = buildArticleJsonLd(
+    date, games, predicted, verified, correct, cancelled, missing,
+  );
 
   return (
     <article className="space-y-6">
@@ -354,6 +369,14 @@ export default async function PredictionDatePage({ params }: Props) {
               </span>
             </>
           )}
+          {missing.length > 0 && (
+            <>
+              <span aria-hidden>·</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                기록 없음 {missing.length}경기
+              </span>
+            </>
+          )}
         </div>
         <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300 pt-2">{intro}</p>
       </header>
@@ -362,9 +385,26 @@ export default async function PredictionDatePage({ params }: Props) {
         <div className="space-y-6">
           {sortedGames.map((game) => {
             const pred = game.predictions?.[0];
-            if (!pred) return null;
             const homeCode = game.home_team?.code as TeamCode;
             const awayCode = game.away_team?.code as TeamCode;
+
+            // 예측 없음 (PLAN_v5 이전 cron 놓침) — PlaceholderCard 로 명시.
+            // game.status 에 따라 "경기 종료 · 예측 미기록" / "예측 준비중"
+            // 등 자동 분기.
+            if (!pred) {
+              return (
+                <div key={game.id} data-game-id={game.id} data-kind="missing">
+                  <PlaceholderCard
+                    homeTeam={homeCode}
+                    awayTeam={awayCode}
+                    gameTime={game.game_time?.slice(0, 5)}
+                    status={game.status}
+                    homeSPName={game.home_sp?.name_ko ?? undefined}
+                    awaySPName={game.away_sp?.name_ko ?? undefined}
+                  />
+                </div>
+              );
+            }
 
             // 취소 경기는 토론/팩터 분석 숨김, 중립 플레이스홀더만 렌더.
             // 이미 생성된 reasoning 은 DB 에 남지만 UI 에서는 노이즈.
@@ -479,7 +519,7 @@ export default async function PredictionDatePage({ params }: Props) {
           <ShareButtons
             url={`${SITE_URL}/predictions/${date}`}
             title={`${date} KBO 승부예측`}
-            text={`${date} ${predicted.length}경기 AI 예측${cancelled.length > 0 ? ` (취소 ${cancelled.length})` : ""} — 적중률 ${verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : "집계중"}${verified.length > 0 ? "%" : ""}`}
+            text={`${date} ${predicted.length}경기 AI 예측${cancelled.length > 0 ? ` (취소 ${cancelled.length})` : ""}${missing.length > 0 ? ` (기록 없음 ${missing.length})` : ""} — 적중률 ${verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : "집계중"}${verified.length > 0 ? "%" : ""}`}
           />
         </footer>
       )}
