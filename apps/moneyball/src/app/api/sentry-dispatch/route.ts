@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
   const errorFile = truncate(source.metadata?.filename || '', 500);
   const permalink = source.web_url || source.issue_url || issue?.permalink || '';
   const triggeredRule = payload.data?.triggered_rule;
+  const issueId = issue?.id || source.id || 'unknown';
+  const firstSeen = source.firstSeen;
 
   const bodyLines: string[] = [];
   bodyLines.push(`**Level**: ${level}`);
@@ -110,12 +112,17 @@ export async function POST(request: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      event_type: 'worker-error',
+      event_type: 'worker-incident',
       client_payload: {
         source_repo: 'kkyu92/moneyballscore',
         title: `Sentry: ${title}`,
         body,
-        type: 'sentry-first-seen',
+        type: 'incident',
+        severity: mapSentryLevel(level),
+        fingerprint: `sentry-issue-${issueId}`,
+        environment,
+        ...(permalink && { run_url: permalink }),
+        ...(firstSeen && { first_seen: firstSeen }),
       },
     }),
   });
@@ -143,7 +150,14 @@ function truncate(s: string, max: number): string {
   return s.slice(0, max - 1) + '…';
 }
 
+function mapSentryLevel(level: string): 'warning' | 'error' | 'critical' {
+  if (level === 'fatal') return 'critical';
+  if (level === 'error') return 'error';
+  return 'warning';
+}
+
 interface SentryEventLike {
+  id?: string;
   title?: string;
   culprit?: string;
   level?: string;
@@ -151,6 +165,7 @@ interface SentryEventLike {
   web_url?: string;
   issue_url?: string;
   environment?: string;
+  firstSeen?: string;
   metadata?: {
     value?: string;
     filename?: string;

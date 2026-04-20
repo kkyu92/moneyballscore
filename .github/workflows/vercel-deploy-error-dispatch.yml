@@ -37,8 +37,12 @@ jobs:
           )
 
           gh api repos/kkyu92/playbook/dispatches \
-            -f event_type=worker-error \
+            -f event_type=worker-incident \
             -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
             -f "client_payload[title]=${TITLE}" \
             -f "client_payload[body]=${BODY}" \
-            -f "client_payload[type]=vercel-deploy-error"
+            -f "client_payload[type]=incident" \
+            -f "client_payload[severity]=error" \
+            -f "client_payload[fingerprint]=vercel-deploy-${SHORT}" \
+            -f "client_payload[environment]=${ENVIRONMENT}" \
+            -f "client_payload[run_url]=${TARGET_URL}"
