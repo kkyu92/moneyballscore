@@ -29,6 +29,10 @@ vi.mock('../scrapers/kbo-official', () => ({
   DEFAULT_PARK_FACTORS: {} as Record<string, number>,
 }));
 
+vi.mock('../scrapers/naver-schedule', () => ({
+  fetchNaverSchedule: vi.fn().mockResolvedValue([]),
+}));
+
 vi.mock('../scrapers/fancy-stats', () => ({
   fetchPitcherStats: vi.fn().mockResolvedValue([]),
   fetchTeamStats: vi.fn().mockResolvedValue([]),
@@ -186,6 +190,7 @@ vi.mock('@supabase/supabase-js', () => ({
 // 실제 테스트에서 per-test mock 주입
 import { createClient } from '@supabase/supabase-js';
 import { fetchGames } from '../scrapers/kbo-official';
+import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 import {
   fetchPitcherStats, fetchTeamStats, fetchEloRatings,
 } from '../scrapers/fancy-stats';
@@ -323,6 +328,64 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
 
       // announce 는 Fancy Stats 건드리지 않음
       expect(vi.mocked(fetchPitcherStats)).not.toHaveBeenCalled();
+    });
+
+    it('announce 끝에 fetchNaverSchedule 로 14일치 prefetch + games upsert', async () => {
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.mocked(fetchGames).mockResolvedValue([makeGame()]);
+      vi.mocked(fetchNaverSchedule).mockResolvedValue([
+        {
+          date: '2026-04-23', homeTeam: 'OB', awayTeam: 'HT',
+          gameTime: '18:30', stadium: '잠실',
+          status: 'scheduled', externalGameId: '20260423HTOB0',
+        },
+        {
+          date: '2026-04-24', homeTeam: 'LG', awayTeam: 'SS',
+          gameTime: '18:30', stadium: '잠실',
+          status: 'scheduled', externalGameId: '20260424SSLG0',
+        },
+      ]);
+
+      const { runDailyPipeline } = await loadPipeline();
+      await runDailyPipeline('2026-04-22', 'announce', 'cron');
+
+      expect(vi.mocked(fetchNaverSchedule)).toHaveBeenCalledOnce();
+      const call = vi.mocked(fetchNaverSchedule).mock.calls[0];
+      expect(call[0]).toBe('2026-04-22');
+      // end = start + 13일 (days=14 inclusive)
+      expect(call[1]).toBe('2026-05-05');
+
+      // games upsert (prefetch 경로) — announce 후 호출
+      const upsertCall = mock._calls
+        .filter((c) => c.table === 'games' && c.operations.includes('upsert'))
+        .pop();
+      expect(upsertCall).toBeDefined();
+    });
+
+    it('Naver prefetch 실패 → errors 기록하되 announce 전체는 finish() 통과', async () => {
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.mocked(fetchGames).mockResolvedValue([makeGame()]);
+      vi.mocked(fetchNaverSchedule).mockRejectedValue(
+        new Error('Naver 500'),
+      );
+
+      const { runDailyPipeline } = await loadPipeline();
+      const result = await runDailyPipeline('2026-04-22', 'announce', 'cron');
+
+      expect(result.errors.some((e) => e.includes('prefetchSchedule')))
+        .toBe(true);
+      expect(result.gamesFound).toBe(1); // announce 자체는 성공
+
+      const runLog = mock._calls.find(
+        (c) => c.table === 'pipeline_runs' && c.operations.includes('insert'),
+      );
+      expect(runLog).toBeDefined();
     });
 
     it('fetchGames 실패 → errors 채우고 finish() 로 pipeline_runs 로그', async () => {

@@ -4,6 +4,7 @@ import type { TeamCode } from '@moneyball/shared';
 import {
   fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS,
 } from '../scrapers/kbo-official';
+import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 import {
   fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher,
 } from '../scrapers/fancy-stats';
@@ -156,6 +157,23 @@ export async function runDailyPipeline(
     } catch (e) {
       errors.push(`notifyAnnounce: ${e instanceof Error ? e.message : String(e)}`);
     }
+
+    // 14일치 일정 prefetch (Naver API 1회 호출) — 홈 empty-state 에서
+    // "다음 경기 일정" 을 바로 찾을 수 있도록 games 테이블에 확보.
+    // 실패해도 announce 전체 실패 아님 (errors 에만 기록).
+    try {
+      const leagueId = await getKBOLeagueId(db);
+      const teamIdMap = await getTeamIdMap(db, leagueId);
+      const prefetched = await prefetchSchedule(db, leagueId, teamIdMap, targetDate, 14);
+      if (prefetched.error) {
+        errors.push(`prefetchSchedule: ${prefetched.error}`);
+      } else {
+        console.log(`[Pipeline] Prefetched ${prefetched.upserted} games (${prefetched.range})`);
+      }
+    } catch (e) {
+      errors.push(`prefetchSchedule: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
@@ -719,6 +737,86 @@ async function getVerifyResults(
     }
   }
   return results;
+}
+
+/**
+ * Naver API 로 14일치 일정 prefetch → games 테이블 upsert.
+ *
+ * 목적: 홈 empty-state "다음 경기 일정" 이 DB 에서 즉시 찾을 수 있도록.
+ * 기존 fetchGames (KBO 공식) 는 단일 날짜만 받아 14회 호출 필요한데,
+ * Naver API 는 fromDate-toDate 한 번에 가능.
+ *
+ * upsert onConflict=league_id,external_game_id → 기존 row 가 있으면 status·
+ * score 만 patch (KBO 공식이 덮어쓴 후라도 일정 자체는 덮어쓰지 않음).
+ */
+async function prefetchSchedule(
+  db: DB,
+  leagueId: number,
+  teamIdMap: Record<TeamCode, number>,
+  startDate: string,
+  days: number,
+): Promise<{ upserted: number; range: string; error: string | null }> {
+  // UTC 정오 앵커로 DST/타임존 영향 제거 + setUTCDate 로 순수 일수 가산.
+  const end = new Date(`${startDate}T12:00:00Z`);
+  end.setUTCDate(end.getUTCDate() + days - 1);
+  const fromStr = startDate;
+  const toStr = end.toISOString().slice(0, 10);
+
+  let scheduled: ScrapedGame[];
+  try {
+    scheduled = await fetchNaverSchedule(fromStr, toStr, 'basic');
+  } catch (e) {
+    return {
+      upserted: 0,
+      range: `${fromStr} ~ ${toStr}`,
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+
+  if (scheduled.length === 0) {
+    return { upserted: 0, range: `${fromStr} ~ ${toStr}`, error: null };
+  }
+
+  const payload = scheduled
+    .map((g) => {
+      const homeTeamId = teamIdMap[g.homeTeam];
+      const awayTeamId = teamIdMap[g.awayTeam];
+      if (!homeTeamId || !awayTeamId) return null;
+      return {
+        league_id: leagueId,
+        game_date: g.date,
+        game_time: g.gameTime,
+        home_team_id: homeTeamId,
+        away_team_id: awayTeamId,
+        stadium: g.stadium,
+        status: g.status,
+        home_score: g.homeScore ?? null,
+        away_score: g.awayScore ?? null,
+        winner_team_id:
+          g.status === 'final' && g.homeScore != null && g.awayScore != null
+            ? g.homeScore > g.awayScore ? homeTeamId : awayTeamId
+            : null,
+        external_game_id: g.externalGameId,
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+
+  if (payload.length === 0) {
+    return { upserted: 0, range: `${fromStr} ~ ${toStr}`, error: null };
+  }
+
+  const { error } = await db
+    .from('games')
+    .upsert(payload, { onConflict: 'league_id,external_game_id' });
+
+  if (error) {
+    return {
+      upserted: 0,
+      range: `${fromStr} ~ ${toStr}`,
+      error: error.message,
+    };
+  }
+  return { upserted: payload.length, range: `${fromStr} ~ ${toStr}`, error: null };
 }
 
 async function updateAccuracy(db: DB, leagueId: number, date: string) {
