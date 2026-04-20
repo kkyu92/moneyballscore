@@ -19,6 +19,17 @@ export const KBO_TEAMS = {
 export type TeamCode = keyof typeof KBO_TEAMS;
 
 /**
+ * 구장 짧은 이름 — UI 노출용. KBO_TEAMS.stadium 은 정식 명칭이라 UI 에 길고,
+ * KBO 공식 API S_NM 은 짧은 지역명 ("대구", "잠실") 을 리턴. Naver basic
+ * 응답처럼 stadium 필드가 비어 있을 때 fallback 용 상수.
+ */
+export const KBO_STADIUM_SHORT: Record<TeamCode, string> = {
+  SK: '인천', HT: '광주', LG: '잠실', OB: '잠실',
+  KT: '수원', SS: '대구', LT: '부산', HH: '대전',
+  NC: '창원', WO: '고척',
+};
+
+/**
  * 구장 좌표 — 날씨 API (Open-Meteo) 조회용.
  * 키는 TeamCode (홈팀). 실측 위도/경도 (소수점 4자리 = ~11m 정확).
  */

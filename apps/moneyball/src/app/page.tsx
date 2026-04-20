@@ -2,7 +2,7 @@ import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
 import { MiniGameCard } from "@/components/shared/MiniGameCard";
 import { fetchStadiumWeather } from "@/lib/weather";
-import { KBO_STADIUM_COORDS } from "@moneyball/shared";
+import { KBO_STADIUM_COORDS, KBO_STADIUM_SHORT } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
@@ -414,7 +414,7 @@ export default async function HomePage() {
                     winProb={winProb}
                     gameId={game.id}
                     isBigMatch={game.id === bigMatchId}
-                    stadium={game.stadium}
+                    stadium={game.stadium || KBO_STADIUM_SHORT[homeCode]}
                     weather={todayWeather.get(game.id)}
                   />
                 </div>
@@ -469,7 +469,7 @@ export default async function HomePage() {
                       homeTeam={g.homeTeam}
                       awayTeam={g.awayTeam}
                       gameTime={g.gameTime}
-                      stadium={g.stadium}
+                      stadium={g.stadium || KBO_STADIUM_SHORT[g.homeTeam]}
                       weather={nextWeather[i]}
                     />
                   ))}

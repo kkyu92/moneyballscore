@@ -764,7 +764,9 @@ async function prefetchSchedule(
 
   let scheduled: ScrapedGame[];
   try {
-    scheduled = await fetchNaverSchedule(fromStr, toStr, 'basic');
+    // fields=all — basic 응답에는 stadium 등이 누락되어 UI 폴백 필요.
+    // all 이 응답 크기 3~4배지만 일별 10경기 * 14일 = 140건이라 무시 가능.
+    scheduled = await fetchNaverSchedule(fromStr, toStr, 'all');
   } catch (e) {
     return {
       upserted: 0,
