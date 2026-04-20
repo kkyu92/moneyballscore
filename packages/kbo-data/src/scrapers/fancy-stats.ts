@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
 import { TEAM_NAME_MAP } from '../types';
+import { fetchKboPitcherBasic } from './kbo-pitcher';
 
 const BASE_URL = 'https://www.kbofancystats.com';
 const DELAY_MS = 2000;
@@ -117,9 +118,9 @@ export function parsePitchersFromHtml(html: string): PitcherStats[] {
 }
 
 /**
- * /leaders/ 페이지에서 투수 스탯 수집 (fetch → parse).
+ * /leaders/ 페이지 fetch → 순수 파서 호출. 내부 전용.
  */
-export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]> {
+async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
   const url = `${BASE_URL}/leaders/`;
   const res = await fetch(url, {
     headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
@@ -134,6 +135,44 @@ export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]
 
   await sleep(DELAY_MS);
   return pitchers;
+}
+
+/**
+ * 투수 시즌 스탯 수집 — Fancy Stats + KBO 공식 merge.
+ *
+ * Fancy Stats 는 WAR·xFIP·K/9 같은 고급 지표 제공하지만 top 50 리미트.
+ * KBO 공식 Basic1 은 28명 + FIP 직접 계산만 가능. 두 소스 교집합은
+ * Fancy Stats 값 우선 (xFIP·WAR·K/9 보존), 차집합은 KBO 공식으로 보강
+ * 해서 커버리지 최대화.
+ *
+ * KBO 공식 호출 실패 시 Fancy Stats 만 반환 (graceful degrade).
+ */
+export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]> {
+  const fancy = await fetchFancyStatsPitchers();
+
+  let kbo: PitcherStats[] = [];
+  try {
+    kbo = await fetchKboPitcherBasic();
+  } catch (e) {
+    console.warn('[fetchPitcherStats] KBO Basic1 fallback skipped:', e);
+  }
+
+  // name@team 키로 중복 제거. Fancy Stats 먼저 넣고, KBO 공식은 신규만.
+  const seen = new Set<string>();
+  const merged: PitcherStats[] = [];
+  for (const p of fancy) {
+    const key = `${p.name}@${p.team}`;
+    seen.add(key);
+    merged.push(p);
+  }
+  for (const p of kbo) {
+    const key = `${p.name}@${p.team}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push(p);
+    }
+  }
+  return merged;
 }
 
 /**
