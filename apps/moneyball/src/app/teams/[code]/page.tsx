@@ -154,7 +154,7 @@ export default async function TeamPage({ params }: PageProps) {
               }`}
               title={
                 profile.verifiedN > 0 && profile.verifiedN < 5
-                  ? `표본 작음 (N=${profile.verifiedN} < 5) — 해석 주의`
+                  ? `검증된 경기가 ${profile.verifiedN}경기뿐이라 참고용입니다 (5경기 이상부터 신뢰 가능)`
                   : undefined
               }
             >
@@ -164,7 +164,7 @@ export default async function TeamPage({ params }: PageProps) {
               검증 {profile.verifiedN}경기
               {profile.verifiedN > 0 && profile.verifiedN < 5 && (
                 <span className="ml-1 text-gray-400 dark:text-gray-500">
-                  · 표본 작음
+                  · 경기 수 적음
                 </span>
               )}
             </p>

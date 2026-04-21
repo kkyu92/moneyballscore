@@ -249,7 +249,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                   className="flex items-center gap-3 text-sm"
                   title={
                     smallSample
-                      ? `표본 작음 (N=${t.predicted} < 5) — 해석 주의`
+                      ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (5경기 이상부터 신뢰 가능)`
                       : undefined
                   }
                 >

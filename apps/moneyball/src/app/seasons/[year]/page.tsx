@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const y = parseInt(year, 10);
   if (!SUPPORTED_YEARS.includes(y)) return {};
   const title = `${y} KBO 시즌 리뷰`;
-  const description = `${y} KBO 정규시즌 전체 요약 — 팀 순위, 월별 득점 추이, 극값 경기. 백필된 실측 데이터 기반.`;
+  const description = `${y} KBO 정규시즌 전체 요약 — 팀 순위, 월별 득점 추이, 인상적인 경기. 실제 경기 결과 기반.`;
   return {
     title,
     description,
@@ -69,7 +69,7 @@ export default async function SeasonPage({ params }: PageProps) {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{y} KBO 시즌 리뷰</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          정규시즌 + 포스트시즌 전체 경기 실측 데이터 요약. 무승부 제외 승률 기준 팀 정렬.
+          정규시즌 + 포스트시즌 전체 경기 결과를 한눈에. 무승부 제외 승률 기준으로 팀 정렬.
         </p>
       </header>
 
@@ -204,7 +204,7 @@ export default async function SeasonPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* 극값 경기 */}
+      {/* 인상적인 경기 */}
       <section className="grid md:grid-cols-3 gap-4">
         <ExtremeCard title="최다 총득점 경기" games={summary.topTotalRuns} metric="totalRuns" suffix="점" />
         <ExtremeCard title="최대 점수차 경기" games={summary.topMargin} metric="margin" suffix="점차" />
@@ -213,8 +213,7 @@ export default async function SeasonPage({ params }: PageProps) {
 
       <footer className="text-xs text-gray-400 dark:text-gray-500 pt-2">
         <p>
-          데이터 소스: Naver 스포츠 스케줄 API (게임 결과) · Open-Meteo (날씨) · 내부 백필.
-          스크린 캡처 및 인용은 출처 표기 요망.
+          자료 출처: Naver 스포츠 스케줄 (경기 결과) · Open-Meteo (날씨). 인용 시 출처 표기.
         </p>
         <p className="mt-1">
           관련: <Link href="/teams" className="underline">팀 페이지</Link> · <Link href="/predictions" className="underline">예측 기록</Link>

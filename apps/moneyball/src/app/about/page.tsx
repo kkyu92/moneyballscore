@@ -102,7 +102,7 @@ const FAQS = [
   },
   {
     q: "데이터는 어디서 가져오나요?",
-    a: "KBO 공식 사이트(koreabaseball.com), KBO Fancy Stats(kbofancystats.com), FanGraphs(fangraphs.com/leaders/international/kbo) 3개 소스를 매일 정해진 시각에 자동 수집합니다. 각 사이트의 robots.txt와 rate limit을 준수합니다.",
+    a: "KBO 공식 사이트(koreabaseball.com), KBO Fancy Stats(kbofancystats.com), FanGraphs(fangraphs.com/leaders/international/kbo) 3개 소스를 매일 정해진 시각에 자동 수집합니다. 각 사이트의 robots.txt와 서버 부하 기준을 준수합니다.",
   },
   {
     q: "유료인가요? 가입이 필요한가요?",
@@ -158,7 +158,7 @@ export default function AboutPage() {
         </div>
         <p className="text-gray-600 dark:text-gray-300">
           10개의 세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
-          홈팀 어드밴티지(+1.5%p, 2023+2024+2025+2026 N=2180 실측 51.93% ±2.10pp)를
+          홈팀 어드밴티지(+1.5%p, 최근 3시즌 2,180경기 실제 홈 승률 51.93% ±2.1%p 기준)를
           추가 반영하며, 각 팩터를 상대 비교로 정규화한 후 최종 승리 확률을
           산출합니다.
         </p>
@@ -186,7 +186,7 @@ export default function AboutPage() {
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
-          + 홈어드밴티지 1.5%p (실측).
+          + 홈어드밴티지 1.5%p (실제 경기 기준).
         </p>
       </section>
 

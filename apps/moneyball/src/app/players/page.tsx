@@ -144,7 +144,7 @@ export default async function PlayersIndexPage() {
                       }`}
                       title={
                         p.verifiedN > 0 && p.verifiedN < SMALL_SAMPLE_N
-                          ? `표본 작음 (N=${p.verifiedN} < ${SMALL_SAMPLE_N}) — 해석 주의`
+                          ? `검증된 경기가 ${p.verifiedN}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
                           : undefined
                       }
                     >
