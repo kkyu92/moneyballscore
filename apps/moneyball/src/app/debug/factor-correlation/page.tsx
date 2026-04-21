@@ -145,7 +145,7 @@ export default async function FactorCorrelationPage() {
       .select(
         'id, game_date, game_time, stadium, home_team_id, away_team_id, winner_team_id, home_score, away_score, weather',
       )
-      .gte('game_date', '2024-01-01')
+      .gte('game_date', '2023-01-01')
       .eq('status', 'final')
       .not('home_score', 'is', null)
       .not('away_score', 'is', null)

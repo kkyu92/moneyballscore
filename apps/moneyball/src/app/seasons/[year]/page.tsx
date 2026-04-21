@@ -13,7 +13,7 @@ interface PageProps {
 }
 
 const SITE_URL = "https://moneyballscore.vercel.app";
-const SUPPORTED_YEARS = [2024, 2025];
+const SUPPORTED_YEARS = [2023, 2024, 2025];
 
 export function generateStaticParams() {
   return SUPPORTED_YEARS.map((y) => ({ year: String(y) }));

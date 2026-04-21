@@ -89,8 +89,9 @@ export const DEFAULT_WEIGHTS = {
 export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 
 // 홈팀 어드밴티지 — 데이터 측정 기반.
-// 2026-04-21 측정 (2024+2025+2026 N=1458): 51.51% ±2.57pp → advantage 1.51pp.
-// 2024 (51.44%) / 2025 (51.54%) 두 시즌 거의 동일 → 구조적 수치. +1.5%p 유지.
+// 2026-04-21 측정 (2023+2024+2025+2026 N=2180): 51.93% ±2.10pp → advantage 1.93pp.
+// 시즌별: 2023 (52.77%) / 2024 (51.44%) / 2025 (51.54%) — 2년 평균 51.49% + 2023 outlier.
+// 현재 0.015 (51.5%) 와 gap 0.43pp, 통계적 유의미 수준 아님 → 유지.
 export const HOME_ADVANTAGE = 0.015;
 
 // 신뢰도 → Tailwind 색상 클래스
