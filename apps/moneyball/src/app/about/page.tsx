@@ -158,8 +158,8 @@ export default function AboutPage() {
         </div>
         <p className="text-gray-600 dark:text-gray-300">
           10개의 세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
-          홈팀 어드밴티지(+3%)를 추가 반영하며, 각 팩터를 상대 비교로 정규화한 후
-          최종 승리 확률을 산출합니다.
+          홈팀 어드밴티지(+1.5%p, 2025+2026 N=731 실측)를 추가 반영하며, 각 팩터를
+          상대 비교로 정규화한 후 최종 승리 확률을 산출합니다.
         </p>
 
         <div className="space-y-3 mt-6">
@@ -185,7 +185,7 @@ export default function AboutPage() {
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
-          + 홈어드밴티지 3%.
+          + 홈어드밴티지 1.5%p (실측).
         </p>
       </section>
 

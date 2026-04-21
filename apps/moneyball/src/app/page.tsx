@@ -508,7 +508,7 @@ export default async function HomePage() {
             { label: "불펜 + 수비", weight: "15%", icon: "🛡" },
             { label: "최근 폼 + 상대전적", weight: "15%", icon: "📈" },
             { label: "Elo + WAR", weight: "16%", icon: "⚡" },
-            { label: "구장 + 홈어드밴티지", weight: "7%", icon: "🏟" },
+            { label: "구장 + 홈어드밴티지", weight: "5.5%", icon: "🏟" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-3 p-3 bg-brand-50 dark:bg-[var(--color-surface)] rounded-lg border border-brand-100 dark:border-[var(--color-border)]">
               <span className="text-lg">{item.icon}</span>

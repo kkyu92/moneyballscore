@@ -166,8 +166,6 @@ export default async function FactorCorrelationPage() {
   const homeWins = games.filter((g) => g.winner_team_id === g.home_team_id).length;
   const homeWinRate = homeWins / decided;
   const homeCi = ci95(homeWinRate, decided);
-  const assumption = 0.53; // +3% 가정
-  const gap = homeWinRate - assumption;
 
   // 구장별
   const stadiumSplit = makeSplit(games, (g) => g.stadium).filter((r) => r.n >= 20);
@@ -207,20 +205,19 @@ export default async function FactorCorrelationPage() {
       </header>
 
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
-        <h2 className="text-lg font-bold">1. Home Advantage — 실측 vs 가정 (+3%)</h2>
+        <h2 className="text-lg font-bold">1. Home Advantage — 실측 vs 가정 (+1.5%p)</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="홈 승률 실측" value={fmtPct(homeWinRate)} suffix={`${homeWins}/${decided} · ±${(homeCi * 100).toFixed(1)}%p`} />
-          <Stat label="모델 가정" value="53.0%" suffix="+3% 홈 어드밴티지" />
+          <Stat label="모델 가정" value="51.5%" suffix="+1.5%p (2026-04-21 실측 반영)" />
           <Stat
             label="Gap (실측 − 가정)"
-            value={fmtPM(gap)}
-            tone={Math.abs(gap) < 0.015 ? 'good' : Math.abs(gap) < 0.03 ? 'warn' : 'bad'}
+            value={fmtPM(homeWinRate - 0.515)}
+            tone={Math.abs(homeWinRate - 0.515) < 0.015 ? 'good' : Math.abs(homeWinRate - 0.515) < 0.03 ? 'warn' : 'bad'}
           />
           <Stat label="표본 충분성" value={decided >= 500 ? '충분' : '부족'} suffix={`N=${decided}`} />
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          실측 홈 승률이 가정(+3%)과 {Math.abs(gap) < 0.01 ? '거의 일치' : gap > 0 ? '더 높음 (가정 보수적)' : '더 낮음 (가정 과대)'}.
-          모델의 `home_field_advantage` 상수 재보정 근거 데이터.
+          홈 어드밴티지 상수는 이 페이지 데이터로 재보정됨. 2024·2023 백필 시 CI 좁아지면 자동 refine 가능.
         </p>
       </section>
 

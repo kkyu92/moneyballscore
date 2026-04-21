@@ -61,8 +61,8 @@ describe('DEFAULT_WEIGHTS', () => {
 });
 
 describe('HOME_ADVANTAGE', () => {
-  it('should be 3%', () => {
-    expect(HOME_ADVANTAGE).toBe(0.03);
+  it('should be 1.5% (data-measured from 2025+2026 N=731)', () => {
+    expect(HOME_ADVANTAGE).toBe(0.015);
   });
 });
 

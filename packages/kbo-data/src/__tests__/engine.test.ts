@@ -63,7 +63,7 @@ describe('예측 엔진 v1.5', () => {
     expect(result.reasoning).toMatch(/LG|두산/);
   });
 
-  it('동등한 팀일 때 확률이 ~0.53 (홈 어드밴티지)', () => {
+  it('동등한 팀일 때 확률이 ~0.515 (홈 어드밴티지 실측 +1.5%p)', () => {
     const equalInput = makeInput({
       homeSPStats: { name: 'A', team: 'LG', fip: 4.0, xfip: 4.0, era: 4.0, innings: 80, war: 2.0, kPer9: 7.0 },
       awaySPStats: { name: 'B', team: 'OB', fip: 4.0, xfip: 4.0, era: 4.0, innings: 80, war: 2.0, kPer9: 7.0 },
@@ -77,9 +77,9 @@ describe('예측 엔진 v1.5', () => {
       parkFactor: 1.0,
     });
     const result = predict(equalInput);
-    // 홈 어드밴티지 +3%로 ~0.53
+    // 홈 어드밴티지 +1.5%p로 ~0.515
     expect(result.homeWinProb).toBeGreaterThan(0.50);
-    expect(result.homeWinProb).toBeLessThan(0.56);
+    expect(result.homeWinProb).toBeLessThan(0.54);
   });
 });
 
