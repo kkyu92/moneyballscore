@@ -1,5 +1,5 @@
-import { PredictionCard } from "@/components/predictions/PredictionCard";
-import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
+import { PredictionCardLive } from "@/components/predictions/PredictionCardLive";
+import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { MiniGameCard } from "@/components/shared/MiniGameCard";
 import { fetchStadiumWeather } from "@/lib/weather";
 import { KBO_STADIUM_COORDS, KBO_STADIUM_SHORT } from "@moneyball/shared";
@@ -376,7 +376,7 @@ export default async function HomePage() {
               if (!pred) {
                 return (
                   <div key={game.id} data-game-id={game.id}>
-                    <PlaceholderCard
+                    <PlaceholderCardLive
                       homeTeam={homeCode}
                       awayTeam={awayCode}
                       gameTime={game.game_time?.slice(0, 5)}
@@ -396,7 +396,7 @@ export default async function HomePage() {
                   : undefined;
               return (
                 <div key={game.id} data-game-id={game.id}>
-                  <PredictionCard
+                  <PredictionCardLive
                     homeTeam={homeCode}
                     awayTeam={awayCode}
                     confidence={pred.confidence}

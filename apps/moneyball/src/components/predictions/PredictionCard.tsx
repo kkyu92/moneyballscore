@@ -7,7 +7,7 @@ import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
 import type { WeatherSlot } from "@/lib/weather";
 
-interface PredictionCardProps {
+export interface PredictionCardProps {
   homeTeam: TeamCode;
   awayTeam: TeamCode;
   confidence: number;
@@ -55,6 +55,17 @@ export function PredictionCard({
   const isLive = status === 'live';
   const isFinal = status === 'final';
   const isPostponed = status === 'postponed';
+
+  const homeWon =
+    isFinal &&
+    homeScore != null &&
+    awayScore != null &&
+    homeScore > awayScore;
+  const awayWon =
+    isFinal &&
+    homeScore != null &&
+    awayScore != null &&
+    awayScore > homeScore;
   // winProb = 예측 승자의 승리 확률. DB predicted_winner 기준으로 표시.
   // debate가 50% 미만으로 낮춰도 predicted_winner는 유지 (적중 판정 일관성)
   const displayPct = winProb
@@ -139,9 +150,34 @@ export function PredictionCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={awayTeam} size={40} />
           </div>
-          <p className="text-sm font-medium">{shortTeamName(awayTeam)}</p>
+          <p
+            className={`text-sm font-medium inline-flex items-center gap-1.5 justify-center ${
+              awayWon
+                ? "font-bold text-brand-700 dark:text-brand-400"
+                : homeWon
+                  ? "text-gray-400 dark:text-gray-500"
+                  : ""
+            }`}
+          >
+            {shortTeamName(awayTeam)}
+            {awayWon && (
+              <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+                승
+              </span>
+            )}
+          </p>
           {awayScore !== null && awayScore !== undefined && (
-            <p className="text-2xl font-bold mt-1">{awayScore}</p>
+            <p
+              className={`text-2xl font-bold mt-1 ${
+                awayWon
+                  ? "text-brand-700 dark:text-brand-400"
+                  : homeWon
+                    ? "text-gray-400 dark:text-gray-500"
+                    : ""
+              }`}
+            >
+              {awayScore}
+            </p>
           )}
         </div>
 
@@ -163,7 +199,15 @@ export function PredictionCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={homeTeam} size={40} />
           </div>
-          <p className="text-sm font-semibold inline-flex items-center gap-1.5 justify-center">
+          <p
+            className={`text-sm font-semibold inline-flex items-center gap-1.5 justify-center ${
+              homeWon
+                ? "font-bold text-brand-700 dark:text-brand-400"
+                : awayWon
+                  ? "text-gray-400 dark:text-gray-500"
+                  : ""
+            }`}
+          >
             {shortTeamName(homeTeam)}
             <span
               aria-label="홈팀"
@@ -172,9 +216,24 @@ export function PredictionCard({
             >
               홈
             </span>
+            {homeWon && (
+              <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+                승
+              </span>
+            )}
           </p>
           {homeScore !== null && homeScore !== undefined && (
-            <p className="text-2xl font-bold mt-1">{homeScore}</p>
+            <p
+              className={`text-2xl font-bold mt-1 ${
+                homeWon
+                  ? "text-brand-700 dark:text-brand-400"
+                  : awayWon
+                    ? "text-gray-400 dark:text-gray-500"
+                    : ""
+              }`}
+            >
+              {homeScore}
+            </p>
           )}
         </div>
       </div>
