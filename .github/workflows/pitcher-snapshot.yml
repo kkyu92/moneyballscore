@@ -1,0 +1,61 @@
+name: Pitcher Stats Snapshot
+
+on:
+  schedule:
+    # KST 일요일 00:00 = UTC 토요일 15:00 — 주간 snapshot
+    # 일주일에 1회. 시즌 말까지 ~30 snapshot 누적.
+    - cron: '0 15 * * 6'
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Season year (default: current)'
+        required: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Call snapshot API
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+          INPUT_SEASON: ${{ github.event.inputs.season }}
+        run: |
+          BODY="{}"
+          if [ -n "$INPUT_SEASON" ]; then
+            BODY="{\"season\":${INPUT_SEASON}}"
+          fi
+
+          echo "Calling snapshot-pitchers: $BODY"
+          curl -sf -X POST "${PRODUCTION_URL}/api/snapshot-pitchers" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -d "$BODY"
+
+      - name: Notify playbook on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          TITLE="${WORKFLOW_NAME} 실패"
+          BODY="Workflow: ${WORKFLOW_NAME}
+          Run: ${RUN_URL}
+          Branch: ${BRANCH}
+          Commit: ${COMMIT_SHA}"
+          gh api repos/kkyu92/playbook/dispatches \
+            -f event_type=worker-error \
+            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[title]=${TITLE}" \
+            -f "client_payload[body]=${BODY}" \
+            -f "client_payload[type]=error-log" \
+            -f "client_payload[severity]=error" \
+            -f "client_payload[fingerprint]=cron-pitcher-snapshot-failure" \
+            -f "client_payload[environment]=production" \
+            -f "client_payload[run_url]=${RUN_URL}"

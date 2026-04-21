@@ -28,6 +28,8 @@ export { runPostviewDaily } from './pipeline/postview-daily';
 export type { PostviewDailyResult } from './pipeline/postview-daily';
 export { syncBatterStats } from './pipeline/sync-batter-stats';
 export type { SyncBatterStatsResult } from './pipeline/sync-batter-stats';
+export { snapshotPitcherStats } from './pipeline/snapshot-pitchers';
+export type { SnapshotOptions, SnapshotResult } from './pipeline/snapshot-pitchers';
 
 // 빅매치 선정 (v4-4)
 export {
