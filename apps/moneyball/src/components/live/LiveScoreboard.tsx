@@ -33,6 +33,21 @@ function ScoreCard({ score }: { score: LiveScore }) {
   const isLive = score.status === 'live';
   const isFinal = score.status === 'final';
   const showScore = isLive || isFinal;
+  const homeWon = isFinal && score.homeScore > score.awayScore;
+  const awayWon = isFinal && score.awayScore > score.homeScore;
+
+  const teamNameClass = (won: boolean, lost: boolean) =>
+    won
+      ? 'text-brand-700 dark:text-brand-400 font-bold'
+      : lost
+        ? 'text-gray-400 dark:text-gray-500'
+        : '';
+  const scoreClass = (won: boolean, lost: boolean) =>
+    won
+      ? 'text-brand-700 dark:text-brand-400'
+      : lost
+        ? 'text-gray-400 dark:text-gray-500'
+        : '';
 
   return (
     <div
@@ -53,14 +68,17 @@ function ScoreCard({ score }: { score: LiveScore }) {
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5 min-w-0">
           <TeamLogo team={score.awayTeam as TeamCode} size={20} />
-          <span className="text-sm font-medium truncate">
+          <span className={`text-sm truncate ${teamNameClass(awayWon, homeWon)}`}>
             {shortTeamName(score.awayTeam as TeamCode) || score.awayTeamName}
           </span>
+          {awayWon && (
+            <span className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 leading-none">
+              승
+            </span>
+          )}
         </div>
         {showScore && (
-          <span className={`text-sm font-bold tabular-nums ${
-            isFinal && score.awayScore > score.homeScore ? 'text-brand-700' : ''
-          }`}>
+          <span className={`text-sm font-bold tabular-nums ${scoreClass(awayWon, homeWon)}`}>
             {score.awayScore}
           </span>
         )}
@@ -70,7 +88,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 min-w-0">
           <TeamLogo team={score.homeTeam as TeamCode} size={20} />
-          <span className="text-sm font-medium truncate">
+          <span className={`text-sm truncate ${teamNameClass(homeWon, awayWon)}`}>
             {shortTeamName(score.homeTeam as TeamCode) || score.homeTeamName}
           </span>
           <span
@@ -79,11 +97,14 @@ function ScoreCard({ score }: { score: LiveScore }) {
           >
             홈
           </span>
+          {homeWon && (
+            <span className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 leading-none">
+              승
+            </span>
+          )}
         </div>
         {showScore && (
-          <span className={`text-sm font-bold tabular-nums ${
-            isFinal && score.homeScore > score.awayScore ? 'text-brand-700' : ''
-          }`}>
+          <span className={`text-sm font-bold tabular-nums ${scoreClass(homeWon, awayWon)}`}>
             {score.homeScore}
           </span>
         )}
