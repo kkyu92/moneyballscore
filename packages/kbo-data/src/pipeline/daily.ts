@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString } from '@moneyball/shared';
+import { toKSTDateString, KBO_STADIUM_COORDS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
+import { fetchForecastWeather } from '../scrapers/weather';
 import {
   fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS,
 } from '../scrapers/kbo-official';
@@ -540,6 +541,25 @@ export async function runDailyPipeline(
     console.log(
       `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`,
     );
+
+    // games.weather 저장 (idempotent — 이미 있으면 skip). 예측과 같은 시점의
+    // 예보 스냅샷을 영구 기록 — 관측 심화 (날씨-결과 상관 분석) 데이터 소스.
+    const coords = KBO_STADIUM_COORDS[game.homeTeam as TeamCode];
+    if (coords) {
+      const hourStr = game.gameTime?.slice(0, 2);
+      const hour = hourStr ? parseInt(hourStr, 10) : 18;
+      const existing = await db
+        .from('games')
+        .select('weather')
+        .eq('id', dbGameId)
+        .single();
+      if (!existing.data?.weather) {
+        const snap = await fetchForecastWeather(coords.lat, coords.lng, targetDate, hour);
+        if (snap) {
+          await db.from('games').update({ weather: snap }).eq('id', dbGameId);
+        }
+      }
+    }
   }
 
   // 하루 요약 알림 — daily_notifications flag 로 idempotent (Codex #6)
