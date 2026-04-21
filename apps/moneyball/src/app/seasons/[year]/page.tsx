@@ -73,6 +73,54 @@ export default async function SeasonPage({ params }: PageProps) {
         </p>
       </header>
 
+      {/* 우승팀 + 한국시리즈 */}
+      {summary.championship && (
+        <section className="bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-900/40 dark:to-brand-800/30 rounded-xl border border-brand-200 dark:border-brand-700 p-5 space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="text-4xl">🏆</div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">
+                {y} 한국시리즈 챔피언
+              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <TeamLogo team={summary.championship.winnerCode} size={40} />
+                <Link href={`/teams/${summary.championship.winnerCode}`} className="text-2xl font-bold hover:underline">
+                  {summary.championship.winnerName}
+                </Link>
+                <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                  vs {summary.championship.loserName} · <span className="font-semibold">{summary.championship.score}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/70 dark:bg-[var(--color-surface-card)]/70 rounded-lg p-3">
+            <p className="text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              한국시리즈 {summary.championship.games.length}경기
+            </p>
+            <ul className="space-y-1 text-sm">
+              {summary.championship.games.map((g, idx) => {
+                const winnerHome = g.homeScore > g.awayScore;
+                return (
+                  <li key={g.id} className="flex items-center gap-2 font-mono text-xs">
+                    <span className="text-gray-400 w-16">{idx + 1}차전</span>
+                    <span className="text-gray-500 w-20">{g.date.slice(5)}</span>
+                    <span className="text-gray-500 w-12">{g.stadium ?? ''}</span>
+                    <span className={winnerHome ? 'text-gray-400' : 'font-semibold'}>
+                      {shortTeamName(g.awayCode as never) ?? g.awayCode} {g.awayScore}
+                    </span>
+                    <span className="text-gray-300">-</span>
+                    <span className={winnerHome ? 'font-semibold' : 'text-gray-400'}>
+                      {g.homeScore} {shortTeamName(g.homeCode as never) ?? g.homeCode}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
+
       {/* 시즌 개요 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
         <h2 className="text-lg font-bold">시즌 개요</h2>

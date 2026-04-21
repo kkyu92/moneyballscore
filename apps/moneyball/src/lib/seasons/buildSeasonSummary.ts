@@ -33,6 +33,15 @@ export interface ExtremeGame {
   margin: number;      // abs(home - away)
 }
 
+export interface ChampionshipSeries {
+  winnerCode: TeamCode;
+  winnerName: string;
+  loserCode: TeamCode;
+  loserName: string;
+  score: string;                  // "4-1" — 우승팀 기준
+  games: ExtremeGame[];           // 날짜 오름차순
+}
+
 export interface SeasonSummary {
   season: number;
   totalGames: number;
@@ -47,6 +56,7 @@ export interface SeasonSummary {
   topTotalRuns: ExtremeGame[];   // top 3 최다 총득점
   topMargin: ExtremeGame[];      // top 3 최대 점수차
   lowTotalRuns: ExtremeGame[];   // bottom 3 최소 총득점 (0-0 제외)
+  championship: ChampionshipSeries | null; // 한국시리즈 + 우승팀
 }
 
 interface GameRow {
@@ -198,6 +208,11 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
     .sort((a, b) => a.totalRuns - b.totalRuns)
     .slice(0, 3);
 
+  // 한국시리즈 탐지 — 날짜 역순, final + decided 경기에서 같은 두 팀이 연속된 그룹
+  // 의 시작을 가장 늦은 날짜부터 찾음. 포스트시즌 라운드별 대진이 바뀌므로 첫 변화
+  // 지점이 KS 시작. 2025 예시: 10-31 LG@HH → 10-26 HH@LG 까지 pair {LG,HH} 5경기.
+  const championship = findChampionship(finalGames, teamById);
+
   // 리그 지표
   const totalRuns = extremes.reduce((s, e) => s + e.totalRuns, 0);
   const homeWinsLeague = decided.filter((g) => g.winner_team_id === g.home_team_id).length;
@@ -216,5 +231,85 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
     topTotalRuns,
     topMargin,
     lowTotalRuns,
+    championship,
+  };
+}
+
+/**
+ * 한국시리즈 + 우승팀 탐지.
+ *
+ * 가정: 한국시리즈는 시즌의 가장 마지막에 열리며, 같은 두 팀이 4~7경기 연달아 맞붙는다.
+ * 포스트시즌 라운드별 (WC / 준PO / PO / KS) 대진이 바뀌므로 날짜 역순으로 내려가며
+ * 첫 "팀 쌍 변화" 지점까지가 한국시리즈.
+ *
+ * Edge cases:
+ *   - 포스트시즌 미진행 (시즌 중단 등) → null
+ *   - 데이터 누락 (승자 없음) → null
+ *   - 우승 결정 안 난 상태 (동점) → null 반환 (winner 확정 필요)
+ */
+function findChampionship(
+  finalGames: GameRow[],
+  teamById: Map<number, TeamMeta>,
+): ChampionshipSeries | null {
+  const decided = finalGames
+    .filter((g) => g.winner_team_id != null && g.home_score != null && g.away_score != null)
+    .sort((a, b) => b.game_date.localeCompare(a.game_date)); // 날짜 내림차순
+
+  if (decided.length === 0) return null;
+
+  const last = decided[0];
+  const pair = new Set([last.home_team_id, last.away_team_id]);
+
+  const seriesGames: GameRow[] = [last];
+  for (let i = 1; i < decided.length; i++) {
+    const g = decided[i];
+    const gPair = new Set([g.home_team_id, g.away_team_id]);
+    // pair 가 정확히 일치하지 않으면 시리즈 끝
+    if (gPair.size !== 2 || !Array.from(gPair).every((id) => pair.has(id))) break;
+    seriesGames.push(g);
+  }
+
+  // 4경기 미만이면 한국시리즈 아님 (준PO 등 마지막에 한 경기로 끝날 수도)
+  // 실제 KBO KS 는 4선승제 → 최소 4경기. 2025처럼 4-1 이면 5경기.
+  if (seriesGames.length < 4) return null;
+
+  // 시리즈 내 각 팀 승수 집계
+  const [idA, idB] = Array.from(pair);
+  let winsA = 0, winsB = 0;
+  for (const g of seriesGames) {
+    if (g.winner_team_id === idA) winsA++;
+    else if (g.winner_team_id === idB) winsB++;
+  }
+
+  const winnerId = winsA > winsB ? idA : idB;
+  const loserId = winnerId === idA ? idB : idA;
+  const winnerMeta = teamById.get(winnerId);
+  const loserMeta = teamById.get(loserId);
+  if (!winnerMeta || !loserMeta) return null;
+
+  const sortedAsc = [...seriesGames].sort((a, b) => a.game_date.localeCompare(b.game_date));
+  const games: ExtremeGame[] = sortedAsc.map((g) => {
+    const hm = teamById.get(g.home_team_id)!;
+    const am = teamById.get(g.away_team_id)!;
+    return {
+      id: g.id,
+      date: g.game_date,
+      homeCode: hm.code,
+      awayCode: am.code,
+      homeScore: g.home_score!,
+      awayScore: g.away_score!,
+      stadium: g.stadium,
+      totalRuns: g.home_score! + g.away_score!,
+      margin: Math.abs(g.home_score! - g.away_score!),
+    };
+  });
+
+  return {
+    winnerCode: winnerMeta.code,
+    winnerName: winnerMeta.name,
+    loserCode: loserMeta.code,
+    loserName: loserMeta.name,
+    score: `${Math.max(winsA, winsB)}-${Math.min(winsA, winsB)}`,
+    games,
   };
 }
