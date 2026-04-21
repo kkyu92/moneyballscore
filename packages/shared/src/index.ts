@@ -88,8 +88,9 @@ export const DEFAULT_WEIGHTS = {
 
 export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 
-// 홈팀 어드밴티지 — 데이터 측정 기반 (2025+2026 N=731, home winP 51.57% ±3.62pp)
-// 2026-04-21 측정: 전통 +3%p 가정 → 실측 +1.54%p 로 교체. CI 넓지만 point estimate 채택.
+// 홈팀 어드밴티지 — 데이터 측정 기반.
+// 2026-04-21 측정 (2024+2025+2026 N=1458): 51.51% ±2.57pp → advantage 1.51pp.
+// 2024 (51.44%) / 2025 (51.54%) 두 시즌 거의 동일 → 구조적 수치. +1.5%p 유지.
 export const HOME_ADVANTAGE = 0.015;
 
 // 신뢰도 → Tailwind 색상 클래스
