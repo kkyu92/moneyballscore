@@ -29,3 +29,11 @@ export type { RestrictedParams } from './models';
 export { loadDecidedGames, buildFeatures, computeHomeWinRates } from './loader';
 export { runBacktest } from './runner';
 export type { RunnerInput, RunnerOutput } from './runner';
+
+export {
+  parseEloTable,
+  fetchSeasonTeamStats,
+  fetchAllSeasonTeamStats,
+  SEASON_SNAPSHOTS,
+} from './wayback-team-stats';
+export type { SeasonTeamStat, SeasonStatsMap } from './wayback-team-stats';

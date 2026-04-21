@@ -55,6 +55,32 @@ export function vectorize(f: GameFeatures): number[] {
 export const FEATURE_NAMES = ['eloDiff/400', 'formDiff', 'h2hShift', 'parkShift/10'];
 
 /**
+ * GameFeatures → wOBA/FIP/SFR 포함 확장 벡터. Wayback 시즌 말 stats
+ * 복원된 시즌에만 사용. stat 누락 시 0 (중립) — 단 시즌 단위로 train
+ * 하므로 누락 시즌 전체를 필터링하는 편이 안전.
+ *
+ * 스케일링 근거 (2022-2024 관측):
+ *   wOBA diff: ±0.04 (최대)    → *20  → ±0.8
+ *   FIP  diff: ±1.0  (최대)    → /2   → ±0.5
+ *   SFR  diff: ±20   (최대)    → /20  → ±1.0
+ */
+export function vectorizeExtended(f: GameFeatures): number[] {
+  const base = vectorize(f);
+  const wobaDiff = ((f.homeWoba ?? 0) - (f.awayWoba ?? 0)) * 20;
+  // FIP 는 낮을수록 좋음 — home-good 방향 맞추기 위해 away - home
+  const fipDiff = ((f.awayFip ?? 0) - (f.homeFip ?? 0)) / 2;
+  const sfrDiff = ((f.homeSfr ?? 0) - (f.awaySfr ?? 0)) / 20;
+  return [...base, wobaDiff, fipDiff, sfrDiff];
+}
+
+export const FEATURE_NAMES_EXTENDED = [
+  ...FEATURE_NAMES,
+  'wobaDiff*20',
+  '(awayFip-homeFip)/2',
+  'sfrDiff/20',
+];
+
+/**
  * Batch gradient descent 로 logistic regression 학습.
  * L2 regularization (intercept 는 penalize 하지 않음, 표준 관례).
  */

@@ -12,6 +12,7 @@ import { calculateRecentForm, calculateHeadToHead } from '../engine/form';
 import type { FinishedGame } from '../engine/form';
 import { getEloAt } from './elo-history';
 import type { EloHistory } from './elo-history';
+import type { SeasonStatsMap } from './wayback-team-stats';
 import type { BacktestGame, GameFeatures } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,6 +86,7 @@ export function buildFeatures(
   target: BacktestGame,
   priorInSeason: FinishedGame[],
   eloHistory: EloHistory,
+  seasonStats?: SeasonStatsMap,
 ): GameFeatures | null {
   const homeFormRaw = calculateRecentForm(priorInSeason, target.homeTeamId, 10);
   const awayFormRaw = calculateRecentForm(priorInSeason, target.awayTeamId, 10);
@@ -97,6 +99,9 @@ export function buildFeatures(
 
   if (homeElo == null || awayElo == null) return null; // Elo 없으면 백테스트 제외
 
+  const homeSeason = seasonStats?.get(target.homeTeam);
+  const awaySeason = seasonStats?.get(target.awayTeam);
+
   return {
     homeElo,
     awayElo,
@@ -107,6 +112,12 @@ export function buildFeatures(
     parkPf: KBO_TEAMS[target.homeTeam].parkPf,
     homeTeam: target.homeTeam,
     awayTeam: target.awayTeam,
+    homeWoba: homeSeason?.woba,
+    awayWoba: awaySeason?.woba,
+    homeFip: homeSeason?.fip,
+    awayFip: awaySeason?.fip,
+    homeSfr: homeSeason?.sfr,
+    awaySfr: awaySeason?.sfr,
   };
 }
 

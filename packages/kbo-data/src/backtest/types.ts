@@ -28,6 +28,16 @@ export interface GameFeatures {
   parkPf: number; // 홈 구장 파크팩터
   homeTeam: TeamCode;
   awayTeam: TeamCode;
+  /**
+   * Wayback 시즌 말 team stats (있으면). logistic 확장 feature 용.
+   * Look-ahead bias 있음 — feature selection 검증에만 사용.
+   */
+  homeWoba?: number;
+  awayWoba?: number;
+  homeFip?: number;
+  awayFip?: number;
+  homeSfr?: number;
+  awaySfr?: number;
 }
 
 /** 모델 = (feature) → p(home win). 순수 함수. */
