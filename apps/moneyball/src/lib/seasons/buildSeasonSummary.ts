@@ -44,12 +44,14 @@ export interface ChampionshipSeries {
 
 export interface SeasonSummary {
   season: number;
+  isOngoing: boolean;        // 현재 진행 중인 시즌 (올해 & 11월 10일 이전)
   totalGames: number;
   finalGames: number;
   postponedGames: number;
   decidedGames: number;
   draws: number;
-  leagueAvgRuns: number;   // total runs per game
+  scheduledGames: number;    // 진행 시즌 — 남은 예정 경기
+  leagueAvgRuns: number;     // total runs per game
   leagueHomeWinRate: number;
   teams: TeamRecord[];
   byMonth: MonthStat[];
@@ -110,6 +112,13 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
 
   const finalGames = games.filter((g) => g.status === "final");
   const postponedGames = games.filter((g) => g.status === "postponed");
+  const scheduledGames = games.filter((g) => g.status === "scheduled" || g.status === "live");
+
+  // 진행 여부: 올해 시즌 + 11월 10일 이전 (KBO KS 마무리 전)
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const ksCutoff = new Date(`${currentYear}-11-10T00:00:00+09:00`);
+  const isOngoing = year === currentYear && now < ksCutoff;
 
   // decided: home_score, away_score 모두 있고 무승부 아님 (winner != null)
   const decided = finalGames.filter(
@@ -208,10 +217,8 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
     .sort((a, b) => a.totalRuns - b.totalRuns)
     .slice(0, 3);
 
-  // 한국시리즈 탐지 — 날짜 역순, final + decided 경기에서 같은 두 팀이 연속된 그룹
-  // 의 시작을 가장 늦은 날짜부터 찾음. 포스트시즌 라운드별 대진이 바뀌므로 첫 변화
-  // 지점이 KS 시작. 2025 예시: 10-31 LG@HH → 10-26 HH@LG 까지 pair {LG,HH} 5경기.
-  const championship = findChampionship(finalGames, teamById);
+  // 한국시리즈 탐지 — 진행 중 시즌은 KS 아직 안 열렸으므로 null. 종료 시즌만.
+  const championship = isOngoing ? null : findChampionship(finalGames, teamById);
 
   // 리그 지표
   const totalRuns = extremes.reduce((s, e) => s + e.totalRuns, 0);
@@ -219,11 +226,13 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
 
   return {
     season: year,
+    isOngoing,
     totalGames: games.length,
     finalGames: finalGames.length,
     postponedGames: postponedGames.length,
     decidedGames: decided.length,
     draws: draws.length,
+    scheduledGames: scheduledGames.length,
     leagueAvgRuns: extremes.length > 0 ? totalRuns / extremes.length : 0,
     leagueHomeWinRate: decided.length > 0 ? homeWinsLeague / decided.length : 0,
     teams,

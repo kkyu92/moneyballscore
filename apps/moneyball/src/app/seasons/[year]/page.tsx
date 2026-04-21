@@ -6,14 +6,17 @@ import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 
-export const revalidate = 3600; // 1시간
+// 진행 중인 시즌은 경기가 매일 추가되므로 10분마다 최신화, 종료 시즌은 1시간.
+// Next.js ISR 은 path별 다른 revalidate 를 동적으로 주지 못해 10분 (진행 시즌 기준)
+// 통일. 종료 시즌 페이지는 데이터 변동 없어서 오버헤드 미미.
+export const revalidate = 600;
 
 interface PageProps {
   params: Promise<{ year: string }>;
 }
 
 const SITE_URL = "https://moneyballscore.vercel.app";
-const SUPPORTED_YEARS = [2023, 2024, 2025];
+const SUPPORTED_YEARS = [2023, 2024, 2025, 2026];
 
 export function generateStaticParams() {
   return SUPPORTED_YEARS.map((y) => ({ year: String(y) }));
@@ -23,8 +26,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { year } = await params;
   const y = parseInt(year, 10);
   if (!SUPPORTED_YEARS.includes(y)) return {};
-  const title = `${y} KBO 시즌 리뷰`;
-  const description = `${y} KBO 정규시즌 전체 요약 — 팀 순위, 월별 득점 추이, 인상적인 경기. 실제 경기 결과 기반.`;
+  const isCurrent = y === new Date().getFullYear();
+  const title = isCurrent ? `${y} KBO 시즌 (진행 중)` : `${y} KBO 시즌 리뷰`;
+  const description = isCurrent
+    ? `${y} KBO 정규시즌 진행 상황 — 매일 경기 결과 반영. 팀 순위, 월별 득점 추이, 인상적인 경기.`
+    : `${y} KBO 정규시즌 전체 요약 — 팀 순위, 월별 득점 추이, 인상적인 경기. 실제 경기 결과 기반.`;
   return {
     title,
     description,
@@ -67,9 +73,19 @@ export default async function SeasonPage({ params }: PageProps) {
       <Breadcrumb items={[{ label: "시즌 리뷰", href: "/seasons" }, { label: `${y}` }]} />
 
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold">{y} KBO 시즌 리뷰</h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-3xl font-bold">{y} KBO 시즌 {summary.isOngoing ? "" : "리뷰"}</h1>
+          {summary.isOngoing && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              진행 중
+            </span>
+          )}
+        </div>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          정규시즌 + 포스트시즌 전체 경기 결과를 한눈에. 무승부 제외 승률 기준으로 팀 정렬.
+          {summary.isOngoing
+            ? `현재 ${summary.finalGames}경기 완료, ${summary.scheduledGames}경기 남음. 경기가 끝날 때마다 자동으로 업데이트됩니다.`
+            : "정규시즌 + 포스트시즌 전체 경기 결과를 한눈에. 무승부 제외 승률 기준으로 팀 정렬."}
         </p>
       </header>
 
@@ -134,7 +150,7 @@ export default async function SeasonPage({ params }: PageProps) {
 
       {/* 팀 순위 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
-        <h2 className="text-lg font-bold">팀 순위 — 승률</h2>
+        <h2 className="text-lg font-bold">{summary.isOngoing ? "현재 순위" : "팀 순위"} — 승률</h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[var(--color-border)]">
