@@ -27,6 +27,7 @@ interface PredictionCardProps {
   isBigMatch?: boolean; // v4-4: 빅매치 뱃지 + 금색 테두리 강조
   stadium?: string | null;
   weather?: WeatherSlot | null;
+  status?: string | null; // scheduled / live / final / postponed — DB games.status
 }
 
 export function PredictionCard({
@@ -49,7 +50,11 @@ export function PredictionCard({
   isBigMatch = false,
   stadium,
   weather,
+  status,
 }: PredictionCardProps) {
+  const isLive = status === 'live';
+  const isFinal = status === 'final';
+  const isPostponed = status === 'postponed';
   // winProb = 예측 승자의 승리 확률. DB predicted_winner 기준으로 표시.
   // debate가 50% 미만으로 낮춰도 predicted_winner는 유지 (적중 판정 일관성)
   const displayPct = winProb
@@ -59,7 +64,9 @@ export function PredictionCard({
 
   const cardClass = isBigMatch
     ? "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
-    : "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:shadow-md transition-shadow";
+    : isLive
+      ? "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-red-400 dark:border-red-600 ring-1 ring-red-300/40 dark:ring-red-700/40 p-5 hover:shadow-md transition-shadow"
+      : "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:shadow-md transition-shadow";
 
   return (
     <div className={cardClass}>
@@ -70,9 +77,30 @@ export function PredictionCard({
         </div>
       )}
 
-      {/* 상단: 경기 시간 + 구장 + 날씨 + 적중 결과 */}
+      {/* 상단: 경기 시간 + 상태 배지 + 적중 결과 */}
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? "18:30"}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? "18:30"}</span>
+          {isLive && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400 px-1.5 py-0.5 rounded-full"
+              aria-label="진행 중"
+            >
+              <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+              진행 중
+            </span>
+          )}
+          {isFinal && (
+            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full">
+              종료
+            </span>
+          )}
+          {isPostponed && (
+            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full">
+              우천취소
+            </span>
+          )}
+        </div>
         {isCorrect !== null && isCorrect !== undefined && (
           <span
             className={`text-xs font-bold px-2 py-0.5 rounded-full ${

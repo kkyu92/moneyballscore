@@ -29,7 +29,9 @@ export interface NaverGame {
   awayTeamName: string;
   homeTeamScore: number;
   awayTeamScore: number;
-  statusCode: 'BEFORE' | 'LIVE' | 'FINAL' | 'CANCEL';
+  // Naver 실측: BEFORE(예정) / STARTED(진행중) / RESULT(종료) / CANCEL(취소).
+  // LIVE/FINAL 은 과거 문서 형식 — 호환 위해 유지.
+  statusCode: 'BEFORE' | 'STARTED' | 'LIVE' | 'RESULT' | 'FINAL' | 'CANCEL';
   statusInfo: string;
   stadium: string;
   gameDateTime: string;
@@ -53,10 +55,16 @@ export interface LiveScore {
 
 function mapStatus(code: string): LiveScore['status'] {
   switch (code) {
-    case 'LIVE': return 'live';
-    case 'FINAL': return 'final';
-    case 'CANCEL': return 'cancelled';
-    default: return 'scheduled';
+    case 'STARTED':
+    case 'LIVE':
+      return 'live';
+    case 'RESULT':
+    case 'FINAL':
+      return 'final';
+    case 'CANCEL':
+      return 'cancelled';
+    default:
+      return 'scheduled';
   }
 }
 

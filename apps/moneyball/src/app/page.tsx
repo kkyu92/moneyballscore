@@ -416,6 +416,7 @@ export default async function HomePage() {
                     isBigMatch={game.id === bigMatchId}
                     stadium={game.stadium || KBO_STADIUM_SHORT[homeCode]}
                     weather={todayWeather.get(game.id)}
+                    status={game.status}
                   />
                 </div>
               );
