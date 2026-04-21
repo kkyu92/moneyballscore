@@ -61,7 +61,7 @@ export function DetailedFactorAnalysis({
           📊 팩터별 정량 해설
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          정량 모델 v1.5의 10개 팩터를 가중치 순으로 분석합니다.
+          정량 모델 v1.6의 10개 팩터를 가중치 순으로 분석합니다.
           {topFactor?.favorTeam && (
             <>
               {" "}

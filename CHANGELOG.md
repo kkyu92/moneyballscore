@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.5.24] - 2026-04-22
+
+### 예측 엔진 v1.6 — Wayback 백테스트 기반 가중치 재분배
+
+**배경**: 2026-04-21 세션에서 2023-2024 시즌 말 Fancy Stats `/elo/` Wayback 스냅샷 복원으로 팀 wOBA/FIP/SFR feature 추가. Logistic regression 학습 (Train 2023 N=722 / Test 2024 N=727) 으로 각 feature 개별 유의성 측정.
+
+**측정 결과 (test Brier 기준)**:
+- 4-feature (Elo+form+h2h+park): 0.24980
+- 7-feature (+ wOBA/FIP/SFR): 0.24661 (Δ −0.00319, Acc +3.99pp)
+- coin_flip baseline: 0.25000
+
+**계수 유의성**:
+- `wobaDiff*20` coef 0.548 z=2.10 ⭐ p<0.05 (유일 유의)
+- `fipDiff/2` coef 0.301 z=0.72 borderline 양성 (방향 정확)
+- `sfrDiff/20` coef 0.101 z=0.37 **null-like**
+- `h2hShift` coef −0.009 z=−0.02 **null-like** (kH2h sweep monotone worsening)
+- `parkShift/10` coef −0.022 z=−0.13 **null-like** (CI [-0.34, 0.30])
+
+**변경** (`DEFAULT_WEIGHTS`):
+| Factor | v1.5 | v1.6 | 근거 |
+|---|---|---|---|
+| lineup_woba | 0.15 | 0.20 (+0.05) | 유일 유의 feature 강화 |
+| sp_fip | 0.15 | 0.19 (+0.04) | FIP 방향 맞는 신호 강화 |
+| elo | 0.08 | 0.13 (+0.05) | wOBA/FIP 신호 흡수 관측 |
+| head_to_head | 0.05 | **0.00** | null-like 제거 |
+| park_factor | 0.04 | **0.00** | null-like 제거 |
+| sfr | 0.05 | **0.00** | null-like 제거 |
+
+합계 0.85 보존, 10팩터 구조 유지 (장기 호환성).
+
+**파일**:
+- `packages/shared/src/index.ts` — DEFAULT_WEIGHTS 수정, 근거 주석
+- `packages/shared/src/index.test.ts` — v1.6 null-like 3종 0 검증 테스트 추가
+- `packages/kbo-data/src/engine/predictor.ts` — doc v1.6
+- `packages/kbo-data/src/engine/weights.ts` — reduce 타입 annotate
+- `packages/kbo-data/src/__tests__/engine.test.ts` — 양수 → >= 0
+- `packages/kbo-data/src/pipeline/daily.ts` — `model_version` v1.5 → v1.6 (agent 없을 때 fallback), `scoring_rule` v1.6
+- `packages/kbo-data/src/pipeline/postview-daily.ts` — `scoring_rule` v1.6
+- `packages/kbo-data/src/pipeline/live.ts` — `v1.5-live` → `v1.6-live`
+- `apps/moneyball/src/app/page.tsx`, `about/page.tsx` — UI 라벨 v1.6
+- `apps/moneyball/src/components/analysis/DetailedFactorAnalysis.tsx` — 라벨
+- `apps/moneyball/src/lib/reviews/buildMonthlyReview.ts`, `buildWeeklyReview.ts` — 문구
+- `apps/moneyball/src/lib/analysis/__tests__/factor-explanations.test.ts` — sp_fip contributionPct 기대값 6 → 8 (weight 0.15 → 0.19)
+
+**한계**: Train 1 시즌 / Test 1 시즌. wOBA CI 하한 0.03 아슬한 유의성. 2025 Wayback 스냅샷 없음. Prod 이식 후 4-6주 데이터 축적 후 재학습 권장.
+
+**검증**: tsc pass · 전체 vitest 103 moneyball + 253 kbo-data + 26 shared = 382 tests pass.
+
 ## [0.5.23] - 2026-04-20
 
 ### PLAN_v5 Phase 4 완료 — 가드 테스트 잔여 2종

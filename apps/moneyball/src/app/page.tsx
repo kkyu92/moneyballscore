@@ -340,7 +340,7 @@ export default async function HomePage() {
         </div>
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">모델 버전</h3>
-          <span className="text-4xl font-bold">v1.5</span>
+          <span className="text-4xl font-bold">v1.6</span>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">10팩터 3소스 가중합산</p>
         </div>
       </section>
@@ -494,7 +494,7 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* 방법론 소개 v1.5 */}
+      {/* 방법론 소개 v1.6 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">분석 방법론</h2>

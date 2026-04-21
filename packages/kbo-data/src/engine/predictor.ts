@@ -20,8 +20,9 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
 }
 
 /**
- * 예측 엔진 v1.5
- * 10팩터 가중합산으로 홈팀 승리 확률 계산
+ * 예측 엔진 v1.6
+ * 10팩터 구조 유지 (가중치 Wayback 백테스트 기반 재분배: park/h2h/sfr → 0).
+ * 가중합산으로 홈팀 승리 확률 계산.
  */
 export function predict(input: PredictionInput): PredictionResult {
   const w = DEFAULT_WEIGHTS;

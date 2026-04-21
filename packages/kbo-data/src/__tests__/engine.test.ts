@@ -36,7 +36,7 @@ function makeInput(overrides?: Partial<PredictionInput>): PredictionInput {
   };
 }
 
-describe('예측 엔진 v1.5', () => {
+describe('예측 엔진 v1.6', () => {
   it('홈팀 유리 시 homeWinProb > 0.5', () => {
     const result = predict(makeInput());
     expect(result.homeWinProb).toBeGreaterThan(0.5);
@@ -85,13 +85,16 @@ describe('예측 엔진 v1.5', () => {
 
 describe('가중치 합산', () => {
   it('가중치 합이 0.85', () => {
-    const sum = Object.values(DEFAULT_WEIGHTS).reduce((a, b) => a + b, 0);
+    const sum = Object.values(DEFAULT_WEIGHTS).reduce<number>(
+      (a, b) => a + b,
+      0,
+    );
     expect(Math.abs(sum - 0.85)).toBeLessThan(0.001);
   });
 
-  it('모든 가중치가 양수', () => {
-    for (const [key, val] of Object.entries(DEFAULT_WEIGHTS)) {
-      expect(val).toBeGreaterThan(0);
+  it('가중치 >= 0 (v1.6: park/h2h/sfr 는 0)', () => {
+    for (const [, val] of Object.entries(DEFAULT_WEIGHTS)) {
+      expect(val).toBeGreaterThanOrEqual(0);
     }
   });
 });

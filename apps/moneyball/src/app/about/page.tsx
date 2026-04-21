@@ -4,7 +4,7 @@ import { DEFAULT_WEIGHTS } from "@moneyball/shared";
 export const metadata: Metadata = {
   title: "소개",
   description:
-    "MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 모델 v1.5.",
+    "MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 모델 v1.6.",
 };
 
 const FACTORS = [
@@ -94,11 +94,11 @@ const DATA_SOURCES = [
 const FAQS = [
   {
     q: "MoneyBall Score는 어떻게 KBO 경기를 예측하나요?",
-    a: "FIP, xFIP, wOBA, WAR, Elo 등 10개 세이버메트릭스 팩터를 가중합산한 정량 모델 v1.5와, 홈/원정/심판 3명의 AI 에이전트가 토론으로 보정하는 v2.0 시스템을 결합합니다. 각 경기 시작 3시간 전 최신 데이터로 개별 예측이 자동 생성됩니다.",
+    a: "FIP, xFIP, wOBA, WAR, Elo 등 10개 세이버메트릭스 팩터를 가중합산한 정량 모델 v1.6과, 홈/원정/심판 3명의 AI 에이전트가 토론으로 보정하는 v2.0 시스템을 결합합니다. 각 경기 시작 3시간 전 최신 데이터로 개별 예측이 자동 생성됩니다.",
   },
   {
     q: "예측 적중률은 얼마인가요?",
-    a: "정량 모델 v1.5는 시즌 누적 검증 경기 기준 적중률을 매일 업데이트해 대시보드에 공개합니다. 모든 예측이 사후 검증되며, 적중·오차 데이터는 모델 개선과 회고 분석에 다시 투입됩니다.",
+    a: "정량 모델 v1.6은 시즌 누적 검증 경기 기준 적중률을 매일 업데이트해 대시보드에 공개합니다. 모든 예측이 사후 검증되며, 적중·오차 데이터는 모델 개선과 회고 분석에 다시 투입됩니다.",
   },
   {
     q: "데이터는 어디서 가져오나요?",
@@ -151,7 +151,7 @@ export default function AboutPage() {
 
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">예측 모델 v1.5</h2>
+          <h2 className="text-xl font-bold">예측 모델 v1.6</h2>
           <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
             10팩터 3소스
           </span>

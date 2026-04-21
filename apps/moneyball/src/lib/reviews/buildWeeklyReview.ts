@@ -241,7 +241,7 @@ function buildSummary(
   }
 
   if (accuracyRate >= 0.7) {
-    text += " 모델 v1.5의 이번 주 퍼포먼스가 강했습니다.";
+    text += " 모델 v1.6의 이번 주 퍼포먼스가 강했습니다.";
   } else if (accuracyRate <= 0.4) {
     text += " 이번 주는 모델이 고전한 구간으로, 팩터 편향 분석을 통해 튜닝 근거를 축적하고 있습니다.";
   }

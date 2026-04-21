@@ -1,6 +1,9 @@
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';
 
-const weightSum = Object.values(DEFAULT_WEIGHTS).reduce((a, b) => a + b, 0);
+const weightSum = Object.values(DEFAULT_WEIGHTS).reduce<number>(
+  (a, b) => a + b,
+  0,
+);
 
 export const WEIGHTS = DEFAULT_WEIGHTS;
 export const WEIGHT_SUM = weightSum;
