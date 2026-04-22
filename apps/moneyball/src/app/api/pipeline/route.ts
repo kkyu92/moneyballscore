@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
   try {
     const result = await runDailyPipeline(date, mode, triggeredBy);
 
-    // 예측 생성 후 ISR revalidation 트리거 (Codex #4: 범위 확장)
+    // ISR revalidation 트리거
+    //   predict/predict_final: 예측 생성 시 홈 + 예측 페이지
+    //   verify: is_correct 업데이트 → /dashboard + /predictions 일자 페이지
     if (
       (mode === 'predict' || mode === 'predict_final') &&
       result.predictionsGenerated > 0
@@ -43,6 +45,25 @@ export async function POST(request: NextRequest) {
             `/predictions/${result.date}`,
             '/analysis',
             '/feed',
+          ],
+        }),
+      });
+    }
+
+    if (mode === 'verify') {
+      const revalidateUrl = new URL('/api/revalidate', request.url);
+      await fetch(revalidateUrl.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${cronSecret}`,
+        },
+        body: JSON.stringify({
+          paths: [
+            '/dashboard',
+            '/predictions',
+            `/predictions/${result.date}`,
+            '/',
           ],
         }),
       });
