@@ -7,64 +7,71 @@ export const metadata: Metadata = {
     "MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 모델 v1.6.",
 };
 
-const FACTORS = [
+type FactorKey = keyof typeof DEFAULT_WEIGHTS;
+
+const FACTORS: Array<{
+  name: string;
+  key: FactorKey;
+  desc: string;
+  source: string;
+}> = [
   {
     name: "선발 투수력 (FIP)",
-    key: "sp_fip" as const,
+    key: "sp_fip",
     desc: "Fielding Independent Pitching. 수비와 무관한 투수 순수 실력 지표. ERA보다 미래 성적 예측에 정확.",
     source: "Fancy Stats",
   },
   {
     name: "선발 잠재력 (xFIP)",
-    key: "sp_xfip" as const,
+    key: "sp_xfip",
     desc: "Expected FIP. 홈런율을 리그 평균으로 정규화한 FIP. 운의 영향을 제거.",
     source: "Fancy Stats",
   },
   {
     name: "타선 화력 (wOBA)",
-    key: "lineup_woba" as const,
+    key: "lineup_woba",
     desc: "weighted On-Base Average. 단타/2루타/홈런 등 각 출루 방식에 가중치를 부여한 종합 타격 생산성.",
     source: "Fancy Stats",
   },
   {
     name: "불펜 안정성 (FIP)",
-    key: "bullpen_fip" as const,
+    key: "bullpen_fip",
     desc: "중계/마무리 투수진의 종합 FIP. 선발 강판 후 경기 결과에 큰 영향.",
     source: "Fancy Stats",
   },
   {
     name: "최근 폼",
-    key: "recent_form" as const,
+    key: "recent_form",
     desc: "최근 10경기 승률. 시즌 전체 성적보다 현재 팀 상태를 반영.",
     source: "KBO 공식",
   },
   {
     name: "팀 전력 (Elo)",
-    key: "elo" as const,
+    key: "elo",
     desc: "체스에서 유래한 상대적 전력 수치. 강팀을 이기면 많이 오르고, 약팀에 지면 많이 내려감.",
     source: "Fancy Stats",
   },
   {
     name: "WAR",
-    key: "war" as const,
+    key: "war",
     desc: "Wins Above Replacement. 대체 선수 대비 팀 승리 기여도 총합.",
     source: "Fancy Stats",
   },
   {
     name: "수비력 (SFR)",
-    key: "sfr" as const,
+    key: "sfr",
     desc: "Statcast Fielding Runs. 포지션별 수비 기여도 합산. 수비력이 실점에 미치는 영향.",
     source: "Fancy Stats",
   },
   {
     name: "상대전적",
-    key: "head_to_head" as const,
+    key: "head_to_head",
     desc: "시즌 상대전적 승률. 특정 팀 간 상성이 존재할 수 있음.",
     source: "KBO 공식",
   },
   {
     name: "구장 보정",
-    key: "park_factor" as const,
+    key: "park_factor",
     desc: "홈구장 특성 보정. 타자 친화 구장과 투수 친화 구장의 차이를 반영.",
     source: "KBO 공식",
   },
@@ -123,6 +130,19 @@ const FAQS = [
 ];
 
 export default function AboutPage() {
+  const activeFactors = FACTORS.filter(
+    (f) => DEFAULT_WEIGHTS[f.key] > 0,
+  ).sort(
+    (a, b) => DEFAULT_WEIGHTS[b.key] - DEFAULT_WEIGHTS[a.key],
+  );
+  const deprecatedFactors = FACTORS.filter(
+    (f) => DEFAULT_WEIGHTS[f.key] === 0,
+  );
+  const activeWeightSum = activeFactors.reduce(
+    (a, f) => a + DEFAULT_WEIGHTS[f.key],
+    0,
+  );
+
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -153,18 +173,19 @@ export default function AboutPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">예측 모델 v1.6</h2>
           <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
-            10팩터 3소스
+            {activeFactors.length}팩터 사용 중
           </span>
         </div>
         <p className="text-gray-600 dark:text-gray-300">
-          10개의 세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
+          세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
           홈팀 어드밴티지(+1.5%p, 최근 3시즌 2,180경기 실제 홈 승률 51.93% ±2.1%p 기준)를
           추가 반영하며, 각 팩터를 상대 비교로 정규화한 후 최종 승리 확률을
-          산출합니다.
+          산출합니다. 2026-04 업데이트에서 실측 유의성이 부족한 3개 팩터를
+          현재 모델에서 제외했습니다 (아래 참고).
         </p>
 
         <div className="space-y-3 mt-6">
-          {FACTORS.map((factor) => (
+          {activeFactors.map((factor) => (
             <div
               key={factor.key}
               className="flex items-start gap-4 p-4 bg-surface rounded-lg"
@@ -186,8 +207,43 @@ export default function AboutPage() {
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
-          + 홈어드밴티지 1.5%p (실제 경기 기준).
+          활성 팩터 합계 {Math.round(activeWeightSum * 100)}% + 홈어드밴티지 1.5%p.
+          남은 {Math.round((1 - activeWeightSum - 0.015) * 100)}%는 경기 간
+          무작위 변동성으로 설명되지 않는 영역.
         </p>
+
+        {deprecatedFactors.length > 0 && (
+          <div className="mt-6 pt-5 border-t border-gray-100 dark:border-[var(--color-border)]">
+            <h3 className="text-base font-semibold text-gray-700 dark:text-gray-200">
+              현재 제외된 팩터
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-3">
+              2023-2024 실측 데이터 logistic 학습 결과, 아래 3개 팩터는
+              개별 기여도가 예측 오차 범위 안 (95% 신뢰구간이 0을 포함).
+              데이터 근거 확보 전까지 가중치 0으로 설정했습니다.
+            </p>
+            <div className="space-y-2">
+              {deprecatedFactors.map((factor) => (
+                <div
+                  key={factor.key}
+                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-md border border-gray-200 dark:border-[var(--color-border)] opacity-75"
+                >
+                  <div className="flex items-center gap-2 min-w-[120px]">
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                      제외
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {factor.name}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 flex-1">
+                    {factor.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
