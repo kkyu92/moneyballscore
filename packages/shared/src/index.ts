@@ -113,16 +113,17 @@ export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 export const HOME_ADVANTAGE = 0.015;
 
 /**
- * 고확신 예측 임계값 — confidence ≥ 0.4 (= 예측 승률 70%+ 또는 30%-).
+ * 고확신 예측 임계값 — confidence ≥ 0.6 (= 예측 승률 80%+ 또는 20%-).
  *
- * confidence = |homeWinProb - 0.5| × 2. 0.4 면 homeWinProb 0.7 또는 0.3.
- * 직관적으로 "모델이 한쪽 편을 70%+ 로 강하게 본 경기".
+ * confidence = |homeWinProb - 0.5| × 2. 0.6 이면 homeWinProb 0.8 또는 0.2.
+ * 직관적으로 "모델이 한쪽 편을 80%+ 로 강하게 본 경기".
  *
- * 기존 `/dashboard` 0.6 (80%+) 와 home 0.4 가 분리되어 있던 것을 통일.
+ * v0.5.26 `/dashboard` 가 사용하던 0.6 을 shared 로 올려 home /
+ * /predictions 와 통일 (이전 0.4 는 분포 관찰 후 변별력 부족으로 상향).
  */
-export const HIGH_CONFIDENCE_THRESHOLD = 0.4;
+export const HIGH_CONFIDENCE_THRESHOLD = 0.6;
 
-/** 예측 승률 기준 고확신 라벨 ("70%+" 또는 "30%-" 강한 예측). */
+/** 예측 승률 기준 고확신 라벨 ("80%+" 또는 "20%-" 강한 예측). */
 export function isHighConfidence(confidence: number | null | undefined): boolean {
   if (confidence == null) return false;
   return confidence >= HIGH_CONFIDENCE_THRESHOLD;

@@ -11,7 +11,7 @@ import { buildDailyAccuracy } from "@/lib/dashboard/buildDailyAccuracy";
 import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
 import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { HIGH_CONFIDENCE_THRESHOLD, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 
 export const metadata: Metadata = {
   title: "대시보드",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 // verify는 매일 23:00 KST 1회 돌아서 5분 TTL은 과잉. /analysis와 맞춰 1시간으로.
 export const revalidate = 3600;
 
-const HIGH_CONF_THRESHOLD = 0.6;
+const HIGH_CONF_THRESHOLD = HIGH_CONFIDENCE_THRESHOLD;
 
 interface OverviewRow {
   confidence: number;
