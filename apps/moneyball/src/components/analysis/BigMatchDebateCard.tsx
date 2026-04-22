@@ -86,11 +86,9 @@ export function BigMatchDebateCard({
               <strong className="block mb-1 text-brand-700">
                 빅매치 선정 기준
               </strong>
-              AI가 다음 4가지 팩터로 오늘 가장 흥미로운 경기를 선정합니다:
-              <br />· Elo 접전성 35%
-              <br />· 라이벌 매치업 25%
-              <br />· 양팀 폼 유사도 20%
-              <br />· 모델 자체 불확실성 20%
+              오늘 모델이 가장 강하게 예측한 경기입니다. 승리 확률
+              70% 이상 (또는 30% 이하) 으로 한쪽 편을 강하게 본 경기 중
+              확률이 가장 극단적인 한 경기를 자동 선정합니다.
             </span>
           </span>
         </div>
@@ -101,7 +99,7 @@ export function BigMatchDebateCard({
           AI 에이전트 토론 대상 경기
         </h2>
         <p className="text-brand-200 text-xs md:text-sm mt-1">
-          AI가 접전성·라이벌리·폼으로 선정한 오늘의 주목 경기
+          오늘 모델이 가장 확신하는 한 경기 — 승률 70%+ 기준
         </p>
       </header>
 

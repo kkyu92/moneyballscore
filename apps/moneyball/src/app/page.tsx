@@ -6,8 +6,12 @@ import { KBO_STADIUM_COORDS, KBO_STADIUM_SHORT } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
-import { toKSTDateString, toKSTDisplayString, type TeamCode } from "@moneyball/shared";
-import { selectBigMatch, type BigMatchCandidate } from "@moneyball/kbo-data";
+import {
+  HIGH_CONFIDENCE_THRESHOLD,
+  toKSTDateString,
+  toKSTDisplayString,
+  type TeamCode,
+} from "@moneyball/shared";
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
@@ -197,7 +201,9 @@ async function getSeasonAccuracy() {
 
   const total = data.length;
   const correct = data.filter((p) => p.is_correct).length;
-  const highConf = data.filter((p) => p.confidence >= 0.4); // 70%+ 승리확률
+  const highConf = data.filter(
+    (p) => p.confidence >= HIGH_CONFIDENCE_THRESHOLD,
+  );
   const highConfCorrect = highConf.filter((p) => p.is_correct).length;
 
   return {
@@ -208,36 +214,37 @@ async function getSeasonAccuracy() {
   };
 }
 
+/**
+ * 오늘 경기 중 가장 확신이 높은 예측을 선택. "오늘의 고확신 예측"
+ * Hero 노출용. 기존 접전·라이벌 기반 "빅매치" 를 대체.
+ *
+ * 선택 규칙:
+ *   1. prediction 있는 경기 중 confidence ≥ HIGH_CONFIDENCE_THRESHOLD (0.4)
+ *      만 후보
+ *   2. 그 중 confidence 최대값
+ *   3. 동점 시 빠른 경기 시간 우선 (ms 단위 tiebreak 성격)
+ *   4. 후보 0 → null (feature flag 꺼진 것과 동일 fallback 경로)
+ */
 function selectBigMatchFromGames(games: HomeGame[]): {
   bigMatch: HomeGame | null;
-  result: ReturnType<typeof selectBigMatch> | null;
+  result: null;
 } {
   if (!isBigMatchEnabled()) return { bigMatch: null, result: null };
 
-  const candidates: BigMatchCandidate[] = [];
+  let best: HomeGame | null = null;
+  let bestConfidence = -1;
   for (const game of games) {
     const pred = game.predictions?.[0];
     if (!pred) continue;
-    const homeCode = game.home_team?.code as TeamCode | undefined;
-    const awayCode = game.away_team?.code as TeamCode | undefined;
-    if (!homeCode || !awayCode) continue;
-    candidates.push({
-      gameId: game.id,
-      homeTeam: homeCode,
-      awayTeam: awayCode,
-      homeElo: pred.home_elo ?? 1500,
-      awayElo: pred.away_elo ?? 1500,
-      homeRecentForm: pred.home_recent_form ?? 0.5,
-      awayRecentForm: pred.away_recent_form ?? 0.5,
-      confidence: pred.confidence ?? 0.5,
-    });
+    const conf = pred.confidence ?? 0;
+    if (conf < HIGH_CONFIDENCE_THRESHOLD) continue;
+    if (conf > bestConfidence) {
+      bestConfidence = conf;
+      best = game;
+    }
   }
 
-  const result = selectBigMatch(candidates);
-  const bigMatch = result.bigMatchGameId
-    ? (games.find((g) => g.id === result.bigMatchGameId) ?? null)
-    : null;
-  return { bigMatch, result };
+  return { bigMatch: best, result: null };
 }
 
 export default async function HomePage() {
@@ -299,7 +306,7 @@ export default async function HomePage() {
       {/* 실시간 스코어 */}
       <LiveScoreboard />
 
-      {/* v4-4 빅매치 Hero (flag enabled + 데이터 있을 때) */}
+      {/* 고확신 예측 Hero — 오늘 가장 강한 확신 경기 1건 (flag enabled 시) */}
       {hasBigMatchHero ? (
         <BigMatchDebateCard
           gameId={bigMatch.id}

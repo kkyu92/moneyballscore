@@ -84,7 +84,7 @@ export function PredictionCard({
       {/* v4-4 빅매치 뱃지 */}
       {isBigMatch && (
         <div className="absolute -top-2.5 left-4 bg-[var(--color-accent)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-          ⭐ 오늘의 빅매치
+          ⭐ 오늘의 고확신 예측
         </div>
       )}
 

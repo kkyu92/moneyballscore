@@ -112,6 +112,22 @@ export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 // 현재 0.015 (51.5%) 와 gap 0.43pp, 통계적 유의미 수준 아님 → 유지.
 export const HOME_ADVANTAGE = 0.015;
 
+/**
+ * 고확신 예측 임계값 — confidence ≥ 0.4 (= 예측 승률 70%+ 또는 30%-).
+ *
+ * confidence = |homeWinProb - 0.5| × 2. 0.4 면 homeWinProb 0.7 또는 0.3.
+ * 직관적으로 "모델이 한쪽 편을 70%+ 로 강하게 본 경기".
+ *
+ * 기존 `/dashboard` 0.6 (80%+) 와 home 0.4 가 분리되어 있던 것을 통일.
+ */
+export const HIGH_CONFIDENCE_THRESHOLD = 0.4;
+
+/** 예측 승률 기준 고확신 라벨 ("70%+" 또는 "30%-" 강한 예측). */
+export function isHighConfidence(confidence: number | null | undefined): boolean {
+  if (confidence == null) return false;
+  return confidence >= HIGH_CONFIDENCE_THRESHOLD;
+}
+
 // 신뢰도 → Tailwind 색상 클래스
 export function getConfidenceColor(pct: number): string {
   if (pct >= 65) return 'text-green-600';
