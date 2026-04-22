@@ -8,11 +8,13 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
   ReferenceLine,
   LabelList,
 } from "recharts";
 
 import type { ConfidenceBucketResult } from "@/lib/dashboard/buildConfidenceBuckets";
+import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
 interface ConfidenceBucketChartProps {
   result: ConfidenceBucketResult;
@@ -42,30 +44,65 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+      <BarChart data={data} margin={{ top: 24, right: 10, left: -10, bottom: 5 }}>
+        <ChartGradients />
+        <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" />
         <XAxis
           dataKey="label"
           tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tickLine={false}
+          axisLine={{ stroke: "#e5e7eb" }}
         />
         <YAxis
           domain={[0, 100]}
           tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tickLine={false}
+          axisLine={false}
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          formatter={(value, _name, props) => {
-            const payload = (props as unknown as { payload: (typeof data)[number] }).payload;
-            return [
-              payload.hasData
-                ? `${Number(value).toFixed(1)}% (${payload.total}경기)`
-                : "표본 없음",
-              "구간 적중률",
-            ];
-          }}
+          cursor={{ fill: "rgba(59,130,246,0.06)" }}
+          content={(props) => (
+            <ChartTooltip
+              {...props}
+              formatRows={(payload) =>
+                ((payload ?? []) as Array<{ value: number; payload: (typeof data)[number] }>).map((p) => {
+                  const d = p.payload;
+                  return {
+                    label: "구간 적중률",
+                    value: d.hasData
+                      ? `${Number(p.value).toFixed(1)}% · ${d.total}경기`
+                      : "표본 없음",
+                    color: "#2563eb",
+                    muted: !d.hasData,
+                  };
+                })
+              }
+            />
+          )}
         />
-        <ReferenceLine y={50} stroke="#ef4444" strokeDasharray="4 4" />
-        <Bar dataKey="accuracy" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+        <ReferenceLine
+          y={50}
+          stroke="#ef4444"
+          strokeDasharray="4 4"
+          strokeOpacity={0.6}
+        />
+        <Bar
+          dataKey="accuracy"
+          radius={[6, 6, 0, 0]}
+          animationDuration={600}
+          filter="url(#barShadow)"
+        >
+          {data.map((entry, i) => (
+            <Cell
+              key={i}
+              fill={
+                entry.hasData
+                  ? "url(#brandBarGradient)"
+                  : "url(#mutedBarGradient)"
+              }
+            />
+          ))}
           <LabelList
             dataKey="total"
             position="top"
@@ -73,7 +110,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
               const n = typeof v === "number" ? v : Number(v);
               return Number.isFinite(n) && n > 0 ? `n=${n}` : "";
             }}
-            style={{ fontSize: 10, fill: "#9ca3af" }}
+            style={{ fontSize: 10, fill: "#9ca3af", fontWeight: 500 }}
           />
         </Bar>
       </BarChart>

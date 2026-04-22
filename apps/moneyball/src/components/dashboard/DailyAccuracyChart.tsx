@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import type { DailyAccuracyPoint } from "@/lib/dashboard/buildDailyAccuracy";
+import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
 interface DailyAccuracyChartProps {
   data: DailyAccuracyPoint[];
@@ -31,31 +32,63 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
+        <ChartGradients />
+        <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" />
         <XAxis
           dataKey="date"
           tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tickLine={false}
+          axisLine={{ stroke: "#e5e7eb" }}
           tickFormatter={(d) => d.slice(5)}
         />
         <YAxis
           domain={[0, 100]}
           tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tickLine={false}
+          axisLine={false}
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          formatter={(value, _name, props) => {
-            const payload = (props as unknown as { payload: DailyAccuracyPoint }).payload;
-            return [
-              `${Number(value).toFixed(1)}% (${payload.correct}/${payload.total})`,
-              "일자 적중률",
-            ];
-          }}
+          cursor={{ fill: "rgba(59,130,246,0.06)" }}
+          content={(props) => (
+            <ChartTooltip
+              {...props}
+              formatRows={(payload) =>
+                ((payload ?? []) as Array<{ value: number; payload: DailyAccuracyPoint }>).map((p) => {
+                  const d = p.payload;
+                  const passed = d.accuracy >= 50;
+                  return {
+                    label: "적중률",
+                    value: `${Number(p.value).toFixed(1)}% (${d.correct}/${d.total})`,
+                    color: passed ? "#2563eb" : "#6b7280",
+                  };
+                })
+              }
+            />
+          )}
         />
-        <ReferenceLine y={50} stroke="#ef4444" strokeDasharray="4 4" />
-        <Bar dataKey="accuracy" radius={[4, 4, 0, 0]}>
+        <ReferenceLine
+          y={50}
+          stroke="#ef4444"
+          strokeDasharray="4 4"
+          strokeOpacity={0.6}
+        />
+        <Bar
+          dataKey="accuracy"
+          radius={[6, 6, 0, 0]}
+          animationDuration={600}
+          filter="url(#barShadow)"
+        >
           {data.map((entry, i) => (
-            <Cell key={i} fill={entry.accuracy >= 50 ? "#3b82f6" : "#9ca3af"} />
+            <Cell
+              key={i}
+              fill={
+                entry.accuracy >= 50
+                  ? "url(#brandBarGradient)"
+                  : "url(#mutedBarGradient)"
+              }
+            />
           ))}
         </Bar>
       </BarChart>
