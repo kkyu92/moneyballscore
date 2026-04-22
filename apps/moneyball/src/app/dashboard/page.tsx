@@ -18,8 +18,9 @@ export const metadata: Metadata = {
   description: "승부예측 시즌 적중률, 팩터별 편향, 확신 구간 분석 종합 대시보드.",
 };
 
-// verify는 매일 23:00 KST 1회 돌아서 5분 TTL은 과잉. /analysis와 맞춰 1시간으로.
-export const revalidate = 3600;
+// verify 결과 + 신규 예측을 빠르게 반영. 5분 TTL.
+// (이전 3600s 1시간은 stale 느낌 컸음 — 사용자 피드백 반영 2026-04-22)
+export const revalidate = 300;
 
 const HIGH_CONF_THRESHOLD = HIGH_CONFIDENCE_THRESHOLD;
 
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
             {highConf.length > 0 ? Math.round(highConfRate * 100) : 0}%
           </span>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            60%+ 확신 예측 ({highConfCorrect}/{highConf.length})
+            승률 80%+ 예측 ({highConfCorrect}/{highConf.length})
           </p>
         </div>
       </section>
