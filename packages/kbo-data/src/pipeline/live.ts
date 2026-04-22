@@ -3,6 +3,8 @@ import { toKSTDateString } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
+import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
+import { saveGameRecord } from './save-game-record';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -234,4 +236,30 @@ async function updateGameScore(db: DB, game: LiveGameState) {
     winner_team_id: winnerId || null,
     updated_at: new Date().toISOString(),
   }).eq('external_game_id', game.externalGameId);
+
+  // v0.5.25: 경기 종료 시 Naver record boxscore 저장 (best-effort).
+  // 실패해도 live 파이프라인 막지 않음.
+  try {
+    const { data: dbGame } = await db
+      .from('games')
+      .select('id, game_date')
+      .eq('external_game_id', game.externalGameId)
+      .single();
+    if (dbGame) {
+      const season = Number((dbGame.game_date as string).slice(0, 4));
+      const naverGameId = toNaverGameId(game.externalGameId, season);
+      const rec = await fetchNaverRecord(naverGameId);
+      if (rec) {
+        const r = await saveGameRecord(db, dbGame.id as number, rec);
+        if (r.error) {
+          console.warn(`[Live] game_records save failed ${naverGameId}: ${r.error}`);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(
+      '[Live] game_records fetch failed:',
+      e instanceof Error ? e.message : String(e),
+    );
+  }
 }

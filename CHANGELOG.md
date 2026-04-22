@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.5.25] - 2026-04-22
+
+### 경기별 boxscore 수집 인프라 + /debug/model-comparison
+
+**경기별 boxscore (Naver record API)**:
+- 이전 조사에서 "Naver API 과거 조회 불가" 로 결론냈던 것 정정: `fromDate/toDate` 스케줄 검색은 과거 무시되지만, **개별 gameId 로 `/schedule/games/{gameId}/record` 호출은 2023-2026 전체 가능** (Referer 헤더 필수).
+- `packages/kbo-data/src/scrapers/naver-record.ts` — fetch + 파싱 + 타입 + unicode 분수 이닝 파서 ("3 ⅔" → 3.6667)
+- `packages/kbo-data/src/pipeline/save-game-record.ts` — upsert 로직 (status=BEFORE/CANCEL 또는 빈 데이터 skip)
+- `packages/kbo-data/src/pipeline/backfill-records.ts` — 시즌별 백필 CLI (rate limit 1.5s)
+- `packages/kbo-data/src/pipeline/live.ts` — 경기 종료 감지 시 record 자동 저장 (best-effort)
+- `supabase/migrations/017_game_records.sql` — game_records 테이블 (JSONB 중심, RLS)
+- 2026 시즌 22 경기 전부 수집 검증. 2023-2025 백필 별도 실행 중.
+
+**모델 비교 대시보드 (`/debug/model-comparison`)**:
+- `lib/dashboard/compareModels.ts` — aggregateByModel + dailyByModel 집계 함수
+- scoring_rule + model_version 조합별 N / Accuracy / Brier / LogLoss / Calibration
+- 최근 14일 일별 추세 + v1.6 ship 마커 (2026-04-22 하이라이트)
+
+**v1.6 pure shadow run**:
+- `daily.ts` 가 debate 실행 전 v1.6 순수 정량 확률을 `reasoning.quantitativeHomeWinProb` 로 병행 저장
+- 대시보드의 `buildShadowRows` 가 v2.0-debate row 에서 추출 → `v1.6-pure-shadow` 가상 그룹 생성
+- 4-6주 후 **Debate 층이 실제로 prediction 을 개선하는지 vs 노이즈인지** 정량 측정 가능 — Agent API 비용 정당화 근거.
+
+**UI 개선 (앞선 커밋)**:
+- 라이브/종료 상태 버그 수정 (Naver STARTED/RESULT 매핑)
+- PredictionCard / LiveScoreboard 에 경기 상태 배지 + 승패 강조
+- LiveScoreboard 와 메인 카드 간 싱크 차이 해결 (`PredictionCardLive` / `PlaceholderCardLive` client wrapper)
+
+**검증**: tsc pass · kbo-data 265 + shared 28 + moneyball 116 = 409 tests pass.
+
 ## [0.5.24] - 2026-04-22
 
 ### 예측 엔진 v1.6 — Wayback 백테스트 기반 가중치 재분배
