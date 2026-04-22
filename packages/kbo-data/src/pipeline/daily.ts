@@ -441,8 +441,14 @@ export async function runDailyPipeline(
     let finalWinner = quantResult.predictedWinner;
     let finalHomeProb = quantResult.homeWinProb;
     let finalConfidence = quantResult.confidence;
+    // Shadow run: debate 가 덮기 전 v1.6 순수 정량 확률을 별도 필드로 항상 보존.
+    // /debug/model-comparison 에서 v1.6-pure vs v2.0-debate Brier 대조에 사용.
+    const quantHomeProb = quantResult.homeWinProb;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let finalReasoning: any = quantResult;
+    let finalReasoning: any = {
+      ...quantResult,
+      quantitativeHomeWinProb: quantHomeProb,
+    };
 
     if (process.env.ANTHROPIC_API_KEY) {
       try {
@@ -462,6 +468,7 @@ export async function runDailyPipeline(
         finalConfidence = debate.verdict.confidence;
         finalReasoning = {
           ...quantResult,
+          quantitativeHomeWinProb: quantHomeProb,
           debate: {
             homeArgument: debate.homeArgument, awayArgument: debate.awayArgument,
             calibration: debate.calibration, verdict: debate.verdict,

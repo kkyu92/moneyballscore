@@ -65,6 +65,21 @@ export function extractHomeWinProb(reasoning: unknown): number | null {
   return null;
 }
 
+/**
+ * Shadow run: debate 가 덮기 전의 v1.6 순수 정량 확률 (daily.ts 가 2026-04-22
+ * 이후 `reasoning.quantitativeHomeWinProb` 로 병행 저장). v1.6-pure vs
+ * v2.0-debate Brier 비교에 사용.
+ */
+export function extractPureQuantProb(reasoning: unknown): number | null {
+  if (!reasoning || typeof reasoning !== 'object') return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const r = reasoning as any;
+  if (typeof r.quantitativeHomeWinProb === 'number') {
+    return r.quantitativeHomeWinProb;
+  }
+  return null;
+}
+
 function clampProb(p: number): number {
   if (p < 1e-9) return 1e-9;
   if (p > 1 - 1e-9) return 1 - 1e-9;
@@ -100,6 +115,42 @@ function buildCalibration(
     });
   }
   return out;
+}
+
+/**
+ * v2.0-debate row 에서 quantitativeHomeWinProb 을 shadow group 으로 추출.
+ * 원래 row 는 그대로 두고 **가상 row 복사본** 을 `v1.6-pure (shadow)` 로 라벨.
+ * Agent 가 덮기 전의 pure 정량 모델 Brier 측정용.
+ */
+export function buildShadowRows(rows: PredictionRow[]): PredictionRow[] {
+  const shadow: PredictionRow[] = [];
+  for (const r of rows) {
+    if (r.model_version !== 'v2.0-debate') continue;
+    const p = extractPureQuantProb(r.reasoning);
+    if (p === null) continue;
+    // pureProb 가 별도로 있으니 homeWinProb 을 그 값으로 세팅한 clone 만듦
+    const cloneReasoning = { homeWinProb: p };
+    shadow.push({
+      ...r,
+      model_version: 'v1.6-pure-shadow',
+      scoring_rule: r.scoring_rule ?? 'v1.6',
+      reasoning: cloneReasoning,
+      // is_correct 은 debate 기준이라 shadow 엔 부정확할 수 있음 — 별도 재계산
+      // (winner_team_id + homeWinProb 으로 재판정)
+      is_correct: inferShadowCorrectness(r, p),
+    });
+  }
+  return shadow;
+}
+
+function inferShadowCorrectness(
+  row: PredictionRow,
+  pHome: number,
+): boolean | null {
+  if (!row.game || row.game.winner_team_id === null) return null;
+  const predictedHome = pHome >= 0.5;
+  const actualHome = row.game.winner_team_id === row.game.home_team_id;
+  return predictedHome === actualHome;
 }
 
 /** scoring_rule + model_version 조합별 집계. 순수 함수. */

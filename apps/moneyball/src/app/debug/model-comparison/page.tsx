@@ -10,6 +10,7 @@
 import { createClient } from '@supabase/supabase-js';
 import {
   aggregateByModel,
+  buildShadowRows,
   dailyByModel,
   type PredictionRow,
 } from '@/lib/dashboard/compareModels';
@@ -77,7 +78,11 @@ async function loadRows(daysBack: number): Promise<PredictionRow[]> {
 export default async function ModelComparisonPage() {
   const daysBack = 90;
   const rows = await loadRows(daysBack);
-  const groups = aggregateByModel(rows);
+  // Shadow run: v2.0-debate row 에서 quantitativeHomeWinProb 추출 → v1.6-pure
+  // 가상 그룹 생성. debate 가 덮기 전의 순수 정량 확률과 비교 가능.
+  const shadow = buildShadowRows(rows);
+  const combined = [...rows, ...shadow];
+  const groups = aggregateByModel(combined);
   const daily = dailyByModel(rows);
 
   // 날짜 × scoringRule pivot — 최근 14일만 화면 표시
@@ -100,6 +105,13 @@ export default async function ModelComparisonPage() {
           최근 {daysBack}일 · {rows.length}건 · scoring_rule + model_version 조합별
           성능 측정. v1.6 ship 이후 데이터 축적은 저녁 predict cron 부터 시작.
         </p>
+        {shadow.length > 0 && (
+          <p className="text-xs text-gray-500 mt-1">
+            Shadow run: {shadow.length}건 v2.0-debate row 에서 v1.6 pure 정량
+            확률 추출 → <span className="font-mono">v1.6-pure-shadow</span>{' '}
+            그룹으로 표시.
+          </p>
+        )}
       </header>
 
       <section className="overflow-x-auto">
