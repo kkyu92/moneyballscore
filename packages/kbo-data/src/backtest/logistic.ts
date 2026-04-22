@@ -81,6 +81,37 @@ export const FEATURE_NAMES_EXTENDED = [
 ];
 
 /**
+ * GameFeatures → v3 벡터 (game_records 기반 4 feature 추가).
+ *
+ * 기본 4개 + 신규 4개 = 8 feature. Wayback wOBA/FIP/SFR 은 2025 미복원이라
+ * 이 버전에서는 미포함 (기본 4 + 신규 4 조합이 2023-2025 전 시즌에 동일하게
+ * 구성됨). 스케일링:
+ *   bullpenInningsL3 diff: ±20 이닝 → /10 = ±2
+ *   runs L5 diff: ±3 점 → /2 = ±1.5
+ *   runsAllowed L5 diff (away-home, 방향 맞춤): ±3 → /2
+ *   homeRuns L5 diff: ±5 개 → /3
+ */
+export function vectorizeV3(f: GameFeatures): number[] {
+  const base = vectorize(f);
+  const bullpenDiff =
+    ((f.homeBullpenInningsL3 ?? 0) - (f.awayBullpenInningsL3 ?? 0)) / 10;
+  const runsDiff = ((f.homeRunsL5 ?? 0) - (f.awayRunsL5 ?? 0)) / 2;
+  // runsAllowed: 낮을수록 좋음 — home 유리 방향 맞추려면 away - home
+  const raDiff =
+    ((f.awayRunsAllowedL5 ?? 0) - (f.homeRunsAllowedL5 ?? 0)) / 2;
+  const hrDiff = ((f.homeHomeRunsL5 ?? 0) - (f.awayHomeRunsL5 ?? 0)) / 3;
+  return [...base, bullpenDiff, runsDiff, raDiff, hrDiff];
+}
+
+export const FEATURE_NAMES_V3 = [
+  ...FEATURE_NAMES,
+  'bullpenInningsL3Diff/10',
+  'runsL5Diff/2',
+  'runsAllowedL5Diff/2',
+  'homeRunsL5Diff/3',
+];
+
+/**
  * Batch gradient descent 로 logistic regression 학습.
  * L2 regularization (intercept 는 penalize 하지 않음, 표준 관례).
  */

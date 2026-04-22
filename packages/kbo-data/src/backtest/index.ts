@@ -26,7 +26,7 @@ export {
 } from './models';
 export type { RestrictedParams } from './models';
 
-export { loadDecidedGames, buildFeatures, computeHomeWinRates } from './loader';
+export { loadDecidedGames, loadGameRecords, buildFeatures, computeHomeWinRates } from './loader';
 export { runBacktest } from './runner';
 export type { RunnerInput, RunnerOutput } from './runner';
 

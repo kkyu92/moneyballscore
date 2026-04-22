@@ -14,6 +14,13 @@ import { getEloAt } from './elo-history';
 import type { EloHistory } from './elo-history';
 import type { SeasonStatsMap } from './wayback-team-stats';
 import type { BacktestGame, GameFeatures } from './types';
+import type { GameRecordLite } from '../features/game-record-features';
+import {
+  bullpenInningsLastNDays,
+  teamRunsPerGameLastN,
+  teamRunsAllowedPerGameLastN,
+  teamHomeRunsLastN,
+} from '../features/game-record-features';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -87,6 +94,7 @@ export function buildFeatures(
   priorInSeason: FinishedGame[],
   eloHistory: EloHistory,
   seasonStats?: SeasonStatsMap,
+  priorRecords?: GameRecordLite[],
 ): GameFeatures | null {
   const homeFormRaw = calculateRecentForm(priorInSeason, target.homeTeamId, 10);
   const awayFormRaw = calculateRecentForm(priorInSeason, target.awayTeamId, 10);
@@ -102,7 +110,7 @@ export function buildFeatures(
   const homeSeason = seasonStats?.get(target.homeTeam);
   const awaySeason = seasonStats?.get(target.awayTeam);
 
-  return {
+  const features: GameFeatures = {
     homeElo,
     awayElo,
     homeForm: homeFormRaw,
@@ -119,6 +127,108 @@ export function buildFeatures(
     homeSfr: homeSeason?.sfr,
     awaySfr: awaySeason?.sfr,
   };
+
+  if (priorRecords && priorRecords.length > 0) {
+    features.homeBullpenInningsL3 = bullpenInningsLastNDays(
+      priorRecords,
+      target.homeTeamId,
+      target.date,
+      3,
+    );
+    features.awayBullpenInningsL3 = bullpenInningsLastNDays(
+      priorRecords,
+      target.awayTeamId,
+      target.date,
+      3,
+    );
+    features.homeRunsL5 = teamRunsPerGameLastN(
+      priorRecords,
+      target.homeTeamId,
+      target.date,
+      5,
+    );
+    features.awayRunsL5 = teamRunsPerGameLastN(
+      priorRecords,
+      target.awayTeamId,
+      target.date,
+      5,
+    );
+    features.homeRunsAllowedL5 = teamRunsAllowedPerGameLastN(
+      priorRecords,
+      target.homeTeamId,
+      target.date,
+      5,
+    );
+    features.awayRunsAllowedL5 = teamRunsAllowedPerGameLastN(
+      priorRecords,
+      target.awayTeamId,
+      target.date,
+      5,
+    );
+    features.homeHomeRunsL5 = teamHomeRunsLastN(
+      priorRecords,
+      target.homeTeamId,
+      target.date,
+      5,
+    );
+    features.awayHomeRunsL5 = teamHomeRunsLastN(
+      priorRecords,
+      target.awayTeamId,
+      target.date,
+      5,
+    );
+  }
+
+  return features;
+}
+
+/**
+ * game_records 테이블 → GameRecordLite[] (시즌 내 완료 경기 전체).
+ * 시간순 정렬 (최신 → 과거 는 호출자 정렬). 여기선 오름차순 반환.
+ */
+export async function loadGameRecords(
+  db: DB,
+  opts: { seasons: number[] },
+): Promise<GameRecordLite[]> {
+  const out: GameRecordLite[] = [];
+  for (const season of opts.seasons) {
+    const pageSize = 1000;
+    let start = 0;
+    for (;;) {
+      const { data, error } = await db
+        .from('game_records')
+        .select(
+          `game_id, pitchers_home, pitchers_away,
+           game:games!inner(id, game_date, home_team_id, away_team_id, home_score, away_score)`,
+        )
+        .gte('game.game_date', `${season}-01-01`)
+        .lte('game.game_date', `${season}-12-31`)
+        .range(start, start + pageSize - 1);
+      if (error) throw new Error('game_records load: ' + error.message);
+      if (!data || data.length === 0) break;
+      for (const r of data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const g = Array.isArray((r as any).game) ? (r as any).game[0] : (r as any).game;
+        if (!g) continue;
+        out.push({
+          gameId: r.game_id as number,
+          gameDate: g.game_date as string,
+          homeTeamId: g.home_team_id as number,
+          awayTeamId: g.away_team_id as number,
+          homeScore: (g.home_score as number) ?? 0,
+          awayScore: (g.away_score as number) ?? 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          pitchersHome: (r.pitchers_home as any) ?? [],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          pitchersAway: (r.pitchers_away as any) ?? [],
+        });
+      }
+      if (data.length < pageSize) break;
+      start += pageSize;
+    }
+  }
+  out.sort((a, b) => a.gameDate.localeCompare(b.gameDate));
+  return out;
 }
 
 /** 2023-2025 각 팀의 홈 승률 (리그 평균 대비 차이는 아님, 그냥 홈 승률 그 자체). */

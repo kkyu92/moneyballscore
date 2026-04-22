@@ -38,6 +38,19 @@ export interface GameFeatures {
   awayFip?: number;
   homeSfr?: number;
   awaySfr?: number;
+
+  /**
+   * game_records 기반 시점별 feature (look-ahead bias 0).
+   * 경기 시점 이전 N일/N경기 데이터로만 구성.
+   */
+  homeBullpenInningsL3?: number;
+  awayBullpenInningsL3?: number;
+  homeRunsL5?: number;
+  awayRunsL5?: number;
+  homeRunsAllowedL5?: number;
+  awayRunsAllowedL5?: number;
+  homeHomeRunsL5?: number;
+  awayHomeRunsL5?: number;
 }
 
 /** 모델 = (feature) → p(home win). 순수 함수. */
