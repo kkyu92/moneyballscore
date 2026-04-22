@@ -11,7 +11,12 @@ import { buildDailyAccuracy } from "@/lib/dashboard/buildDailyAccuracy";
 import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
 import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
-import { HIGH_CONFIDENCE_THRESHOLD, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import {
+  HIGH_CONFIDENCE_THRESHOLD,
+  KBO_TEAMS,
+  shortTeamName,
+  type TeamCode,
+} from "@moneyball/shared";
 
 export const metadata: Metadata = {
   title: "대시보드",
@@ -150,7 +155,7 @@ export default async function DashboardPage() {
   const teamData = Array.from(teamMap.entries())
     .filter(([, stats]) => stats.total >= 3)
     .map(([team, stats]) => ({
-      team,
+      team: shortTeamName(team as TeamCode),
       accuracy: Math.round((stats.correct / stats.total) * 1000) / 10,
       total: stats.total,
       color: stats.color,
