@@ -28,7 +28,11 @@ const HIGH_CONF_THRESHOLD = HIGH_CONFIDENCE_THRESHOLD;
 interface OverviewRow {
   confidence: number;
   is_correct: boolean;
-  game: { game_date: string } | null;
+  game: {
+    game_date: string;
+    home_team: { code: string; color_primary: string | null } | null;
+    away_team: { code: string; color_primary: string | null } | null;
+  } | null;
   winner: { code: string; color_primary: string | null } | null;
 }
 
@@ -39,7 +43,11 @@ async function getOverview(): Promise<OverviewRow[]> {
     .select(
       `
         confidence, is_correct,
-        game:games!predictions_game_id_fkey(game_date),
+        game:games!predictions_game_id_fkey(
+          game_date,
+          home_team:teams!games_home_team_id_fkey(code, color_primary),
+          away_team:teams!games_away_team_id_fkey(code, color_primary)
+        ),
         winner:teams!predictions_predicted_winner_fkey(code, color_primary)
       `,
     )
@@ -113,23 +121,30 @@ export default async function DashboardPage() {
     overview.map((p) => ({ confidence: p.confidence, is_correct: p.is_correct })),
   );
 
-  // 팀별 집계
+  // 팀별 집계 — 경기 참여팀 기준 (home + away 각각 카운트).
+  // 이전 predicted_winner 기준은 모델이 승자로 뽑힌 팀만 포함되어
+  // 대부분 팀이 "표본 <3" 으로 제외됐음. 참여팀 기준으로 전환하면
+  // 한 예측이 양팀 모두에 counted → 모든 팀이 빠르게 표본 확보.
   const teamMap = new Map<string, { correct: number; total: number; color: string }>();
   for (const pred of overview) {
-    const winnerCode = pred.winner?.code;
-    if (!winnerCode) continue;
-
-    if (!teamMap.has(winnerCode)) {
-      const teamInfo = KBO_TEAMS[winnerCode as TeamCode];
-      teamMap.set(winnerCode, {
-        correct: 0,
-        total: 0,
-        color: teamInfo?.color || pred.winner?.color_primary || "#6b7280",
-      });
+    const participants = [pred.game?.home_team, pred.game?.away_team].filter(
+      (t): t is NonNullable<typeof pred.game>["home_team"] & object =>
+        !!t && !!t.code,
+    );
+    for (const team of participants) {
+      const code = team.code;
+      if (!teamMap.has(code)) {
+        const teamInfo = KBO_TEAMS[code as TeamCode];
+        teamMap.set(code, {
+          correct: 0,
+          total: 0,
+          color: teamInfo?.color || team.color_primary || "#6b7280",
+        });
+      }
+      const entry = teamMap.get(code)!;
+      entry.total++;
+      if (pred.is_correct) entry.correct++;
     }
-    const entry = teamMap.get(winnerCode)!;
-    entry.total++;
-    if (pred.is_correct) entry.correct++;
   }
 
   const teamData = Array.from(teamMap.entries())
@@ -208,7 +223,10 @@ export default async function DashboardPage() {
 
       {/* 팀별 성과 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
-        <h2 className="text-lg font-bold mb-4">팀별 예측 적중률</h2>
+        <h2 className="text-lg font-bold mb-1">팀별 예측 적중률</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          각 팀이 참여한 경기에서 모델 예측이 얼마나 맞았는지 (홈·원정 모두 포함)
+        </p>
         <TeamPerformanceChart data={teamData} />
       </section>
 
