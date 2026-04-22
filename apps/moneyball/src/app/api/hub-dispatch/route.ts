@@ -102,9 +102,23 @@ export async function POST(
   let parsed: SentryWebhookInput;
   try {
     const raw = JSON.parse(bodyText);
-    // Sentry action='event_alert' / 'issue_alert' 모두 `data.event` 구조
+    // Sentry rule 저장 시 validation ping (fields / installationId 만 포함,
+    // data.event 없음) → 200 OK 로 응답해서 UI 저장 통과.
     const event = raw?.data?.event ?? raw?.event;
-    if (!event) throw new Error('missing event');
+    if (!event) {
+      const isValidation =
+        raw?.fields !== undefined ||
+        raw?.installationId !== undefined ||
+        raw?.uri !== undefined;
+      if (isValidation) {
+        return Response.json({
+          status: 'dispatched',
+          fingerprint: 'validation-ok',
+          event_type: 'validation',
+        } satisfies DispatchResult);
+      }
+      throw new Error('missing event');
+    }
     parsed = {
       event,
       triggered_rule: raw?.data?.triggered_rule ?? raw?.triggered_rule,
