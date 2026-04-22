@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.5.26] - 2026-04-22
+
+### v3 backtest 결과 — game_records 기반 feature negative
+
+**목적**: 2163 경기 game_records 백필 후 불펜 피로도·팀 타자 폼·팀 투수 컨디션 feature 의 개별 유의성 측정 → v1.7 가중치 후보 발굴.
+
+**실행**: `backtest-v3-run.ts` (Train 2023-24 N=1449 / Test 2025 N=714)
+
+**계수 유의성** (v3 8-feature, train 기준):
+- bullpenInningsL3Diff: coef −0.050, z=−0.35, null-like
+- runsL5Diff: coef 0.020, z=0.42, null-like
+- runsAllowedL5Diff: coef 0.050, z=1.05, null-like
+- **homeRunsL5Diff**: coef 0.069, z=1.43, **borderline** (방향 정확, 95% CI 아슬)
+- 기존 4-feature 도 모두 null-like 로 변동 (multicollinearity)
+
+**Test Brier (2025)**:
+- coin_flip baseline: 0.25000
+- 4-feature: 0.24861
+- 8-feature: 0.24902 (Δ +0.00042, **악화**)
+- Accuracy 54.20% → 54.06% (−0.14pp)
+
+**결론**: **v1.7 ship 근거 없음**. v1.6 유지. 새 4 feature 중 개별 유의성 달성 못 함 — 팀 집계 수준의 거친 지표로는 signal 포착 부족. 더 정교한 개별 선수 feature (투수 pcode fatigue, 타자 hra 최근) 가 필요하지만 별도 엔지니어링 세션 대상.
+
+### 수집된 데이터 자산
+
+- game_records 2,185건 전체 (2023: 722 + 2024: 727 + 2025: 714 + 2026: 22)
+- 타자·투수별 박스스코어 + 이닝별 점수 + 승/패/세/홀 투수
+- 4-6주 후 prod 예측 축적과 함께 재분석 가능
+
+### 기타 (UI)
+
+- /about 가중치 표시 active/제외 섹션 분리 (park/h2h/sfr 0% → 별도 "제외된 팩터")
+- /predictions: 예측 없는 과거 날짜 숨김 + 고확신 적중률 추가 표시
+- 메인 hero: "오늘의 빅매치" (접전/라이벌 휴리스틱) → "오늘의 고확신 예측" (승률 70%+ 최대 confidence)
+- shared HIGH_CONFIDENCE_THRESHOLD = 0.4 상수화 + isHighConfidence helper
+
+**검증**: tsc pass · 전체 tests pass (shared 30 + kbo-data 360 + moneyball 116).
+
 ## [0.5.25] - 2026-04-22
 
 ### 경기별 boxscore 수집 인프라 + /debug/model-comparison
