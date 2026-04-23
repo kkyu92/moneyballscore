@@ -197,7 +197,7 @@ export default async function DashboardPage() {
             {highConf.length > 0 ? Math.round(highConfRate * 100) : 0}%
           </span>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            승률 80%+ 예측 ({highConfCorrect}/{highConf.length})
+            고확신 예측 ({highConfCorrect}/{highConf.length})
           </p>
         </div>
       </section>
