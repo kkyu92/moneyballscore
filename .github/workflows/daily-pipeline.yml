@@ -2,11 +2,12 @@ name: Daily KBO Pipeline
 
 on:
   schedule:
-    # PLAN_v5 Phase 2E — 매시간 cron + announce + predict_final + verify
-    - cron: '0 0 * * *'     # UTC 00 = KST 09 announce
-    - cron: '0 1-12 * * *'  # UTC 01-12 = KST 10-21 predict (매시간 12회)
-    - cron: '0 13 * * *'    # UTC 13 = KST 22 predict_final (gap 체크)
-    - cron: '0 14 * * *'    # UTC 14 = KST 23 verify (accuracy + compound)
+    # 분 오프셋 17 — GitHub 공식 권고: 정각(0분)은 전체 플랫폼 high-load 피크,
+    # 2026-04-23 관측 12/15 cron skip (80%). 정각 회피로 skip 확률 감소.
+    - cron: '17 0 * * *'    # UTC 00:17 ≈ KST 09:17 announce
+    - cron: '17 1-12 * * *' # UTC 01-12:17 매시간 predict
+    - cron: '17 13 * * *'   # UTC 13:17 ≈ KST 22:17 predict_final (gap 체크)
+    - cron: '17 14 * * *'   # UTC 14:17 ≈ KST 23:17 verify (accuracy + compound)
   workflow_dispatch:
     inputs:
       date:
