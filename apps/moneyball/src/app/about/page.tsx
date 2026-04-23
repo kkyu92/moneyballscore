@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "소개",
   description:
     "MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 모델 v1.6.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/about" },
 };
 
 type FactorKey = keyof typeof DEFAULT_WEIGHTS;

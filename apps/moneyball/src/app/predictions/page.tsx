@@ -11,6 +11,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "예측 기록",
   description: "승부예측 기록. 날짜별 세이버메트릭스 기반 경기 분석.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/predictions" },
 };
 
 export const revalidate = 300;

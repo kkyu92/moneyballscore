@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "팀 프로필",
   description:
     "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/teams" },
 };
 
 const TEAM_ORDER: TeamCode[] = [

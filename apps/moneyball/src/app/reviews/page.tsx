@@ -13,6 +13,7 @@ import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
   description: "승부예측 적중 vs 실패 결과 분석. 날짜별 성과 추적.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/reviews" },
 };
 
 export const revalidate = 600;

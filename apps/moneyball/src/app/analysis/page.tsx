@@ -1,9 +1,16 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { KBO_TEAMS, toKSTDateString, type TeamCode } from '@moneyball/shared';
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 
 // v4-4 Phase 1-1: /analysis 는 '오늘 빅매치' 전용. 시즌 누적 성과는 /dashboard 에 통합.
+
+export const metadata: Metadata = {
+  title: 'AI 분석 — 오늘 빅매치',
+  description: '오늘 KBO 경기 중 에이전트 토론 기반 빅매치 1경기. 심판 판정 · 팀 논거 · 팩터 해석까지.',
+  alternates: { canonical: 'https://moneyballscore.vercel.app/analysis' },
+};
 
 export const revalidate = 3600; // 1시간 ISR
 

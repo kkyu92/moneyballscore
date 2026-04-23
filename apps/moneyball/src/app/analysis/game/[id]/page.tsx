@@ -113,6 +113,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     openGraph: { title, description },
+    alternates: {
+      canonical: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+    },
   };
 }
 
@@ -249,11 +252,46 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     mainEntityOfPage: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
   };
 
+  // SportsEvent 스키마 — Google 이 "스포츠 경기" 리치 결과 후보로 노출 (팀·일정·구장).
+  // Article 과 별도로 병기하여 크롤러가 선택.
+  const homeFullName = KBO_TEAMS[homeTeam].name;
+  const awayFullName = KBO_TEAMS[awayTeam].name;
+  const stadiumName = game.stadium || KBO_TEAMS[homeTeam].stadium;
+  const eventStatusIri = (() => {
+    switch (game.status) {
+      case 'postponed': return 'https://schema.org/EventPostponed';
+      case 'final': return 'https://schema.org/EventCompleted';
+      default: return 'https://schema.org/EventScheduled';
+    }
+  })();
+  const startDateIso = `${gameDate}T${(game.game_time || '18:30').slice(0, 5)}:00+09:00`;
+  const sportsEventLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${awayFullName} vs ${homeFullName}`,
+    startDate: startDateIso,
+    sport: "Baseball",
+    eventStatus: eventStatusIri,
+    location: { "@type": "Place", name: stadiumName },
+    homeTeam: { "@type": "SportsTeam", name: homeFullName },
+    awayTeam: { "@type": "SportsTeam", name: awayFullName },
+    url: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+    organizer: {
+      "@type": "SportsOrganization",
+      name: "Korea Baseball Organization",
+      url: "https://www.koreabaseball.com",
+    },
+  };
+
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventLd) }}
       />
       <Breadcrumb
         items={[

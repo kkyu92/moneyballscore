@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "선수 리더보드",
   description:
     "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/players" },
 };
 
 export const revalidate = 1800;

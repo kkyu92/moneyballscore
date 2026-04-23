@@ -22,6 +22,7 @@ import { buildTierRates } from "@/lib/predictions/tierStats";
 export const metadata: Metadata = {
   title: "대시보드",
   description: "승부예측 시즌 적중률, 팩터별 편향, 확신 구간 분석 종합 대시보드.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/dashboard" },
 };
 
 // 하루 경기 종료 시점 verify cron (KST 23:00 = UTC 14:00) 이 끝나면

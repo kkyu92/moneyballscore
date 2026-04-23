@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { PredictionCardLive } from "@/components/predictions/PredictionCardLive";
 import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { MiniGameCard } from "@/components/shared/MiniGameCard";
@@ -19,6 +20,10 @@ import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
 import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "https://moneyballscore.vercel.app" },
+};
 
 interface HomePrediction {
   predicted_winner: number | null;

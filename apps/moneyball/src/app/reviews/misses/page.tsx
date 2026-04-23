@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score가 고확신으로 틀렸던 예측들의 사후 분석. 어떤 팩터가 과대 평가됐는지, 사후 에이전트가 무엇을 지적했는지 공개.",
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://moneyballscore.vercel.app/reviews/misses" },
 };
 
 export const revalidate = 1800;
