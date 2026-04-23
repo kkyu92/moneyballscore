@@ -1,0 +1,40 @@
+name: sitemap-warmup
+
+# Google Search Console "사이트맵을 가져올 수 없음" 대응.
+# sitemap.ts 는 Supabase 쿼리 포함 ISR cache. cache miss 시 cold start +
+# DB round-trip 으로 수 초 걸려 Googlebot timeout 에 걸릴 수 있음.
+# 1시간마다 HEAD 쳐서 ISR 을 warm 유지 → bot 이 언제 와도 즉시 응답.
+#
+# revalidate=21600 (6h) 이라 1h warmup 은 비용 과하지 않고 안정적 커버.
+
+on:
+  schedule:
+    - cron: '37 * * * *' # 매시간 37분 (정각 회피)
+  workflow_dispatch:
+
+concurrency:
+  group: sitemap-warmup
+  cancel-in-progress: true
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Warm /sitemap.xml
+        run: |
+          set -e
+          URL="https://moneyballscore.vercel.app/sitemap.xml"
+          echo "Warming $URL"
+          # GET (HEAD 는 CDN cache-miss 재검증을 강제하지 못함). 바디 버림.
+          curl -sS -o /dev/null -w "status=%{http_code} size=%{size_download} time_total=%{time_total}s\n" \
+            -A "moneyball-sitemap-warmup/1.0" \
+            --max-time 60 \
+            "$URL"
+
+      - name: Warm /robots.txt
+        run: |
+          curl -sS -o /dev/null -w "robots status=%{http_code}\n" \
+            -A "moneyball-sitemap-warmup/1.0" \
+            --max-time 30 \
+            "https://moneyballscore.vercel.app/robots.txt"

@@ -3,53 +3,63 @@ import { createClient } from '@/lib/supabase/server';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
+import { KBO_TEAMS } from '@moneyball/shared';
 
-// v4-4 Task 1: 모든 /analysis/game/[id] URL 포함 (Eng 리뷰 A6)
-// 과거 경기까지 SEO 크롤러에 노출해 AdSense 콘텐츠 양 확보.
+// Google Search Console "가져올 수 없음" 대응: sitemap 생성 시간을 Googlebot
+// timeout 안에 유지 + 모든 URL lastmod 채워 크롤 가치 신호 확실화.
+//
+// - revalidate 6h 로 늘려 ISR miss 빈도 완화
+// - pitcher leaderboard 추가 집계 쿼리 제거 (timeout 기여) — /players 랜딩만 유지
+// - games 쿼리 select/limit 최소화, lastmod 전 URL fallback
+// - warmup cron (.github/workflows/sitemap-warmup.yml) 과 쌍으로 동작
 
-export const revalidate = 3600; // 1시간 캐싱
+export const revalidate = 21600; // 6시간 (이전 1h)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://moneyballscore.vercel.app';
+  const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: baseUrl, changeFrequency: 'daily', priority: 1.0 },
-    { url: `${baseUrl}/predictions`, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/analysis`, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/reviews`, changeFrequency: 'daily', priority: 0.8 },
-    { url: `${baseUrl}/dashboard`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${baseUrl}/reviews/weekly`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/reviews/monthly`, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/reviews/misses`, changeFrequency: 'daily', priority: 0.75 },
-    { url: `${baseUrl}/players`, changeFrequency: 'daily', priority: 0.7 },
-    { url: `${baseUrl}/teams`, changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/matchup`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: baseUrl, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/predictions`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/analysis`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/reviews`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${baseUrl}/dashboard`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/contact`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/reviews/weekly`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/reviews/monthly`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
+    { url: `${baseUrl}/players`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${baseUrl}/teams`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${baseUrl}/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
   ];
 
   // 45개 canonical 팀 매치업 URL
   const matchupRoutes: MetadataRoute.Sitemap = allPairs().map((p) => ({
     url: `${baseUrl}${p.path}`,
+    lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.65,
   }));
 
-  // 10팀 프로필 URL — KBO_TEAMS 키 기반 정적
-  const teamProfileRoutes: MetadataRoute.Sitemap = Object.keys(
-    (await import('@moneyball/shared')).KBO_TEAMS,
-  ).map((code) => ({
-    url: `${baseUrl}/teams/${code}`,
-    changeFrequency: 'weekly',
-    priority: 0.65,
-  }));
+  // 10팀 프로필 URL
+  const teamProfileRoutes: MetadataRoute.Sitemap = Object.keys(KBO_TEAMS).map(
+    (code) => ({
+      url: `${baseUrl}/teams/${code}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.65,
+    }),
+  );
 
-  // 최근 12주 주간 리뷰 URL — 시즌 누적에 따라 매주 +1개
+  // 최근 12주 주간 리뷰 URL
   const weeklyReviewRoutes: MetadataRoute.Sitemap = getRecentWeeks(12).map(
     (w) => ({
       url: `${baseUrl}/reviews/weekly/${w.weekId}`,
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.7,
     }),
@@ -59,48 +69,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const monthlyReviewRoutes: MetadataRoute.Sitemap = getRecentMonths(6).map(
     (m) => ({
       url: `${baseUrl}/reviews/monthly/${m.monthId}`,
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
     }),
   );
 
-  // Top N 투수 프로필 URL — leaderboard 동일 집계 재사용
-  const pitcherProfileRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const { buildPitcherLeaderboard } = await import(
-      '@/lib/players/buildPitcherLeaderboard'
-    );
-    const pitchers = await buildPitcherLeaderboard({ limit: 10, minAppearances: 1 });
-    for (const p of pitchers) {
-      pitcherProfileRoutes.push({
-        url: `${baseUrl}/players/${p.playerId}`,
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      });
-    }
-  } catch (e) {
-    console.warn('[sitemap] pitcher leaderboard failed:', e);
-  }
-
-  // 모든 past + 오늘 경기 /analysis/game/[id] URL
+  // 모든 past + 오늘 경기 /analysis/game/[id] URL + 일자별 /predictions/[date]
   const analysisRoutes: MetadataRoute.Sitemap = [];
-  // 일자별 /predictions/[date] URL — 각 날짜는 포스트 역할
   const predictionDateRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = await createClient();
+    // limit 5000 → 2500 (2023-2026 실제 ~1200 경기 + 여유). 선택 필드도 3개만.
     const { data: games } = await supabase
       .from('games')
       .select('id, game_date, updated_at')
       .order('game_date', { ascending: false })
-      .limit(5000); // 연 ~700 경기 × 7시즌 여유
+      .limit(2500);
 
     if (games) {
       const seenDates = new Set<string>();
       for (const g of games) {
         analysisRoutes.push({
           url: `${baseUrl}/analysis/game/${g.id}`,
-          lastModified: g.updated_at ? new Date(g.updated_at) : undefined,
+          lastModified: g.updated_at ? new Date(g.updated_at) : now,
           changeFrequency: 'weekly',
           priority: 0.7,
         });
@@ -109,7 +102,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           seenDates.add(g.game_date);
           predictionDateRoutes.push({
             url: `${baseUrl}/predictions/${g.game_date}`,
-            lastModified: g.updated_at ? new Date(g.updated_at) : undefined,
+            lastModified: g.updated_at ? new Date(g.updated_at) : now,
             changeFrequency: 'weekly',
             priority: 0.75,
           });
@@ -126,7 +119,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...monthlyReviewRoutes,
     ...teamProfileRoutes,
     ...matchupRoutes,
-    ...pitcherProfileRoutes,
     ...predictionDateRoutes,
     ...analysisRoutes,
   ];
