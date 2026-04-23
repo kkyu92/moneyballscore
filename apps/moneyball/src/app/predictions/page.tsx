@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import {
   classifyWinnerProb,
-  WINNER_TIER_EMOJI,
+  pickTierEmoji,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
 } from "@moneyball/shared";
@@ -144,7 +144,7 @@ export default async function PredictionsPage() {
                           key={tier}
                           className="text-gray-600 dark:text-gray-300"
                         >
-                          · {WINNER_TIER_EMOJI[tier]} {WINNER_TIER_LABEL[tier]}{' '}
+                          · {pickTierEmoji(tier)} {WINNER_TIER_LABEL[tier]}{' '}
                           {d.tiers[tier].predicted}
                         </span>
                       ))}
@@ -196,7 +196,7 @@ export default async function PredictionsPage() {
                                   : "text-red-600"
                             }`}
                           >
-                            {WINNER_TIER_EMOJI[tier]} {WINNER_TIER_LABEL[tier]}{' '}
+                            {pickTierEmoji(tier)} {WINNER_TIER_LABEL[tier]}{' '}
                             {t.correct}/{t.verified} ({Math.round(tierAcc * 100)}%)
                           </div>
                         );

@@ -2,7 +2,7 @@ import {
   KBO_TEAMS,
   shortTeamName,
   classifyWinnerProb,
-  WINNER_TIER_EMOJI,
+  pickTierEmoji,
   WINNER_TIER_LABEL,
   winnerProbOf,
 } from '@moneyball/shared';
@@ -67,7 +67,7 @@ export async function notifyPredictions(
     // 예측 승자 적중 확률 = max(hwp, 1-hwp). 홈/원정 무관 "우리 예측이 맞을 확률".
     const pct = Math.round(winnerProbOf(pred.homeWinProb) * 100);
     const tier = classifyWinnerProb(pred.homeWinProb);
-    const emoji = WINNER_TIER_EMOJI[tier];
+    const emoji = pickTierEmoji(tier);
     const label = WINNER_TIER_LABEL[tier];
 
     lines.push(`${emoji} <b>${label}</b> ${away} vs ${home} → <b>${winner}</b> ${pct}%`);

@@ -152,16 +152,30 @@ export const WINNER_TIER_LABEL: Record<WinnerConfidenceTier, string> = {
 };
 
 /**
- * tier → 이모지 조합. Telegram + UI 공통.
- *   적중 🔥🎯 = 확신 · 정조준
- *   유력 📈    = 상승세
- *   반반 🤔⚖️ = 의심 · 저울
+ * tier → 이모지 pool. pickTierEmoji() 가 하나 뽑아 노출.
+ *   적중 🔥 | 🎯  (확신 / 정조준)
+ *   유력 📈        (상승세 단독)
+ *   반반 🤔 | ⚖️  (의심 / 저울)
  */
-export const WINNER_TIER_EMOJI: Record<WinnerConfidenceTier, string> = {
-  confident: '🔥🎯',
-  lean: '📈',
-  tossup: '🤔⚖️',
+export const WINNER_TIER_EMOJI_POOL: Record<WinnerConfidenceTier, readonly string[]> = {
+  confident: ['🔥', '🎯'],
+  lean: ['📈'],
+  tossup: ['🤔', '⚖️'],
 };
+
+/**
+ * tier → 이모지 1개 랜덤 선택. 여러 경기 나열 시 단조 완화.
+ * `random` 주입 가능 (테스트에서 결정론화).
+ */
+export function pickTierEmoji(
+  tier: WinnerConfidenceTier,
+  random: () => number = Math.random,
+): string {
+  const pool = WINNER_TIER_EMOJI_POOL[tier];
+  if (pool.length === 0) return '';
+  if (pool.length === 1) return pool[0];
+  return pool[Math.floor(random() * pool.length)];
+}
 
 // 신뢰도 → Tailwind 색상 클래스
 export function getConfidenceColor(pct: number): string {

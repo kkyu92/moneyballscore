@@ -189,12 +189,13 @@ describe('notifyPredictions (regression)', () => {
 
     await notifyPredictions(result, predictions);
     const msg = calls[0].text;
-    expect(msg).toContain('🤔');
+    // 반반 pool = [🤔, ⚖️] 중 하나 (랜덤 선택). 라벨 "반반" 으로 1차 앵커.
+    expect(msg).toMatch(/🤔|⚖️/);
     expect(msg).toContain('반반');
     expect(msg).toContain('52%');
   });
 
-  it('승자 적중 확률 ≥ 65% → 🔥 적중', async () => {
+  it('승자 적중 확률 ≥ 65% → 적중 (🔥 또는 🎯)', async () => {
     const calls = captureTelegramCalls();
     const result: PipelineResult = {
       date: '2026-04-22',
@@ -211,7 +212,8 @@ describe('notifyPredictions (regression)', () => {
 
     await notifyPredictions(result, predictions);
     const msg = calls[0].text;
-    expect(msg).toContain('🔥');
+    // 적중 pool = [🔥, 🎯] 중 하나.
+    expect(msg).toMatch(/🔥|🎯/);
     expect(msg).toContain('적중');
     expect(msg).toContain('70%');
   });

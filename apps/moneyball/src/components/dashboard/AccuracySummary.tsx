@@ -1,6 +1,6 @@
 import {
   getAccuracyColor,
-  WINNER_TIER_EMOJI,
+  pickTierEmoji,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
 } from "@moneyball/shared";
@@ -60,7 +60,7 @@ export function AccuracySummary({
                 className="flex items-center justify-between text-gray-600 dark:text-gray-300"
               >
                 <span className="flex items-center gap-1.5">
-                  <span>{WINNER_TIER_EMOJI[tier]}</span>
+                  <span>{pickTierEmoji(tier)}</span>
                   <span>{WINNER_TIER_LABEL[tier]}</span>
                 </span>
                 <span className="font-medium text-gray-700 dark:text-gray-200">
