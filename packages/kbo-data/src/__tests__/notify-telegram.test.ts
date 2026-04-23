@@ -168,7 +168,7 @@ describe('notifyPredictions (regression)', () => {
     expect(msg).toContain('경기 5개');
     expect(msg).toContain('예측 5개');
     expect(msg).toContain('55%'); // 승자(HT) 적중 확률
-    expect(msg).toContain('🎯');
+    expect(msg).toContain('📈');
     expect(msg).toContain('유력');
   });
 

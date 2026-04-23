@@ -152,15 +152,15 @@ export const WINNER_TIER_LABEL: Record<WinnerConfidenceTier, string> = {
 };
 
 /**
- * tier → 이모지 조합 (관련 이모지 3종 concat). Telegram + UI 공통.
- *   적중 🔥🎯💯 = 확신 · 정조준 · 완벽
- *   유력 🎯📈⚡ = 타겟 · 상승세 · 기세
- *   반반 🤔🎲⚖️ = 의심 · 운 · 저울
+ * tier → 이모지 조합. Telegram + UI 공통.
+ *   적중 🔥🎯 = 확신 · 정조준
+ *   유력 📈    = 상승세
+ *   반반 🤔⚖️ = 의심 · 저울
  */
 export const WINNER_TIER_EMOJI: Record<WinnerConfidenceTier, string> = {
-  confident: '🔥🎯💯',
-  lean: '🎯📈⚡',
-  tossup: '🤔🎲⚖️',
+  confident: '🔥🎯',
+  lean: '📈',
+  tossup: '🤔⚖️',
 };
 
 // 신뢰도 → Tailwind 색상 클래스

@@ -194,7 +194,7 @@ export default async function DashboardPage() {
         </div>
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
-            🔥🎯💯 적중 예측 적중률
+            🔥🎯 적중 예측 적중률
           </h3>
           <span className="text-4xl font-bold">
             {confidentStat.total > 0 ? Math.round(confidentRate * 100) : 0}%

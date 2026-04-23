@@ -202,10 +202,10 @@ describe('classifyWinnerProb (3단계)', () => {
     expect(WINNER_TIER_LABEL.tossup).toBe('반반');
   });
 
-  it('tier 이모지 조합 — 각 티어당 관련 이모지 3종 concat', () => {
-    expect(WINNER_TIER_EMOJI.confident).toBe('🔥🎯💯');
-    expect(WINNER_TIER_EMOJI.lean).toBe('🎯📈⚡');
-    expect(WINNER_TIER_EMOJI.tossup).toBe('🤔🎲⚖️');
+  it('tier 이모지 조합 — 적중 🔥🎯 / 유력 📈 / 반반 🤔⚖️', () => {
+    expect(WINNER_TIER_EMOJI.confident).toBe('🔥🎯');
+    expect(WINNER_TIER_EMOJI.lean).toBe('📈');
+    expect(WINNER_TIER_EMOJI.tossup).toBe('🤔⚖️');
   });
 });
 
