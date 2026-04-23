@@ -19,6 +19,33 @@ cat TODOS.md 2>/dev/null | head -30         # 할 일
 
 이 결과를 **메모리·체크포인트에 적힌 상태와 대조**. 드리프트 발견 시 **플래닝 전 사용자에게 먼저 보고**.
 
+### 세션 시작 검증 — 체크포인트 주장을 현실과 대조 (R5)
+
+`/handoff load` 의 기본 drift 감지 (git HEAD 비교) 만으론 부족. 체크포인트·SNAPSHOT 이 주장하는 **구체 사실들을 현실과 대조**:
+
+- "X 가 배포됨" → `git log` + 실제 파일 존재 확인
+- "Y env 설정됨" → `vercel env ls` 또는 Sentry/Supabase API 로 실제 조회
+- "Z 테스트 통과" → 실제 CI 최신 결과 또는 `pnpm test` 실행
+- "Rule/Integration 생성됨" → API 조회로 상태 확인
+
+드리프트 사례 3 (Sentry silent 3건), 사례 4 (homeCode 반쪽 작동), 사례 6 (observability silent) 모두 체크포인트가 "됐다" 고 적혀있어도 현실은 죽어있던 경우. HEAD 만 같다고 안심 금지.
+
+### 커밋 정책 — 묻지 말고 실행 (R4, 기본 정책 override)
+
+**기본 Claude Code 정책**: "NEVER commit unless explicitly asked". 이 프로젝트에선 사용자가 2026-04-23 명시적으로 override — 다음 규칙 적용:
+
+- 논리 단위 완성 시 **묻지 않고 즉시 `git commit`**. "지금 커밋할까요?" 질문 금지.
+- 커밋 후 hash + 한 줄 메시지만 보고 (예: `커밋 a1b2c3d: fix(sentry): alert-rule schema 제거`).
+- 여러 파일이 누적됐어도 **하나의 논리 단위 = 하나의 커밋**.
+
+**예외 (여전히 사용자 허가 필요)**:
+- Secrets/credentials 포함 파일 → 자동 커밋 금지, 먼저 경고
+- 대규모 변경 (100+ 파일) → 먼저 내용 요약 후 사용자 확인
+- push / force-push / --no-verify / --amend / reset --hard 등 파괴적 작업
+- 사용자가 "아직 커밋하지마" 라고 명시한 뒤 그 세션 내
+
+불확실하면 자동 커밋하지 말고 사용자 확인. 상세 규정은 `memory/feedback_session_quality_rules.md` 참고.
+
 ### 드리프트 사례 1 — 구현된 코드를 그린필드로 간주 (2026-04-15 오전)
 
 메모리에 "Phase 2 완료, Phase 3 예정"만 있었는데, git log에 **Phase C (에이전트 토론 통합) + Phase D (Compound 루프) 이미 구현**되어 있었음. 5시간 "그린필드" 플래닝 후 마지막에 787줄 기존 코드 발견 → 플랜 전면 재조정 필요. 같은 사고 반복 금지.
