@@ -5,7 +5,7 @@ interface JudgeVerdictPanelProps {
   homeTeam: TeamCode;
   awayTeam: TeamCode;
   predictedWinner: TeamCode;
-  homeWinProb: number; // 0 ~ 1
+  homeWinProb: number; // 0 ~ 1 (DB 저장 단위)
   confidence: number;   // 0 ~ 1
   reasoning: string;
   calibrationApplied?: string | null;
@@ -14,8 +14,8 @@ interface JudgeVerdictPanelProps {
 /**
  * v4-4 심판 판정 패널 — /analysis/game/[id] 최상단에 배치.
  *
- * Design 리뷰 Pass 1: 사용자가 가장 먼저 보고 싶은 "AI 최종 판단"을 맨 위.
- * 핵심 숫자(홈 승리 %)가 가장 큰 시각 anchor.
+ * 예측 승자 적중 확률을 단일 anchor 로 노출.
+ * "홈팀이 이길 확률" 이 아니라 "우리 예측이 맞을 확률" 관점.
  */
 export function JudgeVerdictPanel({
   homeTeam,
@@ -27,9 +27,10 @@ export function JudgeVerdictPanel({
   calibrationApplied,
 }: JudgeVerdictPanelProps) {
   const winnerTeam = KBO_TEAMS[predictedWinner];
-  const homePct = Math.round(homeWinProb * 100);
-  const awayPct = 100 - homePct;
   const isHomeWinner = predictedWinner === homeTeam;
+  // 예측 승자 적중 확률 = max(hwp, 1-hwp)
+  const winnerProb = Math.max(homeWinProb, 1 - homeWinProb);
+  const winnerPct = Math.round(winnerProb * 100);
   const confPct = Math.round(confidence * 100);
 
   return (
@@ -47,40 +48,36 @@ export function JudgeVerdictPanel({
       </header>
 
       <div className="flex items-center justify-center gap-3 md:gap-6 mb-6">
-        <div className="text-center flex-1 max-w-[30%]">
-          <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/30 bg-white/5">
+        <div className="text-center flex-1 max-w-[30%] opacity-60">
+          <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/20 bg-white/5">
             <TeamLogo team={awayTeam} size={64} className="w-full h-full" />
           </div>
           <p className="text-sm text-brand-200">{KBO_TEAMS[awayTeam].name}</p>
-          <p
-            className="text-2xl md:text-3xl font-bold mt-1"
-            aria-label={`${KBO_TEAMS[awayTeam].name} 승리 확률 ${awayPct}%`}
-          >
-            {awayPct}%
-          </p>
+          <p className="text-xs text-brand-300 mt-1">원정</p>
         </div>
 
         <div className="text-2xl md:text-3xl font-bold text-brand-300">vs</div>
 
-        <div className="text-center flex-1 max-w-[30%]">
-          <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/30 bg-white/5">
+        <div className="text-center flex-1 max-w-[30%] opacity-60">
+          <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/20 bg-white/5">
             <TeamLogo team={homeTeam} size={64} className="w-full h-full" />
           </div>
           <p className="text-sm text-brand-200">{KBO_TEAMS[homeTeam].name}</p>
-          <p
-            className="text-2xl md:text-3xl font-bold mt-1"
-            aria-label={`${KBO_TEAMS[homeTeam].name} 승리 확률 ${homePct}%`}
-          >
-            {homePct}%
-          </p>
+          <p className="text-xs text-brand-300 mt-1">홈</p>
         </div>
       </div>
 
+      {/* 예측 승자 + 적중 확률 (단일 anchor) */}
       <div className="text-center mb-4">
-        <div className="inline-block bg-white/10 rounded-full px-4 py-1">
-          <p className="text-sm text-brand-200">
-            예측 승자: <span className="font-bold text-white">{winnerTeam.name}</span>
-            {isHomeWinner ? ' (홈)' : ' (원정)'}
+        <div
+          className="inline-block bg-white/10 rounded-2xl px-6 py-4 border border-white/20"
+          aria-label={`예측 승자 ${winnerTeam.name}, 적중 확률 ${winnerPct}%`}
+        >
+          <p className="text-xs text-brand-200 mb-1">
+            예측 승자 {isHomeWinner ? '(홈)' : '(원정)'}
+          </p>
+          <p className="text-3xl md:text-4xl font-bold">
+            {winnerTeam.name} <span className="text-brand-300">{winnerPct}%</span>
           </p>
         </div>
       </div>

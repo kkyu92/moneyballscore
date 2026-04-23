@@ -26,7 +26,7 @@ export async function GET() {
       home_team:teams!games_home_team_id_fkey(code, name_ko),
       away_team:teams!games_away_team_id_fkey(code, name_ko),
       predictions!inner(
-        predicted_winner, confidence, prediction_type, is_correct,
+        predicted_winner, confidence, reasoning, prediction_type, is_correct,
         winner:teams!predictions_predicted_winner_fkey(code, name_ko)
       )
     `)
@@ -82,6 +82,7 @@ export async function GET() {
     predictions: Array<{
       predicted_winner: number | null;
       confidence: number;
+      reasoning: { homeWinProb?: number } | null;
       prediction_type: string;
       is_correct: boolean | null;
       winner: { code: string | null; name_ko: string | null } | null;
@@ -98,7 +99,12 @@ export async function GET() {
     const homeName = shortTeamName(homeCode);
     const awayName = shortTeamName(awayCode);
     const winnerName = shortTeamName(pred.winner?.code as TeamCode);
-    const pct = Math.round((0.5 + pred.confidence / 2) * 100);
+    // 예측 승자 적중 확률 = max(hwp, 1-hwp). reasoning.homeWinProb 부재 시 confidence fallback.
+    const hwp = pred.reasoning?.homeWinProb;
+    const winnerProb = hwp != null
+      ? Math.max(hwp, 1 - hwp)
+      : 0.5 + pred.confidence / 2;
+    const pct = Math.round(winnerProb * 100);
 
     const isFinal = game.status === 'final';
     const resultTag = isFinal && pred.is_correct != null

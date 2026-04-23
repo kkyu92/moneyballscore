@@ -41,10 +41,8 @@ export function BigMatchDebateCard({
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
   const winner = KBO_TEAMS[predictedWinner];
-  const homePct = Math.round(homeWinProb * 100);
-  const awayPct = 100 - homePct;
-  const isHomeWinner = predictedWinner === homeTeam;
-  const winnerPct = isHomeWinner ? homePct : awayPct;
+  // 예측 승자 적중 확률 = max(hwp, 1-hwp)
+  const winnerPct = Math.round(Math.max(homeWinProb, 1 - homeWinProb) * 100);
 
   const homeEmphasized =
     homeConfidence !== undefined &&
