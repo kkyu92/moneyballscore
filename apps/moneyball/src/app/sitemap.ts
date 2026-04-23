@@ -1,19 +1,32 @@
 import type { MetadataRoute } from 'next';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
 import { KBO_TEAMS } from '@moneyball/shared';
 
-// Google Search Console "가져올 수 없음" 대응: sitemap 생성 시간을 Googlebot
-// timeout 안에 유지 + 모든 URL lastmod 채워 크롤 가치 신호 확실화.
+// Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
 //
-// - revalidate 6h 로 늘려 ISR miss 빈도 완화
-// - pitcher leaderboard 추가 집계 쿼리 제거 (timeout 기여) — /players 랜딩만 유지
-// - games 쿼리 select/limit 최소화, lastmod 전 URL fallback
-// - warmup cron (.github/workflows/sitemap-warmup.yml) 과 쌍으로 동작
+// 원인 확정: 기존 `createClient` (lib/supabase/server) 는 `await cookies()` 호출 →
+// Next.js 가 Request-time API 로 인식하여 route 를 dynamic 으로 강제 →
+// `export const revalidate` 가 무력화 → 매 요청마다 Supabase 쿼리 실행 →
+// Googlebot 첫 접촉 시 cold start + 쿼리 합산해서 timeout.
+//
+// 해결: sitemap 은 public 조회만 하니 cookie 의존 없는 anon client 를 inline 으로
+// 생성해 route 가 **static** 으로 prerender 되도록 함. `revalidate=21600` 이 이때
+// 비로소 유효. 빌드 시점 1회 생성 + 6시간 ISR. warmup cron 은 ISR miss 시 즉시
+// 재생성 트리거.
 
-export const revalidate = 21600; // 6시간 (이전 1h)
+export const revalidate = 21600;
+
+function createSitemapClient() {
+  // cookie-free, no session — sitemap 전용. RLS 통과하는 public 데이터만 읽음.
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://moneyballscore.vercel.app';
@@ -80,7 +93,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const predictionDateRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const supabase = await createClient();
+    const supabase = createSitemapClient();
     // limit 5000 → 2500 (2023-2026 실제 ~1200 경기 + 여유). 선택 필드도 3개만.
     const { data: games } = await supabase
       .from('games')
