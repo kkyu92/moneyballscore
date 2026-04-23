@@ -147,12 +147,13 @@ describe('notifyPredictions (regression)', () => {
     vi.restoreAllMocks();
   });
 
-  it('기본 포맷: 날짜 + 경기/예측/스킵 + 승자 + 퍼센트', async () => {
+  it('기본 포맷: 날짜 + 경기/예측/스킵 + 승자 + 예측 승자 확률', async () => {
     const calls = captureTelegramCalls();
     const result: PipelineResult = {
       date: '2026-04-22',
       gamesFound: 5, predictionsGenerated: 5, gamesSkipped: 0, errors: [],
     };
+    // hwp=0.45 → 원정 HT 승률 55% → 유력 🎯 (55%)
     const predictions = [
       {
         homeTeam: 'OB' as const, awayTeam: 'HT' as const,
@@ -166,26 +167,53 @@ describe('notifyPredictions (regression)', () => {
     expect(msg).toContain('2026-04-22 승부예측');
     expect(msg).toContain('경기 5개');
     expect(msg).toContain('예측 5개');
-    expect(msg).toContain('45%');
-    expect(msg).toContain('🔥'); // confidence 0.35 >= 0.3
+    expect(msg).toContain('55%'); // 승자(HT) 적중 확률
+    expect(msg).toContain('🎯');
+    expect(msg).toContain('유력');
   });
 
-  it('confidence 낮음 → ⚖️ 이모지', async () => {
+  it('승자 적중 확률 < 55% → 🤔 반반', async () => {
     const calls = captureTelegramCalls();
     const result: PipelineResult = {
       date: '2026-04-22',
       gamesFound: 1, predictionsGenerated: 1, gamesSkipped: 0, errors: [],
     };
+    // hwp=0.52 → 홈 52% 승률 = 반반
     const predictions = [
       {
         homeTeam: 'OB' as const, awayTeam: 'HT' as const,
         predictedWinner: 'OB' as const,
-        confidence: 0.1, homeWinProb: 0.55,
+        confidence: 0.5, homeWinProb: 0.52,
       },
     ];
 
     await notifyPredictions(result, predictions);
-    expect(calls[0].text).toContain('⚖️');
+    const msg = calls[0].text;
+    expect(msg).toContain('🤔');
+    expect(msg).toContain('반반');
+    expect(msg).toContain('52%');
+  });
+
+  it('승자 적중 확률 ≥ 65% → 🔥 적중', async () => {
+    const calls = captureTelegramCalls();
+    const result: PipelineResult = {
+      date: '2026-04-22',
+      gamesFound: 1, predictionsGenerated: 1, gamesSkipped: 0, errors: [],
+    };
+    // hwp=0.30 → 원정 HT 승률 70% = 적중
+    const predictions = [
+      {
+        homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+        predictedWinner: 'HT' as const,
+        confidence: 0.6, homeWinProb: 0.30,
+      },
+    ];
+
+    await notifyPredictions(result, predictions);
+    const msg = calls[0].text;
+    expect(msg).toContain('🔥');
+    expect(msg).toContain('적중');
+    expect(msg).toContain('70%');
   });
 });
 

@@ -57,10 +57,19 @@ export async function notifyPredictions(
     const home = shortTeamName(pred.homeTeam);
     const away = shortTeamName(pred.awayTeam);
     const winner = shortTeamName(pred.predictedWinner);
-    const pct = Math.round(pred.homeWinProb * 100);
-    const conf = pred.confidence >= 0.3 ? '🔥' : pred.confidence >= 0.15 ? '📊' : '⚖️';
+    // 예측 승자 적중 확률 = max(hwp, 1-hwp). 홈/원정 무관 "우리 예측이 맞을 확률".
+    const winnerProb = Math.max(pred.homeWinProb, 1 - pred.homeWinProb);
+    const pct = Math.round(winnerProb * 100);
+    let emoji: string, label: string;
+    if (winnerProb >= 0.65) {
+      emoji = '🔥'; label = '적중';
+    } else if (winnerProb >= 0.55) {
+      emoji = '🎯'; label = '유력';
+    } else {
+      emoji = '🤔'; label = '반반';
+    }
 
-    lines.push(`${conf} ${away} vs ${home} → <b>${winner}</b> (${pct}%)`);
+    lines.push(`${emoji} <b>${label}</b> ${away} vs ${home} → <b>${winner}</b> ${pct}%`);
   }
 
   if (result.errors.length > 0) {
