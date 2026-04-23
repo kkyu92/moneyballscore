@@ -409,6 +409,28 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       );
       expect(runLog).toBeDefined();
     });
+
+    it('announce_sent=true 이면 fetchGames + notifyAnnounce 미호출 — cron 중복 fire 차단', async () => {
+      const tables = baseTables();
+      tables.daily_notifications = {
+        single: { data: { announce_sent: true }, error: null },
+      };
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      const { runDailyPipeline } = await loadPipeline();
+      const result = await runDailyPipeline('2026-04-22', 'announce', 'cron');
+
+      expect(vi.mocked(fetchGames)).not.toHaveBeenCalled();
+      expect(vi.mocked(notifyAnnounce)).not.toHaveBeenCalled();
+      expect(vi.mocked(fetchNaverSchedule)).not.toHaveBeenCalled();
+      expect(result.gamesFound).toBe(0);
+
+      const runLog = mock._calls.find(
+        (c) => c.table === 'pipeline_runs' && c.operations.includes('insert'),
+      );
+      expect(runLog).toBeDefined();
+    });
   });
 
   describe('predict mode', () => {
@@ -704,6 +726,29 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       const result = await runDailyPipeline('2026-04-22', 'verify', 'cron');
 
       expect(result.errors.some((e) => e.includes('compound'))).toBe(true);
+
+      const runLog = mock._calls.find(
+        (c) => c.table === 'pipeline_runs' && c.operations.includes('insert'),
+      );
+      expect(runLog).toBeDefined();
+    });
+
+    it('results_sent=true 이면 verify 전체 skip — cron 중복 fire 차단', async () => {
+      const tables = baseTables();
+      tables.daily_notifications = {
+        single: { data: { results_sent: true }, error: null },
+      };
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.mocked(fetchGames).mockResolvedValue([makeGame({ status: 'final' })]);
+
+      const { runDailyPipeline } = await loadPipeline();
+      await runDailyPipeline('2026-04-22', 'verify', 'cron');
+
+      expect(vi.mocked(updateCalibration)).not.toHaveBeenCalled();
+      expect(vi.mocked(generateAgentMemories)).not.toHaveBeenCalled();
+      expect(vi.mocked(notifyResults)).not.toHaveBeenCalled();
 
       const runLog = mock._calls.find(
         (c) => c.table === 'pipeline_runs' && c.operations.includes('insert'),

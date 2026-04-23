@@ -147,6 +147,13 @@ export async function runDailyPipeline(
 
   // === announce mode (KST 09:00) ===
   if (mode === 'announce') {
+    // GitHub Actions cron 이 동일 expression 을 드물게 2회 fire — announce_sent
+    // flag 로 중복 Telegram 차단. 14일치 prefetch 도 이미 첫 run 에서 돌았으므로 skip.
+    if (await isNotificationSent(db, targetDate, 'announce_sent')) {
+      console.log(`[Pipeline] announce already sent for ${targetDate}, skipping`);
+      return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
+    }
+
     let games: ScrapedGame[] = [];
     try { games = await fetchGames(targetDate); }
     catch (e) {
@@ -155,6 +162,9 @@ export async function runDailyPipeline(
     }
     try {
       await notifyAnnounce(targetDate, games, estimateNotificationTime(games));
+      await markNotificationFlag(db, targetDate, 'announce_sent', {
+        announce_sent_at: new Date().toISOString(),
+      });
     } catch (e) {
       errors.push(`notifyAnnounce: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -266,6 +276,13 @@ export async function runDailyPipeline(
 
   // === verify mode (KST 23:00) ===
   if (mode === 'verify') {
+    // GitHub Actions cron 이 동일 expression 을 드물게 2회 fire — results_sent
+    // flag 로 중복 Telegram + compound 루프 재실행 차단.
+    if (await isNotificationSent(db, targetDate, 'results_sent')) {
+      console.log(`[Pipeline] verify already ran for ${targetDate}, skipping`);
+      return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
+    }
+
     await updateAccuracy(db, leagueId, targetDate);
 
     try {
@@ -281,6 +298,11 @@ export async function runDailyPipeline(
       if (verifyResults.length > 0) {
         await notifyResults(targetDate, verifyResults);
       }
+      // verifyResults.length === 0 이어도 flag 는 설정 — 재실행 차단이 목적.
+      await markNotificationFlag(db, targetDate, 'results_sent', {
+        results_sent_at: new Date().toISOString(),
+        results_count: verifyResults.length,
+      });
     } catch (e) { console.error('[Pipeline] notifyResults failed:', e); }
 
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
@@ -619,7 +641,44 @@ export async function runDailyPipeline(
 }
 
 /**
- * 하루 요약 Telegram 알림 idempotent 처리 (daily_notifications flag).
+ * daily_notifications flag 체크 — 오늘 해당 알림 이미 발송했는지.
+ * 동일 cron 이 2회 fire 하는 경우 중복 Telegram 차단용.
+ */
+type NotificationFlag = 'summary_sent' | 'announce_sent' | 'results_sent';
+
+async function isNotificationSent(
+  db: DB, date: string, flag: NotificationFlag,
+): Promise<boolean> {
+  const { data } = await db
+    .from('daily_notifications')
+    .select(flag).eq('run_date', date).maybeSingle();
+  return !!(data as Record<string, unknown> | null)?.[flag];
+}
+
+/**
+ * daily_notifications flag 설정. row 존재 시 update, 없으면 insert.
+ * upsert 미사용 이유: 부분 payload 가 다른 flag 컬럼을 DEFAULT(false) 로
+ * 덮어쓸 위험 회피 (예: announce row 가 기존 summary_sent=true 를 무효화).
+ */
+async function markNotificationFlag(
+  db: DB, date: string, flag: NotificationFlag,
+  extra: Record<string, unknown> = {},
+): Promise<void> {
+  const { data: existing } = await db
+    .from('daily_notifications')
+    .select('run_date').eq('run_date', date).maybeSingle();
+
+  if (existing) {
+    await db.from('daily_notifications')
+      .update({ [flag]: true, ...extra }).eq('run_date', date);
+  } else {
+    await db.from('daily_notifications')
+      .insert({ run_date: date, [flag]: true, ...extra });
+  }
+}
+
+/**
+ * 하루 요약 Telegram 알림 idempotent 처리 (daily_notifications.summary_sent).
  * 마지막 조각 저장 시점에 전체 예측을 한 번에 전송. SP 늦확정으로 expected 가
  * 늘어도 summary_sent=true 면 재전송 차단.
  */
@@ -639,10 +698,7 @@ async function handleDailySummaryNotification(
 
     if ((todayTotal ?? 0) < expected) return;
 
-    const { data: marker } = await db
-      .from('daily_notifications')
-      .select('summary_sent').eq('run_date', date).maybeSingle();
-    if (marker?.summary_sent) return;
+    if (await isNotificationSent(db, date, 'summary_sent')) return;
 
     const summary = await buildDailySummary(db, dbGameIds);
     await notifyPredictions(
@@ -654,8 +710,7 @@ async function handleDailySummaryNotification(
       summary,
     );
 
-    await db.from('daily_notifications').upsert({
-      run_date: date, summary_sent: true,
+    await markNotificationFlag(db, date, 'summary_sent', {
       sent_at: new Date().toISOString(),
       prediction_count: todayTotal,
     });
