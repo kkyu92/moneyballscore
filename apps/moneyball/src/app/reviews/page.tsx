@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  type TeamCode,
+  shortTeamName,
+  winnerProbOf,
+} from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
@@ -16,6 +21,7 @@ interface VerifiedPredictionRow {
   confidence: number;
   is_correct: boolean | null;
   prediction_type: string;
+  reasoning: { homeWinProb?: number | null } | null;
   predicted_winner_team: { code: string | null; name_ko: string | null } | null;
   game: {
     id: number;
@@ -35,7 +41,7 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   const { data } = await supabase
     .from('predictions')
     .select(`
-      confidence, is_correct, prediction_type,
+      confidence, is_correct, prediction_type, reasoning,
       predicted_winner_team:teams!predictions_predicted_winner_fkey(code, name_ko),
       game:games!predictions_game_id_fkey(
         id, game_date, game_time, home_score, away_score, status,
@@ -179,7 +185,7 @@ export default async function ReviewsPage() {
               const awayName = shortTeamName(awayCode);
               const winnerCode = pred.predicted_winner_team?.code as TeamCode;
               const winnerName = shortTeamName(winnerCode);
-              const pct = Math.round((0.5 + pred.confidence / 2) * 100);
+              const pct = Math.round(winnerProbOf(pred.reasoning?.homeWinProb) * 100);
 
               return (
                 <Link

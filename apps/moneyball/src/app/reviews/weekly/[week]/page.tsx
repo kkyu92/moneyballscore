@@ -78,7 +78,7 @@ function HighlightCard({ h }: { h: WeeklyHighlight }) {
         {h.homeName}
       </p>
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        예측 {winnerName ?? ""} {Math.round(h.confidence * 100)}%{" "}
+        예측 {winnerName ?? ""} {Math.round(h.winnerProb * 100)}%{" "}
         · {h.isCorrect ? "적중" : "빗나감"}
       </p>
     </Link>

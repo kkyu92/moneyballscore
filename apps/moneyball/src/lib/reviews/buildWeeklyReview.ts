@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  type TeamCode,
+  shortTeamName,
+  classifyWinnerProb,
+  winnerProbOf,
+} from '@moneyball/shared';
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { WeekRange } from "./computeWeekRange";
 
@@ -14,7 +20,8 @@ export interface WeeklyHighlight {
   homeScore: number | null;
   awayScore: number | null;
   predictedWinnerCode: TeamCode | null;
-  confidence: number;
+  // 예측 승자 적중 확률 (max(hwp, 1-hwp)). 퍼센트 표기 anchor.
+  winnerProb: number;
   isCorrect: boolean;
   badge: "박빙 적중" | "고확신 적중" | "대역전 실패" | null;
 }
@@ -56,6 +63,7 @@ interface Row {
   confidence: number | null;
   is_correct: boolean | null;
   factors: Record<string, number> | null;
+  reasoning: { homeWinProb?: number | null } | null;
   predicted_winner: number | null;
   predicted_winner_team: {
     code: string | null;
@@ -107,28 +115,29 @@ function pickHighlights(rows: Row[]): WeeklyHighlight[] {
       homeScore: g.home_score,
       awayScore: g.away_score,
       predictedWinnerCode: predictedCode,
-      confidence: r.confidence ?? 0,
+      winnerProb: winnerProbOf(r.reasoning?.homeWinProb),
       isCorrect: r.is_correct ?? false,
       badge: null,
     };
   });
 
-  // 박빙 적중: confidence 0.45~0.58 범위 + 적중
+  // 3단계 tier 기반 badge — 예측 승자 적중 확률 기준.
+  //   박빙 적중 = tossup (winnerProb < 0.55) + 적중 → 작은 확률로 맞춘 경기
+  //   고확신 적중 = confident (winnerProb >= 0.65) + 적중 → 예측대로 맞춘 경기
+  //   대역전 실패 = confident OR lean (winnerProb >= 0.55) + 실패 → 빗나간 강한 예측
   const closeHit = mapped
-    .filter((h) => h.isCorrect && h.confidence >= 0.45 && h.confidence <= 0.58)
-    .sort((a, b) => a.confidence - b.confidence)[0];
+    .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'tossup')
+    .sort((a, b) => a.winnerProb - b.winnerProb)[0];
   if (closeHit) closeHit.badge = "박빙 적중";
 
-  // 고확신 적중: confidence >= 0.65 + 적중
   const highHit = mapped
-    .filter((h) => h.isCorrect && h.confidence >= 0.65)
-    .sort((a, b) => b.confidence - a.confidence)[0];
+    .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'confident')
+    .sort((a, b) => b.winnerProb - a.winnerProb)[0];
   if (highHit && highHit !== closeHit) highHit.badge = "고확신 적중";
 
-  // 대역전 실패: confidence >= 0.6 + 실패
   const bigMiss = mapped
-    .filter((h) => !h.isCorrect && h.confidence >= 0.6)
-    .sort((a, b) => b.confidence - a.confidence)[0];
+    .filter((h) => !h.isCorrect && classifyWinnerProb(h.winnerProb) !== 'tossup')
+    .sort((a, b) => b.winnerProb - a.winnerProb)[0];
   if (bigMiss) bigMiss.badge = "대역전 실패";
 
   const picked = [closeHit, highHit, bigMiss].filter(
@@ -231,12 +240,13 @@ function buildSummary(
     const winner = topHighlight.predictedWinnerCode
       ? shortTeamName(topHighlight.predictedWinnerCode)
       : "";
+    const topPct = Math.round(topHighlight.winnerProb * 100);
     if (topHighlight.badge === "박빙 적중") {
-      text += ` 가장 인상적인 결과는 ${topHighlight.awayName} vs ${topHighlight.homeName} — 확신도 ${Math.round(topHighlight.confidence * 100)}%의 박빙 예측이 적중했습니다.`;
+      text += ` 가장 인상적인 결과는 ${topHighlight.awayName} vs ${topHighlight.homeName} — 예측 적중 확률 ${topPct}%의 박빙 경기를 맞춘 사례.`;
     } else if (topHighlight.badge === "고확신 적중") {
-      text += ` ${topHighlight.gameDate} ${winner} 승리 예측이 ${Math.round(topHighlight.confidence * 100)}% 확신도로 적중하며 고확신 구간의 신뢰도를 보여줬습니다.`;
+      text += ` ${topHighlight.gameDate} ${winner} 승리 예측이 ${topPct}% 적중 확률로 맞아떨어지며 강한 예측 구간의 신뢰도를 보여줬습니다.`;
     } else if (topHighlight.badge === "대역전 실패") {
-      text += ` 다만 ${topHighlight.awayName} vs ${topHighlight.homeName}에서 ${Math.round(topHighlight.confidence * 100)}% 확신도 예측이 빗나가는 이변도 있었습니다.`;
+      text += ` 다만 ${topHighlight.awayName} vs ${topHighlight.homeName}에서 ${topPct}% 적중 확률 예측이 빗나가는 이변도 있었습니다.`;
     }
   }
 
@@ -257,7 +267,7 @@ export async function buildWeeklyReview(
     .from("predictions")
     .select(
       `
-        confidence, is_correct, factors, predicted_winner,
+        confidence, is_correct, factors, reasoning, predicted_winner,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
         game:games!predictions_game_id_fkey(
           id, game_date, home_score, away_score, status,

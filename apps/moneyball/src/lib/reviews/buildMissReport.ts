@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  type TeamCode,
+  shortTeamName,
+  classifyWinnerProb,
+  winnerProbOf,
+} from '@moneyball/shared';
 
 export interface FactorErrorItem {
   factor: string;
@@ -19,7 +25,8 @@ export interface MissReportItem {
   awayScore: number | null;
   predictedWinnerCode: TeamCode | null;
   actualWinnerCode: TeamCode | null;
-  confidence: number;
+  // 예측 승자 적중 확률 — confident/lean 티어만 MissReport 대상.
+  winnerProb: number;
   preGameReasoning: string | null;
   judgePostview: string | null;
   factorErrors: FactorErrorItem[];
@@ -55,7 +62,8 @@ interface PostGameRow {
 }
 
 interface ReasoningPreShape {
-  debate?: { verdict?: { reasoning?: string } };
+  debate?: { verdict?: { reasoning?: string; homeWinProb?: number | null } };
+  homeWinProb?: number | null;
   [key: string]: unknown;
 }
 
@@ -70,8 +78,6 @@ interface ReasoningPostShape {
   awayPostview?: { missedBy?: string };
 }
 
-const MIN_CONFIDENCE = 0.55;
-
 function extractPreGameReasoning(r: unknown): string | null {
   if (!r || typeof r !== "object") return null;
   const shape = r as ReasoningPreShape;
@@ -79,8 +85,16 @@ function extractPreGameReasoning(r: unknown): string | null {
   return typeof reasoning === "string" ? reasoning : null;
 }
 
+function extractHomeWinProb(r: unknown): number {
+  if (!r || typeof r !== "object") return 0.5;
+  const shape = r as ReasoningPreShape;
+  const hwp = shape.debate?.verdict?.homeWinProb ?? shape.homeWinProb;
+  if (typeof hwp !== "number" || Number.isNaN(hwp)) return 0.5;
+  return hwp;
+}
+
 /**
- * 고확신(confidence >= 0.55) 예측 중 틀린 것 Top N.
+ * 강한 예측 / 유력 예측 (winnerProb ≥ 0.55, confident+lean 티어) 중 틀린 것 Top N.
  * 각 항목에 pre_game reasoning + post_game judge reasoning + factor error 통합.
  */
 export async function buildMissReport(options: {
@@ -89,6 +103,9 @@ export async function buildMissReport(options: {
   const limit = options.limit ?? 10;
   const supabase = await createClient();
 
+  // reasoning.homeWinProb 는 JSONB 필드라 서버 필터링 대신 is_correct=false
+  // 전부 가져와 클라이언트에서 winnerProb tier 로 필터. limit 여유분 fetch
+  // 후 tier 통과 건만 N 개 pick.
   const { data: preData } = await supabase
     .from("predictions")
     .select(
@@ -106,11 +123,17 @@ export async function buildMissReport(options: {
     .eq("prediction_type", "pre_game")
     .match(CURRENT_MODEL_FILTER)
     .eq("is_correct", false)
-    .gte("confidence", MIN_CONFIDENCE)
-    .order("confidence", { ascending: false })
-    .limit(limit);
+    .order("game_id", { ascending: false })
+    .limit(limit * 6);
 
-  const rows = (preData ?? []) as unknown as PreGameRow[];
+  const allRows = (preData ?? []) as unknown as PreGameRow[];
+  // winnerProb 계산 + tossup 제외 + winnerProb 내림차순 정렬 + limit.
+  const scored = allRows
+    .map((r) => ({ row: r, wp: winnerProbOf(extractHomeWinProb(r.reasoning)) }))
+    .filter(({ wp }) => classifyWinnerProb(wp) !== 'tossup')
+    .sort((a, b) => b.wp - a.wp)
+    .slice(0, limit);
+  const rows = scored.map((s) => s.row);
   if (rows.length === 0) return [];
 
   const gameIds = rows.map((r) => r.game_id).filter((id): id is number => id != null);
@@ -162,7 +185,7 @@ export async function buildMissReport(options: {
       predictedWinnerCode:
         (r.predicted_winner_team?.code as TeamCode | null) ?? null,
       actualWinnerCode: (g.winner?.code as TeamCode | null) ?? null,
-      confidence: r.confidence ?? 0,
+      winnerProb: winnerProbOf(extractHomeWinProb(r.reasoning)),
       preGameReasoning: extractPreGameReasoning(r.reasoning),
       judgePostview: post?.judgeReasoning ?? null,
       factorErrors: factorErrors.slice(0, 5),

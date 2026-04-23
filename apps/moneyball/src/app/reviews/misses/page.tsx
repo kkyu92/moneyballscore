@@ -103,7 +103,7 @@ export default async function MissesReviewPage() {
             const actualName = item.actualWinnerCode
               ? shortTeamName(item.actualWinnerCode)
               : null;
-            const confPct = Math.round((0.5 + item.confidence / 2) * 100);
+            const confPct = Math.round(item.winnerProb * 100);
 
             return (
               <Link

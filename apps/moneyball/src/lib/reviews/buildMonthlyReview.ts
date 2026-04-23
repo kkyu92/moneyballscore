@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  type TeamCode,
+  shortTeamName,
+  classifyWinnerProb,
+  winnerProbOf,
+} from '@moneyball/shared';
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { MonthRange } from "./computeMonthRange";
 import { getPreviousMonth } from "./computeMonthRange";
@@ -44,6 +50,7 @@ interface Row {
   confidence: number | null;
   is_correct: boolean | null;
   factors: Record<string, number> | null;
+  reasoning: { homeWinProb?: number | null } | null;
   predicted_winner: number | null;
   predicted_winner_team: { code: string | null } | null;
   game: {
@@ -68,7 +75,7 @@ async function fetchRowsInRange(
     .from("predictions")
     .select(
       `
-        confidence, is_correct, factors, predicted_winner,
+        confidence, is_correct, factors, reasoning, predicted_winner,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
         game:games!predictions_game_id_fkey(
           id, game_date, home_score, away_score, status,
@@ -107,13 +114,13 @@ function pickHighlights(rows: Row[], limit = 6): WeeklyHighlight[] {
       homeScore: g.home_score,
       awayScore: g.away_score,
       predictedWinnerCode: predictedCode,
-      confidence: r.confidence ?? 0,
+      winnerProb: winnerProbOf(r.reasoning?.homeWinProb),
       isCorrect: r.is_correct ?? false,
       badge: null,
     };
   });
 
-  // 월간 하이라이트 — 주간보다 넓게: 박빙 적중 2 + 고확신 적중 2 + 대역전 실패 2
+  // 월간 하이라이트 — 주간보다 넓게: tier 별 최대 2건씩 tag.
   const picked: WeeklyHighlight[] = [];
   const used = new Set<number>();
 
@@ -125,18 +132,18 @@ function pickHighlights(rows: Row[], limit = 6): WeeklyHighlight[] {
   };
 
   const closeHits = mapped
-    .filter((h) => h.isCorrect && h.confidence >= 0.45 && h.confidence <= 0.58)
-    .sort((a, b) => a.confidence - b.confidence);
+    .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'tossup')
+    .sort((a, b) => a.winnerProb - b.winnerProb);
   closeHits.slice(0, 2).forEach((h) => tag(h, "박빙 적중"));
 
   const highHits = mapped
-    .filter((h) => h.isCorrect && h.confidence >= 0.65)
-    .sort((a, b) => b.confidence - a.confidence);
+    .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'confident')
+    .sort((a, b) => b.winnerProb - a.winnerProb);
   highHits.slice(0, 2).forEach((h) => tag(h, "고확신 적중"));
 
   const bigMisses = mapped
-    .filter((h) => !h.isCorrect && h.confidence >= 0.6)
-    .sort((a, b) => b.confidence - a.confidence);
+    .filter((h) => !h.isCorrect && classifyWinnerProb(h.winnerProb) !== 'tossup')
+    .sort((a, b) => b.winnerProb - a.winnerProb);
   bigMisses.slice(0, 2).forEach((h) => tag(h, "대역전 실패"));
 
   return picked.slice(0, limit);
