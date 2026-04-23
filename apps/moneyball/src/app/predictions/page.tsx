@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { HIGH_CONFIDENCE_THRESHOLD } from "@moneyball/shared";
+import {
+  classifyWinnerProb,
+  WINNER_TIER_EMOJI,
+  WINNER_TIER_LABEL,
+  type WinnerConfidenceTier,
+} from "@moneyball/shared";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -10,6 +15,12 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
+interface TierCount {
+  predicted: number;
+  verified: number;
+  correct: number;
+}
+
 interface DateStat {
   date: string;
   total: number;
@@ -18,10 +29,18 @@ interface DateStat {
   cancelled: number;
   verified: number;
   correct: number;
-  highConf: number;
-  highConfVerified: number;
-  highConfCorrect: number;
+  tiers: Record<WinnerConfidenceTier, TierCount>;
 }
+
+function emptyTierCounts(): Record<WinnerConfidenceTier, TierCount> {
+  return {
+    confident: { predicted: 0, verified: 0, correct: 0 },
+    lean: { predicted: 0, verified: 0, correct: 0 },
+    tossup: { predicted: 0, verified: 0, correct: 0 },
+  };
+}
+
+const TIER_ORDER: WinnerConfidenceTier[] = ['confident', 'lean', 'tossup'];
 
 async function getPredictionDates(): Promise<DateStat[]> {
   const supabase = await createClient();
@@ -31,7 +50,7 @@ async function getPredictionDates(): Promise<DateStat[]> {
   const { data } = await supabase
     .from('games')
     .select(
-      'game_date, status, predictions(id, confidence, is_correct, prediction_type)',
+      'game_date, status, predictions(id, confidence, is_correct, reasoning, prediction_type)',
     )
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
@@ -42,7 +61,7 @@ async function getPredictionDates(): Promise<DateStat[]> {
   // 날짜별 그룹핑. total = 편성 경기 (LEFT JOIN 총 game row).
   // predicted = prediction row 있는 경기. missing = total - predicted.
   // cancelled = postponed 경기. verified = is_correct 명시된 경기 (취소 제외).
-  // highConf = confidence ≥ HIGH_CONFIDENCE_THRESHOLD 인 예측.
+  // tiers = 예측 승자 적중 확률 3단계 (confident/lean/tossup) 별 카운트.
   const dateMap = new Map<string, DateStat>();
   for (const game of data) {
     const date = game.game_date;
@@ -55,26 +74,28 @@ async function getPredictionDates(): Promise<DateStat[]> {
         cancelled: 0,
         verified: 0,
         correct: 0,
-        highConf: 0,
-        highConfVerified: 0,
-        highConfCorrect: 0,
+        tiers: emptyTierCounts(),
       });
     }
     const entry = dateMap.get(date)!;
     entry.total += 1;
     if (game.status === 'postponed') entry.cancelled += 1;
-    const pred = game.predictions?.[0];
+    const pred = game.predictions?.[0] as
+      | {
+          is_correct: boolean | null;
+          reasoning: { homeWinProb?: number | null } | null;
+        }
+      | undefined;
     if (pred) {
       entry.predicted += 1;
-      const isHigh = (pred.confidence ?? 0) >= HIGH_CONFIDENCE_THRESHOLD;
-      if (isHigh) entry.highConf += 1;
+      const hwp = pred.reasoning?.homeWinProb ?? 0.5;
+      const tier = classifyWinnerProb(hwp);
+      entry.tiers[tier].predicted += 1;
       if (game.status !== 'postponed' && pred.is_correct !== null) {
         entry.verified += 1;
         if (pred.is_correct) entry.correct += 1;
-        if (isHigh) {
-          entry.highConfVerified += 1;
-          if (pred.is_correct) entry.highConfCorrect += 1;
-        }
+        entry.tiers[tier].verified += 1;
+        if (pred.is_correct) entry.tiers[tier].correct += 1;
       }
     } else {
       entry.missing += 1;
@@ -98,8 +119,10 @@ export default async function PredictionsPage() {
         <div className="space-y-2">
           {dates.map((d) => {
             const accuracy = d.verified > 0 ? d.correct / d.verified : 0;
-            const highAccuracy =
-              d.highConfVerified > 0 ? d.highConfCorrect / d.highConfVerified : 0;
+            // 3단계 중 실제 예측된 티어만 카운트 캡션에 노출 (0 인 티어 스킵).
+            const tierChips = TIER_ORDER.filter(
+              (tier) => d.tiers[tier].predicted > 0,
+            );
             return (
               <Link
                 key={d.date}
@@ -116,11 +139,15 @@ export default async function PredictionsPage() {
                     </div>
                     <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-2">
                       <span>예측 {d.predicted}</span>
-                      {d.highConf > 0 && (
-                        <span className="text-brand-700 dark:text-brand-300 font-medium">
-                          · 고확신 {d.highConf}
+                      {tierChips.map((tier) => (
+                        <span
+                          key={tier}
+                          className="text-gray-600 dark:text-gray-300"
+                        >
+                          · {WINNER_TIER_EMOJI[tier]} {WINNER_TIER_LABEL[tier]}{' '}
+                          {d.tiers[tier].predicted}
                         </span>
-                      )}
+                      ))}
                       {d.cancelled > 0 && (
                         <span className="text-gray-400 dark:text-gray-500">
                           · 취소 {d.cancelled}
@@ -153,20 +180,27 @@ export default async function PredictionsPage() {
                           결과 대기
                         </div>
                       )}
-                      {d.highConfVerified > 0 && (
-                        <div
-                          className={`text-xs mt-0.5 ${
-                            highAccuracy >= 0.7
-                              ? "text-green-600 dark:text-green-400"
-                              : highAccuracy >= 0.5
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                          }`}
-                        >
-                          고확신 {d.highConfCorrect}/{d.highConfVerified} (
-                          {Math.round(highAccuracy * 100)}%)
-                        </div>
-                      )}
+                      {TIER_ORDER.filter(
+                        (tier) => d.tiers[tier].verified > 0,
+                      ).map((tier) => {
+                        const t = d.tiers[tier];
+                        const tierAcc = t.correct / t.verified;
+                        return (
+                          <div
+                            key={tier}
+                            className={`text-xs mt-0.5 ${
+                              tierAcc >= 0.7
+                                ? "text-green-600 dark:text-green-400"
+                                : tierAcc >= 0.5
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
+                            }`}
+                          >
+                            {WINNER_TIER_EMOJI[tier]} {WINNER_TIER_LABEL[tier]}{' '}
+                            {t.correct}/{t.verified} ({Math.round(tierAcc * 100)}%)
+                          </div>
+                        );
+                      })}
                     </div>
                     <span className="text-gray-400 dark:text-gray-500">→</span>
                   </div>

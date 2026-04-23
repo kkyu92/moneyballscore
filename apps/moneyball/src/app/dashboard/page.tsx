@@ -12,11 +12,11 @@ import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
 import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import {
-  HIGH_CONFIDENCE_THRESHOLD,
   KBO_TEAMS,
   shortTeamName,
   type TeamCode,
 } from "@moneyball/shared";
+import { buildTierRates } from "@/lib/predictions/tierStats";
 
 export const metadata: Metadata = {
   title: "대시보드",
@@ -28,11 +28,10 @@ export const metadata: Metadata = {
 // revalidate 는 24h 안전망 — API 실패 시 다음 날 자연 갱신.
 export const revalidate = 86400;
 
-const HIGH_CONF_THRESHOLD = HIGH_CONFIDENCE_THRESHOLD;
-
 interface OverviewRow {
   confidence: number;
   is_correct: boolean;
+  reasoning: { homeWinProb?: number | null } | null;
   game: {
     game_date: string;
     home_team: { code: string; color_primary: string | null } | null;
@@ -47,7 +46,7 @@ async function getOverview(): Promise<OverviewRow[]> {
     .from("predictions")
     .select(
       `
-        confidence, is_correct,
+        confidence, is_correct, reasoning,
         game:games!predictions_game_id_fkey(
           game_date,
           home_team:teams!games_home_team_id_fkey(code, color_primary),
@@ -100,9 +99,11 @@ export default async function DashboardPage() {
   const correct = overview.filter((p) => p.is_correct).length;
   const rate = total > 0 ? correct / total : 0;
 
-  const highConf = overview.filter((p) => p.confidence >= HIGH_CONF_THRESHOLD);
-  const highConfCorrect = highConf.filter((p) => p.is_correct).length;
-  const highConfRate = highConf.length > 0 ? highConfCorrect / highConf.length : 0;
+  // 3단계 (confident / lean / tossup) 버킷별 적중률 — 예측 승자 적중 확률 기준.
+  const tierRates = buildTierRates(overview);
+  const confidentStat = tierRates.confident;
+  const confidentRate =
+    confidentStat.total > 0 ? confidentStat.correct / confidentStat.total : 0;
 
   // 누적 + 일자별 — 같은 {date, is_correct} 소스에서 파생
   const dailyInputs = overview
@@ -182,7 +183,7 @@ export default async function DashboardPage() {
 
       {/* 요약 카드 */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <AccuracySummary total={total} correct={correct} rate={rate} highConfRate={highConfRate} />
+        <AccuracySummary total={total} correct={correct} rate={rate} tierRates={tierRates} />
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">총 예측</h3>
           <span className="text-4xl font-bold">{totalPredCount}</span>
@@ -192,12 +193,16 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">고확신 적중</h3>
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+            🔥 강한 예측 적중률
+          </h3>
           <span className="text-4xl font-bold">
-            {highConf.length > 0 ? Math.round(highConfRate * 100) : 0}%
+            {confidentStat.total > 0 ? Math.round(confidentRate * 100) : 0}%
           </span>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            고확신 예측 ({highConfCorrect}/{highConf.length})
+            {confidentStat.total > 0
+              ? `강한 예측 ${confidentStat.correct}/${confidentStat.total}`
+              : '강한 예측 표본 없음'}
           </p>
         </div>
       </section>

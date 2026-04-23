@@ -7,13 +7,16 @@ import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
-  HIGH_CONFIDENCE_THRESHOLD,
+  classifyWinnerProb,
   toKSTDateString,
   toKSTDisplayString,
+  winnerProbOf,
   type TeamCode,
 } from "@moneyball/shared";
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
+import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
+import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import Link from "next/link";
 
@@ -186,44 +189,49 @@ function formatKoreanWeekday(dateStr: string): string {
   return days[d.getUTCDay()];
 }
 
-async function getSeasonAccuracy() {
+async function getSeasonAccuracy(): Promise<{
+  total: number;
+  correct: number;
+  rate: number;
+  tierRates: TierRates;
+}> {
   const supabase = await createClient();
 
   const { data } = await supabase
     .from('predictions')
-    .select('is_correct, confidence')
+    .select('is_correct, reasoning')
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null);
 
   if (!data || data.length === 0) {
-    return { total: 0, correct: 0, rate: 0, highConfRate: 0 };
+    return { total: 0, correct: 0, rate: 0, tierRates: emptyTierRates() };
   }
 
   const total = data.length;
   const correct = data.filter((p) => p.is_correct).length;
-  const highConf = data.filter(
-    (p) => p.confidence >= HIGH_CONFIDENCE_THRESHOLD,
+  const tierRates = buildTierRates(
+    data as Array<{
+      is_correct: boolean | null;
+      reasoning: { homeWinProb?: number | null } | null;
+    }>,
   );
-  const highConfCorrect = highConf.filter((p) => p.is_correct).length;
 
   return {
     total,
     correct,
     rate: total > 0 ? correct / total : 0,
-    highConfRate: highConf.length > 0 ? highConfCorrect / highConf.length : 0,
+    tierRates,
   };
 }
 
 /**
- * 오늘 경기 중 가장 확신이 높은 예측을 선택. "오늘의 고확신 예측"
- * Hero 노출용. 기존 접전·라이벌 기반 "빅매치" 를 대체.
+ * 오늘 경기 중 예측 승자 적중 확률이 가장 높은 경기를 Hero 로 노출.
  *
- * 선택 규칙:
- *   1. prediction 있는 경기 중 confidence ≥ HIGH_CONFIDENCE_THRESHOLD (0.4)
- *      만 후보
- *   2. 그 중 confidence 최대값
- *   3. 동점 시 빠른 경기 시간 우선 (ms 단위 tiebreak 성격)
- *   4. 후보 0 → null (feature flag 꺼진 것과 동일 fallback 경로)
+ * 선택 규칙 (winnerProb = max(hwp, 1-hwp) 기준):
+ *   1. 🔥 강한 예측 (winnerProb ≥ 0.65) 있으면 그 중 최고값
+ *   2. 없으면 🎯 유력 (winnerProb ≥ 0.55) 중 최고값
+ *   3. 없으면 winnerProb 최고값 (🤔 반반 이어도 가장 높은 것)
+ *   4. 예측 자체 없으면 null (hero 미노출)
  */
 function selectBigMatchFromGames(games: HomeGame[]): {
   bigMatch: HomeGame | null;
@@ -231,20 +239,25 @@ function selectBigMatchFromGames(games: HomeGame[]): {
 } {
   if (!isBigMatchEnabled()) return { bigMatch: null, result: null };
 
-  let best: HomeGame | null = null;
-  let bestConfidence = -1;
-  for (const game of games) {
-    const pred = game.predictions?.[0];
-    if (!pred) continue;
-    const conf = pred.confidence ?? 0;
-    if (conf < HIGH_CONFIDENCE_THRESHOLD) continue;
-    if (conf > bestConfidence) {
-      bestConfidence = conf;
-      best = game;
-    }
+  const scored = games
+    .map((game) => {
+      const pred = game.predictions?.[0];
+      const hwp = pred?.reasoning?.debate?.verdict?.homeWinProb ?? pred?.reasoning?.homeWinProb;
+      if (hwp == null) return null;
+      return { game, wp: winnerProbOf(hwp), tier: classifyWinnerProb(hwp) };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  if (scored.length === 0) return { bigMatch: null, result: null };
+
+  for (const tier of ['confident', 'lean', 'tossup'] as const) {
+    const bucket = scored.filter((s) => s.tier === tier);
+    if (bucket.length === 0) continue;
+    bucket.sort((a, b) => b.wp - a.wp);
+    return { bigMatch: bucket[0].game, result: null };
   }
 
-  return { bigMatch: best, result: null };
+  return { bigMatch: null, result: null };
 }
 
 export default async function HomePage() {
@@ -336,7 +349,7 @@ export default async function HomePage() {
           total={accuracy.total}
           correct={accuracy.correct}
           rate={accuracy.rate}
-          highConfRate={accuracy.highConfRate}
+          tierRates={accuracy.tierRates}
         />
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
