@@ -9,6 +9,12 @@ import {
   shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
+  winnerProbOf,
+  classifyWinnerProb,
+  WINNER_PROB_CONFIDENT,
+  WINNER_PROB_LEAN,
+  WINNER_TIER_LABEL,
+  WINNER_TIER_EMOJI,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -138,6 +144,66 @@ describe('toKSTDisplayString', () => {
   it('should handle KST timezone', () => {
     const result = toKSTDisplayString(new Date('2026-04-13T20:00:00Z'));
     expect(result).toBe('2026년 04월 14일');
+  });
+});
+
+describe('winnerProbOf', () => {
+  it('return max(hwp, 1-hwp) — 홈 승률 0.70 → 0.70', () => {
+    expect(winnerProbOf(0.7)).toBeCloseTo(0.7, 5);
+  });
+
+  it('원정 승률 우위 케이스 (홈 0.30) → 0.70 으로 대칭', () => {
+    expect(winnerProbOf(0.3)).toBeCloseTo(0.7, 5);
+  });
+
+  it('동률 홈 0.5 → 0.5', () => {
+    expect(winnerProbOf(0.5)).toBeCloseTo(0.5, 5);
+  });
+
+  it('null / undefined 는 0.5 로 폴백', () => {
+    expect(winnerProbOf(null)).toBe(0.5);
+    expect(winnerProbOf(undefined)).toBe(0.5);
+  });
+});
+
+describe('classifyWinnerProb (3단계)', () => {
+  it('WINNER_PROB_CONFIDENT = 0.65, WINNER_PROB_LEAN = 0.55 (Telegram B2 와 통일)', () => {
+    expect(WINNER_PROB_CONFIDENT).toBe(0.65);
+    expect(WINNER_PROB_LEAN).toBe(0.55);
+  });
+
+  it('winnerProb ≥ 0.65 → confident (🔥 강한 예측)', () => {
+    expect(classifyWinnerProb(0.65)).toBe('confident');
+    expect(classifyWinnerProb(0.80)).toBe('confident');
+    // 홈 0.20 = 원정 0.80 → confident
+    expect(classifyWinnerProb(0.20)).toBe('confident');
+  });
+
+  it('0.55 ≤ winnerProb < 0.65 → lean (🎯 유력)', () => {
+    expect(classifyWinnerProb(0.55)).toBe('lean');
+    expect(classifyWinnerProb(0.60)).toBe('lean');
+    expect(classifyWinnerProb(0.45)).toBe('lean'); // 원정 0.55
+  });
+
+  it('winnerProb < 0.55 → tossup (🤔 반반)', () => {
+    expect(classifyWinnerProb(0.54)).toBe('tossup');
+    expect(classifyWinnerProb(0.50)).toBe('tossup');
+    expect(classifyWinnerProb(0.46)).toBe('tossup');
+  });
+
+  it('null/undefined 는 tossup 으로 분류 (null-safe)', () => {
+    expect(classifyWinnerProb(null)).toBe('tossup');
+    expect(classifyWinnerProb(undefined)).toBe('tossup');
+  });
+
+  it('tier 라벨 / 이모지 3종 모두 정의', () => {
+    for (const tier of ['confident', 'lean', 'tossup'] as const) {
+      expect(WINNER_TIER_LABEL[tier]).toBeTruthy();
+      expect(WINNER_TIER_EMOJI[tier]).toBeTruthy();
+    }
+    expect(WINNER_TIER_EMOJI.confident).toBe('🔥');
+    expect(WINNER_TIER_EMOJI.lean).toBe('🎯');
+    expect(WINNER_TIER_EMOJI.tossup).toBe('🤔');
   });
 });
 

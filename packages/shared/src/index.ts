@@ -113,21 +113,50 @@ export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 export const HOME_ADVANTAGE = 0.015;
 
 /**
- * 고확신 예측 임계값 — confidence ≥ 0.6 (= 예측 승률 80%+ 또는 20%-).
+ * 예측 승자 적중 확률 (winnerProb = max(hwp, 1-hwp)) 기반 3단계 라벨.
  *
- * confidence = |homeWinProb - 0.5| × 2. 0.6 이면 homeWinProb 0.8 또는 0.2.
- * 직관적으로 "모델이 한쪽 편을 80%+ 로 강하게 본 경기".
+ * 단일 anchor 원칙: "누가 이길지"와 그 적중률을 사용자에게 노출. confidence
+ * 축은 debate 심판 LLM 주관값이라 winnerProb 와 de-couple 돼 있어 폐기.
  *
- * v0.5.26 `/dashboard` 가 사용하던 0.6 을 shared 로 올려 home /
- * /predictions 와 통일 (이전 0.4 는 분포 관찰 후 변별력 부족으로 상향).
+ * 임계값은 Telegram B2 알림 (🤔 / 🎯 / 🔥) 과 완전 통일 —
+ *   confident (🔥 강한 예측): winnerProb ≥ 0.65
+ *   lean      (🎯 유력)     : 0.55 ≤ winnerProb < 0.65
+ *   tossup    (🤔 반반)     : winnerProb < 0.55
  */
-export const HIGH_CONFIDENCE_THRESHOLD = 0.6;
+export const WINNER_PROB_CONFIDENT = 0.65;
+export const WINNER_PROB_LEAN = 0.55;
 
-/** 예측 승률 기준 고확신 라벨 ("80%+" 또는 "20%-" 강한 예측). */
-export function isHighConfidence(confidence: number | null | undefined): boolean {
-  if (confidence == null) return false;
-  return confidence >= HIGH_CONFIDENCE_THRESHOLD;
+export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
+
+/** homeWinProb → 예측 승자 적중 확률. null-safe. */
+export function winnerProbOf(homeWinProb: number | null | undefined): number {
+  if (homeWinProb == null) return 0.5;
+  return Math.max(homeWinProb, 1 - homeWinProb);
 }
+
+/** homeWinProb → 3단계 tier. null 은 tossup 으로 간주. */
+export function classifyWinnerProb(
+  homeWinProb: number | null | undefined,
+): WinnerConfidenceTier {
+  const wp = winnerProbOf(homeWinProb);
+  if (wp >= WINNER_PROB_CONFIDENT) return 'confident';
+  if (wp >= WINNER_PROB_LEAN) return 'lean';
+  return 'tossup';
+}
+
+/** tier → 한글 라벨 (사용자 노출). */
+export const WINNER_TIER_LABEL: Record<WinnerConfidenceTier, string> = {
+  confident: '강한 예측',
+  lean: '유력',
+  tossup: '반반',
+};
+
+/** tier → 이모지 (Telegram B2 와 동일). */
+export const WINNER_TIER_EMOJI: Record<WinnerConfidenceTier, string> = {
+  confident: '🔥',
+  lean: '🎯',
+  tossup: '🤔',
+};
 
 // 신뢰도 → Tailwind 색상 클래스
 export function getConfidenceColor(pct: number): string {

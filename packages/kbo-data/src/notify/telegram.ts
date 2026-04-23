@@ -1,4 +1,11 @@
-import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  shortTeamName,
+  classifyWinnerProb,
+  WINNER_TIER_EMOJI,
+  WINNER_TIER_LABEL,
+  winnerProbOf,
+} from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { PipelineResult, ScrapedGame } from '../types';
 
@@ -58,16 +65,11 @@ export async function notifyPredictions(
     const away = shortTeamName(pred.awayTeam);
     const winner = shortTeamName(pred.predictedWinner);
     // 예측 승자 적중 확률 = max(hwp, 1-hwp). 홈/원정 무관 "우리 예측이 맞을 확률".
-    const winnerProb = Math.max(pred.homeWinProb, 1 - pred.homeWinProb);
-    const pct = Math.round(winnerProb * 100);
-    let emoji: string, label: string;
-    if (winnerProb >= 0.65) {
-      emoji = '🔥'; label = '적중';
-    } else if (winnerProb >= 0.55) {
-      emoji = '🎯'; label = '유력';
-    } else {
-      emoji = '🤔'; label = '반반';
-    }
+    const pct = Math.round(winnerProbOf(pred.homeWinProb) * 100);
+    const tier = classifyWinnerProb(pred.homeWinProb);
+    const emoji = WINNER_TIER_EMOJI[tier];
+    // Telegram 은 "적중" 단어로 사용자에게 익숙한 기존 카피 유지.
+    const label = tier === 'confident' ? '적중' : WINNER_TIER_LABEL[tier];
 
     lines.push(`${emoji} <b>${label}</b> ${away} vs ${home} → <b>${winner}</b> ${pct}%`);
   }
