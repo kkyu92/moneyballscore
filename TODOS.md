@@ -1,5 +1,41 @@
 # TODOS
 
+## 🚀 Next-Up (2026-04-24 세션 즉시 착수)
+
+### 관측 수집 (오늘 저녁~내일 아침)
+
+1. **B1 검증** — cron 분 오프셋 17 적용 후 fire 패턴
+   - 오늘 (2026-04-23) 관측: 4/15 fire (80% skip)
+   - 내일 확인: UTC 13:17 predict_final + UTC 14:17 verify 발사 여부
+   - `gh run list --workflow=daily-pipeline.yml --created 2026-04-24` 로 fire 시간 추출
+2. **Part A 검증** — `skipped_detail.raw` 동봉 첫 사례
+   - `not_scheduled` 발생 시 `state_sc` / `cancel_sc_id` / `cancel_sc_nm` 확인
+   - `pipeline_runs.skipped_detail` 조회 쿼리로 raw 존재 여부 확인
+3. **B2 체감** — Telegram notifyPredictions 에 🤔/🎯/🔥 이모지 + 반반/유력/적중 문구
+
+### 핵심 구조 개선 (이번 세션 분석에서 도출)
+
+**HIGH_CONFIDENCE_THRESHOLD 재정의** (범위 大):
+
+문제: 현재 `confidence ≥ 0.4` 가 "고확신" 기준인데 debate 모델 confidence 는 대부분 0.45-0.55 에 몰림 → 사실상 모든 예측이 "고확신" 분류됨. 오늘 5경기 모두 hwp 0.44-0.56 (동률) 이지만 "고확신" 으로 분류.
+
+해결: winnerProb 기반 재정의 — `winnerProb = max(hwp, 1-hwp)` 가 더 정직한 "확신" 지표.
+- `winnerProb ≥ 0.65` → 고확신 (우리 Telegram 🔥 적중 기준과 일치)
+- 또는 두 기준 공존: `confidence ≥ 0.4 && winnerProb ≥ 0.60` 등
+
+연쇄 수정 대상:
+- `packages/shared/src/constants.ts` — `HIGH_CONFIDENCE_THRESHOLD` 재정의 + 새 winnerProb 기반 상수
+- `apps/moneyball/src/app/page.tsx:205,240` — hero 빅매치 선정 로직
+- `apps/moneyball/src/app/dashboard/page.tsx:105` — highConf 분류
+- `apps/moneyball/src/app/predictions/page.tsx:69` — highConf 카운트
+- `apps/moneyball/src/lib/reviews/buildMissReport.ts:83` — 고확신 틀린 예측 선별
+- `apps/moneyball/src/lib/reviews/buildMonthlyReview.ts:116-135` — 월간 하이라이트 "고확신 적중"
+- 테스트 일괄 조정
+
+**B3 (not_scheduled 재시도)**: Part A 관측 데이터 2-3일 쌓인 후 정확한 필드 타겟팅.
+
+---
+
 ## ✅ PLAN_v5 완료 (v0.5.23, 2026-04-20)
 
 **전체 Phase 완료**:
