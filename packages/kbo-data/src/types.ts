@@ -4,6 +4,19 @@ import type { TeamCode, GameStatus } from '@moneyball/shared';
 // 스크래퍼 반환 타입
 // ============================================
 
+/**
+ * KBO API raw status fingerprint — status 이상 발생 시 원인 추적용.
+ * shouldPredictGame 이 `not_scheduled`/`sp_unconfirmed` 로 skip 할 때
+ * pipeline_runs.skipped_detail 에 동봉되어 사후 어느 필드 때문인지 식별.
+ */
+export interface RawStatusSnapshot {
+  state_sc?: string | null;    // GAME_STATE_SC
+  inn_no?: number | null;      // GAME_INN_NO
+  cancel_sc_id?: string | null;// CANCEL_SC_ID
+  cancel_sc_nm?: string | null;// CANCEL_SC_NM
+  result_ck?: number | null;   // GAME_RESULT_CK
+}
+
 export interface ScrapedGame {
   date: string;           // YYYY-MM-DD
   homeTeam: TeamCode;
@@ -16,6 +29,8 @@ export interface ScrapedGame {
   homeScore?: number;
   awayScore?: number;
   externalGameId: string; // KBO 공식 게임 ID
+  /** KBO API raw status snapshot — skipped_detail 동봉용 (생산 안정성 무관, 관측용) */
+  rawStatus?: RawStatusSnapshot;
 }
 
 export interface PitcherStats {
@@ -94,6 +109,8 @@ export interface PredictionResult {
 export interface SkippedGame {
   game: string;    // "LTvHH@17:00" — 판독 편의용 포맷
   reason: string;  // 'window_too_early' | 'window_too_late' | 'not_scheduled' | 'sp_unconfirmed' | 'already_predicted'
+  /** not_scheduled / sp_unconfirmed 등 KBO API status 이상 케이스에서만 동봉. 재발 시 어느 필드 때문인지 특정. */
+  raw?: RawStatusSnapshot;
 }
 
 export interface PipelineResult {
@@ -133,6 +150,7 @@ export interface KBOGameRaw {
   GAME_INN_NO?: number;    // 현재 이닝
   GAME_TB_SC?: string;     // "T"=초, "B"=말
   CANCEL_SC_ID?: string;   // "0"=정상, "1"/"2"=취소
+  CANCEL_SC_NM?: string;   // "정상경기" / "우천취소" / etc. — 관측용
   // deprecated — 실제 API에 없음, 호환성 유지
   HOME_SCORE?: number;
   AWAY_SCORE?: number;

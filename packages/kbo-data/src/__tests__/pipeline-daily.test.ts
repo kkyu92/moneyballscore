@@ -560,6 +560,71 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       );
       expect(runLog).toBeDefined();
     });
+
+    it('not_scheduled skip 시 rawStatus 동봉 → pipeline_runs.skipped_detail 로 원인 추적', async () => {
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T08:30:00Z')); // KST 17:30
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({
+            gameTime: '18:30', status: 'postponed',
+            rawStatus: {
+              state_sc: '1', inn_no: null,
+              cancel_sc_id: '1', cancel_sc_nm: '우천취소',
+              result_ck: 0,
+            },
+          }),
+        ]);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
+
+        expect(result.skippedDetail).toBeDefined();
+        const detail = result.skippedDetail![0];
+        expect(detail.reason).toBe('not_scheduled');
+        expect(detail.raw).toBeDefined();
+        expect(detail.raw?.cancel_sc_id).toBe('1');
+        expect(detail.raw?.cancel_sc_nm).toBe('우천취소');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('window_too_early skip 시 rawStatus 동봉 안 됨 (관측 불필요)', async () => {
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T02:00:00Z')); // KST 11:00 — 7.5h 전
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({
+            gameTime: '18:30',
+            rawStatus: {
+              state_sc: '1', inn_no: null,
+              cancel_sc_id: '0', cancel_sc_nm: '정상경기',
+            },
+          }),
+        ]);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
+
+        expect(result.skippedDetail).toBeDefined();
+        const detail = result.skippedDetail![0];
+        expect(detail.reason).toBe('window_too_early');
+        expect(detail.raw).toBeUndefined();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe('predict_final mode (Codex #9 GAP 감지)', () => {

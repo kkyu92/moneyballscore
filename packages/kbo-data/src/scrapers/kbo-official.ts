@@ -115,6 +115,14 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
       homeScore,
       awayScore,
       externalGameId: raw.G_ID,
+      // 관측용 — status 이상 시 skipped_detail 에 동봉돼 원인 특정 가능
+      rawStatus: {
+        state_sc: raw.GAME_STATE_SC ?? null,
+        inn_no: raw.GAME_INN_NO ?? null,
+        cancel_sc_id: raw.CANCEL_SC_ID ?? null,
+        cancel_sc_nm: raw.CANCEL_SC_NM ?? null,
+        result_ck: raw.GAME_RESULT_CK ?? null,
+      },
     });
   }
 

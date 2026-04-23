@@ -328,9 +328,14 @@ export async function runDailyPipeline(
     if (decision.shouldPredict) {
       windowTargets.push(g);
     } else {
+      // KBO API status 이상 케이스는 raw snapshot 동봉 — 재발 시 어느 필드
+      // 때문인지 pipeline_runs.skipped_detail 만 봐도 특정 가능.
+      const needsRaw = decision.reason === 'not_scheduled'
+        || decision.reason === 'sp_unconfirmed';
       skippedDetail.push({
         game: `${g.awayTeam}v${g.homeTeam}@${g.gameTime}`,
         reason: decision.reason,
+        ...(needsRaw && g.rawStatus ? { raw: g.rawStatus } : {}),
       });
     }
   }
