@@ -196,14 +196,16 @@ describe('classifyWinnerProb (3단계)', () => {
     expect(classifyWinnerProb(undefined)).toBe('tossup');
   });
 
-  it('tier 라벨 / 이모지 3종 모두 정의', () => {
-    for (const tier of ['confident', 'lean', 'tossup'] as const) {
-      expect(WINNER_TIER_LABEL[tier]).toBeTruthy();
-      expect(WINNER_TIER_EMOJI[tier]).toBeTruthy();
-    }
-    expect(WINNER_TIER_EMOJI.confident).toBe('🔥');
-    expect(WINNER_TIER_EMOJI.lean).toBe('🎯');
-    expect(WINNER_TIER_EMOJI.tossup).toBe('🤔');
+  it('tier 라벨 — Telegram + UI 공통 단일 출처 (적중/유력/반반)', () => {
+    expect(WINNER_TIER_LABEL.confident).toBe('적중');
+    expect(WINNER_TIER_LABEL.lean).toBe('유력');
+    expect(WINNER_TIER_LABEL.tossup).toBe('반반');
+  });
+
+  it('tier 이모지 조합 — 각 티어당 관련 이모지 3종 concat', () => {
+    expect(WINNER_TIER_EMOJI.confident).toBe('🔥🎯💯');
+    expect(WINNER_TIER_EMOJI.lean).toBe('🎯📈⚡');
+    expect(WINNER_TIER_EMOJI.tossup).toBe('🤔🎲⚖️');
   });
 });
 

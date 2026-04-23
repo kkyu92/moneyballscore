@@ -144,18 +144,23 @@ export function classifyWinnerProb(
   return 'tossup';
 }
 
-/** tier → 한글 라벨 (사용자 노출). */
+/** tier → 한글 라벨 (사용자 노출, Telegram + UI 공통). */
 export const WINNER_TIER_LABEL: Record<WinnerConfidenceTier, string> = {
-  confident: '강한 예측',
+  confident: '적중',
   lean: '유력',
   tossup: '반반',
 };
 
-/** tier → 이모지 (Telegram B2 와 동일). */
+/**
+ * tier → 이모지 조합 (관련 이모지 3종 concat). Telegram + UI 공통.
+ *   적중 🔥🎯💯 = 확신 · 정조준 · 완벽
+ *   유력 🎯📈⚡ = 타겟 · 상승세 · 기세
+ *   반반 🤔🎲⚖️ = 의심 · 운 · 저울
+ */
 export const WINNER_TIER_EMOJI: Record<WinnerConfidenceTier, string> = {
-  confident: '🔥',
-  lean: '🎯',
-  tossup: '🤔',
+  confident: '🔥🎯💯',
+  lean: '🎯📈⚡',
+  tossup: '🤔🎲⚖️',
 };
 
 // 신뢰도 → Tailwind 색상 클래스

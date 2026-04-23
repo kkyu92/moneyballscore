@@ -68,8 +68,7 @@ export async function notifyPredictions(
     const pct = Math.round(winnerProbOf(pred.homeWinProb) * 100);
     const tier = classifyWinnerProb(pred.homeWinProb);
     const emoji = WINNER_TIER_EMOJI[tier];
-    // Telegram 은 "적중" 단어로 사용자에게 익숙한 기존 카피 유지.
-    const label = tier === 'confident' ? '적중' : WINNER_TIER_LABEL[tier];
+    const label = WINNER_TIER_LABEL[tier];
 
     lines.push(`${emoji} <b>${label}</b> ${away} vs ${home} → <b>${winner}</b> ${pct}%`);
   }
