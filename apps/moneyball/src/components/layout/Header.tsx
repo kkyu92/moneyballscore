@@ -12,9 +12,9 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "오늘의 예측" },
-  { href: "/predictions", label: "예측 기록" },
-  { href: "/analysis", label: "AI 분석" },
+  { href: "/", label: "분석" },
+  { href: "/predictions", label: "기록" },
+  { href: "/dashboard", label: "대시보드" },
   {
     label: "팀·선수",
     items: [
@@ -22,7 +22,7 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/players", label: "선수" },
     ],
   },
-  { href: "/seasons", label: "시즌 리뷰" },
+  { href: "/seasons", label: "시즌" },
 ];
 
 export { NAV_ITEMS };
