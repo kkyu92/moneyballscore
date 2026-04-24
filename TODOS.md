@@ -1,38 +1,80 @@
 # TODOS
 
-## 🚀 Next-Up (2026-04-24 세션 즉시 착수)
+## 🚀 Next-Up (2026-04-25 이후)
 
-### 관측 수집 (오늘 저녁~내일 아침)
+### Day 2 Search Console 색인 요청 (내일)
 
-1. **B1 검증** — cron 분 오프셋 17 적용 후 fire 패턴
-   - 오늘 (2026-04-23) 관측: 4/15 fire (80% skip)
-   - 내일 확인: UTC 13:17 predict_final + UTC 14:17 verify 발사 여부
-   - `gh run list --workflow=daily-pipeline.yml --created 2026-04-24` 로 fire 시간 추출
-2. **Part A 검증** — `skipped_detail.raw` 동봉 첫 사례
-   - `not_scheduled` 발생 시 `state_sc` / `cancel_sc_id` / `cancel_sc_nm` 확인
-   - `pipeline_runs.skipped_detail` 조회 쿼리로 raw 존재 여부 확인
-3. **B2 체감** — Telegram notifyPredictions 에 🤔/🎯/🔥 이모지 + 반반/유력/적중 문구
+Day 1 완료: `/`, `/predictions`, `/dashboard`, `/analysis`. 하루 10개 제한에 걸려 5번부터 오늘 못 감. 나머지 6개 + Day 2 새 4개 순서로:
 
-### 핵심 구조 개선 (이번 세션 분석에서 도출)
+**Day 2** (이어서 10개):
+5. `https://moneyballscore.vercel.app/reviews`
+6. `https://moneyballscore.vercel.app/about`
+7. `https://moneyballscore.vercel.app/teams`
+8. `https://moneyballscore.vercel.app/players`
+9. `https://moneyballscore.vercel.app/matchup`
+10. `https://moneyballscore.vercel.app/reviews/misses`
+11. `https://moneyballscore.vercel.app/privacy`
+12. `https://moneyballscore.vercel.app/terms`
+13. `https://moneyballscore.vercel.app/contact`
+14. `https://moneyballscore.vercel.app/seasons`
 
-**HIGH_CONFIDENCE_THRESHOLD 재정의** (범위 大):
+**Day 3** (인기 팀 프로필 5개 + 최근 리뷰·경기):
+- `/teams/HT`, `/teams/LG`, `/teams/OB`, `/teams/SS`, `/teams/SK`
+- `/teams/KT`, `/teams/HH`, `/teams/LT`, `/teams/NC`, `/teams/WO`
 
-문제: 현재 `confidence ≥ 0.4` 가 "고확신" 기준인데 debate 모델 confidence 는 대부분 0.45-0.55 에 몰림 → 사실상 모든 예측이 "고확신" 분류됨. 오늘 5경기 모두 hwp 0.44-0.56 (동률) 이지만 "고확신" 으로 분류.
+**Day 4 이후 불필요**: 허브 색인되면 sitemap + 내부 링크로 Google 자동 발견.
 
-해결: winnerProb 기반 재정의 — `winnerProb = max(hwp, 1-hwp)` 가 더 정직한 "확신" 지표.
-- `winnerProb ≥ 0.65` → 고확신 (우리 Telegram 🔥 적중 기준과 일치)
-- 또는 두 기준 공존: `confidence ≥ 0.4 && winnerProb ≥ 0.60` 등
+### B3 (not_scheduled 재시도) — **데이터 누적 대기**
 
-연쇄 수정 대상:
-- `packages/shared/src/constants.ts` — `HIGH_CONFIDENCE_THRESHOLD` 재정의 + 새 winnerProb 기반 상수
-- `apps/moneyball/src/app/page.tsx:205,240` — hero 빅매치 선정 로직
-- `apps/moneyball/src/app/dashboard/page.tsx:105` — highConf 분류
-- `apps/moneyball/src/app/predictions/page.tsx:69` — highConf 카운트
-- `apps/moneyball/src/lib/reviews/buildMissReport.ts:83` — 고확신 틀린 예측 선별
-- `apps/moneyball/src/lib/reviews/buildMonthlyReview.ts:116-135` — 월간 하이라이트 "고확신 적중"
-- 테스트 일괄 조정
+Part A 관측 결과 (2026-04-24 확인): **이상 status 발생 無**. 모든 skip 이 scheduler 로직 (`window_too_early/late`) 으로 정상. raw 동봉 케이스 아직 트리거되지 않음. 강제 트리거 어려우니 실제 `not_scheduled`/`sp_unconfirmed` 이벤트 발생 시까지 보류.
 
-**B3 (not_scheduled 재시도)**: Part A 관측 데이터 2-3일 쌓인 후 정확한 필드 타겟팅.
+### 심화 SEO (우선순위 낮음)
+
+- **`generateSitemaps` 로 sub-sitemap 쪼개기**: 현재 1340 URL 단일 파일. 2시즌 더 쌓이면 3000+. Next 16 `id: Promise<string>` breaking change 있음.
+- **OG 이미지 점검**: `/analysis/game/[id]` 공유 시 썸네일 동적 생성 (`opengraph-image.tsx`)
+- **Core Web Vitals 감사**: Lighthouse 또는 PageSpeed Insights. 개선 여지 발견 시 다음 세션
+
+---
+
+## ✅ 2026-04-23~24 세션 완료
+
+### B1 / Part A / B2 관측 — **모두 정상**
+- **B1**: cron 오프셋 17 적용 후 4-23 **7회 fire** (이전 4/15 대비 ↑). KST 16:02 predict 로 예측 5건 성공 생성. KST 23:14 verify success.
+- **4-23 `is_correct`**: 5경기 전부 verified (2승 3패, 40%). 체크포인트 우려 해소.
+- **Part A**: 이상 status 발생 無 (정상). raw 동봉 대기.
+- **B2 체감**: 2026-04-24 KST 09:17 announce 에서 확인 예정.
+
+### HIGH_CONFIDENCE_THRESHOLD 재정의 → winnerProb 3단계 단일 anchor (커밋 6450f60 외)
+
+debate confidence 주관값 축 폐기, 예측 승자 적중 확률 (winnerProb = max(hwp, 1-hwp)) 로 전면 통일:
+- `WINNER_PROB_CONFIDENT = 0.65` / `WINNER_PROB_LEAN = 0.55` (Telegram B2 와 통일)
+- `classifyWinnerProb(hwp)` → `'confident' | 'lean' | 'tossup'`
+- 3단계 라벨 "적중 / 유력 / 반반" + 이모지 pool 랜덤 (`pickTierEmoji`)
+  - 적중 🔥 또는 🎯
+  - 유력 📈 (단일)
+  - 반반 🤔 또는 ⚖️
+- UI 전수 반영: 홈/대시보드/예측기록/주간·월간 리뷰/회고
+- 테스트 **519 → 536 pass**
+
+### SEO — Sitemap "가져올수없음" 근본 해결 (커밋 da59de3)
+
+- **원인 확정**: `createClient` → `cookies()` 호출 → Next.js 가 route 를 dynamic 으로 강제 → `revalidate` 무력화 → 매 요청 2500 DB 쿼리 → Googlebot timeout → "유형: 알수없음 / 상태: 가져올수없음"
+- **해결**: sitemap 전용 cookie-free anon client 인라인 → **static + ISR** prerender
+- `x-vercel-cache: HIT` 확인, Search Console **색인 생성됨** 도달
+- 동시 조치: pitcher leaderboard 쿼리 제거, games limit 5000→2500, 전 URL lastmod, revalidate 3600→21600, warmup cron (매시간 37분)
+
+### SEO 추가 보강 (커밋 e3f5cee)
+
+- `robots.txt` — `/debug`, `/api`, `/search` Disallow
+- canonical — 홈 + /analysis + dashboard/predictions/reviews/reviews-misses/about/teams/players + /analysis/game/[id]
+- **SportsEvent JSON-LD** 추가 — /analysis/game/[id] (Article 과 병기). Google 리치 결과 후보 (팀·일정·구장)
+
+### 외부 웹마스터 등록 (사용자 완료)
+
+- Google Search Console ✅ (Day 1 4개 색인 요청 완료)
+- Naver 웹마스터 ✅
+- Bing Webmaster ✅
+- IndexNow ⏭ 스킵
 
 ---
 
