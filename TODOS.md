@@ -2,9 +2,9 @@
 
 ## 🚀 Next-Up (2026-04-25 이후)
 
-### Day 2 Search Console 색인 요청 (내일)
+### Day 2 Search Console 색인 요청 (2026-04-25 이후)
 
-Day 1 완료: `/`, `/predictions`, `/dashboard`, `/analysis`. 하루 10개 제한에 걸려 5번부터 오늘 못 감. 나머지 6개 + Day 2 새 4개 순서로:
+Day 1 완료: `/`, `/predictions`, `/dashboard`, `/analysis`. 2026-04-24 재확인 결과 하루 10개 제한 모두 소진 → skip. 2026-04-25 한도 리셋 후 아래 10개 먼저 입력. 팀 프로필 10개는 Day 3 으로:
 
 **Day 2** (이어서 10개):
 5. `https://moneyballscore.vercel.app/reviews`
