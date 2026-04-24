@@ -233,8 +233,8 @@ async function getSeasonAccuracy(): Promise<{
  * 오늘 경기 중 예측 승자 적중 확률이 가장 높은 경기를 Hero 로 노출.
  *
  * 선택 규칙 (winnerProb = max(hwp, 1-hwp) 기준):
- *   1. 🔥 강한 예측 (winnerProb ≥ 0.65) 있으면 그 중 최고값
- *   2. 없으면 🎯 유력 (winnerProb ≥ 0.55) 중 최고값
+ *   1. 🔥 적중 (winnerProb ≥ 0.65) 있으면 그 중 최고값
+ *   2. 없으면 📈 유력 (winnerProb ≥ 0.55) 중 최고값
  *   3. 없으면 winnerProb 최고값 (🤔 반반 이어도 가장 높은 것)
  *   4. 예측 자체 없으면 null (hero 미노출)
  */

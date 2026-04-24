@@ -153,7 +153,7 @@ describe('notifyPredictions (regression)', () => {
       date: '2026-04-22',
       gamesFound: 5, predictionsGenerated: 5, gamesSkipped: 0, errors: [],
     };
-    // hwp=0.45 → 원정 HT 승률 55% → 유력 🎯 (55%)
+    // hwp=0.45 → 원정 HT 승률 55% → 유력 📈 (55%)
     const predictions = [
       {
         homeTeam: 'OB' as const, awayTeam: 'HT' as const,
@@ -189,13 +189,13 @@ describe('notifyPredictions (regression)', () => {
 
     await notifyPredictions(result, predictions);
     const msg = calls[0].text;
-    // 반반 pool = [🤔, ⚖️] 중 하나 (랜덤 선택). 라벨 "반반" 으로 1차 앵커.
-    expect(msg).toMatch(/🤔|⚖️/);
+    // 반반 이모지 고정 🤔.
+    expect(msg).toContain('🤔');
     expect(msg).toContain('반반');
     expect(msg).toContain('52%');
   });
 
-  it('승자 적중 확률 ≥ 65% → 적중 (🔥 또는 🎯)', async () => {
+  it('승자 적중 확률 ≥ 65% → 적중 🔥', async () => {
     const calls = captureTelegramCalls();
     const result: PipelineResult = {
       date: '2026-04-22',
@@ -212,8 +212,8 @@ describe('notifyPredictions (regression)', () => {
 
     await notifyPredictions(result, predictions);
     const msg = calls[0].text;
-    // 적중 pool = [🔥, 🎯] 중 하나.
-    expect(msg).toMatch(/🔥|🎯/);
+    // 적중 이모지 고정 🔥.
+    expect(msg).toContain('🔥');
     expect(msg).toContain('적중');
     expect(msg).toContain('70%');
   });
