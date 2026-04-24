@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { NAV_ITEMS } from "./Header";
+import { NAV_ITEMS, isNavGroup } from "./Header";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -39,16 +39,34 @@ export function MobileNav() {
       </button>
       {open && (
         <nav className="absolute top-16 left-0 right-0 bg-brand-800 border-b border-brand-700 shadow-lg z-50">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="block px-6 py-3 text-sm text-brand-200 hover:bg-brand-700 hover:text-white"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) =>
+            isNavGroup(item) ? (
+              <div key={item.label}>
+                <div className="px-6 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-brand-400">
+                  {item.label}
+                </div>
+                {item.items.map((sub) => (
+                  <Link
+                    key={sub.href}
+                    href={sub.href}
+                    onClick={() => setOpen(false)}
+                    className="block px-10 py-2 text-sm text-brand-200 hover:bg-brand-700 hover:text-white"
+                  >
+                    {sub.label}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="block px-6 py-3 text-sm text-brand-200 hover:bg-brand-700 hover:text-white"
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
         </nav>
       )}
     </div>

@@ -3,15 +3,26 @@ import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchForm } from "@/components/shared/SearchForm";
 
-const NAV_ITEMS = [
+export type NavLink = { href: string; label: string };
+export type NavGroup = { label: string; items: NavLink[] };
+export type NavItem = NavLink | NavGroup;
+
+export function isNavGroup(item: NavItem): item is NavGroup {
+  return "items" in item;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "오늘의 예측" },
   { href: "/predictions", label: "예측 기록" },
   { href: "/analysis", label: "AI 분석" },
-  { href: "/players", label: "선수" },
-  { href: "/teams", label: "팀" },
+  {
+    label: "팀·선수",
+    items: [
+      { href: "/teams", label: "팀" },
+      { href: "/players", label: "선수" },
+    ],
+  },
   { href: "/seasons", label: "시즌 리뷰" },
-  { href: "/dashboard", label: "대시보드" },
-  { href: "/about", label: "소개" },
 ];
 
 export { NAV_ITEMS };
@@ -26,15 +37,57 @@ export function Header() {
           <span className="text-xs text-brand-300 font-medium">Score</span>
         </Link>
         <nav className="hidden md:flex items-center gap-5">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm text-brand-200 hover:text-white transition-colors"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) =>
+            isNavGroup(item) ? (
+              <div key={item.label} className="relative group">
+                <button
+                  type="button"
+                  className="text-sm text-brand-200 hover:text-white transition-colors flex items-center gap-1 focus:outline-none focus-visible:text-white"
+                  aria-haspopup="menu"
+                >
+                  {item.label}
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+                <div
+                  role="menu"
+                  className="absolute left-0 top-full pt-2 hidden group-hover:block group-focus-within:block z-50"
+                >
+                  <div className="bg-brand-800 border border-brand-700 rounded-md shadow-lg min-w-[8rem] py-1">
+                    {item.items.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        role="menuitem"
+                        className="block px-4 py-2 text-sm text-brand-200 hover:bg-brand-700 hover:text-white transition-colors"
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm text-brand-200 hover:text-white transition-colors"
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
           <SearchForm compact />
           <ThemeToggle />
         </nav>
