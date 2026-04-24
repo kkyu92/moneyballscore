@@ -2,6 +2,41 @@
 
 ## 🚀 Next-Up (2026-04-25 이후)
 
+### ⭐ 분석 축 — v4-3 자연 발화 관찰 결과 (2026-04-24 실행)
+
+2026-04-24 KST 오전 세션에서 TODOS 체크리스트 A~F 실 DB 조회. **v4-3 핵심은 작동**하지만 **부분 누락 2건** 발견 — 다음 세션 분석 작업의 시작점.
+
+#### ✅ 통과
+- **A**: 어제(2026-04-23) `predictions.prediction_type='post_game'` row **5건** (경기 수 일치)
+- **B**: Sonnet 심판 실제 factor-level reasoning 생성 (fallback 한 줄 아님)
+- **C 부분**: 생성된 경기는 **home+away 양쪽 memory 정확히 생성** (v4-3 버그 수정 확인)
+- **E**: `agent_memories` UNIQUE 제약 작동, duplicates 0
+
+#### ⚠️ 다음 세션 과제
+
+**C1. `agent_memory` 2경기 누락 원인 조사**
+- 어제 5경기 중 game_id `2723/2724/2725` 는 memory 생성, `2726/2727` 는 0 row
+- gap 분석: `packages/kbo-data/src/agents/retro.ts` 코드 독해 + 2726/2727 postview `reasoning` 비교
+- 가설: (a) postview 의 `factorErrors` 구조 문제 (b) retro 가 특정 조건에서 조기 return (c) 경기 스코어 패턴 따라 skip
+
+**C2. GitHub Actions schedule skip 재발 대응**
+- `live-update.yml` 2026-04-23 24h 구간 **5회만 실행** (기대 42회)
+- 2026-04-24 KST 09~10 시 `daily-pipeline` announce cron 도 동일 패턴으로 skip → 수동 트리거로 회복
+- 구조적 대응 후보: (a) schedule 오프셋 여러 개 분산 (b) Vercel Cron 이관 (c) 외부 polling (EasyCron)
+- 결정 전 데이터 필요: 최근 7일 skip 패턴 / daily-pipeline vs live-update 간 skip 비율
+
+**F. Layer-1 validator reject 메트릭 경로 재정의**
+- TODOS 원 문구 "validator_logs 테이블" 은 실제로 `violation_type/severity/detail/backend` 구조 — **명예훼손/hallucination 감지용** (`/debug/hallucination`)
+- Layer-1 (JSON 파싱 + schema) reject 율은 별도: Vercel Functions 로그에 `[Validator]` prefix grep 해야 함
+- 다음 세션: (a) validator.ts 가 실패 시 DB 기록도 하도록 얹을지 (b) 로그 grep 자동화 대시보드 만들지 결정
+
+#### 🎯 분석 축 후속 (C1~F 해결 후 착수)
+- **A** `/analysis` 허브 확장 (전날·주간·비-빅매치 경기 진입점)
+- **B** 모델 성능 분석 사용자 가시화 (`/debug/*` → `/dashboard` 공개 섹션 이식)
+- **D** v2.0 튜닝 준비 (50경기 축적 시점 도달 후)
+
+---
+
 ### Day 2 Search Console 색인 요청 (2026-04-25 이후)
 
 Day 1 완료: `/`, `/predictions`, `/dashboard`, `/analysis`. 2026-04-24 재확인 결과 하루 10개 제한 모두 소진 → skip. 2026-04-25 한도 리셋 후 아래 10개 먼저 입력. 팀 프로필 10개는 Day 3 으로:
