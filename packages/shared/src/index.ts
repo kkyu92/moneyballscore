@@ -118,10 +118,10 @@ export const HOME_ADVANTAGE = 0.015;
  * 단일 anchor 원칙: "누가 이길지"와 그 적중률을 사용자에게 노출. confidence
  * 축은 debate 심판 LLM 주관값이라 winnerProb 와 de-couple 돼 있어 폐기.
  *
- * 임계값은 Telegram B2 알림 (🤔 / 🎯 / 🔥) 과 완전 통일 —
- *   confident (🔥 강한 예측): winnerProb ≥ 0.65
- *   lean      (🎯 유력)     : 0.55 ≤ winnerProb < 0.65
- *   tossup    (🤔 반반)     : winnerProb < 0.55
+ * 임계값 + 이모지 (Telegram + UI 공통 단일 출처, 고정) —
+ *   confident (🔥 적중): winnerProb ≥ 0.65
+ *   lean      (📈 유력): 0.55 ≤ winnerProb < 0.65
+ *   tossup    (🤔 반반): winnerProb < 0.55
  */
 export const WINNER_PROB_CONFIDENT = 0.65;
 export const WINNER_PROB_LEAN = 0.55;
@@ -152,29 +152,22 @@ export const WINNER_TIER_LABEL: Record<WinnerConfidenceTier, string> = {
 };
 
 /**
- * tier → 이모지 pool. pickTierEmoji() 가 하나 뽑아 노출.
- *   적중 🔥 | 🎯  (확신 / 정조준)
- *   유력 📈        (상승세 단독)
- *   반반 🤔 | ⚖️  (의심 / 저울)
+ * tier → 이모지 (고정, tier 당 1개).
+ *   적중 🔥 / 유력 📈 / 반반 🤔
+ *
+ * 과거 pool 랜덤이었으나 같은 경기 재발송 시 이모지가 달라지는
+ * 혼동이 있어 2026-04-24 고정화. 배열 형태는 pickTierEmoji API 호환성 유지.
  */
 export const WINNER_TIER_EMOJI_POOL: Record<WinnerConfidenceTier, readonly string[]> = {
-  confident: ['🔥', '🎯'],
+  confident: ['🔥'],
   lean: ['📈'],
-  tossup: ['🤔', '⚖️'],
+  tossup: ['🤔'],
 };
 
-/**
- * tier → 이모지 1개 랜덤 선택. 여러 경기 나열 시 단조 완화.
- * `random` 주입 가능 (테스트에서 결정론화).
- */
-export function pickTierEmoji(
-  tier: WinnerConfidenceTier,
-  random: () => number = Math.random,
-): string {
+/** tier → 이모지 1개. 고정 pool 이라 결정론적. */
+export function pickTierEmoji(tier: WinnerConfidenceTier): string {
   const pool = WINNER_TIER_EMOJI_POOL[tier];
-  if (pool.length === 0) return '';
-  if (pool.length === 1) return pool[0];
-  return pool[Math.floor(random() * pool.length)];
+  return pool[0] ?? '';
 }
 
 // 신뢰도 → Tailwind 색상 클래스

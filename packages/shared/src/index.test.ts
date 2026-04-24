@@ -180,7 +180,7 @@ describe('classifyWinnerProb (3단계)', () => {
     expect(classifyWinnerProb(0.20)).toBe('confident');
   });
 
-  it('0.55 ≤ winnerProb < 0.65 → lean (🎯 유력)', () => {
+  it('0.55 ≤ winnerProb < 0.65 → lean (📈 유력)', () => {
     expect(classifyWinnerProb(0.55)).toBe('lean');
     expect(classifyWinnerProb(0.60)).toBe('lean');
     expect(classifyWinnerProb(0.45)).toBe('lean'); // 원정 0.55
@@ -203,31 +203,16 @@ describe('classifyWinnerProb (3단계)', () => {
     expect(WINNER_TIER_LABEL.tossup).toBe('반반');
   });
 
-  it('tier 이모지 pool — 적중 [🔥,🎯] / 유력 [📈] / 반반 [🤔,⚖️]', () => {
-    expect(WINNER_TIER_EMOJI_POOL.confident).toEqual(['🔥', '🎯']);
+  it('tier 이모지 — 고정 (적중 🔥 / 유력 📈 / 반반 🤔)', () => {
+    expect(WINNER_TIER_EMOJI_POOL.confident).toEqual(['🔥']);
     expect(WINNER_TIER_EMOJI_POOL.lean).toEqual(['📈']);
-    expect(WINNER_TIER_EMOJI_POOL.tossup).toEqual(['🤔', '⚖️']);
+    expect(WINNER_TIER_EMOJI_POOL.tossup).toEqual(['🤔']);
   });
 
-  it('pickTierEmoji — pool 중 하나 리턴, 결정론 seed 로 검증 가능', () => {
-    // 유력 pool 크기 1 → 항상 📈
+  it('pickTierEmoji — tier 별 고정 이모지 반환', () => {
+    expect(pickTierEmoji('confident')).toBe('🔥');
     expect(pickTierEmoji('lean')).toBe('📈');
-    expect(pickTierEmoji('lean', () => 0.99)).toBe('📈');
-
-    // 적중 pool 2개 — random=0 → pool[0] '🔥', random=0.9 → pool[1] '🎯'
-    expect(pickTierEmoji('confident', () => 0)).toBe('🔥');
-    expect(pickTierEmoji('confident', () => 0.9)).toBe('🎯');
-
-    // 반반 pool 2개 — 동일 패턴
-    expect(pickTierEmoji('tossup', () => 0)).toBe('🤔');
-    expect(pickTierEmoji('tossup', () => 0.9)).toBe('⚖️');
-  });
-
-  it('pickTierEmoji 기본 호출 — pool 멤버여야 함 (randomness 존재)', () => {
-    for (let i = 0; i < 20; i += 1) {
-      expect(WINNER_TIER_EMOJI_POOL.confident).toContain(pickTierEmoji('confident'));
-      expect(WINNER_TIER_EMOJI_POOL.tossup).toContain(pickTierEmoji('tossup'));
-    }
+    expect(pickTierEmoji('tossup')).toBe('🤔');
   });
 });
 
