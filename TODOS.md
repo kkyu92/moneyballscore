@@ -2,30 +2,51 @@
 
 ## 🚀 Next-Up (2026-04-25 이후)
 
-### ⭐ 분석 축 — v4-3 자연 발화 관찰 결과 (2026-04-24 실행)
+### ⭐ 분석 축 — v4-3 자연 발화 관찰 결과 (2026-04-24 실행 + 2026-04-27 후속)
 
-2026-04-24 KST 오전 세션에서 TODOS 체크리스트 A~F 실 DB 조회. **v4-3 핵심은 작동**하지만 **부분 누락 2건** 발견 — 다음 세션 분석 작업의 시작점.
+2026-04-24 KST 오전 세션에서 TODOS 체크리스트 A~F 실 DB 조회. **v4-3 핵심은 작동**. 누락 가설은 2026-04-27 후속 조사로 정정 — 대부분 false alarm 이었고 진짜 버그 2건 (스크래퍼 status 오판정 + pipeline_runs.mode VARCHAR overflow) 별도 fix.
 
-#### ✅ 통과
+#### ✅ 통과 (2026-04-24)
 - **A**: 어제(2026-04-23) `predictions.prediction_type='post_game'` row **5건** (경기 수 일치)
 - **B**: Sonnet 심판 실제 factor-level reasoning 생성 (fallback 한 줄 아님)
 - **C 부분**: 생성된 경기는 **home+away 양쪽 memory 정확히 생성** (v4-3 버그 수정 확인)
 - **E**: `agent_memories` UNIQUE 제약 작동, duplicates 0
 
+#### ✅ C1 정정 — false alarm (2026-04-27)
+
+원 가설: "4/23 5경기 중 2726/2727 만 memory 0 row → 누락 버그".
+실제 원인: `retro.ts:203` 의 `.eq('is_correct', false)` — **틀린 예측에만 mem 생성** 의도된 동작. 2726/2727 은 예측 적중 → mem 생성 안 함이 정상.
+
+4/23~4/26 4일 검증: wrong 예측 수 × 2 = actual mem 수 100% 일치 (4/23 wrong=3 mem=6, 4/24 wrong=3 mem=6, 4/25 wrong=2 mem=4, 4/26 wrong=3 mem=6). **agent_memory 버그 없음**.
+
+부수 디자인 검토 가치:
+- wrong 만 학습 → 적중 패턴(strength) 도 학습할 가치는? 현재는 wrong 에서 추출한 strength/weakness 만 있음
+- content 에 date 포함 → UNIQUE 사실상 매번 새 row → 일별 누적
+
+#### ✅ 진짜 버그 2건 fix (2026-04-27)
+
+**버그 1 — `kbo-official.ts:96` status 오판정** (4/26 LG@OB / KT@SK 영구 누락 직접 원인):
+- KBO API 가 경기 시작 전에도 `GAME_INN_NO=1` 을 미리 set 하는 케이스 발견
+- `state_sc='1' + inn_no=1` raw 가 'live' 로 오판정 → `shouldPredictGame` 이 not_scheduled reject
+- Fix: `Number(inn_no) > 0` OR 절 제거. `state_sc='2'` 단독 신뢰. kbo-live.ts 도 동일 수정. regression test 4건 추가 (358 pass)
+- 커밋 `5cc001f`
+
+**버그 2 — `pipeline_runs.mode VARCHAR(10)` overflow** (4/25, 4/26 predict_final cron 결과 silent 손실 + 4/26 summary 알림 누락 상위 원인):
+- migration 004 의 mode 컬럼 VARCHAR(10) 가 'predict_final' (13자) 거부 → ERROR 22001
+- supabase-js .error silent 리턴 → finish() try/catch 안 잡힘 → pipeline_runs 에 한 row 도 안 남음
+- CLAUDE.md 사례 3 (`predictions.model_version 'v2.0-debate'`) 와 동일 패턴 재발
+- Fix: migration 019 (VARCHAR(10)→VARCHAR(20)) + finish() 의 .insert() .error 가드 추가
+- 커밋 `71a1cbc`
+
 #### ⚠️ 다음 세션 과제
 
-**C1. `agent_memory` 2경기 누락 원인 조사**
-- 어제 5경기 중 game_id `2723/2724/2725` 는 memory 생성, `2726/2727` 는 0 row
-- gap 분석: `packages/kbo-data/src/agents/retro.ts` 코드 독해 + 2726/2727 postview `reasoning` 비교
-- 가설: (a) postview 의 `factorErrors` 구조 문제 (b) retro 가 특정 조건에서 조기 return (c) 경기 스코어 패턴 따라 skip
-
-**C2. GitHub Actions schedule skip 재발 대응**
+**C2. GitHub Actions schedule skip 재발 대응** (잔존)
 - `live-update.yml` 2026-04-23 24h 구간 **5회만 실행** (기대 42회)
-- 2026-04-24 KST 09~10 시 `daily-pipeline` announce cron 도 동일 패턴으로 skip → 수동 트리거로 회복
-- 구조적 대응 후보: (a) schedule 오프셋 여러 개 분산 (b) Vercel Cron 이관 (c) 외부 polling (EasyCron)
-- 결정 전 데이터 필요: 최근 7일 skip 패턴 / daily-pipeline vs live-update 간 skip 비율
+- 4/23, 4/25, 4/26 announce cron (UTC 00:17) skip — 4/24 만 수동 회복
+- 분 17 오프셋만으로 부족. 구조 대응 후보: (a) 오프셋 분산 30 또는 45 (b) 두 시각으로 dual-fire (c) Vercel Cron 이관 (d) 외부 polling
+- 결정 전 데이터 필요: 최근 7일 skip 패턴 / 시간대별 skip 비율
 
-**F. Layer-1 validator reject 메트릭 경로 재정의**
+**F. Layer-1 validator reject 메트릭 경로 재정의** (잔존)
 - TODOS 원 문구 "validator_logs 테이블" 은 실제로 `violation_type/severity/detail/backend` 구조 — **명예훼손/hallucination 감지용** (`/debug/hallucination`)
 - Layer-1 (JSON 파싱 + schema) reject 율은 별도: Vercel Functions 로그에 `[Validator]` prefix grep 해야 함
 - 다음 세션: (a) validator.ts 가 실패 시 DB 기록도 하도록 얹을지 (b) 로그 grep 자동화 대시보드 만들지 결정
