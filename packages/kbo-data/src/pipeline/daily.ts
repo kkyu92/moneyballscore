@@ -117,7 +117,9 @@ export async function runDailyPipeline(
         ? result.predictionsGenerated > 0 ? 'partial' : 'error'
         : 'success';
     try {
-      await db.from('pipeline_runs').insert({
+      // supabase-js 는 INSERT 실패를 throw 안 하고 .error 로 리턴 — 사례 3
+      // (predictions.model_version VARCHAR overflow silent) 재발 차단.
+      const { error: insertErr } = await db.from('pipeline_runs').insert({
         run_date: targetDate, mode, status,
         games_found: result.gamesFound,
         predictions: result.predictionsGenerated,
@@ -129,6 +131,9 @@ export async function runDailyPipeline(
             : null,
         duration_ms: durationMs, triggered_by: triggeredBy,
       });
+      if (insertErr) {
+        console.error('[Pipeline] pipeline_runs insert error:', insertErr);
+      }
     } catch (e) {
       console.error('[Pipeline] pipeline_runs insert failed:', e);
     }
