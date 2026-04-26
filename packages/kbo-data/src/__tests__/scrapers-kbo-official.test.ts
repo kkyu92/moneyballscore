@@ -149,6 +149,61 @@ describe('fetchGames — status 파싱 regression 보호 (PLAN_v5 Phase 4)', () 
     });
   });
 
+  describe('regression: state_sc=1 + inn_no=1 (2026-04-26 prod)', () => {
+    // 4/26 LG@OB / KT@SK 두 경기가 시작 1시간 전 cron 에서
+    // KBO API 응답 GAME_STATE_SC="1" 인데 GAME_INN_NO=1 으로 미리 set 되어
+    // 'live' 오판정 → shouldPredictGame 이 not_scheduled 로 reject 한 사고.
+    // GAME_INN_NO 는 라이브 판정에서 제외되어야 한다.
+    function rawWith(stateSc: string, innNo: number) {
+      return {
+        d: JSON.stringify([
+          {
+            G_ID: '20260426LGOB0',
+            G_DT: '20260426',
+            G_TM: '14:00',
+            S_NM: '잠실',
+            HOME_ID: 'OB',
+            AWAY_ID: 'LG',
+            HOME_NM: '두산',
+            AWAY_NM: 'LG',
+            B_PIT_P_NM: '곽빈',
+            T_PIT_P_NM: '에르난데스',
+            GAME_STATE_SC: stateSc,
+            GAME_INN_NO: innNo,
+            CANCEL_SC_ID: '0',
+            CANCEL_SC_NM: '정상경기',
+            GAME_RESULT_CK: 0,
+          },
+        ]),
+      };
+    }
+
+    it('state_sc=1 + inn_no=1 → scheduled (라이브 아님)', async () => {
+      mockKboApi(rawWith('1', 1));
+      const games = await fetchGames('2026-04-26');
+      expect(games).toHaveLength(1);
+      expect(games[0].status).toBe('scheduled');
+    });
+
+    it('state_sc=1 + inn_no=0 → scheduled', async () => {
+      mockKboApi(rawWith('1', 0));
+      const games = await fetchGames('2026-04-26');
+      expect(games[0].status).toBe('scheduled');
+    });
+
+    it('state_sc=2 + inn_no=1 → live', async () => {
+      mockKboApi(rawWith('2', 1));
+      const games = await fetchGames('2026-04-26');
+      expect(games[0].status).toBe('live');
+    });
+
+    it('state_sc=3 → final (inn_no 무관)', async () => {
+      mockKboApi(rawWith('3', 9));
+      const games = await fetchGames('2026-04-26');
+      expect(games[0].status).toBe('final');
+    });
+  });
+
   describe('externalGameId + 팀 코드 매핑', () => {
     it('weekend-mixed: G_ID 가 externalGameId 로 유지', async () => {
       mockKboApi(weekendMixed);

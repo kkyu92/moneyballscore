@@ -60,11 +60,12 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 판단 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
+    // GAME_INN_NO 는 라이브 판정에 쓰지 않는다 (kbo-official.ts 와 동일 이유).
     const stateCode = String(raw.GAME_STATE_SC || '');
     let status: LiveGameState['status'] = 'scheduled';
     if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
       status = 'final';
-    } else if (stateCode === '2' || Number(raw.GAME_INN_NO) > 0) {
+    } else if (stateCode === '2') {
       status = 'live';
     }
 

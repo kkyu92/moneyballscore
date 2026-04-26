@@ -89,11 +89,14 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
+    // GAME_INN_NO 는 라이브 판정에 쓰지 않는다. KBO API 가 경기 시작 전에도
+    // inn_no=1 을 미리 set 하는 케이스 존재 (2026-04-26 prod 4/5 경기 누락 원인).
+    // state_sc 단독 신뢰.
     const stateCode = String(raw.GAME_STATE_SC || '');
     let status: ScrapedGame['status'] = 'scheduled';
     if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
       status = 'final';
-    } else if (stateCode === '2' || Number(raw.GAME_INN_NO) > 0) {
+    } else if (stateCode === '2') {
       status = 'live';
     } else if (raw.CANCEL_SC_ID === '1' || raw.CANCEL_SC_ID === '2') {
       status = 'postponed';
