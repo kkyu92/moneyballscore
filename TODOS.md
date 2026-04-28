@@ -140,6 +140,43 @@ WHERE is_correct IS NOT NULL AND scoring_rule = 'v1.6';
 ```
 결정 기준: N ≥ 50 && overall_acc ∈ [0.45, 0.55] && 95%CI 가 0.5 포함 → H4 확정 (모델 = random) → v3 설계 (다른 데이터 소스, 다른 모델 구조) 검토.
 
+**H5. v1.6 가중치 변경이 prod 에서 v1.5 보다 더 나쁨** ⭐⭐ 가장 강한 신호 (H4 와 함께)
+
+2026-04-28 중간점검에서 추출. v1.5/v1.6 시기 분리 분석 시 발견:
+
+| scoring_rule | 기간 | n | 적중 | acc | binomial(p=0.5) 우연 |
+|---|---|---|---|---|---|
+| v1.5 | 4/15-21 | 16 | 12 | **75.0%** | 0.11% |
+| v1.6 | 4/22-26 | 21 | 8 | **38.1%** | 17% (random 이하) |
+| 격차 | | | | **36.9pp** | |
+
+4/22 v1.6 ship (`CHANGELOG v0.5.24` — Wayback 백테스트 wOBA/FIP/SFR 추가, train Brier −0.00319) 이후 prod 적중률이 v1.5 대비 −37%p. CHANGELOG v0.5.26 의 game_records 8-feature backtest 도 이미 null-like 로 v1.7 ship 근거 없음 결론. **즉 wayback 백테스트 + game_records backtest 가 prod 와 정반대 방향 시그널**.
+
+H4 와의 관계: H4 (모델=동전) 와 부분 겹침. 다만 H5 는 **v1.5 자체는 75% 로 동전이 아닐 가능성** + **v1.6 변경이 그 가치를 부순 가능성** 을 분리해서 봄. H4 가 random 이면 v1.5 75% 도 운, H5 가 맞으면 v1.5 회귀가 답.
+
+검증 SQL:
+```sql
+SELECT
+  scoring_rule,
+  COUNT(*) AS n,
+  SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) AS hits,
+  AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END) AS accuracy,
+  -- Wald 95%CI 반폭
+  1.96 * SQRT(AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END) *
+              (1 - AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END)) / NULLIF(COUNT(*),0)) AS ci95
+FROM predictions
+WHERE is_correct IS NOT NULL
+GROUP BY scoring_rule
+ORDER BY scoring_rule;
+```
+
+결정 기준 (5/1 N≥50 시점):
+- v1.5_acc ≥ v1.6_acc + 10pp && N(v1.6) ≥ 30 && 95%CI 비중첩 → **H5 확정 → v1.5 회귀 + v1.6 변경 폐기 + Wayback/game_records 백테스트 신뢰성 재검토**
+- 격차 5~10pp → 표본 추가 (5/15 N≥80 재평가)
+- 격차 ≤ 5pp → v1.6 유지 (H4 가설로 재해석 — 둘 다 random)
+
+H4 와 H5 동시 검증: H4 가 N≥50 [0.45, 0.55] 면 v1.5 시기 75% 도 단순 운 → H5 자연 폐기 (v1.6 회귀 의미 없음). H4 가 0.55 초과 또는 0.45 미만이면 H5 유의미 → v1.5/v1.6 격차 분석 가치.
+
 ---
 
 ### Day 2 Search Console 색인 요청 (2026-04-25 이후)
