@@ -11,6 +11,10 @@ import { CookieConsent } from "@/components/layout/CookieConsent";
 
 const GA_ID = "G-2886XKWG4Y";
 
+const ADSENSE_PUBLISHER_ID = process.env.ADSENSE_PUBLISHER_ID?.trim();
+const adsenseEnabled =
+  !!ADSENSE_PUBLISHER_ID && /^pub-\d{16}$/.test(ADSENSE_PUBLISHER_ID);
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -84,6 +88,13 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
           }}
         />
+        {adsenseEnabled && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${ADSENSE_PUBLISHER_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body className="min-h-full flex flex-col text-gray-900 dark:text-gray-100">
         <a
