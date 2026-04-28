@@ -63,8 +63,82 @@
 - **B** 모델 성능 분석 사용자 가시화 (`/debug/*` → `/dashboard` 공개 섹션 이식)
 - **D** v2.0 튜닝 준비 (50경기 축적 시점 도달 후)
   - **2026-04-28 진행**: verified=37건. 적중률 추세 — 4/15 100% → 4/17~19 80% → 4/21~22 50% → 4/23~26 38%. 명확한 하락 신호 (단 표본 작음, 95%CI ±25%p)
-  - **5/1 KST 09:00 자연 트리거** (4/30 verify 완료 후 verified ≥ 50 도달 예상): v1.5 정량 모델 fallback 으로 verified 50+ 게임 retroactive 재예측 → v1.5 vs v2.0-debate Brier/적중률 직접 비교 → "에이전트 토론이 정량 모델보다 나은가?" 가설 검증
+  - **2026-04-28 사전 검증 — 인프라 이미 완성**:
+    - `/debug/model-comparison` 페이지 + `compareModels.ts` (`extractPureQuantProb` / `buildShadowRows`) + 테스트 모두 작동 중
+    - `daily.ts` 가 v1.6 ship (4/22) 이후 모든 v2.0-debate row 에 `reasoning.quantitativeHomeWinProb` 박는 중. shadow 보존률 v1.5 시기 0% (n=16) / v1.6 시기 100% (n=21)
+    - 21건 (v1.6, 4/22~26) 비교 결과: v2.0-debate Accuracy 38.1%(8/21) Brier 0.26817 / v1.6-pure-shadow Accuracy 23.8%(5/21) Brier **0.25768** — debate 가 winner +14%p 우세, shadow Brier 미세 우세, 21건 중 winner 불일치 3건 (확률값 차이 평균 2.26%p)
+    - **재예측 함수 작성 작업 무산** (인프라 자동 처리). v1.5 시기 16건 retroactive 는 ROI 낮아 보류
+  - **5/1 KST 09:00 자연 트리거** (4/30 verify 완료 후 verified ≥ 50 도달 예상): `/debug/model-comparison` 페이지 한 번 열어 v1.6-pure-shadow vs v2.0-debate 결과 확인 + 아래 H1~H4 가설 검증
   - 결정 기준: v1.5 적중률 ≥ v2.0+5%p → v1.5 회귀 검토 / v2.0 적중률 ≥ v1.5+5%p → v2.0 유지 + 가중치 튜닝 / 차이 < 5%p → 표본 더 축적 후 재평가
+
+#### 🔬 5/1 자연 트리거 가설 후보 4건 (2026-04-28 추출, N=37)
+
+가설 nominate 만. 검증 전 가중치 변경/모델 수정 절대 금지 ("데이터로만 이야기"). 5/1 N≥50 도달 시 아래 SQL 일괄 실행.
+
+**H1. confidence ≥ 0.6 만 가치 있음. 그 이하는 random 수준** ⭐ 강한 신호
+
+| confidence | n | 적중률 |
+|---|---|---|
+| [0.45, 0.50) | 3 | 33% |
+| [0.50, 0.60) | **26** | **50%** ← random |
+| [0.60, 0.63] | 8 | **75%** |
+
+전체 70%(26/37)가 random 구간. confidence ≥ 0.6 그룹만 winner 적중 의미 있음.
+
+검증 SQL:
+```sql
+SELECT
+  CASE WHEN confidence >= 0.6 THEN 'high' ELSE 'low' END AS bucket,
+  COUNT(*) AS n,
+  AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END) AS accuracy,
+  -- Wald 95%CI 반폭
+  1.96 * SQRT(AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END) *
+              (1 - AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END)) / COUNT(*)) AS ci95
+FROM predictions WHERE is_correct IS NOT NULL AND scoring_rule = 'v1.6'
+GROUP BY 1;
+```
+결정 기준: high 그룹 적중률 - low 그룹 적중률 ≥ 15%p && 95%CI 비중첩 → H1 확정 → low confidence 예측 사용자 노출 정책 재검토.
+
+**H2. 원정 예측은 random 보다도 약함** ⭐ 강한 신호
+
+- 홈 예측 22건 → 적중 59% (+9%p)
+- 원정 예측 15건 → 적중 47% (random 이하)
+- 실제 홈 승률 57% (페이지 base 51% 대비 +6%p, 4월 표본 편향)
+
+검증 SQL: `extractHomeWinProb(reasoning) >= 0.5` 그룹 vs `< 0.5` 그룹 Accuracy/Brier 비교.
+
+결정 기준: 원정 예측 그룹 적중률 < 50% && N ≥ 25 → H2 확정 → 원정 신호 보강 (원정팀 recent_form 가중치, away SP 신호 강화 등) 후보.
+
+**H3. 시즌 초 표본 함정 — SP FIP 차이가 거의 0**
+
+|SP FIP diff|: 36/37건이 0.5 미만, 1건만 1.0~2.0. SP FIP 가중치 19% (가중치 1위) 인데 차별화 정보 거의 없음. 4월 초 투수 시즌 표본 5경기 안팎.
+
+검증 SQL: 4/15~5/1 SP FIP 평균 + |diff| 분포 추세. |diff| ≥ 0.5 비율이 시간에 따라 늘면 자연 회복, 안 늘면 구조적 약점.
+
+결정 기준: 5/1 시점 |diff| ≥ 0.5 비율 ≥ 30% → 자연 회복 / < 15% → SP 데이터 갱신 빈도 점검 (KBO Fancy Stats 스크래핑 cron 동기성).
+
+**H4. 시간 추세 — 평균 회귀일 가능성 (가장 큰 의심)**
+
+| 기간 | 적중 | % | binomial(p=0.5) |
+|---|---|---|---|
+| 4/16-17 | 7/7 | 100% | 0.78% |
+| 4/18-21 | 5/9 | 56% | random 근처 |
+| 4/22-26 | 8/21 | **38%** | random 이하 |
+
+4/16-17 의 7/7 = binomial(p=0.5) 0.78% 확률. 매우 운 좋은 초기 + 평균 회귀 가능성. 50건 누적 적중률 ≈ 50% 면 **모델 = 동전 던지기** (구조 재설계 필요).
+
+검증 SQL:
+```sql
+SELECT
+  COUNT(*) AS n,
+  AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END) AS overall_acc,
+  -- 95%CI
+  1.96 * SQRT(AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END) *
+              (1 - AVG(CASE WHEN is_correct THEN 1.0 ELSE 0 END)) / COUNT(*)) AS ci95
+FROM predictions
+WHERE is_correct IS NOT NULL AND scoring_rule = 'v1.6';
+```
+결정 기준: N ≥ 50 && overall_acc ∈ [0.45, 0.55] && 95%CI 가 0.5 포함 → H4 확정 (모델 = random) → v3 설계 (다른 데이터 소스, 다른 모델 구조) 검토.
 
 ---
 
