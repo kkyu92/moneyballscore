@@ -601,9 +601,10 @@ export async function runDailyPipeline(
     }
   }
 
-  // 하루 요약 알림 — daily_notifications flag 로 idempotent (Codex #6)
+  // 하루 요약 알림 — daily_notifications flag 로 idempotent (Codex #6).
+  // errors 패스 — silent fail 시 pipeline_runs.errors 에 박혀 다음 진단 가능.
   if (predictionsGenerated > 0) {
-    await handleDailySummaryNotification(db, dbGameIds, targetDate, games);
+    await handleDailySummaryNotification(db, dbGameIds, targetDate, games, errors);
   }
 
   // gap 감지 (predict_final mode 전용, Codex #9)
@@ -694,23 +695,41 @@ async function markNotificationFlag(
  */
 async function handleDailySummaryNotification(
   db: DB, dbGameIds: number[], date: string, games: ScrapedGame[],
+  errors: string[] = [],
 ) {
+  // 단계별 try/catch — silent fail 방지 (4/22~4/28 5/5 누락 사례)
+  let stage = 'init';
   try {
+    stage = 'expected-calc';
     const expected = games.filter(
       (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
     ).length;
-    if (expected === 0) return;
+    if (expected === 0) {
+      console.log(`[Pipeline] summary skip: expected=0 (no SP-confirmed games)`);
+      return;
+    }
 
+    stage = 'todayTotal-count';
     const { count: todayTotal } = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
       .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
 
-    if ((todayTotal ?? 0) < expected) return;
+    if ((todayTotal ?? 0) < expected) {
+      console.log(`[Pipeline] summary skip: todayTotal=${todayTotal} < expected=${expected}`);
+      return;
+    }
 
-    if (await isNotificationSent(db, date, 'summary_sent')) return;
+    stage = 'flag-check';
+    if (await isNotificationSent(db, date, 'summary_sent')) {
+      console.log(`[Pipeline] summary skip: already sent`);
+      return;
+    }
 
+    stage = 'build-summary';
     const summary = await buildDailySummary(db, dbGameIds);
+
+    stage = 'notify-telegram';
     await notifyPredictions(
       {
         date, gamesFound: games.length,
@@ -720,12 +739,17 @@ async function handleDailySummaryNotification(
       summary,
     );
 
+    stage = 'mark-flag';
     await markNotificationFlag(db, date, 'summary_sent', {
       sent_at: new Date().toISOString(),
       prediction_count: todayTotal,
     });
+    console.log(`[Pipeline] summary sent successfully (n=${todayTotal})`);
   } catch (e) {
-    console.error('[Pipeline] daily summary notification failed:', e);
+    const msg = e instanceof Error ? e.message : String(e);
+    const errLine = `[SUMMARY_FAIL@${stage}] ${msg}`;
+    console.error('[Pipeline] daily summary notification failed:', errLine);
+    errors.push(errLine);
   }
 }
 
