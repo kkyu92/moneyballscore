@@ -142,8 +142,72 @@ CEO 리뷰 (이 design 작성 후 다음 단계) 가 깰 가능성 있는 가정
 - `superpowers:/brainstorm` 신규 — 이미 진행 중. 재귀 X.
 - 5/1 결정 직접 실행 — N=37 표본 부족. "데이터로만 이야기" 메모리 위배.
 
-## 8. 다음 단계
+## 8. CEO 리뷰 결과 (2026-04-28 진행 완료)
 
-1. 이 spec 사용자 검토
-2. `/plan-ceo-review` 실행 — design 자체를 CEO 시각에서 검증
-3. CEO 리뷰 결과 반영 → 본 워크플로 실 실행 (agents dispatch)
+### Anchor reframe (D1)
+
+A → **B 채택**: "지속 가능 자동 성장 + AdSense 수익" hard, 적중률 60% stretch (80% 더 좋고). 외부 sportsbook 58% 상한 + v0.5.26 v3 backtest null + 프로젝트 실제 시간 분배 (UI/SEO/인프라 70%) 모두 정합.
+
+### Workflow 압축 (D2)
+
+3 agents → **2 agents + 사이드 + 적중률 직접 인용**:
+- Agent 1: AdSense path gap audit (general-purpose, web search)
+- Agent 2: 서브 인프라 audit (Explore subagent)
+- 사이드 (직접): silent fail audit (사례 8 후보)
+- 적중률 ceiling: 종합 단계 직접 인용 (v0.5.26 + sportsbook 58% + 현 38%)
+- ~25-30분
+
+### Finding 1 — Architecture (Agent split, D3)
+
+통합 agent dual-purpose risk → 위 압축으로 해결 (Agent 2 = Explore code-only, Agent 1 = web).
+
+### Finding 3 — 출력 verification (D4)
+
+종합 출력 (risk map + 60일 결정) 에 outside voice (codex 또는 claude subagent) 1단계 추가.
+
+### Finding 4 — Archive/reuse (D5)
+
+산출물 → `docs/reviews/mid-review/{YYYY-MM-DD}.md`. risk map + 60일 결정 + baseline metrics row 누적. 1년 horizon ~6 사이클 비교용.
+
+### Finding 2 — minor edge cases
+
+- 사용자 검토 단계 응답 없음 default: 워크플로 pause + 다음 세션 resume
+- Issue 57 mid-flight 도착: side note 처리, 다음 사이클 통합
+
+## 9. Codex outside voice 결과 (8 findings + 3 open questions)
+
+CEO 리뷰 마지막 단계 codex (GPT-5.4, reasoning_effort=high) 가 plan 자체 challenge. 8건 중 6건 본질적 cross-model tension.
+
+| # | Codex finding | CEO review tension | 사용자 결정 |
+|---|---|---|---|
+| 1 | 서브 워커-허브 top-2 축 오판 — hub-dispatch + Cloudflare worker = 운영 배관, 성장 엔진 X | anchor B reframe 후 비중 줄였으나 §2 그대로 | 다음 세션 |
+| 2 | "지금 결론 못 낸다" 무시 — N=37, 5/1 N≥50 대기 | 0A option D 일부 상응 | 다음 세션 |
+| 3 | AdSense audit 돌아감 — ads.txt placeholder + 스크립트 부재 + privacy "도입 예정". fix-first 가 직접 path | CEO review 놓침 | 다음 세션 |
+| 4 | archive baseline 재현 불가 — PV/revenue 외부 dashboard 의존 | Finding 4 archive 박았는데 데이터 없음 | 다음 세션 |
+| 5 | 검증 약함 — spot-check 1/agent 부족 | Finding 3 일부 catch | 다음 세션 |
+| 6 | "적중률→콘텐츠 가치" 가정 증명 X — about/JudgeReasoningCard explanation-heavy | anchor B 부분 reframe 했으나 §2 텍스트 그대로 | 다음 세션 |
+| 7 | 진짜 빠진 축 = acquisition/distribution (색인→노출→클릭→재방문) | 메인2 흡수만 함 | 다음 세션 |
+| 8 | 워크플로 자체 과설계 — 메타-work | HOLD SCOPE 결정과 반대 | 다음 세션 |
+
+### Open questions (codex)
+
+- site PV / AdSense revenue 어디서 읽나
+- PlayBook → moneyball 자동 적용 이 실제 사용자 가치 / 성장 지표 올린 증거 있나
+- 수익 hard target 이면 왜 AdSense 가 1차 monetization? 구독/스폰서/제휴 보다 우선 근거?
+
+## 10. 다음 세션 첫 결정 (약 5분)
+
+| Option | 내용 | 영향 |
+|---|---|---|
+| A — Codex 수용 | 본 plan 폐기 → "5/1 까지 계측 대기 + 그 사이 fix-first 1주 작업 list" 로 재정의. fix = ads.txt 채움 + AdSense 스크립트 + privacy update + Search Console 색인 + 콘텐츠 깊이 | 본 세션 산출물 archive 만, 행동은 다른 형태 |
+| B — 부분 수용 | Agent 1 방향 fix-first 점검으로 전환 + 메인2 분리 (AdSense / distribution) + 서브 격하 + 60일 결정 → "조건부 권유" | 워크플로 유지, 텍스트 수정 |
+| C — 강행 | Codex informational 만, plan 4 finding 수정본 그대로 실행 | 일관성 우선 |
+| D — 재설계 | 처음부터 brainstorm | 시간 큼 |
+
+**Recommendation: A** — codex #3 (ads.txt 직접 확인) + #7 (acquisition path) 코드 직접 논거 + N=37 한계 TODOS 입력 + audit 보다 fix-first ROI 높음.
+
+## 11. 본 세션 commit + handoff
+
+- spec 파일 (이 문서) commit
+- CEO review log 박음 (`gstack-review-log`)
+- handoff save → 다음 세션 첫 작업 = §10 결정 1건
