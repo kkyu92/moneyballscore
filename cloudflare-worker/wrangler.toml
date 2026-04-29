@@ -4,15 +4,12 @@ compatibility_date = "2026-01-15"
 compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Workers Cron Triggers — 무료 tier 100k requests/day, 분 단위 fire 가능.
-# GH Actions 와 달리 high-load skip 거의 없음. 분 17 그대로 옮겼지만
-# CF 는 분 영향 적어 정시 (분 0) 도 안전. 일단 GH 와 동일 시각으로 두고
-# 운영 후 분 0 으로 단순화해도 됨.
+# 4개 expression → 1개 합침 (계정당 cron 5개 제한 대응, 다른 worker 이관용 여유).
+# decideMode() 가 event.scheduledTime UTC hour 보고 mode 분기 — cron expression
+# 개수와 무관 (worker.ts:23-30). hour 15-23 은 fire 안 됨 (range 0-14).
 [triggers]
 crons = [
-  "17 0 * * *",     # KST 09:17 announce
-  "17 1-12 * * *",  # KST 10-21:17 predict 매시간
-  "17 13 * * *",    # KST 22:17 predict_final
-  "17 14 * * *",    # KST 23:17 verify
+  "17 0-14 * * *",  # KST 09:17~23:17 매시간 (15회/일). mode = decideMode 가 분기.
 ]
 
 # vars 는 wrangler.toml 에 둬도 되지만 secrets 는 dashboard 또는
