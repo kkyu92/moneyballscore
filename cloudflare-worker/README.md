@@ -12,11 +12,22 @@ sitemap warmup + live-update + self-develop 통합 인프라.
    채우는지 정량 측정.
 3. **Backlog 이관** (4/29) — sitemap-warmup (`37 * * * *`) + live-update
    (`*/10 9-15 * * *`) GH→Cloudflare 이관.
-4. **Phase 5a self-develop** (4/29) — daily fire (`0 0 * * *` = KST 09:00)
+4. **Phase 5a agent-loop** (4/29) — daily fire (`0 0 * * *` = KST 09:00)
    가 GitHub `self-develop.yml` workflow_dispatch. self-hosted [home] runner
    위 claude-code-action 이 진단/결정/실행. 4 prefix (lesson/policy/feedback/
    memory) commit 자동으로 `submit-lesson.yml` dispatch → 허브 auto-ingest
    양방향 흡수. 비용 $0 (CLAUDE_CODE_OAUTH_TOKEN 구독).
+
+   **Phase 5 비전 1 보완 (4/29 ship)**:
+   - **namespace 분리** — 사용자 직접 작업과 agent-loop 자동 결과 분리.
+     모든 자동 결과는 label `agent-loop` + branch prefix `agent-loop/`.
+   - **carry-over chain** — 1 cycle = 10 fire. 큰 task 자율 분해 + GH Issue
+     기반 인계 (label `agent-loop,handoff`). 10 fire 도달 시 횡단 lesson
+     박제 → cycle 종료 → 다음 daily fire 가 새 cycle 시작.
+   - **6 cycles 디버그 경험**: pnpm 충돌 (drift case 3 재발) → bypassPermissions
+     → show_full_output → --dangerously-skip-permissions → settings toggle
+     (PR 생성 권한). carry-over 패턴 부재로 main 직접 5 push 발생 — 본 비전
+     1 보완 후 자연 chain 가능.
 
 ## 1회 셋업
 

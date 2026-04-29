@@ -1,13 +1,16 @@
-name: "🤖 Self-Development"
+name: "🤖 Agent Loop"
 
-# Phase 5a — self-develop closed loop. cloudflare-worker 의 daily cron
-# (0 0 * * * = KST 09:00) 이 workflow_dispatch fire. self-hosted [home] runner
-# 위에서 claude-code-action 이 진단 → 결정 (auto/issue/skip) → 실행. 4 prefix
-# (lesson/policy/feedback/memory) commit 자동으로 submit-lesson.yml dispatch
-# → 허브 (kkyu92/playbook) auto-ingest 흡수.
+# Phase 5a + 비전 1 보완 — agent-loop closed cycle.
+# cloudflare-worker daily cron (0 0 * * * = KST 09:00) 이 workflow_dispatch fire.
+# self-hosted [home] runner 위 claude-code-action 이 진단 → 결정 (auto/issue/skip)
+# → 실행. 4 prefix (lesson/policy/feedback/memory) commit 자동으로
+# submit-lesson.yml dispatch → 허브 (kkyu92/playbook) auto-ingest 흡수.
 #
-# 비용: $0 (CLAUDE_CODE_OAUTH_TOKEN 구독 OAuth 사용, ANTHROPIC_API_KEY 추가 X).
-# 메타 회고: 10 fire = 1 closed cycle, run 카운트 % 10 === 0 시 횡단 분석 → lesson:.
+# Phase 5 비전 1 보완:
+# 1) namespace 분리 — 사용자 직접 작업 vs agent-loop 자동 결과 (label `agent-loop`)
+# 2) carry-over chain — 1 cycle = 10 fire. 큰 task 자율 분해 + GH Issue 기반 인계
+#
+# 비용: $0 (CLAUDE_CODE_OAUTH_TOKEN 구독 OAuth 사용).
 
 on:
   workflow_dispatch:
@@ -35,7 +38,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Run Claude Code self-develop
+      - name: Run Claude Code agent-loop
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -50,61 +53,110 @@ jobs:
           # 디버그용 — Claude turn-by-turn 출력 활성. 작동 안정 후 false 복귀 검토.
           show_full_output: "true"
           prompt: |
-            너는 머니볼 워커의 self-develop agent. 본 fire = 1 cycle 의 1 fire
-            (10 fire = 1 closed cycle).
+            너는 머니볼 워커의 agent-loop. 본 fire = 1 cycle 의 1 fire
+            (10 fire = 1 closed cycle). 사용자 직접 작업과 분리 — 모든 결과는
+            label `agent-loop` namespace + branch prefix `agent-loop/` 에 박제.
 
-            ## 진단 (gh + 파일 read)
+            ## 0. carry-over 검색 — 진입점 분기
+
+            ```bash
+            gh issue list --repo kkyu92/moneyballscore \
+              --label "agent-loop,handoff" --state open --limit 1 \
+              --json number,title,body
+            ```
+
+            - **있으면 (carry-over Issue 발견)**: Issue body 의 "fire N/10",
+              "남은 작업", "다음 step" 읽기 → 본 fire 가 그 작업 carry. 새
+              decision 하지 말고 **직진 작업 진행**. cycle 안 fire 번호 +=1.
+            - **없으면**: 새 cycle 시작 (fire 1/10) → 1번 진단 단계로.
+
+            ## 1. 진단 (gh + 파일 read) — 새 cycle 시작 시
+
             1. gh issue list --state open --limit 20 (label `lesson-pending` 우선)
             2. cat TODOS.md (있으면)
             3. git log --oneline -15
             4. (선택) pnpm test 현재 상태
 
-            ## 결정 (1개 category)
+            ## 2. 결정 (1개 category) — 새 cycle 시작 시
+
             - `auto`: 자동 처리 가능 — 작은 fix, 테스트 추가, 의존성 update,
               문서 보강, dead code 정리, 작은 refactor, lesson 박제 (자체 회고)
             - `issue`: 사용자 개입 필요 — 큰 feature, 보안/외부 결합 결정, 비파괴
             - `skip`: 오늘 할 일 없음 (exit 0, "no work today" 코멘트만)
 
-            ## auto 처리 시
+            ## 3. auto 처리 시
+
             1. 작업 진행 + pnpm test 통과 확인
             2. commit prefix 결정:
                - 코드 fix/feature → `feat:` / `fix:` / `refactor:` (허브 dispatch X)
                - 자체 회고/패턴 박제 → `lesson:` prefix (허브 dispatch ✅, 양방향 흡수)
                - 정책/메모리 변경 → `policy:` / `feedback:` / `memory:`
                  (허브 dispatch ✅)
-            3. branch `self-dev/<date>-<slug>` + PR
-               (label `self-dev`, assignee kkyu92)
+            3. branch `agent-loop/<date>-<slug>` + PR
+               (label `agent-loop`, assignee kkyu92)
             4. 처리한 lesson-pending Issue 가 있으면 그 Issue 에 결과 코멘트
 
-            ## issue 박제 시
-            gh issue create \
-              --title "self-dev/human-needed: ..." \
-              --body "(필요한 결정 + 컨텍스트)" \
-              --label "self-dev,human-needed"
+            ## 4. issue 박제 시
 
-            ## skip 시
+            ```bash
+            gh issue create \
+              --title "agent-loop/human-needed: ..." \
+              --body "(필요한 결정 + 컨텍스트)" \
+              --label "agent-loop,human-needed"
+            ```
+
+            ## 5. skip 시
+
             log "no work today" + exit 0
 
-            ## 10/cycle 메타 회고
-            - workflow run 카운트 = `gh run list --workflow=self-develop.yml --limit 100 | wc -l`
-            - 카운트 % 10 === 0 시: 최근 10 run 결과 (PR/Issue) 횡단 분석
-              → `lesson:` prefix commit + dispatch (허브가 메타 entry 박제)
+            ## 6. carry-over 박제 결정 — 본 fire 종료 직전
+
+            **분기**:
+            - **작업 완료 + 다음 step 없음** → carry-over Issue 박제 X (그냥 종료).
+              직전 fire 의 carry-over Issue 가 있었으면 close.
+            - **작업 미완료 (token cap, 큰 task, 다음 step 명확)** → carry-over
+              Issue 박제:
+              - title: `🔁 agent-loop carry-over: <작업 slug> (fire N/10)`
+              - label: `agent-loop,handoff`
+              - body:
+                - cycle 안 fire 번호: `fire N of 10`
+                - 현재까지 진행: <commit/PR list>
+                - 다음 fire 의 step: <명확 list>
+                - 관련 PR/Issue/files: <list>
+                - 자동 마커: `🤖 Generated by agent-loop`
+              - assignee 없음
+            - **직전 fire 의 carry-over Issue 가 있고 본 fire 가 처리한 거면**:
+              - 처리 완료 → 그 Issue close
+              - 부분 완료 → body 갱신 (fire N+1)
+
+            ## 7. fire 10/10 도달 시 메타 회고
+
+            carry-over Issue 의 fire 카운트가 10 도달:
+            1. 본 cycle 의 10 fire 결과 수집 — `gh pr list --label agent-loop`
+               + `gh issue list --label agent-loop`
+            2. 횡단 lesson 분석 — 어떤 패턴 반복? 어떤 결정 잘 됐나/잘못됐나?
+            3. `lesson:` prefix commit 1건 박제 (허브 dispatch → 메타 entry 흡수)
+            4. carry-over Issue close (cycle 종료)
+            5. 다음 daily fire = 새 cycle 자연 시작 (fire 1/10)
 
             ## 정합 체크
+
             - /handoff /search /ingest skill 활용 OK (Claude Code 환경)
             - 새 GH event_type 추가 X (허브 codex finding #2 정합)
             - 4 prefix dispatch 자연 정합 (허브 흡수 자동)
             - 결과 commit + push + PR + Issue 코멘트 패턴 = blog-autopilot
               issue-agent 그대로
+            - **사용자 직접 작업과 분리** — 모든 결과는 `agent-loop` label
+              namespace + `agent-loop/` branch prefix
 
       - name: Self-report on failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh label create self-dev --color "0e8a16" 2>/dev/null || true
+          gh label create agent-loop --color "0e8a16" 2>/dev/null || true
           gh label create hub-self-report --color "b60205" 2>/dev/null || true
           gh issue create \
-            --title "🚨 self-develop run #${{ github.run_id }} 실패" \
+            --title "🚨 agent-loop run #${{ github.run_id }} 실패" \
             --body "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --label "self-dev,hub-self-report"
+            --label "agent-loop,hub-self-report"
