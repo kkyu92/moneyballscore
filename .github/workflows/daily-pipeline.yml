@@ -1,13 +1,11 @@
 name: Daily KBO Pipeline
 
+# Schedule 영구 비활성화 (2026-04-29).
+# 사유: GH Actions schedule high-load skip 41% (7일 측정). Cloudflare Workers Cron 으로 이관 완료.
+# Worker: moneyballscore-cron, schedule '17 0-14 * * *' (1 cron, 15 fires/일).
+# 4/27 deploy + 4/28 안정 검증 (errors=[] 8/8, summary_sent=true) 통과.
+# 수동 재실행은 아래 workflow_dispatch (mode/date input) 로 가능.
 on:
-  schedule:
-    # 분 오프셋 17 — GitHub 공식 권고: 정각(0분)은 전체 플랫폼 high-load 피크,
-    # 2026-04-23 관측 12/15 cron skip (80%). 정각 회피로 skip 확률 감소.
-    - cron: '17 0 * * *'    # UTC 00:17 ≈ KST 09:17 announce
-    - cron: '17 1-12 * * *' # UTC 01-12:17 매시간 predict
-    - cron: '17 13 * * *'   # UTC 13:17 ≈ KST 22:17 predict_final (gap 체크)
-    - cron: '17 14 * * *'   # UTC 14:17 ≈ KST 23:17 verify (accuracy + compound)
   workflow_dispatch:
     inputs:
       date:
