@@ -1,7 +1,7 @@
 /**
  * Moneyball Score — Cloudflare Cron Worker
  *
- * 여섯 가지 역할 (event.cron 분기):
+ * 일곱 가지 역할 (event.cron 분기):
  *  1) "17 0-14 * * *" — daily-pipeline cron trigger.
  *     UTC hour → mode 결정 후 /api/pipeline 호출.
  *  2) "17 0-14 * * *" 동시 — SP 확정 시각 측정 (KBO 공식 + Naver 두 소스).
@@ -12,6 +12,9 @@
  *  5) "0 0 * * *" — self-develop daily fire (KST 09:00). GitHub
  *     workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
  *     runner 위 claude-code-action 진단/결정/실행.
+ *  6) "17 0-14 * * *" UTC 03:17 조건 — 타자 스탯 일 1회 동기화 (KST 12:17).
+ *     /api/sync-batter-stats POST. 예측(KST 15:17) 3시간 전 선행.
+ *     별도 cron slot 소비 없이 기존 cron 재사용.
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  */
@@ -250,6 +253,28 @@ async function runLiveUpdate(env: Env): Promise<void> {
   }
 }
 
+async function runBatterSync(env: Env): Promise<void> {
+  try {
+    const resp = await fetch(`${env.SITE_URL}/api/sync-batter-stats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+      body: '{}',
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      console.error(`[Worker] batter-sync failed: ${resp.status} ${body.slice(0, 200)}`);
+      return;
+    }
+    const data = (await resp.json().catch(() => ({}))) as { upsertedStats?: number };
+    console.log(`[Worker] batter-sync ok: upserted=${data.upsertedStats ?? '?'}`);
+  } catch (e) {
+    console.error('[Worker] batter-sync error:', e);
+  }
+}
+
 async function dispatchSelfDevelop(env: Env): Promise<void> {
   // env.GH_REPO 형식: "kkyu92/moneyballscore". PAT scope = actions:write.
   const url = `https://api.github.com/repos/${env.GH_REPO}/actions/workflows/self-develop.yml/dispatches`;
@@ -293,6 +318,10 @@ export default {
         console.log(`[Worker] no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping pipeline`);
       }
       ctx.waitUntil(logSpConfirmation(env));
+      // UTC 03:17 (KST 12:17) — 타자 스탯 일 1회 동기화 (예측 3시간 전)
+      if (new Date(event.scheduledTime).getUTCHours() === 3) {
+        ctx.waitUntil(runBatterSync(env));
+      }
     } else if (cronExpr === '37 * * * *') {
       ctx.waitUntil(runSitemapWarmup(env));
     } else if (cronExpr === '*/10 9-15 * * *') {
