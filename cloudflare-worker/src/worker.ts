@@ -1,7 +1,7 @@
 /**
  * Moneyball Score — Cloudflare Cron Worker
  *
- * 다섯 가지 역할 (event.cron 분기):
+ * 여섯 가지 역할 (event.cron 분기):
  *  1) "17 0-14 * * *" — daily-pipeline cron trigger.
  *     UTC hour → mode 결정 후 /api/pipeline 호출.
  *  2) "17 0-14 * * *" 동시 — SP 확정 시각 측정 (KBO 공식 + Naver 두 소스).
@@ -9,6 +9,9 @@
  *  3) "37 * * * *" — sitemap-warmup. /sitemap.xml + /robots.txt GET 으로 ISR warm.
  *  4) live-update — KST 18:00~00:50 매 10분 /api/live POST (cron expression
  *     은 wrangler.toml 참조; JSDoc 안에 그대로 쓰면 주석 종료로 파싱됨).
+ *  5) "0 0 * * *" — self-develop daily fire (KST 09:00). GitHub
+ *     workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
+ *     runner 위 claude-code-action 진단/결정/실행.
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  */
@@ -19,6 +22,8 @@ export interface Env {
   CRON_SECRET: string;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_KEY: string;
+  GH_DISPATCH_PAT: string;
+  GH_REPO: string;
 }
 
 type PipelineMode = 'announce' | 'predict' | 'predict_final' | 'verify';
@@ -245,6 +250,32 @@ async function runLiveUpdate(env: Env): Promise<void> {
   }
 }
 
+async function dispatchSelfDevelop(env: Env): Promise<void> {
+  // env.GH_REPO 형식: "kkyu92/moneyballscore". PAT scope = actions:write.
+  const url = `https://api.github.com/repos/${env.GH_REPO}/actions/workflows/self-develop.yml/dispatches`;
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${env.GH_DISPATCH_PAT}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'moneyballscore-cron/self-develop',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'main' }),
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      console.error(`[Worker] self-develop dispatch failed: ${resp.status} ${body.slice(0, 300)}`);
+      return;
+    }
+    console.log('[Worker] self-develop dispatch ok');
+  } catch (e) {
+    console.error('[Worker] self-develop dispatch error:', e);
+  }
+}
+
 export default {
   async scheduled(
     event: ScheduledEvent,
@@ -266,6 +297,8 @@ export default {
       ctx.waitUntil(runSitemapWarmup(env));
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
+    } else if (cronExpr === '0 0 * * *') {
+      ctx.waitUntil(dispatchSelfDevelop(env));
     } else {
       console.log(`[Worker] unknown cron: ${cronExpr}`);
     }

@@ -5,20 +5,23 @@ compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Workers Cron Triggers — 무료 tier 100k requests/day, 분 단위 fire 가능.
 # event.cron 으로 분기 (worker.ts scheduled handler). 계정당 cron 5개 제한.
-# 총 fire/day = 15 + 24 + 42 = 81 (free tier 여유).
+# 총 fire/day = 15 + 24 + 42 + 1 = 82 (free tier 여유).
 [triggers]
 crons = [
   "17 0-14 * * *",     # daily-pipeline + SP log. KST 09:17~23:17 매시간 (15회/일).
   "37 * * * *",        # sitemap-warmup. 매시간 37분 (24회/일).
   "*/10 9-15 * * *",   # live-update. KST 18:00~00:50 매 10분 (42회/일).
+  "0 0 * * *",         # self-develop daily fire. KST 09:00 (1회/일).
 ]
 
 # vars 는 wrangler.toml 에 둬도 되지만 secrets 는 dashboard 또는
-# `wrangler secret put <NAME>` 으로 등록 (CRON_SECRET, SUPABASE_SERVICE_KEY).
+# `wrangler secret put <NAME>` 으로 등록.
+# 등록 필요 secrets: CRON_SECRET, SUPABASE_SERVICE_KEY, GH_DISPATCH_PAT.
 [vars]
 PIPELINE_URL = "https://moneyballscore.vercel.app/api/pipeline"
 SITE_URL = "https://moneyballscore.vercel.app"
 SUPABASE_URL = "https://utmimgpccbrciwuuacyw.supabase.co"
+GH_REPO = "kkyu92/moneyballscore"
 
 # 관측: 실패 시 Tail logs 로 확인. wrangler tail 로 실시간 스트림.
 [observability]
