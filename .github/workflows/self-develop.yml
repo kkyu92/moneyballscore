@@ -25,8 +25,8 @@ jobs:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # version 명시 X — packageManager: pnpm@10.33.0 (package.json) 사용.
+        # 드리프트 사례 3 (version: 9 vs packageManager 충돌) 회피.
 
       - uses: actions/setup-node@v4
         with:
