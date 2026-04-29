@@ -43,6 +43,8 @@ jobs:
           # 첫 smoke run 25093898831 = permission_denials_count: 19 → 부산물 0.
           # self-hosted runner 환경 (사용자 머신) 이라 권한 모드 bypass 안전.
           settings: '{"permissions": {"defaultMode": "bypassPermissions"}}'
+          # 디버그용 — Claude turn-by-turn 출력 활성. 작동 안정 후 false 복귀 검토.
+          show_full_output: "true"
           prompt: |
             너는 머니볼 워커의 self-develop agent. 본 fire = 1 cycle 의 1 fire
             (10 fire = 1 closed cycle).
