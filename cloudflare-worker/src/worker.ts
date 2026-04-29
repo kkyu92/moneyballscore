@@ -1,18 +1,21 @@
 /**
  * Moneyball Score — Cloudflare Cron Worker
  *
- * 두 가지 역할:
- *  1) Phase 1 — daily-pipeline 의 cron trigger (GH Actions schedule 대체).
+ * 다섯 가지 역할 (event.cron 분기):
+ *  1) "17 0-14 * * *" — daily-pipeline cron trigger.
  *     UTC hour → mode 결정 후 /api/pipeline 호출.
- *  2) Phase 2 — SP 확정 시각 측정 로깅. KBO 공식 + Naver 두 소스 동시 적재.
- *     매 trigger 마다 sp_confirmation_log 에 source='kbo-official' / 'naver'
- *     양쪽 row 삽입. 1주 데이터 누적 후 어느 쪽이 먼저 SP 채우는지 정량 비교.
+ *  2) "17 0-14 * * *" 동시 — SP 확정 시각 측정 (KBO 공식 + Naver 두 소스).
+ *     매 trigger 마다 sp_confirmation_log 양쪽 row 삽입.
+ *  3) "37 * * * *" — sitemap-warmup. /sitemap.xml + /robots.txt GET 으로 ISR warm.
+ *  4) live-update — KST 18:00~00:50 매 10분 /api/live POST (cron expression
+ *     은 wrangler.toml 참조; JSDoc 안에 그대로 쓰면 주석 종료로 파싱됨).
  *
- * Phase 1 / Phase 2-KBO / Phase 2-Naver 세 작업 전부 독립 — 한쪽 실패해도 나머지 정상.
+ * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  */
 
 export interface Env {
   PIPELINE_URL: string;
+  SITE_URL: string;
   CRON_SECRET: string;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_KEY: string;
@@ -203,23 +206,69 @@ async function logSpConfirmation(env: Env): Promise<void> {
   await Promise.all([logKboSp(env, todayKST), logNaverSp(env, todayKST)]);
 }
 
+async function runSitemapWarmup(env: Env): Promise<void> {
+  const headers = { 'User-Agent': 'moneyball-sitemap-warmup/1.0' };
+  // GET (HEAD 는 CDN cache-miss 재검증 강제 못 함). 바디 버림.
+  try {
+    const resp = await fetch(`${env.SITE_URL}/sitemap.xml`, { headers });
+    console.log(`[Worker] sitemap warmup status=${resp.status}`);
+  } catch (e) {
+    console.error('[Worker] sitemap warmup error:', e);
+  }
+  try {
+    const resp = await fetch(`${env.SITE_URL}/robots.txt`, { headers });
+    console.log(`[Worker] robots warmup status=${resp.status}`);
+  } catch (e) {
+    console.error('[Worker] robots warmup error:', e);
+  }
+}
+
+async function runLiveUpdate(env: Env): Promise<void> {
+  try {
+    const resp = await fetch(`${env.SITE_URL}/api/live`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+      body: '{}',
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      console.error(`[Worker] live-update failed: ${resp.status} ${body.slice(0, 200)}`);
+      return;
+    }
+    const data = (await resp.json().catch(() => ({}))) as { liveGames?: number };
+    console.log(`[Worker] live-update ok: liveGames=${data.liveGames ?? '?'}`);
+  } catch (e) {
+    console.error('[Worker] live-update error:', e);
+  }
+}
+
 export default {
   async scheduled(
     event: ScheduledEvent,
     env: Env,
     ctx: ExecutionContext,
   ): Promise<void> {
-    const mode = decideMode(event.scheduledTime);
+    const cronExpr = event.cron;
 
-    // Phase 1 — 정의된 시간대만 pipeline trigger
-    if (mode) {
-      ctx.waitUntil(callPipeline(env, mode));
+    if (cronExpr === '17 0-14 * * *') {
+      // daily-pipeline + SP 측정
+      const mode = decideMode(event.scheduledTime);
+      if (mode) {
+        ctx.waitUntil(callPipeline(env, mode));
+      } else {
+        console.log(`[Worker] no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping pipeline`);
+      }
+      ctx.waitUntil(logSpConfirmation(env));
+    } else if (cronExpr === '37 * * * *') {
+      ctx.waitUntil(runSitemapWarmup(env));
+    } else if (cronExpr === '*/10 9-15 * * *') {
+      ctx.waitUntil(runLiveUpdate(env));
     } else {
-      console.log(`[Worker] no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping pipeline`);
+      console.log(`[Worker] unknown cron: ${cronExpr}`);
     }
-
-    // Phase 2 — SP 측정은 mode 무관하게 매 trigger 적재
-    ctx.waitUntil(logSpConfirmation(env));
   },
 
   // 헬스체크 / 수동 trigger 용 HTTP 엔드포인트

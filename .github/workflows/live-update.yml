@@ -1,12 +1,10 @@
 name: Live Game Update
 
+# 2026-04-29: schedule trigger 를 Cloudflare Worker (cloudflare-worker/)
+# "*/10 9-15 * * *" cron 으로 이관. KST 18:00~00:50 매 10분.
+# workflow_dispatch 는 수동 trigger / 외부 dispatch 용 보존.
+
 on:
-  schedule:
-    # v4-3 Task 4: 경기 시간대 10분 간격 (KST 18:00~00:50 = UTC 09:00~15:50)
-    # 이전 9-13(~22:30 KST)에서 2시간 확장 — 연장 경기·더블헤더 커버 +
-    # postview 자동 트리거 (경기 종료 감지 시 즉시 사후 분석 실행).
-    # 00:50 이후 극단 케이스는 다음날 daily-pipeline 15 KST morning run에서 cleanup.
-    - cron: '*/10 9-15 * * *'
   workflow_dispatch:
 
 jobs:

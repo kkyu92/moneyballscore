@@ -3,13 +3,12 @@ name: sitemap-warmup
 # Google Search Console "사이트맵을 가져올 수 없음" 대응.
 # sitemap.ts 는 Supabase 쿼리 포함 ISR cache. cache miss 시 cold start +
 # DB round-trip 으로 수 초 걸려 Googlebot timeout 에 걸릴 수 있음.
-# 1시간마다 HEAD 쳐서 ISR 을 warm 유지 → bot 이 언제 와도 즉시 응답.
+# 1시간마다 GET 쳐서 ISR 을 warm 유지 → bot 이 언제 와도 즉시 응답.
 #
-# revalidate=21600 (6h) 이라 1h warmup 은 비용 과하지 않고 안정적 커버.
+# 2026-04-29: schedule trigger 를 Cloudflare Worker (cloudflare-worker/)
+# "37 * * * *" cron 으로 이관. workflow_dispatch 는 수동 trigger 용 보존.
 
 on:
-  schedule:
-    - cron: '37 * * * *' # 매시간 37분 (정각 회피)
   workflow_dispatch:
 
 concurrency:
