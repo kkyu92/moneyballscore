@@ -25,6 +25,38 @@ mid-review 워크플로 (`docs/superpowers/specs/2026-04-28-moneyball-mid-review
 - 기존 인프라 점검 결과 ads.txt route 는 이미 env-driven (`apps/moneyball/src/app/ads.txt/route.ts`). codex finding #3 "ads.txt placeholder" 의 정확한 진단은 "publisher ID 미발급" 상태였음
 - 4/28 17시 cron 자연 검증 — `pipeline_runs?run_date=eq.2026-04-28&mode=eq.predict` 8건 모두 `errors=[]` + `daily_notifications.summary_sent=true` (07:19 UTC). **사례 8 (summary silent fail) CLAUDE.md 추가 1주 누적 후 재평가**로 보류 (D10a 갱신, 단일일 표본)
 
+### ⭐ GH Actions schedule → Cloudflare Worker 이관 backlog (2026-04-29~)
+
+GH high-load skip 측정 → Cloudflare Workers Cron 으로 단계적 이관. 무료 tier (Workers Free 100k req/day, 계정 cron 5 trigger 제한).
+
+#### ✅ 완료 (2026-04-29)
+
+- **daily-pipeline** GH schedule 영구 비활성화 (`21a77b2`). Cloudflare `moneyballscore-cron` Phase 1 이관 (4/27 deploy + 4/28 안정 검증 errors=[] 8/8 + summary_sent=true). workflow_dispatch 보존
+- Cloudflare cron 4 → 1 합침 (`03a4867`) — `"17 0-14 * * *"` 단일. `decideMode()` 가 UTC hour 보고 mode 분기. 계정 cron quota 4개 여유 확보
+
+#### ⏸️ 남은 5건 backlog (우선순위 순)
+
+| # | Workflow | Cron | 빈도 | ROI | 작업량 추정 | 우려 |
+|---|---|---|---|---|---|---|
+| 1 | `live-update.yml` | `*/10 9-15 * * *` | 매 10분 (UTC 9-15) | ⭐⭐⭐ skip 85% 측정 | ~30-60분 | 사례 5 (KBO API 필드 매핑) 우려, 분기 다양 (라이브 스코어 + 경기 종료 → postview 자동 트리거) |
+| 2 | `sitemap-warmup.yml` | `37 * * * *` | 매시간 | ⭐⭐ GSC 색인 acquisition path 영향 | ~10분 | 단순 HTTP ping, 위험 ↓ |
+| 3 | `sync-batter-stats.yml` | `0 3 * * *` | 매일 1회 | ⭐ Vercel /api 호출이면 쉬움 | ~15분 | endpoint 형태 확인 필요 |
+| 4 | `pitcher-snapshot.yml` | `0 15 * * 6` | 매주 토 | ⭐ 빈도 낮음 | ~15분 | 동일 |
+| 5 | `pat-expiry-check.yml` | `0 0 1 * *` | 매월 1일 | △ GH PAT 검사라 GH 안에서 도는 게 의미 있을 수도 | 검토 우선 | GH 안 도는 게 본질 검토 |
+
+#### 검증 path (각 이관 시)
+
+1. worker.ts 분기 추가 + wrangler.toml cron 추가 (계정 quota 1개 소비)
+2. `pnpm run deploy` (cloudflare-worker)
+3. 자연 fire 1 cycle 검증 (Cloudflare logs + Supabase row 박힘 확인)
+4. GH schedule 키 제거 + workflow_dispatch 보존
+5. commit
+
+#### 메타
+
+- live-update 이관 = 본 세션에서 안 함 (사례 5 우려 + 별도 검증 시간 필요). 다음 세션에서 별도 ROI/위험 평가 후 진행
+- 5/1 N≥50 자연 트리거 검증 + GSC 색인 1주 결과 와 함께 다음 세션 의제 후보
+
 ### ⭐ 분석 축 — v4-3 자연 발화 관찰 결과 (2026-04-24 실행 + 2026-04-27 후속)
 
 2026-04-24 KST 오전 세션에서 TODOS 체크리스트 A~F 실 DB 조회. **v4-3 핵심은 작동**. 누락 가설은 2026-04-27 후속 조사로 정정 — 대부분 false alarm 이었고 진짜 버그 2건 (스크래퍼 status 오판정 + pipeline_runs.mode VARCHAR overflow) 별도 fix.
