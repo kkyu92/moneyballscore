@@ -43,6 +43,10 @@ jobs:
           # 첫 smoke run 25093898831 = permission_denials_count: 19 → 부산물 0.
           # self-hosted runner 환경 (사용자 머신) 이라 권한 모드 bypass 안전.
           settings: '{"permissions": {"defaultMode": "bypassPermissions"}}'
+          # bypassPermissions = "권한 prompt 안 띄움" 만 의미, 도구 enable/disable 별개.
+          # 4차 run #25095551765 진단 결과 = SDK default 가 Write/Edit/gh CLI 차단 →
+          # closed loop "auto 처리 시 commit/push/PR" 작동 불가. CLI 우회 명시.
+          claude_args: "--dangerously-skip-permissions"
           # 디버그용 — Claude turn-by-turn 출력 활성. 작동 안정 후 false 복귀 검토.
           show_full_output: "true"
           prompt: |
