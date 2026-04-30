@@ -12,6 +12,8 @@
  *  5) "0 0 * * *" — self-develop daily fire (KST 09:00). GitHub
  *     workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
  *     runner 위 claude-code-action 진단/결정/실행.
+ *  6) "0 15 * * 6" — pitcher-snapshot 주간 스냅샷 (KST 토요일 자정).
+ *     /api/snapshot-pitchers POST. 시즌 중 ~30회 누적.
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  */
@@ -250,6 +252,27 @@ async function runLiveUpdate(env: Env): Promise<void> {
   }
 }
 
+async function runPitcherSnapshot(env: Env): Promise<void> {
+  try {
+    const resp = await fetch(`${env.SITE_URL}/api/snapshot-pitchers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+      body: '{}',
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      console.error(`[Worker] pitcher-snapshot failed: ${resp.status} ${body.slice(0, 200)}`);
+      return;
+    }
+    console.log('[Worker] pitcher-snapshot ok');
+  } catch (e) {
+    console.error('[Worker] pitcher-snapshot error:', e);
+  }
+}
+
 async function dispatchSelfDevelop(env: Env): Promise<void> {
   // env.GH_REPO 형식: "kkyu92/moneyballscore". PAT scope = actions:write.
   const url = `https://api.github.com/repos/${env.GH_REPO}/actions/workflows/self-develop.yml/dispatches`;
@@ -299,6 +322,8 @@ export default {
       ctx.waitUntil(runLiveUpdate(env));
     } else if (cronExpr === '0 0 * * *') {
       ctx.waitUntil(dispatchSelfDevelop(env));
+    } else if (cronExpr === '0 15 * * 6') {
+      ctx.waitUntil(runPitcherSnapshot(env));
     } else {
       console.log(`[Worker] unknown cron: ${cronExpr}`);
     }

@@ -5,13 +5,14 @@ compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Workers Cron Triggers — 무료 tier 100k requests/day, 분 단위 fire 가능.
 # event.cron 으로 분기 (worker.ts scheduled handler). 계정당 cron 5개 제한.
-# 총 fire/day = 15 + 24 + 42 + 1 = 82 (free tier 여유).
+# 총 fire/day = 15 + 24 + 42 + 1 = 82, /week += 1 (free tier 여유). 슬롯 5/5.
 [triggers]
 crons = [
   "17 0-14 * * *",     # daily-pipeline + SP log. KST 09:17~23:17 매시간 (15회/일).
   "37 * * * *",        # sitemap-warmup. 매시간 37분 (24회/일).
   "*/10 9-15 * * *",   # live-update. KST 18:00~00:50 매 10분 (42회/일).
   "0 0 * * *",         # self-develop daily fire. KST 09:00 (1회/일).
+  "0 15 * * 6",        # pitcher-snapshot. KST 토요일 00:00 주 1회.
 ]
 
 # vars 는 wrangler.toml 에 둬도 되지만 secrets 는 dashboard 또는
