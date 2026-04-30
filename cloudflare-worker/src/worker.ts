@@ -1,7 +1,7 @@
 /**
  * Moneyball Score — Cloudflare Cron Worker
  *
- * 일곱 가지 역할 (event.cron 분기):
+ * 여섯 가지 역할 (event.cron 분기):
  *  1) "17 0-14 * * *" — daily-pipeline cron trigger.
  *     UTC hour → mode 결정 후 /api/pipeline 호출.
  *  2) "17 0-14 * * *" 동시 — SP 확정 시각 측정 (KBO 공식 + Naver 두 소스).
@@ -9,18 +9,18 @@
  *  3) "37 * * * *" — sitemap-warmup. /sitemap.xml + /robots.txt GET 으로 ISR warm.
  *  4) live-update — KST 18:00~00:50 매 10분 /api/live POST (cron expression
  *     은 wrangler.toml 참조; JSDoc 안에 그대로 쓰면 주석 종료로 파싱됨).
- *  5) "17 0-14 * * *" UTC hour===0 조건 — self-develop daily fire (KST 09:17).
- *     GitHub workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
- *     runner 위 claude-code-action 진단/결정/실행. cron 슬롯 추가 없이 기존
- *     daily-pipeline 분기 안 통합 (4/5 유지, 03a4867 정신 + offset 일관성).
- *  6) "17 0-14 * * *" UTC 03:17 조건 — 타자 스탯 일 1회 동기화 (KST 12:17).
+ *  5) "17 0-14 * * *" UTC 03:17 조건 — 타자 스탯 일 1회 동기화 (KST 12:17).
  *     /api/sync-batter-stats POST. 예측(KST 15:17) 3시간 전 선행.
  *     별도 cron slot 소비 없이 기존 cron 재사용.
- *  7) "37 * * * *" 중 UTC 토요일 15시 — pitcher-snapshot (KST 일요일 00:37).
+ *  6) "37 * * * *" 중 UTC 토요일 15시 — pitcher-snapshot (KST 일요일 00:37).
  *     /api/snapshot-pitchers POST → pitcher_stats 주간 시점 snapshot.
  *     cron 슬롯 추가 없이 sitemap-warmup 분기 안에 조건 통합 (4/5 유지).
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
+ *
+ * 폐기됨 (2026-04-30): agent-loop 자율 cron (self-develop.yml dispatch).
+ * 사용자 결정으로 자연발화 라인 끊고 develop-cycle skill 로 이전 — 사용자 본인
+ * conversation 안에서 직접 trigger.
  */
 
 export interface Env {
@@ -301,32 +301,6 @@ async function runPitcherSnapshot(env: Env): Promise<void> {
   }
 }
 
-async function dispatchSelfDevelop(env: Env): Promise<void> {
-  // env.GH_REPO 형식: "kkyu92/moneyballscore". PAT scope = actions:write.
-  const url = `https://api.github.com/repos/${env.GH_REPO}/actions/workflows/self-develop.yml/dispatches`;
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${env.GH_DISPATCH_PAT}`,
-        'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'moneyballscore-cron/self-develop',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ref: 'main' }),
-    });
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => '');
-      console.error(`[Worker] self-develop dispatch failed: ${resp.status} ${body.slice(0, 300)}`);
-      return;
-    }
-    console.log('[Worker] self-develop dispatch ok');
-  } catch (e) {
-    console.error('[Worker] self-develop dispatch error:', e);
-  }
-}
-
 export default {
   async scheduled(
     event: ScheduledEvent,
@@ -345,10 +319,6 @@ export default {
       }
       ctx.waitUntil(logSpConfirmation(env));
       const utcHour = new Date(event.scheduledTime).getUTCHours();
-      // UTC 00:17 (KST 09:17) — self-develop daily fire (announce 와 동시)
-      if (utcHour === 0) {
-        ctx.waitUntil(dispatchSelfDevelop(env));
-      }
       // UTC 03:17 (KST 12:17) — 타자 스탯 일 1회 동기화 (예측 3시간 전)
       if (utcHour === 3) {
         ctx.waitUntil(runBatterSync(env));
