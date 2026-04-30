@@ -1,5 +1,8 @@
 # TODOS
 
+## ✅ Resolved Lessons
+- `fp:vercel-deploy-1e80b78` (2026-04-22): Sentry /webhook sub-path 3회 실패 → no-relay=true 태그로 해결 (박제 2026-04-29)
+
 ## 🚀 Next-Up (2026-04-25 이후)
 
 ### ⭐ AdSense fix-first batch (2026-04-28 D7=A 결정 후)
