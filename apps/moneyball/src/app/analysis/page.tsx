@@ -1,14 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, toKSTDateString, type TeamCode } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  shortTeamName,
+  toKSTDateString,
+  winnerProbOf,
+  type TeamCode,
+} from '@moneyball/shared';
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
+import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 
 // v4-4 Phase 1-1: /analysis 는 '오늘 빅매치' 전용. 시즌 누적 성과는 /dashboard 에 통합.
+// develop-cycle 1 (2026-04-30, site): "어제 경기" 진입점 보강 — 빅매치 외 경기 분석 retention.
 
 export const metadata: Metadata = {
-  title: 'AI 분석 — 오늘 빅매치',
-  description: '오늘 KBO 경기 중 에이전트 토론 기반 빅매치 1경기. 심판 판정 · 팀 논거 · 팩터 해석까지.',
+  title: 'AI 분석 — 오늘 빅매치 + 어제 경기',
+  description: '오늘 KBO 빅매치 + 어제 경기 AI 분석. 심판 판정 · 팀 논거 · 팩터 해석까지.',
   alternates: { canonical: 'https://moneyballscore.vercel.app/analysis' },
 };
 
@@ -72,15 +80,86 @@ async function getTodayBigMatch() {
   return { bigMatchId: result.bigMatchGameId, mode: result.mode, candidates: candidates.length };
 }
 
+interface YesterdayGameCard {
+  gameId: number;
+  homeCode: TeamCode;
+  awayCode: TeamCode;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictedWinnerCode: TeamCode | null;
+  homeWinProb: number;
+  isCorrect: boolean | null;
+}
+
+async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
+  const supabase = await createClient();
+  const yesterday = getYesterdayKSTDateString();
+
+  const { data } = await supabase
+    .from('games')
+    .select(`
+      id, home_score, away_score,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
+      predictions!inner(
+        prediction_type, is_correct, reasoning,
+        predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+      )
+    `)
+    .eq('game_date', yesterday)
+    .eq('predictions.prediction_type', 'pre_game')
+    .order('game_time', { ascending: true });
+
+  if (!data) return [];
+
+  interface Row {
+    id: number;
+    home_score: number | null;
+    away_score: number | null;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+    predictions: Array<{
+      prediction_type: string;
+      is_correct: boolean | null;
+      reasoning: { homeWinProb?: number | null } | null;
+      predicted_winner_team: { code: string | null } | null;
+    }>;
+  }
+
+  const rows = data as unknown as Row[];
+  const cards: YesterdayGameCard[] = [];
+  for (const row of rows) {
+    const pred = row.predictions?.[0];
+    if (!pred) continue;
+    const homeCode = row.home_team?.code as TeamCode | undefined;
+    const awayCode = row.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
+    cards.push({
+      gameId: row.id,
+      homeCode,
+      awayCode,
+      homeScore: row.home_score,
+      awayScore: row.away_score,
+      predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
+      homeWinProb: winnerProbOf(pred.reasoning?.homeWinProb),
+      isCorrect: pred.is_correct,
+    });
+  }
+  return cards;
+}
+
 export default async function AnalysisIndexPage() {
-  const bigMatch = await getTodayBigMatch();
+  const [bigMatch, yesterdayGames] = await Promise.all([
+    getTodayBigMatch(),
+    getYesterdayGames(),
+  ]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">
-          오늘의 빅매치 AI 에이전트 토론
+          오늘의 빅매치 AI 에이전트 토론과 어제 경기 분석을 한 곳에서.
         </p>
       </header>
 
@@ -126,6 +205,67 @@ export default async function AnalysisIndexPage() {
           </div>
         )}
       </section>
+
+      {/* 어제 경기 분석 진입점 — 빅매치 외 경기 retention */}
+      {yesterdayGames.length > 0 && (
+        <section aria-labelledby="yesterday-games-title">
+          <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+            <h2 id="yesterday-games-title" className="text-xl font-bold">
+              📅 어제 경기 분석
+            </h2>
+            <Link
+              href="/reviews"
+              className="text-sm text-brand-600 hover:underline"
+            >
+              전체 결과 →
+            </Link>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {yesterdayGames.map((g) => {
+              const homeName = shortTeamName(g.homeCode);
+              const awayName = shortTeamName(g.awayCode);
+              const winnerName = g.predictedWinnerCode
+                ? shortTeamName(g.predictedWinnerCode)
+                : null;
+              const winnerPct = g.predictedWinnerCode === g.homeCode
+                ? Math.round(g.homeWinProb * 100)
+                : Math.round((1 - g.homeWinProb) * 100);
+              return (
+                <li key={g.gameId}>
+                  <Link
+                    href={`/analysis/game/${g.gameId}`}
+                    className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {awayName} {g.awayScore ?? '-'} : {g.homeScore ?? '-'} {homeName}
+                        </p>
+                        {winnerName && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            예측: {winnerName} {winnerPct}%
+                          </p>
+                        )}
+                      </div>
+                      {g.isCorrect !== null && (
+                        <span
+                          className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
+                            g.isCorrect
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                          }`}
+                        >
+                          {g.isCorrect ? '적중' : '실패'}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* 시즌 성과 CTA → /dashboard */}
       <section aria-labelledby="season-stats-title">
