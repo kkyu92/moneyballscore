@@ -51,14 +51,13 @@ cat TODOS.md 2>/dev/null | head -30         # 할 일
 agent-loop 자율 cron (`self-develop.yml` + cloudflare worker dispatch) **폐기**. 사용자가 직접 `/develop-cycle [N]` skill 을 호출하는 manual trigger 방식으로 전환.
 
 - 위치: `~/.claude/skills/develop-cycle/SKILL.md` (글로벌)
-- 1 cycle = 진단 → 결정 (auto/issue/skip) → 실행 (4 prefix commit + push) → 짧은 회고
+- **3 차원**: site (사이트개선) / acquisition (사용자유입) / model (분석모듈·적중률). 1 cycle 1 차원
+- **Agent Teams 활용** (실험 기능): `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` + `teammateMode: tmux` + `it2` CLI (iTerm2 native 패널 분할)
+- 1 cycle = 진단 (풀 스캔) → 차원 선택 (자율) → 팀원 dispatch → 4 prefix commit + branch + PR (`develop-cycle/<slug>`) → 회고
 - N 인자 = 사이클 수 (기본 1)
-- skip 도 1 cycle 카운트
-- 컨텍스트 75% 도달 시 handoff save 자동 제안 (잔여 cycle carry-over)
-
-**자율 작업 시 민감 파일 정책** (develop-cycle 안에서도 동일):
-- ✅ 자율 가능: `apps/`, `packages/`, `cloudflare-worker/src/`, `supabase/migrations/` (신규만), `tests/`, `*.md`, lesson commit
-- ⚠️ 사용자 확인 필요: `.github/workflows/*.yml`, `.github/actions/*`, repo settings, secrets, wrangler.toml — 수정 자체는 가능하나 사용자 승인 후
+- 컨텍스트 60% 도달 시 handoff save 자동 제안 (잔여 cycle carry-over)
+- 자율 작업 권한 **전부 허용** (사용자 결정) — secrets/credentials 와 100+ 파일 변경만 명시적 경고
+- 시범 운행은 **다음 세션부터** (settings.json 갱신 안전 보장 시점)
 
 **관련 메모리**:
 - 허브 `feedback_claude_code_action_workflows_write_block` (default 박제)
