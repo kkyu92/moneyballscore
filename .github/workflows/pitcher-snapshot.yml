@@ -1,6 +1,10 @@
 name: Pitcher Stats Snapshot
 
 on:
+  schedule:
+    # KST 일요일 00:00 = UTC 토요일 15:00 — 주간 snapshot
+    # 일주일에 1회. 시즌 말까지 ~30 snapshot 누적.
+    - cron: '0 15 * * 6'
   workflow_dispatch:
     inputs:
       season:

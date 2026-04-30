@@ -12,9 +12,6 @@
  *  5) "0 0 * * *" — self-develop daily fire (KST 09:00). GitHub
  *     workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
  *     runner 위 claude-code-action 진단/결정/실행.
- *  6) "37 * * * *" 중 UTC 토요일 15시 — pitcher-snapshot (KST 일요일 00:37).
- *     /api/snapshot-pitchers POST → pitcher_stats 주간 시점 snapshot.
- *     cron 슬롯 추가 없이 sitemap-warmup 분기 안에 조건 통합 (4/5 유지).
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  */
@@ -214,28 +211,6 @@ async function logSpConfirmation(env: Env): Promise<void> {
   await Promise.all([logKboSp(env, todayKST), logNaverSp(env, todayKST)]);
 }
 
-async function runPitcherSnapshot(env: Env): Promise<void> {
-  try {
-    const resp = await fetch(`${env.SITE_URL}/api/snapshot-pitchers`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.CRON_SECRET}`,
-      },
-      body: '{}',
-    });
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => '');
-      console.error(`[Worker] pitcher-snapshot failed: ${resp.status} ${body.slice(0, 200)}`);
-      return;
-    }
-    const data = (await resp.json().catch(() => ({}))) as { upserted?: number };
-    console.log(`[Worker] pitcher-snapshot ok: upserted=${data.upserted ?? '?'}`);
-  } catch (e) {
-    console.error('[Worker] pitcher-snapshot error:', e);
-  }
-}
-
 async function runSitemapWarmup(env: Env): Promise<void> {
   const headers = { 'User-Agent': 'moneyball-sitemap-warmup/1.0' };
   // GET (HEAD 는 CDN cache-miss 재검증 강제 못 함). 바디 버림.
@@ -320,11 +295,6 @@ export default {
       ctx.waitUntil(logSpConfirmation(env));
     } else if (cronExpr === '37 * * * *') {
       ctx.waitUntil(runSitemapWarmup(env));
-      // UTC 토요일 15:37 ≈ KST 일요일 00:37 — 주간 pitcher-snapshot (기존 GH cron 대체)
-      const d = new Date(event.scheduledTime);
-      if (d.getUTCDay() === 6 && d.getUTCHours() === 15) {
-        ctx.waitUntil(runPitcherSnapshot(env));
-      }
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
     } else if (cronExpr === '0 0 * * *') {
