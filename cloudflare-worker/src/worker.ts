@@ -356,7 +356,8 @@ export default {
       }
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
-    } else if (cronExpr === '0 0 * * *') {
+    } else if (cronExpr === '17 3 * * *' || cronExpr === '0 0 * * *') {
+      // '17 3 * * *' (KST 12:17) = 4/30 09:00 miss 만회용 임시. 4/30 KST 18:00 이후 '0 0 * * *' (KST 09:00) 로 복귀.
       ctx.waitUntil(dispatchSelfDevelop(env));
     } else {
       console.log(`[Worker] unknown cron: ${cronExpr}`);
