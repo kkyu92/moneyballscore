@@ -1,10 +1,9 @@
 name: Pitcher Stats Snapshot
 
 on:
-  schedule:
-    # KST 일요일 00:00 = UTC 토요일 15:00 — 주간 snapshot
-    # 일주일에 1회. 시즌 말까지 ~30 snapshot 누적.
-    - cron: '0 15 * * 6'
+  # schedule 키 제거 (2026-04-30 Cloudflare Worker 이관). cloudflare-worker 의
+  # '37 * * * *' UTC 토요일 15시 조건 분기에서 runPitcherSnapshot() 자동 호출.
+  # workflow_dispatch 만 보존 (수동 trigger 또는 GH Actions UI 에서 fire).
   workflow_dispatch:
     inputs:
       season:

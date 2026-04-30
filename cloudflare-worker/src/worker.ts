@@ -15,6 +15,9 @@
  *  6) "17 0-14 * * *" UTC 03:17 조건 — 타자 스탯 일 1회 동기화 (KST 12:17).
  *     /api/sync-batter-stats POST. 예측(KST 15:17) 3시간 전 선행.
  *     별도 cron slot 소비 없이 기존 cron 재사용.
+ *  7) "37 * * * *" 중 UTC 토요일 15시 — pitcher-snapshot (KST 일요일 00:37).
+ *     /api/snapshot-pitchers POST → pitcher_stats 주간 시점 snapshot.
+ *     cron 슬롯 추가 없이 sitemap-warmup 분기 안에 조건 통합 (4/5 유지).
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  */
@@ -275,6 +278,28 @@ async function runBatterSync(env: Env): Promise<void> {
   }
 }
 
+async function runPitcherSnapshot(env: Env): Promise<void> {
+  try {
+    const resp = await fetch(`${env.SITE_URL}/api/snapshot-pitchers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.CRON_SECRET}`,
+      },
+      body: '{}',
+    });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      console.error(`[Worker] pitcher-snapshot failed: ${resp.status} ${body.slice(0, 200)}`);
+      return;
+    }
+    const data = (await resp.json().catch(() => ({}))) as { upserted?: number };
+    console.log(`[Worker] pitcher-snapshot ok: upserted=${data.upserted ?? '?'}`);
+  } catch (e) {
+    console.error('[Worker] pitcher-snapshot error:', e);
+  }
+}
+
 async function dispatchSelfDevelop(env: Env): Promise<void> {
   // env.GH_REPO 형식: "kkyu92/moneyballscore". PAT scope = actions:write.
   const url = `https://api.github.com/repos/${env.GH_REPO}/actions/workflows/self-develop.yml/dispatches`;
@@ -324,6 +349,11 @@ export default {
       }
     } else if (cronExpr === '37 * * * *') {
       ctx.waitUntil(runSitemapWarmup(env));
+      // UTC 토요일 15:37 ≈ KST 일요일 00:37 — 주간 pitcher-snapshot (기존 GH cron 대체)
+      const d = new Date(event.scheduledTime);
+      if (d.getUTCDay() === 6 && d.getUTCHours() === 15) {
+        ctx.waitUntil(runPitcherSnapshot(env));
+      }
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
     } else if (cronExpr === '0 0 * * *') {

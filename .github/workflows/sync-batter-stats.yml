@@ -1,9 +1,9 @@
 name: Sync Batter Stats
 
 on:
-  schedule:
-    # KST 12:00 = UTC 03:00 — 매일 daily-pipeline predict(15 KST) 전에 타자 스탯 갱신
-    - cron: '0 3 * * *'
+  # schedule 키 제거 (2026-04-30 Cloudflare Worker 이관). cloudflare-worker 의
+  # '17 0-14 * * *' UTC 03:17 분기에서 runBatterSync() 자동 호출. workflow_dispatch
+  # 만 보존 (수동 trigger 또는 GH Actions UI 에서 fire).
   workflow_dispatch:
     inputs:
       season:
