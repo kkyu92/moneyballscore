@@ -46,6 +46,35 @@ cat TODOS.md 2>/dev/null | head -30         # 할 일
 
 불확실하면 자동 커밋하지 말고 사용자 확인. 상세 규정은 `memory/feedback_session_quality_rules.md` 참고.
 
+### 자율 수정 범위 정책 — workflow yaml 보류 default (R6, 2026-04-30)
+
+**agent-loop / claude-code-action 자동 fire 가 자율 수정할 수 있는 파일 범위**:
+
+- ✅ **자율 가능**: `apps/`, `packages/`, `cloudflare-worker/src/`, `supabase/migrations/` (신규만), `tests/`, `*.md` (CLAUDE.md / README.md / TODOS.md 등), lesson commit
+- ❌ **자율 차단**: `.github/workflows/*.yml`, `.github/actions/*`, repo settings, secrets
+
+**Why**: `self-develop.yml` 의 `github_token` 이 default `GITHUB_TOKEN` 이라 claude-code-action 이 workflow yaml 수정 시도 시 push 거부 (workflows write 차단). 4-30 허브 결정 = 이 차단을 **유지**. PAT 활성화로 풀면 자율 수정 범위는 확장되지만 yaml 잘못 수정 시 cron silent drop risk + 진단 비용 큼. 비대칭.
+
+**자율 fire 시 행동 규칙**:
+
+1. workflow yaml 수정이 필요하다고 판단되면 **자율 시도 금지**. 대신:
+   - 허브 이슈 `kkyu92/playbook#84` 에 evidence 댓글 추가 (사례 / 처리 시간 / 자율 가능했으면 표시)
+   - 또는 lesson commit 으로 박제 (`lesson: workflow yaml 수정 필요 사례 — <설명>`) — 허브 auto-ingest 가 흡수
+2. 코드/lib/test/docs/lesson 으로 우회 가능한 경우 우회 (예: cron 슬롯 회복은 worker.ts 분기 통합으로 처리, schedule 키 추가는 사용자 영역)
+3. workflow yaml 수정이 본질적으로 필요한 작업이면 carry-over Issue 에 `human-needed` 라벨 + 사용자 manual 요청
+
+**재검토 Trigger** (허브 #84):
+- 사례 3건 누적: 활성화 검토 시작
+- 사례 5건 누적 + 평균 처리 시간 > 15분: 활성화 강하게 권장
+- 사례 1건이라도 silent drop / cron 죽음 발생: 보류 강화
+
+**적용 범위**: 머니볼 + blog-autopilot Phase 5 진입 시 동일 default.
+
+**관련 메모리**:
+- 허브 `feedback_claude_code_action_workflows_write_block` (default 박제)
+- 허브 `feedback_question_own_defaults` (자가 의심 적용 결과 보류 결정)
+- 허브 `feedback_gh_actions_cron_unreliable` (silent drop risk 가중치 근거)
+
 ### 드리프트 사례 1 — 구현된 코드를 그린필드로 간주 (2026-04-15 오전)
 
 메모리에 "Phase 2 완료, Phase 3 예정"만 있었는데, git log에 **Phase C (에이전트 토론 통합) + Phase D (Compound 루프) 이미 구현**되어 있었음. 5시간 "그린필드" 플래닝 후 마지막에 787줄 기존 코드 발견 → 플랜 전면 재조정 필요. 같은 사고 반복 금지.
