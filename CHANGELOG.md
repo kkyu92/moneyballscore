@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.5.27] - 2026-04-30
+
+### 인프라 신뢰성 — Cloudflare Workers 이관 완료 + agent-loop closed cycle
+
+**배경**: GH Actions schedule 이 high-load skip 으로 41% (daily) / 85% (live) 실패.
+전체 cron 을 Cloudflare Workers Free Tier 로 이관 완료. 동시에 Claude agent-loop
+자율 개발 cycle 구축.
+
+#### Cloudflare Workers Cron 이관 (GH Actions schedule 완전 대체)
+
+- `cloudflare-worker/src/worker.ts` — 단일 파일에 7가지 역할 통합:
+  1. daily-pipeline trigger (`17 0-14 * * *`, UTC hour → mode 분기)
+  2. SP 확정 시각 측정 — KBO 공식 + Naver 이중 소스 동시 INSERT
+  3. sitemap warmup (`37 * * * *`)
+  4. pitcher-snapshot (UTC 토요일 15:37 조건 분기)
+  5. live-update (`*/10 9-15 * * *`)
+  6. sync-batter-stats (UTC 03:17 조건 분기)
+  7. self-develop daily dispatch (UTC 00:17)
+- cron 슬롯 5개 중 3개 사용 (Free tier quota 여유). 총 fire/day = 82 (100k 한도 내)
+- `pat-expiry-check.yml` GH 유지 결정 — GH PAT 검사는 GH 컨텍스트가 본질에 맞음
+- GH Actions yml 에서 schedule 키 제거, workflow_dispatch 보존 (수동 fallback)
+
+#### SP 확정 시각 측정 이중 소스 (Phase 2)
+
+- `supabase/migrations/020_sp_confirmation_log.sql` — sp_confirmation_log 테이블
+- `021_widen_sp_log_state_sc.sql` — state_sc VARCHAR(20) (Naver statusCode 7자 overflow 차단)
+- KBO 공식 (`B_PIT_P_NM`, `T_PIT_P_NM`) + Naver (`homeStarterName`, `awayStarterName`) 양쪽 적재
+- Naver gameId 17자리 → 13자리 normalizeNaverGameId() 로 KBO join 가능
+- 1~2주 누적 후 Phase 3 분석: 어느 소스가 먼저 SP 채우는지 정량 비교
+
+#### Agent-loop closed cycle (Phase 5 비전 1 보완)
+
+- `self-develop.yml` → `agent-loop.yml` 네임스페이스 전환
+  - label `agent-loop` + branch prefix `agent-loop/` 로 사용자 작업과 분리
+  - carry-over chain: 1 cycle = 10 fire. 큰 task 자율 분해 + GH Issue 기반 인계
+  - push step 명시 추가 (`git push origin --all`) — commit 후 push 누락 silent drop 방지
+- Cloudflare cron `0 0 * * *` (KST 09:00) → `self-develop.yml` workflow_dispatch
+- 4 prefix (lesson/policy/feedback/memory) commit → submit-lesson.yml dispatch → 허브 auto-ingest
+
+#### 기타 인프라 / SEO
+
+- `019_widen_pipeline_runs_mode.sql` — mode VARCHAR(20) (predict_final 11자 overflow 차단)
+- AdSense 스크립트 인프라: `ADSENSE_PUBLISHER_ID` env-driven `<script async>` 자동 주입
+- SEO: sitemap 정적 prerender 전환 / canonical 전수 / SportsEvent 스키마 / robots.txt 보강
+- 예측 3단계 (적중/유력/반반) 이모지·레이블 UI+Telegram 통일
+- wrangler 3.114 → 4.85 업그레이드
+
+**검증**: tsc pass · 전체 tests pass (shared 42 + kbo-data 358 + moneyball 139 = 539).
+
 ## [0.5.26] - 2026-04-22
 
 ### v3 backtest 결과 — game_records 기반 feature negative
