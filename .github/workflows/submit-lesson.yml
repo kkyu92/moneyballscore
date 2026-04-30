@@ -3,6 +3,11 @@ name: "📚 Submit Lesson/Policy to Playbook"
 # Phase 4a D4 — `lesson:` + `policy:` / `feedback:` / `memory:` prefix commit 모두
 # 허브 worker-lesson 채널로 dispatch. lesson 외 prefix 는 payload subtype=self-policy
 # 로 표시 → 허브에서 별도 label `self-policy` Issue (Journal PR skip).
+#
+# 2026-04-30 — PR 머지 commit 검출 갭 fix. head_commit 만 검사하던 현행 로직은
+# PR 머지 시 GitHub default merge commit 메시지 ("Merge pull request #N from ...")
+# 가 4 prefix 미해당이라 silent skip. push event 의 commits 배열 loop 추가하여
+# 머지 commit 안에 포함된 lesson commit 도 검출 (허브 #84 evidence #2).
 
 on:
   push:
@@ -10,49 +15,99 @@ on:
 
 jobs:
   submit:
-    if: |
-      startsWith(github.event.head_commit.message, 'lesson:') ||
-      startsWith(github.event.head_commit.message, 'policy:') ||
-      startsWith(github.event.head_commit.message, 'feedback:') ||
-      startsWith(github.event.head_commit.message, 'memory:')
     runs-on: ubuntu-latest
     steps:
-      - name: Determine prefix + subtype
+      - name: Find lesson commit in push
+        id: find
+        env:
+          COMMITS_JSON: ${{ toJSON(github.event.commits) }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          # 1. head_commit prefix 매칭 우선 (직접 push 의 일반 케이스)
+          for prefix in lesson policy feedback memory; do
+            if [[ "$HEAD_MSG" == "${prefix}:"* ]]; then
+              {
+                echo "found=true"
+                echo "prefix=$prefix"
+                echo "sha=$HEAD_SHA"
+                echo "msg<<EOF_M"
+                printf '%s' "$HEAD_MSG"
+                echo
+                echo "EOF_M"
+              } >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          # 2. commits 배열 loop (PR 머지 시 — head_commit 은 머지 commit 메시지)
+          MATCH=$(printf '%s' "$COMMITS_JSON" | jq -c '
+            map(select(
+              (.message | startswith("lesson:")) or
+              (.message | startswith("policy:")) or
+              (.message | startswith("feedback:")) or
+              (.message | startswith("memory:"))
+            )) | .[0] // empty
+          ')
+
+          if [ -z "$MATCH" ] || [ "$MATCH" = "null" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "lesson commit 없음 — skip"
+            exit 0
+          fi
+
+          MSG=$(printf '%s' "$MATCH" | jq -r .message)
+          SHA=$(printf '%s' "$MATCH" | jq -r .id)
+          PREFIX=$(printf '%s' "$MSG" | head -1 | sed 's/:.*//')
+
+          {
+            echo "found=true"
+            echo "prefix=$PREFIX"
+            echo "sha=$SHA"
+            echo "msg<<EOF_M"
+            printf '%s' "$MSG"
+            echo
+            echo "EOF_M"
+          } >> "$GITHUB_OUTPUT"
+          echo "PR 머지에서 lesson commit 검출: $SHA ($PREFIX:)"
+
+      - name: Determine subtype
+        if: steps.find.outputs.found == 'true'
         id: classify
         env:
-          MSG: ${{ github.event.head_commit.message }}
+          PREFIX: ${{ steps.find.outputs.prefix }}
         run: |
-          PREFIX=$(printf '%s' "$MSG" | head -1 | sed 's/:.*//')
-          echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
           # lesson = 기존 (subtype 미지정), 그 외 = self-policy (Phase 4a D4)
           if [ "$PREFIX" = "lesson" ]; then
-            echo "subtype=" >> $GITHUB_OUTPUT
+            echo "subtype=" >> "$GITHUB_OUTPUT"
           else
-            echo "subtype=self-policy" >> $GITHUB_OUTPUT
+            echo "subtype=self-policy" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Extract title & body
+        if: steps.find.outputs.found == 'true'
         id: extract
         env:
-          MSG: ${{ github.event.head_commit.message }}
-          PREFIX: ${{ steps.classify.outputs.prefix }}
+          MSG: ${{ steps.find.outputs.msg }}
+          PREFIX: ${{ steps.find.outputs.prefix }}
         run: |
           TITLE=$(printf '%s' "$MSG" | head -1 | sed "s/^${PREFIX}:[[:space:]]*//")
-          echo "title=$TITLE" >> $GITHUB_OUTPUT
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           {
             echo "body<<EOF_LESSON"
             printf '%s' "$MSG" | tail -n +2
             echo
             echo "EOF_LESSON"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Dispatch to playbook
+        if: steps.find.outputs.found == 'true'
         env:
           GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
           TITLE: ${{ steps.extract.outputs.title }}
           BODY: ${{ steps.extract.outputs.body }}
           SUBTYPE: ${{ steps.classify.outputs.subtype }}
-          FINGERPRINT: ${{ github.sha }}
+          FINGERPRINT: ${{ steps.find.outputs.sha }}
         run: |
           gh api repos/kkyu92/playbook/dispatches \
             -f event_type=worker-lesson \
