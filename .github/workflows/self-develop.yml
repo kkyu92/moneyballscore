@@ -149,6 +149,19 @@ jobs:
             - **사용자 직접 작업과 분리** — 모든 결과는 `agent-loop` label
               namespace + `agent-loop/` branch prefix
 
+      - name: Push agent-loop commits to origin
+        # Claude turn 안에서 commit 만 하고 push 안 하는 사고 방지 (drift case 박제).
+        # self-hosted runner _work/ 디렉토리는 다음 fire 에 fresh checkout → 휘발.
+        # main 직접 patch 패턴이든 agent-loop/ branch 패턴이든 모두 push 강제.
+        if: success()
+        run: |
+          if git diff --quiet origin/main..HEAD 2>/dev/null && ! git for-each-ref --format='%(refname:short)' refs/heads/agent-loop/ | head -1 | grep -q .; then
+            echo "No new commits or agent-loop branches to push"
+          else
+            echo "=== local refs ===" && git for-each-ref --format='%(refname:short) %(objectname:short)' refs/heads/
+            git push origin --all
+          fi
+
       - name: Self-report on failure
         if: failure()
         env:
