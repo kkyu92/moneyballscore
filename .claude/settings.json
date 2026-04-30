@@ -7,6 +7,11 @@
             "type": "command",
             "command": "HUB=/Users/kyusikkim/projects/playbook; SYNC=~/.claude/.moneyballscore-hub-sync; CUR=$(cd $HUB 2>/dev/null && git rev-parse HEAD 2>/dev/null); LAST=$(cat $SYNC 2>/dev/null); if [ -n \"$CUR\" ] && [ \"$CUR\" != \"$LAST\" ]; then if [ -n \"$LAST\" ]; then N=$(cd $HUB && git log --oneline $LAST..HEAD 2>/dev/null | wc -l | tr -d ' '); echo \"🔔 허브 갱신 ${N}건 (${LAST:0:7} → ${CUR:0:7}) — 새 정책/메모리 적용됨\"; else echo \"🔔 허브 sync init (${CUR:0:7})\"; fi; echo $CUR > $SYNC; fi",
             "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "ISSUES=$(gh issue list --label hub-update --state open --limit 5 --json number,title --jq '.[] | \"  #\\(.number) \\(.title)\"' 2>/dev/null); if [ -n \"$ISSUES\" ]; then COUNT=$(echo \"$ISSUES\" | wc -l | tr -d ' '); echo \"📬 hub-update open issues (${COUNT}건) — /develop-cycle Step 0 또는 manual 흡수:\"; echo \"$ISSUES\"; fi",
+            "timeout": 5000
           }
         ]
       }
