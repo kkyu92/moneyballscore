@@ -9,9 +9,10 @@
  *  3) "37 * * * *" — sitemap-warmup. /sitemap.xml + /robots.txt GET 으로 ISR warm.
  *  4) live-update — KST 18:00~00:50 매 10분 /api/live POST (cron expression
  *     은 wrangler.toml 참조; JSDoc 안에 그대로 쓰면 주석 종료로 파싱됨).
- *  5) "0 0 * * *" — self-develop daily fire (KST 09:00). GitHub
- *     workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
- *     runner 위 claude-code-action 진단/결정/실행.
+ *  5) "17 0-14 * * *" UTC hour===0 조건 — self-develop daily fire (KST 09:17).
+ *     GitHub workflow_dispatch 로 self-develop.yml 호출 → self-hosted [home]
+ *     runner 위 claude-code-action 진단/결정/실행. cron 슬롯 추가 없이 기존
+ *     daily-pipeline 분기 안 통합 (4/5 유지, 03a4867 정신 + offset 일관성).
  *  6) "17 0-14 * * *" UTC 03:17 조건 — 타자 스탯 일 1회 동기화 (KST 12:17).
  *     /api/sync-batter-stats POST. 예측(KST 15:17) 3시간 전 선행.
  *     별도 cron slot 소비 없이 기존 cron 재사용.
@@ -343,8 +344,13 @@ export default {
         console.log(`[Worker] no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping pipeline`);
       }
       ctx.waitUntil(logSpConfirmation(env));
+      const utcHour = new Date(event.scheduledTime).getUTCHours();
+      // UTC 00:17 (KST 09:17) — self-develop daily fire (announce 와 동시)
+      if (utcHour === 0) {
+        ctx.waitUntil(dispatchSelfDevelop(env));
+      }
       // UTC 03:17 (KST 12:17) — 타자 스탯 일 1회 동기화 (예측 3시간 전)
-      if (new Date(event.scheduledTime).getUTCHours() === 3) {
+      if (utcHour === 3) {
         ctx.waitUntil(runBatterSync(env));
       }
     } else if (cronExpr === '37 * * * *') {
@@ -356,9 +362,6 @@ export default {
       }
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
-    } else if (cronExpr === '17 3 * * *' || cronExpr === '0 0 * * *') {
-      // '17 3 * * *' (KST 12:17) = 4/30 09:00 miss 만회용 임시. 4/30 KST 18:00 이후 '0 0 * * *' (KST 09:00) 로 복귀.
-      ctx.waitUntil(dispatchSelfDevelop(env));
     } else {
       console.log(`[Worker] unknown cron: ${cronExpr}`);
     }
