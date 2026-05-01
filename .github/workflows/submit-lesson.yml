@@ -8,6 +8,12 @@ name: "📚 Submit Lesson/Policy to Playbook"
 # PR 머지 시 GitHub default merge commit 메시지 ("Merge pull request #N from ...")
 # 가 4 prefix 미해당이라 silent skip. push event 의 commits 배열 loop 추가하여
 # 머지 commit 안에 포함된 lesson commit 도 검출 (허브 #84 evidence #2).
+#
+# 2026-05-01 — Conventional Commit scope-prefix matcher 갭 fix. `lesson(skill):` /
+# `lesson(model):` 등 scope 접미 prefix 가 silent skip 되던 갭 차단. develop-cycle
+# 첫·두 번째 시범 fire 의 lesson commit (a83f75f / aa13056) 둘 다 허브 흡수 0건
+# 검증 후 발견. bash =~ regex + jq test() 양쪽 정정 + PREFIX 추출 grep -oE 로
+# normalization. 본 fix 자체는 `fix(workflow):` prefix 라 흡수 비대상.
 
 on:
   push:
@@ -25,8 +31,10 @@ jobs:
           HEAD_SHA: ${{ github.sha }}
         run: |
           # 1. head_commit prefix 매칭 우선 (직접 push 의 일반 케이스)
+          # prefix: 또는 prefix(scope): 양쪽 인식 (Conventional Commit scope 갭 fix)
           for prefix in lesson policy feedback memory; do
-            if [[ "$HEAD_MSG" == "${prefix}:"* ]]; then
+            re="^${prefix}(\([^)]+\))?:"
+            if [[ "$HEAD_MSG" =~ $re ]]; then
               {
                 echo "found=true"
                 echo "prefix=$prefix"
@@ -41,12 +49,10 @@ jobs:
           done
 
           # 2. commits 배열 loop (PR 머지 시 — head_commit 은 머지 commit 메시지)
+          # prefix: + prefix(scope): 양쪽 인식
           MATCH=$(printf '%s' "$COMMITS_JSON" | jq -c '
             map(select(
-              (.message | startswith("lesson:")) or
-              (.message | startswith("policy:")) or
-              (.message | startswith("feedback:")) or
-              (.message | startswith("memory:"))
+              .message | test("^(lesson|policy|feedback|memory)(\\([^)]+\\))?:")
             )) | .[0] // empty
           ')
 
@@ -58,7 +64,8 @@ jobs:
 
           MSG=$(printf '%s' "$MATCH" | jq -r .message)
           SHA=$(printf '%s' "$MATCH" | jq -r .id)
-          PREFIX=$(printf '%s' "$MSG" | head -1 | sed 's/:.*//')
+          # prefix 만 추출 (scope 제외) — 후속 단계 (subtype / TITLE) 일관성 유지
+          PREFIX=$(printf '%s' "$MSG" | head -1 | grep -oE '^(lesson|policy|feedback|memory)')
 
           {
             echo "found=true"
@@ -91,7 +98,8 @@ jobs:
           MSG: ${{ steps.find.outputs.msg }}
           PREFIX: ${{ steps.find.outputs.prefix }}
         run: |
-          TITLE=$(printf '%s' "$MSG" | head -1 | sed "s/^${PREFIX}:[[:space:]]*//")
+          # prefix: 또는 prefix(scope): 둘 다 처리
+          TITLE=$(printf '%s' "$MSG" | head -1 | sed -E "s/^${PREFIX}(\([^)]+\))?:[[:space:]]*//")
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           {
             echo "body<<EOF_LESSON"
