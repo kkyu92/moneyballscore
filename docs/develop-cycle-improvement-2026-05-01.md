@@ -38,7 +38,7 @@ handoff save/load 자체도 새 세션 SessionStart base (~50k+ hub-update / kno
 
 ---
 
-## 3. SKILL.md 갱신 candidate 4건
+## 3. SKILL.md 갱신 candidate 5건
 
 ### Candidate 1 — Step 1 진단 슬림화
 
@@ -136,6 +136,52 @@ Mailbox to <차원>:
 ```
 
 **효과**: cycle당 ~1~2k → ~0.2k.
+
+---
+
+### Candidate 5 — review skill 자율 호출 조건 (trigger 박제)
+
+**현재**: 차원별 skill 시퀀스에 review 명시 박제. site 만 `plan-design-review` (해당 시). acquisition / model 에 `plan-eng-review` / `plan-ceo-review` 없음. 자율 호출 메커니즘 부재.
+
+**변경**:
+
+차원별 시퀀스는 그대로 (안전망). 추가로:
+
+(1) **새 섹션 "review skill 자율 호출 조건"** 박제 — 워커 self-check + 메인 cross-check:
+
+```
+## review skill 자율 호출 조건 (워커 self-check)
+
+워커는 작업 시작 시 task description 을 다음 trigger 와 매칭. 매칭 시
+해당 plan-X-review 자율 호출 후 구현 진입.
+
+| Review | trigger 신호 | 차원 |
+|---|---|---|
+| plan-design-review | UI 컴포넌트 / 레이아웃 / 페이지 변경 | site, acquisition |
+| plan-eng-review | architecture / 마이그레이션 / 큰 인터페이스 변경 | 주로 model |
+| plan-ceo-review | (1 cycle 단위 X — 메타 회고 시점만) | N 도달 |
+
+매칭 X 면 skip.
+```
+
+(2) **dispatch payload 1줄 추가** (Step 4-2):
+```
+Done when: ... + review trigger 매칭 시 해당 plan-X-review 자율 호출 박제
+```
+
+(3) **Step 5 회고 검증 표 5번 항목 신설** — 메인 cross-check:
+| 검증 항목 | 명령 | 의도 매칭 |
+|---|---|---|
+| 5. review 자율 호출 적정성 | task description trigger 매칭 vs 워커 호출 history | 매칭 → 호출 / 매칭 X → skip 일치 |
+
+**효과**:
+- review 호출은 자율 → 호출 X 시 +0 토큰, 호출 시 +5~10k. cycle당 평균 영향 작음
+- 시퀀스 명시 박제 회피 → SKILL.md 가벼움 유지
+- N=5+ 운영 중 자율 판단 패턴 박제 (어느 차원에서 어느 review 가 자주 호출되는지) → Tier 4 도달 후 시퀀스 박제 결정 자연 자료
+
+**잔여 risk**:
+- 자율 판단 미스 (필요한데 호출 X) — 안전망: 회고 검증 표 5번 cross-check
+- Tier 2 (N=3) skip 시 자율 판단 패턴 자연 폭로 갭 ↑ — 본 design Section 2 의 Tier 2 → 3 직행 결정과 같은 risk axis
 
 ---
 
