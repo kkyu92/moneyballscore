@@ -14,10 +14,23 @@ name: "📚 Submit Lesson/Policy to Playbook"
 # 첫·두 번째 시범 fire 의 lesson commit (a83f75f / aa13056) 둘 다 허브 흡수 0건
 # 검증 후 발견. bash =~ regex + jq test() 양쪽 정정 + PREFIX 추출 grep -oE 로
 # normalization. 본 fix 자체는 `fix(workflow):` prefix 라 흡수 비대상.
+#
+# 2026-05-01 (2nd) — squash-merge silent skip 갭 fix. PR title 이 4 prefix 외이고
+# (예: `model: ...`, `feat: ...`) 안에 lesson commit 이 포함된 PR 을 squash 머지
+# 하면, head_commit + commits 배열 모두 squash 결과 (PR title) 만 보유 → silent
+# skip. 직전 (1st) fix 가 commits 배열 loop 추가했으나 squash 케이스는 commits
+# 배열 자체가 단일 squash commit 만 가져 매칭 불가. 본 fix 는 head_commit 메시지
+# 첫 줄에서 `(#NN)` 추출 → `gh api repos/.../pulls/NN/commits` 호출 → squash 전
+# 원본 commit 들 안에서 4 prefix 검색. PR #32 가 본 갭 회피 위해 `--merge` 사용
+# 했던 정책 의존성 제거. default GITHUB_TOKEN 의 pull-requests: read 권한 사용.
 
 on:
   push:
     branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   submit:
@@ -29,6 +42,8 @@ jobs:
           COMMITS_JSON: ${{ toJSON(github.event.commits) }}
           HEAD_MSG: ${{ github.event.head_commit.message }}
           HEAD_SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           # 1. head_commit prefix 매칭 우선 (직접 push 의 일반 케이스)
           # prefix: 또는 prefix(scope): 양쪽 인식 (Conventional Commit scope 갭 fix)
@@ -56,15 +71,52 @@ jobs:
             )) | .[0] // empty
           ')
 
-          if [ -z "$MATCH" ] || [ "$MATCH" = "null" ]; then
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "lesson commit 없음 — skip"
+          if [ -n "$MATCH" ] && [ "$MATCH" != "null" ]; then
+            MSG=$(printf '%s' "$MATCH" | jq -r .message)
+            SHA=$(printf '%s' "$MATCH" | jq -r .id)
+            # prefix 만 추출 (scope 제외) — 후속 단계 (subtype / TITLE) 일관성 유지
+            PREFIX=$(printf '%s' "$MSG" | head -1 | grep -oE '^(lesson|policy|feedback|memory)')
+
+            {
+              echo "found=true"
+              echo "prefix=$PREFIX"
+              echo "sha=$SHA"
+              echo "msg<<EOF_M"
+              printf '%s' "$MSG"
+              echo
+              echo "EOF_M"
+            } >> "$GITHUB_OUTPUT"
+            echo "PR 머지에서 lesson commit 검출: $SHA ($PREFIX:)"
             exit 0
           fi
 
-          MSG=$(printf '%s' "$MATCH" | jq -r .message)
-          SHA=$(printf '%s' "$MATCH" | jq -r .id)
-          # prefix 만 추출 (scope 제외) — 후속 단계 (subtype / TITLE) 일관성 유지
+          # 3. squash-merge 갭 fallback — head_commit (#NN) 추출 → PR /commits API 조회
+          # PR title 이 4 prefix 외이고 안에 lesson commit 포함된 PR 을 squash 머지하면
+          # commits 배열엔 squash 결과 (PR title) 만 남아 매칭 불가. PR API 로 squash
+          # 전 원본 commit 들 조회 후 검색.
+          PR_NUM=$(printf '%s' "$HEAD_MSG" | head -1 | grep -oE '\(#[0-9]+\)' | tail -1 | grep -oE '[0-9]+')
+          if [ -z "$PR_NUM" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "lesson commit 없음 — skip (head_commit + commits 배열 + (#NN) 패턴 모두 매칭 X)"
+            exit 0
+          fi
+
+          echo "Squash merge 의심 — PR #$PR_NUM /commits 조회"
+          PR_COMMITS=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUM}/commits" --paginate 2>/dev/null || echo '[]')
+          SQUASH_MATCH=$(printf '%s' "$PR_COMMITS" | jq -c '
+            map({sha: .sha, message: .commit.message} | select(
+              .message | test("^(lesson|policy|feedback|memory)(\\([^)]+\\))?:")
+            )) | .[0] // empty
+          ')
+
+          if [ -z "$SQUASH_MATCH" ] || [ "$SQUASH_MATCH" = "null" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "lesson commit 없음 — skip (PR #$PR_NUM commits 안에도 4 prefix 없음)"
+            exit 0
+          fi
+
+          MSG=$(printf '%s' "$SQUASH_MATCH" | jq -r .message)
+          SHA=$(printf '%s' "$SQUASH_MATCH" | jq -r .sha)
           PREFIX=$(printf '%s' "$MSG" | head -1 | grep -oE '^(lesson|policy|feedback|memory)')
 
           {
@@ -76,7 +128,7 @@ jobs:
             echo
             echo "EOF_M"
           } >> "$GITHUB_OUTPUT"
-          echo "PR 머지에서 lesson commit 검출: $SHA ($PREFIX:)"
+          echo "Squash merge PR #$PR_NUM commits 안에서 lesson commit 검출: $SHA ($PREFIX:)"
 
       - name: Determine subtype
         if: steps.find.outputs.found == 'true'
