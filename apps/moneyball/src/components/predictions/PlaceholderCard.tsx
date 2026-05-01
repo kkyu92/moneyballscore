@@ -30,7 +30,8 @@ export function PlaceholderCard({
     statusMsg = "경기 진행중";
     statusIcon = "🔴";
   } else if (status === "final") {
-    statusMsg = "경기 종료 · 예측 미기록";
+    // "예측 미기록" 은 통계 작성자 어휘. 일반 사용자엔 "예측 없음" 이 더 자연.
+    statusMsg = "경기 종료 · 예측 없음";
     statusIcon = "—";
   } else if (!homeSPName || !awaySPName) {
     statusMsg = "선발 확정 대기";
@@ -40,13 +41,26 @@ export function PlaceholderCard({
     statusMsg = "예측 준비중";
   }
 
+  // 스크린리더용 카드 요약 — 매치업 + 시각 + 상태를 한 문장으로.
+  // 시각적으로는 같은 정보가 분산돼 있어 SR 사용자가 토막으로 듣게 됨.
+  const displayTime = gameTime ?? "18:30";
+  const ariaLabel = `${shortTeamName(awayTeam)} 대 ${shortTeamName(homeTeam)} (홈) · ${displayTime} · ${statusMsg}`;
+
   return (
-    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-dashed border-gray-300 dark:border-[var(--color-border)] p-5 opacity-80">
+    <article
+      aria-label={ariaLabel}
+      className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-dashed border-gray-300 dark:border-[var(--color-border)] p-5 opacity-80"
+    >
       <div className="flex justify-between items-center mb-4">
         <span className="text-xs text-gray-500 dark:text-gray-400">
-          {gameTime ?? "18:30"}
+          <time dateTime={displayTime}>{displayTime}</time>
         </span>
-        <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
+        <span
+          aria-hidden="true"
+          className="text-xs text-gray-400 dark:text-gray-500"
+        >
+          —
+        </span>
       </div>
 
       <div className="flex items-center justify-between mb-4">
@@ -89,6 +103,6 @@ export function PlaceholderCard({
           {awaySPName ?? "미확정"} vs {homeSPName ?? "미확정"}
         </div>
       )}
-    </div>
+    </article>
   );
 }
