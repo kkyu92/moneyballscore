@@ -252,3 +252,83 @@ gh pr view 32 --json files | jq '.files | length'
 | 2 (5/1 09:55) | #32 (`604b227 merge`) | model | N=47 표본 축적 결정 + H5 임계 도달 박제. lesson(model) commit aa13056 |
 
 박제 5건 모두 SKILL.md 반영됨 (5/1 09:09 lesson(skill) commit a83f75f + 후속 PR #33 c587b3e fix). Tier 1 통과.
+
+---
+
+## 부록 2 — N=3 한 세션 fire 결과 (2026-05-01 KST)
+
+본 design doc 박제 직후 (`4d4e448` + `d9eb6a4`) `/develop-cycle 3` 자연 호출 — **Candidate 1~5 미적용 base** 에서 한 세션 N=3 강행 통과 자료. 향후 SKILL.md 갱신 후 비교 base.
+
+### Cycle 결과
+
+| Cycle | 차원 | PR | merge sha | 변경 |
+|---|---|---|---|---|
+| 1/3 | acquisition | #36 | `1fea1ce` | sitemap `/players/[id]` 추가 (+20 -2) |
+| 2/3 | model | #37 | `0ebc215` | calibration sparse-history regression test (+52) |
+| 3/3 | site | #38 | `97688b4` | PlaceholderCard 메시지 + a11y (+76 -7) |
+
+메타 회고 lesson commit: `c0d44d3` (submit-lesson run `25219228819` success → 허브 dispatch).
+
+### 차원 분배 (5/1 + 본 fire 누적)
+site 1 / model 2 / acquisition 1 — round-robin 균형.
+
+### 박제 신규 2건 (Tier 2 통과 기준 0~2 충족)
+
+1. **메인 task 명세 라우팅 갭** (Cycle 1)
+   - dispatch 시 `/players/[name]` (실제 `[id]`), `/reviews/[date]` (존재 X, weekly/monthly 만) 표현 부정확
+   - 워커 자율 정정 통과
+   - SKILL.md Step 4-2 dispatch payload 작성 시 "라우팅 구조 사전 확인" 권장 후보
+
+2. **워커 자율 머지 dispatch payload consistency 갭** (Cycle 2)
+   - Cycle 1 spawn prompt "워커는 PR 생성까지만" 명시 / Cycle 2 누락 → 워커가 R7 정신 따라 자체 머지
+   - 사고 X, Cycle 3 명시화로 해결
+   - SKILL.md Step 4-2 표준 template 통일 후보
+
+### Candidate 5 (review trigger 박제) 작동 1차 검증
+
+3/3 워커 모두 자율 판단 정확:
+- acquisition: sitemap 메타만 → 모든 review skip 정상
+- model: test 추가만 → eng-review skip 정상
+- site: 단일 컴포넌트 a11y → design-review skip 판단 정상
+
+**Candidate 5 시퀀스 명시 박제 회피 결정 정당화 입증**.
+
+### 5/1 박제 5건 차단 검증
+
+| 박제 | 결과 |
+|---|---|
+| iTerm2 시각화 X | 변동 없음 (tmux 백엔드만, 사용자 화면 비가시 그대로) |
+| label 부착 | 3/3 ✓ |
+| shutdown race | 1/3 재발 (acquisition 18초 차 idle_notification) — 메커니즘 한계, graceful 영향 X |
+| main checkout | 3/3 ✓ |
+| scope-prefix matcher | 3건 모두 head_commit 4 prefix 외 → 정상 skip |
+| 영역 분리 위반 | 0/3 ✓ |
+
+### 세션 자가 추정 (R3)
+
+| 신호 | 값 |
+|---|---|
+| 대화 turn 누적 | ~30+ |
+| 도구 호출 누적 | ~50+ |
+| system reminders | 5건+ (task tools 권유 반복) |
+| 대형 docs / skill list 노출 | 7~8회 |
+| **자가 추정 컨텍스트** | **~75~85% 근처** |
+
+### Tier 2 통과 — Tier 3 (N=5) 도전 조건
+
+한 세션 N=3 = ~75~85% 도달. **Tier 3 (N=5) 한 세션 도전 시 Candidate 1~4 적용 필수**. 갱신 전 Tier 3 도전 시 carry-over 1회 자연 발생.
+
+### 본 fire 가 design candidate 별 검증 자료
+
+| Candidate | 본 fire base | 갱신 후 비교 가능 |
+|---|---|---|
+| 1. 진단 슬림화 | 매 cycle full scan ~3~5k 진단 토큰 | 적용 후 ~0.5k (10x 절감 추정) |
+| 2. Tier 점진 | Tier 1 → Tier 3 (Tier 2 skip) — 박제 신규 2건 자연 폭로 | Tier 2 정식 진행 시 신규 발견 패턴 비교 |
+| 3. dispatch payload 압축 | spawn prompt ~1.5~2k × 3 | 압축 후 ~0.5k × 3 |
+| 4. 회고 검증 표 file dump | cycle당 ~1~2k | ~0.2k |
+| 5. review trigger 자율 호출 | **3/3 워커 정확 판단 — 작동 검증 통과** | 갱신 시 시퀀스 박제 회피 결정 그대로 |
+
+### 다음 자연 트리거
+
+- model N=50 표본 도달 (5/3~5/5 예상) → `/develop-cycle 1` (model) 또는 `/develop-cycle 5` (Tier 3 도전)
+- 5/7 KST 09:30 retrospective routine (`trig_01FbjATFftDz3bxT89YXUin2`) 자동 fire — 본 fire + 5/1 두 fire 통합 회고 대상
