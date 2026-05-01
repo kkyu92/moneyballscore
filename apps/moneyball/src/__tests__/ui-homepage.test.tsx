@@ -65,7 +65,7 @@ describe('PlaceholderCard — status 분기', () => {
     expect(screen.getByText('🔴')).toBeInTheDocument();
   });
 
-  it('status="final" → 경기 종료 · 예측 미기록 + —', () => {
+  it('status="final" → 경기 종료 · 예측 없음 + —', () => {
     render(
       <PlaceholderCard
         homeTeam="OB"
@@ -75,7 +75,7 @@ describe('PlaceholderCard — status 분기', () => {
       />,
     );
 
-    expect(screen.getByText('경기 종료 · 예측 미기록')).toBeInTheDocument();
+    expect(screen.getByText('경기 종료 · 예측 없음')).toBeInTheDocument();
   });
 
   it('SP 미확정 (homeSP undefined) → 선발 확정 대기', () => {
@@ -213,6 +213,61 @@ describe('PlaceholderCard — status 분기', () => {
     expect(screen.getByText('선발 확정 대기')).toBeInTheDocument();
     // 그래도 awaySP 있으니 SP 라인 표시 (미확정 vs 양현종)
     expect(screen.getByText(/양현종.*vs.*미확정/)).toBeInTheDocument();
+  });
+});
+
+/**
+ * a11y 보강 — 스크린리더 카드 요약 + 의미 있는 마크업.
+ *
+ * 이전엔 카드가 div 묶음이라 스크린리더가 "두산" "—" "KIA" "예측 준비중"
+ * 처럼 토막 텍스트로 읽었음. <article aria-label> 로 매치업 + 시각 + 상태를
+ * 한 문장으로 요약하고, 시각은 <time dateTime> 으로 의미 부여.
+ */
+describe('PlaceholderCard — a11y', () => {
+  it('카드 전체가 article role + 매치업 요약 aria-label 포함', () => {
+    render(
+      <PlaceholderCard
+        homeTeam="OB"
+        awayTeam="HT"
+        gameTime="18:30"
+        status="scheduled"
+        homeSPName="최민석"
+        awaySPName="양현종"
+      />,
+    );
+
+    // article + aria-label 한 문장 요약 (away vs home (홈) · 시각 · 상태)
+    const card = screen.getByRole('article');
+    const label = card.getAttribute('aria-label') ?? '';
+    expect(label).toContain('KIA');
+    expect(label).toContain('두산');
+    expect(label).toContain('홈');
+    expect(label).toContain('18:30');
+    expect(label).toContain('예측 준비중');
+  });
+
+  it('postponed 상태도 article aria-label 에 "경기 취소" 포함', () => {
+    render(
+      <PlaceholderCard
+        homeTeam="OB"
+        awayTeam="HT"
+        gameTime="18:30"
+        status="postponed"
+      />,
+    );
+
+    const label = screen.getByRole('article').getAttribute('aria-label') ?? '';
+    expect(label).toContain('경기 취소');
+  });
+
+  it('gameTime 은 <time dateTime="HH:MM"> 으로 마크업', () => {
+    const { container } = render(
+      <PlaceholderCard homeTeam="OB" awayTeam="HT" gameTime="14:00" status="scheduled" />,
+    );
+
+    const timeEl = container.querySelector('time');
+    expect(timeEl?.getAttribute('dateTime')).toBe('14:00');
+    expect(timeEl?.textContent).toBe('14:00');
   });
 });
 
