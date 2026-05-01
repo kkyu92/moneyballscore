@@ -89,20 +89,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 모든 past + 오늘 경기 /analysis/game/[id] URL + 일자별 /predictions/[date]
+  // + 등판 기록 있는 모든 선발 투수 /players/[id] URL
   const analysisRoutes: MetadataRoute.Sitemap = [];
   const predictionDateRoutes: MetadataRoute.Sitemap = [];
+  const playerRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const supabase = createSitemapClient();
-    // limit 5000 → 2500 (2023-2026 실제 ~1200 경기 + 여유). 선택 필드도 3개만.
+    // limit 5000 → 2500 (2023-2026 실제 ~1200 경기 + 여유). 선택 필드도 5개만.
+    // home_sp_id / away_sp_id 추가 — distinct 모아서 /players/[id] 동적 생성.
     const { data: games } = await supabase
       .from('games')
-      .select('id, game_date, updated_at')
+      .select('id, game_date, updated_at, home_sp_id, away_sp_id')
       .order('game_date', { ascending: false })
       .limit(2500);
 
     if (games) {
       const seenDates = new Set<string>();
+      const seenPlayers = new Set<number>();
       for (const g of games) {
         analysisRoutes.push({
           url: `${baseUrl}/analysis/game/${g.id}`,
@@ -120,6 +124,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.75,
           });
         }
+
+        // 선발 투수 ID 수집 — home/away 양쪽. /players/[id] 는 numeric player_id.
+        for (const spId of [g.home_sp_id, g.away_sp_id]) {
+          if (typeof spId === 'number' && spId > 0 && !seenPlayers.has(spId)) {
+            seenPlayers.add(spId);
+            playerRoutes.push({
+              url: `${baseUrl}/players/${spId}`,
+              lastModified: g.updated_at ? new Date(g.updated_at) : now,
+              changeFrequency: 'weekly',
+              priority: 0.6,
+            });
+          }
+        }
       }
     }
   } catch (e) {
@@ -133,6 +150,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...teamProfileRoutes,
     ...matchupRoutes,
     ...predictionDateRoutes,
+    ...playerRoutes,
     ...analysisRoutes,
   ];
 }
