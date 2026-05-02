@@ -1,22 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 
 const STORAGE_KEY = 'mb_cookie_notice_v1';
 
-export function CookieConsent() {
-  const [visible, setVisible] = useState(false);
+function subscribe(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('storage', callback);
+  return () => window.removeEventListener('storage', callback);
+}
 
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        setVisible(true);
-      }
-    } catch {
-      // localStorage 비활성화 환경 (시크릿 모드 등) — 배너 미표시
-    }
-  }, []);
+function getVisibleSnapshot(): boolean {
+  try {
+    return !localStorage.getItem(STORAGE_KEY);
+  } catch {
+    // localStorage 비활성화 환경 — 배너 미표시
+    return false;
+  }
+}
+
+function getVisibleServerSnapshot(): boolean {
+  return false;
+}
+
+export function CookieConsent() {
+  const visible = useSyncExternalStore(
+    subscribe,
+    getVisibleSnapshot,
+    getVisibleServerSnapshot,
+  );
 
   // 배너가 떠있는 동안 main에 padding-bottom 추가 → 콘텐츠 가림 방지.
   // body[data-cookie-shown="true"] main 셀렉터를 globals.css 에서 매칭.
@@ -34,10 +47,10 @@ export function CookieConsent() {
   const dismiss = () => {
     try {
       localStorage.setItem(STORAGE_KEY, '1');
+      window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY }));
     } catch {
       // ignore
     }
-    setVisible(false);
   };
 
   if (!visible) return null;
