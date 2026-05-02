@@ -10,7 +10,7 @@
 본 메인 영역 (`tools/zero-touch/`) 구현 + 통합 시뮬 통과 완료. 작동하려면 사용자 영역 4가지 필수:
 
 - [ ] **tmux alias 추가** — `~/.zshrc` 에 `alias mcc='tmux new -As claude claude'`. 평소 `mcc` 로 claude 띄우기
-- [ ] **글로벌 SKILL.md 갱신** — `~/.claude/skills/develop-cycle/SKILL.md` 의 사이클 끝 단계에 signal file 작성 로직 추가 (정상: "N\nOK\n\n<next_n>" / fail: "N\nFAIL\n<reason>\n0"). README `tools/zero-touch/README.md` 의 "전제 조건" 섹션 코드 블록 그대로 박제. develop-cycle skill 의 carry-over 박제 항목 (Candidate 1~5 갱신) 과 같이 처리하면 자연스러움
+- [ ] **글로벌 SKILL.md 갱신** — `docs/superpowers/specs/2026-05-02-develop-cycle-SKILL-md-draft.md` 의 본문을 `~/.claude/skills/develop-cycle/SKILL.md` 로 cp. 검증: `grep -E "chain pool|cycle_state|fix-incident" ~/.claude/skills/develop-cycle/SKILL.md`. 6 chain 이름 + chain pool 단어 + cycle_state 단어 모두 grep 명중 시 OK. draft 본문 핵심 = chain pool 6개 (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle) + cycle_state JSON Med 깊이 + 4 단계 갱신. spec: `docs/superpowers/specs/2026-05-02-develop-cycle-skill-chain-design.md`. plan: `docs/superpowers/plans/2026-05-02-develop-cycle-skill-chain.md`
 - [ ] **TELEGRAM_WEBHOOK 환경변수 결정 + install** — 기존 텔레그램 outbound 인프라 webhook URL 사용. `export TELEGRAM_WEBHOOK=... && tools/zero-touch/install.sh` 실행
 - [ ] **첫 fire 검증** — tmux 안에서 `/develop-cycle 3` 호출 → 1 사이클 끝 → watcher 가 자동 reset → 다음 N=3 자동 시작 확인. 1주차 fine-tune (sleep 3/8 타이밍 등). spec section 8 검증 항목 7개 점검
 
