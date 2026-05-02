@@ -86,15 +86,11 @@ export default async function ModelComparisonPage() {
   const daily = dailyByModel(rows);
 
   // 날짜 × scoringRule pivot — 최근 14일만 화면 표시
+  const cutoff = new Date(Date.now() - 14 * 24 * 3600 * 1000)
+    .toISOString()
+    .slice(0, 10);
   const recentDaily = daily
-    .filter((d) => {
-      const cutoff = new Date(
-        Date.now() - 14 * 24 * 3600 * 1000,
-      )
-        .toISOString()
-        .slice(0, 10);
-      return d.date >= cutoff;
-    })
+    .filter((d) => d.date >= cutoff)
     .sort((a, b) => (a.date !== b.date ? b.date.localeCompare(a.date) : 0));
 
   return (

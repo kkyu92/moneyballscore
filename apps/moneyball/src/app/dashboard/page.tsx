@@ -113,17 +113,23 @@ export default async function DashboardPage() {
     .map((p) => ({ game_date: p.game.game_date, is_correct: p.is_correct }));
   const dailyPoints = buildDailyAccuracy(dailyInputs);
 
-  let cumCorrect = 0;
-  let cumTotal = 0;
-  const cumulativeData = dailyPoints.map((pt) => {
-    cumCorrect += pt.correct;
-    cumTotal += pt.total;
-    return {
-      date: pt.date,
-      accuracy: Math.round((cumCorrect / cumTotal) * 1000) / 10,
-      total: cumTotal,
-    };
-  });
+  const { points: cumulativeData } = dailyPoints.reduce<{
+    points: Array<{ date: string; accuracy: number; total: number }>;
+    cumCorrect: number;
+    cumTotal: number;
+  }>(
+    (acc, pt) => {
+      const cumCorrect = acc.cumCorrect + pt.correct;
+      const cumTotal = acc.cumTotal + pt.total;
+      acc.points.push({
+        date: pt.date,
+        accuracy: Math.round((cumCorrect / cumTotal) * 1000) / 10,
+        total: cumTotal,
+      });
+      return { points: acc.points, cumCorrect, cumTotal };
+    },
+    { points: [], cumCorrect: 0, cumTotal: 0 },
+  );
 
   const bucketResult = buildConfidenceBuckets(
     overview.map((p) => ({ confidence: p.confidence, is_correct: p.is_correct })),
