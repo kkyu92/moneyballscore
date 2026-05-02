@@ -20,6 +20,27 @@
   /clear → /handoff load → /develop-cycle N
 ```
 
+## chain pool — 도구상자 6개
+
+| Chain | trigger | 시퀀스 |
+|---|---|---|
+| `fix-incident` | 버그/silent 실패 | `/investigate` → 코드 수정 → `/ship` |
+| `explore-idea` | 신규 기능/큰 방향 | `/office-hours` → `/plan-ceo-review` → `/plan-eng-review` → 구현 → `/ship` |
+| `polish-ui` | UI 이슈/디자인 부채 | `/plan-design-review` → `/design-review` → `/ship` |
+| `review-code` | 코드 품질/테스트 부채 | `/health` → `/simplify` → `/review` → `/ship` |
+| `operational-analysis` | 운영 분석/적중률 | `/weekly-review` → `/extract-pattern` → `/compound` |
+| `dimension-cycle` (legacy) | 위 안 맞음 | 기존 site/acquisition/model 차원 dispatch |
+
+매 사이클의 진단 결과 보고 메인 (Opus 4.7) 이 자유 선택. 새 chain 추가 = SKILL.md table 한 행 추가.
+
+## cycle_state — 사이클 사이 carry-over
+
+위치: `~/.develop-cycle/cycles/<n>.json` (install.sh 가 자동 mkdir)
+
+스키마: spec § 6.2 (`docs/superpowers/specs/2026-05-02-develop-cycle-skill-chain-design.md`).
+
+다음 사이클 진단 단계가 직전 3 cycle_state read → input_from_prev_cycles + 중복 chain 회피 신호.
+
 ## 전제 조건 (사용자 영역)
 
 본 watcher 만 install 한다고 작동 X. 두 가지 사용자 영역 작업 필수:
@@ -37,29 +58,19 @@ alias mcc='tmux new -As claude claude'
 
 ### 2. 글로벌 develop-cycle SKILL.md 갱신
 
-`~/.claude/skills/develop-cycle/SKILL.md` 의 사이클 끝 단계에 다음 추가:
+전체 본문은 `docs/superpowers/specs/2026-05-02-develop-cycle-SKILL-md-draft.md` 박제됨. 사용자 영역 적용:
 
-**정상 끝**:
 ```bash
-cat > ~/.develop-cycle/signal <<EOF
-$CYCLE_NUM
-OK
-
-$NEXT_N
-EOF
+cp docs/superpowers/specs/2026-05-02-develop-cycle-SKILL-md-draft.md ~/.claude/skills/develop-cycle/SKILL.md
+grep -E "chain pool|cycle_state|fix-incident" ~/.claude/skills/develop-cycle/SKILL.md  # 명중 시 OK
 ```
 
-**fail 끝**:
-```bash
-cat > ~/.develop-cycle/signal <<EOF
-$CYCLE_NUM
-FAIL
-$REASON
-0
-EOF
-```
+draft 본문 핵심:
+- chain pool 6개 (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle) + 메인 자유 추론
+- cycle_state JSON 작성 (~/.develop-cycle/cycles/<n>.json)
+- zero-touch signal file 작성 (기존 형식 그대로)
 
-`$NEXT_N` = 사용자가 처음 호출한 N 동일 (무한 반복) 또는 0 (정지). skill 자체가 결정.
+(spec: `docs/superpowers/specs/2026-05-02-develop-cycle-skill-chain-design.md`)
 
 ## 설치
 
