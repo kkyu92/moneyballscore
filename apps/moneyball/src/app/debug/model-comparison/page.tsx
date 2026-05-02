@@ -86,6 +86,8 @@ export default async function ModelComparisonPage() {
   const daily = dailyByModel(rows);
 
   // 날짜 × scoringRule pivot — 최근 14일만 화면 표시
+  // server component: 매 요청마다 새 cutoff = 의도된 동작 (server-side dynamic)
+  // eslint-disable-next-line react-hooks/purity
   const cutoff = new Date(Date.now() - 14 * 24 * 3600 * 1000)
     .toISOString()
     .slice(0, 10);

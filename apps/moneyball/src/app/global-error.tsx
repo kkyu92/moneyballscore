@@ -50,6 +50,8 @@ export default function GlobalError({
             오류 ID: {error.digest}
           </p>
         )}
+        {/* root layout 자체 렌더 실패 환경 — full reload 로 재시도 필요. next/link 의 client navigation 은 깨진 root 컨텍스트에서 또 실패할 위험. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/"
           style={{

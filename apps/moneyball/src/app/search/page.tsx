@@ -138,7 +138,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
       {q && (
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          <strong>"{q}"</strong> 검색 결과 — {totalHits}건
+          <strong>“{q}”</strong> 검색 결과 — {totalHits}건
           {isExactDate && (
             <>
               {' · '}
