@@ -42,13 +42,13 @@ export default function ErrorBoundary({
         <button
           type="button"
           onClick={reset}
-          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-5 py-2.5 transition-colors min-h-[40px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+          className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg px-5 py-2.5 transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
           다시 시도
         </button>
         <Link
           href="/"
-          className="bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 text-sm font-medium rounded-lg px-5 py-2.5 transition-colors min-h-[40px] inline-flex items-center"
+          className="bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 text-sm font-medium rounded-lg px-5 py-2.5 transition-colors min-h-[44px] inline-flex items-center"
         >
           홈으로
         </Link>

@@ -48,7 +48,7 @@ export function SearchForm({ initialQuery = '', compact = false }: Props) {
         className={
           compact
             ? 'text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-md px-3 py-1.5 transition-colors'
-            : 'text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-4 py-2 transition-colors min-h-[40px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
+            : 'text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-4 py-2 transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
         }
       >
         검색

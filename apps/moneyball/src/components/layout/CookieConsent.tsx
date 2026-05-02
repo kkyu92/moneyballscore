@@ -76,14 +76,14 @@ export function CookieConsent() {
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href="/privacy"
-            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-600 transition-colors min-h-[40px] inline-flex items-center"
+            className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-600 transition-colors min-h-[44px] inline-flex items-center"
           >
             자세히
           </Link>
           <button
             type="button"
             onClick={dismiss}
-            className="text-sm font-semibold px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition-colors min-h-[40px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            className="text-sm font-semibold px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             aria-label="쿠키 사용 안내 확인 후 닫기"
           >
             확인
