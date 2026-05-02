@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 
 const STORAGE_FAVORITES = 'mb_favorite_teams_v1';
@@ -20,6 +20,12 @@ const TEAM_ENTRIES = Object.entries(KBO_TEAMS) as Array<
   [TeamCode, (typeof KBO_TEAMS)[TeamCode]]
 >;
 
+function subscribe(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('storage', callback);
+  return () => window.removeEventListener('storage', callback);
+}
+
 function readFavorites(): TeamCode[] {
   try {
     const raw = localStorage.getItem(STORAGE_FAVORITES);
@@ -34,43 +40,72 @@ function readFavorites(): TeamCode[] {
   }
 }
 
+function readFilterOn(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_FILTER_ON) === '1';
+  } catch {
+    return false;
+  }
+}
+
+// useSyncExternalStore 의 getSnapshot 은 reference equality 가 안정적이어야 한다 (배열 매번 new → infinite loop).
+// 캐시: localStorage raw 값이 같으면 같은 배열 reference 반환.
+let favoritesCache: { raw: string | null; value: TeamCode[] } = {
+  raw: null,
+  value: [],
+};
+
+function getFavoritesSnapshot(): TeamCode[] {
+  let raw: string | null = null;
+  try {
+    raw = localStorage.getItem(STORAGE_FAVORITES);
+  } catch {
+    return favoritesCache.value;
+  }
+  if (raw === favoritesCache.raw) return favoritesCache.value;
+  favoritesCache = { raw, value: readFavorites() };
+  return favoritesCache.value;
+}
+
+function getFavoritesServerSnapshot(): TeamCode[] {
+  return favoritesCache.value;
+}
+
+function dispatchStorageEvent(key: string) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new StorageEvent('storage', { key }));
+}
+
 function writeFavorites(codes: TeamCode[]): void {
   try {
     localStorage.setItem(STORAGE_FAVORITES, JSON.stringify(codes));
+    dispatchStorageEvent(STORAGE_FAVORITES);
+  } catch {
+    // ignore
+  }
+}
+
+function writeFilterOn(on: boolean): void {
+  try {
+    localStorage.setItem(STORAGE_FILTER_ON, on ? '1' : '0');
+    dispatchStorageEvent(STORAGE_FILTER_ON);
   } catch {
     // ignore
   }
 }
 
 export function FavoriteTeamFilter({ games }: Props) {
-  const [favorites, setFavorites] = useState<TeamCode[]>([]);
-  const [filterOn, setFilterOn] = useState(false);
+  const favorites = useSyncExternalStore(
+    subscribe,
+    getFavoritesSnapshot,
+    getFavoritesServerSnapshot,
+  );
+  const filterOn = useSyncExternalStore(
+    subscribe,
+    readFilterOn,
+    () => false,
+  );
   const [open, setOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setFavorites(readFavorites());
-    try {
-      setFilterOn(localStorage.getItem(STORAGE_FILTER_ON) === '1');
-    } catch {
-      // ignore
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    writeFavorites(favorites);
-  }, [favorites, hydrated]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      localStorage.setItem(STORAGE_FILTER_ON, filterOn ? '1' : '0');
-    } catch {
-      // ignore
-    }
-  }, [filterOn, hydrated]);
 
   const hiddenIds = useMemo(() => {
     if (!filterOn || favorites.length === 0) return new Set<number>();
@@ -87,15 +122,13 @@ export function FavoriteTeamFilter({ games }: Props) {
   }, [games, favorites, filterOn]);
 
   const toggle = (code: TeamCode) => {
-    setFavorites((prev) =>
-      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
-    );
+    const next = favorites.includes(code)
+      ? favorites.filter((c) => c !== code)
+      : [...favorites, code];
+    writeFavorites(next);
   };
 
-  const clearAll = () => setFavorites([]);
-
-  // Hydration 전에는 서버 렌더 그대로 — flash 방지
-  if (!hydrated) return null;
+  const clearAll = () => writeFavorites([]);
 
   const hiddenSelector = Array.from(hiddenIds)
     .map((id) => `[data-game-id="${id}"]`)
@@ -133,7 +166,7 @@ export function FavoriteTeamFilter({ games }: Props) {
               <input
                 type="checkbox"
                 checked={filterOn}
-                onChange={(e) => setFilterOn(e.target.checked)}
+                onChange={(e) => writeFilterOn(e.target.checked)}
                 className="accent-brand-600"
                 aria-label="관심 팀만 보기"
               />
