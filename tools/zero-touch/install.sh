@@ -29,6 +29,7 @@ run() {
 
 echo "→ ~/.develop-cycle/ 셋업"
 run "mkdir -p '$DC_HOME'"
+run "mkdir -p '$DC_HOME/cycles'"
 run "cp '$SCRIPT_SRC' '$DC_HOME/watch.sh'"
 run "chmod +x '$DC_HOME/watch.sh'"
 
