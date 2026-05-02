@@ -92,3 +92,9 @@ CI 에 lint step 누락 → 12 errors + 12 warnings 가 main 에 silent 누적. 
 - 다음 fire (사용자 호출 시) 직전 3 cycle = 이 6 cycle 마지막 3 (Cycle 4 polish-ui / Cycle 5 review-code / Cycle 6 fix-incident). 회피 신호 input 으로 들어감
 
 자율 첫 fire 메커니즘은 잘 작동. 다음 부터 lesson 박제는 "자연 발화 신규 발견" 시만 (반복 박제 회피).
+
+---
+
+## 메타 — 본 lesson commit 의 4 prefix 정책
+
+본 박제는 별도 commit 으로 분리 (`lesson:` prefix) 하여 submit-lesson workflow 에 dispatch. 이전 commit (`fix(ci):` prefix) 와 묶어 한 PR. 4 prefix 정책 (lesson/policy/feedback/memory) 의 자연 흐름.
