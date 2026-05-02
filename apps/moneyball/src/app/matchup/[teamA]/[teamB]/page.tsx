@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { type TeamCode, shortTeamName } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,

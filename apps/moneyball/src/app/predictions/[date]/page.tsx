@@ -7,7 +7,7 @@ import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard"
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { type TeamCode, shortTeamName } from '@moneyball/shared';
 
 interface Props {
   params: Promise<{ date: string }>;

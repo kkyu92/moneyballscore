@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
-  KBO_TEAMS,
   shortTeamName,
   toKSTDateString,
   winnerProbOf,

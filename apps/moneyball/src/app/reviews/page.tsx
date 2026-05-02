@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import {
-  KBO_TEAMS,
   type TeamCode,
   shortTeamName,
   winnerProbOf,

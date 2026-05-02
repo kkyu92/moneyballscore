@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
+import { shortTeamName } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 

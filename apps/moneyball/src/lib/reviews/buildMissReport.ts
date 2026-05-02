@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
-  KBO_TEAMS,
   type TeamCode,
   shortTeamName,
   classifyWinnerProb,

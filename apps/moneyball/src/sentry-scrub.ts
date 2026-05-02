@@ -1,4 +1,4 @@
-import type { ErrorEvent, EventHint } from '@sentry/nextjs';
+import type { ErrorEvent } from '@sentry/nextjs';
 
 /**
  * Sentry beforeSend 훅 — event payload 전체를 walk 해서 민감 키 [Filtered] 치환.
@@ -70,7 +70,7 @@ function scrubUser(user: ErrorEvent['user']): ErrorEvent['user'] {
   return result;
 }
 
-export function scrubSentryEvent(event: ErrorEvent, _hint?: EventHint): ErrorEvent | null {
+export function scrubSentryEvent(event: ErrorEvent): ErrorEvent | null {
   if (event.user) {
     event.user = scrubUser(event.user);
   }
