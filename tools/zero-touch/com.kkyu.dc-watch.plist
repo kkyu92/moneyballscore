@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.kkyu.dc-watch</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__DC_WATCH_PATH__</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>TELEGRAM_WEBHOOK</key><string>__TELEGRAM_WEBHOOK__</string>
+    <key>TMUX_TARGET</key><string>claude</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>StartInterval</key><integer>5</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardErrorPath</key><string>__DC_HOME__/error.log</string>
+  <key>StandardOutPath</key><string>__DC_HOME__/stdout.log</string>
+</dict>
+</plist>
