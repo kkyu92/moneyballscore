@@ -63,6 +63,21 @@ done
 
 scan + 직전 cycle_state 결과 보고 메인이 주목한 발견 list 박제. 다음 chain 선택의 근거.
 
+### chain 별 진단 source 명시 (다양성 보강)
+
+매 진단이 한쪽 source 만 보면 chain 편중 발생 (lesson v1: review-code 4/6 = lint output 만 본 결과). 6 chain 모두 균형 trigger 위해 각 chain 의 source 진단 시 균형 인지:
+
+| Chain | 진단 source (어디 봐야 trigger 자연) |
+|---|---|
+| `fix-incident` | Sentry alert / Vercel deploy log / cron silent skip (`pipeline_runs` 최근 7일 gap) / `git log` debug commit / 사용자 incident 신고 |
+| `explore-idea` | TODOS.md "Next-Up" / "사용자 영역" 자연 발화 후보 / `docs/superpowers/specs/` 미구현 idea draft / 자연 발화 product 의향 |
+| `polish-ui` | 사용자 UI 신고 / DESIGN.md vs 실제 컴포넌트 균열 / 모바일 layout 깨짐 / 디자인 시스템 inconsistency |
+| `review-code` | `pnpm lint` output / `pnpm test` 커버리지 / 큰 파일 (300+ 줄) 복잡도 / dead code / `health` score |
+| `operational-analysis` | `sp_log` 누적 / `pipeline_runs` metric / Brier / 적중률 / `agent_memories` 패턴 |
+| `dimension-cycle` (legacy) | site/acquisition/model 차원별 metric (LCP / SEO / 적중률) — 위 5개 안 맞을 때 |
+
+진단 단계가 위 6 source 카테고리 균형 있게 훑은 후 key_findings 추출. 한 source 만 깊이 파고 다른 source 안 본 경우 회피.
+
 ## 사이클 단계 2 — chain 선택
 
 ### 메인 자유 추론
