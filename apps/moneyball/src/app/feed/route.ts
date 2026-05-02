@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { type TeamCode, shortTeamName } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 

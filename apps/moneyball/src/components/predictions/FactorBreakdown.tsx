@@ -30,7 +30,7 @@ interface FactorBreakdownProps {
   factors: Record<string, number>;
   homeTeam: TeamCode;
   awayTeam: TeamCode;
-  details: {
+  details?: {
     homeSPFip?: number;
     awaySPFip?: number;
     homeSPxFip?: number;
@@ -52,34 +52,7 @@ interface FactorBreakdownProps {
   };
 }
 
-function formatDetail(key: string, details: FactorBreakdownProps["details"]): string {
-  switch (key) {
-    case "sp_fip":
-      return `${details.awaySPFip?.toFixed(2) ?? "-"} vs ${details.homeSPFip?.toFixed(2) ?? "-"}`;
-    case "sp_xfip":
-      return `${details.awaySPxFip?.toFixed(2) ?? "-"} vs ${details.homeSPxFip?.toFixed(2) ?? "-"}`;
-    case "lineup_woba":
-      return `${details.awayWoba?.toFixed(3) ?? "-"} vs ${details.homeWoba?.toFixed(3) ?? "-"}`;
-    case "bullpen_fip":
-      return `${details.awayBullpenFip?.toFixed(2) ?? "-"} vs ${details.homeBullpenFip?.toFixed(2) ?? "-"}`;
-    case "recent_form":
-      return `${details.awayForm != null ? Math.round(details.awayForm * 100) + "%" : "-"} vs ${details.homeForm != null ? Math.round(details.homeForm * 100) + "%" : "-"}`;
-    case "war":
-      return `${details.awayWar?.toFixed(1) ?? "-"} vs ${details.homeWar?.toFixed(1) ?? "-"}`;
-    case "head_to_head":
-      return details.h2hRate != null ? `홈 ${Math.round(details.h2hRate * 100)}%` : "-";
-    case "park_factor":
-      return details.parkFactor != null ? `${details.parkFactor.toFixed(2)}` : "-";
-    case "elo":
-      return `${details.awayElo?.toFixed(0) ?? "-"} vs ${details.homeElo?.toFixed(0) ?? "-"}`;
-    case "sfr":
-      return `${details.awaySfr?.toFixed(1) ?? "-"} vs ${details.homeSfr?.toFixed(1) ?? "-"}`;
-    default:
-      return "-";
-  }
-}
-
-export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: FactorBreakdownProps) {
+export function FactorBreakdown({ factors, homeTeam, awayTeam }: FactorBreakdownProps) {
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
 

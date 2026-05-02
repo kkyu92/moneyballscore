@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
+import { shortTeamName } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,
