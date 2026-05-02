@@ -415,7 +415,7 @@ function TeamSplitSection({
       <p className="text-xs text-gray-500 dark:text-gray-400">
         리그 평균 홈 승률 <span className="font-mono">{fmtPct(overall)}</span> 가정하에,
         팀별 홈 승률 편차가 ±5%p 이상이면 균일 상수의 한계. 홈·원정 gap (홈 − 원정) 이
-        각 팀의 "실질 홈 어드밴티지".
+        각 팀의 “실질 홈 어드밴티지”.
       </p>
       <table className="w-full text-sm">
         <thead>

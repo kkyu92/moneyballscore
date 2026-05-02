@@ -50,7 +50,7 @@ export function PostviewPanel({
           ⚡ 사후 분석
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          경기 종료 후 AI가 "무엇을 틀렸나" 진단
+          경기 종료 후 AI가 “무엇을 틀렸나” 진단
         </p>
       </header>
 
