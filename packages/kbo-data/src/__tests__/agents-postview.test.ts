@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { deriveFactorErrorsFallback, isWeightedFactor } from '../agents/postview';
+import {
+  deriveFactorErrorsFallback,
+  getZeroWeightFactorPromptList,
+  isWeightedFactor,
+  JUDGE_POSTVIEW_SYSTEM,
+  TEAM_POSTVIEW_SYSTEM,
+} from '../agents/postview';
+import { SYSTEM_PROMPT as JUDGE_PREGAME_SYSTEM } from '../agents/judge-agent';
 
 describe('isWeightedFactor', () => {
   it('가중치 > 0% factor (sp_fip / lineup_woba / bullpen_fip / recent_form / war / sp_xfip / elo) 통과', () => {
@@ -92,5 +99,60 @@ describe('deriveFactorErrorsFallback', () => {
     const errors = deriveFactorErrorsFallback(factors, true);
     expect(errors[0].diagnosis).toContain('-0.20');
     expect(errors[0].diagnosis).toContain('반대 방향');
+  });
+});
+
+// cycle 15 — prompt-level constraint 검증.
+// cycle 12 의 사후 filter (factorErrors 배열) 는 LLM reasoning 본문에서 0% factor 거론을 막지 못함.
+// 본 테스트는 3 prompt (postview judge / postview team / pre_game judge) 모두 가중치 0% factor 명시 + 사용 금지 규칙 박제 확인.
+describe('getZeroWeightFactorPromptList', () => {
+  it('DEFAULT_WEIGHTS 0% factor 모두 (head_to_head/park_factor/sfr) 한국어 라벨 포함', () => {
+    const list = getZeroWeightFactorPromptList();
+    expect(list).toContain('head_to_head');
+    expect(list).toContain('상대전적');
+    expect(list).toContain('park_factor');
+    expect(list).toContain('구장보정');
+    expect(list).toContain('sfr');
+    expect(list).toContain('수비SFR');
+  });
+
+  it('가중치 > 0 factor (sp_fip 등) 미포함', () => {
+    const list = getZeroWeightFactorPromptList();
+    expect(list).not.toContain('sp_fip');
+    expect(list).not.toContain('lineup_woba');
+    expect(list).not.toContain('elo');
+  });
+});
+
+describe('LLM SYSTEM_PROMPT 가중치 0% factor 추론 금지 박제 (cycle 15)', () => {
+  it('JUDGE_POSTVIEW_SYSTEM: 0% factor 3종 + 사용 금지 규칙 명시', () => {
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('head_to_head');
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('park_factor');
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('sfr');
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('가중치 0%');
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('사용 금지');
+  });
+
+  it('TEAM_POSTVIEW_SYSTEM: 0% factor 3종 + keyFactor 지목 금지 명시', () => {
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('head_to_head');
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('park_factor');
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('sfr');
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('가중치 0%');
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('keyFactor');
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('금지');
+  });
+
+  it('JUDGE_PREGAME (judge-agent SYSTEM_PROMPT): 0% factor 3종 + 사용 금지 명시', () => {
+    expect(JUDGE_PREGAME_SYSTEM).toContain('head_to_head');
+    expect(JUDGE_PREGAME_SYSTEM).toContain('park_factor');
+    expect(JUDGE_PREGAME_SYSTEM).toContain('sfr');
+    expect(JUDGE_PREGAME_SYSTEM).toContain('가중치 0%');
+    expect(JUDGE_PREGAME_SYSTEM).toContain('사용 금지');
+  });
+
+  it('3 prompt 모두 정량 모델 가중치 컨텍스트 (왜 금지인지) 박제', () => {
+    for (const prompt of [JUDGE_POSTVIEW_SYSTEM, TEAM_POSTVIEW_SYSTEM, JUDGE_PREGAME_SYSTEM]) {
+      expect(prompt).toMatch(/정량 모델 가중치|확률.*기여|확률 형성/);
+    }
   });
 });

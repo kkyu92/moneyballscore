@@ -29,6 +29,27 @@ export function isWeightedFactor(factor: string): boolean {
   return WEIGHTED_FACTOR_BASES.has(base);
 }
 
+// cycle 15 — LLM prompt-level constraint 용. cycle 12 (사후 filter) 는 factorErrors 배열만 막고
+// reasoning 본문에서 0% factor 거론은 통과시켰음. prompt 자체에 0% factor 명시 + 추론 금지 규칙
+// 박제 → 모델 가중치 ↔ LLM reasoning 일관성 prompt-level 보장.
+const ZERO_WEIGHT_FACTOR_LABELS_KO: Record<string, string> = {
+  head_to_head: '상대전적',
+  park_factor: '구장보정',
+  sfr: '수비SFR',
+};
+
+export function getZeroWeightFactorPromptList(): string {
+  return Object.entries(DEFAULT_WEIGHTS)
+    .filter(([, w]) => w === 0)
+    .map(([k]) => {
+      const ko = ZERO_WEIGHT_FACTOR_LABELS_KO[k];
+      return ko ? `${k} (${ko})` : k;
+    })
+    .join(', ');
+}
+
+const ZERO_WEIGHT_FACTOR_LIST_PROMPT = getZeroWeightFactorPromptList();
+
 // ============================================
 // 타입
 // ============================================
@@ -74,13 +95,15 @@ export interface PostviewResult {
 // 팀 postview 에이전트 (Haiku)
 // ============================================
 
-const TEAM_POSTVIEW_SYSTEM = `당신은 KBO 팀의 사후 분석가입니다. 경기가 끝난 뒤 우리 팀의 관점에서
+export const TEAM_POSTVIEW_SYSTEM = `당신은 KBO 팀의 사후 분석가입니다. 경기가 끝난 뒤 우리 팀의 관점에서
 "왜 이겼/졌는지"를 담담하고 데이터 기반으로 설명합니다.
 
 규칙:
 1. 주입된 실제 결과와 팩터 수치만 인용하세요. 새 숫자·선수명 금지.
 2. pre_game 예측이 무엇을 놓쳤는지 구체적으로 지적하세요 (예: "home_bullpen_fip이 +0.08 편향됐지만 실제로 7회 역전").
 3. 감정·심리·내러티브·운 금지.
+4. 가중치 0% factor (${ZERO_WEIGHT_FACTOR_LIST_PROMPT}) 는 정량 모델 가중치가 0이라
+   pre_game 확률에 기여하지 않습니다. keyFactor 로 지목 금지 + summary 핵심 근거로도 사용 금지.
 
 반드시 JSON:
 {
@@ -165,7 +188,7 @@ async function runTeamPostviewAgent(
 // 심판 factor-attribution 에이전트 (Sonnet)
 // ============================================
 
-const JUDGE_POSTVIEW_SYSTEM = `당신은 KBO 사후 분석 심판입니다. pre_game 예측이 실제 결과와
+export const JUDGE_POSTVIEW_SYSTEM = `당신은 KBO 사후 분석 심판입니다. pre_game 예측이 실제 결과와
 왜 달랐는지 factor 단위로 진단합니다.
 
 역할:
@@ -186,7 +209,10 @@ const JUDGE_POSTVIEW_SYSTEM = `당신은 KBO 사후 분석 심판입니다. pre_
 - factorErrors는 편향 절댓값 내림차순 상위 3개까지만
 - predictedBias는 pre_game factors의 (값 - 0.5) 수치
 - diagnosis는 실제 결과와 연결 (예: "홈 불펜 편향 +0.08이지만 실제로는 9회 블론 세이브")
-- reasoning에 새 숫자·선수명 금지. 주입된 데이터만 사용.`;
+- reasoning에 새 숫자·선수명 금지. 주입된 데이터만 사용.
+- 가중치 0% factor (${ZERO_WEIGHT_FACTOR_LIST_PROMPT}) 는 정량 모델 가중치가 0이라
+  pre_game 확률 형성에 기여하지 않습니다. factorErrors 후보에서 제외하고 reasoning
+  핵심 근거로도 사용 금지. (cycle 11 발견 — 0% factor 가 LLM reasoning 70% 차지)`;
 
 function buildJudgePostviewMessage(
   context: GameContext,
