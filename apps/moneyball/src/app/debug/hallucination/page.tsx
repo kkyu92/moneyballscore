@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import { buildHallucinationStats, type ValidatorLogInput } from '@/lib/dashboard/buildHallucinationStats';
 
 // v4-4 Task 6: /debug/hallucination 대시보드
 // middleware.ts BASIC auth로 보호됨
 // Eng 리뷰 A3 validator_logs 테이블 (migration 011)
+// cycle 28 — buildHallucinationStats 분리 + 일자별 추세 + 비율 추가 (P3)
 //
 // Service role 직접 사용: validator_logs는 RLS로 service role만 접근 가능.
 // 일반 anon key로는 권한 없음. middleware BASIC auth가 이미 페이지 보호 중.
@@ -29,39 +31,41 @@ interface ValidatorLog {
   created_at: string;
 }
 
-async function getStats() {
-  const supabase = getAdminClient();
+interface DashboardData {
+  error: string | null;
+  total: number;
+  hardCount: number;
+  warnCount: number;
+  byType: { key: string; count: number; pct: number }[];
+  byBackend: { key: string; count: number; pct: number }[];
+  daily: { date: string; hard: number; warn: number; total: number }[];
+  samples: ValidatorLog[];
+}
 
-  // 최근 7일 전체 건수
+async function getStats(): Promise<DashboardData> {
+  const supabase = getAdminClient();
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: recent, error: recentErr } = await supabase
     .from('validator_logs')
-    .select('id, severity, violation_type, backend, created_at', { count: 'exact' })
+    .select('severity, violation_type, backend, created_at')
     .gte('created_at', sevenDaysAgo);
 
   if (recentErr) {
-    return { error: recentErr.message, total: 0, byType: {}, byBackend: {}, samples: [] };
+    return {
+      error: recentErr.message,
+      total: 0,
+      hardCount: 0,
+      warnCount: 0,
+      byType: [],
+      byBackend: [],
+      daily: [],
+      samples: [],
+    };
   }
 
-  const logs = (recent ?? []) as Partial<ValidatorLog>[];
-  const total = logs.length;
+  const stats = buildHallucinationStats((recent ?? []) as ValidatorLogInput[]);
 
-  // 사유별 분포
-  const byType: Record<string, number> = {};
-  for (const log of logs) {
-    const key = log.violation_type ?? 'unknown';
-    byType[key] = (byType[key] ?? 0) + 1;
-  }
-
-  // backend별 분포
-  const byBackend: Record<string, number> = {};
-  for (const log of logs) {
-    const key = log.backend ?? 'unknown';
-    byBackend[key] = (byBackend[key] ?? 0) + 1;
-  }
-
-  // 최근 샘플 20건
   const { data: samples } = await supabase
     .from('validator_logs')
     .select('*')
@@ -69,12 +73,93 @@ async function getStats() {
     .limit(20);
 
   return {
-    total,
-    byType,
-    byBackend,
-    samples: (samples ?? []) as ValidatorLog[],
     error: null,
+    total: stats.total,
+    hardCount: stats.hardCount,
+    warnCount: stats.warnCount,
+    byType: stats.byType,
+    byBackend: stats.byBackend,
+    daily: stats.daily,
+    samples: (samples ?? []) as ValidatorLog[],
   };
+}
+
+function DailyTrend({
+  daily,
+}: {
+  daily: { date: string; hard: number; warn: number; total: number }[];
+}) {
+  const max = Math.max(1, ...daily.map((d) => d.total));
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="text-sm text-gray-500 mb-4">일자별 추세 (7일, KST)</h3>
+      <div className="flex items-end gap-2 h-32">
+        {daily.map((d) => {
+          const hardPct = (d.hard / max) * 100;
+          const warnPct = (d.warn / max) * 100;
+          return (
+            <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-full flex-1 flex flex-col justify-end gap-px">
+                <div
+                  className="w-full bg-yellow-400"
+                  style={{ height: `${warnPct}%` }}
+                  title={`warn ${d.warn}건`}
+                />
+                <div
+                  className="w-full bg-red-500"
+                  style={{ height: `${hardPct}%` }}
+                  title={`hard ${d.hard}건`}
+                />
+              </div>
+              <div className="text-[10px] font-mono text-gray-500">
+                {d.date.slice(5)}
+              </div>
+              <div className="text-[10px] text-gray-700">{d.total}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex gap-3 text-xs text-gray-500 mt-3">
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-2 h-2 bg-red-500" /> hard
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-2 h-2 bg-yellow-400" /> warn
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function CategoryList({
+  title,
+  data,
+}: {
+  title: string;
+  data: { key: string; count: number; pct: number }[];
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="text-sm text-gray-500 mb-3">{title}</h3>
+      {data.length === 0 ? (
+        <p className="text-gray-400 italic text-sm">데이터 없음</p>
+      ) : (
+        <ul className="space-y-1 text-sm">
+          {data.map(({ key, count, pct }) => (
+            <li key={key} className="flex justify-between items-baseline">
+              <span className="font-mono text-xs text-gray-700 truncate max-w-[180px]">
+                {key}
+              </span>
+              <span className="text-gray-500 ml-2">
+                <span className="font-mono">{count}</span>
+                <span className="text-xs text-gray-400 ml-1">({pct}%)</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 export default async function HallucinationDashboard() {
@@ -101,46 +186,22 @@ export default async function HallucinationDashboard() {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-sm text-gray-500 mb-2">최근 7일 reject</h3>
               <p className="text-4xl font-bold">{stats.total}</p>
-              <p className="text-xs text-gray-500 mt-1">건</p>
+              <div className="text-xs text-gray-500 mt-2 flex gap-3">
+                <span>
+                  hard <span className="font-mono text-red-600">{stats.hardCount}</span>
+                </span>
+                <span>
+                  warn <span className="font-mono text-yellow-700">{stats.warnCount}</span>
+                </span>
+              </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm text-gray-500 mb-3">사유별 분포</h3>
-              {Object.keys(stats.byType).length === 0 ? (
-                <p className="text-gray-400 italic text-sm">reject 0건</p>
-              ) : (
-                <ul className="space-y-1 text-sm">
-                  {Object.entries(stats.byType)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([type, count]) => (
-                      <li key={type} className="flex justify-between">
-                        <span className="font-mono text-gray-700">{type}</span>
-                        <span className="text-gray-500">{count}</span>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div>
+            <CategoryList title="사유별 분포" data={stats.byType} />
+            <CategoryList title="Backend별 분포" data={stats.byBackend} />
+          </section>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm text-gray-500 mb-3">Backend별 분포</h3>
-              {Object.keys(stats.byBackend).length === 0 ? (
-                <p className="text-gray-400 italic text-sm">데이터 없음</p>
-              ) : (
-                <ul className="space-y-1 text-sm">
-                  {Object.entries(stats.byBackend)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([backend, count]) => (
-                      <li key={backend} className="flex justify-between">
-                        <span className="font-mono text-xs text-gray-700 truncate">
-                          {backend}
-                        </span>
-                        <span className="text-gray-500 ml-2">{count}</span>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div>
+          <section>
+            <DailyTrend daily={stats.daily} />
           </section>
 
           {/* 최근 reject 샘플 20건 */}
