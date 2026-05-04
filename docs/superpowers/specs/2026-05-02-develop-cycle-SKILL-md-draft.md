@@ -99,6 +99,20 @@ recommendation: chain pool 9번째 추가 가치
 
 ## 사이클 단계 1 — 진단
 
+### active-cycle 파일 박제 (hang safety, 첫 step)
+
+watch.sh 가 사이클 진행 사항을 알 수 있도록 진단 시작 직전 active-cycle 파일 작성:
+
+```bash
+cat > ~/.develop-cycle/active-cycle <<EOF
+$CYCLE_N
+$$
+$(date +%s)
+EOF
+```
+
+`$$` = 메인 사이클 process PID. watch.sh 가 매 5s 본 파일 mtime 보고 hybrid timeout 검사 (CYCLE_SOFT 45m + idle 5m 누적 또는 CYCLE_HARD 60m). 정상 종료 시 단계 4 끝에서 삭제.
+
 ### 풀 스캔
 
 CLAUDE.md "세션 시작 시 필수 스캔" 섹션 따름. 추가:
@@ -277,6 +291,16 @@ if [ -f ~/.develop-cycle/skill-evolution-pending ]; then
 fi
 ```
 
+### active-cycle 파일 cleanup (hang safety, signal 직전)
+
+회고 박제 후, signal 작성 직전, hang safety 정상 종료 신호:
+
+```bash
+rm -f ~/.develop-cycle/active-cycle ~/.develop-cycle/idle-since
+```
+
+watch.sh 가 본 파일 부재 시 timeout 검사 skip = 자동 kill 차단. signal 작성 후 새 cycle 이 단계 1 진단 시작 시 다시 active-cycle 작성.
+
 ### zero-touch signal file 작성
 
 회고 박제 후 zero-touch signal file 작성 (변경 X, 기존 형식 그대로):
@@ -323,7 +347,7 @@ EOF
 | 외부 SaaS 자율 결제 시도 | 본 SKILL 안 paid API 호출 명령 박제 절대 X (코드 path 자체 X) |
 | 사용자에게 "이거 해주세요" 자율 요청 | carry-over 박제 채널만 (memory: subtype=needs). 직접 요청 명령 박제 X |
 | Vercel/Supabase free tier 한도 도달 | `meta-pattern` dispatch + cycle outcome=fail. 자율 upgrade X |
-| 사이클 hang (cycle 24 사례) | watch.sh 에 timeout (예: 30분) 후 자동 kill + interrupted cycle_state 박제 — 별도 cycle 위임 |
+| 사이클 hang (cycle 24 사례) | `~/.develop-cycle/active-cycle` 파일 박제 (cycle_n / pid / started_at) + watch.sh hybrid 검사 (PR `fix(dc-watch): cycle hang safety v2`, 2026-05-04). `CYCLE_SOFT=2700` (45분) 초과 시 매 5s `ps %cpu` + `pgrep -P` 측정. 활동 중 (CPU>1% OR child>0) = 살림 + idle tracker reset. idle (CPU≤1% AND child=0) 상태 `IDLE_THRESHOLD=300` (5분) 누적 = SIGTERM/SIGKILL. `CYCLE_HARD=3600` (60분) hard cap = 활동 무관 무조건 kill (안전망). kill 시 `cycles/<n>.json` outcome=interrupted 자동 박제 + watch.log `TIMEOUT_KILL` entry + telegram notify |
 
 ## 호환성
 
@@ -333,7 +357,7 @@ EOF
 - 기존 6 chain (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle) trigger / 시퀀스 변경 X
 - 기존 lesson commit prefix (`lesson:` / `policy:` / `feedback:` / `memory:`) 변경 X. body subtype 라인 추가만
 - `submit-lesson.yml` workflow 변경 X
-- watch.sh 변경 X
+- watch.sh = hang safety v2 추가 (2026-05-04). signal/lock 처리 + tmux send 시퀀스 변경 X. 신규: `check_timeout()` (PR `fix(dc-watch): cycle hang safety v2`)
 - R7 자동 머지 정책 적용 (`skill-evolution` 포함)
 
 ## 비용 가드
