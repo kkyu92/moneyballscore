@@ -202,6 +202,19 @@ EOF
 - zero-touch signal file 포맷 변경 X
 - handoff carry-over 와 cycle_state 책임 분리
 
-## 컨텍스트 60% 도달 시
+## 컨텍스트 % 자가 판단 무시 (D-2 이후)
 
-handoff save 자동 제안 + 잔여 cycle carry-over. 메인 자가 추정 (대화 turn + 도구 호출 + system reminders) + 사용자 % 알림 양쪽 사용 (사용자 알림 우선).
+D-2 (zero-touch watch.sh 매 사이클 새 process) 적용 후엔 메인이 컨텍스트 % 자가 판단 **무시**. 이유:
+
+- 매 사이클 끝 = signal 박제 → watch.sh 가 claude 종료 + 새 fresh process 시작 → 새 process 의 컨텍스트는 0% 부터 (system prompt + skill 캐시 로드만, conversation history X)
+- 즉 사이클당 컨텍스트 누적 X = 자가 판단 자체 의미 없음
+
+**규칙**:
+
+1. 사용자가 N 명시한 만큼 매 사이클 진행. 메인 자가 "N 너무 많지 않나?" 의심 X
+2. 매 사이클 끝 = signal next_n 박제 (잔여 = 사용자 N - 현재 사이클 번호). 마지막 사이클은 next_n=0
+3. handoff save 자동 호출 X — cycle_state JSON 으로 carry-over 충분. handoff save 는 사용자 manual 또는 명시적 stop 신호 시만
+4. 사용자 끼어들기 (next_n=0 박제 또는 "stop" 입력) 가 유일한 stop 신호. 그 외엔 진행
+5. 사용자 % 알림 (예: "지금 80% 야") 받으면 그 사이클 끝낸 후 signal 박제 (정상 진행). handoff save X
+
+**자가 의심 차단 명문화**: 사이클 N 시점에 메인이 "100 사이클 의미 있나?" 자가 판단 절대 X. 사용자 결정이 단일 stop 신호.

@@ -47,12 +47,14 @@ main() {
   case "$status" in
     OK)
       if [[ "$next_n" =~ ^[0-9]+$ ]] && [ "$next_n" -gt 0 ]; then
-        send "/clear" Enter
-        sleep 3
+        send "exit" Enter
+        sleep 2
+        send "claude" Enter
+        sleep 12
         send "/handoff load" Enter
         sleep 8
         send "/develop-cycle $next_n" Enter
-        log "fired cycle N=$next_n"
+        log "fired fresh process cycle N=$next_n"
       else
         log "OK with next_n='$next_n', stop"
       fi

@@ -44,12 +44,13 @@ run_case() {
   bash "$WATCH" 2>&1
 }
 
-# Case 1: OK + next_n=3 → send-keys 시퀀스
+# Case 1: OK + next_n=3 → send-keys 시퀀스 (D-2: 매 사이클 새 process)
 out=$(run_case "ok+next3" "3
 OK
 
 3")
-assert_contains "$out" "DRY_RUN send: /clear" "case1: /clear send"
+assert_contains "$out" "DRY_RUN send: exit" "case1: exit send (claude 종료)"
+assert_contains "$out" "DRY_RUN send: claude" "case1: claude send (새 process 시작)"
 assert_contains "$out" "DRY_RUN send: /handoff load" "case1: /handoff load send"
 assert_contains "$out" "DRY_RUN send: /develop-cycle 3" "case1: /develop-cycle 3 send"
 
