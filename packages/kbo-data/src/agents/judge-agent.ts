@@ -9,6 +9,7 @@ import {
   notifyValidationViolations,
   resolveValidationMode,
 } from './validator';
+import { logValidatorEvent } from './validator-logger';
 
 const ZERO_WEIGHT_FACTOR_LIST_PROMPT = getZeroWeightFactorPromptList();
 
@@ -151,6 +152,20 @@ export async function runJudgeAgent(
     agent: 'judge',
     gameId: context.game.externalGameId ?? null,
   });
+
+  // cycle 30 — judge agent 검증 결과 validator_logs 박제 (near-miss 포함). team_code = 홈/원정 합쳐 'JG' (judge meta)
+  if (validation.violations.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gameId = (context.game as any).id ?? null;
+    logValidatorEvent({
+      gameId,
+      teamCode: 'JG',
+      agent: 'judge',
+      backend: result.model,
+      passed: validation.ok,
+      violations: validation.violations,
+    }).catch((e) => console.warn('[validator_logs] unexpected error:', e));
+  }
 
   if (validation.violations.length === 0) return result;
 
