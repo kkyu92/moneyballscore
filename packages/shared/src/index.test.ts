@@ -58,21 +58,22 @@ describe('DEFAULT_WEIGHTS', () => {
     expect(sum).toBeCloseTo(0.85, 2);
   });
 
-  it('should have 10 factors (구조 유지, v1.6 에서 null-like 3종 가중치 0)', () => {
+  it('should have 10 factors', () => {
     expect(Object.keys(DEFAULT_WEIGHTS)).toHaveLength(10);
   });
 
-  it('should have all values in [0, 1] (v1.6: park/h2h/sfr 는 0)', () => {
+  it('should have all values in [0, 1]', () => {
     for (const value of Object.values(DEFAULT_WEIGHTS)) {
       expect(value).toBeGreaterThanOrEqual(0);
       expect(value).toBeLessThanOrEqual(1);
     }
   });
 
-  it('v1.6: Wayback 백테스트 기반 null-like 3종은 0', () => {
-    expect(DEFAULT_WEIGHTS.park_factor).toBe(0);
-    expect(DEFAULT_WEIGHTS.head_to_head).toBe(0);
-    expect(DEFAULT_WEIGHTS.sfr).toBe(0);
+  it('v1.7-revert (= v1.5): cycle 17 prod 측정 기반 회귀 — 모든 factor 가중치 > 0', () => {
+    for (const [key, value] of Object.entries(DEFAULT_WEIGHTS)) {
+      expect(value).toBeGreaterThan(0);
+      expect(typeof key).toBe('string');
+    }
   });
 });
 
