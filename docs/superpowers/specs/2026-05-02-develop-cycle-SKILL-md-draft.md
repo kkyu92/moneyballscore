@@ -104,14 +104,25 @@ recommendation: chain pool 9번째 추가 가치
 watch.sh 가 사이클 진행 사항을 알 수 있도록 진단 시작 직전 active-cycle 파일 작성:
 
 ```bash
+# 본 도구 bash 의 PPID chain 거슬러 첫 'claude' comm process 매칭 (다중 claude 환경 안전)
+P=""
+PROBE=$$
+for _ in 1 2 3 4 5 6 7 8; do
+  PROBE=$(ps -p "$PROBE" -o ppid= 2>/dev/null | tr -d ' ')
+  { [ -z "$PROBE" ] || [ "$PROBE" = 1 ]; } && break
+  case "$(ps -p "$PROBE" -o comm= 2>/dev/null | xargs basename 2>/dev/null)" in
+    claude|claude.exe|claude-code) P=$PROBE; break ;;
+  esac
+done
+[ -z "$P" ] && P=$(pgrep -x claude 2>/dev/null | head -1 || echo $$)
 cat > ~/.develop-cycle/active-cycle <<EOF
 $CYCLE_N
-$(pgrep -x claude 2>/dev/null | head -1 || echo $$)
+$P
 $(date +%s)
 EOF
 ```
 
-PID 라인 = 메인 claude process PID (`pgrep -x claude` 의 첫 결과). cycle 25 lesson 박제 후 fix (2026-05-04) — `$$` 단순 박제는 도구 호출 bash subshell PID 라 짧은 lifecycle 끝나면 watch.sh 가 stale 판단 → cleaning → hang safety 무효. `pgrep -x claude` = 메인 claude process (긴 lifecycle, 정확). 다중 claude 띄운 환경은 첫 결과 잡지만 fallback `$$`. watch.sh 가 매 5s 본 PID 활동 측정 (CPU%/child) 으로 hybrid timeout 검사 (CYCLE_SOFT 45m + idle 5m 누적 또는 CYCLE_HARD 60m). 정상 종료 시 단계 4 끝에서 삭제.
+PID 라인 = 본 도구 bash 의 PPID chain (최대 8 hop) 거슬러 첫 'claude'/'claude.exe'/'claude-code' comm process 매칭. **다중 claude 환경 안전**: 본 도구 bash 를 띄운 메인 claude 만 잡음. chain 안 매칭 X 또는 chain 끊김 시 fallback `pgrep -x claude` 첫 결과 → fallback `$$`. cycle 25 lesson (subshell `$$` 단명) → cycle 26 fix (`pgrep -x claude` 첫 결과, 다중 claude race 위험) → cycle 33 fix (PPID chain ancestor 매칭) carry-over. watch.sh 가 매 5s 본 PID 활동 측정 (CPU%/child) 으로 hybrid timeout 검사 (CYCLE_SOFT 45m + idle 5m 누적 또는 CYCLE_HARD 60m). 정상 종료 시 단계 4 끝에서 삭제.
 
 ### 풀 스캔
 
