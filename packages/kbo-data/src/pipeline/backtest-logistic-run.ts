@@ -100,36 +100,28 @@ async function main() {
   const test = extractFeatures(testGames, eloHistory);
   console.log(`  train N=${train.X.length} (2023-24) / test N=${test.X.length} (2025)`);
 
-  // L2 grid search — 최적 lambda 를 train CV 없이 단순 train LogLoss 최소값에서 선택
-  // (작은 선택이므로 CV 없이 Adam 대신 간단한 grid)
-  console.log('\n[2/3] Logistic regression 학습 (L2 grid)…');
-  const lambdas = [0, 0.001, 0.01, 0.1, 1.0];
-  let best: { lambda: number; model: ReturnType<typeof trainLogistic> } | null = null;
-  for (const lambda of lambdas) {
-    const model = trainLogistic(train.X, train.y, {
-      lambda,
-      lr: 0.3,
-      maxIter: 10000,
-      tol: 1e-10,
-    });
+  // H6 fix (cycle 23): grid search by test Brier = test-set hyperparam tuning (double-dip).
+  // cycle 22 bootstrap-ci 검증 best λ=0.01 (4f/7f) — fix LAMBDA=0.01.
+  const LAMBDA = 0.01;
+  console.log('\n[2/3] Logistic regression 학습 (λ=0.01 fixed)…');
+  const model = trainLogistic(train.X, train.y, {
+    lambda: LAMBDA,
+    lr: 0.3,
+    maxIter: 10000,
+    tol: 1e-10,
+  });
+  {
     const trainPreds = predict(model, train.X);
     const trainM = computeMetrics(trainPreds, train.y);
     const testPreds = predict(model, test.X);
     const testM = computeMetrics(testPreds, test.y);
     console.log(
-      `  λ=${String(lambda).padStart(5)}  iter=${String(model.iterations).padStart(5)}  trainBrier=${trainM.brier.toFixed(5)}  testBrier=${testM.brier.toFixed(5)}  testAcc=${pct(testM.accuracy)}`,
+      `  λ=${String(LAMBDA).padStart(5)}  iter=${String(model.iterations).padStart(5)}  trainBrier=${trainM.brier.toFixed(5)}  testBrier=${testM.brier.toFixed(5)}  testAcc=${pct(testM.accuracy)}`,
     );
-    if (!best || testM.brier < computeMetrics(predict(best.model, test.X), test.y).brier) {
-      best = { lambda, model };
-    }
   }
-  if (!best) throw new Error('no best model');
-
-  console.log(`\n  ↳ best by test Brier: λ=${best.lambda}`);
 
   // 최종 모델 상세 보고
   console.log('\n[3/3] 최종 모델 계수 + 평가…\n');
-  const model = best.model;
   const se = coefficientStdErrors(model, train.X);
 
   console.log('  === 학습된 계수 (train = 2023-24 N=' + train.X.length + ') ===');
@@ -170,7 +162,7 @@ async function main() {
   console.log(`    coin_flip(0.5)         Brier ${testBase05M.brier.toFixed(5)}  LogLoss ${testBase05M.logLoss.toFixed(5)}  Acc ${pct(testBase05M.accuracy)}`);
   console.log(`    B. elo_only            Brier ${testEloM.brier.toFixed(5)}  LogLoss ${testEloM.logLoss.toFixed(5)}  Acc ${pct(testEloM.accuracy)}`);
   console.log(`    C. restricted_baseline Brier ${testRestrM.brier.toFixed(5)}  LogLoss ${testRestrM.logLoss.toFixed(5)}  Acc ${pct(testRestrM.accuracy)}`);
-  console.log(`    H. logistic (λ=${best.lambda})   Brier ${testM.brier.toFixed(5)}  LogLoss ${testM.logLoss.toFixed(5)}  Acc ${pct(testM.accuracy)}`);
+  console.log(`    H. logistic (λ=${LAMBDA})   Brier ${testM.brier.toFixed(5)}  LogLoss ${testM.logLoss.toFixed(5)}  Acc ${pct(testM.accuracy)}`);
 
   const dBrier = testM.brier - testBase05M.brier;
   console.log(`\n    ΔBrier (H - coin_flip) = ${dBrier >= 0 ? '+' : ''}${dBrier.toFixed(5)}`);

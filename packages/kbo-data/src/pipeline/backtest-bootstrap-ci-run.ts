@@ -196,24 +196,12 @@ async function main() {
   const Xte4 = test.features.map(vectorize);
   const Xtr7 = train.features.map(vectorizeExtended);
   const Xte7 = test.features.map(vectorizeExtended);
-  const lambdas = [0, 0.001, 0.01, 0.1];
-  function best(X: number[][], y: number[], Xte: number[][], yte: number[]) {
-    let bModel: ReturnType<typeof trainLogistic> | null = null;
-    let bBrier = Infinity;
-    for (const lambda of lambdas) {
-      const m = trainLogistic(X, y, { lambda, lr: 0.3, maxIter: 8000, tol: 1e-10 });
-      const p = logisticPredict(m, Xte);
-      const teB = computeMetrics(p, yte).brier;
-      if (teB < bBrier) {
-        bModel = m;
-        bBrier = teB;
-      }
-    }
-    if (!bModel) throw new Error('no fit');
-    return bModel;
-  }
-  const log4Pred = logisticPredict(best(Xtr4, train.outcomes, Xte4, test.outcomes), Xte4);
-  const log7Pred = logisticPredict(best(Xtr7, train.outcomes, Xte7, test.outcomes), Xte7);
+  // H6 fix (cycle 23): best-of-lambda by test Brier = double-dip. cycle 22 검증 best λ=0.01 → fix.
+  const LAMBDA = 0.01;
+  const fit = (X: number[][], y: number[]) =>
+    trainLogistic(X, y, { lambda: LAMBDA, lr: 0.3, maxIter: 8000, tol: 1e-10 });
+  const log4Pred = logisticPredict(fit(Xtr4, train.outcomes), Xte4);
+  const log7Pred = logisticPredict(fit(Xtr7, train.outcomes), Xte7);
 
   const N = test.outcomes.length;
   console.log(`\n[4/5] Bootstrap B=1000, N=${N}…`);
