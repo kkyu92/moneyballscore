@@ -69,14 +69,34 @@ scan + 직전 cycle_state 결과 보고 메인이 주목한 발견 list 박제. 
 
 | Chain | 진단 source (어디 봐야 trigger 자연) |
 |---|---|
-| `fix-incident` | Sentry alert / Vercel deploy log / cron silent skip (`pipeline_runs` 최근 7일 gap) / `git log` debug commit / 사용자 incident 신고 |
-| `explore-idea` | TODOS.md "Next-Up" / "사용자 영역" 자연 발화 후보 / `docs/superpowers/specs/` 미구현 idea draft / 자연 발화 product 의향 |
-| `polish-ui` | 사용자 UI 신고 / DESIGN.md vs 실제 컴포넌트 균열 / 모바일 layout 깨짐 / 디자인 시스템 inconsistency |
-| `review-code` | `pnpm lint` output / `pnpm test` 커버리지 / 큰 파일 (300+ 줄) 복잡도 / dead code / `health` score |
-| `operational-analysis` | `sp_log` 누적 / `pipeline_runs` metric / Brier / 적중률 / `agent_memories` 패턴 |
+| `fix-incident` | open GH issues (label `hub-dispatch` + bug/incident 류) / Sentry alert / Vercel deploy log / cron silent skip (`pipeline_runs` 최근 7일 gap) / `git log` debug commit / 사용자 incident 신고 |
+| `explore-idea` | open GH issues (label `hub-dispatch` + scout/idea 류) / TODOS.md "Next-Up" / "사용자 영역" 자연 발화 후보 / `docs/superpowers/specs/` 미구현 idea draft / 자연 발화 product 의향 |
+| `polish-ui` | open GH issues (label `hub-dispatch` + UI/design 류) / 사용자 UI 신고 / DESIGN.md vs 실제 컴포넌트 균열 / 모바일 layout 깨짐 / 디자인 시스템 inconsistency |
+| `review-code` | open GH issues (label `hub-dispatch` + refactor/quality 류) / `pnpm lint` output / `pnpm test` 커버리지 / 큰 파일 (300+ 줄) 복잡도 / dead code / `health` score |
+| `operational-analysis` | open GH issues (label `hub-dispatch` + metric/analysis 류) / `sp_log` 누적 / `pipeline_runs` metric / Brier / 적중률 / `agent_memories` 패턴 |
 | `dimension-cycle` (legacy) | site/acquisition/model 차원별 metric (LCP / SEO / 적중률) — 위 5개 안 맞을 때 |
 
 진단 단계가 위 6 source 카테고리 균형 있게 훑은 후 key_findings 추출. 한 source 만 깊이 파고 다른 source 안 본 경우 회피.
+
+### 진단 source 우선순위 — open GH issues 우선 (N 무관 자동 처리)
+
+매 사이클 진단 단계 첫 step:
+
+```bash
+gh issue list --state open --label hub-dispatch --limit 20
+```
+
+1. **open issue 있으면** → 그 중 1건 자율 선택 (issue body 보고 chain 매핑) → 사이클 진행. PR commit message 에 `Fixes #<num>` 박제 → R7 머지 시 자동 close
+2. **issue 0 건 또는 직전 3 사이클이 같은 issue 영역 처리 후** → 기존 source (lint / Sentry / TODOS / metric) 진행
+3. **N (사용자 호출 사이클 수) 와 issue 수 무관** — N=8 호출 시 open issue 5건 이면 5 사이클 issue 처리 + 3 사이클 기존 source 자연. 또는 N=3 호출 시 open issue 5건 중 우선 3건 처리
+
+issue 처리 시 매핑 예:
+- "PII 스크러빙" → `polish-ui` 또는 `fix-incident` (privacy fix)
+- "레이스 컨디션 재검토" → `fix-incident`
+- "kbo-cli 데이터 수집 강화" → `explore-idea`
+- "DO_NOT_TRACK 텔레메트리" → `polish-ui` 또는 `fix-incident`
+
+issue body + label 보고 메인 자율 결정. 룰 X.
 
 ## 사이클 단계 2 — chain 선택
 
