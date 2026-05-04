@@ -29,6 +29,8 @@ interface ValidatorLog {
   violation_type: string;
   detail: string | null;
   created_at: string;
+  agent?: string | null;
+  passed?: boolean | null;
 }
 
 interface DashboardData {
@@ -36,8 +38,13 @@ interface DashboardData {
   total: number;
   hardCount: number;
   warnCount: number;
+  teamCount: number;
+  judgeCount: number;
+  passedCount: number;
+  rejectedCount: number;
   byType: { key: string; count: number; pct: number }[];
   byBackend: { key: string; count: number; pct: number }[];
+  byAgent: { key: string; count: number; pct: number }[];
   daily: { date: string; hard: number; warn: number; total: number }[];
   samples: ValidatorLog[];
 }
@@ -48,7 +55,7 @@ async function getStats(): Promise<DashboardData> {
 
   const { data: recent, error: recentErr } = await supabase
     .from('validator_logs')
-    .select('severity, violation_type, backend, created_at')
+    .select('severity, violation_type, backend, created_at, agent, passed')
     .gte('created_at', sevenDaysAgo);
 
   if (recentErr) {
@@ -57,8 +64,13 @@ async function getStats(): Promise<DashboardData> {
       total: 0,
       hardCount: 0,
       warnCount: 0,
+      teamCount: 0,
+      judgeCount: 0,
+      passedCount: 0,
+      rejectedCount: 0,
       byType: [],
       byBackend: [],
+      byAgent: [],
       daily: [],
       samples: [],
     };
@@ -77,8 +89,13 @@ async function getStats(): Promise<DashboardData> {
     total: stats.total,
     hardCount: stats.hardCount,
     warnCount: stats.warnCount,
+    teamCount: stats.teamCount,
+    judgeCount: stats.judgeCount,
+    passedCount: stats.passedCount,
+    rejectedCount: stats.rejectedCount,
     byType: stats.byType,
     byBackend: stats.byBackend,
+    byAgent: stats.byAgent,
     daily: stats.daily,
     samples: (samples ?? []) as ValidatorLog[],
   };
@@ -182,20 +199,28 @@ export default async function HallucinationDashboard() {
       ) : (
         <>
           {/* 요약 카드 */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm text-gray-500 mb-2">최근 7일 reject</h3>
+              <h3 className="text-sm text-gray-500 mb-2">최근 7일 이벤트</h3>
               <p className="text-4xl font-bold">{stats.total}</p>
-              <div className="text-xs text-gray-500 mt-2 flex gap-3">
+              <div className="text-xs text-gray-500 mt-2 flex flex-wrap gap-x-3 gap-y-1">
                 <span>
                   hard <span className="font-mono text-red-600">{stats.hardCount}</span>
                 </span>
                 <span>
                   warn <span className="font-mono text-yellow-700">{stats.warnCount}</span>
                 </span>
+                <span>
+                  reject <span className="font-mono text-red-600">{stats.rejectedCount}</span>
+                </span>
+                <span>
+                  near-miss{' '}
+                  <span className="font-mono text-yellow-700">{stats.passedCount}</span>
+                </span>
               </div>
             </div>
 
+            <CategoryList title="Agent별 분포 (cycle 30)" data={stats.byAgent} />
             <CategoryList title="사유별 분포" data={stats.byType} />
             <CategoryList title="Backend별 분포" data={stats.byBackend} />
           </section>
@@ -219,9 +244,11 @@ export default async function HallucinationDashboard() {
                       <th className="px-3 py-2 text-left">시각</th>
                       <th className="px-3 py-2 text-left">Game</th>
                       <th className="px-3 py-2 text-left">Team</th>
+                      <th className="px-3 py-2 text-left">Agent</th>
                       <th className="px-3 py-2 text-left">Backend</th>
                       <th className="px-3 py-2 text-left">Type</th>
                       <th className="px-3 py-2 text-left">Severity</th>
+                      <th className="px-3 py-2 text-left">Pass</th>
                       <th className="px-3 py-2 text-left">Detail</th>
                     </tr>
                   </thead>
@@ -238,6 +265,9 @@ export default async function HallucinationDashboard() {
                         </td>
                         <td className="px-3 py-2 font-mono">{log.game_id ?? '—'}</td>
                         <td className="px-3 py-2 font-mono">{log.team_code}</td>
+                        <td className="px-3 py-2 font-mono text-xs">
+                          {log.agent ?? 'team'}
+                        </td>
                         <td className="px-3 py-2 font-mono text-xs text-gray-600 truncate max-w-[140px]">
                           {log.backend}
                         </td>
@@ -254,6 +284,13 @@ export default async function HallucinationDashboard() {
                           >
                             {log.severity}
                           </span>
+                        </td>
+                        <td className="px-3 py-2 text-xs">
+                          {log.passed === true ? (
+                            <span className="text-green-700 font-mono">✓</span>
+                          ) : (
+                            <span className="text-red-600 font-mono">✗</span>
+                          )}
                         </td>
                         <td className="px-3 py-2 text-xs text-gray-600 max-w-xs truncate">
                           {log.detail ?? '—'}
