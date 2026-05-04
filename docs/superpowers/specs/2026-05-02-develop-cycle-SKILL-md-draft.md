@@ -1,6 +1,6 @@
 ---
 name: develop-cycle
-description: 머니볼 프로젝트 디벨롭 1 사이클 (진단 → chain 선택 → 시퀀스 실행 → commit + PR → 회고) 을 N번 반복. 사용자가 `/develop-cycle [N=1]` 또는 "사이클 N번 돌려" 입력 시 시작. 각 사이클은 chain pool (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle) 중 메인 자유 추론으로 1개 선택. cycle_state JSON 으로 사이클 사이 풍부 carry-over. agent-loop 자율 cron (2026-04-30 폐기) 의 manual 후속.
+description: 머니볼 프로젝트 디벨롭 1 사이클 (진단 → chain 선택 → 시퀀스 실행 → commit + PR → 회고) 을 N번 반복. 사용자가 `/develop-cycle [N=1]` 또는 "사이클 N번 돌려" 입력 시 시작. chain pool 9개 (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle / expand-scope / design-system / skill-evolution) — 처음 6개 + expand-scope (메타 기획) + design-system (시스템 디자인) 메인 자율 선택, skill-evolution (SKILL.md 자가 갱신) trigger 충족 시 자동 발화. dispatch 채널 4종 (lesson / cycle-retro / meta-pattern / chain-evolution) submit-lesson.yml 단일 transport. cycle_state JSON + skill-evolution-pending 마커로 사이클 사이 carry-over. agent-loop 자율 cron (2026-04-30 폐기) 의 manual 후속.
 ---
 
 # develop-cycle
