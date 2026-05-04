@@ -120,6 +120,24 @@ $CYCLE_N
 $P
 $(date +%s)
 EOF
+
+# tmux socket+target 자동 박제 — watch.sh 가 read (cycle 39 PR 1 + cycle 40 PR 2 조합)
+TMUX_SOCKET_NAME=""
+if [ -n "$TMUX" ]; then
+  TMUX_SOCKET_NAME=$(basename "$(echo "$TMUX" | cut -d, -f1)")
+elif [ -n "$P" ] && [ "$P" != "$$" ]; then
+  TMUX_SOCKET_NAME=$(lsof -p "$P" 2>/dev/null | awk '/tmux/ {print $NF}' | head -1 | xargs basename 2>/dev/null | cut -d, -f1)
+fi
+[ -z "$TMUX_SOCKET_NAME" ] && TMUX_SOCKET_NAME="default"
+echo "$TMUX_SOCKET_NAME" > ~/.develop-cycle/tmux-socket
+
+if [ "$TMUX_SOCKET_NAME" = "default" ]; then
+  TMUX_TARGET_NAME=$(tmux display-message -p '#{session_name}' 2>/dev/null)
+else
+  TMUX_TARGET_NAME=$(tmux -L "$TMUX_SOCKET_NAME" display-message -p '#{session_name}' 2>/dev/null)
+fi
+[ -z "$TMUX_TARGET_NAME" ] && TMUX_TARGET_NAME="claude"
+echo "$TMUX_TARGET_NAME" > ~/.develop-cycle/tmux-target
 ```
 
 PID 라인 = 본 도구 bash 의 PPID chain (최대 8 hop) 거슬러 첫 'claude'/'claude.exe'/'claude-code' comm process 매칭. **다중 claude 환경 안전**: 본 도구 bash 를 띄운 메인 claude 만 잡음. chain 안 매칭 X 또는 chain 끊김 시 fallback `pgrep -x claude` 첫 결과 → fallback `$$`. cycle 25 lesson (subshell `$$` 단명) → cycle 26 fix (`pgrep -x claude` 첫 결과, 다중 claude race 위험) → cycle 33 fix (PPID chain ancestor 매칭) carry-over. watch.sh 가 매 5s 본 PID 활동 측정 (CPU%/child) 으로 hybrid timeout 검사 (CYCLE_SOFT 45m + idle 5m 누적 또는 CYCLE_HARD 60m). 정상 종료 시 단계 4 끝에서 삭제.
