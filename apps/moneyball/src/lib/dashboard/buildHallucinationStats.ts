@@ -7,6 +7,10 @@ export interface ValidatorLogInput {
   violation_type: string;
   backend: string;
   created_at: string;
+  // cycle 30 migration 022 — 'team' (TeamArgument) | 'judge' (JudgeVerdict.reasoning)
+  agent?: string | null;
+  // cycle 30 migration 022 — true=warn 통과 near-miss / false=reject
+  passed?: boolean | null;
 }
 
 export interface CategoryBreakdown {
@@ -26,8 +30,15 @@ export interface HallucinationStats {
   total: number;
   hardCount: number;
   warnCount: number;
+  // cycle 31 — agent 분리 카운트
+  teamCount: number;
+  judgeCount: number;
+  // cycle 31 — passed/rejected 분리 카운트 (near-miss vs hard reject)
+  passedCount: number;
+  rejectedCount: number;
   byType: CategoryBreakdown[];
   byBackend: CategoryBreakdown[];
+  byAgent: CategoryBreakdown[];
   daily: DayBucket[];
 }
 
@@ -61,8 +72,13 @@ export function buildHallucinationStats(
   const total = logs.length;
   let hardCount = 0;
   let warnCount = 0;
+  let teamCount = 0;
+  let judgeCount = 0;
+  let passedCount = 0;
+  let rejectedCount = 0;
   const typeCounts: Record<string, number> = {};
   const backendCounts: Record<string, number> = {};
+  const agentCounts: Record<string, number> = {};
   const dayMap = new Map<string, DayBucket>();
 
   // 빈 day bucket 미리 박제 (오늘 ~ N-1 일전, KST 기준)
@@ -84,6 +100,14 @@ export function buildHallucinationStats(
     const b = log.backend ?? 'unknown';
     backendCounts[b] = (backendCounts[b] ?? 0) + 1;
 
+    const a = log.agent ?? 'team';
+    agentCounts[a] = (agentCounts[a] ?? 0) + 1;
+    if (a === 'judge') judgeCount++;
+    else teamCount++;
+
+    if (log.passed === true) passedCount++;
+    else rejectedCount++;
+
     const dayKey = toIsoDate(log.created_at);
     const bucket = dayMap.get(dayKey);
     if (bucket) {
@@ -97,8 +121,13 @@ export function buildHallucinationStats(
     total,
     hardCount,
     warnCount,
+    teamCount,
+    judgeCount,
+    passedCount,
+    rejectedCount,
     byType: toBreakdown(typeCounts, total),
     byBackend: toBreakdown(backendCounts, total),
+    byAgent: toBreakdown(agentCounts, total),
     daily: Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date)),
   };
 }

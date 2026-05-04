@@ -116,4 +116,43 @@ describe('buildHallucinationStats', () => {
       '2026-05-04',
     ]);
   });
+
+  // cycle 31 — agent / passed 분리 (migration 022)
+  it('agent 분리 카운트 (team / judge)', () => {
+    const logs = [
+      makeLog({ agent: 'team' }),
+      makeLog({ agent: 'team' }),
+      makeLog({ agent: 'judge' }),
+    ];
+    const stats = buildHallucinationStats(logs, { now: new Date('2026-05-04T00:00:00Z') });
+    expect(stats.teamCount).toBe(2);
+    expect(stats.judgeCount).toBe(1);
+    expect(stats.byAgent[0].key).toBe('team');
+    expect(stats.byAgent[0].pct).toBeCloseTo(66.7, 0);
+  });
+
+  it('agent 미박제 (legacy row) → team default', () => {
+    const logs = [makeLog({ agent: undefined })];
+    const stats = buildHallucinationStats(logs, { now: new Date('2026-05-04T00:00:00Z') });
+    expect(stats.teamCount).toBe(1);
+    expect(stats.judgeCount).toBe(0);
+  });
+
+  it('passed 분리 카운트 (near-miss vs reject)', () => {
+    const logs = [
+      makeLog({ passed: true }),
+      makeLog({ passed: true }),
+      makeLog({ passed: false }),
+    ];
+    const stats = buildHallucinationStats(logs, { now: new Date('2026-05-04T00:00:00Z') });
+    expect(stats.passedCount).toBe(2);
+    expect(stats.rejectedCount).toBe(1);
+  });
+
+  it('passed 미박제 (legacy row) → rejected default', () => {
+    const logs = [makeLog({ passed: undefined })];
+    const stats = buildHallucinationStats(logs, { now: new Date('2026-05-04T00:00:00Z') });
+    expect(stats.passedCount).toBe(0);
+    expect(stats.rejectedCount).toBe(1);
+  });
 });
