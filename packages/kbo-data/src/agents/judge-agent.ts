@@ -1,9 +1,12 @@
 import { KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
+import { getZeroWeightFactorPromptList } from './postview';
 import type { TeamArgument, CalibrationHint, JudgeVerdict, AgentResult } from './types';
 
-const SYSTEM_PROMPT = `당신은 승부예측의 심판 분석가입니다.
+const ZERO_WEIGHT_FACTOR_LIST_PROMPT = getZeroWeightFactorPromptList();
+
+export const SYSTEM_PROMPT = `당신은 승부예측의 심판 분석가입니다.
 두 팀 에이전트의 논거와 정량적 모델 결과를 종합하여 최종 확률을 결정합니다.
 
 역할:
@@ -27,7 +30,10 @@ const SYSTEM_PROMPT = `당신은 승부예측의 심판 분석가입니다.
 - Steelman 원칙: 상대방의 가장 강한 논거를 먼저 인정한 후 판단
 - 정량 모델과 토론 결과가 크게 다르면 (10%+) 이유를 설명
 - 확률은 반드시 0.15~0.85 범위 (야구는 불확실하다)
-- reasoning은 블로그 프리뷰 글로 바로 사용됩니다. 읽는 사람을 위해 쓰세요.`;
+- reasoning은 블로그 프리뷰 글로 바로 사용됩니다. 읽는 사람을 위해 쓰세요.
+- 가중치 0% factor (${ZERO_WEIGHT_FACTOR_LIST_PROMPT}) 는 정량 모델 가중치가 0이라
+  확률 형성에 기여하지 않습니다. 양쪽 에이전트의 keyFactor 가 이에 해당해도 reasoning
+  핵심 근거로 사용 금지. (cycle 11 발견 — 0% factor 가 LLM reasoning 70% 차지하던 silent drift 차단)`;
 
 function buildUserMessage(
   homeTeam: TeamCode,
