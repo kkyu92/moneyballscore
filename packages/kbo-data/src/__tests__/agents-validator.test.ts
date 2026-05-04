@@ -8,6 +8,9 @@ import {
   checkClaimTypes,
   buildInjectionText,
   resolveValidationMode,
+  validateJudgeReasoning,
+  maskViolatedReasoning,
+  notifyValidationViolations,
   HARD_LIMIT,
   WARN_LIMIT,
   WARN_LIMIT_LENIENT,
@@ -394,5 +397,141 @@ describe('buildInjectionText', () => {
     ctx.homeSPStats = null;
     const text = buildInjectionText(ctx);
     expect(text).toContain('미확정');
+  });
+});
+
+// ============================================
+// P1 — validateJudgeReasoning (cycle 27, spec 2026-05-04 갭 A)
+// ============================================
+describe('validateJudgeReasoning', () => {
+  it('주입 데이터 일치 reasoning → ok=true', () => {
+    const ctx = makeContext();
+    const reasoning = '임찬규 FIP 3.2 가 곽빈 FIP 4.1 보다 우위. wOBA 0.340 vs 0.320.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.ok).toBe(true);
+    expect(result.violations).toHaveLength(0);
+  });
+
+  it('환각 숫자 → hard 위반 + ok=false', () => {
+    const ctx = makeContext();
+    const reasoning = '임찬규 FIP 3.99 우위. wOBA 0.555 격차.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+  });
+
+  it('발명 선수명 → hard 위반 (strict)', () => {
+    const ctx = makeContext();
+    const reasoning = '김철수가 등판하면 흐름이 바뀐다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((v) => v.type === 'invented_player_name')).toBe(true);
+  });
+
+  it('발명 선수명 → warn 강등 (lenient)', () => {
+    const ctx = makeContext();
+    const reasoning = '김철수가 등판하면 흐름이 바뀐다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'lenient');
+    const inv = result.violations.find((v) => v.type === 'invented_player_name');
+    expect(inv?.severity).toBe('warn');
+  });
+
+  it('금칙어 → warn 위반', () => {
+    const ctx = makeContext();
+    const reasoning = '잠실 LG 왕조의 시대가 도래한다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.violations.some((v) => v.type === 'banned_phrase')).toBe(true);
+  });
+
+  it('claim-type signal 부재 reasoning → 통과 (블로그 톤 false positive 차단)', () => {
+    const ctx = makeContext();
+    const reasoning = '오늘 경기는 홈팀이 유리해 보입니다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.violations.some((v) => v.type === 'unclassified_claim')).toBe(false);
+  });
+
+  it('빈 reasoning → 위반 0건 + ok=true', () => {
+    const ctx = makeContext();
+    const result = validateJudgeReasoning('', ctx, 'strict');
+    expect(result.ok).toBe(true);
+    expect(result.violations).toHaveLength(0);
+  });
+});
+
+// ============================================
+// P1 — maskViolatedReasoning
+// ============================================
+describe('maskViolatedReasoning', () => {
+  it('환각 숫자 → [검증실패:환각숫자] mask', () => {
+    const ctx = makeContext();
+    const reasoning = '임찬규 FIP 3.99 우위.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    const masked = maskViolatedReasoning(reasoning, result.violations);
+    expect(masked).toContain('[검증실패:환각숫자]');
+    expect(masked).not.toContain('3.99');
+  });
+
+  it('발명 선수명 → [검증실패:발명선수] mask', () => {
+    const ctx = makeContext();
+    const reasoning = '김철수가 등판하면 흐름이 바뀐다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    const masked = maskViolatedReasoning(reasoning, result.violations);
+    expect(masked).toContain('[검증실패:발명선수]');
+    expect(masked).not.toContain('김철수');
+  });
+
+  it('금칙어 → [검증실패:금칙어] mask', () => {
+    const ctx = makeContext();
+    const reasoning = '잠실 왕조의 시대가 도래한다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    const masked = maskViolatedReasoning(reasoning, result.violations);
+    expect(masked).toContain('[검증실패:금칙어]');
+    expect(masked).not.toContain('왕조');
+  });
+
+  it('위반 0건 → 원본 유지', () => {
+    const reasoning = 'FIP 3.2 우위.';
+    const masked = maskViolatedReasoning(reasoning, []);
+    expect(masked).toBe(reasoning);
+  });
+
+  it('주변 정상 텍스트 보존 (fallback 한 줄 강제 X)', () => {
+    const ctx = makeContext();
+    const reasoning = '임찬규 FIP 3.2 우위지만 FIP 9.99 같은 환각도 있다. 결론: LG 우세.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    const masked = maskViolatedReasoning(reasoning, result.violations);
+    expect(masked).toContain('임찬규 FIP 3.2');
+    expect(masked).toContain('결론: LG 우세');
+    expect(masked).toContain('[검증실패:환각숫자]');
+  });
+});
+
+// ============================================
+// P2 — notifyValidationViolations (Sentry tag 연계)
+// ============================================
+describe('notifyValidationViolations', () => {
+  it('NODE_ENV=test → Sentry 호출 skip (resolve)', async () => {
+    const result = { ok: false, violations: [
+      { type: 'hallucinated_number' as const, severity: 'hard' as const, detail: 'test' },
+    ]};
+    await expect(
+      notifyValidationViolations(result, { agent: 'judge', gameId: 'test' })
+    ).resolves.toBeUndefined();
+  });
+
+  it('위반 0건 → silent return', async () => {
+    const result = { ok: true, violations: [] };
+    await expect(
+      notifyValidationViolations(result, { agent: 'judge', gameId: 'test' })
+    ).resolves.toBeUndefined();
+  });
+
+  it('Sentry 미설치 환경에서도 throw X', async () => {
+    const result = { ok: false, violations: [
+      { type: 'invented_player_name' as const, severity: 'hard' as const, detail: 'mock' },
+    ]};
+    await expect(
+      notifyValidationViolations(result, { agent: 'team', gameId: null, backend: 'ollama' })
+    ).resolves.toBeUndefined();
   });
 });

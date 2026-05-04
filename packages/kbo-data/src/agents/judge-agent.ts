@@ -2,7 +2,13 @@ import { KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { getZeroWeightFactorPromptList } from './postview';
-import type { TeamArgument, CalibrationHint, JudgeVerdict, AgentResult } from './types';
+import type { TeamArgument, CalibrationHint, JudgeVerdict, AgentResult, GameContext } from './types';
+import {
+  validateJudgeReasoning,
+  maskViolatedReasoning,
+  notifyValidationViolations,
+  resolveValidationMode,
+} from './validator';
 
 const ZERO_WEIGHT_FACTOR_LIST_PROMPT = getZeroWeightFactorPromptList();
 
@@ -111,6 +117,9 @@ function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCode): Ju
 
 /**
  * 심판 에이전트: 양쪽 논거 + 정량 모델 + 회고 보정 → 최종 확률
+ *
+ * cycle 27 — context 인자 추가: validateJudgeReasoning 로 reasoning 검증 + 위반 mask + Sentry tag.
+ * context 미전달 시 (legacy 호출부) 검증 skip — 후방 호환.
  */
 export async function runJudgeAgent(
   homeTeam: TeamCode,
@@ -118,9 +127,10 @@ export async function runJudgeAgent(
   homeArg: TeamArgument,
   awayArg: TeamArgument,
   quantitativeProb: number,
-  calibration: CalibrationHint | null
+  calibration: CalibrationHint | null,
+  context?: GameContext
 ): Promise<AgentResult<JudgeVerdict>> {
-  return callLLM<JudgeVerdict>(
+  const result = await callLLM<JudgeVerdict>(
     {
       model: 'sonnet',
       systemPrompt: SYSTEM_PROMPT,
@@ -129,4 +139,24 @@ export async function runJudgeAgent(
     },
     (text) => parseResponse(text, homeTeam, awayTeam)
   );
+
+  if (!context || !result.success || !result.data || !result.data.reasoning) {
+    return result;
+  }
+
+  const mode = resolveValidationMode();
+  const validation = validateJudgeReasoning(result.data.reasoning, context, mode);
+
+  void notifyValidationViolations(validation, {
+    agent: 'judge',
+    gameId: context.game.externalGameId ?? null,
+  });
+
+  if (validation.violations.length === 0) return result;
+
+  const maskedReasoning = maskViolatedReasoning(result.data.reasoning, validation.violations);
+  return {
+    ...result,
+    data: { ...result.data, reasoning: maskedReasoning },
+  };
 }

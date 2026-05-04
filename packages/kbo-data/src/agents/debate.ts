@@ -56,13 +56,15 @@ export async function runDebate(
   };
 
   // Step 2: 심판 에이전트 (순차 실행, 앞선 결과 필요)
+  // cycle 27 — context 전달로 reasoning 검증 + 위반 mask + Sentry tag 활성화
   const judgeResult = await runJudgeAgent(
     homeTeam,
     awayTeam,
     homeArg,
     awayArg,
     quantitativeProb,
-    calibration
+    calibration,
+    context
   );
 
   totalTokens += judgeResult.tokensUsed;
