@@ -6,7 +6,14 @@ import { scrubSentryEvent } from './sentry-scrub';
 // DSN이 없으면 init 자체를 안 부른다 → 패키지가 no-op.
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
-if (dsn) {
+// DO_NOT_TRACK / GPC 표준 — 사용자가 브라우저 단에서 명시적 텔레메트리 거부 시 init 자체 skip.
+// navigator.doNotTrack === '1' (DNT, Firefox/Safari/Edge), navigator.globalPrivacyControl === true (GPC, CCPA, Brave/Firefox).
+const optedOut =
+  typeof navigator !== 'undefined' &&
+  (navigator.doNotTrack === '1' ||
+    (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true);
+
+if (dsn && !optedOut) {
   Sentry.init({
     dsn,
     environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'development',
