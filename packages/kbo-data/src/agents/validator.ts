@@ -439,3 +439,144 @@ export function validateTeamArgument(
   const ok = hardCount <= HARD_LIMIT && warnCount <= warnLimit;
   return { ok, violations };
 }
+
+// ============================================
+// P1 — validateJudgeReasoning (cycle 27, spec 2026-05-04-llm-output-integrity-cycle25)
+// ============================================
+//
+// JudgeVerdict.reasoning = 블로그 본문 자유 텍스트. validateTeamArgument 가 TeamArgument JSON 만
+// 검증하던 갭 (spec § 3.1 갭 A). 환각 숫자 / 발명 선수 / 금칙어 만 재사용 — claim-type signal 은
+// reasoning 자유 글에 false positive 위험 (블로그 톤은 stat 신호 분포 다름) 으로 skip.
+
+export function validateJudgeReasoning(
+  reasoning: string,
+  context: GameContext,
+  mode: ValidationMode = 'strict'
+): ValidationResult {
+  const injectionText = buildInjectionText(context);
+
+  const rawViolations: Violation[] = [
+    ...checkHallucinatedNumbers(reasoning, injectionText),
+    ...checkInventedPlayerNames(reasoning, context),
+    ...checkBannedPhrases(reasoning),
+  ];
+
+  const violations: Violation[] = mode === 'lenient'
+    ? rawViolations.map((v) =>
+        v.type === 'invented_player_name' ? { ...v, severity: 'warn' as const } : v
+      )
+    : rawViolations;
+
+  const hardCount = violations.filter((v) => v.severity === 'hard').length;
+  const warnCount = violations.filter((v) => v.severity === 'warn').length;
+
+  const warnLimit = mode === 'lenient' ? WARN_LIMIT_LENIENT : WARN_LIMIT;
+  const ok = hardCount <= HARD_LIMIT && warnCount <= warnLimit;
+  return { ok, violations };
+}
+
+// ============================================
+// P1 — maskViolatedReasoning
+// ============================================
+//
+// 위반 reasoning 을 fallback 한 줄로 강제 교체하는 대신 위반 부분만 mask. 사용자 가시 reasoning 의
+// 정보 가치를 80% 보존하면서 환각/발명 leak 차단 (spec § 4.1).
+
+const MASK_HALLUCINATED_NUMBER = '[검증실패:환각숫자]';
+const MASK_INVENTED_PLAYER = '[검증실패:발명선수]';
+const MASK_BANNED_PHRASE = '[검증실패:금칙어]';
+
+function extractDetailValues(detail: string): string[] {
+  const m = detail.match(/:\s*([^]+)$/);
+  if (!m) return [];
+  return m[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+export function maskViolatedReasoning(
+  reasoning: string,
+  violations: Violation[]
+): string {
+  let masked = reasoning;
+
+  for (const v of violations) {
+    if (v.type === 'hallucinated_number') {
+      for (const num of extractDetailValues(v.detail)) {
+        const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        masked = masked.replace(new RegExp(`\\b${escaped}\\b`, 'g'), MASK_HALLUCINATED_NUMBER);
+      }
+    } else if (v.type === 'invented_player_name') {
+      for (const name of extractDetailValues(v.detail)) {
+        masked = masked.split(name).join(MASK_INVENTED_PLAYER);
+      }
+    } else if (v.type === 'banned_phrase') {
+      for (const { pattern } of BANNED_PATTERNS) {
+        masked = masked.replace(pattern, MASK_BANNED_PHRASE);
+      }
+    }
+  }
+
+  return masked;
+}
+
+// ============================================
+// P2 — notifyValidationViolations (Sentry tag 연계, spec § 4.2)
+// ============================================
+//
+// 위반 발생 시 Sentry capture. near-miss (warn 1~2 건 통과 case) 도 동일 path → silent drift 사전 감지.
+// packages/kbo-data 가 @sentry/nextjs 직접 의존 X — 동적 import + try/catch silent fallback 패턴.
+// Sentry 미설치 환경 (test / 로컬 ollama) 에선 자동 no-op.
+
+export interface ValidationMeta {
+  agent: 'team' | 'judge';
+  gameId: string | number | null;
+  backend?: string;
+}
+
+export async function notifyValidationViolations(
+  result: ValidationResult,
+  meta: ValidationMeta
+): Promise<void> {
+  if (result.violations.length === 0) return;
+  if (process.env.NODE_ENV === 'test') return;
+
+  // packages/kbo-data 가 @sentry/nextjs 직접 의존 X → 동적 import + unknown 타입.
+  // apps/moneyball runtime 에선 module 해석 성공, test/cli 에선 silent 실패.
+  type SentryModule = {
+    captureMessage?: (msg: string, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureMessage !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  const backend = meta.backend ?? process.env.LLM_BACKEND ?? 'unknown';
+
+  for (const v of result.violations) {
+    try {
+      Sentry.captureMessage('llm_validator_violation', {
+        level: v.severity === 'hard' ? 'error' : 'warning',
+        tags: {
+          violation_type: v.type,
+          severity: v.severity,
+          agent: meta.agent,
+          backend,
+          passed: String(result.ok),
+        },
+        extra: {
+          detail: v.detail,
+          game_id: meta.gameId ?? 'unknown',
+        },
+      });
+    } catch {
+      // Sentry 호출 자체 실패해도 메인 path 보호
+    }
+  }
+}
