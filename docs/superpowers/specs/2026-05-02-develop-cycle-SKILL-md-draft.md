@@ -313,6 +313,17 @@ EOF
 | 메인이 chain 선택 잘못 | 사용자 끼어들기로 next_n=0 박제 (zero-touch stop) |
 | 직전 cycle_state read 실패 (파일 없음 / 손상) | input_from_prev_cycles = [] 빈 배열 |
 | 동일 chain 3회 연속 | LLM 추론 input 으로 다른 chain 우선 |
+| 메타 chain (`expand-scope` / `design-system`) 1사이클 동시 발화 | 발화 빈도 가드 (1택). 진단 단계서 둘 다 후보면 메인 자율 1택 |
+| 메타 chain 본 chain 의 직전 발화 사이클 outcome ≠ success | 다음 발화 회피 (해당 chain 만). 다른 chain 1회 success 후 가능 |
+| `skill-evolution` 무한 self-trigger | 직전 3 사이클이 `skill-evolution` 이면 회피 (R3 정신). signal next_n 박제 시 마커 무시 |
+| `skill-evolution` smoke test (pnpm test) fail | PR 생성 X. retro-only outcome=fail. 마커 유지 → 다음 사이클 재시도 |
+| `meta-pattern` + `chain-evolution` 1사이클 동시 발화 | 자율 1택 (잡음 차단) |
+| 4채널 dispatch silent skip | 단일 transport `submit-lesson.yml` — #34 PR `/commits` API fallback 이미 squash 안전 |
+| SKILL.md 잘못 변경 누적 | git history 자동 백업. 사용자가 `git revert <commit>` 1회 복구 |
+| 외부 SaaS 자율 결제 시도 | 본 SKILL 안 paid API 호출 명령 박제 절대 X (코드 path 자체 X) |
+| 사용자에게 "이거 해주세요" 자율 요청 | carry-over 박제 채널만 (memory: subtype=needs). 직접 요청 명령 박제 X |
+| Vercel/Supabase free tier 한도 도달 | `meta-pattern` dispatch + cycle outcome=fail. 자율 upgrade X |
+| 사이클 hang (cycle 24 사례) | watch.sh 에 timeout (예: 30분) 후 자동 kill + interrupted cycle_state 박제 — 별도 cycle 위임 |
 
 ## 호환성
 
