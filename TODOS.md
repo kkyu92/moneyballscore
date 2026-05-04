@@ -5,19 +5,44 @@
 
 ## 🚀 Next-Up (2026-04-25 이후)
 
-### ⭐ develop-cycle zero-touch — 사용자 영역 후속 작업 (2026-05-02 spec/plan/구현 완료 후)
+### ⭐ develop-cycle 자율 진행 — 사용자 영역 1 line (cycle 41 진행 후, 2026-05-04)
 
-본 메인 영역 (`tools/zero-touch/`) 구현 + 통합 시뮬 통과 완료. 작동하려면 사용자 영역 4가지 필수:
+cycle 33~41 진행 후 본 메인 base 구현 완료 (PR #74/#80/#81 + 본 cycle 41 PR). 자동 fire 메커니즘 활성화 위해 사용자 영역 **1 line** 필수:
 
-- [ ] **tmux alias 추가** — `~/.zshrc` 에 `alias mcc='tmux new -As claude claude'`. 평소 `mcc` 로 claude 띄우기
-- [ ] **글로벌 SKILL.md 갱신** — `docs/superpowers/specs/2026-05-02-develop-cycle-SKILL-md-draft.md` 의 본문을 `~/.claude/skills/develop-cycle/SKILL.md` 로 cp. 검증: `grep -E "chain pool|cycle_state|fix-incident" ~/.claude/skills/develop-cycle/SKILL.md`. 6 chain 이름 + chain pool 단어 + cycle_state 단어 모두 grep 명중 시 OK. draft 본문 핵심 = chain pool 6개 (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle) + cycle_state JSON Med 깊이 + 4 단계 갱신. spec: `docs/superpowers/specs/2026-05-02-develop-cycle-skill-chain-design.md`. plan: `docs/superpowers/plans/2026-05-02-develop-cycle-skill-chain.md`
-- [ ] **TELEGRAM_WEBHOOK 환경변수 결정 + install** — 기존 텔레그램 outbound 인프라 webhook URL 사용. `export TELEGRAM_WEBHOOK=... && tools/zero-touch/install.sh` 실행
-- [ ] **첫 fire 검증** — tmux 안에서 `/develop-cycle 3` 호출 → 1 사이클 끝 → watcher 가 자동 reset → 다음 N=3 자동 시작 확인. 1주차 fine-tune (sleep 3/8 타이밍 등). spec section 8 검증 항목 7개 점검
+- [ ] **mcc alias 갱신** — `~/.zshrc` 에 다음 1 line 추가. 기존 alias 가 있으면 교체:
 
-**관련**:
-- spec: `docs/superpowers/specs/2026-05-02-develop-cycle-zero-touch-design.md`
-- plan: `docs/superpowers/plans/2026-05-02-develop-cycle-zero-touch.md`
-- 운영 매뉴얼: `tools/zero-touch/README.md`
+  ```bash
+  alias mcc='tmux new -As claude bash -c "trap \"exit 0\" SIGINT; while caffeinate -i command claude; do echo \"[mcc] claude exited normally, restart in 2s...\"; sleep 2; done"'
+  ```
+
+  **핵심**: `bash -c "while ... done"` wrapper 가 claude 종료 시 새 claude 자동 시작. watch.sh 의 `/exit` send-keys → 이 wrapper 가 새 cycle 시작.
+
+  적용:
+  ```bash
+  source ~/.zshrc      # 또는 새 터미널
+  mcc                  # tmux session 안 진입
+  ```
+
+- [ ] **첫 fire 검증** — mcc 안에서 `/develop-cycle 3` 호출. 1 cycle 끝 → watch.sh fire → claude 종료 → bash 새 iter → 새 claude → /handoff load + /develop-cycle 2 자동 입력 → 새 cycle 진행. 3 cycle 모두 success 확인.
+
+- [ ] **TELEGRAM_WEBHOOK** (optional) — fail 시 알림. 미설정 시 자연 skip.
+
+**자동 fire 메커니즘 의존성**:
+- watch.sh send 시퀀스 (cycle 41) = `/exit` slash + Ctrl-D fallback → bash while loop 새 iter
+- SKILL.md active-cycle 박제 시 socket+target 자동 감지 (cycle 40)
+- watch.sh socket+target 동적 지원 (cycle 39)
+- PPID chain 매칭 (cycle 33, 다중 claude 안전)
+
+**관련 spec/plan**:
+- plan: `docs/superpowers/plans/2026-05-04-develop-cycle-self-progression-impl.md` (cycle 38, 8 PR 단위)
+- spec_v3: `docs/superpowers/specs/2026-05-04-spec-v3-develop-cycle-self-progression-design.md` (cycle 37, dashboard)
+- spec v0~v2: cycle 34~36 박제
+
+**남은 본 메인 영역 (cycle 42~46)**:
+- cycle 42 PR 4 = migration 023 develop_cycle_logs (R5 prod push)
+- cycle 43 PR 5 = retro 안 Supabase INSERT/UPSERT
+- cycle 44~45 PR 6+7 = `/debug/develop-cycle` dashboard
+- cycle 46 = end-to-end 자동 fire 실측 검증 (verify-only)
 
 ### ⭐ AdSense fix-first batch (2026-04-28 D7=A 결정 후)
 
