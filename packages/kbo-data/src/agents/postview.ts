@@ -40,7 +40,7 @@ const ZERO_WEIGHT_FACTOR_LABELS_KO: Record<string, string> = {
 
 export function getZeroWeightFactorPromptList(): string {
   return Object.entries(DEFAULT_WEIGHTS)
-    .filter(([, w]) => w === 0)
+    .filter(([, w]) => (w as number) === 0)
     .map(([k]) => {
       const ko = ZERO_WEIGHT_FACTOR_LABELS_KO[k];
       return ko ? `${k} (${ko})` : k;

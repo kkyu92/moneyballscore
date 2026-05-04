@@ -72,36 +72,43 @@ export type GameStatus = 'scheduled' | 'live' | 'final' | 'postponed';
 // 포스트 타입
 export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 
-// 예측 엔진 가중치 v1.6 (10팩터 구조 유지, 3 feature 0 처리 + 재분배)
+// 예측 엔진 가중치 v1.7-revert (= v1.5 가중치 복원)
 //
-// 2026-04-21 Wayback logistic 백테스트 (Train 2023 N=722 / Test 2024 N=727):
-//   wobaDiff*20   coef 0.548 z=2.10 ⭐ p<0.05 (유일 개별 유의)
-//   fipDiff/2     coef 0.301 z=0.72 borderline 양성 (방향 정확)
-//   sfrDiff/20    coef 0.101 z=0.37 null-like (CI [-0.44, 0.64])
-//   h2hShift      coef -0.009 z=-0.02 null-like (kH2h sweep monotone worsening)
-//   parkShift/10  coef -0.022 z=-0.13 null-like (CI [-0.34, 0.30])
+// 2026-05-04 cycle 17 회귀 결정 — prod 측정이 Wayback 백테스트와 정반대.
 //
-// 조정:
-//   sfr/head_to_head/park_factor → 0 (null-like 3종 제거)
-//   lineup_woba +0.05 (유일 유의 feature 강화)
-//   sp_fip     +0.04 (방향 맞는 FIP 신호 강화)
-//   elo        +0.05 (종합 지표, wOBA/FIP 신호 흡수 관측)
-// 합계 0.85 보존.
+// v1.5 vs v1.6 prod 측정 (cycle 14, N=62, 2026-04-22 ~ 2026-05-03):
+//   v1.5: N=16  hits=12  acc=75.00%  Brier=0.2143  CI95=[53.78, 96.22]
+//   v1.6: N=46  hits=17  acc=36.96%  Brier=0.2559  CI95=[23.01, 50.91]
+//   격차 38.04pp / CI95 비중첩 (margin 0.03pp) / Brier +0.0416 악화
+//   v1.6 high-confidence (≥65%) N=2 둘 다 wrong → calibration 압축 + 망김
 //
-// 한계: 1 시즌 train, 1 시즌 test. Test feature 7-feature Brier 0.24661
-//   (vs 4-feature 0.24980, Δ-0.00319, coin_flip 0.25000). 수치 이식보다
-//   방향성 수정에 가중치.
+// 시즌 효과 통제 (cycle 16, 4월 only):
+//   4월 v1.5: N=16  acc=75.00%
+//   4월 v1.6: N=31  acc=35.48%
+//   격차 39.52pp (전체 38.04pp 보다 +1.48pp 더 큼) → H3 (시즌 초 noise) 반증
+//
+// LLM 갭 통제 (cycle 15 PR #54):
+//   가중치 0% factor LLM SYSTEM_PROMPT 추론 금지 박제 후에도 prod 격차 그대로
+//
+// 결론: v1.6 의 Wayback 백테스트 학습 (lineup_woba 유의미) prod 적용 시 정반대.
+// 1 시즌 train / 1 시즌 test 한계 + 시점 distribution shift 의심. 데이터로만
+// 이야기 — 측정된 우수 가중치 (v1.5) 로 회귀. cycle 18+ Wayback 신뢰성 재검토.
+//
+// v1.5 가중치 (CLAUDE.md § 예측 엔진 가중치):
+//   선발FIP 15% / 선발xFIP 5% / 타선wOBA 15% / 불펜FIP 10% / 최근폼 10%
+//   WAR 8% / 상대전적 5% / 구장보정 4% / Elo 8% / 수비SFR 5%
+// 합계 0.85 (v1.6 동일).
 export const DEFAULT_WEIGHTS = {
-  sp_fip: 0.19,
+  sp_fip: 0.15,
   sp_xfip: 0.05,
-  lineup_woba: 0.20,
+  lineup_woba: 0.15,
   bullpen_fip: 0.10,
   recent_form: 0.10,
   war: 0.08,
-  head_to_head: 0.00,
-  park_factor: 0.00,
-  elo: 0.13,
-  sfr: 0.00,
+  head_to_head: 0.05,
+  park_factor: 0.04,
+  elo: 0.08,
+  sfr: 0.05,
 } as const;
 
 export type WeightKey = keyof typeof DEFAULT_WEIGHTS;

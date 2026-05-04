@@ -143,7 +143,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         prediction_type: 'in_game',
         predicted_winner: teamMap[predictedWinner],
         confidence: adjustedConfidence,
-        model_version: 'v1.6-live',
+        model_version: 'v1.7-revert-live',
         reasoning: {
           preGameHomeProb,
           adjustedHomeProb,

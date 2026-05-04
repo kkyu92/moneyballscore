@@ -9,7 +9,7 @@ import {
 import { SYSTEM_PROMPT as JUDGE_PREGAME_SYSTEM } from '../agents/judge-agent';
 
 describe('isWeightedFactor', () => {
-  it('가중치 > 0% factor (sp_fip / lineup_woba / bullpen_fip / recent_form / war / sp_xfip / elo) 통과', () => {
+  it('v1.7-revert: 모든 active factor (10종 + home_/away_ prefix 포함) 통과', () => {
     expect(isWeightedFactor('sp_fip')).toBe(true);
     expect(isWeightedFactor('home_lineup_woba')).toBe(true);
     expect(isWeightedFactor('away_bullpen_fip')).toBe(true);
@@ -17,33 +17,29 @@ describe('isWeightedFactor', () => {
     expect(isWeightedFactor('war')).toBe(true);
     expect(isWeightedFactor('home_sp_xfip')).toBe(true);
     expect(isWeightedFactor('elo')).toBe(true);
+    expect(isWeightedFactor('head_to_head')).toBe(true);
+    expect(isWeightedFactor('home_park_factor')).toBe(true);
+    expect(isWeightedFactor('away_sfr')).toBe(true);
   });
 
-  it('가중치 0% factor (head_to_head / park_factor / sfr) 차단', () => {
-    expect(isWeightedFactor('head_to_head')).toBe(false);
-    expect(isWeightedFactor('home_head_to_head')).toBe(false);
-    expect(isWeightedFactor('park_factor')).toBe(false);
-    expect(isWeightedFactor('sfr')).toBe(false);
-    expect(isWeightedFactor('away_sfr')).toBe(false);
-  });
-
-  it('알려지지 않은 factor 차단', () => {
+  it('알려지지 않은 factor 차단 (helper 메커니즘 자체 — 가중치 0 또는 미정의 시 차단)', () => {
     expect(isWeightedFactor('unknown')).toBe(false);
     expect(isWeightedFactor('')).toBe(false);
   });
 });
 
 describe('deriveFactorErrorsFallback', () => {
-  it('홈승인데 가중치 factor 가 away 쪽 편향 → 그 factor 지목', () => {
+  it('홈승인데 가중치 factor 가 away 쪽 편향 → 그 factor 지목 (v1.7-revert: park_factor 도 가중치 > 0)', () => {
     const factors = {
-      home_sp_fip: 0.4, // 원정 유리 편향, 하지만 홈승 → wrong (weighted)
+      home_sp_fip: 0.4, // 원정 유리 편향, 홈승 → wrong (weighted)
       home_lineup_woba: 0.6, // 홈 유리, 홈승 → correct
-      park_factor: 0.35, // 원정 유리 편향이지만 가중치 0% → 차단
+      park_factor: 0.35, // 원정 유리 편향, 홈승 → wrong (v1.5 회귀 후 가중치 4% > 0 → 후보)
     };
     const errors = deriveFactorErrorsFallback(factors, true);
-    expect(errors).toHaveLength(1);
-    expect(errors[0].factor).toBe('home_sp_fip');
-    expect(errors[0].predictedBias).toBeCloseTo(-0.1, 2);
+    expect(errors).toHaveLength(2);
+    const factorNames = errors.map((e) => e.factor);
+    expect(factorNames).toContain('home_sp_fip');
+    expect(factorNames).toContain('park_factor');
   });
 
   it('원정승인데 factor가 home 쪽 편향 → 그 factor 지목', () => {
@@ -67,11 +63,10 @@ describe('deriveFactorErrorsFallback', () => {
     expect(errors).toEqual([]);
   });
 
-  it('가중치 0% factor 만 들어와도 빈 배열 (head_to_head / sfr / park_factor 차단)', () => {
+  it('알려지지 않은 factor 만 들어오면 빈 배열 (helper 메커니즘: 미정의 차단)', () => {
     const factors = {
-      home_head_to_head: 0.2,
-      away_sfr: 0.7,
-      park_factor: 0.3,
+      home_unknown_a: 0.2,
+      unknown_b: 0.7,
     };
     const errors = deriveFactorErrorsFallback(factors, true);
     expect(errors).toEqual([]);
@@ -102,21 +97,17 @@ describe('deriveFactorErrorsFallback', () => {
   });
 });
 
-// cycle 15 — prompt-level constraint 검증.
+// cycle 15 — prompt-level constraint dynamic injection 검증.
 // cycle 12 의 사후 filter (factorErrors 배열) 는 LLM reasoning 본문에서 0% factor 거론을 막지 못함.
-// 본 테스트는 3 prompt (postview judge / postview team / pre_game judge) 모두 가중치 0% factor 명시 + 사용 금지 규칙 박제 확인.
-describe('getZeroWeightFactorPromptList', () => {
-  it('DEFAULT_WEIGHTS 0% factor 모두 (head_to_head/park_factor/sfr) 한국어 라벨 포함', () => {
+// cycle 15 가 3 prompt 에 `getZeroWeightFactorPromptList()` 동적 주입 → DEFAULT_WEIGHTS 변경 시 자동 동기화.
+// cycle 17 v1.5 회귀 후엔 모든 factor 가중치 > 0 → helper 빈 문자열 반환 → prompt constraint vacuous.
+describe('getZeroWeightFactorPromptList (cycle 15 helper)', () => {
+  it('v1.7-revert (= v1.5): 모든 factor 가중치 > 0 — 빈 문자열 반환', () => {
     const list = getZeroWeightFactorPromptList();
-    expect(list).toContain('head_to_head');
-    expect(list).toContain('상대전적');
-    expect(list).toContain('park_factor');
-    expect(list).toContain('구장보정');
-    expect(list).toContain('sfr');
-    expect(list).toContain('수비SFR');
+    expect(list).toBe('');
   });
 
-  it('가중치 > 0 factor (sp_fip 등) 미포함', () => {
+  it('어떤 active factor (sp_fip / lineup_woba / elo) 도 미포함', () => {
     const list = getZeroWeightFactorPromptList();
     expect(list).not.toContain('sp_fip');
     expect(list).not.toContain('lineup_woba');
@@ -124,28 +115,19 @@ describe('getZeroWeightFactorPromptList', () => {
   });
 });
 
-describe('LLM SYSTEM_PROMPT 가중치 0% factor 추론 금지 박제 (cycle 15)', () => {
-  it('JUDGE_POSTVIEW_SYSTEM: 0% factor 3종 + 사용 금지 규칙 명시', () => {
-    expect(JUDGE_POSTVIEW_SYSTEM).toContain('head_to_head');
-    expect(JUDGE_POSTVIEW_SYSTEM).toContain('park_factor');
-    expect(JUDGE_POSTVIEW_SYSTEM).toContain('sfr');
+describe('LLM SYSTEM_PROMPT dynamic injection 메커니즘 박제 (cycle 15)', () => {
+  it('JUDGE_POSTVIEW_SYSTEM: dynamic injection 자리 + 정량 모델 컨텍스트 박제', () => {
     expect(JUDGE_POSTVIEW_SYSTEM).toContain('가중치 0%');
     expect(JUDGE_POSTVIEW_SYSTEM).toContain('사용 금지');
   });
 
-  it('TEAM_POSTVIEW_SYSTEM: 0% factor 3종 + keyFactor 지목 금지 명시', () => {
-    expect(TEAM_POSTVIEW_SYSTEM).toContain('head_to_head');
-    expect(TEAM_POSTVIEW_SYSTEM).toContain('park_factor');
-    expect(TEAM_POSTVIEW_SYSTEM).toContain('sfr');
+  it('TEAM_POSTVIEW_SYSTEM: dynamic injection 자리 + keyFactor 지목 금지 박제', () => {
     expect(TEAM_POSTVIEW_SYSTEM).toContain('가중치 0%');
     expect(TEAM_POSTVIEW_SYSTEM).toContain('keyFactor');
     expect(TEAM_POSTVIEW_SYSTEM).toContain('금지');
   });
 
-  it('JUDGE_PREGAME (judge-agent SYSTEM_PROMPT): 0% factor 3종 + 사용 금지 명시', () => {
-    expect(JUDGE_PREGAME_SYSTEM).toContain('head_to_head');
-    expect(JUDGE_PREGAME_SYSTEM).toContain('park_factor');
-    expect(JUDGE_PREGAME_SYSTEM).toContain('sfr');
+  it('JUDGE_PREGAME (judge-agent SYSTEM_PROMPT): dynamic injection 자리 + 사용 금지 박제', () => {
     expect(JUDGE_PREGAME_SYSTEM).toContain('가중치 0%');
     expect(JUDGE_PREGAME_SYSTEM).toContain('사용 금지');
   });
