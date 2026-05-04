@@ -30,7 +30,8 @@ export type ViolationType =
   | 'hallucinated_number'
   | 'invented_player_name'
   | 'banned_phrase'
-  | 'unclassified_claim';
+  | 'unclassified_claim'
+  | 'low_weight_factor_emphasis';
 
 export interface Violation {
   type: ViolationType;
@@ -519,6 +520,65 @@ export function maskViolatedReasoning(
   }
 
   return masked;
+}
+
+// ============================================
+// P4 — validateFactorAttribution (cycle 29, spec § 4.4)
+// ============================================
+//
+// LLM postview 가 지목한 factorErrors 의 factor 가중치를 정량 모델과 cross-check.
+// LLM 이 low-weight factor (가중치 < threshold) 를 결과 결정 요인으로 강조할 경우 warn.
+// spec § 4.4 의 "±10pp 격차" 추출은 reasoning 자유 텍스트 regex 정확도 한계로 보류 —
+// 대신 factorErrors 배열 (구조화된 LLM 출력) 의 factor 가중치 cross-check 로 대응.
+
+export interface FactorAttributionInput {
+  factor: string;
+  predictedBias: number;
+}
+
+export interface FactorAttributionResult {
+  ok: boolean;
+  violations: Violation[];
+}
+
+export function validateFactorAttribution(
+  factorErrors: FactorAttributionInput[],
+  weights: Record<string, number>,
+  options?: { lowWeightThreshold?: number }
+): FactorAttributionResult {
+  const threshold = options?.lowWeightThreshold ?? 0.08;
+  const violations: Violation[] = [];
+
+  for (const fe of factorErrors) {
+    const base = fe.factor.replace(/^(home_|away_)/, '');
+    const weight = weights[base];
+    if (typeof weight !== 'number') continue;
+    if (weight === 0) continue;
+    if (weight < threshold) {
+      violations.push({
+        type: 'low_weight_factor_emphasis',
+        severity: 'warn',
+        detail: `factor=${fe.factor} weight=${Math.round(weight * 100)}% (threshold ${Math.round(threshold * 100)}%)`,
+      });
+    }
+  }
+
+  const hardCount = violations.filter((v) => v.severity === 'hard').length;
+  const warnCount = violations.filter((v) => v.severity === 'warn').length;
+  const ok = hardCount <= HARD_LIMIT && warnCount <= WARN_LIMIT;
+  return { ok, violations };
+}
+
+const ATTRIBUTION_WARNING_PREFIX = '[검증 주의: 모델 가중치 낮은 factor 강조]';
+
+export function annotateLowWeightFactorAttribution(
+  reasoning: string,
+  violations: Violation[]
+): string {
+  const hits = violations.filter((v) => v.type === 'low_weight_factor_emphasis');
+  if (hits.length === 0) return reasoning;
+  const factors = hits.map((v) => v.detail).join(' / ');
+  return `${reasoning}\n\n${ATTRIBUTION_WARNING_PREFIX} ${factors}`;
 }
 
 // ============================================

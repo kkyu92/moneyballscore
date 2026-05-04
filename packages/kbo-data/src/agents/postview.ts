@@ -15,6 +15,11 @@
 import { KBO_TEAMS, DEFAULT_WEIGHTS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
+import {
+  validateFactorAttribution,
+  annotateLowWeightFactorAttribution,
+  notifyValidationViolations,
+} from './validator';
 import type { GameContext, AgentResult } from './types';
 
 // 가중치 > 0% 인 factor 만 factorErrors 후보 (cycle 11: head_to_head/sfr 가중치 0% 가 LLM reasoning 의 70% 차지하던 silent drift 차단)
@@ -341,9 +346,23 @@ export async function runPostview(
     reasoning: '사후 분석 LLM 실패. factor 편향 기반 자동 fallback.',
   };
 
+  // cycle 29 (P4) — factor attribution cross-check. low-weight factor 를 결과 요인으로 강조 시 warn.
+  const attribution = validateFactorAttribution(
+    judgeData.factorErrors,
+    DEFAULT_WEIGHTS as Record<string, number>
+  );
+  void notifyValidationViolations(
+    { ok: attribution.ok, violations: attribution.violations },
+    { agent: 'judge', gameId: context.game.externalGameId ?? null }
+  );
+  const annotatedReasoning = annotateLowWeightFactorAttribution(
+    judgeData.reasoning,
+    attribution.violations
+  );
+
   console.log(
     `[Postview] ${awayTeam}@${homeTeam} ${actual.homeScore}:${actual.awayScore}: ` +
-    `${judgeData.factorErrors.length} factorErrors [${totalTokens} tokens]`
+    `${judgeData.factorErrors.length} factorErrors / ${attribution.violations.length} attribution warns [${totalTokens} tokens]`
   );
 
   return {
@@ -352,7 +371,7 @@ export async function runPostview(
     homePostview: homePv,
     awayPostview: awayPv,
     factorErrors: judgeData.factorErrors,
-    judgeReasoning: judgeData.reasoning,
+    judgeReasoning: annotatedReasoning,
     totalTokens,
     totalDurationMs: Date.now() - startTime,
   };
