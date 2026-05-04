@@ -156,24 +156,15 @@ async function main() {
   const Xte8 = test.features.map(vectorizeV3);
 
   console.log('\n[3/4] Logistic 학습 — base 4 vs v3 8 feature…');
-  const lambdas = [0, 0.001, 0.01, 0.1];
-  function best(X: number[][], y: number[], Xte: number[][], yte: number[]) {
-    let b: { lambda: number; model: ReturnType<typeof trainLogistic> } | null = null;
-    let bBrier = Infinity;
-    for (const lambda of lambdas) {
-      const m = trainLogistic(X, y, { lambda, lr: 0.3, maxIter: 8000, tol: 1e-10 });
-      const p = predict(m, Xte);
-      const teB = computeMetrics(p, yte).brier;
-      if (teB < bBrier) {
-        b = { lambda, model: m };
-        bBrier = teB;
-      }
-    }
-    if (!b) throw new Error('no fit');
-    return b;
-  }
-  const fit4 = best(Xtr4, train.outcomes, Xte4, test.outcomes);
-  const fit8 = best(Xtr8, train.outcomes, Xte8, test.outcomes);
+  // H6 fix (cycle 23): best-of-lambda by test Brier = test-set hyperparam tuning (double-dip).
+  // cycle 22 bootstrap-ci 검증 best λ=0.01 — fix LAMBDA=0.01.
+  const LAMBDA = 0.01;
+  const fit = (X: number[][], y: number[]) => ({
+    lambda: LAMBDA,
+    model: trainLogistic(X, y, { lambda: LAMBDA, lr: 0.3, maxIter: 8000, tol: 1e-10 }),
+  });
+  const fit4 = fit(Xtr4, train.outcomes);
+  const fit8 = fit(Xtr8, train.outcomes);
   console.log(`  base 4-feature: λ=${fit4.lambda}  iter=${fit4.model.iterations}`);
   console.log(`  v3 8-feature:   λ=${fit8.lambda}  iter=${fit8.model.iterations}`);
 

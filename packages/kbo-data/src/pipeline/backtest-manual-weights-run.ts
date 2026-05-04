@@ -215,30 +215,14 @@ async function main() {
   const Xtr7 = train.features.map(vectorizeExtended);
   const Xte7 = test.features.map(vectorizeExtended);
 
-  // wayback-run.ts 와 동일 best-of-lambda (test set 자체 selection — H6 알려진 한계).
-  const lambdas = [0, 0.001, 0.01, 0.1];
-  function best(X: number[][], y: number[], Xte: number[][], yte: number[]) {
-    let bModel: ReturnType<typeof trainLogistic> | null = null;
-    let bLambda = -1;
-    let bBrier = Infinity;
-    for (const lambda of lambdas) {
-      const m = trainLogistic(X, y, { lambda, lr: 0.3, maxIter: 8000, tol: 1e-10 });
-      const p = logisticPredict(m, Xte);
-      const teB = computeMetrics(p, yte).brier;
-      if (teB < bBrier) {
-        bModel = m;
-        bLambda = lambda;
-        bBrier = teB;
-      }
-    }
-    if (!bModel) throw new Error('no fit');
-    return { model: bModel, lambda: bLambda };
-  }
-  const fit4 = best(Xtr4, train.outcomes, Xte4, test.outcomes);
-  const fit7 = best(Xtr7, train.outcomes, Xte7, test.outcomes);
-  const log4Pred = logisticPredict(fit4.model, Xte4);
-  const log7Pred = logisticPredict(fit7.model, Xte7);
-  console.log(`  4-feature: λ=${fit4.lambda}, 7-feature: λ=${fit7.lambda}`);
+  // H6 fix (cycle 23): best-of-lambda by test Brier = test-set hyperparam tuning (double-dip).
+  // cycle 22 bootstrap-ci 검증 결과 4f/7f 모두 best λ=0.01 → fix LAMBDA=0.01 (결과 변경 없음).
+  const LAMBDA = 0.01;
+  const fit = (X: number[][], y: number[]) =>
+    trainLogistic(X, y, { lambda: LAMBDA, lr: 0.3, maxIter: 8000, tol: 1e-10 });
+  const log4Pred = logisticPredict(fit(Xtr4, train.outcomes), Xte4);
+  const log7Pred = logisticPredict(fit(Xtr7, train.outcomes), Xte7);
+  console.log(`  4-feature: λ=${LAMBDA}, 7-feature: λ=${LAMBDA}`);
 
   console.log('\n=== 결과 비교 (Test 2024 N=' + test.outcomes.length + ') ===\n');
   const coinPred = new Array(test.outcomes.length).fill(0.5);
