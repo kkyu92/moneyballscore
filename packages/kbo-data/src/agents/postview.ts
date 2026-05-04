@@ -12,10 +12,22 @@
  * 기존 `pre_game` row는 절대 update 금지 (이력 보존).
  */
 
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, DEFAULT_WEIGHTS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import type { GameContext, AgentResult } from './types';
+
+// 가중치 > 0% 인 factor 만 factorErrors 후보 (cycle 11: head_to_head/sfr 가중치 0% 가 LLM reasoning 의 70% 차지하던 silent drift 차단)
+const WEIGHTED_FACTOR_BASES = new Set(
+  Object.entries(DEFAULT_WEIGHTS)
+    .filter(([, w]) => w > 0)
+    .map(([k]) => k)
+);
+
+export function isWeightedFactor(factor: string): boolean {
+  const base = factor.replace(/^(home_|away_)/, '');
+  return WEIGHTED_FACTOR_BASES.has(base);
+}
 
 // ============================================
 // 타입
@@ -220,7 +232,6 @@ function parseJudgePostview(text: string): { factorErrors: FactorError[]; reason
 
     const factorErrors: FactorError[] = Array.isArray(parsed.factorErrors)
       ? parsed.factorErrors
-          .slice(0, 3)
           .map((fe: unknown) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const f = fe as any;
@@ -230,7 +241,8 @@ function parseJudgePostview(text: string): { factorErrors: FactorError[]; reason
               diagnosis: String(f.diagnosis || '').slice(0, 200),
             };
           })
-          .filter((fe: FactorError) => fe.factor.length > 0)
+          .filter((fe: FactorError) => fe.factor.length > 0 && isWeightedFactor(fe.factor))
+          .slice(0, 3)
       : [];
 
     return {
@@ -328,10 +340,12 @@ export function deriveFactorErrorsFallback(
   factors: Record<string, number>,
   homeWon: boolean
 ): FactorError[] {
-  const entries = Object.entries(factors).map(([k, v]) => ({
-    factor: k,
-    bias: v - 0.5,
-  }));
+  const entries = Object.entries(factors)
+    .filter(([k]) => isWeightedFactor(k))
+    .map(([k, v]) => ({
+      factor: k,
+      bias: v - 0.5,
+    }));
 
   // 결과와 반대 방향 편향만 (홈승인데 <0.5 편향, 또는 홈패인데 >0.5 편향)
   const wrong = entries
