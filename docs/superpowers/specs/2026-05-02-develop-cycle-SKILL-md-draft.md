@@ -330,6 +330,34 @@ EOF
 - 기존 차원 사이클 = `dimension-cycle` chain 으로 등록. 첫 시범 fire (PR #31 site) / 2nd fire (model n47) 형태와 동일
 - zero-touch signal file 포맷 변경 X
 - handoff carry-over 와 cycle_state 책임 분리
+- 기존 6 chain (fix-incident / explore-idea / polish-ui / review-code / operational-analysis / dimension-cycle) trigger / 시퀀스 변경 X
+- 기존 lesson commit prefix (`lesson:` / `policy:` / `feedback:` / `memory:`) 변경 X. body subtype 라인 추가만
+- `submit-lesson.yml` workflow 변경 X
+- watch.sh 변경 X
+- R7 자동 머지 정책 적용 (`skill-evolution` 포함)
+
+## 비용 가드
+
+| 비용 종류 | 정책 |
+|---|---|
+| Claude Plan token (Max 요금제) | OK — 효율 신경. 메타 스킬 발화 시 토큰 모니터, fail 시 retro-only fallback |
+| 외부 서비스 결제 (Domain / 유료 SaaS / AdSense paid) | 자율 결제 절대 금지. carry-over 알림만 |
+| 운영 인프라 한도 (Vercel free / Supabase free / Cloudflare Workers free) | 자율 monitor + 자율 upgrade 금지. tier 도달 시 cycle outcome=fail + `meta-pattern` dispatch |
+| 사용자 시간 | 본 메인이 사용자에게 "이거 해주세요" 자율 요청 금지. carry-over 박제 채널 (`memory:` subtype=needs) 만 |
+
+비용 가드 위반 차단 메커니즘:
+- 본 SKILL 안 외부 paid API 호출 명령 박제 X (코드 path 자체 X)
+- 본 SKILL 안 사용자 직접 요청 명령 박제 X (carry-over 채널만)
+
+## 마이그레이션 path (단계적 발화)
+
+| 단계 | 시점 | 발화 |
+|---|---|---|
+| 0 | 본 spec 머지 직후 | chain pool 6 → 9 즉시. 첫 사이클부터 `cycle-retro` commit 강제 |
+| 1 | N ≥ 5 사이클 | `meta-pattern` / `chain-evolution` dispatch 가능 (자율 판단) |
+| 2 | N ≥ 20 사이클 | `skill-evolution` 첫 발화 가능 (chain 0회 발화 trigger) |
+| 3 | N = 50 milestone | `skill-evolution` 자동 발화 (50 milestone trigger) |
+| 4 | N ≥ 100 누적 | 본 SKILL 가 자가 진화 N회 누적. chain pool 자체 변경 가능 |
 
 ## 컨텍스트 % 자가 판단 무시 (D-2 이후)
 
