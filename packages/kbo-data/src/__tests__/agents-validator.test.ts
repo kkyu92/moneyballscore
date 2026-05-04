@@ -11,6 +11,8 @@ import {
   validateJudgeReasoning,
   maskViolatedReasoning,
   notifyValidationViolations,
+  validateFactorAttribution,
+  annotateLowWeightFactorAttribution,
   HARD_LIMIT,
   WARN_LIMIT,
   WARN_LIMIT_LENIENT,
@@ -533,5 +535,131 @@ describe('notifyValidationViolations', () => {
     await expect(
       notifyValidationViolations(result, { agent: 'team', gameId: null, backend: 'ollama' })
     ).resolves.toBeUndefined();
+  });
+});
+
+// ============================================
+// P4 — validateFactorAttribution (cycle 29, spec § 4.4)
+// ============================================
+describe('validateFactorAttribution', () => {
+  const weights = {
+    sp_fip: 0.15,
+    sp_xfip: 0.05,
+    lineup_woba: 0.15,
+    bullpen_fip: 0.10,
+    recent_form: 0.10,
+    war: 0.08,
+    head_to_head: 0.05,
+    park_factor: 0.04,
+    elo: 0.08,
+    sfr: 0.05,
+  };
+
+  it('빈 factorErrors → ok=true + 위반 0건', () => {
+    const result = validateFactorAttribution([], weights);
+    expect(result.ok).toBe(true);
+    expect(result.violations).toHaveLength(0);
+  });
+
+  it('high-weight factor (sp_fip 15%) → 위반 X', () => {
+    const result = validateFactorAttribution(
+      [{ factor: 'home_sp_fip', predictedBias: 0.08 }],
+      weights
+    );
+    expect(result.violations).toHaveLength(0);
+  });
+
+  it('low-weight factor (head_to_head 5%) → warn', () => {
+    const result = validateFactorAttribution(
+      [{ factor: 'home_head_to_head', predictedBias: 0.05 }],
+      weights
+    );
+    expect(result.violations).toHaveLength(1);
+    expect(result.violations[0].type).toBe('low_weight_factor_emphasis');
+    expect(result.violations[0].severity).toBe('warn');
+    expect(result.violations[0].detail).toContain('5%');
+  });
+
+  it('low-weight factor 1건 → ok=true (WARN_LIMIT=2 이하)', () => {
+    const result = validateFactorAttribution(
+      [{ factor: 'home_park_factor', predictedBias: 0.03 }],
+      weights
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it('low-weight factor 3건 → ok=false (warn limit 초과)', () => {
+    const result = validateFactorAttribution(
+      [
+        { factor: 'home_head_to_head', predictedBias: 0.05 },
+        { factor: 'away_park_factor', predictedBias: -0.04 },
+        { factor: 'home_sfr', predictedBias: 0.02 },
+      ],
+      weights
+    );
+    expect(result.ok).toBe(false);
+    expect(result.violations).toHaveLength(3);
+  });
+
+  it('threshold 0% factor (LowWeightThreshold 보다 정확히 0) → skip', () => {
+    const zeroWeight = { ...weights, head_to_head: 0 };
+    const result = validateFactorAttribution(
+      [{ factor: 'home_head_to_head', predictedBias: 0.05 }],
+      zeroWeight
+    );
+    expect(result.violations).toHaveLength(0);
+  });
+
+  it('알 수 없는 factor → skip', () => {
+    const result = validateFactorAttribution(
+      [{ factor: 'home_unknown_factor', predictedBias: 0.05 }],
+      weights
+    );
+    expect(result.violations).toHaveLength(0);
+  });
+
+  it('threshold 옵션 override', () => {
+    const result = validateFactorAttribution(
+      [{ factor: 'home_recent_form', predictedBias: 0.05 }],
+      weights,
+      { lowWeightThreshold: 0.15 }
+    );
+    expect(result.violations).toHaveLength(1);
+  });
+});
+
+// ============================================
+// P4 — annotateLowWeightFactorAttribution
+// ============================================
+describe('annotateLowWeightFactorAttribution', () => {
+  it('위반 0건 → 원본 reasoning', () => {
+    const reasoning = '경기는 홈팀 우세였다.';
+    expect(annotateLowWeightFactorAttribution(reasoning, [])).toBe(reasoning);
+  });
+
+  it('low-weight 위반 → reasoning 끝에 주의 박제', () => {
+    const reasoning = '경기는 홈팀 우세였다.';
+    const annotated = annotateLowWeightFactorAttribution(reasoning, [
+      {
+        type: 'low_weight_factor_emphasis',
+        severity: 'warn',
+        detail: 'factor=home_head_to_head weight=5% (threshold 8%)',
+      },
+    ]);
+    expect(annotated).toContain('경기는 홈팀 우세였다.');
+    expect(annotated).toContain('[검증 주의: 모델 가중치 낮은 factor 강조]');
+    expect(annotated).toContain('home_head_to_head');
+  });
+
+  it('다른 type 위반 → 원본 유지 (factor attribution 만 처리)', () => {
+    const reasoning = 'reasoning text';
+    const annotated = annotateLowWeightFactorAttribution(reasoning, [
+      {
+        type: 'hallucinated_number',
+        severity: 'hard',
+        detail: '환각',
+      },
+    ]);
+    expect(annotated).toBe(reasoning);
   });
 });
