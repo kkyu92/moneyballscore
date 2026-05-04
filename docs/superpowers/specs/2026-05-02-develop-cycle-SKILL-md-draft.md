@@ -237,6 +237,46 @@ chain 결과를 4 prefix (feat/fix/feedback/policy/lesson 등) 따라 commit + b
 | git commit | 변경 단위 | git history |
 | TODOS.md | 사용자 가시 | repo root |
 
+### skill-evolution trigger 자동 평가 (매 사이클 retro 마지막 step)
+
+cycle_state JSON write 후, dispatch 채널 commit 박제 후, signal file 작성 직전에 본 메인이 다음 trigger 5개 중 하나라도 충족 여부 자가 평가:
+
+| # | 조건 | 평가 명령 |
+|---|---|---|
+| 1 | `chain-evolution` subtype commit 5건 누적 (전체 git history) | `git log --all --grep "subtype: chain-evolution" --oneline \| wc -l` ≥ 5 |
+| 2 | 같은 chain 5회 연속 outcome=fail | 직전 5 cycle_state JSON read 후 `chain_selected` + `outcome=fail` 동일 5회 |
+| 3 | `cycle_n % 50 == 0` (milestone) | $CYCLE_N % 50 == 0 |
+| 4 | `meta-pattern` body 에 "SKILL 갱신 필요" 명시 | 본 사이클의 `meta-pattern` commit body grep "SKILL 갱신 필요" |
+| 5 | 직전 20 사이클 동안 chain pool 의 chain 1개가 0회 발화 | 직전 20 cycle_state JSON 의 `chain_selected` distinct count vs chain pool 9개 비교 |
+
+**충족 시 동작**: signal file 의 next_n 변경 X (정상 진행). 다음 사이클 진단 단계 첫 step 에서 본 메인이 `~/.develop-cycle/skill-evolution-pending` 마커 파일 존재 확인 → 존재 시 `skill-evolution` chain 강제 발화 (자율 X).
+
+**충족 X**: 어떤 trigger 도 충족 안 됐으면 정상 진행 (signal next_n 박제 + zero-touch 자동 fire).
+
+**충족 시 마커 박제**:
+
+```bash
+echo "$CYCLE_N: $(git log -1 --format=%H)" > ~/.develop-cycle/skill-evolution-pending
+```
+
+다음 사이클이 본 마커 발견 시 = `skill-evolution` chain 자동 발화. chain 끝 (= success 또는 retro-only) 시 마커 삭제 (`rm ~/.develop-cycle/skill-evolution-pending`).
+
+### 다음 사이클이 skill-evolution 강제 발화 (마커 발견 시)
+
+진단 단계 첫 step:
+
+```bash
+if [ -f ~/.develop-cycle/skill-evolution-pending ]; then
+  echo "skill-evolution 자동 발화 — 마커: $(cat ~/.develop-cycle/skill-evolution-pending)"
+  # chain_selected = "skill-evolution" 자동 결정 (메인 자율 X)
+  # 시퀀스: trigger 증거 수집 → 갱신 영역 list → /office-hours → spec write
+  #         → ~/.claude/skills/develop-cycle/SKILL.md Edit + draft Edit
+  #         → pnpm test smoke → commit feat(skill): → PR + R7
+  #         → meta-pattern dispatch (변경 diff)
+  # chain 끝: rm ~/.develop-cycle/skill-evolution-pending
+fi
+```
+
 ### zero-touch signal file 작성
 
 회고 박제 후 zero-touch signal file 작성 (변경 X, 기존 형식 그대로):
