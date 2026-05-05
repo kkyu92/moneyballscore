@@ -505,6 +505,20 @@ describe('maskViolatedReasoning', () => {
     expect(masked).toContain('결론: LG 우세');
     expect(masked).toContain('[검증실패:환각숫자]');
   });
+
+  // cycle 76 — 6개 이상 환각 시 silent leak 차단 회귀 가드.
+  // detail 이 mask 함수 source 라 slice(0, 5) 는 6번째부터 leak 가능했음.
+  it('환각 숫자 6개 이상 → 모두 mask (5개 limit silent leak 차단)', () => {
+    const ctx = makeContext();
+    const reasoning =
+      'FIP 9.91 9.92 9.93 9.94 9.95 9.96 9.97 우위.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    const masked = maskViolatedReasoning(reasoning, result.violations);
+    for (const num of ['9.91', '9.92', '9.93', '9.94', '9.95', '9.96', '9.97']) {
+      expect(masked).not.toContain(num);
+    }
+    expect(masked).toContain('[검증실패:환각숫자]');
+  });
 });
 
 // ============================================
