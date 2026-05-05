@@ -217,7 +217,11 @@ export async function runDailyPipeline(
       if ((memCount ?? 0) > 0 || (logCount ?? 0) > 0) {
         console.log(`[Pipeline] Retention cleanup: agent_memories=${memCount ?? 0}, validator_logs=${logCount ?? 0}`);
       }
-    } catch (e) { console.warn('[Pipeline] Retention cleanup failed:', e); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn('[Pipeline] Retention cleanup failed:', msg);
+      errors.push(`retention cleanup: ${msg}`);
+    }
 
     try {
       const yesterday = getYesterdayKST(targetDate);
@@ -225,7 +229,11 @@ export async function runDailyPipeline(
       if (cleanup.processed > 0) {
         console.log(`[Pipeline] Morning postview cleanup: ${yesterday} processed=${cleanup.processed}`);
       }
-    } catch (e) { console.warn('[Pipeline] Morning postview cleanup failed:', e); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn('[Pipeline] Morning postview cleanup failed:', msg);
+      errors.push(`morning postview cleanup: ${msg}`);
+    }
   }
 
   // fetchGames
