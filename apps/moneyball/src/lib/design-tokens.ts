@@ -34,4 +34,11 @@ export const neutral = {
   white: "#ffffff",
 } as const;
 
+// DESIGN.md "다크 모드 Surface: #0c0e0d (거의 블랙, 뉴트럴)" / "Card: #151d18 (미세한 그린 틴트)"
+export const surface = {
+  darkBase: "#0c0e0d",
+  darkCard: "#151d18",
+  lightBase: "#f8faf9",
+} as const;
+
 export const chartCursorTint = "rgba(59, 130, 246, 0.06)";
