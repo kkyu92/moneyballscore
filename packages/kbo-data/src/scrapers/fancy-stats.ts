@@ -290,6 +290,34 @@ export async function fetchTeamStats(season: number): Promise<TeamStats[]> {
   }));
 }
 
+// fancy-stats Elo row silent fallback 측정.
+// parseNum 결과가 0/NaN 일 때 || 단락 평가로 fallback 진입 — 진짜 0 vs 데이터 부재 구분 불가.
+// cycle 60 lesson + cycle 62 fix-incident — fellBack 시 console.warn 으로 Sentry 가시화.
+export interface FancyStatsFallbacks {
+  elo: boolean;
+  woba: boolean;
+  fip: boolean;
+  sfr: boolean;
+}
+
+export function detectFancyStatsFallbacks(raw: {
+  elo: number;
+  woba: number;
+  fip: number;
+  sfr: number;
+}): FancyStatsFallbacks {
+  return {
+    elo: !raw.elo,
+    woba: !raw.woba,
+    fip: !raw.fip,
+    sfr: !raw.sfr,
+  };
+}
+
+export function hasAnyFallback(flags: FancyStatsFallbacks): boolean {
+  return flags.elo || flags.woba || flags.fip || flags.sfr;
+}
+
 /**
  * /elo/ 페이지에서 Elo 레이팅 + 팀 통계 수집
  */
@@ -321,6 +349,21 @@ export async function fetchEloRatings(season: number): Promise<(EloRating & { wo
 
     const team = resolveTeamCode(teamName);
     if (!team) return;
+
+    const fallbacks = detectFancyStatsFallbacks({ elo, woba, fip, sfr });
+    if (hasAnyFallback(fallbacks)) {
+      console.warn('[fancy-stats] silent fallback applied', {
+        team,
+        teamName,
+        fallbacks,
+        raw: {
+          elo: cells.eq(2).text().trim(),
+          woba: cells.eq(3).text().trim(),
+          fip: cells.eq(4).text().trim(),
+          sfr: cells.eq(5).text().trim(),
+        },
+      });
+    }
 
     ratings.push({
       team,
