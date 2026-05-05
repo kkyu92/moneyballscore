@@ -136,6 +136,21 @@ const WEIGHTS_V16: Record<string, number> = {
   park_factor: 0,
   sfr: 0,
 };
+const WEIGHTS_V21A: Record<string, number> = {
+  sp_fip: 0.15, sp_xfip: 0.05, lineup_woba: 0.18, bullpen_fip: 0.10,
+  recent_form: 0.13, war: 0.08, head_to_head: 0.02, park_factor: 0.04,
+  elo: 0.08, sfr: 0.02,
+};
+const WEIGHTS_V21B: Record<string, number> = {
+  sp_fip: 0.16, sp_xfip: 0.05, lineup_woba: 0.17, bullpen_fip: 0.11,
+  recent_form: 0.12, war: 0.09, head_to_head: 0.02, park_factor: 0.04,
+  elo: 0.09, sfr: 0.00,
+};
+const WEIGHTS_V21C: Record<string, number> = {
+  sp_fip: 0.18, sp_xfip: 0.06, lineup_woba: 0.18, bullpen_fip: 0.11,
+  recent_form: 0.12, war: 0.10, head_to_head: 0.00, park_factor: 0.00,
+  elo: 0.10, sfr: 0.00,
+};
 
 /** Mulberry32 — fast deterministic PRNG (seedable). */
 function mulberry32(seed: number): () => number {
@@ -188,9 +203,12 @@ async function main() {
   const train = extract(trainGames, eloHistory, seasonStats);
   const test = extract(testGames, eloHistory, seasonStats);
 
-  console.log('\n[3/5] 4 method 예측 (Test 2024)…');
+  console.log('\n[3/5] 7 method 예측 (Test 2024)…');
   const v15Pred = test.features.map((f) => manualScore(f, WEIGHTS_V15));
   const v16Pred = test.features.map((f) => manualScore(f, WEIGHTS_V16));
+  const v21APred = test.features.map((f) => manualScore(f, WEIGHTS_V21A));
+  const v21BPred = test.features.map((f) => manualScore(f, WEIGHTS_V21B));
+  const v21CPred = test.features.map((f) => manualScore(f, WEIGHTS_V21C));
 
   const Xtr4 = train.features.map(vectorize);
   const Xte4 = test.features.map(vectorize);
@@ -212,25 +230,40 @@ async function main() {
 
   const v15Briers: number[] = new Array(B);
   const v16Briers: number[] = new Array(B);
+  const v21ABriers: number[] = new Array(B);
+  const v21BBriers: number[] = new Array(B);
+  const v21CBriers: number[] = new Array(B);
   const log4Briers: number[] = new Array(B);
   const log7Briers: number[] = new Array(B);
   const dV15V16: number[] = new Array(B);
   const dV15Log7: number[] = new Array(B);
+  const dV15V21A: number[] = new Array(B);
+  const dV15V21B: number[] = new Array(B);
+  const dV15V21C: number[] = new Array(B);
 
   for (let b = 0; b < B; b++) {
     const idx = new Int32Array(N);
     for (let i = 0; i < N; i++) idx[i] = Math.floor(rng() * N);
     v15Briers[b] = brierOn(v15Pred, test.outcomes, idx);
     v16Briers[b] = brierOn(v16Pred, test.outcomes, idx);
+    v21ABriers[b] = brierOn(v21APred, test.outcomes, idx);
+    v21BBriers[b] = brierOn(v21BPred, test.outcomes, idx);
+    v21CBriers[b] = brierOn(v21CPred, test.outcomes, idx);
     log4Briers[b] = brierOn(log4Pred, test.outcomes, idx);
     log7Briers[b] = brierOn(log7Pred, test.outcomes, idx);
     dV15V16[b] = v15Briers[b]! - v16Briers[b]!;
     dV15Log7[b] = v15Briers[b]! - log7Briers[b]!;
+    dV15V21A[b] = v15Briers[b]! - v21ABriers[b]!;
+    dV15V21B[b] = v15Briers[b]! - v21BBriers[b]!;
+    dV15V21C[b] = v15Briers[b]! - v21CBriers[b]!;
   }
 
   const point = {
     v15: computeMetrics(v15Pred, test.outcomes).brier,
     v16: computeMetrics(v16Pred, test.outcomes).brier,
+    v21A: computeMetrics(v21APred, test.outcomes).brier,
+    v21B: computeMetrics(v21BPred, test.outcomes).brier,
+    v21C: computeMetrics(v21CPred, test.outcomes).brier,
     log4: computeMetrics(log4Pred, test.outcomes).brier,
     log7: computeMetrics(log7Pred, test.outcomes).brier,
   };
@@ -245,10 +278,16 @@ async function main() {
   }
   const ciV15 = ci(v15Briers);
   const ciV16 = ci(v16Briers);
+  const ciV21A = ci(v21ABriers);
+  const ciV21B = ci(v21BBriers);
+  const ciV21C = ci(v21CBriers);
   const ciLog4 = ci(log4Briers);
   const ciLog7 = ci(log7Briers);
   const ciD1 = ci(dV15V16);
   const ciD2 = ci(dV15Log7);
+  const ciD21A = ci(dV15V21A);
+  const ciD21B = ci(dV15V21B);
+  const ciD21C = ci(dV15V21C);
 
   console.log('\n[5/5] 결과…\n');
   function row(name: string, p: number, c: { lo: number; hi: number; mean: number }) {
@@ -259,18 +298,29 @@ async function main() {
   console.log('  Brier 95% CI per method:');
   row('Manual v1.5', point.v15, ciV15);
   row('Manual v1.6', point.v16, ciV16);
+  row('Manual v2.1-A', point.v21A, ciV21A);
+  row('Manual v2.1-B', point.v21B, ciV21B);
+  row('Manual v2.1-C', point.v21C, ciV21C);
   row('Logistic 4-feat', point.log4, ciLog4);
   row('Logistic 7-feat', point.log7, ciLog7);
 
-  console.log('\n  ΔBrier 95% CI:');
+  console.log('\n  ΔBrier 95% CI (v15 - X — 양수 = X 우수):');
   const dPoint1 = point.v15 - point.v16;
   const dPoint2 = point.v15 - point.log7;
-  console.log(
-    `  v15 - v16              point ${dPoint1 >= 0 ? '+' : ''}${dPoint1.toFixed(5)}  95%CI [${ciD1.lo >= 0 ? '+' : ''}${ciD1.lo.toFixed(5)}, ${ciD1.hi >= 0 ? '+' : ''}${ciD1.hi.toFixed(5)}]`,
-  );
-  console.log(
-    `  v15 - log7             point ${dPoint2 >= 0 ? '+' : ''}${dPoint2.toFixed(5)}  95%CI [${ciD2.lo >= 0 ? '+' : ''}${ciD2.lo.toFixed(5)}, ${ciD2.hi >= 0 ? '+' : ''}${ciD2.hi.toFixed(5)}]`,
-  );
+  const dPointA = point.v15 - point.v21A;
+  const dPointB = point.v15 - point.v21B;
+  const dPointC = point.v15 - point.v21C;
+  function dRow(name: string, dp: number, c: { lo: number; hi: number; mean: number }) {
+    const sigZero = (c.lo > 0 || c.hi < 0) ? '  ★0배제' : '  (0포함)';
+    console.log(
+      `  ${name.padEnd(22)} point ${dp >= 0 ? '+' : ''}${dp.toFixed(5)}  95%CI [${c.lo >= 0 ? '+' : ''}${c.lo.toFixed(5)}, ${c.hi >= 0 ? '+' : ''}${c.hi.toFixed(5)}]${sigZero}`,
+    );
+  }
+  dRow('v15 - v16', dPoint1, ciD1);
+  dRow('v15 - v2.1-A', dPointA, ciD21A);
+  dRow('v15 - v2.1-B', dPointB, ciD21B);
+  dRow('v15 - v2.1-C', dPointC, ciD21C);
+  dRow('v15 - log7', dPoint2, ciD2);
 
   console.log('\n=== H1 결론 ===\n');
   const PROD_DELTA = 0.0416;

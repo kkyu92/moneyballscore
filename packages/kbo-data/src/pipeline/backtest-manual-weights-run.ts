@@ -185,6 +185,48 @@ const WEIGHTS_V16: Record<string, number> = {
   sfr: 0,
 };
 
+/** v2.1-A — 보수적 축소 (cycle 56 spec). sfr/h2h 5%→2%, woba +3pp, form +3pp. 합 0.85. */
+const WEIGHTS_V21A: Record<string, number> = {
+  sp_fip: 0.15,
+  sp_xfip: 0.05,
+  lineup_woba: 0.18,
+  bullpen_fip: 0.10,
+  recent_form: 0.13,
+  war: 0.08,
+  head_to_head: 0.02,
+  park_factor: 0.04,
+  elo: 0.08,
+  sfr: 0.02,
+};
+
+/** v2.1-B — Wayback 부분 회귀 (cycle 56 spec). sfr 0%, h2h 2%, 분산 강화. 합 0.85. */
+const WEIGHTS_V21B: Record<string, number> = {
+  sp_fip: 0.16,
+  sp_xfip: 0.05,
+  lineup_woba: 0.17,
+  bullpen_fip: 0.11,
+  recent_form: 0.12,
+  war: 0.09,
+  head_to_head: 0.02,
+  park_factor: 0.04,
+  elo: 0.09,
+  sfr: 0.00,
+};
+
+/** v2.1-C — Pure Wayback 재시도 (cycle 56 spec, cycle 18 carry-over). h2h/park/sfr 0%. 합 0.85. */
+const WEIGHTS_V21C: Record<string, number> = {
+  sp_fip: 0.18,
+  sp_xfip: 0.06,
+  lineup_woba: 0.18,
+  bullpen_fip: 0.11,
+  recent_form: 0.12,
+  war: 0.10,
+  head_to_head: 0.00,
+  park_factor: 0.00,
+  elo: 0.10,
+  sfr: 0.00,
+};
+
 async function main() {
   console.log('\n=== H4 검증 — Manual 가중합 vs Logistic 학습 (Test 2024) ===\n');
 
@@ -208,6 +250,9 @@ async function main() {
   console.log('\n[3/4] Manual 가중합 적용 (Test 2024)…');
   const manualV15Pred = test.features.map((f) => manualScore(f, WEIGHTS_V15));
   const manualV16Pred = test.features.map((f) => manualScore(f, WEIGHTS_V16));
+  const manualV21APred = test.features.map((f) => manualScore(f, WEIGHTS_V21A));
+  const manualV21BPred = test.features.map((f) => manualScore(f, WEIGHTS_V21B));
+  const manualV21CPred = test.features.map((f) => manualScore(f, WEIGHTS_V21C));
 
   console.log('\n[4/4] Logistic 학습 (대조군)…');
   const Xtr4 = train.features.map(vectorize);
@@ -229,19 +274,36 @@ async function main() {
   const coinM = computeMetrics(coinPred, test.outcomes);
   const v15M = computeMetrics(manualV15Pred, test.outcomes);
   const v16M = computeMetrics(manualV16Pred, test.outcomes);
+  const v21AM = computeMetrics(manualV21APred, test.outcomes);
+  const v21BM = computeMetrics(manualV21BPred, test.outcomes);
+  const v21CM = computeMetrics(manualV21CPred, test.outcomes);
   const log4M = computeMetrics(log4Pred, test.outcomes);
   const log7M = computeMetrics(log7Pred, test.outcomes);
 
   function line(name: string, m: { brier: number; logLoss: number; accuracy: number }) {
     console.log(
-      `  ${name.padEnd(28)} Brier ${m.brier.toFixed(5)}  LogLoss ${m.logLoss.toFixed(5)}  Acc ${pct(m.accuracy)}`,
+      `  ${name.padEnd(34)} Brier ${m.brier.toFixed(5)}  LogLoss ${m.logLoss.toFixed(5)}  Acc ${pct(m.accuracy)}`,
     );
   }
   line('coin_flip(0.5)', coinM);
   line('Manual v1.5 (h2h/park/sfr ON)', v15M);
   line('Manual v1.6 (h2h/park/sfr OFF)', v16M);
+  line('Manual v2.1-A (sfr/h2h 2%, conservative)', v21AM);
+  line('Manual v2.1-B (sfr 0/h2h 2, partial Wayback)', v21BM);
+  line('Manual v2.1-C (h2h/park/sfr 0, pure Wayback)', v21CM);
   line('Logistic 4-feature', log4M);
   line('Logistic 7-feature', log7M);
+
+  console.log('\n=== cycle 56 spec section 3 — v2.1 후보 비교 ===\n');
+  const dV21A = v15M.brier - v21AM.brier;
+  const dV21B = v15M.brier - v21BM.brier;
+  const dV21C = v15M.brier - v21CM.brier;
+  // ΔBrier = v1.5.Brier - candidate.Brier. > 0 = candidate Brier 더 낮음 = 후보 우수.
+  const verdict = (d: number, name: string) =>
+    d > 0.001 ? `(${name} 우수)` : d < -0.001 ? `(${name} 열등)` : '(미미)';
+  console.log(`  v1.5 - v2.1-A ΔBrier: ${dV21A >= 0 ? '+' : ''}${dV21A.toFixed(5)} ${verdict(dV21A, 'A')}`);
+  console.log(`  v1.5 - v2.1-B ΔBrier: ${dV21B >= 0 ? '+' : ''}${dV21B.toFixed(5)} ${verdict(dV21B, 'B')}`);
+  console.log(`  v1.5 - v2.1-C ΔBrier: ${dV21C >= 0 ? '+' : ''}${dV21C.toFixed(5)} ${verdict(dV21C, 'C')}`);
 
   console.log('\n=== H4 결론 ===\n');
   const dManual = v15M.brier - v16M.brier;
