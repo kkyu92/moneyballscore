@@ -12,7 +12,6 @@ import {
   maskViolatedReasoning,
   notifyValidationViolations,
   validateFactorAttribution,
-  annotateLowWeightFactorAttribution,
   HARD_LIMIT,
   WARN_LIMIT,
   WARN_LIMIT_LENIENT,
@@ -628,38 +627,6 @@ describe('validateFactorAttribution', () => {
   });
 });
 
-// ============================================
-// P4 — annotateLowWeightFactorAttribution
-// ============================================
-describe('annotateLowWeightFactorAttribution', () => {
-  it('위반 0건 → 원본 reasoning', () => {
-    const reasoning = '경기는 홈팀 우세였다.';
-    expect(annotateLowWeightFactorAttribution(reasoning, [])).toBe(reasoning);
-  });
-
-  it('low-weight 위반 → reasoning 끝에 주의 박제', () => {
-    const reasoning = '경기는 홈팀 우세였다.';
-    const annotated = annotateLowWeightFactorAttribution(reasoning, [
-      {
-        type: 'low_weight_factor_emphasis',
-        severity: 'warn',
-        detail: 'factor=home_head_to_head weight=5% (threshold 8%)',
-      },
-    ]);
-    expect(annotated).toContain('경기는 홈팀 우세였다.');
-    expect(annotated).toContain('[검증 주의: 모델 가중치 낮은 factor 강조]');
-    expect(annotated).toContain('home_head_to_head');
-  });
-
-  it('다른 type 위반 → 원본 유지 (factor attribution 만 처리)', () => {
-    const reasoning = 'reasoning text';
-    const annotated = annotateLowWeightFactorAttribution(reasoning, [
-      {
-        type: 'hallucinated_number',
-        severity: 'hard',
-        detail: '환각',
-      },
-    ]);
-    expect(annotated).toBe(reasoning);
-  });
-});
+// cycle 70 — annotateLowWeightFactorAttribution 제거.
+// 사용자 가시 judgeReasoning leak 차단 (dev 용어 factor=foo weight=10% threshold 8%).
+// attribution warning 은 Sentry capture (notifyValidationViolations) 만.

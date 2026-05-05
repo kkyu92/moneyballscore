@@ -569,17 +569,9 @@ export function validateFactorAttribution(
   return { ok, violations };
 }
 
-const ATTRIBUTION_WARNING_PREFIX = '[검증 주의: 모델 가중치 낮은 factor 강조]';
-
-export function annotateLowWeightFactorAttribution(
-  reasoning: string,
-  violations: Violation[]
-): string {
-  const hits = violations.filter((v) => v.type === 'low_weight_factor_emphasis');
-  if (hits.length === 0) return reasoning;
-  const factors = hits.map((v) => v.detail).join(' / ');
-  return `${reasoning}\n\n${ATTRIBUTION_WARNING_PREFIX} ${factors}`;
-}
+// cycle 70 — annotateLowWeightFactorAttribution 제거.
+// 사용자 가시 judgeReasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
+// attribution warning 은 notifyValidationViolations (Sentry) 에서만 capture.
 
 // ============================================
 // P2 — notifyValidationViolations (Sentry tag 연계, spec § 4.2)
