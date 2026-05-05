@@ -290,6 +290,18 @@ export async function fetchTeamStats(season: number): Promise<TeamStats[]> {
   }));
 }
 
+// fancy-stats / 파이프라인 default 단일 source.
+// cycle 64 review-code (heavy) — daily.ts 416-419 의 동일 magic number 중복 제거.
+// 본 값들은 KBO 평균 baseline (woba 0.320 / fip 4.00 / sfr 0 / elo 1500 / winPct 0.5).
+// 팀별 데이터 부재 시 진입 — 진입 자체는 silent fallback 위험 신호.
+export const FANCY_STATS_DEFAULTS = {
+  woba: 0.320,
+  fip: 4.00,
+  sfr: 0,
+  elo: 1500,
+  winPct: 0.5,
+} as const;
+
 // fancy-stats Elo row silent fallback 측정.
 // parseNum 결과가 0/NaN 일 때 || 단락 평가로 fallback 진입 — 진짜 0 vs 데이터 부재 구분 불가.
 // cycle 60 lesson + cycle 62 fix-incident — fellBack 시 console.warn 으로 Sentry 가시화.
@@ -367,11 +379,11 @@ export async function fetchEloRatings(season: number): Promise<(EloRating & { wo
 
     ratings.push({
       team,
-      elo: elo || 1500,
-      winPct: 0.5, // Elo 페이지에 승률 없음, 순위 기반 추정
-      woba: woba || 0.320,
-      fip: fip || 4.00,
-      sfr: sfr || 0,
+      elo: elo || FANCY_STATS_DEFAULTS.elo,
+      winPct: FANCY_STATS_DEFAULTS.winPct, // Elo 페이지에 승률 없음, 순위 기반 추정
+      woba: woba || FANCY_STATS_DEFAULTS.woba,
+      fip: fip || FANCY_STATS_DEFAULTS.fip,
+      sfr: sfr || FANCY_STATS_DEFAULTS.sfr,
     });
   });
 
