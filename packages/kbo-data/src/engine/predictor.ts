@@ -3,6 +3,11 @@ import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
 import { FACTOR_TOTAL } from './weights';
 
+// cycle 81 (cycle 80 spec D1) — sfr feature flag.
+// `MONEYBALL_SFR_ENABLED=false` env 시 sfr factor 0.5 (중립) = 검증용. default true (prod 영향 0).
+// cycle 56 sfr/h2h systematic bias 검증 path. cycle 95+ R8 결정 기준 측정 후 cleanup 강제.
+export const SFR_ENABLED = process.env.MONEYBALL_SFR_ENABLED !== 'false';
+
 /**
  * 두 값을 0-1 범위로 정규화 (상대 비교)
  * 홈팀이 유리할수록 1에 가깝고, 원정이 유리할수록 0에 가깝다
@@ -87,11 +92,10 @@ export function predict(input: PredictionInput): PredictionResult {
   factors.elo = normalize(input.homeElo.elo, input.awayElo.elo, true);
 
   // 10. 수비 SFR (높을수록 좋음)
-  factors.sfr = normalize(
-    input.homeTeamStats.sfr,
-    input.awayTeamStats.sfr,
-    true
-  );
+  // cycle 81 — SFR_ENABLED=false 시 0.5 (중립) 리턴. cycle 56 sfr bias 검증 path.
+  factors.sfr = SFR_ENABLED
+    ? normalize(input.homeTeamStats.sfr, input.awayTeamStats.sfr, true)
+    : 0.5;
 
   // 가중합산
   let weightedSum = 0;
