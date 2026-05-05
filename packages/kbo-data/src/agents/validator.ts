@@ -259,11 +259,13 @@ export function checkHallucinatedNumbers(
   }
 
   if (hallucinated.length === 0) return [];
+  // cycle 76 — slice(0, 5) 제거. detail = mask 함수의 source (extractDetailValues).
+  // 6번째 이상 환각 숫자가 사용자 가시 reasoning 에 silent leak 되던 버그.
   return [
     {
       type: 'hallucinated_number',
       severity: 'hard',
-      detail: `주입 블록에 없는 수치 ${hallucinated.length}개: ${hallucinated.slice(0, 5).join(', ')}`,
+      detail: `주입 블록에 없는 수치 ${hallucinated.length}개: ${hallucinated.join(', ')}`,
     },
   ];
 }
@@ -316,11 +318,12 @@ export function checkInventedPlayerNames(
   const invented = Array.from(candidates).filter((n) => !allowed.has(n));
 
   if (invented.length === 0) return [];
+  // cycle 76 — slice(0, 5) 제거. detail = mask 함수의 source (extractDetailValues).
   return [
     {
       type: 'invented_player_name',
       severity: 'hard',
-      detail: `주입 블록에 없는 3자 이름 후보 ${invented.length}개: ${invented.slice(0, 5).join(', ')}`,
+      detail: `주입 블록에 없는 3자 이름 후보 ${invented.length}개: ${invented.join(', ')}`,
     },
   ];
 }
