@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
 interface DataPoint {
@@ -40,20 +41,20 @@ export function AccuracyChart({ data }: AccuracyChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
-          axisLine={{ stroke: "#e5e7eb" }}
+          axisLine={{ stroke: neutral[200] }}
           tickFormatter={(d) => d.slice(5)}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          cursor={{ stroke: "#3b82f6", strokeWidth: 1, strokeDasharray: "3 3" }}
+          cursor={{ stroke: semantic.info, strokeWidth: 1, strokeDasharray: "3 3" }}
           content={(props) => (
             <ChartTooltip
               {...props}
@@ -63,7 +64,7 @@ export function AccuracyChart({ data }: AccuracyChartProps) {
                   return {
                     label: "누적 적중률",
                     value: `${Number(p.value).toFixed(1)}% · n=${d.total}`,
-                    color: "#3b82f6",
+                    color: semantic.info,
                   };
                 })
               }
@@ -72,24 +73,24 @@ export function AccuracyChart({ data }: AccuracyChartProps) {
         />
         <ReferenceLine
           y={50}
-          stroke="#ef4444"
+          stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
           label={{
             value: "50% 기준",
             fontSize: 10,
-            fill: "#ef4444",
+            fill: semantic.error,
             position: "insideBottomRight",
           }}
         />
         <Area
           type="monotone"
           dataKey="accuracy"
-          stroke="#3b82f6"
+          stroke={semantic.info}
           strokeWidth={2.5}
           fill="url(#brandAreaGradient)"
-          dot={{ r: 2, stroke: "#3b82f6", strokeWidth: 1.5, fill: "#ffffff" }}
-          activeDot={{ r: 5, stroke: "#ffffff", strokeWidth: 2, fill: "#3b82f6" }}
+          dot={{ r: 2, stroke: semantic.info, strokeWidth: 1.5, fill: neutral.white }}
+          activeDot={{ r: 5, stroke: neutral.white, strokeWidth: 2, fill: semantic.info }}
           animationDuration={600}
         />
       </AreaChart>

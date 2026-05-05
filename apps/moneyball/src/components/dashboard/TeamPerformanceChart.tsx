@@ -11,6 +11,7 @@ import {
   Cell,
   ReferenceLine,
 } from "recharts";
+import { chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
 interface TeamData {
@@ -64,20 +65,20 @@ export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" />
         <XAxis
           dataKey="team"
-          tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 500 }}
+          tick={{ fontSize: 11, fill: neutral[400], fontWeight: 500 }}
           tickLine={false}
-          axisLine={{ stroke: "#e5e7eb" }}
+          axisLine={{ stroke: neutral[200] }}
           interval={0}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          cursor={{ fill: "rgba(59,130,246,0.06)" }}
+          cursor={{ fill: chartCursorTint }}
           content={(props) => (
             <ChartTooltip
               {...props}
@@ -96,7 +97,7 @@ export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
         />
         <ReferenceLine
           y={50}
-          stroke="#ef4444"
+          stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
         />

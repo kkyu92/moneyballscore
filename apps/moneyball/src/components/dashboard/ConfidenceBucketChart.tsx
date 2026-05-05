@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import type { ConfidenceBucketResult } from "@/lib/dashboard/buildConfidenceBuckets";
+import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
 interface ConfidenceBucketChartProps {
@@ -49,19 +50,19 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" />
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
-          axisLine={{ stroke: "#e5e7eb" }}
+          axisLine={{ stroke: neutral[200] }}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          cursor={{ fill: "rgba(59,130,246,0.06)" }}
+          cursor={{ fill: chartCursorTint }}
           content={(props) => (
             <ChartTooltip
               {...props}
@@ -73,7 +74,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
                     value: d.hasData
                       ? `${Number(p.value).toFixed(1)}% · ${d.total}경기`
                       : "표본 없음",
-                    color: "#2d6b3f",
+                    color: brand[500],
                     muted: !d.hasData,
                   };
                 })
@@ -83,7 +84,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
         />
         <ReferenceLine
           y={50}
-          stroke="#ef4444"
+          stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
         />
@@ -110,7 +111,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
               const n = typeof v === "number" ? v : Number(v);
               return Number.isFinite(n) && n > 0 ? `n=${n}` : "";
             }}
-            style={{ fontSize: 10, fill: "#9ca3af", fontWeight: 500 }}
+            style={{ fontSize: 10, fill: neutral[400], fontWeight: 500 }}
           />
         </Bar>
       </BarChart>
