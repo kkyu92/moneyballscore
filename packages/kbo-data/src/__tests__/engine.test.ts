@@ -97,4 +97,10 @@ describe('가중치 합산', () => {
       expect(val).toBeGreaterThanOrEqual(0);
     }
   });
+
+  // cycle 81 (cycle 80 spec D1) — SFR_ENABLED feature flag prod 영향 0 회귀 가드.
+  it('SFR_ENABLED default true (env 미설정 시 prod 영향 0)', async () => {
+    const { SFR_ENABLED } = await import('../engine/predictor');
+    expect(SFR_ENABLED).toBe(true);
+  });
 });
