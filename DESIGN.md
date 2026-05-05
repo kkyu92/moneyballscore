@@ -96,3 +96,4 @@
 | 2026-04-16 | 다크모드 Hybrid C 채택 | surface 뉴트럴(#0c0e0d) + card 그린틴트(#151d18). 전부 그린이면 레이어 경계 불명확(사용자 피드백). |
 | 2026-04-16 | Geist Mono for data | tabular-nums로 FIP, wOBA 등 숫자 정렬. 이미 프로젝트에 포함. |
 | 2026-04-16 | Motion minimal-functional | 스포츠 데이터 사이트. 화려한 애니메이션보다 즉각적 데이터 갱신이 중요. |
+| 2026-05-05 | 차트 gradient + OG 이미지 brand token 정렬 | ChartTooltip `brandBarGradient` (`#60a5fa`/`#2563eb` blue) → brand-400/700 그린. `barShadow` floodColor (`#1e3a8a`) → brand-900. `successBarGradient` dead code 삭제. `predictions/[date]/opengraph-image.tsx` 그라디언트 (`#052e16`/`#0a6b3a`/`#16a34a`) → brand-900/700/500. `brandAreaGradient` `#3b82f6` = semantic info 일치 유지. ShareButtons 의 `#1DA1F2`/`#1877F2` = 소셜 플랫폼 공식 컬러 유지 (의도). cycle 50 polish-ui. |

@@ -91,23 +91,19 @@ export function ChartGradients() {
         <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
       </linearGradient>
       <linearGradient id="brandBarGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#60a5fa" stopOpacity={1} />
-        <stop offset="100%" stopColor="#2563eb" stopOpacity={0.9} />
+        <stop offset="0%" stopColor="#3d8b54" stopOpacity={1} />
+        <stop offset="100%" stopColor="#1a3d24" stopOpacity={0.9} />
       </linearGradient>
       <linearGradient id="mutedBarGradient" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#9ca3af" stopOpacity={0.85} />
         <stop offset="100%" stopColor="#6b7280" stopOpacity={0.75} />
-      </linearGradient>
-      <linearGradient id="successBarGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#22c55e" stopOpacity={1} />
-        <stop offset="100%" stopColor="#16a34a" stopOpacity={0.85} />
       </linearGradient>
       <filter id="barShadow" x="-10%" y="-10%" width="120%" height="120%">
         <feDropShadow
           dx="0"
           dy="2"
           stdDeviation="2"
-          floodColor="#1e3a8a"
+          floodColor="#0a1f12"
           floodOpacity="0.15"
         />
       </filter>

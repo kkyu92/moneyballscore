@@ -59,7 +59,7 @@ export default async function Image({ params }: Props) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #052e16 0%, #0a6b3a 50%, #16a34a 100%)",
+          background: "linear-gradient(135deg, #0a1f12 0%, #1a3d24 50%, #2d6b3f 100%)",
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
