@@ -17,7 +17,10 @@ import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import {
   validateFactorAttribution,
+  validateJudgeReasoning,
+  maskViolatedReasoning,
   notifyValidationViolations,
+  resolveValidationMode,
 } from './validator';
 import type { GameContext, AgentResult } from './types';
 
@@ -357,9 +360,26 @@ export async function runPostview(
     { agent: 'judge', gameId: context.game.externalGameId ?? null }
   );
 
+  // cycle 83 — judgeReasoning 환각/발명/금칙어 검증 + mask. judge-agent.ts (pre-game)
+  // cycle 76 fix 의 카운터파트. postview judgeReasoning 은 /analysis/game/[id] PostviewPanel
+  // 에 직접 노출 = 사용자 가시 영역. silent leak 차단.
+  const reasoningValidation = validateJudgeReasoning(
+    judgeData.reasoning,
+    context,
+    resolveValidationMode()
+  );
+  void notifyValidationViolations(reasoningValidation, {
+    agent: 'judge',
+    gameId: context.game.externalGameId ?? null,
+  });
+  const finalReasoning =
+    reasoningValidation.violations.length > 0
+      ? maskViolatedReasoning(judgeData.reasoning, reasoningValidation.violations)
+      : judgeData.reasoning;
+
   console.log(
     `[Postview] ${awayTeam}@${homeTeam} ${actual.homeScore}:${actual.awayScore}: ` +
-    `${judgeData.factorErrors.length} factorErrors / ${attribution.violations.length} attribution warns [${totalTokens} tokens]`
+    `${judgeData.factorErrors.length} factorErrors / ${attribution.violations.length} attribution warns / ${reasoningValidation.violations.length} reasoning violations [${totalTokens} tokens]`
   );
 
   return {
@@ -368,7 +388,7 @@ export async function runPostview(
     homePostview: homePv,
     awayPostview: awayPv,
     factorErrors: judgeData.factorErrors,
-    judgeReasoning: judgeData.reasoning,
+    judgeReasoning: finalReasoning,
     totalTokens,
     totalDurationMs: Date.now() - startTime,
   };
