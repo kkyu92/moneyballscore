@@ -17,7 +17,6 @@ import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import {
   validateFactorAttribution,
-  annotateLowWeightFactorAttribution,
   notifyValidationViolations,
 } from './validator';
 import type { GameContext, AgentResult } from './types';
@@ -347,6 +346,8 @@ export async function runPostview(
   };
 
   // cycle 29 (P4) — factor attribution cross-check. low-weight factor 를 결과 요인으로 강조 시 warn.
+  // cycle 70 — 사용자 가시 reasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
+  // attribution warning 은 Sentry capture 만 (dev 모니터링 유지). 사용자 가시 텍스트엔 표기 X.
   const attribution = validateFactorAttribution(
     judgeData.factorErrors,
     DEFAULT_WEIGHTS as Record<string, number>
@@ -354,10 +355,6 @@ export async function runPostview(
   void notifyValidationViolations(
     { ok: attribution.ok, violations: attribution.violations },
     { agent: 'judge', gameId: context.game.externalGameId ?? null }
-  );
-  const annotatedReasoning = annotateLowWeightFactorAttribution(
-    judgeData.reasoning,
-    attribution.violations
   );
 
   console.log(
@@ -371,7 +368,7 @@ export async function runPostview(
     homePostview: homePv,
     awayPostview: awayPv,
     factorErrors: judgeData.factorErrors,
-    judgeReasoning: annotatedReasoning,
+    judgeReasoning: judgeData.reasoning,
     totalTokens,
     totalDurationMs: Date.now() - startTime,
   };
