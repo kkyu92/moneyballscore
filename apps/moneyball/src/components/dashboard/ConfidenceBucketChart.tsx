@@ -73,7 +73,7 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
                     value: d.hasData
                       ? `${Number(p.value).toFixed(1)}% · ${d.total}경기`
                       : "표본 없음",
-                    color: "#2563eb",
+                    color: "#2d6b3f",
                     muted: !d.hasData,
                   };
                 })

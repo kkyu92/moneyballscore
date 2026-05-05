@@ -61,7 +61,7 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
                   return {
                     label: "적중률",
                     value: `${Number(p.value).toFixed(1)}% (${d.correct}/${d.total})`,
-                    color: passed ? "#2563eb" : "#6b7280",
+                    color: passed ? "#2d6b3f" : "#6b7280",
                   };
                 })
               }
