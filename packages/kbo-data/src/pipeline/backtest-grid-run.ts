@@ -117,6 +117,9 @@ async function main() {
     kH2h: [0, 20, 40],
     kPark: [0, 2, 5],
     homeAdvElo: [5, 10, 15, 20],
+    // h2hMinN — 최소 표본수 (cycle 67 spec carry-over 후보 D, cycle 69 review-code heavy)
+    // 2 = 기존 동작 / 3, 5 = 노이즈 완화 후보
+    h2hMinN: [2, 3, 5],
     // clamp 는 고정 (prod v1.5 와 동일)
   } as const;
 
@@ -126,6 +129,7 @@ async function main() {
   total *= grid.kH2h.length;
   total *= grid.kPark.length;
   total *= grid.homeAdvElo.length;
+  total *= grid.h2hMinN.length;
   console.log(`\n[2/3] Grid search (combos=${total})…`);
 
   interface Eval {
@@ -140,18 +144,21 @@ async function main() {
       for (const kH2h of grid.kH2h) {
         for (const kPark of grid.kPark) {
           for (const homeAdvElo of grid.homeAdvElo) {
-            const params: RestrictedParams = {
-              kElo,
-              kForm,
-              kH2h,
-              kPark,
-              homeAdvElo,
-              clampLo: DEFAULT_RESTRICTED.clampLo,
-              clampHi: DEFAULT_RESTRICTED.clampHi,
-            };
-            const trainB = brier(train.features, train.outcomes, params);
-            const testB = brier(test.features, test.outcomes, params);
-            evals.push({ params, trainBrier: trainB, testBrier: testB });
+            for (const h2hMinN of grid.h2hMinN) {
+              const params: RestrictedParams = {
+                kElo,
+                kForm,
+                kH2h,
+                kPark,
+                homeAdvElo,
+                h2hMinN,
+                clampLo: DEFAULT_RESTRICTED.clampLo,
+                clampHi: DEFAULT_RESTRICTED.clampHi,
+              };
+              const trainB = brier(train.features, train.outcomes, params);
+              const testB = brier(test.features, test.outcomes, params);
+              evals.push({ params, trainBrier: trainB, testBrier: testB });
+            }
           }
         }
       }
@@ -162,13 +169,13 @@ async function main() {
   // 3. 결과 출력
   evals.sort((a, b) => a.trainBrier - b.trainBrier);
   console.log('\n[3/3] Train Brier 기준 top-10 (+ test Brier):\n');
-  console.log('    # kElo kForm kH2h kPark homeAdv  trainBrier  testBrier');
-  console.log('    ────────────────────────────────────────────────────────');
+  console.log('    # kElo kForm kH2h kPark homeAdv h2hMinN  trainBrier  testBrier');
+  console.log('    ──────────────────────────────────────────────────────────────────');
   for (let i = 0; i < Math.min(10, evals.length); i++) {
     const e = evals[i];
     const p = e.params;
     console.log(
-      `   ${String(i + 1).padStart(2)}  ${p.kElo.toFixed(1)}  ${String(p.kForm).padStart(4)}  ${String(p.kH2h).padStart(3)}  ${String(p.kPark).padStart(4)}  ${String(p.homeAdvElo).padStart(6)}   ${e.trainBrier.toFixed(5)}  ${e.testBrier.toFixed(5)}`,
+      `   ${String(i + 1).padStart(2)}  ${p.kElo.toFixed(1)}  ${String(p.kForm).padStart(4)}  ${String(p.kH2h).padStart(3)}  ${String(p.kPark).padStart(4)}  ${String(p.homeAdvElo).padStart(6)}  ${String(p.h2hMinN).padStart(6)}   ${e.trainBrier.toFixed(5)}  ${e.testBrier.toFixed(5)}`,
     );
   }
 
@@ -185,7 +192,7 @@ async function main() {
   const coinflipProbs = test.features.map(() => modelCoinFlip({} as GameFeatures));
   const coinflipB = computeMetrics(coinflipProbs, test.outcomes).brier;
   console.log(`    coin_flip                  ${coinflipB.toFixed(5)}`);
-  console.log(`    DEFAULT_RESTRICTED          ${defaultTestB.toFixed(5)}  (kElo=1.0, kH2h=30, kPark=2, HA=${HOME_ADV_ELO_DEFAULT.toFixed(1)})`);
+  console.log(`    DEFAULT_RESTRICTED          ${defaultTestB.toFixed(5)}  (kElo=1.0, kH2h=30, kPark=2, HA=${HOME_ADV_ELO_DEFAULT.toFixed(1)}, h2hMinN=${DEFAULT_RESTRICTED.h2hMinN})`);
 
   const best = bestTrain;
   console.log(`    best-by-train (row 1)       ${best.testBrier.toFixed(5)}  ΔvsDEF ${(best.testBrier - defaultTestB).toFixed(5)}`);
@@ -212,7 +219,7 @@ async function main() {
   const testProbs = test.features.map(bestModel);
   const testM = computeMetrics(testProbs, test.outcomes);
   console.log('\n  === Best combo on 2025 test ===');
-  console.log(`    params      kElo=${best.params.kElo}  kForm=${best.params.kForm}  kH2h=${best.params.kH2h}  kPark=${best.params.kPark}  homeAdv=${best.params.homeAdvElo}`);
+  console.log(`    params      kElo=${best.params.kElo}  kForm=${best.params.kForm}  kH2h=${best.params.kH2h}  kPark=${best.params.kPark}  homeAdv=${best.params.homeAdvElo}  h2hMinN=${best.params.h2hMinN}`);
   console.log(`    Brier       ${testM.brier.toFixed(5)}`);
   console.log(`    LogLoss     ${testM.logLoss.toFixed(5)}`);
   console.log(`    Accuracy    ${pct(testM.accuracy)}`);
@@ -232,7 +239,7 @@ async function main() {
     const p = e.params;
     const rankInTrain = evals.findIndex((x) => x === e) + 1;
     console.log(
-      `   ${String(i + 1).padStart(2)}  kElo=${p.kElo}  kForm=${p.kForm}  kH2h=${p.kH2h}  kPark=${p.kPark}  HA=${p.homeAdvElo}  trainRank=${rankInTrain}  testBrier=${e.testBrier.toFixed(5)}`,
+      `   ${String(i + 1).padStart(2)}  kElo=${p.kElo}  kForm=${p.kForm}  kH2h=${p.kH2h}  kPark=${p.kPark}  HA=${p.homeAdvElo}  h2hMinN=${p.h2hMinN}  trainRank=${rankInTrain}  testBrier=${e.testBrier.toFixed(5)}`,
     );
   }
 

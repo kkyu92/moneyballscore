@@ -34,6 +34,8 @@ export const modelEloHomeAdv: Model = (f) => {
  *   - form 50 Elo pt / (home_form - away_form) (승률 100% 차이 = ±50 pt 는 관례적)
  *   - h2h 30 Elo pt / ((h_rate - 0.5) * 2) — 시즌 내 h2h 표본이 작아 완화
  *   - park 2 Elo pt / (parkPf - 100) — 미미
+ *   - h2hMinN — h2h shift 적용 최소 표본수 (cycle 67 spec carry-over). 기본 2 = 기존 동작.
+ *     2/0=100% 시 ±kH2h Elo pt 노이즈 risk → 3+ 권장 grid 검증 (cycle 69 review-code heavy).
  */
 export interface RestrictedParams {
   kElo: number; // Elo diff 스케일 (1.0 = 원본 그대로). logistic 결과는 0.5 부근.
@@ -41,6 +43,7 @@ export interface RestrictedParams {
   kH2h: number;
   kPark: number;
   homeAdvElo: number;
+  h2hMinN: number;
   clampLo: number;
   clampHi: number;
 }
@@ -51,6 +54,7 @@ export const DEFAULT_RESTRICTED: RestrictedParams = {
   kH2h: 30,
   kPark: 2,
   homeAdvElo: HOME_ADV_ELO_DEFAULT,
+  h2hMinN: 2,
   clampLo: 0.15,
   clampHi: 0.85,
 };
@@ -71,9 +75,9 @@ export function makeRestricted(
     const aForm = f.awayForm ?? 0.5;
     delta += p.kForm * (hForm - aForm);
 
-    // h2h — 표본 2경기 미만이면 무시 (노이즈 과다)
+    // h2h — 표본 p.h2hMinN 미만이면 무시 (노이즈 과다). default 2.
     const h2hN = f.h2hHomeWins + f.h2hAwayWins;
-    if (h2hN >= 2) {
+    if (h2hN >= p.h2hMinN) {
       const h2hRate = f.h2hHomeWins / h2hN;
       delta += p.kH2h * (h2hRate - 0.5) * 2;
     }
