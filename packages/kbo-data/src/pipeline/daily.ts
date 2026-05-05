@@ -8,6 +8,7 @@ import {
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 import {
   fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher,
+  FANCY_STATS_DEFAULTS,
 } from '../scrapers/fancy-stats';
 import { fetchBatterLeaders } from '../scrapers/fangraphs';
 import { predict } from '../engine/predictor';
@@ -413,10 +414,36 @@ export async function runDailyPipeline(
     const homeElo = eloRatings.find((e) => e.team === game.homeTeam);
     const awayElo = eloRatings.find((e) => e.team === game.awayTeam);
 
+    // teamStats / eloRatings 미스 = silent fallback (cycle 60 lesson lineage).
+    // fancy-stats 가 10팀 미만이면 line 374-380 에서 errors 박제됐지만, 단일
+    // 팀 누락은 그 가드 통과 → 본 console.warn 으로 Sentry 가시화.
+    const missing: string[] = [];
+    if (!homeTeamStat) missing.push(`teamStats:${game.homeTeam}`);
+    if (!awayTeamStat) missing.push(`teamStats:${game.awayTeam}`);
+    if (!homeElo) missing.push(`elo:${game.homeTeam}`);
+    if (!awayElo) missing.push(`elo:${game.awayTeam}`);
+    if (missing.length > 0) {
+      console.warn('[Pipeline] teamStats/elo silent fallback', {
+        gameId: game.externalGameId,
+        match: `${game.awayTeam}@${game.homeTeam}`,
+        missing,
+        teamStatsCount: teamStats.length,
+        eloRatingsCount: eloRatings.length,
+      });
+    }
+
     const defaultTeamStats = {
-      team: game.homeTeam as TeamCode, woba: 0.320, bullpenFip: 4.00, totalWar: 12, sfr: 0,
+      team: game.homeTeam as TeamCode,
+      woba: FANCY_STATS_DEFAULTS.woba,
+      bullpenFip: FANCY_STATS_DEFAULTS.fip,
+      totalWar: 12,
+      sfr: FANCY_STATS_DEFAULTS.sfr,
     };
-    const defaultElo = { team: game.homeTeam as TeamCode, elo: 1500, winPct: 0.5 };
+    const defaultElo = {
+      team: game.homeTeam as TeamCode,
+      elo: FANCY_STATS_DEFAULTS.elo,
+      winPct: FANCY_STATS_DEFAULTS.winPct,
+    };
 
     // Phase 2.5 — DB 기반 recent form + h2h (asOfDate 이전 final 경기만).
     // 당일 낮경기 결과는 status='final' 되어도 game_date=오늘 이라 yesterday
