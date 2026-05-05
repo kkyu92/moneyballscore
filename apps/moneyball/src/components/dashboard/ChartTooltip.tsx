@@ -1,5 +1,7 @@
 "use client";
 
+import { brand, neutral, semantic } from "@/lib/design-tokens";
+
 type Primitive = string | number | null | undefined;
 
 interface ChartTooltipRow {
@@ -87,23 +89,23 @@ export function ChartGradients() {
   return (
     <defs>
       <linearGradient id="brandAreaGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.45} />
-        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+        <stop offset="0%" stopColor={semantic.info} stopOpacity={0.45} />
+        <stop offset="100%" stopColor={semantic.info} stopOpacity={0.02} />
       </linearGradient>
       <linearGradient id="brandBarGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#3d8b54" stopOpacity={1} />
-        <stop offset="100%" stopColor="#1a3d24" stopOpacity={0.9} />
+        <stop offset="0%" stopColor={brand[400]} stopOpacity={1} />
+        <stop offset="100%" stopColor={brand[700]} stopOpacity={0.9} />
       </linearGradient>
       <linearGradient id="mutedBarGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#9ca3af" stopOpacity={0.85} />
-        <stop offset="100%" stopColor="#6b7280" stopOpacity={0.75} />
+        <stop offset="0%" stopColor={neutral[400]} stopOpacity={0.85} />
+        <stop offset="100%" stopColor={neutral[500]} stopOpacity={0.75} />
       </linearGradient>
       <filter id="barShadow" x="-10%" y="-10%" width="120%" height="120%">
         <feDropShadow
           dx="0"
           dy="2"
           stdDeviation="2"
-          floodColor="#0a1f12"
+          floodColor={brand[900]}
           floodOpacity="0.15"
         />
       </filter>

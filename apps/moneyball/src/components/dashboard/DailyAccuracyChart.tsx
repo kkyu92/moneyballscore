@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import type { DailyAccuracyPoint } from "@/lib/dashboard/buildDailyAccuracy";
+import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
 interface DailyAccuracyChartProps {
@@ -37,20 +38,20 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-100 dark:text-gray-800" />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
-          axisLine={{ stroke: "#e5e7eb" }}
+          axisLine={{ stroke: neutral[200] }}
           tickFormatter={(d) => d.slice(5)}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          tick={{ fontSize: 11, fill: neutral[400] }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v) => `${v}%`}
         />
         <Tooltip
-          cursor={{ fill: "rgba(59,130,246,0.06)" }}
+          cursor={{ fill: chartCursorTint }}
           content={(props) => (
             <ChartTooltip
               {...props}
@@ -61,7 +62,7 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
                   return {
                     label: "적중률",
                     value: `${Number(p.value).toFixed(1)}% (${d.correct}/${d.total})`,
-                    color: passed ? "#2d6b3f" : "#6b7280",
+                    color: passed ? brand[500] : neutral[500],
                   };
                 })
               }
@@ -70,7 +71,7 @@ export function DailyAccuracyChart({ data }: DailyAccuracyChartProps) {
         />
         <ReferenceLine
           y={50}
-          stroke="#ef4444"
+          stroke={semantic.error}
           strokeDasharray="4 4"
           strokeOpacity={0.6}
         />
