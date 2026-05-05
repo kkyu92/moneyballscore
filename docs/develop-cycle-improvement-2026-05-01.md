@@ -5,6 +5,9 @@
 **Decision maker**: 본 메인 (사용자 axis 위임)
 **Implementation 영역**: `~/.claude/skills/develop-cycle/SKILL.md` (글로벌, 허브측 작업 영역). 본 design 은 reference 박제 — 실제 갱신은 허브 작업 시점에 반영.
 
+**진행 박제**:
+- 2026-05-06 cycle 124 skill-evolution 8 = PASS counter 분리 (PASS_eval / PASS_ship) + ship-0 emergency stop (직전 10 cycle partial → next_n=0 강제) + lite chain retro-only cap (5 연속 retro-only → cooldown N=10) 3건 SKILL.md 갱신. cycle 86~122 = 37 cycle ship 0 streak 후속. spec: `docs/superpowers/specs/2026-05-06-cycle-124-skill-evolution-8.md`
+
 ---
 
 ## 1. 문제 정의
