@@ -117,7 +117,7 @@ cycle 56 spec section 6 "변경 보류" 결정 패턴 동일:
 | prod 발화 데이터 1~2주 누적 | ⏳ | 향후 |
 | op-analysis (heavy) 측정 분석 | ⏳ | 1~2주 후 |
 | h2h 후보 D backtest grid run | ⏳ | 별도 사이클 |
-| shadow A/B 인프라 (cycle 56 H2) | ⏳ | 별도 사이클 |
+| shadow A/B 인프라 (cycle 56 H2) | ✅ spec | 75 (explore-idea lite, `2026-05-06-cycle-75-shadow-ab-infra.md`) |
 
 ## 박제 위치
 
