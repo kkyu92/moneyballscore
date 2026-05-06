@@ -11,7 +11,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { TeamCode } from '@moneyball/shared';
+import { assertSelectOk, type TeamCode } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -86,7 +86,11 @@ async function fetchRecentH2H(
   away: TeamCode,
   date: string
 ): Promise<RivalryGame[]> {
-  const { data, error } = await db
+  // cycle 175 — silent drift family agents 차원 두 번째 진입. .error 미체크 시
+  // 과거 h2h 데이터 누락이 "신규 매치업" 으로 위장 → 팀 에이전트 프롬프트
+  // 라이벌리 블록 silent skip → 결정론 fallback 만 사용. cycle 174 retro.ts
+  // generateAgentMemories.agent_memories 패턴 일관 (per-source tolerant).
+  const result = await db
     .from('games')
     .select(`
       game_date,
@@ -106,7 +110,20 @@ async function fetchRecentH2H(
     .order('game_date', { ascending: false })
     .limit(RECENT_GAMES_LIMIT);
 
-  if (error || !data) return [];
+  let data: unknown[] | null = null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const out = assertSelectOk<any[]>(result, 'rivalry-memory.fetchRecentH2H.games');
+    data = out.data;
+  } catch (e) {
+    console.error(
+      '[rivalry-memory] fetchRecentH2H select failed:',
+      e instanceof Error ? e.message : String(e),
+    );
+    return [];
+  }
+
+  if (!data) return [];
 
   return data
     .map((row): RivalryGame | null => {
@@ -134,7 +151,11 @@ async function fetchMemories(
   away: TeamCode,
   date: string
 ): Promise<RivalryMemoryRow[]> {
-  const { data, error } = await db
+  // cycle 175 — silent drift family agents 차원 두 번째 진입. .error 미체크 시
+  // Phase D Compound 루프 학습 결과 누락이 "메모리 0개" 로 위장 → 팀 에이전트가
+  // 자가 보정 학습 무시한 채 운영. per-source tolerant 의도 보전 위해
+  // try/catch wrapper 안 (h2h 와 분리, 한쪽 fail 시 다른 쪽 살아있음).
+  const result = await db
     .from('agent_memories')
     .select('team_code, memory_type, content, confidence, valid_until')
     .in('team_code', [home, away])
@@ -142,7 +163,20 @@ async function fetchMemories(
     .order('confidence', { ascending: false })
     .limit(MEMORIES_LIMIT);
 
-  if (error || !data) return [];
+  let data: unknown[] | null = null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const out = assertSelectOk<any[]>(result, 'rivalry-memory.fetchMemories.agent_memories');
+    data = out.data;
+  } catch (e) {
+    console.error(
+      '[rivalry-memory] fetchMemories select failed:',
+      e instanceof Error ? e.message : String(e),
+    );
+    return [];
+  }
+
+  if (!data) return [];
 
   return data.map((row): RivalryMemoryRow => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
