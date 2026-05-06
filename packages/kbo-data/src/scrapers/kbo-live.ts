@@ -1,15 +1,7 @@
 import type { TeamCode } from '@moneyball/shared';
-import { TEAM_NAME_MAP } from '../types';
+import { resolveKoreanTeamCode } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
-
-function resolveTeamCode(name: string): TeamCode | null {
-  if (TEAM_NAME_MAP[name]) return TEAM_NAME_MAP[name];
-  for (const [key, code] of Object.entries(TEAM_NAME_MAP)) {
-    if (name.includes(key)) return code;
-  }
-  return null;
-}
 
 export interface LiveGameState {
   externalGameId: string;
@@ -55,8 +47,8 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
 
   const liveGames: LiveGameState[] = [];
   for (const raw of rawGames) {
-    const homeTeam = (raw.HOME_ID as TeamCode) || resolveTeamCode(raw.HOME_NM);
-    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveTeamCode(raw.AWAY_NM);
+    const homeTeam = (raw.HOME_ID as TeamCode) || resolveKoreanTeamCode(raw.HOME_NM);
+    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveKoreanTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 판단 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료

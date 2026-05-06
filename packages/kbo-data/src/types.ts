@@ -171,3 +171,14 @@ export const TEAM_NAME_MAP: Record<string, TeamCode> = {
   'NC': 'NC',
   '키움': 'WO',
 };
+
+// KBO 공식 사이트 + KBO live API scraper 가 받는 한글 팀명 매핑.
+// fancy-stats / fangraphs 의 resolveTeamCode 와는 별개 — 그쪽은 영문 매핑 +
+// 양방향 includes 로 다른 동작이라 통일 X.
+export function resolveKoreanTeamCode(name: string): TeamCode | null {
+  if (TEAM_NAME_MAP[name]) return TEAM_NAME_MAP[name];
+  for (const [key, code] of Object.entries(TEAM_NAME_MAP)) {
+    if (name.includes(key)) return code;
+  }
+  return null;
+}
