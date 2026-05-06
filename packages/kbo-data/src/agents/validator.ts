@@ -174,8 +174,10 @@ const PLAYER_CONTEXT_VERBS = [
 // 한국 성씨 상위 ~50개. 실제 이름 패턴 매칭에 사용.
 // v4-4 hotfix: 일반 3자 단어를 "(1성) + (2이름)"으로 오분류하던 버그 해결.
 // 이 성씨로 시작하지 않는 3자 단어는 이름이 아닐 확률 매우 높음.
-const KOREAN_FAMILY_NAMES =
-  '김이박최정강조윤장임한오서신권황안송전홍유고문손양배백허남심노하곽성차주우구민유';
+// cycle 132: 마지막 '유' 중복 제거 (character class 동작 무관, 정확성 박제).
+// export = test 회귀 가드 가능하게 하기 위함 (cycle 132 silent drift fix).
+export const KOREAN_FAMILY_NAMES =
+  '김이박최정강조윤장임한오서신권황안송전홍유고문손양배백허남심노하곽성차주우구민';
 
 // 금칙어 — 내러티브·심리·성격 관련
 const BANNED_PATTERNS: Array<{ pattern: RegExp; label: string }> = [

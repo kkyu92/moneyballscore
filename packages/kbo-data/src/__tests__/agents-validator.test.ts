@@ -15,6 +15,7 @@ import {
   HARD_LIMIT,
   WARN_LIMIT,
   WARN_LIMIT_LENIENT,
+  KOREAN_FAMILY_NAMES,
 } from '../agents/validator';
 
 function makeContext(): GameContext {
@@ -644,3 +645,29 @@ describe('validateFactorAttribution', () => {
 // cycle 70 — annotateLowWeightFactorAttribution 제거.
 // 사용자 가시 judgeReasoning leak 차단 (dev 용어 factor=foo weight=10% threshold 8%).
 // attribution warning 은 Sentry capture (notifyValidationViolations) 만.
+
+// ============================================
+// cycle 132 — KOREAN_FAMILY_NAMES 회귀 가드 (silent drift fix)
+// ============================================
+// 마지막 '유' 중복 (character class 안 동작 무관) silent drift 박제.
+// character set 안 모든 character distinct 강제. 향후 성씨 추가 시 중복 회피.
+describe('KOREAN_FAMILY_NAMES (cycle 132 silent drift 회귀 가드)', () => {
+  it('character set 안 중복 character 0건', () => {
+    const set = new Set(Array.from(KOREAN_FAMILY_NAMES));
+    expect(set.size).toBe(KOREAN_FAMILY_NAMES.length);
+  });
+
+  it('한국 성씨 상위권 핵심 character 포함 (회귀 가드)', () => {
+    for (const ch of ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임', '유', '한']) {
+      expect(KOREAN_FAMILY_NAMES).toContain(ch);
+    }
+  });
+
+  it('checkInventedPlayerNames 가 character set 의존성 그대로 사용 (smoke)', () => {
+    const ctx = makeContext();
+    // '유' 시작 가상 이름 + 주격조사 → 발명 선수 감지
+    const v = checkInventedPlayerNames('유철수가 등판', ctx);
+    expect(v.length).toBe(1);
+    expect(v[0].detail).toContain('유철수');
+  });
+});
