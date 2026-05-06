@@ -28,7 +28,10 @@ const FS_TEAM_MAP: Record<string, TeamCode> = {
 };
 
 export function resolveTeamCode(name: string): TeamCode | null {
-  const lower = name.toLowerCase();
+  const lower = name.trim().toLowerCase();
+  // 빈 입력 가드 — 없으면 step 2 의 양방향 includes 가
+  // lowerKey.includes('') = true 로 빈 셀을 첫 매핑팀(SK)으로 오분류.
+  if (!lower) return null;
   // 1) case-insensitive 직접 매칭
   for (const [key, code] of Object.entries(FS_TEAM_MAP)) {
     if (key.toLowerCase() === lower) return code;
@@ -352,7 +355,6 @@ export async function fetchEloRatings(season: number): Promise<(EloRating & { wo
     const cells = $(row).find('td');
     if (cells.length < 6) return;
 
-    const rank = cells.eq(0).text().trim();
     const teamName = cells.eq(1).text().trim();
     const elo = parseNum(cells.eq(2).text());
     const woba = parseNum(cells.eq(3).text());
