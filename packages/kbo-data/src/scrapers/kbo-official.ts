@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
+import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
 
 const DELAY_MS = 2000;
@@ -35,9 +35,7 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     body: JSON.stringify({ leId: '1', srId: '0', date: yyyymmdd }),
   });
 
-  if (!res.ok) {
-    throw new Error(`KBO API error: ${res.status} ${res.statusText}`);
-  }
+  assertResponseOk(res, 'KBO API error');
 
   const text = await res.text();
   const cleanJson = sanitizeKboJsonResponse(text);

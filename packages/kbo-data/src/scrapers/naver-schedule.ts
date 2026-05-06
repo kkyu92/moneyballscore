@@ -21,6 +21,7 @@
 import type { TeamCode, GameStatus } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
 import type { ScrapedGame } from '../types';
+import { assertResponseOk } from '../types';
 
 const NAVER_API = 'https://api-gw.sports.naver.com/schedule/games';
 
@@ -143,9 +144,7 @@ export async function fetchNaverSchedule(
     headers: { Accept: 'application/json' },
   });
 
-  if (!res.ok) {
-    throw new Error(`Naver schedule API error: ${res.status} ${res.statusText}`);
-  }
+  assertResponseOk(res, 'Naver schedule API error');
 
   const json = (await res.json()) as NaverResponse;
   if (!json.success) {

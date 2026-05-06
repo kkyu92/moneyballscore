@@ -13,6 +13,8 @@
  *   - scoreBoard 이닝별 점수 (승패 패턴 분석)
  */
 
+import { assertResponseOk } from '../types';
+
 const RECORD_BASE = 'https://api-gw.sports.naver.com/schedule/games';
 
 export interface NaverPitcherRecord {
@@ -180,10 +182,8 @@ export async function fetchNaverRecord(
       Accept: 'application/json',
     },
   });
-  if (!res.ok) {
-    if (res.status === 404) return null;
-    throw new Error(`Naver record fetch ${naverGameId}: ${res.status}`);
-  }
+  if (!res.ok && res.status === 404) return null;
+  assertResponseOk(res, `Naver record fetch ${naverGameId}`);
   const json = await res.json();
   return parseNaverRecord(json);
 }

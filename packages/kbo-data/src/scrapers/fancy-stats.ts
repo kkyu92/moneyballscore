@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
-import { KBO_USER_AGENT, TEAM_NAME_MAP } from '../types';
+import { KBO_USER_AGENT, TEAM_NAME_MAP, assertResponseOk } from '../types';
 import { fetchKboPitcherBasic } from './kbo-pitcher';
 
 const BASE_URL = 'https://www.kbofancystats.com';
@@ -190,9 +190,7 @@ async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
-  if (!res.ok) {
-    throw new Error(`Fancy Stats leaders error: ${res.status}`);
-  }
+  assertResponseOk(res, 'Fancy Stats leaders error');
 
   const html = await res.text();
   const pitchers = parsePitchersFromHtml(html);
@@ -355,9 +353,7 @@ export async function fetchBatterStats(_season: number): Promise<BatterStats[]> 
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
-  if (!res.ok) {
-    throw new Error(`Fancy Stats leaders (batter) error: ${res.status}`);
-  }
+  assertResponseOk(res, 'Fancy Stats leaders (batter) error');
 
   const html = await res.text();
   const batters = parseBattersFromHtml(html);
@@ -450,9 +446,7 @@ export async function fetchEloRatings(_season: number): Promise<(EloRating & { w
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
-  if (!res.ok) {
-    throw new Error(`Fancy Stats Elo error: ${res.status}`);
-  }
+  assertResponseOk(res, 'Fancy Stats Elo error');
 
   const html = await res.text();
   const $ = cheerio.load(html);

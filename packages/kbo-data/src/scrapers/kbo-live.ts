@@ -1,5 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
+import { KBO_BASE_URL as BASE_URL, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 
 export interface LiveGameState {
   externalGameId: string;
@@ -45,9 +45,7 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     body: JSON.stringify({ leId: '1', srId: '0', date: yyyymmdd }),
   });
 
-  if (!res.ok) {
-    throw new Error(`KBO live API error: ${res.status}`);
-  }
+  assertResponseOk(res, 'KBO live API error');
 
   const text = await res.text();
   const cleanJson = sanitizeKboJsonResponse(text);
