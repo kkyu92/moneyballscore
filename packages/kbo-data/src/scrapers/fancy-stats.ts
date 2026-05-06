@@ -7,7 +7,12 @@ import { fetchKboPitcherBasic } from './kbo-pitcher';
 const BASE_URL = 'https://www.kbofancystats.com';
 const DELAY_MS = 2000;
 
-function sleep(ms: number) {
+// scrapers utility — fangraphs.ts 가 동일 1줄 wrapper 보유했음 (cycle 185
+// silent drift family scrapers 차원 6번째 진입). fancy-stats.ts 가 이미
+// parseNumWithFallback export 중이라 같은 위치에서 sleep + parseNum export
+// 통일. kbo-official.ts 의 sleep / backfill-records.ts·llm.ts·llm-deepseek.ts
+// 의 sleep 은 scope 분리 (scrapers utility ≠ pipeline/agents utility).
+export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -45,7 +50,10 @@ export function resolveTeamCode(name: string): TeamCode | null {
   return TEAM_NAME_MAP[name] || null;
 }
 
-function parseNum(text: string): number {
+// parseNum 의 NaN 0-fallback simple 변형. fangraphs.ts 도 동일 정의 박제됐어
+// 단일 export 통일 (cycle 185). xfip fallback / totalWar=0 stub family 와 같
+// 패턴 — silent fallback 차단 위해선 parseNumWithFallback 우선.
+export function parseNum(text: string): number {
   const cleaned = text.replace(/[^0-9.\-]/g, '');
   const val = parseFloat(cleaned);
   return isNaN(val) ? 0 : val;
