@@ -19,6 +19,7 @@
  */
 
 import type { TeamCode, GameStatus } from '@moneyball/shared';
+import { KBO_TEAMS } from '@moneyball/shared';
 import type { ScrapedGame } from '../types';
 
 const NAVER_API = 'https://api-gw.sports.naver.com/schedule/games';
@@ -88,10 +89,9 @@ function extractGameTime(gameDateTime: string): string {
 
 /**
  * KBO 10팀 코드 중 하나인지 검증. 2군·이벤트 경기 혼입 방지.
+ * `KBO_TEAMS` (packages/shared) 단일 소스에서 derive — 팀 추가/변경 시 자동 반영.
  */
-const VALID_TEAM_CODES = new Set<TeamCode>([
-  'SK', 'HT', 'LG', 'OB', 'KT', 'SS', 'LT', 'HH', 'NC', 'WO',
-]);
+const VALID_TEAM_CODES = new Set<TeamCode>(Object.keys(KBO_TEAMS) as TeamCode[]);
 
 function isValidTeamCode(code: string): code is TeamCode {
   return VALID_TEAM_CODES.has(code as TeamCode);
