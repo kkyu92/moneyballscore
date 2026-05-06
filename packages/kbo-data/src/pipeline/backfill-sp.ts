@@ -25,7 +25,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk } from '@moneyball/shared';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -257,9 +257,15 @@ async function main() {
 
       if (Object.keys(updates).length > 0) {
         if (!dryRun) {
-          const { error } = await db.from('games').update(updates).eq('id', game.id);
-          if (error) {
-            console.error(`    ❌ game ${game.id}: ${error.message}`);
+          // cycle 171 silent drift family write 측 네 번째 진입.
+          // .error 미체크 시 RLS / unique violation 시 silent skip → 다음 backfill
+          // 또 같은 game.id 조회 → 무한 재시도 + sp_id NULL 영구 잔존.
+          // assertWriteOk fail-loud (try/catch 안 errors++ continue).
+          try {
+            const updateResult = await db.from('games').update(updates).eq('id', game.id);
+            assertWriteOk(updateResult, 'backfill-sp.main.games.sp_id');
+          } catch (err) {
+            console.error(`    ❌ game ${game.id}: ${err instanceof Error ? err.message : String(err)}`);
             errors++;
             continue;
           }
