@@ -1,6 +1,9 @@
 // Phase v4-4: 라이벌리 정의 re-export
 export { KBO_RIVALRIES, isRivalry } from './rivalries';
 
+// 한국어 조사 자동 선택 helper (받침 유무 판별)
+export { hasJongsung, josa, ro } from './korean';
+
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
 // parkPf / parkNote: Phase v4-2에서 추가. ~/moneyball_debate/personas/teams.yaml 기반.
 export const KBO_TEAMS = {
