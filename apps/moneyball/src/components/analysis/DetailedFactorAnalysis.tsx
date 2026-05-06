@@ -1,4 +1,4 @@
-import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode, shortTeamName, josa } from '@moneyball/shared';
 import {
   explainFactor,
   type FactorRawDetails,
@@ -66,7 +66,7 @@ export function DetailedFactorAnalysis({
             <>
               {" "}
               가장 영향력 큰 팩터는 <strong>{topFactor.label}</strong>
-              으로, {topFactor.favorTeam}이 예측 승률에 {
+              으로, {topFactor.favorTeam}{josa(topFactor.favorTeam, "이", "가")} 예측 승률에 {
                 topFactor.contributionPct > 0 ? "+" : ""
               }
               {topFactor.contributionPct}%p 기여합니다.
