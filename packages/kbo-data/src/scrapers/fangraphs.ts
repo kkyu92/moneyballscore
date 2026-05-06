@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_USER_AGENT, TEAM_NAME_MAP } from '../types';
-import { parseNum, sleep } from './fancy-stats';
+import { parseNumWithFallback, sleep } from './fancy-stats';
 
 const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
 const DELAY_MS = 3000; // 예의상 3초
@@ -58,6 +58,14 @@ export async function fetchBatterLeaders(season: number): Promise<FanGraphsBatte
   // 팀별 집계를 위해 선수별 데이터를 팀으로 그룹핑
   const teamData = new Map<TeamCode, { wrcPlus: number[]; iso: number[]; bbPct: number[]; kPct: number[] }>();
 
+  // parseNum NaN→0 silent fallback 가시화 — fancy-stats parsePitchersFromHtml /
+  // parseBattersFromHtml 와 동일 패턴 (cycle 195 silent drift family scrapers
+  // 차원 16번째 진입). 페이지 구조 변경으로 칼럼 전부 NaN 이면 `> 0` filter 가
+  // 진짜 0 / NaN→0 모두 동일 처리해서 빈 array 박제 → wrcPlus/iso 평균 0
+  // silent. fellBack 카운트로 ratio 측정해야 다음 cycle root fix trigger.
+  const nanCount = { wrcPlus: 0, iso: 0, bbPct: 0, kPct: 0 };
+  let totalRows = 0;
+
   $('table tbody tr').each((_, row) => {
     const cells = $(row).find('td');
     if (cells.length < 8) return;
@@ -71,16 +79,37 @@ export async function fetchBatterLeaders(season: number): Promise<FanGraphsBatte
     }
 
     const data = teamData.get(team)!;
-    const wrcPlus = parseNum(cells.eq(4).text());
-    const iso = parseNum(cells.eq(5).text());
-    const bbPct = parseNum(cells.eq(6).text());
-    const kPct = parseNum(cells.eq(7).text());
+    const wrcPlusParsed = parseNumWithFallback(cells.eq(4).text());
+    const isoParsed = parseNumWithFallback(cells.eq(5).text());
+    const bbPctParsed = parseNumWithFallback(cells.eq(6).text());
+    const kPctParsed = parseNumWithFallback(cells.eq(7).text());
 
-    if (wrcPlus > 0) data.wrcPlus.push(wrcPlus);
-    if (iso > 0) data.iso.push(iso);
-    if (bbPct > 0) data.bbPct.push(bbPct);
-    if (kPct > 0) data.kPct.push(kPct);
+    totalRows += 1;
+    if (wrcPlusParsed.fellBack) nanCount.wrcPlus += 1;
+    if (isoParsed.fellBack) nanCount.iso += 1;
+    if (bbPctParsed.fellBack) nanCount.bbPct += 1;
+    if (kPctParsed.fellBack) nanCount.kPct += 1;
+
+    if (wrcPlusParsed.value > 0) data.wrcPlus.push(wrcPlusParsed.value);
+    if (isoParsed.value > 0) data.iso.push(isoParsed.value);
+    if (bbPctParsed.value > 0) data.bbPct.push(bbPctParsed.value);
+    if (kPctParsed.value > 0) data.kPct.push(kPctParsed.value);
   });
+
+  if (totalRows === 0) {
+    console.warn('[fetchBatterLeaders] empty table silent drift', { ratio: '1.00' });
+  } else {
+    for (const [label, count] of Object.entries(nanCount)) {
+      if (count > 0) {
+        console.warn('[fetchBatterLeaders] parseNum NaN fallback to 0 silent drift', {
+          label,
+          nanCount: count,
+          totalRows,
+          ratio: (count / totalRows).toFixed(2),
+        });
+      }
+    }
+  }
 
   await sleep(DELAY_MS);
 
