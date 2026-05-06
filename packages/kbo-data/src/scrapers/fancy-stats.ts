@@ -280,15 +280,25 @@ export async function fetchBatterStats(_season: number): Promise<BatterStats[]> 
 /**
  * /elo/ 페이지에서 팀별 통계 수집
  * 테이블: Team | Elo | wOBA | FIP | SFR | 1st | 2nd | ...
+ *
+ * totalWar 는 /elo/ 페이지에 없어 0 으로 stub. predictor WAR factor (8%) +
+ * team-agent LLM 프롬프트 + DB 모두 stub 0 진입 — fetchEloRatings 의
+ * detectFancyStatsFallbacks family 가 elo/woba/fip/sfr 만 cover 하던 정합 누락을
+ * stub 가시화로 채워 다음 cycle leaders 페이지 fetch 도입 trigger 로 활용.
  */
 export async function fetchTeamStats(season: number): Promise<TeamStats[]> {
   const eloData = await fetchEloRatings(season);
-  // Elo 페이지에 wOBA, FIP, SFR이 다 있음
+  if (eloData.length > 0) {
+    console.warn('[fetchTeamStats] totalWar=0 stub for all teams — leaders 페이지 별도 수집 미구현', {
+      teamCount: eloData.length,
+      teams: eloData.map((e) => e.team),
+    });
+  }
   return eloData.map((e) => ({
     team: e.team,
     woba: e.woba,
-    bullpenFip: e.fip, // 팀 전체 FIP (불펜 별도 구분 불가)
-    totalWar: 0, // leaders에서 별도 수집 필요
+    bullpenFip: e.fip,
+    totalWar: 0,
     sfr: e.sfr,
   }));
 }
