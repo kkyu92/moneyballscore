@@ -28,6 +28,42 @@ export function assertResponseOk(res: Response, label: string): void {
   throw new Error(`${label}: ${suffix}`);
 }
 
+// predictions.reasoning.homeWinProb 안전 추출 — pipeline/live + pipeline/daily-summary
+// 공유. silent drift family pipeline 차원 첫 진입 (cycle 199, scrapers 19 진입 후속).
+//
+// reasoning JSON 손상 (null / homeWinProb 필드 부재 / 0~1 범위 밖) 시 양쪽 호출 site 가
+// `reasoning?.homeWinProb ?? 0.5` 로 silent 0.5 (no-info coin flip) fallback 하던 패턴.
+// reason 분기 (no_reasoning / no_field / invalid_value) 별로 console.warn 박제 후
+// fallback 0.5 리턴 = 사후 어느 분기로 fail 했는지 정량 측정 가능.
+//
+// 호출 site:
+//   - pipeline/live.ts: pre_game prediction → adjustWinProbability 입력
+//   - pipeline/daily-summary.ts: telegram 요약 prob
+//
+// cycle 198 fetchOpenMeteoHourly / cycle 197 assertResponseOk / cycle 195
+// parseNumWithFallback 와 동형 — 단일 소스 derive + console.warn 가시화.
+export type ReasoningHomeWinProbFailReason = 'no_reasoning' | 'no_field' | 'invalid_value';
+export function extractReasoningHomeWinProb(
+  reasoning: { homeWinProb?: unknown } | null | undefined,
+  label: string,
+): number {
+  if (reasoning == null) {
+    console.warn(`[homeWinProb] ${label}: no_reasoning → fallback 0.5`);
+    return 0.5;
+  }
+  const raw = reasoning.homeWinProb;
+  if (raw == null) {
+    console.warn(`[homeWinProb] ${label}: no_field → fallback 0.5`);
+    return 0.5;
+  }
+  const num = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(num) || num < 0 || num > 1) {
+    console.warn(`[homeWinProb] ${label}: invalid_value ${JSON.stringify(raw)} → fallback 0.5`);
+    return 0.5;
+  }
+  return num;
+}
+
 // ============================================
 // 스크래퍼 반환 타입
 // ============================================
