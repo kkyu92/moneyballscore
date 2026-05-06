@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  canonicalizeFactorKey,
   deriveFactorErrorsFallback,
   getZeroWeightFactorPromptList,
   getZeroWeightRuleJudgePostview,
@@ -7,22 +8,51 @@ import {
   getZeroWeightRuleTeamPostview,
   isWeightedFactor,
   JUDGE_POSTVIEW_SYSTEM,
+  parseJudgePostview,
   TEAM_POSTVIEW_SYSTEM,
 } from '../agents/postview';
 import { SYSTEM_PROMPT as JUDGE_PREGAME_SYSTEM } from '../agents/judge-agent';
 
+// cycle 131 — production factor 키 (predictor.ts 가 박제) 는 home_/away_ prefix 없는
+// normalized single key (sp_fip / bullpen_fip / head_to_head 등). prefix 있는 LLM 출력은
+// canonicalize 안전망으로 strip — downstream factor-bias-bootstrap-ci.ts grouping 보장.
+describe('canonicalizeFactorKey (cycle 131)', () => {
+  it('home_/away_ prefix strip — production no-prefix shape 로 정규화', () => {
+    expect(canonicalizeFactorKey('home_bullpen_fip')).toBe('bullpen_fip');
+    expect(canonicalizeFactorKey('away_recent_form')).toBe('recent_form');
+    expect(canonicalizeFactorKey('home_sp_fip')).toBe('sp_fip');
+  });
+
+  it('prefix 없는 production key 는 그대로 (idempotent)', () => {
+    expect(canonicalizeFactorKey('sp_fip')).toBe('sp_fip');
+    expect(canonicalizeFactorKey('head_to_head')).toBe('head_to_head');
+    expect(canonicalizeFactorKey('park_factor')).toBe('park_factor');
+  });
+
+  it('빈 문자열 / 알려지지 않은 키 — strip 만 적용 (검증은 isWeightedFactor 책임)', () => {
+    expect(canonicalizeFactorKey('')).toBe('');
+    expect(canonicalizeFactorKey('home_unknown')).toBe('unknown');
+  });
+});
+
 describe('isWeightedFactor', () => {
-  it('v1.7-revert: 모든 active factor (10종 + home_/away_ prefix 포함) 통과', () => {
+  it('v1.7-revert: 모든 active factor (10종, production no-prefix shape 우선) 통과', () => {
     expect(isWeightedFactor('sp_fip')).toBe(true);
-    expect(isWeightedFactor('home_lineup_woba')).toBe(true);
-    expect(isWeightedFactor('away_bullpen_fip')).toBe(true);
-    expect(isWeightedFactor('home_recent_form')).toBe(true);
+    expect(isWeightedFactor('lineup_woba')).toBe(true);
+    expect(isWeightedFactor('bullpen_fip')).toBe(true);
+    expect(isWeightedFactor('recent_form')).toBe(true);
     expect(isWeightedFactor('war')).toBe(true);
-    expect(isWeightedFactor('home_sp_xfip')).toBe(true);
+    expect(isWeightedFactor('sp_xfip')).toBe(true);
     expect(isWeightedFactor('elo')).toBe(true);
     expect(isWeightedFactor('head_to_head')).toBe(true);
-    expect(isWeightedFactor('home_park_factor')).toBe(true);
-    expect(isWeightedFactor('away_sfr')).toBe(true);
+    expect(isWeightedFactor('park_factor')).toBe(true);
+    expect(isWeightedFactor('sfr')).toBe(true);
+  });
+
+  it('cycle 131 — LLM 이 잘못 박제한 home_/away_ prefix key 도 canonicalize 후 통과 (방어선)', () => {
+    expect(isWeightedFactor('home_bullpen_fip')).toBe(true);
+    expect(isWeightedFactor('away_recent_form')).toBe(true);
+    expect(isWeightedFactor('home_sp_xfip')).toBe(true);
   });
 
   it('알려지지 않은 factor 차단 (helper 메커니즘 자체 — 가중치 0 또는 미정의 시 차단)', () => {
@@ -31,36 +61,40 @@ describe('isWeightedFactor', () => {
   });
 });
 
+// cycle 131 — production factor shape (predictor.ts 박제 형식, no prefix) 으로 정정.
+// 직전 테스트 (cycle 130 이전) 가 home_sp_fip / home_bullpen_fip prefix 사용 = false confidence.
+// 실제 daily.ts INSERT 시 factors = {sp_fip: 0.4, bullpen_fip: 0.3} no-prefix 박제 → 본 테스트가
+// production-format mismatch 때문에 실제 fallback 동작 검증 안 되던 silent drift.
 describe('deriveFactorErrorsFallback', () => {
   it('홈승인데 가중치 factor 가 away 쪽 편향 → 그 factor 지목 (v1.7-revert: park_factor 도 가중치 > 0)', () => {
     const factors = {
-      home_sp_fip: 0.4, // 원정 유리 편향, 홈승 → wrong (weighted)
-      home_lineup_woba: 0.6, // 홈 유리, 홈승 → correct
+      sp_fip: 0.4, // 원정 유리 편향, 홈승 → wrong (weighted)
+      lineup_woba: 0.6, // 홈 유리, 홈승 → correct
       park_factor: 0.35, // 원정 유리 편향, 홈승 → wrong (v1.5 회귀 후 가중치 4% > 0 → 후보)
     };
     const errors = deriveFactorErrorsFallback(factors, true);
     expect(errors).toHaveLength(2);
     const factorNames = errors.map((e) => e.factor);
-    expect(factorNames).toContain('home_sp_fip');
+    expect(factorNames).toContain('sp_fip');
     expect(factorNames).toContain('park_factor');
   });
 
   it('원정승인데 factor가 home 쪽 편향 → 그 factor 지목', () => {
     const factors = {
-      home_sp_fip: 0.7, // 홈 편향, 원정승 → wrong
-      home_bullpen_fip: 0.5, // 중립
-      home_recent_form: 0.55, // 홈 편향, 원정승 → wrong (작음)
+      sp_fip: 0.7, // 홈 편향, 원정승 → wrong
+      bullpen_fip: 0.5, // 중립
+      recent_form: 0.55, // 홈 편향, 원정승 → wrong (작음)
     };
     const errors = deriveFactorErrorsFallback(factors, false);
     expect(errors).toHaveLength(2);
-    expect(errors[0].factor).toBe('home_sp_fip');
+    expect(errors[0].factor).toBe('sp_fip');
     expect(errors[0].predictedBias).toBeCloseTo(0.2, 2);
   });
 
   it('모든 factor가 결과와 일치 방향 → 빈 배열', () => {
     const factors = {
-      home_sp_fip: 0.7,
-      home_lineup_woba: 0.65,
+      sp_fip: 0.7,
+      lineup_woba: 0.65,
     };
     const errors = deriveFactorErrorsFallback(factors, true);
     expect(errors).toEqual([]);
@@ -68,7 +102,7 @@ describe('deriveFactorErrorsFallback', () => {
 
   it('알려지지 않은 factor 만 들어오면 빈 배열 (helper 메커니즘: 미정의 차단)', () => {
     const factors = {
-      home_unknown_a: 0.2,
+      unknown_a: 0.2,
       unknown_b: 0.7,
     };
     const errors = deriveFactorErrorsFallback(factors, true);
@@ -77,26 +111,115 @@ describe('deriveFactorErrorsFallback', () => {
 
   it('상위 3개까지만 반환 (가중치 factor 만)', () => {
     const factors = {
-      home_sp_fip: 0.2,
-      home_sp_xfip: 0.25,
-      home_bullpen_fip: 0.3,
-      home_recent_form: 0.35,
-      home_war: 0.4,
+      sp_fip: 0.2,
+      sp_xfip: 0.25,
+      bullpen_fip: 0.3,
+      recent_form: 0.35,
+      war: 0.4,
     };
     const errors = deriveFactorErrorsFallback(factors, true);
     expect(errors).toHaveLength(3);
     expect(errors.map((e) => e.factor)).toEqual([
-      'home_sp_fip',
-      'home_sp_xfip',
-      'home_bullpen_fip',
+      'sp_fip',
+      'sp_xfip',
+      'bullpen_fip',
     ]);
   });
 
   it('diagnosis에 편향 수치 포함', () => {
-    const factors = { home_sp_fip: 0.3 };
+    const factors = { sp_fip: 0.3 };
     const errors = deriveFactorErrorsFallback(factors, true);
     expect(errors[0].diagnosis).toContain('-0.20');
     expect(errors[0].diagnosis).toContain('반대 방향');
+  });
+});
+
+// cycle 131 — parseJudgePostview 가 LLM 출력 canonicalize + abs(bias) 내림차순 강제 정렬.
+// 직전 코드는 LLM 이 prefix 박제하면 그대로 박제 + sort 안 하고 slice(0, 3) 만 → silent drift.
+describe('cycle 131 — parseJudgePostview canonicalize + sort 방어선', () => {
+  it('LLM 이 home_/away_ prefix 박제 시 strip 후 production-format 으로 박제', () => {
+    const text = JSON.stringify({
+      factorErrors: [
+        { factor: 'home_bullpen_fip', predictedBias: 0.08, diagnosis: 'home prefix' },
+        { factor: 'away_recent_form', predictedBias: -0.05, diagnosis: 'away prefix' },
+      ],
+      reasoning: '테스트',
+    });
+    const parsed = parseJudgePostview(text);
+    expect(parsed.factorErrors).toHaveLength(2);
+    expect(parsed.factorErrors[0].factor).toBe('bullpen_fip');
+    expect(parsed.factorErrors[1].factor).toBe('recent_form');
+  });
+
+  it('LLM 이 unsorted 박제해도 abs(bias) 내림차순 강제 정렬', () => {
+    const text = JSON.stringify({
+      factorErrors: [
+        { factor: 'recent_form', predictedBias: -0.03, diagnosis: 'small' },
+        { factor: 'bullpen_fip', predictedBias: 0.08, diagnosis: 'large' },
+        { factor: 'sp_fip', predictedBias: -0.05, diagnosis: 'mid' },
+      ],
+      reasoning: 'test',
+    });
+    const parsed = parseJudgePostview(text);
+    expect(parsed.factorErrors.map((fe) => fe.factor)).toEqual([
+      'bullpen_fip',
+      'sp_fip',
+      'recent_form',
+    ]);
+  });
+
+  it('상위 3 cap (LLM 이 5개 박제해도)', () => {
+    const text = JSON.stringify({
+      factorErrors: [
+        { factor: 'sp_fip', predictedBias: 0.10, diagnosis: '1' },
+        { factor: 'sp_xfip', predictedBias: 0.08, diagnosis: '2' },
+        { factor: 'bullpen_fip', predictedBias: 0.06, diagnosis: '3' },
+        { factor: 'recent_form', predictedBias: 0.04, diagnosis: '4' },
+        { factor: 'war', predictedBias: 0.02, diagnosis: '5' },
+      ],
+      reasoning: 'test',
+    });
+    const parsed = parseJudgePostview(text);
+    expect(parsed.factorErrors).toHaveLength(3);
+  });
+
+  it('알려지지 않은 factor 는 filter (사후 정규화 + canonicalize 후 검증)', () => {
+    const text = JSON.stringify({
+      factorErrors: [
+        { factor: 'home_bullpen_fip', predictedBias: 0.08, diagnosis: 'valid prefix' },
+        { factor: 'home_phantom_factor', predictedBias: 0.10, diagnosis: 'invalid prefix' },
+        { factor: 'recent_form', predictedBias: -0.05, diagnosis: 'valid no-prefix' },
+      ],
+      reasoning: 'test',
+    });
+    const parsed = parseJudgePostview(text);
+    expect(parsed.factorErrors).toHaveLength(2);
+    expect(parsed.factorErrors.map((fe) => fe.factor).sort()).toEqual(['bullpen_fip', 'recent_form']);
+  });
+
+  it('JSON 파싱 실패 — 빈 factorErrors + raw text 를 reasoning 으로 fallback', () => {
+    const parsed = parseJudgePostview('not json at all');
+    expect(parsed.factorErrors).toEqual([]);
+    expect(parsed.reasoning).toContain('not json');
+  });
+});
+
+// cycle 131 — JUDGE_POSTVIEW_SYSTEM 예시 schema mismatch silent drift 차단.
+// 직전 prompt 예시가 home_bullpen_fip / away_recent_form prefix 박제 → LLM 이 따라 prefix
+// 박제하면 factor-bias-bootstrap-ci.ts 의 ['sfr', 'head_to_head'] no-prefix grouping 안 잡혀
+// silent skip. 본 테스트는 prompt 가 production-format key 만 박제하도록 보장.
+describe('cycle 131 — JUDGE_POSTVIEW_SYSTEM prompt 예시 production-format key', () => {
+  it('예시 JSON 안 home_/away_ prefix 박제 X (production no-prefix shape)', () => {
+    expect(JUDGE_POSTVIEW_SYSTEM).not.toContain('"factor": "home_');
+    expect(JUDGE_POSTVIEW_SYSTEM).not.toContain('"factor": "away_');
+  });
+
+  it('예시 JSON 안 production-format key 1+ (bullpen_fip / recent_form / sp_fip 등) 박제', () => {
+    expect(JUDGE_POSTVIEW_SYSTEM).toMatch(/"factor": "(sp_fip|sp_xfip|bullpen_fip|recent_form|lineup_woba|war|elo|head_to_head|park_factor|sfr)"/);
+  });
+
+  it('규칙 줄에 "home_/away_ prefix 금지" 명시 (LLM hint)', () => {
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('home_/away_ prefix 금지');
   });
 });
 
