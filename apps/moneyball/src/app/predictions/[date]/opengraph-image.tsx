@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { assertSelectOk } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 
 // 동적 Open Graph 이미지: /predictions/YYYY-MM-DD 각 날짜별로 생성.
@@ -13,15 +14,21 @@ interface Props {
 }
 
 async function getStats(date: string) {
+  // assertSelectOk — cycle 151 silent drift family detection. 기존 try/catch 가 supabase
+  // .error 와 ImageResponse runtime 에러를 동시에 swallow → DB 오류여도 OG image 0 통계로
+  // silent fallback (관측 0 dispatch). assertSelectOk 가 throw → catch 가 console.error
+  // 로그 후 동일 fallback (사용자 가시 image 는 그대로, silent → observable 전환).
   try {
     const supabase = await createClient();
-    const { data } = await supabase
+    const result = await supabase
       .from("games")
       .select(
         "id, predictions!inner(confidence, is_correct, prediction_type)",
       )
       .eq("game_date", date)
       .eq("predictions.prediction_type", "pre_game");
+
+    const { data } = assertSelectOk(result, "opengraph-image getStats");
 
     interface StatsRow {
       id: number;
@@ -42,7 +49,8 @@ async function getStats(date: string) {
     const rate = verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : null;
 
     return { n, verifiedN: verified.length, correctN: correct.length, rate };
-  } catch {
+  } catch (err) {
+    console.error(`opengraph-image getStats(${date}) failed:`, err);
     return { n: 0, verifiedN: 0, correctN: 0, rate: null };
   }
 }
