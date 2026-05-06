@@ -70,6 +70,37 @@ export function mapWeatherCode(code: number): { icon: string; label: string } {
   return { icon: '🌡️', label: '—' };
 }
 
+interface BaseHourly {
+  time: string[];
+  temperature_2m: number[];
+  weather_code: number[];
+  wind_speed_10m: number[];
+  wind_direction_10m: number[];
+}
+
+/** hourly.time 배열에서 `${date}T${HH}:00` 매칭 인덱스. archive/forecast 공용. */
+function findHourIndex(time: string[], date: string, hour: number): number {
+  const targetPrefix = `${date}T${String(hour).padStart(2, '0')}:00`;
+  return time.findIndex((t) => t === targetPrefix);
+}
+
+/** archive/forecast 공통 snapshot 필드. precip 계열은 호출자가 variant 별로 add. */
+function buildBaseSnapshot(
+  hourly: BaseHourly,
+  idx: number,
+): Pick<WeatherSnapshot, 'tempC' | 'windSpeedKmh' | 'windDirDeg' | 'code' | 'icon' | 'label'> {
+  const code = hourly.weather_code[idx];
+  const meta = mapWeatherCode(code);
+  return {
+    tempC: Math.round(hourly.temperature_2m[idx] * 10) / 10,
+    windSpeedKmh: Math.round(hourly.wind_speed_10m[idx] * 10) / 10,
+    windDirDeg: Math.round(hourly.wind_direction_10m[idx]),
+    code,
+    icon: meta.icon,
+    label: meta.label,
+  };
+}
+
 /** 과거 실측 — 경기 종료 후 또는 당일 몇 시간 지난 이후. */
 export async function fetchArchiveWeather(
   lat: number,
@@ -89,19 +120,11 @@ export async function fetchArchiveWeather(
     const json = (await res.json()) as ArchiveResponse;
     const hourly = json.hourly;
     if (!hourly?.time) return null;
-    const targetPrefix = `${date}T${String(hour).padStart(2, '0')}:00`;
-    const idx = hourly.time.findIndex((t) => t === targetPrefix);
+    const idx = findHourIndex(hourly.time, date, hour);
     if (idx < 0) return null;
-    const code = hourly.weather_code[idx];
-    const meta = mapWeatherCode(code);
     return {
-      tempC: Math.round(hourly.temperature_2m[idx] * 10) / 10,
+      ...buildBaseSnapshot(hourly, idx),
       precipMm: Math.round((hourly.precipitation[idx] ?? 0) * 10) / 10,
-      windSpeedKmh: Math.round(hourly.wind_speed_10m[idx] * 10) / 10,
-      windDirDeg: Math.round(hourly.wind_direction_10m[idx]),
-      code,
-      icon: meta.icon,
-      label: meta.label,
       source: 'open-meteo-archive',
     };
   } catch {
@@ -128,19 +151,11 @@ export async function fetchForecastWeather(
     const json = (await res.json()) as ForecastResponse;
     const hourly = json.hourly;
     if (!hourly?.time) return null;
-    const targetPrefix = `${date}T${String(hour).padStart(2, '0')}:00`;
-    const idx = hourly.time.findIndex((t) => t === targetPrefix);
+    const idx = findHourIndex(hourly.time, date, hour);
     if (idx < 0) return null;
-    const code = hourly.weather_code[idx];
-    const meta = mapWeatherCode(code);
     return {
-      tempC: Math.round(hourly.temperature_2m[idx] * 10) / 10,
+      ...buildBaseSnapshot(hourly, idx),
       precipPct: hourly.precipitation_probability[idx] ?? 0,
-      windSpeedKmh: Math.round(hourly.wind_speed_10m[idx] * 10) / 10,
-      windDirDeg: Math.round(hourly.wind_direction_10m[idx]),
-      code,
-      icon: meta.icon,
-      label: meta.label,
       source: 'open-meteo-forecast',
     };
   } catch {
