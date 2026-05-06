@@ -5,8 +5,9 @@ export { KBO_RIVALRIES, isRivalry } from './rivalries';
 export { hasJongsung, josa, ro } from './korean';
 
 // supabase `.error` 미체크 silent drift 가드 helper (cycle 147 — 양쪽 package 공유)
-export { assertSelectOk } from './db-error';
-export type { SelectResult } from './db-error';
+// cycle 168 — write 측 sub-family 진입 (assertWriteOk 추가)
+export { assertSelectOk, assertWriteOk } from './db-error';
+export type { SelectResult, WriteResult } from './db-error';
 
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
 // parkPf / parkNote: Phase v4-2에서 추가. ~/moneyball_debate/personas/teams.yaml 기반.
