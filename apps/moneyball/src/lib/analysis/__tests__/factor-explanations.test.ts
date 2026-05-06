@@ -282,3 +282,52 @@ describe("buildGameOverview", () => {
     expect(result.summary).toContain("KIA");
   });
 });
+
+describe("buildGameOverview — tag/summary 임계값 align (silent drift 차단)", () => {
+  it("박빙 boundary (prob=0.55, marginPp=10): 박빙 태그 + 접전 서술", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.55,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.tags).toContain("박빙");
+    expect(result.summary).toContain("10%p의 접전");
+    expect(result.summary).not.toContain("앞선다");
+    expect(result.summary).not.toContain("크게 앞서는");
+  });
+
+  it("회색지대 (prob=0.56, marginPp=12): 태그 0건 + 중립 '앞선다'", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.56,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.tags).not.toContain("박빙");
+    expect(result.tags).not.toContain("우세 뚜렷");
+    expect(result.summary).toContain("12%p 앞선다");
+    expect(result.summary).not.toContain("크게 앞서는");
+    expect(result.summary).not.toContain("접전");
+  });
+
+  it("회색지대 (prob=0.58, marginPp=16): 태그 0건이면 '크게 앞서는' 표현 X", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.58,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.tags).not.toContain("박빙");
+    expect(result.tags).not.toContain("우세 뚜렷");
+    expect(result.summary).toContain("16%p 앞선다");
+    expect(result.summary).not.toContain("크게 앞서는");
+  });
+
+  it("우세 뚜렷 boundary (prob=0.6, marginPp=20): 우세 태그 + 큰 우세 서술", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.6,
+      homeTeamName: "LG",
+      awayTeamName: "한화",
+    });
+    expect(result.tags).toContain("우세 뚜렷");
+    expect(result.summary).toContain("20%p 크게 앞서는 우세 경기");
+  });
+});
