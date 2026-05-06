@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk } from '@moneyball/shared';
 import { fetchBatterStats } from '../scrapers/fancy-stats';
 import { notifyError } from '../notify/telegram';
 import type { BatterStats } from '../types';
@@ -60,7 +60,11 @@ async function upsertPlayerId(
   if (existing) {
     // position 비어 있으면 업데이트
     if (!existing.position && position) {
-      await db.from('players').update({ position }).eq('id', existing.id);
+      const updateResult = await db
+        .from('players')
+        .update({ position })
+        .eq('id', existing.id);
+      assertWriteOk(updateResult, 'sync-batter-stats.upsertPlayerId.position');
     }
     return existing.id;
   }
