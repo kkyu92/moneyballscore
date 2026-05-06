@@ -7,7 +7,7 @@ import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard"
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { type TeamCode, shortTeamName, josa } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk } from '@moneyball/shared';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -113,7 +113,12 @@ interface DateGame {
 async function getGamePredictions(date: string): Promise<DateGame[]> {
   const supabase = await createClient();
 
-  const { data } = await supabase
+  // assertSelectOk — cycle 154 silent drift family detection. games select 가
+  // .error 미체크 → DB 오류 시 data=null silent fallback → 빈 배열 위장 → 사용자
+  // 에게 "예측 데이터가 없습니다" 가짜 노출 (실제로는 DB 오류). cycle 148 analysis
+  // / cycle 153 dashboard 동일 family. assertSelectOk 로 fail-loud → error.tsx
+  // boundary 처리.
+  const result = await supabase
     .from("games")
     .select(
       `
@@ -141,6 +146,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
     .eq("predictions.prediction_type", "pre_game")
     .order("game_time");
 
+  const { data } = assertSelectOk(result, "predictions/[date] getGamePredictions");
   return (data ?? []) as unknown as DateGame[];
 }
 
