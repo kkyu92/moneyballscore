@@ -392,12 +392,23 @@ export async function fetchEloRatings(season: number): Promise<(EloRating & { wo
     ratings.push({
       team,
       elo: elo || FANCY_STATS_DEFAULTS.elo,
-      winPct: FANCY_STATS_DEFAULTS.winPct, // Elo 페이지에 승률 없음, 순위 기반 추정
+      // Elo 페이지에 승률 컬럼 부재 — 모든 팀 0.5 stub. predictions.elo_win_pct
+      // 컬럼 매 row 동일 0.5 박제 (사용처 = daily.ts insert only, downstream 없음).
+      // cycle 138 가시화: stub 자체는 유지하고 console.warn 으로 silent drift 차단
+      // (cycle 137 totalWar=0 stub 가시화 family 동일 패턴).
+      winPct: FANCY_STATS_DEFAULTS.winPct,
       woba: woba || FANCY_STATS_DEFAULTS.woba,
       fip: fip || FANCY_STATS_DEFAULTS.fip,
       sfr: sfr || FANCY_STATS_DEFAULTS.sfr,
     });
   });
+
+  if (ratings.length > 0) {
+    console.warn('[fetchEloRatings] winPct=0.5 stub for all teams — Elo 페이지에 승률 컬럼 부재', {
+      teamCount: ratings.length,
+      teams: ratings.map((r) => r.team),
+    });
+  }
 
   await sleep(DELAY_MS);
   return ratings;

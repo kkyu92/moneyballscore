@@ -3,6 +3,7 @@ import {
   detectFancyStatsFallbacks,
   hasAnyFallback,
   fetchTeamStats,
+  fetchEloRatings,
 } from '../scrapers/fancy-stats';
 
 describe('detectFancyStatsFallbacks', () => {
@@ -102,5 +103,54 @@ describe('fetchTeamStats totalWar=0 stub 가시화', () => {
       teamCount: result.length,
       teams: expect.arrayContaining(result.map((t) => t.team)),
     });
+  });
+});
+
+describe('fetchEloRatings winPct=0.5 stub 가시화', () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        `<html><body><table><tbody>
+          <tr><td>1</td><td>LG Twins</td><td>1550</td><td>0.330</td><td>4.10</td><td>0.5</td><td>1</td></tr>
+          <tr><td>2</td><td>KT Wiz</td><td>1480</td><td>0.310</td><td>4.30</td><td>-0.2</td><td>2</td></tr>
+        </tbody></table></body></html>`,
+        { status: 200 },
+      ),
+    );
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+
+  it('호출 결과 모든 팀 winPct=0.5 stub + console.warn 1회 가시화', async () => {
+    const result = await fetchEloRatings(2026);
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.every((r) => r.winPct === 0.5)).toBe(true);
+    const stubWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) => typeof call[0] === 'string' && call[0].includes('winPct=0.5 stub'),
+    );
+    expect(stubWarns.length).toBe(1);
+    expect(stubWarns[0][1]).toMatchObject({
+      teamCount: result.length,
+      teams: expect.arrayContaining(result.map((r) => r.team)),
+    });
+  });
+
+  it('teams 배열 0건이면 winPct stub warn 발생 X (안전)', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      new Response(`<html><body><table><tbody></tbody></table></body></html>`, { status: 200 }),
+    );
+    const result = await fetchEloRatings(2026);
+    expect(result.length).toBe(0);
+    const stubWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) => typeof call[0] === 'string' && call[0].includes('winPct=0.5 stub'),
+    );
+    expect(stubWarns.length).toBe(0);
   });
 });
