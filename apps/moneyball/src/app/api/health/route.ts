@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { assertSelectOk } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,15 +9,11 @@ export async function GET() {
   // DB 연결 확인
   try {
     const supabase = await createClient();
-    const { count, error } = await supabase
+    const result = await supabase
       .from('leagues')
       .select('*', { count: 'exact', head: true });
-
-    if (error) {
-      checks.database = { status: 'error', detail: error.message };
-    } else {
-      checks.database = { status: 'ok', detail: `${count} leagues` };
-    }
+    const { count } = assertSelectOk(result, 'health.leagues');
+    checks.database = { status: 'ok', detail: `${count} leagues` };
   } catch (e) {
     checks.database = { status: 'error', detail: String(e) };
   }
@@ -24,12 +21,13 @@ export async function GET() {
   // 최근 파이프라인 실행 확인
   try {
     const supabase = await createClient();
-    const { data } = await supabase
+    const result = await supabase
       .from('pipeline_runs')
       .select('run_date, mode, status, created_at')
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
+    const { data } = assertSelectOk(result, 'health.pipeline_runs');
 
     if (data) {
       checks.pipeline = {

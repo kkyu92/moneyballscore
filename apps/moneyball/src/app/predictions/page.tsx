@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import {
+  assertSelectOk,
   classifyWinnerProb,
   pickTierEmoji,
   WINNER_TIER_LABEL,
@@ -48,7 +49,7 @@ async function getPredictionDates(): Promise<DateStat[]> {
 
   // LEFT JOIN: prediction 없는 편성 경기도 포함. pre_game 타입만 붙여서
   // post_game row 가 있어도 예측 카운트 이중집계 방지.
-  const { data } = await supabase
+  const result = await supabase
     .from('games')
     .select(
       'game_date, status, predictions(id, confidence, is_correct, reasoning, prediction_type)',
@@ -56,6 +57,7 @@ async function getPredictionDates(): Promise<DateStat[]> {
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
     .limit(200);
+  const { data } = assertSelectOk(result, 'predictions.getPredictionDates');
 
   if (!data) return [];
 

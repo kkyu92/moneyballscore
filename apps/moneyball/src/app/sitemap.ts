@@ -3,7 +3,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, assertSelectOk } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
 //
@@ -98,11 +98,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = createSitemapClient();
     // limit 5000 → 2500 (2023-2026 실제 ~1200 경기 + 여유). 선택 필드도 5개만.
     // home_sp_id / away_sp_id 추가 — distinct 모아서 /players/[id] 동적 생성.
-    const { data: games } = await supabase
+    const result = await supabase
       .from('games')
       .select('id, game_date, updated_at, home_sp_id, away_sp_id')
       .order('game_date', { ascending: false })
       .limit(2500);
+    const { data: games } = assertSelectOk(result, 'sitemap.games');
 
     if (games) {
       const seenDates = new Set<string>();
