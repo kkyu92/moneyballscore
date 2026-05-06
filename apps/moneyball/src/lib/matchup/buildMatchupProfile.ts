@@ -66,6 +66,8 @@ interface Row {
   is_correct: boolean | null;
   predicted_winner: number | null;
   predicted_winner_team: { code: string | null } | null;
+  /** null = pre_game prediction 부재 final 경기. record 카운트는 진행, 예측 정확도 카운트는 skip */
+  hasPrediction: boolean;
   game: {
     id: number;
     game_date: string;
@@ -204,8 +206,8 @@ export async function buildMatchupProfile(
   }
 
   // 두 팀이 맞붙은 경기만 SQL 레벨로 필터링.
-  // 이전엔 전체 pre_game 예측 풀스캔 → JS에서 pair 필터.
-  // 이제 (home=A,away=B) OR (home=B,away=A) 만 select → 매치업당 ~1-20 row.
+  // predictions 는 LEFT embed (`!inner` X) — pre_game prediction 누락 final 경기도 record 카운트 위해.
+  // prediction_type='pre_game' 필터는 JS 레벨에서 적용 (PostgREST 에서 dotted eq + LEFT embed 조합은 모호).
   const orFilter =
     `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
     `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
@@ -219,15 +221,14 @@ export async function buildMatchupProfile(
         home_team:teams!games_home_team_id_fkey(id, code),
         away_team:teams!games_away_team_id_fkey(id, code),
         winner:teams!games_winner_team_id_fkey(code),
-        predictions!inner(
+        predictions(
           confidence, is_correct, predicted_winner,
           predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
           prediction_type
         )
       `,
     )
-    .or(orFilter)
-    .eq("predictions.prediction_type", "pre_game");
+    .or(orFilter);
 
   type GameRow = {
     id: number;
@@ -246,19 +247,23 @@ export async function buildMatchupProfile(
       is_correct: boolean | null;
       predicted_winner: number | null;
       predicted_winner_team: { code: string | null } | null;
-    }>;
+      prediction_type: string | null;
+    }> | null;
   };
 
   const gameRows = (data ?? []) as unknown as GameRow[];
   const rows: Row[] = [];
+  let missingPredictionFinalCount = 0;
   for (const g of gameRows) {
-    const pred = g.predictions?.[0];
-    if (!pred) continue;
+    const pred =
+      g.predictions?.find((p) => p.prediction_type === "pre_game") ?? null;
+    if (!pred && g.status === "final") missingPredictionFinalCount += 1;
     rows.push({
-      confidence: pred.confidence,
-      is_correct: pred.is_correct,
-      predicted_winner: pred.predicted_winner,
-      predicted_winner_team: pred.predicted_winner_team,
+      confidence: pred?.confidence ?? null,
+      is_correct: pred?.is_correct ?? null,
+      predicted_winner: pred?.predicted_winner ?? null,
+      predicted_winner_team: pred?.predicted_winner_team ?? null,
+      hasPrediction: pred !== null,
       game: {
         id: g.id,
         game_date: g.game_date,
@@ -273,6 +278,11 @@ export async function buildMatchupProfile(
         winner: g.winner,
       },
     });
+  }
+  if (missingPredictionFinalCount > 0) {
+    console.warn(
+      `[buildMatchupProfile] ${pair.codeA} vs ${pair.codeB}: pre_game prediction 부재 final 경기 ${missingPredictionFinalCount}건 — record 카운트는 진행, AI 예측 정확도 카운트만 skip (silent drift 가시화)`,
+    );
   }
   const games: MatchupGame[] = [];
   const sideA = makeSideStat(teamA.code, teamA.shortName, teamA.color);
