@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString } from '@moneyball/shared';
+import { toKSTDateString, assertSelectOk } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
@@ -74,19 +74,25 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
     };
   }
 
-  // KBO 리그 ID
-  const { data: league } = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  // KBO 리그 ID — cycle 160 silent drift family detection. .error 미체크 →
+  // 네트워크 / 스키마 오류 시 league=null silent fallback → "KBO league not found"
+  // false positive (실제로는 DB 오류). assertSelectOk fail-loud.
+  const leagueResult = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const { data: league } = assertSelectOk<{ id: number }>(leagueResult, 'live.runLiveUpdate league');
   if (!league) return { date: targetDate, liveGames: activeGames.length, updated: 0, errors: ['KBO league not found'] };
 
   for (const game of activeGames) {
     try {
-      // DB에서 해당 경기 찾기
-      const { data: dbGame } = await db
+      // DB에서 해당 경기 찾기 — cycle 160 silent drift family. single() not-found
+      // (PGRST116) 도 .error 로 들어와 throw — DB에 없는 game 은 정상 skip 시그널이라
+      // maybeSingle() 로 변환 + assertSelectOk fail-loud (다른 .error 폭로).
+      const dbGameResult = await db
         .from('games')
         .select('id')
         .eq('external_game_id', game.externalGameId)
         .eq('league_id', league.id)
-        .single();
+        .maybeSingle();
+      const { data: dbGame } = assertSelectOk<{ id: number }>(dbGameResult, 'live.runLiveUpdate dbGame');
 
       if (!dbGame) continue;
 
@@ -98,13 +104,17 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         updated_at: new Date().toISOString(),
       }).eq('id', dbGame.id);
 
-      // pre_game 예측 가져오기
-      const { data: preGame } = await db
+      // pre_game 예측 가져오기 — cycle 160 silent drift family. maybeSingle + assertSelectOk.
+      const preGameResult = await db
         .from('predictions')
         .select('confidence, reasoning')
         .eq('game_id', dbGame.id)
         .eq('prediction_type', 'pre_game')
-        .single();
+        .maybeSingle();
+      const { data: preGame } = assertSelectOk<{ confidence: number; reasoning: unknown }>(
+        preGameResult,
+        'live.runLiveUpdate preGame',
+      );
 
       if (!preGame) continue;
 
@@ -123,12 +133,16 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       const adjustedConfidence = Math.abs(adjustedHomeProb - 0.5) * 2;
 
-      // 팀 ID 조회
-      const { data: teams } = await db
+      // 팀 ID 조회 — cycle 160 silent drift family. assertSelectOk fail-loud.
+      const teamsResult = await db
         .from('teams')
         .select('id, code')
         .eq('league_id', league.id)
         .in('code', [game.homeTeam, game.awayTeam]);
+      const { data: teams } = assertSelectOk<{ id: number; code: string }[]>(
+        teamsResult,
+        'live.runLiveUpdate teams',
+      );
 
       const teamMap: Record<string, number> = {};
       for (const t of teams || []) {
@@ -211,14 +225,20 @@ async function runPostviewDailySafe(date: string): Promise<{
 }
 
 async function updateGameScore(db: DB, game: LiveGameState) {
-  const { data: league } = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  // cycle 160 silent drift family — league/teams select assertSelectOk 통일.
+  const leagueResult = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const { data: league } = assertSelectOk<{ id: number }>(leagueResult, 'live.updateGameScore league');
   if (!league) return;
 
-  const { data: teams } = await db
+  const teamsResult = await db
     .from('teams')
     .select('id, code')
     .eq('league_id', league.id)
     .in('code', [game.homeTeam, game.awayTeam]);
+  const { data: teams } = assertSelectOk<{ id: number; code: string }[]>(
+    teamsResult,
+    'live.updateGameScore teams',
+  );
 
   const teamMap: Record<string, number> = {};
   for (const t of teams || []) {
@@ -240,11 +260,16 @@ async function updateGameScore(db: DB, game: LiveGameState) {
   // v0.5.25: 경기 종료 시 Naver record boxscore 저장 (best-effort).
   // 실패해도 live 파이프라인 막지 않음.
   try {
-    const { data: dbGame } = await db
+    // cycle 160 silent drift family — maybeSingle + assertSelectOk (game 없으면 자연 skip).
+    const dbGameResult = await db
       .from('games')
       .select('id, game_date')
       .eq('external_game_id', game.externalGameId)
-      .single();
+      .maybeSingle();
+    const { data: dbGame } = assertSelectOk<{ id: number; game_date: string }>(
+      dbGameResult,
+      'live.updateGameScore dbGame',
+    );
     if (dbGame) {
       const season = Number((dbGame.game_date as string).slice(0, 4));
       const naverGameId = toNaverGameId(game.externalGameId, season);
