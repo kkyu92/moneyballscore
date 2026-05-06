@@ -13,6 +13,26 @@ export interface LiveGameState {
   status: 'live' | 'final' | 'scheduled';
 }
 
+interface RawKboLiveGame {
+  G_ID: string;
+  HOME_ID?: string;
+  AWAY_ID?: string;
+  HOME_NM?: string;
+  AWAY_NM?: string;
+  GAME_STATE_SC?: string | number;
+  GAME_RESULT_CK?: number;
+  GAME_INN_NO?: string | number;
+  GAME_TB_SC?: string;
+  B_SCORE_CN?: string | number;
+  T_SCORE_CN?: string | number;
+  OUT_CN?: string | number;
+}
+
+interface KboLiveResponse {
+  d?: string;
+  game?: RawKboLiveGame[];
+}
+
 /**
  * KBO 공식 AJAX API에서 진행 중인 경기 라이브 상태 수집
  */
@@ -33,24 +53,26 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
   const jsonEnd = text.indexOf('}<') !== -1 ? text.indexOf('}<') + 1 : text.length;
   const cleanJson = text.slice(0, jsonEnd);
 
-  let json: any;
+  let json: KboLiveResponse;
   try {
-    json = JSON.parse(cleanJson);
+    json = JSON.parse(cleanJson) as KboLiveResponse;
   } catch {
     throw new Error(`KBO live API parse error: ${cleanJson.slice(0, 100)}`);
   }
 
-  const rawGames = json.d ? JSON.parse(json.d) : (json.game || []);
+  const rawGames: RawKboLiveGame[] = json.d
+    ? (JSON.parse(json.d) as RawKboLiveGame[])
+    : (json.game ?? []);
 
   const liveGames: LiveGameState[] = [];
   for (const raw of rawGames) {
-    const homeTeam = (raw.HOME_ID as TeamCode) || resolveKoreanTeamCode(raw.HOME_NM);
-    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveKoreanTeamCode(raw.AWAY_NM);
+    const homeTeam = (raw.HOME_ID as TeamCode) || resolveKoreanTeamCode(raw.HOME_NM ?? '');
+    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveKoreanTeamCode(raw.AWAY_NM ?? '');
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 판단 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
     // GAME_INN_NO 는 라이브 판정에 쓰지 않는다 (kbo-official.ts 와 동일 이유).
-    const stateCode = String(raw.GAME_STATE_SC || '');
+    const stateCode = String(raw.GAME_STATE_SC ?? '');
     let status: LiveGameState['status'] = 'scheduled';
     if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
       status = 'final';
