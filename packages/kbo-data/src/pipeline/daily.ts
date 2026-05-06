@@ -22,6 +22,7 @@ import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { runPostviewDaily } from './postview-daily';
 import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
+import { buildFinalReasoning } from './final-reasoning';
 import {
   notifyPredictions, notifyResults, notifyError,
   notifyPipelineStatus, notifyAnnounce,
@@ -509,14 +510,15 @@ export async function runDailyPipeline(
     let finalWinner = quantResult.predictedWinner;
     let finalHomeProb = quantResult.homeWinProb;
     let finalConfidence = quantResult.confidence;
-    // Shadow run: debate 가 덮기 전 v1.6 순수 정량 확률을 별도 필드로 항상 보존.
-    // /debug/model-comparison 에서 v1.6-pure vs v2.0-debate Brier 대조에 사용.
-    const quantHomeProb = quantResult.homeWinProb;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let finalReasoning: any = {
-      ...quantResult,
-      quantitativeHomeWinProb: quantHomeProb,
-    };
+    // cycle 128 silent drift fix — buildFinalReasoning helper 가 finalHomeProb
+    // 를 reasoning.homeWinProb 로 명시 박제 + 정량 원본을 quantitativeHomeWinProb
+    // 분리. spread 패턴이 quantResult.homeWinProb 만 박제해 buildDailySummary
+    // (`p.reasoning?.homeWinProb`) 가 debate verdict 무시한 quant 확률 표시하던
+    // mismatch 차단.
+    let finalReasoning = buildFinalReasoning({
+      quantResult,
+      finalHomeProb,
+    });
 
     let debateSucceeded = false;
     if (process.env.ANTHROPIC_API_KEY) {
@@ -535,15 +537,15 @@ export async function runDailyPipeline(
         finalWinner = debate.verdict.predictedWinner;
         finalHomeProb = debate.verdict.homeWinProb;
         finalConfidence = debate.verdict.confidence;
-        finalReasoning = {
-          ...quantResult,
-          quantitativeHomeWinProb: quantHomeProb,
+        finalReasoning = buildFinalReasoning({
+          quantResult,
+          finalHomeProb,
           debate: {
             homeArgument: debate.homeArgument, awayArgument: debate.awayArgument,
             calibration: debate.calibration, verdict: debate.verdict,
             quantitativeProb: debate.quantitativeProb, totalTokens: debate.totalTokens,
           },
-        };
+        });
         debateSucceeded = true;
       } catch (e) {
         const debateErr = e instanceof Error ? e.message : String(e);
