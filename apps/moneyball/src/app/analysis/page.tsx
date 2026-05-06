@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
+  assertSelectOk,
   shortTeamName,
   toKSTDateString,
   winnerProbOf,
+  type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
@@ -21,11 +23,29 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600; // 1시간 ISR
 
+interface BigMatchRow {
+  id: number;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
+  predictions: Array<{
+    confidence: number;
+    home_elo: number | null;
+    away_elo: number | null;
+    home_recent_form: number | null;
+    away_recent_form: number | null;
+    prediction_type: string;
+  }>;
+}
+
 async function getTodayBigMatch() {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  const { data: games } = await supabase
+  // assertSelectOk — cycle 148 silent drift family detection. games select 가
+  // DB 오류 시 data=null silent fallback → 빅매치 0 silent 위장 (사용자 가시 빈
+  // 분석 카드). cycle 147 buildMatchupProfile 동일 family 자연 후속 (apps/moneyball
+  // 측 첫 진입 #137 다음 page 차원 진입).
+  const gamesResult = (await supabase
     .from('games')
     .select(`
       id,
@@ -37,23 +57,10 @@ async function getTodayBigMatch() {
       )
     `)
     .eq('game_date', today)
-    .eq('predictions.prediction_type', 'pre_game');
+    .eq('predictions.prediction_type', 'pre_game')) as SelectResult<BigMatchRow[]>;
+  const { data: games } = assertSelectOk(gamesResult, 'analysis getTodayBigMatch');
 
   if (!games) return { bigMatchId: null, candidates: 0 };
-
-  interface BigMatchRow {
-    id: number;
-    home_team: { code: string | null } | null;
-    away_team: { code: string | null } | null;
-    predictions: Array<{
-      confidence: number;
-      home_elo: number | null;
-      away_elo: number | null;
-      home_recent_form: number | null;
-      away_recent_form: number | null;
-      prediction_type: string;
-    }>;
-  }
 
   const rows = games as unknown as BigMatchRow[];
   const candidates: BigMatchCandidate[] = [];
@@ -90,11 +97,28 @@ interface YesterdayGameCard {
   isCorrect: boolean | null;
 }
 
+interface YesterdayGameRow {
+  id: number;
+  home_score: number | null;
+  away_score: number | null;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
+  predictions: Array<{
+    prediction_type: string;
+    is_correct: boolean | null;
+    reasoning: { homeWinProb?: number | null } | null;
+    predicted_winner_team: { code: string | null } | null;
+  }>;
+}
+
 async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   const supabase = await createClient();
   const yesterday = getYesterdayKSTDateString();
 
-  const { data } = await supabase
+  // assertSelectOk — cycle 148 silent drift family detection. error 시 fail-loud
+  // (기존엔 `data ?? []` silent fallback → 어제 경기 0 silent 위장 → 사용자 가시
+  // 빈 카드 영역). cycle 147 family 자연 후속.
+  const gamesResult = (await supabase
     .from('games')
     .select(`
       id, home_score, away_score,
@@ -107,25 +131,12 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
     `)
     .eq('game_date', yesterday)
     .eq('predictions.prediction_type', 'pre_game')
-    .order('game_time', { ascending: true });
+    .order('game_time', { ascending: true })) as SelectResult<YesterdayGameRow[]>;
+  const { data } = assertSelectOk(gamesResult, 'analysis getYesterdayGames');
 
   if (!data) return [];
 
-  interface Row {
-    id: number;
-    home_score: number | null;
-    away_score: number | null;
-    home_team: { code: string | null } | null;
-    away_team: { code: string | null } | null;
-    predictions: Array<{
-      prediction_type: string;
-      is_correct: boolean | null;
-      reasoning: { homeWinProb?: number | null } | null;
-      predicted_winner_team: { code: string | null } | null;
-    }>;
-  }
-
-  const rows = data as unknown as Row[];
+  const rows = data as unknown as YesterdayGameRow[];
   const cards: YesterdayGameCard[] = [];
   for (const row of rows) {
     const pred = row.predictions?.[0];
