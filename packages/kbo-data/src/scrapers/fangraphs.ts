@@ -1,19 +1,10 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { TEAM_NAME_MAP } from '../types';
+import { parseNum, sleep } from './fancy-stats';
 
 const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
 const DELAY_MS = 3000; // 예의상 3초
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function parseNum(text: string): number {
-  const cleaned = text.replace(/[^0-9.\-]/g, '');
-  const val = parseFloat(cleaned);
-  return isNaN(val) ? 0 : val;
-}
 
 // FanGraphs는 영문 팀명 사용
 const FG_TEAM_MAP: Record<string, TeamCode> = {
