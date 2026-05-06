@@ -16,12 +16,6 @@ function formatDate(raw: string): string {
   return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
 }
 
-// HHmm → HH:MM
-function formatTime(raw: string): string {
-  if (!raw || raw.length < 4) return '18:30';
-  return `${raw.slice(0, 2)}:${raw.slice(2, 4)}`;
-}
-
 function resolveTeamCode(name: string): TeamCode | null {
   // 정확한 매핑 먼저
   if (TEAM_NAME_MAP[name]) return TEAM_NAME_MAP[name];
@@ -139,10 +133,13 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
  * (engine/form.ts) 을 우선 사용. 이 함수는 DB 데이터 부족 시 fallback
  * 으로만 호출됨 (시즌 초기 / 운영 첫 주). TeamRankDaily 컬럼은 "최근
  * 10경기" 로 고정이라 asOfDate 필터링 불가 — fallback 에서만 허용.
+ *
+ * **`_season` 인자는 무시됨**. TeamRankDaily 페이지는 시즌 query 미지원
+ * — 호출 시점의 현재 시즌만 반환. 호출자 호환을 위해 시그니처 유지.
  */
 export async function fetchRecentForm(
   teamCode: TeamCode,
-  season: number,
+  _season: number,
   lastNGames = 10,
 ): Promise<number> {
   // KBO 공식 팀 기록 페이지에서 최근 경기 결과 수집
@@ -184,11 +181,18 @@ export async function fetchRecentForm(
  *
  * v0.5.22 이후 daily.ts 는 DB 기반 `calculateHeadToHead` 를 우선 사용.
  * 이 함수는 DB 에 h2h 데이터 0건일 때 fallback 으로만 호출됨.
+ *
+ * **`_season` 인자는 무시됨**. TeamRankVs 페이지는 시즌 query 미지원
+ * — 호출 시점의 현재 시즌만 반환. 호출자 호환을 위해 시그니처 유지.
+ *
+ * **`losses` 는 항상 0 반환** — TeamRankVs HTML 셀이 첫 숫자 (wins) 만
+ * 파싱. fallback 결과 winrate 계산 시 `wins / (wins + 0) = 1.0` 또는 0
+ * 으로 편향. DB 기반 `calculateHeadToHead` 가 정상 path 라 운영상 영향 X.
  */
 export async function fetchHeadToHead(
   homeTeam: TeamCode,
   awayTeam: TeamCode,
-  season: number,
+  _season: number,
 ): Promise<{ wins: number; losses: number }> {
   // KBO 공식 상대전적 페이지
   const url = `${BASE_URL}/Record/TeamRank/TeamRankVs.aspx`;
