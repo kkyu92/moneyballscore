@@ -21,7 +21,7 @@ import type { PredictionHistory } from '../agents/calibration-agent';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { runPostviewDaily } from './postview-daily';
 import { buildSummaryPredictions, type SummaryRow } from './daily-summary';
-import { assertSelectOk } from './db-error';
+import { assertSelectOk, assertWriteOk } from './db-error';
 import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
@@ -448,13 +448,21 @@ export async function runDailyPipeline(
       const teamId = teamIdMap[ts.team];
       if (!teamId) continue;
       const elo = eloRatings.find((e) => e.team === ts.team);
-      await db.from('team_season_stats').upsert({
-        team_id: teamId, season: CURRENT_SEASON,
-        team_woba: ts.woba, team_wrc_plus: ts.wrcPlus ?? null,
-        bullpen_fip: ts.bullpenFip, sfr: ts.sfr,
-        elo_rating: elo?.elo ?? null, elo_win_pct: elo?.winPct ?? null,
-        total_war: ts.totalWar, last_synced: new Date().toISOString(),
-      }, { onConflict: 'team_id,season' });
+      // cycle 172 silent drift family write 측 다섯 번째 진입 — .error 미체크 시
+      // RLS / FK / type cast 실패 silent skip → team_season_stats 누락 → 예측
+      // input 의 woba/bullpenFip 영구 0 또는 stale. assertWriteOk fail-loud.
+      try {
+        const upsertResult = await db.from('team_season_stats').upsert({
+          team_id: teamId, season: CURRENT_SEASON,
+          team_woba: ts.woba, team_wrc_plus: ts.wrcPlus ?? null,
+          bullpen_fip: ts.bullpenFip, sfr: ts.sfr,
+          elo_rating: elo?.elo ?? null, elo_win_pct: elo?.winPct ?? null,
+          total_war: ts.totalWar, last_synced: new Date().toISOString(),
+        }, { onConflict: 'team_id,season' });
+        assertWriteOk(upsertResult, 'daily.team_season_stats.upsert');
+      } catch (e) {
+        errors.push(`team_season_stats ${ts.team}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
   }
 
@@ -615,13 +623,26 @@ export async function runDailyPipeline(
 
     const homeTeamId = teamIdMap[game.homeTeam];
     const awayTeamId = teamIdMap[game.awayTeam];
+    // cycle 172 silent drift family write 측 다섯 번째 진입 — .error 미체크 시
+    // RLS / FK 실패 silent skip → games.home/away_sp_id 영구 NULL → 다음 backfill
+    // 또 같은 game 진입 + sp_id NULL 누적 detection 부재. assertWriteOk fail-loud.
     if (game.homeSP && homeTeamId) {
       const spId = await getOrCreatePlayerId(db, leagueId, game.homeSP, homeTeamId, 'P');
-      await db.from('games').update({ home_sp_id: spId }).eq('id', dbGameId);
+      try {
+        const updateResult = await db.from('games').update({ home_sp_id: spId }).eq('id', dbGameId);
+        assertWriteOk(updateResult, 'daily.games.home_sp_id.update');
+      } catch (e) {
+        errors.push(`games.home_sp_id ${game.homeTeam}v${game.awayTeam}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
     if (game.awaySP && awayTeamId) {
       const spId = await getOrCreatePlayerId(db, leagueId, game.awaySP, awayTeamId, 'P');
-      await db.from('games').update({ away_sp_id: spId }).eq('id', dbGameId);
+      try {
+        const updateResult = await db.from('games').update({ away_sp_id: spId }).eq('id', dbGameId);
+        assertWriteOk(updateResult, 'daily.games.away_sp_id.update');
+      } catch (e) {
+        errors.push(`games.away_sp_id ${game.homeTeam}v${game.awayTeam}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
 
     const payload = {
@@ -689,7 +710,14 @@ export async function runDailyPipeline(
       if (!existing.data?.weather) {
         const snap = await fetchForecastWeather(coords.lat, coords.lng, targetDate, hour);
         if (snap) {
-          await db.from('games').update({ weather: snap }).eq('id', dbGameId);
+          // cycle 172 silent drift family write 측 — .error 미체크 시 weather
+          // 영구 NULL → 날씨-결과 상관 분석 데이터 손실. assertWriteOk fail-loud.
+          try {
+            const updateResult = await db.from('games').update({ weather: snap }).eq('id', dbGameId);
+            assertWriteOk(updateResult, 'daily.games.weather.update');
+          } catch (e) {
+            errors.push(`games.weather ${game.homeTeam}v${game.awayTeam}: ${e instanceof Error ? e.message : String(e)}`);
+          }
         }
       }
     }
@@ -799,11 +827,16 @@ async function markNotificationFlag(
   );
 
   if (existing) {
-    await db.from('daily_notifications')
+    // cycle 172 silent drift family write 측 — .error 미체크 시 flag 영구 false
+    // → idempotent 가드 무력화 → 같은 알림 재전송 위험. assertWriteOk fail-loud
+    // (caller markNotificationFlag 호출 site 모두 try/catch wrap).
+    const updateResult = await db.from('daily_notifications')
       .update({ [flag]: true, ...extra }).eq('run_date', date);
+    assertWriteOk(updateResult, `daily.daily_notifications.${flag}.update`);
   } else {
-    await db.from('daily_notifications')
+    const insertResult = await db.from('daily_notifications')
       .insert({ run_date: date, [flag]: true, ...extra });
+    assertWriteOk(insertResult, `daily.daily_notifications.${flag}.insert`);
   }
 }
 
