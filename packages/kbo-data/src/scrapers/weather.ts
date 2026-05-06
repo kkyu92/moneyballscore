@@ -101,6 +101,48 @@ function buildBaseSnapshot(
   };
 }
 
+// Open-Meteo fetch fail 4 분기 — http_error / no_hourly / idx_not_found / fetch_error.
+// archive + forecast 두 fetcher 가 동일 4 분기 silent return null 반복하던 패턴을
+// 단일 helper 로 derive — silent drift family scrapers 차원 19번째 진입. 호출 site 가
+// 어느 분기로 fail 했는지 console.warn 으로 가시화 (이전: 4 fail mode 모두 silent null).
+export type WeatherFetchFailReason = 'http_error' | 'no_hourly' | 'idx_not_found' | 'fetch_error';
+
+export type OpenMeteoFetchResult<H extends BaseHourly> =
+  | { ok: true; hourly: H; idx: number }
+  | { ok: false; reason: WeatherFetchFailReason; status?: number };
+
+/**
+ * Open-Meteo hourly 응답을 fetch + 인덱스 lookup 단일 helper.
+ * archive (`/v1/archive`) + forecast (`/v1/forecast`) 양쪽 공유 — URL 만 차이.
+ * fail 시 4 분기 reason 박제 (silent return null → 가시화).
+ */
+export async function fetchOpenMeteoHourly<H extends BaseHourly>(
+  url: string,
+  date: string,
+  hour: number,
+): Promise<OpenMeteoFetchResult<H>> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return { ok: false, reason: 'http_error', status: res.status };
+    const json = (await res.json()) as { hourly?: H };
+    const hourly = json.hourly;
+    if (!hourly?.time) return { ok: false, reason: 'no_hourly' };
+    const idx = findHourIndex(hourly.time, date, hour);
+    if (idx < 0) return { ok: false, reason: 'idx_not_found' };
+    return { ok: true, hourly, idx };
+  } catch {
+    return { ok: false, reason: 'fetch_error' };
+  }
+}
+
+function logWeatherFail(
+  source: 'archive' | 'forecast',
+  fail: Exclude<OpenMeteoFetchResult<BaseHourly>, { ok: true }>,
+): void {
+  const suffix = fail.status ? ` (HTTP ${fail.status})` : '';
+  console.warn(`[weather] ${source} fetch failed: ${fail.reason}${suffix}`);
+}
+
 /** 과거 실측 — 경기 종료 후 또는 당일 몇 시간 지난 이후. */
 export async function fetchArchiveWeather(
   lat: number,
@@ -114,22 +156,17 @@ export async function fetchArchiveWeather(
     `&start_date=${date}&end_date=${date}` +
     `&hourly=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m` +
     `&timezone=Asia/Seoul`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const json = (await res.json()) as ArchiveResponse;
-    const hourly = json.hourly;
-    if (!hourly?.time) return null;
-    const idx = findHourIndex(hourly.time, date, hour);
-    if (idx < 0) return null;
-    return {
-      ...buildBaseSnapshot(hourly, idx),
-      precipMm: Math.round((hourly.precipitation[idx] ?? 0) * 10) / 10,
-      source: 'open-meteo-archive',
-    };
-  } catch {
+  const result = await fetchOpenMeteoHourly<NonNullable<ArchiveResponse['hourly']>>(url, date, hour);
+  if (!result.ok) {
+    logWeatherFail('archive', result);
     return null;
   }
+  const { hourly, idx } = result;
+  return {
+    ...buildBaseSnapshot(hourly, idx),
+    precipMm: Math.round((hourly.precipitation[idx] ?? 0) * 10) / 10,
+    source: 'open-meteo-archive',
+  };
 }
 
 /** 예보 — 오늘 or 미래 경기. 예측 엔진이 저장 시점 호출. */
@@ -145,20 +182,15 @@ export async function fetchForecastWeather(
     `&start_date=${date}&end_date=${date}` +
     `&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m` +
     `&timezone=Asia/Seoul`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const json = (await res.json()) as ForecastResponse;
-    const hourly = json.hourly;
-    if (!hourly?.time) return null;
-    const idx = findHourIndex(hourly.time, date, hour);
-    if (idx < 0) return null;
-    return {
-      ...buildBaseSnapshot(hourly, idx),
-      precipPct: hourly.precipitation_probability[idx] ?? 0,
-      source: 'open-meteo-forecast',
-    };
-  } catch {
+  const result = await fetchOpenMeteoHourly<NonNullable<ForecastResponse['hourly']>>(url, date, hour);
+  if (!result.ok) {
+    logWeatherFail('forecast', result);
     return null;
   }
+  const { hourly, idx } = result;
+  return {
+    ...buildBaseSnapshot(hourly, idx),
+    precipPct: hourly.precipitation_probability[idx] ?? 0,
+    source: 'open-meteo-forecast',
+  };
 }
