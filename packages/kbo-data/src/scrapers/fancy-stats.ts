@@ -51,6 +51,17 @@ function parseNum(text: string): number {
   return isNaN(val) ? 0 : val;
 }
 
+// parseNum 의 NaN 0-fallback 가시화 helper. parseNum 자체는 호환성 유지
+// (단순 호출자용). 테이블 파서는 NaN ratio 측정으로 silent drift 차단 —
+// xfip fallback (cycle 145) / totalWar=0 stub (cycle 137) / winPct=0.5 stub
+// (cycle 138) family 와 동일 패턴.
+export function parseNumWithFallback(text: string): { value: number; fellBack: boolean } {
+  const cleaned = text.replace(/[^0-9.\-]/g, '');
+  const val = parseFloat(cleaned);
+  if (isNaN(val)) return { value: 0, fellBack: true };
+  return { value: val, fellBack: false };
+}
+
 /**
  * Fancy Stats 이름 셀 파싱. 현재 구조는 "Eng Name | 한글명" 단일 셀.
  * 한글 이름만 추출 (팀 매칭·DB 저장에 사용).
@@ -73,31 +84,55 @@ function parseNameCell(raw: string): string {
 export function parsePitchersFromHtml(html: string): PitcherStats[] {
   const $ = cheerio.load(html);
 
-  const readPitcherTable = (idx: number): Map<string, { team: string; stat: number }> => {
+  const readPitcherTable = (
+    idx: number,
+    label: string,
+  ): Map<string, { team: string; stat: number }> => {
     const m = new Map<string, { team: string; stat: number }>();
+    let nanCount = 0;
+    let totalRows = 0;
     $('table').eq(idx).find('tbody tr').each((_, row) => {
       const cells = $(row).find('td');
       if (cells.length < 5) return;
       const korName = parseNameCell(cells.eq(1).text());
       const team = cells.eq(2).text().trim();
-      const stat = parseNum(cells.eq(4).text());
-      if (korName && team) m.set(`${korName}@${team}`, { team, stat });
+      const { value: stat, fellBack } = parseNumWithFallback(cells.eq(4).text());
+      if (korName && team) {
+        totalRows += 1;
+        if (fellBack) nanCount += 1;
+        m.set(`${korName}@${team}`, { team, stat });
+      }
     });
+    if (totalRows === 0) {
+      console.warn('[parsePitchersFromHtml] empty table silent drift', {
+        tableIndex: idx,
+        label,
+        ratio: '1.00',
+      });
+    } else if (nanCount > 0) {
+      console.warn('[parsePitchersFromHtml] parseNum NaN fallback to 0 silent drift', {
+        tableIndex: idx,
+        label,
+        nanCount,
+        totalRows,
+        ratio: (nanCount / totalRows).toFixed(2),
+      });
+    }
     return m;
   };
 
-  const warMapT = readPitcherTable(4);
+  const warMapT = readPitcherTable(4, 'war');
   const fipMap = new Map<string, { team: string; fip: number }>();
-  for (const [k, v] of readPitcherTable(5)) fipMap.set(k, { team: v.team, fip: v.stat });
+  for (const [k, v] of readPitcherTable(5, 'fip')) fipMap.set(k, { team: v.team, fip: v.stat });
 
   const xfipMap = new Map<string, number>();
-  for (const [k, v] of readPitcherTable(6)) xfipMap.set(k, v.stat);
+  for (const [k, v] of readPitcherTable(6, 'xfip')) xfipMap.set(k, v.stat);
 
   const warMap = new Map<string, number>();
   for (const [k, v] of warMapT) warMap.set(k, v.stat);
 
   const kMap = new Map<string, number>();
-  for (const [k, v] of readPitcherTable(7)) kMap.set(k, v.stat);
+  for (const [k, v] of readPitcherTable(7, 'kPer9')) kMap.set(k, v.stat);
 
   // xfip fallback silent drift family (cycle 137/138 stub 가시화 패턴 동일):
   // xfipMap 에 없으면 fip 값 박제 → predictor weight (sp_fip 0.15 / sp_xfip 0.05)
@@ -222,6 +257,8 @@ export function parseBattersFromHtml(html: string): BatterStats[] {
     idx: number,
     statKey: 'war' | 'wrcPlus' | 'ops' | 'iso',
   ) => {
+    let nanCount = 0;
+    let totalRows = 0;
     $('table')
       .eq(idx)
       .find('tbody tr')
@@ -230,25 +267,42 @@ export function parseBattersFromHtml(html: string): BatterStats[] {
         if (cells.length < 6) return;
         const korName = parseNameCell(cells.eq(1).text());
         const team = cells.eq(2).text().trim();
-        const age = parseNum(cells.eq(3).text());
+        const ageParsed = parseNumWithFallback(cells.eq(3).text());
         const position = cells.eq(4).text().trim();
-        const stat = parseNum(cells.eq(5).text());
+        const statParsed = parseNumWithFallback(cells.eq(5).text());
         if (!korName || !team) return;
+        totalRows += 1;
+        if (statParsed.fellBack) nanCount += 1;
         const key = `${korName}@${team}`;
         const existing = acc.get(key) ?? {
           team,
           position,
-          age,
+          age: ageParsed.value,
           war: 0,
           wrcPlus: 0,
           ops: 0,
           iso: 0,
         };
-        existing[statKey] = stat;
+        existing[statKey] = statParsed.value;
         if (!existing.position && position) existing.position = position;
-        if (!existing.age && age) existing.age = age;
+        if (!existing.age && ageParsed.value) existing.age = ageParsed.value;
         acc.set(key, existing);
       });
+    if (totalRows === 0) {
+      console.warn('[parseBattersFromHtml] empty table silent drift', {
+        tableIndex: idx,
+        label: statKey,
+        ratio: '1.00',
+      });
+    } else if (nanCount > 0) {
+      console.warn('[parseBattersFromHtml] parseNum NaN fallback to 0 silent drift', {
+        tableIndex: idx,
+        label: statKey,
+        nanCount,
+        totalRows,
+        ratio: (nanCount / totalRows).toFixed(2),
+      });
+    }
   };
 
   readTable(0, 'war');

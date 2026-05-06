@@ -5,6 +5,8 @@ import {
   fetchTeamStats,
   fetchEloRatings,
   parsePitchersFromHtml,
+  parseBattersFromHtml,
+  parseNumWithFallback,
 } from '../scrapers/fancy-stats';
 
 describe('detectFancyStatsFallbacks', () => {
@@ -272,5 +274,205 @@ describe('parsePitchersFromHtml xfip fallback to fip silent drift 가시화', ()
         typeof call[0] === 'string' && call[0].includes('xfip fallback to fip silent drift'),
     );
     expect(fallbackWarns.length).toBe(0);
+  });
+});
+
+describe('parseNumWithFallback', () => {
+  it('정상 숫자 → fellBack=false', () => {
+    expect(parseNumWithFallback('3.45')).toEqual({ value: 3.45, fellBack: false });
+    expect(parseNumWithFallback('-1.2')).toEqual({ value: -1.2, fellBack: false });
+    expect(parseNumWithFallback('0')).toEqual({ value: 0, fellBack: false });
+  });
+
+  it('숫자 추출 가능한 셀 → 정상 파싱', () => {
+    expect(parseNumWithFallback('3.40 (avg)')).toEqual({ value: 3.4, fellBack: false });
+    expect(parseNumWithFallback('1,500')).toEqual({ value: 1500, fellBack: false });
+  });
+
+  it('빈 셀 / 숫자 부재 → fellBack=true + value=0', () => {
+    expect(parseNumWithFallback('')).toEqual({ value: 0, fellBack: true });
+    expect(parseNumWithFallback('—')).toEqual({ value: 0, fellBack: true });
+    expect(parseNumWithFallback('N/A')).toEqual({ value: 0, fellBack: true });
+    expect(parseNumWithFallback('   ')).toEqual({ value: 0, fellBack: true });
+  });
+});
+
+describe('parsePitchersFromHtml parseNum NaN fallback to 0 silent drift 가시화', () => {
+  // table 0~3 batter (empty), 4 WAR / 5 FIP / 6 xFIP / 7 K/9
+  const buildHtml = (warStat1: string, warStat2: string) => `
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>${warStat1}</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>${warStat2}</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.50</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>3.80</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.40</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>3.75</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>9.5</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>8.2</td></tr>
+    </tbody></table>
+  `;
+
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('정상 숫자 stat → NaN warn 호출 X', () => {
+    const html = buildHtml('3.2', '2.8');
+    parsePitchersFromHtml(html);
+    const nanWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('parseNum NaN fallback to 0 silent drift'),
+    );
+    expect(nanWarns.length).toBe(0);
+  });
+
+  it('일부 셀 NaN → war 테이블 warn 1회 + ratio 측정', () => {
+    // 원태인 war 셀 = 빈 문자 → NaN → 0 silent
+    const html = buildHtml('3.2', '');
+    const pitchers = parsePitchersFromHtml(html);
+    const won = pitchers.find((p) => p.name === '원태인');
+    expect(won?.war).toBe(0);
+
+    const nanWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('parseNum NaN fallback to 0 silent drift'),
+    );
+    const warTableWarn = nanWarns.find(
+      (call: unknown[]) =>
+        typeof call[1] === 'object' && call[1] !== null && (call[1] as Record<string, unknown>).label === 'war',
+    );
+    expect(warTableWarn).toBeDefined();
+    expect(warTableWarn?.[1]).toMatchObject({
+      tableIndex: 4,
+      label: 'war',
+      nanCount: 1,
+      totalRows: 2,
+      ratio: '0.50',
+    });
+  });
+
+  it('전체 셀 em-dash → war 테이블 warn 1회 + ratio=1.00', () => {
+    const html = buildHtml('—', '—');
+    parsePitchersFromHtml(html);
+    const nanWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('parseNum NaN fallback to 0 silent drift'),
+    );
+    const warTableWarn = nanWarns.find(
+      (call: unknown[]) =>
+        typeof call[1] === 'object' && call[1] !== null && (call[1] as Record<string, unknown>).label === 'war',
+    );
+    expect(warTableWarn?.[1]).toMatchObject({
+      label: 'war',
+      nanCount: 2,
+      totalRows: 2,
+      ratio: '1.00',
+    });
+  });
+
+  it('table 4 (war) 0건 → empty table warn', () => {
+    // war 테이블 비어있음 + fip/xfip/k9 모두 차있음
+    const html = `
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody>
+        <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.50</td></tr>
+      </tbody></table>
+      <table><tbody>
+        <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.40</td></tr>
+      </tbody></table>
+      <table><tbody>
+        <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>9.5</td></tr>
+      </tbody></table>
+    `;
+    parsePitchersFromHtml(html);
+    const emptyWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('empty table silent drift'),
+    );
+    const warTableWarn = emptyWarns.find(
+      (call: unknown[]) =>
+        typeof call[1] === 'object' && call[1] !== null && (call[1] as Record<string, unknown>).label === 'war',
+    );
+    expect(warTableWarn).toBeDefined();
+    expect(warTableWarn?.[1]).toMatchObject({ tableIndex: 4, label: 'war', ratio: '1.00' });
+  });
+});
+
+describe('parseBattersFromHtml parseNum NaN fallback to 0 silent drift 가시화', () => {
+  // table 0 WAR / 1 wRC+ / 2 OPS / 3 ISO. cells.length>=6 강제 (rank/name/team/age/pos/stat)
+  const buildHtml = (warStat: string) => `
+    <table><tbody>
+      <tr><td>1</td><td>Lee | 이정후</td><td>Kiwoom Heroes</td><td>25</td><td>OF</td><td>${warStat}</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Lee | 이정후</td><td>Kiwoom Heroes</td><td>25</td><td>OF</td><td>140</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Lee | 이정후</td><td>Kiwoom Heroes</td><td>25</td><td>OF</td><td>0.890</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Lee | 이정후</td><td>Kiwoom Heroes</td><td>25</td><td>OF</td><td>0.180</td></tr>
+    </tbody></table>
+  `;
+
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('정상 stat → NaN warn 호출 X', () => {
+    parseBattersFromHtml(buildHtml('3.5'));
+    const nanWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('parseNum NaN fallback to 0 silent drift'),
+    );
+    expect(nanWarns.length).toBe(0);
+  });
+
+  it('war 셀 NaN → war 테이블 warn 1회 + ratio=1.00 + value=0 silent', () => {
+    const batters = parseBattersFromHtml(buildHtml(''));
+    expect(batters).toHaveLength(1);
+    expect(batters[0].war).toBe(0);
+    expect(batters[0].wrcPlus).toBe(140);
+    const nanWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('parseNum NaN fallback to 0 silent drift'),
+    );
+    const warTableWarn = nanWarns.find(
+      (call: unknown[]) =>
+        typeof call[1] === 'object' && call[1] !== null && (call[1] as Record<string, unknown>).label === 'war',
+    );
+    expect(warTableWarn?.[1]).toMatchObject({
+      tableIndex: 0,
+      label: 'war',
+      nanCount: 1,
+      totalRows: 1,
+      ratio: '1.00',
+    });
   });
 });
