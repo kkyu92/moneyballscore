@@ -16,6 +16,18 @@ export function sanitizeKboJsonResponse(text: string): string {
   return text.slice(0, jsonEnd);
 }
 
+// fetch 결과 res.ok 검증 — 6 scraper 파일 (kbo-live / kbo-official / kbo-pitcher /
+// naver-schedule / naver-record / fancy-stats) 공유. 통일 형식: `${label}: ${status} ${statusText}`.
+// statusText 가 빈 문자열이면 status 만 포함 (trim). silent drift family scrapers 차원
+// 18번째 진입 — 호출 site 가 매번 자체 throw 했을 때 status only / statusText 포함 mismatch
+// 박제 패턴. naver-record 등 404→null fallback 케이스는 호출 site 에서 status 분기 후
+// 본 helper 호출 (404 외 path).
+export function assertResponseOk(res: Response, label: string): void {
+  if (res.ok) return;
+  const suffix = res.statusText ? `${res.status} ${res.statusText}` : `${res.status}`;
+  throw new Error(`${label}: ${suffix}`);
+}
+
 // ============================================
 // 스크래퍼 반환 타입
 // ============================================

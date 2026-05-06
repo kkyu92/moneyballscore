@@ -22,7 +22,7 @@
 
 import * as cheerio from 'cheerio';
 import type { PitcherStats } from '../types';
-import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, resolveKoreanTeamCode } from '../types';
+import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, assertResponseOk, resolveKoreanTeamCode } from '../types';
 // KBO 리그 평균 ERA - FIP 구성요소 조정. MLB 는 3.10 고정 관행, KBO 는
 // 공식 수치 미공개라 3.10 으로 근사. 시즌 말 평가 보정 필요 시 변경.
 const FIP_CONSTANT = 3.1;
@@ -123,9 +123,7 @@ export async function fetchKboPitcherBasic(): Promise<PitcherStats[]> {
   const res = await fetch(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
-  if (!res.ok) {
-    throw new Error(`KBO pitcher basic error: ${res.status}`);
-  }
+  assertResponseOk(res, 'KBO pitcher basic error');
   const html = await res.text();
   return parsePitcherBasicFromHtml(html);
 }
