@@ -10,7 +10,6 @@ export interface LiveGameState {
   inning: number;         // 현재 이닝 (1~12+)
   isTop: boolean;         // true=초(원정공격), false=말(홈공격)
   outs: number;
-  runners: string;        // 예: "1,2루" or ""
   status: 'live' | 'final' | 'scheduled';
 }
 
@@ -67,13 +66,7 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     const homeScore = Number(raw.B_SCORE_CN) || 0;
     const awayScore = Number(raw.T_SCORE_CN) || 0;
 
-    // 주자/아웃 정보
     const outs = Number(raw.OUT_CN) || 0;
-    const runners = [
-      raw.B1_BAT_ORDER_NO > 0 ? '1루' : '',
-      raw.B2_BAT_ORDER_NO > 0 ? '2루' : '',
-      raw.B3_BAT_ORDER_NO > 0 ? '3루' : '',
-    ].filter(Boolean).join(',');
 
     liveGames.push({
       externalGameId: raw.G_ID,
@@ -84,7 +77,6 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
       inning,
       isTop,
       outs,
-      runners,
       status,
     });
   }
