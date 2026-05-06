@@ -1,7 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
-import { resolveKoreanTeamCode } from '../types';
-
-const BASE_URL = 'https://www.koreabaseball.com';
+import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode } from '../types';
 
 export interface LiveGameState {
   externalGameId: string;

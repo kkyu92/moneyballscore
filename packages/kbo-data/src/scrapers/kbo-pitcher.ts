@@ -22,9 +22,7 @@
 
 import * as cheerio from 'cheerio';
 import type { PitcherStats } from '../types';
-import { resolveKoreanTeamCode } from '../types';
-
-const BASE_URL = 'https://www.koreabaseball.com';
+import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode } from '../types';
 // KBO 리그 평균 ERA - FIP 구성요소 조정. MLB 는 3.10 고정 관행, KBO 는
 // 공식 수치 미공개라 3.10 으로 근사. 시즌 말 평가 보정 필요 시 변경.
 const FIP_CONSTANT = 3.1;

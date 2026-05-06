@@ -1,5 +1,9 @@
 import type { TeamCode, GameStatus } from '@moneyball/shared';
 
+// KBO 공식 사이트 base URL — kbo-live / kbo-official / kbo-pitcher 공유.
+// fangraphs / fancy-stats 는 다른 도메인이라 자체 BASE_URL 유지.
+export const KBO_BASE_URL = 'https://www.koreabaseball.com';
+
 // ============================================
 // 스크래퍼 반환 타입
 // ============================================
