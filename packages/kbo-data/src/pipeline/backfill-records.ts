@@ -12,6 +12,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { assertSelectOk } from '@moneyball/shared';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 
@@ -44,7 +45,7 @@ async function loadDecidedGames(db: DB, season: number): Promise<GameRow[]> {
   const pageSize = 1000;
   let from = 0;
   for (;;) {
-    const { data, error } = await db
+    const result = await db
       .from('games')
       .select('id, game_date, external_game_id')
       .gte('game_date', `${season}-01-01`)
@@ -53,7 +54,9 @@ async function loadDecidedGames(db: DB, season: number): Promise<GameRow[]> {
       .not('external_game_id', 'is', null)
       .order('game_date', { ascending: true })
       .range(from, from + pageSize - 1);
-    if (error) throw new Error(error.message);
+    const { data } = assertSelectOk<
+      { id: number; game_date: string; external_game_id: string }[]
+    >(result, 'backfill-records.loadDecidedGames');
     if (!data || data.length === 0) break;
     for (const r of data) {
       out.push({
@@ -70,11 +73,15 @@ async function loadDecidedGames(db: DB, season: number): Promise<GameRow[]> {
 
 async function loadAlreadyCovered(db: DB, season: number): Promise<Set<number>> {
   // 해당 시즌 games 의 game_records 조회 — 이미 저장된 건 skip 옵션 제공
-  const { data } = await db
+  const result = await db
     .from('game_records')
     .select('game_id, game:games!inner(game_date)')
     .gte('game.game_date', `${season}-01-01`)
     .lte('game.game_date', `${season}-12-31`);
+  const { data } = assertSelectOk<{ game_id: number }[]>(
+    result,
+    'backfill-records.loadAlreadyCovered',
+  );
   const s = new Set<number>();
   for (const r of data || []) s.add(r.game_id as number);
   return s;
