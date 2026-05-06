@@ -99,21 +99,39 @@ export function parsePitchersFromHtml(html: string): PitcherStats[] {
   const kMap = new Map<string, number>();
   for (const [k, v] of readPitcherTable(7)) kMap.set(k, v.stat);
 
+  // xfip fallback silent drift family (cycle 137/138 stub 가시화 패턴 동일):
+  // xfipMap 에 없으면 fip 값 박제 → predictor weight (sp_fip 0.15 / sp_xfip 0.05)
+  // 가 사실상 sp_fip 0.20 silent 중복. snapshot-pitchers `xfip !== fip` source
+  // 라벨링도 fallback row 를 'kbo-basic1' 로 오분류. 결손률 측정 가시화로
+  // 다음 cycle 의 root fix (table 6 fetch 정합성 / 별도 source 필드) trigger.
   const pitchers: PitcherStats[] = [];
+  const xfipFallbackKeys: string[] = [];
   for (const [key, { team, fip }] of fipMap) {
     const [name] = key.split('@');
     const teamCode = resolveTeamCode(team);
     if (!teamCode) continue;
 
+    const xfipFromMap = xfipMap.get(key);
+    if (xfipFromMap === undefined) xfipFallbackKeys.push(key);
+
     pitchers.push({
       name,
       team: teamCode,
       fip,
-      xfip: xfipMap.get(key) ?? fip,
+      xfip: xfipFromMap ?? fip,
       era: 0,
       innings: 0,
       war: warMap.get(key) ?? 0,
       kPer9: kMap.get(key) ?? 0,
+    });
+  }
+
+  if (xfipFallbackKeys.length > 0 && fipMap.size > 0) {
+    console.warn('[parsePitchersFromHtml] xfip fallback to fip silent drift', {
+      fallbackCount: xfipFallbackKeys.length,
+      totalPitchers: fipMap.size,
+      fallbackRatio: (xfipFallbackKeys.length / fipMap.size).toFixed(2),
+      sampleKeys: xfipFallbackKeys.slice(0, 3),
     });
   }
 

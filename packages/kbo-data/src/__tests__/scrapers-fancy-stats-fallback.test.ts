@@ -4,6 +4,7 @@ import {
   hasAnyFallback,
   fetchTeamStats,
   fetchEloRatings,
+  parsePitchersFromHtml,
 } from '../scrapers/fancy-stats';
 
 describe('detectFancyStatsFallbacks', () => {
@@ -152,5 +153,124 @@ describe('fetchEloRatings winPct=0.5 stub 가시화', () => {
       (call: unknown[]) => typeof call[0] === 'string' && call[0].includes('winPct=0.5 stub'),
     );
     expect(stubWarns.length).toBe(0);
+  });
+});
+
+describe('parsePitchersFromHtml xfip fallback to fip silent drift 가시화', () => {
+  // table 0~3 batter (empty), 4 WAR / 5 FIP / 6 xFIP / 7 K/9. cells.length>=5 강제.
+  const buildHtml = (xfipRows: string) => `
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.2</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>2.8</td></tr>
+    </tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.50</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>3.80</td></tr>
+    </tbody></table>
+    <table><tbody>${xfipRows}</tbody></table>
+    <table><tbody>
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>9.5</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>8.2</td></tr>
+    </tbody></table>
+  `;
+
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('xfip 전부 정상 cover → console.warn 호출 X (silent drift 부재)', () => {
+    const html = buildHtml(`
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.40</td></tr>
+      <tr><td>2</td><td>Won | 원태인</td><td>Samsung Lions</td><td>25</td><td>3.75</td></tr>
+    `);
+    const pitchers = parsePitchersFromHtml(html);
+    expect(pitchers).toHaveLength(2);
+    // xfip 정상 매핑 (fip 와 다른 값)
+    expect(pitchers.find((p) => p.name === '류현진')?.xfip).toBe(3.40);
+    expect(pitchers.find((p) => p.name === '원태인')?.xfip).toBe(3.75);
+    const fallbackWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('xfip fallback to fip silent drift'),
+    );
+    expect(fallbackWarns.length).toBe(0);
+  });
+
+  it('xfip 일부 결손 → console.warn 1회 + fallbackRatio 측정 + xfip=fip silent 박제', () => {
+    // 류현진 만 xfip 있고 원태인 누락
+    const html = buildHtml(`
+      <tr><td>1</td><td>Ryu | 류현진</td><td>Hanwha Eagles</td><td>37</td><td>3.40</td></tr>
+    `);
+    const pitchers = parsePitchersFromHtml(html);
+    expect(pitchers).toHaveLength(2);
+    expect(pitchers.find((p) => p.name === '류현진')?.xfip).toBe(3.40);
+    // 원태인 = xfip fallback (fip 값 silent 중복)
+    const won = pitchers.find((p) => p.name === '원태인');
+    expect(won?.xfip).toBe(3.80);
+    expect(won?.fip).toBe(3.80);
+    // snapshot-pitchers source 라벨링 silent drift evidence:
+    // war>0 + xfip===fip 로 'kbo-basic1' 오분류 가능 — 본 테스트가 그 패턴 박제
+    expect(won?.war).toBe(2.8);
+
+    const fallbackWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('xfip fallback to fip silent drift'),
+    );
+    expect(fallbackWarns.length).toBe(1);
+    expect(fallbackWarns[0][1]).toMatchObject({
+      fallbackCount: 1,
+      totalPitchers: 2,
+      fallbackRatio: '0.50',
+    });
+  });
+
+  it('xfip 전부 결손 → console.warn 1회 + ratio=1.00', () => {
+    const html = buildHtml('');
+    const pitchers = parsePitchersFromHtml(html);
+    expect(pitchers).toHaveLength(2);
+    // 모든 투수 xfip = fip silent drift
+    for (const p of pitchers) {
+      expect(p.xfip).toBe(p.fip);
+    }
+
+    const fallbackWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('xfip fallback to fip silent drift'),
+    );
+    expect(fallbackWarns.length).toBe(1);
+    expect(fallbackWarns[0][1]).toMatchObject({
+      fallbackCount: 2,
+      totalPitchers: 2,
+      fallbackRatio: '1.00',
+    });
+  });
+
+  it('fipMap 0건 (table 5 비어있음) → console.warn 호출 X (안전)', () => {
+    const html = `
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+      <table><tbody></tbody></table>
+    `;
+    const pitchers = parsePitchersFromHtml(html);
+    expect(pitchers).toHaveLength(0);
+    const fallbackWarns = warnSpy.mock.calls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('xfip fallback to fip silent drift'),
+    );
+    expect(fallbackWarns.length).toBe(0);
   });
 });
