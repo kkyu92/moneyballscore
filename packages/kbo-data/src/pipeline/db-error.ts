@@ -8,5 +8,5 @@
  * 새 호출 site 는 직접 `@moneyball/shared` 에서 import 권장.
  */
 
-export { assertSelectOk } from '@moneyball/shared';
-export type { SelectResult } from '@moneyball/shared';
+export { assertSelectOk, assertWriteOk } from '@moneyball/shared';
+export type { SelectResult, WriteResult } from '@moneyball/shared';
