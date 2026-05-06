@@ -5,6 +5,7 @@ import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scr
 import { runPostviewDaily } from './postview-daily';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
+import { extractReasoningHomeWinProb } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -128,9 +129,13 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       if (!preGame) continue;
 
-      // pre_game에서 홈팀 승리확률 추출
-      const preGameReasoning = preGame.reasoning as any;
-      const preGameHomeProb = preGameReasoning?.homeWinProb ?? 0.5;
+      // pre_game에서 홈팀 승리확률 추출 — cycle 199 silent drift family pipeline 차원
+      // 첫 진입. extractReasoningHomeWinProb 단일 소스 derive (3 fail reason 분기
+      // console.warn 가시화: no_reasoning / no_field / invalid_value).
+      const preGameHomeProb = extractReasoningHomeWinProb(
+        preGame.reasoning as { homeWinProb?: unknown } | null,
+        'live.runLiveUpdate preGame',
+      );
 
       // 이닝별 보정
       const adjustedHomeProb = adjustWinProbability(

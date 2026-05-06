@@ -1,4 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
+import { extractReasoningHomeWinProb } from '../types';
 
 // `buildDailySummary` (daily.ts) read 측 silent drift 차단:
 //
@@ -39,6 +40,6 @@ export function buildSummaryPredictions(rows: SummaryRow[]): SummaryPrediction[]
     awayTeam: p.game?.away_team?.code as TeamCode,
     predictedWinner: p.winner?.code as TeamCode,
     confidence: p.confidence ?? 0,
-    homeWinProb: p.reasoning?.homeWinProb ?? 0.5,
+    homeWinProb: extractReasoningHomeWinProb(p.reasoning, 'daily-summary.buildSummaryPredictions'),
   }));
 }
