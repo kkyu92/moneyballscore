@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared';
 
 export interface TeamPitcherRow {
   playerId: number;
@@ -92,11 +92,17 @@ export async function buildTeamProfile(
 
   const supabase = await createClient();
 
-  const { data: teamRow } = await supabase
+  // assertSelectOk — cycle 151 silent drift family detection. teams select 가 .error
+  // 미체크 시 DB 오류에도 teamRow=null silent fallback → 빈 프로필 반환되어 사용자에게
+  // "팀 데이터 없음" 표시 (실제로는 DB 오류). assertSelectOk 로 fail-loud 전환 — error
+  // 시 page boundary 가 처리. .maybeSingle() 빈 row 정상 케이스는 data=null 그대로.
+  const teamResult = await supabase
     .from("teams")
     .select("id")
     .eq("code", teamCode)
     .maybeSingle();
+
+  const { data: teamRow } = assertSelectOk(teamResult, "buildTeamProfile teams");
 
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
   if (teamId == null) {
@@ -130,7 +136,12 @@ export async function buildTeamProfile(
   // 이 팀이 home 또는 away 인 게임만 SQL 레벨로 필터링.
   // 이전엔 전체 pre_game predictions 풀스캔 후 JS 필터 → 매번 수천 row 가져옴.
   // 이제 games 테이블에서 (home_team_id=teamId OR away_team_id=teamId) 만 select.
-  const { data } = await supabase
+  //
+  // assertSelectOk — cycle 151 silent drift family detection. 기존 `const { data }` 직접
+  // destruct 시 DB 오류에 data=null silent fallback → 빈 recentGames/topPitchers 반환되어
+  // 사용자가 "이 팀 데이터 없음" 으로 오해 (실제로는 DB 오류). predictions!inner inner-join
+  // 정합성 (pre_game 없는 game 의도적 제외) 은 그대로, .error 만 fail-loud 로.
+  const gamesResult = await supabase
     .from("games")
     .select(
       `
@@ -153,6 +164,8 @@ export async function buildTeamProfile(
     )
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
     .eq("predictions.prediction_type", "pre_game");
+
+  const { data } = assertSelectOk(gamesResult, "buildTeamProfile games");
 
   type GameRow = NonNullable<PredRow["game"]> & {
     predictions: Array<{
