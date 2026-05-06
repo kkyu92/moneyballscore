@@ -15,7 +15,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { TeamCode } from '@moneyball/shared';
+import { assertSelectOk, type TeamCode } from '@moneyball/shared';
 import { runPostview, type ActualResult, type OriginalPrediction } from '../agents/postview';
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
@@ -61,7 +61,8 @@ export async function runPostviewDaily(
   };
 
   // 1. completed 경기 + pre_game 예측 있음 + post_game 없음
-  const { data: games, error: gamesError } = await db
+  // cycle 161 silent drift family — games select assertSelectOk 통일.
+  const gamesResult = await db
     .from('games')
     .select(`
       id, game_date, game_time, stadium, home_score, away_score,
@@ -72,11 +73,8 @@ export async function runPostviewDaily(
     `)
     .eq('game_date', date)
     .eq('status', 'final');
-
-  if (gamesError) {
-    result.errors.push(`games query: ${gamesError.message}`);
-    return result;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: games } = assertSelectOk<any[]>(gamesResult, 'postview-daily.runPostviewDaily games');
   if (!games || games.length === 0) {
     console.log(`[postview-daily] ${date}: no completed games`);
     return result;
@@ -101,26 +99,39 @@ export async function runPostviewDaily(
       continue;
     }
 
-    // 2. pre_game 예측 조회
-    const { data: preGame } = await db
+    // 2. pre_game 예측 조회 — cycle 161 silent drift family. assertSelectOk fail-loud.
+    const preGameResult = await db
       .from('predictions')
       .select('id, predicted_winner, confidence, factors, reasoning, home_elo, away_elo')
       .eq('game_id', gameId)
       .eq('prediction_type', 'pre_game')
       .maybeSingle();
+    const { data: preGame } = assertSelectOk<{
+      id: number;
+      predicted_winner: number;
+      confidence: number;
+      factors: unknown;
+      reasoning: unknown;
+      home_elo: number | null;
+      away_elo: number | null;
+    }>(preGameResult, 'postview-daily.runPostviewDaily preGame');
 
     if (!preGame) {
       result.skipped++;
       continue;
     }
 
-    // 3. post_game row 이미 있으면 skip (멱등성)
-    const { data: existingPost } = await db
+    // 3. post_game row 이미 있으면 skip (멱등성) — cycle 161 silent drift family.
+    const existingPostResult = await db
       .from('predictions')
       .select('id')
       .eq('game_id', gameId)
       .eq('prediction_type', 'post_game')
       .maybeSingle();
+    const { data: existingPost } = assertSelectOk<{ id: number }>(
+      existingPostResult,
+      'postview-daily.runPostviewDaily existingPost',
+    );
 
     if (existingPost) {
       result.skipped++;
@@ -204,7 +215,9 @@ export async function runPostviewDaily(
 
 async function lookupTeamCodeById(db: DB, teamId: number | null): Promise<TeamCode | null> {
   if (teamId == null) return null;
-  const { data } = await db.from('teams').select('code').eq('id', teamId).maybeSingle();
+  // cycle 161 silent drift family — teams select assertSelectOk 통일.
+  const teamResult = await db.from('teams').select('code').eq('id', teamId).maybeSingle();
+  const { data } = assertSelectOk<{ code: string }>(teamResult, 'postview-daily.lookupTeamCodeById');
   return (data?.code as TeamCode) ?? null;
 }
 
