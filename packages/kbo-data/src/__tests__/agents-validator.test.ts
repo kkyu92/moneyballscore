@@ -400,6 +400,25 @@ describe('buildInjectionText', () => {
     const text = buildInjectionText(ctx);
     expect(text).toContain('미확정');
   });
+
+  // cycle 179 — buildUserMessage (team-agent) 와 동일 소스 정렬 회귀 가드.
+  // SP WAR 가 다시 추가되거나 gameTime 이 빠지면 LLM 미노출 수치가 환각 검사 통과되는 silent drift 재발.
+  it('SP WAR 미포함 (LLM 미노출 → 환각 검사 통과 차단)', () => {
+    const text = buildInjectionText(makeContext());
+    // awaySPStats.war = 1.2, 다른 필드와 substring 충돌 없음 (parkFactor 1.02 는 "1.2" 미포함).
+    expect(text).not.toContain('1.2');
+  });
+
+  it('gameTime 포함 (시간 숫자 false positive 차단)', () => {
+    const text = buildInjectionText(makeContext());
+    expect(text).toContain('18:30');
+  });
+
+  it('recentForm Math.round(form*100)% 포맷 (team-agent buildUserMessage 와 동일)', () => {
+    const text = buildInjectionText(makeContext());
+    expect(text).toContain('70%');
+    expect(text).toContain('40%');
+  });
 });
 
 // ============================================
