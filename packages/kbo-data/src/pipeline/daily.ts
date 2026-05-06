@@ -23,6 +23,7 @@ import { runPostviewDaily } from './postview-daily';
 import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
+import { computeWinnerTeamId } from './winner-id';
 import {
   computePredictionHistory,
   type PredictionHistoryRow,
@@ -270,10 +271,9 @@ export async function runDailyPipeline(
         home_team_id: homeTeamId, away_team_id: awayTeamId,
         stadium: game.stadium, status: game.status,
         home_score: game.homeScore ?? null, away_score: game.awayScore ?? null,
-        winner_team_id:
-          game.status === 'final' && game.homeScore != null && game.awayScore != null
-            ? game.homeScore > game.awayScore ? homeTeamId : awayTeamId
-            : null,
+        winner_team_id: computeWinnerTeamId(
+          game.status, game.homeScore, game.awayScore, homeTeamId, awayTeamId,
+        ),
         external_game_id: game.externalGameId,
       };
     })
@@ -972,10 +972,9 @@ async function prefetchSchedule(
         status: g.status,
         home_score: g.homeScore ?? null,
         away_score: g.awayScore ?? null,
-        winner_team_id:
-          g.status === 'final' && g.homeScore != null && g.awayScore != null
-            ? g.homeScore > g.awayScore ? homeTeamId : awayTeamId
-            : null,
+        winner_team_id: computeWinnerTeamId(
+          g.status, g.homeScore, g.awayScore, homeTeamId, awayTeamId,
+        ),
         external_game_id: g.externalGameId,
       };
     })
