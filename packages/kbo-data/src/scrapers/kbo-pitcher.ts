@@ -21,9 +21,8 @@
  */
 
 import * as cheerio from 'cheerio';
-import type { TeamCode } from '@moneyball/shared';
 import type { PitcherStats } from '../types';
-import { TEAM_NAME_MAP } from '../types';
+import { resolveKoreanTeamCode } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 // KBO 리그 평균 ERA - FIP 구성요소 조정. MLB 는 3.10 고정 관행, KBO 는
@@ -70,7 +69,7 @@ export function calculateFIP(
  * 방어적 파싱:
  *   - 셀 개수 19 미만 행은 스킵 (헤더·합계행).
  *   - 선수명 한글 포함 체크로 헤더 (순위·선수명·팀명 텍스트) 오염 방지.
- *   - 팀명 TEAM_NAME_MAP 미매칭 시 스킵.
+ *   - 팀명 resolveKoreanTeamCode 미매칭 시 스킵 (한글 정확 매칭 + includes fallback).
  *   - IP 0 투수는 FIP 계산 불가 → 스킵.
  */
 export function parsePitcherBasicFromHtml(html: string): PitcherStats[] {
@@ -85,7 +84,7 @@ export function parsePitcherBasicFromHtml(html: string): PitcherStats[] {
     if (!/[가-힣]/.test(name)) return;
 
     const teamRaw = cells.eq(2).text().trim();
-    const teamCode = TEAM_NAME_MAP[teamRaw] as TeamCode | undefined;
+    const teamCode = resolveKoreanTeamCode(teamRaw);
     if (!teamCode) return;
 
     const era = Number.parseFloat(cells.eq(3).text().trim()) || 0;
