@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
-import { TEAM_NAME_MAP } from '../types';
+import { KBO_USER_AGENT, TEAM_NAME_MAP } from '../types';
 import { parseNum, sleep } from './fancy-stats';
 
 const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
@@ -44,7 +44,7 @@ export interface FanGraphsBatterData {
 export async function fetchBatterLeaders(season: number): Promise<FanGraphsBatterData[]> {
   const url = `${BASE_URL}/batting?season=${season}&split=&team=0&type=1&month=0&pos=all`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+    headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
   if (!res.ok) {
