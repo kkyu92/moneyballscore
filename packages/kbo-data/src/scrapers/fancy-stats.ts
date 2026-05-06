@@ -202,6 +202,11 @@ async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
  * 해서 커버리지 최대화.
  *
  * KBO 공식 호출 실패 시 Fancy Stats 만 반환 (graceful degrade).
+ *
+ * **`_season` 인자는 무시됨**. Fancy Stats `/leaders/` 는 시즌 query 미지원 —
+ * 호출 시점의 현재 시즌 데이터만 반환. historical season 전달 시 호출자가
+ * "특정 시즌 snapshot" 으로 신뢰하면 silent drift 발생 (cycle 137 totalWar=0
+ * stub / cycle 138 winPct=0.5 stub family — underscore prefix 가 unused 신호).
  */
 export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]> {
   const fancy = await fetchFancyStatsPitchers();
@@ -332,6 +337,9 @@ export function parseBattersFromHtml(html: string): BatterStats[] {
 
 /**
  * /leaders/ 페이지에서 타자 스탯 수집 (fetch → parse).
+ *
+ * **`_season` 인자는 무시됨**. fetchPitcherStats 와 동일 — Fancy Stats
+ * `/leaders/` 는 시즌 query 미지원, 호출 시점의 현재 시즌 데이터만 반환.
  */
 export async function fetchBatterStats(_season: number): Promise<BatterStats[]> {
   const url = `${BASE_URL}/leaders/`;
@@ -357,9 +365,14 @@ export async function fetchBatterStats(_season: number): Promise<BatterStats[]> 
  * team-agent LLM 프롬프트 + DB 모두 stub 0 진입 — fetchEloRatings 의
  * detectFancyStatsFallbacks family 가 elo/woba/fip/sfr 만 cover 하던 정합 누락을
  * stub 가시화로 채워 다음 cycle leaders 페이지 fetch 도입 trigger 로 활용.
+ *
+ * **`_season` 인자는 무시됨**. Fancy Stats `/elo/` 는 시즌 query 미지원 —
+ * fetchEloRatings 와 동일하게 호출 시점의 현재 시즌만 반환. underscore prefix
+ * 가 unused 신호 (fetchPitcherStats / fetchBatterStats 와 정렬, cycle 180
+ * silent drift family scrapers 차원 첫 진입).
  */
-export async function fetchTeamStats(season: number): Promise<TeamStats[]> {
-  const eloData = await fetchEloRatings(season);
+export async function fetchTeamStats(_season: number): Promise<TeamStats[]> {
+  const eloData = await fetchEloRatings(_season);
   if (eloData.length > 0) {
     console.warn('[fetchTeamStats] totalWar=0 stub for all teams — leaders 페이지 별도 수집 미구현', {
       teamCount: eloData.length,
@@ -416,9 +429,14 @@ export function hasAnyFallback(flags: FancyStatsFallbacks): boolean {
 }
 
 /**
- * /elo/ 페이지에서 Elo 레이팅 + 팀 통계 수집
+ * /elo/ 페이지에서 Elo 레이팅 + 팀 통계 수집.
+ *
+ * **`_season` 인자는 무시됨**. Fancy Stats `/elo/` 는 시즌 query 미지원 —
+ * 호출 시점의 현재 시즌만 반환. fetchPitcherStats / fetchBatterStats /
+ * fetchTeamStats 와 underscore prefix 정렬 (cycle 180 silent drift family
+ * scrapers 차원 첫 진입).
  */
-export async function fetchEloRatings(season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
+export async function fetchEloRatings(_season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
   const url = `${BASE_URL}/elo/`;
   const res = await fetch(url, {
     headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
