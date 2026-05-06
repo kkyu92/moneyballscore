@@ -4,6 +4,7 @@ import {
   type TeamCode,
   shortTeamName,
   winnerProbOf,
+  assertSelectOk,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -38,7 +39,12 @@ interface VerifiedPredictionRow {
 async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   const supabase = await createClient();
 
-  const { data } = await supabase
+  // assertSelectOk — cycle 154 silent drift family detection. predictions select
+  // 가 .error 미체크 → DB 오류 시 data=null silent fallback → 빈 배열 위장 →
+  // "아직 검증된 예측이 없습니다" 가짜 노출 + 적중률 0% silent 0/0 (실제로는 DB
+  // 오류). cycle 148/153 동일 family. assertSelectOk 로 fail-loud → error.tsx
+  // boundary 처리.
+  const result = await supabase
     .from('predictions')
     .select(`
       confidence, is_correct, prediction_type, reasoning,
@@ -54,6 +60,7 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
     .order('created_at', { ascending: false })
     .limit(100);
 
+  const { data } = assertSelectOk(result, "reviews getVerifiedPredictions");
   return (data ?? []) as unknown as VerifiedPredictionRow[];
 }
 
