@@ -7,7 +7,7 @@ import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard"
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { type TeamCode, shortTeamName } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa } from '@moneyball/shared';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -234,7 +234,7 @@ function buildArticleJsonLd(
     description:
       rate !== null
         ? `${date} KBO ${predN}경기 승부예측${excludeSuffix}. 현재 적중률 ${rate}% (${correct.length}/${verified.length}). 세이버메트릭스 기반 AI 분석.`
-        : `${date} KBO ${n}경기 승부예측${excludeSuffix}과 팩터별 분석.`,
+        : `${date} KBO ${n}경기 승부예측${excludeSuffix}${josa(`승부예측${excludeSuffix}`, "과", "와")} 팩터별 분석.`,
     datePublished: `${date}T09:00:00+09:00`,
     dateModified: new Date().toISOString(),
     author: {

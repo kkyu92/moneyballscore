@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { type TeamCode, shortTeamName } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,
@@ -28,7 +28,7 @@ export async function generateMetadata({
   const a = shortTeamName(pair.codeA);
   const b = shortTeamName(pair.codeB);
   const title = `${a} vs ${b} — 상대전적 & 예측 성과`;
-  const description = `${a}과 ${b}의 올 시즌 맞대결 기록 · AI 예측 적중률 · 경기 리스트. KBO 세이버메트릭스 기반 매치업 분석.`;
+  const description = `${a}${josa(a, "과", "와")} ${b}의 올 시즌 맞대결 기록 · AI 예측 적중률 · 경기 리스트. KBO 세이버메트릭스 기반 매치업 분석.`;
   return {
     title,
     description,

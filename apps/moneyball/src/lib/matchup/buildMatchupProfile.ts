@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, josa, ro, type TeamCode } from "@moneyball/shared";
 import type { MatchupPair } from "./canonicalPair";
 
 export interface MatchupGame {
@@ -115,7 +115,7 @@ function buildSummary(profile: {
   const bWin = sideStats.b.wins;
   const draw = finalGames - aWin - bWin;
 
-  let text = `${teamA.shortName}과 ${teamB.shortName}의 올 시즌 상대전적은 ${aWin}승 ${bWin}패`;
+  let text = `${teamA.shortName}${josa(teamA.shortName, "과", "와")} ${teamB.shortName}의 올 시즌 상대전적은 ${aWin}승 ${bWin}패`;
   if (draw > 0) text += ` ${draw}무`;
   text += `입니다.`;
 
@@ -124,7 +124,8 @@ function buildSummary(profile: {
     const leader = aWin > bWin ? teamA : teamB;
     const leaderWin = Math.max(aWin, bWin);
     const loserWin = Math.min(aWin, bWin);
-    text += ` ${leader.shortName}이 ${leaderWin}-${loserWin}로 앞섭니다.`;
+    const score = `${leaderWin}-${loserWin}`;
+    text += ` ${leader.shortName}${josa(leader.shortName, "이", "가")} ${score}${ro(score)} 앞섭니다.`;
   } else {
     text += ` 호각입니다.`;
   }
