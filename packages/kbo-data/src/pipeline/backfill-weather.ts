@@ -28,7 +28,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { KBO_STADIUM_COORDS, type TeamCode } from '@moneyball/shared';
+import { KBO_STADIUM_COORDS, assertSelectOk, type TeamCode } from '@moneyball/shared';
 import { fetchArchiveWeather } from '../scrapers/weather';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,14 +57,17 @@ async function fetchGamesMissingWeather(
   startDate: string,
   endDate: string,
 ): Promise<GameRow[]> {
-  const { data, error } = await db
+  const result = await db
     .from('games')
     .select('id, game_date, game_time, home_team:teams!games_home_team_id_fkey(code)')
     .is('weather', null)
     .gte('game_date', startDate)
     .lte('game_date', endDate)
     .order('game_date', { ascending: true });
-  if (error) throw error;
+  // join shape 은 supabase TypeScript 가 array 로 추론 — runtime 은 단일 객체.
+  // postview-daily / live 와 동일하게 any[] generic + cast 패턴 적용.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = assertSelectOk<any[]>(result, 'backfill-weather.fetchGamesMissingWeather');
   return (data as unknown as GameRow[]) ?? [];
 }
 
