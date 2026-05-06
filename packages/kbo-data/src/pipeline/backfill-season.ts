@@ -31,6 +31,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
+import { assertSelectOk } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,13 +49,15 @@ function createAdminClient(): DB {
 }
 
 async function getKBOLeagueId(db: DB): Promise<number> {
-  const { data } = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const result = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const { data } = assertSelectOk<{ id: number }>(result, 'backfill-season.getKBOLeagueId');
   if (!data) throw new Error('KBO league not found');
   return data.id;
 }
 
 async function getTeamIdMap(db: DB, leagueId: number): Promise<Record<string, number>> {
-  const { data } = await db.from('teams').select('id, code').eq('league_id', leagueId);
+  const result = await db.from('teams').select('id, code').eq('league_id', leagueId);
+  const { data } = assertSelectOk<{ id: number; code: string }[]>(result, 'backfill-season.getTeamIdMap');
   const map: Record<string, number> = {};
   for (const t of data ?? []) map[t.code] = t.id;
   return map;
