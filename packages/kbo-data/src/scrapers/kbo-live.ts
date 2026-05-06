@@ -1,5 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode } from '../types';
+import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 
 export interface LiveGameState {
   externalGameId: string;
@@ -50,8 +50,7 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
   }
 
   const text = await res.text();
-  const jsonEnd = text.indexOf('}<') !== -1 ? text.indexOf('}<') + 1 : text.length;
-  const cleanJson = text.slice(0, jsonEnd);
+  const cleanJson = sanitizeKboJsonResponse(text);
 
   let json: KboLiveResponse;
   try {

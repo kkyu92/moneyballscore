@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, resolveKoreanTeamCode } from '../types';
+import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
 
 const DELAY_MS = 2000;
@@ -39,10 +39,8 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     throw new Error(`KBO API error: ${res.status} ${res.statusText}`);
   }
 
-  // KBO API 응답은 JSON 뒤에 HTML 에러 페이지가 붙을 수 있음
   const text = await res.text();
-  const jsonEnd = text.indexOf('}<') !== -1 ? text.indexOf('}<') + 1 : text.length;
-  const cleanJson = text.slice(0, jsonEnd);
+  const cleanJson = sanitizeKboJsonResponse(text);
 
   let json: any;
   try {

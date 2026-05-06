@@ -8,6 +8,14 @@ export const KBO_BASE_URL = 'https://www.koreabaseball.com';
 // naver-record 는 모바일 페이지 차단 회피용 Mozilla UA + Referer 조합이라 별개 유지.
 export const KBO_USER_AGENT = 'MoneyBall/1.0 (KBO Prediction Engine)';
 
+// KBO API 응답 sanitize — kbo-live / kbo-official 공유.
+// KBO API 가 가끔 JSON body 뒤에 HTML 에러 페이지를 concat 해서 리턴 (응답 자체는 200).
+// 첫 '}<' 패턴까지 자르면 안전한 JSON 만 추출. 패턴 부재 시 원본 그대로.
+export function sanitizeKboJsonResponse(text: string): string {
+  const jsonEnd = text.indexOf('}<') !== -1 ? text.indexOf('}<') + 1 : text.length;
+  return text.slice(0, jsonEnd);
+}
+
 // ============================================
 // 스크래퍼 반환 타입
 // ============================================
