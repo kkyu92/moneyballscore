@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString, assertSelectOk } from '@moneyball/shared';
+import { toKSTDateString, assertSelectOk, assertWriteOk } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
@@ -56,8 +56,14 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
   if (activeGames.length === 0) {
     // 모든 경기 종료 시 스코어 업데이트 + postview trigger (v4-3 Task 4)
+    // cycle 169 — updateGameScore 안 assertWriteOk throw 시 다른 final game 처리
+    // 막히지 않도록 try/catch wrap. errors 배열에 push.
     for (const game of liveGames.filter((g) => g.status === 'final')) {
-      await updateGameScore(db, game);
+      try {
+        await updateGameScore(db, game);
+      } catch (e) {
+        errors.push(`updateGameScore ${game.externalGameId}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
 
     // 경기 종료 감지 → postview-daily 호출 (멱등성으로 중복 안전)
@@ -96,13 +102,17 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       if (!dbGame) continue;
 
-      // 경기 스코어 업데이트
-      await db.from('games').update({
+      // 경기 스코어 업데이트 — cycle 169 silent drift family write 측 두 번째 진입.
+      // .error 미체크 → RLS / connection / unique violation 시 silent skip → 다음 cron
+      // 또 같은 game 조회 → 무한 재시도 + status mismatch. assertWriteOk fail-loud
+      // (try/catch 안이라 errors 배열로 push).
+      const liveUpdateResult = await db.from('games').update({
         status: 'live',
         home_score: game.homeScore,
         away_score: game.awayScore,
         updated_at: new Date().toISOString(),
       }).eq('id', dbGame.id);
+      assertWriteOk(liveUpdateResult, 'live.runLiveUpdate.games.live');
 
       // pre_game 예측 가져오기 — cycle 160 silent drift family. maybeSingle + assertSelectOk.
       const preGameResult = await db
@@ -151,8 +161,10 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       const predictedWinner = adjustedHomeProb >= 0.5 ? game.homeTeam : game.awayTeam;
 
-      // in_game 예측 upsert
-      await db.from('predictions').upsert({
+      // in_game 예측 upsert — cycle 169 silent drift family write 측 진입.
+      // .error 미체크 → unique 위반 / RLS 시 silent skip → in_game 예측 미생성 → 사용자
+      // UI 에 stale pre_game 만 보임. assertWriteOk fail-loud (try/catch 안 errors push).
+      const inGameUpsertResult = await db.from('predictions').upsert({
         game_id: dbGame.id,
         prediction_type: 'in_game',
         predicted_winner: teamMap[predictedWinner],
@@ -174,6 +186,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
           adjusted_prob: adjustedHomeProb,
         },
       }, { onConflict: 'game_id,prediction_type' });
+      assertWriteOk(inGameUpsertResult, 'live.runLiveUpdate.predictions.in_game');
 
       updated++;
       console.log(
@@ -249,13 +262,17 @@ async function updateGameScore(db: DB, game: LiveGameState) {
     ? teamMap[game.homeTeam]
     : teamMap[game.awayTeam];
 
-  await db.from('games').update({
+  // cycle 169 silent drift family write 측 — final 상태 update 가 silent skip 되면
+  // postview trigger / 적중률 verify 모두 stale 상태 사용. assertWriteOk fail-loud.
+  // 호출 site (runLiveUpdate L60-66) try/catch wrap 으로 다른 game 처리 보호.
+  const finalUpdateResult = await db.from('games').update({
     status: 'final',
     home_score: game.homeScore,
     away_score: game.awayScore,
     winner_team_id: winnerId || null,
     updated_at: new Date().toISOString(),
   }).eq('external_game_id', game.externalGameId);
+  assertWriteOk(finalUpdateResult, 'live.updateGameScore.games.final');
 
   // v0.5.25: 경기 종료 시 Naver record boxscore 저장 (best-effort).
   // 실패해도 live 파이프라인 막지 않음.
