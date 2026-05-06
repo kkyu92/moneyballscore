@@ -1,7 +1,13 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  assertSelectOk,
+  shortTeamName,
+  type TeamCode,
+  type SelectResult,
+} from '@moneyball/shared';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
@@ -122,7 +128,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> {
   const supabase = await createClient();
 
-  const { data: game } = await supabase
+  // assertSelectOk — cycle 156 silent drift family detection. games maybeSingle
+  // 가 .error 미체크 → DB 오류 시 game=null silent fallback → notFound() 호출
+  // → 사용자에게 "경기를 찾을 수 없음" 가 노출 (실제로는 DB 오류, 정상 gameId
+  // 도 마치 없는 경기처럼 위장). cycle 152~155 family 자연 후속. nested FK
+  // (home_team / away_team / winner / predictions) 의 PostgrestResponseSuccess
+  // 추론 (FK relation array 추론) 우회 위해 SelectResult cast.
+  const result = (await supabase
     .from('games')
     .select(`
       id, game_date, game_time, stadium, status, home_score, away_score,
@@ -143,9 +155,10 @@ async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> 
       )
     `)
     .eq('id', gameId)
-    .maybeSingle();
+    .maybeSingle()) as SelectResult<GameAnalysisRow>;
+  const { data: game } = assertSelectOk(result, 'analysis-game.getGameAnalysis');
 
-  return (game ?? null) as unknown as GameAnalysisRow | null;
+  return game ?? null;
 }
 
 export default async function GameAnalysisPage({ params }: PageProps) {
