@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { assertSelectOk } from '@moneyball/shared';
 import { fetchBatterStats } from '../scrapers/fancy-stats';
 import { notifyError } from '../notify/telegram';
 import type { BatterStats } from '../types';
@@ -22,16 +23,17 @@ function createAdminClient(): DB {
 }
 
 async function getKBOLeagueId(db: DB): Promise<number> {
-  const { data } = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const result = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const { data } = assertSelectOk<{ id: number }>(result, 'sync-batter-stats.getKBOLeagueId');
   if (!data) throw new Error('KBO league not found in DB');
   return data.id;
 }
 
 async function getTeamIdMap(db: DB, leagueId: number): Promise<Record<string, number>> {
-  const { data } = await db.from('teams').select('id, code').eq('league_id', leagueId);
-  if (!data) return {};
+  const result = await db.from('teams').select('id, code').eq('league_id', leagueId);
+  const { data } = assertSelectOk<{ id: number; code: string }[]>(result, 'sync-batter-stats.getTeamIdMap');
   const map: Record<string, number> = {};
-  for (const t of data) map[t.code] = t.id;
+  for (const t of data ?? []) map[t.code] = t.id;
   return map;
 }
 
@@ -43,13 +45,17 @@ async function upsertPlayerId(
   position: string | null,
 ): Promise<number | null> {
   // 같은 league_id + name_ko + team_id로 기존 player 조회
-  const { data: existing } = await db
+  const existingResult = await db
     .from('players')
     .select('id, position')
     .eq('league_id', leagueId)
     .eq('name_ko', name)
     .eq('team_id', teamId)
     .maybeSingle();
+  const { data: existing } = assertSelectOk<{ id: number; position: string | null }>(
+    existingResult,
+    'sync-batter-stats.upsertPlayerId.existing',
+  );
 
   if (existing) {
     // position 비어 있으면 업데이트
