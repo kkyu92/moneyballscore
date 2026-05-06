@@ -7,9 +7,13 @@ import type { GameContext, DebateResult, TeamArgument, CalibrationHint } from '.
 /**
  * 경기별 에이전트 토론 실행
  *
- * 1. 홈/원정 팀 에이전트 병렬 실행 (각자 논거 생성)
- * 2. 회고 에이전트 실행 (보정 힌트)
- * 3. 심판 에이전트 실행 (최종 확률 결정)
+ * Step 1: 홈/원정 팀 에이전트 + 회고 에이전트 3개 병렬 실행 (Promise.all)
+ *   - runTeamAgent(home) / runTeamAgent(away) / runCalibrationAgent
+ * Step 2: 심판 에이전트 순차 실행 (Step 1 결과 필요)
+ *   - runJudgeAgent(homeArg, awayArg, calibration, ...)
+ *
+ * cycle 176 — docstring 1/2/3 단계 implies 순차 → 실제 1+2 병렬 + 3 순차 mismatch 정정.
+ * silent code drift family detection (cycle 60 predictor.ts 주석 정정 동일 패턴).
  */
 export async function runDebate(
   context: GameContext,
