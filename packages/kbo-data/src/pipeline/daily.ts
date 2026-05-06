@@ -21,6 +21,7 @@ import type { PredictionHistory } from '../agents/calibration-agent';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { runPostviewDaily } from './postview-daily';
 import { buildSummaryPredictions, type SummaryRow } from './daily-summary';
+import { assertSelectOk } from './db-error';
 import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
@@ -331,10 +332,16 @@ export async function runDailyPipeline(
   }
 
   // === predict / predict_final ===
-  // existing pre_game predictions 배치 조회
-  const { data: existing } = await db
+  // existing pre_game predictions 배치 조회 (cycle 143 silent drift 가드 —
+  // `.error` 미체크 시 data=null → existingSet 빈 → 모든 경기를 "예측 없음"
+  // 판정 → 중복 prediction insert 큐 진입. assertSelectOk 로 fail-loud)
+  const existingResult = await db
     .from('predictions').select('game_id')
     .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
+  const { data: existing } = assertSelectOk<{ game_id: number }[]>(
+    existingResult,
+    'runPredict existing predictions',
+  );
   const existingSet = new Set(
     (existing ?? []).map((e: { game_id: number }) => e.game_id),
   );
@@ -667,16 +674,28 @@ export async function runDailyPipeline(
     const expected = games.filter(
       (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
     ).length;
-    const { count: totalToday } = await db
+    // cycle 143 silent drift 가드 — `.error` 미체크 시 count=null → gap=expected
+    // → false positive GAP 알림 (DB 오류가 GAP 으로 위장). assertSelectOk 로
+    // fail-loud → outer catch X 영역이라 errors[] push + GAP 측정 skip 자연.
+    const totalTodayResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
       .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
-    const gap = expected - (totalToday ?? 0);
-    if (gap > 0) {
-      const msg =
-        `예측 누락 ${gap}경기 (expected=${expected}, total=${totalToday})`;
-      errors.push(`[GAP] ${msg}`);
-      try { await notifyError('daily-pipeline GAP', msg); } catch {}
+    let totalToday: number | null = null;
+    try {
+      ({ count: totalToday } = assertSelectOk(totalTodayResult, 'predict_final gap count'));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`[GAP_COUNT_FAIL] ${msg}`);
+    }
+    if (totalToday !== null) {
+      const gap = expected - totalToday;
+      if (gap > 0) {
+        const msg =
+          `예측 누락 ${gap}경기 (expected=${expected}, total=${totalToday})`;
+        errors.push(`[GAP] ${msg}`);
+        try { await notifyError('daily-pipeline GAP', msg); } catch {}
+      }
     }
 
     // SP 미확정 경기 전용 경고 — expected 계산에서 빠지지만 사용자 관점에선
@@ -765,10 +784,14 @@ async function handleDailySummaryNotification(
     }
 
     stage = 'todayTotal-count';
-    const { count: todayTotal } = await db
+    // cycle 143 silent drift 가드 — `.error` 미체크 시 count=null → 0 fallback
+    // → "summary skip: todayTotal=0 < expected" 위장 → root cause 무가시.
+    // assertSelectOk 로 outer catch (errors[] push) 자동 박제.
+    const todayTotalResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
       .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
+    const { count: todayTotal } = assertSelectOk(todayTotalResult, 'todayTotal count');
 
     if ((todayTotal ?? 0) < expected) {
       console.log(`[Pipeline] summary skip: todayTotal=${todayTotal} < expected=${expected}`);
@@ -825,7 +848,9 @@ async function handleDailySummaryNotification(
  * 호출 site `summary.length === 0` 가드 추가.
  */
 async function buildDailySummary(db: DB, dbGameIds: number[]) {
-  const { data, error } = await db
+  // cycle 143 — assertSelectOk helper 통일 (cycle 142 inline `.error` destructure
+  // 의 helper 화. silent drift family detection 단일 채널)
+  const result = await db
     .from('predictions')
     .select(`
       confidence, reasoning,
@@ -837,9 +862,7 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
     `)
     .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
 
-  if (error) {
-    throw new Error(`buildDailySummary select failed: ${error.message}`);
-  }
+  const { data } = assertSelectOk(result, 'buildDailySummary');
 
   return buildSummaryPredictions(
     (data ?? []) as unknown as SummaryRow[],
