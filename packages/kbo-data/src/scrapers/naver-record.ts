@@ -13,8 +13,6 @@
  *   - scoreBoard 이닝별 점수 (승패 패턴 분석)
  */
 
-import type { TeamCode } from '@moneyball/shared';
-
 const RECORD_BASE = 'https://api-gw.sports.naver.com/schedule/games';
 
 export interface NaverPitcherRecord {
@@ -239,7 +237,3 @@ export function summarizeBatting(batters: NaverBatterRecord[]): {
     totalBB,
   };
 }
-
-// KBO 팀 코드 → TeamCode 매핑 검증 (참고용 — 네이버도 동일 코드 사용).
-// import 만 유지하기 위한 가드.
-void 0 as TeamCode | undefined;
