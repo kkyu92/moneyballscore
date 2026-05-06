@@ -23,7 +23,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, type TeamCode } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, type TeamCode } from '@moneyball/shared';
 import { fetchPitcherStats } from '../scrapers/fancy-stats';
 import type { PitcherStats } from '../types';
 
@@ -162,11 +162,17 @@ export async function snapshotPitcherStats(opts: SnapshotOptions = {}): Promise<
     };
 
     if (!dryRun) {
-      const { error } = await db
-        .from('pitcher_stats')
-        .upsert(payload, { onConflict: 'player_id,season,captured_at' });
-      if (error) {
-        console.error(`  ❌ ${s.name} (${s.team}): ${error.message}`);
+      // cycle 170 — pitcher_stats upsert assertWriteOk 통일 (write 측 silent
+      // drift family). 기존 .error 체크는 있었지만 assertWriteOk helper 통일 X →
+      // sync-batter-stats (cycle 168) / live.ts (cycle 169) 와 channel 일관성 확보.
+      // throw → loop break 부작용 차단 위해 try/catch wrap 으로 기존 continue 로직 유지.
+      try {
+        const upsertResult = await db
+          .from('pitcher_stats')
+          .upsert(payload, { onConflict: 'player_id,season,captured_at' });
+        assertWriteOk(upsertResult, 'snapshot-pitchers.pitcher_stats.upsert');
+      } catch (e) {
+        console.error(`  ❌ ${s.name} (${s.team}): ${e instanceof Error ? e.message : String(e)}`);
         result.errors++;
         continue;
       }

@@ -4,6 +4,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { assertWriteOk } from '@moneyball/shared';
 import type { NaverRecord } from '../scrapers/naver-record';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,26 +63,42 @@ export async function saveGameRecord(
     updated_at: new Date().toISOString(),
   };
 
-  const { data, error } = await db
-    .from('game_records')
-    .upsert(payload, { onConflict: 'game_id' })
-    .select('id, created_at, updated_at');
-
-  if (error) {
+  // cycle 170 — game_records upsert assertWriteOk 통일 (write 측 silent drift
+  // family). throw → return SaveResult 패턴 깨짐 방지 위해 try/catch wrap 으로 기존
+  // error return 로직 유지. 추가: row null 가드 (RLS 등으로 data=[] error=null 시
+  // wasUpdated=undefined → inserted true 오판정 차단 — error 명시 return).
+  let data: { id: number; created_at: string; updated_at: string }[] | null = null;
+  try {
+    const upsertResult = await db
+      .from('game_records')
+      .upsert(payload, { onConflict: 'game_id' })
+      .select('id, created_at, updated_at');
+    assertWriteOk(upsertResult, 'save-game-record.game_records.upsert');
+    data = upsertResult.data as { id: number; created_at: string; updated_at: string }[] | null;
+  } catch (e) {
     return {
       gameId,
       inserted: false,
       updated: false,
       skipped: false,
-      error: error.message,
+      error: e instanceof Error ? e.message : String(e),
     };
   }
   const row = Array.isArray(data) ? data[0] : data;
-  const wasUpdated = row && row.created_at !== row.updated_at;
+  if (!row) {
+    return {
+      gameId,
+      inserted: false,
+      updated: false,
+      skipped: false,
+      error: 'save-game-record.game_records.upsert returned no row (RLS or empty select)',
+    };
+  }
+  const wasUpdated = row.created_at !== row.updated_at;
   return {
     gameId,
     inserted: !wasUpdated,
-    updated: !!wasUpdated,
+    updated: wasUpdated,
     skipped: false,
     error: null,
   };
