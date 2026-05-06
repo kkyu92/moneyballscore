@@ -393,14 +393,21 @@ export function buildInjectionText(context: GameContext): string {
   const homeName = KBO_TEAMS[game.homeTeam].name;
   const awayName = KBO_TEAMS[game.awayTeam].name;
 
+  // cycle 179 — buildUserMessage (team-agent) 와 동일 소스 정렬:
+  // SP WAR 제거 (LLM 미노출 → 환각 통과 갭 차단), gameTime 추가 (시간 숫자 false positive 차단),
+  // recentForm Math.round(form*100)% 포맷 (LLM 실제 노출 값 반영). silent drift family agents 차원 다섯 번째 진입.
   const spLine = (p: typeof homeSPStats) =>
-    p ? `${p.name} FIP ${p.fip} xFIP ${p.xfip} K/9 ${p.kPer9} WAR ${p.war}` : '미확정';
+    p ? `${p.name} FIP ${p.fip} xFIP ${p.xfip} K/9 ${p.kPer9}` : '미확정';
+
+  const homeFormPct = Math.round(homeRecentForm * 100);
+  const awayFormPct = Math.round(awayRecentForm * 100);
 
   return [
     `경기: ${awayName} @ ${homeName}`,
+    `시간: ${game.gameTime}`,
     `구장: ${game.stadium} / 파크팩터 ${parkFactor}`,
-    `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | 불펜FIP ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | 최근폼 ${homeRecentForm}`,
-    `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | 불펜FIP ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | 최근폼 ${awayRecentForm}`,
+    `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | 불펜FIP ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | 최근폼 ${homeFormPct}%`,
+    `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | 불펜FIP ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | 최근폼 ${awayFormPct}%`,
     `상대전적 ${headToHead.wins}승 ${headToHead.losses}패`,
   ].join('\n');
 }
