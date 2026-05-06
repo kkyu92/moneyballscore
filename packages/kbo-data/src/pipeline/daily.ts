@@ -21,6 +21,7 @@ import type { PredictionHistory } from '../agents/calibration-agent';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { runPostviewDaily } from './postview-daily';
 import { shouldPredictGame, estimateNotificationTime } from './schedule';
+import { decideModelVersion } from './model-version';
 import {
   notifyPredictions, notifyResults, notifyError,
   notifyPipelineStatus, notifyAnnounce,
@@ -517,6 +518,7 @@ export async function runDailyPipeline(
       quantitativeHomeWinProb: quantHomeProb,
     };
 
+    let debateSucceeded = false;
     if (process.env.ANTHROPIC_API_KEY) {
       try {
         const gameContext: GameContext = {
@@ -542,12 +544,22 @@ export async function runDailyPipeline(
             quantitativeProb: debate.quantitativeProb, totalTokens: debate.totalTokens,
           },
         };
+        debateSucceeded = true;
       } catch (e) {
         const debateErr = e instanceof Error ? e.message : String(e);
         console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, debateErr);
         errors.push(`Debate ${game.homeTeam}v${game.awayTeam}: ${debateErr}`);
       }
     }
+
+    // cycle 127 silent drift fix — debate throw 시 model_version 강등.
+    // 기존: ANTHROPIC_API_KEY 만 보고 'v2.0-debate' 박제 → /debug/model-comparison
+    // 의 v1.6-pure vs v2.0-debate Brier 대조에서 정량 fallback row 가 v2.0
+    // 라벨로 묻혀 분류 오류.
+    const versionDecision = decideModelVersion({
+      hasApiKey: !!process.env.ANTHROPIC_API_KEY,
+      debateSucceeded,
+    });
 
     const result = {
       ...quantResult,
@@ -589,8 +601,8 @@ export async function runDailyPipeline(
       away_elo: input.awayElo.elo,
       home_sfr: input.homeTeamStats.sfr,
       away_sfr: input.awayTeamStats.sfr,
-      model_version: process.env.ANTHROPIC_API_KEY ? 'v2.0-debate' : 'v1.7-revert',
-      debate_version: process.env.ANTHROPIC_API_KEY ? 'v2-persona4' : null,
+      model_version: versionDecision.model_version,
+      debate_version: versionDecision.debate_version,
       scoring_rule: 'v1.7-revert',
       reasoning: finalReasoning,
       factors: result.factors,
