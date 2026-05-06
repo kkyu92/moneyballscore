@@ -308,9 +308,9 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   const marginPp = Math.round(Math.abs(prob - 0.5) * 200);
   const favored = prob > 0.5 ? input.homeTeamName : input.awayTeamName;
 
-  if (marginPp <= 5) {
+  if (marginPp <= 10) {
     summary = `${input.awayTeamName} vs ${input.homeTeamName} — 승률 격차 ${marginPp}%p의 접전. 초반 득점이 승부를 가를 가능성.`;
-  } else if (marginPp <= 15) {
+  } else if (marginPp < 20) {
     summary = `${favored} 승률이 ${marginPp}%p 앞선다. 핵심 팩터가 그대로 작동하면 예측대로, 변수 한 두 개만 틀어져도 역전 가능.`;
   } else {
     summary = `${favored} 승률이 ${marginPp}%p 크게 앞서는 우세 경기. 이변이 나오려면 복수 팩터가 반대로 움직여야 한다.`;
