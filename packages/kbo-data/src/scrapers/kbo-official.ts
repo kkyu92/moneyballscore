@@ -2,10 +2,9 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { resolveKoreanTeamCode } from '../types';
+import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode } from '../types';
 import { sleep } from './fancy-stats';
 
-const BASE_URL = 'https://www.koreabaseball.com';
 const DELAY_MS = 2000;
 
 // YYYYMMDD → YYYY-MM-DD
