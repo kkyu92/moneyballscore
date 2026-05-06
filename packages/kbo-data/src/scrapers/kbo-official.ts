@@ -3,13 +3,10 @@ import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
 import { resolveKoreanTeamCode } from '../types';
+import { sleep } from './fancy-stats';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 const DELAY_MS = 2000;
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // YYYYMMDD → YYYY-MM-DD
 function formatDate(raw: string): string {
