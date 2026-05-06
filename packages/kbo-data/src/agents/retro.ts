@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, assertSelectOk, assertWriteOk } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -15,15 +15,27 @@ function createAdminClient(): DB {
 /**
  * Confidence Calibration 업데이트
  * 검증된 예측을 3버킷(low/mid/high)으로 분류하고 실제 적중률 계산
+ *
+ * cycle 174 — silent drift family agents 차원 첫 진입. predictions select +
+ * calibration_buckets upsert 양쪽 .error 무시 → silent fail 시 calibration
+ * 미갱신을 무에러처럼 위장. assertSelectOk / assertWriteOk 통일 (throw → caller
+ * (daily.ts compound block) try/catch errors[] push). dbInjected param 추가
+ * (테스트 가드 위해, default = createAdminClient).
  */
-export async function updateCalibration(season: number = new Date().getFullYear()) {
-  const db = createAdminClient();
+export async function updateCalibration(
+  season: number = new Date().getFullYear(),
+  dbInjected?: DB,
+) {
+  const db = dbInjected ?? createAdminClient();
 
-  const { data: predictions } = await db
+  const predictionsResult = await db
     .from('predictions')
     .select('confidence, is_correct')
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null);
+  const { data: predictions } = assertSelectOk<
+    Array<{ confidence: number; is_correct: boolean }>
+  >(predictionsResult, 'retro.updateCalibration.predictions');
 
   if (!predictions || predictions.length === 0) return;
 
@@ -43,7 +55,7 @@ export async function updateCalibration(season: number = new Date().getFullYear(
 
   for (const [bucket, stats] of Object.entries(buckets)) {
     const accuracy = stats.total > 0 ? stats.correct / stats.total : null;
-    await db.from('calibration_buckets').upsert({
+    const upsertResult = await db.from('calibration_buckets').upsert({
       bucket,
       season,
       total_predictions: stats.total,
@@ -51,6 +63,7 @@ export async function updateCalibration(season: number = new Date().getFullYear(
       actual_accuracy: accuracy,
       last_updated: new Date().toISOString(),
     }, { onConflict: 'bucket,season' });
+    assertWriteOk(upsertResult, `retro.updateCalibration.calibration_buckets.${bucket}`);
   }
 
   // 단조성 검사: high > mid > low 여야 정상
@@ -185,10 +198,10 @@ export function buildMemoryForTeam(params: {
  * - insert → upsert (onConflict) — UNIQUE(team_code, memory_type, content)와 짝,
  *   동일 내용 재발생 시 valid_until만 연장 (중복 row 방지)
  */
-export async function generateAgentMemories(date: string) {
-  const db = createAdminClient();
+export async function generateAgentMemories(date: string, dbInjected?: DB) {
+  const db = dbInjected ?? createAdminClient();
 
-  const { data: wrongPredictions } = await db
+  const wrongResult = await db
     .from('predictions')
     .select(`
       game_id, predicted_winner, confidence, reasoning, factors,
@@ -201,6 +214,13 @@ export async function generateAgentMemories(date: string) {
     `)
     .eq('prediction_type', 'pre_game')
     .eq('is_correct', false);
+  // cycle 174 — silent drift family agents 차원 첫 진입. .error 미체크 시
+  // wrong 데이터 누락이 "오답 0건" 으로 위장 → Phase D Compound 루프 학습 누락.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: wrongPredictions } = assertSelectOk<any[]>(
+    wrongResult,
+    'retro.generateAgentMemories.predictions',
+  );
 
   if (!wrongPredictions || wrongPredictions.length === 0) return;
 
@@ -236,20 +256,29 @@ export async function generateAgentMemories(date: string) {
       });
       if (!memory) continue;
 
-      // upsert: 동일 (team_code, memory_type, content) 존재 시 valid_until 연장만
-      const { error } = await db.from('agent_memories').upsert(
-        {
-          team_code: t.code,
-          memory_type: memory.type,
-          content: memory.content,
-          confidence: memory.confidence,
-          source_game_id: game.id,
-          valid_until: newValidUntil,
-        },
-        { onConflict: 'team_code,memory_type,content' }
-      );
-      if (error) {
-        console.warn(`[retro] agent_memories upsert failed for ${t.code}:`, error.message);
+      // upsert: 동일 (team_code, memory_type, content) 존재 시 valid_until 연장만.
+      // cycle 174 — silent drift family agents 차원 첫 진입. assertWriteOk
+      // 통일 (try/catch wrapper 안). console.warn → console.error 로 level
+      // 올림 + structured 메시지 (관측 가시성). per-game tolerant 의도 보전 위해
+      // throw 안 (다음 game 계속 진행) — postview-daily / backfill-sp 패턴 일관.
+      try {
+        const upsertResult = await db.from('agent_memories').upsert(
+          {
+            team_code: t.code,
+            memory_type: memory.type,
+            content: memory.content,
+            confidence: memory.confidence,
+            source_game_id: game.id,
+            valid_until: newValidUntil,
+          },
+          { onConflict: 'team_code,memory_type,content' }
+        );
+        assertWriteOk(upsertResult, `retro.generateAgentMemories.agent_memories.${t.code}`);
+      } catch (e) {
+        console.error(
+          `[retro] agent_memories upsert failed for ${t.code}:`,
+          e instanceof Error ? e.message : String(e),
+        );
       }
     }
   }
