@@ -20,6 +20,7 @@ import type { GameContext } from '../agents/types';
 import type { PredictionHistory } from '../agents/calibration-agent';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
 import { runPostviewDaily } from './postview-daily';
+import { buildSummaryPredictions, type SummaryRow } from './daily-summary';
 import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
@@ -782,6 +783,12 @@ async function handleDailySummaryNotification(
 
     stage = 'build-summary';
     const summary = await buildDailySummary(db, dbGameIds);
+    if (summary.length === 0) {
+      console.log(
+        `[Pipeline] summary skip: built summary empty (todayTotal=${todayTotal} mismatch — silent drift guard, summary_sent 박제 회피)`,
+      );
+      return;
+    }
 
     stage = 'notify-telegram';
     await notifyPredictions(
@@ -809,9 +816,16 @@ async function handleDailySummaryNotification(
 
 /**
  * notifyPredictions 에 넘길 predictions 배열 구성 (DB 조회).
+ *
+ * cycle 142 silent drift fix — supabase `.error` 미체크 silent fail 차단.
+ * 기존 `const { data } = await db.from(...)` 는 DB 오류 시 data=null →
+ * `(data ?? []).map` 빈 배열 silent fallback → ghost summary notification +
+ * summary_sent 플래그 박제 → 다음 fire `already sent` silent skip = 사용자
+ * 무감지. `.error` destructure + 명시적 throw 로 catch 측 errors[] push +
+ * 호출 site `summary.length === 0` 가드 추가.
  */
 async function buildDailySummary(db: DB, dbGameIds: number[]) {
-  const { data } = await db
+  const { data, error } = await db
     .from('predictions')
     .select(`
       confidence, reasoning,
@@ -823,14 +837,13 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
     `)
     .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data ?? []).map((p: any) => ({
-    homeTeam: p.game?.home_team?.code as TeamCode,
-    awayTeam: p.game?.away_team?.code as TeamCode,
-    predictedWinner: p.winner?.code as TeamCode,
-    confidence: p.confidence,
-    homeWinProb: p.reasoning?.homeWinProb ?? 0.5,
-  }));
+  if (error) {
+    throw new Error(`buildDailySummary select failed: ${error.message}`);
+  }
+
+  return buildSummaryPredictions(
+    (data ?? []) as unknown as SummaryRow[],
+  );
 }
 
 // cycle 133 silent drift fix — homeTeamAccuracy 시맨틱 decoupling.
