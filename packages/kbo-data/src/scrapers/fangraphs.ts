@@ -1,33 +1,17 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_USER_AGENT, TEAM_NAME_MAP } from '../types';
-import { parseNumWithFallback, sleep } from './fancy-stats';
+import { KBO_USER_AGENT } from '../types';
+import { parseNumWithFallback, resolveTeamCode, sleep } from './fancy-stats';
 
 const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
 const DELAY_MS = 3000; // 예의상 3초
 
-// FanGraphs는 영문 팀명 사용
-const FG_TEAM_MAP: Record<string, TeamCode> = {
-  'SSG Landers': 'SK',
-  'KIA Tigers': 'HT',
-  'LG Twins': 'LG',
-  'Doosan Bears': 'OB',
-  'KT Wiz': 'KT',
-  'Samsung Lions': 'SS',
-  'Lotte Giants': 'LT',
-  'Hanwha Eagles': 'HH',
-  'NC Dinos': 'NC',
-  'Kiwoom Heroes': 'WO',
-};
-
-function resolveTeamCode(name: string): TeamCode | null {
-  if (FG_TEAM_MAP[name]) return FG_TEAM_MAP[name];
-  for (const [key, code] of Object.entries(FG_TEAM_MAP)) {
-    if (name.includes(key) || key.includes(name)) return code;
-  }
-  // 한글 fallback
-  return TEAM_NAME_MAP[name] || null;
-}
+// FG_TEAM_MAP / 자체 resolveTeamCode 삭제 — fancy-stats.resolveTeamCode 단일
+// 소스 derive (cycle 196 silent drift family scrapers 차원 17번째 진입). FS
+// 매핑 테이블과 10팀 영문명 100% 동일했고, 자체 함수는 case-sensitive only +
+// 빈 입력 가드 부재였음. fancy-stats:35 가 이미 case-insensitive + 빈 입력
+// 가드 (cycle 21 "Kia Tigers" drift 사고 박제 후속) → fangraphs 도 같은
+// 패턴 자동 상속.
 
 export interface FanGraphsBatterData {
   team: TeamCode;
