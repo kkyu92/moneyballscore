@@ -24,6 +24,10 @@ import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
 import {
+  computePredictionHistory,
+  type PredictionHistoryRow,
+} from './prediction-history';
+import {
   notifyPredictions, notifyResults, notifyError,
   notifyPipelineStatus, notifyAnnounce,
 } from '../notify/telegram';
@@ -828,32 +832,31 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
   }));
 }
 
+// cycle 133 silent drift fix — homeTeamAccuracy 시맨틱 decoupling.
+// 기존: correct/total (전체 적중률) 을 homeTeamAccuracy 필드에 박제 →
+// calibration-agent.ts:39 의 "홈팀 승리 예측 적중률" 시맨틱과 mismatch →
+// LLM 이 전체 적중률을 홈팀 조건부 적중률로 오해. 본 fix 는 game.home_team_id /
+// away_team_id 조인 후 predicted_winner === home_team_id 분기로 진짜 조건부
+// 적중률 계산. 순수 헬퍼 computePredictionHistory 추출 (cycle 127/128 패턴).
 async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
   const { data: predictions } = await db
     .from('predictions')
-    .select('predicted_winner, confidence, is_correct')
+    .select(`
+      predicted_winner,
+      is_correct,
+      game:games!predictions_game_id_fkey(
+        home_team_id,
+        away_team_id
+      )
+    `)
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null)
     .order('game_id', { ascending: false })
     .limit(50);
 
-  if (!predictions || predictions.length === 0) {
-    return {
-      totalPredictions: 0, correctPredictions: 0, recentResults: [],
-      homeTeamAccuracy: null, awayTeamAccuracy: null, teamAccuracy: {},
-    };
-  }
-
-  const total = predictions.length;
-  const correct = predictions.filter(
-    (p: { is_correct: boolean | null }) => p.is_correct,
-  ).length;
-
-  return {
-    totalPredictions: total, correctPredictions: correct, recentResults: [],
-    homeTeamAccuracy: total >= 10 ? correct / total : null,
-    awayTeamAccuracy: null, teamAccuracy: {},
-  };
+  return computePredictionHistory(
+    (predictions ?? []) as unknown as PredictionHistoryRow[],
+  );
 }
 
 function reverseTeamMap(teamIdMap: Record<string, number>): Record<number, string> {
