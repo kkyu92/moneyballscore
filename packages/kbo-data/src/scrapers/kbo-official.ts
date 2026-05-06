@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { TEAM_NAME_MAP } from '../types';
+import { resolveKoreanTeamCode } from '../types';
 
 const BASE_URL = 'https://www.koreabaseball.com';
 const DELAY_MS = 2000;
@@ -14,16 +14,6 @@ function sleep(ms: number) {
 // YYYYMMDD → YYYY-MM-DD
 function formatDate(raw: string): string {
   return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
-}
-
-function resolveTeamCode(name: string): TeamCode | null {
-  // 정확한 매핑 먼저
-  if (TEAM_NAME_MAP[name]) return TEAM_NAME_MAP[name];
-  // 부분 매칭
-  for (const [key, code] of Object.entries(TEAM_NAME_MAP)) {
-    if (name.includes(key)) return code;
-  }
-  return null;
 }
 
 function parseGameStatus(status: string): ScrapedGame['status'] {
@@ -78,8 +68,8 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
   const games: ScrapedGame[] = [];
   for (const raw of rawGames) {
     // API 팀 코드를 직접 사용, 없으면 한글명으로 fallback
-    const homeTeam = (raw.HOME_ID as TeamCode) || resolveTeamCode(raw.HOME_NM);
-    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveTeamCode(raw.AWAY_NM);
+    const homeTeam = (raw.HOME_ID as TeamCode) || resolveKoreanTeamCode(raw.HOME_NM);
+    const awayTeam = (raw.AWAY_ID as TeamCode) || resolveKoreanTeamCode(raw.AWAY_NM);
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
