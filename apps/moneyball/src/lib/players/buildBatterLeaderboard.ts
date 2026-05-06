@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import {
+  KBO_TEAMS,
+  assertSelectOk,
+  type SelectResult,
+  type TeamCode,
+} from "@moneyball/shared";
 
 export interface BatterLeaderboardRow {
   playerId: number;
@@ -39,7 +44,11 @@ export async function buildBatterLeaderboard(options: {
   const season = options.season ?? new Date().getFullYear();
 
   const supabase = await createClient();
-  const { data } = await supabase
+  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
+  // 차원 (players) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
+  // → 빈 leaderboard 위장, 사용자엔 "선수 없음" 으로 보임). 호출 site (page) 가
+  // catch 결정.
+  const queryResult = (await supabase
     .from("batter_stats")
     .select(
       `
@@ -52,9 +61,13 @@ export async function buildBatterLeaderboard(options: {
     )
     .eq("season", season)
     .order("war", { ascending: false, nullsFirst: false })
-    .limit(limit * 2); // position 필터로 일부 제외 대비
+    .limit(limit * 2)) as unknown as SelectResult<Row[]>; // position 필터로 일부 제외 대비
 
-  const rows = (data ?? []) as unknown as Row[];
+  const { data } = assertSelectOk(
+    queryResult,
+    `buildBatterLeaderboard season=${season}`,
+  );
+  const rows = (data ?? []) as Row[];
   const result: BatterLeaderboardRow[] = [];
 
   for (const r of rows) {

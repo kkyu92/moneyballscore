@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  assertSelectOk,
+  shortTeamName,
+  type SelectResult,
+  type TeamCode,
+} from '@moneyball/shared';
 
 export interface PitcherAppearance {
   gameId: number;
@@ -69,7 +75,11 @@ export async function buildPitcherProfile(
 ): Promise<PitcherProfile | null> {
   const supabase = await createClient();
 
-  const { data: player } = await supabase
+  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
+  // 차원 (players) 첫 진입. player select error 시 fail-loud (기존엔 silent
+  // null → 페이지에서 "선수 없음" 위장. RLS / connection 실패가 정상 404 와
+  // 구분 안 됨).
+  const playerResult = (await supabase
     .from("players")
     .select(
       `
@@ -78,15 +88,22 @@ export async function buildPitcherProfile(
       `,
     )
     .eq("id", playerId)
-    .maybeSingle();
+    .maybeSingle()) as unknown as SelectResult<PlayerRow>;
+
+  const { data: player } = assertSelectOk(
+    playerResult,
+    `buildPitcherProfile player id=${playerId}`,
+  );
 
   if (!player) return null;
 
-  const p = player as unknown as PlayerRow;
+  const p = player as PlayerRow;
   const teamCode = (p.team?.code as TeamCode | null) ?? null;
   const teamInfo = teamCode ? KBO_TEAMS[teamCode] : null;
 
-  const { data: preds } = await supabase
+  // assertSelectOk — predictions select error 시 fail-loud (기존엔 silent
+  // 빈 등판 → "등판 기록 없음" 위장).
+  const predsResult = (await supabase
     .from("predictions")
     .select(
       `
@@ -100,9 +117,13 @@ export async function buildPitcherProfile(
         )
       `,
     )
-    .eq("prediction_type", "pre_game");
+    .eq("prediction_type", "pre_game")) as unknown as SelectResult<AppearanceRow[]>;
 
-  const rows = (preds ?? []) as unknown as AppearanceRow[];
+  const { data: preds } = assertSelectOk(
+    predsResult,
+    `buildPitcherProfile predictions id=${playerId}`,
+  );
+  const rows = (preds ?? []) as AppearanceRow[];
   const appearances: PitcherAppearance[] = [];
   let fipSum = 0;
   let fipN = 0;

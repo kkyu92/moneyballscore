@@ -2,10 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   KBO_TEAMS,
-  type TeamCode,
-  shortTeamName,
+  assertSelectOk,
   classifyWinnerProb,
+  shortTeamName,
   winnerProbOf,
+  type SelectResult,
+  type TeamCode,
 } from '@moneyball/shared';
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { WeekRange } from "./computeWeekRange";
@@ -263,7 +265,10 @@ export async function buildWeeklyReview(
   week: WeekRange,
 ): Promise<WeeklyReview> {
   const supabase = await createClient();
-  const { data } = await supabase
+  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
+  // 차원 (reviews) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
+  // → 빈 weekly review → "이번 주 검증 0" 위장).
+  const result = (await supabase
     .from("predictions")
     .select(
       `
@@ -280,11 +285,13 @@ export async function buildWeeklyReview(
     .eq("prediction_type", "pre_game")
     .match(CURRENT_MODEL_FILTER)
     .gte("game.game_date", week.startDate)
-    .lte("game.game_date", week.endDate);
+    .lte("game.game_date", week.endDate)) as unknown as SelectResult<Row[]>;
 
-  const rows = (data ?? []).filter(
-    (r: unknown) => (r as Row).game !== null,
-  ) as unknown as Row[];
+  const { data } = assertSelectOk(
+    result,
+    `buildWeeklyReview week ${week.startDate}~${week.endDate}`,
+  );
+  const rows = ((data ?? []) as Row[]).filter((r) => r.game !== null);
 
   const totalGames = rows.length;
   const verified = rows.filter((r) => r.is_correct !== null);
