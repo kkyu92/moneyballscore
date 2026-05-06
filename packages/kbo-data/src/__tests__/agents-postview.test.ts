@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   deriveFactorErrorsFallback,
   getZeroWeightFactorPromptList,
+  getZeroWeightRuleJudgePostview,
+  getZeroWeightRuleJudgePregame,
+  getZeroWeightRuleTeamPostview,
   isWeightedFactor,
   JUDGE_POSTVIEW_SYSTEM,
   TEAM_POSTVIEW_SYSTEM,
@@ -100,7 +103,9 @@ describe('deriveFactorErrorsFallback', () => {
 // cycle 15 — prompt-level constraint dynamic injection 검증.
 // cycle 12 의 사후 filter (factorErrors 배열) 는 LLM reasoning 본문에서 0% factor 거론을 막지 못함.
 // cycle 15 가 3 prompt 에 `getZeroWeightFactorPromptList()` 동적 주입 → DEFAULT_WEIGHTS 변경 시 자동 동기화.
-// cycle 17 v1.5 회귀 후엔 모든 factor 가중치 > 0 → helper 빈 문자열 반환 → prompt constraint vacuous.
+// cycle 17 v1.5 회귀 후엔 모든 factor 가중치 > 0 → helper 빈 문자열 반환.
+// cycle 126 silent drift 가드 — 빈 문자열 반환 시 prompt template 안 `(${...})` 가 빈 괄호 `()` 로
+// 출력되어 LLM 추론 noise. 본 fix 에서 conditional rule helper 추가 → 빈 list 시 규칙 줄 자체 skip.
 describe('getZeroWeightFactorPromptList (cycle 15 helper)', () => {
   it('v1.7-revert (= v1.5): 모든 factor 가중치 > 0 — 빈 문자열 반환', () => {
     const list = getZeroWeightFactorPromptList();
@@ -113,28 +118,67 @@ describe('getZeroWeightFactorPromptList (cycle 15 helper)', () => {
     expect(list).not.toContain('lineup_woba');
     expect(list).not.toContain('elo');
   });
+
+  it('cycle 126: weights 인자 주입 시 weight=0 factor 만 list', () => {
+    const list = getZeroWeightFactorPromptList({
+      sp_fip: 1.0,
+      head_to_head: 0,
+      park_factor: 0,
+      sfr: 0.5,
+    });
+    expect(list).toContain('head_to_head');
+    expect(list).toContain('park_factor');
+    expect(list).not.toContain('sp_fip');
+    expect(list).not.toContain('sfr');
+  });
 });
 
-describe('LLM SYSTEM_PROMPT dynamic injection 메커니즘 박제 (cycle 15)', () => {
-  it('JUDGE_POSTVIEW_SYSTEM: dynamic injection 자리 + 정량 모델 컨텍스트 박제', () => {
-    expect(JUDGE_POSTVIEW_SYSTEM).toContain('가중치 0%');
-    expect(JUDGE_POSTVIEW_SYSTEM).toContain('사용 금지');
+// cycle 126 — DEFAULT_WEIGHTS 의 weight=0 factor 0건일 때 prompt template 의 vacuous 규칙 줄
+// (= 빈 괄호 `()` LLM noise) 자동 skip 검증. cycle 17 주석에 박제만 있고 실제 fix 부재였던 silent drift.
+describe('cycle 126 — ZERO_WEIGHT_RULE conditional skip (silent drift 가드)', () => {
+  it('weight=0 factor 0건 시 team_postview rule = 빈 문자열', () => {
+    expect(getZeroWeightRuleTeamPostview({ sp_fip: 1.0, lineup_woba: 0.5 })).toBe('');
   });
 
-  it('TEAM_POSTVIEW_SYSTEM: dynamic injection 자리 + keyFactor 지목 금지 박제', () => {
-    expect(TEAM_POSTVIEW_SYSTEM).toContain('가중치 0%');
-    expect(TEAM_POSTVIEW_SYSTEM).toContain('keyFactor');
-    expect(TEAM_POSTVIEW_SYSTEM).toContain('금지');
+  it('weight=0 factor 0건 시 judge_postview rule = 빈 문자열', () => {
+    expect(getZeroWeightRuleJudgePostview({ sp_fip: 1.0, lineup_woba: 0.5 })).toBe('');
   });
 
-  it('JUDGE_PREGAME (judge-agent SYSTEM_PROMPT): dynamic injection 자리 + 사용 금지 박제', () => {
-    expect(JUDGE_PREGAME_SYSTEM).toContain('가중치 0%');
-    expect(JUDGE_PREGAME_SYSTEM).toContain('사용 금지');
+  it('weight=0 factor 0건 시 judge_pregame rule = 빈 문자열', () => {
+    expect(getZeroWeightRuleJudgePregame({ sp_fip: 1.0, lineup_woba: 0.5 })).toBe('');
   });
 
-  it('3 prompt 모두 정량 모델 가중치 컨텍스트 (왜 금지인지) 박제', () => {
+  it('weight=0 factor 1+ 건 시 team_postview rule = 규칙 줄 + factor list 포함', () => {
+    const rule = getZeroWeightRuleTeamPostview({ sp_fip: 1.0, head_to_head: 0 });
+    expect(rule).toContain('가중치 0%');
+    expect(rule).toContain('head_to_head');
+    expect(rule).toContain('keyFactor');
+  });
+
+  it('weight=0 factor 1+ 건 시 judge_postview rule = factorErrors 후보 제외 룰 출력', () => {
+    const rule = getZeroWeightRuleJudgePostview({ sp_fip: 1.0, park_factor: 0 });
+    expect(rule).toContain('가중치 0%');
+    expect(rule).toContain('park_factor');
+    expect(rule).toContain('factorErrors');
+  });
+
+  it('weight=0 factor 1+ 건 시 judge_pregame rule = reasoning 핵심 근거 사용 금지 룰 출력', () => {
+    const rule = getZeroWeightRuleJudgePregame({ sp_fip: 1.0, sfr: 0 });
+    expect(rule).toContain('가중치 0%');
+    expect(rule).toContain('sfr');
+    expect(rule).toContain('reasoning');
+  });
+
+  it('현재 DEFAULT_WEIGHTS (모두 > 0) 기준 3 prompt 모두 "가중치 0%" 부재 (vacuous prompt 차단)', () => {
     for (const prompt of [JUDGE_POSTVIEW_SYSTEM, TEAM_POSTVIEW_SYSTEM, JUDGE_PREGAME_SYSTEM]) {
-      expect(prompt).toMatch(/정량 모델 가중치|확률.*기여|확률 형성/);
+      expect(prompt).not.toContain('가중치 0%');
+      expect(prompt).not.toContain('()');
     }
+  });
+
+  it('3 prompt 모두 핵심 의도 (반드시 JSON / 사용자 글) 박제 유지', () => {
+    expect(JUDGE_POSTVIEW_SYSTEM).toContain('JSON');
+    expect(TEAM_POSTVIEW_SYSTEM).toContain('JSON');
+    expect(JUDGE_PREGAME_SYSTEM).toContain('JSON');
   });
 });
