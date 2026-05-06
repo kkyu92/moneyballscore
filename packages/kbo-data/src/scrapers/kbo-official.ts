@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { KBO_BASE_URL as BASE_URL, resolveKoreanTeamCode } from '../types';
+import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, resolveKoreanTeamCode } from '../types';
 import { sleep } from './fancy-stats';
 
 const DELAY_MS = 2000;
@@ -133,7 +133,7 @@ export async function fetchRecentForm(
 
   const url = `${BASE_URL}/Record/TeamRank/TeamRankDaily.aspx`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+    headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
   if (!res.ok) return 0.5; // fallback
@@ -183,7 +183,7 @@ export async function fetchHeadToHead(
   // KBO 공식 상대전적 페이지
   const url = `${BASE_URL}/Record/TeamRank/TeamRankVs.aspx`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+    headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
   if (!res.ok) return { wins: 0, losses: 0 };

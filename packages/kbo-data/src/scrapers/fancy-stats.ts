@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
-import { TEAM_NAME_MAP } from '../types';
+import { KBO_USER_AGENT, TEAM_NAME_MAP } from '../types';
 import { fetchKboPitcherBasic } from './kbo-pitcher';
 
 const BASE_URL = 'https://www.kbofancystats.com';
@@ -187,7 +187,7 @@ export function parsePitchersFromHtml(html: string): PitcherStats[] {
 async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
   const url = `${BASE_URL}/leaders/`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+    headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
   if (!res.ok) {
@@ -352,7 +352,7 @@ export function parseBattersFromHtml(html: string): BatterStats[] {
 export async function fetchBatterStats(_season: number): Promise<BatterStats[]> {
   const url = `${BASE_URL}/leaders/`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+    headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
   if (!res.ok) {
@@ -447,7 +447,7 @@ export function hasAnyFallback(flags: FancyStatsFallbacks): boolean {
 export async function fetchEloRatings(_season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
   const url = `${BASE_URL}/elo/`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Prediction Engine)' },
+    headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
   if (!res.ok) {

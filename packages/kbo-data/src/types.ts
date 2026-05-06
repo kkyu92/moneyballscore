@@ -4,6 +4,10 @@ import type { TeamCode, GameStatus } from '@moneyball/shared';
 // fangraphs / fancy-stats 는 다른 도메인이라 자체 BASE_URL 유지.
 export const KBO_BASE_URL = 'https://www.koreabaseball.com';
 
+// 자체 식별 User-Agent — kbo-official / kbo-pitcher / fangraphs / fancy-stats 공유.
+// naver-record 는 모바일 페이지 차단 회피용 Mozilla UA + Referer 조합이라 별개 유지.
+export const KBO_USER_AGENT = 'MoneyBall/1.0 (KBO Prediction Engine)';
+
 // ============================================
 // 스크래퍼 반환 타입
 // ============================================
