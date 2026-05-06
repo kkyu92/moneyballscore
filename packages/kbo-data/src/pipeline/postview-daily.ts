@@ -15,7 +15,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, type TeamCode } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, type TeamCode } from '@moneyball/shared';
 import { runPostview, type ActualResult, type OriginalPrediction } from '../agents/postview';
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
@@ -168,6 +168,10 @@ export async function runPostviewDaily(
       result.totalTokens += postview.totalTokens;
 
       // 6. post_game row insert (upsert로 멱등성 보장)
+      // cycle 171 silent drift family write 측 네 번째 진입.
+      // .error 미체크 시 unique violation / RLS 시 silent skip → post_game row
+      // 미생성 → 다음 postview-daily 또 같은 game 처리 시도 → 무한 재시도 +
+      // 운영 토큰 낭비. assertWriteOk fail-loud (외부 try/catch errors push).
       const upsertResult = await db.from('predictions').upsert(
         {
           game_id: gameId,
@@ -187,11 +191,7 @@ export async function runPostviewDaily(
         },
         { onConflict: 'game_id,prediction_type' }
       );
-
-      if (upsertResult.error) {
-        result.errors.push(`game ${gameId} upsert: ${upsertResult.error.message}`);
-        continue;
-      }
+      assertWriteOk(upsertResult, 'postview-daily.runPostviewDaily.predictions.post_game');
 
       result.processed++;
     } catch (err) {
