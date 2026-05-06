@@ -33,24 +33,39 @@ function makeQueryBuilder(games: GameFixture[]) {
         { id: HT_ID, code: "HT" },
         { id: LG_ID, code: "LG" },
       ],
+      error: null,
     }),
-    or: vi.fn().mockResolvedValue({ data: games }),
-    eq: vi.fn().mockResolvedValue({ data: games }),
+    or: vi.fn().mockResolvedValue({ data: games, error: null }),
+    eq: vi.fn().mockResolvedValue({ data: games, error: null }),
   };
   return builder;
 }
 
-function makeSupabaseMock(games: GameFixture[]) {
+interface SupabaseMockOptions {
+  teamsError?: { message: string } | null;
+  gamesError?: { message: string } | null;
+}
+
+function makeSupabaseMock(games: GameFixture[], opts: SupabaseMockOptions = {}) {
   const teamsBuilder = {
     select: vi.fn().mockReturnThis(),
     in: vi.fn().mockResolvedValue({
-      data: [
-        { id: HT_ID, code: "HT" },
-        { id: LG_ID, code: "LG" },
-      ],
+      data: opts.teamsError
+        ? null
+        : [
+            { id: HT_ID, code: "HT" },
+            { id: LG_ID, code: "LG" },
+          ],
+      error: opts.teamsError ?? null,
     }),
   };
-  const gamesBuilder = makeQueryBuilder(games);
+  const gamesBuilder = {
+    select: vi.fn().mockReturnThis(),
+    or: vi.fn().mockResolvedValue({
+      data: opts.gamesError ? null : games,
+      error: opts.gamesError ?? null,
+    }),
+  };
   return {
     from: vi.fn((table: string) => {
       if (table === "teams") return teamsBuilder;
@@ -324,6 +339,43 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
     expect(profile.predictionAccuracy.correct).toBe(1);
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining("pre_game prediction 부재 final 경기 1건"),
+    );
+  });
+});
+
+describe("buildMatchupProfile — cycle 147 silent drift family `.error` 미체크 회귀 가드", () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+    vi.clearAllMocks();
+  });
+
+  it("teams select error → assertSelectOk throw (silent 빈 프로필 fallback 차단)", async () => {
+    supabaseMock = makeSupabaseMock([], {
+      teamsError: { message: "connection refused" },
+    });
+
+    const { buildMatchupProfile } = await import("../buildMatchupProfile");
+    const pair = canonicalPair("HT", "LG")!;
+    await expect(buildMatchupProfile(pair)).rejects.toThrow(
+      /buildMatchupProfile teams .* select failed: connection refused/,
+    );
+  });
+
+  it("games select error → assertSelectOk throw (silent 빈 record 위장 차단)", async () => {
+    supabaseMock = makeSupabaseMock([], {
+      gamesError: { message: "syntax error at or near 'and'" },
+    });
+
+    const { buildMatchupProfile } = await import("../buildMatchupProfile");
+    const pair = canonicalPair("HT", "LG")!;
+    await expect(buildMatchupProfile(pair)).rejects.toThrow(
+      /buildMatchupProfile games .* select failed: syntax error/,
     );
   });
 });

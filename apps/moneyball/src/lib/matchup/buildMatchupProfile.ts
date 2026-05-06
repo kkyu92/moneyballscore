@@ -1,5 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, josa, ro, type TeamCode } from "@moneyball/shared";
+import {
+  KBO_TEAMS,
+  assertSelectOk,
+  josa,
+  ro,
+  type SelectResult,
+  type TeamCode,
+} from "@moneyball/shared";
 import type { MatchupPair } from "./canonicalPair";
 
 export interface MatchupGame {
@@ -167,12 +174,21 @@ export async function buildMatchupProfile(
   const supabase = await createClient();
 
   // teams 테이블에서 두 팀의 id 확보
-  const { data: teamRows } = await supabase
+  // assertSelectOk — cycle 147 silent drift family detection. error 시 fail-loud
+  // (기존엔 `data ?? []` silent fallback → idA/idB undefined → 빈 프로필 silent
+  // 반환, 사용자엔 "0 경기" 위장). 호출 site 가 catch 결정.
+  const teamsResult = (await supabase
     .from("teams")
     .select("id, code")
-    .in("code", [pair.codeA, pair.codeB]);
+    .in("code", [pair.codeA, pair.codeB])) as SelectResult<
+    Array<{ id: number; code: string }>
+  >;
+  const { data: teamRows } = assertSelectOk(
+    teamsResult,
+    `buildMatchupProfile teams ${pair.codeA} vs ${pair.codeB}`,
+  );
   const teamIdByCode = new Map<string, number>();
-  for (const t of (teamRows ?? []) as Array<{ id: number; code: string }>) {
+  for (const t of teamRows ?? []) {
     teamIdByCode.set(t.code, t.id);
   }
   const idA = teamIdByCode.get(pair.codeA);
@@ -212,24 +228,9 @@ export async function buildMatchupProfile(
     `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
     `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
 
-  const { data } = await supabase
-    .from("games")
-    .select(
-      `
-        id, game_date, status, home_score, away_score,
-        home_team_id, away_team_id, winner_team_id,
-        home_team:teams!games_home_team_id_fkey(id, code),
-        away_team:teams!games_away_team_id_fkey(id, code),
-        winner:teams!games_winner_team_id_fkey(code),
-        predictions(
-          confidence, is_correct, predicted_winner,
-          predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
-          prediction_type
-        )
-      `,
-    )
-    .or(orFilter);
-
+  // assertSelectOk — cycle 147 silent drift family detection. games select 가
+  // DB 오류 시 data=null silent fallback → 빈 record/예측 정확도 silent 위장
+  // (사용자엔 "두 팀 맞붙은 적 없음" 으로 보임). 호출 site 가 catch 결정.
   type GameRow = {
     id: number;
     game_date: string;
@@ -251,7 +252,29 @@ export async function buildMatchupProfile(
     }> | null;
   };
 
-  const gameRows = (data ?? []) as unknown as GameRow[];
+  const gamesResult = (await supabase
+    .from("games")
+    .select(
+      `
+        id, game_date, status, home_score, away_score,
+        home_team_id, away_team_id, winner_team_id,
+        home_team:teams!games_home_team_id_fkey(id, code),
+        away_team:teams!games_away_team_id_fkey(id, code),
+        winner:teams!games_winner_team_id_fkey(code),
+        predictions(
+          confidence, is_correct, predicted_winner,
+          predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
+          prediction_type
+        )
+      `,
+    )
+    .or(orFilter)) as SelectResult<GameRow[]>;
+  const { data: gamesData } = assertSelectOk(
+    gamesResult,
+    `buildMatchupProfile games ${pair.codeA} vs ${pair.codeB}`,
+  );
+
+  const gameRows = gamesData ?? [];
   const rows: Row[] = [];
   let missingPredictionFinalCount = 0;
   for (const g of gameRows) {
