@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  assertSelectOk,
+  type TeamCode,
+  type SelectResult,
+} from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { SearchForm } from '@/components/shared/SearchForm';
 import { TeamLogo } from '@/components/shared/TeamLogo';
@@ -57,14 +62,20 @@ async function searchPlayers(q: string): Promise<PlayerHit[]> {
   if (q.length < 1) return [];
   const supabase = await createClient();
   const pattern = `%${q}%`;
-  const { data } = await supabase
+  // assertSelectOk — cycle 155 silent drift family detection. players select
+  // 가 .error 미체크 → DB 오류 시 data=null silent fallback → 빈 검색 결과
+  // ("검색 결과가 없습니다") 가 사용자에게 노출 (실제로는 DB 오류, ilike pattern
+  // 정상이어도 가시 X). cycle 152~154 family 자연 후속. nested FK select 의
+  // PostgrestResponseSuccess 추론 (team:[] array) 우회 위해 SelectResult cast.
+  const result = (await supabase
     .from('players')
     .select(
       'id, name_ko, name_en, position, team:teams!players_team_id_fkey(code, name_ko)',
     )
     .or(`name_ko.ilike.${pattern},name_en.ilike.${pattern}`)
-    .limit(15);
-  return (data ?? []) as unknown as PlayerHit[];
+    .limit(15)) as SelectResult<PlayerHit[]>;
+  const { data } = assertSelectOk(result, 'search.players');
+  return data ?? [];
 }
 
 async function searchDates(q: string): Promise<DateHit[]> {
@@ -97,10 +108,16 @@ async function searchDates(q: string): Promise<DateHit[]> {
     .select('game_date')
     .order('game_date', { ascending: false })
     .limit(60);
-  const { data: games } =
-    from === to
-      ? await query.eq('game_date', from)
-      : await query.gte('game_date', from).lt('game_date', to);
+  // assertSelectOk — cycle 155 silent drift family detection. games select 가
+  // .error 미체크 → DB 오류 시 data=null silent fallback → 검색 일자 결과 0건
+  // 위장 ("검색 결과가 없습니다") 가 사용자에게 노출 (실제로는 DB 오류, 정상
+  // 일자 query 도 빈 결과로 위장). cycle 152~154 family 자연 후속.
+  const result = (from === to
+    ? await query.eq('game_date', from)
+    : await query.gte('game_date', from).lt('game_date', to)) as SelectResult<
+    Array<{ game_date: string }>
+  >;
+  const { data: games } = assertSelectOk(result, 'search.dates');
   if (!games) return [];
   const counts = new Map<string, number>();
   for (const g of games as Array<{ game_date: string }>) {
