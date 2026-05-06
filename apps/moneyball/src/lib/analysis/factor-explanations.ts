@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, josa, ro } from "@moneyball/shared";
 
 export interface FactorRawDetails {
   homeSPFip?: number | null;
@@ -108,12 +108,14 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
       homeLabel = fmtFip(details.homeSPFip);
       if (details.awaySPFip != null && details.homeSPFip != null) {
         const diff = Math.abs(details.awaySPFip - details.homeSPFip);
+        const diffStr = diff.toFixed(2);
         const better =
           details.awaySPFip < details.homeSPFip ? awayTeamName : homeTeamName;
+        const weightStr = `${weightPct}%`;
         narrative =
           favor === "neutral"
-            ? `양 선발 FIP 격차 ${diff.toFixed(2)}로 크지 않아 결정적 요소는 아니다.`
-            : `선발 FIP에서 ${better}이 ${diff.toFixed(2)} 낮아 방어력 우위. 가중치 ${weightPct}%로 이번 예측에 ${contribSign}${contribPp}%p 기여.`;
+            ? `양 선발 FIP 격차 ${diffStr}${ro(diffStr)} 크지 않아 결정적 요소는 아니다.`
+            : `선발 FIP에서 ${better}${josa(better, "이", "가")} ${diffStr} 낮아 방어력 우위. 가중치 ${weightStr}${ro(weightStr)} 이번 예측에 ${contribSign}${contribPp}%p 기여.`;
       }
       break;
     }
@@ -129,7 +131,7 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         narrative =
           favor === "neutral"
             ? "xFIP 격차가 작아 선발 잠재력은 팽팽."
-            : `${better}의 xFIP가 ${diff.toFixed(2)} 낮다. 홈런 운을 제거한 기대 실점에서 우위.`;
+            : `${better}의 xFIP${josa("xFIP", "이", "가")} ${diff.toFixed(2)} 낮다. 홈런 운을 제거한 기대 실점에서 우위.`;
       }
       break;
     }
@@ -161,7 +163,7 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         narrative =
           favor === "neutral"
             ? "불펜 안정성에서 큰 격차 없음."
-            : `${better} 불펜의 FIP가 ${diff.toFixed(2)} 낮다. 후반 리드 지키기 우위 (${weightPct}% 가중).`;
+            : `${better} 불펜의 FIP${josa("FIP", "이", "가")} ${diff.toFixed(2)} 낮다. 후반 리드 지키기 우위 (${weightPct}% 가중).`;
       }
       break;
     }
@@ -176,7 +178,7 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         narrative =
           favor === "neutral"
             ? "최근 10경기 폼이 비슷해 모멘텀 변수는 중립."
-            : `${better}이 최근 10경기 승률에서 ${diffPp}%p 앞선다. 폼 모멘텀 우위.`;
+            : `${better}${josa(better, "이", "가")} 최근 10경기 승률에서 ${diffPp}%p 앞선다. 폼 모멘텀 우위.`;
       }
       break;
     }
@@ -200,10 +202,11 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         const awayWinPct = 100 - homeWinPct;
         awayLabel = `${awayWinPct}%`;
         homeLabel = `${homeWinPct}%`;
+        const awayWinPctStr = `${awayWinPct}`;
         narrative =
           favor === "neutral"
-            ? `올 시즌 상대전적 ${homeWinPct}:${awayWinPct}로 거의 호각.`
-            : `상대전적에서 ${favorTeam}이 ${favor === "home" ? homeWinPct : awayWinPct}% 승률로 앞선다.`;
+            ? `올 시즌 상대전적 ${homeWinPct}:${awayWinPct}${ro(awayWinPctStr)} 거의 호각.`
+            : `상대전적에서 ${favorTeam}${josa(favorTeam ?? "", "이", "가")} ${favor === "home" ? homeWinPct : awayWinPct}% 승률로 앞선다.`;
       } else {
         narrative = "올 시즌 첫 대결이라 상대전적 데이터 없음.";
       }
@@ -319,7 +322,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
       const better =
         homePct > 50 ? input.homeTeamName : input.awayTeamName;
       const advPct = Math.abs(homePct - 50);
-      summary += ` 올 시즌 상대전적은 ${better}이 ${50 + advPct}% 승률로 강세.`;
+      summary += ` 올 시즌 상대전적은 ${better}${josa(better, "이", "가")} ${50 + advPct}% 승률로 강세.`;
     }
   }
 

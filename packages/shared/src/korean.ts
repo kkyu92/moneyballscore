@@ -10,7 +10,10 @@
  */
 
 // 영문 약어 발음의 받침 유무.
-// 모든 KBO 팀 약어 마지막 알파벳 발음은 받침 X — 엘지, 기아, 케이티, 엔씨, 에스에스지.
+// KBO 팀 약어: 마지막 알파벳 발음 받침 X — 엘지, 기아, 케이티, 엔씨, 에스에스지.
+// 세이버메트릭스 약어: 마지막 알파벳 한국어 발음 기준.
+//   FIP=에프아이피 (피 ㅍ 받침), XFIP 동일, WOBA=우바 (받침 X), WAR=워 (받침 X),
+//   ELO=엘로 (받침 X), SFR=에스에프알 (알 ㄹ 받침).
 const ENGLISH_TOKEN_HAS_BATCHIM: Record<string, boolean> = {
   SSG: false,
   KIA: false,
@@ -18,6 +21,17 @@ const ENGLISH_TOKEN_HAS_BATCHIM: Record<string, boolean> = {
   KT: false,
   NC: false,
   SK: false,
+  FIP: true,
+  XFIP: true,
+  WOBA: false,
+  WAR: false,
+  ELO: false,
+  SFR: true,
+};
+
+// 영문 약어 마지막 알파벳 발음의 ㄹ 받침 여부 — "(으)로" 처리 시 ㄹ 은 "로" 예외.
+const ENGLISH_TOKEN_IS_RIEUL: Record<string, boolean> = {
+  SFR: true,
 };
 
 // 한국어 디지트 한자 읽기 받침 유무.
@@ -87,8 +101,10 @@ function hasRieulJongsung(word: string): boolean {
       return DIGIT_IS_RIEUL[code - 48];
     }
     if (/[A-Za-z]/.test(ch)) {
-      // KBO 팀 약어 발음 ㄹ 종성 케이스 없음
-      return false;
+      let j = i;
+      while (j > 0 && /[A-Za-z]/.test(word[j - 1])) j--;
+      const token = word.slice(j, i + 1).toUpperCase();
+      return ENGLISH_TOKEN_IS_RIEUL[token] ?? false;
     }
   }
   return false;

@@ -96,6 +96,138 @@ describe("explainFactor", () => {
   });
 });
 
+describe("explainFactor — Korean particle silent drift 차단", () => {
+  it("sp_fip non-neutral: 받침 없는 팀명 → '가'", () => {
+    const result = explainFactor({
+      key: "sp_fip",
+      factorValue: 0.7,
+      details: { awaySPFip: 4.0, homeSPFip: 3.0 },
+      homeTeamName: "LG",
+      awayTeamName: "한화",
+    });
+    expect(result.narrative).toContain("LG가");
+    expect(result.narrative).not.toContain("LG이");
+  });
+
+  it("sp_fip non-neutral: 받침 있는 팀명 → '이'", () => {
+    const result = explainFactor({
+      key: "sp_fip",
+      factorValue: 0.7,
+      details: { awaySPFip: 4.0, homeSPFip: 3.0 },
+      homeTeamName: "두산",
+      awayTeamName: "한화",
+    });
+    expect(result.narrative).toContain("두산이");
+  });
+
+  it("sp_fip neutral: diff 받침 있는 digit ('0' 영) → '으로'", () => {
+    const result = explainFactor({
+      key: "sp_fip",
+      factorValue: 0.5,
+      details: { awaySPFip: 4.0, homeSPFip: 3.0 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("1.00으로");
+    expect(result.narrative).not.toContain("1.00로");
+  });
+
+  it("sp_xfip non-neutral: 'xFIP이' (피 ㅍ 받침)", () => {
+    const result = explainFactor({
+      key: "sp_xfip",
+      factorValue: 0.7,
+      details: { awaySPxFip: 4.0, homeSPxFip: 3.0 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("xFIP이");
+    expect(result.narrative).not.toContain("xFIP가");
+  });
+
+  it("bullpen_fip non-neutral: 'FIP이' (피 ㅍ 받침)", () => {
+    const result = explainFactor({
+      key: "bullpen_fip",
+      factorValue: 0.7,
+      details: { awayBullpenFip: 4.0, homeBullpenFip: 3.0 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("FIP이");
+    expect(result.narrative).not.toContain("FIP가");
+  });
+
+  it("recent_form non-neutral: 받침 없는 팀명 → '가'", () => {
+    const result = explainFactor({
+      key: "recent_form",
+      factorValue: 0.75,
+      details: { awayForm: 0.4, homeForm: 0.7 },
+      homeTeamName: "LG",
+      awayTeamName: "KT",
+    });
+    expect(result.narrative).toContain("LG가");
+    expect(result.narrative).not.toContain("LG이");
+  });
+
+  it("h2h neutral: awayWinPct '0' 영 → '으로'", () => {
+    const result = explainFactor({
+      key: "head_to_head",
+      factorValue: 0.5,
+      details: { h2hRate: 0.5 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("50:50으로");
+    expect(result.narrative).not.toContain("50:50로");
+  });
+
+  it("h2h neutral: awayWinPct '5' 오 → '로'", () => {
+    const result = explainFactor({
+      key: "head_to_head",
+      factorValue: 0.5,
+      details: { h2hRate: 0.55 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("55:45로");
+    expect(result.narrative).not.toContain("55:45으로");
+  });
+
+  it("h2h non-neutral: 받침 없는 팀명 → '가'", () => {
+    const result = explainFactor({
+      key: "head_to_head",
+      factorValue: 0.7,
+      details: { h2hRate: 0.7 },
+      homeTeamName: "LG",
+      awayTeamName: "한화",
+    });
+    expect(result.narrative).toContain("LG가");
+    expect(result.narrative).not.toContain("LG이");
+  });
+});
+
+describe("buildGameOverview — Korean particle silent drift 차단", () => {
+  it("h2h 강세: 받침 없는 팀명 → '가'", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.55,
+      homeTeamName: "LG",
+      awayTeamName: "한화",
+      h2hRate: 0.75,
+    });
+    expect(result.summary).toContain("LG가");
+    expect(result.summary).not.toContain("LG이");
+  });
+
+  it("h2h 강세: 받침 있는 팀명 → '이'", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.45,
+      homeTeamName: "한화",
+      awayTeamName: "두산",
+      h2hRate: 0.25,
+    });
+    expect(result.summary).toContain("두산이");
+  });
+});
+
 describe("buildGameOverview", () => {
   it("박빙 경기: 박빙 태그 + 접전 서술", () => {
     const result = buildGameOverview({

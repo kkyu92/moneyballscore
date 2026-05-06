@@ -39,6 +39,26 @@ describe('hasJongsung — 영문 약어 (KBO 팀 발음)', () => {
   });
 });
 
+describe('hasJongsung — 영문 약어 (세이버메트릭스)', () => {
+  it('피 받침 ㅍ — FIP / XFIP', () => {
+    expect(hasJongsung('FIP')).toBe(true);
+    expect(hasJongsung('XFIP')).toBe(true);
+    expect(hasJongsung('xFIP')).toBe(true);
+  });
+
+  it('받침 없음 — WOBA / WAR / ELO', () => {
+    expect(hasJongsung('WOBA')).toBe(false);
+    expect(hasJongsung('wOBA')).toBe(false);
+    expect(hasJongsung('WAR')).toBe(false);
+    expect(hasJongsung('ELO')).toBe(false);
+    expect(hasJongsung('Elo')).toBe(false);
+  });
+
+  it('알 ㄹ 받침 — SFR', () => {
+    expect(hasJongsung('SFR')).toBe(true);
+  });
+});
+
 describe('hasJongsung — 디지트 한자 읽기', () => {
   it('받침 있는 디지트', () => {
     expect(hasJongsung('0')).toBe(true);  // 영 ㅇ
@@ -137,6 +157,15 @@ describe('ro — (으)로', () => {
   it('ㄹ 받침 → 로 (한국어 예외)', () => {
     expect(ro('서울')).toBe('로');
     expect(ro('1')).toBe('로'); // 일
+    expect(ro('SFR')).toBe('로'); // 알 ㄹ 받침 예외
+  });
+
+  it('세이버메트릭스 약어 — 발음 받침 분기', () => {
+    expect(ro('FIP')).toBe('으로');   // 피 ㅍ 받침
+    expect(ro('XFIP')).toBe('으로');  // 피 ㅍ 받침
+    expect(ro('WOBA')).toBe('로');    // 받침 X
+    expect(ro('WAR')).toBe('로');     // 받침 X
+    expect(ro('ELO')).toBe('로');     // 받침 X
   });
 
   it('스코어 표기 마지막 디지트 발음 기준', () => {
