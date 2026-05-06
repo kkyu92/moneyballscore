@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { type TeamCode, shortTeamName } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 
@@ -19,7 +19,15 @@ function escapeXml(str: string): string {
 export async function GET() {
   const supabase = await createClient();
 
-  const { data: games } = await supabase
+  // assertSelectOk — cycle 149 silent drift family detection. RSS feed select 가
+  // .error 시 data=null silent fallback → feedGames=[] → game items 0건 silent
+  // 빈 RSS 응답 (review items 만 + game items 없음). 구독자 입장에서 RSS reader
+  // 갱신 0건처럼 보여 silent drift. assertSelectOk 로 fail-loud 전환 — error
+  // 시 throw → Next.js route handler 가 500 반환하여 RSS reader 가 명시적 실패
+  // 표시 + Sentry 캡처. 기존 stale RSS cache (revalidate=3600) 는 1시간 이내
+  // 그대로 유지 (Vercel CDN). silent drift family 시리즈 (cycle 141~148) 와
+  // 동일 패턴 통일.
+  const gamesResult = await supabase
     .from('games')
     .select(`
       id, game_date, game_time, status, home_score, away_score,
@@ -34,6 +42,7 @@ export async function GET() {
     .order('game_date', { ascending: false })
     .order('game_time', { ascending: true })
     .limit(50);
+  const { data: games } = assertSelectOk(gamesResult, 'feed getRssGames');
 
   const reviewItems: string[] = [];
 
