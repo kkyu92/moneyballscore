@@ -1,5 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import {
+  KBO_TEAMS,
+  assertSelectOk,
+  type SelectResult,
+  type TeamCode,
+} from "@moneyball/shared";
 
 export interface TeamRecord {
   code: TeamCode;
@@ -80,7 +85,18 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
   const db = createAdminClient();
 
   // teams id → (code, name) 매핑
-  const { data: teamRows } = await db.from("teams").select("id, code, name_ko");
+  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
+  // 차원 (seasons) 첫 진입. teams select error 시 fail-loud (기존엔 data=null
+  // silent fallback → null SeasonSummary → 페이지에서 "시즌 데이터 없음"
+  // 위장 = 정상 빈 시즌 vs DB 오류 구분 안 됨).
+  type TeamRowRaw = { id: number; code: string; name_ko: string };
+  const teamsResult = (await db
+    .from("teams")
+    .select("id, code, name_ko")) as unknown as SelectResult<TeamRowRaw[]>;
+  const { data: teamRows } = assertSelectOk(
+    teamsResult,
+    `buildSeasonSummary teams year=${year}`,
+  );
   if (!teamRows || teamRows.length === 0) return null;
   const teamById = new Map<number, TeamMeta>();
   for (const t of teamRows) {
@@ -96,13 +112,20 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
   const games: GameRow[] = [];
   const pageSize = 1000;
   for (let from = 0; ; from += pageSize) {
-    const { data } = await db
+    // assertSelectOk — games 페이지네이션 select error 시 fail-loud (기존엔
+    // data=null silent break → 부분 페이지만 누적된 채 partial summary 반환 =
+    // 시즌 통계가 silent 절단 위장).
+    const gamesResult = (await db
       .from("games")
       .select("id, game_date, stadium, status, home_team_id, away_team_id, winner_team_id, home_score, away_score")
       .gte("game_date", startDate)
       .lte("game_date", endDate)
       .order("game_date", { ascending: true })
-      .range(from, from + pageSize - 1);
+      .range(from, from + pageSize - 1)) as unknown as SelectResult<GameRow[]>;
+    const { data } = assertSelectOk(
+      gamesResult,
+      `buildSeasonSummary games year=${year} from=${from}`,
+    );
     if (!data || data.length === 0) break;
     games.push(...(data as GameRow[]));
     if (data.length < pageSize) break;

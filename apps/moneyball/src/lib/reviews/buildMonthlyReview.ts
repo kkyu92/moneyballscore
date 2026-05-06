@@ -2,10 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   KBO_TEAMS,
-  type TeamCode,
-  shortTeamName,
+  assertSelectOk,
   classifyWinnerProb,
+  shortTeamName,
   winnerProbOf,
+  type SelectResult,
+  type TeamCode,
 } from '@moneyball/shared';
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { MonthRange } from "./computeMonthRange";
@@ -71,7 +73,11 @@ async function fetchRowsInRange(
   endDate: string,
 ): Promise<Row[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
+  // 차원 (reviews) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
+  // → 빈 monthly review → "이번 달 검증 0" 위장 = 누락된 검증을 "검증 안 한 것"
+  // 으로 표기 = 모델 평가 차단).
+  const result = (await supabase
     .from("predictions")
     .select(
       `
@@ -88,9 +94,13 @@ async function fetchRowsInRange(
     .eq("prediction_type", "pre_game")
     .match(CURRENT_MODEL_FILTER)
     .gte("game.game_date", startDate)
-    .lte("game.game_date", endDate);
+    .lte("game.game_date", endDate)) as unknown as SelectResult<Row[]>;
 
-  return ((data ?? []) as unknown as Row[]).filter((r) => r.game !== null);
+  const { data } = assertSelectOk(
+    result,
+    `buildMonthlyReview range ${startDate}~${endDate}`,
+  );
+  return ((data ?? []) as Row[]).filter((r) => r.game !== null);
 }
 
 function pickHighlights(rows: Row[], limit = 6): WeeklyHighlight[] {

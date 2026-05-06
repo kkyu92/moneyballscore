@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
-  type TeamCode,
-  shortTeamName,
+  assertSelectOk,
   classifyWinnerProb,
+  shortTeamName,
   winnerProbOf,
+  type SelectResult,
+  type TeamCode,
 } from '@moneyball/shared';
 
 export interface FactorErrorItem {
@@ -105,7 +107,10 @@ export async function buildMissReport(options: {
   // reasoning.homeWinProb 는 JSONB 필드라 서버 필터링 대신 is_correct=false
   // 전부 가져와 클라이언트에서 winnerProb tier 로 필터. limit 여유분 fetch
   // 후 tier 통과 건만 N 개 pick.
-  const { data: preData } = await supabase
+  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
+  // 차원 (reviews) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
+  // → 빈 miss list → "틀린 예측 없음" 위장 = 사용자엔 모델이 완벽한 것처럼 보임).
+  const preResult = (await supabase
     .from("predictions")
     .select(
       `
@@ -123,9 +128,13 @@ export async function buildMissReport(options: {
     .match(CURRENT_MODEL_FILTER)
     .eq("is_correct", false)
     .order("game_id", { ascending: false })
-    .limit(limit * 6);
+    .limit(limit * 6)) as unknown as SelectResult<PreGameRow[]>;
 
-  const allRows = (preData ?? []) as unknown as PreGameRow[];
+  const { data: preData } = assertSelectOk(
+    preResult,
+    "buildMissReport pre_game",
+  );
+  const allRows = (preData ?? []) as PreGameRow[];
   // winnerProb 계산 + tossup 제외 + winnerProb 내림차순 정렬 + limit.
   const scored = allRows
     .map((r) => ({ row: r, wp: winnerProbOf(extractHomeWinProb(r.reasoning)) }))
@@ -137,14 +146,21 @@ export async function buildMissReport(options: {
 
   const gameIds = rows.map((r) => r.game_id).filter((id): id is number => id != null);
 
-  const { data: postData } = await supabase
+  // assertSelectOk — post_game select error 시 fail-loud (기존엔 silent
+  // 빈 postByGame → factorErrors / judgePostview / missedBy 모두 빈 채로 노출
+  // → 사용자엔 "사후 분석 없음" 으로 위장).
+  const postResult = (await supabase
     .from("predictions")
     .select("game_id, reasoning")
     .eq("prediction_type", "post_game")
-    .in("game_id", gameIds);
+    .in("game_id", gameIds)) as unknown as SelectResult<PostGameRow[]>;
 
+  const { data: postData } = assertSelectOk(
+    postResult,
+    "buildMissReport post_game",
+  );
   const postByGame = new Map<number, ReasoningPostShape>();
-  for (const p of (postData ?? []) as unknown as PostGameRow[]) {
+  for (const p of (postData ?? []) as PostGameRow[]) {
     if (p.reasoning && typeof p.reasoning === "object") {
       postByGame.set(p.game_id, p.reasoning as ReasoningPostShape);
     }
