@@ -13,8 +13,10 @@ import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsigh
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   KBO_TEAMS,
+  assertSelectOk,
   pickTierEmoji,
   shortTeamName,
+  type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
 import { buildTierRates } from "@/lib/predictions/tierStats";
@@ -44,7 +46,12 @@ interface OverviewRow {
 
 async function getOverview(): Promise<OverviewRow[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  // assertSelectOk — cycle 153 silent drift family detection. predictions select
+  // 가 .error 미체크 → DB 오류 시 data=null silent fallback → overview=[] silent
+  // 위장 → "검증 완료 0경기" / 누적 적중률 0% 가 사용자에게 노출 (실제로는 DB
+  // 오류). cycle 152 buildModelTuningInsights / cycle 148 analysis page 동일
+  // family. assertSelectOk 로 fail-loud → /dashboard error.tsx boundary 처리.
+  const result = (await supabase
     .from("predictions")
     .select(
       `
@@ -60,31 +67,34 @@ async function getOverview(): Promise<OverviewRow[]> {
     .eq("prediction_type", "pre_game")
     .match(CURRENT_MODEL_FILTER)
     .not("is_correct", "is", null)
-    .order("game_id", { ascending: true });
+    .order("game_id", { ascending: true })) as SelectResult<OverviewRow[]>;
 
-  return (data ?? []) as unknown as OverviewRow[];
+  const { data } = assertSelectOk(result, "dashboard getOverview");
+  return (data ?? []) as OverviewRow[];
 }
 
 async function getFactorErrors(): Promise<FactorErrorRow[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const result = (await supabase
     .from("factor_error_summary")
     .select("factor, error_count, avg_bias")
     .gte("error_count", 2)
     .order("error_count", { ascending: false })
-    .limit(5);
+    .limit(5)) as SelectResult<FactorErrorRow[]>;
 
+  const { data } = assertSelectOk(result, "dashboard getFactorErrors");
   return (data ?? []) as FactorErrorRow[];
 }
 
 async function getTotalPredCount(): Promise<number> {
   const supabase = await createClient();
-  const { count } = await supabase
+  const result = (await supabase
     .from("predictions")
     .select("id", { count: "exact", head: true })
     .eq("prediction_type", "pre_game")
-    .match(CURRENT_MODEL_FILTER);
+    .match(CURRENT_MODEL_FILTER)) as SelectResult<never>;
 
+  const { count } = assertSelectOk(result, "dashboard getTotalPredCount");
   return count ?? 0;
 }
 
