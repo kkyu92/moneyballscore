@@ -24,6 +24,7 @@ import { shouldPredictGame, estimateNotificationTime } from './schedule';
 import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
+import { buildAccuracyUpdates } from './accuracy-update';
 import {
   computePredictionHistory,
   type PredictionHistoryRow,
@@ -303,7 +304,7 @@ export async function runDailyPipeline(
       return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
     }
 
-    await updateAccuracy(db, leagueId, targetDate);
+    await updateAccuracy(db, leagueId, targetDate, errors);
 
     try {
       await updateCalibration();
@@ -998,33 +999,47 @@ async function prefetchSchedule(
   return { upserted: payload.length, range: `${fromStr} ~ ${toStr}`, error: null };
 }
 
-async function updateAccuracy(db: DB, leagueId: number, date: string) {
-  const { data: gamesData } = await db
+async function updateAccuracy(
+  db: DB,
+  leagueId: number,
+  date: string,
+  errors: string[],
+) {
+  const { data: gamesData, error: gamesErr } = await db
     .from('games').select('id, winner_team_id')
     .eq('league_id', leagueId).eq('game_date', date).eq('status', 'final');
+  if (gamesErr) {
+    errors.push(`updateAccuracy games select: ${gamesErr.message}`);
+    return;
+  }
   if (!gamesData) return;
 
-  const finalGames = gamesData.filter((g) => g.winner_team_id);
+  const finalGames = (gamesData as Array<{ id: number; winner_team_id: number | null }>)
+    .filter((g): g is { id: number; winner_team_id: number } => g.winner_team_id != null);
   if (finalGames.length === 0) return;
 
-  const { data: predRows } = await db
+  const { data: predRows, error: predErr } = await db
     .from('predictions').select('id, game_id, predicted_winner')
     .eq('prediction_type', 'pre_game')
     .in('game_id', finalGames.map((g) => g.id));
+  if (predErr) {
+    errors.push(`updateAccuracy predictions select: ${predErr.message}`);
+    return;
+  }
 
   const predByGameId = new Map<number, { id: number; predicted_winner: number }>();
   for (const row of (predRows ?? []) as Array<{ id: number; game_id: number; predicted_winner: number }>) {
     predByGameId.set(row.game_id, { id: row.id, predicted_winner: row.predicted_winner });
   }
 
-  const verifiedAt = new Date().toISOString();
-  for (const game of finalGames) {
-    const pred = predByGameId.get(game.id);
-    if (!pred) continue;
-    await db.from('predictions').update({
-      is_correct: pred.predicted_winner === game.winner_team_id,
-      actual_winner: game.winner_team_id,
-      verified_at: verifiedAt,
-    }).eq('id', pred.id);
+  const updates = buildAccuracyUpdates(finalGames, predByGameId, new Date().toISOString());
+  const results = await Promise.all(
+    updates.map(({ predId, payload }) =>
+      db.from('predictions').update(payload).eq('id', predId)
+        .then((res: { error: { message: string } | null }) => ({ predId, error: res.error })),
+    ),
+  );
+  for (const { predId, error } of results) {
+    if (error) errors.push(`updateAccuracy prediction id=${predId}: ${error.message}`);
   }
 }
