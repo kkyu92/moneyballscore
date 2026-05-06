@@ -8,6 +8,7 @@ import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
+  assertSelectOk,
   classifyWinnerProb,
   toKSTDateString,
   toKSTDisplayString,
@@ -78,7 +79,9 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  const { data: games } = await supabase
+  // assertSelectOk — cycle 157 silent drift family detection. games select 가
+  // DB 오류 시 data=null silent → 홈 카드 0건 위장. fail-loud 로 차단.
+  const gamesResult = await supabase
     .from('games')
     .select(`
       id, game_date, game_time, stadium, status,
@@ -97,6 +100,7 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
     .eq('game_date', today)
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_time');
+  const { data: games } = assertSelectOk(gamesResult, 'home.getTodayPredictions');
 
   return (games ?? []) as unknown as HomeGame[];
 }
@@ -128,7 +132,9 @@ async function getNextScheduledGames(): Promise<NextSchedule | null> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  const { data } = await supabase
+  // assertSelectOk — cycle 157 silent drift family detection. error 시 fail-loud
+  // 차단. data=null silent → empty-state "다음 일정 미공개" 위장 회피.
+  const gamesResult = await supabase
     .from('games')
     .select(`
       id, game_date, game_time, stadium,
@@ -140,6 +146,7 @@ async function getNextScheduledGames(): Promise<NextSchedule | null> {
     .order('game_date', { ascending: true })
     .order('game_time', { ascending: true })
     .limit(30);
+  const { data } = assertSelectOk(gamesResult, 'home.getNextScheduledGames');
 
   if (!data || data.length === 0) return null;
 
@@ -202,11 +209,14 @@ async function getSeasonAccuracy(): Promise<{
 }> {
   const supabase = await createClient();
 
-  const { data } = await supabase
+  // assertSelectOk — cycle 157 silent drift family detection. predictions select
+  // 가 DB 오류 시 data=null silent → 적중률 0% 위장. fail-loud 로 차단.
+  const predResult = await supabase
     .from('predictions')
     .select('is_correct, reasoning')
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null);
+  const { data } = assertSelectOk(predResult, 'home.getSeasonAccuracy');
 
   if (!data || data.length === 0) {
     return { total: 0, correct: 0, rate: 0, tierRates: emptyTierRates() };
