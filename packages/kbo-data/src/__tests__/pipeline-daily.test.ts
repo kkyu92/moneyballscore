@@ -755,10 +755,9 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
         ],
       };
       tables.predictions = {
-        single: {
-          data: { id: 501, predicted_winner: 1, is_correct: null },
-          error: null,
-        },
+        selectData: [
+          { id: 501, game_id: 101, predicted_winner: 1, is_correct: null },
+        ],
       };
 
       const mock = createMockSupabase(tables);

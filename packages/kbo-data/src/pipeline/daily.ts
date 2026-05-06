@@ -884,14 +884,24 @@ async function getVerifyResults(
     isCorrect: boolean; homeScore: number; awayScore: number;
   }
 
+  const finalGameIds = gamesData.filter((g) => g.winner_team_id).map((g) => g.id);
+  if (finalGameIds.length === 0) return [];
+
+  const { data: predRows } = await db
+    .from('predictions')
+    .select('game_id, predicted_winner, is_correct')
+    .eq('prediction_type', 'pre_game')
+    .in('game_id', finalGameIds);
+
+  const predByGameId = new Map<number, PredRow>();
+  for (const row of (predRows ?? []) as Array<PredRow & { game_id: number }>) {
+    predByGameId.set(row.game_id, { predicted_winner: row.predicted_winner, is_correct: row.is_correct });
+  }
+
   const results: VerifyResult[] = [];
   for (const game of gamesData) {
     if (!game.winner_team_id) continue;
-    const { data: pred } = await db
-      .from('predictions')
-      .select('predicted_winner, is_correct')
-      .eq('game_id', game.id).eq('prediction_type', 'pre_game')
-      .single<PredRow>();
+    const pred = predByGameId.get(game.id);
     if (pred) {
       results.push({
         homeTeam: (idToCode[game.home_team_id] || 'UNK') as TeamCode,
@@ -995,17 +1005,27 @@ async function updateAccuracy(db: DB, leagueId: number, date: string) {
     .eq('league_id', leagueId).eq('game_date', date).eq('status', 'final');
   if (!gamesData) return;
 
-  for (const game of gamesData) {
-    if (!game.winner_team_id) continue;
-    const { data: pred } = await db
-      .from('predictions').select('id, predicted_winner')
-      .eq('game_id', game.id).eq('prediction_type', 'pre_game').single();
-    if (pred) {
-      await db.from('predictions').update({
-        is_correct: pred.predicted_winner === game.winner_team_id,
-        actual_winner: game.winner_team_id,
-        verified_at: new Date().toISOString(),
-      }).eq('id', pred.id);
-    }
+  const finalGames = gamesData.filter((g) => g.winner_team_id);
+  if (finalGames.length === 0) return;
+
+  const { data: predRows } = await db
+    .from('predictions').select('id, game_id, predicted_winner')
+    .eq('prediction_type', 'pre_game')
+    .in('game_id', finalGames.map((g) => g.id));
+
+  const predByGameId = new Map<number, { id: number; predicted_winner: number }>();
+  for (const row of (predRows ?? []) as Array<{ id: number; game_id: number; predicted_winner: number }>) {
+    predByGameId.set(row.game_id, { id: row.id, predicted_winner: row.predicted_winner });
+  }
+
+  const verifiedAt = new Date().toISOString();
+  for (const game of finalGames) {
+    const pred = predByGameId.get(game.id);
+    if (!pred) continue;
+    await db.from('predictions').update({
+      is_correct: pred.predicted_winner === game.winner_team_id,
+      actual_winner: game.winner_team_id,
+      verified_at: verifiedAt,
+    }).eq('id', pred.id);
   }
 }
