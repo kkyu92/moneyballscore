@@ -132,6 +132,27 @@ describe('deriveFactorErrorsFallback', () => {
     expect(errors[0].diagnosis).toContain('-0.20');
     expect(errors[0].diagnosis).toContain('반대 방향');
   });
+
+  // cycle 177 — parser (parseJudgePostview line 311) canonicalize 통일이지만 fallback 만 raw key 박제.
+  // factor-bias-bootstrap-ci.ts FACTORS_OF_INTEREST = ['sfr', 'head_to_head'] no-prefix grouping →
+  // factors 가 prefixed key (home_bullpen_fip 등) 받으면 fallback 출력 silent skip.
+  // production 은 predictor.ts no-prefix 박제라 trigger 0건이지만 cycle 131 동일 패턴 defensive consistency.
+  it('cycle 177 — factors 안 home_/away_ prefix 키 들어와도 canonicalize 후 박제 (parser/parseJudgePostview 동치)', () => {
+    const factors = {
+      home_sp_fip: 0.4, // 원정 유리, 홈승 → wrong + canonicalize 'sp_fip'
+      away_recent_form: 0.65, // 홈 유리, 홈승 → correct (이긴쪽이라 fallback 아님)
+      home_bullpen_fip: 0.3, // 원정 유리, 홈승 → wrong + canonicalize 'bullpen_fip'
+    };
+    const errors = deriveFactorErrorsFallback(factors, true);
+    expect(errors).toHaveLength(2);
+    const factorNames = errors.map((e) => e.factor);
+    expect(factorNames).toContain('sp_fip');
+    expect(factorNames).toContain('bullpen_fip');
+    // prefix leak 차단 (downstream FACTORS_OF_INTEREST grouping 보장)
+    for (const name of factorNames) {
+      expect(name).not.toMatch(/^(home_|away_)/);
+    }
+  });
 });
 
 // cycle 131 — parseJudgePostview 가 LLM 출력 canonicalize + abs(bias) 내림차순 강제 정렬.
