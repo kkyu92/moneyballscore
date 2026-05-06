@@ -65,7 +65,8 @@ function getYesterdayKST(date: string): string {
 }
 
 async function getKBOLeagueId(db: DB): Promise<number> {
-  const { data } = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const result = await db.from('leagues').select('id').eq('code', 'KBO').single();
+  const { data } = assertSelectOk<{ id: number }>(result, 'daily.getKBOLeagueId');
   if (!data) throw new Error('KBO league not found in DB');
   return data.id;
 }
@@ -73,7 +74,10 @@ async function getKBOLeagueId(db: DB): Promise<number> {
 async function getTeamIdMap(
   db: DB, leagueId: number,
 ): Promise<Record<TeamCode, number>> {
-  const { data } = await db.from('teams').select('id, code').eq('league_id', leagueId);
+  const result = await db.from('teams').select('id, code').eq('league_id', leagueId);
+  const { data } = assertSelectOk<{ id: number; code: string }[]>(
+    result, 'daily.getTeamIdMap',
+  );
   if (!data) return {} as Record<TeamCode, number>;
   const map: Partial<Record<TeamCode, number>> = {};
   for (const team of data) map[team.code as TeamCode] = team.id;
@@ -83,14 +87,21 @@ async function getTeamIdMap(
 async function getOrCreatePlayerId(
   db: DB, leagueId: number, name: string, teamId: number, position: string,
 ): Promise<number> {
-  const { data: existing } = await db
+  const existingResult = await db
     .from('players').select('id')
-    .eq('league_id', leagueId).eq('name_ko', name).eq('team_id', teamId).single();
+    .eq('league_id', leagueId).eq('name_ko', name).eq('team_id', teamId)
+    .maybeSingle();
+  const { data: existing } = assertSelectOk<{ id: number }>(
+    existingResult, 'daily.getOrCreatePlayerId existing',
+  );
   if (existing) return existing.id;
-  const { data: created } = await db
+  const createdResult = await db
     .from('players')
     .insert({ league_id: leagueId, name_ko: name, team_id: teamId, position })
     .select('id').single();
+  const { data: created } = assertSelectOk<{ id: number }>(
+    createdResult, 'daily.getOrCreatePlayerId insert',
+  );
   if (!created) throw new Error(`Failed to create player: ${name}`);
   return created.id;
 }
@@ -165,8 +176,15 @@ export async function runDailyPipeline(
   if (mode === 'announce') {
     // GitHub Actions cron 이 동일 expression 을 드물게 2회 fire — announce_sent
     // flag 로 중복 Telegram 차단. 14일치 prefetch 도 이미 첫 run 에서 돌았으므로 skip.
-    if (await isNotificationSent(db, targetDate, 'announce_sent')) {
-      console.log(`[Pipeline] announce already sent for ${targetDate}, skipping`);
+    // cycle 167 — isNotificationSent 가 assertSelectOk 통일로 throw 가능 →
+    // finish() 통과 보장 위해 try/catch + errors[] push.
+    try {
+      if (await isNotificationSent(db, targetDate, 'announce_sent')) {
+        console.log(`[Pipeline] announce already sent for ${targetDate}, skipping`);
+        return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
+      }
+    } catch (e) {
+      errors.push(`isNotificationSent announce_sent: ${e instanceof Error ? e.message : String(e)}`);
       return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
     }
 
@@ -301,8 +319,15 @@ export async function runDailyPipeline(
   if (mode === 'verify') {
     // GitHub Actions cron 이 동일 expression 을 드물게 2회 fire — results_sent
     // flag 로 중복 Telegram + compound 루프 재실행 차단.
-    if (await isNotificationSent(db, targetDate, 'results_sent')) {
-      console.log(`[Pipeline] verify already ran for ${targetDate}, skipping`);
+    // cycle 167 — isNotificationSent assertSelectOk 통일 → throw 가능. finish()
+    // 통과 보장 위해 try/catch + errors[] push.
+    try {
+      if (await isNotificationSent(db, targetDate, 'results_sent')) {
+        console.log(`[Pipeline] verify already ran for ${targetDate}, skipping`);
+        return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
+      }
+    } catch (e) {
+      errors.push(`isNotificationSent results_sent: ${e instanceof Error ? e.message : String(e)}`);
       return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
     }
 
@@ -316,7 +341,14 @@ export async function runDailyPipeline(
       errors.push(`compound: ${e instanceof Error ? e.message : String(e)}`);
     }
 
-    const verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
+    // cycle 167 — getVerifyResults assertSelectOk 통일 → throw 가능. finish()
+    // 통과 보장 위해 try/catch + errors[] push. fail 시 verifyResults=[] 자연.
+    let verifyResults: Awaited<ReturnType<typeof getVerifyResults>> = [];
+    try {
+      verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
+    } catch (e) {
+      errors.push(`getVerifyResults: ${e instanceof Error ? e.message : String(e)}`);
+    }
     try {
       if (verifyResults.length > 0) {
         await notifyResults(targetDate, verifyResults);
@@ -734,10 +766,17 @@ type NotificationFlag = 'summary_sent' | 'announce_sent' | 'results_sent';
 async function isNotificationSent(
   db: DB, date: string, flag: NotificationFlag,
 ): Promise<boolean> {
-  const { data } = await db
+  const result = await db
     .from('daily_notifications')
     .select(flag).eq('run_date', date).maybeSingle();
-  return !!(data as Record<string, unknown> | null)?.[flag];
+  // silent drift 가드 — `.error` 미체크 시 data=null → false 리턴 →
+  // 같은 cron 재 fire 가 중복 Telegram 발송 (announce/summary/results).
+  // assertSelectOk 로 fail-loud → 호출 site (announce/verify/summary) 가
+  // notify 분기 직전 catch 또는 errors[] push 결정.
+  const { data } = assertSelectOk<Record<string, unknown>>(
+    result, `daily.isNotificationSent ${flag}`,
+  );
+  return !!data?.[flag];
 }
 
 /**
@@ -749,9 +788,15 @@ async function markNotificationFlag(
   db: DB, date: string, flag: NotificationFlag,
   extra: Record<string, unknown> = {},
 ): Promise<void> {
-  const { data: existing } = await db
+  const existingResult = await db
     .from('daily_notifications')
     .select('run_date').eq('run_date', date).maybeSingle();
+  // silent drift 가드 — `.error` 미체크 시 existing=null → 항상 INSERT 분기
+  // → unique constraint(run_date) 충돌 또는 새 row → 다른 flag 컬럼 DEFAULT 덮어쓰기.
+  // assertSelectOk 로 fail-loud (호출 site catch X 영역이라 propagate 자연).
+  const { data: existing } = assertSelectOk<{ run_date: string }>(
+    existingResult, 'daily.markNotificationFlag existing',
+  );
 
   if (existing) {
     await db.from('daily_notifications')
@@ -876,7 +921,10 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
 // away_team_id 조인 후 predicted_winner === home_team_id 분기로 진짜 조건부
 // 적중률 계산. 순수 헬퍼 computePredictionHistory 추출 (cycle 127/128 패턴).
 async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
-  const { data: predictions } = await db
+  // cycle 167 — assertSelectOk 통일. silent drift 시 predictions=null →
+  // computePredictionHistory 빈 배열 → calibration-agent 에 0건 전달 →
+  // ±5% 보정 신호 영구 silent drift. fail-loud 로 caller (verify mode) errors[].
+  const result = await db
     .from('predictions')
     .select(`
       predicted_winner,
@@ -890,6 +938,10 @@ async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
     .not('is_correct', 'is', null)
     .order('game_id', { ascending: false })
     .limit(50);
+
+  const { data: predictions } = assertSelectOk(
+    result, 'daily.getPredictionHistory',
+  );
 
   return computePredictionHistory(
     (predictions ?? []) as unknown as PredictionHistoryRow[],
@@ -907,10 +959,21 @@ async function getVerifyResults(
 ) {
   const idToCode = reverseTeamMap(teamIdMap);
 
-  const { data: gamesData } = await db
+  // cycle 167 — assertSelectOk 통일. silent drift 시 gamesData=null → 빈 결과
+  // 리턴 → verify Telegram silent skip (사용자 가시 직접 영향). fail-loud 로
+  // caller (verify mode) catch (이미 trycatch 안 호출) → errors[] push.
+  interface FinalGameRow {
+    id: number; home_team_id: number; away_team_id: number;
+    home_score: number | null; away_score: number | null;
+    winner_team_id: number | null;
+  }
+  const gamesResult = await db
     .from('games')
     .select('id, home_team_id, away_team_id, home_score, away_score, winner_team_id')
     .eq('league_id', leagueId).eq('game_date', date).eq('status', 'final');
+  const { data: gamesData } = assertSelectOk<FinalGameRow[]>(
+    gamesResult, 'daily.getVerifyResults games',
+  );
 
   if (!gamesData) return [];
 
@@ -924,11 +987,16 @@ async function getVerifyResults(
   const finalGameIds = gamesData.filter((g) => g.winner_team_id).map((g) => g.id);
   if (finalGameIds.length === 0) return [];
 
-  const { data: predRows } = await db
+  // silent drift 시 predRows=null → results 빈 배열 → notifyResults 미호출
+  // → 사용자 verify Telegram 누락 (사용자 가시 직접 영향).
+  const predResult = await db
     .from('predictions')
     .select('game_id, predicted_winner, is_correct')
     .eq('prediction_type', 'pre_game')
     .in('game_id', finalGameIds);
+  const { data: predRows } = assertSelectOk<Array<PredRow & { game_id: number }>>(
+    predResult, 'daily.getVerifyResults predictions',
+  );
 
   const predByGameId = new Map<number, PredRow>();
   for (const row of (predRows ?? []) as Array<PredRow & { game_id: number }>) {
