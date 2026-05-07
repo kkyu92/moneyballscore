@@ -160,10 +160,13 @@ export default async function FactorCorrelationPage() {
   }
 
   // teams 코드 조회 (팀명 표시용)
-  const { data: teamsData } = await db
+  const { data: teamsData, error: teamsErr } = await db
     .from('teams')
     .select('id, code, name_ko')
     .order('id');
+  if (teamsErr) {
+    console.warn('[debug/factor-correlation] teams query failed:', teamsErr.message);
+  }
   const teamMap = new Map<number, { code: string; name: string }>();
   for (const t of teamsData ?? []) {
     teamMap.set(t.id as number, { code: t.code as string, name: t.name_ko as string });

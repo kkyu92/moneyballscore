@@ -78,11 +78,14 @@ async function getStats(): Promise<DashboardData> {
 
   const stats = buildHallucinationStats((recent ?? []) as ValidatorLogInput[]);
 
-  const { data: samples } = await supabase
+  const { data: samples, error: samplesErr } = await supabase
     .from('validator_logs')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(20);
+  if (samplesErr) {
+    console.warn('[debug/hallucination] samples query failed:', samplesErr.message);
+  }
 
   return {
     error: null,
