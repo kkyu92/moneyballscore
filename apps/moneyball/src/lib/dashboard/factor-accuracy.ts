@@ -91,7 +91,7 @@ function computeFactorStat(
     directionalN: dirN,
     correlation,
     currentWeight,
-    proposedWeight: n >= minSamples ? null : null,
+    proposedWeight: null,
   };
 }
 
