@@ -13,6 +13,7 @@ const SITEMAP_COLUMNS = [
   {
     label: "팀·선수",
     links: [
+      { href: "/standings", label: "팀 순위" },
       { href: "/teams", label: "팀 프로필" },
       { href: "/players", label: "선수 리더보드" },
     ],
