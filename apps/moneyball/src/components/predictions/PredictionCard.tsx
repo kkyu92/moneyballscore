@@ -6,6 +6,7 @@ import {
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
 import type { WeatherSlot } from "@/lib/weather";
+import { topFavoringFactors } from "@/lib/predictions/factorLabels";
 
 export interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -28,6 +29,7 @@ export interface PredictionCardProps {
   stadium?: string | null;
   weather?: WeatherSlot | null;
   status?: string | null; // scheduled / live / final / postponed — DB games.status
+  factors?: Record<string, number> | null;
 }
 
 export function PredictionCard({
@@ -51,6 +53,7 @@ export function PredictionCard({
   stadium,
   weather,
   status,
+  factors,
 }: PredictionCardProps) {
   const isLive = status === 'live';
   const isFinal = status === 'final';
@@ -267,6 +270,22 @@ export function PredictionCard({
           </div>
         )}
       </div>
+
+      {/* 주요 근거 — 예측 승자 쪽으로 가장 기울어진 팩터 top-2 */}
+      {factors && (() => {
+        const isHome = predictedWinner === homeTeam;
+        const top = topFavoringFactors(factors, isHome, 2);
+        if (top.length === 0) return null;
+        return (
+          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              <span className="font-medium text-gray-500 dark:text-gray-400">주요 근거</span>
+              {" "}
+              {top.join(" · ")} 우위
+            </p>
+          </div>
+        );
+      })()}
 
       {/* v4-4: 상세 분석 링크 */}
       {gameId != null && (
