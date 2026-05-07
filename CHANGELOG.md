@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.36] - 2026-05-07 buildTeamAccuracy + getVerifiedPredictions CURRENT_MODEL_FILTER 누락 수정 (cycle 248 review-code heavy)
+
+### Fixed
+
+- **`buildTeamAccuracy` CURRENT_MODEL_FILTER 누락**: `/standings` 팀별 예측 적중률이 이전 모델 버전 예측까지 포함해 집계하던 silent drift 수정. `buildAllTeamAccuracy()` 쿼리에 `.match(CURRENT_MODEL_FILTER)` 추가.
+- **`getVerifiedPredictions` CURRENT_MODEL_FILTER 누락**: `/reviews` 최근 예측 목록이 전 버전 데이터를 섞던 silent drift 수정. `reviews/page.tsx` 인라인 쿼리에 `.match(CURRENT_MODEL_FILTER)` 추가.
+- **`buildTeamAccuracy.test.ts` 보강**: `match(CURRENT_MODEL_FILTER)` 호출 검증 테스트 케이스 추가. cycle 245 (getMonthlyStats) / 247 (getSeasonAccuracy) 와 동일 패턴의 세 번째 발견.
+
 ## [0.5.35] - 2026-05-07 WeeklyGameResult brand token 정렬 + details/summary 연속성 (cycle 240 polish-ui)
 
 ### Changed
