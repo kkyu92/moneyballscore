@@ -165,9 +165,6 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   const supabase = await createClient();
   const yesterday = getYesterdayKSTDateString();
 
-  // assertSelectOk — cycle 148 silent drift family detection. error 시 fail-loud
-  // (기존엔 `data ?? []` silent fallback → 어제 경기 0 silent 위장 → 사용자 가시
-  // 빈 카드 영역). cycle 147 family 자연 후속.
   const gamesResult = (await supabase
     .from('games')
     .select(`
