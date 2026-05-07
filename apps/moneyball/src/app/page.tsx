@@ -522,6 +522,7 @@ export default async function HomePage() {
                     stadium={game.stadium || KBO_STADIUM_SHORT[homeCode]}
                     weather={todayWeather.get(game.id)}
                     status={game.status}
+                    factors={pred.factors}
                   />
                 </div>
               );
