@@ -14,6 +14,7 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "오늘" },
   { href: "/analysis", label: "AI 분석" },
+  { href: "/standings", label: "순위" },
   { href: "/predictions", label: "기록" },
   {
     label: "팀·선수",

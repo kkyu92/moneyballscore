@@ -48,6 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/players`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/teams`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${baseUrl}/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
   ];
 
   // 45개 canonical 팀 매치업 URL

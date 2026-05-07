@@ -14,7 +14,8 @@ export type {
 export { TEAM_NAME_MAP } from './types';
 
 // 스크래퍼
-export { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS } from './scrapers/kbo-official';
+export { fetchGames, fetchRecentForm, fetchHeadToHead, DEFAULT_PARK_FACTORS, fetchStandings } from './scrapers/kbo-official';
+export type { StandingRow } from './scrapers/kbo-official';
 export { fetchPitcherStats, fetchTeamStats, fetchEloRatings, fetchBatterStats, findPitcher } from './scrapers/fancy-stats';
 export { fetchBatterLeaders } from './scrapers/fangraphs';
 

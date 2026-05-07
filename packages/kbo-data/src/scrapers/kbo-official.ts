@@ -243,3 +243,60 @@ export const DEFAULT_PARK_FACTORS: Record<string, number> = {
   '창원NC파크': 0.99,
   '서울고척스카이돔': 0.95,
 };
+
+export interface StandingRow {
+  rank: number;
+  teamCode: TeamCode;
+  games: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  winPct: number;
+  gamesBehind: number | null;
+  recent10: string;
+}
+
+/**
+ * KBO 공식 팀 순위표 — TeamRankDaily.aspx 전체 파싱.
+ *
+ * 컬럼 순서 (0-indexed):
+ *   0=순위, 1=팀, 2=경기, 3=승, 4=무, 5=패, 6=승률, 7=게임차, 8=홈, 9=최근10
+ */
+export async function fetchStandings(): Promise<StandingRow[]> {
+  const url = `${BASE_URL}/Record/TeamRank/TeamRankDaily.aspx`;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': KBO_USER_AGENT },
+    next: { revalidate: 3600 },
+  } as RequestInit);
+
+  if (!res.ok) return [];
+
+  const html = await res.text();
+  const $ = cheerio.load(html);
+  const rows: StandingRow[] = [];
+
+  $('table tbody tr').each((_, row) => {
+    const cells = $(row).find('td');
+    if (cells.length < 9) return;
+
+    const rankText = cells.eq(0).text().trim();
+    const teamName = cells.eq(1).text().trim();
+    const teamCode = resolveKoreanTeamCode(teamName);
+    if (!teamCode) return;
+
+    const rank = parseInt(rankText, 10) || rows.length + 1;
+    const games = parseInt(cells.eq(2).text().trim(), 10) || 0;
+    const wins = parseInt(cells.eq(3).text().trim(), 10) || 0;
+    const draws = parseInt(cells.eq(4).text().trim(), 10) || 0;
+    const losses = parseInt(cells.eq(5).text().trim(), 10) || 0;
+    const winPctText = cells.eq(6).text().trim();
+    const winPct = parseFloat(winPctText) || 0;
+    const gbText = cells.eq(7).text().trim();
+    const gamesBehind = gbText === '-' || gbText === '' ? null : parseFloat(gbText) || 0;
+    const recent10 = cells.eq(9).text().trim();
+
+    rows.push({ rank, teamCode, games, wins, draws, losses, winPct, gamesBehind, recent10 });
+  });
+
+  return rows;
+}
