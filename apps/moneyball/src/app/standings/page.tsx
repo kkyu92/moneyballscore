@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { shortTeamName } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
+import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 
@@ -49,7 +50,10 @@ function Recent10({ text }: { text: string }) {
 }
 
 export default async function StandingsPage() {
-  const standings = await buildStandings();
+  const [standings, teamAccuracy] = await Promise.all([
+    buildStandings(),
+    buildAllTeamAccuracy().catch(() => []),
+  ]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -163,6 +167,51 @@ export default async function StandingsPage() {
       <p className="text-xs text-gray-400 dark:text-gray-500 text-right">
         출처: KBO 공식 · 1시간마다 갱신
       </p>
+
+      {teamAccuracy.length > 0 && (
+        <section aria-labelledby="prediction-accuracy-title">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 id="prediction-accuracy-title" className="text-base font-bold">MoneyBall 예측 적중률</h2>
+              <span className="text-xs text-gray-400 dark:text-gray-500">팀별 · 시즌 누적</span>
+            </div>
+            <ul className="space-y-2">
+              {teamAccuracy.map((row, i) => {
+                const pct = row.accuracyRate != null ? Math.round(row.accuracyRate * 100) : null;
+                const barWidth = pct ?? 0;
+                return (
+                  <li key={row.teamCode} className="flex items-center gap-3">
+                    <span className="w-5 text-xs text-gray-400 dark:text-gray-500 tabular-nums text-right shrink-0">
+                      {i + 1}
+                    </span>
+                    <Link
+                      href={`/teams/${row.teamCode}`}
+                      className="flex items-center gap-2 min-w-[6rem] hover:opacity-80 transition-opacity shrink-0"
+                    >
+                      <TeamLogo team={row.teamCode} size={20} />
+                      <span className="text-sm font-medium">{shortTeamName(row.teamCode)}</span>
+                    </Link>
+                    <div className="flex-1 flex items-center gap-2">
+                      <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+                        <div
+                          className="bg-brand-500 h-1.5 rounded-full transition-all"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold tabular-nums w-10 text-right">
+                        {pct != null ? `${pct}%` : "-"}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums shrink-0">
+                      {row.correctN}/{row.verifiedN}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
