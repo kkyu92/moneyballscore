@@ -2,10 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { NAV_ITEMS, isNavGroup } from "./Header";
+
+function isActive(href: string, pathname: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(href + "/");
+}
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div className="md:hidden">
@@ -13,6 +20,7 @@ export function MobileNav() {
         onClick={() => setOpen(!open)}
         className="p-2 text-brand-200 hover:text-white"
         aria-label="메뉴"
+        aria-expanded={open}
       >
         <svg
           className="w-6 h-6"
@@ -50,7 +58,12 @@ export function MobileNav() {
                     key={sub.href}
                     href={sub.href}
                     onClick={() => setOpen(false)}
-                    className="block px-10 py-2 text-sm text-brand-200 hover:bg-brand-700 hover:text-white"
+                    aria-current={isActive(sub.href, pathname) ? "page" : undefined}
+                    className={`block px-10 py-2 text-sm transition-colors ${
+                      isActive(sub.href, pathname)
+                        ? "text-white font-medium bg-brand-700"
+                        : "text-brand-200 hover:bg-brand-700 hover:text-white"
+                    }`}
                   >
                     {sub.label}
                   </Link>
@@ -61,7 +74,12 @@ export function MobileNav() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="block px-6 py-3 text-sm text-brand-200 hover:bg-brand-700 hover:text-white"
+                aria-current={isActive(item.href, pathname) ? "page" : undefined}
+                className={`block px-6 py-3 text-sm transition-colors ${
+                  isActive(item.href, pathname)
+                    ? "text-white font-semibold bg-brand-700"
+                    : "text-brand-200 hover:bg-brand-700 hover:text-white"
+                }`}
               >
                 {item.label}
               </Link>
