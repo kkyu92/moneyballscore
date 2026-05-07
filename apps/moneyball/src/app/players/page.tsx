@@ -4,6 +4,7 @@ import type { TeamCode } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "선수 리더보드",
@@ -41,6 +42,7 @@ export default async function PlayersIndexPage() {
 
   return (
     <div className="space-y-8">
+      <Breadcrumb items={[{ label: '선수 리더보드' }]} />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">선수 리더보드</h1>
         <p className="text-gray-500 dark:text-gray-400">

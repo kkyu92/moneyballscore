@@ -3,6 +3,7 @@ import Link from "next/link";
 import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "팀 간 매치업",
@@ -26,6 +27,7 @@ const TEAMS: TeamCode[] = [
 export default function MatchupIndexPage() {
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: '팀 간 매치업' }]} />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">팀 간 매치업</h1>
         <p className="text-gray-500 dark:text-gray-400">

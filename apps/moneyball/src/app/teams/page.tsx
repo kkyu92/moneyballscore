@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "팀 프로필",
@@ -26,6 +27,7 @@ const TEAM_ORDER: TeamCode[] = [
 export default function TeamsIndexPage() {
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: '팀 프로필' }]} />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">팀 프로필</h1>
         <p className="text-gray-500 dark:text-gray-400">
