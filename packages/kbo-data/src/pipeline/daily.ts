@@ -59,9 +59,10 @@ function createAdminClient(): DB {
 const CURRENT_SEASON = new Date().getFullYear();
 
 function getYesterdayKST(date: string): string {
+  // d.getDate() uses local TZ (UTC on server) but KST midnight is UTC-prior-day
+  // → setDate(getDate()-1) undershoots by 1. Subtract exact 24h then convert KST.
   const d = new Date(date + 'T00:00:00+09:00');
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
+  return toKSTDateString(new Date(d.getTime() - 86_400_000));
 }
 
 async function getKBOLeagueId(db: DB): Promise<number> {
@@ -1151,30 +1152,40 @@ async function updateAccuracy(
   date: string,
   errors: string[],
 ) {
-  const { data: gamesData, error: gamesErr } = await db
+  const gamesResult = await db
     .from('games').select('id, winner_team_id')
     .eq('league_id', leagueId).eq('game_date', date).eq('status', 'final');
-  if (gamesErr) {
-    errors.push(`updateAccuracy games select: ${gamesErr.message}`);
+  let gamesData: Array<{ id: number; winner_team_id: number | null }> | null;
+  try {
+    ({ data: gamesData } = assertSelectOk<Array<{ id: number; winner_team_id: number | null }>>(
+      gamesResult, 'updateAccuracy games select',
+    ));
+  } catch (e) {
+    errors.push(`updateAccuracy games select: ${e instanceof Error ? e.message : String(e)}`);
     return;
   }
   if (!gamesData) return;
 
-  const finalGames = (gamesData as Array<{ id: number; winner_team_id: number | null }>)
+  const finalGames = gamesData
     .filter((g): g is { id: number; winner_team_id: number } => g.winner_team_id != null);
   if (finalGames.length === 0) return;
 
-  const { data: predRows, error: predErr } = await db
+  const predResult = await db
     .from('predictions').select('id, game_id, predicted_winner')
     .eq('prediction_type', 'pre_game')
     .in('game_id', finalGames.map((g) => g.id));
-  if (predErr) {
-    errors.push(`updateAccuracy predictions select: ${predErr.message}`);
+  let predRows: Array<{ id: number; game_id: number; predicted_winner: number }> | null;
+  try {
+    ({ data: predRows } = assertSelectOk<Array<{ id: number; game_id: number; predicted_winner: number }>>(
+      predResult, 'updateAccuracy predictions select',
+    ));
+  } catch (e) {
+    errors.push(`updateAccuracy predictions select: ${e instanceof Error ? e.message : String(e)}`);
     return;
   }
 
   const predByGameId = new Map<number, { id: number; predicted_winner: number }>();
-  for (const row of (predRows ?? []) as Array<{ id: number; game_id: number; predicted_winner: number }>) {
+  for (const row of (predRows ?? [])) {
     predByGameId.set(row.game_id, { id: row.id, predicted_winner: row.predicted_winner });
   }
 
