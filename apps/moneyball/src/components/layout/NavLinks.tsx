@@ -15,7 +15,13 @@ function isActive(href: string, pathname: string): boolean {
 export function NavLinks() {
   const pathname = usePathname();
   const [openLabel, setOpenLabel] = useState<string | null>(null);
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const navRef = useRef<HTMLElement>(null);
+
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setOpenLabel(null);
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -33,11 +39,6 @@ export function NavLinks() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  // Close dropdown on route change
-  useEffect(() => {
-    setOpenLabel(null);
-  }, [pathname]);
 
   return (
     <nav ref={navRef} className="hidden md:flex items-center gap-5">
