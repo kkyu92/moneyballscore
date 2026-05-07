@@ -5,6 +5,7 @@ import { MiniGameCard } from "@/components/shared/MiniGameCard";
 import { fetchStadiumWeather } from "@/lib/weather";
 import { KBO_STADIUM_COORDS, KBO_STADIUM_SHORT } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
+import { WeeklyTrendMini, type WeeklyTrendPoint } from "@/components/dashboard/WeeklyTrendMini";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
@@ -23,6 +24,8 @@ import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
+import { getRecentWeeks, getCurrentWeek } from "@/lib/reviews/computeWeekRange";
+import { CURRENT_DEBATE_VERSION } from "@/config/model";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -321,6 +324,51 @@ async function getSeasonAccuracy(): Promise<{
   };
 }
 
+async function getRecentWeeksAccuracy(): Promise<WeeklyTrendPoint[]> {
+  const weeks = getRecentWeeks(4);
+  const currentWeek = getCurrentWeek();
+  const startDate = weeks[0].startDate;
+
+  const supabase = await createClient();
+  const result = await supabase
+    .from('games')
+    .select('game_date, predictions!inner(is_correct)')
+    .gte('game_date', startDate)
+    .eq('predictions.prediction_type', 'pre_game')
+    .eq('predictions.debate_version', CURRENT_DEBATE_VERSION)
+    .not('predictions.is_correct', 'is', null);
+
+  const { data } = assertSelectOk(result, 'home.getRecentWeeksAccuracy');
+
+  const weekMap = new Map<string, { correct: number; verified: number }>();
+  for (const w of weeks) weekMap.set(w.weekId, { correct: 0, verified: 0 });
+
+  for (const game of (data ?? []) as Array<{ game_date: string; predictions: Array<{ is_correct: boolean | null }> }>) {
+    for (const w of weeks) {
+      if (game.game_date >= w.startDate && game.game_date <= w.endDate) {
+        const stat = weekMap.get(w.weekId)!;
+        for (const pred of game.predictions) {
+          stat.verified++;
+          if (pred.is_correct) stat.correct++;
+        }
+        break;
+      }
+    }
+  }
+
+  return weeks.map((w) => {
+    const stat = weekMap.get(w.weekId) ?? { correct: 0, verified: 0 };
+    return {
+      label: `W${w.week}`,
+      weekId: w.weekId,
+      rate: stat.verified > 0 ? stat.correct / stat.verified : 0,
+      verified: stat.verified,
+      correct: stat.correct,
+      isCurrent: w.weekId === currentWeek.weekId,
+    };
+  });
+}
+
 // Tier priority: confident (≥0.65) > lean (≥0.55) > tossup; highest wp within tier wins.
 function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
   if (!isBigMatchEnabled()) return null;
@@ -348,13 +396,14 @@ function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
 
 export default async function HomePage() {
   const today = toKSTDisplayString();
-  const [games, accuracy, weekSchedule, yesterdayResults, standings, teamAccuracyRows] = await Promise.all([
+  const [games, accuracy, weekSchedule, yesterdayResults, standings, teamAccuracyRows, weeklyTrend] = await Promise.all([
     getTodayPredictions(),
     getSeasonAccuracy(),
     getWeekAheadSchedule(),
     getYesterdayResults(),
     buildStandings().catch(() => []),
     buildAllTeamAccuracy().catch(() => []),
+    getRecentWeeksAccuracy().catch(() => [] as WeeklyTrendPoint[]),
   ]);
   const teamAccuracyMap = new Map(teamAccuracyRows.map((r) => [r.teamCode, r]));
 
@@ -449,11 +498,7 @@ export default async function HomePage() {
           <span className="text-4xl font-bold">{games.length}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
         </div>
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">모델 버전</h3>
-          <span className="text-4xl font-bold">v1.6</span>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">10팩터 3소스 가중합산</p>
-        </div>
+        <WeeklyTrendMini weeks={weeklyTrend} />
       </section>
 
       {/* 예측 카드 목록 */}
