@@ -808,7 +808,7 @@ export function YesterdayResultsSection({ games }: { games: YesterdayGame[] }) {
           const isCorrect = pred?.is_correct;
           const badge =
             isCorrect === true ? (
-              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-brand-500/15 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300">
                 적중
               </span>
             ) : isCorrect === false ? (
