@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.35] - 2026-05-07 WeeklyGameResult brand token 정렬 + details/summary 연속성 (cycle 240 polish-ui)
+
+### Changed
+
+- **WeeklyGameResult 디자인 토큰 정렬**: `/reviews/weekly/[week]` 경기 목록 섹션의 "적중" 뱃지·통계·팩터 라벨이 사용하던 `text-green-*`/`bg-green-*` raw Tailwind 클래스를 `brand-500`/`brand-600`/`brand-300` 브랜드 토큰으로 교체. DESIGN.md "적중 표시 = brand-500" 규칙 준수 (cycle 65 박제).
+- **팩터 인사이트 카드 완전 이관**: `border-green-500/30` → `border-brand-500/30` 로 best-factor 카드 테두리도 동일 토큰 계열로 통일.
+- **WCAG AA 대비율 보정**: 다크 모드 `dark:text-brand-400` (#3d8b54 on #151d18 = 4.11:1) → `dark:text-brand-300` (#5aad70 = ≥4.5:1), xs 텍스트 AA 기준 충족.
+- **details/summary 시각 연속성**: 경기 목록 열림 시 summary 헤더와 콘텐츠가 하나의 카드처럼 보이도록 `group-open:rounded-b-none` / `group-open:mt-0 group-open:rounded-t-none group-open:border-t-0` 추가.
+
 ## [0.5.34] - 2026-05-07 주간 리뷰 전체 경기 목록 섹션 추가 (cycle 239 explore-idea)
 
 ### Added
