@@ -109,7 +109,7 @@ async function getOrCreatePlayerId(
 export type PipelineMode = 'announce' | 'predict' | 'predict_final' | 'verify';
 
 /**
- * PLAN_v5 Phase 2C — 통합 파이프라인 엔트리.
+ * 통합 파이프라인 엔트리.
  *
  * 모드:
  * - announce (UTC 00 = KST 09): 오늘 편성 + 예상 알림 시각 Telegram
@@ -516,7 +516,7 @@ export async function runDailyPipeline(
       winPct: FANCY_STATS_DEFAULTS.winPct,
     };
 
-    // Phase 2.5 — DB 기반 recent form + h2h (asOfDate 이전 final 경기만).
+    // DB 기반 recent form + h2h (asOfDate 이전 final 경기만).
     // 당일 낮경기 결과는 status='final' 되어도 game_date=오늘 이라 yesterday
     // 필터에서 자동 제외. KBO 스크래핑 대비 구조적으로 누수 없음.
     const homeTeamIdForForm = teamIdMap[game.homeTeam];
@@ -618,10 +618,8 @@ export async function runDailyPipeline(
       }
     }
 
-    // cycle 127 silent drift fix — debate throw 시 model_version 강등.
-    // 기존: ANTHROPIC_API_KEY 만 보고 'v2.0-debate' 박제 → /debug/model-comparison
-    // 의 v1.6-pure vs v2.0-debate Brier 대조에서 정량 fallback row 가 v2.0
-    // 라벨로 묻혀 분류 오류.
+    // debate throw 시 model_version 강등 — ANTHROPIC_API_KEY 만 보면 debate 실패 row 도
+    // 'v2.0-debate' 라벨로 묻혀 /debug/model-comparison Brier 분류 오류.
     const versionDecision = decideModelVersion({
       hasApiKey: !!process.env.ANTHROPIC_API_KEY,
       debateSucceeded,
