@@ -73,15 +73,13 @@ interface HomeGame {
   predictions: HomePrediction[];
 }
 
-// v4-4: 10분 ISR (Eng 리뷰 P3)
 export const revalidate = 600;
 
 async function getTodayPredictions(): Promise<HomeGame[]> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  // assertSelectOk — cycle 157 silent drift family detection. games select 가
-  // DB 오류 시 data=null silent → 홈 카드 0건 위장. fail-loud 로 차단.
+  // supabase silently returns null on DB error; assertSelectOk throws instead.
   const gamesResult = await supabase
     .from('games')
     .select(`
@@ -148,7 +146,6 @@ interface YesterdayGame {
   }>;
 }
 
-/** 내일부터 최대 5일간 편성 경기 목록 — "이번 주 일정" 섹션용. */
 async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
   const supabase = await createClient();
   const today = toKSTDateString();
@@ -192,7 +189,6 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
   return Array.from(byDate.values()).slice(0, 5);
 }
 
-/** 어제 종료 경기 결과 + 예측 맞춤 여부 — "어제 결과" 섹션용. */
 async function getYesterdayResults(): Promise<YesterdayGame[]> {
   const supabase = await createClient();
   const yesterdayDate = new Date(Date.now() - 86400000);
@@ -214,16 +210,11 @@ async function getYesterdayResults(): Promise<YesterdayGame[]> {
   return (data ?? []) as unknown as YesterdayGame[];
 }
 
-/**
- * 오늘 이후 가장 빠른 편성 날짜 + 그 날의 경기 풀 리스트. 홈 empty-state 에서
- * 휴식/오프 구분 + 5경기 미니카드 + 구장 날씨 조회에 사용.
- */
 async function getNextScheduledGames(): Promise<NextSchedule | null> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  // assertSelectOk — cycle 157 silent drift family detection. error 시 fail-loud
-  // 차단. data=null silent → empty-state "다음 일정 미공개" 위장 회피.
+  // supabase silently returns null on DB error; assertSelectOk throws instead.
   const gamesResult = await supabase
     .from('games')
     .select(`
@@ -258,13 +249,7 @@ async function getNextScheduledGames(): Promise<NextSchedule | null> {
   };
 }
 
-/**
- * 다음 경기 날짜 + 오늘 사이 gap 과 요일로 휴식일/시즌오프 구분.
- * - null (다음 경기 전혀 없음) → 시즌오프 또는 시즌 종료
- * - gap > 7일 → 시즌오프/포스트시즌 간격 (올스타 브레이크 포함)
- * - 월요일 + gap ≤ 2일 → 정기 월요일 휴식
- * - 그 외 → 비정기 경기 없음
- */
+// gap > 7d → offseason/break; Monday + gap ≤ 2d → regular rest; otherwise unknown.
 function classifyNoGameReason(
   today: string,
   next: NextSchedule | null,
@@ -299,8 +284,7 @@ async function getSeasonAccuracy(): Promise<{
 }> {
   const supabase = await createClient();
 
-  // assertSelectOk — cycle 157 silent drift family detection. predictions select
-  // 가 DB 오류 시 data=null silent → 적중률 0% 위장. fail-loud 로 차단.
+  // supabase silently returns null on DB error; assertSelectOk throws instead.
   const predResult = await supabase
     .from('predictions')
     .select('is_correct, reasoning')
@@ -329,15 +313,7 @@ async function getSeasonAccuracy(): Promise<{
   };
 }
 
-/**
- * 오늘 경기 중 예측 승자 적중 확률이 가장 높은 경기를 Hero 로 노출.
- *
- * 선택 규칙 (winnerProb = max(hwp, 1-hwp) 기준):
- *   1. 🔥 적중 (winnerProb ≥ 0.65) 있으면 그 중 최고값
- *   2. 없으면 📈 유력 (winnerProb ≥ 0.55) 중 최고값
- *   3. 없으면 winnerProb 최고값 (🤔 반반 이어도 가장 높은 것)
- *   4. 예측 자체 없으면 null (hero 미노출)
- */
+// Tier priority: confident (≥0.65) > lean (≥0.55) > tossup; highest wp within tier wins.
 function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
   if (!isBigMatchEnabled()) return null;
 
@@ -676,7 +652,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 방법론 소개 v1.6 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">분석 방법론</h2>

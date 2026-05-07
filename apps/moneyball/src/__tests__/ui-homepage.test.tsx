@@ -502,7 +502,7 @@ describe('홈 게임 목록 렌더 (R3 — LEFT JOIN 가드)', () => {
 });
 
 /**
- * YesterdayResultsSection — 어제 경기 결과 섹션 (cycle 217 신규)
+ * YesterdayResultsSection — 어제 경기 결과 섹션
  *
  * 이 헬퍼는 page.tsx:YesterdayResultsSection 과 동일한 렌더 로직.
  * 실제 page.tsx 는 async server component + supabase import 로 직접 mount 불가.
@@ -558,7 +558,7 @@ function YesterdaySection({ games }: { games: StubYesterdayGame[] }) {
   );
 }
 
-describe('YesterdayResultsSection — 어제 결과 섹션 (cycle 217)', () => {
+describe('YesterdayResultsSection — 어제 결과 섹션', () => {
   it('적중 예측 → 적중 배지, 빗나간 예측 → 빗나감 배지', () => {
     const games: StubYesterdayGame[] = [
       { id: 1, game_date: '2026-05-06', home_score: 5, away_score: 3,
