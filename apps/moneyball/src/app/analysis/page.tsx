@@ -301,12 +301,13 @@ async function getBestPickOfWeek(startDate: string, endDate: string): Promise<Be
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, weeklyStats, monthlyStats, bestPickOfWeek] = await Promise.all([
+  const [todayData, yesterdayGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getPeriodStats(currentWeek.startDate, currentWeek.endDate),
     getPeriodStats(currentMonth.startDate, currentMonth.endDate),
     getBestPickOfWeek(currentWeek.startDate, currentWeek.endDate),
+    getBestPickOfWeek(currentMonth.startDate, currentMonth.endDate),
   ]);
 
   return (
@@ -569,6 +570,53 @@ export default async function AnalysisIndexPage() {
           </div>
         </Link>
       </section>
+
+      {/* 이번 달 AI 최고 픽 — 이달 가장 자신 있게 맞춘 예측 */}
+      {bestPickOfMonth && bestPickOfMonth.gameId !== bestPickOfWeek?.gameId && (
+        <section aria-labelledby="best-pick-month-title">
+          <h2 id="best-pick-month-title" className="text-xl font-bold mb-3">
+            🥇 이번 달 AI 최고 픽
+          </h2>
+          <Link
+            href={`/analysis/game/${bestPickOfMonth.gameId}`}
+            className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/40 dark:border-brand-500/30 p-5 hover:border-brand-500 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300">
+                    적중
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {bestPickOfMonth.gameDate}
+                  </span>
+                </div>
+                <p className="font-bold text-gray-900 dark:text-gray-100 truncate">
+                  {shortTeamName(bestPickOfMonth.awayCode)}{' '}
+                  {bestPickOfMonth.awayScore ?? '-'} : {bestPickOfMonth.homeScore ?? '-'}{' '}
+                  {shortTeamName(bestPickOfMonth.homeCode)}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  예측: {shortTeamName(bestPickOfMonth.predictedWinnerCode)}{' '}
+                  {bestPickOfMonth.predictedWinnerCode === bestPickOfMonth.homeCode
+                    ? Math.round(bestPickOfMonth.homeWinProb * 100)
+                    : Math.round((1 - bestPickOfMonth.homeWinProb) * 100)}%
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">
+                  {Math.round(
+                    (bestPickOfMonth.predictedWinnerCode === bestPickOfMonth.homeCode
+                      ? bestPickOfMonth.homeWinProb
+                      : 1 - bestPickOfMonth.homeWinProb) * 100,
+                  )}%
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">확신도</p>
+              </div>
+            </div>
+          </Link>
+        </section>
+      )}
 
       {/* 이번 달 리뷰 CTA → /reviews/monthly/[monthId] */}
       <section aria-labelledby="monthly-review-title">

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.37] - 2026-05-07 /analysis 이번 달 AI 최고 픽 카드 추가 (cycle 249 explore-idea lite)
+
+### Added
+
+- **`/analysis` 이번 달 AI 최고 픽 카드**: 이달 가장 자신 있게 맞춘 예측을 이번 주 최고 픽 카드와 동일한 UI로 표시. `getBestPickOfWeek(month range)` 재사용 — 주간 최고 픽과 동일 경기인 경우 중복 숨김 (`bestPickOfMonth.gameId !== bestPickOfWeek?.gameId`).
+
 ## [0.5.36] - 2026-05-07 buildTeamAccuracy + getVerifiedPredictions CURRENT_MODEL_FILTER 누락 수정 (cycle 248 review-code heavy)
 
 ### Fixed
