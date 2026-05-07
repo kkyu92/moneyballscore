@@ -6,17 +6,18 @@ import { FACTOR_TOTAL } from './weights';
 /**
  * 두 값을 0-1 범위로 정규화 (상대 비교)
  * 홈팀이 유리할수록 1에 가깝고, 원정이 유리할수록 0에 가깝다
+ *
+ * 차이 기반 정규화: (home - away) / scale → [-1, 1] → [0, 1]
+ * 양수 전용 비율 공식(a/(a+b))과 동치이면서 음수 입력값에서도 정확.
+ * SFR 등 KBO stat은 평균 대비 상대값으로 음수 가능 — cycle 207 버그 수정.
  */
 function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): number {
   if (homeVal === 0 && awayVal === 0) return 0.5;
   const total = Math.abs(homeVal) + Math.abs(awayVal);
   if (total === 0) return 0.5;
 
-  if (higherIsBetter) {
-    return homeVal / total;
-  }
-  // 낮을수록 좋은 지표 (FIP 등)
-  return awayVal / total;
+  const diff = higherIsBetter ? homeVal - awayVal : awayVal - homeVal;
+  return (diff / total + 1) / 2;
 }
 
 /**
