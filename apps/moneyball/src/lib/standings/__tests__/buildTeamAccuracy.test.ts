@@ -9,6 +9,7 @@ interface MockOptions {
 function makeMock(opts: MockOptions = {}) {
   const builder = {
     select: vi.fn().mockReturnThis(),
+    match: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     not: vi.fn().mockResolvedValue({
       data: opts.error ? null : (opts.data ?? []),
@@ -80,5 +81,14 @@ describe("buildAllTeamAccuracy", () => {
   it("DB error → assertSelectOk throw", async () => {
     supabaseMock = makeMock({ error: { message: "db error" } });
     await expect(buildAllTeamAccuracy()).rejects.toThrow();
+  });
+
+  it("CURRENT_MODEL_FILTER 적용 — match 호출 확인", async () => {
+    supabaseMock = makeMock({ data: [] });
+    await buildAllTeamAccuracy();
+    const builder = supabaseMock.from.mock.results[0].value;
+    expect(builder.match).toHaveBeenCalledWith(
+      expect.objectContaining({ debate_version: expect.any(String) }),
+    );
   });
 });
