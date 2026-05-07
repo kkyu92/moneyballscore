@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.30] - 2026-05-07 헤더 드롭다운 접근성 개선 + 브랜드 토큰 정렬
+
+### 변경 사항
+
+- **NavLinks 드롭다운 접근성**: CSS-only `group-hover:block` 방식을 React `useState` 기반으로 전환. `aria-expanded`, `aria-controls`, `role="menu"`, `role="menuitem"`, `aria-labelledby` 추가. Escape 키로 드롭다운 닫기, 외부 클릭 시 닫기, 라우트 변경 시 닫기 지원. 스크린리더 및 키보드 사용자 모두 네비게이션 드롭다운 인식 가능.
+- **브랜드 토큰 정렬**: `text-green-600`/`bg-green-100`/`text-green-700` → `text-emerald-600`/`bg-emerald-100`/`text-emerald-700` (DESIGN.md `success: #10b981` = Tailwind emerald-500/600 기준). PredictionCard 적중 배지, ModelTuningInsights 상관계수·가중치 델타 지표 2곳 수정.
+
 ## [0.5.29] - 2026-05-07 normalize() 음수 입력값 버그 수정
 
 ### 예측 엔진 버그 수정 (cycle 208 fix-incident)

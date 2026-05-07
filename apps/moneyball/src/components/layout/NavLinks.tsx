@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, isNavGroup } from "./Header";
 import { SearchForm } from "@/components/shared/SearchForm";
@@ -13,20 +14,53 @@ function isActive(href: string, pathname: string): boolean {
 
 export function NavLinks() {
   const pathname = usePathname();
+  const [openLabel, setOpenLabel] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenLabel(null);
+    }
+    function handleClickOutside(e: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenLabel(null);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setOpenLabel(null);
+  }, [pathname]);
 
   return (
-    <nav className="hidden md:flex items-center gap-5">
+    <nav ref={navRef} className="hidden md:flex items-center gap-5">
       {NAV_ITEMS.map((item) =>
         isNavGroup(item) ? (
-          <div key={item.label} className="relative group">
+          <div key={item.label} className="relative">
             <button
               type="button"
+              id={`nav-btn-${item.label}`}
               className={`text-sm transition-colors flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:rounded ${
                 item.items.some((sub) => isActive(sub.href, pathname))
                   ? "text-white font-semibold"
                   : "text-brand-200 hover:text-white"
               }`}
               aria-haspopup="menu"
+              aria-expanded={openLabel === item.label}
+              aria-controls={`nav-menu-${item.label}`}
+              onClick={() =>
+                setOpenLabel((prev) =>
+                  prev === item.label ? null : item.label,
+                )
+              }
+              onMouseEnter={() => setOpenLabel(item.label)}
             >
               {item.label}
               <svg
@@ -39,31 +73,41 @@ export function NavLinks() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden
+                style={{
+                  transform:
+                    openLabel === item.label ? "rotate(180deg)" : undefined,
+                  transition: "transform 150ms ease-out",
+                }}
               >
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
-            <div
-              role="menu"
-              className="absolute left-0 top-full pt-2 hidden group-hover:block group-focus-within:block z-50"
-            >
-              <div className="bg-brand-800 border border-brand-700 rounded-md shadow-lg min-w-[8rem] py-1">
-                {item.items.map((sub) => (
-                  <Link
-                    key={sub.href}
-                    href={sub.href}
-                    role="menuitem"
-                    className={`block px-4 py-2 text-sm transition-colors ${
-                      isActive(sub.href, pathname)
-                        ? "text-white bg-brand-700 font-medium"
-                        : "text-brand-200 hover:bg-brand-700 hover:text-white"
-                    }`}
-                  >
-                    {sub.label}
-                  </Link>
-                ))}
+            {openLabel === item.label && (
+              <div
+                id={`nav-menu-${item.label}`}
+                role="menu"
+                aria-labelledby={`nav-btn-${item.label}`}
+                className="absolute left-0 top-full pt-2 z-50"
+              >
+                <div className="bg-brand-800 border border-brand-700 rounded-md shadow-lg min-w-[8rem] py-1">
+                  {item.items.map((sub) => (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      role="menuitem"
+                      onClick={() => setOpenLabel(null)}
+                      className={`block px-4 py-2 text-sm transition-colors ${
+                        isActive(sub.href, pathname)
+                          ? "text-white bg-brand-700 font-medium"
+                          : "text-brand-200 hover:bg-brand-700 hover:text-white"
+                      }`}
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <Link
