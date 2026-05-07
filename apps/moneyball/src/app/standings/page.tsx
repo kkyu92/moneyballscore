@@ -42,7 +42,7 @@ function Recent10({ text }: { text: string }) {
   const losses = lm ? parseInt(lm[1], 10) : 0;
   return (
     <span className="tabular-nums text-xs font-mono">
-      <span className="text-green-600 dark:text-green-400">{wins}승</span>
+      <span className="text-brand-600 dark:text-brand-400">{wins}승</span>
       <span className="text-gray-400 mx-0.5">·</span>
       <span className="text-red-500 dark:text-red-400">{losses}패</span>
     </span>
@@ -143,7 +143,7 @@ export default async function StandingsPage() {
                         </Link>
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums text-gray-600 dark:text-gray-300">{row.games}</td>
-                      <td className="px-3 py-3 text-right tabular-nums font-semibold text-green-700 dark:text-green-400">{row.wins}</td>
+                      <td className="px-3 py-3 text-right tabular-nums font-semibold text-brand-700 dark:text-brand-400">{row.wins}</td>
                       <td className="px-3 py-3 text-right tabular-nums text-gray-400">{row.draws}</td>
                       <td className="px-3 py-3 text-right tabular-nums text-red-600 dark:text-red-400">{row.losses}</td>
                       <td className="px-3 py-3 text-right tabular-nums font-mono font-semibold">

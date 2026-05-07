@@ -171,7 +171,7 @@ export default async function PredictionsPage() {
                         <div
                           className={`text-sm font-bold ${
                             accuracy >= 0.6
-                              ? "text-green-600"
+                              ? "text-brand-600 dark:text-brand-400"
                               : accuracy >= 0.5
                                 ? "text-yellow-600"
                                 : "text-red-600"
@@ -195,7 +195,7 @@ export default async function PredictionsPage() {
                             key={tier}
                             className={`text-xs mt-0.5 ${
                               tierAcc >= 0.7
-                                ? "text-green-600 dark:text-green-400"
+                                ? "text-brand-600 dark:text-brand-400"
                                 : tierAcc >= 0.5
                                   ? "text-yellow-600"
                                   : "text-red-600"

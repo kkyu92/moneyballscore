@@ -175,11 +175,11 @@ export default async function ReviewsPage() {
             </div>
             <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
               <p className="text-sm text-gray-500 dark:text-gray-400">적중</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">{correct}<span className="text-sm text-gray-400 dark:text-gray-500 ml-1">경기</span></p>
+              <p className="text-3xl font-bold text-brand-600 dark:text-brand-400 mt-1">{correct}<span className="text-sm text-gray-400 dark:text-gray-500 ml-1">경기</span></p>
             </div>
             <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
               <p className="text-sm text-gray-500 dark:text-gray-400">적중률</p>
-              <p className={`text-3xl font-bold mt-1 ${rate >= 60 ? 'text-green-600' : rate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+              <p className={`text-3xl font-bold mt-1 ${rate >= 60 ? 'text-brand-600 dark:text-brand-400' : rate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
                 {rate}%
               </p>
             </div>
