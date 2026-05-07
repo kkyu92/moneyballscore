@@ -16,6 +16,7 @@ import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import { CURRENT_MODEL_FILTER } from '@/config/model';
 
 export const metadata: Metadata = {
   title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 어제 경기',
@@ -218,6 +219,7 @@ async function getMonthlyStats(startDate: string, endDate: string): Promise<Mont
     .from('predictions')
     .select('is_correct, game:games!predictions_game_id_fkey(game_date)')
     .eq('prediction_type', 'pre_game')
+    .match(CURRENT_MODEL_FILTER)
     .not('is_correct', 'is', null)
     .gte('game.game_date', startDate)
     .lte('game.game_date', endDate)) as SelectResult<Array<{ is_correct: boolean | null }>>;
@@ -231,12 +233,12 @@ async function getMonthlyStats(startDate: string, endDate: string): Promise<Mont
 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
+  const currentWeek = getCurrentWeek();
   const [todayData, yesterdayGames, monthlyStats] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getMonthlyStats(currentMonth.startDate, currentMonth.endDate),
   ]);
-  const currentWeek = getCurrentWeek();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
