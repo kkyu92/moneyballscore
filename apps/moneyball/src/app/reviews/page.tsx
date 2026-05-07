@@ -10,6 +10,7 @@ import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { CURRENT_MODEL_FILTER } from "@/config/model";
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -56,6 +57,7 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
         away_team:teams!games_away_team_id_fkey(code, name_ko)
       )
     `)
+    .match(CURRENT_MODEL_FILTER)
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null)
     .order('created_at', { ascending: false })

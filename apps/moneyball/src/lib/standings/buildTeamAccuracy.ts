@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk, type TeamCode } from "@moneyball/shared";
+import { CURRENT_MODEL_FILTER } from "@/config/model";
 
 export interface TeamAccuracyRow {
   teamCode: TeamCode;
@@ -30,6 +31,7 @@ export async function buildAllTeamAccuracy(): Promise<TeamAccuracyRow[]> {
       )
     `,
     )
+    .match(CURRENT_MODEL_FILTER)
     .eq("prediction_type", "pre_game")
     .not("is_correct", "is", null);
 
