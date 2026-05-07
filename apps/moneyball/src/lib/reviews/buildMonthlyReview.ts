@@ -12,6 +12,7 @@ import {
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { MonthRange } from "./computeMonthRange";
 import { getPreviousMonth } from "./computeMonthRange";
+import { FACTOR_LABELS_TECHNICAL as FACTOR_LABELS } from "@/lib/predictions/factorLabels";
 import type {
   WeeklyHighlight,
   WeeklyTeamStat,
@@ -34,19 +35,6 @@ export interface MonthlyReview {
   };
   summary: string;
 }
-
-const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  recent_form: "최근 10경기 폼",
-  war: "WAR 누적",
-  head_to_head: "상대전적",
-  park_factor: "구장 보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
-};
 
 interface Row {
   confidence: number | null;

@@ -11,6 +11,19 @@ export const FACTOR_LABELS: Record<string, string> = {
   sfr: "수비력",
 };
 
+export const FACTOR_LABELS_TECHNICAL: Record<string, string> = {
+  sp_fip: "선발 FIP",
+  sp_xfip: "선발 xFIP",
+  lineup_woba: "타선 wOBA",
+  bullpen_fip: "불펜 FIP",
+  recent_form: "최근 10경기 폼",
+  war: "WAR 누적",
+  head_to_head: "상대전적",
+  park_factor: "구장 보정",
+  elo: "Elo 레이팅",
+  sfr: "수비 SFR",
+};
+
 export const FACTOR_TIPS: Record<string, string> = {
   sp_fip: "선발투수의 순수 실력 (낮을수록 좋음)",
   sp_xfip: "운 요소를 제거한 선발투수 잠재력",

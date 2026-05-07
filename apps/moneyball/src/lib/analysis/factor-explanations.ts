@@ -1,4 +1,5 @@
 import { DEFAULT_WEIGHTS, josa, ro } from "@moneyball/shared";
+import { FACTOR_LABELS_TECHNICAL as FACTOR_LABELS } from "@/lib/predictions/factorLabels";
 
 export interface FactorRawDetails {
   homeSPFip?: number | null;
@@ -41,18 +42,6 @@ interface ExplainInput {
   awayTeamName: string;
 }
 
-const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  recent_form: "최근 10경기 폼",
-  war: "WAR 누적",
-  head_to_head: "상대전적",
-  park_factor: "구장 보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
-};
 
 function determineFavor(value: number): "home" | "away" | "neutral" {
   if (value > 0.55) return "home";

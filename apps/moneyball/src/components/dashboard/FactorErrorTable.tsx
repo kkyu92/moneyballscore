@@ -1,3 +1,5 @@
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+
 export interface FactorErrorRow {
   factor: string;
   error_count: number;
@@ -7,21 +9,6 @@ export interface FactorErrorRow {
 interface FactorErrorTableProps {
   rows: FactorErrorRow[];
 }
-
-// judge-agent postview가 축약 키로 factorErrors를 저장함(예: "sfr", "recent_form").
-// 미매핑 키는 원문 그대로 노출.
-const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  war: "WAR",
-  recent_form: "최근폼",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
-  head_to_head: "상대 전적",
-  park_factor: "구장 보정",
-};
 
 export function FactorErrorTable({ rows }: FactorErrorTableProps) {
   if (rows.length === 0) {
@@ -41,7 +28,7 @@ export function FactorErrorTable({ rows }: FactorErrorTableProps) {
   return (
     <ul className="space-y-3">
       {rows.map((row) => {
-        const label = FACTOR_LABELS[row.factor] ?? row.factor;
+        const label = FACTOR_LABELS_TECHNICAL[row.factor] ?? row.factor;
         const isHomeFavor = row.avg_bias > 0;
         const widthPct = Math.min(100, (Math.abs(row.avg_bias) / maxAbsBias) * 100);
         const biasLabel = row.avg_bias >= 0 ? `+${row.avg_bias.toFixed(2)}` : row.avg_bias.toFixed(2);

@@ -1,21 +1,9 @@
 import type { FactorAccuracyReport } from "@/lib/dashboard/factor-accuracy";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 interface Props {
   report: FactorAccuracyReport;
 }
-
-const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  recent_form: "최근 10경기 폼",
-  war: "WAR 누적",
-  head_to_head: "상대전적",
-  park_factor: "구장 보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
-};
 
 function fmtPct(v: number | null): string {
   if (v == null) return "-";
@@ -104,7 +92,7 @@ export function ModelTuningInsights({ report }: Props) {
                 >
                   <td className="py-2 pr-3">
                     <span className="font-medium text-gray-800 dark:text-gray-100">
-                      {FACTOR_LABELS[s.factor] ?? s.factor}
+                      {FACTOR_LABELS_TECHNICAL[s.factor] ?? s.factor}
                     </span>
                   </td>
                   <td className="py-2 pr-3 text-right font-mono text-xs text-gray-500 dark:text-gray-400">

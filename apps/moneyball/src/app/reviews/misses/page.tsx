@@ -4,6 +4,7 @@ import { shortTeamName } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const metadata: Metadata = {
   title: "회고: 크게 빗나간 예측",
@@ -18,16 +19,7 @@ export const revalidate = 1800;
 const SITE_URL = "https://moneyballscore.vercel.app";
 
 const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  recent_form: "최근 10경기 폼",
-  war: "WAR 누적",
-  head_to_head: "상대전적",
-  park_factor: "구장 보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
+  ...FACTOR_LABELS_TECHNICAL,
   home_sp_fip: "홈 선발 FIP",
   away_sp_fip: "원정 선발 FIP",
   home_bullpen_fip: "홈 불펜 FIP",
