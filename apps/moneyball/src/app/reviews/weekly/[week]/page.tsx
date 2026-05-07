@@ -89,7 +89,7 @@ function HighlightCard({ h }: { h: WeeklyHighlight }) {
 function GameResultRow({ g }: { g: WeeklyGameResult }) {
   const correctBadge =
     g.isCorrect === true ? (
-      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-brand-500/15 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300">
         적중
       </span>
     ) : g.isCorrect === false ? (
@@ -219,7 +219,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
           </div>
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">적중</p>
-            <p className="text-3xl font-bold text-green-600 mt-1">
+            <p className="text-3xl font-bold text-brand-500 mt-1">
               {review.correctGames}
               <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
                 경기
@@ -231,7 +231,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
             <p
               className={`text-3xl font-bold mt-1 ${
                 review.accuracyRate >= 0.6
-                  ? "text-green-600"
+                  ? "text-brand-500"
                   : review.accuracyRate >= 0.5
                     ? "text-yellow-600"
                     : "text-red-600"
@@ -311,8 +311,8 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {review.factorInsights.best && (
-              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-green-500/30 p-5">
-                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs text-brand-500 dark:text-brand-300 font-medium">
                   가장 잘 맞힌 팩터
                 </p>
                 <p className="text-lg font-bold mt-1">
@@ -353,7 +353,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
           <details className="group">
             <summary
               id="weekly-games-title"
-              className="flex items-center justify-between cursor-pointer list-none rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] px-5 py-4 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
+              className="flex items-center justify-between cursor-pointer list-none rounded-xl group-open:rounded-b-none bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] px-5 py-4 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
             >
               <h2 className="text-base font-bold">
                 이번 주 전체 경기
@@ -371,7 +371,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </summary>
-            <div className="mt-2 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] divide-y divide-gray-100 dark:divide-gray-700/40 overflow-hidden">
+            <div className="mt-2 group-open:mt-0 bg-white dark:bg-[var(--color-surface-card)] rounded-xl group-open:rounded-t-none border border-gray-200 dark:border-[var(--color-border)] group-open:border-t-0 divide-y divide-gray-100 dark:divide-gray-700/40 overflow-hidden">
               {review.games.map((g) => (
                 <GameResultRow key={g.gameId} g={g} />
               ))}
