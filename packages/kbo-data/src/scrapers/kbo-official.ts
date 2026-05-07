@@ -12,13 +12,6 @@ function formatDate(raw: string): string {
   return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
 }
 
-function parseGameStatus(status: string): ScrapedGame['status'] {
-  if (status === '경기종료' || status === '종료') return 'final';
-  if (status === '경기중' || status === '진행') return 'live';
-  if (status === '취소' || status === '우천취소') return 'postponed';
-  return 'scheduled';
-}
-
 /**
  * KBO 공식 사이트에서 특정 날짜의 경기 목록 가져오기
  * AJAX API: /ws/Main.asmx/GetKboGameList
@@ -277,7 +270,7 @@ export async function fetchStandings(): Promise<StandingRow[]> {
 
   $('table tbody tr').each((_, row) => {
     const cells = $(row).find('td');
-    if (cells.length < 9) return;
+    if (cells.length < 10) return;
 
     const rankText = cells.eq(0).text().trim();
     const teamName = cells.eq(1).text().trim();
