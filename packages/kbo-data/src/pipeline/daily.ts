@@ -366,17 +366,25 @@ export async function runDailyPipeline(
   // === predict / predict_final ===
   // existing pre_game predictions 배치 조회 (cycle 143 silent drift 가드 —
   // `.error` 미체크 시 data=null → existingSet 빈 → 모든 경기를 "예측 없음"
-  // 판정 → 중복 prediction insert 큐 진입. assertSelectOk 로 fail-loud)
-  const existingResult = await db
-    .from('predictions').select('game_id')
-    .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
-  const { data: existing } = assertSelectOk<{ game_id: number }[]>(
-    existingResult,
-    'runPredict existing predictions',
-  );
-  const existingSet = new Set(
-    (existing ?? []).map((e: { game_id: number }) => e.game_id),
-  );
+  // 판정 → 중복 prediction insert 큐 진입. assertSelectOk 로 fail-loud.
+  // cycle 211 — assertSelectOk throw 시 finish() 우회 → pipeline_runs 로그
+  // 누락 (line 120 불변 위반). try/catch 로 래핑해 finish() 경유 보장.
+  let existingSet: Set<number>;
+  try {
+    const existingResult = await db
+      .from('predictions').select('game_id')
+      .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
+    const { data: existing } = assertSelectOk<{ game_id: number }[]>(
+      existingResult,
+      'runPredict existing predictions',
+    );
+    existingSet = new Set(
+      (existing ?? []).map((e: { game_id: number }) => e.game_id),
+    );
+  } catch (e) {
+    errors.push(`existing predictions: ${e instanceof Error ? e.message : String(e)}`);
+    return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: games.length, errors });
+  }
 
   // windowTargets 계산 + 스킵 사유 수집. reason 버리지 말고 pipeline_runs 에
   // 보존 → 사후 "왜 이 경기가 예측 안 됐나" 즉각 판독 가능.
