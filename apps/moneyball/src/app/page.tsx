@@ -25,7 +25,7 @@ import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { getRecentWeeks, getCurrentWeek } from "@/lib/reviews/computeWeekRange";
-import { CURRENT_DEBATE_VERSION } from "@/config/model";
+import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -300,6 +300,7 @@ async function getSeasonAccuracy(): Promise<{
     .from('predictions')
     .select('is_correct, reasoning')
     .eq('prediction_type', 'pre_game')
+    .match(CURRENT_MODEL_FILTER)
     .not('is_correct', 'is', null);
   const { data } = assertSelectOk(predResult, 'home.getSeasonAccuracy');
 
