@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.29] - 2026-05-07 normalize() 음수 입력값 버그 수정
+
+### 예측 엔진 버그 수정 (cycle 208 fix-incident)
+
+**파일**: `packages/kbo-data/src/engine/predictor.ts`
+
+`normalize()` 함수의 양수 전용 비율 공식(`a/(|a|+|b|)`) 이 `higherIsBetter=true` + `homeVal<0` 시
+팩터값 음수 반환하는 버그 수정. KBO SFR 지표는 평균 대비 상대값으로 음수 가능.
+
+**수정 내용**: 차이 기반 정규화 `(home-away)/(|home|+|away|) → [-1,1] → [0,1]` 로 교체.
+- 양수 전용 입력과 수학적 동치 증명: `((a-b)/(a+b)+1)/2 = a/(a+b)` ← 완전 backward compatible
+- 음수 SFR 입력에서 팩터 [0,1] 범위 보장
+- 신규 테스트 4개 추가 (홈열세/홈우세/양팀음수/전체팩터≥0)
+
+**영향**: 72건 중 6건 음수 SFR 팩터 수정 (단일 경기 최대 ±4.2pp). Brier 영향 미미.
+
+557 → 561 tests all pass.
+
 ## [0.5.28] - 2026-05-07 주간 성과 분석 (W19)
 
 ### 예측 성과 — 2026 시즌 누적 (cycle 207 operational-analysis)
