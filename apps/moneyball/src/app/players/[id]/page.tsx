@@ -194,7 +194,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                     a.isCorrect == null
                       ? "text-gray-500 dark:text-gray-400"
                       : a.isCorrect
-                        ? "text-green-600 dark:text-green-400"
+                        ? "text-brand-600 dark:text-brand-400"
                         : "text-red-600 dark:text-red-400";
                   return (
                     <tr

@@ -421,7 +421,7 @@ export default async function AnalysisIndexPage() {
                           </p>
                           <p className={`text-xs font-semibold mt-0.5 ${
                             tier === 'confident'
-                              ? 'text-green-600 dark:text-green-400'
+                              ? 'text-brand-600 dark:text-brand-400'
                               : tier === 'lean'
                                 ? 'text-yellow-600 dark:text-yellow-400'
                                 : 'text-gray-500 dark:text-gray-400'

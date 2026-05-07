@@ -171,7 +171,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
           </div>
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">적중</p>
-            <p className="text-3xl font-bold text-green-600 mt-1">
+            <p className="text-3xl font-bold text-brand-600 dark:text-brand-400 mt-1">
               {review.correctGames}
               <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
                 경기
@@ -183,7 +183,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
             <p
               className={`text-3xl font-bold mt-1 ${
                 review.accuracyRate >= 0.6
-                  ? "text-green-600"
+                  ? "text-brand-600 dark:text-brand-400"
                   : review.accuracyRate >= 0.5
                     ? "text-yellow-600"
                     : "text-red-600"
@@ -199,7 +199,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                 <p
                   className={`text-3xl font-bold mt-1 font-mono ${
                     diffPp > 0
-                      ? "text-green-600"
+                      ? "text-brand-600 dark:text-brand-400"
                       : diffPp < 0
                         ? "text-red-600"
                         : "text-gray-500"
@@ -289,8 +289,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {review.factorInsights.best && (
-              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-green-500/30 p-5">
-                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs text-brand-600 dark:text-brand-300 font-medium">
                   가장 잘 맞힌 팩터
                 </p>
                 <p className="text-lg font-bold mt-1">

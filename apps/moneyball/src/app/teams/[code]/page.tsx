@@ -147,7 +147,7 @@ export default async function TeamPage({ params }: PageProps) {
                 profile.verifiedN > 0 && profile.verifiedN < 5
                   ? "text-gray-400 dark:text-gray-500"
                   : (profile.accuracyRate ?? 0) >= 0.6
-                    ? "text-green-600"
+                    ? "text-brand-600 dark:text-brand-400"
                     : (profile.accuracyRate ?? 0) >= 0.5
                       ? "text-yellow-600"
                       : "text-red-600"
@@ -316,7 +316,7 @@ export default async function TeamPage({ params }: PageProps) {
                     r.isCorrect == null
                       ? "text-gray-500 dark:text-gray-400"
                       : r.isCorrect
-                        ? "text-green-600 dark:text-green-400"
+                        ? "text-brand-600 dark:text-brand-400"
                         : "text-red-600 dark:text-red-400";
                   const resultLabel =
                     r.isCorrect == null

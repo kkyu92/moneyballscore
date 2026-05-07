@@ -151,7 +151,7 @@ export default async function MatchupPage({ params }: PageProps) {
             <p
               className={`text-3xl font-bold font-mono ${
                 (predictionAccuracy.rate ?? 0) >= 0.6
-                  ? "text-green-600"
+                  ? "text-brand-600 dark:text-brand-400"
                   : (predictionAccuracy.rate ?? 0) >= 0.5
                     ? "text-yellow-600"
                     : "text-red-600"
@@ -206,7 +206,7 @@ export default async function MatchupPage({ params }: PageProps) {
                     g.isCorrect == null
                       ? "text-gray-500 dark:text-gray-400"
                       : g.isCorrect
-                        ? "text-green-600 dark:text-green-400"
+                        ? "text-brand-600 dark:text-brand-400"
                         : "text-red-600 dark:text-red-400";
                   return (
                     <tr
