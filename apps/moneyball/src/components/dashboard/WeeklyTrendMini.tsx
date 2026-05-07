@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   BarChart,
   Bar,
@@ -60,15 +62,24 @@ function CustomTooltip({
 }
 
 export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
+  const router = useRouter();
   const current = [...weeks].reverse().find((w) => w.isCurrent);
   const currentPct =
     current && current.verified > 0 ? Math.round(current.rate * 100) : null;
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-        최근 4주 성과
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+          최근 4주 성과
+        </h3>
+        <Link
+          href="/reviews/weekly"
+          className="text-xs text-brand-600 hover:text-brand-800 hover:underline"
+        >
+          전체 보기 →
+        </Link>
+      </div>
       {currentPct != null ? (
         <div className="flex items-end gap-1.5">
           <span
@@ -97,7 +108,16 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
           barCategoryGap="20%"
         >
           <ReferenceLine y={0.5} stroke="#9ca3af" strokeDasharray="3 2" strokeWidth={1} />
-          <Bar dataKey="rate" radius={[3, 3, 0, 0]} maxBarSize={28}>
+          <Bar
+            dataKey="rate"
+            radius={[3, 3, 0, 0]}
+            maxBarSize={28}
+            style={{ cursor: "pointer" }}
+            onClick={(data) => {
+              const weekId = (data as { payload?: { weekId?: string } })?.payload?.weekId;
+              if (weekId) router.push(`/reviews/weekly/${weekId}`);
+            }}
+          >
             {weeks.map((w, i) => (
               <Cell
                 key={i}
