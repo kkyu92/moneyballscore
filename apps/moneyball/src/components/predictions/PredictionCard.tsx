@@ -116,7 +116,7 @@ export function PredictionCard({
           <span
             className={`text-xs font-bold px-2 py-0.5 rounded-full ${
               isCorrect
-                ? "bg-green-100 dark:bg-green-900/30 text-green-700"
+                ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700"
                 : "bg-red-100 dark:bg-red-900/30 text-red-700"
             }`}
           >
