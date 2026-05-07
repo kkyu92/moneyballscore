@@ -1,10 +1,10 @@
 /**
  * Validator Layer 1 — 팀 에이전트 JSON 응답 결정론적 검증
  *
- * Phase v4-2 신규. 환각·편향·금칙어·선수명 발명을 차단.
+ * 환각·편향·금칙어·선수명 발명을 차단.
  * 위반 시 AgentResult.success=false로 전환되어 debate.ts의 기존 fallback 경로 사용.
  *
- * 정책 (Q2 + v4-3 mode 도입):
+ * 정책:
  *   strict (프로덕션/Claude 기본):
  *     - 하드 위반(환각, 선수명 발명) 1건 이상 → reject
  *     - 경고(금칙어, claim-type 분류 불가) 3건 이상 → reject
@@ -13,7 +13,7 @@
  *     - 환각 숫자 hard는 유지
  *     - 경고 6건 이상 → reject (WARN_LIMIT_LENIENT=5)
  *
- * 호출부는 NODE_ENV=production이면 무조건 strict. v4-3 eng-review A4.
+ * 호출부는 NODE_ENV=production이면 무조건 strict.
  */
 
 import type { TeamCode } from '@moneyball/shared';
@@ -174,8 +174,7 @@ const PLAYER_CONTEXT_VERBS = [
 // 한국 성씨 상위 ~50개. 실제 이름 패턴 매칭에 사용.
 // v4-4 hotfix: 일반 3자 단어를 "(1성) + (2이름)"으로 오분류하던 버그 해결.
 // 이 성씨로 시작하지 않는 3자 단어는 이름이 아닐 확률 매우 높음.
-// cycle 132: 마지막 '유' 중복 제거 (character class 동작 무관, 정확성 박제).
-// export = test 회귀 가드 가능하게 하기 위함 (cycle 132 silent drift fix).
+// export = test 회귀 가드용.
 export const KOREAN_FAMILY_NAMES =
   '김이박최정강조윤장임한오서신권황안송전홍유고문손양배백허남심노하곽성차주우구민';
 
@@ -261,8 +260,6 @@ export function checkHallucinatedNumbers(
   }
 
   if (hallucinated.length === 0) return [];
-  // cycle 76 — slice(0, 5) 제거. detail = mask 함수의 source (extractDetailValues).
-  // 6번째 이상 환각 숫자가 사용자 가시 reasoning 에 silent leak 되던 버그.
   return [
     {
       type: 'hallucinated_number',
@@ -393,9 +390,9 @@ export function buildInjectionText(context: GameContext): string {
   const homeName = KBO_TEAMS[game.homeTeam].name;
   const awayName = KBO_TEAMS[game.awayTeam].name;
 
-  // cycle 179 — buildUserMessage (team-agent) 와 동일 소스 정렬:
+  // team-agent buildUserMessage 와 동일 소스 정렬:
   // SP WAR 제거 (LLM 미노출 → 환각 통과 갭 차단), gameTime 추가 (시간 숫자 false positive 차단),
-  // recentForm Math.round(form*100)% 포맷 (LLM 실제 노출 값 반영). silent drift family agents 차원 다섯 번째 진입.
+  // recentForm Math.round(form*100)% 포맷 (LLM 실제 노출 값 반영).
   const spLine = (p: typeof homeSPStats) =>
     p ? `${p.name} FIP ${p.fip} xFIP ${p.xfip} K/9 ${p.kPer9}` : '미확정';
 
@@ -454,7 +451,7 @@ export function validateTeamArgument(
 }
 
 // ============================================
-// P1 — validateJudgeReasoning (cycle 27, spec 2026-05-04-llm-output-integrity-cycle25)
+// P1 — validateJudgeReasoning
 // ============================================
 //
 // JudgeVerdict.reasoning = 블로그 본문 자유 텍스트. validateTeamArgument 가 TeamArgument JSON 만
@@ -535,7 +532,7 @@ export function maskViolatedReasoning(
 }
 
 // ============================================
-// P4 — validateFactorAttribution (cycle 29, spec § 4.4)
+// P4 — validateFactorAttribution
 // ============================================
 //
 // LLM postview 가 지목한 factorErrors 의 factor 가중치를 정량 모델과 cross-check.
@@ -581,7 +578,6 @@ export function validateFactorAttribution(
   return { ok, violations };
 }
 
-// cycle 70 — annotateLowWeightFactorAttribution 제거.
 // 사용자 가시 judgeReasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
 // attribution warning 은 notifyValidationViolations (Sentry) 에서만 capture.
 
