@@ -8,6 +8,7 @@ import {
   type WinnerConfidenceTier,
 } from "@moneyball/shared";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -115,6 +116,7 @@ export default async function PredictionsPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: '예측 기록' }]} />
       <h1 className="text-3xl font-bold">예측 기록</h1>
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
 

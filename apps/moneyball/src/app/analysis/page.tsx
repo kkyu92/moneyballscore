@@ -11,6 +11,7 @@ import {
 } from '@moneyball/shared';
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
+import { Breadcrumb } from '@/components/shared/Breadcrumb';
 
 // v4-4 Phase 1-1: /analysis 는 '오늘 빅매치' 전용. 시즌 누적 성과는 /dashboard 에 통합.
 // develop-cycle 1 (2026-04-30, site): "어제 경기" 진입점 보강 — 빅매치 외 경기 분석 retention.
@@ -166,6 +167,7 @@ export default async function AnalysisIndexPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
+      <Breadcrumb items={[{ label: 'AI 분석' }]} />
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">

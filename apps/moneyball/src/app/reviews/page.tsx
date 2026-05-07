@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -75,6 +76,7 @@ export default async function ReviewsPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={[{ label: '예측 결과 리뷰' }]} />
       <div>
         <h1 className="text-3xl font-bold">예측 결과 리뷰</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">

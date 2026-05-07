@@ -3,6 +3,7 @@ import Link from "next/link";
 import { shortTeamName } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "회고: 크게 빗나간 예측",
@@ -66,14 +67,9 @@ export default async function MissesReviewPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <Breadcrumb items={[{ href: '/reviews', label: '예측 결과 리뷰' }, { label: '크게 빗나간 예측' }]} />
+
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
-        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <Link href="/reviews" className="hover:text-brand-500">
-            리뷰
-          </Link>
-          <span aria-hidden>/</span>
-          <span>회고</span>
-        </div>
         <h1 className="text-3xl md:text-4xl font-bold">
           회고: 크게 빗나간 예측
         </h1>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DEFAULT_WEIGHTS } from "@moneyball/shared";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "소개",
@@ -163,6 +164,7 @@ export default function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
+      <Breadcrumb items={[{ label: '소개' }]} />
       <section>
         <h1 className="text-3xl font-bold mb-2">MoneyBall Score</h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg">
