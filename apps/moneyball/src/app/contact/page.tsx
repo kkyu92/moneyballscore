@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "문의",
@@ -41,6 +42,7 @@ const EMAIL = "moneyballscore777@gmail.com";
 export default function ContactPage() {
   return (
     <article className="max-w-3xl space-y-8">
+      <Breadcrumb items={[{ label: "문의" }]} className="mb-2" />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">문의</h1>
         <p className="text-gray-600 dark:text-gray-300">

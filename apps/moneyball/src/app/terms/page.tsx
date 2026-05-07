@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "이용약관",
@@ -178,6 +179,7 @@ const SECTIONS = [
 export default function TermsPage() {
   return (
     <article className="max-w-3xl space-y-8">
+      <Breadcrumb items={[{ label: "이용약관" }]} className="mb-2" />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">이용약관</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">

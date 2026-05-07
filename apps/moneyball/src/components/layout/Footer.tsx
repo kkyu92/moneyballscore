@@ -1,68 +1,101 @@
 import Link from "next/link";
 
+const SITEMAP_COLUMNS = [
+  {
+    label: "분석·예측",
+    links: [
+      { href: "/", label: "오늘 경기" },
+      { href: "/analysis", label: "AI 분석" },
+      { href: "/predictions", label: "예측 기록" },
+      { href: "/matchup", label: "매치업" },
+    ],
+  },
+  {
+    label: "팀·선수",
+    links: [
+      { href: "/teams", label: "팀 프로필" },
+      { href: "/players", label: "선수 리더보드" },
+    ],
+  },
+  {
+    label: "리뷰·시즌",
+    links: [
+      { href: "/reviews", label: "예측 리뷰" },
+      { href: "/reviews/misses", label: "크게 빗나간 예측" },
+      { href: "/seasons", label: "시즌 기록" },
+    ],
+  },
+  {
+    label: "서비스",
+    links: [
+      { href: "/dashboard", label: "대시보드" },
+      { href: "/about", label: "소개" },
+      { href: "/contact", label: "문의" },
+    ],
+  },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-brand-800 bg-brand-900 mt-auto text-brand-300">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">⚾</span>
-            <span className="font-semibold text-white">MoneyBall Score</span>
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
+          <div className="shrink-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">⚾</span>
+              <span className="font-semibold text-white">MoneyBall Score</span>
+            </div>
+            <p className="text-xs text-brand-400 max-w-[14rem]">
+              세이버메트릭스 기반 KBO 승부예측 서비스
+            </p>
           </div>
+
           <nav
-            aria-label="서비스"
-            className="flex items-center gap-x-6 gap-y-2 text-sm flex-wrap justify-center"
+            aria-label="사이트맵"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 flex-1"
           >
-            <Link href="/" className="hover:text-white transition-colors">
-              홈
-            </Link>
-            <Link href="/predictions" className="hover:text-white transition-colors">
-              예측
-            </Link>
-            <Link href="/analysis" className="hover:text-white transition-colors">
-              AI 분석
-            </Link>
-            <Link href="/reviews" className="hover:text-white transition-colors">
-              리뷰
-            </Link>
-            <Link href="/players" className="hover:text-white transition-colors">
-              선수
-            </Link>
-            <Link href="/teams" className="hover:text-white transition-colors">
-              팀
-            </Link>
-            <Link href="/dashboard" className="hover:text-white transition-colors">
-              대시보드
-            </Link>
-            <Link href="/about" className="hover:text-white transition-colors">
-              소개
-            </Link>
+            {SITEMAP_COLUMNS.map((col) => (
+              <div key={col.label}>
+                <h3 className="text-xs font-semibold text-brand-400 uppercase tracking-wide mb-2">
+                  {col.label}
+                </h3>
+                <ul className="space-y-1.5">
+                  {col.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-sm hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </nav>
         </div>
 
-        <nav
-          aria-label="법적 고지"
-          className="flex items-center justify-center gap-4 text-xs text-brand-400 flex-wrap"
-        >
-          <Link href="/privacy" className="hover:text-white transition-colors">
-            개인정보처리방침
-          </Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/terms" className="hover:text-white transition-colors">
-            이용약관
-          </Link>
-          <span aria-hidden="true">·</span>
-          <Link href="/contact" className="hover:text-white transition-colors">
-            문의
-          </Link>
-        </nav>
-
-        <div className="text-center text-xs text-brand-400 space-y-1">
-          <p>
-            세이버메트릭스 기반 정보 제공 서비스. 본 사이트는 스포츠 토토,
-            사설 베팅, 금전 거래를 일체 권유·중개·조장하지 않습니다.
+        <div className="border-t border-brand-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <nav
+            aria-label="법적 고지"
+            className="flex items-center gap-4 text-xs text-brand-400 flex-wrap justify-center"
+          >
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              개인정보처리방침
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/terms" className="hover:text-white transition-colors">
+              이용약관
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              문의
+            </Link>
+          </nav>
+          <p className="text-xs text-brand-400 text-center sm:text-right">
+            예측 결과는 통계 모델의 추정이며 실제 결과와 일치를 보장하지 않습니다.
           </p>
-          <p>예측 결과는 통계 모델의 추정이며, 실제 경기 결과와 일치를 보장하지 않습니다.</p>
         </div>
       </div>
     </footer>

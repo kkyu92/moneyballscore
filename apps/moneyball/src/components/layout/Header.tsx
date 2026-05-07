@@ -12,16 +12,18 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "분석" },
+  { href: "/", label: "오늘" },
+  { href: "/analysis", label: "AI 분석" },
   { href: "/predictions", label: "기록" },
-  { href: "/dashboard", label: "대시보드" },
   {
     label: "팀·선수",
     items: [
       { href: "/teams", label: "팀" },
       { href: "/players", label: "선수" },
+      { href: "/matchup", label: "매치업" },
     ],
   },
+  { href: "/reviews", label: "리뷰" },
   { href: "/seasons", label: "시즌" },
 ];
 
