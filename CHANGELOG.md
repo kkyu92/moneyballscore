@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.33] - 2026-05-07 getYesterdayKST off-by-1 수정 (cycle 232 review-code heavy)
+
+### Bug Fix
+
+- **`getYesterdayKST` off-by-1**: UTC 서버에서 `d.getDate()` = UTC day이지만, KST 자정(`T00:00:00+09:00`)은 UTC 전날 15:00 → `setDate(getDate()-1)` 이 2일 소급하는 버그.
+  - 영향: `recent form` 필터가 2일치 더 제외됨 (daily.ts 라인 528)
+  - 영향: 아침 `postview cleanup` 이 하루 이른 날짜 처리 (daily.ts 라인 256)
+  - 수정: `toKSTDateString(new Date(d.getTime() - 86_400_000))` — 정확히 24h 빼고 KST 변환
+- **`updateAccuracy` assertSelectOk 통일**: 직접 `.error` 패턴 → `assertSelectOk` try/catch 일관화
+
 ## [0.5.32] - 2026-05-07 W19 부분 성과 + 팩터 유효성 재검토 (cycle 231 operational-analysis heavy)
 
 ### 예측 성과 — 2026 시즌 누적 (72건, 4/16~5/6)
