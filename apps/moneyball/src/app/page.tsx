@@ -270,6 +270,12 @@ function classifyNoGameReason(
   return 'unknown';
 }
 
+function extractJudgeReasoning(text: string | undefined | null): string | undefined {
+  if (!text) return undefined;
+  const trim = text.trim();
+  return trim.length > 100 ? trim.slice(0, 100) + '...' : trim;
+}
+
 function formatKoreanWeekday(dateStr: string): string {
   // 서버 timezone (Vercel UTC) 무관하게 날짜 문자열 그대로의 요일.
   // UTC 정오 앵커 + getUTCDay 로 하루 밀리지 않음.
@@ -523,6 +529,7 @@ export default async function HomePage() {
                     weather={todayWeather.get(game.id)}
                     status={game.status}
                     factors={pred.factors}
+                    judgeReasoning={extractJudgeReasoning(pred.reasoning?.debate?.verdict?.reasoning)}
                   />
                 </div>
               );

@@ -30,6 +30,7 @@ export interface PredictionCardProps {
   weather?: WeatherSlot | null;
   status?: string | null; // scheduled / live / final / postponed — DB games.status
   factors?: Record<string, number> | null;
+  judgeReasoning?: string; // AI 심판 판정 근거 첫 문장 (≤100자)
 }
 
 export function PredictionCard({
@@ -54,6 +55,7 @@ export function PredictionCard({
   weather,
   status,
   factors,
+  judgeReasoning,
 }: PredictionCardProps) {
   const isLive = status === 'live';
   const isFinal = status === 'final';
@@ -269,18 +271,25 @@ export function PredictionCard({
         )}
       </div>
 
-      {/* 주요 근거 — 예측 승자 쪽으로 가장 기울어진 팩터 top-2 */}
-      {factors && (() => {
+      {/* 주요 근거 + AI 판정 요약 */}
+      {(() => {
         const isHome = predictedWinner === homeTeam;
-        const top = topFavoringFactors(factors, isHome, 2);
-        if (top.length === 0) return null;
+        const top = factors ? topFavoringFactors(factors, isHome, 2) : [];
+        if (top.length === 0 && !judgeReasoning) return null;
         return (
           <div className="mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              <span className="font-medium text-gray-500 dark:text-gray-400">주요 근거</span>
-              {" "}
-              {top.join(" · ")} 우위
-            </p>
+            {top.length > 0 && (
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                <span className="font-medium text-gray-500 dark:text-gray-400">주요 근거</span>
+                {" "}
+                {top.join(" · ")} 우위
+              </p>
+            )}
+            {judgeReasoning && (
+              <p className={`text-xs text-gray-400 dark:text-gray-500 italic leading-relaxed${top.length > 0 ? ' mt-1' : ''}`}>
+                {judgeReasoning}
+              </p>
+            )}
           </div>
         );
       })()}

@@ -654,3 +654,49 @@ describe('YesterdayResultsSection — 어제 결과 섹션', () => {
     expect(link?.getAttribute('href')).toBe('/analysis/game/42');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PredictionCard — judgeReasoning prop (cycle 235 추가)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('PredictionCard — judgeReasoning', () => {
+  const BASE_PROPS = {
+    homeTeam: 'OB' as TeamCode,
+    awayTeam: 'HT' as TeamCode,
+    confidence: 0.3,
+    predictedWinner: 'OB' as TeamCode,
+  };
+
+  it('judgeReasoning 제공 시 카드에 텍스트 표시', () => {
+    render(
+      <PredictionCard
+        {...BASE_PROPS}
+        judgeReasoning="KT 위즈가 선발 FIP 우위와 최근 폼 강세로 승리가 예상됩니다."
+      />,
+    );
+    expect(
+      screen.getByText('KT 위즈가 선발 FIP 우위와 최근 폼 강세로 승리가 예상됩니다.'),
+    ).toBeInTheDocument();
+  });
+
+  it('judgeReasoning 없으면 주요 근거도 없을 때 인사이트 영역 미표시', () => {
+    const { container } = render(
+      <PredictionCard {...BASE_PROPS} />,
+    );
+    // italic 태그 없어야 함
+    expect(container.querySelector('p.italic')).not.toBeInTheDocument();
+  });
+
+  it('factors 없고 judgeReasoning만 있어도 인사이트 영역 표시', () => {
+    render(
+      <PredictionCard
+        {...BASE_PROPS}
+        factors={null}
+        judgeReasoning="선발 투수 비교에서 홈팀이 확실한 우위."
+      />,
+    );
+    expect(screen.getByText('선발 투수 비교에서 홈팀이 확실한 우위.')).toBeInTheDocument();
+    // '주요 근거' 레이블은 없어야 함 (factors null)
+    expect(screen.queryByText('주요 근거')).not.toBeInTheDocument();
+  });
+});
