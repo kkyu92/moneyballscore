@@ -49,7 +49,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/teams`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
+    { url: `${baseUrl}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
   ];
+
+  // 시즌별 URL (generateStaticParams 에서 2023~2026 정적 생성)
+  const currentYear = now.getFullYear();
+  const seasonYearRoutes: MetadataRoute.Sitemap = [2023, 2024, 2025, 2026].map((year) => ({
+    url: `${baseUrl}/seasons/${year}`,
+    lastModified: now,
+    changeFrequency: (year === currentYear ? 'daily' : 'monthly') as 'daily' | 'monthly',
+    priority: year === currentYear ? 0.8 : 0.65,
+  }));
 
   // 45개 canonical 팀 매치업 URL
   const matchupRoutes: MetadataRoute.Sitemap = allPairs().map((p) => ({
@@ -147,6 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...seasonYearRoutes,
     ...weeklyReviewRoutes,
     ...monthlyReviewRoutes,
     ...teamProfileRoutes,
