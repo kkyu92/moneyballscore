@@ -22,6 +22,8 @@ const SITEMAP_COLUMNS = [
     label: "리뷰·시즌",
     links: [
       { href: "/reviews", label: "예측 리뷰" },
+      { href: "/reviews/weekly", label: "주간 리뷰" },
+      { href: "/reviews/monthly", label: "월간 리뷰" },
       { href: "/reviews/misses", label: "크게 빗나간 예측" },
       { href: "/seasons", label: "시즌 기록" },
     ],
@@ -30,6 +32,7 @@ const SITEMAP_COLUMNS = [
     label: "서비스",
     links: [
       { href: "/dashboard", label: "대시보드" },
+      { href: "/search", label: "검색" },
       { href: "/about", label: "소개" },
       { href: "/contact", label: "문의" },
     ],
