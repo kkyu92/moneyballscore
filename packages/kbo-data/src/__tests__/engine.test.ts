@@ -83,6 +83,44 @@ describe('예측 엔진 v1.6', () => {
   });
 });
 
+describe('normalize 음수 입력값 (SFR 버그 수정 cycle 208)', () => {
+  it('홈팀 음수 SFR, 원정팀 양수 SFR → sfr 팩터 < 0.5 (홈 열세)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: -5.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 3.0 },
+    }));
+    expect(result.factors.sfr).toBeGreaterThanOrEqual(0);
+    expect(result.factors.sfr).toBeLessThan(0.5);
+  });
+
+  it('홈팀 양수 SFR, 원정팀 음수 SFR → sfr 팩터 > 0.5 (홈 우세)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 3.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: -5.0 },
+    }));
+    expect(result.factors.sfr).toBeGreaterThan(0.5);
+    expect(result.factors.sfr).toBeLessThanOrEqual(1.0);
+  });
+
+  it('양팀 모두 음수 SFR, 홈팀이 덜 나쁨 → sfr 팩터 > 0.5', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: -2.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: -5.0 },
+    }));
+    expect(result.factors.sfr).toBeGreaterThan(0.5);
+  });
+
+  it('모든 팩터값이 0 이상 (음수 팩터 없음)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.320, bullpenFip: 4.2, totalWar: 15, sfr: -7.9 },
+      awayTeamStats: { team: 'OB', woba: 0.340, bullpenFip: 3.8, totalWar: 18, sfr: 3.2 },
+    }));
+    for (const [key, val] of Object.entries(result.factors)) {
+      expect(val, `팩터 ${key} 음수`).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
+
 describe('가중치 합산', () => {
   it('가중치 합이 0.85', () => {
     const sum = Object.values(DEFAULT_WEIGHTS).reduce<number>(
