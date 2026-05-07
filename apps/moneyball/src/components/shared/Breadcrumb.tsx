@@ -40,13 +40,13 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
     <>
       <nav
         aria-label="breadcrumb"
-        className={`text-xs text-gray-500 dark:text-gray-400 ${className}`}
+        className={`text-xs text-brand-400 dark:text-brand-300 ${className}`}
       >
         <ol className="flex items-center gap-1.5 flex-wrap">
           <li>
             <Link
               href="/"
-              className="hover:text-brand-600 dark:hover:text-brand-300 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
+              className="hover:text-brand-600 dark:hover:text-brand-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
             >
               홈
             </Link>
@@ -55,13 +55,13 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
             const isLast = idx === items.length - 1;
             return (
               <li key={`${item.label}-${idx}`} className="flex items-center gap-1.5">
-                <span aria-hidden="true" className="text-gray-300 dark:text-gray-600">
+                <span aria-hidden="true" className="text-brand-700 dark:text-brand-600">
                   /
                 </span>
                 {item.href && !isLast ? (
                   <Link
                     href={item.href}
-                    className="hover:text-brand-600 dark:hover:text-brand-300 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
+                    className="hover:text-brand-600 dark:hover:text-brand-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
                   >
                     {item.label}
                   </Link>
@@ -70,8 +70,8 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
                     aria-current={isLast ? 'page' : undefined}
                     className={
                       isLast
-                        ? 'font-medium text-gray-700 dark:text-gray-200'
-                        : 'text-gray-500 dark:text-gray-400'
+                        ? 'font-medium text-brand-600 dark:text-brand-100'
+                        : 'text-brand-400 dark:text-brand-300'
                     }
                   >
                     {item.label}
