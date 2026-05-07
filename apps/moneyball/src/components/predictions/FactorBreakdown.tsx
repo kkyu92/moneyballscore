@@ -31,7 +31,6 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam }: FactorBreakdown
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
 
-  // 팩터를 가중치 순으로 정렬
   const sortedFactors = Object.entries(factors)
     .filter(([key]) => key in DEFAULT_WEIGHTS)
     .sort(([a], [b]) => {

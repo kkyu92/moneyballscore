@@ -11,6 +11,7 @@ import {
 } from '@moneyball/shared';
 import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
 import type { WeekRange } from "./computeWeekRange";
+import { FACTOR_LABELS_TECHNICAL as FACTOR_LABELS } from "@/lib/predictions/factorLabels";
 
 export interface WeeklyHighlight {
   gameId: number;
@@ -82,19 +83,6 @@ interface Row {
     away_team: { code: string | null } | null;
   } | null;
 }
-
-const FACTOR_LABELS: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  recent_form: "최근 10경기 폼",
-  war: "WAR 누적",
-  head_to_head: "상대전적",
-  park_factor: "구장 보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
-};
 
 function pickHighlights(rows: Row[]): WeeklyHighlight[] {
   const verified = rows.filter(

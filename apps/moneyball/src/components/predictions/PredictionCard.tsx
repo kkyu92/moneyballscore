@@ -71,10 +71,9 @@ export function PredictionCard({
     awayScore > homeScore;
   // winProb = 예측 승자의 승리 확률. DB predicted_winner 기준으로 표시.
   // debate가 50% 미만으로 낮춰도 predicted_winner는 유지 (적중 판정 일관성)
-  const displayPct = winProb
+  const confidencePct = winProb
     ? Math.round(winProb * 100)
     : Math.round((0.5 + confidence / 2) * 100);
-  const confidencePct = displayPct;
 
   const cardClass = isBigMatch
     ? "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
@@ -84,7 +83,6 @@ export function PredictionCard({
 
   return (
     <div className={cardClass}>
-      {/* v4-4 빅매치 뱃지 */}
       {isBigMatch && (
         <div className="absolute -top-2.5 left-4 bg-[var(--color-accent)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
           ⭐ 오늘의 고확신 예측
@@ -287,7 +285,6 @@ export function PredictionCard({
         );
       })()}
 
-      {/* v4-4: 상세 분석 링크 */}
       {gameId != null && (
         <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 mt-3 text-center">
           <AnalysisLink gameId={gameId} label="AI 분석 보기" variant="subtle" />
