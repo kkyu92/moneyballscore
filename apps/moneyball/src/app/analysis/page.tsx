@@ -208,12 +208,12 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   return cards;
 }
 
-interface MonthlyStats {
+interface PeriodStats {
   total: number;
   correct: number;
 }
 
-async function getMonthlyStats(startDate: string, endDate: string): Promise<MonthlyStats> {
+async function getPeriodStats(startDate: string, endDate: string): Promise<PeriodStats> {
   const supabase = await createClient();
   const result = (await supabase
     .from('predictions')
@@ -224,20 +224,92 @@ async function getMonthlyStats(startDate: string, endDate: string): Promise<Mont
     .gte('game.game_date', startDate)
     .lte('game.game_date', endDate)) as SelectResult<Array<{ is_correct: boolean | null }>>;
 
-  const { data } = assertSelectOk(result, 'analysis getMonthlyStats');
+  const { data } = assertSelectOk(result, 'analysis getPeriodStats');
   const rows = (data ?? []) as Array<{ is_correct: boolean | null }>;
   const total = rows.length;
   const correct = rows.filter((r) => r.is_correct === true).length;
   return { total, correct };
 }
 
+interface BestPickCard {
+  gameId: number;
+  gameDate: string;
+  homeCode: TeamCode;
+  awayCode: TeamCode;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictedWinnerCode: TeamCode;
+  confidence: number;
+  homeWinProb: number;
+}
+
+interface BestPickRow {
+  confidence: number | null;
+  reasoning: { homeWinProb?: number | null } | null;
+  game: {
+    id: number;
+    game_date: string;
+    home_score: number | null;
+    away_score: number | null;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+  } | null;
+  predicted_winner_team: { code: string | null } | null;
+}
+
+async function getBestPickOfWeek(startDate: string, endDate: string): Promise<BestPickCard | null> {
+  const supabase = await createClient();
+  const result = (await supabase
+    .from('predictions')
+    .select(`
+      confidence, reasoning,
+      game:games!predictions_game_id_fkey(
+        id, game_date, home_score, away_score,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      ),
+      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+    `)
+    .eq('prediction_type', 'pre_game')
+    .match(CURRENT_MODEL_FILTER)
+    .eq('is_correct', true)
+    .gte('game.game_date', startDate)
+    .lte('game.game_date', endDate)
+    .order('confidence', { ascending: false })
+    .limit(1)) as SelectResult<BestPickRow[]>;
+
+  const { data } = assertSelectOk(result, 'analysis getBestPickOfWeek');
+  const rows = (data ?? []) as unknown as BestPickRow[];
+  const row = rows[0];
+  if (!row?.game) return null;
+
+  const homeCode = row.game.home_team?.code as TeamCode | undefined;
+  const awayCode = row.game.away_team?.code as TeamCode | undefined;
+  const winnerCode = row.predicted_winner_team?.code as TeamCode | undefined;
+  if (!homeCode || !awayCode || !winnerCode) return null;
+
+  return {
+    gameId: row.game.id,
+    gameDate: row.game.game_date,
+    homeCode,
+    awayCode,
+    homeScore: row.game.home_score,
+    awayScore: row.game.away_score,
+    predictedWinnerCode: winnerCode,
+    confidence: row.confidence ?? 0.5,
+    homeWinProb: winnerProbOf(row.reasoning?.homeWinProb),
+  };
+}
+
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, monthlyStats] = await Promise.all([
+  const [todayData, yesterdayGames, weeklyStats, monthlyStats, bestPickOfWeek] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
-    getMonthlyStats(currentMonth.startDate, currentMonth.endDate),
+    getPeriodStats(currentWeek.startDate, currentWeek.endDate),
+    getPeriodStats(currentMonth.startDate, currentMonth.endDate),
+    getBestPickOfWeek(currentWeek.startDate, currentWeek.endDate),
   ]);
 
   return (
@@ -430,6 +502,53 @@ export default async function AnalysisIndexPage() {
         </section>
       )}
 
+      {/* 이번 주 AI 최고 픽 — 가장 자신 있게 맞춘 예측 */}
+      {bestPickOfWeek && (
+        <section aria-labelledby="best-pick-title">
+          <h2 id="best-pick-title" className="text-xl font-bold mb-3">
+            🏆 이번 주 AI 최고 픽
+          </h2>
+          <Link
+            href={`/analysis/game/${bestPickOfWeek.gameId}`}
+            className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/40 dark:border-brand-500/30 p-5 hover:border-brand-500 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300">
+                    적중
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {bestPickOfWeek.gameDate}
+                  </span>
+                </div>
+                <p className="font-bold text-gray-900 dark:text-gray-100 truncate">
+                  {shortTeamName(bestPickOfWeek.awayCode)}{' '}
+                  {bestPickOfWeek.awayScore ?? '-'} : {bestPickOfWeek.homeScore ?? '-'}{' '}
+                  {shortTeamName(bestPickOfWeek.homeCode)}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  예측: {shortTeamName(bestPickOfWeek.predictedWinnerCode)}{' '}
+                  {bestPickOfWeek.predictedWinnerCode === bestPickOfWeek.homeCode
+                    ? Math.round(bestPickOfWeek.homeWinProb * 100)
+                    : Math.round((1 - bestPickOfWeek.homeWinProb) * 100)}%
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">
+                  {Math.round(
+                    (bestPickOfWeek.predictedWinnerCode === bestPickOfWeek.homeCode
+                      ? bestPickOfWeek.homeWinProb
+                      : 1 - bestPickOfWeek.homeWinProb) * 100,
+                  )}%
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">확신도</p>
+              </div>
+            </div>
+          </Link>
+        </section>
+      )}
+
       {/* 이번 주 리뷰 CTA → /reviews/weekly/[weekId] */}
       <section aria-labelledby="weekly-review-title">
         <h2 id="weekly-review-title" className="sr-only">이번 주 예측 리뷰</h2>
@@ -444,7 +563,10 @@ export default async function AnalysisIndexPage() {
                 이번 주 예측 리뷰 →
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {currentWeek.label} 경기 결과·예측 성과 요약
+                {currentWeek.label}
+                {weeklyStats.total > 0
+                  ? ` · ${weeklyStats.total}경기 중 ${weeklyStats.correct}적중 (${Math.round((weeklyStats.correct / weeklyStats.total) * 100)}%)`
+                  : ' · 이번 주 검증된 경기를 기다리는 중'}
               </p>
             </div>
           </div>
