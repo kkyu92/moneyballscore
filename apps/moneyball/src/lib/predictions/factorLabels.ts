@@ -40,6 +40,7 @@ export const FACTOR_TIPS: Record<string, string> = {
 /**
  * factors 맵에서 predictedWinner 쪽으로 가장 강하게 기울어진 top-N 팩터 이름 반환.
  * value 범위 [0,1]: 0.5=중립, >0.5=홈 우위, <0.5=원정 우위
+ * threshold 0.55/0.45는 FactorBreakdown의 favorable 판정과 동일 — "우위" 표시 일관성
  */
 export function topFavoringFactors(
   factors: Record<string, number>,
@@ -49,7 +50,7 @@ export function topFavoringFactors(
   return Object.entries(factors)
     .filter(([key]) => key in FACTOR_LABELS)
     .filter(([, value]) =>
-      isHomePredicted ? value > 0.52 : value < 0.48,
+      isHomePredicted ? value > 0.55 : value < 0.45,
     )
     .sort(([, a], [, b]) => {
       const sa = isHomePredicted ? a - 0.5 : 0.5 - a;
