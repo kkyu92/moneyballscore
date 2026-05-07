@@ -49,8 +49,7 @@ function pearsonCorrelation(xs: number[], ys: number[]): number {
 function computeFactorStat(
   factor: string,
   samples: FactorSample[],
-  currentWeight: number,
-  minSamples: number
+  currentWeight: number
 ): FactorStat {
   const values: number[] = [];
   const actuals: number[] = [];
@@ -147,8 +146,7 @@ export function analyzeFactorAccuracy(
     computeFactorStat(
       factor,
       samples,
-      DEFAULT_WEIGHTS[factor as keyof typeof DEFAULT_WEIGHTS],
-      minSamples
+      DEFAULT_WEIGHTS[factor as keyof typeof DEFAULT_WEIGHTS]
     )
   );
   const stats = proposeWeights(rawStats, minSamples);

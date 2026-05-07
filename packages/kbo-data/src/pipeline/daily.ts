@@ -521,7 +521,7 @@ export async function runDailyPipeline(
     // 필터에서 자동 제외. KBO 스크래핑 대비 구조적으로 누수 없음.
     const homeTeamIdForForm = teamIdMap[game.homeTeam];
     const awayTeamIdForForm = teamIdMap[game.awayTeam];
-    const { data: recentFinalGames } = await db
+    const rfgResult = await db
       .from('games')
       .select('home_team_id, away_team_id, winner_team_id')
       .eq('status', 'final')
@@ -535,7 +535,10 @@ export async function runDailyPipeline(
       .order('game_date', { ascending: false })
       .limit(50);
 
-    const finished: FinishedGame[] = (recentFinalGames ?? []) as FinishedGame[];
+    if (rfgResult.error) {
+      errors.push(`recentFinalGames ${game.awayTeam}v${game.homeTeam}: ${rfgResult.error.message}`);
+    }
+    const finished: FinishedGame[] = (rfgResult.data ?? []) as FinishedGame[];
     let homeForm = calculateRecentForm(finished, homeTeamIdForForm, 10);
     let awayForm = calculateRecentForm(finished, awayTeamIdForForm, 10);
     let h2h = calculateHeadToHead(finished, homeTeamIdForForm, awayTeamIdForForm);
@@ -715,7 +718,7 @@ export async function runDailyPipeline(
         .select('weather')
         .eq('id', dbGameId)
         .single();
-      if (!existing.data?.weather) {
+      if (!existing.error && !existing.data?.weather) {
         const snap = await fetchForecastWeather(coords.lat, coords.lng, targetDate, hour);
         if (snap) {
           // cycle 172 silent drift family write 측 — .error 미체크 시 weather
