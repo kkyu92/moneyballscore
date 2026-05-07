@@ -13,6 +13,7 @@ import {
 } from '@moneyball/shared';
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
+import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 
 export const metadata: Metadata = {
@@ -210,6 +211,7 @@ export default async function AnalysisIndexPage() {
     getTodayAnalysisData(),
     getYesterdayGames(),
   ]);
+  const currentWeek = getCurrentWeek();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
@@ -385,7 +387,7 @@ export default async function AnalysisIndexPage() {
                         <span
                           className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
                             g.isCorrect
-                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                              ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
                               : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                           }`}
                         >
@@ -400,6 +402,27 @@ export default async function AnalysisIndexPage() {
           </ul>
         </section>
       )}
+
+      {/* 이번 주 리뷰 CTA → /reviews/weekly/[weekId] */}
+      <section aria-labelledby="weekly-review-title">
+        <h2 id="weekly-review-title" className="sr-only">이번 주 예측 리뷰</h2>
+        <Link
+          href={`/reviews/weekly/${currentWeek.weekId}`}
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 hover:border-brand-500 dark:hover:border-brand-500 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-3xl shrink-0">📅</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                이번 주 예측 리뷰 →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currentWeek.label} 경기 결과·예측 성과 요약
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
 
       {/* 시즌 성과 CTA → /dashboard */}
       <section aria-labelledby="season-stats-title">
