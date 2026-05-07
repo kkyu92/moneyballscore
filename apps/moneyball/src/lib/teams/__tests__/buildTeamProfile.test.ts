@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // cycle 151 silent drift family — buildTeamProfile.ts 의 supabase select `.error` 미체크
 // 회귀 차단. 기존엔 `const { data: teamRow }` / `const { data }` 직접 destruct → DB

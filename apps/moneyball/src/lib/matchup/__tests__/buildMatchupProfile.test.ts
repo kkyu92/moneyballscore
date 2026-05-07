@@ -25,22 +25,6 @@ type GameFixture = {
 const HT_ID = 1;
 const LG_ID = 2;
 
-function makeQueryBuilder(games: GameFixture[]) {
-  const builder = {
-    select: vi.fn().mockReturnThis(),
-    in: vi.fn().mockResolvedValue({
-      data: [
-        { id: HT_ID, code: "HT" },
-        { id: LG_ID, code: "LG" },
-      ],
-      error: null,
-    }),
-    or: vi.fn().mockResolvedValue({ data: games, error: null }),
-    eq: vi.fn().mockResolvedValue({ data: games, error: null }),
-  };
-  return builder;
-}
-
 interface SupabaseMockOptions {
   teamsError?: { message: string } | null;
   gamesError?: { message: string } | null;
