@@ -10,6 +10,7 @@ import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
   assertSelectOk,
   classifyWinnerProb,
+  shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
   winnerProbOf,
@@ -122,6 +123,60 @@ interface NextSchedule {
     homeTeam: TeamCode;
     awayTeam: TeamCode;
   }>;
+}
+
+interface WeekGameDay {
+  date: string;
+  games: Array<{
+    id: number;
+    gameTime: string;
+    homeTeam: TeamCode;
+    awayTeam: TeamCode;
+  }>;
+}
+
+/** 내일부터 최대 5일간 편성 경기 목록 — "이번 주 일정" 섹션용. */
+async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
+  const supabase = await createClient();
+  const today = toKSTDateString();
+
+  const until = new Date(`${today}T12:00:00Z`);
+  until.setUTCDate(until.getUTCDate() + 7);
+  const untilStr = until.toISOString().slice(0, 10);
+
+  const result = await supabase
+    .from('games')
+    .select(`
+      id, game_date, game_time,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code)
+    `)
+    .gt('game_date', today)
+    .lte('game_date', untilStr)
+    .eq('status', 'scheduled')
+    .order('game_date', { ascending: true })
+    .order('game_time', { ascending: true })
+    .limit(60);
+  const { data } = assertSelectOk(result, 'home.getWeekAheadSchedule');
+
+  if (!data || data.length === 0) return [];
+
+  type WeekRow = { id: number; game_date: string; game_time: string | null; home_team: { code: string } | null; away_team: { code: string } | null };
+  const rows = data as unknown as WeekRow[];
+  const byDate = new Map<string, WeekGameDay>();
+  for (const r of rows) {
+    if (!r.home_team?.code || !r.away_team?.code) continue;
+    const date = r.game_date;
+    if (!byDate.has(date)) byDate.set(date, { date, games: [] });
+    byDate.get(date)!.games.push({
+      id: r.id,
+      gameTime: (r.game_time ?? '').slice(0, 5) || '18:30',
+      homeTeam: r.home_team.code as TeamCode,
+      awayTeam: r.away_team.code as TeamCode,
+    });
+  }
+
+  return Array.from(byDate.values()).slice(0, 5);
 }
 
 /**
@@ -277,9 +332,10 @@ function selectBigMatchFromGames(games: HomeGame[]): {
 
 export default async function HomePage() {
   const today = toKSTDisplayString();
-  const [games, accuracy] = await Promise.all([
+  const [games, accuracy, weekSchedule] = await Promise.all([
     getTodayPredictions(),
     getSeasonAccuracy(),
+    getWeekAheadSchedule(),
   ]);
 
   // 오늘 편성 없을 때만 다음 일정·날씨 조회 (추가 쿼리 비용 최소화).
@@ -528,6 +584,59 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* 이번 주 경기 일정 */}
+      {weekSchedule.length > 0 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">이번 주 일정</h2>
+            <Link href="/predictions" className="text-xs text-brand-600 hover:underline">
+              예측 기록 →
+            </Link>
+          </div>
+          <div className="overflow-x-auto -mx-1 px-1">
+            <div className="flex gap-3 min-w-max pb-1">
+              {weekSchedule.map(({ date, games: dayGames }) => (
+                <div key={date} className="w-48 shrink-0">
+                  <Link
+                    href={`/predictions/${date}`}
+                    className="flex items-baseline gap-1.5 mb-2 group"
+                  >
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 group-hover:text-brand-600 transition-colors">
+                      {formatKoreanWeekday(date)}요일
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {date.slice(5).replace('-', '/')}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
+                      {dayGames.length}경기
+                    </span>
+                  </Link>
+                  <div className="space-y-1.5">
+                    {dayGames.map((g) => (
+                      <div
+                        key={g.id}
+                        className="flex items-center justify-between bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg px-2.5 py-2 text-xs"
+                      >
+                        <span className="text-gray-600 dark:text-gray-300 w-12 truncate">
+                          {shortTeamName(g.awayTeam)}
+                        </span>
+                        <span className="text-gray-400 dark:text-gray-500 text-[10px] mx-1">@</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-100 w-12 truncate text-right">
+                          {shortTeamName(g.homeTeam)}
+                        </span>
+                        <span className="text-gray-400 dark:text-gray-500 text-[10px] ml-1.5 tabular-nums shrink-0">
+                          {g.gameTime}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 방법론 소개 v1.6 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
