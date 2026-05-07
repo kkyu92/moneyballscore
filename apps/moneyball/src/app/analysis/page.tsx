@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
   assertSelectOk,
+  classifyWinnerProb,
+  pickTierEmoji,
   shortTeamName,
   toKSTDateString,
   winnerProbOf,
@@ -13,19 +15,17 @@ import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 
-// v4-4 Phase 1-1: /analysis 는 '오늘 빅매치' 전용. 시즌 누적 성과는 /dashboard 에 통합.
-// develop-cycle 1 (2026-04-30, site): "어제 경기" 진입점 보강 — 빅매치 외 경기 분석 retention.
-
 export const metadata: Metadata = {
-  title: 'AI 분석 — 오늘 빅매치 + 어제 경기',
-  description: '오늘 KBO 빅매치 + 어제 경기 AI 분석. 심판 판정 · 팀 논거 · 팩터 해석까지.',
+  title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 어제 경기',
+  description: '오늘 KBO 전체 AI 예측 + 빅매치 에이전트 토론 + 어제 경기 분석. 확신 순으로 정렬.',
   alternates: { canonical: 'https://moneyballscore.vercel.app/analysis' },
 };
 
-export const revalidate = 3600; // 1시간 ISR
+export const revalidate = 3600;
 
-interface BigMatchRow {
+interface TodayAllRow {
   id: number;
+  game_time: string | null;
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
@@ -35,42 +35,66 @@ interface BigMatchRow {
     home_recent_form: number | null;
     away_recent_form: number | null;
     prediction_type: string;
+    reasoning: { homeWinProb?: number | null } | null;
+    predicted_winner_team: { code: string | null } | null;
   }>;
 }
 
-async function getTodayBigMatch() {
+interface TodayGameCard {
+  gameId: number;
+  gameTime: string | null;
+  homeCode: TeamCode;
+  awayCode: TeamCode;
+  predictedWinnerCode: TeamCode | null;
+  homeWinProb: number;
+  confidence: number;
+}
+
+interface TodayAnalysisData {
+  bigMatchId: number | null;
+  bigMatchMode: string | undefined;
+  bigMatchHomeCode: TeamCode | null;
+  bigMatchAwayCode: TeamCode | null;
+  games: TodayGameCard[];
+}
+
+async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
   const supabase = await createClient();
   const today = toKSTDateString();
 
-  // assertSelectOk — cycle 148 silent drift family detection. games select 가
-  // DB 오류 시 data=null silent fallback → 빅매치 0 silent 위장 (사용자 가시 빈
-  // 분석 카드). cycle 147 buildMatchupProfile 동일 family 자연 후속 (apps/moneyball
-  // 측 첫 진입 #137 다음 page 차원 진입).
   const gamesResult = (await supabase
     .from('games')
     .select(`
-      id,
+      id, game_time,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
-        prediction_type
+        prediction_type, reasoning,
+        predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
     `)
     .eq('game_date', today)
-    .eq('predictions.prediction_type', 'pre_game')) as SelectResult<BigMatchRow[]>;
-  const { data: games } = assertSelectOk(gamesResult, 'analysis getTodayBigMatch');
+    .eq('predictions.prediction_type', 'pre_game')
+    .order('game_time', { ascending: true })) as SelectResult<TodayAllRow[]>;
 
-  if (!games) return { bigMatchId: null, candidates: 0 };
+  const { data: rawGames } = assertSelectOk(gamesResult, 'analysis getTodayAnalysisData');
 
-  const rows = games as unknown as BigMatchRow[];
+  if (!rawGames) {
+    return { bigMatchId: null, bigMatchMode: 'no-games', bigMatchHomeCode: null, bigMatchAwayCode: null, games: [] };
+  }
+
+  const rows = rawGames as unknown as TodayAllRow[];
   const candidates: BigMatchCandidate[] = [];
+  const cards: TodayGameCard[] = [];
+
   for (const game of rows) {
     const pred = game.predictions?.[0];
     if (!pred) continue;
     const homeCode = game.home_team?.code as TeamCode | undefined;
     const awayCode = game.away_team?.code as TeamCode | undefined;
     if (!homeCode || !awayCode) continue;
+
     candidates.push({
       gameId: game.id,
       homeTeam: homeCode,
@@ -81,10 +105,32 @@ async function getTodayBigMatch() {
       awayRecentForm: pred.away_recent_form ?? 0.5,
       confidence: pred.confidence ?? 0.5,
     });
+
+    cards.push({
+      gameId: game.id,
+      gameTime: game.game_time,
+      homeCode,
+      awayCode,
+      predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
+      homeWinProb: winnerProbOf(pred.reasoning?.homeWinProb),
+      confidence: pred.confidence ?? 0.5,
+    });
   }
 
-  const result = selectBigMatch(candidates);
-  return { bigMatchId: result.bigMatchGameId, mode: result.mode, candidates: candidates.length };
+  const bigMatchResult = selectBigMatch(candidates);
+  const bigMatchRow = bigMatchResult.bigMatchGameId
+    ? rows.find((g) => g.id === bigMatchResult.bigMatchGameId)
+    : null;
+
+  const sortedCards = [...cards].sort((a, b) => b.confidence - a.confidence);
+
+  return {
+    bigMatchId: bigMatchResult.bigMatchGameId ?? null,
+    bigMatchMode: bigMatchResult.mode,
+    bigMatchHomeCode: bigMatchRow ? (bigMatchRow.home_team?.code as TeamCode | null) : null,
+    bigMatchAwayCode: bigMatchRow ? (bigMatchRow.away_team?.code as TeamCode | null) : null,
+    games: sortedCards,
+  };
 }
 
 interface YesterdayGameCard {
@@ -160,8 +206,8 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
 }
 
 export default async function AnalysisIndexPage() {
-  const [bigMatch, yesterdayGames] = await Promise.all([
-    getTodayBigMatch(),
+  const [todayData, yesterdayGames] = await Promise.all([
+    getTodayAnalysisData(),
     getYesterdayGames(),
   ]);
 
@@ -171,7 +217,7 @@ export default async function AnalysisIndexPage() {
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">
-          오늘의 빅매치 AI 에이전트 토론과 어제 경기 분석을 한 곳에서.
+          오늘의 전체 AI 예측 · 빅매치 에이전트 토론 · 어제 경기 분석을 한 곳에서.
         </p>
       </header>
 
@@ -180,19 +226,24 @@ export default async function AnalysisIndexPage() {
         <h2 id="big-match-title" className="text-xl font-bold mb-4">
           ⭐ 오늘의 빅매치
         </h2>
-        {bigMatch.bigMatchId ? (
+        {todayData.bigMatchId ? (
           <Link
-            href={`/analysis/game/${bigMatch.bigMatchId}`}
+            href={`/analysis/game/${todayData.bigMatchId}`}
             className="block bg-gradient-to-br from-[var(--color-bg-hero-start)] to-[var(--color-bg-hero-end)] text-white rounded-2xl p-8 hover:shadow-xl transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            <p className="text-sm text-brand-200 mb-2">
+            {todayData.bigMatchAwayCode && todayData.bigMatchHomeCode && (
+              <p className="text-2xl font-bold mb-1">
+                {shortTeamName(todayData.bigMatchAwayCode)} vs {shortTeamName(todayData.bigMatchHomeCode)}
+              </p>
+            )}
+            <p className="text-sm text-brand-200 mb-3">
               AI 에이전트 토론 대상 경기
             </p>
-            <p className="text-2xl font-bold">상세 분석 보기 →</p>
+            <p className="text-lg font-semibold">상세 분석 보기 →</p>
           </Link>
         ) : (
           <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center text-gray-500 dark:text-gray-400">
-            {bigMatch.mode === 'no-games' ? (
+            {todayData.bigMatchMode === 'no-games' ? (
               <>
                 <p className="text-4xl mb-2">😴</p>
                 <p className="text-lg font-medium">오늘은 KBO 휴식일</p>
@@ -217,6 +268,77 @@ export default async function AnalysisIndexPage() {
           </div>
         )}
       </section>
+
+      {/* 오늘 전체 AI 예측 — 확신 순 정렬 */}
+      {todayData.games.length > 0 && (
+        <section aria-labelledby="today-all-title">
+          <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+            <h2 id="today-all-title" className="text-xl font-bold">
+              ⚾ 오늘 AI 예측 ({todayData.games.length}경기)
+            </h2>
+            <Link href="/" className="text-sm text-brand-600 hover:underline">
+              홈에서 라이브 현황 →
+            </Link>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {todayData.games.map((g) => {
+              const homeName = shortTeamName(g.homeCode);
+              const awayName = shortTeamName(g.awayCode);
+              const winnerCode = g.predictedWinnerCode;
+              const winnerName = winnerCode ? shortTeamName(winnerCode) : null;
+              const winnerPct = winnerCode === g.homeCode
+                ? Math.round(g.homeWinProb * 100)
+                : Math.round((1 - g.homeWinProb) * 100);
+              const tier = classifyWinnerProb(g.homeWinProb);
+              const isBig = g.gameId === todayData.bigMatchId;
+              return (
+                <li key={g.gameId}>
+                  <Link
+                    href={`/analysis/game/${g.gameId}`}
+                    className={`block rounded-xl border p-4 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                      isBig
+                        ? 'bg-white dark:bg-[var(--color-surface-card)] border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20'
+                        : 'bg-white dark:bg-[var(--color-surface-card)] border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 dark:hover:border-brand-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {awayName} vs {homeName}
+                        </p>
+                        {g.gameTime && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {g.gameTime.substring(0, 5)}
+                            {isBig && (
+                              <span className="ml-2 text-[var(--color-accent)] font-semibold">⭐ 빅매치</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      {winnerName && (
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                            {winnerName}
+                          </p>
+                          <p className={`text-xs font-semibold mt-0.5 ${
+                            tier === 'confident'
+                              ? 'text-green-600 dark:text-green-400'
+                              : tier === 'lean'
+                                ? 'text-yellow-600 dark:text-yellow-400'
+                                : 'text-gray-500 dark:text-gray-400'
+                          }`}>
+                            {pickTierEmoji(tier)} {winnerPct}%
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* 어제 경기 분석 진입점 — 빅매치 외 경기 retention */}
       {yesterdayGames.length > 0 && (

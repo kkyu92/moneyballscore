@@ -2,6 +2,7 @@
 
 **카테고리**: anti_pattern  
 **발견**: cycle 207 operational-analysis (2026-05-07)  
+**수정**: cycle 208 fix-incident (2026-05-07) — Option B (차이 기반 정규화) 적용 완료 (PR #195)  
 **파일**: `packages/kbo-data/src/engine/predictor.ts`
 
 ## 문제
