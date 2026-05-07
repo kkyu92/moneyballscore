@@ -44,3 +44,4 @@ pnpm-debug.log*
 # supabase local cache
 supabase/.temp/
 .vercel
+.env*.local

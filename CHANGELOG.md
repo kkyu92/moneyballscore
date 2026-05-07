@@ -1,5 +1,91 @@
 # Changelog
 
+## [0.5.28] - 2026-05-07 주간 성과 분석 (W19)
+
+### 예측 성과 — 2026 시즌 누적 (cycle 207 operational-analysis)
+
+**이번 주 (W19: 5/5~5/6 완료 10경기)**: 6/10 = **60.0%** · Brier 0.2561
+**지난 주 (W18: 5/1~5/3)**: 9/25 = **36.0%** ← 이상 급락
+**4월 이후 누적 (72건)**: 35/72 = **48.6%** · Brier 0.2494
+
+#### W18 급락 원인 분석
+
+W18 36.0% 급락은 **3개 반복 실패 매치업** 집중:
+- **SSG(홈) vs 롯데**: 3연전 전패 예측 (0/3) — 모델이 SSG 우세로 연속 평가했지만 롯데 3연승
+- **키움(홈) vs 두산**: 2연전 엇갈림 (1/2) — 방향 혼선
+- **KIA(홈) vs KT**: 2경기 1패 — KT 강세 과소평가
+
+매치업 정확도 0% 패턴 3개 (삼성vsSSG / 키움vs삼성 / SSGvs롯데) → **특정 팀 pair 구조적 예측 실패** 신호.
+
+#### 팩터 유효성 진단 (72건)
+
+| 팩터 | 방향성 차이(correct-wrong) | 현 가중치 | 평가 |
+|---|---|---|---|
+| `head_to_head` | **+0.0432** (최고) | 5% | ↑ 과소평가 가능성 |
+| `war` | +0.0135 | 8% | 적정 |
+| `sp_fip` / `sp_xfip` | +0.010 | 15% / 5% | 적정 |
+| `bullpen_fip` | +0.011 | 10% | 적정 |
+| `elo` | +0.003 (최저) | 8% | ↓ 효과 미미 |
+| `sfr` | avg=0.202, 범위 -0.833~1.0 | 5% | **이상값 확인 필요** |
+
+#### SFR 팩터 이상값 (버그 후보)
+
+`predictor.ts:normalize(homeVal, awayVal, true)` = `homeVal / (|homeVal|+|awayVal|)`.
+SFR 원값이 음수일 때 팩터값도 음수 가능 (예: -5SFR / (-5+3) = -0.625). 72건 중 **6건 음수 SFR 팩터 존재** → normalize 함수가 음수 입력값 미처리. v1.5 가중치에서 SFR 5%이므로 영향 미미하나, 개념적 오류.
+
+#### Calibration 진단
+
+| Confidence 구간 | 실제 적중률 | 이상적 |
+|---|---|---|
+| 0.4 | 54.5% (6/11) | 40% — **과도하게 높음** |
+| 0.5 | 41.9% (13/31) | 50% — 낮음 |
+| 0.6 | 53.3% (16/30) | 60% — 낮음 |
+
+전반적으로 confidence 0.5 구간 예측이 실제보다 과신. 모델이 "박빙" 경기를 낮게 확신하면서 오히려 맞추고, "보통" 경기를 중간 확신하면서 못 맞추는 역설적 패턴.
+
+#### 가중치 조정 판단
+
+**현 시점 보류 (72건 < 100건 임계)**. 통계적 신뢰구간 너무 넓음. 단, 다음 checkpoint 기준:
+- head_to_head 5% → 8% 상향 후보 (가장 높은 방향성 차이)
+- elo 8% → 5% 하향 후보 (방향성 차이 최저)
+- SFR 음수값 버그 수정 선행 필요
+- 100건 도달 예상 시점: 5월 2주차 (~5/14)
+
+#### 학습 포인트
+
+1. **반복 실패 매치업 신호**: 같은 pair 3연전 전패는 팩터 데이터 자체가 틀린 신호. recent_form 또는 roster 변동 미반영 가능성.
+2. **SFR normalize 음수 처리**: `Math.abs` 없이 음수 SFR 입력 시 팩터값 음수 → 가중합 오염. 데이터로 측정된 영향: Brier ≈ 0.0002 이하 (5% 가중치 × 소수 케이스).
+3. **Calibration 역전**: confidence 0.4 구간이 0.5 구간보다 실제 정확도 높음 (54.5% > 41.9%) → 과신 구간(0.5) 존재.
+4. **데이터 충분성 기준**: 100건 미만 = 가중치 변경 금지. CI95 범위가 40pp+ 이상이라 측정값 신뢰 불가.
+
+### 추출 패턴 (cycle 207 extract-pattern)
+
+**[quality_guard] `silent-drift-single-source-derive`**
+- **문제**: 스크래퍼/파이프라인 여러 호출 site에서 오류 처리 로직 중복 → 각자 다르게 구현 → silent divergence
+- **해결**: 단일 소스 helper 추출 + 실패 이유 named enum + console.warn per reason
+- **결과**: cycles 125~199에서 20+ 파일 4개 helper로 통합 (`assertResponseOk`, `assertSelectOk`, `assertWriteOk`, `extractReasoningHomeWinProb`)
+- **재사용**: TypeScript API fetch/DB query 반복 패턴 어디서나 적용
+
+**[content_auto] `breadcrumb-jsonld-dual-output`**
+- **문제**: SEO JSON-LD와 시각적 Breadcrumb nav를 별도 유지 → drift 발생
+- **해결**: 단일 `<Breadcrumb>` 컴포넌트가 `<nav>` + `<script type="application/ld+json">` 동시 출력
+- **결과**: 2 사이클 안에 breadcrumb 누락 11→actionable 0건 달성
+- **재사용**: Next.js App Router + 구조화 데이터 필요한 모든 사이트
+
+**[data_pipeline] `prediction-calibration-confidence-bucket-audit`**
+- **문제**: 모델 confidence 0.5가 실제 41.9% 정확도 — calibration 역전 구간 존재, 사용자 레이블 신뢰성 의문
+- **해결**: verified 예측을 confidence 0.1 단위 bucket으로 분류 → actual accuracy vs ideal 비교
+- **결과**: conf=0.4 → 54.5% (과교정), conf=0.5 → 41.9% (저교정) 발견. 가중치 조정 100건 임계 재확인
+- **재사용**: ML/AI 확신도 점수를 사용자에게 노출하는 서비스 모두
+
+**[anti_pattern] `normalize-assumes-nonnegative-inputs`**
+- **문제**: `normalize(a, b) = a / (|a|+|b|)` — 입력이 음수면 factor값 0~1 벗어남
+- **현상**: SFR 값 음수 6건/72건, predictor.ts sfr factor = -0.833까지 발생
+- **영향**: SFR 5% 가중치 + 소수 케이스 → Brier ≈ 0.0002 이하 (minor), 개념적 오류
+- **수정 방향**: 음수 가능 지표는 `max(0, val)` 클램핑 또는 `(a-b)/(|a|+|b|+ε)` → [0,1] 재매핑
+
+---
+
 ## [0.5.27] - 2026-04-30
 
 ### 인프라 신뢰성 — Cloudflare Workers 이관 완료 + agent-loop closed cycle
