@@ -276,7 +276,7 @@ Key routing rules:
 
 ## 예측 엔진 가중치 (v1.5 — 10팩터, 3소스)
 - 선발FIP 15% / 선발xFIP 5% / 타선wOBA 15% / 불펜FIP 10% / 최근폼 10% / WAR 8% / 상대전적 5% / 구장보정 4% / Elo레이팅 8% / 수비SFR 5%
-- 홈팀 어드밴티지: +3%
+- 홈팀 어드밴티지: +1.5% (HOME_ADVANTAGE=0.015, 2026-04-21 N=2180 측정)
 - Elo baseline: KBO Fancy Stats Elo 예측과 비교하여 모델 성능 측정
 - v2.0 업그레이드: **100건 임계** 달성 후 오차분석 기반 (cycle 207 측정, 예상 5/14). 후보: head_to_head 5%→8%, elo 8%→5%
 - **알려진 버그**: `predictor.ts:normalize()` 음수 SFR 입력 시 factor<0 (6/72건 발생, Brier 영향 미미 — `docs/solutions/normalize-negative-inputs.md`)
