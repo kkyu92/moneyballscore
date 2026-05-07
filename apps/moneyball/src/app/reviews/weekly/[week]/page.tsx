@@ -6,6 +6,7 @@ import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
   buildWeeklyReview,
   type WeeklyHighlight,
+  type WeeklyGameResult,
 } from "@/lib/reviews/buildWeeklyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -81,6 +82,58 @@ function HighlightCard({ h }: { h: WeeklyHighlight }) {
         예측 {winnerName ?? ""} {Math.round(h.winnerProb * 100)}%{" "}
         · {h.isCorrect ? "적중" : "빗나감"}
       </p>
+    </Link>
+  );
+}
+
+function GameResultRow({ g }: { g: WeeklyGameResult }) {
+  const correctBadge =
+    g.isCorrect === true ? (
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+        적중
+      </span>
+    ) : g.isCorrect === false ? (
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+        빗나감
+      </span>
+    ) : (
+      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+        미결
+      </span>
+    );
+
+  const confLabel =
+    g.confidence != null
+      ? `${Math.round(g.confidence * 100)}%`
+      : null;
+
+  return (
+    <Link
+      href={`/analysis/game/${g.gameId}`}
+      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-[var(--color-surface-card)] transition-colors group"
+    >
+      <span className="w-14 shrink-0 text-xs text-gray-400 dark:text-gray-500 tabular-nums">
+        {g.gameDate.slice(5).replace('-', '/')}
+      </span>
+      <TeamLogo team={g.awayCode} size={16} className="shrink-0" />
+      <span className="text-gray-600 dark:text-gray-300 w-10 truncate text-xs">
+        {shortTeamName(g.awayCode)}
+      </span>
+      <span className="text-gray-400 dark:text-gray-500 text-xs tabular-nums font-mono mx-0.5">
+        {g.awayScore ?? '-'} : {g.homeScore ?? '-'}
+      </span>
+      <span className="font-medium text-gray-800 dark:text-gray-100 w-10 truncate text-xs">
+        {shortTeamName(g.homeCode)}
+      </span>
+      <TeamLogo team={g.homeCode} size={16} className="shrink-0" />
+      <div className="flex-1" />
+      {g.predictedWinnerCode && (
+        <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:inline truncate max-w-[5rem]">
+          예측 {shortTeamName(g.predictedWinnerCode)}{confLabel ? ` ${confLabel}` : ''}
+        </span>
+      )}
+      {correctBadge}
+      <span className="text-gray-300 dark:text-gray-600 text-xs group-hover:text-brand-500 transition-colors">→</span>
     </Link>
   );
 }
@@ -292,6 +345,38 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
               </div>
             )}
           </div>
+        </section>
+      )}
+
+      {review.games.length > 0 && (
+        <section aria-labelledby="weekly-games-title" className="space-y-3">
+          <details className="group">
+            <summary
+              id="weekly-games-title"
+              className="flex items-center justify-between cursor-pointer list-none rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] px-5 py-4 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
+            >
+              <h2 className="text-base font-bold">
+                이번 주 전체 경기
+                <span className="ml-2 text-sm font-normal text-gray-400 dark:text-gray-500">
+                  {review.games.length}경기
+                </span>
+              </h2>
+              <svg
+                className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div className="mt-2 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] divide-y divide-gray-100 dark:divide-gray-700/40 overflow-hidden">
+              {review.games.map((g) => (
+                <GameResultRow key={g.gameId} g={g} />
+              ))}
+            </div>
+          </details>
         </section>
       )}
 

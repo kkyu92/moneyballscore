@@ -46,6 +46,18 @@ export interface WeeklyFactorInsight {
   direction: "positive" | "negative" | "weak";
 }
 
+export interface WeeklyGameResult {
+  gameId: number;
+  gameDate: string;
+  homeCode: TeamCode;
+  awayCode: TeamCode;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictedWinnerCode: TeamCode | null;
+  confidence: number | null;
+  isCorrect: boolean | null;
+}
+
 export interface WeeklyReview {
   week: WeekRange;
   hasData: boolean;
@@ -59,6 +71,7 @@ export interface WeeklyReview {
     best: WeeklyFactorInsight | null;
     worst: WeeklyFactorInsight | null;
   };
+  games: WeeklyGameResult[];
   summary: string;
 }
 
@@ -299,6 +312,21 @@ export async function buildWeeklyReview(
     highlights[0] ?? null,
   );
 
+  const games: WeeklyGameResult[] = rows
+    .filter((r) => r.game !== null)
+    .map((r) => ({
+      gameId: r.game!.id,
+      gameDate: r.game!.game_date,
+      homeCode: r.game!.home_team?.code as TeamCode,
+      awayCode: r.game!.away_team?.code as TeamCode,
+      homeScore: r.game!.home_score,
+      awayScore: r.game!.away_score,
+      predictedWinnerCode: r.predicted_winner_team?.code as TeamCode | null,
+      confidence: r.confidence,
+      isCorrect: r.is_correct,
+    }))
+    .sort((a, b) => a.gameDate.localeCompare(b.gameDate));
+
   return {
     week,
     hasData: totalGames > 0,
@@ -309,6 +337,7 @@ export async function buildWeeklyReview(
     highlights,
     teamStats,
     factorInsights,
+    games,
     summary,
   };
 }

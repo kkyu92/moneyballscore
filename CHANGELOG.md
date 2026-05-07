@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.34] - 2026-05-07 주간 리뷰 전체 경기 목록 섹션 추가 (cycle 239 explore-idea)
+
+### Added
+
+- **주간 리뷰 전체 경기 목록**: `/reviews/weekly/[week]` 페이지에 접을 수 있는 "이번 주 전체 경기" 섹션 추가. 해당 주의 모든 예측 경기를 날짜 순으로 나열 — 원정/홈 팀 로고·이름·스코어, 예측 승자·신뢰도, 적중/빗나감/미결 badge, 각 경기 분석 페이지 링크.
+- **`WeeklyGameResult` 타입**: `buildWeeklyReview` 가 `games: WeeklyGameResult[]` 배열을 반환. 기존 3개 하이라이트 외 전체 경기 데이터를 UI에 노출.
+- **native `<details>/<summary>` 접기**: 클라이언트 컴포넌트 없이 Server Component 상태 유지 — 하이드레이션 비용 0.
+
 ## [0.5.33] - 2026-05-07 getYesterdayKST off-by-1 수정 (cycle 232 review-code heavy)
 
 ### Bug Fix
