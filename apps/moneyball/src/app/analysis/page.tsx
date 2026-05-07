@@ -14,6 +14,7 @@ import {
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
+import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 
 export const metadata: Metadata = {
@@ -206,10 +207,34 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   return cards;
 }
 
+interface MonthlyStats {
+  total: number;
+  correct: number;
+}
+
+async function getMonthlyStats(startDate: string, endDate: string): Promise<MonthlyStats> {
+  const supabase = await createClient();
+  const result = (await supabase
+    .from('predictions')
+    .select('is_correct, game:games!predictions_game_id_fkey(game_date)')
+    .eq('prediction_type', 'pre_game')
+    .not('is_correct', 'is', null)
+    .gte('game.game_date', startDate)
+    .lte('game.game_date', endDate)) as SelectResult<Array<{ is_correct: boolean | null }>>;
+
+  const { data } = assertSelectOk(result, 'analysis getMonthlyStats');
+  const rows = (data ?? []) as Array<{ is_correct: boolean | null }>;
+  const total = rows.length;
+  const correct = rows.filter((r) => r.is_correct === true).length;
+  return { total, correct };
+}
+
 export default async function AnalysisIndexPage() {
-  const [todayData, yesterdayGames] = await Promise.all([
+  const currentMonth = getCurrentMonth();
+  const [todayData, yesterdayGames, monthlyStats] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
+    getMonthlyStats(currentMonth.startDate, currentMonth.endDate),
   ]);
   const currentWeek = getCurrentWeek();
 
@@ -418,6 +443,30 @@ export default async function AnalysisIndexPage() {
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {currentWeek.label} 경기 결과·예측 성과 요약
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      {/* 이번 달 리뷰 CTA → /reviews/monthly/[monthId] */}
+      <section aria-labelledby="monthly-review-title">
+        <h2 id="monthly-review-title" className="sr-only">이번 달 예측 리뷰</h2>
+        <Link
+          href={`/reviews/monthly/${currentMonth.monthId}`}
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 hover:border-brand-500 dark:hover:border-brand-500 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-3xl shrink-0">📆</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                이번 달 예측 리뷰 →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currentMonth.label}
+                {monthlyStats.total > 0
+                  ? ` · ${monthlyStats.total}경기 중 ${monthlyStats.correct}적중 (${Math.round((monthlyStats.correct / monthlyStats.total) * 100)}%)`
+                  : ' · 이번 달 검증된 경기를 기다리는 중'}
               </p>
             </div>
           </div>
