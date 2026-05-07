@@ -21,6 +21,8 @@ import { createClient } from "@/lib/supabase/server";
 import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
 import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
+import { buildStandings } from "@/lib/standings/buildStandings";
+import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -340,12 +342,15 @@ function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
 
 export default async function HomePage() {
   const today = toKSTDisplayString();
-  const [games, accuracy, weekSchedule, yesterdayResults] = await Promise.all([
+  const [games, accuracy, weekSchedule, yesterdayResults, standings, teamAccuracyRows] = await Promise.all([
     getTodayPredictions(),
     getSeasonAccuracy(),
     getWeekAheadSchedule(),
     getYesterdayResults(),
+    buildStandings().catch(() => []),
+    buildAllTeamAccuracy().catch(() => []),
   ]);
+  const teamAccuracyMap = new Map(teamAccuracyRows.map((r) => [r.teamCode, r]));
 
   // 오늘 편성 없을 때만 다음 일정·날씨 조회 (추가 쿼리 비용 최소화).
   const nextSchedule =
@@ -648,6 +653,45 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {standings.length > 0 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">KBO 팀 순위</h2>
+            <Link href="/standings" className="text-xs text-brand-600 hover:underline">
+              전체 보기 →
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+            {standings.slice(0, 5).map((row) => {
+              const acc = teamAccuracyMap.get(row.teamCode);
+              const pct = acc?.accuracyRate != null ? Math.round(acc.accuracyRate * 100) : null;
+              return (
+                <Link
+                  key={row.teamCode}
+                  href={`/teams/${row.teamCode}`}
+                  className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
+                >
+                  <span className="text-sm font-bold text-gray-400 w-5 text-center tabular-nums">
+                    {row.rank}
+                  </span>
+                  <span className="text-sm font-semibold flex-1 text-gray-900 dark:text-gray-100">
+                    {shortTeamName(row.teamCode)}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+                    {row.wins}승 {row.losses}패
+                  </span>
+                  {pct != null && (
+                    <span className="text-xs font-medium text-brand-600 dark:text-brand-400 tabular-nums ml-3">
+                      예측 {pct}%
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
