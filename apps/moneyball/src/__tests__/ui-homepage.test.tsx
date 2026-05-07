@@ -500,3 +500,157 @@ describe('홈 게임 목록 렌더 (R3 — LEFT JOIN 가드)', () => {
     expect(within(cancelled as HTMLElement).getByText('경기 취소')).toBeInTheDocument();
   });
 });
+
+/**
+ * YesterdayResultsSection — 어제 경기 결과 섹션 (cycle 217 신규)
+ *
+ * 이 헬퍼는 page.tsx:YesterdayResultsSection 과 동일한 렌더 로직.
+ * 실제 page.tsx 는 async server component + supabase import 로 직접 mount 불가.
+ * 핵심 검증: 적중/빗나감 배지, 점수 표시(null→'-'), "N/M 적중" 헤더, 전경기 노출.
+ */
+
+interface StubYesterdayGame {
+  id: number;
+  game_date: string;
+  home_score: number | null;
+  away_score: number | null;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
+  predictions: Array<{ is_correct: boolean | null }>;
+}
+
+function YesterdaySection({ games }: { games: StubYesterdayGame[] }) {
+  const withPred = games.filter((g) => g.predictions.length > 0);
+  const correct = withPred.filter((g) => g.predictions[0]?.is_correct === true).length;
+  const dateStr = games[0]?.game_date ?? '';
+  const displayDate = dateStr ? dateStr.slice(5).replace('-', '/') : '';
+
+  return (
+    <section>
+      <div>
+        <h2>어제 결과</h2>
+        {displayDate && <span data-testid="display-date">{displayDate}</span>}
+        {withPred.length > 0 && (
+          <span data-testid="accuracy">{correct}/{withPred.length} 적중</span>
+        )}
+      </div>
+      <div>
+        {games.map((g) => {
+          const pred = g.predictions[0];
+          const isCorrect = pred?.is_correct;
+          const badge =
+            isCorrect === true
+              ? <span data-testid={`badge-${g.id}`}>적중</span>
+              : isCorrect === false
+                ? <span data-testid={`badge-${g.id}`}>빗나감</span>
+                : null;
+          return (
+            <a key={g.id} href={`/analysis/game/${g.id}`} data-game-id={g.id}>
+              <span>{g.away_team?.code ?? '?'}</span>
+              <span data-testid={`score-${g.id}`}>{g.away_score ?? '-'} : {g.home_score ?? '-'}</span>
+              <span>{g.home_team?.code ?? '?'}</span>
+              {badge}
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+describe('YesterdayResultsSection — 어제 결과 섹션 (cycle 217)', () => {
+  it('적중 예측 → 적중 배지, 빗나간 예측 → 빗나감 배지', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 1, game_date: '2026-05-06', home_score: 5, away_score: 3,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [{ is_correct: true }] },
+      { id: 2, game_date: '2026-05-06', home_score: 2, away_score: 4,
+        home_team: { code: 'LG' }, away_team: { code: 'SS' },
+        predictions: [{ is_correct: false }] },
+    ];
+    render(<YesterdaySection games={games} />);
+
+    expect(screen.getByTestId('badge-1').textContent).toBe('적중');
+    expect(screen.getByTestId('badge-2').textContent).toBe('빗나감');
+  });
+
+  it('예측 없는 경기는 배지 미노출 + 행은 여전히 렌더됨', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 1, game_date: '2026-05-06', home_score: 5, away_score: 3,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [] },
+    ];
+    render(<YesterdaySection games={games} />);
+
+    expect(screen.queryByTestId('badge-1')).toBeNull();
+    expect(screen.getByText('HT')).toBeInTheDocument();
+    expect(screen.getByText('OB')).toBeInTheDocument();
+  });
+
+  it('"N/M 적중" 헤더 — 예측 있는 경기만 분모, 적중만 분자', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 1, game_date: '2026-05-06', home_score: 3, away_score: 1,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [{ is_correct: true }] },
+      { id: 2, game_date: '2026-05-06', home_score: 0, away_score: 2,
+        home_team: { code: 'LG' }, away_team: { code: 'SS' },
+        predictions: [{ is_correct: false }] },
+      { id: 3, game_date: '2026-05-06', home_score: 4, away_score: 1,
+        home_team: { code: 'LT' }, away_team: { code: 'HH' },
+        predictions: [] },
+    ];
+    render(<YesterdaySection games={games} />);
+
+    // 예측 있는 경기 2건 중 1 적중 → "1/2 적중"
+    expect(screen.getByTestId('accuracy').textContent).toBe('1/2 적중');
+  });
+
+  it('점수 null → "-" 표시 (스코어 미기입 방어)', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 1, game_date: '2026-05-06', home_score: null, away_score: null,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [] },
+    ];
+    render(<YesterdaySection games={games} />);
+
+    expect(screen.getByTestId('score-1').textContent).toBe('- : -');
+  });
+
+  it('날짜 헤더 "MM/DD" 형식으로 표시', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 1, game_date: '2026-05-06', home_score: 3, away_score: 2,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [] },
+    ];
+    render(<YesterdaySection games={games} />);
+
+    expect(screen.getByTestId('display-date').textContent).toBe('05/06');
+  });
+
+  it('전경기 행 렌더 — 예측 없는 경기도 목록에서 제외되지 않음', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 1, game_date: '2026-05-06', home_score: 5, away_score: 2,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [{ is_correct: true }] },
+      { id: 2, game_date: '2026-05-06', home_score: 1, away_score: 3,
+        home_team: { code: 'LG' }, away_team: { code: 'SS' },
+        predictions: [] },
+    ];
+    const { container } = render(<YesterdaySection games={games} />);
+
+    const rows = container.querySelectorAll('[data-game-id]');
+    expect(rows).toHaveLength(2);
+  });
+
+  it('분석 페이지 링크 — /analysis/game/[id] 경로', () => {
+    const games: StubYesterdayGame[] = [
+      { id: 42, game_date: '2026-05-06', home_score: 3, away_score: 1,
+        home_team: { code: 'OB' }, away_team: { code: 'HT' },
+        predictions: [{ is_correct: true }] },
+    ];
+    const { container } = render(<YesterdaySection games={games} />);
+
+    const link = container.querySelector('[data-game-id="42"]') as HTMLAnchorElement;
+    expect(link?.getAttribute('href')).toBe('/analysis/game/42');
+  });
+});

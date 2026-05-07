@@ -338,11 +338,8 @@ async function getSeasonAccuracy(): Promise<{
  *   3. 없으면 winnerProb 최고값 (🤔 반반 이어도 가장 높은 것)
  *   4. 예측 자체 없으면 null (hero 미노출)
  */
-function selectBigMatchFromGames(games: HomeGame[]): {
-  bigMatch: HomeGame | null;
-  result: null;
-} {
-  if (!isBigMatchEnabled()) return { bigMatch: null, result: null };
+function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
+  if (!isBigMatchEnabled()) return null;
 
   const scored = games
     .map((game) => {
@@ -353,16 +350,16 @@ function selectBigMatchFromGames(games: HomeGame[]): {
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
 
-  if (scored.length === 0) return { bigMatch: null, result: null };
+  if (scored.length === 0) return null;
 
   for (const tier of ['confident', 'lean', 'tossup'] as const) {
     const bucket = scored.filter((s) => s.tier === tier);
     if (bucket.length === 0) continue;
     bucket.sort((a, b) => b.wp - a.wp);
-    return { bigMatch: bucket[0].game, result: null };
+    return bucket[0].game;
   }
 
-  return { bigMatch: null, result: null };
+  return null;
 }
 
 export default async function HomePage() {
@@ -415,7 +412,7 @@ export default async function HomePage() {
     for (const [id, w] of results) todayWeather.set(id, w);
   }
 
-  const { bigMatch } = selectBigMatchFromGames(games);
+  const bigMatch = selectBigMatchFromGames(games);
   const bigMatchPred = bigMatch?.predictions?.[0];
   const bigMatchDebate = bigMatchPred?.reasoning?.debate;
   const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
@@ -710,7 +707,7 @@ export default async function HomePage() {
   );
 }
 
-function YesterdayResultsSection({ games }: { games: YesterdayGame[] }) {
+export function YesterdayResultsSection({ games }: { games: YesterdayGame[] }) {
   const withPred = games.filter((g) => g.predictions.length > 0);
   const correct = withPred.filter((g) => g.predictions[0]?.is_correct === true).length;
   const dateStr = games[0]?.game_date ?? '';
