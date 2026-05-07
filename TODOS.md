@@ -3,6 +3,29 @@
 ## ✅ Resolved Lessons
 - `fp:vercel-deploy-1e80b78` (2026-04-22): Sentry /webhook sub-path 3회 실패 → no-relay=true 태그로 해결 (박제 2026-04-29)
 
+## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 228 박제, 2026-05-07)
+
+**현재 상태**: 72건 완료 / 100건 임계 미달
+**100건 도달 예상**: 2026-05-11~5/12
+**v2.0 가중치 후보** (100건 도달 시 CI95 재측정 후 최종 확정):
+
+| 팩터 | 현재 | v2.0 후보 | 근거 |
+|---|---|---|---|
+| `head_to_head` | 5% | → 8% | 방향성 diff +0.0432 (최고) |
+| `lineup_woba` | 15% | → 12% | 방향성 diff +0.0040 (과소) |
+| `elo` | 8% | → 5% | 방향성 diff +0.0031 (최저) |
+| `sfr` | 5% | → 3% | 방향성 diff +0.0009 |
+| `park_factor` | 4% | → 2% | 방향성 diff 0.0000 |
+| `bullpen_fip` + others | 합계 조정 | | 총 100% 보장 |
+
+**일요일 대응 후보** (100건 통계 확보 후):
+- `judge-agent.ts` Sunday confidence_clamp 상한 0.65 → 0.55 조정
+- 현재 일요일 적중률: 1/9 = 11% (3 Sundays, 4/19 / 4/26 / 5/3)
+
+**Action at 100건**: operational-analysis heavy 재실행 → CI95 측정 → v2.0 weight 적용 commit
+
+---
+
 ## 🚀 Next-Up (2026-04-25 이후)
 
 ### ⭐ develop-cycle 자율 진행 — 사용자 영역 1 line (cycle 41 진행 후, 2026-05-04)
