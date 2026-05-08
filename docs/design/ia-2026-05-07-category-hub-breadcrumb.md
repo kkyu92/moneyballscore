@@ -57,6 +57,19 @@ cycle 203 진단 단계 measurement:
 - 푸터 sitemap 컬럼 추가 — fallback navigation
 - sitemap.xml URL 수 vs 실제 page.tsx 수 동기 측정
 
+## 후속 처리 박제 (cycle 279, 2026-05-08)
+
+cycle 279 info-architecture-review chain 진단 결과 위 4건 모두 처리 확인:
+
+| 후속 | 처리 cycle | 검증 |
+|---|---|---|
+| `/privacy` `/terms` `/contact` Breadcrumb | (점진적, cycle 203~278 사이) | `grep -L "Breadcrumb" apps/moneyball/src/app/**/page.tsx` 결과 = 3 page 모두 import + 사용 박제 |
+| 헤더 메가메뉴 도입 | (점진적) | `Header.tsx:14` `NAV_ITEMS` 내 `NavGroup` 타입 + `팀·선수` `리뷰·시즌` 2 그룹 박제 |
+| 푸터 sitemap 컬럼 | (점진적) | `Footer.tsx:3` `SITEMAP_COLUMNS` 4 컬럼 박제 (분석·예측 / 팀·선수 / 리뷰·시즌 / 서비스) |
+| sitemap.xml URL 동기 | cycle 279 (본 measurement) | 31 page.tsx vs `sitemap.ts` staticRoutes 16 + dynamic block 8 + 의도 제외 7 (debug 5 + reviews/{weekly,monthly} redirect-only) = 정합성 OK. mismatch 0건 |
+
+본 spec close — trigger 8 (cycle 203 spec "다음 cycle 후속 후보" 미처리) 더 이상 발화 X.
+
 ## R5 evidence
 
 본 cycle = info-architecture-review chain 첫 진입 = cycle 202 신규 chain 추가의 R5 진짜 PASS (isolated smoke 단독 X — 실측 PR ship + R7 머지). 신규 chain 발화 → 자연 trigger 매핑 → spec + 구현 + ship sequence 정상 작동.
