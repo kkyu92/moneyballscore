@@ -40,9 +40,9 @@ export async function updateCalibration(
   if (!predictions || predictions.length === 0) return;
 
   const buckets = {
-    low: { total: 0, correct: 0 },   // confidence < 0.60
-    mid: { total: 0, correct: 0 },   // 0.60 ~ 0.75
-    high: { total: 0, correct: 0 },  // >= 0.75
+    low: { total: 0, correct: 0, minConf: 0.00, maxConf: 0.60 },
+    mid: { total: 0, correct: 0, minConf: 0.60, maxConf: 0.75 },
+    high: { total: 0, correct: 0, minConf: 0.75, maxConf: 1.00 },
   };
 
   for (const pred of predictions) {
@@ -58,6 +58,8 @@ export async function updateCalibration(
     const upsertResult = await db.from('calibration_buckets').upsert({
       bucket,
       season,
+      min_confidence: stats.minConf,
+      max_confidence: stats.maxConf,
       total_predictions: stats.total,
       correct_predictions: stats.correct,
       actual_accuracy: accuracy,

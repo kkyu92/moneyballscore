@@ -122,6 +122,44 @@ describe('retro silent drift family — cycle 174 agents 차원 첫 진입 회�
         /retro\.updateCalibration\.calibration_buckets\.\w+ write failed: RLS violation/,
       );
     });
+
+    it('calibration_buckets upsert payload includes min_confidence and max_confidence (NOT NULL 컬럼 회귀 가드)', async () => {
+      // cycle 258: min_confidence/max_confidence 누락 → PostgreSQL NOT NULL constraint
+      // 위반. upsert INSERT 단계에서 constraint 체크 → DO UPDATE 도달 전 실패.
+      const upsertPayloads: unknown[] = [];
+      const dbMock = {
+        from: vi.fn((table: string) => {
+          if (table === 'predictions') {
+            return makeChainBuilder({
+              data: [
+                { confidence: 0.2, is_correct: true },   // winProb=0.6 → mid
+                { confidence: 0.6, is_correct: false },  // winProb=0.8 → high
+              ],
+              error: null,
+            });
+          }
+          if (table === 'calibration_buckets') {
+            const builder: Record<string, unknown> = {};
+            builder['upsert'] = vi.fn((payload: unknown) => {
+              upsertPayloads.push(payload);
+              return { then: (resolve: (v: unknown) => unknown) => Promise.resolve({ error: null }).then(resolve) };
+            });
+            return builder;
+          }
+          throw new Error(`unexpected table: ${table}`);
+        }),
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await updateCalibration(2026, dbMock as any);
+      expect(upsertPayloads.length).toBeGreaterThan(0);
+      for (const payload of upsertPayloads) {
+        const p = payload as Record<string, unknown>;
+        expect(p).toHaveProperty('min_confidence');
+        expect(p).toHaveProperty('max_confidence');
+        expect(p['min_confidence']).not.toBeNull();
+        expect(p['max_confidence']).not.toBeNull();
+      }
+    });
   });
 
   describe('generateAgentMemories', () => {
