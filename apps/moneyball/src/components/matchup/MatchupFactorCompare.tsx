@@ -1,8 +1,8 @@
 import type { TeamFactorAverages } from "@/lib/teams/buildTeamFactorAverages";
 
 interface Props {
-  teamA: { code: string; shortName: string; color: string };
-  teamB: { code: string; shortName: string; color: string };
+  teamA: { shortName: string };
+  teamB: { shortName: string };
   factorA: TeamFactorAverages;
   factorB: TeamFactorAverages;
 }

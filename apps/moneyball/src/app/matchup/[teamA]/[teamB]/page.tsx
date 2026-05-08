@@ -161,8 +161,8 @@ export default async function MatchupPage({ params }: PageProps) {
       )}
 
       <MatchupFactorCompare
-        teamA={{ code: tA.code, shortName: tA.shortName, color: tA.color }}
-        teamB={{ code: tB.code, shortName: tB.shortName, color: tB.color }}
+        teamA={{ shortName: tA.shortName }}
+        teamB={{ shortName: tB.shortName }}
         factorA={factorA}
         factorB={factorB}
       />
