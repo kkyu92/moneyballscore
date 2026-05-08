@@ -4,6 +4,7 @@ import {
   assertSelectOk,
   josa,
   ro,
+  shortTeamName,
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
@@ -161,13 +162,13 @@ export async function buildMatchupProfile(
   const teamA = {
     code: pair.codeA,
     name: metaA.name,
-    shortName: metaA.name.split(" ")[0],
+    shortName: shortTeamName(pair.codeA),
     color: metaA.color,
   };
   const teamB = {
     code: pair.codeB,
     name: metaB.name,
-    shortName: metaB.name.split(" ")[0],
+    shortName: shortTeamName(pair.codeB),
     color: metaB.color,
   };
 

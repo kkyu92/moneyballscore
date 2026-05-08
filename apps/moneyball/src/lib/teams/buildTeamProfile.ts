@@ -110,7 +110,7 @@ export async function buildTeamProfile(
     return {
       code: teamCode,
       name: meta.name,
-      shortName: meta.name.split(" ")[0],
+      shortName: shortTeamName(teamCode),
       stadium: meta.stadium,
       color: meta.color,
       parkPf: meta.parkPf,
@@ -347,7 +347,7 @@ export async function buildTeamProfile(
   return {
     code: teamCode,
     name: meta.name,
-    shortName: meta.name.split(" ")[0],
+    shortName: shortTeamName(teamCode),
     stadium: meta.stadium,
     color: meta.color,
     parkPf: meta.parkPf,

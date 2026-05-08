@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   KBO_TEAMS,
   assertSelectOk,
+  shortTeamName,
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
@@ -79,7 +80,7 @@ export async function buildBatterLeaderboard(options: {
       playerId: r.player.id,
       nameKo: r.player.name_ko,
       teamCode,
-      teamName: team?.name.split(" ")[0] ?? null,
+      teamName: teamCode ? shortTeamName(teamCode) : null,
       teamColor: team?.color ?? null,
       position: r.player.position,
       war: r.war ?? 0,

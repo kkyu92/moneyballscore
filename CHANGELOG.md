@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.39] - 2026-05-08 shortName silent drift fix — meta.name.split → shortTeamName 통일 (cycle 274 review-code heavy)
+
+### 수정
+
+- `apps/moneyball/src/lib/teams/buildTeamProfile.ts:113,350`
+- `apps/moneyball/src/lib/matchup/buildMatchupProfile.ts:165,171` (+ shortTeamName import)
+- `apps/moneyball/src/lib/players/buildPitcherProfile.ts:198`
+- `apps/moneyball/src/lib/players/buildBatterLeaderboard.ts:83` (+ shortTeamName import)
+- `apps/moneyball/src/lib/players/buildPitcherLeaderboard.ts:189` (+ shortTeamName import)
+
+5 파일 7곳 inline `meta.name.split(" ")[0]` → canonical helper `shortTeamName(code)` 일괄 교체. 페이지 컴포넌트 (`app/teams/[code]/page.tsx:295`) + 다른 lib (reviews/buildMissReport, buildMonthlyReview, buildWeeklyReview) 는 이미 `shortTeamName` 사용 중이었음 — lib (teams/matchup/players) 만 inline split 으로 drift.
+
+### 검증
+
+전체 10팀 `meta.name.split(" ")[0]` vs `KBO_TEAM_SHORT_NAME[code]` 결과 일치 확인 (출력 동일). 사용자 가시 변화 0. type-check + 876 tests (shared 73 + kbo-data 562 + moneyball 241) PASS.
+
+### 의도
+
+cycle 264~271 silent drift family detection 7번째. 같은 패턴 — canonical helper 가 있는데 inline 중복 구현 누적. KBO_TEAMS 메타 또는 KBO_TEAM_SHORT_NAME 테이블 일방 변경 시 7곳이 drift 가능 (예: 팀 리브랜드 — "KT 위즈" → "kt wiz" 변경 시 split 결과 = "kt", short table 갱신 안 하면 mismatch).
+
 ## [0.5.38] - 2026-05-08 W19 최종 성과 + SFR 극단값 편향 패턴 박제 (cycle 256 operational-analysis lite)
 
 ### 예측 성과 — W19 최종 (2026-05-05~05/07, 14경기)

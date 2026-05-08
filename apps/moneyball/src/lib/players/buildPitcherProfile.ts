@@ -195,7 +195,7 @@ export async function buildPitcherProfile(
     nameKo: p.name_ko,
     nameEn: p.name_en,
     teamCode,
-    teamName: teamInfo?.name.split(" ")[0] ?? null,
+    teamName: teamCode ? shortTeamName(teamCode) : null,
     teamColor: teamInfo?.color ?? null,
     position: p.position,
     throws: p.throws,
