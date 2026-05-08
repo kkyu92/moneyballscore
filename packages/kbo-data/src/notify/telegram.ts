@@ -97,6 +97,7 @@ export async function notifyResults(
     isCorrect: boolean;
     homeScore: number;
     awayScore: number;
+    isCancelled?: boolean;
   }>
 ) {
   if (results.length === 0) return;
@@ -115,7 +116,11 @@ export async function notifyResults(
     const home = shortTeamName(r.homeTeam);
     const away = shortTeamName(r.awayTeam);
     const mark = r.isCorrect ? '✅' : '❌';
-    lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home}`);
+    if (r.isCancelled) {
+      lines.push(`${mark} ${away} 0:0 ${home} (취소)`);
+    } else {
+      lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home}`);
+    }
   }
 
   lines.push('');

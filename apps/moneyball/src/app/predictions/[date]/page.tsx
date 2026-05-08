@@ -187,7 +187,10 @@ function buildIntro(
   const verifiable = predicted.filter((g) => g.status !== 'postponed');
   const allVerified =
     verified.length === verifiable.length && verifiable.length > 0;
-  const rate = verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : null;
+  // 취소 경기는 적중으로 집계 (경기 자체 무효, 예측 책임 없음).
+  const correctN = correct.length + cancelled.length;
+  const totalN = verified.length + cancelled.length;
+  const rate = totalN > 0 ? Math.round((correctN / totalN) * 100) : null;
 
   // 박빙 매치업 — 취소 경기는 제외.
   const tightest = [...verifiable].sort((a, b) => {
@@ -204,7 +207,7 @@ function buildIntro(
   const tightestPhrase = tAway && tHome ? `${tAway} vs ${tHome}` : "";
 
   if (allVerified && rate !== null) {
-    return `${date} KBO ${predicted.length}경기 최종 결과${suffix} — AI 적중률 ${rate}% (${correct.length}/${verified.length})${tightestPhrase ? `. 가장 박빙이었던 경기: ${tightestPhrase}` : ""}.`;
+    return `${date} KBO ${predicted.length}경기 최종 결과${suffix} — AI 적중률 ${rate}% (${correctN}/${totalN})${tightestPhrase ? `. 가장 박빙이었던 경기: ${tightestPhrase}` : ""}.`;
   }
 
   if (verified.length > 0 && rate !== null) {
@@ -224,7 +227,9 @@ function buildArticleJsonLd(
   missing: DateGame[],
 ) {
   const url = `${SITE_URL}/predictions/${date}`;
-  const rate = verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : null;
+  const correctN = correct.length + cancelled.length;
+  const totalN = verified.length + cancelled.length;
+  const rate = totalN > 0 ? Math.round((correctN / totalN) * 100) : null;
   const n = games.length;
   const predN = predicted.length;
   const excludeParts: string[] = [];

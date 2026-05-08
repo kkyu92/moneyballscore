@@ -115,15 +115,15 @@ export function PredictionCard({
             </span>
           )}
         </div>
-        {isCorrect !== null && isCorrect !== undefined && (
+        {(isCorrect !== null && isCorrect !== undefined || isPostponed) && (
           <span
             className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-              isCorrect
+              (isCorrect || isPostponed)
                 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700"
                 : "bg-red-100 dark:bg-red-900/30 text-red-700"
             }`}
           >
-            {isCorrect ? "적중" : "실패"}
+            {isPostponed ? "적중" : (isCorrect ? "적중" : "실패")}
           </span>
         )}
       </div>

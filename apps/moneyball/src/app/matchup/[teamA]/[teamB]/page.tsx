@@ -345,7 +345,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
                 </td>
                 <td className="py-2 pr-3">
                   <Link href={`/analysis/game/${g.gameId}`} className="hover:text-brand-500">
-                    {awayName} @ {homeName}
+                    {awayName} vs {homeName}
                   </Link>
                 </td>
                 <td className="py-2 pr-3 text-right font-mono text-xs">
