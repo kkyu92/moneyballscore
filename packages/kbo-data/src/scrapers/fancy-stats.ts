@@ -507,7 +507,14 @@ export async function fetchEloRatings(_season: number): Promise<(EloRating & { w
 }
 
 /**
- * 특정 투수 이름으로 스탯 조회
+ * 특정 투수 이름으로 스탯 조회.
+ *
+ * exact 실패 후 byName fallback 진입 시 = 같은 이름이지만 다른 팀 row
+ * (KBO 동명이인 / 트레이드 직후 Fancy Stats 미반영 / 입력 team mismatch).
+ * cycle 145 xfip fallback / 137 totalWar=0 / 138 winPct=0.5 stub family 와 동일
+ * 패턴 — fallback 자체는 유지하되 console.warn 으로 가시화하여 silent 통과
+ * 차단. 호출자 daily.ts:563-564 의 PredictionInput.homeSPStats / awaySPStats
+ * 흐름과 동작 호환 유지.
  */
 export function findPitcher(
   pitchers: PitcherStats[],
@@ -517,5 +524,12 @@ export function findPitcher(
   const exact = pitchers.find((p) => p.name === name && p.team === team);
   if (exact) return exact;
   const byName = pitchers.find((p) => p.name === name);
+  if (byName) {
+    console.warn('[findPitcher] byName fallback team mismatch silent drift', {
+      name,
+      requestedTeam: team,
+      foundTeam: byName.team,
+    });
+  }
   return byName || null;
 }
