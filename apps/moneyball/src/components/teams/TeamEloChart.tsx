@@ -13,17 +13,12 @@ import {
 import { KBO_TEAMS, KBO_TEAM_SHORT_NAME, type TeamCode } from "@moneyball/shared";
 import type { TeamEloPoint } from "@/lib/teams/buildTeamEloTrend";
 import { ChartTooltip } from "@/components/dashboard/ChartTooltip";
+import { formatChartDate } from "@/components/dashboard/chart-format";
 import { neutral } from "@/lib/design-tokens";
 
 interface TeamEloChartProps {
   points: TeamEloPoint[];
   teamCode: TeamCode;
-}
-
-function fmtDate(date: string): string {
-  const parts = date.split("-");
-  if (parts.length < 3) return date;
-  return `${parts[1]}/${parts[2]}`;
 }
 
 export function TeamEloChart({ points, teamCode }: TeamEloChartProps) {
@@ -58,11 +53,12 @@ export function TeamEloChart({ points, teamCode }: TeamEloChartProps) {
           />
           <XAxis
             dataKey="date"
-            tickFormatter={fmtDate}
+            tickFormatter={formatChartDate}
             tick={{ fontSize: 11, fill: neutral[500] }}
             tickLine={false}
             axisLine={{ stroke: neutral[200] }}
             interval="preserveStartEnd"
+            minTickGap={40}
           />
           <YAxis
             domain={[yMin, yMax]}
@@ -70,6 +66,7 @@ export function TeamEloChart({ points, teamCode }: TeamEloChartProps) {
             tickLine={false}
             axisLine={false}
             width={40}
+            tickFormatter={(v: number) => v.toFixed(0)}
           />
           <Tooltip
             content={(props) => (

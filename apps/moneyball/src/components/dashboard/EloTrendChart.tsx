@@ -13,17 +13,12 @@ import {
 import { KBO_TEAMS, KBO_TEAM_SHORT_NAME, type TeamCode } from "@moneyball/shared";
 import type { EloDataPoint } from "@/lib/standings/buildEloTrend";
 import { ChartTooltip } from "./ChartTooltip";
+import { formatChartDate } from "./chart-format";
 import { neutral } from "@/lib/design-tokens";
 
 interface EloTrendChartProps {
   points: EloDataPoint[];
   teams: TeamCode[];
-}
-
-function fmtDate(date: string): string {
-  const parts = date.split("-");
-  if (parts.length < 3) return date;
-  return `${parts[1]}/${parts[2]}`;
 }
 
 export function EloTrendChart({ points, teams }: EloTrendChartProps) {
@@ -54,7 +49,7 @@ export function EloTrendChart({ points, teams }: EloTrendChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke={neutral[200]} strokeOpacity={0.6} />
           <XAxis
             dataKey="date"
-            tickFormatter={fmtDate}
+            tickFormatter={formatChartDate}
             tick={{ fontSize: 11, fill: neutral[500] }}
             tickLine={false}
             axisLine={{ stroke: neutral[200] }}
