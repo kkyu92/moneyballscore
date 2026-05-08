@@ -37,7 +37,7 @@ export function PitcherFipTrend({ points, teamColor }: PitcherFipTrendProps) {
   const yMin = Math.floor((minVal - pad) * 2) / 2;
   const yMax = Math.ceil((maxVal + pad) * 2) / 2;
 
-  const fipColor = teamColor ?? neutral[700];
+  const fipColor = teamColor ?? neutral[500];
 
   return (
     <div className="bg-white dark:bg-gray-50 rounded-lg -mx-1 px-1 pt-2 pb-1">

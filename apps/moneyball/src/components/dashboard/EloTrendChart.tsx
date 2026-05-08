@@ -94,6 +94,7 @@ export function EloTrendChart({ points, teams }: EloTrendChartProps) {
               stroke={KBO_TEAMS[team].color}
               strokeWidth={1.5}
               dot={false}
+              // 시즌 시작 first observation 이전 forward-fill 부재 (buildEloTrend) — connectNulls 필요
               connectNulls
             />
           ))}
