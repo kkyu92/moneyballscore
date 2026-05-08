@@ -175,8 +175,9 @@ export async function runDailyPipeline(
 
   // === announce mode (KST 09:00) ===
   if (mode === 'announce') {
-    // GitHub Actions cron 이 동일 expression 을 드물게 2회 fire — announce_sent
-    // flag 로 중복 Telegram 차단. 14일치 prefetch 도 이미 첫 run 에서 돌았으므로 skip.
+    // cron 이 동일 expression 을 드물게 2회 fire (GH Actions schedule 이관 후
+    // 현재는 Cloudflare Workers cron, 2026-04-29~) — announce_sent flag 로
+    // 중복 Telegram 차단. 14일치 prefetch 도 이미 첫 run 에서 돌았으므로 skip.
     // cycle 167 — isNotificationSent 가 assertSelectOk 통일로 throw 가능 →
     // finish() 통과 보장 위해 try/catch + errors[] push.
     try {
@@ -318,8 +319,9 @@ export async function runDailyPipeline(
 
   // === verify mode (KST 23:00) ===
   if (mode === 'verify') {
-    // GitHub Actions cron 이 동일 expression 을 드물게 2회 fire — results_sent
-    // flag 로 중복 Telegram + compound 루프 재실행 차단.
+    // cron 이 동일 expression 을 드물게 2회 fire (GH Actions schedule 이관 후
+    // 현재는 Cloudflare Workers cron, 2026-04-29~) — results_sent flag 로
+    // 중복 Telegram + compound 루프 재실행 차단.
     // cycle 167 — isNotificationSent assertSelectOk 통일 → throw 가능. finish()
     // 통과 보장 위해 try/catch + errors[] push.
     try {
