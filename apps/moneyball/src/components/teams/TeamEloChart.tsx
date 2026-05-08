@@ -94,7 +94,6 @@ export function TeamEloChart({ points, teamCode }: TeamEloChartProps) {
             stroke={teamColor}
             strokeWidth={2}
             dot={false}
-            connectNulls
           />
           <Line
             type="monotone"
@@ -103,7 +102,6 @@ export function TeamEloChart({ points, teamCode }: TeamEloChartProps) {
             strokeWidth={1.5}
             strokeDasharray="4 3"
             dot={false}
-            connectNulls
           />
         </LineChart>
       </ResponsiveContainer>
