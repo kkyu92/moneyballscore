@@ -11,10 +11,15 @@ import {
   buildTeamFactorAverages,
   EMPTY_FACTOR_AVERAGES,
 } from "@/lib/teams/buildTeamFactorAverages";
+import {
+  buildTeamRecentForm,
+  EMPTY_RECENT_FORM,
+} from "@/lib/teams/buildTeamRecentForm";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare";
+import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 
 export const revalidate = 3600;
 
@@ -59,10 +64,12 @@ export default async function MatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const [profile, factorA, factorB] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB] = await Promise.all([
     buildMatchupProfile(pair),
     buildTeamFactorAverages(pair.codeA).catch(() => EMPTY_FACTOR_AVERAGES),
     buildTeamFactorAverages(pair.codeB).catch(() => EMPTY_FACTOR_AVERAGES),
+    buildTeamRecentForm(pair.codeA, 5).catch(() => EMPTY_RECENT_FORM),
+    buildTeamRecentForm(pair.codeB, 5).catch(() => EMPTY_RECENT_FORM),
   ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
@@ -165,6 +172,13 @@ export default async function MatchupPage({ params }: PageProps) {
         teamB={{ shortName: tB.shortName }}
         factorA={factorA}
         factorB={factorB}
+      />
+
+      <MatchupRecentForm
+        teamA={{ shortName: tA.shortName }}
+        teamB={{ shortName: tB.shortName }}
+        formA={formA}
+        formB={formB}
       />
 
       {predictionAccuracy.verified > 0 && (
