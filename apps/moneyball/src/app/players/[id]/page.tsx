@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
+import { buildPitcherFipTrend } from "@/lib/players/buildPitcherFipTrend";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { PitcherFipTrend } from "@/components/players/PitcherFipTrend";
 
 export const revalidate = 1800;
 
@@ -160,6 +162,26 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {(() => {
+        const trendPoints = buildPitcherFipTrend(profile.recent);
+        if (trendPoints.length < 3) return null;
+        return (
+          <section
+            aria-labelledby="pitcher-fip-trend-title"
+            className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+          >
+            <h2 id="pitcher-fip-trend-title" className="text-lg font-bold mb-4">
+              FIP / xFIP 추이
+            </h2>
+            <PitcherFipTrend points={trendPoints} teamColor={profile.teamColor} />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+              최근 등판 {trendPoints.length}경기의 예측 시점 시즌 누적 FIP/xFIP.
+              값이 낮을수록 좋습니다.
+            </p>
+          </section>
+        );
+      })()}
 
       {profile.recent.length > 0 && (
         <section
