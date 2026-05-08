@@ -99,7 +99,6 @@ export function PitcherFipTrend({ points, teamColor }: PitcherFipTrendProps) {
             stroke={fipColor}
             strokeWidth={2}
             dot={{ r: 3, fill: fipColor }}
-            connectNulls
           />
           <Line
             type="monotone"
