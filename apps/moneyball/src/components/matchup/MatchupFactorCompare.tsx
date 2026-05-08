@@ -13,7 +13,6 @@ interface FactorRow {
     "spFip" | "lineupWoba" | "bullpenFip" | "recentForm" | "elo"
   >;
   label: string;
-  description: string;
   /** "lower" = 낮을수록 우세, "higher" = 높을수록 우세 */
   direction: "lower" | "higher";
   format: (v: number) => string;
@@ -23,35 +22,30 @@ const FACTORS: FactorRow[] = [
   {
     key: "spFip",
     label: "선발 FIP",
-    description: "선발 투수 평균 — 낮을수록 우세",
     direction: "lower",
     format: (v) => v.toFixed(2),
   },
   {
     key: "lineupWoba",
     label: "타선 wOBA",
-    description: "타선 평균 — 높을수록 우세",
     direction: "higher",
     format: (v) => v.toFixed(3),
   },
   {
     key: "bullpenFip",
     label: "불펜 FIP",
-    description: "불펜 평균 — 낮을수록 우세",
     direction: "lower",
     format: (v) => v.toFixed(2),
   },
   {
     key: "recentForm",
     label: "최근 폼",
-    description: "최근 10경기 승률 — 높을수록 우세",
     direction: "higher",
     format: (v) => `${Math.round(v * 100)}%`,
   },
   {
     key: "elo",
     label: "Elo 레이팅",
-    description: "전력 평가 — 높을수록 우세",
     direction: "higher",
     format: (v) => v.toFixed(0),
   },
