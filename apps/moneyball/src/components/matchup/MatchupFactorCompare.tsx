@@ -87,32 +87,52 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
           const a = factorA[f.key];
           const b = factorB[f.key];
           const winner = compare(a, b, f.direction);
-          const aClass =
-            winner === "a"
-              ? "font-bold text-brand-600 dark:text-brand-400"
-              : "text-gray-700 dark:text-gray-200";
-          const bClass =
-            winner === "b"
-              ? "font-bold text-brand-600 dark:text-brand-400"
-              : "text-gray-700 dark:text-gray-200";
+          const aWins = winner === "a";
+          const bWins = winner === "b";
+          const aClass = aWins
+            ? "font-bold text-brand-600 dark:text-brand-400"
+            : "text-gray-700 dark:text-gray-200";
+          const bClass = bWins
+            ? "font-bold text-brand-600 dark:text-brand-400"
+            : "text-gray-700 dark:text-gray-200";
 
           return (
             <div
               key={f.key}
-              className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center text-sm"
+              className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-sm"
             >
-              <div className={`text-right font-mono ${aClass}`}>
+              {/* 팀A 수치 — 우세 시 배경 강조 */}
+              <div className={`text-right font-mono px-2 py-1 rounded-md transition-colors ${
+                aWins ? "bg-brand-500/10 dark:bg-brand-500/20" : ""
+              } ${aClass}`}>
                 {a != null ? f.format(a) : "-"}
               </div>
-              <div className="min-w-[7rem] text-center">
-                <div className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+
+              {/* 센터: 레이블 + 비교 바 */}
+              <div className="flex flex-col items-center gap-1 min-w-[8rem]">
+                <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none">
                   {f.label}
+                </span>
+                {/* 비교 바 — 승자 쪽 절반이 brand 색으로 채워짐 */}
+                <div className="relative w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                  {aWins && (
+                    <div className="absolute inset-y-0 left-0 right-[50%] bg-brand-500/50 dark:bg-brand-400/60 rounded-l-full" />
+                  )}
+                  {bWins && (
+                    <div className="absolute inset-y-0 left-[50%] right-0 bg-brand-500/50 dark:bg-brand-400/60 rounded-r-full" />
+                  )}
+                  {/* 중앙 구분선 */}
+                  <div className="absolute inset-y-0 left-1/2 w-px bg-gray-300 dark:bg-gray-500 -translate-x-px" />
                 </div>
-                <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-none">
                   {f.direction === "lower" ? "낮을수록 우세" : "높을수록 우세"}
-                </div>
+                </span>
               </div>
-              <div className={`text-left font-mono ${bClass}`}>
+
+              {/* 팀B 수치 — 우세 시 배경 강조 */}
+              <div className={`text-left font-mono px-2 py-1 rounded-md transition-colors ${
+                bWins ? "bg-brand-500/10 dark:bg-brand-500/20" : ""
+              } ${bClass}`}>
                 {b != null ? f.format(b) : "-"}
               </div>
             </div>

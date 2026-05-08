@@ -306,19 +306,19 @@ export default async function MatchupPage({ params }: PageProps) {
 
 function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile").MatchupGame[] }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-800">
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
-            <th className="py-2 pr-3 font-medium">일자</th>
-            <th className="py-2 pr-3 font-medium">매치</th>
-            <th className="py-2 pr-3 font-medium text-right">점수</th>
-            <th className="py-2 pr-3 font-medium text-right">예측</th>
-            <th className="py-2 font-medium text-right">결과</th>
+          <tr className="bg-gray-50 dark:bg-gray-900/40 border-b-2 border-gray-200 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
+            <th className="py-2.5 px-3 font-semibold">일자</th>
+            <th className="py-2.5 px-3 font-semibold">매치</th>
+            <th className="py-2.5 px-3 font-semibold text-right">점수</th>
+            <th className="py-2.5 px-3 font-semibold text-right">예측</th>
+            <th className="py-2.5 px-3 font-semibold text-right">결과</th>
           </tr>
         </thead>
         <tbody>
-          {games.map((g) => {
+          {games.map((g, idx) => {
             const homeName = shortTeamName(g.homeCode);
             const awayName = shortTeamName(g.awayCode);
             const predName = g.predictedWinnerCode
@@ -334,34 +334,43 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
                   : "실패";
             const resultClass =
               g.isCorrect == null
-                ? "text-gray-500 dark:text-gray-400"
+                ? "text-gray-400 dark:text-gray-500"
                 : g.isCorrect
-                  ? "text-brand-600 dark:text-brand-400"
-                  : "text-red-600 dark:text-red-400";
+                  ? "text-brand-600 dark:text-brand-400 font-semibold"
+                  : "text-red-500 dark:text-red-400";
+            const rowBg = idx % 2 === 1
+              ? "bg-gray-50/60 dark:bg-gray-900/20"
+              : "bg-white dark:bg-transparent";
             return (
-              <tr key={g.gameId} className="border-b border-gray-100 dark:border-gray-800">
-                <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
+              <tr
+                key={g.gameId}
+                className={`border-b border-gray-100 dark:border-gray-800 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors ${rowBg}`}
+              >
+                <td className="py-2.5 px-3 font-mono text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {g.gameDate}
                 </td>
-                <td className="py-2 pr-3">
-                  <Link href={`/analysis/game/${g.gameId}`} className="hover:text-brand-500">
+                <td className="py-2.5 px-3">
+                  <Link
+                    href={`/analysis/game/${g.gameId}`}
+                    className="text-sm font-medium text-gray-800 dark:text-gray-100 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                  >
                     {awayName} vs {homeName}
                   </Link>
                 </td>
-                <td className="py-2 pr-3 text-right font-mono text-xs">
+                <td className="py-2.5 px-3 text-right font-mono text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">
                   {g.homeScore != null && g.awayScore != null
                     ? `${g.awayScore}-${g.homeScore}`
-                    : "-"}
+                    : "—"}
                 </td>
-                <td className="py-2 pr-3 text-right text-xs text-gray-700 dark:text-gray-200">
-                  {predName ?? "-"}
+                <td className="py-2.5 px-3 text-right text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                  {predName ?? "—"}
                   {g.confidence != null && (
                     <span className="text-gray-400 dark:text-gray-500 ml-1">
                       ({Math.round((0.5 + g.confidence / 2) * 100)}%)
                     </span>
                   )}
                 </td>
-                <td className={`py-2 text-right text-xs ${resultClass}`}>
+                <td className={`py-2.5 px-3 text-right text-xs ${resultClass}`}>
                   {resultLabel}
                 </td>
               </tr>
