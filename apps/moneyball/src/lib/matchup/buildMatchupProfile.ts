@@ -268,7 +268,8 @@ export async function buildMatchupProfile(
         )
       `,
     )
-    .or(orFilter)) as SelectResult<GameRow[]>;
+    .or(orFilter)
+    .order("game_date", { ascending: false })) as SelectResult<GameRow[]>;
   const { data: gamesData } = assertSelectOk(
     gamesResult,
     `buildMatchupProfile games ${pair.codeA} vs ${pair.codeB}`,

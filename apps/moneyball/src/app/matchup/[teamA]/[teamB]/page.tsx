@@ -57,6 +57,18 @@ export default async function MatchupPage({ params }: PageProps) {
   const profile = await buildMatchupProfile(pair);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const currentYear = new Date().getFullYear().toString();
+  const upcomingGames = games.filter(
+    (g) => g.gameDate > todayStr && g.status !== "final" && g.status !== "postponed",
+  ).sort((a, b) => a.gameDate.localeCompare(b.gameDate));
+  const thisYearGames = games.filter(
+    (g) => g.gameDate.startsWith(currentYear) && (g.status === "final" || g.gameDate <= todayStr),
+  ).sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+  const pastGames = games.filter(
+    (g) => !g.gameDate.startsWith(currentYear) && g.status === "final",
+  ).sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+
   const otherMatchupsA = pairsForTeam(tA.code).filter(
     (p) => p.path !== pair.path,
   );
@@ -171,83 +183,38 @@ export default async function MatchupPage({ params }: PageProps) {
       {games.length > 0 && (
         <section
           aria-labelledby="matchup-games-title"
-          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-5"
         >
-          <h2 id="matchup-games-title" className="text-lg font-bold mb-3">
+          <h2 id="matchup-games-title" className="text-lg font-bold">
             경기 기록
           </h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
-                  <th className="py-2 pr-3 font-medium">일자</th>
-                  <th className="py-2 pr-3 font-medium">매치</th>
-                  <th className="py-2 pr-3 font-medium text-right">점수</th>
-                  <th className="py-2 pr-3 font-medium text-right">예측</th>
-                  <th className="py-2 font-medium text-right">결과</th>
-                </tr>
-              </thead>
-              <tbody>
-                {games.map((g) => {
-                  const homeName = shortTeamName(g.homeCode);
-                  const awayName = shortTeamName(g.awayCode);
-                  const predName = g.predictedWinnerCode
-                    ? shortTeamName(g.predictedWinnerCode)
-                    : null;
-                  const resultLabel =
-                    g.isCorrect == null
-                      ? g.status === "final"
-                        ? "-"
-                        : "예정"
-                      : g.isCorrect
-                        ? "적중"
-                        : "실패";
-                  const resultClass =
-                    g.isCorrect == null
-                      ? "text-gray-500 dark:text-gray-400"
-                      : g.isCorrect
-                        ? "text-brand-600 dark:text-brand-400"
-                        : "text-red-600 dark:text-red-400";
-                  return (
-                    <tr
-                      key={g.gameId}
-                      className="border-b border-gray-100 dark:border-gray-800"
-                    >
-                      <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
-                        {g.gameDate}
-                      </td>
-                      <td className="py-2 pr-3">
-                        <Link
-                          href={`/analysis/game/${g.gameId}`}
-                          className="hover:text-brand-500"
-                        >
-                          {awayName} @ {homeName}
-                        </Link>
-                      </td>
-                      <td className="py-2 pr-3 text-right font-mono text-xs">
-                        {g.homeScore != null && g.awayScore != null
-                          ? `${g.awayScore}-${g.homeScore}`
-                          : "-"}
-                      </td>
-                      <td className="py-2 pr-3 text-right text-xs text-gray-700 dark:text-gray-200">
-                        {predName ?? "-"}
-                        {g.confidence != null && (
-                          <span className="text-gray-400 dark:text-gray-500 ml-1">
-                            ({Math.round((0.5 + g.confidence / 2) * 100)}%)
-                          </span>
-                        )}
-                      </td>
-                      <td
-                        className={`py-2 text-right text-xs ${resultClass}`}
-                      >
-                        {resultLabel}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+          {upcomingGames.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide mb-2">
+                예정
+              </p>
+              <GameTable games={upcomingGames} />
+            </div>
+          )}
+
+          {thisYearGames.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                {currentYear}시즌
+              </p>
+              <GameTable games={thisYearGames} />
+            </div>
+          )}
+
+          {pastGames.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
+                과거 기록
+              </p>
+              <GameTable games={pastGames} />
+            </div>
+          )}
         </section>
       )}
 
@@ -304,5 +271,74 @@ export default async function MatchupPage({ params }: PageProps) {
         />
       </footer>
     </article>
+  );
+}
+
+function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile").MatchupGame[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
+            <th className="py-2 pr-3 font-medium">일자</th>
+            <th className="py-2 pr-3 font-medium">매치</th>
+            <th className="py-2 pr-3 font-medium text-right">점수</th>
+            <th className="py-2 pr-3 font-medium text-right">예측</th>
+            <th className="py-2 font-medium text-right">결과</th>
+          </tr>
+        </thead>
+        <tbody>
+          {games.map((g) => {
+            const homeName = shortTeamName(g.homeCode);
+            const awayName = shortTeamName(g.awayCode);
+            const predName = g.predictedWinnerCode
+              ? shortTeamName(g.predictedWinnerCode)
+              : null;
+            const resultLabel =
+              g.isCorrect == null
+                ? g.status === "final"
+                  ? "-"
+                  : "예정"
+                : g.isCorrect
+                  ? "적중"
+                  : "실패";
+            const resultClass =
+              g.isCorrect == null
+                ? "text-gray-500 dark:text-gray-400"
+                : g.isCorrect
+                  ? "text-brand-600 dark:text-brand-400"
+                  : "text-red-600 dark:text-red-400";
+            return (
+              <tr key={g.gameId} className="border-b border-gray-100 dark:border-gray-800">
+                <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
+                  {g.gameDate}
+                </td>
+                <td className="py-2 pr-3">
+                  <Link href={`/analysis/game/${g.gameId}`} className="hover:text-brand-500">
+                    {awayName} @ {homeName}
+                  </Link>
+                </td>
+                <td className="py-2 pr-3 text-right font-mono text-xs">
+                  {g.homeScore != null && g.awayScore != null
+                    ? `${g.awayScore}-${g.homeScore}`
+                    : "-"}
+                </td>
+                <td className="py-2 pr-3 text-right text-xs text-gray-700 dark:text-gray-200">
+                  {predName ?? "-"}
+                  {g.confidence != null && (
+                    <span className="text-gray-400 dark:text-gray-500 ml-1">
+                      ({Math.round((0.5 + g.confidence / 2) * 100)}%)
+                    </span>
+                  )}
+                </td>
+                <td className={`py-2 text-right text-xs ${resultClass}`}>
+                  {resultLabel}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }

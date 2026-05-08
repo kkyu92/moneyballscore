@@ -43,11 +43,14 @@ function makeSupabaseMock(games: GameFixture[], opts: SupabaseMockOptions = {}) 
       error: opts.teamsError ?? null,
     }),
   };
+  const gamesOrResult = {
+    data: opts.gamesError ? null : games,
+    error: opts.gamesError ?? null,
+  };
   const gamesBuilder = {
     select: vi.fn().mockReturnThis(),
-    or: vi.fn().mockResolvedValue({
-      data: opts.gamesError ? null : games,
-      error: opts.gamesError ?? null,
+    or: vi.fn().mockReturnValue({
+      order: vi.fn().mockResolvedValue(gamesOrResult),
     }),
   };
   return {
