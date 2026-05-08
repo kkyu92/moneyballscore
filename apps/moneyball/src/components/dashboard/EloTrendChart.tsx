@@ -5,12 +5,15 @@ import {
   Line,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
 } from "recharts";
 import { KBO_TEAMS, KBO_TEAM_SHORT_NAME, type TeamCode } from "@moneyball/shared";
 import type { EloDataPoint } from "@/lib/standings/buildEloTrend";
+import { ChartTooltip } from "./ChartTooltip";
+import { neutral } from "@/lib/design-tokens";
 
 interface EloTrendChartProps {
   points: EloDataPoint[];
@@ -26,7 +29,6 @@ function fmtDate(date: string): string {
 export function EloTrendChart({ points, teams }: EloTrendChartProps) {
   if (points.length === 0) return null;
 
-  // Elo 범위 계산 (여백 포함)
   let minElo = Infinity;
   let maxElo = -Infinity;
   for (const pt of points) {
@@ -43,50 +45,65 @@ export function EloTrendChart({ points, teams }: EloTrendChartProps) {
   const yMax = Math.ceil((maxElo + pad) / 10) * 10;
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart
-        data={points}
-        margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
-      >
-        <XAxis
-          dataKey="date"
-          tickFormatter={fmtDate}
-          tick={{ fontSize: 11 }}
-          interval="preserveStartEnd"
-          minTickGap={40}
-        />
-        <YAxis
-          domain={[yMin, yMax]}
-          tick={{ fontSize: 11 }}
-          width={48}
-          tickFormatter={(v: number) => v.toFixed(0)}
-        />
-        <Tooltip
-          formatter={(value: unknown, name: unknown) => {
-            const v = typeof value === "number" ? value.toFixed(1) : String(value);
-            const n = typeof name === "string" ? (KBO_TEAM_SHORT_NAME[name as TeamCode] ?? name) : String(name);
-            return [v, n];
-          }}
-          labelFormatter={(label: unknown) => String(label)}
-        />
-        <Legend
-          formatter={(value: string) =>
-            KBO_TEAM_SHORT_NAME[value as TeamCode] ?? value
-          }
-          wrapperStyle={{ fontSize: 12 }}
-        />
-        {teams.map((team) => (
-          <Line
-            key={team}
-            type="monotone"
-            dataKey={team}
-            stroke={KBO_TEAMS[team].color}
-            strokeWidth={1.5}
-            dot={false}
-            connectNulls
+    <div className="bg-white dark:bg-gray-50 rounded-lg -mx-1 px-1 pt-2 pb-1">
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart
+          data={points}
+          margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={neutral[200]} strokeOpacity={0.6} />
+          <XAxis
+            dataKey="date"
+            tickFormatter={fmtDate}
+            tick={{ fontSize: 11, fill: neutral[500] }}
+            tickLine={false}
+            axisLine={{ stroke: neutral[200] }}
+            interval="preserveStartEnd"
+            minTickGap={40}
           />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+          <YAxis
+            domain={[yMin, yMax]}
+            tick={{ fontSize: 11, fill: neutral[500] }}
+            tickLine={false}
+            axisLine={false}
+            width={48}
+            tickFormatter={(v: number) => v.toFixed(0)}
+          />
+          <Tooltip
+            content={(props) => (
+              <ChartTooltip
+                {...props}
+                formatRows={(payload) =>
+                  ((payload ?? []) as Array<{ value: number; name: string; color: string }>)
+                    .sort((a, b) => b.value - a.value)
+                    .map((p) => ({
+                      label: KBO_TEAM_SHORT_NAME[p.name as TeamCode] ?? p.name,
+                      value: Number(p.value).toFixed(1),
+                      color: p.color,
+                    }))
+                }
+              />
+            )}
+          />
+          <Legend
+            formatter={(value: string) =>
+              KBO_TEAM_SHORT_NAME[value as TeamCode] ?? value
+            }
+            wrapperStyle={{ fontSize: 11, color: neutral[500] }}
+          />
+          {teams.map((team) => (
+            <Line
+              key={team}
+              type="monotone"
+              dataKey={team}
+              stroke={KBO_TEAMS[team].color}
+              strokeWidth={1.5}
+              dot={false}
+              connectNulls
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
