@@ -438,7 +438,7 @@ export async function runPostview(
  * LLM 실패 시 factor 편향 기반 deterministic fallback
  * 결과와 반대 방향으로 편향된 상위 3 factor 선택
  *
- * cycle 177 — parseJudgePostview (line 311) 와 동일하게 canonicalizeFactorKey 적용.
+ * cycle 177 — parseJudgePostview 와 동일하게 canonicalizeFactorKey 적용.
  * production factor (predictor.ts) 는 no-prefix 박제이지만 input 이 prefixed key 받아도
  * downstream factor-bias-bootstrap-ci.ts FACTORS_OF_INTEREST=['sfr','head_to_head'] no-prefix
  * grouping 안전망. cycle 131 silent drift family defensive consistency 통일.

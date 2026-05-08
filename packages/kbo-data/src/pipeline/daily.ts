@@ -489,8 +489,8 @@ export async function runDailyPipeline(
     const awayElo = eloRatings.find((e) => e.team === game.awayTeam);
 
     // teamStats / eloRatings 미스 = silent fallback (cycle 60 lesson lineage).
-    // fancy-stats 가 10팀 미만이면 line 374-380 에서 errors 박제됐지만, 단일
-    // 팀 누락은 그 가드 통과 → 본 console.warn 으로 Sentry 가시화.
+    // fancy-stats 가 10팀 미만이면 위 Fancy Stats scraperIssues 가드에서 errors
+    // 박제됐지만, 단일 팀 누락은 그 가드 통과 → 본 console.warn 으로 Sentry 가시화.
     const missing: string[] = [];
     if (!homeTeamStat) missing.push(`teamStats:${game.homeTeam}`);
     if (!awayTeamStat) missing.push(`teamStats:${game.awayTeam}`);
