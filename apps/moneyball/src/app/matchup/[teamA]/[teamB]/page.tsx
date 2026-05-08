@@ -7,9 +7,14 @@ import {
   pairsForTeam,
 } from "@/lib/matchup/canonicalPair";
 import { buildMatchupProfile } from "@/lib/matchup/buildMatchupProfile";
+import {
+  buildTeamFactorAverages,
+  EMPTY_FACTOR_AVERAGES,
+} from "@/lib/teams/buildTeamFactorAverages";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare";
 
 export const revalidate = 3600;
 
@@ -54,7 +59,11 @@ export default async function MatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const profile = await buildMatchupProfile(pair);
+  const [profile, factorA, factorB] = await Promise.all([
+    buildMatchupProfile(pair),
+    buildTeamFactorAverages(pair.codeA).catch(() => EMPTY_FACTOR_AVERAGES),
+    buildTeamFactorAverages(pair.codeB).catch(() => EMPTY_FACTOR_AVERAGES),
+  ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -150,6 +159,13 @@ export default async function MatchupPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <MatchupFactorCompare
+        teamA={{ code: tA.code, shortName: tA.shortName, color: tA.color }}
+        teamB={{ code: tB.code, shortName: tB.shortName, color: tB.color }}
+        factorA={factorA}
+        factorB={factorB}
+      />
 
       {predictionAccuracy.verified > 0 && (
         <section
