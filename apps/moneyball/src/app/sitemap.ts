@@ -43,8 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/contact`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${baseUrl}/reviews/weekly`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/reviews/monthly`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    // /reviews/weekly /reviews/monthly = redirect-only 페이지 (즉시 /reviews/(weekly|monthly)/{currentId} 로 308).
+    // sitemap 에 두면 redirect chain → 중복 URL 인덱싱. dynamic block (weeklyReviewRoutes / monthlyReviewRoutes) 이 실제 컨텐츠 URL 커버.
     { url: `${baseUrl}/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
     { url: `${baseUrl}/players`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/teams`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
