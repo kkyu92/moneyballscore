@@ -3,8 +3,10 @@ import Link from "next/link";
 import { shortTeamName } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
+import { buildEloTrend } from "@/lib/standings/buildEloTrend";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 
 export const revalidate = 3600;
 
@@ -50,9 +52,10 @@ function Recent10({ text }: { text: string }) {
 }
 
 export default async function StandingsPage() {
-  const [standings, teamAccuracy] = await Promise.all([
+  const [standings, teamAccuracy, eloTrend] = await Promise.all([
     buildStandings(),
     buildAllTeamAccuracy().catch(() => []),
+    buildEloTrend().catch(() => ({ points: [], teams: [] })),
   ]);
 
   const jsonLd = {
@@ -167,6 +170,21 @@ export default async function StandingsPage() {
       <p className="text-xs text-gray-400 dark:text-gray-500 text-right">
         출처: KBO 공식 · 1시간마다 갱신
       </p>
+
+      {eloTrend.points.length > 0 && (
+        <section aria-labelledby="elo-trend-title">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 id="elo-trend-title" className="text-base font-bold">팀별 Elo 레이팅 추이</h2>
+              <span className="text-xs text-gray-400 dark:text-gray-500">2026 시즌 · AI 예측 기반</span>
+            </div>
+            <EloTrendChart points={eloTrend.points} teams={eloTrend.teams} />
+            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+              경기 직전 AI 예측에 사용된 Elo 레이팅. 상승세 팀일수록 예측 모델이 높은 전력으로 평가.
+            </p>
+          </div>
+        </section>
+      )}
 
       {teamAccuracy.length > 0 && (
         <section aria-labelledby="prediction-accuracy-title">
