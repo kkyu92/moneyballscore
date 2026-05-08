@@ -90,7 +90,13 @@ export function NavLinks() {
                 aria-labelledby={`nav-btn-${item.label}`}
                 className="absolute left-0 top-full pt-2 z-50"
               >
-                <div className="bg-brand-800 border border-brand-700 rounded-md shadow-lg min-w-[8rem] py-1">
+                <div
+                  className={`bg-brand-800 border border-brand-700 rounded-md shadow-lg py-1 ${
+                    item.items.length >= 4
+                      ? "grid grid-cols-2 min-w-[18rem]"
+                      : "min-w-[8rem]"
+                  }`}
+                >
                   {item.items.map((sub) => (
                     <Link
                       key={sub.href}

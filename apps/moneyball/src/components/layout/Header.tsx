@@ -25,16 +25,16 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: "리뷰",
+    label: "리뷰·시즌",
     items: [
       { href: "/reviews", label: "예측 리뷰" },
       { href: "/reviews/weekly", label: "주간 리뷰" },
       { href: "/reviews/monthly", label: "월간 리뷰" },
       { href: "/reviews/misses", label: "빗나간 예측" },
       { href: "/dashboard", label: "모델 성능" },
+      { href: "/seasons", label: "시즌 기록" },
     ],
   },
-  { href: "/seasons", label: "시즌" },
 ];
 
 export { NAV_ITEMS };
