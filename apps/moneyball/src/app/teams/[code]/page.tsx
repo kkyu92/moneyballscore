@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
+import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { TeamEloChart } from "@/components/teams/TeamEloChart";
 
 export const revalidate = 1800;
 
@@ -65,7 +67,10 @@ export default async function TeamPage({ params }: PageProps) {
   const { code } = await params;
   if (!isTeamCode(code)) notFound();
 
-  const profile = await buildTeamProfile(code);
+  const [profile, eloTrend] = await Promise.all([
+    buildTeamProfile(code),
+    buildTeamEloTrend(code).catch(() => ({ points: [] })),
+  ]);
   if (!profile) notFound();
 
   const jsonLd = {
@@ -230,6 +235,21 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {eloTrend.points.length > 0 && (
+        <section
+          aria-labelledby="team-elo-trend-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="team-elo-trend-title" className="text-lg font-bold mb-1">
+            Elo 레이팅 추이
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            시즌 경기별 Elo 변화 · 점선은 리그 평균
+          </p>
+          <TeamEloChart points={eloTrend.points} teamCode={profile.code} />
+        </section>
+      )}
 
       {profile.topPitchers.length > 0 && (
         <section
