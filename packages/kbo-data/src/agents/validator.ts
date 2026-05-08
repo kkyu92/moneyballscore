@@ -1,8 +1,14 @@
 /**
- * Validator Layer 1 — 팀 에이전트 JSON 응답 결정론적 검증
+ * Validator Layer 1 — LLM 응답 결정론적 검증
  *
- * 환각·편향·금칙어·선수명 발명을 차단.
- * 위반 시 AgentResult.success=false로 전환되어 debate.ts의 기존 fallback 경로 사용.
+ * 환각·편향·금칙어·선수명 발명을 차단. 다음 LLM 출력 경로를 cover:
+ *   - team-agent: validateTeamArgument (홈/원정 team-agent JSON)
+ *   - judge-agent: validateJudgeReasoning (심판 reasoning 자유 텍스트)
+ *   - postview: validateJudgeReasoning + validateFactorAttribution (사후분석)
+ *   - 위반 reasoning 은 maskViolatedReasoning 으로 mask (사용자 가시 leak 차단)
+ *   - notifyValidationViolations 가 Sentry tag 로 위반 capture (silent drift 사전 감지)
+ *
+ * 위반 시 AgentResult.success=false 로 전환되어 debate.ts 의 기존 fallback 경로 사용.
  *
  * 정책:
  *   strict (프로덕션/Claude 기본):
@@ -539,6 +545,9 @@ export function maskViolatedReasoning(
 // LLM 이 low-weight factor (가중치 < threshold) 를 결과 결정 요인으로 강조할 경우 warn.
 // spec § 4.4 의 "±10pp 격차" 추출은 reasoning 자유 텍스트 regex 정확도 한계로 보류 —
 // 대신 factorErrors 배열 (구조화된 LLM 출력) 의 factor 가중치 cross-check 로 대응.
+//
+// attribution warning 은 notifyValidationViolations (Sentry) 에서만 capture —
+// 사용자 가시 judgeReasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
 
 export interface FactorAttributionInput {
   factor: string;
@@ -577,9 +586,6 @@ export function validateFactorAttribution(
   const ok = hardCount <= HARD_LIMIT && warnCount <= WARN_LIMIT;
   return { ok, violations };
 }
-
-// 사용자 가시 judgeReasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
-// attribution warning 은 notifyValidationViolations (Sentry) 에서만 capture.
 
 // ============================================
 // P2 — notifyValidationViolations (Sentry tag 연계, spec § 4.2)
