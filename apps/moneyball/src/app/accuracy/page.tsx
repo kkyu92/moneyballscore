@@ -427,7 +427,7 @@ export default async function AccuracyPage() {
                 {weekly.map((w) => (
                   <tr
                     key={w.weekLabel}
-                    className="border-b border-[var(--color-border)]"
+                    className="border-b border-gray-200 dark:border-[var(--color-border)]"
                   >
                     <td className="py-2 pr-4">{w.weekLabel}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
@@ -546,7 +546,7 @@ export default async function AccuracyPage() {
                 {teamRows.map((t) => (
                   <tr
                     key={t.teamCode}
-                    className="border-b border-[var(--color-border)]"
+                    className="border-b border-gray-200 dark:border-[var(--color-border)]"
                   >
                     <td className="py-2 pr-4 font-medium">{shortTeamName(t.teamCode)}</td>
                     <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
