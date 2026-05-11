@@ -236,7 +236,7 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
         const cy = py(b.hitRate);
         const r = Math.max(5, Math.min(16, Math.sqrt(b.n) * 3.5));
         const small = b.n < 5;
-        const col = small ? '#9ca3af' : '#2d6b3f';
+        const colVar = small ? '#9ca3af' : 'var(--color-brand-500)';
         return (
           <g key={b.lower}>
             <line
@@ -244,11 +244,11 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
               y1={py(Math.min(1, b.hitRate + b.ci95Half))}
               x2={cx}
               y2={py(Math.max(0, b.hitRate - b.ci95Half))}
-              stroke={col}
+              style={{ stroke: colVar }}
               strokeWidth="1.5"
               opacity="0.35"
             />
-            <circle cx={cx} cy={cy} r={r} fill={col} fillOpacity="0.8" />
+            <circle cx={cx} cy={cy} r={r} style={{ fill: colVar }} fillOpacity="0.8" />
             <text
               x={cx}
               y={cy + 4}
@@ -400,13 +400,7 @@ export default async function AccuracyPage() {
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.hits}</td>
                     <td
-                      className="py-2 text-right font-mono font-semibold"
-                      style={{
-                        color:
-                          w.accuracy !== null && w.accuracy >= 0.5
-                            ? '#2d6b3f'
-                            : undefined,
-                      }}
+                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : ''}`}
                     >
                       {w.accuracy !== null
                         ? `${(w.accuracy * 100).toFixed(1)}%`
@@ -449,13 +443,7 @@ export default async function AccuracyPage() {
                     <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
                     <td className="py-2 pr-4 text-right font-mono">{t.correctN}</td>
                     <td
-                      className="py-2 text-right font-mono font-semibold"
-                      style={{
-                        color:
-                          t.accuracyRate !== null && t.accuracyRate >= 0.5
-                            ? '#2d6b3f'
-                            : undefined,
-                      }}
+                      className={`py-2 text-right font-mono font-semibold ${t.accuracyRate !== null && t.accuracyRate >= 0.5 ? 'text-brand-500' : ''}`}
                     >
                       {t.verifiedN < 3
                         ? '(샘플 부족)'
@@ -499,7 +487,7 @@ function StatCard({
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p
-        className={`text-2xl font-bold font-mono mt-1 ${accent ? 'text-[#2d6b3f]' : ''}`}
+        className={`text-2xl font-bold font-mono mt-1 ${accent ? 'text-brand-500' : ''}`}
       >
         {value}
       </p>
