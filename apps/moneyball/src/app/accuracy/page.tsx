@@ -98,6 +98,36 @@ function calibrationGap(rows: PredRow[]): number {
   return avgConf - acc;
 }
 
+// ── 요일별 집계 (KST 기준) ────────────────────────────────────
+interface DayBucket {
+  day: number; // 0=일,1=월,...,6=토
+  dayLabel: string;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+}
+
+const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일 순서
+
+function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
+  const acc = Array.from({ length: 7 }, (_, i) => ({ day: i, n: 0, hits: 0 }));
+  for (const r of rows) {
+    // verified_at은 UTC. KST = UTC+9
+    const kstMs = new Date(r.verified_at).getTime() + 9 * 3600 * 1000;
+    const dow = new Date(kstMs).getUTCDay();
+    acc[dow].n += 1;
+    if (r.is_correct) acc[dow].hits += 1;
+  }
+  return DOW_ORDER.map((day) => ({
+    day,
+    dayLabel: DAY_LABELS[day],
+    n: acc[day].n,
+    hits: acc[day].hits,
+    accuracy: acc[day].n > 0 ? acc[day].hits / acc[day].n : null,
+  }));
+}
+
 // ── 주별 집계 ──────────────────────────────────────────────────
 interface WeekBucket {
   weekLabel: string;
@@ -313,6 +343,7 @@ export default async function AccuracyPage() {
   const gap = calibrationGap(rows);
   const buckets = bucketize(rows);
   const weekly = buildWeeklyTrend(rows);
+  const dow = buildDayOfWeek(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
 
@@ -413,6 +444,62 @@ export default async function AccuracyPage() {
               </tbody>
             </table>
           </div>
+        </section>
+      )}
+
+      {/* 요일별 적중률 */}
+      {dow.some((d) => d.n > 0) && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">요일별 적중률</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              KST 기준. 요일에 따라 예측 난이도가 다를 수 있습니다. 막대 높이 ∝ 적중률.
+            </p>
+          </div>
+          <div className="grid grid-cols-7 gap-2 mt-2">
+            {dow.map((d) => {
+              const acc = d.accuracy;
+              const barH = acc !== null ? Math.round(acc * 80) : 0;
+              const colorClass =
+                acc === null
+                  ? 'bg-gray-200 dark:bg-gray-700'
+                  : acc >= 0.55
+                    ? 'bg-brand-500'
+                    : acc >= 0.45
+                      ? 'bg-neutral-400'
+                      : 'bg-red-400';
+              return (
+                <div key={d.day} className="flex flex-col items-center gap-1">
+                  <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                    {d.dayLabel}
+                  </span>
+                  <span
+                    className={`text-sm font-bold font-mono ${
+                      acc !== null && acc >= 0.5
+                        ? 'text-brand-500'
+                        : acc !== null && acc < 0.4
+                          ? 'text-red-400'
+                          : ''
+                    }`}
+                  >
+                    {acc !== null ? `${(acc * 100).toFixed(0)}%` : '—'}
+                  </span>
+                  <div className="w-full h-20 flex flex-col justify-end rounded-sm overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div
+                      className={`w-full rounded-sm ${colorClass}`}
+                      style={{ height: `${barH}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                    {d.n > 0 ? `${d.hits}/${d.n}` : '—'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 pt-1">
+            * 50% 기준선: 동전 던지기 수준. 막대가 높을수록 AI가 잘 맞힌 요일.
+          </p>
         </section>
       )}
 
