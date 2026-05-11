@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.41] - 2026-05-12 W20 주간 분석 + 누적 89건 업데이트 (cycle 290 operational-analysis lite)
+## [0.5.41] - 2026-05-12 W20 주간 분석 + 패턴 추출 4건 (cycle 290 operational-analysis lite)
 
 ### 학습 포인트 (W20: 2026-05-05~05-10)
 
@@ -17,6 +17,13 @@
 
 - 누적 89건 (목표 n=150+). 잔여 61건 → 예상 4주 추가 관찰 필요.
 - 가중치 변경 없음 (소표본). n=150 도달 시 operational-analysis heavy 재실행 예정.
+
+### 패턴 추출 (gstack learnings 등록)
+
+- **[quality_guard] new-page-3cycle-cleanup-pipeline**: 신규 페이지 ship 후 design token drift + assertSelectOk 미적용이 매번 2사이클 연속 발생. PR 체크리스트로 예방 가능.
+- **[anti_pattern] confidence-inversion-high-conf-underperforms**: 고확신(≥55%) < 저확신 적중률 역전 지속. calibration curve re-fit 필요 (n=150 도달 후).
+- **[data_pipeline] day-of-week-prediction-bias-sunday**: 일요일 ~15% 구조적 취약. judge-agent max_confidence 일요일 cap 0.55 적용 검토.
+- **[anti_pattern] head-to-head-factor-systematic-noise**: W20 방향 적중 35.3% — 랜덤 이하. v2.0 가중치 5%→3% 하향 evidence 충분.
 
 ## [0.5.40] - 2026-05-12 공개 AI 적중률 대시보드 /accuracy 신규 (cycle 287 explore-idea heavy)
 
