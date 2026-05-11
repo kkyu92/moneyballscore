@@ -427,7 +427,7 @@ export default async function AccuracyPage() {
                 {weekly.map((w) => (
                   <tr
                     key={w.weekLabel}
-                    className="border-b border-gray-100 dark:border-gray-800"
+                    className="border-b border-[var(--color-border)]"
                   >
                     <td className="py-2 pr-4">{w.weekLabel}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
@@ -459,7 +459,7 @@ export default async function AccuracyPage() {
           <div className="grid grid-cols-7 gap-2 mt-2">
             {dow.map((d) => {
               const acc = d.accuracy;
-              const barH = acc !== null ? Math.round(acc * 80) : 0;
+              const barH = acc !== null ? Math.round(acc * 100) : 0;
               const colorClass =
                 acc === null
                   ? 'bg-gray-200 dark:bg-gray-700'
@@ -484,7 +484,12 @@ export default async function AccuracyPage() {
                   >
                     {acc !== null ? `${(acc * 100).toFixed(0)}%` : '—'}
                   </span>
-                  <div className="w-full h-20 flex flex-col justify-end rounded-sm overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="relative w-full h-20 flex flex-col justify-end rounded-sm overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    {/* 50% 기준선 */}
+                    <div
+                      className="absolute inset-x-0 border-t border-dashed border-gray-400/50 dark:border-gray-500/50 z-10"
+                      style={{ bottom: '50%' }}
+                    />
                     <div
                       className={`w-full rounded-sm ${colorClass}`}
                       style={{ height: `${barH}%` }}
@@ -497,9 +502,24 @@ export default async function AccuracyPage() {
               );
             })}
           </div>
-          <p className="text-[11px] text-gray-400 dark:text-gray-500 pt-1">
-            * 50% 기준선: 동전 던지기 수준. 막대가 높을수록 AI가 잘 맞힌 요일.
-          </p>
+          <div className="flex gap-4 text-[10px] text-gray-400 dark:text-gray-500 pt-1">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-sm bg-brand-500" />
+              ≥55%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-sm bg-neutral-400" />
+              45~54%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-sm bg-red-400" />
+              {'<'}45%
+            </span>
+            <span className="ml-auto flex items-center gap-1">
+              <span className="inline-block w-3 border-t border-dashed border-gray-400/70" />
+              50% 기준선
+            </span>
+          </div>
         </section>
       )}
 
@@ -526,7 +546,7 @@ export default async function AccuracyPage() {
                 {teamRows.map((t) => (
                   <tr
                     key={t.teamCode}
-                    className="border-b border-gray-100 dark:border-gray-800"
+                    className="border-b border-[var(--color-border)]"
                   >
                     <td className="py-2 pr-4 font-medium">{shortTeamName(t.teamCode)}</td>
                     <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
