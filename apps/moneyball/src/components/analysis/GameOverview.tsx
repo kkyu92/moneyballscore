@@ -7,9 +7,9 @@ const TAG_STYLES: Record<string, string> = {
   "투수전 예상":
     "bg-brand-500/10 text-brand-600 dark:text-brand-300 border-brand-500/30",
   "타격전 예상":
-    "bg-orange-500/10 text-orange-600 dark:text-orange-300 border-orange-500/30",
+    "bg-[var(--color-away)]/10 text-[var(--color-away)] dark:text-[var(--color-away-light)] border-[var(--color-away)]/30",
   박빙:
-    "bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/30",
+    "bg-accent/10 text-accent dark:text-accent-light border-accent/30",
   "우세 뚜렷":
     "bg-gray-500/10 text-gray-700 dark:text-gray-200 border-gray-400/30",
 };
