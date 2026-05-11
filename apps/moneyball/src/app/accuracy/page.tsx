@@ -170,6 +170,29 @@ function buildWeeklyTrend(rows: PredRow[]): WeekBucket[] {
     });
 }
 
+// ── 최근 폼 ────────────────────────────────────────────────────
+interface RecentForm {
+  dots: boolean[];
+  hits: number;
+  total: number;
+  trend: 'up' | 'down' | 'flat';
+}
+
+function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
+  const recent = rows.slice(-limit);
+  const dots = recent.map((r) => r.is_correct);
+  const hits = dots.filter(Boolean).length;
+  const total = dots.length;
+  let trend: 'up' | 'down' | 'flat' = 'flat';
+  if (total >= 20) {
+    const prev = dots.slice(0, 10).filter(Boolean).length / 10;
+    const last = dots.slice(-10).filter(Boolean).length / 10;
+    const diff = last - prev;
+    trend = diff >= 0.1 ? 'up' : diff <= -0.1 ? 'down' : 'flat';
+  }
+  return { dots, hits, total, trend };
+}
+
 // ── SVG 캘리브레이션 다이어그램 ───────────────────────────────
 const PLOT_SIZE = 400;
 const PAD_LEFT = 55;
@@ -344,6 +367,7 @@ export default async function AccuracyPage() {
   const buckets = bucketize(rows);
   const weekly = buildWeeklyTrend(rows);
   const dow = buildDayOfWeek(rows);
+  const recentForm = buildRecentForm(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
 
@@ -391,6 +415,59 @@ export default async function AccuracyPage() {
         />
       </section>
 
+      {/* 최근 예측 폼 */}
+      {recentForm.total >= 5 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <h2 className="text-lg font-bold">최근 예측 폼</h2>
+            <div className="flex items-center gap-2 text-sm flex-wrap">
+              <span
+                className={
+                  recentForm.total > 0 && recentForm.hits / recentForm.total >= overallAcc
+                    ? 'text-brand-600 dark:text-brand-400 font-semibold'
+                    : 'text-red-600 dark:text-red-400 font-semibold'
+                }
+              >
+                최근 {recentForm.total}경기 {recentForm.hits}적중 (
+                {Math.round((recentForm.hits / recentForm.total) * 100)}%)
+              </span>
+              <span className="text-gray-400 dark:text-gray-500">vs 전체 {Math.round(overallAcc * 100)}%</span>
+              {recentForm.trend !== 'flat' && (
+                <span
+                  className={
+                    recentForm.trend === 'up'
+                      ? 'text-brand-600 dark:text-brand-400 font-medium'
+                      : 'text-red-600 dark:text-red-400 font-medium'
+                  }
+                >
+                  {recentForm.trend === 'up' ? '▲ 상승 중' : '▼ 하락 중'}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5" role="list" aria-label="최근 예측 결과">
+            {recentForm.dots.map((hit, i) => (
+              <span
+                key={i}
+                role="listitem"
+                aria-label={hit ? '적중' : '실패'}
+                title={hit ? '적중' : '실패'}
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none ${
+                  hit
+                    ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'
+                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                }`}
+              >
+                {hit ? '●' : '×'}
+              </span>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            검증 완료된 최근 {recentForm.total}경기 순서. 왼쪽이 이전, 오른쪽이 최신.
+          </p>
+        </section>
+      )}
+
       {/* 캘리브레이션 다이어그램 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
         <div>
@@ -427,7 +504,7 @@ export default async function AccuracyPage() {
                 {weekly.map((w) => (
                   <tr
                     key={w.weekLabel}
-                    className="border-b border-[var(--color-border)]"
+                    className="border-b border-gray-200 dark:border-[var(--color-border)]"
                   >
                     <td className="py-2 pr-4">{w.weekLabel}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
@@ -546,7 +623,7 @@ export default async function AccuracyPage() {
                 {teamRows.map((t) => (
                   <tr
                     key={t.teamCode}
-                    className="border-b border-[var(--color-border)]"
+                    className="border-b border-gray-200 dark:border-[var(--color-border)]"
                   >
                     <td className="py-2 pr-4 font-medium">{shortTeamName(t.teamCode)}</td>
                     <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
