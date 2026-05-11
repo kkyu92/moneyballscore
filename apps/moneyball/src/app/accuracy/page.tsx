@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { buildAllTeamAccuracy } from '@/lib/standings/buildTeamAccuracy';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
-import { shortTeamName } from '@moneyball/shared';
+import { assertSelectOk, shortTeamName } from '@moneyball/shared';
+import { neutral } from '@/lib/design-tokens';
 
 export const revalidate = 3600;
 
@@ -236,7 +237,7 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
         const cy = py(b.hitRate);
         const r = Math.max(5, Math.min(16, Math.sqrt(b.n) * 3.5));
         const small = b.n < 5;
-        const colVar = small ? '#9ca3af' : 'var(--color-brand-500)';
+        const colVar = small ? neutral[400] : 'var(--color-brand-500)';
         return (
           <g key={b.lower}>
             <line
@@ -292,7 +293,7 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 export default async function AccuracyPage() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from('predictions')
     .select('confidence, is_correct, verified_at')
     .match(CURRENT_MODEL_FILTER)
@@ -303,7 +304,8 @@ export default async function AccuracyPage() {
 
   const teamRows = await buildAllTeamAccuracy();
 
-  const rows = error ? [] : ((data ?? []) as PredRow[]);
+  const { data } = assertSelectOk(result, 'AccuracyPage');
+  const rows = (data ?? []) as PredRow[];
   const n = rows.length;
   const correct = rows.filter((r) => r.is_correct).length;
   const overallAcc = n > 0 ? correct / n : 0;
