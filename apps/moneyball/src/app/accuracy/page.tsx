@@ -340,7 +340,7 @@ export default async function AccuracyPage() {
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.hits}</td>
                     <td
-                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : ''}`}
+                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : w.accuracy !== null && w.accuracy < 0.5 ? 'text-red-400' : ''}`}
                     >
                       {w.accuracy !== null
                         ? `${(w.accuracy * 100).toFixed(1)}%`
@@ -391,7 +391,7 @@ export default async function AccuracyPage() {
                   >
                     {acc !== null ? `${(acc * 100).toFixed(0)}%` : '—'}
                   </span>
-                  <div className="relative w-full h-20 flex flex-col justify-end rounded-sm overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="relative w-full h-20 flex flex-col justify-end rounded-sm overflow-hidden bg-gray-100 dark:bg-[var(--color-border)]">
                     {/* 50% 기준선 */}
                     <div
                       className="absolute inset-x-0 border-t border-dashed border-gray-400/50 dark:border-gray-500/50 z-10"
@@ -459,7 +459,7 @@ export default async function AccuracyPage() {
                     <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
                     <td className="py-2 pr-4 text-right font-mono">{t.correctN}</td>
                     <td
-                      className={`py-2 text-right font-mono font-semibold ${t.accuracyRate !== null && t.accuracyRate >= 0.5 ? 'text-brand-500' : ''}`}
+                      className={`py-2 text-right font-mono font-semibold ${t.accuracyRate !== null && t.accuracyRate >= 0.5 ? 'text-brand-500' : t.accuracyRate !== null && t.accuracyRate < 0.5 && t.verifiedN >= 3 ? 'text-red-400' : ''}`}
                     >
                       {t.verifiedN < 3
                         ? '(샘플 부족)'
