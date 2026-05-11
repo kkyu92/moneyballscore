@@ -94,7 +94,7 @@ jobs:
           # PR title 이 4 prefix 외이고 안에 lesson commit 포함된 PR 을 squash 머지하면
           # commits 배열엔 squash 결과 (PR title) 만 남아 매칭 불가. PR API 로 squash
           # 전 원본 commit 들 조회 후 검색.
-          PR_NUM=$(printf '%s' "$HEAD_MSG" | head -1 | grep -oE '\(#[0-9]+\)' | tail -1 | grep -oE '[0-9]+')
+          PR_NUM=$(printf '%s' "$HEAD_MSG" | head -1 | grep -oE '\(#[0-9]+\)' | tail -1 | grep -oE '[0-9]+' || true)
           if [ -z "$PR_NUM" ]; then
             echo "found=false" >> "$GITHUB_OUTPUT"
             echo "lesson commit 없음 — skip (head_commit + commits 배열 + (#NN) 패턴 모두 매칭 X)"
