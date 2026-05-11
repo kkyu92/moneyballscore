@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.43] - 2026-05-12 /accuracy 최근 예측 폼 섹션 추가 (cycle 295 explore-idea heavy)
+
+### 변경 사항
+- `/accuracy` 최근 20경기 예측 폼: 적중/실패 도트 시각화 + 전체 적중률 대비 현재 폼 강조
+- 추세 감지: 최근 10경기 vs 이전 10경기 비율 차 ±10% 기준 ▲상승/▼하락/flat 표시
+- `buildRecentForm()` 순수 함수 추가 (기존 `buildWeeklyTrend` 패턴 동일 구조)
+
 ## [0.5.42] - 2026-05-12 /accuracy 요일별 막대차트 50% 기준선 + 컬러 범례 + border 토큰 정렬 (cycle 293 polish-ui)
 
 ### 변경 사항
