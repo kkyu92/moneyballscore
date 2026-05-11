@@ -31,6 +31,7 @@ const SITEMAP_COLUMNS = [
   {
     label: "서비스",
     links: [
+      { href: "/accuracy", label: "AI 적중 기록" },
       { href: "/dashboard", label: "대시보드" },
       { href: "/search", label: "검색" },
       { href: "/about", label: "소개" },
