@@ -662,6 +662,27 @@ export default async function AnalysisIndexPage() {
           </div>
         </Link>
       </section>
+
+      {/* AI 적중 기록 CTA → /accuracy */}
+      <section aria-labelledby="accuracy-title">
+        <h2 id="accuracy-title" className="sr-only">AI 적중 기록</h2>
+        <Link
+          href="/accuracy"
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 hover:border-brand-500 dark:hover:border-brand-500 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-3xl shrink-0">🎯</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                AI 적중 기록 →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                신뢰도별 캘리브레이션, 주별 트렌드, 팀별 성과 — 얼마나 정확한지 솔직하게 공개합니다
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
     </div>
   );
 }
