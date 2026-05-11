@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.40] - 2026-05-12 공개 AI 적중률 대시보드 /accuracy 신규 (cycle 287 explore-idea heavy)
+
+### 추가
+
+- `apps/moneyball/src/app/accuracy/page.tsx` — 공개 AI 적중률 대시보드
+  - 캘리브레이션 SVG (신뢰도 0.4~1.0 구간별 실제 적중률 vs 이상적 대각선)
+  - 주별 트렌드 테이블 (최근 8주 ISO week 기준, 예측수·정답수·적중률)
+  - 팀별 성과 테이블 (`buildAllTeamAccuracy` 재사용, 적중률 내림차순)
+  - 4개 요약 stat 카드 (전체 예측수·전체 적중률·최고 주별 적중률·Brier Score)
+  - ISR revalidate=3600, 공개 anon client (SUPABASE_SERVICE_ROLE_KEY 미사용)
+  - OG/canonical 메타데이터, FAQPage JSON-LD 디스클레이머 footer
+- `apps/moneyball/src/app/analysis/page.tsx` — /accuracy CTA 카드 섹션 추가
+
+### 검증
+
+type-check + 876 tests (shared 73 + kbo-data 562 + moneyball 241) PASS.
+
 ## [0.5.39] - 2026-05-08 shortName silent drift fix — meta.name.split → shortTeamName 통일 (cycle 274 review-code heavy)
 
 ### 수정
