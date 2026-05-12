@@ -48,9 +48,11 @@ export function WeeklyHistorySection({ groups }: Props) {
   const pastGroups = groups.slice(1);
   if (pastGroups.length === 0) return null;
 
+  const sectionLabel = pastGroups.length === 1 ? '지난 주 기록' : '이전 주 기록';
+
   return (
     <div className="space-y-2">
-      <h2 className="text-sm font-semibold">지난 주 기록</h2>
+      <h2 className="text-sm font-semibold">{sectionLabel}</h2>
       {pastGroups.map((group, idx) => {
         const { stats, entries } = group;
         const myRatePct = stats.myRate !== null ? Math.round(stats.myRate * 100) : null;
