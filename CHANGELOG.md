@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.47.0] - 2026-05-12 커뮤니티 픽 익명 집계 강화 (cycle 327 explore-idea)
+
+### Added
+- `pick_poll_events` 테이블 (마이그레이션 025): `device_id` 기반 익명 픽 집계. 닉네임 없는 모든 방문자 참여 가능. RLS: public read / 서비스롤 write.
+- `POST /api/picks/submit`: `{game_id, pick, device_id}` 검증 후 `pick_poll_events` upsert. 디바이스당 경기별 1표 보장.
+- `PickButton.tsx`: `getOrCreateDeviceId()` + `handlePick()` — 픽 클릭 시 fire-and-forget POST + poll 자동 갱신.
+
+### Changed
+- `/api/picks/poll`: 집계 소스를 `user_picks` → `pick_poll_events`로 전환. 익명 사용자 포함 전체 커뮤니티 픽 집계.
+
 ## [0.5.46.7] - 2026-05-12 use-user-picks lazy init (cycle 325 review-code)
 
 ### Fixed
