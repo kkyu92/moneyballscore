@@ -478,7 +478,6 @@ export async function runDailyPipeline(
   }
 
   // windowTargets predict 루프
-  const yesterday = getYesterdayKST(targetDate);
   for (const game of windowTargets) {
     const dbGameId = gameIdMap.get(game.externalGameId);
     if (!dbGameId) continue;
@@ -519,16 +518,16 @@ export async function runDailyPipeline(
       winPct: FANCY_STATS_DEFAULTS.winPct,
     };
 
-    // DB 기반 recent form + h2h (asOfDate 이전 final 경기만).
-    // 당일 낮경기 결과는 status='final' 되어도 game_date=오늘 이라 yesterday
-    // 필터에서 자동 제외. KBO 스크래핑 대비 구조적으로 누수 없음.
+    // DB 기반 recent form + h2h (targetDate 이전 final 경기만).
+    // lt(game_date, targetDate) — 오늘 경기(game_date=오늘) 제외,
+    // 어제 포함. 이전 verify 가 winner_team_id 확정했으므로 안전.
     const homeTeamIdForForm = teamIdMap[game.homeTeam];
     const awayTeamIdForForm = teamIdMap[game.awayTeam];
     const rfgResult = await db
       .from('games')
       .select('home_team_id, away_team_id, winner_team_id')
       .eq('status', 'final')
-      .lt('game_date', yesterday)
+      .lt('game_date', targetDate)
       .or(
         `home_team_id.eq.${homeTeamIdForForm},` +
         `away_team_id.eq.${homeTeamIdForForm},` +
