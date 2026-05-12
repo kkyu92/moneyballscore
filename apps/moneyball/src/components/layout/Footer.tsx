@@ -2,16 +2,21 @@ import Link from "next/link";
 
 const SITEMAP_COLUMNS = [
   {
-    label: "분석·예측",
+    label: "AI 예측",
     links: [
       { href: "/", label: "오늘 경기" },
       { href: "/analysis", label: "AI 분석" },
       { href: "/accuracy", label: "AI 적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
-      { href: "/picks", label: "내 픽 기록" },
-      { href: "/leaderboard", label: "픽 리더보드" },
       { href: "/predictions", label: "예측 기록" },
       { href: "/matchup", label: "매치업" },
+    ],
+  },
+  {
+    label: "커뮤니티",
+    links: [
+      { href: "/picks", label: "내 픽 기록" },
+      { href: "/leaderboard", label: "픽 리더보드" },
     ],
   },
   {
@@ -23,18 +28,11 @@ const SITEMAP_COLUMNS = [
     ],
   },
   {
-    label: "리뷰·시즌",
+    label: "리뷰·서비스",
     links: [
       { href: "/reviews", label: "예측 리뷰" },
-      { href: "/reviews/weekly", label: "주간 리뷰" },
-      { href: "/reviews/monthly", label: "월간 리뷰" },
-      { href: "/reviews/misses", label: "크게 빗나간 예측" },
+      { href: "/reviews/misses", label: "빗나간 예측" },
       { href: "/seasons", label: "시즌 기록" },
-    ],
-  },
-  {
-    label: "서비스",
-    links: [
       { href: "/search", label: "검색" },
       { href: "/about", label: "소개" },
       { href: "/contact", label: "문의" },
