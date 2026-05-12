@@ -14,6 +14,7 @@ import {
   buildWeeklyTrend,
   buildRecentForm,
 } from '@/lib/accuracy/buildAccuracyData';
+import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
 export const revalidate = 3600;
 
@@ -170,16 +171,35 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 export default async function AccuracyPage() {
   const supabase = await createClient();
 
-  const result = await supabase
-    .from('predictions')
-    .select('confidence, is_correct, verified_at')
-    .match(CURRENT_MODEL_FILTER)
-    .eq('prediction_type', 'pre_game')
-    .not('verified_at', 'is', null)
-    .not('is_correct', 'is', null)
-    .order('verified_at', { ascending: true });
+  const [result, pollResult, completedGamesResult, predForPoll, teamRows] = await Promise.all([
+    supabase
+      .from('predictions')
+      .select('confidence, is_correct, verified_at')
+      .match(CURRENT_MODEL_FILTER)
+      .eq('prediction_type', 'pre_game')
+      .not('verified_at', 'is', null)
+      .not('is_correct', 'is', null)
+      .order('verified_at', { ascending: true }),
+    supabase.from('pick_poll_events').select('game_id, pick'),
+    supabase
+      .from('games')
+      .select('id, home_score, away_score')
+      .eq('status', 'final')
+      .not('home_score', 'is', null)
+      .not('away_score', 'is', null),
+    supabase
+      .from('predictions')
+      .select('game_id, is_correct')
+      .match(CURRENT_MODEL_FILTER)
+      .not('is_correct', 'is', null),
+    buildAllTeamAccuracy(),
+  ]);
 
-  const teamRows = await buildAllTeamAccuracy();
+  const communityStats = computeCommunityVsAI(
+    (pollResult.data ?? []) as Array<{ game_id: number; pick: string }>,
+    (completedGamesResult.data ?? []) as Array<{ id: number; home_score: number | null; away_score: number | null }>,
+    (predForPoll.data ?? []) as Array<{ game_id: number; is_correct: boolean | null }>,
+  );
 
   const { data } = assertSelectOk(result, 'AccuracyPage');
   const rows = (data ?? []) as PredRow[];
@@ -238,6 +258,65 @@ export default async function AccuracyPage() {
           }
         />
       </section>
+
+      {/* 커뮤니티 vs AI 대결 */}
+      {communityStats.communityGames >= 3 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+          <div>
+            <h2 className="text-lg font-bold">커뮤니티 vs AI 대결</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              3명 이상 참여한 경기 기준 — 커뮤니티 다수결 vs AI 예측 정확도 비교
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-4 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">커뮤니티 정답률</p>
+              <p
+                className={`text-2xl font-bold font-mono ${
+                  communityStats.communityAccuracy !== null && communityStats.communityAccuracy >= 0.5
+                    ? 'text-brand-500'
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {communityStats.communityAccuracy !== null
+                  ? `${(communityStats.communityAccuracy * 100).toFixed(1)}%`
+                  : '—'}
+              </p>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                {communityStats.communityCorrect}/{communityStats.communityGames} 적중
+              </p>
+            </div>
+            <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-4 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">AI 정답률 (같은 경기)</p>
+              <p
+                className={`text-2xl font-bold font-mono ${
+                  communityStats.aiAccuracyWithPoll !== null && communityStats.aiAccuracyWithPoll >= 0.5
+                    ? 'text-brand-500'
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {communityStats.aiAccuracyWithPoll !== null
+                  ? `${(communityStats.aiAccuracyWithPoll * 100).toFixed(1)}%`
+                  : '—'}
+              </p>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                {communityStats.aiGamesWithPoll > 0
+                  ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중`
+                  : '예측 없음'}
+              </p>
+            </div>
+          </div>
+          {communityStats.communityAccuracy !== null && communityStats.aiAccuracyWithPoll !== null && (
+            <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+              {communityStats.communityAccuracy > communityStats.aiAccuracyWithPoll
+                ? `🏆 커뮤니티가 AI보다 ${((communityStats.communityAccuracy - communityStats.aiAccuracyWithPoll) * 100).toFixed(1)}%p 앞섭니다`
+                : communityStats.communityAccuracy < communityStats.aiAccuracyWithPoll
+                  ? `AI가 커뮤니티보다 ${((communityStats.aiAccuracyWithPoll - communityStats.communityAccuracy) * 100).toFixed(1)}%p 앞섭니다`
+                  : '커뮤니티와 AI가 동률입니다'}
+            </p>
+          )}
+        </section>
+      )}
 
       {/* 최근 예측 폼 */}
       {recentForm.total >= 5 && (
