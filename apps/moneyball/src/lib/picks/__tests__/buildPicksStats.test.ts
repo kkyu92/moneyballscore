@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { buildPickEntries, buildPicksStats } from '../buildPicksStats';
+import { buildPickEntries, buildPicksStats, buildWeeklyStats } from '../buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
 
@@ -276,5 +276,80 @@ describe('pickingStreakDays', () => {
     ];
     const stats = buildPicksStats(entries);
     expect(stats.pickingStreakDays).toBe(2);
+  });
+});
+
+// 2026-05-12 is a Tuesday in KST. Week = Mon 2026-05-11 ~ Sun 2026-05-17.
+const WEEK_NOW = new Date('2026-05-12T10:00:00Z'); // 19:00 KST Tuesday
+
+describe('buildWeeklyStats', () => {
+  function makeEntry(id: number, gameDate: string, isResolved: boolean, myIsCorrect: boolean | null, aiIsCorrect: boolean | null) {
+    return {
+      gameId: id,
+      game_date: gameDate,
+      myPick: 'home' as const,
+      pickedAt: `${gameDate}T03:00:00Z`,
+      homeTeamName: 'LG',
+      awayTeamName: '두산',
+      homeScore: isResolved ? (myIsCorrect ? 5 : 1) : null,
+      awayScore: isResolved ? (myIsCorrect ? 1 : 5) : null,
+      status: isResolved ? 'final' : null,
+      isResolved,
+      myIsCorrect,
+      aiIsCorrect,
+      aiPredictedHome: null,
+    };
+  }
+
+  it('returns null when no entries in current week', () => {
+    const entries = [makeEntry(1, '2026-05-04', true, true, true)]; // last week
+    expect(buildWeeklyStats(entries, WEEK_NOW)).toBeNull();
+  });
+
+  it('includes only entries in current week', () => {
+    const entries = [
+      makeEntry(1, '2026-05-11', true, true, true),  // Monday this week ✓
+      makeEntry(2, '2026-05-12', true, false, true), // Tuesday this week ✓
+      makeEntry(3, '2026-05-10', true, true, true),  // last Sunday ✗
+    ];
+    const result = buildWeeklyStats(entries, WEEK_NOW);
+    expect(result).not.toBeNull();
+    expect(result!.total).toBe(2);
+    expect(result!.myCorrect).toBe(1);
+  });
+
+  it('computes weekLabel for same month', () => {
+    const result = buildWeeklyStats([makeEntry(1, '2026-05-12', false, null, null)], WEEK_NOW);
+    expect(result!.weekLabel).toBe('5월 11일~17일');
+  });
+
+  it('computes myRate and aiRate correctly', () => {
+    const entries = [
+      makeEntry(1, '2026-05-11', true, true, true),   // my ✓, AI ✓
+      makeEntry(2, '2026-05-12', true, true, false),   // my ✓, AI ✗
+      makeEntry(3, '2026-05-13', true, false, null),   // my ✗, AI no pred
+    ];
+    const result = buildWeeklyStats(entries, WEEK_NOW)!;
+    expect(result.resolved).toBe(3);
+    expect(result.myCorrect).toBe(2);
+    expect(result.myRate).toBeCloseTo(2 / 3);
+    expect(result.aiResolved).toBe(2);
+    expect(result.aiCorrect).toBe(1);
+    expect(result.aiRate).toBeCloseTo(0.5);
+  });
+
+  it('returns null for empty entries', () => {
+    expect(buildWeeklyStats([], WEEK_NOW)).toBeNull();
+  });
+
+  it('handles unresolved picks in weekly total', () => {
+    const entries = [
+      makeEntry(1, '2026-05-11', true, true, true),
+      makeEntry(2, '2026-05-17', false, null, null), // Sunday, not resolved
+    ];
+    const result = buildWeeklyStats(entries, WEEK_NOW)!;
+    expect(result.total).toBe(2);
+    expect(result.resolved).toBe(1);
+    expect(result.myRate).toBeCloseTo(1);
   });
 });

@@ -1,6 +1,17 @@
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
 
+export interface WeeklyStats {
+  weekLabel: string;
+  total: number;
+  resolved: number;
+  myCorrect: number;
+  aiResolved: number;
+  aiCorrect: number;
+  myRate: number | null;
+  aiRate: number | null;
+}
+
 export interface PickEntry {
   gameId: number;
   game_date: string;
@@ -84,6 +95,55 @@ export function buildPickEntries(
       };
     })
     .sort((a, b) => b.pickedAt.localeCompare(a.pickedAt)); // 최근순
+}
+
+function getKSTWeekRange(now: Date = new Date()): { start: string; end: string; label: string } {
+  // Shift by +9h to work with KST dates via UTC methods
+  const kstMs = now.getTime() + 9 * 60 * 60 * 1000;
+  const kst = new Date(kstMs);
+  const dow = kst.getUTCDay(); // 0=Sun … 6=Sat, in KST
+  const daysSinceMon = dow === 0 ? 6 : dow - 1;
+
+  const monMs = kstMs - daysSinceMon * 86400000;
+  const sunMs = monMs + 6 * 86400000;
+
+  const monStr = new Date(monMs).toISOString().slice(0, 10);
+  const sunStr = new Date(sunMs).toISOString().slice(0, 10);
+
+  const monMonth = parseInt(monStr.slice(5, 7), 10);
+  const monDay = parseInt(monStr.slice(8, 10), 10);
+  const sunMonth = parseInt(sunStr.slice(5, 7), 10);
+  const sunDay = parseInt(sunStr.slice(8, 10), 10);
+
+  const label =
+    monMonth === sunMonth
+      ? `${monMonth}월 ${monDay}일~${sunDay}일`
+      : `${monMonth}월 ${monDay}일~${sunMonth}월 ${sunDay}일`;
+
+  return { start: monStr, end: sunStr, label };
+}
+
+export function buildWeeklyStats(entries: PickEntry[], now: Date = new Date()): WeeklyStats | null {
+  const { start, end, label } = getKSTWeekRange(now);
+
+  const weekEntries = entries.filter((e) => e.game_date >= start && e.game_date <= end);
+  if (weekEntries.length === 0) return null;
+
+  const resolved = weekEntries.filter((e) => e.isResolved);
+  const myCorrect = resolved.filter((e) => e.myIsCorrect === true).length;
+  const aiResolved = resolved.filter((e) => e.aiIsCorrect !== null);
+  const aiCorrect = aiResolved.filter((e) => e.aiIsCorrect === true).length;
+
+  return {
+    weekLabel: label,
+    total: weekEntries.length,
+    resolved: resolved.length,
+    myCorrect,
+    aiResolved: aiResolved.length,
+    aiCorrect,
+    myRate: resolved.length > 0 ? myCorrect / resolved.length : null,
+    aiRate: aiResolved.length > 0 ? aiCorrect / aiResolved.length : null,
+  };
 }
 
 function toKSTDate(iso: string): string {
