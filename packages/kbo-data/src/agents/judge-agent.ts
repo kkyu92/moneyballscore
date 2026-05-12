@@ -128,7 +128,7 @@ export async function runJudgeAgent(
   calibration: CalibrationHint | null,
   context?: GameContext
 ): Promise<AgentResult<JudgeVerdict>> {
-  const result = await callLLM<JudgeVerdict>(
+  let result = await callLLM<JudgeVerdict>(
     {
       model: 'sonnet',
       systemPrompt: SYSTEM_PROMPT,
@@ -137,6 +137,24 @@ export async function runJudgeAgent(
     },
     (text) => parseResponse(text, homeTeam, awayTeam)
   );
+
+  // Sunday confidence cap: 일요일 과적합 방지 (데이터: n≈20 일요일 적중률 ~15%, W20 1/5=20%)
+  // n=150 전 선제 단독 적용 — cycle 308 operational-analysis 결론
+  if (context && result.success && result.data && result.data.confidence > 0.55) {
+    const dow = new Date(context.game.date + 'T00:00:00Z').getUTCDay(); // 0=일요일
+    if (dow === 0) {
+      result = {
+        ...result,
+        data: {
+          ...result.data,
+          confidence: 0.55,
+          calibrationApplied: result.data.calibrationApplied
+            ? `${result.data.calibrationApplied}; 일요일 상한 0.55`
+            : '일요일 상한 0.55',
+        },
+      };
+    }
+  }
 
   if (!context || !result.success || !result.data || !result.data.reasoning) {
     return result;
