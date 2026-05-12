@@ -6,12 +6,57 @@ import { buildPickEntries, buildPicksStats, type PickEntry, type PicksStats } fr
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import Link from 'next/link';
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatCard({ label, value, sub, hero }: { label: string; value: string; sub?: string; hero?: boolean }) {
   return (
-    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 text-center">
+    <div className={`bg-white dark:bg-[var(--color-surface-card)] rounded-xl border p-4 text-center ${
+      hero
+        ? 'border-brand-300 dark:border-brand-700'
+        : 'border-gray-200 dark:border-[var(--color-border)]'
+    }`}>
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-      <p className="text-2xl font-bold tabular-nums">{value}</p>
+      <p className={`font-bold tabular-nums ${hero ? 'text-3xl' : 'text-xl'}`}>{value}</p>
       {sub && <p className="text-xs text-gray-400 dark:text-gray-400 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1].map((i) => (
+          <div key={i} className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-300 dark:border-brand-700 p-4 text-center">
+            <div className="h-3 w-16 mx-auto mb-2 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+            <div className="h-8 w-20 mx-auto rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {[0, 1].map((i) => (
+          <div key={i} className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3 text-center">
+            <div className="h-3 w-14 mx-auto mb-2 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+            <div className="h-6 w-12 mx-auto rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+          </div>
+        ))}
+      </div>
+      <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
+        <div className="h-4 w-24 mb-3 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+        <div className="flex gap-1.5">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="w-6 h-6 rounded-full animate-pulse bg-gray-200 dark:bg-gray-700" />
+          ))}
+        </div>
+      </div>
+      <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
+        <div className="h-4 w-16 mb-3 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="flex gap-3 py-2 border-b border-gray-100 dark:border-[var(--color-border)]">
+            <div className="h-4 w-10 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+            <div className="h-4 flex-1 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+            <div className="h-4 w-14 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -38,20 +83,20 @@ function PickRow({ entry }: { entry: PickEntry }) {
   }
 
   return (
-    <div className="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-[var(--color-border)] last:border-0">
+    <div className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-[var(--color-border)] last:border-0">
       <span className="text-xs text-gray-400 dark:text-gray-500 w-10 shrink-0 tabular-nums">{dateStr}</span>
-      <span className="flex-1 text-sm truncate">
+      <span className="flex-1 text-sm truncate min-w-0">
         {entry.awayTeamName ?? '?'} @ {entry.homeTeamName ?? '?'}
       </span>
       <span className="text-xs text-gray-600 dark:text-gray-300 shrink-0">
         내 픽: <span className="font-medium">{myLabel ?? entry.myPick}</span>
       </span>
       {aiLabel && (
-        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 hidden sm:inline">
+        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
           AI: {aiLabel}
         </span>
       )}
-      <span className="w-20 text-right shrink-0">{resultEl}</span>
+      <span className="w-16 text-right shrink-0">{resultEl}</span>
     </div>
   );
 }
@@ -61,6 +106,7 @@ export function MyPicksClient() {
   const [entries, setEntries] = useState<PickEntry[]>([]);
   const [stats, setStats] = useState<PicksStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasNetworkError, setHasNetworkError] = useState(false);
 
   useEffect(() => {
     const ids = Object.keys(picks);
@@ -70,6 +116,7 @@ export function MyPicksClient() {
     }
 
     setLoading(true);
+    setHasNetworkError(false);
     fetch(`/api/picks/results?ids=${ids.join(',')}`)
       .then((r) => r.json())
       .then((results: PickGameResult[]) => {
@@ -78,23 +125,30 @@ export function MyPicksClient() {
         setStats(buildPicksStats(e));
       })
       .catch(() => {
-        // fail silently — show picks without results
+        // show picks without results, surface a soft error notice
         const e = buildPickEntries(picks, []);
         setEntries(e);
         setStats(buildPicksStats(e));
+        setHasNetworkError(true);
       })
       .finally(() => setLoading(false));
   }, [picks]);
 
   if (loading) {
-    return (
-      <div className="text-center py-16 text-gray-400 dark:text-gray-500">불러오는 중...</div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (entries.length === 0) {
     return (
       <div className="text-center py-16">
+        <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8 text-brand-400 dark:text-brand-500" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M5.5 8.5c1.5 1 3.5 1.5 6.5 1.5s5-0.5 6.5-1.5" />
+            <path d="M5.5 15.5c1.5-1 3.5-1.5 6.5-1.5s5 0.5 6.5 1.5" />
+            <line x1="12" y1="2" x2="12" y2="22" />
+          </svg>
+        </div>
         <p className="text-lg font-semibold mb-2">아직 픽한 경기가 없습니다</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           오늘 경기 카드에서 홈 또는 원정팀을 픽해보세요
@@ -111,24 +165,39 @@ export function MyPicksClient() {
 
   const myRateStr = stats?.myRate != null ? `${(stats.myRate * 100).toFixed(1)}%` : '—';
   const aiRateStr = stats?.aiRate != null ? `${(stats.aiRate * 100).toFixed(1)}%` : '—';
+  const streakStr = stats
+    ? stats.currentStreak > 0 ? `${stats.currentStreak}연속` : '없음'
+    : '—';
 
   return (
     <div className="space-y-6">
-      {/* 요약 카드 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {hasNetworkError && (
+        <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
+          결과를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.
+        </p>
+      )}
+
+      {/* 히어로 요약 카드 — 내/AI 적중률 */}
+      <div className="grid grid-cols-2 gap-3">
         <StatCard
           label="내 적중률"
           value={myRateStr}
           sub={stats ? `${stats.myCorrect}/${stats.resolved}` : undefined}
+          hero
         />
         <StatCard
           label="AI 적중률"
           value={aiRateStr}
           sub={stats ? `${stats.aiCorrect}/${stats.aiResolved}` : undefined}
+          hero
         />
+      </div>
+
+      {/* 보조 요약 카드 */}
+      <div className="grid grid-cols-2 gap-2">
         <StatCard
           label="현재 연속 정답"
-          value={stats ? `${stats.currentStreak}경기` : '—'}
+          value={streakStr}
         />
         <StatCard
           label="총 픽"
