@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.46.5] - 2026-05-12 주간 픽 요약 카드 폴리시 (cycle 323 polish-ui)
+
+### 변경 사항
+- `WeeklyPicksSummary.tsx`: resolved=0 zero-state — "결과 대기 중" 표시 (0/0 제거)
+- `WeeklyPicksSummary.tsx`: aiResolved=0 시 "—" 표시 (0/0 제거)
+- `WeeklyPicksSummary.tsx`: 구분선 높이 `h-10` → `self-stretch` (컨테이너 전체 높이 신장)
+- `WeeklyPicksSummary.tsx`: "AI 격파!" 배지 amber → `bg-[var(--color-accent)] text-white` (DESIGN.md accent token 적용)
+- `SharePicksButton.tsx`: 버튼 텍스트 "픽 성적 공유하기" 단일화
+
 ## [0.5.46.4] - 2026-05-12 픽 AI 힌트 대비 강화 (cycle 320 polish-ui)
 
 ### 변경 사항

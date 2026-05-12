@@ -25,14 +25,18 @@ export function WeeklyPicksSummary({ weekly, currentStreak }: Props) {
       <div className="flex items-center gap-3">
         <div className="flex-1 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">내 성적</p>
-          <p className="text-xl font-bold tabular-nums">
-            {weekly.myCorrect}/{weekly.resolved}
-            {myRatePct !== null && (
-              <span className="text-sm font-normal text-gray-400 dark:text-gray-400">
-                {' '}({myRatePct}%)
-              </span>
-            )}
-          </p>
+          {weekly.resolved === 0 ? (
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-1">결과 대기 중</p>
+          ) : (
+            <p className="text-xl font-bold tabular-nums">
+              {weekly.myCorrect}/{weekly.resolved}
+              {myRatePct !== null && (
+                <span className="text-sm font-normal text-gray-400 dark:text-gray-400">
+                  {' '}({myRatePct}%)
+                </span>
+              )}
+            </p>
+          )}
           {weekly.total > weekly.resolved && (
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
               +{weekly.total - weekly.resolved}경기 대기
@@ -40,25 +44,29 @@ export function WeeklyPicksSummary({ weekly, currentStreak }: Props) {
           )}
         </div>
 
-        <div className="w-px h-10 bg-brand-200 dark:bg-brand-800" aria-hidden="true" />
+        <div className="w-px self-stretch bg-brand-200 dark:bg-brand-800" aria-hidden="true" />
 
         <div className="flex-1 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">AI 성적</p>
-          <p className="text-xl font-bold tabular-nums text-gray-600 dark:text-gray-300">
-            {weekly.aiCorrect}/{weekly.aiResolved}
-            {aiRatePct !== null && (
-              <span className="text-sm font-normal text-gray-400 dark:text-gray-400">
-                {' '}({aiRatePct}%)
-              </span>
-            )}
-          </p>
+          {weekly.aiResolved === 0 ? (
+            <p className="text-sm text-gray-400 dark:text-gray-500 py-1">—</p>
+          ) : (
+            <p className="text-xl font-bold tabular-nums text-gray-600 dark:text-gray-300">
+              {weekly.aiCorrect}/{weekly.aiResolved}
+              {aiRatePct !== null && (
+                <span className="text-sm font-normal text-gray-400 dark:text-gray-400">
+                  {' '}({aiRatePct}%)
+                </span>
+              )}
+            </p>
+          )}
         </div>
       </div>
 
       {hasBadge && (
         <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-brand-200 dark:border-brand-800">
           {beatAI && (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--color-accent)] text-white">
               🏆 AI 격파!
             </span>
           )}
