@@ -6,6 +6,8 @@ const SITEMAP_COLUMNS = [
     links: [
       { href: "/", label: "오늘 경기" },
       { href: "/analysis", label: "AI 분석" },
+      { href: "/accuracy", label: "AI 적중 기록" },
+      { href: "/dashboard", label: "모델 성능" },
       { href: "/predictions", label: "예측 기록" },
       { href: "/matchup", label: "매치업" },
     ],
@@ -31,8 +33,6 @@ const SITEMAP_COLUMNS = [
   {
     label: "서비스",
     links: [
-      { href: "/accuracy", label: "AI 적중 기록" },
-      { href: "/dashboard", label: "대시보드" },
       { href: "/search", label: "검색" },
       { href: "/about", label: "소개" },
       { href: "/contact", label: "문의" },

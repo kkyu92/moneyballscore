@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.44.1] - 2026-05-12 헤더 AI 기능 그룹화 (cycle 301 info-architecture-review)
+
+### 변경 사항
+- 헤더 내비게이션 재편: `AI 분석` 단일 링크 → `AI ▾` 드롭다운 그룹 (AI 분석 / 적중 기록 / 모델 성능)
+- `리뷰·시즌` 그룹 7개 항목 → 5개 (accuracy + dashboard AI 그룹으로 이동)
+- 푸터 `분석·예측` 컬럼에 적중 기록 / 모델 성능 추가, `서비스` 컬럼 정리
+- `docs/design/ia-2026-05-12-ai-nav-group.md` IA spec 추가
+
 ## [0.5.44] - 2026-05-12 Pick vs AI 게임화 기능 (cycle 298 explore-idea heavy)
 
 ### 변경 사항
