@@ -1,13 +1,13 @@
 {
   "name": "moneyball",
-  "version": "0.5.46.7",
+  "version": "0.5.47.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run --run",
+    "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
