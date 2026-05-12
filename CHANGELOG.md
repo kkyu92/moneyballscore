@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.46.4] - 2026-05-12 픽 AI 힌트 대비 강화 (cycle 320 polish-ui)
+
+### 변경 사항
+- `PickButton.tsx`: AI 힌트 행 2열 레이아웃으로 재설계 — "AI 예측" 브랜드 컬러 레이블 + 확률 배지 + 분석 보기 링크 1행, 주요 팩터 2행
+- `PickButton.tsx`: 확률 표시를 `bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300` 배지로 감싸 WCAG 대비 개선
+- `SharePicksButton.tsx`: 공유/복사 버튼에 SVG 아이콘 추가 — 공유 그래프 아이콘(기본) + 체크마크 아이콘(복사됨)
+- `PickButton.test.tsx`: AI 힌트 텍스트 변경에 맞춰 3개 테스트 어서션 갱신
+
 ## [0.5.46.3] - 2026-05-12 UI 폴리시 (cycle 318 polish-ui)
 
 ### 변경 사항

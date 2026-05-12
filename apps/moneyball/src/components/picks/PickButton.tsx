@@ -103,25 +103,28 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
   return (
     <div>
       {aiProbPct != null && aiTeamName != null && (
-        <div className="flex items-center gap-1 mt-2 px-1 text-xs text-gray-400 dark:text-gray-500">
-          <span className="shrink-0">AI 예측:</span>
-          <span className="font-medium text-gray-600 dark:text-gray-300 shrink-0">
-            {aiTeamName} {aiSideLabel}
-          </span>
-          <span className="shrink-0">{aiProbPct}%</span>
+        <div className="mt-2 px-1 space-y-0.5">
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="font-semibold text-brand-600 dark:text-brand-400 shrink-0">AI 예측</span>
+            <span className="font-semibold text-gray-800 dark:text-gray-200 shrink-0">
+              {aiTeamName} {aiSideLabel}
+            </span>
+            <span className="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-semibold px-1.5 py-0.5 rounded text-[11px] shrink-0 tabular-nums">
+              {aiProbPct}%
+            </span>
+            <Link
+              href={`/analysis/game/${gameId}`}
+              className="ml-auto shrink-0 text-brand-600 dark:text-brand-400 hover:underline"
+              aria-label={`경기 ${gameId} 분석 보기`}
+            >
+              분석 보기 ↗
+            </Link>
+          </div>
           {aiTopFactor && (
-            <>
-              <span>·</span>
-              <span className="truncate">{aiTopFactor}</span>
-            </>
+            <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+              주요 팩터: {aiTopFactor}
+            </p>
           )}
-          <Link
-            href={`/analysis/game/${gameId}`}
-            className="ml-auto shrink-0 text-brand-600 dark:text-brand-400 hover:underline"
-            aria-label={`경기 ${gameId} 분석 보기`}
-          >
-            분석 보기 ↗
-          </Link>
         </div>
       )}
       <div className="flex items-center gap-2 mt-2 px-1">

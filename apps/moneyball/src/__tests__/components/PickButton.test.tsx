@@ -25,7 +25,7 @@ describe('PickButton AI 힌트', () => {
         aiWinProb={0.65}
       />
     );
-    expect(screen.getByText('AI 예측:')).toBeInTheDocument();
+    expect(screen.getByText('AI 예측')).toBeInTheDocument();
     expect(screen.getByText('65%')).toBeInTheDocument();
   });
 
@@ -39,7 +39,7 @@ describe('PickButton AI 힌트', () => {
         aiWinProb={0.58}
       />
     );
-    expect(screen.getByText('AI 예측:')).toBeInTheDocument();
+    expect(screen.getByText('AI 예측')).toBeInTheDocument();
     expect(screen.getByText('58%')).toBeInTheDocument();
   });
 
@@ -54,7 +54,7 @@ describe('PickButton AI 힌트', () => {
         aiTopFactor="선발 투수력 우세"
       />
     );
-    expect(screen.getByText('선발 투수력 우세')).toBeInTheDocument();
+    expect(screen.getByText('주요 팩터: 선발 투수력 우세')).toBeInTheDocument();
   });
 
   it('분석 보기 링크가 올바른 href 가짐', () => {
