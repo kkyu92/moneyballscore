@@ -65,7 +65,7 @@ describe('bucketize', () => {
 
   it('n=0 bucket은 제외', () => {
     const result = bucketize([row(0.55, true), row(0.95, false)]);
-    // 0.55 → bucket 1 (0.5~0.55), 0.95 → bucket 9 (0.9~0.95)
+    // 0.55 → bucket 1 (0.55~0.60), 0.95 → bucket 9 (0.95~1.00)
     expect(result).toHaveLength(2);
   });
 });
