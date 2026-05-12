@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { buildPickEntries, buildPicksStats, buildWeeklyStats } from '../buildPicksStats';
+import { buildPickEntries, buildPicksStats, buildWeeklyStats, buildWeeklyHistory } from '../buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
 
@@ -351,5 +351,77 @@ describe('buildWeeklyStats', () => {
     expect(result.total).toBe(2);
     expect(result.resolved).toBe(1);
     expect(result.myRate).toBeCloseTo(1);
+  });
+});
+
+describe('buildWeeklyHistory', () => {
+  function makeEntry(id: number, gameDate: string, isResolved: boolean, myIsCorrect: boolean | null) {
+    return {
+      gameId: id,
+      game_date: gameDate,
+      myPick: 'home' as const,
+      pickedAt: `${gameDate}T03:00:00Z`,
+      homeTeamName: 'LG',
+      awayTeamName: '두산',
+      homeScore: isResolved ? (myIsCorrect ? 5 : 1) : null,
+      awayScore: isResolved ? (myIsCorrect ? 1 : 5) : null,
+      status: isResolved ? 'final' : null,
+      isResolved,
+      myIsCorrect,
+      aiIsCorrect: null,
+      aiPredictedHome: null,
+    };
+  }
+
+  it('returns empty array for empty entries', () => {
+    expect(buildWeeklyHistory([])).toEqual([]);
+  });
+
+  it('returns one group for single week', () => {
+    const entries = [
+      makeEntry(1, '2026-05-11', true, true),
+      makeEntry(2, '2026-05-12', true, false),
+    ];
+    const groups = buildWeeklyHistory(entries);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].stats.total).toBe(2);
+    expect(groups[0].stats.myCorrect).toBe(1);
+  });
+
+  it('groups entries into separate weeks (최신순)', () => {
+    const entries = [
+      makeEntry(1, '2026-05-11', true, true),   // W21 (Mon 05-11)
+      makeEntry(2, '2026-05-04', true, false),   // W20 (Mon 05-04)
+    ];
+    const groups = buildWeeklyHistory(entries);
+    expect(groups).toHaveLength(2);
+    // 최신순: W21 first
+    expect(groups[0].weekStart).toBe('2026-05-11');
+    expect(groups[1].weekStart).toBe('2026-05-04');
+  });
+
+  it('weekStart is always Monday', () => {
+    // 2026-05-13 is Wednesday
+    const entries = [makeEntry(1, '2026-05-13', false, null)];
+    const groups = buildWeeklyHistory(entries);
+    expect(groups[0].weekStart).toBe('2026-05-11'); // Monday
+  });
+
+  it('includes entries in each group', () => {
+    const entries = [
+      makeEntry(1, '2026-05-11', true, true),
+      makeEntry(2, '2026-05-12', true, true),
+      makeEntry(3, '2026-05-04', true, false),
+    ];
+    const groups = buildWeeklyHistory(entries);
+    expect(groups[0].entries).toHaveLength(2); // W21
+    expect(groups[1].entries).toHaveLength(1); // W20
+  });
+
+  it('weekLabel format matches expectation', () => {
+    const entries = [makeEntry(1, '2026-05-11', false, null)];
+    const groups = buildWeeklyHistory(entries);
+    // Mon 05-11 ~ Sun 05-17
+    expect(groups[0].stats.weekLabel).toBe('5월 11일~17일');
   });
 });

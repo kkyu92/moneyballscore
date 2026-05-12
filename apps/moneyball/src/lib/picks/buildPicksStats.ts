@@ -29,6 +29,12 @@ export interface PickEntry {
   aiPredictedHome: boolean | null;
 }
 
+export interface WeeklyGroup {
+  weekStart: string;
+  stats: WeeklyStats;
+  entries: PickEntry[];
+}
+
 export interface PicksStats {
   total: number;
   resolved: number;
@@ -219,4 +225,63 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     recentDots,
     trend,
   };
+}
+
+function getWeekStartStr(dateStr: string): string {
+  // dateStr = "YYYY-MM-DD" (KST 날짜를 UTC date string으로 취급)
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const dow = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const daysSinceMon = dow === 0 ? 6 : dow - 1;
+  const monMs = d.getTime() - daysSinceMon * 86400000;
+  return new Date(monMs).toISOString().slice(0, 10);
+}
+
+function makeWeekLabel(monStr: string): string {
+  const sunMs = new Date(monStr + 'T00:00:00Z').getTime() + 6 * 86400000;
+  const sunStr = new Date(sunMs).toISOString().slice(0, 10);
+  const monMonth = parseInt(monStr.slice(5, 7), 10);
+  const monDay = parseInt(monStr.slice(8, 10), 10);
+  const sunMonth = parseInt(sunStr.slice(5, 7), 10);
+  const sunDay = parseInt(sunStr.slice(8, 10), 10);
+  return monMonth === sunMonth
+    ? `${monMonth}월 ${monDay}일~${sunDay}일`
+    : `${monMonth}월 ${monDay}일~${sunMonth}월 ${sunDay}일`;
+}
+
+function computeWeekStats(weekEntries: PickEntry[], monStr: string): WeeklyStats {
+  const resolved = weekEntries.filter((e) => e.isResolved);
+  const myCorrect = resolved.filter((e) => e.myIsCorrect === true).length;
+  const aiResolved = resolved.filter((e) => e.aiIsCorrect !== null);
+  const aiCorrect = aiResolved.filter((e) => e.aiIsCorrect === true).length;
+  return {
+    weekLabel: makeWeekLabel(monStr),
+    total: weekEntries.length,
+    resolved: resolved.length,
+    myCorrect,
+    aiResolved: aiResolved.length,
+    aiCorrect,
+    myRate: resolved.length > 0 ? myCorrect / resolved.length : null,
+    aiRate: aiResolved.length > 0 ? aiCorrect / aiResolved.length : null,
+  };
+}
+
+// 모든 주차 데이터 반환 (최신순). 이번 주 포함.
+export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
+  if (entries.length === 0) return [];
+
+  const weekMap = new Map<string, PickEntry[]>();
+  for (const entry of entries) {
+    const ws = getWeekStartStr(entry.game_date);
+    const bucket = weekMap.get(ws);
+    if (bucket) bucket.push(entry);
+    else weekMap.set(ws, [entry]);
+  }
+
+  return Array.from(weekMap.entries())
+    .sort(([a], [b]) => b.localeCompare(a)) // 최신순
+    .map(([weekStart, wEntries]) => ({
+      weekStart,
+      stats: computeWeekStats(wEntries, weekStart),
+      entries: wEntries.sort((a, b) => b.game_date.localeCompare(a.game_date)),
+    }));
 }
