@@ -9,21 +9,40 @@
 
 import { useKboScores } from '@/hooks/use-kbo-scores';
 import { PredictionCard, type PredictionCardProps } from './PredictionCard';
+import { PickButton } from '@/components/picks/PickButton';
 
 export function PredictionCardLive(props: PredictionCardProps) {
   const { scores } = useKboScores();
   const live = scores.find(
     (s) => s.homeTeam === props.homeTeam && s.awayTeam === props.awayTeam,
   );
-  if (!live) return <PredictionCard {...props} />;
+
+  const effectiveStatus = live?.status ?? props.status;
+  const showPickButton = effectiveStatus === 'scheduled' && props.gameId != null;
+
+  if (!live) {
+    return (
+      <>
+        <PredictionCard {...props} />
+        {showPickButton && (
+          <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} />
+        )}
+      </>
+    );
+  }
 
   const showScore = live.status === 'live' || live.status === 'final';
   return (
-    <PredictionCard
-      {...props}
-      status={live.status ?? props.status ?? undefined}
-      homeScore={showScore ? live.homeScore : props.homeScore}
-      awayScore={showScore ? live.awayScore : props.awayScore}
-    />
+    <>
+      <PredictionCard
+        {...props}
+        status={live.status ?? props.status ?? undefined}
+        homeScore={showScore ? live.homeScore : props.homeScore}
+        awayScore={showScore ? live.awayScore : props.awayScore}
+      />
+      {showPickButton && (
+        <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} />
+      )}
+    </>
   );
 }

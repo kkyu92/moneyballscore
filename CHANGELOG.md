@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.44] - 2026-05-12 Pick vs AI 게임화 기능 (cycle 298 explore-idea heavy)
+
+### 변경 사항
+- `useUserPicks` 훅: localStorage `mb_user_picks_v1` 기반 picks CRUD + 30일 만료 자동 정리
+- `PickButton` 컴포넌트: 예약 경기 카드 하단 원정/홈 픽 버튼 (PredictionCardLive 통합)
+- `UserVsAIScorecard` 컴포넌트: 홈 페이지 "AI와 대결" 섹션 — 어제 내 성적 vs AI 성적 비교 + 시즌 AI 적중률
+- 8 unit tests: useUserPicks 초기화/setPick/getPick/만료/손상 JSON 처리 등 전체 경로 커버
+
 ## [0.5.43] - 2026-05-12 /accuracy 최근 예측 폼 섹션 추가 (cycle 295 explore-idea heavy)
 
 ### 변경 사항

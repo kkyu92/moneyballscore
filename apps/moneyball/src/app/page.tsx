@@ -22,6 +22,7 @@ import { createClient } from "@/lib/supabase/server";
 import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
 import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
+import { UserVsAIScorecard } from "@/components/picks/UserVsAIScorecard";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { getRecentWeeks, getCurrentWeek } from "@/lib/reviews/computeWeekRange";
@@ -653,7 +654,17 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* 어제 경기 결과 */}
+      {/* AI 대결 스코어카드 + 어제 경기 결과 */}
+      <UserVsAIScorecard
+        aiTotal={accuracy.total}
+        aiCorrect={accuracy.correct}
+        yesterdayGames={yesterdayResults.map((g) => ({
+          id: g.id,
+          home_score: g.home_score,
+          away_score: g.away_score,
+          aiIsCorrect: g.predictions[0]?.is_correct ?? null,
+        }))}
+      />
       {yesterdayResults.length > 0 && (
         <YesterdayResultsSection games={yesterdayResults} />
       )}
