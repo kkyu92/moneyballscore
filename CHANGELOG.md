@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.45.0] - 2026-05-12 내 픽 기록 페이지 (cycle 302 explore-idea heavy)
+
+### 변경 사항
+- `/picks` 신규 페이지: localStorage 픽 이력 전체 조회 + 성과 분석
+- 요약 카드 4종: 내 적중률 / AI 적중률 / 현재 연속 정답 / 총 픽
+- 최근 10경기 폼 도트 시각화 + 상승/하락 추세 감지
+- 픽 이력 목록: 날짜 / 경기 / 내 픽 / AI 픽 / 결과 비교
+- `GET /api/picks/results?ids=...` 엔드포인트: 픽한 경기 결과 배치 조회
+- `UserVsAIScorecard` 하단에 "전체 이력 →" 링크 추가 (홈페이지 진입점)
+- 헤더 AI 그룹에 "내 픽 기록" 추가, 푸터 분석·예측 컬럼에 추가
+- `buildPicksStats.ts` 순수 함수 라이브러리 + 12 unit tests
+
 ## [0.5.44.1] - 2026-05-12 헤더 AI 기능 그룹화 (cycle 301 info-architecture-review)
 
 ### 변경 사항

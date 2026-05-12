@@ -8,6 +8,7 @@ const SITEMAP_COLUMNS = [
       { href: "/analysis", label: "AI 분석" },
       { href: "/accuracy", label: "AI 적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
+      { href: "/picks", label: "내 픽 기록" },
       { href: "/predictions", label: "예측 기록" },
       { href: "/matchup", label: "매치업" },
     ],
