@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.45.2] - 2026-05-12 ESLint CI 수정 (cycle 305 fix-incident)
+
+### 변경 사항
+- `use-user-picks.ts`: useEffect 내 localStorage 동기 읽기 후 `setPicks()` — `react-hooks/set-state-in-effect` disable 주석 추가 (유효한 패턴)
+- `MyPicksClient.tsx`: picks 빈 배열 조기 반환 경로의 `setLoading(false)` — 동일 규칙 disable 주석 추가 (async fetch 없는 early-return 경로)
+
 ## [0.5.45.1] - 2026-05-12 내 픽 기록 UI 개선 (cycle 304 polish-ui)
 
 ### 변경 사항

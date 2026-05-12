@@ -50,6 +50,7 @@ export function useUserPicks() {
     const stored = readStore();
     const cleaned = pruneExpired(stored);
     if (Object.keys(cleaned).length !== Object.keys(stored).length) writeStore(cleaned);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPicks(cleaned);
   }, []);
 
