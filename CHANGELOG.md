@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.47.1] - 2026-05-12 AI 그룹 분리 — 커뮤니티 nav 재편 (cycle 330 info-architecture-review)
+
+### Changed
+- `Header.tsx`: AI 그룹(5개) → AI(3개) + 커뮤니티(2개) 분리. AI: AI 분석/적중 기록/모델 성능. 커뮤니티: 내 픽 기록/픽 리더보드.
+- `Footer.tsx`: "분석·예측" 컬럼 → "AI 예측" + "커뮤니티" 분리. "리뷰·시즌"+"서비스" → "리뷰·서비스" 통합으로 4-column 유지.
+
 ## [0.5.47.0] - 2026-05-12 커뮤니티 픽 익명 집계 강화 (cycle 327 explore-idea)
 
 ### Added
