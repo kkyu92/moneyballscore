@@ -60,20 +60,27 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries }: Props) {
       )}
 
       {/* 탭 */}
-      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-        {(['weekly', 'season'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              tab === t
-                ? 'bg-white dark:bg-[var(--color-surface-card)] shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-            }`}
-          >
-            {t === 'weekly' ? '이번 주' : '시즌 전체'}
-          </button>
-        ))}
+      <div>
+        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          {(['weekly', 'season'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                tab === t
+                  ? 'bg-white dark:bg-[var(--color-surface-card)] shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              {t === 'weekly' ? '이번 주' : '시즌 전체'}
+            </button>
+          ))}
+        </div>
+        {tab === 'weekly' && (
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 px-1">
+            매주 월요일 초기화 · 픽 5개 이상 완료 시 등장
+          </p>
+        )}
       </div>
 
       {/* 리더보드 테이블 */}

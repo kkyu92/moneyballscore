@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/accuracy", label: "적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
       { href: "/picks", label: "내 픽 기록" },
+      { href: "/leaderboard", label: "픽 리더보드" },
     ],
   },
   { href: "/standings", label: "순위" },
