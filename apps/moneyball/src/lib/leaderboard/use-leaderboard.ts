@@ -72,8 +72,18 @@ export function useLeaderboard(): LeaderboardState {
   const [syncCount, setSyncCount] = useState(0);
 
   useEffect(() => {
-    setNickname(readNickname());
-  }, []);
+    const n = readNickname();
+    setNickname(n);
+    if (!n || !deviceId) return;
+    // Auto-sync new picks for already-joined users (idempotent — upsert ignores existing)
+    const picks = readLocalPicks();
+    if (picks.length === 0) return;
+    void fetch('/api/leaderboard/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_id: deviceId, nickname: n, picks }),
+    }).catch(() => {});
+  }, [deviceId]);
 
   const join = useCallback(
     async (name: string) => {

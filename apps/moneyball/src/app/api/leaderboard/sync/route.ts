@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
   const { error } = await supabase
     .from('user_picks')
-    .upsert(rows, { onConflict: 'device_id,game_id', ignoreDuplicates: true });
+    .upsert(rows, { onConflict: 'device_id,game_id', ignoreDuplicates: false });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
