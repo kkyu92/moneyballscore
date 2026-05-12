@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.46.1] - 2026-05-12 Sunday confidence cap (cycle 309 explore-idea)
+
+### 변경 사항
+- `judge-agent.ts`: 일요일 confidence 상한 0.55 추가 (기존 0.65+ → 0.55 캡)
+  - 데이터 근거: 일요일 누적 적중률 n≈20 ~15%, W20 1/5=20% — n=150 전 선제 단독 적용
+  - 일요일 게임 시 `calibrationApplied` 에 `'일요일 상한 0.55'` 자동 기록
+- `agents-judge-sunday-cap.test.ts`: 신규 테스트 8건 (일요일/평일/context없음/캡 경계값)
+
 ## W20 모델 학습 포인트 - 2026-05-12 (cycle 308 operational-analysis)
 
 ### W20 성과 (2026-05-05~05-10, n=26 확인)
