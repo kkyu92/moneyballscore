@@ -80,32 +80,27 @@ export type GameStatus = 'scheduled' | 'live' | 'final' | 'postponed';
 // 포스트 타입
 export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 
-// 예측 엔진 가중치 v1.7-revert (= v1.5 가중치 복원)
+// 예측 엔진 가중치 v1.8 — head_to_head 노이즈 감축 + Elo 보상
 //
-// 2026-05-04 cycle 17 회귀 결정 — prod 측정이 Wayback 백테스트와 정반대.
+// 2026-05-12 cycle 335 변경 — W20/W21 실측 데이터 기반 선제 조정 (Sunday cap 선례).
 //
-// v1.5 vs v1.6 prod 측정 (cycle 14, N=62, 2026-04-22 ~ 2026-05-03):
-//   v1.5: N=16  hits=12  acc=75.00%  Brier=0.2143  CI95=[53.78, 96.22]
-//   v1.6: N=46  hits=17  acc=36.96%  Brier=0.2559  CI95=[23.01, 50.91]
-//   격차 38.04pp / CI95 비중첩 (margin 0.03pp) / Brier +0.0416 악화
-//   v1.6 high-confidence (≥65%) N=2 둘 다 wrong → calibration 압축 + 망김
+// head_to_head noise 누적 증거:
+//   W20: 방향 적중률 35.3% (n=17) — 랜덤(50%) 이하. 역전 패턴 발견
+//        낮은 h2h 구간(0.0~0.33)에서 저확신이 오히려 정답 (63.2% vs 37.5%)
+//   W21: head_to_head noise 재확인 (cycle 333 lesson)
+//   v2.0 후보 (cycle 231 정보가치 분석): head_to_head Δ=-0.10 (음의 기여)
 //
-// 시즌 효과 통제 (cycle 16, 4월 only):
-//   4월 v1.5: N=16  acc=75.00%
-//   4월 v1.6: N=31  acc=35.48%
-//   격차 39.52pp (전체 38.04pp 보다 +1.48pp 더 큼) → H3 (시즌 초 noise) 반증
+// Elo 근거:
+//   v2.0 후보 정보가치 Δ=+0.30 (최강). 13% 목표치 대비 단계적 증가.
 //
-// LLM 갭 통제 (cycle 15 PR #54):
-//   가중치 0% factor LLM SYSTEM_PROMPT 추론 금지 박제 후에도 prod 격차 그대로
+// 변경: head_to_head 5%→3% (-2pp) / elo 8%→10% (+2pp). 합계 0.85 유지.
+// Sunday cap (cycle 309) 와 동일 선례 — n=150 전 방향 명확 시 선제 적용.
+// n=150 도달 후 full v2.0 (elo 13%, bullpen_fip 14% 등) 재확정 예정.
 //
-// 결론: v1.6 의 Wayback 백테스트 학습 (lineup_woba 유의미) prod 적용 시 정반대.
-// 1 시즌 train / 1 시즌 test 한계 + 시점 distribution shift 의심. 데이터로만
-// 이야기 — 측정된 우수 가중치 (v1.5) 로 회귀. cycle 18+ Wayback 신뢰성 재검토.
-//
-// v1.5 가중치 (CLAUDE.md § 예측 엔진 가중치):
+// v1.8 가중치:
 //   선발FIP 15% / 선발xFIP 5% / 타선wOBA 15% / 불펜FIP 10% / 최근폼 10%
-//   WAR 8% / 상대전적 5% / 구장보정 4% / Elo 8% / 수비SFR 5%
-// 합계 0.85 (v1.6 동일).
+//   WAR 8% / 상대전적 3% / 구장보정 4% / Elo 10% / 수비SFR 5%
+// 합계 0.85.
 export const DEFAULT_WEIGHTS = {
   sp_fip: 0.15,
   sp_xfip: 0.05,
@@ -113,9 +108,9 @@ export const DEFAULT_WEIGHTS = {
   bullpen_fip: 0.10,
   recent_form: 0.10,
   war: 0.08,
-  head_to_head: 0.05,
+  head_to_head: 0.03,
   park_factor: 0.04,
-  elo: 0.08,
+  elo: 0.10,
   sfr: 0.05,
 } as const;
 

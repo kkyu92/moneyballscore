@@ -682,7 +682,7 @@ export async function runDailyPipeline(
       away_sfr: input.awayTeamStats.sfr,
       model_version: versionDecision.model_version,
       debate_version: versionDecision.debate_version,
-      scoring_rule: 'v1.7-revert',
+      scoring_rule: 'v1.8',
       reasoning: finalReasoning,
       factors: result.factors,
       predicted_at: new Date().toISOString(),
