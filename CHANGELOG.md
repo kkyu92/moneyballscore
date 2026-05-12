@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.46.3] - 2026-05-12 UI 폴리시 (cycle 318 polish-ui)
+
+### 변경 사항
+- `analysis/page.tsx`: 이번 주 경기 섹션 제목 한자 오기 수정 — `分析`(중국어) → `분석`(한국어)
+- `NavLinks.tsx`: nav `onMouseLeave` 추가 — 마우스가 네비게이션 영역을 벗어나면 드롭다운 자동 닫힘
+
 ## [0.5.46.2] - 2026-05-12 AI 드롭다운 메가메뉴 (cycle 317 info-architecture-review)
 
 ### 변경 사항
