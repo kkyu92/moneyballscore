@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.46.7] - 2026-05-12 use-user-picks lazy init (cycle 325 review-code)
+
+### Fixed
+- `use-user-picks.ts`: `useState` lazy init으로 `setState-in-effect` anti-pattern 제거 — `useEffect`에서 `setPicks()` 호출 패턴을 `useState(() => ...)` 초기화로 교체. ESLint disable 주석 제거. `44947fd` (use-leaderboard 8차 수정)와 동일한 구조적 원인 동시 식별/제거.
+
 ## [0.5.46.6] - 2026-05-12 픽 히스토리 트렌드 차트 + 주차별 아코디언 (cycle 324 explore-idea)
 
 ### 변경 사항
