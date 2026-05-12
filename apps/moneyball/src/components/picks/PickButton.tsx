@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { shortTeamName, type TeamCode } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
@@ -11,6 +12,9 @@ interface Props {
   gameId: number;
   homeTeam: TeamCode;
   awayTeam: TeamCode;
+  aiPredictedWinner?: 'home' | 'away';
+  aiWinProb?: number;
+  aiTopFactor?: string;
 }
 
 function PollBar({
@@ -59,7 +63,7 @@ function PollBar({
   );
 }
 
-export function PickButton({ gameId, homeTeam, awayTeam }: Props) {
+export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor }: Props) {
   const { getPick, setPick } = useUserPicks();
   const current = getPick(gameId);
   const [poll, setPoll] = useState<PickPollEntry | null>(null);
@@ -92,8 +96,34 @@ export function PickButton({ gameId, homeTeam, awayTeam }: Props) {
 
   const showPoll = current && poll && poll.total >= MIN_POLL_TOTAL;
 
+  const aiProbPct = aiWinProb != null ? Math.round(aiWinProb * 100) : null;
+  const aiTeamName = aiPredictedWinner === 'home' ? homeName : aiPredictedWinner === 'away' ? awayName : null;
+  const aiSideLabel = aiPredictedWinner === 'home' ? '홈' : aiPredictedWinner === 'away' ? '원정' : null;
+
   return (
     <div>
+      {aiProbPct != null && aiTeamName != null && (
+        <div className="flex items-center gap-1 mt-2 px-1 text-xs text-gray-400 dark:text-gray-500">
+          <span className="shrink-0">AI 예측:</span>
+          <span className="font-medium text-gray-600 dark:text-gray-300 shrink-0">
+            {aiTeamName} {aiSideLabel}
+          </span>
+          <span className="shrink-0">{aiProbPct}%</span>
+          {aiTopFactor && (
+            <>
+              <span>·</span>
+              <span className="truncate">{aiTopFactor}</span>
+            </>
+          )}
+          <Link
+            href={`/analysis/game/${gameId}`}
+            className="ml-auto shrink-0 text-brand-600 dark:text-brand-400 hover:underline"
+            aria-label={`경기 ${gameId} 분석 보기`}
+          >
+            분석 보기 ↗
+          </Link>
+        </div>
+      )}
       <div className="flex items-center gap-2 mt-2 px-1">
         <span className="text-xs text-gray-400 dark:text-gray-400 shrink-0">내 픽</span>
         <button

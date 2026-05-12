@@ -10,6 +10,18 @@
 import { useKboScores } from '@/hooks/use-kbo-scores';
 import { PredictionCard, type PredictionCardProps } from './PredictionCard';
 import { PickButton } from '@/components/picks/PickButton';
+import { topFavoringFactors } from '@/lib/predictions/factorLabels';
+
+function buildAiHintProps(props: PredictionCardProps) {
+  if (!props.predictedWinner || props.winProb == null) return {};
+  const isHomePredicted = props.predictedWinner === props.homeTeam;
+  const aiPredictedWinner: 'home' | 'away' = isHomePredicted ? 'home' : 'away';
+  const topFactors = props.factors
+    ? topFavoringFactors(props.factors, isHomePredicted, 1)
+    : [];
+  const aiTopFactor = topFactors[0] ? `${topFactors[0]} 우세` : undefined;
+  return { aiPredictedWinner, aiWinProb: props.winProb, aiTopFactor };
+}
 
 export function PredictionCardLive(props: PredictionCardProps) {
   const { scores } = useKboScores();
@@ -19,13 +31,14 @@ export function PredictionCardLive(props: PredictionCardProps) {
 
   const effectiveStatus = live?.status ?? props.status;
   const showPickButton = effectiveStatus === 'scheduled' && props.gameId != null;
+  const aiHintProps = showPickButton ? buildAiHintProps(props) : {};
 
   if (!live) {
     return (
       <>
         <PredictionCard {...props} />
         {showPickButton && (
-          <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} />
+          <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} {...aiHintProps} />
         )}
       </>
     );
@@ -41,7 +54,7 @@ export function PredictionCardLive(props: PredictionCardProps) {
         awayScore={showScore ? live.awayScore : props.awayScore}
       />
       {showPickButton && (
-        <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} />
+        <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} {...aiHintProps} />
       )}
     </>
   );
