@@ -19,6 +19,7 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/analysis", label: "AI 분석" },
       { href: "/accuracy", label: "적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
+      { href: "/picks", label: "내 픽 기록" },
     ],
   },
   { href: "/standings", label: "순위" },

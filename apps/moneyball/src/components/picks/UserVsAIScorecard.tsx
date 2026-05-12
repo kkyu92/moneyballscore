@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useUserPicks } from '@/hooks/use-user-picks';
 
 export interface YesterdayGameSummary {
@@ -61,8 +62,16 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
               </span>
             </p>
           </div>
-          <div className="col-span-2 text-center text-xs text-gray-400 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">
-            이번 시즌 AI {aiCorrect}/{aiTotal} ({aiRate}%) · 내 총 픽 {totalPicks}경기
+          <div className="col-span-2 flex items-center justify-between pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">
+            <span className="text-xs text-gray-400 dark:text-gray-400">
+              이번 시즌 AI {aiCorrect}/{aiTotal} ({aiRate}%) · 내 총 픽 {totalPicks}경기
+            </span>
+            <Link
+              href="/picks"
+              className="text-xs text-brand-600 dark:text-brand-400 hover:underline shrink-0 ml-2"
+            >
+              전체 이력 →
+            </Link>
           </div>
         </div>
       ) : (
@@ -77,6 +86,12 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
             이번 시즌 AI 적중률 {aiRate}% ({aiCorrect}/{aiTotal})
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">이길 수 있을까요?</p>
+          <Link
+            href="/picks"
+            className="mt-3 inline-block text-xs text-brand-600 dark:text-brand-400 hover:underline"
+          >
+            픽 이력 보기 →
+          </Link>
         </div>
       )}
     </section>
