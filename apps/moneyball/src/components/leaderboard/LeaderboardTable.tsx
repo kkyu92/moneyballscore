@@ -52,6 +52,8 @@ export function LeaderboardTable({ entries, myDeviceId }: Props) {
               className={`grid grid-cols-[2.5rem_1fr_5rem_5rem] px-4 py-2.5 text-sm items-center border-b last:border-b-0 border-gray-50 dark:border-gray-800 ${
                 isMe
                   ? 'bg-brand-50 dark:bg-brand-900/10'
+                  : rank <= 3
+                  ? 'bg-amber-50/60 dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
               }`}
             >
