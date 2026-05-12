@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { buildPickEntries, buildPicksStats } from '../buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
@@ -187,5 +187,94 @@ describe('buildPicksStats', () => {
     const entries = buildPickEntries(picks, [...recentResults, ...prevResults]);
     const stats = buildPicksStats(entries);
     expect(stats.trend).toBe('up');
+  });
+});
+
+describe('pickingStreakDays', () => {
+  // fake time: 2026-05-12T10:00:00Z → KST 19:00 → today KST = "2026-05-12"
+  const FAKE_NOW = new Date('2026-05-12T10:00:00Z');
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(FAKE_NOW);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function makeEntryWithPickedAt(id: number, pickedAt: string): ReturnType<typeof buildPickEntries>[number] {
+    return {
+      gameId: id,
+      game_date: pickedAt.slice(0, 10),
+      myPick: 'home',
+      pickedAt,
+      homeTeamName: 'LG',
+      awayTeamName: '두산',
+      homeScore: null,
+      awayScore: null,
+      status: null,
+      isResolved: false,
+      myIsCorrect: null,
+      aiIsCorrect: null,
+      aiPredictedHome: null,
+    };
+  }
+
+  it('returns 0 for empty entries', () => {
+    const stats = buildPicksStats([]);
+    expect(stats.pickingStreakDays).toBe(0);
+  });
+
+  it('returns 1 when picked only today (KST)', () => {
+    // 2026-05-12T03:00:00Z = 2026-05-12 12:00 KST
+    const entries = [makeEntryWithPickedAt(1, '2026-05-12T03:00:00Z')];
+    const stats = buildPicksStats(entries);
+    expect(stats.pickingStreakDays).toBe(1);
+  });
+
+  it('returns 1 when picked only yesterday (KST)', () => {
+    // 2026-05-11T03:00:00Z = 2026-05-11 12:00 KST → yesterday
+    const entries = [makeEntryWithPickedAt(1, '2026-05-11T03:00:00Z')];
+    const stats = buildPicksStats(entries);
+    expect(stats.pickingStreakDays).toBe(1);
+  });
+
+  it('returns 3 for 3 consecutive days ending today', () => {
+    const entries = [
+      makeEntryWithPickedAt(1, '2026-05-12T03:00:00Z'), // today
+      makeEntryWithPickedAt(2, '2026-05-11T03:00:00Z'), // yesterday
+      makeEntryWithPickedAt(3, '2026-05-10T03:00:00Z'), // 2 days ago
+    ];
+    const stats = buildPicksStats(entries);
+    expect(stats.pickingStreakDays).toBe(3);
+  });
+
+  it('breaks streak on a missing day', () => {
+    const entries = [
+      makeEntryWithPickedAt(1, '2026-05-12T03:00:00Z'), // today
+      // 2026-05-11 missing
+      makeEntryWithPickedAt(2, '2026-05-10T03:00:00Z'), // 2 days ago
+    ];
+    const stats = buildPicksStats(entries);
+    expect(stats.pickingStreakDays).toBe(1);
+  });
+
+  it('returns 0 when most recent pick is older than yesterday', () => {
+    const entries = [
+      makeEntryWithPickedAt(1, '2026-05-10T03:00:00Z'), // 2 days ago
+    ];
+    const stats = buildPicksStats(entries);
+    expect(stats.pickingStreakDays).toBe(0);
+  });
+
+  it('counts multiple picks on same day as 1 day', () => {
+    const entries = [
+      makeEntryWithPickedAt(1, '2026-05-12T03:00:00Z'),
+      makeEntryWithPickedAt(2, '2026-05-12T05:00:00Z'), // same KST day
+      makeEntryWithPickedAt(3, '2026-05-11T03:00:00Z'),
+    ];
+    const stats = buildPicksStats(entries);
+    expect(stats.pickingStreakDays).toBe(2);
   });
 });

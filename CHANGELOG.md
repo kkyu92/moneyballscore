@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.46.0] - 2026-05-12 픽 공유하기 + 연속 픽 참여일 (cycle 306 explore-idea)
+
+### 변경 사항
+- `SharePicksButton.tsx`: 신규 — Web Share API + 클립보드 fallback, 내/AI 성과 + 결과 URL 공유 텍스트 생성
+- `buildPicksStats.ts`: `pickingStreakDays` 필드 추가 — KST 기준 연속 픽 참여일 계산 (오늘/어제 기준 활성)
+- `MyPicksClient.tsx`: 보조 요약 카드 3열 전환 (연속 정답 / 연속 참여일 / 총 픽), 공유하기 버튼 삽입
+- `buildPicksStats.test.ts`: `pickingStreakDays` 테스트 6건 추가 (vitest fake timers 활용)
+
 ## [0.5.45.2] - 2026-05-12 ESLint CI 수정 (cycle 305 fix-incident)
 
 ### 변경 사항
