@@ -22,6 +22,7 @@ export interface PicksStats {
   total: number;
   resolved: number;
   myCorrect: number;
+  aiResolved: number;
   aiCorrect: number;
   myRate: number | null;
   aiRate: number | null;
@@ -87,10 +88,11 @@ export function buildPickEntries(
 export function buildPicksStats(entries: PickEntry[]): PicksStats {
   const resolved = entries.filter((e) => e.isResolved);
   const myCorrect = resolved.filter((e) => e.myIsCorrect === true).length;
-  const aiCorrect = resolved.filter((e) => e.aiIsCorrect === true).length;
+  const aiResolved = resolved.filter((e) => e.aiIsCorrect !== null);
+  const aiCorrect = aiResolved.filter((e) => e.aiIsCorrect === true).length;
 
   const myRate = resolved.length > 0 ? myCorrect / resolved.length : null;
-  const aiRate = resolved.length > 0 ? aiCorrect / resolved.length : null;
+  const aiRate = aiResolved.length > 0 ? aiCorrect / aiResolved.length : null;
 
   // 연속 정답 (최근순으로 이미 정렬돼 있음)
   let currentStreak = 0;
@@ -116,6 +118,7 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     total: entries.length,
     resolved: resolved.length,
     myCorrect,
+    aiResolved: aiResolved.length,
     aiCorrect,
     myRate,
     aiRate,
