@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_picks')
+    .from('pick_poll_events')
     .select('game_id, pick')
     .in('game_id', ids);
 
