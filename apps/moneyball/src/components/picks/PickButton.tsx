@@ -1,12 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { shortTeamName, type TeamCode } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
 
 const MIN_POLL_TOTAL = 3;
+const DEVICE_KEY = 'mb_device_id_v1';
+
+function getOrCreateDeviceId(): string {
+  try {
+    const stored = localStorage.getItem(DEVICE_KEY);
+    if (stored) return stored;
+    const id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_KEY, id);
+    return id;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
 
 interface Props {
   gameId: number;
@@ -71,8 +84,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
   const homeName = shortTeamName(homeTeam) ?? homeTeam;
   const awayName = shortTeamName(awayTeam) ?? awayTeam;
 
-  useEffect(() => {
-    if (!current) return;
+  const fetchPoll = useCallback(() => {
     let cancelled = false;
     fetch(`/api/picks/poll?ids=${gameId}`)
       .then((r) => r.json())
@@ -86,7 +98,27 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
     return () => {
       cancelled = true;
     };
-  }, [gameId, current]);
+  }, [gameId]);
+
+  useEffect(() => {
+    if (!current) return;
+    return fetchPoll();
+  }, [gameId, current, fetchPoll]);
+
+  const handlePick = useCallback(
+    (choice: 'home' | 'away') => {
+      setPick(gameId, choice);
+      const deviceId = getOrCreateDeviceId();
+      fetch('/api/picks/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: gameId, pick: choice, device_id: deviceId }),
+      })
+        .then(() => fetchPoll())
+        .catch(() => {});
+    },
+    [gameId, setPick, fetchPoll],
+  );
 
   const base =
     'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
@@ -131,7 +163,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
         <span className="text-xs text-gray-400 dark:text-gray-400 shrink-0">내 픽</span>
         <button
           type="button"
-          onClick={() => setPick(gameId, 'away')}
+          onClick={() => handlePick('away')}
           className={`${base} ${current?.pick === 'away' ? active : idle}`}
           aria-pressed={current?.pick === 'away'}
           aria-label={`${awayName} 원정팀 픽`}
@@ -140,7 +172,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
         </button>
         <button
           type="button"
-          onClick={() => setPick(gameId, 'home')}
+          onClick={() => handlePick('home')}
           className={`${base} ${current?.pick === 'home' ? active : idle}`}
           aria-pressed={current?.pick === 'home'}
           aria-label={`${homeName} 홈팀 픽`}
