@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useUserPicks } from '@/hooks/use-user-picks';
-import { buildPickEntries, buildPicksStats, buildWeeklyStats, type PickEntry, type PicksStats, type WeeklyStats } from '@/lib/picks/buildPicksStats';
+import { buildPickEntries, buildPicksStats, buildWeeklyStats, buildWeeklyHistory, type PickEntry, type PicksStats, type WeeklyStats, type WeeklyGroup } from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import Link from 'next/link';
 import { SharePicksButton } from './SharePicksButton';
 import { WeeklyPicksSummary } from './WeeklyPicksSummary';
+import { PicksTrendChart } from './PicksTrendChart';
+import { WeeklyHistorySection } from './WeeklyHistorySection';
 import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
@@ -116,6 +118,7 @@ export function MyPicksClient() {
   const [entries, setEntries] = useState<PickEntry[]>([]);
   const [stats, setStats] = useState<PicksStats | null>(null);
   const [weekly, setWeekly] = useState<WeeklyStats | null>(null);
+  const [weeklyGroups, setWeeklyGroups] = useState<WeeklyGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasNetworkError, setHasNetworkError] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
@@ -143,6 +146,7 @@ export function MyPicksClient() {
         setEntries(e);
         setStats(buildPicksStats(e));
         setWeekly(buildWeeklyStats(e));
+        setWeeklyGroups(buildWeeklyHistory(e));
       })
       .catch(() => {
         // show picks without results, surface a soft error notice
@@ -150,6 +154,7 @@ export function MyPicksClient() {
         setEntries(e);
         setStats(buildPicksStats(e));
         setWeekly(buildWeeklyStats(e));
+        setWeeklyGroups(buildWeeklyHistory(e));
         setHasNetworkError(true);
       })
       .finally(() => setLoading(false));
@@ -274,6 +279,12 @@ export function MyPicksClient() {
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">왼쪽이 이전, 오른쪽이 최신</p>
         </div>
       )}
+
+      {/* 주차별 트렌드 차트 */}
+      {weeklyGroups.length >= 2 && <PicksTrendChart groups={weeklyGroups} />}
+
+      {/* 지난 주 기록 아코디언 */}
+      {weeklyGroups.length > 1 && <WeeklyHistorySection groups={weeklyGroups} />}
 
       {/* 공유하기 */}
       {stats && <SharePicksButton stats={stats} weekly={weekly} />}

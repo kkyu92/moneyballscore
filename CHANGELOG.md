@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.46.6] - 2026-05-12 픽 히스토리 트렌드 차트 + 주차별 아코디언 (cycle 324 explore-idea)
+
+### 변경 사항
+- `buildPicksStats.ts`: `WeeklyGroup` 타입 추가 + `buildWeeklyHistory()` 함수 — 모든 주차 데이터 최신순 배열 반환
+- `PicksTrendChart.tsx` (신규): 주차별 내 적중률 vs AI 적중률 SVG 꺾은선 차트 (의존성 0)
+- `WeeklyHistorySection.tsx` (신규): 지난 주차 성과 아코디언 목록 (기본 접힘, AI 격파 배지 표시)
+- `MyPicksClient.tsx`: `buildWeeklyHistory` 통합 + 두 신규 컴포넌트 삽입 (폼 도트 아래, 공유버튼 위)
+- `buildPicksStats.test.ts`: `buildWeeklyHistory` unit test 6건 추가 (빈 배열/단일주/2주/weekStart=월요일/그룹별 entries/weekLabel 형식)
+
 ## [0.5.46.5] - 2026-05-12 주간 픽 요약 카드 폴리시 (cycle 323 polish-ui)
 
 ### 변경 사항
