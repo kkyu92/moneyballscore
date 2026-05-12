@@ -89,12 +89,19 @@ export function PicksTrendChart({ groups }: Props) {
         aria-label="주차별 픽 적중률 추이 차트"
         role="img"
       >
-        {/* 50% 기준선 */}
+        {/* 50% 기준선 + 레이블 */}
         <line
           x1={PAD_L} y1={midY} x2={W - PAD_R} y2={midY}
           strokeWidth={0.5} strokeDasharray="3,3"
           className="stroke-gray-200 dark:stroke-gray-700"
         />
+        <text
+          x={W - PAD_R + 2} y={midY + 3}
+          fontSize={7} textAnchor="start"
+          className="fill-gray-300 dark:fill-gray-600"
+        >
+          50%
+        </text>
         {/* AI 선 */}
         {aiSegments.map((pts, i) => (
           <polyline key={`ai-${i}`} points={pts}
@@ -102,6 +109,14 @@ export function PicksTrendChart({ groups }: Props) {
             className="stroke-gray-400 dark:stroke-gray-500"
           />
         ))}
+        {/* AI 점 */}
+        {aiPoints.map((pt, i) =>
+          pt.y !== null ? (
+            <circle key={i} cx={pt.x} cy={pt.y} r={2}
+              className="fill-gray-400 dark:fill-gray-500"
+            />
+          ) : null
+        )}
         {/* 내 적중률 선 */}
         {mySegments.map((pts, i) => (
           <polyline key={`my-${i}`} points={pts}
