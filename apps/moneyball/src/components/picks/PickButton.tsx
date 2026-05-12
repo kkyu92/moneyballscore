@@ -101,9 +101,8 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
   }, [gameId]);
 
   useEffect(() => {
-    if (!current) return;
     return fetchPoll();
-  }, [gameId, current, fetchPoll]);
+  }, [gameId, fetchPoll]);
 
   const handlePick = useCallback(
     (choice: 'home' | 'away') => {
@@ -187,6 +186,11 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
           homeName={homeName}
           awayName={awayName}
         />
+      )}
+      {!current && poll && poll.total > 0 && (
+        <p className="mt-1 px-1 text-xs text-gray-400 dark:text-gray-400">
+          {poll.total}명이 예측 중 · 픽 후 결과 공개
+        </p>
       )}
       {current && poll && poll.total > 0 && poll.total < MIN_POLL_TOTAL && (
         <p className="mt-1 px-1 text-xs text-gray-400 dark:text-gray-400">
