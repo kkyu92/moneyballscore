@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useUserPicks } from '@/hooks/use-user-picks';
-import { buildPickEntries, buildPicksStats, type PickEntry, type PicksStats } from '@/lib/picks/buildPicksStats';
+import { buildPickEntries, buildPicksStats, buildWeeklyStats, type PickEntry, type PicksStats, type WeeklyStats } from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import Link from 'next/link';
 import { SharePicksButton } from './SharePicksButton';
+import { WeeklyPicksSummary } from './WeeklyPicksSummary';
 import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
@@ -114,6 +115,7 @@ export function MyPicksClient() {
   const { picks } = useUserPicks();
   const [entries, setEntries] = useState<PickEntry[]>([]);
   const [stats, setStats] = useState<PicksStats | null>(null);
+  const [weekly, setWeekly] = useState<WeeklyStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasNetworkError, setHasNetworkError] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
@@ -140,12 +142,14 @@ export function MyPicksClient() {
         const e = buildPickEntries(picks, results);
         setEntries(e);
         setStats(buildPicksStats(e));
+        setWeekly(buildWeeklyStats(e));
       })
       .catch(() => {
         // show picks without results, surface a soft error notice
         const e = buildPickEntries(picks, []);
         setEntries(e);
         setStats(buildPicksStats(e));
+        setWeekly(buildWeeklyStats(e));
         setHasNetworkError(true);
       })
       .finally(() => setLoading(false));
@@ -195,6 +199,11 @@ export function MyPicksClient() {
         <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
           결과를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.
         </p>
+      )}
+
+      {/* 이번 주 요약 */}
+      {weekly && stats && (
+        <WeeklyPicksSummary weekly={weekly} currentStreak={stats.currentStreak} />
       )}
 
       {/* 히어로 요약 카드 — 내/AI 적중률 */}
@@ -267,7 +276,7 @@ export function MyPicksClient() {
       )}
 
       {/* 공유하기 */}
-      {stats && <SharePicksButton stats={stats} />}
+      {stats && <SharePicksButton stats={stats} weekly={weekly} />}
 
       {/* 리더보드 참가 / 내 순위 */}
       {!nickname ? (

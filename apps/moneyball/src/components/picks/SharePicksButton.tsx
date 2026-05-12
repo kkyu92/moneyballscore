@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import type { PicksStats } from '@/lib/picks/buildPicksStats';
+import type { PicksStats, WeeklyStats } from '@/lib/picks/buildPicksStats';
 
 const SITE_URL = 'https://moneyballscore.vercel.app/picks';
 
 interface Props {
   stats: PicksStats;
+  weekly?: WeeklyStats | null;
 }
 
-function buildShareText(stats: PicksStats): string {
+function buildShareText(stats: PicksStats, weekly?: WeeklyStats | null): string {
   const myWrong = stats.resolved - stats.myCorrect;
   const myRatePct =
     stats.myRate !== null ? Math.round(stats.myRate * 100) : null;
@@ -35,16 +36,31 @@ function buildShareText(stats: PicksStats): string {
           : ' 🤝 AI와 동점'
       : '';
 
-  return `[머니볼스코어] AI와 픽 대결${verdict}\n${myLine}\n${aiLine}\n\nKBO 경기 AI 예측 → ${SITE_URL}`;
+  let weeklyLine = '';
+  if (weekly && weekly.resolved > 0) {
+    const wMyPct = weekly.myRate !== null ? Math.round(weekly.myRate * 100) : null;
+    const wVerdict =
+      weekly.myRate !== null && weekly.aiRate !== null
+        ? weekly.myRate > weekly.aiRate
+          ? ' 🏆'
+          : ''
+        : '';
+    weeklyLine =
+      wMyPct !== null
+        ? `\n이번 주 (${weekly.weekLabel}): ${weekly.myCorrect}/${weekly.resolved} (${wMyPct}%)${wVerdict}`
+        : '';
+  }
+
+  return `[머니볼스코어] AI와 픽 대결${verdict}${weeklyLine}\n${myLine}\n${aiLine}\n\nKBO 경기 AI 예측 → ${SITE_URL}`;
 }
 
-export function SharePicksButton({ stats }: Props) {
+export function SharePicksButton({ stats, weekly }: Props) {
   const [copied, setCopied] = useState(false);
 
   if (stats.resolved === 0) return null;
 
   const handleShare = async () => {
-    const text = buildShareText(stats);
+    const text = buildShareText(stats, weekly);
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
