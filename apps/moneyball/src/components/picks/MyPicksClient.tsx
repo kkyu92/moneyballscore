@@ -93,8 +93,14 @@ function PickRow({ entry }: { entry: PickEntry }) {
         내 픽: <span className="font-medium">{myLabel ?? entry.myPick}</span>
       </span>
       {aiLabel && (
-        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
-          AI: {aiLabel}
+        <span className={`text-xs shrink-0 ${
+          entry.isResolved && entry.aiIsCorrect !== null
+            ? entry.aiIsCorrect
+              ? 'text-brand-600 dark:text-brand-400'
+              : 'text-red-500 dark:text-red-400'
+            : 'text-gray-400 dark:text-gray-500'
+        }`}>
+          AI: {aiLabel}{entry.isResolved && entry.aiIsCorrect !== null ? (entry.aiIsCorrect ? ' ✓' : ' ✗') : ''}
         </span>
       )}
       <span className="w-16 text-right shrink-0">{resultEl}</span>
