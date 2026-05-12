@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export type PickChoice = 'home' | 'away';
 
@@ -44,15 +44,13 @@ function pruneExpired(store: UserPicksStore): UserPicksStore {
 }
 
 export function useUserPicks() {
-  const [picks, setPicks] = useState<UserPicksStore>({});
-
-  useEffect(() => {
+  const [picks, setPicks] = useState<UserPicksStore>(() => {
+    if (typeof window === 'undefined') return {};
     const stored = readStore();
     const cleaned = pruneExpired(stored);
     if (Object.keys(cleaned).length !== Object.keys(stored).length) writeStore(cleaned);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPicks(cleaned);
-  }, []);
+    return cleaned;
+  });
 
   const setPick = useCallback((gameId: number, choice: PickChoice) => {
     setPicks((prev) => {
