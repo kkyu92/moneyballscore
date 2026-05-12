@@ -596,7 +596,7 @@ export default async function AnalysisIndexPage() {
         <section aria-labelledby="this-week-archive-title">
           <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
             <h2 id="this-week-archive-title" className="text-xl font-bold">
-              📆 이번 주 경기 분析
+              📆 이번 주 경기 분석
             </h2>
             <Link
               href={`/reviews/weekly/${currentWeek.weekId}`}

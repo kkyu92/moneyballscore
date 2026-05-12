@@ -41,7 +41,7 @@ export function NavLinks() {
   }, []);
 
   return (
-    <nav ref={navRef} className="hidden md:flex items-center gap-5">
+    <nav ref={navRef} className="hidden md:flex items-center gap-5" onMouseLeave={() => setOpenLabel(null)}>
       {NAV_ITEMS.map((item) =>
         isNavGroup(item) ? (
           <div key={item.label} className="relative">
