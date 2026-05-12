@@ -3,7 +3,7 @@
  *
  * Grouping key = `scoring_rule ?? '(null)'` + `model_version`.
  *   - 과거 row 는 scoring_rule=null 로 저장됨 (v1.5 시절)
- *   - 2026-04-22 이후 신규 row 는 scoring_rule='v1.6'
+ *   - 2026-04-22~cycle17 사이 row 는 scoring_rule='v1.6', 이후 'v1.7-revert'
  *   - model_version 은 agent 존재 여부: v1.5/v1.6/v2.0-debate/v2.0-postview/
  *     v1.5-live/v1.6-live
  *
