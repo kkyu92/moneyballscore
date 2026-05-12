@@ -100,9 +100,10 @@ export async function runPostviewDaily(
     }
 
     // 2. pre_game 예측 조회 — cycle 161 silent drift family. assertSelectOk fail-loud.
+    // scoring_rule 포함 — post_game row 에 pre_game 의 scoring_rule 상속 (cycle 334 fix).
     const preGameResult = await db
       .from('predictions')
-      .select('id, predicted_winner, confidence, factors, reasoning, home_elo, away_elo')
+      .select('id, predicted_winner, confidence, factors, reasoning, home_elo, away_elo, scoring_rule')
       .eq('game_id', gameId)
       .eq('prediction_type', 'pre_game')
       .maybeSingle();
@@ -114,6 +115,7 @@ export async function runPostviewDaily(
       reasoning: unknown;
       home_elo: number | null;
       away_elo: number | null;
+      scoring_rule: string | null;
     }>(preGameResult, 'postview-daily.runPostviewDaily preGame');
 
     if (!preGame) {
@@ -180,7 +182,7 @@ export async function runPostviewDaily(
           confidence: preGame.confidence,
           model_version: 'v2.0-postview',
           debate_version: 'v2-postview',
-          scoring_rule: 'v1.6',
+          scoring_rule: preGame.scoring_rule ?? 'v1.7-revert',
           reasoning: {
             judgeReasoning: postview.judgeReasoning,
             factorErrors: postview.factorErrors,
