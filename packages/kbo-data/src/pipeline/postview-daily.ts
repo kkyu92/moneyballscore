@@ -182,7 +182,7 @@ export async function runPostviewDaily(
           confidence: preGame.confidence,
           model_version: 'v2.0-postview',
           debate_version: 'v2-postview',
-          scoring_rule: preGame.scoring_rule ?? 'v1.7-revert',
+          scoring_rule: preGame.scoring_rule ?? 'v1.8',
           reasoning: {
             judgeReasoning: postview.judgeReasoning,
             factorErrors: postview.factorErrors,

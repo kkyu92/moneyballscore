@@ -69,7 +69,7 @@ describe('DEFAULT_WEIGHTS', () => {
     }
   });
 
-  it('v1.7-revert (= v1.5): cycle 17 prod 측정 기반 회귀 — 모든 factor 가중치 > 0', () => {
+  it('v1.8: head_to_head 노이즈 감축 (5%→3%) + elo 보상 (8%→10%) — 모든 factor 가중치 > 0', () => {
     for (const [key, value] of Object.entries(DEFAULT_WEIGHTS)) {
       expect(value).toBeGreaterThan(0);
       expect(typeof key).toBe('string');

@@ -80,7 +80,7 @@ export async function runDebate(
     homeArgSummary: homeArg.reasoning,
     awayArgSummary: awayArg.reasoning,
     calibrationApplied: null,
-    reasoning: '에이전트 토론 불가. 정량 모델 v1.5 결과 사용.',
+    reasoning: '에이전트 토론 불가. 정량 모델 v1.8 결과 사용.',
     predictedWinner: quantitativeProb >= 0.5 ? homeTeam : awayTeam,
   };
 

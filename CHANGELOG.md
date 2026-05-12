@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.8 가중치 조정 — head_to_head 노이즈 감축 (2026-05-12, cycle 335)
+
+### 변경 내용
+- `head_to_head`: **5% → 3%** (-2pp) — W20/W21 실측 noise 데이터 기반
+- `elo`: **8% → 10%** (+2pp) — 정보가치 Δ=+0.30 최강 팩터로 보상
+- `scoring_rule` 버전: `v1.7-revert` → `v1.8`
+- 합계 0.85 유지
+
+### 근거
+- W20 head_to_head 방향 적중률 **35.3%** (n=17) — 랜덤(50%) 이하
+- 낮은 h2h 구간(0.0~0.33)에서 저확신이 오히려 정답 (63.2% vs 37.5% 역전)
+- W21 cycle 333 lesson: head_to_head noise 재확인
+- cycle 231 정보가치 분석: head_to_head Δ=-0.10 (음의 기여)
+- Sunday cap (cycle 309) 선례: n=150 전 방향 명확 시 선제 적용
+
+### 미완료 (n=150 도달 후)
+- 전면 v2.0 재조정 (elo→13%, bullpen_fip→14%, recent_form→13% 등)
+
+---
+
 ## W21 모델 성과 분석 (2026-05-12, cycle 333 operational-analysis lite)
 
 ### 주간 성과 요약
