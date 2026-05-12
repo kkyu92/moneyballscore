@@ -19,6 +19,11 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석" },
       { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹" },
       { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표" },
+    ],
+  },
+  {
+    label: "커뮤니티",
+    items: [
       { href: "/picks", label: "내 픽 기록", description: "내 예측과 AI 성과 비교" },
       { href: "/leaderboard", label: "픽 리더보드", description: "커뮤니티 예측 순위" },
     ],
