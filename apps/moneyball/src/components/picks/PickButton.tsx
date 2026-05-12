@@ -17,14 +17,14 @@ export function PickButton({ gameId, homeTeam, awayTeam }: Props) {
   const awayName = shortTeamName(awayTeam) ?? awayTeam;
 
   const base =
-    'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors min-h-[32px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
+    'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
   const active = 'bg-brand-500 dark:bg-brand-400 text-white border-transparent';
   const idle =
     'border-gray-200 dark:border-[var(--color-border)] text-gray-600 dark:text-gray-300 hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-300';
 
   return (
     <div className="flex items-center gap-2 mt-2 px-1">
-      <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">내 픽</span>
+      <span className="text-xs text-gray-400 dark:text-gray-400 shrink-0">내 픽</span>
       <button
         type="button"
         onClick={() => setPick(gameId, 'away')}
