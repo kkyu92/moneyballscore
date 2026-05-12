@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { buildAllTeamAccuracy } from '@/lib/standings/buildTeamAccuracy';
@@ -8,9 +7,6 @@ import { neutral } from '@/lib/design-tokens';
 import {
   type PredRow,
   type Bucket,
-  type DayBucket,
-  type WeekBucket,
-  type RecentForm,
   bucketize,
   brierScore,
   calibrationGap,
@@ -20,8 +16,6 @@ import {
 } from '@/lib/accuracy/buildAccuracyData';
 
 export const revalidate = 3600;
-
-const SITE_URL = 'https://moneyballscore.vercel.app';
 
 // ── SVG 캘리브레이션 다이어그램 ───────────────────────────────
 const PLOT_SIZE = 400;
