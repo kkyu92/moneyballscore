@@ -6,6 +6,8 @@ import { buildPickEntries, buildPicksStats, type PickEntry, type PicksStats } fr
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import Link from 'next/link';
 import { SharePicksButton } from './SharePicksButton';
+import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
+import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
 function StatCard({ label, value, sub, hero }: { label: string; value: string; sub?: string; hero?: boolean }) {
   return (
@@ -114,6 +116,13 @@ export function MyPicksClient() {
   const [stats, setStats] = useState<PicksStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasNetworkError, setHasNetworkError] = useState(false);
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
+  const { nickname, syncState, syncCount, join } = useLeaderboard();
+
+  const handleLeaderboardJoin = async (name: string) => {
+    await join(name);
+    setShowLeaderboardModal(false);
+  };
 
   useEffect(() => {
     const ids = Object.keys(picks);
@@ -259,6 +268,42 @@ export function MyPicksClient() {
 
       {/* 공유하기 */}
       {stats && <SharePicksButton stats={stats} />}
+
+      {/* 리더보드 참가 / 내 순위 */}
+      {!nickname ? (
+        <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-brand-800 dark:text-brand-200">전국 순위에 도전하세요!</p>
+            <p className="text-xs text-brand-600 dark:text-brand-400">픽 5개 이상 완료하면 순위에 등장합니다</p>
+          </div>
+          <button
+            onClick={() => setShowLeaderboardModal(true)}
+            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            참가하기
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] rounded-xl px-4 py-3">
+          <div>
+            <p className="text-sm font-medium">{nickname}</p>
+            {syncState === 'done' && syncCount > 0 && (
+              <p className="text-xs text-green-600 dark:text-green-400">{syncCount}개 픽 동기화 완료</p>
+            )}
+          </div>
+          <Link href="/leaderboard" className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">
+            리더보드 보기 →
+          </Link>
+        </div>
+      )}
+
+      {showLeaderboardModal && (
+        <LeaderboardJoinModal
+          onJoin={handleLeaderboardJoin}
+          onClose={() => setShowLeaderboardModal(false)}
+          loading={syncState === 'syncing'}
+        />
+      )}
 
       {/* 픽 목록 */}
       <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
