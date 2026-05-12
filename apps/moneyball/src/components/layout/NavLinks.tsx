@@ -90,29 +90,47 @@ export function NavLinks() {
                 aria-labelledby={`nav-btn-${item.label}`}
                 className="absolute left-0 top-full pt-2 z-50"
               >
-                <div
-                  className={`bg-brand-800 border border-brand-700 rounded-md shadow-lg py-1 ${
-                    item.items.length >= 4
-                      ? "grid grid-cols-2 min-w-[18rem]"
-                      : "min-w-[8rem]"
-                  }`}
-                >
-                  {item.items.map((sub) => (
-                    <Link
-                      key={sub.href}
-                      href={sub.href}
-                      role="menuitem"
-                      onClick={() => setOpenLabel(null)}
-                      className={`block px-4 py-2 text-sm transition-colors ${
-                        isActive(sub.href, pathname)
-                          ? "text-white bg-brand-700 font-medium"
-                          : "text-brand-200 hover:bg-brand-700 hover:text-white"
+                {(() => {
+                  const hasDescriptions = item.items.some((sub) => sub.description);
+                  return (
+                    <div
+                      className={`bg-brand-800 border border-brand-700 rounded-md shadow-lg py-1 ${
+                        hasDescriptions
+                          ? "min-w-[14rem]"
+                          : item.items.length >= 4
+                            ? "grid grid-cols-2 min-w-[18rem]"
+                            : "min-w-[8rem]"
                       }`}
                     >
-                      {sub.label}
-                    </Link>
-                  ))}
-                </div>
+                      {item.items.map((sub) => (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          role="menuitem"
+                          onClick={() => setOpenLabel(null)}
+                          className={`block px-4 py-2.5 text-sm transition-colors ${
+                            isActive(sub.href, pathname)
+                              ? "text-white bg-brand-700"
+                              : "text-brand-200 hover:bg-brand-700 hover:text-white"
+                          }`}
+                        >
+                          {sub.description ? (
+                            <>
+                              <span className={`block font-medium ${isActive(sub.href, pathname) ? "text-white" : ""}`}>
+                                {sub.label}
+                              </span>
+                              <span className={`block text-xs mt-0.5 ${isActive(sub.href, pathname) ? "text-brand-300" : "text-brand-400"}`}>
+                                {sub.description}
+                              </span>
+                            </>
+                          ) : (
+                            sub.label
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

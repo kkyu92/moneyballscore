@@ -3,7 +3,7 @@ import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
 
-export type NavLink = { href: string; label: string };
+export type NavLink = { href: string; label: string; description?: string };
 export type NavGroup = { label: string; items: NavLink[] };
 export type NavItem = NavLink | NavGroup;
 
@@ -16,11 +16,11 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "AI",
     items: [
-      { href: "/analysis", label: "AI 분석" },
-      { href: "/accuracy", label: "적중 기록" },
-      { href: "/dashboard", label: "모델 성능" },
-      { href: "/picks", label: "내 픽 기록" },
-      { href: "/leaderboard", label: "픽 리더보드" },
+      { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석" },
+      { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹" },
+      { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표" },
+      { href: "/picks", label: "내 픽 기록", description: "내 예측과 AI 성과 비교" },
+      { href: "/leaderboard", label: "픽 리더보드", description: "커뮤니티 예측 순위" },
     ],
   },
   { href: "/standings", label: "순위" },
