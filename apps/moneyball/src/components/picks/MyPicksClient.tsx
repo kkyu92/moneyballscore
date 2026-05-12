@@ -69,6 +69,7 @@ export function MyPicksClient() {
       return;
     }
 
+    setLoading(true);
     fetch(`/api/picks/results?ids=${ids.join(',')}`)
       .then((r) => r.json())
       .then((results: PickGameResult[]) => {
@@ -123,7 +124,7 @@ export function MyPicksClient() {
         <StatCard
           label="AI 적중률"
           value={aiRateStr}
-          sub={stats ? `${stats.aiCorrect}/${stats.resolved}` : undefined}
+          sub={stats ? `${stats.aiCorrect}/${stats.aiResolved}` : undefined}
         />
         <StatCard
           label="현재 연속 정답"

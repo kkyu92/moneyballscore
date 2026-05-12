@@ -100,6 +100,28 @@ describe('buildPicksStats', () => {
     expect(stats.resolved).toBe(3);
     expect(stats.myCorrect).toBe(2);
     expect(stats.myRate).toBeCloseTo(2 / 3);
+    expect(stats.aiResolved).toBe(3);
+  });
+
+  it('excludes games without AI prediction from aiRate denominator', () => {
+    const picks = makePicks([
+      [1, 'home', '2026-05-10T10:00:00Z'],
+      [2, 'home', '2026-05-09T10:00:00Z'],
+    ]);
+    const results: PickGameResult[] = [
+      makeResult(1, 5, 2), // AI correct
+      {
+        ...makeResult(2, 4, 1),
+        ai_predicted_winner_id: null,
+        ai_is_correct: null, // no AI prediction
+      },
+    ];
+    const entries = buildPickEntries(picks, results);
+    const stats = buildPicksStats(entries);
+    expect(stats.resolved).toBe(2);
+    expect(stats.aiResolved).toBe(1); // only game 1 has AI prediction
+    expect(stats.aiCorrect).toBe(1);
+    expect(stats.aiRate).toBeCloseTo(1); // 1/1, not 1/2
   });
 
   it('computes currentStreak from most recent consecutive wins', () => {
