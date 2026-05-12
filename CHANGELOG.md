@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5.47.2 (2026-05-12)
+- fix(accuracy): predForPoll 쿼리에 prediction_type='pre_game' 필터 추가 — post_game 예측 혼재로 커뮤니티 vs AI 정확도 비결정적 결과 방지
+
 ## [0.5.47.1] - 2026-05-12 AI 그룹 분리 — 커뮤니티 nav 재편 (cycle 330 info-architecture-review)
 
 ### Changed

@@ -191,6 +191,7 @@ export default async function AccuracyPage() {
       .from('predictions')
       .select('game_id, is_correct')
       .match(CURRENT_MODEL_FILTER)
+      .eq('prediction_type', 'pre_game')
       .not('is_correct', 'is', null),
     buildAllTeamAccuracy(),
   ]);
