@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.46.2] - 2026-05-12 AI 드롭다운 메가메뉴 (cycle 317 info-architecture-review)
+
+### 변경 사항
+- `Header.tsx`: `NavLink` 타입에 optional `description` 필드 추가 — backward compatible
+- `Header.tsx`: AI 그룹 5개 항목에 한 줄 설명 박제 (AI 분석 / 적중 기록 / 모델 성능 / 내 픽 기록 / 픽 리더보드)
+- `NavLinks.tsx`: description 있는 그룹 단일 컬럼 패널 렌더링 — label(font-medium) + description(text-xs, brand-400) 2행 표시
+- `NavLinks.tsx`: 기존 2-col grid 동작 (description 없는 그룹) 유지 — 팀·선수 / 리뷰·시즌 변경 없음
+
 ## [0.5.46.1] - 2026-05-12 Sunday confidence cap (cycle 309 explore-idea)
 
 ### 변경 사항
