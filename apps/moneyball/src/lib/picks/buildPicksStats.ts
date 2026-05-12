@@ -27,6 +27,7 @@ export interface PicksStats {
   myRate: number | null;
   aiRate: number | null;
   currentStreak: number; // 현재 연속 정답 (가장 최근부터)
+  pickingStreakDays: number; // 연속 픽 참여일 (KST 기준)
   recentDots: boolean[]; // 최근 10경기 정답 여부 (가장 오래된→최근)
   trend: 'up' | 'down' | 'flat';
 }
@@ -85,6 +86,17 @@ export function buildPickEntries(
     .sort((a, b) => b.pickedAt.localeCompare(a.pickedAt)); // 최근순
 }
 
+function toKSTDate(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + 9 * 3600 * 1000);
+  return d.toISOString().slice(0, 10);
+}
+
+function prevDay(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export function buildPicksStats(entries: PickEntry[]): PicksStats {
   const resolved = entries.filter((e) => e.isResolved);
   const myCorrect = resolved.filter((e) => e.myIsCorrect === true).length;
@@ -99,6 +111,26 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
   for (const e of resolved) {
     if (e.myIsCorrect === true) currentStreak++;
     else break;
+  }
+
+  // 연속 픽 참여일 (KST 기준, 오늘 또는 어제 픽한 경우에만 streak 활성)
+  const pickDates = [...new Set(entries.map((e) => toKSTDate(e.pickedAt)))].sort().reverse();
+  let pickingStreakDays = 0;
+  if (pickDates.length > 0) {
+    const todayKST = toKSTDate(new Date().toISOString());
+    const yesterdayKST = prevDay(todayKST);
+    const mostRecent = pickDates[0];
+    if (mostRecent === todayKST || mostRecent === yesterdayKST) {
+      let expected = mostRecent;
+      for (const date of pickDates) {
+        if (date === expected) {
+          pickingStreakDays++;
+          expected = prevDay(expected);
+        } else {
+          break;
+        }
+      }
+    }
   }
 
   // 최근 10경기 dots
@@ -123,6 +155,7 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     myRate,
     aiRate,
     currentStreak,
+    pickingStreakDays,
     recentDots,
     trend,
   };

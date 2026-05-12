@@ -5,6 +5,7 @@ import { useUserPicks } from '@/hooks/use-user-picks';
 import { buildPickEntries, buildPicksStats, type PickEntry, type PicksStats } from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import Link from 'next/link';
+import { SharePicksButton } from './SharePicksButton';
 
 function StatCard({ label, value, sub, hero }: { label: string; value: string; sub?: string; hero?: boolean }) {
   return (
@@ -169,6 +170,9 @@ export function MyPicksClient() {
   const streakStr = stats
     ? stats.currentStreak > 0 ? `${stats.currentStreak}연속` : '없음'
     : '—';
+  const pickingDaysStr = stats
+    ? stats.pickingStreakDays > 0 ? `${stats.pickingStreakDays}일째` : '—'
+    : '—';
 
   return (
     <div className="space-y-6">
@@ -195,15 +199,19 @@ export function MyPicksClient() {
       </div>
 
       {/* 보조 요약 카드 */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <StatCard
           label="현재 연속 정답"
           value={streakStr}
         />
         <StatCard
+          label="연속 픽 참여"
+          value={pickingDaysStr}
+        />
+        <StatCard
           label="총 픽"
           value={stats ? `${stats.total}경기` : '—'}
-          sub={stats && stats.total !== stats.resolved ? `${stats.resolved}경기 결과 확정` : undefined}
+          sub={stats && stats.total !== stats.resolved ? `${stats.resolved}경기 확정` : undefined}
         />
       </div>
 
@@ -242,6 +250,9 @@ export function MyPicksClient() {
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">왼쪽이 이전, 오른쪽이 최신</p>
         </div>
       )}
+
+      {/* 공유하기 */}
+      {stats && <SharePicksButton stats={stats} />}
 
       {/* 픽 목록 */}
       <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
