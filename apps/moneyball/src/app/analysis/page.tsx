@@ -19,8 +19,8 @@ import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 
 export const metadata: Metadata = {
-  title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 어제 경기',
-  description: '오늘 KBO 전체 AI 예측 + 빅매치 에이전트 토론 + 어제 경기 분석. 확신 순으로 정렬.',
+  title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 이번 주 경기',
+  description: '오늘 KBO 전체 AI 예측 + 빅매치 에이전트 토론 + 이번 주 전체 경기 분석. 확신 순으로 정렬.',
   alternates: { canonical: 'https://moneyballscore.vercel.app/analysis' },
 };
 
@@ -205,6 +205,96 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   return cards;
 }
 
+interface ThisWeekGameCard {
+  gameId: number;
+  gameDate: string;
+  homeCode: TeamCode;
+  awayCode: TeamCode;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictedWinnerCode: TeamCode | null;
+  confidence: number | null;
+  isCorrect: boolean | null;
+}
+
+interface ThisWeekGameRow {
+  id: number;
+  game_date: string;
+  game_time: string | null;
+  home_score: number | null;
+  away_score: number | null;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
+  predictions: Array<{
+    prediction_type: string;
+    confidence: number | null;
+    is_correct: boolean | null;
+    predicted_winner_team: { code: string | null } | null;
+  }>;
+}
+
+async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
+  const yesterday = getYesterdayKSTDateString();
+  const currentWeek = getCurrentWeek();
+  if (currentWeek.startDate >= yesterday) return [];
+
+  const supabase = await createClient();
+  const gamesResult = (await supabase
+    .from('games')
+    .select(`
+      id, game_date, game_time, home_score, away_score,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
+      predictions!inner(
+        prediction_type, confidence, is_correct,
+        predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+      )
+    `)
+    .gte('game_date', currentWeek.startDate)
+    .lt('game_date', yesterday)
+    .eq('predictions.prediction_type', 'pre_game')
+    .order('game_date', { ascending: false })
+    .order('game_time', { ascending: true })) as SelectResult<ThisWeekGameRow[]>;
+
+  const { data } = assertSelectOk(gamesResult, 'analysis getThisWeekPreviousGames');
+  if (!data) return [];
+
+  const rows = data as unknown as ThisWeekGameRow[];
+  const cards: ThisWeekGameCard[] = [];
+  for (const row of rows) {
+    const pred = row.predictions?.[0];
+    if (!pred) continue;
+    const homeCode = row.home_team?.code as TeamCode | undefined;
+    const awayCode = row.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
+    cards.push({
+      gameId: row.id,
+      gameDate: row.game_date,
+      homeCode,
+      awayCode,
+      homeScore: row.home_score,
+      awayScore: row.away_score,
+      predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
+      confidence: pred.confidence,
+      isCorrect: pred.is_correct,
+    });
+  }
+  return cards;
+}
+
+function groupByDate(games: ThisWeekGameCard[]): Array<{ date: string; games: ThisWeekGameCard[] }> {
+  const map = new Map<string, ThisWeekGameCard[]>();
+  for (const g of games) {
+    const existing = map.get(g.gameDate) ?? [];
+    existing.push(g);
+    map.set(g.gameDate, existing);
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([date, gs]) => ({ date, gs: gs }))
+    .map(({ date, gs }) => ({ date, games: gs }));
+}
+
 interface PeriodStats {
   total: number;
   correct: number;
@@ -301,9 +391,10 @@ async function getBestPickOfWeek(startDate: string, endDate: string): Promise<Be
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
+    getThisWeekPreviousGames(),
     getPeriodStats(currentWeek.startDate, currentWeek.endDate),
     getPeriodStats(currentMonth.startDate, currentMonth.endDate),
     getBestPickOfWeek(currentWeek.startDate, currentWeek.endDate),
@@ -316,7 +407,7 @@ export default async function AnalysisIndexPage() {
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">
-          오늘의 전체 AI 예측 · 빅매치 에이전트 토론 · 어제 경기 분석을 한 곳에서.
+          오늘의 전체 AI 예측 · 빅매치 에이전트 토론 · 이번 주 전체 경기 분석을 한 곳에서.
         </p>
       </header>
 
@@ -497,6 +588,84 @@ export default async function AnalysisIndexPage() {
               );
             })}
           </ul>
+        </section>
+      )}
+
+      {/* 이번 주 경기 아카이브 — 월요일 이후 어제까지 */}
+      {thisWeekPreviousGames.length > 0 && (
+        <section aria-labelledby="this-week-archive-title">
+          <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+            <h2 id="this-week-archive-title" className="text-xl font-bold">
+              📆 이번 주 경기 분析
+            </h2>
+            <Link
+              href={`/reviews/weekly/${currentWeek.weekId}`}
+              className="text-sm text-brand-600 hover:underline"
+            >
+              이번 주 전체 리뷰 →
+            </Link>
+          </div>
+          <div className="space-y-5">
+            {groupByDate(thisWeekPreviousGames).map(({ date, games: dayGames }) => {
+              const [, mm, dd] = date.split('-');
+              const dateLabel = `${Number(mm)}월 ${Number(dd)}일`;
+              return (
+                <div key={date}>
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                    {dateLabel}
+                  </p>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {dayGames.map((g) => {
+                      const homeName = shortTeamName(g.homeCode);
+                      const awayName = shortTeamName(g.awayCode);
+                      const winnerName = g.predictedWinnerCode
+                        ? shortTeamName(g.predictedWinnerCode)
+                        : null;
+                      const confPct = g.confidence !== null
+                        ? Math.round(g.confidence * 100)
+                        : null;
+                      return (
+                        <li key={g.gameId}>
+                          <Link
+                            href={`/analysis/game/${g.gameId}`}
+                            className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                  {awayName} {g.awayScore ?? '-'} : {g.homeScore ?? '-'} {homeName}
+                                </p>
+                                {winnerName && confPct !== null && (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    예측: {winnerName} {confPct}%
+                                  </p>
+                                )}
+                              </div>
+                              {g.isCorrect !== null ? (
+                                <span
+                                  className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
+                                    g.isCorrect
+                                      ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
+                                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                  }`}
+                                >
+                                  {g.isCorrect ? '적중' : '실패'}
+                                </span>
+                              ) : (
+                                <span className="shrink-0 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                                  미결
+                                </span>
+                              )}
+                            </div>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
         </section>
       )}
 
