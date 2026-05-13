@@ -1,5 +1,70 @@
 # Changelog
 
+## 재사용 패턴 추출 (2026-05-13, cycle 346 extract-pattern)
+
+### [content_auto] `cjk-safe-og-image-latin-fallback`
+
+**문제**: Next.js `@vercel/og` (Satori)는 CJK 폰트를 번들하지 않음. 한국어 팀명이 OG 이미지에서 ▢▢로 렌더링.
+
+**해결**: 라틴 대체 맵 + route-collocated `opengraph-image.tsx`
+```ts
+const OG_TEAM: Record<string, string> = {
+  SK: "SSG", HT: "KIA", LG: "LG", OB: "Doosan",
+  KT: "KT", SS: "Samsung", LT: "Lotte", HH: "Hanwha", NC: "NC", WO: "Kiwoom",
+};
+```
+- 한국어 팀 코드 → 글로벌 인식 라틴명 매핑
+- `export const runtime = "nodejs"` (edge 런타임 CJK 제약 회피)
+- DB에서 team.code 읽어 OG_TEAM 룩업 → fallback = code 그대로
+
+**결과**: `/analysis/game/[id]` 전 경기 맞춤 소셜 카드. Away vs Home 매치업 + AI Pick 배지. 폰트 로딩 비용 0.
+
+**범용성**: 한국어 콘텐츠 보유 Next.js 앱에서 OG 이미지 구현 시 공통 패턴. CJK 폰트 없는 환경 (Satori, PDF 등) 대응에 동일 라틴 맵 전략 재사용 가능.
+
+---
+
+### [anti_pattern] `accuracy-query-without-prediction-type-filter`
+
+**문제**: ML 파이프라인이 동일 테이블에 다수 예측 타입(pre_game / postview / live) 저장. 필터 없이 accuracy 집계 시 사후 분석 예측까지 포함 → 지표 왜곡.
+
+**발견**: cycle 331 — `predForPoll` accuracy 쿼리가 postview 예측까지 포함 → 커뮤니티 vs AI 정확도 비교 오염.
+
+**해결**: accuracy 관련 모든 쿼리에 `prediction_type = 'pre_game'` 필터 필수화
+```sql
+-- 잘못된 패턴
+SELECT * FROM predictions WHERE game_id = $1
+
+-- 올바른 패턴
+SELECT * FROM predictions WHERE game_id = $1 AND prediction_type = 'pre_game'
+```
+
+**결과**: 순수 사전예측 적중률 분리. 후처리 분석이 지표를 오염시키지 않음.
+
+**범용성**: output_type / prediction_type / stage 컬럼이 있는 모든 ML 파이프라인. 쿼리 작성 시 타입 필터를 기본값으로.
+
+---
+
+### [data_pipeline] `per-category-accuracy-outlier-detection`
+
+**문제**: 전체 정확도 지표(48.9%)가 카테고리별 극단 성과를 숨김. 특정 팀/요일/선수에서 모델이 체계적으로 실패해도 집계에 묻힘.
+
+**발견**: cycle 346 — 팀별 분리 시 WO(키움) 1/6 = **16.7%** 이상치 발견. 전체 평균 대비 -32pp 격차.
+
+**해결**: 최소 샘플 임계(≥3) + 카테고리별 집계 → 이상치 정렬
+```python
+team_stats = defaultdict(lambda: {'correct':0,'total':0})
+# ... 집계 ...
+for team, stat in sorted(team_stats.items(), key=lambda x: -x[1]['total']):
+    if stat['total'] >= 3:  # 소표본 제거
+        acc = stat['correct']/stat['total']*100
+```
+
+**결과**: 키움 팀 특성(빠른 공격형/수비 스타일) 미반영 가능성 식별. n=150 후 팀별 보정 검토 트리거.
+
+**범용성**: 분류 모델의 정기 성과 감사. 전체 metric만 추적 시 카테고리 drift 탐지 불가. 팀/지역/시간대별 세그먼트 분해가 ML 모니터링 표준 절차.
+
+---
+
 ## W22 팀별 정확도 + v1.8 첫날 (2026-05-13, cycle 346 operational-analysis lite)
 
 ### 팀별 예측 적중률 분석 (전체 n=94, 3경기 이상)
