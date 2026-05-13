@@ -9,10 +9,11 @@
  * 실패 row 가 v2.0-debate 라벨에 묻혀 분류 오류.
  *
  * 본 헬퍼는 "API key 존재 + debate 호출 성공 (throw X)" 두 조건 모두 충족
- * 시에만 v2.0-debate 박제. 하나라도 X 면 v1.7-revert (정량 모델 fallback).
+ * 시에만 v2.0-debate 박제. 하나라도 X 면 v1.8 (정량 모델 fallback, cycle 335).
+ * 과거 v1.7-revert row 는 DB 에 그대로 유지됨 — cycle 335 이전 데이터.
  */
 
-export type ModelVersion = 'v2.0-debate' | 'v1.7-revert';
+export type ModelVersion = 'v2.0-debate' | 'v1.8' | 'v1.7-revert';
 export type DebateVersion = 'v2-persona4' | null;
 
 export interface ModelVersionDecision {
@@ -30,5 +31,5 @@ export function decideModelVersion({
   if (hasApiKey && debateSucceeded) {
     return { model_version: 'v2.0-debate', debate_version: 'v2-persona4' };
   }
-  return { model_version: 'v1.7-revert', debate_version: null };
+  return { model_version: 'v1.8', debate_version: null };
 }
