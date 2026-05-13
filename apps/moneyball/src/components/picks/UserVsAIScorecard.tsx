@@ -79,13 +79,13 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
             아직 픽한 경기가 없습니다
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-400 mb-3">
+          <p className="text-xs text-gray-500 dark:text-gray-300 mb-3">
             오늘 경기 카드에서 팀을 픽해보세요
           </p>
           <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">
             이번 시즌 AI 적중률 {aiRate}% ({aiCorrect}/{aiTotal})
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">이길 수 있을까요?</p>
+          <p className="text-xs font-medium text-brand-600 dark:text-brand-400 mt-1">이길 수 있을까요?</p>
           <Link
             href="/picks"
             className="mt-3 inline-block text-xs text-brand-600 dark:text-brand-400 hover:underline"

@@ -188,13 +188,14 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
         />
       )}
       {!current && poll && poll.total > 0 && (
-        <p className="mt-1 px-1 text-xs text-gray-400 dark:text-gray-400">
-          {poll.total}명이 예측 중 · 픽 후 결과 공개
+        <p className="mt-1.5 px-1 text-xs text-gray-500 dark:text-gray-300 flex items-center gap-1">
+          <span className="font-semibold text-brand-600 dark:text-brand-400 tabular-nums">{poll.total}명</span>
+          <span>참여 중 · 픽 후 결과 공개</span>
         </p>
       )}
       {current && poll && poll.total > 0 && poll.total < MIN_POLL_TOTAL && (
-        <p className="mt-1 px-1 text-xs text-gray-400 dark:text-gray-400">
-          {poll.total}명 참여 중 · 더 많이 참여하면 결과가 공개돼요
+        <p className="mt-1.5 px-1 text-xs text-gray-500 dark:text-gray-300">
+          {poll.total}명 참여 중 · {MIN_POLL_TOTAL}명 이상 모이면 분포 공개
         </p>
       )}
     </div>
