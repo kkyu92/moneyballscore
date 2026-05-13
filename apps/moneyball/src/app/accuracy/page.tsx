@@ -543,6 +543,7 @@ export default async function AccuracyPage() {
           <div className="grid grid-cols-3 gap-3">
             {(confidenceTiers as ConfidenceTier[]).map((tier) => {
               const pct = tier.accuracy !== null ? Math.round(tier.accuracy * 100) : null;
+              const ciPct = tier.n > 0 ? Math.round(tier.ci95Half * 100) : null;
               const isInverted =
                 tier.accuracy !== null &&
                 confidenceTiers[0].accuracy !== null &&
@@ -551,22 +552,31 @@ export default async function AccuracyPage() {
               return (
                 <div
                   key={tier.label}
-                  className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 space-y-1 text-center"
+                  className={`rounded-lg border p-3 space-y-1 text-center ${
+                    isInverted
+                      ? 'border-amber-400 dark:border-amber-500 bg-amber-50/40 dark:bg-amber-900/10'
+                      : 'border-gray-200 dark:border-[var(--color-border)]'
+                  }`}
                 >
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{tier.label}</p>
                   <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.range}</p>
                   {pct !== null ? (
-                    <p
-                      className={`text-2xl font-bold ${
-                        isInverted
-                          ? 'text-amber-500 dark:text-amber-400'
-                          : pct >= 55
-                          ? 'text-brand-600 dark:text-brand-400'
-                          : 'text-red-500 dark:text-red-400'
-                      }`}
-                    >
-                      {pct}%
-                    </p>
+                    <>
+                      <p
+                        className={`text-2xl font-bold ${
+                          isInverted
+                            ? 'text-amber-500 dark:text-amber-400'
+                            : pct >= 55
+                            ? 'text-brand-600 dark:text-brand-400'
+                            : 'text-red-500 dark:text-red-400'
+                        }`}
+                      >
+                        {pct}%
+                      </p>
+                      {ciPct !== null && tier.n < 20 && (
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}% CI</p>
+                      )}
+                    </>
                   ) : (
                     <p className="text-2xl font-bold text-gray-300 dark:text-gray-600">—</p>
                   )}
@@ -574,7 +584,7 @@ export default async function AccuracyPage() {
                     {tier.n > 0 ? `${tier.hits}/${tier.n}` : '데이터 없음'}
                   </p>
                   {isInverted && (
-                    <p className="text-[10px] text-amber-500 dark:text-amber-400 font-medium">
+                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
                       역전 패턴 ⚠
                     </p>
                   )}

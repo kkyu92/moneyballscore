@@ -8,13 +8,6 @@ export interface MatchupPair {
   path: string;
 }
 
-class InvalidMatchupError extends Error {
-  constructor(reason: string) {
-    super(reason);
-    this.name = "InvalidMatchupError";
-  }
-}
-
 function isTeamCode(v: string): v is TeamCode {
   return v in KBO_TEAMS;
 }
