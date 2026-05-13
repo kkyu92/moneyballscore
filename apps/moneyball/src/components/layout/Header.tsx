@@ -29,23 +29,23 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { href: "/standings", label: "순위" },
-  { href: "/predictions", label: "기록" },
+  { href: "/predictions", label: "예측 기록" },
   {
     label: "팀·선수",
     items: [
-      { href: "/teams", label: "팀" },
-      { href: "/players", label: "선수" },
-      { href: "/matchup", label: "매치업" },
+      { href: "/teams", label: "팀", description: "KBO 10구단 프로필·통계" },
+      { href: "/players", label: "선수", description: "선수 세이버메트릭스 지표" },
+      { href: "/matchup", label: "매치업", description: "팀간 맞대결 이력 분석" },
     ],
   },
   {
     label: "리뷰·시즌",
     items: [
-      { href: "/reviews", label: "예측 리뷰" },
-      { href: "/reviews/weekly", label: "주간 리뷰" },
-      { href: "/reviews/monthly", label: "월간 리뷰" },
-      { href: "/reviews/misses", label: "빗나간 예측" },
-      { href: "/seasons", label: "시즌 기록" },
+      { href: "/reviews", label: "예측 리뷰", description: "주간·월간 예측 총평" },
+      { href: "/reviews/weekly", label: "주간 리뷰", description: "이번 주 예측 성과 분석" },
+      { href: "/reviews/monthly", label: "월간 리뷰", description: "월별 적중률 트렌드" },
+      { href: "/reviews/misses", label: "빗나간 예측", description: "오답 원인 factor 분석" },
+      { href: "/seasons", label: "시즌 기록", description: "연도별 성과 아카이브" },
     ],
   },
 ];

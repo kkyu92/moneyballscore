@@ -93,7 +93,9 @@ export function NavLinks() {
                 <div
                   className={`bg-brand-800 border border-brand-700 rounded-md shadow-lg py-1 ${
                     item.items.some((sub) => sub.description)
-                      ? "min-w-[14rem]"
+                      ? item.items.length >= 4
+                        ? "min-w-[18rem]"
+                        : "min-w-[14rem]"
                       : item.items.length >= 4
                         ? "grid grid-cols-2 min-w-[18rem]"
                         : "min-w-[8rem]"
