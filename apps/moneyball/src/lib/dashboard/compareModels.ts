@@ -1,5 +1,5 @@
 /**
- * 모델 버전별 성능 집계. v1.5 → v1.6 전환 효과 측정용.
+ * 모델 버전별 성과 비교 — scoring_rule + model_version 조합별 집계.
  *
  * Grouping key = `scoring_rule ?? '(null)'` + `model_version`.
  *   - 과거 row 는 scoring_rule=null 로 저장됨 (v1.5 시절)
@@ -120,8 +120,8 @@ function buildCalibration(
 
 /**
  * v2.0-debate row 에서 quantitativeHomeWinProb 을 shadow group 으로 추출.
- * 원래 row 는 그대로 두고 **가상 row 복사본** 을 `v1.6-pure (shadow)` 로 라벨.
- * Agent 가 덮기 전의 pure 정량 모델 Brier 측정용.
+ * 원래 row 는 그대로 두고 **가상 row 복사본** 을 `quant-only-shadow` 로 라벨.
+ * Agent 가 덮기 전의 pure 정량 모델 Brier 측정용 (scoring_rule 은 원본 상속).
  */
 export function buildShadowRows(rows: PredictionRow[]): PredictionRow[] {
   const shadow: PredictionRow[] = [];
@@ -133,8 +133,8 @@ export function buildShadowRows(rows: PredictionRow[]): PredictionRow[] {
     const cloneReasoning = { homeWinProb: p };
     shadow.push({
       ...r,
-      model_version: 'v1.6-pure-shadow',
-      scoring_rule: r.scoring_rule ?? 'v1.6',
+      model_version: 'quant-only-shadow',
+      scoring_rule: r.scoring_rule,
       reasoning: cloneReasoning,
       // is_correct 은 debate 기준이라 shadow 엔 부정확할 수 있음 — 별도 재계산
       // (winner_team_id + homeWinProb 으로 재판정)
