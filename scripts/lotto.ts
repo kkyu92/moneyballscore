@@ -211,6 +211,10 @@ interface Stats {
   multOf5Max: number;
   perfSqMax: number;
   primesMax: number;
+  maxRunMax: number;                           // 최대 연속런 상한
+  low3Max: number;                             // n[0]+n[1]+n[2] 상한
+  hi3Min: number;                              // n[3]+n[4]+n[5] 하한
+  mid4Min: number;     mid4Max: number;        // n[1]+n[2]+n[3]+n[4] 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -240,6 +244,16 @@ function computeStats(rounds: LottoRound[]): Stats {
   const minMaxSums = ns.map(n=>n[0]+n[5]);
   const midSums    = ns.map(n=>n[2]+n[3]);
 
+  const maxRuns = ns.map(n => {
+    let max=1, cur=1;
+    for (let i=1;i<6;i++) { if(n[i]-n[i-1]===1){cur++;if(cur>max)max=cur;}else cur=1; }
+    return max;
+  });
+
+  const low3s  = ns.map(n=>n[0]+n[1]+n[2]);
+  const hi3s   = ns.map(n=>n[3]+n[4]+n[5]);
+  const mid4s  = ns.map(n=>n[1]+n[2]+n[3]+n[4]);
+
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
 
@@ -264,6 +278,10 @@ function computeStats(rounds: LottoRound[]): Stats {
     multOf5Max: Math.max(...ns.map(n=>n.filter(x=>x%5===0).length)),
     perfSqMax:  Math.max(...ns.map(n=>n.filter(x=>PERF_SQ.has(x)).length)),
     primesMax:  Math.max(...ns.map(n=>n.filter(x=>PRIMES.has(x)).length)),
+    maxRunMax: Math.max(...maxRuns),
+    low3Max:   Math.max(...low3s),
+    hi3Min:    Math.min(...hi3s),
+    mid4Min:   Math.min(...mid4s), mid4Max: Math.max(...mid4s),
     zones,
     freq,
   };
@@ -299,6 +317,10 @@ const RULES: Rule[] = [
   { name: '5의배수 개수',      get: (n)=>n.filter(x=>x%5===0).length,        lo:()=>null, hi:s=>s.multOf5Max },
   { name: '완전제곱수 개수',   get: (n)=>n.filter(x=>PERF_SQ.has(x)).length, lo:()=>null, hi:s=>s.perfSqMax },
   { name: '소수 개수',         get: (n)=>n.filter(x=>PRIMES.has(x)).length,   lo:()=>null, hi:s=>s.primesMax },
+  { name: '최대연속런',        get: (n)=>{ let m=1,c=1; for(let i=1;i<6;i++){if(n[i]-n[i-1]===1){c++;if(c>m)m=c;}else c=1;} return m; }, lo:()=>null, hi:s=>s.maxRunMax },
+  { name: '하위3개합(p1+2+3)', get: (n)=>n[0]+n[1]+n[2],          lo:()=>null,         hi:s=>s.low3Max },
+  { name: '상위3개합(p4+5+6)', get: (n)=>n[3]+n[4]+n[5],          lo:s=>s.hi3Min,      hi:()=>null },
+  { name: '중간4개합(p2-5)',   get: (n)=>n[1]+n[2]+n[3]+n[4],     lo:s=>s.mid4Min,     hi:s=>s.mid4Max },
   ...([0,1,2,3,4,5,6,7,8,9].map(d => ({
     name: `끝자리${d} 개수`,
     get: (n: number[]) => n.filter(x=>x%10===d).length,
