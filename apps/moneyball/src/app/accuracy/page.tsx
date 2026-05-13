@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { buildAllTeamAccuracy, buildMatchupData } from '@/lib/standings/buildTeamAccuracy';
 import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
+import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { assertSelectOk, shortTeamName } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
@@ -16,6 +17,7 @@ import {
   buildWeeklyTrend,
   buildRecentForm,
   buildConfidenceTiers,
+  buildVersionHistory,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -177,7 +179,7 @@ export default async function AccuracyPage() {
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData] = await Promise.all([
     supabase
       .from('predictions')
-      .select('confidence, is_correct, verified_at')
+      .select('confidence, is_correct, verified_at, scoring_rule')
       .match(CURRENT_MODEL_FILTER)
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
@@ -218,6 +220,7 @@ export default async function AccuracyPage() {
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
+  const versionHistory = buildVersionHistory(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
 
@@ -606,6 +609,19 @@ export default async function AccuracyPage() {
               </p>
             ) : null;
           })()}
+        </section>
+      )}
+
+      {/* AI 모델 버전별 성과 */}
+      {versionHistory.some((v) => v.n > 0) && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">AI 모델 버전별 성과</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              가중치 버전별 예측 정확도. 실패에서 배우고 개선하는 AI 진화 기록.
+            </p>
+          </div>
+          <ModelVersionHistory versions={versionHistory} />
         </section>
       )}
 

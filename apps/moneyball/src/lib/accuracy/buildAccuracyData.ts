@@ -2,6 +2,19 @@ export interface PredRow {
   confidence: number;
   is_correct: boolean;
   verified_at: string;
+  scoring_rule?: string | null;
+}
+
+export interface VersionHistoryRow {
+  version: string;
+  label: string;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+  ci95Half: number;
+  dateRange: string;
+  brier: number | null;
+  note: string;
 }
 
 export interface Bucket {
@@ -181,4 +194,63 @@ export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
     trend = diff >= 0.1 ? 'up' : diff <= -0.1 ? 'down' : 'flat';
   }
   return { dots, hits, total, trend };
+}
+
+const VERSION_ORDER = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8'];
+const VERSION_META: Record<string, { label: string; note: string }> = {
+  'v1.5': { label: 'v1.5', note: '기준 모델' },
+  'v1.6': { label: 'v1.6', note: 'ELO·상대전적 실험 → 저조로 복원' },
+  'v1.7-revert': { label: 'v1.7', note: 'v1.5 가중치 복원 + 일요일 상한 55%' },
+  'v1.8': { label: 'v1.8', note: 'ELO 10%↑ / head_to_head 3%↓' },
+};
+
+export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
+  const grouped = new Map<string, PredRow[]>();
+  for (const r of rows) {
+    const key = r.scoring_rule ?? '';
+    if (!VERSION_ORDER.includes(key)) continue;
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key)!.push(r);
+  }
+
+  return VERSION_ORDER.map((version) => {
+    const vRows = grouped.get(version) ?? [];
+    const n = vRows.length;
+    const hits = vRows.filter((r) => r.is_correct).length;
+    const accuracy = n > 0 ? hits / n : null;
+    const ci95Half =
+      accuracy !== null && n > 0
+        ? 1.96 * Math.sqrt((accuracy * (1 - accuracy)) / n)
+        : 0;
+
+    let dateRange = '';
+    if (n > 0) {
+      const sorted = [...vRows].sort((a, b) =>
+        a.verified_at.localeCompare(b.verified_at),
+      );
+      const kstFmt = (d: Date) => {
+        const kst = new Date(d.getTime() + 9 * 3600 * 1000);
+        return `${kst.getUTCMonth() + 1}/${kst.getUTCDate()}`;
+      };
+      const first = new Date(sorted[0].verified_at);
+      const last = new Date(sorted[n - 1].verified_at);
+      dateRange =
+        first.toDateString() === last.toDateString()
+          ? kstFmt(first)
+          : `${kstFmt(first)}~${kstFmt(last)}`;
+    }
+
+    let brier: number | null = null;
+    if (n > 0) {
+      let sum = 0;
+      for (const r of vRows) {
+        const o = r.is_correct ? 1 : 0;
+        sum += (r.confidence - o) ** 2;
+      }
+      brier = sum / n;
+    }
+
+    const meta = VERSION_META[version] ?? { label: version, note: '' };
+    return { version, label: meta.label, n, hits, accuracy, ci95Half, dateRange, brier, note: meta.note };
+  });
 }

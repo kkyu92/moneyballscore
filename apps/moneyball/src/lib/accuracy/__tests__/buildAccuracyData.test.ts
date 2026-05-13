@@ -4,6 +4,7 @@ import {
   buildConfidenceTiers,
   buildDayOfWeek,
   buildRecentForm,
+  buildVersionHistory,
   buildWeeklyTrend,
   bucketize,
   calibrationGap,
@@ -212,6 +213,72 @@ describe('buildConfidenceTiers', () => {
     expect(result[0].accuracy).toBe(1);
     expect(result[1].accuracy).toBe(0);
     expect(result[1].accuracy!).toBeLessThan(result[0].accuracy!);
+  });
+});
+
+describe('buildVersionHistory', () => {
+  function vrow(
+    confidence: number,
+    is_correct: boolean,
+    scoring_rule: string | null,
+    verified_at = '2026-05-01T10:00:00Z',
+  ) {
+    return { confidence, is_correct, verified_at, scoring_rule };
+  }
+
+  it('빈 배열 → 4개 버전 모두 n=0', () => {
+    const result = buildVersionHistory([]);
+    expect(result).toHaveLength(4);
+    result.forEach((v) => {
+      expect(v.n).toBe(0);
+      expect(v.accuracy).toBeNull();
+    });
+  });
+
+  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8', () => {
+    const result = buildVersionHistory([]);
+    expect(result.map((v) => v.version)).toEqual(['v1.5', 'v1.6', 'v1.7-revert', 'v1.8']);
+  });
+
+  it('v1.5: 4건 3적중 → accuracy=0.75', () => {
+    const rows = [
+      vrow(0.6, true, 'v1.5'),
+      vrow(0.6, true, 'v1.5'),
+      vrow(0.6, true, 'v1.5'),
+      vrow(0.6, false, 'v1.5'),
+    ];
+    const result = buildVersionHistory(rows);
+    const v15 = result.find((v) => v.version === 'v1.5')!;
+    expect(v15.n).toBe(4);
+    expect(v15.hits).toBe(3);
+    expect(v15.accuracy).toBeCloseTo(0.75);
+  });
+
+  it('알 수 없는 scoring_rule은 무시', () => {
+    const rows = [vrow(0.6, true, 'unknown_ver'), vrow(0.6, true, null)];
+    const result = buildVersionHistory(rows);
+    result.forEach((v) => expect(v.n).toBe(0));
+  });
+
+  it('v1.8에 진행 중 레이블 메타 포함', () => {
+    const result = buildVersionHistory([]);
+    const v18 = result.find((v) => v.version === 'v1.8')!;
+    expect(v18.label).toBe('v1.8');
+    expect(v18.note).toContain('ELO');
+  });
+
+  it('dateRange: 단일 날짜 → M/D 형식', () => {
+    const rows = [vrow(0.6, true, 'v1.6', '2026-04-01T10:00:00Z')];
+    const result = buildVersionHistory(rows);
+    const v16 = result.find((v) => v.version === 'v1.6')!;
+    expect(v16.dateRange).toMatch(/^\d+\/\d+$/);
+  });
+
+  it('Brier 계산: confidence=0.5, is_correct=true → brier=0.25', () => {
+    const rows = [vrow(0.5, true, 'v1.7-revert')];
+    const result = buildVersionHistory(rows);
+    const v17 = result.find((v) => v.version === 'v1.7-revert')!;
+    expect(v17.brier).toBeCloseTo(0.25);
   });
 });
 
