@@ -12,22 +12,23 @@ describe('decideModelVersion', () => {
   });
 
   // cycle 127 silent drift — daily.ts try/catch 가 runDebate 의 throw 를 받아
-  // 정량 fallback 으로 되돌아간 경우, 박제는 v1.7-revert 로 강등돼야
+  // 정량 fallback 으로 되돌아간 경우, 박제는 v1.8 로 강등돼야
   // /debug/model-comparison 의 v1.6-pure vs v2.0-debate Brier 대조 노이즈 차단.
-  it('downgrades to v1.7-revert when API key present but debate threw', () => {
+  // cycle 340 review-code: v1.7-revert → v1.8 (cycle 335 가중치 업그레이드 반영).
+  it('downgrades to v1.8 when API key present but debate threw', () => {
     expect(
       decideModelVersion({ hasApiKey: true, debateSucceeded: false }),
     ).toEqual({
-      model_version: 'v1.7-revert',
+      model_version: 'v1.8',
       debate_version: null,
     });
   });
 
-  it('downgrades to v1.7-revert when API key absent', () => {
+  it('downgrades to v1.8 when API key absent', () => {
     expect(
       decideModelVersion({ hasApiKey: false, debateSucceeded: false }),
     ).toEqual({
-      model_version: 'v1.7-revert',
+      model_version: 'v1.8',
       debate_version: null,
     });
   });
@@ -36,7 +37,7 @@ describe('decideModelVersion', () => {
     expect(
       decideModelVersion({ hasApiKey: false, debateSucceeded: true }),
     ).toEqual({
-      model_version: 'v1.7-revert',
+      model_version: 'v1.8',
       debate_version: null,
     });
   });
