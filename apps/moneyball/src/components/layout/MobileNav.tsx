@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, isNavGroup } from "./Header";
+import { NavIcon } from "./nav-icon";
 
 function isActive(href: string, pathname: string): boolean {
   if (href === "/") return pathname === "/";
@@ -59,12 +60,17 @@ export function MobileNav() {
                     href={sub.href}
                     onClick={() => setOpen(false)}
                     aria-current={isActive(sub.href, pathname) ? "page" : undefined}
-                    className={`block px-10 py-2 text-sm transition-colors ${
+                    className={`flex items-center gap-2.5 px-6 pl-10 py-2 text-sm transition-colors ${
                       isActive(sub.href, pathname)
                         ? "text-white font-medium bg-brand-700"
                         : "text-brand-200 hover:bg-brand-700 hover:text-white"
                     }`}
                   >
+                    {sub.icon && (
+                      <span className="opacity-60 shrink-0">
+                        <NavIcon name={sub.icon} />
+                      </span>
+                    )}
                     {sub.label}
                   </Link>
                 ))}
