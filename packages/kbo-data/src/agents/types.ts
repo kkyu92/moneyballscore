@@ -65,4 +65,6 @@ export interface DebateResult {
   quantitativeProb: number;  // v1.5 정량 모델 결과
   totalTokens: number;
   totalDurationMs: number;
+  agentsFailed: boolean;   // 에이전트 1개 이상 fallback 사용 (API 오류)
+  agentError: string | null; // 첫 번째 에러 메시지 (ANTHROPIC credit 부족 등)
 }
