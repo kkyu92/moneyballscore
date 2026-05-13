@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts"]
+    },
+    "packages/kbo-data": {
+      "entry": [
+        "src/pipeline/backtest-*.ts",
+        "src/pipeline/backfill-*.ts",
+        "src/pipeline/factor-bias-bootstrap-ci.ts"
+      ]
+    }
+  },
+  "ignoreExportsUsedInFile": true,
+  "ignore": [
+    "apps/moneyball/src/lib/supabase/client.ts",
+    "cloudflare-worker/src/worker.ts"
+  ]
+}

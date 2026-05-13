@@ -57,7 +57,7 @@ interface ForecastResponse {
 }
 
 /** WMO code → 이모지 + 한국어 라벨. UI weather.ts 와 동일 매핑 (duplication 허용). */
-export function mapWeatherCode(code: number): { icon: string; label: string } {
+function mapWeatherCode(code: number): { icon: string; label: string } {
   if (code === 0) return { icon: '☀️', label: '맑음' };
   if (code <= 3) return { icon: '🌤️', label: '구름조금' };
   if (code === 45 || code === 48) return { icon: '🌫️', label: '안개' };

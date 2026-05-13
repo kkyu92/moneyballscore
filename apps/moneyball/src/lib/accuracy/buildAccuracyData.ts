@@ -83,7 +83,7 @@ export function calibrationGap(rows: PredRow[]): number {
 }
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
-export const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일 순서
+const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일 순서
 
 export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
   const acc = Array.from({ length: 7 }, (_, i) => ({ day: i, n: 0, hits: 0 }));
@@ -103,7 +103,7 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
   }));
 }
 
-export function getWeekStart(dateStr: string): string {
+function getWeekStart(dateStr: string): string {
   // KST 기준으로 주 시작(월요일) 계산
   const kstMs = new Date(dateStr).getTime() + 9 * 3600 * 1000;
   const d = new Date(kstMs);

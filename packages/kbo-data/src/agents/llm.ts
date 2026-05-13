@@ -7,7 +7,7 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 // 재시도 정책: 3회 시도, 500ms → 1000ms → 2000ms exponential backoff
 // 재시도 대상: 네트워크 에러, 5xx, 429(rate limit)
 // 재시도 제외: 4xx (400/401/403 등 — 요청 자체가 잘못됨)
-export const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
+const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
 export const MAX_ATTEMPTS = RETRY_BACKOFF_MS.length;
 
 export interface LLMCallOptions {
@@ -97,7 +97,7 @@ export async function callLLM<T>(
  * 재시도: 네트워크 에러 + 5xx + 429에 대해 최대 3회(500/1000/2000ms backoff).
  * 4xx는 즉시 실패(요청 자체가 잘못된 것이라 재시도해도 무의미).
  */
-export async function callClaude<T>(
+async function callClaude<T>(
   options: LLMCallOptions,
   parseResponse: (text: string) => T
 ): Promise<AgentResult<T>> {

@@ -9,7 +9,7 @@
  */
 
 export const PERSONA_VERSION = 'v2-persona4' as const;
-export type PersonaVersion = typeof PERSONA_VERSION;
+type PersonaVersion = typeof PERSONA_VERSION;
 
 // ============================================
 // base.md — 모든 에이전트 공통 규칙

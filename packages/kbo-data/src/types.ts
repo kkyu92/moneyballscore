@@ -42,7 +42,7 @@ export function assertResponseOk(res: Response, label: string): void {
 //
 // cycle 198 fetchOpenMeteoHourly / cycle 197 assertResponseOk / cycle 195
 // parseNumWithFallback 와 동형 — 단일 소스 derive + console.warn 가시화.
-export type ReasoningHomeWinProbFailReason = 'no_reasoning' | 'no_field' | 'invalid_value';
+type ReasoningHomeWinProbFailReason = 'no_reasoning' | 'no_field' | 'invalid_value';
 export function extractReasoningHomeWinProb(
   reasoning: { homeWinProb?: unknown } | null | undefined,
   label: string,
@@ -190,7 +190,7 @@ export interface PipelineResult {
 // KBO 공식 API 응답 타입
 // ============================================
 
-export interface KBOGameListResponse {
+interface KBOGameListResponse {
   d: string; // JSON string of game array
 }
 

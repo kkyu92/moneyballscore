@@ -211,7 +211,7 @@ export async function fetchHeadToHead(
  * 구장 파크팩터 (간이 계산)
  * 홈/원정 득점 비율 기반
  */
-export function calculateParkFactor(
+function calculateParkFactor(
   homeRunsAtHome: number,
   homeRunsAway: number,
   homeGamesHome: number,

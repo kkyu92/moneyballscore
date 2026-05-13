@@ -75,7 +75,7 @@ export interface CalibrationBucket {
 }
 
 /** 실행 결과 한 행 (모델별 × scope 별). */
-export interface BacktestRow {
+interface BacktestRow {
   model: string;
   scope: string; // "2023-2025 all" 등
   metrics: MetricsSummary;

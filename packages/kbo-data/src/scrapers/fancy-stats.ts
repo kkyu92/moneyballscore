@@ -53,7 +53,7 @@ export function resolveTeamCode(name: string): TeamCode | null {
 // parseNum 의 NaN 0-fallback simple 변형. fangraphs.ts 도 동일 정의 박제됐어
 // 단일 export 통일 (cycle 185). xfip fallback / totalWar=0 stub family 와 같
 // 패턴 — silent fallback 차단 위해선 parseNumWithFallback 우선.
-export function parseNum(text: string): number {
+function parseNum(text: string): number {
   const cleaned = text.replace(/[^0-9.\-]/g, '');
   const val = parseFloat(cleaned);
   return isNaN(val) ? 0 : val;

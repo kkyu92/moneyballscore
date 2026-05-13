@@ -8,7 +8,7 @@ export interface MatchupPair {
   path: string;
 }
 
-export class InvalidMatchupError extends Error {
+class InvalidMatchupError extends Error {
   constructor(reason: string) {
     super(reason);
     this.name = "InvalidMatchupError";

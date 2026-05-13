@@ -4,7 +4,6 @@ export type {
   Model,
   MetricsSummary,
   CalibrationBucket,
-  BacktestRow,
 } from './types';
 
 export { computeMetrics, buildCalibration } from './metrics';
