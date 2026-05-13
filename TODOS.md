@@ -5,7 +5,7 @@
 
 ## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07)
 
-**현재 상태**: 94건 검증 완료 (cycle 349 업데이트, 2026-05-13) / 전체 적중률 48.9% / Brier 0.2549
+**현재 상태**: 94건 검증 완료 (cycle 354 업데이트, 2026-05-13) / 전체 적중률 48.9% / Brier 0.2549
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
 ### v2.0 가중치 후보 (재검토, cycle 231)
@@ -42,6 +42,13 @@
 - head_to_head 0.0~0.33 낮은 구간에서 오히려 저확신 예측이 정답 (저확신 63.2% vs 고확신 37.5% 역전)
 
 **Action**: n=150 검증 도달 시 operational-analysis heavy 재실행 → 합계 100% 맞춰 최종 commit
+
+**🎯 cycle 354 operational-analysis lite (2026-05-13)**:
+- v1.7-revert 최종: 32건 53.1% (W20=27건 55.6%, W22=5건 40%)
+- **확신도 역전**: medium (55-64%) = 37.5% (8건) < low (<55%) = 58.3% (24건) — judge-agent 과보수 신호
+- high ≥65% = 0건 — judge-agent 가 고확신 발화 X (Sunday cap 0.55 + 보수적 calibration 누적)
+- 팀별 극단값: OB 85.7% (6/7) ↑ / SK 28.6% (2/7) ↓ (소표본 주의)
+- v1.8 시작: 2026-05-13 elo 10%↑ + head_to_head 3%↓. n=150 도달 후 heavy 재실행.
 
 ---
 
