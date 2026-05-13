@@ -299,7 +299,7 @@ export default async function AccuracyPage() {
                     {communityStats.communityCorrect}/{communityStats.communityGames} 적중
                   </p>
                 </div>
-                <div className={`rounded-lg p-4 text-center ${aiWins ? 'bg-[var(--color-brand-50)] dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}>
+                <div className={`rounded-lg p-4 text-center ${aiWins ? 'bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                     {aiWins && '🏆 '}AI 정답률 (같은 경기)
                   </p>
