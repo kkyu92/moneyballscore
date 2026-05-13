@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.47.3 (2026-05-13, cycle 338 fix-incident)
+
+### CI/CD 보안 강화 (PR #361, Fixes #360)
+- **next@16.2.6**: DoS x3 (high), Middleware bypass x4 (high), SSRF (high), XSS x2 (moderate), Image Opt DoS (moderate), cache poisoning (moderate/low) — 16개 CVE 수정
+- **pnpm overrides**: `fast-uri>=3.1.2` + `postcss>=8.5.10` (transitive high/moderate 제거)
+- **CI audit 게이트**: `pnpm audit --audit-level=high` — 공급망 취약점 자동 차단
+- **pnpm/action-setup SHA 핀**: semver 태그 → commit SHA 고정 (TanStack 공급망 침해 패턴 대응)
+
 ## W22 모델 성과 분석 (2026-05-13, cycle 337 operational-analysis lite)
 
 ### 주간 성과 요약
