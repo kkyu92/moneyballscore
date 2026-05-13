@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
-import { buildAllTeamAccuracy } from '@/lib/standings/buildTeamAccuracy';
+import { buildAllTeamAccuracy, buildMatchupData } from '@/lib/standings/buildTeamAccuracy';
+import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { assertSelectOk, shortTeamName } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
@@ -173,7 +174,7 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 export default async function AccuracyPage() {
   const supabase = await createClient();
 
-  const [result, pollResult, completedGamesResult, predForPoll, teamRows] = await Promise.all([
+  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData] = await Promise.all([
     supabase
       .from('predictions')
       .select('confidence, is_correct, verified_at')
@@ -196,6 +197,7 @@ export default async function AccuracyPage() {
       .eq('prediction_type', 'pre_game')
       .not('is_correct', 'is', null),
     buildAllTeamAccuracy(),
+    buildMatchupData(),
   ]);
 
   const communityStats = computeCommunityVsAI(
@@ -672,6 +674,24 @@ export default async function AccuracyPage() {
               </tbody>
             </table>
           </div>
+        </section>
+      )}
+
+      {/* 상대팀별 AI 강약 분석 */}
+      {matchupData.matchups.length > 0 && (
+        <section id="matchup" className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+          <div>
+            <h2 className="text-lg font-bold">팀별 상대 강약 분석</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              각 팀 경기에서 AI가 어떤 상대팀을 만날 때 잘 맞추고 못 맞추는지 분석합니다.
+              n=1 결과는 연하게 표시됩니다 (표본 1건). 홈/원정 적중률은 각 n을 함께 표시합니다.
+            </p>
+          </div>
+          <TeamMatchupCards
+            matchups={matchupData.matchups}
+            homeAway={matchupData.homeAway}
+            teamAccuracy={teamRows}
+          />
         </section>
       )}
 
