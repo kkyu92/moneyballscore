@@ -459,7 +459,7 @@ export default async function AccuracyPage() {
             <h2 className="text-lg font-bold">요일별 적중률</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               KST 기준. 요일에 따라 예측 난이도가 다를 수 있습니다. 막대 높이 ∝ 적중률.
-              일요일은 과적합 방지를 위해 AI 신뢰도 상한 55%를 적용합니다.
+              일요일은 과적합 방지를 위해 AI 신뢰도 상한 45%를 적용합니다.
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -482,7 +482,7 @@ export default async function AccuracyPage() {
                   </span>
                   {d.day === 0 && (
                     <span className="text-[8px] leading-none bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded px-0.5 py-0.5 whitespace-nowrap">
-                      상한 55%
+                      상한 45%
                     </span>
                   )}
                   <span

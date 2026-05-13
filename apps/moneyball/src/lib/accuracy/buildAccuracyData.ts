@@ -200,7 +200,7 @@ const VERSION_ORDER = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8'];
 const VERSION_META: Record<string, { label: string; note: string }> = {
   'v1.5': { label: 'v1.5', note: '기준 모델' },
   'v1.6': { label: 'v1.6', note: 'ELO·상대전적 실험 → 저조로 복원' },
-  'v1.7-revert': { label: 'v1.7', note: 'v1.5 가중치 복원 + 일요일 상한 55%' },
+  'v1.7-revert': { label: 'v1.7', note: 'v1.5 가중치 복원 + 일요일 상한 도입 (55%→45% 조정)' },
   'v1.8': { label: 'v1.8', note: 'ELO 10%↑ / head_to_head 3%↓' },
 };
 
