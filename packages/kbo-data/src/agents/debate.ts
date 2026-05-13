@@ -84,6 +84,18 @@ export async function runDebate(
     predictedWinner: quantitativeProb >= 0.5 ? homeTeam : awayTeam,
   };
 
+  const agentsFailed = !homeResult.data || !awayResult.data || !judgeResult.data;
+  const agentError = (!homeResult.success ? homeResult.error : null)
+    ?? (!awayResult.success ? awayResult.error : null)
+    ?? (!judgeResult.success ? judgeResult.error : null)
+    ?? null;
+
+  if (agentsFailed) {
+    console.error(
+      `[Debate] ${awayTeam}@${homeTeam}: 에이전트 fallback — ${agentError ?? 'unknown'}`
+    );
+  }
+
   console.log(
     `[Debate] ${awayTeam}@${homeTeam}: ` +
     `홈 ${Math.round(homeArg.confidence * 100)}% vs 원정 ${Math.round(awayArg.confidence * 100)}% → ` +
@@ -100,5 +112,7 @@ export async function runDebate(
     quantitativeProb,
     totalTokens,
     totalDurationMs: Date.now() - startTime,
+    agentsFailed,
+    agentError,
   };
 }

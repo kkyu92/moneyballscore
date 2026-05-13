@@ -230,4 +230,58 @@ describe('runDebate 오케스트레이션', () => {
     const result = await runDebate(makeContext(), 0.57, makeHistory());
     expect(result.totalDurationMs).toBeGreaterThanOrEqual(0);
   });
+
+  // --- agentsFailed / agentError 가시화 회귀 테스트 (cycle 362) ---
+
+  it('모든 에이전트 성공 시 agentsFailed=false, agentError=null', async () => {
+    vi.mocked(runTeamAgent).mockImplementation(async (team) =>
+      team === 'LG' ? ok(homeArg, 120) : ok(awayArg, 110)
+    );
+    vi.mocked(runCalibrationAgent).mockResolvedValue(ok(calibZero, 60));
+    vi.mocked(runJudgeAgent).mockResolvedValue(ok(verdict, 250));
+
+    const result = await runDebate(makeContext(), 0.57, makeHistory());
+
+    expect(result.agentsFailed).toBe(false);
+    expect(result.agentError).toBeNull();
+  });
+
+  it('심판 에이전트 실패 시 agentsFailed=true, agentError 캡처', async () => {
+    vi.mocked(runTeamAgent).mockImplementation(async (team) =>
+      team === 'LG' ? ok(homeArg, 120) : ok(awayArg, 110)
+    );
+    vi.mocked(runCalibrationAgent).mockResolvedValue(ok(calibZero, 60));
+    vi.mocked(runJudgeAgent).mockResolvedValue(fail<JudgeVerdict>());
+
+    const result = await runDebate(makeContext(), 0.57, makeHistory());
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('mock fail');
+  });
+
+  it('홈 팀 에이전트 실패 시 agentsFailed=true', async () => {
+    vi.mocked(runTeamAgent).mockImplementation(async (team) =>
+      team === 'LG' ? fail<TeamArgument>() : ok(awayArg, 110)
+    );
+    vi.mocked(runCalibrationAgent).mockResolvedValue(ok(calibZero, 60));
+    vi.mocked(runJudgeAgent).mockResolvedValue(ok(verdict, 250));
+
+    const result = await runDebate(makeContext(), 0.57, makeHistory());
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('mock fail');
+  });
+
+  it('원정 팀 에이전트 실패 시 agentsFailed=true', async () => {
+    vi.mocked(runTeamAgent).mockImplementation(async (team) =>
+      team === 'LG' ? ok(homeArg, 120) : fail<TeamArgument>()
+    );
+    vi.mocked(runCalibrationAgent).mockResolvedValue(ok(calibZero, 60));
+    vi.mocked(runJudgeAgent).mockResolvedValue(ok(verdict, 250));
+
+    const result = await runDebate(makeContext(), 0.57, makeHistory());
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('mock fail');
+  });
 });

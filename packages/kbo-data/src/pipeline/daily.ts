@@ -612,7 +612,12 @@ export async function runDailyPipeline(
             quantitativeProb: debate.quantitativeProb, totalTokens: debate.totalTokens,
           },
         });
-        debateSucceeded = true;
+        if (debate.agentsFailed) {
+          const errMsg = debate.agentError?.slice(0, 200) ?? 'API error';
+          errors.push(`Debate agents fallback ${game.homeTeam}v${game.awayTeam}: ${errMsg}`);
+        } else {
+          debateSucceeded = true;
+        }
       } catch (e) {
         const debateErr = e instanceof Error ? e.message : String(e);
         console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, debateErr);
