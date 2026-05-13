@@ -388,10 +388,55 @@ async function getBestPickOfWeek(startDate: string, endDate: string): Promise<Be
   };
 }
 
+async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<BestPickCard | null> {
+  const supabase = await createClient();
+  const result = (await supabase
+    .from('predictions')
+    .select(`
+      confidence, reasoning,
+      game:games!predictions_game_id_fkey(
+        id, game_date, home_score, away_score,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      ),
+      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+    `)
+    .eq('prediction_type', 'pre_game')
+    .match(CURRENT_MODEL_FILTER)
+    .eq('is_correct', false)
+    .gte('confidence', 0.65)
+    .gte('game.game_date', startDate)
+    .lte('game.game_date', endDate)
+    .order('confidence', { ascending: false })
+    .limit(1)) as SelectResult<BestPickRow[]>;
+
+  const { data } = assertSelectOk(result, 'analysis getUpsetPickOfMonth');
+  const rows = (data ?? []) as unknown as BestPickRow[];
+  const row = rows[0];
+  if (!row?.game) return null;
+
+  const homeCode = row.game.home_team?.code as TeamCode | undefined;
+  const awayCode = row.game.away_team?.code as TeamCode | undefined;
+  const winnerCode = row.predicted_winner_team?.code as TeamCode | undefined;
+  if (!homeCode || !awayCode || !winnerCode) return null;
+
+  return {
+    gameId: row.game.id,
+    gameDate: row.game.game_date,
+    homeCode,
+    awayCode,
+    homeScore: row.game.home_score,
+    awayScore: row.game.away_score,
+    predictedWinnerCode: winnerCode,
+    confidence: row.confidence ?? 0.65,
+    homeWinProb: winnerProbOf(row.reasoning?.homeWinProb),
+  };
+}
+
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -399,6 +444,7 @@ export default async function AnalysisIndexPage() {
     getPeriodStats(currentMonth.startDate, currentMonth.endDate),
     getBestPickOfWeek(currentWeek.startDate, currentWeek.endDate),
     getBestPickOfWeek(currentMonth.startDate, currentMonth.endDate),
+    getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
   ]);
 
   return (
@@ -781,6 +827,53 @@ export default async function AnalysisIndexPage() {
                   )}%
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">확신도</p>
+              </div>
+            </div>
+          </Link>
+        </section>
+      )}
+
+      {/* 이번 달 AI 이변 경기 — 고확신(65%+) 예측이 틀린 경기 */}
+      {upsetPickOfMonth && (
+        <section aria-labelledby="upset-pick-month-title">
+          <h2 id="upset-pick-month-title" className="text-xl font-bold mb-3">
+            🤯 이번 달 AI 이변 경기
+          </h2>
+          <Link
+            href={`/analysis/game/${upsetPickOfMonth.gameId}`}
+            className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-red-300/50 dark:border-red-800/40 p-5 hover:border-red-400 dark:hover:border-red-600 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                    실패
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {upsetPickOfMonth.gameDate}
+                  </span>
+                </div>
+                <p className="font-bold text-gray-900 dark:text-gray-100 truncate">
+                  {shortTeamName(upsetPickOfMonth.awayCode)}{' '}
+                  {upsetPickOfMonth.awayScore ?? '-'} : {upsetPickOfMonth.homeScore ?? '-'}{' '}
+                  {shortTeamName(upsetPickOfMonth.homeCode)}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  예측: {shortTeamName(upsetPickOfMonth.predictedWinnerCode)}{' '}
+                  {upsetPickOfMonth.predictedWinnerCode === upsetPickOfMonth.homeCode
+                    ? Math.round(upsetPickOfMonth.homeWinProb * 100)
+                    : Math.round((1 - upsetPickOfMonth.homeWinProb) * 100)}% → 실패
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {Math.round(
+                    (upsetPickOfMonth.predictedWinnerCode === upsetPickOfMonth.homeCode
+                      ? upsetPickOfMonth.homeWinProb
+                      : 1 - upsetPickOfMonth.homeWinProb) * 100,
+                  )}%
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">확신했는데</p>
               </div>
             </div>
           </Link>
