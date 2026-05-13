@@ -36,6 +36,15 @@ export interface RecentForm {
   trend: 'up' | 'down' | 'flat';
 }
 
+export interface ConfidenceTier {
+  label: string;
+  range: string;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+  ci95Half: number;
+}
+
 const BUCKET_WIDTH = 0.05;
 const BUCKET_START = 0.5;
 const BUCKET_COUNT = 10;
@@ -137,6 +146,25 @@ export function buildWeeklyTrend(rows: PredRow[]): WeekBucket[] {
         accuracy: n > 0 ? hits / n : null,
       };
     });
+}
+
+export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
+  const tiers = [
+    { label: '낮은 확신', range: '~55%', min: 0, max: 0.55 },
+    { label: '보통 확신', range: '55~65%', min: 0.55, max: 0.65 },
+    { label: '높은 확신', range: '65%~', min: 0.65, max: 1.01 },
+  ];
+  return tiers.map(({ label, range, min, max }) => {
+    const subset = rows.filter((r) => r.confidence >= min && r.confidence < max);
+    const n = subset.length;
+    const hits = subset.filter((r) => r.is_correct).length;
+    const accuracy = n > 0 ? hits / n : null;
+    const ci95Half =
+      accuracy !== null && n > 0
+        ? 1.96 * Math.sqrt((accuracy * (1 - accuracy)) / n)
+        : 0;
+    return { label, range, n, hits, accuracy, ci95Half };
+  });
 }
 
 export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
