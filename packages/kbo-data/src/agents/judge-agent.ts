@@ -140,6 +140,8 @@ export async function runJudgeAgent(
 
   // Sunday confidence cap: 일요일 과적합 방지 (데이터: n≈20 일요일 적중률 ~15%, W20 1/5=20%)
   // n=150 전 선제 단독 적용 — cycle 308 operational-analysis 결론
+  // cap 타겟 0.45: 0.55 경계값에 맞추면 medium tier(≥0.55)로 오분류 → 실측 low 정확도가
+  // medium tier 적중률 오염 (cycle 358 review-code heavy). 0.45 = low tier 명확 배치.
   if (context && result.success && result.data && result.data.confidence > 0.55) {
     const dow = new Date(context.game.date + 'T00:00:00Z').getUTCDay(); // 0=일요일
     if (dow === 0) {
@@ -147,10 +149,10 @@ export async function runJudgeAgent(
         ...result,
         data: {
           ...result.data,
-          confidence: 0.55,
+          confidence: 0.45,
           calibrationApplied: result.data.calibrationApplied
-            ? `${result.data.calibrationApplied}; 일요일 상한 0.55`
-            : '일요일 상한 0.55',
+            ? `${result.data.calibrationApplied}; 일요일 상한 0.45`
+            : '일요일 상한 0.45',
         },
       };
     }

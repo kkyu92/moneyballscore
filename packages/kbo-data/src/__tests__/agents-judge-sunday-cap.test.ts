@@ -88,12 +88,12 @@ describe('runJudgeAgent — Sunday confidence cap', () => {
     vi.clearAllMocks();
   });
 
-  it('일요일: confidence 0.70 → 0.55 캡', async () => {
+  it('일요일: confidence 0.70 → 0.45 캡 (low tier 분류)', async () => {
     vi.mocked(callLLM).mockResolvedValue(llmOk(0.70));
     // 2026-05-10 = 일요일
     const result = await runJudgeAgent('LG', 'OB', homeArg, awayArg, 0.57, null, makeContext('2026-05-10'));
-    expect(result.data!.confidence).toBe(0.55);
-    expect(result.data!.calibrationApplied).toBe('일요일 상한 0.55');
+    expect(result.data!.confidence).toBe(0.45);
+    expect(result.data!.calibrationApplied).toBe('일요일 상한 0.45');
   });
 
   it('일요일: confidence 0.55 이하면 캡 미적용', async () => {
@@ -113,7 +113,7 @@ describe('runJudgeAgent — Sunday confidence cap', () => {
   it('일요일: 기존 calibrationApplied 있으면 세미콜론 append', async () => {
     vi.mocked(callLLM).mockResolvedValue(llmOk(0.70, '최근 홈팀 편향'));
     const result = await runJudgeAgent('LG', 'OB', homeArg, awayArg, 0.57, null, makeContext('2026-05-10'));
-    expect(result.data!.calibrationApplied).toBe('최근 홈팀 편향; 일요일 상한 0.55');
+    expect(result.data!.calibrationApplied).toBe('최근 홈팀 편향; 일요일 상한 0.45');
   });
 
   it('월요일: confidence 0.70 → 변경 없음', async () => {
