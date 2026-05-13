@@ -37,7 +37,7 @@ describe('buildShadowRows', () => {
   it('creates shadow row from v2.0-debate with pure prob', () => {
     const shadow = buildShadowRows([base]);
     expect(shadow).toHaveLength(1);
-    expect(shadow[0].model_version).toBe('v1.6-pure-shadow');
+    expect(shadow[0].model_version).toBe('quant-only-shadow');
     expect(shadow[0].scoring_rule).toBe('v1.6');
     // is_correct: pHome=0.56 >= 0.5 → predict home. winner=home_team → correct
     expect(shadow[0].is_correct).toBe(true);
@@ -61,7 +61,7 @@ describe('buildShadowRows', () => {
     const shadow = buildShadowRows(rows);
     const groups = aggregateByModel([...rows, ...shadow]);
     const debate = groups.find((g) => g.modelVersion === 'v2.0-debate');
-    const pure = groups.find((g) => g.modelVersion === 'v1.6-pure-shadow');
+    const pure = groups.find((g) => g.modelVersion === 'quant-only-shadow');
     expect(debate).toBeDefined();
     expect(pure).toBeDefined();
     // debate Brier: (0.72 - 1)^2 = 0.0784
