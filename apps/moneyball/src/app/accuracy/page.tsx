@@ -220,13 +220,13 @@ export default async function AccuracyPage() {
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <Breadcrumb items={[{ label: 'AI 적중 기록' }]} className="mb-2" />
 
-      <header className="space-y-2">
+      <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
         <h1 className="text-2xl font-bold">AI 적중 기록</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-white/70">
           MoneyBall Score AI가 얼마나 정확한지 솔직하게 공개합니다. 시즌 내 모든 검증 완료 예측 기준.
         </p>
         {lastUpdated && (
-          <p className="text-xs text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-white/50">
             최종 업데이트:{' '}
             {new Date(lastUpdated).toLocaleDateString('ko-KR', {
               year: 'numeric',
@@ -269,48 +269,64 @@ export default async function AccuracyPage() {
               3명 이상 참여한 경기 기준 — 커뮤니티 다수결 vs AI 예측 정확도 비교
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-4 text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">커뮤니티 정답률</p>
-              <p
-                className={`text-2xl font-bold font-mono ${
-                  communityStats.communityAccuracy !== null && communityStats.communityAccuracy >= 0.5
-                    ? 'text-brand-500'
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {communityStats.communityAccuracy !== null
-                  ? `${(communityStats.communityAccuracy * 100).toFixed(1)}%`
-                  : '—'}
-              </p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
-                {communityStats.communityCorrect}/{communityStats.communityGames} 적중
-              </p>
-            </div>
-            <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-4 text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">AI 정답률 (같은 경기)</p>
-              <p
-                className={`text-2xl font-bold font-mono ${
-                  communityStats.aiAccuracyWithPoll !== null && communityStats.aiAccuracyWithPoll >= 0.5
-                    ? 'text-brand-500'
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {communityStats.aiAccuracyWithPoll !== null
-                  ? `${(communityStats.aiAccuracyWithPoll * 100).toFixed(1)}%`
-                  : '—'}
-              </p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
-                {communityStats.aiGamesWithPoll > 0
-                  ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중`
-                  : '예측 없음'}
-              </p>
-            </div>
-          </div>
+          {(() => {
+            const commWins =
+              communityStats.communityAccuracy !== null &&
+              communityStats.aiAccuracyWithPoll !== null &&
+              communityStats.communityAccuracy > communityStats.aiAccuracyWithPoll;
+            const aiWins =
+              communityStats.communityAccuracy !== null &&
+              communityStats.aiAccuracyWithPoll !== null &&
+              communityStats.aiAccuracyWithPoll > communityStats.communityAccuracy;
+            return (
+              <div className="grid grid-cols-2 gap-4">
+                <div className={`rounded-lg p-4 text-center ${commWins ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {commWins && '🏆 '}커뮤니티 정답률
+                  </p>
+                  <p
+                    className={`text-2xl font-bold font-mono ${
+                      communityStats.communityAccuracy !== null && communityStats.communityAccuracy >= 0.5
+                        ? 'text-brand-500'
+                        : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {communityStats.communityAccuracy !== null
+                      ? `${(communityStats.communityAccuracy * 100).toFixed(1)}%`
+                      : '—'}
+                  </p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                    {communityStats.communityCorrect}/{communityStats.communityGames} 적중
+                  </p>
+                </div>
+                <div className={`rounded-lg p-4 text-center ${aiWins ? 'bg-[var(--color-brand-50)] dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {aiWins && '🏆 '}AI 정답률 (같은 경기)
+                  </p>
+                  <p
+                    className={`text-2xl font-bold font-mono ${
+                      communityStats.aiAccuracyWithPoll !== null && communityStats.aiAccuracyWithPoll >= 0.5
+                        ? 'text-brand-500'
+                        : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {communityStats.aiAccuracyWithPoll !== null
+                      ? `${(communityStats.aiAccuracyWithPoll * 100).toFixed(1)}%`
+                      : '—'}
+                  </p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                    {communityStats.aiGamesWithPoll > 0
+                      ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중`
+                      : '예측 없음'}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
           {communityStats.communityAccuracy !== null && communityStats.aiAccuracyWithPoll !== null && (
             <p className="text-xs text-center text-gray-400 dark:text-gray-500">
               {communityStats.communityAccuracy > communityStats.aiAccuracyWithPoll
-                ? `🏆 커뮤니티가 AI보다 ${((communityStats.communityAccuracy - communityStats.aiAccuracyWithPoll) * 100).toFixed(1)}%p 앞섭니다`
+                ? `커뮤니티가 AI보다 ${((communityStats.communityAccuracy - communityStats.aiAccuracyWithPoll) * 100).toFixed(1)}%p 앞섭니다`
                 : communityStats.communityAccuracy < communityStats.aiAccuracyWithPoll
                   ? `AI가 커뮤니티보다 ${((communityStats.aiAccuracyWithPoll - communityStats.communityAccuracy) * 100).toFixed(1)}%p 앞섭니다`
                   : '커뮤니티와 AI가 동률입니다'}
@@ -438,7 +454,8 @@ export default async function AccuracyPage() {
               일요일은 과적합 방지를 위해 AI 신뢰도 상한 55%를 적용합니다.
             </p>
           </div>
-          <div className="grid grid-cols-7 gap-2 mt-2">
+          <div className="overflow-x-auto">
+          <div className="grid grid-cols-7 gap-2 mt-2 min-w-[360px]">
             {dow.map((d) => {
               const acc = d.accuracy;
               const barH = acc !== null ? Math.round(acc * 100) : 0;
@@ -489,6 +506,7 @@ export default async function AccuracyPage() {
               );
             })}
           </div>
+          </div>
           <div className="flex gap-4 text-[10px] text-gray-400 dark:text-gray-500 pt-1">
             <span className="flex items-center gap-1">
               <span className="inline-block w-2 h-2 rounded-sm bg-brand-500" />
@@ -530,25 +548,48 @@ export default async function AccuracyPage() {
                 </tr>
               </thead>
               <tbody>
-                {teamRows.map((t) => (
-                  <tr
-                    key={t.teamCode}
-                    className="border-b border-gray-200 dark:border-[var(--color-border)]"
-                  >
-                    <td className="py-2 pr-4 font-medium">{shortTeamName(t.teamCode)}</td>
-                    <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
-                    <td className="py-2 pr-4 text-right font-mono">{t.correctN}</td>
-                    <td
-                      className={`py-2 text-right font-mono font-semibold ${t.accuracyRate !== null && t.accuracyRate >= 0.5 ? 'text-brand-500' : t.accuracyRate !== null && t.accuracyRate < 0.5 && t.verifiedN >= 3 ? 'text-red-400' : ''}`}
-                    >
-                      {t.verifiedN < 3
-                        ? '(샘플 부족)'
-                        : t.accuracyRate !== null
-                          ? `${(t.accuracyRate * 100).toFixed(1)}%`
-                          : '—'}
-                    </td>
-                  </tr>
-                ))}
+                {teamRows.map((t) => {
+                    const isOutlier =
+                      t.accuracyRate !== null &&
+                      t.verifiedN >= 3 &&
+                      overallAcc - t.accuracyRate > 0.15;
+                    return (
+                      <tr
+                        key={t.teamCode}
+                        className={`border-b border-gray-200 dark:border-[var(--color-border)] ${
+                          isOutlier ? 'bg-amber-50 dark:bg-amber-900/20' : ''
+                        }`}
+                      >
+                        <td className="py-2 pr-4 font-medium">
+                          {shortTeamName(t.teamCode)}
+                          {isOutlier && (
+                            <span className="ml-1.5 text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded px-1 py-0.5">
+                              이상치
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
+                        <td className="py-2 pr-4 text-right font-mono">{t.correctN}</td>
+                        <td
+                          className={`py-2 text-right font-mono font-semibold ${
+                            t.accuracyRate !== null && t.accuracyRate >= 0.5
+                              ? 'text-brand-500'
+                              : isOutlier
+                                ? 'text-amber-600 dark:text-amber-400'
+                                : t.accuracyRate !== null && t.accuracyRate < 0.5 && t.verifiedN >= 3
+                                  ? 'text-red-400'
+                                  : ''
+                          }`}
+                        >
+                          {t.verifiedN < 3
+                            ? '(샘플 부족)'
+                            : t.accuracyRate !== null
+                              ? `${(t.accuracyRate * 100).toFixed(1)}%`
+                              : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -583,7 +624,7 @@ function StatCard({
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p
-        className={`text-2xl font-bold font-mono mt-1 ${accent ? 'text-brand-500' : ''}`}
+        className={`text-3xl font-bold font-mono mt-1 ${accent ? 'text-brand-500' : ''}`}
       >
         {value}
       </p>
