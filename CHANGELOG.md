@@ -1,5 +1,51 @@
 # Changelog
 
+## W22 중간 점검 (2026-05-13, cycle 341 operational-analysis lite)
+
+### 재사용 패턴 추출 (cycles 334~341)
+
+#### anti_pattern: Versioned Label Drift After Model Upgrade
+- **문제**: 가중치 파일 변경 후 파이프라인 코드의 version label 하드코딩이 자동 갱신 안 됨
+- **사례**: cycle 334 (`scoring_rule='v1.6'` 하드코딩) + cycle 340 (`model_version='v1.7-revert'` fallback)
+- **해결**: 버전 라벨 단일 소스 (`CURRENT_SCORING_RULE` 상수) + 파이프라인이 import 참조
+- **범용성**: ML 파이프라인에서 weights 파일과 logging 코드 분리 시 공통 패턴
+
+#### quality_guard: Supply Chain Security CI Gate
+- **문제**: pnpm/action-setup semver 태그 + transitive 취약점 탐지 미자동화
+- **해결**: `pnpm audit --audit-level=high` CI 필수 스텝 + actions SHA 핀 + pnpm overrides
+- **결과**: 16개 CVE 차단, 향후 high severity 자동 차단 게이트
+
+#### data_pipeline: Dual Version Field — model_version vs scoring_rule
+- **발견**: `model_version='v2.0-debate'` (에이전트 고정) vs `scoring_rule` (가중치 버전) 구분
+- **의미**: scoring_rule이 실질적 성과 비교 기준. v1.6(37%) 저성과가 누적 끌어내린 주범
+- **범용성**: 메타-버전과 하이퍼파라미터 버전 분리 관리 패턴
+
+### v1.8 scoring_rule 첫 배치 시작 확인
+
+**scoring_rule별 누적 성과** (n=94 전체):
+| scoring_rule | 적중 | 건수 | 적중률 | 비고 |
+|---|---|---|---|---|
+| v1.5 | 12 | 16 | **75.0%** | game_id 81~150 (소표본) |
+| v1.6 | 17 | 46 | **37.0%** | game_id 151~3252 |
+| v1.7-revert | 17 | 32 | **53.1%** | game_id 3328~3822 (5/5~5/12) |
+| **v1.8** | **0** | **0** | **-** | 5/13~부터 첫 배치 (cycle 340 fix 적용) |
+
+**핵심 발견**: cycle 340 v1.8 label fix 이전 모든 예측이 v1.7-revert로 저장됨.
+v1.8 가중치 실제 적용일 = 2026-05-12 22:18 KST (cycle 335 deploy). 당일 5/12 경기는 오전 pipeline 실행 → v1.7-revert 라벨. 5/13부터 v1.8 첫 건 시작.
+
+**전체 현황**:
+- 누적 n=94, 48.9% / Brier 0.2549 (이전 0.2501에서 소폭 악화 — W22 5/12 40.0% 영향)
+- v2.0 임계까지 56건 부족 (n=150 목표)
+
+**확신도 역설 재확인** (W22 5/12):
+- 저확신(≤0.35): 2/2 = **100%** (HH, NC — 모두 0.30)
+- 중확신(0.35~0.50): 0/1 = **0%** (KT 0.45)
+- 고확신(0.50+): 0/2 = **0%** (LG 0.50, HT 0.52)
+
+**가중치 조정 결정**: 없음 — v1.8 데이터 0건. n=150 도달 후 v2.0 확정.
+
+---
+
 ## W22 성과 업데이트 (2026-05-13, cycle 339 operational-analysis lite)
 
 ### 주간 성과 요약
