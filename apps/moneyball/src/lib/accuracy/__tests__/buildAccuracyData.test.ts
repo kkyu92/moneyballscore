@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   brierScore,
+  buildConfidenceTiers,
   buildDayOfWeek,
   buildRecentForm,
   buildWeeklyTrend,
@@ -171,6 +172,46 @@ describe('buildDayOfWeek', () => {
     const result = buildDayOfWeek([]);
     const labels = result.map((d) => d.dayLabel);
     expect(labels).toEqual(['월', '화', '수', '목', '금', '토', '일']);
+  });
+});
+
+describe('buildConfidenceTiers', () => {
+  it('빈 배열 → 3개 tier, 모두 accuracy=null', () => {
+    const result = buildConfidenceTiers([]);
+    expect(result).toHaveLength(3);
+    result.forEach((t) => expect(t.accuracy).toBeNull());
+  });
+
+  it('confidence 0.5 → 낮은 확신 tier에 포함', () => {
+    const result = buildConfidenceTiers([row(0.5, true)]);
+    expect(result[0].n).toBe(1);
+    expect(result[0].hits).toBe(1);
+    expect(result[1].n).toBe(0);
+    expect(result[2].n).toBe(0);
+  });
+
+  it('confidence 0.55 → 보통 확신 tier에 포함', () => {
+    const result = buildConfidenceTiers([row(0.55, false)]);
+    expect(result[0].n).toBe(0);
+    expect(result[1].n).toBe(1);
+    expect(result[1].hits).toBe(0);
+  });
+
+  it('confidence 0.65 → 높은 확신 tier에 포함', () => {
+    const result = buildConfidenceTiers([row(0.65, true)]);
+    expect(result[2].n).toBe(1);
+    expect(result[2].accuracy).toBe(1);
+  });
+
+  it('역전 패턴 감지 — low accuracy > mid accuracy', () => {
+    const rows = [
+      ...Array(10).fill(row(0.5, true)),   // low: 10/10 = 100%
+      ...Array(5).fill(row(0.55, false)),  // mid: 0/5 = 0%
+    ];
+    const result = buildConfidenceTiers(rows);
+    expect(result[0].accuracy).toBe(1);
+    expect(result[1].accuracy).toBe(0);
+    expect(result[1].accuracy!).toBeLessThan(result[0].accuracy!);
   });
 });
 

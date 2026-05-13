@@ -7,12 +7,14 @@ import { neutral } from '@/lib/design-tokens';
 import {
   type PredRow,
   type Bucket,
+  type ConfidenceTier,
   bucketize,
   brierScore,
   calibrationGap,
   buildDayOfWeek,
   buildWeeklyTrend,
   buildRecentForm,
+  buildConfidenceTiers,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -213,6 +215,7 @@ export default async function AccuracyPage() {
   const weekly = buildWeeklyTrend(rows);
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
+  const confidenceTiers = buildConfidenceTiers(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
 
@@ -525,6 +528,72 @@ export default async function AccuracyPage() {
               50% 기준선
             </span>
           </div>
+        </section>
+      )}
+
+      {/* AI 확신도별 분석 */}
+      {n >= 5 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+          <div>
+            <h2 className="text-lg font-bold">AI 확신도별 분석</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              AI가 스스로 매긴 확신도 구간별 실제 적중률. 확신이 높을수록 맞아야 잘 보정된 모델.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {(confidenceTiers as ConfidenceTier[]).map((tier) => {
+              const pct = tier.accuracy !== null ? Math.round(tier.accuracy * 100) : null;
+              const isInverted =
+                tier.accuracy !== null &&
+                confidenceTiers[0].accuracy !== null &&
+                tier.label === '보통 확신' &&
+                tier.accuracy < confidenceTiers[0].accuracy;
+              return (
+                <div
+                  key={tier.label}
+                  className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 space-y-1 text-center"
+                >
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{tier.label}</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.range}</p>
+                  {pct !== null ? (
+                    <p
+                      className={`text-2xl font-bold ${
+                        isInverted
+                          ? 'text-amber-500 dark:text-amber-400'
+                          : pct >= 55
+                          ? 'text-brand-600 dark:text-brand-400'
+                          : 'text-red-500 dark:text-red-400'
+                      }`}
+                    >
+                      {pct}%
+                    </p>
+                  ) : (
+                    <p className="text-2xl font-bold text-gray-300 dark:text-gray-600">—</p>
+                  )}
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">
+                    {tier.n > 0 ? `${tier.hits}/${tier.n}` : '데이터 없음'}
+                  </p>
+                  {isInverted && (
+                    <p className="text-[10px] text-amber-500 dark:text-amber-400 font-medium">
+                      역전 패턴 ⚠
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {(() => {
+            const low = confidenceTiers[0];
+            const mid = confidenceTiers[1];
+            const isInverted =
+              low.n >= 5 && mid.n >= 3 && mid.accuracy !== null && low.accuracy !== null && mid.accuracy < low.accuracy;
+            return isInverted ? (
+              <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+                보통 확신 예측이 낮은 확신보다 적중률이 낮습니다. AI가 중간 구간에서 과보수하거나
+                어려운 경기를 중간 확신으로 표현하는 패턴입니다.
+              </p>
+            ) : null;
+          })()}
         </section>
       )}
 
