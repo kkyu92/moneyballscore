@@ -2,8 +2,9 @@ import Link from "next/link";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
+import type { NavIconName } from "./nav-icon";
 
-export type NavLink = { href: string; label: string; description?: string };
+export type NavLink = { href: string; label: string; description?: string; icon?: NavIconName };
 export type NavGroup = { label: string; items: NavLink[] };
 export type NavItem = NavLink | NavGroup;
 
@@ -16,16 +17,16 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "AI",
     items: [
-      { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석" },
-      { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹" },
-      { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표" },
+      { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석", icon: "activity" },
+      { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
+      { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표", icon: "bar-chart" },
     ],
   },
   {
     label: "커뮤니티",
     items: [
-      { href: "/picks", label: "내 픽 기록", description: "내 예측과 AI 성과 비교" },
-      { href: "/leaderboard", label: "픽 리더보드", description: "커뮤니티 예측 순위" },
+      { href: "/picks", label: "내 픽 기록", description: "내 예측과 AI 성과 비교", icon: "clipboard-check" },
+      { href: "/leaderboard", label: "픽 리더보드", description: "커뮤니티 예측 순위", icon: "award" },
     ],
   },
   { href: "/standings", label: "순위" },
@@ -33,19 +34,19 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "팀·선수",
     items: [
-      { href: "/teams", label: "팀", description: "KBO 10구단 프로필·통계" },
-      { href: "/players", label: "선수", description: "선수 세이버메트릭스 지표" },
-      { href: "/matchup", label: "매치업", description: "팀간 맞대결 이력 분석" },
+      { href: "/teams", label: "팀", description: "KBO 10구단 프로필·통계", icon: "shield" },
+      { href: "/players", label: "선수", description: "선수 세이버메트릭스 지표", icon: "user" },
+      { href: "/matchup", label: "매치업", description: "팀간 맞대결 이력 분석", icon: "arrows-swap" },
     ],
   },
   {
     label: "리뷰·시즌",
     items: [
-      { href: "/reviews", label: "예측 리뷰", description: "주간·월간 예측 총평" },
-      { href: "/reviews/weekly", label: "주간 리뷰", description: "이번 주 예측 성과 분석" },
-      { href: "/reviews/monthly", label: "월간 리뷰", description: "월별 적중률 트렌드" },
-      { href: "/reviews/misses", label: "빗나간 예측", description: "오답 원인 factor 분석" },
-      { href: "/seasons", label: "시즌 기록", description: "연도별 성과 아카이브" },
+      { href: "/reviews", label: "예측 리뷰", description: "주간·월간 예측 총평", icon: "file-text" },
+      { href: "/reviews/weekly", label: "주간 리뷰", description: "이번 주 예측 성과 분석", icon: "calendar" },
+      { href: "/reviews/monthly", label: "월간 리뷰", description: "월별 적중률 트렌드", icon: "calendar" },
+      { href: "/reviews/misses", label: "빗나간 예측", description: "오답 원인 factor 분석", icon: "x-circle" },
+      { href: "/seasons", label: "시즌 기록", description: "연도별 성과 아카이브", icon: "database" },
     ],
   },
 ];

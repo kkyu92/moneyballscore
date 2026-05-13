@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS, isNavGroup } from "./Header";
+import { NavIcon } from "./nav-icon";
 import { SearchForm } from "@/components/shared/SearchForm";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -107,21 +108,26 @@ export function NavLinks() {
                       href={sub.href}
                       role="menuitem"
                       onClick={() => setOpenLabel(null)}
-                      className={`block px-4 py-2.5 text-sm transition-colors ${
+                      className={`flex items-start gap-3 px-4 py-2.5 text-sm transition-colors ${
                         isActive(sub.href, pathname)
                           ? "text-white bg-brand-700"
                           : "text-brand-200 hover:bg-brand-700 hover:text-white"
                       }`}
                     >
+                      {sub.icon && (
+                        <span className="mt-0.5 shrink-0 opacity-70">
+                          <NavIcon name={sub.icon} />
+                        </span>
+                      )}
                       {sub.description ? (
-                        <>
+                        <span>
                           <span className={`block font-medium ${isActive(sub.href, pathname) ? "text-white" : ""}`}>
                             {sub.label}
                           </span>
                           <span className={`block text-xs mt-0.5 ${isActive(sub.href, pathname) ? "text-brand-300" : "text-brand-400"}`}>
                             {sub.description}
                           </span>
-                        </>
+                        </span>
                       ) : (
                         sub.label
                       )}
