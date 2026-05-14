@@ -700,6 +700,9 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* 오늘의 AI vs 커뮤니티 포인트 게임 */}
+      {divergenceGame && <DivergenceChip game={divergenceGame} />}
+
       {/* AI 대결 스코어카드 + 어제 경기 결과 */}
       <UserVsAIScorecard
         aiTotal={accuracy.total}
@@ -711,7 +714,6 @@ export default async function HomePage() {
           aiIsCorrect: g.predictions[0]?.is_correct ?? null,
         }))}
       />
-      {divergenceGame && <DivergenceChip game={divergenceGame} />}
       {yesterdayResults.length > 0 && (
         <YesterdayResultsSection games={yesterdayResults} />
       )}
