@@ -485,6 +485,11 @@ interface Stats {
   tzSumMin: number;       tzSumMax: number;       // Σ trailing_zeros(n[i])
   popcountDistMin: number; popcountDistMax: number; // distinct popcount values across 6
   bitLenDistMin: number;  bitLenDistMax: number;  // distinct bit_length values across 6
+  digitSumSumMin: number;  digitSumSumMax: number;  // Σ digitSum(n[i]) — total digit-sum across 6 (cycle 13/15)
+  digitSumMaxMin: number;  digitSumMaxMax: number;  // min/max of max digitSum per draw
+  digitSumMinMin: number;  digitSumMinMax: number;  // min/max of min digitSum per draw
+  maxDigitMin: number;     maxDigitMax: number;     // min/max of largest single digit across 12 digit positions
+  distinctDigitsMin: number; distinctDigitsMax: number; // distinct digit values (0-9) across 12 digit positions
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -714,6 +719,13 @@ function computeStats(rounds: LottoRound[]): Stats {
   const tzSums        = ns.map(n=>n.reduce((a,x)=>a+TZ[x],0));
   const popcountDists = ns.map(n=>new Set(n.map(x=>POPCOUNT[x])).size);
   const bitLenDists   = ns.map(n=>new Set(n.map(x=>BIT_LEN[x])).size);
+  const digitSumsPer  = ns.map(n=>n.map(x=>(x%10)+Math.floor(x/10)));
+  const digitSumSums  = digitSumsPer.map(d=>d.reduce((a,x)=>a+x,0));
+  const digitSumMaxes = digitSumsPer.map(d=>Math.max(...d));
+  const digitSumMins  = digitSumsPer.map(d=>Math.min(...d));
+  const allDigitsPer  = ns.map(n=>n.flatMap(x=>[Math.floor(x/10), x%10]));
+  const maxDigits     = allDigitsPer.map(d=>Math.max(...d));
+  const distinctDigs  = allDigitsPer.map(d=>new Set(d).size);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -910,6 +922,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     tzSumMin:        Math.min(...tzSums),        tzSumMax:       Math.max(...tzSums),
     popcountDistMin: Math.min(...popcountDists), popcountDistMax: Math.max(...popcountDists),
     bitLenDistMin:   Math.min(...bitLenDists),   bitLenDistMax:  Math.max(...bitLenDists),
+    digitSumSumMin:    Math.min(...digitSumSums),  digitSumSumMax: Math.max(...digitSumSums),
+    digitSumMaxMin:    Math.min(...digitSumMaxes), digitSumMaxMax: Math.max(...digitSumMaxes),
+    digitSumMinMin:    Math.min(...digitSumMins),  digitSumMinMax: Math.max(...digitSumMins),
+    maxDigitMin:       Math.min(...maxDigits),     maxDigitMax:    Math.max(...maxDigits),
+    distinctDigitsMin: Math.min(...distinctDigs),  distinctDigitsMax: Math.max(...distinctDigs),
     zones,
     freq,
   };
@@ -1139,6 +1156,12 @@ const RULES: Rule[] = [
   { name: 'trailing zero 합',     get: (n)=>n.reduce((a,x)=>a+TZ[x],0),          lo:s=>s.tzSumMin,        hi:s=>s.tzSumMax },
   { name: 'popcount distinct',    get: (n)=>new Set(n.map(x=>POPCOUNT[x])).size, lo:s=>s.popcountDistMin, hi:s=>s.popcountDistMax },
   { name: 'bit length distinct',  get: (n)=>new Set(n.map(x=>BIT_LEN[x])).size,  lo:s=>s.bitLenDistMin,   hi:s=>s.bitLenDistMax },
+  // ── 자리수합 합 + max + min + 각자리수 max + 각자리수 distinct (cycle 13/15)
+  { name: '자리수합 합',          get: (n)=>n.reduce((a,x)=>a+(x%10)+Math.floor(x/10),0),               lo:s=>s.digitSumSumMin,    hi:s=>s.digitSumSumMax },
+  { name: '자리수합 max',         get: (n)=>Math.max(...n.map(x=>(x%10)+Math.floor(x/10))),             lo:s=>s.digitSumMaxMin,    hi:s=>s.digitSumMaxMax },
+  { name: '자리수합 min',         get: (n)=>Math.min(...n.map(x=>(x%10)+Math.floor(x/10))),             lo:s=>s.digitSumMinMin,    hi:s=>s.digitSumMinMax },
+  { name: '각자리수 max',          get: (n)=>Math.max(...n.flatMap(x=>[Math.floor(x/10), x%10])),        lo:s=>s.maxDigitMin,       hi:s=>s.maxDigitMax },
+  { name: '각자리수 distinct',     get: (n)=>new Set(n.flatMap(x=>[Math.floor(x/10), x%10])).size,        lo:s=>s.distinctDigitsMin, hi:s=>s.distinctDigitsMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
