@@ -337,7 +337,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
                 ? "text-gray-400 dark:text-gray-500"
                 : g.isCorrect
                   ? "text-brand-600 dark:text-brand-400 font-semibold"
-                  : "text-red-500 dark:text-red-400";
+                  : "text-red-600 dark:text-red-400";
             const rowBg = idx % 2 === 1
               ? "bg-gray-50/60 dark:bg-gray-900/20"
               : "bg-white dark:bg-transparent";

@@ -609,7 +609,7 @@ export default async function AccuracyPage() {
                             ? 'text-amber-500 dark:text-amber-400'
                             : pct >= 55
                             ? 'text-brand-600 dark:text-brand-400'
-                            : 'text-red-500 dark:text-red-400'
+                            : 'text-red-600 dark:text-red-400'
                         }`}
                       >
                         {pct}%

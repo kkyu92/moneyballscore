@@ -46,7 +46,7 @@ function Recent10({ text }: { text: string }) {
     <span className="tabular-nums text-xs font-mono">
       <span className="text-brand-600 dark:text-brand-400">{wins}승</span>
       <span className="text-gray-400 mx-0.5">·</span>
-      <span className="text-red-500 dark:text-red-400">{losses}패</span>
+      <span className="text-red-600 dark:text-red-400">{losses}패</span>
     </span>
   );
 }
