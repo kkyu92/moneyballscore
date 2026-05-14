@@ -53,7 +53,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
           <span className="text-brand-700 dark:text-brand-300">
             내 순위: <span className="font-bold">{myRank}등</span>
             {myEntry.current_streak >= 2 && (
-              <span className="ml-2 text-amber-600 dark:text-amber-400">
+              <span className="ml-2 text-accent dark:text-accent-light">
                 🔥 {myEntry.current_streak}연속
               </span>
             )}
@@ -91,7 +91,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
                 isMe
                   ? 'bg-brand-50 dark:bg-brand-900/10'
                   : rank <= 3
-                  ? 'bg-amber-50/60 dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                  ? 'bg-accent/5 hover:bg-accent/10'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
               }`}
             >
@@ -104,7 +104,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
               </span>
               <span className="text-right tabular-nums text-xs">
                 {entry.current_streak >= 2 ? (
-                  <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                  <span className="text-accent dark:text-accent-light font-semibold">
                     🔥{entry.current_streak}
                   </span>
                 ) : (

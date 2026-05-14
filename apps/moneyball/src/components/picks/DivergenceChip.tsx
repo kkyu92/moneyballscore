@@ -38,16 +38,16 @@ export function DivergenceChip({ game }: Props) {
   return (
     <Link
       href={`/analysis/game/${game.gameId}`}
-      className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl px-4 py-3 text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+      className="flex items-center gap-2 bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 text-sm hover:bg-accent/15 transition-colors"
     >
-      <span className="text-amber-500 dark:text-amber-400 shrink-0 text-base">⚡</span>
+      <span className="text-accent dark:text-accent-light shrink-0 text-base">⚡</span>
       <span className="text-gray-700 dark:text-gray-200 min-w-0">
-        <span className="font-semibold text-amber-700 dark:text-amber-300">{communitySide}</span>
+        <span className="font-semibold text-accent dark:text-accent-light">{communitySide}</span>
         {eulReul(communitySide)} 커뮤니티 {communityPct}% 픽 — AI는{' '}
         <span className="font-semibold">{aiSide}</span> {aiPct}% 예측
         <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">({game.communityTotal}명)</span>
       </span>
-      <span className="shrink-0 text-xs text-amber-600 dark:text-amber-400 ml-auto">분석 →</span>
+      <span className="shrink-0 text-xs text-accent dark:text-accent-light ml-auto">분석 →</span>
     </Link>
   );
 }

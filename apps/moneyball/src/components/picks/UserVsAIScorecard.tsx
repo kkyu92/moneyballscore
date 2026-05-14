@@ -61,7 +61,7 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-bold">AI와 대결</h2>
           {currentStreak >= 2 && (
-            <span className="text-xs font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full tabular-nums">
+            <span className="text-xs font-semibold bg-accent/15 text-accent dark:text-accent-light px-2 py-0.5 rounded-full tabular-nums">
               🔥 {currentStreak}연속
             </span>
           )}
