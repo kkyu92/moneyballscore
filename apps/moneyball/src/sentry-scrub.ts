@@ -17,7 +17,7 @@ const FILTERED = '[Filtered]';
 const SENSITIVE_KEYS = new Set<string>([
   // 자격 증명
   'password', 'passwd', 'secret', 'token', 'api_key', 'apikey',
-  'authorization', 'cookie', 'ssn', 'credentials',
+  'authorization', 'cookie', 'cookies', 'ssn', 'credentials',
   // 식별자
   'email', 'email_verified', 'phone', 'phone_number',
   'user_id', 'userid', 'member_id', 'subscriber_id',
@@ -82,6 +82,15 @@ export function scrubSentryEvent(event: ErrorEvent): ErrorEvent | null {
   }
   if (event.extra) {
     event.extra = scrubObject(event.extra) as ErrorEvent['extra'];
+  }
+  // cycle 437 review-code heavy — sentry/PII spec (cycle 433) Y/C 후속.
+  // event.request 와 event.breadcrumbs 누락 시 url 쿼리·헤더·navigation history 의 PII 가
+  // 대시보드 기본 스크러버 의존만으로 노출 가능. 코드 강제 적용.
+  if (event.request) {
+    event.request = scrubObject(event.request) as ErrorEvent['request'];
+  }
+  if (event.breadcrumbs) {
+    event.breadcrumbs = scrubObject(event.breadcrumbs) as ErrorEvent['breadcrumbs'];
   }
   return event;
 }
