@@ -1072,36 +1072,43 @@ async function getVerifyResults(
   }
 
   // 취소(postponed) 경기에도 예측이 있으면 적중으로 집계.
+  // cycle 439 silent drift family 통일 — 본 분기만 `if (!res.error)` 패턴 잔존.
+  // assertSelectOk fail-loud 로 통일 → caller try/catch (line 350-354) 자동 처리.
+  interface PostponedGameRow { id: number; home_team_id: number; away_team_id: number; }
   const postponedRes = await db
     .from('games')
     .select('id, home_team_id, away_team_id')
     .eq('league_id', leagueId).eq('game_date', date).eq('status', 'postponed');
-  if (!postponedRes.error && postponedRes.data?.length) {
-    const postponedIds = (postponedRes.data as Array<{ id: number }>).map((g) => g.id);
+  const { data: postponedData } = assertSelectOk<PostponedGameRow[]>(
+    postponedRes, 'daily.getVerifyResults postponed games',
+  );
+  if (postponedData && postponedData.length > 0) {
+    const postponedIds = postponedData.map((g) => g.id);
     const postponedPredRes = await db
       .from('predictions')
       .select('game_id, predicted_winner')
       .eq('prediction_type', 'pre_game')
       .in('game_id', postponedIds);
-    if (!postponedPredRes.error) {
-      const ppMap = new Map<number, number>();
-      for (const p of (postponedPredRes.data ?? []) as Array<{ game_id: number; predicted_winner: number }>) {
-        ppMap.set(p.game_id, p.predicted_winner);
-      }
-      for (const game of (postponedRes.data as Array<{ id: number; home_team_id: number; away_team_id: number }>) ) {
-        const predWinner = ppMap.get(game.id);
-        if (predWinner) {
-          results.push({
-            homeTeam: (idToCode[game.home_team_id] || 'UNK') as TeamCode,
-            awayTeam: (idToCode[game.away_team_id] || 'UNK') as TeamCode,
-            predictedWinner: (idToCode[predWinner] || 'UNK') as TeamCode,
-            actualWinner: (idToCode[predWinner] || 'UNK') as TeamCode,
-            isCorrect: true,
-            homeScore: 0,
-            awayScore: 0,
-            isCancelled: true,
-          });
-        }
+    const { data: postponedPredRows } = assertSelectOk<
+      Array<{ game_id: number; predicted_winner: number }>
+    >(postponedPredRes, 'daily.getVerifyResults postponed predictions');
+    const ppMap = new Map<number, number>();
+    for (const p of (postponedPredRows ?? [])) {
+      ppMap.set(p.game_id, p.predicted_winner);
+    }
+    for (const game of postponedData) {
+      const predWinner = ppMap.get(game.id);
+      if (predWinner) {
+        results.push({
+          homeTeam: (idToCode[game.home_team_id] || 'UNK') as TeamCode,
+          awayTeam: (idToCode[game.away_team_id] || 'UNK') as TeamCode,
+          predictedWinner: (idToCode[predWinner] || 'UNK') as TeamCode,
+          actualWinner: (idToCode[predWinner] || 'UNK') as TeamCode,
+          isCorrect: true,
+          homeScore: 0,
+          awayScore: 0,
+          isCancelled: true,
+        });
       }
     }
   }
