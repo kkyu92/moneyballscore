@@ -216,6 +216,46 @@ const SQUAREFREE: Set<number> = (() => {
   return s;
 })();
 
+// ── prime-factor family (cycle 11/15) ─────────────────────────────────────────
+// BIG_OMEGA[x] = Ω(x) = sum of prime factor multiplicities (e.g. 12=2²·3 → 3)
+// OMEGA[x]     = ω(x) = distinct prime factor count (e.g. 12=2²·3 → 2)
+// GPF[x]       = greatest prime factor (GPF(1)=1)
+// LPF[x]       = least prime factor (LPF(1)=1)
+// MU[x]        = Möbius function (μ(1)=1, μ(squarefree p1·…·pk)=(-1)^k, else 0)
+const BIG_OMEGA: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 2; x <= 45; x++) { let m = x, c = 0; for (let p = 2; p*p <= m; p++) while (m%p===0) { m=Math.floor(m/p); c++; } if (m > 1) c++; a[x] = c; }
+  return a;
+})();
+const OMEGA: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 2; x <= 45; x++) { let m = x, c = 0; for (let p = 2; p*p <= m; p++) if (m%p===0) { while (m%p===0) m=Math.floor(m/p); c++; } if (m > 1) c++; a[x] = c; }
+  return a;
+})();
+const GPF: number[] = (() => {
+  const a = new Array(46).fill(0);
+  a[1] = 1;
+  for (let x = 2; x <= 45; x++) { let m = x, g = 1; for (let p = 2; p*p <= m; p++) if (m%p===0) { g=p; while (m%p===0) m=Math.floor(m/p); } if (m > 1) g = m; a[x] = g; }
+  return a;
+})();
+const LPF: number[] = (() => {
+  const a = new Array(46).fill(0);
+  a[1] = 1;
+  for (let x = 2; x <= 45; x++) { let m = x, l = m; for (let p = 2; p*p <= m; p++) if (m%p===0) { l = p; break; } a[x] = l; }
+  return a;
+})();
+const MU: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) {
+    let m = x, mu = 1, sf = true;
+    for (let p = 2; p*p <= m; p++) if (m%p===0) { if (Math.floor(m/p)%p===0) { sf = false; break; } m = Math.floor(m/p); mu = -mu; }
+    if (!sf) { a[x] = 0; continue; }
+    if (m > 1) mu = -mu;
+    a[x] = mu;
+  }
+  return a;
+})();
+
 function sumNums(n: number[])       { return n.reduce((a,b)=>a+b,0); }
 function oddCount(n: number[])      { return n.filter(x=>x%2===1).length; }
 function consecPairs(n: number[])   { let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]===1)c++; return c; }
@@ -415,6 +455,11 @@ interface Stats {
   pairGcdSumMin: number; pairGcdSumMax: number;  // Σ_{i<j} gcd(n[i],n[j]) over 15 pairs
   tauSumMin: number;   tauSumMax: number;        // Σ τ(n[i]) — number of divisors
   squarefreeMax: number;                         // count of squarefree numbers in n[]
+  bigOmegaSumMin: number; bigOmegaSumMax: number; // Σ Ω(n[i]) — multiplicity prime count (cycle 11/15)
+  omegaSumMin: number;    omegaSumMax: number;    // Σ ω(n[i]) — distinct prime count
+  gpfSumMin: number;      gpfSumMax: number;      // Σ greatest-prime-factor(n[i])
+  lpfSumMin: number;      lpfSumMax: number;      // Σ least-prime-factor(n[i])
+  muSumMin: number;       muSumMax: number;       // Σ μ(n[i]) — Möbius (bounded -6..6)
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -634,6 +679,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   });
   const tauSums       = ns.map(n=>n.reduce((a,x)=>a+TAU[x],0));
   const squarefrees   = ns.map(n=>n.filter(x=>SQUAREFREE.has(x)).length);
+  const bigOmegaSums  = ns.map(n=>n.reduce((a,x)=>a+BIG_OMEGA[x],0));
+  const omegaSums     = ns.map(n=>n.reduce((a,x)=>a+OMEGA[x],0));
+  const gpfSums       = ns.map(n=>n.reduce((a,x)=>a+GPF[x],0));
+  const lpfSums       = ns.map(n=>n.reduce((a,x)=>a+LPF[x],0));
+  const muSums        = ns.map(n=>n.reduce((a,x)=>a+MU[x],0));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -820,6 +870,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     pairGcdSumMin:   Math.min(...pairGcdSums),   pairGcdSumMax:  Math.max(...pairGcdSums),
     tauSumMin:       Math.min(...tauSums),       tauSumMax:      Math.max(...tauSums),
     squarefreeMax:   Math.max(...squarefrees),
+    bigOmegaSumMin:  Math.min(...bigOmegaSums),  bigOmegaSumMax: Math.max(...bigOmegaSums),
+    omegaSumMin:     Math.min(...omegaSums),     omegaSumMax:    Math.max(...omegaSums),
+    gpfSumMin:       Math.min(...gpfSums),       gpfSumMax:      Math.max(...gpfSums),
+    lpfSumMin:       Math.min(...lpfSums),       lpfSumMax:      Math.max(...lpfSums),
+    muSumMin:        Math.min(...muSums),        muSumMax:       Math.max(...muSums),
     zones,
     freq,
   };
@@ -1036,6 +1091,13 @@ const RULES: Rule[] = [
   { name: '페어GCD 총합',    get: (n)=>{ const g=(a:number,b:number):number=>{while(b){[a,b]=[b,a%b];}return a;}; let s=0; for(let i=0;i<5;i++) for(let j=i+1;j<6;j++) s+=g(n[i],n[j]); return s; }, lo:s=>s.pairGcdSumMin, hi:s=>s.pairGcdSumMax },
   { name: 'τ(약수개수) 합',  get: (n)=>n.reduce((a,x)=>a+TAU[x],0),   lo:s=>s.tauSumMin,   hi:s=>s.tauSumMax },
   { name: 'squarefree 개수', get: (n)=>n.filter(x=>SQUAREFREE.has(x)).length, lo:()=>null, hi:s=>s.squarefreeMax },
+
+  // ── Ω 합 + ω 합 + gpf 합 + lpf 합 + μ 합 (cycle 11/15) ──────────────────────
+  { name: 'Ω(소인수multiplicity) 합', get: (n)=>n.reduce((a,x)=>a+BIG_OMEGA[x],0), lo:s=>s.bigOmegaSumMin, hi:s=>s.bigOmegaSumMax },
+  { name: 'ω(distinct소인수) 합',     get: (n)=>n.reduce((a,x)=>a+OMEGA[x],0),     lo:s=>s.omegaSumMin,    hi:s=>s.omegaSumMax },
+  { name: 'gpf(최대소인수) 합',        get: (n)=>n.reduce((a,x)=>a+GPF[x],0),       lo:s=>s.gpfSumMin,      hi:s=>s.gpfSumMax },
+  { name: 'lpf(최소소인수) 합',        get: (n)=>n.reduce((a,x)=>a+LPF[x],0),       lo:s=>s.lpfSumMin,      hi:s=>s.lpfSumMax },
+  { name: 'μ(모비우스) 합',            get: (n)=>n.reduce((a,x)=>a+MU[x],0),        lo:s=>s.muSumMin,       hi:s=>s.muSumMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
