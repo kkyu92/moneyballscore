@@ -212,8 +212,10 @@ interface Stats {
   perfSqMax: number;
   primesMax: number;
   maxRunMax: number;                           // 최대 연속런 상한
-  low3Max: number;                             // n[0]+n[1]+n[2] 상한
-  hi3Min: number;                              // n[3]+n[4]+n[5] 하한
+  low2Min: number;     low2Max: number;        // n[0]+n[1] 범위
+  hi2Min: number;      hi2Max: number;         // n[4]+n[5] 범위
+  low3Min: number;     low3Max: number;        // n[0]+n[1]+n[2] 범위
+  hi3Min: number;      hi3Max: number;         // n[3]+n[4]+n[5] 범위
   mid4Min: number;     mid4Max: number;        // n[1]+n[2]+n[3]+n[4] 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
@@ -250,6 +252,8 @@ function computeStats(rounds: LottoRound[]): Stats {
     return max;
   });
 
+  const low2s  = ns.map(n=>n[0]+n[1]);
+  const hi2s   = ns.map(n=>n[4]+n[5]);
   const low3s  = ns.map(n=>n[0]+n[1]+n[2]);
   const hi3s   = ns.map(n=>n[3]+n[4]+n[5]);
   const mid4s  = ns.map(n=>n[1]+n[2]+n[3]+n[4]);
@@ -279,8 +283,10 @@ function computeStats(rounds: LottoRound[]): Stats {
     perfSqMax:  Math.max(...ns.map(n=>n.filter(x=>PERF_SQ.has(x)).length)),
     primesMax:  Math.max(...ns.map(n=>n.filter(x=>PRIMES.has(x)).length)),
     maxRunMax: Math.max(...maxRuns),
-    low3Max:   Math.max(...low3s),
-    hi3Min:    Math.min(...hi3s),
+    low2Min:   Math.min(...low2s),  low2Max: Math.max(...low2s),
+    hi2Min:    Math.min(...hi2s),   hi2Max:  Math.max(...hi2s),
+    low3Min:   Math.min(...low3s),  low3Max: Math.max(...low3s),
+    hi3Min:    Math.min(...hi3s),   hi3Max:  Math.max(...hi3s),
     mid4Min:   Math.min(...mid4s), mid4Max: Math.max(...mid4s),
     zones,
     freq,
@@ -297,30 +303,46 @@ interface Rule {
 }
 
 const RULES: Rule[] = [
+  // ── 기본 분포 ──────────────────────────────────────────────────────────────
   { name: '합계',              get: (n)=>sumNums(n),      lo:s=>s.sumMin,      hi:s=>s.sumMax },
   { name: '스팬',              get: (n)=>numRange(n),     lo:s=>s.rangeMin,    hi:s=>s.rangeMax },
+  { name: '홀수 개수',         get: (n)=>oddCount(n),     lo:s=>s.oddMin,      hi:s=>s.oddMax },
   { name: '연속쌍',            get: (n)=>consecPairs(n),  lo:()=>null,         hi:s=>s.consecMax },
   { name: '최대인접간격',      get: (n)=>maxGap(n),       lo:s=>s.maxGapMin,   hi:()=>null },
+  // ── 위치별 범위 ────────────────────────────────────────────────────────────
   { name: '최솟값(pos1)',      get: (n)=>n[0],            lo:s=>s.posMin[0],   hi:s=>s.posMax[0] },
   { name: '2번째(pos2)',       get: (n)=>n[1],            lo:s=>s.posMin[1],   hi:s=>s.posMax[1] },
   { name: '3번째(pos3)',       get: (n)=>n[2],            lo:s=>s.posMin[2],   hi:s=>s.posMax[2] },
   { name: '4번째(pos4)',       get: (n)=>n[3],            lo:s=>s.posMin[3],   hi:s=>s.posMax[3] },
   { name: '5번째(pos5)',       get: (n)=>n[4],            lo:s=>s.posMin[4],   hi:s=>s.posMax[4] },
   { name: '최댓값(pos6)',      get: (n)=>n[5],            lo:s=>s.posMin[5],   hi:s=>s.posMax[5] },
+  // ── 인접 간격 상한 ─────────────────────────────────────────────────────────
   { name: '간격[1-2]',         get: (n)=>n[1]-n[0],       lo:()=>null,         hi:s=>s.gapMax[0] },
   { name: '간격[2-3]',         get: (n)=>n[2]-n[1],       lo:()=>null,         hi:s=>s.gapMax[1] },
   { name: '간격[3-4]',         get: (n)=>n[3]-n[2],       lo:()=>null,         hi:s=>s.gapMax[2] },
   { name: '간격[4-5]',         get: (n)=>n[4]-n[3],       lo:()=>null,         hi:s=>s.gapMax[3] },
   { name: '간격[5-6]',         get: (n)=>n[5]-n[4],       lo:()=>null,         hi:s=>s.gapMax[4] },
+  // ── 부분합 범위 ────────────────────────────────────────────────────────────
   { name: '최솟+최댓값 합',    get: (n)=>n[0]+n[5],       lo:s=>s.minMaxSumMin, hi:s=>s.minMaxSumMax },
+  { name: '하위2개합(p1+2)',   get: (n)=>n[0]+n[1],        lo:s=>s.low2Min,     hi:s=>s.low2Max },
+  { name: '상위2개합(p5+6)',   get: (n)=>n[4]+n[5],        lo:s=>s.hi2Min,      hi:s=>s.hi2Max },
   { name: '중간값 합(pos3+4)', get: (n)=>n[2]+n[3],       lo:s=>s.midSumMin,   hi:s=>s.midSumMax },
+  { name: '하위3개합(p1+2+3)', get: (n)=>n[0]+n[1]+n[2],  lo:s=>s.low3Min,     hi:s=>s.low3Max },
+  { name: '상위3개합(p4+5+6)', get: (n)=>n[3]+n[4]+n[5],  lo:s=>s.hi3Min,      hi:s=>s.hi3Max },
+  { name: '중간4개합(p2-5)',   get: (n)=>n[1]+n[2]+n[3]+n[4], lo:s=>s.mid4Min, hi:s=>s.mid4Max },
+  // ── 특수 패턴 ──────────────────────────────────────────────────────────────
   { name: '5의배수 개수',      get: (n)=>n.filter(x=>x%5===0).length,        lo:()=>null, hi:s=>s.multOf5Max },
   { name: '완전제곱수 개수',   get: (n)=>n.filter(x=>PERF_SQ.has(x)).length, lo:()=>null, hi:s=>s.perfSqMax },
   { name: '소수 개수',         get: (n)=>n.filter(x=>PRIMES.has(x)).length,   lo:()=>null, hi:s=>s.primesMax },
   { name: '최대연속런',        get: (n)=>{ let m=1,c=1; for(let i=1;i<6;i++){if(n[i]-n[i-1]===1){c++;if(c>m)m=c;}else c=1;} return m; }, lo:()=>null, hi:s=>s.maxRunMax },
-  { name: '하위3개합(p1+2+3)', get: (n)=>n[0]+n[1]+n[2],          lo:()=>null,         hi:s=>s.low3Max },
-  { name: '상위3개합(p4+5+6)', get: (n)=>n[3]+n[4]+n[5],          lo:s=>s.hi3Min,      hi:()=>null },
-  { name: '중간4개합(p2-5)',   get: (n)=>n[1]+n[2]+n[3]+n[4],     lo:s=>s.mid4Min,     hi:s=>s.mid4Max },
+  // ── 구간별 개수 ────────────────────────────────────────────────────────────
+  ...ZONES.map(([zoneLo, zoneHi], i) => ({
+    name: `구간[${zoneLo}-${zoneHi}] 개수`,
+    get: (n: number[]) => zoneCount(n, zoneLo, zoneHi),
+    lo: (s: Stats) => s.zones[i].min,
+    hi: (s: Stats) => s.zones[i].max,
+  })),
+  // ── 끝자리별 상한 ──────────────────────────────────────────────────────────
   ...([0,1,2,3,4,5,6,7,8,9].map(d => ({
     name: `끝자리${d} 개수`,
     get: (n: number[]) => n.filter(x=>x%10===d).length,
@@ -483,6 +505,24 @@ async function update(): Promise<LottoRound[]> {
   return rounds;
 }
 
+// ─── COUNT VALID ─────────────────────────────────────────────────────────────
+
+function countValid(stats: Stats): { valid: number; total: number; elimPct: string } {
+  const total = 8_145_060; // C(45,6)
+  let valid = 0;
+  for (let a = 1; a <= 40; a++)
+  for (let b = a+1; b <= 41; b++)
+  for (let c = b+1; c <= 42; c++)
+  for (let d = c+1; d <= 43; d++)
+  for (let e = d+1; e <= 44; e++)
+  for (let f = e+1; f <= 45; f++) {
+    if (isValid([a,b,c,d,e,f], stats)) valid++;
+  }
+  const elim = total - valid;
+  const elimPct = (elim / total * 100).toFixed(2);
+  return { valid, total, elimPct };
+}
+
 // ─── UNPOPULARITY SCORE ──────────────────────────────────────────────────────
 
 const LUCKY_NUMS = new Set([3,7,11,13,17]);
@@ -570,6 +610,18 @@ async function main() {
 
   if (mode === 'rules') {
     printRulesTable(stats);
+    return;
+  }
+
+  if (mode === 'count') {
+    console.log(`규칙 ${RULES.length}개 적용 기준 유효 조합 계산 중...`);
+    const t0 = Date.now();
+    const { valid, total, elimPct } = countValid(stats);
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`\n  전체 조합: ${total.toLocaleString()}`);
+    console.log(`  유효 조합: ${valid.toLocaleString()}`);
+    console.log(`  제거 조합: ${(total - valid).toLocaleString()} (${elimPct}%)`);
+    console.log(`  소요: ${elapsed}s\n`);
     return;
   }
 
