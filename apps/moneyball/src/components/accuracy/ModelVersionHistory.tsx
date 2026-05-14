@@ -41,7 +41,7 @@ export function ModelVersionHistory({ versions }: Props) {
                     ? 'text-brand-500 dark:text-brand-400'
                     : pct >= 45
                       ? 'text-gray-600 dark:text-gray-300'
-                      : 'text-red-500 dark:text-red-400';
+                      : 'text-red-600 dark:text-red-400';
 
               return (
                 <tr
