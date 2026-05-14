@@ -251,6 +251,15 @@ interface Stats {
   n03Min: number;      n03Max: number;         // n[0]+n[3] 범위
   n35Min: number;                              // n[3]+n[5] 하한
   cubSumMin: number;   cubSumMax: number;      // 세제곱합 범위
+  span1to4Min: number; span1to4Max: number;   // n[3]-n[0] 범위
+  span3to6Min: number; span3to6Max: number;   // n[5]-n[2] 범위
+  span1to5Min: number; span1to5Max: number;   // n[4]-n[0] 범위
+  span2to6Min: number; span2to6Max: number;   // n[5]-n[1] 범위
+  n02Min: number;      n02Max: number;         // n[0]+n[2] 범위
+  n04Min: number;      n04Max: number;         // n[0]+n[4] 범위
+  n14Min: number;      n14Max: number;         // n[1]+n[4] 범위
+  n24Min: number;      n24Max: number;         // n[2]+n[4] 범위
+  n34Min: number;      n34Max: number;         // n[3]+n[4] 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -313,9 +322,18 @@ function computeStats(rounds: LottoRound[]): Stats {
   const s1245s    = ns.map(n=>n[1]+n[2]+n[4]+n[5]);
   const low5s     = ns.map(n=>n[0]+n[1]+n[2]+n[3]+n[4]);
   const hi5s      = ns.map(n=>n[1]+n[2]+n[3]+n[4]+n[5]);
-  const gapOuters = ns.map(gapOuter);
-  const gapInners = ns.map(gapInner);
-  const cubSums   = ns.map(cubSum);
+  const gapOuters  = ns.map(gapOuter);
+  const gapInners  = ns.map(gapInner);
+  const cubSums    = ns.map(cubSum);
+  const span1to4s  = ns.map(n=>n[3]-n[0]);
+  const span3to6s  = ns.map(n=>n[5]-n[2]);
+  const span1to5s  = ns.map(n=>n[4]-n[0]);
+  const span2to6s  = ns.map(n=>n[5]-n[1]);
+  const n02s       = ns.map(n=>n[0]+n[2]);
+  const n04s       = ns.map(n=>n[0]+n[4]);
+  const n14s       = ns.map(n=>n[1]+n[4]);
+  const n24s       = ns.map(n=>n[2]+n[4]);
+  const n34s       = ns.map(n=>n[3]+n[4]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -373,6 +391,15 @@ function computeStats(rounds: LottoRound[]): Stats {
     n03Min:       Math.min(...n03s),     n03Max:       Math.max(...n03s),
     n35Min:       Math.min(...n35s),
     cubSumMin:    Math.min(...cubSums),  cubSumMax:    Math.max(...cubSums),
+    span1to4Min:  Math.min(...span1to4s), span1to4Max: Math.max(...span1to4s),
+    span3to6Min:  Math.min(...span3to6s), span3to6Max: Math.max(...span3to6s),
+    span1to5Min:  Math.min(...span1to5s), span1to5Max: Math.max(...span1to5s),
+    span2to6Min:  Math.min(...span2to6s), span2to6Max: Math.max(...span2to6s),
+    n02Min:       Math.min(...n02s),    n02Max:       Math.max(...n02s),
+    n04Min:       Math.min(...n04s),    n04Max:       Math.max(...n04s),
+    n14Min:       Math.min(...n14s),    n14Max:       Math.max(...n14s),
+    n24Min:       Math.min(...n24s),    n24Max:       Math.max(...n24s),
+    n34Min:       Math.min(...n34s),    n34Max:       Math.max(...n34s),
     zones,
     freq,
   };
@@ -440,6 +467,17 @@ const RULES: Rule[] = [
   // ── gap 조합 합 ────────────────────────────────────────────────────────────
   { name: '외부gap합(g01+g45)', get: (n)=>gapOuter(n),        lo:()=>null,         hi:s=>s.gapOuterMax },
   { name: '내부gap합(g12+g34)', get: (n)=>gapInner(n),        lo:()=>null,         hi:s=>s.gapInnerMax },
+  // ── 추가 부분 스팬 ─────────────────────────────────────────────────────────
+  { name: '스팬(pos1-4)',      get: (n)=>n[3]-n[0],            lo:s=>s.span1to4Min, hi:s=>s.span1to4Max },
+  { name: '스팬(pos3-6)',      get: (n)=>n[5]-n[2],            lo:s=>s.span3to6Min, hi:s=>s.span3to6Max },
+  { name: '스팬(pos1-5)',      get: (n)=>n[4]-n[0],            lo:s=>s.span1to5Min, hi:s=>s.span1to5Max },
+  { name: '스팬(pos2-6)',      get: (n)=>n[5]-n[1],            lo:s=>s.span2to6Min, hi:s=>s.span2to6Max },
+  // ── 추가 위치쌍 합 ─────────────────────────────────────────────────────────
+  { name: 'n[0]+n[2] 합',     get: (n)=>n[0]+n[2],            lo:s=>s.n02Min,      hi:s=>s.n02Max },
+  { name: 'n[0]+n[4] 합',     get: (n)=>n[0]+n[4],            lo:s=>s.n04Min,      hi:s=>s.n04Max },
+  { name: 'n[1]+n[4] 합',     get: (n)=>n[1]+n[4],            lo:s=>s.n14Min,      hi:s=>s.n14Max },
+  { name: 'n[2]+n[4] 합',     get: (n)=>n[2]+n[4],            lo:s=>s.n24Min,      hi:s=>s.n24Max },
+  { name: 'n[3]+n[4] 합',     get: (n)=>n[3]+n[4],            lo:s=>s.n34Min,      hi:s=>s.n34Max },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
