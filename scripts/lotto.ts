@@ -180,6 +180,8 @@ async function fetchAll(): Promise<LottoRound[]> {
 const ZONES    = [[1,9],[10,19],[20,29],[30,39],[40,45]] as const;
 const PERF_SQ  = new Set([1,4,9,16,25,36]);
 const PRIMES   = new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43]);
+const FIBS     = new Set([1,2,3,5,8,13,21,34]);
+const MULT3    = new Set([3,6,9,12,15,18,21,24,27,30,33,36,39,42,45]);
 
 function sumNums(n: number[])       { return n.reduce((a,b)=>a+b,0); }
 function oddCount(n: number[])      { return n.filter(x=>x%2===1).length; }
@@ -260,6 +262,10 @@ interface Stats {
   n14Min: number;      n14Max: number;         // n[1]+n[4] 범위
   n24Min: number;      n24Max: number;         // n[2]+n[4] 범위
   n34Min: number;      n34Max: number;         // n[3]+n[4] 범위
+  multOf3Max: number;                          // 3의배수 개수 상한
+  fibMax: number;                              // 피보나치수 개수 상한
+  mod3SumMin: number;  mod3SumMax: number;     // Σ(n[i]%3) 범위
+  samePairMax: number;                         // 인접 동일홀짝 쌍 수 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -334,6 +340,10 @@ function computeStats(rounds: LottoRound[]): Stats {
   const n14s       = ns.map(n=>n[1]+n[4]);
   const n24s       = ns.map(n=>n[2]+n[4]);
   const n34s       = ns.map(n=>n[3]+n[4]);
+  const mult3s     = ns.map(n=>n.filter(x=>MULT3.has(x)).length);
+  const fibCnts    = ns.map(n=>n.filter(x=>FIBS.has(x)).length);
+  const mod3Sums   = ns.map(n=>n.reduce((a,x)=>a+(x%3),0));
+  const samePairs  = ns.map(n=>{ let c=0; for(let i=0;i<5;i++) if((n[i]%2)===(n[i+1]%2))c++; return c; });
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -400,6 +410,10 @@ function computeStats(rounds: LottoRound[]): Stats {
     n14Min:       Math.min(...n14s),    n14Max:       Math.max(...n14s),
     n24Min:       Math.min(...n24s),    n24Max:       Math.max(...n24s),
     n34Min:       Math.min(...n34s),    n34Max:       Math.max(...n34s),
+    multOf3Max:   Math.max(...mult3s),
+    fibMax:       Math.max(...fibCnts),
+    mod3SumMin:   Math.min(...mod3Sums), mod3SumMax:  Math.max(...mod3Sums),
+    samePairMax:  Math.max(...samePairs),
     zones,
     freq,
   };
@@ -488,6 +502,10 @@ const RULES: Rule[] = [
   { name: '완전제곱수 개수',   get: (n)=>n.filter(x=>PERF_SQ.has(x)).length, lo:()=>null, hi:s=>s.perfSqMax },
   { name: '소수 개수',         get: (n)=>n.filter(x=>PRIMES.has(x)).length,   lo:()=>null, hi:s=>s.primesMax },
   { name: '최대연속런',        get: (n)=>{ let m=1,c=1; for(let i=1;i<6;i++){if(n[i]-n[i-1]===1){c++;if(c>m)m=c;}else c=1;} return m; }, lo:()=>null, hi:s=>s.maxRunMax },
+  { name: '3의배수 개수',      get: (n)=>n.filter(x=>MULT3.has(x)).length,   lo:()=>null, hi:s=>s.multOf3Max },
+  { name: '피보나치수 개수',   get: (n)=>n.filter(x=>FIBS.has(x)).length,    lo:()=>null, hi:s=>s.fibMax },
+  { name: 'mod3 합',           get: (n)=>n.reduce((a,x)=>a+(x%3),0),         lo:s=>s.mod3SumMin, hi:s=>s.mod3SumMax },
+  { name: '인접동일홀짝쌍수', get: (n)=>{ let c=0; for(let i=0;i<5;i++) if((n[i]%2)===(n[i+1]%2))c++; return c; }, lo:()=>null, hi:s=>s.samePairMax },
   // ── 구간별 개수 ────────────────────────────────────────────────────────────
   ...ZONES.map(([zoneLo, zoneHi], i) => ({
     name: `구간[${zoneLo}-${zoneHi}] 개수`,
