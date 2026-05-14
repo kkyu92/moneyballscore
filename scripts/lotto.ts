@@ -302,6 +302,11 @@ interface Stats {
   gapSorted3Max: number;                       // 정렬간격[3] (4번째) 상한
   gapMid3SumMin: number;  gapMid3SumMax: number;    // 정렬간격[1]+[2]+[3] 범위
   gapMidMaxMax: number;                        // max(g[1],g[2],g[3]) 상한
+  gapBot3Max: number;                          // 정렬간격[0]+[1]+[2] 상한
+  gapTop3Min: number;                          // 정렬간격[2]+[3]+[4] 하한
+  gapS04Max: number;                           // 정렬간격[0]+[4] (min+max 간격합) 상한
+  gapS02Max: number;                           // 정렬간격[0]+[2] 상한
+  gapS14Max: number;                           // 정렬간격[1]+[4] 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -417,6 +422,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const gapSorted3s  = gapsSorted.map(g=>g[3]);
   const gapMid3Sums  = gapsSorted.map(g=>g[1]+g[2]+g[3]);
   const gapMidMaxs   = ns.map(n=>Math.max(n[2]-n[1],n[3]-n[2],n[4]-n[3]));
+  const gapBot3s     = gapsSorted.map(g=>g[0]+g[1]+g[2]);
+  const gapTop3s     = gapsSorted.map(g=>g[2]+g[3]+g[4]);
+  const gapS04s      = gapsSorted.map(g=>g[0]+g[4]);
+  const gapS02s      = gapsSorted.map(g=>g[0]+g[2]);
+  const gapS14s      = gapsSorted.map(g=>g[1]+g[4]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -523,6 +533,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     gapSorted3Max:   Math.max(...gapSorted3s),
     gapMid3SumMin:   Math.min(...gapMid3Sums),  gapMid3SumMax:   Math.max(...gapMid3Sums),
     gapMidMaxMax:    Math.max(...gapMidMaxs),
+    gapBot3Max:      Math.max(...gapBot3s),
+    gapTop3Min:      Math.min(...gapTop3s),
+    gapS04Max:       Math.max(...gapS04s),
+    gapS02Max:       Math.max(...gapS02s),
+    gapS14Max:       Math.max(...gapS14s),
     zones,
     freq,
   };
@@ -643,6 +658,12 @@ const RULES: Rule[] = [
   { name: '정렬간격[3]',        get: (n)=>[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b)[3], lo:()=>null, hi:s=>s.gapSorted3Max },
   { name: '간격중간3합(정렬)',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[1]+g[2]+g[3]; }, lo:s=>s.gapMid3SumMin, hi:s=>s.gapMid3SumMax },
   { name: '중앙3간격최대',      get: (n)=>Math.max(n[2]-n[1],n[3]-n[2],n[4]-n[3]), lo:()=>null, hi:s=>s.gapMidMaxMax },
+  // ── 정렬 간격 추가 조합 ────────────────────────────────────────────────────
+  { name: '정렬간격하위3합',   get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[0]+g[1]+g[2]; }, lo:()=>null, hi:s=>s.gapBot3Max },
+  { name: '정렬간격상위3합',   get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[2]+g[3]+g[4]; }, lo:s=>s.gapTop3Min, hi:()=>null },
+  { name: '정렬간격[0]+[4]',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[0]+g[4]; }, lo:()=>null, hi:s=>s.gapS04Max },
+  { name: '정렬간격[0]+[2]',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[0]+g[2]; }, lo:()=>null, hi:s=>s.gapS02Max },
+  { name: '정렬간격[1]+[4]',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[1]+g[4]; }, lo:()=>null, hi:s=>s.gapS14Max },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
