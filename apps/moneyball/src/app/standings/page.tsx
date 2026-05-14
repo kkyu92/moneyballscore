@@ -127,7 +127,7 @@ export default async function StandingsPage() {
                         <span
                           className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                             row.rank === 1
-                              ? "bg-amber-400 text-amber-900"
+                              ? "bg-accent text-brand-900"
                               : row.rank <= 3
                               ? "bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
                               : "text-gray-500 dark:text-gray-400"
