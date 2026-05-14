@@ -374,6 +374,11 @@ interface Stats {
   mod13DistMin: number; mod13DistMax: number;  // distinct count of x%13 over 6
   gcdPairsMin: number; gcdPairsMax: number;    // count of pairs (i<j) with gcd(n[i],n[j])>1
   tensDistMin: number; tensDistMax: number;    // distinct count of floor(x/10) over 6 (decade spread)
+  maxPairGcdMin: number; maxPairGcdMax: number; // max gcd over all 15 pairs (cycle 9/15)
+  palindProdSumMin: number; palindProdSumMax: number; // n[0]*n[5]+n[1]*n[4]+n[2]*n[3]
+  crossProdSumMin: number; crossProdSumMax: number;   // n[0]*n[3]+n[1]*n[4]+n[2]*n[5]
+  digitSumDistMin: number; digitSumDistMax: number;   // distinct count of digit-sum(n_i)
+  oddRunMaxMax: number;                          // longest consecutive run where n[i] is odd
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -568,6 +573,22 @@ function computeStats(rounds: LottoRound[]): Stats {
     return c;
   });
   const tensDists     = ns.map(n=>new Set(n.map(x=>Math.floor(x/10))).size);
+  const maxPairGcds   = ns.map(n=>{
+    let m = 1;
+    for (let i = 0; i < 5; i++) for (let j = i+1; j < 6; j++) {
+      const g = gcd2(n[i], n[j]); if (g > m) m = g;
+    }
+    return m;
+  });
+  const palindProdSums = ns.map(n=>n[0]*n[5]+n[1]*n[4]+n[2]*n[3]);
+  const crossProdSums  = ns.map(n=>n[0]*n[3]+n[1]*n[4]+n[2]*n[5]);
+  const digitSumOf     = (x: number) => (x % 10) + Math.floor(x / 10);
+  const digitSumDists  = ns.map(n=>new Set(n.map(digitSumOf)).size);
+  const oddRunMaxs     = ns.map(n=>{
+    let m = 0, cur = 0;
+    for (const x of n) { if (x % 2 === 1) { cur++; if (cur > m) m = cur; } else cur = 0; }
+    return m;
+  });
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -744,6 +765,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     mod13DistMin:    Math.min(...mod13Dists),  mod13DistMax:  Math.max(...mod13Dists),
     gcdPairsMin:     Math.min(...gcdPairs),    gcdPairsMax:   Math.max(...gcdPairs),
     tensDistMin:     Math.min(...tensDists),   tensDistMax:   Math.max(...tensDists),
+    maxPairGcdMin:   Math.min(...maxPairGcds), maxPairGcdMax: Math.max(...maxPairGcds),
+    palindProdSumMin: Math.min(...palindProdSums), palindProdSumMax: Math.max(...palindProdSums),
+    crossProdSumMin:  Math.min(...crossProdSums),  crossProdSumMax:  Math.max(...crossProdSums),
+    digitSumDistMin: Math.min(...digitSumDists), digitSumDistMax: Math.max(...digitSumDists),
+    oddRunMaxMax:    Math.max(...oddRunMaxs),
     zones,
     freq,
   };
@@ -948,6 +974,12 @@ const RULES: Rule[] = [
   { name: 'mod13 distinct', get: (n)=>new Set(n.map(x=>x%13)).size, lo:s=>s.mod13DistMin, hi:s=>s.mod13DistMax },
   { name: 'GCD>1 페어수',   get: (n)=>{ const g=(a:number,b:number):number=>{while(b){[a,b]=[b,a%b];}return a;}; let c=0; for(let i=0;i<5;i++) for(let j=i+1;j<6;j++) if(g(n[i],n[j])>1) c++; return c; }, lo:s=>s.gcdPairsMin, hi:s=>s.gcdPairsMax },
   { name: 'tens distinct',  get: (n)=>new Set(n.map(x=>Math.floor(x/10))).size, lo:s=>s.tensDistMin, hi:s=>s.tensDistMax },
+  // ── max pair GCD + palind prod sum + cross prod sum + digitSum distinct + odd run max (cycle 9/15) ───
+  { name: '최대페어GCD',    get: (n)=>{ const g=(a:number,b:number):number=>{while(b){[a,b]=[b,a%b];}return a;}; let m=1; for(let i=0;i<5;i++) for(let j=i+1;j<6;j++){const v=g(n[i],n[j]); if(v>m) m=v;} return m; }, lo:s=>s.maxPairGcdMin, hi:s=>s.maxPairGcdMax },
+  { name: '대칭곱합',       get: (n)=>n[0]*n[5]+n[1]*n[4]+n[2]*n[3], lo:s=>s.palindProdSumMin, hi:s=>s.palindProdSumMax },
+  { name: '교차곱합',       get: (n)=>n[0]*n[3]+n[1]*n[4]+n[2]*n[5], lo:s=>s.crossProdSumMin, hi:s=>s.crossProdSumMax },
+  { name: '자리수합 distinct', get: (n)=>new Set(n.map(x=>(x%10)+Math.floor(x/10))).size, lo:s=>s.digitSumDistMin, hi:s=>s.digitSumDistMax },
+  { name: '홀수연속런 최대', get: (n)=>{ let m=0,c=0; for(const x of n){if(x%2===1){c++;if(c>m)m=c;}else c=0;} return m; }, lo:()=>null, hi:s=>s.oddRunMaxMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
