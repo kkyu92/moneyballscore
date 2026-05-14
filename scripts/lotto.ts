@@ -307,6 +307,11 @@ interface Stats {
   gapS04Max: number;                           // 정렬간격[0]+[4] (min+max 간격합) 상한
   gapS02Max: number;                           // 정렬간격[0]+[2] 상한
   gapS14Max: number;                           // 정렬간격[1]+[4] 상한
+  oddNumSumMin: number;  oddNumSumMax: number; // 홀수값 번호 합 범위
+  evenNumSumMax: number;                       // 짝수값 번호 합 상한
+  loHalfSumMax: number;                        // ≤22 번호 합 상한
+  hiHalfSumMin: number;                        // ≥23 번호 합 하한
+  extremeProdMax: number;                      // n[0]*n[5] 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -427,6 +432,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const gapS04s      = gapsSorted.map(g=>g[0]+g[4]);
   const gapS02s      = gapsSorted.map(g=>g[0]+g[2]);
   const gapS14s      = gapsSorted.map(g=>g[1]+g[4]);
+  const oddNumSums   = ns.map(n=>n.filter(x=>x%2===1).reduce((a,b)=>a+b,0));
+  const evenNumSums  = ns.map(n=>n.filter(x=>x%2===0).reduce((a,b)=>a+b,0));
+  const loHalfSums   = ns.map(n=>n.filter(x=>x<=22).reduce((a,b)=>a+b,0));
+  const hiHalfSums   = ns.map(n=>n.filter(x=>x>=23).reduce((a,b)=>a+b,0));
+  const extremeProds = ns.map(n=>n[0]*n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -538,6 +548,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     gapS04Max:       Math.max(...gapS04s),
     gapS02Max:       Math.max(...gapS02s),
     gapS14Max:       Math.max(...gapS14s),
+    oddNumSumMin:    Math.min(...oddNumSums),   oddNumSumMax:  Math.max(...oddNumSums),
+    evenNumSumMax:   Math.max(...evenNumSums),
+    loHalfSumMax:    Math.max(...loHalfSums),
+    hiHalfSumMin:    Math.min(...hiHalfSums),
+    extremeProdMax:  Math.max(...extremeProds),
     zones,
     freq,
   };
@@ -664,6 +679,12 @@ const RULES: Rule[] = [
   { name: '정렬간격[0]+[4]',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[0]+g[4]; }, lo:()=>null, hi:s=>s.gapS04Max },
   { name: '정렬간격[0]+[2]',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[0]+g[2]; }, lo:()=>null, hi:s=>s.gapS02Max },
   { name: '정렬간격[1]+[4]',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[1]+g[4]; }, lo:()=>null, hi:s=>s.gapS14Max },
+  // ── 값 기반 분류 합 ────────────────────────────────────────────────────────
+  { name: '홀수번호합',        get: (n)=>n.filter(x=>x%2===1).reduce((a,b)=>a+b,0), lo:s=>s.oddNumSumMin, hi:s=>s.oddNumSumMax },
+  { name: '짝수번호합',        get: (n)=>n.filter(x=>x%2===0).reduce((a,b)=>a+b,0), lo:()=>null,         hi:s=>s.evenNumSumMax },
+  { name: '하위절반합(≤22)',  get: (n)=>n.filter(x=>x<=22).reduce((a,b)=>a+b,0),   lo:()=>null,         hi:s=>s.loHalfSumMax },
+  { name: '상위절반합(≥23)',  get: (n)=>n.filter(x=>x>=23).reduce((a,b)=>a+b,0),   lo:s=>s.hiHalfSumMin, hi:()=>null },
+  { name: '극값곱(n0×n5)',    get: (n)=>n[0]*n[5],                                  lo:()=>null,         hi:s=>s.extremeProdMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
