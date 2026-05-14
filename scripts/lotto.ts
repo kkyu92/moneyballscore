@@ -297,6 +297,11 @@ interface Stats {
   gap0234Max: number;                          // g[0]+g[2]+g[3]+g[4] 상한
   gapBot2Max: number;                          // 간격 하위2합 상한 (정렬)
   gapTop2Min: number;                          // 간격 상위2합 하한 (정렬)
+  gapSortedMedMin: number; gapSortedMedMax: number; // 정렬간격[2] 중앙값 범위
+  gapSorted1Max: number;                       // 정렬간격[1] (2번째 작은) 상한
+  gapSorted3Max: number;                       // 정렬간격[3] (4번째) 상한
+  gapMid3SumMin: number;  gapMid3SumMax: number;    // 정렬간격[1]+[2]+[3] 범위
+  gapMidMaxMax: number;                        // max(g[1],g[2],g[3]) 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -405,8 +410,13 @@ function computeStats(rounds: LottoRound[]): Stats {
   const gap0134s   = ns.map(n=>(n[1]-n[0])+(n[2]-n[1])+(n[4]-n[3])+(n[5]-n[4]));
   const gap0234s   = ns.map(n=>(n[1]-n[0])+(n[3]-n[2])+(n[4]-n[3])+(n[5]-n[4]));
   const gapsSorted = ns.map(n=>[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b));
-  const gapBot2s   = gapsSorted.map(g=>g[0]+g[1]);
-  const gapTop2s   = gapsSorted.map(g=>g[3]+g[4]);
+  const gapBot2s     = gapsSorted.map(g=>g[0]+g[1]);
+  const gapTop2s     = gapsSorted.map(g=>g[3]+g[4]);
+  const gapSortedMed = gapsSorted.map(g=>g[2]);
+  const gapSorted1s  = gapsSorted.map(g=>g[1]);
+  const gapSorted3s  = gapsSorted.map(g=>g[3]);
+  const gapMid3Sums  = gapsSorted.map(g=>g[1]+g[2]+g[3]);
+  const gapMidMaxs   = ns.map(n=>Math.max(n[2]-n[1],n[3]-n[2],n[4]-n[3]));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -508,6 +518,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     gap0234Max:   Math.max(...gap0234s),
     gapBot2Max:   Math.max(...gapBot2s),
     gapTop2Min:   Math.min(...gapTop2s),
+    gapSortedMedMin: Math.min(...gapSortedMed), gapSortedMedMax: Math.max(...gapSortedMed),
+    gapSorted1Max:   Math.max(...gapSorted1s),
+    gapSorted3Max:   Math.max(...gapSorted3s),
+    gapMid3SumMin:   Math.min(...gapMid3Sums),  gapMid3SumMax:   Math.max(...gapMid3Sums),
+    gapMidMaxMax:    Math.max(...gapMidMaxs),
     zones,
     freq,
   };
@@ -622,6 +637,12 @@ const RULES: Rule[] = [
   { name: 'gap[0]+[2]+[3]+[4]', get: (n)=>(n[1]-n[0])+(n[5]-n[2]), lo:()=>null, hi:s=>s.gap0234Max },
   { name: '간격하위2합',        get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[0]+g[1]; }, lo:()=>null, hi:s=>s.gapBot2Max },
   { name: '간격상위2합',        get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[3]+g[4]; }, lo:s=>s.gapTop2Min, hi:()=>null },
+  // ── 정렬 간격 통계 ─────────────────────────────────────────────────────────
+  { name: '간격중앙값(정렬[2])', get: (n)=>[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b)[2], lo:s=>s.gapSortedMedMin, hi:s=>s.gapSortedMedMax },
+  { name: '정렬간격[1]',        get: (n)=>[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b)[1], lo:()=>null, hi:s=>s.gapSorted1Max },
+  { name: '정렬간격[3]',        get: (n)=>[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b)[3], lo:()=>null, hi:s=>s.gapSorted3Max },
+  { name: '간격중간3합(정렬)',  get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]).sort((a,b)=>a-b); return g[1]+g[2]+g[3]; }, lo:s=>s.gapMid3SumMin, hi:s=>s.gapMid3SumMax },
+  { name: '중앙3간격최대',      get: (n)=>Math.max(n[2]-n[1],n[3]-n[2],n[4]-n[3]), lo:()=>null, hi:s=>s.gapMidMaxMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
