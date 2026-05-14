@@ -180,6 +180,8 @@ export default async function AccuracyPage() {
 
   // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화용 최근 7일 query.
   // CURRENT_MODEL_FILTER (debate_version=v2-persona4) 제거 — fallback row 도 포함해서 비율 측정.
+  // cycle 385 review-code heavy — pre_game 만 query 하면 postview fallback 분류 (v1.8-postview)
+  // 가 silent. buildFallbackStats 는 양쪽 mv 모두 지원하므로 prediction_type 필터 확장.
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([
@@ -209,7 +211,7 @@ export default async function AccuracyPage() {
     supabase
       .from('predictions')
       .select('model_version, predicted_at')
-      .eq('prediction_type', 'pre_game')
+      .in('prediction_type', ['pre_game', 'post_game'])
       .gte('predicted_at', sevenDaysAgo)
       .order('predicted_at', { ascending: false }),
   ]);
@@ -283,7 +285,8 @@ export default async function AccuracyPage() {
         />
       </section>
 
-      {/* cycle 384 — AI 분석 활성률 (최근 7일). fallback 0건이면 hide. */}
+      {/* cycle 384 — AI 분석 활성률 (최근 7일). fallback 0건이면 hide.
+          cycle 385 — pre_game + post_game 양쪽 분석 통합 표시. */}
       {fallbackStats.total > 0 && fallbackStats.fallback > 0 && (
         <section className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5 space-y-2">
           <div className="flex items-baseline justify-between gap-3 flex-wrap">
@@ -291,12 +294,12 @@ export default async function AccuracyPage() {
               최근 7일 AI 분석 활성률
             </h2>
             <span className="text-xs text-amber-700 dark:text-amber-200/80">
-              {fallbackStats.llmActive}/{fallbackStats.total} 경기 AI 토론 적용 ({((1 - fallbackStats.fallbackRate) * 100).toFixed(0)}%)
+              {fallbackStats.llmActive}/{fallbackStats.total} AI 추론 활성 ({((1 - fallbackStats.fallbackRate) * 100).toFixed(0)}%)
             </span>
           </div>
           <p className="text-xs text-amber-800/80 dark:text-amber-100/70 leading-relaxed">
-            나머지 {fallbackStats.fallback}건은 정량 모델만으로 예측됐습니다 (LLM 분석 미적용).
-            보통 API 한도·일시 장애 영향이며, 적중 기록은 정량 모델만 사용한 경기를 제외합니다.
+            나머지 {fallbackStats.fallback}건은 정량 모델만 사용했습니다 (AI 토론·사후분석 미적용).
+            보통 API 한도·일시 장애 영향이며, 적중 기록은 AI 토론이 적용된 예측만 사용합니다.
           </p>
         </section>
       )}
