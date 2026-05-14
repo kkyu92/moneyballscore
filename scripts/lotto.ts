@@ -317,6 +317,11 @@ interface Stats {
   loThirdSumMax: number;                       // ≤15 번호 합 상한
   midThirdSumMax: number;                      // 16-30 번호 합 상한
   hiThirdSumMin: number;                       // ≥31 번호 합 하한
+  perfSqSumMax: number;                        // 완전제곱수번호 합 상한
+  fibSumMax: number;                           // 피보나치번호 합 상한
+  prodLo2Max: number;                          // n[0]*n[1] 상한
+  prodHi2Max: number;                          // n[4]*n[5] 상한
+  prodMid2Max: number;                         // n[2]*n[3] 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -447,6 +452,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const loThirdSums   = ns.map(n=>n.filter(x=>x<=15).reduce((a,b)=>a+b,0));
   const midThirdSums  = ns.map(n=>n.filter(x=>x>=16&&x<=30).reduce((a,b)=>a+b,0));
   const hiThirdSums   = ns.map(n=>n.filter(x=>x>=31).reduce((a,b)=>a+b,0));
+  const perfSqSums    = ns.map(n=>n.filter(x=>PERF_SQ.has(x)).reduce((a,b)=>a+b,0));
+  const fibSums       = ns.map(n=>n.filter(x=>FIBS.has(x)).reduce((a,b)=>a+b,0));
+  const prodLo2s      = ns.map(n=>n[0]*n[1]);
+  const prodHi2s      = ns.map(n=>n[4]*n[5]);
+  const prodMid2s     = ns.map(n=>n[2]*n[3]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -568,6 +578,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     loThirdSumMax:   Math.max(...loThirdSums),
     midThirdSumMax:  Math.max(...midThirdSums),
     hiThirdSumMin:   Math.min(...hiThirdSums),
+    perfSqSumMax:    Math.max(...perfSqSums),
+    fibSumMax:       Math.max(...fibSums),
+    prodLo2Max:      Math.max(...prodLo2s),
+    prodHi2Max:      Math.max(...prodHi2s),
+    prodMid2Max:     Math.max(...prodMid2s),
     zones,
     freq,
   };
@@ -706,6 +721,12 @@ const RULES: Rule[] = [
   { name: '하위3분의1합(≤15)', get: (n)=>n.filter(x=>x<=15).reduce((a,b)=>a+b,0),         lo:()=>null, hi:s=>s.loThirdSumMax },
   { name: '중간3분의1합(16-30)',get: (n)=>n.filter(x=>x>=16&&x<=30).reduce((a,b)=>a+b,0), lo:()=>null, hi:s=>s.midThirdSumMax },
   { name: '상위3분의1합(≥31)', get: (n)=>n.filter(x=>x>=31).reduce((a,b)=>a+b,0),         lo:s=>s.hiThirdSumMin, hi:()=>null },
+  // ── 특수집합 합 + 위치쌍 곱 ───────────────────────────────────────────────
+  { name: '완전제곱수합',      get: (n)=>n.filter(x=>PERF_SQ.has(x)).reduce((a,b)=>a+b,0), lo:()=>null, hi:s=>s.perfSqSumMax },
+  { name: '피보나치번호합',    get: (n)=>n.filter(x=>FIBS.has(x)).reduce((a,b)=>a+b,0),    lo:()=>null, hi:s=>s.fibSumMax },
+  { name: 'n[0]×n[1] 곱',    get: (n)=>n[0]*n[1],                                        lo:()=>null, hi:s=>s.prodLo2Max },
+  { name: 'n[4]×n[5] 곱',    get: (n)=>n[4]*n[5],                                        lo:()=>null, hi:s=>s.prodHi2Max },
+  { name: 'n[2]×n[3] 곱',    get: (n)=>n[2]*n[3],                                        lo:()=>null, hi:s=>s.prodMid2Max },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
