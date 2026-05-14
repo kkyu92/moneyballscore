@@ -286,8 +286,6 @@ export default async function AccuracyPage() {
         />
       </section>
 
-      {/* cycle 384 — AI 분석 활성률 (최근 7일). fallback 0건이면 hide.
-          cycle 385 — pre_game + post_game 양쪽 분석 통합 표시. */}
       {fallbackStats.total > 0 && fallbackStats.fallback > 0 && (
         <section className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5 space-y-2">
           <div className="flex items-baseline justify-between gap-3 flex-wrap">
@@ -302,6 +300,19 @@ export default async function AccuracyPage() {
             나머지 {fallbackStats.fallback}건은 정량 모델만 사용했습니다 (AI 토론·사후분석 미적용).
             보통 API 한도·일시 장애 영향이며, 적중 기록은 AI 토론이 적용된 예측만 사용합니다.
           </p>
+          {fallbackStats.latestFallbackAt && (
+            <p className="text-[11px] text-amber-700/70 dark:text-amber-200/60 font-mono">
+              최근 정량 fallback:{' '}
+              {new Date(fallbackStats.latestFallbackAt).toLocaleString('ko-KR', {
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Asia/Seoul',
+              })}{' '}
+              KST
+            </p>
+          )}
         </section>
       )}
 
