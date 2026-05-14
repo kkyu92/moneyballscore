@@ -160,9 +160,15 @@ export async function runPostviewDaily(
 
     const original: OriginalPrediction = {
       predictedWinner: predictedWinnerCode,
-      homeWinProb: estimateHomeWinProb(preGame.confidence as number, predictedWinnerCode === homeCode),
+      homeWinProb: resolveOriginalHomeWinProb(
+        preGame.reasoning,
+        preGame.confidence as number,
+        predictedWinnerCode === homeCode,
+      ),
       factors: (preGame.factors as Record<string, number>) ?? {},
-      reasoning: String(preGame.reasoning ?? ''),
+      reasoning: typeof preGame.reasoning === 'string'
+        ? preGame.reasoning
+        : String((preGame.reasoning as { reasoning?: unknown })?.reasoning ?? ''),
     };
 
     try {
@@ -257,12 +263,44 @@ function buildMinimalContext(game: any, homeCode: TeamCode, awayCode: TeamCode):
 }
 
 /**
- * pre_game의 confidence + predicted_winner → homeWinProb 역추정
- * confidence는 0~1 (승리확률의 절반 범위), 아래 조합으로 복원.
- * daily.ts에서 confidence는 Math.abs(homeWinProb - 0.5) * 2로 저장되므로
- * homeWinProb = predictedWinner가 home이면 0.5 + conf/2, 아니면 0.5 - conf/2
+ * pre_game의 confidence + predicted_winner → homeWinProb 역추정 (legacy fallback).
+ * confidence는 0~1 (승리확률의 절반 범위). 아래 조합으로 복원.
+ * 정량 fallback path (debate 미실행) 에서 confidence = Math.abs(homeWinProb - 0.5) * 2
+ * 이므로 homeWinProb = predictedWinner가 home이면 0.5 + conf/2, 아니면 0.5 - conf/2.
+ *
+ * ⚠️ debate 성공 path 에선 confidence = judge meta-confidence (사용자에게 보여지는
+ * 자신감 수치) — homeWinProb 와의 산술 관계가 깨짐. 그래서 reasoning.homeWinProb
+ * 가 있으면 그 값 우선 (resolveOriginalHomeWinProb).
  */
-function estimateHomeWinProb(confidence: number, predictedWinnerIsHome: boolean): number {
+export function estimateHomeWinProb(confidence: number, predictedWinnerIsHome: boolean): number {
   if (predictedWinnerIsHome) return 0.5 + confidence / 2;
   return 0.5 - confidence / 2;
+}
+
+/**
+ * pre_game row 의 실제 homeWinProb 복원.
+ *
+ * - `reasoning.homeWinProb` (final-reasoning.ts buildFinalReasoning 박제 source
+ *   of truth) 존재 시 그 값을 그대로 사용.
+ * - 부재 시 (legacy row 또는 reasoning 이 string) confidence + predicted_winner
+ *   조합으로 역추정. debate 성공 row 의 confidence 는 judge meta-confidence 라
+ *   역추정값이 실제 homeWinProb 와 다를 수 있지만 v1.5/v1.6 시절 quant-only
+ *   path 에선 정확.
+ *
+ * cycle 379 silent drift family fix — debate-success row 의 postview prompt
+ * `original.homeWinProb` 가 judge meta-confidence 로 잘못 추정돼 factor
+ * attribution 이 깨진 채 agent_memories 학습.
+ */
+export function resolveOriginalHomeWinProb(
+  reasoning: unknown,
+  confidence: number,
+  predictedWinnerIsHome: boolean,
+): number {
+  if (reasoning && typeof reasoning === 'object') {
+    const hwp = (reasoning as { homeWinProb?: unknown }).homeWinProb;
+    if (typeof hwp === 'number' && Number.isFinite(hwp) && hwp >= 0 && hwp <= 1) {
+      return hwp;
+    }
+  }
+  return estimateHomeWinProb(confidence, predictedWinnerIsHome);
 }
