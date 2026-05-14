@@ -512,6 +512,12 @@ interface Stats {
   digitSqSumMin: number; digitSqSumMax: number; // Σ (floor(x/10)² + (x%10)²) — 자리수제곱합
   triRevWMin: number;   triRevWMax: number;    // 역삼각수가중합 21·n[0]+15·n[1]+10·n[2]+6·n[3]+3·n[4]+1·n[5] (외측 강)
   sqRevWMin: number;    sqRevWMax: number;     // 역정사각수가중합 36·n[0]+25·n[1]+16·n[2]+9·n[3]+4·n[4]+1·n[5] (외측 강)
+  // ── mod25/29 합 + 2거듭제곱가중합 + 자리수세제곱합 + 오각수가중합 (cycle 18/?? 새 batch 3/5) ──
+  mod25SumMin: number;  mod25SumMax: number;   // Σ (n[i] mod 25) — composite modulus (5² 자연 확장)
+  mod29SumMin: number;  mod29SumMax: number;   // Σ (n[i] mod 29) — 다음 소수 modulus
+  pow2WMin: number;     pow2WMax: number;      // 2거듭제곱가중합 1·n[0]+2·n[1]+4·n[2]+8·n[3]+16·n[4]+32·n[5] (geometric)
+  digitCubSumMin: number; digitCubSumMax: number; // Σ (floor(x/10)³ + (x%10)³) — 자리수세제곱합 (digit family 확장)
+  pentWMin: number;     pentWMax: number;      // 오각수가중합 1·n[0]+5·n[1]+12·n[2]+22·n[3]+35·n[4]+51·n[5] (P_k = k(3k-1)/2)
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -775,6 +781,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const digitSqSums   = ns.map(n=>n.reduce((a,x)=>a+Math.floor(x/10)**2+(x%10)**2,0));
   const triRevWs      = ns.map(n=>21*n[0]+15*n[1]+10*n[2]+6*n[3]+3*n[4]+1*n[5]);
   const sqRevWs       = ns.map(n=>36*n[0]+25*n[1]+16*n[2]+9*n[3]+4*n[4]+1*n[5]);
+  // ── cycle 18/?? batch 3/5: mod25/29 합 + 2거듭제곱가중합 + 자리수세제곱합 + 오각수가중합 ─
+  const mod25Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%25),0));
+  const mod29Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%29),0));
+  const pow2Ws        = ns.map(n=>1*n[0]+2*n[1]+4*n[2]+8*n[3]+16*n[4]+32*n[5]);
+  const digitCubSums  = ns.map(n=>n.reduce((a,x)=>a+Math.floor(x/10)**3+(x%10)**3,0));
+  const pentWs        = ns.map(n=>1*n[0]+5*n[1]+12*n[2]+22*n[3]+35*n[4]+51*n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -996,6 +1008,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     digitSqSumMin:     Math.min(...digitSqSums),   digitSqSumMax:     Math.max(...digitSqSums),
     triRevWMin:        Math.min(...triRevWs),      triRevWMax:        Math.max(...triRevWs),
     sqRevWMin:         Math.min(...sqRevWs),       sqRevWMax:         Math.max(...sqRevWs),
+    mod25SumMin:       Math.min(...mod25Sums),     mod25SumMax:       Math.max(...mod25Sums),
+    mod29SumMin:       Math.min(...mod29Sums),     mod29SumMax:       Math.max(...mod29Sums),
+    pow2WMin:          Math.min(...pow2Ws),        pow2WMax:          Math.max(...pow2Ws),
+    digitCubSumMin:    Math.min(...digitCubSums),  digitCubSumMax:    Math.max(...digitCubSums),
+    pentWMin:          Math.min(...pentWs),        pentWMax:          Math.max(...pentWs),
     zones,
     freq,
   };
@@ -1255,6 +1272,12 @@ const RULES: Rule[] = [
   { name: '자리수제곱합',           get: (n)=>n.reduce((a,x)=>a+Math.floor(x/10)**2+(x%10)**2,0),         lo:s=>s.digitSqSumMin,     hi:s=>s.digitSqSumMax },
   { name: '역삼각수가중합',         get: (n)=>21*n[0]+15*n[1]+10*n[2]+6*n[3]+3*n[4]+1*n[5],                lo:s=>s.triRevWMin,        hi:s=>s.triRevWMax },
   { name: '역정사각수가중합',       get: (n)=>36*n[0]+25*n[1]+16*n[2]+9*n[3]+4*n[4]+1*n[5],                lo:s=>s.sqRevWMin,         hi:s=>s.sqRevWMax },
+  // ── mod25/29 합 + 2거듭제곱가중합 + 자리수세제곱합 + 오각수가중합 (cycle 18/?? 새 batch 3/5) ─
+  { name: 'mod25 합',              get: (n)=>n.reduce((a,x)=>a+(x%25),0),                                lo:s=>s.mod25SumMin,       hi:s=>s.mod25SumMax },
+  { name: 'mod29 합',              get: (n)=>n.reduce((a,x)=>a+(x%29),0),                                lo:s=>s.mod29SumMin,       hi:s=>s.mod29SumMax },
+  { name: '2거듭제곱가중합',         get: (n)=>1*n[0]+2*n[1]+4*n[2]+8*n[3]+16*n[4]+32*n[5],                 lo:s=>s.pow2WMin,          hi:s=>s.pow2WMax },
+  { name: '자리수세제곱합',         get: (n)=>n.reduce((a,x)=>a+Math.floor(x/10)**3+(x%10)**3,0),         lo:s=>s.digitCubSumMin,    hi:s=>s.digitCubSumMax },
+  { name: '오각수가중합',           get: (n)=>1*n[0]+5*n[1]+12*n[2]+22*n[3]+35*n[4]+51*n[5],               lo:s=>s.pentWMin,          hi:s=>s.pentWMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
