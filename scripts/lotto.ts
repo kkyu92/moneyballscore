@@ -190,6 +190,8 @@ function maxGap(n: number[])        { return Math.max(...n.slice(1).map((v,i)=>v
 function gap2nd(n: number[])        { const g=[...n.slice(1).map((v,i)=>v-n[i])].sort((a,b)=>b-a); return g[1]; }
 function minGapFn(n: number[])      { return Math.min(...n.slice(1).map((v,i)=>v-n[i])); }
 function sqSum(n: number[])         { return n.reduce((a,x)=>a+x*x,0); }
+function tenSum(n: number[])        { return n.reduce((a,x)=>a+Math.floor(x/10),0); }
+function oneSum(n: number[])        { return n.reduce((a,x)=>a+(x%10),0); }
 function lastDigitCounts(n: number[]): number[] {
   const c = new Array(10).fill(0);
   for (const x of n) c[x%10]++;
@@ -233,6 +235,12 @@ interface Stats {
   oddPosMin: number;   oddPosMax: number;      // n[0]+n[2]+n[4] 범위
   evenPosMin: number;  evenPosMax: number;     // n[1]+n[3]+n[5] 범위
   sqSumMin: number;    sqSumMax: number;       // 번호 제곱합 범위
+  tensMin: number;     tensMax: number;        // 10의자리 합 범위
+  onesMin: number;     onesMax: number;        // 1의자리 합 범위
+  n15Min: number;      n15Max: number;         // n[1]+n[5] 범위
+  n25Min: number;      n25Max: number;         // n[2]+n[5] 범위
+  n13Min: number;      n13Max: number;         // n[1]+n[3] 범위
+  s1245Min: number;    s1245Max: number;       // n[1]+n[2]+n[4]+n[5] 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -285,6 +293,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const oddPoss   = ns.map(n=>n[0]+n[2]+n[4]);
   const evenPoss  = ns.map(n=>n[1]+n[3]+n[5]);
   const sqSums    = ns.map(sqSum);
+  const tenSums   = ns.map(tenSum);
+  const oneSums   = ns.map(oneSum);
+  const n15s      = ns.map(n=>n[1]+n[5]);
+  const n25s      = ns.map(n=>n[2]+n[5]);
+  const n13s      = ns.map(n=>n[1]+n[3]);
+  const s1245s    = ns.map(n=>n[1]+n[2]+n[4]+n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -329,6 +343,12 @@ function computeStats(rounds: LottoRound[]): Stats {
     oddPosMin:    Math.min(...oddPoss),  oddPosMax:    Math.max(...oddPoss),
     evenPosMin:   Math.min(...evenPoss), evenPosMax:   Math.max(...evenPoss),
     sqSumMin:     Math.min(...sqSums),   sqSumMax:     Math.max(...sqSums),
+    tensMin:      Math.min(...tenSums),  tensMax:      Math.max(...tenSums),
+    onesMin:      Math.min(...oneSums),  onesMax:      Math.max(...oneSums),
+    n15Min:       Math.min(...n15s),     n15Max:       Math.max(...n15s),
+    n25Min:       Math.min(...n25s),     n25Max:       Math.max(...n25s),
+    n13Min:       Math.min(...n13s),     n13Max:       Math.max(...n13s),
+    s1245Min:     Math.min(...s1245s),   s1245Max:     Math.max(...s1245s),
     zones,
     freq,
   };
@@ -384,6 +404,14 @@ const RULES: Rule[] = [
   { name: '홀수위치합(p1+3+5)', get: (n)=>n[0]+n[2]+n[4],   lo:s=>s.oddPosMin,   hi:s=>s.oddPosMax },
   { name: '짝수위치합(p2+4+6)', get: (n)=>n[1]+n[3]+n[5],   lo:s=>s.evenPosMin,  hi:s=>s.evenPosMax },
   { name: '번호제곱합',       get: (n)=>sqSum(n),             lo:s=>s.sqSumMin,    hi:s=>s.sqSumMax },
+  // ── 위치쌍 합 ──────────────────────────────────────────────────────────────
+  { name: 'n[1]+n[5] 합',     get: (n)=>n[1]+n[5],            lo:s=>s.n15Min,      hi:s=>s.n15Max },
+  { name: 'n[2]+n[5] 합',     get: (n)=>n[2]+n[5],            lo:s=>s.n25Min,      hi:s=>s.n25Max },
+  { name: 'n[1]+n[3] 합',     get: (n)=>n[1]+n[3],            lo:s=>s.n13Min,      hi:s=>s.n13Max },
+  { name: 'n[1]+n[2]+n[4]+n[5]', get: (n)=>n[1]+n[2]+n[4]+n[5], lo:s=>s.s1245Min, hi:s=>s.s1245Max },
+  // ── 자리수 기반 ────────────────────────────────────────────────────────────
+  { name: '10의자리 합',       get: (n)=>tenSum(n),            lo:s=>s.tensMin,     hi:s=>s.tensMax },
+  { name: '1의자리 합',        get: (n)=>oneSum(n),            lo:s=>s.onesMin,     hi:s=>s.onesMax },
   // ── 특수 패턴 ──────────────────────────────────────────────────────────────
   { name: '5의배수 개수',      get: (n)=>n.filter(x=>x%5===0).length,        lo:()=>null, hi:s=>s.multOf5Max },
   { name: '완전제곱수 개수',   get: (n)=>n.filter(x=>PERF_SQ.has(x)).length, lo:()=>null, hi:s=>s.perfSqMax },
