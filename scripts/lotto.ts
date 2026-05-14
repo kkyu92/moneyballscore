@@ -192,6 +192,9 @@ function minGapFn(n: number[])      { return Math.min(...n.slice(1).map((v,i)=>v
 function sqSum(n: number[])         { return n.reduce((a,x)=>a+x*x,0); }
 function tenSum(n: number[])        { return n.reduce((a,x)=>a+Math.floor(x/10),0); }
 function oneSum(n: number[])        { return n.reduce((a,x)=>a+(x%10),0); }
+function cubSum(n: number[])        { return n.reduce((a,x)=>a+x*x*x,0); }
+function gapOuter(n: number[])      { return (n[1]-n[0])+(n[5]-n[4]); }
+function gapInner(n: number[])      { return (n[2]-n[1])+(n[4]-n[3]); }
 function lastDigitCounts(n: number[]): number[] {
   const c = new Array(10).fill(0);
   for (const x of n) c[x%10]++;
@@ -241,6 +244,13 @@ interface Stats {
   n25Min: number;      n25Max: number;         // n[2]+n[5] 범위
   n13Min: number;      n13Max: number;         // n[1]+n[3] 범위
   s1245Min: number;    s1245Max: number;       // n[1]+n[2]+n[4]+n[5] 범위
+  low5Min: number;     low5Max: number;        // n[0]+n[1]+n[2]+n[3]+n[4] 범위
+  hi5Min: number;      hi5Max: number;         // n[1]+n[2]+n[3]+n[4]+n[5] 범위
+  gapOuterMax: number;                         // (n[1]-n[0])+(n[5]-n[4]) 상한
+  gapInnerMax: number;                         // (n[2]-n[1])+(n[4]-n[3]) 상한
+  n03Min: number;      n03Max: number;         // n[0]+n[3] 범위
+  n35Min: number;                              // n[3]+n[5] 하한
+  cubSumMin: number;   cubSumMax: number;      // 세제곱합 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -298,7 +308,14 @@ function computeStats(rounds: LottoRound[]): Stats {
   const n15s      = ns.map(n=>n[1]+n[5]);
   const n25s      = ns.map(n=>n[2]+n[5]);
   const n13s      = ns.map(n=>n[1]+n[3]);
+  const n03s      = ns.map(n=>n[0]+n[3]);
+  const n35s      = ns.map(n=>n[3]+n[5]);
   const s1245s    = ns.map(n=>n[1]+n[2]+n[4]+n[5]);
+  const low5s     = ns.map(n=>n[0]+n[1]+n[2]+n[3]+n[4]);
+  const hi5s      = ns.map(n=>n[1]+n[2]+n[3]+n[4]+n[5]);
+  const gapOuters = ns.map(gapOuter);
+  const gapInners = ns.map(gapInner);
+  const cubSums   = ns.map(cubSum);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -349,6 +366,13 @@ function computeStats(rounds: LottoRound[]): Stats {
     n25Min:       Math.min(...n25s),     n25Max:       Math.max(...n25s),
     n13Min:       Math.min(...n13s),     n13Max:       Math.max(...n13s),
     s1245Min:     Math.min(...s1245s),   s1245Max:     Math.max(...s1245s),
+    low5Min:      Math.min(...low5s),    low5Max:      Math.max(...low5s),
+    hi5Min:       Math.min(...hi5s),     hi5Max:       Math.max(...hi5s),
+    gapOuterMax:  Math.max(...gapOuters),
+    gapInnerMax:  Math.max(...gapInners),
+    n03Min:       Math.min(...n03s),     n03Max:       Math.max(...n03s),
+    n35Min:       Math.min(...n35s),
+    cubSumMin:    Math.min(...cubSums),  cubSumMax:    Math.max(...cubSums),
     zones,
     freq,
   };
@@ -412,6 +436,15 @@ const RULES: Rule[] = [
   // ── 자리수 기반 ────────────────────────────────────────────────────────────
   { name: '10의자리 합',       get: (n)=>tenSum(n),            lo:s=>s.tensMin,     hi:s=>s.tensMax },
   { name: '1의자리 합',        get: (n)=>oneSum(n),            lo:s=>s.onesMin,     hi:s=>s.onesMax },
+  { name: '세제곱합',          get: (n)=>cubSum(n),            lo:s=>s.cubSumMin,   hi:s=>s.cubSumMax },
+  // ── gap 조합 합 ────────────────────────────────────────────────────────────
+  { name: '외부gap합(g01+g45)', get: (n)=>gapOuter(n),        lo:()=>null,         hi:s=>s.gapOuterMax },
+  { name: '내부gap합(g12+g34)', get: (n)=>gapInner(n),        lo:()=>null,         hi:s=>s.gapInnerMax },
+  // ── 추가 부분합 ────────────────────────────────────────────────────────────
+  { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
+  { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
+  { name: 'n[0]+n[3] 합',     get: (n)=>n[0]+n[3],            lo:s=>s.n03Min,      hi:s=>s.n03Max },
+  { name: 'n[3]+n[5] 합',     get: (n)=>n[3]+n[5],            lo:s=>s.n35Min,      hi:()=>null },
   // ── 특수 패턴 ──────────────────────────────────────────────────────────────
   { name: '5의배수 개수',      get: (n)=>n.filter(x=>x%5===0).length,        lo:()=>null, hi:s=>s.multOf5Max },
   { name: '완전제곱수 개수',   get: (n)=>n.filter(x=>PERF_SQ.has(x)).length, lo:()=>null, hi:s=>s.perfSqMax },
