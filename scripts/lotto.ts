@@ -256,6 +256,26 @@ const MU: number[] = (() => {
   return a;
 })();
 
+// ── binary / bitwise family (cycle 12/15) ─────────────────────────────────────
+// POPCOUNT[x] = number of 1-bits in binary representation
+// BIT_LEN[x]  = floor(log2(x)) + 1 = number of bits (BIT_LEN[1]=1, BIT_LEN[45]=6)
+// TZ[x]       = trailing zero count (times x is divisible by 2; odd → 0)
+const POPCOUNT: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) { let m = x, c = 0; while (m) { c += m & 1; m >>>= 1; } a[x] = c; }
+  return a;
+})();
+const BIT_LEN: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) { let m = x, c = 0; while (m) { c++; m >>>= 1; } a[x] = c; }
+  return a;
+})();
+const TZ: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) { let m = x, c = 0; while ((m & 1) === 0) { c++; m >>>= 1; } a[x] = c; }
+  return a;
+})();
+
 function sumNums(n: number[])       { return n.reduce((a,b)=>a+b,0); }
 function oddCount(n: number[])      { return n.filter(x=>x%2===1).length; }
 function consecPairs(n: number[])   { let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]===1)c++; return c; }
@@ -460,6 +480,11 @@ interface Stats {
   gpfSumMin: number;      gpfSumMax: number;      // Σ greatest-prime-factor(n[i])
   lpfSumMin: number;      lpfSumMax: number;      // Σ least-prime-factor(n[i])
   muSumMin: number;       muSumMax: number;       // Σ μ(n[i]) — Möbius (bounded -6..6)
+  popcountSumMin: number; popcountSumMax: number; // Σ popcount(n[i]) — bit count (cycle 12/15)
+  bitLenSumMin: number;   bitLenSumMax: number;   // Σ bit_length(n[i])
+  tzSumMin: number;       tzSumMax: number;       // Σ trailing_zeros(n[i])
+  popcountDistMin: number; popcountDistMax: number; // distinct popcount values across 6
+  bitLenDistMin: number;  bitLenDistMax: number;  // distinct bit_length values across 6
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -684,6 +709,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const gpfSums       = ns.map(n=>n.reduce((a,x)=>a+GPF[x],0));
   const lpfSums       = ns.map(n=>n.reduce((a,x)=>a+LPF[x],0));
   const muSums        = ns.map(n=>n.reduce((a,x)=>a+MU[x],0));
+  const popcountSums  = ns.map(n=>n.reduce((a,x)=>a+POPCOUNT[x],0));
+  const bitLenSums    = ns.map(n=>n.reduce((a,x)=>a+BIT_LEN[x],0));
+  const tzSums        = ns.map(n=>n.reduce((a,x)=>a+TZ[x],0));
+  const popcountDists = ns.map(n=>new Set(n.map(x=>POPCOUNT[x])).size);
+  const bitLenDists   = ns.map(n=>new Set(n.map(x=>BIT_LEN[x])).size);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -875,6 +905,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     gpfSumMin:       Math.min(...gpfSums),       gpfSumMax:      Math.max(...gpfSums),
     lpfSumMin:       Math.min(...lpfSums),       lpfSumMax:      Math.max(...lpfSums),
     muSumMin:        Math.min(...muSums),        muSumMax:       Math.max(...muSums),
+    popcountSumMin:  Math.min(...popcountSums),  popcountSumMax: Math.max(...popcountSums),
+    bitLenSumMin:    Math.min(...bitLenSums),    bitLenSumMax:   Math.max(...bitLenSums),
+    tzSumMin:        Math.min(...tzSums),        tzSumMax:       Math.max(...tzSums),
+    popcountDistMin: Math.min(...popcountDists), popcountDistMax: Math.max(...popcountDists),
+    bitLenDistMin:   Math.min(...bitLenDists),   bitLenDistMax:  Math.max(...bitLenDists),
     zones,
     freq,
   };
@@ -1098,6 +1133,12 @@ const RULES: Rule[] = [
   { name: 'gpf(최대소인수) 합',        get: (n)=>n.reduce((a,x)=>a+GPF[x],0),       lo:s=>s.gpfSumMin,      hi:s=>s.gpfSumMax },
   { name: 'lpf(최소소인수) 합',        get: (n)=>n.reduce((a,x)=>a+LPF[x],0),       lo:s=>s.lpfSumMin,      hi:s=>s.lpfSumMax },
   { name: 'μ(모비우스) 합',            get: (n)=>n.reduce((a,x)=>a+MU[x],0),        lo:s=>s.muSumMin,       hi:s=>s.muSumMax },
+  // ── popcount 합 + bit length 합 + trailing zero 합 + popcount distinct + bit length distinct (cycle 12/15)
+  { name: 'popcount 합',          get: (n)=>n.reduce((a,x)=>a+POPCOUNT[x],0),    lo:s=>s.popcountSumMin,  hi:s=>s.popcountSumMax },
+  { name: 'bit length 합',        get: (n)=>n.reduce((a,x)=>a+BIT_LEN[x],0),     lo:s=>s.bitLenSumMin,    hi:s=>s.bitLenSumMax },
+  { name: 'trailing zero 합',     get: (n)=>n.reduce((a,x)=>a+TZ[x],0),          lo:s=>s.tzSumMin,        hi:s=>s.tzSumMax },
+  { name: 'popcount distinct',    get: (n)=>new Set(n.map(x=>POPCOUNT[x])).size, lo:s=>s.popcountDistMin, hi:s=>s.popcountDistMax },
+  { name: 'bit length distinct',  get: (n)=>new Set(n.map(x=>BIT_LEN[x])).size,  lo:s=>s.bitLenDistMin,   hi:s=>s.bitLenDistMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
