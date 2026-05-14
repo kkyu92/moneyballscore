@@ -312,6 +312,11 @@ interface Stats {
   loHalfSumMax: number;                        // ≤22 번호 합 상한
   hiHalfSumMin: number;                        // ≥23 번호 합 하한
   extremeProdMax: number;                      // n[0]*n[5] 상한
+  primeSumMax: number;                         // 소수번호 합 상한
+  mult3SumMax: number;                         // 3의배수번호 합 상한
+  loThirdSumMax: number;                       // ≤15 번호 합 상한
+  midThirdSumMax: number;                      // 16-30 번호 합 상한
+  hiThirdSumMin: number;                       // ≥31 번호 합 하한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -436,7 +441,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const evenNumSums  = ns.map(n=>n.filter(x=>x%2===0).reduce((a,b)=>a+b,0));
   const loHalfSums   = ns.map(n=>n.filter(x=>x<=22).reduce((a,b)=>a+b,0));
   const hiHalfSums   = ns.map(n=>n.filter(x=>x>=23).reduce((a,b)=>a+b,0));
-  const extremeProds = ns.map(n=>n[0]*n[5]);
+  const extremeProds  = ns.map(n=>n[0]*n[5]);
+  const primeSums     = ns.map(n=>n.filter(x=>PRIMES.has(x)).reduce((a,b)=>a+b,0));
+  const mult3Sums     = ns.map(n=>n.filter(x=>MULT3.has(x)).reduce((a,b)=>a+b,0));
+  const loThirdSums   = ns.map(n=>n.filter(x=>x<=15).reduce((a,b)=>a+b,0));
+  const midThirdSums  = ns.map(n=>n.filter(x=>x>=16&&x<=30).reduce((a,b)=>a+b,0));
+  const hiThirdSums   = ns.map(n=>n.filter(x=>x>=31).reduce((a,b)=>a+b,0));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -553,6 +563,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     loHalfSumMax:    Math.max(...loHalfSums),
     hiHalfSumMin:    Math.min(...hiHalfSums),
     extremeProdMax:  Math.max(...extremeProds),
+    primeSumMax:     Math.max(...primeSums),
+    mult3SumMax:     Math.max(...mult3Sums),
+    loThirdSumMax:   Math.max(...loThirdSums),
+    midThirdSumMax:  Math.max(...midThirdSums),
+    hiThirdSumMin:   Math.min(...hiThirdSums),
     zones,
     freq,
   };
@@ -685,6 +700,12 @@ const RULES: Rule[] = [
   { name: '하위절반합(≤22)',  get: (n)=>n.filter(x=>x<=22).reduce((a,b)=>a+b,0),   lo:()=>null,         hi:s=>s.loHalfSumMax },
   { name: '상위절반합(≥23)',  get: (n)=>n.filter(x=>x>=23).reduce((a,b)=>a+b,0),   lo:s=>s.hiHalfSumMin, hi:()=>null },
   { name: '극값곱(n0×n5)',    get: (n)=>n[0]*n[5],                                  lo:()=>null,         hi:s=>s.extremeProdMax },
+  // ── 값 분류 합 추가 ────────────────────────────────────────────────────────
+  { name: '소수번호합',        get: (n)=>n.filter(x=>PRIMES.has(x)).reduce((a,b)=>a+b,0), lo:()=>null, hi:s=>s.primeSumMax },
+  { name: '3배수번호합',       get: (n)=>n.filter(x=>MULT3.has(x)).reduce((a,b)=>a+b,0),  lo:()=>null, hi:s=>s.mult3SumMax },
+  { name: '하위3분의1합(≤15)', get: (n)=>n.filter(x=>x<=15).reduce((a,b)=>a+b,0),         lo:()=>null, hi:s=>s.loThirdSumMax },
+  { name: '중간3분의1합(16-30)',get: (n)=>n.filter(x=>x>=16&&x<=30).reduce((a,b)=>a+b,0), lo:()=>null, hi:s=>s.midThirdSumMax },
+  { name: '상위3분의1합(≥31)', get: (n)=>n.filter(x=>x>=31).reduce((a,b)=>a+b,0),         lo:s=>s.hiThirdSumMin, hi:()=>null },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
