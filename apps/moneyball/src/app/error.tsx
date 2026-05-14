@@ -24,7 +24,7 @@ export default function ErrorBoundary({
   return (
     <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-6">
       <header className="space-y-3">
-        <p className="text-7xl font-bold font-mono text-red-500/40">!</p>
+        <p className="text-7xl font-bold font-mono text-red-600/40">!</p>
         <h2 className="text-2xl md:text-3xl font-bold">
           페이지를 표시하는 중 오류가 발생했습니다
         </h2>
