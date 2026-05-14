@@ -327,6 +327,11 @@ interface Stats {
   prodN35Max: number;                          // n[3]*n[5] 상한
   multOf7Max: number;                          // 7의배수 개수 상한
   mult7SumMax: number;                         // 7의배수번호 합 상한
+  weightedSumAscMin: number; weightedSumAscMax: number; // Σ(i+1)*n[i] 범위
+  weightedSumDescMin: number; weightedSumDescMax: number; // Σ(6-i)*n[i] 범위
+  arithTripleMax: number;                      // 등차수열 트리플 개수 상한
+  closeGap2Max: number;                        // 간격≤2인 인접쌍 개수 상한
+  sumOfRootsMax: number;                       // Σfloor(√n[i]) 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -467,7 +472,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const prodN15s      = ns.map(n=>n[1]*n[5]);
   const prodN35s      = ns.map(n=>n[3]*n[5]);
   const mult7Cnts     = ns.map(n=>n.filter(x=>MULT7.has(x)).length);
-  const mult7Sums     = ns.map(n=>n.filter(x=>MULT7.has(x)).reduce((a,b)=>a+b,0));
+  const mult7Sums      = ns.map(n=>n.filter(x=>MULT7.has(x)).reduce((a,b)=>a+b,0));
+  const weightedAsc   = ns.map(n=>n.reduce((a,x,i)=>a+(i+1)*x,0));
+  const weightedDesc  = ns.map(n=>n.reduce((a,x,i)=>a+(6-i)*x,0));
+  const arithTriples  = ns.map(n=>{ let c=0; for(let i=0;i<4;i++) for(let j=i+1;j<5;j++) for(let k=j+1;k<6;k++) if(n[j]-n[i]===n[k]-n[j]) c++; return c; });
+  const closeGap2s    = ns.map(n=>{ let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]<=2) c++; return c; });
+  const sumOfRoots    = ns.map(n=>n.reduce((a,x)=>a+Math.floor(Math.sqrt(x)),0));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -599,6 +609,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     prodN35Max:      Math.max(...prodN35s),
     multOf7Max:      Math.max(...mult7Cnts),
     mult7SumMax:     Math.max(...mult7Sums),
+    weightedSumAscMin:  Math.min(...weightedAsc),  weightedSumAscMax:  Math.max(...weightedAsc),
+    weightedSumDescMin: Math.min(...weightedDesc), weightedSumDescMax: Math.max(...weightedDesc),
+    arithTripleMax:  Math.max(...arithTriples),
+    closeGap2Max:    Math.max(...closeGap2s),
+    sumOfRootsMax:   Math.max(...sumOfRoots),
     zones,
     freq,
   };
@@ -749,6 +764,12 @@ const RULES: Rule[] = [
   { name: 'n[3]×n[5] 곱',    get: (n)=>n[3]*n[5],                                        lo:()=>null, hi:s=>s.prodN35Max },
   { name: '7의배수 개수',     get: (n)=>n.filter(x=>[7,14,21,28,35,42].includes(x)).length, lo:()=>null, hi:s=>s.multOf7Max },
   { name: '7배수번호합',      get: (n)=>n.filter(x=>[7,14,21,28,35,42].includes(x)).reduce((a,b)=>a+b,0), lo:()=>null, hi:s=>s.mult7SumMax },
+  // ── 위치가중합 + 구조 패턴 ────────────────────────────────────────────────
+  { name: '위치가중합(오름)', get: (n)=>n.reduce((a,x,i)=>a+(i+1)*x,0), lo:s=>s.weightedSumAscMin,  hi:s=>s.weightedSumAscMax },
+  { name: '위치가중합(내림)', get: (n)=>n.reduce((a,x,i)=>a+(6-i)*x,0), lo:s=>s.weightedSumDescMin, hi:s=>s.weightedSumDescMax },
+  { name: '등차트리플 개수',  get: (n)=>{ let c=0; for(let i=0;i<4;i++) for(let j=i+1;j<5;j++) for(let k=j+1;k<6;k++) if(n[j]-n[i]===n[k]-n[j]) c++; return c; }, lo:()=>null, hi:s=>s.arithTripleMax },
+  { name: '근접간격≤2 개수', get: (n)=>{ let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]<=2) c++; return c; }, lo:()=>null, hi:s=>s.closeGap2Max },
+  { name: '제곱근합(floor)', get: (n)=>n.reduce((a,x)=>a+Math.floor(Math.sqrt(x)),0), lo:()=>null, hi:s=>s.sumOfRootsMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
