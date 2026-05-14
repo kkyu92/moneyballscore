@@ -18,7 +18,9 @@ export type ModelVersion =
   | 'v2.0-postview'
   | 'v1.8'
   | 'v1.8-postview'
-  | 'v1.7-revert';
+  | 'v1.8-live'
+  | 'v1.7-revert'
+  | 'v1.7-revert-live';
 export type DebateVersion = 'v2-persona4' | 'v2-postview' | null;
 
 export interface ModelVersionDecision {
