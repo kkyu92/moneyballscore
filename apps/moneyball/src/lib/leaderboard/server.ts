@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import type { LeaderboardEntry, LeaderboardMode } from './types';
+import { CURRENT_MODEL_FILTER } from '@/config/model';
+import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from './types';
 
 export async function fetchLeaderboard(
   mode: LeaderboardMode,
@@ -15,4 +16,38 @@ export async function fetchLeaderboard(
 
   if (error) return [];
   return (data ?? []) as LeaderboardEntry[];
+}
+
+export async function fetchAiBaseline(mode: LeaderboardMode): Promise<AiBaseline | null> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('predictions')
+    .select('is_correct, verified_at')
+    .match(CURRENT_MODEL_FILTER)
+    .eq('prediction_type', 'pre_game')
+    .not('is_correct', 'is', null)
+    .not('verified_at', 'is', null);
+
+  if (mode === 'weekly') {
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const dow = kst.getUTCDay();
+    const mondayOffset = dow === 0 ? 6 : dow - 1;
+    const monday = new Date(kst);
+    monday.setUTCDate(monday.getUTCDate() - mondayOffset);
+    monday.setUTCHours(0, 0, 0, 0);
+    const mondayUtc = new Date(monday.getTime() - 9 * 60 * 60 * 1000);
+    query = query.gte('verified_at', mondayUtc.toISOString());
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return null;
+
+  const total = data.length;
+  if (total === 0) return null;
+
+  const correct = data.filter((r) => r.is_correct === true).length;
+  const pct = Math.round((correct / total) * 1000) / 10;
+  return { pct, total };
 }

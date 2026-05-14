@@ -18,3 +18,8 @@ export interface LeaderboardSyncPayload {
 }
 
 export type LeaderboardMode = 'weekly' | 'season';
+
+export interface AiBaseline {
+  pct: number;
+  total: number;
+}

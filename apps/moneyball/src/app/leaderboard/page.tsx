@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
-import { fetchLeaderboard } from '@/lib/leaderboard/server';
+import { fetchAiBaseline, fetchLeaderboard } from '@/lib/leaderboard/server';
 
 export const revalidate = 30;
 
@@ -15,9 +15,11 @@ export const metadata: Metadata = {
 };
 
 export default async function LeaderboardPage() {
-  const [weeklyEntries, seasonEntries] = await Promise.all([
+  const [weeklyEntries, seasonEntries, weeklyAi, seasonAi] = await Promise.all([
     fetchLeaderboard('weekly'),
     fetchLeaderboard('season'),
+    fetchAiBaseline('weekly'),
+    fetchAiBaseline('season'),
   ]);
 
   return (
@@ -35,6 +37,8 @@ export default async function LeaderboardPage() {
       <LeaderboardClient
         weeklyEntries={weeklyEntries}
         seasonEntries={seasonEntries}
+        weeklyAi={weeklyAi}
+        seasonAi={seasonAi}
       />
     </main>
   );
