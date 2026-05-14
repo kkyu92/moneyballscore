@@ -610,6 +610,7 @@ export async function runDailyPipeline(
             homeArgument: debate.homeArgument, awayArgument: debate.awayArgument,
             calibration: debate.calibration, verdict: debate.verdict,
             quantitativeProb: debate.quantitativeProb, totalTokens: debate.totalTokens,
+            agentsFailed: debate.agentsFailed, agentError: debate.agentError,
           },
         });
         if (debate.agentsFailed) {
