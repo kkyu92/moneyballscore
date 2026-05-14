@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   canonicalizeFactorKey,
   deriveFactorErrorsFallback,
@@ -10,8 +10,17 @@ import {
   JUDGE_POSTVIEW_SYSTEM,
   parseJudgePostview,
   TEAM_POSTVIEW_SYSTEM,
+  runPostview,
+  type ActualResult,
+  type OriginalPrediction,
 } from '../agents/postview';
 import { SYSTEM_PROMPT as JUDGE_PREGAME_SYSTEM } from '../agents/judge-agent';
+import { callLLM } from '../agents/llm';
+import type { GameContext, AgentResult } from '../agents/types';
+
+vi.mock('../agents/llm', () => ({
+  callLLM: vi.fn(),
+}));
 
 // cycle 131 — production factor 키 (predictor.ts 가 박제) 는 home_/away_ prefix 없는
 // normalized single key (sp_fip / bullpen_fip / head_to_head 등). prefix 있는 LLM 출력은
@@ -324,5 +333,116 @@ describe('cycle 126 — ZERO_WEIGHT_RULE conditional skip (silent drift 가드)'
     expect(JUDGE_POSTVIEW_SYSTEM).toContain('JSON');
     expect(TEAM_POSTVIEW_SYSTEM).toContain('JSON');
     expect(JUDGE_PREGAME_SYSTEM).toContain('JSON');
+  });
+});
+
+// cycle 384 fix-incident heavy — runPostview agentsFailed/agentError 회귀 테스트.
+// PR #372 (cycle 362) 의 debate 차원 가시화를 postview path 에 확장. ANTHROPIC credit
+// 소진 시 mv='v2.0-postview' 라벨 silent drift 차단 evidence.
+describe('runPostview agentsFailed (cycle 384)', () => {
+  const makeContext = (): GameContext => ({
+    game: {
+      date: '2026-05-14',
+      homeTeam: 'LG',
+      awayTeam: 'HT',
+      gameTime: '18:30',
+      stadium: '잠실',
+      status: 'final',
+      externalGameId: 'TEST-1',
+    },
+    homeSPStats: null,
+    awaySPStats: null,
+    homeTeamStats: { team: 'LG', woba: 0, bullpenFip: 0, totalWar: 0, sfr: 0 },
+    awayTeamStats: { team: 'HT', woba: 0, bullpenFip: 0, totalWar: 0, sfr: 0 },
+    homeElo: { team: 'LG', elo: 1500, winPct: 0.5 },
+    awayElo: { team: 'HT', elo: 1500, winPct: 0.5 },
+    headToHead: { wins: 0, losses: 0 },
+    homeRecentForm: 0.5,
+    awayRecentForm: 0.5,
+    parkFactor: 1.0,
+  });
+
+  const actual: ActualResult = { homeScore: 5, awayScore: 3, winnerCode: 'LG' };
+  const original: OriginalPrediction = {
+    predictedWinner: 'LG',
+    homeWinProb: 0.55,
+    factors: { sp_fip: 0.55, bullpen_fip: 0.52, recent_form: 0.51 },
+    reasoning: 'pre_game LG 우세',
+  };
+
+  const ok = <T,>(data: T): AgentResult<T> => ({
+    success: true,
+    data,
+    error: null,
+    model: 'mock',
+    tokensUsed: 100,
+    durationMs: 50,
+  });
+  const fail = <T,>(error = 'API credit error'): AgentResult<T> => ({
+    success: false,
+    data: null,
+    error,
+    model: 'mock',
+    tokensUsed: 0,
+    durationMs: 10,
+  });
+
+  beforeEach(() => {
+    vi.mocked(callLLM).mockReset();
+  });
+
+  it('모든 에이전트 성공 시 agentsFailed=false, agentError=null', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ team: 'LG', summary: 'home', keyFactor: 'sp_fip', missedBy: '' }));
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ team: 'HT', summary: 'away', keyFactor: 'bullpen_fip', missedBy: '' }));
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ factorErrors: [], reasoning: 'judge OK' }));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.agentsFailed).toBe(false);
+    expect(result.agentError).toBeNull();
+  });
+
+  it('심판 에이전트 실패 시 agentsFailed=true, agentError 캡처', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ team: 'LG', summary: 'home', keyFactor: 'sp_fip', missedBy: '' }));
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ team: 'HT', summary: 'away', keyFactor: 'bullpen_fip', missedBy: '' }));
+    vi.mocked(callLLM).mockResolvedValueOnce(fail('judge fail'));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('judge fail');
+  });
+
+  it('홈 팀 postview 실패 시 agentsFailed=true', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(fail('home fail'));
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ team: 'HT', summary: 'away', keyFactor: 'bullpen_fip', missedBy: '' }));
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ factorErrors: [], reasoning: 'judge OK' }));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('home fail');
+  });
+
+  it('원정 팀 postview 실패 시 agentsFailed=true', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ team: 'LG', summary: 'home', keyFactor: 'sp_fip', missedBy: '' }));
+    vi.mocked(callLLM).mockResolvedValueOnce(fail('away fail'));
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ factorErrors: [], reasoning: 'judge OK' }));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('away fail');
+  });
+
+  it('3개 모두 실패 시 agentsFailed=true + agentError = 홈 에러 (첫 번째)', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(fail('credit exhausted'));
+    vi.mocked(callLLM).mockResolvedValueOnce(fail('credit exhausted'));
+    vi.mocked(callLLM).mockResolvedValueOnce(fail('credit exhausted'));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.agentsFailed).toBe(true);
+    expect(result.agentError).toBe('credit exhausted');
   });
 });

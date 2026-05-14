@@ -21,6 +21,7 @@ import {
   maskViolatedReasoning,
   notifyValidationViolations,
   resolveValidationMode,
+  captureAgentFallback,
 } from './validator';
 import type { GameContext, AgentResult } from './types';
 
@@ -134,6 +135,8 @@ export interface PostviewResult {
   judgeReasoning: string; // 블로그용 종합 분석 (300-500자)
   totalTokens: number;
   totalDurationMs: number;
+  agentsFailed: boolean;   // cycle 384 — postview 에이전트 1개 이상 fallback (PR #372 패턴)
+  agentError: string | null; // cycle 384 — 첫 번째 에러 메시지 (ANTHROPIC credit 등)
 }
 
 // ============================================
@@ -388,6 +391,27 @@ export async function runPostview(
     reasoning: '사후 분석 LLM 실패. factor 편향 기반 자동 fallback.',
   };
 
+  // cycle 384 fix-incident heavy — PR #372 (cycle 362) 패턴의 postview path 확장.
+  // ANTHROPIC_API_KEY credit 소진 시 mv='v2.0-postview' 라벨 silent drift 차단.
+  const agentsFailed = !homeResult.data || !awayResult.data || !judgeResult.data;
+  const agentError = (!homeResult.success ? homeResult.error : null)
+    ?? (!awayResult.success ? awayResult.error : null)
+    ?? (!judgeResult.success ? judgeResult.error : null)
+    ?? null;
+
+  if (agentsFailed) {
+    console.error(
+      `[Postview] ${awayTeam}@${homeTeam}: 에이전트 fallback — ${agentError ?? 'unknown'}`
+    );
+    void captureAgentFallback({
+      path: 'post_game',
+      homeTeam,
+      awayTeam,
+      gameId: context.game.externalGameId ?? null,
+      agentError,
+    });
+  }
+
   // cycle 29 (P4) — factor attribution cross-check. low-weight factor 를 결과 요인으로 강조 시 warn.
   // cycle 70 — 사용자 가시 reasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
   // attribution warning 은 Sentry capture 만 (dev 모니터링 유지). 사용자 가시 텍스트엔 표기 X.
@@ -431,6 +455,8 @@ export async function runPostview(
     judgeReasoning: finalReasoning,
     totalTokens,
     totalDurationMs: Date.now() - startTime,
+    agentsFailed,
+    agentError,
   };
 }
 

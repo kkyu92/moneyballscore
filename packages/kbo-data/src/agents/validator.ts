@@ -646,3 +646,58 @@ export async function notifyValidationViolations(
     }
   }
 }
+
+// ============================================
+// cycle 384 fix-incident heavy — agent fallback Sentry capture
+// ============================================
+//
+// debate.ts / postview.ts 의 agentsFailed=true 시 호출. console.error 만으로는
+// Cloudflare Workers cron 환경에서 alert 안 잡힘 (CLAUDE.md 드리프트 사례 6 family).
+// notifyValidationViolations 와 동일 동적 import 패턴 — test/local ollama no-op.
+
+export interface AgentFailureMeta {
+  path: 'pre_game' | 'post_game';
+  homeTeam: string;
+  awayTeam: string;
+  gameId: string | number | null;
+  agentError: string | null;
+}
+
+export async function captureAgentFallback(meta: AgentFailureMeta): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  const backend = process.env.LLM_BACKEND ?? 'anthropic';
+  const errMsg = meta.agentError ?? 'unknown';
+
+  try {
+    Sentry.captureException(new Error(`agent_fallback: ${meta.path} ${errMsg}`), {
+      level: 'error',
+      tags: {
+        agent_fallback: 'true',
+        agent_path: meta.path,
+        backend,
+      },
+      extra: {
+        home_team: meta.homeTeam,
+        away_team: meta.awayTeam,
+        game_id: meta.gameId ?? 'unknown',
+        agent_error: errMsg,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}

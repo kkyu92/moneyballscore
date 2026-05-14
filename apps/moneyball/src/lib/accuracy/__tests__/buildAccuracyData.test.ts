@@ -3,6 +3,7 @@ import {
   brierScore,
   buildConfidenceTiers,
   buildDayOfWeek,
+  buildFallbackStats,
   buildRecentForm,
   buildVersionHistory,
   buildWeeklyTrend,
@@ -317,5 +318,69 @@ describe('buildWeeklyTrend', () => {
     const result = buildWeeklyTrend(rows);
     // KST 기준 2026-05-04 → 주 시작 월요일 2026-05-04 → "5/4 주"
     expect(result[0].weekLabel).toBe('5/4 주');
+  });
+});
+
+// cycle 384 fix-incident heavy — LLM 토론 활성 vs fallback 가시화.
+describe('buildFallbackStats', () => {
+  it('빈 배열 → 0/0/0%', () => {
+    const s = buildFallbackStats([]);
+    expect(s.total).toBe(0);
+    expect(s.llmActive).toBe(0);
+    expect(s.fallback).toBe(0);
+    expect(s.fallbackRate).toBe(0);
+  });
+
+  it('모두 v2.0-debate → fallback 0%', () => {
+    const s = buildFallbackStats([
+      { model_version: 'v2.0-debate', predicted_at: '2026-05-13T10:00:00Z' },
+      { model_version: 'v2.0-debate', predicted_at: '2026-05-13T11:00:00Z' },
+    ]);
+    expect(s.total).toBe(2);
+    expect(s.llmActive).toBe(2);
+    expect(s.fallback).toBe(0);
+    expect(s.fallbackRate).toBe(0);
+  });
+
+  it('mv=v1.8 → fallback 100%', () => {
+    const s = buildFallbackStats([
+      { model_version: 'v1.8', predicted_at: '2026-05-13T10:00:00Z' },
+      { model_version: 'v1.8', predicted_at: '2026-05-14T10:00:00Z' },
+    ]);
+    expect(s.total).toBe(2);
+    expect(s.llmActive).toBe(0);
+    expect(s.fallback).toBe(2);
+    expect(s.fallbackRate).toBe(1);
+    expect(s.latestFallbackAt).toBe('2026-05-14T10:00:00Z');
+  });
+
+  it('mv=v1.8-postview 도 fallback 으로 분류', () => {
+    const s = buildFallbackStats([
+      { model_version: 'v1.8-postview', predicted_at: '2026-05-13T10:00:00Z' },
+      { model_version: 'v2.0-postview', predicted_at: '2026-05-13T11:00:00Z' },
+    ]);
+    expect(s.fallback).toBe(1);
+    expect(s.llmActive).toBe(1);
+    expect(s.fallbackRate).toBe(0.5);
+  });
+
+  it('v1.7-revert / null 모델은 total 에서 제외 (legacy 잡음 차단)', () => {
+    const s = buildFallbackStats([
+      { model_version: 'v1.7-revert', predicted_at: '2026-05-10T10:00:00Z' },
+      { model_version: null, predicted_at: '2026-05-11T10:00:00Z' },
+      { model_version: 'v2.0-debate', predicted_at: '2026-05-12T10:00:00Z' },
+    ]);
+    expect(s.total).toBe(1);
+    expect(s.llmActive).toBe(1);
+    expect(s.fallback).toBe(0);
+  });
+
+  it('latestFallbackAt = 가장 최근 fallback 시각', () => {
+    const s = buildFallbackStats([
+      { model_version: 'v1.8', predicted_at: '2026-05-13T07:00:00Z' },
+      { model_version: 'v2.0-debate', predicted_at: '2026-05-14T07:00:00Z' },
+      { model_version: 'v1.8', predicted_at: '2026-05-14T03:00:00Z' },
+    ]);
+    expect(s.latestFallbackAt).toBe('2026-05-14T03:00:00Z');
   });
 });

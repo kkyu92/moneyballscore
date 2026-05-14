@@ -19,6 +19,7 @@ import { assertSelectOk, assertWriteOk, type TeamCode } from '@moneyball/shared'
 import { runPostview, type ActualResult, type OriginalPrediction } from '../agents/postview';
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
+import { decidePostviewModelVersion } from './model-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -175,6 +176,18 @@ export async function runPostviewDaily(
       const postview = await runPostview(context, actual, original);
       result.totalTokens += postview.totalTokens;
 
+      // cycle 384 fix-incident heavy — agentsFailed silent drift 차단 (PR #372 패턴).
+      // ANTHROPIC credit 소진 시 모든 LLM 호출 실패 → fallback verdict 박제됨에도
+      // mv='v2.0-postview' 라벨 silent. errors push + version 강등 (v1.8-postview).
+      if (postview.agentsFailed) {
+        const errMsg = postview.agentError?.slice(0, 200) ?? 'API error';
+        result.errors.push(`game ${gameId} postview agents fallback: ${errMsg}`);
+      }
+      const versionDecision = decidePostviewModelVersion({
+        hasApiKey: !!process.env.ANTHROPIC_API_KEY,
+        agentsSucceeded: !postview.agentsFailed,
+      });
+
       // 6. post_game row insert (upsert로 멱등성 보장)
       // cycle 171 silent drift family write 측 네 번째 진입.
       // .error 미체크 시 unique violation / RLS 시 silent skip → post_game row
@@ -186,8 +199,8 @@ export async function runPostviewDaily(
           prediction_type: 'post_game',
           predicted_winner: preGame.predicted_winner, // pre_game과 동일 (참조용)
           confidence: preGame.confidence,
-          model_version: 'v2.0-postview',
-          debate_version: 'v2-postview',
+          model_version: versionDecision.model_version,
+          debate_version: versionDecision.debate_version,
           scoring_rule: preGame.scoring_rule ?? 'v1.8',
           reasoning: {
             judgeReasoning: postview.judgeReasoning,

@@ -10,6 +10,7 @@ import {
   type PredRow,
   type Bucket,
   type ConfidenceTier,
+  type FallbackStatsRow,
   bucketize,
   brierScore,
   calibrationGap,
@@ -18,6 +19,7 @@ import {
   buildRecentForm,
   buildConfidenceTiers,
   buildVersionHistory,
+  buildFallbackStats,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -176,7 +178,11 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 export default async function AccuracyPage() {
   const supabase = await createClient();
 
-  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData] = await Promise.all([
+  // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화용 최근 7일 query.
+  // CURRENT_MODEL_FILTER (debate_version=v2-persona4) 제거 — fallback row 도 포함해서 비율 측정.
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([
     supabase
       .from('predictions')
       .select('confidence, is_correct, verified_at, scoring_rule, reasoning->homeWinProb')
@@ -200,6 +206,12 @@ export default async function AccuracyPage() {
       .not('is_correct', 'is', null),
     buildAllTeamAccuracy(),
     buildMatchupData(),
+    supabase
+      .from('predictions')
+      .select('model_version, predicted_at')
+      .eq('prediction_type', 'pre_game')
+      .gte('predicted_at', sevenDaysAgo)
+      .order('predicted_at', { ascending: false }),
   ]);
 
   const communityStats = computeCommunityVsAI(
@@ -210,6 +222,9 @@ export default async function AccuracyPage() {
 
   const { data } = assertSelectOk(result, 'AccuracyPage');
   const rows = (data ?? []) as PredRow[];
+
+  const { data: fallbackData } = assertSelectOk(fallbackResult, 'AccuracyPage fallback');
+  const fallbackStats = buildFallbackStats((fallbackData ?? []) as FallbackStatsRow[]);
   const n = rows.length;
   const correct = rows.filter((r) => r.is_correct).length;
   const overallAcc = n > 0 ? correct / n : 0;
@@ -267,6 +282,24 @@ export default async function AccuracyPage() {
           }
         />
       </section>
+
+      {/* cycle 384 — AI 분석 활성률 (최근 7일). fallback 0건이면 hide. */}
+      {fallbackStats.total > 0 && fallbackStats.fallback > 0 && (
+        <section className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5 space-y-2">
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <h2 className="text-sm font-bold text-amber-900 dark:text-amber-100">
+              최근 7일 AI 분석 활성률
+            </h2>
+            <span className="text-xs text-amber-700 dark:text-amber-200/80">
+              {fallbackStats.llmActive}/{fallbackStats.total} 경기 AI 토론 적용 ({((1 - fallbackStats.fallbackRate) * 100).toFixed(0)}%)
+            </span>
+          </div>
+          <p className="text-xs text-amber-800/80 dark:text-amber-100/70 leading-relaxed">
+            나머지 {fallbackStats.fallback}건은 정량 모델만으로 예측됐습니다 (LLM 분석 미적용).
+            보통 API 한도·일시 장애 영향이며, 적중 기록은 정량 모델만 사용한 경기를 제외합니다.
+          </p>
+        </section>
+      )}
 
       {/* 커뮤니티 vs AI 대결 */}
       {communityStats.communityGames >= 3 && (
