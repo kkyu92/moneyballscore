@@ -271,6 +271,11 @@ interface Stats {
   s023Min: number;     s023Max: number;        // n[0]+n[2]+n[3]
   s135Min: number;     s135Max: number;        // n[1]+n[3]+n[5]
   s025Min: number;     s025Max: number;        // n[0]+n[2]+n[5]
+  s035Min: number;     s035Max: number;        // n[0]+n[3]+n[5]
+  s124Min: number;     s124Max: number;        // n[1]+n[2]+n[4]
+  s015Min: number;     s015Max: number;        // n[0]+n[1]+n[5]
+  s235Min: number;     s235Max: number;        // n[2]+n[3]+n[5]
+  s125Min: number;     s125Max: number;        // n[1]+n[2]+n[5]
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -354,6 +359,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const s023s      = ns.map(n=>n[0]+n[2]+n[3]);
   const s135s      = ns.map(n=>n[1]+n[3]+n[5]);
   const s025s      = ns.map(n=>n[0]+n[2]+n[5]);
+  const s035s      = ns.map(n=>n[0]+n[3]+n[5]);
+  const s124s      = ns.map(n=>n[1]+n[2]+n[4]);
+  const s015s      = ns.map(n=>n[0]+n[1]+n[5]);
+  const s235s      = ns.map(n=>n[2]+n[3]+n[5]);
+  const s125s      = ns.map(n=>n[1]+n[2]+n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -429,6 +439,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     s023Min:      Math.min(...s023s),    s023Max:      Math.max(...s023s),
     s135Min:      Math.min(...s135s),    s135Max:      Math.max(...s135s),
     s025Min:      Math.min(...s025s),    s025Max:      Math.max(...s025s),
+    s035Min:      Math.min(...s035s),    s035Max:      Math.max(...s035s),
+    s124Min:      Math.min(...s124s),    s124Max:      Math.max(...s124s),
+    s015Min:      Math.min(...s015s),    s015Max:      Math.max(...s015s),
+    s235Min:      Math.min(...s235s),    s235Max:      Math.max(...s235s),
+    s125Min:      Math.min(...s125s),    s125Max:      Math.max(...s125s),
     zones,
     freq,
   };
@@ -513,6 +528,11 @@ const RULES: Rule[] = [
   { name: 'n[0]+n[2]+n[3]',  get: (n)=>n[0]+n[2]+n[3],       lo:s=>s.s023Min,     hi:s=>s.s023Max },
   { name: 'n[1]+n[3]+n[5]',  get: (n)=>n[1]+n[3]+n[5],       lo:s=>s.s135Min,     hi:s=>s.s135Max },
   { name: 'n[0]+n[2]+n[5]',  get: (n)=>n[0]+n[2]+n[5],       lo:s=>s.s025Min,     hi:s=>s.s025Max },
+  { name: 'n[0]+n[3]+n[5]',  get: (n)=>n[0]+n[3]+n[5],       lo:s=>s.s035Min,     hi:s=>s.s035Max },
+  { name: 'n[1]+n[2]+n[4]',  get: (n)=>n[1]+n[2]+n[4],       lo:s=>s.s124Min,     hi:s=>s.s124Max },
+  { name: 'n[0]+n[1]+n[5]',  get: (n)=>n[0]+n[1]+n[5],       lo:s=>s.s015Min,     hi:s=>s.s015Max },
+  { name: 'n[2]+n[3]+n[5]',  get: (n)=>n[2]+n[3]+n[5],       lo:s=>s.s235Min,     hi:s=>s.s235Max },
+  { name: 'n[1]+n[2]+n[5]',  get: (n)=>n[1]+n[2]+n[5],       lo:s=>s.s125Min,     hi:s=>s.s125Max },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
