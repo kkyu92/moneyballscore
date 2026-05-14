@@ -266,6 +266,11 @@ interface Stats {
   fibMax: number;                              // 피보나치수 개수 상한
   mod3SumMin: number;  mod3SumMax: number;     // Σ(n[i]%3) 범위
   samePairMax: number;                         // 인접 동일홀짝 쌍 수 상한
+  s013Min: number;     s013Max: number;        // n[0]+n[1]+n[3]
+  s014Min: number;     s014Max: number;        // n[0]+n[1]+n[4]
+  s023Min: number;     s023Max: number;        // n[0]+n[2]+n[3]
+  s135Min: number;     s135Max: number;        // n[1]+n[3]+n[5]
+  s025Min: number;     s025Max: number;        // n[0]+n[2]+n[5]
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -344,6 +349,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const fibCnts    = ns.map(n=>n.filter(x=>FIBS.has(x)).length);
   const mod3Sums   = ns.map(n=>n.reduce((a,x)=>a+(x%3),0));
   const samePairs  = ns.map(n=>{ let c=0; for(let i=0;i<5;i++) if((n[i]%2)===(n[i+1]%2))c++; return c; });
+  const s013s      = ns.map(n=>n[0]+n[1]+n[3]);
+  const s014s      = ns.map(n=>n[0]+n[1]+n[4]);
+  const s023s      = ns.map(n=>n[0]+n[2]+n[3]);
+  const s135s      = ns.map(n=>n[1]+n[3]+n[5]);
+  const s025s      = ns.map(n=>n[0]+n[2]+n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -414,6 +424,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     fibMax:       Math.max(...fibCnts),
     mod3SumMin:   Math.min(...mod3Sums), mod3SumMax:  Math.max(...mod3Sums),
     samePairMax:  Math.max(...samePairs),
+    s013Min:      Math.min(...s013s),    s013Max:      Math.max(...s013s),
+    s014Min:      Math.min(...s014s),    s014Max:      Math.max(...s014s),
+    s023Min:      Math.min(...s023s),    s023Max:      Math.max(...s023s),
+    s135Min:      Math.min(...s135s),    s135Max:      Math.max(...s135s),
+    s025Min:      Math.min(...s025s),    s025Max:      Math.max(...s025s),
     zones,
     freq,
   };
@@ -492,6 +507,12 @@ const RULES: Rule[] = [
   { name: 'n[1]+n[4] 합',     get: (n)=>n[1]+n[4],            lo:s=>s.n14Min,      hi:s=>s.n14Max },
   { name: 'n[2]+n[4] 합',     get: (n)=>n[2]+n[4],            lo:s=>s.n24Min,      hi:s=>s.n24Max },
   { name: 'n[3]+n[4] 합',     get: (n)=>n[3]+n[4],            lo:s=>s.n34Min,      hi:s=>s.n34Max },
+  // ── 3항 위치합 ─────────────────────────────────────────────────────────────
+  { name: 'n[0]+n[1]+n[3]',  get: (n)=>n[0]+n[1]+n[3],       lo:s=>s.s013Min,     hi:s=>s.s013Max },
+  { name: 'n[0]+n[1]+n[4]',  get: (n)=>n[0]+n[1]+n[4],       lo:s=>s.s014Min,     hi:s=>s.s014Max },
+  { name: 'n[0]+n[2]+n[3]',  get: (n)=>n[0]+n[2]+n[3],       lo:s=>s.s023Min,     hi:s=>s.s023Max },
+  { name: 'n[1]+n[3]+n[5]',  get: (n)=>n[1]+n[3]+n[5],       lo:s=>s.s135Min,     hi:s=>s.s135Max },
+  { name: 'n[0]+n[2]+n[5]',  get: (n)=>n[0]+n[2]+n[5],       lo:s=>s.s025Min,     hi:s=>s.s025Max },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
