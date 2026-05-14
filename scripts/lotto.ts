@@ -490,6 +490,11 @@ interface Stats {
   digitSumMinMin: number;  digitSumMinMax: number;  // min/max of min digitSum per draw
   maxDigitMin: number;     maxDigitMax: number;     // min/max of largest single digit across 12 digit positions
   distinctDigitsMin: number; distinctDigitsMax: number; // distinct digit values (0-9) across 12 digit positions
+  altSumMin: number;    altSumMax: number;     // 교번합 n[0]-n[1]+n[2]-n[3]+n[4]-n[5] (cycle 14/15)
+  qPosAscMin: number;   qPosAscMax: number;    // Σ i²·n[i] (i=0..5) weights (0,1,4,9,16,25)
+  qPosDescMin: number;  qPosDescMax: number;   // Σ (5-i)²·n[i] weights (25,16,9,4,1,0)
+  vWeightMin: number;   vWeightMax: number;    // V형 5·n[0]+3·n[1]+1·n[2]+1·n[3]+3·n[4]+5·n[5]
+  lWeightMin: number;   lWeightMax: number;    // Λ형 1·n[0]+3·n[1]+5·n[2]+5·n[3]+3·n[4]+1·n[5]
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -726,6 +731,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const allDigitsPer  = ns.map(n=>n.flatMap(x=>[Math.floor(x/10), x%10]));
   const maxDigits     = allDigitsPer.map(d=>Math.max(...d));
   const distinctDigs  = allDigitsPer.map(d=>new Set(d).size);
+  // ── cycle 14/15 positional weighting family ────────────────────────────────
+  const altSums       = ns.map(n=>n[0]-n[1]+n[2]-n[3]+n[4]-n[5]);
+  const qPosAscs      = ns.map(n=>n.reduce((a,x,i)=>a+i*i*x,0));
+  const qPosDescs     = ns.map(n=>n.reduce((a,x,i)=>a+(5-i)*(5-i)*x,0));
+  const vWeights      = ns.map(n=>5*n[0]+3*n[1]+1*n[2]+1*n[3]+3*n[4]+5*n[5]);
+  const lWeights      = ns.map(n=>1*n[0]+3*n[1]+5*n[2]+5*n[3]+3*n[4]+1*n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -927,6 +938,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     digitSumMinMin:    Math.min(...digitSumMins),  digitSumMinMax: Math.max(...digitSumMins),
     maxDigitMin:       Math.min(...maxDigits),     maxDigitMax:    Math.max(...maxDigits),
     distinctDigitsMin: Math.min(...distinctDigs),  distinctDigitsMax: Math.max(...distinctDigs),
+    altSumMin:         Math.min(...altSums),       altSumMax:         Math.max(...altSums),
+    qPosAscMin:        Math.min(...qPosAscs),      qPosAscMax:        Math.max(...qPosAscs),
+    qPosDescMin:       Math.min(...qPosDescs),     qPosDescMax:       Math.max(...qPosDescs),
+    vWeightMin:        Math.min(...vWeights),      vWeightMax:        Math.max(...vWeights),
+    lWeightMin:        Math.min(...lWeights),      lWeightMax:        Math.max(...lWeights),
     zones,
     freq,
   };
@@ -1162,6 +1178,12 @@ const RULES: Rule[] = [
   { name: '자리수합 min',         get: (n)=>Math.min(...n.map(x=>(x%10)+Math.floor(x/10))),             lo:s=>s.digitSumMinMin,    hi:s=>s.digitSumMinMax },
   { name: '각자리수 max',          get: (n)=>Math.max(...n.flatMap(x=>[Math.floor(x/10), x%10])),        lo:s=>s.maxDigitMin,       hi:s=>s.maxDigitMax },
   { name: '각자리수 distinct',     get: (n)=>new Set(n.flatMap(x=>[Math.floor(x/10), x%10])).size,        lo:s=>s.distinctDigitsMin, hi:s=>s.distinctDigitsMax },
+  // ── 교번합 + 위치제곱가중합(오름/내림) + V형/Λ형 중심가중합 (cycle 14/15) ───
+  { name: '교번합',                get: (n)=>n[0]-n[1]+n[2]-n[3]+n[4]-n[5],                              lo:s=>s.altSumMin,         hi:s=>s.altSumMax },
+  { name: '위치제곱가중합(오름)', get: (n)=>n.reduce((a,x,i)=>a+i*i*x,0),                                lo:s=>s.qPosAscMin,        hi:s=>s.qPosAscMax },
+  { name: '위치제곱가중합(내림)', get: (n)=>n.reduce((a,x,i)=>a+(5-i)*(5-i)*x,0),                        lo:s=>s.qPosDescMin,       hi:s=>s.qPosDescMax },
+  { name: 'V형중심가중합',         get: (n)=>5*n[0]+3*n[1]+1*n[2]+1*n[3]+3*n[4]+5*n[5],                  lo:s=>s.vWeightMin,        hi:s=>s.vWeightMax },
+  { name: 'Λ형중심가중합',         get: (n)=>1*n[0]+3*n[1]+5*n[2]+5*n[3]+3*n[4]+1*n[5],                  lo:s=>s.lWeightMin,        hi:s=>s.lWeightMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
