@@ -285,6 +285,12 @@ interface Stats {
   gapSkip03Max: number;                       // (n[1]-n[0])+(n[4]-n[3]) 상한
   gapSkip14Max: number;                       // (n[2]-n[1])+(n[5]-n[4]) 상한
   gapSkip24Max: number;                       // (n[3]-n[2])+(n[5]-n[4]) 상한
+  gapSqSumMin: number; gapSqSumMax: number;   // Σ(n[i+1]-n[i])² 범위
+  gap024Max: number;                           // g[0]+g[2]+g[4] 상한 (교대)
+  gap013Max: number;                           // g[0]+g[1]+g[3] 상한
+  gap014Max: number;                           // g[0]+g[1]+g[4] 상한
+  gap124Max: number;                           // g[1]+g[2]+g[4] 상한
+  gap034Max: number;                           // g[0]+g[3]+g[4] 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -382,6 +388,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const gapSkip03s = ns.map(n=>(n[1]-n[0])+(n[4]-n[3]));
   const gapSkip14s = ns.map(n=>(n[2]-n[1])+(n[5]-n[4]));
   const gapSkip24s = ns.map(n=>(n[3]-n[2])+(n[5]-n[4]));
+  const gapSqSums  = ns.map(n=>[0,1,2,3,4].reduce((a,i)=>a+(n[i+1]-n[i])**2,0));
+  const gap024s    = ns.map(n=>(n[1]-n[0])+(n[3]-n[2])+(n[5]-n[4]));
+  const gap013s    = ns.map(n=>(n[1]-n[0])+(n[2]-n[1])+(n[4]-n[3]));
+  const gap014s    = ns.map(n=>(n[1]-n[0])+(n[2]-n[1])+(n[5]-n[4]));
+  const gap124s    = ns.map(n=>(n[2]-n[1])+(n[3]-n[2])+(n[5]-n[4]));
+  const gap034s    = ns.map(n=>(n[1]-n[0])+(n[4]-n[3])+(n[5]-n[4]));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -471,6 +483,12 @@ function computeStats(rounds: LottoRound[]): Stats {
     gapSkip03Max: Math.max(...gapSkip03s),
     gapSkip14Max: Math.max(...gapSkip14s),
     gapSkip24Max: Math.max(...gapSkip24s),
+    gapSqSumMin:  Math.min(...gapSqSums), gapSqSumMax: Math.max(...gapSqSums),
+    gap024Max:    Math.max(...gap024s),
+    gap013Max:    Math.max(...gap013s),
+    gap014Max:    Math.max(...gap014s),
+    gap124Max:    Math.max(...gap124s),
+    gap034Max:    Math.max(...gap034s),
     zones,
     freq,
   };
@@ -571,6 +589,13 @@ const RULES: Rule[] = [
   { name: 'gap[0]+gap[3]',      get: (n)=>(n[1]-n[0])+(n[4]-n[3]), lo:()=>null, hi:s=>s.gapSkip03Max },
   { name: 'gap[1]+gap[4]',      get: (n)=>(n[2]-n[1])+(n[5]-n[4]), lo:()=>null, hi:s=>s.gapSkip14Max },
   { name: 'gap[2]+gap[4]',      get: (n)=>(n[3]-n[2])+(n[5]-n[4]), lo:()=>null, hi:s=>s.gapSkip24Max },
+  // ── 비선형 gap 패턴 ────────────────────────────────────────────────────────
+  { name: '간격 제곱합',        get: (n)=>[0,1,2,3,4].reduce((a,i)=>a+(n[i+1]-n[i])**2,0), lo:s=>s.gapSqSumMin, hi:s=>s.gapSqSumMax },
+  { name: 'gap[0]+[2]+[4]',    get: (n)=>(n[1]-n[0])+(n[3]-n[2])+(n[5]-n[4]), lo:()=>null, hi:s=>s.gap024Max },
+  { name: 'gap[0]+[1]+[3]',    get: (n)=>(n[1]-n[0])+(n[2]-n[1])+(n[4]-n[3]), lo:()=>null, hi:s=>s.gap013Max },
+  { name: 'gap[0]+[1]+[4]',    get: (n)=>(n[1]-n[0])+(n[2]-n[1])+(n[5]-n[4]), lo:()=>null, hi:s=>s.gap014Max },
+  { name: 'gap[1]+[2]+[4]',    get: (n)=>(n[2]-n[1])+(n[3]-n[2])+(n[5]-n[4]), lo:()=>null, hi:s=>s.gap124Max },
+  { name: 'gap[0]+[3]+[4]',    get: (n)=>(n[1]-n[0])+(n[4]-n[3])+(n[5]-n[4]), lo:()=>null, hi:s=>s.gap034Max },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
