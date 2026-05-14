@@ -5,10 +5,12 @@
 
 ## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07)
 
-**현재 상태**: 94건 검증 완료 (cycle 365 업데이트, 2026-05-13) / 전체 적중률 48.9% / Brier 0.2549 / v1.7-revert=53.1%(32건) / v1.8 시작(오늘)
+**현재 상태**: 99건 검증 완료 (cycle 387 갱신, 2026-05-14) / 전체 적중률 49.5% / Brier 0.2587 / v1.5=75%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / v1.8=60%(5, quant-only fallback)
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
-> ⚠️ **v1.8 데이터 신뢰성 경고 (cycle 383 발견, 2026-05-14)**: 5/13~ 모든 v1.8 예측이 quant-only fallback 으로 silent 운영 중 (ANTHROPIC_API_KEY credit 소진 의심). totalTokens=0 + reasoning="에이전트 토론 불가. 정량 모델 v1.8 결과 사용." v1.8 가중치 효과 측정 불가능. 후속 fix-incident heavy cycle 자연 redirect. 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+> ⚠️ **v1.8 데이터 신뢰성 경고 (cycle 383 발견, cycle 387 갱신 — 2026-05-14 17:00 KST)**: 5/13~5/14 (2일째) 모든 v1.8 예측이 quant-only fallback 으로 silent 운영 중. cycle 384~386 ship 3건 (#413/#414/#415) 으로 label 강등 fix 완료 — 5/14 mv='v1.8' (정정 라벨) 검증 PASS. **하지만 ROOT cause (ANTHROPIC_API_KEY credit) 는 외부 SaaS 영역 — code fix 불가**. v1.8 가중치 효과 측정 영구 불가능 (credit 복구 시점까지). **필요 user action**: Vercel+Cloudflare env ANTHROPIC_API_KEY credit/만료 확인 + 충전/재발급. 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+
+> ⚠️ **v1.6 anomaly (cycle 387 발견, 2026-05-14)**: v1.6 scoring_rule n=46 (2026-04-22~05-03) 전체 17/46 = **37.0%** (coinflip 13%p 이하). high conf 35.7% / low conf 37.5% 양쪽 random 이하 = v1.6 가중치 자체 역방향 신호 가능성. n=150+ 도달 후 op-analysis heavy 에서 era별 factor backtest 권장.
 
 ### v2.0 가중치 후보 (재검토, cycle 231)
 
