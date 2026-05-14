@@ -53,7 +53,7 @@ function PollBar({
         <span className="flex items-center gap-1">
           커뮤니티 픽
           {showDivergence && (
-            <span className="text-amber-500 dark:text-amber-400 font-medium">⚡ AI와 반대</span>
+            <span className="text-accent dark:text-accent-light font-medium">⚡ AI와 반대</span>
           )}
         </span>
         <span>{poll.total}명 참여</span>
