@@ -322,6 +322,11 @@ interface Stats {
   prodLo2Max: number;                          // n[0]*n[1] 상한
   prodHi2Max: number;                          // n[4]*n[5] 상한
   prodMid2Max: number;                         // n[2]*n[3] 상한
+  prodN02Max: number;                          // n[0]*n[2] 상한
+  prodN15Max: number;                          // n[1]*n[5] 상한
+  prodN35Max: number;                          // n[3]*n[5] 상한
+  multOf7Max: number;                          // 7의배수 개수 상한
+  mult7SumMax: number;                         // 7의배수번호 합 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -457,6 +462,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const prodLo2s      = ns.map(n=>n[0]*n[1]);
   const prodHi2s      = ns.map(n=>n[4]*n[5]);
   const prodMid2s     = ns.map(n=>n[2]*n[3]);
+  const MULT7         = new Set([7,14,21,28,35,42]);
+  const prodN02s      = ns.map(n=>n[0]*n[2]);
+  const prodN15s      = ns.map(n=>n[1]*n[5]);
+  const prodN35s      = ns.map(n=>n[3]*n[5]);
+  const mult7Cnts     = ns.map(n=>n.filter(x=>MULT7.has(x)).length);
+  const mult7Sums     = ns.map(n=>n.filter(x=>MULT7.has(x)).reduce((a,b)=>a+b,0));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -583,6 +594,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     prodLo2Max:      Math.max(...prodLo2s),
     prodHi2Max:      Math.max(...prodHi2s),
     prodMid2Max:     Math.max(...prodMid2s),
+    prodN02Max:      Math.max(...prodN02s),
+    prodN15Max:      Math.max(...prodN15s),
+    prodN35Max:      Math.max(...prodN35s),
+    multOf7Max:      Math.max(...mult7Cnts),
+    mult7SumMax:     Math.max(...mult7Sums),
     zones,
     freq,
   };
@@ -727,6 +743,12 @@ const RULES: Rule[] = [
   { name: 'n[0]×n[1] 곱',    get: (n)=>n[0]*n[1],                                        lo:()=>null, hi:s=>s.prodLo2Max },
   { name: 'n[4]×n[5] 곱',    get: (n)=>n[4]*n[5],                                        lo:()=>null, hi:s=>s.prodHi2Max },
   { name: 'n[2]×n[3] 곱',    get: (n)=>n[2]*n[3],                                        lo:()=>null, hi:s=>s.prodMid2Max },
+  // ── 교차 위치 곱 + 7의배수 ────────────────────────────────────────────────
+  { name: 'n[0]×n[2] 곱',    get: (n)=>n[0]*n[2],                                        lo:()=>null, hi:s=>s.prodN02Max },
+  { name: 'n[1]×n[5] 곱',    get: (n)=>n[1]*n[5],                                        lo:()=>null, hi:s=>s.prodN15Max },
+  { name: 'n[3]×n[5] 곱',    get: (n)=>n[3]*n[5],                                        lo:()=>null, hi:s=>s.prodN35Max },
+  { name: '7의배수 개수',     get: (n)=>n.filter(x=>[7,14,21,28,35,42].includes(x)).length, lo:()=>null, hi:s=>s.multOf7Max },
+  { name: '7배수번호합',      get: (n)=>n.filter(x=>[7,14,21,28,35,42].includes(x)).reduce((a,b)=>a+b,0), lo:()=>null, hi:s=>s.mult7SumMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
