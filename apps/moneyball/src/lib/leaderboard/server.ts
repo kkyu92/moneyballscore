@@ -10,7 +10,7 @@ export async function fetchLeaderboard(
 
   const { data, error } = await supabase
     .from(view)
-    .select('nickname, device_id, total, correct, accuracy_pct')
+    .select('nickname, device_id, total, correct, accuracy_pct, current_streak')
     .limit(limit);
 
   if (error) return [];
