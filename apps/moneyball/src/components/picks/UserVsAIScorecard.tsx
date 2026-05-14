@@ -29,14 +29,17 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
   useEffect(() => {
     const ids = Object.keys(picks);
     if (ids.length === 0) return;
+    let cancelled = false;
     fetch(`/api/picks/results?ids=${ids.join(',')}`)
       .then((r) => r.json())
       .then((results: PickGameResult[]) => {
+        if (cancelled) return;
         const entries = buildPickEntries(picks, results);
         const stats = buildPicksStats(entries);
         setCurrentStreak(stats.currentStreak);
       })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, [picks]);
 
   const yesterdayPicked = yesterdayGames.filter((g) => picks[String(g.id)]);

@@ -281,8 +281,8 @@ async function getTodayDivergenceGame(games: HomeGame[]): Promise<DivergenceGame
     if (hwp == null) continue;
 
     const aiHomePct = Math.round(
-      (pred.predicted_winner != null && g.home_team?.code != null
-        ? pred.winner?.code === g.home_team.code
+      (pred.winner?.code != null && g.home_team?.code != null
+        ? pred.winner.code === g.home_team.code
           ? hwp
           : 1 - hwp
         : hwp) * 100,
