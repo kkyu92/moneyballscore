@@ -26,6 +26,11 @@ export function LeaderboardTable({ entries, myDeviceId }: Props) {
         <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-xl px-4 py-3 flex items-center justify-between text-sm font-medium">
           <span className="text-brand-700 dark:text-brand-300">
             내 순위: <span className="font-bold">{myRank}등</span>
+            {myEntry.current_streak >= 2 && (
+              <span className="ml-2 text-amber-600 dark:text-amber-400">
+                🔥 {myEntry.current_streak}연속
+              </span>
+            )}
           </span>
           <span className="tabular-nums text-brand-600 dark:text-brand-400">
             {myEntry.accuracy_pct}% ({myEntry.correct}/{myEntry.total})
@@ -35,9 +40,10 @@ export function LeaderboardTable({ entries, myDeviceId }: Props) {
 
       {/* 순위표 */}
       <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
-        <div className="grid grid-cols-[2.5rem_1fr_5rem_5rem] text-xs text-gray-400 border-b border-gray-100 dark:border-gray-800 px-4 py-2">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] text-xs text-gray-400 border-b border-gray-100 dark:border-gray-800 px-4 py-2">
           <span>#</span>
           <span>닉네임</span>
+          <span className="text-right">연속</span>
           <span className="text-right">적중률</span>
           <span className="text-right">픽 수</span>
         </div>
@@ -49,7 +55,7 @@ export function LeaderboardTable({ entries, myDeviceId }: Props) {
           return (
             <div
               key={entry.device_id + i}
-              className={`grid grid-cols-[2.5rem_1fr_5rem_5rem] px-4 py-2.5 text-sm items-center border-b last:border-b-0 border-gray-50 dark:border-gray-800 ${
+              className={`grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] px-4 py-2.5 text-sm items-center border-b last:border-b-0 border-gray-50 dark:border-gray-800 ${
                 isMe
                   ? 'bg-brand-50 dark:bg-brand-900/10'
                   : rank <= 3
@@ -63,6 +69,15 @@ export function LeaderboardTable({ entries, myDeviceId }: Props) {
               <span className={`truncate font-medium ${isMe ? 'text-brand-700 dark:text-brand-300' : ''}`}>
                 {entry.nickname}
                 {isMe && <span className="ml-1 text-xs text-brand-400">(나)</span>}
+              </span>
+              <span className="text-right tabular-nums text-xs">
+                {entry.current_streak >= 2 ? (
+                  <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                    🔥{entry.current_streak}
+                  </span>
+                ) : (
+                  <span className="text-gray-300 dark:text-gray-600">–</span>
+                )}
               </span>
               <span className="text-right tabular-nums font-bold">
                 {entry.accuracy_pct}%

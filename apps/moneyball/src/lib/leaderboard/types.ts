@@ -4,6 +4,7 @@ export interface LeaderboardEntry {
   total: number;
   correct: number;
   accuracy_pct: number;
+  current_streak: number;
 }
 
 export interface LeaderboardSyncPayload {
