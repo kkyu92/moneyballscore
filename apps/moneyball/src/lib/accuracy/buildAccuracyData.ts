@@ -3,6 +3,18 @@ export interface PredRow {
   is_correct: boolean;
   verified_at: string;
   scoring_rule?: string | null;
+  // homeWinProb from reasoning JSONB — used for proper Brier Score computation.
+  // winner_prob = homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb (always 0.5-1).
+  // Falls back to confidence when null (old rows or parse failures).
+  homeWinProb?: number | null;
+}
+
+function resolveWinnerProb(r: PredRow): number {
+  if (r.homeWinProb != null) {
+    const hwp = Number(r.homeWinProb);
+    return hwp >= 0.5 ? hwp : 1 - hwp;
+  }
+  return Math.max(0.5, r.confidence);
 }
 
 export interface VersionHistoryRow {
@@ -69,11 +81,12 @@ export function bucketize(rows: PredRow[]): Bucket[] {
     hits: 0,
   }));
   for (const r of rows) {
+    const wp = resolveWinnerProb(r);
     const idx = Math.min(
       BUCKET_COUNT - 1,
-      Math.max(0, Math.floor((r.confidence - BUCKET_START) / BUCKET_WIDTH)),
+      Math.max(0, Math.floor((wp - BUCKET_START) / BUCKET_WIDTH)),
     );
-    acc[idx].sumConf += r.confidence;
+    acc[idx].sumConf += wp;
     acc[idx].n += 1;
     if (r.is_correct) acc[idx].hits += 1;
   }
@@ -92,14 +105,14 @@ export function brierScore(rows: PredRow[]): number {
   let sum = 0;
   for (const r of rows) {
     const o = r.is_correct ? 1 : 0;
-    sum += (r.confidence - o) ** 2;
+    sum += (resolveWinnerProb(r) - o) ** 2;
   }
   return sum / rows.length;
 }
 
 export function calibrationGap(rows: PredRow[]): number {
   if (rows.length === 0) return 0;
-  const avgConf = rows.reduce((s, r) => s + r.confidence, 0) / rows.length;
+  const avgConf = rows.reduce((s, r) => s + resolveWinnerProb(r), 0) / rows.length;
   const acc = rows.filter((r) => r.is_correct).length / rows.length;
   return avgConf - acc;
 }
@@ -245,7 +258,7 @@ export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
       let sum = 0;
       for (const r of vRows) {
         const o = r.is_correct ? 1 : 0;
-        sum += (r.confidence - o) ** 2;
+        sum += (resolveWinnerProb(r) - o) ** 2;
       }
       brier = sum / n;
     }
