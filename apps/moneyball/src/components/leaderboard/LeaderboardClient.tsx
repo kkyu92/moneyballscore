@@ -4,21 +4,24 @@ import { useState } from 'react';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
-import type { LeaderboardEntry } from '@/lib/leaderboard/types';
+import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
 interface Props {
   weeklyEntries: LeaderboardEntry[];
   seasonEntries: LeaderboardEntry[];
+  weeklyAi: AiBaseline | null;
+  seasonAi: AiBaseline | null;
 }
 
 type Tab = 'weekly' | 'season';
 
-export function LeaderboardClient({ weeklyEntries, seasonEntries }: Props) {
+export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seasonAi }: Props) {
   const [tab, setTab] = useState<Tab>('weekly');
   const [showModal, setShowModal] = useState(false);
   const { deviceId, nickname, syncState, syncCount, join } = useLeaderboard();
 
   const entries = tab === 'weekly' ? weeklyEntries : seasonEntries;
+  const aiBaseline = tab === 'weekly' ? weeklyAi : seasonAi;
   const isSyncing = syncState === 'syncing';
 
   const handleJoin = async (name: string) => {
@@ -84,7 +87,7 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries }: Props) {
       </div>
 
       {/* 리더보드 테이블 */}
-      <LeaderboardTable entries={entries} myDeviceId={deviceId} />
+      <LeaderboardTable entries={entries} myDeviceId={deviceId} aiBaseline={aiBaseline} />
 
       {/* 모달 */}
       {showModal && (
