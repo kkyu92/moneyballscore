@@ -536,6 +536,12 @@ interface Stats {
   pow5WMin: number;     pow5WMax: number;      // 5거듭제곱가중합 1·n[0]+5·n[1]+25·n[2]+125·n[3]+625·n[4]+3125·n[5] (geometric base 5)
   digitHexSumMin: number; digitHexSumMax: number; // Σ (floor(x/10)⁶ + (x%10)⁶) — 자리수여섯제곱합 (digit family 확장)
   octWMin: number;      octWMax: number;       // 팔각수가중합 1·n[0]+8·n[1]+21·n[2]+40·n[3]+65·n[4]+96·n[5] (Oct_k = k(3k-2))
+  // ── mod43/47 합 + 6거듭제곱가중합 + 자리수일곱제곱합 + 구각수가중합 (cycle 429 새 batch) ──
+  mod43SumMin: number;  mod43SumMax: number;   // Σ (n[i] mod 43) — 다음 소수 modulus
+  mod47SumMin: number;  mod47SumMax: number;   // Σ (n[i] mod 47) — 다음 소수 modulus
+  pow6WMin: number;     pow6WMax: number;      // 6거듭제곱가중합 1·n[0]+6·n[1]+36·n[2]+216·n[3]+1296·n[4]+7776·n[5] (geometric base 6)
+  digitHeptSumMin: number; digitHeptSumMax: number; // Σ (floor(x/10)⁷ + (x%10)⁷) — 자리수일곱제곱합 (digit family 확장)
+  nonWMin: number;      nonWMax: number;       // 구각수가중합 1·n[0]+9·n[1]+24·n[2]+46·n[3]+75·n[4]+111·n[5] (Non_k = k(7k-5)/2)
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -822,6 +828,12 @@ function computeStats(rounds: LottoRound[]): Stats {
   const pow5Ws        = ns.map(n=>1*n[0]+5*n[1]+25*n[2]+125*n[3]+625*n[4]+3125*n[5]);
   const digitHexSums  = ns.map(n=>n.reduce((a,x)=>a+Math.floor(x/10)**6+(x%10)**6,0));
   const octWs         = ns.map(n=>1*n[0]+8*n[1]+21*n[2]+40*n[3]+65*n[4]+96*n[5]);
+  // ── cycle 429 새 batch: mod43/47 합 + 6거듭제곱가중합 + 자리수일곱제곱합 + 구각수가중합 ─
+  const mod43Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%43),0));
+  const mod47Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%47),0));
+  const pow6Ws        = ns.map(n=>1*n[0]+6*n[1]+36*n[2]+216*n[3]+1296*n[4]+7776*n[5]);
+  const digitHeptSums = ns.map(n=>n.reduce((a,x)=>a+Math.floor(x/10)**7+(x%10)**7,0));
+  const nonWs         = ns.map(n=>1*n[0]+9*n[1]+24*n[2]+46*n[3]+75*n[4]+111*n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -1063,6 +1075,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     pow5WMin:          Math.min(...pow5Ws),        pow5WMax:          Math.max(...pow5Ws),
     digitHexSumMin:    Math.min(...digitHexSums),  digitHexSumMax:    Math.max(...digitHexSums),
     octWMin:           Math.min(...octWs),         octWMax:           Math.max(...octWs),
+    mod43SumMin:       Math.min(...mod43Sums),     mod43SumMax:       Math.max(...mod43Sums),
+    mod47SumMin:       Math.min(...mod47Sums),     mod47SumMax:       Math.max(...mod47Sums),
+    pow6WMin:          Math.min(...pow6Ws),        pow6WMax:          Math.max(...pow6Ws),
+    digitHeptSumMin:   Math.min(...digitHeptSums), digitHeptSumMax:   Math.max(...digitHeptSums),
+    nonWMin:           Math.min(...nonWs),         nonWMax:           Math.max(...nonWs),
     zones,
     freq,
   };
@@ -1346,6 +1363,12 @@ const RULES: Rule[] = [
   { name: '5거듭제곱가중합',         get: (n)=>1*n[0]+5*n[1]+25*n[2]+125*n[3]+625*n[4]+3125*n[5],          lo:s=>s.pow5WMin,          hi:s=>s.pow5WMax },
   { name: '자리수여섯제곱합',       get: (n)=>n.reduce((a,x)=>a+Math.floor(x/10)**6+(x%10)**6,0),         lo:s=>s.digitHexSumMin,    hi:s=>s.digitHexSumMax },
   { name: '팔각수가중합',           get: (n)=>1*n[0]+8*n[1]+21*n[2]+40*n[3]+65*n[4]+96*n[5],               lo:s=>s.octWMin,           hi:s=>s.octWMax },
+  // ── mod43/47 합 + 6거듭제곱가중합 + 자리수일곱제곱합 + 구각수가중합 (cycle 429 새 batch) ─
+  { name: 'mod43 합',              get: (n)=>n.reduce((a,x)=>a+(x%43),0),                                lo:s=>s.mod43SumMin,       hi:s=>s.mod43SumMax },
+  { name: 'mod47 합',              get: (n)=>n.reduce((a,x)=>a+(x%47),0),                                lo:s=>s.mod47SumMin,       hi:s=>s.mod47SumMax },
+  { name: '6거듭제곱가중합',         get: (n)=>1*n[0]+6*n[1]+36*n[2]+216*n[3]+1296*n[4]+7776*n[5],         lo:s=>s.pow6WMin,          hi:s=>s.pow6WMax },
+  { name: '자리수일곱제곱합',       get: (n)=>n.reduce((a,x)=>a+Math.floor(x/10)**7+(x%10)**7,0),         lo:s=>s.digitHeptSumMin,   hi:s=>s.digitHeptSumMax },
+  { name: '구각수가중합',           get: (n)=>1*n[0]+9*n[1]+24*n[2]+46*n[3]+75*n[4]+111*n[5],              lo:s=>s.nonWMin,           hi:s=>s.nonWMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
