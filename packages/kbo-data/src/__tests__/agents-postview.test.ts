@@ -45,7 +45,7 @@ describe('canonicalizeFactorKey (cycle 131)', () => {
 });
 
 describe('isWeightedFactor', () => {
-  it('v1.7-revert: 모든 active factor (10종, production no-prefix shape 우선) 통과', () => {
+  it('v1.8: 모든 active factor (10종, production no-prefix shape 우선) 통과', () => {
     expect(isWeightedFactor('sp_fip')).toBe(true);
     expect(isWeightedFactor('lineup_woba')).toBe(true);
     expect(isWeightedFactor('bullpen_fip')).toBe(true);
@@ -75,7 +75,7 @@ describe('isWeightedFactor', () => {
 // 실제 daily.ts INSERT 시 factors = {sp_fip: 0.4, bullpen_fip: 0.3} no-prefix 박제 → 본 테스트가
 // production-format mismatch 때문에 실제 fallback 동작 검증 안 되던 silent drift.
 describe('deriveFactorErrorsFallback', () => {
-  it('홈승인데 가중치 factor 가 away 쪽 편향 → 그 factor 지목 (v1.7-revert: park_factor 도 가중치 > 0)', () => {
+  it('홈승인데 가중치 factor 가 away 쪽 편향 → 그 factor 지목 (v1.8: park_factor 도 가중치 > 0)', () => {
     const factors = {
       sp_fip: 0.4, // 원정 유리 편향, 홈승 → wrong (weighted)
       lineup_woba: 0.6, // 홈 유리, 홈승 → correct
@@ -260,7 +260,7 @@ describe('cycle 131 — JUDGE_POSTVIEW_SYSTEM prompt 예시 production-format ke
 // cycle 126 silent drift 가드 — 빈 문자열 반환 시 prompt template 안 `(${...})` 가 빈 괄호 `()` 로
 // 출력되어 LLM 추론 noise. 본 fix 에서 conditional rule helper 추가 → 빈 list 시 규칙 줄 자체 skip.
 describe('getZeroWeightFactorPromptList (cycle 15 helper)', () => {
-  it('v1.7-revert (= v1.5): 모든 factor 가중치 > 0 — 빈 문자열 반환', () => {
+  it('v1.8 (= v1.5): 모든 factor 가중치 > 0 — 빈 문자열 반환', () => {
     const list = getZeroWeightFactorPromptList();
     expect(list).toBe('');
   });
