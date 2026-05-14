@@ -13,8 +13,13 @@
  * 과거 v1.7-revert row 는 DB 에 그대로 유지됨 — cycle 335 이전 데이터.
  */
 
-export type ModelVersion = 'v2.0-debate' | 'v1.8' | 'v1.7-revert';
-export type DebateVersion = 'v2-persona4' | null;
+export type ModelVersion =
+  | 'v2.0-debate'
+  | 'v2.0-postview'
+  | 'v1.8'
+  | 'v1.8-postview'
+  | 'v1.7-revert';
+export type DebateVersion = 'v2-persona4' | 'v2-postview' | null;
 
 export interface ModelVersionDecision {
   model_version: ModelVersion;
@@ -32,4 +37,27 @@ export function decideModelVersion({
     return { model_version: 'v2.0-debate', debate_version: 'v2-persona4' };
   }
   return { model_version: 'v1.8', debate_version: null };
+}
+
+/**
+ * cycle 384 fix-incident heavy — postview path model_version 결정.
+ *
+ * pre_game path 의 decideModelVersion 카운터파트. ANTHROPIC credit 소진 시
+ * postview 의 모든 에이전트가 fallback → 그럼에도 mv='v2.0-postview' 라벨
+ * 박제되던 silent drift 차단. agentsFailed=true 면 'v1.8-postview' 강등.
+ *
+ * /accuracy + /debug/model-comparison 의 mv 별 Brier 분석에서 LLM 토론
+ * 실패 row 가 v2.0-postview 라벨에 묻혀 분류 오류 차단.
+ */
+export function decidePostviewModelVersion({
+  hasApiKey,
+  agentsSucceeded,
+}: {
+  hasApiKey: boolean;
+  agentsSucceeded: boolean;
+}): ModelVersionDecision {
+  if (hasApiKey && agentsSucceeded) {
+    return { model_version: 'v2.0-postview', debate_version: 'v2-postview' };
+  }
+  return { model_version: 'v1.8-postview', debate_version: null };
 }

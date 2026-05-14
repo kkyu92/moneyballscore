@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decideModelVersion } from '../pipeline/model-version';
+import { decideModelVersion, decidePostviewModelVersion } from '../pipeline/model-version';
 
 describe('decideModelVersion', () => {
   it('promotes to v2.0-debate when API key present and debate succeeded', () => {
@@ -58,5 +58,45 @@ describe('decideModelVersion', () => {
         expect(d.debate_version).toBe('v2-persona4');
       }
     }
+  });
+});
+
+// cycle 384 fix-incident heavy — postview path counterpart. ANTHROPIC credit 소진
+// 시 mv='v2.0-postview' 라벨 silent drift 차단 (PR #372 패턴의 postview 확장).
+describe('decidePostviewModelVersion', () => {
+  it('promotes to v2.0-postview when API key present and agents succeeded', () => {
+    expect(
+      decidePostviewModelVersion({ hasApiKey: true, agentsSucceeded: true }),
+    ).toEqual({
+      model_version: 'v2.0-postview',
+      debate_version: 'v2-postview',
+    });
+  });
+
+  it('downgrades to v1.8-postview when API key present but agents fallback', () => {
+    expect(
+      decidePostviewModelVersion({ hasApiKey: true, agentsSucceeded: false }),
+    ).toEqual({
+      model_version: 'v1.8-postview',
+      debate_version: null,
+    });
+  });
+
+  it('downgrades to v1.8-postview when API key absent', () => {
+    expect(
+      decidePostviewModelVersion({ hasApiKey: false, agentsSucceeded: false }),
+    ).toEqual({
+      model_version: 'v1.8-postview',
+      debate_version: null,
+    });
+  });
+
+  it('downgrades when API key absent even if succeeded flag accidentally true', () => {
+    expect(
+      decidePostviewModelVersion({ hasApiKey: false, agentsSucceeded: true }),
+    ).toEqual({
+      model_version: 'v1.8-postview',
+      debate_version: null,
+    });
   });
 });

@@ -9,6 +9,52 @@ export interface PredRow {
   homeWinProb?: number | null;
 }
 
+// cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화.
+// PR #372 (debate 라벨링 fix) 이후 mv='v2.0-debate' = LLM 성공, mv='v1.8' = 정량 fallback.
+// PR cycle 384 (postview 라벨링 fix) 이후 mv='v2.0-postview' = LLM 성공, mv='v1.8-postview' = fallback.
+export interface FallbackStatsRow {
+  model_version: string | null;
+  predicted_at: string;
+}
+
+export interface FallbackStats {
+  total: number;
+  llmActive: number;
+  fallback: number;
+  fallbackRate: number;
+  oldestSeenAt: string | null;
+  latestFallbackAt: string | null;
+}
+
+const LLM_ACTIVE_VERSIONS = new Set(['v2.0-debate', 'v2.0-postview']);
+const FALLBACK_VERSIONS = new Set(['v1.8', 'v1.8-postview']);
+
+export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
+  let llmActive = 0;
+  let fallback = 0;
+  let latestFallbackAt: string | null = null;
+  let oldestSeenAt: string | null = null;
+  for (const r of rows) {
+    if (!oldestSeenAt || r.predicted_at < oldestSeenAt) oldestSeenAt = r.predicted_at;
+    const mv = r.model_version ?? '';
+    if (LLM_ACTIVE_VERSIONS.has(mv)) {
+      llmActive++;
+    } else if (FALLBACK_VERSIONS.has(mv)) {
+      fallback++;
+      if (!latestFallbackAt || r.predicted_at > latestFallbackAt) latestFallbackAt = r.predicted_at;
+    }
+  }
+  const total = llmActive + fallback;
+  return {
+    total,
+    llmActive,
+    fallback,
+    fallbackRate: total > 0 ? fallback / total : 0,
+    oldestSeenAt,
+    latestFallbackAt,
+  };
+}
+
 function resolveWinnerProb(r: PredRow): number {
   if (r.homeWinProb != null) {
     const hwp = Number(r.homeWinProb);

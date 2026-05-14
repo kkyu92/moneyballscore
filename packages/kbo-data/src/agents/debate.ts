@@ -2,6 +2,7 @@ import type { TeamCode } from '@moneyball/shared';
 import { runTeamAgent } from './team-agent';
 import { runJudgeAgent } from './judge-agent';
 import { runCalibrationAgent, type PredictionHistory } from './calibration-agent';
+import { captureAgentFallback } from './validator';
 import type { GameContext, DebateResult, TeamArgument, CalibrationHint } from './types';
 
 /**
@@ -94,6 +95,15 @@ export async function runDebate(
     console.error(
       `[Debate] ${awayTeam}@${homeTeam}: 에이전트 fallback — ${agentError ?? 'unknown'}`
     );
+    // cycle 384 — Cloudflare Workers cron 환경에서 console.error 가 Sentry alert
+    // 못 잡음 (드리프트 사례 6 family). 직접 captureException 으로 silent 차단.
+    void captureAgentFallback({
+      path: 'pre_game',
+      homeTeam,
+      awayTeam,
+      gameId: context.game.externalGameId ?? null,
+      agentError,
+    });
   }
 
   console.log(
