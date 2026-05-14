@@ -12,8 +12,8 @@ function formatDelta(diff: number): string {
 }
 
 function deltaClass(diff: number): string {
-  if (diff > 0) return 'text-emerald-600 dark:text-emerald-400';
-  if (diff < 0) return 'text-red-500 dark:text-red-400';
+  if (diff > 0) return 'text-brand-600 dark:text-brand-400';
+  if (diff < 0) return 'text-red-600 dark:text-red-400';
   return 'text-gray-400 dark:text-gray-500';
 }
 
