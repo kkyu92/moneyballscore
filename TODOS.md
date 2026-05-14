@@ -32,8 +32,8 @@
 
 > n=72 소표본 경고. 각 Δ의 95% CI ≈ ±15%p. **n=150+ 도달 후 최종 확정 권장.**
 
-**일요일 대응** ✅ **구현 완료 (cycle 309)**:
-- `judge-agent.ts` Sunday confidence_clamp 상한 0.55 적용 (2026-05-12)
+**일요일 대응** ✅ **구현 완료 (cycle 309, cycle 358 조정)**:
+- `judge-agent.ts` Sunday confidence_clamp — 임계 0.55 초과 시 0.45 강등 (cycle 358 변경: 기존 cap 0.55 → 0.45, medium tier 오염 수정)
 - 데이터 근거: 일요일 누적 적중률 n≈20 ~15%, W20 1/5=20% — 선제 단독 적용 확정
 
 **SFR 극단값 대응 후보** (n=150+ 도달 후, cycle 256 신규):
@@ -50,7 +50,7 @@
 **🎯 cycle 354 operational-analysis lite (2026-05-13)**:
 - v1.7-revert 최종: 32건 53.1% (W20=27건 55.6%, W22=5건 40%)
 - **확신도 역전**: medium (55-64%) = 37.5% (8건) < low (<55%) = 58.3% (24건) — judge-agent 과보수 신호
-- high ≥65% = 0건 — judge-agent 가 고확신 발화 X (Sunday cap 0.55 + 보수적 calibration 누적)
+- high ≥65% = 0건 — judge-agent 가 고확신 발화 X (Sunday cap 0.45 + 보수적 calibration 누적)
 - 팀별 극단값: OB 85.7% (6/7) ↑ / SK 28.6% (2/7) ↓ (소표본 주의)
 - v1.8 시작: 2026-05-13 elo 10%↑ + head_to_head 3%↓. n=150 도달 후 heavy 재실행.
 
