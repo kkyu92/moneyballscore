@@ -280,6 +280,55 @@ export function MyPicksClient() {
         </div>
       )}
 
+      {/* AI 와 의견 다를 때 — 사용자 독립 판단 가치 */}
+      {stats && stats.divergentResolved >= 3 && (() => {
+        const myDivPct = Math.round((stats.divergentRate ?? 0) * 100);
+        const aiDivResolved = stats.divergentResolved;
+        const aiDivCorrect = aiDivResolved - stats.divergentMyCorrect;
+        const aiDivPct = Math.round((aiDivCorrect / aiDivResolved) * 100);
+        const userWins = myDivPct > aiDivPct;
+        const tied = myDivPct === aiDivPct;
+        return (
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold">AI 와 의견 다를 때</h2>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{stats.divergentResolved}경기 기준</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className={`rounded-lg p-3 text-center ${userWins && !tied ? 'bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                  {userWins && !tied && '🏆 '}내 적중률
+                </p>
+                <p className={`text-2xl font-bold tabular-nums ${userWins && !tied ? 'text-brand-600 dark:text-brand-400' : ''}`}>
+                  {myDivPct}%
+                </p>
+                <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                  {stats.divergentMyCorrect}/{stats.divergentResolved}
+                </p>
+              </div>
+              <div className={`rounded-lg p-3 text-center ${!userWins && !tied ? 'bg-gray-100 dark:bg-[var(--color-surface)] border border-gray-300 dark:border-[var(--color-border)]' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                  {!userWins && !tied && '🏆 '}같은 경기 AI
+                </p>
+                <p className="text-2xl font-bold tabular-nums text-gray-600 dark:text-gray-300">
+                  {aiDivPct}%
+                </p>
+                <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                  {aiDivCorrect}/{aiDivResolved}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+              {tied
+                ? 'AI 와 다른 픽을 한 경기에서 동률입니다.'
+                : userWins
+                  ? `AI 와 다른 의견을 낼 때 ${myDivPct - aiDivPct}%p 더 잘 맞췄습니다.`
+                  : `AI 와 다른 의견을 낼 때 AI 가 ${aiDivPct - myDivPct}%p 더 잘 맞췄습니다.`}
+            </p>
+          </div>
+        );
+      })()}
+
       {/* 주차별 트렌드 차트 */}
       {weeklyGroups.length >= 2 && <PicksTrendChart groups={weeklyGroups} />}
 

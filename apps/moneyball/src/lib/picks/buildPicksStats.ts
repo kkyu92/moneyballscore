@@ -47,6 +47,12 @@ export interface PicksStats {
   pickingStreakDays: number; // 연속 픽 참여일 (KST 기준)
   recentDots: boolean[]; // 최근 10경기 정답 여부 (가장 오래된→최근)
   trend: 'up' | 'down' | 'flat';
+  // AI 와 다른 픽 (divergent) 통계 — 사용자의 독립 판단 가치 측정
+  divergentResolved: number; // AI 와 다른 픽 + 결과 확정 (AI 예측 있는 경기만)
+  divergentMyCorrect: number; // 그 중 내가 맞은 수
+  divergentRate: number | null; // divergentMyCorrect / divergentResolved
+  agreedResolved: number; // AI 와 같은 픽 + 결과 확정
+  agreedCorrect: number; // 그 중 맞은 수 (사용자=AI 이므로 동일)
 }
 
 export function buildPickEntries(
@@ -212,6 +218,25 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     else if (p5 - r5 > 0.1) trend = 'down';
   }
 
+  // divergent / agreed 분기 — AI 예측 있는 경기만 (aiPredictedHome != null)
+  let divergentResolved = 0;
+  let divergentMyCorrect = 0;
+  let agreedResolved = 0;
+  let agreedCorrect = 0;
+  for (const e of resolved) {
+    if (e.aiPredictedHome === null) continue;
+    const myPickHome = e.myPick === 'home';
+    const isDivergent = myPickHome !== e.aiPredictedHome;
+    if (isDivergent) {
+      divergentResolved++;
+      if (e.myIsCorrect === true) divergentMyCorrect++;
+    } else {
+      agreedResolved++;
+      if (e.myIsCorrect === true) agreedCorrect++;
+    }
+  }
+  const divergentRate = divergentResolved > 0 ? divergentMyCorrect / divergentResolved : null;
+
   return {
     total: entries.length,
     resolved: resolved.length,
@@ -224,6 +249,11 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     pickingStreakDays,
     recentDots,
     trend,
+    divergentResolved,
+    divergentMyCorrect,
+    divergentRate,
+    agreedResolved,
+    agreedCorrect,
   };
 }
 
