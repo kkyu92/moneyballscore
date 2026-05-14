@@ -8,6 +8,8 @@
 **현재 상태**: 94건 검증 완료 (cycle 365 업데이트, 2026-05-13) / 전체 적중률 48.9% / Brier 0.2549 / v1.7-revert=53.1%(32건) / v1.8 시작(오늘)
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
+> ⚠️ **v1.8 데이터 신뢰성 경고 (cycle 383 발견, 2026-05-14)**: 5/13~ 모든 v1.8 예측이 quant-only fallback 으로 silent 운영 중 (ANTHROPIC_API_KEY credit 소진 의심). totalTokens=0 + reasoning="에이전트 토론 불가. 정량 모델 v1.8 결과 사용." v1.8 가중치 효과 측정 불가능. 후속 fix-incident heavy cycle 자연 redirect. 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+
 ### v2.0 가중치 후보 (재검토, cycle 231)
 
 > ⚠️ cycle 228 후보와 방향 상충. 실측 게임 아웃컴 기반 분석 우선.

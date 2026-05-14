@@ -1,5 +1,29 @@
 # Changelog
 
+## 📋 W22 운영 노트 (2026-05-14, cycle 383 operational-analysis lite)
+
+### v1.8 era silent fallback 발견 (긴급)
+
+- **상황**: 2026-05-13 v1.8 첫 fire 부터 모든 예측이 quant-only fallback. `totalTokens=0` + `reasoning="에이전트 토론 불가. 정량 모델 v1.8 결과 사용."` 10건 모두 동일 패턴 (5 pre_game + 5 postview).
+- **시점**: 5/12 (Tue) v1.7-revert 5건 중 4-5번째 부터 fail 시작 (mid-batch credit exhaustion 패턴). 5/13~ 전체 fail.
+- **가설**: ANTHROPIC_API_KEY credit 소진. PR #372 (cycle 362) 가 미리 식별한 시나리오 그대로.
+- **잔존 silent drift**: PR #372 fix 5/13 17:24 KST merge → 5/13 16:17 KST v1.8 pre_game fire 시점엔 미적용. mv='v2.0-debate' 라벨 silent. postview path 도 동일 silent (`mv='v2.0-postview'`).
+- **영향**: v1.8 가중치 효과 (head_to_head 5→3% + elo 8→10%) 측정 불가능. n=99→150 진행 가속 가설 깨짐. AI reasoning UI 노출도 검토 필요.
+- **후속 fix-incident heavy chain 권장**: API key 상태 확인 / postview path agentsFailed 가시화 / Sentry captureException 직접 호출 / /accuracy 에 fallback 비율 표시.
+- **lesson**: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+
+### W22 (5/11~5/18) 부분 데이터
+
+| 날짜 | scoring_rule | 검증 | 적중 | 비고 |
+|---|---|---|---|---|
+| 5/12 Tue | v1.7-revert | 5 | 2 | 40%. 1~3 게임 정상 토론 / 4~5 게임 fallback 시작 |
+| 5/13 Wed | v1.8 | 5 | 3 | 60%. 전부 fallback (quant-only) — 표면 적중률은 fallback quant 모델 성능 측정 |
+| 5/14 Thu | — | — | — | SP 미확정 (18:30 게임). 예측 미생성 |
+
+전체 W22 검증 10건 / 5건 적중 = 50%. v1.8 등급화 분석 무효 — fallback 성능만 측정됨.
+
+---
+
 ## v0.5.49.0 (2026-05-13, cycles 355-365)
 
 ### Added
