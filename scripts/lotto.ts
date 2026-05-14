@@ -182,6 +182,8 @@ const PERF_SQ  = new Set([1,4,9,16,25,36]);
 const PRIMES   = new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43]);
 const FIBS     = new Set([1,2,3,5,8,13,21,34]);
 const MULT3    = new Set([3,6,9,12,15,18,21,24,27,30,33,36,39,42,45]);
+const MULT4    = new Set([4,8,12,16,20,24,28,32,36,40,44]);
+const TRI      = new Set([1,3,6,10,15,21,28,36,45]);
 
 function sumNums(n: number[])       { return n.reduce((a,b)=>a+b,0); }
 function oddCount(n: number[])      { return n.filter(x=>x%2===1).length; }
@@ -332,6 +334,11 @@ interface Stats {
   arithTripleMax: number;                      // 등차수열 트리플 개수 상한
   closeGap2Max: number;                        // 간격≤2인 인접쌍 개수 상한
   sumOfRootsMax: number;                       // Σfloor(√n[i]) 상한
+  digitSumMin: number; digitSumMax: number;    // Σ(n[i] 자리수합) 범위
+  triMax: number;                              // 삼각수 개수 상한
+  mult4Max: number;                            // 4의배수 개수 상한
+  extOuterMidMin: number; extOuterMidMax: number; // (n[0]+n[5])-(n[2]+n[3]) 범위
+  tripleConsecMax: number;                     // n[i+2]-n[i]=2 (3 연속) 개수 상한
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -478,6 +485,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const arithTriples  = ns.map(n=>{ let c=0; for(let i=0;i<4;i++) for(let j=i+1;j<5;j++) for(let k=j+1;k<6;k++) if(n[j]-n[i]===n[k]-n[j]) c++; return c; });
   const closeGap2s    = ns.map(n=>{ let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]<=2) c++; return c; });
   const sumOfRoots    = ns.map(n=>n.reduce((a,x)=>a+Math.floor(Math.sqrt(x)),0));
+  const digitSums     = ns.map(n=>n.reduce((a,x)=>a+(x%10)+Math.floor(x/10),0));
+  const triCnts       = ns.map(n=>n.filter(x=>TRI.has(x)).length);
+  const mult4Cnts     = ns.map(n=>n.filter(x=>MULT4.has(x)).length);
+  const extOuterMids  = ns.map(n=>(n[0]+n[5])-(n[2]+n[3]));
+  const tripleConsecs = ns.map(n=>{ let c=0; for(let i=0;i<4;i++) if(n[i+2]-n[i]===2) c++; return c; });
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -614,6 +626,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     arithTripleMax:  Math.max(...arithTriples),
     closeGap2Max:    Math.max(...closeGap2s),
     sumOfRootsMax:   Math.max(...sumOfRoots),
+    digitSumMin:     Math.min(...digitSums),    digitSumMax: Math.max(...digitSums),
+    triMax:          Math.max(...triCnts),
+    mult4Max:        Math.max(...mult4Cnts),
+    extOuterMidMin:  Math.min(...extOuterMids), extOuterMidMax: Math.max(...extOuterMids),
+    tripleConsecMax: Math.max(...tripleConsecs),
     zones,
     freq,
   };
@@ -770,6 +787,12 @@ const RULES: Rule[] = [
   { name: '등차트리플 개수',  get: (n)=>{ let c=0; for(let i=0;i<4;i++) for(let j=i+1;j<5;j++) for(let k=j+1;k<6;k++) if(n[j]-n[i]===n[k]-n[j]) c++; return c; }, lo:()=>null, hi:s=>s.arithTripleMax },
   { name: '근접간격≤2 개수', get: (n)=>{ let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]<=2) c++; return c; }, lo:()=>null, hi:s=>s.closeGap2Max },
   { name: '제곱근합(floor)', get: (n)=>n.reduce((a,x)=>a+Math.floor(Math.sqrt(x)),0), lo:()=>null, hi:s=>s.sumOfRootsMax },
+  // ── 자리수합 + 특수집합 + 외내차 + 연속3 ─────────────────────────────────
+  { name: '자리수합',         get: (n)=>n.reduce((a,x)=>a+(x%10)+Math.floor(x/10),0), lo:s=>s.digitSumMin, hi:s=>s.digitSumMax },
+  { name: '삼각수 개수',      get: (n)=>n.filter(x=>TRI.has(x)).length, lo:()=>null, hi:s=>s.triMax },
+  { name: '4의배수 개수',     get: (n)=>n.filter(x=>MULT4.has(x)).length, lo:()=>null, hi:s=>s.mult4Max },
+  { name: '외내차(p1+6-p3-4)', get: (n)=>(n[0]+n[5])-(n[2]+n[3]), lo:s=>s.extOuterMidMin, hi:s=>s.extOuterMidMax },
+  { name: '연속3 개수',       get: (n)=>{ let c=0; for(let i=0;i<4;i++) if(n[i+2]-n[i]===2) c++; return c; }, lo:()=>null, hi:s=>s.tripleConsecMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
