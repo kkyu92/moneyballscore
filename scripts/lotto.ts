@@ -344,6 +344,11 @@ interface Stats {
   topBotDiffMin: number; topBotDiffMax: number; // (n[3]+n[4]+n[5])-(n[0]+n[1]+n[2]) 범위
   centerDistMin: number; centerDistMax: number; // Σ|n[i]-23| 범위
   gapProdMin: number;  gapProdMax: number;     // ∏(n[i+1]-n[i]) 범위
+  mod4SumMin: number;  mod4SumMax: number;     // Σ(n[i]%4) 범위
+  mod9SumMin: number;  mod9SumMax: number;     // Σ(n[i]%9) 범위
+  mod11SumMin: number; mod11SumMax: number;    // Σ(n[i]%11) 범위
+  varNumMin: number;   varNumMax: number;      // 6·Σn² - (Σn)² (번호 분산 정수형)
+  varGapMin: number;   varGapMax: number;      // 5·Σg² - (Σg)² (간격 분산 정수형)
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -500,6 +505,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const topBotDiffs   = ns.map(n=>(n[3]+n[4]+n[5])-(n[0]+n[1]+n[2]));
   const centerDists   = ns.map(n=>n.reduce((a,x)=>a+Math.abs(x-23),0));
   const gapProds      = ns.map(n=>[0,1,2,3,4].reduce((a,i)=>a*(n[i+1]-n[i]),1));
+  const mod4Sums      = ns.map(n=>n.reduce((a,x)=>a+(x%4),0));
+  const mod9Sums      = ns.map(n=>n.reduce((a,x)=>a+(x%9),0));
+  const mod11Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%11),0));
+  const varNums       = ns.map(n=>{ const s=n.reduce((a,x)=>a+x,0); const sq=n.reduce((a,x)=>a+x*x,0); return 6*sq - s*s; });
+  const varGaps       = ns.map(n=>{ const gs=[0,1,2,3,4].map(i=>n[i+1]-n[i]); const s=gs.reduce((a,x)=>a+x,0); const sq=gs.reduce((a,x)=>a+x*x,0); return 5*sq - s*s; });
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -646,6 +656,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     topBotDiffMin:   Math.min(...topBotDiffs), topBotDiffMax: Math.max(...topBotDiffs),
     centerDistMin:   Math.min(...centerDists), centerDistMax: Math.max(...centerDists),
     gapProdMin:      Math.min(...gapProds),    gapProdMax:    Math.max(...gapProds),
+    mod4SumMin:      Math.min(...mod4Sums),    mod4SumMax:    Math.max(...mod4Sums),
+    mod9SumMin:      Math.min(...mod9Sums),    mod9SumMax:    Math.max(...mod9Sums),
+    mod11SumMin:     Math.min(...mod11Sums),   mod11SumMax:   Math.max(...mod11Sums),
+    varNumMin:       Math.min(...varNums),     varNumMax:     Math.max(...varNums),
+    varGapMin:       Math.min(...varGaps),     varGapMax:     Math.max(...varGaps),
     zones,
     freq,
   };
@@ -814,6 +829,12 @@ const RULES: Rule[] = [
   { name: '상하3합차',        get: (n)=>(n[3]+n[4]+n[5])-(n[0]+n[1]+n[2]), lo:s=>s.topBotDiffMin, hi:s=>s.topBotDiffMax },
   { name: '중심거리합',       get: (n)=>n.reduce((a,x)=>a+Math.abs(x-23),0), lo:s=>s.centerDistMin, hi:s=>s.centerDistMax },
   { name: '간격 곱',          get: (n)=>[0,1,2,3,4].reduce((a,i)=>a*(n[i+1]-n[i]),1), lo:s=>s.gapProdMin, hi:s=>s.gapProdMax },
+  // ── mod4/9/11 합 + 번호분산 + 간격분산 (cycle 3/15) ────────────────────────
+  { name: 'mod4 합',          get: (n)=>n.reduce((a,x)=>a+(x%4),0), lo:s=>s.mod4SumMin, hi:s=>s.mod4SumMax },
+  { name: 'mod9 합',          get: (n)=>n.reduce((a,x)=>a+(x%9),0), lo:s=>s.mod9SumMin, hi:s=>s.mod9SumMax },
+  { name: 'mod11 합',         get: (n)=>n.reduce((a,x)=>a+(x%11),0), lo:s=>s.mod11SumMin, hi:s=>s.mod11SumMax },
+  { name: '번호분산(6Σn²-Σ²)', get: (n)=>{ const s=n.reduce((a,x)=>a+x,0); const sq=n.reduce((a,x)=>a+x*x,0); return 6*sq - s*s; }, lo:s=>s.varNumMin, hi:s=>s.varNumMax },
+  { name: '간격분산(5Σg²-Σ²)', get: (n)=>{ const gs=[0,1,2,3,4].map(i=>n[i+1]-n[i]); const s=gs.reduce((a,x)=>a+x,0); const sq=gs.reduce((a,x)=>a+x*x,0); return 5*sq - s*s; }, lo:s=>s.varGapMin, hi:s=>s.varGapMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
