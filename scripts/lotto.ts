@@ -349,6 +349,11 @@ interface Stats {
   mod11SumMin: number; mod11SumMax: number;    // Σ(n[i]%11) 범위
   varNumMin: number;   varNumMax: number;      // 6·Σn² - (Σn)² (번호 분산 정수형)
   varGapMin: number;   varGapMax: number;      // 5·Σg² - (Σg)² (간격 분산 정수형)
+  mod6SumMin: number;  mod6SumMax: number;     // Σ(n[i]%6) 범위
+  mod8SumMin: number;  mod8SumMax: number;     // Σ(n[i]%8) 범위
+  mod13SumMin: number; mod13SumMax: number;    // Σ(n[i]%13) 범위
+  top3ProdMin: number; top3ProdMax: number;    // n[3]*n[4]*n[5] 범위
+  sumDigitSumMin: number; sumDigitSumMax: number; // Σn 의 자리수합 (3자리 분해) 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -510,6 +515,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const mod11Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%11),0));
   const varNums       = ns.map(n=>{ const s=n.reduce((a,x)=>a+x,0); const sq=n.reduce((a,x)=>a+x*x,0); return 6*sq - s*s; });
   const varGaps       = ns.map(n=>{ const gs=[0,1,2,3,4].map(i=>n[i+1]-n[i]); const s=gs.reduce((a,x)=>a+x,0); const sq=gs.reduce((a,x)=>a+x*x,0); return 5*sq - s*s; });
+  const mod6Sums      = ns.map(n=>n.reduce((a,x)=>a+(x%6),0));
+  const mod8Sums      = ns.map(n=>n.reduce((a,x)=>a+(x%8),0));
+  const mod13Sums     = ns.map(n=>n.reduce((a,x)=>a+(x%13),0));
+  const top3Prods     = ns.map(n=>n[3]*n[4]*n[5]);
+  const sumDigitSums  = ns.map(n=>{ const s=n.reduce((a,x)=>a+x,0); return (s%10)+Math.floor(s/100)+Math.floor((s/10)%10); });
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -661,6 +671,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     mod11SumMin:     Math.min(...mod11Sums),   mod11SumMax:   Math.max(...mod11Sums),
     varNumMin:       Math.min(...varNums),     varNumMax:     Math.max(...varNums),
     varGapMin:       Math.min(...varGaps),     varGapMax:     Math.max(...varGaps),
+    mod6SumMin:      Math.min(...mod6Sums),    mod6SumMax:    Math.max(...mod6Sums),
+    mod8SumMin:      Math.min(...mod8Sums),    mod8SumMax:    Math.max(...mod8Sums),
+    mod13SumMin:     Math.min(...mod13Sums),   mod13SumMax:   Math.max(...mod13Sums),
+    top3ProdMin:     Math.min(...top3Prods),   top3ProdMax:   Math.max(...top3Prods),
+    sumDigitSumMin:  Math.min(...sumDigitSums),sumDigitSumMax:Math.max(...sumDigitSums),
     zones,
     freq,
   };
@@ -835,6 +850,12 @@ const RULES: Rule[] = [
   { name: 'mod11 합',         get: (n)=>n.reduce((a,x)=>a+(x%11),0), lo:s=>s.mod11SumMin, hi:s=>s.mod11SumMax },
   { name: '번호분산(6Σn²-Σ²)', get: (n)=>{ const s=n.reduce((a,x)=>a+x,0); const sq=n.reduce((a,x)=>a+x*x,0); return 6*sq - s*s; }, lo:s=>s.varNumMin, hi:s=>s.varNumMax },
   { name: '간격분산(5Σg²-Σ²)', get: (n)=>{ const gs=[0,1,2,3,4].map(i=>n[i+1]-n[i]); const s=gs.reduce((a,x)=>a+x,0); const sq=gs.reduce((a,x)=>a+x*x,0); return 5*sq - s*s; }, lo:s=>s.varGapMin, hi:s=>s.varGapMax },
+  // ── mod6/8/13 합 + 상위3곱 + 합자리수합 (cycle 4/15) ───────────────────────
+  { name: 'mod6 합',          get: (n)=>n.reduce((a,x)=>a+(x%6),0), lo:s=>s.mod6SumMin, hi:s=>s.mod6SumMax },
+  { name: 'mod8 합',          get: (n)=>n.reduce((a,x)=>a+(x%8),0), lo:s=>s.mod8SumMin, hi:s=>s.mod8SumMax },
+  { name: 'mod13 합',         get: (n)=>n.reduce((a,x)=>a+(x%13),0), lo:s=>s.mod13SumMin, hi:s=>s.mod13SumMax },
+  { name: '상위3개 곱',       get: (n)=>n[3]*n[4]*n[5], lo:s=>s.top3ProdMin, hi:s=>s.top3ProdMax },
+  { name: '합 자리수합',      get: (n)=>{ const s=n.reduce((a,x)=>a+x,0); return (s%10)+Math.floor(s/100)+Math.floor((s/10)%10); }, lo:s=>s.sumDigitSumMin, hi:s=>s.sumDigitSumMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
