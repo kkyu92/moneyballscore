@@ -23,6 +23,7 @@ import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
 import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import { UserVsAIScorecard } from "@/components/picks/UserVsAIScorecard";
+import { DivergenceChip, type DivergenceGame } from "@/components/picks/DivergenceChip";
 import { YesterdayResultsSection, type YesterdayGame } from "@/components/predictions/YesterdayResultsSection";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
@@ -237,6 +238,73 @@ async function getNextScheduledGames(): Promise<NextSchedule | null> {
   };
 }
 
+async function getTodayDivergenceGame(games: HomeGame[]): Promise<DivergenceGame | null> {
+  const scheduledWithPred = games.filter(
+    (g) =>
+      g.status === 'scheduled' &&
+      g.id != null &&
+      g.predictions[0]?.reasoning?.homeWinProb != null,
+  );
+  if (scheduledWithPred.length === 0) return null;
+
+  const ids = scheduledWithPred.map((g) => g.id);
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('pick_poll_events')
+    .select('game_id, pick')
+    .in('game_id', ids);
+
+  if (!data || data.length === 0) return null;
+
+  // Aggregate home/away counts per game
+  const pollMap = new Map<number, { home: number; away: number }>();
+  for (const row of data) {
+    const gid = row.game_id as number;
+    if (!pollMap.has(gid)) pollMap.set(gid, { home: 0, away: 0 });
+    const entry = pollMap.get(gid)!;
+    if (row.pick === 'home') entry.home++;
+    else entry.away++;
+  }
+
+  let best: DivergenceGame | null = null;
+  let maxDelta = 0;
+
+  for (const g of scheduledWithPred) {
+    const poll = pollMap.get(g.id);
+    if (!poll) continue;
+    const total = poll.home + poll.away;
+    if (total < 3) continue;
+
+    const communityHomePct = Math.round((poll.home / total) * 100);
+    const pred = g.predictions[0];
+    const hwp = pred?.reasoning?.homeWinProb;
+    if (hwp == null) continue;
+
+    const aiHomePct = Math.round(
+      (pred.predicted_winner != null && g.home_team?.code != null
+        ? pred.winner?.code === g.home_team.code
+          ? hwp
+          : 1 - hwp
+        : hwp) * 100,
+    );
+
+    const delta = Math.abs(aiHomePct - communityHomePct);
+    if (delta >= 20 && delta > maxDelta) {
+      maxDelta = delta;
+      best = {
+        gameId: g.id,
+        homeTeam: g.home_team?.code as TeamCode,
+        awayTeam: g.away_team?.code as TeamCode,
+        aiHomePct,
+        communityHomePct,
+        communityTotal: total,
+      };
+    }
+  }
+
+  return best;
+}
+
 // gap > 7d → offseason/break; Monday + gap ≤ 2d → regular rest; otherwise unknown.
 function classifyNoGameReason(
   today: string,
@@ -437,6 +505,8 @@ export default async function HomePage() {
   const bigMatchDebate = bigMatchPred?.reasoning?.debate;
   const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
   const bigMatchId = bigMatch?.id;
+
+  const divergenceGame = await getTodayDivergenceGame(games).catch(() => null);
 
   return (
     <div className="space-y-8">
@@ -647,6 +717,7 @@ export default async function HomePage() {
           aiIsCorrect: g.predictions[0]?.is_correct ?? null,
         }))}
       />
+      {divergenceGame && <DivergenceChip game={divergenceGame} />}
       {yesterdayResults.length > 0 && (
         <YesterdayResultsSection games={yesterdayResults} />
       )}

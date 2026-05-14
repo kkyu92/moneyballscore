@@ -35,19 +35,27 @@ function PollBar({
   myPick,
   homeName,
   awayName,
+  aiHomePct,
 }: {
   poll: PickPollEntry;
   myPick: 'home' | 'away';
   homeName: string;
   awayName: string;
+  aiHomePct?: number;
 }) {
   const homePct = poll.total > 0 ? Math.round((poll.home / poll.total) * 100) : 50;
   const awayPct = 100 - homePct;
+  const showDivergence = aiHomePct != null && Math.abs(aiHomePct - homePct) >= 20;
 
   return (
     <div className="mt-2 px-1 space-y-1">
       <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-400">
-        <span>커뮤니티 픽</span>
+        <span className="flex items-center gap-1">
+          커뮤니티 픽
+          {showDivergence && (
+            <span className="text-amber-500 dark:text-amber-400 font-medium">⚡ AI와 반대</span>
+          )}
+        </span>
         <span>{poll.total}명 참여</span>
       </div>
       <div className="relative h-7 rounded-lg overflow-hidden flex text-xs font-medium">
@@ -130,6 +138,12 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
   const aiProbPct = aiWinProb != null ? Math.round(aiWinProb * 100) : null;
   const aiTeamName = aiPredictedWinner === 'home' ? homeName : aiPredictedWinner === 'away' ? awayName : null;
   const aiSideLabel = aiPredictedWinner === 'home' ? '홈' : aiPredictedWinner === 'away' ? '원정' : null;
+  const aiHomePct =
+    aiProbPct != null
+      ? aiPredictedWinner === 'home'
+        ? aiProbPct
+        : 100 - aiProbPct
+      : undefined;
 
   return (
     <div>
@@ -185,6 +199,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
           myPick={current.pick}
           homeName={homeName}
           awayName={awayName}
+          aiHomePct={aiHomePct}
         />
       )}
       {!current && poll && poll.total > 0 && (

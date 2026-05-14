@@ -1,7 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useUserPicks } from '@/hooks/use-user-picks';
+import { buildPickEntries, buildPicksStats } from '@/lib/picks/buildPicksStats';
+import type { PickGameResult } from '@/app/api/picks/results/route';
 
 export interface YesterdayGameSummary {
   id: number;
@@ -18,9 +21,23 @@ interface Props {
 
 export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props) {
   const { picks } = useUserPicks();
+  const [currentStreak, setCurrentStreak] = useState<number>(0);
 
   const totalPicks = Object.keys(picks).length;
   const aiRate = aiTotal > 0 ? ((aiCorrect / aiTotal) * 100).toFixed(1) : '0.0';
+
+  useEffect(() => {
+    const ids = Object.keys(picks);
+    if (ids.length === 0) return;
+    fetch(`/api/picks/results?ids=${ids.join(',')}`)
+      .then((r) => r.json())
+      .then((results: PickGameResult[]) => {
+        const entries = buildPickEntries(picks, results);
+        const stats = buildPicksStats(entries);
+        setCurrentStreak(stats.currentStreak);
+      })
+      .catch(() => {});
+  }, [picks]);
 
   const yesterdayPicked = yesterdayGames.filter((g) => picks[String(g.id)]);
   const yesterdayUserCorrect = yesterdayPicked.filter((g) => {
@@ -38,7 +55,14 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
   return (
     <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold">AI와 대결</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-bold">AI와 대결</h2>
+          {currentStreak >= 2 && (
+            <span className="text-xs font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full tabular-nums">
+              🔥 {currentStreak}연속
+            </span>
+          )}
+        </div>
         <span className="text-xs text-gray-400 dark:text-gray-400">로컬 저장 · 로그인 불필요</span>
       </div>
 
