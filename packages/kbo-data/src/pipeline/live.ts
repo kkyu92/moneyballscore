@@ -174,7 +174,11 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         prediction_type: 'in_game',
         predicted_winner: teamMap[predictedWinner],
         confidence: adjustedConfidence,
-        model_version: 'v1.7-revert-live',
+        // cycle 420 review-code heavy silent drift fix — cycle 335 에서
+        // pre_game 'v1.7-revert' → 'v1.8' 전환할 때 live path 누락. cycle 335~419
+        // 사이 in_game 라이브 row 가 모두 'v1.7-revert-live' 라벨 박제 → /accuracy
+        // mv 별 Brier 분석에서 stale 분류. 본 fix 부터 'v1.8-live'.
+        model_version: 'v1.8-live',
         reasoning: {
           preGameHomeProb,
           adjustedHomeProb,
