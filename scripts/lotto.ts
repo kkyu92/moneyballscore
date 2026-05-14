@@ -369,6 +369,11 @@ interface Stats {
   s0235Min: number; s0235Max: number;          // n[0]+n[2]+n[3]+n[5] 범위
   mod10DistMin: number; mod10DistMax: number;  // distinct count of x%10 over 6 numbers
   mod7DistMin: number; mod7DistMax: number;    // distinct count of x%7 over 6 numbers
+  mod9DistMin: number; mod9DistMax: number;    // distinct count of x%9 over 6 (cycle 8/15)
+  mod11DistMin: number; mod11DistMax: number;  // distinct count of x%11 over 6
+  mod13DistMin: number; mod13DistMax: number;  // distinct count of x%13 over 6
+  gcdPairsMin: number; gcdPairsMax: number;    // count of pairs (i<j) with gcd(n[i],n[j])>1
+  tensDistMin: number; tensDistMax: number;    // distinct count of floor(x/10) over 6 (decade spread)
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -553,6 +558,16 @@ function computeStats(rounds: LottoRound[]): Stats {
   const s0235s        = ns.map(n=>n[0]+n[2]+n[3]+n[5]);
   const mod10Dists    = ns.map(n=>new Set(n.map(x=>x%10)).size);
   const mod7Dists     = ns.map(n=>new Set(n.map(x=>x%7)).size);
+  const mod9Dists     = ns.map(n=>new Set(n.map(x=>x%9)).size);
+  const mod11Dists    = ns.map(n=>new Set(n.map(x=>x%11)).size);
+  const mod13Dists    = ns.map(n=>new Set(n.map(x=>x%13)).size);
+  const gcd2 = (a: number, b: number): number => { while (b) { [a, b] = [b, a % b]; } return a; };
+  const gcdPairs      = ns.map(n=>{
+    let c = 0;
+    for (let i = 0; i < 5; i++) for (let j = i+1; j < 6; j++) if (gcd2(n[i], n[j]) > 1) c++;
+    return c;
+  });
+  const tensDists     = ns.map(n=>new Set(n.map(x=>Math.floor(x/10))).size);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -724,6 +739,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     s0235Min:        Math.min(...s0235s),      s0235Max:      Math.max(...s0235s),
     mod10DistMin:    Math.min(...mod10Dists),  mod10DistMax:  Math.max(...mod10Dists),
     mod7DistMin:     Math.min(...mod7Dists),   mod7DistMax:   Math.max(...mod7Dists),
+    mod9DistMin:     Math.min(...mod9Dists),   mod9DistMax:   Math.max(...mod9Dists),
+    mod11DistMin:    Math.min(...mod11Dists),  mod11DistMax:  Math.max(...mod11Dists),
+    mod13DistMin:    Math.min(...mod13Dists),  mod13DistMax:  Math.max(...mod13Dists),
+    gcdPairsMin:     Math.min(...gcdPairs),    gcdPairsMax:   Math.max(...gcdPairs),
+    tensDistMin:     Math.min(...tensDists),   tensDistMax:   Math.max(...tensDists),
     zones,
     freq,
   };
@@ -922,6 +942,12 @@ const RULES: Rule[] = [
   { name: 'n[0]+n[2]+n[3]+n[5]', get: (n)=>n[0]+n[2]+n[3]+n[5], lo:s=>s.s0235Min,   hi:s=>s.s0235Max },
   { name: 'mod10 distinct', get: (n)=>new Set(n.map(x=>x%10)).size, lo:s=>s.mod10DistMin, hi:s=>s.mod10DistMax },
   { name: 'mod7 distinct',  get: (n)=>new Set(n.map(x=>x%7)).size,  lo:s=>s.mod7DistMin,  hi:s=>s.mod7DistMax },
+  // ── mod9/11/13 distinct + GCD>1 페어 + tens distinct (cycle 8/15) ────────────
+  { name: 'mod9 distinct',  get: (n)=>new Set(n.map(x=>x%9)).size,  lo:s=>s.mod9DistMin,  hi:s=>s.mod9DistMax },
+  { name: 'mod11 distinct', get: (n)=>new Set(n.map(x=>x%11)).size, lo:s=>s.mod11DistMin, hi:s=>s.mod11DistMax },
+  { name: 'mod13 distinct', get: (n)=>new Set(n.map(x=>x%13)).size, lo:s=>s.mod13DistMin, hi:s=>s.mod13DistMax },
+  { name: 'GCD>1 페어수',   get: (n)=>{ const g=(a:number,b:number):number=>{while(b){[a,b]=[b,a%b];}return a;}; let c=0; for(let i=0;i<5;i++) for(let j=i+1;j<6;j++) if(g(n[i],n[j])>1) c++; return c; }, lo:s=>s.gcdPairsMin, hi:s=>s.gcdPairsMax },
+  { name: 'tens distinct',  get: (n)=>new Set(n.map(x=>Math.floor(x/10))).size, lo:s=>s.tensDistMin, hi:s=>s.tensDistMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
