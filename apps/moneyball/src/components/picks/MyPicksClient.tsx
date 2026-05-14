@@ -102,7 +102,7 @@ function PickRow({ entry }: { entry: PickEntry }) {
           entry.isResolved && entry.aiIsCorrect !== null
             ? entry.aiIsCorrect
               ? 'text-brand-600 dark:text-brand-400'
-              : 'text-red-500 dark:text-red-400'
+              : 'text-red-600 dark:text-red-400'
             : 'text-gray-400 dark:text-gray-500'
         }`}>
           AI: {aiLabel}{entry.isResolved && entry.aiIsCorrect !== null ? (entry.aiIsCorrect ? ' ✓' : ' ✗') : ''}
