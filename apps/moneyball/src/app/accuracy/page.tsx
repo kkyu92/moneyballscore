@@ -182,6 +182,7 @@ export default async function AccuracyPage() {
   // CURRENT_MODEL_FILTER (debate_version=v2-persona4) 제거 — fallback row 도 포함해서 비율 측정.
   // cycle 385 review-code heavy — pre_game 만 query 하면 postview fallback 분류 (v1.8-postview)
   // 가 silent. buildFallbackStats 는 양쪽 mv 모두 지원하므로 prediction_type 필터 확장.
+  // eslint-disable-next-line react-hooks/purity -- Server Component request-scoped Date.now() 의도된 동작
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([
