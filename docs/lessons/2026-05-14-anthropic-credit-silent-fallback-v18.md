@@ -59,3 +59,38 @@ LLM API 호출 의존 ML 파이프라인 일반:
 - PR #372 (cycle 362): agentsFailed 플래그 — pre_game 만 가시화. postview 미수정.
 - CLAUDE.md 드리프트 사례 6 (관측 인프라 silent 실패): 본 사례 = 동일 family.
 - cycle 359 retro: "v1.8 첫날 파이프라인 정상(window_too_early = 예정 동작)" — 예측 fire 이전 진단이라 fallback 발견 못함. 정상 보고가 silent drift 은폐.
+
+---
+
+## 후속 evidence — cycle 387 (2026-05-14 16:00 KST)
+
+### Label 강등 검증 PASS
+
+5/14 07:18 UTC (16:18 KST) pre_game fire 5건 → 모두 `model_version='v1.8'` (강등 라벨) + `scoring_rule='v1.8'` + `confidence=0.30`.
+
+cycle 386 PR #415 (final-reasoning.ts agentsFailed/agentError 박제) + 기존 model-version.ts `determineModelVersion()` 가 함께 작동 = label silent drift 완전 차단 검증됨.
+
+| 시점 | mv 라벨 | 의미 |
+|---|---|---|
+| 2026-05-13 (PR #372 머지 이전) | `v2.0-debate` | silent drift — debate 실패해도 정상 라벨 |
+| 2026-05-14 (PR #372 머지 이후) | `v1.8` | 정정 — debate 실패 시 fallback 라벨 자연 표시 |
+
+### Root cause 2일째 미해결
+
+5/13 ~ 5/14 = 10 fire 전부 quant-only fallback. ANTHROPIC_API_KEY credit 또는 인증 상태 변화 X. Label 강등 fix (downstream) 만 적용되고 ROOT cause (credit) 는 user action 대기 중.
+
+**필요 action (user)**:
+1. Vercel + Cloudflare Worker 의 ANTHROPIC_API_KEY env 값 확인 — 잔여 credit / 만료 여부
+2. 직접 API 호출 테스트 (`curl https://api.anthropic.com/v1/messages -H "x-api-key: $KEY" ...`)
+3. credit 충전 또는 키 재발급
+
+본 cycle (387) = lesson 박제 + carry-over `memory: subtype=needs` dispatch. fix-incident chain 자율 발화 불가 (root cause = 외부 SaaS credit, 코드 fix 영역 X).
+
+### v1.6 anomaly 추가 발견 (cycle 387 측정, op-analysis heavy 후속 후보)
+
+v1.6 scoring_rule n=46 (2026-04-22~05-03):
+- 전체 17/46 = **37.0%** (coinflip 50% 이하 13%p)
+- high conf (≥0.55) n=14: 5/14 = 35.7%
+- low conf (<0.55) n=32: 12/32 = 37.5%
+
+12일 span 양쪽 conf bucket 모두 random 이하 → v1.6 가중치 자체가 역방향 신호 가능성. v2.0 가중치 후보 (TODOS.md) 와 비교 시 v1.6 의 sp_fip 15% / lineup_woba 15% 가 의심 영역. n=150+ 도달 후 op-analysis heavy 에서 v1.5/v1.6/v1.7-revert/v1.8 era 별 factor weight backtest 권장.
