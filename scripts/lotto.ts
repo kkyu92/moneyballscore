@@ -359,6 +359,11 @@ interface Stats {
   adjProdSumMin: number; adjProdSumMax: number; // Σ n[i]*n[i+1] 범위
   sumMod7Min: number;  sumMod7Max: number;     // (Σn) % 7 범위
   sumMod11Min: number; sumMod11Max: number;    // (Σn) % 11 범위
+  prodN03Max: number;                          // n[0]*n[3] 상한 (cycle 6/15)
+  prodN13Max: number;                          // n[1]*n[3] 상한
+  prodN24Max: number;                          // n[2]*n[4] 상한
+  gapSmoothMax: number;                        // Σ|gap[i+1]-gap[i]| (i=0..3) 상한 — 평탄도
+  digitProdMin: number; digitProdMax: number;  // Σ(floor(x/10)*(x%10)) 범위 — 자리수곱합
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -530,6 +535,14 @@ function computeStats(rounds: LottoRound[]): Stats {
   const adjProdSums   = ns.map(n=>n[0]*n[1]+n[1]*n[2]+n[2]*n[3]+n[3]*n[4]+n[4]*n[5]);
   const sumMod7s      = ns.map(n=>n.reduce((a,x)=>a+x,0)%7);
   const sumMod11s     = ns.map(n=>n.reduce((a,x)=>a+x,0)%11);
+  const prodN03s      = ns.map(n=>n[0]*n[3]);
+  const prodN13s      = ns.map(n=>n[1]*n[3]);
+  const prodN24s      = ns.map(n=>n[2]*n[4]);
+  const gapSmooths    = ns.map(n=>{
+    const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]);
+    return Math.abs(g[1]-g[0])+Math.abs(g[2]-g[1])+Math.abs(g[3]-g[2])+Math.abs(g[4]-g[3]);
+  });
+  const digitProds    = ns.map(n=>n.reduce((a,x)=>a+Math.floor(x/10)*(x%10),0));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -691,6 +704,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     adjProdSumMin:   Math.min(...adjProdSums), adjProdSumMax: Math.max(...adjProdSums),
     sumMod7Min:      Math.min(...sumMod7s),    sumMod7Max:    Math.max(...sumMod7s),
     sumMod11Min:     Math.min(...sumMod11s),   sumMod11Max:   Math.max(...sumMod11s),
+    prodN03Max:      Math.max(...prodN03s),
+    prodN13Max:      Math.max(...prodN13s),
+    prodN24Max:      Math.max(...prodN24s),
+    gapSmoothMax:    Math.max(...gapSmooths),
+    digitProdMin:    Math.min(...digitProds),  digitProdMax:  Math.max(...digitProds),
     zones,
     freq,
   };
@@ -877,6 +895,12 @@ const RULES: Rule[] = [
   { name: '인접곱 합',        get: (n)=>n[0]*n[1]+n[1]*n[2]+n[2]*n[3]+n[3]*n[4]+n[4]*n[5], lo:s=>s.adjProdSumMin, hi:s=>s.adjProdSumMax },
   { name: '합 mod7',          get: (n)=>n.reduce((a,x)=>a+x,0)%7, lo:s=>s.sumMod7Min, hi:s=>s.sumMod7Max },
   { name: '합 mod11',         get: (n)=>n.reduce((a,x)=>a+x,0)%11, lo:s=>s.sumMod11Min, hi:s=>s.sumMod11Max },
+  // ── n[0]·n[3] + n[1]·n[3] + n[2]·n[4] + 간격평탄도 + 자리수곱합 (cycle 6/15) ───
+  { name: 'n[0]×n[3] 곱',    get: (n)=>n[0]*n[3], lo:()=>null, hi:s=>s.prodN03Max },
+  { name: 'n[1]×n[3] 곱',    get: (n)=>n[1]*n[3], lo:()=>null, hi:s=>s.prodN13Max },
+  { name: 'n[2]×n[4] 곱',    get: (n)=>n[2]*n[4], lo:()=>null, hi:s=>s.prodN24Max },
+  { name: '간격평탄도',       get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]); return Math.abs(g[1]-g[0])+Math.abs(g[2]-g[1])+Math.abs(g[3]-g[2])+Math.abs(g[4]-g[3]); }, lo:()=>null, hi:s=>s.gapSmoothMax },
+  { name: '자리수곱 합',      get: (n)=>n.reduce((a,x)=>a+Math.floor(x/10)*(x%10),0), lo:s=>s.digitProdMin, hi:s=>s.digitProdMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
