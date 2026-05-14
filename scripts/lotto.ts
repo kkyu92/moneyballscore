@@ -339,6 +339,11 @@ interface Stats {
   mult4Max: number;                            // 4의배수 개수 상한
   extOuterMidMin: number; extOuterMidMax: number; // (n[0]+n[5])-(n[2]+n[3]) 범위
   tripleConsecMax: number;                     // n[i+2]-n[i]=2 (3 연속) 개수 상한
+  mod5SumMin: number;  mod5SumMax: number;     // Σ(n[i]%5) 범위
+  mod7SumMin: number;  mod7SumMax: number;     // Σ(n[i]%7) 범위
+  topBotDiffMin: number; topBotDiffMax: number; // (n[3]+n[4]+n[5])-(n[0]+n[1]+n[2]) 범위
+  centerDistMin: number; centerDistMax: number; // Σ|n[i]-23| 범위
+  gapProdMin: number;  gapProdMax: number;     // ∏(n[i+1]-n[i]) 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -490,6 +495,11 @@ function computeStats(rounds: LottoRound[]): Stats {
   const mult4Cnts     = ns.map(n=>n.filter(x=>MULT4.has(x)).length);
   const extOuterMids  = ns.map(n=>(n[0]+n[5])-(n[2]+n[3]));
   const tripleConsecs = ns.map(n=>{ let c=0; for(let i=0;i<4;i++) if(n[i+2]-n[i]===2) c++; return c; });
+  const mod5Sums      = ns.map(n=>n.reduce((a,x)=>a+(x%5),0));
+  const mod7Sums      = ns.map(n=>n.reduce((a,x)=>a+(x%7),0));
+  const topBotDiffs   = ns.map(n=>(n[3]+n[4]+n[5])-(n[0]+n[1]+n[2]));
+  const centerDists   = ns.map(n=>n.reduce((a,x)=>a+Math.abs(x-23),0));
+  const gapProds      = ns.map(n=>[0,1,2,3,4].reduce((a,i)=>a*(n[i+1]-n[i]),1));
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -631,6 +641,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     mult4Max:        Math.max(...mult4Cnts),
     extOuterMidMin:  Math.min(...extOuterMids), extOuterMidMax: Math.max(...extOuterMids),
     tripleConsecMax: Math.max(...tripleConsecs),
+    mod5SumMin:      Math.min(...mod5Sums),    mod5SumMax:    Math.max(...mod5Sums),
+    mod7SumMin:      Math.min(...mod7Sums),    mod7SumMax:    Math.max(...mod7Sums),
+    topBotDiffMin:   Math.min(...topBotDiffs), topBotDiffMax: Math.max(...topBotDiffs),
+    centerDistMin:   Math.min(...centerDists), centerDistMax: Math.max(...centerDists),
+    gapProdMin:      Math.min(...gapProds),    gapProdMax:    Math.max(...gapProds),
     zones,
     freq,
   };
@@ -793,6 +808,12 @@ const RULES: Rule[] = [
   { name: '4의배수 개수',     get: (n)=>n.filter(x=>MULT4.has(x)).length, lo:()=>null, hi:s=>s.mult4Max },
   { name: '외내차(p1+6-p3-4)', get: (n)=>(n[0]+n[5])-(n[2]+n[3]), lo:s=>s.extOuterMidMin, hi:s=>s.extOuterMidMax },
   { name: '연속3 개수',       get: (n)=>{ let c=0; for(let i=0;i<4;i++) if(n[i+2]-n[i]===2) c++; return c; }, lo:()=>null, hi:s=>s.tripleConsecMax },
+  // ── mod 합 + 상하차 + 중심거리 + 간격 곱 (cycle 2/15) ──────────────────────
+  { name: 'mod5 합',          get: (n)=>n.reduce((a,x)=>a+(x%5),0), lo:s=>s.mod5SumMin, hi:s=>s.mod5SumMax },
+  { name: 'mod7 합',          get: (n)=>n.reduce((a,x)=>a+(x%7),0), lo:s=>s.mod7SumMin, hi:s=>s.mod7SumMax },
+  { name: '상하3합차',        get: (n)=>(n[3]+n[4]+n[5])-(n[0]+n[1]+n[2]), lo:s=>s.topBotDiffMin, hi:s=>s.topBotDiffMax },
+  { name: '중심거리합',       get: (n)=>n.reduce((a,x)=>a+Math.abs(x-23),0), lo:s=>s.centerDistMin, hi:s=>s.centerDistMax },
+  { name: '간격 곱',          get: (n)=>[0,1,2,3,4].reduce((a,i)=>a*(n[i+1]-n[i]),1), lo:s=>s.gapProdMin, hi:s=>s.gapProdMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
