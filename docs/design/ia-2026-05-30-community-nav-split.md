@@ -55,6 +55,18 @@ AI 예측: 오늘 경기 / AI 분석 / AI 적중 기록 / 모델 성능 / 예측
 
 ## 다음 cycle 후속 후보
 
-- 헤더 드롭다운 아이콘 추가 (SVG inline, 각 항목에 카테고리 아이콘)
+- ~~헤더 드롭다운 아이콘 추가 (SVG inline, 각 항목에 카테고리 아이콘)~~ ✅ cycle 350 (PR #366) 완료
 - 커뮤니티 그룹에 `/search` 또는 소셜 링크 추가 고려
-- `기록` 직접 링크 레이블 → "예측 기록"으로 명확화
+- ~~`기록` 직접 링크 레이블 → "예측 기록"으로 명확화~~ ✅ cycle 344 (PR #364) 완료
+
+## 후속 처리 박제 (cycle 399, 2026-05-14)
+
+cycle 399 info-architecture-review chain 진단 결과 위 후속 후보 3건 중 2건 처리 확인:
+
+| 후속 | 처리 cycle | 검증 |
+|---|---|---|
+| 헤더 드롭다운 아이콘 추가 (SVG) | cycle 350 (PR #366) | `Header.tsx` `NavLink.icon` 필드 + 11개 항목 `icon` 박제 |
+| `기록` 레이블 → `예측 기록` | cycle 344 (PR #364) | `Header.tsx:33` `{ href: "/predictions", label: "예측 기록" }` 박제 |
+| 커뮤니티 그룹에 `/search` 또는 소셜 링크 | 미처리 | trigger 자연 발화 시 진행 |
+
+본 spec 위 2건 close — trigger 8 (carry-over 미처리 ≥ 20 사이클) 처리 항목 더 이상 발화 X. "커뮤니티 그룹에 `/search` 또는 소셜 링크" 1건만 carry-over 잔존.

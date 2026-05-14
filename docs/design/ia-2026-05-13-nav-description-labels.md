@@ -75,5 +75,16 @@ NavLinks.tsx의 패널 스타일 조건: `sub.description 있음 → min-w-[14re
 
 ## 다음 cycle 후속 후보
 
-- 드롭다운 항목에 SVG 아이콘 추가 (각 항목 앞 카테고리 아이콘) — 별 cycle scope
+- ~~드롭다운 항목에 SVG 아이콘 추가 (각 항목 앞 카테고리 아이콘) — 별 cycle scope~~ ✅ cycle 350 (PR #366) 완료
 - 헤더 메가메뉴 전환 (전체 그리드 hover panel) — 큰 scope
+
+## 후속 처리 박제 (cycle 399, 2026-05-14)
+
+cycle 399 info-architecture-review chain 진단 결과 위 후속 후보 1건 처리 확인:
+
+| 후속 | 처리 cycle | 검증 |
+|---|---|---|
+| 드롭다운 항목에 SVG 아이콘 추가 | cycle 350 (PR #366) | `Header.tsx:20-50` `NavLink.icon` 필드 + `nav-icon.tsx` `NavIconName` 박제. AI(3) + 팀·선수(3) + 리뷰·시즌(5) 11개 항목 모두 `icon` 지정 |
+| 헤더 메가메뉴 전환 | 미처리 | 큰 scope — 별 cycle 보류 |
+
+본 spec close 부분 박제 — trigger 8 (carry-over 미처리 ≥ 20 사이클) 본 처리 항목 더 이상 발화 X. "헤더 메가메뉴 전환" 1건만 carry-over 잔존.
