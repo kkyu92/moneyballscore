@@ -179,7 +179,7 @@ export default async function AccuracyPage() {
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData] = await Promise.all([
     supabase
       .from('predictions')
-      .select('confidence, is_correct, verified_at, scoring_rule')
+      .select('confidence, is_correct, verified_at, scoring_rule, reasoning->homeWinProb')
       .match(CURRENT_MODEL_FILTER)
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
