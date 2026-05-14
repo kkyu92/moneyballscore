@@ -495,6 +495,11 @@ interface Stats {
   qPosDescMin: number;  qPosDescMax: number;   // Σ (5-i)²·n[i] weights (25,16,9,4,1,0)
   vWeightMin: number;   vWeightMax: number;    // V형 5·n[0]+3·n[1]+1·n[2]+1·n[3]+3·n[4]+5·n[5]
   lWeightMin: number;   lWeightMax: number;    // Λ형 1·n[0]+3·n[1]+5·n[2]+5·n[3]+3·n[4]+1·n[5]
+  gapAccelMin: number;  gapAccelMax: number;   // 간격가속제곱합 Σ(g[i+1]-g[i])² (i=0..3) (cycle 15/15)
+  primeWMin: number;    primeWMax: number;     // 소수가중합 2·n[0]+3·n[1]+5·n[2]+7·n[3]+11·n[4]+13·n[5]
+  fibWMin: number;      fibWMax: number;       // 피보나치가중합 1·n[0]+1·n[1]+2·n[2]+3·n[3]+5·n[4]+8·n[5]
+  bellWMin: number;     bellWMax: number;      // 종모양가중합 6·n[0]+10·n[1]+12·n[2]+12·n[3]+10·n[4]+6·n[5]
+  triWMin: number;      triWMax: number;       // 삼각수가중합 1·n[0]+3·n[1]+6·n[2]+10·n[3]+15·n[4]+21·n[5]
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -737,6 +742,15 @@ function computeStats(rounds: LottoRound[]): Stats {
   const qPosDescs     = ns.map(n=>n.reduce((a,x,i)=>a+(5-i)*(5-i)*x,0));
   const vWeights      = ns.map(n=>5*n[0]+3*n[1]+1*n[2]+1*n[3]+3*n[4]+5*n[5]);
   const lWeights      = ns.map(n=>1*n[0]+3*n[1]+5*n[2]+5*n[3]+3*n[4]+1*n[5]);
+  // ── cycle 15/15 finale: gap acceleration + named weight family ─────────────
+  const gapAccels     = ns.map(n=>{
+    const g = [n[1]-n[0], n[2]-n[1], n[3]-n[2], n[4]-n[3], n[5]-n[4]];
+    return (g[1]-g[0])**2 + (g[2]-g[1])**2 + (g[3]-g[2])**2 + (g[4]-g[3])**2;
+  });
+  const primeWs       = ns.map(n=>2*n[0]+3*n[1]+5*n[2]+7*n[3]+11*n[4]+13*n[5]);
+  const fibWs         = ns.map(n=>1*n[0]+1*n[1]+2*n[2]+3*n[3]+5*n[4]+8*n[5]);
+  const bellWs        = ns.map(n=>6*n[0]+10*n[1]+12*n[2]+12*n[3]+10*n[4]+6*n[5]);
+  const triWs         = ns.map(n=>1*n[0]+3*n[1]+6*n[2]+10*n[3]+15*n[4]+21*n[5]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -943,6 +957,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     qPosDescMin:       Math.min(...qPosDescs),     qPosDescMax:       Math.max(...qPosDescs),
     vWeightMin:        Math.min(...vWeights),      vWeightMax:        Math.max(...vWeights),
     lWeightMin:        Math.min(...lWeights),      lWeightMax:        Math.max(...lWeights),
+    gapAccelMin:       Math.min(...gapAccels),     gapAccelMax:       Math.max(...gapAccels),
+    primeWMin:         Math.min(...primeWs),       primeWMax:         Math.max(...primeWs),
+    fibWMin:           Math.min(...fibWs),         fibWMax:           Math.max(...fibWs),
+    bellWMin:          Math.min(...bellWs),        bellWMax:          Math.max(...bellWs),
+    triWMin:           Math.min(...triWs),         triWMax:           Math.max(...triWs),
     zones,
     freq,
   };
@@ -1184,6 +1203,12 @@ const RULES: Rule[] = [
   { name: '위치제곱가중합(내림)', get: (n)=>n.reduce((a,x,i)=>a+(5-i)*(5-i)*x,0),                        lo:s=>s.qPosDescMin,       hi:s=>s.qPosDescMax },
   { name: 'V형중심가중합',         get: (n)=>5*n[0]+3*n[1]+1*n[2]+1*n[3]+3*n[4]+5*n[5],                  lo:s=>s.vWeightMin,        hi:s=>s.vWeightMax },
   { name: 'Λ형중심가중합',         get: (n)=>1*n[0]+3*n[1]+5*n[2]+5*n[3]+3*n[4]+1*n[5],                  lo:s=>s.lWeightMin,        hi:s=>s.lWeightMax },
+  // ── 간격가속제곱합 + 소수/피보나치/종모양/삼각수 가중합 (cycle 15/15) ───────
+  { name: '간격가속제곱합',        get: (n)=>{ const g=[n[1]-n[0],n[2]-n[1],n[3]-n[2],n[4]-n[3],n[5]-n[4]]; return (g[1]-g[0])**2+(g[2]-g[1])**2+(g[3]-g[2])**2+(g[4]-g[3])**2; }, lo:s=>s.gapAccelMin, hi:s=>s.gapAccelMax },
+  { name: '소수가중합',            get: (n)=>2*n[0]+3*n[1]+5*n[2]+7*n[3]+11*n[4]+13*n[5],                lo:s=>s.primeWMin,         hi:s=>s.primeWMax },
+  { name: '피보나치가중합',        get: (n)=>1*n[0]+1*n[1]+2*n[2]+3*n[3]+5*n[4]+8*n[5],                  lo:s=>s.fibWMin,           hi:s=>s.fibWMax },
+  { name: '종모양가중합',          get: (n)=>6*n[0]+10*n[1]+12*n[2]+12*n[3]+10*n[4]+6*n[5],              lo:s=>s.bellWMin,          hi:s=>s.bellWMax },
+  { name: '삼각수가중합',          get: (n)=>1*n[0]+3*n[1]+6*n[2]+10*n[3]+15*n[4]+21*n[5],               lo:s=>s.triWMin,           hi:s=>s.triWMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
