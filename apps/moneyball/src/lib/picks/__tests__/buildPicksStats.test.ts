@@ -166,6 +166,65 @@ describe('buildPicksStats', () => {
     expect(stats.recentDots).toHaveLength(10);
   });
 
+  it('counts divergent vs agreed picks correctly', () => {
+    // game 1: 내=home, AI=home (homeWin) → agreed, correct
+    // game 2: 내=away, AI=home (homeWin) → divergent, wrong (내 틀림, AI 맞음)
+    // game 3: 내=home, AI=away (awayWin) → divergent, wrong (내 틀림, AI 맞음)
+    // game 4: 내=away, AI=home (awayWin → AI 빗나감) → divergent, correct (내 맞고 AI 틀림)
+    const picks = makePicks([
+      [1, 'home', '2026-05-01T10:00:00Z'],
+      [2, 'away', '2026-05-02T10:00:00Z'],
+      [3, 'home', '2026-05-03T10:00:00Z'],
+      [4, 'away', '2026-05-04T10:00:00Z'],
+    ]);
+    const results: PickGameResult[] = [
+      makeResult(1, 5, 2), // home win, AI=home → agreed
+      makeResult(2, 5, 2), // home win, AI=home → 내 away 이므로 divergent
+      makeResult(3, 1, 4), // away win, AI=away → 내 home 이므로 divergent
+      {
+        ...makeResult(4, 1, 4), // away win (AI 가 home 으로 빗나감)
+        ai_predicted_winner_id: HOME_TEAM.id,
+        ai_is_correct: false,
+      },
+    ];
+    const entries = buildPickEntries(picks, results);
+    const stats = buildPicksStats(entries);
+    expect(stats.agreedResolved).toBe(1);
+    expect(stats.agreedCorrect).toBe(1);
+    expect(stats.divergentResolved).toBe(3);
+    expect(stats.divergentMyCorrect).toBe(1); // 오직 game 4 에서만
+    expect(stats.divergentRate).toBeCloseTo(1 / 3);
+  });
+
+  it('skips games without AI prediction from divergence stats', () => {
+    const picks = makePicks([
+      [1, 'home', '2026-05-01T10:00:00Z'],
+      [2, 'away', '2026-05-02T10:00:00Z'],
+    ]);
+    const results: PickGameResult[] = [
+      makeResult(1, 5, 2), // AI=home, 내=home → agreed
+      {
+        ...makeResult(2, 1, 4),
+        ai_predicted_winner_id: null,
+        ai_is_correct: null,
+      },
+    ];
+    const entries = buildPickEntries(picks, results);
+    const stats = buildPicksStats(entries);
+    expect(stats.agreedResolved).toBe(1);
+    expect(stats.divergentResolved).toBe(0);
+    expect(stats.divergentRate).toBeNull();
+  });
+
+  it('returns null divergentRate when no divergent picks resolved', () => {
+    const picks = makePicks([[1, 'home', '2026-05-01T10:00:00Z']]);
+    const results = [makeResult(1, 5, 2)]; // AI=home, 내=home → agreed only
+    const entries = buildPickEntries(picks, results);
+    const stats = buildPicksStats(entries);
+    expect(stats.divergentResolved).toBe(0);
+    expect(stats.divergentRate).toBeNull();
+  });
+
   it('detects upward trend', () => {
     // recent 5: 4/5 correct, prev 5: 1/5 correct → up
     const picks = makePicks([
