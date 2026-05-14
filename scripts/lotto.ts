@@ -185,6 +185,37 @@ const MULT3    = new Set([3,6,9,12,15,18,21,24,27,30,33,36,39,42,45]);
 const MULT4    = new Set([4,8,12,16,20,24,28,32,36,40,44]);
 const TRI      = new Set([1,3,6,10,15,21,28,36,45]);
 
+// ── number-theoretic (cycle 10/15) ────────────────────────────────────────────
+const SIGMA: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) { let s = 0; for (let d = 1; d <= x; d++) if (x%d===0) s+=d; a[x]=s; }
+  return a;
+})();
+const PHI: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) {
+    let m = x, r = x;
+    for (let p = 2; p*p <= m; p++) if (m%p===0) { while (m%p===0) m=Math.floor(m/p); r -= Math.floor(r/p); }
+    if (m > 1) r -= Math.floor(r/m);
+    a[x] = r;
+  }
+  return a;
+})();
+const TAU: number[] = (() => {
+  const a = new Array(46).fill(0);
+  for (let x = 1; x <= 45; x++) { let c = 0; for (let d = 1; d <= x; d++) if (x%d===0) c++; a[x]=c; }
+  return a;
+})();
+const SQUAREFREE: Set<number> = (() => {
+  const s = new Set<number>();
+  for (let x = 1; x <= 45; x++) {
+    let sf = true;
+    for (let p = 2; p*p <= x; p++) if (x % (p*p) === 0) { sf = false; break; }
+    if (sf) s.add(x);
+  }
+  return s;
+})();
+
 function sumNums(n: number[])       { return n.reduce((a,b)=>a+b,0); }
 function oddCount(n: number[])      { return n.filter(x=>x%2===1).length; }
 function consecPairs(n: number[])   { let c=0; for(let i=0;i<5;i++) if(n[i+1]-n[i]===1)c++; return c; }
@@ -379,6 +410,11 @@ interface Stats {
   crossProdSumMin: number; crossProdSumMax: number;   // n[0]*n[3]+n[1]*n[4]+n[2]*n[5]
   digitSumDistMin: number; digitSumDistMax: number;   // distinct count of digit-sum(n_i)
   oddRunMaxMax: number;                          // longest consecutive run where n[i] is odd
+  sigmaSumMin: number; sigmaSumMax: number;      // Σ σ(n[i]) — divisor sum (cycle 10/15)
+  phiSumMin: number;   phiSumMax: number;        // Σ φ(n[i]) — Euler totient
+  pairGcdSumMin: number; pairGcdSumMax: number;  // Σ_{i<j} gcd(n[i],n[j]) over 15 pairs
+  tauSumMin: number;   tauSumMax: number;        // Σ τ(n[i]) — number of divisors
+  squarefreeMax: number;                         // count of squarefree numbers in n[]
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -589,6 +625,15 @@ function computeStats(rounds: LottoRound[]): Stats {
     for (const x of n) { if (x % 2 === 1) { cur++; if (cur > m) m = cur; } else cur = 0; }
     return m;
   });
+  const sigmaSums     = ns.map(n=>n.reduce((a,x)=>a+SIGMA[x],0));
+  const phiSums       = ns.map(n=>n.reduce((a,x)=>a+PHI[x],0));
+  const pairGcdSums   = ns.map(n=>{
+    let s = 0;
+    for (let i = 0; i < 5; i++) for (let j = i+1; j < 6; j++) s += gcd2(n[i], n[j]);
+    return s;
+  });
+  const tauSums       = ns.map(n=>n.reduce((a,x)=>a+TAU[x],0));
+  const squarefrees   = ns.map(n=>n.filter(x=>SQUAREFREE.has(x)).length);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -770,6 +815,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     crossProdSumMin:  Math.min(...crossProdSums),  crossProdSumMax:  Math.max(...crossProdSums),
     digitSumDistMin: Math.min(...digitSumDists), digitSumDistMax: Math.max(...digitSumDists),
     oddRunMaxMax:    Math.max(...oddRunMaxs),
+    sigmaSumMin:     Math.min(...sigmaSums),     sigmaSumMax:    Math.max(...sigmaSums),
+    phiSumMin:       Math.min(...phiSums),       phiSumMax:      Math.max(...phiSums),
+    pairGcdSumMin:   Math.min(...pairGcdSums),   pairGcdSumMax:  Math.max(...pairGcdSums),
+    tauSumMin:       Math.min(...tauSums),       tauSumMax:      Math.max(...tauSums),
+    squarefreeMax:   Math.max(...squarefrees),
     zones,
     freq,
   };
@@ -980,6 +1030,12 @@ const RULES: Rule[] = [
   { name: '교차곱합',       get: (n)=>n[0]*n[3]+n[1]*n[4]+n[2]*n[5], lo:s=>s.crossProdSumMin, hi:s=>s.crossProdSumMax },
   { name: '자리수합 distinct', get: (n)=>new Set(n.map(x=>(x%10)+Math.floor(x/10))).size, lo:s=>s.digitSumDistMin, hi:s=>s.digitSumDistMax },
   { name: '홀수연속런 최대', get: (n)=>{ let m=0,c=0; for(const x of n){if(x%2===1){c++;if(c>m)m=c;}else c=0;} return m; }, lo:()=>null, hi:s=>s.oddRunMaxMax },
+  // ── σ 합 + φ 합 + 페어GCD 총합 + τ 합 + squarefree 개수 (cycle 10/15) ──────
+  { name: 'σ(약수합) 합',    get: (n)=>n.reduce((a,x)=>a+SIGMA[x],0), lo:s=>s.sigmaSumMin, hi:s=>s.sigmaSumMax },
+  { name: 'φ(토션트) 합',    get: (n)=>n.reduce((a,x)=>a+PHI[x],0),   lo:s=>s.phiSumMin,   hi:s=>s.phiSumMax },
+  { name: '페어GCD 총합',    get: (n)=>{ const g=(a:number,b:number):number=>{while(b){[a,b]=[b,a%b];}return a;}; let s=0; for(let i=0;i<5;i++) for(let j=i+1;j<6;j++) s+=g(n[i],n[j]); return s; }, lo:s=>s.pairGcdSumMin, hi:s=>s.pairGcdSumMax },
+  { name: 'τ(약수개수) 합',  get: (n)=>n.reduce((a,x)=>a+TAU[x],0),   lo:s=>s.tauSumMin,   hi:s=>s.tauSumMax },
+  { name: 'squarefree 개수', get: (n)=>n.filter(x=>SQUAREFREE.has(x)).length, lo:()=>null, hi:s=>s.squarefreeMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
