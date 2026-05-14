@@ -1,6 +1,14 @@
 import Link from 'next/link';
 import { shortTeamName, type TeamCode } from '@moneyball/shared';
 
+function eulReul(name: string): string {
+  const code = name.charCodeAt(name.length - 1);
+  if (code >= 0xac00 && code <= 0xd7a3) {
+    return (code - 0xac00) % 28 !== 0 ? '을' : '를';
+  }
+  return '를';
+}
+
 export interface DivergenceGame {
   gameId: number;
   homeTeam: TeamCode;
@@ -35,7 +43,7 @@ export function DivergenceChip({ game }: Props) {
       <span className="text-amber-500 dark:text-amber-400 shrink-0 text-base">⚡</span>
       <span className="text-gray-700 dark:text-gray-200 min-w-0">
         <span className="font-semibold text-amber-700 dark:text-amber-300">{communitySide}</span>
-        {' '}을 커뮤니티 {communityPct}% 픽 — AI는{' '}
+        {eulReul(communitySide)} 커뮤니티 {communityPct}% 픽 — AI는{' '}
         <span className="font-semibold">{aiSide}</span> {aiPct}% 예측
         <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">({game.communityTotal}명)</span>
       </span>
