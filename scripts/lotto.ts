@@ -216,7 +216,13 @@ interface Stats {
   hi2Min: number;      hi2Max: number;         // n[4]+n[5] 범위
   low3Min: number;     low3Max: number;        // n[0]+n[1]+n[2] 범위
   hi3Min: number;      hi3Max: number;         // n[3]+n[4]+n[5] 범위
+  low4Min: number;     low4Max: number;        // n[0]+n[1]+n[2]+n[3] 범위
+  hi4Min: number;      hi4Max: number;         // n[2]+n[3]+n[4]+n[5] 범위
   mid4Min: number;     mid4Max: number;        // n[1]+n[2]+n[3]+n[4] 범위
+  maxGapMax: number;                           // 최대인접간격 상한
+  span3LoMin: number;  span3LoMax: number;     // n[2]-n[0] 범위
+  span3HiMin: number;  span3HiMax: number;     // n[5]-n[3] 범위
+  span4MidMin: number; span4MidMax: number;    // n[4]-n[1] 범위
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -252,11 +258,16 @@ function computeStats(rounds: LottoRound[]): Stats {
     return max;
   });
 
-  const low2s  = ns.map(n=>n[0]+n[1]);
-  const hi2s   = ns.map(n=>n[4]+n[5]);
-  const low3s  = ns.map(n=>n[0]+n[1]+n[2]);
-  const hi3s   = ns.map(n=>n[3]+n[4]+n[5]);
-  const mid4s  = ns.map(n=>n[1]+n[2]+n[3]+n[4]);
+  const low2s     = ns.map(n=>n[0]+n[1]);
+  const hi2s      = ns.map(n=>n[4]+n[5]);
+  const low3s     = ns.map(n=>n[0]+n[1]+n[2]);
+  const hi3s      = ns.map(n=>n[3]+n[4]+n[5]);
+  const low4s     = ns.map(n=>n[0]+n[1]+n[2]+n[3]);
+  const hi4s      = ns.map(n=>n[2]+n[3]+n[4]+n[5]);
+  const mid4s     = ns.map(n=>n[1]+n[2]+n[3]+n[4]);
+  const span3Los  = ns.map(n=>n[2]-n[0]);
+  const span3His  = ns.map(n=>n[5]-n[3]);
+  const span4Mids = ns.map(n=>n[4]-n[1]);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -282,12 +293,18 @@ function computeStats(rounds: LottoRound[]): Stats {
     multOf5Max: Math.max(...ns.map(n=>n.filter(x=>x%5===0).length)),
     perfSqMax:  Math.max(...ns.map(n=>n.filter(x=>PERF_SQ.has(x)).length)),
     primesMax:  Math.max(...ns.map(n=>n.filter(x=>PRIMES.has(x)).length)),
-    maxRunMax: Math.max(...maxRuns),
-    low2Min:   Math.min(...low2s),  low2Max: Math.max(...low2s),
-    hi2Min:    Math.min(...hi2s),   hi2Max:  Math.max(...hi2s),
-    low3Min:   Math.min(...low3s),  low3Max: Math.max(...low3s),
-    hi3Min:    Math.min(...hi3s),   hi3Max:  Math.max(...hi3s),
-    mid4Min:   Math.min(...mid4s), mid4Max: Math.max(...mid4s),
+    maxRunMax:    Math.max(...maxRuns),
+    maxGapMax:    Math.max(...maxGaps),
+    low2Min:      Math.min(...low2s),    low2Max:      Math.max(...low2s),
+    hi2Min:       Math.min(...hi2s),     hi2Max:       Math.max(...hi2s),
+    low3Min:      Math.min(...low3s),    low3Max:      Math.max(...low3s),
+    hi3Min:       Math.min(...hi3s),     hi3Max:       Math.max(...hi3s),
+    low4Min:      Math.min(...low4s),    low4Max:      Math.max(...low4s),
+    hi4Min:       Math.min(...hi4s),     hi4Max:       Math.max(...hi4s),
+    mid4Min:      Math.min(...mid4s),    mid4Max:      Math.max(...mid4s),
+    span3LoMin:   Math.min(...span3Los), span3LoMax:   Math.max(...span3Los),
+    span3HiMin:   Math.min(...span3His), span3HiMax:   Math.max(...span3His),
+    span4MidMin:  Math.min(...span4Mids),span4MidMax:  Math.max(...span4Mids),
     zones,
     freq,
   };
@@ -308,7 +325,7 @@ const RULES: Rule[] = [
   { name: '스팬',              get: (n)=>numRange(n),     lo:s=>s.rangeMin,    hi:s=>s.rangeMax },
   { name: '홀수 개수',         get: (n)=>oddCount(n),     lo:s=>s.oddMin,      hi:s=>s.oddMax },
   { name: '연속쌍',            get: (n)=>consecPairs(n),  lo:()=>null,         hi:s=>s.consecMax },
-  { name: '최대인접간격',      get: (n)=>maxGap(n),       lo:s=>s.maxGapMin,   hi:()=>null },
+  { name: '최대인접간격',      get: (n)=>maxGap(n),       lo:s=>s.maxGapMin,   hi:s=>s.maxGapMax },
   // ── 위치별 범위 ────────────────────────────────────────────────────────────
   { name: '최솟값(pos1)',      get: (n)=>n[0],            lo:s=>s.posMin[0],   hi:s=>s.posMax[0] },
   { name: '2번째(pos2)',       get: (n)=>n[1],            lo:s=>s.posMin[1],   hi:s=>s.posMax[1] },
@@ -327,9 +344,15 @@ const RULES: Rule[] = [
   { name: '하위2개합(p1+2)',   get: (n)=>n[0]+n[1],        lo:s=>s.low2Min,     hi:s=>s.low2Max },
   { name: '상위2개합(p5+6)',   get: (n)=>n[4]+n[5],        lo:s=>s.hi2Min,      hi:s=>s.hi2Max },
   { name: '중간값 합(pos3+4)', get: (n)=>n[2]+n[3],       lo:s=>s.midSumMin,   hi:s=>s.midSumMax },
-  { name: '하위3개합(p1+2+3)', get: (n)=>n[0]+n[1]+n[2],  lo:s=>s.low3Min,     hi:s=>s.low3Max },
-  { name: '상위3개합(p4+5+6)', get: (n)=>n[3]+n[4]+n[5],  lo:s=>s.hi3Min,      hi:s=>s.hi3Max },
-  { name: '중간4개합(p2-5)',   get: (n)=>n[1]+n[2]+n[3]+n[4], lo:s=>s.mid4Min, hi:s=>s.mid4Max },
+  { name: '하위3개합(p1+2+3)', get: (n)=>n[0]+n[1]+n[2],      lo:s=>s.low3Min,     hi:s=>s.low3Max },
+  { name: '상위3개합(p4+5+6)', get: (n)=>n[3]+n[4]+n[5],      lo:s=>s.hi3Min,      hi:s=>s.hi3Max },
+  { name: '하위4개합(p1-4)',   get: (n)=>n[0]+n[1]+n[2]+n[3], lo:s=>s.low4Min,     hi:s=>s.low4Max },
+  { name: '상위4개합(p3-6)',   get: (n)=>n[2]+n[3]+n[4]+n[5], lo:s=>s.hi4Min,      hi:s=>s.hi4Max },
+  { name: '중간4개합(p2-5)',   get: (n)=>n[1]+n[2]+n[3]+n[4], lo:s=>s.mid4Min,     hi:s=>s.mid4Max },
+  // ── 부분 스팬 범위 ──────────────────────────────────────────────────────────
+  { name: '스팬(pos1-3)',     get: (n)=>n[2]-n[0],            lo:s=>s.span3LoMin,  hi:s=>s.span3LoMax },
+  { name: '스팬(pos4-6)',     get: (n)=>n[5]-n[3],            lo:s=>s.span3HiMin,  hi:s=>s.span3HiMax },
+  { name: '스팬(pos2-5)',     get: (n)=>n[4]-n[1],            lo:s=>s.span4MidMin, hi:s=>s.span4MidMax },
   // ── 특수 패턴 ──────────────────────────────────────────────────────────────
   { name: '5의배수 개수',      get: (n)=>n.filter(x=>x%5===0).length,        lo:()=>null, hi:s=>s.multOf5Max },
   { name: '완전제곱수 개수',   get: (n)=>n.filter(x=>PERF_SQ.has(x)).length, lo:()=>null, hi:s=>s.perfSqMax },
