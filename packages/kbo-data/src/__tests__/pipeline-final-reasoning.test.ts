@@ -90,4 +90,50 @@ describe('buildFinalReasoning', () => {
     expect(out.quantitativeHomeWinProb).toBe(0.62);
     expect(out.homeWinProb).toBe(0.85);
   });
+
+  // cycle 386 fix-incident heavy — pre_game path reasoning.debate JSONB 에
+  // agentsFailed/agentError 박제. cycle 384 postview path schema parity 대응.
+  // mv 라벨 강등 (cycle 384 fix) 은 작동했으나 reasoning.debate 직접 read 하는
+  // 곳 silent drift. ANTHROPIC credit 소진 fallback 5/14 5건 evidence (W22).
+  it('cycle 386 — debate.agentsFailed/agentError 가 reasoning.debate 에 박제 보존', () => {
+    const fallbackDebate: DebatePayload = {
+      ...debate,
+      agentsFailed: true,
+      agentError: 'ANTHROPIC credit exhausted',
+      totalTokens: 0,
+    };
+    const out = buildFinalReasoning({
+      quantResult: baseQuant,
+      finalHomeProb: baseQuant.homeWinProb,
+      debate: fallbackDebate,
+    });
+    expect(out.debate?.agentsFailed).toBe(true);
+    expect(out.debate?.agentError).toBe('ANTHROPIC credit exhausted');
+    expect(out.debate?.totalTokens).toBe(0);
+  });
+
+  it('cycle 386 — debate succeed 시 agentsFailed=false / agentError=null 박제 보존', () => {
+    const successDebate: DebatePayload = {
+      ...debate,
+      agentsFailed: false,
+      agentError: null,
+    };
+    const out = buildFinalReasoning({
+      quantResult: baseQuant,
+      finalHomeProb: debate.verdict.homeWinProb,
+      debate: successDebate,
+    });
+    expect(out.debate?.agentsFailed).toBe(false);
+    expect(out.debate?.agentError).toBeNull();
+  });
+
+  it('cycle 386 — agentsFailed/agentError 미설정 시 키 부재 (옵션 필드 보존)', () => {
+    const out = buildFinalReasoning({
+      quantResult: baseQuant,
+      finalHomeProb: debate.verdict.homeWinProb,
+      debate,
+    });
+    expect(out.debate?.agentsFailed).toBeUndefined();
+    expect(out.debate?.agentError).toBeUndefined();
+  });
 });

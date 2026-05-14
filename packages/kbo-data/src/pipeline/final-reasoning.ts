@@ -26,6 +26,12 @@ export interface DebatePayload {
   };
   quantitativeProb: number;
   totalTokens?: number;
+  // cycle 386 fix-incident heavy — pre_game path reasoning.debate JSONB 에
+  // agentsFailed/agentError 박제 누락 (cycle 384 postview path 만 fix). mv 라벨
+  // 강등 (`v1.8`) 은 작동했으나 reasoning.debate 안 직접 flag read 하는 곳
+  // (e.g. /debug/model-comparison) silent drift. postview path schema parity.
+  agentsFailed?: boolean;
+  agentError?: string | null;
 }
 
 export interface FinalReasoning {
