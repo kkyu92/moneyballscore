@@ -364,6 +364,11 @@ interface Stats {
   prodN24Max: number;                          // n[2]*n[4] 상한
   gapSmoothMax: number;                        // Σ|gap[i+1]-gap[i]| (i=0..3) 상한 — 평탄도
   digitProdMin: number; digitProdMax: number;  // Σ(floor(x/10)*(x%10)) 범위 — 자리수곱합
+  s034Min: number; s034Max: number;            // n[0]+n[3]+n[4] 범위 (cycle 7/15)
+  s123Min: number; s123Max: number;            // n[1]+n[2]+n[3] 범위
+  s0235Min: number; s0235Max: number;          // n[0]+n[2]+n[3]+n[5] 범위
+  mod10DistMin: number; mod10DistMax: number;  // distinct count of x%10 over 6 numbers
+  mod7DistMin: number; mod7DistMax: number;    // distinct count of x%7 over 6 numbers
   zones: Array<{lo:number; hi:number; min:number; max:number}>;
   freq: number[];                              // [46]
 }
@@ -543,6 +548,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     return Math.abs(g[1]-g[0])+Math.abs(g[2]-g[1])+Math.abs(g[3]-g[2])+Math.abs(g[4]-g[3]);
   });
   const digitProds    = ns.map(n=>n.reduce((a,x)=>a+Math.floor(x/10)*(x%10),0));
+  const s034s         = ns.map(n=>n[0]+n[3]+n[4]);
+  const s123s         = ns.map(n=>n[1]+n[2]+n[3]);
+  const s0235s        = ns.map(n=>n[0]+n[2]+n[3]+n[5]);
+  const mod10Dists    = ns.map(n=>new Set(n.map(x=>x%10)).size);
+  const mod7Dists     = ns.map(n=>new Set(n.map(x=>x%7)).size);
 
   const freq = new Array(46).fill(0);
   for (const n of ns) for (const x of n) freq[x]++;
@@ -709,6 +719,11 @@ function computeStats(rounds: LottoRound[]): Stats {
     prodN24Max:      Math.max(...prodN24s),
     gapSmoothMax:    Math.max(...gapSmooths),
     digitProdMin:    Math.min(...digitProds),  digitProdMax:  Math.max(...digitProds),
+    s034Min:         Math.min(...s034s),       s034Max:       Math.max(...s034s),
+    s123Min:         Math.min(...s123s),       s123Max:       Math.max(...s123s),
+    s0235Min:        Math.min(...s0235s),      s0235Max:      Math.max(...s0235s),
+    mod10DistMin:    Math.min(...mod10Dists),  mod10DistMax:  Math.max(...mod10Dists),
+    mod7DistMin:     Math.min(...mod7Dists),   mod7DistMax:   Math.max(...mod7Dists),
     zones,
     freq,
   };
@@ -901,6 +916,12 @@ const RULES: Rule[] = [
   { name: 'n[2]×n[4] 곱',    get: (n)=>n[2]*n[4], lo:()=>null, hi:s=>s.prodN24Max },
   { name: '간격평탄도',       get: (n)=>{ const g=[0,1,2,3,4].map(i=>n[i+1]-n[i]); return Math.abs(g[1]-g[0])+Math.abs(g[2]-g[1])+Math.abs(g[3]-g[2])+Math.abs(g[4]-g[3]); }, lo:()=>null, hi:s=>s.gapSmoothMax },
   { name: '자리수곱 합',      get: (n)=>n.reduce((a,x)=>a+Math.floor(x/10)*(x%10),0), lo:s=>s.digitProdMin, hi:s=>s.digitProdMax },
+  // ── s034 + s123 + s0235 + mod10distinct + mod7distinct (cycle 7/15) ──────────
+  { name: 'n[0]+n[3]+n[4]',  get: (n)=>n[0]+n[3]+n[4],         lo:s=>s.s034Min,    hi:s=>s.s034Max },
+  { name: 'n[1]+n[2]+n[3]',  get: (n)=>n[1]+n[2]+n[3],         lo:s=>s.s123Min,    hi:s=>s.s123Max },
+  { name: 'n[0]+n[2]+n[3]+n[5]', get: (n)=>n[0]+n[2]+n[3]+n[5], lo:s=>s.s0235Min,   hi:s=>s.s0235Max },
+  { name: 'mod10 distinct', get: (n)=>new Set(n.map(x=>x%10)).size, lo:s=>s.mod10DistMin, hi:s=>s.mod10DistMax },
+  { name: 'mod7 distinct',  get: (n)=>new Set(n.map(x=>x%7)).size,  lo:s=>s.mod7DistMin,  hi:s=>s.mod7DistMax },
   // ── 추가 부분합 ────────────────────────────────────────────────────────────
   { name: '하위5개합(p1-5)',    get: (n)=>n[0]+n[1]+n[2]+n[3]+n[4], lo:s=>s.low5Min, hi:s=>s.low5Max },
   { name: '상위5개합(p2-6)',    get: (n)=>n[1]+n[2]+n[3]+n[4]+n[5], lo:s=>s.hi5Min,  hi:s=>s.hi5Max },
