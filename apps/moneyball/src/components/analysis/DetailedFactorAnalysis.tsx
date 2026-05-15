@@ -1,4 +1,11 @@
-import { KBO_TEAMS, DEFAULT_WEIGHTS, type TeamCode, shortTeamName, josa } from '@moneyball/shared';
+import {
+  CURRENT_SCORING_RULE,
+  DEFAULT_WEIGHTS,
+  KBO_TEAMS,
+  josa,
+  shortTeamName,
+  type TeamCode,
+} from '@moneyball/shared';
 import {
   explainFactor,
   type FactorRawDetails,
@@ -61,7 +68,7 @@ export function DetailedFactorAnalysis({
           📊 팩터별 정량 해설
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          정량 모델 v1.8의 10개 팩터를 가중치 순으로 분석합니다.
+          정량 모델 {CURRENT_SCORING_RULE}의 10개 팩터를 가중치 순으로 분석합니다.
           {topFactor?.favorTeam && (
             <>
               {" "}
