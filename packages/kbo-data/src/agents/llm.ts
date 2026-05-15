@@ -66,6 +66,55 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Anthropic API 에러 응답을 canonical 분류로 매핑.
+ *
+ * 원본 에러 응답 구조:
+ *   {type:'error', error:{type:'invalid_request_error', message:'Your credit balance is too low...'}}
+ *
+ * Telegram/Sentry alert 에 raw JSON 누설 차단 + 사용자/오너 액션 명확화.
+ * 분류:
+ *   - CREDIT_EXHAUSTED: 계정 credit 잔액 부족 (Plans & Billing 충전 필요)
+ *   - AUTH_INVALID: API key 인증 실패
+ *   - RATE_LIMITED: 분당/일 token 한도 초과
+ *   - INVALID_REQUEST: 4xx generic
+ *   - SERVER_ERROR: 5xx
+ *   - UNKNOWN: 위 패턴 매칭 실패
+ */
+export function classifyAnthropicError(status: number, body: string): string {
+  let errorType = '';
+  let message = '';
+  try {
+    const parsed = JSON.parse(body) as {
+      error?: { type?: string; message?: string };
+    };
+    errorType = parsed.error?.type ?? '';
+    message = parsed.error?.message ?? '';
+  } catch {
+    // raw body — JSON 파싱 실패. message 만 trim 사용.
+    message = body.slice(0, 100);
+  }
+
+  const lowerMsg = message.toLowerCase();
+  if (lowerMsg.includes('credit balance')) {
+    return `CREDIT_EXHAUSTED: Anthropic API 잔액 부족 (Plans & Billing 충전 필요)`;
+  }
+  if (status === 401 || errorType === 'authentication_error' || lowerMsg.includes('x-api-key')) {
+    return `AUTH_INVALID: ANTHROPIC_API_KEY 인증 실패`;
+  }
+  if (status === 429 || errorType === 'rate_limit_error') {
+    return `RATE_LIMITED: ${message.slice(0, 100) || 'token/요청 한도 초과'}`;
+  }
+  if (status >= 500) {
+    return `SERVER_ERROR ${status}: ${message.slice(0, 100) || errorType || 'upstream 5xx'}`;
+  }
+  if (status >= 400) {
+    const detail = message.slice(0, 100) || errorType || 'invalid request';
+    return `INVALID_REQUEST ${status}: ${detail}`;
+  }
+  return `UNKNOWN ${status}: ${message.slice(0, 100) || errorType || 'no detail'}`;
+}
+
+/**
  * LLM 호출 디스패처 (Phase v4-2.5)
  *
  * LLM_BACKEND 환경변수로 백엔드 선택:
@@ -138,7 +187,7 @@ async function callClaude<T>(
 
       if (!res.ok) {
         const errText = await res.text();
-        lastError = `API ${res.status}: ${errText.slice(0, 200)}`;
+        lastError = classifyAnthropicError(res.status, errText);
 
         if (isRetryableStatus(res.status) && attempt < MAX_ATTEMPTS - 1) {
           await sleep(RETRY_BACKOFF_MS[attempt]);
