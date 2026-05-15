@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { errMsg } from '@moneyball/shared';
 import { runDailyPipeline, notifyError } from '@moneyball/kbo-data';
 
 export async function POST(request: NextRequest) {
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
+    const message = errMsg(e);
     console.error('[Pipeline API]', message);
 
     // 에러 알림

@@ -25,7 +25,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -265,7 +265,7 @@ async function main() {
             const updateResult = await db.from('games').update(updates).eq('id', game.id);
             assertWriteOk(updateResult, 'backfill-sp.main.games.sp_id');
           } catch (err) {
-            console.error(`    ❌ game ${game.id}: ${err instanceof Error ? err.message : String(err)}`);
+            console.error(`    ❌ game ${game.id}: ${errMsg(err)}`);
             errors++;
             continue;
           }

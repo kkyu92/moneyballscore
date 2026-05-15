@@ -12,7 +12,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, errMsg } from '@moneyball/shared';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 
@@ -134,7 +134,7 @@ async function processSeason(
       }
     } catch (e) {
       failed++;
-      errors.push(`${naverGameId}: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`${naverGameId}: ${errMsg(e)}`);
     }
     await sleep(DELAY_MS);
   }

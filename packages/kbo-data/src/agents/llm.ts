@@ -1,3 +1,4 @@
+import { errMsg } from '@moneyball/shared';
 import type { AgentResult } from './types';
 import { callOllama } from './llm-ollama';
 import { callDeepSeek } from './llm-deepseek';
@@ -219,7 +220,7 @@ async function callClaude<T>(
         durationMs: Date.now() - startTime,
       };
     } catch (e) {
-      lastError = e instanceof Error ? e.message : String(e);
+      lastError = errMsg(e);
       if (attempt < MAX_ATTEMPTS - 1) {
         await sleep(RETRY_BACKOFF_MS[attempt]);
         continue;

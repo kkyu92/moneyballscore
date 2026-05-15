@@ -16,6 +16,7 @@
  *   - tokensUsed는 eval_count (생성 토큰 수)로 근사. input token도 prompt_eval_count로 더함
  */
 
+import { errMsg } from '@moneyball/shared';
 import type { AgentResult } from './types';
 
 const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
@@ -114,7 +115,7 @@ export async function callOllama<T>(
     return {
       success: false,
       data: null,
-      error: e instanceof Error ? e.message : String(e),
+      error: errMsg(e),
       model: `ollama:${modelId}`,
       tokensUsed: 0,
       durationMs: Date.now() - startTime,

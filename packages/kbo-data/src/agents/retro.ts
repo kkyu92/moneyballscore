@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS, assertSelectOk, assertWriteOk } from '@moneyball/shared';
+import { KBO_TEAMS, assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -279,7 +279,7 @@ export async function generateAgentMemories(date: string, dbInjected?: DB) {
       } catch (e) {
         console.error(
           `[retro] agent_memories upsert failed for ${t.code}:`,
-          e instanceof Error ? e.message : String(e),
+          errMsg(e),
         );
       }
     }

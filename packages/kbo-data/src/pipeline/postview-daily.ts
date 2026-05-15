@@ -15,7 +15,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, type TeamCode } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, type TeamCode } from '@moneyball/shared';
 import { runPostview, type ActualResult, type OriginalPrediction } from '../agents/postview';
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
@@ -216,7 +216,7 @@ export async function runPostviewDaily(
 
       result.processed++;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = errMsg(err);
       result.errors.push(`game ${gameId} runPostview: ${msg}`);
     }
   }
