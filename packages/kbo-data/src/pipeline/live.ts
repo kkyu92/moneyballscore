@@ -3,6 +3,7 @@ import { toKSTDateString, assertSelectOk, assertWriteOk } from '@moneyball/share
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
+import { CURRENT_SCORING_RULE } from './model-version';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 import { extractReasoningHomeWinProb } from '../types';
@@ -182,8 +183,9 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         // cycle 443 review-code heavy silent drift fix — pre_game (daily.ts:691) +
         // post_game (postview-daily.ts:204) 양쪽 scoring_rule 박제하는데 live in_game
         // upsert 만 누락 → DB scoring_rule=NULL. /accuracy + /debug 의 scoring_rule
-        // 별 Brier 분석에서 in_game row 영구 분류 X. daily.ts 와 동일 'v1.8' 박제.
-        scoring_rule: 'v1.8',
+        // 별 Brier 분석에서 in_game row 영구 분류 X.
+        // cycle 445 review-code heavy 통합 — CURRENT_SCORING_RULE 단일 source.
+        scoring_rule: CURRENT_SCORING_RULE,
         reasoning: {
           preGameHomeProb,
           adjustedHomeProb,

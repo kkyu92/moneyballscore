@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { decideModelVersion, decidePostviewModelVersion } from '../pipeline/model-version';
+import {
+  decideModelVersion,
+  decidePostviewModelVersion,
+  CURRENT_SCORING_RULE,
+} from '../pipeline/model-version';
 
 describe('decideModelVersion', () => {
   it('promotes to v2.0-debate when API key present and debate succeeded', () => {
@@ -8,6 +12,7 @@ describe('decideModelVersion', () => {
     ).toEqual({
       model_version: 'v2.0-debate',
       debate_version: 'v2-persona4',
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -21,6 +26,7 @@ describe('decideModelVersion', () => {
     ).toEqual({
       model_version: 'v1.8',
       debate_version: null,
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -30,6 +36,7 @@ describe('decideModelVersion', () => {
     ).toEqual({
       model_version: 'v1.8',
       debate_version: null,
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -39,6 +46,7 @@ describe('decideModelVersion', () => {
     ).toEqual({
       model_version: 'v1.8',
       debate_version: null,
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -70,6 +78,7 @@ describe('decidePostviewModelVersion', () => {
     ).toEqual({
       model_version: 'v2.0-postview',
       debate_version: 'v2-postview',
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -79,6 +88,7 @@ describe('decidePostviewModelVersion', () => {
     ).toEqual({
       model_version: 'v1.8-postview',
       debate_version: null,
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -88,6 +98,7 @@ describe('decidePostviewModelVersion', () => {
     ).toEqual({
       model_version: 'v1.8-postview',
       debate_version: null,
+      scoring_rule: CURRENT_SCORING_RULE,
     });
   });
 
@@ -97,6 +108,28 @@ describe('decidePostviewModelVersion', () => {
     ).toEqual({
       model_version: 'v1.8-postview',
       debate_version: null,
+      scoring_rule: CURRENT_SCORING_RULE,
     });
+  });
+});
+
+// cycle 445 review-code heavy 통합 — scoring_rule 단일 source 검증.
+describe('CURRENT_SCORING_RULE', () => {
+  it('is v1.8 (current weights era, cycle 335+)', () => {
+    expect(CURRENT_SCORING_RULE).toBe('v1.8');
+  });
+
+  it('is consistently embedded in every decision shape', () => {
+    const decisions = [
+      decideModelVersion({ hasApiKey: true, debateSucceeded: true }),
+      decideModelVersion({ hasApiKey: true, debateSucceeded: false }),
+      decideModelVersion({ hasApiKey: false, debateSucceeded: false }),
+      decidePostviewModelVersion({ hasApiKey: true, agentsSucceeded: true }),
+      decidePostviewModelVersion({ hasApiKey: true, agentsSucceeded: false }),
+      decidePostviewModelVersion({ hasApiKey: false, agentsSucceeded: false }),
+    ];
+    for (const d of decisions) {
+      expect(d.scoring_rule).toBe(CURRENT_SCORING_RULE);
+    }
   });
 });
