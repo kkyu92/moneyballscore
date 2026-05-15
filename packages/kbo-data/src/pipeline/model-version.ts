@@ -4,13 +4,13 @@
  * cycle 127 review-code (heavy) silent drift fix — daily.ts 가
  * `process.env.ANTHROPIC_API_KEY` 만 보고 LLM_DEBATE_VERSION 박제하면, runDebate
  * 호출이 try/catch 에서 throw 받아 정량 fallback 으로 되돌아간 경우에도
- * model_version=LLM_DEBATE_VERSION / debate_version='v2-persona4' 박제됨.
- * `/debug/model-comparison` 의 v1.6-pure vs LLM_DEBATE_VERSION Brier 대조에서 debate
- * 실패 row 가 LLM_DEBATE_VERSION 라벨에 묻혀 분류 오류.
+ * model_version=LLM_DEBATE_VERSION / debate_version=DEBATE_VERSION_PREGAME
+ * 박제됨. `/debug/model-comparison` 의 v1.6-pure vs LLM_DEBATE_VERSION Brier
+ * 대조에서 debate 실패 row 가 LLM_DEBATE_VERSION 라벨에 묻혀 분류 오류.
  *
  * 본 헬퍼는 "API key 존재 + debate 호출 성공 (throw X)" 두 조건 모두 충족
- * 시에만 v2.0-debate 박제. 하나라도 X 면 QUANT_PREGAME_VERSION (정량 모델
- * fallback, cycle 335). 과거 v1.7-revert row 는 DB 에 그대로 유지됨.
+ * 시에만 LLM_DEBATE_VERSION 박제. 하나라도 X 면 QUANT_PREGAME_VERSION (정량
+ * 모델 fallback, cycle 335). 과거 v1.7-revert row 는 DB 에 그대로 유지됨.
  *
  * cycle 448 review-code heavy — model_version / scoring_rule 라벨 단일 source 를
  * @moneyball/shared 로 이동. apps/moneyball 의 buildAccuracyData 도 동일 source
@@ -24,6 +24,8 @@ import {
   QUANT_POSTVIEW_VERSION,
   LLM_DEBATE_VERSION,
   LLM_POSTVIEW_VERSION,
+  DEBATE_VERSION_PREGAME,
+  DEBATE_VERSION_POSTVIEW,
   type ModelVersion,
   type DebateVersion,
   type ScoringRule,
@@ -37,6 +39,8 @@ export {
   LLM_DEBATE_VERSION,
   LLM_POSTVIEW_VERSION,
   LLM_ACTIVE_VERSIONS,
+  DEBATE_VERSION_PREGAME,
+  DEBATE_VERSION_POSTVIEW,
 } from '@moneyball/shared';
 export type { ModelVersion, DebateVersion, ScoringRule } from '@moneyball/shared';
 
@@ -56,7 +60,7 @@ export function decideModelVersion({
   if (hasApiKey && debateSucceeded) {
     return {
       model_version: LLM_DEBATE_VERSION,
-      debate_version: 'v2-persona4',
+      debate_version: DEBATE_VERSION_PREGAME,
       scoring_rule: CURRENT_SCORING_RULE,
     };
   }
@@ -87,7 +91,7 @@ export function decidePostviewModelVersion({
   if (hasApiKey && agentsSucceeded) {
     return {
       model_version: LLM_POSTVIEW_VERSION,
-      debate_version: 'v2-postview',
+      debate_version: DEBATE_VERSION_POSTVIEW,
       scoring_rule: CURRENT_SCORING_RULE,
     };
   }

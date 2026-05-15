@@ -20,6 +20,8 @@ export {
   LLM_DEBATE_VERSION,
   LLM_POSTVIEW_VERSION,
   LLM_ACTIVE_VERSIONS,
+  DEBATE_VERSION_PREGAME,
+  DEBATE_VERSION_POSTVIEW,
 } from './model-version-labels';
 export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
 
