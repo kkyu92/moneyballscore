@@ -240,12 +240,20 @@ export async function runDailyPipeline(
   if (isFirstPredictRun) {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { count: memCount } = await db.from('agent_memories')
+      // cycle 446 silent drift family write 측 6번째 진입 — `.error` 미체크 시
+      // delete 실패 silent skip → agent_memories / validator_logs 30일+ 무한
+      // 누적 + 다음 cron 재진입 시 memCount=null 로 console.log 분기도 skip =
+      // 무가시. assertWriteOk fail-loud → outer catch errors[] push 자연.
+      const memResult = await db.from('agent_memories')
         .delete({ count: 'exact' }).lt('created_at', thirtyDaysAgo);
-      const { count: logCount } = await db.from('validator_logs')
+      assertWriteOk(memResult, 'daily.retention.agent_memories.delete');
+      const logResult = await db.from('validator_logs')
         .delete({ count: 'exact' }).lt('created_at', thirtyDaysAgo);
-      if ((memCount ?? 0) > 0 || (logCount ?? 0) > 0) {
-        console.log(`[Pipeline] Retention cleanup: agent_memories=${memCount ?? 0}, validator_logs=${logCount ?? 0}`);
+      assertWriteOk(logResult, 'daily.retention.validator_logs.delete');
+      const memCount = memResult.count ?? 0;
+      const logCount = logResult.count ?? 0;
+      if (memCount > 0 || logCount > 0) {
+        console.log(`[Pipeline] Retention cleanup: agent_memories=${memCount}, validator_logs=${logCount}`);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -1072,8 +1080,8 @@ async function getVerifyResults(
   }
 
   // 취소(postponed) 경기에도 예측이 있으면 적중으로 집계.
-  // cycle 439 silent drift family 통일 — 본 분기만 `if (!res.error)` 패턴 잔존.
-  // assertSelectOk fail-loud 로 통일 → caller try/catch (line 350-354) 자동 처리.
+  // cycle 439 silent drift family 통일 완료 — assertSelectOk fail-loud →
+  // caller try/catch (line 350-354) 자동 처리.
   interface PostponedGameRow { id: number; home_team_id: number; away_team_id: number; }
   const postponedRes = await db
     .from('games')
