@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { HOME_ADVANTAGE } from '@moneyball/shared';
 
 // /debug/factor-correlation — 환경 변수 → 경기 결과 상관 분석
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
@@ -8,13 +9,18 @@ import { createClient } from '@supabase/supabase-js';
 // "모델 상수 가정이 데이터와 일치하나" 검증.
 //
 // 다루는 것:
-//   1. Home advantage 실측 — 홈 승률 vs 가정 +1.5%p
+//   1. Home advantage 실측 — 홈 승률 vs 가정 (HOME_ADVANTAGE @moneyball/shared 단일 source)
 //   2. 구장별 평균 득점 환경
 //   3. 낮/밤, 요일, 기온, 바람, 강수
 //   4. 팀별 홈/원정 승률 편차 — 균일 가정 검증
 //   5. 매치업 매트릭스 10×9 — 팀 간 상성
 
 export const dynamic = 'force-dynamic';
+
+// HOME_ADVANTAGE 단일 source 라벨 — 매직 넘버 silent drift 차단 (cycle 470)
+const ASSUMED_HOME_WIN_RATE = 0.5 + HOME_ADVANTAGE;
+const HOME_ADV_PCT_LABEL = `+${(HOME_ADVANTAGE * 100).toFixed(1)}%p`;
+const ASSUMED_HOME_WIN_RATE_LABEL = `${(ASSUMED_HOME_WIN_RATE * 100).toFixed(1)}%`;
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -252,7 +258,7 @@ export default async function FactorCorrelationPage() {
   teamRows.sort((a, b) => b.homeRate - a.homeRate);
 
   // 9. 매치업 매트릭스 (home × away) — 홈팀 기준 승률
-  // 각 셀 N ~50 (3 시즌) 이라 CI ±14%p. 평균 (리그 홈 승률 51.5%) 대비 편차 강조.
+  // 각 셀 N ~50 (3 시즌) 이라 CI ±14%p. 평균 (리그 홈 승률 = ASSUMED_HOME_WIN_RATE_LABEL) 대비 편차 강조.
   interface MatchupCell { n: number; homeWins: number; rate: number }
   const matrix = new Map<string, MatchupCell>();
   for (const g of games) {
@@ -281,14 +287,14 @@ export default async function FactorCorrelationPage() {
       </header>
 
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
-        <h2 className="text-lg font-bold">1. Home Advantage — 실측 vs 가정 (+1.5%p)</h2>
+        <h2 className="text-lg font-bold">1. Home Advantage — 실측 vs 가정 ({HOME_ADV_PCT_LABEL})</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="홈 승률 실측" value={fmtPct(homeWinRate)} suffix={`${homeWins}/${decided} · ±${(homeCi * 100).toFixed(1)}%p`} />
-          <Stat label="모델 가정" value="51.5%" suffix="+1.5%p (2026-04-21 실측 반영)" />
+          <Stat label="모델 가정" value={ASSUMED_HOME_WIN_RATE_LABEL} suffix={`${HOME_ADV_PCT_LABEL} (2026-04-21 실측 반영)`} />
           <Stat
             label="Gap (실측 − 가정)"
-            value={fmtPM(homeWinRate - 0.515)}
-            tone={Math.abs(homeWinRate - 0.515) < 0.015 ? 'good' : Math.abs(homeWinRate - 0.515) < 0.03 ? 'warn' : 'bad'}
+            value={fmtPM(homeWinRate - ASSUMED_HOME_WIN_RATE)}
+            tone={Math.abs(homeWinRate - ASSUMED_HOME_WIN_RATE) < HOME_ADVANTAGE ? 'good' : Math.abs(homeWinRate - ASSUMED_HOME_WIN_RATE) < HOME_ADVANTAGE * 2 ? 'warn' : 'bad'}
           />
           <Stat label="표본 충분성" value={decided >= 500 ? '충분' : '부족'} suffix={`N=${decided}`} />
         </div>
@@ -402,7 +408,7 @@ function SplitSection({
 }
 
 /**
- * 팀별 홈/원정 승률. 모델의 "균일 +1.5%p 가정" 검증.
+ * 팀별 홈/원정 승률. 모델의 "균일 HOME_ADVANTAGE 가정" 검증.
  * 편차가 크면 팀별 홈 어드밴티지 변수가 필요하다는 신호.
  */
 function TeamSplitSection({
@@ -464,7 +470,7 @@ function TeamSplitSection({
 /**
  * 매치업 매트릭스 10×9 — 홈팀(행) × 원정팀(열) 홈 승률.
  * 각 셀 N ~50 (3 시즌) CI ±14%p 로 개별 셀은 노이즈 큼. 하지만 row 평균과의
- * 편차가 극단적 (>15%p) 인 셀은 "팀 상성" 가능성. 리그 평균 (51.5%) 대비 색상.
+ * 편차가 극단적 (>15%p) 인 셀은 "팀 상성" 가능성. 리그 평균 (HOME_ADVANTAGE 단일 source) 대비 색상.
  */
 function MatchupMatrix({
   teamIds,
