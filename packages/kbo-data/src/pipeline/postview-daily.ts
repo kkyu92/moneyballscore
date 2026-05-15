@@ -178,7 +178,7 @@ export async function runPostviewDaily(
 
       // cycle 384 fix-incident heavy — agentsFailed silent drift 차단 (PR #372 패턴).
       // ANTHROPIC credit 소진 시 모든 LLM 호출 실패 → fallback verdict 박제됨에도
-      // mv='v2.0-postview' 라벨 silent. errors push + version 강등 (v1.8-postview).
+      // mv=LLM_POSTVIEW_VERSION 라벨 silent. errors push + version 강등 (QUANT_POSTVIEW_VERSION).
       if (postview.agentsFailed) {
         const errMsg = postview.agentError?.slice(0, 200) ?? 'API error';
         result.errors.push(`game ${gameId} postview agents fallback: ${errMsg}`);

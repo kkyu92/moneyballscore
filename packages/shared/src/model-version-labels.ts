@@ -2,9 +2,9 @@
  * model_version / scoring_rule 라벨 단일 source.
  *
  * cycle 445 review-code heavy 가 scoring_rule 만 통합. model_version literal
- * ('v1.8' / 'v1.8-postview' / 'v1.8-live') 3개는 여전히 하드코드 → v2.0 bump 시
- * 4곳 수정 필요 (silent drift family 7번째). cycle 448 review-code heavy 가
- * 본 모듈로 통합 — CURRENT_SCORING_RULE 1줄 변경 = 4개 라벨 동시 박제.
+ * (QUANT_PREGAME_VERSION / QUANT_POSTVIEW_VERSION / QUANT_LIVE_VERSION) 3개도
+ * cycle 448 review-code heavy 가 본 모듈로 통합 — CURRENT_SCORING_RULE 1줄 변경
+ * = 4개 라벨 동시 박제 (silent drift family 7번째).
  *
  * @moneyball/shared 위치 이유: packages/kbo-data 가 `@sentry/nextjs` dynamic
  * import 보유 → apps/moneyball 의 vitest 가 buildAccuracyData.test 안에서

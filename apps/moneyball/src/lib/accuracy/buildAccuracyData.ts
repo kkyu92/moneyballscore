@@ -19,8 +19,8 @@ export interface PredRow {
 }
 
 // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화.
-// PR #372 (debate 라벨링 fix) 이후 mv='v2.0-debate' = LLM 성공, mv=QUANT_PREGAME_VERSION = 정량 fallback.
-// PR cycle 384 (postview 라벨링 fix) 이후 mv='v2.0-postview' = LLM 성공, mv=QUANT_POSTVIEW_VERSION = fallback.
+// PR #372 (debate 라벨링 fix) 이후 mv=LLM_DEBATE_VERSION = LLM 성공, mv=QUANT_PREGAME_VERSION = 정량 fallback.
+// PR cycle 384 (postview 라벨링 fix) 이후 mv=LLM_POSTVIEW_VERSION = LLM 성공, mv=QUANT_POSTVIEW_VERSION = fallback.
 // cycle 448 review-code heavy — QUANT_*_VERSION 단일 source. CURRENT_SCORING_RULE bump 시 동시 박제.
 export interface FallbackStatsRow {
   model_version: string | null;
