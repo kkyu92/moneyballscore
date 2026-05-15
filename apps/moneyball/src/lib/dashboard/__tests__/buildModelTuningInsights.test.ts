@@ -36,9 +36,14 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: () => Promise.resolve(supabaseMock),
 }));
 
-vi.mock("@/config/model", () => ({
-  CURRENT_MODEL_FILTER: { model_version: "v2.0-debate" },
-}));
+// cycle 486 — vi.mock("@/config/model") 제거. 기존 fixture mock 은 key/value 둘 다
+// source 와 mismatch:
+//   - mock: { model_version: "v2.0-debate" }
+//   - source (config/model.ts): { debate_version: CURRENT_DEBATE_VERSION = 'v2-persona4' }
+// supabase mock 의 .match() 가 mockReturnThis() 라 런타임 영향 X (검증 X). 단 source 변경
+// 시 fixture 자동 동기 X = silent drift family 28번째 surface. mock 제거 → 실제 config
+// import (DEBATE_VERSION_PREGAME 순수 상수 chain, side effect X). buildAccuracyData test
+// 패턴 (cycle 482/483) 과 동일.
 
 describe("buildModelTuningInsights — cycle 152 silent drift family `.error` 미체크 회귀 가드", () => {
   afterEach(() => {
