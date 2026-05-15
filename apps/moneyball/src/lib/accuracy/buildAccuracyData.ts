@@ -1,4 +1,9 @@
-import { QUANT_PREGAME_VERSION, QUANT_POSTVIEW_VERSION } from '@moneyball/shared';
+import {
+  ALL_SCORING_RULES,
+  QUANT_PREGAME_VERSION,
+  QUANT_POSTVIEW_VERSION,
+  type ScoringRule,
+} from '@moneyball/shared';
 
 export interface PredRow {
   confidence: number;
@@ -317,19 +322,26 @@ export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
   return { dots, hits, total, trend };
 }
 
-const VERSION_ORDER = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8'];
-const VERSION_META: Record<string, { label: string; note: string }> = {
+// cycle 475 — VERSION_ORDER = ALL_SCORING_RULES (shared tuple). 신규 버전 추가
+// 시 shared/model-version-labels.ts ALL_SCORING_RULES 1줄 변경 = ScoringRule
+// union + VERSION_ORDER 동시 박제. cycle 474 invariant test 와 짝.
+const VERSION_ORDER = ALL_SCORING_RULES;
+const VERSION_META: Record<ScoringRule, { label: string; note: string }> = {
   'v1.5': { label: 'v1.5', note: '기준 모델' },
   'v1.6': { label: 'v1.6', note: 'ELO·상대전적 실험 → 저조로 복원' },
   'v1.7-revert': { label: 'v1.7', note: 'v1.5 가중치 복원 + 일요일 상한 도입 (55%→45% 조정)' },
   'v1.8': { label: 'v1.8', note: 'ELO 10%↑ / head_to_head 3%↓' },
 };
 
+function isScoringRule(s: string): s is ScoringRule {
+  return (VERSION_ORDER as readonly string[]).includes(s);
+}
+
 export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
-  const grouped = new Map<string, PredRow[]>();
+  const grouped = new Map<ScoringRule, PredRow[]>();
   for (const r of rows) {
     const key = r.scoring_rule ?? '';
-    if (!VERSION_ORDER.includes(key)) continue;
+    if (!isScoringRule(key)) continue;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(r);
   }
