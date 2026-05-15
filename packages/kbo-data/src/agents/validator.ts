@@ -663,6 +663,39 @@ export interface AgentFailureMeta {
   agentError: string | null;
 }
 
+// cycle 466 review-code (heavy) — debate.ts + postview.ts 의 20-line 동일 패턴 dedupe.
+// cycle 384 fix-incident heavy 가 양쪽 path 각자 동일 로직 박제했고 silent drift family
+// streak (cycle 453~) 연속 발화 후속. results[].data 부재 검사 + 첫 fail.error 추출 +
+// console.error + captureAgentFallback 일괄.
+export function evaluateAndCaptureAgentFallback(
+  results: Array<{ success: boolean; data: unknown; error: string | null }>,
+  meta: {
+    label: string;
+    path: 'pre_game' | 'post_game';
+    homeTeam: string;
+    awayTeam: string;
+    gameId: string | number | null;
+  }
+): { agentsFailed: boolean; agentError: string | null } {
+  const agentsFailed = results.some((r) => !r.data);
+  const agentError = results.find((r) => !r.success)?.error ?? null;
+
+  if (agentsFailed) {
+    console.error(
+      `[${meta.label}] ${meta.awayTeam}@${meta.homeTeam}: 에이전트 fallback — ${agentError ?? 'unknown'}`
+    );
+    void captureAgentFallback({
+      path: meta.path,
+      homeTeam: meta.homeTeam,
+      awayTeam: meta.awayTeam,
+      gameId: meta.gameId,
+      agentError,
+    });
+  }
+
+  return { agentsFailed, agentError };
+}
+
 export async function captureAgentFallback(meta: AgentFailureMeta): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
 

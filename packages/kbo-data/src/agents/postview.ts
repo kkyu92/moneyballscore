@@ -21,7 +21,7 @@ import {
   maskViolatedReasoning,
   notifyValidationViolations,
   resolveValidationMode,
-  captureAgentFallback,
+  evaluateAndCaptureAgentFallback,
 } from './validator';
 import type { GameContext, AgentResult } from './types';
 
@@ -391,26 +391,19 @@ export async function runPostview(
     reasoning: '사후 분석 LLM 실패. factor 편향 기반 자동 fallback.',
   };
 
-  // cycle 384 fix-incident heavy — PR #372 (cycle 362) 패턴의 postview path 확장.
-  // ANTHROPIC_API_KEY credit 소진 시 mv='v2.0-postview' 라벨 silent drift 차단.
-  const agentsFailed = !homeResult.data || !awayResult.data || !judgeResult.data;
-  const agentError = (!homeResult.success ? homeResult.error : null)
-    ?? (!awayResult.success ? awayResult.error : null)
-    ?? (!judgeResult.success ? judgeResult.error : null)
-    ?? null;
-
-  if (agentsFailed) {
-    console.error(
-      `[Postview] ${awayTeam}@${homeTeam}: 에이전트 fallback — ${agentError ?? 'unknown'}`
-    );
-    void captureAgentFallback({
+  // cycle 466 — evaluateAndCaptureAgentFallback helper 로 dedupe. cycle 384 (PR #372 패턴
+  // postview path 확장 + ANTHROPIC_API_KEY credit 소진 시 mv='v2.0-postview' 라벨 silent drift
+  // 차단) 의 debate.ts 와 공통 패턴.
+  const { agentsFailed, agentError } = evaluateAndCaptureAgentFallback(
+    [homeResult, awayResult, judgeResult],
+    {
+      label: 'Postview',
       path: 'post_game',
       homeTeam,
       awayTeam,
       gameId: context.game.externalGameId ?? null,
-      agentError,
-    });
-  }
+    }
+  );
 
   // cycle 29 (P4) — factor attribution cross-check. low-weight factor 를 결과 요인으로 강조 시 warn.
   // cycle 70 — 사용자 가시 reasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.

@@ -2,7 +2,7 @@ import type { TeamCode } from '@moneyball/shared';
 import { runTeamAgent } from './team-agent';
 import { runJudgeAgent } from './judge-agent';
 import { runCalibrationAgent, type PredictionHistory } from './calibration-agent';
-import { captureAgentFallback } from './validator';
+import { evaluateAndCaptureAgentFallback } from './validator';
 import type { GameContext, DebateResult, TeamArgument, CalibrationHint } from './types';
 
 /**
@@ -85,26 +85,18 @@ export async function runDebate(
     predictedWinner: quantitativeProb >= 0.5 ? homeTeam : awayTeam,
   };
 
-  const agentsFailed = !homeResult.data || !awayResult.data || !judgeResult.data;
-  const agentError = (!homeResult.success ? homeResult.error : null)
-    ?? (!awayResult.success ? awayResult.error : null)
-    ?? (!judgeResult.success ? judgeResult.error : null)
-    ?? null;
-
-  if (agentsFailed) {
-    console.error(
-      `[Debate] ${awayTeam}@${homeTeam}: 에이전트 fallback — ${agentError ?? 'unknown'}`
-    );
-    // cycle 384 — Cloudflare Workers cron 환경에서 console.error 가 Sentry alert
-    // 못 잡음 (드리프트 사례 6 family). 직접 captureException 으로 silent 차단.
-    void captureAgentFallback({
+  // cycle 466 — evaluateAndCaptureAgentFallback helper 로 dedupe. cycle 384 (Cloudflare
+  // Workers cron 환경 console.error → Sentry alert silent miss 차단) 의 양쪽 path 공통 패턴.
+  const { agentsFailed, agentError } = evaluateAndCaptureAgentFallback(
+    [homeResult, awayResult, judgeResult],
+    {
+      label: 'Debate',
       path: 'pre_game',
       homeTeam,
       awayTeam,
       gameId: context.game.externalGameId ?? null,
-      agentError,
-    });
-  }
+    }
+  );
 
   console.log(
     `[Debate] ${awayTeam}@${homeTeam}: ` +
