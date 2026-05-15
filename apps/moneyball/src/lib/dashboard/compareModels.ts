@@ -4,9 +4,9 @@
  * Grouping key = `scoring_rule ?? '(null)'` + `model_version`.
  *   - 과거 row 는 scoring_rule=null 로 저장됨 (v1.5 시절)
  *   - 2026-04-22~cycle17 사이 row 는 scoring_rule='v1.6'
- *   - cycle 17~334 사이 row 는 scoring_rule='v1.7-revert', cycle 335~ 는 'v1.8'
- *   - model_version 은 agent 존재 여부: v1.5/v1.6/v2.0-debate/v2.0-postview/
- *     v1.5-live/v1.6-live/v1.7-revert(cycle335 이전)/v1.8(cycle335~)
+ *   - cycle 17~334 사이 row 는 scoring_rule='v1.7-revert', cycle 335~ 는 CURRENT_SCORING_RULE
+ *   - model_version 은 agent 존재 여부: v1.5/v1.6/LLM_DEBATE_VERSION/LLM_POSTVIEW_VERSION/
+ *     v1.5-live/v1.6-live/v1.7-revert(cycle335 이전)/QUANT_LIVE_VERSION(cycle335~)
  *
  * Brier 계산: reasoning JSON 에서 homeWinProb 추출 후 실제 home 승리 여부
  * (winner_team_id === home_team_id) 와 (p - y)^2 평균.

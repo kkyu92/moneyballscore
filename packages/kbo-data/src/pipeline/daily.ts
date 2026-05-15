@@ -635,7 +635,7 @@ export async function runDailyPipeline(
     }
 
     // debate throw 시 model_version 강등 — ANTHROPIC_API_KEY 만 보면 debate 실패 row 도
-    // 'v2.0-debate' 라벨로 묻혀 /debug/model-comparison Brier 분류 오류.
+    // LLM_DEBATE_VERSION 라벨로 묻혀 /debug/model-comparison Brier 분류 오류.
     const versionDecision = decideModelVersion({
       hasApiKey: !!process.env.ANTHROPIC_API_KEY,
       debateSucceeded,

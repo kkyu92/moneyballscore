@@ -392,7 +392,7 @@ export async function runPostview(
   };
 
   // cycle 466 — evaluateAndCaptureAgentFallback helper 로 dedupe. cycle 384 (PR #372 패턴
-  // postview path 확장 + ANTHROPIC_API_KEY credit 소진 시 mv='v2.0-postview' 라벨 silent drift
+  // postview path 확장 + ANTHROPIC_API_KEY credit 소진 시 mv=LLM_POSTVIEW_VERSION 라벨 silent drift
   // 차단) 의 debate.ts 와 공통 패턴.
   const { agentsFailed, agentError } = evaluateAndCaptureAgentFallback(
     [homeResult, awayResult, judgeResult],
