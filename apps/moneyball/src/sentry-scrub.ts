@@ -34,7 +34,32 @@ const SENSITIVE_KEYS = new Set<string>([
   'username', 'display_name', 'avatar_url',
   // 외부 플랫폼 ID
   'discord_id', 'slack_user_id', 'webhook_url',
+  // cycle 442 — env 변수 키 정확 매칭 (Sentry/PII spec C-2 SENSITIVE_KEYS 감사).
+  // process.env.* 가 extra/contexts.runtime.env 로 dump 되면 키 전체가 객체 key 가 됨.
+  // 'token' 같은 base 키만으론 'TELEGRAM_BOT_TOKEN'.toLowerCase() 가 매칭 X (정확 매칭).
+  'supabase_service_role_key', 'service_role_key', 'service_role',
+  'supabase_anon_key',
+  'anthropic_api_key', 'deepseek_api_key',
+  'sentry_auth_token', 'sentry_webhook_secret',
+  'telegram_bot_token', 'telegram_chat_id', 'bot_token', 'chat_id',
+  'playbook_pat', 'personal_access_token', 'pat',
+  'cron_secret', 'debug_password', 'debug_username',
+  'webhook_secret', 'auth_token',
 ]);
+
+// cycle 442 — suffix 매칭 (Sentry/PII spec C-2 후속).
+// 동적 prefix 키 회귀 차단 (e.g. `MY_CLIENT_SECRET`, `X_BOT_TOKEN`).
+// 보수 list — `_key`/`_id` 는 false positive (`region_key`, `game_id`) 위험으로 제외.
+const SENSITIVE_KEY_SUFFIXES = ['_token', '_secret', '_password', '_passwd'];
+
+function isSensitiveKey(key: string): boolean {
+  const lower = key.toLowerCase();
+  if (SENSITIVE_KEYS.has(lower)) return true;
+  for (const suffix of SENSITIVE_KEY_SUFFIXES) {
+    if (lower.endsWith(suffix)) return true;
+  }
+  return false;
+}
 
 function scrubObject(obj: unknown, depth = 0): unknown {
   if (depth > 20) return obj;
@@ -47,7 +72,7 @@ function scrubObject(obj: unknown, depth = 0): unknown {
 
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-    if (SENSITIVE_KEYS.has(key.toLowerCase())) {
+    if (isSensitiveKey(key)) {
       result[key] = FILTERED;
     } else if (value !== null && typeof value === 'object') {
       result[key] = scrubObject(value, depth + 1);
