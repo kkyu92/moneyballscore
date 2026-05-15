@@ -1,23 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
-import { CURRENT_MODEL_FILTER } from "@/config/model";
-import {
-  KBO_TEAMS,
-  assertSelectOk,
-  classifyWinnerProb,
-  shortTeamName,
-  winnerProbOf,
-  type SelectResult,
-  type TeamCode,
-} from '@moneyball/shared';
-import { analyzeFactorAccuracy } from "@/lib/dashboard/factor-accuracy";
+import { classifyWinnerProb } from '@moneyball/shared';
 import type { MonthRange } from "./computeMonthRange";
 import { getPreviousMonth } from "./computeMonthRange";
-import { FACTOR_LABELS_TECHNICAL as FACTOR_LABELS } from "@/lib/predictions/factorLabels";
-import type {
-  WeeklyHighlight,
-  WeeklyTeamStat,
-  WeeklyFactorInsight,
-} from "./buildWeeklyReview";
+import {
+  buildFactorInsights,
+  buildTeamStats,
+  fetchPredictionRowsInRange,
+  mapRowsToHighlightCandidates,
+  type PredictionRow,
+  type WeeklyFactorInsight,
+  type WeeklyHighlight,
+  type WeeklyTeamStat,
+} from "./shared";
 
 export interface MonthlyReview {
   month: MonthRange;
@@ -36,87 +29,9 @@ export interface MonthlyReview {
   summary: string;
 }
 
-interface Row {
-  confidence: number | null;
-  is_correct: boolean | null;
-  factors: Record<string, number> | null;
-  reasoning: { homeWinProb?: number | null } | null;
-  predicted_winner: number | null;
-  predicted_winner_team: { code: string | null } | null;
-  game: {
-    id: number;
-    game_date: string;
-    home_score: number | null;
-    away_score: number | null;
-    status: string | null;
-    home_team_id: number | null;
-    winner_team_id: number | null;
-    home_team: { code: string | null } | null;
-    away_team: { code: string | null } | null;
-  } | null;
-}
-
-async function fetchRowsInRange(
-  startDate: string,
-  endDate: string,
-): Promise<Row[]> {
-  const supabase = await createClient();
-  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
-  // 차원 (reviews) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
-  // → 빈 monthly review → "이번 달 검증 0" 위장 = 누락된 검증을 "검증 안 한 것"
-  // 으로 표기 = 모델 평가 차단).
-  const result = (await supabase
-    .from("predictions")
-    .select(
-      `
-        confidence, is_correct, factors, reasoning, predicted_winner,
-        predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
-        game:games!predictions_game_id_fkey(
-          id, game_date, home_score, away_score, status,
-          home_team_id, winner_team_id,
-          home_team:teams!games_home_team_id_fkey(code),
-          away_team:teams!games_away_team_id_fkey(code)
-        )
-      `,
-    )
-    .eq("prediction_type", "pre_game")
-    .match(CURRENT_MODEL_FILTER)
-    .gte("game.game_date", startDate)
-    .lte("game.game_date", endDate)) as unknown as SelectResult<Row[]>;
-
-  const { data } = assertSelectOk(
-    result,
-    `buildMonthlyReview range ${startDate}~${endDate}`,
-  );
-  return ((data ?? []) as Row[]).filter((r) => r.game !== null);
-}
-
-function pickHighlights(rows: Row[], limit = 6): WeeklyHighlight[] {
-  const verified = rows.filter(
-    (r) => r.is_correct !== null && r.game && r.game.status === "final",
-  );
-  if (verified.length === 0) return [];
-
-  const mapped: WeeklyHighlight[] = verified.map((r) => {
-    const g = r.game!;
-    const homeCode = g.home_team?.code as TeamCode;
-    const awayCode = g.away_team?.code as TeamCode;
-    const predictedCode = r.predicted_winner_team?.code as TeamCode | null;
-    return {
-      gameId: g.id,
-      gameDate: g.game_date,
-      homeCode,
-      awayCode,
-      homeName: homeCode ? (shortTeamName(homeCode)) : "홈",
-      awayName: awayCode ? (shortTeamName(awayCode)) : "원정",
-      homeScore: g.home_score,
-      awayScore: g.away_score,
-      predictedWinnerCode: predictedCode,
-      winnerProb: winnerProbOf(r.reasoning?.homeWinProb),
-      isCorrect: r.is_correct ?? false,
-      badge: null,
-    };
-  });
+function pickHighlights(rows: PredictionRow[], limit = 6): WeeklyHighlight[] {
+  const mapped = mapRowsToHighlightCandidates(rows);
+  if (mapped.length === 0) return [];
 
   // 월간 하이라이트 — 주간보다 넓게: tier 별 최대 2건씩 tag.
   const picked: WeeklyHighlight[] = [];
@@ -147,83 +62,6 @@ function pickHighlights(rows: Row[], limit = 6): WeeklyHighlight[] {
   return picked.slice(0, limit);
 }
 
-function buildTeamStats(rows: Row[]): WeeklyTeamStat[] {
-  const byTeam = new Map<
-    TeamCode,
-    { predicted: number; correct: number }
-  >();
-
-  for (const r of rows) {
-    if (r.is_correct === null || !r.predicted_winner_team?.code) continue;
-    const code = r.predicted_winner_team.code as TeamCode;
-    const prev = byTeam.get(code) ?? { predicted: 0, correct: 0 };
-    prev.predicted += 1;
-    if (r.is_correct) prev.correct += 1;
-    byTeam.set(code, prev);
-  }
-
-  return Array.from(byTeam.entries())
-    .map(([code, s]) => ({
-      teamCode: code,
-      teamName: shortTeamName(code),
-      predicted: s.predicted,
-      correct: s.correct,
-      accuracy: s.predicted > 0 ? s.correct / s.predicted : 0,
-      color: KBO_TEAMS[code]?.color ?? "#888",
-    }))
-    .sort((a, b) => b.accuracy - a.accuracy || b.predicted - a.predicted);
-}
-
-function buildFactorInsights(rows: Row[]): {
-  best: WeeklyFactorInsight | null;
-  worst: WeeklyFactorInsight | null;
-} {
-  const samples = rows
-    .filter((r) => r.factors && r.game && r.game.status === "final")
-    .filter(
-      (r) =>
-        r.game!.home_team_id != null && r.game!.winner_team_id != null,
-    )
-    .map((r) => ({
-      factors: r.factors as Record<string, number>,
-      actualHomeWin: (r.game!.winner_team_id === r.game!.home_team_id
-        ? 1
-        : 0) as 0 | 1,
-    }));
-
-  // 월간은 주간보다 샘플 많아서 min 5
-  if (samples.length < 5) return { best: null, worst: null };
-
-  const report = analyzeFactorAccuracy(samples, { minSamples: 5 });
-  const eligible = report.stats.filter((s) => s.n >= 5);
-  if (eligible.length === 0) return { best: null, worst: null };
-
-  const toInsight = (key: string): WeeklyFactorInsight | null => {
-    const s = eligible.find((e) => e.factor === key);
-    if (!s) return null;
-    return {
-      factor: s.factor,
-      label: FACTOR_LABELS[s.factor] ?? s.factor,
-      correlation: s.correlation,
-      directionalAccuracy: s.directionalAccuracy,
-      direction:
-        s.correlation >= 0.2
-          ? "positive"
-          : s.correlation <= -0.1
-            ? "negative"
-            : "weak",
-    };
-  };
-
-  const sortedByCorr = [...eligible].sort(
-    (a, b) => b.correlation - a.correlation,
-  );
-  const best = toInsight(sortedByCorr[0].factor);
-  const worst = toInsight(sortedByCorr[sortedByCorr.length - 1].factor);
-
-  return { best, worst };
-}
-
 function buildSummary(
   month: MonthRange,
   verifiedGames: number,
@@ -251,7 +89,7 @@ function buildSummary(
   }
 
   if (accuracyRate >= 0.65) {
-    text += " 모델 v1.6의 견조한 퍼포먼스가 유지됐습니다.";
+    text += " 모델의 견조한 퍼포먼스가 유지됐습니다.";
   } else if (accuracyRate <= 0.45) {
     text += " 변수 많은 달이었으며, 팩터 편향 분석 결과는 다음 튜닝 근거로 축적됩니다.";
   }
@@ -262,7 +100,11 @@ function buildSummary(
 export async function buildMonthlyReview(
   month: MonthRange,
 ): Promise<MonthlyReview> {
-  const rows = await fetchRowsInRange(month.startDate, month.endDate);
+  const rows = await fetchPredictionRowsInRange(
+    month.startDate,
+    month.endDate,
+    `buildMonthlyReview range ${month.startDate}~${month.endDate}`,
+  );
 
   const totalGames = rows.length;
   const verified = rows.filter((r) => r.is_correct !== null);
@@ -275,7 +117,11 @@ export async function buildMonthlyReview(
   let previousAccuracyRate: number | null = null;
   if (verifiedGames >= 5) {
     const prev = getPreviousMonth(month);
-    const prevRows = await fetchRowsInRange(prev.startDate, prev.endDate);
+    const prevRows = await fetchPredictionRowsInRange(
+      prev.startDate,
+      prev.endDate,
+      `buildMonthlyReview range ${prev.startDate}~${prev.endDate}`,
+    );
     const prevVerified = prevRows.filter((r) => r.is_correct !== null);
     if (prevVerified.length >= 5) {
       const prevCorrect = prevVerified.filter(
@@ -286,8 +132,8 @@ export async function buildMonthlyReview(
   }
 
   const highlights = pickHighlights(rows);
-  const teamStats = buildTeamStats(rows);
-  const factorInsights = buildFactorInsights(rows);
+  const teamStats = buildTeamStats(rows, { sortBy: "accuracy" });
+  const factorInsights = buildFactorInsights(rows, { minSamples: 5 });
   const topTeam =
     teamStats.find((t) => t.predicted >= 5) ?? teamStats[0] ?? null;
   const summary = buildSummary(
