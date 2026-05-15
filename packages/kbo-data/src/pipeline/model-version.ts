@@ -22,6 +22,8 @@ import {
   CURRENT_SCORING_RULE,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
+  LLM_DEBATE_VERSION,
+  LLM_POSTVIEW_VERSION,
   type ModelVersion,
   type DebateVersion,
   type ScoringRule,
@@ -32,6 +34,9 @@ export {
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   QUANT_LIVE_VERSION,
+  LLM_DEBATE_VERSION,
+  LLM_POSTVIEW_VERSION,
+  LLM_ACTIVE_VERSIONS,
 } from '@moneyball/shared';
 export type { ModelVersion, DebateVersion, ScoringRule } from '@moneyball/shared';
 
@@ -50,7 +55,7 @@ export function decideModelVersion({
 }): ModelVersionDecision {
   if (hasApiKey && debateSucceeded) {
     return {
-      model_version: 'v2.0-debate',
+      model_version: LLM_DEBATE_VERSION,
       debate_version: 'v2-persona4',
       scoring_rule: CURRENT_SCORING_RULE,
     };
@@ -81,7 +86,7 @@ export function decidePostviewModelVersion({
 }): ModelVersionDecision {
   if (hasApiKey && agentsSucceeded) {
     return {
-      model_version: 'v2.0-postview',
+      model_version: LLM_POSTVIEW_VERSION,
       debate_version: 'v2-postview',
       scoring_rule: CURRENT_SCORING_RULE,
     };
