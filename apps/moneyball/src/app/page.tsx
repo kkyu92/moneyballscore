@@ -11,11 +11,14 @@ import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
   assertSelectOk,
   classifyWinnerProb,
+  DEFAULT_WEIGHTS,
+  HOME_ADVANTAGE,
   shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
   winnerProbOf,
   type TeamCode,
+  type WeightKey,
 } from "@moneyball/shared";
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
@@ -82,6 +85,30 @@ interface HomeGame {
 }
 
 export const revalidate = 600;
+
+// 분석 방법론 카드의 6 그룹 정의 — DEFAULT_WEIGHTS + HOME_ADVANTAGE 단일 source.
+// 라벨 텍스트는 그대로 두고 weight 숫자만 compute (가중치 변경 시 자동 동기).
+// v1.8 변경 (cycle 335) 직후 page.tsx 라벨 미갱신 silent drift (Elo+WAR "16%" → 실제 18%,
+// 최근폼+h2h "15%" → 실제 13%) 재발 차단 (cycle 469 fix).
+const METHODOLOGY_GROUPS: Array<{
+  label: string;
+  keys: WeightKey[];
+  icon: string;
+  extra?: number;
+}> = [
+  { label: "선발 FIP + xFIP", keys: ["sp_fip", "sp_xfip"], icon: "🎯" },
+  { label: "타선 wOBA", keys: ["lineup_woba"], icon: "💪" },
+  { label: "불펜 + 수비", keys: ["bullpen_fip", "sfr"], icon: "🛡" },
+  { label: "최근 폼 + 상대전적", keys: ["recent_form", "head_to_head"], icon: "📈" },
+  { label: "Elo + WAR", keys: ["elo", "war"], icon: "⚡" },
+  { label: "구장 + 홈어드밴티지", keys: ["park_factor"], icon: "🏟", extra: HOME_ADVANTAGE },
+];
+
+function formatMethodologyWeight(group: (typeof METHODOLOGY_GROUPS)[number]): string {
+  const sum = group.keys.reduce((s, k) => s + DEFAULT_WEIGHTS[k], 0) + (group.extra ?? 0);
+  const pct = sum * 100;
+  return Number.isInteger(pct) ? `${pct}%` : `${pct.toFixed(1)}%`;
+}
 
 async function getTodayPredictions(): Promise<HomeGame[]> {
   const supabase = await createClient();
@@ -826,19 +853,12 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {[
-            { label: "선발 FIP + xFIP", weight: "20%", icon: "🎯" },
-            { label: "타선 wOBA", weight: "15%", icon: "💪" },
-            { label: "불펜 + 수비", weight: "15%", icon: "🛡" },
-            { label: "최근 폼 + 상대전적", weight: "15%", icon: "📈" },
-            { label: "Elo + WAR", weight: "16%", icon: "⚡" },
-            { label: "구장 + 홈어드밴티지", weight: "5.5%", icon: "🏟" },
-          ].map((item) => (
+          {METHODOLOGY_GROUPS.map((item) => (
             <div key={item.label} className="flex items-center gap-3 p-3 bg-brand-50 dark:bg-[var(--color-surface)] rounded-lg border border-brand-100 dark:border-[var(--color-border)]">
               <span className="text-lg">{item.icon}</span>
               <div>
                 <p className="text-sm font-medium">{item.label}</p>
-                <p className="text-sm text-brand-600 dark:text-brand-400 font-bold">{item.weight}</p>
+                <p className="text-sm text-brand-600 dark:text-brand-400 font-bold">{formatMethodologyWeight(item)}</p>
               </div>
             </div>
           ))}
