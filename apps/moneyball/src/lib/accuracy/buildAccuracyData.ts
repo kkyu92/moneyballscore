@@ -58,6 +58,53 @@ export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
   };
 }
 
+// cycle 460 polish-ui heavy — spec scope A: /accuracy 신규 섹션 "AI 토론 사용률" 일별 stacked bar.
+// LLM 활성 vs quant-only fallback 일별 분포 가시화. silent quality drift 차단.
+export interface FallbackDailyBucket {
+  dateISO: string; // YYYY-MM-DD (KST)
+  dateLabel: string; // M/D
+  llmActive: number;
+  fallback: number;
+  total: number;
+}
+
+export function buildFallbackDailyTrend(
+  rows: FallbackStatsRow[],
+  days: number,
+  now: number = Date.now(),
+): FallbackDailyBucket[] {
+  const KST_OFFSET_MS = 9 * 3600 * 1000;
+  const buckets = new Map<string, FallbackDailyBucket>();
+  for (let i = days - 1; i >= 0; i--) {
+    const kstDate = new Date(now + KST_OFFSET_MS - i * 86_400_000);
+    const dateISO = kstDate.toISOString().slice(0, 10);
+    const [, m, d] = dateISO.split('-');
+    buckets.set(dateISO, {
+      dateISO,
+      dateLabel: `${Number(m)}/${Number(d)}`,
+      llmActive: 0,
+      fallback: 0,
+      total: 0,
+    });
+  }
+  for (const r of rows) {
+    const kstISO = new Date(new Date(r.predicted_at).getTime() + KST_OFFSET_MS)
+      .toISOString()
+      .slice(0, 10);
+    const b = buckets.get(kstISO);
+    if (!b) continue;
+    const mv = r.model_version ?? '';
+    if (LLM_ACTIVE_VERSIONS.has(mv)) {
+      b.llmActive++;
+      b.total++;
+    } else if (FALLBACK_VERSIONS.has(mv)) {
+      b.fallback++;
+      b.total++;
+    }
+  }
+  return Array.from(buckets.values());
+}
+
 function resolveWinnerProb(r: PredRow): number {
   if (r.homeWinProb != null) {
     const hwp = Number(r.homeWinProb);
