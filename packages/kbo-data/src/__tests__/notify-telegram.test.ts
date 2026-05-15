@@ -217,6 +217,89 @@ describe('notifyPredictions (regression)', () => {
     expect(msg).toContain('적중');
     expect(msg).toContain('70%');
   });
+
+  // cycle 463 polish-ui scope D — Telegram daily summary fallback 비율 가시화.
+  describe('AI 토론 사용률 라인 (scope D)', () => {
+    const result: PipelineResult = {
+      date: '2026-05-15',
+      gamesFound: 5, predictionsGenerated: 5, gamesSkipped: 0, errors: [],
+    };
+
+    it('전부 LLM 활성 (v2.0-debate) → "AI 토론 5/5 정상" (fallback 보충 X)', async () => {
+      const calls = captureTelegramCalls();
+      const predictions = Array.from({ length: 5 }, (_, i) => ({
+        homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+        predictedWinner: 'OB' as const,
+        confidence: 0.6, homeWinProb: 0.6,
+        modelVersion: 'v2.0-debate' as const,
+      }));
+      await notifyPredictions(result, predictions);
+      const msg = calls[0].text;
+      expect(msg).toContain('🤖 AI 토론 5/5 정상');
+      expect(msg).not.toContain('정량 모델 fallback');
+    });
+
+    it('전부 quant fallback (v1.8) → "AI 토론 0/5 정상 (나머지 정량 모델 fallback)"', async () => {
+      const calls = captureTelegramCalls();
+      const predictions = Array.from({ length: 5 }, (_, i) => ({
+        homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+        predictedWinner: 'OB' as const,
+        confidence: 0.55, homeWinProb: 0.55,
+        modelVersion: 'v1.8' as const,
+      }));
+      await notifyPredictions(result, predictions);
+      const msg = calls[0].text;
+      expect(msg).toContain('🤖 AI 토론 0/5 정상 (나머지 정량 모델 fallback)');
+    });
+
+    it('혼합 (3 LLM / 2 fallback) → "AI 토론 3/5 정상 (나머지 정량 모델 fallback)"', async () => {
+      const calls = captureTelegramCalls();
+      const predictions = [
+        ...Array.from({ length: 3 }, () => ({
+          homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+          predictedWinner: 'OB' as const, confidence: 0.6, homeWinProb: 0.6,
+          modelVersion: 'v2.0-debate' as const,
+        })),
+        ...Array.from({ length: 2 }, () => ({
+          homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+          predictedWinner: 'OB' as const, confidence: 0.55, homeWinProb: 0.55,
+          modelVersion: 'v1.8' as const,
+        })),
+      ];
+      await notifyPredictions(result, predictions);
+      const msg = calls[0].text;
+      expect(msg).toContain('🤖 AI 토론 3/5 정상 (나머지 정량 모델 fallback)');
+    });
+
+    it('modelVersion 누락 (옛 row) → AI 토론 라인 노출 X', async () => {
+      const calls = captureTelegramCalls();
+      const predictions = [
+        {
+          homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+          predictedWinner: 'OB' as const, confidence: 0.6, homeWinProb: 0.6,
+          // modelVersion 없음
+        },
+      ];
+      await notifyPredictions(result, predictions);
+      const msg = calls[0].text;
+      expect(msg).not.toContain('AI 토론');
+    });
+
+    it('postview 라벨 (v2.0-postview) 도 LLM 활성 분류', async () => {
+      const calls = captureTelegramCalls();
+      const predictions = [
+        {
+          homeTeam: 'OB' as const, awayTeam: 'HT' as const,
+          predictedWinner: 'OB' as const, confidence: 0.6, homeWinProb: 0.6,
+          modelVersion: 'v2.0-postview' as const,
+        },
+      ];
+      await notifyPredictions(result, predictions);
+      const msg = calls[0].text;
+      expect(msg).toContain('🤖 AI 토론 1/1 정상');
+      expect(msg).not.toContain('정량 모델 fallback');
+    });
+  });
 });
 
 describe('notifyError (regression)', () => {

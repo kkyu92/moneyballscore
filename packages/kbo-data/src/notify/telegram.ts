@@ -6,8 +6,14 @@ import {
   WINNER_TIER_LABEL,
   winnerProbOf,
 } from '@moneyball/shared';
-import type { TeamCode } from '@moneyball/shared';
+import type { ModelVersion, TeamCode } from '@moneyball/shared';
 import type { PipelineResult, ScrapedGame } from '../types';
+
+// cycle 463 polish-ui scope D — Telegram daily summary 마지막 line "AI 토론 N/M 정상"
+// 노출. mv = 'v2.0-debate' = LLM 활성, mv = QUANT_PREGAME_VERSION ('v1.8') 등 = quant
+// fallback. 분류 시맨틱은 apps/moneyball/src/lib/accuracy/buildAccuracyData.ts 동일.
+// silent quality drift 차단 — 사용자가 fallback 비율 직접 인지.
+const LLM_ACTIVE_VERSIONS = new Set<string>(['v2.0-debate', 'v2.0-postview']);
 
 const TELEGRAM_API = 'https://api.telegram.org/bot';
 
@@ -52,6 +58,8 @@ export async function notifyPredictions(
     predictedWinner: TeamCode;
     confidence: number;
     homeWinProb: number;
+    // cycle 463 polish-ui scope D — fallback 비율 표시용. null = 옛 row (분류 X).
+    modelVersion?: ModelVersion | null;
   }>
 ) {
   const lines = [
@@ -71,6 +79,20 @@ export async function notifyPredictions(
     const label = WINNER_TIER_LABEL[tier];
 
     lines.push(`${emoji} <b>${label}</b> ${away} vs ${home} → <b>${winner}</b> ${pct}%`);
+  }
+
+  // cycle 463 polish-ui scope D — AI 토론 정상 비율. mv 박제된 row 만 분모 (옛 row 제외).
+  const labeled = predictions.filter((p) => p.modelVersion != null);
+  if (labeled.length > 0) {
+    const llmActive = labeled.filter(
+      (p) => LLM_ACTIVE_VERSIONS.has(p.modelVersion as string),
+    ).length;
+    lines.push('');
+    if (llmActive < labeled.length) {
+      lines.push(`🤖 AI 토론 ${llmActive}/${labeled.length} 정상 (나머지 정량 모델 fallback)`);
+    } else {
+      lines.push(`🤖 AI 토론 ${llmActive}/${labeled.length} 정상`);
+    }
   }
 
   if (result.errors.length > 0) {

@@ -956,7 +956,7 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
   const result = await db
     .from('predictions')
     .select(`
-      confidence, reasoning,
+      confidence, reasoning, model_version,
       winner:teams!predictions_predicted_winner_fkey(code),
       game:games!predictions_game_id_fkey(
         home_team:teams!games_home_team_id_fkey(code),
