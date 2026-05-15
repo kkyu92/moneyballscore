@@ -12,7 +12,12 @@
  * 양쪽 package 모두 안전 import.
  */
 
-export type ScoringRule = 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8';
+// cycle 475 — tuple 1개 → ScoringRule 타입 + ALL_SCORING_RULES list 동시 도출.
+// 신규 버전 추가 시 본 tuple 1줄 변경 = ScoringRule union + 외부 VERSION_ORDER
+// 자동 전파 (silent drift family 사전 자동 차단 evidence).
+export const ALL_SCORING_RULES = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8'] as const;
+
+export type ScoringRule = (typeof ALL_SCORING_RULES)[number];
 
 export type ModelVersion =
   | 'v2.0-debate'

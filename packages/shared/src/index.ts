@@ -9,8 +9,10 @@ export { hasJongsung, josa, ro } from './korean';
 export { assertSelectOk, assertWriteOk } from './db-error';
 export type { SelectResult, WriteResult } from './db-error';
 
-// model_version / scoring_rule 라벨 단일 source (cycle 448 통합)
+// model_version / scoring_rule 라벨 단일 source (cycle 448 통합 + cycle 475
+// ALL_SCORING_RULES tuple 도출)
 export {
+  ALL_SCORING_RULES,
   CURRENT_SCORING_RULE,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
