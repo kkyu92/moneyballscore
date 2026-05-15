@@ -32,6 +32,21 @@ export interface FallbackStats {
 const LLM_ACTIVE_VERSIONS = new Set<string>(['v2.0-debate', 'v2.0-postview']);
 const FALLBACK_VERSIONS = new Set<string>([QUANT_PREGAME_VERSION, QUANT_POSTVIEW_VERSION]);
 
+// LLM_ACTIVE_VERSIONS / FALLBACK_VERSIONS set 변경 시 동시 박제 누락 차단 (silent drift family).
+function classifyVersion(mv: string | null | undefined): 'llmActive' | 'fallback' | null {
+  const v = mv ?? '';
+  if (LLM_ACTIVE_VERSIONS.has(v)) return 'llmActive';
+  if (FALLBACK_VERSIONS.has(v)) return 'fallback';
+  return null;
+}
+
+// 95% Wald CI half-width for binomial proportion. n=0 시 0.
+function binomCi95Half(hits: number, n: number): number {
+  if (n <= 0) return 0;
+  const p = hits / n;
+  return 1.96 * Math.sqrt((p * (1 - p)) / n);
+}
+
 export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
   let llmActive = 0;
   let fallback = 0;
@@ -39,10 +54,10 @@ export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
   let oldestSeenAt: string | null = null;
   for (const r of rows) {
     if (!oldestSeenAt || r.predicted_at < oldestSeenAt) oldestSeenAt = r.predicted_at;
-    const mv = r.model_version ?? '';
-    if (LLM_ACTIVE_VERSIONS.has(mv)) {
+    const cls = classifyVersion(r.model_version);
+    if (cls === 'llmActive') {
       llmActive++;
-    } else if (FALLBACK_VERSIONS.has(mv)) {
+    } else if (cls === 'fallback') {
       fallback++;
       if (!latestFallbackAt || r.predicted_at > latestFallbackAt) latestFallbackAt = r.predicted_at;
     }
@@ -93,11 +108,11 @@ export function buildFallbackDailyTrend(
       .slice(0, 10);
     const b = buckets.get(kstISO);
     if (!b) continue;
-    const mv = r.model_version ?? '';
-    if (LLM_ACTIVE_VERSIONS.has(mv)) {
+    const cls = classifyVersion(r.model_version);
+    if (cls === 'llmActive') {
       b.llmActive++;
       b.total++;
-    } else if (FALLBACK_VERSIONS.has(mv)) {
+    } else if (cls === 'fallback') {
       b.fallback++;
       b.total++;
     }
@@ -191,7 +206,7 @@ export function bucketize(rows: PredRow[]): Bucket[] {
     const lower = BUCKET_START + i * BUCKET_WIDTH;
     const upper = lower + BUCKET_WIDTH;
     const hitRate = b.hits / b.n;
-    const ci95Half = 1.96 * Math.sqrt((hitRate * (1 - hitRate)) / b.n);
+    const ci95Half = binomCi95Half(b.hits, b.n);
     return [{ lower, upper, n: b.n, hits: b.hits, avgConf: b.sumConf / b.n, hitRate, ci95Half }];
   });
 }
@@ -281,10 +296,7 @@ export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
     const n = subset.length;
     const hits = subset.filter((r) => r.is_correct).length;
     const accuracy = n > 0 ? hits / n : null;
-    const ci95Half =
-      accuracy !== null && n > 0
-        ? 1.96 * Math.sqrt((accuracy * (1 - accuracy)) / n)
-        : 0;
+    const ci95Half = binomCi95Half(hits, n);
     return { label, range, n, hits, accuracy, ci95Half };
   });
 }
@@ -327,10 +339,7 @@ export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
     const n = vRows.length;
     const hits = vRows.filter((r) => r.is_correct).length;
     const accuracy = n > 0 ? hits / n : null;
-    const ci95Half =
-      accuracy !== null && n > 0
-        ? 1.96 * Math.sqrt((accuracy * (1 - accuracy)) / n)
-        : 0;
+    const ci95Half = binomCi95Half(hits, n);
 
     let dateRange = '';
     if (n > 0) {
