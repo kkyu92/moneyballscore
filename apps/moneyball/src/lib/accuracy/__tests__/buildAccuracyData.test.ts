@@ -270,6 +270,15 @@ describe('buildVersionHistory', () => {
     expect(v18.note).toContain('ELO');
   });
 
+  // cycle 485 — labelOf('-revert' suffix strip) 계약 박제. v1.7-revert internal
+  // key 가 display 'v1.7' 로 strip 되는 의도가 silent drift 되지 않도록 lock.
+  it("labelOf: '-revert' suffix 는 display 라벨에서 strip", () => {
+    const rows = [vrow(0.6, true, 'v1.7-revert')];
+    const result = buildVersionHistory(rows);
+    const v17 = result.find((v) => v.version === 'v1.7-revert')!;
+    expect(v17.label).toBe('v1.7');
+  });
+
   it('dateRange: 단일 날짜 → M/D 형식', () => {
     const rows = [vrow(0.6, true, 'v1.6', '2026-04-01T10:00:00Z')];
     const result = buildVersionHistory(rows);
@@ -285,17 +294,19 @@ describe('buildVersionHistory', () => {
   });
 
   // cycle 474 silent drift family guard — CURRENT_SCORING_RULE bump (v1.9/v2.0)
-  // 시 VERSION_ORDER + VERSION_META 동시 갱신 누락 차단. shared 의 라벨 단일
+  // 시 VERSION_ORDER + VERSION_NOTES 동시 갱신 누락 차단. shared 의 라벨 단일
   // source 와 buildAccuracyData 의 historical entry list 분리 의도는 유지하되
   // current 가 list 에서 사라지는 silent drift 만 차단.
-  it('CURRENT_SCORING_RULE invariant: VERSION_ORDER 와 VERSION_META 에 포함', () => {
+  // cycle 485 — VERSION_META → VERSION_NOTES rename. label 필드 제거 + labelOf
+  // 헬퍼로 '-revert' suffix strip 만 special-case.
+  it('CURRENT_SCORING_RULE invariant: VERSION_ORDER 와 VERSION_NOTES 에 포함', () => {
     const rows = [vrow(0.6, true, CURRENT_SCORING_RULE)];
     const result = buildVersionHistory(rows);
     const cur = result.find((v) => v.version === CURRENT_SCORING_RULE);
     expect(cur, `CURRENT_SCORING_RULE='${CURRENT_SCORING_RULE}' VERSION_ORDER 누락 — buildAccuracyData.ts 의 VERSION_ORDER 에 추가 필요`).toBeDefined();
     expect(cur!.n).toBe(1);
-    expect(cur!.label, `VERSION_META['${CURRENT_SCORING_RULE}'].label 미설정`).toBeTruthy();
-    expect(cur!.note, `VERSION_META['${CURRENT_SCORING_RULE}'].note 미설정`).toBeTruthy();
+    expect(cur!.label, `labelOf('${CURRENT_SCORING_RULE}') 빈 라벨`).toBeTruthy();
+    expect(cur!.note, `VERSION_NOTES['${CURRENT_SCORING_RULE}'] 미설정`).toBeTruthy();
   });
 });
 

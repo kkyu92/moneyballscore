@@ -328,12 +328,20 @@ export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
 // 시 shared/model-version-labels.ts ALL_SCORING_RULES 1줄 변경 = ScoringRule
 // union + VERSION_ORDER 동시 박제. cycle 474 invariant test 와 짝.
 const VERSION_ORDER = ALL_SCORING_RULES;
-const VERSION_META: Record<ScoringRule, { label: string; note: string }> = {
-  'v1.5': { label: 'v1.5', note: '기준 모델' },
-  'v1.6': { label: 'v1.6', note: 'ELO·상대전적 실험 → 저조로 복원' },
-  'v1.7-revert': { label: 'v1.7', note: 'v1.5 가중치 복원 + 일요일 상한 도입 (55%→45% 조정)' },
-  'v1.8': { label: 'v1.8', note: 'ELO 10%↑ / head_to_head 3%↓' },
+
+// cycle 485 — label 필드 제거. label==key 중복 3/4 (v1.5/v1.6/v1.8) 제거 + key
+// 의 '-revert' suffix strip 만 special-case. silent drift family streak 27 cycle:
+// 새 ScoringRule 추가 시 VERSION_NOTES 한 줄만 박제 (label 필드 동기 잊을 surface 제거).
+const VERSION_NOTES: Record<ScoringRule, string> = {
+  'v1.5': '기준 모델',
+  'v1.6': 'ELO·상대전적 실험 → 저조로 복원',
+  'v1.7-revert': 'v1.5 가중치 복원 + 일요일 상한 도입 (55%→45% 조정)',
+  'v1.8': 'ELO 10%↑ / head_to_head 3%↓',
 };
+
+function labelOf(version: ScoringRule): string {
+  return version.replace(/-revert$/, '');
+}
 
 function isScoringRule(s: string): s is ScoringRule {
   return (VERSION_ORDER as readonly string[]).includes(s);
@@ -382,7 +390,16 @@ export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
       brier = sum / n;
     }
 
-    const meta = VERSION_META[version] ?? { label: version, note: '' };
-    return { version, label: meta.label, n, hits, accuracy, ci95Half, dateRange, brier, note: meta.note };
+    return {
+      version,
+      label: labelOf(version),
+      n,
+      hits,
+      accuracy,
+      ci95Half,
+      dateRange,
+      brier,
+      note: VERSION_NOTES[version] ?? '',
+    };
   });
 }
