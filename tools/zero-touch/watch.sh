@@ -49,7 +49,7 @@ main() {
       if [[ "$next_n" =~ ^[0-9]+$ ]] && [ "$next_n" -gt 0 ]; then
         send "exit" Enter
         sleep 2
-        send "claude" Enter
+        send "claude --model sonnet" Enter
         sleep 12
         send "/handoff load" Enter
         sleep 8

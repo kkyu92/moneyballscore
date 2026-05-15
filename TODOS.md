@@ -8,7 +8,7 @@
 **현재 상태**: 99건 검증 완료 (cycle 387 갱신, 2026-05-14) / 전체 적중률 49.5% / Brier 0.2587 / v1.5=75%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / v1.8=60%(5, quant-only fallback)
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
-> ⚠️ **v1.8 데이터 신뢰성 경고 (cycle 383 발견, cycle 387 갱신 — 2026-05-14 17:00 KST)**: 5/13~5/14 (2일째) 모든 v1.8 예측이 quant-only fallback 으로 silent 운영 중. cycle 384~386 ship 3건 (#413/#414/#415) 으로 label 강등 fix 완료 — 5/14 mv='v1.8' (정정 라벨) 검증 PASS. **하지만 ROOT cause (ANTHROPIC_API_KEY credit) 는 외부 SaaS 영역 — code fix 불가**. v1.8 가중치 효과 측정 영구 불가능 (credit 복구 시점까지). **필요 user action**: Vercel+Cloudflare env ANTHROPIC_API_KEY credit/만료 확인 + 충전/재발급. 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+> ✅ **v1.8 credit 복구 완료 (2026-05-16 08:06 KST, user action)**: ANTHROPIC_API_KEY credit 충전 완료. retro debate 분석은 결과 누수/방법론 위반으로 **비채택**. 앞으로 fire 되는 신규 경기 v1.8 debate 누적으로 정직한 n 증가. 검증 항목 — (1) 다음 predict cron UTC 01 (KST 10:00) 첫 fire 시 `totalTokens>0` + reasoning 텍스트 길이 정상 + mv='v2.0-debate' 라벨 / (2) postview path 도 동일 verify (mv='v2.0-postview'). silent fallback 재발 시 PR #372 family fix 정상 작동 → mv='v1.8' (강등 라벨) 노출. 5/13~5/15 fallback 기간 5건은 quant-only 라벨로 누적 유지 (역사 박제). 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
 
 > ⚠️ **v1.6 anomaly (cycle 387 발견, 2026-05-14)**: v1.6 scoring_rule n=46 (2026-04-22~05-03) 전체 17/46 = **37.0%** (coinflip 13%p 이하). high conf 35.7% / low conf 37.5% 양쪽 random 이하 = v1.6 가중치 자체 역방향 신호 가능성. n=150+ 도달 후 op-analysis heavy 에서 era별 factor backtest 권장.
 
