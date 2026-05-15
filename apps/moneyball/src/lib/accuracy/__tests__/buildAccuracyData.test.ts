@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CURRENT_SCORING_RULE } from '@moneyball/shared';
 import {
   brierScore,
   buildConfidenceTiers,
@@ -281,6 +282,20 @@ describe('buildVersionHistory', () => {
     const result = buildVersionHistory(rows);
     const v17 = result.find((v) => v.version === 'v1.7-revert')!;
     expect(v17.brier).toBeCloseTo(0.25);
+  });
+
+  // cycle 474 silent drift family guard — CURRENT_SCORING_RULE bump (v1.9/v2.0)
+  // 시 VERSION_ORDER + VERSION_META 동시 갱신 누락 차단. shared 의 라벨 단일
+  // source 와 buildAccuracyData 의 historical entry list 분리 의도는 유지하되
+  // current 가 list 에서 사라지는 silent drift 만 차단.
+  it('CURRENT_SCORING_RULE invariant: VERSION_ORDER 와 VERSION_META 에 포함', () => {
+    const rows = [vrow(0.6, true, CURRENT_SCORING_RULE)];
+    const result = buildVersionHistory(rows);
+    const cur = result.find((v) => v.version === CURRENT_SCORING_RULE);
+    expect(cur, `CURRENT_SCORING_RULE='${CURRENT_SCORING_RULE}' VERSION_ORDER 누락 — buildAccuracyData.ts 의 VERSION_ORDER 에 추가 필요`).toBeDefined();
+    expect(cur!.n).toBe(1);
+    expect(cur!.label, `VERSION_META['${CURRENT_SCORING_RULE}'].label 미설정`).toBeTruthy();
+    expect(cur!.note, `VERSION_META['${CURRENT_SCORING_RULE}'].note 미설정`).toBeTruthy();
   });
 });
 
