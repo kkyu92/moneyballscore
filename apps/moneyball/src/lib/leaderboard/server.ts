@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
+import { assertSelectOk } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from './types';
 
 export async function fetchLeaderboard(
@@ -9,12 +10,12 @@ export async function fetchLeaderboard(
   const supabase = await createClient();
   const view = mode === 'weekly' ? 'leaderboard_weekly' : 'leaderboard_season';
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from(view)
     .select('nickname, device_id, total, correct, accuracy_pct, current_streak')
     .limit(limit);
 
-  if (error) return [];
+  const { data } = assertSelectOk(result, `leaderboard.fetchLeaderboard(${mode})`);
   return (data ?? []) as LeaderboardEntry[];
 }
 
@@ -41,8 +42,9 @@ export async function fetchAiBaseline(mode: LeaderboardMode): Promise<AiBaseline
     query = query.gte('verified_at', mondayUtc.toISOString());
   }
 
-  const { data, error } = await query;
-  if (error || !data) return null;
+  const result = await query;
+  const { data } = assertSelectOk(result, `leaderboard.fetchAiBaseline(${mode})`);
+  if (!data) return null;
 
   const total = data.length;
   if (total === 0) return null;
