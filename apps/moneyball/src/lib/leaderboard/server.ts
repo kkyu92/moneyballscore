@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, getKSTMondayUtcIso } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from './types';
 
 export async function fetchLeaderboard(
@@ -31,15 +31,7 @@ export async function fetchAiBaseline(mode: LeaderboardMode): Promise<AiBaseline
     .not('verified_at', 'is', null);
 
   if (mode === 'weekly') {
-    const now = new Date();
-    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const dow = kst.getUTCDay();
-    const mondayOffset = dow === 0 ? 6 : dow - 1;
-    const monday = new Date(kst);
-    monday.setUTCDate(monday.getUTCDate() - mondayOffset);
-    monday.setUTCHours(0, 0, 0, 0);
-    const mondayUtc = new Date(monday.getTime() - 9 * 60 * 60 * 1000);
-    query = query.gte('verified_at', mondayUtc.toISOString());
+    query = query.gte('verified_at', getKSTMondayUtcIso());
   }
 
   const result = await query;

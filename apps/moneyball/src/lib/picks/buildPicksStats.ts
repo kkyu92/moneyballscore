@@ -1,5 +1,6 @@
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
+import { getKSTWeekRange } from '@moneyball/shared';
 
 export interface WeeklyStats {
   weekLabel: string;
@@ -107,16 +108,6 @@ export function buildPickEntries(
       };
     })
     .sort((a, b) => b.pickedAt.localeCompare(a.pickedAt)); // 최근순
-}
-
-function getKSTWeekRange(now: Date = new Date()): { start: string; end: string } {
-  const kstMs = now.getTime() + 9 * 60 * 60 * 1000;
-  const monMs = kstMs - ((new Date(kstMs).getUTCDay() + 6) % 7) * 86400000;
-  const sunMs = monMs + 6 * 86400000;
-  return {
-    start: new Date(monMs).toISOString().slice(0, 10),
-    end: new Date(sunMs).toISOString().slice(0, 10),
-  };
 }
 
 export function buildWeeklyStats(entries: PickEntry[], now: Date = new Date()): WeeklyStats | null {

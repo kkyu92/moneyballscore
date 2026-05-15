@@ -9,6 +9,8 @@ import {
   shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
+  getKSTWeekRange,
+  getKSTMondayUtcIso,
   winnerProbOf,
   classifyWinnerProb,
   WINNER_PROB_CONFIDENT,
@@ -146,6 +148,55 @@ describe('toKSTDisplayString', () => {
   it('should handle KST timezone', () => {
     const result = toKSTDisplayString(new Date('2026-04-13T20:00:00Z'));
     expect(result).toBe('2026년 04월 14일');
+  });
+});
+
+// cycle 457 — picks/leaderboard silent drift family. KST 월요일 boundary 단일 source.
+describe('getKSTWeekRange', () => {
+  it('수요일 입력 → 그 주 월~일 ISO date string', () => {
+    // 2026-05-13 (수) UTC 06:00 = KST 15:00 — 그 주 월=2026-05-11, 일=2026-05-17
+    const result = getKSTWeekRange(new Date('2026-05-13T06:00:00Z'));
+    expect(result.start).toBe('2026-05-11');
+    expect(result.end).toBe('2026-05-17');
+  });
+
+  it('월요일 입력 → 그 주 월요일 자체', () => {
+    const result = getKSTWeekRange(new Date('2026-05-11T03:00:00Z'));
+    expect(result.start).toBe('2026-05-11');
+    expect(result.end).toBe('2026-05-17');
+  });
+
+  it('일요일 입력 → 그 주 월요일 (직전 월요일)', () => {
+    // 2026-05-17 (일) UTC 12:00 = KST 21:00 — 그 주 월=2026-05-11
+    const result = getKSTWeekRange(new Date('2026-05-17T12:00:00Z'));
+    expect(result.start).toBe('2026-05-11');
+    expect(result.end).toBe('2026-05-17');
+  });
+
+  it('KST 자정 직후 boundary — UTC 일요일 15:00 = KST 월요일 00:00', () => {
+    const result = getKSTWeekRange(new Date('2026-05-10T15:00:00Z'));
+    expect(result.start).toBe('2026-05-11');
+    expect(result.end).toBe('2026-05-17');
+  });
+});
+
+describe('getKSTMondayUtcIso', () => {
+  it('수요일 KST 입력 → 그 주 월요일 00:00 KST 의 UTC ISO', () => {
+    // 2026-05-13 (수) UTC 06:00 = KST 15:00 — 월요일 00:00 KST = 일요일 15:00 UTC
+    const result = getKSTMondayUtcIso(new Date('2026-05-13T06:00:00Z'));
+    expect(result).toBe('2026-05-10T15:00:00.000Z');
+  });
+
+  it('월요일 KST 직후 → 같은 월요일 00:00 KST', () => {
+    // 2026-05-11 (월) UTC 03:00 = KST 12:00 — 그 주 월요일 00:00 KST
+    const result = getKSTMondayUtcIso(new Date('2026-05-11T03:00:00Z'));
+    expect(result).toBe('2026-05-10T15:00:00.000Z');
+  });
+
+  it('일요일 KST → 직전 월요일 00:00 KST', () => {
+    // 2026-05-17 (일) UTC 12:00 = KST 21:00 — 그 주 월요일 = 2026-05-11
+    const result = getKSTMondayUtcIso(new Date('2026-05-17T12:00:00Z'));
+    expect(result).toBe('2026-05-10T15:00:00.000Z');
   });
 });
 
