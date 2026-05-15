@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callLLM, MAX_ATTEMPTS } from '../agents/llm';
+import { callLLM, MAX_ATTEMPTS, classifyAnthropicError } from '../agents/llm';
 
 const originalFetch = global.fetch;
 const originalKey = process.env.ANTHROPIC_API_KEY;
@@ -112,7 +112,7 @@ describe('callLLM retry/backoff', () => {
     const result = await promise;
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('401');
+    expect(result.error).toContain('AUTH_INVALID');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -181,5 +181,76 @@ describe('callLLM retry/backoff', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('ETIMEDOUT');
     expect(fetchMock).toHaveBeenCalledTimes(MAX_ATTEMPTS);
+  });
+
+  // cycle 461 — credit balance too low 실제 incident → raw JSON leak 차단 검증
+  it('credit balance too low 400 → CREDIT_EXHAUSTED 분류 (raw JSON leak 차단)', async () => {
+    const creditErrorBody = {
+      type: 'error',
+      error: {
+        type: 'invalid_request_error',
+        message:
+          'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.',
+      },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(creditErrorBody, 400));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    const result = await promise;
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('CREDIT_EXHAUSTED');
+    expect(result.error).toContain('Plans & Billing');
+    // raw JSON 응답 leak 차단 (이전 동작: errText.slice(0,200) 으로 응답 본문 통째 노출)
+    expect(result.error).not.toContain('{"type":"error"');
+    expect(result.error).not.toContain('invalid_request_error');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('classifyAnthropicError', () => {
+  it('credit balance too low → CREDIT_EXHAUSTED', () => {
+    const body = JSON.stringify({
+      type: 'error',
+      error: { type: 'invalid_request_error', message: 'Your credit balance is too low to access the Anthropic API.' },
+    });
+    expect(classifyAnthropicError(400, body)).toContain('CREDIT_EXHAUSTED');
+  });
+
+  it('401 authentication_error → AUTH_INVALID', () => {
+    const body = JSON.stringify({ error: { type: 'authentication_error', message: 'invalid x-api-key' } });
+    expect(classifyAnthropicError(401, body)).toContain('AUTH_INVALID');
+  });
+
+  it('429 rate_limit_error → RATE_LIMITED', () => {
+    const body = JSON.stringify({ error: { type: 'rate_limit_error', message: 'tokens per minute exceeded' } });
+    const result = classifyAnthropicError(429, body);
+    expect(result).toContain('RATE_LIMITED');
+    expect(result).toContain('tokens per minute');
+  });
+
+  it('503 overloaded → SERVER_ERROR 503', () => {
+    const body = JSON.stringify({ error: { type: 'overloaded_error', message: 'upstream overloaded' } });
+    expect(classifyAnthropicError(503, body)).toContain('SERVER_ERROR 503');
+  });
+
+  it('400 generic invalid_request → INVALID_REQUEST 400', () => {
+    const body = JSON.stringify({ error: { type: 'invalid_request_error', message: 'max_tokens out of range' } });
+    const result = classifyAnthropicError(400, body);
+    expect(result).toContain('INVALID_REQUEST 400');
+    expect(result).toContain('max_tokens');
+  });
+
+  it('파싱 불가 body → UNKNOWN or status 분류 (truncate)', () => {
+    const body = '<html>500 Bad Gateway</html>'.repeat(20);
+    const result = classifyAnthropicError(502, body);
+    expect(result).toContain('SERVER_ERROR 502');
+    // 100자 truncate 검증 — raw HTML 전체 leak X
+    expect(result.length).toBeLessThan(200);
   });
 });
