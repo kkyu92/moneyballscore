@@ -4,7 +4,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { assertWriteOk } from '@moneyball/shared';
+import { assertWriteOk, errMsg } from '@moneyball/shared';
 import type { NaverRecord } from '../scrapers/naver-record';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +81,7 @@ export async function saveGameRecord(
       inserted: false,
       updated: false,
       skipped: false,
-      error: e instanceof Error ? e.message : String(e),
+      error: errMsg(e),
     };
   }
   const row = Array.isArray(data) ? data[0] : data;

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString, assertSelectOk, assertWriteOk } from '@moneyball/shared';
+import { toKSTDateString, assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
@@ -48,7 +48,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
   try {
     liveGames = await fetchLiveGames(targetDate);
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+    const msg = errMsg(e);
     return { date: targetDate, liveGames: 0, updated: 0, errors: [msg] };
   }
 
@@ -64,7 +64,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
       try {
         await updateGameScore(db, game);
       } catch (e) {
-        errors.push(`updateGameScore ${game.externalGameId}: ${e instanceof Error ? e.message : String(e)}`);
+        errors.push(`updateGameScore ${game.externalGameId}: ${errMsg(e)}`);
       }
     }
 
@@ -248,7 +248,7 @@ async function runPostviewDailySafe(date: string): Promise<{
       totalTokens: result.totalTokens,
     };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+    const msg = errMsg(e);
     console.warn('[Live] runPostviewDaily failed, continuing:', msg);
     return { processed: 0, skipped: 0, errors: [`postview-daily: ${msg}`], totalTokens: 0 };
   }
@@ -318,7 +318,7 @@ async function updateGameScore(db: DB, game: LiveGameState) {
   } catch (e) {
     console.warn(
       '[Live] game_records fetch failed:',
-      e instanceof Error ? e.message : String(e),
+      errMsg(e),
     );
   }
 }

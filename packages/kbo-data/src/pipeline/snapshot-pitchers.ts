@@ -23,7 +23,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, type TeamCode } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, type TeamCode } from '@moneyball/shared';
 import { fetchPitcherStats } from '../scrapers/fancy-stats';
 import type { PitcherStats } from '../types';
 
@@ -172,7 +172,7 @@ export async function snapshotPitcherStats(opts: SnapshotOptions = {}): Promise<
           .upsert(payload, { onConflict: 'player_id,season,captured_at' });
         assertWriteOk(upsertResult, 'snapshot-pitchers.pitcher_stats.upsert');
       } catch (e) {
-        console.error(`  ❌ ${s.name} (${s.team}): ${e instanceof Error ? e.message : String(e)}`);
+        console.error(`  ❌ ${s.name} (${s.team}): ${errMsg(e)}`);
         result.errors++;
         continue;
       }

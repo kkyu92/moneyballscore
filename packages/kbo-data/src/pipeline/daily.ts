@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString, KBO_STADIUM_COORDS } from '@moneyball/shared';
+import { toKSTDateString, KBO_STADIUM_COORDS, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
 import {
@@ -186,14 +186,14 @@ export async function runDailyPipeline(
         return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
       }
     } catch (e) {
-      errors.push(`isNotificationSent announce_sent: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`isNotificationSent announce_sent: ${errMsg(e)}`);
       return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
     }
 
     let games: ScrapedGame[] = [];
     try { games = await fetchGames(targetDate); }
     catch (e) {
-      errors.push(`fetchGames: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`fetchGames: ${errMsg(e)}`);
       return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
     }
     try {
@@ -202,7 +202,7 @@ export async function runDailyPipeline(
         announce_sent_at: new Date().toISOString(),
       });
     } catch (e) {
-      errors.push(`notifyAnnounce: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`notifyAnnounce: ${errMsg(e)}`);
     }
 
     // 14일치 일정 prefetch (Naver API 1회 호출) — 홈 empty-state 에서
@@ -218,7 +218,7 @@ export async function runDailyPipeline(
         console.log(`[Pipeline] Prefetched ${prefetched.upserted} games (${prefetched.range})`);
       }
     } catch (e) {
-      errors.push(`prefetchSchedule: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`prefetchSchedule: ${errMsg(e)}`);
     }
 
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
@@ -231,7 +231,7 @@ export async function runDailyPipeline(
     leagueId = await getKBOLeagueId(db);
     teamIdMap = await getTeamIdMap(db, leagueId);
   } catch (e) {
-    errors.push(`setup: ${e instanceof Error ? e.message : String(e)}`);
+    errors.push(`setup: ${errMsg(e)}`);
     return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
@@ -256,7 +256,7 @@ export async function runDailyPipeline(
         console.log(`[Pipeline] Retention cleanup: agent_memories=${memCount}, validator_logs=${logCount}`);
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg = errMsg(e);
       console.warn('[Pipeline] Retention cleanup failed:', msg);
       errors.push(`retention cleanup: ${msg}`);
     }
@@ -268,7 +268,7 @@ export async function runDailyPipeline(
         console.log(`[Pipeline] Morning postview cleanup: ${yesterday} processed=${cleanup.processed}`);
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg = errMsg(e);
       console.warn('[Pipeline] Morning postview cleanup failed:', msg);
       errors.push(`morning postview cleanup: ${msg}`);
     }
@@ -280,7 +280,7 @@ export async function runDailyPipeline(
     games = await fetchGames(targetDate);
     console.log(`[Pipeline] ${games.length} games found`);
   } catch (e) {
-    errors.push(`fetchGames: ${e instanceof Error ? e.message : String(e)}`);
+    errors.push(`fetchGames: ${errMsg(e)}`);
     return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
@@ -338,7 +338,7 @@ export async function runDailyPipeline(
         return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
       }
     } catch (e) {
-      errors.push(`isNotificationSent results_sent: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`isNotificationSent results_sent: ${errMsg(e)}`);
       return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
     }
 
@@ -349,7 +349,7 @@ export async function runDailyPipeline(
       await generateAgentMemories(targetDate);
       console.log('[Pipeline] Calibration + Agent memories updated');
     } catch (e) {
-      errors.push(`compound: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`compound: ${errMsg(e)}`);
     }
 
     // cycle 167 — getVerifyResults assertSelectOk 통일 → throw 가능. finish()
@@ -358,7 +358,7 @@ export async function runDailyPipeline(
     try {
       verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
     } catch (e) {
-      errors.push(`getVerifyResults: ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`getVerifyResults: ${errMsg(e)}`);
     }
     try {
       if (verifyResults.length > 0) {
@@ -393,7 +393,7 @@ export async function runDailyPipeline(
       (existing ?? []).map((e: { game_id: number }) => e.game_id),
     );
   } catch (e) {
-    errors.push(`existing predictions: ${e instanceof Error ? e.message : String(e)}`);
+    errors.push(`existing predictions: ${errMsg(e)}`);
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: games.length, errors });
   }
 
@@ -480,7 +480,7 @@ export async function runDailyPipeline(
         }, { onConflict: 'team_id,season' });
         assertWriteOk(upsertResult, 'daily.team_season_stats.upsert');
       } catch (e) {
-        errors.push(`team_season_stats ${ts.team}: ${e instanceof Error ? e.message : String(e)}`);
+        errors.push(`team_season_stats ${ts.team}: ${errMsg(e)}`);
       }
     }
   }
@@ -628,7 +628,7 @@ export async function runDailyPipeline(
           debateSucceeded = true;
         }
       } catch (e) {
-        const debateErr = e instanceof Error ? e.message : String(e);
+        const debateErr = errMsg(e);
         console.error(`[Pipeline] Debate failed for ${game.homeTeam} vs ${game.awayTeam}:`, debateErr);
         errors.push(`Debate ${game.homeTeam}v${game.awayTeam}: ${debateErr}`);
       }
@@ -657,7 +657,7 @@ export async function runDailyPipeline(
         const updateResult = await db.from('games').update({ home_sp_id: spId }).eq('id', dbGameId);
         assertWriteOk(updateResult, 'daily.games.home_sp_id.update');
       } catch (e) {
-        errors.push(`games.home_sp_id ${game.homeTeam}v${game.awayTeam}: ${e instanceof Error ? e.message : String(e)}`);
+        errors.push(`games.home_sp_id ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
       }
     }
     if (game.awaySP && awayTeamId) {
@@ -666,7 +666,7 @@ export async function runDailyPipeline(
         const updateResult = await db.from('games').update({ away_sp_id: spId }).eq('id', dbGameId);
         assertWriteOk(updateResult, 'daily.games.away_sp_id.update');
       } catch (e) {
-        errors.push(`games.away_sp_id ${game.homeTeam}v${game.awayTeam}: ${e instanceof Error ? e.message : String(e)}`);
+        errors.push(`games.away_sp_id ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
       }
     }
 
@@ -741,7 +741,7 @@ export async function runDailyPipeline(
             const updateResult = await db.from('games').update({ weather: snap }).eq('id', dbGameId);
             assertWriteOk(updateResult, 'daily.games.weather.update');
           } catch (e) {
-            errors.push(`games.weather ${game.homeTeam}v${game.awayTeam}: ${e instanceof Error ? e.message : String(e)}`);
+            errors.push(`games.weather ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
           }
         }
       }
@@ -770,7 +770,7 @@ export async function runDailyPipeline(
     try {
       ({ count: totalToday } = assertSelectOk(totalTodayResult, 'predict_final gap count'));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg = errMsg(e);
       errors.push(`[GAP_COUNT_FAIL] ${msg}`);
     }
     if (totalToday !== null) {
@@ -933,7 +933,7 @@ async function handleDailySummaryNotification(
     });
     console.log(`[Pipeline] summary sent successfully (n=${todayTotal})`);
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
+    const msg = errMsg(e);
     const errLine = `[SUMMARY_FAIL@${stage}] ${msg}`;
     console.error('[Pipeline] daily summary notification failed:', errLine);
     errors.push(errLine);
@@ -1156,7 +1156,7 @@ async function prefetchSchedule(
     return {
       upserted: 0,
       range: `${fromStr} ~ ${toStr}`,
-      error: e instanceof Error ? e.message : String(e),
+      error: errMsg(e),
     };
   }
 
@@ -1220,7 +1220,7 @@ async function updateAccuracy(
       gamesResult, 'updateAccuracy games select',
     ));
   } catch (e) {
-    errors.push(`updateAccuracy games select: ${e instanceof Error ? e.message : String(e)}`);
+    errors.push(`updateAccuracy games select: ${errMsg(e)}`);
     return;
   }
   if (!gamesData) return;
@@ -1239,7 +1239,7 @@ async function updateAccuracy(
       predResult, 'updateAccuracy predictions select',
     ));
   } catch (e) {
-    errors.push(`updateAccuracy predictions select: ${e instanceof Error ? e.message : String(e)}`);
+    errors.push(`updateAccuracy predictions select: ${errMsg(e)}`);
     return;
   }
 

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { errMsg } from '@moneyball/shared';
 import { syncBatterStats } from '@moneyball/kbo-data';
 
 /**
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json(result);
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
+    const message = errMsg(e);
     console.error('[sync-batter-stats]', message);
     return Response.json({ error: message }, { status: 500 });
   }

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { errMsg } from '@moneyball/shared';
 import { runLiveUpdate } from '@moneyball/kbo-data';
 
 export async function POST(request: NextRequest) {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json(result);
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
+    const message = errMsg(e);
     console.error('[Live API]', message);
     return Response.json({ error: message }, { status: 500 });
   }

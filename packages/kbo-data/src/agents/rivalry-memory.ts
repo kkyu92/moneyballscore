@@ -11,7 +11,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, type TeamCode } from '@moneyball/shared';
+import { assertSelectOk, errMsg, type TeamCode } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -118,7 +118,7 @@ async function fetchRecentH2H(
   } catch (e) {
     console.error(
       '[rivalry-memory] fetchRecentH2H select failed:',
-      e instanceof Error ? e.message : String(e),
+      errMsg(e),
     );
     return [];
   }
@@ -171,7 +171,7 @@ async function fetchMemories(
   } catch (e) {
     console.error(
       '[rivalry-memory] fetchMemories select failed:',
-      e instanceof Error ? e.message : String(e),
+      errMsg(e),
     );
     return [];
   }

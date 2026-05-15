@@ -17,6 +17,7 @@
  * Auth: Bearer DEEPSEEK_API_KEY
  */
 
+import { errMsg } from '@moneyball/shared';
 import type { AgentResult } from './types';
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
@@ -147,7 +148,7 @@ export async function callDeepSeek<T>(
         durationMs: Date.now() - startTime,
       };
     } catch (e) {
-      lastError = e instanceof Error ? e.message : String(e);
+      lastError = errMsg(e);
       if (attempt < MAX_ATTEMPTS - 1) {
         await sleep(RETRY_BACKOFF_MS[attempt]);
         continue;

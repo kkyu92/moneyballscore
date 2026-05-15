@@ -243,3 +243,10 @@ export function getKSTMondayUtcIso(now: Date = new Date()): string {
   monday.setUTCHours(0, 0, 0, 0);
   return new Date(monday.getTime() - 9 * 60 * 60 * 1000).toISOString();
 }
+
+// catch (e) { ... e instanceof Error ? e.message : String(e) } 패턴 단일 source.
+// cycle 468 review-code heavy — silent drift family streak 15 cycle 째.
+// 14 file 41 곳 (daily.ts 22 / live.ts 4 / 기타) 통합.
+export function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
