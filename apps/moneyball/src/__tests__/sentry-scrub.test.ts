@@ -102,4 +102,53 @@ describe('scrubSentryEvent', () => {
     expect(out?.request).toBeUndefined();
     expect(out?.breadcrumbs).toBeUndefined();
   });
+
+  // cycle 442 — Y/C 후속 (Sentry/PII spec C-2). env 변수 키가 객체 key 로 dump 시
+  // 'token'/'secret' 단일 키만으론 정확 매칭 실패 → SUPABASE_SERVICE_ROLE_KEY 등
+  // silent 노출. 명시 키 + suffix 매칭 회귀 가드.
+  it('scrubs env-style keys dumped as object keys (TELEGRAM_BOT_TOKEN/SERVICE_ROLE_KEY/PAT)', () => {
+    const ev = emptyEvent();
+    ev.extra = {
+      env: {
+        SUPABASE_SERVICE_ROLE_KEY: 'eyJhbGciOi...',
+        TELEGRAM_BOT_TOKEN: '12345:AAAA',
+        SENTRY_AUTH_TOKEN: 'sntrys_xxx',
+        PLAYBOOK_PAT: 'ghp_xxx',
+        SENTRY_WEBHOOK_SECRET: 'whsec_xxx',
+        NODE_ENV: 'production',
+      },
+    } as ErrorEvent['extra'];
+    const out = scrubSentryEvent(ev);
+    const env = (out?.extra as Record<string, unknown>).env as Record<string, unknown>;
+    expect(env.SUPABASE_SERVICE_ROLE_KEY).toBe(FILTERED);
+    expect(env.TELEGRAM_BOT_TOKEN).toBe(FILTERED);
+    expect(env.SENTRY_AUTH_TOKEN).toBe(FILTERED);
+    expect(env.PLAYBOOK_PAT).toBe(FILTERED);
+    expect(env.SENTRY_WEBHOOK_SECRET).toBe(FILTERED);
+    expect(env.NODE_ENV).toBe('production');
+  });
+
+  it('scrubs dynamic-prefix keys via suffix match (_token/_secret/_password)', () => {
+    const ev = emptyEvent();
+    ev.extra = {
+      MY_CLIENT_SECRET: 's1',
+      X_BOT_TOKEN: 't1',
+      ADMIN_PASSWORD: 'p1',
+      legacy_passwd: 'p2',
+      // false positive 회피 — `_key`/`_id` 는 suffix list 제외
+      region_key: 'kr',
+      game_id: '12345',
+      cache_key: 'abc',
+    } as ErrorEvent['extra'];
+    const out = scrubSentryEvent(ev);
+    const ex = out?.extra as Record<string, unknown>;
+    expect(ex.MY_CLIENT_SECRET).toBe(FILTERED);
+    expect(ex.X_BOT_TOKEN).toBe(FILTERED);
+    expect(ex.ADMIN_PASSWORD).toBe(FILTERED);
+    expect(ex.legacy_passwd).toBe(FILTERED);
+    // false positive 회피 — pass-through
+    expect(ex.region_key).toBe('kr');
+    expect(ex.game_id).toBe('12345');
+    expect(ex.cache_key).toBe('abc');
+  });
 });
