@@ -1,10 +1,17 @@
 import { describe, it, expect } from 'vitest';
+import { CURRENT_SCORING_RULE } from '@moneyball/shared';
 import {
   isFallbackReasoning,
   presentJudgeReasoning,
   presentJudgeReasoningWithFallback,
   FALLBACK_USER_TEXT,
 } from '../judgeReasoning';
+
+// cycle 483 review-code (heavy) — fixture 의 'v1.8' 하드코딩 제거 +
+// debate.ts:84 런타임 source (`${CURRENT_SCORING_RULE}`) 와 단일 source 정렬.
+// silent drift family streak 26 cycle 째 (테스트 fixture vs 런타임 literal mismatch).
+const PREGAME_FALLBACK = `에이전트 토론 불가. 정량 모델 ${CURRENT_SCORING_RULE} 결과 사용.`;
+const POSTVIEW_FALLBACK = '사후 분석 LLM 실패. factor 편향 기반 자동 fallback.';
 
 describe('isFallbackReasoning', () => {
   it('null / undefined / empty → false', () => {
@@ -15,16 +22,12 @@ describe('isFallbackReasoning', () => {
   });
 
   it('debate.ts pre_game fallback prefix 감지', () => {
-    expect(
-      isFallbackReasoning('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.'),
-    ).toBe(true);
+    expect(isFallbackReasoning(PREGAME_FALLBACK)).toBe(true);
     expect(isFallbackReasoning('에이전트 토론 불가')).toBe(true);
   });
 
   it('postview.ts fallback prefix 감지', () => {
-    expect(
-      isFallbackReasoning('사후 분석 LLM 실패. factor 편향 기반 자동 fallback.'),
-    ).toBe(true);
+    expect(isFallbackReasoning(POSTVIEW_FALLBACK)).toBe(true);
   });
 
   it('정상 reasoning → false', () => {
@@ -49,13 +52,9 @@ describe('presentJudgeReasoning', () => {
     expect(presentJudgeReasoning('   ')).toBeUndefined();
   });
 
-  it('fallback reasoning → 사용자 문구 swap (dev 용어 v1.8 leak 차단)', () => {
-    expect(
-      presentJudgeReasoning('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.'),
-    ).toBe(FALLBACK_USER_TEXT);
-    expect(
-      presentJudgeReasoning('사후 분석 LLM 실패. factor 편향 기반 자동 fallback.'),
-    ).toBe(FALLBACK_USER_TEXT);
+  it('fallback reasoning → 사용자 문구 swap (dev 용어 scoring_rule leak 차단)', () => {
+    expect(presentJudgeReasoning(PREGAME_FALLBACK)).toBe(FALLBACK_USER_TEXT);
+    expect(presentJudgeReasoning(POSTVIEW_FALLBACK)).toBe(FALLBACK_USER_TEXT);
   });
 
   it('정상 reasoning → 원본 그대로', () => {
@@ -72,14 +71,13 @@ describe('presentJudgeReasoning', () => {
 
   it('maxLength 무시 — fallback 은 swap 우선 (truncate X)', () => {
     expect(
-      presentJudgeReasoning('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.', {
-        maxLength: 10,
-      }),
+      presentJudgeReasoning(PREGAME_FALLBACK, { maxLength: 10 }),
     ).toBe(FALLBACK_USER_TEXT);
   });
 
-  it('사용자 문구에 "v1.8" / "에이전트 토론" / "factor 편향" dev 용어 부재', () => {
+  it('사용자 문구에 scoring_rule / "에이전트 토론" / "factor 편향" dev 용어 부재', () => {
     expect(FALLBACK_USER_TEXT).not.toMatch(/v1\.\d/);
+    expect(FALLBACK_USER_TEXT).not.toMatch(/v2\.\d/);
     expect(FALLBACK_USER_TEXT).not.toMatch(/에이전트 토론/);
     expect(FALLBACK_USER_TEXT).not.toMatch(/factor 편향/);
     expect(FALLBACK_USER_TEXT).not.toMatch(/fallback/i);
@@ -96,10 +94,10 @@ describe('presentJudgeReasoningWithFallback', () => {
 
   it('fallback reasoning → { text: FALLBACK_USER_TEXT, isFallback: true }', () => {
     expect(
-      presentJudgeReasoningWithFallback('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.'),
+      presentJudgeReasoningWithFallback(PREGAME_FALLBACK),
     ).toEqual({ text: FALLBACK_USER_TEXT, isFallback: true });
     expect(
-      presentJudgeReasoningWithFallback('사후 분석 LLM 실패. factor 편향 기반 자동 fallback.'),
+      presentJudgeReasoningWithFallback(POSTVIEW_FALLBACK),
     ).toEqual({ text: FALLBACK_USER_TEXT, isFallback: true });
   });
 
@@ -121,9 +119,7 @@ describe('presentJudgeReasoningWithFallback', () => {
 
   it('fallback + maxLength → swap 우선 (truncate X) + isFallback true', () => {
     expect(
-      presentJudgeReasoningWithFallback('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.', {
-        maxLength: 10,
-      }),
+      presentJudgeReasoningWithFallback(PREGAME_FALLBACK, { maxLength: 10 }),
     ).toEqual({ text: FALLBACK_USER_TEXT, isFallback: true });
   });
 });
