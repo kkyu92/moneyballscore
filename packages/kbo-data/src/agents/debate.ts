@@ -1,4 +1,4 @@
-import type { TeamCode } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, type TeamCode } from '@moneyball/shared';
 import { runTeamAgent } from './team-agent';
 import { runJudgeAgent } from './judge-agent';
 import { runCalibrationAgent, type PredictionHistory } from './calibration-agent';
@@ -81,7 +81,7 @@ export async function runDebate(
     homeArgSummary: homeArg.reasoning,
     awayArgSummary: awayArg.reasoning,
     calibrationApplied: null,
-    reasoning: '에이전트 토론 불가. 정량 모델 v1.8 결과 사용.',
+    reasoning: `에이전트 토론 불가. 정량 모델 ${CURRENT_SCORING_RULE} 결과 사용.`,
     predictedWinner: quantitativeProb >= 0.5 ? homeTeam : awayTeam,
   };
 

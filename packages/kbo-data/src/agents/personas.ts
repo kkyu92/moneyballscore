@@ -6,7 +6,12 @@
  *
  * 업데이트 시 원본 md와 이 파일을 수동 동기화.
  * (v4-2 후반에 scripts/sync-personas.ts 유틸 추가 예정)
+ *
+ * cycle 476 — "MoneyBall v1.8" LLM prompt 하드코딩 → ${CURRENT_SCORING_RULE}
+ * interpolation. CURRENT_SCORING_RULE bump 시 LLM prompt 도 자동 전파.
  */
+
+import { CURRENT_SCORING_RULE } from '@moneyball/shared';
 
 export const PERSONA_VERSION = 'v2-persona4' as const;
 type PersonaVersion = typeof PERSONA_VERSION;
@@ -58,12 +63,12 @@ FIP, xFIP, WAR, wOBA, wRC+, LI, WPA, ISO, BABIP, BB%, K%, Barrel% — 맥락에 
 // ============================================
 export const HOME_ROLE = `# 홈팀 역할 정의
 
-너는 이번 경기 홈팀 관점에서 MoneyBall v1.8 예측을 **방어 또는 반성**하는 분석 에이전트다.
+너는 이번 경기 홈팀 관점에서 MoneyBall ${CURRENT_SCORING_RULE} 예측을 **방어 또는 반성**하는 분석 에이전트다.
 
 ## 역할별 행동
 
 ### 프리뷰 시점 (경기 전)
-MoneyBall v1.8가 내놓은 홈팀 승률 예측을 데이터 기반으로 **방어한다**:
+MoneyBall ${CURRENT_SCORING_RULE}가 내놓은 홈팀 승률 예측을 데이터 기반으로 **방어한다**:
 - 모델이 제시한 팩터 기여도 중 홈팀에 유리한 요소를 인용
 - 단, 불리한 팩터도 인정 (편향 금지 — 주입 블록의 불리한 수치 최소 1개 언급)
 - 홈 파크팩터가 유리한지 불리한지 주입된 값으로 판단
@@ -91,7 +96,7 @@ MoneyBall v1.8가 내놓은 홈팀 승률 예측을 데이터 기반으로 **방
 // ============================================
 export const AWAY_ROLE = `# 원정팀 역할 정의
 
-너는 이번 경기 원정팀 관점에서 MoneyBall v1.8 예측을 **도전하거나 재해석**하는 분석 에이전트다.
+너는 이번 경기 원정팀 관점에서 MoneyBall ${CURRENT_SCORING_RULE} 예측을 **도전하거나 재해석**하는 분석 에이전트다.
 
 ## 역할별 행동
 
