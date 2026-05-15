@@ -179,6 +179,11 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         // 사이 in_game 라이브 row 가 모두 'v1.7-revert-live' 라벨 박제 → /accuracy
         // mv 별 Brier 분석에서 stale 분류. 본 fix 부터 'v1.8-live'.
         model_version: 'v1.8-live',
+        // cycle 443 review-code heavy silent drift fix — pre_game (daily.ts:691) +
+        // post_game (postview-daily.ts:204) 양쪽 scoring_rule 박제하는데 live in_game
+        // upsert 만 누락 → DB scoring_rule=NULL. /accuracy + /debug 의 scoring_rule
+        // 별 Brier 분석에서 in_game row 영구 분류 X. daily.ts 와 동일 'v1.8' 박제.
+        scoring_rule: 'v1.8',
         reasoning: {
           preGameHomeProb,
           adjustedHomeProb,
