@@ -4,6 +4,7 @@ import {
   buildConfidenceTiers,
   buildDayOfWeek,
   buildFallbackStats,
+  buildFallbackDailyTrend,
   buildRecentForm,
   buildVersionHistory,
   buildWeeklyTrend,
@@ -382,5 +383,84 @@ describe('buildFallbackStats', () => {
       { model_version: 'v1.8', predicted_at: '2026-05-14T03:00:00Z' },
     ]);
     expect(s.latestFallbackAt).toBe('2026-05-14T03:00:00Z');
+  });
+});
+
+// cycle 460 polish-ui heavy — spec scope A: 일별 stacked bar 데이터.
+describe('buildFallbackDailyTrend', () => {
+  // 2026-05-15 12:00 KST = 2026-05-15 03:00 UTC
+  const NOW = new Date('2026-05-15T03:00:00Z').getTime();
+
+  it('빈 배열 → days 만큼 빈 bucket', () => {
+    const t = buildFallbackDailyTrend([], 7, NOW);
+    expect(t).toHaveLength(7);
+    expect(t.every((b) => b.total === 0)).toBe(true);
+    // 시간 순서: 가장 오래된 부터 (i=days-1) → 가장 최근 (i=0)
+    expect(t[0].dateISO).toBe('2026-05-09');
+    expect(t[6].dateISO).toBe('2026-05-15');
+  });
+
+  it('KST date 기준 bucket — UTC 와 9시간 차이', () => {
+    // 2026-05-13 23:00 KST = 2026-05-13 14:00 UTC
+    const t = buildFallbackDailyTrend(
+      [{ model_version: 'v2.0-debate', predicted_at: '2026-05-13T14:00:00Z' }],
+      7,
+      NOW,
+    );
+    const may13 = t.find((b) => b.dateISO === '2026-05-13');
+    expect(may13?.llmActive).toBe(1);
+    expect(may13?.total).toBe(1);
+  });
+
+  it('LLM 활성 + fallback 같은 날 stacked', () => {
+    const t = buildFallbackDailyTrend(
+      [
+        { model_version: 'v2.0-debate', predicted_at: '2026-05-14T05:00:00Z' },
+        { model_version: 'v1.8', predicted_at: '2026-05-14T06:00:00Z' },
+        { model_version: 'v1.8-postview', predicted_at: '2026-05-14T07:00:00Z' },
+      ],
+      7,
+      NOW,
+    );
+    const may14 = t.find((b) => b.dateISO === '2026-05-14');
+    expect(may14?.llmActive).toBe(1);
+    expect(may14?.fallback).toBe(2);
+    expect(may14?.total).toBe(3);
+  });
+
+  it('window 외 row 는 무시', () => {
+    const t = buildFallbackDailyTrend(
+      [
+        { model_version: 'v2.0-debate', predicted_at: '2026-05-01T05:00:00Z' }, // 14일 전 (out of 7d)
+        { model_version: 'v1.8', predicted_at: '2026-05-14T06:00:00Z' },
+      ],
+      7,
+      NOW,
+    );
+    const total = t.reduce((s, b) => s + b.total, 0);
+    expect(total).toBe(1);
+  });
+
+  it('v1.7-revert / null 제외 (legacy 잡음 차단)', () => {
+    const t = buildFallbackDailyTrend(
+      [
+        { model_version: 'v1.7-revert', predicted_at: '2026-05-13T05:00:00Z' },
+        { model_version: null, predicted_at: '2026-05-13T06:00:00Z' },
+        { model_version: 'v2.0-debate', predicted_at: '2026-05-13T07:00:00Z' },
+      ],
+      7,
+      NOW,
+    );
+    const may13 = t.find((b) => b.dateISO === '2026-05-13');
+    expect(may13?.total).toBe(1);
+    expect(may13?.llmActive).toBe(1);
+  });
+
+  it('dateLabel = M/D 형식 (leading zero 없음)', () => {
+    const t = buildFallbackDailyTrend([], 7, NOW);
+    const may9 = t.find((b) => b.dateISO === '2026-05-09');
+    expect(may9?.dateLabel).toBe('5/9');
+    const may15 = t.find((b) => b.dateISO === '2026-05-15');
+    expect(may15?.dateLabel).toBe('5/15');
   });
 });

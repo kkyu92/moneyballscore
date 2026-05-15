@@ -11,6 +11,7 @@ import {
   type Bucket,
   type ConfidenceTier,
   type FallbackStatsRow,
+  type FallbackDailyBucket,
   bucketize,
   brierScore,
   calibrationGap,
@@ -20,6 +21,7 @@ import {
   buildConfidenceTiers,
   buildVersionHistory,
   buildFallbackStats,
+  buildFallbackDailyTrend,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -178,12 +180,14 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 export default async function AccuracyPage() {
   const supabase = await createClient();
 
-  // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화용 최근 7일 query.
+  // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화용 query.
   // CURRENT_MODEL_FILTER (debate_version=v2-persona4) 제거 — fallback row 도 포함해서 비율 측정.
   // cycle 385 review-code heavy — pre_game 만 query 하면 postview fallback 분류 (v1.8-postview)
   // 가 silent. buildFallbackStats 는 양쪽 mv 모두 지원하므로 prediction_type 필터 확장.
+  // cycle 460 polish-ui heavy — spec scope A: 30일 window + 일별 stacked bar 추가.
   // eslint-disable-next-line react-hooks/purity -- Server Component request-scoped Date.now() 의도된 동작
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fallbackWindowStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const FALLBACK_TREND_DAYS = 30;
 
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([
     supabase
@@ -213,7 +217,7 @@ export default async function AccuracyPage() {
       .from('predictions')
       .select('model_version, predicted_at')
       .in('prediction_type', ['pre_game', 'post_game'])
-      .gte('predicted_at', sevenDaysAgo)
+      .gte('predicted_at', fallbackWindowStart)
       .order('predicted_at', { ascending: false }),
   ]);
 
@@ -227,7 +231,9 @@ export default async function AccuracyPage() {
   const rows = (data ?? []) as PredRow[];
 
   const { data: fallbackData } = assertSelectOk(fallbackResult, 'AccuracyPage fallback');
-  const fallbackStats = buildFallbackStats((fallbackData ?? []) as FallbackStatsRow[]);
+  const fallbackRows = (fallbackData ?? []) as FallbackStatsRow[];
+  const fallbackStats = buildFallbackStats(fallbackRows);
+  const fallbackTrend = buildFallbackDailyTrend(fallbackRows, FALLBACK_TREND_DAYS);
   const n = rows.length;
   const correct = rows.filter((r) => r.is_correct).length;
   const overallAcc = n > 0 ? correct / n : 0;
@@ -287,10 +293,10 @@ export default async function AccuracyPage() {
       </section>
 
       {fallbackStats.total > 0 && fallbackStats.fallback > 0 && (
-        <section className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5 space-y-2">
+        <section className="bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5 space-y-3">
           <div className="flex items-baseline justify-between gap-3 flex-wrap">
             <h2 className="text-sm font-bold text-amber-900 dark:text-amber-100">
-              최근 7일 AI 분석 활성률
+              최근 30일 AI 토론 사용률
             </h2>
             <span className="text-xs text-amber-700 dark:text-amber-200/80">
               {fallbackStats.llmActive}/{fallbackStats.total} AI 추론 활성 ({((1 - fallbackStats.fallbackRate) * 100).toFixed(0)}%)
@@ -300,6 +306,7 @@ export default async function AccuracyPage() {
             나머지 {fallbackStats.fallback}건은 정량 모델만 사용했습니다 (AI 토론·사후분석 미적용).
             보통 API 한도·일시 장애 영향이며, 적중 기록은 AI 토론이 적용된 예측만 사용합니다.
           </p>
+          <FallbackTrendChart trend={fallbackTrend} />
           {fallbackStats.latestFallbackAt && (
             <p className="text-[11px] text-amber-700/70 dark:text-amber-200/60 font-mono">
               최근 정량 fallback:{' '}
@@ -769,6 +776,78 @@ export default async function AccuracyPage() {
         <p>• 예측은 정보 제공 목적이며, 베팅에 사용하지 마세요.</p>
       </footer>
     </main>
+  );
+}
+
+// cycle 460 polish-ui heavy — spec scope A: AI 토론 vs 정량 fallback 일별 stacked bar.
+// LLM 활성 = brand-500, fallback = amber-500. 빈 날 = 회색 미니 바.
+function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
+  const maxTotal = trend.reduce((m, b) => Math.max(m, b.total), 0);
+  if (maxTotal === 0) return null;
+  const CHART_H = 80;
+  return (
+    <div className="space-y-1">
+      <div className="overflow-x-auto">
+        <div
+          className="flex items-end gap-[2px] min-w-[300px]"
+          style={{ height: CHART_H + 14 }}
+          role="img"
+          aria-label="최근 30일 AI 토론 사용 vs 정량 fallback 일별 분포"
+        >
+          {trend.map((b) => {
+            const activeH = b.total > 0 ? (b.llmActive / maxTotal) * CHART_H : 0;
+            const fallbackH = b.total > 0 ? (b.fallback / maxTotal) * CHART_H : 0;
+            const showLabel = b.dateISO.endsWith('-01') || b.dateISO.endsWith('-15');
+            const tooltip = `${b.dateLabel}: 토론 ${b.llmActive} / fallback ${b.fallback}`;
+            return (
+              <div
+                key={b.dateISO}
+                className="flex-1 flex flex-col items-center justify-end min-w-[6px]"
+                title={tooltip}
+              >
+                <div
+                  className="w-full flex flex-col justify-end"
+                  style={{ height: CHART_H }}
+                >
+                  {fallbackH > 0 && (
+                    <div
+                      className="w-full bg-amber-500 dark:bg-amber-400 rounded-t-sm"
+                      style={{ height: `${fallbackH}px` }}
+                    />
+                  )}
+                  {activeH > 0 && (
+                    <div
+                      className={`w-full bg-brand-500 ${fallbackH === 0 ? 'rounded-t-sm' : ''}`}
+                      style={{ height: `${activeH}px` }}
+                    />
+                  )}
+                  {b.total === 0 && (
+                    <div className="w-full h-[2px] bg-amber-200/40 dark:bg-amber-700/30 mt-auto" />
+                  )}
+                </div>
+                <span className="text-[9px] text-amber-700/60 dark:text-amber-200/50 mt-1 h-3">
+                  {showLabel ? b.dateLabel : ''}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex gap-3 text-[10px] text-amber-700/70 dark:text-amber-200/60 pt-1">
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-brand-500" />
+          AI 토론 활성
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-amber-500 dark:bg-amber-400" />
+          정량 fallback
+        </span>
+        <span className="flex items-center gap-1 opacity-70">
+          <span className="inline-block w-2.5 h-0.5 bg-amber-200/60 dark:bg-amber-700/40" />
+          예측 없음
+        </span>
+      </div>
+    </div>
   );
 }
 
