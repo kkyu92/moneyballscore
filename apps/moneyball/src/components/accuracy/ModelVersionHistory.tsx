@@ -1,3 +1,4 @@
+import { CURRENT_SCORING_RULE } from '@moneyball/shared';
 import type { VersionHistoryRow } from '@/lib/accuracy/buildAccuracyData';
 
 interface Props {
@@ -25,7 +26,7 @@ export function ModelVersionHistory({ versions }: Props) {
             {versions.map((v) => {
               const pct = v.accuracy !== null ? Math.round(v.accuracy * 100) : null;
               const ciPct = v.n > 0 && v.n < 30 ? Math.round(v.ci95Half * 100) : null;
-              const isActive = v.version === 'v1.8';
+              const isActive = v.version === CURRENT_SCORING_RULE;
               const barColor =
                 pct === null || v.n === 0
                   ? 'bg-gray-200 dark:bg-gray-700'
