@@ -4,7 +4,11 @@ import { buildAllTeamAccuracy, buildMatchupData } from '@/lib/standings/buildTea
 import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
 import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
-import { assertSelectOk, shortTeamName } from '@moneyball/shared';
+import {
+  assertSelectOk,
+  shortTeamName,
+  DEBATE_VERSION_PREGAME,
+} from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
   type PredRow,
@@ -770,8 +774,8 @@ export default async function AccuracyPage() {
       <footer className="text-xs text-gray-400 dark:text-gray-500 space-y-1 border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
         <p>• 이 페이지의 모든 데이터는 실제 KBO 경기 결과를 기준으로 자동 집계됩니다.</p>
         <p>
-          • 현재 운영 중인 AI 에이전트 토론 시스템 (v2-persona4) 기준. 시스템
-          업그레이드 시 집계 기준이 변경될 수 있습니다.
+          • 현재 운영 중인 AI 에이전트 토론 시스템 ({DEBATE_VERSION_PREGAME})
+          기준. 시스템 업그레이드 시 집계 기준이 변경될 수 있습니다.
         </p>
         <p>• 예측은 정보 제공 목적이며, 베팅에 사용하지 마세요.</p>
       </footer>
