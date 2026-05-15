@@ -1,7 +1,7 @@
 // cycle 450 fix-incident heavy — 사용자 가시 카드/패널에서 dev 용어 leak 차단.
-// debate.ts pre_game fallback ("에이전트 토론 불가. 정량 모델 v1.8 결과 사용.") +
+// debate.ts pre_game fallback ("에이전트 토론 불가. 정량 모델 ${CURRENT_SCORING_RULE} 결과 사용.") +
 // postview.ts ("사후 분석 LLM 실패. factor 편향 기반 자동 fallback.") 사용자 카드 노출 시
-// "v1.8" / "factor 편향" dev 용어 leak. UI 문구 사용자 언어 룰 (memory feedback_ui_copy_no_dev_jargon).
+// scoring_rule 값 / "factor 편향" dev 용어 leak. UI 문구 사용자 언어 룰 (memory feedback_ui_copy_no_dev_jargon).
 // DB 원본 reasoning 변경 X — observability/debug 안전. 사용자 가시 path 만 swap.
 
 const FALLBACK_PREFIXES = ['에이전트 토론 불가', '사후 분석 LLM 실패'] as const;
