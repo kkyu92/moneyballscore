@@ -1,4 +1,4 @@
-import type { TeamCode } from '@moneyball/shared';
+import type { ModelVersion, TeamCode } from '@moneyball/shared';
 import { extractReasoningHomeWinProb } from '../types';
 
 // `buildDailySummary` (daily.ts) read 측 silent drift 차단:
@@ -22,11 +22,15 @@ export type SummaryPrediction = {
   predictedWinner: TeamCode;
   confidence: number;
   homeWinProb: number;
+  // cycle 463 polish-ui scope D — Telegram daily summary fallback 비율 가시화.
+  // null = 라벨 박제 X (옛 row), ModelVersion literal = 정상/fallback 분류 input.
+  modelVersion: ModelVersion | null;
 };
 
 export type SummaryRow = {
   confidence: number | null;
   reasoning: { homeWinProb?: number } | null;
+  model_version: string | null;
   winner: { code: string } | null;
   game: {
     home_team: { code: string } | null;
@@ -41,5 +45,6 @@ export function buildSummaryPredictions(rows: SummaryRow[]): SummaryPrediction[]
     predictedWinner: p.winner?.code as TeamCode,
     confidence: p.confidence ?? 0,
     homeWinProb: extractReasoningHomeWinProb(p.reasoning, 'daily-summary.buildSummaryPredictions'),
+    modelVersion: (p.model_version ?? null) as ModelVersion | null,
   }));
 }
