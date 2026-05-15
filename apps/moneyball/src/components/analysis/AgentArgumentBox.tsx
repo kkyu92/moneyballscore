@@ -1,5 +1,6 @@
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from '../shared/TeamLogo';
+import { QuantOnlyBadge } from '../shared/QuantOnlyBadge';
 
 interface AgentArgumentBoxProps {
   team: TeamCode;
@@ -10,6 +11,7 @@ interface AgentArgumentBoxProps {
   opponentWeaknesses: string[];
   reasoning: string;
   emphasized?: boolean; // 비대칭 강조 — 확신도 높은 쪽
+  isQuantOnlyFallback?: boolean;
 }
 
 /**
@@ -28,6 +30,7 @@ export function AgentArgumentBox({
   opponentWeaknesses,
   reasoning,
   emphasized = false,
+  isQuantOnlyFallback = false,
 }: AgentArgumentBoxProps) {
   const teamInfo = KBO_TEAMS[team];
   const confPct = Math.round(confidence * 100);
@@ -42,7 +45,7 @@ export function AgentArgumentBox({
       aria-labelledby={titleId}
       className={`bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 ${borderColor} p-4 md:p-5 transition-transform ${emphasisClass}`}
     >
-      <header className="flex items-center justify-between mb-3">
+      <header className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <TeamLogo team={team} size={32} className="w-full h-full" />
@@ -50,6 +53,7 @@ export function AgentArgumentBox({
           <h3 id={titleId} className="text-sm font-semibold">
             {teamInfo.name} 에이전트
           </h3>
+          {isQuantOnlyFallback && <QuantOnlyBadge variant="light" />}
         </div>
         <span
           className="text-lg font-bold text-brand-600"

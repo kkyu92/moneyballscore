@@ -1,4 +1,5 @@
 import { KBO_TEAMS, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { QuantOnlyBadge } from "../shared/QuantOnlyBadge";
 
 interface JudgeReasoningCardProps {
   homeTeam: TeamCode;
@@ -6,6 +7,7 @@ interface JudgeReasoningCardProps {
   judgeReasoning: string;
   homeArgSummary?: string | null;
   awayArgSummary?: string | null;
+  isQuantOnlyFallback?: boolean;
 }
 
 /**
@@ -20,6 +22,7 @@ export function JudgeReasoningCard({
   judgeReasoning,
   homeArgSummary,
   awayArgSummary,
+  isQuantOnlyFallback = false,
 }: JudgeReasoningCardProps) {
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
@@ -33,6 +36,7 @@ export function JudgeReasoningCard({
           AI
         </span>
         <span className="font-medium text-gray-700 dark:text-gray-200">심판 에이전트 분석</span>
+        {isQuantOnlyFallback && <QuantOnlyBadge variant="light" />}
       </div>
 
       <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap">

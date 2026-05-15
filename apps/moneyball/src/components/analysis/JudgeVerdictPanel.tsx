@@ -1,5 +1,6 @@
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from '../shared/TeamLogo';
+import { QuantOnlyBadge } from '../shared/QuantOnlyBadge';
 
 interface JudgeVerdictPanelProps {
   homeTeam: TeamCode;
@@ -9,6 +10,7 @@ interface JudgeVerdictPanelProps {
   confidence: number;   // 0 ~ 1
   reasoning: string;
   calibrationApplied?: string | null;
+  isQuantOnlyFallback?: boolean;
 }
 
 /**
@@ -25,6 +27,7 @@ export function JudgeVerdictPanel({
   confidence,
   reasoning,
   calibrationApplied,
+  isQuantOnlyFallback = false,
 }: JudgeVerdictPanelProps) {
   const winnerTeam = KBO_TEAMS[predictedWinner];
   const isHomeWinner = predictedWinner === homeTeam;
@@ -38,10 +41,13 @@ export function JudgeVerdictPanel({
       aria-labelledby="judge-verdict-title"
       className="bg-gradient-to-br from-[var(--color-bg-hero-start)] to-[var(--color-bg-hero-end)] rounded-2xl p-6 md:p-8 text-white shadow-xl"
     >
-      <header className="flex items-center justify-between mb-4">
-        <h2 id="judge-verdict-title" className="text-sm font-medium text-brand-200">
-          🎯 AI 심판 최종 판정
-        </h2>
+      <header className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <h2 id="judge-verdict-title" className="text-sm font-medium text-brand-200">
+            🎯 AI 심판 최종 판정
+          </h2>
+          {isQuantOnlyFallback && <QuantOnlyBadge variant="dark" />}
+        </div>
         <span className="text-xs text-brand-300">
           판정 신뢰도 {confPct}%
         </span>

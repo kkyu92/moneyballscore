@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   isFallbackReasoning,
   presentJudgeReasoning,
+  presentJudgeReasoningWithFallback,
   FALLBACK_USER_TEXT,
 } from '../judgeReasoning';
 
@@ -82,5 +83,47 @@ describe('presentJudgeReasoning', () => {
     expect(FALLBACK_USER_TEXT).not.toMatch(/에이전트 토론/);
     expect(FALLBACK_USER_TEXT).not.toMatch(/factor 편향/);
     expect(FALLBACK_USER_TEXT).not.toMatch(/fallback/i);
+  });
+});
+
+describe('presentJudgeReasoningWithFallback', () => {
+  it('null / undefined / empty → undefined', () => {
+    expect(presentJudgeReasoningWithFallback(null)).toBeUndefined();
+    expect(presentJudgeReasoningWithFallback(undefined)).toBeUndefined();
+    expect(presentJudgeReasoningWithFallback('')).toBeUndefined();
+    expect(presentJudgeReasoningWithFallback('   ')).toBeUndefined();
+  });
+
+  it('fallback reasoning → { text: FALLBACK_USER_TEXT, isFallback: true }', () => {
+    expect(
+      presentJudgeReasoningWithFallback('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.'),
+    ).toEqual({ text: FALLBACK_USER_TEXT, isFallback: true });
+    expect(
+      presentJudgeReasoningWithFallback('사후 분석 LLM 실패. factor 편향 기반 자동 fallback.'),
+    ).toEqual({ text: FALLBACK_USER_TEXT, isFallback: true });
+  });
+
+  it('정상 reasoning → { text: 원본, isFallback: false }', () => {
+    const text = '한화의 불펜 안정성과 홈 어드밴티지가 결합되어 우세.';
+    expect(presentJudgeReasoningWithFallback(text)).toEqual({
+      text,
+      isFallback: false,
+    });
+  });
+
+  it('정상 reasoning + maxLength → truncate + isFallback false', () => {
+    const long = 'a'.repeat(150);
+    expect(presentJudgeReasoningWithFallback(long, { maxLength: 100 })).toEqual({
+      text: 'a'.repeat(100) + '...',
+      isFallback: false,
+    });
+  });
+
+  it('fallback + maxLength → swap 우선 (truncate X) + isFallback true', () => {
+    expect(
+      presentJudgeReasoningWithFallback('에이전트 토론 불가. 정량 모델 v1.8 결과 사용.', {
+        maxLength: 10,
+      }),
+    ).toEqual({ text: FALLBACK_USER_TEXT, isFallback: true });
   });
 });
