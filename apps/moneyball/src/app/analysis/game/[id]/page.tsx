@@ -17,7 +17,7 @@ import { ShareButtons } from '@/components/share/ShareButtons';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
-import { presentJudgeReasoning } from '@/lib/predictions/judgeReasoning';
+import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
 export const revalidate = 600;
 
@@ -237,6 +237,11 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   };
 
   const homeWinProbForOverview = verdict?.homeWinProb ?? 0.5;
+  const verdictPresented = verdict
+    ? presentJudgeReasoningWithFallback(verdict.reasoning)
+    : undefined;
+  const isQuantOnlyFallback = verdictPresented?.isFallback ?? false;
+
   const overview = buildGameOverview({
     homeWinProb: homeWinProbForOverview,
     homeSPFip: preGame.home_sp_fip,
@@ -348,8 +353,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           predictedWinner={verdict.predictedWinner}
           homeWinProb={verdict.homeWinProb}
           confidence={verdict.confidence}
-          reasoning={presentJudgeReasoning(verdict.reasoning) ?? ''}
+          reasoning={verdictPresented?.text ?? ''}
           calibrationApplied={verdict.calibrationApplied}
+          isQuantOnlyFallback={isQuantOnlyFallback}
         />
       ) : (
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
@@ -373,6 +379,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
               opponentWeaknesses={awayArg.opponentWeaknesses ?? []}
               reasoning={awayArg.reasoning}
               emphasized={awayArg.confidence > homeArg.confidence}
+              isQuantOnlyFallback={isQuantOnlyFallback}
             />
             <AgentArgumentBox
               team={homeTeam}
@@ -383,6 +390,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
               opponentWeaknesses={homeArg.opponentWeaknesses ?? []}
               reasoning={homeArg.reasoning}
               emphasized={homeArg.confidence > awayArg.confidence}
+              isQuantOnlyFallback={isQuantOnlyFallback}
             />
           </div>
         </section>

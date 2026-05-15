@@ -20,7 +20,10 @@ import {
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
-import { presentJudgeReasoning } from "@/lib/predictions/judgeReasoning";
+import {
+  presentJudgeReasoning,
+  presentJudgeReasoningWithFallback,
+} from "@/lib/predictions/judgeReasoning";
 import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import { UserVsAIScorecard } from "@/components/picks/UserVsAIScorecard";
@@ -507,20 +510,26 @@ export default async function HomePage() {
       <LiveScoreboard />
 
       {/* 고확신 예측 Hero — 오늘 가장 강한 확신 경기 1건 (flag enabled 시) */}
-      {hasBigMatchHero ? (
-        <BigMatchDebateCard
-          gameId={bigMatch.id}
-          homeTeam={bigMatch.home_team?.code as TeamCode}
-          awayTeam={bigMatch.away_team?.code as TeamCode}
-          homeWinProb={bigMatchDebate.verdict?.homeWinProb ?? 0.5}
-          predictedWinner={bigMatchDebate.verdict?.predictedWinner as TeamCode}
-          reasoning={bigMatchDebate.verdict?.reasoning ?? ''}
-          homeConfidence={bigMatchDebate.homeArgument?.confidence}
-          awayConfidence={bigMatchDebate.awayArgument?.confidence}
-          homeKeyFactor={bigMatchDebate.homeArgument?.keyFactor}
-          awayKeyFactor={bigMatchDebate.awayArgument?.keyFactor}
-        />
-      ) : (
+      {hasBigMatchHero ? (() => {
+        const presented = presentJudgeReasoningWithFallback(
+          bigMatchDebate.verdict?.reasoning,
+        );
+        return (
+          <BigMatchDebateCard
+            gameId={bigMatch.id}
+            homeTeam={bigMatch.home_team?.code as TeamCode}
+            awayTeam={bigMatch.away_team?.code as TeamCode}
+            homeWinProb={bigMatchDebate.verdict?.homeWinProb ?? 0.5}
+            predictedWinner={bigMatchDebate.verdict?.predictedWinner as TeamCode}
+            reasoning={presented?.text ?? ''}
+            homeConfidence={bigMatchDebate.homeArgument?.confidence}
+            awayConfidence={bigMatchDebate.awayArgument?.confidence}
+            homeKeyFactor={bigMatchDebate.homeArgument?.keyFactor}
+            awayKeyFactor={bigMatchDebate.awayArgument?.keyFactor}
+            isQuantOnlyFallback={presented?.isFallback ?? false}
+          />
+        );
+      })() : (
         <section className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
           <p className="text-brand-300 text-sm mb-1">{today}</p>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</h1>

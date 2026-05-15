@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { KBO_TEAMS, shortTeamName, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from '../shared/TeamLogo';
+import { QuantOnlyBadge } from '../shared/QuantOnlyBadge';
 
 interface BigMatchDebateCardProps {
   gameId: number;
@@ -13,6 +14,7 @@ interface BigMatchDebateCardProps {
   awayConfidence?: number;
   homeKeyFactor?: string;
   awayKeyFactor?: string;
+  isQuantOnlyFallback?: boolean;
 }
 
 /**
@@ -37,6 +39,7 @@ export function BigMatchDebateCard({
   awayConfidence,
   homeKeyFactor,
   awayKeyFactor,
+  isQuantOnlyFallback = false,
 }: BigMatchDebateCardProps) {
   const home = KBO_TEAMS[homeTeam];
   const away = KBO_TEAMS[awayTeam];
@@ -99,6 +102,11 @@ export function BigMatchDebateCard({
         <p className="text-brand-200 text-xs md:text-sm mt-1">
           오늘 모델이 가장 확신하는 한 경기 — 승률 80%+ 기준
         </p>
+        {isQuantOnlyFallback && (
+          <div className="mt-2">
+            <QuantOnlyBadge variant="dark" />
+          </div>
+        )}
       </header>
 
       {/* 팀 vs 팀 — away 왼쪽, home 오른쪽 */}

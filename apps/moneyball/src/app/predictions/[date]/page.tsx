@@ -8,7 +8,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { type TeamCode, shortTeamName, josa, assertSelectOk } from '@moneyball/shared';
-import { presentJudgeReasoning } from '@/lib/predictions/judgeReasoning';
+import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -471,15 +471,19 @@ export default async function PredictionDatePage({ params }: Props) {
                   gameId={game.id}
                 />
 
-                {verdict?.reasoning && (
-                  <JudgeReasoningCard
-                    homeTeam={homeCode}
-                    awayTeam={awayCode}
-                    judgeReasoning={presentJudgeReasoning(verdict.reasoning) ?? ''}
-                    homeArgSummary={verdict.homeArgSummary ?? null}
-                    awayArgSummary={verdict.awayArgSummary ?? null}
-                  />
-                )}
+                {verdict?.reasoning && (() => {
+                  const presented = presentJudgeReasoningWithFallback(verdict.reasoning);
+                  return (
+                    <JudgeReasoningCard
+                      homeTeam={homeCode}
+                      awayTeam={awayCode}
+                      judgeReasoning={presented?.text ?? ''}
+                      homeArgSummary={verdict.homeArgSummary ?? null}
+                      awayArgSummary={verdict.awayArgSummary ?? null}
+                      isQuantOnlyFallback={presented?.isFallback ?? false}
+                    />
+                  );
+                })()}
 
                 {pred.factors && (
                   <FactorBreakdown

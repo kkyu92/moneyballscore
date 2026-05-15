@@ -18,11 +18,20 @@ export function presentJudgeReasoning(
   text: string | undefined | null,
   options: { maxLength?: number } = {},
 ): string | undefined {
+  return presentJudgeReasoningWithFallback(text, options)?.text;
+}
+
+// cycle 459 fix-incident heavy — caller 가 fallback 여부 알 수 있도록 객체 반환.
+// 사용자 가시 path 에 fallback 배지 노출 위함 (silent quality drift → 명시적 라벨).
+export function presentJudgeReasoningWithFallback(
+  text: string | undefined | null,
+  options: { maxLength?: number } = {},
+): { text: string; isFallback: boolean } | undefined {
   if (!text) return undefined;
   const trim = text.trim();
   if (!trim) return undefined;
-  if (isFallbackReasoning(trim)) return FALLBACK_USER_TEXT;
+  if (isFallbackReasoning(trim)) return { text: FALLBACK_USER_TEXT, isFallback: true };
   const max = options.maxLength;
-  if (max && trim.length > max) return trim.slice(0, max) + '...';
-  return trim;
+  const out = max && trim.length > max ? trim.slice(0, max) + '...' : trim;
+  return { text: out, isFallback: false };
 }
