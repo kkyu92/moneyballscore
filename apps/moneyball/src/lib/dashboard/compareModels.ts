@@ -12,6 +12,9 @@
  * (winner_team_id === home_team_id) 와 (p - y)^2 평균.
  */
 
+// cycle 477 review-code heavy — LLM_DEBATE_VERSION 단일 source (v2.0 → v2.1 bump 동시 박제).
+import { LLM_DEBATE_VERSION } from '@moneyball/shared';
+
 export interface CalibrationBucket {
   lo: number;
   hi: number;
@@ -126,7 +129,7 @@ function buildCalibration(
 export function buildShadowRows(rows: PredictionRow[]): PredictionRow[] {
   const shadow: PredictionRow[] = [];
   for (const r of rows) {
-    if (r.model_version !== 'v2.0-debate') continue;
+    if (r.model_version !== LLM_DEBATE_VERSION) continue;
     const p = extractPureQuantProb(r.reasoning);
     if (p === null) continue;
     // pureProb 가 별도로 있으니 homeWinProb 을 그 값으로 세팅한 clone 만듦

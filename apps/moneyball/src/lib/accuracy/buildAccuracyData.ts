@@ -2,6 +2,8 @@ import {
   ALL_SCORING_RULES,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
+  LLM_ACTIVE_VERSIONS,
+  type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
 
@@ -34,13 +36,13 @@ export interface FallbackStats {
   latestFallbackAt: string | null;
 }
 
-const LLM_ACTIVE_VERSIONS = new Set<string>(['v2.0-debate', 'v2.0-postview']);
+// cycle 477 review-code heavy — LLM_ACTIVE_VERSIONS 중복 박제 (telegram + 본 파일) 단일 source 화.
 const FALLBACK_VERSIONS = new Set<string>([QUANT_PREGAME_VERSION, QUANT_POSTVIEW_VERSION]);
 
-// LLM_ACTIVE_VERSIONS / FALLBACK_VERSIONS set 변경 시 동시 박제 누락 차단 (silent drift family).
+// LLM_ACTIVE_VERSIONS (shared) / FALLBACK_VERSIONS 변경 시 동시 박제 누락 차단 (silent drift family).
 function classifyVersion(mv: string | null | undefined): 'llmActive' | 'fallback' | null {
   const v = mv ?? '';
-  if (LLM_ACTIVE_VERSIONS.has(v)) return 'llmActive';
+  if (LLM_ACTIVE_VERSIONS.has(v as ModelVersion)) return 'llmActive';
   if (FALLBACK_VERSIONS.has(v)) return 'fallback';
   return null;
 }

@@ -17,6 +17,9 @@ export {
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   QUANT_LIVE_VERSION,
+  LLM_DEBATE_VERSION,
+  LLM_POSTVIEW_VERSION,
+  LLM_ACTIVE_VERSIONS,
 } from './model-version-labels';
 export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
 

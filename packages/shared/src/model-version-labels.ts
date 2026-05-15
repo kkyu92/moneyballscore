@@ -37,3 +37,17 @@ export const QUANT_PREGAME_VERSION: ModelVersion = CURRENT_SCORING_RULE;
 export const QUANT_POSTVIEW_VERSION: ModelVersion = `${CURRENT_SCORING_RULE}-postview`;
 /** Quant 라벨 — live in_game 경로 (항상 quant). */
 export const QUANT_LIVE_VERSION: ModelVersion = `${CURRENT_SCORING_RULE}-live`;
+
+// cycle 477 — LLM (debate / postview) 활성 라벨 단일 source. v2.0 → v2.1 bump 시
+// 본 상수 1줄 변경 = decideModelVersion / decidePostviewModelVersion 본체 +
+// telegram LLM_ACTIVE_VERSIONS + buildAccuracyData LLM_ACTIVE_VERSIONS +
+// compareModels 분기 5곳 자동 전파. silent drift family streak 22 cycle 째.
+/** LLM debate 활성 라벨 — pre_game 경로 (LLM 성공 시). */
+export const LLM_DEBATE_VERSION: ModelVersion = 'v2.0-debate';
+/** LLM postview 활성 라벨 — postview 경로 (agents 성공 시). */
+export const LLM_POSTVIEW_VERSION: ModelVersion = 'v2.0-postview';
+/** LLM 활성 라벨 set — telegram emoji 분기 / accuracy fallback 분류 단일 source. */
+export const LLM_ACTIVE_VERSIONS: ReadonlySet<ModelVersion> = new Set<ModelVersion>([
+  LLM_DEBATE_VERSION,
+  LLM_POSTVIEW_VERSION,
+]);
