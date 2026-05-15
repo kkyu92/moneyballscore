@@ -20,6 +20,7 @@ import {
 import { isBigMatchEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
 import { buildTierRates, emptyTierRates } from "@/lib/predictions/tierStats";
+import { presentJudgeReasoning } from "@/lib/predictions/judgeReasoning";
 import type { TierRates } from "@/components/dashboard/AccuracySummary";
 import { FavoriteTeamFilter } from "@/components/shared/FavoriteTeamFilter";
 import { UserVsAIScorecard } from "@/components/picks/UserVsAIScorecard";
@@ -319,9 +320,7 @@ function classifyNoGameReason(
 }
 
 function extractJudgeReasoning(text: string | undefined | null): string | undefined {
-  if (!text) return undefined;
-  const trim = text.trim();
-  return trim.length > 100 ? trim.slice(0, 100) + '...' : trim;
+  return presentJudgeReasoning(text, { maxLength: 100 });
 }
 
 function formatKoreanWeekday(dateStr: string): string {

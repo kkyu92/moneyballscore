@@ -17,6 +17,7 @@ import { ShareButtons } from '@/components/share/ShareButtons';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
+import { presentJudgeReasoning } from '@/lib/predictions/judgeReasoning';
 
 export const revalidate = 600;
 
@@ -347,7 +348,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           predictedWinner={verdict.predictedWinner}
           homeWinProb={verdict.homeWinProb}
           confidence={verdict.confidence}
-          reasoning={verdict.reasoning}
+          reasoning={presentJudgeReasoning(verdict.reasoning) ?? ''}
           calibrationApplied={verdict.calibrationApplied}
         />
       ) : (

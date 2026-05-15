@@ -8,6 +8,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { type TeamCode, shortTeamName, josa, assertSelectOk } from '@moneyball/shared';
+import { presentJudgeReasoning } from '@/lib/predictions/judgeReasoning';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -474,7 +475,7 @@ export default async function PredictionDatePage({ params }: Props) {
                   <JudgeReasoningCard
                     homeTeam={homeCode}
                     awayTeam={awayCode}
-                    judgeReasoning={verdict.reasoning}
+                    judgeReasoning={presentJudgeReasoning(verdict.reasoning) ?? ''}
                     homeArgSummary={verdict.homeArgSummary ?? null}
                     awayArgSummary={verdict.awayArgSummary ?? null}
                   />
