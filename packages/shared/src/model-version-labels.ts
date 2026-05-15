@@ -26,7 +26,18 @@ export type ModelVersion =
   | `${ScoringRule}-postview`
   | `${ScoringRule}-live`;
 
-export type DebateVersion = 'v2-persona4' | 'v2-postview' | null;
+// cycle 479 — debate_version literal 단일 source. pre_game (decideModelVersion)
+// + postview (decidePostviewModelVersion) + apps/moneyball CURRENT_DEBATE_VERSION
+// + kbo-data PERSONA_VERSION 4곳 분산 literal → 본 상수 참조 통일. v2-persona4
+// → v2-persona5 bump 시 본 모듈 1줄 변경 = 4곳 동시 박제 (silent drift family
+// streak 24 cycle 째).
+export const DEBATE_VERSION_PREGAME = 'v2-persona4' as const;
+export const DEBATE_VERSION_POSTVIEW = 'v2-postview' as const;
+
+export type DebateVersion =
+  | typeof DEBATE_VERSION_PREGAME
+  | typeof DEBATE_VERSION_POSTVIEW
+  | null;
 
 /** 현 가중치 버전. daily / live / postview 3-path 모두 본 상수 참조. */
 export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';

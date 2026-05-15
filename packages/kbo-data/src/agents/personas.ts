@@ -11,9 +11,12 @@
  * interpolation. CURRENT_SCORING_RULE bump 시 LLM prompt 도 자동 전파.
  */
 
-import { CURRENT_SCORING_RULE } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, DEBATE_VERSION_PREGAME } from '@moneyball/shared';
 
-export const PERSONA_VERSION = 'v2-persona4' as const;
+// cycle 479 — PERSONA_VERSION 단일 source = shared DEBATE_VERSION_PREGAME.
+// 4곳 분산 literal (model-version.ts decideModelVersion / config/model.ts
+// CURRENT_DEBATE_VERSION / 본 모듈) 통합 (silent drift family streak 24 cycle 째).
+export const PERSONA_VERSION = DEBATE_VERSION_PREGAME;
 type PersonaVersion = typeof PERSONA_VERSION;
 
 // ============================================
