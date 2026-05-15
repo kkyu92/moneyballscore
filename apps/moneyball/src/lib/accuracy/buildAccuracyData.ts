@@ -1,3 +1,5 @@
+import { QUANT_PREGAME_VERSION, QUANT_POSTVIEW_VERSION } from '@moneyball/shared';
+
 export interface PredRow {
   confidence: number;
   is_correct: boolean;
@@ -10,8 +12,9 @@ export interface PredRow {
 }
 
 // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화.
-// PR #372 (debate 라벨링 fix) 이후 mv='v2.0-debate' = LLM 성공, mv='v1.8' = 정량 fallback.
-// PR cycle 384 (postview 라벨링 fix) 이후 mv='v2.0-postview' = LLM 성공, mv='v1.8-postview' = fallback.
+// PR #372 (debate 라벨링 fix) 이후 mv='v2.0-debate' = LLM 성공, mv=QUANT_PREGAME_VERSION = 정량 fallback.
+// PR cycle 384 (postview 라벨링 fix) 이후 mv='v2.0-postview' = LLM 성공, mv=QUANT_POSTVIEW_VERSION = fallback.
+// cycle 448 review-code heavy — QUANT_*_VERSION 단일 source. CURRENT_SCORING_RULE bump 시 동시 박제.
 export interface FallbackStatsRow {
   model_version: string | null;
   predicted_at: string;
@@ -26,8 +29,8 @@ export interface FallbackStats {
   latestFallbackAt: string | null;
 }
 
-const LLM_ACTIVE_VERSIONS = new Set(['v2.0-debate', 'v2.0-postview']);
-const FALLBACK_VERSIONS = new Set(['v1.8', 'v1.8-postview']);
+const LLM_ACTIVE_VERSIONS = new Set<string>(['v2.0-debate', 'v2.0-postview']);
+const FALLBACK_VERSIONS = new Set<string>([QUANT_PREGAME_VERSION, QUANT_POSTVIEW_VERSION]);
 
 export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
   let llmActive = 0;
