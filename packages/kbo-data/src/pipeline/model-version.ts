@@ -22,10 +22,23 @@ export type ModelVersion =
   | 'v1.7-revert'
   | 'v1.7-revert-live';
 export type DebateVersion = 'v2-persona4' | 'v2-postview' | null;
+export type ScoringRule = 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8';
+
+/**
+ * 현 가중치 버전. scoring_rule 단일 source — daily / live / postview 3-path 가
+ * 본 상수를 import 하여 박제 (cycle 445 review-code heavy 통합).
+ *
+ * cycle 443 까지 3-path 모두 `'v1.8'` 하드코드 → v2.0 가중치 upgrade 시 동시
+ * 수정 누락 위험 (cycle 420 family — pre_game v1.8 전환 시 live 누락 패턴).
+ * 본 상수 통합으로 향후 가중치 변경은 1곳만 수정 → /accuracy + /debug 의
+ * scoring_rule 별 Brier 분석 분류 안정.
+ */
+export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
 
 export interface ModelVersionDecision {
   model_version: ModelVersion;
   debate_version: DebateVersion;
+  scoring_rule: ScoringRule;
 }
 
 export function decideModelVersion({
@@ -36,9 +49,17 @@ export function decideModelVersion({
   debateSucceeded: boolean;
 }): ModelVersionDecision {
   if (hasApiKey && debateSucceeded) {
-    return { model_version: 'v2.0-debate', debate_version: 'v2-persona4' };
+    return {
+      model_version: 'v2.0-debate',
+      debate_version: 'v2-persona4',
+      scoring_rule: CURRENT_SCORING_RULE,
+    };
   }
-  return { model_version: 'v1.8', debate_version: null };
+  return {
+    model_version: 'v1.8',
+    debate_version: null,
+    scoring_rule: CURRENT_SCORING_RULE,
+  };
 }
 
 /**
@@ -59,7 +80,15 @@ export function decidePostviewModelVersion({
   agentsSucceeded: boolean;
 }): ModelVersionDecision {
   if (hasApiKey && agentsSucceeded) {
-    return { model_version: 'v2.0-postview', debate_version: 'v2-postview' };
+    return {
+      model_version: 'v2.0-postview',
+      debate_version: 'v2-postview',
+      scoring_rule: CURRENT_SCORING_RULE,
+    };
   }
-  return { model_version: 'v1.8-postview', debate_version: null };
+  return {
+    model_version: 'v1.8-postview',
+    debate_version: null,
+    scoring_rule: CURRENT_SCORING_RULE,
+  };
 }

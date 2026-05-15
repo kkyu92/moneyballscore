@@ -201,7 +201,7 @@ export async function runPostviewDaily(
           confidence: preGame.confidence,
           model_version: versionDecision.model_version,
           debate_version: versionDecision.debate_version,
-          scoring_rule: preGame.scoring_rule ?? 'v1.8',
+          scoring_rule: preGame.scoring_rule ?? versionDecision.scoring_rule,
           reasoning: {
             judgeReasoning: postview.judgeReasoning,
             factorErrors: postview.factorErrors,
