@@ -50,7 +50,7 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
           <div>
             <p className="text-sm font-medium">{nickname}</p>
             {syncState === 'done' && syncCount > 0 && (
-              <p className="text-xs text-green-600 dark:text-green-400">{syncCount}개 픽 동기화 완료</p>
+              <p className="text-xs text-brand-600 dark:text-brand-400">{syncCount}개 픽 동기화 완료</p>
             )}
           </div>
           <button
