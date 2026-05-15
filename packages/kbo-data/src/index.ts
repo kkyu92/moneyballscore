@@ -53,3 +53,10 @@ export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } f
 
 // 공유 re-export
 export { KBO_TEAMS, DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';
+export {
+  CURRENT_SCORING_RULE,
+  QUANT_PREGAME_VERSION,
+  QUANT_POSTVIEW_VERSION,
+  QUANT_LIVE_VERSION,
+} from '@moneyball/shared';
+export type { ScoringRule, ModelVersion, DebateVersion } from '@moneyball/shared';

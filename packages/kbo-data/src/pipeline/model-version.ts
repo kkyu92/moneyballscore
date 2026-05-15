@@ -9,31 +9,31 @@
  * 실패 row 가 v2.0-debate 라벨에 묻혀 분류 오류.
  *
  * 본 헬퍼는 "API key 존재 + debate 호출 성공 (throw X)" 두 조건 모두 충족
- * 시에만 v2.0-debate 박제. 하나라도 X 면 v1.8 (정량 모델 fallback, cycle 335).
- * 과거 v1.7-revert row 는 DB 에 그대로 유지됨 — cycle 335 이전 데이터.
- */
-
-export type ModelVersion =
-  | 'v2.0-debate'
-  | 'v2.0-postview'
-  | 'v1.8'
-  | 'v1.8-postview'
-  | 'v1.8-live'
-  | 'v1.7-revert'
-  | 'v1.7-revert-live';
-export type DebateVersion = 'v2-persona4' | 'v2-postview' | null;
-export type ScoringRule = 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8';
-
-/**
- * 현 가중치 버전. scoring_rule 단일 source — daily / live / postview 3-path 가
- * 본 상수를 import 하여 박제 (cycle 445 review-code heavy 통합).
+ * 시에만 v2.0-debate 박제. 하나라도 X 면 QUANT_PREGAME_VERSION (정량 모델
+ * fallback, cycle 335). 과거 v1.7-revert row 는 DB 에 그대로 유지됨.
  *
- * cycle 443 까지 3-path 모두 `'v1.8'` 하드코드 → v2.0 가중치 upgrade 시 동시
- * 수정 누락 위험 (cycle 420 family — pre_game v1.8 전환 시 live 누락 패턴).
- * 본 상수 통합으로 향후 가중치 변경은 1곳만 수정 → /accuracy + /debug 의
- * scoring_rule 별 Brier 분석 분류 안정.
+ * cycle 448 review-code heavy — model_version / scoring_rule 라벨 단일 source 를
+ * @moneyball/shared 로 이동. apps/moneyball 의 buildAccuracyData 도 동일 source
+ * 참조. CURRENT_SCORING_RULE 1줄 변경 = 4곳 (kbo-data pre_game / postview / live
+ *  + apps/moneyball accuracy FALLBACK_VERSIONS) 동시 박제.
  */
-export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
+
+import {
+  CURRENT_SCORING_RULE,
+  QUANT_PREGAME_VERSION,
+  QUANT_POSTVIEW_VERSION,
+  type ModelVersion,
+  type DebateVersion,
+  type ScoringRule,
+} from '@moneyball/shared';
+
+export {
+  CURRENT_SCORING_RULE,
+  QUANT_PREGAME_VERSION,
+  QUANT_POSTVIEW_VERSION,
+  QUANT_LIVE_VERSION,
+} from '@moneyball/shared';
+export type { ModelVersion, DebateVersion, ScoringRule } from '@moneyball/shared';
 
 export interface ModelVersionDecision {
   model_version: ModelVersion;
@@ -56,7 +56,7 @@ export function decideModelVersion({
     };
   }
   return {
-    model_version: 'v1.8',
+    model_version: QUANT_PREGAME_VERSION,
     debate_version: null,
     scoring_rule: CURRENT_SCORING_RULE,
   };
@@ -67,7 +67,7 @@ export function decideModelVersion({
  *
  * pre_game path 의 decideModelVersion 카운터파트. ANTHROPIC credit 소진 시
  * postview 의 모든 에이전트가 fallback → 그럼에도 mv='v2.0-postview' 라벨
- * 박제되던 silent drift 차단. agentsFailed=true 면 'v1.8-postview' 강등.
+ * 박제되던 silent drift 차단. agentsFailed=true 면 QUANT_POSTVIEW_VERSION 강등.
  *
  * /accuracy + /debug/model-comparison 의 mv 별 Brier 분석에서 LLM 토론
  * 실패 row 가 v2.0-postview 라벨에 묻혀 분류 오류 차단.
@@ -87,7 +87,7 @@ export function decidePostviewModelVersion({
     };
   }
   return {
-    model_version: 'v1.8-postview',
+    model_version: QUANT_POSTVIEW_VERSION,
     debate_version: null,
     scoring_rule: CURRENT_SCORING_RULE,
   };

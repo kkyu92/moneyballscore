@@ -9,6 +9,15 @@ export { hasJongsung, josa, ro } from './korean';
 export { assertSelectOk, assertWriteOk } from './db-error';
 export type { SelectResult, WriteResult } from './db-error';
 
+// model_version / scoring_rule 라벨 단일 source (cycle 448 통합)
+export {
+  CURRENT_SCORING_RULE,
+  QUANT_PREGAME_VERSION,
+  QUANT_POSTVIEW_VERSION,
+  QUANT_LIVE_VERSION,
+} from './model-version-labels';
+export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
+
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
 // parkPf / parkNote: Phase v4-2에서 추가. ~/moneyball_debate/personas/teams.yaml 기반.
 export const KBO_TEAMS = {

@@ -3,7 +3,7 @@ import { toKSTDateString, assertSelectOk, assertWriteOk } from '@moneyball/share
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
-import { CURRENT_SCORING_RULE } from './model-version';
+import { CURRENT_SCORING_RULE, QUANT_LIVE_VERSION } from './model-version';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 import { extractReasoningHomeWinProb } from '../types';
@@ -178,8 +178,9 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         // cycle 420 review-code heavy silent drift fix — cycle 335 에서
         // pre_game 'v1.7-revert' → 'v1.8' 전환할 때 live path 누락. cycle 335~419
         // 사이 in_game 라이브 row 가 모두 'v1.7-revert-live' 라벨 박제 → /accuracy
-        // mv 별 Brier 분석에서 stale 분류. 본 fix 부터 'v1.8-live'.
-        model_version: 'v1.8-live',
+        // mv 별 Brier 분석에서 stale 분류.
+        // cycle 448 review-code heavy 통합 — QUANT_LIVE_VERSION 단일 source.
+        model_version: QUANT_LIVE_VERSION,
         // cycle 443 review-code heavy silent drift fix — pre_game (daily.ts:691) +
         // post_game (postview-daily.ts:204) 양쪽 scoring_rule 박제하는데 live in_game
         // upsert 만 누락 → DB scoring_rule=NULL. /accuracy + /debug 의 scoring_rule
