@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DEFAULT_WEIGHTS } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
@@ -210,8 +210,8 @@ export default function AboutPage() {
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
-          활성 팩터 합계 {Math.round(activeWeightSum * 100)}% + 홈어드밴티지 1.5%p.
-          남은 {Math.round((1 - activeWeightSum - 0.015) * 100)}%는 경기 간
+          활성 팩터 합계 {Math.round(activeWeightSum * 100)}% + 홈어드밴티지 {(HOME_ADVANTAGE * 100).toFixed(1)}%p.
+          남은 {Math.round((1 - activeWeightSum - HOME_ADVANTAGE) * 100)}%는 경기 간
           무작위 변동성으로 설명되지 않는 영역.
         </p>
 
