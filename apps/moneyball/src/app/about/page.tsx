@@ -251,7 +251,7 @@ export default function AboutPage() {
 
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">AI 에이전트 토론 v2.0</h2>
+          <h2 className="text-xl font-bold">AI 에이전트 토론</h2>
           <span className="text-xs px-2 py-1 bg-accent/20 text-accent rounded-full font-medium">
             debate
           </span>
