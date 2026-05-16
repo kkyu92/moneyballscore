@@ -59,7 +59,6 @@ export function PredictionCard({
 }: PredictionCardProps) {
   const isLive = status === 'live';
   const isFinal = status === 'final';
-  const isPostponed = status === 'postponed';
 
   const homeWon =
     isFinal &&
@@ -109,21 +108,16 @@ export function PredictionCard({
               종료
             </span>
           )}
-          {isPostponed && (
-            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full">
-              우천취소
-            </span>
-          )}
         </div>
-        {(isCorrect !== null && isCorrect !== undefined || isPostponed) && (
+        {isCorrect !== null && isCorrect !== undefined && (
           <span
             className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-              (isCorrect || isPostponed)
+              isCorrect
                 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700"
                 : "bg-red-100 dark:bg-red-900/30 text-red-700"
             }`}
           >
-            {isPostponed ? "적중" : (isCorrect ? "적중" : "실패")}
+            {isCorrect ? "적중" : "실패"}
           </span>
         )}
       </div>
