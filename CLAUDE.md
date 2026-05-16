@@ -289,8 +289,8 @@ Key routing rules:
 - 홈팀 어드밴티지: +1.5% (HOME_ADVANTAGE=0.015, 2026-04-21 N=2180 측정)
 - Elo baseline: KBO Fancy Stats Elo 예측과 비교하여 모델 성능 측정
 - **v1.8 변경 (cycle 335, 2026-05-12)**: head_to_head 5%→3% (W20/W21 noise, 37.5% 실측) + elo 8%→10% (정보가치 Δ=+0.30 최강)
-- v2.0 업그레이드: **n=150 임계** 달성 후 전면 재조정 (현재 n=89, 61건 부족)
-- **Calibration 현황** (89건, cycle 333 측정): 전체 49.4% / Brier 0.2501
+- v2.0 업그레이드: **n=150 임계** 달성 후 전면 재조정 (real n=94, v1.8 credit-fail 15건 분리, 56건 부족 — cycle 495 측정)
+- **Calibration 현황** (n=109 total / real n=94, cycle 495 측정): 전체 45.9% / real (v1.8 제외) 48.9% / Brier 0.327
 
 ## 데이터 소스
 - **KBO 공식** (koreabaseball.com): 경기일정, 선발확정, 결과, 최근폼, 상대전적, 구장별 기록
