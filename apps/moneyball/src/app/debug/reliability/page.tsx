@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { neutral, brand } from '@/lib/design-tokens';
 
 // /debug/reliability — 예측 신뢰도 reliability diagram
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
@@ -216,7 +217,7 @@ function ReliabilityChart({ buckets }: { buckets: Bucket[] }) {
         // 반지름 ∝ √N (최소 6, 최대 18)
         const r = Math.max(6, Math.min(18, Math.sqrt(b.n) * 4));
         const smallSample = b.n < 5;
-        const color = smallSample ? '#9ca3af' : '#2d6b3f';
+        const color = smallSample ? neutral[400] : brand[500];
         return (
           <g key={`${b.lower}`}>
             {/* 95% CI bar */}

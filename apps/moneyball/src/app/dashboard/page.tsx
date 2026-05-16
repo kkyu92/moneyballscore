@@ -21,6 +21,7 @@ import {
 } from "@moneyball/shared";
 import { buildTierRates } from "@/lib/predictions/tierStats";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { neutral } from "@/lib/design-tokens";
 
 export const metadata: Metadata = {
   title: "대시보드",
@@ -163,7 +164,7 @@ export default async function DashboardPage() {
         teamMap.set(code, {
           correct: 0,
           total: 0,
-          color: teamInfo?.color || team.color_primary || "#6b7280",
+          color: teamInfo?.color || team.color_primary || neutral[500],
         });
       }
       const entry = teamMap.get(code)!;
