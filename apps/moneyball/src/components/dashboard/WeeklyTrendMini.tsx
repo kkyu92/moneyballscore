@@ -28,8 +28,8 @@ interface WeeklyTrendMiniProps {
 
 function barColor(rate: number, verified: number): string {
   if (verified === 0) return "#e5e7eb";
-  if (rate >= 0.6) return "#10b981";
-  if (rate >= 0.5) return "#f59e0b";
+  if (rate >= 0.65) return "#10b981";
+  if (rate >= 0.55) return "#f59e0b";
   return "#ef4444";
 }
 
