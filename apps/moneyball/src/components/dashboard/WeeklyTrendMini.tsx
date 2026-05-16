@@ -12,6 +12,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { getAccuracyColor } from "@moneyball/shared";
+import { neutral, semantic } from "@/lib/design-tokens";
 
 export interface WeeklyTrendPoint {
   label: string;
@@ -27,10 +28,10 @@ interface WeeklyTrendMiniProps {
 }
 
 function barColor(rate: number, verified: number): string {
-  if (verified === 0) return "#e5e7eb";
-  if (rate >= 0.65) return "#10b981";
-  if (rate >= 0.55) return "#f59e0b";
-  return "#ef4444";
+  if (verified === 0) return neutral[200];
+  if (rate >= 0.65) return semantic.success;
+  if (rate >= 0.55) return semantic.warning;
+  return semantic.error;
 }
 
 function CustomTooltip({
@@ -107,7 +108,7 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
           margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
           barCategoryGap="20%"
         >
-          <ReferenceLine y={0.5} stroke="#9ca3af" strokeDasharray="3 2" strokeWidth={1} />
+          <ReferenceLine y={0.5} stroke={neutral[400]} strokeDasharray="3 2" strokeWidth={1} />
           <Bar
             dataKey="rate"
             radius={[3, 3, 0, 0]}
