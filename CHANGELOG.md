@@ -1,5 +1,20 @@
 # Changelog
 
+## 📋 W22 운영 노트 갱신 (2026-05-16, cycle 490 operational-analysis lite)
+
+### v1.8 첫 주 측정 — n=15 noise 영역, 가중치 유지
+
+- **fallback 해결 검증**: 5/12~5/15 60건 예측 모두 실제 debate (model_version `v2.0-debate` / `v1.8` / `v1.8-postview`). cycle 362 PR #372 fix 적용 후 silent fallback 0건.
+- **W22 적중**: 6/20 = 30.0% (Tue 2/5 / Wed 3/5 / Thu **0/5** / Fri 1/5). scoring_rule 분해: v1.7-revert 2/5 (40%) + v1.8 4/15 (26.7%).
+- **v1.8 vs v1.7-revert**: Δ=-26.4%p 큰 격차. 그러나 n=15 binomial CI ±25%p — v1.7-revert 53.1% 가 v1.8 CI 상단 근접. 통계적 분리 X.
+- **누적 갱신**: n=99→109, 49.5%→45.9%, Brier 0.2587→0.2469.
+- **가중치 결정**: 변경 X (head_to_head 3% / elo 10% 유지). 표본 n<30 시 가중치 회귀 No-go gate 박제.
+- **요일별 누적 (n=109)**: Tue 45.0% (9/20) / Wed 53.8% (7/13) / Thu 45.8% (11/24) / Fri 57.1% (12/21) / Sat 52.9% (9/17) / **Sun 14.3% (2/14, cap 적용 중)**. Fri 68.8%→57.1% 하락은 W22 1/5 Fri 영향.
+- **lesson**: `docs/lessons/2026-05-16-v18-first-week-downturn-noise.md`
+- **다음 측정**: W23 (5/19~5/25) 데이터 누적 후 v1.8 재평가. v2.0 임계 n=150 까지 41건.
+
+---
+
 ## 📋 W22 운영 노트 (2026-05-14, cycle 383 operational-analysis lite)
 
 ### v1.8 era silent fallback 발견 (긴급)
