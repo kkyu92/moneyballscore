@@ -11,6 +11,7 @@ import {
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { neutral } from "@/lib/design-tokens";
 
 export const revalidate = 1800;
 
@@ -284,7 +285,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                       className="h-full"
                       style={{
                         width: `${Math.min(100, pct)}%`,
-                        backgroundColor: smallSample ? "#9ca3af" : t.color,
+                        backgroundColor: smallSample ? neutral[400] : t.color,
                       }}
                     />
                   </div>
