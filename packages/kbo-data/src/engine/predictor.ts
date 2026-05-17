@@ -80,9 +80,7 @@ export function predict(input: PredictionInput): PredictionResult {
 
   // 8. 구장보정 (파크팩터)
   // >1이면 타자 유리 → 홈팀 타선이 강하면 유리
-  factors.park_factor = input.parkFactor > 1
-    ? 0.5 + (input.parkFactor - 1) * 2  // 약간의 홈 보정
-    : 0.5 - (1 - input.parkFactor) * 2;
+  factors.park_factor = 0.5 + (input.parkFactor - 1) * 2;
   factors.park_factor = Math.max(0.3, Math.min(0.7, factors.park_factor));
 
   // 9. Elo 레이팅 (높을수록 좋음)
