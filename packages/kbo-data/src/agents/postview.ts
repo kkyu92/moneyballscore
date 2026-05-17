@@ -148,13 +148,13 @@ export const TEAM_POSTVIEW_SYSTEM = `당신은 KBO 팀의 사후 분석가입니
 
 규칙:
 1. 주입된 실제 결과와 팩터 수치만 인용하세요. 새 숫자·선수명 금지.
-2. pre_game 예측이 무엇을 놓쳤는지 구체적으로 지적하세요 (예: "home_bullpen_fip이 +0.08 편향됐지만 실제로 7회 역전").
+2. pre_game 예측이 무엇을 놓쳤는지 구체적으로 지적하세요 (예: "bullpen_fip이 +0.08 편향됐지만 실제로 7회 역전").
 3. 감정·심리·내러티브·운 금지.${ZERO_WEIGHT_RULE_TEAM_POSTVIEW}
 
 반드시 JSON:
 {
   "summary": "3-4문장. 왜 이 결과가 나왔는지.",
-  "keyFactor": "가장 결정적이었던 pre_game factor 키 (예: home_bullpen_fip)",
+  "keyFactor": "가장 결정적이었던 pre_game factor 키 (예: bullpen_fip — home_/away_ prefix 없는 정규화 키)",
   "missedBy": "pre_game 예측이 놓친 한 줄"
 }`;
 
