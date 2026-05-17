@@ -121,7 +121,7 @@ function DailyTrend({
             <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
               <div className="w-full flex-1 flex flex-col justify-end gap-px">
                 <div
-                  className="w-full bg-yellow-400"
+                  className="w-full bg-warning"
                   style={{ height: `${warnPct}%` }}
                   title={`warn ${d.warn}건`}
                 />
@@ -144,7 +144,7 @@ function DailyTrend({
           <span className="inline-block w-2 h-2 bg-red-500" /> hard
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-2 bg-yellow-400" /> warn
+          <span className="inline-block w-2 h-2 bg-warning" /> warn
         </span>
       </div>
     </div>
@@ -211,14 +211,14 @@ export default async function HallucinationDashboard() {
                   hard <span className="font-mono text-red-600">{stats.hardCount}</span>
                 </span>
                 <span>
-                  warn <span className="font-mono text-yellow-700">{stats.warnCount}</span>
+                  warn <span className="font-mono text-warning">{stats.warnCount}</span>
                 </span>
                 <span>
                   reject <span className="font-mono text-red-600">{stats.rejectedCount}</span>
                 </span>
                 <span>
                   near-miss{' '}
-                  <span className="font-mono text-yellow-700">{stats.passedCount}</span>
+                  <span className="font-mono text-warning">{stats.passedCount}</span>
                 </span>
               </div>
             </div>
@@ -282,7 +282,7 @@ export default async function HallucinationDashboard() {
                             className={`text-xs px-2 py-0.5 rounded-full ${
                               log.severity === 'hard'
                                 ? 'bg-red-100 text-red-700'
-                                : 'bg-yellow-100 text-yellow-700'
+                                : 'bg-warning/15 text-warning'
                             }`}
                           >
                             {log.severity}
