@@ -150,14 +150,14 @@ function modeBadge(mode: string) {
     announce: 'bg-blue-100 text-blue-700',
     predict: 'bg-green-100 text-green-700',
     predict_final: 'bg-purple-100 text-purple-700',
-    verify: 'bg-amber-100 text-amber-700',
+    verify: 'bg-warning/15 text-warning',
   };
   return colors[mode] ?? 'bg-gray-100 text-gray-700';
 }
 
 function statusBadge(status: string) {
   if (status === 'success') return 'bg-green-100 text-green-700';
-  if (status === 'partial') return 'bg-yellow-100 text-yellow-700';
+  if (status === 'partial') return 'bg-warning/15 text-warning';
   if (status === 'error') return 'bg-red-100 text-red-700';
   return 'bg-gray-100 text-gray-700';
 }
@@ -244,7 +244,7 @@ export default async function PipelineDashboard() {
                         <td className="px-3 py-2 text-right font-mono text-green-600">
                           {sub.success}
                         </td>
-                        <td className="px-3 py-2 text-right font-mono text-yellow-600">
+                        <td className="px-3 py-2 text-right font-mono text-warning">
                           {sub.partial}
                         </td>
                         <td className="px-3 py-2 text-right font-mono text-red-600">
@@ -266,10 +266,10 @@ export default async function PipelineDashboard() {
           {/* 이번 주 SP 미확정 이벤트 */}
           {stats.spEventsWeek && stats.spEventsWeek.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold mb-3 text-amber-700">⚠️ 이번 주 선발 미확정 이벤트</h2>
-              <div className="bg-amber-50 border border-amber-200 rounded-xl overflow-hidden">
+              <h2 className="text-lg font-bold mb-3 text-warning">⚠️ 이번 주 선발 미확정 이벤트</h2>
+              <div className="bg-warning/10 border border-warning/30 rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-amber-100 text-xs text-amber-800">
+                  <thead className="bg-warning/15 text-xs text-warning">
                     <tr>
                       <th className="px-3 py-2 text-left">시각</th>
                       <th className="px-3 py-2 text-left">Run date</th>
@@ -277,7 +277,7 @@ export default async function PipelineDashboard() {
                       <th className="px-3 py-2 text-left">Message</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-amber-100">
+                  <tbody className="divide-y divide-warning/15">
                     {stats.spEventsWeek.map((s, i) => (
                       <tr key={i}>
                         <td className="px-3 py-2 text-xs text-gray-700 font-mono">
@@ -290,7 +290,7 @@ export default async function PipelineDashboard() {
                         </td>
                         <td className="px-3 py-2 font-mono">{s.run_date}</td>
                         <td className="px-3 py-2 font-mono text-xs">{s.mode}</td>
-                        <td className="px-3 py-2 text-xs text-amber-700">{s.sp_msg}</td>
+                        <td className="px-3 py-2 text-xs text-warning">{s.sp_msg}</td>
                       </tr>
                     ))}
                   </tbody>

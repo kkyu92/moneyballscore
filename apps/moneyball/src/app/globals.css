@@ -34,6 +34,12 @@
   --color-factor-neutral: #9ca3af;                  /* factor 편향 없음 (비슷) — Tailwind gray-400 */
   --color-bg-hero-start: var(--color-brand-800);    /* hero 그라데이션 시작 */
   --color-bg-hero-end: var(--color-brand-700);      /* hero 그라데이션 끝 */
+
+  /* Semantic status tokens — DESIGN.md "Semantic" 행 정렬 (cycle 520) */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
 }
 
 /* 다크모드 시맨틱 토큰 오버라이드 — Hybrid C: 뉴트럴 배경 + 그린 틴트 카드 */
