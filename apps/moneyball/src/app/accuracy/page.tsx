@@ -540,7 +540,7 @@ export default async function AccuracyPage() {
                     {d.dayLabel}
                   </span>
                   {d.day === 0 && (
-                    <span className="text-[8px] leading-none bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded px-0.5 py-0.5 whitespace-nowrap">
+                    <span className="text-[8px] leading-none bg-warning/15 text-warning rounded px-0.5 py-0.5 whitespace-nowrap">
                       상한 45%
                     </span>
                   )}
@@ -618,7 +618,7 @@ export default async function AccuracyPage() {
                   key={tier.label}
                   className={`rounded-lg border p-3 space-y-1 text-center ${
                     isInverted
-                      ? 'border-amber-400 dark:border-amber-500 bg-amber-50/40 dark:bg-amber-900/10'
+                      ? 'border-warning bg-warning/10'
                       : 'border-gray-200 dark:border-[var(--color-border)]'
                   }`}
                 >
@@ -629,7 +629,7 @@ export default async function AccuracyPage() {
                       <p
                         className={`text-2xl font-bold ${
                           isInverted
-                            ? 'text-amber-500 dark:text-amber-400'
+                            ? 'text-warning'
                             : pct >= 55
                             ? 'text-brand-600 dark:text-brand-400'
                             : 'text-red-600 dark:text-red-400'
@@ -648,7 +648,7 @@ export default async function AccuracyPage() {
                     {tier.n > 0 ? `${tier.hits}/${tier.n}` : '데이터 없음'}
                   </p>
                   {isInverted && (
-                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                    <p className="text-[10px] text-warning font-semibold">
                       역전 패턴 ⚠
                     </p>
                   )}
@@ -662,7 +662,7 @@ export default async function AccuracyPage() {
             const isInverted =
               low.n >= 5 && mid.n >= 3 && mid.accuracy !== null && low.accuracy !== null && mid.accuracy < low.accuracy;
             return isInverted ? (
-              <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
+              <p className="text-xs text-warning bg-warning/15 rounded-lg px-3 py-2">
                 보통 확신 예측이 낮은 확신보다 적중률이 낮습니다. AI가 중간 구간에서 과보수하거나
                 어려운 경기를 중간 확신으로 표현하는 패턴입니다.
               </p>
@@ -713,13 +713,13 @@ export default async function AccuracyPage() {
                       <tr
                         key={t.teamCode}
                         className={`border-b border-gray-200 dark:border-[var(--color-border)] ${
-                          isOutlier ? 'bg-amber-50 dark:bg-amber-900/20' : ''
+                          isOutlier ? 'bg-warning/10' : ''
                         }`}
                       >
                         <td className="py-2 pr-4 font-medium">
                           {shortTeamName(t.teamCode)}
                           {isOutlier && (
-                            <span className="ml-1.5 text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded px-1 py-0.5">
+                            <span className="ml-1.5 text-[10px] bg-warning/15 text-warning rounded px-1 py-0.5">
                               이상치
                             </span>
                           )}
@@ -731,7 +731,7 @@ export default async function AccuracyPage() {
                             t.accuracyRate !== null && t.accuracyRate >= 0.5
                               ? 'text-brand-500'
                               : isOutlier
-                                ? 'text-amber-600 dark:text-amber-400'
+                                ? 'text-warning'
                                 : t.accuracyRate !== null && t.accuracyRate < 0.5 && t.verifiedN >= 3
                                   ? 'text-red-400'
                                   : ''
