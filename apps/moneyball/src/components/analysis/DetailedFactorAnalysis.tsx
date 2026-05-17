@@ -107,7 +107,7 @@ export function DetailedFactorAnalysis({
                     ? KBO_TEAMS[homeTeam].color
                     : row.favor === "away"
                       ? KBO_TEAMS[awayTeam].color
-                      : "rgb(156 163 175)",
+                      : "var(--color-factor-neutral)",
               }}
             >
               <div className="flex items-center justify-between gap-2 flex-wrap">

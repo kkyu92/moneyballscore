@@ -46,6 +46,7 @@
 - **Accent:** #c5a23e (골드) — 빅매치 뱃지, 승률 하이라이트, 프리미엄 강조
 - **Accent Light:** #e2c96b
 - **Away:** #c5872a (오렌지) — 원정팀 색상, 다크 그린과 대비
+- **Factor Neutral:** #9ca3af (light, Tailwind gray-400) / #4b5563 (dark, gray-600) — factor 편향 없음 (비슷) 표시. CSS 토큰 `--color-factor-neutral`
 - **Semantic:** success #10b981, warning #f59e0b, error #ef4444, info #3b82f6
 - **Light mode:**
   - Surface: #f8faf9 (그린 틴트 배경)

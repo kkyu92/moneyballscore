@@ -31,6 +31,7 @@
   --color-away-light: #e2a55c;
   --color-factor-favor: var(--color-brand-500);     /* 홈팀 유리 편향 */
   --color-factor-against: var(--color-away);        /* 원정팀 유리 편향 */
+  --color-factor-neutral: #9ca3af;                  /* factor 편향 없음 (비슷) — Tailwind gray-400 */
   --color-bg-hero-start: var(--color-brand-800);    /* hero 그라데이션 시작 */
   --color-bg-hero-end: var(--color-brand-700);      /* hero 그라데이션 끝 */
 }
@@ -40,6 +41,7 @@
   --color-surface: #0c0e0d;
   --color-surface-card: #151d18;
   --color-border: #1e2b23;
+  --color-factor-neutral: #4b5563;  /* 다크모드 neutral — Tailwind gray-600 */
   color-scheme: dark;
 }
 
