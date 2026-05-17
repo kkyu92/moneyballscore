@@ -1,5 +1,20 @@
 # Changelog
 
+## 📋 W22 마감 노트 (2026-05-17, cycle 516 operational-analysis lite)
+
+### Sat reversion — Thu/Fri 1/10 noise 가설 강화
+
+- **5/16 Sat 측정**: 3/5 = 60.0% (Sat 누적 12/22 = 54.5% 안정 회복).
+- **W22 갱신 (n=20→25)**: 30.0% → 36.0%. scoring_rule 분해: v1.7-revert 2/5 (40.0%, 변동 X) + v1.8 7/20 (35.0%, cycle 490 26.7%→+8.3%p).
+- **누적 갱신**: n=109→114, 45.9%→46.5%, Brier 0.2469→0.2473.
+- **5/17 Sun 10건 verify 대기**: cron 14 UTC = 23:00 KST 대기 중. cycle 517 후속 측정.
+- **가중치 결정**: cycle 490 No-go gate 유지 (head_to_head 3% / elo 10%). v1.8 n=20 binomial CI ±21.5%p — 여전히 v1.7-revert 53.1% 와 통계적 분리 X.
+- **v2.0 임계 n=150 까지 36건**: W23~W24 2주 후 도달 가능.
+- **lesson**: `docs/lessons/2026-05-17-w22-saturday-recovery.md`
+- **다음 측정**: cycle 517 5/17 Sun verify 후 + W23 (5/19~5/25) 데이터.
+
+---
+
 ## 📋 W22 운영 노트 갱신 (2026-05-16, cycle 490 operational-analysis lite)
 
 ### v1.8 첫 주 측정 — n=15 noise 영역, 가중치 유지
