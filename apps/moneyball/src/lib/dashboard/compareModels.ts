@@ -5,8 +5,11 @@
  *   - 과거 row 는 scoring_rule=null 로 저장됨 (v1.5 시절)
  *   - 2026-04-22~cycle17 사이 row 는 scoring_rule='v1.6'
  *   - cycle 17~334 사이 row 는 scoring_rule='v1.7-revert', cycle 335~ 는 CURRENT_SCORING_RULE
- *   - model_version 은 agent 존재 여부: v1.5/v1.6/LLM_DEBATE_VERSION/LLM_POSTVIEW_VERSION/
- *     v1.5-live/v1.6-live/v1.7-revert(cycle335 이전)/QUANT_LIVE_VERSION(cycle335~)
+ *   - model_version 은 `ModelVersion` union (shared/model-version-labels.ts) 참조:
+ *     LLM 활성 시 LLM_DEBATE_VERSION / LLM_POSTVIEW_VERSION, fallback 시
+ *     QUANT_PREGAME_VERSION / QUANT_POSTVIEW_VERSION / QUANT_LIVE_VERSION,
+ *     과거 row 는 ScoringRule literal 그대로. literal list 박제 X
+ *     (silent drift family streak 52: cycle 477/479/448 single-source 전파).
  *
  * Brier 계산: reasoning JSON 에서 homeWinProb 추출 후 실제 home 승리 여부
  * (winner_team_id === home_team_id) 와 (p - y)^2 평균.
