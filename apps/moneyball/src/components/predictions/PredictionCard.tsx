@@ -113,8 +113,8 @@ export function PredictionCard({
           <span
             className={`text-xs font-bold px-2 py-0.5 rounded-full ${
               isCorrect
-                ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700"
-                : "bg-red-100 dark:bg-red-900/30 text-red-700"
+                ? "bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
+                : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
             }`}
           >
             {isCorrect ? "적중" : "실패"}
