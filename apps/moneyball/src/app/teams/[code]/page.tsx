@@ -154,8 +154,8 @@ export default async function TeamPage({ params }: PageProps) {
                   : (profile.accuracyRate ?? 0) >= 0.6
                     ? "text-brand-600 dark:text-brand-400"
                     : (profile.accuracyRate ?? 0) >= 0.5
-                      ? "text-yellow-600"
-                      : "text-red-600"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
               }`}
               title={
                 profile.verifiedN > 0 && profile.verifiedN < 5
