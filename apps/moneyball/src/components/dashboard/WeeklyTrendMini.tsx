@@ -44,7 +44,7 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs shadow-lg">
+    <div className="bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] rounded-lg px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-gray-800 dark:text-gray-100">{d.weekId}</p>
       {d.verified === 0 ? (
         <p className="text-gray-400 mt-0.5">데이터 없음</p>
