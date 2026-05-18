@@ -5,8 +5,8 @@
  * 개발·테스트 비용 0원화. llm.ts의 backend dispatcher가 이 모듈을 선택적으로 호출.
  *
  * 모델 매핑 (v3 PLAN D2/D3 결정):
- *   'haiku' 역할(팀/회고 에이전트) → exaone3.5:7.8b (한국어 네이티브)
- *   'sonnet' 역할(심판)            → qwen2.5:14b (논리 추론 강점)
+ *   'haiku' 역할(team-agent / calibration-agent / postview team-postview-agent 3종) → exaone3.5:7.8b (한국어 네이티브)
+ *   'sonnet' 역할(pre-game judge + postview factor-attribution 심판)               → qwen2.5:14b (논리 추론 강점)
  *
  * 호출 형식: /api/generate (stream=false, JSON 응답)
  *
