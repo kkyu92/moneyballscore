@@ -1,6 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS, assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
