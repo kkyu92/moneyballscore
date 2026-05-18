@@ -50,7 +50,7 @@ export function LeaderboardJoinModal({ onJoin, onClose, loading }: Props) {
             maxLength={12}
             className="w-full border border-gray-200 dark:border-[var(--color-border)] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[var(--color-surface)] focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 dark:text-gray-500">
             {value.trim().length}/12자
             {value.trim().length > 0 && value.trim().length < 2 && (
               <span className="text-error ml-1">최소 2자 필요</span>

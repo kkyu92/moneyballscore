@@ -45,7 +45,7 @@ function Recent10({ text }: { text: string }) {
   return (
     <span className="tabular-nums text-xs font-mono">
       <span className="text-brand-600 dark:text-brand-400">{wins}승</span>
-      <span className="text-gray-400 mx-0.5">·</span>
+      <span className="text-gray-400 dark:text-gray-500 mx-0.5">·</span>
       <span className="text-red-600 dark:text-red-400">{losses}패</span>
     </span>
   );
@@ -147,7 +147,7 @@ export default async function StandingsPage() {
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums text-gray-600 dark:text-gray-300">{row.games}</td>
                       <td className="px-3 py-3 text-right tabular-nums font-semibold text-brand-700 dark:text-brand-400">{row.wins}</td>
-                      <td className="px-3 py-3 text-right tabular-nums text-gray-400">{row.draws}</td>
+                      <td className="px-3 py-3 text-right tabular-nums text-gray-400 dark:text-gray-500">{row.draws}</td>
                       <td className="px-3 py-3 text-right tabular-nums text-red-600 dark:text-red-400">{row.losses}</td>
                       <td className="px-3 py-3 text-right tabular-nums font-mono font-semibold">
                         {formatWinPct(row.winPct)}
@@ -156,7 +156,7 @@ export default async function StandingsPage() {
                         {formatGB(row.gamesBehind)}
                       </td>
                       <td className="px-3 py-3 text-center">
-                        {row.recent10 ? <Recent10 text={row.recent10} /> : <span className="text-gray-300">-</span>}
+                        {row.recent10 ? <Recent10 text={row.recent10} /> : <span className="text-gray-300 dark:text-gray-600">-</span>}
                       </td>
                     </tr>
                   );

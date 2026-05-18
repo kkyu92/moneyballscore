@@ -47,7 +47,7 @@ function CustomTooltip({
     <div className="bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] rounded-lg px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-gray-800 dark:text-gray-100">{d.weekId}</p>
       {d.verified === 0 ? (
-        <p className="text-gray-400 mt-0.5">데이터 없음</p>
+        <p className="text-gray-400 dark:text-gray-500 mt-0.5">데이터 없음</p>
       ) : (
         <>
           <p className="text-gray-600 dark:text-gray-300 mt-0.5">

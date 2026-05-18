@@ -55,7 +55,7 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-200"
           >
             닉네임 변경
           </button>
