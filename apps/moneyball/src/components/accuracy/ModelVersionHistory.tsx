@@ -34,7 +34,7 @@ export function ModelVersionHistory({ versions }: Props) {
                     ? 'bg-brand-500'
                     : pct >= 45
                       ? 'bg-gray-400 dark:bg-gray-500'
-                      : 'bg-red-400';
+                      : 'bg-red-400 dark:bg-red-500';
               const textColor =
                 pct === null || v.n === 0
                   ? 'text-gray-400 dark:text-gray-500'
