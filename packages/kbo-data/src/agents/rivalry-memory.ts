@@ -86,10 +86,8 @@ async function fetchRecentH2H(
   away: TeamCode,
   date: string
 ): Promise<RivalryGame[]> {
-  // cycle 175 — silent drift family agents 차원 두 번째 진입. .error 미체크 시
-  // 과거 h2h 데이터 누락이 "신규 매치업" 으로 위장 → 팀 에이전트 프롬프트
-  // 라이벌리 블록 silent skip → 결정론 fallback 만 사용. cycle 174 retro.ts
-  // generateAgentMemories.agent_memories 패턴 일관 (per-source tolerant).
+  // .error 미체크 시 h2h 누락이 "신규 매치업" 위장 → 라이벌리 블록 silent skip.
+  // per-source tolerant: try/catch wrapper 안 (memories 와 분리, 한쪽 fail 시 다른 쪽 살아있음).
   const result = await db
     .from('games')
     .select(`
@@ -151,10 +149,8 @@ async function fetchMemories(
   away: TeamCode,
   date: string
 ): Promise<RivalryMemoryRow[]> {
-  // cycle 175 — silent drift family agents 차원 두 번째 진입. .error 미체크 시
-  // Phase D Compound 루프 학습 결과 누락이 "메모리 0개" 로 위장 → 팀 에이전트가
-  // 자가 보정 학습 무시한 채 운영. per-source tolerant 의도 보전 위해
-  // try/catch wrapper 안 (h2h 와 분리, 한쪽 fail 시 다른 쪽 살아있음).
+  // .error 미체크 시 Compound 루프 학습 누락이 "메모리 0개" 위장 → 자가 보정 무시.
+  // per-source tolerant: try/catch wrapper 안 (h2h 와 분리, 한쪽 fail 시 다른 쪽 살아있음).
   const result = await db
     .from('agent_memories')
     .select('team_code, memory_type, content, confidence, valid_until')
