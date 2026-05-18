@@ -1,13 +1,12 @@
 /**
- * Phase v4-2 페르소나 v2 — 데이터 역할 중심
+ * 페르소나 — 데이터 역할 중심
  *
  * 본 모듈이 source of truth. ~/moneyball_debate/personas/{base,home_role,away_role}.md
- * 는 v4-2 시작 시 archive snapshot (Apr 15 2026 freeze, 이후 갱신 X).
+ * 는 archive snapshot (Apr 15 2026 freeze, 이후 갱신 X).
  *
  * 원칙: 팀별 내러티브 제거. 공통 역할 2개(홈/원정) + 데이터 경향만.
- *
- * cycle 476 — "MoneyBall v1.8" LLM prompt 하드코딩 → ${CURRENT_SCORING_RULE}
- * interpolation. CURRENT_SCORING_RULE bump 시 LLM prompt 도 자동 전파.
+ * LLM prompt 의 scoring rule 라벨은 ${CURRENT_SCORING_RULE} interpolation —
+ * CURRENT_SCORING_RULE bump 시 LLM prompt 도 자동 전파.
  */
 
 import { CURRENT_SCORING_RULE, DEBATE_VERSION_PREGAME } from '@moneyball/shared';
