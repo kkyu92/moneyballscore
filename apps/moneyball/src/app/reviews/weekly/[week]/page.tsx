@@ -94,7 +94,7 @@ function GameResultRow({ g }: { g: WeeklyGameResult }) {
         적중
       </span>
     ) : g.isCorrect === false ? (
-      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300">
         빗나감
       </span>
     ) : (
