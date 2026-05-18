@@ -122,9 +122,8 @@ export async function buildPitcherLeaderboard(options: {
   const minAppearances = options.minAppearances ?? 1;
 
   const supabase = await createClient();
-  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
-  // 차원 (players) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
-  // → 빈 leaderboard 위장).
+  // assertSelectOk — error 시 fail-loud (data=null silent fallback → 빈
+  // leaderboard 위장 차단).
   const queryResult = (await supabase
     .from("predictions")
     .select(
