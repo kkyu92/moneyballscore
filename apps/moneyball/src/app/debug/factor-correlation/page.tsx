@@ -184,7 +184,7 @@ export default async function FactorCorrelationPage() {
   if (decided === 0) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <p className="text-gray-500">검증 가능한 경기가 없습니다.</p>
+        <p className="text-gray-500 dark:text-gray-400">검증 가능한 경기가 없습니다.</p>
       </div>
     );
   }
@@ -276,11 +276,11 @@ export default async function FactorCorrelationPage() {
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">Factor Correlation</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
           환경 변수 → 경기 결과 상관 분석 (2025 시즌 + 2026 진행분).
           팩터 가중치 튜닝 전 사전 검증 — 상수 가정이 데이터와 일치하나.
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500">
+        <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">
           표본: 완료된 경기 중 승부 확정분 <span className="font-mono">{decided}</span>경기
           (무승부 제외). Wald 95% CI.
         </p>
@@ -298,7 +298,7 @@ export default async function FactorCorrelationPage() {
           />
           <Stat label="표본 충분성" value={decided >= 500 ? '충분' : '부족'} suffix={`N=${decided}`} />
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
           홈 어드밴티지 상수는 이 페이지 데이터로 재보정됨. 2024·2023 백필 시 CI 좁아지면 자동 refine 가능.
         </p>
       </section>
@@ -338,9 +338,9 @@ function Stat({
     tone === 'good' ? 'text-green-600' : tone === 'warn' ? 'text-yellow-600' : tone === 'bad' ? 'text-red-600' : '';
   return (
     <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-4">
-      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${toneClass}`}>{value}</p>
-      {suffix && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">{suffix}</p>}
+      {suffix && <p className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400 mt-1">{suffix}</p>}
     </div>
   );
 }
@@ -360,11 +360,11 @@ function SplitSection({
     <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
       <h2 className="text-lg font-bold">{title}</h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400">데이터 없음</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">데이터 없음</p>
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[var(--color-border)]">
+            <tr className="text-left text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 border-b border-gray-200 dark:border-[var(--color-border)]">
               <th className="py-2 pr-3 font-medium">구분</th>
               <th className="py-2 pr-3 font-medium text-right">N</th>
               <th className="py-2 pr-3 font-medium text-right">홈 승률</th>
@@ -421,14 +421,14 @@ function TeamSplitSection({
   return (
     <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
       <h2 className="text-lg font-bold">8. 팀별 홈/원정 승률 — 균일 가정 검증</h2>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
         리그 평균 홈 승률 <span className="font-mono">{fmtPct(overall)}</span> 가정하에,
         팀별 홈 승률 편차가 ±5%p 이상이면 균일 상수의 한계. 홈·원정 gap (홈 − 원정) 이
         각 팀의 “실질 홈 어드밴티지”.
       </p>
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[var(--color-border)]">
+          <tr className="text-left text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 border-b border-gray-200 dark:border-[var(--color-border)]">
             <th className="py-2 pr-3 font-medium">팀</th>
             <th className="py-2 pr-3 font-medium text-right">홈 N</th>
             <th className="py-2 pr-3 font-medium text-right">홈 승률</th>
@@ -451,10 +451,10 @@ function TeamSplitSection({
                 <td className={`py-2 pr-3 text-right font-mono font-semibold ${extreme ? (homeDev > 0 ? 'text-brand-600' : 'text-red-600') : ''}`}>
                   {fmtPct(r.homeRate)}
                 </td>
-                <td className="py-2 pr-3 text-right font-mono text-xs text-gray-500">±{(r.homeCi * 100).toFixed(1)}%p</td>
+                <td className="py-2 pr-3 text-right font-mono text-xs text-gray-500 dark:text-gray-400">±{(r.homeCi * 100).toFixed(1)}%p</td>
                 <td className="py-2 pr-3 text-right font-mono">{r.awayN}</td>
                 <td className="py-2 pr-3 text-right font-mono font-semibold">{fmtPct(r.awayRate)}</td>
-                <td className="py-2 pr-3 text-right font-mono text-xs text-gray-500">±{(r.awayCi * 100).toFixed(1)}%p</td>
+                <td className="py-2 pr-3 text-right font-mono text-xs text-gray-500 dark:text-gray-400">±{(r.awayCi * 100).toFixed(1)}%p</td>
                 <td className={`py-2 text-right font-mono ${Math.abs(gap) > 0.08 ? 'text-brand-600 font-semibold' : ''}`}>
                   {fmtPM(gap)}
                 </td>
@@ -486,7 +486,7 @@ function MatchupMatrix({
   return (
     <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
       <h2 className="text-lg font-bold">9. 매치업 매트릭스 — 홈팀 기준 승률</h2>
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
         행 = 홈팀, 열 = 원정팀. 각 셀은 해당 매치업 홈 승률 (N 작음 · CI ±14%p).
         리그 평균 <span className="font-mono">{fmtPct(overall)}</span> 대비 ±15%p 이상 편차 셀은
         색상 강조 — 팀 상성 가능성.
@@ -497,7 +497,7 @@ function MatchupMatrix({
             <tr>
               <th className="p-1"></th>
               {teamIds.map((aid) => (
-                <th key={aid} className="p-1 text-center font-semibold text-gray-500 dark:text-gray-400 min-w-[52px]">
+                <th key={aid} className="p-1 text-center font-semibold text-gray-500 dark:text-gray-400 dark:text-gray-500 min-w-[52px]">
                   {teamMap.get(aid)?.name ?? aid}
                 </th>
               ))}
@@ -506,14 +506,14 @@ function MatchupMatrix({
           <tbody>
             {teamIds.map((hid) => (
               <tr key={hid}>
-                <td className="p-1 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap pr-2">
+                <td className="p-1 font-semibold text-gray-700 dark:text-gray-300 dark:text-gray-600 whitespace-nowrap pr-2">
                   {teamMap.get(hid)?.name ?? hid}
                 </td>
                 {teamIds.map((aid) => {
-                  if (hid === aid) return <td key={aid} className="p-1 text-center text-gray-300">—</td>;
+                  if (hid === aid) return <td key={aid} className="p-1 text-center text-gray-300 dark:text-gray-600">—</td>;
                   const cell = matrix.get(`${hid}-${aid}`);
                   if (!cell || cell.n === 0) {
-                    return <td key={aid} className="p-1 text-center text-gray-300">·</td>;
+                    return <td key={aid} className="p-1 text-center text-gray-300 dark:text-gray-600">·</td>;
                   }
                   const dev = cell.rate - overall;
                   const extreme = Math.abs(dev) > 0.15;
@@ -537,7 +537,7 @@ function MatchupMatrix({
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-gray-400 dark:text-gray-500">
+      <p className="text-[11px] text-gray-400 dark:text-gray-500 dark:text-gray-400">
         값: 홈 승률 % (정수 반올림). hover 로 N 확인.
       </p>
     </section>

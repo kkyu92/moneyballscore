@@ -99,12 +99,12 @@ export default async function ModelComparisonPage() {
     <div className="p-4 md:p-8 space-y-6 max-w-6xl mx-auto">
       <header>
         <h1 className="text-2xl md:text-3xl font-bold">모델 비교 대시보드</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+        <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-600 mt-1">
           최근 {daysBack}일 · {rows.length}건 · scoring_rule + model_version 조합별
           성능 측정. v1.6 ship 이후 데이터 축적은 저녁 predict cron 부터 시작.
         </p>
         {shadow.length > 0 && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Shadow run: {shadow.length}건 v2.0-debate row 에서 v1.6 pure 정량
             확률 추출 → <span className="font-mono">v1.6-pure-shadow</span>{' '}
             그룹으로 표시.
@@ -132,7 +132,7 @@ export default async function ModelComparisonPage() {
               <tr>
                 <td
                   colSpan={8}
-                  className="border p-4 text-center text-gray-500"
+                  className="border p-4 text-center text-gray-500 dark:text-gray-400"
                 >
                   데이터 없음
                 </td>
@@ -152,7 +152,7 @@ export default async function ModelComparisonPage() {
                 <td className="border p-2 text-right tabular-nums">
                   {fmt(g.brier)}
                   {g.brierN > 0 && (
-                    <span className="text-gray-400 text-xs ml-1">
+                    <span className="text-gray-400 dark:text-gray-500 text-xs ml-1">
                       (n={g.brierN})
                     </span>
                   )}
@@ -160,7 +160,7 @@ export default async function ModelComparisonPage() {
                 <td className="border p-2 text-right tabular-nums">
                   {fmt(g.logLoss)}
                 </td>
-                <td className="border p-2 text-xs text-gray-500">
+                <td className="border p-2 text-xs text-gray-500 dark:text-gray-400">
                   {g.firstSeen?.slice(0, 10)} ~ {g.lastSeen?.slice(0, 10)}
                 </td>
               </tr>
@@ -172,7 +172,7 @@ export default async function ModelComparisonPage() {
       {groups.length > 0 && (
         <section>
           <h2 className="text-lg font-semibold mb-2">Calibration (bucket)</h2>
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
             각 확률 구간에서 평균 예측 확률 (avgP) vs 실제 홈팀 승률
             (actualRate). 잘 calibrated 된 모델은 두 값이 같다.
           </p>
@@ -186,13 +186,13 @@ export default async function ModelComparisonPage() {
                 >
                   <div className="font-semibold text-sm mb-2 font-mono">
                     {g.scoringRule} + {g.modelVersion}{' '}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       (n={g.brierN})
                     </span>
                   </div>
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="text-gray-500">
+                      <tr className="text-gray-500 dark:text-gray-400">
                         <th className="text-left">range</th>
                         <th className="text-right">n</th>
                         <th className="text-right">avgP</th>
@@ -231,7 +231,7 @@ export default async function ModelComparisonPage() {
                 </div>
               ))}
             {groups.filter((g) => g.brierN >= 5).length === 0 && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Calibration bucket 표시는 Brier 샘플 ≥ 5 인 조합부터.
               </p>
             )}
@@ -241,7 +241,7 @@ export default async function ModelComparisonPage() {
 
       <section>
         <h2 className="text-lg font-semibold mb-2">최근 14일 일별 추세</h2>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
           v1.6 ship 마커: 2026-04-22. 이 날짜 이후 scoring_rule=v1.6 row 가
           누적되기 시작.
         </p>
@@ -261,7 +261,7 @@ export default async function ModelComparisonPage() {
             <tbody>
               {recentDaily.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="border p-2 text-center text-gray-500">
+                  <td colSpan={7} className="border p-2 text-center text-gray-500 dark:text-gray-400">
                     최근 14일 데이터 없음
                   </td>
                 </tr>
@@ -295,7 +295,7 @@ export default async function ModelComparisonPage() {
         </div>
       </section>
 
-      <footer className="text-xs text-gray-500 border-t pt-4">
+      <footer className="text-xs text-gray-500 dark:text-gray-400 border-t pt-4">
         Brier score 낮을수록 좋음. coin_flip baseline = 0.25000. Acc 50% 는
         홈팀 승률 선 (v1.x 리그 평균 51.87%). 4-6주 축적 (N≥200) 후 통계적
         유의성 판단 가능.
