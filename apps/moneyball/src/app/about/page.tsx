@@ -339,7 +339,7 @@ export default function AboutPage() {
           </div>
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">경기 중 30초 간격</p>
-            <p className="text-gray-500 dark:text-gray-400">실시간 스코어 (네이버 API)</p>
+            <p className="text-gray-500 dark:text-gray-400">실시간 스코어 (KBO 공식 API)</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">
             <p className="font-medium">경기 종료 자동</p>
