@@ -4,8 +4,8 @@
  * v4-4 empirical 테스트용. Claude API 대비 품질 비교를 위해 추가.
  *
  * 모델 매핑:
- *   'haiku' 역할(팀/회고 에이전트) → deepseek-chat (V3, 저비용·고속)
- *   'sonnet' 역할(심판)           → deepseek-chat (V3, 동일 모델 사용)
+ *   'haiku' 역할(team-agent / calibration-agent / postview team-postview-agent 3종) → deepseek-chat (V3, 저비용·고속)
+ *   'sonnet' 역할(pre-game judge + postview factor-attribution 심판)               → deepseek-chat (V3, 동일 모델 사용)
  *   (deepseek-reasoner는 chain-of-thought 특화라 JSON 출력에 부적합 — 사용 안 함)
  *
  * 비용 (2026-04 시점):

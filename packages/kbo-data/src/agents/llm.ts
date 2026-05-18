@@ -51,8 +51,8 @@ function getBackend(role: 'haiku' | 'sonnet'): LLMBackend {
 
 function getModelId(model: 'haiku' | 'sonnet'): string {
   // Anthropic Claude 4.x 모델 ID
-  // Haiku 4.5: 'claude-haiku-4-5-20251001' (2025-10-01 릴리즈, 팀/회고 에이전트용)
-  // Sonnet 4.6: 'claude-sonnet-4-6' (심판용 — 이전 버전 'claude-sonnet-4-6-20250514'는 오타. 20250514는 구 Sonnet 4.0 날짜였음. 2026-04-15 v4-2 프로덕션 검증 중 judge 실패로 발견)
+  // Haiku 4.5: 'claude-haiku-4-5-20251001' (2025-10-01 릴리즈, team-agent / calibration-agent / postview team-postview-agent 3종 모두 사용)
+  // Sonnet 4.6: 'claude-sonnet-4-6' (pre-game judge-agent + postview factor-attribution 양쪽 심판 모두 사용. 이전 버전 'claude-sonnet-4-6-20250514'는 오타. 20250514는 구 Sonnet 4.0 날짜였음. 2026-04-15 v4-2 프로덕션 검증 중 judge 실패로 발견)
   return model === 'haiku'
     ? 'claude-haiku-4-5-20251001'
     : 'claude-sonnet-4-6';
@@ -143,8 +143,8 @@ export async function callLLM<T>(
 
 /**
  * Claude API 호출 (에이전트용)
- * Haiku: 팀 에이전트/회고 에이전트 (저비용, 빠름)
- * Sonnet: 심판 에이전트 (고품질 판단)
+ * Haiku: team-agent (pre-game 팀 논거) + calibration-agent (pre-game calibration 힌트) + postview team-postview-agent (post-game 팀 분석) 3종 (저비용, 빠름)
+ * Sonnet: pre-game judge-agent + postview factor-attribution 양쪽 심판 (고품질 판단)
  *
  * 재시도: 네트워크 에러 + 5xx + 429에 대해 최대 3회(500/1000/2000ms backoff).
  * 4xx는 즉시 실패(요청 자체가 잘못된 것이라 재시도해도 무의미).
