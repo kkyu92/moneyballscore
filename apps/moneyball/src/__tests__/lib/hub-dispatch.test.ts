@@ -165,6 +165,36 @@ describe('composePayload', () => {
     const p = composePayload(sampleEvent, { sourceRepo: 'x', intent: 'test' });
     expect(p.intent).toBe('test');
   });
+
+  it('request.url query param sensitive value scrubbed (cycle 528)', () => {
+    const withTokenUrl: SentryWebhookInput = {
+      ...sampleEvent,
+      event: {
+        ...sampleEvent.event,
+        request: { url: 'https://example.com/cb?token=plaintext-abc&id=42' },
+      },
+    };
+    const p = composePayload(withTokenUrl, { sourceRepo: 'x' });
+    expect(p.body).not.toContain('plaintext-abc');
+    expect(p.body).toContain('token=[Filtered]');
+    expect(p.body).toContain('id=42');
+  });
+
+  it('web_url query param sensitive value scrubbed + run_url scrubbed (cycle 528)', () => {
+    const withSecretLink: SentryWebhookInput = {
+      ...sampleEvent,
+      event: {
+        ...sampleEvent.event,
+        web_url: 'https://sentry.io/issues/1/?access_token=plaintext-xyz&page=2',
+      },
+    };
+    const p = composePayload(withSecretLink, { sourceRepo: 'x' });
+    expect(p.body).not.toContain('plaintext-xyz');
+    expect(p.body).toContain('access_token=[Filtered]');
+    expect(p.run_url).not.toContain('plaintext-xyz');
+    expect(p.run_url).toContain('access_token=[Filtered]');
+    expect(p.run_url).toContain('page=2');
+  });
 });
 
 describe('toDispatchBody', () => {
