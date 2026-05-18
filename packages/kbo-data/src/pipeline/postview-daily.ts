@@ -1,7 +1,7 @@
 /**
  * Postview Daily Runner
  *
- * Phase v4-3 Task 5. 멱등성 함수 — 어느 진입점에서도 안전하게 호출 가능.
+ * 멱등성 함수 — 어느 진입점에서도 안전하게 호출 가능.
  *
  * 진입점:
  *   1. live-update.yml cron (18:00~00:50 KST, 10분 간격) — 경기 completed 감지 시
@@ -61,8 +61,8 @@ export async function runPostviewDaily(
     totalTokens: 0,
   };
 
-  // 1. completed 경기 + pre_game 예측 있음 + post_game 없음
-  // cycle 161 silent drift family — games select assertSelectOk 통일.
+  // 1. completed 경기 + pre_game 예측 있음 + post_game 없음.
+  // assertSelectOk fail-loud — silent skip 차단.
   const gamesResult = await db
     .from('games')
     .select(`
@@ -100,8 +100,8 @@ export async function runPostviewDaily(
       continue;
     }
 
-    // 2. pre_game 예측 조회 — cycle 161 silent drift family. assertSelectOk fail-loud.
-    // scoring_rule 포함 — post_game row 에 pre_game 의 scoring_rule 상속 (cycle 334 fix).
+    // 2. pre_game 예측 조회. assertSelectOk fail-loud.
+    // scoring_rule 포함 — post_game row 가 pre_game scoring_rule 상속.
     const preGameResult = await db
       .from('predictions')
       .select('id, predicted_winner, confidence, factors, reasoning, home_elo, away_elo, scoring_rule')
@@ -124,7 +124,7 @@ export async function runPostviewDaily(
       continue;
     }
 
-    // 3. post_game row 이미 있으면 skip (멱등성) — cycle 161 silent drift family.
+    // 3. post_game row 이미 있으면 skip (멱등성). assertSelectOk fail-loud.
     const existingPostResult = await db
       .from('predictions')
       .select('id')
@@ -176,9 +176,9 @@ export async function runPostviewDaily(
       const postview = await runPostview(context, actual, original);
       result.totalTokens += postview.totalTokens;
 
-      // cycle 384 fix-incident heavy — agentsFailed silent drift 차단 (PR #372 패턴).
-      // ANTHROPIC credit 소진 시 모든 LLM 호출 실패 → fallback verdict 박제됨에도
-      // mv=LLM_POSTVIEW_VERSION 라벨 silent. errors push + version 강등 (QUANT_POSTVIEW_VERSION).
+      // agentsFailed silent drift 차단. ANTHROPIC credit 소진 시 모든 LLM 호출 실패
+      // → fallback verdict 박제됨에도 mv=LLM_POSTVIEW_VERSION 라벨 silent.
+      // errors push + version 강등 (QUANT_POSTVIEW_VERSION).
       if (postview.agentsFailed) {
         const errMsg = postview.agentError?.slice(0, 200) ?? 'API error';
         result.errors.push(`game ${gameId} postview agents fallback: ${errMsg}`);
@@ -188,11 +188,10 @@ export async function runPostviewDaily(
         agentsSucceeded: !postview.agentsFailed,
       });
 
-      // 6. post_game row insert (upsert로 멱등성 보장)
-      // cycle 171 silent drift family write 측 네 번째 진입.
-      // .error 미체크 시 unique violation / RLS 시 silent skip → post_game row
+      // 6. post_game row insert (upsert로 멱등성 보장). assertWriteOk fail-loud —
+      // .error 미체크 시 unique violation / RLS silent skip → post_game row
       // 미생성 → 다음 postview-daily 또 같은 game 처리 시도 → 무한 재시도 +
-      // 운영 토큰 낭비. assertWriteOk fail-loud (외부 try/catch errors push).
+      // 운영 토큰 낭비 (외부 try/catch errors push).
       const upsertResult = await db.from('predictions').upsert(
         {
           game_id: gameId,
@@ -236,7 +235,7 @@ export async function runPostviewDaily(
 
 async function lookupTeamCodeById(db: DB, teamId: number | null): Promise<TeamCode | null> {
   if (teamId == null) return null;
-  // cycle 161 silent drift family — teams select assertSelectOk 통일.
+  // assertSelectOk fail-loud — silent skip 차단.
   const teamResult = await db.from('teams').select('code').eq('id', teamId).maybeSingle();
   const { data } = assertSelectOk<{ code: string }>(teamResult, 'postview-daily.lookupTeamCodeById');
   return (data?.code as TeamCode) ?? null;
@@ -300,9 +299,8 @@ export function estimateHomeWinProb(confidence: number, predictedWinnerIsHome: b
  *   역추정값이 실제 homeWinProb 와 다를 수 있지만 v1.5/v1.6 시절 quant-only
  *   path 에선 정확.
  *
- * cycle 379 silent drift family fix — debate-success row 의 postview prompt
- * `original.homeWinProb` 가 judge meta-confidence 로 잘못 추정돼 factor
- * attribution 이 깨진 채 agent_memories 학습.
+ * reasoning.homeWinProb 누락 시 factor attribution 이 깨진 채 agent_memories
+ * 학습됨 — 따라서 reasoning 우선 lookup 절대 skip 금지.
  */
 export function resolveOriginalHomeWinProb(
   reasoning: unknown,
