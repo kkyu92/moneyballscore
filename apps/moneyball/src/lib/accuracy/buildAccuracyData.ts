@@ -18,10 +18,10 @@ export interface PredRow {
   homeWinProb?: number | null;
 }
 
-// cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화.
-// PR #372 (debate 라벨링 fix) 이후 mv=LLM_DEBATE_VERSION = LLM 성공, mv=QUANT_PREGAME_VERSION = 정량 fallback.
-// PR cycle 384 (postview 라벨링 fix) 이후 mv=LLM_POSTVIEW_VERSION = LLM 성공, mv=QUANT_POSTVIEW_VERSION = fallback.
-// cycle 448 review-code heavy — QUANT_*_VERSION 단일 source. CURRENT_SCORING_RULE bump 시 동시 박제.
+// LLM 토론 활성 vs 정량 fallback 가시화.
+// mv=LLM_DEBATE_VERSION = LLM debate 성공, mv=QUANT_PREGAME_VERSION = pregame 정량 fallback.
+// mv=LLM_POSTVIEW_VERSION = LLM postview 성공, mv=QUANT_POSTVIEW_VERSION = postview 정량 fallback.
+// QUANT_*_VERSION 단일 source — CURRENT_SCORING_RULE bump 시 shared 와 동시 박제.
 export interface FallbackStatsRow {
   model_version: string | null;
   predicted_at: string;
@@ -36,7 +36,7 @@ export interface FallbackStats {
   latestFallbackAt: string | null;
 }
 
-// cycle 477 review-code heavy — LLM_ACTIVE_VERSIONS 중복 박제 (telegram + 본 파일) 단일 source 화.
+// LLM_ACTIVE_VERSIONS 는 shared 단일 source. FALLBACK_VERSIONS 는 QUANT_*_VERSION 두 상수만.
 const FALLBACK_VERSIONS = new Set<string>([QUANT_PREGAME_VERSION, QUANT_POSTVIEW_VERSION]);
 
 // LLM_ACTIVE_VERSIONS (shared) / FALLBACK_VERSIONS 변경 시 동시 박제 누락 차단 (silent drift family).
@@ -80,8 +80,8 @@ export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
   };
 }
 
-// cycle 460 polish-ui heavy — spec scope A: /accuracy 신규 섹션 "AI 토론 사용률" 일별 stacked bar.
-// LLM 활성 vs quant-only fallback 일별 분포 가시화. silent quality drift 차단.
+// /accuracy "AI 토론 사용률" 섹션 일별 stacked bar 데이터.
+// LLM 활성 vs quant-only fallback 일별 분포 가시화 — silent quality drift 차단.
 export interface FallbackDailyBucket {
   dateISO: string; // YYYY-MM-DD (KST)
   dateLabel: string; // M/D
@@ -324,14 +324,13 @@ export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
   return { dots, hits, total, trend };
 }
 
-// cycle 475 — VERSION_ORDER = ALL_SCORING_RULES (shared tuple). 신규 버전 추가
-// 시 shared/model-version-labels.ts ALL_SCORING_RULES 1줄 변경 = ScoringRule
-// union + VERSION_ORDER 동시 박제. cycle 474 invariant test 와 짝.
+// VERSION_ORDER = ALL_SCORING_RULES (shared tuple). 신규 버전 추가 시
+// shared/model-version-labels.ts ALL_SCORING_RULES 1줄 변경 = ScoringRule union +
+// VERSION_ORDER 동시 박제. shared invariant test (ALL_SCORING_RULES 누락 검출) 와 짝.
 const VERSION_ORDER = ALL_SCORING_RULES;
 
-// cycle 485 — label 필드 제거. label==key 중복 3/4 (v1.5/v1.6/v1.8) 제거 + key
-// 의 '-revert' suffix strip 만 special-case. silent drift family streak 27 cycle:
 // 새 ScoringRule 추가 시 VERSION_NOTES 한 줄만 박제 (label 필드 동기 잊을 surface 제거).
+// label==key 중복 제거 + '-revert' suffix strip 만 labelOf() 안 special-case.
 const VERSION_NOTES: Record<ScoringRule, string> = {
   'v1.5': '기준 모델',
   'v1.6': 'ELO·상대전적 실험 → 저조로 복원',
