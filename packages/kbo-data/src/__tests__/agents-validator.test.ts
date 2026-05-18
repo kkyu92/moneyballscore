@@ -110,6 +110,30 @@ describe('checkInventedPlayerNames', () => {
     const v = checkInventedPlayerNames('홈팀 선발 투수 강점', ctx);
     expect(v).toHaveLength(0);
   });
+
+  // cycle 526 regression — silent drift family streak 6축 agent layer 2nd fix.
+  // PLAYER_CONTEXT_VERBS 에 noun 류 (타격·삼진·홈런·피칭·완투·세이브) 가 섞여
+  // "공격적 타격" "결정적 홈런" 형 일반 어휘 + verb 조합이 highConfidencePattern 으로
+  // 잡혀 false positive 가 발생. 본 fix 가 subjectMarkerPattern 의 filter 를
+  // highConfidencePattern 에도 동기. 회귀 가드 (asymmetric filtering 재발 차단).
+  it('cycle 526: -적 형용사 + verb 명사 → false positive 차단 (isKoreanAdjectivalSuffix)', () => {
+    // '천재적' = COMMON_KOREAN_NOUNS 미포함, 3자 + 적 어미. 'verb' 타격 뒤따름.
+    const v = checkInventedPlayerNames('천재적 타격을 보임', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 526: 분석 어휘(COMMON_KOREAN_NOUNS) + verb 명사 → false positive 차단', () => {
+    // '가능성' 분석 어휘 + 'verb' 타격. highConfidencePattern 매칭 후 filter.
+    const v = checkInventedPlayerNames('가능성 타격에 의존', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 526: 성씨로 시작하는 분석 어휘 + 주격조사 → false positive 차단 (subjectMarkerPattern defense-in-depth)', () => {
+    // '안정성이' = '안' 성씨 prefix + '안정성'(COMMON_KOREAN_NOUNS) + 주격조사 '이'.
+    // subjectMarkerPattern 매칭 후 filter. cycle 526 이전부터 작동했던 path 회귀 가드.
+    const v = checkInventedPlayerNames('안정성이 강한 팀', ctx);
+    expect(v).toHaveLength(0);
+  });
 });
 
 // ============================================
