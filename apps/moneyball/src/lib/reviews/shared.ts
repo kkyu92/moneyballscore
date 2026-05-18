@@ -66,8 +66,7 @@ export interface PredictionRow {
   } | null;
 }
 
-// cycle 173 silent drift family apps/moneyball lib sub-dir 차원 (reviews) 회귀
-// 가드. error 시 fail-loud (기존엔 data=null silent fallback → 빈 review → "검증 0"
+// fail-loud 가드. error 시 throw (data=null silent fallback → 빈 review → "검증 0"
 // 위장 = 정상 미검증 vs DB 오류 구분 불가 = 모델 평가 차단).
 export async function fetchPredictionRowsInRange(
   startDate: string,
