@@ -11,12 +11,7 @@ export const metadata: Metadata = {
 export default function PicksPage() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-8">
-      <Breadcrumb
-        items={[
-          { label: '홈', href: '/' },
-          { label: '내 픽 기록' },
-        ]}
-      />
+      <Breadcrumb items={[{ label: '내 픽 기록' }]} />
       <h1 className="text-2xl font-bold mb-2 mt-4">내 픽 기록</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
         AI와 대결한 결과를 한눈에 확인하세요
