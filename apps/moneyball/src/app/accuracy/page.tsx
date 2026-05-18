@@ -412,7 +412,7 @@ export default async function AccuracyPage() {
                 className={
                   recentForm.total > 0 && recentForm.hits / recentForm.total >= overallAcc
                     ? 'text-brand-600 dark:text-brand-400 font-semibold'
-                    : 'text-red-600 dark:text-red-400 font-semibold'
+                    : 'text-error font-semibold'
                 }
               >
                 최근 {recentForm.total}경기 {recentForm.hits}적중 (
@@ -424,7 +424,7 @@ export default async function AccuracyPage() {
                   className={
                     recentForm.trend === 'up'
                       ? 'text-brand-600 dark:text-brand-400 font-medium'
-                      : 'text-red-600 dark:text-red-400 font-medium'
+                      : 'text-error font-medium'
                   }
                 >
                   {recentForm.trend === 'up' ? '▲ 상승 중' : '▼ 하락 중'}
@@ -442,7 +442,7 @@ export default async function AccuracyPage() {
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none ${
                   hit
                     ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'
-                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                    : 'bg-error/10 text-error'
                 }`}
               >
                 {hit ? '●' : '×'}

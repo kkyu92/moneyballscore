@@ -47,7 +47,7 @@ export function YesterdayResultsSection({ games }: { games: YesterdayGame[] }) {
                 적중
               </span>
             ) : isCorrect === false ? (
-              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-error/10 text-error">
                 빗나감
               </span>
             ) : null;
