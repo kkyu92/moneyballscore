@@ -183,7 +183,7 @@ export default async function SeasonPage({ params }: PageProps) {
                 <td className="py-2 pr-3 text-right font-mono font-semibold">{fmtPct(t.winPct, 3)}</td>
                 <td className="py-2 pr-3 text-right font-mono">{t.runsScored}</td>
                 <td className="py-2 pr-3 text-right font-mono">{t.runsAllowed}</td>
-                <td className={`py-2 text-right font-mono ${t.runDiff > 0 ? "text-brand-600" : t.runDiff < 0 ? "text-red-600" : ""}`}>
+                <td className={`py-2 text-right font-mono ${t.runDiff > 0 ? "text-brand-600 dark:text-brand-400" : t.runDiff < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
                   {t.runDiff > 0 ? "+" : ""}{t.runDiff}
                 </td>
               </tr>

@@ -186,8 +186,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                 review.accuracyRate >= 0.6
                   ? "text-brand-600 dark:text-brand-400"
                   : review.accuracyRate >= 0.5
-                    ? "text-yellow-600"
-                    : "text-red-600"
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
               }`}
             >
               {pctLabel}
@@ -202,8 +202,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                     diffPp > 0
                       ? "text-brand-600 dark:text-brand-400"
                       : diffPp < 0
-                        ? "text-red-600"
-                        : "text-gray-500"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   {diffPp > 0 ? "+" : ""}
