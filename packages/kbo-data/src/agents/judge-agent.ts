@@ -173,7 +173,7 @@ export async function runJudgeAgent(
     gameId: context.game.externalGameId ?? null,
   });
 
-  // cycle 30 — judge agent 검증 결과 validator_logs 박제 (near-miss 포함). team_code = 홈/원정 합쳐 'JG' (judge meta)
+  // judge agent 검증 결과 validator_logs 박제 (near-miss 포함). team_code = 홈/원정 합쳐 'JG' (judge meta)
   if (validation.violations.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const gameId = (context.game as any).id ?? null;

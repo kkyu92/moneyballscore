@@ -125,7 +125,7 @@ export async function runTeamAgent(
     const mode = resolveValidationMode();
     const validation = validateTeamArgument(result.data, context, mode);
 
-    // cycle 30 — near-miss 도 박제. validation.ok=true 라도 violations.length > 0 면 silent drift 사전 감지.
+    // near-miss 도 박제. validation.ok=true 라도 violations.length > 0 면 silent drift 사전 감지.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const gameId = (context.game as any).id ?? null;
     if (validation.violations.length > 0) {
