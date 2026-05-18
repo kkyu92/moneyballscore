@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { ErrorEvent } from '@sentry/nextjs';
-import { scrubSentryEvent } from '../sentry-scrub';
+import { scrubSentryEvent, scrubUrlString } from '../sentry-scrub';
 
 const FILTERED = '[Filtered]';
 
@@ -66,13 +66,15 @@ describe('scrubSentryEvent', () => {
     expect(req.method).toBe('POST');
   });
 
-  it('scrubs event.breadcrumbs array — nav url / fetch data PII', () => {
+  // cycle 527 — URL 값 스크럽 (PII spec C-3). breadcrumb data.to 의 ?token= 값이
+  // key-based scrub 만으론 노출. URL_VALUE_KEYS 매칭 + scrubUrlString 회귀 가드.
+  it('scrubs event.breadcrumbs array — nav url query params (PII spec C-3)', () => {
     const ev = emptyEvent();
     ev.breadcrumbs = [
       {
         category: 'navigation',
         message: 'to /picks',
-        data: { from: '/', to: '/picks?token=real-value' },
+        data: { from: '/', to: '/picks?token=real-value&page=1' },
       },
       {
         category: 'fetch',
@@ -88,7 +90,10 @@ describe('scrubSentryEvent', () => {
     const crumbs = out?.breadcrumbs as Array<Record<string, unknown>>;
     expect(crumbs).toHaveLength(3);
     expect((crumbs[0].data as Record<string, unknown>).from).toBe('/');
-    expect((crumbs[0].data as Record<string, unknown>).to).toBe('/picks?token=real-value');
+    // token query param scrubbed, page param 보존, path 보존
+    expect((crumbs[0].data as Record<string, unknown>).to).toBe(
+      `/picks?token=${FILTERED}&page=1`,
+    );
     expect((crumbs[1].data as Record<string, unknown>).email).toBe(FILTERED);
     expect((crumbs[1].data as Record<string, unknown>).url).toBe('/api/x');
     expect(crumbs[2].category).toBe('console');
@@ -126,6 +131,63 @@ describe('scrubSentryEvent', () => {
     expect(env.PLAYBOOK_PAT).toBe(FILTERED);
     expect(env.SENTRY_WEBHOOK_SECRET).toBe(FILTERED);
     expect(env.NODE_ENV).toBe('production');
+  });
+
+  // cycle 527 — URL 값 스크럽 unit 가드 (PII spec C-3).
+  describe('scrubUrlString', () => {
+    it('returns input unchanged when no query string', () => {
+      expect(scrubUrlString('/picks')).toBe('/picks');
+      expect(scrubUrlString('https://example.com/path')).toBe('https://example.com/path');
+      expect(scrubUrlString('')).toBe('');
+    });
+
+    it('scrubs single sensitive query param', () => {
+      expect(scrubUrlString('/x?token=abc')).toBe(`/x?token=${FILTERED}`);
+      expect(scrubUrlString('/y?api_key=xyz')).toBe(`/y?api_key=${FILTERED}`);
+    });
+
+    it('preserves non-sensitive query params, scrubs sensitive ones', () => {
+      expect(scrubUrlString('/x?page=1&token=abc&size=10')).toBe(
+        `/x?page=1&token=${FILTERED}&size=10`,
+      );
+    });
+
+    it('preserves fragment intact', () => {
+      expect(scrubUrlString('/x?token=abc#section')).toBe(
+        `/x?token=${FILTERED}#section`,
+      );
+    });
+
+    it('handles absolute URLs', () => {
+      expect(scrubUrlString('https://example.com/api?access_token=xyz&q=baseball')).toBe(
+        `https://example.com/api?access_token=${FILTERED}&q=baseball`,
+      );
+    });
+
+    it('handles suffix-matched sensitive keys (_token / _secret)', () => {
+      expect(scrubUrlString('/x?my_token=abc&my_secret=def')).toBe(
+        `/x?my_token=${FILTERED}&my_secret=${FILTERED}`,
+      );
+    });
+
+    it('handles URL-encoded keys', () => {
+      expect(scrubUrlString('/x?api%5Fkey=abc')).toBe(`/x?api%5Fkey=${FILTERED}`);
+    });
+
+    it('passes through valueless params (key only, no =)', () => {
+      expect(scrubUrlString('/x?flag&page=1')).toBe('/x?flag&page=1');
+    });
+  });
+
+  it('scrubs event.request.url query params (PII spec C-3)', () => {
+    const ev = emptyEvent();
+    ev.request = {
+      url: 'https://moneyballscore.com/x?token=real-value&q=lg',
+      method: 'GET',
+    };
+    const out = scrubSentryEvent(ev);
+    const req = out?.request as Record<string, unknown>;
+    expect(req.url).toBe(`https://moneyballscore.com/x?token=${FILTERED}&q=lg`);
   });
 
   it('scrubs dynamic-prefix keys via suffix match (_token/_secret/_password)', () => {
