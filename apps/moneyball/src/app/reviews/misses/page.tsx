@@ -117,7 +117,7 @@ export default async function MissesReviewPage() {
                       실제 <strong>{actualName ?? ""}</strong> 승리
                     </p>
                   </div>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-500/15 text-red-600 dark:text-red-400 shrink-0">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-500/15 text-red-600 dark:text-red-300 shrink-0">
                     고확신 실패
                   </span>
                 </div>

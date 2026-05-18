@@ -56,7 +56,7 @@ function HighlightCard({ h }: { h: WeeklyHighlight }) {
       ? "bg-purple-500/15 text-purple-600 dark:text-purple-300"
       : h.badge === "고확신 적중"
         ? "bg-brand-500/15 text-brand-600 dark:text-brand-300"
-        : "bg-red-500/15 text-red-600 dark:text-red-400";
+        : "bg-red-500/15 text-red-600 dark:text-red-300";
   return (
     <Link
       href={`/analysis/game/${h.gameId}`}
