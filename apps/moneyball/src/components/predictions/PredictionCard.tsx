@@ -24,8 +24,8 @@ export interface PredictionCardProps {
   isCorrect?: boolean | null;
   homeScore?: number | null;
   awayScore?: number | null;
-  gameId?: number; // v4-4: AnalysisLink 용
-  isBigMatch?: boolean; // v4-4: 빅매치 뱃지 + 금색 테두리 강조
+  gameId?: number;
+  isBigMatch?: boolean;
   stadium?: string | null;
   weather?: WeatherSlot | null;
   status?: string | null; // scheduled / live / final / postponed — DB games.status
@@ -90,7 +90,6 @@ export function PredictionCard({
         </div>
       )}
 
-      {/* 상단: 경기 시간 + 상태 배지 + 적중 결과 */}
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? "18:30"}</span>
@@ -235,7 +234,6 @@ export function PredictionCard({
         </div>
       </div>
 
-      {/* 핵심 지표 */}
       <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 grid grid-cols-2 gap-2 text-sm">
         {homeSPName && awaySPName && (
           <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">
@@ -265,7 +263,6 @@ export function PredictionCard({
         )}
       </div>
 
-      {/* 주요 근거 + AI 판정 요약 */}
       {(() => {
         const isHome = predictedWinner === homeTeam;
         const top = factors ? topFavoringFactors(factors, isHome, 2) : [];
