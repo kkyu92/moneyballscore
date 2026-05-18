@@ -86,10 +86,6 @@ export async function updateCalibration(
   return { buckets, monotonic };
 }
 
-// ============================================
-// v4-3 Task 3: memory_type 분류 + home/away 양쪽 row
-// ============================================
-
 export type MemoryType = 'strength' | 'weakness' | 'pattern' | 'matchup';
 
 export interface MemoryClassification {
@@ -189,15 +185,14 @@ export function buildMemoryForTeam(params: {
 }
 
 /**
- * 경기 결과 기반 팀 에이전트 메모리 생성 (v4-3 Task 3 개선)
+ * 경기 결과 기반 팀 에이전트 메모리 생성
  *
- * 변경점 (v4-2 → v4-3):
- * - 🔴 BUG FIX: home 팀만 insert → home/away **양쪽** insert (eng-review C1)
- * - memory_type: 'pattern' 하드코딩 → strength/weakness/pattern/matchup 분류
- * - valid_until: null → date + 7일
- * - source_game_id: 누락 → FK로 저장
- * - insert → upsert (onConflict) — UNIQUE(team_code, memory_type, content)와 짝,
- *   동일 내용 재발생 시 valid_until만 연장 (중복 row 방지)
+ * 동작:
+ * - 오답 예측 (is_correct=false) 의 maxBias factor → home/away 양쪽 관점 memory 생성
+ * - memory_type 분류: strength / weakness / pattern / matchup (classifyMemoryType)
+ * - valid_until: date + 7일 (addDays)
+ * - source_game_id: FK 로 저장
+ * - upsert (onConflict: team_code,memory_type,content) — 동일 내용 재발생 시 valid_until 만 연장
  */
 export async function generateAgentMemories(date: string, dbInjected?: DB) {
   const db = dbInjected ?? createAdminClient();
