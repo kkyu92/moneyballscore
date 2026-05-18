@@ -307,12 +307,18 @@ export function checkInventedPlayerNames(
 
   const candidates = new Set<string>();
 
-  // 1단계: 동사 뒤 이름 (high confidence)
+  // 1단계: 동사 뒤 이름 — 일반 명사 + 파생형용사 접미사 filter (subjectMarkerPattern 과 동일).
+  // verb list 에 noun 류 (타격·삼진·홈런·피칭·완투·세이브) 가 섞여 있어 "공격적 타격"
+  // "결정적 홈런" 형 false positive 발생. cycle 526 review-code (heavy) — asymmetric filtering
+  // 으로 인한 silent drift family streak 6축 agent layer 2nd fix (cycle 524 postview prompt → 본 fix).
   for (const m of outputText.matchAll(highConfidencePattern)) {
-    candidates.add(m[1]);
+    const word = m[1];
+    if (COMMON_KOREAN_NOUNS.has(word)) continue;
+    if (isKoreanAdjectivalSuffix(word)) continue;
+    candidates.add(word);
   }
 
-  // 2단계: 조사 뒤 이름 (일반 명사 화이트리스트 + 파생형용사 접미사 필터링)
+  // 2단계: 조사 뒤 이름
   for (const m of outputText.matchAll(subjectMarkerPattern)) {
     const word = m[1];
     if (COMMON_KOREAN_NOUNS.has(word)) continue;
