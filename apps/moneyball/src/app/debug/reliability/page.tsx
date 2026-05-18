@@ -366,7 +366,7 @@ export default async function ReliabilityPage() {
                   return (
                     <tr
                       key={b.lower}
-                      className={`border-b border-gray-100 dark:border-gray-800 ${
+                      className={`border-b border-gray-100 dark:border-[var(--color-border)] ${
                         smallSample ? 'text-gray-400 dark:text-gray-500' : ''
                       }`}
                     >

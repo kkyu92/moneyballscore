@@ -225,7 +225,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                   <div className="flex items-center gap-2 shrink-0 text-xs text-gray-500 dark:text-gray-400">
                     {p.team?.name_ko && <span>{p.team.name_ko}</span>}
                     {p.position && (
-                      <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800">
+                      <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[var(--color-surface-card)]">
                         {p.position}
                       </span>
                     )}
@@ -274,7 +274,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       )}
 
       {!q && (
-        <section className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 text-sm text-gray-600 dark:text-gray-300 space-y-2">
+        <section className="bg-gray-50 dark:bg-[var(--color-surface-card)]/50 rounded-xl p-6 text-sm text-gray-600 dark:text-gray-300 space-y-2">
           <h2 className="font-semibold text-gray-700 dark:text-gray-200">
             검색 팁
           </h2>

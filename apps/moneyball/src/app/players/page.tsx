@@ -92,7 +92,7 @@ export default async function PlayersIndexPage() {
         ) : (
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-gray-50 dark:bg-[var(--color-surface-card)]">
                 <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
                   <th className="py-3 pl-4 pr-3 font-medium w-8">#</th>
                   <th className="py-3 pr-3 font-medium">선수</th>
@@ -109,7 +109,7 @@ export default async function PlayersIndexPage() {
                 {pitchers.map((p, idx) => (
                   <tr
                     key={p.playerId}
-                    className="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
+                    className="border-t border-gray-100 dark:border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-[var(--color-surface-card)]/40 transition-colors"
                   >
                     <td className="py-3 pl-4 pr-3 text-gray-400 dark:text-gray-500 font-mono">
                       {idx + 1}
@@ -199,7 +199,7 @@ export default async function PlayersIndexPage() {
         ) : (
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-gray-50 dark:bg-[var(--color-surface-card)]">
                 <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
                   <th className="py-3 pl-4 pr-3 font-medium w-8">#</th>
                   <th className="py-3 pr-3 font-medium">선수</th>
@@ -214,7 +214,7 @@ export default async function PlayersIndexPage() {
                 {batters.map((b, idx) => (
                   <tr
                     key={b.playerId}
-                    className="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
+                    className="border-t border-gray-100 dark:border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-[var(--color-surface-card)]/40 transition-colors"
                   >
                     <td className="py-3 pl-4 pr-3 text-gray-400 dark:text-gray-500 font-mono">
                       {idx + 1}

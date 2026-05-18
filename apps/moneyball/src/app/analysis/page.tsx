@@ -478,7 +478,7 @@ export default async function AnalysisIndexPage() {
             <p className="text-lg font-semibold">상세 분석 보기 →</p>
           </Link>
         ) : (
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center text-gray-500 dark:text-gray-400">
+          <div className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-2xl p-8 text-center text-gray-500 dark:text-gray-400">
             {todayData.bigMatchMode === 'no-games' ? (
               <>
                 <p className="text-4xl mb-2">😴</p>
@@ -698,7 +698,7 @@ export default async function AnalysisIndexPage() {
                                   {g.isCorrect ? '적중' : '실패'}
                                 </span>
                               ) : (
-                                <span className="shrink-0 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                                <span className="shrink-0 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-500 dark:text-gray-400">
                                   미결
                                 </span>
                               )}

@@ -325,7 +325,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
             {gameDate} · {game.stadium ?? '구장 미정'}
           </p>
           {isPast && (
-            <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded-full">
+            <span className="text-xs bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-700 dark:text-gray-200 px-2 py-1 rounded-full">
               과거 경기
             </span>
           )}
@@ -358,7 +358,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           isQuantOnlyFallback={isQuantOnlyFallback}
         />
       ) : (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
+        <div className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
           심판 판정 데이터가 아직 없습니다.
         </div>
       )}
@@ -408,7 +408,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 3b. 모델 메타 (접기) */}
       {preGame.factors && (
-        <details className="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-2 text-xs">
+        <details className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg px-4 py-2 text-xs">
           <summary className="cursor-pointer text-gray-500 dark:text-gray-400">
             모델 메타 정보
           </summary>

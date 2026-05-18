@@ -115,7 +115,7 @@ export default async function ModelComparisonPage() {
       <section className="overflow-x-auto">
         <h2 className="text-lg font-semibold mb-2">조합별 집계</h2>
         <table className="w-full text-sm border-collapse">
-          <thead className="bg-gray-50 dark:bg-gray-800">
+          <thead className="bg-gray-50 dark:bg-[var(--color-surface-card)]">
             <tr>
               <th className="border p-2 text-left">scoring_rule</th>
               <th className="border p-2 text-left">model_version</th>
@@ -247,7 +247,7 @@ export default async function ModelComparisonPage() {
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+            <thead className="bg-gray-50 dark:bg-[var(--color-surface-card)]">
               <tr>
                 <th className="border p-1 text-left">date</th>
                 <th className="border p-1 text-left">scoring_rule</th>

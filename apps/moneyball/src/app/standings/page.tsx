@@ -96,7 +96,7 @@ export default async function StandingsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                <tr className="bg-gray-50 dark:bg-[var(--color-surface-card)]/50 border-b border-gray-200 dark:border-gray-700">
                   <th className="px-3 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 w-10">순위</th>
                   <th className="px-3 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">팀</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">경기</th>
@@ -115,7 +115,7 @@ export default async function StandingsPage() {
                   return (
                     <tr
                       key={row.teamCode}
-                      className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30 ${
+                      className={`transition-colors hover:bg-gray-50 dark:hover:bg-[var(--color-surface-card)]/30 ${
                         isTop3
                           ? "bg-green-50/40 dark:bg-green-900/10"
                           : isLast
@@ -210,7 +210,7 @@ export default async function StandingsPage() {
                       <span className="text-sm font-medium">{shortTeamName(row.teamCode)}</span>
                     </Link>
                     <div className="flex-1 flex items-center gap-2">
-                      <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+                      <div className="flex-1 bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-1.5">
                         <div
                           className="bg-brand-500 h-1.5 rounded-full transition-all"
                           style={{ width: `${barWidth}%` }}

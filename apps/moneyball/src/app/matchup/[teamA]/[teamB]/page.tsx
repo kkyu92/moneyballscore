@@ -306,7 +306,7 @@ export default async function MatchupPage({ params }: PageProps) {
 
 function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile").MatchupGame[] }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-800">
+    <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-[var(--color-border)]">
       <table className="min-w-full text-sm">
         <thead>
           <tr className="bg-gray-50 dark:bg-gray-900/40 border-b-2 border-gray-200 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
@@ -344,7 +344,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
             return (
               <tr
                 key={g.gameId}
-                className={`border-b border-gray-100 dark:border-gray-800 hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors ${rowBg}`}
+                className={`border-b border-gray-100 dark:border-[var(--color-border)] hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors ${rowBg}`}
               >
                 <td className="py-2.5 px-3 font-mono text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {g.gameDate}

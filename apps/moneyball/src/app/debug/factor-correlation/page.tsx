@@ -380,7 +380,7 @@ function SplitSection({
               return (
                 <tr
                   key={r.key}
-                  className={`border-b border-gray-100 dark:border-gray-800 ${smallSample ? 'text-gray-400 dark:text-gray-500' : ''}`}
+                  className={`border-b border-gray-100 dark:border-[var(--color-border)] ${smallSample ? 'text-gray-400 dark:text-gray-500' : ''}`}
                   title={smallSample ? `표본 작음 (N=${r.n} < 30)` : undefined}
                 >
                   <td className="py-2 pr-3 font-medium">{r.key}</td>
@@ -445,7 +445,7 @@ function TeamSplitSection({
             const homeDev = r.homeRate - overall;
             const extreme = Math.abs(homeDev) > 0.05;
             return (
-              <tr key={r.teamId} className="border-b border-gray-100 dark:border-gray-800">
+              <tr key={r.teamId} className="border-b border-gray-100 dark:border-[var(--color-border)]">
                 <td className="py-2 pr-3 font-medium">{r.name}</td>
                 <td className="py-2 pr-3 text-right font-mono">{r.homeN}</td>
                 <td className={`py-2 pr-3 text-right font-mono font-semibold ${extreme ? (homeDev > 0 ? 'text-brand-600' : 'text-red-600') : ''}`}>

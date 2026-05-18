@@ -306,7 +306,7 @@ export default function AboutPage() {
           {FAQS.map((f, idx) => (
             <details
               key={idx}
-              className="border-b border-gray-100 dark:border-gray-800 last:border-0 py-3"
+              className="border-b border-gray-100 dark:border-[var(--color-border)] last:border-0 py-3"
             >
               <summary className="font-medium cursor-pointer text-gray-800 dark:text-gray-100 hover:text-brand-600 dark:hover:text-brand-300 list-none flex items-start gap-2">
                 <span className="text-brand-500 mt-0.5" aria-hidden>

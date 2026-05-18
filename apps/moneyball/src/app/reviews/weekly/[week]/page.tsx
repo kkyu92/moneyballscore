@@ -98,7 +98,7 @@ function GameResultRow({ g }: { g: WeeklyGameResult }) {
         빗나감
       </span>
     ) : (
-      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-400 dark:text-gray-500">
         미결
       </span>
     );
