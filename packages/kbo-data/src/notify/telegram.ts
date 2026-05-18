@@ -141,8 +141,13 @@ export async function notifyResults(
     const mark = r.isCorrect ? '✅' : '❌';
     if (r.isCancelled) {
       lines.push(`${mark} ${away} 0:0 ${home} (취소)`);
-    } else {
+    } else if (r.isCorrect) {
       lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home}`);
+    } else {
+      // cycle 639 polish-ui scope D — Telegram 가독성. ❌ row 에 우리 예측 명시.
+      // 사용자가 score 만 보고 어느 팀을 예측했는지 역추론해야 하는 번거로움 차단.
+      const predicted = shortTeamName(r.predictedWinner);
+      lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home} (예측 ${predicted})`);
     }
   }
 
