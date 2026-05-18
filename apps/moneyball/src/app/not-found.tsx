@@ -69,7 +69,7 @@ export default function NotFound() {
         </div>
       </nav>
 
-      <section className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 text-left text-sm text-gray-600 dark:text-gray-300 space-y-2">
+      <section className="bg-gray-50 dark:bg-[var(--color-surface-card)]/50 rounded-xl p-5 text-left text-sm text-gray-600 dark:text-gray-300 space-y-2">
         <h2 className="font-semibold text-gray-700 dark:text-gray-200">
           자주 찾는 페이지 형식
         </h2>

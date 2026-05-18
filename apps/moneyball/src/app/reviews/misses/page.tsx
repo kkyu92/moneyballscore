@@ -123,7 +123,7 @@ export default async function MissesReviewPage() {
                 </div>
 
                 {item.judgePostview && (
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <div className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
                       사후 심판 분석
                     </p>

@@ -168,7 +168,7 @@ export default async function SeasonPage({ params }: PageProps) {
           </thead>
           <tbody>
             {summary.teams.map((t, idx) => (
-              <tr key={t.code} className="border-b border-gray-100 dark:border-gray-800">
+              <tr key={t.code} className="border-b border-gray-100 dark:border-[var(--color-border)]">
                 <td className="py-2 text-center text-gray-400 font-mono">{idx + 1}</td>
                 <td className="py-2 pr-3">
                   <Link href={`/teams/${t.code}`} className="flex items-center gap-2 hover:underline">
@@ -280,7 +280,7 @@ function ExtremeCard({
       ) : (
         <ul className="space-y-2 text-xs">
           {games.map((g) => (
-            <li key={g.id} className="border-b border-gray-100 dark:border-gray-800 pb-2 last:border-0">
+            <li key={g.id} className="border-b border-gray-100 dark:border-[var(--color-border)] pb-2 last:border-0">
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 font-mono">{g.date}</span>
                 <span className="font-mono font-semibold">

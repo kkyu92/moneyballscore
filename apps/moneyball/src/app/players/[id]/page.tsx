@@ -111,12 +111,12 @@ export default async function PlayerProfilePage({ params }: PageProps) {
             </span>
           )}
           {profile.throws && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-700 dark:text-gray-200">
               {profile.throws === "R" ? "우완" : profile.throws === "L" ? "좌완" : profile.throws}
             </span>
           )}
           {profile.position && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-700 dark:text-gray-200">
               {profile.position}
             </span>
           )}
@@ -221,7 +221,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                   return (
                     <tr
                       key={a.gameId}
-                      className="border-b border-gray-100 dark:border-gray-800"
+                      className="border-b border-gray-100 dark:border-[var(--color-border)]"
                     >
                       <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
                         {a.gameDate}

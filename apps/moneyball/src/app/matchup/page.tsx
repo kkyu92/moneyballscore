@@ -62,7 +62,7 @@ export default function MatchupIndexPage() {
             {TEAMS.map((row) => (
               <tr key={row}>
                 <th
-                  className="p-2 text-left text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800"
+                  className="p-2 text-left text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[var(--color-surface-card)]"
                   title={KBO_TEAMS[row].name}
                 >
                   {row}

@@ -264,7 +264,7 @@ export default async function TeamPage({ params }: PageProps) {
               <Link
                 key={p.playerId}
                 href={`/players/${p.playerId}`}
-                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-[var(--color-surface-card)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-gray-400 dark:text-gray-500 font-mono text-sm">
@@ -347,7 +347,7 @@ export default async function TeamPage({ params }: PageProps) {
                   return (
                     <tr
                       key={r.gameId}
-                      className="border-b border-gray-100 dark:border-gray-800"
+                      className="border-b border-gray-100 dark:border-[var(--color-border)]"
                     >
                       <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
                         {r.gameDate}
