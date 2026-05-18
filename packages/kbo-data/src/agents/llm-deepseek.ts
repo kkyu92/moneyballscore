@@ -1,9 +1,7 @@
 /**
  * DeepSeek 백엔드 — OpenAI 호환 API wrapper
  *
- * v4-4 empirical 테스트용. Claude API 대비 품질 비교를 위해 추가.
- *
- * 모델 매핑:
+ * Claude API 대비 저비용 대체 백엔드. 5종 역할 모두 deepseek-chat (V3) 매핑:
  *   'haiku' 역할(team-agent / calibration-agent / postview team-postview-agent 3종) → deepseek-chat (V3, 저비용·고속)
  *   'sonnet' 역할(pre-game judge + postview factor-attribution 심판)               → deepseek-chat (V3, 동일 모델 사용)
  *   (deepseek-reasoner는 chain-of-thought 특화라 JSON 출력에 부적합 — 사용 안 함)
