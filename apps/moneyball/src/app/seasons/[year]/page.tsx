@@ -119,14 +119,14 @@ export default async function SeasonPage({ params }: PageProps) {
                 const winnerHome = g.homeScore > g.awayScore;
                 return (
                   <li key={g.id} className="flex items-center gap-2 font-mono text-xs">
-                    <span className="text-gray-400 w-16">{idx + 1}차전</span>
-                    <span className="text-gray-500 w-20">{g.date.slice(5)}</span>
-                    <span className="text-gray-500 w-12">{g.stadium ?? ''}</span>
-                    <span className={winnerHome ? 'text-gray-400' : 'font-semibold'}>
+                    <span className="text-gray-400 dark:text-gray-500 w-16">{idx + 1}차전</span>
+                    <span className="text-gray-500 dark:text-gray-400 w-20">{g.date.slice(5)}</span>
+                    <span className="text-gray-500 dark:text-gray-400 w-12">{g.stadium ?? ''}</span>
+                    <span className={winnerHome ? 'text-gray-400 dark:text-gray-500' : 'font-semibold'}>
                       {shortTeamName(g.awayCode as never) ?? g.awayCode} {g.awayScore}
                     </span>
-                    <span className="text-gray-300">-</span>
-                    <span className={winnerHome ? 'font-semibold' : 'text-gray-400'}>
+                    <span className="text-gray-300 dark:text-gray-600">-</span>
+                    <span className={winnerHome ? 'font-semibold' : 'text-gray-400 dark:text-gray-500'}>
                       {g.homeScore} {shortTeamName(g.homeCode as never) ?? g.homeCode}
                     </span>
                   </li>
@@ -169,7 +169,7 @@ export default async function SeasonPage({ params }: PageProps) {
           <tbody>
             {summary.teams.map((t, idx) => (
               <tr key={t.code} className="border-b border-gray-100 dark:border-[var(--color-border)]">
-                <td className="py-2 text-center text-gray-400 font-mono">{idx + 1}</td>
+                <td className="py-2 text-center text-gray-400 dark:text-gray-500 font-mono">{idx + 1}</td>
                 <td className="py-2 pr-3">
                   <Link href={`/teams/${t.code}`} className="flex items-center gap-2 hover:underline">
                     <TeamLogo team={t.code} size={24} />
@@ -179,7 +179,7 @@ export default async function SeasonPage({ params }: PageProps) {
                 <td className="py-2 pr-3 text-right font-mono">{t.games}</td>
                 <td className="py-2 pr-3 text-right font-mono">{t.wins}</td>
                 <td className="py-2 pr-3 text-right font-mono">{t.losses}</td>
-                <td className="py-2 pr-3 text-right font-mono text-gray-500">{t.draws}</td>
+                <td className="py-2 pr-3 text-right font-mono text-gray-500 dark:text-gray-400">{t.draws}</td>
                 <td className="py-2 pr-3 text-right font-mono font-semibold">{fmtPct(t.winPct, 3)}</td>
                 <td className="py-2 pr-3 text-right font-mono">{t.runsScored}</td>
                 <td className="py-2 pr-3 text-right font-mono">{t.runsAllowed}</td>
@@ -212,8 +212,8 @@ export default async function SeasonPage({ params }: PageProps) {
                   />
                 </div>
                 <span className="text-xs font-mono w-16 text-right">{fmtNum(m.avgRuns, 2)}</span>
-                <span className="text-[11px] font-mono text-gray-400 w-16 text-right">N={m.n}</span>
-                <span className="text-[11px] font-mono text-gray-400 w-16 text-right">홈{fmtPct(m.homeWinRate, 0)}</span>
+                <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500 w-16 text-right">N={m.n}</span>
+                <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500 w-16 text-right">홈{fmtPct(m.homeWinRate, 0)}</span>
               </div>
             );
           })}
@@ -276,25 +276,25 @@ function ExtremeCard({
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 space-y-2">
       <h3 className="text-sm font-bold">{title}</h3>
       {games.length === 0 ? (
-        <p className="text-xs text-gray-500">데이터 없음</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">데이터 없음</p>
       ) : (
         <ul className="space-y-2 text-xs">
           {games.map((g) => (
             <li key={g.id} className="border-b border-gray-100 dark:border-[var(--color-border)] pb-2 last:border-0">
               <div className="flex items-center justify-between">
-                <span className="text-gray-500 font-mono">{g.date}</span>
+                <span className="text-gray-500 dark:text-gray-400 font-mono">{g.date}</span>
                 <span className="font-mono font-semibold">
                   {metric === "totalRuns" ? g.totalRuns : g.margin}{suffix}
                 </span>
               </div>
               <div className="mt-1 font-medium">
                 {shortTeamName(g.awayCode as never) ?? g.awayCode}{" "}
-                <span className="font-mono text-gray-400">{g.awayScore}</span>{" "}
-                <span className="text-gray-400">@</span>{" "}
-                <span className="font-mono text-gray-400">{g.homeScore}</span>{" "}
+                <span className="font-mono text-gray-400 dark:text-gray-500">{g.awayScore}</span>{" "}
+                <span className="text-gray-400 dark:text-gray-500">@</span>{" "}
+                <span className="font-mono text-gray-400 dark:text-gray-500">{g.homeScore}</span>{" "}
                 {shortTeamName(g.homeCode as never) ?? g.homeCode}
               </div>
-              {g.stadium && <p className="text-[10px] text-gray-400 mt-1">{g.stadium}</p>}
+              {g.stadium && <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">{g.stadium}</p>}
             </li>
           ))}
         </ul>
