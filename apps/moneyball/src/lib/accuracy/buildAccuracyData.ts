@@ -12,6 +12,7 @@ export interface PredRow {
   is_correct: boolean;
   verified_at: string;
   scoring_rule?: string | null;
+  model_version?: string | null;
   // homeWinProb from reasoning JSONB — used for proper Brier Score computation.
   // winner_prob = homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb (always 0.5-1).
   // Falls back to confidence when null (old rows or parse failures).
@@ -344,6 +345,52 @@ function labelOf(version: ScoringRule): string {
 
 function isScoringRule(s: string): s is ScoringRule {
   return (VERSION_ORDER as readonly string[]).includes(s);
+}
+
+// cycle 627 explore-idea heavy — spec 623 candidate A: v1.8 sub-cohort split.
+// v1.8 scoring_rule 안 LLM debate 활성 (model_version='v2.0-debate') vs quant
+// fallback (model_version!='v2.0-debate', 보통 'v1.8') 2분할. 사용자 가시
+// 사용률 + 적중률 sub-cohort 공개.
+export interface SubCohortBucket {
+  label: string;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+  ci95Half: number;
+}
+
+export interface V18SubCohortStats {
+  realDebate: SubCohortBucket;
+  fallback: SubCohortBucket;
+  total: number;
+}
+
+export function buildV18SubCohort(rows: PredRow[]): V18SubCohortStats {
+  const v18Rows = rows.filter((r) => r.scoring_rule === 'v1.8');
+  const realDebateRows = v18Rows.filter(
+    (r) => r.model_version != null && LLM_ACTIVE_VERSIONS.has(r.model_version as ModelVersion),
+  );
+  const fallbackRows = v18Rows.filter(
+    (r) => r.model_version == null || !LLM_ACTIVE_VERSIONS.has(r.model_version as ModelVersion),
+  );
+
+  const toBucket = (label: string, subset: PredRow[]): SubCohortBucket => {
+    const n = subset.length;
+    const hits = subset.filter((r) => r.is_correct).length;
+    return {
+      label,
+      n,
+      hits,
+      accuracy: n > 0 ? hits / n : null,
+      ci95Half: binomCi95Half(hits, n),
+    };
+  };
+
+  return {
+    realDebate: toBucket('AI 토론 활성', realDebateRows),
+    fallback: toBucket('정량 fallback', fallbackRows),
+    total: v18Rows.length,
+  };
 }
 
 export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
