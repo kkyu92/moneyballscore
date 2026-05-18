@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PredictionsStatusFilter } from "@/components/predictions/PredictionsStatusFilter";
 import { PredictionsSortControl } from "@/components/predictions/PredictionsSortControl";
+import { PredictionsTierFilter } from "@/components/predictions/PredictionsTierFilter";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -122,6 +123,13 @@ export default async function PredictionsPage() {
     pending: dates.filter((d) => d.verified === 0).length,
   };
 
+  const tierCounts = {
+    all: dates.length,
+    confident: dates.filter((d) => d.tiers.confident.predicted > 0).length,
+    lean: dates.filter((d) => d.tiers.lean.predicted > 0).length,
+    tossup: dates.filter((d) => d.tiers.tossup.predicted > 0).length,
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: '예측 기록' }]} />
@@ -129,6 +137,7 @@ export default async function PredictionsPage() {
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
 
       {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
+      {dates.length > 0 && <PredictionsTierFilter counts={tierCounts} />}
       {dates.length > 0 && <PredictionsSortControl />}
 
       {dates.length > 0 ? (
@@ -140,11 +149,13 @@ export default async function PredictionsPage() {
             const tierChips = TIER_ORDER.filter(
               (tier) => d.tiers[tier].predicted > 0,
             );
+            const tiersPresent = tierChips.join(' ');
             return (
               <Link
                 key={d.date}
                 href={`/predictions/${d.date}`}
                 data-prediction-status={status}
+                data-prediction-tiers={tiersPresent}
                 className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between gap-4">
