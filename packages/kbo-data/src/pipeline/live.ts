@@ -57,9 +57,9 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
   console.log(`[Live] ${activeGames.length} active games`);
 
   if (activeGames.length === 0) {
-    // 모든 경기 종료 시 스코어 업데이트 + postview trigger (v4-3 Task 4)
-    // cycle 169 — updateGameScore 안 assertWriteOk throw 시 다른 final game 처리
-    // 막히지 않도록 try/catch wrap. errors 배열에 push.
+    // 모든 경기 종료 시 스코어 업데이트 + postview trigger.
+    // updateGameScore 안 assertWriteOk throw 시 다른 final game 처리 막히지
+    // 않도록 try/catch wrap. errors 배열에 push.
     for (const game of liveGames.filter((g) => g.status === 'final')) {
       try {
         await updateGameScore(db, game);
@@ -82,18 +82,18 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
     };
   }
 
-  // KBO 리그 ID — cycle 160 silent drift family detection. .error 미체크 →
-  // 네트워크 / 스키마 오류 시 league=null silent fallback → "KBO league not found"
-  // false positive (실제로는 DB 오류). assertSelectOk fail-loud.
+  // KBO 리그 ID — `.error` 미체크 시 네트워크 / 스키마 오류 시 league=null silent
+  // fallback → "KBO league not found" false positive (실제로는 DB 오류).
+  // assertSelectOk fail-loud.
   const leagueResult = await db.from('leagues').select('id').eq('code', 'KBO').single();
   const { data: league } = assertSelectOk<{ id: number }>(leagueResult, 'live.runLiveUpdate league');
   if (!league) return { date: targetDate, liveGames: activeGames.length, updated: 0, errors: ['KBO league not found'] };
 
   for (const game of activeGames) {
     try {
-      // DB에서 해당 경기 찾기 — cycle 160 silent drift family. single() not-found
-      // (PGRST116) 도 .error 로 들어와 throw — DB에 없는 game 은 정상 skip 시그널이라
-      // maybeSingle() 로 변환 + assertSelectOk fail-loud (다른 .error 폭로).
+      // DB에서 해당 경기 찾기 — single() not-found (PGRST116) 도 `.error` 로 들어와
+      // throw. DB 에 없는 game 은 정상 skip 시그널이라 maybeSingle() 로 변환 +
+      // assertSelectOk fail-loud (다른 `.error` 폭로).
       const dbGameResult = await db
         .from('games')
         .select('id')
@@ -104,10 +104,9 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       if (!dbGame) continue;
 
-      // 경기 스코어 업데이트 — cycle 169 silent drift family write 측 두 번째 진입.
-      // .error 미체크 → RLS / connection / unique violation 시 silent skip → 다음 cron
-      // 또 같은 game 조회 → 무한 재시도 + status mismatch. assertWriteOk fail-loud
-      // (try/catch 안이라 errors 배열로 push).
+      // 경기 스코어 업데이트 — `.error` 미체크 시 RLS / connection / unique violation
+      // 시 silent skip → 다음 cron 또 같은 game 조회 → 무한 재시도 + status mismatch.
+      // assertWriteOk fail-loud (try/catch 안이라 errors 배열로 push).
       const liveUpdateResult = await db.from('games').update({
         status: 'live',
         home_score: game.homeScore,
@@ -116,7 +115,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
       }).eq('id', dbGame.id);
       assertWriteOk(liveUpdateResult, 'live.runLiveUpdate.games.live');
 
-      // pre_game 예측 가져오기 — cycle 160 silent drift family. maybeSingle + assertSelectOk.
+      // pre_game 예측 가져오기 — maybeSingle + assertSelectOk.
       const preGameResult = await db
         .from('predictions')
         .select('confidence, reasoning')
@@ -130,9 +129,9 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       if (!preGame) continue;
 
-      // pre_game에서 홈팀 승리확률 추출 — cycle 199 silent drift family pipeline 차원
-      // 첫 진입. extractReasoningHomeWinProb 단일 소스 derive (3 fail reason 분기
-      // console.warn 가시화: no_reasoning / no_field / invalid_value).
+      // pre_game 에서 홈팀 승리확률 추출 — extractReasoningHomeWinProb 단일 소스
+      // derive (3 fail reason 분기 console.warn 가시화: no_reasoning / no_field /
+      // invalid_value).
       const preGameHomeProb = extractReasoningHomeWinProb(
         preGame.reasoning as { homeWinProb?: unknown } | null,
         'live.runLiveUpdate preGame',
@@ -149,7 +148,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       const adjustedConfidence = Math.abs(adjustedHomeProb - 0.5) * 2;
 
-      // 팀 ID 조회 — cycle 160 silent drift family. assertSelectOk fail-loud.
+      // 팀 ID 조회 — assertSelectOk fail-loud.
       const teamsResult = await db
         .from('teams')
         .select('id, code')
@@ -167,25 +166,22 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
 
       const predictedWinner = adjustedHomeProb >= 0.5 ? game.homeTeam : game.awayTeam;
 
-      // in_game 예측 upsert — cycle 169 silent drift family write 측 진입.
-      // .error 미체크 → unique 위반 / RLS 시 silent skip → in_game 예측 미생성 → 사용자
-      // UI 에 stale pre_game 만 보임. assertWriteOk fail-loud (try/catch 안 errors push).
+      // in_game 예측 upsert — `.error` 미체크 시 unique 위반 / RLS 시 silent skip →
+      // in_game 예측 미생성 → 사용자 UI 에 stale pre_game 만 보임. assertWriteOk
+      // fail-loud (try/catch 안 errors push).
       const inGameUpsertResult = await db.from('predictions').upsert({
         game_id: dbGame.id,
         prediction_type: 'in_game',
         predicted_winner: teamMap[predictedWinner],
         confidence: adjustedConfidence,
-        // cycle 420 review-code heavy silent drift fix — cycle 335 에서
-        // pre_game CURRENT_SCORING_RULE bump 시 live path 누락. cycle 335~419
-        // 사이 in_game 라이브 row 가 모두 stale `${prev}-live` 라벨 박제 → /accuracy
+        // QUANT_LIVE_VERSION 단일 source — pre_game bump 시 live path 누락 회피.
+        // 누락 시 in_game 라이브 row 가 stale `${prev}-live` 라벨로 박제 → /accuracy
         // mv 별 Brier 분석에서 stale 분류.
-        // cycle 448 review-code heavy 통합 — QUANT_LIVE_VERSION 단일 source.
         model_version: QUANT_LIVE_VERSION,
-        // cycle 443 review-code heavy silent drift fix — pre_game (daily.ts:691) +
-        // post_game (postview-daily.ts:204) 양쪽 scoring_rule 박제하는데 live in_game
-        // upsert 만 누락 → DB scoring_rule=NULL. /accuracy + /debug 의 scoring_rule
-        // 별 Brier 분석에서 in_game row 영구 분류 X.
-        // cycle 445 review-code heavy 통합 — CURRENT_SCORING_RULE 단일 source.
+        // CURRENT_SCORING_RULE 단일 source — pre_game (daily.ts) + post_game
+        // (postview-daily.ts) 양쪽 박제하는데 live in_game upsert 만 누락 시 DB
+        // scoring_rule=NULL → /accuracy + /debug 의 scoring_rule 별 Brier 분석에서
+        // in_game row 영구 분류 X.
         scoring_rule: CURRENT_SCORING_RULE,
         reasoning: {
           preGameHomeProb,
@@ -255,7 +251,7 @@ async function runPostviewDailySafe(date: string): Promise<{
 }
 
 async function updateGameScore(db: DB, game: LiveGameState) {
-  // cycle 160 silent drift family — league/teams select assertSelectOk 통일.
+  // league/teams select assertSelectOk 통일.
   const leagueResult = await db.from('leagues').select('id').eq('code', 'KBO').single();
   const { data: league } = assertSelectOk<{ id: number }>(leagueResult, 'live.updateGameScore league');
   if (!league) return;
@@ -279,9 +275,9 @@ async function updateGameScore(db: DB, game: LiveGameState) {
     ? teamMap[game.homeTeam]
     : teamMap[game.awayTeam];
 
-  // cycle 169 silent drift family write 측 — final 상태 update 가 silent skip 되면
-  // postview trigger / 적중률 verify 모두 stale 상태 사용. assertWriteOk fail-loud.
-  // 호출 site (runLiveUpdate L60-66) try/catch wrap 으로 다른 game 처리 보호.
+  // final 상태 update 가 silent skip 되면 postview trigger / 적중률 verify 모두
+  // stale 상태 사용. assertWriteOk fail-loud — 호출 site try/catch wrap 으로 다른
+  // game 처리 보호.
   const finalUpdateResult = await db.from('games').update({
     status: 'final',
     home_score: game.homeScore,
@@ -291,10 +287,10 @@ async function updateGameScore(db: DB, game: LiveGameState) {
   }).eq('external_game_id', game.externalGameId);
   assertWriteOk(finalUpdateResult, 'live.updateGameScore.games.final');
 
-  // v0.5.25: 경기 종료 시 Naver record boxscore 저장 (best-effort).
-  // 실패해도 live 파이프라인 막지 않음.
+  // 경기 종료 시 Naver record boxscore 저장 (best-effort) — 실패해도 live
+  // 파이프라인 막지 않음.
   try {
-    // cycle 160 silent drift family — maybeSingle + assertSelectOk (game 없으면 자연 skip).
+    // maybeSingle + assertSelectOk (game 없으면 자연 skip).
     const dbGameResult = await db
       .from('games')
       .select('id, game_date')
