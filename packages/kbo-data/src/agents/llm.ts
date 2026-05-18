@@ -116,7 +116,7 @@ export function classifyAnthropicError(status: number, body: string): string {
 }
 
 /**
- * LLM 호출 디스패처 (Phase v4-2.5 / v4-4 hybrid 지원)
+ * LLM 호출 디스패처 (역할별 backend hybrid)
  *
  * 역할별 백엔드 선택은 getBackend() 참조 (LLM_BACKEND_HAIKU / LLM_BACKEND_SONNET /
  * LLM_BACKEND). 분기 후 해당 wrapper 호출:
