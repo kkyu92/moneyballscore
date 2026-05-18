@@ -497,7 +497,7 @@ export default async function AccuracyPage() {
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.hits}</td>
                     <td
-                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : w.accuracy !== null && w.accuracy < 0.5 ? 'text-red-400' : ''}`}
+                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : w.accuracy !== null && w.accuracy < 0.5 ? 'text-red-400 dark:text-red-500' : ''}`}
                     >
                       {w.accuracy !== null
                         ? `${(w.accuracy * 100).toFixed(1)}%`
@@ -533,7 +533,7 @@ export default async function AccuracyPage() {
                     ? 'bg-brand-500'
                     : acc >= 0.45
                       ? 'bg-neutral-400'
-                      : 'bg-red-400';
+                      : 'bg-red-400 dark:bg-red-500';
               return (
                 <div key={d.day} className="flex flex-col items-center gap-1">
                   <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
@@ -549,7 +549,7 @@ export default async function AccuracyPage() {
                       acc !== null && acc >= 0.5
                         ? 'text-brand-500'
                         : acc !== null && acc < 0.4
-                          ? 'text-red-400'
+                          ? 'text-red-400 dark:text-red-500'
                           : ''
                     }`}
                   >
@@ -584,7 +584,7 @@ export default async function AccuracyPage() {
               45~54%
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block w-2 h-2 rounded-sm bg-red-400" />
+              <span className="inline-block w-2 h-2 rounded-sm bg-red-400 dark:bg-red-500" />
               {'<'}45%
             </span>
             <span className="ml-auto flex items-center gap-1">
