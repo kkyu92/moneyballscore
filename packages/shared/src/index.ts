@@ -1,4 +1,4 @@
-// Phase v4-4: 라이벌리 정의 re-export
+// 라이벌리 정의 re-export (빅매치 rivalry_bonus 가산점 source)
 export { KBO_RIVALRIES, isRivalry } from './rivalries';
 
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
@@ -26,7 +26,8 @@ export {
 export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
 
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
-// parkPf / parkNote: Phase v4-2에서 추가. ~/moneyball_debate/personas/teams.yaml 기반.
+// parkPf / parkNote: 구장 보정 계수 (100 = 중립, 100+ 타자 친화, 100- 투수 친화).
+// `~/moneyball_debate/personas/teams.yaml` 기반.
 export const KBO_TEAMS = {
   SK: { name: 'SSG 랜더스', stadium: '인천SSG랜더스필드', color: '#CE0E2D', parkPf: 105, parkNote: '타자 친화 (짧은 펜스)' },
   HT: { name: 'KIA 타이거즈', stadium: '광주-기아 챔피언스 필드', color: '#EA0029', parkPf: 100, parkNote: '중립' },
