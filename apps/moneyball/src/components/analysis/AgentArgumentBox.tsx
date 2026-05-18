@@ -15,11 +15,7 @@ interface AgentArgumentBoxProps {
 }
 
 /**
- * v4-4 팀 에이전트 논거 박스.
- * /analysis/game/[id] + BigMatchDebateCard hero에서 공용 사용.
- *
- * Design 리뷰 Pass 4: 비대칭 강조 (emphasized=true 시 scale 1.05)
- * a11y: semantic section + aria-labelledby
+ * 비대칭 강조: emphasized=true → 확신도 높은 쪽 scale 1.05.
  */
 export function AgentArgumentBox({
   team,

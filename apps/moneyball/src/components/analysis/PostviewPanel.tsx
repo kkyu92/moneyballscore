@@ -21,10 +21,7 @@ interface PostviewPanelProps {
 }
 
 /**
- * v4-4 사후 분석 패널 — /analysis/game/[id] 하단 조건부 렌더.
- * post_game row 있는 경기에만 표시.
- *
- * 구성: factorErrors 막대 차트 + 홈/원정 postview + 심판 사후 reasoning
+ * post_game row 있는 경기에만 렌더.
  */
 export function PostviewPanel({
   homeTeam,
