@@ -7,6 +7,7 @@ import {
   buildFallbackStats,
   buildFallbackDailyTrend,
   buildRecentForm,
+  buildV18SubCohort,
   buildVersionHistory,
   buildWeeklyTrend,
   bucketize,
@@ -488,5 +489,96 @@ describe('buildFallbackDailyTrend', () => {
     expect(may9?.dateLabel).toBe('5/9');
     const may15 = t.find((b) => b.dateISO === '2026-05-15');
     expect(may15?.dateLabel).toBe('5/15');
+  });
+});
+
+describe('buildV18SubCohort', () => {
+  function v18Row(
+    is_correct: boolean,
+    model_version: string | null,
+    confidence = 0.6,
+  ) {
+    return {
+      confidence,
+      is_correct,
+      verified_at: '2026-05-15T10:00:00Z',
+      scoring_rule: 'v1.8',
+      model_version,
+    };
+  }
+
+  it('빈 배열 → total=0, 두 bucket 모두 n=0', () => {
+    const s = buildV18SubCohort([]);
+    expect(s.total).toBe(0);
+    expect(s.realDebate.n).toBe(0);
+    expect(s.fallback.n).toBe(0);
+    expect(s.realDebate.accuracy).toBeNull();
+    expect(s.fallback.accuracy).toBeNull();
+  });
+
+  it('v1.8 외 row 제외', () => {
+    const s = buildV18SubCohort([
+      { confidence: 0.6, is_correct: true, verified_at: '2026-05-01T10:00:00Z', scoring_rule: 'v1.7-revert' },
+      v18Row(true, 'v2.0-debate'),
+    ]);
+    expect(s.total).toBe(1);
+    expect(s.realDebate.n).toBe(1);
+  });
+
+  it('model_version=v2.0-debate → realDebate bucket', () => {
+    const s = buildV18SubCohort([
+      v18Row(true, 'v2.0-debate'),
+      v18Row(false, 'v2.0-debate'),
+      v18Row(true, 'v2.0-debate'),
+    ]);
+    expect(s.realDebate.n).toBe(3);
+    expect(s.realDebate.hits).toBe(2);
+    expect(s.realDebate.accuracy).toBeCloseTo(2 / 3);
+    expect(s.fallback.n).toBe(0);
+  });
+
+  it('model_version=v1.8 (강등 라벨) → fallback bucket', () => {
+    const s = buildV18SubCohort([
+      v18Row(false, 'v1.8'),
+      v18Row(true, 'v1.8'),
+    ]);
+    expect(s.fallback.n).toBe(2);
+    expect(s.fallback.hits).toBe(1);
+    expect(s.fallback.accuracy).toBe(0.5);
+    expect(s.realDebate.n).toBe(0);
+  });
+
+  it('model_version=null → fallback bucket', () => {
+    const s = buildV18SubCohort([v18Row(true, null)]);
+    expect(s.fallback.n).toBe(1);
+    expect(s.realDebate.n).toBe(0);
+  });
+
+  it('v2.0-postview → realDebate bucket (LLM_ACTIVE_VERSIONS 포함)', () => {
+    const s = buildV18SubCohort([v18Row(true, 'v2.0-postview')]);
+    expect(s.realDebate.n).toBe(1);
+    expect(s.fallback.n).toBe(0);
+  });
+
+  it('mixed cohort — total = realDebate + fallback', () => {
+    const s = buildV18SubCohort([
+      v18Row(true, 'v2.0-debate'),
+      v18Row(false, 'v2.0-debate'),
+      v18Row(true, 'v1.8'),
+      v18Row(false, 'v1.8'),
+      v18Row(false, null),
+    ]);
+    expect(s.total).toBe(5);
+    expect(s.realDebate.n).toBe(2);
+    expect(s.fallback.n).toBe(3);
+    expect(s.realDebate.hits + s.fallback.hits).toBe(2);
+  });
+
+  it('ci95Half > 0 when n > 0', () => {
+    const s = buildV18SubCohort([
+      v18Row(true, 'v2.0-debate'),
+      v18Row(false, 'v2.0-debate'),
+    ]);
+    expect(s.realDebate.ci95Half).toBeGreaterThan(0);
   });
 });

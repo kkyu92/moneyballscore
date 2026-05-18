@@ -16,6 +16,7 @@ import {
   type ConfidenceTier,
   type FallbackStatsRow,
   type FallbackDailyBucket,
+  type V18SubCohortStats,
   bucketize,
   brierScore,
   calibrationGap,
@@ -24,6 +25,7 @@ import {
   buildRecentForm,
   buildConfidenceTiers,
   buildVersionHistory,
+  buildV18SubCohort,
   buildFallbackStats,
   buildFallbackDailyTrend,
 } from '@/lib/accuracy/buildAccuracyData';
@@ -196,7 +198,7 @@ export default async function AccuracyPage() {
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([
     supabase
       .from('predictions')
-      .select('confidence, is_correct, verified_at, scoring_rule, reasoning->homeWinProb')
+      .select('confidence, is_correct, verified_at, scoring_rule, model_version, reasoning->homeWinProb')
       .match(CURRENT_MODEL_FILTER)
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
@@ -249,6 +251,7 @@ export default async function AccuracyPage() {
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
   const versionHistory = buildVersionHistory(rows);
+  const v18SubCohort = buildV18SubCohort(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
 
@@ -684,6 +687,11 @@ export default async function AccuracyPage() {
         </section>
       )}
 
+      {/* 현 버전 (v1.8) 세부 분석 — AI 토론 활성 vs 정량 fallback */}
+      {v18SubCohort.total > 0 && (
+        <V18SubCohortPanel stats={v18SubCohort} />
+      )}
+
       {/* 팀별 성과 */}
       {teamRows.length > 0 && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
@@ -851,6 +859,95 @@ function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
           예측 없음
         </span>
       </div>
+    </div>
+  );
+}
+
+// cycle 627 explore-idea heavy — spec 623 candidate A: 현 버전 (v1.8) 세부 분석.
+// AI 토론 활성 (model_version='v2.0-debate') vs 정량 fallback ('v1.8' 강등 라벨).
+// 사용자 가시 — AI 토론 신뢰성 + 사용률 공개.
+function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
+  const realDebatePct =
+    stats.total > 0 ? Math.round((stats.realDebate.n / stats.total) * 100) : 0;
+  return (
+    <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+      <div>
+        <h2 className="text-lg font-bold">현 버전 (v1.8) 세부 분석</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          v1.8 가중치 안에서 AI 토론이 실제 활성화된 예측과 API 한도로 정량 fallback 처리된
+          예측을 분리. AI 토론 신뢰성을 별도 측정합니다.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <SubCohortCard
+          label="AI 토론 활성"
+          subLabel="model_version: v2.0-debate"
+          bucket={stats.realDebate}
+          totalN={stats.total}
+          accent="brand"
+        />
+        <SubCohortCard
+          label="정량 fallback"
+          subLabel="API 한도/장애로 LLM 비활성"
+          bucket={stats.fallback}
+          totalN={stats.total}
+          accent="amber"
+        />
+      </div>
+      <p className="text-xs text-gray-400 dark:text-gray-500">
+        AI 토론 사용률 = {realDebatePct}% ({stats.realDebate.n}/{stats.total}). 표본이 작은
+        구간은 신뢰구간이 넓습니다 (±15~25%p).
+      </p>
+    </section>
+  );
+}
+
+function SubCohortCard({
+  label,
+  subLabel,
+  bucket,
+  totalN,
+  accent,
+}: {
+  label: string;
+  subLabel: string;
+  bucket: { n: number; hits: number; accuracy: number | null; ci95Half: number };
+  totalN: number;
+  accent: 'brand' | 'amber';
+}) {
+  const pct = bucket.accuracy !== null ? Math.round(bucket.accuracy * 100) : null;
+  const ciPct = bucket.n > 0 ? Math.round(bucket.ci95Half * 100) : null;
+  const sharePct = totalN > 0 ? Math.round((bucket.n / totalN) * 100) : 0;
+  const accentCls =
+    accent === 'brand'
+      ? 'border-brand-200 dark:border-brand-800 bg-brand-50/40 dark:bg-brand-900/10'
+      : 'border-amber-200 dark:border-amber-700/40 bg-amber-50/40 dark:bg-amber-900/10';
+  const valueCls =
+    accent === 'brand'
+      ? 'text-brand-600 dark:text-brand-400'
+      : 'text-amber-700 dark:text-amber-300';
+  return (
+    <div className={`rounded-lg border p-4 space-y-2 ${accentCls}`}>
+      <div className="flex items-baseline justify-between gap-2 flex-wrap">
+        <p className="text-sm font-bold">{label}</p>
+        <span className="text-[11px] text-gray-500 dark:text-gray-400">
+          {bucket.n}건 ({sharePct}%)
+        </span>
+      </div>
+      <p className="text-[11px] text-gray-400 dark:text-gray-500 font-mono">{subLabel}</p>
+      {pct !== null ? (
+        <div className="flex items-baseline gap-2">
+          <p className={`text-3xl font-bold font-mono ${valueCls}`}>{pct}%</p>
+          {ciPct !== null && bucket.n < 30 && (
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}%p CI</span>
+          )}
+        </div>
+      ) : (
+        <p className="text-3xl font-bold font-mono text-gray-300 dark:text-gray-600">—</p>
+      )}
+      <p className="text-[11px] text-gray-400 dark:text-gray-500">
+        {bucket.n > 0 ? `${bucket.hits}/${bucket.n} 적중` : '데이터 없음'}
+      </p>
     </div>
   );
 }
