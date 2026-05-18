@@ -81,7 +81,7 @@ export default function SeasonsIndexPage() {
                   </span>
                 )}
               </div>
-              <span className="text-xs text-gray-500 font-mono text-right">{s.subtitle}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono text-right">{s.subtitle}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-3">{s.note}</p>
             <p className="text-xs text-brand-600 dark:text-brand-400 mt-4">자세히 보기 →</p>

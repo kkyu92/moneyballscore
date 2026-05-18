@@ -465,7 +465,7 @@ export default async function AccuracyPage() {
           </p>
         </div>
         {n === 0 ? (
-          <p className="text-gray-400 text-sm py-8 text-center">
+          <p className="text-gray-400 dark:text-gray-500 text-sm py-8 text-center">
             아직 검증된 예측이 없습니다.
           </p>
         ) : (

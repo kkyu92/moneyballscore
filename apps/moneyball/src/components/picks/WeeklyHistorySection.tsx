@@ -85,7 +85,7 @@ export function WeeklyHistorySection({ groups }: Props) {
                   {stats.myCorrect}/{stats.resolved}
                   {myRatePct !== null ? ` (${myRatePct}%)` : ''}
                 </span>
-                <span className="text-xs text-gray-400" aria-hidden="true">
+                <span className="text-xs text-gray-400 dark:text-gray-500" aria-hidden="true">
                   {isOpen ? '▲' : '▼'}
                 </span>
               </div>

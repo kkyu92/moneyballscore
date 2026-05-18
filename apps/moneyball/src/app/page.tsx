@@ -824,7 +824,7 @@ export default async function HomePage() {
                   href={`/teams/${row.teamCode}`}
                   className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
                 >
-                  <span className="text-sm font-bold text-gray-400 w-5 text-center tabular-nums">
+                  <span className="text-sm font-bold text-gray-400 dark:text-gray-500 w-5 text-center tabular-nums">
                     {row.rank}
                   </span>
                   <span className="text-sm font-semibold flex-1 text-gray-900 dark:text-gray-100">
