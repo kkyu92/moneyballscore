@@ -622,7 +622,7 @@ export default async function AnalysisIndexPage() {
                           className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
                             g.isCorrect
                               ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
-                              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                              : 'bg-error/10 text-error'
                           }`}
                         >
                           {g.isCorrect ? '적중' : '실패'}
@@ -692,7 +692,7 @@ export default async function AnalysisIndexPage() {
                                   className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
                                     g.isCorrect
                                       ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
-                                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                      : 'bg-error/10 text-error'
                                   }`}
                                 >
                                   {g.isCorrect ? '적중' : '실패'}
@@ -846,7 +846,7 @@ export default async function AnalysisIndexPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-error/10 text-error">
                     실패
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -866,7 +866,7 @@ export default async function AnalysisIndexPage() {
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                <p className="text-2xl font-bold text-error">
                   {Math.round(
                     (upsetPickOfMonth.predictedWinnerCode === upsetPickOfMonth.homeCode
                       ? upsetPickOfMonth.homeWinProb
