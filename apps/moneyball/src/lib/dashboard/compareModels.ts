@@ -2,20 +2,17 @@
  * 모델 버전별 성과 비교 — scoring_rule + model_version 조합별 집계.
  *
  * Grouping key = `scoring_rule ?? '(null)'` + `model_version`.
- *   - 과거 row 는 scoring_rule=null 로 저장됨 (v1.5 시절)
- *   - 2026-04-22~cycle17 사이 row 는 scoring_rule='v1.6'
- *   - cycle 17~334 사이 row 는 scoring_rule='v1.7-revert', cycle 335~ 는 CURRENT_SCORING_RULE
- *   - model_version 은 `ModelVersion` union (shared/model-version-labels.ts) 참조:
+ *   - 과거 row 는 scoring_rule=null 일 수 있음 (초기 row)
+ *   - 이후 row 는 ScoringRule literal (`'v1.6'` / `'v1.7-revert'` / CURRENT_SCORING_RULE)
+ *   - model_version 은 `ModelVersion` union (shared/model-version-labels.ts) 참조.
  *     LLM 활성 시 LLM_DEBATE_VERSION / LLM_POSTVIEW_VERSION, fallback 시
- *     QUANT_PREGAME_VERSION / QUANT_POSTVIEW_VERSION / QUANT_LIVE_VERSION,
- *     과거 row 는 ScoringRule literal 그대로. literal list 박제 X
- *     (silent drift family streak 52: cycle 477/479/448 single-source 전파).
+ *     QUANT_PREGAME_VERSION / QUANT_POSTVIEW_VERSION / QUANT_LIVE_VERSION.
+ *     literal list 박제 X — single source 는 model-version-labels.ts.
  *
  * Brier 계산: reasoning JSON 에서 homeWinProb 추출 후 실제 home 승리 여부
  * (winner_team_id === home_team_id) 와 (p - y)^2 평균.
  */
 
-// cycle 477 review-code heavy — LLM_DEBATE_VERSION 단일 source (v2.0 → v2.1 bump 동시 박제).
 import { LLM_DEBATE_VERSION } from '@moneyball/shared';
 
 export interface CalibrationBucket {
