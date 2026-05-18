@@ -52,6 +52,20 @@ const SENSITIVE_KEYS = new Set<string>([
 // 보수 list — `_key`/`_id` 는 false positive (`region_key`, `game_id`) 위험으로 제외.
 const SENSITIVE_KEY_SUFFIXES = ['_token', '_secret', '_password', '_passwd'];
 
+// cycle 527 — URL 값 스크럽 (PII spec C-3: GH issue #742).
+// 기존 scrubObject 는 key-based 만. breadcrumb data.to / data.url / event.request.url
+// 등은 key 가 'url'/'to' 라 통과 → 값에 임베디드된 ?token=... ?session=... silent 노출.
+// 해당 key 들 만 대상 — 모든 문자열에 URL 파서 돌리면 false positive 위험.
+const URL_VALUE_KEYS = new Set<string>([
+  'url',
+  'href',
+  'to',
+  'from',
+  'referer',
+  'referrer',
+  'redirect_uri',
+]);
+
 function isSensitiveKey(key: string): boolean {
   const lower = key.toLowerCase();
   if (SENSITIVE_KEYS.has(lower)) return true;
@@ -59,6 +73,42 @@ function isSensitiveKey(key: string): boolean {
     if (lower.endsWith(suffix)) return true;
   }
   return false;
+}
+
+// URL string 안 sensitive query param 값만 [Filtered]. path / fragment / 비민감 param 보존.
+// 상대 / 절대 URL 모두 처리. ? 없으면 원본 그대로 (idempotent).
+export function scrubUrlString(raw: string): string {
+  if (!raw || typeof raw !== 'string') return raw;
+  const qIdx = raw.indexOf('?');
+  if (qIdx === -1) return raw;
+
+  const pathPart = raw.slice(0, qIdx);
+  const afterQ = raw.slice(qIdx + 1);
+
+  const fragIdx = afterQ.indexOf('#');
+  const queryOnly = fragIdx === -1 ? afterQ : afterQ.slice(0, fragIdx);
+  const fragment = fragIdx === -1 ? '' : afterQ.slice(fragIdx);
+
+  const scrubbed = queryOnly
+    .split('&')
+    .map((pair) => {
+      const eqIdx = pair.indexOf('=');
+      if (eqIdx === -1) return pair;
+      const key = pair.slice(0, eqIdx);
+      let decodedKey = key;
+      try {
+        decodedKey = decodeURIComponent(key);
+      } catch {
+        // malformed encoding — fall back to raw key
+      }
+      if (isSensitiveKey(decodedKey)) {
+        return `${key}=${FILTERED}`;
+      }
+      return pair;
+    })
+    .join('&');
+
+  return `${pathPart}?${scrubbed}${fragment}`;
 }
 
 function scrubObject(obj: unknown, depth = 0): unknown {
@@ -74,6 +124,8 @@ function scrubObject(obj: unknown, depth = 0): unknown {
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
     if (isSensitiveKey(key)) {
       result[key] = FILTERED;
+    } else if (typeof value === 'string' && URL_VALUE_KEYS.has(key.toLowerCase())) {
+      result[key] = scrubUrlString(value);
     } else if (value !== null && typeof value === 'object') {
       result[key] = scrubObject(value, depth + 1);
     } else {
