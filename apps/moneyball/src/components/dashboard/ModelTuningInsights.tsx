@@ -36,7 +36,7 @@ export function ModelTuningInsights({ report }: Props) {
       {!ready && (
         <p
           role="status"
-          className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded px-3 py-2"
+          className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[var(--color-surface)] rounded px-3 py-2"
         >
           샘플 {report.totalSamples}경기 · v2.0 가중치 제안은 {report.minSamples}
           경기 이상에서 활성화됩니다. 현재는 팩터별 방향성·편향 진단만 표시.
@@ -87,7 +87,7 @@ export function ModelTuningInsights({ report }: Props) {
               return (
                 <tr
                   key={s.factor}
-                  className="border-b border-gray-100 dark:border-gray-800"
+                  className="border-b border-gray-100 dark:border-[var(--color-border)]"
                 >
                   <td className="py-2 pr-3">
                     <span className="font-medium text-gray-800 dark:text-gray-100">
@@ -142,7 +142,7 @@ export function ModelTuningInsights({ report }: Props) {
         </table>
       </div>
 
-      <details className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded px-3 py-2">
+      <details className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[var(--color-surface)] rounded px-3 py-2">
         <summary className="cursor-pointer">지표 해석</summary>
         <ul className="mt-2 space-y-1 pl-4 list-disc">
           <li>
