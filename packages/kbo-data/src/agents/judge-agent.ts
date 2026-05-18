@@ -116,8 +116,11 @@ function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCode): Ju
 /**
  * 심판 에이전트: 양쪽 논거 + 정량 모델 + 회고 보정 → 최종 확률
  *
- * cycle 27 — context 인자 추가: validateJudgeReasoning 로 reasoning 검증 + 위반 mask + Sentry tag.
- * context 미전달 시 (legacy 호출부) 검증 skip — 후방 호환.
+ * 후처리 거동:
+ * - 일요일 confidence cap 0.45 (`context.game.date` 의 UTC 요일 == 0 + confidence > 0.55).
+ *   medium tier(≥0.55) 오분류 차단 — low tier 명확 배치.
+ * - reasoning validation: `validateJudgeReasoning` 위반 시 mask + Sentry tag + `validator_logs` row.
+ * - `context` 미전달 (legacy 호출부) 시 두 후처리 모두 skip — 후방 호환.
  */
 export async function runJudgeAgent(
   homeTeam: TeamCode,
