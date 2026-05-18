@@ -77,13 +77,15 @@ export function PredictionsTierFilter({ counts }: Props) {
         </span>
         {ORDER.map((key) => {
           const active = filter === key;
+          const empty = key !== 'all' && counts[key] === 0;
           return (
             <button
               key={key}
               type="button"
               onClick={() => writeFilter(key)}
               aria-pressed={active}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors min-h-[32px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
+              disabled={empty}
+              className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors min-h-[32px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-40 disabled:cursor-not-allowed ${
                 active
                   ? 'bg-brand-600 text-white border-transparent'
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
