@@ -1,15 +1,13 @@
-// cycle 28 — /debug/hallucination 대시보드 통계 분리
-// spec docs/superpowers/specs/2026-05-04-llm-output-integrity-cycle25.md § 4.3 (P3)
-// 기존 page.tsx 의 인라인 집계 로직을 순수 함수로 추출 + 일자별 추세 + 비율 추가.
+// /debug/hallucination 대시보드 통계 집계 — validator_logs 행을 일자별/카테고리별로 분해.
 
 export interface ValidatorLogInput {
   severity: string;
   violation_type: string;
   backend: string;
   created_at: string;
-  // cycle 30 migration 022 — 'team' (TeamArgument) | 'judge' (JudgeVerdict.reasoning)
+  // migration 022 — 'team' (TeamArgument) | 'judge' (JudgeVerdict.reasoning)
   agent?: string | null;
-  // cycle 30 migration 022 — true=warn 통과 near-miss / false=reject
+  // migration 022 — true=warn 통과 near-miss / false=reject
   passed?: boolean | null;
 }
 
@@ -30,10 +28,10 @@ export interface HallucinationStats {
   total: number;
   hardCount: number;
   warnCount: number;
-  // cycle 31 — agent 분리 카운트
+  // agent 분리 카운트
   teamCount: number;
   judgeCount: number;
-  // cycle 31 — passed/rejected 분리 카운트 (near-miss vs hard reject)
+  // passed/rejected 분리 카운트 (near-miss vs hard reject)
   passedCount: number;
   rejectedCount: number;
   byType: CategoryBreakdown[];
