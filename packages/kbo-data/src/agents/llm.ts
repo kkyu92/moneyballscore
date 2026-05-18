@@ -21,7 +21,7 @@ export interface LLMCallOptions {
 export type LLMBackend = 'claude' | 'ollama' | 'deepseek';
 
 /**
- * 역할별 백엔드 선택 (v4-4 Hybrid 지원)
+ * 역할별 백엔드 선택 (Hybrid 지원)
  *
  * 우선순위:
  *   1. 역할별 env var 직접 지정 (LLM_BACKEND_HAIKU / LLM_BACKEND_SONNET)
