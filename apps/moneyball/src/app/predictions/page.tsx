@@ -9,6 +9,7 @@ import {
 } from "@moneyball/shared";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { PredictionsStatusFilter } from "@/components/predictions/PredictionsStatusFilter";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -114,16 +115,25 @@ async function getPredictionDates(): Promise<DateStat[]> {
 export default async function PredictionsPage() {
   const dates = await getPredictionDates();
 
+  const counts = {
+    all: dates.length,
+    verified: dates.filter((d) => d.verified > 0).length,
+    pending: dates.filter((d) => d.verified === 0).length,
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: '예측 기록' }]} />
       <h1 className="text-3xl font-bold">예측 기록</h1>
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
 
+      {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
+
       {dates.length > 0 ? (
         <div className="space-y-2">
           {dates.map((d) => {
             const accuracy = d.verified > 0 ? d.correct / d.verified : 0;
+            const status = d.verified > 0 ? 'verified' : 'pending';
             // 3단계 중 실제 예측된 티어만 카운트 캡션에 노출 (0 인 티어 스킵).
             const tierChips = TIER_ORDER.filter(
               (tier) => d.tiers[tier].predicted > 0,
@@ -132,6 +142,7 @@ export default async function PredictionsPage() {
               <Link
                 key={d.date}
                 href={`/predictions/${d.date}`}
+                data-prediction-status={status}
                 className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between gap-4">
