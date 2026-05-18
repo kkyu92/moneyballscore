@@ -525,7 +525,7 @@ export default async function AccuracyPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-          <div className="grid grid-cols-7 gap-2 mt-2 min-w-[360px]">
+          <div className="grid grid-cols-7 gap-2 mt-2 min-w-[336px] sm:min-w-[360px]">
             {dow.map((d) => {
               const acc = d.accuracy;
               const barH = acc !== null ? Math.round(acc * 100) : 0;
