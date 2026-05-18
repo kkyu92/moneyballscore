@@ -1,10 +1,10 @@
 /**
  * Rivalry Memory — 팀 에이전트 프롬프트 주입용 과거 맥락 로더
  *
- * Phase v4-3 Task 1.
+ * 동작:
  * - 과거 5경기 h2h (home vs away)
  * - agent_memories 테이블에서 해당 팀의 valid_until 유효한 row ≤5개 (confidence DESC)
- * - 플레인텍스트 블록으로 조합 → team-agent buildUserMessage에 주입
+ * - 플레인텍스트 블록으로 조합 → team-agent buildUserMessage 에 주입
  *
  * 실패 모드: 빈 블록 반환. throw 금지. fallback 유지.
  * 토큰 예산: ~400 tokens (MAX_BLOCK_CHARS=600 한국어 ≈1.5자/토큰 근사). 초과 시 앞부분 truncate.
