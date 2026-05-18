@@ -152,14 +152,14 @@ function modeBadge(mode: string) {
     predict_final: 'bg-purple-100 text-purple-700',
     verify: 'bg-warning/15 text-warning',
   };
-  return colors[mode] ?? 'bg-gray-100 text-gray-700';
+  return colors[mode] ?? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 }
 
 function statusBadge(status: string) {
   if (status === 'success') return 'bg-green-100 text-green-700';
   if (status === 'partial') return 'bg-warning/15 text-warning';
   if (status === 'error') return 'bg-red-100 text-red-700';
-  return 'bg-gray-100 text-gray-700';
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 }
 
 export default async function PipelineDashboard() {
@@ -169,7 +169,7 @@ export default async function PipelineDashboard() {
     <div className="max-w-6xl mx-auto space-y-6 py-6">
       <header className="border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-bold mb-1">Pipeline Dashboard</h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           최근 30일 pipeline_runs · 내부용 · BASIC auth 보호 · PLAN_v5 Phase 3
         </p>
       </header>
@@ -184,13 +184,13 @@ export default async function PipelineDashboard() {
           {/* 요약 상단 */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm text-gray-500 mb-2">최근 30일 전체 run</h3>
+              <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2">최근 30일 전체 run</h3>
               <p className="text-4xl font-bold">{stats.totalRuns}</p>
-              <p className="text-xs text-gray-500 mt-1">건</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">건</p>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm text-gray-500 mb-2">이번 주 GAP 이벤트</h3>
+              <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2">이번 주 GAP 이벤트</h3>
               <p
                 className={`text-4xl font-bold ${
                   stats.gapEventsWeek.length > 0 ? 'text-red-600' : 'text-green-600'
@@ -198,17 +198,17 @@ export default async function PipelineDashboard() {
               >
                 {stats.gapEventsWeek.length}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {stats.gapEventsWeek.length > 0 ? '누락 감지됨' : '예측 누락 0건'}
               </p>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm text-gray-500 mb-2">cron 무료 티어 사용</h3>
+              <h3 className="text-sm text-gray-500 dark:text-gray-400 mb-2">cron 무료 티어 사용</h3>
               <p className="text-4xl font-bold">
                 {Math.round((stats.totalRuns * 30) / 60)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 분/월 추정 (run 당 30초)
               </p>
             </div>
@@ -219,7 +219,7 @@ export default async function PipelineDashboard() {
             <h2 className="text-lg font-bold mb-3">Mode 별 30일 합계</h2>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-xs text-gray-600">
+                <thead className="bg-gray-50 text-xs text-gray-600 dark:text-gray-400">
                   <tr>
                     <th className="px-3 py-2 text-left">Mode</th>
                     <th className="px-3 py-2 text-right">Runs</th>
@@ -253,7 +253,7 @@ export default async function PipelineDashboard() {
                         <td className="px-3 py-2 text-right font-mono">
                           {sub.totalPredictions}
                         </td>
-                        <td className="px-3 py-2 text-right font-mono text-xs text-gray-600">
+                        <td className="px-3 py-2 text-right font-mono text-xs text-gray-600 dark:text-gray-400">
                           {formatDuration(sub.avgDurationMs)}
                         </td>
                       </tr>
@@ -280,7 +280,7 @@ export default async function PipelineDashboard() {
                   <tbody className="divide-y divide-warning/15">
                     {stats.spEventsWeek.map((s, i) => (
                       <tr key={i}>
-                        <td className="px-3 py-2 text-xs text-gray-700 font-mono">
+                        <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 font-mono">
                           {new Date(s.created_at).toLocaleString('ko-KR', {
                             month: '2-digit',
                             day: '2-digit',
@@ -316,7 +316,7 @@ export default async function PipelineDashboard() {
                   <tbody className="divide-y divide-red-100">
                     {stats.gapEventsWeek.map((g, i) => (
                       <tr key={i}>
-                        <td className="px-3 py-2 text-xs text-gray-700 font-mono">
+                        <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 font-mono">
                           {new Date(g.created_at).toLocaleString('ko-KR', {
                             month: '2-digit',
                             day: '2-digit',
@@ -339,13 +339,13 @@ export default async function PipelineDashboard() {
           <section>
             <h2 className="text-lg font-bold mb-3">최근 50 run</h2>
             {stats.runs.length === 0 ? (
-              <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
+              <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
                 <p>pipeline_runs 기록 없음</p>
               </div>
             ) : (
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-xs text-gray-600">
+                  <thead className="bg-gray-50 text-xs text-gray-600 dark:text-gray-400">
                     <tr>
                       <th className="px-3 py-2 text-left">시각</th>
                       <th className="px-3 py-2 text-left">Run date</th>
@@ -370,7 +370,7 @@ export default async function PipelineDashboard() {
                           key={run.id}
                           className={hasGap ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}
                         >
-                          <td className="px-3 py-2 text-xs text-gray-500 font-mono">
+                          <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 font-mono">
                             {new Date(run.created_at).toLocaleString('ko-KR', {
                               month: '2-digit', day: '2-digit',
                               hour: '2-digit', minute: '2-digit',
@@ -389,14 +389,14 @@ export default async function PipelineDashboard() {
                           </td>
                           <td className="px-3 py-2 text-right font-mono">{run.games_found}</td>
                           <td className="px-3 py-2 text-right font-mono">{run.predictions}</td>
-                          <td className="px-3 py-2 text-right font-mono text-gray-500">
+                          <td className="px-3 py-2 text-right font-mono text-gray-500 dark:text-gray-400">
                             <div>{run.games_skipped}</div>
                             {(() => {
                               const entries = parseSkippedDetail(run.skipped_detail);
                               const summary = summarizeReasons(entries);
                               return summary ? (
                                 <div
-                                  className="text-[10px] text-gray-400 mt-0.5"
+                                  className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5"
                                   title={entries
                                     .map((e) => `${e.game} — ${e.reason}`)
                                     .join('\n')}
@@ -406,10 +406,10 @@ export default async function PipelineDashboard() {
                               ) : null;
                             })()}
                           </td>
-                          <td className="px-3 py-2 text-right font-mono text-xs text-gray-600">
+                          <td className="px-3 py-2 text-right font-mono text-xs text-gray-600 dark:text-gray-400">
                             {formatDuration(run.duration_ms)}
                           </td>
-                          <td className="px-3 py-2 text-xs text-gray-600 max-w-xs truncate">
+                          <td className="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 max-w-xs truncate">
                             {errs.length > 0 ? errs[0] : '—'}
                           </td>
                         </tr>
