@@ -16,6 +16,8 @@ interface FactorRow {
   /** "lower" = 낮을수록 우세, "higher" = 높을수록 우세 */
   direction: "lower" | "higher";
   format: (v: number) => string;
+  /** native title 툴팁 — 비전문가용 약어 풀이 + 의미 (cycle 629) */
+  hint: string;
 }
 
 const FACTORS: FactorRow[] = [
@@ -24,30 +26,39 @@ const FACTORS: FactorRow[] = [
     label: "선발 FIP",
     direction: "lower",
     format: (v) => v.toFixed(2),
+    hint:
+      "FIP — Fielding Independent Pitching. 선발투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세.",
   },
   {
     key: "lineupWoba",
     label: "타선 wOBA",
     direction: "higher",
     format: (v) => v.toFixed(3),
+    hint:
+      "wOBA — Weighted On-Base Average. 안타·볼넷·홈런 등 출루 결과별 가치를 가중치로 합산한 종합 타격 지표. 높을수록 우세.",
   },
   {
     key: "bullpenFip",
     label: "불펜 FIP",
     direction: "lower",
     format: (v) => v.toFixed(2),
+    hint:
+      "불펜 FIP — 중계/마무리 투수진의 종합 FIP. 선발 강판 후 경기 결과에 큰 영향. 낮을수록 우세.",
   },
   {
     key: "recentForm",
     label: "최근 폼",
     direction: "higher",
     format: (v) => `${Math.round(v * 100)}%`,
+    hint: "최근 폼 — 최근 10경기 승률. 높을수록 우세.",
   },
   {
     key: "elo",
     label: "Elo 레이팅",
     direction: "higher",
     format: (v) => v.toFixed(0),
+    hint:
+      "Elo — 체스에서 유래한 상대평가 레이팅. KBO Fancy Stats 기준. 높을수록 강팀.",
   },
 ];
 
@@ -110,7 +121,10 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
 
               {/* 센터: 레이블 + 비교 바 */}
               <div className="flex flex-col items-center gap-1 min-w-[8rem]">
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none">
+                <span
+                  className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none cursor-help"
+                  title={f.hint}
+                >
                   {f.label}
                 </span>
                 {/* 비교 바 — 승자 쪽 절반이 brand 색으로 채워짐 */}
