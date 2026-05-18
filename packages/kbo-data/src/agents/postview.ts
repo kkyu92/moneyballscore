@@ -1,8 +1,6 @@
 /**
  * Postview — 경기 종료 후 "왜 틀렸나" 분석 오케스트레이터
  *
- * Phase v4-3 Task 4.
- *
  * 프리뷰(pre_game)와 구조는 비슷하지만 입력·프롬프트가 다름:
  *   - 입력: GameContext + actualResult + originalPrediction (pre_game 예측)
  *   - 홈/원정 에이전트: "우리 팀이 왜 이겼/졌는지, pre_game이 무엇을 놓쳤는지"
@@ -33,9 +31,12 @@ const WEIGHTED_FACTOR_BASES = new Set(
 );
 
 // cycle 131 — production factor 키는 home_/away_ prefix 없음 (predictor.ts 가 factors.sp_fip /
-// factors.bullpen_fip 등 normalized single key 로 박제). 단 LLM 이 legacy 예시 또는 user message 의
-// home/away 어휘 보고 'home_bullpen_fip' 같은 prefixed key 박제할 가능성 존재 → strip 후 canonicalize.
-// downstream factor-bias-bootstrap-ci.ts 가 prefixed key 를 grouping 못해 silent skip 되던 drift 차단.
+// factors.bullpen_fip 등 normalized single key 로 박제). LLM training data 안 일반 스포츠
+// home_/away_ naming convention 또는 user message 의 자연어 home/away 표현 영향으로
+// 'home_bullpen_fip' 같은 prefixed key 박제 가능 — system prompt (JUDGE_POSTVIEW_SYSTEM
+// "home_/away_ prefix 금지" 룰) 어겨도 안전. downstream factor-bias-bootstrap-ci.ts 가
+// FACTORS_OF_INTEREST=['sfr','head_to_head'] no-prefix grouping → prefixed key 박제 시
+// silent skip 되던 drift 차단.
 export function canonicalizeFactorKey(factor: string): string {
   return factor.replace(/^(home_|away_)/, '');
 }
