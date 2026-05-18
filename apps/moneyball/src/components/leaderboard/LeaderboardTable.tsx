@@ -37,7 +37,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
     <div className="space-y-2">
       {/* AI 베이스라인 */}
       {aiBaseline && (
-        <div className="flex items-center justify-between text-xs px-4 py-2 bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 rounded-lg">
+        <div className="flex items-center justify-between text-xs px-4 py-2 bg-gray-50 dark:bg-[var(--color-surface-card)]/60 border border-gray-100 dark:border-[var(--color-border)] rounded-lg">
           <span className="text-gray-500 dark:text-gray-400">
             AI 적중률 <span className="text-gray-400 dark:text-gray-500">(n={aiBaseline.total})</span>
           </span>
@@ -71,7 +71,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
 
       {/* 순위표 */}
       <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
-        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] text-xs text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 px-4 py-2">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] text-xs text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-[var(--color-border)] px-4 py-2">
           <span>#</span>
           <span>닉네임</span>
           <span className="text-right">연속</span>
@@ -87,7 +87,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
           return (
             <div
               key={entry.device_id + i}
-              className={`grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] px-4 py-2.5 text-sm items-center border-b last:border-b-0 border-gray-50 dark:border-gray-800 ${
+              className={`grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] px-4 py-2.5 text-sm items-center border-b last:border-b-0 border-gray-50 dark:border-[var(--color-border)] ${
                 isMe
                   ? 'bg-brand-50 dark:bg-brand-900/10'
                   : rank <= 3

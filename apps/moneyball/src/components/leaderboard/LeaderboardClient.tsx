@@ -64,7 +64,7 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
 
       {/* 탭 */}
       <div>
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="flex gap-1 bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-lg p-1">
           {(['weekly', 'season'] as const).map((t) => (
             <button
               key={t}
