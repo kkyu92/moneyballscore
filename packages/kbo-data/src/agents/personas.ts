@@ -11,9 +11,9 @@
 
 import { CURRENT_SCORING_RULE, DEBATE_VERSION_PREGAME } from '@moneyball/shared';
 
-// cycle 479 — PERSONA_VERSION 단일 source = shared DEBATE_VERSION_PREGAME.
+// PERSONA_VERSION 단일 source = shared DEBATE_VERSION_PREGAME.
 // 4곳 분산 literal (model-version.ts decideModelVersion / config/model.ts
-// CURRENT_DEBATE_VERSION / 본 모듈) 통합 (silent drift family streak 24 cycle 째).
+// CURRENT_DEBATE_VERSION / 본 모듈) 통합.
 export const PERSONA_VERSION = DEBATE_VERSION_PREGAME;
 
 // ============================================
