@@ -23,14 +23,14 @@ import {
 } from './validator';
 import type { GameContext, AgentResult } from './types';
 
-// 가중치 > 0% 인 factor 만 factorErrors 후보 (cycle 11: head_to_head/sfr 가중치 0% 가 LLM reasoning 의 70% 차지하던 silent drift 차단)
+// 가중치 > 0% 인 factor 만 factorErrors 후보 — 0% factor 가 LLM reasoning 의 70% 차지하던 silent drift 차단.
 const WEIGHTED_FACTOR_BASES = new Set(
   Object.entries(DEFAULT_WEIGHTS)
     .filter(([, w]) => w > 0)
     .map(([k]) => k)
 );
 
-// cycle 131 — production factor 키는 home_/away_ prefix 없음 (predictor.ts 가 factors.sp_fip /
+// production factor 키는 home_/away_ prefix 없음 (predictor.ts 가 factors.sp_fip /
 // factors.bullpen_fip 등 normalized single key 로 박제). LLM training data 안 일반 스포츠
 // home_/away_ naming convention 또는 user message 의 자연어 home/away 표현 영향으로
 // 'home_bullpen_fip' 같은 prefixed key 박제 가능 — system prompt (JUDGE_POSTVIEW_SYSTEM
@@ -45,9 +45,8 @@ export function isWeightedFactor(factor: string): boolean {
   return WEIGHTED_FACTOR_BASES.has(canonicalizeFactorKey(factor));
 }
 
-// cycle 15 — LLM prompt-level constraint 용. cycle 12 (사후 filter) 는 factorErrors 배열만 막고
-// reasoning 본문에서 0% factor 거론은 통과시켰음. prompt 자체에 0% factor 명시 + 추론 금지 규칙
-// 박제 → 모델 가중치 ↔ LLM reasoning 일관성 prompt-level 보장.
+// LLM prompt-level constraint. 사후 filter (factorErrors 배열) 만으론 reasoning 본문의 0% factor
+// 거론 통과 — prompt 에 0% factor 명시 + 추론 금지 규칙 박제로 모델 가중치 ↔ LLM reasoning 일관성 보장.
 const ZERO_WEIGHT_FACTOR_LABELS_KO: Record<string, string> = {
   head_to_head: '상대전적',
   park_factor: '구장보정',
@@ -66,10 +65,10 @@ export function getZeroWeightFactorPromptList(
     .join(', ');
 }
 
-// cycle 126 silent drift 가드 — DEFAULT_WEIGHTS 안 weight=0 factor 0건이면 helper 가
-// 빈 문자열 반환. 이전 코드는 prompt template 안 `(${ZERO_WEIGHT_FACTOR_LIST_PROMPT})`
-// 가 빈 괄호 `()` 로 출력되어 LLM 추론 noise + cycle 17 주석에 "vacuous" 박제만 있고 fix 부재.
-// 본 helper 들은 list 가 비어있을 때 규칙 줄 자체를 skip → DEFAULT_WEIGHTS 변경 시 prompt 자동 정합.
+// silent drift 가드 — DEFAULT_WEIGHTS 안 weight=0 factor 0건이면 helper 가 빈 문자열 반환.
+// 직전 구현은 prompt template `(${ZERO_WEIGHT_FACTOR_LIST_PROMPT})` 가 빈 괄호 `()` 로
+// 출력되어 LLM 추론 noise. 본 helper 들은 list 가 비어있을 때 규칙 줄 자체를 skip →
+// DEFAULT_WEIGHTS 변경 시 prompt 자동 정합.
 export function getZeroWeightRuleTeamPostview(
   weights: Record<string, number> = DEFAULT_WEIGHTS,
 ): string {
@@ -83,7 +82,7 @@ export function getZeroWeightRuleJudgePostview(
 ): string {
   const list = getZeroWeightFactorPromptList(weights);
   if (!list) return '';
-  return `\n- 가중치 0% factor (${list}) 는 정량 모델 가중치가 0이라\n  pre_game 확률 형성에 기여하지 않습니다. factorErrors 후보에서 제외하고 reasoning\n  핵심 근거로도 사용 금지. (cycle 11 발견 — 0% factor 가 LLM reasoning 70% 차지)`;
+  return `\n- 가중치 0% factor (${list}) 는 정량 모델 가중치가 0이라\n  pre_game 확률 형성에 기여하지 않습니다. factorErrors 후보에서 제외하고 reasoning\n  핵심 근거로도 사용 금지. (0% factor 가 LLM reasoning 70% 차지하던 silent drift 차단)`;
 }
 
 export function getZeroWeightRuleJudgePregame(
@@ -91,7 +90,7 @@ export function getZeroWeightRuleJudgePregame(
 ): string {
   const list = getZeroWeightFactorPromptList(weights);
   if (!list) return '';
-  return `\n- 가중치 0% factor (${list}) 는 정량 모델 가중치가 0이라\n  확률 형성에 기여하지 않습니다. 양쪽 에이전트의 keyFactor 가 이에 해당해도 reasoning\n  핵심 근거로 사용 금지. (cycle 11 발견 — 0% factor 가 LLM reasoning 70% 차지하던 silent drift 차단)`;
+  return `\n- 가중치 0% factor (${list}) 는 정량 모델 가중치가 0이라\n  확률 형성에 기여하지 않습니다. 양쪽 에이전트의 keyFactor 가 이에 해당해도 reasoning\n  핵심 근거로 사용 금지. (0% factor 가 LLM reasoning 70% 차지하던 silent drift 차단)`;
 }
 
 const ZERO_WEIGHT_RULE_TEAM_POSTVIEW = getZeroWeightRuleTeamPostview();
@@ -136,8 +135,8 @@ export interface PostviewResult {
   judgeReasoning: string; // 블로그용 종합 분석 (300-500자)
   totalTokens: number;
   totalDurationMs: number;
-  agentsFailed: boolean;   // cycle 384 — postview 에이전트 1개 이상 fallback (PR #372 패턴)
-  agentError: string | null; // cycle 384 — 첫 번째 에러 메시지 (ANTHROPIC credit 등)
+  agentsFailed: boolean;   // postview 에이전트 1개 이상 fallback 시 true
+  agentError: string | null; // 첫 번째 에러 메시지 (ANTHROPIC credit 소진 등)
 }
 
 // ============================================
@@ -301,7 +300,7 @@ export function parseJudgePostview(text: string): { factorErrors: FactorError[];
     if (!jsonMatch) throw new Error('No JSON found');
     const parsed = JSON.parse(jsonMatch[0]);
 
-    // cycle 131 — LLM 이 'home_bullpen_fip' 같은 prefixed key 박제해도 canonicalize.
+    // LLM 이 'home_bullpen_fip' 같은 prefixed key 박제해도 canonicalize.
     // production factor 키는 prefix 없음 (predictor.ts 단일 normalized key).
     // downstream factor-bias-bootstrap-ci.ts 가 ['sfr', 'head_to_head'] no-prefix 로 grouping →
     // prefixed key 가 박제되면 silent skip 되던 drift 차단.
@@ -392,9 +391,8 @@ export async function runPostview(
     reasoning: '사후 분석 LLM 실패. factor 편향 기반 자동 fallback.',
   };
 
-  // cycle 466 — evaluateAndCaptureAgentFallback helper 로 dedupe. cycle 384 (PR #372 패턴
-  // postview path 확장 + ANTHROPIC_API_KEY credit 소진 시 mv=LLM_POSTVIEW_VERSION 라벨 silent drift
-  // 차단) 의 debate.ts 와 공통 패턴.
+  // evaluateAndCaptureAgentFallback helper 로 debate.ts 와 dedupe.
+  // ANTHROPIC_API_KEY credit 소진 시 mv=LLM_POSTVIEW_VERSION 라벨 silent drift 차단 패턴.
   const { agentsFailed, agentError } = evaluateAndCaptureAgentFallback(
     [homeResult, awayResult, judgeResult],
     {
@@ -406,8 +404,8 @@ export async function runPostview(
     }
   );
 
-  // cycle 29 (P4) — factor attribution cross-check. low-weight factor 를 결과 요인으로 강조 시 warn.
-  // cycle 70 — 사용자 가시 reasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
+  // factor attribution cross-check — low-weight factor 를 결과 요인으로 강조 시 warn.
+  // 사용자 가시 reasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
   // attribution warning 은 Sentry capture 만 (dev 모니터링 유지). 사용자 가시 텍스트엔 표기 X.
   const attribution = validateFactorAttribution(
     judgeData.factorErrors,
@@ -418,9 +416,8 @@ export async function runPostview(
     { agent: 'judge', gameId: context.game.externalGameId ?? null }
   );
 
-  // cycle 83 — judgeReasoning 환각/발명/금칙어 검증 + mask. judge-agent.ts (pre-game)
-  // cycle 76 fix 의 카운터파트. postview judgeReasoning 은 /analysis/game/[id] PostviewPanel
-  // 에 직접 노출 = 사용자 가시 영역. silent leak 차단.
+  // judgeReasoning 환각/발명/금칙어 검증 + mask. judge-agent.ts (pre-game) 패턴과 동일.
+  // postview judgeReasoning 은 /analysis/game/[id] PostviewPanel 에 직접 노출 = 사용자 가시 영역. silent leak 차단.
   const reasoningValidation = validateJudgeReasoning(
     judgeData.reasoning,
     context,
@@ -458,10 +455,10 @@ export async function runPostview(
  * LLM 실패 시 factor 편향 기반 deterministic fallback
  * 결과와 반대 방향으로 편향된 상위 3 factor 선택
  *
- * cycle 177 — parseJudgePostview 와 동일하게 canonicalizeFactorKey 적용.
+ * parseJudgePostview 와 동일하게 canonicalizeFactorKey 적용.
  * production factor (predictor.ts) 는 no-prefix 박제이지만 input 이 prefixed key 받아도
  * downstream factor-bias-bootstrap-ci.ts FACTORS_OF_INTEREST=['sfr','head_to_head'] no-prefix
- * grouping 안전망. cycle 131 silent drift family defensive consistency 통일.
+ * grouping 안전망. silent drift family defensive consistency 통일.
  */
 export function deriveFactorErrorsFallback(
   factors: Record<string, number>,
