@@ -185,7 +185,7 @@ export function FavoriteTeamFilter({ games }: Props) {
       </div>
 
       {open && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[var(--color-border)]">
           <div className="flex flex-wrap gap-1.5">
             {TEAM_ENTRIES.map(([code, t]) => {
               const active = favorites.includes(code);
