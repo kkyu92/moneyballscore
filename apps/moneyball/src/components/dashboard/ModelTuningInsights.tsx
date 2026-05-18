@@ -20,7 +20,6 @@ function fmtWeightPct(v: number): string {
 }
 
 /**
- * v4-4 Phase 1-3 후속 (퀄리티 B):
  * 각 팩터의 실제 예측 기여도를 검증하고 v2.0 가중치 제안을 표시.
  *
  * - samples < minSamples: 현재 수치만 + "수집 중" 안내
