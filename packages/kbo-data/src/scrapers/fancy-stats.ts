@@ -7,11 +7,9 @@ import { fetchKboPitcherBasic } from './kbo-pitcher';
 const BASE_URL = 'https://www.kbofancystats.com';
 const DELAY_MS = 2000;
 
-// scrapers utility — fangraphs.ts 가 동일 1줄 wrapper 보유했음 (cycle 185
-// silent drift family scrapers 차원 6번째 진입). fancy-stats.ts 가 이미
-// parseNumWithFallback export 중이라 같은 위치에서 sleep + parseNum export
-// 통일. kbo-official.ts 의 sleep / backfill-records.ts·llm.ts·llm-deepseek.ts
-// 의 sleep 은 scope 분리 (scrapers utility ≠ pipeline/agents utility).
+// scrapers utility export — kbo-official.ts·fangraphs.ts 와 동일 위치에서
+// sleep + parseNum 통일. backfill-records.ts·llm.ts·llm-deepseek.ts 의 sleep 은
+// scope 분리 (scrapers utility ≠ pipeline/agents utility).
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -50,9 +48,8 @@ export function resolveTeamCode(name: string): TeamCode | null {
   return TEAM_NAME_MAP[name] || null;
 }
 
-// parseNum 의 NaN 0-fallback simple 변형. fangraphs.ts 도 동일 정의 박제됐어
-// 단일 export 통일 (cycle 185). xfip fallback / totalWar=0 stub family 와 같
-// 패턴 — silent fallback 차단 위해선 parseNumWithFallback 우선.
+// parseNum 의 NaN 0-fallback simple 변형. fangraphs.ts 와 단일 export 통일.
+// silent fallback 차단 위해선 parseNumWithFallback 우선.
 function parseNum(text: string): number {
   const cleaned = text.replace(/[^0-9.\-]/g, '');
   const val = parseFloat(cleaned);
@@ -61,8 +58,7 @@ function parseNum(text: string): number {
 
 // parseNum 의 NaN 0-fallback 가시화 helper. parseNum 자체는 호환성 유지
 // (단순 호출자용). 테이블 파서는 NaN ratio 측정으로 silent drift 차단 —
-// xfip fallback (cycle 145) / totalWar=0 stub (cycle 137) / winPct=0.5 stub
-// (cycle 138) family 와 동일 패턴.
+// xfip fallback / totalWar=0 stub / winPct=0.5 stub family 와 동일 패턴.
 export function parseNumWithFallback(text: string): { value: number; fellBack: boolean } {
   const cleaned = text.replace(/[^0-9.\-]/g, '');
   const val = parseFloat(cleaned);
@@ -142,11 +138,11 @@ export function parsePitchersFromHtml(html: string): PitcherStats[] {
   const kMap = new Map<string, number>();
   for (const [k, v] of readPitcherTable(7, 'kPer9')) kMap.set(k, v.stat);
 
-  // xfip fallback silent drift family (cycle 137/138 stub 가시화 패턴 동일):
+  // xfip fallback silent drift family (stub 가시화 패턴 동일):
   // xfipMap 에 없으면 fip 값 박제 → predictor weight (sp_fip 0.15 / sp_xfip 0.05)
   // 가 사실상 sp_fip 0.20 silent 중복. snapshot-pitchers `xfip !== fip` source
   // 라벨링도 fallback row 를 'kbo-basic1' 로 오분류. 결손률 측정 가시화로
-  // 다음 cycle 의 root fix (table 6 fetch 정합성 / 별도 source 필드) trigger.
+  // root fix (table 6 fetch 정합성 / 별도 source 필드) trigger.
   const pitchers: PitcherStats[] = [];
   const xfipFallbackKeys: string[] = [];
   for (const [key, { team, fip }] of fipMap) {
@@ -211,8 +207,8 @@ async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
  *
  * **`_season` 인자는 무시됨**. Fancy Stats `/leaders/` 는 시즌 query 미지원 —
  * 호출 시점의 현재 시즌 데이터만 반환. historical season 전달 시 호출자가
- * "특정 시즌 snapshot" 으로 신뢰하면 silent drift 발생 (cycle 137 totalWar=0
- * stub / cycle 138 winPct=0.5 stub family — underscore prefix 가 unused 신호).
+ * "특정 시즌 snapshot" 으로 신뢰하면 silent drift 발생 (totalWar=0 stub /
+ * winPct=0.5 stub family — underscore prefix 가 unused 신호).
  */
 export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]> {
   const fancy = await fetchFancyStatsPitchers();
@@ -368,12 +364,11 @@ export async function fetchBatterStats(_season: number): Promise<BatterStats[]> 
  * totalWar 는 /elo/ 페이지에 없어 0 으로 stub. predictor WAR factor (8%) +
  * team-agent LLM 프롬프트 + DB 모두 stub 0 진입 — fetchEloRatings 의
  * detectFancyStatsFallbacks family 가 elo/woba/fip/sfr 만 cover 하던 정합 누락을
- * stub 가시화로 채워 다음 cycle leaders 페이지 fetch 도입 trigger 로 활용.
+ * stub 가시화로 채워 leaders 페이지 fetch 도입 trigger 로 활용.
  *
  * **`_season` 인자는 무시됨**. Fancy Stats `/elo/` 는 시즌 query 미지원 —
  * fetchEloRatings 와 동일하게 호출 시점의 현재 시즌만 반환. underscore prefix
- * 가 unused 신호 (fetchPitcherStats / fetchBatterStats 와 정렬, cycle 180
- * silent drift family scrapers 차원 첫 진입).
+ * 가 unused 신호 (fetchPitcherStats / fetchBatterStats 와 정렬).
  */
 export async function fetchTeamStats(_season: number): Promise<TeamStats[]> {
   const eloData = await fetchEloRatings(_season);
@@ -392,8 +387,8 @@ export async function fetchTeamStats(_season: number): Promise<TeamStats[]> {
   }));
 }
 
-// fancy-stats / 파이프라인 default 단일 source.
-// cycle 64 review-code (heavy) — daily.ts 416-419 의 동일 magic number 중복 제거.
+// fancy-stats / 파이프라인 default 단일 source — daily.ts 의 동일 magic
+// number 중복 제거 통일.
 // 본 값들은 KBO 평균 baseline (woba 0.320 / fip 4.00 / sfr 0 / elo 1500 / winPct 0.5).
 // 팀별 데이터 부재 시 진입 — 진입 자체는 silent fallback 위험 신호.
 export const FANCY_STATS_DEFAULTS = {
@@ -406,7 +401,7 @@ export const FANCY_STATS_DEFAULTS = {
 
 // fancy-stats Elo row silent fallback 측정.
 // parseNum 결과가 0/NaN 일 때 || 단락 평가로 fallback 진입 — 진짜 0 vs 데이터 부재 구분 불가.
-// cycle 60 lesson + cycle 62 fix-incident — fellBack 시 console.warn 으로 Sentry 가시화.
+// fellBack 시 console.warn 으로 Sentry 가시화.
 export interface FancyStatsFallbacks {
   elo: boolean;
   woba: boolean;
@@ -437,8 +432,7 @@ export function hasAnyFallback(flags: FancyStatsFallbacks): boolean {
  *
  * **`_season` 인자는 무시됨**. Fancy Stats `/elo/` 는 시즌 query 미지원 —
  * 호출 시점의 현재 시즌만 반환. fetchPitcherStats / fetchBatterStats /
- * fetchTeamStats 와 underscore prefix 정렬 (cycle 180 silent drift family
- * scrapers 차원 첫 진입).
+ * fetchTeamStats 와 underscore prefix 정렬.
  */
 export async function fetchEloRatings(_season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
   const url = `${BASE_URL}/elo/`;
@@ -486,8 +480,8 @@ export async function fetchEloRatings(_season: number): Promise<(EloRating & { w
       elo: elo || FANCY_STATS_DEFAULTS.elo,
       // Elo 페이지에 승률 컬럼 부재 — 모든 팀 0.5 stub. predictions.elo_win_pct
       // 컬럼 매 row 동일 0.5 박제 (사용처 = daily.ts insert only, downstream 없음).
-      // cycle 138 가시화: stub 자체는 유지하고 console.warn 으로 silent drift 차단
-      // (cycle 137 totalWar=0 stub 가시화 family 동일 패턴).
+      // stub 자체는 유지하고 console.warn 으로 silent drift 차단
+      // (totalWar=0 stub 가시화 family 동일 패턴).
       winPct: FANCY_STATS_DEFAULTS.winPct,
       woba: woba || FANCY_STATS_DEFAULTS.woba,
       fip: fip || FANCY_STATS_DEFAULTS.fip,
@@ -511,9 +505,9 @@ export async function fetchEloRatings(_season: number): Promise<(EloRating & { w
  *
  * exact 실패 후 byName fallback 진입 시 = 같은 이름이지만 다른 팀 row
  * (KBO 동명이인 / 트레이드 직후 Fancy Stats 미반영 / 입력 team mismatch).
- * cycle 145 xfip fallback / 137 totalWar=0 / 138 winPct=0.5 stub family 와 동일
- * 패턴 — fallback 자체는 유지하되 console.warn 으로 가시화하여 silent 통과
- * 차단. 호출자 daily.ts:563-564 의 PredictionInput.homeSPStats / awaySPStats
+ * xfip fallback / totalWar=0 / winPct=0.5 stub family 와 동일 패턴 —
+ * fallback 자체는 유지하되 console.warn 으로 가시화하여 silent 통과 차단.
+ * 호출자 daily.ts:563-564 의 PredictionInput.homeSPStats / awaySPStats
  * 흐름과 동작 호환 유지.
  */
 export function findPitcher(
