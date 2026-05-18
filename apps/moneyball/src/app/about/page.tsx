@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -173,11 +174,19 @@ export default function AboutPage() {
       </section>
 
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-xl font-bold">예측 모델</h2>
-          <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
-            {activeFactors.length}팩터 사용 중
-          </span>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/glossary"
+              className="text-xs px-2 py-1 rounded-full border border-brand-200 dark:border-brand-700 text-brand-600 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900 transition-colors"
+            >
+              용어 자세히 →
+            </Link>
+            <span className="text-xs px-2 py-1 bg-brand-100 text-brand-700 rounded-full font-medium">
+              {activeFactors.length}팩터 사용 중
+            </span>
+          </div>
         </div>
         <p className="text-gray-600 dark:text-gray-300">
           세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.

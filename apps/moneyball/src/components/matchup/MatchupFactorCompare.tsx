@@ -18,6 +18,8 @@ interface FactorRow {
   format: (v: number) => string;
   /** native title 툴팁 — 비전문가용 약어 풀이 + 의미 (cycle 629) */
   hint: string;
+  /** /glossary anchor slug (cycle 631) */
+  glossarySlug: string;
 }
 
 const FACTORS: FactorRow[] = [
@@ -28,6 +30,7 @@ const FACTORS: FactorRow[] = [
     format: (v) => v.toFixed(2),
     hint:
       "FIP — Fielding Independent Pitching. 선발투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세.",
+    glossarySlug: "fip",
   },
   {
     key: "lineupWoba",
@@ -36,6 +39,7 @@ const FACTORS: FactorRow[] = [
     format: (v) => v.toFixed(3),
     hint:
       "wOBA — Weighted On-Base Average. 안타·볼넷·홈런 등 출루 결과별 가치를 가중치로 합산한 종합 타격 지표. 높을수록 우세.",
+    glossarySlug: "woba",
   },
   {
     key: "bullpenFip",
@@ -44,6 +48,7 @@ const FACTORS: FactorRow[] = [
     format: (v) => v.toFixed(2),
     hint:
       "불펜 FIP — 중계/마무리 투수진의 종합 FIP. 선발 강판 후 경기 결과에 큰 영향. 낮을수록 우세.",
+    glossarySlug: "bullpen-fip",
   },
   {
     key: "recentForm",
@@ -51,6 +56,7 @@ const FACTORS: FactorRow[] = [
     direction: "higher",
     format: (v) => `${Math.round(v * 100)}%`,
     hint: "최근 폼 — 최근 10경기 승률. 높을수록 우세.",
+    glossarySlug: "recent-form",
   },
   {
     key: "elo",
@@ -59,6 +65,7 @@ const FACTORS: FactorRow[] = [
     format: (v) => v.toFixed(0),
     hint:
       "Elo — 체스에서 유래한 상대평가 레이팅. KBO Fancy Stats 기준. 높을수록 강팀.",
+    glossarySlug: "elo",
   },
 ];
 
@@ -121,12 +128,13 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
 
               {/* 센터: 레이블 + 비교 바 */}
               <div className="flex flex-col items-center gap-1 min-w-[8rem]">
-                <span
-                  className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none cursor-help"
+                <a
+                  href={`/glossary#${f.glossarySlug}`}
+                  className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 underline-offset-2"
                   title={f.hint}
                 >
                   {f.label}
-                </span>
+                </a>
                 {/* 비교 바 — 승자 쪽 절반이 brand 색으로 채워짐 */}
                 <div className="relative w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                   {aWins && (

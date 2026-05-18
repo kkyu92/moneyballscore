@@ -240,23 +240,31 @@ export function PredictionCard({
             <span>
               선발: {awaySPName}
               {awaySPFip != null && (
-                <span
-                  className="text-gray-400 dark:text-gray-500 cursor-help"
-                  title="FIP — Fielding Independent Pitching. 투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세."
-                >
-                  {" "}FIP {awaySPFip}
-                </span>
+                <>
+                  {" "}
+                  <a
+                    href="/glossary#fip"
+                    className="text-gray-400 dark:text-gray-500 cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600 underline-offset-2"
+                    title="FIP — Fielding Independent Pitching. 투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세."
+                  >
+                    FIP {awaySPFip}
+                  </a>
+                </>
               )}
             </span>
             <span>
               {homeSPName}
               {homeSPFip != null && (
-                <span
-                  className="text-gray-400 dark:text-gray-500 cursor-help"
-                  title="FIP — Fielding Independent Pitching. 투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세."
-                >
-                  {" "}FIP {homeSPFip}
-                </span>
+                <>
+                  {" "}
+                  <a
+                    href="/glossary#fip"
+                    className="text-gray-400 dark:text-gray-500 cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600 underline-offset-2"
+                    title="FIP — Fielding Independent Pitching. 투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세."
+                  >
+                    FIP {homeSPFip}
+                  </a>
+                </>
               )}
             </span>
           </div>
@@ -264,23 +272,25 @@ export function PredictionCard({
         {homeWoba != null && awayWoba != null && (
           <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">
             <span>
-              <span
-                className="cursor-help"
+              <a
+                href="/glossary#woba"
+                className="cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600 underline-offset-2"
                 title="wOBA — Weighted On-Base Average. 안타·볼넷·홈런 등 출루 결과별 가치를 가중치로 합산한 종합 타격 지표. 높을수록 우세."
               >
                 타선 wOBA
-              </span>
+              </a>
               {" "}
               <span className="font-mono">{awayWoba.toFixed(3)}</span>
             </span>
             <span>
               <span className="font-mono">{homeWoba.toFixed(3)}</span>{" "}
-              <span
-                className="cursor-help"
+              <a
+                href="/glossary#woba"
+                className="cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600 underline-offset-2"
                 title="wOBA — Weighted On-Base Average. 안타·볼넷·홈런 등 출루 결과별 가치를 가중치로 합산한 종합 타격 지표. 높을수록 우세."
               >
                 wOBA
-              </span>
+              </a>
             </span>
           </div>
         )}
