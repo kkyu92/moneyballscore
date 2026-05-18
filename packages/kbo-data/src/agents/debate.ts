@@ -12,9 +12,6 @@ import type { GameContext, DebateResult, TeamArgument, CalibrationHint } from '.
  *   - runTeamAgent(home) / runTeamAgent(away) / runCalibrationAgent
  * Step 2: 심판 에이전트 순차 실행 (Step 1 결과 필요)
  *   - runJudgeAgent(homeArg, awayArg, calibration, ...)
- *
- * cycle 176 — docstring 1/2/3 단계 implies 순차 → 실제 1+2 병렬 + 3 순차 mismatch 정정.
- * silent code drift family detection (cycle 60 predictor.ts 주석 정정 동일 패턴).
  */
 export async function runDebate(
   context: GameContext,
@@ -61,7 +58,7 @@ export async function runDebate(
   };
 
   // Step 2: 심판 에이전트 (순차 실행, 앞선 결과 필요)
-  // cycle 27 — context 전달로 reasoning 검증 + 위반 mask + Sentry tag 활성화
+  // context 전달로 reasoning 검증 + 위반 mask + Sentry tag 활성화
   const judgeResult = await runJudgeAgent(
     homeTeam,
     awayTeam,
@@ -85,8 +82,8 @@ export async function runDebate(
     predictedWinner: quantitativeProb >= 0.5 ? homeTeam : awayTeam,
   };
 
-  // cycle 466 — evaluateAndCaptureAgentFallback helper 로 dedupe. cycle 384 (Cloudflare
-  // Workers cron 환경 console.error → Sentry alert silent miss 차단) 의 양쪽 path 공통 패턴.
+  // pre_game/post_game 양쪽 path 공통 helper — Cloudflare Workers cron 환경에서
+  // console.error 만으론 Sentry alert silent miss 발생, captureException 명시 강제.
   const { agentsFailed, agentError } = evaluateAndCaptureAgentFallback(
     [homeResult, awayResult, judgeResult],
     {
