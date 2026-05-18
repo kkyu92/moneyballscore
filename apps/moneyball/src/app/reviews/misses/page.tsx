@@ -144,7 +144,7 @@ export default async function MissesReviewPage() {
                           key={`${item.gameId}-${fe.factor}-${idx}`}
                           className="flex items-start gap-2 text-sm"
                         >
-                          <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-600 dark:text-orange-400 shrink-0">
+                          <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-600 dark:text-orange-300 shrink-0">
                             {fmtSignedBias(fe.predictedBias)}
                           </span>
                           <span className="text-gray-700 dark:text-gray-200">
