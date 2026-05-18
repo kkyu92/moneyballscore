@@ -209,8 +209,7 @@ export async function generateAgentMemories(date: string, dbInjected?: DB) {
     `)
     .eq('prediction_type', 'pre_game')
     .eq('is_correct', false);
-  // .error 미체크 시 wrong 데이터 누락이 "오답 0건" 으로 위장 → Phase D Compound
-  // 루프 학습 누락.
+  // .error 미체크 시 wrong 데이터 누락이 "오답 0건" 으로 위장 → agent_memories 학습 누락.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: wrongPredictions } = assertSelectOk<any[]>(
     wrongResult,
