@@ -9,7 +9,7 @@ function StatusBadge({ score }: { score: LiveScore }) {
   switch (score.status) {
     case 'live':
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600">
+        <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400">
           <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
           {score.statusText}
         </span>
@@ -137,7 +137,7 @@ export function LiveScoreboard() {
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200">실시간 스코어</h2>
           {hasLiveGames && (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
               LIVE
             </span>
