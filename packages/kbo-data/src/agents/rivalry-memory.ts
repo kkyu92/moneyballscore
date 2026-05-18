@@ -7,7 +7,7 @@
  * - 플레인텍스트 블록으로 조합 → team-agent buildUserMessage에 주입
  *
  * 실패 모드: 빈 블록 반환. throw 금지. fallback 유지.
- * 토큰 예산: ~400 tokens (Ollama 드라이런으로 경험적 검증 예정). 초과 시 앞부분 truncate.
+ * 토큰 예산: ~400 tokens (MAX_BLOCK_CHARS=600 한국어 ≈1.5자/토큰 근사). 초과 시 앞부분 truncate.
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
