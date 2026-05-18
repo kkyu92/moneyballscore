@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PredictionsStatusFilter } from "@/components/predictions/PredictionsStatusFilter";
+import { PredictionsSortControl } from "@/components/predictions/PredictionsSortControl";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -128,9 +129,10 @@ export default async function PredictionsPage() {
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
 
       {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
+      {dates.length > 0 && <PredictionsSortControl />}
 
       {dates.length > 0 ? (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2" data-predictions-list>
           {dates.map((d) => {
             const accuracy = d.verified > 0 ? d.correct / d.verified : 0;
             const status = d.verified > 0 ? 'verified' : 'pending';
