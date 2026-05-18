@@ -64,7 +64,6 @@ export type ValidationMode = 'strict' | 'lenient';
 /**
  * 호출부 mode 결정 헬퍼.
  * 프로덕션에서는 무조건 strict. LLM_BACKEND가 실수로 ollama로 설정돼도 차단.
- * v4-3 eng-review A4 — 블로그 환각 leak 방어.
  */
 export function resolveValidationMode(env: NodeJS.ProcessEnv = process.env): ValidationMode {
   if (env.NODE_ENV === 'production') return 'strict';
@@ -77,8 +76,7 @@ export function resolveValidationMode(env: NodeJS.ProcessEnv = process.env): Val
 const NUMERIC_WHITELIST = new Set([
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
   '10', '100', // 100% 같은 표현
-  // v4-4 hotfix: 이닝 수, 아웃 카운트 등 단일 digit은 이미 포함.
-  // 일반 % 수치 (50, 60 등)도 false positive 방지
+  // 일반 % 수치 (50, 60 등) false positive 방지
   '50', '20', '30', '40', '60', '70', '80', '90',
 ]);
 
@@ -86,13 +84,10 @@ const NUMERIC_WHITELIST = new Set([
 const NUMERIC_EPSILON = 0.0001;
 
 /**
- * v4-4 hotfix: 주입된 수치들의 산술 파생값(차이·합·비율·percent 변환)을 허용.
+ * 주입된 수치들의 산술 파생값(차이·합·비율·percent 변환)을 허용.
  *
- * 문제: LLM이 합리적으로 계산한 차이값(예: FIP 4.1 - 3.42 = 0.68)을 환각으로 분류하던 버그.
- * 해결: 주입 수치 pairwise로 |a-b|, a+b, a/b, a*100 등을 미리 계산해 허용 set에 추가.
- *
- * CEO 리뷰 empirical 발견: Claude와 DeepSeek 둘 다 합리적 파생값을 출력했으나
- * validator가 잘못 reject. 프로덕션에서도 silent 문제 가능성.
+ * LLM이 합리적으로 계산한 차이값(예: FIP 4.1 - 3.42 = 0.68)을 환각으로 분류하던 버그 차단.
+ * 주입 수치 pairwise로 |a-b|, a+b, a/b, a*100 등을 미리 계산해 허용 set에 추가.
  */
 function computeArithmeticDerivatives(injectedNums: number[]): Set<string> {
   const derived = new Set<string>();
@@ -132,9 +127,8 @@ function computeArithmeticDerivatives(injectedNums: number[]): Set<string> {
 // ============================================
 // 일반 한국어 3자 명사 화이트리스트 (선수명 false positive 방지)
 // ============================================
-// v4-4 hotfix: 선수명 regex가 일반 명사를 잘못 잡는 문제 해결.
-// 이 집합은 야구 분석 맥락에서 자주 등장하지만 선수명이 아닌 3자 단어들.
-// CEO 리뷰 empirical 발견: "가능성이", "창출력을", "경쟁력이" 등이 false positive로 reject됨.
+// 야구 분석 맥락에서 자주 등장하지만 선수명이 아닌 3자 단어들.
+// "가능성이", "창출력을", "경쟁력이" 등이 false positive 로 reject 되던 문제 차단.
 const COMMON_KOREAN_NOUNS = new Set([
   // 일반 분석 어휘
   '가능성', '생산성', '경쟁력', '창출력', '주도권', '신뢰도', '안정성',
@@ -178,7 +172,7 @@ const PLAYER_CONTEXT_VERBS = [
 ];
 
 // 한국 성씨 상위 ~50개. 실제 이름 패턴 매칭에 사용.
-// v4-4 hotfix: 일반 3자 단어를 "(1성) + (2이름)"으로 오분류하던 버그 해결.
+// 일반 3자 단어를 "(1성) + (2이름)"으로 오분류하던 버그 차단.
 // 이 성씨로 시작하지 않는 3자 단어는 이름이 아닐 확률 매우 높음.
 // export = test 회귀 가드용.
 export const KOREAN_FAMILY_NAMES =
@@ -241,7 +235,7 @@ export function checkHallucinatedNumbers(
   const injectedRaw = extractNumbers(injectionText);
   const injectedNums = new Set(injectedRaw.map(normalizeNum));
 
-  // v4-4 hotfix: 주입 수치의 산술 파생값(차이·합·비율·percent) 허용
+  // 주입 수치의 산술 파생값(차이·합·비율·percent) 허용
   const injectedFloats = injectedRaw
     .map((s) => parseFloat(s))
     .filter((n) => Number.isFinite(n));
@@ -288,13 +282,13 @@ export function checkInventedPlayerNames(
   if (context.homeSPStats?.name) allowed.add(context.homeSPStats.name);
   if (context.awaySPStats?.name) allowed.add(context.awaySPStats.name);
 
-  // v4-4 hotfix: 한국 성씨 기반 매칭으로 false positive 제거
+  // 한국 성씨 기반 매칭으로 false positive 제거.
   //
   // 1단계: 야구 선수 맥락 동사(등판/선발로/출전/타격 등)가 뒤따르는 3자 이름 — 신뢰도 높음
   // 2단계: 한국 성씨로 시작하는 3자 + 주격조사(이/가/은/는) 매칭 — 진짜 이름 패턴만
   //
-  // CEO 리뷰 empirical 발견: 일반 3자 단어(과대평가/가능성/창출력) + 조사 조합이 원래
-  // regex에 잘못 잡히던 버그. 성씨 접두 매칭으로 근본 해결.
+  // 일반 3자 단어(과대평가/가능성/창출력) + 조사 조합이 regex 에 잘못 잡히던 버그 차단.
+  // 성씨 접두 매칭으로 근본 해결.
   const verbAlternation = PLAYER_CONTEXT_VERBS.join('|');
   const highConfidencePattern = new RegExp(
     `(?<![가-힣])([가-힣]{3})(?=\\s*(?:${verbAlternation}))`,
@@ -309,8 +303,7 @@ export function checkInventedPlayerNames(
 
   // 1단계: 동사 뒤 이름 — 일반 명사 + 파생형용사 접미사 filter (subjectMarkerPattern 과 동일).
   // verb list 에 noun 류 (타격·삼진·홈런·피칭·완투·세이브) 가 섞여 있어 "공격적 타격"
-  // "결정적 홈런" 형 false positive 발생. cycle 526 review-code (heavy) — asymmetric filtering
-  // 으로 인한 silent drift family streak 6축 agent layer 2nd fix (cycle 524 postview prompt → 본 fix).
+  // "결정적 홈런" 형 false positive 발생 → 양쪽 pattern 동일 filter 로 차단.
   for (const m of outputText.matchAll(highConfidencePattern)) {
     const word = m[1];
     if (COMMON_KOREAN_NOUNS.has(word)) continue;
@@ -329,7 +322,7 @@ export function checkInventedPlayerNames(
   const invented = Array.from(candidates).filter((n) => !allowed.has(n));
 
   if (invented.length === 0) return [];
-  // cycle 76 — slice(0, 5) 제거. detail = mask 함수의 source (extractDetailValues).
+  // detail = mask 함수의 source (extractDetailValues). slice 제한 X — 모두 mask 대상.
   return [
     {
       type: 'invented_player_name',
@@ -362,7 +355,7 @@ export function checkBannedPhrases(outputText: string): Violation[] {
 // ============================================
 
 /**
- * claim-type 검증 (v4-2 단순화 버전)
+ * claim-type 검증 (단순화 버전)
  *
  * 문장 분할 기반은 소수점 숫자("3.2")를 잘못 끊는 문제가 있어 폐기.
  * 대신 **텍스트 전체에 통계 언어 신호가 충분한지**를 본다:
@@ -370,8 +363,7 @@ export function checkBannedPhrases(outputText: string): Violation[] {
  *  - claim-type 5개 중 매치되는 유형 개수
  * 합산 ≥ 2이면 통과. 그 미만이면 경고(warn).
  *
- * 이 방식은 문장 수준 분류 정확도는 떨어지지만, v4-2 초기 dry-run에서
- * false positive를 최소화하는 것이 우선. v4-3에서 정교화.
+ * 문장 수준 분류 정확도는 떨어지지만 false positive 최소화 우선.
  */
 export function checkClaimTypes(outputText: string): Violation[] {
   const decimalCount = (outputText.match(/\d+\.\d+/g) ?? []).length;
@@ -463,11 +455,11 @@ export function validateTeamArgument(
 }
 
 // ============================================
-// P1 — validateJudgeReasoning
+// validateJudgeReasoning
 // ============================================
 //
 // JudgeVerdict.reasoning = 블로그 본문 자유 텍스트. validateTeamArgument 가 TeamArgument JSON 만
-// 검증하던 갭 (spec § 3.1 갭 A). 환각 숫자 / 발명 선수 / 금칙어 만 재사용 — claim-type signal 은
+// 검증하던 갭. 환각 숫자 / 발명 선수 / 금칙어 만 재사용 — claim-type signal 은
 // reasoning 자유 글에 false positive 위험 (블로그 톤은 stat 신호 분포 다름) 으로 skip.
 
 export function validateJudgeReasoning(
@@ -498,11 +490,11 @@ export function validateJudgeReasoning(
 }
 
 // ============================================
-// P1 — maskViolatedReasoning
+// maskViolatedReasoning
 // ============================================
 //
 // 위반 reasoning 을 fallback 한 줄로 강제 교체하는 대신 위반 부분만 mask. 사용자 가시 reasoning 의
-// 정보 가치를 80% 보존하면서 환각/발명 leak 차단 (spec § 4.1).
+// 정보 가치를 80% 보존하면서 환각/발명 leak 차단.
 
 const MASK_HALLUCINATED_NUMBER = '[검증실패:환각숫자]';
 const MASK_INVENTED_PLAYER = '[검증실패:발명선수]';
@@ -544,12 +536,12 @@ export function maskViolatedReasoning(
 }
 
 // ============================================
-// P4 — validateFactorAttribution
+// validateFactorAttribution
 // ============================================
 //
 // LLM postview 가 지목한 factorErrors 의 factor 가중치를 정량 모델과 cross-check.
 // LLM 이 low-weight factor (가중치 < threshold) 를 결과 결정 요인으로 강조할 경우 warn.
-// spec § 4.4 의 "±10pp 격차" 추출은 reasoning 자유 텍스트 regex 정확도 한계로 보류 —
+// reasoning 자유 텍스트 regex 정확도 한계로 "±10pp 격차" 직접 추출은 보류 —
 // 대신 factorErrors 배열 (구조화된 LLM 출력) 의 factor 가중치 cross-check 로 대응.
 //
 // attribution warning 은 notifyValidationViolations (Sentry) 에서만 capture —
@@ -594,7 +586,7 @@ export function validateFactorAttribution(
 }
 
 // ============================================
-// P2 — notifyValidationViolations (Sentry tag 연계, spec § 4.2)
+// notifyValidationViolations (Sentry tag 연계)
 // ============================================
 //
 // 위반 발생 시 Sentry capture. near-miss (warn 1~2 건 통과 case) 도 동일 path → silent drift 사전 감지.
@@ -654,7 +646,7 @@ export async function notifyValidationViolations(
 }
 
 // ============================================
-// cycle 384 fix-incident heavy — agent fallback Sentry capture
+// agent fallback Sentry capture
 // ============================================
 //
 // debate.ts / postview.ts 의 agentsFailed=true 시 호출. console.error 만으로는
@@ -669,10 +661,8 @@ export interface AgentFailureMeta {
   agentError: string | null;
 }
 
-// cycle 466 review-code (heavy) — debate.ts + postview.ts 의 20-line 동일 패턴 dedupe.
-// cycle 384 fix-incident heavy 가 양쪽 path 각자 동일 로직 박제했고 silent drift family
-// streak (cycle 453~) 연속 발화 후속. results[].data 부재 검사 + 첫 fail.error 추출 +
-// console.error + captureAgentFallback 일괄.
+// debate.ts + postview.ts 양쪽 path 동일 20-line 패턴 dedupe.
+// results[].data 부재 검사 + 첫 fail.error 추출 + console.error + captureAgentFallback 일괄.
 export function evaluateAndCaptureAgentFallback(
   results: Array<{ success: boolean; data: unknown; error: string | null }>,
   meta: {
