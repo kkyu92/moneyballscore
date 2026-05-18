@@ -82,7 +82,7 @@ function PickRow({ entry }: { entry: PickEntry }) {
   if (entry.isResolved) {
     const scoreStr = `${entry.homeScore ?? '-'}:${entry.awayScore ?? '-'}`;
     resultEl = (
-      <span className={`text-xs font-semibold ${entry.myIsCorrect ? 'text-brand-600 dark:text-brand-400' : 'text-red-600 dark:text-red-400'}`}>
+      <span className={`text-xs font-semibold ${entry.myIsCorrect ? 'text-brand-600 dark:text-brand-400' : 'text-error'}`}>
         {entry.myIsCorrect ? '✓' : '✗'} {scoreStr}
       </span>
     );
@@ -102,7 +102,7 @@ function PickRow({ entry }: { entry: PickEntry }) {
           entry.isResolved && entry.aiIsCorrect !== null
             ? entry.aiIsCorrect
               ? 'text-brand-600 dark:text-brand-400'
-              : 'text-red-600 dark:text-red-400'
+              : 'text-error'
             : 'text-gray-400 dark:text-gray-500'
         }`}>
           AI: {aiLabel}{entry.isResolved && entry.aiIsCorrect !== null ? (entry.aiIsCorrect ? ' ✓' : ' ✗') : ''}
@@ -201,7 +201,7 @@ export function MyPicksClient() {
   return (
     <div className="space-y-6">
       {hasNetworkError && (
-        <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
+        <p className="text-xs text-warning text-center">
           결과를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.
         </p>
       )}
@@ -253,7 +253,7 @@ export function MyPicksClient() {
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                 stats.trend === 'up'
                   ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'
-                  : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                  : 'bg-error/10 text-error'
               }`}>
                 {stats.trend === 'up' ? '▲ 상승 중' : '▼ 하락 중'}
               </span>
@@ -269,7 +269,7 @@ export function MyPicksClient() {
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none ${
                   hit
                     ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'
-                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                    : 'bg-error/10 text-error'
                 }`}
               >
                 {hit ? '●' : '×'}

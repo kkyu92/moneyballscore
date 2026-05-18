@@ -16,7 +16,7 @@ function PastPickRow({ entry }: { entry: PickEntry }) {
       <span className={`text-xs font-semibold ${
         entry.myIsCorrect
           ? 'text-brand-600 dark:text-brand-400'
-          : 'text-red-600 dark:text-red-400'
+          : 'text-error'
       }`}>
         {entry.myIsCorrect ? '✓' : '✗'} {scoreStr}
       </span>
