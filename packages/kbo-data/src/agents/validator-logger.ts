@@ -1,6 +1,6 @@
 // cycle 30 — validator_logs fire-and-forget insert 통합 lib
 //
-// 기존 team-agent.ts 의 logValidatorRejection 을 분리 + judge-agent / postview 도 동일 path 재사용.
+// 기존 team-agent.ts 의 logValidatorRejection 을 분리 + judge-agent 도 동일 path 재사용.
 // migration 022 의 agent + passed 컬럼 박제.
 //
 // 정책:
