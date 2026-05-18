@@ -20,7 +20,7 @@ function deltaClass(diff: number): string {
 export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
   if (entries.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-400 text-sm">
+      <div className="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">
         <p className="text-2xl mb-2">🏆</p>
         <p>아직 순위가 없습니다.</p>
         <p className="text-xs mt-1">픽 5개 이상 완료 후 순위에 등장합니다.</p>
@@ -71,7 +71,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
 
       {/* 순위표 */}
       <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
-        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] text-xs text-gray-400 border-b border-gray-100 dark:border-gray-800 px-4 py-2">
+        <div className="grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] text-xs text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 px-4 py-2">
           <span>#</span>
           <span>닉네임</span>
           <span className="text-right">연속</span>
@@ -95,7 +95,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
                   : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
               }`}
             >
-              <span className="tabular-nums text-gray-400 font-medium">
+              <span className="tabular-nums text-gray-400 dark:text-gray-500 font-medium">
                 {medal ?? rank}
               </span>
               <span className={`truncate font-medium ${isMe ? 'text-brand-700 dark:text-brand-300' : ''}`}>
@@ -119,7 +119,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
                   </span>
                 )}
               </span>
-              <span className="text-right tabular-nums text-gray-500">
+              <span className="text-right tabular-nums text-gray-500 dark:text-gray-400">
                 {entry.correct}/{entry.total}
               </span>
             </div>
@@ -128,7 +128,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
       </div>
 
       {entries.length >= 50 && (
-        <p className="text-xs text-center text-gray-400">상위 50명만 표시됩니다</p>
+        <p className="text-xs text-center text-gray-400 dark:text-gray-500">상위 50명만 표시됩니다</p>
       )}
     </div>
   );
