@@ -53,7 +53,7 @@ export function LeaderboardJoinModal({ onJoin, onClose, loading }: Props) {
           <p className="text-xs text-gray-400">
             {value.trim().length}/12자
             {value.trim().length > 0 && value.trim().length < 2 && (
-              <span className="text-red-400 ml-1">최소 2자 필요</span>
+              <span className="text-error ml-1">최소 2자 필요</span>
             )}
           </p>
           <div className="flex gap-2">
