@@ -621,7 +621,7 @@ export default async function AnalysisIndexPage() {
                         <span
                           className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
                             g.isCorrect
-                              ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
+                              ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'
                               : 'bg-error/10 text-error'
                           }`}
                         >
@@ -691,7 +691,7 @@ export default async function AnalysisIndexPage() {
                                 <span
                                   className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full ${
                                     g.isCorrect
-                                      ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300'
+                                      ? 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'
                                       : 'bg-error/10 text-error'
                                   }`}
                                 >
@@ -728,7 +728,7 @@ export default async function AnalysisIndexPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                     적중
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -799,7 +799,7 @@ export default async function AnalysisIndexPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                     적중
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
