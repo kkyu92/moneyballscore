@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   notifyAnnounce,
   notifyPredictions,
+  notifyResults,
   notifyError,
   notifyPipelineStatus,
 } from '../notify/telegram';
@@ -299,6 +300,85 @@ describe('notifyPredictions (regression)', () => {
       expect(msg).toContain('🤖 AI 토론 1/1 정상');
       expect(msg).not.toContain('정량 모델 fallback');
     });
+  });
+});
+
+// cycle 639 polish-ui scope D — Telegram 가독성. ❌ row 에 우리 예측 명시.
+describe('notifyResults (scope D)', () => {
+  beforeEach(() => {
+    process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+    process.env.TELEGRAM_CHAT_ID = '12345';
+  });
+
+  afterEach(() => {
+    if (ORIGINAL_TOKEN === undefined) delete process.env.TELEGRAM_BOT_TOKEN;
+    else process.env.TELEGRAM_BOT_TOKEN = ORIGINAL_TOKEN;
+    if (ORIGINAL_CHAT === undefined) delete process.env.TELEGRAM_CHAT_ID;
+    else process.env.TELEGRAM_CHAT_ID = ORIGINAL_CHAT;
+    vi.restoreAllMocks();
+  });
+
+  it('적중 ✅ row → 예측 suffix 노출 X', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-19', [
+      {
+        homeTeam: 'OB', awayTeam: 'HT',
+        predictedWinner: 'HT', actualWinner: 'HT',
+        isCorrect: true, homeScore: 3, awayScore: 5,
+      },
+    ]);
+    const msg = calls[0].text;
+    expect(msg).toContain('✅ KIA 5:3 두산');
+    expect(msg).not.toContain('예측');
+  });
+
+  it('실패 ❌ row → 우리 예측 suffix 노출', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-19', [
+      {
+        homeTeam: 'OB', awayTeam: 'HT',
+        predictedWinner: 'OB', actualWinner: 'HT',
+        isCorrect: false, homeScore: 3, awayScore: 5,
+      },
+    ]);
+    const msg = calls[0].text;
+    expect(msg).toContain('❌ KIA 5:3 두산 (예측 두산)');
+  });
+
+  it('취소 row → 예측 suffix 노출 X (실제 결과 X)', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-19', [
+      {
+        homeTeam: 'OB', awayTeam: 'HT',
+        predictedWinner: 'OB', actualWinner: 'OB',
+        isCorrect: false, homeScore: 0, awayScore: 0,
+        isCancelled: true,
+      },
+    ]);
+    const msg = calls[0].text;
+    expect(msg).toContain('❌ KIA 0:0 두산 (취소)');
+    expect(msg).not.toContain('예측 두산');
+  });
+
+  it('혼합 (적중 1 + 실패 1) → ❌ 만 예측 suffix', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-19', [
+      {
+        homeTeam: 'OB', awayTeam: 'HT',
+        predictedWinner: 'HT', actualWinner: 'HT',
+        isCorrect: true, homeScore: 3, awayScore: 5,
+      },
+      {
+        homeTeam: 'LG', awayTeam: 'SS',
+        predictedWinner: 'LG', actualWinner: 'SS',
+        isCorrect: false, homeScore: 2, awayScore: 7,
+      },
+    ]);
+    const msg = calls[0].text;
+    expect(msg).toContain('✅ KIA 5:3 두산');
+    expect(msg).toContain('❌ 삼성 7:2 LG (예측 LG)');
+    // 적중 라인엔 "예측" suffix X (mismatch lines 만)
+    expect(msg.match(/예측/g)?.length ?? 0).toBe(1);
   });
 });
 
