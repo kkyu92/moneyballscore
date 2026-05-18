@@ -18,15 +18,12 @@ interface BigMatchDebateCardProps {
 }
 
 /**
- * v4-4 Task 5 — 메인 페이지 hero 섹션.
+ * 메인 페이지 빅매치 hero 카드.
  *
- * Design 리뷰 Pass 4 비대칭 hero:
- * - 팀 로고 우선 (텍스트 이니셜 fallback)
- * - 심판 판정 % 가장 큰 시각 anchor
- * - 홈/원정 논거 박스 비대칭 (확신 높은 쪽 1.05 scale)
- * - 단일 CTA ("상세 분석 보기")
- * - 70vh min-height (모바일), 그라데이션 140°
- * - reasoning line-clamp 3 + 전체 보기
+ * - 양팀 로고 + AI 심판 판정 % 핵심 시각 anchor
+ * - 양팀 논거 비대칭 (confidence 높은 쪽 md:scale-105)
+ * - 70vh min-height, 140° 그라데이션
+ * - reasoning line-clamp-3
  */
 export function BigMatchDebateCard({
   gameId,
