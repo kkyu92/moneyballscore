@@ -1,8 +1,7 @@
 /**
  * 빅매치 자동 선정 휴리스틱
  *
- * Phase v4-4 Task 0. 하루 경기 중 사용자 관심이 높을 가능성이 큰 1경기를
- * hero 섹션에 강조하기 위해 선정. CEO 리뷰 Q2 + Eng 리뷰 결정.
+ * 하루 경기 중 사용자 관심이 높을 가능성이 큰 1경기를 hero 섹션에 강조하기 위해 선정.
  *
  * 가중치 (총합 1.0):
  *   - elo_closeness  0.35: Elo 격차가 작을수록 (접전성)
@@ -10,7 +9,7 @@
  *   - form_momentum  0.20: 양팀 최근폼 유사도 (둘 다 상승세 or 둘 다 하락세)
  *   - confidence_low 0.20: 정량 모델 confidence 낮을수록 (토론 가치 큼)
  *
- * 3단계 fallback (CEO 리뷰 Q6):
+ * 3단계 fallback:
  *   1. games.length === 0 → mode: 'no-games'
  *   2. maxScore < THRESHOLD → mode: 'below-threshold'
  *   3. 정상 → mode: 'normal'
