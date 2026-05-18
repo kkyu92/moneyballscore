@@ -175,9 +175,8 @@ export async function buildMatchupProfile(
   const supabase = await createClient();
 
   // teams 테이블에서 두 팀의 id 확보
-  // assertSelectOk — cycle 147 silent drift family detection. error 시 fail-loud
-  // (기존엔 `data ?? []` silent fallback → idA/idB undefined → 빈 프로필 silent
-  // 반환, 사용자엔 "0 경기" 위장). 호출 site 가 catch 결정.
+  // assertSelectOk — error 시 fail-loud (data=null silent fallback → idA/idB
+  // undefined → 빈 프로필 silent 반환, 사용자엔 "0 경기" 위장 차단).
   const teamsResult = (await supabase
     .from("teams")
     .select("id, code")
@@ -229,9 +228,8 @@ export async function buildMatchupProfile(
     `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
     `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
 
-  // assertSelectOk — cycle 147 silent drift family detection. games select 가
-  // DB 오류 시 data=null silent fallback → 빈 record/예측 정확도 silent 위장
-  // (사용자엔 "두 팀 맞붙은 적 없음" 으로 보임). 호출 site 가 catch 결정.
+  // assertSelectOk — DB 오류 시 fail-loud (data=null silent fallback → 빈 record/
+  // 예측 정확도 silent 위장, 사용자엔 "두 팀 맞붙은 적 없음" 위장 차단).
   type GameRow = {
     id: number;
     game_date: string;
