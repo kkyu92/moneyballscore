@@ -1,8 +1,8 @@
 /**
  * KBO 팀 라이벌리 정의
  *
- * Phase v4-4 신규. 빅매치 자동 선정 알고리즘에서 rivalry_bonus 가산점 계산에 사용.
- * CEO 리뷰 Q2 + Eng 리뷰 C1 결정 (2026-04-15).
+ * 빅매치 자동 선정 알고리즘에서 rivalry_bonus 가산점 계산에 사용
+ * (`packages/kbo-data/src/big-match.ts` `rivalryScore`).
  *
  * 5쌍 정의:
  *   LG-OB: 잠실 한지붕 라이벌 (같은 구장 공유)
@@ -11,8 +11,7 @@
  *   HH-KT: 충청 라이벌 (지역 인접)
  *   NC-LT: 경남 라이벌 (지역 인접)
  *
- * 이 정의는 v4-4 빅매치 선정에만 사용. 리그 확장 시 MLB/NPB 라이벌리도
- * 같은 파일에 추가 예정.
+ * 리그 확장 시 MLB/NPB 라이벌리도 같은 파일에 추가 예정.
  */
 
 import type { TeamCode } from './index';
