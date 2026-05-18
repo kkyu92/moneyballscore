@@ -173,8 +173,8 @@ export default async function PredictionsPage() {
                             accuracy >= 0.6
                               ? "text-brand-600 dark:text-brand-400"
                               : accuracy >= 0.5
-                                ? "text-yellow-600"
-                                : "text-red-600"
+                                ? "text-yellow-600 dark:text-yellow-400"
+                                : "text-red-600 dark:text-red-400"
                           }`}
                         >
                           {d.correct}/{d.verified} 적중 ({Math.round(accuracy * 100)}
@@ -197,8 +197,8 @@ export default async function PredictionsPage() {
                               tierAcc >= 0.7
                                 ? "text-brand-600 dark:text-brand-400"
                                 : tierAcc >= 0.5
-                                  ? "text-yellow-600"
-                                  : "text-red-600"
+                                  ? "text-yellow-600 dark:text-yellow-400"
+                                  : "text-red-600 dark:text-red-400"
                             }`}
                           >
                             {pickTierEmoji(tier)} {WINNER_TIER_LABEL[tier]}{' '}

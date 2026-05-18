@@ -195,8 +195,8 @@ export default async function MatchupPage({ params }: PageProps) {
                 (predictionAccuracy.rate ?? 0) >= 0.6
                   ? "text-brand-600 dark:text-brand-400"
                   : (predictionAccuracy.rate ?? 0) >= 0.5
-                    ? "text-yellow-600"
-                    : "text-red-600"
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
               }`}
             >
               {predictionAccuracy.rate != null
