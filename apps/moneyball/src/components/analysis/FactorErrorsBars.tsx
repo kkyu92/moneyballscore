@@ -9,13 +9,7 @@ interface FactorErrorsBarsProps {
 }
 
 /**
- * v4-4 factor 편향 시각화 — postview에서 사용.
- *
- * Design 리뷰 D4: 색 코딩
- *   홈 유리 편향(+) → var(--color-factor-favor) 녹색
- *   원정 유리 편향(-) → var(--color-factor-against) 오렌지
- *
- * a11y: 각 막대 aria-label 포함
+ * 색 코딩: 홈 유리 편향(+) → var(--color-factor-favor) / 원정 유리 편향(-) → var(--color-factor-against).
  */
 export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
   if (errors.length === 0) {

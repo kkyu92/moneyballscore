@@ -14,8 +14,6 @@ interface JudgeVerdictPanelProps {
 }
 
 /**
- * v4-4 심판 판정 패널 — /analysis/game/[id] 최상단에 배치.
- *
  * 예측 승자 적중 확률을 단일 anchor 로 노출.
  * "홈팀이 이길 확률" 이 아니라 "우리 예측이 맞을 확률" 관점.
  */
