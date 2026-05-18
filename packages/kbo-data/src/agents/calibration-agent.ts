@@ -110,7 +110,7 @@ function parseResponse(text: string): CalibrationHint {
 /**
  * 보정 에이전트: 과거 예측 성과 회고 → 보정 힌트 (±5%, Haiku)
  *
- * retro.ts (Phase D Compound 루프, agent_memories 학습) 와 분리.
+ * retro.ts (agent_memories 학습) 와 분리.
  * 본 에이전트는 단발 보정값 산출만 담당 — DB write X.
  */
 export async function runCalibrationAgent(
