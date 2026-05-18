@@ -168,7 +168,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
       </button>
 
       {shareError && (
-        <span className="text-xs text-red-600" role="alert">
+        <span className="text-xs text-red-600 dark:text-red-400" role="alert">
           {shareError}
         </span>
       )}
