@@ -234,8 +234,8 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 review.accuracyRate >= 0.6
                   ? "text-brand-500"
                   : review.accuracyRate >= 0.5
-                    ? "text-yellow-600"
-                    : "text-red-600"
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
               }`}
             >
               {pctLabel}
