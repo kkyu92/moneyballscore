@@ -62,7 +62,7 @@ const FACTORS: Array<{
   {
     name: "수비력 (SFR)",
     key: "sfr",
-    desc: "Statcast Fielding Runs. 포지션별 수비 기여도 합산. 수비력이 실점에 미치는 영향.",
+    desc: "Sabermetric Fielding Runs. KBO Fancy Stats 수비 지표로 포지션별 기여도 합산. 수비력이 실점에 미치는 영향.",
     source: "Fancy Stats",
   },
   {
