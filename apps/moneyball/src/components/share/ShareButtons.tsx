@@ -80,7 +80,7 @@ function IconLink() {
 }
 
 /**
- * v4-4: 콘텐츠 페이지 하단 공유 버튼.
+ * 콘텐츠 페이지 하단 공유 버튼.
  * - 모바일: Web Share API (navigator.share)
  * - 데스크톱: Twitter / Facebook intent + 링크 복사
  */
@@ -94,7 +94,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
       await navigator.share({ title, text, url });
       setShareError(null);
     } catch (err: unknown) {
-      // 사용자 취소는 에러 아님 (NotAllowedError / AbortError)
+      // 사용자 취소(AbortError)는 에러 아님
       if (err instanceof Error && err.name !== "AbortError") {
         setShareError("공유 실패");
       }
