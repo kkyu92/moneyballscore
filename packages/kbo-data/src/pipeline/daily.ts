@@ -132,7 +132,7 @@ export async function runDailyPipeline(
 
   console.log(`[Pipeline] ${mode} mode for ${targetDate}`);
 
-  // 모든 exit 경로가 통과 — pipeline_runs 로그 + (조건부) Telegram status (Codex #7)
+  // 모든 exit 경로가 통과 — pipeline_runs 로그 + (조건부) Telegram status.
   const finish = async (result: PipelineResult): Promise<PipelineResult> => {
     const durationMs = Date.now() - startTime;
     const status =
@@ -175,11 +175,10 @@ export async function runDailyPipeline(
 
   // === announce mode (KST 09:00) ===
   if (mode === 'announce') {
-    // cron 이 동일 expression 을 드물게 2회 fire (GH Actions schedule 이관 후
-    // 현재는 Cloudflare Workers cron, 2026-04-29~) — announce_sent flag 로
-    // 중복 Telegram 차단. 14일치 prefetch 도 이미 첫 run 에서 돌았으므로 skip.
-    // cycle 167 — isNotificationSent 가 assertSelectOk 통일로 throw 가능 →
-    // finish() 통과 보장 위해 try/catch + errors[] push.
+    // cron 이 동일 expression 을 드물게 2회 fire — announce_sent flag 로 중복
+    // Telegram 차단. 14일치 prefetch 도 이미 첫 run 에서 돌았으므로 skip.
+    // isNotificationSent 의 assertSelectOk throw 를 finish() 통과 보장 위해
+    // try/catch + errors[] push.
     try {
       if (await isNotificationSent(db, targetDate, 'announce_sent')) {
         console.log(`[Pipeline] announce already sent for ${targetDate}, skipping`);
@@ -235,15 +234,15 @@ export async function runDailyPipeline(
     return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
-  // 첫 predict cron 전용 cleanup (Codex #5) — UTC 01 = KST 10
+  // 첫 predict cron 전용 cleanup — UTC 01 = KST 10
   const isFirstPredictRun = mode === 'predict' && new Date().getUTCHours() === 1;
   if (isFirstPredictRun) {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      // cycle 446 silent drift family write 측 6번째 진입 — `.error` 미체크 시
-      // delete 실패 silent skip → agent_memories / validator_logs 30일+ 무한
-      // 누적 + 다음 cron 재진입 시 memCount=null 로 console.log 분기도 skip =
-      // 무가시. assertWriteOk fail-loud → outer catch errors[] push 자연.
+      // silent drift 가드 — `.error` 미체크 시 delete 실패 silent skip →
+      // agent_memories / validator_logs 30일+ 무한 누적 + 다음 cron 재진입 시
+      // memCount=null 로 console.log 분기도 skip = 무가시. assertWriteOk
+      // fail-loud → outer catch errors[] push 자연.
       const memResult = await db.from('agent_memories')
         .delete({ count: 'exact' }).lt('created_at', thirtyDaysAgo);
       assertWriteOk(memResult, 'daily.retention.agent_memories.delete');
@@ -288,7 +287,7 @@ export async function runDailyPipeline(
     return finish({ date: targetDate, gamesFound: 0, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
 
-  // games upsert + gameIdMap 배치 (Codex #10)
+  // games upsert + gameIdMap 배치.
   const gamesPayload = games
     .map((game) => {
       const homeTeamId = teamIdMap[game.homeTeam];
@@ -327,11 +326,9 @@ export async function runDailyPipeline(
 
   // === verify mode (KST 23:00) ===
   if (mode === 'verify') {
-    // cron 이 동일 expression 을 드물게 2회 fire (GH Actions schedule 이관 후
-    // 현재는 Cloudflare Workers cron, 2026-04-29~) — results_sent flag 로
-    // 중복 Telegram + compound 루프 재실행 차단.
-    // cycle 167 — isNotificationSent assertSelectOk 통일 → throw 가능. finish()
-    // 통과 보장 위해 try/catch + errors[] push.
+    // cron 이 동일 expression 을 드물게 2회 fire — results_sent flag 로 중복
+    // Telegram + compound 루프 재실행 차단. isNotificationSent assertSelectOk
+    // throw 를 finish() 통과 보장 위해 try/catch + errors[] push.
     try {
       if (await isNotificationSent(db, targetDate, 'results_sent')) {
         console.log(`[Pipeline] verify already ran for ${targetDate}, skipping`);
@@ -352,8 +349,8 @@ export async function runDailyPipeline(
       errors.push(`compound: ${errMsg(e)}`);
     }
 
-    // cycle 167 — getVerifyResults assertSelectOk 통일 → throw 가능. finish()
-    // 통과 보장 위해 try/catch + errors[] push. fail 시 verifyResults=[] 자연.
+    // getVerifyResults assertSelectOk throw 를 finish() 통과 보장 위해
+    // try/catch + errors[] push. fail 시 verifyResults=[] 자연.
     let verifyResults: Awaited<ReturnType<typeof getVerifyResults>> = [];
     try {
       verifyResults = await getVerifyResults(db, leagueId, targetDate, teamIdMap);
@@ -375,11 +372,11 @@ export async function runDailyPipeline(
   }
 
   // === predict / predict_final ===
-  // existing pre_game predictions 배치 조회 (cycle 143 silent drift 가드 —
-  // `.error` 미체크 시 data=null → existingSet 빈 → 모든 경기를 "예측 없음"
-  // 판정 → 중복 prediction insert 큐 진입. assertSelectOk 로 fail-loud.
-  // cycle 211 — assertSelectOk throw 시 finish() 우회 → pipeline_runs 로그
-  // 누락 (line 120 불변 위반). try/catch 로 래핑해 finish() 경유 보장.
+  // existing pre_game predictions 배치 조회. silent drift 가드 — `.error`
+  // 미체크 시 data=null → existingSet 빈 → 모든 경기를 "예측 없음" 판정 →
+  // 중복 prediction insert 큐 진입. assertSelectOk 로 fail-loud. 단 throw 시
+  // finish() 우회 → pipeline_runs 로그 누락 (line 120 불변 위반) 차단 위해
+  // try/catch 로 래핑해 finish() 경유 보장.
   let existingSet: Set<number>;
   try {
     const existingResult = await db
@@ -467,9 +464,9 @@ export async function runDailyPipeline(
       const teamId = teamIdMap[ts.team];
       if (!teamId) continue;
       const elo = eloRatings.find((e) => e.team === ts.team);
-      // cycle 172 silent drift family write 측 다섯 번째 진입 — .error 미체크 시
-      // RLS / FK / type cast 실패 silent skip → team_season_stats 누락 → 예측
-      // input 의 woba/bullpenFip 영구 0 또는 stale. assertWriteOk fail-loud.
+      // silent drift 가드 — .error 미체크 시 RLS / FK / type cast 실패 silent
+      // skip → team_season_stats 누락 → 예측 input 의 woba/bullpenFip 영구 0
+      // 또는 stale. assertWriteOk fail-loud.
       try {
         const upsertResult = await db.from('team_season_stats').upsert({
           team_id: teamId, season: CURRENT_SEASON,
@@ -495,9 +492,9 @@ export async function runDailyPipeline(
     const homeElo = eloRatings.find((e) => e.team === game.homeTeam);
     const awayElo = eloRatings.find((e) => e.team === game.awayTeam);
 
-    // teamStats / eloRatings 미스 = silent fallback (cycle 60 lesson lineage).
-    // fancy-stats 가 10팀 미만이면 위 Fancy Stats scraperIssues 가드에서 errors
-    // 박제됐지만, 단일 팀 누락은 그 가드 통과 → 본 console.warn 으로 Sentry 가시화.
+    // teamStats / eloRatings 미스 = silent fallback. fancy-stats 가 10팀
+    // 미만이면 위 Fancy Stats scraperIssues 가드에서 errors 박제됐지만, 단일
+    // 팀 누락은 그 가드 통과 → 본 console.warn 으로 Sentry 가시화.
     const missing: string[] = [];
     if (!homeTeamStat) missing.push(`teamStats:${game.homeTeam}`);
     if (!awayTeamStat) missing.push(`teamStats:${game.awayTeam}`);
@@ -584,9 +581,9 @@ export async function runDailyPipeline(
     let finalWinner = quantResult.predictedWinner;
     let finalHomeProb = quantResult.homeWinProb;
     let finalConfidence = quantResult.confidence;
-    // cycle 128 silent drift fix — buildFinalReasoning helper 가 finalHomeProb
-    // 를 reasoning.homeWinProb 로 명시 박제 + 정량 원본을 quantitativeHomeWinProb
-    // 분리. spread 패턴이 quantResult.homeWinProb 만 박제해 buildDailySummary
+    // buildFinalReasoning helper 가 finalHomeProb 를 reasoning.homeWinProb 로
+    // 명시 박제 + 정량 원본을 quantitativeHomeWinProb 분리. spread 패턴이
+    // quantResult.homeWinProb 만 박제해 buildDailySummary
     // (`p.reasoning?.homeWinProb`) 가 debate verdict 무시한 quant 확률 표시하던
     // mismatch 차단.
     let finalReasoning = buildFinalReasoning({
@@ -648,9 +645,9 @@ export async function runDailyPipeline(
 
     const homeTeamId = teamIdMap[game.homeTeam];
     const awayTeamId = teamIdMap[game.awayTeam];
-    // cycle 172 silent drift family write 측 다섯 번째 진입 — .error 미체크 시
-    // RLS / FK 실패 silent skip → games.home/away_sp_id 영구 NULL → 다음 backfill
-    // 또 같은 game 진입 + sp_id NULL 누적 detection 부재. assertWriteOk fail-loud.
+    // silent drift 가드 — .error 미체크 시 RLS / FK 실패 silent skip →
+    // games.home/away_sp_id 영구 NULL → 다음 backfill 또 같은 game 진입 +
+    // sp_id NULL 누적 detection 부재. assertWriteOk fail-loud.
     if (game.homeSP && homeTeamId) {
       const spId = await getOrCreatePlayerId(db, leagueId, game.homeSP, homeTeamId, 'P');
       try {
@@ -702,7 +699,7 @@ export async function runDailyPipeline(
       predicted_at: new Date().toISOString(),
     };
 
-    // INSERT with UNIQUE(game_id, prediction_type) — race 시 23505 catch (Codex #1)
+    // INSERT with UNIQUE(game_id, prediction_type) — race 시 23505 catch.
     const insertResult = await db.from('predictions').insert(payload).select('id');
 
     if (insertResult.error) {
@@ -735,8 +732,8 @@ export async function runDailyPipeline(
       if (!existing.error && !existing.data?.weather) {
         const snap = await fetchForecastWeather(coords.lat, coords.lng, targetDate, hour);
         if (snap) {
-          // cycle 172 silent drift family write 측 — .error 미체크 시 weather
-          // 영구 NULL → 날씨-결과 상관 분석 데이터 손실. assertWriteOk fail-loud.
+          // silent drift 가드 — .error 미체크 시 weather 영구 NULL → 날씨-결과
+          // 상관 분석 데이터 손실. assertWriteOk fail-loud.
           try {
             const updateResult = await db.from('games').update({ weather: snap }).eq('id', dbGameId);
             assertWriteOk(updateResult, 'daily.games.weather.update');
@@ -748,20 +745,20 @@ export async function runDailyPipeline(
     }
   }
 
-  // 하루 요약 알림 — daily_notifications flag 로 idempotent (Codex #6).
+  // 하루 요약 알림 — daily_notifications flag 로 idempotent.
   // errors 패스 — silent fail 시 pipeline_runs.errors 에 박혀 다음 진단 가능.
   if (predictionsGenerated > 0) {
     await handleDailySummaryNotification(db, dbGameIds, targetDate, games, errors);
   }
 
-  // gap 감지 (predict_final mode 전용, Codex #9)
+  // gap 감지 (predict_final mode 전용)
   if (mode === 'predict_final') {
     const expected = games.filter(
       (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
     ).length;
-    // cycle 143 silent drift 가드 — `.error` 미체크 시 count=null → gap=expected
-    // → false positive GAP 알림 (DB 오류가 GAP 으로 위장). assertSelectOk 로
-    // fail-loud → outer catch X 영역이라 errors[] push + GAP 측정 skip 자연.
+    // silent drift 가드 — `.error` 미체크 시 count=null → gap=expected → false
+    // positive GAP 알림 (DB 오류가 GAP 으로 위장). assertSelectOk 로 fail-loud
+    // → outer catch X 영역이라 errors[] push + GAP 측정 skip 자연.
     const totalTodayResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
@@ -852,9 +849,9 @@ async function markNotificationFlag(
   );
 
   if (existing) {
-    // cycle 172 silent drift family write 측 — .error 미체크 시 flag 영구 false
-    // → idempotent 가드 무력화 → 같은 알림 재전송 위험. assertWriteOk fail-loud
-    // (caller markNotificationFlag 호출 site 모두 try/catch wrap).
+    // silent drift 가드 — .error 미체크 시 flag 영구 false → idempotent 가드
+    // 무력화 → 같은 알림 재전송 위험. assertWriteOk fail-loud (caller
+    // markNotificationFlag 호출 site 모두 try/catch wrap).
     const updateResult = await db.from('daily_notifications')
       .update({ [flag]: true, ...extra }).eq('run_date', date);
     assertWriteOk(updateResult, `daily.daily_notifications.${flag}.update`);
@@ -874,7 +871,7 @@ async function handleDailySummaryNotification(
   db: DB, dbGameIds: number[], date: string, games: ScrapedGame[],
   errors: string[] = [],
 ) {
-  // 단계별 try/catch — silent fail 방지 (4/22~4/28 5/5 누락 사례)
+  // 단계별 try/catch — silent fail 방지 (stage 라벨로 회귀 진단 보조).
   let stage = 'init';
   try {
     stage = 'expected-calc';
@@ -887,8 +884,8 @@ async function handleDailySummaryNotification(
     }
 
     stage = 'todayTotal-count';
-    // cycle 143 silent drift 가드 — `.error` 미체크 시 count=null → 0 fallback
-    // → "summary skip: todayTotal=0 < expected" 위장 → root cause 무가시.
+    // silent drift 가드 — `.error` 미체크 시 count=null → 0 fallback →
+    // "summary skip: todayTotal=0 < expected" 위장 → root cause 무가시.
     // assertSelectOk 로 outer catch (errors[] push) 자동 박제.
     const todayTotalResult = await db
       .from('predictions')
@@ -943,16 +940,15 @@ async function handleDailySummaryNotification(
 /**
  * notifyPredictions 에 넘길 predictions 배열 구성 (DB 조회).
  *
- * cycle 142 silent drift fix — supabase `.error` 미체크 silent fail 차단.
- * 기존 `const { data } = await db.from(...)` 는 DB 오류 시 data=null →
+ * silent drift 가드 — supabase `.error` 미체크 silent fail 차단. 기존
+ * `const { data } = await db.from(...)` 는 DB 오류 시 data=null →
  * `(data ?? []).map` 빈 배열 silent fallback → ghost summary notification +
  * summary_sent 플래그 박제 → 다음 fire `already sent` silent skip = 사용자
- * 무감지. `.error` destructure + 명시적 throw 로 catch 측 errors[] push +
- * 호출 site `summary.length === 0` 가드 추가.
+ * 무감지. assertSelectOk 로 throw → catch 측 errors[] push + 호출 site
+ * `summary.length === 0` 가드 추가.
  */
 async function buildDailySummary(db: DB, dbGameIds: number[]) {
-  // cycle 143 — assertSelectOk helper 통일 (cycle 142 inline `.error` destructure
-  // 의 helper 화. silent drift family detection 단일 채널)
+  // assertSelectOk helper 통일 (silent drift family detection 단일 채널)
   const result = await db
     .from('predictions')
     .select(`
@@ -972,14 +968,12 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
   );
 }
 
-// cycle 133 silent drift fix — homeTeamAccuracy 시맨틱 decoupling.
-// 기존: correct/total (전체 적중률) 을 homeTeamAccuracy 필드에 박제 →
-// calibration-agent.ts:39 의 "홈팀 승리 예측 적중률" 시맨틱과 mismatch →
-// LLM 이 전체 적중률을 홈팀 조건부 적중률로 오해. 본 fix 는 game.home_team_id /
-// away_team_id 조인 후 predicted_winner === home_team_id 분기로 진짜 조건부
-// 적중률 계산. 순수 헬퍼 computePredictionHistory 추출 (cycle 127/128 패턴).
+// homeTeamAccuracy 시맨틱 — calibration-agent.ts 의 "홈팀 승리 예측 적중률"
+// 시맨틱과 일치 위해 game.home_team_id / away_team_id 조인 후
+// predicted_winner === home_team_id 분기로 진짜 조건부 적중률 계산. 순수
+// 헬퍼 computePredictionHistory 분리.
 async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
-  // cycle 167 — assertSelectOk 통일. silent drift 시 predictions=null →
+  // assertSelectOk 통일 — silent drift 시 predictions=null →
   // computePredictionHistory 빈 배열 → calibration-agent 에 0건 전달 →
   // ±5% 보정 신호 영구 silent drift. fail-loud 로 caller (verify mode) errors[].
   const result = await db
@@ -1017,9 +1011,9 @@ async function getVerifyResults(
 ) {
   const idToCode = reverseTeamMap(teamIdMap);
 
-  // cycle 167 — assertSelectOk 통일. silent drift 시 gamesData=null → 빈 결과
-  // 리턴 → verify Telegram silent skip (사용자 가시 직접 영향). fail-loud 로
-  // caller (verify mode) catch (이미 trycatch 안 호출) → errors[] push.
+  // assertSelectOk 통일 — silent drift 시 gamesData=null → 빈 결과 리턴 →
+  // verify Telegram silent skip (사용자 가시 직접 영향). fail-loud 로 caller
+  // (verify mode) catch (이미 trycatch 안 호출) → errors[] push.
   interface FinalGameRow {
     id: number; home_team_id: number; away_team_id: number;
     home_score: number | null; away_score: number | null;
@@ -1079,9 +1073,8 @@ async function getVerifyResults(
     }
   }
 
-  // 취소(postponed) 경기에도 예측이 있으면 적중으로 집계.
-  // cycle 439 silent drift family 통일 완료 — assertSelectOk fail-loud →
-  // caller try/catch (line 350-354) 자동 처리.
+  // 취소(postponed) 경기에도 예측이 있으면 적중으로 집계. assertSelectOk
+  // fail-loud → caller try/catch (verify mode block) 자동 처리.
   interface PostponedGameRow { id: number; home_team_id: number; away_team_id: number; }
   const postponedRes = await db
     .from('games')
