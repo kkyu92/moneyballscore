@@ -116,13 +116,15 @@ export function classifyAnthropicError(status: number, body: string): string {
 }
 
 /**
- * LLM 호출 디스패처 (Phase v4-2.5)
+ * LLM 호출 디스패처 (Phase v4-2.5 / v4-4 hybrid 지원)
  *
- * LLM_BACKEND 환경변수로 백엔드 선택:
- *   - 'claude' (기본값, 프로덕션 안전): Anthropic API 호출
- *   - 'ollama': 로컬 Ollama 서비스 호출 (exaone3.5:7.8b / qwen2.5:14b)
+ * 역할별 백엔드 선택은 getBackend() 참조 (LLM_BACKEND_HAIKU / LLM_BACKEND_SONNET /
+ * LLM_BACKEND). 분기 후 해당 wrapper 호출:
+ *   - 'claude' (기본값, 프로덕션 안전): callClaude (Anthropic API)
+ *   - 'ollama': callOllama (로컬 LLM, $0 / exaone3.5:7.8b / qwen2.5:14b)
+ *   - 'deepseek': callDeepSeek (OpenAI 호환 API, ~$0.02/경기)
  *
- * 로컬 개발에서 LLM_BACKEND=ollama로 비용 0원 테스트 가능.
+ * 로컬 개발에서 LLM_BACKEND=ollama 또는 LLM_BACKEND=deepseek 로 비용 절감 테스트 가능.
  * Vercel 프로덕션은 LLM_BACKEND 설정 안 하면 자동으로 claude 사용.
  */
 export async function callLLM<T>(
