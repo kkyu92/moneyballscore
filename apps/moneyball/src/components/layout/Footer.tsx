@@ -9,7 +9,6 @@ const SITEMAP_COLUMNS = [
       { href: "/accuracy", label: "AI 적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
       { href: "/predictions", label: "예측 기록" },
-      { href: "/matchup", label: "매치업" },
     ],
   },
   {
@@ -25,6 +24,7 @@ const SITEMAP_COLUMNS = [
       { href: "/standings", label: "팀 순위" },
       { href: "/teams", label: "팀 프로필" },
       { href: "/players", label: "선수 리더보드" },
+      { href: "/matchup", label: "매치업" },
     ],
   },
   {
