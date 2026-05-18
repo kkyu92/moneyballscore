@@ -1,7 +1,3 @@
-// cycle 459 fix-incident heavy — AI 토론 fallback (quant-only) 사용자 가시 라벨.
-// silent quality drift 차단: 사용자가 fallback 상태인지 명시적으로 인지.
-// reasoning 자체는 cycle 450 FALLBACK_USER_TEXT 로 swap 됨 — 본 배지는 추가 signal.
-
 interface QuantOnlyBadgeProps {
   variant?: 'light' | 'dark';
 }
