@@ -7,11 +7,10 @@ const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
 const DELAY_MS = 3000; // 예의상 3초
 
 // FG_TEAM_MAP / 자체 resolveTeamCode 삭제 — fancy-stats.resolveTeamCode 단일
-// 소스 derive (cycle 196 silent drift family scrapers 차원 17번째 진입). FS
-// 매핑 테이블과 10팀 영문명 100% 동일했고, 자체 함수는 case-sensitive only +
-// 빈 입력 가드 부재였음. fancy-stats:35 가 이미 case-insensitive + 빈 입력
-// 가드 (cycle 21 "Kia Tigers" drift 사고 박제 후속) → fangraphs 도 같은
-// 패턴 자동 상속.
+// 소스 derive. FS 매핑 테이블과 10팀 영문명 100% 동일했고, 자체 함수는
+// case-sensitive only + 빈 입력 가드 부재였음. fancy-stats:35 가 이미
+// case-insensitive + 빈 입력 가드 ("Kia Tigers" drift 사고 박제 후속)
+// → fangraphs 도 같은 패턴 자동 상속.
 
 export interface FanGraphsBatterData {
   team: TeamCode;
@@ -43,10 +42,9 @@ export async function fetchBatterLeaders(season: number): Promise<FanGraphsBatte
   const teamData = new Map<TeamCode, { wrcPlus: number[]; iso: number[]; bbPct: number[]; kPct: number[] }>();
 
   // parseNum NaN→0 silent fallback 가시화 — fancy-stats parsePitchersFromHtml /
-  // parseBattersFromHtml 와 동일 패턴 (cycle 195 silent drift family scrapers
-  // 차원 16번째 진입). 페이지 구조 변경으로 칼럼 전부 NaN 이면 `> 0` filter 가
-  // 진짜 0 / NaN→0 모두 동일 처리해서 빈 array 박제 → wrcPlus/iso 평균 0
-  // silent. fellBack 카운트로 ratio 측정해야 다음 cycle root fix trigger.
+  // parseBattersFromHtml 와 동일 패턴. 페이지 구조 변경으로 칼럼 전부 NaN 이면
+  // `> 0` filter 가 진짜 0 / NaN→0 모두 동일 처리해서 빈 array 박제 →
+  // wrcPlus/iso 평균 0 silent. fellBack 카운트로 ratio 측정해야 root fix trigger.
   const nanCount = { wrcPlus: 0, iso: 0, bbPct: 0, kPct: 0 };
   let totalRows = 0;
 
