@@ -101,8 +101,8 @@ export async function runTeamAgent(
 ): Promise<AgentResult<TeamArgument>> {
   const role: 'home' | 'away' = context.game.homeTeam === team ? 'home' : 'away';
 
-  // v4-3 Task 2: rivalry-memory 주입 (Compound 루프 읽기 경로)
-  // 실패 시 빈 블록 반환하도록 구현됨 → throw 가능성 없음
+  // rivalry-memory 주입 (과거 h2h + agent_memories Compound 학습 읽기 경로).
+  // 실패 시 빈 블록 반환 — throw 가능성 없음.
   const rivalry = await getRivalryBlock({
     homeTeam: context.game.homeTeam,
     awayTeam: context.game.awayTeam,
