@@ -89,14 +89,11 @@ function parseResponse(text: string, team: TeamCode): TeamArgument {
 }
 
 /**
- * 특정 팀의 에이전트를 실행하여 논거를 생성 (v4-2 리팩터)
- *
- * 변경점 (v1-narrative → v2-persona4):
- * - TEAM_PROFILES 내러티브 dict 제거
- * - BASE_PROMPT + HOME_ROLE/AWAY_ROLE 주입 (데이터 역할 중심)
- * - parseResponse 성공 후 validateTeamArgument 호출
- * - 위반(hard > 0 또는 warn > 2) 시 AgentResult.success=false로 전환
- *   → debate.ts의 기존 fallback 로직이 그대로 처리 (호환성 유지)
+ * 특정 팀의 에이전트를 실행하여 논거를 생성.
+ * - BASE_PROMPT + HOME_ROLE/AWAY_ROLE + rivalry block 주입
+ * - parseResponse 후 validator Layer 1 (mode = resolveValidationMode())
+ * - 임계 초과 시 AgentResult.success=false → debate.ts fallback 처리
+ *   (strict: hard>0 OR warn>2 / lenient: hard>0 OR warn>5)
  */
 export async function runTeamAgent(
   team: TeamCode,
