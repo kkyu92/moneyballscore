@@ -71,7 +71,7 @@ export function ModelVersionHistory({ versions }: Props) {
                     ) : (
                       <div className="flex items-center gap-2">
                         <div
-                          className="relative w-16 h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex-shrink-0"
+                          className="relative w-16 h-2.5 bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full overflow-hidden flex-shrink-0"
                           aria-hidden
                         >
                           <div

@@ -103,7 +103,7 @@ export function PredictionCard({
             </span>
           )}
           {isFinal && (
-            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[var(--color-surface-card)] px-1.5 py-0.5 rounded-full">
               종료
             </span>
           )}

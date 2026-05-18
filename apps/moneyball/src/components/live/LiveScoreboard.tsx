@@ -122,7 +122,7 @@ export function LiveScoreboard() {
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-[160px] h-[88px] rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-gray-800 animate-pulse"
+            className="flex-shrink-0 w-[160px] h-[88px] rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-surface-card)] animate-pulse"
           />
         ))}
       </div>

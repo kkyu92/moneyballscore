@@ -44,7 +44,7 @@ export function JudgeReasoningCard({
       </p>
 
       {(homeArgSummary || awayArgSummary) && (
-        <div className="grid sm:grid-cols-2 gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+        <div className="grid sm:grid-cols-2 gap-3 pt-3 border-t border-gray-100 dark:border-[var(--color-border)]">
           {homeArgSummary && (
             <div className="text-xs">
               <div className="flex items-center gap-2 mb-1">
