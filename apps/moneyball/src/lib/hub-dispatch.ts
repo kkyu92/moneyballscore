@@ -1,3 +1,5 @@
+import { scrubUrlString } from '@/sentry-scrub';
+
 /**
  * Playbook 허브로 L3 에러·사고·lesson 을 전송하는 공통 payload 빌더.
  *
@@ -205,7 +207,12 @@ export function composePayload(
   const rawTitle = `${excType}: ${excValue}`;
   const stack = formatStack(e.exception);
   const tags = e.tags ?? [];
-  const requestUrl = e.request?.url ?? '';
+  // cycle 528 — URL value scrub (sentry-scrub cycle 527 카운터파트).
+  // requestUrl / web_url 의 ?token=… ?session=… 같은 민감 query param 값은
+  // scrubPII 의 텍스트 regex (JWT/hex/sk_*/UUID) 와 매칭 안 되는 짧은 토큰일 때
+  // silent 노출. URL 필드는 정의상 URL 이므로 scrubUrlString 무조건 적용.
+  const requestUrl = scrubUrlString(e.request?.url ?? '');
+  const webUrl = scrubUrlString(e.web_url ?? '');
 
   const bodyParts: string[] = [
     '## Error',
@@ -233,10 +240,10 @@ export function composePayload(
     bodyParts.push(`## Triggered rule`);
     bodyParts.push(`\`${input.triggered_rule}\``);
   }
-  if (e.web_url) {
+  if (webUrl) {
     bodyParts.push('');
     bodyParts.push('## Links');
-    bodyParts.push(`- Sentry: ${e.web_url}`);
+    bodyParts.push(`- Sentry: ${webUrl}`);
   }
 
   const rawBody = bodyParts.join('\n');
@@ -256,7 +263,7 @@ export function composePayload(
     severity: mapSeverity(e.level),
     fingerprint: makeFingerprint(fingerprintKeys),
     environment: e.environment,
-    run_url: e.web_url,
+    run_url: webUrl || undefined,
     first_seen: firstSeen,
     intent: opts.intent,
   };
