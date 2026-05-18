@@ -12,8 +12,8 @@ interface Props {
 
 const RESULT_CLASS: Record<GameResult, string> = {
   W: "bg-brand-500 text-white",
-  L: "bg-red-500 text-white",
-  T: "bg-gray-400 text-white",
+  L: "bg-red-500 dark:bg-red-600 text-white",
+  T: "bg-gray-400 dark:bg-gray-600 text-white",
 };
 
 function ResultBoxes({ results }: { results: GameResult[] }) {
