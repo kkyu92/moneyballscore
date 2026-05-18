@@ -39,7 +39,7 @@ export function GameOverview({ tags, summary }: GameOverviewProps) {
               key={tag}
               className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
                 TAG_STYLES[tag] ??
-                "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200"
+                "bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-700 dark:text-gray-200 border-gray-200"
               }`}
             >
               {tag}

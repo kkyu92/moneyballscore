@@ -42,7 +42,7 @@ export function AccuracySummary({
           ({correct}/{total})
         </span>
       </div>
-      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-4">
+      <div className="w-full bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-2 mb-4">
         <div
           className="bg-brand-500 h-2 rounded-full transition-all"
           style={{ width: `${ratePct}%` }}

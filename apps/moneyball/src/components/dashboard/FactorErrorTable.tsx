@@ -56,7 +56,7 @@ export function FactorErrorTable({ rows }: FactorErrorTableProps) {
               </div>
             </div>
             <div
-              className="bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden"
+              className="bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-2 overflow-hidden"
               role="img"
               aria-label={`${label} 평균 편향 ${biasLabel}, ${
                 isHomeFavor ? "홈팀 유리" : "원정팀 유리"
