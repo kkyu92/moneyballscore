@@ -62,7 +62,7 @@ export interface DebateResult {
   awayArgument: TeamArgument;
   calibration: CalibrationHint;
   verdict: JudgeVerdict;
-  quantitativeProb: number;  // v1.5 정량 모델 결과
+  quantitativeProb: number;  // 정량 모델 결과 (CURRENT_SCORING_RULE 기준)
   totalTokens: number;
   totalDurationMs: number;
   agentsFailed: boolean;   // 에이전트 1개 이상 fallback 사용 (API 오류)
