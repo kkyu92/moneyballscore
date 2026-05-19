@@ -34,10 +34,15 @@ const SITEMAP_COLUMNS = [
       { href: "/reviews/misses", label: "빗나간 예측" },
       { href: "/seasons", label: "시즌 기록" },
       { href: "/search", label: "검색" },
-      { href: "/about", label: "소개" },
-      { href: "/guide", label: "사용 가이드" },
+    ],
+  },
+  {
+    label: "도움말",
+    links: [
       { href: "/methodology", label: "예측 방법론" },
+      { href: "/guide", label: "사용 가이드" },
       { href: "/glossary", label: "용어 사전" },
+      { href: "/about", label: "소개" },
     ],
   },
 ];
@@ -59,7 +64,7 @@ export function Footer() {
 
           <nav
             aria-label="사이트맵"
-            className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 flex-1"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 flex-1"
           >
             {SITEMAP_COLUMNS.map((col) => (
               <div key={col.label}>
