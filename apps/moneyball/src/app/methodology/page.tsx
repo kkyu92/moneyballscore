@@ -449,7 +449,7 @@ export default function MethodologyPage() {
           >
             <h3 className="font-semibold mb-1">용어 사전</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
-              FIP · wOBA · WAR 등 26개 지표 정의.
+              FIP · wOBA · WAR 등 25개 지표 정의.
             </p>
           </Link>
           <Link
