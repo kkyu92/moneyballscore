@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DEFAULT_WEIGHTS } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import {
+  GlossaryCategoryFilter,
+  type GlossaryCategorySlug,
+} from '@/components/glossary/GlossaryCategoryFilter';
 
 export const metadata: Metadata = {
   title: '야구 통계 용어 사전',
@@ -22,6 +26,7 @@ type GlossaryEntry = {
 };
 
 type GlossaryCategory = {
+  slug: GlossaryCategorySlug;
   title: string;
   description: string;
   entries: GlossaryEntry[];
@@ -29,6 +34,7 @@ type GlossaryCategory = {
 
 const CATEGORIES: GlossaryCategory[] = [
   {
+    slug: 'pitcher',
     title: '투수 지표',
     description: '투수의 순수 실력을 평가. 수비 영향을 분리해서 본다.',
     entries: [
@@ -98,6 +104,7 @@ const CATEGORIES: GlossaryCategory[] = [
     ],
   },
   {
+    slug: 'batter',
     title: '타격 지표',
     description: '타자의 종합 생산성을 평가. 안타 종류별 가치를 다르게 본다.',
     entries: [
@@ -195,6 +202,7 @@ const CATEGORIES: GlossaryCategory[] = [
     ],
   },
   {
+    slug: 'composite',
     title: '종합 지표',
     description: '여러 능력을 단일 숫자로 합산. 야수·투수 비교 가능.',
     entries: [
@@ -223,6 +231,7 @@ const CATEGORIES: GlossaryCategory[] = [
     ],
   },
   {
+    slug: 'context',
     title: '팀·맥락 지표',
     description: '경기 외부 요인. 팀 전력·구장·일정 등 정량화.',
     entries: [
@@ -294,6 +303,7 @@ const CATEGORIES: GlossaryCategory[] = [
     ],
   },
   {
+    slug: 'validation',
     title: '검증·평가 지표',
     description: '예측 모델 자체를 평가하는 지표. 적중률만으로는 모자란 영역.',
     entries: [
@@ -325,6 +335,18 @@ const CATEGORIES: GlossaryCategory[] = [
 
 export default function GlossaryPage() {
   const allEntries = CATEGORIES.flatMap((c) => c.entries);
+
+  const categoryCounts = {
+    all: allEntries.length,
+    pitcher: 0,
+    batter: 0,
+    composite: 0,
+    context: 0,
+    validation: 0,
+  } as Record<GlossaryCategorySlug, number> & { all: number };
+  for (const c of CATEGORIES) {
+    categoryCounts[c.slug] = c.entries.length;
+  }
 
   const definedTermSetJsonLd = {
     '@context': 'https://schema.org',
@@ -389,9 +411,12 @@ export default function GlossaryPage() {
         </ul>
       </nav>
 
+      <GlossaryCategoryFilter counts={categoryCounts} />
+
       {CATEGORIES.map((category) => (
         <section
-          key={category.title}
+          key={category.slug}
+          data-glossary-category={category.slug}
           className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4"
         >
           <div>
