@@ -16,6 +16,7 @@ import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import { YesterdayStatusFilter } from '@/components/analysis/YesterdayStatusFilter';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 
 export const metadata: Metadata = {
@@ -590,6 +591,14 @@ export default async function AnalysisIndexPage() {
               전체 결과 →
             </Link>
           </div>
+          <YesterdayStatusFilter
+            counts={{
+              all: yesterdayGames.length,
+              correct: yesterdayGames.filter((g) => g.isCorrect === true).length,
+              wrong: yesterdayGames.filter((g) => g.isCorrect === false).length,
+              pending: yesterdayGames.filter((g) => g.isCorrect === null).length,
+            }}
+          />
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {yesterdayGames.map((g) => {
               const homeName = shortTeamName(g.homeCode);
@@ -600,8 +609,10 @@ export default async function AnalysisIndexPage() {
               const winnerPct = g.predictedWinnerCode === g.homeCode
                 ? Math.round(g.homeWinProb * 100)
                 : Math.round((1 - g.homeWinProb) * 100);
+              const yesterdayStatus =
+                g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
               return (
-                <li key={g.gameId}>
+                <li key={g.gameId} data-yesterday-status={yesterdayStatus}>
                   <Link
                     href={`/analysis/game/${g.gameId}`}
                     className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
