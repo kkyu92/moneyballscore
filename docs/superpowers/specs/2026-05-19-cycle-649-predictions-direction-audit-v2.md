@@ -2,7 +2,7 @@
 
 **Cycle**: 649 (2026-05-19)
 **Chain**: explore-idea (lite, improvement saturation trigger 7 = 13/15 ≥ 12 충족)
-**Status**: spec 박제 + 사용자 review 대기 (partial)
+**Status**: spec 4/5 후보 fire 완료 — F (cycle 658) / I (cycle 660) / G (cycle 661) / J (다른 cycle ship 완료). H (heavy) 잔존. cycle 668 review-code (lite, heavy 모드) 에서 stale claim 정정.
 **Parent**: `2026-05-19-cycle-623-saturation-direction-audit.md`
 
 ---
@@ -86,13 +86,13 @@
 
 ## ROI ranking + 차기 cycle 매핑
 
-| 우선 | 후보 | 1순위 trigger | 적합 chain | 적합 mode |
-|---|---|---|---|---|
-| 1 | F 누적 적중률 헤더 | at-a-glance 가시 | explore-idea | lite (1 cycle) |
-| 2 | I 최근 N건 trend | 후보 F 후속 자연 | explore-idea / polish-ui | lite (F 통합 권장) |
-| 3 | G 월별 그룹 | 정보 정리 | explore-idea | lite (1 cycle) |
-| 4 | H 검색박스 | 사용자 탐색 | explore-idea | heavy (2 cycle 분할) |
-| 5 | J 공유 버튼 | viral | explore-idea | lite (1 cycle) + SDK 의존성 가드 |
+| 우선 | 후보 | 1순위 trigger | 적합 chain | 적합 mode | Fire 상태 |
+|---|---|---|---|---|---|
+| 1 | F 누적 적중률 헤더 | at-a-glance 가시 | explore-idea | lite (1 cycle) | **cycle 658 fire** (AccuracyHeaderCard.tsx) |
+| 2 | I 최근 N건 trend | 후보 F 후속 자연 | explore-idea / polish-ui | lite (F 통합 권장) | **cycle 660 fire** (recentVerified/recentCorrect props) |
+| 3 | G 월별 그룹 | 정보 정리 | explore-idea | lite (1 cycle) | **cycle 661 fire** (PredictionsMonthFilter.tsx) |
+| 4 | H 검색박스 | 사용자 탐색 | explore-idea | heavy (2 cycle 분할) | 미 fire (heavy spec 별도 박제 대기) |
+| 5 | J 공유 버튼 | viral | explore-idea | lite (1 cycle) + SDK 의존성 가드 | **이미 ship 완료** (`@/components/share/ShareButtons` — analysis/matchup/predictions/[date]/reviews monthly·weekly·misses 6 page 사용. cycle 649 spec 박제 시점에 미인지 = stale claim) |
 
 **자율 발화 정책**:
 - 본 후보 5건 = saturation break 옵션 pool 갱신 (cycle 623 spec 5건 + 본 spec 5건 = 10건 누적, A~E 모두 fire 완료)
@@ -123,10 +123,10 @@
 
 ## 후속
 
-- 사용자 review pending — spec 박제 only, 구현 X
-- 본 spec = cycle 650+ explore-idea / polish-ui 발화 시 carry-over evidence + saturation break 옵션 pool
-- 본 후보 5건 = 자율 fire 우선순위 ranking — 차기 cycle 진단 input
-- cycle 623 spec § ROI 1순위 (A `/accuracy` sub-cohort UI) = cycle 627 fire 완료 — 본 spec § ROI 1순위 (F 누적 적중률 헤더) = cycle 655 ± 5 fire 예상
+- ~~사용자 review pending — spec 박제 only, 구현 X~~ (stale, cycle 668 정정)
+- 본 spec 후속 자율 fire 결과: F (658) / I (660) / G (661) 3건 직접 explore-idea·polish-ui lite fire + J ShareButtons 다른 cycle ship 박제 + H heavy 잔존
+- cycle 623 spec § ROI 1순위 (A `/accuracy` sub-cohort UI) = cycle 627 fire 완료 — 본 spec § ROI 1순위 (F 누적 적중률 헤더) = cycle 658 fire (655 ± 5 예상 정합)
+- 차기 큰 후보 후속 = H (검색박스 heavy 2 cycle 분할) — 별도 spec 박제 필요 시 explore-idea heavy 자연 fire
 
 ## 관련
 
