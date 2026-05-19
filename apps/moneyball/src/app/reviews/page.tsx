@@ -10,6 +10,7 @@ import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 
 export const metadata: Metadata = {
@@ -185,6 +186,11 @@ export default async function ReviewsPage() {
             </div>
           </div>
 
+          {/* 결과 필터 */}
+          <ReviewsResultFilter
+            counts={{ all: total, correct, incorrect: total - correct }}
+          />
+
           {/* 경기 목록 */}
           <div className="space-y-3">
             {predictions.map((pred, i) => {
@@ -202,6 +208,7 @@ export default async function ReviewsPage() {
                 <Link
                   key={`${game.id}-${i}`}
                   href={`/analysis/game/${game.id}`}
+                  data-review-result={pred.is_correct ? 'correct' : 'incorrect'}
                   className="flex items-center justify-between bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center gap-4 min-w-0">
