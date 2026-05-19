@@ -4,6 +4,8 @@ interface Props {
   entries: LeaderboardEntry[];
   myDeviceId?: string;
   aiBaseline?: AiBaseline | null;
+  streakRankMap?: Map<string, number>;
+  sampleRankMap?: Map<string, number>;
 }
 
 function formatDelta(diff: number): string {
@@ -17,7 +19,7 @@ function deltaClass(diff: number): string {
   return 'text-gray-400 dark:text-gray-500';
 }
 
-export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
+export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMap, sampleRankMap }: Props) {
   if (entries.length === 0) {
     return (
       <div className="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">
@@ -78,15 +80,20 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
           <span className="text-right">적중률</span>
           <span className="text-right">픽 수</span>
         </div>
+        <div data-leaderboard-list>
         {entries.map((entry, i) => {
           const isMe = myDeviceId && entry.device_id === myDeviceId;
           const rank = i + 1;
           const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
           const delta = aiPct !== null ? entry.accuracy_pct - aiPct : null;
+          const streakRank = streakRankMap?.get(entry.device_id);
+          const sampleRank = sampleRankMap?.get(entry.device_id);
 
           return (
             <div
               key={entry.device_id + i}
+              data-streak-rank={streakRank}
+              data-sample-rank={sampleRank}
               className={`grid grid-cols-[2.5rem_1fr_3.5rem_5rem_4rem] px-4 py-2.5 text-sm items-center border-b last:border-b-0 border-gray-50 dark:border-[var(--color-border)] ${
                 isMe
                   ? 'bg-brand-50 dark:bg-brand-900/10'
@@ -125,6 +132,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline }: Props) {
             </div>
           );
         })}
+        </div>
       </div>
 
       {entries.length >= 50 && (
