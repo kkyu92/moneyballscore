@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
+import { LeaderboardSortControl } from './LeaderboardSortControl';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
@@ -56,6 +57,27 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
   const entries = tab === 'weekly' ? weeklyEntries : seasonEntries;
   const aiBaseline = tab === 'weekly' ? weeklyAi : seasonAi;
   const isSyncing = syncState === 'syncing';
+
+  const sortMeta = useMemo(() => {
+    const streakSorted = [...entries].sort(
+      (a, b) =>
+        b.current_streak - a.current_streak ||
+        b.accuracy_pct - a.accuracy_pct ||
+        b.total - a.total,
+    );
+    const sampleSorted = [...entries].sort(
+      (a, b) =>
+        b.total - a.total ||
+        b.accuracy_pct - a.accuracy_pct ||
+        b.current_streak - a.current_streak,
+    );
+    const streakRankMap = new Map<string, number>();
+    streakSorted.forEach((e, i) => streakRankMap.set(e.device_id, i));
+    const sampleRankMap = new Map<string, number>();
+    sampleSorted.forEach((e, i) => sampleRankMap.set(e.device_id, i));
+    const streakCohort = entries.filter((e) => e.current_streak >= 2).length;
+    return { streakRankMap, sampleRankMap, streakEnabled: streakCohort >= 2 };
+  }, [entries]);
 
   const handleJoin = async (name: string) => {
     await join(name);
@@ -120,8 +142,19 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
         )}
       </div>
 
+      {/* 정렬 칩 — 표본 가드: entries >= 5 */}
+      {entries.length >= 5 && (
+        <LeaderboardSortControl streakEnabled={sortMeta.streakEnabled} />
+      )}
+
       {/* 리더보드 테이블 */}
-      <LeaderboardTable entries={entries} myDeviceId={deviceId} aiBaseline={aiBaseline} />
+      <LeaderboardTable
+        entries={entries}
+        myDeviceId={deviceId}
+        aiBaseline={aiBaseline}
+        streakRankMap={sortMeta.streakRankMap}
+        sampleRankMap={sortMeta.sampleRankMap}
+      />
 
       {/* 모달 */}
       {showModal && (
