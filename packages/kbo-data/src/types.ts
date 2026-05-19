@@ -172,9 +172,11 @@ export interface PredictionResult {
  */
 export interface SkippedGame {
   game: string;    // "LTvHH@17:00" — 판독 편의용 포맷
-  reason: string;  // 'window_too_early' | 'window_too_late' | 'not_scheduled' | 'sp_unconfirmed' | 'already_predicted'
+  reason: string;  // 'window_too_early' | 'window_too_late' | 'not_scheduled' | 'sp_unconfirmed' | 'already_predicted' | 'debate_fallback'
   /** not_scheduled / sp_unconfirmed 등 KBO API status 이상 케이스에서만 동봉. 재발 시 어느 필드 때문인지 특정. */
   raw?: RawStatusSnapshot;
+  /** debate_fallback 케이스에서 Anthropic API 에러 메시지 박제. classifyAnthropicError 출력. */
+  error?: string;
 }
 
 export interface PipelineResult {

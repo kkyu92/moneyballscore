@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callLLM, MAX_ATTEMPTS, classifyAnthropicError } from '../agents/llm';
+import { callLLM, MAX_ATTEMPTS, classifyAnthropicError, backoffMs } from '../agents/llm';
 
 const originalFetch = global.fetch;
 const originalKey = process.env.ANTHROPIC_API_KEY;
@@ -252,5 +252,27 @@ describe('classifyAnthropicError', () => {
     expect(result).toContain('SERVER_ERROR 502');
     // 100자 truncate 검증 — raw HTML 전체 leak X
     expect(result.length).toBeLessThan(200);
+  });
+});
+
+// 사례 (2026-05-19 5경기 토론 fallback) — Anthropic 529 Overloaded 시 기본
+// 3.5s backoff 부족, capacity 회복 못 잡아 fallback row 박제. 5x 곱해 17.5s
+// 까지 늘림 — capacity 회복 확률 상승.
+describe('backoffMs (529 overloaded multiplier)', () => {
+  it('200-499 status 일반 backoff', () => {
+    expect(backoffMs(0, 503)).toBe(500);
+    expect(backoffMs(1, 503)).toBe(1000);
+    expect(backoffMs(2, 503)).toBe(2000);
+  });
+
+  it('429 rate limit 일반 backoff', () => {
+    expect(backoffMs(0, 429)).toBe(500);
+    expect(backoffMs(2, 429)).toBe(2000);
+  });
+
+  it('529 overloaded 5x backoff', () => {
+    expect(backoffMs(0, 529)).toBe(2500);
+    expect(backoffMs(1, 529)).toBe(5000);
+    expect(backoffMs(2, 529)).toBe(10000);
   });
 });

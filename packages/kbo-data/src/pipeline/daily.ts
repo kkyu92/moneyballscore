@@ -621,6 +621,17 @@ export async function runDailyPipeline(
         if (debate.agentsFailed) {
           const errMsg = debate.agentError?.slice(0, 200) ?? 'API error';
           errors.push(`Debate agents fallback ${game.homeTeam}v${game.awayTeam}: ${errMsg}`);
+          // predict mode 시 fallback row 박제 차단 — first-write-wins 가 다음 cron
+          // 재시도 잠금. predict_final 은 마지막 기회라 fallback 으로라도 박제.
+          // 사례 (2026-05-19 Anthropic 529 5경기) 재발 차단.
+          if (mode === 'predict') {
+            skippedDetail.push({
+              game: `${game.awayTeam}v${game.homeTeam}@${game.gameTime}`,
+              reason: 'debate_fallback',
+              error: errMsg,
+            });
+            continue;
+          }
         } else {
           debateSucceeded = true;
         }
