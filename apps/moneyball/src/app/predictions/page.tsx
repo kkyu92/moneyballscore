@@ -13,6 +13,7 @@ import { PredictionsStatusFilter } from "@/components/predictions/PredictionsSta
 import { PredictionsSortControl } from "@/components/predictions/PredictionsSortControl";
 import { PredictionsTierFilter } from "@/components/predictions/PredictionsTierFilter";
 import { PredictionsMonthFilter } from "@/components/predictions/PredictionsMonthFilter";
+import { PredictionsSearchBox } from "@/components/predictions/PredictionsSearchBox";
 import { AccuracyHeaderCard } from "@/components/predictions/AccuracyHeaderCard";
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ interface DateStat {
   verified: number;
   correct: number;
   tiers: Record<WinnerConfidenceTier, TierCount>;
+  teamCodes: Set<string>;
 }
 
 function emptyTierCounts(): Record<WinnerConfidenceTier, TierCount> {
@@ -58,7 +60,7 @@ async function getPredictionDates(): Promise<DateStat[]> {
   const result = await supabase
     .from('games')
     .select(
-      'game_date, status, predictions(id, confidence, is_correct, reasoning, prediction_type)',
+      'game_date, status, home_team_code, away_team_code, predictions(id, confidence, is_correct, reasoning, prediction_type)',
     )
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
@@ -84,10 +86,13 @@ async function getPredictionDates(): Promise<DateStat[]> {
         verified: 0,
         correct: 0,
         tiers: emptyTierCounts(),
+        teamCodes: new Set<string>(),
       });
     }
     const entry = dateMap.get(date)!;
     entry.total += 1;
+    if (game.home_team_code) entry.teamCodes.add(game.home_team_code);
+    if (game.away_team_code) entry.teamCodes.add(game.away_team_code);
     if (game.status === 'postponed') entry.cancelled += 1;
     const pred = game.predictions?.[0] as
       | {
@@ -178,6 +183,7 @@ export default async function PredictionsPage() {
         />
       )}
 
+      {dates.length > 0 && <PredictionsSearchBox />}
       {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
       {dates.length > 0 && <PredictionsTierFilter counts={tierCounts} />}
       {months.length > 1 && (
@@ -202,6 +208,8 @@ export default async function PredictionsPage() {
                 data-prediction-status={status}
                 data-prediction-tiers={tiersPresent}
                 data-prediction-month={d.date.slice(0, 7)}
+                data-prediction-date={d.date}
+                data-prediction-teams={Array.from(d.teamCodes).join(' ')}
                 className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between gap-4">
