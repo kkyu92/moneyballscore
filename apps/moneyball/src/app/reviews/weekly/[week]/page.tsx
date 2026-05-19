@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +12,7 @@ import {
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
 import { neutral } from "@/lib/design-tokens";
 
 export const revalidate = 1800;
@@ -87,7 +89,7 @@ function HighlightCard({ h }: { h: WeeklyHighlight }) {
   );
 }
 
-function GameResultRow({ g }: { g: WeeklyGameResult }) {
+function GameResultRow({ g, style }: { g: WeeklyGameResult; style?: CSSProperties }) {
   const correctBadge =
     g.isCorrect === true ? (
       <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-brand-500/15 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300">
@@ -111,6 +113,7 @@ function GameResultRow({ g }: { g: WeeklyGameResult }) {
   return (
     <Link
       href={`/analysis/game/${g.gameId}`}
+      style={style}
       className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-[var(--color-surface-card)] transition-colors group"
     >
       <span className="w-14 shrink-0 text-xs text-gray-400 dark:text-gray-500 tabular-nums">
@@ -146,6 +149,14 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
 
   const review = await buildWeeklyReview(range);
   const url = `${SITE_URL}/reviews/weekly/${week}`;
+
+  // confidence desc 순위 — date default 도착 순서에서 confidence desc rank 계산.
+  // WeeklyGamesSortControl 가 '확신도순' 활성 시 CSS variable 로 flex order 토글.
+  // confidence null 은 -1 처리 = 마지막 rank.
+  const confRankMap = new Map<number, number>();
+  [...review.games]
+    .sort((a, b) => (b.confidence ?? -1) - (a.confidence ?? -1))
+    .forEach((g, idx) => confRankMap.set(g.gameId, idx));
 
   const recent = getRecentWeeks(4)
     .filter((w) => w.weekId !== range.weekId)
@@ -372,10 +383,16 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </summary>
-            <div className="mt-2 group-open:mt-0 bg-white dark:bg-[var(--color-surface-card)] rounded-xl group-open:rounded-t-none border border-gray-200 dark:border-[var(--color-border)] group-open:border-t-0 divide-y divide-gray-100 dark:divide-gray-700/40 overflow-hidden">
-              {review.games.map((g) => (
-                <GameResultRow key={g.gameId} g={g} />
-              ))}
+            <div className="mt-2 group-open:mt-0 bg-white dark:bg-[var(--color-surface-card)] rounded-xl group-open:rounded-t-none border border-gray-200 dark:border-[var(--color-border)] group-open:border-t-0 overflow-hidden">
+              <WeeklyGamesSortControl />
+              <div className="divide-y divide-gray-100 dark:divide-gray-700/40" data-weekly-games>
+                {review.games.map((g) => {
+                  const cardStyle = {
+                    '--mb-weekly-game-order': confRankMap.get(g.gameId) ?? 0,
+                  } as CSSProperties;
+                  return <GameResultRow key={g.gameId} g={g} style={cardStyle} />;
+                })}
+              </div>
             </div>
           </details>
         </section>
