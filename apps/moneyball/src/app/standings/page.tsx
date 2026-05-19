@@ -7,6 +7,7 @@ import { buildEloTrend } from "@/lib/standings/buildEloTrend";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
+import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
 
 export const revalidate = 3600;
 
@@ -199,18 +200,31 @@ export default async function StandingsPage() {
       )}
 
       {teamAccuracy.length > 0 && (
-        <section aria-labelledby="prediction-accuracy-title">
+        <section aria-labelledby="prediction-accuracy-title" className="space-y-3">
+          <TeamAccuracySortControl />
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <div className="flex items-baseline justify-between mb-4">
               <h2 id="prediction-accuracy-title" className="text-base font-bold">MoneyBall 예측 적중률</h2>
               <span className="text-xs text-gray-400 dark:text-gray-500">팀별 · 시즌 누적</span>
             </div>
-            <ul className="space-y-2">
+            {(() => {
+              const sampleRankMap = new Map<string, number>();
+              [...teamAccuracy]
+                .sort((a, b) => b.verifiedN - a.verifiedN)
+                .forEach((row, idx) => sampleRankMap.set(row.teamCode, idx));
+              return (
+            <ul className="space-y-2" data-team-accuracy-list>
               {teamAccuracy.map((row, i) => {
                 const pct = row.accuracyRate != null ? Math.round(row.accuracyRate * 100) : null;
                 const barWidth = pct ?? 0;
+                const sampleRank = sampleRankMap.get(row.teamCode) ?? 0;
                 return (
-                  <li key={row.teamCode} className="flex items-center gap-3">
+                  <li
+                    key={row.teamCode}
+                    className="flex items-center gap-3"
+                    data-accuracy-rank={i}
+                    data-sample-rank={sampleRank}
+                  >
                     <span className="w-5 text-xs text-gray-400 dark:text-gray-500 tabular-nums text-right shrink-0">
                       {i + 1}
                     </span>
@@ -239,6 +253,8 @@ export default async function StandingsPage() {
                 );
               })}
             </ul>
+              );
+            })()}
           </div>
         </section>
       )}
