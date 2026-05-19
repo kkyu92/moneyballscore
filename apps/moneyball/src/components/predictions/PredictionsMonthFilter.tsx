@@ -45,7 +45,7 @@ function writeFilter(value: MonthFilter): void {
 function chipLabel(key: MonthFilter): string {
   if (key === 'all') return '전체';
   const [y, m] = key.split('-');
-  return `${y}.${m}`;
+  return `${y}년 ${parseInt(m, 10)}월`;
 }
 
 export function PredictionsMonthFilter({ months, counts }: Props) {
