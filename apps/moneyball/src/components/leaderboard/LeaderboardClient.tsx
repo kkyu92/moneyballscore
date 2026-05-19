@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
@@ -15,8 +15,41 @@ interface Props {
 
 type Tab = 'weekly' | 'season';
 
+const STORAGE_TAB = 'mb_leaderboard_tab_v1';
+
+function subscribeTab(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('storage', callback);
+  return () => window.removeEventListener('storage', callback);
+}
+
+function readTab(): Tab {
+  try {
+    const raw = localStorage.getItem(STORAGE_TAB);
+    if (raw === 'season') return 'season';
+    return 'weekly';
+  } catch {
+    return 'weekly';
+  }
+}
+
+function getTabServerSnapshot(): Tab {
+  return 'weekly';
+}
+
+function writeTab(value: Tab): void {
+  try {
+    localStorage.setItem(STORAGE_TAB, value);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_TAB }));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seasonAi }: Props) {
-  const [tab, setTab] = useState<Tab>('weekly');
+  const tab = useSyncExternalStore(subscribeTab, readTab, getTabServerSnapshot);
   const [showModal, setShowModal] = useState(false);
   const { deviceId, nickname, syncState, syncCount, join } = useLeaderboard();
 
@@ -68,7 +101,8 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
           {(['weekly', 'season'] as const).map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => writeTab(t)}
+              aria-pressed={tab === t}
               className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 tab === t
                   ? 'bg-white dark:bg-[var(--color-surface-card)] shadow-sm'
