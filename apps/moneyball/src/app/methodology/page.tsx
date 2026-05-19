@@ -8,6 +8,19 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 가 KBO 승부예측을 만드는 전체 과정. 세이버메트릭스 10팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증. 데이터 소스 3종, 가중치 도출 근거, 모델 진화 history 를 한 페이지에서 확인.",
   alternates: { canonical: "https://moneyballscore.vercel.app/methodology" },
+  openGraph: {
+    title: "예측 방법론 | MoneyBall Score",
+    description:
+      "세이버메트릭스 10팩터 + AI 에이전트 토론 + 적중률 검증. 가중치 도출 근거와 모델 진화 history 전체 공개.",
+    url: "https://moneyballscore.vercel.app/methodology",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "예측 방법론 | MoneyBall Score",
+    description:
+      "세이버메트릭스 10팩터 + AI 에이전트 토론. 가중치 근거 + 모델 진화 history 전체 공개.",
+  },
 };
 
 const FACTOR_WEIGHTS = [
