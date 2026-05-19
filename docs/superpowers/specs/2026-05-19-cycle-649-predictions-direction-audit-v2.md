@@ -2,7 +2,7 @@
 
 **Cycle**: 649 (2026-05-19)
 **Chain**: explore-idea (lite, improvement saturation trigger 7 = 13/15 ≥ 12 충족)
-**Status**: spec 4/5 후보 fire 완료 — F (cycle 658) / I (cycle 660) / G (cycle 661) / J (다른 cycle ship 완료). H (heavy) 잔존. cycle 668 review-code (lite, heavy 모드) 에서 stale claim 정정.
+**Status**: spec 5/5 후보 fire 완료 — F (cycle 658) / I (cycle 660) / G (cycle 661) / J (다른 cycle ship 완료) / **H (cycle 670 ship PR #959)**. cycle 668 review-code (lite, heavy 모드) 에서 stale claim 정정. cycle 671 review-code (lite, heavy 모드) 에서 H fire 완료 박제 동기.
 **Parent**: `2026-05-19-cycle-623-saturation-direction-audit.md`
 
 ---
@@ -91,7 +91,7 @@
 | 1 | F 누적 적중률 헤더 | at-a-glance 가시 | explore-idea | lite (1 cycle) | **cycle 658 fire** (AccuracyHeaderCard.tsx) |
 | 2 | I 최근 N건 trend | 후보 F 후속 자연 | explore-idea / polish-ui | lite (F 통합 권장) | **cycle 660 fire** (recentVerified/recentCorrect props) |
 | 3 | G 월별 그룹 | 정보 정리 | explore-idea | lite (1 cycle) | **cycle 661 fire** (PredictionsMonthFilter.tsx) |
-| 4 | H 검색박스 | 사용자 탐색 | explore-idea | heavy (2 cycle 분할) | 미 fire (heavy spec 별도 박제 대기) |
+| 4 | H 검색박스 | 사용자 탐색 | explore-idea | heavy (단일 cycle ship — 분할 예상 vs 실측 차이) | **cycle 670 fire** (PredictionsSearchBox.tsx + page.tsx, +130 -1) |
 | 5 | J 공유 버튼 | viral | explore-idea | lite (1 cycle) + SDK 의존성 가드 | **이미 ship 완료** (`@/components/share/ShareButtons` — analysis/matchup/predictions/[date]/reviews monthly·weekly·misses 6 page 사용. cycle 649 spec 박제 시점에 미인지 = stale claim) |
 
 **자율 발화 정책**:
@@ -116,7 +116,7 @@
 |---|---|
 | 본 후보 5건 = 자율 fire trigger 모호 → 영구 spec only 잔존 | 사용자 review 시 1~2 후보 명시적 채택 신호 → 그 후보 ranking 1st priority. 그 외엔 사용자 자연 발화 trigger 만 |
 | 후보 J KaKao SDK 추가 → 외부 의존성 누적 | Twitter intent URL + Web Share API 만 fallback 우선. SDK 추가 시 사용자 명시 확인 필요 (cycle 605 외부 의존 가드 룰) |
-| 후보 H heavy → 1 cycle 안 ship 못 끝낼 위험 | spec 단계 + 구현 단계 2 cycle 분할 명시. spec 만 1 cycle = partial 가능 |
+| ~~후보 H heavy → 1 cycle 안 ship 못 끝낼 위험~~ (stale, cycle 670 ship 단일 cycle 완료 — +130 -1, sibling filter pattern 정합 덕 분할 불필요) | ~~spec 단계 + 구현 단계 2 cycle 분할 명시~~ |
 | 후보 F+I 한 PR 통합 시 line ≥ 90 → lite scope 초과 | 분리 가능. F 만 단독 ship 30~40 line 안전 |
 | saturation 누적 = 추가 후속 polish-ui 14th carry-over fire 회피 신호 | cycle 622 retro 명시 후속 chain rotation 강제. 같은 chain 8 연속 success 시 자가 redirect |
 | 본 spec 자체 = explore-idea 2nd partial (623/649) 누적 — lite chain retro-only cap trigger 근접 | cap = 5 연속 partial. 현재 explore-idea 2 partial (623/649). 추가 3 cycle partial 시 cap 1건 잔존 |
@@ -124,9 +124,9 @@
 ## 후속
 
 - ~~사용자 review pending — spec 박제 only, 구현 X~~ (stale, cycle 668 정정)
-- 본 spec 후속 자율 fire 결과: F (658) / I (660) / G (661) 3건 직접 explore-idea·polish-ui lite fire + J ShareButtons 다른 cycle ship 박제 + H heavy 잔존
+- 본 spec 후속 자율 fire 결과: F (658) / I (660) / G (661) 3건 직접 explore-idea·polish-ui lite fire + J ShareButtons 다른 cycle ship 박제 + **H (670 ship PR #959)** — 5/5 후보 모두 ship 완료
 - cycle 623 spec § ROI 1순위 (A `/accuracy` sub-cohort UI) = cycle 627 fire 완료 — 본 spec § ROI 1순위 (F 누적 적중률 헤더) = cycle 658 fire (655 ± 5 예상 정합)
-- 차기 큰 후보 후속 = H (검색박스 heavy 2 cycle 분할) — 별도 spec 박제 필요 시 explore-idea heavy 자연 fire
+- ~~차기 큰 후보 후속 = H (검색박스 heavy 2 cycle 분할)~~ (stale, cycle 670 단일 cycle ship 완료) — 본 spec 5/5 후보 모두 closure. 차기 saturation break 시 신규 spec audit 필요 (cycle 623 + 649 = 10건 누적 모두 fire 완료)
 
 ## 관련
 
