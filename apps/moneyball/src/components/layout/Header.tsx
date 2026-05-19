@@ -49,6 +49,13 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/seasons", label: "시즌 기록", description: "연도별 성과 아카이브", icon: "database" },
     ],
   },
+  {
+    label: "도움말",
+    items: [
+      { href: "/methodology", label: "예측 방법론", description: "v1.8 모델·10팩터·AI 토론", icon: "file-text" },
+      { href: "/guide", label: "사용 가이드", description: "예측 카드·차트·페이지 활용", icon: "clipboard-check" },
+    ],
+  },
 ];
 
 export { NAV_ITEMS };
