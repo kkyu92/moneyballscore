@@ -10,6 +10,7 @@ import { WeeklyPicksSummary } from './WeeklyPicksSummary';
 import { PicksTrendChart } from './PicksTrendChart';
 import { WeeklyHistorySection } from './WeeklyHistorySection';
 import { PicksStatusFilter } from './PicksStatusFilter';
+import { PicksSortControl } from './PicksSortControl';
 import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
@@ -389,14 +390,15 @@ export function MyPicksClient() {
           const incorrect = entries.filter((e) => e.isResolved && e.myIsCorrect === false).length;
           const pending = entries.filter((e) => !e.isResolved).length;
           return (
-            <div className="mb-3">
+            <div className="mb-3 space-y-2">
               <PicksStatusFilter
                 counts={{ all: entries.length, correct, incorrect, pending }}
               />
+              <PicksSortControl />
             </div>
           );
         })()}
-        <div>
+        <div data-picks-list>
           {entries.map((entry) => (
             <PickRow key={entry.gameId} entry={entry} />
           ))}
