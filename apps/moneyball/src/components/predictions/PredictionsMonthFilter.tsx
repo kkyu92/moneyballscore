@@ -68,7 +68,7 @@ export function PredictionsMonthFilter({ months, counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          월
+          월별
         </span>
         {order.map((key) => {
           const active = filter === key;
