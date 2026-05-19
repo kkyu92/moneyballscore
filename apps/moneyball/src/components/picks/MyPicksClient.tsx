@@ -9,6 +9,7 @@ import { SharePicksButton } from './SharePicksButton';
 import { WeeklyPicksSummary } from './WeeklyPicksSummary';
 import { PicksTrendChart } from './PicksTrendChart';
 import { WeeklyHistorySection } from './WeeklyHistorySection';
+import { PicksStatusFilter } from './PicksStatusFilter';
 import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
@@ -76,6 +77,12 @@ function PickRow({ entry }: { entry: PickEntry }) {
     ? entry.homeTeamName
     : entry.awayTeamName;
 
+  const statusAttr = entry.isResolved
+    ? entry.myIsCorrect
+      ? 'correct'
+      : 'incorrect'
+    : 'pending';
+
   let resultEl: React.ReactNode = (
     <span className="text-xs text-gray-400 dark:text-gray-500">대기중</span>
   );
@@ -89,7 +96,7 @@ function PickRow({ entry }: { entry: PickEntry }) {
   }
 
   return (
-    <div className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-[var(--color-border)] last:border-0">
+    <div data-pick-status={statusAttr} className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-[var(--color-border)] last:border-0">
       <span className="text-xs text-gray-400 dark:text-gray-500 w-10 shrink-0 tabular-nums">{dateStr}</span>
       <span className="flex-1 text-sm truncate min-w-0">
         {entry.awayTeamName ?? '?'} @ {entry.homeTeamName ?? '?'}
@@ -377,6 +384,18 @@ export function MyPicksClient() {
       {/* 픽 목록 */}
       <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
         <h2 className="text-sm font-semibold mb-3">픽 이력</h2>
+        {entries.length >= 3 && (() => {
+          const correct = entries.filter((e) => e.isResolved && e.myIsCorrect === true).length;
+          const incorrect = entries.filter((e) => e.isResolved && e.myIsCorrect === false).length;
+          const pending = entries.filter((e) => !e.isResolved).length;
+          return (
+            <div className="mb-3">
+              <PicksStatusFilter
+                counts={{ all: entries.length, correct, incorrect, pending }}
+              />
+            </div>
+          );
+        })()}
         <div>
           {entries.map((entry) => (
             <PickRow key={entry.gameId} entry={entry} />
