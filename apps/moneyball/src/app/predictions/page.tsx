@@ -12,6 +12,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PredictionsStatusFilter } from "@/components/predictions/PredictionsStatusFilter";
 import { PredictionsSortControl } from "@/components/predictions/PredictionsSortControl";
 import { PredictionsTierFilter } from "@/components/predictions/PredictionsTierFilter";
+import { AccuracyHeaderCard } from "@/components/predictions/AccuracyHeaderCard";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -130,11 +131,28 @@ export default async function PredictionsPage() {
     tossup: dates.filter((d) => d.tiers.tossup.predicted > 0).length,
   };
 
+  const totals = dates.reduce(
+    (acc, d) => ({
+      predicted: acc.predicted + d.predicted,
+      verified: acc.verified + d.verified,
+      correct: acc.correct + d.correct,
+    }),
+    { predicted: 0, verified: 0, correct: 0 },
+  );
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: '예측 기록' }]} />
       <h1 className="text-3xl font-bold">예측 기록</h1>
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
+
+      {dates.length > 0 && (
+        <AccuracyHeaderCard
+          totalPredicted={totals.predicted}
+          totalVerified={totals.verified}
+          totalCorrect={totals.correct}
+        />
+      )}
 
       {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
       {dates.length > 0 && <PredictionsTierFilter counts={tierCounts} />}
