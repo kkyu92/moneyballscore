@@ -15,7 +15,7 @@ import { PredictionsTierFilter } from "@/components/predictions/PredictionsTierF
 
 export const metadata: Metadata = {
   title: "예측 기록",
-  description: "승부예측 기록. 날짜별 세이버메트릭스 기반 경기 분석.",
+  description: "KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색. 세이버메트릭스 10팩터 정량 모델 + AI 에이전트 토론 기반.",
   alternates: { canonical: "https://moneyballscore.vercel.app/predictions" },
 };
 
