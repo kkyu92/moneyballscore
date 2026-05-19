@@ -28,12 +28,13 @@ const SITEMAP_COLUMNS = [
     ],
   },
   {
-    label: "리뷰·서비스",
+    label: "리뷰·시즌",
     links: [
       { href: "/reviews", label: "예측 리뷰" },
+      { href: "/reviews/weekly", label: "주간 리뷰" },
+      { href: "/reviews/monthly", label: "월간 리뷰" },
       { href: "/reviews/misses", label: "빗나간 예측" },
       { href: "/seasons", label: "시즌 기록" },
-      { href: "/search", label: "검색" },
     ],
   },
   {
@@ -43,6 +44,7 @@ const SITEMAP_COLUMNS = [
       { href: "/guide", label: "사용 가이드" },
       { href: "/glossary", label: "용어 사전" },
       { href: "/about", label: "소개" },
+      { href: "/search", label: "검색" },
     ],
   },
 ];
