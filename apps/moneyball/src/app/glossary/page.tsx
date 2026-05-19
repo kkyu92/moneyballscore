@@ -65,6 +65,36 @@ const CATEGORIES: GlossaryCategory[] = [
         modelUsage: `가중치 ${Math.round(DEFAULT_WEIGHTS.bullpen_fip * 100)}%`,
         source: 'KBO Fancy Stats',
       },
+      {
+        id: 'era',
+        abbr: 'ERA',
+        korean: '평균자책점',
+        fullName: 'Earned Run Average',
+        definition:
+          '9이닝당 자책점 평균. 가장 익숙한 투수 평가 지표이지만 수비·운의 영향을 받아 FIP 보다 미래 예측력이 떨어진다.',
+        range: 'KBO 평균 ≈ 4.50. 3.50 이하 = 에이스, 5.00 이상 = 부진.',
+        source: 'KBO 공식',
+      },
+      {
+        id: 'whip',
+        abbr: 'WHIP',
+        korean: '이닝당 출루 허용',
+        fullName: 'Walks plus Hits per Inning Pitched',
+        definition:
+          '한 이닝에 안타 + 볼넷을 몇 명에게 허용했는지. 1.00 이하 = 압도적, 1.40 이상 = 위험. ERA 보다 직관적이라 자주 인용된다.',
+        range: 'KBO 평균 ≈ 1.40. 1.20 이하 = 에이스, 1.50+ = 부진.',
+        source: 'KBO 공식',
+      },
+      {
+        id: 'lob-pct',
+        abbr: 'LOB%',
+        korean: '잔루 처리율',
+        fullName: 'Left On Base Percentage',
+        definition:
+          '주자를 출루시킨 후 실점 없이 막아낸 비율. 위기 관리 능력. 단 운의 영향이 크므로 시즌이 짧으면 신뢰도 ↓.',
+        range: 'KBO 평균 ≈ 72%. 78%+ = 위기 강함, 65% 이하 = 위기 약함.',
+        source: 'FanGraphs (보조 검증)',
+      },
     ],
   },
   {
@@ -120,6 +150,46 @@ const CATEGORIES: GlossaryCategory[] = [
         definition:
           '전체 타석 중 삼진 비율. 타자: 낮을수록 우세 / 투수: 높을수록 우세. 시즌별 변동이 작아 신뢰도 높다.',
         range: '타자: KBO 평균 ≈ 18%, 25%+ 부진 / 투수: 22%+ 우수.',
+        source: 'FanGraphs (보조 검증)',
+      },
+      {
+        id: 'obp',
+        abbr: 'OBP',
+        korean: '출루율',
+        fullName: 'On-Base Percentage',
+        definition:
+          '타석에서 안타·볼넷·몸에 맞는 공으로 출루한 비율. 타율보다 득점 기여도와 강한 상관. wOBA 의 기반 지표.',
+        range: 'KBO 평균 ≈ .350. .400+ = 최상위, .300 이하 = 부진.',
+        source: 'KBO 공식',
+      },
+      {
+        id: 'slg',
+        abbr: 'SLG',
+        korean: '장타율',
+        fullName: 'Slugging Percentage',
+        definition:
+          '타수당 루타 수 평균. 단타 1, 2루타 2, 3루타 3, 홈런 4 가중. 장타 능력을 단일 숫자로 본다.',
+        range: 'KBO 평균 ≈ .420. .500+ = 거포, .350 이하 = 단타형.',
+        source: 'KBO 공식',
+      },
+      {
+        id: 'ops',
+        abbr: 'OPS',
+        korean: '출루+장타',
+        fullName: 'On-base Plus Slugging',
+        definition:
+          'OBP + SLG. 출루 능력과 장타 능력을 한 숫자로 본다. 직관적이라 야구 중계·기사에 자주 인용되지만 wOBA 보다 정밀도 ↓.',
+        range: 'KBO 평균 ≈ .770. .900+ = 슈퍼스타, .700 이하 = 부진.',
+        source: 'KBO 공식',
+      },
+      {
+        id: 'babip',
+        abbr: 'BABIP',
+        korean: '인플레이 타율',
+        fullName: 'Batting Average on Balls In Play',
+        definition:
+          '홈런·삼진·볼넷을 제외한 인플레이 타구의 타율. 운의 영향이 크다. 평균보다 너무 높거나 낮으면 정상 회귀 예상.',
+        range: 'KBO 평균 ≈ .310. .350+ 또는 .270 이하 = 운 변동 의심.',
         source: 'FanGraphs (보조 검증)',
       },
     ],
@@ -210,6 +280,44 @@ const CATEGORIES: GlossaryCategory[] = [
         range: '실측 (2023~2026 N=2180) 51.93% — 가산 1.93%p.',
         modelUsage: '+1.5%p 고정 가산 (HOME_ADVANTAGE=0.015)',
         source: '실측 데이터',
+      },
+      {
+        id: 'pythagorean',
+        abbr: 'Pythagorean',
+        korean: '피타고리안 승률',
+        fullName: 'Pythagorean Expectation',
+        definition:
+          '득점² / (득점² + 실점²) 공식으로 계산한 기대 승률. 실제 승률과 차이 = 운 또는 클러치 영향. 시즌 잔여 경기 예측에 사용.',
+        range: '실제 승률과 ±0.020 이상 차이 = 클러치 운, 회귀 예상.',
+        source: 'KBO Fancy Stats',
+      },
+    ],
+  },
+  {
+    title: '검증·평가 지표',
+    description: '예측 모델 자체를 평가하는 지표. 적중률만으로는 모자란 영역.',
+    entries: [
+      {
+        id: 'brier-score',
+        abbr: 'Brier Score',
+        korean: '브라이어 점수',
+        fullName: 'Brier Score',
+        definition:
+          '예측 승률과 실제 결과(0 또는 1)의 제곱 오차 평균. 적중률만 보면 신뢰도 정보가 빠지지만 Brier 는 신뢰도까지 평가. 낮을수록 ↑정확.',
+        range: '0.25 = 동전 던지기 / 0.20 이하 = 우수. 우리 모델 ≈ 0.246 (n=119 기준).',
+        modelUsage: '모델 진화 결정 기준 — 새 가중치 후보 채택 여부 판정.',
+        source: '내부 계산',
+      },
+      {
+        id: 'calibration',
+        abbr: 'Calibration',
+        korean: '보정 일치도',
+        fullName: 'Calibration',
+        definition:
+          '"70% 확신 한 예측 중 실제 70% 가 맞아야 정상." 신뢰도 구간별 예측 비율과 실제 적중률의 일치도. SVG 차트로 시각화.',
+        range: '대각선에 가까울수록 정상 보정. 0.10 이상 벗어나면 보정 필요.',
+        modelUsage: '/accuracy 페이지에서 캘리브레이션 차트 공개.',
+        source: '내부 계산',
       },
     ],
   },
