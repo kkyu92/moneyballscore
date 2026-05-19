@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 이용약관. 서비스 성격, 면책, 예측 정확성 무보증, 스포츠 베팅 관련 고지, 분쟁 해결 조항.",
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://moneyballscore.vercel.app/terms" },
 };
 
 const SECTIONS = [

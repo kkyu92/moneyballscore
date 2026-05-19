@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 문의 및 제보. 데이터 오류 신고, 예측 관련 질문, 협업·제휴 제안, 개인정보 관련 요청.",
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://moneyballscore.vercel.app/contact" },
 };
 
 const INQUIRY_TYPES = [
