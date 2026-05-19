@@ -1,9 +1,11 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { shortTeamName } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MissesSortControl } from "@/components/reviews/MissesSortControl";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const metadata: Metadata = {
@@ -40,6 +42,13 @@ function fmtSignedBias(v: number): string {
 
 export default async function MissesReviewPage() {
   const items = await buildMissReport({ limit: 10 });
+
+  // 날짜 desc 순위 — confidence default 도착 순서에서 gameDate desc rank 계산.
+  // MissesSortControl 가 '최신순' 활성 시 CSS variable 로 flex order 토글.
+  const dateRankMap = new Map<number, number>();
+  [...items]
+    .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
+    .forEach((item, idx) => dateRankMap.set(item.gameId, idx));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -84,7 +93,9 @@ export default async function MissesReviewPage() {
           </p>
         </section>
       ) : (
-        <div className="space-y-5">
+        <>
+          <MissesSortControl />
+          <div className="space-y-5" data-misses-list>
           {items.map((item) => {
             const predName = item.predictedWinnerCode
               ? shortTeamName(item.predictedWinnerCode)
@@ -93,11 +104,15 @@ export default async function MissesReviewPage() {
               ? shortTeamName(item.actualWinnerCode)
               : null;
             const confPct = Math.round(item.winnerProb * 100);
+            const cardStyle = {
+              '--mb-miss-date-order': dateRankMap.get(item.gameId) ?? 0,
+            } as CSSProperties;
 
             return (
               <Link
                 href={`/analysis/game/${item.gameId}`}
                 key={item.gameId}
+                style={cardStyle}
                 className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500/50 hover:shadow-md transition-all space-y-4"
               >
                 <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -197,7 +212,8 @@ export default async function MissesReviewPage() {
               </Link>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
 
       <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
