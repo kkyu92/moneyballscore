@@ -9,6 +9,7 @@ export const revalidate = 30;
 export const metadata: Metadata = {
   title: '픽 리더보드 | 머니볼스코어',
   description: 'KBO 승부예측 픽 전체 순위. 닉네임을 설정하고 전국 팬들과 적중률을 겨뤄보세요.',
+  alternates: { canonical: 'https://moneyballscore.vercel.app/leaderboard' },
   openGraph: {
     title: '픽 리더보드 | 머니볼스코어',
     description: '내 픽 적중률이 전국 몇 등인지 확인하세요!',

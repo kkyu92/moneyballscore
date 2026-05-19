@@ -119,6 +119,15 @@ export default function RootLayout({
                 name: "MoneyBall Score",
                 url: "https://moneyballscore.vercel.app",
               },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate:
+                    "https://moneyballscore.vercel.app/search?q={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
             }),
           }}
         />

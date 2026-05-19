@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score의 개인정보 수집·이용·보관에 관한 방침. 방문자 통계 수집 범위, 제3자 서비스 고지, 쿠키 사용 내역.",
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://moneyballscore.vercel.app/privacy" },
 };
 
 const SECTIONS = [
