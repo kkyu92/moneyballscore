@@ -8,6 +8,7 @@ import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { TeamEloChart } from "@/components/teams/TeamEloChart";
+import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
 
 export const revalidate = 1800;
 
@@ -307,14 +308,24 @@ export default async function TeamPage({ params }: PageProps) {
         </div>
       </section>
 
-      {profile.recentGames.length > 0 && (
+      {profile.recentGames.length > 0 && (() => {
+        const homeN = profile.recentGames.filter((r) => r.isHome).length;
+        const awayN = profile.recentGames.length - homeN;
+        const correctN = profile.recentGames.filter((r) => r.isCorrect === true).length;
+        const incorrectN = profile.recentGames.filter((r) => r.isCorrect === false).length;
+        const filterCounts = {
+          location: { all: profile.recentGames.length, home: homeN, away: awayN },
+          result: { all: profile.recentGames.length, correct: correctN, incorrect: incorrectN },
+        };
+        return (
         <section
           aria-labelledby="team-recent-title"
-          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
         >
-          <h2 id="team-recent-title" className="text-lg font-bold mb-3">
+          <h2 id="team-recent-title" className="text-lg font-bold">
             최근 예측 기록
           </h2>
+          <TeamRecentGamesFilter counts={filterCounts} />
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
@@ -344,9 +355,18 @@ export default async function TeamPage({ params }: PageProps) {
                       : r.isCorrect
                         ? "적중"
                         : "실패";
+                  const locationAttr = r.isHome ? "home" : "away";
+                  const resultAttr =
+                    r.isCorrect == null
+                      ? "pending"
+                      : r.isCorrect
+                        ? "correct"
+                        : "incorrect";
                   return (
                     <tr
                       key={r.gameId}
+                      data-team-game-location={locationAttr}
+                      data-team-game-result={resultAttr}
                       className="border-b border-gray-100 dark:border-[var(--color-border)]"
                     >
                       <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
@@ -386,7 +406,8 @@ export default async function TeamPage({ params }: PageProps) {
             </table>
           </div>
         </section>
-      )}
+        );
+      })()}
 
       {profile.predictedGames === 0 && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
