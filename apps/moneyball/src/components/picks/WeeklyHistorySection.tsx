@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { WeeklyGroup, PickEntry } from '@/lib/picks/buildPicksStats';
+import { WeeklyHistorySortControl } from './WeeklyHistorySortControl';
 
 function PastPickRow({ entry }: { entry: PickEntry }) {
   const dateStr = entry.game_date.slice(5); // "MM-DD"
@@ -49,10 +50,15 @@ export function WeeklyHistorySection({ groups }: Props) {
   if (pastGroups.length === 0) return null;
 
   const sectionLabel = pastGroups.length === 1 ? '지난 주 기록' : '이전 주 기록';
+  const showSort = pastGroups.length >= 2;
 
   return (
     <div className="space-y-2">
-      <h2 className="text-sm font-semibold">{sectionLabel}</h2>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <h2 className="text-sm font-semibold">{sectionLabel}</h2>
+        {showSort && <WeeklyHistorySortControl />}
+      </div>
+      <div data-weekly-history-list className="flex flex-col gap-2">
       {pastGroups.map((group, idx) => {
         const { stats, entries } = group;
         const myRatePct = stats.myRate !== null ? Math.round(stats.myRate * 100) : null;
@@ -104,6 +110,7 @@ export function WeeklyHistorySection({ groups }: Props) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
