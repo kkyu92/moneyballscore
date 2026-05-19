@@ -104,3 +104,15 @@ Footer `리뷰·서비스` 컬럼 갱신:
 - 모바일 헤더 햄버거 메뉴 `리뷰·시즌` dropdown 동기 검증 (Header.tsx 와 mobile menu 별도 코드 경로 가능성)
 - `/reviews` hub page 안 weekly/monthly hub 카드 진입 path 점검 (cycle 685 후속)
 - sitemap.xml `/reviews/weekly` + `/reviews/monthly` priority 점검 (redirect-only 라도 sitemap 등록 가치)
+
+## 후속 처리 박제 (cycle 709, 2026-05-19)
+
+cycle 709 info-architecture-review chain (lite verify mode) 진단 결과 위 3건 모두 처리 확인:
+
+| 후속 | 검증 |
+|---|---|
+| 모바일 햄버거 dropdown 동기 검증 | `MobileNav.tsx:6` `import { NAV_ITEMS, isNavGroup } from "./Header"` — Header 의 NAV_ITEMS 단일 source 직접 import. 별도 코드 경로 X. mobile/desktop 자동 sync 박제. |
+| `/reviews` hub page weekly/monthly 진입 path | `apps/moneyball/src/app/reviews/page.tsx:102,112,132,142` — 최신 주간 hero `/reviews/weekly/${recentWeeks[last].weekId}` + 주간 카드 list + 최신 월간 hero `/reviews/monthly/${recentMonths[last].monthId}` + 월간 카드 list 4 진입 path 박제. |
+| sitemap.xml weekly/monthly priority 점검 | `apps/moneyball/src/app/sitemap.ts` — `/reviews/weekly` `/reviews/monthly` hub URLs **의도적 staticRoutes 제외** (주석 "redirect-only 페이지... redirect chain → 중복 URL 인덱싱" 박제). dynamic block `weeklyReviewRoutes` (최근 12주) + `monthlyReviewRoutes` (최근 6개월) 가 실제 컨텐츠 URL 0.7 priority 커버. redirect chain 회피 + crawl 가치 확보 양쪽 자연. |
+
+본 spec close — trigger 8 (carry-over ≥ 20 사이클) 후보 X.
