@@ -42,7 +42,7 @@ const SECTIONS = [
       <ul className="list-disc pl-5 space-y-1">
         <li>서비스 품질 개선을 위한 방문자 행동 통계 분석</li>
         <li>서버 장애·부정 접근 탐지 및 대응</li>
-        <li>향후 광고 서비스(Google AdSense) 도입 시 광고 품질 향상</li>
+        <li>광고 서비스(Google AdSense) 운영 — 광고 품질 향상 및 관련성 높은 광고 노출</li>
       </ul>
     ),
   },
@@ -61,8 +61,8 @@ const SECTIONS = [
             집계 도구. 개인 식별자 없이 해시 기반으로 방문 단위를 추정합니다.
           </li>
           <li>
-            <strong>Google AdSense</strong> (도입 예정) — 승인 후 관심 기반
-            광고 노출을 위해 쿠키(DoubleClick, IDE 등)를 설정할 수 있습니다.
+            <strong>Google AdSense</strong> — 관심 기반 광고 노출을 위해
+            쿠키(DoubleClick, IDE 등)를 설정할 수 있습니다.
             사용자는{" "}
             <a
               href="https://adssettings.google.com"
