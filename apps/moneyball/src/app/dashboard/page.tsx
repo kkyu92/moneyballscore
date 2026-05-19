@@ -25,7 +25,7 @@ import { neutral } from "@/lib/design-tokens";
 
 export const metadata: Metadata = {
   title: "대시보드",
-  description: "승부예측 시즌 적중률, 팩터별 편향, 확신 구간 분석 종합 대시보드.",
+  description: "KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 구간별 분포, 10팩터 평균 가중치, Elo 추이, 모델 버전별 (v1.5 ~ v1.8) 성과 비교.",
   alternates: { canonical: "https://moneyballscore.vercel.app/dashboard" },
 };
 
