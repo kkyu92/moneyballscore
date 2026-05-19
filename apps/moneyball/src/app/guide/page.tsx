@@ -7,6 +7,19 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 사용법 — 예측 카드 해석법, 적중률 차트 읽는 법, 픽 기록 시작하기, 모델 버전 의미. KBO 승부예측 사이트 처음 사용자를 위한 단계별 가이드.",
   alternates: { canonical: "https://moneyballscore.vercel.app/guide" },
+  openGraph: {
+    title: "사용 가이드 | MoneyBall Score",
+    description:
+      "예측 카드 해석 + 적중률 차트 읽기 + 픽 시작하기 + 모델 버전 의미. 처음 사용자를 위한 단계별 가이드.",
+    url: "https://moneyballscore.vercel.app/guide",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "사용 가이드 | MoneyBall Score",
+    description:
+      "예측 카드 해석 + 적중률 차트 + 픽 시작하기. 단계별 가이드.",
+  },
 };
 
 const GUIDE_JSONLD = {
