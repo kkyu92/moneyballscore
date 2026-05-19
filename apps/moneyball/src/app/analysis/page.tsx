@@ -17,6 +17,7 @@ import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { YesterdayStatusFilter } from '@/components/analysis/YesterdayStatusFilter';
+import { ThisWeekStatusFilter } from '@/components/analysis/ThisWeekStatusFilter';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 
 export const metadata: Metadata = {
@@ -662,12 +663,20 @@ export default async function AnalysisIndexPage() {
               이번 주 전체 리뷰 →
             </Link>
           </div>
+          <ThisWeekStatusFilter
+            counts={{
+              all: thisWeekPreviousGames.length,
+              correct: thisWeekPreviousGames.filter((g) => g.isCorrect === true).length,
+              wrong: thisWeekPreviousGames.filter((g) => g.isCorrect === false).length,
+              pending: thisWeekPreviousGames.filter((g) => g.isCorrect === null).length,
+            }}
+          />
           <div className="space-y-5">
             {groupByDate(thisWeekPreviousGames).map(({ date, games: dayGames }) => {
               const [, mm, dd] = date.split('-');
               const dateLabel = `${Number(mm)}월 ${Number(dd)}일`;
               return (
-                <div key={date}>
+                <div key={date} data-this-week-day-group>
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
                     {dateLabel}
                   </p>
@@ -681,8 +690,10 @@ export default async function AnalysisIndexPage() {
                       const confPct = g.confidence !== null
                         ? Math.round(g.confidence * 100)
                         : null;
+                      const thisWeekStatus =
+                        g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
                       return (
-                        <li key={g.gameId}>
+                        <li key={g.gameId} data-this-week-status={thisWeekStatus}>
                           <Link
                             href={`/analysis/game/${g.gameId}`}
                             className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
