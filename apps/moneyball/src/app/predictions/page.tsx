@@ -12,6 +12,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PredictionsStatusFilter } from "@/components/predictions/PredictionsStatusFilter";
 import { PredictionsSortControl } from "@/components/predictions/PredictionsSortControl";
 import { PredictionsTierFilter } from "@/components/predictions/PredictionsTierFilter";
+import { PredictionsMonthFilter } from "@/components/predictions/PredictionsMonthFilter";
 import { AccuracyHeaderCard } from "@/components/predictions/AccuracyHeaderCard";
 
 export const metadata: Metadata = {
@@ -131,6 +132,16 @@ export default async function PredictionsPage() {
     tossup: dates.filter((d) => d.tiers.tossup.predicted > 0).length,
   };
 
+  // 월별 그룹 — dates 는 game_date desc 정렬 → months 도 desc 자연 유지.
+  const monthCountMap = new Map<string, number>();
+  for (const d of dates) {
+    const month = d.date.slice(0, 7);
+    monthCountMap.set(month, (monthCountMap.get(month) ?? 0) + 1);
+  }
+  const months = Array.from(monthCountMap.keys());
+  const monthCounts: Record<string, number> = { all: dates.length };
+  for (const [m, c] of monthCountMap) monthCounts[m] = c;
+
   const totals = dates.reduce(
     (acc, d) => ({
       predicted: acc.predicted + d.predicted,
@@ -169,6 +180,9 @@ export default async function PredictionsPage() {
 
       {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
       {dates.length > 0 && <PredictionsTierFilter counts={tierCounts} />}
+      {months.length > 1 && (
+        <PredictionsMonthFilter months={months} counts={monthCounts} />
+      )}
       {dates.length > 0 && <PredictionsSortControl />}
 
       {dates.length > 0 ? (
@@ -187,6 +201,7 @@ export default async function PredictionsPage() {
                 href={`/predictions/${d.date}`}
                 data-prediction-status={status}
                 data-prediction-tiers={tiersPresent}
+                data-prediction-month={d.date.slice(0, 7)}
                 className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between gap-4">
