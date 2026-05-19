@@ -140,6 +140,17 @@ export default async function PredictionsPage() {
     { predicted: 0, verified: 0, correct: 0 },
   );
 
+  // 최근 N건 trend — dates 는 game_date desc 정렬. verified 누적 ≥ 20 도달 시
+  // 멈춤. 본 chip = 전체 적중률 대비 최근 ±%p diff 노출 (헤더 카드 안).
+  const RECENT_TARGET = 20;
+  let recentVerified = 0;
+  let recentCorrect = 0;
+  for (const d of dates) {
+    if (recentVerified >= RECENT_TARGET) break;
+    recentVerified += d.verified;
+    recentCorrect += d.correct;
+  }
+
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: '예측 기록' }]} />
@@ -151,6 +162,8 @@ export default async function PredictionsPage() {
           totalPredicted={totals.predicted}
           totalVerified={totals.verified}
           totalCorrect={totals.correct}
+          recentVerified={recentVerified}
+          recentCorrect={recentCorrect}
         />
       )}
 
