@@ -160,7 +160,7 @@ export default function MethodologyPage() {
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-2">① 정량 우선</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              "어느 팀 분위기 좋다" 같은 직관 평가 X. 모든 예측은 측정 가능한
+              &quot;어느 팀 분위기 좋다&quot; 같은 직관 평가 X. 모든 예측은 측정 가능한
               세이버메트릭스 지표로 환산됩니다.
             </p>
           </div>
@@ -304,8 +304,8 @@ export default function MethodologyPage() {
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-1">홈팀 에이전트 (Haiku)</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              홈팀 입장에서 우호적인 지표를 강조. "선발 FIP 3.20 로 리그 상위
-              10%, 최근 5경기 4승" 등 옹호 논리 생성.
+              홈팀 입장에서 우호적인 지표를 강조. &quot;선발 FIP 3.20 로 리그 상위
+              10%, 최근 5경기 4승&quot; 등 옹호 논리 생성.
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
@@ -350,7 +350,7 @@ export default function MethodologyPage() {
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-2">Calibration</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              "70% 확신 한 예측 중 실제 70% 가 맞아야 정상." 신뢰도와 실제 적중률
+              &quot;70% 확신 한 예측 중 실제 70% 가 맞아야 정상.&quot; 신뢰도와 실제 적중률
               의 일치도를 측정. <Link href="/accuracy" className="text-brand-500 hover:underline">/accuracy</Link>{" "}
               페이지에서 SVG 차트로 공개.
             </p>
