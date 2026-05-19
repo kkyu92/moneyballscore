@@ -53,10 +53,23 @@ export default function SeasonsIndexPage() {
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <Breadcrumb items={[{ label: "시즌 리뷰" }]} />
 
-      <header className="space-y-2">
+      <header className="space-y-3">
         <h1 className="text-3xl font-bold">KBO 시즌 리뷰</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           역대 시즌 실제 경기 결과를 한눈에. 예측과 독립된 사실 기록입니다.
+        </p>
+        <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
+          각 시즌 카드를 클릭하면 그 해의 정규시즌 + 포스트시즌 전체 결과,
+          팀별 시즌 성적, 월별 득점 추이, 인상적인 경기 (역전·노히터·끝내기)
+          가 표시됩니다. 우리 예측 모델 (v1.5 ~ v1.8) 의 적중률은{" "}
+          <Link href="/accuracy" className="text-brand-500 hover:underline">
+            /accuracy
+          </Link>{" "}
+          에서, 모델 방법론은{" "}
+          <Link href="/methodology" className="text-brand-500 hover:underline">
+            /methodology
+          </Link>{" "}
+          에서 별도 공개.
         </p>
       </header>
 
