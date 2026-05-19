@@ -101,7 +101,7 @@ export function PredictionsSearchBox() {
         />
       )}
       <label className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">검색</span>
+        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">검색</span>
         <input
           type="search"
           value={query}
