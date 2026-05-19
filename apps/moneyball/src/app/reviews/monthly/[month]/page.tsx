@@ -11,6 +11,7 @@ import type { WeeklyHighlight } from "@/lib/reviews/buildWeeklyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { MonthlyTeamStatsSortControl } from "@/components/reviews/MonthlyTeamStatsSortControl";
 import { neutral } from "@/lib/design-tokens";
 
 export const revalidate = 3600;
@@ -240,45 +241,58 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
           <h2 id="monthly-teams-title" className="text-xl font-bold">
             팀별 월간 예측 적중률
           </h2>
+          {review.teamStats.length >= 2 && <MonthlyTeamStatsSortControl />}
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-2">
-            {review.teamStats.map((t) => {
-              const pct = Math.round(t.accuracy * 100);
-              const smallSample = t.predicted < 5;
+            {(() => {
+              const sampleRankMap = new Map<string, number>();
+              [...review.teamStats]
+                .sort((a, b) => b.predicted - a.predicted)
+                .forEach((row, idx) => sampleRankMap.set(row.teamCode, idx));
               return (
-                <div
-                  key={t.teamCode}
-                  className="flex items-center gap-3 text-sm"
-                  title={
-                    smallSample
-                      ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (5경기 이상부터 신뢰 가능)`
-                      : undefined
-                  }
-                >
-                  <TeamLogo team={t.teamCode} size={20} className="shrink-0" />
-                  <span className="w-24 shrink-0 font-medium">
-                    {t.teamName}
-                  </span>
-                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full"
-                      style={{
-                        width: `${Math.min(100, pct)}%`,
-                        backgroundColor: smallSample ? neutral[400] : t.color,
-                      }}
-                    />
-                  </div>
-                  <span
-                    className={`text-xs font-mono w-20 text-right ${
-                      smallSample
-                        ? "text-gray-400 dark:text-gray-500"
-                        : "text-gray-600 dark:text-gray-300"
-                    }`}
-                  >
-                    {pct}% ({t.correct}/{t.predicted})
-                  </span>
+                <div data-monthly-team-stats-list className="space-y-2">
+                  {review.teamStats.map((t) => {
+                    const pct = Math.round(t.accuracy * 100);
+                    const smallSample = t.predicted < 5;
+                    const sampleRank = sampleRankMap.get(t.teamCode) ?? 0;
+                    return (
+                      <div
+                        key={t.teamCode}
+                        className="flex items-center gap-3 text-sm"
+                        data-sample-rank={sampleRank}
+                        title={
+                          smallSample
+                            ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (5경기 이상부터 신뢰 가능)`
+                            : undefined
+                        }
+                      >
+                        <TeamLogo team={t.teamCode} size={20} className="shrink-0" />
+                        <span className="w-24 shrink-0 font-medium">
+                          {t.teamName}
+                        </span>
+                        <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full"
+                            style={{
+                              width: `${Math.min(100, pct)}%`,
+                              backgroundColor: smallSample ? neutral[400] : t.color,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className={`text-xs font-mono w-20 text-right ${
+                            smallSample
+                              ? "text-gray-400 dark:text-gray-500"
+                              : "text-gray-600 dark:text-gray-300"
+                          }`}
+                        >
+                          {pct}% ({t.correct}/{t.predicted})
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               );
-            })}
+            })()}
           </div>
         </section>
       )}
