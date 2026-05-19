@@ -73,3 +73,14 @@ links: [
 
 - (선택) Header 리뷰·시즌 dropdown 에 `/glossary` 추가 — Footer-only 진입이 부족할 시. 단 현 cycle 644 lite scope = Footer 1 line 만
 - (선택) `/picks` `/leaderboard` 사용자 진입 path 검토 — Footer `커뮤니티` 그룹만 있음. Header dropdown 이미 있음 (mental model 정렬 OK)
+
+## 후속 처리 박제 (cycle 709, 2026-05-19)
+
+cycle 709 info-architecture-review chain (lite verify mode) 진단 결과 위 (선택) 2건 모두 자연 처리 확인:
+
+| 후속 (선택) | 검증 |
+|---|---|
+| Header `/glossary` 추가 | Header NAV_ITEMS 에 **"도움말" group** 신규 (cycle 655 이후) — `/methodology` `/guide` `/glossary` `/about` 4 entry 박제. 리뷰·시즌 group 대신 도움말 group 에 reference 류 정렬 = mental model 더 자연 (cycle 656 ia-2026-05-19-footer-help-column-split spec 후속). |
+| `/picks` `/leaderboard` 진입 path | Header NAV_ITEMS "커뮤니티" group (`/picks` `/leaderboard` 2 entry 박제) + Footer "커뮤니티" 컬럼 (동일 2 entry) — 양쪽 진입 path 박제. mental model 정렬 자연. |
+
+본 spec close — trigger 8 (carry-over ≥ 20 사이클) 후보 X.
