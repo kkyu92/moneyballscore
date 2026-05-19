@@ -38,6 +38,7 @@ vi.mock('../scrapers/fancy-stats', () => ({
   fetchTeamStats: vi.fn().mockResolvedValue([]),
   fetchEloRatings: vi.fn().mockResolvedValue([]),
   findPitcher: vi.fn().mockReturnValue(null),
+  FANCY_STATS_DEFAULTS: { woba: 0.320, fip: 4.00, sfr: 0, elo: 1500, winPct: 0.5 },
 }));
 
 vi.mock('../scrapers/fangraphs', () => ({
@@ -623,6 +624,51 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
         expect(detail.raw).toBeUndefined();
       } finally {
         vi.useRealTimers();
+      }
+    });
+
+    // 사례 (2026-05-19 5경기 Anthropic 529) — debate fallback row 가 first-write-wins 로
+    // 영구 박제되어 다음 cron 재시도 잠금. predict mode 시 skip → 다음 cron 진정한 재시도.
+    it('debate agentsFailed=true → predict mode INSERT skip + skippedDetail.reason=debate_fallback', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key';
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T06:30:00Z')); // KST 15:30 — 18:30 경기 in-window
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({ gameTime: '18:30' }),
+        ]);
+
+        const { runDebate } = await import('../agents/debate');
+        vi.mocked(runDebate).mockResolvedValueOnce({
+          homeArgument: null, awayArgument: null, calibration: null,
+          verdict: { predictedWinner: 'OB', homeWinProb: 0.55, confidence: 0.3 },
+          quantitativeProb: 0.55, totalTokens: 0,
+          agentsFailed: true,
+          agentError: 'SERVER_ERROR 529: Overloaded',
+        } as never);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
+
+        expect(result.predictionsGenerated).toBe(0);
+        expect(result.skippedDetail).toBeDefined();
+        const fb = result.skippedDetail!.find((s) => s.reason === 'debate_fallback');
+        expect(fb).toBeDefined();
+        expect(fb!.error).toContain('529');
+
+        // predictions insert 호출 없음 — fallback row 박제 차단
+        const predInsert = mock._calls.find(
+          (c) => c.table === 'predictions' && c.operations.includes('insert'),
+        );
+        expect(predInsert).toBeUndefined();
+      } finally {
+        vi.useRealTimers();
+        delete process.env.ANTHROPIC_API_KEY;
       }
     });
   });

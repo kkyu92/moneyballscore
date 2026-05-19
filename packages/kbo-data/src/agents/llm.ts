@@ -8,8 +8,17 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 // 재시도 정책: 3회 시도, 500ms → 1000ms → 2000ms exponential backoff
 // 재시도 대상: 네트워크 에러, 5xx, 429(rate limit)
 // 재시도 제외: 4xx (400/401/403 등 — 요청 자체가 잘못됨)
+// 529 Overloaded 특수 처리: Anthropic capacity 한계 — backoff 5x 곱해
+// 더 길게 대기 (2.5s → 5s → 10s = 총 17.5s). 사례 (2026-05-19 5경기
+// 토론 fallback) 재발 차단.
 const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
+const OVERLOADED_BACKOFF_MULTIPLIER = 5;
 export const MAX_ATTEMPTS = RETRY_BACKOFF_MS.length;
+
+export function backoffMs(attempt: number, status: number): number {
+  const base = RETRY_BACKOFF_MS[attempt];
+  return status === 529 ? base * OVERLOADED_BACKOFF_MULTIPLIER : base;
+}
 
 export interface LLMCallOptions {
   model: 'haiku' | 'sonnet';
@@ -193,7 +202,7 @@ async function callClaude<T>(
         lastError = classifyAnthropicError(res.status, errText);
 
         if (isRetryableStatus(res.status) && attempt < MAX_ATTEMPTS - 1) {
-          await sleep(RETRY_BACKOFF_MS[attempt]);
+          await sleep(backoffMs(attempt, res.status));
           continue;
         }
 
