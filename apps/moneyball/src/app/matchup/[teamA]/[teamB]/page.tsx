@@ -20,6 +20,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare";
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
+import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 
 export const revalidate = 3600;
 
@@ -84,6 +85,14 @@ export default async function MatchupPage({ params }: PageProps) {
   const pastGames = games.filter(
     (g) => !g.gameDate.startsWith(currentYear) && g.status === "final",
   ).sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+
+  const closeCount = games.filter(
+    (g) =>
+      g.status === "final" &&
+      g.homeScore != null &&
+      g.awayScore != null &&
+      Math.abs(g.homeScore - g.awayScore) <= 1,
+  ).length;
 
   const otherMatchupsA = pairsForTeam(tA.code).filter(
     (p) => p.path !== pair.path,
@@ -219,8 +228,12 @@ export default async function MatchupPage({ params }: PageProps) {
             경기 기록
           </h2>
 
+          <MatchupGamesCloseFilter
+            counts={{ all: games.length, close: closeCount }}
+          />
+
           {upcomingGames.length > 0 && (
-            <div>
+            <div data-matchup-section>
               <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide mb-2">
                 예정
               </p>
@@ -229,7 +242,7 @@ export default async function MatchupPage({ params }: PageProps) {
           )}
 
           {thisYearGames.length > 0 && (
-            <div>
+            <div data-matchup-section>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                 {currentYear}시즌
               </p>
@@ -238,7 +251,7 @@ export default async function MatchupPage({ params }: PageProps) {
           )}
 
           {pastGames.length > 0 && (
-            <div>
+            <div data-matchup-section>
               <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
                 과거 기록
               </p>
@@ -307,7 +320,7 @@ export default async function MatchupPage({ params }: PageProps) {
 function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile").MatchupGame[] }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-[var(--color-border)]">
-      <table className="min-w-full text-sm">
+      <table className="min-w-full text-sm" data-matchup-games>
         <thead>
           <tr className="bg-gray-50 dark:bg-gray-900/40 border-b-2 border-gray-200 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
             <th className="py-2.5 px-3 font-semibold">일자</th>
@@ -319,6 +332,11 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
         </thead>
         <tbody>
           {games.map((g, idx) => {
+            const margin =
+              g.status === "final" && g.homeScore != null && g.awayScore != null
+                ? Math.abs(g.homeScore - g.awayScore)
+                : null;
+            const isClose = margin != null && margin <= 1;
             const homeName = shortTeamName(g.homeCode);
             const awayName = shortTeamName(g.awayCode);
             const predName = g.predictedWinnerCode
@@ -344,6 +362,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
             return (
               <tr
                 key={g.gameId}
+                data-margin-close={isClose ? "true" : "false"}
                 className={`border-b border-gray-100 dark:border-[var(--color-border)] hover:bg-brand-50 dark:hover:bg-brand-500/5 transition-colors ${rowBg}`}
               >
                 <td className="py-2.5 px-3 font-mono text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
