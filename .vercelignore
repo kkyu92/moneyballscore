@@ -1,0 +1,38 @@
+# dependencies
+node_modules
+**/node_modules
+
+# next.js
+.next
+**/.next
+out
+**/out
+
+# build
+dist
+**/dist
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# turbo
+.turbo
+**/.turbo
+
+# vercel
+.vercel
+**/.vercel
+
+# gstack local
+.gstack
+.gstack-screenshots
+
+# git
+.git
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+
+# supabase local cache
+supabase/.temp
