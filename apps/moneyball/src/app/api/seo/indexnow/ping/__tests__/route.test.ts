@@ -26,7 +26,7 @@ describe('GET /api/seo/indexnow/ping', () => {
   beforeEach(() => {
     vi.resetModules();
     fetchMock.mockReset();
-    fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
+    fetchMock.mockResolvedValue(new Response('OK', { status: 200 }));
     process.env.CRON_SECRET = 'test-secret';
     process.env.INDEXNOW_KEY = 'abc123def456';
   });
@@ -69,16 +69,19 @@ describe('GET /api/seo/indexnow/ping', () => {
     const body = JSON.parse(init.body);
     expect(body.host).toBe('moneyballscore.vercel.app');
     expect(body.key).toBe('abc123def456');
-    expect(body.keyLocation).toBe('https://moneyballscore.vercel.app/api/seo/indexnow/key.txt');
+    expect(body.keyLocation).toBe('https://moneyballscore.vercel.app/abc123def456.txt');
     expect(body.urlList).toHaveLength(3);
   });
 
-  it('IndexNow API 실패 → ok=false 그대로 반환', async () => {
-    fetchMock.mockResolvedValue(new Response(null, { status: 422 }));
+  it('IndexNow API 실패 → ok=false + response body 박제', async () => {
+    fetchMock.mockResolvedValue(
+      new Response('{"errorCode":"InvalidRequestParameters","message":"test"}', { status: 422 }),
+    );
     const res = await callGet({ authorization: 'Bearer test-secret' });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.ok).toBe(false);
     expect(json.status).toBe(422);
+    expect(json.indexnowResponse).toContain('InvalidRequestParameters');
   });
 });
