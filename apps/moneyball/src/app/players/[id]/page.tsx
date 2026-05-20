@@ -5,6 +5,9 @@ import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
 import { buildPitcherFipTrend } from "@/lib/players/buildPitcherFipTrend";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PitcherFipTrend } from "@/components/players/PitcherFipTrend";
+import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
+import { pairsForTeam } from "@/lib/matchup/canonicalPair";
+import { shortTeamName } from '@moneyball/shared';
 
 export const revalidate = 1800;
 
@@ -267,6 +270,26 @@ export default async function PlayerProfilePage({ params }: PageProps) {
           차이가 있을 수 있습니다.
         </p>
       </section>
+
+      {profile.teamCode && (() => {
+        const teamCode = profile.teamCode;
+        const items: RelatedLink[] = [
+          {
+            href: `/teams/${teamCode}`,
+            label: `${profile.teamName} 팀 프로필`,
+            hint: '팀 평균 FIP · 적중률 · Elo 트렌드',
+          },
+          ...pairsForTeam(teamCode).map((p) => {
+            const opp = (p.codeA === teamCode ? p.codeB : p.codeA);
+            return {
+              href: p.path,
+              label: `vs ${shortTeamName(opp)}`,
+              hint: '맞대결 기록',
+            };
+          }),
+        ];
+        return <RelatedLinks title={`${profile.teamName ?? '팀'} 관련 페이지`} items={items} />;
+      })()}
     </article>
   );
 }

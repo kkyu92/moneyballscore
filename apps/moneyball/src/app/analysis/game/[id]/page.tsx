@@ -15,6 +15,8 @@ import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnal
 import { GameOverview } from '@/components/analysis/GameOverview';
 import { ShareButtons } from '@/components/share/ShareButtons';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
+import { canonicalPair } from '@/lib/matchup/canonicalPair';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
@@ -489,6 +491,17 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           text={`${gameDate} ${awayName} vs ${homeName} 세이버메트릭스 기반 AI 분석`}
         />
       </footer>
+
+      {(() => {
+        const pair = canonicalPair(homeTeam, awayTeam);
+        const items: RelatedLink[] = [
+          { href: `/teams/${homeTeam}`, label: `${homeName} 팀 프로필`, hint: '시즌 통계 + 적중률' },
+          { href: `/teams/${awayTeam}`, label: `${awayName} 팀 프로필`, hint: '시즌 통계 + 적중률' },
+          ...(pair ? [{ href: pair.path, label: `${shortTeamName(awayTeam)} vs ${shortTeamName(homeTeam)} 매치업`, hint: '상대전적 + 예측 성과' }] : []),
+          { href: `/predictions/${gameDate}`, label: `${gameDate} 전체 예측`, hint: '같은 날짜 다른 경기' },
+        ];
+        return <RelatedLinks title="관련 페이지" items={items} />;
+      })()}
     </article>
   );
 }

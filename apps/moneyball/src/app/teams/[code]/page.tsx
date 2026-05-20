@@ -10,6 +10,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { TeamEloChart } from "@/components/teams/TeamEloChart";
 import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
 export const revalidate = 1800;
 
@@ -418,6 +419,17 @@ export default async function TeamPage({ params }: PageProps) {
           description="시즌 경기가 진행되면 자동으로 집계됩니다."
         />
       )}
+
+      {(() => {
+        const others: RelatedLink[] = (Object.keys(KBO_TEAMS) as TeamCode[])
+          .filter((c) => c !== code)
+          .map((c) => ({
+            href: `/teams/${c}`,
+            label: shortTeamName(c),
+            hint: KBO_TEAMS[c].stadium,
+          }));
+        return <RelatedLinks title="다른 팀 프로필" items={others} />;
+      })()}
     </article>
   );
 }

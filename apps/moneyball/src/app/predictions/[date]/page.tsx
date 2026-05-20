@@ -8,6 +8,7 @@ import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard"
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { type TeamCode, shortTeamName, josa, assertSelectOk } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
@@ -542,6 +543,23 @@ export default async function PredictionDatePage({ params }: Props) {
           />
         </footer>
       )}
+
+      {(() => {
+        const d = new Date(`${date}T00:00:00+09:00`);
+        const prev = new Date(d);
+        prev.setUTCDate(prev.getUTCDate() - 1);
+        const next = new Date(d);
+        next.setUTCDate(next.getUTCDate() + 1);
+        const fmt = (x: Date) => x.toISOString().slice(0, 10);
+        const items: RelatedLink[] = [
+          { href: `/predictions/${fmt(prev)}`, label: '이전 날짜', hint: fmt(prev) },
+          { href: `/predictions/${fmt(next)}`, label: '다음 날짜', hint: fmt(next) },
+          { href: '/predictions', label: '예측 hub', hint: '전체 카드 모음' },
+          { href: '/accuracy', label: '누적 적중률', hint: '캘리브레이션 + 트렌드' },
+          { href: '/reviews', label: '예측 리뷰', hint: '주간 / 월간' },
+        ];
+        return <RelatedLinks title="관련 예측 페이지" items={items} />;
+      })()}
     </article>
   );
 }
