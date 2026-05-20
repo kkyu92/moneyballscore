@@ -171,6 +171,23 @@ curl 진단:
 
 **교훈**: 외부 site 봇 차단 정책은 사전 통지 X — 어느 날 갑자기 endpoint 응답 형식 변경. cron silent error 시 endpoint 별 curl 진단 필수 (UA + Referer + Origin 조합). source-of-truth 단일 상수로 박제하여 향후 다른 endpoint 발생 시 한 줄 추가로 fix.
 
+### 드리프트 사례 9 — Vercel CLI 가 .gitignore 무시 → main push 자동 production deploy silent skip (2026-05-20, cycle 772)
+
+cycle 763~772 (10 PR) 모두 main push 후 production deploy 자동 트리거 X. PR vercel check = `Canceled by Ignored Build Step` (preview ignoreCommand 정상). 단 `vercel ls --prod` 마지막 Ready = cycle 762 retro (a2a73e6) 2h 전. cycle 763 이후 10 retro commit + 9 ship PR 모두 production 미반영 (사용자 가시 X — main push CI green 만 봐선 발견 불가능). cycle 772 IndexNow ping 첫 fire 진단 중 부수 발견.
+
+진단:
+- vercel CLI 가 root `.gitignore` 따르지 않음 → `vercel --prod` 강제 시 1.2GB 업로드 시도 → `File size limit exceeded (100 MB)`
+- `node_modules` / `.next` / `.turbo` / `dist` 명시 제외 `.vercelignore` 박제로 해소
+- 박제 후 `vercel --prod --yes` 정상 deploy (`dpl_35pqXz8sox5WXaYJKDCeUxkQEZYh`)
+
+최소 scope fix (PR #1104):
+- `.vercelignore` 박제 — vercel CLI silent `.gitignore` skip 차단
+- 모든 cycle 763~772 ship 본 deploy 로 일괄 production 반영 확인
+
+root cause 미확정 (24h carry-over): vercel.com dashboard production branch 설정 / webhook / git connection 점검 필요 (사용자 영역, dashboard 접근 본 메인 X). 임시 해소 = `.vercelignore` + 수동 `vercel --prod` 정착.
+
+**교훈**: CI green + PR merge 만으론 production 반영 단정 X. 운영 인프라 (deploy/webhook) 도 silent drift family — vercel deploy 자동 트리거 ↔ git push 사이 단절 가능. 매 cycle N 시점 `vercel ls --prod` 또는 production URL 의 최신 ship 검증 1회 권장. R5 메타 패턴 silent drift family evidence (사례 3/4/6/7/8 운영 코드 silent — 사례 9 = 운영 인프라 silent 확장).
+
 ### 이미 구현된 주요 모듈 (v0.5.49+ 기준, cycle 651 phase)
 
 **AdSense 심사 인프라 (cycle 651 phase, 2026-05-19, PR #934~940)**:
@@ -186,6 +203,13 @@ curl 진단:
 - `apps/moneyball/src/app/{predictions,reviews,dashboard,analysis}/page.tsx` — meta description 100자 미만 → 150자 보강 (SEO)
 - `apps/moneyball/src/components/layout/Footer.tsx` — 리뷰·서비스 컬럼에 "예측 방법론" + "사용 가이드" 진입점 추가
 - `apps/moneyball/src/app/sitemap.ts` — `/methodology` / `/guide` priority 0.6 monthly 추가
+
+**IndexNow 자동 ping 인프라 (cycle 772 phase, 2026-05-20, PR #1103~#1105)**:
+- `apps/moneyball/src/app/api/seo/indexnow/ping/route.ts` — sitemap() 직접 호출 → URL 추출 → IndexNow API POST. CRON_SECRET Bearer auth + urlList 10,000 limit + host 필터 (`https://moneyballscore.vercel.app/*` 만). 5 unit test (auth 부재 401 / 잘못된 secret 401 / INDEXNOW_KEY 부재 503 / 정상 호출 IndexNow API POST + urlCount + keyLocation 검증 / IndexNow 422 → ok=false 정확 반환)
+- `apps/moneyball/src/app/[indexnowKey].txt/route.ts` — root level key file (Bing IndexNow spec `https://<host>/<key>.txt` 권장 path 강제). path segment 가 `INDEXNOW_KEY` env 와 일치할 때만 200 + key body 반환, mismatch → 404 (brute-force 차단). Next.js 16 type generation 이 `[].txt` segment 인식 X → `params: Promise<Record<string,string>>` 시그니처. cycle 772 첫 fire 시 keyLocation 비표준 path (`/api/seo/indexnow/key.txt`) 422 InvalidRequestParameters 응답 → 본 root level dynamic route 로 fix (PR #1105)
+- `.github/workflows/indexnow-ping.yml` — cron `'37 0 * * *'` (KST 09:37) + `workflow_dispatch`. `HTTP_STATUS != 200` 시 `::error::` 명시 (silent skip 차단). sitemap-warmup `'37 * * * *'` 분 정합.
+- `.vercelignore` — vercel CLI 가 root `.gitignore` 무시 silent drift 차단 (드리프트 사례 9 임시 해소). `node_modules` / `.next` / `.turbo` / `dist` 명시 제외.
+- `INDEXNOW_KEY` env — Vercel production + GH secret 양쪽 박제 완료 (사용자 영역). Google IndexNow 미지원 (2026-05 기준) → 별도 sitemap-warmup workflow 유지. Bing / Naver / Yandex / Seznam 동시 색인 신호 가치 + AdSense 심사 phase 보조.
 
 **v0.5.40~41 신규 (2026-05-12)**:
 - `apps/moneyball/src/app/accuracy/page.tsx` — 공개 AI 적중률 대시보드 (캘리브레이션 SVG / 주별 트렌드 / 팀별 성과, cycle 287)
@@ -248,6 +272,7 @@ curl 진단:
   - `cloudflare-worker/` **(2026-04-27 신규)**: Cloudflare Workers 기반 cron + SP 측정. (1) Phase 1 — 기존 daily-pipeline schedule 그대로 옮김 + mode 명시 호출. (2) Phase 2 — 매 trigger 마다 KBO 공식 (`B_PIT_P_NM`) + Naver (`schedule/games?fields=all`) 양쪽 동시 호출 → `sp_confirmation_log` 에 `source='kbo-official'` / `source='naver'` 양쪽 row 적재. 두 소스 비교로 어느 쪽이 먼저 SP 채우는지 정량 측정 (가설: KBO 만 polling 으론 fallback 가치 검증 불가). 1~2주 누적 후 분석 SQL 5개 (README.md Phase 3 섹션) 실행 → cron 횟수 정밀 축소 + Naver fallback 도입 여부 결정. 무료 tier (Workers Free 100k req/day).
   - `.github/workflows/pat-expiry-check.yml` / `vercel-deploy-error-dispatch.yml` — worker-incident dispatch
   - `.github/workflows/submit-lesson.yml` — worker-lesson dispatch. **(2026-04-29 Phase 4a D4)** `lesson:` + `policy:` / `feedback:` / `memory:` 4 prefix 모두 허브 worker-lesson 채널로 dispatch. lesson 외 prefix 는 payload `subtype=self-policy` 표시. develop-cycle skill 의 commit 도 동일 dispatch.
+  - `.github/workflows/indexnow-ping.yml` **(cycle 772, 2026-05-20)** — IndexNow 자동 ping cron `'37 0 * * *'` (KST 09:37) + workflow_dispatch. `/api/seo/indexnow/ping` 호출 → sitemap URL 전부 (현재 ~1500 URL) Bing/Naver/Yandex/Seznam 동시 색인 신호. silent skip 차단 가드 (`HTTP_STATUS != 200` → `::error::`).
   - **폐기 (2026-04-30)**: `.github/workflows/self-develop.yml` + cloudflare worker `dispatchSelfDevelop` 분기. agent-loop 자율 cron 라인 끊고 사용자 직접 호출 `/develop-cycle [N]` skill 로 전환 (위 R6 참조).
 - UI:
   - `apps/moneyball/src/components/predictions/PlaceholderCard.tsx` — **(v0.5.22 신규)** 예측 없는 경기 플레이스홀더. status 분기 (우천취소/진행중/종료/SP 대기/예측 준비중).
