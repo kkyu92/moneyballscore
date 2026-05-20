@@ -168,8 +168,31 @@ export default async function PredictionsPage() {
     recentCorrect += d.correct;
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "KBO 예측 기록",
+    description:
+      "KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색.",
+    url: "https://moneyballscore.vercel.app/predictions",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: dates.length,
+      itemListElement: dates.slice(0, 30).map((d, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `https://moneyballscore.vercel.app/predictions/${d.date}`,
+        name: `${d.date} 예측 ${d.predicted}경기`,
+      })),
+    },
+  };
+
   return (
     <div className="space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb items={[{ label: '예측 기록' }]} />
       <h1 className="text-3xl font-bold">예측 기록</h1>
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>

@@ -68,6 +68,8 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   return (data ?? []) as unknown as VerifiedPredictionRow[];
 }
 
+const SITE_URL = "https://moneyballscore.vercel.app";
+
 export default async function ReviewsPage() {
   const predictions = await getVerifiedPredictions();
   const recentWeeks = getRecentWeeks(4);
@@ -77,8 +79,29 @@ export default async function ReviewsPage() {
   const correct = predictions.filter((p) => p.is_correct).length;
   const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "예측 결과 리뷰",
+    description:
+      "KBO 승부예측 적중 vs 빗나간 결과 리뷰 — 주간·월간·전체 시즌 적중률 추이.",
+    url: `${SITE_URL}/reviews`,
+    mainEntity: {
+      "@type": "Dataset",
+      name: "KBO 승부예측 검증 데이터셋",
+      description: `검증 완료 ${total}건 · 적중 ${correct}건 · 적중률 ${rate}%`,
+      variableMeasured: ["적중", "실패", "신뢰도", "팀별 적중률"],
+      isAccessibleForFree: true,
+      keywords: ["KBO", "승부예측", "적중률", "세이버메트릭스"],
+    },
+  };
+
   return (
     <div className="space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb items={[{ label: '예측 결과 리뷰' }]} />
       <div>
         <h1 className="text-3xl font-bold">예측 결과 리뷰</h1>
