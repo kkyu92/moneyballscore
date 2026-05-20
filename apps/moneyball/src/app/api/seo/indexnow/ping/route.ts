@@ -33,7 +33,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     return Response.json({ error: 'sitemap returned 0 URLs' }, { status: 500 });
   }
 
-  const keyLocation = `https://${HOST}/api/seo/indexnow/key.txt`;
+  const keyLocation = `https://${HOST}/${key}.txt`;
   const body = { host: HOST, key, keyLocation, urlList };
 
   const response = await fetch(INDEXNOW_ENDPOINT, {
@@ -42,11 +42,14 @@ export async function GET(request: NextRequest): Promise<Response> {
     body: JSON.stringify(body),
   });
 
+  const responseBody = await response.text().catch(() => '');
+
   return Response.json({
     ok: response.ok,
     status: response.status,
     urlCount: urlList.length,
     host: HOST,
     timestamp: new Date().toISOString(),
+    indexnowResponse: responseBody.slice(0, 500),
   });
 }
