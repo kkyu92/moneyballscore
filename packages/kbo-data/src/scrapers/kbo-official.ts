@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
-import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
+import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
 
 const DELAY_MS = 2000;
@@ -24,6 +24,7 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
+      'Referer': KBO_SCHEDULE_REFERER,
     },
     body: JSON.stringify({ leId: '1', srId: '0', date: yyyymmdd }),
   });

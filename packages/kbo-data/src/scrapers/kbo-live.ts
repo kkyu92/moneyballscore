@@ -1,5 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_BASE_URL as BASE_URL, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
+import { KBO_BASE_URL as BASE_URL, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 
 export interface LiveGameState {
   externalGameId: string;
@@ -41,7 +41,10 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
 
   const res = await fetch(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Referer': KBO_SCHEDULE_REFERER,
+    },
     body: JSON.stringify({ leId: '1', srId: '0', date: yyyymmdd }),
   });
 
