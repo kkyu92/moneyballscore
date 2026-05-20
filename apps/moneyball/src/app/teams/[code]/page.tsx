@@ -76,20 +76,29 @@ export default async function TeamPage({ params }: PageProps) {
   ]);
   if (!profile) notFound();
 
+  const teamUrl = `${SITE_URL}/teams/${code}`;
+  const logoUrl = `${SITE_URL}/logos/${code}.png`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SportsTeam",
+    "@id": teamUrl,
+    url: teamUrl,
     name: profile.name,
     sport: "Baseball",
+    logo: logoUrl,
+    description: `KBO ${profile.name} 시즌 예측 기록 — 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)}, 적중률 ${fmtPct(profile.accuracyRate)}, 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`.replace(/\s+/g, " ").trim(),
     location: {
       "@type": "Place",
       name: profile.stadium,
     },
     memberOf: {
       "@type": "SportsOrganization",
+      "@id": "https://www.koreabaseball.com",
+      url: "https://www.koreabaseball.com",
       name: "KBO 리그",
+      alternateName: "Korea Baseball Organization",
     },
-    mainEntityOfPage: `${SITE_URL}/teams/${code}`,
+    mainEntityOfPage: teamUrl,
   };
 
   const parkAdvantage =

@@ -72,20 +72,38 @@ export default async function PlayerProfilePage({ params }: PageProps) {
       ? `현재 시즌 ${profile.appearances}경기 선발 등판`
       : "아직 선발 등판 데이터가 없습니다";
 
+  const playerUrl = `${SITE_URL}/players/${playerId}`;
+  const teamUrl = profile.teamCode ? `${SITE_URL}/teams/${profile.teamCode}` : undefined;
+  const jobTitle = profile.position
+    ? profile.position
+    : profile.throws
+      ? `${profile.throws === "L" ? "좌완" : "우완"} 선발 투수`
+      : "선발 투수";
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
+    "@id": playerUrl,
+    url: playerUrl,
     name: profile.nameKo,
     alternateName: profile.nameEn ?? undefined,
-    nationality: "KR",
+    jobTitle,
+    description: `KBO ${profile.teamName ?? ""} 선발 투수 ${profile.nameKo} 프로필 — 평균 FIP ${fmtFip(profile.avgFip)}, 등판 ${profile.appearances}경기, 예측 적중률 ${fmtPct(profile.accuracyRate)}.`.replace(/\s+/g, " ").trim(),
+    nationality: {
+      "@type": "Country",
+      name: "South Korea",
+      identifier: "KR",
+    },
+    knowsLanguage: ["ko-KR"],
     memberOf: profile.teamName
       ? {
           "@type": "SportsTeam",
+          "@id": teamUrl,
+          url: teamUrl,
           name: profile.teamName,
           sport: "Baseball",
         }
       : undefined,
-    mainEntityOfPage: `${SITE_URL}/players/${playerId}`,
+    mainEntityOfPage: playerUrl,
   };
 
   return (
