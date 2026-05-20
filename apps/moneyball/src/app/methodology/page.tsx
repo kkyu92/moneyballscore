@@ -2,6 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { TableOfContents } from "@/components/shared/TableOfContents";
+
+const TOC_ITEMS = [
+  { id: "principles", label: "핵심 원칙" },
+  { id: "data-sources", label: "데이터 소스" },
+  { id: "weights", label: "10팩터 가중치" },
+  { id: "agents", label: "AI 에이전트" },
+  { id: "verification", label: "검증 방법" },
+  { id: "history", label: "모델 진화" },
+  { id: "limits", label: "한계 + 면책" },
+];
 
 export const metadata: Metadata = {
   title: "예측 방법론",
@@ -165,7 +176,9 @@ export default function MethodologyPage() {
         </p>
       </header>
 
-      <section className="space-y-4">
+      <TableOfContents items={TOC_ITEMS} />
+
+      <section id="principles" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           1. 핵심 원칙 3가지
         </h2>
@@ -194,7 +207,7 @@ export default function MethodologyPage() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section id="data-sources" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           2. 데이터 소스 3종
         </h2>
@@ -260,7 +273,7 @@ export default function MethodologyPage() {
         </p>
       </section>
 
-      <section className="space-y-4">
+      <section id="weights" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           3. 10팩터 가중합산 (v1.8)
         </h2>
@@ -305,7 +318,7 @@ export default function MethodologyPage() {
         </p>
       </section>
 
-      <section className="space-y-4">
+      <section id="agents" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           4. AI 에이전트 토론
         </h2>
@@ -343,7 +356,7 @@ export default function MethodologyPage() {
         </p>
       </section>
 
-      <section className="space-y-4">
+      <section id="verification" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           5. 검증 방법
         </h2>
@@ -380,7 +393,7 @@ export default function MethodologyPage() {
         </p>
       </section>
 
-      <section className="space-y-4">
+      <section id="history" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           6. 모델 진화 History
         </h2>
@@ -407,7 +420,7 @@ export default function MethodologyPage() {
         </ul>
       </section>
 
-      <section className="space-y-4">
+      <section id="limits" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           7. 한계 + 면책
         </h2>

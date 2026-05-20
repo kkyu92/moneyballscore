@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { TableOfContents } from "@/components/shared/TableOfContents";
+
+const TOC_ITEMS = [
+  { id: "cards", label: "예측 카드 해석" },
+  { id: "charts", label: "적중률 차트" },
+  { id: "picks", label: "픽 기록 시작" },
+  { id: "pages", label: "페이지별 활용" },
+];
 
 export const metadata: Metadata = {
   title: "사용 가이드",
@@ -60,7 +68,9 @@ export default function GuidePage() {
         </p>
       </header>
 
-      <section className="space-y-4">
+      <TableOfContents items={TOC_ITEMS} />
+
+      <section id="cards" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           1. 예측 카드 해석법
         </h2>
@@ -109,7 +119,7 @@ export default function GuidePage() {
         </ul>
       </section>
 
-      <section className="space-y-4">
+      <section id="charts" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           2. 적중률 차트 읽는 법
         </h2>
@@ -155,7 +165,7 @@ export default function GuidePage() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section id="picks" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           3. 픽 기록 시작하기
         </h2>
@@ -197,7 +207,7 @@ export default function GuidePage() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section id="pages" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
           4. 페이지별 활용 방법
         </h2>
