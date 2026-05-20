@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DEFAULT_WEIGHTS } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import { TableOfContents } from '@/components/shared/TableOfContents';
 import {
   GlossaryCategoryFilter,
   type GlossaryCategorySlug,
@@ -390,6 +391,11 @@ export default function GlossaryPage() {
         </p>
       </header>
 
+      <TableOfContents
+        title="카테고리 이동"
+        items={CATEGORIES.map((c) => ({ id: `cat-${c.slug}`, label: c.title }))}
+      />
+
       <nav
         aria-label="용어 빠른 이동"
         className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4"
@@ -416,8 +422,9 @@ export default function GlossaryPage() {
       {CATEGORIES.map((category) => (
         <section
           key={category.slug}
+          id={`cat-${category.slug}`}
           data-glossary-category={category.slug}
-          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4"
+          className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4"
         >
           <div>
             <h2 className="text-xl font-bold">{category.title}</h2>

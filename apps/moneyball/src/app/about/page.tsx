@@ -2,6 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { TableOfContents } from "@/components/shared/TableOfContents";
+
+const TOC_ITEMS = [
+  { id: "model", label: "예측 모델" },
+  { id: "agents", label: "AI 에이전트 토론" },
+  { id: "data-sources", label: "데이터 소스" },
+  { id: "faq-title", label: "FAQ" },
+  { id: "schedule", label: "업데이트 주기" },
+];
 
 export const metadata: Metadata = {
   title: "소개",
@@ -205,7 +214,9 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
+      <TableOfContents items={TOC_ITEMS} />
+
+      <section id="model" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-xl font-bold">예측 모델</h2>
           <div className="flex items-center gap-2">
@@ -290,7 +301,7 @@ export default function AboutPage() {
         )}
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
+      <section id="agents" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">AI 에이전트 토론</h2>
           <span className="text-xs px-2 py-1 bg-accent/20 text-accent rounded-full font-medium">
@@ -320,7 +331,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+      <section id="data-sources" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-xl font-bold mb-4">데이터 소스</h2>
         <div className="space-y-3">
           {DATA_SOURCES.map((source) => (
@@ -338,7 +349,7 @@ export default function AboutPage() {
 
       <section
         aria-labelledby="faq-title"
-        className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6"
+        className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6"
       >
         <h2 id="faq-title" className="text-xl font-bold mb-4">
           자주 묻는 질문 (FAQ)
@@ -363,7 +374,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+      <section id="schedule" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-xl font-bold mb-3">업데이트 주기</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-surface rounded-lg">

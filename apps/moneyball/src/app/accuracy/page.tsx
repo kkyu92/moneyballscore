@@ -4,6 +4,17 @@ import { buildAllTeamAccuracy, buildMatchupData } from '@/lib/standings/buildTea
 import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
 import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import { TableOfContents } from '@/components/shared/TableOfContents';
+
+const TOC_ITEMS = [
+  { id: 'calibration', label: '캘리브레이션' },
+  { id: 'weekly', label: '주별 트렌드' },
+  { id: 'weekday', label: '요일별' },
+  { id: 'confidence', label: 'AI 확신도' },
+  { id: 'versions', label: '모델 버전별' },
+  { id: 'teams', label: '팀별 성과' },
+  { id: 'matchup', label: '상대 강약' },
+];
 import {
   assertSelectOk,
   shortTeamName,
@@ -276,6 +287,8 @@ export default async function AccuracyPage() {
         )}
       </header>
 
+      <TableOfContents items={TOC_ITEMS} />
+
       {/* 주요 지표 카드 */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="검증 완료" value={n.toString()} sub="경기" />
@@ -459,7 +472,7 @@ export default async function AccuracyPage() {
       )}
 
       {/* 캘리브레이션 다이어그램 */}
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+      <section id="calibration" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
         <div>
           <h2 className="text-lg font-bold">신뢰도 vs 실제 적중률</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -478,7 +491,7 @@ export default async function AccuracyPage() {
 
       {/* 주별 트렌드 */}
       {weekly.length > 0 && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+        <section id="weekly" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <h2 className="text-lg font-bold">주별 적중률 트렌드</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -516,7 +529,7 @@ export default async function AccuracyPage() {
 
       {/* 요일별 적중률 */}
       {dow.some((d) => d.n > 0) && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+        <section id="weekday" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div>
             <h2 className="text-lg font-bold">요일별 적중률</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -600,7 +613,7 @@ export default async function AccuracyPage() {
 
       {/* AI 확신도별 분석 */}
       {n >= 5 && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+        <section id="confidence" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
           <div>
             <h2 className="text-lg font-bold">AI 확신도별 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -676,7 +689,7 @@ export default async function AccuracyPage() {
 
       {/* AI 모델 버전별 성과 */}
       {versionHistory.some((v) => v.n > 0) && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+        <section id="versions" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div>
             <h2 className="text-lg font-bold">AI 모델 버전별 성과</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -694,7 +707,7 @@ export default async function AccuracyPage() {
 
       {/* 팀별 성과 */}
       {teamRows.length > 0 && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+        <section id="teams" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div>
             <h2 className="text-lg font-bold">팀별 예측 성과</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -762,7 +775,7 @@ export default async function AccuracyPage() {
 
       {/* 상대팀별 AI 강약 분석 */}
       {matchupData.matchups.length > 0 && (
-        <section id="matchup" className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+        <section id="matchup" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
           <div>
             <h2 className="text-lg font-bold">팀별 상대 강약 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
