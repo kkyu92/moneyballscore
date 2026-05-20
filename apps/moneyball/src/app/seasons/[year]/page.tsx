@@ -5,6 +5,7 @@ import { shortTeamName } from "@moneyball/shared";
 import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { SeasonStandingsSortControl } from "@/components/seasons/SeasonStandingsSortControl";
 
 // 진행 중인 시즌은 경기가 매일 추가되므로 10분마다 최신화, 종료 시즌은 1시간.
 // Next.js ISR 은 path별 다른 revalidate 를 동적으로 주지 못해 10분 (진행 시즌 기준)
@@ -150,46 +151,70 @@ export default async function SeasonPage({ params }: PageProps) {
 
       {/* 팀 순위 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
-        <h2 className="text-lg font-bold">{summary.isOngoing ? "현재 순위" : "팀 순위"} — 승률</h2>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[var(--color-border)]">
-              <th className="py-2 pr-2 font-medium text-center w-8">#</th>
-              <th className="py-2 pr-3 font-medium">팀</th>
-              <th className="py-2 pr-3 font-medium text-right">경기</th>
-              <th className="py-2 pr-3 font-medium text-right">승</th>
-              <th className="py-2 pr-3 font-medium text-right">패</th>
-              <th className="py-2 pr-3 font-medium text-right">무</th>
-              <th className="py-2 pr-3 font-medium text-right">승률</th>
-              <th className="py-2 pr-3 font-medium text-right">득점</th>
-              <th className="py-2 pr-3 font-medium text-right">실점</th>
-              <th className="py-2 font-medium text-right">득실</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summary.teams.map((t, idx) => (
-              <tr key={t.code} className="border-b border-gray-100 dark:border-[var(--color-border)]">
-                <td className="py-2 text-center text-gray-400 dark:text-gray-500 font-mono">{idx + 1}</td>
-                <td className="py-2 pr-3">
-                  <Link href={`/teams/${t.code}`} className="flex items-center gap-2 hover:underline">
-                    <TeamLogo team={t.code} size={24} />
-                    <span className="font-medium">{shortTeamName(t.code) ?? t.name}</span>
-                  </Link>
-                </td>
-                <td className="py-2 pr-3 text-right font-mono">{t.games}</td>
-                <td className="py-2 pr-3 text-right font-mono">{t.wins}</td>
-                <td className="py-2 pr-3 text-right font-mono">{t.losses}</td>
-                <td className="py-2 pr-3 text-right font-mono text-gray-500 dark:text-gray-400">{t.draws}</td>
-                <td className="py-2 pr-3 text-right font-mono font-semibold">{fmtPct(t.winPct, 3)}</td>
-                <td className="py-2 pr-3 text-right font-mono">{t.runsScored}</td>
-                <td className="py-2 pr-3 text-right font-mono">{t.runsAllowed}</td>
-                <td className={`py-2 text-right font-mono ${t.runDiff > 0 ? "text-brand-600 dark:text-brand-400" : t.runDiff < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
-                  {t.runDiff > 0 ? "+" : ""}{t.runDiff}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-bold">{summary.isOngoing ? "현재 순위" : "팀 순위"}</h2>
+          {summary.teams.length >= 5 && <SeasonStandingsSortControl />}
+        </div>
+        {(() => {
+          const runDiffRankMap = new Map<string, number>();
+          [...summary.teams]
+            .sort((a, b) => b.runDiff - a.runDiff)
+            .forEach((t, i) => runDiffRankMap.set(t.code, i));
+          const sampleRankMap = new Map<string, number>();
+          [...summary.teams]
+            .sort((a, b) => b.games - a.games)
+            .forEach((t, i) => sampleRankMap.set(t.code, i));
+          return (
+            <div className="overflow-x-auto">
+              <div className="min-w-[640px]">
+                <div className="grid grid-cols-[2.5rem_1fr_3rem_3rem_3rem_3rem_4rem_3.5rem_3.5rem_3.5rem] text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[var(--color-border)] py-2 pr-1">
+                  <span className="text-center font-medium">#</span>
+                  <span className="font-medium">팀</span>
+                  <span className="text-right font-medium">경기</span>
+                  <span className="text-right font-medium">승</span>
+                  <span className="text-right font-medium">패</span>
+                  <span className="text-right font-medium">무</span>
+                  <span className="text-right font-medium">승률</span>
+                  <span className="text-right font-medium">득점</span>
+                  <span className="text-right font-medium">실점</span>
+                  <span className="text-right font-medium">득실</span>
+                </div>
+                <div data-season-standings-list>
+                  {summary.teams.map((t, idx) => {
+                    const runDiffRank = runDiffRankMap.get(t.code);
+                    const sampleRank = sampleRankMap.get(t.code);
+                    return (
+                      <div
+                        key={t.code}
+                        data-rundiff-rank={runDiffRank}
+                        data-sample-rank={sampleRank}
+                        className="grid grid-cols-[2.5rem_1fr_3rem_3rem_3rem_3rem_4rem_3.5rem_3.5rem_3.5rem] items-center border-b border-gray-100 dark:border-[var(--color-border)] py-2 pr-1 text-sm"
+                      >
+                        <span className="text-center text-gray-400 dark:text-gray-500 font-mono">{idx + 1}</span>
+                        <span className="pr-3">
+                          <Link href={`/teams/${t.code}`} className="flex items-center gap-2 hover:underline">
+                            <TeamLogo team={t.code} size={24} />
+                            <span className="font-medium">{shortTeamName(t.code) ?? t.name}</span>
+                          </Link>
+                        </span>
+                        <span className="text-right font-mono">{t.games}</span>
+                        <span className="text-right font-mono">{t.wins}</span>
+                        <span className="text-right font-mono">{t.losses}</span>
+                        <span className="text-right font-mono text-gray-500 dark:text-gray-400">{t.draws}</span>
+                        <span className="text-right font-mono font-semibold">{fmtPct(t.winPct, 3)}</span>
+                        <span className="text-right font-mono">{t.runsScored}</span>
+                        <span className="text-right font-mono">{t.runsAllowed}</span>
+                        <span className={`text-right font-mono ${t.runDiff > 0 ? "text-brand-600 dark:text-brand-400" : t.runDiff < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
+                          {t.runDiff > 0 ? "+" : ""}{t.runDiff}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       {/* 월별 득점 추이 */}
