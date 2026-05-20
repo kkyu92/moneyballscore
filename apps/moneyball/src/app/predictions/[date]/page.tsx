@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { AnalysisLink } from "@/components/shared/AnalysisLink";
@@ -525,9 +526,11 @@ export default async function PredictionDatePage({ params }: Props) {
           })}
         </div>
       ) : (
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-8 text-center text-gray-400 dark:text-gray-500">
-          <p className="text-lg">{date}의 예측 데이터가 없습니다.</p>
-        </div>
+        <EmptyState
+          icon="⚾"
+          title={`${date}의 예측 데이터가 없습니다.`}
+          description="해당 날짜의 KBO 경기 편성이 없거나 아직 예측이 생성되지 않았습니다."
+        />
       )}
 
       {predicted.length > 0 && (

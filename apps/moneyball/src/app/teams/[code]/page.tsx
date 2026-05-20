@@ -9,6 +9,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { TeamEloChart } from "@/components/teams/TeamEloChart";
 import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export const revalidate = 1800;
 
@@ -410,15 +411,12 @@ export default async function TeamPage({ params }: PageProps) {
       })()}
 
       {profile.predictedGames === 0 && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
-          <span className="text-5xl block mb-4">⚾</span>
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
-            {profile.shortName}의 예측 기록이 아직 없습니다
-          </p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-            시즌 경기가 진행되면 자동으로 집계됩니다.
-          </p>
-        </section>
+        <EmptyState
+          size="lg"
+          icon="⚾"
+          title={`${profile.shortName}의 예측 기록이 아직 없습니다`}
+          description="시즌 경기가 진행되면 자동으로 집계됩니다."
+        />
       )}
     </article>
   );
