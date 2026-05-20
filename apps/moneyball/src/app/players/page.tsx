@@ -34,14 +34,66 @@ function fmtWar(v: number): string {
 
 const SMALL_SAMPLE_N = 5;
 
+const SITE_URL = "https://moneyballscore.vercel.app";
+
 export default async function PlayersIndexPage() {
   const [pitchers, batters] = await Promise.all([
     buildPitcherLeaderboard({ limit: 10, minAppearances: 1 }),
     buildBatterLeaderboard({ limit: 10 }),
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "KBO 선수 리더보드",
+    description:
+      "KBO 주요 선수 성과 리더보드 — 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR).",
+    url: `${SITE_URL}/players`,
+    mainEntity: [
+      {
+        "@type": "ItemList",
+        name: `선발 투수 Top ${pitchers.length}`,
+        numberOfItems: pitchers.length,
+        itemListElement: pitchers.map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `${SITE_URL}/players/${p.playerId}`,
+          item: {
+            "@type": "Person",
+            name: p.nameKo,
+            jobTitle: "투수",
+            affiliation: p.teamName
+              ? { "@type": "SportsTeam", name: p.teamName }
+              : undefined,
+          },
+        })),
+      },
+      {
+        "@type": "ItemList",
+        name: `타자 Top ${batters.length}`,
+        numberOfItems: batters.length,
+        itemListElement: batters.map((b, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: {
+            "@type": "Person",
+            name: b.nameKo,
+            jobTitle: b.position ?? "야수",
+            affiliation: b.teamName
+              ? { "@type": "SportsTeam", name: b.teamName }
+              : undefined,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb items={[{ label: '선수 리더보드' }]} />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">선수 리더보드</h1>

@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
+const SITE_URL = "https://moneyballscore.vercel.app";
+
 export default async function LeaderboardPage() {
   const [weeklyEntries, seasonEntries, weeklyAi, seasonAi] = await Promise.all([
     fetchLeaderboard('weekly'),
@@ -24,8 +26,43 @@ export default async function LeaderboardPage() {
     fetchAiBaseline('season'),
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "픽 리더보드",
+    description:
+      "KBO 승부예측 픽 적중률 순위 — 주간·시즌 리더보드 + AI 모델 baseline 대결.",
+    url: `${SITE_URL}/leaderboard`,
+    mainEntity: [
+      {
+        "@type": "ItemList",
+        name: "주간 리더보드",
+        numberOfItems: weeklyEntries.length,
+        itemListElement: weeklyEntries.slice(0, 10).map((e, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: e.nickname ?? `참가자 ${i + 1}`,
+        })),
+      },
+      {
+        "@type": "ItemList",
+        name: "시즌 리더보드",
+        numberOfItems: seasonEntries.length,
+        itemListElement: seasonEntries.slice(0, 10).map((e, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: e.nickname ?? `참가자 ${i + 1}`,
+        })),
+      },
+    ],
+  };
+
   return (
     <main className="max-w-2xl mx-auto px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb items={[{ label: '픽 리더보드' }]} />
       <h1 className="text-2xl font-bold mb-2 mt-4">픽 리더보드</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">

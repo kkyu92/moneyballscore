@@ -24,9 +24,43 @@ const TEAM_ORDER: TeamCode[] = [
   "WO",
 ];
 
+const SITE_URL = "https://moneyballscore.vercel.app";
+
 export default function TeamsIndexPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "KBO 팀 프로필",
+    description:
+      "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
+    url: `${SITE_URL}/teams`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: TEAM_ORDER.length,
+      itemListElement: TEAM_ORDER.map((code, i) => {
+        const team = KBO_TEAMS[code];
+        return {
+          "@type": "ListItem",
+          position: i + 1,
+          url: `${SITE_URL}/teams/${code}`,
+          item: {
+            "@type": "SportsTeam",
+            name: team.name,
+            sport: "Baseball",
+            location: { "@type": "Place", name: team.stadium },
+            memberOf: { "@type": "SportsOrganization", name: "KBO 리그" },
+          },
+        };
+      }),
+    },
+  };
+
   return (
     <div className="space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb items={[{ label: '팀 프로필' }]} />
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">팀 프로필</h1>
