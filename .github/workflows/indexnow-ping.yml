@@ -1,0 +1,45 @@
+name: indexnow-ping
+
+# IndexNow API ping — Bing / Naver / Yandex / Seznam 동시 색인 신호.
+# /api/seo/indexnow/ping endpoint 가 sitemap.xml URL 전부를 매일 1회 ping.
+# Google 은 IndexNow 미지원 (2026-05 기준) → 별도 sitemap-warmup 워크플로우 유지.
+#
+# cron schedule = '37 0 * * *' (매일 UTC 00:37 = KST 09:37)
+# - sitemap-warmup '37 * * * *' 패턴 정합 (분 동일)
+# - announce cron UTC 00:00 직후 → 오늘 경기 SP 확정 전 가장 신선한 sitemap 상태
+# - GH Actions schedule 신뢰성 부족 (cycle 27 박제 41% skip) → 향후 Cloudflare Worker 이관 후보
+
+on:
+  schedule:
+    - cron: '37 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: indexnow-ping
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Trigger IndexNow ping
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -e
+          URL="https://moneyballscore.vercel.app/api/seo/indexnow/ping"
+          echo "Pinging $URL"
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -A "moneyball-indexnow/1.0" \
+            --max-time 60 \
+            "$URL")
+          STATUS=$(echo "$RESPONSE" | tail -n1 | sed 's/HTTP_STATUS://')
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          echo "status=$STATUS"
+          echo "body=$BODY"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::IndexNow ping failed with HTTP $STATUS"
+            exit 1
+          fi
