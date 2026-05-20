@@ -8,6 +8,12 @@ export const KBO_BASE_URL = 'https://www.koreabaseball.com';
 // naver-record 는 모바일 페이지 차단 회피용 Mozilla UA + Referer 조합이라 별개 유지.
 export const KBO_USER_AGENT = 'MoneyBall/1.0 (KBO Prediction Engine)';
 
+// /ws/Main.asmx 엔드포인트 봇 차단 회피용 Referer — 2026-05-20 KBO 측이
+// /ws/Main.asmx/GetKboGameList Referer 없는 요청 응답을 KBO 메인 HTML
+// (IE conditional comment) 로 리턴하도록 변경. Referer 동봉 시만 정상 JSON,
+// UA 단독은 불충분. fetchGames / fetchLiveGames 공유.
+export const KBO_SCHEDULE_REFERER = 'https://www.koreabaseball.com/Schedule/Schedule.aspx';
+
 // KBO API 응답 sanitize — kbo-live / kbo-official 공유.
 // KBO API 가 가끔 JSON body 뒤에 HTML 에러 페이지를 concat 해서 리턴 (응답 자체는 200).
 // 첫 '}<' 패턴까지 자르면 안전한 JSON 만 추출. 패턴 부재 시 원본 그대로.

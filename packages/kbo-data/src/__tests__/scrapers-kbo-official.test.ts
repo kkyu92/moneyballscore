@@ -25,6 +25,26 @@ describe('fetchGames — status 파싱 regression 보호 (PLAN_v5 Phase 4)', () 
     vi.restoreAllMocks();
   });
 
+  describe('Referer 헤더 회귀 보호 (cycle 769, 2026-05-20 KBO 봇 차단)', () => {
+    it('GetKboGameList POST 시 Referer 헤더 = Schedule.aspx 동봉', async () => {
+      const fetchSpy = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => JSON.stringify(weekendMixed),
+      } as unknown as Response);
+      globalThis.fetch = fetchSpy;
+
+      await fetchGames('2026-05-20');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      const [, init] = fetchSpy.mock.calls[0];
+      expect(init?.headers).toMatchObject({
+        'Referer': 'https://www.koreabaseball.com/Schedule/Schedule.aspx',
+      });
+    });
+  });
+
   describe('weekend-mixed: 14:00/14:00/17:00/18:30/18:30 혼재', () => {
     it('5경기 전부 파싱', async () => {
       mockKboApi(weekendMixed);
