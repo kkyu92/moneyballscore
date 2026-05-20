@@ -1,5 +1,10 @@
+import Link from "next/link";
 import { DEFAULT_WEIGHTS, shortTeamName, type TeamCode } from "@moneyball/shared";
-import { FACTOR_LABELS, FACTOR_TIPS } from "@/lib/predictions/factorLabels";
+import {
+  FACTOR_GLOSSARY_ANCHORS,
+  FACTOR_LABELS,
+  FACTOR_TIPS,
+} from "@/lib/predictions/factorLabels";
 
 interface FactorDetails {
   homeSPFip?: number;
@@ -122,12 +127,22 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
           return (
             <div key={key} className="flex items-center gap-2">
               <div className="w-20 shrink-0 text-right">
-                <span
-                  className="text-sm text-gray-600 dark:text-gray-300 cursor-help"
-                  title={FACTOR_TIPS[key] || ''}
-                >
-                  {FACTOR_LABELS[key] || key}
-                </span>
+                {FACTOR_GLOSSARY_ANCHORS[key] ? (
+                  <Link
+                    href={`/glossary#${FACTOR_GLOSSARY_ANCHORS[key]}`}
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-brand-500 hover:underline underline-offset-2"
+                    title={FACTOR_TIPS[key] || ''}
+                  >
+                    {FACTOR_LABELS[key] || key}
+                  </Link>
+                ) : (
+                  <span
+                    className="text-sm text-gray-600 dark:text-gray-300 cursor-help"
+                    title={FACTOR_TIPS[key] || ''}
+                  >
+                    {FACTOR_LABELS[key] || key}
+                  </span>
+                )}
                 {statLabel && (
                   <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
                     {statLabel}
