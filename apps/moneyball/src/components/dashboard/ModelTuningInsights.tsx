@@ -69,7 +69,7 @@ export function ModelTuningInsights({ report }: Props) {
             {rows.map((s) => {
               const corrColor =
                 s.correlation >= 0.2
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-brand-600 dark:text-brand-400"
                   : s.correlation <= -0.1
                     ? "text-red-600 dark:text-red-400"
                     : "text-gray-500 dark:text-gray-400";
@@ -125,7 +125,7 @@ export function ModelTuningInsights({ report }: Props) {
                           <span
                             className={`ml-1 text-[10px] ${
                               deltaPp > 0
-                                ? "text-emerald-600 dark:text-emerald-400"
+                                ? "text-brand-600 dark:text-brand-400"
                                 : "text-red-600 dark:text-red-400"
                             }`}
                           >
