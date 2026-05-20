@@ -2,6 +2,7 @@ import type {
   GameResult,
   TeamRecentForm,
 } from "@/lib/teams/buildTeamRecentForm";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface Props {
   teamA: { shortName: string };
@@ -18,9 +19,7 @@ const RESULT_CLASS: Record<GameResult, string> = {
 
 function ResultBoxes({ results }: { results: GameResult[] }) {
   if (results.length === 0) {
-    return (
-      <span className="text-xs text-gray-400 dark:text-gray-500">기록 없음</span>
-    );
+    return <EmptyState size="inline" title="기록 없음" />;
   }
   return (
     <div className="flex gap-1">

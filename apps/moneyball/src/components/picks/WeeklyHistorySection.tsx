@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { WeeklyGroup, PickEntry } from '@/lib/picks/buildPicksStats';
 import { WeeklyHistorySortControl } from './WeeklyHistorySortControl';
+import { EmptyState } from '@/components/shared/EmptyState';
 
 function PastPickRow({ entry }: { entry: PickEntry }) {
   const dateStr = entry.game_date.slice(5); // "MM-DD"
@@ -99,7 +100,9 @@ export function WeeklyHistorySection({ groups }: Props) {
             {isOpen && (
               <div className="px-4 pb-3 border-t border-gray-100 dark:border-[var(--color-border)]">
                 {entries.length === 0 ? (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 py-2">픽 기록 없음</p>
+                  <div className="py-2">
+                    <EmptyState size="inline" title="픽 기록 없음" />
+                  </div>
                 ) : (
                   entries.map((entry) => (
                     <PastPickRow key={entry.gameId} entry={entry} />

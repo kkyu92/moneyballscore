@@ -15,6 +15,7 @@ import { PredictionsTierFilter } from "@/components/predictions/PredictionsTierF
 import { PredictionsMonthFilter } from "@/components/predictions/PredictionsMonthFilter";
 import { PredictionsSearchBox } from "@/components/predictions/PredictionsSearchBox";
 import { AccuracyHeaderCard } from "@/components/predictions/AccuracyHeaderCard";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -293,12 +294,10 @@ export default async function PredictionsPage() {
           })}
         </div>
       ) : (
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-8 text-center text-gray-400 dark:text-gray-500">
-          <p className="text-lg">예측 기록이 아직 없습니다.</p>
-          <p className="text-sm mt-2">
-            파이프라인이 실행되면 자동으로 데이터가 채워집니다.
-          </p>
-        </div>
+        <EmptyState
+          title="예측 기록이 아직 없습니다."
+          description="파이프라인이 실행되면 자동으로 데이터가 채워집니다."
+        />
       )}
     </div>
   );
