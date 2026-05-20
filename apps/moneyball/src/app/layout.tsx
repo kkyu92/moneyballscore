@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -71,6 +71,14 @@ export const metadata: Metadata = {
       "application/rss+xml": "https://moneyballscore.vercel.app/feed",
     },
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#2d6b3f" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a1f12" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({
