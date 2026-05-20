@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { CookieConsent } from "@/components/layout/CookieConsent";
+import { WebVitalsReporter } from "@/components/shared/WebVitalsReporter";
 
 const GA_ID = "G-2886XKWG4Y";
 
@@ -146,6 +147,7 @@ export default function RootLayout({
         <Analytics />
         <SpeedInsights />
         <GoogleAnalytics gaId={GA_ID} />
+        <WebVitalsReporter />
       </body>
     </html>
   );
