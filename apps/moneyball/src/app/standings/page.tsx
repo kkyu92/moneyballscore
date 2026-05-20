@@ -130,7 +130,7 @@ export default async function StandingsPage() {
                       key={row.teamCode}
                       className={`transition-colors hover:bg-gray-50 dark:hover:bg-[var(--color-surface-card)]/30 ${
                         isTop3
-                          ? "bg-green-50/40 dark:bg-green-900/10"
+                          ? "bg-brand-50/40 dark:bg-brand-900/10"
                           : isLast
                           ? "bg-red-50/30 dark:bg-red-900/10"
                           : ""
