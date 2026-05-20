@@ -216,6 +216,12 @@ root cause 미확정 (24h carry-over): vercel.com dashboard production branch �
 - `apps/moneyball/src/app/twitter-image.tsx` — opengraph-image.tsx re-export (DRY). Twitter card=summary_large_image 대응 image 박제.
 - 직전 OG image coverage = `predictions/[date]` / `analysis/game/[id]` 2 동적 라우트 only → 루트 + 정적 hub 라우트는 plain text 폴백 (소셜 공유 시 rich preview 미노출). 본 phase 가 전역 default 박제로 silent drift 해소.
 
+**PWA manifest + 아이콘 박제 (cycle 781 phase, 2026-05-20, PR #1113)**:
+- `apps/moneyball/src/app/manifest.ts` — Next.js 16 File Convention `MetadataRoute.Manifest` 자동 생성 (`/manifest.webmanifest`). name="MoneyBall Score - 세이버메트릭스 KBO 승부예측" + short_name="MoneyBall" + description (wOBA/FIP/WAR + AI 토론 + 10팩터) + start_url="/" + scope="/" + display="standalone" + orientation="portrait" + background_color="#0a1f12" + theme_color="#2d6b3f" (DESIGN.md brand-500/900 token 정합) + lang="ko-KR" + categories=["sports","news","entertainment"]. 아이콘 3종 등록 — `/icon/192` (any 192x192) + `/icon/512` (any 512x512) + `/icon/512-maskable` (maskable 512x512 — Android safe area 18% 패딩).
+- `apps/moneyball/src/app/icon.tsx` — Next.js 16 multi-size File Convention. `generateImageMetadata()` 로 3 variant 자동 생성 (192/512/512-maskable). ImageResponse 기반 PNG — 다크 그린 gradient (`#0a1f12 → #1a3d24 → #2d6b3f` 135deg DESIGN.md brand 정합) + 흰색 "MB" 텍스트 (fontWeight=900 / letterSpacing=-0.04em / system-ui). maskable 패딩 = `width * 0.18` (Android safe area spec).
+- `apps/moneyball/src/app/apple-icon.tsx` — Next.js 16 File Convention. 180x180 ImageResponse (Apple touch icon spec) — icon.tsx 동일 gradient + "MB" 텍스트 (fontSize=82px hardcode 180 px 정합). iOS home screen install 대응.
+- 직전 PWA coverage = 0 (manifest 부재 + 아이콘 부재). 본 phase 가 모바일 install prompt 활성 (Android `beforeinstallprompt` + iOS Safari "홈 화면에 추가") + Lighthouse PWA score 0→9+ 잠재 + theme-color 모바일 browser chrome 브랜드 컬러 노출.
+
 **v0.5.40~41 신규 (2026-05-12)**:
 - `apps/moneyball/src/app/accuracy/page.tsx` — 공개 AI 적중률 대시보드 (캘리브레이션 SVG / 주별 트렌드 / 팀별 성과, cycle 287)
 - 누적 검증 124건 (n=119→124, cycle 775 측정 시점 +5건 모두 v1.8). v2.0 임계 n=150 까지 26건.
