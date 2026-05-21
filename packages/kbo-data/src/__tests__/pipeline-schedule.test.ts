@@ -143,6 +143,59 @@ describe('shouldPredictGame', () => {
       expect(result.reason).toBe('window_too_early');
     });
   });
+
+  // 사례 11 (2026-05-20 SKvWO silent drift family) — predict mode 3회 fallback fail
+  // 후 predict_final 시점엔 모든 18:30 KST 경기 window_too_late 라 마지막 기회 누락.
+  // allowLateWindow=true (predict_final mode 한정) 시 game 시작 후 라도 후보 포함.
+  describe('allowLateWindow (predict_final mode 마지막 기회 박제)', () => {
+    it('default (allowLateWindow=false) 시 시작 후 1h 경기는 window_too_late', () => {
+      const game = makeGame({ gameTime: '14:00' });
+      const result = shouldPredictGame(game, emptySet, 1, KST_1900);
+      expect(result.reason).toBe('window_too_late');
+    });
+
+    it('allowLateWindow=true + status=scheduled 시 시작 후 라도 ok', () => {
+      // 14:00 경기를 19:00 (시작 5h 이후) 시점에 평가하지만 KBO API 가
+      // 아직 status=scheduled 인 케이스 — 매우 드문 race 상황. 그래도
+      // predict_final 마지막 기회는 박제 시도.
+      const game = makeGame({ gameTime: '14:00', status: 'scheduled' });
+      const result = shouldPredictGame(game, emptySet, 1, KST_1900, 3, true);
+      expect(result.shouldPredict).toBe(true);
+      expect(result.reason).toBe('ok');
+    });
+
+    it('allowLateWindow=true 라도 status=live 는 not_scheduled', () => {
+      const game = makeGame({ gameTime: '14:00', status: 'live' });
+      const result = shouldPredictGame(game, emptySet, 1, KST_1900, 3, true);
+      expect(result.shouldPredict).toBe(false);
+      expect(result.reason).toBe('not_scheduled');
+    });
+
+    it('allowLateWindow=true 라도 status=final 는 not_scheduled', () => {
+      const game = makeGame({ gameTime: '14:00', status: 'final' });
+      const result = shouldPredictGame(game, emptySet, 1, KST_1900, 3, true);
+      expect(result.reason).toBe('not_scheduled');
+    });
+
+    it('allowLateWindow=true 라도 SP 미확정은 sp_unconfirmed', () => {
+      const game = makeGame({ gameTime: '14:00', homeSP: undefined });
+      const result = shouldPredictGame(game, emptySet, 1, KST_1900, 3, true);
+      expect(result.reason).toBe('sp_unconfirmed');
+    });
+
+    it('allowLateWindow=true 라도 already_predicted 우선', () => {
+      const game = makeGame({ gameTime: '14:00' });
+      const existing = new Set<number>([1]);
+      const result = shouldPredictGame(game, existing, 1, KST_1900, 3, true);
+      expect(result.reason).toBe('already_predicted');
+    });
+
+    it('allowLateWindow=true 라도 window_too_early 우선', () => {
+      const game = makeGame({ gameTime: '18:30' });
+      const result = shouldPredictGame(game, emptySet, 1, KST_1000, 3, true);
+      expect(result.reason).toBe('window_too_early');
+    });
+  });
 });
 
 describe('estimateNotificationTime', () => {
