@@ -59,6 +59,9 @@ export function PredictionCard({
 }: PredictionCardProps) {
   const isLive = status === 'live';
   const isFinal = status === 'final';
+  // DB games.status enum 단일 source — 'postponed' (우천/미세먼지 등 취소·연기).
+  // /api/kbo-scores 도 'cancelled' 폐기 후 'postponed' 정합 (rename).
+  const isPostponed = status === 'postponed';
 
   const homeWon =
     isFinal &&
@@ -105,6 +108,15 @@ export function PredictionCard({
           {isFinal && (
             <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[var(--color-surface-card)] px-1.5 py-0.5 rounded-full">
               종료
+            </span>
+          )}
+          {isPostponed && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/60 px-1.5 py-0.5 rounded-full"
+              aria-label="경기 취소"
+            >
+              <span aria-hidden="true">🚫</span>
+              취소
             </span>
           )}
         </div>

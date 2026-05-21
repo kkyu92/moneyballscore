@@ -358,9 +358,10 @@ export async function runDailyPipeline(
       errors.push(`getVerifyResults: ${errMsg(e)}`);
     }
     try {
-      if (verifyResults.length > 0) {
-        await notifyResults(targetDate, verifyResults);
-      }
+      // verifyResults.length === 0 이어도 notifyResults 호출 — 함수 안 0-result
+      // 명시 메시지 ("오늘 검증할 예측 결과가 없습니다") 박제로 사용자 알림 누락
+      // 차단. 직전 length>0 가드 silent skip 회피 (운영 silent drift family).
+      await notifyResults(targetDate, verifyResults);
       // verifyResults.length === 0 이어도 flag 는 설정 — 재실행 차단이 목적.
       await markNotificationFlag(db, targetDate, 'results_sent', {
         results_sent_at: new Date().toISOString(),

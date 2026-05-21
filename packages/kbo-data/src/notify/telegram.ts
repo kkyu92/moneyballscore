@@ -123,24 +123,45 @@ export async function notifyResults(
     isCancelled?: boolean;
   }>
 ) {
-  if (results.length === 0) return;
+  // 0-result 케이스 명시 메시지 — 비시즌/예측 0건/cron 누락 시에도 사용자 알림.
+  // 직전 silent return 은 운영 silent drift 위험 (사용자가 verify 결과 누락
+  // 인지 불가). 매 verify mode 1회 발송 보장.
+  if (results.length === 0) {
+    await sendMessage(
+      `<b>📭 ${date} 결과</b>\n\n오늘 검증할 예측 결과가 없습니다.\n(편성 0경기 또는 예측 미생성)`,
+    );
+    return;
+  }
 
-  const correct = results.filter((r) => r.isCorrect).length;
-  const total = results.length;
-  const pct = Math.round((correct / total) * 100);
-  const emoji = pct >= 70 ? '🎯' : pct >= 50 ? '✅' : '😅';
+  // 우천취소(isCancelled) 와 정상 종료 분리 — 직전 pct 계산이 취소 + 정상 합산
+  // 분모로 사용 → 5/5 = 100% (전부 취소) 같은 오해 noise 발생. 정상 종료만
+  // 분모/분자 + 취소 별도 헤더 카운트.
+  const cancelled = results.filter((r) => r.isCancelled);
+  const verified = results.filter((r) => !r.isCancelled);
+  const correct = verified.filter((r) => r.isCorrect).length;
+  const total = verified.length;
 
-  const lines = [
-    `<b>${emoji} ${date} 결과: ${correct}/${total} 적중 (${pct}%)</b>`,
-    '',
-  ];
+  let header: string;
+  if (total === 0) {
+    // 전부 우천취소 — pct 계산 무의미. 명시.
+    header = `<b>🌧 ${date} 결과: 전 경기 취소 (${cancelled.length}건)</b>`;
+  } else {
+    const pct = Math.round((correct / total) * 100);
+    const emoji = pct >= 70 ? '🎯' : pct >= 50 ? '✅' : '😅';
+    const tail = cancelled.length > 0 ? ` · 취소 ${cancelled.length}건` : '';
+    header = `<b>${emoji} ${date} 결과: ${correct}/${total} 적중 (${pct}%)${tail}</b>`;
+  }
+
+  const lines = [header, ''];
 
   for (const r of results) {
     const home = shortTeamName(r.homeTeam);
     const away = shortTeamName(r.awayTeam);
     const mark = r.isCorrect ? '✅' : '❌';
     if (r.isCancelled) {
-      lines.push(`${mark} ${away} 0:0 ${home} (취소)`);
+      // 우천취소 row 는 mark 무관 단일 마크. 직전 isCorrect true 라 ✅ 노출됐던
+      // 혼란 차단 — 적중도 실패도 아닌 별도 카테고리.
+      lines.push(`🚫 ${away} vs ${home} (취소)`);
     } else if (r.isCorrect) {
       lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home}`);
     } else {

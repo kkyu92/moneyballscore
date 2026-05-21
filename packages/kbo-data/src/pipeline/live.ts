@@ -52,6 +52,19 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
     return { date: targetDate, liveGames: 0, updated: 0, errors: [msg] };
   }
 
+  // 우천취소(postponed) 게임 DB status 박제 — kbo-live.ts:CANCEL_SC_ID 매핑 후
+  // live-update cron 매 fire 마다 postponed 게임 status update. daily.ts verify
+  // mode postponed branch 의 dead code 자동 activate → notifyResults 적중 집계.
+  // active/final 분기와 독립적으로 항상 처리 (active 경기 있어도 다른 postponed
+  // 누락 차단).
+  for (const game of liveGames.filter((g) => g.status === 'postponed')) {
+    try {
+      await markGamePostponed(db, game);
+    } catch (e) {
+      errors.push(`markGamePostponed ${game.externalGameId}: ${errMsg(e)}`);
+    }
+  }
+
   // 진행 중인 경기만 필터
   const activeGames = liveGames.filter((g) => g.status === 'live');
   console.log(`[Live] ${activeGames.length} active games`);
@@ -248,6 +261,18 @@ async function runPostviewDailySafe(date: string): Promise<{
     console.warn('[Live] runPostviewDaily failed, continuing:', msg);
     return { processed: 0, skipped: 0, errors: [`postview-daily: ${msg}`], totalTokens: 0 };
   }
+}
+
+async function markGamePostponed(db: DB, game: LiveGameState) {
+  // 우천/미세먼지/감염병 등 취소 처리. winner_team_id 박제 X (정답 부재),
+  // score 갱신 X (kbo-official.ts: postponed 경기는 0:0 stub). assertWriteOk
+  // fail-loud → caller try/catch wrap 다른 game 처리 보호. eq 조건에 league
+  // 무관 (external_game_id 자체가 KBO 고유) — kbo-official.ts upsert 패턴 정합.
+  const postponedUpdateResult = await db.from('games').update({
+    status: 'postponed',
+    updated_at: new Date().toISOString(),
+  }).eq('external_game_id', game.externalGameId);
+  assertWriteOk(postponedUpdateResult, 'live.markGamePostponed.games.postponed');
 }
 
 async function updateGameScore(db: DB, game: LiveGameState) {

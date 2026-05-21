@@ -18,9 +18,12 @@ function StatusBadge({ score }: { score: LiveScore }) {
       return (
         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">종료</span>
       );
-    case 'cancelled':
+    case 'postponed':
       return (
-        <span className="text-xs font-medium text-gray-400 dark:text-gray-500">취소</span>
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span aria-hidden="true">🚫</span>
+          취소
+        </span>
       );
     default:
       return (

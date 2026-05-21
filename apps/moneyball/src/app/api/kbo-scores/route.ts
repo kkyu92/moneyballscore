@@ -47,13 +47,21 @@ export interface LiveScore {
   awayTeamName: string;
   homeScore: number;
   awayScore: number;
-  status: 'scheduled' | 'live' | 'final' | 'cancelled';
+  // DB games.status enum 단일 source 정합 — 'cancelled' 폐기 (kbo-official.ts /
+  // kbo-live.ts / daily.ts 전부 'postponed' 사용).
+  status: 'scheduled' | 'live' | 'final' | 'postponed';
   statusText: string;
   stadium: string;
   gameTime: string;
 }
 
-function mapStatus(code: string): LiveScore['status'] {
+function mapStatus(code: string, info?: string): LiveScore['status'] {
+  // statusInfo 한국어 '취소' / '연기' 텍스트 폴백 — Naver API 가 우천취소 시
+  // statusCode='BEFORE' + statusInfo='경기취소' 응답 (statusCode='CANCEL' 만
+  // 의존 시 'scheduled' fallback → UI / verify mode silent drift). 실측 패턴.
+  if (info && (info.includes('취소') || info.includes('연기'))) {
+    return 'postponed';
+  }
   switch (code) {
     case 'STARTED':
     case 'LIVE':
@@ -62,7 +70,7 @@ function mapStatus(code: string): LiveScore['status'] {
     case 'FINAL':
       return 'final';
     case 'CANCEL':
-      return 'cancelled';
+      return 'postponed';
     default:
       return 'scheduled';
   }
@@ -108,7 +116,7 @@ export async function GET(request: NextRequest) {
       awayTeamName: g.awayTeamName,
       homeScore: g.homeTeamScore ?? 0,
       awayScore: g.awayTeamScore ?? 0,
-      status: mapStatus(g.statusCode),
+      status: mapStatus(g.statusCode, g.statusInfo),
       statusText: g.statusInfo ?? '',
       stadium: g.stadium ?? '',
       gameTime: g.gameDateTime?.split('T')[1]?.slice(0, 5) ?? '',
