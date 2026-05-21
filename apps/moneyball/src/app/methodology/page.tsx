@@ -446,7 +446,7 @@ export default function MethodologyPage() {
 
       <section className="space-y-4 pt-4 border-t border-gray-200 dark:border-brand-700">
         <h2 className="text-xl font-semibold">더 알아보기</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link
             href="/about"
             className="rounded-lg border border-gray-200 dark:border-brand-700 p-3 hover:border-brand-500 transition-colors bg-white dark:bg-[var(--color-surface)]"
@@ -472,6 +472,15 @@ export default function MethodologyPage() {
             <h3 className="font-semibold mb-1">적중률</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
               버전별 Brier Score 와 Calibration 차트.
+            </p>
+          </Link>
+          <Link
+            href="/insights"
+            className="rounded-lg border border-gray-200 dark:border-brand-700 p-3 hover:border-brand-500 transition-colors bg-white dark:bg-[var(--color-surface)]"
+          >
+            <h3 className="font-semibold mb-1">AI 인사이트</h3>
+            <p className="text-xs text-gray-600 dark:text-brand-400">
+              심판 에이전트 reasoning timeline + 일자별 archive.
             </p>
           </Link>
         </div>
