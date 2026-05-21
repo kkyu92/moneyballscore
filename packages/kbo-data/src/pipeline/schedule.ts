@@ -30,6 +30,11 @@ export interface ShouldPredictResult {
  * @param gameDbId - 해당 경기의 games 테이블 id (없으면 null)
  * @param nowMs - 현재 시각 (Date.now(), 테스트 시 mock)
  * @param windowHours - 윈도우 크기 (기본 3)
+ * @param allowLateWindow - true 시 hoursUntil < 0 (이미 시작) 인 경기도 후보 포함.
+ *   predict_final mode 의 마지막 기회 박제 경로 — predict mode 3회 fallback fail 후
+ *   predict_final 시점엔 모든 경기 window_too_late 라 fallback row 박제 path 진입 못함
+ *   = silent drift family 사례 11 (2026-05-20 SKvWO 1경기 영구 누락). status='live' 또는
+ *   'final' 진입 시 not_scheduled 가 별도 reject 유지.
  */
 export function shouldPredictGame(
   game: ScrapedGame,
@@ -37,11 +42,12 @@ export function shouldPredictGame(
   gameDbId: number | null,
   nowMs: number,
   windowHours = 3,
+  allowLateWindow = false,
 ): ShouldPredictResult {
   const startMs = new Date(`${game.date}T${game.gameTime}+09:00`).getTime();
   const hoursUntil = (startMs - nowMs) / 3_600_000;
 
-  if (hoursUntil < 0) {
+  if (hoursUntil < 0 && !allowLateWindow) {
     return { shouldPredict: false, reason: 'window_too_late' };
   }
   if (hoursUntil > windowHours) {

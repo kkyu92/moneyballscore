@@ -397,12 +397,16 @@ export async function runDailyPipeline(
 
   // windowTargets 계산 + 스킵 사유 수집. reason 버리지 말고 pipeline_runs 에
   // 보존 → 사후 "왜 이 경기가 예측 안 됐나" 즉각 판독 가능.
+  // mode==='predict_final' 시 allowLateWindow — predict mode 3회 fallback fail 후
+  // predict_final 시점 모든 18:30 KST 경기 window_too_late 라 마지막 기회 누락
+  // (사례 11, 2026-05-20 SKvWO). predict_final 만 late window 허용.
   const nowMs = Date.now();
+  const allowLateWindow = mode === 'predict_final';
   const windowTargets: ScrapedGame[] = [];
   const skippedDetail: SkippedGame[] = [];
   for (const g of games) {
     const dbId = gameIdMap.get(g.externalGameId) ?? null;
-    const decision = shouldPredictGame(g, existingSet, dbId, nowMs);
+    const decision = shouldPredictGame(g, existingSet, dbId, nowMs, 3, allowLateWindow);
     if (decision.shouldPredict) {
       windowTargets.push(g);
     } else {
