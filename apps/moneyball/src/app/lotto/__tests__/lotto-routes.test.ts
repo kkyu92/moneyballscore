@@ -14,6 +14,10 @@ const METHODOLOGY_SRC = join(
   REPO_ROOT,
   "src/app/lotto/methodology/page.tsx",
 );
+const ARCHIVE_SRC = join(
+  REPO_ROOT,
+  "src/app/lotto/archive/[date]/page.tsx",
+);
 const SITEMAP_SRC = join(REPO_ROOT, "src/app/sitemap.ts");
 
 describe("/lotto/methodology metadata + module load", () => {
@@ -25,8 +29,10 @@ describe("/lotto/methodology metadata + module load", () => {
   });
 
   it("OG type article + Twitter summary_large_image", () => {
-    expect(methodologyMetadata.openGraph?.type).toBe("article");
-    expect(methodologyMetadata.twitter?.card).toBe("summary_large_image");
+    const og = methodologyMetadata.openGraph as { type?: string } | undefined;
+    const tw = methodologyMetadata.twitter as { card?: string } | undefined;
+    expect(og?.type).toBe("article");
+    expect(tw?.card).toBe("summary_large_image");
   });
 });
 
@@ -64,24 +70,31 @@ describe("/lotto/archive/[date] noindex metadata (regression guard)", () => {
   });
 });
 
+interface RobotsRule {
+  userAgent?: string | string[];
+  allow?: string | string[];
+  disallow?: string | string[];
+  crawlDelay?: number;
+}
+
 describe("robots.ts — /lotto/archive disallow rules (regression guard)", () => {
   const r = robots();
+  const rules = (Array.isArray(r.rules) ? r.rules : [r.rules]) as RobotsRule[];
+
+  const findRule = (ua: string): RobotsRule | undefined =>
+    rules.find((x) =>
+      Array.isArray(x.userAgent) ? x.userAgent.includes(ua) : x.userAgent === ua,
+    );
 
   it("User-agent * disallow /lotto/archive", () => {
-    const rule = r.rules.find((x) =>
-      Array.isArray(x.userAgent) ? x.userAgent.includes("*") : x.userAgent === "*",
-    );
+    const rule = findRule("*");
     expect(rule).toBeTruthy();
     const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
     expect(dis).toContain("/lotto/archive");
   });
 
   it("Googlebot disallow /lotto/archive", () => {
-    const rule = r.rules.find((x) =>
-      Array.isArray(x.userAgent)
-        ? x.userAgent.includes("Googlebot")
-        : x.userAgent === "Googlebot",
-    );
+    const rule = findRule("Googlebot");
     expect(rule).toBeTruthy();
     const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
     expect(dis).toContain("/lotto/archive");
@@ -89,9 +102,7 @@ describe("robots.ts — /lotto/archive disallow rules (regression guard)", () =>
 
   it("Mediapartners-Google + AdsBot-Google disallow /lotto/archive", () => {
     for (const ua of ["Mediapartners-Google", "AdsBot-Google"]) {
-      const rule = r.rules.find((x) =>
-        Array.isArray(x.userAgent) ? x.userAgent.includes(ua) : x.userAgent === ua,
-      );
+      const rule = findRule(ua);
       expect(rule, `${ua} rule`).toBeTruthy();
       const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
       expect(dis, `${ua} disallow`).toContain("/lotto/archive");
@@ -111,6 +122,20 @@ describe("sitemap.ts — /lotto/archive 미포함 + /lotto/methodology 포함 (s
       .split("\n")
       .filter((line) => /url:.*\/lotto\/archive/.test(line));
     expect(archiveEntries).toEqual([]);
+  });
+});
+
+describe("/lotto/archive/[date] — Breadcrumb 박제 (info-arch regression guard)", () => {
+  const src = readFileSync(ARCHIVE_SRC, "utf-8");
+
+  it("Breadcrumb import 박제", () => {
+    expect(src).toMatch(/import\s*\{\s*Breadcrumb\s*\}\s*from\s*"@\/components\/shared\/Breadcrumb"/);
+  });
+
+  it("<Breadcrumb> render + /lotto/methodology href + date label", () => {
+    expect(src).toMatch(/<Breadcrumb/);
+    expect(src).toMatch(/href:\s*"\/lotto\/methodology"/);
+    expect(src).toMatch(/label:\s*"Lotto 통계"/);
   });
 });
 

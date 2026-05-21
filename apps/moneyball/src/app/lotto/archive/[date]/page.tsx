@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listArchiveDates, readArchive } from "@/lib/lotto/archive";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -40,11 +41,12 @@ export default async function LottoArchiveDatePage({ params }: Props) {
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-10 space-y-6">
-      <div className="text-xs text-brand-400">
-        <Link href="/lotto/methodology" className="hover:text-brand-200">
-          ← Lotto 통계 방법론
-        </Link>
-      </div>
+      <Breadcrumb
+        items={[
+          { href: "/lotto/methodology", label: "Lotto 통계" },
+          { label: date },
+        ]}
+      />
 
       <header className="space-y-2 border-b border-brand-800 pb-4">
         <p className="text-xs uppercase tracking-widest text-brand-400">
