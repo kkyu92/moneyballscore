@@ -28,7 +28,7 @@ cat TODOS.md 2>/dev/null | head -30         # 할 일
 - "Z 테스트 통과" → 실제 CI 최신 결과 또는 `pnpm test` 실행
 - "Rule/Integration 생성됨" → API 조회로 상태 확인
 
-드리프트 사례 3 (Sentry silent 3건), 사례 4 (homeCode 반쪽 작동), 사례 6 (observability silent), 사례 8 (KBO `/ws/Main.asmx` Referer 봇 차단) 모두 체크포인트가 "됐다" 고 적혀있어도 현실은 죽어있던 경우. HEAD 만 같다고 안심 금지. cron silent error 시 endpoint 별 curl 진단 필수.
+드리프트 사례 3 (Sentry silent 3건), 사례 4 (homeCode 반쪽 작동), 사례 6 (observability silent), 사례 8 (KBO `/ws/Main.asmx` Referer 봇 차단), 사례 11 (predict_final window_too_late silent silent drop) 모두 체크포인트가 "됐다" 고 적혀있어도 현실은 죽어있던 경우. HEAD 만 같다고 안심 금지. cron silent error 시 endpoint 별 curl 진단 필수. predict_final 의 silent silent drop 류 = predictions=0 + games_found>0 mismatch 운영 alert 후보.
 
 ### 커밋 정책 — 묻지 말고 실행 (R4, 기본 정책 override)
 
@@ -218,6 +218,26 @@ Next.js can't recognize the exported `runtime` field in route. It mustn't be ree
 
 **교훈**: build fail 도 deploy silent drift 의 동급 위험. CI green + PR merge 만 아니라 `vercel ls --prod` Ready 상태 + alias swap 양쪽 검증 필수. `vercel inspect <deploy> --logs` build error 진단이 root cause 정확도 100%. 매 cycle N 시점 production alias commit 과 main HEAD 대조 1회 권장. R5 메타 패턴 silent drift family evidence — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 운영 인프라 (deploy quota) silent + 사례 10 = **빌드 시스템 silent** 확장.
 
+### 드리프트 사례 11 — predict_final window_too_late silent silent drop (2026-05-20, cycle 813)
+
+2026-05-20 SKvWO 1경기 predictions 영구 누락. daily-pipeline cron 4 mode (announce/predict/predict_final/verify) 의 마지막 기회 path 인 `predict_final` (UTC 13:00 = KST 22:00) 시점엔 18:30 KST 경기 이미 3.5h 진행 → `shouldPredictGame` 가 `hoursUntil < 0` 검사로 `window_too_late` reject → `windowTargets` 진입 못함 → `predict_final` 의 fallback row 박제 path 자체 진입 못함 = **silent silent drop**.
+
+원인 chain:
+- predict mode (UTC 07/08/09 = KST 16/17/18) 3회 모두 debate fallback fail (Claude API 529 + validator hallucinated 응답)
+- cycle 779 fix (predict mode 3회 fallback continue 의도) = predict mode 다음 cron 재시도 잠금 회피 + 의도된 동작 유지
+- predict_final 시점엔 18:30 경기 이미 시작 → window_too_late reject → fallback row 박제 path 부재
+- 결과 = predictions=0 + games_found>0 silent 누락 (사용자 가시 X, cron pipeline_runs.status=success)
+
+최소 scope fix (PR #1173):
+- `packages/kbo-data/src/pipeline/schedule.ts:shouldPredictGame` 에 `allowLateWindow = false` param 추가 (default 후방호환)
+- `hoursUntil < 0 && !allowLateWindow` 조건 변경 — 다른 reject 경로 (not_scheduled / sp_unconfirmed / already_predicted / window_too_early) 정상 작동 유지
+- `packages/kbo-data/src/pipeline/daily.ts` 의 windowTargets 계산 시 `mode==='predict_final'` 일 때만 `allowLateWindow=true` 전달
+- 7 unit test regression guard 추가 (allowLateWindow 비활성 시 reject + true 시 통과 + 다른 reject 경로 영향 0)
+
+cycle 779 fix 와 호환: predict mode 다음 cron 재시도 잠금 회피 유지 + predict_final 마지막 기회 추가 보장. status='live' 또는 'final' 진입 시 `not_scheduled` 별도 reject 유지.
+
+**교훈**: cron mode 별 fallback path 의 마지막 기회 누락이 silent silent drop 으로 이어짐. predict mode 3회 fail 운영 가시 시그널 없으면 predict_final 시점 발견 0건. silent drift family 11번째 — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 인프라 silent + 사례 10 빌드 시스템 silent + **사례 11 = cron mode-specific fallback path silent**. 운영 alert 후보: predict_final cron 의 predictions=0 + games_found>0 시 sentry warning 박제 (carry-over).
+
 ### 이미 구현된 주요 모듈 (v0.5.49+ 기준, cycle 651 phase)
 
 **AdSense 심사 인프라 (cycle 651 phase, 2026-05-19, PR #934~940)**:
@@ -337,8 +357,8 @@ Next.js can't recognize the exported `runtime` field in route. It mustn't be ree
   - `types.ts`: 공통 타입
 - `packages/kbo-data/src/pipeline/`:
   - `daily.ts`: predict/verify 모드 + **아침 run fallback postview cleanup** (v4-3)
-  - `daily.ts`: **(v0.5.22 재편)** 4-mode 단일 엔트리 — announce/predict/predict_final/verify. finish() helper 모든 exit 로그. shouldPredictGame 윈도우 필터. INSERT + ON CONFLICT DO NOTHING (first-write-wins). Fancy Stats early return. handleDailySummaryNotification idempotent.
-  - `schedule.ts`: **(v0.5.22 신규)** `shouldPredictGame()` 결정 함수 (window 0-3h + status + SP + existing set) + `estimateNotificationTime()` announce 알림 예상 시각 계산. 24 unit tests.
+  - `daily.ts`: **(v0.5.22 재편)** 4-mode 단일 엔트리 — announce/predict/predict_final/verify. finish() helper 모든 exit 로그. shouldPredictGame 윈도우 필터. INSERT + ON CONFLICT DO NOTHING (first-write-wins). Fancy Stats early return. handleDailySummaryNotification idempotent. **(cycle 813, 2026-05-20)** windowTargets 계산 시 `mode==='predict_final'` 일 때만 `allowLateWindow=true` 전달 — silent drift family 사례 11 fix (predict mode 3회 fallback fail 후 predict_final 마지막 기회 박제 보장).
+  - `schedule.ts`: **(v0.5.22 신규)** `shouldPredictGame()` 결정 함수 (window 0-3h + status + SP + existing set) + `estimateNotificationTime()` announce 알림 예상 시각 계산. 24 unit tests. **(cycle 813, 2026-05-20)** `allowLateWindow = false` param 추가 (default 후방호환) — `predict_final` mode 만 true 전달하여 `hoursUntil < 0` 경기도 fallback row 박제 path 진입 가능. silent drift family 사례 11 (predict_final window_too_late silent silent drop) Layer 1 fix. 31 unit test (allowLateWindow 비활성/활성 + 다른 reject 경로 영향 0 regression guard 7건).
   - `live.ts`: live-update + **경기 종료 감지 시 postview 자동 트리거** (v4-3)
   - `postview-daily.ts`: **(v4-3)** 멱등성 postview runner.
 - Migrations (prod 모두 적용):
