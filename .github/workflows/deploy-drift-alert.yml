@@ -1,0 +1,93 @@
+name: deploy-drift-alert
+
+# Production deploy drift 자동 감지 — 드리프트 사례 9 (cycle 772 .vercelignore
+# 임시 해소) + 사례 10 (cycle 794 Turbopack build fail) silent drift family
+# alert coverage 확장 (cycle 838).
+#
+# main HEAD 와 production alias 의 VERCEL_GIT_COMMIT_SHA 시간당 비교:
+# - mismatch + ≥ 1 hour gap (사용자 가시 잠재 silent drop) → ::error::
+# - production /api/version endpoint 부재 (deploy fail / endpoint X) → ::error::
+# - 정상 sync → ::notice:: + exit 0
+#
+# silent drift family alert 박제 (Sentry warning + GH Actions email 알림 자동
+# fire). 사례 8 (cycle 826 KBO scraper) / 사례 11 (cycle 819 predict_final)
+# 패턴 정합.
+#
+# cron schedule = '17 * * * *' (매시간 UTC 17분)
+# - sitemap-warmup '37 * * * *' / indexnow-ping '37 0 * * *' 분 겹침 회피
+# - 매시간 검사로 30+ commit silent skip 누적 (사례 10) 즉시 감지
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-drift-alert
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout main HEAD
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Compare main HEAD vs production /api/version
+        run: |
+          set -e
+          MAIN_SHA=$(git rev-parse HEAD)
+          MAIN_SHORT=$(git rev-parse --short HEAD)
+          echo "main_sha=$MAIN_SHA"
+          echo "main_short=$MAIN_SHORT"
+
+          PROD_URL="https://moneyballscore.vercel.app/api/version"
+          echo "Fetching $PROD_URL"
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            -A "moneyball-drift-alert/1.0" \
+            --max-time 30 \
+            "$PROD_URL" || echo "HTTP_STATUS:000")
+          STATUS=$(echo "$RESPONSE" | tail -n1 | sed 's/HTTP_STATUS://')
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          echo "status=$STATUS"
+          echo "body=$BODY"
+
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::production /api/version 응답 비정상 (HTTP $STATUS) — endpoint 부재 또는 deploy fail. 사례 10 (Turbopack build fail) family 재발 의심."
+            exit 1
+          fi
+
+          PROD_SHA=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('commit_sha') or '')" 2>/dev/null || echo "")
+          echo "prod_sha=$PROD_SHA"
+
+          if [ -z "$PROD_SHA" ]; then
+            echo "::warning::production VERCEL_GIT_COMMIT_SHA 미주입 (Vercel env 누락 가능성)."
+            exit 0
+          fi
+
+          if [ "$MAIN_SHA" = "$PROD_SHA" ]; then
+            echo "::notice::main HEAD = production alias ($MAIN_SHORT). drift 0."
+            exit 0
+          fi
+
+          COMMITS_AHEAD=$(git rev-list --count "$PROD_SHA..$MAIN_SHA" 2>/dev/null || echo "unknown")
+          MAIN_TIME=$(git log -1 --format=%ct "$MAIN_SHA" 2>/dev/null || echo "0")
+          NOW=$(date +%s)
+          GAP_SECONDS=$((NOW - MAIN_TIME))
+          GAP_HOURS=$((GAP_SECONDS / 3600))
+
+          echo "main_short=$MAIN_SHORT prod_short=$(echo $PROD_SHA | cut -c1-7)"
+          echo "commits_ahead=$COMMITS_AHEAD gap_hours=$GAP_HOURS"
+
+          if [ "$GAP_HOURS" -ge 1 ]; then
+            echo "::error::deploy drift detected — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch. $COMMITS_AHEAD commit ahead, gap ${GAP_HOURS}h. 사례 9/10 silent drift family 재발 의심 — vercel ls --prod + vercel inspect <id> --logs 진단 권장."
+            exit 1
+          else
+            echo "::notice::recent push detected — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch이지만 gap ${GAP_HOURS}h < 1h (deploy in progress). 다음 시간 재검사."
+          fi
