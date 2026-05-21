@@ -80,13 +80,27 @@ export async function listInsightsDates(daysBack = 90): Promise<string[]> {
   return [...dates].sort().reverse();
 }
 
+interface InsightsGameRow {
+  id: number;
+  game_date: string;
+  status: string;
+  home_team: { code: string } | { code: string }[] | null;
+  away_team: { code: string } | { code: string }[] | null;
+}
+
+function extractTeamCode(field: InsightsGameRow["home_team"]): string | null {
+  if (!field) return null;
+  const obj = Array.isArray(field) ? field[0] : field;
+  return obj?.code ?? null;
+}
+
 export async function getInsightsForDate(date: string): Promise<InsightEntry[]> {
   if (!isValidInsightsDate(date)) return [];
   const supabase = createInsightsClient();
   const result = await supabase
     .from("predictions")
     .select(
-      "is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, home_team_code, away_team_code, status)",
+      "is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
     .eq("games.game_date", date)
@@ -102,29 +116,20 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
     const presented = presentJudgeReasoningWithFallback(verdict?.reasoning);
     if (!presented) continue;
     const gamesField = row.games as unknown as
-      | {
-          id: number;
-          game_date: string;
-          home_team_code: string;
-          away_team_code: string;
-          status: string;
-        }
-      | {
-          id: number;
-          game_date: string;
-          home_team_code: string;
-          away_team_code: string;
-          status: string;
-        }[]
+      | InsightsGameRow
+      | InsightsGameRow[]
       | null;
     const game = Array.isArray(gamesField) ? gamesField[0] : gamesField;
     if (!game || seen.has(game.id)) continue;
+    const homeCode = extractTeamCode(game.home_team);
+    const awayCode = extractTeamCode(game.away_team);
+    if (!homeCode || !awayCode) continue;
     seen.add(game.id);
     out.push({
       gameId: game.id,
       date: game.game_date,
-      homeTeam: game.home_team_code as TeamCode,
-      awayTeam: game.away_team_code as TeamCode,
+      homeTeam: homeCode as TeamCode,
+      awayTeam: awayCode as TeamCode,
       status: game.status,
       isCorrect: row.is_correct,
       reasoningText: presented.text,

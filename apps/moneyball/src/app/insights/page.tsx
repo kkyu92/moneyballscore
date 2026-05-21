@@ -52,12 +52,26 @@ interface InsightRow {
   homeWinProb: number | null;
 }
 
+interface GameRow {
+  id: number;
+  game_date: string;
+  home_team: { code: string } | { code: string }[] | null;
+  away_team: { code: string } | { code: string }[] | null;
+  status: string;
+}
+
+function extractTeamCode(field: GameRow["home_team"]): string | null {
+  if (!field) return null;
+  const obj = Array.isArray(field) ? field[0] : field;
+  return obj?.code ?? null;
+}
+
 async function getRecentInsights(): Promise<InsightRow[]> {
   const supabase = await createClient();
   const result = await supabase
     .from("predictions")
     .select(
-      "confidence, is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, home_team_code, away_team_code, status)",
+      "confidence, is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
     .order("created_at", { ascending: false })
@@ -72,29 +86,17 @@ async function getRecentInsights(): Promise<InsightRow[]> {
     const raw = verdict?.reasoning;
     const presented = presentJudgeReasoningWithFallback(raw, { maxLength: PREVIEW_LENGTH });
     if (!presented) continue;
-    const gamesField = row.games as unknown as
-      | {
-          id: number;
-          game_date: string;
-          home_team_code: string;
-          away_team_code: string;
-          status: string;
-        }
-      | {
-          id: number;
-          game_date: string;
-          home_team_code: string;
-          away_team_code: string;
-          status: string;
-        }[]
-      | null;
+    const gamesField = row.games as unknown as GameRow | GameRow[] | null;
     const game = Array.isArray(gamesField) ? gamesField[0] : gamesField;
     if (!game) continue;
+    const homeCode = extractTeamCode(game.home_team);
+    const awayCode = extractTeamCode(game.away_team);
+    if (!homeCode || !awayCode) continue;
     out.push({
       gameId: game.id,
       date: game.game_date,
-      homeTeam: game.home_team_code as TeamCode,
-      awayTeam: game.away_team_code as TeamCode,
+      homeTeam: homeCode as TeamCode,
+      awayTeam: awayCode as TeamCode,
       status: game.status,
       isCorrect: row.is_correct,
       reasoningText: presented.text,
