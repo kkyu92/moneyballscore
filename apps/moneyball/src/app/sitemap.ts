@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
+import { listInsightsDates } from '@/lib/insights/loader';
 import { KBO_TEAMS, assertSelectOk } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
@@ -120,6 +121,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const analysisRoutes: MetadataRoute.Sitemap = [];
   const predictionDateRoutes: MetadataRoute.Sitemap = [];
   const playerRoutes: MetadataRoute.Sitemap = [];
+  const insightsDateRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const insightsDates = await listInsightsDates(90);
+    for (const d of insightsDates) {
+      insightsDateRoutes.push({
+        url: `${baseUrl}/insights/${d}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      });
+    }
+  } catch (e) {
+    console.warn('[sitemap] insights dates query failed:', e);
+  }
 
   try {
     const supabase = createSitemapClient();
@@ -181,5 +197,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...predictionDateRoutes,
     ...playerRoutes,
     ...analysisRoutes,
+    ...insightsDateRoutes,
   ];
 }
