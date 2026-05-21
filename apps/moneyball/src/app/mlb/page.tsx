@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { WaitlistForm } from "@/components/mlb/WaitlistForm";
 
 export const dynamic = "force-static";
 export const revalidate = 86400;
@@ -146,7 +147,7 @@ function SampleAnalysisCard() {
   );
 }
 
-function WaitlistFormSkeleton() {
+function WaitlistFormSection() {
   return (
     <section
       aria-labelledby="waitlist-heading"
@@ -162,45 +163,7 @@ function WaitlistFormSkeleton() {
         waitlist 100명 달성 또는 30일 내 출시 결정. 정식 출시 시 가입자에게 알림 발송.
       </p>
 
-      <form className="space-y-3" aria-describedby="waitlist-status">
-        <label className="block">
-          <span className="text-xs text-brand-500 dark:text-brand-400 uppercase tracking-wide font-medium">
-            이메일
-          </span>
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            placeholder="example@domain.com"
-            disabled
-            className="mt-1 w-full rounded-lg border border-brand-200 dark:border-brand-800 bg-white dark:bg-brand-950 px-4 py-2.5 text-sm text-brand-700 dark:text-brand-100 placeholder:text-brand-400 dark:placeholder:text-brand-600 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:opacity-60 disabled:cursor-not-allowed"
-          />
-        </label>
-
-        <input
-          type="text"
-          name="_hp"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-          className="hidden"
-        />
-
-        <button
-          type="submit"
-          disabled
-          className="w-full rounded-lg bg-brand-500 text-white font-medium py-2.5 px-4 text-sm shadow-sm hover:bg-brand-600 transition-colors disabled:bg-brand-300 dark:disabled:bg-brand-800 disabled:cursor-not-allowed"
-        >
-          가입 활성 준비 중
-        </button>
-
-        <p
-          id="waitlist-status"
-          className="text-xs text-brand-500 dark:text-brand-400 leading-relaxed"
-        >
-          폼은 박제 완료, API 활성 다음 단계 박제 후 가입 가능.
-        </p>
-      </form>
+      <WaitlistForm />
     </section>
   );
 }
@@ -234,7 +197,7 @@ export default function MLBLandingPage() {
 
       <SampleAnalysisCard />
 
-      <WaitlistFormSkeleton />
+      <WaitlistFormSection />
 
       <section className="text-center text-sm text-brand-500 dark:text-brand-400 py-4">
         <p className="mb-2">
