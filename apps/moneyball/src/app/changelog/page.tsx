@@ -123,6 +123,22 @@ export default function ChangelogPage() {
           >
             용어 사전 →
           </Link>
+          <a
+            href="/feed"
+            className="px-3 py-1.5 rounded-full border border-brand-300 dark:border-brand-600 bg-brand-50 dark:bg-brand-900 text-brand-700 dark:text-brand-200 hover:border-brand-500 hover:text-brand-900 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"
+            aria-label="RSS 피드 구독"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-3 h-3"
+              aria-hidden="true"
+            >
+              <path d="M3.429 5.1v2.4c7.248 0 13.114 5.867 13.114 13.115h2.4C18.943 12.3 11.829 5.1 3.429 5.1zm0 4.8v2.4a6 6 0 0 1 6 6h2.4c0-4.65-3.75-8.4-8.4-8.4zm1.8 4.8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+            </svg>
+            RSS 구독
+          </a>
         </nav>
       </header>
 
@@ -156,7 +172,7 @@ export default function ChangelogPage() {
         ))}
       </ol>
 
-      <footer className="pt-6 border-t border-brand-200 dark:border-brand-800 text-xs text-brand-500 dark:text-brand-400">
+      <footer className="pt-6 border-t border-brand-200 dark:border-brand-800 text-xs text-brand-500 dark:text-brand-400 space-y-2">
         <p>
           전체 변경 이력은 GitHub 저장소의{' '}
           <a
@@ -168,6 +184,16 @@ export default function ChangelogPage() {
             CHANGELOG.md
           </a>
           {' '}에서도 확인할 수 있습니다.
+        </p>
+        <p>
+          최근 사이클 변경을 RSS 리더로 받아보려면{' '}
+          <a
+            href="/feed"
+            className="text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-100 underline"
+          >
+            RSS 피드
+          </a>
+          를 구독하세요. (사이트 전체 RSS — 사이클·주간/월간 리뷰·최근 경기 예측 통합)
         </p>
       </footer>
     </main>
