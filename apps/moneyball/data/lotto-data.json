@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-21T00:00:00Z",
+  "rules_total": 256,
+  "count_valid": 7700649,
+  "total_combinations": 8145060,
+  "rules_history": [
+    { "cycle": 823, "count": 256, "delta": 0 }
+  ],
+  "oos_pass_rate": [
+    { "draw": 1224, "date": "2026-05-16", "passed": 1, "failed": 0 }
+  ],
+  "chain_fire_history": [
+    { "cycle": 402, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 403, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 404, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 405, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 406, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 407, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 408, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 409, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 410, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 411, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 412, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 413, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 414, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 415, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 416, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 423, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 424, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 425, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 426, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 427, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 428, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 429, "outcome": "success", "date": "2026-05-14" },
+    { "cycle": 444, "outcome": "partial", "date": "2026-05-15" },
+    { "cycle": 802, "outcome": "success", "date": "2026-05-21" },
+    { "cycle": 823, "outcome": "success", "date": "2026-05-21" }
+  ]
+}
