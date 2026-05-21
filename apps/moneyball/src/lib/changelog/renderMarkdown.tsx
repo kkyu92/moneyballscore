@@ -57,13 +57,13 @@ function renderInline(text: string): ReactNode[] {
   });
 }
 
-interface Block {
+export interface Block {
   kind: 'h3' | 'p' | 'ul' | 'hr';
   lines?: string[];
   items?: { text: string; depth: number }[];
 }
 
-function tokenize(body: string): Block[] {
+export function tokenize(body: string): Block[] {
   const blocks: Block[] = [];
   const lines = body.split('\n');
   let para: string[] = [];
