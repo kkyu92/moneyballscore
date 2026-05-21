@@ -43,6 +43,16 @@ export default function PlayerNotFound() {
         </ul>
       </nav>
 
+      <section className="bg-gray-50 dark:bg-[var(--color-surface-card)]/50 rounded-xl p-5 text-left text-sm text-gray-600 dark:text-gray-300 space-y-2">
+        <h2 className="font-semibold text-gray-700 dark:text-gray-200">
+          URL 형식
+        </h2>
+        <ul className="space-y-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+          <li>· 선수 프로필 — <code>/players/{`{playerId}`}</code></li>
+          <li>· 선수 ID — KBO 공식 코드. 팀별 선수단에서 진입 권장</li>
+        </ul>
+      </section>
+
       <div className="pt-2 flex justify-center gap-3 text-sm">
         <Link href="/players" className="text-brand-600 dark:text-brand-400 hover:underline">
           선수 리더보드 →
