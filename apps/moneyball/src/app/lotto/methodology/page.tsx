@@ -239,14 +239,41 @@ export default function LottoMethodologyPage() {
           develop-cycle skill 안 lotto chain fire 누적. 본 사이트 운영
           시스템이 매 사이클 본 규칙 검증을 실행한 운영 기록입니다.
         </p>
+        <div className="bg-brand-900 border border-brand-800 rounded p-3 text-xs text-brand-300 space-y-2">
+          <p className="text-brand-200 font-semibold">규칙 정합 evidence</p>
+          <p>
+            본 chain trigger 조건 (chain pool table) = 신규 회차 추첨 D-7 안 picks
+            부재 / 추첨 직후 OOS 박제 부재 / 30+ 사이클 미발화 gap / 사용자 자연
+            발화 등. 매 fire 의 outcome 과 다음 추천 chain 은 본 운영 spec
+            정합으로 자가 검증됩니다.
+          </p>
+        </div>
         <details className="bg-brand-900 border border-brand-800 rounded">
           <summary className="cursor-pointer px-3 py-2 text-sm text-brand-200">
             누적 {totalFires} 진행 ({successCount} success)
           </summary>
-          <ul className="text-xs text-brand-400 px-4 py-2 max-h-48 overflow-y-auto space-y-0.5">
+          <ul className="text-xs text-brand-400 px-4 py-2 max-h-64 overflow-y-auto space-y-1">
             {lottoData.chain_fire_history.map((c) => (
-              <li key={`${c.cycle}-${c.date}`}>
-                cycle {c.cycle} — {c.outcome} ({c.date})
+              <li key={`${c.cycle}-${c.date}`} className="flex flex-wrap gap-x-2">
+                <span className="text-brand-300">cycle {c.cycle}</span>
+                <span>—</span>
+                <span
+                  className={
+                    c.outcome === "success"
+                      ? "text-brand-200"
+                      : c.outcome === "partial"
+                        ? "text-amber-400"
+                        : "text-red-400"
+                  }
+                >
+                  {c.outcome}
+                </span>
+                <span className="text-brand-500">({c.date})</span>
+                {c.next_recommended ? (
+                  <span className="text-brand-500">
+                    → next: {c.next_recommended}
+                  </span>
+                ) : null}
               </li>
             ))}
           </ul>

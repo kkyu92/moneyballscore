@@ -120,4 +120,15 @@ describe("ChainFireHistoryEntrySchema", () => {
       }).success
     ).toBe(false);
   });
+
+  it("next_recommended optional 통과", () => {
+    expect(
+      ChainFireHistoryEntrySchema.safeParse({
+        cycle: 823,
+        outcome: "success",
+        date: "2026-05-21",
+        next_recommended: "review-code",
+      }).success
+    ).toBe(true);
+  });
 });

@@ -17,6 +17,7 @@ export const ChainFireHistoryEntrySchema = z.object({
   cycle: z.number().int().positive(),
   outcome: z.enum(["success", "partial", "fail", "interrupted", "retro-only"]),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  next_recommended: z.string().optional(),
 });
 
 export const LottoDataSchema = z.object({
