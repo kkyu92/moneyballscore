@@ -55,11 +55,7 @@ function slugify(title: string, idx: number): string {
   return `${idx}-${base || 'entry'}`;
 }
 
-export function parseChangelog(): ChangelogEntry[] {
-  const raw = readChangelogFile();
-  if (!raw) return FALLBACK_ENTRIES;
-
-  // Split on h2 boundaries. Keep separator for accurate slicing.
+export function parseChangelogText(raw: string): ChangelogEntry[] {
   const lines = raw.split('\n');
   const entries: ChangelogEntry[] = [];
   let currentTitle: string | null = null;
@@ -81,7 +77,6 @@ export function parseChangelog(): ChangelogEntry[] {
 
   for (const line of lines) {
     if (line.startsWith('# ')) {
-      // top-level title, skip
       continue;
     }
     if (line.startsWith('## ')) {
@@ -94,5 +89,12 @@ export function parseChangelog(): ChangelogEntry[] {
   }
   flush();
 
+  return entries;
+}
+
+export function parseChangelog(): ChangelogEntry[] {
+  const raw = readChangelogFile();
+  if (!raw) return FALLBACK_ENTRIES;
+  const entries = parseChangelogText(raw);
   return entries.length > 0 ? entries : FALLBACK_ENTRIES;
 }
