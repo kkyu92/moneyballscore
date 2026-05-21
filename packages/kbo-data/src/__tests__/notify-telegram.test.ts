@@ -345,19 +345,75 @@ describe('notifyResults (scope D)', () => {
     expect(msg).toContain('❌ KIA 5:3 두산 (예측 두산)');
   });
 
-  it('취소 row → 예측 suffix 노출 X (실제 결과 X)', async () => {
+  it('취소 row → 🚫 단일 마크 + 예측 suffix 노출 X', async () => {
     const calls = captureTelegramCalls();
     await notifyResults('2026-05-19', [
       {
         homeTeam: 'OB', awayTeam: 'HT',
         predictedWinner: 'OB', actualWinner: 'OB',
-        isCorrect: false, homeScore: 0, awayScore: 0,
+        isCorrect: true, homeScore: 0, awayScore: 0,
         isCancelled: true,
       },
     ]);
     const msg = calls[0].text;
-    expect(msg).toContain('❌ KIA 0:0 두산 (취소)');
+    // mark 무관 🚫 단일 — 적중/실패 적용 불가 카테고리 분리
+    expect(msg).toContain('🚫 KIA vs 두산 (취소)');
     expect(msg).not.toContain('예측 두산');
+    expect(msg).not.toContain('0:0');
+  });
+
+  it('0-result → silent return 금지 + 📭 명시 메시지 (cron silent drift 차단)', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-19', []);
+    // 직전 return X — 1회 발송 보장.
+    expect(calls).toHaveLength(1);
+    const msg = calls[0].text;
+    expect(msg).toContain('📭 2026-05-19 결과');
+    expect(msg).toContain('오늘 검증할 예측 결과가 없습니다');
+  });
+
+  it('전부 우천취소 (4건) → 🌧 명시 + pct 계산 회피', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-20', [
+      { homeTeam: 'SS', awayTeam: 'KT', predictedWinner: 'SS', actualWinner: 'SS',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+      { homeTeam: 'HT', awayTeam: 'LG', predictedWinner: 'HT', actualWinner: 'HT',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+      { homeTeam: 'HH', awayTeam: 'LT', predictedWinner: 'HH', actualWinner: 'HH',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+      { homeTeam: 'NC', awayTeam: 'OB', predictedWinner: 'NC', actualWinner: 'NC',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+    ]);
+    const msg = calls[0].text;
+    expect(msg).toContain('🌧 2026-05-20 결과: 전 경기 취소 (4건)');
+    // 4/4 = 100% 오해 신호 차단
+    expect(msg).not.toContain('100%');
+    expect(msg).not.toContain('4/4 적중');
+    // 각 경기 🚫 line
+    expect(msg).toContain('🚫 KT vs 삼성 (취소)');
+    expect(msg).toContain('🚫 LG vs KIA (취소)');
+  });
+
+  it('partial (1 정상 적중 + 4 우천취소) → 정상 종료만 분모 + 취소 별도 헤더 (5/20 시나리오)', async () => {
+    const calls = captureTelegramCalls();
+    await notifyResults('2026-05-20', [
+      { homeTeam: 'SK', awayTeam: 'WO', predictedWinner: 'SK', actualWinner: 'SK',
+        isCorrect: true, homeScore: 7, awayScore: 3 },
+      { homeTeam: 'SS', awayTeam: 'KT', predictedWinner: 'SS', actualWinner: 'SS',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+      { homeTeam: 'HT', awayTeam: 'LG', predictedWinner: 'HT', actualWinner: 'HT',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+      { homeTeam: 'HH', awayTeam: 'LT', predictedWinner: 'HH', actualWinner: 'HH',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+      { homeTeam: 'NC', awayTeam: 'OB', predictedWinner: 'NC', actualWinner: 'NC',
+        isCorrect: true, homeScore: 0, awayScore: 0, isCancelled: true },
+    ]);
+    const msg = calls[0].text;
+    // 정상 종료 1건만 분모 — 직전 5/5 = 100% noise 회피
+    expect(msg).toContain('1/1 적중 (100%)');
+    expect(msg).toContain('취소 4건');
+    expect(msg).toContain('✅ 키움 3:7 SSG');
+    expect(msg).toContain('🚫 KT vs 삼성 (취소)');
   });
 
   it('혼합 (적중 1 + 실패 1) → ❌ 만 예측 suffix', async () => {

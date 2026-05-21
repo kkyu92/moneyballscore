@@ -1,5 +1,6 @@
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_BASE_URL as BASE_URL, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
+import { fetchNaverSchedule } from './naver-schedule';
 
 export interface LiveGameState {
   externalGameId: string;
@@ -10,7 +11,7 @@ export interface LiveGameState {
   inning: number;         // 현재 이닝 (1~12+)
   isTop: boolean;         // true=초(원정공격), false=말(홈공격)
   outs: number;
-  status: 'live' | 'final' | 'scheduled';
+  status: 'live' | 'final' | 'scheduled' | 'postponed';
 }
 
 interface RawKboLiveGame {
@@ -26,6 +27,8 @@ interface RawKboLiveGame {
   B_SCORE_CN?: string | number;
   T_SCORE_CN?: string | number;
   OUT_CN?: string | number;
+  CANCEL_SC_ID?: string | number;
+  CANCEL_SC_NM?: string;
 }
 
 interface KboLiveResponse {
@@ -64,6 +67,42 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     ? (JSON.parse(json.d) as RawKboLiveGame[])
     : (json.game ?? []);
 
+  // 드리프트 사례 추가 — KBO 공식 `/ws/Main.asmx` 가 우천취소 결정 후 해당 일자
+  // 데이터를 미반환하는 경우 관측 (2026-05-20 사례). 결과: live.ts 가 0건 처리
+  // → DB status 영구 stale → daily.ts verify postponed/final branch 0 row 매치
+  // → notifyResults silent skip. Naver schedule API 폴백 — 동일 endpoint
+  // (api-gw.sports.naver.com) 가 cancel:true 박제 (naver-schedule.ts:mapStatus
+  // 단일 source). status/score 만 cover (inning=0 fallback — KBO 정상 시만
+  // in-game 보정 가능).
+  if (rawGames.length === 0) {
+    try {
+      const naverGames = await fetchNaverSchedule(date, date, 'basic');
+      return naverGames
+        .filter((g) => g.externalGameId)
+        .map<LiveGameState>((g) => ({
+          externalGameId: g.externalGameId!,
+          homeTeam: g.homeTeam,
+          awayTeam: g.awayTeam,
+          homeScore: g.homeScore ?? 0,
+          awayScore: g.awayScore ?? 0,
+          inning: 0,
+          isTop: true,
+          outs: 0,
+          status:
+            g.status === 'postponed'
+              ? 'postponed'
+              : g.status === 'final'
+                ? 'final'
+                : g.status === 'live'
+                  ? 'live'
+                  : 'scheduled',
+        }));
+    } catch (e) {
+      console.warn('[KBO Live] Naver fallback failed:', e);
+      return [];
+    }
+  }
+
   const liveGames: LiveGameState[] = [];
   for (const raw of rawGames) {
     const homeTeam = (raw.HOME_ID as TeamCode) || resolveKoreanTeamCode(raw.HOME_NM ?? '');
@@ -71,10 +110,17 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
     if (!homeTeam || !awayTeam) continue;
 
     // 경기 상태 판단 — GAME_STATE_SC: "1"=경기전, "2"=진행중, "3"=종료
+    // CANCEL_SC_ID: "1"|"2" = 우천/미세먼지/감염병 등 취소·연기 (kbo-official.ts:65-72 패턴 정합).
+    // 누락 시 우천취소 경기가 'scheduled' fallback → live-update cron 이 DB status 갱신 X
+    // → daily.ts verify mode 의 postponed branch dead code → notifyResults silent skip
+    // (사용자 가시 Telegram 누락). 단일 source 박제.
     // GAME_INN_NO 는 라이브 판정에 쓰지 않는다 (kbo-official.ts 와 동일 이유).
     const stateCode = String(raw.GAME_STATE_SC ?? '');
+    const cancelCode = String(raw.CANCEL_SC_ID ?? '');
     let status: LiveGameState['status'] = 'scheduled';
-    if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
+    if (cancelCode === '1' || cancelCode === '2') {
+      status = 'postponed';
+    } else if (stateCode === '3' || raw.GAME_RESULT_CK === 1) {
       status = 'final';
     } else if (stateCode === '2') {
       status = 'live';
