@@ -1,6 +1,7 @@
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_BASE_URL as BASE_URL, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { fetchNaverSchedule } from './naver-schedule';
+import { captureKboScraperHtmlAlert } from './kbo-scraper-alert';
 
 export interface LiveGameState {
   externalGameId: string;
@@ -60,6 +61,13 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
   try {
     json = JSON.parse(cleanJson) as KboLiveResponse;
   } catch {
+    await captureKboScraperHtmlAlert({
+      endpoint: '/ws/Main.asmx/GetKboGameList',
+      date,
+      status: res.status,
+      contentType: res.headers.get('content-type'),
+      bodySample: cleanJson,
+    });
     throw new Error(`KBO live API parse error: ${cleanJson.slice(0, 100)}`);
   }
 
