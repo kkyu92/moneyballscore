@@ -4,6 +4,7 @@ import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
 import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
+import { captureKboScraperHtmlAlert } from './kbo-scraper-alert';
 
 const DELAY_MS = 2000;
 
@@ -38,6 +39,13 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
   try {
     json = JSON.parse(cleanJson);
   } catch {
+    await captureKboScraperHtmlAlert({
+      endpoint: '/ws/Main.asmx/GetKboGameList',
+      date,
+      status: res.status,
+      contentType: res.headers.get('content-type'),
+      bodySample: cleanJson,
+    });
     throw new Error(`KBO API parse error: ${cleanJson.slice(0, 100)}`);
   }
 
