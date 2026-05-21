@@ -5,7 +5,7 @@
 
 ## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07)
 
-**현재 상태**: 99건 검증 완료 (cycle 387 갱신, 2026-05-14) / 전체 적중률 49.5% / Brier 0.2587 / v1.5=75%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / v1.8=60%(5, quant-only fallback)
+**현재 상태**: 124건 검증 완료 (cycle 775 갱신, 2026-05-20) / 전체 적중률 47.6% / Brier v1.8 0.2241 / v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / v1.8=43.3%(30) — credit-fail 22건(40.9%) + real-debate 8건(50.0%) gap +9.1pp. v2.0 임계 n=150 까지 26건
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
 > ✅ **v1.8 credit 복구 완료 (2026-05-16 08:06 KST, user action)**: ANTHROPIC_API_KEY credit 충전 완료. retro debate 분석은 결과 누수/방법론 위반으로 **비채택**. 앞으로 fire 되는 신규 경기 v1.8 debate 누적으로 정직한 n 증가. 검증 항목 — (1) 다음 predict cron UTC 01 (KST 10:00) 첫 fire 시 `totalTokens>0` + reasoning 텍스트 길이 정상 + mv='v2.0-debate' 라벨 / (2) postview path 도 동일 verify (mv='v2.0-postview'). silent fallback 재발 시 PR #372 family fix 정상 작동 → mv='v1.8' (강등 라벨) 노출. 5/13~5/15 fallback 기간 5건은 quant-only 라벨로 누적 유지 (역사 박제). 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
