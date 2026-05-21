@@ -43,6 +43,7 @@ const SITEMAP_COLUMNS = [
       { href: "/methodology", label: "예측 방법론" },
       { href: "/guide", label: "사용 가이드" },
       { href: "/glossary", label: "용어 사전" },
+      { href: "/changelog", label: "변경 로그" },
       { href: "/about", label: "소개" },
       { href: "/search", label: "검색" },
     ],
