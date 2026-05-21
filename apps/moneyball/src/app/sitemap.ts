@@ -58,6 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    // /lotto/methodology — 통계 분석 자료. /lotto/archive/[date] 는 noindex + sitemap 미포함 (robots Disallow 정합)
+    { url: `${baseUrl}/lotto/methodology`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
   ];
 
   // 시즌별 URL (generateStaticParams 에서 2023~2026 정적 생성)
