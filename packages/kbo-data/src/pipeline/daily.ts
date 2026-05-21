@@ -27,6 +27,7 @@ import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
+import { captureSilentDriftAlert } from './silent-drift-alert';
 import {
   computePredictionHistory,
   type PredictionHistoryRow,
@@ -170,6 +171,21 @@ export async function runDailyPipeline(
       try { await notifyPipelineStatus(result, durationMs); }
       catch (e) { console.error('[Pipeline] notifyPipelineStatus failed:', e); }
     }
+
+    // silent drift family 사례 11 (cycle 813) — predict_final
+    // predictions=0 + gamesFound>0 silent silent drop 즉시 감지 sentry warning.
+    try {
+      await captureSilentDriftAlert({
+        mode,
+        date: targetDate,
+        gamesFound: result.gamesFound,
+        predictionsGenerated: result.predictionsGenerated,
+        errors: result.errors,
+      });
+    } catch (e) {
+      console.error('[Pipeline] captureSilentDriftAlert failed:', e);
+    }
+
     return result;
   };
 
