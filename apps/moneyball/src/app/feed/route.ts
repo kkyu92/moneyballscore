@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
+import { parseChangelog } from '@/lib/changelog/parse';
 
 export const revalidate = 3600;
 
@@ -78,6 +79,33 @@ export async function GET() {
       <description>${escapeXml("고확신으로 틀린 예측의 사후 분석 — 편향 지목 팩터와 놓친 것을 투명하게 공개")}</description>
       <pubDate>${missesPubDate}</pubDate>
     </item>`);
+
+  // /changelog 최근 10건 RSS item — date 있는 entry 만, 시간 역순. cycle 810
+  // v13-E 박제. 구독자가 사이클별 변경 이력 (가중치 튜닝 / 신규 기능 / SEO /
+  // AdSense / 적중률 분석) 을 RSS reader 에서 즉시 받음. layout.tsx alternates
+  // (cycle ?) + feed/route.ts items 두 layer 모두 박제해야 구독 가치 노출.
+  const changelogEntries = parseChangelog()
+    .filter((e) => e.date !== null)
+    .slice(0, 10);
+  for (const entry of changelogEntries) {
+    const link = `${SITE_URL}/changelog#${entry.id}`;
+    const cyclePrefix = entry.cycle !== null ? `Cycle ${entry.cycle} — ` : '';
+    const titleNoDate = entry.title.replace(/^\d{4}-\d{2}-\d{2}\s*[—-]?\s*/, '');
+    const itemTitle = `${cyclePrefix}${titleNoDate}`;
+    const bodySnippet = entry.body
+      .replace(/[#*`>_~\[\]]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 240);
+    const pubDate = new Date(`${entry.date}T23:59:00+09:00`).toUTCString();
+    reviewItems.push(`    <item>
+      <title>${escapeXml(itemTitle)}</title>
+      <link>${link}</link>
+      <guid isPermaLink="true">${link}</guid>
+      <description>${escapeXml(bodySnippet)}</description>
+      <pubDate>${pubDate}</pubDate>
+    </item>`);
+  }
 
   interface FeedGameRow {
     id: number;

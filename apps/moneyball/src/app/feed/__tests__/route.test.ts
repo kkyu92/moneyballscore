@@ -64,4 +64,18 @@ describe("feed/route — silent drift family detection (cycle 149)", () => {
     // game items 없어도 review items (weekly + monthly + misses) 는 항상 있음
     expect(xml).toContain("주간 리뷰");
   });
+
+  // cycle 810 v13-E — /changelog entries RSS feed 박제 regression guard.
+  // 구독자 가치 (사이클별 변경 이력 RSS reader 즉시 수신) silent break 차단.
+  it("changelog entries 포함 (link href + Cycle 라벨)", async () => {
+    gamesResult = { data: [], error: null };
+
+    const { GET } = await import("../route");
+    const res = await GET();
+    const xml = await res.text();
+    // changelog deep-link 형식 (#anchor) 노출
+    expect(xml).toMatch(/moneyballscore\.vercel\.app\/changelog#/);
+    // Cycle 번호 라벨 또는 changelog 본문 markup 정리 (# / * 제거) 자취
+    expect(xml).toMatch(/Cycle \d+/);
+  });
 });
