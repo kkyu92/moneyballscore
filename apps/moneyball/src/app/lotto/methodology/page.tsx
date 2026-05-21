@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 import { LottoDataSchema, type LottoData } from "@/lib/lotto/lotto-data-schema";
+import { listArchiveDates } from "@/lib/lotto/archive";
 import lottoDataRaw from "../../../../data/lotto-data.json";
 
 export const dynamic = "force-static";
@@ -91,6 +92,7 @@ export default function LottoMethodologyPage() {
   const ratio = ((lottoData.count_valid / lottoData.total_combinations) * 100).toFixed(2);
   const oosLatest = lottoData.oos_pass_rate[lottoData.oos_pass_rate.length - 1];
   const sparkPoints = buildSparkline(lottoData.rules_history);
+  const latestArchiveDate = listArchiveDates()[0] ?? null;
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
@@ -258,6 +260,17 @@ export default function LottoMethodologyPage() {
           비공개로 보관됩니다. 통계 분석 자료 정체성 보존 + 검색 색인
           차단 (noindex).
         </p>
+        {latestArchiveDate ? (
+          <p className="text-xs text-brand-400">
+            <Link
+              href={`/lotto/archive/${latestArchiveDate}`}
+              rel="nofollow"
+              className="text-brand-300 underline hover:text-brand-100"
+            >
+              최근 archive 보기 ({latestArchiveDate}) →
+            </Link>
+          </p>
+        ) : null}
         <p className="text-xs text-brand-400">
           본 자료는 통계/분석 학습 자료이며, 실제 행동/베팅/구매 권유를
           포함하지 않습니다.
