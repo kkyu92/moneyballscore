@@ -38,18 +38,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/analysis`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/reviews`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/dashboard`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/accuracy`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
-    { url: `${baseUrl}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/guide`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/methodology`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${baseUrl}/glossary`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/accuracy`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
+    { url: `${baseUrl}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/guide`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/methodology`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/glossary`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/search`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
     { url: `${baseUrl}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${baseUrl}/contact`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     // /reviews/weekly /reviews/monthly = redirect-only 페이지 (즉시 /reviews/(weekly|monthly)/{currentId} 로 308).
     // sitemap 에 두면 redirect chain → 중복 URL 인덱싱. dynamic block (weeklyReviewRoutes / monthlyReviewRoutes) 이 실제 컨텐츠 URL 커버.
-    { url: `${baseUrl}/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
+    { url: `${baseUrl}/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/players`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/teams`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
@@ -60,13 +60,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // 시즌별 URL (generateStaticParams 에서 2023~2026 정적 생성)
+  // priority: 현재 시즌 0.8 / 직전 시즌 (currentYear-1) 0.7 (recent) / 그 외 0.65 (ancient)
   const currentYear = now.getFullYear();
-  const seasonYearRoutes: MetadataRoute.Sitemap = [2023, 2024, 2025, 2026].map((year) => ({
-    url: `${baseUrl}/seasons/${year}`,
-    lastModified: now,
-    changeFrequency: (year === currentYear ? 'daily' : 'monthly') as 'daily' | 'monthly',
-    priority: year === currentYear ? 0.8 : 0.65,
-  }));
+  const seasonYearRoutes: MetadataRoute.Sitemap = [2023, 2024, 2025, 2026].map((year) => {
+    const isCurrent = year === currentYear;
+    const isRecent = year === currentYear - 1;
+    return {
+      url: `${baseUrl}/seasons/${year}`,
+      lastModified: now,
+      changeFrequency: (isCurrent ? 'daily' : 'monthly') as 'daily' | 'monthly',
+      priority: isCurrent ? 0.8 : isRecent ? 0.7 : 0.65,
+    };
+  });
 
   // 45개 canonical 팀 매치업 URL
   const matchupRoutes: MetadataRoute.Sitemap = allPairs().map((p) => ({
@@ -131,7 +136,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           url: `${baseUrl}/analysis/game/${g.id}`,
           lastModified: g.updated_at ? new Date(g.updated_at) : now,
           changeFrequency: 'weekly',
-          priority: 0.7,
+          priority: 0.75,
         });
 
         if (g.game_date && !seenDates.has(g.game_date)) {
