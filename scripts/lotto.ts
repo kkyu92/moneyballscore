@@ -1673,6 +1673,44 @@ async function main() {
     return;
   }
 
+  if (mode === 'oos') {
+    const winningStr = process.argv[3];
+    const drwNo = process.argv[4] ?? '?';
+    if (!winningStr) {
+      console.error('사용법: pnpm tsx scripts/lotto.ts oos "9,18,21,27,44,45" 1224');
+      process.exit(1);
+    }
+    const nums = winningStr.split(',').map((s) => Number(s.trim())).sort((a, b) => a - b);
+    if (nums.length !== 6 || nums.some((n) => Number.isNaN(n) || n < 1 || n > 45)) {
+      console.error('winning numbers 6개 (1~45) 필요');
+      process.exit(1);
+    }
+    let passed = 0;
+    let failed = 0;
+    const failures: { name: string; val: number; lo: number | null; hi: number | null }[] = [];
+    for (const rule of RULES) {
+      const { pass, val } = checkRule(nums, rule, stats);
+      if (pass) {
+        passed++;
+      } else {
+        failed++;
+        failures.push({ name: rule.name, val, lo: rule.lo(stats), hi: rule.hi(stats) });
+      }
+    }
+    console.log(`\n=== OOS 검증 ${drwNo}회 (${nums.join(' ')}) ===`);
+    console.log(`전체 규칙: ${RULES.length}`);
+    console.log(`PASS: ${passed} / FAIL: ${failed}`);
+    if (failures.length > 0) {
+      console.log(`\nFAIL 규칙 상세:`);
+      for (const f of failures) {
+        const range = `[${f.lo ?? '-∞'}, ${f.hi ?? '+∞'}]`;
+        console.log(`  - ${f.name.padEnd(18)} val=${f.val} 범위=${range}`);
+      }
+    }
+    console.log(`\nJSON: {"draw": ${drwNo}, "passed": ${passed}, "failed": ${failed}}`);
+    return;
+  }
+
   if (mode !== 'fetch' && mode !== 'update') {
     analyzePatterns(rounds, stats);
   }
