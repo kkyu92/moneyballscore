@@ -274,7 +274,61 @@ Type error: Property 'home_team_code' does not exist on type ...
 - `apps/moneyball/src/app/feed/route.ts` 안 남은 `home_team_code` / `away_team_code` query reference sync (loader.ts fix scope 외 silent layer — cycle 856 19 신규 unit test 박제 시점 동시 발견)
 - 사례 12 family 의 silent layer 차단 patch 완료
 
-**교훈**: ORM type generation 이 supabase 컬럼명 mismatch 를 build time 까지 silent (CI test 가 mocked supabase type 으로 통과). Turbopack build fail 발생 시점 = production deploy 시 vercel build = 사용자 가시 evidence 부재 (사례 10 동일 layer). silent drift family 12번째 — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 인프라 silent + 사례 10/12 **빌드 시스템 silent 2건** + 사례 11 cron fallback silent. 운영 alert 자동 감지 path 박제 완료 (cycle 838 PR #1195 deploy-drift-alert.yml) — build fail → /api/version HTTP ≠ 200 → `::error::` 즉시 exit 1 (사례 10 Turbopack build fail family 와 동일 trigger path 자연 흡수). cycle 849 fix 직후 사례 9 family 5번째 재발 evidence = cycle 850 carry-over (사례 9 본문 line 224 박제). silent drift family streak ~327 cycle (cycle 458 → cycle 862) 유지 — 본 메인 자율 영역 silent layer 11/12 fix path 박제 + 사례 9 만 사용자 영역 root cause 미확정 carry-over.
+**교훈**: ORM type generation 이 supabase 컬럼명 mismatch 를 build time 까지 silent (CI test 가 mocked supabase type 으로 통과). Turbopack build fail 발생 시점 = production deploy 시 vercel build = 사용자 가시 evidence 부재 (사례 10 동일 layer). silent drift family 12번째 — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 인프라 silent + 사례 10/12 **빌드 시스템 silent 2건** + 사례 11 cron fallback silent. 운영 alert 자동 감지 path 박제 완료 (cycle 838 PR #1195 deploy-drift-alert.yml) — build fail → /api/version HTTP ≠ 200 → `::error::` 즉시 exit 1 (사례 10 Turbopack build fail family 와 동일 trigger path 자연 흡수). cycle 849 fix 직후 사례 9 family 5번째 재발 evidence = cycle 850 carry-over (사례 9 본문 line 224 박제). 사례 12 family 잔존 instance = 사례 14 (cycle 869 PR #1225 predictions/page.tsx 동일 column 패턴, 본문 사례 14 entry 박제). silent drift family streak ~334 cycle (cycle 458 → cycle 869) 유지 — 본 메인 자율 영역 silent layer 12/14 fix path 박제 + 사례 9 만 사용자 영역 root cause 미확정 carry-over.
+
+### 드리프트 사례 13 — pnpm overrides 전역 swap → minimatch@3 transitive 의존 brace-expansion@5 ESM-only require fail → ESLint runtime 빌드 시스템 silent (2026-05-22, cycle 866)
+
+cycle 859 PR #1216 `npm audit` 4건 0건 fix 시 `pnpm.overrides` 에 `"brace-expansion": ">=5.0.6"` 전역 박제. 본 override 가 minimatch@3.1.5 transitive 의존 (`eslint-config-next > eslint-plugin-import > @typescript-eslint/parser > @typescript-eslint/typescript-estree`) 의 `brace-expansion: "^1.1.7"` resolution 도 5.0.6 으로 강제 swap. brace-expansion@5.x = ESM-only (`"type": "module"`) → minimatch@3.1.5 CommonJS `require('brace-expansion')` 시 `expand=undefined` → `TypeError: expand is not a function` ESLint config-array `doMatch` 호출 시 throw.
+
+```
+TypeError: expand is not a function
+    at Minimatch.parse (.../minimatch@3.1.5/dist/cjs/index.js:...)
+    at doMatch (eslint config-array)
+```
+
+→ `pnpm lint` EXIT 2 → CI green 채널 깨짐 → cycle 859→866 **16 consecutive CI failures**. 운영 코드 변경 0 / 패키지 의존성 자체 silent layer = 사례 10 (Turbopack route segment config statically X) + 사례 12 (ORM column mismatch) 와 동일 **빌드 시스템 silent layer 3번째 evidence**.
+
+진단 (cycle 866):
+- `/health` baseline 측정 중 `pnpm lint` exit 2 노출 — review-code (heavy) chain 가 fix-incident chain 자연 redirect (review-code-discovered)
+- cycle 859 머지 (4a6c459a, 2026-05-22T00:36:31Z) 직후 첫 CI fail, 직전 cycle 858 머지 cc3b4f22 = green
+- R7 자동 머지가 main push 후 CI 결과 무시 가능성 (PR auto-merge required check 미설정) — 후속 진단 carry-over
+
+최소 scope fix (PR #1222):
+- `pnpm.overrides` path-scoped + version-pinned 박제:
+  - `minimatch@3>brace-expansion: ^1.1.14` — minimatch@3 transitive 만 1.x patched (CVE-2026-45149 fix in 1.1.12+)
+  - `brace-expansion@<1.1.12: >=1.1.14` — 미패치 1.x 강제 upgrade (defense in depth)
+  - `brace-expansion@2|3|4|5: >=2.0.2|>=3.0.2|>=4.0.1|>=5.0.6` — 각 메이저 patched 버전 (cycle 859 의도 유지)
+- `pnpm install` (+6 -3 packages) + `pnpm lint` 3/3 tasks → CI green 복귀 + `pnpm audit` 0 advisory + `pnpm test` 537 PASS regression 0
+
+**교훈**: pnpm.overrides 전역 single-version pin = transitive 의존이 다른 메이저 버전 요구하는 경우 ESM/CJS 호환성 silent break. fix path = path-scoped override (`A>B: version` 형식) + 모든 메이저 version constraint 명시. CI green 채널 16 cycle silent = R7 auto-merge 의 required check 미설정 가능성 carry-over (사용자 영역 점검). silent drift family 13번째 — 빌드 시스템 silent layer 사례 10 (Turbopack runtime re-export) + 사례 12 (ORM column) + **사례 13 = ESLint runtime CommonJS/ESM transitive** 3번째 evidence. cycle 859 PR #1216 test plan 안 `pnpm lint` 검증 step 누락 = R5 메타 패턴 (test 만 보고 lint 안 봄) 재발. fix 후 lint pre-merge step 강제 carry-over.
+
+### 드리프트 사례 14 — Supabase select 컬럼 부재 (`games.home_team_code` / `games.away_team_code`) → REST 42703 → `/predictions` 페이지 silent 500 운영 코드 silent (2026-05-22, cycle 869)
+
+cycle 670 PR #959 `/predictions` 검색박스 박제 시 `apps/moneyball/src/app/predictions/page.tsx:64` data select 에 `home_team_code` + `away_team_code` 직접 컬럼 박제 (검색 attr `data-prediction-teams` 박제 source 의도). 실제 `games` 테이블 컬럼명 = `home_team` + `away_team` (KBO team_code 직접 컬럼) = 사례 12 와 동일 column mismatch.
+
+```
+Supabase REST: "code": "42703", "message": "column games.home_team_code does not exist"
+→ assertSelectOk(error) throw → Next.js error boundary 렌더 → /predictions HTTP 500
+```
+
+→ cycle 670 머지 (2026-05-19) 이후 production **~199 cycle 잔존 silent 500**. 사례 12 family 잔존 instance — cycle 849 PR #1205 loader.ts sweep + cycle 856 PR #1213 feed/route.ts sweep 시점 모두 predictions/page.tsx 미포함. **사례 12 family 잔존 detection channel = review-code (heavy) sweep + supabase REST 수동 fire 진단**. 사례 12 = Turbopack build fail (사용자 가시 evidence X) vs 사례 14 = REST runtime 500 (사용자 가시 — production HTML `error="" parallel router param` 노출).
+
+진단 (cycle 869 fix-incident heavy):
+- production HTML fetch → error boundary 렌더 evidence 확인
+- supabase REST 수동 fire (service role anon) → `42703 column does not exist` 정확 노출
+- 직전 sweep (cycle 849 + cycle 856) 시점 grep scope = loader.ts + feed/route.ts only, predictions/page.tsx 누락
+- review-code sweep 44 (cycle 866→867→868 next_rec carry-over) 가 자연 source 매핑 → fix-incident redirect
+
+최소 scope fix (PR #1225):
+- `apps/moneyball/src/app/predictions/page.tsx` select clause 정정 — `home_team_code` + `away_team_code` → `home_team:teams!games_home_team_id_fkey(code)` + `away_team:teams!games_away_team_id_fkey(code)` FK 조인 패턴 (insights/page.tsx cycle 844 정합)
+- 신규 regression guard 1 test (`predictions-page.test.ts`) — `home_team_code` / `away_team_code` 0 match grep
+- `pnpm test` 538 → 539 + `pnpm build` `/predictions` static prerender 통과 + `pnpm lint` + `tsc --noEmit` 0 error
+
+후속 family sweep 박제 (cycle 870 review-code sweep 45):
+- `apps/moneyball/src` + `packages` 전수 grep — 운영 코드 `home_team_code` / `away_team_code` 잔존 instance 0건 확인 (regression guard test 3 파일 = insights/loader/predictions 만 reference)
+- 사례 12/14 family silent layer 차단 patch 완료 — 이후 발생 시 grep guard 즉시 차단
+
+**교훈**: 같은 silent column 패턴 (사례 12 + 사례 14) 이 2 cycle 간격으로 재발 → fix scope 가 단일 instance 만 cover 시 family 잔존 가능. sweep chain 의 grep 범위 = full repo + test 분리 보장 필수. supabase REST 수동 fire = column mismatch 진단의 fastest path (CI test mock 회피, vercel build log 회피). silent drift family 14번째 — 사례 12 family 잔존 instance + 운영 코드 silent (사례 3/4/6/7/8 동일 layer, REST runtime 500 형식 신규). 사례 9 family quota carry-over 로 본 fix production silent skip 가능성 carry-over (cycle 868 박제 quota 100/day 한도 도달). silent drift family alert 채널 (cycle 838 deploy-drift-alert.yml) = build/deploy layer cover, runtime 500 layer 별도 detection channel 부재 carry-over (Sentry capture 활용 가능 — cycle 870 carry-over).
 
 ### 이미 구현된 주요 모듈 (v0.5.49+ 기준, cycle 651 phase)
 
