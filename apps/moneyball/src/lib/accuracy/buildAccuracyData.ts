@@ -3,6 +3,8 @@ import {
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   LLM_ACTIVE_VERSIONS,
+  WINNER_PROB_CONFIDENT,
+  WINNER_PROB_LEAN,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -295,9 +297,9 @@ export function buildWeeklyTrend(rows: PredRow[]): WeekBucket[] {
 
 export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
   const tiers = [
-    { label: '낮은 확신', range: '~55%', min: 0, max: 0.55 },
-    { label: '보통 확신', range: '55~65%', min: 0.55, max: 0.65 },
-    { label: '높은 확신', range: '65%~', min: 0.65, max: 1.01 },
+    { label: '낮은 확신', range: '~55%', min: 0, max: WINNER_PROB_LEAN },
+    { label: '보통 확신', range: '55~65%', min: WINNER_PROB_LEAN, max: WINNER_PROB_CONFIDENT },
+    { label: '높은 확신', range: '65%~', min: WINNER_PROB_CONFIDENT, max: 1.01 },
   ];
   return tiers.map(({ label, range, min, max }) => {
     const subset = rows.filter((r) => r.confidence >= min && r.confidence < max);
