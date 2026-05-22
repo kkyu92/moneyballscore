@@ -3,6 +3,20 @@
 ## ✅ Resolved Lessons
 - `fp:vercel-deploy-1e80b78` (2026-04-22): Sentry /webhook sub-path 3회 실패 → no-relay=true 태그로 해결 (박제 2026-04-29)
 
+## 🎰 Lotto plan #6/7 carry-over (cycle 882, 2026-05-22~)
+
+**상태**: plan #6 Step A ship 완료 (PR #1239, 6a1e8d6). 사용자 명시 = 본 carry-over 모두 완료 후 MLB 작업 시작.
+
+**carry-over 항목**:
+
+1. **plan #6 Step B** (본 메인 자율 가능, **즉시 fire**) — Header NAV "로또" group 2 link (`/lotto/methodology` + `/lotto/archive`) + `/lotto/archive/page.tsx` 회차 list index page 신규 박제 (Header NAV link 404 회피) + Footer "로또" column 2 link. **사용자 /goal fire 대기**.
+2. **1225회 OOS 검증** (본 메인 자율, **2026-05-23 토 추첨 후 ~21:00 KST**) — `~/lotto_picks/2026-05-23-50sets.md` 사전 박제됨 + scripts/lotto.ts 'oos' mode (cycle 881 박제) 재사용 → cycle 881 PR #1238 패턴 정합 (1224회 OOS) → PR + R7 자동 머지. **추첨 시각 자연 trigger**.
+3. **14일 AdSense reject signal monitor** (사용자 영역, **2026-05-22 ~ 06-05**) — Google AdSense policy center site review + Sentry warning channel. reject 신호 0 시 항목 4 (plan #7) 박제 GO. reject 시 plan #6 + plan #7 모두 status=killed + plan #2 v1 보수 rollback (robots.ts AdSense crawler block 유지된 상태 → /lotto/archive indexable 도 되돌리기).
+4. **plan #7 Step C/D/E/F** (본 메인 자율, **항목 3 통과 후 박제**) — `/lotto` hub 페이지 신규 + UI 강화 (renderMarkdown.tsx 재사용 + 50조합 default collapse + 추천 5세트 above-the-fold + KBO vs lotto 시각 차별화) + GH Actions cron 매주 금요일 multi-fire 자동 갱신 + 6+ unit test 박제. plan = `~/.develop-cycle/plans/moneyballscore/7.md` (status: deferred_pending_adsense_monitor).
+5. **N≥10 누적 OOS** (자연 누적, ~07-25 ETA) — 현재 N=1 (1224회 단건). 메모리 `content-architecture-lotto-rule-oos-sample-floor.md` floor = N=5 preliminary / N=10 actionable. 매주 토 추첨 후 자연 누적 → N=10 도달 시 256 rules 통계적 우위 재평가.
+
+**완료 조건 (MLB 작업 시작 trigger)**: 항목 1~4 모두 ship 완료. 항목 5 = 백그라운드 자연 누적 (MLB 작업과 동시 진행 OK).
+
 ## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07)
 
 **현재 상태**: 124건 검증 완료 (cycle 775 갱신, 2026-05-20) / 전체 적중률 47.6% / Brier v1.8 0.2241 / v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / v1.8=43.3%(30) — credit-fail 22건(40.9%) + real-debate 8건(50.0%) gap +9.1pp. v2.0 임계 n=150 까지 26건

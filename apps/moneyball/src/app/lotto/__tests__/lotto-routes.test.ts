@@ -6,6 +6,7 @@ import {
   generateMetadata as archiveGenerateMetadata,
 } from "@/app/lotto/archive/[date]/page";
 import { metadata as notFoundMetadata } from "@/app/lotto/archive/[date]/not-found";
+import { metadata as archiveIndexMetadata } from "@/app/lotto/archive/page";
 import {
   metadata as methodologyMetadata,
 } from "@/app/lotto/methodology/page";
@@ -22,6 +23,8 @@ const ARCHIVE_SRC = join(
   "src/app/lotto/archive/[date]/page.tsx",
 );
 const SITEMAP_SRC = join(REPO_ROOT, "src/app/sitemap.ts");
+const HEADER_SRC = join(REPO_ROOT, "src/components/layout/Header.tsx");
+const FOOTER_SRC = join(REPO_ROOT, "src/components/layout/Footer.tsx");
 
 describe("/lotto/methodology metadata + module load", () => {
   it("metadata title + canonical 박제", () => {
@@ -191,6 +194,89 @@ describe("/lotto/archive/[date] — Breadcrumb 박제 (info-arch regression guar
     expect(src).toMatch(/<Breadcrumb/);
     expect(src).toMatch(/href:\s*"\/lotto\/methodology"/);
     expect(src).toMatch(/label:\s*"Lotto 통계"/);
+  });
+});
+
+describe("/lotto/archive index page metadata (plan #6 Step B)", () => {
+  it("metadata.robots.index === true + follow === true", () => {
+    const robotsMeta = archiveIndexMetadata.robots;
+    expect(robotsMeta).toBeTruthy();
+    if (typeof robotsMeta === "object" && robotsMeta !== null) {
+      expect(robotsMeta.index).toBe(true);
+      expect(robotsMeta.follow).toBe(true);
+    } else {
+      throw new Error("archive index robots metadata expected object");
+    }
+  });
+
+  it("canonical = SITE_URL/lotto/archive", () => {
+    expect(archiveIndexMetadata.alternates?.canonical).toBe(
+      "https://moneyballscore.vercel.app/lotto/archive",
+    );
+  });
+
+  it("title + description 박제", () => {
+    expect(archiveIndexMetadata.title).toBe("Lotto 통계 아카이브");
+    expect(archiveIndexMetadata.description).toMatch(/통계 분석/);
+  });
+});
+
+describe("Header NAV — 로또 group 박제 (plan #6 Step B)", () => {
+  const src = readFileSync(HEADER_SRC, "utf-8");
+
+  it("로또 group label 박제", () => {
+    expect(src).toMatch(/label:\s*"로또"/);
+  });
+
+  it("/lotto/methodology link 박제 in NAV", () => {
+    expect(src).toMatch(/href:\s*"\/lotto\/methodology"/);
+  });
+
+  it("/lotto/archive link 박제 in NAV", () => {
+    expect(src).toMatch(/href:\s*"\/lotto\/archive"/);
+  });
+});
+
+describe("Footer SITEMAP — 로또 column 박제 (plan #6 Step B)", () => {
+  const src = readFileSync(FOOTER_SRC, "utf-8");
+
+  it("로또 column label 박제", () => {
+    expect(src).toMatch(/label:\s*"로또"/);
+  });
+
+  it("/lotto/methodology + /lotto/archive link 양쪽 박제 in Footer", () => {
+    expect(src).toMatch(/href:\s*"\/lotto\/methodology"/);
+    expect(src).toMatch(/href:\s*"\/lotto\/archive"/);
+  });
+
+  it("도움말 column 안 /lotto/methodology entry 부재 (로또 column 으로 이동)", () => {
+    const helpColumnMatch = src.match(
+      /label:\s*"도움말",\s*links:\s*\[([\s\S]*?)\]/,
+    );
+    expect(helpColumnMatch).toBeTruthy();
+    if (helpColumnMatch) {
+      expect(helpColumnMatch[1]).not.toMatch(/\/lotto\/methodology/);
+    }
+  });
+});
+
+describe("sitemap.ts — /lotto/archive static index entry 박제 (plan #6 Step B)", () => {
+  const src = readFileSync(SITEMAP_SRC, "utf-8");
+
+  it("/lotto/archive static entry 박제 (priority 0.6 weekly)", () => {
+    expect(src).toMatch(
+      /url:\s*`\$\{baseUrl\}\/lotto\/archive`[^}]*priority:\s*0\.6/,
+    );
+  });
+
+  it("sitemap() 호출 시 /lotto/archive static entry 생성", async () => {
+    const entries = await sitemap();
+    const archiveIndexEntry = entries.find(
+      (e) => e.url === "https://moneyballscore.vercel.app/lotto/archive",
+    );
+    expect(archiveIndexEntry).toBeTruthy();
+    expect(archiveIndexEntry?.priority).toBe(0.6);
+    expect(archiveIndexEntry?.changeFrequency).toBe("weekly");
   });
 });
 

@@ -47,7 +47,13 @@ const SITEMAP_COLUMNS = [
       { href: "/changelog", label: "변경 로그" },
       { href: "/about", label: "소개" },
       { href: "/search", label: "검색" },
-      { href: "/lotto/methodology", label: "Lotto 통계" },
+    ],
+  },
+  {
+    label: "로또",
+    links: [
+      { href: "/lotto/methodology", label: "통계 방법론" },
+      { href: "/lotto/archive", label: "아카이브" },
     ],
   },
 ];
