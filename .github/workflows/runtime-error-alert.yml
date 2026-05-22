@@ -1,0 +1,79 @@
+name: runtime-error-alert
+
+# Production runtime error 자동 감지 — silent drift family 사례 14 (cycle 869
+# predictions/page.tsx home_team_code REST 42703 → runtime 500 silent) 형식
+# alert coverage 신규 박제 (cycle 871).
+#
+# 핵심 라우트 HTTP smoke 매시간 검사:
+# - HTTP 200 외 응답 (500 / 503 / 404 / timeout) → ::error:: + exit 1
+# - 정상 sync → ::notice:: + exit 0
+#
+# 사례 9 family (deploy-drift-alert.yml cycle 838) = main HEAD vs production
+# alias commit drift detection. 본 workflow = 사례 14 family (REST runtime
+# 500 silent — supabase column mismatch / Next.js error boundary 등) detection
+# 채널. layer 분리 — deploy success 이후 runtime 단계 silent 500 별도 감지.
+#
+# cron schedule = '23 * * * *' (매시간 UTC 23분)
+# - deploy-drift-alert '17 * * * *' / sitemap-warmup '37 * * * *' /
+#   indexnow-ping '37 0 * * *' 분 겹침 회피
+# - 매시간 검사로 cycle 670~869 (199 cycle) 사례 14 silent 500 누적 같은
+#   장기 누락 즉시 감지
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: runtime-error-alert
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Smoke key production routes
+        run: |
+          set +e
+          BASE="https://moneyballscore.vercel.app"
+          ROUTES=(
+            "/"
+            "/predictions"
+            "/insights"
+            "/analysis"
+            "/accuracy"
+            "/methodology"
+            "/guide"
+            "/glossary"
+            "/leaderboard"
+            "/changelog"
+          )
+
+          FAILED=0
+          FAILED_ROUTES=""
+
+          for r in "${ROUTES[@]}"; do
+            STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+              -A "moneyball-runtime-alert/1.0" \
+              --max-time 30 \
+              "$BASE$r" 2>/dev/null)
+
+            if [ "$STATUS" = "200" ]; then
+              echo "ok $r → $STATUS"
+            else
+              echo "FAIL $r → $STATUS"
+              FAILED=$((FAILED + 1))
+              FAILED_ROUTES="$FAILED_ROUTES $r($STATUS)"
+            fi
+          done
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::runtime drift detected — $FAILED route(s) non-200:$FAILED_ROUTES. 사례 14 family (REST runtime 500 silent — supabase column mismatch / Next.js error boundary) 재발 의심. Sentry issues + vercel logs <prod-id> 진단 권장."
+            exit 1
+          fi
+
+          echo "::notice::all ${#ROUTES[@]} routes ok."
