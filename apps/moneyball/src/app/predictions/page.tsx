@@ -58,10 +58,12 @@ async function getPredictionDates(): Promise<DateStat[]> {
 
   // LEFT JOIN: prediction 없는 편성 경기도 포함. pre_game 타입만 붙여서
   // post_game row 가 있어도 예측 카운트 이중집계 방지.
+  // games 테이블 컬럼 = home_team_id / away_team_id (FK to teams). teams.code
+  // 가 KBO team code. cycle 869 사례 14 fix — silent drift family 잔존 instance.
   const result = await supabase
     .from('games')
     .select(
-      'game_date, status, home_team_code, away_team_code, predictions(id, confidence, is_correct, reasoning, prediction_type)',
+      'game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code), predictions(id, confidence, is_correct, reasoning, prediction_type)',
     )
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
@@ -92,8 +94,22 @@ async function getPredictionDates(): Promise<DateStat[]> {
     }
     const entry = dateMap.get(date)!;
     entry.total += 1;
-    if (game.home_team_code) entry.teamCodes.add(game.home_team_code);
-    if (game.away_team_code) entry.teamCodes.add(game.away_team_code);
+    const homeTeamField = game.home_team as
+      | { code: string }
+      | { code: string }[]
+      | null;
+    const awayTeamField = game.away_team as
+      | { code: string }
+      | { code: string }[]
+      | null;
+    const homeCode = Array.isArray(homeTeamField)
+      ? homeTeamField[0]?.code
+      : homeTeamField?.code;
+    const awayCode = Array.isArray(awayTeamField)
+      ? awayTeamField[0]?.code
+      : awayTeamField?.code;
+    if (homeCode) entry.teamCodes.add(homeCode);
+    if (awayCode) entry.teamCodes.add(awayCode);
     if (game.status === 'postponed') entry.cancelled += 1;
     const pred = game.predictions?.[0] as
       | {
