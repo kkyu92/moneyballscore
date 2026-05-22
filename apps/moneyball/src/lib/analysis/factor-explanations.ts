@@ -1,5 +1,9 @@
 import { DEFAULT_WEIGHTS, josa, ro } from "@moneyball/shared";
-import { FACTOR_LABELS_TECHNICAL as FACTOR_LABELS } from "@/lib/predictions/factorLabels";
+import {
+  FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
+  NEUTRAL_HI,
+  NEUTRAL_LO,
+} from "@/lib/predictions/factorLabels";
 
 export interface FactorRawDetails {
   homeSPFip?: number | null;
@@ -44,8 +48,8 @@ interface ExplainInput {
 
 
 function determineFavor(value: number): "home" | "away" | "neutral" {
-  if (value > 0.55) return "home";
-  if (value < 0.45) return "away";
+  if (value > NEUTRAL_HI) return "home";
+  if (value < NEUTRAL_LO) return "away";
   return "neutral";
 }
 

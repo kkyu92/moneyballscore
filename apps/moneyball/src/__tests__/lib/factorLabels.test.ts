@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { topFavoringFactors } from "@/lib/predictions/factorLabels";
+import {
+  NEUTRAL_HI,
+  NEUTRAL_LO,
+  topFavoringFactors,
+} from "@/lib/predictions/factorLabels";
+import {
+  NEUTRAL_HI as INSIGHTS_NEUTRAL_HI,
+  NEUTRAL_LO as INSIGHTS_NEUTRAL_LO,
+  selectTopFactors,
+} from "@/lib/insights/topFactors";
 
 describe("topFavoringFactors", () => {
   const factors: Record<string, number> = {
@@ -40,5 +49,41 @@ describe("topFavoringFactors", () => {
     const withUnknown = { ...factors, unknown_factor: 0.9 };
     const result = topFavoringFactors(withUnknown, true, 10);
     expect(result.every((label) => label !== "unknown_factor")).toBe(true);
+  });
+});
+
+describe("NEUTRAL threshold source-of-truth (cycle 876 sweep 46)", () => {
+  it("NEUTRAL_LO=0.45 / NEUTRAL_HI=0.55 single source", () => {
+    expect(NEUTRAL_LO).toBe(0.45);
+    expect(NEUTRAL_HI).toBe(0.55);
+  });
+
+  it("topFactors.ts re-export 가 factorLabels.ts source 와 동일 reference", () => {
+    expect(INSIGHTS_NEUTRAL_LO).toBe(NEUTRAL_LO);
+    expect(INSIGHTS_NEUTRAL_HI).toBe(NEUTRAL_HI);
+  });
+
+  it("selectTopFactors favorable 분류가 NEUTRAL boundary 정합", () => {
+    const top = selectTopFactors({
+      sp_fip: NEUTRAL_HI + 0.01, // home
+      bullpen_fip: NEUTRAL_LO - 0.01, // away
+      elo: 0.5, // neutral
+    });
+    const sp = top.find((t) => t.key === "sp_fip");
+    const bp = top.find((t) => t.key === "bullpen_fip");
+    const elo = top.find((t) => t.key === "elo");
+    expect(sp?.favorable).toBe("home");
+    expect(bp?.favorable).toBe("away");
+    expect(elo?.favorable).toBe("neutral");
+  });
+
+  it("boundary edge — value === NEUTRAL_HI 정확히 = neutral (> 검사 정합)", () => {
+    const top = selectTopFactors({ sp_fip: NEUTRAL_HI });
+    expect(top[0]?.favorable).toBe("neutral");
+  });
+
+  it("boundary edge — value === NEUTRAL_LO 정확히 = neutral (< 검사 정합)", () => {
+    const top = selectTopFactors({ sp_fip: NEUTRAL_LO });
+    expect(top[0]?.favorable).toBe("neutral");
   });
 });
