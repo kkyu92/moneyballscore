@@ -3,6 +3,10 @@ import {
   analyzeFactorAccuracy,
   type FactorSample,
 } from "../factor-accuracy";
+import {
+  NEUTRAL_HI,
+  NEUTRAL_LO,
+} from "@/lib/predictions/factorLabels";
 
 function buildSamples(
   n: number,
@@ -128,5 +132,28 @@ describe("analyzeFactorAccuracy", () => {
     const report = analyzeFactorAccuracy(samples, { minSamples: 2 });
     const spFip = report.stats.find((s) => s.factor === "sp_fip");
     expect(spFip?.n).toBe(2);
+  });
+
+  it("NEUTRAL band 경계 (== NEUTRAL_LO / == NEUTRAL_HI) 는 directional 평가 제외", () => {
+    const samples: FactorSample[] = [
+      { factors: { sp_fip: NEUTRAL_LO }, actualHomeWin: 0 },
+      { factors: { sp_fip: NEUTRAL_HI }, actualHomeWin: 1 },
+      { factors: { sp_fip: 0.6 }, actualHomeWin: 1 },
+    ];
+    const report = analyzeFactorAccuracy(samples, { minSamples: 1 });
+    const spFip = report.stats.find((s) => s.factor === "sp_fip");
+    expect(spFip?.directionalN).toBe(1);
+    expect(spFip?.directionalAccuracy).toBe(1);
+  });
+
+  it("NEUTRAL band 바깥 (< NEUTRAL_LO / > NEUTRAL_HI) 은 directional 평가 포함", () => {
+    const samples: FactorSample[] = [
+      { factors: { sp_fip: NEUTRAL_LO - 0.01 }, actualHomeWin: 0 },
+      { factors: { sp_fip: NEUTRAL_HI + 0.01 }, actualHomeWin: 1 },
+    ];
+    const report = analyzeFactorAccuracy(samples, { minSamples: 1 });
+    const spFip = report.stats.find((s) => s.factor === "sp_fip");
+    expect(spFip?.directionalN).toBe(2);
+    expect(spFip?.directionalAccuracy).toBe(1);
   });
 });

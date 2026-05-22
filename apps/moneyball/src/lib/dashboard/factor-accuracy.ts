@@ -1,4 +1,5 @@
 import { DEFAULT_WEIGHTS } from "@moneyball/shared";
+import { NEUTRAL_HI, NEUTRAL_LO } from "@/lib/predictions/factorLabels";
 
 export interface FactorSample {
   factors: Record<string, number>;
@@ -10,7 +11,7 @@ export interface FactorStat {
   n: number;
   meanBias: number; // 평균 signed error (positive = 홈팀 과대 예측)
   mae: number; // mean absolute error
-  directionalAccuracy: number | null; // 중립(0.45-0.55) 제외한 방향 일치 비율
+  directionalAccuracy: number | null; // NEUTRAL_LO~NEUTRAL_HI 제외한 방향 일치 비율
   directionalN: number;
   correlation: number; // Pearson correlation (value vs actualHomeWin)
   currentWeight: number;
@@ -23,8 +24,6 @@ export interface FactorAccuracyReport {
   stats: FactorStat[];
   proposedWeightsDelta: number; // 현재 vs 제안 가중치 총 변화량 (L1)
 }
-
-const NEUTRAL_BAND = 0.05;
 
 function pearsonCorrelation(xs: number[], ys: number[]): number {
   const n = xs.length;
@@ -67,7 +66,7 @@ function computeFactorStat(
     const error = v - actual;
     absSum += Math.abs(error);
     signedSum += error;
-    if (Math.abs(v - 0.5) > NEUTRAL_BAND) {
+    if (v < NEUTRAL_LO || v > NEUTRAL_HI) {
       dirN += 1;
       const predictedHome = v > 0.5;
       const actualHome = actual === 1;

@@ -3,6 +3,10 @@ import {
   explainFactor,
   buildGameOverview,
 } from "../factor-explanations";
+import {
+  NEUTRAL_HI,
+  NEUTRAL_LO,
+} from "@/lib/predictions/factorLabels";
 
 describe("explainFactor", () => {
   it("sp_fip: away가 낮으면 away 유리 + 서술에 팀명 + 격차 포함", () => {
@@ -280,6 +284,27 @@ describe("buildGameOverview", () => {
     });
     expect(result.summary).toContain("상대전적");
     expect(result.summary).toContain("KIA");
+  });
+
+  it("박빙 태그 임계 = NEUTRAL_LO/HI source (silent drift 차단)", () => {
+    const inBand = buildGameOverview({
+      homeWinProb: NEUTRAL_LO,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(inBand.tags).toContain("박빙");
+    const outBand = buildGameOverview({
+      homeWinProb: NEUTRAL_LO - 0.001,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(outBand.tags).not.toContain("박빙");
+    const inBandHi = buildGameOverview({
+      homeWinProb: NEUTRAL_HI,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(inBandHi.tags).toContain("박빙");
   });
 });
 
