@@ -157,6 +157,43 @@ describe("/insights hub data fetch shape (regression guard)", () => {
   });
 });
 
+describe("/insights/[date] FactorBreakdown integration (plan #5 Step 3 regression guard)", () => {
+  it("FactorBreakdown import wire", () => {
+    expect(DATE_SRC).toMatch(
+      /import\s*\{\s*FactorBreakdown\s*\}\s*from\s*"@\/components\/predictions\/FactorBreakdown"/,
+    );
+  });
+
+  it("FactorBreakdown render after JudgeReasoningCard with item.factors guard", () => {
+    expect(DATE_SRC).toMatch(/item\.factors\s*&&\s*\(/);
+    expect(DATE_SRC).toMatch(
+      /<FactorBreakdown[\s\S]*?factors=\{item\.factors\}[\s\S]*?homeTeam=\{item\.homeTeam\}[\s\S]*?awayTeam=\{item\.awayTeam\}/,
+    );
+  });
+});
+
+describe("insights loader factors column (plan #5 Step 2 regression guard)", () => {
+  const LOADER_SRC = readFileSync(
+    join(REPO_ROOT, "src/lib/insights/loader.ts"),
+    "utf8",
+  );
+
+  it("InsightEntry interface includes factors Record<string,number> | null", () => {
+    expect(LOADER_SRC).toMatch(
+      /factors:\s*Record<string,\s*number>\s*\|\s*null/,
+    );
+  });
+
+  it("getInsightsForDate select clause includes factors column", () => {
+    expect(LOADER_SRC).toMatch(/"is_correct,\s*reasoning,\s*factors,/);
+  });
+
+  it("home_team_code / away_team_code 직접 컬럼 참조 X (사례 12/14 silent drift family guard)", () => {
+    expect(LOADER_SRC).not.toMatch(/home_team_code/);
+    expect(LOADER_SRC).not.toMatch(/away_team_code/);
+  });
+});
+
 describe("sitemap.ts /insights URL coverage (regression guard)", () => {
   it("/insights hub URL priority 0.75 daily", () => {
     expect(SITEMAP_SRC).toMatch(
