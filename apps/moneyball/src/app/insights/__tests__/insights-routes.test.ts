@@ -3,6 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { metadata as hubMetadata } from "@/app/insights/page";
 import { generateMetadata as dateGenerateMetadata } from "@/app/insights/[date]/page";
+import {
+  selectTopFactors,
+  TOP_FACTOR_LIMIT,
+} from "@/lib/insights/topFactors";
 
 const REPO_ROOT = process.cwd();
 const HUB_SRC = readFileSync(
@@ -219,10 +223,10 @@ describe("/insights hub mini factor preview (plan #5 Step 4 regression guard)", 
     );
   });
 
-  it("selectTopFactors helper + TOP_FACTOR_LIMIT=3 + dist sort", () => {
-    expect(HUB_SRC).toMatch(/function selectTopFactors/);
-    expect(HUB_SRC).toMatch(/TOP_FACTOR_LIMIT\s*=\s*3/);
-    expect(HUB_SRC).toMatch(/Math\.abs\(value - 0\.5\)/);
+  it("selectTopFactors import from topFactors.ts (extracted helper, plan #5 Step 5)", () => {
+    expect(HUB_SRC).toMatch(
+      /import\s*\{\s*selectTopFactors\s*\}\s*from\s*"@\/lib\/insights\/topFactors"/,
+    );
   });
 
   it("mini factor preview render block with data-mini-factor-preview attr", () => {
@@ -236,10 +240,59 @@ describe("/insights hub mini factor preview (plan #5 Step 4 regression guard)", 
     );
     expect(HUB_SRC).toMatch(/전체 팩터 보기/);
   });
+});
 
-  it("FACTOR_LABELS import from factorLabels.ts (sync source of truth)", () => {
-    expect(HUB_SRC).toMatch(
-      /import\s*\{\s*FACTOR_LABELS\s*\}\s*from\s*"@\/lib\/predictions\/factorLabels"/,
-    );
+describe("selectTopFactors behavior (plan #5 Step 5 — extracted helper unit test)", () => {
+  it("(1) null factors → 빈 배열 (factors 부재 시 skip)", () => {
+    expect(selectTopFactors(null)).toEqual([]);
+  });
+
+  it("(2) 빈 객체 / FACTOR_LABELS 미매칭 키 / 비정상 값 모두 filter (null-safe normalize)", () => {
+    expect(selectTopFactors({})).toEqual([]);
+    expect(selectTopFactors({ unknown_key: 0.9 })).toEqual([]);
+    expect(
+      selectTopFactors({
+        sp_fip: Number.NaN,
+        bullpen_fip: Number.POSITIVE_INFINITY,
+        elo: 0.7,
+      }),
+    ).toEqual([
+      { key: "elo", label: expect.any(String), pct: 70, favorable: "home" },
+    ]);
+  });
+
+  it("(3) abs(value - 0.5) 거리 desc 정렬 + TOP_FACTOR_LIMIT=3 슬라이스", () => {
+    const factors = {
+      sp_fip: 0.52,
+      bullpen_fip: 0.85,
+      lineup_woba: 0.15,
+      recent_form: 0.5,
+      elo: 0.7,
+      war: 0.55,
+    };
+    const top = selectTopFactors(factors);
+    expect(top).toHaveLength(TOP_FACTOR_LIMIT);
+    expect(top[0].key).toBe("bullpen_fip");
+    expect(top[1].key).toBe("lineup_woba");
+    expect(top[2].key).toBe("elo");
+  });
+
+  it("(4) favorable home / away / neutral 분류 (NEUTRAL 0.45~0.55 경계)", () => {
+    const factors = {
+      sp_fip: 0.7,
+      bullpen_fip: 0.3,
+      elo: 0.5,
+    };
+    const top = selectTopFactors(factors);
+    expect(top.find((f) => f.key === "sp_fip")?.favorable).toBe("home");
+    expect(top.find((f) => f.key === "bullpen_fip")?.favorable).toBe("away");
+    expect(top.find((f) => f.key === "elo")?.favorable).toBe("neutral");
+  });
+
+  it("(5) pct = Math.round(value * 100) (정수 % 박제)", () => {
+    const factors = { sp_fip: 0.723, elo: 0.314 };
+    const top = selectTopFactors(factors);
+    expect(top.find((f) => f.key === "sp_fip")?.pct).toBe(72);
+    expect(top.find((f) => f.key === "elo")?.pct).toBe(31);
   });
 });

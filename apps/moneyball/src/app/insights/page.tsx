@@ -4,47 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { assertSelectOk, shortTeamName, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
-import { FACTOR_LABELS } from "@/lib/predictions/factorLabels";
+import { selectTopFactors } from "@/lib/insights/topFactors";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/insights`;
 const LIMIT = 30;
 const PREVIEW_LENGTH = 280;
-const TOP_FACTOR_LIMIT = 3;
-const NEUTRAL_LO = 0.45;
-const NEUTRAL_HI = 0.55;
-
-interface TopFactor {
-  key: string;
-  label: string;
-  pct: number;
-  favorable: "home" | "away" | "neutral";
-}
-
-function selectTopFactors(
-  factors: Record<string, number> | null,
-  limit = TOP_FACTOR_LIMIT,
-): TopFactor[] {
-  if (!factors) return [];
-  return Object.entries(factors)
-    .filter(([key]) => key in FACTOR_LABELS)
-    .filter(([, value]) => typeof value === "number" && Number.isFinite(value))
-    .map(([key, value]) => ({
-      key,
-      label: FACTOR_LABELS[key],
-      value,
-      dist: Math.abs(value - 0.5),
-    }))
-    .sort((a, b) => b.dist - a.dist)
-    .slice(0, limit)
-    .map(({ key, label, value }) => ({
-      key,
-      label,
-      pct: Math.round(value * 100),
-      favorable:
-        value > NEUTRAL_HI ? "home" : value < NEUTRAL_LO ? "away" : "neutral",
-    }));
-}
 
 export const metadata: Metadata = {
   title: "AI 인사이트",
