@@ -22,14 +22,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = content
     ? `${date} 50조합 archive`
     : "Archive 조회 불가";
+  // Alt 3 변형 (plan #6 Step A) — Googlebot 검색 색인 활성 + AdSense crawler 차단은
+  // robots.ts 의 AdsBot-Google + Mediapartners-Google Disallow 로 유지.
   return {
     title,
-    description: "본인 사용 50조합 기록 (noindex, 검색 색인 차단).",
+    description: "통계 분석 기반 50조합 기록 (회피 조건 통과 조합). 행동/베팅/구매 권유 X.",
+    alternates: {
+      canonical: `https://moneyballscore.vercel.app/lotto/archive/${date}`,
+    },
     robots: {
-      index: false,
-      follow: false,
-      nocache: true,
-      googleBot: { index: false, follow: false, noimageindex: true },
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true },
     },
   };
 }
@@ -50,14 +54,14 @@ export default async function LottoArchiveDatePage({ params }: Props) {
 
       <header className="space-y-2 border-b border-brand-800 pb-4">
         <p className="text-xs uppercase tracking-widest text-brand-400">
-          본인 사용 기록 · noindex
+          통계 분석 · 회피 조건 통과 조합
         </p>
         <h1 className="text-2xl font-semibold text-brand-100">
           {content.title}
         </h1>
         <p className="text-sm text-brand-300">
-          본 페이지는 검색 색인 차단 + AdSense 크롤러 차단됩니다. 통계/분석
-          학습 자료이며 행동/베팅/구매 권유를 포함하지 않습니다.
+          본 페이지는 256개 회피 규칙을 통과한 50조합 통계 분석 기록입니다.
+          당첨 확률 향상 X · 행동/베팅/구매 권유 X · 통계 학습 자료.
         </p>
       </header>
 

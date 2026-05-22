@@ -4,6 +4,7 @@ import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
+import { listArchiveDates } from '@/lib/lotto/archive';
 import { KBO_TEAMS, assertSelectOk } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
@@ -60,7 +61,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
-    // /lotto/methodology — 통계 분석 자료. /lotto/archive/[date] 는 noindex + sitemap 미포함 (robots Disallow 정합)
+    // /lotto/methodology — 통계 분석 방법론. /lotto/archive/[date] 는 plan #6 Step A (cycle 882~) 부터
+    // indexable 활성 — lottoArchiveRoutes (아래) 가 동적 URL 추가. AdSense crawler 는 robots.ts 차단.
     { url: `${baseUrl}/lotto/methodology`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
   ];
 
@@ -187,6 +189,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn('[sitemap] games query failed, serving static routes only:', e);
   }
 
+  // /lotto/archive/[date] 동적 URL — plan #6 Step A (cycle 882~). data/lotto-picks/ glob → 회차별 archive 색인 활성.
+  // priority 0.6 weekly + lastModified = 추첨일 20:45 KST (KBO 추첨 시각).
+  const lottoArchiveRoutes: MetadataRoute.Sitemap = listArchiveDates().map(
+    (date) => ({
+      url: `${baseUrl}/lotto/archive/${date}`,
+      lastModified: new Date(`${date}T20:45:00+09:00`),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }),
+  );
+
   return [
     ...staticRoutes,
     ...seasonYearRoutes,
@@ -198,5 +211,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...playerRoutes,
     ...analysisRoutes,
     ...insightsDateRoutes,
+    ...lottoArchiveRoutes,
   ];
 }
