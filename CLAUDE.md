@@ -222,6 +222,8 @@ Next.js can't recognize the exported `runtime` field in route. It mustn't be ree
 
 **사례 9 family 재재재발 (2026-05-21, cycle 843, gap=1 cycle + 임시 해소 패턴 자체 한도 도달)**: cycle 842 수동 fix (dpl_E6rZ8fRYteBmfffdutLnPPFCBet2, alias swap 시점 prod_sha=bb1b037) → cycle 842 retro 1 commit (6bc7b49) main push → cycle 843 진단 시점 production /api/version 응답 = 여전히 bb1b037 (= cycle 841 시점 박힌 prod sha) + main HEAD = 6bc7b49 (cycle 842 commit) + gap=1 commit silent skip = **사례 9 family gap=1 (3 cycle 연속) 재재재발 입증** (cycle 838 첫 발견 11 cycle gap → cycle 840 재발 2 cycle gap → cycle 842 재재발 2 cycle gap → cycle 843 재재재발 1 cycle gap, 가속 패턴). 본 cycle 843 수동 `vercel --prod --yes` 3rd 시도 → **`api-deployments-free-per-day` 100/day 한도 초과 error** ("Resource is limited - try again in 24 hours") = **임시 해소 패턴 (수동 vercel --prod fire) 자체 운영 한도 도달**. 24h 안 100+ deploy 누적 (preview ignoreCommand cancel 다수 + cycle 840/842 production fire 2건 + 본 cycle 시도 1건 = vercel 카운트 산정 기준 한도 초과). **임시 해소 패턴 fail 입증** — 매 cycle 수동 fire 운영이 본질적으로 sustainable X. cycle 843 fallback = (1) 24h 후 자연 reset 대기 (passive 정착) (2) deploy-drift-alert 자동 cron 21:17 KST 자연 fire (수동 dispatch X) 결과 박제 evidence + (3) carry-over 사용자 영역 root cause 점검 (vercel.com dashboard webhook + git connection) 영구 강조. **본 메인 진단 가능 범위 소진 입증** — silent drift family 사례 9 만은 본 메인 가능 범위 내 fix path 부재 (사례 8/10/11 = 운영 코드 fix path 명확, 사례 9 = vercel.com dashboard 사용자 영역). 사용자 영역 carry-over 채널 본 cycle 843 retro 박제 = 본 메인 자율 영역 closed. 다음 자율 진단 = silent drift family 본 메인 가능 범위 외 인정 + 다른 chain 우선 (explore-idea plan #3 또는 review-code silent drift family 외 영역 sweep).
 
+**사례 9 family 5번째 재발 (2026-05-21, cycle 850, gap=7 cycle, fix-incident heavy gap=1 carry-over)**: cycle 849 PR #1205 fix (c2ec1cb, 사례 12 신규 발견 = ORM column 부재 fix) 머지 직후 production /api/version 응답 = cycle 842 시점 박힌 prod_sha bb1b037 + main HEAD = 624c582 (cycle 849 commit) + gap=7 commit silent skip = **사례 9 family 5번째 재발 입증**. cycle 843 박제 "본 메인 가능 범위 외 인정" 패턴 정정 — vercel 100/day deploy 한도 24h 자연 reset 후 (cycle 843 → cycle 850 = 7 cycle gap 안 한도 회복) 수동 `vercel --prod --yes` 다시 가능. dpl_B5MxZUXGowEwV4Fs46rCDvNbmfuw Ready (2m) → alias swap → /api/version commit_sha=624c582 gap=0 + /insights/[date] 라우트 3건 (2026-05-20/21/22) 모두 HTTP 200 검증 통과. deploy-drift-alert 자동 dispatch (run 26226856192) 14s success = alert channel **5번째 작동 evidence** (cycle 838 박제 인프라 5번 실측 통과). 가속 패턴 정정 — cycle 838→840→842→843 = gap 11→2→2→1 가속 → cycle 843→850 = gap 7 (cycle 844~849 6 cycle 동안 main push 없는 lite chain 또는 fix-incident gap 자연 흡수 = 가속 패턴 break). **사례 9 family 본 메인 가능 범위 정정**: vercel 100/day 한도 reset (24h 주기) 후 수동 fire 가능 = 본 메인 자율 fix path 존재 (단 24h 안 fire 한도 도달 시 carry-over). 사용자 영역 root cause (vercel.com dashboard webhook + git connection) 점검은 여전히 carry-over 유지 = 영구 fix X, 매 cycle main push 시 silent skip 잠재 반복 패턴 유효.
+
 **교훈**: build fail 도 deploy silent drift 의 동급 위험. CI green + PR merge 만 아니라 `vercel ls --prod` Ready 상태 + alias swap 양쪽 검증 필수. `vercel inspect <deploy> --logs` build error 진단이 root cause 정확도 100%. 매 cycle N 시점 production alias commit 과 main HEAD 대조 1회 권장. R5 메타 패턴 silent drift family evidence — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 운영 인프라 (deploy quota + auto-deploy 채널 간헐 silent skip) silent + 사례 10 = **빌드 시스템 silent** 확장. 운영 alert 박제 완료 (cycle 838 PR #1195): `apps/moneyball/src/app/api/version/route.ts` neue endpoint (VERCEL_GIT_COMMIT_SHA + commit_ref + deploy_env + region + timestamp 노출, no-store cache) + `.github/workflows/deploy-drift-alert.yml` 매시간 cron `'17 * * * *'` — main HEAD vs production /api/version commit 비교. mismatch + ≥ 1 hour gap 시 `::error::` (사례 9/10 silent drift family 재발 의심 진단 권장 메시지 포함). endpoint 부재 / deploy fail (HTTP ≠ 200) 시 즉시 `::error::` (사례 10 Turbopack build fail family). silent drift family alert coverage 확장 — 사례 8 (cycle 826 KBO scraper) + 사례 11 (cycle 819 predict_final) 운영 코드 silent + **사례 9/10 deploy 인프라/빌드 시스템 silent 통합 alert**. **첫 fire 실측 통과 (cycle 840, 2026-05-21)**: 수동 `gh workflow run deploy-drift-alert.yml` dispatch (run 26222762877) 11s success + body status=200, main_sha=prod_sha=d44e820, `::notice::drift 0`. alert channel 본 사용자 가시 evidence 통과 = cycle 838 박제 인프라 작동 검증.
 
 ### 드리프트 사례 11 — predict_final window_too_late silent silent drop (2026-05-20, cycle 813)
@@ -243,6 +245,34 @@ Next.js can't recognize the exported `runtime` field in route. It mustn't be ree
 cycle 779 fix 와 호환: predict mode 다음 cron 재시도 잠금 회피 유지 + predict_final 마지막 기회 추가 보장. status='live' 또는 'final' 진입 시 `not_scheduled` 별도 reject 유지.
 
 **교훈**: cron mode 별 fallback path 의 마지막 기회 누락이 silent silent drop 으로 이어짐. predict mode 3회 fail 운영 가시 시그널 없으면 predict_final 시점 발견 0건. silent drift family 11번째 — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 인프라 silent + 사례 10 빌드 시스템 silent + **사례 11 = cron mode-specific fallback path silent**. 운영 alert 박제 완료 (cycle 819 PR #1179): `packages/kbo-data/src/pipeline/silent-drift-alert.ts` 신규 헬퍼 (`shouldAlertSilentDrift` pure + `captureSilentDriftAlert` 동적 sentry import) + `daily.ts` finish() wire — predict_final cron predictions=0 + games_found>0 즉시 Sentry warning 발사 (`predict_final_silent_drift` 메시지 + `pattern: silent_drift_family_case11` 태그). 다음 silent silent drop 발생 시 사용자 가시 metric loss 차단. **실측 fire evidence (cycle 861, 2026-05-22 op-analysis lite 측정)**: pipeline_runs 직전 7일 (2026-05-15~22) 106 runs 중 사례 11 silent_drop (predict_final + games_found>0 + predictions=0) 6건 = silent-drift-alert.ts 6회 실측 fire. 운영 alert channel 작동 검증 = cycle 819 박제 인프라 6번 실측 통과 evidence + 사례 11 family 재발 monitoring 채널 활성.
+
+### 드리프트 사례 12 — ORM select 컬럼 부재 → Turbopack build fail → `/insights/[date]` route 빌드 시스템 silent (2026-05-21, cycle 849)
+
+cycle 847 PR #1203 `/insights/[date]` daily archive route 박제 시 `apps/moneyball/src/lib/insights/loader.ts` 가 supabase `predictions!inner(games)` select 안 `games.home_team_code` + `games.away_team_code` 컬럼 참조. 실제 `games` 테이블 컬럼명 = `home_team` + `away_team` (KBO team_code 직접 컬럼) = 컬럼명 mismatch.
+
+```
+Failed to compile.
+./src/lib/insights/loader.ts
+Type error: Property 'home_team_code' does not exist on type ...
+```
+
+→ Turbopack build fail → cycle 847 PR #1203 머지 (2026-05-21) 이후 production deploy 자동 trigger 시도 silent skip (build fail). 사례 10 family (twitter-image runtime re-export) 패턴 정합 — **빌드 시스템 silent layer** 두 번째 evidence (re-export 차이: 사례 10 = route segment config statically X / 사례 12 = ORM column mismatch).
+
+진단:
+- `vercel ls --prod | head -5` → 직전 3 deploy `● Error` (Turbopack build fail)
+- `vercel inspect <deploy> --logs | grep "home_team_code"` → loader.ts 정확 노출
+- local `pnpm build` 가 동일 에러 재현 (CI test smoke 통과 = supabase type generation mocked 차이)
+
+최소 scope fix (PR #1205, cycle 849 fix-incident heavy gap=6 carry-over):
+- `apps/moneyball/src/lib/insights/loader.ts` 의 select clause 정정 — `home_team_code` → `home_team` (실제 컬럼명) + `away_team_code` → `away_team`
+- `apps/moneyball/src/app/insights/[date]/page.tsx` 의 entry mapping alias 패턴 정합
+- local `pnpm build` 통과 + production deploy = c2ec1cb (단 cycle 850 사례 9 family 5번째 재발 = 수동 vercel --prod 1회 fire 후 alias swap)
+
+후속 family fix (PR #1213, cycle 856 explore-idea lite Step 8):
+- `apps/moneyball/src/app/feed/route.ts` 안 남은 `home_team_code` / `away_team_code` query reference sync (loader.ts fix scope 외 silent layer — cycle 856 19 신규 unit test 박제 시점 동시 발견)
+- 사례 12 family 의 silent layer 차단 patch 완료
+
+**교훈**: ORM type generation 이 supabase 컬럼명 mismatch 를 build time 까지 silent (CI test 가 mocked supabase type 으로 통과). Turbopack build fail 발생 시점 = production deploy 시 vercel build = 사용자 가시 evidence 부재 (사례 10 동일 layer). silent drift family 12번째 — 사례 3/4/6/7/8 운영 코드 silent + 사례 9 인프라 silent + 사례 10/12 **빌드 시스템 silent 2건** + 사례 11 cron fallback silent. 운영 alert 자동 감지 path 박제 완료 (cycle 838 PR #1195 deploy-drift-alert.yml) — build fail → /api/version HTTP ≠ 200 → `::error::` 즉시 exit 1 (사례 10 Turbopack build fail family 와 동일 trigger path 자연 흡수). cycle 849 fix 직후 사례 9 family 5번째 재발 evidence = cycle 850 carry-over (사례 9 본문 line 224 박제). silent drift family streak ~327 cycle (cycle 458 → cycle 862) 유지 — 본 메인 자율 영역 silent layer 11/12 fix path 박제 + 사례 9 만 사용자 영역 root cause 미확정 carry-over.
 
 ### 이미 구현된 주요 모듈 (v0.5.49+ 기준, cycle 651 phase)
 
