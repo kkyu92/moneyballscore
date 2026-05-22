@@ -11,7 +11,11 @@ import {
   Cell,
   ReferenceLine,
 } from "recharts";
-import { getAccuracyColor } from "@moneyball/shared";
+import {
+  getAccuracyColor,
+  WINNER_PROB_CONFIDENT,
+  WINNER_PROB_LEAN,
+} from "@moneyball/shared";
 import { neutral, semantic } from "@/lib/design-tokens";
 
 export interface WeeklyTrendPoint {
@@ -29,8 +33,8 @@ interface WeeklyTrendMiniProps {
 
 function barColor(rate: number, verified: number): string {
   if (verified === 0) return neutral[200];
-  if (rate >= 0.65) return semantic.success;
-  if (rate >= 0.55) return semantic.warning;
+  if (rate >= WINNER_PROB_CONFIDENT) return semantic.success;
+  if (rate >= WINNER_PROB_LEAN) return semantic.warning;
   return semantic.error;
 }
 
