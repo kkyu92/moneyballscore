@@ -108,11 +108,12 @@ export async function GET() {
     </item>`);
   }
 
-  // /insights/[date] 최근 10 daily archive RSS item — cycle 810 v13-E /changelog
-  // entry 패턴 정합. cycle 844 /insights hub + cycle 847 /insights/[date] daily
-  // archive 박제 후 RSS 구독자가 일자별 reasoning 모음 진입 path 박제. plan #3
-  // Step 4 closure.
-  const insightsDates = await listInsightsDates(10);
+  let insightsDates: string[] = [];
+  try {
+    insightsDates = await listInsightsDates(10);
+  } catch (e) {
+    console.warn("[feed] insights dates query failed:", e);
+  }
   for (const date of insightsDates) {
     const link = `${SITE_URL}/insights/${date}`;
     const pubDate = new Date(`${date}T23:59:00+09:00`).toUTCString();
