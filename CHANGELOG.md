@@ -1,5 +1,19 @@
 # Changelog
 
+## 📋 /insights 시즌 2 closure (2026-05-22, cycle 872~875)
+
+### plan #5 factor breakdown timeline integration 박제 6/6 Step closure
+
+- **cycle 872 PR #1228** (Step 1, plan write) — `~/.develop-cycle/plans/moneyballscore/5.md` 외부 박제. lite mode 4축 review skip (자동 fire AskUserQuestion hang 차단, cycle 200 박제 정합).
+- **cycle 873 PR #1229** (Step 2~3) — `apps/moneyball/src/lib/insights/loader.ts` `InsightEntry.factors: Record<string,number> | null` 확장 + supabase select `factors` column 추가 + null-safe normalize (빈 객체 → null). `apps/moneyball/src/app/insights/[date]/page.tsx` 안 `<FactorBreakdown factors={item.factors} ... />` JudgeReasoningCard 다음 stacked render.
+- **cycle 874 PR #1230** (Step 4) — `/insights` hub `selectTopFactors` helper + mini factor preview (상위 3 factor, `Math.abs(value - 0.5)` desc 정렬, "전체 팩터 보기" anchor → `/insights/${date}#game-${gameId}`).
+- **cycle 875** (Step 5~6) — `selectTopFactors` helper `apps/moneyball/src/lib/insights/topFactors.ts` 추출 + 5 신규 behavior unit test (null factors → [] / 비정상 값 filter / desc 정렬 + limit 슬라이스 / favorable home/away/neutral 분류 / pct 정수 round). `pnpm test` 549 → 554. CLAUDE.md + CHANGELOG.md sync.
+- **사용자 가치**: 정량 (factor breakdown) + 정성 (judge reasoning) 양쪽 archive timeline 동시 비교. 사용자 1 페이지에서 "왜 이 예측인가" + "어떤 factor 가 가중치 얼마였나" 비교 path 박제.
+- **AdSense article surface 강화**: factor 한국어 label + percentage 자연어 노출 = thin content 회피 더 강력. glossary inline link (cycle 756 박제) inbound 자연 확장.
+- **regression**: `pnpm test` 554 PASS (+5) / `pnpm lint` 0 warning / `pnpm exec tsc --noEmit` 0 error / `pnpm build` /insights + /insights/[date] static prerender 통과.
+
+---
+
 ## 📋 W22 마감 노트 (2026-05-17, cycle 516 operational-analysis lite)
 
 ### Sat reversion — Thu/Fri 1/10 noise 가설 강화
