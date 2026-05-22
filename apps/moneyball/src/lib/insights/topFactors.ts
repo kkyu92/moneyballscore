@@ -1,8 +1,11 @@
-import { FACTOR_LABELS } from "@/lib/predictions/factorLabels";
+import {
+  FACTOR_LABELS,
+  NEUTRAL_HI,
+  NEUTRAL_LO,
+} from "@/lib/predictions/factorLabels";
 
 export const TOP_FACTOR_LIMIT = 3;
-const NEUTRAL_LO = 0.45;
-const NEUTRAL_HI = 0.55;
+export { NEUTRAL_HI, NEUTRAL_LO };
 
 export interface TopFactor {
   key: string;

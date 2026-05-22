@@ -4,6 +4,8 @@ import {
   FACTOR_GLOSSARY_ANCHORS,
   FACTOR_LABELS,
   FACTOR_TIPS,
+  NEUTRAL_HI,
+  NEUTRAL_LO,
 } from "@/lib/predictions/factorLabels";
 
 interface FactorDetails {
@@ -113,7 +115,7 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
           const pct = Math.round(weight * 100);
           // value: 0=원정유리, 0.5=중립, 1=홈유리
           const barPct = Math.round(value * 100);
-          const favorable = value > 0.55 ? "home" : value < 0.45 ? "away" : "neutral";
+          const favorable = value > NEUTRAL_HI ? "home" : value < NEUTRAL_LO ? "away" : "neutral";
 
           const favorLabel =
             favorable === "home" ? `${homeName} 우위` :
