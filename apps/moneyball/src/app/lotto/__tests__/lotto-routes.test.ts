@@ -5,9 +5,12 @@ import robots from "@/app/robots";
 import {
   generateMetadata as archiveGenerateMetadata,
 } from "@/app/lotto/archive/[date]/page";
+import { metadata as notFoundMetadata } from "@/app/lotto/archive/[date]/not-found";
 import {
   metadata as methodologyMetadata,
 } from "@/app/lotto/methodology/page";
+import sitemap from "@/app/sitemap";
+import { listArchiveDates } from "@/lib/lotto/archive";
 
 const REPO_ROOT = process.cwd();
 const METHODOLOGY_SRC = join(
@@ -36,22 +39,22 @@ describe("/lotto/methodology metadata + module load", () => {
   });
 });
 
-describe("/lotto/archive/[date] noindex metadata (regression guard)", () => {
-  it("metadata.robots.index === false + follow === false", async () => {
+describe("/lotto/archive/[date] indexable metadata (plan #6 Step A regression)", () => {
+  it("metadata.robots.index === true + follow === true (Alt 3 변형)", async () => {
     const meta = await archiveGenerateMetadata({
       params: Promise.resolve({ date: "2026-05-16" }),
     });
     const robotsMeta = meta.robots;
     expect(robotsMeta).toBeTruthy();
     if (typeof robotsMeta === "object" && robotsMeta !== null) {
-      expect(robotsMeta.index).toBe(false);
-      expect(robotsMeta.follow).toBe(false);
+      expect(robotsMeta.index).toBe(true);
+      expect(robotsMeta.follow).toBe(true);
     } else {
       throw new Error("robots metadata expected object");
     }
   });
 
-  it("googleBot index/follow false", async () => {
+  it("googleBot index/follow true (검색 색인 활성)", async () => {
     const meta = await archiveGenerateMetadata({
       params: Promise.resolve({ date: "2026-05-16" }),
     });
@@ -62,10 +65,32 @@ describe("/lotto/archive/[date] noindex metadata (regression guard)", () => {
       typeof robotsMeta.googleBot === "object" &&
       robotsMeta.googleBot !== null
     ) {
-      expect(robotsMeta.googleBot.index).toBe(false);
-      expect(robotsMeta.googleBot.follow).toBe(false);
+      expect(robotsMeta.googleBot.index).toBe(true);
+      expect(robotsMeta.googleBot.follow).toBe(true);
     } else {
       throw new Error("googleBot metadata expected object");
+    }
+  });
+
+  it("alternates.canonical 박제 (date 별 unique URL)", async () => {
+    const meta = await archiveGenerateMetadata({
+      params: Promise.resolve({ date: "2026-05-16" }),
+    });
+    expect(meta.alternates?.canonical).toBe(
+      "https://moneyballscore.vercel.app/lotto/archive/2026-05-16",
+    );
+  });
+});
+
+describe("/lotto/archive/[date]/not-found.tsx — noindex metadata (cycle 799 v13-A 정합)", () => {
+  it("metadata.robots.index === false + follow === false", () => {
+    const robotsMeta = notFoundMetadata.robots;
+    expect(robotsMeta).toBeTruthy();
+    if (typeof robotsMeta === "object" && robotsMeta !== null) {
+      expect(robotsMeta.index).toBe(false);
+      expect(robotsMeta.follow).toBe(false);
+    } else {
+      throw new Error("not-found robots metadata expected object");
     }
   });
 });
@@ -77,7 +102,7 @@ interface RobotsRule {
   crawlDelay?: number;
 }
 
-describe("robots.ts — /lotto/archive disallow rules (regression guard)", () => {
+describe("robots.ts — Alt 3 변형 (plan #6 Step A)", () => {
   const r = robots();
   const rules = (Array.isArray(r.rules) ? r.rules : [r.rules]) as RobotsRule[];
 
@@ -86,42 +111,72 @@ describe("robots.ts — /lotto/archive disallow rules (regression guard)", () =>
       Array.isArray(x.userAgent) ? x.userAgent.includes(ua) : x.userAgent === ua,
     );
 
-  it("User-agent * disallow /lotto/archive", () => {
+  it("User-agent * — /lotto/archive disallow 부재 (검색 색인 활성)", () => {
     const rule = findRule("*");
     expect(rule).toBeTruthy();
     const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
-    expect(dis).toContain("/lotto/archive");
+    expect(dis).not.toContain("/lotto/archive");
+    expect(dis).not.toContain("/lotto");
   });
 
-  it("Googlebot disallow /lotto/archive", () => {
+  it("Googlebot — /lotto/archive disallow 부재 (검색 색인 활성)", () => {
     const rule = findRule("Googlebot");
     expect(rule).toBeTruthy();
     const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
+    expect(dis).not.toContain("/lotto/archive");
+    expect(dis).not.toContain("/lotto");
+  });
+
+  it("Mediapartners-Google — /lotto + /lotto/archive 양쪽 sub-tree disallow 명시 (AdSense 차단)", () => {
+    const rule = findRule("Mediapartners-Google");
+    expect(rule).toBeTruthy();
+    const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
+    expect(dis).toContain("/lotto");
     expect(dis).toContain("/lotto/archive");
   });
 
-  it("Mediapartners-Google + AdsBot-Google disallow /lotto/archive", () => {
-    for (const ua of ["Mediapartners-Google", "AdsBot-Google"]) {
-      const rule = findRule(ua);
-      expect(rule, `${ua} rule`).toBeTruthy();
-      const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
-      expect(dis, `${ua} disallow`).toContain("/lotto/archive");
-    }
+  it("AdsBot-Google — /lotto + /lotto/archive 양쪽 sub-tree disallow 명시 (AdSense 차단)", () => {
+    const rule = findRule("AdsBot-Google");
+    expect(rule).toBeTruthy();
+    const dis = Array.isArray(rule!.disallow) ? rule!.disallow : [rule!.disallow];
+    expect(dis).toContain("/lotto");
+    expect(dis).toContain("/lotto/archive");
   });
 });
 
-describe("sitemap.ts — /lotto/archive 미포함 + /lotto/methodology 포함 (source-level guard)", () => {
+describe("sitemap.ts — /lotto/archive 동적 URL 포함 + /lotto/methodology static entry", () => {
   const src = readFileSync(SITEMAP_SRC, "utf-8");
 
   it("/lotto/methodology entry 박제", () => {
     expect(src).toMatch(/\/lotto\/methodology/);
   });
 
-  it("/lotto/archive sitemap entry 부재 (noindex 정합)", () => {
-    const archiveEntries = src
-      .split("\n")
-      .filter((line) => /url:.*\/lotto\/archive/.test(line));
-    expect(archiveEntries).toEqual([]);
+  it("lottoArchiveRoutes 동적 URL 박제 (listArchiveDates source)", () => {
+    expect(src).toMatch(/lottoArchiveRoutes/);
+    expect(src).toMatch(/listArchiveDates/);
+  });
+
+  it("lottoArchiveRoutes priority 0.6 + lastModified T20:45+09:00 정합", () => {
+    expect(src).toMatch(/priority:\s*0\.6/);
+    expect(src).toMatch(/T20:45:00\+09:00/);
+  });
+
+  it("sitemap() 호출 시 lottoArchiveRoutes entry 생성 (실제 박제된 date 있을 때)", async () => {
+    const entries = await sitemap();
+    const archiveDates = listArchiveDates();
+    if (archiveDates.length > 0) {
+      const archiveEntries = entries.filter((e) =>
+        e.url.startsWith("https://moneyballscore.vercel.app/lotto/archive/"),
+      );
+      expect(archiveEntries.length).toBe(archiveDates.length);
+      const firstDate = archiveDates[0];
+      const sampleEntry = archiveEntries.find((e) =>
+        e.url.endsWith(`/lotto/archive/${firstDate}`),
+      );
+      expect(sampleEntry).toBeTruthy();
+      expect(sampleEntry?.priority).toBe(0.6);
+      expect(sampleEntry?.changeFrequency).toBe("weekly");
+    }
   });
 });
 
