@@ -133,6 +133,11 @@ export async function runDailyPipeline(
 
   console.log(`[Pipeline] ${mode} mode for ${targetDate}`);
 
+  // 이미 DB 에 박제된 같은 날짜 pre_game predictions 수. predict / predict_final
+  // 진행 단계서 existingSet.size 로 채워짐. finish() 의 silent drift alert 가
+  // coverage 판단 사용 (cycle 864 86% false positive fix).
+  const existingPredictionsCount = { value: 0 };
+
   // 모든 exit 경로가 통과 — pipeline_runs 로그 + (조건부) Telegram status.
   const finish = async (result: PipelineResult): Promise<PipelineResult> => {
     const durationMs = Date.now() - startTime;
@@ -174,6 +179,9 @@ export async function runDailyPipeline(
 
     // silent drift family 사례 11 (cycle 813) — predict_final
     // predictions=0 + gamesFound>0 silent silent drop 즉시 감지 sentry warning.
+    // cycle 864: existingPredictionsCount 전달 — 이미 박제된 같은 날짜 pre_game
+    // predictions (predict mode 가 아침에 박제) 가 모든 games 를 cover 하면
+    // alert 미발화 (86% false positive 차단).
     try {
       await captureSilentDriftAlert({
         mode,
@@ -181,6 +189,7 @@ export async function runDailyPipeline(
         gamesFound: result.gamesFound,
         predictionsGenerated: result.predictionsGenerated,
         errors: result.errors,
+        existingPredictionsCount: existingPredictionsCount.value,
       });
     } catch (e) {
       console.error('[Pipeline] captureSilentDriftAlert failed:', e);
@@ -406,6 +415,7 @@ export async function runDailyPipeline(
     existingSet = new Set(
       (existing ?? []).map((e: { game_id: number }) => e.game_id),
     );
+    existingPredictionsCount.value = existingSet.size;
   } catch (e) {
     errors.push(`existing predictions: ${errMsg(e)}`);
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: games.length, errors });

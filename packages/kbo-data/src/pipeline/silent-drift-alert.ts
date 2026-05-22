@@ -17,14 +17,18 @@ export interface SilentDriftAlertMeta {
   gamesFound: number;
   predictionsGenerated: number;
   errors: string[];
+  // 이미 DB 에 박제된 같은 날짜 pre_game predictions 수 (existingSet.size).
+  // 미지정 시 0 가정 — predictionsGenerated 만으로 coverage 판단 (기존 동작 보존).
+  // 사례: predict mode 가 아침에 5건 박제 → predict_final 시 existing=5, predictionsGenerated=0
+  // 이어도 coverage 충분 → alert 미발화 (cycle 864 op-analysis 86% false positive fix).
+  existingPredictionsCount?: number;
 }
 
 export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {
-  return (
-    meta.mode === 'predict_final' &&
-    meta.gamesFound > 0 &&
-    meta.predictionsGenerated === 0
-  );
+  if (meta.mode !== 'predict_final') return false;
+  if (meta.gamesFound <= 0) return false;
+  const covered = meta.predictionsGenerated + (meta.existingPredictionsCount ?? 0);
+  return covered < meta.gamesFound;
 }
 
 type SentryModule = {
