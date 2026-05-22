@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
+import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { shortTeamName } from "@moneyball/shared";
 import {
   getInsightsForDate,
@@ -190,6 +191,13 @@ export default async function InsightsDatePage({ params }: Props) {
                 awayArgSummary={item.awayArgSummary}
                 isQuantOnlyFallback={item.isFallback}
               />
+              {item.factors && (
+                <FactorBreakdown
+                  factors={item.factors}
+                  homeTeam={item.homeTeam}
+                  awayTeam={item.awayTeam}
+                />
+              )}
             </li>
           );
         })}

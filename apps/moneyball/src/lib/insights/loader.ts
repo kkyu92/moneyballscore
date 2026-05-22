@@ -48,6 +48,7 @@ export interface InsightEntry {
   homeArgSummary: string | null;
   awayArgSummary: string | null;
   homeWinProb: number | null;
+  factors: Record<string, number> | null;
 }
 
 export async function listInsightsDates(daysBack = 90): Promise<string[]> {
@@ -100,7 +101,7 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
   const result = await supabase
     .from("predictions")
     .select(
-      "is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
+      "is_correct, reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
     .eq("games.game_date", date)
@@ -125,6 +126,11 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
     const awayCode = extractTeamCode(game.away_team);
     if (!homeCode || !awayCode) continue;
     seen.add(game.id);
+    const rawFactors = row.factors as Record<string, number> | null;
+    const factors =
+      rawFactors && typeof rawFactors === "object" && Object.keys(rawFactors).length > 0
+        ? rawFactors
+        : null;
     out.push({
       gameId: game.id,
       date: game.game_date,
@@ -137,6 +143,7 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
       homeArgSummary: verdict?.homeArgSummary ?? null,
       awayArgSummary: verdict?.awayArgSummary ?? null,
       homeWinProb: verdict?.homeWinProb ?? null,
+      factors,
     });
   }
   return out;
