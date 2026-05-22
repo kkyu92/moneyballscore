@@ -3,6 +3,7 @@ import { type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared'
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { parseChangelog } from '@/lib/changelog/parse';
+import { listInsightsDates } from '@/lib/insights/loader';
 
 export const revalidate = 3600;
 
@@ -103,6 +104,23 @@ export async function GET() {
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
       <description>${escapeXml(bodySnippet)}</description>
+      <pubDate>${pubDate}</pubDate>
+    </item>`);
+  }
+
+  // /insights/[date] 최근 10 daily archive RSS item — cycle 810 v13-E /changelog
+  // entry 패턴 정합. cycle 844 /insights hub + cycle 847 /insights/[date] daily
+  // archive 박제 후 RSS 구독자가 일자별 reasoning 모음 진입 path 박제. plan #3
+  // Step 4 closure.
+  const insightsDates = await listInsightsDates(10);
+  for (const date of insightsDates) {
+    const link = `${SITE_URL}/insights/${date}`;
+    const pubDate = new Date(`${date}T23:59:00+09:00`).toUTCString();
+    reviewItems.push(`    <item>
+      <title>${escapeXml(`AI 인사이트 — ${date}`)}</title>
+      <link>${link}</link>
+      <guid isPermaLink="true">${link}</guid>
+      <description>${escapeXml("해당 일자 AI 토론 reasoning 모음 — 양팀 선수단 분석 + 최종 판단 + 적중 검증")}</description>
       <pubDate>${pubDate}</pubDate>
     </item>`);
   }
