@@ -207,3 +207,39 @@ describe("sitemap.ts /insights URL coverage (regression guard)", () => {
     expect(SITEMAP_SRC).toMatch(/`\$\{baseUrl\}\/insights\/\$\{d\}`/);
   });
 });
+
+describe("/insights hub mini factor preview (plan #5 Step 4 regression guard)", () => {
+  it("getRecentInsights select clause includes factors column", () => {
+    expect(HUB_SRC).toMatch(/"confidence,\s*is_correct,\s*reasoning,\s*factors,/);
+  });
+
+  it("InsightRow interface includes factors Record<string,number> | null", () => {
+    expect(HUB_SRC).toMatch(
+      /factors:\s*Record<string,\s*number>\s*\|\s*null/,
+    );
+  });
+
+  it("selectTopFactors helper + TOP_FACTOR_LIMIT=3 + dist sort", () => {
+    expect(HUB_SRC).toMatch(/function selectTopFactors/);
+    expect(HUB_SRC).toMatch(/TOP_FACTOR_LIMIT\s*=\s*3/);
+    expect(HUB_SRC).toMatch(/Math\.abs\(value - 0\.5\)/);
+  });
+
+  it("mini factor preview render block with data-mini-factor-preview attr", () => {
+    expect(HUB_SRC).toMatch(/data-mini-factor-preview/);
+    expect(HUB_SRC).toMatch(/topFactors\.length\s*>\s*0/);
+  });
+
+  it("전체 팩터 보기 anchor link to /insights/${date}#game-${gameId}", () => {
+    expect(HUB_SRC).toMatch(
+      /href=\{`\/insights\/\$\{item\.date\}#game-\$\{item\.gameId\}`\}/,
+    );
+    expect(HUB_SRC).toMatch(/전체 팩터 보기/);
+  });
+
+  it("FACTOR_LABELS import from factorLabels.ts (sync source of truth)", () => {
+    expect(HUB_SRC).toMatch(
+      /import\s*\{\s*FACTOR_LABELS\s*\}\s*from\s*"@\/lib\/predictions\/factorLabels"/,
+    );
+  });
+});

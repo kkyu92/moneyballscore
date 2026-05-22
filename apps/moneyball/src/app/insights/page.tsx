@@ -4,11 +4,47 @@ import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { assertSelectOk, shortTeamName, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
+import { FACTOR_LABELS } from "@/lib/predictions/factorLabels";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/insights`;
 const LIMIT = 30;
 const PREVIEW_LENGTH = 280;
+const TOP_FACTOR_LIMIT = 3;
+const NEUTRAL_LO = 0.45;
+const NEUTRAL_HI = 0.55;
+
+interface TopFactor {
+  key: string;
+  label: string;
+  pct: number;
+  favorable: "home" | "away" | "neutral";
+}
+
+function selectTopFactors(
+  factors: Record<string, number> | null,
+  limit = TOP_FACTOR_LIMIT,
+): TopFactor[] {
+  if (!factors) return [];
+  return Object.entries(factors)
+    .filter(([key]) => key in FACTOR_LABELS)
+    .filter(([, value]) => typeof value === "number" && Number.isFinite(value))
+    .map(([key, value]) => ({
+      key,
+      label: FACTOR_LABELS[key],
+      value,
+      dist: Math.abs(value - 0.5),
+    }))
+    .sort((a, b) => b.dist - a.dist)
+    .slice(0, limit)
+    .map(({ key, label, value }) => ({
+      key,
+      label,
+      pct: Math.round(value * 100),
+      favorable:
+        value > NEUTRAL_HI ? "home" : value < NEUTRAL_LO ? "away" : "neutral",
+    }));
+}
 
 export const metadata: Metadata = {
   title: "AI 인사이트",
@@ -50,6 +86,7 @@ interface InsightRow {
   reasoningText: string;
   isFallback: boolean;
   homeWinProb: number | null;
+  factors: Record<string, number> | null;
 }
 
 interface GameRow {
@@ -71,7 +108,7 @@ async function getRecentInsights(): Promise<InsightRow[]> {
   const result = await supabase
     .from("predictions")
     .select(
-      "confidence, is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
+      "confidence, is_correct, reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
     .order("created_at", { ascending: false })
@@ -92,6 +129,11 @@ async function getRecentInsights(): Promise<InsightRow[]> {
     const homeCode = extractTeamCode(game.home_team);
     const awayCode = extractTeamCode(game.away_team);
     if (!homeCode || !awayCode) continue;
+    const rawFactors = row.factors as Record<string, number> | null;
+    const factors =
+      rawFactors && typeof rawFactors === "object" && Object.keys(rawFactors).length > 0
+        ? rawFactors
+        : null;
     out.push({
       gameId: game.id,
       date: game.game_date,
@@ -102,6 +144,7 @@ async function getRecentInsights(): Promise<InsightRow[]> {
       reasoningText: presented.text,
       isFallback: presented.isFallback,
       homeWinProb: verdict?.homeWinProb ?? null,
+      factors,
     });
     if (out.length >= LIMIT) break;
   }
@@ -203,6 +246,7 @@ export default async function InsightsHubPage() {
             const badge = statusBadge(item.status, item.isCorrect);
             const homeName = shortTeamName(item.homeTeam);
             const awayName = shortTeamName(item.awayTeam);
+            const topFactors = selectTopFactors(item.factors);
             return (
               <li
                 key={`${item.gameId}-${item.date}`}
@@ -235,13 +279,60 @@ export default async function InsightsHubPage() {
                 <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
                   {item.reasoningText}
                 </p>
-                <div className="text-xs">
+                {topFactors.length > 0 && (
+                  <div
+                    data-mini-factor-preview
+                    className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-1.5"
+                  >
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                      상위 팩터 {topFactors.length}
+                    </p>
+                    <ul className="space-y-1 text-xs">
+                      {topFactors.map((f) => {
+                        const favorLabel =
+                          f.favorable === "home"
+                            ? `${homeName} 우위`
+                            : f.favorable === "away"
+                              ? `${awayName} 우위`
+                              : "비슷";
+                        const favorColor =
+                          f.favorable === "home"
+                            ? "text-brand-600 dark:text-brand-300"
+                            : f.favorable === "away"
+                              ? "text-[var(--color-away)]"
+                              : "text-gray-500 dark:text-gray-400";
+                        return (
+                          <li key={f.key} className="flex items-center gap-2">
+                            <span className="w-20 shrink-0 text-gray-700 dark:text-gray-300">
+                              {f.label}
+                            </span>
+                            <span className={`font-medium ${favorColor}`}>
+                              {favorLabel}
+                            </span>
+                            <span className="text-gray-400 dark:text-gray-500">
+                              ({f.pct}%)
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+                <div className="text-xs flex flex-wrap gap-x-4 gap-y-1">
                   <Link
                     href={`/predictions/${item.date}`}
                     className="text-brand-600 dark:text-brand-300 hover:underline"
                   >
                     해당 일자 전체 예측 보기 →
                   </Link>
+                  {topFactors.length > 0 && (
+                    <Link
+                      href={`/insights/${item.date}#game-${item.gameId}`}
+                      className="text-brand-600 dark:text-brand-300 hover:underline"
+                    >
+                      전체 팩터 보기 →
+                    </Link>
+                  )}
                 </div>
               </li>
             );
