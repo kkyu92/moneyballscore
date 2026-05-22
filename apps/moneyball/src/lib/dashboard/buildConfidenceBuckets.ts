@@ -1,3 +1,5 @@
+import { WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN } from '@moneyball/shared';
+
 export interface ConfidenceBucketInput {
   confidence: number;
   is_correct: boolean;
@@ -36,10 +38,10 @@ export interface ConfidenceBucketResult {
 const MIN_TOTAL = 10;
 
 const BUCKET_DEFS: Array<{ label: string; min: number; max: number }> = [
-  { label: '확신 낮음', min: 0, max: 0.55 },
-  { label: '확신 보통', min: 0.55, max: 0.6 },
-  { label: '확신 높음', min: 0.6, max: 0.65 },
-  { label: '확신 최상', min: 0.65, max: 1.01 },
+  { label: '확신 낮음', min: 0, max: WINNER_PROB_LEAN },
+  { label: '확신 보통', min: WINNER_PROB_LEAN, max: 0.6 },
+  { label: '확신 높음', min: 0.6, max: WINNER_PROB_CONFIDENT },
+  { label: '확신 최상', min: WINNER_PROB_CONFIDENT, max: 1.01 },
 ];
 
 export function buildConfidenceBuckets(

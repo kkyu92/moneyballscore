@@ -8,6 +8,7 @@ import {
   shortTeamName,
   toKSTDateString,
   winnerProbOf,
+  WINNER_PROB_CONFIDENT,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -406,7 +407,7 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
     .eq('prediction_type', 'pre_game')
     .match(CURRENT_MODEL_FILTER)
     .eq('is_correct', false)
-    .gte('confidence', 0.65)
+    .gte('confidence', WINNER_PROB_CONFIDENT)
     .gte('game.game_date', startDate)
     .lte('game.game_date', endDate)
     .order('confidence', { ascending: false })
@@ -430,7 +431,7 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
     homeScore: row.game.home_score,
     awayScore: row.game.away_score,
     predictedWinnerCode: winnerCode,
-    confidence: row.confidence ?? 0.65,
+    confidence: row.confidence ?? WINNER_PROB_CONFIDENT,
     homeWinProb: winnerProbOf(row.reasoning?.homeWinProb),
   };
 }
