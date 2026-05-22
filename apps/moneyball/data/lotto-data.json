@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-22T00:30:00Z",
+  "generated_at": "2026-05-22T05:30:00Z",
   "rules_total": 256,
   "count_valid": 7700649,
   "total_combinations": 8145060,
@@ -20,7 +20,7 @@
     {
       "draw": 1224,
       "date": "2026-05-16",
-      "passed": 1,
+      "passed": 256,
       "failed": 0
     }
   ],
@@ -180,6 +180,12 @@
       "outcome": "success",
       "date": "2026-05-22",
       "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 881,
+      "outcome": "success",
+      "date": "2026-05-22",
+      "next_recommended": "moneyball"
     }
   ]
 }
