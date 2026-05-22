@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, KBO_TEAMS } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, KBO_TEAMS, WINNER_PROB_LEAN } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { getZeroWeightRuleJudgePregame } from './postview';
@@ -144,7 +144,7 @@ export async function runJudgeAgent(
   // Sunday confidence cap: 일요일 과적합 방지 (n≈20 적중률 ~15%, W20 1/5=20%)
   // cap 0.45: 0.55 경계는 medium tier(≥0.55) 오분류 → 실측 low 정확도가 medium tier 오염.
   // 0.45 = low tier 명확 배치.
-  if (context && result.success && result.data && result.data.confidence > 0.55) {
+  if (context && result.success && result.data && result.data.confidence > WINNER_PROB_LEAN) {
     const dow = new Date(context.game.date + 'T00:00:00Z').getUTCDay(); // 0=일요일
     if (dow === 0) {
       result = {
