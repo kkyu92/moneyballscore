@@ -1,5 +1,9 @@
 import type { FactorAccuracyReport } from "@/lib/dashboard/factor-accuracy";
-import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import {
+  FACTOR_LABELS_TECHNICAL,
+  NEUTRAL_HI,
+  NEUTRAL_LO,
+} from "@/lib/predictions/factorLabels";
 
 interface Props {
   report: FactorAccuracyReport;
@@ -146,8 +150,8 @@ export function ModelTuningInsights({ report }: Props) {
         <summary className="cursor-pointer">지표 해석</summary>
         <ul className="mt-2 space-y-1 pl-4 list-disc">
           <li>
-            <strong>방향 정확</strong>: 중립(0.45-0.55) 제외 후 팩터가 가리킨
-            팀이 실제로 이긴 비율.
+            <strong>방향 정확</strong>: 중립({NEUTRAL_LO}-{NEUTRAL_HI}) 제외 후
+            팩터가 가리킨 팀이 실제로 이긴 비율.
           </li>
           <li>
             <strong>편향</strong>: 팩터값에서 실제 홈 승률을 뺀 signed error 평균.

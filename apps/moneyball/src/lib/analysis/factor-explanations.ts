@@ -294,7 +294,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   if (avgWoba != null && avgWoba >= 0.34) tags.push("타격전 예상");
 
   const prob = input.homeWinProb;
-  if (prob >= 0.45 && prob <= 0.55) tags.push("박빙");
+  if (prob >= NEUTRAL_LO && prob <= NEUTRAL_HI) tags.push("박빙");
   else if (prob >= 0.6 || prob <= 0.4) tags.push("우세 뚜렷");
 
   let summary = "";
