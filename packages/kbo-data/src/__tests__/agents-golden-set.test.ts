@@ -186,15 +186,15 @@ describe('골든 클린 세트 — 5팀 × 4시나리오 = 20케이스', () => {
     expect(result.error).toContain('validator');
   });
 
-  it('validator reject (환각 숫자) → success=false', async () => {
+  it('validator reject (환각 숫자 3개+ hard) → success=false (cycle 884 threshold)', async () => {
     const ctx = makeScenario('LG', 'OB', '임찬규', '곽빈', 'tossup');
     const hallucinated: TeamArgument = {
       team: 'LG',
-      strengths: ['임찬규 FIP 0.99 압도적'],
+      strengths: ['임찬규 FIP 0.99 압도적', 'xFIP 0.88 추가', 'WAR 7.77 격차'],
       opponentWeaknesses: ['상대 wOBA 0.99'],
       keyFactor: '선발',
       confidence: 0.7,
-      reasoning: '임찬규 FIP 0.99로 역대급. 상대 wOBA 0.99 수준.',
+      reasoning: '임찬규 FIP 0.99로 역대급. xFIP 0.88 추가. WAR 7.77 격차. 상대 wOBA 0.99 수준.',
     };
     vi.mocked(callLLM).mockResolvedValue(mockSuccess(hallucinated));
 

@@ -67,12 +67,22 @@ describe('checkHallucinatedNumbers', () => {
     expect(v).toHaveLength(0);
   });
 
-  it('주입에 없는 숫자 → 환각 위반', () => {
+  it('주입에 없는 숫자 1개 → 환각 위반 warn 강등 (cycle 884)', () => {
     const v = checkHallucinatedNumbers('FIP 3.99 우위', injection);
+    expect(v).toHaveLength(1);
+    expect(v[0].type).toBe('hallucinated_number');
+    expect(v[0].severity).toBe('warn');
+    expect(v[0].detail).toContain('3.99');
+  });
+
+  it('주입에 없는 숫자 3개+ → 환각 위반 hard (cycle 884 threshold)', () => {
+    const v = checkHallucinatedNumbers('FIP 3.99 xFIP 8.88 wOBA 0.777 격차', injection);
     expect(v).toHaveLength(1);
     expect(v[0].type).toBe('hallucinated_number');
     expect(v[0].severity).toBe('hard');
     expect(v[0].detail).toContain('3.99');
+    expect(v[0].detail).toContain('8.88');
+    expect(v[0].detail).toContain('0.777');
   });
 
   it('단일 digit 화이트리스트 통과', () => {
@@ -193,11 +203,28 @@ describe('validateTeamArgument 통합', () => {
     expect(result.violations).toHaveLength(0);
   });
 
-  it('환각 숫자 1개 → ok=false (hard 위반)', () => {
+  it('환각 숫자 1개 → ok=true warn 강등 (cycle 884)', () => {
     const arg = makeArg({ reasoning: '임찬규 FIP 9.99 압도적' });
     const result = validateTeamArgument(arg, ctx);
+    expect(result.ok).toBe(true);
+    expect(
+      result.violations.some(
+        (v) => v.type === 'hallucinated_number' && v.severity === 'warn',
+      ),
+    ).toBe(true);
+  });
+
+  it('환각 숫자 3개+ → ok=false (cycle 884 hard threshold)', () => {
+    const arg = makeArg({
+      reasoning: '임찬규 FIP 9.99 xFIP 8.88 wOBA 0.777 격차 압도',
+    });
+    const result = validateTeamArgument(arg, ctx);
     expect(result.ok).toBe(false);
-    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+    expect(
+      result.violations.some(
+        (v) => v.type === 'hallucinated_number' && v.severity === 'hard',
+      ),
+    ).toBe(true);
   });
 
   it('선수명 발명 → ok=false (hard)', () => {
@@ -253,7 +280,7 @@ describe('validateTeamArgument lenient mode', () => {
     expect(result.violations.some((v) => v.type === 'invented_player_name' && v.severity === 'warn')).toBe(true);
   });
 
-  it('lenient: 환각 숫자는 여전히 hard → reject', () => {
+  it('lenient: 환각 숫자 3개+ 는 여전히 hard → reject (cycle 884 threshold 적용)', () => {
     const arg = makeArg({
       reasoning: '임찬규 FIP 9.99 xFIP 8.88 압도. wOBA 0.777 격차.',
     });
@@ -457,12 +484,28 @@ describe('validateJudgeReasoning', () => {
     expect(result.violations).toHaveLength(0);
   });
 
-  it('환각 숫자 → hard 위반 + ok=false', () => {
+  it('환각 숫자 2개 → ok=true warn 강등 (cycle 884)', () => {
     const ctx = makeContext();
     const reasoning = '임찬규 FIP 3.99 우위. wOBA 0.555 격차.';
     const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.ok).toBe(true);
+    expect(
+      result.violations.some(
+        (v) => v.type === 'hallucinated_number' && v.severity === 'warn',
+      ),
+    ).toBe(true);
+  });
+
+  it('환각 숫자 3개+ → ok=false (cycle 884 hard threshold)', () => {
+    const ctx = makeContext();
+    const reasoning = '임찬규 FIP 3.99 xFIP 8.88 wOBA 0.555 격차.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
     expect(result.ok).toBe(false);
-    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+    expect(
+      result.violations.some(
+        (v) => v.type === 'hallucinated_number' && v.severity === 'hard',
+      ),
+    ).toBe(true);
   });
 
   it('발명 선수명 → hard 위반 (strict)', () => {

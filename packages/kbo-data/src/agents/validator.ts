@@ -12,14 +12,22 @@
  *
  * 정책:
  *   strict (프로덕션/Claude 기본):
- *     - 하드 위반(환각, 선수명 발명) 1건 이상 → reject
- *     - 경고(금칙어, claim-type 분류 불가) 3건 이상 → reject
+ *     - 환각 숫자 count ≥ HALLUCINATED_NUMBER_HARD_THRESHOLD (3) → hard reject
+ *     - 환각 숫자 count 1~2 → warn 강등 (LLM nondeterminism 허용)
+ *     - 선수명 발명 1건 이상 → hard reject
+ *     - 경고(금칙어, claim-type 분류 불가, 환각숫자 warn) 3건 이상 → reject
  *   lenient (로컬 Ollama 개발 전용):
  *     - 선수명 발명은 hard→warn으로 강등 (exaone 환각 허용치)
- *     - 환각 숫자 hard는 유지
+ *     - 환각 숫자 동일 정책 (count ≥ 3 hard, 1~2 warn)
  *     - 경고 6건 이상 → reject (WARN_LIMIT_LENIENT=5)
  *
  * 호출부는 NODE_ENV=production이면 무조건 strict.
+ *
+ * 환각 숫자 threshold 도입 (cycle 884):
+ *   사용자 며칠 누적 fail 원인 = Claude API 가 단일 hallucinated_number 1개 (예: 4.66) 만
+ *   생성해도 hard reject → 4/5 game predictions 누락 영속. LLM nondeterminism = 1~2개 hallucinate
+ *   자주 발생 (특히 DH/recent stats 한국야구 도메인). 1~2개 warn 강등 = 통과 + maskViolatedReasoning
+ *   으로 leak 차단 보존. 3개+ = LLM quality 실제 문제 = hard reject 유지.
  */
 
 import type { TeamCode } from '@moneyball/shared';
@@ -58,6 +66,11 @@ export interface ValidationResult {
 export const HARD_LIMIT = 0;
 export const WARN_LIMIT = 2; // strict: 3건 이상이면 reject
 export const WARN_LIMIT_LENIENT = 5; // lenient: 6건 이상이면 reject
+
+// 환각 숫자 hard threshold — count 이상 시 hard, 미만 = warn 강등 (cycle 884).
+// LLM nondeterminism 으로 1~2개 hallucinate 자주 발생 → strict mode 도 1~2개 warn 통과.
+// 3개+ = LLM quality 실제 문제 = hard reject 유지.
+export const HALLUCINATED_NUMBER_HARD_THRESHOLD = 3;
 
 export type ValidationMode = 'strict' | 'lenient';
 
@@ -260,10 +273,14 @@ export function checkHallucinatedNumbers(
   }
 
   if (hallucinated.length === 0) return [];
+  // cycle 884 — count threshold 적용. 1~2 = warn 강등 (LLM nondeterminism 허용),
+  // 3+ = hard reject (LLM quality 실제 문제). maskViolatedReasoning 가 양쪽 모두 mask.
+  const severity: ViolationSeverity =
+    hallucinated.length >= HALLUCINATED_NUMBER_HARD_THRESHOLD ? 'hard' : 'warn';
   return [
     {
       type: 'hallucinated_number',
-      severity: 'hard',
+      severity,
       detail: `주입 블록에 없는 수치 ${hallucinated.length}개: ${hallucinated.join(', ')}`,
     },
   ];
