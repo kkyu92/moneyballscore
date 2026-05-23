@@ -12,6 +12,7 @@ import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
+import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -203,7 +204,7 @@ export default async function ReviewsPage() {
             </div>
             <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
               <p className="text-sm text-gray-500 dark:text-gray-400">적중률</p>
-              <p className={`text-3xl font-bold mt-1 ${rate >= 60 ? 'text-brand-600 dark:text-brand-400' : rate >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
+              <p className={`text-3xl font-bold mt-1 ${accuracyRateColorClass(rate, true)}`}>
                 {rate}%
               </p>
             </div>

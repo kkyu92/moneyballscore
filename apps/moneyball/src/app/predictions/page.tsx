@@ -16,6 +16,7 @@ import { PredictionsMonthFilter } from "@/components/predictions/PredictionsMont
 import { PredictionsSearchBox } from "@/components/predictions/PredictionsSearchBox";
 import { AccuracyHeaderCard } from "@/components/predictions/AccuracyHeaderCard";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 
 export const metadata: Metadata = {
   title: "예측 기록",
@@ -287,13 +288,7 @@ export default async function PredictionsPage() {
                     <div className="text-right">
                       {d.verified > 0 ? (
                         <div
-                          className={`text-sm font-bold ${
-                            accuracy >= 0.6
-                              ? "text-brand-600 dark:text-brand-400"
-                              : accuracy >= 0.5
-                                ? "text-yellow-600 dark:text-yellow-400"
-                                : "text-red-600 dark:text-red-400"
-                          }`}
+                          className={`text-sm font-bold ${accuracyRateColorClass(accuracy)}`}
                         >
                           {d.correct}/{d.verified} 적중 ({Math.round(accuracy * 100)}
                           %)

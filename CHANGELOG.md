@@ -1,5 +1,40 @@
 # Changelog
 
+## 🎰 Lotto 1225회 OOS + plan #7 Step E/F partial 박제 (2026-05-23, cycle 885)
+
+### 1225회 OOS 검증 (PR #1246 cf86586) — 256 rules 100% PASS + 5등 6건 + score breakdown
+
+- **추첨 결과**: 8, 9, 19, 25, 41, 42 (보너스 33). 합 144 / 홀:짝 4:2 / 연속쌍 2.
+- **256 rules OOS**: PASS 256 / FAIL 0 (100% 통과). 누적 N=2 (1224 + 1225) 모두 PASS = filter robust 입증.
+- **50세트 매칭**: 5등 **6건** (random expected 0.89건 → **6.7× over-perform**). 평균 매칭 1.12 (1224회 0.84 → +0.28 향상).
+- **1등 score breakdown**: unpopularityScore(1등) = +6.60 (LUCKY 0 / consecPairs +6 / sum 거리 +0.6 / 등차·decade·저번호 0). 50세트 cutoff = 14.40 → **gap 7.80**. valid pool 7.7M 안 추정 rank ~836k (top 10.86%) → 추천 50,000 candidates 진입 fail.
+- **약점 dimension 식별**: **sum 거리 가중치 책임 80%+**. 모델 "평균 합 138 멀어진 조합 = 비인기 = 추천" 가정에서 1등 합 144 catch fail. N=2 evidence (1224 합 164 sum 거리 +2.60 / 1225 합 144 sum 거리 +0.60 양쪽 모두 cutoff 미달) = 가설 강화.
+- **결론**: rule 제거 0건 / 추가 동기 X. score 모델 sum 가중치 튜닝 evidence 누적 — N≥10 (~07-25 ETA) 후 GO.
+
+### plan #7 Step E + F partial 박제 (PR #1247 b1da036) — cron 자동 갱신
+
+- **scripts/lotto.ts**: `pick-md` mode 신규 (`buildCandidates` + `renderPickMarkdown` + `nextSaturdayKST` + `pickMd`). 기존 `pick` 함수 = `buildCandidates` 재사용 (regression 0).
+- **.github/workflows/lotto-pick-update.yml**: cron `'19 0,3,6 * * 5'` (UTC 금 multi-fire 3회 = KST 09:19/12:19/15:19) + idempotent skip + PR auto-merge (R7).
+- **.github/workflows/lotto-pick-monitor.yml**: cron `'0 17 * * 5'` (KST 토 02:00) silent skip 감지 `::error::`.
+- **apps/moneyball/data/lotto-picks/2026-05-30.md**: pick-md smoke test bootstrap seed (1226회 50조합, 첫 cron fire 전 archive empty 차단).
+- **+9 신규 regression test** (cron YAML + pick-md mode + AdSense surface signal grep).
+- **AdSense surface risk 0** — archive 만 매주 갱신 (cycle 822 PR #1240 이미 indexable), `/lotto` hub 미박제 (gating 유지).
+- **사용자 가치**: 매주 사용자 수동 50조합 박제 부담 제거 + Step C/D ship 시점 PR 부담 사전 분담.
+
+### 잔여 carry-over (자율 영역 외)
+
+- 14일 AdSense reject signal monitor (사용자 영역, ~06-05 ETA) → Step C/D 박제 GO trigger
+- plan #7 Step C/D (`/lotto` hub + UI 강화) = gating (AdSense monitor 통과 후)
+- N≥10 누적 OOS = 자연 누적 (매주 자동 cron 박제 + 사용자 'oos' mode 수동 fire)
+- score 모델 sum 가중치 튜닝 = N≥10 evidence 누적 후 GO
+
+### regression
+
+- `pnpm test`: 587 PASS (54 files, +9 신규) / `pnpm lint` 0 warning / `pnpm exec tsc --noEmit` 0 error / `pnpm tsx scripts/lotto.ts pick-md 2026-05-30 1226` smoke test PASS / `LottoDataSchema` PASS
+- **deploy drift**: production /api/version commit_sha = main HEAD = b1da036 (gap=0, 사례 9 family 재발 X)
+
+---
+
 ## 📋 /insights 시즌 2 closure (2026-05-22, cycle 872~875)
 
 ### plan #5 factor breakdown timeline integration 박제 6/6 Step closure

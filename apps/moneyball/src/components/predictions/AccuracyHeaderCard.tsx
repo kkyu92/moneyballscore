@@ -1,3 +1,5 @@
+import { accuracyRateColorClass } from '@/lib/accuracy/buildAccuracyData';
+
 interface Props {
   totalPredicted: number;
   totalVerified: number;
@@ -17,12 +19,7 @@ export function AccuracyHeaderCard({
 
   const accuracy = totalCorrect / totalVerified;
   const accuracyPct = Math.round(accuracy * 100);
-  const colorClass =
-    accuracy >= 0.6
-      ? 'text-brand-600 dark:text-brand-400'
-      : accuracy >= 0.5
-        ? 'text-yellow-600 dark:text-yellow-400'
-        : 'text-red-600 dark:text-red-400';
+  const colorClass = accuracyRateColorClass(accuracy);
 
   const showTrend =
     recentVerified !== undefined &&
