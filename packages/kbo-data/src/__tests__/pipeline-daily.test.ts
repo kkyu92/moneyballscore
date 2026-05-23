@@ -627,11 +627,17 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       }
     });
 
-    // 사례 (2026-05-19 5경기 Anthropic 529) — debate fallback row 가 first-write-wins 로
-    // 영구 박제되어 다음 cron 재시도 잠금. predict mode 시 skip → 다음 cron 진정한 재시도.
-    it('debate agentsFailed=true → predict mode INSERT skip + skippedDetail.reason=debate_fallback', async () => {
+    // cycle 884 D fix — predict mode 안 debate fail 시 quant fallback 박제 (continue 제거).
+    // 직전 (cycle 779) 의도 = "다음 cron 재시도 잠금 회피" trade-off 와 5/5 보장 / 알림
+    // 보장 가치 비교 후 후자 우선. 5/22 5/5 fail + 5/23 4/5 fail 며칠 누적 evidence.
+    // quant 박제 = predictions++ + skippedDetail.reason='debate_fallback_quant' 양쪽 박제.
+    it('debate agentsFailed=true → predict mode quant fallback 박제 (cycle 884 D fix)', async () => {
       process.env.ANTHROPIC_API_KEY = 'test-key';
       const tables = baseTables();
+      // D fix fall through path = players insert (getOrCreatePlayerId) 호출 — mock 추가
+      tables.players = {
+        single: { data: { id: 999 }, error: null }, // existing player 박제 (find path)
+      };
       const mock = createMockSupabase(tables);
       vi.mocked(createClient).mockReturnValue(mock as never);
 
@@ -655,17 +661,20 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
         const { runDailyPipeline } = await loadPipeline();
         const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
 
-        expect(result.predictionsGenerated).toBe(0);
+        // cycle 884 D fix — quant fallback 박제 (1 prediction 생성)
+        expect(result.predictionsGenerated).toBe(1);
         expect(result.skippedDetail).toBeDefined();
-        const fb = result.skippedDetail!.find((s) => s.reason === 'debate_fallback');
+        const fb = result.skippedDetail!.find(
+          (s) => s.reason === 'debate_fallback_quant',
+        );
         expect(fb).toBeDefined();
         expect(fb!.error).toContain('529');
 
-        // predictions insert 호출 없음 — fallback row 박제 차단
+        // predictions insert 호출 있음 — quant fallback row 박제
         const predInsert = mock._calls.find(
           (c) => c.table === 'predictions' && c.operations.includes('insert'),
         );
-        expect(predInsert).toBeUndefined();
+        expect(predInsert).toBeDefined();
       } finally {
         vi.useRealTimers();
         delete process.env.ANTHROPIC_API_KEY;

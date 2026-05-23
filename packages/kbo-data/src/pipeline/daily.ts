@@ -652,17 +652,24 @@ export async function runDailyPipeline(
         if (debate.agentsFailed) {
           const errMsg = debate.agentError?.slice(0, 200) ?? 'API error';
           errors.push(`Debate agents fallback ${game.homeTeam}v${game.awayTeam}: ${errMsg}`);
-          // predict mode 시 fallback row 박제 차단 — first-write-wins 가 다음 cron
-          // 재시도 잠금. predict_final 은 마지막 기회라 fallback 으로라도 박제.
-          // 사례 (2026-05-19 Anthropic 529 5경기) 재발 차단.
-          if (mode === 'predict') {
-            skippedDetail.push({
-              game: `${game.awayTeam}v${game.homeTeam}@${game.gameTime}`,
-              reason: 'debate_fallback',
-              error: errMsg,
-            });
-            continue;
-          }
+          // cycle 884 D fix — predict mode 도 quant fallback 박제 fall through.
+          //
+          // 직전 (cycle 779) 의도 = predict mode 안 debate fail 시 fallback row 박제
+          // 차단 (first-write-wins 가 다음 cron retry 잠금) → 더 좋은 LLM 응답 기대.
+          // 단 evidence (5/22 5/5 fail + 5/23 4/5 fail 며칠 누적) = LLM 응답 quality
+          // 항상 보장 X (529 / validator hallucinated). cron 매시간 fire 도 quality
+          // 회복 보장 X → 사용자 며칠 알림 X.
+          //
+          // trade-off — 1차 cron 시점 quant 박제 = 5/5 보장 + summary 자연 발사
+          //   vs 다음 cron retry 안 더 좋은 LLM 응답 받을 가능성. 5/5 + 알림 우선.
+          // versionDecision (line 678+) 가 debateSucceeded=false 시 model_version 강등
+          //   = /debug/model-comparison Brier 분류 정합.
+          skippedDetail.push({
+            game: `${game.awayTeam}v${game.homeTeam}@${game.gameTime}`,
+            reason: 'debate_fallback_quant',
+            error: errMsg,
+          });
+          // fall through — quant 박제 진행 (기존 finalWinner/finalHomeProb = quantResult)
         } else {
           debateSucceeded = true;
         }
