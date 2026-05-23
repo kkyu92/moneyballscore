@@ -9,6 +9,18 @@ import {
   type ScoringRule,
 } from '@moneyball/shared';
 
+// 적중률 3-tier color class — accuracy rate 표시 위치 일관 source-of-truth.
+// >= 60% = brand (강한 적중) / >= 50% = yellow (균형) / else = red (저조).
+// asPercent=true 일 때 rate 가 0~100 정수 (예: 65) / false 일 때 0~1 소수 (예: 0.65).
+// caller: AccuracyHeaderCard / predictions/page.tsx tier row / reviews/page.tsx hero stat (sweep 51 통합).
+export function accuracyRateColorClass(rate: number, asPercent = false): string {
+  const high = asPercent ? 60 : 0.6;
+  const mid = asPercent ? 50 : 0.5;
+  if (rate >= high) return 'text-brand-600 dark:text-brand-400';
+  if (rate >= mid) return 'text-yellow-600 dark:text-yellow-400';
+  return 'text-red-600 dark:text-red-400';
+}
+
 export interface PredRow {
   confidence: number;
   is_correct: boolean;
