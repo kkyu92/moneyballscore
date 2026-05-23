@@ -790,7 +790,9 @@ export async function runDailyPipeline(
   // 하루 요약 알림 — daily_notifications flag 로 idempotent.
   // errors 패스 — silent fail 시 pipeline_runs.errors 에 박혀 다음 진단 가능.
   // mode 전달 (cycle 884) — predict_final 에서 partial trigger 허용 (last-chance pattern).
-  if (predictionsGenerated > 0) {
+  // predict_final 은 본 cron 안 새 박제 0건이라도 호출 = handleDailySummaryNotification
+  // 안 todayTotal (DB count) 가 기존 partial 박제 잡아서 trigger.
+  if (predictionsGenerated > 0 || mode === 'predict_final') {
     await handleDailySummaryNotification(db, dbGameIds, targetDate, games, errors, mode);
   }
 
