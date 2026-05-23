@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-22T05:30:00Z",
+  "generated_at": "2026-05-23T12:30:00Z",
   "rules_total": 256,
   "count_valid": 7700649,
   "total_combinations": 8145060,
@@ -20,6 +20,12 @@
     {
       "draw": 1224,
       "date": "2026-05-16",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1225,
+      "date": "2026-05-23",
       "passed": 256,
       "failed": 0
     }
@@ -185,6 +191,12 @@
       "cycle": 881,
       "outcome": "success",
       "date": "2026-05-22",
+      "next_recommended": "moneyball"
+    },
+    {
+      "cycle": 885,
+      "outcome": "success",
+      "date": "2026-05-23",
       "next_recommended": "moneyball"
     }
   ]
