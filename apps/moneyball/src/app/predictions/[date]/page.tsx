@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PredictionCard } from "@/components/predictions/PredictionCard";
 import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
@@ -307,6 +308,7 @@ function buildSportsEventJsonLd(game: DateGame, date: string) {
 
 export default async function PredictionDatePage({ params }: Props) {
   const { date } = await params;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound();
   const games = await getGamePredictions(date);
 
   // predictions 배열이 비어 있으면 is_correct 값이 undefined → !== null 로는 걸러지지 않음.
