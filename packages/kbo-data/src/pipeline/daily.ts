@@ -789,8 +789,9 @@ export async function runDailyPipeline(
 
   // 하루 요약 알림 — daily_notifications flag 로 idempotent.
   // errors 패스 — silent fail 시 pipeline_runs.errors 에 박혀 다음 진단 가능.
+  // mode 전달 (cycle 884) — predict_final 에서 partial trigger 허용 (last-chance pattern).
   if (predictionsGenerated > 0) {
-    await handleDailySummaryNotification(db, dbGameIds, targetDate, games, errors);
+    await handleDailySummaryNotification(db, dbGameIds, targetDate, games, errors, mode);
   }
 
   // gap 감지 (predict_final mode 전용)
@@ -908,10 +909,15 @@ async function markNotificationFlag(
  * 하루 요약 Telegram 알림 idempotent 처리 (daily_notifications.summary_sent).
  * 마지막 조각 저장 시점에 전체 예측을 한 번에 전송. SP 늦확정으로 expected 가
  * 늘어도 summary_sent=true 면 재전송 차단.
+ *
+ * partial trigger (cycle 884) — predict_final mode = last-chance trigger.
+ *   며칠 누적 fail (LLM nondeterminism + strict validator) 시 1/5 만 박제돼도
+ *   사용자 가시 알림 보장. predict mode 안 strict skip 유지 (전부 박제까지 wait).
  */
 async function handleDailySummaryNotification(
   db: DB, dbGameIds: number[], date: string, games: ScrapedGame[],
   errors: string[] = [],
+  mode: PipelineMode = 'predict',
 ) {
   // 단계별 try/catch — silent fail 방지 (stage 라벨로 회귀 진단 보조).
   let stage = 'init';
@@ -936,8 +942,18 @@ async function handleDailySummaryNotification(
     const { count: todayTotal } = assertSelectOk(todayTotalResult, 'todayTotal count');
 
     if ((todayTotal ?? 0) < expected) {
-      console.log(`[Pipeline] summary skip: todayTotal=${todayTotal} < expected=${expected}`);
-      return;
+      // partial trigger (cycle 884) — predict_final = last-chance, partial 도 trigger.
+      // 사용자 며칠 누적 fail 차단. 1/5 만 박제돼도 알림 보장.
+      if (mode !== 'predict_final') {
+        console.log(`[Pipeline] summary skip: todayTotal=${todayTotal} < expected=${expected} (mode=${mode}, strict)`);
+        return;
+      }
+      if ((todayTotal ?? 0) === 0) {
+        console.log(`[Pipeline] summary skip: todayTotal=0 (mode=predict_final, partial trigger 불요)`);
+        return;
+      }
+      console.log(`[Pipeline] summary partial trigger: todayTotal=${todayTotal}/${expected} (mode=predict_final, last-chance)`);
+      // continue → flag check → build → notify
     }
 
     stage = 'flag-check';
