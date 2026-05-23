@@ -3,19 +3,20 @@
 ## ✅ Resolved Lessons
 - `fp:vercel-deploy-1e80b78` (2026-04-22): Sentry /webhook sub-path 3회 실패 → no-relay=true 태그로 해결 (박제 2026-04-29)
 
-## 🎰 Lotto plan #6/7 carry-over (cycle 882, 2026-05-22~)
+## 🎰 Lotto plan #6/7 carry-over (cycle 882, 2026-05-22~, **cycle 885 갱신**)
 
-**상태**: plan #6 Step A ship 완료 (PR #1239, 6a1e8d6). 사용자 명시 = 본 carry-over 모두 완료 후 MLB 작업 시작.
+**상태**: 자율 영역 항목 1, 2, 4-partial **모두 ship 완료**. 잔여 = 사용자 영역 (항목 3) + gating 잔여 (항목 4 Step C/D) + 자연 누적 (항목 5).
 
 **carry-over 항목**:
 
-1. **plan #6 Step B** (본 메인 자율 가능, **즉시 fire**) — Header NAV "로또" group 2 link (`/lotto/methodology` + `/lotto/archive`) + `/lotto/archive/page.tsx` 회차 list index page 신규 박제 (Header NAV link 404 회피) + Footer "로또" column 2 link. **사용자 /goal fire 대기**.
-2. **1225회 OOS 검증** (본 메인 자율, **2026-05-23 토 추첨 후 ~21:00 KST**) — `~/lotto_picks/2026-05-23-50sets.md` 사전 박제됨 + scripts/lotto.ts 'oos' mode (cycle 881 박제) 재사용 → cycle 881 PR #1238 패턴 정합 (1224회 OOS) → PR + R7 자동 머지. **추첨 시각 자연 trigger**.
-3. **14일 AdSense reject signal monitor** (사용자 영역, **2026-05-22 ~ 06-05**) — Google AdSense policy center site review + Sentry warning channel. reject 신호 0 시 항목 4 (plan #7) 박제 GO. reject 시 plan #6 + plan #7 모두 status=killed + plan #2 v1 보수 rollback (robots.ts AdSense crawler block 유지된 상태 → /lotto/archive indexable 도 되돌리기).
-4. **plan #7 Step C/D/E/F** (본 메인 자율, **항목 3 통과 후 박제**) — `/lotto` hub 페이지 신규 + UI 강화 (renderMarkdown.tsx 재사용 + 50조합 default collapse + 추천 5세트 above-the-fold + KBO vs lotto 시각 차별화) + GH Actions cron 매주 금요일 multi-fire 자동 갱신 + 6+ unit test 박제. plan = `~/.develop-cycle/plans/moneyballscore/7.md` (status: deferred_pending_adsense_monitor).
-5. **N≥10 누적 OOS** (자연 누적, ~07-25 ETA) — 현재 N=1 (1224회 단건). 메모리 `content-architecture-lotto-rule-oos-sample-floor.md` floor = N=5 preliminary / N=10 actionable. 매주 토 추첨 후 자연 누적 → N=10 도달 시 256 rules 통계적 우위 재평가.
+1. ✅ **plan #6 Step B** ship 완료 (PR #1240 e663fe8, cycle 822) — Header NAV "로또" group 2 link (`/lotto/methodology` + `/lotto/archive`) + `/lotto/archive/page.tsx` index + Footer "로또" column 2 link 박제 확인.
+2. ✅ **1225회 OOS 검증** ship 완료 (PR #1246 cf86586, cycle 885) — 256 rules **100% PASS** + 5등 6건 (random 0.89 → 실제 6 = **6.7× over-perform**) + 1등 score breakdown (sum 거리 가중치 약점 80%+ 식별, valid pool top 10.86%) + 누적 OOS **N=2** (1224 + 1225).
+3. ⏳ **14일 AdSense reject signal monitor** (사용자 영역, **2026-05-22 ~ 06-05**) — Google AdSense policy center site review + Sentry warning channel. reject 신호 0 시 항목 4 Step C/D 박제 GO. reject 시 plan #6 + plan #7 모두 status=killed + plan #2 v1 보수 rollback (robots.ts AdSense crawler block 유지된 상태 → /lotto/archive indexable 도 되돌리기).
+4. 🔀 **plan #7 Step C/D** (본 메인 자율, **항목 3 통과 후 박제**) — `/lotto` hub 페이지 신규 + UI 강화 (renderMarkdown.tsx 재사용 + 50조합 default collapse + 추천 5세트 above-the-fold + KBO vs lotto 시각 차별화). plan = `~/.develop-cycle/plans/moneyballscore/7.md` (status: deferred_pending_adsense_monitor).
+   - ✅ **Step E (cron 자동 갱신) + Step F partial (cron YAML + pick-md regression test)** ship 완료 (cycle 885 plan #7 partial) — `apps/moneyball/data/lotto-picks/<saturday>.md` 매주 금요일 cron 자동 박제 + 토 02:00 KST monitor. AdSense surface risk 0 (archive 만 매주 갱신, `/lotto` hub 미박제).
+5. ⏳ **N≥10 누적 OOS** (자연 누적, ~07-25 ETA) — 현재 **N=2** (1224 + 1225). 메모리 `content-architecture-lotto-rule-oos-sample-floor.md` floor = N=5 preliminary / N=10 actionable. 매주 토 추첨 후 자연 누적 → N=10 도달 시 256 rules 통계적 우위 재평가 + score 모델 sum 가중치 튜닝 evidence 누적 (1등 catch 0/2 → N=10 시점 0/10 if 패턴 유지 = 튜닝 GO).
 
-**완료 조건 (MLB 작업 시작 trigger)**: 항목 1~4 모두 ship 완료. 항목 5 = 백그라운드 자연 누적 (MLB 작업과 동시 진행 OK).
+**완료 조건 (MLB 작업 시작 trigger)**: 항목 1, 2, 4-Step E/F partial 자율 영역 closed. 잔존 carry-over = 항목 3 (사용자 영역) + 항목 4 Step C/D (gating) + 항목 5 (자연 누적). MLB 작업 시작 = 사용자 영역 통과 후 사용자 결정.
 
 ## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07)
 
