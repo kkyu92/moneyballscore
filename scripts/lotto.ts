@@ -1591,13 +1591,9 @@ function unpopularityScore(nums: number[]): number {
 
 // ─── PICK ────────────────────────────────────────────────────────────────────
 
-function pick(rounds: LottoRound[], stats: Stats, count = 5): void {
-  const bar = '═'.repeat(56);
-  console.log(`${bar}`);
-  console.log(`  추천 번호 ${count}세트`);
-  console.log(`  필터1: 100% 규칙 (${RULES.length}개) / 필터2: 역대 당첨 제외 / 필터3: 기피점수`);
-  console.log(`${bar}\n`);
+interface PickEntry { nums: number[]; score: number; sum: number; odd: number; consec: number; }
 
+function buildCandidates(rounds: LottoRound[], stats: Stats, count: number): { picks: PickEntry[]; poolSize: number; attempts: number } {
   const pastWinners = new Set(rounds.map(r => r.numbers.join(',')));
   const candidates: Array<{nums: number[]; score: number}> = [];
   const seen = new Set<string>();
@@ -1617,19 +1613,110 @@ function pick(rounds: LottoRound[], stats: Stats, count = 5): void {
   }
 
   candidates.sort((a,b)=>b.score-a.score);
-  const results = candidates.slice(0, count);
+  const top = candidates.slice(0, count);
+  const picks: PickEntry[] = top.map(({nums, score}) => ({
+    nums,
+    score,
+    sum: sumNums(nums),
+    odd: oddCount(nums),
+    consec: consecPairs(nums),
+  }));
+  return { picks, poolSize: candidates.length, attempts };
+}
 
-  console.log(`  후보 풀: ${candidates.length.toLocaleString()}개 (${attempts.toLocaleString()}회 시도)\n`);
-  results.forEach(({nums, score}, i) => {
-    const s = sumNums(nums);
-    const oc = oddCount(nums);
-    const cp = consecPairs(nums);
+function pick(rounds: LottoRound[], stats: Stats, count = 5): void {
+  const bar = '═'.repeat(56);
+  console.log(`${bar}`);
+  console.log(`  추천 번호 ${count}세트`);
+  console.log(`  필터1: 100% 규칙 (${RULES.length}개) / 필터2: 역대 당첨 제외 / 필터3: 기피점수`);
+  console.log(`${bar}\n`);
+
+  const { picks, poolSize, attempts } = buildCandidates(rounds, stats, count);
+
+  console.log(`  후보 풀: ${poolSize.toLocaleString()}개 (${attempts.toLocaleString()}회 시도)\n`);
+  picks.forEach((p, i) => {
     console.log(
-      `  세트 ${i+1}: [${nums.map(n=>String(n).padStart(2)).join('  ')}]` +
-      `  합${String(s).padStart(3)} / 홀${oc}짝${6-oc} / 연속${cp}쌍 / 기피점수:${score.toFixed(1)}`
+      `  세트 ${i+1}: [${p.nums.map(n=>String(n).padStart(2)).join('  ')}]` +
+      `  합${String(p.sum).padStart(3)} / 홀${p.odd}짝${6-p.odd} / 연속${p.consec}쌍 / 기피점수:${p.score.toFixed(1)}`
     );
   });
   console.log('');
+}
+
+function nextSaturdayKST(now: Date = new Date()): string {
+  const kstMs = now.getTime() + 9 * 60 * 60 * 1000;
+  const kst = new Date(kstMs);
+  const day = kst.getUTCDay();
+  const daysUntilSat = day === 6 ? 7 : (6 - day + 7) % 7 || 7;
+  const target = new Date(kst.getTime() + daysUntilSat * 24 * 60 * 60 * 1000);
+  return target.toISOString().slice(0, 10);
+}
+
+export function renderPickMarkdown(meta: {
+  drawDate: string;
+  drawNo: number | string;
+  totalRules: number;
+  totalCombinations: number;
+  validCombinations: number;
+  cachedRounds: number;
+  poolSize: number;
+  attempts: number;
+  picks: PickEntry[];
+}): string {
+  const elimPct = ((1 - meta.validCombinations / meta.totalCombinations) * 100).toFixed(2);
+  const top50 = meta.picks.slice(0, 50);
+
+  const rowsAll = top50.map((p, i) =>
+    `| ${i + 1} | ${p.nums.join(' ')} | ${p.sum} | ${p.odd}:${6 - p.odd} | ${p.consec} | ${p.score.toFixed(1)} |`,
+  ).join('\n');
+
+  const head = `# ${meta.drawDate} (토) 추첨 50세트 추천 (${meta.drawNo}회)
+
+**생성 시각**: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC (cron 자동 갱신)
+**필터링 룰**: ${meta.totalRules}개 100% 규칙 (cycle 444 saturation 도달)
+**조합 풀**: ${meta.totalCombinations.toLocaleString()} → 유효 ${meta.validCombinations.toLocaleString()} (${elimPct}% 제거)
+**데이터 캐시**: 1~${meta.cachedRounds}회차
+**생성 명령**: \`pnpm tsx scripts/lotto.ts pick-md\` (후보 풀 ${meta.poolSize.toLocaleString()}개 / ${meta.attempts.toLocaleString()}회 시도)
+
+## 50세트 전체
+
+| # | 번호 | 합 | 홀:짝 | 연속쌍 | 기피점수 |
+|---|---|---|---|---|---|
+${rowsAll}
+
+## 추첨 후 비교 검증
+
+${meta.drawDate} 추첨 결과 (${meta.drawNo}회) 확정 후 매칭 수 기록 + lesson 박제.
+
+## 주의
+
+- 50세트 추천 = **${meta.totalRules} 규칙 필터 통과 + 역대 당첨 제외 + 기피점수 sort**. 통계적 우위는 없음
+- 본 비교 = **filter 효과 OOS 검증** 목적 (${meta.drawNo}회 미래 데이터 = 룰 셋에 미포함)
+- N=1 단건 결과로 결론 X. 누적 N≥10회 후 재평가
+`;
+  return head;
+}
+
+function pickMd(rounds: LottoRound[], stats: Stats): void {
+  const targetDate = process.argv[3] ?? nextSaturdayKST();
+  const drawNo = process.argv[4] ?? (rounds.length + 1);
+  const { picks, poolSize, attempts } = buildCandidates(rounds, stats, 50);
+  const { valid, total } = countValid(stats);
+  const md = renderPickMarkdown({
+    drawDate: targetDate,
+    drawNo,
+    totalRules: RULES.length,
+    totalCombinations: total,
+    validCombinations: valid,
+    cachedRounds: rounds.length,
+    poolSize,
+    attempts,
+    picks,
+  });
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}.md`);
+  writeFileSync(outPath, md);
+  console.log(`박제: ${outPath}`);
+  console.log(`회차: ${drawNo} / 50세트 / 후보 풀 ${poolSize.toLocaleString()}`);
 }
 
 // ─── MAIN ────────────────────────────────────────────────────────────────────
@@ -1717,6 +1804,10 @@ async function main() {
 
   if (mode === 'pick' || mode === 'all') {
     pick(rounds, stats, pickCount);
+  }
+
+  if (mode === 'pick-md') {
+    pickMd(rounds, stats);
   }
 }
 

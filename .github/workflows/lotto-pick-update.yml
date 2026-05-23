@@ -1,0 +1,137 @@
+name: lotto-pick-update
+
+# 매주 금요일 50조합 markdown 자동 박제 → apps/moneyball/data/lotto-picks/<next-saturday>.md
+# multi-fire (3회 시도) — GH Actions schedule 41% skip mitigation (cycle 27 박제)
+# idempotent skip — 이미 박제된 파일 있으면 exit 0
+#
+# cron = '19 0,3,6 * * 5' (UTC 금 00:19 + 03:19 + 06:19 = KST 09:19 + 12:19 + 15:19)
+# - sitemap-warmup '37 * * * *' / indexnow-ping '37 0 * * *' / deploy-drift-alert '17 * * * *' 분 겹침 회피
+# - 금요일 다양한 시간대 fire = 토요일 추첨 (20:45 KST) 12+ 시간 전 박제 보장
+#
+# plan #7 Step E 박제 (cycle 885)
+
+on:
+  schedule:
+    - cron: '19 0,3,6 * * 5'
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'Target Saturday (YYYY-MM-DD), defaults to next Saturday'
+        required: false
+      draw_no:
+        description: 'Draw number (defaults to cached rounds + 1)'
+        required: false
+
+concurrency:
+  group: lotto-pick-update
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute next Saturday (KST)
+        id: target
+        run: |
+          set -e
+          if [ -n "${{ inputs.target_date }}" ]; then
+            TARGET="${{ inputs.target_date }}"
+          else
+            # KST = UTC+9. find next Saturday in KST.
+            TARGET=$(TZ='Asia/Seoul' date -d 'next Saturday' '+%Y-%m-%d' 2>/dev/null || \
+                     TZ='Asia/Seoul' python3 -c 'import datetime; today=datetime.datetime.now(); days=(5-today.weekday())%7 or 7; print((today+datetime.timedelta(days=days)).strftime("%Y-%m-%d"))')
+          fi
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "Target date: $TARGET"
+
+      - name: Idempotent skip if already exists
+        id: check
+        run: |
+          set -e
+          FILE="apps/moneyball/data/lotto-picks/${{ steps.target.outputs.target }}.md"
+          if [ -f "$FILE" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$FILE already exists — idempotent skip"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip == 'false'
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install deps
+        if: steps.check.outputs.skip == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Update lotto cache + generate markdown
+        if: steps.check.outputs.skip == 'false'
+        env:
+          DRAW_NO: ${{ inputs.draw_no }}
+        run: |
+          set -e
+          pnpm tsx scripts/lotto.ts update
+          if [ -n "$DRAW_NO" ]; then
+            pnpm tsx scripts/lotto.ts pick-md "${{ steps.target.outputs.target }}" "$DRAW_NO"
+          else
+            pnpm tsx scripts/lotto.ts pick-md "${{ steps.target.outputs.target }}"
+          fi
+
+      - name: Verify markdown saved
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          set -e
+          FILE="apps/moneyball/data/lotto-picks/${{ steps.target.outputs.target }}.md"
+          if [ ! -f "$FILE" ]; then
+            echo "::error::Expected markdown file not created: $FILE"
+            exit 1
+          fi
+          LINE_COUNT=$(wc -l < "$FILE")
+          if [ "$LINE_COUNT" -lt 50 ]; then
+            echo "::error::Markdown file too short ($LINE_COUNT lines, expected ≥ 50)"
+            exit 1
+          fi
+          echo "✓ Saved $FILE ($LINE_COUNT lines)"
+
+      - name: Create PR
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          BRANCH="lotto/pick-${{ steps.target.outputs.target }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add apps/moneyball/data/lotto-picks/ scripts/lotto-data.json
+          git commit -m "data(lotto): ${{ steps.target.outputs.target }} 50조합 자동 박제 (cron)" || {
+            echo "::notice::no changes to commit"
+            exit 0
+          }
+          git push -u origin "$BRANCH"
+          PR_URL=$(gh pr create \
+            --title "data(lotto): ${{ steps.target.outputs.target }} 50조합 자동 박제 (cron)" \
+            --body "plan #7 Step E cron 자동 갱신 — 매주 금요일 multi-fire ('19 0,3,6 * * 5'). idempotent skip. AdSense surface risk 0 (archive 만 갱신, /lotto hub 미박제)." \
+            --label "automated,lotto" 2>/dev/null || echo "")
+          if [ -n "$PR_URL" ]; then
+            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            gh pr merge "$PR_NUM" --squash --auto --delete-branch
+            echo "::notice::PR $PR_URL queued for auto-merge"
+          fi
+

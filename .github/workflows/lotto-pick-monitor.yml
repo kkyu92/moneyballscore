@@ -1,0 +1,40 @@
+name: lotto-pick-monitor
+
+# 매주 토요일 새벽 (KST 02:00 = UTC 금 17:00) markdown 박제 여부 감지.
+# lotto-pick-update.yml (cron '19 0,3,6 * * 5') 3회 fire 모두 실패 시 ::error::
+#
+# plan #7 Step E 박제 (cycle 885)
+
+on:
+  schedule:
+    - cron: '0 17 * * 5'
+  workflow_dispatch:
+
+concurrency:
+  group: lotto-pick-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Saturday markdown 박제
+        run: |
+          set -e
+          # UTC 금 17:00 시점 = KST 토 02:00. 다음 토요일 = 본 monitor fire 당일.
+          TARGET=$(TZ='Asia/Seoul' python3 -c 'import datetime; today=datetime.datetime.now(); days=(5-today.weekday())%7; days=days if days>=0 else 7; print((today+datetime.timedelta(days=days)).strftime("%Y-%m-%d"))')
+          FILE="apps/moneyball/data/lotto-picks/${TARGET}.md"
+          echo "Checking $FILE"
+          if [ ! -f "$FILE" ]; then
+            echo "::error::Lotto pick markdown missing: $FILE — lotto-pick-update.yml 3회 fire (UTC 금 00/03/06:19) 모두 실패 또는 silent skip. 수동 'workflow_dispatch' fire 권장 (lotto-pick-update.yml + target_date=$TARGET)."
+            exit 1
+          fi
+          LINES=$(wc -l < "$FILE")
+          if [ "$LINES" -lt 50 ]; then
+            echo "::error::$FILE too short ($LINES lines, expected ≥ 50)"
+            exit 1
+          fi
+          echo "::notice::$FILE OK ($LINES lines)"

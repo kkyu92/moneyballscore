@@ -295,3 +295,68 @@ describe("/lotto/methodology — AdSense surface signal grep (정체성 보존)"
     });
   }
 });
+
+describe("plan #7 Step E — lotto-pick-update cron workflow regression", () => {
+  const UPDATE_YAML = join(REPO_ROOT, "../../.github/workflows/lotto-pick-update.yml");
+  const MONITOR_YAML = join(REPO_ROOT, "../../.github/workflows/lotto-pick-monitor.yml");
+
+  it("update workflow cron = '19 0,3,6 * * 5' (multi-fire 3회)", () => {
+    const yaml = readFileSync(UPDATE_YAML, "utf-8");
+    expect(yaml).toContain("'19 0,3,6 * * 5'");
+  });
+
+  it("update workflow idempotent skip 가드 박제", () => {
+    const yaml = readFileSync(UPDATE_YAML, "utf-8");
+    expect(yaml).toMatch(/Idempotent skip if already exists/);
+    expect(yaml).toContain("apps/moneyball/data/lotto-picks/");
+  });
+
+  it("update workflow pick-md mode 호출", () => {
+    const yaml = readFileSync(UPDATE_YAML, "utf-8");
+    expect(yaml).toContain("scripts/lotto.ts pick-md");
+  });
+
+  it("update workflow PR auto-merge 박제 (R7 정합)", () => {
+    const yaml = readFileSync(UPDATE_YAML, "utf-8");
+    expect(yaml).toContain("--squash --auto --delete-branch");
+  });
+
+  it("monitor workflow cron = '0 17 * * 5' (KST 토 02:00)", () => {
+    const yaml = readFileSync(MONITOR_YAML, "utf-8");
+    expect(yaml).toContain("'0 17 * * 5'");
+  });
+
+  it("monitor workflow ::error:: 명시 박제 (silent skip 차단)", () => {
+    const yaml = readFileSync(MONITOR_YAML, "utf-8");
+    expect(yaml).toContain("::error::");
+  });
+});
+
+describe("plan #7 Step E — scripts/lotto.ts pick-md mode + markdown renderer", () => {
+  it("scripts/lotto.ts 안 'pick-md' mode dispatch 박제", () => {
+    const src = readFileSync(join(REPO_ROOT, "../../scripts/lotto.ts"), "utf-8");
+    expect(src).toMatch(/mode === ['"]pick-md['"]/);
+    expect(src).toMatch(/function pickMd\(/);
+    expect(src).toMatch(/function renderPickMarkdown\(/);
+    expect(src).toMatch(/function buildCandidates\(/);
+    expect(src).toMatch(/function nextSaturdayKST\(/);
+  });
+
+  it("markdown 출력 = 50조합 table + 추첨 후 비교 + 주의 섹션", () => {
+    const src = readFileSync(join(REPO_ROOT, "../../scripts/lotto.ts"), "utf-8");
+    const renderFn = src.match(/export function renderPickMarkdown[\s\S]*?return head;/)?.[0] ?? "";
+    expect(renderFn).toContain("## 50세트 전체");
+    expect(renderFn).toContain("## 추첨 후 비교 검증");
+    expect(renderFn).toContain("## 주의");
+    expect(renderFn).toContain("규칙 필터 통과 + 역대 당첨 제외");
+  });
+
+  it("markdown 안 AdSense 표면 신호 0건 (당첨/베팅/예상번호/베팅추천)", () => {
+    const src = readFileSync(join(REPO_ROOT, "../../scripts/lotto.ts"), "utf-8");
+    const renderFn = src.match(/export function renderPickMarkdown[\s\S]*?return head;/)?.[0] ?? "";
+    expect(renderFn).not.toMatch(/당첨\s*번호/);
+    expect(renderFn).not.toMatch(/베팅\s*추천/);
+    expect(renderFn).not.toMatch(/예상\s*번호/);
+    expect(renderFn).not.toContain("조합 추천");
+  });
+});
