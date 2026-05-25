@@ -1,0 +1,101 @@
+name: data-refresh-weekly
+
+# 주간 stale-data snapshot — plan #9 Step 4 (X2 데이터 갱신 cron).
+#
+# CLAUDE.md / TODOS.md 의 "scoring_rule 성과 (cycle N 갱신, YYYY-MM-DD 측정)" / "요일별 누적" 류
+# stale 라인 source-of-truth markdown 매주 자동 박제.
+#
+# auto-commit risk 차단 패턴 — CLAUDE.md / TODOS.md 직접 sed 갱신 X,
+# 별도 `apps/moneyball/data/stale-data/${DATE}.md` snapshot 만 commit.
+# 사용자 / 본 메인이 사이클 retro 시 snapshot 보고 수동 갱신.
+#
+# cron '15 17 * * 2' (UTC 화 17:15 = KST 수 02:15) — verify cron + op-analysis-weekly 다음 timing.
+# manual fire 가능 (workflow_dispatch).
+
+on:
+  schedule:
+    - cron: '15 17 * * 2'
+  workflow_dispatch:
+
+concurrency:
+  group: data-refresh-weekly
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Run stale-data snapshot
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          mkdir -p apps/moneyball/data/stale-data
+          DATE=$(date -u +%Y-%m-%d)
+          OUT="apps/moneyball/data/stale-data/${DATE}.md"
+          pnpm tsx scripts/update-stale-data.ts "$OUT" 2>&1 | tail -20
+          if [ ! -f "$OUT" ]; then
+            echo "::error::stale-data snapshot not generated"
+            exit 1
+          fi
+          LINES=$(wc -l < "$OUT")
+          if [ "$LINES" -lt 15 ]; then
+            echo "::error::stale-data snapshot too short ($LINES lines)"
+            exit 1
+          fi
+          if [ "$LINES" -gt 200 ]; then
+            echo "::error::stale-data snapshot too long ($LINES lines) — risk guard"
+            exit 1
+          fi
+          echo "::notice::stale-data snapshot saved to $OUT ($LINES lines)"
+
+      - name: Create PR (data prefix, R7 auto-merge)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          DATE=$(date -u +%Y-%m-%d)
+          BRANCH="data/stale-data-${DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add apps/moneyball/data/stale-data/
+          # diff guard — 변경 line 200 줄 초과 시 fail (auto-commit risk)
+          DIFF_LINES=$(git diff --cached --numstat | awk '{s+=$1+$2} END {print s+0}')
+          if [ "$DIFF_LINES" -gt 200 ]; then
+            echo "::error::diff too large ($DIFF_LINES lines) — auto-commit risk guard"
+            exit 1
+          fi
+          git commit -m "data(stale-data): ${DATE} weekly snapshot (plan #9 Step 4 X2)" || {
+            echo "::notice::no changes to commit"
+            exit 0
+          }
+          git push -u origin "$BRANCH"
+          PR_URL=$(gh pr create \
+            --title "data(stale-data): ${DATE} weekly snapshot (cron)" \
+            --body "plan #9 Step 4 X2 — stale-data 자동 측정. scoring_rule cohort + 요일별 누적 + v1.8 진행 markdown 박제. CLAUDE.md / TODOS.md 직접 mutation 차단 (snapshot 만 commit, 수동 갱신 source-of-truth)." \
+            --label "automated,stale-data" 2>/dev/null || echo "")
+          if [ -n "$PR_URL" ]; then
+            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            gh pr merge "$PR_NUM" --squash --auto --delete-branch
+            echo "::notice::PR $PR_URL queued for auto-merge"
+          fi
