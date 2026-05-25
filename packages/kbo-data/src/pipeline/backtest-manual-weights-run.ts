@@ -227,6 +227,28 @@ const WEIGHTS_V21C: Record<string, number> = {
   sfr: 0.00,
 };
 
+/**
+ * v2.0-cycle231 — cycle 231 operational-analysis heavy 정보가치 분석 후보 (CHANGELOG L520).
+ * v1.8 baseline (DEFAULT_WEIGHTS) 기준 재조정:
+ *   sp_fip 0.15 → 0.08 (-7pp), lineup_woba 0.15 → 0.12 (-3pp),
+ *   bullpen_fip 0.10 → 0.14 (+4pp), recent_form 0.10 → 0.13 (+3pp), elo 0.10 → 0.13 (+3pp).
+ *   sp_xfip / war / h2h / park / sfr 동일. 합 0.85.
+ * ⚠️ backtest 한계: bullpen_fip / sp_xfip / war 매핑 불가 (0.5 중립). 본 후보 변화 중
+ *   sp_fip / lineup_woba / recent_form / elo (매핑 가능) 만 reflect. bullpen +4pp Δ 측정 X.
+ */
+const WEIGHTS_V20_C231: Record<string, number> = {
+  sp_fip: 0.08,
+  sp_xfip: 0.05,
+  lineup_woba: 0.12,
+  bullpen_fip: 0.14,
+  recent_form: 0.13,
+  war: 0.08,
+  head_to_head: 0.03,
+  park_factor: 0.04,
+  elo: 0.13,
+  sfr: 0.05,
+};
+
 async function main() {
   console.log('\n=== H4 검증 — Manual 가중합 vs Logistic 학습 (Test 2024) ===\n');
 
@@ -253,6 +275,7 @@ async function main() {
   const manualV21APred = test.features.map((f) => manualScore(f, WEIGHTS_V21A));
   const manualV21BPred = test.features.map((f) => manualScore(f, WEIGHTS_V21B));
   const manualV21CPred = test.features.map((f) => manualScore(f, WEIGHTS_V21C));
+  const manualV20C231Pred = test.features.map((f) => manualScore(f, WEIGHTS_V20_C231));
 
   console.log('\n[4/4] Logistic 학습 (대조군)…');
   const Xtr4 = train.features.map(vectorize);
@@ -277,6 +300,7 @@ async function main() {
   const v21AM = computeMetrics(manualV21APred, test.outcomes);
   const v21BM = computeMetrics(manualV21BPred, test.outcomes);
   const v21CM = computeMetrics(manualV21CPred, test.outcomes);
+  const v20C231M = computeMetrics(manualV20C231Pred, test.outcomes);
   const log4M = computeMetrics(log4Pred, test.outcomes);
   const log7M = computeMetrics(log7Pred, test.outcomes);
 
@@ -291,6 +315,7 @@ async function main() {
   line('Manual v2.1-A (sfr/h2h 2%, conservative)', v21AM);
   line('Manual v2.1-B (sfr 0/h2h 2, partial Wayback)', v21BM);
   line('Manual v2.1-C (h2h/park/sfr 0, pure Wayback)', v21CM);
+  line('Manual v2.0-cycle231 (elo/bullpen/form +)', v20C231M);
   line('Logistic 4-feature', log4M);
   line('Logistic 7-feature', log7M);
 
@@ -304,6 +329,11 @@ async function main() {
   console.log(`  v1.5 - v2.1-A ΔBrier: ${dV21A >= 0 ? '+' : ''}${dV21A.toFixed(5)} ${verdict(dV21A, 'A')}`);
   console.log(`  v1.5 - v2.1-B ΔBrier: ${dV21B >= 0 ? '+' : ''}${dV21B.toFixed(5)} ${verdict(dV21B, 'B')}`);
   console.log(`  v1.5 - v2.1-C ΔBrier: ${dV21C >= 0 ? '+' : ''}${dV21C.toFixed(5)} ${verdict(dV21C, 'C')}`);
+
+  console.log('\n=== plan #8 M1 — v2.0-cycle231 후보 비교 ===\n');
+  const dV20C231 = v15M.brier - v20C231M.brier;
+  console.log(`  v1.5 - v2.0-cycle231 ΔBrier: ${dV20C231 >= 0 ? '+' : ''}${dV20C231.toFixed(5)} ${verdict(dV20C231, 'cycle231')}`);
+  console.log('  ⚠️ 한계: bullpen_fip +4pp 매핑 불가 (0.5 중립). sp_fip/lineup/form/elo Δ 만 reflect.');
 
   console.log('\n=== H4 결론 ===\n');
   const dManual = v15M.brier - v16M.brier;
@@ -335,6 +365,61 @@ async function main() {
   console.log('\n  매핑 가능 weight 합: 0.62 (sp_fip+lineup_woba+recent_form+h2h+park+elo+sfr)');
   console.log('  매핑 불가 weight 합: 0.23 (sp_xfip+bullpen_fip+war = 0.5 중립)');
   console.log('  본 manual 모델 ≠ prod 100% 동일 — H4 의 핵심 질문만 답.');
+
+  // plan #8 M1 — JSON output 박제 (apps/moneyball/data/v2-backtest-results.json).
+  // baseline simulation evidence — 결론 X, n=133 noise + 매핑 불가 한계 명시.
+  const path = await import('node:path');
+  const fs = await import('node:fs');
+  const outDir = path.resolve(process.cwd(), '../../apps/moneyball/data');
+  const outPath = path.join(outDir, 'v2-backtest-results.json');
+  const result = {
+    version: 1,
+    generated_at: new Date().toISOString(),
+    plan: 'plan #8 M1 (Tier 2) — v2.0 가중치 backtest harness fire',
+    cycle: 903,
+    dataset: {
+      train_season: 2023,
+      test_season: 2024,
+      train_n: train.outcomes.length,
+      test_n: test.outcomes.length,
+    },
+    limits: {
+      mapping_unavailable: ['sp_xfip', 'bullpen_fip', 'war'],
+      mapping_unavailable_weight_sum: 0.23,
+      mapping_available_weight_sum: 0.62,
+      note: 'GameFeatures 에 sp_xfip/bullpen_fip/war 부재 → 0.5 중립 처리. bullpen +4pp Δ 측정 불가.',
+    },
+    models: {
+      coin_flip: coinM,
+      manual_v15: v15M,
+      manual_v16: v16M,
+      manual_v21a: v21AM,
+      manual_v21b: v21BM,
+      manual_v21c: v21CM,
+      manual_v20_cycle231: v20C231M,
+      logistic_4f: log4M,
+      logistic_7f: log7M,
+    },
+    deltas_vs_v15: {
+      v16: v15M.brier - v16M.brier,
+      v21a: v15M.brier - v21AM.brier,
+      v21b: v15M.brier - v21BM.brier,
+      v21c: v15M.brier - v21CM.brier,
+      v20_cycle231: v15M.brier - v20C231M.brier,
+      logistic_7f: v15M.brier - log7M.brier,
+    },
+    weights: {
+      v15: WEIGHTS_V15,
+      v16: WEIGHTS_V16,
+      v21a: WEIGHTS_V21A,
+      v21b: WEIGHTS_V21B,
+      v21c: WEIGHTS_V21C,
+      v20_cycle231: WEIGHTS_V20_C231,
+    },
+  };
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(outPath, JSON.stringify(result, null, 2) + '\n');
+  console.log(`\n  📦 결과 박제: ${outPath}`);
 
   console.log('\n=== 완료 ===\n');
 }

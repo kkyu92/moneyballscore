@@ -1,5 +1,50 @@
 # Changelog
 
+## 🧪 plan #8 M1 — v2.0-cycle231 backtest harness fire (2026-05-26, cycle 903)
+
+### v2.0-cycle231 후보 baseline simulation 박제
+
+cycle 231 정보가치 분석 후보 (`elo +3pp / bullpen_fip +4pp / recent_form +3pp / sp_fip -7pp / lineup_woba -3pp`, 합 0.85) 를 `backtest-manual-weights-run.ts` harness 에 추가 + Test 2024 (N=727) fire. 결과 `apps/moneyball/data/v2-backtest-results.json` 박제.
+
+**결과 비교 (Test 2024 N=727)**:
+
+| 모델 | Brier | LogLoss | Acc |
+|------|-------|---------|-----|
+| coin_flip | 0.25000 | 0.69315 | 51.44% |
+| Manual v1.5 (현 prod) | 0.24974 | 0.69264 | 52.82% |
+| Manual v1.6 | 0.24886 | 0.69086 | 53.37% |
+| Manual v2.1-A | 0.24854 | 0.69023 | 52.96% |
+| **Manual v2.1-B** | **0.24830** | **0.68975** | 52.82% |
+| Manual v2.1-C | 0.24885 | 0.69084 | 53.09% |
+| **Manual v2.0-cycle231** | **0.24977** | **0.69271** | 52.82% |
+| Logistic 4f | 0.24980 | 0.69276 | 52.41% |
+| **Logistic 7f** | **0.24661** | **0.68635** | **56.40%** |
+
+**ΔBrier vs v1.5**:
+- v2.0-cycle231: **-0.00003 (미미, evidence 부재)**
+- v2.1-B: +0.00143 (backtest 안 가장 우수)
+- Logistic 7f: +0.00313
+
+### 한계 명시
+
+- backtest harness 매핑 가능 weight 합 = 0.62 (sp_fip / lineup_woba / recent_form / h2h / park / elo / sfr). 매핑 불가 = 0.23 (sp_xfip / bullpen_fip / war = 0.5 중립).
+- v2.0-cycle231 후보 가중치 변화 중 **bullpen_fip +4pp 매핑 불가** → backtest 결과 미반영. 실 prod 적용 시 결과 다를 가능성.
+- N=727 wayback test set 결과 = 2024 시즌 데이터. v1.8 prod 누적 n=39 (cycle 886 기준) noise level 다름.
+
+### 결론
+
+- **결론 X (baseline 박제만)**. plan #8 self_verification rubric (risk 1, n=133 noise) 정합.
+- v2.0-cycle231 backtest evidence 부재 (Δ -0.00003). 그러나 매핑 불가 영역 (bullpen) 큰 가중치 변화 미반영 → backtest 단독 판단 X.
+- 실 prod n≥150 도달 (~2026-06-04) 후 v1.8 → v2.0-cycle231 또는 v2.1-B switch 결정 필요. evidence valuation 신중 (CI ±15%p).
+
+### plan #8 status 갱신
+
+- Tier 1 (M2/M5/M7/M10/L4) — 100% ship 완료
+- Tier 2 M1 — 본 cycle 903 ship 완료
+- Tier 2 L1 — cycle 887~898 partial ship
+- Tier 2 L3 — cycle 898 closure
+- **Tier 2 closure 잔여 = 0** (Tier 3 = plan #9 carry-over, completed cycle 896)
+
 ## 🎰 Lotto 1225회 OOS + plan #7 Step E/F partial 박제 (2026-05-23, cycle 885)
 
 ### 1225회 OOS 검증 (PR #1246 cf86586) — 256 rules 100% PASS + 5등 6건 + score breakdown
