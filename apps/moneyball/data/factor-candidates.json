@@ -1,0 +1,159 @@
+{
+  "generated_at": "2026-05-25T00:00:00Z",
+  "cycle": 889,
+  "plan_n": 9,
+  "step": "Step 1 (M4) — 신규 factor 후보 식별 + 수집 path design",
+  "current_factors": {
+    "count": 10,
+    "list": [
+      "sp_fip",
+      "sp_xfip",
+      "lineup_woba",
+      "bullpen_fip",
+      "recent_form",
+      "war",
+      "head_to_head",
+      "park_factor",
+      "elo",
+      "sfr"
+    ],
+    "total_weight": 0.85,
+    "home_advantage": 0.015
+  },
+  "candidates": [
+    {
+      "slug": "back_to_back",
+      "name_ko": "백투백 game (선수 누적 경기 수)",
+      "source": "KBO 공식 schedule API + games.game_date sequence",
+      "collection_path": "scripts/factor-backfill-back-to-back.ts — games table game_date sort + sequence count + 24h gap 검사",
+      "collection_cost": "low (기존 games table 활용, 외부 API 불요)",
+      "value_hypothesis": "직전 경기 24h 안 = 피로도 증가 → 승률 영향. 더블헤더 (1일 2경기) 미발생 KBO 환경에선 weekday/weekend back-to-back 영향 약할 가능성",
+      "expected_weight_pct": "2-4%",
+      "risk": 1,
+      "notes": "KBO 시즌 우천취소 + 7월 휴식기 영향 = back-to-back 패턴 noise 가능. backfill 후 backtest 측정 필수"
+    },
+    {
+      "slug": "sp_rest_days",
+      "name_ko": "선발투수 휴식일 gap (직전 등판 후 경과일)",
+      "source": "pitcher_stats snapshot (cycle 287 박제, supabase) + games.starter_id",
+      "collection_path": "scripts/factor-backfill-sp-rest.ts — pitcher_stats.captured_at + games.starting_pitcher_id join + 일자 gap 계산",
+      "collection_cost": "medium (사용자 영역 미운영 pitcher_stats 활성 필요)",
+      "value_hypothesis": "SP 휴식일 4-6일 = 정상 / 3일 이하 = under-rested fatigue / 7일+ = over-rested rust. 정상 휴식 cohort 대비 +/- 승률 측정 가능",
+      "expected_weight_pct": "3-5%",
+      "risk": 2,
+      "notes": "pitcher_stats snapshot 미운영 시 = 수집 X. carry-over plan #10 dependency. 사용자 영역 cron 활성 후 가능"
+    },
+    {
+      "slug": "weather_temp",
+      "name_ko": "구장 기온 (Open-Meteo)",
+      "source": "games.weather JSONB (cycle 287 박제, 015_games_weather.sql)",
+      "collection_path": "이미 박제 — games.weather.temperature_c 직접 read",
+      "collection_cost": "none (이미 운영)",
+      "value_hypothesis": "30°C 이상 = 더위로 타구 비거리 증가 + 투수 피로도 / 10°C 이하 = 타구 비거리 감소 + 변화구 영향. 돔구장 (창원NC / 고척키움) 제외 outdoor 경기만 측정",
+      "expected_weight_pct": "1-3%",
+      "risk": 1,
+      "notes": "돔구장 분리 처리 필요. weather null 시 기본값 fallback. 기온 외 풍속/강수도 추가 차원 가능"
+    },
+    {
+      "slug": "weather_wind",
+      "name_ko": "구장 풍속 + 방향 (홈런 비거리 영향)",
+      "source": "games.weather JSONB",
+      "collection_path": "games.weather.wind_speed_kmh + wind_direction",
+      "collection_cost": "none (이미 운영)",
+      "value_hypothesis": "풍속 15km/h+ + 외야 방향 (구장별 외야 방위 매핑) = 홈런 증가 → 高 ISO 팀 유리. 측정 정확도 = 구장별 outfield 방위 매핑 사전 필수",
+      "expected_weight_pct": "0.5-2%",
+      "risk": 2,
+      "notes": "구장별 outfield 방위 매핑 데이터 필요. KBO 9 구장 × outfield 방위 (LF/CF/RF) 정적 표 박제 사전"
+    },
+    {
+      "slug": "weather_precipitation",
+      "name_ko": "강수량 (우천취소 외 부분 우천 영향)",
+      "source": "games.weather JSONB",
+      "collection_path": "games.weather.precipitation_mm",
+      "collection_cost": "none",
+      "value_hypothesis": "강수 1mm+ = 그라운드 컨디션 저하 → 실책 증가 + 守備 SFR 약화. 우천취소 분리 (status='postponed') 후 진행 경기만 측정",
+      "expected_weight_pct": "0.5-1.5%",
+      "risk": 1,
+      "notes": "noise 가능성 high (강수 0 vs 약함 분리 모호). 0.5mm 임계 권장"
+    },
+    {
+      "slug": "travel_distance",
+      "name_ko": "원정팀 이동 거리 (km)",
+      "source": "정적 매핑 (KBO 9 구장 좌표 + haversine)",
+      "collection_path": "scripts/factor-build-travel-matrix.ts — 9 구장 위경도 + haversine distance pre-compute → games.away_team + games.home_team lookup",
+      "collection_cost": "low (1회 박제 + lookup)",
+      "value_hypothesis": "직전 경기 구장 → 본 경기 구장 거리 200km+ = 이동 피로 / 400km+ = 비행/장거리 = 추가 피로. 시즌 시리즈 진행 (3-game 단위) = 첫 game 만 long-travel 영향",
+      "expected_weight_pct": "1-2%",
+      "risk": 1,
+      "notes": "직전 경기 구장 join 필요 (games table 자기 join + game_date sort). 시리즈 1차전만 측정 vs 모든 게임 cohort split"
+    },
+    {
+      "slug": "series_game_order",
+      "name_ko": "시리즈 안 game 순서 (1차전 / 2차전 / 3차전)",
+      "source": "games table game_date + home_team + away_team grouping",
+      "collection_path": "scripts/factor-derive-series-order.ts — 동일 home+away 3-game 단위 grouping + 순서 번호",
+      "collection_cost": "low (derive only)",
+      "value_hypothesis": "1차전 = SP ace 등판 + 양팀 fresh / 2차전 = mid-rotation / 3차전 = back-end rotation. 1차전 cohort vs 3차전 cohort 승률/Brier 분리 측정",
+      "expected_weight_pct": "1-2%",
+      "risk": 1,
+      "notes": "SP 정보 (sp_fip) 와 일부 collinear 가능 (rotation 순서가 SP quality 와 자연 정합). regression 안 보조 차원 가치"
+    },
+    {
+      "slug": "streak_momentum",
+      "name_ko": "직전 result streak (연승/연패 모멘텀)",
+      "source": "games table is_home_win + game_date sort",
+      "collection_path": "scripts/factor-derive-streak.ts — 팀별 최근 N=5 game result rolling",
+      "collection_cost": "low (derive only)",
+      "value_hypothesis": "**random hypothesis** — streak 자체는 noise (regression to mean). 단 recent_form (현재 박제) 와 별개 차원 = 최근 5경기 단순 W/L count vs 정렬 순서 영향. 비교 evidence 측정 후 결정",
+      "expected_weight_pct": "0-1% (random hypothesis 검증 후)",
+      "risk": 2,
+      "notes": "recent_form (현재 0.10 가중치) 와 collinear high 가능. backtest 시 두 factor 동시 fire → 정보가치 분리 측정. random hypothesis 정합 시 가중치 0 권장"
+    },
+    {
+      "slug": "umpire_strike_zone_bias",
+      "name_ko": "주심 strike zone bias (BB/K% 영향)",
+      "source": "manual scrape 필요 (KBO 주심 stats 공개 X)",
+      "collection_path": "scripts/factor-scrape-umpire.ts — KBOdata 또는 statiz crawl (statiz robots.txt 차단 = 사용자 영역 필요)",
+      "collection_cost": "high (외부 scrape + 차단 회피)",
+      "value_hypothesis": "주심별 BB%/K% bias 측정 가능 시 = 컨택 hitter 유리 vs 컨택 타자 fly hitter cohort 분리 정확도 향상",
+      "expected_weight_pct": "0.5-1.5%",
+      "risk": 3,
+      "notes": "수집 cost high + 차단 risk + KBO 주심 rotation 비공개 가능성. plan #10 carry-over 강력 권장 (본 cycle Step 1 scope 외)"
+    }
+  ],
+  "summary": {
+    "total_candidates": 9,
+    "immediate_collection_available": [
+      "back_to_back",
+      "weather_temp",
+      "weather_wind",
+      "weather_precipitation",
+      "travel_distance",
+      "series_game_order",
+      "streak_momentum"
+    ],
+    "dependency_blocked": [
+      "sp_rest_days (pitcher_stats snapshot 사용자 영역 미운영 carry-over)",
+      "umpire_strike_zone_bias (manual scrape + 차단 risk = 사용자 영역 + plan #10 권장)"
+    ],
+    "expected_total_weight_pct_max": "10-22% (대부분 1-5% 작은 가중치)",
+    "v2_0_integration_path": "n=150 도달 후 (06-04 ETA) v2.0 가중치 prod 적용 + 신규 factor 1-2개 동시 backtest = plan #10",
+    "risk_high_carry_over": [
+      "umpire_strike_zone_bias (risk=3, scrape 차단)",
+      "streak_momentum (random hypothesis, recent_form collinear)",
+      "weather_wind (구장별 outfield 방위 매핑 사전 필요)"
+    ]
+  },
+  "next_steps": {
+    "plan_9_step_2": "X1 — backtest harness 통합 framework (backtest-harness.ts entry + Zod schema)",
+    "plan_9_step_3": "M9 — /v2-preview 신규 hub (M1 backtest evidence + n=150 후)",
+    "plan_9_step_4": "X2 — data-refresh-weekly cron (auto-commit risk mitigation 추가 spec)",
+    "plan_10_carry_over": "n=150 도달 후 v2.0 가중치 prod 적용 + 본 candidates 안 immediate collection 7개 중 우선 1-2개 backtest fire"
+  },
+  "limitations": [
+    "본 박제 = 식별 + 수집 path design only. 실제 수집 + backtest X (plan #10 carry-over)",
+    "예상 가중치 % = 가설, backtest 측정 후 변경 가능",
+    "overfitting risk — 신규 factor 추가 시 v2.0 가중치 noise 증가, sum=100% 재조정 필수",
+    "collinearity risk (streak_momentum vs recent_form / sp_rest_days vs sp_fip) — backtest 안 동시 fire + 정보가치 분리 측정 필수"
+  ]
+}
