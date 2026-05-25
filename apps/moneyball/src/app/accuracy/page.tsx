@@ -5,9 +5,11 @@ import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
 import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { TableOfContents } from '@/components/shared/TableOfContents';
+import { BrierTrendChart } from '@/components/dashboard/BrierTrendChart';
 
 const TOC_ITEMS = [
   { id: 'calibration', label: '캘리브레이션' },
+  { id: 'brier-trend', label: 'Brier 추세' },
   { id: 'weekly', label: '주별 트렌드' },
   { id: 'weekday', label: '요일별' },
   { id: 'confidence', label: 'AI 확신도' },
@@ -39,6 +41,7 @@ import {
   buildV18SubCohort,
   buildFallbackStats,
   buildFallbackDailyTrend,
+  buildBrierTrend,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -258,6 +261,7 @@ export default async function AccuracyPage() {
   const gap = calibrationGap(rows);
   const buckets = bucketize(rows);
   const weekly = buildWeeklyTrend(rows);
+  const brierTrend = buildBrierTrend(rows);
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
@@ -488,6 +492,25 @@ export default async function AccuracyPage() {
           <CalibrationChart buckets={buckets} />
         )}
       </section>
+
+      {/* Brier 추세 (scoring_rule 진화 + 주차별) */}
+      {brierTrend.length >= 3 && (
+        <section
+          id="brier-trend"
+          className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-lg font-bold">Brier 추세 (모델 진화)</h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              낮을수록 정확. 0.25 = baseline
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            scoring_rule 별 주차 Brier — v1.5 → v1.6 → v1.7-revert → v1.8 진화 추세 시각화.
+          </p>
+          <BrierTrendChart data={brierTrend} />
+        </section>
+      )}
 
       {/* 주별 트렌드 */}
       {weekly.length > 0 && (

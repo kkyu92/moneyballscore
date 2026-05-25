@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-05-25T07:00:54.190Z",
+  "n_rounds": 1224,
+  "score_stats": {
+    "n": 1224,
+    "min": -8.7,
+    "max": 19,
+    "median": 1.7000000000000002,
+    "mean": 1.9477124183006524
+  },
+  "score_percentiles": {
+    "p0": 19,
+    "p5": 8.4,
+    "p10": 6.8,
+    "p25": 4.3,
+    "p50": 1.7000000000000002,
+    "p75": -0.5,
+    "p90": -2.7,
+    "p95": -4.1,
+    "p100": -8.7
+  },
+  "note": "N=1000+ 1등 조합 unpopularityScore 분포. 실제 50세트 추천 cutoff 와 비교 시 top 0.65% 가정 (50/7.7M valid pool). 1등 조합 평균 score 가 cutoff 보다 낮으면 추천 모델 약점 evidence.",
+  "limitations": [
+    "unpopularityScore 가 valid pool 전체 (7.7M) 분포 아님 — 1등 조합 만의 분포",
+    "실제 50세트 cutoff 는 valid pool 안 추정 top 0.65% — 본 통계와 직접 비교 X",
+    "N=2 prod OOS (1224 + 1225) evidence 와 분리 — backtest 는 historical 1등 조합 분포만"
+  ]
+}

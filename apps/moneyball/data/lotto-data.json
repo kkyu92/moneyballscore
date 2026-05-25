@@ -21,13 +21,52 @@
       "draw": 1224,
       "date": "2026-05-16",
       "passed": 256,
-      "failed": 0
+      "failed": 0,
+      "match_distribution": {
+        "tier_3": 2,
+        "tier_4": 0,
+        "tier_5": 0,
+        "tier_5_bonus": 0,
+        "tier_6": 0,
+        "avg_match": 0.84,
+        "random_expected_tier_3": 0.89,
+        "over_perform_ratio": 2.25
+      },
+      "winning_score_breakdown": {
+        "lucky_penalty": 0,
+        "consec_pairs_bonus": 3,
+        "sum_distance": 2.6,
+        "arith_penalty": 0,
+        "decade_penalty": 0,
+        "very_low_penalty": 0,
+        "total": 5.6
+      }
     },
     {
       "draw": 1225,
       "date": "2026-05-23",
       "passed": 256,
-      "failed": 0
+      "failed": 0,
+      "match_distribution": {
+        "tier_3": 6,
+        "tier_4": 0,
+        "tier_5": 0,
+        "tier_5_bonus": 0,
+        "tier_6": 0,
+        "avg_match": 1.12,
+        "random_expected_tier_3": 0.89,
+        "over_perform_ratio": 6.74
+      },
+      "winning_score_breakdown": {
+        "lucky_penalty": 0,
+        "consec_pairs_bonus": 6,
+        "sum_distance": 0.6,
+        "arith_penalty": 0,
+        "decade_penalty": 0,
+        "very_low_penalty": 0,
+        "total": 6.6,
+        "pool_rank_pct": 10.86
+      }
     }
   ],
   "chain_fire_history": [

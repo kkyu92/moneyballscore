@@ -1719,6 +1719,76 @@ function pickMd(rounds: LottoRound[], stats: Stats): void {
   console.log(`회차: ${drawNo} / 50세트 / 후보 풀 ${poolSize.toLocaleString()}`);
 }
 
+// ─── SCORE BACKTEST (plan #8 Tier 2 L1) ────────────────────────────────────
+
+function scoreBacktest(rounds: LottoRound[]): void {
+  // 과거 1000+ 회차 1등 조합 unpopularityScore 분포 측정.
+  // N=2 단건 evidence 한계 명시 — backtest 인프라 박제만, 결론 X.
+  // 출력 = apps/moneyball/data/lotto-score-backtest.json
+
+  const winningScores: number[] = [];
+  const breakdowns: Array<{ round: number; total: number; sum: number; cp: number; lucky: number; veryLow: number }> = [];
+
+  for (const r of rounds) {
+    const nums = r.numbers;
+    const lucky = nums.filter(n => LUCKY_NUMS.has(n)).length;
+    const cp = consecPairs(nums);
+    const s = sumNums(nums);
+    const sumDist = Math.abs(s - 138) * 0.1;
+    const gaps = nums.slice(1).map((n, i) => n - nums[i]);
+    const isArith = gaps.every(g => g === gaps[0]);
+    const arithPen = isArith ? -10 : 0;
+    const decades = nums.map(n => Math.floor(n / 10));
+    const sameDecade = decades.every(d => d === decades[0]);
+    const decadePen = sameDecade ? -5 : 0;
+    const veryLow = nums.filter(n => n <= 9).length;
+    const veryLowPen = veryLow >= 3 ? -veryLow * 2 : 0;
+    const luckyPen = -lucky * 3;
+    const cpBonus = cp * 3;
+    const total = luckyPen + cpBonus + sumDist + arithPen + decadePen + veryLowPen;
+    winningScores.push(total);
+    breakdowns.push({ round: r.round, total, sum: s, cp, lucky, veryLow });
+  }
+
+  winningScores.sort((a, b) => b - a);
+  const stats = {
+    n: winningScores.length,
+    min: winningScores[winningScores.length - 1],
+    max: winningScores[0],
+    median: winningScores[Math.floor(winningScores.length / 2)],
+    mean: winningScores.reduce((a, b) => a + b, 0) / winningScores.length,
+  };
+
+  // percentile bins
+  const bins = [0, 5, 10, 25, 50, 75, 90, 95, 100];
+  const percentiles: Record<string, number> = {};
+  for (const p of bins) {
+    const idx = Math.max(0, Math.min(winningScores.length - 1, Math.floor((p / 100) * winningScores.length)));
+    percentiles[`p${p}`] = winningScores[idx];
+  }
+
+  // top 50 cutoff (50세트 추천 cutoff 가정) — 50세트 = top 약 0.65% (50/7.7M) 단 본 backtest 는 1등 조합만, 가설 분리.
+  // 본 backtest 결과 → 1등 조합 score 분포가 top 50% 안에 들면 추천 50세트 안 들 가능성 있음 evidence.
+
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-score-backtest.json');
+  const out = {
+    generated_at: new Date().toISOString(),
+    n_rounds: rounds.length,
+    score_stats: stats,
+    score_percentiles: percentiles,
+    note: 'N=1000+ 1등 조합 unpopularityScore 분포. 실제 50세트 추천 cutoff 와 비교 시 top 0.65% 가정 (50/7.7M valid pool). 1등 조합 평균 score 가 cutoff 보다 낮으면 추천 모델 약점 evidence.',
+    limitations: [
+      'unpopularityScore 가 valid pool 전체 (7.7M) 분포 아님 — 1등 조합 만의 분포',
+      '실제 50세트 cutoff 는 valid pool 안 추정 top 0.65% — 본 통계와 직접 비교 X',
+      'N=2 prod OOS (1224 + 1225) evidence 와 분리 — backtest 는 historical 1등 조합 분포만',
+    ],
+  };
+  writeFileSync(outPath, JSON.stringify(out, null, 2));
+  console.log(`박제: ${outPath}`);
+  console.log(`회차: ${rounds.length} / score min=${stats.min.toFixed(2)} median=${stats.median.toFixed(2)} max=${stats.max.toFixed(2)} mean=${stats.mean.toFixed(2)}`);
+  console.log(`percentile: p10=${percentiles.p10.toFixed(2)} p50=${percentiles.p50.toFixed(2)} p90=${percentiles.p90.toFixed(2)}`);
+}
+
 // ─── MAIN ────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -1808,6 +1878,10 @@ async function main() {
 
   if (mode === 'pick-md') {
     pickMd(rounds, stats);
+  }
+
+  if (mode === 'score-backtest') {
+    scoreBacktest(rounds);
   }
 }
 

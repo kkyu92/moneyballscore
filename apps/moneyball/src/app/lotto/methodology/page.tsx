@@ -211,20 +211,77 @@ export default function LottoMethodologyPage() {
                 <th className="text-left px-3 py-2 font-semibold">날짜</th>
                 <th className="text-right px-3 py-2 font-semibold">PASS</th>
                 <th className="text-right px-3 py-2 font-semibold">FAIL</th>
+                <th className="text-right px-3 py-2 font-semibold">5등 매칭</th>
+                <th className="text-right px-3 py-2 font-semibold">평균 매칭</th>
+                <th className="text-right px-3 py-2 font-semibold">over-perform</th>
               </tr>
             </thead>
             <tbody>
-              {lottoData.oos_pass_rate.map((r) => (
-                <tr key={r.draw} className="border-b border-brand-800/50">
-                  <td className="px-3 py-2 text-brand-200">{r.draw}</td>
-                  <td className="px-3 py-2 text-brand-300">{r.date}</td>
-                  <td className="px-3 py-2 text-right text-brand-100">{r.passed}</td>
-                  <td className="px-3 py-2 text-right text-brand-400">{r.failed}</td>
-                </tr>
-              ))}
+              {lottoData.oos_pass_rate.map((r) => {
+                const md = r.match_distribution;
+                return (
+                  <tr key={r.draw} className="border-b border-brand-800/50">
+                    <td className="px-3 py-2 text-brand-200">{r.draw}</td>
+                    <td className="px-3 py-2 text-brand-300">{r.date}</td>
+                    <td className="px-3 py-2 text-right text-brand-100">{r.passed}</td>
+                    <td className="px-3 py-2 text-right text-brand-400">{r.failed}</td>
+                    <td className="px-3 py-2 text-right text-brand-200">
+                      {md ? `${md.tier_3}` : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-right text-brand-300">
+                      {md ? md.avg_match.toFixed(2) : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-right text-brand-200">
+                      {md ? `${md.over_perform_ratio.toFixed(2)}×` : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+        {oosLatest?.match_distribution && (
+          <div className="bg-brand-900 border border-brand-800 rounded p-3 text-xs text-brand-300 space-y-2">
+            <p className="text-brand-200 font-semibold">
+              직전 회차 ({oosLatest.draw}) 50세트 매칭 분포
+            </p>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+              <li>5등 (3개): {oosLatest.match_distribution.tier_3}건</li>
+              <li>4등 (4개): {oosLatest.match_distribution.tier_4}건</li>
+              <li>3등 (5개): {oosLatest.match_distribution.tier_5}건</li>
+              <li>2등 (5+B): {oosLatest.match_distribution.tier_5_bonus}건</li>
+              <li>1등 (6개): {oosLatest.match_distribution.tier_6}건</li>
+              <li>평균 매칭: {oosLatest.match_distribution.avg_match.toFixed(2)}</li>
+            </ul>
+            <p>
+              random benchmark 5등 expected ={" "}
+              {oosLatest.match_distribution.random_expected_tier_3.toFixed(2)}건 → 실제{" "}
+              {oosLatest.match_distribution.tier_3}건 ={" "}
+              <strong className="text-brand-200">
+                {oosLatest.match_distribution.over_perform_ratio.toFixed(2)}× over-perform
+              </strong>
+              .
+            </p>
+            {oosLatest.winning_score_breakdown && (
+              <p>
+                1등 조합 unpopularityScore ={" "}
+                <strong className="text-brand-200">
+                  {oosLatest.winning_score_breakdown.total.toFixed(2)}
+                </strong>{" "}
+                (sum 거리 +{oosLatest.winning_score_breakdown.sum_distance.toFixed(2)} / 연속쌍 +
+                {oosLatest.winning_score_breakdown.consec_pairs_bonus.toFixed(2)} / LUCKY{" "}
+                {oosLatest.winning_score_breakdown.lucky_penalty.toFixed(2)})
+                {oosLatest.winning_score_breakdown.pool_rank_pct !== undefined && (
+                  <>
+                    . valid pool 안 추정 top{" "}
+                    {oosLatest.winning_score_breakdown.pool_rank_pct.toFixed(2)}% — 50세트 cutoff
+                    (top ~0.65%) 미달 = score 모델 약점 candidate.
+                  </>
+                )}
+              </p>
+            )}
+          </div>
+        )}
         {oosLatest && (
           <p className="text-xs text-brand-400">
             최근 회차 ({oosLatest.draw} / {oosLatest.date}) PASS {oosLatest.passed} / FAIL {oosLatest.failed}.

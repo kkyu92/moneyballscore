@@ -1,0 +1,86 @@
+name: op-analysis-weekly
+
+# 주간 operational-analysis lite — cohort split 측정 + Sentry warning (변화 감지 시).
+# scoring_rule + 요일 + win_prob_tier 누적 + markdown 박제.
+#
+# cron '45 17 * * 1' (UTC 월 17:00 = KST 화 02:00).
+#
+# plan #8 Tier 1 M7.
+
+on:
+  schedule:
+    - cron: '45 17 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: op-analysis-weekly
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Run op-analysis cohort measurement
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          mkdir -p apps/moneyball/data/op-analysis
+          DATE=$(date -u +%Y-%m-%d)
+          OUT="apps/moneyball/data/op-analysis/${DATE}-cohort-split.md"
+          pnpm tsx scripts/op-analysis-cohort.ts "$OUT" 2>&1 | tail -50
+          if [ ! -f "$OUT" ]; then
+            echo "::error::cohort split markdown not generated"
+            exit 1
+          fi
+          LINES=$(wc -l < "$OUT")
+          if [ "$LINES" -lt 10 ]; then
+            echo "::error::cohort markdown too short ($LINES lines)"
+            exit 1
+          fi
+          echo "::notice::cohort split saved to $OUT ($LINES lines)"
+
+      - name: Create PR (data prefix, R7 auto-merge)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          DATE=$(date -u +%Y-%m-%d)
+          BRANCH="data/op-analysis-${DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add apps/moneyball/data/op-analysis/
+          git commit -m "data(op-analysis): ${DATE} weekly cohort split (plan #8 Tier 1 M7)" || {
+            echo "::notice::no changes to commit"
+            exit 0
+          }
+          git push -u origin "$BRANCH"
+          PR_URL=$(gh pr create \
+            --title "data(op-analysis): ${DATE} weekly cohort split (cron)" \
+            --body "plan #8 Tier 1 M7 — weekly cohort 자동 측정. scoring_rule + 요일 + win_prob_tier 누적 markdown 박제." \
+            --label "automated,op-analysis" 2>/dev/null || echo "")
+          if [ -n "$PR_URL" ]; then
+            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            gh pr merge "$PR_NUM" --squash --auto --delete-branch
+            echo "::notice::PR $PR_URL queued for auto-merge"
+          fi
