@@ -1,0 +1,808 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-25T15:03:13.537Z",
+  "plan": "plan #8 M1 (Tier 2) — v2.0 가중치 backtest harness fire",
+  "cycle": 903,
+  "dataset": {
+    "train_season": 2023,
+    "test_season": 2024,
+    "train_n": 722,
+    "test_n": 727
+  },
+  "limits": {
+    "mapping_unavailable": [
+      "sp_xfip",
+      "bullpen_fip",
+      "war"
+    ],
+    "mapping_unavailable_weight_sum": 0.23,
+    "mapping_available_weight_sum": 0.62,
+    "note": "GameFeatures 에 sp_xfip/bullpen_fip/war 부재 → 0.5 중립 처리. bullpen +4pp Δ 측정 불가."
+  },
+  "models": {
+    "coin_flip": {
+      "n": 727,
+      "brier": 0.25,
+      "logLoss": 0.693147180559947,
+      "accuracy": 0.5144429160935351,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 727,
+          "avgPredicted": 0.5,
+          "actualRate": 0.5144429160935351
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "manual_v15": {
+      "n": 727,
+      "brier": 0.24973961992608903,
+      "logLoss": 0.6926392325320387,
+      "accuracy": 0.5281980742778541,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 4,
+          "avgPredicted": 0.3885383203579406,
+          "actualRate": 0.5
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 392,
+          "avgPredicted": 0.46397546709886694,
+          "actualRate": 0.4872448979591837
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 331,
+          "avgPredicted": 0.5227113567859323,
+          "actualRate": 0.5468277945619335
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "manual_v16": {
+      "n": 727,
+      "brier": 0.24885791821214742,
+      "logLoss": 0.6908608997466864,
+      "accuracy": 0.5337001375515819,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 158,
+          "avgPredicted": 0.4861325433770353,
+          "actualRate": 0.45569620253164556
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 569,
+          "avgPredicted": 0.5225701581614574,
+          "actualRate": 0.5307557117750439
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "manual_v21a": {
+      "n": 727,
+      "brier": 0.2485430072481706,
+      "logLoss": 0.6902282777870925,
+      "accuracy": 0.5295735900962861,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 301,
+          "avgPredicted": 0.47889900421094533,
+          "actualRate": 0.48172757475083056
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 424,
+          "avgPredicted": 0.5224455518355974,
+          "actualRate": 0.5377358490566038
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 2,
+          "avgPredicted": 0.6034553428008165,
+          "actualRate": 0.5
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "manual_v21b": {
+      "n": 727,
+      "brier": 0.24830477896370318,
+      "logLoss": 0.6897492812426418,
+      "accuracy": 0.5281980742778541,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 184,
+          "avgPredicted": 0.48322016886735875,
+          "actualRate": 0.47282608695652173
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 542,
+          "avgPredicted": 0.5246268885973299,
+          "actualRate": 0.5276752767527675
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 1,
+          "avgPredicted": 0.6023616012169226,
+          "actualRate": 1
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "manual_v21c": {
+      "n": 727,
+      "brier": 0.24884658992205264,
+      "logLoss": 0.6908381462676322,
+      "accuracy": 0.530949105914718,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 162,
+          "avgPredicted": 0.4856159140086158,
+          "actualRate": 0.46296296296296297
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 565,
+          "avgPredicted": 0.5229598613688601,
+          "actualRate": 0.5292035398230088
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "manual_v20_cycle231": {
+      "n": 727,
+      "brier": 0.24977162783866652,
+      "logLoss": 0.6927073442963553,
+      "accuracy": 0.5281980742778541,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 9,
+          "avgPredicted": 0.38337131635202204,
+          "actualRate": 0.4444444444444444
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 383,
+          "avgPredicted": 0.4621922145284577,
+          "actualRate": 0.48825065274151436
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 333,
+          "avgPredicted": 0.524670079512341,
+          "actualRate": 0.5465465465465466
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 2,
+          "avgPredicted": 0.6063779115373589,
+          "actualRate": 0.5
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "logistic_4f": {
+      "n": 727,
+      "brier": 0.24979654393664558,
+      "logLoss": 0.6927561804158899,
+      "accuracy": 0.5240715268225584,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 117,
+          "avgPredicted": 0.4868230330306591,
+          "actualRate": 0.4700854700854701
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 609,
+          "avgPredicted": 0.5347402850715416,
+          "actualRate": 0.5238095238095238
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 1,
+          "avgPredicted": 0.6273692148373516,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    },
+    "logistic_7f": {
+      "n": 727,
+      "brier": 0.2466059432294661,
+      "logLoss": 0.6863453962734269,
+      "accuracy": 0.5639614855570839,
+      "calibration": [
+        {
+          "lo": 0,
+          "hi": 0.1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.1,
+          "hi": 0.2,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.2,
+          "hi": 0.3,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.4,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.4,
+          "hi": 0.5,
+          "n": 198,
+          "avgPredicted": 0.4741394961381733,
+          "actualRate": 0.4090909090909091
+        },
+        {
+          "lo": 0.5,
+          "hi": 0.6,
+          "n": 493,
+          "avgPredicted": 0.5434580018773337,
+          "actualRate": 0.5496957403651116
+        },
+        {
+          "lo": 0.6,
+          "hi": 0.7,
+          "n": 36,
+          "avgPredicted": 0.6174071528540371,
+          "actualRate": 0.6111111111111112
+        },
+        {
+          "lo": 0.7,
+          "hi": 0.8,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.8,
+          "hi": 0.9,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        },
+        {
+          "lo": 0.9,
+          "hi": 1,
+          "n": 0,
+          "avgPredicted": 0,
+          "actualRate": 0
+        }
+      ]
+    }
+  },
+  "deltas_vs_v15": {
+    "v16": 0.0008817017139416128,
+    "v21a": 0.0011966126779184294,
+    "v21b": 0.0014348409623858582,
+    "v21c": 0.0008930300040363992,
+    "v20_cycle231": -0.000032007912577486364,
+    "logistic_7f": 0.003133676696622928
+  },
+  "weights": {
+    "v15": {
+      "sp_fip": 0.15,
+      "sp_xfip": 0.05,
+      "lineup_woba": 0.15,
+      "bullpen_fip": 0.1,
+      "recent_form": 0.1,
+      "war": 0.08,
+      "head_to_head": 0.03,
+      "park_factor": 0.04,
+      "elo": 0.1,
+      "sfr": 0.05
+    },
+    "v16": {
+      "sp_fip": 0.15,
+      "sp_xfip": 0.05,
+      "lineup_woba": 0.15,
+      "bullpen_fip": 0.1,
+      "recent_form": 0.1,
+      "war": 0.08,
+      "head_to_head": 0,
+      "park_factor": 0,
+      "elo": 0.1,
+      "sfr": 0
+    },
+    "v21a": {
+      "sp_fip": 0.15,
+      "sp_xfip": 0.05,
+      "lineup_woba": 0.18,
+      "bullpen_fip": 0.1,
+      "recent_form": 0.13,
+      "war": 0.08,
+      "head_to_head": 0.02,
+      "park_factor": 0.04,
+      "elo": 0.08,
+      "sfr": 0.02
+    },
+    "v21b": {
+      "sp_fip": 0.16,
+      "sp_xfip": 0.05,
+      "lineup_woba": 0.17,
+      "bullpen_fip": 0.11,
+      "recent_form": 0.12,
+      "war": 0.09,
+      "head_to_head": 0.02,
+      "park_factor": 0.04,
+      "elo": 0.09,
+      "sfr": 0
+    },
+    "v21c": {
+      "sp_fip": 0.18,
+      "sp_xfip": 0.06,
+      "lineup_woba": 0.18,
+      "bullpen_fip": 0.11,
+      "recent_form": 0.12,
+      "war": 0.1,
+      "head_to_head": 0,
+      "park_factor": 0,
+      "elo": 0.1,
+      "sfr": 0
+    },
+    "v20_cycle231": {
+      "sp_fip": 0.08,
+      "sp_xfip": 0.05,
+      "lineup_woba": 0.12,
+      "bullpen_fip": 0.14,
+      "recent_form": 0.13,
+      "war": 0.08,
+      "head_to_head": 0.03,
+      "park_factor": 0.04,
+      "elo": 0.13,
+      "sfr": 0.05
+    }
+  }
+}
