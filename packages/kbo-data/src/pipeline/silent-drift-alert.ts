@@ -8,6 +8,9 @@
 //
 // packages/kbo-data 가 @sentry/nextjs 직접 의존 X — 동적 import +
 // try/catch silent fallback 패턴 (validator.ts 와 동일).
+//
+// cycle 886 (2026-05-25) 확장 — verify mode 도 동일 패턴 (verified=0 + games_found>0)
+// 감지. 사례 11 family 확장 — predict_final 외 verify silent drop 도 박제.
 
 import type { PipelineMode } from './daily';
 
@@ -22,13 +25,28 @@ export interface SilentDriftAlertMeta {
   // 사례: predict mode 가 아침에 5건 박제 → predict_final 시 existing=5, predictionsGenerated=0
   // 이어도 coverage 충분 → alert 미발화 (cycle 864 op-analysis 86% false positive fix).
   existingPredictionsCount?: number;
+  // cycle 886 추가 — verify mode 의 검증 완료 count.
+  // verify mode 가 games_found>0 단 verified=0 → silent verify drop (사례 11 family 확장).
+  verifiedCount?: number;
 }
 
 export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {
-  if (meta.mode !== 'predict_final') return false;
   if (meta.gamesFound <= 0) return false;
-  const covered = meta.predictionsGenerated + (meta.existingPredictionsCount ?? 0);
-  return covered < meta.gamesFound;
+
+  if (meta.mode === 'predict_final') {
+    const covered = meta.predictionsGenerated + (meta.existingPredictionsCount ?? 0);
+    return covered < meta.gamesFound;
+  }
+
+  // cycle 886 — verify mode silent drop detection.
+  // verify mode 가 games_found > 0 인 day 의 verified=0 = silent verify drop.
+  // verifiedCount undefined → 기존 동작 보존 (alert 미발화).
+  if (meta.mode === 'verify') {
+    if (meta.verifiedCount === undefined) return false;
+    return meta.verifiedCount === 0;
+  }
+
+  return false;
 }
 
 type SentryModule = {
@@ -51,17 +69,24 @@ export async function captureSilentDriftAlert(
   if (!Sentry || typeof Sentry.captureMessage !== 'function') return;
   if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
 
+  const isVerify = meta.mode === 'verify';
+  const message = isVerify ? 'verify_silent_drift' : 'predict_final_silent_drift';
+  const pattern = isVerify
+    ? 'silent_drift_family_case11_verify_extension'
+    : 'silent_drift_family_case11';
+
   try {
-    Sentry.captureMessage('predict_final_silent_drift', {
+    Sentry.captureMessage(message, {
       level: 'warning',
       tags: {
-        pattern: 'silent_drift_family_case11',
+        pattern,
         pipeline_mode: meta.mode,
         date: meta.date,
       },
       extra: {
         games_found: meta.gamesFound,
         predictions_generated: meta.predictionsGenerated,
+        verified_count: meta.verifiedCount,
         errors: meta.errors,
       },
     });

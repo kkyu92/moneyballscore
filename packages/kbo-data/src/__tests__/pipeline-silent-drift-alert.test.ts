@@ -48,8 +48,26 @@ describe('shouldAlertSilentDrift', () => {
     expect(shouldAlertSilentDrift(makeMeta({ mode: 'announce' }))).toBe(false);
   });
 
-  it('verify mode 는 alert 안 함', () => {
+  it('verify mode + verifiedCount 미지정 → 기존 동작 보존 (alert 안 함)', () => {
     expect(shouldAlertSilentDrift(makeMeta({ mode: 'verify' }))).toBe(false);
+  });
+
+  it('verify mode + games>0 + verified=0 → alert (cycle 886 verify family extension)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'verify', gamesFound: 5, verifiedCount: 0 })),
+    ).toBe(true);
+  });
+
+  it('verify mode + games>0 + verified>0 → alert 안 함 (정상 verify)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'verify', gamesFound: 5, verifiedCount: 3 })),
+    ).toBe(false);
+  });
+
+  it('verify mode + games=0 → alert 안 함 (경기 없음 정상)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'verify', gamesFound: 0, verifiedCount: 0 })),
+    ).toBe(false);
   });
 
   it('gamesFound=0 (경기 없음 정상) 시 alert 안 함', () => {
