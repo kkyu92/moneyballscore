@@ -2,9 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
-import { LottoDataSchema, type LottoData } from "@/lib/lotto/lotto-data-schema";
+import {
+  LottoDataSchema,
+  LottoScoreBacktestSchema,
+  type LottoData,
+  type LottoScoreBacktest,
+} from "@/lib/lotto/lotto-data-schema";
 import { listArchiveDates } from "@/lib/lotto/archive";
 import lottoDataRaw from "../../../../data/lotto-data.json";
+import lottoScoreBacktestRaw from "../../../../data/lotto-score-backtest.json";
 
 export const dynamic = "force-static";
 export const revalidate = 86400;
@@ -17,6 +23,7 @@ const TOC_ITEMS = [
   { id: "method", label: "방법론 개요" },
   { id: "rules", label: "규칙 누적 진화" },
   { id: "oos", label: "OOS 검증" },
+  { id: "score-distribution", label: "score 분포 backtest" },
   { id: "fire", label: "사이클 진행 history" },
   { id: "use", label: "본인 사용 기록" },
 ];
@@ -41,6 +48,47 @@ export const metadata: Metadata = {
 };
 
 const lottoData: LottoData = LottoDataSchema.parse(lottoDataRaw);
+const scoreBacktest: LottoScoreBacktest = LottoScoreBacktestSchema.parse(
+  lottoScoreBacktestRaw,
+);
+
+type PercentileMarker = {
+  key: keyof LottoScoreBacktest["score_percentiles"];
+  label: string;
+};
+
+const PERCENTILE_MARKERS: PercentileMarker[] = [
+  { key: "p0", label: "top 0%" },
+  { key: "p5", label: "top 5%" },
+  { key: "p25", label: "top 25%" },
+  { key: "p50", label: "median" },
+  { key: "p75", label: "top 75%" },
+  { key: "p95", label: "top 95%" },
+  { key: "p100", label: "top 100%" },
+];
+
+function buildScoreDistribution(backtest: LottoScoreBacktest) {
+  const { min, max } = backtest.score_stats;
+  const range = max - min || 1;
+  const width = 320;
+  const height = 56;
+  const padX = 12;
+  const innerW = width - padX * 2;
+  const baseY = height - 20;
+  const positionFor = (value: number) =>
+    padX + ((value - min) / range) * innerW;
+  return {
+    width,
+    height,
+    padX,
+    baseY,
+    positionFor,
+    markers: PERCENTILE_MARKERS.map((m) => ({
+      ...m,
+      value: backtest.score_percentiles[m.key],
+    })),
+  };
+}
 
 function formatNumber(n: number): string {
   return n.toLocaleString("ko-KR");
@@ -93,6 +141,7 @@ export default function LottoMethodologyPage() {
   const oosLatest = lottoData.oos_pass_rate[lottoData.oos_pass_rate.length - 1];
   const sparkPoints = buildSparkline(lottoData.rules_history);
   const latestArchiveDate = listArchiveDates()[0] ?? null;
+  const dist = buildScoreDistribution(scoreBacktest);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
@@ -288,6 +337,102 @@ export default function LottoMethodologyPage() {
             N&lt;10 sample preliminary — 단일 회차 PASS 로 검증 단정 차단.
           </p>
         )}
+      </section>
+
+      <section id="score-distribution" className="scroll-mt-20 space-y-3">
+        <h2 className="text-xl font-semibold text-brand-100">
+          score 분포 backtest
+        </h2>
+        <p className="text-sm text-brand-300 leading-relaxed">
+          N={formatNumber(scoreBacktest.n_rounds)} 회차 1등 조합 unpopularityScore
+          분포. 50세트 추천 모델 cutoff (valid pool 안 top 0.65%) 와 비교 시
+          historical 1등 조합 평균이 어느 percentile band 에 분포하는지 확인.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div className="bg-brand-900 border border-brand-800 rounded p-2 space-y-1">
+            <div className="text-brand-400">표본 수 N</div>
+            <div className="text-brand-100 font-semibold">
+              {formatNumber(scoreBacktest.score_stats.n)}
+            </div>
+          </div>
+          <div className="bg-brand-900 border border-brand-800 rounded p-2 space-y-1">
+            <div className="text-brand-400">평균</div>
+            <div className="text-brand-100 font-semibold">
+              {scoreBacktest.score_stats.mean.toFixed(2)}
+            </div>
+          </div>
+          <div className="bg-brand-900 border border-brand-800 rounded p-2 space-y-1">
+            <div className="text-brand-400">중앙값</div>
+            <div className="text-brand-100 font-semibold">
+              {scoreBacktest.score_stats.median.toFixed(2)}
+            </div>
+          </div>
+          <div className="bg-brand-900 border border-brand-800 rounded p-2 space-y-1">
+            <div className="text-brand-400">범위</div>
+            <div className="text-brand-100 font-semibold">
+              {scoreBacktest.score_stats.min.toFixed(1)} ~{" "}
+              {scoreBacktest.score_stats.max.toFixed(1)}
+            </div>
+          </div>
+        </div>
+        <div className="bg-brand-900 border border-brand-800 rounded p-3">
+          <svg
+            viewBox={`0 0 ${dist.width} ${dist.height}`}
+            className="w-full h-14"
+            role="img"
+            aria-label="historical 1등 조합 unpopularityScore percentile 분포"
+          >
+            <line
+              x1={dist.padX}
+              y1={dist.baseY}
+              x2={dist.width - dist.padX}
+              y2={dist.baseY}
+              stroke="currentColor"
+              strokeWidth="1"
+              className="text-brand-700"
+            />
+            {dist.markers.map((m) => {
+              const x = dist.positionFor(m.value);
+              const isMedian = m.key === "p50";
+              return (
+                <g key={m.key}>
+                  <line
+                    x1={x}
+                    y1={dist.baseY - (isMedian ? 18 : 12)}
+                    x2={x}
+                    y2={dist.baseY + (isMedian ? 8 : 4)}
+                    stroke="currentColor"
+                    strokeWidth={isMedian ? "1.8" : "1"}
+                    className={isMedian ? "text-brand-200" : "text-brand-400"}
+                  />
+                  <text
+                    x={x}
+                    y={dist.baseY - (isMedian ? 22 : 16)}
+                    fontSize="8"
+                    textAnchor="middle"
+                    fill="currentColor"
+                    className={isMedian ? "text-brand-200" : "text-brand-500"}
+                  >
+                    {m.value.toFixed(1)}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+          <div className="mt-2 grid grid-cols-3 sm:grid-cols-7 gap-1 text-[10px] text-brand-500">
+            {dist.markers.map((m) => (
+              <div key={`${m.key}-label`} className="text-center">
+                {m.label}
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-xs text-brand-400 leading-relaxed">{scoreBacktest.note}</p>
+        <ul className="text-xs text-brand-500 list-disc pl-5 space-y-1">
+          {scoreBacktest.limitations.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
       </section>
 
       <section id="fire" className="scroll-mt-20 space-y-3">
