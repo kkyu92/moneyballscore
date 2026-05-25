@@ -44,6 +44,7 @@ const SITEMAP_COLUMNS = [
       { href: "/guide", label: "사용 가이드" },
       { href: "/glossary", label: "용어 사전" },
       { href: "/insights", label: "AI 인사이트" },
+      { href: "/v2-preview", label: "v2 시뮬레이션 미리보기" },
       { href: "/changelog", label: "변경 로그" },
       { href: "/about", label: "소개" },
       { href: "/search", label: "검색" },
