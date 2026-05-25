@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, SMALL_SAMPLE_N, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
@@ -161,7 +161,7 @@ export default async function TeamPage({ params }: PageProps) {
             <p className="text-xs text-gray-500 dark:text-gray-400">적중률</p>
             <p
               className={`text-2xl font-bold mt-1 font-mono ${
-                profile.verifiedN > 0 && profile.verifiedN < 5
+                profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N
                   ? "text-gray-400 dark:text-gray-500"
                   : (profile.accuracyRate ?? 0) >= 0.6
                     ? "text-brand-600 dark:text-brand-400"
@@ -170,8 +170,8 @@ export default async function TeamPage({ params }: PageProps) {
                       : "text-red-600 dark:text-red-400"
               }`}
               title={
-                profile.verifiedN > 0 && profile.verifiedN < 5
-                  ? `검증된 경기가 ${profile.verifiedN}경기뿐이라 참고용입니다 (5경기 이상부터 신뢰 가능)`
+                profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N
+                  ? `검증된 경기가 ${profile.verifiedN}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
                   : undefined
               }
             >
@@ -179,7 +179,7 @@ export default async function TeamPage({ params }: PageProps) {
             </p>
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
               검증 {profile.verifiedN}경기
-              {profile.verifiedN > 0 && profile.verifiedN < 5 && (
+              {profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N && (
                 <span className="ml-1 text-gray-400 dark:text-gray-500">
                   · 경기 수 적음
                 </span>
