@@ -55,9 +55,41 @@ export const LottoDataSchema = z.object({
   chain_fire_history: z.array(ChainFireHistoryEntrySchema),
 });
 
+export const ScoreStatsSchema = z.object({
+  n: z.number().int().nonnegative(),
+  min: z.number(),
+  max: z.number(),
+  median: z.number(),
+  mean: z.number(),
+});
+
+export const ScorePercentilesSchema = z.object({
+  p0: z.number(),
+  p5: z.number(),
+  p10: z.number(),
+  p25: z.number(),
+  p50: z.number(),
+  p75: z.number(),
+  p90: z.number(),
+  p95: z.number(),
+  p100: z.number(),
+});
+
+export const LottoScoreBacktestSchema = z.object({
+  generated_at: z.string(),
+  n_rounds: z.number().int().nonnegative(),
+  score_stats: ScoreStatsSchema,
+  score_percentiles: ScorePercentilesSchema,
+  note: z.string(),
+  limitations: z.array(z.string()),
+});
+
 export type LottoData = z.infer<typeof LottoDataSchema>;
 export type RulesHistoryEntry = z.infer<typeof RulesHistoryEntrySchema>;
 export type OOSPassRateEntry = z.infer<typeof OOSPassRateEntrySchema>;
 export type ChainFireHistoryEntry = z.infer<typeof ChainFireHistoryEntrySchema>;
 export type MatchDistribution = z.infer<typeof MatchDistributionSchema>;
 export type WinningScoreBreakdown = z.infer<typeof WinningScoreBreakdownSchema>;
+export type LottoScoreBacktest = z.infer<typeof LottoScoreBacktestSchema>;
+export type ScoreStats = z.infer<typeof ScoreStatsSchema>;
+export type ScorePercentiles = z.infer<typeof ScorePercentilesSchema>;

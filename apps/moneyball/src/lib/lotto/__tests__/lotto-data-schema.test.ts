@@ -6,9 +6,15 @@ import {
   RulesHistoryEntrySchema,
   OOSPassRateEntrySchema,
   ChainFireHistoryEntrySchema,
+  LottoScoreBacktestSchema,
 } from "../lotto-data-schema";
 
 const dataPath = join(process.cwd(), "data", "lotto-data.json");
+const scoreBacktestPath = join(
+  process.cwd(),
+  "data",
+  "lotto-score-backtest.json",
+);
 
 describe("LottoDataSchema", () => {
   it("apps/moneyball/data/lotto-data.json 정합 (build-time guard)", () => {
@@ -97,6 +103,42 @@ describe("OOSPassRateEntrySchema", () => {
         failed: 0,
       }).success
     ).toBe(false);
+  });
+});
+
+describe("LottoScoreBacktestSchema", () => {
+  it("apps/moneyball/data/lotto-score-backtest.json 정합 (build-time guard)", () => {
+    const raw = JSON.parse(readFileSync(scoreBacktestPath, "utf-8"));
+    const parsed = LottoScoreBacktestSchema.safeParse(raw);
+    if (!parsed.success) {
+      throw new Error(
+        `lotto-score-backtest.json schema fail: ${JSON.stringify(parsed.error.format(), null, 2)}`,
+      );
+    }
+    expect(parsed.success).toBe(true);
+  });
+
+  it("score_stats n 양의 정수 + min ≤ median ≤ max + mean 유한", () => {
+    const raw = JSON.parse(readFileSync(scoreBacktestPath, "utf-8"));
+    expect(raw.score_stats.n).toBeGreaterThan(0);
+    expect(Number.isInteger(raw.score_stats.n)).toBe(true);
+    expect(raw.score_stats.min).toBeLessThanOrEqual(raw.score_stats.median);
+    expect(raw.score_stats.median).toBeLessThanOrEqual(raw.score_stats.max);
+    expect(Number.isFinite(raw.score_stats.mean)).toBe(true);
+  });
+
+  it("score_percentiles 9 keys 모두 존재 + finite number", () => {
+    const raw = JSON.parse(readFileSync(scoreBacktestPath, "utf-8"));
+    const keys = ["p0", "p5", "p10", "p25", "p50", "p75", "p90", "p95", "p100"];
+    for (const k of keys) {
+      expect(Number.isFinite(raw.score_percentiles[k])).toBe(true);
+    }
+  });
+
+  it("limitations 배열 1+ entry (N=2 단건 evidence 한계 명시)", () => {
+    const raw = JSON.parse(readFileSync(scoreBacktestPath, "utf-8"));
+    expect(Array.isArray(raw.limitations)).toBe(true);
+    expect(raw.limitations.length).toBeGreaterThan(0);
   });
 });
 
