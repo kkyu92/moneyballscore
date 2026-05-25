@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { shortTeamName } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,
@@ -252,7 +252,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                 <div data-monthly-team-stats-list className="space-y-2">
                   {review.teamStats.map((t) => {
                     const pct = Math.round(t.accuracy * 100);
-                    const smallSample = t.predicted < 5;
+                    const smallSample = t.predicted < SMALL_SAMPLE_N;
                     const sampleRank = sampleRankMap.get(t.teamCode) ?? 0;
                     return (
                       <div
@@ -261,7 +261,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                         data-sample-rank={sampleRank}
                         title={
                           smallSample
-                            ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (5경기 이상부터 신뢰 가능)`
+                            ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
                             : undefined
                         }
                       >
