@@ -10,6 +10,7 @@ import {
   isValidInsightsDate,
   listInsightsDates,
 } from "@/lib/insights/loader";
+import { insightsStatusBadge } from "@/lib/insights/statusBadge";
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -53,22 +54,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `${date} KBO 경기 AI 심판 reasoning 모음`,
     },
   };
-}
-
-function statusBadge(status: string, isCorrect: boolean | null): { label: string; cls: string } {
-  if (status === "postponed") {
-    return { label: "취소", cls: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300" };
-  }
-  if (isCorrect === true) {
-    return { label: "적중", cls: "bg-brand-50 text-brand-700 dark:bg-brand-900 dark:text-brand-200" };
-  }
-  if (isCorrect === false) {
-    return { label: "빗나감", cls: "bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-300" };
-  }
-  if (status === "final") {
-    return { label: "결과 대기", cls: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300" };
-  }
-  return { label: "예정", cls: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-200" };
 }
 
 export default async function InsightsDatePage({ params }: Props) {
@@ -155,7 +140,7 @@ export default async function InsightsDatePage({ params }: Props) {
 
       <ol className="space-y-6">
         {entries.map((item) => {
-          const badge = statusBadge(item.status, item.isCorrect);
+          const badge = insightsStatusBadge(item.status, item.isCorrect);
           const homeName = shortTeamName(item.homeTeam);
           const awayName = shortTeamName(item.awayTeam);
           return (
@@ -196,6 +181,7 @@ export default async function InsightsDatePage({ params }: Props) {
                   factors={item.factors}
                   homeTeam={item.homeTeam}
                   awayTeam={item.awayTeam}
+                  gameId={item.gameId}
                 />
               )}
             </li>

@@ -234,11 +234,27 @@ describe("/insights hub mini factor preview (plan #5 Step 4 regression guard)", 
     expect(HUB_SRC).toMatch(/topFactors\.length\s*>\s*0/);
   });
 
-  it("전체 팩터 보기 anchor link to /insights/${date}#game-${gameId}", () => {
+  it("전체 팩터 보기 anchor link to /insights/${date}#factor-breakdown-${gameId} (cycle 886 deep link)", () => {
     expect(HUB_SRC).toMatch(
-      /href=\{`\/insights\/\$\{item\.date\}#game-\$\{item\.gameId\}`\}/,
+      /href=\{`\/insights\/\$\{item\.date\}#factor-breakdown-\$\{item\.gameId\}`\}/,
     );
     expect(HUB_SRC).toMatch(/전체 팩터 보기/);
+  });
+});
+
+describe("FactorBreakdown — gameId deep link anchor (cycle 886)", () => {
+  const FB_SRC = readFileSync(
+    join(REPO_ROOT, "src/components/predictions/FactorBreakdown.tsx"),
+    "utf-8",
+  );
+
+  it("gameId prop 박제 + id=factor-breakdown-${gameId}", () => {
+    expect(FB_SRC).toMatch(/gameId\?:\s*number\s*\|\s*string/);
+    expect(FB_SRC).toMatch(/factor-breakdown-\$\{gameId\}/);
+  });
+
+  it("scroll-mt-20 박제 (header sticky offset)", () => {
+    expect(FB_SRC).toMatch(/scroll-mt-20/);
   });
 });
 

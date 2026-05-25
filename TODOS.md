@@ -18,9 +18,9 @@
 
 **완료 조건 (MLB 작업 시작 trigger)**: 항목 1, 2, 4-Step E/F partial 자율 영역 closed. 잔존 carry-over = 항목 3 (사용자 영역) + 항목 4 Step C/D (gating) + 항목 5 (자연 누적). MLB 작업 시작 = 사용자 영역 통과 후 사용자 결정.
 
-## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07)
+## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07, **cycle 886 갱신**)
 
-**현재 상태**: 124건 검증 완료 (cycle 775 갱신, 2026-05-20) / 전체 적중률 47.6% / Brier v1.8 0.2241 / v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / v1.8=43.3%(30) — credit-fail 22건(40.9%) + real-debate 8건(50.0%) gap +9.1pp. v2.0 임계 n=150 까지 26건
+**현재 상태 (cycle 886, 2026-05-25 측정)**: **133건 검증 완료** (cycle 775 n=124 → +9 in 5일 = velocity ~1.8/day) / 전체 적중률 **48.9%** / v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / **v1.8=48.7%(39, Brier 0.2325)** — cycle 864 v1.8 n=32 43.8% → +7건 **+4.9pp 향상**. v2.0 임계 n=150 까지 **17건**.
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
 > ✅ **v1.8 credit 복구 완료 (2026-05-16 08:06 KST, user action)**: ANTHROPIC_API_KEY credit 충전 완료. retro debate 분석은 결과 누수/방법론 위반으로 **비채택**. 앞으로 fire 되는 신규 경기 v1.8 debate 누적으로 정직한 n 증가. 검증 항목 — (1) 다음 predict cron UTC 01 (KST 10:00) 첫 fire 시 `totalTokens>0` + reasoning 텍스트 길이 정상 + mv='v2.0-debate' 라벨 / (2) postview path 도 동일 verify (mv='v2.0-postview'). silent fallback 재발 시 PR #372 family fix 정상 작동 → mv='v1.8' (강등 라벨) 노출. 5/13~5/15 fallback 기간 5건은 quant-only 라벨로 누적 유지 (역사 박제). 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`

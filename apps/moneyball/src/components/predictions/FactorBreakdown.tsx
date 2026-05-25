@@ -34,6 +34,7 @@ interface FactorBreakdownProps {
   homeTeam: TeamCode;
   awayTeam: TeamCode;
   details?: FactorDetails;
+  gameId?: number | string;
 }
 
 function getStatLabel(
@@ -90,7 +91,7 @@ function getStatLabel(
   return null;
 }
 
-export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: FactorBreakdownProps) {
+export function FactorBreakdown({ factors, homeTeam, awayTeam, details, gameId }: FactorBreakdownProps) {
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
 
@@ -102,8 +103,13 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details }: Factor
       return wb - wa;
     });
 
+  const anchorId = gameId !== undefined ? `factor-breakdown-${gameId}` : undefined;
+
   return (
-    <div className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
+    <div
+      id={anchorId}
+      className={`bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4${anchorId ? " scroll-mt-20" : ""}`}
+    >
       <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">예측 근거 (팩터별 분석)</h4>
       <div className="text-xs text-gray-400 dark:text-gray-500 mb-2 flex justify-between">
         <span>← {awayName} 유리</span>

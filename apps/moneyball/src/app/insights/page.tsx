@@ -5,6 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { assertSelectOk, shortTeamName, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
+import { insightsStatusBadge } from "@/lib/insights/statusBadge";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/insights`;
@@ -116,21 +117,6 @@ async function getRecentInsights(): Promise<InsightRow[]> {
   return out;
 }
 
-function statusBadge(status: string, isCorrect: boolean | null): { label: string; cls: string } {
-  if (status === "postponed") {
-    return { label: "취소", cls: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300" };
-  }
-  if (isCorrect === true) {
-    return { label: "적중", cls: "bg-brand-50 text-brand-700 dark:bg-brand-900 dark:text-brand-200" };
-  }
-  if (isCorrect === false) {
-    return { label: "빗나감", cls: "bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-300" };
-  }
-  if (status === "final") {
-    return { label: "결과 대기", cls: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300" };
-  }
-  return { label: "예정", cls: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-200" };
-}
 
 export default async function InsightsHubPage() {
   const insights = await getRecentInsights();
@@ -208,7 +194,7 @@ export default async function InsightsHubPage() {
       ) : (
         <ol className="space-y-4">
           {insights.map((item) => {
-            const badge = statusBadge(item.status, item.isCorrect);
+            const badge = insightsStatusBadge(item.status, item.isCorrect);
             const homeName = shortTeamName(item.homeTeam);
             const awayName = shortTeamName(item.awayTeam);
             const topFactors = selectTopFactors(item.factors);
@@ -292,7 +278,7 @@ export default async function InsightsHubPage() {
                   </Link>
                   {topFactors.length > 0 && (
                     <Link
-                      href={`/insights/${item.date}#game-${item.gameId}`}
+                      href={`/insights/${item.date}#factor-breakdown-${item.gameId}`}
                       className="text-brand-600 dark:text-brand-300 hover:underline"
                     >
                       전체 팩터 보기 →
