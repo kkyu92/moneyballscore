@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET() {
+  const start = Date.now();
   const commitSha = process.env.VERCEL_GIT_COMMIT_SHA ?? null;
   const commitRef = process.env.VERCEL_GIT_COMMIT_REF ?? null;
   const deployUrl = process.env.VERCEL_URL ?? null;
@@ -17,6 +18,7 @@ export async function GET() {
       deploy_env: deployEnv,
       region,
       timestamp: new Date().toISOString(),
+      response_time_ms: Date.now() - start,
     },
     {
       status: 200,
