@@ -153,6 +153,15 @@ export const HOME_ADVANTAGE = 0.015;
 export const WINNER_PROB_CONFIDENT = 0.65;
 export const WINNER_PROB_LEAN = 0.55;
 
+/**
+ * 소표본 hedge 임계 — verifiedN < SMALL_SAMPLE_N 시 적중률을 흐림 색 / "참고용"
+ * 라벨로 노출. 본 임계는 통계적 유의성 (≥5경기) 보다는 사용자 UX 의 "표본 부족"
+ * 자연어 경계. 팀별 (teams/[code]) + 선수별 (players hub) 동일 임계 사용 —
+ * 본 상수가 single source. 변경 시 그에 따라 UI hedge 라벨 ("N경기 이상부터
+ * 신뢰 가능") 의 N 도 sync 필요.
+ */
+export const SMALL_SAMPLE_N = 5;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

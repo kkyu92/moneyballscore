@@ -15,6 +15,7 @@ import {
   classifyWinnerProb,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_LEAN,
+  SMALL_SAMPLE_N,
   WINNER_TIER_LABEL,
   WINNER_TIER_EMOJI_POOL,
   pickTierEmoji,
@@ -223,6 +224,10 @@ describe('classifyWinnerProb (3단계)', () => {
   it('WINNER_PROB_CONFIDENT = 0.65, WINNER_PROB_LEAN = 0.55 (Telegram B2 와 통일)', () => {
     expect(WINNER_PROB_CONFIDENT).toBe(0.65);
     expect(WINNER_PROB_LEAN).toBe(0.55);
+  });
+
+  it('SMALL_SAMPLE_N = 5 (sweep 51 source-of-truth)', () => {
+    expect(SMALL_SAMPLE_N).toBe(5);
   });
 
   it('winnerProb ≥ 0.65 → confident (🔥 강한 예측)', () => {

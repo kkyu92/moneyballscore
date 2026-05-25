@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { TeamCode } from "@moneyball/shared";
+import { SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -31,8 +31,6 @@ function fmtDec(v: number, digits = 3): string {
 function fmtWar(v: number): string {
   return v.toFixed(1);
 }
-
-const SMALL_SAMPLE_N = 5;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
