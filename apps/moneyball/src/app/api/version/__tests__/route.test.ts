@@ -70,4 +70,12 @@ describe('GET /api/version', () => {
     const body = await res.json();
     expect(body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
   });
+
+  it('response_time_ms 정수 + ≥ 0 (deploy-drift-alert.yml threshold 측정 source)', async () => {
+    const res = await callGet();
+    const body = await res.json();
+    expect(typeof body.response_time_ms).toBe('number');
+    expect(Number.isInteger(body.response_time_ms)).toBe(true);
+    expect(body.response_time_ms).toBeGreaterThanOrEqual(0);
+  });
 });
