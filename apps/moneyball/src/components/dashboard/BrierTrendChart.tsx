@@ -13,20 +13,21 @@ import {
 } from "recharts";
 
 import type { BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
-import { brand, chartCursorTint, neutral } from "@/lib/design-tokens";
+import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
 
 interface BrierTrendChartProps {
   data: BrierTrendPoint[];
 }
 
-// scoring_rule 색상 매핑 — 진화 추세 시각화
+// scoring_rule 색상 매핑 — DESIGN.md semantic + brand token 정합 (cycle 887 polish-ui).
+// 의미 매핑: v1.5 = neutral (baseline) / v1.6 = error (anomaly) / v1.7-revert = warning (revert) / v1.8 = brand (current) / all = brand 강조.
 const SR_COLOR_MAP: Record<string, string> = {
-  all: brand[500],
-  "v1.5": "#9333ea", // purple
-  "v1.6": "#ef4444", // red
-  "v1.7-revert": "#f59e0b", // amber
-  "v1.8": brand[600],
+  all: brand[600],
+  "v1.5": neutral[500], // baseline
+  "v1.6": semantic.error, // anomaly (n=46 37%)
+  "v1.7-revert": semantic.warning, // revert
+  "v1.8": brand[500], // current
 };
 
 const SR_ORDER = ["all", "v1.5", "v1.6", "v1.7-revert", "v1.8"];
