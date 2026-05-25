@@ -1,0 +1,77 @@
+name: factor-backtest-weekly
+
+# 주간 factor backtest 자동 fire — packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts.
+# 결과 JSON 박제 + 변화 시 Sentry warning (plan #8 Tier 1 M2).
+#
+# cron '33 17 * * 0' (UTC 일 17:00 = KST 월 02:00) — verify cron 직후 baseline 측정 timing.
+# manual fire 가능 (workflow_dispatch).
+
+on:
+  schedule:
+    - cron: '33 17 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: factor-backtest-weekly
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Run manual weights backtest
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -e
+          mkdir -p apps/moneyball/data/backtest-results
+          DATE=$(date -u +%Y-%m-%d)
+          OUT="apps/moneyball/data/backtest-results/${DATE}-manual-weights.txt"
+          pnpm tsx packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts 2>&1 | tee "$OUT"
+          echo "::notice::backtest result saved to $OUT"
+
+      - name: Create PR (data prefix, R7 auto-merge)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          DATE=$(date -u +%Y-%m-%d)
+          BRANCH="data/factor-backtest-${DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add apps/moneyball/data/backtest-results/
+          git commit -m "data(backtest): ${DATE} factor backtest weekly (plan #8 Tier 1 M2)" || {
+            echo "::notice::no changes to commit"
+            exit 0
+          }
+          git push -u origin "$BRANCH"
+          PR_URL=$(gh pr create \
+            --title "data(backtest): ${DATE} factor backtest weekly (cron)" \
+            --body "plan #8 Tier 1 M2 — weekly cron 자동 backtest. cycle 231 v2.0 후보 적용 시 추정 acc/Brier 박제." \
+            --label "automated,backtest" 2>/dev/null || echo "")
+          if [ -n "$PR_URL" ]; then
+            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            gh pr merge "$PR_NUM" --squash --auto --delete-branch
+            echo "::notice::PR $PR_URL queued for auto-merge"
+          fi

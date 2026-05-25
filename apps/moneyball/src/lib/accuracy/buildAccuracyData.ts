@@ -307,6 +307,53 @@ export function buildWeeklyTrend(rows: PredRow[]): WeekBucket[] {
     });
 }
 
+// plan #8 Tier 1 M5+M10 — Brier score 시계열 + scoring_rule 분리.
+export interface BrierTrendPoint {
+  date: string; // YYYY-MM-DD (week start, ISO)
+  weekLabel: string;
+  n: number;
+  brier: number | null;
+  scoringRule: string; // 'all' | 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8'
+}
+
+export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
+  // 주차 + scoring_rule 별 누적 Brier
+  const buckets = new Map<string, Map<string, { n: number; brierSum: number }>>();
+  for (const r of rows) {
+    const wk = getWeekStart(r.verified_at);
+    const sr = r.scoring_rule ?? 'unknown';
+    const target = r.is_correct ? 1 : 0;
+    const conf = r.confidence;
+    const brierContribution = (conf - target) ** 2;
+    if (!buckets.has(wk)) buckets.set(wk, new Map());
+    const wkMap = buckets.get(wk)!;
+    for (const key of ['all', sr]) {
+      if (!wkMap.has(key)) wkMap.set(key, { n: 0, brierSum: 0 });
+      const cell = wkMap.get(key)!;
+      cell.n += 1;
+      cell.brierSum += brierContribution;
+    }
+  }
+  const result: BrierTrendPoint[] = [];
+  const sortedWeeks = Array.from(buckets.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-12);
+  for (const [date, wkMap] of sortedWeeks) {
+    const d = new Date(date + 'T00:00:00Z');
+    const month = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    const weekLabel = `${month}/${day} 주`;
+    for (const [sr, { n, brierSum }] of wkMap.entries()) {
+      result.push({
+        date,
+        weekLabel,
+        n,
+        brier: n > 0 ? brierSum / n : null,
+        scoringRule: sr,
+      });
+    }
+  }
+  return result;
+}
+
 export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
   const tiers = [
     { label: '낮은 확신', range: '~55%', min: 0, max: WINNER_PROB_LEAN },
