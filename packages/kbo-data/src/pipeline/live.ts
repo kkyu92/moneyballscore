@@ -220,7 +220,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         `(${game.inning}회${game.isTop ? '초' : '말'}) → ${predictedWinner} ${Math.round(adjustedHomeProb * 100)}%`
       );
     } catch (e) {
-      errors.push(`${game.homeTeam} vs ${game.awayTeam}: ${e}`);
+      errors.push(`${game.homeTeam} vs ${game.awayTeam}: ${errMsg(e)}`);
     }
   }
 
