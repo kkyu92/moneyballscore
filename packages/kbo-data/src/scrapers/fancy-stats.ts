@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
+import { errMsg } from '@moneyball/shared';
 import { KBO_USER_AGENT, TEAM_NAME_MAP, assertResponseOk } from '../types';
 import { fetchKboPitcherBasic } from './kbo-pitcher';
 
@@ -217,7 +218,7 @@ export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]
   try {
     kbo = await fetchKboPitcherBasic();
   } catch (e) {
-    console.warn('[fetchPitcherStats] KBO Basic1 fallback skipped:', e);
+    console.warn('[fetchPitcherStats] KBO Basic1 fallback skipped:', errMsg(e));
   }
 
   // name@team 키로 중복 제거. Fancy Stats 먼저 넣고, KBO 공식은 신규만.
