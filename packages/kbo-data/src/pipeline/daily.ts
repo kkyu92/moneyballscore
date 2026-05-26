@@ -467,9 +467,9 @@ export async function runDailyPipeline(
   if (windowTargets.length > 0) {
     console.log('[Pipeline] Fetching Fancy Stats...');
     [pitcherStats, teamStats, eloRatings] = await Promise.all([
-      fetchPitcherStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats pitchers: ${e}`); return []; }),
-      fetchTeamStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats teams: ${e}`); return []; }),
-      fetchEloRatings(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats elo: ${e}`); return []; }),
+      fetchPitcherStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats pitchers: ${errMsg(e)}`); return []; }),
+      fetchTeamStats(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats teams: ${errMsg(e)}`); return []; }),
+      fetchEloRatings(CURRENT_SEASON).catch((e) => { errors.push(`FancyStats elo: ${errMsg(e)}`); return []; }),
     ]);
 
     const scraperIssues: string[] = [];
@@ -484,7 +484,7 @@ export async function runDailyPipeline(
 
     console.log('[Pipeline] Fetching FanGraphs...');
     const fgBatters = await fetchBatterLeaders(CURRENT_SEASON).catch((e) => {
-      errors.push(`FanGraphs: ${e}`); return [];
+      errors.push(`FanGraphs: ${errMsg(e)}`); return [];
     });
     for (const fg of fgBatters) {
       const ts = teamStats.find((t) => t.team === fg.team);
