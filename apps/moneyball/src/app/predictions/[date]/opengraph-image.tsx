@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { assertSelectOk } from "@moneyball/shared";
+import { assertSelectOk, errMsg } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 
 // 동적 Open Graph 이미지: /predictions/YYYY-MM-DD 각 날짜별로 생성.
@@ -50,7 +50,7 @@ async function getStats(date: string) {
 
     return { n, verifiedN: verified.length, correctN: correct.length, rate };
   } catch (err) {
-    console.error(`opengraph-image getStats(${date}) failed:`, err);
+    console.error(`opengraph-image getStats(${date}) failed:`, errMsg(err));
     return { n: 0, verifiedN: 0, correctN: 0, rate: null };
   }
 }

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { assertSelectOk, type SelectResult } from "@moneyball/shared";
+import { assertSelectOk, errMsg, type SelectResult } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 
 // 경기 분석 동적 OG 이미지: /analysis/game/[id] 경기별 소셜 공유.
@@ -68,7 +68,7 @@ async function getGameOg(gameId: number) {
 
     return { date: game.game_date, homeLabel, awayLabel, winnerLabel, confPct };
   } catch (err) {
-    console.error(`opengraph-image[id] getGameOg(${gameId}) failed:`, err);
+    console.error(`opengraph-image[id] getGameOg(${gameId}) failed:`, errMsg(err));
     return null;
   }
 }

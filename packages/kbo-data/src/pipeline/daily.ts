@@ -164,7 +164,7 @@ export async function runDailyPipeline(
         console.error('[Pipeline] pipeline_runs insert error:', insertErr);
       }
     } catch (e) {
-      console.error('[Pipeline] pipeline_runs insert failed:', e);
+      console.error('[Pipeline] pipeline_runs insert failed:', errMsg(e));
     }
 
     // Telegram status 는 의미 있는 run 에만 — 매시간 spam 방지
@@ -174,7 +174,7 @@ export async function runDailyPipeline(
       mode === 'verify';
     if (shouldNotifyStatus) {
       try { await notifyPipelineStatus(result, durationMs); }
-      catch (e) { console.error('[Pipeline] notifyPipelineStatus failed:', e); }
+      catch (e) { console.error('[Pipeline] notifyPipelineStatus failed:', errMsg(e)); }
     }
 
     // silent drift family 사례 11 (cycle 813) — predict_final
@@ -192,7 +192,7 @@ export async function runDailyPipeline(
         existingPredictionsCount: existingPredictionsCount.value,
       });
     } catch (e) {
-      console.error('[Pipeline] captureSilentDriftAlert failed:', e);
+      console.error('[Pipeline] captureSilentDriftAlert failed:', errMsg(e));
     }
 
     return result;
