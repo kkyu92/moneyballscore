@@ -31,7 +31,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,7 +117,7 @@ async function main() {
     try {
       games = await fetchNaverSchedule(from, to, 'all');
     } catch (err) {
-      console.error(`  ❌ ${from}~${to} fetch failed:`, err instanceof Error ? err.message : err);
+      console.error(`  ❌ ${from}~${to} fetch failed: ${errMsg(err)}`);
       errors++;
       continue;
     }
