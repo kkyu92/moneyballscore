@@ -2167,6 +2167,127 @@ async function main() {
     return;
   }
 
+  // L5 — 4 variant 매칭 분포 비교 (plan #10 Tier 1, cycle 947)
+  // 5/30 토 1226회 추첨 후 fire — winning numbers vs 4 variant 50조합 매칭 카운트.
+  if (mode === 'oos-multi') {
+    const winningStr = process.argv[3];
+    const drwNo = process.argv[4] ?? '?';
+    const targetDate = process.argv[5] ?? nextSaturdayKST();
+    if (!winningStr) {
+      console.error('사용법: pnpm tsx scripts/lotto.ts oos-multi "1,2,3,4,5,6" 1226 [2026-05-30]');
+      process.exit(1);
+    }
+    const winning = winningStr.split(',').map((s) => Number(s.trim())).sort((a, b) => a - b);
+    if (winning.length !== 6 || winning.some((n) => Number.isNaN(n) || n < 1 || n > 45)) {
+      console.error('winning numbers 6개 (1~45) 필요');
+      process.exit(1);
+    }
+    const winningSet = new Set(winning);
+
+    // 4 variant 50조합 read — apps/moneyball/data/lotto-picks/<date>{,-balanced,-moderate,-mix}.md
+    const variants = ['default', 'balanced', 'moderate', 'mix'] as const;
+    const suffixOf = (v: typeof variants[number]) => v === 'default' ? '' : `-${v}`;
+    const variantResults: Array<{
+      variant: string;
+      file: string;
+      n: number;
+      matchHistogram: number[]; // index = match count (0~6), value = 카운트
+      topMatchSets: Array<{ idx: number; nums: number[]; match: number }>;
+    }> = [];
+
+    for (const v of variants) {
+      const filePath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}${suffixOf(v)}.md`);
+      if (!existsSync(filePath)) continue;
+      const md = readFileSync(filePath, 'utf-8');
+      // 50조합 parse — table row form: | # | n1 n2 n3 n4 n5 n6 | sum | ...
+      const rows: number[][] = [];
+      const lines = md.split('\n');
+      for (const line of lines) {
+        const match = line.match(/^\|\s*\d+\s*\|\s*([0-9 ]+)\s*\|/);
+        if (!match) continue;
+        const nums = match[1].trim().split(/\s+/).map(Number).filter((n) => n >= 1 && n <= 45);
+        if (nums.length === 6) rows.push(nums.sort((a, b) => a - b));
+      }
+      if (rows.length === 0) continue;
+
+      // 매칭 카운트
+      const histogram = [0, 0, 0, 0, 0, 0, 0]; // 0~6
+      const matched: Array<{ idx: number; nums: number[]; match: number }> = [];
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        const m = r.filter((n) => winningSet.has(n)).length;
+        histogram[m]++;
+        if (m >= 3) matched.push({ idx: i + 1, nums: r, match: m });
+      }
+      matched.sort((a, b) => b.match - a.match);
+
+      variantResults.push({
+        variant: v,
+        file: `${targetDate}${suffixOf(v)}.md`,
+        n: rows.length,
+        matchHistogram: histogram,
+        topMatchSets: matched.slice(0, 10),
+      });
+    }
+
+    // 256 rules OOS
+    let passed = 0;
+    let failed = 0;
+    for (const rule of RULES) {
+      const { pass } = checkRule(winning, rule, stats);
+      if (pass) passed++;
+      else failed++;
+    }
+
+    // markdown 박제
+    const rowsAll = variantResults
+      .map((vr) => {
+        const h = vr.matchHistogram;
+        return `| ${vr.variant} | ${vr.n} | ${h[6]} | ${h[5]} | ${h[4]} | ${h[3]} | ${h[6] + h[5] + h[4] + h[3]} |`;
+      })
+      .join('\n');
+
+    const topMatchSection = variantResults
+      .filter((vr) => vr.topMatchSets.length > 0)
+      .map((vr) => {
+        const lines = vr.topMatchSets
+          .map((m) => `- ${vr.variant} #${m.idx}: [${m.nums.join(' ')}] = ${m.match} 매칭`)
+          .join('\n');
+        return `### ${vr.variant} 상위 매칭\n\n${lines}`;
+      })
+      .join('\n\n');
+
+    const md = `# ${targetDate} (토) ${drwNo}회 OOS 검증 결과 — 4 variant
+
+**추첨 결과**: ${winning.join(' ')}
+**256 rules OOS**: PASS ${passed} / FAIL ${failed} (${failed === 0 ? '100% 통과' : `${((failed / RULES.length) * 100).toFixed(1)}% fail`})
+
+## 4 variant 매칭 분포
+
+| variant | n | 6 매칭 (1등) | 5 매칭 (2/3등) | 4 매칭 (4등) | 3 매칭 (5등) | 누적 (≥3) |
+|---|---|---|---|---|---|---|
+${rowsAll}
+
+## 상위 매칭 (≥3) — variant 별 top 10
+
+${topMatchSection || '(상위 매칭 0건)'}
+
+## 의도
+
+- 4 strategy mix 매칭 분포 비교 evidence — N=1 단건 결과 (1등 확률 evidence X)
+- 누적 N≥10 후 strategy 별 catch 패턴 evidence 박제 (plan #10 Tier 2 L6 carry-over)
+- lotto-data.json oos_pass_rate 갱신 (N=${Number(drwNo) === 1226 ? 3 : 'N+1'})
+
+JSON: {"draw": ${drwNo}, "passed_rules": ${passed}, "failed_rules": ${failed}, "variants": ${variantResults.length}}
+`;
+
+    const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}-oos-multi.md`);
+    writeFileSync(outPath, md);
+    console.log(`박제: ${outPath}`);
+    console.log(`회차: ${drwNo} / 4 variant 매칭 분포 + 256 rules PASS ${passed}/FAIL ${failed}`);
+    return;
+  }
+
   if (mode !== 'fetch' && mode !== 'update') {
     analyzePatterns(rounds, stats);
   }
