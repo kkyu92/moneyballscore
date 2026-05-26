@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, KBO_TEAMS, WINNER_PROB_LEAN } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, KBO_TEAMS, WINNER_PROB_LEAN, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { getZeroWeightRuleJudgePregame } from './postview';
@@ -183,7 +183,7 @@ export async function runJudgeAgent(
       backend: result.model,
       passed: validation.ok,
       violations: validation.violations,
-    }).catch((e) => console.warn('[validator_logs] unexpected error:', e));
+    }).catch((e) => console.warn('[validator_logs] unexpected error:', errMsg(e)));
   }
 
   if (validation.violations.length === 0) return result;
