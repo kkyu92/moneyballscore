@@ -1719,6 +1719,110 @@ function pickMd(rounds: LottoRound[], stats: Stats): void {
   console.log(`회차: ${drawNo} / 50세트 / 후보 풀 ${poolSize.toLocaleString()}`);
 }
 
+// ─── BALANCED STRATEGY (1등 historical 분포 median ±5 cutoff) ──────────────
+// historical N=1224 1등 조합 unpopularityScore mean=1.95 / median=1.7 / p5=8.4 / p95=-4.1.
+// 기존 buildCandidates = score desc top 50 (= unique strategy, p0 영역, share 우선).
+// balanced = score [-3, +7] cutoff + shuffle (= 1등 historical 분포 정합, 확률 우선).
+// 양쪽 strategy tradeoff — unique = 1등 share max + 1등 확률 매우 낮음 / balanced = 1등 확률 max + share 낮음.
+// L1 backtest (cycle 887) evidence 활용 — historical 1등 분포 정합 cutoff.
+
+function buildBalancedCandidates(
+  rounds: LottoRound[],
+  stats: Stats,
+  count: number,
+  scoreLo = -3,
+  scoreHi = 7,
+): { picks: PickEntry[]; poolSize: number; attempts: number } {
+  const pastWinners = new Set(rounds.map(r => r.numbers.join(',')));
+  const candidates: Array<{nums: number[]; score: number}> = [];
+  const seen = new Set<string>();
+  let attempts = 0;
+
+  while (candidates.length < 50_000 && attempts < 2_000_000) {
+    attempts++;
+    const set = new Set<number>();
+    while (set.size < 6) set.add(Math.floor(Math.random() * 45) + 1);
+    const nums = [...set].sort((a,b)=>a-b);
+    const key = nums.join(',');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!isValid(nums, stats)) continue;
+    if (pastWinners.has(key)) continue;
+    const score = unpopularityScore(nums);
+    if (score < scoreLo || score > scoreHi) continue;
+    candidates.push({ nums, score });
+  }
+
+  // Fisher-Yates shuffle — score sort X (분포 정합 안 random sample)
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+
+  const top = candidates.slice(0, count);
+  const picks: PickEntry[] = top.map(({nums, score}) => ({
+    nums,
+    score,
+    sum: sumNums(nums),
+    odd: oddCount(nums),
+    consec: consecPairs(nums),
+  }));
+  return { picks, poolSize: candidates.length, attempts };
+}
+
+function pickMdBalanced(rounds: LottoRound[], stats: Stats): void {
+  const targetDate = process.argv[3] ?? nextSaturdayKST();
+  const drawNo = process.argv[4] ?? (rounds.length + 1);
+  const { picks, poolSize, attempts } = buildBalancedCandidates(rounds, stats, 50);
+  const { valid, total } = countValid(stats);
+  const elimPct = ((1 - valid / total) * 100).toFixed(2);
+  const rowsAll = picks.map((p, i) =>
+    `| ${i + 1} | ${p.nums.join(' ')} | ${p.sum} | ${p.odd}:${6 - p.odd} | ${p.consec} | ${p.score.toFixed(1)} |`,
+  ).join('\n');
+
+  const md = `# ${targetDate} (토) 추첨 50세트 추천 — balanced strategy (${drawNo}회)
+
+**생성 시각**: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC (ad-hoc fire)
+**strategy**: balanced (historical 1등 분포 median ±5 cutoff, score range [-3, +7])
+**필터링 룰**: ${RULES.length}개 100% 규칙 (cycle 444 saturation)
+**조합 풀**: ${total.toLocaleString()} → 유효 ${valid.toLocaleString()} (${elimPct}% 제거) → score cutoff ${poolSize.toLocaleString()}
+**데이터 캐시**: 1~${rounds.length}회차
+**생성 명령**: \`pnpm tsx scripts/lotto.ts pick-md-balanced ${targetDate} ${drawNo}\` (${attempts.toLocaleString()}회 시도)
+
+## strategy tradeoff
+
+| | unique (default) | balanced (본 파일) |
+|---|---|---|
+| sort criteria | unpopularityScore desc top 50 | score [-3, +7] cutoff + shuffle |
+| score 영역 | p0 (14.5~18.7, 극 unique) | median ±5 (-3~+7, 1등 분포 정합) |
+| 1등 확률 | 매우 낮음 (historical 1등 0.5%~1% 영역) | 최대화 (1등 historical 76% 영역) |
+| 1등 share | 매우 높음 (다른 사람 거의 안 사는 패턴) | 낮음 (대중적 패턴 정합) |
+| evidence | L1 backtest cycle 887 — 1등 조합 mean=1.95/median=1.7 | 동일 evidence — balanced cutoff = ±5 around median |
+
+## 50세트 전체
+
+| # | 번호 | 합 | 홀:짝 | 연속쌍 | 기피점수 |
+|---|---|---|---|---|---|
+${rowsAll}
+
+## 추첨 후 비교 검증
+
+${targetDate} 추첨 결과 (${drawNo}회) 확정 후 매칭 수 + 양쪽 strategy 1등 확률/share 비교 박제.
+
+## 주의
+
+- 본 strategy = **L1 backtest evidence-based 정정** — 기존 unique strategy 가 historical 1등 분포 p0 영역에 박제 = 1등 확률 매우 낮음 (1등 조합 1% 이하만 본 영역).
+- balanced = 1등 historical 분포 median ±5 정합 = 1등 확률 max 우선 (단 share 낮음).
+- **양쪽 strategy = 사용자 선택 path** — unique (share 우선) / balanced (확률 우선). 본 메인 자가 결정 X (data-only 룰).
+- N=1 단건 결과로 결론 X. 누적 N≥10회 후 strategy 비교 평가.
+`;
+
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}-balanced.md`);
+  writeFileSync(outPath, md);
+  console.log(`박제: ${outPath}`);
+  console.log(`회차: ${drawNo} / 50세트 balanced / score cutoff pool ${poolSize.toLocaleString()}`);
+}
+
 // ─── SCORE BACKTEST (plan #8 Tier 2 L1) ────────────────────────────────────
 
 function scoreBacktest(rounds: LottoRound[]): void {
@@ -1878,6 +1982,10 @@ async function main() {
 
   if (mode === 'pick-md') {
     pickMd(rounds, stats);
+  }
+
+  if (mode === 'pick-md-balanced') {
+    pickMdBalanced(rounds, stats);
   }
 
   if (mode === 'score-backtest') {
