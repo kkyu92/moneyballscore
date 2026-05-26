@@ -1,4 +1,5 @@
 import type { TeamCode } from '@moneyball/shared';
+import { errMsg } from '@moneyball/shared';
 import { KBO_BASE_URL as BASE_URL, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { fetchNaverSchedule } from './naver-schedule';
 import { captureKboScraperHtmlAlert } from './kbo-scraper-alert';
@@ -106,7 +107,7 @@ export async function fetchLiveGames(date: string): Promise<LiveGameState[]> {
                   : 'scheduled',
         }));
     } catch (e) {
-      console.warn('[KBO Live] Naver fallback failed:', e);
+      console.warn('[KBO Live] Naver fallback failed:', errMsg(e));
       return [];
     }
   }

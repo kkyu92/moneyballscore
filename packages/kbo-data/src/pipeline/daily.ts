@@ -392,7 +392,7 @@ export async function runDailyPipeline(
         results_sent_at: new Date().toISOString(),
         results_count: verifyResults.length,
       });
-    } catch (e) { console.error('[Pipeline] notifyResults failed:', e); }
+    } catch (e) { console.error('[Pipeline] notifyResults failed:', errMsg(e)); }
 
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
