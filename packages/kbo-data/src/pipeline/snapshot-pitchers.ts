@@ -205,7 +205,7 @@ async function cli() {
 
 // ESM: import.meta.url === `file://${process.argv[1]}` 로 직접 실행 판정
 if (import.meta.url === `file://${process.argv[1]}`) {
-  cli().catch((err) => { console.error('💥 Fatal:', err); process.exit(1); });
+  cli().catch((err) => { console.error('💥 Fatal:', errMsg(err)); process.exit(1); });
 }
 
 export { matchPitcher, normalizeName, tagSource };

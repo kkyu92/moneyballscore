@@ -75,7 +75,7 @@ export async function getRivalryBlock(params: {
     return { recentGames, memories, promptBlock };
   } catch (err) {
     // Supabase timeout/네트워크 등 — throw 금지, 빈 블록 반환
-    console.warn('[rivalry-memory] query failed, returning empty block:', err);
+    console.warn('[rivalry-memory] query failed, returning empty block:', errMsg(err));
     return EMPTY_BLOCK;
   }
 }
