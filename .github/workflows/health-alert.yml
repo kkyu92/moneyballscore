@@ -1,0 +1,82 @@
+name: health-alert
+
+# /api/health composite health 매시간 cron 감지 — silent drift family 운영 코드 layer
+# alert 확장 (plan #11 Step 3, cycle 909 ship).
+#
+# /api/health 4-check (supabase + pipeline + kbo_api + deploy_alias) overall 응답:
+# - overall='ok' → ::notice::health ok ($latency_ms ms)
+# - overall='degraded' → ::warning::degraded — checks
+# - overall='fail' → ::error::fail — checks + exit 1
+# - HTTP 404 / 미배포 → ::warning:: exit 0 (deploy 진행 중 가정)
+#
+# deploy-drift-alert.yml ('17 * * * *') 와 분 겹침 회피 — '27 * * * *' 매시간 27분.
+# gap 검사 X (deploy-drift-alert.yml 가 cover) — 본 workflow 는 runtime health only.
+
+on:
+  schedule:
+    - cron: '27 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: health-alert
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Fetch production /api/health
+        run: |
+          set -e
+          PROD_URL="https://moneyballscore.vercel.app/api/health"
+          echo "Fetching $PROD_URL"
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            -A "moneyball-health-alert/1.0" \
+            --max-time 30 \
+            "$PROD_URL" || echo "HTTP_STATUS:000")
+          STATUS=$(echo "$RESPONSE" | tail -n1 | sed 's/HTTP_STATUS://')
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          echo "status=$STATUS"
+          echo "body=$BODY"
+
+          if [ "$STATUS" = "404" ]; then
+            echo "::warning::production /api/health endpoint 부재 (HTTP 404) — 신규 deploy 진행 중 또는 라우트 미배포 가정. 다음 시간 재검사."
+            exit 0
+          fi
+
+          # HTTP 503 = overall=fail (정상 응답, 본문 parse 필요) — 본 workflow 가 ::error:: 발사
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "503" ]; then
+            echo "::error::production /api/health HTTP $STATUS — endpoint 응답 비정상. deploy fail 또는 라우트 깨짐 의심."
+            exit 1
+          fi
+
+          OVERALL=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('overall') or '')" 2>/dev/null || echo "")
+          LATENCY=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); v=d.get('latency_ms'); print(v if isinstance(v,int) else '')" 2>/dev/null || echo "")
+          CHECKS=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); import json as j; print(j.dumps(d.get('checks') or {}, ensure_ascii=False))" 2>/dev/null || echo "{}")
+
+          echo "overall=$OVERALL"
+          echo "latency_ms=$LATENCY"
+          echo "checks=$CHECKS"
+
+          case "$OVERALL" in
+            ok)
+              echo "::notice::health ok (${LATENCY}ms) — checks: $CHECKS"
+              exit 0
+              ;;
+            degraded)
+              echo "::warning::health degraded — checks: $CHECKS. silent drift family 운영 코드 layer 약화 감지 (warning level only, alert fatigue 회피)."
+              exit 0
+              ;;
+            fail)
+              echo "::error::health fail — checks: $CHECKS. silent drift family 운영 코드 layer break 감지 — supabase / kbo_api / deploy_alias 진단 권장."
+              exit 1
+              ;;
+            *)
+              echo "::error::production /api/health overall field 미주입 또는 unknown value ($OVERALL) — endpoint schema 깨짐 의심."
+              exit 1
+              ;;
+          esac
