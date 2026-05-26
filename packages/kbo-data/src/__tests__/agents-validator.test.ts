@@ -144,6 +144,39 @@ describe('checkInventedPlayerNames', () => {
     const v = checkInventedPlayerNames('안정성이 강한 팀', ctx);
     expect(v).toHaveLength(0);
   });
+
+  // cycle 982 regression — silent drift family validator agent layer 3rd fix.
+  // cycle 981 KT@OB / LG@LT / SS@SK 3건 fallback evidence: "두산이"/"전까지"/"최근폼"
+  // 같은 일반 명사 + 한국어 조사 조합이 highConfidencePattern `[가-힣]{3}` + verb
+  // 매칭으로 invented_player_name false positive 발생. endsWithKoreanParticle filter
+  // + COMMON_KOREAN_NOUNS '최근폼' 추가로 본질 차단. 회귀 가드 (재발 차단).
+  it('cycle 982: 팀명 + 주격조사 "이" (두산+이) → false positive 차단 (endsWithKoreanParticle)', () => {
+    // "두산이" = 팀명 "두산" + 주격조사 "이". 3자 매칭 후 verb 매칭으로 잡힘.
+    // 본 filter 가 끝 글자 "이" 조사 감지 → reject.
+    const v = checkInventedPlayerNames('두산이 타격에서 강점을 보임', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 982: 시간 부사 + 조사 "전+까지" → false positive 차단 (endsWithKoreanParticle)', () => {
+    // "전까지" = 시간 부사. 끝 글자 "지" 조사 감지 → reject.
+    const v = checkInventedPlayerNames('5회 전까지 타격이 강함', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 982: 합성어 "최근폼" + verb → false positive 차단 (COMMON_KOREAN_NOUNS)', () => {
+    // "최근폼" = recent form. COMMON_KOREAN_NOUNS 명시 추가.
+    const v = checkInventedPlayerNames('최근폼 타격 추세가 우위', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 982: 진짜 3자 선수명 (조사 X) → hard 위반 유지 (regression guard)', () => {
+    // "김광현" 끝 글자 "현" = 조사 X. fix 가 진짜 이름 매칭 미영향 검증.
+    const v = checkInventedPlayerNames('김광현이 등판한다', ctx);
+    expect(v).toHaveLength(1);
+    expect(v[0].type).toBe('invented_player_name');
+    expect(v[0].severity).toBe('hard');
+    expect(v[0].detail).toContain('김광현');
+  });
 });
 
 // ============================================

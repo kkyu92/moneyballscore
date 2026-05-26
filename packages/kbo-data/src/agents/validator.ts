@@ -160,6 +160,8 @@ const COMMON_KOREAN_NOUNS = new Set([
   '선취점', '결정타', '역전승', '패전처', '경기력', '집중력',
   '기동력', '수비력', '타격력', '투구력', '공격력', '방어력',
   '득점력', '돌파력', '파워력',
+  // cycle 982 — 한국어 합성어 (recent form 류)
+  '최근폼', '팀모멘', '이번주', '저번주', '다음주', '오늘밤',
   // 외래어·일반 명사
   '데이터', '시스템', '밸런스', '페이스', '모멘텀', '컨디션',
   '스타트', '매치업',
@@ -175,6 +177,19 @@ const COMMON_KOREAN_NOUNS = new Set([
 // 한국어 파생접미사 -적은 adjective 생성용. 모든 -적 3자 단어 자동 제외.
 function isKoreanAdjectivalSuffix(word: string): boolean {
   return word.length === 3 && word.endsWith('적');
+}
+
+// 캡처된 3자 끝 글자가 한국어 단음 조사/접속어 시 reject — "X(2자) + 조사(1자)"
+// 형태가 highConfidencePattern `[가-힣]{3}` 으로 매칭되는 false positive 차단.
+// cycle 981 evidence: "두산이"(두산+이) / "전까지"(전+까지). subjectMarkerPattern
+// 의 lookahead `(?=[이가은는])` 는 captured 외 조사 분리해서 안전, 본 helper 는
+// highConfidencePattern 의 verb 매칭 path 가드.
+const KOREAN_PARTICLE_END_CHARS = new Set([
+  '이', '가', '은', '는', '을', '를', '도', '만', '지', '까', '서', '에',
+  '의', '와', '과', '께', '서', '나', '며',
+]);
+function endsWithKoreanParticle(word: string): boolean {
+  return word.length === 3 && KOREAN_PARTICLE_END_CHARS.has(word[2]);
 }
 
 // 야구 선수 맥락 동사 (이게 뒤에 오면 진짜 선수명일 가능성 높음)
@@ -318,21 +333,28 @@ export function checkInventedPlayerNames(
 
   const candidates = new Set<string>();
 
-  // 1단계: 동사 뒤 이름 — 일반 명사 + 파생형용사 접미사 filter (subjectMarkerPattern 과 동일).
+  // 1단계: 동사 뒤 이름 — 일반 명사 + 파생형용사 접미사 + 조사 결합 명사 filter
+  // (subjectMarkerPattern 과 동일).
   // verb list 에 noun 류 (타격·삼진·홈런·피칭·완투·세이브) 가 섞여 있어 "공격적 타격"
   // "결정적 홈런" 형 false positive 발생 → 양쪽 pattern 동일 filter 로 차단.
+  // cycle 982 — endsWithKoreanParticle 추가: "두산이"(두산+이) / "전까지"(전+까지)
+  // 형 "X(2자)+조사(1자)" 가 3자로 매칭되는 false positive 본질 차단.
   for (const m of outputText.matchAll(highConfidencePattern)) {
     const word = m[1];
     if (COMMON_KOREAN_NOUNS.has(word)) continue;
     if (isKoreanAdjectivalSuffix(word)) continue;
+    if (endsWithKoreanParticle(word)) continue;
     candidates.add(word);
   }
 
-  // 2단계: 조사 뒤 이름
+  // 2단계: 조사 뒤 이름. lookahead 가 captured 외 조사 분리해서 안전하지만
+  // defense-in-depth — captured 3자가 조사로 끝나는 케이스 (예: "성씨이가"
+  // 형식 — 드물지만 가능) 도 reject.
   for (const m of outputText.matchAll(subjectMarkerPattern)) {
     const word = m[1];
     if (COMMON_KOREAN_NOUNS.has(word)) continue;
     if (isKoreanAdjectivalSuffix(word)) continue;
+    if (endsWithKoreanParticle(word)) continue;
     candidates.add(word);
   }
 
