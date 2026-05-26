@@ -215,7 +215,7 @@ async function main() {
     try {
       naverGames = await fetchNaverSchedule(from, to, 'all');
     } catch (err) {
-      console.error(`  ❌ ${from} fetch failed:`, err instanceof Error ? err.message : err);
+      console.error(`  ❌ ${from} fetch failed: ${errMsg(err)}`);
       errors++;
       continue;
     }
