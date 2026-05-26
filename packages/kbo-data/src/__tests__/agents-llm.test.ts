@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callLLM, MAX_ATTEMPTS, classifyAnthropicError, backoffMs } from '../agents/llm';
+import { callLLM, MAX_ATTEMPTS, MAX_OVERLOADED_ATTEMPTS, classifyAnthropicError, backoffMs } from '../agents/llm';
 
 const originalFetch = global.fetch;
 const originalKey = process.env.ANTHROPIC_API_KEY;
@@ -183,6 +183,69 @@ describe('callLLM retry/backoff', () => {
     expect(fetchMock).toHaveBeenCalledTimes(MAX_ATTEMPTS);
   });
 
+  // cycle 986 — 529 Overloaded 시 attempts 동적 확장 (3 → 4).
+  // evidence: 14d agentsFailed 17건 중 5건 (29.4%) 가 5/19 Anthropic 외부 장애 SERVER_ERROR 529.
+  // 기존 3 attempts (17.5s window) 부족 → 4 attempts (37.5s window) 로 확장하여
+  // capacity 회복 확률 ↑.
+  it('cycle 986: 전부 529 Overloaded → MAX_OVERLOADED_ATTEMPTS (4) 시도', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () =>
+      jsonResponse({ error: { type: 'overloaded_error', message: 'Overloaded' } }, 529)
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    const result = await promise;
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('529');
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_OVERLOADED_ATTEMPTS);
+    expect(MAX_OVERLOADED_ATTEMPTS).toBeGreaterThan(MAX_ATTEMPTS);
+  });
+
+  // cycle 986 — 529 → 200 회복 시 확장된 attempt 안 정상 성공 박제
+  it('cycle 986: 529 3회 → 4번째 200 회복 → success (확장 attempt 효과 검증)', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ error: { type: 'overloaded_error', message: 'Overloaded' } }, 529))
+      .mockResolvedValueOnce(jsonResponse({ error: { type: 'overloaded_error', message: 'Overloaded' } }, 529))
+      .mockResolvedValueOnce(jsonResponse({ error: { type: 'overloaded_error', message: 'Overloaded' } }, 529))
+      .mockResolvedValueOnce(jsonResponse(successBody('recovered after 529 storm')));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    const result = await promise;
+
+    expect(result.success).toBe(true);
+    expect(result.data).toBe('recovered after 529 storm');
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  // cycle 986 — 일반 5xx 는 attempts 확장 X (overcompensate 회피 검증)
+  it('cycle 986: 503 4회 시도 시 3번째에서 멈춤 (529 만 확장)', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () =>
+      jsonResponse({ error: { type: 'overloaded_error', message: 'upstream 503' } }, 503)
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    const result = await promise;
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('503');
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_ATTEMPTS);
+  });
+
   // cycle 461 — credit balance too low 실제 incident → raw JSON leak 차단 검증
   it('credit balance too low 400 → CREDIT_EXHAUSTED 분류 (raw JSON leak 차단)', async () => {
     const creditErrorBody = {
@@ -258,7 +321,9 @@ describe('classifyAnthropicError', () => {
 // 사례 (2026-05-19 5경기 토론 fallback) — Anthropic 529 Overloaded 시 기본
 // 3.5s backoff 부족, capacity 회복 못 잡아 fallback row 박제. 5x 곱해 17.5s
 // 까지 늘림 — capacity 회복 확률 상승.
-describe('backoffMs (529 overloaded multiplier)', () => {
+// cycle 986 강화 — 3 attempts (17.5s) 도 부족 evidence (14d 5건 fallback).
+// 529 단독 4 attempts 로 확장: 2.5s → 5s → 10s → 20s = 37.5s window.
+describe('backoffMs (529 overloaded multiplier + cycle 986 확장)', () => {
   it('200-499 status 일반 backoff', () => {
     expect(backoffMs(0, 503)).toBe(500);
     expect(backoffMs(1, 503)).toBe(1000);
@@ -270,9 +335,21 @@ describe('backoffMs (529 overloaded multiplier)', () => {
     expect(backoffMs(2, 429)).toBe(2000);
   });
 
-  it('529 overloaded 5x backoff', () => {
+  it('529 overloaded 5x backoff (첫 3 attempt 호환 유지)', () => {
     expect(backoffMs(0, 529)).toBe(2500);
     expect(backoffMs(1, 529)).toBe(5000);
     expect(backoffMs(2, 529)).toBe(10000);
+  });
+
+  it('cycle 986: 529 attempt 3 → 20s backoff (4번째 시도)', () => {
+    expect(backoffMs(3, 529)).toBe(20000);
+  });
+
+  it('cycle 986: 529 attempt index overflow → 마지막 backoff clamp', () => {
+    expect(backoffMs(99, 529)).toBe(20000);
+  });
+
+  it('cycle 986: 일반 5xx attempt index overflow → 마지막 backoff clamp (network catch path 호환)', () => {
+    expect(backoffMs(99, 503)).toBe(2000);
   });
 });

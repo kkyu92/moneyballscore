@@ -8,16 +8,24 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 // 재시도 정책: 3회 시도, 500ms → 1000ms → 2000ms exponential backoff
 // 재시도 대상: 네트워크 에러, 5xx, 429(rate limit)
 // 재시도 제외: 4xx (400/401/403 등 — 요청 자체가 잘못됨)
-// 529 Overloaded 특수 처리: Anthropic capacity 한계 — backoff 5x 곱해
-// 더 길게 대기 (2.5s → 5s → 10s = 총 17.5s). 사례 (2026-05-19 5경기
-// 토론 fallback) 재발 차단.
+// 529 Overloaded 특수 처리 (cycle 986 강화):
+//   - Anthropic capacity 한계 — backoff 5x 곱해 더 길게 대기
+//   - 기본 3 attempts 부족 (2026-05-19 5경기 fallback 재발 evidence)
+//   - 529 단독 attempts 4 로 확장: 2.5s → 5s → 10s → 20s = 총 37.5s window
+//   - 일반 5xx / 429 / 네트워크 에러 = 기존 3 attempts 유지 (overcompensate 회피)
 const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
-const OVERLOADED_BACKOFF_MULTIPLIER = 5;
+const OVERLOADED_BACKOFF_MS = [2500, 5000, 10000, 20000] as const;
+const OVERLOADED_BACKOFF_MULTIPLIER = 5; // 첫 3 attempt 일반 5xx 대비 배율 — 테스트 호환
 export const MAX_ATTEMPTS = RETRY_BACKOFF_MS.length;
+export const MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length;
 
 export function backoffMs(attempt: number, status: number): number {
-  const base = RETRY_BACKOFF_MS[attempt];
-  return status === 529 ? base * OVERLOADED_BACKOFF_MULTIPLIER : base;
+  if (status === 529) {
+    const idx = Math.min(attempt, OVERLOADED_BACKOFF_MS.length - 1);
+    return OVERLOADED_BACKOFF_MS[idx];
+  }
+  const idx = Math.min(attempt, RETRY_BACKOFF_MS.length - 1);
+  return RETRY_BACKOFF_MS[idx];
 }
 
 export interface LLMCallOptions {
@@ -184,8 +192,10 @@ async function callClaude<T>(
   });
 
   let lastError = 'unknown';
+  // 529 발생 시 maxAttempts 동적 확장 (3 → 4). 일반 5xx / 네트워크 에러는 3 유지.
+  let maxAttempts: number = MAX_ATTEMPTS;
 
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const res = await fetch(ANTHROPIC_API_URL, {
         method: 'POST',
@@ -201,7 +211,12 @@ async function callClaude<T>(
         const errText = await res.text();
         lastError = classifyAnthropicError(res.status, errText);
 
-        if (isRetryableStatus(res.status) && attempt < MAX_ATTEMPTS - 1) {
+        // 529 Overloaded 시 retry 한도 확장 (cycle 986 fix)
+        if (res.status === 529) {
+          maxAttempts = MAX_OVERLOADED_ATTEMPTS;
+        }
+
+        if (isRetryableStatus(res.status) && attempt < maxAttempts - 1) {
           await sleep(backoffMs(attempt, res.status));
           continue;
         }
@@ -232,8 +247,8 @@ async function callClaude<T>(
       };
     } catch (e) {
       lastError = errMsg(e);
-      if (attempt < MAX_ATTEMPTS - 1) {
-        await sleep(RETRY_BACKOFF_MS[attempt]);
+      if (attempt < maxAttempts - 1) {
+        await sleep(backoffMs(attempt, 0));
         continue;
       }
     }
