@@ -754,6 +754,49 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       }
     });
 
+    it('live 상태 경기는 expected 제외 — predict_final 시점 cover 불가능 (cycle 936 사례 11 family 후속)', async () => {
+      // 5/23 evidence: KST 18:58 시점 17:00 경기 state_sc=2 (LIVE) 가 expected 에
+      // 잘못 포함 → "expected=4, total=1" GAP false positive. live 제외 후
+      // expected=2 (scheduled 2건) + total=2 → gap=0 (정확).
+      const tables = baseTables();
+      tables.predictions = {
+        selectData: [{ game_id: 101 }, { game_id: 102 }],
+        count: 2,
+      };
+
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T06:30:00Z'));
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({ gameTime: '18:30' }),
+          makeGame({
+            homeTeam: 'LG', awayTeam: 'SS',
+            externalGameId: '20260422SSLG0', gameTime: '18:30',
+          }),
+          // 17:00 경기 — predict_final cron 시점 이미 LIVE
+          makeGame({
+            homeTeam: 'SK', awayTeam: 'HT', gameTime: '17:00',
+            externalGameId: '20260422HTSK0', status: 'live',
+          }),
+        ]);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict_final', 'cron');
+
+        expect(result.errors.filter((e) => e.includes('[GAP]'))).toHaveLength(0);
+        expect(vi.mocked(notifyError)).not.toHaveBeenCalledWith(
+          expect.stringContaining('GAP'),
+          expect.anything(),
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('SP 미확정 경기 존재 → notifyError("SP_UNCONFIRMED") + errors 마커', async () => {
       const tables = baseTables();
       tables.predictions = {

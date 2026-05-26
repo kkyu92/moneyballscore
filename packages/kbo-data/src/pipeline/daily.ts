@@ -805,8 +805,16 @@ export async function runDailyPipeline(
 
   // gap 감지 (predict_final mode 전용)
   if (mode === 'predict_final') {
+    // status 'live' 도 expected 제외 — predict_final 시점 이미 진행 중인 경기는
+    // cover 불가능 (사례 11 family lesson). 5/23 evidence: 17:00 경기 state_sc=2
+    // (LIVE) 가 expected=4 에 잡혀 GAP false positive (cycle 936 fix).
     const expected = games.filter(
-      (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
+      (g) =>
+        g.status !== 'final' &&
+        g.status !== 'postponed' &&
+        g.status !== 'live' &&
+        g.homeSP &&
+        g.awaySP,
     ).length;
     // silent drift 가드 — `.error` 미체크 시 count=null → gap=expected → false
     // positive GAP 알림 (DB 오류가 GAP 으로 위장). assertSelectOk 로 fail-loud
