@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, assertSelectOk, errMsg } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { parseChangelog } from '@/lib/changelog/parse';
@@ -112,7 +112,7 @@ export async function GET() {
   try {
     insightsDates = await listInsightsDates(10);
   } catch (e) {
-    console.warn("[feed] insights dates query failed:", e);
+    console.warn("[feed] insights dates query failed:", errMsg(e));
   }
   for (const date of insightsDates) {
     const link = `${SITE_URL}/insights/${date}`;

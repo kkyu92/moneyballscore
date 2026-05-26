@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, errMsg } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -22,7 +22,7 @@ async function checkSupabase(): Promise<Check> {
     const { count } = assertSelectOk(result, 'health.leagues');
     return { status: 'ok', detail: `${count} leagues` };
   } catch (e) {
-    return { status: 'error', detail: e instanceof Error ? e.message : String(e) };
+    return { status: 'error', detail: errMsg(e) };
   }
 }
 
@@ -58,7 +58,7 @@ async function checkKboApi(): Promise<Check> {
     if (res.status === 200) return { status: 'ok', detail: `HTTP ${res.status}` };
     return { status: 'warning', detail: `HTTP ${res.status}` };
   } catch (e) {
-    return { status: 'error', detail: e instanceof Error ? e.message : String(e) };
+    return { status: 'error', detail: errMsg(e) };
   }
 }
 
