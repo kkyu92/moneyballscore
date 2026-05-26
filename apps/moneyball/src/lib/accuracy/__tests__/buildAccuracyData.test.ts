@@ -7,11 +7,13 @@ import {
   buildFallbackStats,
   buildFallbackDailyTrend,
   buildRecentForm,
+  buildScoringRuleDayHeatmap,
   buildV18SubCohort,
   buildVersionHistory,
   buildWeeklyTrend,
   bucketize,
   calibrationGap,
+  SCORING_RULE_HEATMAP_ROWS,
 } from '../buildAccuracyData';
 
 function row(confidence: number, is_correct: boolean, verified_at = '2026-05-01T10:00:00Z') {
@@ -580,5 +582,72 @@ describe('buildV18SubCohort', () => {
       v18Row(false, 'v2.0-debate'),
     ]);
     expect(s.realDebate.ci95Half).toBeGreaterThan(0);
+  });
+});
+
+// M13 — scoring_rule × day_of_week heatmap (plan #10 Tier 1, cycle 947)
+describe('buildScoringRuleDayHeatmap', () => {
+  function srRow(
+    scoring_rule: string | null,
+    is_correct: boolean,
+    verified_at = '2026-05-12T10:00:00Z', // KST 화요일 19시
+  ) {
+    return { confidence: 0.6, is_correct, verified_at, scoring_rule };
+  }
+
+  it('빈 배열 → 5 rows × 7 days = 35 cell 모두 n=0 + accuracy=null', () => {
+    const result = buildScoringRuleDayHeatmap([]);
+    expect(result.length).toBe(35);
+    for (const cell of result) {
+      expect(cell.n).toBe(0);
+      expect(cell.hits).toBe(0);
+      expect(cell.accuracy).toBeNull();
+    }
+  });
+
+  it('all row + scoring_rule row 양쪽 누적 — known scoring_rule', () => {
+    // 2026-05-12 = KST 화요일. KST=UTC+9. UTC 10:00 = KST 19:00 화요일.
+    const result = buildScoringRuleDayHeatmap([
+      srRow('v1.8', true),
+      srRow('v1.8', false),
+      srRow('v1.8', true),
+    ]);
+    // all row 화요일 cell
+    const allTue = result.find((c) => c.scoringRule === 'all' && c.day === 2)!;
+    expect(allTue.n).toBe(3);
+    expect(allTue.hits).toBe(2);
+    expect(allTue.accuracy).toBeCloseTo(2 / 3);
+
+    // v1.8 row 화요일 cell
+    const v18Tue = result.find((c) => c.scoringRule === 'v1.8' && c.day === 2)!;
+    expect(v18Tue.n).toBe(3);
+    expect(v18Tue.hits).toBe(2);
+    expect(v18Tue.accuracy).toBeCloseTo(2 / 3);
+  });
+
+  it('N<3 소표본 cell → accuracy=null (UI 회색 표시 trigger)', () => {
+    const result = buildScoringRuleDayHeatmap([srRow('v1.8', true), srRow('v1.8', true)]);
+    const v18Tue = result.find((c) => c.scoringRule === 'v1.8' && c.day === 2)!;
+    expect(v18Tue.n).toBe(2);
+    expect(v18Tue.accuracy).toBeNull();
+  });
+
+  it('unknown scoring_rule → all aggregate 만 누적, sr 별 row 미박제', () => {
+    const result = buildScoringRuleDayHeatmap([
+      srRow('v2.0-future', true),
+      srRow('v2.0-future', false),
+      srRow('v2.0-future', true),
+    ]);
+    // all row 누적
+    const allTue = result.find((c) => c.scoringRule === 'all' && c.day === 2)!;
+    expect(allTue.n).toBe(3);
+    expect(allTue.hits).toBe(2);
+
+    // SCORING_RULE_HEATMAP_ROWS 안 known sr 만 row 박제 (v1.5/v1.6/v1.7-revert/v1.8)
+    for (const sr of SCORING_RULE_HEATMAP_ROWS) {
+      if (sr === 'all') continue;
+      const cell = result.find((c) => c.scoringRule === sr && c.day === 2)!;
+      expect(cell.n).toBe(0);
+    }
   });
 });

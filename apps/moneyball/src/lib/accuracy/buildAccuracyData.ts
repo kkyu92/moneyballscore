@@ -271,6 +271,69 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
   }));
 }
 
+// M13 — scoring_rule × day_of_week 매트릭스 (cycle 947 plan #10 Tier 1).
+// row = scoring_rule (v1.5 / v1.6 / v1.7-revert / v1.8) + 'all' aggregate.
+// col = day_of_week (월~일 KST).
+// cell = { n, hits, accuracy }. n<3 = 소표본 (acc null 표시 처리는 UI 책임).
+
+export interface ScoringRuleDayCell {
+  scoringRule: string;
+  day: number; // 0=일,...,6=토
+  dayLabel: string;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+}
+
+export const SCORING_RULE_HEATMAP_ROWS = ['all', 'v1.5', 'v1.6', 'v1.7-revert', 'v1.8'];
+export const SMALL_SAMPLE_THRESHOLD = 3;
+
+export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[] {
+  // (scoringRule, day) → { n, hits } accumulator
+  const acc = new Map<string, { n: number; hits: number }>();
+  const keyOf = (sr: string, day: number) => `${sr}__${day}`;
+
+  for (const sr of SCORING_RULE_HEATMAP_ROWS) {
+    for (let d = 0; d < 7; d++) {
+      acc.set(keyOf(sr, d), { n: 0, hits: 0 });
+    }
+  }
+
+  for (const r of rows) {
+    const kstMs = new Date(r.verified_at).getTime() + 9 * 3600 * 1000;
+    const dow = new Date(kstMs).getUTCDay();
+    const sr = r.scoring_rule ?? '';
+
+    // 'all' aggregate 항상 누적
+    const allCell = acc.get(keyOf('all', dow))!;
+    allCell.n += 1;
+    if (r.is_correct) allCell.hits += 1;
+
+    // scoring_rule 별 cell — known sr 만
+    if (SCORING_RULE_HEATMAP_ROWS.includes(sr)) {
+      const srCell = acc.get(keyOf(sr, dow))!;
+      srCell.n += 1;
+      if (r.is_correct) srCell.hits += 1;
+    }
+  }
+
+  const out: ScoringRuleDayCell[] = [];
+  for (const sr of SCORING_RULE_HEATMAP_ROWS) {
+    for (const day of DOW_ORDER) {
+      const cell = acc.get(keyOf(sr, day))!;
+      out.push({
+        scoringRule: sr,
+        day,
+        dayLabel: DAY_LABELS[day],
+        n: cell.n,
+        hits: cell.hits,
+        accuracy: cell.n >= SMALL_SAMPLE_THRESHOLD ? cell.hits / cell.n : null,
+      });
+    }
+  }
+  return out;
+}
+
 function getWeekStart(dateStr: string): string {
   // KST 기준으로 주 시작(월요일) 계산
   const kstMs = new Date(dateStr).getTime() + 9 * 3600 * 1000;
