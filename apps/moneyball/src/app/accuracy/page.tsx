@@ -6,6 +6,7 @@ import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { TableOfContents } from '@/components/shared/TableOfContents';
 import { BrierTrendChart } from '@/components/dashboard/BrierTrendChart';
+import { ScoringRuleDayHeatmap } from '@/components/dashboard/ScoringRuleDayHeatmap';
 
 const TOC_ITEMS = [
   { id: 'calibration', label: '캘리브레이션' },
@@ -42,6 +43,7 @@ import {
   buildFallbackStats,
   buildFallbackDailyTrend,
   buildBrierTrend,
+  buildScoringRuleDayHeatmap,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -262,6 +264,7 @@ export default async function AccuracyPage() {
   const buckets = bucketize(rows);
   const weekly = buildWeeklyTrend(rows);
   const brierTrend = buildBrierTrend(rows);
+  const scoringRuleDayHeatmap = buildScoringRuleDayHeatmap(rows);
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
@@ -509,6 +512,25 @@ export default async function AccuracyPage() {
             scoring_rule 별 주차 Brier — v1.5 → v1.6 → v1.7-revert → v1.8 진화 추세 시각화.
           </p>
           <BrierTrendChart data={brierTrend} />
+        </section>
+      )}
+
+      {/* M13 — scoring_rule × 요일 heatmap (plan #10 Tier 1, cycle 947) */}
+      {scoringRuleDayHeatmap.length > 0 && rows.length >= 10 && (
+        <section
+          id="scoring-rule-day-heatmap"
+          className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-lg font-bold">요일별 scoring_rule cohort</h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              N&lt;3 = 소표본 회색
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            scoring_rule × 요일 (KST) 적중률 매트릭스 — v1.6 anomaly cohort + Sunday cap (cycle 358) 효과 시각화.
+          </p>
+          <ScoringRuleDayHeatmap data={scoringRuleDayHeatmap} />
         </section>
       )}
 
