@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
+import {
+  buildRejectReasonBreakdown,
+  REJECT_REASON_LABEL,
+  type RejectReasonCell,
+} from '@/lib/debug/pipelineStats';
 
 // PLAN_v5 Phase 3 — /debug/pipeline 대시보드
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
 //
 // pipeline_runs 최근 30일 표시. mode 별 subtotal + 이번 주 GAP 강조.
 // /debug/hallucination 패턴 답습.
+// M16 (plan #10 Tier 1, cycle 947): skipped_detail reject reason cohort.
 
 export const dynamic = 'force-dynamic';
 
@@ -133,10 +139,14 @@ async function getPipelineStats() {
     }
   }
 
+  // M16 — reject reason cohort breakdown (전체 30일 runs).
+  const rejectReasons: RejectReasonCell[] = buildRejectReasonBreakdown(runs);
+
   return {
     runs: runs.slice(0, 50),
     byMode, gapEventsWeek, spEventsWeek,
     totalRuns: runs.length, error: null,
+    rejectReasons,
   };
 }
 
@@ -327,6 +337,49 @@ export default async function PipelineDashboard() {
                         <td className="px-3 py-2 font-mono">{g.run_date}</td>
                         <td className="px-3 py-2 font-mono text-xs">{g.mode}</td>
                         <td className="px-3 py-2 text-xs text-red-700">{g.gap_msg}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {/* M16 — Reject Reason 분포 (plan #10 Tier 1, cycle 947) */}
+          {stats.rejectReasons && stats.rejectReasons.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold mb-3">Reject Reason 분포 (skipped_detail)</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                shouldPredictGame (schedule.ts) reject reason 누적 — window 정상 reject vs silent silent drop 영역 분리.
+              </p>
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
+                      <th className="px-3 py-2 font-medium">reason</th>
+                      <th className="px-3 py-2 font-medium text-right">count</th>
+                      <th className="px-3 py-2 font-medium text-right">share</th>
+                      <th className="px-3 py-2 font-medium w-1/3">distribution</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.rejectReasons.map((r) => (
+                      <tr key={r.reason} className="border-t border-gray-200 dark:border-[var(--color-border)]">
+                        <td className="px-3 py-2 font-mono text-xs">
+                          {REJECT_REASON_LABEL[r.reason] ?? r.reason}
+                        </td>
+                        <td className="px-3 py-2 text-right font-mono">{r.count}</td>
+                        <td className="px-3 py-2 text-right font-mono">
+                          {(r.pct * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded overflow-hidden">
+                            <div
+                              className="h-full bg-brand-500"
+                              style={{ width: `${(r.pct * 100).toFixed(1)}%` }}
+                            />
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
