@@ -177,6 +177,34 @@ describe('checkInventedPlayerNames', () => {
     expect(v[0].severity).toBe('hard');
     expect(v[0].detail).toContain('김광현');
   });
+
+  // cycle 986 regression — 야구 도메인 plural / 합성어 false positive 차단.
+  // evidence: row 1524 (5/24) "안타들" → invented_player_name:hard 분류.
+  // COMMON_KOREAN_NOUNS 에 야구 도메인 plural (X+들) + 감각·전략 합성어 박제.
+  it('cycle 986: 야구 plural "안타들" + verb → false positive 차단 (COMMON_KOREAN_NOUNS)', () => {
+    const v = checkInventedPlayerNames('안타들 타격 추세가 강함', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 야구 plural "홈런들" + verb → false positive 차단', () => {
+    const v = checkInventedPlayerNames('홈런들 타격 비중이 높음', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 야구 plural "타자들" + verb → false positive 차단', () => {
+    const v = checkInventedPlayerNames('타자들 타격감 우위', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 야구 감각 합성어 "타격감" + verb → false positive 차단', () => {
+    const v = checkInventedPlayerNames('타격감 타격 안정', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 야구 운영 합성어 "작전상" + verb → false positive 차단', () => {
+    const v = checkInventedPlayerNames('작전상 타격 강조', ctx);
+    expect(v).toHaveLength(0);
+  });
 });
 
 // ============================================
