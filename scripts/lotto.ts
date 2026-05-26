@@ -1770,6 +1770,71 @@ function buildBalancedCandidates(
   return { picks, poolSize: candidates.length, attempts };
 }
 
+// ─── MODERATE STRATEGY (buffer 영역, unique 와 balanced 사이) ─────────────
+// score [7, 14] cutoff — historical 1등 분포 p5~p10 영역 (4.3~8.4 + 약간 위)
+// unique (14+) 와 balanced (-3~+7) 사이 buffer = 1등 확률 중간 + share 중간 tradeoff
+
+function buildModerateCandidates(
+  rounds: LottoRound[],
+  stats: Stats,
+  count: number,
+  scoreLo = 7,
+  scoreHi = 14,
+): { picks: PickEntry[]; poolSize: number; attempts: number } {
+  const pastWinners = new Set(rounds.map(r => r.numbers.join(',')));
+  const candidates: Array<{nums: number[]; score: number}> = [];
+  const seen = new Set<string>();
+  let attempts = 0;
+
+  while (candidates.length < 50_000 && attempts < 2_000_000) {
+    attempts++;
+    const set = new Set<number>();
+    while (set.size < 6) set.add(Math.floor(Math.random() * 45) + 1);
+    const nums = [...set].sort((a,b)=>a-b);
+    const key = nums.join(',');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!isValid(nums, stats)) continue;
+    if (pastWinners.has(key)) continue;
+    const score = unpopularityScore(nums);
+    if (score < scoreLo || score > scoreHi) continue;
+    candidates.push({ nums, score });
+  }
+
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+
+  const top = candidates.slice(0, count);
+  const picks: PickEntry[] = top.map(({nums, score}) => ({
+    nums,
+    score,
+    sum: sumNums(nums),
+    odd: oddCount(nums),
+    consec: consecPairs(nums),
+  }));
+  return { picks, poolSize: candidates.length, attempts };
+}
+
+// ─── VERIFY ALL RULES (256 rules 전수 재검증) ──────────────────────────────
+
+function verifyAllRules(picks: PickEntry[], stats: Stats): { allPass: boolean; failures: Array<{ idx: number; nums: number[]; failedRules: string[] }> } {
+  const failures: Array<{ idx: number; nums: number[]; failedRules: string[] }> = [];
+  for (let i = 0; i < picks.length; i++) {
+    const p = picks[i];
+    const failedRules: string[] = [];
+    for (const rule of RULES) {
+      const { pass } = checkRule(p.nums, rule, stats);
+      if (!pass) failedRules.push(rule.name);
+    }
+    if (failedRules.length > 0) {
+      failures.push({ idx: i + 1, nums: p.nums, failedRules });
+    }
+  }
+  return { allPass: failures.length === 0, failures };
+}
+
 function pickMdBalanced(rounds: LottoRound[], stats: Stats): void {
   const targetDate = process.argv[3] ?? nextSaturdayKST();
   const drawNo = process.argv[4] ?? (rounds.length + 1);
@@ -1821,6 +1886,136 @@ ${targetDate} 추첨 결과 (${drawNo}회) 확정 후 매칭 수 + 양쪽 strate
   writeFileSync(outPath, md);
   console.log(`박제: ${outPath}`);
   console.log(`회차: ${drawNo} / 50세트 balanced / score cutoff pool ${poolSize.toLocaleString()}`);
+}
+
+// ─── MODERATE MODE ─────────────────────────────────────────────────────────
+
+function pickMdModerate(rounds: LottoRound[], stats: Stats): void {
+  const targetDate = process.argv[3] ?? nextSaturdayKST();
+  const drawNo = process.argv[4] ?? (rounds.length + 1);
+  const { picks, poolSize, attempts } = buildModerateCandidates(rounds, stats, 50);
+  const { valid, total } = countValid(stats);
+  const verify = verifyAllRules(picks, stats);
+  const elimPct = ((1 - valid / total) * 100).toFixed(2);
+  const rowsAll = picks.map((p, i) =>
+    `| ${i + 1} | ${p.nums.join(' ')} | ${p.sum} | ${p.odd}:${6 - p.odd} | ${p.consec} | ${p.score.toFixed(1)} |`,
+  ).join('\n');
+
+  const md = `# ${targetDate} (토) 추첨 50세트 추천 — moderate strategy (${drawNo}회)
+
+**생성 시각**: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC
+**strategy**: moderate (score [7, 14] cutoff — unique 와 balanced 사이 buffer 영역)
+**필터링 룰**: ${RULES.length}개 100% 규칙 (cycle 444 saturation)
+**조합 풀**: ${total.toLocaleString()} → 유효 ${valid.toLocaleString()} (${elimPct}% 제거) → score cutoff ${poolSize.toLocaleString()}
+**데이터 캐시**: 1~${rounds.length}회차
+**256 rules 전수 재검증**: ${verify.allPass ? '✓ 50/50 PASS' : `✗ ${verify.failures.length} FAIL`}
+
+## 50세트 전체
+
+| # | 번호 | 합 | 홀:짝 | 연속쌍 | 기피점수 |
+|---|---|---|---|---|---|
+${rowsAll}
+`;
+
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}-moderate.md`);
+  writeFileSync(outPath, md);
+  console.log(`박제: ${outPath}`);
+  console.log(`회차: ${drawNo} / 50세트 moderate / score cutoff pool ${poolSize.toLocaleString()} / verify ${verify.allPass ? 'PASS' : 'FAIL'}`);
+}
+
+// ─── MIX MODE — 3 strategy 합성 (17 unique + 17 moderate + 16 balanced) ───
+
+function pickMdMix(rounds: LottoRound[], stats: Stats): void {
+  const targetDate = process.argv[3] ?? nextSaturdayKST();
+  const drawNo = process.argv[4] ?? (rounds.length + 1);
+
+  // 3 source 별 후보 풀 생성
+  const uniqueResult = buildCandidates(rounds, stats, 17);
+  const moderateResult = buildModerateCandidates(rounds, stats, 17);
+  const balancedResult = buildBalancedCandidates(rounds, stats, 16);
+
+  // 합성 + dedupe (3 source 간 중복 차단)
+  const merged: PickEntry[] = [];
+  const seen = new Set<string>();
+  const sources: string[] = [];
+
+  for (const [src, res] of [
+    ['unique', uniqueResult] as const,
+    ['moderate', moderateResult] as const,
+    ['balanced', balancedResult] as const,
+  ]) {
+    for (const p of res.picks) {
+      const key = p.nums.join(',');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(p);
+      sources.push(src);
+    }
+  }
+
+  // Fisher-Yates shuffle (source 순서 X — random presentation)
+  const indices = merged.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  const shuffled = indices.map(i => ({ pick: merged[i], src: sources[i] }));
+
+  // 256 rules 전수 재검증
+  const verify = verifyAllRules(shuffled.map(s => s.pick), stats);
+  const { valid, total } = countValid(stats);
+  const elimPct = ((1 - valid / total) * 100).toFixed(2);
+
+  // source 별 count
+  const srcCount: Record<string, number> = { unique: 0, moderate: 0, balanced: 0 };
+  for (const s of sources) srcCount[s]++;
+
+  const rowsAll = shuffled.map((s, i) =>
+    `| ${i + 1} | ${s.pick.nums.join(' ')} | ${s.pick.sum} | ${s.pick.odd}:${6 - s.pick.odd} | ${s.pick.consec} | ${s.pick.score.toFixed(1)} | ${s.src} |`,
+  ).join('\n');
+
+  const md = `# ${targetDate} (토) 추첨 50세트 추천 — mix strategy (${drawNo}회)
+
+**생성 시각**: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC
+**strategy**: mix (unique ${srcCount.unique} + moderate ${srcCount.moderate} + balanced ${srcCount.balanced} 합성, Fisher-Yates shuffle)
+**필터링 룰**: ${RULES.length}개 100% 규칙 (cycle 444 saturation)
+**조합 풀**: ${total.toLocaleString()} → 유효 ${valid.toLocaleString()} (${elimPct}% 제거)
+**source 풀**: unique ${uniqueResult.poolSize.toLocaleString()} / moderate ${moderateResult.poolSize.toLocaleString()} / balanced ${balancedResult.poolSize.toLocaleString()}
+**데이터 캐시**: 1~${rounds.length}회차
+**256 rules 전수 재검증**: ${verify.allPass ? `✓ ${shuffled.length}/${shuffled.length} PASS — 모든 조합 100% 규칙 통과` : `✗ ${verify.failures.length} FAIL`}
+${verify.failures.length > 0 ? `\n**FAIL 상세**:\n${verify.failures.map(f => `- #${f.idx} [${f.nums.join(' ')}] — ${f.failedRules.join(', ')}`).join('\n')}\n` : ''}
+
+## 3 strategy tradeoff
+
+| | unique | moderate | balanced |
+|---|---|---|---|
+| score 영역 | 14~19 (p0 극 unique) | 7~14 (buffer) | -3~+7 (median 정합) |
+| 1등 확률 | 매우 낮음 (1% 이하) | 중간 (10~20%) | max (median 정합) |
+| 1등 share | max (다른 사람 안 사는 패턴) | 중간 | 낮음 (대중 정합) |
+| 합성 비율 | ${srcCount.unique}/50 | ${srcCount.moderate}/50 | ${srcCount.balanced}/50 |
+
+## 50세트 전체 (shuffled order)
+
+| # | 번호 | 합 | 홀:짝 | 연속쌍 | 기피점수 | 출처 |
+|---|---|---|---|---|---|---|
+${rowsAll}
+
+## 추첨 후 비교 검증
+
+${targetDate} 추첨 결과 (${drawNo}회) 확정 후 매칭 수 + 3 source 별 1등 확률/share evidence 박제.
+
+## 주의
+
+- **3 strategy mix** = 사용자 제안 (cycle 946) — risk 분산 + 다양성 ↑ + 1등 확률 + share 양쪽 동시 hedge
+- 1등 확률 향상 evidence X (3 strategy mix 자체 = harness 박제만, 결론 X)
+- N=1 단건 결과로 결론 X. 누적 N≥10회 후 source 별 매칭 분포 비교 평가
+- L1 backtest harness (cycle 887 PR #1265) historical N=1224 evidence 활용
+`;
+
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}-mix.md`);
+  writeFileSync(outPath, md);
+  console.log(`박제: ${outPath}`);
+  console.log(`회차: ${drawNo} / mix 50세트 (unique ${srcCount.unique} + moderate ${srcCount.moderate} + balanced ${srcCount.balanced}) / verify ${verify.allPass ? `PASS ${shuffled.length}/${shuffled.length}` : `FAIL ${verify.failures.length}`}`);
 }
 
 // ─── SCORE BACKTEST (plan #8 Tier 2 L1) ────────────────────────────────────
@@ -1986,6 +2181,14 @@ async function main() {
 
   if (mode === 'pick-md-balanced') {
     pickMdBalanced(rounds, stats);
+  }
+
+  if (mode === 'pick-md-moderate') {
+    pickMdModerate(rounds, stats);
+  }
+
+  if (mode === 'pick-md-mix') {
+    pickMdMix(rounds, stats);
   }
 
   if (mode === 'score-backtest') {
