@@ -56,6 +56,7 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/guide", label: "사용 가이드", description: "예측 카드·차트·페이지 활용", icon: "clipboard-check" },
       { href: "/glossary", label: "용어 사전", description: "10팩터·세이버메트릭 용어 풀이", icon: "database" },
       { href: "/insights", label: "AI 인사이트", description: "AI 토론 reasoning 시계열 아카이브", icon: "activity" },
+      { href: "/v2-preview", label: "v2 시뮬레이션", description: "v2.0 가중치 backtest 미리보기", icon: "bar-chart" },
       { href: "/changelog", label: "변경 로그", description: "사이클별 모델·기능 갱신 이력", icon: "file-text" },
       { href: "/about", label: "서비스 소개", description: "FAQ·서비스 안내·문의", icon: "file-text" },
     ],
