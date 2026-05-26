@@ -1,4 +1,4 @@
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
@@ -136,7 +136,7 @@ export async function runTeamAgent(
         backend: result.model,
         passed: validation.ok,
         violations: validation.violations,
-      }).catch((e) => console.warn('[validator_logs] unexpected error:', e));
+      }).catch((e) => console.warn('[validator_logs] unexpected error:', errMsg(e)));
     }
 
     if (!validation.ok) {
