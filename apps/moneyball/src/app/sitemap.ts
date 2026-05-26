@@ -5,7 +5,7 @@ import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
 import { listArchiveDates } from '@/lib/lotto/archive';
-import { KBO_TEAMS, assertSelectOk } from '@moneyball/shared';
+import { KBO_TEAMS, assertSelectOk, errMsg } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
 //
@@ -139,7 +139,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
   } catch (e) {
-    console.warn('[sitemap] insights dates query failed:', e);
+    console.warn('[sitemap] insights dates query failed:', errMsg(e));
   }
 
   try {
@@ -189,7 +189,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
   } catch (e) {
-    console.warn('[sitemap] games query failed, serving static routes only:', e);
+    console.warn('[sitemap] games query failed, serving static routes only:', errMsg(e));
   }
 
   // /lotto/archive/[date] 동적 URL — plan #6 Step A (cycle 882~). data/lotto-picks/ glob → 회차별 archive 색인 활성.
