@@ -33,7 +33,9 @@ export function listArchiveDates(): string[] {
     .readdirSync(dir)
     .filter((f) => f.endsWith(".md"))
     .map((f) => f.replace(/\.md$/, ""))
+    .map((s) => s.replace(/-(?:mix|balanced|moderate)$/, ""))
     .filter(isValidArchiveDate)
+    .filter((v, i, a) => a.indexOf(v) === i)
     .sort()
     .reverse();
 }
@@ -44,13 +46,49 @@ export interface ArchiveContent {
   title: string;
 }
 
-export function readArchive(date: string): ArchiveContent | null {
-  if (!isValidArchiveDate(date)) return null;
+export type ArchiveVariant = "default" | "mix" | "balanced" | "moderate";
+
+export interface ArchiveVariants {
+  date: string;
+  primary: ArchiveVariant;
+  available: ArchiveVariant[];
+  contents: Partial<Record<ArchiveVariant, ArchiveContent>>;
+}
+
+function suffixFor(v: ArchiveVariant): string {
+  return v === "default" ? "" : `-${v}`;
+}
+
+function readVariant(date: string, v: ArchiveVariant): ArchiveContent | null {
   const dir = getArchiveDir();
-  const filePath = path.join(dir, `${date}.md`);
+  const filePath = path.join(dir, `${date}${suffixFor(v)}.md`);
   if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, "utf8");
   const titleMatch = raw.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : `${date} 추첨 50세트`;
   return { date, raw, title };
+}
+
+// mix 우선 (cycle 946 사용자 제안 — 3 strategy 합성, 256 rules 50/50 검증). fallback default.
+export function readArchive(date: string): ArchiveContent | null {
+  if (!isValidArchiveDate(date)) return null;
+  return readVariant(date, "mix") ?? readVariant(date, "default");
+}
+
+// 4 variant 통합 read — primary 자동 결정 (mix 우선) + available list.
+export function readArchiveVariants(date: string): ArchiveVariants | null {
+  if (!isValidArchiveDate(date)) return null;
+  const VARIANTS: ArchiveVariant[] = ["mix", "default", "moderate", "balanced"];
+  const contents: Partial<Record<ArchiveVariant, ArchiveContent>> = {};
+  const available: ArchiveVariant[] = [];
+  for (const v of VARIANTS) {
+    const c = readVariant(date, v);
+    if (c) {
+      contents[v] = c;
+      available.push(v);
+    }
+  }
+  if (available.length === 0) return null;
+  const primary = available.includes("mix") ? "mix" : available[0];
+  return { date, primary, available, contents };
 }
