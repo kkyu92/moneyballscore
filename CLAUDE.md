@@ -94,20 +94,23 @@ R4 (자동 commit) 의 PR 차원 확장. 본 메인이 만든 PR + CI green → 
 **역사적 갭 (#34 이전)**: `lesson:` 차원 PR 을 squash 머지하면 head_commit + commits 배열 모두 squash 결과 (PR title) 만 남아 submit-lesson workflow silent skip. 회피 위해 PR #32 가 `--merge` 강제. 본 fix #34 가 `gh api repos/.../pulls/NN/commits` fallback 추가 → squash 도 안전. R7 시점부턴 squash default.
 
 
-### 드리프트 사례 박제 (사례 1~14)
+### 드리프트 사례 박제 (사례 1~15) + 박제된 모듈 archive
 
-본 문서 다이어트 (2026-05-27, cycle 986 시점). 사례 1~14 → `memory/drift-cases.md` 분리 박제. 원본 풀버전 = `CLAUDE.md.bak-2026-05-27` (rollback path).
+본 문서 다이어트 (2026-05-27, cycle 986 시점). 분리 박제:
+- 사례 1~15 → `memory/drift-cases.md` (351줄, 사례 9 family 26번째 재발 누적 박제)
+- 박제된 모듈 archive (cycle 651~986) → `memory/implemented-modules.md` (351줄, 신규 작업 전 "그린필드 가정" 차단 mitigation)
+- 원본 풀버전 = `CLAUDE.md.bak-2026-05-27` (rollback path)
 
-세션 시작 시 권장 로드 순서:
+**세션 시작 시 권장 로드 순서**:
 1. CLAUDE.md (본 문서, 룰 + 메타)
 2. AI-AGENT-GUIDE.md (원칙)
-3. memory/drift-cases.md (역사적 silent drift 패턴)
-4. git log --oneline -20 (최근 상태)
+3. **memory/implemented-modules.md** (신규 라우트 / 컴포넌트 / 인프라 박제 직전 필수 read — 사례 1 그린필드 가정 차단)
+4. memory/drift-cases.md (역사적 silent drift 패턴)
+5. git log --oneline -20 (최근 상태)
 
 **carry-over (다음 cycle 박제 필요)**:
-- 사례 15+ (cycle 870~986 gap, 117 cycle) — silent drift family 25+ 재발 박제
-- AI-AGENT-GUIDE.md 와 CLAUDE.md 정합 점검
-- memory/ 디렉토리의 깨진 reference (`feedback_session_quality_rules.md`, `content-*.md`) 재박제 또는 path 정정
+- memory/ 디렉토리의 깨진 reference (`feedback_session_quality_rules.md`, `content-*.md` 4건) 재박제 또는 path 정정 — auto-memory (`~/.claude/projects/...`) vs repo memory/ path mismatch 결정 (사용자 영역)
+- AI-AGENT-GUIDE.md 와 CLAUDE.md 정합 점검 = 113줄 + drift/silent/family 어구 0건 = 중복 X 확인됨 (cycle 986 박제)
 
 ## 프로젝트 구조
 - 모노레포 (pnpm + turborepo)
