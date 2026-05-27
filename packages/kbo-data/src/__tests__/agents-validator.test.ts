@@ -205,6 +205,33 @@ describe('checkInventedPlayerNames', () => {
     const v = checkInventedPlayerNames('작전상 타격 강조', ctx);
     expect(v).toHaveLength(0);
   });
+
+  // cycle 986 (5/27 cron fire 후속) — 야구 분석 추상 명사 (X+성 접미사) family.
+  // evidence: row 1599 (5/27 SS@SK) "우수성" → invented_player_name:hard 분류.
+  it('cycle 986: 추상 명사 "우수성" + verb → false positive 차단 (X+성 접미사 family)', () => {
+    const v = checkInventedPlayerNames('우수성 타격 분석', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 추상 명사 "유리성" + verb → false positive 차단', () => {
+    const v = checkInventedPlayerNames('유리성 타격 우위', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 추상 명사 "결정성" + verb → false positive 차단', () => {
+    const v = checkInventedPlayerNames('결정성 타격 강조', ctx);
+    expect(v).toHaveLength(0);
+  });
+
+  it('cycle 986: 진짜 인명 "김민성" (성씨+이름 끝 "성") → hard 위반 유지 (regression guard — X+성 일괄 처리 회피 검증)', () => {
+    // "김민성" = 김(성씨) + 민성(이름) 3자 — 진짜 인명 패턴. X+성 일괄 처리 시
+    // false negative 위험 ↑↑. 화이트리스트 명시화 패턴이 본 case 매칭 유지 검증.
+    const v = checkInventedPlayerNames('김민성이 등판한다', ctx);
+    expect(v).toHaveLength(1);
+    expect(v[0].type).toBe('invented_player_name');
+    expect(v[0].severity).toBe('hard');
+    expect(v[0].detail).toContain('김민성');
+  });
 });
 
 // ============================================
