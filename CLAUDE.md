@@ -44,7 +44,7 @@ cat TODOS.md 2>/dev/null | head -30         # 할 일
 - push / force-push / --no-verify / --amend / reset --hard 등 파괴적 작업
 - 사용자가 "아직 커밋하지마" 라고 명시한 뒤 그 세션 내
 
-불확실하면 자동 커밋하지 말고 사용자 확인. 상세 규정은 `memory/feedback_session_quality_rules.md` 참고.
+불확실하면 자동 커밋하지 말고 사용자 확인. 상세 규정 = auto-memory `feedback_session_quality_rules.md` (본 메인 conversation 시작 시 MEMORY.md 통해 자동 로드. repo `memory/` 와 별개 위치).
 
 ### develop-cycle skill (R6 — 2026-04-30 재정의)
 
@@ -108,9 +108,10 @@ R4 (자동 commit) 의 PR 차원 확장. 본 메인이 만든 PR + CI green → 
 4. memory/drift-cases.md (역사적 silent drift 패턴)
 5. git log --oneline -20 (최근 상태)
 
-**carry-over (다음 cycle 박제 필요)**:
-- memory/ 디렉토리의 깨진 reference (`feedback_session_quality_rules.md`, `content-*.md` 4건) 재박제 또는 path 정정 — auto-memory (`~/.claude/projects/...`) vs repo memory/ path mismatch 결정 (사용자 영역)
-- AI-AGENT-GUIDE.md 와 CLAUDE.md 정합 점검 = 113줄 + drift/silent/family 어구 0건 = 중복 X 확인됨 (cycle 986 박제)
+**memory layer 박제 분리 (cycle 986 정합)**:
+- repo `memory/` = `drift-cases.md` (역사 silent drift 패턴) + `implemented-modules.md` (cycle 651~986 박제 archive) — 본 메인 세션 시작 시 권장 로드 + 사용자 git history 가시
+- auto-memory `~/.claude/projects/-Users-kyusikkim-projects-moneyballscore/memory/` = `MEMORY.md` 인덱스 + `feedback_*.md` / `content-*.md` / `project_*.md` 류 — 본 메인 conversation 시작 시 자동 로드 (사용자 가시 X, 본 메인 직접 read/write)
+- 양쪽 별개 박제 layer — repo memory/ = 사용자 보조 가시 archive, auto-memory = 본 메인 자체 기억 source
 
 ## 프로젝트 구조
 - 모노레포 (pnpm + turborepo)
