@@ -118,6 +118,10 @@ export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 //   선발FIP 15% / 선발xFIP 5% / 타선wOBA 15% / 불펜FIP 10% / 최근폼 10%
 //   WAR 8% / 상대전적 3% / 구장보정 4% / Elo 10% / 수비SFR 5%
 // 합계 0.85.
+//
+// Shadow-only factor (M-F1 cycle 1013, 2026-05-28):
+//   park_weather 0% — Open-Meteo 기상 영향 (저온 / 외야 바람 / 강수). production 가중치 0,
+//   shadow cohort (v2.1-B-shadow) 에서만 weight>0 로 활성. 박제 위치: factors/park-weather.ts.
 export const DEFAULT_WEIGHTS = {
   sp_fip: 0.15,
   sp_xfip: 0.05,
@@ -129,7 +133,25 @@ export const DEFAULT_WEIGHTS = {
   park_factor: 0.04,
   elo: 0.10,
   sfr: 0.05,
+  park_weather: 0,
 } as const;
+
+/**
+ * Production-active factor keys — v1.8 까지 weight>0 인 10 factor.
+ * shadow-only factor (park_weather, umpire_sz) 와 분리해서 invariant 테스트 / UI 활성 표시에 사용.
+ */
+export const ACTIVE_FACTOR_KEYS = [
+  'sp_fip',
+  'sp_xfip',
+  'lineup_woba',
+  'bullpen_fip',
+  'recent_form',
+  'war',
+  'head_to_head',
+  'park_factor',
+  'elo',
+  'sfr',
+] as const;
 
 export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 

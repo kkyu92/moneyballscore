@@ -2,6 +2,7 @@ import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
 import { FACTOR_TOTAL } from './weights';
+import { scoreParkWeather, parkWeatherFactor } from '../factors/park-weather';
 
 /**
  * 두 값을 0-1 범위로 정규화 (상대 비교)
@@ -89,6 +90,15 @@ export function predict(input: PredictionInput): PredictionResult {
   // 10. 수비 SFR (높을수록 좋음)
   factors.sfr = normalize(input.homeTeamStats.sfr, input.awayTeamStats.sfr, true);
 
+  // 11. park_weather (M-F1 cycle 1013 — shadow factor, production weight=0)
+  // weather/isDome 결측 시 0.5 neutral. shadow cohort 에서만 효과 발현.
+  const pwScore = scoreParkWeather(
+    input.weather ?? null,
+    input.parkFactor,
+    input.isDome ?? false,
+  );
+  factors.park_weather = parkWeatherFactor(pwScore);
+
   // 가중합산
   let weightedSum = 0;
   for (const [key, weight] of Object.entries(w)) {
@@ -156,6 +166,7 @@ function generateReasoning(
     park_factor: '구장효과',
     elo: 'Elo 레이팅',
     sfr: '수비력(SFR)',
+    park_weather: '기상영향',
   };
 
   const topFactors = contributions

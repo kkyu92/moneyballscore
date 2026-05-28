@@ -158,6 +158,15 @@ export interface PredictionInput {
   homeRecentForm: number;  // 최근 10경기 승률 (0-1)
   awayRecentForm: number;
   parkFactor: number;      // 1.0 = 중립, >1 = 타자 유리
+
+  /**
+   * M-F1 park_weather factor input (cycle 1013).
+   * 결측 시 (legacy 호출자 + scoreParkWeather null 분기) factor=0.5 neutral.
+   * production weight=0 이라 effect 0. shadow cohort (v2.1-B-shadow) 에서만 weight>0.
+   */
+  weather?: import('./scrapers/weather').WeatherSnapshot | null;
+  /** 돔구장 여부 — KBO 안 WO (고척) 만 true. weather 무시 noop. */
+  isDome?: boolean;
 }
 
 export interface PredictionResult {

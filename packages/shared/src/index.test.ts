@@ -3,6 +3,7 @@ import {
   KBO_TEAMS,
   KBO_TEAM_SHORT_NAME,
   DEFAULT_WEIGHTS,
+  ACTIVE_FACTOR_KEYS,
   HOME_ADVANTAGE,
   getConfidenceColor,
   getAccuracyColor,
@@ -53,7 +54,7 @@ describe('KBO_TEAMS', () => {
 });
 
 describe('DEFAULT_WEIGHTS', () => {
-  it('should sum to 0.85', () => {
+  it('should sum to 0.85 (production-active 10 factor — shadow factor weight=0 → 합계 무영향)', () => {
     const sum = Object.values(DEFAULT_WEIGHTS).reduce<number>(
       (a, b) => a + b,
       0,
@@ -61,8 +62,10 @@ describe('DEFAULT_WEIGHTS', () => {
     expect(sum).toBeCloseTo(0.85, 2);
   });
 
-  it('should have 10 factors', () => {
-    expect(Object.keys(DEFAULT_WEIGHTS)).toHaveLength(10);
+  it('should have production-active 10 factor + shadow factor (park_weather)', () => {
+    // M-F1 cycle 1013 — park_weather 도입 (production 0). M-F2 시 umpire_sz 추가 예정.
+    expect(Object.keys(DEFAULT_WEIGHTS).length).toBeGreaterThanOrEqual(11);
+    expect(DEFAULT_WEIGHTS.park_weather).toBe(0);
   });
 
   it('should have all values in [0, 1]', () => {
@@ -72,10 +75,14 @@ describe('DEFAULT_WEIGHTS', () => {
     }
   });
 
-  it('v1.8: head_to_head 노이즈 감축 (5%→3%) + elo 보상 (8%→10%) — 모든 factor 가중치 > 0', () => {
+  it('v1.8: ACTIVE_FACTOR_KEYS (production 10 factor) 가중치 > 0 + shadow factor (park_weather) = 0', () => {
+    const activeKeys = new Set(ACTIVE_FACTOR_KEYS);
     for (const [key, value] of Object.entries(DEFAULT_WEIGHTS)) {
-      expect(value).toBeGreaterThan(0);
-      expect(typeof key).toBe('string');
+      if (activeKeys.has(key as typeof ACTIVE_FACTOR_KEYS[number])) {
+        expect(value, `${key} active factor must be > 0`).toBeGreaterThan(0);
+      } else {
+        expect(value, `${key} shadow factor must be 0`).toBe(0);
+      }
     }
   });
 });

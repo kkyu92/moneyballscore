@@ -10,7 +10,7 @@
  * 기존 `pre_game` row는 절대 update 금지 (이력 보존).
  */
 
-import { KBO_TEAMS, DEFAULT_WEIGHTS } from '@moneyball/shared';
+import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { callLLM } from './llm';
 import {
@@ -53,11 +53,16 @@ const ZERO_WEIGHT_FACTOR_LABELS_KO: Record<string, string> = {
   sfr: '수비SFR',
 };
 
+// shadow-only factor (park_weather, umpire_sz 등) 는 production weight=0 가 의도된 상태 +
+// LLM input 에 자체적으로 미노출 → "0% 거론 금지" 룰의 대상 아님. ACTIVE_FACTOR_KEYS 만
+// 검사해서 production-active factor 가 0% 로 떨어질 때만 prompt 에 박제 (cycle 1013 M-F1).
+const ACTIVE_FACTOR_SET = new Set<string>(ACTIVE_FACTOR_KEYS);
+
 export function getZeroWeightFactorPromptList(
   weights: Record<string, number> = DEFAULT_WEIGHTS,
 ): string {
   return Object.entries(weights)
-    .filter(([, w]) => (w as number) === 0)
+    .filter(([k, w]) => (w as number) === 0 && ACTIVE_FACTOR_SET.has(k))
     .map(([k]) => {
       const ko = ZERO_WEIGHT_FACTOR_LABELS_KO[k];
       return ko ? `${k} (${ko})` : k;
