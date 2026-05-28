@@ -84,9 +84,11 @@ async function fetchTeamCodeIdMap(db: SupabaseClient): Promise<Map<string, numbe
  * Fancy Stats Elo fetch + team_id 매핑 — plan #15 C1d (cycle 1021).
  * fail tolerant — Elo scraper fail 시 빈 map 반환 (evaluateFancyElo 가 null Brier 보고).
  */
-async function fetchTeamElos(db: SupabaseClient): Promise<TeamEloMap> {
+async function fetchTeamElos(db: SupabaseClient): Promise<{ map: TeamEloMap; scraperFailed: boolean; scraperError: string | null }> {
   const teamMap = await fetchTeamCodeIdMap(db);
   const teamEloMap: TeamEloMap = new Map();
+  let scraperFailed = false;
+  let scraperError: string | null = null;
   try {
     const currentSeason = new Date().getFullYear();
     const eloData = await fetchEloRatings(currentSeason);
@@ -95,9 +97,11 @@ async function fetchTeamElos(db: SupabaseClient): Promise<TeamEloMap> {
       if (teamId != null) teamEloMap.set(teamId, row.elo);
     }
   } catch (e) {
-    console.warn(`[backtest-v2-candidate] fetchEloRatings 실패 (Elo baseline skip):`, e instanceof Error ? e.message : String(e));
+    scraperFailed = true;
+    scraperError = e instanceof Error ? e.message : String(e);
+    console.warn(`[backtest-v2-candidate] fetchEloRatings 실패 (Elo baseline skip):`, scraperError);
   }
-  return teamEloMap;
+  return { map: teamEloMap, scraperFailed, scraperError };
 }
 
 /** plan #15 C1e — --cv-pattern flag parser. default walk-forward (기존 cycle 1019 pattern). */
@@ -128,10 +132,16 @@ async function main() {
     cohortNote = `expanding window: train=${split.train.length} (v1.5/v1.6/v1.7-revert) / test=${split.test.length} (v1.8 OOS)`;
   } else if (cvPattern === 'rolling') {
     // rolling time CV: 최근 30일 window 안 train(7) test(3)
+    // H3 fix — window > cohort span silent 차단. dates 추출 후 span 측정.
     const v18 = await fetchV18Cohort(db);
+    const dates = v18.map((r) => r.games?.game_date).filter((d): d is string => !!d).sort();
+    const cohortSpanDays = dates.length >= 2 ? Math.ceil((Date.parse(dates[dates.length - 1] + 'T00:00:00Z') - Date.parse(dates[0] + 'T00:00:00Z')) / 86400000) : 0;
+    if (cohortSpanDays < 30 && cohortSpanDays > 0) {
+      console.warn(`[backtest-v2-candidate] WARNING: rolling windowDays=30 > cohort span=${cohortSpanDays} → effective window = full cohort. label misleading.`);
+    }
     const split = rollingTimeCV(v18, 30, 0.7);
     cohort = split.test;
-    cohortNote = `rolling 30-day window: train=${split.train.length} / test=${split.test.length} (production OOS)`;
+    cohortNote = `rolling 30-day window (cohort span=${cohortSpanDays}d): train=${split.train.length} / test=${split.test.length} (production OOS)`;
   } else {
     // walk-forward (기존 cycle 1019 pattern — train ≈ 0 degenerate)
     cohort = await fetchV18Cohort(db);
@@ -140,14 +150,27 @@ async function main() {
   console.log(`[backtest-v2-candidate] ${cohortNote}`);
   console.log(`[backtest-v2-candidate] fetched n=${cohort.length} predictions`);
 
+  // H4 fix — empty cohort (test set 0 row) silent doc 박제 차단
+  if (cohort.length === 0) {
+    console.error(`[backtest-v2-candidate] FATAL: cohort.length=0 (${cvPattern} mode). measure 불가, doc 박제 skip.`);
+    process.exit(2);
+  }
+
   // plan #15 C1d — Fancy Stats Elo baseline 측정 (cohort_n=0 이슈와 분리 가능, final game outcome 만 필요)
-  const teamElos = await fetchTeamElos(db);
+  const teamElosResult = await fetchTeamElos(db);
+  const teamElos = teamElosResult.map;
   console.log(`[backtest-v2-candidate] team Elo map size=${teamElos.size}`);
 
   const result = evaluatePair(cohort);
   const eloResult = evaluateFancyElo(cohort, teamElos);
   result.fancy_stats_elo_brier = eloResult.brier;
-  result.fancy_stats_elo_note = `[${cvPattern}] ${cohortNote} / ${eloResult.note}`;
+  // H2 fix — scraper silent fail 시 status banner 박제 + warning 추가
+  if (teamElosResult.scraperFailed) {
+    result.fancy_stats_elo_note = `[ELO_SCRAPER_FAILED] [${cvPattern}] ${cohortNote} / scraper error: ${teamElosResult.scraperError} / Elo baseline 측정 X — 본 evidence pack 안 Elo Brier 신뢰 X`;
+    result.warnings.push(`CRITICAL: Fancy Stats Elo scraper failed (${teamElosResult.scraperError}). Brier 측정 X. 본 fire 결과 Elo baseline 항목 사용 금지.`);
+  } else {
+    result.fancy_stats_elo_note = `[${cvPattern}] ${cohortNote} / ${eloResult.note}`;
+  }
   console.log(`[backtest-v2-candidate] result:`, JSON.stringify(result, null, 2));
 
   if (writeMode) {
