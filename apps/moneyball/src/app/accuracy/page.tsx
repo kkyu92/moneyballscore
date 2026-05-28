@@ -7,9 +7,15 @@ import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { TableOfContents } from '@/components/shared/TableOfContents';
 import { BrierTrendChart } from '@/components/dashboard/BrierTrendChart';
 import { ScoringRuleDayHeatmap } from '@/components/dashboard/ScoringRuleDayHeatmap';
+import { RollingAccuracyChart } from '@/components/dashboard/RollingAccuracyChart';
+import { WinnerProbBucketChart } from '@/components/dashboard/WinnerProbBucketChart';
+import { CohortComparisonHeatmap } from '@/components/dashboard/CohortComparisonHeatmap';
 
 const TOC_ITEMS = [
   { id: 'calibration', label: '캘리브레이션' },
+  { id: 'rolling-accuracy', label: '30일 rolling 추세' },
+  { id: 'winner-prob-bucket', label: '확률 bucket 보정' },
+  { id: 'cohort-comparison', label: 'cohort × 주차 비교' },
   { id: 'brier-trend', label: 'Brier 추세' },
   { id: 'weekly', label: '주별 트렌드' },
   { id: 'weekday', label: '요일별' },
@@ -44,6 +50,9 @@ import {
   buildFallbackDailyTrend,
   buildBrierTrend,
   buildScoringRuleDayHeatmap,
+  buildRollingAccuracy,
+  buildWinnerProbBuckets,
+  buildScoringRuleWeekHeatmap,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 
@@ -265,6 +274,9 @@ export default async function AccuracyPage() {
   const weekly = buildWeeklyTrend(rows);
   const brierTrend = buildBrierTrend(rows);
   const scoringRuleDayHeatmap = buildScoringRuleDayHeatmap(rows);
+  const rollingAccuracy = buildRollingAccuracy(rows);
+  const winnerProbBuckets = buildWinnerProbBuckets(rows);
+  const cohortWeekHeatmap = buildScoringRuleWeekHeatmap(rows);
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
@@ -495,6 +507,67 @@ export default async function AccuracyPage() {
           <CalibrationChart buckets={buckets} />
         )}
       </section>
+
+      {/* 30일 rolling accuracy 추세 (plan #14 C2 a2 cycle 1021) */}
+      {rollingAccuracy.some((p) => p.windowAccuracy !== null) && (
+        <section
+          id="rolling-accuracy"
+          className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <h2 className="text-lg font-bold">30일 rolling 적중률 추세</h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              최근 90일, window=30일
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            각 날짜의 직전 30일 평균 적중률입니다. 한두 경기 운에 흔들리지 않고 모델의 실제
+            추세를 보여줍니다. 50% 기준선보다 위에 있으면 모델이 동전 던지기보다 낫다는 뜻입니다.
+          </p>
+          <RollingAccuracyChart data={rollingAccuracy} />
+        </section>
+      )}
+
+      {/* winner prob bucket × 실제 적중률 (calibration evidence) */}
+      {winnerProbBuckets.some((b) => b.n >= 3) && (
+        <section
+          id="winner-prob-bucket"
+          className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <h2 className="text-lg font-bold">예측 확률 구간별 실제 적중률</h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              예측 = 실제 가까울수록 잘 보정
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            AI 가 50–60% 라고 한 경기는 실제 몇 %를 맞혔는지 비교합니다.
+            예측 구간 평균과 실제 적중률이 가까울수록 잘 보정된 모델입니다.
+            과신 (예측 &gt; 실제 + 5%p) 구간은 주황색으로 표시됩니다.
+          </p>
+          <WinnerProbBucketChart data={winnerProbBuckets} />
+        </section>
+      )}
+
+      {/* scoring_rule × 주차 (최근 4주) cohort 비교 */}
+      {cohortWeekHeatmap.some((c) => c.n >= 3) && (
+        <section
+          id="cohort-comparison"
+          className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <h2 className="text-lg font-bold">cohort × 주차 비교</h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              최근 4주
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            scoring_rule (모델 가중치 버전) × 주차 적중률 매트릭스 — 어느 가중치가
+            최근 주차에서 안정적인지 비교합니다. 요일 축 heatmap 의 시간 축 자매 view.
+          </p>
+          <CohortComparisonHeatmap data={cohortWeekHeatmap} />
+        </section>
+      )}
 
       {/* Brier 추세 (scoring_rule 진화 + 주차별) */}
       {brierTrend.length >= 3 && (

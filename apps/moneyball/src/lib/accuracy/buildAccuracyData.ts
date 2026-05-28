@@ -417,6 +417,155 @@ export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
   return result;
 }
 
+// plan #14 C2 (a2 cycle 1021) — 30일 rolling window accuracy 추세.
+// 최근 90일 each day = 직전 30일 (해당 날짜 포함) 적중률 mean.
+// 사용자 신뢰도 직접 가시화 — Brier 보다 직관적.
+export interface RollingAccuracyPoint {
+  date: string;
+  dateLabel: string;
+  windowN: number;
+  windowAccuracy: number | null;
+}
+
+export function buildRollingAccuracy(
+  rows: PredRow[],
+  windowDays = 30,
+  totalDays = 90,
+  now: number = Date.now(),
+): RollingAccuracyPoint[] {
+  const KST_OFFSET_MS = 9 * 3600 * 1000;
+  const daily = new Map<string, { hits: number; n: number }>();
+  for (const r of rows) {
+    const kstISO = new Date(new Date(r.verified_at).getTime() + KST_OFFSET_MS)
+      .toISOString()
+      .slice(0, 10);
+    if (!daily.has(kstISO)) daily.set(kstISO, { hits: 0, n: 0 });
+    const d = daily.get(kstISO)!;
+    d.n += 1;
+    if (r.is_correct) d.hits += 1;
+  }
+  const todayKstISO = new Date(now + KST_OFFSET_MS).toISOString().slice(0, 10);
+  const points: RollingAccuracyPoint[] = [];
+  for (let i = totalDays - 1; i >= 0; i--) {
+    const ms = new Date(todayKstISO + 'T00:00:00Z').getTime() - i * 86_400_000;
+    const dateISO = new Date(ms).toISOString().slice(0, 10);
+    let hits = 0;
+    let n = 0;
+    for (let j = 0; j < windowDays; j++) {
+      const wMs = ms - j * 86_400_000;
+      const wISO = new Date(wMs).toISOString().slice(0, 10);
+      const cell = daily.get(wISO);
+      if (cell) {
+        hits += cell.hits;
+        n += cell.n;
+      }
+    }
+    const [, m, d] = dateISO.split('-');
+    points.push({
+      date: dateISO,
+      dateLabel: `${Number(m)}/${Number(d)}`,
+      windowN: n,
+      windowAccuracy: n >= 3 ? hits / n : null,
+    });
+  }
+  return points;
+}
+
+// plan #14 C2 (a2 cycle 1021) — winner prob bucket × 실제 적중률 calibration evidence.
+export interface WinnerProbBucket {
+  label: string;
+  range: string;
+  min: number;
+  max: number;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+  avgPredicted: number | null;
+  ci95Half: number;
+}
+
+const WINNER_PROB_BUCKETS: ReadonlyArray<{ label: string; range: string; min: number; max: number }> = [
+  { label: '50-60%', range: '0.50~0.60', min: 0.5, max: 0.6 },
+  { label: '60-70%', range: '0.60~0.70', min: 0.6, max: 0.7 },
+  { label: '70-80%', range: '0.70~0.80', min: 0.7, max: 0.8 },
+  { label: '80%+', range: '0.80~1.00', min: 0.8, max: 1.01 },
+];
+
+export function buildWinnerProbBuckets(rows: PredRow[]): WinnerProbBucket[] {
+  return WINNER_PROB_BUCKETS.map(({ label, range, min, max }) => {
+    const subset = rows.filter((r) => {
+      const wp = resolveWinnerProb(r);
+      return wp >= min && wp < max;
+    });
+    const n = subset.length;
+    const hits = subset.filter((r) => r.is_correct).length;
+    const accuracy = n > 0 ? hits / n : null;
+    const avgPredicted = n > 0 ? subset.reduce((s, r) => s + resolveWinnerProb(r), 0) / n : null;
+    const ci95Half = binomCi95Half(hits, n);
+    return { label, range, min, max, n, hits, accuracy, avgPredicted, ci95Half };
+  });
+}
+
+// plan #14 C2 (a2 cycle 1021) — scoring_rule × 주차 (최근 4주) accuracy 매트릭스.
+export interface ScoringRuleWeekCell {
+  scoringRule: string;
+  weekStart: string;
+  weekLabel: string;
+  n: number;
+  hits: number;
+  accuracy: number | null;
+}
+
+export function buildScoringRuleWeekHeatmap(rows: PredRow[], weeksWindow = 4): ScoringRuleWeekCell[] {
+  const allWeeks = new Set<string>();
+  for (const r of rows) {
+    allWeeks.add(getWeekStart(r.verified_at));
+  }
+  const sortedWeeks = Array.from(allWeeks).sort().slice(-weeksWindow);
+  const weekSet = new Set(sortedWeeks);
+
+  const acc = new Map<string, { n: number; hits: number }>();
+  const keyOf = (sr: string, wk: string) => `${sr}__${wk}`;
+
+  for (const sr of SCORING_RULE_HEATMAP_ROWS) {
+    for (const wk of sortedWeeks) {
+      acc.set(keyOf(sr, wk), { n: 0, hits: 0 });
+    }
+  }
+
+  for (const r of rows) {
+    const wk = getWeekStart(r.verified_at);
+    if (!weekSet.has(wk)) continue;
+    const sr = r.scoring_rule ?? '';
+    const allCell = acc.get(keyOf('all', wk))!;
+    allCell.n += 1;
+    if (r.is_correct) allCell.hits += 1;
+    if (SCORING_RULE_HEATMAP_ROWS.includes(sr) && sr !== 'all') {
+      const srCell = acc.get(keyOf(sr, wk))!;
+      srCell.n += 1;
+      if (r.is_correct) srCell.hits += 1;
+    }
+  }
+
+  const out: ScoringRuleWeekCell[] = [];
+  for (const sr of SCORING_RULE_HEATMAP_ROWS) {
+    for (const wk of sortedWeeks) {
+      const cell = acc.get(keyOf(sr, wk))!;
+      const d = new Date(wk + 'T00:00:00Z');
+      const weekLabel = `${d.getUTCMonth() + 1}/${d.getUTCDate()} 주`;
+      out.push({
+        scoringRule: sr,
+        weekStart: wk,
+        weekLabel,
+        n: cell.n,
+        hits: cell.hits,
+        accuracy: cell.n >= SMALL_SAMPLE_THRESHOLD ? cell.hits / cell.n : null,
+      });
+    }
+  }
+  return out;
+}
+
 export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
   const tiers = [
     { label: '낮은 확신', range: '~55%', min: 0, max: WINNER_PROB_LEAN },
