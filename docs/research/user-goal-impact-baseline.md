@@ -118,7 +118,28 @@ outcome: success (retro-only)
 
 shadow path = `pairProbForRow(scoring_rule, reasoning, factors)` helper 정합 (page.tsx L95). 의도된 정상 평가 — 다음 sweep 96 (cycle 1017) 자연 carry-over.
 
+## Cycle 1017 누적 갱신 (delta)
+
+chain_selected: review-code (lite, sweep 96 silent drift detection)
+pr_number: null (코드 변경 0, baseline doc append 만)
+outcome: success (retro-only)
+
+- 축 1 MLB IA slot: Δ 0 (route count 1 / import 분기 0 / production 가중치 0 invariant 유지)
+- 축 2 분석: Δ 0 (factor 11 park_weather=118 LOC / factor 12 umpire_sz=111 LOC / predictor.ts factor 11/12 grep 7 = import + factor 박제 / DEFAULT_WEIGHTS L138-139 park_weather=0 + umpire_sz=0 → 가중합 곱셈 0 = production weight=0 invariant 유지)
+- 축 3 웹사이트: Δ 0 (page.tsx 7일 안 24건 동일 / 전체 50건 / 신규 라우트 0)
+- 축 4 디자인: Δ 0 (DESIGN.md mtime 2026-05-28 11:15:35 동일)
+
+**측정 evidence**: `git log f223adb..HEAD --oneline` = 0 commit (cycle 1016 retro 직후, 신규 코드 변경 0). 본 cycle baseline append commit 만 추가.
+
+**sweep 96 결과**: silent drift catch **1건** — cycle 1015/1016 sweep 박제 표기 정정.
+
+- 정정: cycle 1015/1016 박제 "predictor.ts factor 11/12 grep 0" = 부정확 표기 (실제 grep=7 매칭, import L5-6 + factor 박제 L94-107).
+- 정확: production weight=0 invariant 의 진짜 근거 = `packages/shared/src/index.ts` DEFAULT_WEIGHTS L138-139 `park_weather: 0` + `umpire_sz: 0` → 가중합 (predictor.ts L110-114) `factorValue * weight` 곱셈 0 → production prob 무영향.
+- shadow path 별도 = `SHADOW_WEIGHTS` (index.ts L185-186: park_weather: 0.03 / umpire_sz: 0.02) — shadow cohort 만 사용.
+
+다음 sweep 부터 정확 표기 = "DEFAULT_WEIGHTS park_weather=0 + umpire_sz=0 invariant 유지" (grep count X / 가중치 source 확인). **silent drift family 자체 차원 박제 패턴 silent skip 1건 자가 catch — develop-cycle 자가 진단의 dominance-positive streak detection channel 작동 evidence**.
+
 ## 다음 단계
 
-- cycle 1017 시작 시 본 doc Read → delta 측정 → 갱신 append (sweep 96)
-- cycle 1018 retro 안 종합 보고 (5 cycle delta + 4축 영향 평가 + 자연 누적 wait 잔여 + 사용자 영역 wait 잔여)
+- cycle 1018 시작 시 본 doc Read → delta 측정 → 갱신 append (sweep 97)
+- cycle 1019 retro 안 종합 보고 (5 cycle delta + 4축 영향 평가 + 자연 누적 wait 잔여 + 사용자 영역 wait 잔여)
