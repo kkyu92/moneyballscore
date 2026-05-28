@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-const SITEMAP_COLUMNS = [
+// IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
+type FooterLink = { href: string; label: string };
+type FooterColumn = { label: string; links: FooterLink[] };
+
+const SITEMAP_COLUMNS: FooterColumn[] = [
   {
     label: "AI 예측",
     links: [
