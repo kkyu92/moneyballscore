@@ -1,9 +1,34 @@
 # Decision 1-pager: MLB 풀 인제스트 vs KBO 우선 강화
 
-**Status**: pending user decision
+**Status**: ✅ DECIDED — (B) KBO 우선 강화 (2026-05-28 사용자 결정)
+**Decided at**: 2026-05-28 cycle 1021 후속
 **Created**: 2026-05-28 (cycle 1021, plan #14 C3b)
 **Owner**: 사용자 (kyusikkim@gmail.com)
-**Linked**: `DESIGN.md ## Future / MLB IA` (시안 spec — 본 결정 wait), `apps/moneyball/src/app/mlb/page.tsx` (현 waitlist hub)
+**Linked**: `DESIGN.md ## Future / MLB IA` (시안 spec — 본 결정 후 lock 유지), `apps/moneyball/src/app/mlb/page.tsx` (현 waitlist hub 유지)
+
+## 결정 결과
+
+**(B) KBO 우선 강화 채택** — v1.8 → v2.0 cohort 박제 (이미 진행 중) + IA 강화 + AdSense 심사 + factor 11/12 forward backtest. cost ~$0, 본 메인 자율 fire 권한 ↑.
+
+**(A) MLB 풀 인제스트 = 보류** — `/mlb` waitlist demand 측정 후 재검토 (N >= 30 또는 N >= 100 충족 시 escalation 룰 정합).
+
+## 결정 후 자율 진행 영역 (본 메인)
+
+| 영역 | status |
+|---|---|
+| v1.8 → v2.0 cohort 박제 | 진행 중 (plan #14 C1a/C1b + plan #15 C1d/C1e ship). n=150 wait (ETA 2026-08-04) |
+| factor 11/12 forward backtest | 진행 중 (plan #15 harness fire — n=27 evidence pack) |
+| IA 강화 | 진행 중 (plan #14 C2 Step 2a/2b/4 ship — Radix MegaMenu + axe-core) |
+| `/mlb` hub 유지 | 시안 spec only (DESIGN.md `## Future / MLB IA` 박제 유지) |
+| AdSense 심사 | 사용자 영역 (domain 구매 권유 X 룰 정합) |
+| MLB sub-route 박제 | **금지** (commitment escalation 차단 lock 유지) |
+
+## (A) 보류 escalation 룰
+
+`/mlb` waitlist N 측정 trigger:
+- N >= 30 (30일 안) → (A) 재검토
+- N >= 100 (전체) → (A) 재검토
+- 충족 X → (B) 유지
 
 ## 결정 요청
 
