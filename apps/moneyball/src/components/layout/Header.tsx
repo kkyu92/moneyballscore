@@ -65,7 +65,7 @@ const KBO_NAV: NavItem[] = [
 ];
 
 const MLB_NAV: NavItem[] = [
-  { href: "/mlb", label: "MLB 베타" },
+  { href: "/mlb", label: "MLB (검토 중)" },
 ];
 
 const LOTTO_LINKS: NavLink[] = [
