@@ -22,8 +22,74 @@ export interface BacktestPredictionRow {
     game_date: string;
     status: string;
     home_team_id: number;
+    away_team_id?: number;
     winner_team_id: number | null;
   } | null;
+}
+
+/** team_id → Elo rating map. backtest 호출 site 에서 fetchEloRatings 결과 후 매핑. */
+export type TeamEloMap = Map<number, number>;
+
+/**
+ * Elo logistic prob — home win 확률. 표준 ELO 공식.
+ * 1 / (1 + 10^((awayElo - homeElo - homeAdj) / 400))
+ *
+ * homeAdj = HOME_ADVANTAGE × 400 ≈ 6 Elo point (KBO 측정 +1.5%).
+ * plan #15 C1d (cycle 1021) — Fancy Stats Elo baseline 측정.
+ */
+export function computeEloProb(homeElo: number, awayElo: number): number {
+  const homeAdj = HOME_ADVANTAGE * 400;
+  const adjustedDiff = awayElo - homeElo - homeAdj;
+  return 1 / (1 + Math.pow(10, adjustedDiff / 400));
+}
+
+/**
+ * Fancy Stats Elo Brier 평가 — cohort 안 모든 final game 에 적용.
+ * cohort_n=0 (degenerate train set) 이슈와 무관 — Elo baseline 은 game outcome 만 필요.
+ *
+ * teamElos = team_id → Elo rating map (호출 site 에서 fetchEloRatings 결과).
+ * 누락 team_id 시 cohort 에서 제외 (Elo 없으면 baseline 측정 X).
+ */
+export function evaluateFancyElo(
+  rows: BacktestPredictionRow[],
+  teamElos: TeamEloMap,
+): { brier: number | null; n: number; note: string } {
+  let sum = 0;
+  let n = 0;
+  let missing = 0;
+
+  for (const row of rows) {
+    const game = row.games;
+    if (!game || game.status !== 'final' || game.winner_team_id == null) continue;
+    if (game.away_team_id == null) {
+      missing += 1;
+      continue;
+    }
+    const homeElo = teamElos.get(game.home_team_id);
+    const awayElo = teamElos.get(game.away_team_id);
+    if (homeElo == null || awayElo == null) {
+      missing += 1;
+      continue;
+    }
+    const prob = computeEloProb(homeElo, awayElo);
+    const homeWin = game.winner_team_id === game.home_team_id;
+    sum += brierScore(prob, homeWin);
+    n += 1;
+  }
+
+  if (n === 0) {
+    return {
+      brier: null,
+      n: 0,
+      note: `Fancy Stats Elo Brier 측정 불가 — cohort=0 (missing=${missing}, teamElos size=${teamElos.size})`,
+    };
+  }
+
+  return {
+    brier: Math.round((sum / n) * 10000) / 10000,
+    n,
+    note: `Fancy Stats Elo Brier 측정 (n=${n}, missing=${missing}, teamElos size=${teamElos.size})`,
+  };
 }
 
 export interface BacktestResult {
@@ -93,7 +159,7 @@ export function evaluatePair(rows: BacktestPredictionRow[]): BacktestResult {
 
   for (const row of rows) {
     const game = row.games;
-    if (!game || game.status !== 'completed' || game.winner_team_id == null) continue;
+    if (!game || game.status !== 'final' || game.winner_team_id == null) continue;
     if (!row.factors) continue;
     const homeWin = game.winner_team_id === game.home_team_id;
 
