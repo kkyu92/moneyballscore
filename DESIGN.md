@@ -126,3 +126,33 @@
 | 2026-05-15 | picks/leaderboard "오답/실패" 색상 = red-600/400 (text) / red-100·red-900/30 (badge) 박제 | brand-600/400 (적중/성공) 의 반대 의미 semantic. `MyPicksClient.tsx` (text 2곳 + badge 2곳), `WeeklyHistorySection.tsx`, `LeaderboardTable.tsx` (음수 delta) 이미 동일 패턴 통일 사용 중. Decisions Log 박제 누락분만 보강. validation 에러 (`LeaderboardJoinModal.tsx:56 text-red-400`) 는 별 utility semantic (inline 입력 검증) — 의도 유지. cycle 454 brand-* 토스트 통일 (silent drift write 1) → cycle 456 red-* token 박제 (write 8) family 확장. cycle 456 polish-ui (lite). |
 | 2026-05-20 | standings top3 row + dashboard ModelTuningInsights 양수 강조 색상 = brand-* 정렬 | standings/page.tsx:133 `bg-green-50/40 dark:bg-green-900/10` (top 3 row 강조) → `bg-brand-*` / ModelTuningInsights.tsx:72,128 `text-emerald-600 dark:text-emerald-400` (correlation 양수 + deltaPp 양수) → `text-brand-*`. tailwind 디폴트 green/emerald = brand 그린 (#2d6b3f) 과 분리된 별 hue silent drift. DESIGN.md "적중/성공 = brand-*" 박제 (cycle 50/65/456) family 확장. cycle 744 polish-ui (lite, gap=7). |
 | 2026-05-28 | Motion 토큰 + Reduced-motion 가드 + Contrast 표 박제 (W-D, 2-day blast) | 기존 "Motion: Minimal-functional / micro(50-100ms)" 단편 → `--motion-fast/medium/slow` + `--ease-out/in/in-out` 토큰화. `globals.css @theme inline` 정렬 + `prefers-reduced-motion: reduce` 시 `:root --motion-*: 0ms` 강제. PredictReveal 신규 (win prob 카운트업, `var(--motion-medium)`, `matchMedia` 가드). Contrast 표 신규 — 라이트/다크 8 조합 WebAIM 측정 (8건 모두 AA+). 신규 컴포넌트는 본 표 토큰만 사용. 컴포넌트 라이브러리 1-pager `docs/design/components.md` 신규 (Header / LeagueSelector / FactorBreakdown / PredictReveal). |
+| 2026-05-28 | MLB IA spec-only 박제 + 결정 1-pager (plan #14 C3) | `## Future / MLB IA` section append (시안 spec only, 페이지 박제 X). `Status: pending decision` 명시 + `docs/decisions/mlb-vs-kbo-priority.md` 참조 강제 — 시안 spec 이 결정된 system 으로 오인되지 않도록 분리. sub-route 시안 (`/mlb/games/[date]` / `/mlb/team/[code]` / `/mlb/factors`) = MLB 풀 인제스트 결정 후 활성화 path 박제. 현 `/mlb` hub = waitlist + sample analysis 만 유지 (commitment escalation 차단, CEO High #3). cycle 1021 design-system. |
+
+## Future / MLB IA (spec only, not implemented)
+
+> **Status: pending decision** — 활성화 여부는 `docs/decisions/mlb-vs-kbo-priority.md` 결정 wait. 본 section 은 시안 spec only — 페이지 / 라우트 박제 X, DESIGN.md token / motion / contrast 표 같은 결정된 system 과 분리.
+
+### Trigger (활성화 조건)
+- MLB 풀 인제스트 결정 (1-pager 사용자 승인) AND
+- `/mlb` waitlist N ≥ 100 또는 30일 경과 (현 `/mlb` hub 박제 success criterion 정합)
+
+### sub-route 시안 (구현 X, KBO 정합 패턴만 박제)
+| Route | KBO 정합 source | Status |
+|---|---|---|
+| `/mlb` (hub) | `/` (KBO hub) | **현재**: waitlist + sample 1건 only (구현됨) |
+| `/mlb/games/[date]` | `/predictions/[date]` | spec — 일자별 예측 list |
+| `/mlb/games/[date]/[slug]` | `/predictions/[date]/[slug]` | spec — 경기 상세 (10팩터 + AI 토론) |
+| `/mlb/team/[code]` | `/team/[code]` | spec — 팀별 시즌 누적 (30팀 TBD) |
+| `/mlb/factors` | `/factors` (가정) | spec — MLB 팩터 가중치 설명 |
+| `/mlb/standings` | `/standings` | spec — AL/NL 6 division |
+
+### IA 정합 룰 (활성화 시 강제)
+- `LEAGUE_NAVS.mlb` 확장: 현 `[{ href: '/mlb', label: 'MLB 베타' }]` → KBO_NAV 5 group 패턴 정합 (오늘의 경기 / 분석 / 시즌 / 검증 / 정보)
+- `LeagueSelector` pill `mlb` active 시 sub-NAV 그룹화 (현 단일 link → 5 group)
+- Breadcrumb 강제 (`docs/design/ia-hierarchy.md` 룰 정합 — cycle 1020 C2 박제)
+- megamenu 안 MLB 항목 badge "베타" → "정식" 전환 시점 = `/mlb` waitlist trigger 충족 직후
+
+### Lock-in 차단 (cycle 1021 박제)
+- 본 section 박제 = 시안 spec 매핑 용도 only — 활성화 commitment X
+- 사용자 결정 (`docs/decisions/mlb-vs-kbo-priority.md`) 전 라우트 / 페이지 / 컴포넌트 박제 절대 X
+- `/mlb` hub 만 유지 — waitlist demand 측정 단일 source of truth (commitment escalation lock-in 차단, CEO High #3 정합)

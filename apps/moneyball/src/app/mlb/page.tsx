@@ -9,23 +9,23 @@ export const revalidate = 86400;
 const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
-  title: "MLB 분석 준비 중",
+  title: "MLB 분석 검토 중 (결정 wait)",
   description:
-    "KBO에서 검증된 세이버메트릭스 10팩터 + AI 에이전트 토론을 MLB로 확장 준비 중. 출시 전 waitlist 가입으로 알림을 받으세요. 샘플 분석 — 2024 WS Game 1 NYY vs LAD 5 stat + 실제 결과 공개.",
+    "KBO에서 검증된 세이버메트릭스 10팩터 + AI 에이전트 토론의 MLB 확장은 현재 검토 중입니다. 활성화 여부는 결정 wait — 결정 전 페이지/라우트 박제 X. waitlist 가입으로 결정 시 알림. 샘플 분석 — 2024 WS Game 1 NYY vs LAD 5 stat + 실제 결과 공개.",
   alternates: { canonical: `${SITE_URL}/mlb` },
   robots: { index: false, follow: false },
   openGraph: {
-    title: "MLB 분석 준비 중 | MoneyBall Score",
+    title: "MLB 분석 검토 중 (결정 wait) | MoneyBall Score",
     description:
-      "KBO 세이버메트릭스 + AI 토론 모델, MLB 확장 waitlist 모집 중. 2024 WS Game 1 샘플 분석 공개.",
+      "KBO 세이버메트릭스 + AI 토론 모델, MLB 확장 검토 중. 결정 wait — waitlist 가입으로 결정 시 알림. 2024 WS Game 1 샘플 분석 공개.",
     url: `${SITE_URL}/mlb`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB 분석 준비 중 | MoneyBall Score",
+    title: "MLB 분석 검토 중 (결정 wait) | MoneyBall Score",
     description:
-      "KBO 검증 모델 MLB 확장 waitlist. 2024 WS Game 1 NYY vs LAD 샘플 분석.",
+      "KBO 검증 모델 MLB 확장 검토 중, 결정 wait. 2024 WS Game 1 NYY vs LAD 샘플 분석.",
   },
 };
 
@@ -177,8 +177,11 @@ export default function MLBLandingPage() {
         aria-labelledby="hero-heading"
         className="text-center space-y-4 py-6 md:py-10"
       >
-        <span className="inline-block rounded-full bg-brand-500 text-white text-xs font-bold px-3 py-1 tracking-wider uppercase">
+        <span className="inline-flex items-center gap-2 rounded-full bg-brand-500 text-white text-xs font-bold px-3 py-1 tracking-wider uppercase">
           MLB
+          <span className="rounded-sm bg-brand-800/50 text-accent-light px-1.5 py-px text-[9px] normal-case tracking-wide">
+            검토 중
+          </span>
         </span>
         <h1
           id="hero-heading"
@@ -187,11 +190,14 @@ export default function MLBLandingPage() {
           MoneyBall Score
           <br />
           <span className="text-brand-500 dark:text-brand-300">
-            MLB 분석 준비 중
+            MLB 분석 검토 중
           </span>
         </h1>
         <p className="text-base md:text-lg text-brand-600 dark:text-brand-300 max-w-xl mx-auto leading-relaxed">
-          KBO에서 검증된 세이버메트릭스 10팩터 + AI 에이전트 토론을 MLB로 확장.
+          KBO에서 검증된 세이버메트릭스 10팩터 + AI 에이전트 토론의 MLB 확장은 현재 결정 wait. waitlist 가입으로 결정 시 알림.
+        </p>
+        <p className="text-xs text-brand-500 dark:text-brand-400 max-w-xl mx-auto">
+          결정 1-pager → <a className="underline underline-offset-2 hover:text-brand-700 dark:hover:text-brand-100" href="https://github.com/kkyu92/moneyballscore/blob/main/docs/decisions/mlb-vs-kbo-priority.md" target="_blank" rel="noopener noreferrer">mlb-vs-kbo-priority.md</a>
         </p>
       </section>
 
@@ -199,18 +205,30 @@ export default function MLBLandingPage() {
 
       <WaitlistFormSection />
 
-      <section className="text-center text-sm text-brand-500 dark:text-brand-400 py-4">
-        <p className="mb-2">
-          본 페이지 = MLB 모델 출시 전 waitlist demand 측정 demo.
+      <section
+        aria-labelledby="kbo-return-heading"
+        className="rounded-2xl border-2 border-brand-500 dark:border-brand-400 bg-brand-50 dark:bg-brand-900/40 p-6 md:p-8 text-center"
+      >
+        <h2
+          id="kbo-return-heading"
+          className="text-lg md:text-xl font-bold text-brand-700 dark:text-brand-100 mb-2"
+        >
+          현재 정식 서비스 = KBO 예측
+        </h2>
+        <p className="text-sm text-brand-600 dark:text-brand-300 mb-4 leading-relaxed">
+          MLB 활성화 결정 wait — 그 동안 KBO 매 경기 10팩터 분석 + AI 토론 + 적중률 검증을 이용해 보세요.
         </p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm md:text-base font-semibold px-5 py-2.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        >
+          오늘의 KBO 예측 보기 →
+        </Link>
+      </section>
+
+      <section className="text-center text-xs text-brand-500 dark:text-brand-400 py-2">
         <p>
-          KBO 정식 서비스 보러 가기 →{" "}
-          <Link
-            href="/"
-            className="text-brand-600 dark:text-brand-300 underline underline-offset-2 hover:text-brand-700 dark:hover:text-brand-100"
-          >
-            오늘의 KBO 예측
-          </Link>
+          본 페이지 = MLB 모델 활성화 결정 전 waitlist demand 측정 layer.
         </p>
       </section>
     </main>
