@@ -194,6 +194,16 @@ export function evaluatePair(rows: BacktestPredictionRow[]): BacktestResult {
   const v18Accuracy = n > 0 ? v18Hits / n : 0;
   const v20Accuracy = n > 0 ? v20Hits / n : 0;
 
+  // v2.0 후보 kill-switch (autoplan CEO-3 A 채택, cycle 1021 후속).
+  // docs/research/v2.0-killswitch.md 정합.
+  // 조건: n >= 60 AND v20_accuracy < v18_accuracy - 0.02 (2pp 하회)
+  // single-fire warning (3회 연속 검증은 carry-over)
+  if (n >= 60 && (v20Accuracy - v18Accuracy) < -0.02) {
+    warnings.push(
+      `KILL_SWITCH_TRIGGERED: v20_accuracy ${v20Accuracy.toFixed(4)} < v18_accuracy ${v18Accuracy.toFixed(4)} by ${((v18Accuracy - v20Accuracy) * 100).toFixed(2)}pp at n=${n}. 본 weights 폐기 권장 (3회 연속 확인 후). 자세한 protocol = docs/research/v2.0-killswitch.md`,
+    );
+  }
+
   return {
     cohort_n: n,
     v18_brier: Math.round(v18Brier * 10000) / 10000,
