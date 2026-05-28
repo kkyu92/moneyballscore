@@ -175,7 +175,7 @@ Key routing rules:
 - 홈팀 어드밴티지: +1.5% (HOME_ADVANTAGE=0.015, 2026-04-21 N=2180 측정)
 - Elo baseline: KBO Fancy Stats Elo 예측과 비교하여 모델 성능 측정
 - **v1.8 변경 (cycle 335, 2026-05-12)**: head_to_head 5%→3% (W20/W21 noise, 37.5% 실측) + elo 8%→10% (정보가치 Δ=+0.30 최강)
-- v2.0 업그레이드: **n=150 임계** 달성 후 전면 재조정 (real n=94, v1.8 credit-fail 15건 분리, 56건 부족 — cycle 495 측정). cycle 861 측정 = v1.8 n=32 (+2 in 9일, velocity ~0.22/day), n=150 도달 추정 06월 말~07월 초
+- v2.0 업그레이드: **n=150 임계** 달성 후 전면 재조정 (real n=94, v1.8 credit-fail 15건 분리, 56건 부족 — cycle 495 측정). cycle 989/994 측정 = v1.8 n=27 verified (correct 13 / wrong 14 / pending 1 postponed) / accuracy 48.1% / velocity 1.80/day (5/13~5/28, 15일 / pre_game cohort only), n=150 도달 추정 2026-08-04 (잔여 123, 68일). cycle 861 박제 (n=32 / velocity 0.22) 는 method drift — cohort 범위 또는 측정 method 차이로 추정
 - **Calibration 현황** (n=126 total / real n=94, cycle 861 갱신): 전체 약 47% / real (v1.8 제외) 48.9% (cycle 775 박제 stale 유지 — credit-fail/real 라벨 cycle 861 lite 미측정) / Brier v1.8 0.4335 winner-centric (cycle 861 측정 방식) — cycle 775 박제 Brier 0.2241 (squared diff) 와 산정 방식 다름, 직접 비교 X
 
 ## 데이터 소스
