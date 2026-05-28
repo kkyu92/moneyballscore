@@ -379,6 +379,16 @@ export function getKSTMondayUtcIso(now: Date = new Date()): string {
   return new Date(monday.getTime() - 9 * 60 * 60 * 1000).toISOString();
 }
 
+// KST 기준 이번 달 1일 00:00 의 UTC ISO timestamp. Supabase `.gte(verified_at, ...)` SQL 필터용.
+// cycle 1021 c10: leaderboard monthly 모드 신규. monthly view (migration 032) 와 동일 경계.
+export function getKSTMonthStartUtcIso(now: Date = new Date()): string {
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const monthStart = new Date(kst);
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+  return new Date(monthStart.getTime() - 9 * 60 * 60 * 1000).toISOString();
+}
+
 /**
  * M-D Factor anomaly detection (cycle 1013).
  *

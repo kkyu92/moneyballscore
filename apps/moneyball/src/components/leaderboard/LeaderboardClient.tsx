@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useMemo, useState } from 'react';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
 import { LeaderboardSortControl } from './LeaderboardSortControl';
@@ -8,54 +8,19 @@ import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
 interface Props {
-  weeklyEntries: LeaderboardEntry[];
-  seasonEntries: LeaderboardEntry[];
-  weeklyAi: AiBaseline | null;
-  seasonAi: AiBaseline | null;
+  entries: LeaderboardEntry[];
+  aiBaseline: AiBaseline | null;
 }
 
-type Tab = 'weekly' | 'season';
-
-const STORAGE_TAB = 'mb_leaderboard_tab_v1';
-
-function subscribeTab(callback: () => void) {
-  if (typeof window === 'undefined') return () => {};
-  window.addEventListener('storage', callback);
-  return () => window.removeEventListener('storage', callback);
-}
-
-function readTab(): Tab {
-  try {
-    const raw = localStorage.getItem(STORAGE_TAB);
-    if (raw === 'season') return 'season';
-    return 'weekly';
-  } catch {
-    return 'weekly';
-  }
-}
-
-function getTabServerSnapshot(): Tab {
-  return 'weekly';
-}
-
-function writeTab(value: Tab): void {
-  try {
-    localStorage.setItem(STORAGE_TAB, value);
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_TAB }));
-    }
-  } catch {
-    // ignore
-  }
-}
-
-export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seasonAi }: Props) {
-  const tab = useSyncExternalStore(subscribeTab, readTab, getTabServerSnapshot);
+/**
+ * cycle 1021 c10: 시즌별 분할 — 탭 자체는 page.tsx (Server Component) 의 URL
+ * search param 기반 <Link>. 본 컴포넌트는 진입 / 동기화 / 내 순위 강조 + 정렬
+ * 칩 + 모달 처리만 담당. 기존 weekly/season 토글 로직 (localStorage
+ * useSyncExternalStore) 제거 — SEO 친화 + 'use client' 최소화.
+ */
+export function LeaderboardClient({ entries, aiBaseline }: Props) {
   const [showModal, setShowModal] = useState(false);
   const { deviceId, nickname, syncState, syncCount, join } = useLeaderboard();
-
-  const entries = tab === 'weekly' ? weeklyEntries : seasonEntries;
-  const aiBaseline = tab === 'weekly' ? weeklyAi : seasonAi;
   const isSyncing = syncState === 'syncing';
 
   const sortMeta = useMemo(() => {
@@ -116,31 +81,6 @@ export function LeaderboardClient({ weeklyEntries, seasonEntries, weeklyAi, seas
           </button>
         </div>
       )}
-
-      {/* 탭 */}
-      <div>
-        <div className="flex gap-1 bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-lg p-1">
-          {(['weekly', 'season'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => writeTab(t)}
-              aria-pressed={tab === t}
-              className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                tab === t
-                  ? 'bg-white dark:bg-[var(--color-surface-card)] shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-              }`}
-            >
-              {t === 'weekly' ? '이번 주' : '시즌 전체'}
-            </button>
-          ))}
-        </div>
-        {tab === 'weekly' && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 px-1">
-            매주 월요일 초기화 · 픽 5개 이상 완료 시 등장
-          </p>
-        )}
-      </div>
 
       {/* 정렬 칩 — 표본 가드: entries >= 5 */}
       {entries.length >= 5 && (

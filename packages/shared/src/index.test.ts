@@ -12,6 +12,7 @@ import {
   toKSTDisplayString,
   getKSTWeekRange,
   getKSTMondayUtcIso,
+  getKSTMonthStartUtcIso,
   winnerProbOf,
   classifyWinnerProb,
   WINNER_PROB_CONFIDENT,
@@ -206,6 +207,26 @@ describe('getKSTMondayUtcIso', () => {
     // 2026-05-17 (일) UTC 12:00 = KST 21:00 — 그 주 월요일 = 2026-05-11
     const result = getKSTMondayUtcIso(new Date('2026-05-17T12:00:00Z'));
     expect(result).toBe('2026-05-10T15:00:00.000Z');
+  });
+});
+
+describe('getKSTMonthStartUtcIso', () => {
+  it('5월 중순 KST → 5월 1일 00:00 KST = 4월 30일 15:00 UTC', () => {
+    // 2026-05-13 (수) UTC 06:00 = KST 15:00 — 그 달 1일 00:00 KST = 2026-04-30 15:00 UTC
+    const result = getKSTMonthStartUtcIso(new Date('2026-05-13T06:00:00Z'));
+    expect(result).toBe('2026-04-30T15:00:00.000Z');
+  });
+
+  it('5월 1일 직후 KST → 같은 5월 1일 00:00 KST', () => {
+    // 2026-05-01 UTC 00:00 = KST 09:00 (이미 5월 1일 KST) → 그 달 1일 = 2026-05-01 00:00 KST = 2026-04-30 15:00 UTC
+    const result = getKSTMonthStartUtcIso(new Date('2026-05-01T00:00:00Z'));
+    expect(result).toBe('2026-04-30T15:00:00.000Z');
+  });
+
+  it('UTC 가 4월 30일 23:00 이지만 KST 가 5월 1일 08:00 → 5월 1일 00:00 KST 반환', () => {
+    // 2026-04-30 UTC 23:00 = KST 2026-05-01 08:00 → KST 월초 = 2026-05-01 00:00 KST
+    const result = getKSTMonthStartUtcIso(new Date('2026-04-30T23:00:00Z'));
+    expect(result).toBe('2026-04-30T15:00:00.000Z');
   });
 });
 

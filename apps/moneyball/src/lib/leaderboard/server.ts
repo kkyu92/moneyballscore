@@ -1,14 +1,27 @@
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
-import { assertSelectOk, getKSTMondayUtcIso } from '@moneyball/shared';
+import {
+  assertSelectOk,
+  getKSTMondayUtcIso,
+  getKSTMonthStartUtcIso,
+} from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from './types';
+
+// cycle 1021 c10: monthly / all 신규 view (migration 032).
+// season / weekly = 기존 (027) — backward compat.
+const VIEW_BY_MODE: Record<LeaderboardMode, string> = {
+  weekly: 'leaderboard_weekly',
+  monthly: 'leaderboard_monthly',
+  season: 'leaderboard_season',
+  all: 'leaderboard_all',
+};
 
 export async function fetchLeaderboard(
   mode: LeaderboardMode,
   limit = 50
 ): Promise<LeaderboardEntry[]> {
   const supabase = await createClient();
-  const view = mode === 'weekly' ? 'leaderboard_weekly' : 'leaderboard_season';
+  const view = VIEW_BY_MODE[mode];
 
   const result = await supabase
     .from(view)
@@ -30,8 +43,13 @@ export async function fetchAiBaseline(mode: LeaderboardMode): Promise<AiBaseline
     .not('is_correct', 'is', null)
     .not('verified_at', 'is', null);
 
+  // weekly = KST 이번 주 월요일 이후, monthly = KST 이번 달 1일 이후.
+  // season / all = 전체 누적 (CURRENT_MODEL_FILTER 가 이미 현 운영 모델만 추출하므로
+  // season ≈ all 결과 동일하나 view 측은 명시적 분리).
   if (mode === 'weekly') {
     query = query.gte('verified_at', getKSTMondayUtcIso());
+  } else if (mode === 'monthly') {
+    query = query.gte('verified_at', getKSTMonthStartUtcIso());
   }
 
   const result = await query;
