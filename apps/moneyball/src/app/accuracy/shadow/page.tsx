@@ -36,7 +36,7 @@ interface GameField {
 interface ShadowRowRaw {
   game_id: number;
   scoring_rule: string;
-  reasoning: string | null;
+  reasoning: unknown;
   predicted_winner: number;
   factors: Record<string, number> | null;
   games: GameField | GameField[] | null;
@@ -64,10 +64,26 @@ function pickGames(field: ShadowRowRaw["games"]): GameField | null {
   return Array.isArray(field) ? field[0] ?? null : field;
 }
 
-function probFromReasoning(reasoning: string | null, factors: Record<string, number> | null): number | null {
-  if (reasoning) {
+function extractProbText(reasoning: unknown): string {
+  if (typeof reasoning === "string") return reasoning;
+  if (reasoning && typeof reasoning === "object") {
+    const r = reasoning as { reasoning?: unknown; debate?: { verdict?: { reasoning?: unknown; homeWinProb?: number } } };
+    if (typeof r.reasoning === "string") return r.reasoning;
+    const verdict = r.debate?.verdict;
+    if (verdict?.homeWinProb != null && Number.isFinite(verdict.homeWinProb)) {
+      const pct = Math.round(verdict.homeWinProb * 100);
+      return `${pct}%`;
+    }
+    if (typeof verdict?.reasoning === "string") return verdict.reasoning;
+  }
+  return "";
+}
+
+function probFromReasoning(reasoning: unknown, factors: Record<string, number> | null): number | null {
+  const text = extractProbText(reasoning);
+  if (text) {
     // reasoning 안 "확률 NN%" 패턴 fallback (v1.8 path)
-    const m = reasoning.match(/(\d{2,3})%/);
+    const m = text.match(/(\d{2,3})%/);
     if (m) {
       const n = parseInt(m[1], 10);
       if (n >= 0 && n <= 100) return n / 100;
