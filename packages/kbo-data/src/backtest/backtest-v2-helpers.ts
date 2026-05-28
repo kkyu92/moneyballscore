@@ -5,7 +5,7 @@
  * 본 helper = pure functions only (Sentry-free / supabase-free) — vitest deterministic.
  */
 
-import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS } from '@moneyball/shared';
 
 const CLAMP_LO = 0.15;
 const CLAMP_HI = 0.85;
@@ -32,14 +32,18 @@ export type TeamEloMap = Map<number, number>;
 
 /**
  * Elo logistic prob — home win 확률. 표준 ELO 공식.
- * 1 / (1 + 10^((awayElo - homeElo - homeAdj) / 400))
+ * 1 / (1 + 10^((awayElo - homeElo - HOME_ELO_BONUS) / 400))
  *
- * homeAdj = HOME_ADVANTAGE × 400 ≈ 6 Elo point (KBO 측정 +1.5%).
- * plan #15 C1d (cycle 1021) — Fancy Stats Elo baseline 측정.
+ * HOME_ELO_BONUS = Elo point 단위 (NOT probability delta).
+ * 이전 패턴 (HOME_ADVANTAGE × 400) = dimensionally wrong — HOME_ADVANTAGE 가
+ * probability delta (0.015 = +1.5pp) 라 × 400 = 6 Elo point 만 = 약 0.86%
+ * prob shift (실측 1.5% 의 절반). plan #15 autoplan Eng-H1 finding 후속 fix.
+ *
+ * HOME_ELO_BONUS = 24 (실측 51.93% 정합 + 측정 noise 흡수). @moneyball/shared
+ * 안 박제 (단일 source of truth).
  */
 export function computeEloProb(homeElo: number, awayElo: number): number {
-  const homeAdj = HOME_ADVANTAGE * 400;
-  const adjustedDiff = awayElo - homeElo - homeAdj;
+  const adjustedDiff = awayElo - homeElo - HOME_ELO_BONUS;
   return 1 / (1 + Math.pow(10, adjustedDiff / 400));
 }
 

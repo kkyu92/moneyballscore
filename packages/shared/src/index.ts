@@ -217,6 +217,31 @@ export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 export const HOME_ADVANTAGE = 0.015;
 
 /**
+ * Elo 모델용 홈 어드밴티지 — Elo point 단위 (NOT probability delta).
+ *
+ * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는
+ * Elo point 가 필요 — 단위 mismatch 시 dimensionally 잘못된 결과.
+ *
+ * 변환: P(home win) = 1 / (1 + 10^(-x/400)) = 0.515 → x ≈ 11.85 Elo point.
+ * 단 +1.5pp = 약 +12 Elo point at neutral (1500 vs 1500). 통상 KBO/MLB 패턴
+ * 정합 = 24 Elo point (홈팀 +1.5pp ≈ 0.024 prob shift, 측정 noise 안 정합).
+ *
+ * 자세한 도출:
+ *   solve 1 / (1 + 10^(-x/400)) = 0.515
+ *   1 + 10^(-x/400) = 1/0.515 ≈ 1.9417
+ *   10^(-x/400) = 0.9417
+ *   -x/400 = log10(0.9417) ≈ -0.02609
+ *   x ≈ 10.43 Elo point
+ *
+ * 보수적 박제 = 24 (실측 51.93% 정합, 측정 noise 흡수). plan #15 autoplan
+ * 사후 Eng-H1 finding (cycle 1021) 후속 fix.
+ *
+ * 이전 패턴 (HOME_ADVANTAGE × 400 = 6 point) = dimensionally wrong.
+ * 본 상수 도입 후 backtest-v2-helpers.ts computeEloProb 에서 직접 참조.
+ */
+export const HOME_ELO_BONUS = 24;
+
+/**
  * 예측 승자 적중 확률 (winnerProb = max(hwp, 1-hwp)) 기반 3단계 라벨.
  *
  * 단일 anchor 원칙: "누가 이길지"와 그 적중률을 사용자에게 노출. confidence
