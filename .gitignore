@@ -45,3 +45,9 @@ pnpm-debug.log*
 supabase/.temp/
 .vercel
 .env*.local
+
+# Playwright (cycle 1021 plan #14 C2 Step 4 carry-over)
+apps/moneyball/test-results/
+apps/moneyball/playwright-report/
+apps/moneyball/blob-report/
+apps/moneyball/playwright/.cache/
