@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS, isNavGroup } from "./Header";
+import { LEAGUE_NAVS, isNavGroup } from "./Header";
+import { leagueFromPath } from "./LeagueSelector";
 import { NavIcon } from "./nav-icon";
 import { SearchForm } from "@/components/shared/SearchForm";
 import { ThemeToggle } from "./ThemeToggle";
@@ -41,9 +42,17 @@ export function NavLinks() {
     };
   }, []);
 
+  const league = leagueFromPath(pathname ?? "/");
+  const navItems = LEAGUE_NAVS[league];
+
   return (
-    <nav ref={navRef} className="hidden md:flex items-center gap-5" onMouseLeave={() => setOpenLabel(null)}>
-      {NAV_ITEMS.map((item) =>
+    <nav
+      ref={navRef}
+      data-league={league}
+      className="hidden md:flex items-center gap-5"
+      onMouseLeave={() => setOpenLabel(null)}
+    >
+      {navItems.map((item) =>
         isNavGroup(item) ? (
           <div key={item.label} className="relative">
             <button

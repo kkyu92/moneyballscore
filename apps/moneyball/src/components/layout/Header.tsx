@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
+import { LeagueSelector, type League } from "./LeagueSelector";
 import type { NavIconName } from "./nav-icon";
 
 export type NavLink = { href: string; label: string; description?: string; icon?: NavIconName };
@@ -12,7 +13,7 @@ export function isNavGroup(item: NavItem): item is NavGroup {
   return "items" in item;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const KBO_NAV: NavItem[] = [
   { href: "/", label: "오늘" },
   {
     label: "AI",
@@ -61,16 +62,27 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/about", label: "서비스 소개", description: "FAQ·서비스 안내·문의", icon: "file-text" },
     ],
   },
-  {
-    label: "로또",
-    items: [
-      { href: "/lotto/methodology", label: "통계 방법론", description: "6/45 패턴 통계 검증·256 규칙 saturation", icon: "file-text" },
-      { href: "/lotto/archive", label: "아카이브", description: "회차별 50조합 통계 분석 기록", icon: "database" },
-    ],
-  },
 ];
 
-export { NAV_ITEMS };
+const MLB_NAV: NavItem[] = [
+  { href: "/mlb", label: "MLB 베타" },
+];
+
+const LOTTO_LINKS: NavLink[] = [
+  { href: "/lotto/methodology", label: "통계 방법론", description: "6/45 패턴 통계 검증·256 규칙 saturation", icon: "file-text" },
+  { href: "/lotto/archive", label: "아카이브", description: "회차별 50조합 통계 분석 기록", icon: "database" },
+];
+
+// MLB top-level pill — sub-NAV 는 단일 link 라 그룹화 없이 펼침 link 로 렌더.
+// 로또는 기존대로 sub-NAV 그룹으로 렌더 (드롭다운).
+export const LEAGUE_NAVS: Record<League, NavItem[]> = {
+  kbo: KBO_NAV,
+  mlb: MLB_NAV,
+  lotto: [{ label: "로또", items: LOTTO_LINKS }],
+};
+
+// 백워드 호환 — 외부 consumer 가 있을 경우 KBO 전체 NAV 유지.
+export const NAV_ITEMS: NavItem[] = KBO_NAV;
 
 export function Header() {
   return (
@@ -81,7 +93,10 @@ export function Header() {
           <span className="font-bold text-xl tracking-tight text-white">MoneyBall</span>
           <span className="text-xs text-brand-300 font-medium">Score</span>
         </Link>
-        <NavLinks />
+        <div className="flex items-center">
+          <LeagueSelector variant="desktop" />
+          <NavLinks />
+        </div>
         <div className="flex items-center md:hidden">
           <Link
             href="/search"

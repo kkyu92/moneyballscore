@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS, isNavGroup } from "./Header";
+import { LEAGUE_NAVS, isNavGroup } from "./Header";
+import { LeagueSelector, leagueFromPath } from "./LeagueSelector";
 import { NavIcon } from "./nav-icon";
 
 function isActive(href: string, pathname: string): boolean {
@@ -14,6 +15,8 @@ function isActive(href: string, pathname: string): boolean {
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const league = leagueFromPath(pathname ?? "/");
+  const navItems = LEAGUE_NAVS[league];
 
   return (
     <div className="md:hidden">
@@ -47,8 +50,12 @@ export function MobileNav() {
         </svg>
       </button>
       {open && (
-        <nav className="absolute top-16 left-0 right-0 bg-brand-800 border-b border-brand-700 shadow-lg z-50">
-          {NAV_ITEMS.map((item) =>
+        <nav
+          data-league={league}
+          className="absolute top-16 left-0 right-0 bg-brand-800 border-b border-brand-700 shadow-lg z-50"
+        >
+          <LeagueSelector variant="mobile" onSelect={() => setOpen(false)} />
+          {navItems.map((item) =>
             isNavGroup(item) ? (
               <div key={item.label}>
                 <div className="px-6 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-brand-400">
