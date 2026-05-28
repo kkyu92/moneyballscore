@@ -10,8 +10,10 @@
 
 import {
   SHADOW_WEIGHTS,
+  SHADOW_V20_WEIGHTS,
   HOME_ADVANTAGE,
   SHADOW_SCORING_RULE,
+  SHADOW_V20_SCORING_RULE,
 } from '@moneyball/shared';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -151,6 +153,95 @@ export async function insertShadowRow(
     const result = await db.from('predictions').insert(payload).select('id');
     if (result.error) {
       // race condition — 다른 cron 이 먼저 shadow row 박제. UNIQUE 23505 = silent skip.
+      if (result.error.code === '23505') {
+        return { ok: true, shadowProb: computed.homeWinProb, reason: 'duplicate' };
+      }
+      return {
+        ok: false,
+        shadowProb: computed.homeWinProb,
+        reason: 'db_error',
+        error: result.error.message,
+      };
+    }
+    return { ok: true, shadowProb: computed.homeWinProb, reason: 'inserted' };
+  } catch (e) {
+    return {
+      ok: false,
+      shadowProb: computed.homeWinProb,
+      reason: 'db_error',
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
+
+/**
+ * v2.0-shadow compute — SHADOW_V20_WEIGHTS 기반 (plan #14 C1a, cycle 1019).
+ * computeShadowPrediction 와 동일 산출 공식 (weightedSum / FACTOR_TOTAL + HOME_ADVANTAGE → clamp).
+ * SHADOW_V20_WEIGHTS = v1.8 base + 3 factor bump (elo/bullpen_fip/recent_form).
+ * shadow factor (park_weather/umpire_sz) X — production 10 factor 만 사용.
+ */
+export function computeShadowPredictionV20(
+  factors: Record<string, number> | null | undefined,
+): ShadowComputeResult | null {
+  if (!factors || typeof factors !== 'object') return null;
+
+  let weightedSum = 0;
+  let factorTotal = 0;
+  let appliedFactorCount = 0;
+
+  for (const [key, weight] of Object.entries(SHADOW_V20_WEIGHTS)) {
+    factorTotal += weight as number;
+    const raw = factors[key];
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      weightedSum += raw * (weight as number);
+      if ((weight as number) > 0) appliedFactorCount += 1;
+    } else {
+      weightedSum += NEUTRAL_FACTOR * (weight as number);
+    }
+  }
+
+  if (factorTotal === 0) return null;
+
+  let homeWinProb = weightedSum / factorTotal + HOME_ADVANTAGE;
+  homeWinProb = Math.max(CLAMP_LO, Math.min(CLAMP_HI, homeWinProb));
+
+  return {
+    homeWinProb: Math.round(homeWinProb * 1000) / 1000,
+    factorTotal,
+    appliedFactorCount,
+  };
+}
+
+/**
+ * v2.0-shadow row insert — production v1.8 insert + v2.1-B-shadow insert 직후 호출.
+ * insertShadowRow 와 동일 패턴 (failure tolerant, throw X). v1.8 + v2.1-B-shadow path 영향 X.
+ * plan #14 C1a (cycle 1019) — n=150 wait 시간 절반 evidence 누적.
+ */
+export async function insertShadowRowV20(
+  db: SupabaseClient,
+  input: ShadowRowInsertInput,
+): Promise<ShadowRowInsertResult> {
+  const computed = computeShadowPredictionV20(input.factors);
+  if (!computed) {
+    return { ok: false, shadowProb: null, reason: 'compute_failed' };
+  }
+
+  const payload = {
+    game_id: input.gameId,
+    prediction_type: 'pre_game',
+    predicted_winner: input.predictedWinnerId,
+    confidence: Math.abs(computed.homeWinProb - 0.5) * 2,
+    ...input.baseRowMeta,
+    model_version: SHADOW_V20_SCORING_RULE,
+    debate_version: null,
+    scoring_rule: SHADOW_V20_SCORING_RULE,
+    factors: input.factors,
+    predicted_at: new Date().toISOString(),
+  };
+
+  try {
+    const result = await db.from('predictions').insert(payload).select('id');
+    if (result.error) {
       if (result.error.code === '23505') {
         return { ok: true, shadowProb: computed.homeWinProb, reason: 'duplicate' };
       }
