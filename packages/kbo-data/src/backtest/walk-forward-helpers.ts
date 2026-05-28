@@ -19,7 +19,19 @@
 
 import type { BacktestPredictionRow } from './backtest-v2-helpers';
 
-export type CvPattern = 'walk-forward' | 'expanding' | 'rolling';
+/**
+ * CvPattern union — backtest harness mode flag.
+ *
+ * - walk-forward: 기존 cycle 1019 pattern (rule_definition_date 기준 train/test 분리).
+ *   v1.8 시작 직후 cohort = train ≈ 0 degenerate.
+ * - v18-only-rescore: 이전 'expanding' alias. autoplan Eng-C1 finding (CRITICAL)
+ *   후속 rename — backtest-v2-candidate.ts 안 `cohort = split.test` 만 사용,
+ *   train cohort (v1.5/v1.6/v1.7-revert) 자체 X. 실제 동작 = v1.8 cohort 재가중합
+ *   (rescore) only. 정직 라벨로 변경 (cycle 1021 autoplan CEO-3 B 채택, 2026-05-29).
+ *   true expanding window OOS = train weights 학습 layer 필요 (carry-over plan).
+ * - rolling: 시간 window 안 train(7) test(3) split.
+ */
+export type CvPattern = 'walk-forward' | 'v18-only-rescore' | 'rolling';
 
 export interface SplitResult {
   pattern: CvPattern;
@@ -54,12 +66,16 @@ export function walkForwardSplit(
 }
 
 /**
- * expanding window OOS — train=옛 scoring_rule 전체 (예: v1.7-revert) + test=새
- * scoring_rule cohort (예: v1.8). 시간 leakage 차단.
+ * scoring_rule 기준 split helper (이전 'expandingWindowSplit' rename).
+ *
+ * autoplan Eng-C1 finding (CRITICAL) 후속: 본 helper 자체는 OK (pure split).
+ * 단 backtest-v2-candidate.ts caller 가 split.test 만 사용 = train 폐기 → 정직
+ * 라벨 `'v18-only-rescore'`. 진짜 expanding window OOS = train weights 학습 layer
+ * 추가 필요 (carry-over plan).
  *
  * train_scoring_rules + test_scoring_rules 명시 — silent drift 차단.
  */
-export function expandingWindowSplit(
+export function scoringRuleSplit(
   rows: BacktestPredictionRow[],
   trainScoringRules: readonly string[],
   testScoringRules: readonly string[],
@@ -71,10 +87,10 @@ export function expandingWindowSplit(
     else if (testScoringRules.includes(row.scoring_rule)) test.push(row);
   }
   return {
-    pattern: 'expanding',
+    pattern: 'v18-only-rescore',
     train,
     test,
-    notes: `expanding window split: train=[${trainScoringRules.join(',')}] (n=${train.length}) / test=[${testScoringRules.join(',')}] (n=${test.length})`,
+    notes: `v18-only-rescore split (caller 가 train 사용 X — test set 만 re-weighted): train=[${trainScoringRules.join(',')}] (n=${train.length}) / test=[${testScoringRules.join(',')}] (n=${test.length})`,
   };
 }
 

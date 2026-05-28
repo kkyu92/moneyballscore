@@ -19,7 +19,7 @@ import {
   type TeamEloMap,
 } from '@moneyball/kbo-data/src/backtest/backtest-v2-helpers';
 import {
-  expandingWindowSplit,
+  scoringRuleSplit,
   rollingTimeCV,
   type CvPattern,
 } from '@moneyball/kbo-data/src/backtest/walk-forward-helpers';
@@ -109,8 +109,8 @@ function parseCvPattern(): CvPattern {
   const flag = process.argv.find((a) => a.startsWith('--cv-pattern='));
   if (!flag) return 'walk-forward';
   const value = flag.split('=')[1];
-  if (value === 'walk-forward' || value === 'expanding' || value === 'rolling') return value;
-  throw new Error(`invalid --cv-pattern=${value}. allowed: walk-forward | expanding | rolling`);
+  if (value === 'walk-forward' || value === 'v18-only-rescore' || value === 'rolling') return value;
+  throw new Error(`invalid --cv-pattern=${value}. allowed: walk-forward | v18-only-rescore | rolling`);
 }
 
 async function main() {
@@ -123,13 +123,16 @@ async function main() {
   // plan #15 C1e — cohort 구성 (cv-pattern 별 분기)
   let cohort: BacktestPredictionRow[];
   let cohortNote: string;
-  if (cvPattern === 'expanding') {
-    // expanding window OOS: train=옛 scoring_rule (v1.5/v1.6/v1.7-revert) + test=v1.8
+  if (cvPattern === 'v18-only-rescore') {
+    // v18-only-rescore (이전 'expanding' alias). autoplan Eng-C1 rename
+    // (CRITICAL, cycle 1021): train (v1.5/v1.6/v1.7-revert) cohort 가져오나
+    // `cohort = split.test` 만 사용 = train 폐기. 실제 동작 = v1.8 cohort 재가중합.
+    // 진짜 expanding window OOS = train weights 학습 layer 필요 (carry-over plan).
     const v18 = await fetchV18Cohort(db);
     const train = await fetchTrainCohort(db, ['v1.5', 'v1.6', 'v1.7-revert']);
-    const split = expandingWindowSplit([...train, ...v18], ['v1.5', 'v1.6', 'v1.7-revert'], ['v1.8']);
-    cohort = split.test; // production OOS evidence = test set 만 evaluate
-    cohortNote = `expanding window: train=${split.train.length} (v1.5/v1.6/v1.7-revert) / test=${split.test.length} (v1.8 OOS)`;
+    const split = scoringRuleSplit([...train, ...v18], ['v1.5', 'v1.6', 'v1.7-revert'], ['v1.8']);
+    cohort = split.test; // production OOS evidence = v1.8 test set 만 (train 폐기)
+    cohortNote = `v18-only-rescore (train ${split.train.length} 폐기, v1.8 test ${split.test.length} re-weighted)`;
   } else if (cvPattern === 'rolling') {
     // rolling time CV: 최근 30일 window 안 train(7) test(3)
     // H3 fix — window > cohort span silent 차단. dates 추출 후 span 측정.
