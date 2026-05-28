@@ -15,7 +15,7 @@
 // cycle 475 — tuple 1개 → ScoringRule 타입 + ALL_SCORING_RULES list 동시 도출.
 // 신규 버전 추가 시 본 tuple 1줄 변경 = ScoringRule union + 외부 VERSION_ORDER
 // 자동 전파 (silent drift family 사전 자동 차단 evidence).
-export const ALL_SCORING_RULES = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8', 'v2.1-B-shadow'] as const;
+export const ALL_SCORING_RULES = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8', 'v2.1-B-shadow', 'v2.0-shadow'] as const;
 
 export type ScoringRule = (typeof ALL_SCORING_RULES)[number];
 
@@ -49,6 +49,14 @@ export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
  * accuracy/shadow page 안 v1.8 vs shadow Brier delta 측정 source.
  */
 export const SHADOW_SCORING_RULE: ScoringRule = 'v2.1-B-shadow';
+
+/**
+ * v2.0 후보 가중치 shadow 라벨 — plan #14 C1a (cycle 1019, 2026-05-28).
+ * cycle 231 박제 가중치 (elo 0.13 / bullpen_fip 0.14 / recent_form 0.13) shadow 실주행.
+ * v1.8 production 영향 X (DEFAULT_WEIGHTS invariant 유지). day 1 부터 v2.0 표본 누적 →
+ * n=150 wait 시간 절반 (CEO Critical #1 반영, plan #14 C1a).
+ */
+export const SHADOW_V20_SCORING_RULE: ScoringRule = 'v2.0-shadow';
 
 /** Quant fallback 라벨 — pre_game 경로 (ScoringRule 그대로). */
 export const QUANT_PREGAME_VERSION: ModelVersion = CURRENT_SCORING_RULE;

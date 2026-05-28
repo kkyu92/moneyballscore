@@ -1,11 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import {
   computeShadowPrediction,
+  computeShadowPredictionV20,
   shadowBrierDelta,
   insertShadowRow,
+  insertShadowRowV20,
   type ShadowRowInsertInput,
 } from '../pipeline/shadow-cohort';
-import { SHADOW_WEIGHTS, SHADOW_SCORING_RULE } from '@moneyball/shared';
+import {
+  SHADOW_WEIGHTS,
+  SHADOW_V20_WEIGHTS,
+  SHADOW_SCORING_RULE,
+  SHADOW_V20_SCORING_RULE,
+} from '@moneyball/shared';
 
 const FACTORS_HOME_FAVORED: Record<string, number> = {
   sp_fip: 0.65,
@@ -196,5 +203,107 @@ describe('insertShadowRow (M-V2 row pair insert)', () => {
     expect(result.ok).toBe(false);
     expect(result.reason).toBe('compute_failed');
     expect(calls).toHaveLength(0); // DB insert 시도 X
+  });
+});
+
+describe('computeShadowPredictionV20 (plan #14 C1a — v2.0 후보 가중치)', () => {
+  it('SHADOW_V20_WEIGHTS 합계 0.95 (v1.8 base 0.85 + 3 factor bump 0.10)', () => {
+    const sum = (Object.values(SHADOW_V20_WEIGHTS) as number[]).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    expect(sum).toBeCloseTo(0.95, 6);
+  });
+
+  it('홈 유리 factors → homeWinProb > 0.5', () => {
+    const result = computeShadowPredictionV20(FACTORS_HOME_FAVORED);
+    expect(result).not.toBeNull();
+    expect(result!.homeWinProb).toBeGreaterThan(0.5);
+    expect(result!.factorTotal).toBeCloseTo(0.95, 6);
+  });
+
+  it('factors null/undefined → null 반환', () => {
+    expect(computeShadowPredictionV20(null)).toBeNull();
+    expect(computeShadowPredictionV20(undefined)).toBeNull();
+  });
+
+  it('shadow factor (park_weather/umpire_sz) X — production 10 factor 만', () => {
+    expect(Object.keys(SHADOW_V20_WEIGHTS)).not.toContain('park_weather');
+    expect(Object.keys(SHADOW_V20_WEIGHTS)).not.toContain('umpire_sz');
+  });
+
+  it('v2.0 candidate bump 가중치 정확 (cycle 231 박제)', () => {
+    expect(SHADOW_V20_WEIGHTS.elo).toBe(0.13);
+    expect(SHADOW_V20_WEIGHTS.bullpen_fip).toBe(0.14);
+    expect(SHADOW_V20_WEIGHTS.recent_form).toBe(0.13);
+  });
+
+  it('clamp [0.15, 0.85]', () => {
+    const extreme: Record<string, number> = Object.fromEntries(
+      Object.keys(SHADOW_V20_WEIGHTS).map((k) => [k, 1]),
+    );
+    const result = computeShadowPredictionV20(extreme);
+    expect(result!.homeWinProb).toBeLessThanOrEqual(0.85);
+    expect(result!.homeWinProb).toBeGreaterThanOrEqual(0.15);
+  });
+});
+
+describe('insertShadowRowV20 (plan #14 C1a — v2.0-shadow row insert)', () => {
+  it('v2.0-shadow row insert pair (scoring_rule = v2.0-shadow 라벨)', async () => {
+    const { db, calls } = mockInsert({ data: [{ id: 99 }], error: null });
+    const result = await insertShadowRowV20(db, {
+      gameId: 200,
+      predictedWinnerId: 2,
+      factors: FACTORS_HOME_FAVORED,
+      baseRowMeta: baseMeta(),
+    });
+    expect(result.ok).toBe(true);
+    expect(result.reason).toBe('inserted');
+    expect(result.shadowProb).not.toBeNull();
+    expect(calls).toHaveLength(1);
+    const payload = calls[0].payload as Record<string, unknown>;
+    expect(payload.scoring_rule).toBe(SHADOW_V20_SCORING_RULE);
+    expect(payload.model_version).toBe(SHADOW_V20_SCORING_RULE);
+    expect(payload.scoring_rule).toBe('v2.0-shadow');
+    expect(payload.game_id).toBe(200);
+    expect(payload.prediction_type).toBe('pre_game');
+    expect(payload.debate_version).toBeNull();
+  });
+
+  it('insert fail tolerant (db_error)', async () => {
+    const { db } = mockInsert({
+      data: null,
+      error: { code: '23502', message: 'NOT NULL violation' },
+    });
+    const result = await insertShadowRowV20(db, {
+      gameId: 200,
+      predictedWinnerId: 2,
+      factors: FACTORS_HOME_FAVORED,
+      baseRowMeta: baseMeta(),
+    });
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('db_error');
+  });
+
+  it('UNIQUE 23505 race → ok silent (duplicate)', async () => {
+    const { db } = mockInsert({
+      data: null,
+      error: { code: '23505', message: 'duplicate key' },
+    });
+    const result = await insertShadowRowV20(db, {
+      gameId: 200,
+      predictedWinnerId: 2,
+      factors: FACTORS_HOME_FAVORED,
+      baseRowMeta: baseMeta(),
+    });
+    expect(result.ok).toBe(true);
+    expect(result.reason).toBe('duplicate');
+  });
+
+  it('SHADOW_WEIGHTS (v2.1-B-shadow) 와 SHADOW_V20_WEIGHTS 별개 const (Eng Critical #1)', () => {
+    // v2.1-B-shadow = SHADOW_WEIGHTS (park_weather/umpire_sz 포함)
+    expect(Object.keys(SHADOW_WEIGHTS)).toContain('park_weather');
+    // v2.0-shadow = SHADOW_V20_WEIGHTS (production 10 factor only)
+    expect(Object.keys(SHADOW_V20_WEIGHTS)).not.toContain('park_weather');
   });
 });

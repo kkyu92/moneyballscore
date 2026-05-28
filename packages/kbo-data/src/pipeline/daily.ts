@@ -28,7 +28,7 @@ import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
 import { captureSilentDriftAlert } from './silent-drift-alert';
-import { insertShadowRow } from './shadow-cohort';
+import { insertShadowRow, insertShadowRowV20 } from './shadow-cohort';
 import {
   computePredictionHistory,
   type PredictionHistoryRow,
@@ -807,6 +807,46 @@ export async function runDailyPipeline(
     } catch (e) {
       // insertShadowRow 는 자체 try/catch — 본 outer catch 는 방어 deepest fallback
       errors.push(`shadow row catch ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
+    }
+
+    // plan #14 C1a (cycle 1019) — v2.0-shadow row insert.
+    // v1.8 → v2.1-B-shadow → v2.0-shadow ordering. 동일 game_id 에 cycle 231 박제 가중치
+    // (elo 0.13 / bullpen_fip 0.14 / recent_form 0.13) 기반 v2.0 후보 row 별도 누적.
+    // failure tolerant (throw X) → v1.8 + v2.1-B-shadow path 영향 X. n=150 wait 시간 절반.
+    try {
+      const shadowV20Result = await insertShadowRowV20(db, {
+        gameId: dbGameId,
+        predictedWinnerId: teamIdMap[result.predictedWinner],
+        factors: result.factors,
+        baseRowMeta: {
+          home_sp_fip: payload.home_sp_fip,
+          away_sp_fip: payload.away_sp_fip,
+          home_sp_xfip: payload.home_sp_xfip,
+          away_sp_xfip: payload.away_sp_xfip,
+          home_lineup_woba: payload.home_lineup_woba,
+          away_lineup_woba: payload.away_lineup_woba,
+          home_bullpen_fip: payload.home_bullpen_fip,
+          away_bullpen_fip: payload.away_bullpen_fip,
+          home_war_total: payload.home_war_total,
+          away_war_total: payload.away_war_total,
+          home_recent_form: payload.home_recent_form,
+          away_recent_form: payload.away_recent_form,
+          head_to_head_rate: payload.head_to_head_rate,
+          park_factor: payload.park_factor,
+          home_elo: payload.home_elo,
+          away_elo: payload.away_elo,
+          home_sfr: payload.home_sfr,
+          away_sfr: payload.away_sfr,
+          reasoning: `[v2.0-shadow quant only] ${finalReasoning}`,
+        },
+      });
+      if (!shadowV20Result.ok && shadowV20Result.reason === 'db_error') {
+        errors.push(
+          `shadow_v20 row ${game.homeTeam}v${game.awayTeam}: ${shadowV20Result.error ?? 'unknown'}`,
+        );
+      }
+    } catch (e) {
+      errors.push(`shadow_v20 row catch ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
     }
 
     // games.weather 저장 (idempotent — 이미 있으면 skip). 예측과 같은 시점의

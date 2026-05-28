@@ -15,6 +15,7 @@ export {
   ALL_SCORING_RULES,
   CURRENT_SCORING_RULE,
   SHADOW_SCORING_RULE,
+  SHADOW_V20_SCORING_RULE,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   QUANT_LIVE_VERSION,
@@ -184,6 +185,27 @@ export const SHADOW_WEIGHTS = {
   ...V2_1_B_WEIGHTS,
   park_weather: 0.03,
   umpire_sz: 0.02,
+} as const;
+
+/**
+ * v2.0 후보 가중치 — plan #14 C1a (cycle 1019, 2026-05-28).
+ * cycle 231 박제 정보가치 측정 기반 (elo Δ=+0.30 / bullpen_fip Δ=+0.26 / recent_form Δ=+0.20).
+ * v1.8 base + 3 factor bump (elo 0.10→0.13 / bullpen_fip 0.10→0.14 / recent_form 0.10→0.13).
+ * shadow cohort scoring_rule='v2.0-shadow' row 의 quant 재계산.
+ * SHADOW_WEIGHTS (v2.1-B-shadow factor 11/12) 와 별개 const 분리 (Eng Critical #1 반영).
+ * 합계 0.95 (자체 FACTOR_TOTAL 로 정규화).
+ */
+export const SHADOW_V20_WEIGHTS = {
+  sp_fip: 0.15,
+  sp_xfip: 0.05,
+  lineup_woba: 0.15,
+  bullpen_fip: 0.14,
+  recent_form: 0.13,
+  war: 0.08,
+  head_to_head: 0.03,
+  park_factor: 0.04,
+  elo: 0.13,
+  sfr: 0.05,
 } as const;
 
 export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
