@@ -47,12 +47,12 @@ describe("PredictReveal", () => {
     expect(span).toHaveAttribute("data-reduced", "false");
     expect(span).toHaveAttribute("data-target", "0.62");
 
-    // 최종 값까지 도달 (RAF 자연 진행)
+    // 최종 값까지 도달 (RAF 자연 진행). jsdom RAF 가 느릴 수 있어 timeout 3s + interval 30ms.
     await waitFor(
       () => {
         expect(span.textContent).toBe("62%");
       },
-      { timeout: 1000 },
+      { timeout: 3000, interval: 30 },
     );
 
     // aria-label = 최종 값 (중간 progress 무시)
