@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   walkForwardSplit,
-  expandingWindowSplit,
+  scoringRuleSplit,
   rollingTimeCV,
 } from '../backtest/walk-forward-helpers';
 import type { BacktestPredictionRow } from '../backtest/backtest-v2-helpers';
@@ -56,7 +56,7 @@ describe('walkForwardSplit', () => {
   });
 });
 
-describe('expandingWindowSplit', () => {
+describe('scoringRuleSplit', () => {
   it('scoring_rule 기준 train/test 분리', () => {
     const rows = [
       makeRow(1, '2026-05-10', 'v1.7-revert'),
@@ -64,10 +64,10 @@ describe('expandingWindowSplit', () => {
       makeRow(3, '2026-05-13', 'v1.8'),
       makeRow(4, '2026-05-14', 'v1.8'),
     ];
-    const r = expandingWindowSplit(rows, ['v1.7-revert'], ['v1.8']);
+    const r = scoringRuleSplit(rows, ['v1.7-revert'], ['v1.8']);
     expect(r.train.length).toBe(2);
     expect(r.test.length).toBe(2);
-    expect(r.pattern).toBe('expanding');
+    expect(r.pattern).toBe('v18-only-rescore');
   });
 
   it('다중 train scoring_rule', () => {
@@ -77,7 +77,7 @@ describe('expandingWindowSplit', () => {
       makeRow(3, '2026-04-20', 'v1.7-revert'),
       makeRow(4, '2026-05-13', 'v1.8'),
     ];
-    const r = expandingWindowSplit(rows, ['v1.5', 'v1.6', 'v1.7-revert'], ['v1.8']);
+    const r = scoringRuleSplit(rows, ['v1.5', 'v1.6', 'v1.7-revert'], ['v1.8']);
     expect(r.train.length).toBe(3);
     expect(r.test.length).toBe(1);
   });
@@ -87,7 +87,7 @@ describe('expandingWindowSplit', () => {
       makeRow(1, '2026-04-01', 'v1.5'),
       makeRow(2, '2026-05-13', 'v2.1-B-shadow'),
     ];
-    const r = expandingWindowSplit(rows, ['v1.7-revert'], ['v1.8']);
+    const r = scoringRuleSplit(rows, ['v1.7-revert'], ['v1.8']);
     expect(r.train.length).toBe(0);
     expect(r.test.length).toBe(0);
   });
