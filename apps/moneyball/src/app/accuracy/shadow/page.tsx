@@ -11,6 +11,7 @@ import {
   type TeamCode,
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
+import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/accuracy/shadow`;
@@ -64,36 +65,6 @@ function pickGames(field: ShadowRowRaw["games"]): GameField | null {
   return Array.isArray(field) ? field[0] ?? null : field;
 }
 
-function extractProbText(reasoning: unknown): string {
-  if (typeof reasoning === "string") return reasoning;
-  if (reasoning && typeof reasoning === "object") {
-    const r = reasoning as { reasoning?: unknown; debate?: { verdict?: { reasoning?: unknown; homeWinProb?: number } } };
-    if (typeof r.reasoning === "string") return r.reasoning;
-    const verdict = r.debate?.verdict;
-    if (verdict?.homeWinProb != null && Number.isFinite(verdict.homeWinProb)) {
-      const pct = Math.round(verdict.homeWinProb * 100);
-      return `${pct}%`;
-    }
-    if (typeof verdict?.reasoning === "string") return verdict.reasoning;
-  }
-  return "";
-}
-
-function probFromReasoning(reasoning: unknown, factors: Record<string, number> | null): number | null {
-  const text = extractProbText(reasoning);
-  if (text) {
-    // reasoning 안 "확률 NN%" 패턴 fallback (v1.8 path)
-    const m = text.match(/(\d{2,3})%/);
-    if (m) {
-      const n = parseInt(m[1], 10);
-      if (n >= 0 && n <= 100) return n / 100;
-    }
-  }
-  // factors 안 가중합 fallback (shadow 미사용 — shadow 는 자체 계산 path)
-  void factors;
-  return null;
-}
-
 async function getCohortPairs(): Promise<CohortPair[]> {
   const supabase = await createClient();
   const result = await supabase
@@ -121,7 +92,7 @@ async function getCohortPairs(): Promise<CohortPair[]> {
       v18Prob: null,
       shadowProb: null,
     };
-    const prob = probFromReasoning(row.reasoning, row.factors);
+    const prob = pairProbForRow(row.scoring_rule, row.reasoning, row.factors);
     if (row.scoring_rule === SHADOW_SCORING_RULE) {
       existing.shadowProb = prob;
     } else {
