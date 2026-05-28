@@ -54,6 +54,16 @@ jobs:
             "/accuracy/shadow"
             "/insights/series/ht-vs-sk"
             "/mlb"
+            "/dashboard"
+            "/v2-preview"
+            "/picks"
+            "/standings"
+            "/matchup"
+            "/seasons"
+            "/teams"
+            "/players"
+            "/lotto/archive"
+            "/search"
           )
 
           FAILED=0
