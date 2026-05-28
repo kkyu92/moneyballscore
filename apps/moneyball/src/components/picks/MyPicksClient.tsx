@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useUserPicks } from '@/hooks/use-user-picks';
-import { buildPickEntries, buildPicksStats, buildWeeklyStats, buildWeeklyHistory, type PickEntry, type PicksStats, type WeeklyStats, type WeeklyGroup } from '@/lib/picks/buildPicksStats';
+import {
+  buildPickEntries,
+  buildPicksStats,
+  buildWeeklyStats,
+  buildWeeklyHistory,
+  buildFactorAgreement,
+  type PickEntry,
+  type PicksStats,
+  type WeeklyStats,
+  type WeeklyGroup,
+  type FactorAgreement,
+} from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import Link from 'next/link';
 import { SharePicksButton } from './SharePicksButton';
@@ -11,6 +22,7 @@ import { PicksTrendChart } from './PicksTrendChart';
 import { WeeklyHistorySection } from './WeeklyHistorySection';
 import { PicksStatusFilter } from './PicksStatusFilter';
 import { PicksSortControl } from './PicksSortControl';
+import { FactorAgreementCard } from './FactorAgreementCard';
 import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
@@ -127,6 +139,7 @@ export function MyPicksClient() {
   const [stats, setStats] = useState<PicksStats | null>(null);
   const [weekly, setWeekly] = useState<WeeklyStats | null>(null);
   const [weeklyGroups, setWeeklyGroups] = useState<WeeklyGroup[]>([]);
+  const [factorAgreement, setFactorAgreement] = useState<FactorAgreement | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasNetworkError, setHasNetworkError] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
@@ -155,6 +168,7 @@ export function MyPicksClient() {
         setStats(buildPicksStats(e));
         setWeekly(buildWeeklyStats(e));
         setWeeklyGroups(buildWeeklyHistory(e));
+        setFactorAgreement(buildFactorAgreement(e));
       })
       .catch(() => {
         // show picks without results, surface a soft error notice
@@ -163,6 +177,7 @@ export function MyPicksClient() {
         setStats(buildPicksStats(e));
         setWeekly(buildWeeklyStats(e));
         setWeeklyGroups(buildWeeklyHistory(e));
+        setFactorAgreement(buildFactorAgreement(e));
         setHasNetworkError(true);
       })
       .finally(() => setLoading(false));
@@ -336,6 +351,9 @@ export function MyPicksClient() {
           </div>
         );
       })()}
+
+      {/* 팩터 일치도 — 10 factor 중 내 픽 방향 lean 비율 (cycle 1021 c9) */}
+      {factorAgreement && <FactorAgreementCard agreement={factorAgreement} />}
 
       {/* 주차별 트렌드 차트 */}
       {weeklyGroups.length >= 2 && <PicksTrendChart groups={weeklyGroups} />}
