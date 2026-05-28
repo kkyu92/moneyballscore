@@ -13,6 +13,8 @@ import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
 import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnalysis';
 import { FactorWaterfallChart } from '@/components/predictions/FactorWaterfallChart';
+import { DebateTimeline } from '@/components/insights/DebateTimeline';
+import type { DebateTimelineData } from '@/lib/insights/loader';
 import { RivalryMemorySurface } from '@/components/predictions/RivalryMemorySurface';
 import { GameOverview } from '@/components/analysis/GameOverview';
 import { ShareButtons } from '@/components/share/ShareButtons';
@@ -56,7 +58,7 @@ interface PreGamePrediction {
   prediction_type: 'pre_game';
   predicted_winner: number | null;
   confidence: number;
-  reasoning: { debate?: { verdict?: DebateVerdict; homeArgument?: DebateArgument; awayArgument?: DebateArgument; calibration?: DebateCalibration } } | null;
+  reasoning: { debate?: { verdict?: DebateVerdict; homeArgument?: DebateArgument; awayArgument?: DebateArgument; calibration?: DebateCalibration; quantitativeProb?: number } } | null;
   factors: Record<string, number> | null;
   is_correct: boolean | null;
   model_version: string | null;
@@ -366,6 +368,51 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           심판 판정 데이터가 아직 없습니다.
         </div>
       )}
+
+      {/* 2a. AI 토론 timeline 5 step 시각화 — 정량 baseline → 홈/원정 옹호 → 보정 → 심판 (cycle 1021 (a1)) */}
+      {debate && verdict && !isQuantOnlyFallback && (() => {
+        const timelineData: DebateTimelineData = {
+          quantHomeProb: debate.quantitativeProb ?? null,
+          homeArgument: debate.homeArgument
+            ? {
+                keyFactor: debate.homeArgument.keyFactor ?? null,
+                strengths: debate.homeArgument.strengths ?? [],
+                opponentWeaknesses: debate.homeArgument.opponentWeaknesses ?? [],
+                confidence: debate.homeArgument.confidence ?? null,
+                reasoning: debate.homeArgument.reasoning ?? null,
+              }
+            : null,
+          awayArgument: debate.awayArgument
+            ? {
+                keyFactor: debate.awayArgument.keyFactor ?? null,
+                strengths: debate.awayArgument.strengths ?? [],
+                opponentWeaknesses: debate.awayArgument.opponentWeaknesses ?? [],
+                confidence: debate.awayArgument.confidence ?? null,
+                reasoning: debate.awayArgument.reasoning ?? null,
+              }
+            : null,
+          calibration: debate.calibration
+            ? {
+                recentBias: debate.calibration.recentBias ?? null,
+                teamSpecific: debate.calibration.teamSpecific ?? null,
+                modelWeakness: debate.calibration.modelWeakness ?? null,
+                adjustmentSuggestion: debate.calibration.adjustmentSuggestion ?? null,
+              }
+            : null,
+          verdictHomeProb: verdict.homeWinProb,
+          verdictConfidence: verdict.confidence,
+          verdictReasoning: verdict.reasoning,
+          predictedWinner: verdict.predictedWinner,
+          calibrationApplied: verdict.calibrationApplied,
+        };
+        return (
+          <DebateTimeline
+            homeTeam={homeTeam}
+            awayTeam={awayTeam}
+            debate={timelineData}
+          />
+        );
+      })()}
 
       {/* 2. 양팀 에이전트 논거 — 관례: away 왼쪽 / home 오른쪽 */}
       {homeArg && awayArg && (
