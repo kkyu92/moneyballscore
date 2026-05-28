@@ -30,7 +30,7 @@ interface GameField {
   game_date: string;
   status: string;
   home_team_id: number;
-  home_winner_team_id: number | null;
+  winner_team_id: number | null;
 }
 
 interface ShadowRowRaw {
@@ -83,7 +83,7 @@ async function getCohortPairs(): Promise<CohortPair[]> {
   const result = await supabase
     .from("predictions")
     .select(
-      "game_id, scoring_rule, reasoning, predicted_winner, factors, games!inner(game_date, status, home_team_id, home_winner_team_id)",
+      "game_id, scoring_rule, reasoning, predicted_winner, factors, games!inner(game_date, status, home_team_id, winner_team_id)",
     )
     .in("scoring_rule", [CURRENT_SCORING_RULE, SHADOW_SCORING_RULE])
     .eq("prediction_type", "pre_game")
@@ -99,8 +99,8 @@ async function getCohortPairs(): Promise<CohortPair[]> {
     const existing = byGame.get(row.game_id) ?? {
       gameId: row.game_id,
       date: game.game_date,
-      homeWin: game.home_winner_team_id !== null
-        ? game.home_winner_team_id === game.home_team_id
+      homeWin: game.winner_team_id !== null
+        ? game.winner_team_id === game.home_team_id
         : null,
       v18Prob: null,
       shadowProb: null,
