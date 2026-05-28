@@ -12,6 +12,7 @@ import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
 import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnalysis';
+import { RivalryMemorySurface } from '@/components/predictions/RivalryMemorySurface';
 import { GameOverview } from '@/components/analysis/GameOverview';
 import { ShareButtons } from '@/components/share/ShareButtons';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -407,6 +408,13 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           details={factorDetails}
         />
       )}
+
+      {/* 3a. 라이벌리 메모리 — AI 에이전트가 학습한 매치업 패턴 (max 3, 없으면 hide) */}
+      <RivalryMemorySurface
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
+        asOfDate={gameDate}
+      />
 
       {/* 3b. 모델 메타 (접기) */}
       {preGame.factors && (

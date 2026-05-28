@@ -27,6 +27,12 @@ interface FactorDetails {
   awayElo?: number;
   homeSfr?: number;
   awaySfr?: number;
+  // factor 11/12 (shadow cohort, production weight=0)
+  parkWeatherTempC?: number;
+  parkWeatherWindMps?: number;
+  parkWeatherPrecipMm?: number;
+  umpireName?: string;
+  umpireSzWidenPct?: number;
 }
 
 interface FactorBreakdownProps {
@@ -35,7 +41,16 @@ interface FactorBreakdownProps {
   awayTeam: TeamCode;
   details?: FactorDetails;
   gameId?: number | string;
+  /** chart variant — true 시 contribution %p column + factor 11/12 row 강제 렌더 (값 nullable → "측정 중"). */
+  chart?: boolean;
 }
+
+// factor 11/12 = shadow-only (production weight=0). chart=true 시에만 렌더.
+const SHADOW_FACTOR_KEYS = ["park_weather", "umpire_sz"] as const;
+const SHADOW_FACTOR_LABELS: Record<string, { label: string; tip: string }> = {
+  park_weather: { label: "구장 날씨", tip: "Open-Meteo 기상 (저온 / 외야 바람 / 강수) — shadow 측정" },
+  umpire_sz: { label: "주심 SZ", tip: "주심 strike zone bias (umpire_stats) — shadow 측정" },
+};
 
 function getStatLabel(
   key: string,
@@ -87,68 +102,175 @@ function getStatLabel(
       if (d.awaySfr != null && d.homeSfr != null)
         return `${awayName} ${d.awaySfr.toFixed(1)} · ${homeName} ${d.homeSfr.toFixed(1)}`;
       break;
+    case "park_weather": {
+      const parts: string[] = [];
+      if (d.parkWeatherTempC != null) parts.push(`기온 ${d.parkWeatherTempC.toFixed(1)}°C`);
+      if (d.parkWeatherWindMps != null) parts.push(`바람 ${d.parkWeatherWindMps.toFixed(1)}m/s`);
+      if (d.parkWeatherPrecipMm != null) parts.push(`강수 ${d.parkWeatherPrecipMm.toFixed(1)}mm`);
+      return parts.length > 0 ? parts.join(" · ") : null;
+    }
+    case "umpire_sz":
+      if (d.umpireName) {
+        const widen =
+          d.umpireSzWidenPct != null
+            ? ` (${d.umpireSzWidenPct >= 0 ? "+" : ""}${d.umpireSzWidenPct.toFixed(1)}%)`
+            : "";
+        return `주심 ${d.umpireName}${widen}`;
+      }
+      break;
   }
   return null;
 }
 
-export function FactorBreakdown({ factors, homeTeam, awayTeam, details, gameId }: FactorBreakdownProps) {
+/**
+ * factor 의 win prob 기여도 (percentage point).
+ * value ∈ [0,1], 0.5=중립. 0.5 에서 멀어진 만큼 × weight × 2 = home prob 변화 (-1 ~ +1).
+ * 100 곱해서 %p 단위로 표시.
+ * 음수 = away 유리, 양수 = home 유리.
+ */
+export function contributionPp(value: number, weight: number): number {
+  return (value - 0.5) * weight * 2 * 100;
+}
+
+function labelFor(key: string): string {
+  if (key in FACTOR_LABELS) return FACTOR_LABELS[key];
+  if (key in SHADOW_FACTOR_LABELS) return SHADOW_FACTOR_LABELS[key].label;
+  return key;
+}
+
+function tipFor(key: string): string {
+  if (key in FACTOR_TIPS) return FACTOR_TIPS[key];
+  if (key in SHADOW_FACTOR_LABELS) return SHADOW_FACTOR_LABELS[key].tip;
+  return "";
+}
+
+export function FactorBreakdown({
+  factors,
+  homeTeam,
+  awayTeam,
+  details,
+  gameId,
+  chart = false,
+}: FactorBreakdownProps) {
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
 
-  const sortedFactors = Object.entries(factors)
-    .filter(([key]) => key in DEFAULT_WEIGHTS)
-    .sort(([a], [b]) => {
-      const wa = DEFAULT_WEIGHTS[a as keyof typeof DEFAULT_WEIGHTS] || 0;
-      const wb = DEFAULT_WEIGHTS[b as keyof typeof DEFAULT_WEIGHTS] || 0;
-      return wb - wa;
-    });
+  // chart=true 시 shadow factor 11/12 row 강제 노출 (값 nullable → "측정 중" 라벨).
+  // chart=false (기본) 시 factors map 의 키만 (기존 동작 유지).
+  const baseEntries = Object.entries(factors).filter(
+    ([key]) => key in DEFAULT_WEIGHTS,
+  );
+
+  const shadowEntries: [string, number | null][] = chart
+    ? SHADOW_FACTOR_KEYS.map((k) => [
+        k,
+        k in factors ? factors[k] : null,
+      ])
+    : [];
+
+  // de-dup (factors 안 shadow factor 키 이미 있으면 baseEntries 안 포함 → shadowEntries 에서 제외)
+  const dedupedShadow = shadowEntries.filter(
+    ([k]) => !baseEntries.some(([bk]) => bk === k),
+  );
+
+  const allEntries: [string, number | null][] = [
+    ...baseEntries.map(([k, v]) => [k, v] as [string, number | null]),
+    ...dedupedShadow,
+  ];
+
+  const sortedFactors = allEntries.sort(([a], [b]) => {
+    const wa = DEFAULT_WEIGHTS[a as keyof typeof DEFAULT_WEIGHTS] ?? 0;
+    const wb = DEFAULT_WEIGHTS[b as keyof typeof DEFAULT_WEIGHTS] ?? 0;
+    return wb - wa;
+  });
 
   const anchorId = gameId !== undefined ? `factor-breakdown-${gameId}` : undefined;
 
   return (
     <div
       id={anchorId}
+      data-variant={chart ? "chart" : "default"}
       className={`bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4${anchorId ? " scroll-mt-20" : ""}`}
     >
-      <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">예측 근거 (팩터별 분석)</h4>
+      <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">
+        예측 근거 (팩터별 분석)
+        {chart && (
+          <span className="ml-2 text-[10px] text-gray-400 dark:text-gray-500 font-normal">
+            · 기여도 chart 모드
+          </span>
+        )}
+      </h4>
       <div className="text-xs text-gray-400 dark:text-gray-500 mb-2 flex justify-between">
         <span>← {awayName} 유리</span>
         <span>{homeName} 유리 →</span>
       </div>
       <div className="space-y-2">
         {sortedFactors.map(([key, value]) => {
-          const weight = DEFAULT_WEIGHTS[key as keyof typeof DEFAULT_WEIGHTS] || 0;
+          const weight = DEFAULT_WEIGHTS[key as keyof typeof DEFAULT_WEIGHTS] ?? 0;
           const pct = Math.round(weight * 100);
-          // value: 0=원정유리, 0.5=중립, 1=홈유리
-          const barPct = Math.round(value * 100);
-          const favorable = value > NEUTRAL_HI ? "home" : value < NEUTRAL_LO ? "away" : "neutral";
+          const isShadow = SHADOW_FACTOR_KEYS.includes(
+            key as (typeof SHADOW_FACTOR_KEYS)[number],
+          );
+          const isMeasuring = value == null;
+
+          // value: 0=원정유리, 0.5=중립, 1=홈유리. null 시 중립으로 표시.
+          const safeValue = value ?? 0.5;
+          const barPct = Math.round(safeValue * 100);
+          const favorable = isMeasuring
+            ? "measuring"
+            : safeValue > NEUTRAL_HI
+              ? "home"
+              : safeValue < NEUTRAL_LO
+                ? "away"
+                : "neutral";
 
           const favorLabel =
-            favorable === "home" ? `${homeName} 우위` :
-            favorable === "away" ? `${awayName} 우위` : "비슷";
+            favorable === "home"
+              ? `${homeName} 우위`
+              : favorable === "away"
+                ? `${awayName} 우위`
+                : favorable === "measuring"
+                  ? "측정 중"
+                  : "비슷";
           const favorColor =
-            favorable === "home" ? "text-brand-500" :
-            favorable === "away" ? "text-[var(--color-away)]" : "text-gray-400 dark:text-gray-500";
+            favorable === "home"
+              ? "text-brand-500"
+              : favorable === "away"
+                ? "text-[var(--color-away)]"
+                : favorable === "measuring"
+                  ? "text-[var(--color-factor-neutral)]"
+                  : "text-gray-400 dark:text-gray-500";
 
           const statLabel = details ? getStatLabel(key, details, awayName, homeName) : null;
+          const contrib = !isMeasuring ? contributionPp(safeValue, weight) : null;
 
           return (
-            <div key={key} className="flex items-center gap-2">
+            <div
+              key={key}
+              data-factor={key}
+              data-shadow={isShadow ? "true" : "false"}
+              className="flex items-center gap-2"
+            >
               <div className="w-20 shrink-0 text-right">
                 {FACTOR_GLOSSARY_ANCHORS[key] ? (
                   <Link
                     href={`/glossary#${FACTOR_GLOSSARY_ANCHORS[key]}`}
                     className="text-sm text-gray-600 dark:text-gray-300 hover:text-brand-500 hover:underline underline-offset-2"
-                    title={FACTOR_TIPS[key] || ''}
+                    title={tipFor(key)}
                   >
-                    {FACTOR_LABELS[key] || key}
+                    {labelFor(key)}
                   </Link>
                 ) : (
                   <span
                     className="text-sm text-gray-600 dark:text-gray-300 cursor-help"
-                    title={FACTOR_TIPS[key] || ''}
+                    title={tipFor(key)}
                   >
-                    {FACTOR_LABELS[key] || key}
+                    {labelFor(key)}
+                    {isShadow && (
+                      <span className="ml-1 text-[9px] text-[var(--color-factor-neutral)] align-top">
+                        shadow
+                      </span>
+                    )}
                   </span>
                 )}
                 {statLabel && (
@@ -160,9 +282,15 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details, gameId }
               <span className="text-sm text-gray-400 dark:text-gray-500 w-8 shrink-0 text-right">
                 {pct}%
               </span>
-              <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
+              <div
+                className={`flex-1 h-4 rounded-full relative overflow-hidden ${
+                  isMeasuring
+                    ? "bg-gray-100 dark:bg-gray-800"
+                    : "bg-gray-200 dark:bg-gray-700"
+                }`}
+              >
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-400 dark:bg-gray-500 z-10" />
-                {barPct >= 50 ? (
+                {isMeasuring ? null : barPct >= 50 ? (
                   <div
                     className="absolute top-0 bottom-0 bg-brand-500 rounded-r-full"
                     style={{
@@ -183,6 +311,25 @@ export function FactorBreakdown({ factors, homeTeam, awayTeam, details, gameId }
               <span className={`text-sm font-medium w-28 shrink-0 ${favorColor}`}>
                 {favorLabel}
               </span>
+              {chart && (
+                <span
+                  data-contribution-pp
+                  className={`text-xs font-mono w-16 shrink-0 text-right ${
+                    contrib == null
+                      ? "text-[var(--color-factor-neutral)]"
+                      : contrib > 0
+                        ? "text-brand-500"
+                        : contrib < 0
+                          ? "text-[var(--color-away)]"
+                          : "text-gray-400 dark:text-gray-500"
+                  }`}
+                  title="홈팀 승률 기여도 (percentage point)"
+                >
+                  {contrib == null
+                    ? "—"
+                    : `${contrib > 0 ? "+" : ""}${contrib.toFixed(1)}pp`}
+                </span>
+              )}
             </div>
           );
         })}
