@@ -7,10 +7,13 @@ import {
   buildFallbackStats,
   buildFallbackDailyTrend,
   buildRecentForm,
+  buildRollingAccuracy,
   buildScoringRuleDayHeatmap,
+  buildScoringRuleWeekHeatmap,
   buildV18SubCohort,
   buildVersionHistory,
   buildWeeklyTrend,
+  buildWinnerProbBuckets,
   bucketize,
   calibrationGap,
   SCORING_RULE_HEATMAP_ROWS,
@@ -657,5 +660,152 @@ describe('buildScoringRuleDayHeatmap', () => {
       const cell = result.find((c) => c.scoringRule === sr && c.day === 2)!;
       expect(cell.n).toBe(0);
     }
+  });
+});
+
+// plan #14 C2 (a2 cycle 1021) — 신규 chart 3건 builder tests
+describe('buildRollingAccuracy', () => {
+  // fixed now → 2026-05-29 (cycle 1021 시점). KST midnight.
+  const NOW_MS = new Date('2026-05-29T00:00:00Z').getTime();
+
+  function rowAt(date: string, is_correct: boolean) {
+    return {
+      confidence: 0.6,
+      is_correct,
+      verified_at: `${date}T10:00:00Z`,
+    };
+  }
+
+  it('빈 배열 → 90 point 모두 windowAccuracy=null (n=0)', () => {
+    const pts = buildRollingAccuracy([], 30, 90, NOW_MS);
+    expect(pts.length).toBe(90);
+    for (const p of pts) {
+      expect(p.windowN).toBe(0);
+      expect(p.windowAccuracy).toBeNull();
+    }
+  });
+
+  it('최근 5일 each 1 row → 마지막 point 가 누적 5건 적중률 측정', () => {
+    const rows = [
+      rowAt('2026-05-25', true),
+      rowAt('2026-05-26', true),
+      rowAt('2026-05-27', false),
+      rowAt('2026-05-28', true),
+      rowAt('2026-05-29', false),
+    ];
+    const pts = buildRollingAccuracy(rows, 30, 90, NOW_MS);
+    const last = pts[pts.length - 1];
+    expect(last.windowN).toBe(5);
+    expect(last.windowAccuracy).toBeCloseTo(3 / 5);
+  });
+
+  it('n<3 day → accuracy=null', () => {
+    const rows = [rowAt('2026-05-29', true), rowAt('2026-05-29', false)];
+    const pts = buildRollingAccuracy(rows, 30, 90, NOW_MS);
+    const last = pts[pts.length - 1];
+    expect(last.windowN).toBe(2);
+    expect(last.windowAccuracy).toBeNull();
+  });
+});
+
+describe('buildWinnerProbBuckets', () => {
+  function rowConf(c: number, is_correct: boolean) {
+    return {
+      confidence: c,
+      is_correct,
+      verified_at: '2026-05-01T10:00:00Z',
+    };
+  }
+
+  it('빈 배열 → 4 bucket 모두 n=0 + accuracy=null', () => {
+    const b = buildWinnerProbBuckets([]);
+    expect(b.length).toBe(4);
+    for (const cell of b) {
+      expect(cell.n).toBe(0);
+      expect(cell.accuracy).toBeNull();
+      expect(cell.avgPredicted).toBeNull();
+    }
+  });
+
+  it('confidence=0.55 → 50-60% bucket 누적', () => {
+    const b = buildWinnerProbBuckets([
+      rowConf(0.55, true),
+      rowConf(0.58, false),
+    ]);
+    const bucket = b.find((x) => x.label === '50-60%')!;
+    expect(bucket.n).toBe(2);
+    expect(bucket.hits).toBe(1);
+    expect(bucket.accuracy).toBeCloseTo(0.5);
+    expect(bucket.avgPredicted).toBeCloseTo(0.565);
+  });
+
+  it('80%+ bucket = [0.80, 1.01)', () => {
+    const b = buildWinnerProbBuckets([
+      rowConf(0.85, true),
+      rowConf(0.95, true),
+    ]);
+    const top = b.find((x) => x.label === '80%+')!;
+    expect(top.n).toBe(2);
+    expect(top.accuracy).toBeCloseTo(1);
+  });
+
+  it('ci95Half > 0 when n > 0', () => {
+    const b = buildWinnerProbBuckets([rowConf(0.65, true), rowConf(0.65, false)]);
+    const bucket = b.find((x) => x.label === '60-70%')!;
+    expect(bucket.ci95Half).toBeGreaterThan(0);
+  });
+});
+
+describe('buildScoringRuleWeekHeatmap', () => {
+  function srRow(scoring_rule: string, is_correct: boolean, verified_at: string) {
+    return { confidence: 0.6, is_correct, verified_at, scoring_rule };
+  }
+
+  it('빈 배열 → 빈 결과', () => {
+    const result = buildScoringRuleWeekHeatmap([]);
+    expect(result.length).toBe(0);
+  });
+
+  it('1주차 데이터 → all + v1.8 row 양쪽 누적', () => {
+    const rows = [
+      srRow('v1.8', true, '2026-05-12T10:00:00Z'),
+      srRow('v1.8', true, '2026-05-13T10:00:00Z'),
+      srRow('v1.8', false, '2026-05-14T10:00:00Z'),
+    ];
+    const result = buildScoringRuleWeekHeatmap(rows, 4);
+    const allCell = result.find((c) => c.scoringRule === 'all');
+    const v18Cell = result.find((c) => c.scoringRule === 'v1.8');
+    expect(allCell?.n).toBe(3);
+    expect(allCell?.hits).toBe(2);
+    expect(v18Cell?.n).toBe(3);
+    expect(v18Cell?.accuracy).toBeCloseTo(2 / 3);
+  });
+
+  it('weeksWindow=4 → 최근 4주만 포함', () => {
+    const rows = [
+      srRow('v1.8', true, '2026-04-07T10:00:00Z'),
+      srRow('v1.8', true, '2026-04-14T10:00:00Z'),
+      srRow('v1.8', true, '2026-04-21T10:00:00Z'),
+      srRow('v1.8', true, '2026-04-28T10:00:00Z'),
+      srRow('v1.8', true, '2026-05-05T10:00:00Z'),
+      srRow('v1.8', true, '2026-05-12T10:00:00Z'),
+    ];
+    const result = buildScoringRuleWeekHeatmap(rows, 4);
+    const allCells = result.filter((c) => c.scoringRule === 'all');
+    expect(allCells.length).toBe(4);
+    // 첫 주 (2026-04-07) 는 윈도우 밖이어야 함
+    const firstWeekIncluded = allCells.some((c) => c.weekStart <= '2026-04-07');
+    expect(firstWeekIncluded).toBe(false);
+  });
+
+  it('n<3 cell → accuracy=null (소표본)', () => {
+    const rows = [
+      srRow('v1.8', true, '2026-05-12T10:00:00Z'),
+      srRow('v1.8', false, '2026-05-13T10:00:00Z'),
+    ];
+    const result = buildScoringRuleWeekHeatmap(rows, 4);
+    const v18Cell = result.find((c) => c.scoringRule === 'v1.8');
+    expect(v18Cell?.n).toBe(2);
+    expect(v18Cell?.accuracy).toBeNull();
   });
 });
