@@ -167,6 +167,13 @@ export interface PredictionInput {
   weather?: import('./scrapers/weather').WeatherSnapshot | null;
   /** 돔구장 여부 — KBO 안 WO (고척) 만 true. weather 무시 noop. */
   isDome?: boolean;
+
+  /**
+   * M-F2 umpire_sz factor pre-computed input (cycle 1013).
+   * predictor 동기 — DB 호출 X. daily pipeline 이 scoreUmpireSZ() 결과를 본 input 에 주입.
+   * 결측 시 factor=0.5 neutral. production weight=0 이라 effect 0.
+   */
+  umpireSZScore?: import('./factors/umpire-sz').UmpireSZScore | null;
 }
 
 export interface PredictionResult {

@@ -3,6 +3,7 @@ import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
 import { FACTOR_TOTAL } from './weights';
 import { scoreParkWeather, parkWeatherFactor } from '../factors/park-weather';
+import { umpireSZFactor } from '../factors/umpire-sz';
 
 /**
  * 두 값을 0-1 범위로 정규화 (상대 비교)
@@ -99,6 +100,12 @@ export function predict(input: PredictionInput): PredictionResult {
   );
   factors.park_weather = parkWeatherFactor(pwScore);
 
+  // 12. umpire_sz (M-F2 cycle 1013 — shadow factor, production weight=0)
+  // umpireSZScore 결측 시 0.5 neutral. predictor 동기 — DB lookup 은 외부 pipeline 에서 처리.
+  factors.umpire_sz = input.umpireSZScore
+    ? umpireSZFactor(input.umpireSZScore)
+    : 0.5;
+
   // 가중합산
   let weightedSum = 0;
   for (const [key, weight] of Object.entries(w)) {
@@ -167,6 +174,7 @@ function generateReasoning(
     elo: 'Elo 레이팅',
     sfr: '수비력(SFR)',
     park_weather: '기상영향',
+    umpire_sz: '주심 SZ',
   };
 
   const topFactors = contributions

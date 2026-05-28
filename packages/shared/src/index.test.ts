@@ -62,10 +62,11 @@ describe('DEFAULT_WEIGHTS', () => {
     expect(sum).toBeCloseTo(0.85, 2);
   });
 
-  it('should have production-active 10 factor + shadow factor (park_weather)', () => {
-    // M-F1 cycle 1013 — park_weather 도입 (production 0). M-F2 시 umpire_sz 추가 예정.
-    expect(Object.keys(DEFAULT_WEIGHTS).length).toBeGreaterThanOrEqual(11);
+  it('should have production-active 10 factor + shadow factor (park_weather + umpire_sz)', () => {
+    // M-F1 / M-F2 cycle 1013 — park_weather + umpire_sz 도입 (production 0).
+    expect(Object.keys(DEFAULT_WEIGHTS).length).toBe(12);
     expect(DEFAULT_WEIGHTS.park_weather).toBe(0);
+    expect(DEFAULT_WEIGHTS.umpire_sz).toBe(0);
   });
 
   it('should have all values in [0, 1]', () => {

@@ -119,9 +119,10 @@ export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 //   WAR 8% / 상대전적 3% / 구장보정 4% / Elo 10% / 수비SFR 5%
 // 합계 0.85.
 //
-// Shadow-only factor (M-F1 cycle 1013, 2026-05-28):
-//   park_weather 0% — Open-Meteo 기상 영향 (저온 / 외야 바람 / 강수). production 가중치 0,
-//   shadow cohort (v2.1-B-shadow) 에서만 weight>0 로 활성. 박제 위치: factors/park-weather.ts.
+// Shadow-only factor (M-F1 / M-F2 cycle 1013, 2026-05-28):
+//   park_weather 0% — Open-Meteo 기상 영향 (저온 / 외야 바람 / 강수). 박제: factors/park-weather.ts.
+//   umpire_sz    0% — 주심 strike zone bias (umpire_stats DB lookup). 박제: factors/umpire-sz.ts.
+// production 가중치 0, shadow cohort (v2.1-B-shadow) 에서만 weight>0 로 활성.
 export const DEFAULT_WEIGHTS = {
   sp_fip: 0.15,
   sp_xfip: 0.05,
@@ -134,6 +135,7 @@ export const DEFAULT_WEIGHTS = {
   elo: 0.10,
   sfr: 0.05,
   park_weather: 0,
+  umpire_sz: 0,
 } as const;
 
 /**
