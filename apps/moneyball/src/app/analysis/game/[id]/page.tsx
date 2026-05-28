@@ -12,6 +12,7 @@ import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
 import { DetailedFactorAnalysis } from '@/components/analysis/DetailedFactorAnalysis';
+import { FactorWaterfallChart } from '@/components/predictions/FactorWaterfallChart';
 import { RivalryMemorySurface } from '@/components/predictions/RivalryMemorySurface';
 import { GameOverview } from '@/components/analysis/GameOverview';
 import { ShareButtons } from '@/components/share/ShareButtons';
@@ -406,6 +407,15 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           awayTeam={awayTeam}
           factors={preGame.factors as Record<string, number>}
           details={factorDetails}
+        />
+      )}
+
+      {/* 3.5 팩터 누적 영향 waterfall chart — 모델 prob 도출 path 시각화 (cycle 1021 (a3)) */}
+      {preGame.factors && (
+        <FactorWaterfallChart
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          factors={preGame.factors as Record<string, number>}
         />
       )}
 
