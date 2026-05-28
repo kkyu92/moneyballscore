@@ -4,6 +4,7 @@ import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
+import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
 import { KBO_TEAMS, assertSelectOk, errMsg } from '@moneyball/shared';
 
@@ -203,6 +204,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // /insights/series/[topic] — 45 team-pair canonical slug (W-SEO, 2026-05-28).
+  // 정적 generateStaticParams 와 정확히 매칭. priority 0.55 weekly.
+  const insightsSeriesRoutes: MetadataRoute.Sitemap = listSeriesTopics().map(
+    (topic) => ({
+      url: `${baseUrl}/insights/series/${topic.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.55,
+    }),
+  );
+
   return [
     ...staticRoutes,
     ...seasonYearRoutes,
@@ -214,6 +226,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...playerRoutes,
     ...analysisRoutes,
     ...insightsDateRoutes,
+    ...insightsSeriesRoutes,
     ...lottoArchiveRoutes,
   ];
 }
