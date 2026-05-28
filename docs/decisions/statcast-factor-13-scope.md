@@ -4,7 +4,9 @@
 **Created**: 2026-05-28 (cycle 1021 plan #15 C1f)
 **Owner**: 사용자 (kyusikkyu@gmail.com)
 **Linked**: `~/.develop-cycle/plans/moneyballscore/15.md` (plan #15 C1f), parent plan #14
-**Decision timing**: n=150 도달 (ETA 2026-08-04) 또는 v2.0 production ship 결정 시점 중 먼저
+**Decision timing**: **2026-06-30 (캘린더 hard deadline)** 또는 n=150 도달 (ETA 2026-08-04) 또는 v2.0 production ship 결정 시점 중 가장 빠름
+
+> ⚠️ **캘린더 trigger 추가 (autoplan CEO-4 finding 후속)**: 이전 trigger 2건 (n=150 + v2.0 ship) = 둘 다 같은 blocked event 의존 → 무기한 deferral risk. 캘린더 hard deadline 2026-06-30 추가로 강제 재검토 보장. 본 날짜까지 미결정 시 자동 escalation (carry-over plan 박제 + 사용자 알림).
 
 ## 결정 요청
 
@@ -102,3 +104,15 @@
 ## Next action
 
 사용자 결정 wait. 결정 시 본 1-pager `Status: decided` 갱신 + 매핑 plan 박제 (carry-over).
+
+## 캘린더 escalation 룰 (cycle 1021 autoplan CEO-4 후속)
+
+본 1-pager 가 **2026-06-30 까지 미결정** 시:
+
+1. 본 1-pager 안 `Status: ESCALATED — deadline passed` 박제
+2. carry-over plan #N 박제 — "사용자 결정 wait" 명시 + 본 1-pager link
+3. 다음 develop-cycle 진단 단계 자동 trigger (unprocessed-plan lookup)
+4. 사용자 알림 채널 (Telegram 또는 commit body) 박제
+
+본 룰 = autoplan CEO-4 finding ("1-pagers must have a calendar-bound trigger, not
+an event-bound one tied to the same critical path") 정합. 무기한 deferral 차단.
