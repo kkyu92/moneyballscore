@@ -16,6 +16,7 @@ import { FactorWaterfallChart } from '@/components/predictions/FactorWaterfallCh
 import { DebateTimeline } from '@/components/insights/DebateTimeline';
 import type { DebateTimelineData } from '@/lib/insights/loader';
 import { RivalryMemorySurface } from '@/components/predictions/RivalryMemorySurface';
+import { HistoricalAnalogMatchup } from '@/components/predictions/HistoricalAnalogMatchup';
 import { GameOverview } from '@/components/analysis/GameOverview';
 import { ShareButtons } from '@/components/share/ShareButtons';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -103,6 +104,8 @@ interface GameAnalysisRow {
   status: string | null;
   home_score: number | null;
   away_score: number | null;
+  home_team_id: number | null;
+  away_team_id: number | null;
   home_team: { code: string | null; name_ko: string | null } | null;
   away_team: { code: string | null; name_ko: string | null } | null;
   winner: { code: string | null } | null;
@@ -145,6 +148,7 @@ async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> 
     .from('games')
     .select(`
       id, game_date, game_time, stadium, status, home_score, away_score,
+      home_team_id, away_team_id,
       home_team:teams!games_home_team_id_fkey(code, name_ko),
       away_team:teams!games_away_team_id_fkey(code, name_ko),
       winner:teams!games_winner_team_id_fkey(code),
@@ -473,7 +477,19 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         asOfDate={gameDate}
       />
 
-      {/* 3b. 모델 메타 (접기) */}
+      {/* 3b. 최근 같은 대결 — 우리 모델 과거 예측 vs 실제 결과 (a4, cycle 1021) */}
+      {game.home_team_id != null && game.away_team_id != null && (
+        <HistoricalAnalogMatchup
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          homeTeamId={game.home_team_id}
+          awayTeamId={game.away_team_id}
+          gameId={gameId}
+          asOfDate={gameDate}
+        />
+      )}
+
+      {/* 3c. 모델 메타 (접기) */}
       {preGame.factors && (
         <details className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg px-4 py-2 text-xs">
           <summary className="cursor-pointer text-gray-500 dark:text-gray-400">
