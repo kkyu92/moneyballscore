@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
+import { DebateTimeline } from "@/components/insights/DebateTimeline";
 import { shortTeamName } from "@moneyball/shared";
 import {
   getInsightsForDate,
@@ -168,14 +169,40 @@ export default async function InsightsDatePage({ params }: Props) {
                   경기 분석 →
                 </Link>
               </div>
-              <JudgeReasoningCard
-                homeTeam={item.homeTeam}
-                awayTeam={item.awayTeam}
-                judgeReasoning={item.reasoningText}
-                homeArgSummary={item.homeArgSummary}
-                awayArgSummary={item.awayArgSummary}
-                isQuantOnlyFallback={item.isFallback}
-              />
+              {item.debate ? (
+                <>
+                  <DebateTimeline
+                    homeTeam={item.homeTeam}
+                    awayTeam={item.awayTeam}
+                    debate={item.debate}
+                  />
+                  <details className="group rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-surface)] open:bg-white dark:open:bg-[var(--color-surface-card)]">
+                    <summary className="cursor-pointer px-4 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 select-none list-none flex items-center gap-2">
+                      <span aria-hidden className="inline-block transition-transform group-open:rotate-90">▶</span>
+                      심판 reasoning 원문 + 양팀 논거 요약
+                    </summary>
+                    <div className="px-4 pb-4 pt-2">
+                      <JudgeReasoningCard
+                        homeTeam={item.homeTeam}
+                        awayTeam={item.awayTeam}
+                        judgeReasoning={item.reasoningText}
+                        homeArgSummary={item.homeArgSummary}
+                        awayArgSummary={item.awayArgSummary}
+                        isQuantOnlyFallback={item.isFallback}
+                      />
+                    </div>
+                  </details>
+                </>
+              ) : (
+                <JudgeReasoningCard
+                  homeTeam={item.homeTeam}
+                  awayTeam={item.awayTeam}
+                  judgeReasoning={item.reasoningText}
+                  homeArgSummary={item.homeArgSummary}
+                  awayArgSummary={item.awayArgSummary}
+                  isQuantOnlyFallback={item.isFallback}
+                />
+              )}
               {item.factors && (
                 <FactorBreakdown
                   factors={item.factors}

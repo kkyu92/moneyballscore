@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { assertSelectOk, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, CURRENT_SCORING_RULE, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 
 const DATE_REGEX = /^20[2-9]\d-\d{2}-\d{2}$/;
@@ -30,10 +30,61 @@ interface Verdict {
   predictedWinner?: string;
   homeArgSummary?: string;
   awayArgSummary?: string;
+  calibrationApplied?: string | null;
+  confidence?: number;
+}
+
+interface TeamArgumentShape {
+  team?: string;
+  strengths?: unknown;
+  opponentWeaknesses?: unknown;
+  keyFactor?: string;
+  confidence?: number;
+  reasoning?: string;
+}
+
+interface CalibrationShape {
+  recentBias?: string | null;
+  teamSpecific?: string | null;
+  modelWeakness?: string | null;
+  adjustmentSuggestion?: number;
 }
 
 interface ReasoningShape {
-  debate?: { verdict?: Verdict };
+  debate?: {
+    verdict?: Verdict;
+    homeArgument?: TeamArgumentShape;
+    awayArgument?: TeamArgumentShape;
+    calibration?: CalibrationShape;
+    quantitativeProb?: number;
+  };
+}
+
+export interface DebateArgumentSummary {
+  keyFactor: string | null;
+  strengths: string[];
+  opponentWeaknesses: string[];
+  confidence: number | null;
+  reasoning: string | null;
+}
+
+export interface DebateCalibrationSummary {
+  recentBias: string | null;
+  teamSpecific: string | null;
+  modelWeakness: string | null;
+  adjustmentSuggestion: number | null;
+}
+
+export interface DebateTimelineData {
+  quantHomeProb: number | null;
+  homeArgument: DebateArgumentSummary | null;
+  awayArgument: DebateArgumentSummary | null;
+  calibration: DebateCalibrationSummary | null;
+  verdictHomeProb: number | null;
+  verdictConfidence: number | null;
+  verdictReasoning: string;
+  predictedWinner: TeamCode | null;
+  calibrationApplied: string | null;
 }
 
 export interface InsightEntry {
@@ -49,6 +100,76 @@ export interface InsightEntry {
   awayArgSummary: string | null;
   homeWinProb: number | null;
   factors: Record<string, number> | null;
+  debate: DebateTimelineData | null;
+}
+
+function normalizeStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (v): v is string => typeof v === "string" && v.trim().length > 0,
+  );
+}
+
+function normalizeArgument(
+  arg: TeamArgumentShape | undefined,
+): DebateArgumentSummary | null {
+  if (!arg) return null;
+  const keyFactor =
+    typeof arg.keyFactor === "string" && arg.keyFactor.trim().length > 0
+      ? arg.keyFactor
+      : null;
+  const confidence =
+    typeof arg.confidence === "number" && Number.isFinite(arg.confidence)
+      ? arg.confidence
+      : null;
+  const reasoning =
+    typeof arg.reasoning === "string" && arg.reasoning.trim().length > 0
+      ? arg.reasoning
+      : null;
+  const strengths = normalizeStringList(arg.strengths);
+  const opponentWeaknesses = normalizeStringList(arg.opponentWeaknesses);
+  if (
+    !keyFactor &&
+    confidence === null &&
+    !reasoning &&
+    strengths.length === 0 &&
+    opponentWeaknesses.length === 0
+  ) {
+    return null;
+  }
+  return { keyFactor, confidence, reasoning, strengths, opponentWeaknesses };
+}
+
+function normalizeCalibration(
+  c: CalibrationShape | undefined,
+): DebateCalibrationSummary | null {
+  if (!c) return null;
+  const recentBias =
+    typeof c.recentBias === "string" && c.recentBias.trim().length > 0
+      ? c.recentBias
+      : null;
+  const teamSpecific =
+    typeof c.teamSpecific === "string" && c.teamSpecific.trim().length > 0
+      ? c.teamSpecific
+      : null;
+  const modelWeakness =
+    typeof c.modelWeakness === "string" && c.modelWeakness.trim().length > 0
+      ? c.modelWeakness
+      : null;
+  const adjustmentSuggestion =
+    typeof c.adjustmentSuggestion === "number" &&
+    Number.isFinite(c.adjustmentSuggestion)
+      ? c.adjustmentSuggestion
+      : null;
+  if (
+    !recentBias &&
+    !teamSpecific &&
+    !modelWeakness &&
+    (adjustmentSuggestion === null || adjustmentSuggestion === 0)
+  ) {
+    return null;
+  }
+  return { recentBias, teamSpecific, modelWeakness, adjustmentSuggestion };
 }
 
 export async function listInsightsDates(daysBack = 90): Promise<string[]> {
@@ -61,6 +182,7 @@ export async function listInsightsDates(daysBack = 90): Promise<string[]> {
     .from("predictions")
     .select("games!inner(game_date)")
     .eq("prediction_type", "pre_game")
+    .eq("scoring_rule", CURRENT_SCORING_RULE)
     .gte("games.game_date", sinceStr)
     .order("created_at", { ascending: false })
     .limit(daysBack * 6);
@@ -104,6 +226,7 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
       "is_correct, reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
+    .eq("scoring_rule", CURRENT_SCORING_RULE)
     .eq("games.game_date", date)
     .order("created_at", { ascending: false });
   const { data } = assertSelectOk(result, "insights.getInsightsForDate");
@@ -131,6 +254,43 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
       rawFactors && typeof rawFactors === "object" && Object.keys(rawFactors).length > 0
         ? rawFactors
         : null;
+    const debateRaw = r?.debate;
+    const homeArgument = normalizeArgument(debateRaw?.homeArgument);
+    const awayArgument = normalizeArgument(debateRaw?.awayArgument);
+    const calibration = normalizeCalibration(debateRaw?.calibration);
+    const quantHomeProb =
+      typeof debateRaw?.quantitativeProb === "number" && Number.isFinite(debateRaw.quantitativeProb)
+        ? debateRaw.quantitativeProb
+        : null;
+    const verdictHomeProb =
+      typeof verdict?.homeWinProb === "number" && Number.isFinite(verdict.homeWinProb)
+        ? verdict.homeWinProb
+        : null;
+    const verdictConfidence =
+      typeof verdict?.confidence === "number" && Number.isFinite(verdict.confidence)
+        ? verdict.confidence
+        : null;
+    const predictedWinnerCode =
+      typeof verdict?.predictedWinner === "string" && verdict.predictedWinner.trim().length > 0
+        ? (verdict.predictedWinner as TeamCode)
+        : null;
+    const calibrationApplied =
+      typeof verdict?.calibrationApplied === "string" && verdict.calibrationApplied.trim().length > 0
+        ? verdict.calibrationApplied
+        : null;
+    const debate: DebateTimelineData | null = presented.isFallback
+      ? null
+      : {
+          quantHomeProb,
+          homeArgument,
+          awayArgument,
+          calibration,
+          verdictHomeProb,
+          verdictConfidence,
+          verdictReasoning: presented.text,
+          predictedWinner: predictedWinnerCode,
+          calibrationApplied,
+        };
     out.push({
       gameId: game.id,
       date: game.game_date,
@@ -144,6 +304,7 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
       awayArgSummary: verdict?.awayArgSummary ?? null,
       homeWinProb: verdict?.homeWinProb ?? null,
       factors,
+      debate,
     });
   }
   return out;
