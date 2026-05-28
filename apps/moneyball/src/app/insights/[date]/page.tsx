@@ -182,6 +182,7 @@ export default async function InsightsDatePage({ params }: Props) {
                   homeTeam={item.homeTeam}
                   awayTeam={item.awayTeam}
                   gameId={item.gameId}
+                  chart
                 />
               )}
             </li>
