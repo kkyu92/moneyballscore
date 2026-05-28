@@ -285,7 +285,7 @@ export interface ScoringRuleDayCell {
   accuracy: number | null;
 }
 
-export const SCORING_RULE_HEATMAP_ROWS = ['all', 'v1.5', 'v1.6', 'v1.7-revert', 'v1.8'];
+export const SCORING_RULE_HEATMAP_ROWS = ['all', 'v1.5', 'v1.6', 'v1.7-revert', 'v1.8', 'v1.8-credit-fail'];
 export const SMALL_SAMPLE_THRESHOLD = 3;
 
 export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[] {
@@ -376,7 +376,7 @@ export interface BrierTrendPoint {
   weekLabel: string;
   n: number;
   brier: number | null;
-  scoringRule: string; // 'all' | 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8'
+  scoringRule: string; // 'all' | 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8' | 'v1.8-credit-fail'
 }
 
 export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
@@ -461,6 +461,7 @@ const VERSION_NOTES: Record<ScoringRule, string> = {
   'v1.6': 'ELO·상대전적 실험 → 저조로 복원',
   'v1.7-revert': 'v1.5 가중치 복원 + 일요일 상한 0.55 도입',
   'v1.8': 'ELO 10%↑ / head_to_head 3%↓ + 일요일 상한 0.45 조정',
+  'v1.8-credit-fail': 'v1.8 안 LLM credit 소진 / agents_failed 분리 cohort (baseline 정합성 회복 — plan #14 C1c)',
   'v2.1-B-shadow': 'v2.1-B + shadow factor (park_weather / umpire_sz) — cohort evidence only',
   'v2.0-shadow': 'v1.8 + elo/bullpen_fip/recent_form 가중치 bump — cohort evidence only',
 };
