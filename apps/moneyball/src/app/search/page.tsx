@@ -8,7 +8,7 @@ import {
   type SelectResult,
 } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
-import { SearchForm } from '@/components/shared/SearchForm';
+import { SearchClient, type SearchEntry } from '@/components/search/SearchClient';
 import { TeamLogo } from '@/components/shared/TeamLogo';
 
 export const revalidate = 0;
@@ -128,14 +128,137 @@ async function searchDates(q: string): Promise<DateHit[]> {
     .sort((a, b) => (a.game_date < b.game_date ? 1 : -1));
 }
 
+// Static page entries surfaced in the fuzzy index. Kept short — pages that
+// users commonly land on but might not bookmark by name.
+const STATIC_PAGES: Array<{
+  slug: string;
+  label: string;
+  meta?: string;
+  keywords: string;
+}> = [
+  { slug: '/', label: '홈', keywords: 'home main 메인' },
+  { slug: '/predictions', label: '오늘의 예측', meta: '오늘', keywords: 'predictions today 예측' },
+  { slug: '/accuracy', label: '적중률', keywords: 'accuracy hit-rate 정확도' },
+  { slug: '/leaderboard', label: '리더보드', keywords: 'leaderboard ranking 순위' },
+  { slug: '/standings', label: '팀 순위', keywords: 'standings team-ranking 팀 순위' },
+  { slug: '/teams', label: '팀 목록', keywords: 'teams 팀목록' },
+  { slug: '/players', label: '선수 목록', keywords: 'players 선수목록' },
+  { slug: '/insights', label: '인사이트', keywords: 'insights 인사이트 ai-judge' },
+  { slug: '/dashboard', label: '대시보드', keywords: 'dashboard 대시보드 stats' },
+  { slug: '/methodology', label: '방법론', keywords: 'methodology 방법론 모델' },
+  { slug: '/glossary', label: '용어집', keywords: 'glossary 용어집 fip woba war' },
+  { slug: '/about', label: 'About', keywords: 'about 소개' },
+  { slug: '/changelog', label: '변경 기록', keywords: 'changelog 변경 release' },
+  { slug: '/contact', label: '문의', keywords: 'contact 문의' },
+  { slug: '/picks', label: 'My Picks', keywords: 'picks my-picks 내픽' },
+];
+
+async function buildSearchIndex(): Promise<SearchEntry[]> {
+  const entries: SearchEntry[] = [];
+
+  // 1) Teams — 10 fixed.
+  for (const [code, t] of TEAM_ENTRIES) {
+    entries.push({
+      kind: 'team',
+      id: `team:${code}`,
+      label: t.name,
+      sub: code,
+      meta: t.stadium,
+      href: `/teams/${code}`,
+      teamCode: code,
+      haystack: `${code} ${t.name} ${t.stadium}`.toLowerCase(),
+    });
+  }
+
+  // 2) Static pages.
+  for (const p of STATIC_PAGES) {
+    entries.push({
+      kind: 'page',
+      id: `page:${p.slug}`,
+      label: p.label,
+      sub: null,
+      meta: p.meta ?? p.slug,
+      href: p.slug,
+      haystack: `${p.label} ${p.keywords} ${p.slug}`.toLowerCase(),
+    });
+  }
+
+  // 3) Players — top N by `id` (proxy for recency). assertSelectOk for
+  //    silent-drift detection (cycle 155 family).
+  try {
+    const supabase = await createClient();
+    const playersResult = (await supabase
+      .from('players')
+      .select('id, name_ko, name_en, position, team:teams!players_team_id_fkey(code, name_ko)')
+      .order('id', { ascending: false })
+      .limit(200)) as SelectResult<PlayerHit[]>;
+    const { data: players } = assertSelectOk(playersResult, 'search.index.players');
+    if (players) {
+      for (const p of players) {
+        const teamLabel = p.team?.name_ko ?? '';
+        entries.push({
+          kind: 'player',
+          id: `player:${p.id}`,
+          label: p.name_ko,
+          sub: p.name_en ?? null,
+          meta: [teamLabel, p.position].filter(Boolean).join(' · ') || null,
+          href: `/players/${p.id}`,
+          haystack: `${p.name_ko} ${p.name_en ?? ''} ${teamLabel} ${p.position ?? ''}`.toLowerCase(),
+        });
+      }
+    }
+  } catch {
+    // Index population is best-effort — silent fallback if DB unreachable.
+  }
+
+  // 4) Recent game dates — last 30 distinct (within 90 day window).
+  try {
+    const supabase = await createClient();
+    const today = new Date();
+    const since = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    const datesResult = (await supabase
+      .from('games')
+      .select('game_date')
+      .gte('game_date', since)
+      .order('game_date', { ascending: false })
+      .limit(200)) as SelectResult<Array<{ game_date: string }>>;
+    const { data: dates } = assertSelectOk(datesResult, 'search.index.dates');
+    if (dates) {
+      const seen = new Set<string>();
+      for (const row of dates) {
+        if (seen.has(row.game_date)) continue;
+        seen.add(row.game_date);
+        if (seen.size > 30) break;
+        entries.push({
+          kind: 'date',
+          id: `date:${row.game_date}`,
+          label: row.game_date,
+          sub: null,
+          meta: '예측 페이지',
+          href: `/predictions/${row.game_date}`,
+          haystack: `${row.game_date} ${row.game_date.replace(/-/g, '')}`.toLowerCase(),
+        });
+      }
+    }
+  } catch {
+    // best-effort
+  }
+
+  return entries;
+}
+
 export default async function SearchPage({ searchParams }: PageProps) {
   const { q: rawQ } = await searchParams;
   const q = (rawQ ?? '').trim();
 
-  const teamHits = q ? matchTeams(q) : [];
-  const [playerHits, dateHits] = q
-    ? await Promise.all([searchPlayers(q), searchDates(q)])
-    : [[], []];
+  const [searchIndex, teamHits, playerHits, dateHits] = await Promise.all([
+    buildSearchIndex(),
+    Promise.resolve(q ? matchTeams(q) : []),
+    q ? searchPlayers(q) : Promise.resolve<PlayerHit[]>([]),
+    q ? searchDates(q) : Promise.resolve<DateHit[]>([]),
+  ]);
 
   const totalHits = teamHits.length + playerHits.length + dateHits.length;
   const isExactDate = ISO_DATE_RE.test(q);
@@ -151,7 +274,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
         </p>
       </header>
 
-      <SearchForm initialQuery={q} />
+      <SearchClient entries={searchIndex} initialQuery={q} />
 
       {q && (
         <p className="text-sm text-gray-600 dark:text-gray-300">
