@@ -43,10 +43,17 @@ interface LeaderboardMockOptions {
   predictionsError?: { message: string } | null;
 }
 
+const LEADERBOARD_VIEW_TABLES = new Set([
+  "leaderboard_weekly",
+  "leaderboard_monthly",
+  "leaderboard_season",
+  "leaderboard_all",
+]);
+
 function makeServerMock(opts: LeaderboardMockOptions = {}) {
   return {
     from: vi.fn((table: string) => {
-      if (table === "leaderboard_weekly" || table === "leaderboard_season") {
+      if (LEADERBOARD_VIEW_TABLES.has(table)) {
         return makeChainBuilder({
           data: opts.viewError ? null : [],
           error: opts.viewError ?? null,
@@ -105,6 +112,27 @@ describe("leaderboard lib — cycle 453 silent drift family `.error` 미체크 �
     const { fetchLeaderboard } = await import("../server");
     await expect(fetchLeaderboard("season")).rejects.toThrow(
       /leaderboard\.fetchLeaderboard\(season\) select failed: view missing/,
+    );
+  });
+
+  // cycle 1021 c10: monthly / all 신규 mode 동일 가드.
+  it("fetchLeaderboard monthly view select error → assertSelectOk throw", async () => {
+    serverMock = makeServerMock({
+      viewError: { message: "view missing monthly" },
+    });
+    const { fetchLeaderboard } = await import("../server");
+    await expect(fetchLeaderboard("monthly")).rejects.toThrow(
+      /leaderboard\.fetchLeaderboard\(monthly\) select failed: view missing monthly/,
+    );
+  });
+
+  it("fetchLeaderboard all view select error → assertSelectOk throw", async () => {
+    serverMock = makeServerMock({
+      viewError: { message: "view missing all" },
+    });
+    const { fetchLeaderboard } = await import("../server");
+    await expect(fetchLeaderboard("all")).rejects.toThrow(
+      /leaderboard\.fetchLeaderboard\(all\) select failed: view missing all/,
     );
   });
 
