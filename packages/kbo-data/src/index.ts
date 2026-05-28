@@ -25,6 +25,14 @@ export { predict } from './engine/predictor';
 // 파이프라인
 export { runDailyPipeline } from './pipeline/daily';
 export { runLiveUpdate } from './pipeline/live';
+export {
+  computeShadowPrediction,
+  shadowBrierDelta,
+  insertShadowRow,
+  type ShadowComputeResult,
+  type ShadowRowInsertInput,
+  type ShadowRowInsertResult,
+} from './pipeline/shadow-cohort';
 export { runPostviewDaily } from './pipeline/postview-daily';
 export type { PostviewDailyResult } from './pipeline/postview-daily';
 export { syncBatterStats } from './pipeline/sync-batter-stats';

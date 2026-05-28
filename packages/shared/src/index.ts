@@ -14,6 +14,7 @@ export type { SelectResult, WriteResult } from './db-error';
 export {
   ALL_SCORING_RULES,
   CURRENT_SCORING_RULE,
+  SHADOW_SCORING_RULE,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   QUANT_LIVE_VERSION,
@@ -154,6 +155,36 @@ export const ACTIVE_FACTOR_KEYS = [
   'elo',
   'sfr',
 ] as const;
+
+/**
+ * v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%).
+ * /v2-preview 사전 evidence + shadow cohort 베이스 가중치. cycle 1013 packages/shared 로
+ * 이관 (이전 apps/moneyball/src/lib/predictions/v2Predictor.ts → 본 위치).
+ * 합계 0.85 (DEFAULT_WEIGHTS 와 동일).
+ */
+export const V2_1_B_WEIGHTS = {
+  sp_fip: 0.16,
+  sp_xfip: 0.05,
+  lineup_woba: 0.17,
+  bullpen_fip: 0.11,
+  recent_form: 0.12,
+  war: 0.09,
+  head_to_head: 0.02,
+  park_factor: 0.04,
+  elo: 0.09,
+  sfr: 0.00,
+} as const;
+
+/**
+ * Shadow cohort 가중치 — v2.1-B 베이스 + 신규 shadow factor (park_weather / umpire_sz) 활성.
+ * scoring_rule='v2.1-B-shadow' row 의 quant 재계산에 사용. n=150 도달 후 production 적용 결정.
+ * 합계 0.90 (자체 FACTOR_TOTAL 로 정규화 — predictor.ts 와 동일 산출 공식).
+ */
+export const SHADOW_WEIGHTS = {
+  ...V2_1_B_WEIGHTS,
+  park_weather: 0.03,
+  umpire_sz: 0.02,
+} as const;
 
 export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 

@@ -28,6 +28,7 @@ import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
 import { captureSilentDriftAlert } from './silent-drift-alert';
+import { insertShadowRow } from './shadow-cohort';
 import {
   computePredictionHistory,
   type PredictionHistoryRow,
@@ -766,6 +767,47 @@ export async function runDailyPipeline(
     console.log(
       `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`,
     );
+
+    // M-V2 shadow cohort row insert (cycle 1013) — production v1.8 insert 직후 동일 game_id 에
+    // scoring_rule='v2.1-B-shadow' row 별도 누적. failure tolerant (throw X) → v1.8 path 영향 X.
+    // /accuracy/shadow page 안 Brier delta evidence source.
+    try {
+      const shadowResult = await insertShadowRow(db, {
+        gameId: dbGameId,
+        predictedWinnerId: teamIdMap[result.predictedWinner],
+        factors: result.factors,
+        baseRowMeta: {
+          home_sp_fip: payload.home_sp_fip,
+          away_sp_fip: payload.away_sp_fip,
+          home_sp_xfip: payload.home_sp_xfip,
+          away_sp_xfip: payload.away_sp_xfip,
+          home_lineup_woba: payload.home_lineup_woba,
+          away_lineup_woba: payload.away_lineup_woba,
+          home_bullpen_fip: payload.home_bullpen_fip,
+          away_bullpen_fip: payload.away_bullpen_fip,
+          home_war_total: payload.home_war_total,
+          away_war_total: payload.away_war_total,
+          home_recent_form: payload.home_recent_form,
+          away_recent_form: payload.away_recent_form,
+          head_to_head_rate: payload.head_to_head_rate,
+          park_factor: payload.park_factor,
+          home_elo: payload.home_elo,
+          away_elo: payload.away_elo,
+          home_sfr: payload.home_sfr,
+          away_sfr: payload.away_sfr,
+          reasoning: `[v2.1-B-shadow quant only] ${finalReasoning}`,
+        },
+      });
+      if (!shadowResult.ok && shadowResult.reason === 'db_error') {
+        // db_error 만 errors[] push (compute_failed / duplicate 는 silent OK)
+        errors.push(
+          `shadow row ${game.homeTeam}v${game.awayTeam}: ${shadowResult.error ?? 'unknown'}`,
+        );
+      }
+    } catch (e) {
+      // insertShadowRow 는 자체 try/catch — 본 outer catch 는 방어 deepest fallback
+      errors.push(`shadow row catch ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
+    }
 
     // games.weather 저장 (idempotent — 이미 있으면 skip). 예측과 같은 시점의
     // 예보 스냅샷을 영구 기록 — 관측 심화 (날씨-결과 상관 분석) 데이터 소스.

@@ -461,6 +461,7 @@ const VERSION_NOTES: Record<ScoringRule, string> = {
   'v1.6': 'ELO·상대전적 실험 → 저조로 복원',
   'v1.7-revert': 'v1.5 가중치 복원 + 일요일 상한 0.55 도입',
   'v1.8': 'ELO 10%↑ / head_to_head 3%↓ + 일요일 상한 0.45 조정',
+  'v2.1-B-shadow': 'v2.1-B + shadow factor (park_weather / umpire_sz) — cohort evidence only',
 };
 
 function labelOf(version: ScoringRule): string {

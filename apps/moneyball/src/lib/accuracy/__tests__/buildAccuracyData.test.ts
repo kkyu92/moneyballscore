@@ -232,18 +232,24 @@ describe('buildVersionHistory', () => {
     return { confidence, is_correct, verified_at, scoring_rule };
   }
 
-  it('빈 배열 → 4개 버전 모두 n=0', () => {
+  it('빈 배열 → 5개 버전 모두 n=0 (v2.1-B-shadow cohort 박제 cycle 1013)', () => {
     const result = buildVersionHistory([]);
-    expect(result).toHaveLength(4);
+    expect(result).toHaveLength(5);
     result.forEach((v) => {
       expect(v.n).toBe(0);
       expect(v.accuracy).toBeNull();
     });
   });
 
-  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8', () => {
+  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8 → v2.1-B-shadow', () => {
     const result = buildVersionHistory([]);
-    expect(result.map((v) => v.version)).toEqual(['v1.5', 'v1.6', 'v1.7-revert', 'v1.8']);
+    expect(result.map((v) => v.version)).toEqual([
+      'v1.5',
+      'v1.6',
+      'v1.7-revert',
+      'v1.8',
+      'v2.1-B-shadow',
+    ]);
   });
 
   it('v1.5: 4건 3적중 → accuracy=0.75', () => {

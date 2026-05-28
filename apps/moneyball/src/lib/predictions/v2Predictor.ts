@@ -1,22 +1,12 @@
-// v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%, Brier 0.24830).
-// /v2-preview 사용자 가시 사전 evidence. N=150 도달 후 prod 적용 결정 → 변경 가능.
-//
-// 가중치 합 0.85 (DEFAULT_WEIGHTS 와 동일). 예측 산출 공식 = packages/kbo-data
-// src/engine/predictor.ts 동일 — weightedSum / FACTOR_TOTAL + HOME_ADVANTAGE → clamp [0.15, 0.85].
+// v2.1-B 가중치 — packages/shared 단일 source (cycle 1013 이관). 본 모듈은 backward-compat
+// re-export + apps/moneyball /v2-preview 의 quant 재계산 path.
+// 예측 산출 공식 = packages/kbo-data src/engine/predictor.ts 동일 — weightedSum /
+// FACTOR_TOTAL + HOME_ADVANTAGE → clamp [0.15, 0.85].
 // 본 모듈은 이미 저장된 pre_game predictions.factors JSONB 를 재가중치 적용해 미리보기 산출.
 
-export const V2_1_B_WEIGHTS = {
-  sp_fip: 0.16,
-  sp_xfip: 0.05,
-  lineup_woba: 0.17,
-  bullpen_fip: 0.11,
-  recent_form: 0.12,
-  war: 0.09,
-  head_to_head: 0.02,
-  park_factor: 0.04,
-  elo: 0.09,
-  sfr: 0.00,
-} as const;
+import { V2_1_B_WEIGHTS as SHARED_V2_1_B_WEIGHTS } from '@moneyball/shared';
+
+export const V2_1_B_WEIGHTS = SHARED_V2_1_B_WEIGHTS;
 
 export type V2WeightKey = keyof typeof V2_1_B_WEIGHTS;
 
