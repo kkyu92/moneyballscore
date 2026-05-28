@@ -82,7 +82,23 @@ trigger: 사용자 "사이클 5번 더 돌리고 영향 보고" 요청 (cycle 10
 - artifact size 증가 ≠ 사용자 가치. cycle 86~122 ship 0 streak 박제 사례 = artifact 누적이 가치 아닌 evidence.
 - 본 baseline = 진척 추적 도구, 종합 보고 = artifact + 자연 누적 evidence + 사용자 영역 결정 wait 분리 명시 필요.
 
+## Cycle 1015 누적 갱신 (delta)
+
+chain_selected: review-code (lite, sweep 94 silent drift detection)
+pr_number: null (코드 변경 0, baseline doc append 만)
+outcome: success (retro-only)
+
+- 축 1 MLB IA slot: Δ 0 (route count 1 / import 분기 5 / production 가중치 0 invariant 유지)
+- 축 2 분석: Δ 0 (factor 11/12 production 가중치 0 / shadow cohort n=49 / pair n=16 동일 / v1.8 n=126 cohort 동일)
+- 축 3 웹사이트: Δ 0 (page.tsx 24건 동일 / chart variant 동일 / 신규 라우트 0)
+- 축 4 디자인: Δ 0 (DESIGN.md mtime 2026-05-28 11:15:35 동일 / motion 토큰 동일)
+
+**측정 evidence**: `git log 8e6dd16..HEAD --oneline` = 0 commit (cycle 1014 retro + baseline doc 박제 직후, cycle 1015 시점 신규 commit 없음 — 본 cycle baseline append commit 만 추가).
+
+**sweep 94 결과**: silent drift catch 0건. cycle 1013 fix #1331 후 잔여 silent path 부재. /accuracy/shadow page totalN = pair count (양쪽 모두 존재 + 결과 박제) 정확 표기 확인 (page.tsx L105-107 filter + helper `pairProbForRow` scoring_rule 분기 정합). 의도된 정상 평가 — 다음 sweep 95 (cycle 1016) 자연 carry-over.
+
 ## 다음 단계
 
-- cycle 1015 시작 시 본 doc Read → delta 측정 → 갱신 append
+- cycle 1016 시작 시 본 doc Read → delta 측정 → 갱신 append (sweep 95)
+- cycle 1017 시작 시 본 doc Read → delta 측정 → 갱신 append
 - cycle 1018 retro 안 종합 보고 (5 cycle delta + 4축 영향 평가 + 자연 누적 wait 잔여 + 사용자 영역 wait 잔여)
