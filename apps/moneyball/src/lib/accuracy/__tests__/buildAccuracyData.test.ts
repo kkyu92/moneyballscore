@@ -232,22 +232,23 @@ describe('buildVersionHistory', () => {
     return { confidence, is_correct, verified_at, scoring_rule };
   }
 
-  it('빈 배열 → 6개 버전 모두 n=0 (v2.0-shadow cohort 박제 cycle 1019)', () => {
+  it('빈 배열 → 7개 버전 모두 n=0 (v1.8-credit-fail cohort 박제 cycle 1021 plan #14 C1c)', () => {
     const result = buildVersionHistory([]);
-    expect(result).toHaveLength(6);
+    expect(result).toHaveLength(7);
     result.forEach((v) => {
       expect(v.n).toBe(0);
       expect(v.accuracy).toBeNull();
     });
   });
 
-  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8 → v2.1-B-shadow → v2.0-shadow', () => {
+  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8 → v1.8-credit-fail → v2.1-B-shadow → v2.0-shadow', () => {
     const result = buildVersionHistory([]);
     expect(result.map((v) => v.version)).toEqual([
       'v1.5',
       'v1.6',
       'v1.7-revert',
       'v1.8',
+      'v1.8-credit-fail',
       'v2.1-B-shadow',
       'v2.0-shadow',
     ]);
@@ -602,9 +603,9 @@ describe('buildScoringRuleDayHeatmap', () => {
     return { confidence: 0.6, is_correct, verified_at, scoring_rule };
   }
 
-  it('빈 배열 → 5 rows × 7 days = 35 cell 모두 n=0 + accuracy=null', () => {
+  it('빈 배열 → 6 rows × 7 days = 42 cell 모두 n=0 + accuracy=null (plan #14 C1c v1.8-credit-fail row 추가)', () => {
     const result = buildScoringRuleDayHeatmap([]);
-    expect(result.length).toBe(35);
+    expect(result.length).toBe(42);
     for (const cell of result) {
       expect(cell.n).toBe(0);
       expect(cell.hits).toBe(0);
