@@ -101,6 +101,26 @@ describe('evaluatePair', () => {
     expect(r.warnings.some((w) => w.includes('walk-forward'))).toBe(true);
   });
 
+  it('kill-switch n<60 → trigger X (autoplan CEO-3 A)', () => {
+    const rows = Array.from({ length: 30 }, (_, i) =>
+      makeRow(i + 1, FACTORS_HOME_FAVORED, i % 2 === 0)
+    );
+    const r = evaluatePair(rows);
+    expect(r.cohort_n).toBe(30);
+    expect(r.warnings.some((w) => w.includes('KILL_SWITCH_TRIGGERED'))).toBe(false);
+  });
+
+  it('kill-switch n>=60 + accuracy_delta=0 → trigger X (delta 부족)', () => {
+    // 60 row, v18/v20 동일 factors → accuracy_delta = 0 → kill-switch trigger X
+    const rows = Array.from({ length: 60 }, (_, i) =>
+      makeRow(i + 1, FACTORS_HOME_FAVORED, i % 2 === 0)
+    );
+    const r = evaluatePair(rows);
+    expect(r.cohort_n).toBe(60);
+    expect(r.accuracy_delta).toBe(0);
+    expect(r.warnings.some((w) => w.includes('KILL_SWITCH_TRIGGERED'))).toBe(false);
+  });
+
   it('미완료 game → cohort 제외', () => {
     const rows: BacktestPredictionRow[] = [
       makeRow(1, FACTORS_HOME_FAVORED, true),
