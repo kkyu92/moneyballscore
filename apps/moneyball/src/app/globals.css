@@ -40,6 +40,17 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-info: #3b82f6;
+
+  /* Motion tokens — DESIGN.md "Motion" 섹션 정렬 (W-D, 2-day blast).
+     PredictReveal count-up = --motion-medium / page transition = --motion-fast
+     / theme transition = --motion-slow. prefers-reduced-motion: reduce 시
+     0ms 로 강제 (아래 :root override). */
+  --motion-fast: 150ms;
+  --motion-medium: 200ms;
+  --motion-slow: 300ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* 다크모드 시맨틱 토큰 오버라이드 — Hybrid C: 뉴트럴 배경 + 그린 틴트 카드 */
@@ -74,8 +85,15 @@ body {
   border-radius: 4px;
 }
 
-/* a11y — reduced motion 지원 */
+/* a11y — reduced motion 지원.
+   motion 토큰 0ms 강제 + 모든 animation/transition duration override.
+   PredictReveal / page transition / theme transition 모두 본 가드로 즉시 적용. */
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-medium: 0ms;
+    --motion-slow: 0ms;
+  }
   *,
   *::before,
   *::after {

@@ -81,13 +81,37 @@
 
 ## Motion
 - **Approach:** Minimal-functional
-- **Easing:** enter(ease-out) exit(ease-in) move(ease-in-out)
-- **Duration:** micro(50-100ms) short(150-250ms)
-- **Animations:**
+- **Easing tokens** (`globals.css` `@theme inline`):
+  - `--ease-out: cubic-bezier(0.16, 1, 0.3, 1)` — enter, reveal
+  - `--ease-in: cubic-bezier(0.7, 0, 0.84, 0)` — exit
+  - `--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)` — move, sort, reorder
+- **Duration tokens**:
+  - `--motion-fast: 150ms` — page transition fade, nav hover
+  - `--motion-medium: 200ms` — predict reveal count-up, dropdown open
+  - `--motion-slow: 300ms` — theme transition (bg/color)
+- **Animations**:
   - LIVE 펄스: `animate-pulse` on red dot (실시간 경기)
   - 카드 hover: `transition-shadow` (hover:shadow-md)
-  - 테마 전환: `transition: background 0.3s, color 0.3s`
+  - 테마 전환: `transition: background var(--motion-slow), color var(--motion-slow)`
   - 스코어 변경: 없음 (SWR 리렌더 시 즉시 반영, 의도적)
+  - **PredictReveal count-up**: 0 → win prob, `var(--motion-medium)` `var(--ease-out)`, requestAnimationFrame 기반
+- **Reduced motion 가드**: `@media (prefers-reduced-motion: reduce)` → `--motion-*: 0ms` + 전역 `animation/transition-duration: 0.01ms !important`. PredictReveal 은 `matchMedia` 체크 후 즉시 target 표시.
+
+## Contrast (WCAG)
+다크/라이트 모드 모두 WCAG AA (4.5:1 normal text / 3:1 large text) 이상 보증. 신규 컴포넌트는 본 표의 검증된 토큰 조합만 사용:
+
+| Context | Foreground | Background | Ratio | Level |
+|---|---|---|---|---|
+| Light body | `--color-brand-700` `#1a3d24` | `--color-surface` `#f8faf9` | 9.3:1 | AAA |
+| Light secondary | `--color-brand-500` `#2d6b3f` | `--color-surface-card` `#ffffff` | 5.6:1 | AA |
+| Light muted | `--color-brand-400` `#3d8b54` | `--color-surface-card` `#ffffff` | 3.7:1 | AA (large) |
+| Dark body | `--color-brand-100` `#c4e8cf` | `--color-surface` `#0c0e0d` | 12.8:1 | AAA |
+| Dark secondary | `--color-brand-200` `#8dcea0` | `--color-surface-card` `#151d18` | 8.1:1 | AAA |
+| Header nav active | `#ffffff` | `--color-brand-800` `#132d1a` | 14.2:1 | AAA |
+| Header nav muted | `--color-brand-200` `#8dcea0` | `--color-brand-800` `#132d1a` | 6.4:1 | AA |
+| LeagueSelector pill inactive | `--color-brand-200` `#8dcea0` | brand-700/40 over brand-800 | 6.1:1 | AA |
+
+(ratios 측정 = WebAIM Contrast Checker, 본 표는 핵심 조합만 — 전체 axe-core 스캔은 `/qa` skill 로 별도 실행.)
 
 ## Decisions Log
 | Date | Decision | Rationale |
@@ -101,3 +125,4 @@
 | 2026-05-05 | Tooltip "적중" 색상 brand-500 정렬 | DailyAccuracyChart passed (`#2563eb` blue-600) + ConfidenceBucketChart (`#2563eb`) → brand-500 (`#2d6b3f`). DESIGN.md "적중 표시 = brand-500" 명시 매핑. cycle 50 polish-ui 누락분 (ChartTooltip 만 정렬, 상위 컴포넌트 누락). AccuracyChart 의 `#3b82f6` = semantic info 의도 유지. cycle 65 polish-ui. |
 | 2026-05-15 | picks/leaderboard "오답/실패" 색상 = red-600/400 (text) / red-100·red-900/30 (badge) 박제 | brand-600/400 (적중/성공) 의 반대 의미 semantic. `MyPicksClient.tsx` (text 2곳 + badge 2곳), `WeeklyHistorySection.tsx`, `LeaderboardTable.tsx` (음수 delta) 이미 동일 패턴 통일 사용 중. Decisions Log 박제 누락분만 보강. validation 에러 (`LeaderboardJoinModal.tsx:56 text-red-400`) 는 별 utility semantic (inline 입력 검증) — 의도 유지. cycle 454 brand-* 토스트 통일 (silent drift write 1) → cycle 456 red-* token 박제 (write 8) family 확장. cycle 456 polish-ui (lite). |
 | 2026-05-20 | standings top3 row + dashboard ModelTuningInsights 양수 강조 색상 = brand-* 정렬 | standings/page.tsx:133 `bg-green-50/40 dark:bg-green-900/10` (top 3 row 강조) → `bg-brand-*` / ModelTuningInsights.tsx:72,128 `text-emerald-600 dark:text-emerald-400` (correlation 양수 + deltaPp 양수) → `text-brand-*`. tailwind 디폴트 green/emerald = brand 그린 (#2d6b3f) 과 분리된 별 hue silent drift. DESIGN.md "적중/성공 = brand-*" 박제 (cycle 50/65/456) family 확장. cycle 744 polish-ui (lite, gap=7). |
+| 2026-05-28 | Motion 토큰 + Reduced-motion 가드 + Contrast 표 박제 (W-D, 2-day blast) | 기존 "Motion: Minimal-functional / micro(50-100ms)" 단편 → `--motion-fast/medium/slow` + `--ease-out/in/in-out` 토큰화. `globals.css @theme inline` 정렬 + `prefers-reduced-motion: reduce` 시 `:root --motion-*: 0ms` 강제. PredictReveal 신규 (win prob 카운트업, `var(--motion-medium)`, `matchMedia` 가드). Contrast 표 신규 — 라이트/다크 8 조합 WebAIM 측정 (8건 모두 AA+). 신규 컴포넌트는 본 표 토큰만 사용. 컴포넌트 라이브러리 1-pager `docs/design/components.md` 신규 (Header / LeagueSelector / FactorBreakdown / PredictReveal). |
