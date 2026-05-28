@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { parseUmpiresFromHtml } from '../scrapers/umpire';
+import { parseUmpiresFromRecord } from '../scrapers/umpire';
 import {
   scoreUmpireSZ,
   scoreUmpireSZFromRow,
@@ -9,12 +7,24 @@ import {
   UMPIRE_SAMPLE_THRESHOLD,
 } from '../factors/umpire-sz';
 
-const FIXTURE_DIR = join(__dirname, 'fixtures');
-const FIXTURE_FORMAL = readFileSync(join(FIXTURE_DIR, 'kbo-game-score.html'), 'utf8');
-const FIXTURE_LABEL = readFileSync(
-  join(FIXTURE_DIR, 'kbo-game-score-label-fallback.html'),
-  'utf8',
-);
+const FIXTURE_RECORD_VALID = {
+  result: {
+    recordData: {
+      etcRecords: [
+        { result: '박승규(5회 무사 1루서 좌월 홈런)', how: '결승타' },
+        { result: '김준희 박종철 이영재 문승훈', how: '심판' },
+      ],
+    },
+  },
+};
+
+const FIXTURE_RECORD_MISSING_UMPIRE = {
+  result: {
+    recordData: {
+      etcRecords: [{ result: '박승규(5회 무사 1루서 좌월 홈런)', how: '결승타' }],
+    },
+  },
+};
 
 // SupabaseClient mock — maybeSingle 가 .data/.error 분기 동작.
 function mockDb(returnValue: {
@@ -33,26 +43,23 @@ function mockDb(returnValue: {
   } as any;
 }
 
-describe('parseUmpiresFromHtml (KBO Score.aspx scraper)', () => {
-  it('test 3 — mock fixture (정식 tbl-umpire 셀렉터) HTML parse 4명 추출', () => {
-    const umps = parseUmpiresFromHtml(FIXTURE_FORMAL);
+describe('parseUmpiresFromRecord (Naver record API)', () => {
+  it('etcRecords 안 how=심판 row 의 result 공백 split → 4 umpire', () => {
+    const umps = parseUmpiresFromRecord(FIXTURE_RECORD_VALID);
     expect(umps.main).toBe('김준희');
     expect(umps.first).toBe('박종철');
     expect(umps.second).toBe('이영재');
     expect(umps.third).toBe('문승훈');
   });
 
-  it('라벨 fallback (정식 셀렉터 부재) HTML parse 4명 추출', () => {
-    const umps = parseUmpiresFromHtml(FIXTURE_LABEL);
-    expect(umps.main).toBe('최규현');
-    expect(umps.first).toBe('한승국');
-    expect(umps.second).toBe('황인태');
-    expect(umps.third).toBe('송수근');
+  it('심판 row 부재 → throw (silent drift 차단)', () => {
+    expect(() => parseUmpiresFromRecord(FIXTURE_RECORD_MISSING_UMPIRE)).toThrow(
+      /심판 row not found/,
+    );
   });
 
-  it('셀렉터 변경 / 4명 미만 → throw (silent drift 차단)', () => {
-    const broken = '<html><body><p>심판 정보 없음</p></body></html>';
-    expect(() => parseUmpiresFromHtml(broken)).toThrow(/umpire parse error/);
+  it('etcRecords 부재 → throw', () => {
+    expect(() => parseUmpiresFromRecord({})).toThrow(/etcRecords missing/);
   });
 });
 
