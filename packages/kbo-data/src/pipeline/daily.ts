@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString, KBO_STADIUM_COORDS, errMsg } from '@moneyball/shared';
+import {
+  toKSTDateString, KBO_STADIUM_COORDS, errMsg, CURRENT_SCORING_RULE,
+} from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
 import {
@@ -406,9 +408,14 @@ export async function runDailyPipeline(
   // try/catch 로 래핑해 finish() 경유 보장.
   let existingSet: Set<number>;
   try {
+    // shadow row 제외 — v2.1-B-shadow / v2.0-shadow 가 동일 game_id +
+    // prediction_type='pre_game' 으로 insert (shadow-cohort.ts:141/231). production
+    // v1.8 row 만 boolean 존재 판정에 사용. cycle 1021 hotfix (사용자 알림 15 토론 bug).
     const existingResult = await db
       .from('predictions').select('game_id')
-      .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
+      .eq('prediction_type', 'pre_game')
+      .eq('scoring_rule', CURRENT_SCORING_RULE)
+      .in('game_id', dbGameIds);
     const { data: existing } = assertSelectOk<{ game_id: number }[]>(
       existingResult,
       'runPredict existing predictions',
@@ -901,10 +908,12 @@ export async function runDailyPipeline(
     // silent drift 가드 — `.error` 미체크 시 count=null → gap=expected → false
     // positive GAP 알림 (DB 오류가 GAP 으로 위장). assertSelectOk 로 fail-loud
     // → outer catch X 영역이라 errors[] push + GAP 측정 skip 자연.
+    // shadow row 제외 (cycle 1021 hotfix) — production v1.8 row 만 count.
     const totalTodayResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
-      .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
+      .in('game_id', dbGameIds).eq('prediction_type', 'pre_game')
+      .eq('scoring_rule', CURRENT_SCORING_RULE);
     let totalToday: number | null = null;
     try {
       ({ count: totalToday } = assertSelectOk(totalTodayResult, 'predict_final gap count'));
@@ -1034,10 +1043,12 @@ async function handleDailySummaryNotification(
     // silent drift 가드 — `.error` 미체크 시 count=null → 0 fallback →
     // "summary skip: todayTotal=0 < expected" 위장 → root cause 무가시.
     // assertSelectOk 로 outer catch (errors[] push) 자동 박제.
+    // shadow row 제외 (cycle 1021 hotfix) — production v1.8 row 만 count.
     const todayTotalResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
-      .in('game_id', dbGameIds).eq('prediction_type', 'pre_game');
+      .in('game_id', dbGameIds).eq('prediction_type', 'pre_game')
+      .eq('scoring_rule', CURRENT_SCORING_RULE);
     const { count: todayTotal } = assertSelectOk(todayTotalResult, 'todayTotal count');
 
     if ((todayTotal ?? 0) < expected) {
@@ -1106,6 +1117,10 @@ async function handleDailySummaryNotification(
  */
 async function buildDailySummary(db: DB, dbGameIds: number[]) {
   // assertSelectOk helper 통일 (silent drift family detection 단일 채널)
+  // shadow row 제외 (cycle 1021 hotfix) — v2.1-B-shadow + v2.0-shadow 가 동일
+  // game_id + prediction_type='pre_game' 으로 insert (shadow-cohort.ts:141/231)
+  // → Telegram summary 가 game 당 3 line ("15 토론" bug 사용자 알림).
+  // production v1.8 row 만 단일 라인 박제.
   const result = await db
     .from('predictions')
     .select(`
@@ -1116,7 +1131,9 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
         away_team:teams!games_away_team_id_fkey(code)
       )
     `)
-    .eq('prediction_type', 'pre_game').in('game_id', dbGameIds);
+    .eq('prediction_type', 'pre_game')
+    .eq('scoring_rule', CURRENT_SCORING_RULE)
+    .in('game_id', dbGameIds);
 
   const { data } = assertSelectOk(result, 'buildDailySummary');
 
@@ -1133,6 +1150,7 @@ async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
   // assertSelectOk 통일 — silent drift 시 predictions=null →
   // computePredictionHistory 빈 배열 → calibration-agent 에 0건 전달 →
   // ±5% 보정 신호 영구 silent drift. fail-loud 로 caller (verify mode) errors[].
+  // shadow row 제외 (cycle 1021 hotfix) — production v1.8 calibration 영역 분리.
   const result = await db
     .from('predictions')
     .select(`
@@ -1144,6 +1162,7 @@ async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
       )
     `)
     .eq('prediction_type', 'pre_game')
+    .eq('scoring_rule', CURRENT_SCORING_RULE)
     .not('is_correct', 'is', null)
     .order('game_id', { ascending: false })
     .limit(50);
@@ -1199,10 +1218,12 @@ async function getVerifyResults(
 
   // silent drift 시 predRows=null → results 빈 배열 → notifyResults 미호출
   // → 사용자 verify Telegram 누락 (사용자 가시 직접 영향).
+  // shadow row 제외 (cycle 1021 hotfix) — production v1.8 결과만 verify Telegram.
   const predResult = await db
     .from('predictions')
     .select('game_id, predicted_winner, is_correct')
     .eq('prediction_type', 'pre_game')
+    .eq('scoring_rule', CURRENT_SCORING_RULE)
     .in('game_id', finalGameIds);
   const { data: predRows } = assertSelectOk<Array<PredRow & { game_id: number }>>(
     predResult, 'daily.getVerifyResults predictions',
@@ -1242,10 +1263,12 @@ async function getVerifyResults(
   );
   if (postponedData && postponedData.length > 0) {
     const postponedIds = postponedData.map((g) => g.id);
+    // shadow row 제외 (cycle 1021 hotfix) — production v1.8 row 만 dedupe.
     const postponedPredRes = await db
       .from('predictions')
       .select('game_id, predicted_winner')
       .eq('prediction_type', 'pre_game')
+      .eq('scoring_rule', CURRENT_SCORING_RULE)
       .in('game_id', postponedIds);
     const { data: postponedPredRows } = assertSelectOk<
       Array<{ game_id: number; predicted_winner: number }>
@@ -1379,9 +1402,17 @@ async function updateAccuracy(
     .filter((g): g is { id: number; winner_team_id: number } => g.winner_team_id != null);
   if (finalGames.length === 0) return;
 
+  // shadow row 제외 (cycle 1021 hotfix CRITICAL) — updateAccuracy 는 row id 로
+  // is_correct 갱신. shadow row 가 production v1.8 row 와 동일 game_id +
+  // prediction_type='pre_game' 으로 insert 되어 Map.set last-wins 시 shadow 의 id
+  // 가 박제 → production v1.8 row.is_correct=null 영구 + shadow row 만 is_correct
+  // 갱신 = accuracy 통계 silent contamination. cycle 1013 v2.1-B-shadow + cycle
+  // 1019 v2.0-shadow 추가 이후 production v1.8 cohort accuracy 박제 모두 영향
+  // (silent drift family 14 사례 확장 가능성).
   const predResult = await db
     .from('predictions').select('id, game_id, predicted_winner')
     .eq('prediction_type', 'pre_game')
+    .eq('scoring_rule', CURRENT_SCORING_RULE)
     .in('game_id', finalGames.map((g) => g.id));
   let predRows: Array<{ id: number; game_id: number; predicted_winner: number }> | null;
   try {
