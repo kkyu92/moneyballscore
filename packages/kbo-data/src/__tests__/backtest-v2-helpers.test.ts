@@ -162,7 +162,7 @@ describe('evaluatePair', () => {
 });
 
 describe('computeEloProb', () => {
-  it('같은 Elo + home adj → home prob > 0.5 (HOME_ADVANTAGE 양수)', () => {
+  it('같은 Elo + home bonus → home prob > 0.5 (HOME_ELO_BONUS 양수)', () => {
     const p = computeEloProb(1500, 1500);
     expect(p).toBeGreaterThan(0.5);
   });
@@ -181,6 +181,16 @@ describe('computeEloProb', () => {
     const p = computeEloProb(1500, 1500);
     expect(p).toBeGreaterThan(0);
     expect(p).toBeLessThan(1);
+  });
+
+  it('HOME_ELO_BONUS=24 dimensional 정합 — neutral Elo home prob ≈ 0.5345', () => {
+    // 1 / (1 + 10^(-24/400)) ≈ 0.5345 (홈 +3.45pp at neutral)
+    // 실측 HOME_ADVANTAGE +1.5pp 와 noise margin 안 정합
+    // 이전 패턴 (HOME_ADVANTAGE × 400 = 6 point) 결과 ≈ 0.5086 (홈 +0.86pp 만)
+    // = 실측 1.5pp 의 절반. dimensionally wrong fix 검증.
+    const p = computeEloProb(1500, 1500);
+    expect(p).toBeGreaterThan(0.53); // 이전 wrong 패턴 = 0.5086, 통과 X
+    expect(p).toBeLessThan(0.55);
   });
 });
 
