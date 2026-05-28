@@ -93,8 +93,7 @@ export const KBO_STADIUM_COORDS: Record<TeamCode, { lat: number; lng: number }> 
   WO: { lat: 37.4982, lng: 126.8670 }, // 서울고척스카이돔 (돔구장 — 날씨 영향 없음 주의)
 };
 
-// 경기 상태
-export type GameStatus = 'scheduled' | 'live' | 'final' | 'postponed';
+// 경기 상태 — ALL_GAME_STATUSES tuple (line 246+) 로 통합 (cycle 1021 autoplan Eng-C2 fix)
 
 // 포스트 타입
 export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
@@ -240,6 +239,23 @@ export const HOME_ADVANTAGE = 0.015;
  * 본 상수 도입 후 backtest-v2-helpers.ts computeEloProb 에서 직접 참조.
  */
 export const HOME_ELO_BONUS = 24;
+
+/**
+ * Game status literal — DB 실제 값 단일 source of truth.
+ *
+ * cycle 1019 plan #14 C1b 박제 시점 'completed' literal 박제 → cycle 1021
+ * harness fire cohort_n=0 = silent drift. DB 실제 값 = 'final' / 'scheduled'
+ * / 'postponed' / 'live' (autoplan Eng-C2 finding CRITICAL).
+ *
+ * 신규 status literal 도입 시 본 tuple 갱신 = ScoringRule pattern 정합 (silent
+ * drift family 7번째 차단). consumer site 모두 본 const 참조 의무.
+ */
+export const ALL_GAME_STATUSES = ['scheduled', 'live', 'final', 'postponed'] as const;
+
+export type GameStatus = (typeof ALL_GAME_STATUSES)[number];
+
+/** Game 종료 + 결과 박제됨 (winner_team_id NOT NULL). predict cohort base. */
+export const GAME_STATUS_FINAL: GameStatus = 'final';
 
 /**
  * 예측 승자 적중 확률 (winnerProb = max(hwp, 1-hwp)) 기반 3단계 라벨.

@@ -5,7 +5,7 @@
  * 본 helper = pure functions only (Sentry-free / supabase-free) — vitest deterministic.
  */
 
-import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL } from '@moneyball/shared';
 
 const CLAMP_LO = 0.15;
 const CLAMP_HI = 0.85;
@@ -64,7 +64,7 @@ export function evaluateFancyElo(
 
   for (const row of rows) {
     const game = row.games;
-    if (!game || game.status !== 'final' || game.winner_team_id == null) continue;
+    if (!game || game.status !== GAME_STATUS_FINAL || game.winner_team_id == null) continue;
     if (game.away_team_id == null) {
       missing += 1;
       continue;
@@ -163,7 +163,7 @@ export function evaluatePair(rows: BacktestPredictionRow[]): BacktestResult {
 
   for (const row of rows) {
     const game = row.games;
-    if (!game || game.status !== 'final' || game.winner_team_id == null) continue;
+    if (!game || game.status !== GAME_STATUS_FINAL || game.winner_team_id == null) continue;
     if (!row.factors) continue;
     const homeWin = game.winner_team_id === game.home_team_id;
 
