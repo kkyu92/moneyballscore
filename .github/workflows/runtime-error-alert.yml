@@ -51,6 +51,9 @@ jobs:
             "/glossary"
             "/leaderboard"
             "/changelog"
+            "/accuracy/shadow"
+            "/insights/series/ht-vs-sk"
+            "/mlb"
           )
 
           FAILED=0
