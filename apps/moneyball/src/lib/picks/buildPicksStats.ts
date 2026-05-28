@@ -28,6 +28,12 @@ export interface PickEntry {
   myIsCorrect: boolean | null;
   aiIsCorrect: boolean | null;
   aiPredictedHome: boolean | null;
+  /**
+   * AI factor breakdown (cycle 1021 c9) — per-factor home-win prob [0,1] (0.5=중립).
+   * pre_game + CURRENT_SCORING_RULE 만. null = factors 없음 (pre_game prediction
+   * 누락 / shadow only).
+   */
+  aiFactors: Record<string, number> | null;
 }
 
 export interface WeeklyGroup {
@@ -105,6 +111,7 @@ export function buildPickEntries(
         myIsCorrect,
         aiIsCorrect,
         aiPredictedHome,
+        aiFactors: r?.ai_factors ?? null,
       };
     })
     .sort((a, b) => b.pickedAt.localeCompare(a.pickedAt)); // 최근순
@@ -273,4 +280,119 @@ export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
       stats: computeWeekStats(wEntries, weekStart),
       entries: wEntries.sort((a, b) => b.game_date.localeCompare(a.game_date)),
     }));
+}
+
+// ---------------------------------------------------------------------------
+// Factor Agreement (cycle 1021 c9) — 사용자 픽 vs AI factor 별 일치 분석.
+//
+// 사용자 가시 가치: 사용자가 "내 의견이 어느 팩터에서 데이터와 일치하는가" 를
+// factor 단위 (선발/타선/Elo 등 10 factor) 로 즉시 확인. 단순 prob 차이 보다
+// strong 한 reasoning surface — 사용자 자가 인식 (강점/약점 factor) 가능.
+// ---------------------------------------------------------------------------
+
+// factor lean threshold — predictions/factorLabels.ts 의 NEUTRAL_HI/LO 와 정합.
+// 0.5=중립. >0.55=홈 favor / <0.45=원정 favor. 사이 = 중립으로 분류.
+const FACTOR_NEUTRAL_LO = 0.45;
+const FACTOR_NEUTRAL_HI = 0.55;
+
+export type FactorLean = 'home' | 'away' | 'neutral';
+
+export interface FactorAgreementRow {
+  factor: string;
+  // 사용자 픽 방향으로 leaned 한 횟수
+  withMyPick: number;
+  // 반대 (AI 방향) 으로 leaned 한 횟수
+  againstMyPick: number;
+  // neutral 횟수
+  neutral: number;
+  // 총 측정 횟수 (factors present in entry)
+  total: number;
+  // withMyPick / (withMyPick + againstMyPick), neutral 제외.
+  // >0.5 = 이 factor 가 내 의견 지지 경향 / <0.5 = AI 방향 우세
+  agreementRate: number | null;
+}
+
+export interface FactorAgreement {
+  // 측정 가능 (aiFactors != null + isResolved + aiPredictedHome != null) entries 수
+  measuredCount: number;
+  // factor key → 집계. DEFAULT_WEIGHTS 안 10 factor key.
+  byFactor: FactorAgreementRow[];
+}
+
+/** factor value [0,1] → home/away/neutral classification. */
+function classifyFactorLean(value: number): FactorLean {
+  if (value > FACTOR_NEUTRAL_HI) return 'home';
+  if (value < FACTOR_NEUTRAL_LO) return 'away';
+  return 'neutral';
+}
+
+/**
+ * 사용자 픽 방향 vs 각 factor lean 일치도 집계.
+ *
+ * 분석 대상: aiFactors != null + isResolved + aiPredictedHome != null 인 entries.
+ * (aiPredictedHome 게이트 = AI prediction 존재 자체 확인 — 실제 일치 판단엔
+ * myPick + factor lean 만 사용.)
+ *
+ * agreementRate 계산:
+ *   - withMyPick = factor lean === myPick 방향
+ *   - againstMyPick = factor lean === 반대 방향
+ *   - neutral 제외 → withMyPick / (withMyPick + againstMyPick)
+ *   - 분모=0 (모두 neutral) → null
+ *
+ * @returns FactorAgreement (분석 가능 entry 0 시 measuredCount=0 + byFactor=[])
+ */
+export function buildFactorAgreement(entries: PickEntry[]): FactorAgreement {
+  const candidates = entries.filter(
+    (e) => e.aiFactors !== null && e.isResolved && e.aiPredictedHome !== null,
+  );
+  if (candidates.length === 0) {
+    return { measuredCount: 0, byFactor: [] };
+  }
+
+  // factor key 수집 — 운영 가중치 변경 시 본 분석 영향 없도록 entries 안 실제 key 만 사용.
+  const factorKeys = new Set<string>();
+  for (const e of candidates) {
+    if (e.aiFactors) {
+      for (const k of Object.keys(e.aiFactors)) factorKeys.add(k);
+    }
+  }
+
+  const byFactor: FactorAgreementRow[] = [];
+  for (const factor of factorKeys) {
+    let withMyPick = 0;
+    let againstMyPick = 0;
+    let neutral = 0;
+    let total = 0;
+    for (const e of candidates) {
+      const v = e.aiFactors?.[factor];
+      if (typeof v !== 'number' || !Number.isFinite(v)) continue;
+      total++;
+      const lean = classifyFactorLean(v);
+      if (lean === 'neutral') {
+        neutral++;
+        continue;
+      }
+      if (lean === e.myPick) withMyPick++;
+      else againstMyPick++;
+    }
+    const denom = withMyPick + againstMyPick;
+    byFactor.push({
+      factor,
+      withMyPick,
+      againstMyPick,
+      neutral,
+      total,
+      agreementRate: denom > 0 ? withMyPick / denom : null,
+    });
+  }
+
+  // 정렬: total desc (표본 큰 factor 우선) → tie 시 agreementRate desc.
+  byFactor.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    const aRate = a.agreementRate ?? -1;
+    const bRate = b.agreementRate ?? -1;
+    return bRate - aRate;
+  });
+
+  return { measuredCount: candidates.length, byFactor };
 }

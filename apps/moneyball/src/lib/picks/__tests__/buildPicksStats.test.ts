@@ -18,6 +18,7 @@ function makeResult(id: number, homeScore: number, awayScore: number): PickGameR
     ai_predicted_winner_id: homeScore > awayScore ? HOME_TEAM.id : AWAY_TEAM.id,
     ai_confidence: 0.65,
     ai_is_correct: homeScore !== awayScore ? (homeScore > awayScore ? true : false) : null,
+    ai_factors: null,
   };
 }
 
@@ -277,6 +278,7 @@ describe('pickingStreakDays', () => {
       myIsCorrect: null,
       aiIsCorrect: null,
       aiPredictedHome: null,
+      aiFactors: null,
     };
   }
 
@@ -357,6 +359,7 @@ describe('buildWeeklyStats', () => {
       myIsCorrect,
       aiIsCorrect,
       aiPredictedHome: null,
+      aiFactors: null,
     };
   }
 
@@ -429,6 +432,7 @@ describe('buildWeeklyHistory', () => {
       myIsCorrect,
       aiIsCorrect: null,
       aiPredictedHome: null,
+      aiFactors: null,
     };
   }
 
