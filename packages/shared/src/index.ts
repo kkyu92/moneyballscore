@@ -316,6 +316,46 @@ export function getKSTMondayUtcIso(now: Date = new Date()): string {
   return new Date(monday.getTime() - 9 * 60 * 60 * 1000).toISOString();
 }
 
+/**
+ * M-D Factor anomaly detection (cycle 1013).
+ *
+ * 단일 factor 시계열 안 z-score>FACTOR_ANOMALY_Z_THRESHOLD outlier 추출.
+ * shadow factor (park_weather / umpire_sz) 도입 후 분포 collapse / 결측 spike 사전 감지.
+ *
+ * Sentry-free (pure) — packages/shared 안 박제 이유:
+ *   apps/moneyball vitest 가 @moneyball/kbo-data 안 sentry dynamic import 해결 못함.
+ *   본 helper 는 detectFactorAnomalies (compute) + Sentry alert (kbo-data) 분리.
+ */
+export const FACTOR_ANOMALY_Z_THRESHOLD = 3;
+export const FACTOR_ANOMALY_MIN_SAMPLE = 5;
+
+export interface FactorAnomaly {
+  factorKey: string;
+  value: number;
+  mean: number;
+  stdDev: number;
+  zScore: number;
+}
+
+export function detectFactorAnomalies(
+  factorKey: string,
+  values: number[],
+): FactorAnomaly[] {
+  if (values.length < FACTOR_ANOMALY_MIN_SAMPLE) return [];
+  const mean = values.reduce((s, v) => s + v, 0) / values.length;
+  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length;
+  const stdDev = Math.sqrt(variance);
+  if (stdDev === 0) return [];
+  const out: FactorAnomaly[] = [];
+  for (const value of values) {
+    const zScore = Math.abs((value - mean) / stdDev);
+    if (zScore > FACTOR_ANOMALY_Z_THRESHOLD) {
+      out.push({ factorKey, value, mean, stdDev, zScore });
+    }
+  }
+  return out;
+}
+
 // catch (e) { ... e instanceof Error ? e.message : String(e) } 패턴 단일 source.
 // cycle 468 review-code heavy — silent drift family streak 15 cycle 째.
 // 14 file 41 곳 (daily.ts 22 / live.ts 4 / 기타) 통합.

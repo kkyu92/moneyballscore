@@ -33,6 +33,10 @@ export {
   type ShadowRowInsertInput,
   type ShadowRowInsertResult,
 } from './pipeline/shadow-cohort';
+export {
+  captureFactorAnomalyAlert,
+  type FactorAnomalyAlertMeta,
+} from './pipeline/silent-drift-alert';
 export { runPostviewDaily } from './pipeline/postview-daily';
 export type { PostviewDailyResult } from './pipeline/postview-daily';
 export { syncBatterStats } from './pipeline/sync-batter-stats';
