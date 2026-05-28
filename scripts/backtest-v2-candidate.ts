@@ -18,6 +18,11 @@ import {
   type BacktestPredictionRow,
   type TeamEloMap,
 } from '@moneyball/kbo-data/src/backtest/backtest-v2-helpers';
+import {
+  expandingWindowSplit,
+  rollingTimeCV,
+  type CvPattern,
+} from '@moneyball/kbo-data/src/backtest/walk-forward-helpers';
 import { fetchEloRatings } from '@moneyball/kbo-data/src/scrapers/fancy-stats';
 
 function createAdminClient(): SupabaseClient {
@@ -39,6 +44,26 @@ async function fetchV18Cohort(db: SupabaseClient): Promise<BacktestPredictionRow
     .eq('prediction_type', 'pre_game')
     .order('game_id', { ascending: false });
   if (result.error) throw new Error(`fetch v1.8 cohort: ${result.error.message}`);
+  return (result.data ?? []) as unknown as BacktestPredictionRow[];
+}
+
+/**
+ * plan #15 C1e — expanding window OOS 용 train cohort fetch (옛 scoring_rule 포함).
+ * train_scoring_rules ∈ ['v1.5', 'v1.6', 'v1.7-revert'] (default).
+ */
+async function fetchTrainCohort(
+  db: SupabaseClient,
+  trainScoringRules: readonly string[],
+): Promise<BacktestPredictionRow[]> {
+  const result = await db
+    .from('predictions')
+    .select(
+      'game_id, scoring_rule, factors, games!inner(game_date, status, home_team_id, away_team_id, winner_team_id)',
+    )
+    .in('scoring_rule', trainScoringRules)
+    .eq('prediction_type', 'pre_game')
+    .order('game_id', { ascending: false });
+  if (result.error) throw new Error(`fetch train cohort: ${result.error.message}`);
   return (result.data ?? []) as unknown as BacktestPredictionRow[];
 }
 
@@ -75,13 +100,45 @@ async function fetchTeamElos(db: SupabaseClient): Promise<TeamEloMap> {
   return teamEloMap;
 }
 
+/** plan #15 C1e — --cv-pattern flag parser. default walk-forward (기존 cycle 1019 pattern). */
+function parseCvPattern(): CvPattern {
+  const flag = process.argv.find((a) => a.startsWith('--cv-pattern='));
+  if (!flag) return 'walk-forward';
+  const value = flag.split('=')[1];
+  if (value === 'walk-forward' || value === 'expanding' || value === 'rolling') return value;
+  throw new Error(`invalid --cv-pattern=${value}. allowed: walk-forward | expanding | rolling`);
+}
+
 async function main() {
   const writeMode = process.argv.includes('--write');
-  console.log(`[backtest-v2-candidate] mode=${writeMode ? 'write' : 'dry-run'}`);
+  const cvPattern = parseCvPattern();
+  console.log(`[backtest-v2-candidate] mode=${writeMode ? 'write' : 'dry-run'} cv-pattern=${cvPattern}`);
 
   const db = createAdminClient();
-  const cohort = await fetchV18Cohort(db);
-  console.log(`[backtest-v2-candidate] fetched n=${cohort.length} predictions (scoring_rule=v1.8)`);
+
+  // plan #15 C1e — cohort 구성 (cv-pattern 별 분기)
+  let cohort: BacktestPredictionRow[];
+  let cohortNote: string;
+  if (cvPattern === 'expanding') {
+    // expanding window OOS: train=옛 scoring_rule (v1.5/v1.6/v1.7-revert) + test=v1.8
+    const v18 = await fetchV18Cohort(db);
+    const train = await fetchTrainCohort(db, ['v1.5', 'v1.6', 'v1.7-revert']);
+    const split = expandingWindowSplit([...train, ...v18], ['v1.5', 'v1.6', 'v1.7-revert'], ['v1.8']);
+    cohort = split.test; // production OOS evidence = test set 만 evaluate
+    cohortNote = `expanding window: train=${split.train.length} (v1.5/v1.6/v1.7-revert) / test=${split.test.length} (v1.8 OOS)`;
+  } else if (cvPattern === 'rolling') {
+    // rolling time CV: 최근 30일 window 안 train(7) test(3)
+    const v18 = await fetchV18Cohort(db);
+    const split = rollingTimeCV(v18, 30, 0.7);
+    cohort = split.test;
+    cohortNote = `rolling 30-day window: train=${split.train.length} / test=${split.test.length} (production OOS)`;
+  } else {
+    // walk-forward (기존 cycle 1019 pattern — train ≈ 0 degenerate)
+    cohort = await fetchV18Cohort(db);
+    cohortNote = `walk-forward: train ≈ 0 (rule_definition_date 2026-05-12 직후 cohort)`;
+  }
+  console.log(`[backtest-v2-candidate] ${cohortNote}`);
+  console.log(`[backtest-v2-candidate] fetched n=${cohort.length} predictions`);
 
   // plan #15 C1d — Fancy Stats Elo baseline 측정 (cohort_n=0 이슈와 분리 가능, final game outcome 만 필요)
   const teamElos = await fetchTeamElos(db);
@@ -90,7 +147,7 @@ async function main() {
   const result = evaluatePair(cohort);
   const eloResult = evaluateFancyElo(cohort, teamElos);
   result.fancy_stats_elo_brier = eloResult.brier;
-  result.fancy_stats_elo_note = eloResult.note;
+  result.fancy_stats_elo_note = `[${cvPattern}] ${cohortNote} / ${eloResult.note}`;
   console.log(`[backtest-v2-candidate] result:`, JSON.stringify(result, null, 2));
 
   if (writeMode) {
