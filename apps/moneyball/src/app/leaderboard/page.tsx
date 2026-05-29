@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
+import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
 import { fetchAiBaseline, fetchLeaderboard } from '@/lib/leaderboard/server';
 import type { LeaderboardMode } from '@/lib/leaderboard/types';
@@ -130,6 +131,13 @@ export default async function LeaderboardPage({
           {PERIOD_NOTE[period]}
         </p>
       </div>
+
+      {/* cycle 1021 Tier 1 carry-over B: Hall of Fame (top 3 medal) */}
+      {entries.length > 0 && (
+        <div className="mb-5">
+          <HallOfFame entries={entries} periodLabel={PERIOD_LABEL[period]} />
+        </div>
+      )}
 
       <LeaderboardClient entries={entries} aiBaseline={aiBaseline} />
     </main>
