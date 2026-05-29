@@ -2129,6 +2129,151 @@ async function main() {
     return;
   }
 
+  // check — 외부 조합 파일을 우리 필터(256 규칙 + 역대 당첨 제외)로 검증
+  // 사용법: pnpm tsx scripts/lotto.ts check <file> [--json]
+  //   file = 한 줄 1조합. "N: 1 8 13 ..." prefix 허용, 공백/콤마 구분 모두 OK.
+  if (mode === 'check') {
+    const file = process.argv[3];
+    const asJson = process.argv.includes('--json');
+    if (!file || !existsSync(file)) {
+      console.error('사용법: pnpm tsx scripts/lotto.ts check <combos.txt> [--json]');
+      process.exit(1);
+    }
+    const pastWinners = new Set(rounds.map((r) => r.numbers.join(',')));
+    const lines = readFileSync(file, 'utf-8')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && !l.startsWith('#'));
+
+    interface CheckResult {
+      idx: number;
+      nums: number[];
+      ruleFails: { name: string; val: number; lo: number | null; hi: number | null }[];
+      isPastWinner: boolean;
+      parseError?: string;
+    }
+    const results: CheckResult[] = [];
+
+    lines.forEach((line, i) => {
+      const idx = i + 1;
+      const body = line.replace(/^\s*\d+\s*[:.]\s*/, ''); // "12: ..." prefix 제거
+      const nums = body
+        .split(/[\s,]+/)
+        .map((s) => Number(s.trim()))
+        .filter((x) => !Number.isNaN(x))
+        .sort((a, b) => a - b);
+      if (nums.length !== 6 || nums.some((n) => n < 1 || n > 45) || new Set(nums).size !== 6) {
+        results.push({ idx, nums, ruleFails: [], isPastWinner: false, parseError: `유효한 6개 번호 아님: "${line}"` });
+        return;
+      }
+      const ruleFails: CheckResult['ruleFails'] = [];
+      for (const rule of RULES) {
+        const { pass, val } = checkRule(nums, rule, stats);
+        if (!pass) ruleFails.push({ name: rule.name, val, lo: rule.lo(stats), hi: rule.hi(stats) });
+      }
+      results.push({
+        idx,
+        nums,
+        ruleFails,
+        isPastWinner: pastWinners.has(nums.join(',')),
+      });
+    });
+
+    const parseErrors = results.filter((r) => r.parseError);
+    const valid = results.filter((r) => !r.parseError);
+    const fullPass = valid.filter((r) => r.ruleFails.length === 0 && !r.isPastWinner);
+    const rulePass = valid.filter((r) => r.ruleFails.length === 0);
+    const ruleFailed = valid.filter((r) => r.ruleFails.length > 0);
+    const pastWinnerHits = valid.filter((r) => r.isPastWinner);
+
+    if (asJson) {
+      console.log(
+        JSON.stringify(
+          {
+            total: lines.length,
+            parseErrors: parseErrors.length,
+            rules: RULES.length,
+            lastRound: stats.lastRound,
+            rulePass: rulePass.length,
+            ruleFailed: ruleFailed.length,
+            pastWinnerHits: pastWinnerHits.length,
+            fullPass: fullPass.length,
+            fullPassIdx: fullPass.map((r) => r.idx),
+            details: valid.map((r) => ({
+              idx: r.idx,
+              nums: r.nums,
+              pass: r.ruleFails.length === 0 && !r.isPastWinner,
+              ruleFailCount: r.ruleFails.length,
+              ruleFails: r.ruleFails,
+              isPastWinner: r.isPastWinner,
+            })),
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
+
+    const bar = '═'.repeat(64);
+    console.log(`\n${bar}`);
+    console.log(`  외부 조합 검증 — ${RULES.length} 규칙 (1~${stats.lastRound}회 기준) + 역대 당첨 제외`);
+    console.log(`${bar}`);
+    console.log(`  입력 ${lines.length}조합 / 파싱오류 ${parseErrors.length}`);
+    console.log(`  규칙 통과(필터1): ${rulePass.length} / 규칙 위반: ${ruleFailed.length}`);
+    console.log(`  역대 당첨 중복(필터2): ${pastWinnerHits.length}`);
+    console.log(`  ✅ 최종 통과 (필터1+2): ${fullPass.length} / ${valid.length}`);
+    console.log(`${bar}\n`);
+
+    // 위반 규칙 빈도 집계
+    const failFreq = new Map<string, number>();
+    for (const r of ruleFailed) {
+      for (const f of r.ruleFails) failFreq.set(f.name, (failFreq.get(f.name) ?? 0) + 1);
+    }
+    if (failFreq.size > 0) {
+      console.log('◆ 가장 많이 위반된 규칙 TOP 15');
+      [...failFreq.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15)
+        .forEach(([name, cnt]) =>
+          console.log(`    ${name.padEnd(20)} ${String(cnt).padStart(3)}회 위반`),
+        );
+      console.log('');
+    }
+
+    // 조합별 한 줄 결과
+    console.log('◆ 조합별 결과');
+    for (const r of results) {
+      if (r.parseError) {
+        console.log(`  #${String(r.idx).padStart(3)} ⚠️  ${r.parseError}`);
+        continue;
+      }
+      const tag = r.ruleFails.length === 0 && !r.isPastWinner ? '✅ PASS' : '❌ FAIL';
+      const reasons: string[] = [];
+      if (r.ruleFails.length > 0) reasons.push(`규칙위반 ${r.ruleFails.length}`);
+      if (r.isPastWinner) reasons.push('역대당첨중복');
+      const detail =
+        r.ruleFails.length > 0
+          ? '  → ' +
+            r.ruleFails
+              .slice(0, 4)
+              .map((f) => `${f.name}=${f.val}[${f.lo ?? '-∞'},${f.hi ?? '+∞'}]`)
+              .join(', ') +
+            (r.ruleFails.length > 4 ? ` 외 ${r.ruleFails.length - 4}건` : '')
+          : '';
+      console.log(
+        `  #${String(r.idx).padStart(3)} [${r.nums.map((n) => String(n).padStart(2)).join(' ')}] ${tag}` +
+          (reasons.length ? ` (${reasons.join(', ')})` : '') +
+          detail,
+      );
+    }
+    console.log('');
+    if (fullPass.length > 0) {
+      console.log(`◆ 최종 통과 조합 번호: ${fullPass.map((r) => '#' + r.idx).join(', ')}\n`);
+    }
+    return;
+  }
+
   if (mode === 'oos') {
     const winningStr = process.argv[3];
     const drwNo = process.argv[4] ?? '?';
