@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-26T17:00:00Z",
+  "generated_at": "2026-05-29T00:00:00Z",
   "rules_total": 256,
   "count_valid": 7700649,
   "total_combinations": 8145060,
@@ -40,7 +40,8 @@
         "decade_penalty": 0,
         "very_low_penalty": 0,
         "total": 5.6
-      }
+      },
+      "frame": "balanced"
     },
     {
       "draw": 1225,
@@ -66,9 +67,38 @@
         "very_low_penalty": 0,
         "total": 6.6,
         "pool_rank_pct": 10.86
-      }
+      },
+      "frame": "balanced"
     }
   ],
+  "frame_distribution": {
+    "all_time": {
+      "n": 1225,
+      "mean_score": 1.95,
+      "buckets": [
+        { "frame": "very-popular", "count": 91, "pct": 7.4 },
+        { "frame": "balanced", "count": 1029, "pct": 84.0 },
+        { "frame": "moderate", "count": 101, "pct": 8.2 },
+        { "frame": "unique", "count": 4, "pct": 0.3 }
+      ]
+    },
+    "recent_100": {
+      "n": 100,
+      "mean_score": 1.55,
+      "buckets": [
+        { "frame": "very-popular", "count": 12, "pct": 12.0 },
+        { "frame": "balanced", "count": 80, "pct": 80.0 },
+        { "frame": "moderate", "count": 8, "pct": 8.0 },
+        { "frame": "unique", "count": 0, "pct": 0.0 }
+      ]
+    },
+    "target_ratio": {
+      "very-popular": 10,
+      "balanced": 80,
+      "moderate": 8,
+      "unique": 2
+    }
+  },
   "chain_fire_history": [
     {
       "cycle": 402,

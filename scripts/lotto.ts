@@ -1589,6 +1589,61 @@ function unpopularityScore(nums: number[]): number {
   return score;
 }
 
+// ─── FRAME (기피점수 밴드) ─────────────────────────────────────────────────────
+// 표기 순서 고정: very-popular(<-3) : balanced[-3,7] : moderate(7,14] : unique(>14)
+type FrameKey = 'very-popular' | 'balanced' | 'moderate' | 'unique';
+const FRAME_ORDER: FrameKey[] = ['very-popular', 'balanced', 'moderate', 'unique'];
+// 앞으로 픽 생성 시 적용할 목표 비율 (합 100)
+const FRAME_TARGET_RATIO: Record<FrameKey, number> = {
+  'very-popular': 10,
+  balanced: 80,
+  moderate: 8,
+  unique: 2,
+};
+
+function classifyFrame(score: number): FrameKey {
+  if (score < -3) return 'very-popular';
+  if (score <= 7) return 'balanced';
+  if (score <= 14) return 'moderate';
+  return 'unique';
+}
+
+function frameDistribution(sets: number[][]): {
+  n: number;
+  mean_score: number;
+  buckets: { frame: FrameKey; count: number; pct: number }[];
+} {
+  const counts: Record<FrameKey, number> = { 'very-popular': 0, balanced: 0, moderate: 0, unique: 0 };
+  let sum = 0;
+  for (const nums of sets) {
+    const s = unpopularityScore(nums);
+    sum += s;
+    counts[classifyFrame(s)]++;
+  }
+  const n = sets.length || 1;
+  return {
+    n: sets.length,
+    mean_score: Number((sum / n).toFixed(2)),
+    buckets: FRAME_ORDER.map((f) => ({
+      frame: f,
+      count: counts[f],
+      pct: Number(((counts[f] / n) * 100).toFixed(1)),
+    })),
+  };
+}
+
+// total 픽 → 프레임별 목표 개수 (largest-remainder 로 합계 보존)
+function frameQuota(total: number, ratio: Record<FrameKey, number> = FRAME_TARGET_RATIO): Record<FrameKey, number> {
+  const ratioSum = FRAME_ORDER.reduce((a, f) => a + ratio[f], 0);
+  const raw = FRAME_ORDER.map((f) => ({ f, exact: (total * ratio[f]) / ratioSum }));
+  const quota: Record<FrameKey, number> = { 'very-popular': 0, balanced: 0, moderate: 0, unique: 0 };
+  let assigned = 0;
+  for (const r of raw) { quota[r.f] = Math.floor(r.exact); assigned += quota[r.f]; }
+  raw.sort((a, b) => (b.exact - Math.floor(b.exact)) - (a.exact - Math.floor(a.exact)));
+  for (let i = 0; assigned < total; i++, assigned++) quota[raw[i % raw.length].f]++;
+  return quota;
+}
+
 // ─── PICK ────────────────────────────────────────────────────────────────────
 
 interface PickEntry { nums: number[]; score: number; sum: number; odd: number; consec: number; }
@@ -2016,6 +2071,136 @@ ${targetDate} 추첨 결과 (${drawNo}회) 확정 후 매칭 수 + 3 source 별 
   writeFileSync(outPath, md);
   console.log(`박제: ${outPath}`);
   console.log(`회차: ${drawNo} / mix 50세트 (unique ${srcCount.unique} + moderate ${srcCount.moderate} + balanced ${srcCount.balanced}) / verify ${verify.allPass ? `PASS ${shuffled.length}/${shuffled.length}` : `FAIL ${verify.failures.length}`}`);
+}
+
+// ─── FRAME STRATEGY (목표 비율 10:80:8:2, 사용자 cycle 1032) ──────────────────
+// very-popular(<-3):balanced[-3,7]:moderate(7,14]:unique(>14) = 10:80:8:2.
+// 50세트 → 5:40:4:1. 각 프레임 내부는 무작위 샘플 (분포 정합).
+function pickMdFrame(rounds: LottoRound[], stats: Stats): void {
+  const targetDate = process.argv[3] ?? nextSaturdayKST();
+  const drawNo = process.argv[4] ?? (rounds.length + 1);
+  const TOTAL = 50;
+  const quota = frameQuota(TOTAL);
+  const pastWinners = new Set(rounds.map((r) => r.numbers.join(',')));
+
+  // 유효·비당첨 조합을 프레임별 버킷에 수집 (각 버킷 충분히 채울 때까지)
+  const buckets: Record<FrameKey, { nums: number[]; score: number }[]> = {
+    'very-popular': [], balanced: [], moderate: [], unique: [],
+  };
+  const seen = new Set<string>();
+  let attempts = 0;
+  const enough = () => FRAME_ORDER.every((f) => buckets[f].length >= Math.max(quota[f], 1) * 20 || buckets[f].length >= 200);
+  while (attempts < 6_000_000 && !enough()) {
+    attempts++;
+    const set = new Set<number>();
+    while (set.size < 6) set.add(Math.floor(Math.random() * 45) + 1);
+    const nums = [...set].sort((a, b) => a - b);
+    const key = nums.join(',');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!isValid(nums, stats)) continue;
+    if (pastWinners.has(key)) continue;
+    const score = unpopularityScore(nums);
+    buckets[classifyFrame(score)].push({ nums, score });
+  }
+
+  // 프레임별 quota 만큼 샘플 (Fisher-Yates). 부족분은 balanced 에서 backfill.
+  const shortfall: Partial<Record<FrameKey, number>> = {};
+  const chosen: { pick: PickEntry; frame: FrameKey }[] = [];
+  const usedKeys = new Set<string>();
+  for (const f of FRAME_ORDER) {
+    const pool = buckets[f];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    let taken = 0;
+    for (const c of pool) {
+      if (taken >= quota[f]) break;
+      if (usedKeys.has(c.nums.join(','))) continue;
+      usedKeys.add(c.nums.join(','));
+      chosen.push({
+        frame: f,
+        pick: { nums: c.nums, score: c.score, sum: sumNums(c.nums), odd: oddCount(c.nums), consec: consecPairs(c.nums) },
+      });
+      taken++;
+    }
+    if (taken < quota[f]) shortfall[f] = quota[f] - taken;
+  }
+  // backfill (부족 프레임 → balanced 잉여로 채워 50 유지)
+  let need = TOTAL - chosen.length;
+  if (need > 0) {
+    for (const c of buckets.balanced) {
+      if (need <= 0) break;
+      if (usedKeys.has(c.nums.join(','))) continue;
+      usedKeys.add(c.nums.join(','));
+      chosen.push({
+        frame: 'balanced',
+        pick: { nums: c.nums, score: c.score, sum: sumNums(c.nums), odd: oddCount(c.nums), consec: consecPairs(c.nums) },
+      });
+      need--;
+    }
+  }
+
+  // 최종 표시 순서 shuffle
+  for (let i = chosen.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [chosen[i], chosen[j]] = [chosen[j], chosen[i]];
+  }
+
+  const verify = verifyAllRules(chosen.map((c) => c.pick), stats);
+  const { valid, total } = countValid(stats);
+  const elimPct = ((1 - valid / total) * 100).toFixed(2);
+  const dist = frameDistribution(chosen.map((c) => c.pick.nums));
+  const got: Record<FrameKey, number> = { 'very-popular': 0, balanced: 0, moderate: 0, unique: 0 };
+  for (const c of chosen) got[c.frame]++;
+
+  const rowsAll = chosen
+    .map((c, i) => `| ${i + 1} | ${c.pick.nums.join(' ')} | ${c.pick.sum} | ${c.pick.odd}:${6 - c.pick.odd} | ${c.pick.consec} | ${c.pick.score.toFixed(1)} | ${c.frame} |`)
+    .join('\n');
+
+  const md = `# ${targetDate} (토) 추첨 ${TOTAL}세트 추천 — frame strategy (${drawNo}회)
+
+**생성 시각**: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC
+**strategy**: frame (목표 비율 very-popular:balanced:moderate:unique = ${FRAME_TARGET_RATIO['very-popular']}:${FRAME_TARGET_RATIO.balanced}:${FRAME_TARGET_RATIO.moderate}:${FRAME_TARGET_RATIO.unique})
+**필터링 룰**: ${RULES.length}개 100% 규칙 (cycle 444 saturation)
+**조합 풀**: ${total.toLocaleString()} → 유효 ${valid.toLocaleString()} (${elimPct}% 제거)
+**데이터 캐시**: 1~${rounds.length}회차
+**256 rules 전수 재검증**: ${verify.allPass ? `✓ ${chosen.length}/${chosen.length} PASS — 모든 조합 100% 규칙 통과` : `✗ ${verify.failures.length} FAIL`}
+${verify.failures.length > 0 ? `\n**FAIL 상세**:\n${verify.failures.map((f) => `- #${f.idx} [${f.nums.join(' ')}] — ${f.failedRules.join(', ')}`).join('\n')}\n` : ''}${Object.keys(shortfall).length > 0 ? `\n**프레임 부족 (balanced backfill)**: ${Object.entries(shortfall).map(([f, n]) => `${f} -${n}`).join(', ')}\n` : ''}
+
+## 프레임 배분 (목표 vs 실제)
+
+| 프레임 | score 범위 | 목표 | 실제 |
+|---|---|---|---|
+| very-popular | < -3 | ${quota['very-popular']} | ${got['very-popular']} |
+| balanced | -3 ~ 7 | ${quota.balanced} | ${got.balanced} |
+| moderate | 7 ~ 14 | ${quota.moderate} | ${got.moderate} |
+| unique | > 14 | ${quota.unique} | ${got.unique} |
+
+평균 score ${dist.mean_score.toFixed(2)} (역대 1등 전체 평균 1.95 / 최근 100회 1.55 정합 목표)
+
+## ${TOTAL}세트 전체 (shuffled order)
+
+| # | 번호 | 합 | 홀:짝 | 연속쌍 | 기피점수 | 프레임 |
+|---|---|---|---|---|---|---|
+${rowsAll}
+
+## 추첨 후 비교 검증
+
+${targetDate} 추첨 결과 (${drawNo}회) 확정 후 매칭 수 + 프레임별 매칭 분포 박제.
+
+## 주의
+
+- **frame strategy** = 사용자 지정 목표 비율 ${FRAME_TARGET_RATIO['very-popular']}:${FRAME_TARGET_RATIO.balanced}:${FRAME_TARGET_RATIO.moderate}:${FRAME_TARGET_RATIO.unique} — 역대 1등 프레임 분포 근사 + 꼬리 영역 hedge
+- 프레임 정합 = 역대 패턴 근사일 뿐 당첨 확률 우위 X. 6/45 균등추첨
+- N=1 단건 결과로 결론 X. 누적 N≥10회 후 프레임별 매칭 분포 비교 평가
+`;
+
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}-frame.md`);
+  writeFileSync(outPath, md);
+  console.log(`박제: ${outPath}`);
+  console.log(`회차: ${drawNo} / frame ${TOTAL}세트 (vp ${got['very-popular']} / bal ${got.balanced} / mod ${got.moderate} / uniq ${got.unique}) / verify ${verify.allPass ? `PASS ${chosen.length}/${chosen.length}` : `FAIL ${verify.failures.length}`}`);
 }
 
 // ─── SCORE BACKTEST (plan #8 Tier 2 L1) ────────────────────────────────────
@@ -2455,6 +2640,29 @@ JSON: {"draw": ${drwNo}, "passed_rules": ${passed}, "failed_rules": ${failed}, "
 
   if (mode === 'pick-md-mix') {
     pickMdMix(rounds, stats);
+  }
+
+  if (mode === 'pick-md-frame') {
+    pickMdFrame(rounds, stats);
+  }
+
+  // frame-dist — 역대 1등 프레임 분포 산출 (lotto-data.json frame_distribution 블록용)
+  if (mode === 'frame-dist') {
+    const all = frameDistribution(rounds.map((r) => r.numbers));
+    const recent = frameDistribution(rounds.slice(-100).map((r) => r.numbers));
+    const block = {
+      all_time: all,
+      recent_100: recent,
+      target_ratio: FRAME_TARGET_RATIO,
+    };
+    console.log(`\n=== 프레임 분포 (1~${rounds[rounds.length - 1].round}회) ===`);
+    for (const [title, w] of [['전체', all], ['최근 100회', recent]] as const) {
+      console.log(`\n◆ ${title} (N=${w.n}, 평균 score ${w.mean_score})`);
+      for (const b of w.buckets) console.log(`    ${b.frame.padEnd(13)} ${String(b.count).padStart(4)} (${b.pct.toFixed(1).padStart(5)}%)`);
+    }
+    console.log(`\n목표 비율 (앞으로 적용): vp ${FRAME_TARGET_RATIO['very-popular']} / bal ${FRAME_TARGET_RATIO.balanced} / mod ${FRAME_TARGET_RATIO.moderate} / uniq ${FRAME_TARGET_RATIO.unique}`);
+    console.log(`\nJSON (frame_distribution 블록):\n${JSON.stringify(block, null, 2)}`);
+    return;
   }
 
   if (mode === 'score-backtest') {

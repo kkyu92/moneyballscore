@@ -7,6 +7,7 @@ import {
   LottoScoreBacktestSchema,
   type LottoData,
   type LottoScoreBacktest,
+  type FrameKey,
 } from "@/lib/lotto/lotto-data-schema";
 import { listArchiveDates } from "@/lib/lotto/archive";
 import lottoDataRaw from "../../../../data/lotto-data.json";
@@ -22,6 +23,7 @@ const TOC_ITEMS = [
   { id: "bridge", label: "분석 정체성" },
   { id: "method", label: "방법론 개요" },
   { id: "rules", label: "규칙 누적 진화" },
+  { id: "frame", label: "프레임 분포" },
   { id: "oos", label: "OOS 검증" },
   { id: "score-distribution", label: "score 분포 backtest" },
   { id: "fire", label: "사이클 진행 history" },
@@ -65,6 +67,20 @@ const PERCENTILE_MARKERS: PercentileMarker[] = [
   { key: "p75", label: "top 75%" },
   { key: "p95", label: "top 95%" },
   { key: "p100", label: "top 100%" },
+];
+
+const FRAME_META: Record<FrameKey, { label: string; range: string }> = {
+  "very-popular": { label: "very-popular", range: "score < -3" },
+  balanced: { label: "balanced", range: "-3 ≤ score ≤ 7" },
+  moderate: { label: "moderate", range: "7 < score ≤ 14" },
+  unique: { label: "unique", range: "score > 14" },
+};
+
+const FRAME_ORDER: FrameKey[] = [
+  "very-popular",
+  "balanced",
+  "moderate",
+  "unique",
 ];
 
 function buildScoreDistribution(backtest: LottoScoreBacktest) {
@@ -140,6 +156,7 @@ export default function LottoMethodologyPage() {
   const ratio = ((lottoData.count_valid / lottoData.total_combinations) * 100).toFixed(2);
   const oosLatest = lottoData.oos_pass_rate[lottoData.oos_pass_rate.length - 1];
   const sparkPoints = buildSparkline(lottoData.rules_history);
+  const frameDist = lottoData.frame_distribution;
   const latestArchiveDate = listArchiveDates()[0] ?? null;
   const dist = buildScoreDistribution(scoreBacktest);
 
@@ -247,6 +264,77 @@ export default function LottoMethodologyPage() {
         </ul>
       </section>
 
+      {frameDist && (
+        <section id="frame" className="scroll-mt-20 space-y-3">
+          <h2 className="text-xl font-semibold text-brand-100">프레임 분포</h2>
+          <p className="text-sm text-brand-300 leading-relaxed">
+            기피점수(unpopularityScore) 밴드로 조합을 4 프레임 — very-popular
+            (score &lt; -3) / balanced (-3~7) / moderate (7~14) / unique (&gt;14)
+            — 으로 분류. 역대 1등 조합이 각 프레임에 실제로 어떻게 분포하는지,
+            그리고 앞으로 픽 생성 시 적용할 목표 비율을 기록합니다.
+          </p>
+
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="text-brand-300">픽 생성 목표 비율 (앞으로 적용):</span>
+            {FRAME_ORDER.map((f) => (
+              <span
+                key={f}
+                className="rounded bg-brand-900 border border-brand-800 px-2 py-1 text-brand-200 tabular-nums"
+              >
+                {FRAME_META[f].label} {frameDist.target_ratio[f]}%
+              </span>
+            ))}
+          </div>
+
+          {(
+            [
+              { title: `전체 (1~${lottoData.oos_pass_rate.at(-1)?.draw ?? ""}회)`, win: frameDist.all_time },
+              { title: "최근 100회", win: frameDist.recent_100 },
+            ] as const
+          ).map(({ title, win }) => (
+            <div key={title} className="space-y-1">
+              <p className="text-sm text-brand-200 font-semibold">
+                {title} — N={formatNumber(win.n)} / 평균 score {win.mean_score.toFixed(2)}
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse tabular-nums">
+                  <thead>
+                    <tr className="bg-brand-900 border-b border-brand-800 text-brand-300 text-xs uppercase">
+                      <th className="text-left px-3 py-2 font-semibold">프레임</th>
+                      <th className="text-left px-3 py-2 font-semibold">score 범위</th>
+                      <th className="text-right px-3 py-2 font-semibold">회수</th>
+                      <th className="text-right px-3 py-2 font-semibold">비율</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {FRAME_ORDER.map((f) => {
+                      const b = win.buckets.find((x) => x.frame === f);
+                      return (
+                        <tr key={f} className="border-b border-brand-800/50">
+                          <td className="px-3 py-2 text-brand-200">{FRAME_META[f].label}</td>
+                          <td className="px-3 py-2 text-brand-400 text-xs">{FRAME_META[f].range}</td>
+                          <td className="px-3 py-2 text-right text-brand-100">{b ? b.count : 0}</td>
+                          <td className="px-3 py-2 text-right text-brand-200">
+                            {b ? b.pct.toFixed(1) : "0.0"}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+
+          <p className="text-xs text-brand-400 leading-relaxed">
+            역대 1등은 balanced 밴드에 84% 집중되지만 moderate(8%)·very-popular(7%)
+            꼬리까지 퍼져 있습니다. 목표 비율 10:80:8:2 는 이 분포를 근사하면서
+            꼬리 영역도 일부 베팅에 포함하기 위한 설정입니다. 프레임 정합 =
+            역대 패턴 근사일 뿐 당첨 확률 우위를 의미하지 않습니다.
+          </p>
+        </section>
+      )}
+
       <section id="oos" className="scroll-mt-20 space-y-3">
         <h2 className="text-xl font-semibold text-brand-100">OOS 검증</h2>
         <p className="text-sm text-brand-300 leading-relaxed">
@@ -258,6 +346,7 @@ export default function LottoMethodologyPage() {
               <tr className="bg-brand-900 border-b border-brand-800 text-brand-300 text-xs uppercase">
                 <th className="text-left px-3 py-2 font-semibold">회차</th>
                 <th className="text-left px-3 py-2 font-semibold">날짜</th>
+                <th className="text-left px-3 py-2 font-semibold">프레임</th>
                 <th className="text-right px-3 py-2 font-semibold">PASS</th>
                 <th className="text-right px-3 py-2 font-semibold">FAIL</th>
                 <th className="text-right px-3 py-2 font-semibold">5등 매칭</th>
@@ -272,6 +361,9 @@ export default function LottoMethodologyPage() {
                   <tr key={r.draw} className="border-b border-brand-800/50">
                     <td className="px-3 py-2 text-brand-200">{r.draw}</td>
                     <td className="px-3 py-2 text-brand-300">{r.date}</td>
+                    <td className="px-3 py-2 text-brand-300">
+                      {r.frame ? FRAME_META[r.frame].label : "—"}
+                    </td>
                     <td className="px-3 py-2 text-right text-brand-100">{r.passed}</td>
                     <td className="px-3 py-2 text-right text-brand-400">{r.failed}</td>
                     <td className="px-3 py-2 text-right text-brand-200">
