@@ -252,7 +252,7 @@ if __name__ == "__main__":
 | 4 | KBO 데이터 backfill + TabPFN checkpoint download + verification | carry-over (사용자 영역) | TBD |
 | 5 | v2.0 A/B test harness production fire | carry-over (사용자 영역, gating v1.8 cohort n=150 ≈ 07-05 ETA) | TBD |
 
-본 plan #12 = Step 1~2 closure 후 status=approved 유지 (expiry 2026-08-26). Step 3~5 = 사용자 영역 carry-over, v1.8 n=150 도달 후 사용자 결정 시점에 자연 fire 또는 archive.
+본 plan #12 = Step 1~2 closure 후 status=completed_autonomy_pending_user_step_3_5 (expiry 2026-08-26, cycle 1037 frontmatter 갱신). Step 3~5 = 사용자 영역 carry-over, v1.8 n=150 도달 후 사용자 결정 시점에 자연 fire 또는 archive.
 
 ## 8. 비용 가드 reminder (cycle 957 정합)
 
