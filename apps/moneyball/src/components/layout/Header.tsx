@@ -67,7 +67,28 @@ const KBO_NAV: NavItem[] = [
 ];
 
 const MLB_NAV: NavItem[] = [
-  { href: "/mlb", label: "MLB (검토 중)" },
+  { href: "/mlb", label: "오늘" },
+  {
+    label: "경기·팀",
+    items: [
+      { href: "/mlb/standings", label: "AL/NL 순위", description: "6 division standings", icon: "award" },
+      { href: "/mlb/team", label: "팀", description: "30팀 시즌 stat", icon: "shield" },
+      { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
+    ],
+  },
+  {
+    label: "포스트시즌",
+    items: [
+      { href: "/mlb/wild-card", label: "Wild Card", description: "AL/NL Wild Card race", icon: "target" },
+      { href: "/mlb/postseason", label: "Postseason", description: "WC / DS / LCS / WS bracket", icon: "award" },
+    ],
+  },
+  {
+    label: "모델",
+    items: [
+      { href: "/mlb/factors", label: "14팩터", description: "KBO 10 + Statcast 4", icon: "bar-chart" },
+    ],
+  },
 ];
 
 const LOTTO_LINKS: NavLink[] = [

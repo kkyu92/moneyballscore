@@ -270,3 +270,25 @@ export function resolveKoreanTeamCode(name: string): TeamCode | null {
   }
   return null;
 }
+
+export type League = 'kbo' | 'mlb';
+
+export interface MlbStatcast {
+  xwoba: number;          // 0~0.5
+  barrel_pct: number;     // 0~30
+  hard_hit_pct: number;   // 0~100
+  launch_angle: number;   // -30~50 deg
+}
+
+export interface MlbBase14Factor {
+  // KBO 10 동등
+  sp_fip: number; sp_xfip: number; lineup_woba: number;
+  bullpen_fip: number; recent_form: number; war: number;
+  head_to_head: number; park_factor: number; elo: number;
+  defense_sfr: number;
+  // Statcast 4 추가
+  lineup_xwoba: number; lineup_barrel_pct: number;
+  sp_xwoba_against: number; woba_std: number;
+  // 보너스
+  home_elo_bonus: number;
+}

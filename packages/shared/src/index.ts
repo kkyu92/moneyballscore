@@ -1,6 +1,16 @@
 // 라이벌리 정의 re-export (빅매치 rivalry_bonus 가산점 source)
 export { KBO_RIVALRIES, isRivalry } from './rivalries';
 
+// MLB 30팀 + division mapping — Plan B Tier C+D Task 3 prerequisite helper sprint
+export {
+  MLB_TEAMS,
+  MLB_DIVISIONS,
+  MLB_TEAMS_PRE_RENDER,
+  mlbShortTeamName,
+  mlbTeamDivision,
+} from './mlb-teams';
+export type { MlbTeamCode, MlbLeagueSide, MlbDivisionSide } from './mlb-teams';
+
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
 export { hasJongsung, josa, ro } from './korean';
 

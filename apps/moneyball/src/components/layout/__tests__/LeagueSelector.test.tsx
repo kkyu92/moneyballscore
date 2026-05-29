@@ -38,8 +38,7 @@ describe("LeagueSelector", () => {
     expect(mlbTab).toHaveAttribute("href", "/mlb");
     unmount();
 
-    // sub-NAV switches: leagueFromPath('/mlb') → 'mlb', LEAGUE_NAVS.mlb → MLB (검토 중) link
-    // cycle 1021 plan #14 C3d: badge "베타" → "검토 중" (commitment escalation 차단, CEO High #3)
+    // sub-NAV switches: leagueFromPath('/mlb') → 'mlb', LEAGUE_NAVS.mlb → 9 sub-route (cycle 1023 MLB ship)
     const league = leagueFromPath("/mlb");
     expect(league).toBe("mlb");
     const mlbNav = LEAGUE_NAVS[league];
@@ -47,7 +46,8 @@ describe("LeagueSelector", () => {
     const labels = mlbNav.flatMap((item) =>
       isNavGroup(item) ? item.items.map((sub) => sub.label) : [item.label],
     );
-    expect(labels).toContain("MLB (검토 중)");
+    expect(labels).toContain("Wild Card");
+    expect(labels).toContain("Statcast");
   });
 
   it("모바일 variant 는 mobile container 클래스 + onSelect 콜백 호출", () => {
