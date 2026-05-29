@@ -29,9 +29,7 @@ test.describe("LeagueSelector navigation", () => {
   test("MLB league link exists with 베타 badge", async ({ page }) => {
     // 햄버거가 보이는 경우 (모바일) 먼저 열기
     const hamburger = page.getByRole("button", { name: "메뉴" });
-    const hamburgerVisible = await hamburger.isVisible().catch(() => false);
-
-    if (hamburgerVisible) {
+    if ((await hamburger.count()) > 0 && (await hamburger.isVisible())) {
       await hamburger.click();
       await page.waitForTimeout(300); // 애니메이션 대기
     }
@@ -56,9 +54,7 @@ test.describe("LeagueSelector navigation", () => {
   test("navigate to MLB via league link", async ({ page }) => {
     // 햄버거가 보이면 열기 (모바일)
     const hamburger = page.getByRole("button", { name: "메뉴" });
-    const hamburgerVisible = await hamburger.isVisible().catch(() => false);
-
-    if (hamburgerVisible) {
+    if ((await hamburger.count()) > 0 && (await hamburger.isVisible())) {
       await hamburger.click();
       await page.waitForTimeout(300);
     }
@@ -82,9 +78,7 @@ test.describe("LeagueSelector navigation", () => {
   test("navigate to Lotto via league link", async ({ page }) => {
     // 햄버거가 보이면 열기
     const hamburger = page.getByRole("button", { name: "메뉴" });
-    const hamburgerVisible = await hamburger.isVisible().catch(() => false);
-
-    if (hamburgerVisible) {
+    if ((await hamburger.count()) > 0 && (await hamburger.isVisible())) {
       await hamburger.click();
       await page.waitForTimeout(300);
     }
@@ -112,9 +106,7 @@ test.describe("LeagueSelector navigation", () => {
 
     // 햄버거가 보이면 열기
     const hamburger = page.getByRole("button", { name: "메뉴" });
-    const hamburgerVisible = await hamburger.isVisible().catch(() => false);
-
-    if (hamburgerVisible) {
+    if ((await hamburger.count()) > 0 && (await hamburger.isVisible())) {
       await hamburger.click();
       await page.waitForTimeout(300);
     }
