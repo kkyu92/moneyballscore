@@ -14,7 +14,7 @@
  *   pnpm e2e megamenu-states.spec.ts                          # diff 검증
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, devices } from "@playwright/test";
 
 const STATES = [
   { id: 1, name: "default", path: "/", action: null },
@@ -80,7 +80,7 @@ test.describe("MegaMenu 12 case 시각 baseline", () => {
 test.describe("MegaMenu mobile 12 case (case 12 mobile-collapse)", () => {
   // iPhone 13 device 의 viewport / userAgent / deviceScaleFactor / isMobile / hasTouch 만 사용.
   // defaultBrowserType 은 describe scope 안 test.use 에서 사용 불가 (worker 재할당 강제) — 제외.
-  const iPhone13 = require("@playwright/test").devices["iPhone 13"];
+  const iPhone13 = devices["iPhone 13"];
   test.use({
     viewport: iPhone13.viewport,
     userAgent: iPhone13.userAgent,
