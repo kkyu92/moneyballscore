@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { assertSelectOk, errMsg, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { assertSelectOk, errMsg, PRODUCTION_COHORT_RULES } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 
 // 동적 Open Graph 이미지: /predictions/YYYY-MM-DD 각 날짜별로 생성.
@@ -30,7 +30,8 @@ async function getStats(date: string): Promise<{
 }> {
   // assertSelectOk — cycle 151 silent drift family. cycle 1021 (c12) — top pick
   // 추출 위해 winner/game team code + reasoning JSONB 추가.
-  // scoring_rule filter (CURRENT_SCORING_RULE) — shadow row 제외 (#1338 family).
+  // scoring_rule filter — shadow row 제외 + production cohort 양쪽 포함 (cycle
+  // 1022 hotfix: credit-fail 분리된 row 도 사용자 가시 OG image 박제 의무).
   try {
     const supabase = await createClient();
     const result = await supabase
@@ -39,7 +40,7 @@ async function getStats(date: string): Promise<{
         "confidence, is_correct, prediction_type, scoring_rule, reasoning, winner:teams!predictions_predicted_winner_fkey(code), game:games!predictions_game_id_fkey(game_date, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
       )
       .eq("prediction_type", "pre_game")
-      .eq("scoring_rule", CURRENT_SCORING_RULE)
+      .in("scoring_rule", PRODUCTION_COHORT_RULES)
       .eq("game.game_date", date);
 
     const { data } = assertSelectOk(result, "opengraph-image getStats");
