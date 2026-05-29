@@ -30,8 +30,12 @@ import type { BacktestPredictionRow } from './backtest-v2-helpers';
  *   (rescore) only. 정직 라벨로 변경 (cycle 1021 autoplan CEO-3 B 채택, 2026-05-29).
  *   true expanding window OOS = train weights 학습 layer 필요 (carry-over plan).
  * - rolling: 시간 window 안 train(7) test(3) split.
+ * - train-and-test: plan #16 true expanding window OOS. train cohort
+ *   (v1.5/v1.6/v1.7-revert) 위 logistic regression fit → learned weights.
+ *   test cohort (v1.8) 위 learned vs DEFAULT vs SHADOW_V20 3-way comparison.
+ *   v18-only-rescore 와 분리 — train set 자체 사용 (학습 layer 신규).
  */
-export type CvPattern = 'walk-forward' | 'v18-only-rescore' | 'rolling';
+export type CvPattern = 'walk-forward' | 'v18-only-rescore' | 'rolling' | 'train-and-test';
 
 export interface SplitResult {
   pattern: CvPattern;
