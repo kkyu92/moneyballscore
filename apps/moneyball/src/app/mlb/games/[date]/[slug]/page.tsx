@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
+import { assertSelectOk } from "@moneyball/shared";
+
+export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
@@ -21,22 +24,66 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
   };
 }
 
+interface PredictionDetailRow {
+  game_id: number;
+  predicted_winner: number | null;
+  confidence: number | null;
+  home_sp_fip: number | null;
+  away_sp_fip: number | null;
+  home_lineup_woba: number | null;
+  away_lineup_woba: number | null;
+  home_lineup_xwoba: number | null;
+  away_lineup_xwoba: number | null;
+  home_lineup_barrel_pct: number | null;
+  away_lineup_barrel_pct: number | null;
+  games: {
+    game_date: string;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+  } | null;
+  predicted_winner_team: { code: string | null } | null;
+}
+
 export default async function GameDetail({ params }: PageParams) {
   const { date, slug } = await params;
   const [home, away] = slug.split('-vs-');
   if (!home || !away) notFound();
 
   const supabase = await createClient();
-  const { data: pred } = await supabase
+  const result = await supabase
     .from('predictions')
-    .select('*')
+    .select(`
+      game_id,
+      predicted_winner,
+      confidence,
+      home_sp_fip,
+      away_sp_fip,
+      home_lineup_woba,
+      away_lineup_woba,
+      home_lineup_xwoba,
+      away_lineup_xwoba,
+      home_lineup_barrel_pct,
+      away_lineup_barrel_pct,
+      games!inner(
+        game_date,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      ),
+      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+    `)
     .eq('league', 'mlb')
-    .eq('game_date', date)
-    .eq('home_team_code', home)
-    .eq('away_team_code', away)
-    .single();
+    .eq('games.game_date', date)
+    .eq('games.home_team.code', home)
+    .eq('games.away_team.code', away)
+    .maybeSingle();
+
+  const { data: predRaw } = assertSelectOk(result, 'MlbGameDetail prediction');
+  const pred = predRaw as unknown as PredictionDetailRow | null;
 
   if (!pred) notFound();
+
+  const winnerCode = pred.predicted_winner_team?.code ?? '?';
+  const conf = pred.confidence != null ? Math.round(pred.confidence * 100) : 0;
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -46,18 +93,18 @@ export default async function GameDetail({ params }: PageParams) {
         { label: `${home} vs ${away}` },
       ]} />
 
-      <h1 className="text-2xl md:text-3xl font-bold">
+      <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         {home} vs {away}
       </h1>
 
       <section className="rounded-lg bg-brand-50 dark:bg-brand-900 p-5">
         <div className="text-3xl font-bold text-brand-700 dark:text-brand-100">
-          {pred.predicted_winner} {Math.round(pred.confidence * 100)}%
+          {winnerCode} {conf}%
         </div>
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-3">14 factor breakdown</h2>
+        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">14 factor breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <FactorRow label="선발 FIP" home={pred.home_sp_fip} away={pred.away_sp_fip} />
           <FactorRow label="타선 wOBA" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
@@ -72,8 +119,8 @@ export default async function GameDetail({ params }: PageParams) {
 function FactorRow({ label, home, away }: { label: string; home: number | null; away: number | null }) {
   return (
     <div className="border border-brand-200 dark:border-brand-800 rounded p-3">
-      <dt className="text-xs text-brand-500">{label}</dt>
-      <dd className="font-mono mt-1">{home ?? '—'} / {away ?? '—'}</dd>
+      <dt className="text-xs text-brand-500 dark:text-brand-400">{label}</dt>
+      <dd className="font-mono mt-1 text-brand-700 dark:text-brand-100">{home ?? '—'} / {away ?? '—'}</dd>
     </div>
   );
 }

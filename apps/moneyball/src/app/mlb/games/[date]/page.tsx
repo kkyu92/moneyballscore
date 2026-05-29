@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
+import { assertSelectOk } from "@moneyball/shared";
+
+export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
@@ -18,17 +21,42 @@ export async function generateMetadata({ params }: { params: Promise<{ date: str
   };
 }
 
+interface PredictionRow {
+  game_id: number;
+  predicted_winner: number | null;
+  confidence: number | null;
+  games: {
+    game_date: string;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+  } | null;
+  predicted_winner_team: { code: string | null } | null;
+}
+
 export default async function MlbGames({ params }: { params: Promise<{ date: string }> }) {
   const { date } = await params;
   if (!/^20[2-9]\d-\d{2}-\d{2}$/.test(date)) notFound();
 
   const supabase = await createClient();
-  const { data: predictions } = await supabase
+  const result = await supabase
     .from('predictions')
-    .select('game_id, predicted_winner, confidence, home_team_code, away_team_code')
+    .select(`
+      game_id,
+      predicted_winner,
+      confidence,
+      games!inner(
+        game_date,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      ),
+      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+    `)
     .eq('league', 'mlb')
-    .eq('game_date', date)
+    .eq('games.game_date', date)
     .order('game_id', { ascending: true });
+
+  const { data: predictions } = assertSelectOk(result, 'MlbGames predictions');
+  const rows = (predictions ?? []) as unknown as PredictionRow[];
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -41,22 +69,28 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
         MLB {date} 경기
       </h1>
 
-      {!predictions || predictions.length === 0 ? (
-        <p className="text-brand-500">해당 일자 경기 박제 X</p>
+      {rows.length === 0 ? (
+        <p className="text-brand-500 dark:text-brand-400">해당 일자 경기가 없습니다.</p>
       ) : (
         <ul className="space-y-3">
-          {predictions.map((p) => (
-            <li key={p.game_id} className="rounded-lg border border-brand-200 dark:border-brand-800 p-4 hover:border-brand-400 transition-colors">
-              <Link href={`/mlb/games/${date}/${p.home_team_code}-vs-${p.away_team_code}`} className="flex items-center justify-between">
-                <span className="font-semibold">
-                  {p.home_team_code} vs {p.away_team_code}
-                </span>
-                <span className="text-sm text-brand-600 dark:text-brand-300">
-                  {p.predicted_winner} {Math.round(p.confidence * 100)}%
-                </span>
-              </Link>
-            </li>
-          ))}
+          {rows.map((p) => {
+            const homeCode = p.games?.home_team?.code ?? '?';
+            const awayCode = p.games?.away_team?.code ?? '?';
+            const winnerCode = p.predicted_winner_team?.code ?? '?';
+            const conf = p.confidence != null ? Math.round(p.confidence * 100) : 0;
+            return (
+              <li key={p.game_id} className="rounded-lg border border-brand-200 dark:border-brand-800 p-4 hover:border-brand-400 transition-colors">
+                <Link href={`/mlb/games/${date}/${homeCode}-vs-${awayCode}`} className="flex items-center justify-between">
+                  <span className="font-semibold">
+                    {homeCode} vs {awayCode}
+                  </span>
+                  <span className="text-sm text-brand-600 dark:text-brand-300">
+                    {winnerCode} {conf}%
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>
