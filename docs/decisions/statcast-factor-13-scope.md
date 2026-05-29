@@ -110,7 +110,7 @@
 본 1-pager 가 **2026-06-30 까지 미결정** 시:
 
 1. 본 1-pager 안 `Status: ESCALATED — deadline passed` 박제
-2. carry-over plan #N 박제 — "사용자 결정 wait" 명시 + 본 1-pager link
+2. carry-over 별도 plan 박제 (number TBD — escalation 시점 next-available number 결정) — "사용자 결정 wait" 명시 + 본 1-pager link
 3. 다음 develop-cycle 진단 단계 자동 trigger (unprocessed-plan lookup)
 4. 사용자 알림 채널 (Telegram 또는 commit body) 박제
 
