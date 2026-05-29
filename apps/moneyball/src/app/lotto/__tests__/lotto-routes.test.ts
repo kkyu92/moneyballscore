@@ -240,8 +240,8 @@ describe("Header NAV — 로또 group 박제 (plan #6 Step B)", () => {
 describe("Footer SITEMAP — 로또 column 박제 (plan #6 Step B)", () => {
   const src = readFileSync(FOOTER_SRC, "utf-8");
 
-  it("로또 column label 박제", () => {
-    expect(src).toMatch(/label:\s*"로또"/);
+  it("로또 column title 박제", () => {
+    expect(src).toMatch(/title:\s*"로또"/);
   });
 
   it("/lotto/methodology + /lotto/archive link 양쪽 박제 in Footer", () => {
@@ -251,7 +251,7 @@ describe("Footer SITEMAP — 로또 column 박제 (plan #6 Step B)", () => {
 
   it("도움말 column 안 /lotto/methodology entry 부재 (로또 column 으로 이동)", () => {
     const helpColumnMatch = src.match(
-      /label:\s*"도움말",\s*links:\s*\[([\s\S]*?)\]/,
+      /title:\s*"도움말",\s*links:\s*\[([\s\S]*?)\]/,
     );
     expect(helpColumnMatch).toBeTruthy();
     if (helpColumnMatch) {
