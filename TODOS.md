@@ -18,9 +18,19 @@
 
 **완료 조건 (MLB 작업 시작 trigger)**: 항목 1, 2, 4-Step E/F partial 자율 영역 closed. 잔존 carry-over = 항목 3 (사용자 영역) + 항목 4 Step C/D (gating) + 항목 5 (자연 누적). MLB 작업 시작 = 사용자 영역 통과 후 사용자 결정.
 
-## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07, **cycle 886 갱신**)
+## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07, **cycle 1038 갱신**)
 
-**현재 상태 (cycle 886, 2026-05-25 측정)**: **133건 검증 완료** (cycle 775 n=124 → +9 in 5일 = velocity ~1.8/day) / 전체 적중률 **48.9%** / v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly) / v1.7-revert=53.1%(32) / **v1.8=48.7%(39, Brier 0.2325)** — cycle 864 v1.8 n=32 43.8% → +7건 **+4.9pp 향상**. v2.0 임계 n=150 까지 **17건**.
+**현재 상태 (cycle 1038, 2026-05-29 측정)** — 아티팩트: `apps/moneyball/data/op-analysis-cohort/2026-05-29-cohort.md`:
+- 총 n=205 (적중 105 / **51.2%**) — cycle 886 n=133 → +72건 누적 (4일 / velocity ~18/day, cron 누적 정상)
+- **v1.8 (real) n=27 (44.4%, Brier 0.2487)** — cycle 989/994 측정 n=27 → cycle 1038 동일 (pre-14d ≤10건 추산)
+- v1.8-credit-fail n=25 (60.0%, Brier 0.2304) — 2026-05-13~16 ANTHROPIC credit 실패 fallback cohort 분리
+- v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly 잔존) / v1.7-revert=55.9%(34)
+- v2.0-shadow n=5 (60.0%, Brier 0.5616) / **v2.1-B-shadow n=52 (51.9%, Brier 0.4635)** — Brier 0.46+ calibration 미흡 surface
+- 요일 weak: 일 33.3%/n=24 누적 — v2.0 가중치 후보 검토 시 요일 보정 검토
+- v2.0 임계 n=150 까지 (v1.8 real 기준) **잔여 123건** — ETA 2026-08-04 (velocity 1.80/day, cycle 989/994 박제)
+
+> 📜 **history (cycle 886, 2026-05-25 측정)**: 133건 / 48.9% / v1.5=75.0%(16) / v1.6=37.0%(46) / v1.7-revert=53.1%(32) / **v1.8=48.7%(39, Brier 0.2325)** — credit-fail row 미분리 측정. cycle 989/994 부터 real v1.8 cohort 분리 (n=27 real, n=25 credit-fail) — `+39` 는 conflated cohort, **현재 측정 n=27 real 이 source of truth**.
+
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
 > ✅ **v1.8 credit 복구 완료 (2026-05-16 08:06 KST, user action)**: ANTHROPIC_API_KEY credit 충전 완료. retro debate 분석은 결과 누수/방법론 위반으로 **비채택**. 앞으로 fire 되는 신규 경기 v1.8 debate 누적으로 정직한 n 증가. 검증 항목 — (1) 다음 predict cron UTC 01 (KST 10:00) 첫 fire 시 `totalTokens>0` + reasoning 텍스트 길이 정상 + mv='v2.0-debate' 라벨 / (2) postview path 도 동일 verify (mv='v2.0-postview'). silent fallback 재발 시 PR #372 family fix 정상 작동 → mv='v1.8' (강등 라벨) 노출. 5/13~5/15 fallback 기간 5건은 quant-only 라벨로 누적 유지 (역사 박제). 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
