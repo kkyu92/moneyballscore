@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PredictionCard } from "@/components/predictions/PredictionCard";
-import { PlaceholderCard } from "@/components/predictions/PlaceholderCard";
+import { PredictionCardLive } from "@/components/predictions/PredictionCardLive";
+import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
@@ -410,13 +410,14 @@ export default async function PredictionDatePage({ params }: Props) {
             if (!pred) {
               return (
                 <div key={game.id} data-game-id={game.id} data-kind="missing">
-                  <PlaceholderCard
+                  <PlaceholderCardLive
                     homeTeam={homeCode}
                     awayTeam={awayCode}
                     gameTime={game.game_time?.slice(0, 5)}
                     status={game.status}
                     homeSPName={game.home_sp?.name_ko ?? undefined}
                     awaySPName={game.away_sp?.name_ko ?? undefined}
+                    gameDate={date}
                   />
                 </div>
               );
@@ -427,13 +428,14 @@ export default async function PredictionDatePage({ params }: Props) {
             if (game.status === 'postponed') {
               return (
                 <div key={game.id} data-game-id={game.id} data-kind="cancelled">
-                  <PlaceholderCard
+                  <PlaceholderCardLive
                     homeTeam={homeCode}
                     awayTeam={awayCode}
                     gameTime={game.game_time?.slice(0, 5)}
                     status="postponed"
                     homeSPName={game.home_sp?.name_ko ?? undefined}
                     awaySPName={game.away_sp?.name_ko ?? undefined}
+                    gameDate={date}
                   />
                 </div>
               );
@@ -456,7 +458,7 @@ export default async function PredictionDatePage({ params }: Props) {
                   dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventJsonLd) }}
                 />
 
-                <PredictionCard
+                <PredictionCardLive
                   homeTeam={homeCode}
                   awayTeam={awayCode}
                   confidence={pred.confidence}
@@ -473,6 +475,9 @@ export default async function PredictionDatePage({ params }: Props) {
                   awayScore={game.away_score}
                   winProb={winProb}
                   gameId={game.id}
+                  status={game.status}
+                  gameDate={date}
+                  enablePickButton={false}
                 />
 
                 {verdict?.reasoning && (() => {
