@@ -333,7 +333,7 @@ parent_plan: #15 (Eng-C1 finding 후속)
 
 ## Learned weights (normalized sum=1)
 
-${weightRow('factor', Object.fromEntries(keys.map((k) => [k, 0])))}
+| weights | ${keys.join(' | ')} |
 |---|${keys.map(() => '---').join('|')}|
 ${weightRow('DEFAULT', DEFAULT_WEIGHTS as unknown as Record<string, number>)}
 ${weightRow('SHADOW_V20', SHADOW_V20_WEIGHTS as unknown as Record<string, number>)}
