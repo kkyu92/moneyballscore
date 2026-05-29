@@ -68,7 +68,8 @@ export function splitMessage(text: string): string[] {
       flushOversize(line).forEach((c) => parts.push(c));
       continue;
     }
-    if (current.length + line.length + 1 > MAX_TELEGRAM_LENGTH) {
+    const sep = current ? 1 : 0;  // newline 박제 시점만 +1
+    if (current.length + sep + line.length > MAX_TELEGRAM_LENGTH) {
       parts.push(current);
       current = line;
     } else {

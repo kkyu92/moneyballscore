@@ -27,7 +27,15 @@ describe('MlbCombinedMessage', () => {
     parts.forEach((p) => expect(p.length).toBeLessThanOrEqual(4096));
   });
 
-  it('빅매치 criteria = confidence > 0.65 또는 playoff race', () => {
+  it('returns empty string when both recap.games=0 and preview.games=[]', () => {
+    const msg = formatMlbCombinedMessage({
+      recap: { date: '2026-05-28', games: 0, correct: 0, brier: 0 },
+      preview: { date: '2026-05-29', games: [] },
+    });
+    expect(msg).toBe('');
+  });
+
+  it('빅매치 criteria = confidence > 0.65 또는 bigGame=true', () => {
     const msg = formatMlbCombinedMessage({
       recap: { date: '2026-05-28', games: 0, correct: 0, brier: 0 },
       preview: { date: '2026-05-29', games: [
