@@ -32,6 +32,7 @@ const KBO_NAV: NavItem[] = [
   },
   { href: "/standings", label: "순위" },
   { href: "/predictions", label: "예측 기록" },
+  { href: "/calendar", label: "월별 캘린더" },
   {
     label: "팀·선수",
     items: [
