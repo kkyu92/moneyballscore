@@ -1,9 +1,10 @@
 ---
 created_at: 2026-05-29
 cycle: 1049
+updated_cycle: 1062
 scout_issue: 1206
 related_plan: 12
-status: carry-over tracker (Step 1/2 evidence pack done, Step 3-5 user-domain wait)
+status: carry-over tracker (Step 1/2 evidence pack done, Step 3-5 user-domain wait, kill-switch ETA 2026-06-03)
 ---
 
 # TabPFN Scout #1206 — Status (cycle 1049)
@@ -31,8 +32,14 @@ scout #1206 (2026-05-21 박제) carry-over status snapshot. plan #12 Step 1/2 ev
 
 - 측정 baseline: cycle 989/994 (2026-05-26) — n=27 / accuracy 48.1% / velocity 1.80/day / pre_game cohort only
 - 갱신 측정: cycle 1038 (2026-05-29) — n=27 변동 0 (11 cycle cluster time gap, real time ≤ 4시간)
-- n=150 ETA: 2026-08-04 (잔여 123, velocity 1.80/day = 68일 추정, cycle 989 retro 박제)
+- **fresh baseline: cycle 1061 (2026-05-29) — n=205 total, v1.8 cohort split 신규 등장**:
+  - v1.8 main: n=27 / acc 44.4% / Brier 0.2487
+  - v1.8-credit-fail: n=25 / acc 60.0% / Brier 0.2304 (best of v1.8 family)
+  - **v1.8 real (main + credit-fail): n=52** — credit-fail subset +15.6pp 우수 (mechanism 이 prediction quality 보존 evidence)
 - kill-switch fire 조건: cohort_n ≥ 60 + accuracy 2pp+ 하회 + 3회 연속 (cycle 949~ 박제, `docs/research/v2.0-killswitch.md`)
+  - **kill-switch threshold ETA**: real n=52 → n=60 까지 잔여 8건, 추정 2026-06-03 (~5일)
+  - v1.8 main 44.4% vs v1.7-revert baseline 55.9% = **-11.5pp 하회 (1회 누적)** — 3회 연속 도달 시 kill-switch fire
+- n=150 ETA: 2026-08-04 (보수 추정 유지, velocity 1.80/day 가정 — cohort split 신규 등장은 분류 진화이지 prediction generation rate 변동 X)
 
 ## 4. 본 cycle 결정 (explore-idea lite)
 
@@ -42,7 +49,7 @@ scout #1206 (2026-05-21 박제) carry-over status snapshot. plan #12 Step 1/2 ev
 
 ## 5. 다음 자율 fire 조건 (자가 의심 차단)
 
-- v1.8 cohort n ≥ 60 도달 시 kill-switch evidence check (operational-analysis chain 자연 fire trigger)
+- **v1.8 real n=60 도달 임박 (잔여 8건, ETA ~2026-06-03)** → kill-switch evidence check (operational-analysis chain 자연 fire trigger). v1.8 main -11.5pp 하회 1회 누적 → 추가 2회 연속 시 kill-switch fire 조건 충족
 - v1.8 cohort n=150 도달 시 v2.0 결정 시점 진입 → 사용자 결정 wait (Step 3 사용자 결정 후 본 메인 Step 4-5 자율 영역 진입)
 - 사용자 자연 발화 ("TabPFN" / "v2.0" / "tabular model") 시 본 doc 박제 evidence 안내
 
