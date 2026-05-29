@@ -39,7 +39,7 @@ export function MobileNav() {
     <div className="md:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 text-brand-200 hover:text-white"
+        className="p-2 min-h-11 min-w-11 text-brand-200 hover:text-white focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
         aria-label="메뉴"
         aria-expanded={open}
       >
@@ -88,7 +88,7 @@ export function MobileNav() {
                 >
                   <Accordion.Header className="flex">
                     <Accordion.Trigger
-                      className="group flex w-full items-center justify-between px-6 py-3 text-xs font-semibold uppercase tracking-wide text-brand-300 hover:text-white hover:bg-brand-700/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                      className="group flex w-full items-center justify-between px-6 py-3 min-h-11 text-xs font-semibold uppercase tracking-wide text-brand-300 hover:text-white hover:bg-brand-700/40 transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-500"
                     >
                       {item.label}
                       <svg
@@ -114,7 +114,7 @@ export function MobileNav() {
                         href={sub.href}
                         onClick={() => setOpen(false)}
                         aria-current={isActive(sub.href, pathname) ? "page" : undefined}
-                        className={`flex items-center gap-2.5 px-6 pl-10 py-2 text-sm transition-colors ${
+                        className={`flex items-center gap-2.5 px-6 pl-10 py-2 min-h-11 text-sm transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-500 ${
                           isActive(sub.href, pathname)
                             ? "text-white font-medium bg-brand-700"
                             : "text-brand-200 hover:bg-brand-700 hover:text-white"
@@ -136,7 +136,7 @@ export function MobileNav() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   aria-current={isActive(item.href, pathname) ? "page" : undefined}
-                  className={`block px-6 py-3 text-sm transition-colors ${
+                  className={`block px-6 py-3 min-h-11 text-sm transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-500 ${
                     isActive(item.href, pathname)
                       ? "text-white font-semibold bg-brand-700"
                       : "text-brand-200 hover:bg-brand-700 hover:text-white"

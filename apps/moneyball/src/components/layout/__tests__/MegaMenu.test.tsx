@@ -54,10 +54,10 @@ describe("MegaMenu", () => {
     // Radix NavigationMenu.Trigger 가 자동 aria-* 처리
   });
 
-  it("desktop hidden md:block — viewport < md 시 시각 hidden", () => {
+  it("desktop hidden md:flex — viewport < md 시 시각 hidden (cycle 1044 shadcn wrapper)", () => {
     const { container } = render(<MegaMenu items={SAMPLE_ITEMS} pathname="/" />);
     const root = container.querySelector("nav") ?? container.firstChild as HTMLElement;
-    expect(root?.className).toContain("md:block");
+    expect(root?.className).toContain("md:flex");
     expect(root?.className).toContain("hidden");
   });
 });

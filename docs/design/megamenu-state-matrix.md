@@ -1,6 +1,12 @@
-# Megamenu 상태 매트릭스 + spec (plan #14 C2 Step 2)
+# Megamenu 상태 매트릭스 + spec (plan #14 C2 Step 2 / plan #19 Step 2)
 
-cycle 1021 carry-over — Header.tsx 메가메뉴 spec 박제. shadcn `<NavigationMenu>` full migration = 별도 plan (본 spec 활용 기준).
+cycle 1021 carry-over — Header.tsx 메가메뉴 spec 박제. shadcn `<NavigationMenu>` full migration = plan #19 Step 2 (cycle 1044) 완료.
+
+## 마이그레이션 이력
+
+- **cycle 1021** (plan #14 C2 Step 2): MegaMenu.tsx 신규 박제 (Radix NavigationMenu 직접 wrapper)
+- **cycle 1042** (plan #19 Step 0.5): shadcn navigation-menu 컴포넌트 박제 (`apps/moneyball/src/components/ui/navigation-menu.tsx`) + brand token override 표 박제
+- **cycle 1044** (plan #19 Step 2): MegaMenu.tsx 가 shadcn wrapper 직접 사용 (`@/components/ui/navigation-menu`) — Radix 직접 import 제거. focus-visible token `outline-brand-500` + touch target `min-h-11` 강제. desktop trigger + mobile Accordion 양쪽 정합.
 
 ## 채택 라이브러리
 
@@ -34,16 +40,26 @@ cd apps/moneyball && pnpm dlx shadcn@latest add navigation-menu
 | 11 | disabled | item.disabled=true | text-brand-400 opacity-50, no pointer | aria-disabled=true |
 | 12 | mobile-collapse | viewport < 768px | hamburger 패턴, panel = full-screen accordion | aria-expanded toggle |
 
-## 메가메뉴 spec (각 메뉴별)
+## 메가메뉴 spec (각 메뉴별 — cycle 1044 KBO_NAV 정합)
 
-| 메뉴 | trigger label | panel-width | column-count | item-count | icon |
-|---|---|---|---|---|---|
-| AI | `AI` | 320px | 1 | 3 | true |
-| 커뮤니티 | `커뮤니티` | 280px | 1 | 2 | true |
-| 팀·선수 | `팀·선수` | 320px | 1 | 3 | true |
-| 리뷰·시즌 | `리뷰·시즌` | 380px | 1 | 5 | true |
-| 도움말 | `도움말` | 640px | 2 | 7 | true |
-| 로또 | `로또` | 280px | 1 | 2 | true |
+cycle 1022 polish 후 KBO 9 top-level → 6 (33% 압축) — 매트릭스 spec 갱신.
+
+| league | 메뉴 | trigger label | panel-width | column-count | item-count | icon |
+|---|---|---|---|---|---|---|
+| KBO | 분석 | `분석` | 640px | 2 | 4 | true |
+| KBO | 기록 | `기록` | 640px | 2 | 4 | true |
+| KBO | 팀·선수 | `팀·선수` | 280px | 1 | 3 | true |
+| KBO | 커뮤니티 | `커뮤니티` | 280px | 1 | 2 | true |
+| KBO | 더보기 | `더보기` | 640px | 2 | 8 | true |
+| MLB | 경기·팀 | `경기·팀` | 280px | 1 | 3 | true |
+| MLB | 포스트시즌 | `포스트시즌` | 280px | 1 | 2 | true |
+| Lotto | 로또 | `로또` | 280px | 1 | 2 | true |
+
+**룰 (MegaMenu.tsx 자동 적용)**:
+- `item.items.length >= 4 && sub.description` → `grid grid-cols-2 w-[640px]` (분석 / 기록 / 더보기)
+- `item.items.length >= 4 && !description` → `grid grid-cols-2 w-[440px]`
+- `item.items.length < 4 && sub.description` → `w-[280px]` (팀·선수 / 커뮤니티 / 경기·팀 / 포스트시즌 / 로또)
+- `item.items.length < 4 && !description` → `w-[200px]`
 
 ## brand token override 매핑
 
@@ -92,11 +108,13 @@ DESIGN.md Contrast 표 8 조합 정합 — 모두 AA+ 보증.
 
 ## 후속 PR 순서 (carry-over)
 
-1. **Radix install + 기본 wrapper** (`<MegaMenu>` 컴포넌트 신규)
-2. **Header.tsx 마이그레이션** (NavLinks → MegaMenu 전환, 1 메뉴 layer 부터)
-3. **mobile accordion variant** (MobileNav.tsx 갱신)
-4. **interaction test 6 case + axe-core**
-5. **상태 매트릭스 12 case 시각 검증** (storybook 또는 design-shotgun)
+1. ✅ **Radix install + 기본 wrapper** (`<MegaMenu>` 컴포넌트 신규) — cycle 1021 ship
+2. ✅ **Header.tsx 마이그레이션** (NavLinks → MegaMenu 전환) — cycle 1021 ship
+3. ✅ **mobile accordion variant** (MobileNav.tsx 갱신) — cycle 1021 ship
+4. ✅ **shadcn navigation-menu 박제 + brand token override** — cycle 1042 ship (plan #19 Step 0.5)
+5. ✅ **MegaMenu.tsx shadcn wrapper 마이그레이션** — cycle 1044 ship (plan #19 Step 2)
+6. ⏳ **interaction test 6 case + axe-core** — plan #19 Step 4 carry-over
+7. ⏳ **상태 매트릭스 12 case 시각 검증** (storybook 또는 design-shotgun) — 별도 cycle
 
 본 spec = source of truth. 후속 PR 모두 본 spec 정합 + 상태 매트릭스 12 case skip 항목 없음.
 
