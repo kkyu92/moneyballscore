@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   toKSTDateString, KBO_STADIUM_COORDS, errMsg, CURRENT_SCORING_RULE,
+  PRODUCTION_COHORT_RULES,
 } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
@@ -414,7 +415,7 @@ export async function runDailyPipeline(
     const existingResult = await db
       .from('predictions').select('game_id')
       .eq('prediction_type', 'pre_game')
-      .eq('scoring_rule', CURRENT_SCORING_RULE)
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .in('game_id', dbGameIds);
     const { data: existing } = assertSelectOk<{ game_id: number }[]>(
       existingResult,
@@ -908,12 +909,14 @@ export async function runDailyPipeline(
     // silent drift 가드 — `.error` 미체크 시 count=null → gap=expected → false
     // positive GAP 알림 (DB 오류가 GAP 으로 위장). assertSelectOk 로 fail-loud
     // → outer catch X 영역이라 errors[] push + GAP 측정 skip 자연.
-    // shadow row 제외 (cycle 1021 hotfix) — production v1.8 row 만 count.
+    // shadow row 제외 (cycle 1021 hotfix) — production cohort (v1.8 +
+    // v1.8-credit-fail) count. cycle 1022 hotfix: credit-fail row 도 사용자
+    // 가시 gap count 에 포함 (silent 누락 차단).
     const totalTodayResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
       .in('game_id', dbGameIds).eq('prediction_type', 'pre_game')
-      .eq('scoring_rule', CURRENT_SCORING_RULE);
+      .in('scoring_rule', PRODUCTION_COHORT_RULES);
     let totalToday: number | null = null;
     try {
       ({ count: totalToday } = assertSelectOk(totalTodayResult, 'predict_final gap count'));
@@ -1043,12 +1046,13 @@ async function handleDailySummaryNotification(
     // silent drift 가드 — `.error` 미체크 시 count=null → 0 fallback →
     // "summary skip: todayTotal=0 < expected" 위장 → root cause 무가시.
     // assertSelectOk 로 outer catch (errors[] push) 자동 박제.
-    // shadow row 제외 (cycle 1021 hotfix) — production v1.8 row 만 count.
+    // shadow row 제외 — production cohort (v1.8 + v1.8-credit-fail) count.
+    // cycle 1022 hotfix: credit-fail row 도 summary 사전 count 포함.
     const todayTotalResult = await db
       .from('predictions')
       .select('*', { count: 'exact', head: true })
       .in('game_id', dbGameIds).eq('prediction_type', 'pre_game')
-      .eq('scoring_rule', CURRENT_SCORING_RULE);
+      .in('scoring_rule', PRODUCTION_COHORT_RULES);
     const { count: todayTotal } = assertSelectOk(todayTotalResult, 'todayTotal count');
 
     if ((todayTotal ?? 0) < expected) {
@@ -1132,7 +1136,7 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
       )
     `)
     .eq('prediction_type', 'pre_game')
-    .eq('scoring_rule', CURRENT_SCORING_RULE)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .in('game_id', dbGameIds);
 
   const { data } = assertSelectOk(result, 'buildDailySummary');
@@ -1218,12 +1222,14 @@ async function getVerifyResults(
 
   // silent drift 시 predRows=null → results 빈 배열 → notifyResults 미호출
   // → 사용자 verify Telegram 누락 (사용자 가시 직접 영향).
-  // shadow row 제외 (cycle 1021 hotfix) — production v1.8 결과만 verify Telegram.
+  // shadow row 제외 — production cohort (v1.8 + v1.8-credit-fail) 결과 verify.
+  // cycle 1022 hotfix: 본 사이트가 5/28 verify 알림 5건 중 3건 silent 누락
+  // 원인 (credit-fail 분리된 3건 제외). PRODUCTION_COHORT_RULES 양쪽 포함.
   const predResult = await db
     .from('predictions')
     .select('game_id, predicted_winner, is_correct')
     .eq('prediction_type', 'pre_game')
-    .eq('scoring_rule', CURRENT_SCORING_RULE)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .in('game_id', finalGameIds);
   const { data: predRows } = assertSelectOk<Array<PredRow & { game_id: number }>>(
     predResult, 'daily.getVerifyResults predictions',
@@ -1263,12 +1269,13 @@ async function getVerifyResults(
   );
   if (postponedData && postponedData.length > 0) {
     const postponedIds = postponedData.map((g) => g.id);
-    // shadow row 제외 (cycle 1021 hotfix) — production v1.8 row 만 dedupe.
+    // shadow row 제외 — production cohort (v1.8 + v1.8-credit-fail) dedupe.
+    // cycle 1022 hotfix: postponed alert 도 credit-fail row 포함.
     const postponedPredRes = await db
       .from('predictions')
       .select('game_id, predicted_winner')
       .eq('prediction_type', 'pre_game')
-      .eq('scoring_rule', CURRENT_SCORING_RULE)
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .in('game_id', postponedIds);
     const { data: postponedPredRows } = assertSelectOk<
       Array<{ game_id: number; predicted_winner: number }>
@@ -1406,13 +1413,15 @@ async function updateAccuracy(
   // is_correct 갱신. shadow row 가 production v1.8 row 와 동일 game_id +
   // prediction_type='pre_game' 으로 insert 되어 Map.set last-wins 시 shadow 의 id
   // 가 박제 → production v1.8 row.is_correct=null 영구 + shadow row 만 is_correct
-  // 갱신 = accuracy 통계 silent contamination. cycle 1013 v2.1-B-shadow + cycle
-  // 1019 v2.0-shadow 추가 이후 production v1.8 cohort accuracy 박제 모두 영향
-  // (silent drift family 14 사례 확장 가능성).
+  // 갱신 = accuracy 통계 silent contamination.
+  //
+  // cycle 1022 hotfix: PRODUCTION_COHORT_RULES (v1.8 + v1.8-credit-fail) 양쪽
+  // 포함 — credit-fail row 도 사용자 가시 적중률 통계 박제 의무 (#1342 분리 후
+  // silent 누락).
   const predResult = await db
     .from('predictions').select('id, game_id, predicted_winner')
     .eq('prediction_type', 'pre_game')
-    .eq('scoring_rule', CURRENT_SCORING_RULE)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .in('game_id', finalGames.map((g) => g.id));
   let predRows: Array<{ id: number; game_id: number; predicted_winner: number }> | null;
   try {

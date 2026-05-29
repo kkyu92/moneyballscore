@@ -14,6 +14,7 @@ export type { SelectResult, WriteResult } from './db-error';
 export {
   ALL_SCORING_RULES,
   CURRENT_SCORING_RULE,
+  PRODUCTION_COHORT_RULES,
   SHADOW_SCORING_RULE,
   SHADOW_V20_SCORING_RULE,
   QUANT_PREGAME_VERSION,

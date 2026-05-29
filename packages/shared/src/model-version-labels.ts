@@ -43,6 +43,20 @@ export type DebateVersion =
 export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
 
 /**
+ * 사용자 가시 layer cohort (alert / 통계 / OG image). v1.8 + v1.8-credit-fail
+ * 양쪽 포함 — credit-fail 분리 (cycle 1021 plan #14 C1c #1342) 가 baseline
+ * 정합성 회복 의도 단 사용자 가시 alert silent 누락 부작용 (cycle 1022 hotfix).
+ *
+ * baseline 분석 (accuracy/page.tsx / buildAccuracyData) 은 CURRENT_SCORING_RULE
+ * (v1.8) 만 사용 — credit-fail 분리 cohort 정합 유지.
+ *
+ * 본 cohort 사용 site: getVerifyResults / buildDailySummary / postponed alert /
+ * updateAccuracy / opengraph-image / predict_final gap count / todayTotal count /
+ * existingSet predict check.
+ */
+export const PRODUCTION_COHORT_RULES: readonly ScoringRule[] = ['v1.8', 'v1.8-credit-fail'] as const;
+
+/**
  * Shadow cohort 라벨 — production 가중치 변경 X. quant only 재계산 (debate LLM 호출 X).
  * v2.1-B 가중치 (apps/moneyball/src/lib/predictions/v2Predictor.ts V2_1_B_WEIGHTS) +
  * shadow factor (park_weather, umpire_sz) weight>0 양쪽 evidence 누적.
