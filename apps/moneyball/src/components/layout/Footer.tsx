@@ -1,12 +1,29 @@
 import Link from "next/link";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
-type FooterLink = { href: string; label: string };
-type FooterColumn = { label: string; links: FooterLink[] };
+//
+// Sitemap wireframe (plan #19 Step 1, cycle 1043):
+// ┌──────────────────────────────────────────────────────────────────────────┐
+// │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
+// │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
+// │ /         /picks    /standings /reviews   /method.. /mlb      /lotto/.. │
+// │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/ar │
+// │ /accuracy            /players   /reviews/m /glossary /mlb/team           │
+// │ /dashboard           /matchup   /reviews/. /insights /mlb/play..         │
+// │ /predictions                     /seasons   /v2-prev. /mlb/wc..           │
+// │                                              /change.. /mlb/post..         │
+// │                                              /about                       │
+// │                                              /search                      │
+// └──────────────────────────────────────────────────────────────────────────┘
+//   Desktop (≥ md, 768px) : 2 → 3 → 5 column grid (always expanded)
+//   Mobile  (< md, 768px) : <details> accordion per column (open by default)
+
+type FooterLink = { label: string; href: string };
+type FooterColumn = { title: string; links: FooterLink[] };
 
 const SITEMAP_COLUMNS: FooterColumn[] = [
   {
-    label: "AI 예측",
+    title: "AI 예측",
     links: [
       { href: "/", label: "오늘 경기" },
       { href: "/analysis", label: "AI 분석" },
@@ -16,14 +33,14 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    label: "커뮤니티",
+    title: "커뮤니티",
     links: [
       { href: "/picks", label: "내 픽 기록" },
       { href: "/leaderboard", label: "픽 리더보드" },
     ],
   },
   {
-    label: "팀·선수",
+    title: "팀·선수",
     links: [
       { href: "/standings", label: "팀 순위" },
       { href: "/teams", label: "팀 프로필" },
@@ -32,7 +49,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    label: "리뷰·시즌",
+    title: "리뷰·시즌",
     links: [
       { href: "/reviews", label: "예측 리뷰" },
       { href: "/reviews/weekly", label: "주간 리뷰" },
@@ -42,7 +59,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    label: "도움말",
+    title: "도움말",
     links: [
       { href: "/methodology", label: "예측 방법론" },
       { href: "/guide", label: "사용 가이드" },
@@ -55,7 +72,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    label: "MLB",
+    title: "MLB",
     links: [
       { href: "/mlb", label: "오늘 경기" },
       { href: "/mlb/standings", label: "AL/NL 순위" },
@@ -66,7 +83,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     ],
   },
   {
-    label: "로또",
+    title: "로또",
     links: [
       { href: "/lotto/methodology", label: "통계 방법론" },
       { href: "/lotto/archive", label: "아카이브" },
@@ -76,7 +93,10 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-brand-800 bg-brand-900 mt-auto text-brand-300">
+    <footer
+      role="contentinfo"
+      className="border-t border-brand-800 bg-brand-900 mt-auto text-brand-300"
+    >
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-col md:flex-row gap-8 md:gap-12">
           <div className="shrink-0">
@@ -94,23 +114,37 @@ export function Footer() {
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 flex-1"
           >
             {SITEMAP_COLUMNS.map((col) => (
-              <div key={col.label}>
-                <h3 className="text-xs font-semibold text-brand-400 uppercase tracking-wide mb-2">
-                  {col.label}
-                </h3>
+              <details
+                key={col.title}
+                open
+                className="group"
+              >
+                <summary
+                  className="flex items-center justify-between mb-2 cursor-pointer md:cursor-default list-none [&::-webkit-details-marker]:hidden"
+                >
+                  <h2 className="text-xs font-semibold text-brand-400 uppercase tracking-wide">
+                    {col.title}
+                  </h2>
+                  <span
+                    aria-hidden="true"
+                    className="text-brand-400 md:hidden transition-transform group-open:rotate-180"
+                  >
+                    ▾
+                  </span>
+                </summary>
                 <ul className="space-y-1.5">
                   {col.links.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-sm hover:text-white transition-colors"
+                        className="text-sm hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-brand-500 focus-visible:outline-offset-2 rounded-sm"
                       >
                         {link.label}
                       </Link>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </details>
             ))}
           </nav>
         </div>
@@ -120,15 +154,24 @@ export function Footer() {
             aria-label="법적 고지"
             className="flex items-center gap-4 text-xs text-brand-400 flex-wrap justify-center"
           >
-            <Link href="/privacy" className="hover:text-white transition-colors">
+            <Link
+              href="/privacy"
+              className="hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-brand-500 focus-visible:outline-offset-2 rounded-sm"
+            >
               개인정보처리방침
             </Link>
             <span aria-hidden="true">·</span>
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link
+              href="/terms"
+              className="hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-brand-500 focus-visible:outline-offset-2 rounded-sm"
+            >
               이용약관
             </Link>
             <span aria-hidden="true">·</span>
-            <Link href="/contact" className="hover:text-white transition-colors">
+            <Link
+              href="/contact"
+              className="hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-brand-500 focus-visible:outline-offset-2 rounded-sm"
+            >
               문의
             </Link>
           </nav>
