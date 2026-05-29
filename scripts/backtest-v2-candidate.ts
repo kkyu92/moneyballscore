@@ -14,6 +14,7 @@ import { resolve } from 'node:path';
 import {
   evaluatePair,
   evaluateFancyElo,
+  evaluateThreeWay,
   formatBacktestMarkdown,
   type BacktestPredictionRow,
   type TeamEloMap,
@@ -23,7 +24,12 @@ import {
   rollingTimeCV,
   type CvPattern,
 } from '@moneyball/kbo-data/src/backtest/walk-forward-helpers';
+import {
+  fitWeightedLogistic,
+  type FactorMap,
+} from '@moneyball/kbo-data/src/backtest/logistic-regression';
 import { fetchEloRatings } from '@moneyball/kbo-data/src/scrapers/fancy-stats';
+import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, GAME_STATUS_FINAL } from '@moneyball/shared';
 
 function createAdminClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -104,13 +110,22 @@ async function fetchTeamElos(db: SupabaseClient): Promise<{ map: TeamEloMap; scr
   return { map: teamEloMap, scraperFailed, scraperError };
 }
 
-/** plan #15 C1e — --cv-pattern flag parser. default walk-forward (기존 cycle 1019 pattern). */
+/** plan #15 C1e + plan #16 — --cv-pattern flag parser. default walk-forward. */
 function parseCvPattern(): CvPattern {
   const flag = process.argv.find((a) => a.startsWith('--cv-pattern='));
   if (!flag) return 'walk-forward';
   const value = flag.split('=')[1];
-  if (value === 'walk-forward' || value === 'v18-only-rescore' || value === 'rolling') return value;
-  throw new Error(`invalid --cv-pattern=${value}. allowed: walk-forward | v18-only-rescore | rolling`);
+  if (
+    value === 'walk-forward' ||
+    value === 'v18-only-rescore' ||
+    value === 'rolling' ||
+    value === 'train-and-test'
+  ) {
+    return value;
+  }
+  throw new Error(
+    `invalid --cv-pattern=${value}. allowed: walk-forward | v18-only-rescore | rolling | train-and-test`,
+  );
 }
 
 async function main() {
@@ -120,9 +135,14 @@ async function main() {
 
   const db = createAdminClient();
 
-  // plan #15 C1e — cohort 구성 (cv-pattern 별 분기)
+  // plan #15 C1e + plan #16 — cohort 구성 (cv-pattern 별 분기)
   let cohort: BacktestPredictionRow[];
   let cohortNote: string;
+  // plan #16 train-and-test mode 전용 — 별도 분기 (3-way comparison)
+  if (cvPattern === 'train-and-test') {
+    await runTrainAndTestMode(db, writeMode);
+    return;
+  }
   if (cvPattern === 'v18-only-rescore') {
     // v18-only-rescore (이전 'expanding' alias). autoplan Eng-C1 rename
     // (CRITICAL, cycle 1021): train (v1.5/v1.6/v1.7-revert) cohort 가져오나
@@ -183,6 +203,154 @@ async function main() {
   } else {
     console.log(`[backtest-v2-candidate] dry-run — pass --write to ship doc`);
   }
+}
+
+/**
+ * plan #16 — true expanding window OOS train-and-test mode.
+ *
+ * 1. train cohort fetch (v1.5/v1.6/v1.7-revert)
+ * 2. final 경기 + factors 있는 row 만 필터 (학습 가능 cohort)
+ * 3. logistic regression fit → learned weights
+ * 4. test cohort (v1.8) fetch
+ * 5. 3-way comparison (learned vs DEFAULT vs SHADOW_V20)
+ * 6. 결과 stdout + (--write 시) markdown 박제
+ *
+ * 자가 의신 (plan #16 frontmatter 정합):
+ * - learned weights 절대값 신뢰 X — cross-version factor normalization 위장 risk
+ * - 소표본 train cohort noise (n ≈ 105 추정) — production 적용 결정 X
+ */
+async function runTrainAndTestMode(db: SupabaseClient, writeMode: boolean) {
+  console.log(`[backtest-v2-candidate] train-and-test mode (plan #16 — true expanding window OOS)`);
+
+  const trainRows = await fetchTrainCohort(db, ['v1.5', 'v1.6', 'v1.7-revert']);
+  const testRows = await fetchV18Cohort(db);
+
+  // 학습 cohort = final + factors 있는 train row 만
+  const factorsList: FactorMap[] = [];
+  const homeWinList: boolean[] = [];
+  for (const row of trainRows) {
+    const g = row.games;
+    if (!g || g.status !== GAME_STATUS_FINAL || g.winner_team_id == null) continue;
+    if (!row.factors) continue;
+    factorsList.push(row.factors as FactorMap);
+    homeWinList.push(g.winner_team_id === g.home_team_id);
+  }
+
+  console.log(
+    `[backtest-v2-candidate] train: total=${trainRows.length} / learnable=${factorsList.length} (final + factors 있는 row)`,
+  );
+  console.log(`[backtest-v2-candidate] test (v1.8): total=${testRows.length}`);
+
+  if (factorsList.length < 30) {
+    console.error(
+      `[backtest-v2-candidate] FATAL: train cohort learnable=${factorsList.length} < 30. logistic regression fit 위험 (소표본). doc 박제 skip.`,
+    );
+    process.exit(2);
+  }
+
+  const fit = fitWeightedLogistic(factorsList, homeWinList, {
+    lambda: 0.01,
+    lr: 0.5,
+    maxIter: 5000,
+    tol: 1e-8,
+  });
+
+  console.log(`[backtest-v2-candidate] logistic regression fit:`, {
+    trainN: fit.trainN,
+    iterations: fit.iterations,
+    finalLoss: fit.finalLoss,
+    bias: fit.bias,
+  });
+  console.log(`[backtest-v2-candidate] learned weights (normalized sum=1):`, fit.weights);
+  console.log(`[backtest-v2-candidate] raw weights (pre-clamp):`, fit.rawWeights);
+
+  if (testRows.length === 0) {
+    console.error(`[backtest-v2-candidate] FATAL: test cohort (v1.8) empty. 3-way comparison 불가, doc 박제 skip.`);
+    process.exit(2);
+  }
+
+  const threeWay = evaluateThreeWay(testRows, fit.weights, DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS);
+  console.log(`[backtest-v2-candidate] 3-way comparison:`, JSON.stringify(threeWay, null, 2));
+
+  if (writeMode) {
+    const docPath = resolve(__dirname, '../docs/research/v2.0-backtest-evidence.md');
+    const md = formatTrainAndTestMarkdown(fit, threeWay, factorsList.length, testRows.length);
+    writeFileSync(docPath, md, 'utf-8');
+    console.log(`[backtest-v2-candidate] written: ${docPath}`);
+  } else {
+    console.log(`[backtest-v2-candidate] dry-run — pass --write to ship doc`);
+  }
+}
+
+/**
+ * plan #16 train-and-test markdown formatter — evidence pack.
+ *
+ * 자가 의심 (소표본 + cross-version normalization 위장 risk) 명시 박제.
+ */
+function formatTrainAndTestMarkdown(
+  fit: ReturnType<typeof fitWeightedLogistic>,
+  threeWay: ReturnType<typeof evaluateThreeWay>,
+  trainTotal: number,
+  testTotal: number,
+): string {
+  const weightRow = (label: string, w: Record<string, number>) => {
+    const keys = Object.keys(DEFAULT_WEIGHTS).filter((k) => DEFAULT_WEIGHTS[k as keyof typeof DEFAULT_WEIGHTS] > 0);
+    return `| ${label} | ${keys.map((k) => (w[k] ?? 0).toFixed(3)).join(' | ')} |`;
+  };
+  const keys = Object.keys(DEFAULT_WEIGHTS).filter((k) => DEFAULT_WEIGHTS[k as keyof typeof DEFAULT_WEIGHTS] > 0);
+
+  return `# v2.0 후보 가중치 backtest evidence — plan #16 (train-and-test mode)
+
+생성: ${new Date().toISOString()}
+cycle: 1021
+plan: #16 — true expanding window OOS (train cohort 위 logistic regression fit)
+parent_plan: #15 (Eng-C1 finding 후속)
+
+## 자가 검증 (plan #16 frontmatter 정합)
+
+- **소표본 결정 X**: train_learnable=${fit.trainN} / test_n=${threeWay.test_n}. 본 결과 = evidence pack only.
+- **cross-version factor normalization 위장 risk**: train (v1.5/v1.6/v1.7-revert) 과 test (v1.8) factors 가 다른 weights/scale 로 generate 됐을 가능성. learned weights 절대값 신뢰 X — 상대 ordering 비교만.
+- **warnings**: ${threeWay.warnings.length === 0 ? '없음' : threeWay.warnings.join(' / ')}
+
+## Train summary
+
+- train cohort total: ${trainTotal} row (v1.5 + v1.6 + v1.7-revert)
+- learnable (final + factors 있는 row): ${fit.trainN}
+- iterations: ${fit.iterations}
+- finalLoss: ${fit.finalLoss}
+- bias (intercept): ${fit.bias}
+
+## Test (v1.8) 위 3-way comparison
+
+| 가중치 | n | Brier | accuracy |
+|---|---|---|---|
+| DEFAULT_WEIGHTS (v1.8 production) | ${threeWay.test_n} | ${threeWay.default_brier} | ${threeWay.default_accuracy} |
+| SHADOW_V20_WEIGHTS (v2.0 후보) | ${threeWay.test_n} | ${threeWay.shadow_v20_brier} | ${threeWay.shadow_v20_accuracy} |
+| Learned (plan #16 logistic regression) | ${threeWay.test_n} | ${threeWay.learned_brier} | ${threeWay.learned_accuracy} |
+
+- **best by Brier (낮을수록 좋음)**: \`${threeWay.best_by_brier}\`
+- **best by accuracy (높을수록 좋음)**: \`${threeWay.best_by_accuracy}\`
+
+## Learned weights (normalized sum=1)
+
+${weightRow('factor', Object.fromEntries(keys.map((k) => [k, 0])))}
+|---|${keys.map(() => '---').join('|')}|
+${weightRow('DEFAULT', DEFAULT_WEIGHTS as unknown as Record<string, number>)}
+${weightRow('SHADOW_V20', SHADOW_V20_WEIGHTS as unknown as Record<string, number>)}
+${weightRow('Learned', fit.weights as unknown as Record<string, number>)}
+
+## Raw weights (pre-clamp/pre-normalize)
+
+\`\`\`json
+${JSON.stringify(fit.rawWeights, null, 2)}
+\`\`\`
+
+## 다음 단계
+
+- learned weights 절대값 신뢰 X — 상대 ordering 비교 + n=150 forward cohort 측정 후 production 적용 결정
+- v2.0 후보 weights 재설계 input (CEO-3 finding 후속) — learned weights 가 SHADOW_V20 보다 win 시 그 ordering 참고
+- plan #15 C1f (Statcast factor 13+ 후보) 와 분리 — 본 plan #16 = 기존 10 factor 위 학습 layer
+`;
 }
 
 if (require.main === module) {

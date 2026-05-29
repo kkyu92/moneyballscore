@@ -111,6 +111,113 @@ export interface BacktestResult {
 }
 
 /**
+ * 3-way comparison 결과 — plan #16 train weights 학습 layer 위 학습된 weights vs
+ * DEFAULT_WEIGHTS vs SHADOW_V20_WEIGHTS 비교.
+ *
+ * 자가 의심 (plan #16 frontmatter 정합):
+ * - learned weights 절대값 신뢰 X — cross-version factor normalization 위장 risk
+ * - 본 결과 = "evidence pack only" 라벨 강제
+ */
+export interface ThreeWayResult {
+  test_n: number;
+  default_brier: number;
+  default_accuracy: number;
+  shadow_v20_brier: number;
+  shadow_v20_accuracy: number;
+  learned_brier: number;
+  learned_accuracy: number;
+  /** test 위 best by Brier (낮을수록 좋음) */
+  best_by_brier: 'default' | 'shadow_v20' | 'learned';
+  /** test 위 best by accuracy (높을수록 좋음) */
+  best_by_accuracy: 'default' | 'shadow_v20' | 'learned';
+  warnings: string[];
+}
+
+/**
+ * 3-way evaluate — test cohort 위 DEFAULT_WEIGHTS / SHADOW_V20_WEIGHTS / learned weights.
+ *
+ * 입력 weights 는 모두 동일 factor key (ACTIVE_FACTOR_KEYS) 지원해야 함.
+ * factor 누락 시 NEUTRAL fallback (computeProb 공식 정합).
+ *
+ * 자가 의심: learned weights 가 win 한다고 production 적용 X — 소표본 noise 가능.
+ * production ship 결정은 본 결과 + n=150 forward cohort 측정 + 사용자 판단.
+ */
+export function evaluateThreeWay(
+  rows: BacktestPredictionRow[],
+  learnedWeights: Record<string, number>,
+  defaultWeights: Record<string, number>,
+  shadowV20Weights: Record<string, number>,
+): ThreeWayResult {
+  const warnings: string[] = [];
+  let defSum = 0;
+  let v20Sum = 0;
+  let learnedSum = 0;
+  let defHits = 0;
+  let v20Hits = 0;
+  let learnedHits = 0;
+  let n = 0;
+
+  for (const row of rows) {
+    const game = row.games;
+    if (!game || game.status !== GAME_STATUS_FINAL || game.winner_team_id == null) continue;
+    if (!row.factors) continue;
+    const homeWin = game.winner_team_id === game.home_team_id;
+
+    const defProb = computeProb(row.factors, defaultWeights);
+    const v20Prob = computeProb(row.factors, shadowV20Weights);
+    const learnedProb = computeProb(row.factors, learnedWeights);
+    if (defProb == null || v20Prob == null || learnedProb == null) continue;
+
+    defSum += brierScore(defProb, homeWin);
+    v20Sum += brierScore(v20Prob, homeWin);
+    learnedSum += brierScore(learnedProb, homeWin);
+    if (accuracyHit(defProb, homeWin)) defHits += 1;
+    if (accuracyHit(v20Prob, homeWin)) v20Hits += 1;
+    if (accuracyHit(learnedProb, homeWin)) learnedHits += 1;
+    n += 1;
+  }
+
+  if (n < 150) {
+    warnings.push(
+      `소표본 결정 X (test_n=${n} < 150) — 3-way comparison evidence pack only. learned weights production 적용 결정은 n=150 도달 후.`,
+    );
+  }
+
+  const defBrier = n > 0 ? defSum / n : 0;
+  const v20Brier = n > 0 ? v20Sum / n : 0;
+  const learnedBrier = n > 0 ? learnedSum / n : 0;
+  const defAcc = n > 0 ? defHits / n : 0;
+  const v20Acc = n > 0 ? v20Hits / n : 0;
+  const learnedAcc = n > 0 ? learnedHits / n : 0;
+
+  const briers: Array<{ name: 'default' | 'shadow_v20' | 'learned'; v: number }> = [
+    { name: 'default', v: defBrier },
+    { name: 'shadow_v20', v: v20Brier },
+    { name: 'learned', v: learnedBrier },
+  ];
+  const accs: Array<{ name: 'default' | 'shadow_v20' | 'learned'; v: number }> = [
+    { name: 'default', v: defAcc },
+    { name: 'shadow_v20', v: v20Acc },
+    { name: 'learned', v: learnedAcc },
+  ];
+  const bestByBrier = briers.reduce((a, b) => (b.v < a.v ? b : a)).name;
+  const bestByAccuracy = accs.reduce((a, b) => (b.v > a.v ? b : a)).name;
+
+  return {
+    test_n: n,
+    default_brier: Math.round(defBrier * 10000) / 10000,
+    default_accuracy: Math.round(defAcc * 10000) / 10000,
+    shadow_v20_brier: Math.round(v20Brier * 10000) / 10000,
+    shadow_v20_accuracy: Math.round(v20Acc * 10000) / 10000,
+    learned_brier: Math.round(learnedBrier * 10000) / 10000,
+    learned_accuracy: Math.round(learnedAcc * 10000) / 10000,
+    best_by_brier: bestByBrier,
+    best_by_accuracy: bestByAccuracy,
+    warnings,
+  };
+}
+
+/**
  * 가중합 prob — predictor.ts / shadow-cohort.ts 와 동일 공식.
  * weights 안 key 가 factors 에 없으면 NEUTRAL_FACTOR (0.5) fallback.
  */
