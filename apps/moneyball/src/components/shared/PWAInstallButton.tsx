@@ -19,22 +19,22 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 };
 
+function getInitialDismissed(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return sessionStorage.getItem(DISMISS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function PWAInstallButton() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState<boolean>(getInitialDismissed);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // 본 세션 dismiss 체크
-    try {
-      if (sessionStorage.getItem(DISMISS_KEY) === '1') {
-        setDismissed(true);
-        return;
-      }
-    } catch {
-      // private mode 등 sessionStorage 차단 — 무시
-    }
+    if (dismissed) return;
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -53,7 +53,7 @@ export function PWAInstallButton() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, []);
+  }, [dismissed]);
 
   if (dismissed || !promptEvent) return null;
 

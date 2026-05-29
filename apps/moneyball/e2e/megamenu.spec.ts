@@ -12,7 +12,7 @@
  * 6. mobile collapse → hamburger toggle + accordion expand
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, devices } from "@playwright/test";
 
 test.describe("MegaMenu desktop interaction", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
@@ -67,7 +67,7 @@ test.describe("MegaMenu desktop interaction", () => {
 });
 
 test.describe("MegaMenu mobile interaction", () => {
-  test.use({ ...require("@playwright/test").devices["iPhone 13"] });
+  test.use({ ...devices["iPhone 13"] });
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
