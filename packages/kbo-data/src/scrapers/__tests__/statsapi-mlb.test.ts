@@ -108,3 +108,32 @@ describe('statsapi-mlb.fetchProbablePitchers', () => {
     });
   });
 });
+
+import { fetchBoxscore } from '../statsapi-mlb';
+
+describe('statsapi-mlb.fetchBoxscore', () => {
+  it('extracts final score + winner', async () => {
+    vi.mocked(global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        teams: {
+          home: { team: { abbreviation: 'NYY' }, teamStats: { batting: { runs: 6 } } },
+          away: { team: { abbreviation: 'BOS' }, teamStats: { batting: { runs: 3 } } },
+        },
+      }),
+    });
+
+    const box = await fetchBoxscore(745123);
+    expect(box).toEqual({
+      gamePk: 745123,
+      homeTeam: 'NYY', awayTeam: 'BOS',
+      homeScore: 6, awayScore: 3,
+      winner: 'NYY',
+    });
+  });
+
+  it('throws on 404 (game not found)', async () => {
+    vi.mocked(global.fetch as any).mockResolvedValueOnce({ ok: false, status: 404 });
+    await expect(fetchBoxscore(999999)).rejects.toThrow();
+  });
+});
