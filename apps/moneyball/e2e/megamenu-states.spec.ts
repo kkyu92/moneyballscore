@@ -35,7 +35,8 @@ test.describe("MegaMenu 12 case 시각 baseline", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
   for (const state of STATES.filter((s) => s.id !== 12)) {
-    test(`case ${state.id} — ${state.name}`, async ({ page }) => {
+    test(`case ${state.id} — ${state.name}`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== "chromium-desktop", "desktop-only case");
       await page.goto(state.path);
       const aiTrigger = page.getByRole("button", { name: /^AI/ });
 
@@ -77,9 +78,20 @@ test.describe("MegaMenu 12 case 시각 baseline", () => {
 });
 
 test.describe("MegaMenu mobile 12 case (case 12 mobile-collapse)", () => {
-  test.use({ ...require("@playwright/test").devices["iPhone 13"] });
+  // iPhone 13 device 의 viewport / userAgent / deviceScaleFactor / isMobile / hasTouch 만 사용.
+  // defaultBrowserType 은 describe scope 안 test.use 에서 사용 불가 (worker 재할당 강제) — 제외.
+  const iPhone13 = require("@playwright/test").devices["iPhone 13"];
+  test.use({
+    viewport: iPhone13.viewport,
+    userAgent: iPhone13.userAgent,
+    deviceScaleFactor: iPhone13.deviceScaleFactor,
+    isMobile: iPhone13.isMobile,
+    hasTouch: iPhone13.hasTouch,
+  });
 
-  test("case 12 — mobile-collapse default + accordion expand", async ({ page }) => {
+  test("case 12 — mobile-collapse default + accordion expand", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-mobile", "mobile-only case");
+
     await page.goto("/");
 
     // (a) 기본 햄버거 상태
@@ -92,7 +104,7 @@ test.describe("MegaMenu mobile 12 case (case 12 mobile-collapse)", () => {
     const hamburger = page.getByRole("button", { name: "메뉴" });
     await hamburger.click();
     await page.waitForTimeout(200);
-    await expect(page.locator("nav").first()).toHaveScreenshot("case-12b-mobile-open.png", {
+    await expect(page.locator('nav[aria-label="모바일 메뉴"]')).toHaveScreenshot("case-12b-mobile-open.png", {
       maxDiffPixelRatio: 0.01,
     });
 
@@ -100,7 +112,7 @@ test.describe("MegaMenu mobile 12 case (case 12 mobile-collapse)", () => {
     const aiAccordion = page.getByRole("button", { name: /^AI$/ });
     await aiAccordion.click();
     await page.waitForTimeout(200);
-    await expect(page.locator("nav").first()).toHaveScreenshot("case-12c-mobile-accordion-expand.png", {
+    await expect(page.locator('nav[aria-label="모바일 메뉴"]')).toHaveScreenshot("case-12c-mobile-accordion-expand.png", {
       maxDiffPixelRatio: 0.01,
     });
   });

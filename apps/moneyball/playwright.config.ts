@@ -39,7 +39,11 @@ export default defineConfig({
     {
       name: "chromium-mobile",
       use: {
+        // iPhone 13 viewport / userAgent / deviceScaleFactor / isMobile / hasTouch 만 사용.
+        // defaultBrowserType (webkit) 은 override — chromium 만 install 해서 운영.
         ...devices["iPhone 13"],
+        defaultBrowserType: "chromium",
+        channel: undefined,
       },
     },
   ],
