@@ -130,7 +130,7 @@ const VERSION_HISTORY = [
     version: "v2.0 (예정)",
     date: "n=150 도달 후",
     change:
-      "검증 표본 n=150 이상 누적 시 전면 가중치 재조정. 현재 119 누적 (cycle 542 측정).",
+      "검증 표본 n=150 이상 누적 시 전면 가중치 재조정. v1.8 cohort 누적 진행 중 — 실시간 진척은 /accuracy 페이지 참조.",
   },
 ];
 
@@ -369,8 +369,11 @@ export default function MethodologyPage() {
             <h3 className="font-semibold mb-2">Brier Score</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               예측 승률과 실제 결과 (0 또는 1) 의 제곱 오차 평균. 낮을수록
-              ↑정확. 0.25 = 동전 던지기 수준, 0.20 이하 = 우수. 우리 모델 현재
-              0.246 (cycle 375 보정 이후 정상 계산).
+              ↑정확. 0.25 = 동전 던지기 수준, 0.20 이하 = 우수. 실측치는{" "}
+              <Link href="/accuracy" className="text-brand-500 hover:underline">
+                /accuracy
+              </Link>{" "}
+              페이지 참조.
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">

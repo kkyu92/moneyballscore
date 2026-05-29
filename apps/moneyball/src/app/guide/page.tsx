@@ -146,8 +146,7 @@ export default function GuidePage() {
             <h3 className="font-semibold mb-2">Brier Score</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed mb-2">
               예측 승률과 실제 결과 (0 또는 1) 의 제곱 오차 평균. 0.25 = 동전
-              던지기 / 0.20 이하 = 우수. 우리 모델 ≈ 0.246 (n=119, cycle 542
-              기준).
+              던지기 / 0.20 이하 = 우수. 실측치는 /accuracy 페이지 참조.
             </p>
             <p className="text-xs text-gray-500 dark:text-brand-400">
               참고: 단순 적중률만 봤다면 잡지 못하는 신뢰도 보정 품질을 측정.
