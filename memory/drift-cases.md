@@ -336,9 +336,9 @@ Supabase REST: "code": "42703", "message": "column games.home_team_code does not
 
 ---
 
-### silent drift family 메타 패턴 누적 (cycle 986 시점)
+### silent drift family 메타 패턴 누적 (cycle 1050 시점 갱신)
 
-총 15 사례 + family 재발 누적:
+총 16 사례 + family 재발 누적:
 
 | family | total | layer | 최근 재발 |
 |--------|-------|-------|----------|
@@ -347,5 +347,31 @@ Supabase REST: "code": "42703", "message": "column games.home_team_code does not
 | 사례 10+13 (Turbopack/ESM transitive build fail) | 2회 | 빌드 시스템 | cycle 866 |
 | 사례 11 (predict_final silent silent drop) | 1회 + monitoring | cron mode fallback | cycle 819 alert 박제 |
 | 사례 15 (agent 토론 fail rate L1+L2+L3) | 1회 | LLM nondeterminism + 외부 API | cycle 986 |
+| **사례 16 (plan frontmatter status field stale)** | 2회 (plan #17 + #18) | develop-cycle retro layer | cycle 1050 |
 
-**streak**: ~461 cycle (cycle 525~986 silent drift family detection + fix patterns 유지)
+**streak**: ~525 cycle (cycle 525~1050 silent drift family detection + fix patterns 유지)
+
+---
+
+### 사례 16 — plan frontmatter status field stale (cycle 1050 신규)
+
+`~/.develop-cycle/plans/$SLUG/{N}.md` plan body Step (예: "Step A doc 박제") ship 완료 후 frontmatter `status:` field 자동 갱신 누락 = silent retro drift. SKILL.md unprocessed plan lookup 이 `status: approved` 기준 매칭 → 이미 ship 된 plan 이 반복 매칭 가능성 (silent re-process risk).
+
+**evidence (cycle 1050 발견 시점)**:
+- **plan #17** (cycle 1032 ship → PR #1407 `docs(decisions): plan #17 feature flag PoC scope 1-pager`) → status `approved` 18 cycle gap stale → cycle 1050 갱신 `doc_only_shipped_cycle_1032_pending_user_step_a`
+- **plan #18** (cycle 1039 ship → PR #1415 `docs(decisions): plan #18 외부 인프라 장애 방어 1-pager`) → status `approved` 11 cycle gap stale → cycle 1050 갱신 `doc_only_shipped_cycle_1039_pending_user_step_b`
+
+**대조 evidence (정상 status 갱신 케이스)**:
+- plan #11 → `completed_autonomy_pending_user_step_4_5`
+- plan #12 → `completed_autonomy_pending_user_step_3_5`
+- plan #13 → `tier_1_shipped_pending_user_step_4_5`
+- plan #15 → `completed_all_phases_shipped_cycle_1036`
+- plan #16 → `completed_first_fire_pending_n150_or_evidence_cycle_1036`
+- plan #19 → `all_steps_shipped_cycle_1042_1043_1044_1046`
+
+**fix path**: develop-cycle retro 단계에서 `cycle_state.execution.plan_n_processed=[N]` 박제 시 `~/.develop-cycle/plans/$SLUG/{N}.md` frontmatter `status:` field 자동 갱신 절차 SKILL.md 박제 (skill-evolution chain carry-over). plans/ = repo 밖 → git commit X = 본 메인 자체 retro 단계 의무 박제 layer.
+
+**관련 family**:
+- 사례 9 (vercel auto-deploy alias) — 운영 인프라 silent
+- plan #N stale ref drift (cycle 1047+1048 13 occurrence, auto-memory `silent-drift-family-plan-number-stale-ref.md`) — plan body 미래 plan number 가정 stale
+- 사례 16 = plan frontmatter status field stale — develop-cycle retro layer 자체 silent
