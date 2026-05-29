@@ -6,7 +6,7 @@ import { allPairs } from '@/lib/matchup/canonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
-import { KBO_TEAMS, assertSelectOk, errMsg } from '@moneyball/shared';
+import { KBO_TEAMS, MLB_TEAMS, assertSelectOk, errMsg } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
 //
@@ -60,6 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
     { url: `${baseUrl}/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
+    { url: `${baseUrl}/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
@@ -100,6 +101,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.65,
+    }),
+  );
+
+  // MLB 30팀 프로필 URL — Plan B Tier C+D Task 4 (cycle 1026 ship)
+  const mlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
+    (code) => ({
+      url: `${baseUrl}/mlb/team/${code}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
     }),
   );
 
@@ -222,6 +233,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...weeklyReviewRoutes,
     ...monthlyReviewRoutes,
     ...teamProfileRoutes,
+    ...mlbTeamProfileRoutes,
     ...matchupRoutes,
     ...predictionDateRoutes,
     ...playerRoutes,
