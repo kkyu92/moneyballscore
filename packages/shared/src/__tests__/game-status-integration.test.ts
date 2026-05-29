@@ -30,6 +30,6 @@ describe('GameStatus invariant', () => {
     // cycle 1019 plan #14 C1b 박제 시점 hard-coded 'completed' literal → cycle 1021
     // 첫 fire cohort_n=0 silent drift evidence. ALL_GAME_STATUSES 안 'completed'
     // 존재 시 본 invariant test fail → 박제 차단.
-    expect(ALL_GAME_STATUSES.some((s) => s === 'completed')).toBe(false);
+    expect(ALL_GAME_STATUSES.some((s) => (s as string) === 'completed')).toBe(false);
   });
 });
