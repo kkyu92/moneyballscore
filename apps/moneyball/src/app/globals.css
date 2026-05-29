@@ -41,6 +41,14 @@
   --color-error: #ef4444;
   --color-info: #3b82f6;
 
+  /* shadcn token override matching — DESIGN.md brand 정합 (plan #19 Step 0.5, cycle 1042).
+     매핑 표 = docs/design/shadcn-token-override.md. Tailwind v4 native CSS variable
+     채택 — `bg-primary` `text-primary-foreground` 류 shadcn registry className X.
+     `bg-[var(--color-brand-N)]` 패턴 직접 inline (`apps/moneyball/src/components/ui/`
+     navigation-menu.tsx + breadcrumb.tsx 박제). 신규 shadcn 컴포넌트 박제 시 본 표
+     className 패턴 의무 — silent drift family 7 (DESIGN.md token vs 실제 컴포넌트
+     grep 균열) 차단. */
+
   /* Motion tokens — DESIGN.md "Motion" 섹션 정렬 (W-D, 2-day blast).
      PredictReveal count-up = --motion-medium / page transition = --motion-fast
      / theme transition = --motion-slow. prefers-reduced-motion: reduce 시
