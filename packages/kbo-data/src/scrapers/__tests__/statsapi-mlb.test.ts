@@ -69,3 +69,42 @@ describe('statsapi-mlb.fetchMlbSchedule', () => {
     expect(games).toEqual([]);
   });
 });
+
+import { fetchProbablePitchers } from '../statsapi-mlb';
+
+describe('statsapi-mlb.fetchProbablePitchers', () => {
+  it('extracts probable pitchers via hydrate', async () => {
+    vi.mocked(global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        dates: [{ games: [{
+          gamePk: 745123,
+          teams: {
+            home: { probablePitcher: { id: 1001, fullName: 'Gerrit Cole' } },
+            away: { probablePitcher: { id: 2002, fullName: 'Brayan Bello' } },
+          },
+        }]}],
+      }),
+    });
+
+    const pitchers = await fetchProbablePitchers('2026-05-29');
+    expect(pitchers).toEqual({
+      745123: { home: { id: 1001, name: 'Gerrit Cole' },
+                away: { id: 2002, name: 'Brayan Bello' } },
+    });
+  });
+
+  it('handles missing probable pitchers (D-2 미정)', async () => {
+    vi.mocked(global.fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        dates: [{ games: [{ gamePk: 745123, teams: { home: {}, away: {} } }]}],
+      }),
+    });
+
+    const pitchers = await fetchProbablePitchers('2026-05-29');
+    expect(pitchers).toEqual({
+      745123: { home: null, away: null },
+    });
+  });
+});

@@ -70,3 +70,39 @@ export async function fetchMlbSchedule(dateKst: string): Promise<MlbGame[]> {
     throw err;
   }
 }
+
+export interface ProbablePitcher {
+  id: number;
+  name: string;
+}
+
+export type ProbablePitcherMap = Record<number, {
+  home: ProbablePitcher | null;
+  away: ProbablePitcher | null;
+}>;
+
+export async function fetchProbablePitchers(dateKst: string): Promise<ProbablePitcherMap> {
+  const url = `${BASE_URL}/schedule?sportId=1&date=${dateKst}&hydrate=probablePitcher`;
+
+  try {
+    const res = await fetchWithRetry(url);
+    const json = await res.json();
+
+    const result: ProbablePitcherMap = {};
+    for (const date of json.dates ?? []) {
+      for (const g of date.games ?? []) {
+        const home = g.teams.home.probablePitcher;
+        const away = g.teams.away.probablePitcher;
+        result[g.gamePk] = {
+          home: home ? { id: home.id, name: home.fullName } : null,
+          away: away ? { id: away.id, name: away.fullName } : null,
+        };
+      }
+    }
+    return result;
+  } catch (err: any) {
+    if (err.message === 'tos_cooldown') return {};
+    Sentry.captureException(err);
+    throw err;
+  }
+}
