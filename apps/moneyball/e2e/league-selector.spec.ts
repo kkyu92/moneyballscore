@@ -40,9 +40,8 @@ test.describe("LeagueSelector navigation", () => {
       .filter({ has: page.getByText("MLB") })
       .first();
 
-    const isVisible = await mlbLink.isVisible().catch(() => false);
-    if (!isVisible) {
-      // Skip if MLB not visible (unexpected layout)
+    if (!((await mlbLink.count()) > 0 && (await mlbLink.isVisible()))) {
+      // Skip if MLB not present (unexpected layout)
       return;
     }
 
@@ -65,9 +64,8 @@ test.describe("LeagueSelector navigation", () => {
       .filter({ has: page.getByText("MLB") })
       .first();
 
-    const isVisible = await mlbLink.isVisible().catch(() => false);
-    if (!isVisible) {
-      // Skip if not visible
+    if (!((await mlbLink.count()) > 0 && (await mlbLink.isVisible()))) {
+      // Skip if not present
       return;
     }
 
@@ -89,9 +87,8 @@ test.describe("LeagueSelector navigation", () => {
       .filter({ has: page.getByText("로또") })
       .first();
 
-    const isVisible = await lottoLink.isVisible().catch(() => false);
-    if (!isVisible) {
-      // Skip if not visible
+    if (!((await lottoLink.count()) > 0 && (await lottoLink.isVisible()))) {
+      // Skip if not present
       return;
     }
 
@@ -114,9 +111,8 @@ test.describe("LeagueSelector navigation", () => {
     // KBO 링크 (role=tab 으로 특정)
     const kboLink = page.locator('[data-league="kbo"][role="tab"]').first();
 
-    const isVisible = await kboLink.isVisible().catch(() => false);
-    if (!isVisible) {
-      // Skip if not visible (unexpected layout)
+    if (!((await kboLink.count()) > 0 && (await kboLink.isVisible()))) {
+      // Skip if not present (unexpected layout)
       return;
     }
 
