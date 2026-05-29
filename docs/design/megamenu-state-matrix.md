@@ -113,7 +113,7 @@ DESIGN.md Contrast 표 8 조합 정합 — 모두 AA+ 보증.
 3. ✅ **mobile accordion variant** (MobileNav.tsx 갱신) — cycle 1021 ship
 4. ✅ **shadcn navigation-menu 박제 + brand token override** — cycle 1042 ship (plan #19 Step 0.5)
 5. ✅ **MegaMenu.tsx shadcn wrapper 마이그레이션** — cycle 1044 ship (plan #19 Step 2)
-6. ⏳ **interaction test 6 case + axe-core** — plan #19 Step 4 carry-over
+6. ✅ **interaction test 6 case + axe-core** — cycle 1046 ship (plan #19 Step 4, PR #1424)
 7. ⏳ **상태 매트릭스 12 case 시각 검증** (storybook 또는 design-shotgun) — 별도 cycle
 
 본 spec = source of truth. 후속 PR 모두 본 spec 정합 + 상태 매트릭스 12 case skip 항목 없음.

@@ -100,14 +100,14 @@ describe('pingHealthchecksIo', () => {
 });
 ```
 
-## 4. Step C (carry-over, plan #19 후속)
+## 4. Step C (carry-over, 별도 plan TBD)
 
 Cross-vendor outage detection layer:
 - Cloudflare Workers free tier (100k requests/day) 사용 — production URL HEAD probe 매 5분
 - 3회 연속 실패 시 Telegram alert
 - Healthchecks.io 자체 down 검출 = "Healthchecks.io 가 우리 ping 받는지" 자체 cross-check 외 layer
 
-본 plan scope 외 (Step B fire 후 후속 plan #19 박제 검토).
+본 plan scope 외 (Step B fire 후 별도 plan 박제 검토). 본 doc 박제 시점 (cycle 1039) `plan #19` 가정 = 실제 plan #19 박제 (cycle 1041, Footer + 메가메뉴 + shadcn carry-over) 와 plan number 충돌 — 본 cross-vendor Step C 는 후속 별도 plan number 박제 시점에 결정.
 
 ## 5. 사용자 결정 요청
 
@@ -115,7 +115,7 @@ Cross-vendor outage detection layer:
 |---|---|---|
 | Healthchecks.io 가입 | go / skip | **go** (free tier, silent fallback, plan #17 패턴 정합) |
 | Step B fire 시점 | 즉시 / n=150 이후 / kill-switch fire 후 | **즉시** (lite scope, plan #17 SDK 통합 동일 시점) |
-| Step C (Cloudflare Workers) | plan #19 박제 / skip | **plan #19 박제** (cross-vendor layer 1회 발생 시 데이터 누락 차단 가치) |
+| Step C (Cloudflare Workers) | 별도 plan 박제 / skip | **별도 plan 박제** (cross-vendor layer 1회 발생 시 데이터 누락 차단 가치) |
 
 ## 6. cost 분석
 
@@ -143,7 +143,7 @@ cost guard 정합 (외부 paid SaaS 회피).
 ## 8. carry-over
 
 - Step B fire = 사용자 결정 후 별도 PR (lite scope, ~150 LOC + smoke test)
-- Step C = plan #19 박제 검토 (cross-vendor outage detection layer)
+- Step C = 별도 plan 박제 검토 (cross-vendor outage detection layer)
 - plan #18 status = approved → completed_doc_only_pending_user_healthchecks_setup (Step B fire 시점 갱신)
 - 사용자 결정 wait 패턴 = plan #17 (Vercel Edge Config slot 생성 wait) 동일
 
