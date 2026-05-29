@@ -83,12 +83,6 @@ const MLB_NAV: NavItem[] = [
       { href: "/mlb/postseason", label: "Postseason", description: "WC / DS / LCS / WS bracket", icon: "award" },
     ],
   },
-  {
-    label: "모델",
-    items: [
-      { href: "/mlb/factors", label: "14팩터", description: "KBO 10 + Statcast 4", icon: "bar-chart" },
-    ],
-  },
 ];
 
 const LOTTO_LINKS: NavLink[] = [

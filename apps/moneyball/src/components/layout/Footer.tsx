@@ -55,6 +55,17 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     ],
   },
   {
+    label: "MLB",
+    links: [
+      { href: "/mlb", label: "오늘 경기" },
+      { href: "/mlb/standings", label: "AL/NL 순위" },
+      { href: "/mlb/team", label: "팀 프로필" },
+      { href: "/mlb/players", label: "Statcast 선수" },
+      { href: "/mlb/wild-card", label: "Wild Card race" },
+      { href: "/mlb/postseason", label: "Postseason 브래킷" },
+    ],
+  },
+  {
     label: "로또",
     links: [
       { href: "/lotto/methodology", label: "통계 방법론" },
