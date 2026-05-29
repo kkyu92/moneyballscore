@@ -11,7 +11,7 @@ describe('Placeholder 페이지 3', () => {
     ['community', Community, '커뮤니티'],
   ])('%s renders placeholder + ETA', (_name, Component, expectedText) => {
     render(<Component />);
-    expect(screen.getByText(new RegExp(expectedText))).toBeDefined();
+    expect(screen.getByText(new RegExp(expectedText))).toBeInTheDocument();
     expect(screen.queryAllByText(/2026-08~09|박제 중/).length).toBeGreaterThan(0);
   });
 });
