@@ -5,12 +5,25 @@
  * server-side DB status/score 를 덮어씀 — live-update cron (10분) 보다
  * Naver 실시간 응답이 빠르기 때문에 메인 카드 섹션과 상단 미니 카드
  * (LiveScoreboard) 간 싱크 차이 제거.
+ *
+ * `gameDate` 옵션 (cycle 1021 Tier 1 A): KST date 명시 전달 시
+ * useKboScores 가 오늘이 아니면 SWR polling 자동 차단. predictions/[date]
+ * 아카이브 페이지가 Naver API spam 없이 같은 컴포넌트 재사용 가능.
+ *
+ * `enablePickButton` 옵션 (default true): 홈 / 라이브 컨텍스트는 PickButton
+ * 노출 유지. predictions/[date] 아카이브 페이지는 false 로 PickButton 숨김
+ * (해당 페이지는 예측 기록 열람 용도, 투표 진입점 X).
  */
 
 import { useKboScores } from '@/hooks/use-kbo-scores';
 import { PredictionCard, type PredictionCardProps } from './PredictionCard';
 import { PickButton } from '@/components/picks/PickButton';
 import { topFavoringFactors } from '@/lib/predictions/factorLabels';
+
+interface ExtraProps {
+  gameDate?: string;
+  enablePickButton?: boolean;
+}
 
 function buildAiHintProps(props: PredictionCardProps) {
   if (!props.predictedWinner || props.winProb == null) return {};
@@ -23,22 +36,24 @@ function buildAiHintProps(props: PredictionCardProps) {
   return { aiPredictedWinner, aiWinProb: props.winProb, aiTopFactor };
 }
 
-export function PredictionCardLive(props: PredictionCardProps) {
-  const { scores } = useKboScores();
+export function PredictionCardLive(props: PredictionCardProps & ExtraProps) {
+  const { gameDate, enablePickButton = true, ...cardProps } = props;
+  const { scores } = useKboScores({ date: gameDate });
   const live = scores.find(
-    (s) => s.homeTeam === props.homeTeam && s.awayTeam === props.awayTeam,
+    (s) => s.homeTeam === cardProps.homeTeam && s.awayTeam === cardProps.awayTeam,
   );
 
-  const effectiveStatus = live?.status ?? props.status;
-  const showPickButton = effectiveStatus === 'scheduled' && props.gameId != null;
-  const aiHintProps = showPickButton ? buildAiHintProps(props) : {};
+  const effectiveStatus = live?.status ?? cardProps.status;
+  const showPickButton =
+    enablePickButton && effectiveStatus === 'scheduled' && cardProps.gameId != null;
+  const aiHintProps = showPickButton ? buildAiHintProps(cardProps) : {};
 
   if (!live) {
     return (
       <>
-        <PredictionCard {...props} />
+        <PredictionCard {...cardProps} />
         {showPickButton && (
-          <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} {...aiHintProps} />
+          <PickButton gameId={cardProps.gameId!} homeTeam={cardProps.homeTeam} awayTeam={cardProps.awayTeam} {...aiHintProps} />
         )}
       </>
     );
@@ -48,13 +63,13 @@ export function PredictionCardLive(props: PredictionCardProps) {
   return (
     <>
       <PredictionCard
-        {...props}
-        status={live.status ?? props.status ?? undefined}
-        homeScore={showScore ? live.homeScore : props.homeScore}
-        awayScore={showScore ? live.awayScore : props.awayScore}
+        {...cardProps}
+        status={live.status ?? cardProps.status ?? undefined}
+        homeScore={showScore ? live.homeScore : cardProps.homeScore}
+        awayScore={showScore ? live.awayScore : cardProps.awayScore}
       />
       {showPickButton && (
-        <PickButton gameId={props.gameId!} homeTeam={props.homeTeam} awayTeam={props.awayTeam} {...aiHintProps} />
+        <PickButton gameId={cardProps.gameId!} homeTeam={cardProps.homeTeam} awayTeam={cardProps.awayTeam} {...aiHintProps} />
       )}
     </>
   );
