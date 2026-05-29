@@ -18,7 +18,7 @@ const PLACEHOLDER_PAGES = [
 ];
 
 test.describe("Placeholder pages — noindex + 박제 중 카피", () => {
-  for (const { route, title } of PLACEHOLDER_PAGES) {
+  for (const { route } of PLACEHOLDER_PAGES) {
     test(`${route} renders with 박제 중 message`, async ({ page }) => {
       const response = await page.goto(route);
       expect(response?.status()).toBe(200);

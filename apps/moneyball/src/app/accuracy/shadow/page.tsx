@@ -4,11 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import {
   assertSelectOk,
-  shortTeamName,
   SHADOW_WEIGHTS,
   SHADOW_SCORING_RULE,
   CURRENT_SCORING_RULE,
-  type TeamCode,
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
 import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";
