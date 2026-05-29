@@ -14,7 +14,7 @@ type LeagueDef = {
 
 export const LEAGUES: readonly LeagueDef[] = [
   { id: "kbo", label: "KBO", href: "/" },
-  { id: "mlb", label: "MLB", href: "/mlb", badge: "검토 중" },
+  { id: "mlb", label: "MLB", href: "/mlb", badge: "베타" },
   { id: "lotto", label: "로또", href: "/lotto/methodology" },
 ] as const;
 
