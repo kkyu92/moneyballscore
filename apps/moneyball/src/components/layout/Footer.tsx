@@ -2,7 +2,7 @@ import Link from "next/link";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe (plan #19 Step 1, cycle 1043):
+// Sitemap wireframe (plan #19 Step 1, cycle 1043 + cycle 1064 plan #20 /calendar 추가):
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
 // │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
@@ -11,12 +11,13 @@ import Link from "next/link";
 // │ /accuracy            /players   /reviews/m /glossary /mlb/team           │
 // │ /dashboard           /matchup   /reviews/. /insights /mlb/play..         │
 // │ /predictions                     /seasons   /v2-prev. /mlb/wc..           │
-// │                                              /change.. /mlb/post..         │
+// │ /calendar                                    /change.. /mlb/post..         │
 // │                                              /about                       │
 // │                                              /search                      │
 // └──────────────────────────────────────────────────────────────────────────┘
-//   Desktop (≥ md, 768px) : 2 → 3 → 5 column grid (always expanded)
-//   Mobile  (< md, 768px) : <details> accordion per column (open by default)
+//   Desktop (≥ lg, 1024px) : 5 column grid (always expanded, 7 column wrap to 2 row)
+//   Tablet  (≥ sm, 640px)  : 3 column grid
+//   Mobile  (< sm, 640px)  : 2 column grid + <details> accordion (open by default)
 
 type FooterLink = { label: string; href: string };
 type FooterColumn = { title: string; links: FooterLink[] };
