@@ -1,8 +1,10 @@
 /**
  * /debug/model-comparison — 모델 버전별 성능 비교 대시보드.
  *
- * 목적: v1.5 → v1.6 전환 효과를 데이터로 측정. scoring_rule + model_version
- * 조합별 N / 적중률 / Brier / Calibration 제시. 4-6주 축적 후 정량 판단.
+ * 목적: v1.5 → v1.8 / v2.0-debate 진화 효과를 데이터로 측정. scoring_rule +
+ * model_version 조합별 N / 적중률 / Brier / Calibration 제시. v2.0-debate row
+ * 의 정량 확률은 quant-only-shadow 그룹으로 분리 표시 (LLM debate 덮기 전 순수
+ * 정량 모델 비교용).
  *
  * middleware.ts BASIC auth 로 /debug/* 보호됨.
  */
@@ -78,8 +80,8 @@ async function loadRows(daysBack: number): Promise<PredictionRow[]> {
 export default async function ModelComparisonPage() {
   const daysBack = 90;
   const rows = await loadRows(daysBack);
-  // Shadow run: v2.0-debate row 에서 quantitativeHomeWinProb 추출 → v1.6-pure
-  // 가상 그룹 생성. debate 가 덮기 전의 순수 정량 확률과 비교 가능.
+  // Shadow run: v2.0-debate row 에서 quantitativeHomeWinProb 추출 →
+  // quant-only-shadow 가상 그룹 생성. debate 가 덮기 전의 순수 정량 확률과 비교 가능.
   const shadow = buildShadowRows(rows);
   const combined = [...rows, ...shadow];
   const groups = aggregateByModel(combined);
@@ -101,13 +103,13 @@ export default async function ModelComparisonPage() {
         <h1 className="text-2xl md:text-3xl font-bold">모델 비교 대시보드</h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-600 mt-1">
           최근 {daysBack}일 · {rows.length}건 · scoring_rule + model_version 조합별
-          성능 측정. v1.6 ship 이후 데이터 축적은 저녁 predict cron 부터 시작.
+          성능 측정. 현재 v1.8 ship + v2.0-debate / v2.1-B shadow 누적 중.
         </p>
         {shadow.length > 0 && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Shadow run: {shadow.length}건 v2.0-debate row 에서 v1.6 pure 정량
-            확률 추출 → <span className="font-mono">v1.6-pure-shadow</span>{' '}
-            그룹으로 표시.
+            Shadow run: {shadow.length}건 v2.0-debate row 에서 정량 확률 추출 →{' '}
+            <span className="font-mono">quant-only-shadow</span> 그룹으로 표시
+            (LLM debate 덮기 전 순수 정량 모델 비교용).
           </p>
         )}
       </header>
