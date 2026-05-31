@@ -26,7 +26,11 @@ export async function fetchFangraphsMlbTeams(season: number): Promise<FangraphsM
   const res = await fetch(url);
 
   if (!res.ok) {
-    Sentry.captureMessage(`fangraphs-mlb HTTP ${res.status}`, 'warning');
+    Sentry.captureMessage(`fangraphs-mlb HTTP ${res.status}`, {
+      level: 'warning',
+      tags: { scraper: 'fangraphs-mlb', fn: 'fetchFangraphsMlbTeams', status: String(res.status) },
+      extra: { url, season },
+    });
     throw new Error(`fangraphs HTTP ${res.status}`);
   }
 
@@ -35,7 +39,11 @@ export async function fetchFangraphsMlbTeams(season: number): Promise<FangraphsM
   const rows = $('table#LeaderBoard1_dg1_ctl00 tbody tr');
 
   if (rows.length === 0) {
-    Sentry.captureMessage('fangraphs-mlb parse fail — selector 변경 가능', 'warning');
+    Sentry.captureMessage('fangraphs-mlb parse fail — selector 변경 가능', {
+      level: 'warning',
+      tags: { scraper: 'fangraphs-mlb', fn: 'fetchFangraphsMlbTeams', reason: 'parse_fail' },
+      extra: { url, season, selector: 'table#LeaderBoard1_dg1_ctl00 tbody tr' },
+    });
     throw new Error('parse fail');
   }
 
