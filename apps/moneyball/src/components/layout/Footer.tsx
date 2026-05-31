@@ -30,6 +30,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/accuracy", label: "AI 적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
       { href: "/predictions", label: "예측 기록" },
+      { href: "/calendar", label: "월별 캘린더" },
     ],
   },
   {

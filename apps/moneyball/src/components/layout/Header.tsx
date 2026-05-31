@@ -13,32 +13,26 @@ export function isNavGroup(item: NavItem): item is NavGroup {
   return "items" in item;
 }
 
-// KBO_NAV — cycle 1022 polish: 9 top-level → 6 (33% 압축).
-// 의도: 가독성 + 디자인 청결. 사용자 path 명확 (오늘 / 분석 / 기록 / 팀·선수 /
-// 커뮤니티 / 더보기). 모든 link 가 group 안 정리됨 ("오늘" 만 top-level link).
+// KBO_NAV — cycle 1064 plan #20 polish: 22 link / 5 group → 9 link / 3 group (59% 압축).
+// 의도: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
+// 더보기 8 link dumping ground 해체 → Footer "도움말" column 단독 노출 (이미 박제 완료).
+// /insights /calendar /seasons → Footer "리뷰·시즌"/"도움말" column 단독 노출.
+// 결과: 1 top-level (오늘) + 3 group (예측·기록 / 팀·선수 / 커뮤니티) = 4 hover zone.
 const KBO_NAV: NavItem[] = [
   { href: "/", label: "오늘" },
   {
-    label: "분석",
+    label: "예측·기록",
     items: [
       { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석", icon: "activity" },
-      { href: "/insights", label: "AI 인사이트", description: "AI 토론 reasoning 시계열 아카이브", icon: "activity" },
       { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
-      { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표", icon: "bar-chart" },
-    ],
-  },
-  {
-    label: "기록",
-    items: [
       { href: "/predictions", label: "예측 기록", description: "일자별 예측 아카이브", icon: "file-text" },
-      { href: "/standings", label: "순위", description: "KBO 정규시즌 순위표", icon: "award" },
-      { href: "/calendar", label: "월별 캘린더", description: "월별 예측·적중률 히트맵", icon: "calendar" },
-      { href: "/seasons", label: "시즌 기록", description: "연도별 성과 아카이브", icon: "database" },
+      { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표", icon: "bar-chart" },
     ],
   },
   {
     label: "팀·선수",
     items: [
+      { href: "/standings", label: "순위", description: "KBO 정규시즌 순위표", icon: "award" },
       { href: "/teams", label: "팀", description: "KBO 10구단 프로필·통계", icon: "shield" },
       { href: "/players", label: "선수", description: "선수 세이버메트릭스 지표", icon: "user" },
       { href: "/matchup", label: "매치업", description: "팀간 맞대결 이력 분석", icon: "arrows-swap" },
@@ -49,19 +43,6 @@ const KBO_NAV: NavItem[] = [
     items: [
       { href: "/picks", label: "내 픽 기록", description: "내 예측과 AI 성과 비교", icon: "clipboard-check" },
       { href: "/leaderboard", label: "픽 리더보드", description: "커뮤니티 예측 순위", icon: "award" },
-    ],
-  },
-  {
-    label: "더보기",
-    items: [
-      { href: "/reviews", label: "예측 리뷰", description: "주간·월간 예측 총평", icon: "file-text" },
-      { href: "/reviews/misses", label: "빗나간 예측", description: "오답 원인 factor 분석", icon: "x-circle" },
-      { href: "/methodology", label: "예측 방법론", description: "v1.8 모델·10팩터·AI 토론", icon: "file-text" },
-      { href: "/guide", label: "사용 가이드", description: "예측 카드·차트·페이지 활용", icon: "clipboard-check" },
-      { href: "/glossary", label: "용어 사전", description: "10팩터·세이버메트릭 용어 풀이", icon: "database" },
-      { href: "/v2-preview", label: "v2 시뮬레이션", description: "v2.0 가중치 backtest 미리보기", icon: "bar-chart" },
-      { href: "/changelog", label: "변경 로그", description: "사이클별 모델·기능 갱신 이력", icon: "file-text" },
-      { href: "/about", label: "서비스 소개", description: "FAQ·서비스 안내·문의", icon: "file-text" },
     ],
   },
 ];

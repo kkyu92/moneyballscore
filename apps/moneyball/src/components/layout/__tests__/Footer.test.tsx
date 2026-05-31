@@ -25,7 +25,7 @@ describe("Footer", () => {
     }
   });
 
-  it("AI 예측 column 의 5 link (오늘 경기 / AI 분석 / AI 적중 기록 / 모델 성능 / 예측 기록) 박제", () => {
+  it("AI 예측 column 의 6 link (오늘 경기 / AI 분석 / AI 적중 기록 / 모델 성능 / 예측 기록 / 월별 캘린더) 박제", () => {
     render(<Footer />);
     const aiHeading = screen.getByRole("heading", { level: 2, name: "AI 예측" });
     const aiColumn = aiHeading.closest("details") as HTMLElement;
@@ -35,6 +35,7 @@ describe("Footer", () => {
     expect(within(aiColumn).getByRole("link", { name: "AI 적중 기록" })).toHaveAttribute("href", "/accuracy");
     expect(within(aiColumn).getByRole("link", { name: "모델 성능" })).toHaveAttribute("href", "/dashboard");
     expect(within(aiColumn).getByRole("link", { name: "예측 기록" })).toHaveAttribute("href", "/predictions");
+    expect(within(aiColumn).getByRole("link", { name: "월별 캘린더" })).toHaveAttribute("href", "/calendar");
   });
 
   it("법적 고지 nav 에 개인정보처리방침 / 이용약관 / 문의 link 박제", () => {
