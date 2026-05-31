@@ -85,24 +85,28 @@ describe("LeagueSelector", () => {
     expect(lottoTab).toHaveAttribute("aria-current", "page");
   });
 
-  it("KBO sub-NAV 보존 — leagueFromPath('/') → kbo 안 6 top-level 유지 (cycle 1022 polish)", () => {
-    // cycle 1022: 9 top-level → 6 압축. "오늘" link + 5 group (분석 / 기록 /
-    // 팀·선수 / 커뮤니티 / 더보기). AI / 리뷰·시즌 / 도움말 = 더보기 또는 분석 안 통합.
+  it("KBO sub-NAV 보존 — leagueFromPath('/') → kbo 안 4 top-level 유지 (cycle 1064 plan #20 polish)", () => {
+    // cycle 1064 plan #20: 6 top-level → 4 압축 (22→9 link). "오늘" link + 3 group
+    // (예측·기록 / 팀·선수 / 커뮤니티). 더보기 8 link 해체 → Footer "도움말" column 단독 노출.
+    // /insights /calendar /seasons → Footer "리뷰·시즌"/"AI 예측" column 단독 노출.
     const kboNav = LEAGUE_NAVS.kbo;
     const labels = kboNav.map((item) =>
       isNavGroup(item) ? item.label : item.label,
     );
 
-    // 신규 박제된 NAV 라벨
+    // 신규 박제된 NAV 라벨 (4 top-level: 오늘 + 예측·기록 + 팀·선수 + 커뮤니티)
     expect(labels).toContain("오늘");
-    expect(labels).toContain("분석");
-    expect(labels).toContain("기록");
+    expect(labels).toContain("예측·기록");
     expect(labels).toContain("팀·선수");
     expect(labels).toContain("커뮤니티");
-    expect(labels).toContain("더보기");
 
-    // top-level 6 items
-    expect(labels.length).toBe(6);
+    // top-level 4 items
+    expect(labels.length).toBe(4);
+
+    // 해체된 그룹 (더보기 dumping ground 해체)
+    expect(labels).not.toContain("더보기");
+    expect(labels).not.toContain("분석");
+    expect(labels).not.toContain("기록");
 
     // KBO NAV 에 "로또" 그룹은 없어야 함 (LEAGUE_NAVS.lotto 로 분리됨)
     expect(labels).not.toContain("로또");
