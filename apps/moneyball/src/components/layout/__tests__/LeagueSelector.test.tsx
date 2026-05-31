@@ -38,7 +38,7 @@ describe("LeagueSelector", () => {
     expect(mlbTab).toHaveAttribute("href", "/mlb");
     unmount();
 
-    // sub-NAV switches: leagueFromPath('/mlb') → 'mlb', LEAGUE_NAVS.mlb → 9 sub-route (cycle 1023 MLB ship)
+    // sub-NAV switches: leagueFromPath('/mlb') → 'mlb', LEAGUE_NAVS.mlb → 6 sub-route (1 top-level + 3 경기·팀 + 2 포스트시즌)
     const league = leagueFromPath("/mlb");
     expect(league).toBe("mlb");
     const mlbNav = LEAGUE_NAVS[league];
@@ -86,7 +86,7 @@ describe("LeagueSelector", () => {
   });
 
   it("KBO sub-NAV 보존 — leagueFromPath('/') → kbo 안 4 top-level 유지 (cycle 1064 plan #20 polish)", () => {
-    // cycle 1064 plan #20: 6 top-level → 4 압축 (22→9 link). "오늘" link + 3 group
+    // cycle 1064 plan #20: 6 top-level → 4 압축 (22→11 link, Header.tsx 정합 cycle 1070). "오늘" link + 3 group
     // (예측·기록 / 팀·선수 / 커뮤니티). 더보기 8 link 해체 → Footer "도움말" column 단독 노출.
     // /insights /calendar /seasons → Footer "리뷰·시즌"/"AI 예측" column 단독 노출.
     const kboNav = LEAGUE_NAVS.kbo;
