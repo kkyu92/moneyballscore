@@ -26,7 +26,11 @@ async function fetchWithRetry(url: string, retry = 0): Promise<Response> {
   if (res.ok) return res;
 
   if (res.status === 401 || res.status === 403) {
-    Sentry.captureMessage(`statsapi-mlb ${res.status} — ToS cool down`, 'warning');
+    Sentry.captureMessage(`statsapi-mlb ${res.status} — ToS cool down`, {
+      level: 'warning',
+      tags: { scraper: 'statsapi-mlb', fn: 'fetchWithRetry', status: String(res.status) },
+      extra: { url },
+    });
     throw new Error('tos_cooldown');
   }
 
@@ -66,7 +70,10 @@ export async function fetchMlbSchedule(dateKst: string): Promise<MlbGame[]> {
     return games;
   } catch (err: any) {
     if (err.message === 'tos_cooldown') return [];
-    Sentry.captureException(err);
+    Sentry.captureException(err, {
+      tags: { scraper: 'statsapi-mlb', fn: 'fetchMlbSchedule' },
+      extra: { dateKst, url },
+    });
     throw err;
   }
 }
@@ -102,7 +109,10 @@ export async function fetchProbablePitchers(dateKst: string): Promise<ProbablePi
     return result;
   } catch (err: any) {
     if (err.message === 'tos_cooldown') return {};
-    Sentry.captureException(err);
+    Sentry.captureException(err, {
+      tags: { scraper: 'statsapi-mlb', fn: 'fetchProbablePitchers' },
+      extra: { dateKst, url },
+    });
     throw err;
   }
 }

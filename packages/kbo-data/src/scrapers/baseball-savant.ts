@@ -26,7 +26,11 @@ export async function fetchSavantTeamStatcast(season: number): Promise<SavantTea
   const res = await fetch(url);
 
   if (!res.ok) {
-    Sentry.captureMessage(`savant HTTP ${res.status}`, 'warning');
+    Sentry.captureMessage(`savant HTTP ${res.status}`, {
+      level: 'warning',
+      tags: { scraper: 'baseball-savant', fn: 'fetchSavantTeamStatcast', status: String(res.status) },
+      extra: { url, season },
+    });
     throw new Error(`savant HTTP ${res.status}`);
   }
 
@@ -42,7 +46,11 @@ export async function fetchSavantTeamStatcast(season: number): Promise<SavantTea
   const launchIdx = header.indexOf('launch_angle');
 
   if ([teamIdx, xwobaIdx, barrelIdx, hardHitIdx, launchIdx].some((i) => i === -1)) {
-    Sentry.captureMessage('savant CSV format 변경', 'warning');
+    Sentry.captureMessage('savant CSV format 변경', {
+      level: 'warning',
+      tags: { scraper: 'baseball-savant', fn: 'fetchSavantTeamStatcast', reason: 'csv_format_changed' },
+      extra: { url, season, headerColumns: header, missing: { teamIdx, xwobaIdx, barrelIdx, hardHitIdx, launchIdx } },
+    });
     throw new Error('parse fail — CSV format 변경');
   }
 
