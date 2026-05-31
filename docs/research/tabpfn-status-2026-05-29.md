@@ -1,10 +1,10 @@
 ---
 created_at: 2026-05-29
 cycle: 1049
-updated_cycle: 1062
+updated_cycle: 1078
 scout_issue: 1206
 related_plan: 12
-status: carry-over tracker (Step 1/2 evidence pack done, Step 3-5 user-domain wait, kill-switch ETA 2026-06-03)
+status: carry-over tracker (Step 1/2 evidence pack done, Step 3-5 user-domain wait, kill-switch ETA 2026-06-03 D-2)
 ---
 
 # TabPFN Scout #1206 — Status (cycle 1049)
@@ -46,6 +46,14 @@ scout #1206 (2026-05-21 박제) carry-over status snapshot. plan #12 Step 1/2 ev
 - 본 메인 자율 fire X — plan #12 Step 3-5 = 사용자 영역, v1.8 n=150 gating
 - issue #1206 close 결정 X — carry-over 추적 채널 유지 (user-decision wait 명확화)
 - 신규 코드 / 신규 plan slot 박제 X — Step 1/2 evidence pack 충분
+
+### 4.1 cycle 1078 갱신 (2026-06-01, gap 16 cycle)
+
+- **오늘 = 2026-06-01 = kill-switch ETA D-2** (cycle 1062 측정 시점 5/29 → 본 cycle 1078 6/01, 3일 경과)
+- cycle 1062 fresh baseline 후 op-analysis chain 0회 발화 = kill-switch threshold evaluation gap 17 cycle (1061→1078) 누적
+- velocity 1.80/day 가정 시 3일 경과 = real n=52 → n=57~58 추정 (n=60 도달 미달 가능)
+- D-2 임박 신호 박제 = 다음 op-analysis (lite) fire 시 fresh cohort 측정 권장 (gap=17, ETA cycle 1086 미달이지만 D-2 임박 자연 redirect trigger)
+- 본 cycle (explore-idea lite) = scout #1206 carry-over status doc 갱신 only, 코드 변경 X / PR retro-only ship
 
 ## 5. 다음 자율 fire 조건 (자가 의심 차단)
 
