@@ -40,7 +40,7 @@ export default function V2ShadowMonitorPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score v2 섀도우 모니터",
     description:
-      "v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow era 별 적중률·Brier 점수 공개. n=150 도달 시 v2.0 가중치 확정 결정.",
+      "v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=150 도달 시 v2.0 가중치 확정 결정.",
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
     datePublished: "2026-06-01",
