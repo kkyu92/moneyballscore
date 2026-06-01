@@ -151,6 +151,12 @@ const STATIC_PAGES: Array<{
   { slug: '/changelog', label: '변경 기록', keywords: 'changelog 변경 release' },
   { slug: '/contact', label: '문의', keywords: 'contact 문의' },
   { slug: '/picks', label: 'My Picks', keywords: 'picks my-picks 내픽' },
+  { slug: '/guide', label: '사용 가이드', keywords: 'guide 가이드 howto 도움말' },
+  { slug: '/matchup', label: '매치업', keywords: 'matchup 매치업 vs 대결' },
+  { slug: '/reviews', label: '예측 리뷰', keywords: 'reviews 리뷰 review' },
+  { slug: '/seasons', label: '시즌 history', keywords: 'seasons 시즌 history' },
+  { slug: '/mlb', label: 'MLB', keywords: 'mlb 메이저리그 majorleague baseball' },
+  { slug: '/lotto/methodology', label: '로또 통계', keywords: 'lotto 로또 stats 통계' },
 ];
 
 async function buildSearchIndex(): Promise<SearchEntry[]> {
