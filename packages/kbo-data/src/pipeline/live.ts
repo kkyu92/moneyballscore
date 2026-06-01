@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { toKSTDateString, assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
+import { toKSTDateString, assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
@@ -129,11 +129,15 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
       assertWriteOk(liveUpdateResult, 'live.runLiveUpdate.games.live');
 
       // pre_game 예측 가져오기 — maybeSingle + assertSelectOk.
+      // shadow row (v2.0-shadow / v2.1-B-shadow 등) 가 같은 game_id 안 누적 시
+      // maybeSingle 다중 행 → PGRST116 race. .in('scoring_rule', PRODUCTION_COHORT_RULES)
+      // 로 production cohort 만 좁혀 silent drift family 사례 17 차단.
       const preGameResult = await db
         .from('predictions')
         .select('confidence, reasoning')
         .eq('game_id', dbGame.id)
         .eq('prediction_type', 'pre_game')
+        .in('scoring_rule', PRODUCTION_COHORT_RULES)
         .maybeSingle();
       const { data: preGame } = assertSelectOk<{ confidence: number; reasoning: unknown }>(
         preGameResult,
