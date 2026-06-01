@@ -125,7 +125,7 @@ export default async function V2PreviewPage() {
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
-      <Breadcrumb items={[{ label: "홈", href: "/" }, { label: "v2 시뮬레이션 미리보기" }]} />
+      <Breadcrumb items={[{ label: "v2 시뮬레이션 미리보기" }]} />
 
       <header className="mt-4 space-y-3">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">

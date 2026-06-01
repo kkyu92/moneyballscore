@@ -153,7 +153,7 @@ export default async function InsightsHubPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
 
-      <Breadcrumb items={[{ label: "홈", href: "/" }, { label: "AI 인사이트" }]} />
+      <Breadcrumb items={[{ label: "AI 인사이트" }]} />
 
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI 인사이트</h1>
