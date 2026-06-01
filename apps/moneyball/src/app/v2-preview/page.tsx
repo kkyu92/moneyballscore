@@ -166,8 +166,8 @@ export default async function V2PreviewPage() {
         </div>
         <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
           v1.8 대비 변경 — sp_fip 15→16% · lineup_woba 15→17% · bullpen_fip 10→11% ·
-          recent_form 10→12% · war 8→9% · head_to_head 3→2% · sfr 5→0% (sfr 제외, Wayback
-          부분 회귀).
+          recent_form 10→12% · war 8→9% · head_to_head 3→2% · elo 10→9% · sfr 5→0% (sfr
+          제외, Wayback 부분 회귀).
         </p>
       </section>
 
