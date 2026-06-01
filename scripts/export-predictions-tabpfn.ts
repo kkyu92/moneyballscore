@@ -1,28 +1,31 @@
 /**
- * TabPFN export stub (M-D cycle 1013).
+ * TabPFN CSV export (cycle 1130 v17 candidate P body 박제).
  *
- * 사용자 GPU 결정 후 fire 가능한 형태 — predictions.factors + games 결과를
- * TabPFN input shape (CSV) 로 출력. 본 plan = stub only — 실제 fire 는
- * 사용자 GPU 박제 후 carry-over.
+ * predictions JOIN games row 들을 docs/research/tabpfn-data-prep.md schema 에 맞춰
+ * CSV 로 출력. Step 3 (Python sidecar 인프라 결정) 사용자 영역 fire 직전 input 파일.
  *
- * Usage (carry-over):
+ * Usage:
  *   pnpm tsx scripts/export-predictions-tabpfn.ts \
- *     --start 2026-04-01 --end 2026-05-28 \
+ *     --start 2026-04-01 --end 2026-05-31 \
  *     --out tabpfn-train.csv
  *
- * Output shape:
- *   feature columns = 12 factor 평균 (sp_fip ... umpire_sz, [0, 1] 정규화)
- *   target column   = home_won (binary 0/1)
+ * scope filter (data-prep.md §2.2):
+ *   - prediction_type = 'pre_game'
+ *   - is_correct IS NOT NULL
+ *   - factors IS NOT NULL + 10팩터 key 모두 존재 (drop NaN row)
+ *   - games.status = 'final' + winner_team_id IS NOT NULL
  *
- * TabPFN 학습 path 는 별도 Python notebook (사용자 GPU 환경):
- *   1. `pip install tabpfn-extensions`
- *   2. `from tabpfn import TabPFNClassifier`
- *   3. `clf.fit(X_train, y_train)` → `clf.predict(X_test)`
- *
- * 본 stub 은 TODO 박제 — 실행 시 즉시 stderr + 종료. fire 전 본 함수 body 박제 필요.
+ * 자율 영역 한도: CSV 박제 only. TabPFN inference / checkpoint download 사용자 영역.
  */
 
+import { writeFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
+import {
+  CSV_HEADER,
+  buildCsvRow,
+  type DropReason,
+  type PredictionExportRow,
+} from '../apps/moneyball/src/lib/tabpfn-export';
 
 interface CliArgs {
   start: string;
@@ -42,10 +45,14 @@ function parseArgs(argv: string[]): CliArgs | null {
   return args as CliArgs;
 }
 
+const PAGE_SIZE = 1000;
+
 async function main() {
   const args = parseArgs(process.argv);
   if (!args) {
-    console.error('Usage: tsx scripts/export-predictions-tabpfn.ts --start YYYY-MM-DD --end YYYY-MM-DD --out path.csv');
+    console.error(
+      'Usage: tsx scripts/export-predictions-tabpfn.ts --start YYYY-MM-DD --end YYYY-MM-DD --out path.csv',
+    );
     process.exit(1);
   }
 
@@ -56,20 +63,62 @@ async function main() {
     process.exit(1);
   }
 
-  // STUB — 본 plan = body 박제 안 함. 사용자 GPU 결정 후 carry-over fire.
-  // 박제 시 아래 path 작성:
-  //   1. predictions JOIN games (start ~ end, prediction_type='pre_game', game.status='final')
-  //   2. row 별 factors JSONB → 12 column 평탄화 (결측 → 0.5 neutral)
-  //   3. target = (game.home_winner_team_id === game.home_team_id) ? 1 : 0
-  //   4. CSV write to args.out (header row + data rows)
-  //   5. console.log(`exported ${n} rows → ${args.out}`)
-  console.error('STUB — TabPFN export 아직 박제 X (사용자 GPU 결정 carry-over). cycle 1013 M-D plan.');
-  console.error(`args=${JSON.stringify(args)} (used: 0)`);
-  console.error('Supabase connection ready 확인:', createClient(url, key, { auth: { persistSession: false } }) ? 'OK' : 'FAIL');
-  process.exit(2); // STUB exit code — fire path 박제 시 0 으로 변경
+  const supabase = createClient(url, key, { auth: { persistSession: false } });
+  const drops: Record<DropReason, number> = {
+    no_games_join: 0,
+    no_factors: 0,
+    missing_factor_key: 0,
+    invalid_factor_value: 0,
+    no_home_win_prob: 0,
+    no_winner_team_id: 0,
+    is_correct_null: 0,
+  };
+  const lines: string[] = [CSV_HEADER];
+
+  let fetched = 0;
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('predictions')
+      .select(
+        'game_id, predicted_winner, confidence, prediction_type, scoring_rule, factors, reasoning, is_correct, games:games!inner(id, game_date, home_team_id, winner_team_id, status)',
+      )
+      .eq('prediction_type', 'pre_game')
+      .not('is_correct', 'is', null)
+      .gte('games.game_date', args.start)
+      .lte('games.game_date', args.end)
+      .eq('games.status', 'final')
+      .order('game_id', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) {
+      console.error('supabase fetch error:', error);
+      process.exit(1);
+    }
+    if (!data || data.length === 0) break;
+
+    for (const raw of data) {
+      const row = raw as unknown as PredictionExportRow;
+      const result = buildCsvRow(row);
+      if (result.ok) {
+        lines.push(result.line);
+      } else {
+        drops[result.reason] += 1;
+      }
+    }
+
+    fetched += data.length;
+    if (data.length < PAGE_SIZE) break;
+  }
+
+  writeFileSync(args.out, lines.join('\n') + '\n', 'utf-8');
+
+  const kept = lines.length - 1;
+  console.log(`fetched ${fetched} rows, exported ${kept} rows → ${args.out}`);
+  console.log('drops:', drops);
+  process.exit(0);
 }
 
 main().catch((e) => {
-  console.error('export-predictions-tabpfn stub error:', e);
+  console.error('export-predictions-tabpfn error:', e);
   process.exit(1);
 });
