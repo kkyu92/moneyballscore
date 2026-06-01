@@ -138,6 +138,7 @@ const STATIC_PAGES: Array<{
 }> = [
   { slug: '/', label: '홈', keywords: 'home main 메인' },
   { slug: '/predictions', label: '오늘의 예측', meta: '오늘', keywords: 'predictions today 예측' },
+  { slug: '/analysis', label: 'AI 분석', keywords: 'analysis 분석 ai-judge 에이전트 토론' },
   { slug: '/accuracy', label: '적중률', keywords: 'accuracy hit-rate 정확도' },
   { slug: '/leaderboard', label: '리더보드', keywords: 'leaderboard ranking 순위' },
   { slug: '/standings', label: '팀 순위', keywords: 'standings team-ranking 팀 순위' },
@@ -157,6 +158,9 @@ const STATIC_PAGES: Array<{
   { slug: '/seasons', label: '시즌 history', keywords: 'seasons 시즌 history' },
   { slug: '/mlb', label: 'MLB', keywords: 'mlb 메이저리그 majorleague baseball' },
   { slug: '/lotto/methodology', label: '로또 통계', keywords: 'lotto 로또 stats 통계' },
+  { slug: '/lotto/archive', label: '로또 아카이브', keywords: 'lotto archive 아카이브 회차 통계' },
+  { slug: '/privacy', label: '개인정보처리방침', keywords: 'privacy 개인정보 처리방침 legal' },
+  { slug: '/terms', label: '이용약관', keywords: 'terms 이용약관 legal' },
 ];
 
 async function buildSearchIndex(): Promise<SearchEntry[]> {
