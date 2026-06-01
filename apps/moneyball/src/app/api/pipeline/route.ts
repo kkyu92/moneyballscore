@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { errMsg } from '@moneyball/shared';
 import { runDailyPipeline, notifyError } from '@moneyball/kbo-data';
 
@@ -80,6 +81,11 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     const message = errMsg(e);
     console.error('[Pipeline API]', message);
+
+    Sentry.captureException(e, {
+      tags: { layer: 'api-route', route: 'pipeline', mode, triggered_by: triggeredBy },
+      extra: { date, message },
+    });
 
     // 에러 알림
     try { await notifyError('Pipeline API', message); } catch {}
