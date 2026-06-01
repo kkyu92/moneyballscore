@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { errMsg } from '@moneyball/shared';
 import { syncBatterStats } from '@moneyball/kbo-data';
 
@@ -48,6 +49,12 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     const message = errMsg(e);
     console.error('[sync-batter-stats]', message);
+
+    Sentry.captureException(e, {
+      tags: { layer: 'api-route', route: 'sync-batter-stats' },
+      extra: { season, message },
+    });
+
     return Response.json({ error: message }, { status: 500 });
   }
 }
