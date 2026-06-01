@@ -49,4 +49,11 @@ describe('sitemap MLB URL coverage', () => {
     expect(hasHome).toBeDefined();
     expect(hasPredictions).toBeDefined();
   });
+
+  it('includes /mlb/factors route (14 factor weight explainer)', async () => {
+    const urls = await sitemap();
+    const factors = urls.find((u) => u.url.endsWith('/mlb/factors'));
+    expect(factors).toBeDefined();
+    expect(factors?.priority).toBeGreaterThanOrEqual(0.65);
+  });
 });

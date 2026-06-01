@@ -53,6 +53,14 @@ export {
 } from './big-match';
 export type { BigMatchCandidate, BigMatchResult, BigMatchMode } from './big-match';
 
+// MLB 14팩터 본선
+export {
+  MLB_BASE_WEIGHTS,
+  HOME_ELO_BONUS_VALUE,
+  computeMlbProbability,
+} from './factors/mlb-base';
+export type { MlbFactorInputs } from './factors/mlb-base';
+
 // 라이브
 export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
 
