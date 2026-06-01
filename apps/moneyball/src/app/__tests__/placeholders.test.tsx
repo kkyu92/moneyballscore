@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Login from '../login/page';
-import Settings from '../settings/page';
-import Community from '../community/page';
+import Login, { metadata as loginMeta } from '../login/page';
+import Settings, { metadata as settingsMeta } from '../settings/page';
+import Community, { metadata as communityMeta } from '../community/page';
 
 describe('Placeholder 페이지 3', () => {
   it.each([
@@ -13,5 +13,15 @@ describe('Placeholder 페이지 3', () => {
     render(<Component />);
     expect(screen.getByText(new RegExp(expectedText))).toBeInTheDocument();
     expect(screen.queryAllByText(/2026-08~09|박제 중/).length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    ['login', loginMeta],
+    ['settings', settingsMeta],
+    ['community', communityMeta],
+  ])('%s exports robots noindex/nofollow metadata (plan #21 Step 2)', (_name, meta) => {
+    const robots = meta.robots as { index?: boolean; follow?: boolean };
+    expect(robots.index).toBe(false);
+    expect(robots.follow).toBe(false);
   });
 });
