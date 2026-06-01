@@ -2,6 +2,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   toKSTDateString, KBO_STADIUM_COORDS, errMsg, CURRENT_SCORING_RULE,
   PRODUCTION_COHORT_RULES,
+  isV2ModelEnabled, isV21BShadowEnabled, isDebateEnabled,
+  SHADOW_V20_WEIGHTS,
 } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
@@ -616,7 +618,11 @@ export async function runDailyPipeline(
       parkFactor: DEFAULT_PARK_FACTORS[game.stadium] ?? 1.0,
     };
 
-    const quantResult = predict(input);
+    // cycle 1127 plan-v17 candidate N Tier 2 — V2_MODEL_ENABLED=true 시 production
+    // 가중치 SHADOW_V20_WEIGHTS swap. default OFF = DEFAULT_WEIGHTS (v1.8) 유지.
+    // n=150 v1.8 cohort 측정 완료 (ETA 2026-08-04) 후 flag flip → v2.0 canary.
+    const productionWeights = isV2ModelEnabled() ? SHADOW_V20_WEIGHTS : undefined;
+    const quantResult = predict(input, { weights: productionWeights });
 
     let finalWinner = quantResult.predictedWinner;
     let finalHomeProb = quantResult.homeWinProb;
@@ -632,7 +638,9 @@ export async function runDailyPipeline(
     });
 
     let debateSucceeded = false;
-    if (process.env.ANTHROPIC_API_KEY) {
+    // cycle 1127 plan-v17 candidate N Tier 2 — DEBATE_ENABLED=false (kill switch) 시 LLM debate
+    // path 즉시 차단 → QUANT_PREGAME fallback only. Anthropic credit 소진 / 비용 controlling.
+    if (process.env.ANTHROPIC_API_KEY && isDebateEnabled()) {
       try {
         const gameContext: GameContext = {
           game: input.game,
@@ -779,6 +787,8 @@ export async function runDailyPipeline(
     // M-V2 shadow cohort row insert (cycle 1013) — production v1.8 insert 직후 동일 game_id 에
     // scoring_rule='v2.1-B-shadow' row 별도 누적. failure tolerant (throw X) → v1.8 path 영향 X.
     // /accuracy/shadow page 안 Brier delta evidence source.
+    // cycle 1127 plan-v17 candidate N Tier 2 — V21B_SHADOW_ENABLED=false (kill switch) 시 즉시 차단.
+    if (isV21BShadowEnabled()) {
     try {
       const shadowResult = await insertShadowRow(db, {
         gameId: dbGameId,
@@ -815,6 +825,7 @@ export async function runDailyPipeline(
     } catch (e) {
       // insertShadowRow 는 자체 try/catch — 본 outer catch 는 방어 deepest fallback
       errors.push(`shadow row catch ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
+    }
     }
 
     // plan #14 C1a (cycle 1019) — v2.0-shadow row insert.

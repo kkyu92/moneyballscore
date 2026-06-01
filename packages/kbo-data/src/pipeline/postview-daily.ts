@@ -20,9 +20,16 @@ import {
   assertWriteOk,
   errMsg,
   PRODUCTION_COHORT_RULES,
+  isPostviewEnabled,
   type TeamCode,
 } from '@moneyball/shared';
-import { runPostview, type ActualResult, type OriginalPrediction } from '../agents/postview';
+import {
+  runPostview,
+  deriveFactorErrorsFallback,
+  type ActualResult,
+  type OriginalPrediction,
+  type PostviewResult,
+} from '../agents/postview';
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
 import { decidePostviewModelVersion } from './model-version';
@@ -187,7 +194,27 @@ export async function runPostviewDaily(
     };
 
     try {
-      const postview = await runPostview(context, actual, original);
+      // cycle 1127 plan-v17 candidate N Tier 2 — POSTVIEW_ENABLED=false (kill switch) 시 LLM
+      // 호출 즉시 차단 + fallback path 박제 (agentsFailed=true → QUANT_POSTVIEW_VERSION 강등).
+      // Anthropic credit 소진 / 비용 controlling 운영 kill switch. post_game row 정상 박제 →
+      // 무한 retry loop 차단.
+      const homeTeam = context.game.homeTeam;
+      const awayTeam = context.game.awayTeam;
+      const homeWon = actual.winnerCode === homeTeam;
+      const postview: PostviewResult = isPostviewEnabled()
+        ? await runPostview(context, actual, original)
+        : {
+            game: context.game,
+            actual,
+            homePostview: { team: homeTeam, summary: 'LLM 사후 분석 비활성', keyFactor: '', missedBy: '' },
+            awayPostview: { team: awayTeam, summary: 'LLM 사후 분석 비활성', keyFactor: '', missedBy: '' },
+            factorErrors: deriveFactorErrorsFallback(original.factors, homeWon),
+            judgeReasoning: 'POSTVIEW_ENABLED=false kill switch — quant fallback 박제.',
+            totalTokens: 0,
+            totalDurationMs: 0,
+            agentsFailed: true,
+            agentError: 'POSTVIEW_ENABLED=false',
+          };
       result.totalTokens += postview.totalTokens;
 
       // agentsFailed silent drift 차단. ANTHROPIC credit 소진 시 모든 LLM 호출 실패

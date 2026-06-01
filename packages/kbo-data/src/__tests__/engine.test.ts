@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { predict } from '../engine/predictor';
-import { DEFAULT_WEIGHTS } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS } from '@moneyball/shared';
 import type { PredictionInput } from '../types';
 
 function makeInput(overrides?: Partial<PredictionInput>): PredictionInput {
@@ -136,4 +136,26 @@ describe('가중치 합산', () => {
     }
   });
 
+});
+
+describe('predict opts.weights (cycle 1127 plan-v17 candidate N — V2_MODEL_ENABLED swap)', () => {
+  it('opts 미지정 → DEFAULT_WEIGHTS 사용 (기존 동작 유지)', () => {
+    const baseline = predict(makeInput());
+    const explicit = predict(makeInput(), { weights: DEFAULT_WEIGHTS });
+    expect(baseline.homeWinProb).toBe(explicit.homeWinProb);
+    expect(baseline.predictedWinner).toBe(explicit.predictedWinner);
+  });
+
+  it('opts.weights = SHADOW_V20_WEIGHTS → DEFAULT_WEIGHTS 결과와 다름 (가중치 swap 검증)', () => {
+    const v18 = predict(makeInput());
+    const v20 = predict(makeInput(), { weights: SHADOW_V20_WEIGHTS });
+    // 동일 input + 다른 weights → homeWinProb 가 달라야 (factor 가중 분포 차이)
+    expect(v18.homeWinProb).not.toBe(v20.homeWinProb);
+  });
+
+  it('opts.weights = SHADOW_V20_WEIGHTS → reasoning 생성 정상 (DEFAULT_WEIGHTS hardcode silent X)', () => {
+    const result = predict(makeInput(), { weights: SHADOW_V20_WEIGHTS });
+    expect(typeof result.reasoning).toBe('string');
+    expect(result.reasoning.length).toBeGreaterThan(0);
+  });
 });

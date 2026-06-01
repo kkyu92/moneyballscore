@@ -14,6 +14,15 @@ export type { MlbTeamCode, MlbLeagueSide, MlbDivisionSide } from './mlb-teams';
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
 export { hasJongsung, josa, ro } from './korean';
 
+// Server-side feature flags (apps + pipelines 공유 단일 source — cycle 1127 plan-v17 candidate N Tier 2 callsite swap)
+export {
+  isBigMatchEnabled,
+  isV2ModelEnabled,
+  isV21BShadowEnabled,
+  isDebateEnabled,
+  isPostviewEnabled,
+} from './feature-flags';
+
 // supabase `.error` 미체크 silent drift 가드 helper (cycle 147 — 양쪽 package 공유)
 // cycle 168 — write 측 sub-family 진입 (assertWriteOk 추가)
 export { assertSelectOk, assertWriteOk } from './db-error';
