@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,10 @@ export async function POST(req: NextRequest) {
     );
 
   if (error) {
+    Sentry.captureException(error, {
+      tags: { layer: 'api-route', route: 'picks-submit', pick },
+      extra: { game_id, message: error.message },
+    });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
