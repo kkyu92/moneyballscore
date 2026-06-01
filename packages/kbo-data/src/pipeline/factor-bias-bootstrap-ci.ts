@@ -15,6 +15,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 
 const FACTORS_OF_INTEREST = ['sfr', 'head_to_head'] as const;
 const DAYS = 30;
@@ -80,6 +81,7 @@ async function main(): Promise<void> {
   const { data, error } = await supabase
     .from('predictions')
     .select('id,game_id,reasoning')
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('prediction_type', 'post_game')
     .gte('created_at', cutoff)
     .limit(2000);
