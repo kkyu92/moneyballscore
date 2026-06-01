@@ -15,7 +15,13 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg, type TeamCode } from '@moneyball/shared';
+import {
+  assertSelectOk,
+  assertWriteOk,
+  errMsg,
+  PRODUCTION_COHORT_RULES,
+  type TeamCode,
+} from '@moneyball/shared';
 import { runPostview, type ActualResult, type OriginalPrediction } from '../agents/postview';
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
@@ -102,11 +108,17 @@ export async function runPostviewDaily(
 
     // 2. pre_game 예측 조회. assertSelectOk fail-loud.
     // scoring_rule 포함 — post_game row 가 pre_game scoring_rule 상속.
+    // shadow row 제외 (cycle 1087 fix-incident, mig 030 후속) — production v1.8 +
+    // v1.8-credit-fail 만. shadow (v2.1-B-shadow / v2.0-shadow) 가 동일 game_id +
+    // prediction_type='pre_game' 으로 누적 → maybeSingle PGRST116 'multiple rows
+    // returned' throw (사례 17 신규 family — postview-daily preGame select silent
+    // crash → predict/error 3건/7일).
     const preGameResult = await db
       .from('predictions')
       .select('id, predicted_winner, confidence, factors, reasoning, home_elo, away_elo, scoring_rule')
       .eq('game_id', gameId)
       .eq('prediction_type', 'pre_game')
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .maybeSingle();
     const { data: preGame } = assertSelectOk<{
       id: number;
@@ -125,11 +137,13 @@ export async function runPostviewDaily(
     }
 
     // 3. post_game row 이미 있으면 skip (멱등성). assertSelectOk fail-loud.
+    // shadow row 제외 — production cohort post_game 만 멱등성 판정 (preGame 정합).
     const existingPostResult = await db
       .from('predictions')
       .select('id')
       .eq('game_id', gameId)
       .eq('prediction_type', 'post_game')
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .maybeSingle();
     const { data: existingPost } = assertSelectOk<{ id: number }>(
       existingPostResult,
