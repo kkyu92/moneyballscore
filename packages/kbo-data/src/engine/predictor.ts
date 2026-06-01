@@ -1,7 +1,6 @@
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_TEAMS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
-import { FACTOR_TOTAL } from './weights';
 import { scoreParkWeather, parkWeatherFactor } from '../factors/park-weather';
 import { umpireSZFactor } from '../factors/umpire-sz';
 
@@ -32,8 +31,21 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
  * 현 활성 가중치는 packages/shared/src/index.ts DEFAULT_WEIGHTS 단일 출처
  * (sp_fip 0.15 / lineup_woba 0.15 / elo 0.10 / h2h 0.03 / park 0.04 / sfr 0.05 등 10 팩터 모두 활성).
  */
-export function predict(input: PredictionInput): PredictionResult {
-  const w = DEFAULT_WEIGHTS;
+export type PredictWeights = Readonly<Record<string, number>>;
+
+export interface PredictOptions {
+  /**
+   * 가중치 override. 미지정 시 DEFAULT_WEIGHTS (v1.8).
+   * cycle 1127 plan-v17 candidate N Tier 2 — V2_MODEL_ENABLED=true 시 daily.ts 가
+   * SHADOW_V20_WEIGHTS 주입하여 production 가중치 swap. default OFF = 기존 동작 유지.
+   * Record<string, number> 로 정의 — DEFAULT_WEIGHTS (12 key) / SHADOW_V20_WEIGHTS (10 key)
+   * 키셋 차이 호환 (predict() 가 존재하는 키만 사용, 결측 키는 자연 0 무시).
+   */
+  weights?: PredictWeights;
+}
+
+export function predict(input: PredictionInput, opts?: PredictOptions): PredictionResult {
+  const w: PredictWeights = opts?.weights ?? DEFAULT_WEIGHTS;
   const factors: Record<string, number> = {};
 
   // 1. 선발 FIP (낮을수록 좋음)
@@ -108,13 +120,17 @@ export function predict(input: PredictionInput): PredictionResult {
 
   // 가중합산
   let weightedSum = 0;
+  let factorTotal = 0;
   for (const [key, weight] of Object.entries(w)) {
     const factorValue = factors[key] ?? 0.5;
     weightedSum += factorValue * weight;
+    factorTotal += weight;
   }
 
   // 정규화: 가중합을 팩터 총합으로 나눈 후 0-1 범위로
-  let homeWinProb = weightedSum / FACTOR_TOTAL;
+  // cycle 1127 plan-v17 candidate N — DEFAULT_WEIGHTS (sum=0.85) vs SHADOW_V20_WEIGHTS
+  // (sum=0.95) 합 차이 호환. opts.weights 미지정 시 FACTOR_TOTAL 와 동치.
+  let homeWinProb = factorTotal > 0 ? weightedSum / factorTotal : 0.5;
 
   // 홈 어드밴티지 적용
   homeWinProb += HOME_ADVANTAGE;
@@ -131,7 +147,7 @@ export function predict(input: PredictionInput): PredictionResult {
     : input.game.awayTeam;
 
   // 예측 근거 생성
-  const reasoning = generateReasoning(input, factors, homeWinProb);
+  const reasoning = generateReasoning(input, factors, homeWinProb, w);
 
   return {
     predictedWinner,
@@ -145,18 +161,16 @@ export function predict(input: PredictionInput): PredictionResult {
 function generateReasoning(
   input: PredictionInput,
   factors: Record<string, number>,
-  homeWinProb: number
+  homeWinProb: number,
+  w: PredictWeights = DEFAULT_WEIGHTS
 ): string {
   const homeName = KBO_TEAMS[input.game.homeTeam].name;
   const awayName = KBO_TEAMS[input.game.awayTeam].name;
   const pct = Math.round(homeWinProb * 100);
-
-  // 가장 영향력 큰 팩터 3개 추출
-  const w = DEFAULT_WEIGHTS;
   const contributions = Object.entries(factors)
     .map(([key, val]) => ({
       key,
-      impact: Math.abs(val - 0.5) * (w[key as keyof typeof w] || 0),
+      impact: Math.abs(val - 0.5) * (w[key] || 0),
       favorable: val > 0.5 ? 'home' : 'away',
     }))
     .sort((a, b) => b.impact - a.impact)
