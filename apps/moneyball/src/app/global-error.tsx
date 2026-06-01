@@ -17,7 +17,10 @@ export default function GlobalError({
       digest: error.digest,
       stack: error.stack,
     });
-    Sentry.captureException(error);
+    Sentry.captureException(error, {
+      tags: { layer: 'error-boundary', boundary: 'global' },
+      extra: { digest: error.digest, message: error.message },
+    });
   }, [error]);
 
   return (
