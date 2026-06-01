@@ -56,4 +56,16 @@ describe('sitemap MLB URL coverage', () => {
     expect(factors).toBeDefined();
     expect(factors?.priority).toBeGreaterThanOrEqual(0.65);
   });
+
+  it('includes /mlb/players/[id] dynamic routes for 30 teams (plan #21 Step 1)', async () => {
+    const urls = await sitemap();
+    const playerDetailUrls = urls.filter((u) =>
+      /\/mlb\/players\/[A-Z]{2,3}$/.test(u.url),
+    );
+    expect(playerDetailUrls.length).toBe(30);
+    // sample: LAD
+    const lad = playerDetailUrls.find((u) => u.url.endsWith('/mlb/players/LAD'));
+    expect(lad).toBeDefined();
+    expect(lad?.priority).toBeGreaterThan(0);
+  });
 });

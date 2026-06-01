@@ -213,7 +213,7 @@ export default function MlbPlayersHub() {
                       return (
                         <li key={code}>
                           <Link
-                            href={`/mlb/team/${code}`}
+                            href={`/mlb/players/${code}`}
                             className="flex items-center gap-2 bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-2 hover:shadow-md hover:border-brand-500/50 transition-all"
                           >
                             <span
