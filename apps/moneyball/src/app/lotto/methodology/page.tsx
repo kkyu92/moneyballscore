@@ -152,7 +152,6 @@ export default function LottoMethodologyPage() {
 
       <Breadcrumb
         items={[
-          { label: "홈", href: "/" },
           { label: "Lotto 통계 방법론" },
         ]}
       />

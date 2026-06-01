@@ -96,7 +96,6 @@ export default async function InsightsDatePage({ params }: Props) {
 
       <Breadcrumb
         items={[
-          { label: "홈", href: "/" },
           { label: "AI 인사이트", href: "/insights" },
           { label: date },
         ]}
