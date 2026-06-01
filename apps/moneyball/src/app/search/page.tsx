@@ -158,6 +158,7 @@ const STATIC_PAGES: Array<{
   { slug: '/guide', label: '사용 가이드', keywords: 'guide 가이드 howto 도움말' },
   { slug: '/matchup', label: '매치업', keywords: 'matchup 매치업 vs 대결' },
   { slug: '/reviews', label: '예측 리뷰', keywords: 'reviews 리뷰 review' },
+  { slug: '/reviews/misses', label: '빗나간 예측', keywords: 'reviews misses 빗나간 회고 misses 틀린' },
   { slug: '/seasons', label: '시즌 history', keywords: 'seasons 시즌 history' },
   { slug: '/mlb', label: 'MLB', keywords: 'mlb 메이저리그 majorleague baseball' },
   { slug: '/mlb/standings', label: 'MLB 순위', keywords: 'mlb standings al nl division 순위' },
