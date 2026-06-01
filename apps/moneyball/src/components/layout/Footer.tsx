@@ -69,6 +69,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/insights", label: "AI 인사이트" },
       { href: "/v2-preview", label: "v2 시뮬레이션 미리보기" },
       { href: "/v2-shadow-monitor", label: "v2 섀도우 모니터" },
+      { href: "/accuracy/shadow", label: "Shadow 적중률" },
       { href: "/changelog", label: "변경 로그" },
       { href: "/about", label: "소개" },
       { href: "/search", label: "검색" },
