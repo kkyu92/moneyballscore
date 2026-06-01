@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, CURRENT_SCORING_RULE } from '@moneyball/shared';
+import { assertSelectOk, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -8,7 +8,7 @@ import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks
 
 // /calendar — 현재 월 (KST) 의 daily prediction count + accuracy heatmap.
 // cycle 1021 (b8) — 사용자 가시 entry route 추가. 월별 view + 각 cell 클릭 시
-// /predictions/[date] 진입. CURRENT_SCORING_RULE filter (shadow row 제외, #1338 family).
+// /predictions/[date] 진입. PRODUCTION_COHORT_RULES filter (v1.8 + v1.8-credit-fail, 사례 17 family wave 15).
 
 export const revalidate = 3600;
 
@@ -122,15 +122,16 @@ async function getMonthHeatmap(info: MonthInfo): Promise<DayCell[]> {
   const cells = buildEmptyGrid(info);
   const supabase = await createClient();
 
-  // assertSelectOk — silent drift family detection. CURRENT_SCORING_RULE filter
-  // 로 shadow row 제외 (#1338 family).
+  // assertSelectOk — silent drift family detection. PRODUCTION_COHORT_RULES filter
+  // (v1.8 + v1.8-credit-fail) — 사용자 가시 layer, credit-fail row 분리 후 정합 복원
+  // (사례 17 family wave 15, cycle 1096).
   const result = await supabase
     .from('predictions')
     .select(
       'is_correct, prediction_type, scoring_rule, game:games!predictions_game_id_fkey(game_date)',
     )
     .eq('prediction_type', 'pre_game')
-    .eq('scoring_rule', CURRENT_SCORING_RULE)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .gte('game.game_date', info.firstDay)
     .lte('game.game_date', info.lastDay);
 
