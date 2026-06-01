@@ -119,6 +119,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // MLB 30팀 Statcast deep-dive URL — plan #21 Step 1 (cycle 1092 ship)
+  const mlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
+    (code) => ({
+      url: `${baseUrl}/mlb/players/${code}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.55,
+    }),
+  );
+
   // 최근 12주 주간 리뷰 URL
   const weeklyReviewRoutes: MetadataRoute.Sitemap = getRecentWeeks(12).map(
     (w) => ({
@@ -239,6 +249,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...monthlyReviewRoutes,
     ...teamProfileRoutes,
     ...mlbTeamProfileRoutes,
+    ...mlbPlayersDetailRoutes,
     ...matchupRoutes,
     ...predictionDateRoutes,
     ...playerRoutes,
