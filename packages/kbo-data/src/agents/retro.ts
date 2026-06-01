@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -30,6 +30,7 @@ export async function updateCalibration(
     .from('predictions')
     .select('confidence, is_correct')
     .eq('prediction_type', 'pre_game')
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .not('is_correct', 'is', null);
   const { data: predictions } = assertSelectOk<
     Array<{ confidence: number; is_correct: boolean }>
@@ -208,6 +209,7 @@ export async function generateAgentMemories(date: string, dbInjected?: DB) {
       )
     `)
     .eq('prediction_type', 'pre_game')
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('is_correct', false);
   // .error 미체크 시 wrong 데이터 누락이 "오답 0건" 으로 위장 → agent_memories 학습 누락.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

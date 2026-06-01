@@ -23,7 +23,7 @@ interface MockResult {
 
 function makeChainBuilder(result: MockResult) {
   const builder: Record<string, unknown> = {};
-  const chainMethods = ['select', 'eq', 'not', 'upsert'];
+  const chainMethods = ['select', 'eq', 'not', 'in', 'upsert'];
   for (const m of chainMethods) {
     builder[m] = vi.fn(() => builder);
   }
