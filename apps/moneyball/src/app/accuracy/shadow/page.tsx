@@ -10,6 +10,11 @@ import {
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
 import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";
+import { buildShadowCalibration } from "@/lib/accuracy/buildShadowCalibration";
+import {
+  CalibrationPlot,
+  CALIBRATION_COLORS,
+} from "@/components/accuracy/CalibrationPlot";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/accuracy/shadow`;
@@ -160,6 +165,7 @@ export default async function ShadowAccuracyPage() {
   const avgV18 = totalN > 0 ? totalV18Brier / totalN : 0;
   const avgShadow = totalN > 0 ? totalShadowBrier / totalN : 0;
   const totalDelta = avgShadow - avgV18;
+  const calibration = buildShadowCalibration(pairs);
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
@@ -222,6 +228,31 @@ export default async function ShadowAccuracyPage() {
         <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
           shadow factor: park_weather 3% · umpire_sz 2% — production weight 0 양립.
         </p>
+      </section>
+
+      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+        <h2 className="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Calibration plot (10-bucket)
+        </h2>
+        <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+          예측 확률 vs 실제 적중률. 대각선 위 = 잘 맞은 bucket, 대각선 아래 = 과신
+          (over-confident). v1.8 (production) vs {SHADOW_SCORING_RULE} (shadow) 두 모델
+          calibration 차이 시각화.
+        </p>
+        <CalibrationPlot
+          series={[
+            {
+              label: "v1.8 (production)",
+              color: CALIBRATION_COLORS.v18,
+              buckets: calibration.v18,
+            },
+            {
+              label: `${SHADOW_SCORING_RULE} (shadow)`,
+              color: CALIBRATION_COLORS.shadow,
+              buckets: calibration.shadow,
+            },
+          ]}
+        />
       </section>
 
       <section className="mt-8">
