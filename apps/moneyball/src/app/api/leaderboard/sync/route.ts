@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { LeaderboardSyncPayload } from '@/lib/leaderboard/types';
 
@@ -58,6 +59,10 @@ export async function POST(req: NextRequest) {
     .upsert(rows, { onConflict: 'device_id,game_id', ignoreDuplicates: false });
 
   if (error) {
+    Sentry.captureException(error, {
+      tags: { layer: 'api-route', route: 'leaderboard-sync' },
+      extra: { rows_count: rows.length, message: error.message },
+    });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

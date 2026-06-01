@@ -1,4 +1,5 @@
 import { type NextRequest } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 
 const NAVER_API_URL = 'https://api-gw.sports.naver.com/schedule/games';
 const NAVER_HEADERS = {
@@ -97,6 +98,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (!res.ok) {
+      Sentry.captureMessage('Naver API non-OK response', {
+        level: 'warning',
+        tags: { layer: 'api-route', route: 'kbo-scores' },
+        extra: { date, naver_status: res.status },
+      });
       return Response.json(
         { error: 'Naver API unavailable', scores: [] },
         { status: 502 },
@@ -123,7 +129,11 @@ export async function GET(request: NextRequest) {
     }));
 
     return Response.json({ scores, updatedAt: new Date().toISOString() });
-  } catch {
+  } catch (e) {
+    Sentry.captureException(e, {
+      tags: { layer: 'api-route', route: 'kbo-scores' },
+      extra: { date },
+    });
     return Response.json(
       { error: 'Failed to fetch scores', scores: [] },
       { status: 502 },

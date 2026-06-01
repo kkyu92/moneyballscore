@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_SCORING_RULE, assertSelectOk } from '@moneyball/shared';
 
@@ -59,9 +60,24 @@ export async function GET(req: NextRequest) {
     .in('id', ids)
     .order('game_date', { ascending: false });
 
-  if (result.error) return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (result.error) {
+    Sentry.captureException(result.error, {
+      tags: { layer: 'api-route', route: 'picks-results' },
+      extra: { ids_count: ids.length, message: result.error.message },
+    });
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  }
 
-  const { data } = assertSelectOk(result, 'picks.results.getGames');
+  let data;
+  try {
+    ({ data } = assertSelectOk(result, 'picks.results.getGames'));
+  } catch (e) {
+    Sentry.captureException(e, {
+      tags: { layer: 'api-route', route: 'picks-results' },
+      extra: { ids_count: ids.length, stage: 'assertSelectOk' },
+    });
+    throw e;
+  }
 
   const results: PickGameResult[] = (data ?? []).map((g) => {
     const predsRaw = Array.isArray(g.predictions)
