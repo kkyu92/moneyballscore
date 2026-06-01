@@ -2,7 +2,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { parseCohortMarkdown, type CohortDoc } from "./parse";
 
-const COHORT_DIR = join(
+const APP_COHORT_DIR = join(process.cwd(), "data", "op-analysis-cohort");
+
+const ROOT_COHORT_DIR = join(
   process.cwd(),
   "..",
   "..",
@@ -12,8 +14,6 @@ const COHORT_DIR = join(
   "op-analysis-cohort",
 );
 
-const FALLBACK_DIR = join(process.cwd(), "data", "op-analysis-cohort");
-
 export interface CohortFile {
   file: string;
   doc: CohortDoc;
@@ -21,10 +21,10 @@ export interface CohortFile {
 
 function resolveCohortDir(): string {
   try {
-    readdirSync(FALLBACK_DIR);
-    return FALLBACK_DIR;
+    readdirSync(APP_COHORT_DIR);
+    return APP_COHORT_DIR;
   } catch {
-    return COHORT_DIR;
+    return ROOT_COHORT_DIR;
   }
 }
 
