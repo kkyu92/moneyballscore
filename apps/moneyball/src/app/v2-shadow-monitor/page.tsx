@@ -189,7 +189,7 @@ export default function V2ShadowMonitorPage() {
             >
               예측 방법론
             </Link>{" "}
-            — 14팩터 가중치 구조와 era 정의
+            — 10팩터 가중치 구조와 era 정의
           </li>
           <li>
             <Link
