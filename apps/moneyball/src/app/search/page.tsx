@@ -141,6 +141,7 @@ const STATIC_PAGES: Array<{
   { slug: '/calendar', label: '월별 캘린더', keywords: 'calendar 캘린더 월별 경기 일정' },
   { slug: '/analysis', label: 'AI 분석', keywords: 'analysis 분석 ai-judge 에이전트 토론' },
   { slug: '/accuracy', label: '적중률', keywords: 'accuracy hit-rate 정확도' },
+  { slug: '/accuracy/shadow', label: 'Shadow 적중률', keywords: 'accuracy shadow cohort v2.1-B brier delta 섀도우 적중률' },
   { slug: '/leaderboard', label: '리더보드', keywords: 'leaderboard ranking 순위' },
   { slug: '/standings', label: '팀 순위', keywords: 'standings team-ranking 팀 순위' },
   { slug: '/teams', label: '팀 목록', keywords: 'teams 팀목록' },
