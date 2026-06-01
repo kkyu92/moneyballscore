@@ -18,7 +18,10 @@ export default function ErrorBoundary({
       digest: error.digest,
       stack: error.stack,
     });
-    Sentry.captureException(error);
+    Sentry.captureException(error, {
+      tags: { layer: 'error-boundary', boundary: 'page' },
+      extra: { digest: error.digest, message: error.message },
+    });
   }, [error]);
 
   return (
