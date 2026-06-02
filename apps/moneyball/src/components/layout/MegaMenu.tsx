@@ -73,12 +73,16 @@ export function MegaMenu({ items, pathname }: MegaMenuProps) {
                 <div
                   className={`bg-brand-800 border border-brand-700 rounded-md shadow-lg py-1 ${
                     item.items.some((sub) => sub.description)
-                      ? item.items.length >= 4
-                        ? "grid grid-cols-2 w-[640px]"
-                        : "w-[280px]"
-                      : item.items.length >= 4
-                        ? "grid grid-cols-2 w-[440px]"
-                        : "w-[200px]"
+                      ? item.items.length === 5
+                        ? "w-[320px]"
+                        : item.items.length >= 4
+                          ? "grid grid-cols-2 w-[640px]"
+                          : "w-[280px]"
+                      : item.items.length === 5
+                        ? "w-[220px]"
+                        : item.items.length >= 4
+                          ? "grid grid-cols-2 w-[440px]"
+                          : "w-[200px]"
                   }`}
                 >
                   {item.items.map((sub) => (

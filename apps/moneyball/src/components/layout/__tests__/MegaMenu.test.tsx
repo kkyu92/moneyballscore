@@ -60,4 +60,20 @@ describe("MegaMenu", () => {
     expect(root?.className).toContain("md:flex");
     expect(root?.className).toContain("hidden");
   });
+
+  it("5-item group render — crash X (cycle 1134 polish-ui candidate X 비대칭 grid 해소 — content DOM = Radix lazy mount, 시각 검증은 manual screenshot)", () => {
+    const FIVE_ITEMS: NavItem[] = [
+      {
+        label: "예측·기록",
+        items: [
+          { href: "/analysis", label: "AI 분석", description: "에이전트 토론" },
+          { href: "/accuracy", label: "적중 기록", description: "AI 성과" },
+          { href: "/accuracy/shadow", label: "Shadow 적중률", description: "v2.1-B cohort" },
+          { href: "/predictions", label: "예측 기록", description: "일자별" },
+          { href: "/dashboard", label: "모델 성능", description: "Brier" },
+        ],
+      },
+    ];
+    expect(() => render(<MegaMenu items={FIVE_ITEMS} pathname="/" />)).not.toThrow();
+  });
 });
