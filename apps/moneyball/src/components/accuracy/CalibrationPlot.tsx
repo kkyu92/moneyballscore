@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Legend,
-  Line,
   ComposedChart,
 } from "recharts";
 
@@ -33,11 +32,6 @@ interface PlotRow {
   n: number;
   bucket: string;
 }
-
-const PERFECT_LINE: Array<{ predicted: number; perfect: number }> = [
-  { predicted: 0, perfect: 0 },
-  { predicted: 1, perfect: 1 },
-];
 
 function toRows(buckets: CalibrationBucket[]): PlotRow[] {
   return buckets
@@ -104,14 +98,6 @@ export function CalibrationPlot({ series }: CalibrationPlotProps) {
           stroke={neutral[400]}
           strokeDasharray="4 4"
           ifOverflow="visible"
-        />
-        <Line
-          data={PERFECT_LINE}
-          dataKey="perfect"
-          stroke="transparent"
-          dot={false}
-          activeDot={false}
-          legendType="none"
         />
         <Tooltip
           content={(props) => (
