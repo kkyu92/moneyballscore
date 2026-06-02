@@ -869,6 +869,20 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <section className="rounded-2xl border border-[#c5a23e]/30 bg-gradient-to-r from-brand-800 to-brand-700 p-6 text-center">
+        <p className="text-2xl mb-2">☕</p>
+        <h2 className="text-base font-bold text-white mb-1">매일 무료로 제공되는 KBO 데이터 분석</h2>
+        <p className="text-sm text-brand-200 mb-4">서버 비용과 모델 개선에 도움이 됩니다</p>
+        <a
+          href="https://ko-fi.com/moneyballscore"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-[#c5a23e] hover:bg-[#e2c96b] text-brand-900 transition-colors"
+        >
+          ☕ 커피 한 잔 후원하기
+        </a>
+      </section>
     </div>
   );
 }
