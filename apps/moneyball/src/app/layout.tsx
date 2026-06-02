@@ -11,6 +11,7 @@ import { CookieConsent } from "@/components/layout/CookieConsent";
 import { WebVitalsReporter } from "@/components/shared/WebVitalsReporter";
 import { ServiceWorkerRegister } from "@/components/shared/ServiceWorkerRegister";
 import { PWAInstallButton } from "@/components/shared/PWAInstallButton";
+import { KofiWidget } from "@/components/shared/KofiWidget";
 
 const GA_ID = "G-2886XKWG4Y";
 
@@ -158,6 +159,7 @@ export default function RootLayout({
         <WebVitalsReporter />
         <ServiceWorkerRegister />
         <PWAInstallButton />
+        <KofiWidget />
       </body>
     </html>
   );
