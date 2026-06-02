@@ -22,8 +22,12 @@ export interface CalibrationSeriesData {
   buckets: CalibrationBucket[];
 }
 
+const CALIBRATION_FULL_N = 100;
+
 interface CalibrationPlotProps {
   series: CalibrationSeriesData[];
+  /** total paired predictions — shows progress badge below CALIBRATION_FULL_N */
+  totalN?: number;
 }
 
 interface PlotRow {
@@ -44,20 +48,47 @@ function toRows(buckets: CalibrationBucket[]): PlotRow[] {
     }));
 }
 
-export function CalibrationPlot({ series }: CalibrationPlotProps) {
+export function CalibrationPlot({ series, totalN }: CalibrationPlotProps) {
   const hasData = series.some((s) => s.buckets.some((b) => b.n > 0));
   if (!hasData) {
     return (
-      <div className="h-48 flex flex-col items-center justify-center text-center">
-        <span className="text-3xl mb-2">📈</span>
+      <div className="h-48 flex flex-col items-center justify-center text-center gap-2">
+        <span className="text-3xl">📈</span>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           calibration plot 측정에는 더 많은 검증 예측이 필요합니다.
         </p>
+        {totalN !== undefined && (
+          <div className="w-full max-w-xs">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
+              n={totalN} / {CALIBRATION_FULL_N}
+            </p>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <div
+                className="h-full rounded-full bg-brand-500"
+                style={{ width: `${Math.min((totalN / CALIBRATION_FULL_N) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
+    <div>
+      {totalN !== undefined && totalN < CALIBRATION_FULL_N && (
+        <div className="mb-3 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
+          <div className="flex items-center justify-between mb-1">
+            <span>표본 수집 중 — n={totalN} / {CALIBRATION_FULL_N} (n={CALIBRATION_FULL_N} 도달 시 신뢰도 ↑)</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-yellow-200 dark:bg-yellow-800">
+            <div
+              className="h-full rounded-full bg-yellow-500"
+              style={{ width: `${Math.min((totalN / CALIBRATION_FULL_N) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
     <ResponsiveContainer width="100%" height={320}>
       <ComposedChart margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid
@@ -153,6 +184,7 @@ export function CalibrationPlot({ series }: CalibrationPlotProps) {
         ))}
       </ComposedChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 
