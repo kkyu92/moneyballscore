@@ -14,9 +14,9 @@ import { PWAInstallButton } from "@/components/shared/PWAInstallButton";
 
 const GA_ID = "G-2886XKWG4Y";
 
-const ADSENSE_PUBLISHER_ID = process.env.ADSENSE_PUBLISHER_ID?.trim();
-const adsenseEnabled =
-  !!ADSENSE_PUBLISHER_ID && /^pub-\d{16}$/.test(ADSENSE_PUBLISHER_ID);
+// pub ID는 metadata.verification.other["google-adsense-account"] 와 동일해야 함.
+// 단일 상수로 관리 — 두 곳 중 한쪽만 바꾸는 silent drift 방지.
+const ADSENSE_CLIENT = "ca-pub-9964930444224182";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     google: "KHDQrWaTIhknJ7pTsiGuEHz-uJMal-8b9bCyw2QL89w",
     other: {
       "naver-site-verification": "d319e640e7d38d160b4055873079ec14d652c749",
-      "google-adsense-account": "ca-pub-9964930444224182",
+      "google-adsense-account": ADSENSE_CLIENT,
     },
   },
   alternates: {
@@ -100,13 +100,11 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
           }}
         />
-        {adsenseEnabled && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${ADSENSE_PUBLISHER_ID}`}
-            crossOrigin="anonymous"
-          />
-        )}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="min-h-full flex flex-col text-gray-900 dark:text-gray-100">
         <a
