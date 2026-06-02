@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { type TeamCode, shortTeamName, assertSelectOk, errMsg } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, assertSelectOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { parseChangelog } from '@/lib/changelog/parse';
@@ -41,6 +41,7 @@ export async function GET() {
       )
     `)
     .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_date', { ascending: false })
     .order('game_time', { ascending: true })
     .limit(50);

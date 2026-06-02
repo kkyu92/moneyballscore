@@ -5,6 +5,7 @@ import {
   assertSelectOk,
   classifyWinnerProb,
   pickTierEmoji,
+  PRODUCTION_COHORT_RULES,
   shortTeamName,
   toKSTDateString,
   winnerProbOf,
@@ -82,6 +83,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
     `)
     .eq('game_date', today)
     .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_time', { ascending: true })) as SelectResult<TodayAllRow[]>;
 
   const { data: rawGames } = assertSelectOk(gamesResult, 'analysis getTodayAnalysisData');
@@ -181,6 +183,7 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
     `)
     .eq('game_date', yesterday)
     .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_time', { ascending: true })) as SelectResult<YesterdayGameRow[]>;
   const { data } = assertSelectOk(gamesResult, 'analysis getYesterdayGames');
 
@@ -256,6 +259,7 @@ async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
     .gte('game_date', currentWeek.startDate)
     .lt('game_date', yesterday)
     .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_date', { ascending: false })
     .order('game_time', { ascending: true })) as SelectResult<ThisWeekGameRow[]>;
 
@@ -310,6 +314,7 @@ async function getPeriodStats(startDate: string, endDate: string): Promise<Perio
     .select('is_correct, game:games!predictions_game_id_fkey(game_date)')
     .eq('prediction_type', 'pre_game')
     .match(CURRENT_MODEL_FILTER)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .not('is_correct', 'is', null)
     .gte('game.game_date', startDate)
     .lte('game.game_date', endDate)) as SelectResult<Array<{ is_correct: boolean | null }>>;
@@ -362,6 +367,7 @@ async function getBestPickOfWeek(startDate: string, endDate: string): Promise<Be
     `)
     .eq('prediction_type', 'pre_game')
     .match(CURRENT_MODEL_FILTER)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('is_correct', true)
     .gte('game.game_date', startDate)
     .lte('game.game_date', endDate)
@@ -406,6 +412,7 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
     `)
     .eq('prediction_type', 'pre_game')
     .match(CURRENT_MODEL_FILTER)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('is_correct', false)
     .gte('confidence', WINNER_PROB_CONFIDENT)
     .gte('game.game_date', startDate)

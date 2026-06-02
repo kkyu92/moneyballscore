@@ -13,6 +13,7 @@ import {
   classifyWinnerProb,
   DEFAULT_WEIGHTS,
   HOME_ADVANTAGE,
+  PRODUCTION_COHORT_RULES,
   shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
@@ -132,6 +133,7 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
     `)
     .eq('game_date', today)
     .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_time');
   const { data: games } = assertSelectOk(gamesResult, 'home.getTodayPredictions');
 
@@ -226,6 +228,7 @@ async function getYesterdayResults(): Promise<YesterdayGame[]> {
     .eq('game_date', yesterday)
     .eq('status', 'final')
     .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('id');
   const { data } = assertSelectOk(result, 'home.getYesterdayResults');
   return (data ?? []) as unknown as YesterdayGame[];
@@ -375,6 +378,7 @@ async function getSeasonAccuracy(): Promise<{
     .select('is_correct, reasoning')
     .eq('prediction_type', 'pre_game')
     .match(CURRENT_MODEL_FILTER)
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .not('is_correct', 'is', null);
   const { data } = assertSelectOk(predResult, 'home.getSeasonAccuracy');
 
@@ -411,6 +415,7 @@ async function getRecentWeeksAccuracy(): Promise<WeeklyTrendPoint[]> {
     .gte('game_date', startDate)
     .eq('predictions.prediction_type', 'pre_game')
     .eq('predictions.debate_version', CURRENT_DEBATE_VERSION)
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .not('predictions.is_correct', 'is', null);
 
   const { data } = assertSelectOk(result, 'home.getRecentWeeksAccuracy');
