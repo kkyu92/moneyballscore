@@ -15,6 +15,7 @@ const KOFI_CONFIG: Record<string, string> = {
   'floating-chat.donateButton.text': 'Donate',
   'floating-chat.donateButton.background-color': '#c5a23e',
   'floating-chat.donateButton.text-color': '#132d1a',
+  'floating-chat.notice.text': 'MoneyBall Score 후원하기',
 };
 
 export function KofiWidget() {
