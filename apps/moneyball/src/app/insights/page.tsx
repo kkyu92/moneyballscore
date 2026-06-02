@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, type TeamCode, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
@@ -77,6 +77,7 @@ async function getRecentInsights(): Promise<InsightRow[]> {
       "confidence, is_correct, reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
+    .eq("scoring_rule", CURRENT_SCORING_RULE)
     .order("created_at", { ascending: false })
     .limit(LIMIT * 4);
   const { data } = assertSelectOk(result, "insights.getRecentInsights");
