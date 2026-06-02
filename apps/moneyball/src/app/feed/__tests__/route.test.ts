@@ -16,6 +16,7 @@ function makeSupabaseMock() {
   const gamesBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockImplementation(() => Promise.resolve(gamesResult)),
   };
