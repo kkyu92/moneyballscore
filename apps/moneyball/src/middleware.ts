@@ -1,7 +1,7 @@
 /**
  * Next.js 16 Edge middleware
  *
- * 1. 보안 헤더: 모든 응답에 X-Content-Type-Options / X-Frame-Options /
+ * 1. 보안 헤더: 모든 응답에 X-Content-Type-Options /
  *    Referrer-Policy / Permissions-Policy 주입.
  * 2. /debug/* 경로: BASIC auth (DEBUG_USERNAME / DEBUG_PASSWORD env).
  */
@@ -10,7 +10,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const SECURITY_HEADERS: Record<string, string> = {
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 };
