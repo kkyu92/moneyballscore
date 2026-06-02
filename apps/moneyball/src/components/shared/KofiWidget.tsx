@@ -18,7 +18,7 @@ export function KofiWidget() {
       onLoad={() => {
         window.kofiWidgetOverlay.draw('moneyballscore', {
           type: 'floating-chat',
-          'floating-chat.donateButton.text': '후원하기',
+          'floating-chat.donateButton.text': 'Support',
           'floating-chat.donateButton.background-color': '#c5a23e',
           'floating-chat.donateButton.text-color': '#132d1a',
         });
