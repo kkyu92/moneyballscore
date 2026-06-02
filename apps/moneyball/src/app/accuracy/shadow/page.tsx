@@ -240,6 +240,7 @@ export default async function ShadowAccuracyPage() {
           calibration 차이 시각화.
         </p>
         <CalibrationPlot
+          totalN={pairs.length}
           series={[
             {
               label: "v1.8 (production)",
