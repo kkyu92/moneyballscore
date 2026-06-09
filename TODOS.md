@@ -20,18 +20,20 @@
 
 ## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07, **cycle 1098 갱신**)
 
-**현재 상태 (cycle 1098, 2026-06-01 측정)** — 아티팩트: `apps/moneyball/data/op-analysis-cohort/2026-06-01-cohort-cycle-1098.md`:
-- 총 n=220 (적중 117 / **53.2%**) — cycle 1038 n=205 → +15건 누적 (3일 / velocity ~5/day, 5/29 이후 cron 정상)
-- **v1.8 (real) n=42 (57.1%, Brier 0.2416)** — cycle 1038 n=27 → +15건 누적, 44.4% → 57.1% (+12.7pp). Brier 0.2487 → 0.2416 개선
-- v1.8-credit-fail n=25 (60.0%, Brier 0.2304) — frozen (2026-05-13~16 cohort)
+**현재 상태 (cycle 1138, 2026-06-10 측정)** — 아티팩트: `apps/moneyball/data/op-analysis-cohort/2026-06-10-cohort-cycle-1138.md`:
+- 총 n=254 (적중 138 / **54.3%**) — cycle 1098 n=220 → +34건 누적 (9일 / velocity 3.4/day 가속)
+- **v1.8 (real) n=76 (59.2%, Brier 0.2478)** — cycle 1098 n=42 → +34건 누적, 57.1% → 59.2% (+2.1pp). Brier 0.2416 → 0.2478 (소폭 변동)
+- v1.8-credit-fail n=25 (60.0%, Brier 0.2304) — frozen
 - v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly 잔존) / v1.7-revert=55.9%(34)
-- v2.0-shadow n=5 (60.0%, Brier 0.5616) / **v2.1-B-shadow n=52 (51.9%, Brier 0.4635)** — Brier 0.46+ calibration 미흡 surface
-- 요일 weak: 일 41.4%/n=29 / 목 50.6%/n=77 (목 max sample, 약 random) — v2.0 가중치 후보 검토 시 요일 보정 검토
-- v2.0 임계 n=150 까지 (v1.8 real 기준) **잔여 108건** — ETA 2026-07-22 (velocity 3.0/day actual, cycle 1098 박제. 직전 ETA 2026-08-04 → 2주 단축)
+- v2.0-shadow n=5 (60.0%, Brier 0.5616) / **v2.1-B-shadow n=52 (51.9%, Brier 0.4635)** — debate_version=null → accuracy/page.tsx 오염 없음 확인
+- confidence tier: low 52.1% / mid 54.7% / **high 65.6%** — 고신뢰 신호 강함
+- 요일 weak: 일 44.1%/n=34 / 수 50.0%/n=22 — v2.0 가중치 후보 검토 시 요일 보정 검토
+- v2.0 임계 n=150 까지 (v1.8 real 기준) **잔여 74건** — ETA **2026-07-01** (velocity 3.4/day, cycle 1138 박제. 직전 ETA 2026-07-22 → 3주 단축)
 
 > 📜 **history**:
-> - cycle 1038 (2026-05-29 측정): 205건 / 51.2% / v1.8 n=27 (44.4%, Brier 0.2487) — cycle 989/994 부터 real v1.8 cohort 분리 박제
-> - cycle 886 (2026-05-25 측정): 133건 / 48.9% / v1.8=48.7%(39, conflated cohort)
+> - cycle 1098 (2026-06-01 측정): n=220 / 53.2% / v1.8 n=42 (57.1%, Brier 0.2416)
+> - cycle 1038 (2026-05-29 측정): n=205 / 51.2% / v1.8 n=27 (44.4%, Brier 0.2487) — cycle 989/994 부터 real v1.8 cohort 분리 박제
+> - cycle 886 (2026-05-25 측정): n=133 / 48.9% / v1.8=48.7%(39, conflated cohort)
 
 **실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
 
