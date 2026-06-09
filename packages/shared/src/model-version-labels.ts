@@ -15,7 +15,7 @@
 // cycle 475 — tuple 1개 → ScoringRule 타입 + ALL_SCORING_RULES list 동시 도출.
 // 신규 버전 추가 시 본 tuple 1줄 변경 = ScoringRule union + 외부 VERSION_ORDER
 // 자동 전파 (silent drift family 사전 자동 차단 evidence).
-export const ALL_SCORING_RULES = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8', 'v1.8-credit-fail', 'v2.1-B-shadow', 'v2.0-shadow'] as const;
+export const ALL_SCORING_RULES = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8', 'v1.8-credit-fail', 'v2.1-B-shadow', 'v2.0-shadow', 'tabpfn-shadow'] as const;
 
 export type ScoringRule = (typeof ALL_SCORING_RULES)[number];
 
@@ -71,6 +71,13 @@ export const SHADOW_SCORING_RULE: ScoringRule = 'v2.1-B-shadow';
  * n=150 wait 시간 절반 (CEO Critical #1 반영, plan #14 C1a).
  */
 export const SHADOW_V20_SCORING_RULE: ScoringRule = 'v2.0-shadow';
+
+/**
+ * TabPFN inference shadow 라벨 — cycle 1137 v18 candidate Y.
+ * scripts/import-tabpfn-predictions.ts 가 TabPFN Python output CSV 읽어 import.
+ * v1.8 production 영향 X. /accuracy/shadow 안 TabPFN vs v1.8 비교 source.
+ */
+export const TABPFN_SCORING_RULE: ScoringRule = 'tabpfn-shadow';
 
 /** Quant fallback 라벨 — pre_game 경로 (ScoringRule 그대로). */
 export const QUANT_PREGAME_VERSION: ModelVersion = CURRENT_SCORING_RULE;

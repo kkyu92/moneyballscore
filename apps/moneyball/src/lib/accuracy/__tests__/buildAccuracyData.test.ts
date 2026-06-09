@@ -235,16 +235,16 @@ describe('buildVersionHistory', () => {
     return { confidence, is_correct, verified_at, scoring_rule };
   }
 
-  it('빈 배열 → 7개 버전 모두 n=0 (v1.8-credit-fail cohort 박제 cycle 1021 plan #14 C1c)', () => {
+  it('빈 배열 → 8개 버전 모두 n=0 (tabpfn-shadow 추가 cycle 1137 v18 candidate Y)', () => {
     const result = buildVersionHistory([]);
-    expect(result).toHaveLength(7);
+    expect(result).toHaveLength(8);
     result.forEach((v) => {
       expect(v.n).toBe(0);
       expect(v.accuracy).toBeNull();
     });
   });
 
-  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8 → v1.8-credit-fail → v2.1-B-shadow → v2.0-shadow', () => {
+  it('버전 순서: v1.5 → v1.6 → v1.7-revert → v1.8 → v1.8-credit-fail → v2.1-B-shadow → v2.0-shadow → tabpfn-shadow', () => {
     const result = buildVersionHistory([]);
     expect(result.map((v) => v.version)).toEqual([
       'v1.5',
@@ -254,6 +254,7 @@ describe('buildVersionHistory', () => {
       'v1.8-credit-fail',
       'v2.1-B-shadow',
       'v2.0-shadow',
+      'tabpfn-shadow',
     ]);
   });
 

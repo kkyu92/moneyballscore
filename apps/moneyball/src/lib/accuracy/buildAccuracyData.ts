@@ -613,6 +613,7 @@ const VERSION_NOTES: Record<ScoringRule, string> = {
   'v1.8-credit-fail': 'v1.8 안 LLM credit 소진 / agents_failed 분리 cohort (baseline 정합성 회복 — plan #14 C1c)',
   'v2.1-B-shadow': 'v2.1-B + shadow factor (park_weather / umpire_sz) — cohort evidence only',
   'v2.0-shadow': 'v1.8 + elo/bullpen_fip/recent_form 가중치 bump — cohort evidence only',
+  'tabpfn-shadow': 'TabPFN inference (Python) — import-tabpfn-predictions.ts 로 박제',
 };
 
 function labelOf(version: ScoringRule): string {
