@@ -25,7 +25,7 @@
 - **v1.8 (real) n=76 (59.2%, Brier 0.2478)** — cycle 1098 n=42 → +34건 누적, 57.1% → 59.2% (+2.1pp). Brier 0.2416 → 0.2478 (소폭 변동)
 - v1.8-credit-fail n=25 (60.0%, Brier 0.2304) — frozen
 - v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly 잔존) / v1.7-revert=55.9%(34)
-- v2.0-shadow n=5 (60.0%, Brier 0.5616) / **v2.1-B-shadow n=52 (51.9%, Brier 0.4635)** — debate_version=null → accuracy/page.tsx 오염 없음 확인
+- v2.0-shadow n=5 (60.0%, Brier 0.5616) / **v2.1-B-shadow n=52 (51.9%, Brier 0.4635)** — ⚠️ 전량 백필 아티팩트 (2026-05-25 일괄 삽입, SP null → conf≈0 붕괴 → 랜덤 수준). 가중치 신호 아님. 라이브 행(6/7~) verified 대기 필요. v2.0 설계 시 이 cohort 배제. debate_version=null → accuracy/page.tsx 오염 없음 확인
 - confidence tier: low 52.1% / mid 54.7% / **high 65.6%** — 고신뢰 신호 강함
 - 요일 weak: 일 44.1%/n=34 / 수 50.0%/n=22 — v2.0 가중치 후보 검토 시 요일 보정 검토
 - v2.0 임계 n=150 까지 (v1.8 real 기준) **잔여 74건** — ETA **2026-07-01** (velocity 3.4/day, cycle 1138 박제. 직전 ETA 2026-07-22 → 3주 단축)
