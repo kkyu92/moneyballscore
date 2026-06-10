@@ -216,7 +216,7 @@ describe("/lotto/archive index page metadata (plan #6 Step B)", () => {
   });
 
   it("title + description 박제", () => {
-    expect(archiveIndexMetadata.title).toBe("Lotto 통계 아카이브");
+    expect(archiveIndexMetadata.title).toBe("로또 통계 아카이브");
     expect(archiveIndexMetadata.description).toMatch(/통계 분석/);
   });
 });

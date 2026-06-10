@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { date } = await params;
   const variants = readArchiveVariants(date);
-  const title = variants ? `${date} 50조합 archive` : "Archive 조회 불가";
+  const title = variants ? `${date} 50조합 아카이브` : "아카이브 조회 불가";
   return {
     title,
     description: "통계 분석 기반 50조합 기록 (회피 조건 통과 조합). 행동/베팅/구매 권유 X.",

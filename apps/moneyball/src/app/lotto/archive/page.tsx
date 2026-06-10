@@ -10,12 +10,12 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/lotto/archive`;
 
 export const metadata: Metadata = {
-  title: "Lotto 통계 아카이브",
+  title: "로또 통계 아카이브",
   description:
     "토요일 추첨일별 50조합 통계 분석 아카이브. 256개 회피 규칙을 통과한 조합 기록. 통계 학습 자료 — 행동/베팅/구매 권유 X.",
   alternates: { canonical: PAGE_URL },
   openGraph: {
-    title: "Lotto 통계 아카이브 | MoneyBall Score",
+    title: "로또 통계 아카이브 | MoneyBall Score",
     description:
       "토요일 추첨일별 50조합 통계 분석 아카이브. 256개 회피 규칙 통과 조합 기록.",
     url: PAGE_URL,
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lotto 통계 아카이브 | MoneyBall Score",
+    title: "로또 통계 아카이브 | MoneyBall Score",
     description: "회차별 50조합 통계 분석 기록.",
   },
   robots: {
@@ -39,7 +39,7 @@ export default function LottoArchiveIndexPage() {
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    headline: "Lotto 통계 아카이브",
+    headline: "로또 통계 아카이브",
     description:
       "토요일 추첨일별 50조합 통계 분석 아카이브 — 256개 회피 규칙 통과 조합 기록.",
     url: PAGE_URL,
@@ -74,7 +74,7 @@ export default function LottoArchiveIndexPage() {
 
       <Breadcrumb
         items={[
-          { href: "/lotto/methodology", label: "Lotto 통계" },
+          { href: "/lotto", label: "로또 통계 분석" },
           { label: "아카이브" },
         ]}
       />
@@ -84,7 +84,7 @@ export default function LottoArchiveIndexPage() {
           통계 분석 · 회차별 기록
         </p>
         <h1 className="text-3xl font-semibold text-brand-100">
-          Lotto 통계 아카이브
+          로또 통계 아카이브
         </h1>
         <p className="text-sm text-brand-300">
           토요일 추첨일별 50조합 통계 분석 기록입니다. 256개 회피 규칙을 통과한
@@ -135,7 +135,7 @@ export default function LottoArchiveIndexPage() {
             href="/lotto/methodology"
             className="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-900/40 border border-brand-800 hover:border-brand-500 rounded-full text-sm text-brand-200 hover:text-brand-100 transition-colors"
           >
-            ← Lotto 통계 방법론
+            ← 로또 통계 방법론
           </Link>
           <Link
             href="/methodology"
