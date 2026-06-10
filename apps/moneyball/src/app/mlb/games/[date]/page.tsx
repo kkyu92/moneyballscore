@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk } from "@moneyball/shared";
 
 export const revalidate = 1800;
 
@@ -55,8 +54,13 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
     .eq('games.game_date', date)
     .order('game_id', { ascending: true });
 
-  const { data: predictions } = assertSelectOk(result, 'MlbGames predictions');
-  const rows = (predictions ?? []) as unknown as PredictionRow[];
+  // MLB backend migrations 미적용 → query 실패 시 empty render fallback (cycle 1149).
+  if (result.error) {
+    console.warn(`[MlbGames] predictions query failed: ${result.error.message}`);
+  }
+  const rows: PredictionRow[] = result.error
+    ? []
+    : (result.data ?? []) as unknown as PredictionRow[];
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">

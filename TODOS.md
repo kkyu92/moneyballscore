@@ -1,5 +1,20 @@
 # TODOS
 
+## 🚨 MLB backend migrations 033-037 prod 미적용 (cycle 1149 발견)
+
+**증상**: `/mlb` + `/mlb/games/[date]` 500 (runtime-error-alert cron 10회 연속 fail, 2026-06-08T22:05~).
+
+**원인**: Migration 033 안 broken index (`predictions.game_date` 컬럼 부재 참조) → 트랜잭션 롤백 → 8 table league column + 034 statcast factors + 035 shadow_weights + 036 walk_forward_brier + 037 fix index 모두 prod 미적용.
+
+**확인 (REST API)**:
+- 🔴 predictions / pipeline_runs / agent_memories / team_season_stats / umpire_stats: `league` column MISSING
+- ⚠️ team_recent_form / head_to_head / stadium_stats: table 자체 부재 (schema cache)
+- 🔴 games.league MISSING / predictions.home_lineup_xwoba|barrel_pct MISSING
+
+**임시 mitigation (cycle 1149 ship)**: `/mlb` hub + `/mlb/games/[date]` query 실패 시 empty fallback (200 유지). runtime-error-alert 차단.
+
+**후속 fix-incident heavy**: migration 038 박제 — 033 broken index 제거 + 8 table league column 재추가 + 034/035/036 column/table + 037 corrected index. `pnpm supabase db push --linked` 적용.
+
 ## ✅ Resolved Lessons
 - `fp:vercel-deploy-1e80b78` (2026-04-22): Sentry /webhook sub-path 3회 실패 → no-relay=true 태그로 해결 (박제 2026-04-29)
 
