@@ -28,12 +28,12 @@ export default function LottoHubOgImage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <span style={{ background: "#c5a23e", color: "#132d1a", fontSize: 14, fontWeight: 700, padding: "4px 12px", borderRadius: 6 }}>
-            제 {drawNo}회
+            {`제 ${drawNo}회`}
           </span>
           <span style={{ color: "#8dcea0", fontSize: 14 }}>MoneyBall Score · 로또 통계 분석</span>
         </div>
         <div style={{ fontSize: 40, fontWeight: 800, marginBottom: 8 }}>
-          {date} 추천 조합
+          {`${date} 추천 조합`}
         </div>
         <div style={{ color: "#c4e8cf", fontSize: 16, marginBottom: 32 }}>
           256개 통계 규칙 통과 · 역대 미출현 조합 선별
@@ -61,7 +61,7 @@ export default function LottoHubOgImage() {
                   </span>
                 ))}
               </div>
-              <span style={{ color: "#8dcea0", fontSize: 13 }}>합 {set.sum}</span>
+              <span style={{ color: "#8dcea0", fontSize: 13 }}>{`합 ${set.sum}`}</span>
             </div>
           ))}
         </div>

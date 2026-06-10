@@ -360,3 +360,40 @@ describe("plan #7 Step E — scripts/lotto.ts pick-md mode + markdown renderer",
     expect(renderFn).not.toContain("조합 추천");
   });
 });
+
+const LOTTO_HUB_SRC = join(REPO_ROOT, "src/app/lotto/page.tsx");
+
+describe("plan #7 Step F — /lotto hub AdSense surface signal grep (정체성 보존)", () => {
+  const src = readFileSync(LOTTO_HUB_SRC, "utf-8");
+  const visibleText = src
+    .split("\n")
+    .filter((line) => !line.trim().startsWith("//") && !line.includes("당첨/베팅"))
+    .join("\n");
+
+  const forbiddenLiteral = ["당첨 번호", "베팅 추천", "조합 추천", "예상번호"];
+
+  for (const term of forbiddenLiteral) {
+    it(`hub page "${term}" 표면 신호 0건`, () => {
+      expect(visibleText).not.toContain(term);
+    });
+  }
+});
+
+describe("plan #7 Step F — /lotto hub 산문 콘텐츠 박제 (AdSense content quality)", () => {
+  const src = readFileSync(LOTTO_HUB_SRC, "utf-8");
+
+  it("조합 선별 방식 section 박제", () => {
+    expect(src).toMatch(/조합 선별 방식/);
+  });
+
+  it("합계·홀짝·연속쌍 3지표 설명 박제", () => {
+    expect(src).toMatch(/합계/);
+    expect(src).toMatch(/홀짝/);
+    expect(src).toMatch(/연속쌍/);
+  });
+
+  it("robots: index + follow true", () => {
+    expect(src).toContain("index: true");
+    expect(src).toContain("follow: true");
+  });
+});
