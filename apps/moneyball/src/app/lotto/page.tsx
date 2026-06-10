@@ -42,7 +42,7 @@ function Ball({ n }: { n: number }) {
   const color = ballColor(n);
   return (
     <span
-      className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold tabular-nums ${BALL_BG[color]}`}
+      className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold tabular-nums font-mono ${BALL_BG[color]}`}
     >
       {n}
     </span>
@@ -63,7 +63,7 @@ function SetRow({ set, rank }: { set: LottoSet; rank?: string }) {
         ))}
       </div>
       <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
-        합 {set.sum} · {set.oddEven} · 연속{set.consecutive}쌍
+        합 {set.sum} · {set.oddEven} · 연속 {set.consecutive}쌍
       </span>
     </div>
   );
