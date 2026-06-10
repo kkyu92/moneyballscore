@@ -1,19 +1,22 @@
 # TODOS
 
-## 🚨 MLB backend migrations 033-037 prod 미적용 (cycle 1149 발견)
+## ✅ MLB backend migrations 033-037 prod 적용 완료 (cycle 1151, 2026-06-10)
 
-**증상**: `/mlb` + `/mlb/games/[date]` 500 (runtime-error-alert cron 10회 연속 fail, 2026-06-08T22:05~).
+**root cause fix-incident heavy 완료** — cycle 1149 lite mitigation (empty fallback) 위 root cause 정리.
 
-**원인**: Migration 033 안 broken index (`predictions.game_date` 컬럼 부재 참조) → 트랜잭션 롤백 → 8 table league column + 034 statcast factors + 035 shadow_weights + 036 walk_forward_brier + 037 fix index 모두 prod 미적용.
+**migration 033 수정 사항** (cycle 1151):
+- 3 missing table ALTER 제거 (`team_recent_form` / `head_to_head` / `stadium_stats` — prod 부재, git/코드 안 사용 X, spec design 미실현)
+- broken index `idx_predictions_league_date (league, game_date DESC)` 라인 제거 (predictions.game_date 부재 → 037 가 corrected `(league, game_id DESC)` 박제 중)
+- `idx_team_season_stats_league_season_team` 컬럼 정정 (`team_code` → `team_id`)
 
-**확인 (REST API)**:
-- 🔴 predictions / pipeline_runs / agent_memories / team_season_stats / umpire_stats: `league` column MISSING
-- ⚠️ team_recent_form / head_to_head / stadium_stats: table 자체 부재 (schema cache)
-- 🔴 games.league MISSING / predictions.home_lineup_xwoba|barrel_pct MISSING
+**검증 (REST API, prod)**:
+- ✅ predictions.league = "kbo" (default 적용)
+- ✅ predictions.home_lineup_xwoba / barrel_pct / hard_hit_pct / launch_angle = null OK
+- ✅ shadow_weights table 존재 (row 0)
+- ✅ walk_forward_brier table 존재 (row 0)
+- ✅ games.game_datetime_utc 박제 (UTC TIMESTAMPTZ backfill 완료)
 
-**임시 mitigation (cycle 1149 ship)**: `/mlb` hub + `/mlb/games/[date]` query 실패 시 empty fallback (200 유지). runtime-error-alert 차단.
-
-**후속 fix-incident heavy**: migration 038 박제 — 033 broken index 제거 + 8 table league column 재추가 + 034/035/036 column/table + 037 corrected index. `pnpm supabase db push --linked` 적용.
+**잔여 cleanup (별도 cycle)**: `/mlb` hub + `/mlb/games/[date]` empty fallback (cycle 1149) safety layer 유지 (silent drift family wave 13 재발 방지).
 
 ## ✅ Resolved Lessons
 - `fp:vercel-deploy-1e80b78` (2026-04-22): Sentry /webhook sub-path 3회 실패 → no-relay=true 태그로 해결 (박제 2026-04-29)
