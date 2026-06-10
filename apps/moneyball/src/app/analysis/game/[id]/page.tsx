@@ -25,6 +25,7 @@ import { canonicalPair } from '@/lib/matchup/canonicalPair';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
+import { GameAnalysisProse } from '@/components/analysis/GameAnalysisProse';
 
 export const revalidate = 600;
 
@@ -354,6 +355,17 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 0. 경기 개요 — 태그 + 1-2줄 요약 */}
       <GameOverview tags={overview.tags} summary={overview.summary} />
+
+      {/* 0a. AI 종합 분석 요약 — factor 서술형 prose (AdSense content quality) */}
+      {preGame.factors && (
+        <GameAnalysisProse
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          homeWinProb={homeWinProbForOverview}
+          factors={preGame.factors as Record<string, number>}
+          details={factorDetails}
+        />
+      )}
 
       {/* 1. 심판 판정 (최상단, Design 리뷰 Pass 1) */}
       {verdict ? (
