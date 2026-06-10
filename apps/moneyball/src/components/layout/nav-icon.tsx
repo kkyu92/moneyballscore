@@ -10,7 +10,8 @@ export type NavIconName =
   | "file-text"
   | "calendar"
   | "x-circle"
-  | "database";
+  | "database"
+  | "star";
 
 export function NavIcon({ name, className }: { name: NavIconName; className?: string }) {
   return (
@@ -95,6 +96,9 @@ export function NavIcon({ name, className }: { name: NavIconName; className?: st
           <line x1="15" y1="9" x2="9" y2="15" />
           <line x1="9" y1="9" x2="15" y2="15" />
         </>
+      )}
+      {name === "star" && (
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       )}
       {name === "database" && (
         <>
