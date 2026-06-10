@@ -40,7 +40,22 @@ import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  title: "KBO AI 승부예측 | MoneyBall Score",
+  description:
+    "오늘 KBO 경기 AI 승부예측. 세이버메트릭스 10팩터(FIP·wOBA·Elo·WAR) 기반 정량 모델 + AI 에이전트 토론 분석. 매일 오전 9시 업데이트.",
   alternates: { canonical: "https://moneyballscore.vercel.app" },
+  openGraph: {
+    title: "KBO AI 승부예측 | MoneyBall Score",
+    description:
+      "세이버메트릭스 10팩터 기반 KBO 경기 AI 승부예측. FIP·wOBA·Elo·WAR 정량 모델 + 에이전트 토론.",
+    url: "https://moneyballscore.vercel.app",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KBO AI 승부예측 | MoneyBall Score",
+    description: "세이버메트릭스 10팩터 기반 KBO 경기 AI 승부예측.",
+  },
 };
 
 interface HomePrediction {

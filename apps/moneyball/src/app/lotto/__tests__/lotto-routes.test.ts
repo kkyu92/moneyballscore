@@ -393,7 +393,7 @@ describe("plan #7 Step F — /lotto hub 산문 콘텐츠 박제 (AdSense content
   });
 
   it("robots: index + follow true", () => {
-    expect(src).toMatch(/robots.*index.*true/s);
-    expect(src).toMatch(/robots.*follow.*true/s);
+    expect(src).toContain("index: true");
+    expect(src).toContain("follow: true");
   });
 });
