@@ -190,10 +190,10 @@ describe("/lotto/archive/[date] — Breadcrumb 박제 (info-arch regression guar
     expect(src).toMatch(/import\s*\{\s*Breadcrumb\s*\}\s*from\s*"@\/components\/shared\/Breadcrumb"/);
   });
 
-  it("<Breadcrumb> render + /lotto/methodology href + date label", () => {
+  it("<Breadcrumb> render + /lotto hub href + /lotto/archive href (plan #7 Step C 이후 구조)", () => {
     expect(src).toMatch(/<Breadcrumb/);
-    expect(src).toMatch(/href:\s*"\/lotto\/methodology"/);
-    expect(src).toMatch(/label:\s*"Lotto 통계"/);
+    expect(src).toMatch(/href:\s*"\/lotto"/);
+    expect(src).toMatch(/href:\s*"\/lotto\/archive"/);
   });
 });
 
