@@ -272,7 +272,7 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
 }
 
 // M13 — scoring_rule × day_of_week 매트릭스 (cycle 947 plan #10 Tier 1).
-// row = scoring_rule (v1.5 / v1.6 / v1.7-revert / v1.8) + 'all' aggregate.
+// row = scoring_rule (v1.5 / v1.6 / v1.7-revert / v1.8 / v1.8-credit-fail) + 'all' aggregate.
 // col = day_of_week (월~일 KST).
 // cell = { n, hits, accuracy }. n<3 = 소표본 (acc null 표시 처리는 UI 책임).
 

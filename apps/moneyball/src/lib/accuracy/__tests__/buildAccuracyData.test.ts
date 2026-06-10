@@ -655,7 +655,7 @@ describe('buildScoringRuleDayHeatmap', () => {
     expect(allTue.n).toBe(3);
     expect(allTue.hits).toBe(2);
 
-    // SCORING_RULE_HEATMAP_ROWS 안 known sr 만 row 박제 (v1.5/v1.6/v1.7-revert/v1.8)
+    // SCORING_RULE_HEATMAP_ROWS 안 known sr 만 row 박제 (v1.5/v1.6/v1.7-revert/v1.8/v1.8-credit-fail)
     for (const sr of SCORING_RULE_HEATMAP_ROWS) {
       if (sr === 'all') continue;
       const cell = result.find((c) => c.scoringRule === sr && c.day === 2)!;
