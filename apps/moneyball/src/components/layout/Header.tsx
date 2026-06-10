@@ -70,6 +70,7 @@ const MLB_NAV: NavItem[] = [
 ];
 
 const LOTTO_LINKS: NavLink[] = [
+  { href: "/lotto", label: "이번 주 조합", description: "최신 50조합 + 추천 5세트 통계 선별", icon: "star" },
   { href: "/lotto/methodology", label: "통계 방법론", description: "6/45 패턴 통계 검증·256 규칙 saturation", icon: "file-text" },
   { href: "/lotto/archive", label: "아카이브", description: "회차별 50조합 통계 분석 기록", icon: "database" },
 ];

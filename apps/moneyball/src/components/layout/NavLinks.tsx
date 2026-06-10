@@ -12,7 +12,6 @@
  * / PlaceholderLoginButton) embed.
  */
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LEAGUE_NAVS } from "./Header";
 import { leagueFromPath } from "./LeagueSelector";

@@ -71,6 +71,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    // /lotto hub — plan #7 Step C (cycle 1138). weekly 갱신.
+    { url: `${baseUrl}/lotto`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
     // /lotto/methodology — 통계 분석 방법론. /lotto/archive/[date] 는 plan #6 Step A (cycle 882~) 부터
     // indexable 활성 — lottoArchiveRoutes (아래) 가 동적 URL 추가. AdSense crawler 는 robots.ts 차단.
     { url: `${baseUrl}/lotto/methodology`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
