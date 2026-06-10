@@ -1,25 +1,6 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
-
-export const metadata: Metadata = {
-  title: "AI 예측 적중 기록 | MoneyBall Score",
-  description:
-    "KBO 경기 AI 승부예측 성과 트래킹. 버전별 정확도·Brier 점수·팀별 적중률·캘리브레이션 분석. 세이버메트릭스 기반 정량 모델 v1.8.",
-  alternates: { canonical: "https://moneyballscore.vercel.app/accuracy" },
-  openGraph: {
-    title: "AI 예측 적중 기록 | MoneyBall Score",
-    description:
-      "KBO 경기 AI 승부예측 성과. Brier 점수·팀별 적중률·캘리브레이션 대시보드.",
-    url: "https://moneyballscore.vercel.app/accuracy",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI 예측 적중 기록 | MoneyBall Score",
-    description: "KBO 경기 AI 승부예측 성과 트래킹.",
-  },
-};
 import { buildAllTeamAccuracy, buildMatchupData } from '@/lib/standings/buildTeamAccuracy';
 import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
 import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
@@ -30,20 +11,6 @@ import { ScoringRuleDayHeatmap } from '@/components/dashboard/ScoringRuleDayHeat
 import { RollingAccuracyChart } from '@/components/dashboard/RollingAccuracyChart';
 import { WinnerProbBucketChart } from '@/components/dashboard/WinnerProbBucketChart';
 import { CohortComparisonHeatmap } from '@/components/dashboard/CohortComparisonHeatmap';
-
-const TOC_ITEMS = [
-  { id: 'calibration', label: '캘리브레이션' },
-  { id: 'rolling-accuracy', label: '30일 rolling 추세' },
-  { id: 'winner-prob-bucket', label: '확률 bucket 보정' },
-  { id: 'cohort-comparison', label: 'cohort × 주차 비교' },
-  { id: 'brier-trend', label: 'Brier 추세' },
-  { id: 'weekly', label: '주별 트렌드' },
-  { id: 'weekday', label: '요일별' },
-  { id: 'confidence', label: 'AI 확신도' },
-  { id: 'versions', label: '모델 버전별' },
-  { id: 'teams', label: '팀별 성과' },
-  { id: 'matchup', label: '상대 강약' },
-];
 import {
   assertSelectOk,
   shortTeamName,
@@ -75,6 +42,39 @@ import {
   buildScoringRuleWeekHeatmap,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
+
+export const metadata: Metadata = {
+  title: "AI 예측 적중 기록 | MoneyBall Score",
+  description:
+    "KBO 경기 AI 승부예측 성과 트래킹. 버전별 정확도·Brier 점수·팀별 적중률·캘리브레이션 분석. 세이버메트릭스 기반 정량 모델 v1.8.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/accuracy" },
+  openGraph: {
+    title: "AI 예측 적중 기록 | MoneyBall Score",
+    description:
+      "KBO 경기 AI 승부예측 성과. Brier 점수·팀별 적중률·캘리브레이션 대시보드.",
+    url: "https://moneyballscore.vercel.app/accuracy",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI 예측 적중 기록 | MoneyBall Score",
+    description: "KBO 경기 AI 승부예측 성과 트래킹.",
+  },
+};
+
+const TOC_ITEMS = [
+  { id: 'calibration', label: '캘리브레이션' },
+  { id: 'rolling-accuracy', label: '30일 rolling 추세' },
+  { id: 'winner-prob-bucket', label: '확률 bucket 보정' },
+  { id: 'cohort-comparison', label: 'cohort × 주차 비교' },
+  { id: 'brier-trend', label: 'Brier 추세' },
+  { id: 'weekly', label: '주별 트렌드' },
+  { id: 'weekday', label: '요일별' },
+  { id: 'confidence', label: 'AI 확신도' },
+  { id: 'versions', label: '모델 버전별' },
+  { id: 'teams', label: '팀별 성과' },
+  { id: 'matchup', label: '상대 강약' },
+];
 
 export const revalidate = 3600;
 
