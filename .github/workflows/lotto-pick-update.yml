@@ -86,11 +86,11 @@ jobs:
           DRAW_NO: ${{ inputs.draw_no }}
         run: |
           set -e
-          pnpm tsx scripts/lotto.ts update
+          pnpm exec tsx scripts/lotto.ts update
           if [ -n "$DRAW_NO" ]; then
-            pnpm tsx scripts/lotto.ts pick-md "${{ steps.target.outputs.target }}" "$DRAW_NO"
+            pnpm exec tsx scripts/lotto.ts pick-md "${{ steps.target.outputs.target }}" "$DRAW_NO"
           else
-            pnpm tsx scripts/lotto.ts pick-md "${{ steps.target.outputs.target }}"
+            pnpm exec tsx scripts/lotto.ts pick-md "${{ steps.target.outputs.target }}"
           fi
 
       - name: Verify markdown saved

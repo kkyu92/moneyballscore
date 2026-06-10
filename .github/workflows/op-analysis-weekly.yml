@@ -47,7 +47,7 @@ jobs:
           mkdir -p apps/moneyball/data/op-analysis
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/op-analysis/${DATE}-cohort-split.md"
-          pnpm tsx scripts/op-analysis-cohort.ts "$OUT" 2>&1 | tail -50
+          pnpm exec tsx scripts/op-analysis-cohort.ts "$OUT" 2>&1 | tail -50
           if [ ! -f "$OUT" ]; then
             echo "::error::cohort split markdown not generated"
             exit 1

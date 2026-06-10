@@ -47,7 +47,7 @@ jobs:
           mkdir -p apps/moneyball/data/backtest-results
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/backtest-results/${DATE}-manual-weights.txt"
-          pnpm tsx packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts 2>&1 | tee "$OUT"
+          pnpm exec tsx packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts 2>&1 | tee "$OUT"
           echo "::notice::backtest result saved to $OUT"
 
       - name: Create PR (data prefix, R7 auto-merge)

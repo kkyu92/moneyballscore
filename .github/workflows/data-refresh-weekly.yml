@@ -52,7 +52,7 @@ jobs:
           mkdir -p apps/moneyball/data/stale-data
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/stale-data/${DATE}.md"
-          pnpm tsx scripts/update-stale-data.ts "$OUT" 2>&1 | tail -20
+          pnpm exec tsx scripts/update-stale-data.ts "$OUT" 2>&1 | tail -20
           if [ ! -f "$OUT" ]; then
             echo "::error::stale-data snapshot not generated"
             exit 1
