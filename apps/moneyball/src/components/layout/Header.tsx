@@ -83,9 +83,6 @@ export const LEAGUE_NAVS: Record<League, NavItem[]> = {
   lotto: [{ label: "로또", items: LOTTO_LINKS }],
 };
 
-// 백워드 호환 — 외부 consumer 가 있을 경우 KBO 전체 NAV 유지.
-export const NAV_ITEMS: NavItem[] = KBO_NAV;
-
 export function Header() {
   return (
     <header className="border-b border-brand-700 bg-brand-800">
