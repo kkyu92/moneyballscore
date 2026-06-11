@@ -74,7 +74,23 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
       </h1>
 
       {rows.length === 0 ? (
-        <p className="text-brand-500 dark:text-brand-400">해당 일자 경기가 없습니다.</p>
+        <div className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/50 p-6 space-y-3">
+          <p className="text-brand-600 dark:text-brand-300">해당 일자 MLB 경기가 없습니다.</p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/mlb"
+              className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
+            >
+              MLB 분석 hub
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
+            >
+              오늘 KBO 분석
+            </Link>
+          </div>
+        </div>
       ) : (
         <ul className="space-y-3">
           {rows.map((p) => {
