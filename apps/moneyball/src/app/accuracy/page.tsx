@@ -68,6 +68,7 @@ const TOC_ITEMS = [
   { id: 'winner-prob-bucket', label: '확률 bucket 보정' },
   { id: 'cohort-comparison', label: 'cohort × 주차 비교' },
   { id: 'brier-trend', label: 'Brier 추세' },
+  { id: 'scoring-rule-day-heatmap', label: '요일별 scoring_rule cohort' },
   { id: 'weekly', label: '주별 트렌드' },
   { id: 'weekday', label: '요일별' },
   { id: 'confidence', label: 'AI 확신도' },
