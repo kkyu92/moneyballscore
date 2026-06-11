@@ -69,12 +69,6 @@ function readVariant(date: string, v: ArchiveVariant): ArchiveContent | null {
   return { date, raw, title };
 }
 
-// mix 우선 (cycle 946 사용자 제안 — 3 strategy 합성, 256 rules 50/50 검증). fallback default.
-export function readArchive(date: string): ArchiveContent | null {
-  if (!isValidArchiveDate(date)) return null;
-  return readVariant(date, "mix") ?? readVariant(date, "default");
-}
-
 // 4 variant 통합 read — primary 자동 결정 (mix 우선) + available list.
 export function readArchiveVariants(date: string): ArchiveVariants | null {
   if (!isValidArchiveDate(date)) return null;

@@ -6,12 +6,6 @@ export interface ShadowCohortPair {
   homeWin: boolean | null;
 }
 
-export interface CalibrationSeries {
-  label: string;
-  color: string;
-  buckets: CalibrationBucket[];
-}
-
 function buildBuckets(
   pairs: Array<{ p: number; y: number }>,
   bins = 10,

@@ -14,12 +14,6 @@ export const brand = {
   50: "#edf7f0",
 } as const;
 
-export const accent = {
-  base: "#c5a23e",
-  light: "#e2c96b",
-  away: "#c5872a",
-} as const;
-
 export const semantic = {
   success: "#10b981",
   warning: "#f59e0b",
@@ -39,14 +33,6 @@ export const surface = {
   darkBase: "#0c0e0d",
   darkCard: "#151d18",
   lightBase: "#f8faf9",
-} as const;
-
-// 외부 브랜드 색 — DESIGN.md token 영역 X. ShareButtons.tsx 의 Tailwind arbitrary value
-// (hover:border-[#1DA1F2]) 와 일치. 외부 brand identity 라 design-tokens 정렬 대상 X.
-// 사용처 변경 시 본 export 와 ShareButtons 양쪽 동기화.
-export const brandExternal = {
-  twitter: "#1DA1F2",
-  facebook: "#1877F2",
 } as const;
 
 export const chartCursorTint = "rgba(59, 130, 246, 0.06)";

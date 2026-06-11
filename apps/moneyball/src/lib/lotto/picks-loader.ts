@@ -78,19 +78,6 @@ export function getLatestLottoPicks(): LottoPicks | null {
   return { date, ...parseLottoPicksMd(raw) };
 }
 
-export function listLottoPicksDates(daysBack = 180): string[] {
-  const dir = getPicksDir();
-  if (!fs.existsSync(dir)) return [];
-  const cutoff = new Date(Date.now() - daysBack * 86400_000);
-  return fs
-    .readdirSync(dir)
-    .filter(isSaturdayFile)
-    .map(f => f.replace(/\.md$/, ""))
-    .filter(d => new Date(d + "T00:00:00Z") >= cutoff)
-    .sort()
-    .reverse();
-}
-
 export type LottoBallColor = "yellow" | "blue" | "red" | "gray" | "green";
 
 export function ballColor(n: number): LottoBallColor {
