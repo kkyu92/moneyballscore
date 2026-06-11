@@ -336,6 +336,8 @@ export async function runDailyPipeline(
           game.status, game.homeScore, game.awayScore, homeTeamId, awayTeamId,
         ),
         external_game_id: game.externalGameId,
+        // migration 034 NOT NULL — INSERT 경로 constraint 위반 방지
+        game_datetime_utc: new Date(`${game.date}T${game.gameTime}:00+09:00`).toISOString(),
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
@@ -1374,6 +1376,8 @@ async function prefetchSchedule(
           g.status, g.homeScore, g.awayScore, homeTeamId, awayTeamId,
         ),
         external_game_id: g.externalGameId,
+        // migration 034 NOT NULL — INSERT 경로 constraint 위반 방지
+        game_datetime_utc: new Date(`${g.date}T${g.gameTime}:00+09:00`).toISOString(),
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);
