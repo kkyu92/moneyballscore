@@ -31,6 +31,7 @@ export interface Env {
   SUPABASE_SERVICE_KEY: string;
   GH_DISPATCH_PAT: string;
   GH_REPO: string;
+  MLB_PIPELINE_URL: string;
 }
 
 type PipelineMode = 'announce' | 'predict' | 'predict_final' | 'verify';
@@ -59,6 +60,53 @@ async function callPipeline(env: Env, mode: PipelineMode): Promise<void> {
     return;
   }
   console.log(`[Worker] pipeline ${mode} ok`);
+}
+
+// ─────────────────────────────────────────────
+// MLB pipeline (Plan C Task 4)
+// ─────────────────────────────────────────────
+type MlbPipelineMode =
+  | 'mlb_statsapi_scrape'
+  | 'mlb_fancy_scrape'
+  | 'mlb_savant_scrape'
+  | 'mlb_predict_final'
+  | 'mlb_combined_notify'
+  | 'mlb_shadow_train'
+  | 'mlb_walk_forward_measure';
+
+/**
+ * UTC hour → MlbPipelineMode 결정.
+ * UTC 18 (KST 03) → statsapi_scrape
+ * UTC 19 (KST 04) → fancy_scrape
+ * UTC 20 (KST 05) → savant_scrape
+ * UTC 21 (KST 06) → shadow_train
+ * UTC 10 (KST 19) → predict_final (predict + notify 통합)
+ */
+function decideMlbMode(scheduledTime: number): MlbPipelineMode | null {
+  const utcHour = new Date(scheduledTime).getUTCHours();
+  if (utcHour === 18) return 'mlb_statsapi_scrape';
+  if (utcHour === 19) return 'mlb_fancy_scrape';
+  if (utcHour === 20) return 'mlb_savant_scrape';
+  if (utcHour === 21) return 'mlb_shadow_train';
+  if (utcHour === 10) return 'mlb_predict_final';
+  return null;
+}
+
+async function callMlbPipeline(env: Env, mode: MlbPipelineMode): Promise<void> {
+  const resp = await fetch(env.MLB_PIPELINE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${env.CRON_SECRET}`,
+    },
+    body: JSON.stringify({ mode, triggeredBy: 'cron' }),
+  });
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => '');
+    console.error(`[Worker] mlb-pipeline ${mode} failed: ${resp.status} ${body.slice(0, 300)}`);
+    return;
+  }
+  console.log(`[Worker] mlb-pipeline ${mode} ok`);
 }
 
 interface SpLogRow {
@@ -332,6 +380,14 @@ export default {
       }
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
+    } else if (cronExpr === '17 18-21,10 * * *') {
+      // MLB pipeline cron: UTC 18-21 (KST 03-06, 새벽 scrape) + UTC 10 (KST 19, predict)
+      const mlbMode = decideMlbMode(event.scheduledTime);
+      if (mlbMode) {
+        ctx.waitUntil(callMlbPipeline(env, mlbMode));
+      } else {
+        console.log(`[Worker] MLB: no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping`);
+      }
     } else {
       console.log(`[Worker] unknown cron: ${cronExpr}`);
     }

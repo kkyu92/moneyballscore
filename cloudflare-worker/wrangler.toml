@@ -8,11 +8,12 @@ compatibility_flags = ["nodejs_compat"]
 # 총 fire/day = 15 + 24 + 42 + 1 = 82 (free tier 여유).
 [triggers]
 crons = [
-  "17 0-14 * * *",     # daily-pipeline + SP log. KST 09:17~23:17 매시간 (15회/일).
-  "37 * * * *",        # sitemap-warmup. 매시간 37분 (24회/일).
-  "*/10 9-15 * * *",   # live-update. KST 18:00~00:50 매 10분 (42회/일).
+  "17 0-14 * * *",        # daily-pipeline + SP log. KST 09:17~23:17 매시간 (15회/일).
+  "37 * * * *",           # sitemap-warmup. 매시간 37분 (24회/일).
+  "*/10 9-15 * * *",      # live-update. KST 18:00~00:50 매 10분 (42회/일).
+  "17 18-21,10 * * *",    # MLB pipeline. UTC 18-21 (KST 03-06, 새벽 scrape) + UTC 10 (KST 19, predict+notify). 4회/일.
 # self-develop daily fire = '17 0-14 * * *' UTC hour===0 분기 안 통합 (KST 09:17).
-# cron 슬롯 추가 없이 daily-pipeline cron 재사용 (4/5 유지, 03a4867 정신 보존).
+# cron 슬롯 추가 없이 daily-pipeline cron 재사용 (4/5 유지 → MLB 추가로 4/5).
 ]
 
 # vars 는 wrangler.toml 에 둬도 되지만 secrets 는 dashboard 또는
@@ -20,6 +21,7 @@ crons = [
 # 등록 필요 secrets: CRON_SECRET, SUPABASE_SERVICE_KEY, GH_DISPATCH_PAT.
 [vars]
 PIPELINE_URL = "https://moneyballscore.vercel.app/api/pipeline"
+MLB_PIPELINE_URL = "https://moneyballscore.vercel.app/api/mlb/pipeline"
 SITE_URL = "https://moneyballscore.vercel.app"
 SUPABASE_URL = "https://utmimgpccbrciwuuacyw.supabase.co"
 GH_REPO = "kkyu92/moneyballscore"
