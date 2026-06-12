@@ -138,18 +138,22 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
   // Compute probability for each game using default inputs
   // Full factor inputs will be wired when scrapers are complete (stub values for now)
   const predictionRows = gameList.map((g) => {
+    // stub factor inputs — 스크래퍼 완성 전 default neutral values
     const prob = computeMlbProbability({
-      homeEra: 4.0,
-      awayEra: 4.0,
-      homeWoba: 0.320,
-      awayWoba: 0.320,
-      homeWinPct: 0.500,
-      awayWinPct: 0.500,
-      homeBullpenEra: 4.0,
-      awayBullpenEra: 4.0,
-      eloHome: 1500,
-      eloAway: 1500,
-      parkFactor: 1.0,
+      sp_fip: { home: 4.0, away: 4.0 },
+      sp_xfip: { home: 4.0, away: 4.0 },
+      lineup_woba: { home: 0.320, away: 0.320 },
+      bullpen_fip: { home: 4.0, away: 4.0 },
+      recent_form: { home: 50, away: 50 },
+      war: { home: 0, away: 0 },
+      head_to_head: { homeWinRate: 0.5 },
+      park_factor: 1.0,
+      elo: { home: 1500, away: 1500 },
+      defense_sfr: { home: 0, away: 0 },
+      lineup_xwoba: { home: 0.320, away: 0.320 },
+      lineup_barrel_pct: { home: 0.08, away: 0.08 },
+      sp_xwoba_against: { home: 0.320, away: 0.320 },
+      woba_std: { home: 0.030, away: 0.030 },
     });
     return {
       league: 'mlb',
@@ -232,7 +236,7 @@ async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: numbe
   const samples: TrainingSample[] = gameList
     .filter((g) => predMap.has(g.external_game_id))
     .map((g) => ({
-      homeWinProb: predMap.get(g.external_game_id)!,
+      factors: { home_win_prob: predMap.get(g.external_game_id)! },
       homeWon: g.home_score > g.away_score ? 1 : 0,
     }));
 
@@ -250,7 +254,8 @@ async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: numbe
     date,
     sample_count: samples.length,
     weights: trainResult.weights,
-    loss: trainResult.loss,
+    brier: trainResult.brier,
+    accuracy: trainResult.accuracy,
     milestone_hit: hitMilestone,
   });
 
@@ -281,19 +286,25 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
-  const rows = (joined ?? []) as Array<{
+  // Supabase join 결과 — games 관계는 배열로 반환됨. unknown 캐스트 후 처리.
+  const rawRows = (joined ?? []) as unknown as Array<{
     home_win_prob: number;
-    games: { home_score: number; away_score: number; status: string };
+    games: Array<{ home_score: number; away_score: number; status: string }>;
   }>;
 
-  const finalRows = rows.filter((r) => r.games.status === 'final');
+  // games 배열에서 첫 번째 row 추출 후 final 필터
+  const rows = rawRows
+    .map((r) => ({ home_win_prob: r.home_win_prob, game: r.games[0] }))
+    .filter((r): r is { home_win_prob: number; game: { home_score: number; away_score: number; status: string } } => !!r.game);
+
+  const finalRows = rows.filter((r) => r.game.status === 'final');
   if (finalRows.length === 0) {
     return { gamesFound: rows.length, rowsInserted: 0, errors };
   }
 
   const brierInputs: BrierInput[] = finalRows.map((r) => ({
     predicted: r.home_win_prob,
-    actual: r.games.home_score > r.games.away_score ? 1 : 0,
+    actual: r.game.home_score > r.game.away_score ? 1 : 0,
   }));
 
   const brier = computeBrier(brierInputs);

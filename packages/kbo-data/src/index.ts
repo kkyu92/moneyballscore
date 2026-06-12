@@ -61,6 +61,10 @@ export {
 } from './factors/mlb-base';
 export type { MlbFactorInputs } from './factors/mlb-base';
 
+// MLB 파이프라인
+export { runMlbPipeline } from './pipeline/mlb-pipeline';
+export type { MlbPipelineMode, MlbPipelineResult } from './pipeline/mlb-pipeline';
+
 // 라이브
 export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
 
