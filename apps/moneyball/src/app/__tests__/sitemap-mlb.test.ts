@@ -69,3 +69,41 @@ describe('sitemap MLB URL coverage', () => {
     expect(lad?.priority).toBeGreaterThan(0);
   });
 });
+
+describe('sitemap /en/mlb/* English mirror URL coverage', () => {
+  it('/en/mlb hub — priority ≥ 0.8', async () => {
+    const urls = await sitemap();
+    const hub = urls.find((u) => u.url.endsWith('/en/mlb'));
+    expect(hub).toBeDefined();
+    expect(hub?.priority).toBeGreaterThanOrEqual(0.8);
+  });
+
+  it('/en/mlb 6 static routes present', async () => {
+    const urls = await sitemap();
+    const enStatic = [
+      '/en/mlb/team',
+      '/en/mlb/standings',
+      '/en/mlb/players',
+      '/en/mlb/factors',
+      '/en/mlb/wild-card',
+      '/en/mlb/postseason',
+    ];
+    for (const path of enStatic) {
+      expect(urls.find((u) => u.url.endsWith(path))).toBeDefined();
+    }
+  });
+
+  it('/en/mlb/team/[code] 30 dynamic routes present', async () => {
+    const urls = await sitemap();
+    const enTeam = urls.filter((u) => /\/en\/mlb\/team\/[A-Z]{2,3}$/.test(u.url));
+    expect(enTeam.length).toBe(30);
+    expect(enTeam.find((u) => u.url.endsWith('/en/mlb/team/LAD'))).toBeDefined();
+  });
+
+  it('/en/mlb/players/[id] 30 dynamic Statcast routes present', async () => {
+    const urls = await sitemap();
+    const enPlayers = urls.filter((u) => /\/en\/mlb\/players\/[A-Z]{2,3}$/.test(u.url));
+    expect(enPlayers.length).toBe(30);
+    expect(enPlayers.find((u) => u.url.endsWith('/en/mlb/players/NYY'))).toBeDefined();
+  });
+});
