@@ -60,7 +60,7 @@ describe('sitemap MLB URL coverage', () => {
   it('includes /mlb/players/[id] dynamic routes for 30 teams (plan #21 Step 1)', async () => {
     const urls = await sitemap();
     const playerDetailUrls = urls.filter((u) =>
-      /\/mlb\/players\/[A-Z]{2,3}$/.test(u.url),
+      /\/mlb\/players\/[A-Z]{2,3}$/.test(u.url) && !u.url.includes('/en/mlb/'),
     );
     expect(playerDetailUrls.length).toBe(30);
     // sample: LAD

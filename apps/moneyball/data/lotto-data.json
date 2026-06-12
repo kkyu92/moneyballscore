@@ -72,30 +72,13 @@
       "draw": 1226,
       "date": "2026-05-30",
       "passed": 256,
-      "failed": 0,
-      "winning_numbers": [4, 6, 13, 17, 26, 28],
-      "match_distribution": {
-        "variants": 4,
-        "tier_3_total": 1,
-        "tier_4_total": 0,
-        "tier_5_total": 0,
-        "tier_6_total": 0,
-        "note": "balanced variant #29 [6 9 16 17 24 28] 3매칭"
-      }
+      "failed": 0
     },
     {
       "draw": 1227,
       "date": "2026-06-06",
       "passed": 256,
-      "failed": 0,
-      "winning_numbers": [1, 14, 16, 34, 41, 44],
-      "match_distribution": {
-        "variants": 1,
-        "tier_3_total": 0,
-        "tier_4_total": 0,
-        "tier_5_total": 0,
-        "tier_6_total": 0
-      }
+      "failed": 0
     }
   ],
   "chain_fire_history": [

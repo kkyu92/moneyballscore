@@ -29,7 +29,7 @@
 
 1. ✅ **plan #6 Step B** ship 완료 (PR #1240 e663fe8, cycle 822) — Header NAV "로또" group 2 link (`/lotto/methodology` + `/lotto/archive`) + `/lotto/archive/page.tsx` index + Footer "로또" column 2 link 박제 확인.
 2. ✅ **1225회 OOS 검증** ship 완료 (PR #1246 cf86586, cycle 885) — 256 rules **100% PASS** + 5등 6건 (random 0.89 → 실제 6 = **6.7× over-perform**) + 1등 score breakdown (sum 거리 가중치 약점 80%+ 식별, valid pool top 10.86%) + 누적 OOS **N=2** (1224 + 1225).
-3. ⏳ **14일 AdSense reject signal monitor** (사용자 영역, **2026-05-22 ~ 06-05**) — Google AdSense policy center site review + Sentry warning channel. reject 신호 0 시 항목 4 Step C/D 박제 GO. reject 시 plan #6 + plan #7 모두 status=killed + plan #2 v1 보수 rollback (robots.ts AdSense crawler block 유지된 상태 → /lotto/archive indexable 도 되돌리기).
+3. ✅ **14일 AdSense reject signal monitor** 완료 (2026-06-12, cycle 1163) — 모니터 기간 05-22~06-05 reject 신호 0. plan #6/7 유지. plan #7 Step C/D 이미 ship (cycle 1138). lotto 섹션 자율 영역 완전 closed.
 4. ✅ **plan #7 Step C/D** ship 완료 (cycle 1138, 2026-06-10) — `/lotto` hub + `/lotto/archive/[date]` UI 강화 박제.
    - ✅ **Step C** — `/lotto/page.tsx` hub (ISR 1h) + picks-loader.ts + OG image. 추천 5세트 above-the-fold (gold border) + 50조합 default collapse + 통계 표. Header NAV 3 link 완성.
    - ✅ **Step D** — `/lotto/archive/[date]` 번호 ball + gold hero + collapse + 자연어 표기. Breadcrumb /lotto→archive→date.
