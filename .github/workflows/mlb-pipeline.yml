@@ -1,0 +1,89 @@
+name: MLB Pipeline (manual)
+
+# Schedule 없음 — Cloudflare Worker cron ('17 18-21,10 * * *') 이 primary trigger.
+# 본 workflow 는 수동 재실행/디버그 전용.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Pipeline mode'
+        required: true
+        type: choice
+        options:
+          - mlb_statsapi_scrape
+          - mlb_fancy_scrape
+          - mlb_savant_scrape
+          - mlb_predict_final
+          - mlb_combined_notify
+          - mlb_shadow_train
+          - mlb_walk_forward_measure
+      date:
+        description: 'Target date (YYYY-MM-DD, optional — defaults to today KST)'
+        required: false
+
+concurrency:
+  group: mlb-pipeline-${{ github.event.inputs.mode }}
+  cancel-in-progress: false
+
+jobs:
+  run-mlb-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run MLB pipeline
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          MLB_PIPELINE_URL="https://moneyballscore.vercel.app/api/mlb/pipeline"
+          MODE="${{ github.event.inputs.mode }}"
+          DATE="${{ github.event.inputs.date }}"
+
+          BODY="{\"mode\":\"${MODE}\",\"triggeredBy\":\"manual\""
+          if [ -n "$DATE" ]; then
+            BODY="${BODY},\"date\":\"${DATE}\""
+          fi
+          BODY="${BODY}}"
+
+          echo "Calling MLB pipeline: mode=$MODE date=${DATE:-today}"
+          curl -sf -X POST "$MLB_PIPELINE_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -d "$BODY" | jq .
+
+      - name: Notify playbook on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          TITLE="${WORKFLOW_NAME} 실패"
+          BODY="Workflow: ${WORKFLOW_NAME}
+          Run: ${RUN_URL}
+          Branch: ${BRANCH}
+          Commit: ${COMMIT_SHA}"
+          gh api repos/kkyu92/playbook/dispatches \
+            -f event_type=worker-error \
+            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[title]=${TITLE}" \
+            -f "client_payload[body]=${BODY}" \
+            -f "client_payload[type]=error-log" \
+            -f "client_payload[severity]=error" \
+            -f "client_payload[fingerprint]=cron-mlb-pipeline-failure" \
+            -f "client_payload[environment]=production" \
+            -f "client_payload[run_url]=${RUN_URL}"
