@@ -35,10 +35,25 @@ export interface SilentDriftAlertMeta {
   verifiedCount?: number;
 }
 
+// MLB modes that use rowsInserted=0 pattern (scrape/train/measure modes)
+const MLB_SCRAPE_MODES = new Set<string>([
+  'mlb_statsapi_scrape',
+  'mlb_fancy_scrape',
+  'mlb_savant_scrape',
+  'mlb_shadow_train',
+  'mlb_walk_forward_measure',
+]);
+
 export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {
   if (meta.gamesFound <= 0) return false;
 
   if (meta.mode === 'predict_final') {
+    const covered = meta.predictionsGenerated + (meta.existingPredictionsCount ?? 0);
+    return covered < meta.gamesFound;
+  }
+
+  // MLB predict_final — 동일 로직 (predictions coverage check)
+  if (meta.mode === 'mlb_predict_final') {
     const covered = meta.predictionsGenerated + (meta.existingPredictionsCount ?? 0);
     return covered < meta.gamesFound;
   }
@@ -49,6 +64,11 @@ export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {
   if (meta.mode === 'verify') {
     if (meta.verifiedCount === undefined) return false;
     return meta.verifiedCount === 0;
+  }
+
+  // MLB scrape/train/measure modes — gamesFound>0 단 rowsInserted=0 → silent drop
+  if (MLB_SCRAPE_MODES.has(meta.mode)) {
+    return meta.predictionsGenerated === 0;
   }
 
   return false;
@@ -75,10 +95,17 @@ export async function captureSilentDriftAlert(
   if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
 
   const isVerify = meta.mode === 'verify';
-  const message = isVerify ? 'verify_silent_drift' : 'predict_final_silent_drift';
+  const isMlb = meta.mode.startsWith('mlb_');
+  const message = isVerify
+    ? 'verify_silent_drift'
+    : isMlb
+      ? `mlb_${meta.mode}_silent_drift`
+      : 'predict_final_silent_drift';
   const pattern = isVerify
     ? 'silent_drift_family_case11_verify_extension'
-    : 'silent_drift_family_case11';
+    : isMlb
+      ? 'silent_drift_family_mlb'
+      : 'silent_drift_family_case11';
 
   try {
     Sentry.captureMessage(message, {

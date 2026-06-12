@@ -114,7 +114,18 @@ async function getOrCreatePlayerId(
   return created.id;
 }
 
-export type PipelineMode = 'announce' | 'predict' | 'predict_final' | 'verify';
+export type PipelineMode =
+  | 'announce'
+  | 'predict'
+  | 'predict_final'
+  | 'verify'
+  | 'mlb_statsapi_scrape'
+  | 'mlb_fancy_scrape'
+  | 'mlb_savant_scrape'
+  | 'mlb_predict_final'
+  | 'mlb_combined_notify'
+  | 'mlb_shadow_train'
+  | 'mlb_walk_forward_measure';
 
 /**
  * 통합 파이프라인 엔트리.
