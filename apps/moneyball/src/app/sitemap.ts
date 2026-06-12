@@ -68,6 +68,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/mlb/factors`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/mlb/wild-card`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/mlb/postseason`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    // /en/mlb/* English mirror static routes — Plan B Task 17 (cycle 1162)
+    { url: `${baseUrl}/en/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${baseUrl}/en/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
+    { url: `${baseUrl}/en/mlb/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${baseUrl}/en/mlb/players`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${baseUrl}/en/mlb/factors`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
+    { url: `${baseUrl}/en/mlb/wild-card`, lastModified: now, changeFrequency: 'daily', priority: 0.65 },
+    { url: `${baseUrl}/en/mlb/postseason`, lastModified: now, changeFrequency: 'daily', priority: 0.65 },
     { url: `${baseUrl}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${baseUrl}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${baseUrl}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
@@ -130,6 +138,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.55,
+    }),
+  );
+
+  // /en/mlb/team/[code] 30팀 English mirror — Plan B Task 17 (cycle 1162)
+  const enMlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
+    (code) => ({
+      url: `${baseUrl}/en/mlb/team/${code}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.55,
+    }),
+  );
+
+  // /en/mlb/players/[id] 30팀 English mirror Statcast — Plan B Task 17 (cycle 1162)
+  const enMlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
+    (code) => ({
+      url: `${baseUrl}/en/mlb/players/${code}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.5,
     }),
   );
 
@@ -254,6 +282,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...teamProfileRoutes,
     ...mlbTeamProfileRoutes,
     ...mlbPlayersDetailRoutes,
+    ...enMlbTeamProfileRoutes,
+    ...enMlbPlayersDetailRoutes,
     ...matchupRoutes,
     ...predictionDateRoutes,
     ...playerRoutes,
