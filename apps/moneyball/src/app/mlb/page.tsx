@@ -10,14 +10,14 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "MLB 분석 — 세이버메트릭스 14팩터 + Statcast | MoneyBall Score",
-  description: "MLB 162game 풀 인제스트 + 14팩터 (KBO 10 + Statcast 4) + Brier 측정. 영문 페이지 박제. Telegram MLB combined 알림.",
+  description: "MLB 30개 구단 162경기 분석 + 14팩터 모델 (KBO 10 + Statcast 4) 기반 승부예측. 한국어/영어 페이지 제공.",
   alternates: {
     canonical: `${SITE_URL}/mlb`,
     languages: { 'en': `${SITE_URL}/en/mlb`, 'ko': `${SITE_URL}/mlb` },
   },
   openGraph: {
-    title: "MLB 분석 정식 ship | MoneyBall Score",
-    description: "MLB 162game 풀 인제스트 + 14팩터 + Statcast",
+    title: "MLB 분석 | MoneyBall Score",
+    description: "MLB 162경기 분석 + 14팩터 모델 + Statcast",
     url: `${SITE_URL}/mlb`,
     type: "website",
   },
@@ -59,18 +59,18 @@ export default async function MlbHub() {
           MLB 분석
         </h1>
         <p className="text-base text-brand-600 dark:text-brand-300">
-          162game 풀 인제스트 · 14팩터 본선 (KBO 10 + Statcast 4) · Shadow C 학습 weights
+          162경기 시즌 분석 · 14팩터 모델 (KBO 10 + Statcast 4) · 데이터 기반 학습 가중치
         </p>
       </section>
 
       <section className="grid md:grid-cols-3 gap-4">
         <Link href={`/mlb/games/${today}`} className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">오늘 경기 ({todayGames?.length ?? 0})</h3>
-          <p className="text-xs text-brand-500 mt-1">14팩터 + 예측 confidence</p>
+          <p className="text-xs text-brand-500 mt-1">14팩터 + 예측 확률</p>
         </Link>
         <Link href="/mlb/standings" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
-          <h3 className="font-bold text-brand-700 dark:text-brand-100">팀 standings</h3>
-          <p className="text-xs text-brand-500 mt-1">AL/NL 6 division</p>
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">팀 순위</h3>
+          <p className="text-xs text-brand-500 mt-1">AL/NL 6 디비전</p>
         </Link>
         <Link href="/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast deep-dive</h3>
@@ -85,8 +85,8 @@ export default async function MlbHub() {
           <p className="text-xs text-amber-600 mt-1">ETA 2026-09</p>
         </Link>
         <Link href="/mlb/factors" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
-          <h3 className="font-bold text-brand-700 dark:text-brand-100">14 factor 설명</h3>
-          <p className="text-xs text-brand-500 mt-1">가중치 + HOME_ELO_BONUS</p>
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">14팩터 설명</h3>
+          <p className="text-xs text-brand-500 mt-1">가중치 + 홈팀 어드밴티지</p>
         </Link>
       </section>
     </main>
