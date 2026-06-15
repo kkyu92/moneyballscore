@@ -85,11 +85,4 @@ export const LottoScoreBacktestSchema = z.object({
 });
 
 export type LottoData = z.infer<typeof LottoDataSchema>;
-export type RulesHistoryEntry = z.infer<typeof RulesHistoryEntrySchema>;
-export type OOSPassRateEntry = z.infer<typeof OOSPassRateEntrySchema>;
-export type ChainFireHistoryEntry = z.infer<typeof ChainFireHistoryEntrySchema>;
-export type MatchDistribution = z.infer<typeof MatchDistributionSchema>;
-export type WinningScoreBreakdown = z.infer<typeof WinningScoreBreakdownSchema>;
 export type LottoScoreBacktest = z.infer<typeof LottoScoreBacktestSchema>;
-export type ScoreStats = z.infer<typeof ScoreStatsSchema>;
-export type ScorePercentiles = z.infer<typeof ScorePercentilesSchema>;
