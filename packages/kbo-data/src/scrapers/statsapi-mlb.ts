@@ -47,7 +47,7 @@ async function fetchWithRetry(url: string, retry = 0): Promise<Response> {
 }
 
 export async function fetchMlbSchedule(dateKst: string): Promise<MlbGame[]> {
-  const url = `${BASE_URL}/schedule?sportId=1&date=${dateKst}`;
+  const url = `${BASE_URL}/schedule?sportId=1&date=${dateKst}&hydrate=team`;
 
   try {
     const res = await fetchWithRetry(url);
