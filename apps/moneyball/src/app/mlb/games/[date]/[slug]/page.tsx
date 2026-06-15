@@ -14,12 +14,27 @@ interface PageParams {
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
+  const title = `${slug} ${date} 분석 | MoneyBall Score`;
+  const description = `${slug} 14팩터 + Statcast 4 + waterfall`;
   return {
-    title: `${slug} ${date} 분석 | MoneyBall Score`,
-    description: `${slug} 14팩터 + Statcast 4 + waterfall`,
+    title,
+    description,
     alternates: {
       canonical: `${SITE_URL}/mlb/games/${date}/${slug}`,
       languages: { 'en': `${SITE_URL}/en/mlb/games/${date}/${slug}`, 'ko': `${SITE_URL}/mlb/games/${date}/${slug}` },
+    },
+    openGraph: {
+      type: "website",
+      locale: "ko_KR",
+      siteName: "MoneyBall Score",
+      title,
+      description,
+      url: `${SITE_URL}/mlb/games/${date}/${slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }
