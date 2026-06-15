@@ -279,33 +279,51 @@ async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: numbe
 async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
   const errors: string[] = [];
 
-  // Load final games with predictions for Brier score computation
-  const { data: joined, error: jErr } = await db
+  // MLB predictions 는 predictions.mlb_game_date + external_game_id 에 박제 (game_id=NULL).
+  // 2-step: predictions select → mlb_schedule select via external_game_id IN.
+  // games!inner 조인은 KBO 전용 (game_id FK) — MLB 에 부적합 (silent drift family fix, cycle 1168).
+  const { data: preds, error: pErr } = await db
     .from('predictions')
-    .select('home_win_prob, games!inner(home_score, away_score, status)')
+    .select('external_game_id, home_win_prob')
     .eq('league', 'mlb')
     .eq('scoring_rule', 'mlb_v0.1')
-    .eq('game_date', date);
+    .eq('mlb_game_date', date);
 
-  if (jErr) {
-    errors.push(`joined select: ${jErr.message}`);
+  if (pErr) {
+    errors.push(`predictions select: ${pErr.message}`);
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
-  // Supabase join 결과 — games 관계는 배열로 반환됨. unknown 캐스트 후 처리.
-  const rawRows = (joined ?? []) as unknown as Array<{
-    home_win_prob: number;
-    games: Array<{ home_score: number; away_score: number; status: string }>;
-  }>;
+  const predList = ((preds ?? []) as Array<{ external_game_id: string; home_win_prob: number }>);
+  if (predList.length === 0) {
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
 
-  // games 배열에서 첫 번째 row 추출 후 final 필터
-  const rows = rawRows
-    .map((r) => ({ home_win_prob: r.home_win_prob, game: r.games[0] }))
-    .filter((r): r is { home_win_prob: number; game: { home_score: number; away_score: number; status: string } } => !!r.game);
+  const externalIds = predList.map((p) => p.external_game_id);
+  const { data: schedules, error: sErr } = await db
+    .from('mlb_schedule')
+    .select('external_game_id, home_score, away_score, status')
+    .in('external_game_id', externalIds)
+    .eq('status', 'final');
 
-  const finalRows = rows.filter((r) => r.game.status === 'final');
+  if (sErr) {
+    errors.push(`mlb_schedule select: ${sErr.message}`);
+    return { gamesFound: predList.length, rowsInserted: 0, errors };
+  }
+
+  const scheduleMap = new Map(
+    ((schedules ?? []) as Array<{ external_game_id: string; home_score: number; away_score: number; status: string }>).map((s) => [
+      s.external_game_id,
+      s,
+    ]),
+  );
+
+  const finalRows = predList
+    .filter((p) => scheduleMap.has(p.external_game_id))
+    .map((p) => ({ home_win_prob: p.home_win_prob, game: scheduleMap.get(p.external_game_id)! }));
+
   if (finalRows.length === 0) {
-    return { gamesFound: rows.length, rowsInserted: 0, errors };
+    return { gamesFound: predList.length, rowsInserted: 0, errors };
   }
 
   const brierInputs: BrierInput[] = finalRows.map((r) => ({
