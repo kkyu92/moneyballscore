@@ -9,6 +9,21 @@ export const metadata: Metadata = {
   description:
     "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
   alternates: { canonical: "https://moneyballscore.vercel.app/teams" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/teams",
+    siteName: "MoneyBall Score",
+    title: "팀 프로필 | MoneyBall Score",
+    description:
+      "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "팀 프로필 | MoneyBall Score",
+    description:
+      "KBO 10팀의 예측 기록·적중률·주요 투수·구장 특성 허브.",
+  },
 };
 
 const TEAM_ORDER: TeamCode[] = [
