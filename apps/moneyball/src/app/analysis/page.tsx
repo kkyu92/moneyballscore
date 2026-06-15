@@ -26,6 +26,19 @@ export const metadata: Metadata = {
   title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 이번 주 경기',
   description: '오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론 (홈/원정 옹호 + 심판 보정), 팩터별 강약점, 이번 주 전체 경기 신뢰도 정렬. 매일 09:00 KST 갱신.',
   alternates: { canonical: 'https://moneyballscore.vercel.app/analysis' },
+  openGraph: {
+    title: 'AI 분석 — 오늘 KBO 전체 경기 예측 | MoneyBall Score',
+    description: '오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론, 팩터별 강약점, 이번 주 신뢰도 정렬. 매일 09:00 KST 갱신.',
+    url: 'https://moneyballscore.vercel.app/analysis',
+    type: 'website',
+    locale: 'ko_KR',
+    siteName: 'MoneyBall Score',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI 분석 — 오늘 KBO 전체 경기 예측 | MoneyBall Score',
+    description: '오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론, 팩터별 강약점, 이번 주 신뢰도 정렬.',
+  },
 };
 
 export const revalidate = 3600;

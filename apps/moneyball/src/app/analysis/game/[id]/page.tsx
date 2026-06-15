@@ -129,7 +129,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    openGraph: { title, description },
+    openGraph: {
+      title,
+      description,
+      url: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+      type: 'article',
+      locale: 'ko_KR',
+      siteName: 'MoneyBall Score',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
     alternates: {
       canonical: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
     },
