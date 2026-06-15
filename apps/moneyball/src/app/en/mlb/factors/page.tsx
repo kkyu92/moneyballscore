@@ -23,6 +23,7 @@ export const metadata: Metadata = {
     description: "KBO 10 + Statcast 4 = 14-factor MLB prediction model weight table.",
     url: `${SITE_URL}/en/mlb/factors`,
     type: "website",
+    locale: "en_US",
   },
 };
 

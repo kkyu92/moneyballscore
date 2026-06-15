@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     description: "MLB 162-game analysis + 14-factor model + Statcast",
     url: `${SITE_URL}/en/mlb`,
     type: "website",
+    locale: "en_US",
   },
   twitter: { card: "summary_large_image" },
 };
