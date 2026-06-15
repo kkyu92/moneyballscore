@@ -33,6 +33,7 @@ import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
 import { captureSilentDriftAlert } from './silent-drift-alert';
+import { shouldNotifyPipelineStatus } from './notify-status-predicate';
 import { insertShadowRow, insertShadowRowV20 } from './shadow-cohort';
 import {
   computePredictionHistory,
@@ -192,12 +193,10 @@ export async function runDailyPipeline(
       console.error('[Pipeline] pipeline_runs insert failed:', errMsg(e));
     }
 
-    // Telegram status 는 의미 있는 run 에만 — 매시간 spam 방지
-    const shouldNotifyStatus =
-      (mode === 'predict' && result.predictionsGenerated > 0) ||
-      mode === 'predict_final' ||
-      mode === 'verify';
-    if (shouldNotifyStatus) {
+    // Telegram status — predict 는 (predictions>0 || errors>0) 일 때만.
+    // cycle 1191 wave 20 — predict mode errors[] 발생 silent layer 차단
+    // (predicate 단일 source = notify-status-predicate.ts).
+    if (shouldNotifyPipelineStatus(mode, result.predictionsGenerated, result.errors.length)) {
       try { await notifyPipelineStatus(result, durationMs); }
       catch (e) { console.error('[Pipeline] notifyPipelineStatus failed:', errMsg(e)); }
     }
