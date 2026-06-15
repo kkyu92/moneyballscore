@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 /**
  * Floating "앱 설치" 버튼 (cycle 1021 Tier 2 E PWA install prompt scope).
@@ -28,7 +29,29 @@ function getInitialDismissed(): boolean {
   }
 }
 
+const COPY = {
+  ko: {
+    dialogAria: '앱 설치 안내',
+    title: '앱으로 설치',
+    body: '홈 화면에 추가하고 더 빠르게 열어보세요.',
+    install: '설치',
+    later: '나중에',
+    closeAria: '닫기',
+  },
+  en: {
+    dialogAria: 'Install app',
+    title: 'Install as app',
+    body: 'Add to home screen for faster access.',
+    install: 'Install',
+    later: 'Later',
+    closeAria: 'Close',
+  },
+} as const;
+
 export function PWAInstallButton() {
+  const pathname = usePathname();
+  const locale: 'ko' | 'en' = pathname?.startsWith('/en/') || pathname === '/en' ? 'en' : 'ko';
+  const copy = COPY[locale];
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState<boolean>(getInitialDismissed);
 
@@ -90,15 +113,15 @@ export function PWAInstallButton() {
   return (
     <div
       role="dialog"
-      aria-label="앱 설치 안내"
+      aria-label={copy.dialogAria}
       className="fixed bottom-4 right-4 z-50 max-w-xs rounded-lg border border-brand-600 bg-brand-800 px-4 py-3 shadow-lg text-white"
     >
       <div className="flex items-start gap-3">
         <span className="text-2xl" aria-hidden>📱</span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">앱으로 설치</p>
+          <p className="text-sm font-medium">{copy.title}</p>
           <p className="text-xs text-brand-200 mt-0.5">
-            홈 화면에 추가하고 더 빠르게 열어보세요.
+            {copy.body}
           </p>
           <div className="mt-2 flex gap-2">
             <button
@@ -106,21 +129,21 @@ export function PWAInstallButton() {
               onClick={handleInstall}
               className="text-xs font-medium px-3 py-1.5 rounded bg-brand-500 hover:bg-brand-400 text-white transition-colors"
             >
-              설치
+              {copy.install}
             </button>
             <button
               type="button"
               onClick={handleDismiss}
               className="text-xs px-3 py-1.5 rounded text-brand-200 hover:text-white transition-colors"
             >
-              나중에
+              {copy.later}
             </button>
           </div>
         </div>
         <button
           type="button"
           onClick={handleDismiss}
-          aria-label="닫기"
+          aria-label={copy.closeAria}
           className="text-brand-300 hover:text-white text-sm leading-none"
         >
           ✕
