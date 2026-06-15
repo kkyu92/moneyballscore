@@ -43,11 +43,19 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          set -e
+          set -eo pipefail
           mkdir -p apps/moneyball/data/backtest-results
           DATE=$(date -u +%Y-%m-%d)
           OUT="apps/moneyball/data/backtest-results/${DATE}-manual-weights.txt"
           pnpm exec tsx packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts 2>&1 | tee "$OUT"
+          if [ ! -s "$OUT" ]; then
+            echo "::error::backtest output empty"
+            exit 1
+          fi
+          if grep -qE "Command \"tsx\" not found|ERR_PNPM" "$OUT"; then
+            echo "::error::tsx invocation failed (silent drift family)"
+            exit 1
+          fi
           echo "::notice::backtest result saved to $OUT"
 
       - name: Create PR (data prefix, R7 auto-merge)
