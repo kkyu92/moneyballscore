@@ -155,6 +155,14 @@ export async function runDailyPipeline(
   // coverage 판단 사용 (cycle 864 86% false positive fix).
   const existingPredictionsCount = { value: 0 };
 
+  // cycle 886 에 silent-drift-alert.ts 에 verify mode 분기 박제됐지만, finish()
+  // 가 verifiedCount 안 넘겨 silent drift 감지 영구 no-op (verifiedCount===undefined
+  // → 항상 false). cycle 1173~1181 = v1.8 cohort n=90 stable 8 사이클 + 1주+
+  // 미인지 결과의 root cause. verify mode 안 verifyResults.length 채워서 finish()
+  // captureSilentDriftAlert 에 전달. mode!=='verify' 시 0 유지 (silent-drift-alert
+  // 안 mode 분기가 알아서 무시).
+  const verifiedCount = { value: 0 };
+
   // 모든 exit 경로가 통과 — pipeline_runs 로그 + (조건부) Telegram status.
   const finish = async (result: PipelineResult): Promise<PipelineResult> => {
     const durationMs = Date.now() - startTime;
@@ -207,6 +215,7 @@ export async function runDailyPipeline(
         predictionsGenerated: result.predictionsGenerated,
         errors: result.errors,
         existingPredictionsCount: existingPredictionsCount.value,
+        verifiedCount: mode === 'verify' ? verifiedCount.value : undefined,
       });
     } catch (e) {
       console.error('[Pipeline] captureSilentDriftAlert failed:', errMsg(e));
@@ -401,6 +410,10 @@ export async function runDailyPipeline(
     } catch (e) {
       errors.push(`getVerifyResults: ${errMsg(e)}`);
     }
+    // verifiedCount = finish() captureSilentDriftAlert 가 사용. verify silent
+    // drop 감지 wire-up (cycle 1182 사례 wave 19 root cause fix). length=0 +
+    // games>0 → Sentry warning + Telegram 알림 (silent-drift-alert.ts).
+    verifiedCount.value = verifyResults.length;
     try {
       // verifyResults.length === 0 이어도 notifyResults 호출 — 함수 안 0-result
       // 명시 메시지 ("오늘 검증할 예측 결과가 없습니다") 박제로 사용자 알림 누락

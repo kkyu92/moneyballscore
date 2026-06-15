@@ -18,6 +18,7 @@
 // (M-V2) 의 evidence 누적 + 본 alert 가 함께 작동.
 
 import type { PipelineMode } from './daily';
+import { notifyError } from '../notify/telegram';
 
 export interface SilentDriftAlertMeta {
   mode: PipelineMode;
@@ -85,15 +86,6 @@ export async function captureSilentDriftAlert(
   if (!shouldAlertSilentDrift(meta)) return;
   if (process.env.NODE_ENV === 'test') return;
 
-  let Sentry: SentryModule | null = null;
-  try {
-    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
-  } catch {
-    return;
-  }
-  if (!Sentry || typeof Sentry.captureMessage !== 'function') return;
-  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
-
   const isVerify = meta.mode === 'verify';
   const isMlb = meta.mode.startsWith('mlb_');
   const message = isVerify
@@ -107,23 +99,53 @@ export async function captureSilentDriftAlert(
       ? 'silent_drift_family_mlb'
       : 'silent_drift_family_case11';
 
+  // Sentry warning channel (기존 — getClient 부재 시 silent skip).
+  let Sentry: SentryModule | null = null;
   try {
-    Sentry.captureMessage(message, {
-      level: 'warning',
-      tags: {
-        pattern,
-        pipeline_mode: meta.mode,
-        date: meta.date,
-      },
-      extra: {
-        games_found: meta.gamesFound,
-        predictions_generated: meta.predictionsGenerated,
-        verified_count: meta.verifiedCount,
-        errors: meta.errors,
-      },
-    });
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
   } catch {
-    // sentry capture fail silent — main path 보호
+    Sentry = null;
+  }
+  if (Sentry && typeof Sentry.captureMessage === 'function') {
+    const hasClient = typeof Sentry.getClient === 'function' ? !!Sentry.getClient() : true;
+    if (hasClient) {
+      try {
+        Sentry.captureMessage(message, {
+          level: 'warning',
+          tags: {
+            pattern,
+            pipeline_mode: meta.mode,
+            date: meta.date,
+          },
+          extra: {
+            games_found: meta.gamesFound,
+            predictions_generated: meta.predictionsGenerated,
+            verified_count: meta.verifiedCount,
+            errors: meta.errors,
+          },
+        });
+      } catch {
+        // sentry capture fail silent — main path 보호
+      }
+    }
+  }
+
+  // cycle 1182 — Telegram fallback. Sentry warning 만 보면 사용자 가시 채널
+  // 부재 (cycle 1173~1181 = wave 19 1주+ 미인지 root cause 2nd layer). 본
+  // dispatcher 가 shouldAlert=true 도달했단 건 silent drop evidence 명확 → 사용자
+  // 가시 알림 의무. silent drift family detection 단일 채널 (#34 fallback +
+  // submit-lesson 패턴 정합).
+  try {
+    const verifiedText = meta.verifiedCount !== undefined
+      ? ` verified=${meta.verifiedCount}` : '';
+    const errCount = meta.errors?.length ?? 0;
+    const errText = errCount > 0 ? ` errors=${errCount}` : '';
+    await notifyError(
+      `silent-drift ${meta.mode} ${meta.date}`,
+      `games=${meta.gamesFound} predictions=${meta.predictionsGenerated}${verifiedText}${errText} pattern=${pattern}`,
+    );
+  } catch {
+    // telegram fail silent — main path 보호
   }
 }
 
