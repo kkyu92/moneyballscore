@@ -21,9 +21,17 @@ function secure(res: NextResponse): NextResponse {
   return res;
 }
 
+function pathHeaders(req: NextRequest): Headers {
+  const h = new Headers(req.headers);
+  h.set('x-pathname', req.nextUrl.pathname);
+  return h;
+}
+
 export function middleware(req: NextRequest) {
+  const requestHeaders = pathHeaders(req);
+
   if (!req.nextUrl.pathname.startsWith('/debug')) {
-    return secure(NextResponse.next());
+    return secure(NextResponse.next({ request: { headers: requestHeaders } }));
   }
 
   const auth = req.headers.get('authorization');
@@ -64,7 +72,7 @@ export function middleware(req: NextRequest) {
     );
   }
 
-  return secure(NextResponse.next());
+  return secure(NextResponse.next({ request: { headers: requestHeaders } }));
 }
 
 export const config = {

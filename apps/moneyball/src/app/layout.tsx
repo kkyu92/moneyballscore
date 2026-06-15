@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -84,14 +85,22 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") ?? "";
+  const isEn = pathname.startsWith("/en");
+  const lang = isEn ? "en" : "ko";
+  const skipText = isEn ? "Skip to main content" : "본문 바로가기";
+  const siteDescription = isEn
+    ? "KBO baseball prediction based on sabermetrics"
+    : "세이버메트릭스 기반 프로야구 승부예측";
   return (
     <html
-      lang="ko"
+      lang={lang}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -112,7 +121,7 @@ export default function RootLayout({
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-md focus:shadow-lg"
         >
-          본문 바로가기
+          {skipText}
         </a>
         <script
           type="application/ld+json"
@@ -122,8 +131,8 @@ export default function RootLayout({
               "@type": "WebSite",
               name: "MoneyBall Score",
               url: "https://moneyballscore.vercel.app",
-              description: "세이버메트릭스 기반 프로야구 승부예측",
-              inLanguage: "ko",
+              description: siteDescription,
+              inLanguage: lang,
               publisher: {
                 "@type": "Organization",
                 name: "MoneyBall Score",
