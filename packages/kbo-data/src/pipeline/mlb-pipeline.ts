@@ -388,15 +388,18 @@ export async function runMlbPipeline(
 
   // pipeline_runs 기록 — MLB 실행 추적
   const hasErrors = errors.length > 0;
-  const runStatus = rowsInserted > 0 ? 'success' : hasErrors ? 'error' : 'success';
+  const runStatus = hasErrors && rowsInserted === 0 ? 'error' : 'success';
   await db.from('pipeline_runs').insert({
+    run_date: date,
     league: 'mlb',
     mode,
     status: runStatus,
     games_found: gamesFound,
     predictions: rowsInserted,
-    errors: hasErrors ? errors : null,
+    errors: hasErrors ? errors : [],
     triggered_by: triggeredBy,
+  }).then(({ error: e }) => {
+    if (e) console.error(`[MLB] pipeline_runs insert failed: ${e.message}`);
   });
 
   // Silent drift alert — MLB modes 매핑
