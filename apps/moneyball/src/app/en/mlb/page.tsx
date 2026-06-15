@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
 
 export const revalidate = 1800;
@@ -47,7 +48,10 @@ export default async function MlbHubEn() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
-      <Breadcrumb items={[{ label: "MLB Analysis" }]} />
+      <div className="flex items-center justify-between gap-3">
+        <Breadcrumb items={[{ label: "MLB Analysis" }]} />
+        <LanguageSwitch koHref="/mlb" enHref="/en/mlb" current="en" />
+      </div>
 
       <section className="text-center space-y-3 py-6">
         <h1 className="text-3xl md:text-5xl font-bold text-brand-700 dark:text-brand-100">
