@@ -22,7 +22,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Analysis | MoneyBall Score",
+    description: "MLB 162-game analysis + 14-factor model + Statcast",
+  },
 };
 
 export default async function MlbHubEn() {

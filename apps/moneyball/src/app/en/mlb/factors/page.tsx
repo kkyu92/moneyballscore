@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB 14 Model Factors Weights | MoneyBall Score",
+    description: "KBO 10 + Statcast 4 = 14-factor MLB prediction model weight table.",
+  },
 };
 
 type FactorRow = {

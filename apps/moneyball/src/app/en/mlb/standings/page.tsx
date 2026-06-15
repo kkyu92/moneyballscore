@@ -31,6 +31,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB AL/NL Standings — 6 Divisions | MoneyBall Score",
+    description: "AL/NL × East/Central/West 6-division team composition and park factors.",
+  },
 };
 
 const LEAGUES: MlbLeagueSide[] = ["AL", "NL"];

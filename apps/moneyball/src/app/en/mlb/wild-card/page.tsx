@@ -31,6 +31,12 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Wild Card Race | MoneyBall Score",
+    description:
+      "MLB AL/NL Wild Card 3-spot race + 14-factor model base — Live data ETA 2026-08.",
+  },
 };
 
 const LEAGUES: MlbLeagueSide[] = ["AL", "NL"];

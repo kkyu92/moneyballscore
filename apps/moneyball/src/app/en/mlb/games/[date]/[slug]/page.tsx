@@ -14,12 +14,19 @@ interface PageParams {
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
+  const title = `${slug} ${date} Analysis | MoneyBall Score`;
+  const description = `${slug} 14-factor breakdown + Statcast 4 + waterfall prediction.`;
   return {
-    title: `${slug} ${date} Analysis | MoneyBall Score`,
-    description: `${slug} 14-factor breakdown + Statcast 4 + waterfall prediction.`,
+    title,
+    description,
     alternates: {
       canonical: `${SITE_URL}/en/mlb/games/${date}/${slug}`,
       languages: { en: `${SITE_URL}/en/mlb/games/${date}/${slug}`, ko: `${SITE_URL}/mlb/games/${date}/${slug}` },
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }
