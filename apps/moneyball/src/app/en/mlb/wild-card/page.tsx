@@ -54,6 +54,7 @@ export default function MlbWildCardHubEn() {
           { href: "/en/mlb", label: "MLB Analysis" },
           { label: "Wild Card Race" },
         ]}
+        locale="en"
       />
 
       <header className="space-y-2">

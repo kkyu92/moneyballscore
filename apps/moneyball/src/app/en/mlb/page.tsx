@@ -49,7 +49,7 @@ export default async function MlbHubEn() {
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
       <div className="flex items-center justify-between gap-3">
-        <Breadcrumb items={[{ label: "MLB Analysis" }]} />
+        <Breadcrumb items={[{ label: "MLB Analysis" }]} locale="en" />
         <LanguageSwitch koHref="/mlb" enHref="/en/mlb" current="en" />
       </div>
 

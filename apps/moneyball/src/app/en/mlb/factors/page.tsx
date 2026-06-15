@@ -244,6 +244,7 @@ export default function MlbFactorsHubEn() {
           { href: "/en/mlb", label: "MLB Analysis" },
           { label: "14 Model Factors" },
         ]}
+        locale="en"
       />
 
       <header className="space-y-2">

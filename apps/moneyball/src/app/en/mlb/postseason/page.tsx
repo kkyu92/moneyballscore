@@ -95,6 +95,7 @@ export default function MlbPostseasonHubEn() {
           { href: "/en/mlb", label: "MLB Analysis" },
           { label: "Postseason Bracket" },
         ]}
+        locale="en"
       />
 
       <header className="space-y-2">
