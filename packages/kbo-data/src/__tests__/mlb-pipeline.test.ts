@@ -115,6 +115,42 @@ describe('runMlbPipeline', () => {
     assertResultShape(result, 'mlb_walk_forward_measure');
   });
 
+  it('mlb_walk_forward_measure — predictions 쿼리 컬럼 mlb_game_date 사용 (silent drift family fix, cycle 1168)', async () => {
+    const eqCalls: Array<[string, unknown]> = [];
+    const fromCalls: string[] = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    type QueryBuilder = {
+      select: ReturnType<typeof vi.fn>;
+      insert: ReturnType<typeof vi.fn>;
+      eq: ReturnType<typeof vi.fn>;
+      in: ReturnType<typeof vi.fn>;
+    };
+    const builder: QueryBuilder = {
+      select: vi.fn(() => builder),
+      insert: vi.fn().mockResolvedValue({ error: null }),
+      eq: vi.fn((col: string, val: unknown) => {
+        eqCalls.push([col, val]);
+        return builder;
+      }),
+      in: vi.fn(() => builder),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        fromCalls.push(table);
+        return builder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_walk_forward_measure', DATE, TRIGGERED_BY);
+
+    expect(fromCalls).toContain('predictions');
+    expect(eqCalls.some(([col]) => col === 'mlb_game_date')).toBe(true);
+    expect(eqCalls.some(([col]) => col === 'game_date')).toBe(false);
+  });
+
   it('unknown mode → throw Error', async () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     // @ts-expect-error intentional invalid mode
