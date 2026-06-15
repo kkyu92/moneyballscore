@@ -86,25 +86,24 @@ async function runStatsApiScrape(db: DB, date: string): Promise<{ gamesFound: nu
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
-  // Upsert into games table with league='mlb'
   const rows = games.map((g) => ({
     league: 'mlb',
     external_game_id: String(g.gamePk),
     game_date: date,
     game_datetime_utc: g.gameDateUtc.toISOString(),
-    home_team: g.homeTeam,
-    away_team: g.awayTeam,
+    home_team_code: g.homeTeam,
+    away_team_code: g.awayTeam,
     status: g.status,
     home_score: g.homeScore ?? null,
     away_score: g.awayScore ?? null,
   }));
 
   const { error } = await db
-    .from('games')
+    .from('mlb_schedule')
     .upsert(rows, { onConflict: 'external_game_id' });
 
   if (error) {
-    errors.push(`games upsert: ${error.message}`);
+    errors.push(`mlb_schedule upsert: ${error.message}`);
     return { gamesFound: games.length, rowsInserted: 0, errors };
   }
 
@@ -117,28 +116,24 @@ async function runStatsApiScrape(db: DB, date: string): Promise<{ gamesFound: nu
 async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
   const errors: string[] = [];
 
-  // Load today's MLB games from DB
+  // Load today's MLB games from mlb_schedule
   const { data: games, error: gErr } = await db
-    .from('games')
-    .select('external_game_id, home_team, away_team')
-    .eq('league', 'mlb')
+    .from('mlb_schedule')
+    .select('external_game_id, home_team_code, away_team_code')
     .eq('game_date', date)
     .eq('status', 'scheduled');
 
   if (gErr) {
-    errors.push(`games select: ${gErr.message}`);
+    errors.push(`mlb_schedule select: ${gErr.message}`);
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
-  const gameList = (games ?? []) as Array<{ external_game_id: string; home_team: string; away_team: string }>;
+  const gameList = (games ?? []) as Array<{ external_game_id: string; home_team_code: string; away_team_code: string }>;
   if (gameList.length === 0) {
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
-  // Compute probability for each game using default inputs
-  // Full factor inputs will be wired when scrapers are complete (stub values for now)
   const predictionRows = gameList.map((g) => {
-    // stub factor inputs — 스크래퍼 완성 전 default neutral values
     const prob = computeMlbProbability({
       sp_fip: { home: 4.0, away: 4.0 },
       sp_xfip: { home: 4.0, away: 4.0 },
@@ -157,11 +152,10 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     });
     return {
       league: 'mlb',
-      game_date: date,
       external_game_id: g.external_game_id,
-      home_team: g.home_team,
-      away_team: g.away_team,
+      mlb_game_date: date,
       home_win_prob: prob,
+      predicted_winner: prob >= 0.5 ? g.home_team_code : g.away_team_code,
       scoring_rule: 'mlb_v0.1',
     };
   });
@@ -194,16 +188,15 @@ async function runCombinedNotify(_db: DB, _date: string): Promise<{ gamesFound: 
 async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
   const errors: string[] = [];
 
-  // Load resolved MLB games (has result) for training
+  // Load resolved MLB games from mlb_schedule
   const { data: games, error: gErr } = await db
-    .from('games')
+    .from('mlb_schedule')
     .select('external_game_id, home_score, away_score')
-    .eq('league', 'mlb')
     .eq('game_date', date)
     .eq('status', 'final');
 
   if (gErr) {
-    errors.push(`games select: ${gErr.message}`);
+    errors.push(`mlb_schedule select: ${gErr.message}`);
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
@@ -393,12 +386,24 @@ export async function runMlbPipeline(
     }
   }
 
+  // pipeline_runs 기록 — MLB 실행 추적
+  const hasErrors = errors.length > 0;
+  const runStatus = rowsInserted > 0 ? 'success' : hasErrors ? 'error' : 'success';
+  await db.from('pipeline_runs').insert({
+    league: 'mlb',
+    mode,
+    status: runStatus,
+    games_found: gamesFound,
+    predictions: rowsInserted,
+    errors: hasErrors ? errors : null,
+    triggered_by: triggeredBy,
+  });
+
   // Silent drift alert — MLB modes 매핑
   await captureSilentDriftAlert({
     mode,
     date,
     gamesFound,
-    // rowsInserted → predictionsGenerated 필드로 전달
     predictionsGenerated: rowsInserted,
     errors,
   });
