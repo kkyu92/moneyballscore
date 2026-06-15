@@ -21,11 +21,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { date } = await params;
   const variants = readArchiveVariants(date);
   const title = variants ? `${date} 50조합 아카이브` : "아카이브 조회 불가";
+  const description = "통계 분석 기반 50조합 기록 (회피 조건 통과 조합). 행동/베팅/구매 권유 X.";
   return {
     title,
-    description: "통계 분석 기반 50조합 기록 (회피 조건 통과 조합). 행동/베팅/구매 권유 X.",
+    description,
     alternates: { canonical: `https://moneyballscore.vercel.app/lotto/archive/${date}` },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+    openGraph: {
+      title,
+      description,
+      url: `https://moneyballscore.vercel.app/lotto/archive/${date}`,
+      type: "article",
+      locale: "ko_KR",
+      siteName: "MoneyBall Score",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "MoneyBall Score",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "KBO 팀 순위 2026 | MoneyBall Score",
+    description: "2026 KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.",
+  },
 };
 
 function formatWinPct(v: number): string {

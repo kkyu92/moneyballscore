@@ -11,6 +11,21 @@ export const metadata: Metadata = {
   description:
     "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
   alternates: { canonical: "https://moneyballscore.vercel.app/players" },
+  openGraph: {
+    title: "KBO 선수 리더보드 | MoneyBall Score",
+    description:
+      "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
+    url: "https://moneyballscore.vercel.app/players",
+    type: "website",
+    locale: "ko_KR",
+    siteName: "MoneyBall Score",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KBO 선수 리더보드 | MoneyBall Score",
+    description:
+      "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 · 타자 Top 10.",
+  },
 };
 
 export const revalidate = 1800;
