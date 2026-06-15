@@ -26,7 +26,8 @@
       "brace-expansion@4": ">=4.0.1",
       "brace-expansion@5": ">=5.0.6",
       "ws": ">=8.20.1",
-      "turbo": ">=2.9.14"
+      "turbo": ">=2.9.14",
+      "esbuild": ">=0.28.1"
     }
   },
   "version": "0.5.48.0"
