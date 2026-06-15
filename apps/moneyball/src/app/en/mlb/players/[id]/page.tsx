@@ -123,6 +123,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
     "@type": "SportsTeam",
     "@id": pageUrl,
     url: pageUrl,
+    inLanguage: "en-US",
     name: team.name,
     sport: "Baseball",
     description: `${team.name} Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) measurements + individual player layer ETA.`,

@@ -110,6 +110,7 @@ export default function MlbPlayersHubEn() {
     description:
       "MLB 14-factor model Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status.",
     url: `${SITE_URL}/en/mlb/players`,
+    inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: 30,

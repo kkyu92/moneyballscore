@@ -84,6 +84,7 @@ export default function MlbPostseasonHubEn() {
     description:
       "MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + 14-factor model series predictions.",
     url: `${SITE_URL}/en/mlb/postseason`,
+    inLanguage: "en-US",
     isPartOf: {
       "@type": "WebSite",
       name: "MoneyBall Score",

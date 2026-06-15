@@ -69,6 +69,7 @@ export default function MlbStandingsHubEn() {
     description:
       "MLB AL/NL × East/Central/West 6-division team composition. Live season W/L standings integration coming soon.",
     url: `${SITE_URL}/en/mlb/standings`,
+    inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: 30,
