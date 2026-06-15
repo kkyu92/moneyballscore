@@ -18,6 +18,19 @@ export const metadata: Metadata = {
   title: "예측 결과 리뷰",
   description: "KBO 승부예측 적중 vs 빗나간 결과 리뷰 — 주간·월간·전체 시즌 적중률 추이, 팀별·요일별 분해, 빗나간 예측의 사후 분석을 한 페이지에서 확인.",
   alternates: { canonical: "https://moneyballscore.vercel.app/reviews" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/reviews",
+    siteName: "MoneyBall Score",
+    title: "예측 결과 리뷰 | MoneyBall Score",
+    description: "KBO 승부예측 적중 vs 빗나간 결과 리뷰 — 주간·월간·전체 시즌 적중률 추이.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "예측 결과 리뷰 | MoneyBall Score",
+    description: "KBO 승부예측 적중 vs 빗나간 결과 리뷰.",
+  },
 };
 
 export const revalidate = 600;
