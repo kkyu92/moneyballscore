@@ -115,6 +115,72 @@ describe('runMlbPipeline', () => {
     assertResultShape(result, 'mlb_walk_forward_measure');
   });
 
+  it('mlb_predict_final — predictions insert 모든 row predicted_winner=null (regression: cycle 1180 PHI integer cast fix)', async () => {
+    // 회귀 가드: predicted_winner = INT REFERENCES teams(id) — KBO teams 만 row 보유.
+    // MLB 팀 row 부재 → string team_code (PHI/BOS/NYY 등) insert 시 Postgres
+    // "invalid input syntax for type integer" 전체 batch fail. 본 테스트는
+    // insert payload 의 모든 row 가 predicted_winner=null 임을 명시 강제.
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    type QueryBuilder = {
+      select: ReturnType<typeof vi.fn>;
+      insert: ReturnType<typeof vi.fn>;
+      delete: ReturnType<typeof vi.fn>;
+      eq: ReturnType<typeof vi.fn>;
+    };
+    const scheduleGames = [
+      { external_game_id: '1001', home_team_code: 'PHI', away_team_code: 'BOS' },
+      { external_game_id: '1002', home_team_code: 'NYY', away_team_code: 'LAD' },
+    ];
+
+    const builder: QueryBuilder = {
+      select: vi.fn(() => builder),
+      delete: vi.fn(() => builder),
+      eq: vi.fn(() => builder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) {
+          insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        }
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    // mlb_schedule select → scheduleGames, predictions delete/insert → builder
+    let mlbScheduleSelected = false;
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule' && !mlbScheduleSelected) {
+          mlbScheduleSelected = true;
+          return {
+            ...builder,
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+              })),
+            })),
+          };
+        }
+        return builder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    expect(insertedRows.length).toBe(2);
+    for (const row of insertedRows) {
+      expect(row.predicted_winner).toBeNull();
+      expect(row.league).toBe('mlb');
+      expect(row.scoring_rule).toBe('mlb_v0.1');
+      // string team_code 가 predicted_winner 에 새지 않았는지 명시 강제
+      expect(row.predicted_winner).not.toBe('PHI');
+      expect(row.predicted_winner).not.toBe('BOS');
+      expect(row.predicted_winner).not.toBe('NYY');
+      expect(row.predicted_winner).not.toBe('LAD');
+    }
+  });
+
   it('mlb_walk_forward_measure — predictions 쿼리 컬럼 mlb_game_date 사용 (silent drift family fix, cycle 1168)', async () => {
     const eqCalls: Array<[string, unknown]> = [];
     const fromCalls: string[] = [];
