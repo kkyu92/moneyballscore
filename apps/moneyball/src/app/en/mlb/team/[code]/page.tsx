@@ -90,6 +90,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
     "@type": "SportsTeam",
     "@id": teamUrl,
     url: teamUrl,
+    inLanguage: "en-US",
     name: profile.name,
     sport: "Baseball",
     logo: logoUrl,

@@ -234,6 +234,7 @@ export default function MlbFactorsHubEn() {
     description:
       "MLB 14-factor model = KBO 10 + Statcast 4. Each factor's weight, definition, source, and application method.",
     url: `${SITE_URL}/en/mlb/factors`,
+    inLanguage: "en-US",
     author: { "@type": "Organization", name: "MoneyBall Score" },
     about: { "@type": "Thing", name: "MLB sabermetrics prediction model" },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/en/mlb/factors` },

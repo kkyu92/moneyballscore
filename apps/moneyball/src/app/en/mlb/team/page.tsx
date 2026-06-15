@@ -52,6 +52,7 @@ export default function MlbTeamsHubEn() {
     name: "MLB Team Profiles",
     description: "MLB 30 team season prediction records · 14-factor model · Home ballpark park factor",
     url: `${SITE_URL}/en/mlb/team`,
+    inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: 30,
