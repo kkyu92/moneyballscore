@@ -160,12 +160,25 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     };
   });
 
+  // delete-then-insert (partial index 대신 idempotent 보장)
+  const { error: dErr } = await db
+    .from('predictions')
+    .delete()
+    .eq('league', 'mlb')
+    .eq('mlb_game_date', date)
+    .eq('scoring_rule', 'mlb_v0.1');
+
+  if (dErr) {
+    errors.push(`predictions delete: ${dErr.message}`);
+    return { gamesFound: gameList.length, rowsInserted: 0, errors };
+  }
+
   const { error: pErr } = await db
     .from('predictions')
-    .upsert(predictionRows, { onConflict: 'external_game_id,scoring_rule' });
+    .insert(predictionRows);
 
   if (pErr) {
-    errors.push(`predictions upsert: ${pErr.message}`);
+    errors.push(`predictions insert: ${pErr.message}`);
     return { gamesFound: gameList.length, rowsInserted: 0, errors };
   }
 
