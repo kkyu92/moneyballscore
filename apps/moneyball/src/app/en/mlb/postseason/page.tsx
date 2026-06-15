@@ -25,6 +25,12 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Postseason Bracket | MoneyBall Score",
+    description:
+      "MLB Postseason 4-round bracket + 14-factor series predictions — Live integration ETA 2026-09.",
+  },
 };
 
 type PostseasonRound = {

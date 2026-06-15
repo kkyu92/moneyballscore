@@ -31,6 +31,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Statcast 4 Factors | MoneyBall Score",
+    description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14-factor Statcast 4.",
+  },
 };
 
 const LEAGUES: MlbLeagueSide[] = ["AL", "NL"];

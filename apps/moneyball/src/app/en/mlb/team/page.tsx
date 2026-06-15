@@ -31,6 +31,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Teams — 30 Profiles | MoneyBall Score",
+    description: "MLB 30 team season prediction records + 14 factors",
+  },
 };
 
 const LEAGUES: MlbLeagueSide[] = ["AL", "NL"];
