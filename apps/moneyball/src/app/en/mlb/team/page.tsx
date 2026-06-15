@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     description: "MLB 30 team season prediction records + 14 factors",
     url: `${SITE_URL}/en/mlb/team`,
     type: "website",
+    locale: "en_US",
   },
 };
 

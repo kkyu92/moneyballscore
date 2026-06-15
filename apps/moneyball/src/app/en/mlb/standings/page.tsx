@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     description: "AL/NL × East/Central/West 6-division team composition and park factors.",
     url: `${SITE_URL}/en/mlb/standings`,
     type: "website",
+    locale: "en_US",
   },
 };
 

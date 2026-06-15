@@ -29,6 +29,7 @@ export const metadata: Metadata = {
       "MLB AL/NL Wild Card 3-spot race + 14-factor model base — Live data ETA 2026-08.",
     url: `${SITE_URL}/en/mlb/wild-card`,
     type: "website",
+    locale: "en_US",
   },
 };
 

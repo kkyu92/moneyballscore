@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14-factor Statcast 4.",
     url: `${SITE_URL}/en/mlb/players`,
     type: "website",
+    locale: "en_US",
   },
 };
 

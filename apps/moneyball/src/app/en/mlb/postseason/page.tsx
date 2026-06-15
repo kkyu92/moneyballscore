@@ -23,6 +23,7 @@ export const metadata: Metadata = {
       "MLB Postseason 4-round bracket + 14-factor series predictions — Live integration ETA 2026-09.",
     url: `${SITE_URL}/en/mlb/postseason`,
     type: "website",
+    locale: "en_US",
   },
 };
 
