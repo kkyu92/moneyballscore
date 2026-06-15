@@ -155,7 +155,9 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       external_game_id: g.external_game_id,
       mlb_game_date: date,
       home_win_prob: prob,
-      predicted_winner: prob >= 0.5 ? g.home_team_code : g.away_team_code,
+      // predicted_winner = INT REFERENCES teams(id) — KBO 전용. MLB 팀 row 부재 → null.
+      // 승자 정보는 home_win_prob + mlb_schedule.home/away_team_code 로 derive.
+      predicted_winner: null,
       scoring_rule: 'mlb_v0.1',
     };
   });
