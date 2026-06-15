@@ -8,19 +8,23 @@ export interface BreadcrumbItem {
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
   className?: string;
+  locale?: 'ko' | 'en';
 }
 
 const SITE_URL = 'https://moneyballscore.vercel.app';
 
-export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
+export function Breadcrumb({ items, className = '', locale = 'ko' }: BreadcrumbProps) {
   if (items.length === 0) return null;
+
+  const homeLabel = locale === 'en' ? 'Home' : '홈';
+  const homeHref = locale === 'en' ? '/en/mlb' : '/';
 
   const itemListElement = [
     {
       '@type': 'ListItem',
       position: 1,
-      name: '홈',
-      item: SITE_URL,
+      name: homeLabel,
+      item: locale === 'en' ? `${SITE_URL}${homeHref}` : SITE_URL,
     },
     ...items.map((item, idx) => ({
       '@type': 'ListItem',
@@ -45,10 +49,10 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
         <ol className="flex items-center gap-1.5 flex-wrap">
           <li>
             <Link
-              href="/"
+              href={homeHref}
               className="hover:text-brand-600 dark:hover:text-brand-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
             >
-              홈
+              {homeLabel}
             </Link>
           </li>
           {items.map((item, idx) => {

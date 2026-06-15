@@ -78,6 +78,7 @@ export default function MlbTeamsHubEn() {
           { href: "/en/mlb", label: "MLB Analysis" },
           { label: "Teams" },
         ]}
+        locale="en"
       />
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB Team Profiles</h1>

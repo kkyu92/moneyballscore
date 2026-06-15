@@ -67,7 +67,7 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
       <Breadcrumb items={[
         { label: 'MLB Analysis', href: '/en/mlb' },
         { label: date },
-      ]} />
+      ]} locale="en" />
 
       <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         MLB Games — {date}

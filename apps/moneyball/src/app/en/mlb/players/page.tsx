@@ -135,6 +135,7 @@ export default function MlbPlayersHubEn() {
           { href: "/en/mlb", label: "MLB Analysis" },
           { label: "Statcast 4 Factors" },
         ]}
+        locale="en"
       />
 
       <header className="space-y-2">

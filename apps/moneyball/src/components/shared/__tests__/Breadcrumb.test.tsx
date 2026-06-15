@@ -93,4 +93,23 @@ describe("Breadcrumb", () => {
     expect(screen.queryByRole("link", { name: "팀" })).toBeNull();
     expect(screen.getByText("팀")).toBeInTheDocument();
   });
+
+  it("locale='en' 시 첫 link label 'Home' + href '/en/mlb' 박제", () => {
+    render(<Breadcrumb items={[{ label: "MLB Analysis" }]} locale="en" />);
+    const home = screen.getByRole("link", { name: "Home" });
+    expect(home).toHaveAttribute("href", "/en/mlb");
+    expect(screen.queryByText("홈")).toBeNull();
+  });
+
+  it("locale='en' 시 JSON-LD itemListElement[0].name='Home' + 절대 URL '/en/mlb' 박제", () => {
+    const { container } = render(
+      <Breadcrumb items={[{ label: "MLB Analysis" }]} locale="en" />,
+    );
+    const ld = container.querySelector('script[type="application/ld+json"]');
+    const parsed = JSON.parse(ld!.textContent!);
+    expect(parsed.itemListElement[0].name).toBe("Home");
+    expect(parsed.itemListElement[0].item).toBe(
+      "https://moneyballscore.vercel.app/en/mlb",
+    );
+  });
 });

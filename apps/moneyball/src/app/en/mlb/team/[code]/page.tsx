@@ -116,6 +116,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           { href: "/en/mlb/team", label: "Teams" },
           { label: profile.name },
         ]}
+        locale="en"
       />
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">

@@ -91,7 +91,7 @@ export default async function GameDetailEn({ params }: PageParams) {
         { label: 'MLB Analysis', href: '/en/mlb' },
         { label: date, href: `/en/mlb/games/${date}` },
         { label: `${home} vs ${away}` },
-      ]} />
+      ]} locale="en" />
 
       <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         {home} vs {away}

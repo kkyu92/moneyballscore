@@ -153,6 +153,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
           { href: "/en/mlb/players", label: "Statcast Players" },
           { label: team.name },
         ]}
+        locale="en"
       />
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">

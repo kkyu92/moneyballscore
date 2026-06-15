@@ -95,6 +95,7 @@ export default function MlbStandingsHubEn() {
           { href: "/en/mlb", label: "MLB Analysis" },
           { label: "AL/NL Standings" },
         ]}
+        locale="en"
       />
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB AL/NL Standings</h1>
