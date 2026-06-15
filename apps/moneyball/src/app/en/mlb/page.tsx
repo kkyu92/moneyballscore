@@ -10,14 +10,14 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "MLB Analysis — 14-Factor Sabermetrics + Statcast | MoneyBall Score",
-  description: "MLB 162-game full ingestion + 14-factor model (KBO 10 + Statcast 4). Brier-scored predictions with Telegram alerts.",
+  description: "MLB 30-team 162-game analysis with a 14-factor model (KBO 10 + Statcast 4). Data-driven win predictions in Korean and English.",
   alternates: {
     canonical: `${SITE_URL}/en/mlb`,
     languages: { en: `${SITE_URL}/en/mlb`, ko: `${SITE_URL}/mlb` },
   },
   openGraph: {
-    title: "MLB Analysis — 14-Factor Model | MoneyBall Score",
-    description: "MLB 162-game full ingestion + 14 factors + Statcast",
+    title: "MLB Analysis | MoneyBall Score",
+    description: "MLB 162-game analysis + 14-factor model + Statcast",
     url: `${SITE_URL}/en/mlb`,
     type: "website",
   },
@@ -58,7 +58,7 @@ export default async function MlbHubEn() {
           MLB Analysis
         </h1>
         <p className="text-base text-brand-600 dark:text-brand-300">
-          162-game full ingestion · 14-factor model (KBO 10 + Statcast 4) · Shadow C learning weights
+          162-game season analysis · 14-factor model (KBO 10 + Statcast 4) · data-driven weights
         </p>
       </section>
 
@@ -84,8 +84,8 @@ export default async function MlbHubEn() {
           <p className="text-xs text-amber-600 mt-1">ETA 2026-09</p>
         </Link>
         <Link href="/en/mlb/factors" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
-          <h3 className="font-bold text-brand-700 dark:text-brand-100">14 Model Factors</h3>
-          <p className="text-xs text-brand-500 mt-1">Weights + HOME_ELO_BONUS</p>
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">14-Factor Model</h3>
+          <p className="text-xs text-brand-500 mt-1">Weights + home-field advantage</p>
         </Link>
       </section>
     </main>
