@@ -23,6 +23,13 @@ export const metadata: Metadata = {
       "MLB Postseason 4 라운드 브라켓 + 14팩터 시리즈 예측 — ETA 2026-09 라이브 통합.",
     url: `${SITE_URL}/mlb/postseason`,
     type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Postseason 브라켓 | MoneyBall Score",
+    description:
+      "MLB Postseason 4 라운드 브라켓 + 14팩터 시리즈 예측 — ETA 2026-09 라이브 통합.",
   },
 };
 

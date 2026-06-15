@@ -23,6 +23,12 @@ export const metadata: Metadata = {
     description: "KBO 10 + Statcast 4 의 14팩터 본선 = MLB 예측 모델의 기반 가중치 표.",
     url: `${SITE_URL}/mlb/factors`,
     type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB 14팩터 본선 가중치 | MoneyBall Score",
+    description: "KBO 10 + Statcast 4 의 14팩터 본선 = MLB 예측 모델의 기반 가중치 표.",
   },
 };
 

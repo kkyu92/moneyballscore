@@ -29,6 +29,12 @@ export const metadata: Metadata = {
     description: "AL/NL × East/Central/West 6 division 팀 구성 및 파크팩터.",
     url: `${SITE_URL}/mlb/standings`,
     type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB AL/NL 순위 — 6 division | MoneyBall Score",
+    description: "AL/NL × East/Central/West 6 division 팀 구성 및 파크팩터.",
   },
 };
 

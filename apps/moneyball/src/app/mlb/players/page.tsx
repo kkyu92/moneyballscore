@@ -29,6 +29,12 @@ export const metadata: Metadata = {
     description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14팩터 본선 Statcast 4.",
     url: `${SITE_URL}/mlb/players`,
     type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Statcast 4 팩터 | MoneyBall Score",
+    description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14팩터 본선 Statcast 4.",
   },
 };
 

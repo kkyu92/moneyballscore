@@ -29,6 +29,13 @@ export const metadata: Metadata = {
       "MLB AL/NL Wild Card 3장 진출 경쟁 + 14팩터 본선 base — ETA 2026-08 라이브 데이터.",
     url: `${SITE_URL}/mlb/wild-card`,
     type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB Wild Card race | MoneyBall Score",
+    description:
+      "MLB AL/NL Wild Card 3장 진출 경쟁 + 14팩터 본선 base — ETA 2026-08 라이브 데이터.",
   },
 };
 
