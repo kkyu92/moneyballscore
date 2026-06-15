@@ -271,7 +271,7 @@ function buildArticleJsonLd(
       "@id": url,
     },
     articleSection: "KBO",
-    inLanguage: "ko",
+    inLanguage: "ko-KR",
   };
 }
 
