@@ -23,6 +23,14 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
       canonical: `${SITE_URL}/en/mlb/games/${date}/${slug}`,
       languages: { en: `${SITE_URL}/en/mlb/games/${date}/${slug}`, ko: `${SITE_URL}/mlb/games/${date}/${slug}` },
     },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      siteName: "MoneyBall Score",
+      title,
+      description,
+      url: `${SITE_URL}/en/mlb/games/${date}/${slug}`,
+    },
     twitter: {
       card: "summary_large_image",
       title,
