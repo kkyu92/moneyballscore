@@ -10,12 +10,27 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export async function generateMetadata({ params }: { params: Promise<{ date: string }> }): Promise<Metadata> {
   const { date } = await params;
+  const title = `MLB ${date} 경기 예측 | MoneyBall Score`;
+  const description = `${date} MLB 경기 14팩터 분석 + 예측 confidence`;
   return {
-    title: `MLB ${date} 경기 예측 | MoneyBall Score`,
-    description: `${date} MLB 경기 14팩터 분석 + 예측 confidence`,
+    title,
+    description,
     alternates: {
       canonical: `${SITE_URL}/mlb/games/${date}`,
       languages: { 'en': `${SITE_URL}/en/mlb/games/${date}`, 'ko': `${SITE_URL}/mlb/games/${date}` },
+    },
+    openGraph: {
+      type: "website",
+      locale: "ko_KR",
+      siteName: "MoneyBall Score",
+      title,
+      description,
+      url: `${SITE_URL}/mlb/games/${date}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }
