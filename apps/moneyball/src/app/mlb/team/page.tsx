@@ -29,6 +29,12 @@ export const metadata: Metadata = {
     description: "MLB 30팀 시즌 예측 기록 + 14팩터",
     url: `${SITE_URL}/mlb/team`,
     type: "website",
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MLB 팀 프로필 30팀 | MoneyBall Score",
+    description: "MLB 30팀 시즌 예측 기록 + 14팩터",
   },
 };
 
