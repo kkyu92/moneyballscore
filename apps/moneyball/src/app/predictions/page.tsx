@@ -192,6 +192,7 @@ export default async function PredictionsPage() {
     description:
       "KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색.",
     url: "https://moneyballscore.vercel.app/predictions",
+    inLanguage: "ko-KR",
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: dates.length,
