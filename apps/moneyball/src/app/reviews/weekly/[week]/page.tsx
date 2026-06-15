@@ -175,6 +175,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
     },
     publisher: { "@type": "Organization", name: "MoneyBall Score" },
     mainEntityOfPage: url,
+    inLanguage: "ko-KR",
   };
 
   const pctLabel = `${Math.round(review.accuracyRate * 100)}%`;

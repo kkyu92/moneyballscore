@@ -59,6 +59,7 @@ export default async function MissesReviewPage() {
     datePublished: new Date().toISOString(),
     publisher: { "@type": "Organization", name: "MoneyBall Score" },
     mainEntityOfPage: `${SITE_URL}/reviews/misses`,
+    inLanguage: "ko-KR",
   };
 
   return (

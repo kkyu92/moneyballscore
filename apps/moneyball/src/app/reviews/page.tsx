@@ -87,6 +87,7 @@ export default async function ReviewsPage() {
     description:
       "KBO 승부예측 적중 vs 빗나간 결과 리뷰 — 주간·월간·전체 시즌 적중률 추이.",
     url: `${SITE_URL}/reviews`,
+    inLanguage: "ko-KR",
     mainEntity: {
       "@type": "Dataset",
       name: "KBO 승부예측 검증 데이터셋",
