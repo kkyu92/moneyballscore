@@ -45,7 +45,20 @@ const SEASONS: SeasonCard[] = [CURRENT_SEASON, ...PAST_SEASONS];
 export const metadata: Metadata = {
   title: "KBO 시즌 리뷰",
   description: "KBO 역대 시즌 실제 경기 결과 요약 — 팀 순위, 월별 득점, 인상적인 경기.",
-  alternates: { canonical: `${SITE_URL}/seasons` },
+  alternates: { canonical: "https://moneyballscore.vercel.app/seasons" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/seasons",
+    siteName: "MoneyBall Score",
+    title: "KBO 시즌 리뷰 | MoneyBall Score",
+    description: "KBO 역대 시즌 실제 경기 결과 요약 — 팀 순위, 월별 득점, 인상적인 경기.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KBO 시즌 리뷰 | MoneyBall Score",
+    description: "KBO 역대 시즌 실제 경기 결과 요약 — 팀 순위, 월별 득점.",
+  },
 };
 
 export default function SeasonsIndexPage() {

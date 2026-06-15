@@ -13,6 +13,21 @@ export const metadata: Metadata = {
   description:
     'KBO 승부예측에 쓰이는 세이버메트릭스 용어 사전. FIP, xFIP, wOBA, WAR, Elo, SFR, wRC+, ISO 등 25개 지표의 정의, 정상 범위, 우리 모델 가중치를 한 페이지에서 확인.',
   alternates: { canonical: 'https://moneyballscore.vercel.app/glossary' },
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: 'https://moneyballscore.vercel.app/glossary',
+    siteName: 'MoneyBall Score',
+    title: '야구 통계 용어 사전 | MoneyBall Score',
+    description:
+      'KBO 승부예측에 쓰이는 세이버메트릭스 용어 사전 — FIP, xFIP, wOBA, WAR, Elo, SFR, wRC+, ISO 등 25개 지표의 정의·정상 범위·모델 가중치.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '야구 통계 용어 사전 | MoneyBall Score',
+    description:
+      'KBO 승부예측 세이버메트릭스 25개 지표의 정의·정상 범위·모델 가중치.',
+  },
 };
 
 type GlossaryEntry = {
