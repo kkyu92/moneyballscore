@@ -9,6 +9,22 @@ export const metadata: Metadata = {
   title: "팀 간 매치업",
   description:
     "KBO 10팀의 45가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.",
+  alternates: { canonical: "https://moneyballscore.vercel.app/matchup" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/matchup",
+    siteName: "MoneyBall Score",
+    title: "팀 간 매치업 | MoneyBall Score",
+    description:
+      "KBO 10팀의 45가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "팀 간 매치업 | MoneyBall Score",
+    description:
+      "KBO 10팀 × 45가지 맞대결 상대전적 · AI 예측 적중률.",
+  },
 };
 
 const TEAMS: TeamCode[] = [
