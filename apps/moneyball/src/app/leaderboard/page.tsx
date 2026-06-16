@@ -14,6 +14,15 @@ export const metadata: Metadata = {
     'KBO 승부예측 픽 순위. 이번 달 / 시즌 / 누적 3개 탭으로 적중률 1위에 도전하세요.',
   alternates: { canonical: 'https://moneyballscore.vercel.app/leaderboard' },
   openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: 'https://moneyballscore.vercel.app/leaderboard',
+    siteName: 'MoneyBall Score',
+    title: '픽 리더보드 | 머니볼스코어',
+    description: '내 픽 적중률이 전국 몇 등인지 확인하세요!',
+  },
+  twitter: {
+    card: 'summary_large_image',
     title: '픽 리더보드 | 머니볼스코어',
     description: '내 픽 적중률이 전국 몇 등인지 확인하세요!',
   },
