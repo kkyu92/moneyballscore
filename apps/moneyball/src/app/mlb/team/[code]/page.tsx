@@ -68,6 +68,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       locale: "ko_KR",
       siteName: "MoneyBall Score",
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

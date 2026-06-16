@@ -56,6 +56,11 @@ export async function generateMetadata({
       locale: "ko_KR",
       siteName: "MoneyBall Score",
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
