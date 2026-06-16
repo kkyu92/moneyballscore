@@ -8,6 +8,21 @@ export const metadata: Metadata = {
     "MoneyBall Score 이용약관. 서비스 성격, 면책, 예측 정확성 무보증, 스포츠 베팅 관련 고지, 분쟁 해결 조항.",
   robots: { index: true, follow: true },
   alternates: { canonical: "https://moneyballscore.vercel.app/terms" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/terms",
+    siteName: "MoneyBall Score",
+    title: "이용약관 | MoneyBall Score",
+    description:
+      "MoneyBall Score 이용약관 — 서비스 성격, 면책, 예측 정확성 무보증, 스포츠 베팅 관련 고지, 분쟁 해결 조항.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "이용약관 | MoneyBall Score",
+    description:
+      "서비스 성격, 면책, 예측 정확성 무보증, 스포츠 베팅 관련 고지.",
+  },
 };
 
 const SECTIONS = [

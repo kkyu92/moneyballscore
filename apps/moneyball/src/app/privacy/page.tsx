@@ -8,6 +8,21 @@ export const metadata: Metadata = {
     "MoneyBall Score의 개인정보 수집·이용·보관에 관한 방침. 방문자 통계 수집 범위, 제3자 서비스 고지, 쿠키 사용 내역.",
   robots: { index: true, follow: true },
   alternates: { canonical: "https://moneyballscore.vercel.app/privacy" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/privacy",
+    siteName: "MoneyBall Score",
+    title: "개인정보처리방침 | MoneyBall Score",
+    description:
+      "MoneyBall Score 개인정보 수집·이용·보관 방침 — 방문자 통계 범위, 제3자 서비스 고지, 쿠키 사용 내역.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "개인정보처리방침 | MoneyBall Score",
+    description:
+      "방문자 통계 수집 범위, 제3자 서비스 고지, 쿠키 사용 내역.",
+  },
 };
 
 const SECTIONS = [
