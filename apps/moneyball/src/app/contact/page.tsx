@@ -8,6 +8,21 @@ export const metadata: Metadata = {
     "MoneyBall Score 문의 및 제보. 데이터 오류 신고, 예측 관련 질문, 협업·제휴 제안, 개인정보 관련 요청.",
   robots: { index: true, follow: true },
   alternates: { canonical: "https://moneyballscore.vercel.app/contact" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/contact",
+    siteName: "MoneyBall Score",
+    title: "문의 | MoneyBall Score",
+    description:
+      "MoneyBall Score 문의 및 제보 — 데이터 오류, 예측 관련 질문, 협업·제휴 제안.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "문의 | MoneyBall Score",
+    description:
+      "MoneyBall Score 데이터 오류 신고 · 예측 문의 · 협업 제안.",
+  },
 };
 
 const INQUIRY_TYPES = [

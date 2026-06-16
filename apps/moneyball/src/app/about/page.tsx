@@ -17,6 +17,21 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 10팩터 3소스 가중합산 정량 모델.",
   alternates: { canonical: "https://moneyballscore.vercel.app/about" },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://moneyballscore.vercel.app/about",
+    siteName: "MoneyBall Score",
+    title: "소개 | MoneyBall Score",
+    description:
+      "MoneyBall Score 승부예측 방법론 — 세이버메트릭스 기반 10팩터 3소스 가중합산 정량 모델.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "소개 | MoneyBall Score",
+    description:
+      "세이버메트릭스 10팩터 3소스 정량 모델 — 승부예측 방법론.",
+  },
 };
 
 type FactorKey = keyof typeof DEFAULT_WEIGHTS;
