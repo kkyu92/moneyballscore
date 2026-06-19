@@ -128,6 +128,17 @@ const VERSION_HISTORY = [
   },
 ];
 
+// MetricRegistry source filter 단일 source-of-truth — silent drift family wave 68 (cycle 1268).
+// hardcoded "FIP · xFIP · WAR · wOBA · SFR · Elo" (bullpen_fip 누락) → MetricRegistry dynamic.
+const FANCYSTATS_PRODUCTION_METRICS = Object.values(MetricRegistry)
+  .filter((m) => m.source === "fancystats" && m.weight_v18 > 0)
+  .map((m) => m.ko_name);
+const FANCYSTATS_METRIC_LABEL = FANCYSTATS_PRODUCTION_METRICS.join(" · ");
+const FANCYSTATS_METRIC_COUNT = FANCYSTATS_PRODUCTION_METRICS.length;
+const PRODUCTION_METRIC_COUNT = Object.values(MetricRegistry).filter(
+  (m) => m.weight_v18 > 0,
+).length;
+
 const JSONLD = {
   "@context": "https://schema.org",
   "@type": "Article",
@@ -236,12 +247,13 @@ export default function MethodologyPage() {
                 </span>
               </h3>
               <span className="text-xs text-gray-500 dark:text-brand-400">
-                FIP · xFIP · WAR · wOBA · SFR · Elo
+                {FANCYSTATS_METRIC_LABEL}
               </span>
             </div>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              세이버메트릭스 고급 지표의 주 원천. 분석 가중치 10팩터 중 7개를
-              이 소스에서 가져온다.
+              세이버메트릭스 고급 지표의 주 원천. 분석 가중치{" "}
+              {PRODUCTION_METRIC_COUNT}팩터 중 {FANCYSTATS_METRIC_COUNT}개를 이
+              소스에서 가져온다.
             </p>
           </li>
           <li className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
