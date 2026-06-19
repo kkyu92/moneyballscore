@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
+const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
 export const metadata: Metadata = {
   title: "MLB Postseason 브라켓 — WC / DS / LCS / WS | MoneyBall Score",
-  description:
-    "MLB Postseason 4 라운드 (Wild Card / Division Series / League Championship / World Series) 브라켓 + 14팩터 본선 시리즈별 예측. ETA 2026-09 라이브 통합.",
+  description: `MLB Postseason 4 라운드 (Wild Card / Division Series / League Championship / World Series) 브라켓 + ${FACTOR_TOTAL}팩터 본선 시리즈별 예측. ETA 2026-09 라이브 통합.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/postseason`,
     languages: {
@@ -19,8 +20,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "MLB Postseason 브라켓 | MoneyBall Score",
-    description:
-      "MLB Postseason 4 라운드 브라켓 + 14팩터 시리즈 예측 — ETA 2026-09 라이브 통합.",
+    description: `MLB Postseason 4 라운드 브라켓 + ${FACTOR_TOTAL}팩터 시리즈 예측 — ETA 2026-09 라이브 통합.`,
     url: `${SITE_URL}/mlb/postseason`,
     type: "website",
     locale: "ko_KR",
@@ -28,8 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB Postseason 브라켓 | MoneyBall Score",
-    description:
-      "MLB Postseason 4 라운드 브라켓 + 14팩터 시리즈 예측 — ETA 2026-09 라이브 통합.",
+    description: `MLB Postseason 4 라운드 브라켓 + ${FACTOR_TOTAL}팩터 시리즈 예측 — ETA 2026-09 라이브 통합.`,
   },
 };
 
@@ -81,8 +80,7 @@ export default function MlbPostseasonHub() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "MLB Postseason 브라켓",
-    description:
-      "MLB Postseason 4 라운드 (Wild Card / Division Series / League Championship / World Series) 브라켓 + 14팩터 본선 시리즈별 예측.",
+    description: `MLB Postseason 4 라운드 (Wild Card / Division Series / League Championship / World Series) 브라켓 + ${FACTOR_TOTAL}팩터 본선 시리즈별 예측.`,
     url: `${SITE_URL}/mlb/postseason`,
     isPartOf: {
       "@type": "WebSite",
@@ -112,7 +110,7 @@ export default function MlbPostseasonHub() {
           정규시즌 종료 후 4 라운드 toss-up — Wild Card / Division Series / League Championship / World Series.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          ETA 2026-09 — 정규시즌 종료 직후 시리즈별 14팩터 본선 base 라이브 예측 + 브라켓 시각화 활성.
+          ETA 2026-09 — 정규시즌 종료 직후 시리즈별 {FACTOR_TOTAL}팩터 본선 base 라이브 예측 + 브라켓 시각화 활성.
         </p>
       </header>
 
@@ -127,10 +125,10 @@ export default function MlbPostseasonHub() {
           준비 진행 status
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
-          <li>MLB 162game 풀 인제스트 + 14팩터 본선 — <strong>박제 완료</strong></li>
+          <li>MLB 162game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
           <li>30팀 standings + 시즌 game-back 추적 — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
           <li>Wild Card race 추적 — <strong>ETA 2026-08</strong> (<Link href="/mlb/wild-card" className="underline">/mlb/wild-card</Link>)</li>
-          <li>Postseason 브라켓 + 시리즈별 14팩터 예측 — <strong>ETA 2026-09</strong></li>
+          <li>Postseason 브라켓 + 시리즈별 {FACTOR_TOTAL}팩터 예측 — <strong>ETA 2026-09</strong></li>
         </ul>
       </section>
 
@@ -166,7 +164,7 @@ export default function MlbPostseasonHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ 본 hub = Header NAV 깨진 link 회수 layer (cycle 1029). 라이브 Postseason 브라켓 + 시리즈별 14팩터 예측 = ETA 2026-09 (정규시즌 종료 직후 활성).
+          ※ 본 hub = Header NAV 깨진 link 회수 layer (cycle 1029). 라이브 Postseason 브라켓 + 시리즈별 {FACTOR_TOTAL}팩터 예측 = ETA 2026-09 (정규시즌 종료 직후 활성).
         </p>
         <p>
           ※ 관련: <Link href="/mlb/wild-card" className="underline">/mlb/wild-card</Link> · <Link href="/mlb/standings" className="underline">/mlb/standings</Link> · <Link href="/mlb" className="underline">/mlb</Link> hub.

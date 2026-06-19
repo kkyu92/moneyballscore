@@ -6,7 +6,10 @@ import {
   type MlbTeamCode,
   type MlbLeagueSide,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+
+const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
 export const revalidate = 21600;
 
@@ -14,8 +17,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "MLB Wild Card race — AL/NL Wild Card 진출 경쟁 | MoneyBall Score",
-  description:
-    "MLB AL/NL 양리그 Wild Card 3장 진출 경쟁. 9월 막판 game-back 추적 + 14팩터 본선 base. ETA 2026-08 라이브 데이터 통합.",
+  description: `MLB AL/NL 양리그 Wild Card 3장 진출 경쟁. 9월 막판 game-back 추적 + ${FACTOR_TOTAL}팩터 본선 base. ETA 2026-08 라이브 데이터 통합.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/wild-card`,
     languages: {
@@ -25,8 +27,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "MLB Wild Card race | MoneyBall Score",
-    description:
-      "MLB AL/NL Wild Card 3장 진출 경쟁 + 14팩터 본선 base — ETA 2026-08 라이브 데이터.",
+    description: `MLB AL/NL Wild Card 3장 진출 경쟁 + ${FACTOR_TOTAL}팩터 본선 base — ETA 2026-08 라이브 데이터.`,
     url: `${SITE_URL}/mlb/wild-card`,
     type: "website",
     locale: "ko_KR",
@@ -34,8 +35,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB Wild Card race | MoneyBall Score",
-    description:
-      "MLB AL/NL Wild Card 3장 진출 경쟁 + 14팩터 본선 base — ETA 2026-08 라이브 데이터.",
+    description: `MLB AL/NL Wild Card 3장 진출 경쟁 + ${FACTOR_TOTAL}팩터 본선 base — ETA 2026-08 라이브 데이터.`,
   },
 };
 
@@ -71,7 +71,7 @@ export default function MlbWildCardHub() {
           AL/NL 양리그 — Wild Card 3장 진출 경쟁. division 1위 6팀 외 잔여 10팀 가운데 양리그 3팀씩 진출.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          ETA 2026-08 — 9월 막판 game-back / Magic Number 추적 + 14팩터 본선 base 라이브 데이터 통합.
+          ETA 2026-08 — 9월 막판 game-back / Magic Number 추적 + {FACTOR_TOTAL}팩터 본선 base 라이브 데이터 통합.
         </p>
       </header>
 
@@ -86,7 +86,7 @@ export default function MlbWildCardHub() {
           준비 진행 status
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
-          <li>MLB 162game 풀 인제스트 + 14팩터 본선 — <strong>박제 완료</strong></li>
+          <li>MLB 162game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
           <li>30팀 standings (AL/NL × E/C/W 6 division) — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
           <li>Wild Card 3장 진출 경쟁 추적 + game-back 라이브 — <strong>ETA 2026-08</strong></li>
           <li>Postseason 브라켓 (WC / DS / LCS / WS) 시각화 — <strong>ETA 2026-09</strong></li>

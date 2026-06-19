@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -56,7 +57,7 @@ export default function MlbWildCardTwitterImage() {
             display: "flex",
           }}
         >
-          AL/NL 양리그 3장 진출 경쟁 · 9월 game-back 추적 · 14팩터
+          AL/NL 양리그 3장 진출 경쟁 · 9월 game-back 추적 · {MLB_FACTOR_COUNTS.total}팩터
         </div>
 
         <div
