@@ -87,6 +87,24 @@ export type {
   MetricDirection,
 } from './context/metrics';
 
+// LLM Agent KBO Domain KB (plan #23 Step 2, cycle 1226)
+export {
+  KBO_PARKS,
+  KBO_DOMAIN_KB,
+  SEASON_PHASES,
+  TIME_WINDOWS,
+  getSeasonPhase,
+  renderParkForLLM,
+  renderRivalryForLLM,
+  renderSeasonForLLM,
+  renderTimeWindowsForLLM,
+} from './context/domain';
+export type {
+  ParkContext,
+  SeasonPhase,
+  TimeWindowKey,
+} from './context/domain';
+
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
 
