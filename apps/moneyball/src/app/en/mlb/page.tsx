@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
@@ -8,16 +9,20 @@ export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
+const TOTAL = MLB_FACTOR_COUNTS.total;
+const KBO_N = MLB_FACTOR_COUNTS.kbo;
+const STAT_N = MLB_FACTOR_COUNTS.statcast;
+
 export const metadata: Metadata = {
-  title: "MLB Analysis — 14-Factor Sabermetrics + Statcast | MoneyBall Score",
-  description: "MLB 30-team 162-game analysis with a 14-factor model (KBO 10 + Statcast 4). Data-driven win predictions in Korean and English.",
+  title: `MLB Analysis — ${TOTAL}-Factor Sabermetrics + Statcast | MoneyBall Score`,
+  description: `MLB 30-team 162-game analysis with a ${TOTAL}-factor model (KBO ${KBO_N} + Statcast ${STAT_N}). Data-driven win predictions in Korean and English.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb`,
     languages: { en: `${SITE_URL}/en/mlb`, ko: `${SITE_URL}/mlb` },
   },
   openGraph: {
     title: "MLB Analysis | MoneyBall Score",
-    description: "MLB 162-game analysis + 14-factor model + Statcast",
+    description: `MLB 162-game analysis + ${TOTAL}-factor model + Statcast`,
     url: `${SITE_URL}/en/mlb`,
     type: "website",
     locale: "en_US",
@@ -25,7 +30,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB Analysis | MoneyBall Score",
-    description: "MLB 162-game analysis + 14-factor model + Statcast",
+    description: `MLB 162-game analysis + ${TOTAL}-factor model + Statcast`,
   },
 };
 
@@ -63,14 +68,14 @@ export default async function MlbHubEn() {
           MLB Analysis
         </h1>
         <p className="text-base text-brand-600 dark:text-brand-300">
-          162-game season analysis · 14-factor model (KBO 10 + Statcast 4) · data-driven weights
+          162-game season analysis · {TOTAL}-factor model (KBO {KBO_N} + Statcast {STAT_N}) · data-driven weights
         </p>
       </section>
 
       <section className="grid md:grid-cols-3 gap-4">
         <Link href={`/en/mlb/games/${today}`} className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Today&apos;s Games ({todayGames?.length ?? 0})</h3>
-          <p className="text-xs text-brand-500 mt-1">14-factor + prediction confidence</p>
+          <p className="text-xs text-brand-500 mt-1">{TOTAL}-factor + prediction confidence</p>
         </Link>
         <Link href="/en/mlb/standings" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Team Standings</h3>
@@ -89,7 +94,7 @@ export default async function MlbHubEn() {
           <p className="text-xs text-amber-600 mt-1">ETA 2026-09</p>
         </Link>
         <Link href="/en/mlb/factors" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
-          <h3 className="font-bold text-brand-700 dark:text-brand-100">14-Factor Model</h3>
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">{TOTAL}-Factor Model</h3>
           <p className="text-xs text-brand-500 mt-1">Weights + home-field advantage</p>
         </Link>
       </section>

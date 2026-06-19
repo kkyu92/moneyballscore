@@ -39,6 +39,34 @@ describe('/en/mlb — hub page', () => {
   it('error fallback — renders without throwing when query fails', () => {
     expect(PAGE).toMatch(/result\.error/);
   });
+
+  it('imports MLB_FACTOR_COUNTS from @moneyball/kbo-data (wave 72)', () => {
+    expect(PAGE).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(PAGE).toMatch(/@moneyball\/kbo-data/);
+    expect(PAGE).toMatch(/TOTAL\s*=\s*MLB_FACTOR_COUNTS\.total/);
+  });
+
+  it('no hardcoded "14-factor" / "KBO 10 + Statcast 4" (silent drift wave 72)', () => {
+    expect(PAGE).not.toMatch(/[^{]14-factor/);
+    expect(PAGE).not.toMatch(/KBO 10 \+ Statcast 4/);
+  });
+});
+
+describe('/en/mlb opengraph + twitter images — MLB_FACTOR_COUNTS (wave 72)', () => {
+  const OG = src('opengraph-image.tsx');
+  const TW = src('twitter-image.tsx');
+
+  it('opengraph imports MLB_FACTOR_COUNTS', () => {
+    expect(OG).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(OG).toMatch(/@moneyball\/kbo-data/);
+    expect(OG).not.toMatch(/14-factor model/);
+  });
+
+  it('twitter imports MLB_FACTOR_COUNTS', () => {
+    expect(TW).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(TW).toMatch(/@moneyball\/kbo-data/);
+    expect(TW).not.toMatch(/14-factor model/);
+  });
 });
 
 // ── Standings (/en/mlb/standings) ────────────────────────────────────

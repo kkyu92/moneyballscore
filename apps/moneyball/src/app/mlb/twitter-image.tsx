@@ -1,9 +1,12 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "MLB 분석 | MoneyBall Score";
+
+const TOTAL = MLB_FACTOR_COUNTS.total;
 
 export default function MlbHubTwitterImage() {
   return new ImageResponse(
@@ -56,7 +59,7 @@ export default function MlbHubTwitterImage() {
             display: "flex",
           }}
         >
-          14-factor model · Statcast · 30 teams · 162 games
+          {TOTAL}-factor model · Statcast · 30 teams · 162 games
         </div>
 
         <div
