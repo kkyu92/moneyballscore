@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KBO_TEAM_COUNT } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
@@ -56,8 +56,8 @@ const MLB_NAV: NavItem[] = [
   {
     label: "경기·팀",
     items: [
-      { href: "/mlb/standings", label: "AL/NL 순위", description: "6 division standings", icon: "award" },
-      { href: "/mlb/team", label: "팀", description: "30팀 시즌 stat", icon: "shield" },
+      { href: "/mlb/standings", label: "AL/NL 순위", description: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
+      { href: "/mlb/team", label: "팀", description: `${MLB_TEAM_COUNT}팀 시즌 stat`, icon: "shield" },
       { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, icon: "file-text" },
     ],

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
   KBO_TEAMS,
+  MLB_TEAM_COUNT,
   assertSelectOk,
   type TeamCode,
   type SelectResult,
@@ -164,7 +165,7 @@ const STATIC_PAGES: Array<{
   { slug: '/seasons', label: '시즌 history', keywords: 'seasons 시즌 history' },
   { slug: '/mlb', label: 'MLB', keywords: 'mlb 메이저리그 majorleague baseball' },
   { slug: '/mlb/standings', label: 'MLB 순위', keywords: 'mlb standings al nl division 순위' },
-  { slug: '/mlb/team', label: 'MLB 팀', keywords: 'mlb team teams 30팀 메이저리그' },
+  { slug: '/mlb/team', label: 'MLB 팀', keywords: `mlb team teams ${MLB_TEAM_COUNT}팀 메이저리그` },
   { slug: '/mlb/players', label: 'MLB Statcast', keywords: 'mlb statcast players xwoba barrel launch angle' },
   { slug: '/mlb/factors', label: `MLB ${MLB_FACTOR_COUNTS.total}팩터`, keywords: `mlb factors ${MLB_FACTOR_COUNTS.total}팩터 가중치 statcast` },
   { slug: '/mlb/wild-card', label: 'MLB Wild Card', keywords: 'mlb wild-card wildcard race' },
