@@ -8,6 +8,7 @@ import {
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isMlbTeamCode(code)) return {};
   const meta = MLB_TEAMS[code];
   const title = `${meta.name} — MLB Team Profile | MoneyBall Score`;
-  const description = `${meta.name} (${meta.league} ${meta.division}) season prediction records · Home stadium ${meta.stadium} (park factor ${meta.parkPf}) · 14-factor model (KBO 10 + Statcast 4) aggregates.`;
+  const description = `${meta.name} (${meta.league} ${meta.division}) season prediction records · Home stadium ${meta.stadium} (park factor ${meta.parkPf}) · ${MLB_FACTOR_COUNTS.total}-factor model (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) aggregates.`;
 
   return {
     title,
@@ -203,7 +204,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
         className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
       >
         <h2 id="mlb-team-factors-title" className="text-lg font-bold mb-3">
-          Season Average Factor Values (14 factors = KBO 10 + Statcast 4)
+          Season Average Factor Values ({MLB_FACTOR_COUNTS.total} factors = KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast})
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
           <div>
