@@ -1,10 +1,11 @@
 import { ImageResponse } from "next/og";
+import { MLB_TEAM_COUNT } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = `MLB 30 Team profiles — ${MLB_FACTOR_COUNTS.total} Factor | MoneyBall Score`;
+export const alt = `MLB ${MLB_TEAM_COUNT} Team profiles — ${MLB_FACTOR_COUNTS.total} Factor | MoneyBall Score`;
 
 export default function EnMlbTeamTwitterImage() {
   return new ImageResponse(
@@ -45,7 +46,7 @@ export default function EnMlbTeamTwitterImage() {
             lineHeight: 1,
           }}
         >
-          30 Teams
+          {MLB_TEAM_COUNT} Teams
         </div>
 
         <div
@@ -97,7 +98,7 @@ export default function EnMlbTeamTwitterImage() {
           }}
         >
           <span>moneyballscore.vercel.app/en/mlb/team</span>
-          <span>EN · KO · 30 teams</span>
+          <span>EN · KO · {MLB_TEAM_COUNT} teams</span>
         </div>
       </div>
     ),
