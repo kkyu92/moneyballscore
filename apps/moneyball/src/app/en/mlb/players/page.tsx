@@ -7,16 +7,19 @@ import {
   type MlbLeagueSide,
   type MlbDivisionSide,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
+const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
+const FACTOR_KBO = MLB_FACTOR_COUNTS.kbo;
+const FACTOR_STATCAST = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
-  title: "MLB Statcast 4 Factors — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score",
-  description:
-    "MLB 14-factor model Statcast 4 layer (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status. Live team Statcast data integration ETA carry-over.",
+  title: `MLB Statcast ${FACTOR_STATCAST} Factors — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score`,
+  description: `MLB ${FACTOR_TOTAL}-factor model Statcast ${FACTOR_STATCAST} layer (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status. Live team Statcast data integration ETA carry-over.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/players`,
     languages: {
@@ -25,16 +28,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MLB Statcast 4 Factors | MoneyBall Score",
-    description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14-factor Statcast 4.",
+    title: `MLB Statcast ${FACTOR_STATCAST} Factors | MoneyBall Score`,
+    description: `xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB ${FACTOR_TOTAL}-factor Statcast ${FACTOR_STATCAST}.`,
     url: `${SITE_URL}/en/mlb/players`,
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB Statcast 4 Factors | MoneyBall Score",
-    description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14-factor Statcast 4.",
+    title: `MLB Statcast ${FACTOR_STATCAST} Factors | MoneyBall Score`,
+    description: `xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB ${FACTOR_TOTAL}-factor Statcast ${FACTOR_STATCAST}.`,
   },
 };
 
@@ -59,7 +62,7 @@ const STATCAST_FACTORS: readonly StatcastFactor[] = [
     range: "0.200 ~ 0.500",
     description:
       "Expected wOBA estimated from launch angle + exit velocity. Removes luck (defense/ballpark/weather) to measure true contact quality.",
-    why: "While wOBA measures actual outcomes, xwOBA eliminates result noise to reveal true hitting skill. Top weight among Statcast 4 in the 14-factor model.",
+    why: `While wOBA measures actual outcomes, xwOBA eliminates result noise to reveal true hitting skill. Top weight among Statcast ${FACTOR_STATCAST} in the ${FACTOR_TOTAL}-factor model.`,
     source: "Baseball Savant — Statcast Era 2015~",
   },
   {
@@ -106,9 +109,8 @@ export default function MlbPlayersHubEn() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "MLB Statcast 4 Factors",
-    description:
-      "MLB 14-factor model Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status.",
+    name: `MLB Statcast ${FACTOR_STATCAST} Factors`,
+    description: `MLB ${FACTOR_TOTAL}-factor model Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status.`,
     url: `${SITE_URL}/en/mlb/players`,
     inLanguage: "en-US",
     mainEntity: {
@@ -140,18 +142,18 @@ export default function MlbPlayersHubEn() {
       <Breadcrumb
         items={[
           { href: "/en/mlb", label: "MLB Analysis" },
-          { label: "Statcast 4 Factors" },
+          { label: `Statcast ${FACTOR_STATCAST} Factors` },
         ]}
         locale="en"
       />
 
       <header className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">MLB Statcast 4 Factors</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">MLB Statcast {FACTOR_STATCAST} Factors</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          MLB 14-factor model = KBO 10 (FIP / xFIP / wOBA / Bullpen FIP / Recent Form / WAR / H2H / Park Factor / Elo / Defense SFR) + Statcast 4.
+          MLB {FACTOR_TOTAL}-factor model = KBO {FACTOR_KBO} (FIP / xFIP / wOBA / Bullpen FIP / Recent Form / WAR / H2H / Park Factor / Elo / Defense SFR) + Statcast {FACTOR_STATCAST}.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          Currently shown: 4 factor explanations + 30-team entry paths. Team-level Statcast measurements (xwOBA · Barrel% · Hard Hit% · Launch Angle) live data integration = separate datasource integration carry-over.
+          Currently shown: {FACTOR_STATCAST} factor explanations + 30-team entry paths. Team-level Statcast measurements (xwOBA · Barrel% · Hard Hit% · Launch Angle) live data integration = separate datasource integration carry-over.
         </p>
       </header>
 
@@ -160,7 +162,7 @@ export default function MlbPlayersHubEn() {
           id="statcast-factors-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Statcast 4 Factor Explanations
+          Statcast {FACTOR_STATCAST} Factor Explanations
         </h2>
         <ol className="grid md:grid-cols-2 gap-4">
           {STATCAST_FACTORS.map((factor, idx) => (
@@ -198,7 +200,7 @@ export default function MlbPlayersHubEn() {
           </span>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Each team card leads to a team profile (current: season placeholder + 14-factor explainer + home ballpark park factor). Statcast measurements carry-over in team profile.
+          Each team card leads to a team profile (current: season placeholder + {FACTOR_TOTAL}-factor explainer + home ballpark park factor). Statcast measurements carry-over in team profile.
         </p>
         {LEAGUES.map((league) => (
           <div key={league} className="space-y-4" aria-labelledby={`mlb-${league}-statcast`}>
@@ -252,7 +254,7 @@ export default function MlbPlayersHubEn() {
           ※ Statcast data source: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media). Scraper: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
         </p>
         <p>
-          ※ This hub = Statcast 4 explanation layer within the 14-factor model. Live team measurements = pending separate ingestion integration. KBO 10 factors = <Link href="/en/mlb/factors" className="underline">/en/mlb/factors</Link>.
+          ※ This hub = Statcast {FACTOR_STATCAST} explanation layer within the {FACTOR_TOTAL}-factor model. Live team measurements = pending separate ingestion integration. KBO {FACTOR_KBO} factors = <Link href="/en/mlb/factors" className="underline">/en/mlb/factors</Link>.
         </p>
       </footer>
     </main>

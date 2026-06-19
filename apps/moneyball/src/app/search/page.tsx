@@ -7,6 +7,7 @@ import {
   type TeamCode,
   type SelectResult,
 } from '@moneyball/shared';
+import { MLB_FACTOR_COUNTS } from '@moneyball/kbo-data';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { SearchClient, type SearchEntry } from '@/components/search/SearchClient';
 import { TeamLogo } from '@/components/shared/TeamLogo';
@@ -165,7 +166,7 @@ const STATIC_PAGES: Array<{
   { slug: '/mlb/standings', label: 'MLB 순위', keywords: 'mlb standings al nl division 순위' },
   { slug: '/mlb/team', label: 'MLB 팀', keywords: 'mlb team teams 30팀 메이저리그' },
   { slug: '/mlb/players', label: 'MLB Statcast', keywords: 'mlb statcast players xwoba barrel launch angle' },
-  { slug: '/mlb/factors', label: 'MLB 14팩터', keywords: 'mlb factors 14팩터 가중치 statcast' },
+  { slug: '/mlb/factors', label: `MLB ${MLB_FACTOR_COUNTS.total}팩터`, keywords: `mlb factors ${MLB_FACTOR_COUNTS.total}팩터 가중치 statcast` },
   { slug: '/mlb/wild-card', label: 'MLB Wild Card', keywords: 'mlb wild-card wildcard race' },
   { slug: '/mlb/postseason', label: 'MLB Postseason', keywords: 'mlb postseason ws lcs ds bracket' },
   { slug: '/lotto/methodology', label: '로또 통계', keywords: 'lotto 로또 stats 통계' },
