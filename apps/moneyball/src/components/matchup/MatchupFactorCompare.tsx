@@ -1,3 +1,4 @@
+import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
 import type { TeamFactorAverages } from "@/lib/teams/buildTeamFactorAverages";
 
 interface Props {
@@ -12,7 +13,8 @@ interface FactorRow {
     TeamFactorAverages,
     "spFip" | "lineupWoba" | "bullpenFip" | "recentForm" | "elo"
   >;
-  label: string;
+  /** MetricRegistry slug — label 단일 source (silent drift wave 57, cycle 1253) */
+  slug: MetricSlug;
   /** "lower" = 낮을수록 우세, "higher" = 높을수록 우세 */
   direction: "lower" | "higher";
   format: (v: number) => string;
@@ -25,7 +27,7 @@ interface FactorRow {
 const FACTORS: FactorRow[] = [
   {
     key: "spFip",
-    label: "선발 FIP",
+    slug: "sp_fip",
     direction: "lower",
     format: (v) => v.toFixed(2),
     hint:
@@ -34,7 +36,7 @@ const FACTORS: FactorRow[] = [
   },
   {
     key: "lineupWoba",
-    label: "타선 wOBA",
+    slug: "lineup_woba",
     direction: "higher",
     format: (v) => v.toFixed(3),
     hint:
@@ -43,7 +45,7 @@ const FACTORS: FactorRow[] = [
   },
   {
     key: "bullpenFip",
-    label: "불펜 FIP",
+    slug: "bullpen_fip",
     direction: "lower",
     format: (v) => v.toFixed(2),
     hint:
@@ -52,7 +54,7 @@ const FACTORS: FactorRow[] = [
   },
   {
     key: "recentForm",
-    label: "최근 폼",
+    slug: "recent_form",
     direction: "higher",
     format: (v) => `${Math.round(v * 100)}%`,
     hint: "최근 폼 — 최근 10경기 승률. 높을수록 우세.",
@@ -60,7 +62,7 @@ const FACTORS: FactorRow[] = [
   },
   {
     key: "elo",
-    label: "Elo 레이팅",
+    slug: "elo",
     direction: "higher",
     format: (v) => v.toFixed(0),
     hint:
@@ -133,7 +135,7 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
                   className="text-xs font-semibold text-gray-700 dark:text-gray-200 leading-none cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 underline-offset-2"
                   title={f.hint}
                 >
-                  {f.label}
+                  {MetricRegistry[f.slug].ko_name}
                 </a>
                 {/* 비교 바 — 승자 쪽 절반이 brand 색으로 채워짐 */}
                 <div className="relative w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
