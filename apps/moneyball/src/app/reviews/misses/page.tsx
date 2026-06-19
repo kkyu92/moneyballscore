@@ -6,6 +6,7 @@ import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MissesSortControl } from "@/components/reviews/MissesSortControl";
+import { MetricRegistry } from "@moneyball/kbo-data";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const metadata: Metadata = {
@@ -33,14 +34,16 @@ export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
+const PREFIXED_VARIANTS = (["sp_fip", "bullpen_fip", "lineup_woba"] as const).flatMap(
+  (slug) => [
+    [`home_${slug}`, `홈 ${MetricRegistry[slug].ko_name}`],
+    [`away_${slug}`, `원정 ${MetricRegistry[slug].ko_name}`],
+  ] as const,
+);
+
 const FACTOR_LABELS: Record<string, string> = {
   ...FACTOR_LABELS_TECHNICAL,
-  home_sp_fip: "홈 선발 FIP",
-  away_sp_fip: "원정 선발 FIP",
-  home_bullpen_fip: "홈 불펜 FIP",
-  away_bullpen_fip: "원정 불펜 FIP",
-  home_lineup_woba: "홈 타선 wOBA",
-  away_lineup_woba: "원정 타선 wOBA",
+  ...Object.fromEntries(PREFIXED_VARIANTS),
 };
 
 function factorLabel(key: string): string {
