@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
+const TOTAL = MLB_FACTOR_COUNTS.total;
+const KBO_N = MLB_FACTOR_COUNTS.kbo;
+const STAT_N = MLB_FACTOR_COUNTS.statcast;
+const TITLE_EN = `MLB ${TOTAL} Model Factors Weights | MoneyBall Score`;
+const SUMMARY_EN = `KBO ${KBO_N} + Statcast ${STAT_N} = ${TOTAL}-factor MLB prediction model weight table.`;
+
 export const metadata: Metadata = {
-  title: "MLB 14 Model Factors — Weights + Descriptions + Sources | MoneyBall Score",
+  title: `MLB ${TOTAL} Model Factors — Weights + Descriptions + Sources | MoneyBall Score`,
   description:
-    "MLB 14-factor model weight table — KBO 10 (FIP · xFIP · wOBA · Bullpen FIP · Recent Form · WAR · H2H · Park Factor · Elo · Defense SFR) + Statcast 4 (xwOBA · Barrel% · xwOBA-against · wOBA std). Each factor defined with source and application method.",
+    `MLB ${TOTAL}-factor model weight table — KBO ${KBO_N} (FIP · xFIP · wOBA · Bullpen FIP · Recent Form · WAR · H2H · Park Factor · Elo · Defense SFR) + Statcast ${STAT_N} (xwOBA · Barrel% · xwOBA-against · wOBA std). Each factor defined with source and application method.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/factors`,
     languages: {
@@ -19,16 +25,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MLB 14 Model Factors Weights | MoneyBall Score",
-    description: "KBO 10 + Statcast 4 = 14-factor MLB prediction model weight table.",
+    title: TITLE_EN,
+    description: SUMMARY_EN,
     url: `${SITE_URL}/en/mlb/factors`,
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB 14 Model Factors Weights | MoneyBall Score",
-    description: "KBO 10 + Statcast 4 = 14-factor MLB prediction model weight table.",
+    title: TITLE_EN,
+    description: SUMMARY_EN,
   },
 };
 
@@ -230,9 +236,9 @@ export default function MlbFactorsHubEn() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    headline: "MLB 14-Factor Model Weights + Descriptions",
+    headline: `MLB ${TOTAL}-Factor Model Weights + Descriptions`,
     description:
-      "MLB 14-factor model = KBO 10 + Statcast 4. Each factor's weight, definition, source, and application method.",
+      `MLB ${TOTAL}-factor model = KBO ${KBO_N} + Statcast ${STAT_N}. Each factor's weight, definition, source, and application method.`,
     url: `${SITE_URL}/en/mlb/factors`,
     inLanguage: "en-US",
     author: { "@type": "Organization", name: "MoneyBall Score" },
@@ -249,19 +255,19 @@ export default function MlbFactorsHubEn() {
       <Breadcrumb
         items={[
           { href: "/en/mlb", label: "MLB Analysis" },
-          { label: "14 Model Factors" },
+          { label: `${TOTAL} Model Factors` },
         ]}
         locale="en"
       />
 
       <header className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">MLB 14 Model Factors</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">MLB {TOTAL} Model Factors</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          KBO 10 factors (FIP · xFIP · wOBA · Bullpen FIP · Recent Form · WAR · H2H · Park Factor · Elo · Defense SFR) +{" "}
+          KBO {KBO_N} factors (FIP · xFIP · wOBA · Bullpen FIP · Recent Form · WAR · H2H · Park Factor · Elo · Defense SFR) +{" "}
           <Link href="/en/mlb/players" className="underline">
-            Statcast 4
+            Statcast {STAT_N}
           </Link>{" "}
-          (xwOBA · Barrel% · xwOBA-against · wOBA σ) = 14 factors.
+          (xwOBA · Barrel% · xwOBA-against · wOBA σ) = {TOTAL} factors.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           Weight total = {weightPercent(sum)} (including home bonus {weightPercent(MLB_BASE_WEIGHTS.home_elo_bonus)}). Weights defined in{" "}
@@ -333,10 +339,10 @@ export default function MlbFactorsHubEn() {
           id="kbo-10-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          KBO 10 Factors (Equivalent)
+          KBO {KBO_N} Factors (Equivalent)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          The 10 factors from KBO model v1.8 mapped directly to the MLB domain. Only the data sources change — statsapi.mlb / FanGraphs MLB instead of KBO sources.
+          The {KBO_N} factors from KBO model v1.8 mapped directly to the MLB domain. Only the data sources change — statsapi.mlb / FanGraphs MLB instead of KBO sources.
         </p>
         <ol className="space-y-4">
           {KBO_10_FACTORS.map((factor, idx) => (
@@ -373,10 +379,10 @@ export default function MlbFactorsHubEn() {
           id="statcast-4-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Statcast 4 Factors (MLB-exclusive layer)
+          Statcast {STAT_N} Factors (MLB-exclusive layer)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Batted-ball measurement layer available from the MLB Statcast Era (2015~) — 4 factors not present in the KBO model. Detailed team measurements ={" "}
+          Batted-ball measurement layer available from the MLB Statcast Era (2015~) — {STAT_N} factors not present in the KBO model. Detailed team measurements ={" "}
           <Link href="/en/mlb/players" className="underline">
             /en/mlb/players
           </Link>
@@ -444,7 +450,7 @@ export default function MlbFactorsHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ These weights = MLB v1.0 (KBO v1.8 mapping + Statcast 4 additions). Will update when model evolves.
+          ※ These weights = MLB v1.0 (KBO v1.8 mapping + Statcast {STAT_N} additions). Will update when model evolves.
         </p>
         <p>
           ※ Weight source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C learning cohort = walk-forward expanding window (milestones n=27 / 60 / 150 / 300 / 1000 / 2430).

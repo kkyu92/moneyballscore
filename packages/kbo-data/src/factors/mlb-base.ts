@@ -19,6 +19,32 @@ export const MLB_BASE_WEIGHTS = {
   home_elo_bonus: 0.10,
 } as const;
 
+export const MLB_KBO_FACTOR_KEYS = [
+  "sp_fip",
+  "sp_xfip",
+  "lineup_woba",
+  "bullpen_fip",
+  "recent_form",
+  "war",
+  "head_to_head",
+  "park_factor",
+  "elo",
+  "defense_sfr",
+] as const satisfies readonly (keyof typeof MLB_BASE_WEIGHTS)[];
+
+export const MLB_STATCAST_FACTOR_KEYS = [
+  "lineup_xwoba",
+  "lineup_barrel_pct",
+  "sp_xwoba_against",
+  "woba_std",
+] as const satisfies readonly (keyof typeof MLB_BASE_WEIGHTS)[];
+
+export const MLB_FACTOR_COUNTS = {
+  kbo: MLB_KBO_FACTOR_KEYS.length,
+  statcast: MLB_STATCAST_FACTOR_KEYS.length,
+  total: MLB_KBO_FACTOR_KEYS.length + MLB_STATCAST_FACTOR_KEYS.length,
+} as const;
+
 export const HOME_ELO_BONUS_VALUE = 24;
 
 export interface MlbFactorInputs {

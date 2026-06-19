@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB 14팩터 본선 — 가중치 표 | MoneyBall Score";
+export const alt = `MLB ${MLB_FACTOR_COUNTS.total}팩터 본선 — 가중치 표 | MoneyBall Score`;
 
 export default function MlbFactorsOgImage() {
   return new ImageResponse(
@@ -44,7 +45,7 @@ export default function MlbFactorsOgImage() {
             lineHeight: 1,
           }}
         >
-          14 Factors
+          {MLB_FACTOR_COUNTS.total} Factors
         </div>
 
         <div
@@ -56,7 +57,7 @@ export default function MlbFactorsOgImage() {
             display: "flex",
           }}
         >
-          KBO 10 (FIP · wOBA · WAR · Elo …) + Statcast 4 (xwOBA · Barrel · Hard hit · Launch)
+          KBO {MLB_FACTOR_COUNTS.kbo} (FIP · wOBA · WAR · Elo …) + Statcast {MLB_FACTOR_COUNTS.statcast} (xwOBA · Barrel · Hard hit · Launch)
         </div>
 
         <div
@@ -96,7 +97,7 @@ export default function MlbFactorsOgImage() {
           }}
         >
           <span>moneyballscore.vercel.app/mlb/factors</span>
-          <span>KBO 10 + Statcast 4</span>
+          <span>KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}</span>
         </div>
       </div>
     ),
