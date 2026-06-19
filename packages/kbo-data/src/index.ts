@@ -72,6 +72,21 @@ export { fetchLiveGames, adjustWinProbability } from './scrapers/kbo-live';
 export { runDebate } from './agents/debate';
 export type { DebateResult, GameContext, TeamArgument, JudgeVerdict, CalibrationHint } from './agents/types';
 
+// LLM Agent context layer (plan #23 Step 1, cycle 1225)
+export {
+  MetricRegistry,
+  getProductionMetrics,
+  isMetricValueValid,
+  renderMetricForLLM,
+} from './context/metrics';
+export type {
+  MetricDefinition,
+  MetricSlug,
+  MetricUnit,
+  MetricSource,
+  MetricDirection,
+} from './context/metrics';
+
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
 
