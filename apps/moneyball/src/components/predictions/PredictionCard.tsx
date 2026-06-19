@@ -6,7 +6,7 @@ import {
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
 import type { WeatherSlot } from "@/lib/weather";
-import { topFavoringFactors } from "@/lib/predictions/factorLabels";
+import { FACTOR_LABELS_TECHNICAL, topFavoringFactors } from "@/lib/predictions/factorLabels";
 
 export interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -289,7 +289,7 @@ export function PredictionCard({
                 className="cursor-help hover:text-brand-600 dark:hover:text-brand-300 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600 underline-offset-2"
                 title="wOBA — Weighted On-Base Average. 안타·볼넷·홈런 등 출루 결과별 가치를 가중치로 합산한 종합 타격 지표. 높을수록 우세."
               >
-                타선 wOBA
+                {FACTOR_LABELS_TECHNICAL.lineup_woba}
               </a>
               {" "}
               <span className="font-mono">{awayWoba.toFixed(3)}</span>
