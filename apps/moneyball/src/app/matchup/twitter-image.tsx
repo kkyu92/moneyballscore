@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { KBO_TEAM_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -56,7 +57,7 @@ export default function MatchupHubTwitterImage() {
             display: "flex",
           }}
         >
-          10 teams · 45 head-to-head combos · accuracy log
+          {KBO_TEAM_COUNT} teams · 45 head-to-head combos · accuracy log
         </div>
 
         <div

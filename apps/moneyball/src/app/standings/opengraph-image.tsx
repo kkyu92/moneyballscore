@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { KBO_TEAM_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -67,7 +68,7 @@ export default function StandingsHubOgImage() {
             flexWrap: "wrap",
           }}
         >
-          {["Hourly refresh", "Elo trend", "Team accuracy", "10 teams"].map((label) => (
+          {["Hourly refresh", "Elo trend", "Team accuracy", `${KBO_TEAM_COUNT} teams`].map((label) => (
             <div
               key={label}
               style={{

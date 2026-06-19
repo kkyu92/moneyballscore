@@ -67,6 +67,13 @@ export const KBO_TEAMS = {
 export type TeamCode = keyof typeof KBO_TEAMS;
 
 /**
+ * KBO 팀 수 — 사이트 전반 metadata/OG/JSX 에서 "KBO 10팀" / "10 teams" 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 76 (cycle 1278) — wave 67-75 MLB_FACTOR_COUNTS 패턴의 KBO 차원 확장.
+ * KBO_TEAMS 변경 시 자동 동기 (Object.keys length).
+ */
+export const KBO_TEAM_COUNT = Object.keys(KBO_TEAMS).length;
+
+/**
  * 구장 짧은 이름 — UI 노출용. KBO_TEAMS.stadium 은 정식 명칭이라 UI 에 길고,
  * KBO 공식 API S_NM 은 짧은 지역명 ("대구", "잠실") 을 리턴. Naver basic
  * 응답처럼 stadium 필드가 비어 있을 때 fallback 용 상수.
