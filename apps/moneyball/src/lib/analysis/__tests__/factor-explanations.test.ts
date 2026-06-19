@@ -282,7 +282,7 @@ describe("buildGameOverview", () => {
       awayTeamName: "NC",
       h2hRate: 0.75,
     });
-    expect(result.summary).toContain("상대전적");
+    expect(result.summary).toContain("상대 전적");
     expect(result.summary).toContain("KIA");
   });
 
