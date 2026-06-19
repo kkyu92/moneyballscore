@@ -2,7 +2,7 @@
  * Rivalry Memory — 팀 에이전트 프롬프트 주입용 과거 맥락 로더
  *
  * 동작:
- * - 과거 5경기 h2h (home vs away)
+ * - 과거 N 경기 h2h (home vs away) — `TIME_WINDOWS.h2h_recent_games.games` 단일 source
  * - agent_memories 테이블에서 해당 팀의 valid_until 유효한 row ≤5개 (confidence DESC)
  * - 플레인텍스트 블록으로 조합 → team-agent buildUserMessage 에 주입
  *
@@ -12,6 +12,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { assertSelectOk, errMsg, type TeamCode } from '@moneyball/shared';
+import { TIME_WINDOWS } from '../context/domain';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -40,7 +41,10 @@ export interface RivalryBlock {
 
 // 토큰 1개 ≈ 한국어 1.5자 근사. 400 tokens ≈ 600자 상한. 초과 시 truncate.
 const MAX_BLOCK_CHARS = 600;
-const RECENT_GAMES_LIMIT = 5;
+// h2h 경기 수 = TIME_WINDOWS.h2h_recent_games 단일 source — agent context layer
+// (plan #23 wave 49) silent drift 차단. predictor 가 사용하는 h2h_window (30일) 와
+// 별도 — agent prompt 토큰 예산 (MAX_BLOCK_CHARS=600) 안 example 박제용.
+const RECENT_GAMES_LIMIT = TIME_WINDOWS.h2h_recent_games.games;
 const MEMORIES_LIMIT = 5;
 
 function createAdminClient(): DB | null {
