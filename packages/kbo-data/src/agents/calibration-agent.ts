@@ -1,5 +1,6 @@
 import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
+import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWindowsForLLM } from '../context/domain';
 import { callLLM } from './llm';
 import type { CalibrationHint, AgentResult } from './types';
 
@@ -41,15 +42,38 @@ interface PredictionHistory {
   teamAccuracy: Record<string, { correct: number; total: number }>;
 }
 
+/**
+ * plan #23 Step 5 wave 47 (cycle 1237): calibration 회고 prompt 에 domain hint
+ * (구장 / 라이벌리 / 시즌 / 시간 윈도우) prepend. GameContext 미수신 agent (model
+ * 회고 차원) 라 production weight metric 박제 X — domain hints only.
+ *
+ * `today` 인자 default = `new Date()`. 호출자 변경 없이 후방 호환.
+ */
+export function buildCalibrationContextBlock(
+  homeTeam: TeamCode,
+  awayTeam: TeamCode,
+  today: Date = new Date()
+): string {
+  const lines: string[] = ['[도메인 컨텍스트]'];
+  lines.push(`  - ${renderParkForLLM(homeTeam)}`);
+  const rivalry = renderRivalryForLLM(homeTeam, awayTeam);
+  if (rivalry) lines.push(`  - ${rivalry}`);
+  lines.push(`  - ${renderSeasonForLLM(today)}`);
+  lines.push(`  - ${renderTimeWindowsForLLM()}`);
+  return lines.join('\n');
+}
+
 function buildUserMessage(
   homeTeam: TeamCode,
   awayTeam: TeamCode,
-  history: PredictionHistory
+  history: PredictionHistory,
+  today: Date = new Date()
 ): string {
   const homeName = KBO_TEAMS[homeTeam].name;
   const awayName = KBO_TEAMS[awayTeam].name;
 
-  let msg = `오늘 경기: ${awayName} @ ${homeName}\n\n`;
+  let msg = `${buildCalibrationContextBlock(homeTeam, awayTeam, today)}\n\n`;
+  msg += `오늘 경기: ${awayName} @ ${homeName}\n\n`;
 
   msg += `[모델 성과 요약]\n`;
   msg += `총 예측: ${history.totalPredictions}건\n`;
