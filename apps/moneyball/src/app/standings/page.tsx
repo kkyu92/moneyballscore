@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -93,7 +93,7 @@ export default async function StandingsPage() {
           KBO 공식 집계 기준 · 매시간 갱신
         </p>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-          현재 정규시즌 10팀의 승·무·패, 승률, 게임차, 최근 10경기 성적을
+          현재 정규시즌 {KBO_TEAM_COUNT}팀의 승·무·패, 승률, 게임차, 최근 10경기 성적을
           실시간으로 표시. 같은 페이지 하단에서 우리 모델이 본 팀별 적중률 +
           Elo 레이팅 30일 추이를 차트로 공개합니다. 모델 방법론은{" "}
           <Link

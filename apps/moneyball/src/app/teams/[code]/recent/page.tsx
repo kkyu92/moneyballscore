@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   KBO_TEAMS,
+  KBO_TEAM_COUNT,
   type TeamCode,
   shortTeamName,
   assertSelectOk,
@@ -194,7 +195,7 @@ export default async function TeamRecentPage({ params }: PageProps) {
 
   const related: RelatedLink[] = [
     { href: `/teams/${code}`, label: `${teamName} 팀 프로필`, hint: '시즌 종합' },
-    { href: '/teams', label: '전체 팀', hint: 'KBO 10팀' },
+    { href: '/teams', label: '전체 팀', hint: `KBO ${KBO_TEAM_COUNT}팀` },
     { href: '/predictions', label: '예측 hub', hint: '전체 카드 모음' },
     { href: '/calendar', label: '월별 캘린더', hint: '월별 적중률' },
   ];

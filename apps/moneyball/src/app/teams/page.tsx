@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, KBO_TEAM_COUNT, type TeamCode } from "@moneyball/shared";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "팀 프로필",
   description:
-    "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
+    `KBO ${KBO_TEAM_COUNT}팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.`,
   alternates: { canonical: "https://moneyballscore.vercel.app/teams" },
   openGraph: {
     type: "website",
@@ -16,13 +16,13 @@ export const metadata: Metadata = {
     siteName: "MoneyBall Score",
     title: "팀 프로필 | MoneyBall Score",
     description:
-      "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
+      `KBO ${KBO_TEAM_COUNT}팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.`,
   },
   twitter: {
     card: "summary_large_image",
     title: "팀 프로필 | MoneyBall Score",
     description:
-      "KBO 10팀의 예측 기록·적중률·주요 투수·구장 특성 허브.",
+      `KBO ${KBO_TEAM_COUNT}팀의 예측 기록·적중률·주요 투수·구장 특성 허브.`,
   },
 };
 
@@ -47,7 +47,7 @@ export default function TeamsIndexPage() {
     "@type": "CollectionPage",
     name: "KBO 팀 프로필",
     description:
-      "KBO 10팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.",
+      `KBO ${KBO_TEAM_COUNT}팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.`,
     url: `${SITE_URL}/teams`,
     mainEntity: {
       "@type": "ItemList",
@@ -80,7 +80,7 @@ export default function TeamsIndexPage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">팀 프로필</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          KBO 10팀의 시즌 예측 기록, 팩터 평균값, 주요 투수, 홈구장 특성.
+          KBO {KBO_TEAM_COUNT}팀의 시즌 예측 기록, 팩터 평균값, 주요 투수, 홈구장 특성.
         </p>
       </header>
 

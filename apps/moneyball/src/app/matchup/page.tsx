@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, KBO_TEAM_COUNT, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -8,7 +8,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 export const metadata: Metadata = {
   title: "팀 간 매치업",
   description:
-    "KBO 10팀의 45가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.",
+    `KBO ${KBO_TEAM_COUNT}팀의 45가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.`,
   alternates: { canonical: "https://moneyballscore.vercel.app/matchup" },
   openGraph: {
     type: "website",
@@ -17,13 +17,13 @@ export const metadata: Metadata = {
     siteName: "MoneyBall Score",
     title: "팀 간 매치업 | MoneyBall Score",
     description:
-      "KBO 10팀의 45가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.",
+      `KBO ${KBO_TEAM_COUNT}팀의 45가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.`,
   },
   twitter: {
     card: "summary_large_image",
     title: "팀 간 매치업 | MoneyBall Score",
     description:
-      "KBO 10팀 × 45가지 맞대결 상대전적 · AI 예측 적중률.",
+      `KBO ${KBO_TEAM_COUNT}팀 × 45가지 맞대결 상대전적 · AI 예측 적중률.`,
   },
 };
 
@@ -47,7 +47,7 @@ export default function MatchupIndexPage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">팀 간 매치업</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          KBO 10팀 × 45가지 맞대결 조합. 상대전적과 AI 예측 적중률을 조합별로
+          KBO {KBO_TEAM_COUNT}팀 × 45가지 맞대결 조합. 상대전적과 AI 예측 적중률을 조합별로
           확인하세요.
         </p>
       </header>

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { KBO_TEAM_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -56,7 +57,7 @@ export default function TeamsHubOgImage() {
             display: "flex",
           }}
         >
-          KBO 10팀 · 예측 기록 · 적중률 · 주요 투수 · 구장 특성
+          KBO {KBO_TEAM_COUNT}팀 · 예측 기록 · 적중률 · 주요 투수 · 구장 특성
         </div>
 
         <div
@@ -67,7 +68,7 @@ export default function TeamsHubOgImage() {
             flexWrap: "wrap",
           }}
         >
-          {["10 teams", "Accuracy log", "Park factor", "Rotation"].map((label) => (
+          {[`${KBO_TEAM_COUNT} teams`, "Accuracy log", "Park factor", "Rotation"].map((label) => (
             <div
               key={label}
               style={{

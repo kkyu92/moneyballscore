@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   KBO_TEAMS,
+  KBO_TEAM_COUNT,
   KBO_TEAM_SHORT_NAME,
   DEFAULT_WEIGHTS,
   ACTIVE_FACTOR_KEYS,
@@ -26,6 +27,11 @@ import {
 describe('KBO_TEAMS', () => {
   it('should have exactly 10 teams', () => {
     expect(Object.keys(KBO_TEAMS)).toHaveLength(10);
+  });
+
+  it('KBO_TEAM_COUNT should match KBO_TEAMS length (silent drift wave 76 guard)', () => {
+    expect(KBO_TEAM_COUNT).toBe(Object.keys(KBO_TEAMS).length);
+    expect(KBO_TEAM_COUNT).toBe(10);
   });
 
   it('should have required fields for each team', () => {

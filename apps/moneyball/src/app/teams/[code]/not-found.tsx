@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { KBO_TEAMS, KBO_TEAM_SHORT_NAME, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, KBO_TEAM_COUNT, KBO_TEAM_SHORT_NAME, type TeamCode } from "@moneyball/shared";
 
 export const metadata: Metadata = {
   title: "팀을 찾을 수 없음",
-  description: "요청하신 팀 코드가 KBO 10팀에 존재하지 않습니다.",
+  description: `요청하신 팀 코드가 KBO ${KBO_TEAM_COUNT}팀에 존재하지 않습니다.`,
   robots: { index: false, follow: false },
 };
 
@@ -19,15 +19,15 @@ export default function TeamNotFound() {
           팀을 찾을 수 없습니다
         </h1>
         <p className="text-base text-gray-600 dark:text-gray-300">
-          요청하신 팀 코드가 KBO 10팀에 존재하지 않습니다.
+          요청하신 팀 코드가 KBO {KBO_TEAM_COUNT}팀에 존재하지 않습니다.
           <br className="hidden sm:block" />
           아래에서 원하는 팀을 선택하세요.
         </p>
       </header>
 
-      <nav aria-label="KBO 10팀" className="space-y-3">
+      <nav aria-label={`KBO ${KBO_TEAM_COUNT}팀`} className="space-y-3">
         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-          KBO 10팀
+          KBO {KBO_TEAM_COUNT}팀
         </h2>
         <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {TEAM_CODES.map((code) => (
