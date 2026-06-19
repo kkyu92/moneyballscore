@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -67,7 +68,12 @@ export default function PlayersHubOgImage() {
             flexWrap: "wrap",
           }}
         >
-          {["Pitcher FIP", "Batter WAR", "wOBA", "Top 10"].map((label) => (
+          {[
+            FACTOR_LABELS_TECHNICAL.sp_fip,
+            FACTOR_LABELS_TECHNICAL.war,
+            FACTOR_LABELS_TECHNICAL.lineup_woba,
+            "Top 10",
+          ].map((label) => (
             <div
               key={label}
               style={{
