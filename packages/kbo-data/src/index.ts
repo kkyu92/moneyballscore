@@ -116,16 +116,21 @@ export type {
   MetricObservation,
 } from './context/agent-context';
 
-// LLM Agent 회귀 가드 + 측정 harness (plan #23 Step 4, cycle 1228)
+// LLM Agent 회귀 가드 + 측정 harness (plan #23 Step 4, cycle 1228 / 1235 Brier delta)
 export {
   extractMetricPairsFromText,
   measureHallucinations,
   estimatePromptTokens,
   measureContextTokenBudget,
+  measureBrierStats,
+  measureContextLayerBrierDelta,
 } from './context/measurement';
 export type {
   HallucinationStats,
   TokenBudgetStats,
+  JudgmentRecord,
+  BrierStats,
+  ContextLayerBrierDelta,
 } from './context/measurement';
 
 // 알림

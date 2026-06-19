@@ -12,8 +12,11 @@ import { describe, expect, it } from 'vitest';
 import {
   estimatePromptTokens,
   extractMetricPairsFromText,
+  measureBrierStats,
+  measureContextLayerBrierDelta,
   measureContextTokenBudget,
   measureHallucinations,
+  type JudgmentRecord,
 } from '../measurement';
 import { buildAgentContext } from '../agent-context';
 import type { GameContext } from '../../agents/types';
@@ -157,5 +160,109 @@ describe('measureContextTokenBudget', () => {
     const ac = buildAgentContext(makeCtx());
     const stats = measureContextTokenBudget(ac);
     expect(stats.char_count).toBeGreaterThan(stats.estimated_tokens);
+  });
+});
+
+describe('measureBrierStats', () => {
+  it('빈 cohort → n=0 / brier=0 / acc=0', () => {
+    const stats = measureBrierStats([]);
+    expect(stats.n).toBe(0);
+    expect(stats.brier_mean).toBe(0);
+    expect(stats.accuracy).toBe(0);
+  });
+
+  it('완벽 예측 → brier=0 / acc=1', () => {
+    const records: JudgmentRecord[] = [
+      { home_win_prob: 1.0, actual_home_win: true },
+      { home_win_prob: 0.0, actual_home_win: false },
+    ];
+    const stats = measureBrierStats(records);
+    expect(stats.brier_mean).toBe(0);
+    expect(stats.accuracy).toBe(1);
+  });
+
+  it('완벽 반대 → brier=1 / acc=0', () => {
+    const records: JudgmentRecord[] = [
+      { home_win_prob: 1.0, actual_home_win: false },
+      { home_win_prob: 0.0, actual_home_win: true },
+    ];
+    const stats = measureBrierStats(records);
+    expect(stats.brier_mean).toBe(1);
+    expect(stats.accuracy).toBe(0);
+  });
+
+  it('50/50 random → brier=0.25 / acc 임의 (≥0.5 픽 가정)', () => {
+    const records: JudgmentRecord[] = [
+      { home_win_prob: 0.5, actual_home_win: true },
+      { home_win_prob: 0.5, actual_home_win: false },
+    ];
+    const stats = measureBrierStats(records);
+    expect(stats.brier_mean).toBe(0.25);
+    expect(stats.accuracy).toBe(0.5);
+  });
+
+  it('혼합 cohort → mean 계산 정합', () => {
+    const records: JudgmentRecord[] = [
+      { home_win_prob: 0.8, actual_home_win: true }, // (0.8-1)^2 = 0.04
+      { home_win_prob: 0.3, actual_home_win: false }, // (0.3-0)^2 = 0.09
+      { home_win_prob: 0.6, actual_home_win: false }, // (0.6-0)^2 = 0.36 + 픽 wrong
+    ];
+    const stats = measureBrierStats(records);
+    expect(stats.n).toBe(3);
+    expect(stats.brier_mean).toBeCloseTo((0.04 + 0.09 + 0.36) / 3, 5);
+    expect(stats.accuracy).toBeCloseTo(2 / 3, 5);
+  });
+});
+
+describe('measureContextLayerBrierDelta', () => {
+  it('post 가 더 정확 → delta_brier 음수 / improvement=true', () => {
+    const pre: JudgmentRecord[] = [
+      { home_win_prob: 0.6, actual_home_win: true }, // brier 0.16
+      { home_win_prob: 0.4, actual_home_win: false }, // brier 0.16
+    ];
+    const post: JudgmentRecord[] = [
+      { home_win_prob: 0.8, actual_home_win: true }, // brier 0.04
+      { home_win_prob: 0.2, actual_home_win: false }, // brier 0.04
+    ];
+    const delta = measureContextLayerBrierDelta(pre, post);
+    expect(delta.pre.brier_mean).toBeCloseTo(0.16, 5);
+    expect(delta.post.brier_mean).toBeCloseTo(0.04, 5);
+    expect(delta.delta_brier).toBeLessThan(0);
+    expect(delta.improvement).toBe(true);
+  });
+
+  it('post 가 더 부정확 → delta_brier 양수 / improvement=false', () => {
+    const pre: JudgmentRecord[] = [
+      { home_win_prob: 0.9, actual_home_win: true }, // brier 0.01
+    ];
+    const post: JudgmentRecord[] = [
+      { home_win_prob: 0.5, actual_home_win: true }, // brier 0.25
+    ];
+    const delta = measureContextLayerBrierDelta(pre, post);
+    expect(delta.delta_brier).toBeGreaterThan(0);
+    expect(delta.improvement).toBe(false);
+  });
+
+  it('accuracy delta 측정', () => {
+    const pre: JudgmentRecord[] = [
+      { home_win_prob: 0.6, actual_home_win: false }, // 픽 wrong
+      { home_win_prob: 0.4, actual_home_win: true }, // 픽 wrong
+    ];
+    const post: JudgmentRecord[] = [
+      { home_win_prob: 0.6, actual_home_win: true }, // 픽 right
+      { home_win_prob: 0.4, actual_home_win: false }, // 픽 right
+    ];
+    const delta = measureContextLayerBrierDelta(pre, post);
+    expect(delta.pre.accuracy).toBe(0);
+    expect(delta.post.accuracy).toBe(1);
+    expect(delta.delta_accuracy).toBe(1);
+  });
+
+  it('빈 양쪽 cohort → 0 stats / improvement=false (delta=0)', () => {
+    const delta = measureContextLayerBrierDelta([], []);
+    expect(delta.pre.n).toBe(0);
+    expect(delta.post.n).toBe(0);
+    expect(delta.delta_brier).toBe(0);
+    expect(delta.improvement).toBe(false);
   });
 });
