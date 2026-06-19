@@ -1,5 +1,6 @@
 import { CURRENT_SCORING_RULE, KBO_TEAMS, WINNER_PROB_LEAN, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
+import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
 import { getZeroWeightRuleJudgePregame } from './postview';
 import type { TeamArgument, CalibrationHint, JudgeVerdict, AgentResult, GameContext } from './types';
@@ -45,12 +46,21 @@ function buildUserMessage(
   homeArg: TeamArgument,
   awayArg: TeamArgument,
   quantitativeProb: number,
-  calibration: CalibrationHint | null
+  calibration: CalibrationHint | null,
+  context?: GameContext
 ): string {
   const homeName = KBO_TEAMS[homeTeam].name;
   const awayName = KBO_TEAMS[awayTeam].name;
 
-  let msg = `경기: ${awayName} @ ${homeName}
+  // plan #23 Step 5 (cycle 1232): context layer 통합 — production weight>0 메트릭 +
+  // 도메인 hint (구장 / 라이벌리 / 시즌 / 시간 윈도우) 를 표준 ContextPayload 로 prepend.
+  // legacy 호출부 (context 미전달) 는 기존 동작 유지 — 후방 호환.
+  let contextBlock = '';
+  if (context) {
+    contextBlock = `${renderContextForLLM(buildAgentContext(context))}\n\n`;
+  }
+
+  let msg = `${contextBlock}경기: ${awayName} @ ${homeName}
 
 [${homeName} 에이전트 주장]
 강점: ${homeArg.strengths.join(', ')}
@@ -135,7 +145,7 @@ export async function runJudgeAgent(
     {
       model: 'sonnet',
       systemPrompt: SYSTEM_PROMPT,
-      userMessage: buildUserMessage(homeTeam, awayTeam, homeArg, awayArg, quantitativeProb, calibration),
+      userMessage: buildUserMessage(homeTeam, awayTeam, homeArg, awayArg, quantitativeProb, calibration, context),
       maxTokens: 1500,
     },
     (text) => parseResponse(text, homeTeam, awayTeam)
