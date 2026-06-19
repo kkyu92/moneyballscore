@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -73,7 +74,7 @@ export default async function Image({ params }: Props) {
             gap: 12,
           }}
         >
-          {["14팩터", "Statcast 4", "Confidence", "구장보정"].map((tag) => (
+          {[`${MLB_FACTOR_COUNTS.total}팩터`, `Statcast ${MLB_FACTOR_COUNTS.statcast}`, "Confidence", "구장보정"].map((tag) => (
             <div
               key={tag}
               style={{

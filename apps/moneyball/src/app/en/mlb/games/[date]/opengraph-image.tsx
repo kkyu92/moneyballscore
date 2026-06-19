@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -73,7 +74,7 @@ export default async function Image({ params }: Props) {
             gap: 12,
           }}
         >
-          {["14 Factors", "Statcast 4", "Confidence", "Park Factor"].map((tag) => (
+          {[`${MLB_FACTOR_COUNTS.total} Factors`, `Statcast ${MLB_FACTOR_COUNTS.statcast}`, "Confidence", "Park Factor"].map((tag) => (
             <div
               key={tag}
               style={{

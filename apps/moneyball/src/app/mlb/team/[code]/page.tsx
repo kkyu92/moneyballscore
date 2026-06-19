@@ -8,6 +8,7 @@ import {
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isMlbTeamCode(code)) return {};
   const meta = MLB_TEAMS[code];
   const title = `${meta.name} — MLB 팀 프로필 | MoneyBall Score`;
-  const description = `${meta.name} (${meta.league} ${meta.division}) 시즌 예측 기록 · 홈구장 ${meta.stadium} (파크팩터 ${meta.parkPf}) · 14팩터 (KBO 10 + Statcast 4) 집계.`;
+  const description = `${meta.name} (${meta.league} ${meta.division}) 시즌 예측 기록 · 홈구장 ${meta.stadium} (파크팩터 ${meta.parkPf}) · ${MLB_FACTOR_COUNTS.total}팩터 (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) 집계.`;
 
   return {
     title,
@@ -201,7 +202,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
         className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
       >
         <h2 id="mlb-team-factors-title" className="text-lg font-bold mb-3">
-          시즌 평균 팩터값 (14팩터 = KBO 10 + Statcast 4)
+          시즌 평균 팩터값 ({MLB_FACTOR_COUNTS.total}팩터 = KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast})
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
           <div>

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { KBO_TEAM_COUNT } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
@@ -35,7 +37,7 @@ const KBO_NAV: NavItem[] = [
     label: "팀·선수",
     items: [
       { href: "/standings", label: "순위", description: "KBO 정규시즌 순위표", icon: "award" },
-      { href: "/teams", label: "팀", description: "KBO 10구단 프로필·통계", icon: "shield" },
+      { href: "/teams", label: "팀", description: `KBO ${KBO_TEAM_COUNT}구단 프로필·통계`, icon: "shield" },
       { href: "/players", label: "선수", description: "선수 세이버메트릭스 지표", icon: "user" },
       { href: "/matchup", label: "매치업", description: "팀간 맞대결 이력 분석", icon: "arrows-swap" },
     ],
@@ -57,7 +59,7 @@ const MLB_NAV: NavItem[] = [
       { href: "/mlb/standings", label: "AL/NL 순위", description: "6 division standings", icon: "award" },
       { href: "/mlb/team", label: "팀", description: "30팀 시즌 stat", icon: "shield" },
       { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
-      { href: "/mlb/factors", label: "14팩터", description: "KBO 10 + Statcast 4 가중치", icon: "file-text" },
+      { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, icon: "file-text" },
     ],
   },
   {

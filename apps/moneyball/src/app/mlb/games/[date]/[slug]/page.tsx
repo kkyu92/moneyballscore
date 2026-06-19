@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk } from "@moneyball/shared";
-import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
+import { MetricRegistry, type MetricSlug, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const revalidate = 1800;
 
@@ -16,7 +16,7 @@ interface PageParams {
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
   const title = `${slug} ${date} 분석 | MoneyBall Score`;
-  const description = `${slug} 14팩터 + Statcast 4 + waterfall`;
+  const description = `${slug} ${MLB_FACTOR_COUNTS.total}팩터 + Statcast ${MLB_FACTOR_COUNTS.statcast} + waterfall`;
   return {
     title,
     description,
