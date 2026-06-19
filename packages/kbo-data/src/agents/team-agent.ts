@@ -1,5 +1,6 @@
 import { KBO_TEAMS, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
+import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
 import { validateTeamArgument, resolveValidationMode } from './validator';
@@ -42,7 +43,12 @@ export function buildUserMessage(
   const myForm = isHome ? context.homeRecentForm : context.awayRecentForm;
   const oppForm = isHome ? context.awayRecentForm : context.homeRecentForm;
 
-  return `오늘 경기: ${KBO_TEAMS[context.game.awayTeam].name} @ ${KBO_TEAMS[context.game.homeTeam].name}
+  // plan #23 Step 5 wave 44 (cycle 1233): context layer 통합 — production weight>0 메트릭 +
+  // 도메인 hint (구장 / 라이벌리 / 시즌 / 시간 윈도우) 표준 ContextPayload prepend.
+  // 기존 inline 데이터 박제 (선발/wOBA/Elo 등) 는 후방 호환 유지.
+  const contextBlock = `${renderContextForLLM(buildAgentContext(context))}\n\n`;
+
+  return `${contextBlock}오늘 경기: ${KBO_TEAMS[context.game.awayTeam].name} @ ${KBO_TEAMS[context.game.homeTeam].name}
 구장: ${context.game.stadium} | 시간: ${context.game.gameTime}
 ${isHome ? '홈' : '원정'} 경기입니다.
 
