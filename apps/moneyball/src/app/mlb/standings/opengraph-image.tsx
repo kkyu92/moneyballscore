@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB AL/NL 순위 · 6 division | MoneyBall Score";
+export const alt = `MLB AL/NL 순위 · ${MLB_DIVISION_COUNT} division | MoneyBall Score`;
 
 export default function MlbStandingsOgImage() {
   return new ImageResponse(
@@ -56,7 +57,7 @@ export default function MlbStandingsOgImage() {
             display: "flex",
           }}
         >
-          AL/NL × East/Central/West · 6 division 30팀 · park factor
+          AL/NL × East/Central/West · {MLB_DIVISION_COUNT} division {MLB_TEAM_COUNT}팀 · park factor
         </div>
 
         <div
@@ -96,7 +97,7 @@ export default function MlbStandingsOgImage() {
           }}
         >
           <span>moneyballscore.vercel.app/mlb/standings</span>
-          <span>KO · EN · 30 teams</span>
+          <span>KO · EN · {MLB_TEAM_COUNT} teams</span>
         </div>
       </div>
     ),

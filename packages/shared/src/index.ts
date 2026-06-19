@@ -11,6 +11,13 @@ export {
 } from './mlb-teams';
 export type { MlbTeamCode, MlbLeagueSide, MlbDivisionSide } from './mlb-teams';
 
+// MLB 팀 수 / division 수 — wave 80 (cycle 1284) "30팀 / 30 teams / 6 division(s) / 6 디비전" 하드코딩 sweep 단일 source.
+// MLB_TEAMS / MLB_DIVISIONS 변경 시 자동 동기.
+import { MLB_TEAMS as _MLB_TEAMS, MLB_DIVISIONS as _MLB_DIVISIONS } from './mlb-teams';
+export const MLB_TEAM_COUNT = Object.keys(_MLB_TEAMS).length;
+export const MLB_DIVISION_COUNT =
+  Object.keys(_MLB_DIVISIONS.AL).length + Object.keys(_MLB_DIVISIONS.NL).length;
+
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
 export { hasJongsung, josa, ro } from './korean';
 

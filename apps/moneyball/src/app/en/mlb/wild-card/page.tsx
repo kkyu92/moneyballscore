@@ -3,6 +3,8 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
+  MLB_DIVISION_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
 } from "@moneyball/shared";
@@ -70,7 +72,7 @@ export default function MlbWildCardHubEn() {
           ⭐ MLB Wild Card Race
         </h1>
         <p className="text-base text-gray-600 dark:text-gray-300">
-          AL/NL both leagues — Wild Card 3-spot race. Of the remaining 10 teams outside the 6 division leaders, 3 per league advance.
+          AL/NL both leagues — Wild Card 3-spot race. Of the remaining {MLB_TEAM_COUNT - MLB_DIVISION_COUNT} teams outside the {MLB_DIVISION_COUNT} division leaders, 3 per league advance.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
           ETA 2026-08 — Late-season game-back / Magic Number tracking + {MLB_FACTOR_COUNTS.total}-factor model live data integration.
@@ -89,7 +91,7 @@ export default function MlbWildCardHubEn() {
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
           <li>MLB 162-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
-          <li>30-team standings (AL/NL × E/C/W 6 divisions) — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
+          <li>{MLB_TEAM_COUNT}-team standings (AL/NL × E/C/W {MLB_DIVISION_COUNT} divisions) — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
           <li>Wild Card 3-spot race tracking + live game-back — <strong>ETA 2026-08</strong></li>
           <li>Postseason bracket (WC / DS / LCS / WS) visualization — <strong>ETA 2026-09</strong></li>
         </ul>
@@ -103,7 +105,7 @@ export default function MlbWildCardHubEn() {
           Wild Card Candidate Pool — Teams Outside Division Leaders
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          3 division leaders per league = automatic playoff berths. Top 3 by win rate among the remaining 12 = Wild Card spots. This hub shows all 30 team entry paths — live game-back data activates at ETA.
+          3 division leaders per league = automatic playoff berths. Top 3 by win rate among the remaining {MLB_TEAM_COUNT / 2 - 3} = Wild Card spots. This hub shows all {MLB_TEAM_COUNT} team entry paths — live game-back data activates at ETA.
         </p>
         {LEAGUES.map((league) => {
           const codes = leagueAllCodes(league);
