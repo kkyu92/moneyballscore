@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MetricRegistry } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -43,11 +43,13 @@ type FactorRow = {
   source: string;
 };
 
+// KBO 10 factor 라벨 = MetricRegistry.ko_name 단일 source — silent drift wave 60 (cycle 1256 박제).
+// MLB MLB_BASE_WEIGHTS.defense_sfr key = MetricRegistry.sfr slug 매핑.
 const KBO_10_FACTORS: readonly FactorRow[] = [
   {
     key: "sp_fip",
-    label: "선발 FIP (Fielding Independent Pitching)",
-    shortLabel: "선발 FIP",
+    label: `${MetricRegistry.sp_fip.ko_name} (Fielding Independent Pitching)`,
+    shortLabel: MetricRegistry.sp_fip.ko_name,
     category: "선발",
     range: "1.50 ~ 6.00",
     description:
@@ -57,8 +59,8 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "sp_xfip",
-    label: "선발 xFIP",
-    shortLabel: "선발 xFIP",
+    label: MetricRegistry.sp_xfip.ko_name,
+    shortLabel: MetricRegistry.sp_xfip.ko_name,
     category: "선발",
     range: "1.50 ~ 6.00",
     description:
@@ -68,8 +70,8 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "lineup_woba",
-    label: "타선 wOBA (Weighted On-Base Average)",
-    shortLabel: "타선 wOBA",
+    label: `${MetricRegistry.lineup_woba.ko_name} (Weighted On-Base Average)`,
+    shortLabel: MetricRegistry.lineup_woba.ko_name,
     category: "타선",
     range: "0.250 ~ 0.420",
     description:
@@ -79,8 +81,8 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "bullpen_fip",
-    label: "불펜 FIP (Bullpen Aggregate)",
-    shortLabel: "불펜 FIP",
+    label: `${MetricRegistry.bullpen_fip.ko_name} (Bullpen Aggregate)`,
+    shortLabel: MetricRegistry.bullpen_fip.ko_name,
     category: "불펜",
     range: "2.50 ~ 6.00",
     description:
@@ -90,8 +92,8 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "recent_form",
-    label: "최근폼 (Last 10 Games)",
-    shortLabel: "최근폼",
+    label: `${MetricRegistry.recent_form.ko_name} (Last 10 Games)`,
+    shortLabel: MetricRegistry.recent_form.ko_name,
     category: "팀폼",
     range: "-3 ~ +3",
     description:
@@ -101,8 +103,8 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "war",
-    label: "WAR (Wins Above Replacement)",
-    shortLabel: "팀 WAR",
+    label: `${MetricRegistry.war.ko_name} (Wins Above Replacement)`,
+    shortLabel: MetricRegistry.war.ko_name,
     category: "기록",
     range: "-2 ~ +12 (선수당)",
     description:
@@ -112,7 +114,7 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "head_to_head",
-    label: "상대전적 (H2H)",
+    label: `${MetricRegistry.head_to_head.ko_name} (H2H)`,
     shortLabel: "H2H",
     category: "기록",
     range: "0.00 ~ 1.00",
@@ -123,7 +125,7 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "park_factor",
-    label: "구장보정 (Park Factor)",
+    label: `${MetricRegistry.park_factor.ko_name} (Park Factor)`,
     shortLabel: "PF",
     category: "구장",
     range: "85 ~ 115",
@@ -134,7 +136,7 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "elo",
-    label: "Elo 레이팅",
+    label: MetricRegistry.elo.ko_name,
     shortLabel: "Elo",
     category: "레이팅",
     range: "1300 ~ 1700",
@@ -145,8 +147,8 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "defense_sfr",
-    label: "수비 SFR (Skill-Free Runs)",
-    shortLabel: "수비 SFR",
+    label: `${MetricRegistry.sfr.ko_name} (Skill-Free Runs)`,
+    shortLabel: MetricRegistry.sfr.ko_name,
     category: "수비",
     range: "-30 ~ +30 (팀)",
     description:
