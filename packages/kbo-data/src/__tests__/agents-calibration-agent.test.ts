@@ -8,7 +8,7 @@
  * 본 테스트는 LLM 미호출 path 만 검증 — fetch 모킹 없이도 안정적.
  */
 import { describe, it, expect } from 'vitest';
-import { runCalibrationAgent, type PredictionHistory } from '../agents/calibration-agent';
+import { runCalibrationAgent, buildCalibrationContextBlock, type PredictionHistory } from '../agents/calibration-agent';
 
 function makeHistory(totalPredictions: number): PredictionHistory {
   return {
@@ -48,5 +48,27 @@ describe('runCalibrationAgent — sparse-history guard', () => {
     expect(result.data?.recentBias).toBeNull();
     expect(result.data?.teamSpecific).toBeNull();
     expect(result.data?.modelWeakness).toBeNull();
+  });
+});
+
+describe('buildCalibrationContextBlock — plan #23 Step 5 wave 47 domain hints prepend', () => {
+  // mid-season (6월) 고정 — getSeasonPhase 가 안정 박제
+  const midSeason = new Date('2026-06-19T00:00:00Z');
+
+  it('LG home → 잠실 park hint + season + time windows 박제', () => {
+    const block = buildCalibrationContextBlock('LG', 'HT', midSeason);
+
+    expect(block.startsWith('[도메인 컨텍스트]')).toBe(true);
+    expect(block).toContain('잠실');
+    expect(block).toContain('park_factor=');
+    expect(block).toContain('시즌');   // renderSeasonForLLM 의 한글 라벨
+    expect(block).toContain('분석 윈도우');
+  });
+
+  it('non-rivalry 매치 시 라이벌리 hint 자동 제외', () => {
+    // KT vs NC = 일반적으로 KBO_RIVALRIES 미포함
+    const block = buildCalibrationContextBlock('KT', 'NC', midSeason);
+
+    expect(block).not.toContain('라이벌리 매치');
   });
 });
