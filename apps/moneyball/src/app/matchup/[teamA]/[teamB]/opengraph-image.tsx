@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { shortTeamName } from "@moneyball/shared";
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -108,7 +109,12 @@ export default async function Image({ params }: Props) {
             gap: 12,
           }}
         >
-          {["H2H", "Factor 비교", "최근 폼", "구장 정보"].map((tag) => (
+          {[
+            FACTOR_LABELS_TECHNICAL.head_to_head,
+            "팩터 비교",
+            FACTOR_LABELS_TECHNICAL.recent_form,
+            FACTOR_LABELS_TECHNICAL.park_factor,
+          ].map((tag) => (
             <div
               key={tag}
               style={{
