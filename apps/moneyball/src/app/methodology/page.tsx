@@ -8,6 +8,7 @@ import {
 } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
+import { GLOSSARY_TERM_COUNT } from "../glossary/data";
 
 const TOC_ITEMS = [
   { id: "principles", label: "핵심 원칙" },
@@ -482,7 +483,7 @@ export default function MethodologyPage() {
           >
             <h3 className="font-semibold mb-1">용어 사전</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
-              FIP · wOBA · WAR 등 25개 지표 정의.
+              FIP · wOBA · WAR 등 {GLOSSARY_TERM_COUNT}개 지표 정의.
             </p>
           </Link>
           <Link

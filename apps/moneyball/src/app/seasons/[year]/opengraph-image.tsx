@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { KBO_TEAM_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -99,7 +100,7 @@ export default async function Image({ params }: Props) {
           }}
         >
           <span>moneyballscore.vercel.app/seasons/{year}</span>
-          <span>10 Teams · Full Season</span>
+          <span>{KBO_TEAM_COUNT} Teams · Full Season</span>
         </div>
       </div>
     ),
