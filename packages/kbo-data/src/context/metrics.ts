@@ -112,7 +112,7 @@ export const MetricRegistry = {
     slug: 'recent_form',
     ko_name: '최근 폼',
     unit: 'percent',
-    description_ko: '최근 7경기 승률 (%). 폼/탄력성/모멘텀 proxy.',
+    description_ko: '최근 10경기 승률 (%). 폼/탄력성/모멘텀 proxy.',
     source: 'derived',
     bounds: { min: 0, max: 100 },
     direction: 'higher-better',
