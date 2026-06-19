@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
+import { HOME_ADVANTAGE } from "@moneyball/shared";
+import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -34,70 +35,63 @@ export const metadata: Metadata = {
   },
 };
 
-const FACTOR_WEIGHTS = [
+const FACTOR_WEIGHTS: Array<{ slug: MetricSlug; rationale: string }> = [
   {
-    name: "선발 투수 FIP",
-    pct: DEFAULT_WEIGHTS.sp_fip,
+    slug: "sp_fip",
     rationale:
       "선발이 게임 전체 흐름의 절반 이상을 만든다. FIP 는 운/수비 영향을 제거한 투수 본인 실력이라 다음 등판 예측에 ERA 보다 정확.",
   },
   {
-    name: "선발 투수 xFIP",
-    pct: DEFAULT_WEIGHTS.sp_xfip,
+    slug: "sp_xfip",
     rationale:
       "FIP 의 홈런 변동성을 정규화한 보조 지표. 시즌 후반으로 갈수록 신뢰도가 ↑.",
   },
   {
-    name: "타선 wOBA",
-    pct: DEFAULT_WEIGHTS.lineup_woba,
+    slug: "lineup_woba",
     rationale:
       "단타·2루타·홈런·볼넷 각각에 가중치를 둔 종합 타격 생산성. 타율보다 득점 기여도와 강한 상관.",
   },
   {
-    name: "불펜 FIP",
-    pct: DEFAULT_WEIGHTS.bullpen_fip,
+    slug: "bullpen_fip",
     rationale:
       "선발 강판 후 경기 결과를 좌우. 불펜 평균자책점 (RA) 은 수비 운에 흔들리니 FIP 사용.",
   },
   {
-    name: "팀 전력 Elo",
-    pct: DEFAULT_WEIGHTS.elo,
+    slug: "elo",
     rationale:
       "체스에서 유래한 상대적 전력. 강팀을 이기면 많이 오르고 약팀에 지면 많이 내려간다. KBO Fancy Stats Elo 와 비교하여 우리 모델 성능을 검증.",
   },
   {
-    name: "최근 폼 (10경기)",
-    pct: DEFAULT_WEIGHTS.recent_form,
+    slug: "recent_form",
     rationale:
       "시즌 전체 성적보다 현재 팀 컨디션을 반영. 부상자 복귀·trade 후 변화도 빠르게 잡힌다.",
   },
   {
-    name: "팀 WAR",
-    pct: DEFAULT_WEIGHTS.war,
+    slug: "war",
     rationale:
       "Wins Above Replacement. 대체 선수 대비 팀 승리 기여도 총합. 시즌 전체 누적 전력 척도.",
   },
   {
-    name: "수비 SFR",
-    pct: DEFAULT_WEIGHTS.sfr,
+    slug: "sfr",
     rationale:
       "Skill-based Fielding Runs. 수비 능력을 점수로 환산. 운/구장 효과 분리.",
   },
   {
-    name: "구장 보정 (Park Factor)",
-    pct: DEFAULT_WEIGHTS.park_factor,
+    slug: "park_factor",
     rationale:
       "잠실 (투수 친화) ↔ 사직 (타자 친화) 같은 구장별 득점 환경 차이를 보정.",
   },
   {
-    name: "상대 전적",
-    pct: DEFAULT_WEIGHTS.head_to_head,
+    slug: "head_to_head",
     rationale:
       "두 팀 시즌 내 맞대결 기록. 분석에서 가장 작은 가중치 — 표본이 작아 노이즈가 크다는 사실을 누적 데이터로 확인.",
   },
 ];
 
-const totalWeight = FACTOR_WEIGHTS.reduce((sum, f) => sum + f.pct, 0);
+const totalWeight = FACTOR_WEIGHTS.reduce(
+  (sum, f) => sum + MetricRegistry[f.slug].weight_v18,
+  0,
+);
 
 const VERSION_HISTORY = [
   {
@@ -294,20 +288,23 @@ export default function MethodologyPage() {
               </tr>
             </thead>
             <tbody>
-              {FACTOR_WEIGHTS.map((f) => (
-                <tr
-                  key={f.name}
-                  className="border-b border-gray-100 dark:border-brand-800 align-top"
-                >
-                  <td className="py-2 px-2 font-medium">{f.name}</td>
-                  <td className="py-2 px-2 text-right tabular-nums">
-                    {(f.pct * 100).toFixed(0)}%
-                  </td>
-                  <td className="py-2 px-2 text-gray-600 dark:text-brand-300 leading-relaxed hidden md:table-cell">
-                    {f.rationale}
-                  </td>
-                </tr>
-              ))}
+              {FACTOR_WEIGHTS.map((f) => {
+                const m = MetricRegistry[f.slug];
+                return (
+                  <tr
+                    key={f.slug}
+                    className="border-b border-gray-100 dark:border-brand-800 align-top"
+                  >
+                    <td className="py-2 px-2 font-medium">{m.ko_name}</td>
+                    <td className="py-2 px-2 text-right tabular-nums">
+                      {(m.weight_v18 * 100).toFixed(0)}%
+                    </td>
+                    <td className="py-2 px-2 text-gray-600 dark:text-brand-300 leading-relaxed hidden md:table-cell">
+                      {f.rationale}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
