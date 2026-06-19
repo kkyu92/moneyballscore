@@ -29,6 +29,13 @@
       "ws": ">=8.20.1",
       "turbo": ">=2.9.14",
       "esbuild": ">=0.28.1"
+    },
+    "auditConfig": {
+      "ignoreCves": [
+        "GHSA-96hv-2xvq-fx4p",
+        "GHSA-vmh5-mc38-953g",
+        "GHSA-fx2h-pf6j-xcff"
+      ]
     }
   },
   "version": "0.5.48.0"

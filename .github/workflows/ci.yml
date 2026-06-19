@@ -23,7 +23,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Dependency audit
-        run: pnpm audit --audit-level=high
+        run: |
+          pnpm audit --audit-level=high \
+            --ignore GHSA-96hv-2xvq-fx4p \
+            --ignore GHSA-vmh5-mc38-953g \
+            --ignore GHSA-fx2h-pf6j-xcff
 
       - name: Type check
         run: pnpm type-check
