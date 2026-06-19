@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -19,7 +20,7 @@ const FACTOR_STATCAST = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
   title: `MLB Statcast ${FACTOR_STATCAST} Factors — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score`,
-  description: `MLB ${FACTOR_TOTAL}-factor model Statcast ${FACTOR_STATCAST} layer (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status. Live team Statcast data integration ETA carry-over.`,
+  description: `MLB ${FACTOR_TOTAL}-factor model Statcast ${FACTOR_STATCAST} layer (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + ${MLB_TEAM_COUNT}-team measurement status. Live team Statcast data integration ETA carry-over.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/players`,
     languages: {
@@ -110,12 +111,12 @@ export default function MlbPlayersHubEn() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: `MLB Statcast ${FACTOR_STATCAST} Factors`,
-    description: `MLB ${FACTOR_TOTAL}-factor model Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + 30-team measurement status.`,
+    description: `MLB ${FACTOR_TOTAL}-factor model Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) explained + ${MLB_TEAM_COUNT}-team measurement status.`,
     url: `${SITE_URL}/en/mlb/players`,
     inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: 30,
+      numberOfItems: MLB_TEAM_COUNT,
       itemListElement: (Object.keys(MLB_TEAMS) as MlbTeamCode[]).map((code, i) => {
         const team = MLB_TEAMS[code];
         return {
@@ -153,7 +154,7 @@ export default function MlbPlayersHubEn() {
           MLB {FACTOR_TOTAL}-factor model = KBO {FACTOR_KBO} (FIP / xFIP / wOBA / Bullpen FIP / Recent Form / WAR / H2H / Park Factor / Elo / Defense SFR) + Statcast {FACTOR_STATCAST}.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          Currently shown: {FACTOR_STATCAST} factor explanations + 30-team entry paths. Team-level Statcast measurements (xwOBA · Barrel% · Hard Hit% · Launch Angle) live data integration = separate datasource integration carry-over.
+          Currently shown: {FACTOR_STATCAST} factor explanations + {MLB_TEAM_COUNT}-team entry paths. Team-level Statcast measurements (xwOBA · Barrel% · Hard Hit% · Launch Angle) live data integration = separate datasource integration carry-over.
         </p>
       </header>
 
@@ -193,7 +194,7 @@ export default function MlbPlayersHubEn() {
       <section className="space-y-4" aria-labelledby="teams-heading">
         <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-2">
           <h2 id="teams-heading" className="text-xl font-bold">
-            30 Teams
+            {MLB_TEAM_COUNT} Teams
           </h2>
           <span className="text-xs px-2 py-1 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 shrink-0">
             Team measurements ETA
