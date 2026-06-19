@@ -12,6 +12,7 @@
 
 import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
+import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
 import {
   validateFactorAttribution,
@@ -179,7 +180,12 @@ function buildTeamPostviewMessage(
     .map(([k, v]) => `  ${k}: ${v.toFixed(3)} (편향 ${(v - 0.5).toFixed(3)})`)
     .join('\n');
 
-  return `경기: ${awayName} @ ${homeName}
+  // plan #23 Step 5 wave 45 (cycle 1234): context layer 통합 — production weight>0 메트릭 +
+  // 도메인 hint (구장 / 라이벌리 / 시즌 / 시간 윈도우) 표준 ContextPayload prepend.
+  // 기존 pre_game factor 분해 박제는 유지 (factor-level attribution 의 source).
+  const contextBlock = `${renderContextForLLM(buildAgentContext(context))}\n\n`;
+
+  return `${contextBlock}경기: ${awayName} @ ${homeName}
 최종 스코어: ${homeName} ${actual.homeScore} - ${actual.awayScore} ${awayName}
 승리: ${KBO_TEAMS[actual.winnerCode].name}
 
@@ -277,7 +283,11 @@ function buildJudgePostviewMessage(
     .map(([k, v]) => `  ${k}: ${v.toFixed(3)} (편향 ${(v - 0.5).toFixed(3)})`)
     .join('\n');
 
-  return `경기: ${awayName} @ ${homeName}
+  // plan #23 Step 5 wave 45 (cycle 1234): context layer 통합 — judge-postview 도 production weight>0
+  // 메트릭 + 도메인 hint 표준 ContextPayload 소비. factor-level attribution 의 metric 의미 단일 source.
+  const contextBlock = `${renderContextForLLM(buildAgentContext(context))}\n\n`;
+
+  return `${contextBlock}경기: ${awayName} @ ${homeName}
 스코어: ${homeName} ${actual.homeScore} - ${actual.awayScore} ${awayName}
 실제 승자: ${KBO_TEAMS[actual.winnerCode].name}
 
