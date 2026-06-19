@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
+import { KBO_FACTOR_COUNT } from "@moneyball/shared";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "MoneyBall Score - 세이버메트릭스 KBO 승부예측",
     short_name: "MoneyBall",
-    description:
-      "wOBA, FIP, WAR 등 세이버메트릭스 지표 + AI 에이전트 토론 + 10팩터 정량 모델 기반 KBO 매일 승부예측.",
+    description: `wOBA, FIP, WAR 등 세이버메트릭스 지표 + AI 에이전트 토론 + ${KBO_FACTOR_COUNT}팩터 정량 모델 기반 KBO 매일 승부예측.`,
     start_url: "/",
     scope: "/",
     display: "standalone",

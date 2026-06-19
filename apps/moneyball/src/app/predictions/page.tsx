@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
   classifyWinnerProb,
+  KBO_FACTOR_COUNT,
   pickTierEmoji,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
@@ -20,7 +21,7 @@ import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 
 export const metadata: Metadata = {
   title: "예측 기록",
-  description: "KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색. 세이버메트릭스 10팩터 정량 모델 + AI 에이전트 토론 기반.",
+  description: `KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색. 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델 + AI 에이전트 토론 기반.`,
   alternates: { canonical: "https://moneyballscore.vercel.app/predictions" },
   openGraph: {
     type: "website",

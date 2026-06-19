@@ -1,6 +1,7 @@
 import {
   CURRENT_SCORING_RULE,
   DEFAULT_WEIGHTS,
+  KBO_FACTOR_COUNT,
   KBO_TEAMS,
   josa,
   shortTeamName,
@@ -20,7 +21,7 @@ interface DetailedFactorAnalysisProps {
 
 /**
  * /analysis/game/[id] 전용 확장 팩터 해설 섹션.
- * 가중치 내림차순으로 정렬된 10팩터 각각에:
+ * 가중치 내림차순으로 정렬된 KBO_FACTOR_COUNT 팩터 각각에:
  *   - 원정/홈 수치
  *   - 우위 표시
  *   - 한국어 1-2줄 해설
@@ -68,7 +69,7 @@ export function DetailedFactorAnalysis({
           📊 팩터별 정량 해설
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          정량 모델 {CURRENT_SCORING_RULE}의 10개 팩터를 가중치 순으로 분석합니다.
+          정량 모델 {CURRENT_SCORING_RULE}의 {KBO_FACTOR_COUNT}개 팩터를 가중치 순으로 분석합니다.
           {topFactor?.favorTeam && (
             <>
               {" "}

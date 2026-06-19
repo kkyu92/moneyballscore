@@ -12,6 +12,7 @@ import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
 import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import {
+  KBO_FACTOR_COUNT,
   KBO_TEAMS,
   assertSelectOk,
   pickTierEmoji,
@@ -25,7 +26,7 @@ import { neutral } from "@/lib/design-tokens";
 
 export const metadata: Metadata = {
   title: "대시보드",
-  description: "KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 구간별 분포, 10팩터 평균 가중치, Elo 추이, 모델 버전별 (v1.5 ~ v1.8) 성과 비교.",
+  description: `KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 구간별 분포, ${KBO_FACTOR_COUNT}팩터 평균 가중치, Elo 추이, 모델 버전별 (v1.5 ~ v1.8) 성과 비교.`,
   alternates: { canonical: "https://moneyballscore.vercel.app/dashboard" },
   openGraph: {
     type: "website",
@@ -33,14 +34,12 @@ export const metadata: Metadata = {
     url: "https://moneyballscore.vercel.app/dashboard",
     siteName: "MoneyBall Score",
     title: "대시보드 | MoneyBall Score",
-    description:
-      "KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 분포, 10팩터 가중치, Elo 추이, 모델 버전별 성과 비교.",
+    description: `KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 분포, ${KBO_FACTOR_COUNT}팩터 가중치, Elo 추이, 모델 버전별 성과 비교.`,
   },
   twitter: {
     card: "summary_large_image",
     title: "대시보드 | MoneyBall Score",
-    description:
-      "KBO 모델 성능 종합 — 시즌 누적 적중률, 신뢰도 분포, 10팩터 가중치, Elo 추이.",
+    description: `KBO 모델 성능 종합 — 시즌 누적 적중률, 신뢰도 분포, ${KBO_FACTOR_COUNT}팩터 가중치, Elo 추이.`,
   },
 };
 

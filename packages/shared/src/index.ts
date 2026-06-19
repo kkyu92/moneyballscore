@@ -192,6 +192,13 @@ export const ACTIVE_FACTOR_KEYS = [
 ] as const;
 
 /**
+ * KBO 정량 모델 팩터 수 — 사이트 전반 metadata/OG/JSX 의 "10팩터 / 10 factors / 10-factor / 10개 팩터 / 10개 세이버메트릭스 지표" 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 83 (cycle 1287) — wave 76 (KBO_TEAM_COUNT) / wave 75-78 (MLB_FACTOR_COUNTS) 패턴의 KBO factor 차원 확장.
+ * ACTIVE_FACTOR_KEYS 변경 시 자동 동기 (length).
+ */
+export const KBO_FACTOR_COUNT = ACTIVE_FACTOR_KEYS.length;
+
+/**
  * v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%).
  * /v2-preview 사전 evidence + shadow cohort 베이스 가중치. cycle 1013 packages/shared 로
  * 이관 (이전 apps/moneyball/src/lib/predictions/v2Predictor.ts → 본 위치).

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
+import { KBO_FACTOR_COUNT } from "@moneyball/shared";
 import {
   LottoDataSchema,
   LottoScoreBacktestSchema,
@@ -181,7 +182,7 @@ export default function LottoMethodologyPage() {
         <h2 className="text-xl font-semibold text-brand-100">분석 정체성</h2>
         <p className="text-sm text-brand-200 leading-relaxed">
           KBO 분석 방법론을 로또 패턴 검증에 응용. MoneyBall Score 본체는
-          세이버메트릭스 10팩터 모델 + AI 에이전트 토론 + 적중률 검증으로
+          세이버메트릭스 {KBO_FACTOR_COUNT}팩터 모델 + AI 에이전트 토론 + 적중률 검증으로
           야구 경기 결과를 통계적으로 분석합니다. 본 페이지는 같은 사고
           방식 — 누적 데이터 + 검증 가능한 규칙 + 사이클 단위 진화 — 을
           6/45 추첨 데이터에 적용한 결과를 정리한 자료입니다.

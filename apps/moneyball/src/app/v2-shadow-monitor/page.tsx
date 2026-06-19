@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { loadLatestCohort } from "@/lib/v2-shadow-monitor/loader";
+import { KBO_FACTOR_COUNT } from "@moneyball/shared";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
@@ -189,7 +190,7 @@ export default function V2ShadowMonitorPage() {
             >
               예측 방법론
             </Link>{" "}
-            — 10팩터 가중치 구조와 era 정의
+            — {KBO_FACTOR_COUNT}팩터 가중치 구조와 era 정의
           </li>
           <li>
             <Link

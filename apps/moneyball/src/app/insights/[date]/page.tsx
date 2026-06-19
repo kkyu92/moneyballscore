@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { DebateTimeline } from "@/components/insights/DebateTimeline";
-import { shortTeamName } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, shortTeamName } from "@moneyball/shared";
 import {
   getInsightsForDate,
   isValidInsightsDate,
@@ -105,7 +105,7 @@ export default async function InsightsDatePage({ params }: Props) {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{date} AI 인사이트</h1>
         <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
           {date} KBO 경기의 AI 심판 에이전트가 남긴 reasoning 모음입니다.
-          정량 세이버메트릭스 모델 (10팩터) 위에 홈/원정 에이전트 토론 → 심판 종합 결과를
+          정량 세이버메트릭스 모델 ({KBO_FACTOR_COUNT}팩터) 위에 홈/원정 에이전트 토론 → 심판 종합 결과를
           {entries.length}경기 보여드립니다.
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">

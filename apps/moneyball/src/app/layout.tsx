@@ -13,6 +13,7 @@ import { WebVitalsReporter } from "@/components/shared/WebVitalsReporter";
 import { ServiceWorkerRegister } from "@/components/shared/ServiceWorkerRegister";
 import { PWAInstallButton } from "@/components/shared/PWAInstallButton";
 import { KofiWidget } from "@/components/shared/KofiWidget";
+import { KBO_FACTOR_COUNT } from "@moneyball/shared";
 
 const GA_ID = "G-2886XKWG4Y";
 
@@ -36,8 +37,7 @@ export const metadata: Metadata = {
     template: "%s | MoneyBall Score",
     default: "MoneyBall Score - 세이버메트릭스 기반 승부예측",
   },
-  description:
-    "wOBA, FIP, WAR 등 세이버메트릭스 지표를 활용한 KBO 프로야구 승부예측. AI 에이전트 토론 + 10팩터 정량 모델. 매일 업데이트.",
+  description: `wOBA, FIP, WAR 등 세이버메트릭스 지표를 활용한 KBO 프로야구 승부예측. AI 에이전트 토론 + ${KBO_FACTOR_COUNT}팩터 정량 모델. 매일 업데이트.`,
   keywords: [
     "KBO",
     "승부예측",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "MoneyBall Score",
     title: "MoneyBall Score - 세이버메트릭스 기반 승부예측",
-    description: "AI 에이전트 토론 + 10팩터 정량 모델 기반 KBO 매일 승부예측. 실시간 스코어, 적중률 트래킹.",
+    description: `AI 에이전트 토론 + ${KBO_FACTOR_COUNT}팩터 정량 모델 기반 KBO 매일 승부예측. 실시간 스코어, 적중률 트래킹.`,
   },
   twitter: {
     card: "summary_large_image",

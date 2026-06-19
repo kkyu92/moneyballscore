@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { KBO_FACTOR_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -67,7 +68,7 @@ export default function PredictionsHubOgImage() {
             flexWrap: "wrap",
           }}
         >
-          {["10-factor sabermetrics", "Multi-agent debate", "Verified daily"].map((label) => (
+          {[`${KBO_FACTOR_COUNT}-factor sabermetrics`, "Multi-agent debate", "Verified daily"].map((label) => (
             <div
               key={label}
               style={{
