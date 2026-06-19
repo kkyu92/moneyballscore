@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB Wild Card race | MoneyBall Score";
+export const alt = `MLB Wild Card race — ${MLB_FACTOR_COUNTS.total} Factor base | MoneyBall Score`;
 
 export default function EnMlbWildCardOgImage() {
   return new ImageResponse(
@@ -56,7 +57,7 @@ export default function EnMlbWildCardOgImage() {
             display: "flex",
           }}
         >
-          AL/NL · 3 spots per league · September game-back · 14-factor base
+          AL/NL · 3 spots per league · September game-back · {MLB_FACTOR_COUNTS.total}-factor base
         </div>
 
         <div

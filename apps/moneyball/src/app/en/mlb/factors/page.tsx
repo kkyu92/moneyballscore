@@ -58,7 +58,7 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
     range: "1.50 ~ 6.00",
     description:
       "ERA estimated from strikeouts, walks, and home runs only — removes fielder influence to measure true pitcher skill. Lower is better.",
-    why: "Starting pitcher matchup is the single biggest influence on a game — ranks #2 in 14-factor model weights.",
+    why: `Starting pitcher matchup is the single biggest influence on a game — ranks #2 in ${TOTAL}-factor model weights.`,
     source: "FanGraphs MLB · KBO Fancy Stats",
   },
   {
@@ -171,7 +171,7 @@ const STATCAST_4_FACTORS: readonly FactorRow[] = [
     range: "0.250 ~ 0.420",
     description:
       "Expected wOBA from launch angle + exit velocity. Removes luck (defense / ballpark / weather) to measure true contact quality.",
-    why: "Eliminates result noise from wOBA → more meaningful in small samples. Top Statcast weight in the 14-factor model.",
+    why: `Eliminates result noise from wOBA → more meaningful in small samples. Top Statcast weight in the ${TOTAL}-factor model.`,
     source: "Baseball Savant (Statcast Era 2015~)",
   },
   {

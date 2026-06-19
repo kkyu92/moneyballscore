@@ -7,6 +7,7 @@ import {
   type MlbLeagueSide,
   type MlbDivisionSide,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -16,7 +17,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 export const metadata: Metadata = {
   title: "MLB Teams — 30 Team Season Stats | MoneyBall Score",
   description:
-    "MLB 30 teams (AL 15 + NL 15) season prediction records · 14-factor model (KBO 10 + Statcast 4) · Home ballpark park factor.",
+    `MLB 30 teams (AL 15 + NL 15) season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/team`,
     languages: {
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "MLB Teams — 30 Profiles | MoneyBall Score",
-    description: "MLB 30 team season prediction records + 14 factors",
+    description: `MLB 30 team season prediction records + ${MLB_FACTOR_COUNTS.total} factors`,
     url: `${SITE_URL}/en/mlb/team`,
     type: "website",
     locale: "en_US",
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB Teams — 30 Profiles | MoneyBall Score",
-    description: "MLB 30 team season prediction records + 14 factors",
+    description: `MLB 30 team season prediction records + ${MLB_FACTOR_COUNTS.total} factors`,
   },
 };
 
@@ -50,7 +51,7 @@ export default function MlbTeamsHubEn() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "MLB Team Profiles",
-    description: "MLB 30 team season prediction records · 14-factor model · Home ballpark park factor",
+    description: `MLB 30 team season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model · Home ballpark park factor`,
     url: `${SITE_URL}/en/mlb/team`,
     inLanguage: "en-US",
     mainEntity: {
@@ -90,7 +91,7 @@ export default function MlbTeamsHubEn() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB Team Profiles</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL 15 teams + NL 15 teams = 30 total. Season prediction records · 14-factor model (KBO 10 + Statcast 4) · Home ballpark park factor.
+          AL 15 teams + NL 15 teams = 30 total. Season prediction records · {MLB_FACTOR_COUNTS.total}-factor model (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.
         </p>
       </header>
 

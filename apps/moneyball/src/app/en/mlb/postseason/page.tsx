@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -9,7 +10,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 export const metadata: Metadata = {
   title: "MLB Postseason Bracket — WC / DS / LCS / WS | MoneyBall Score",
   description:
-    "MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + 14-factor model series predictions. Live integration ETA 2026-09.",
+    `MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + ${MLB_FACTOR_COUNTS.total}-factor model series predictions. Live integration ETA 2026-09.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/postseason`,
     languages: {
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MLB Postseason Bracket | MoneyBall Score",
     description:
-      "MLB Postseason 4-round bracket + 14-factor series predictions — Live integration ETA 2026-09.",
+      `MLB Postseason 4-round bracket + ${MLB_FACTOR_COUNTS.total}-factor series predictions — Live integration ETA 2026-09.`,
     url: `${SITE_URL}/en/mlb/postseason`,
     type: "website",
     locale: "en_US",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MLB Postseason Bracket | MoneyBall Score",
     description:
-      "MLB Postseason 4-round bracket + 14-factor series predictions — Live integration ETA 2026-09.",
+      `MLB Postseason 4-round bracket + ${MLB_FACTOR_COUNTS.total}-factor series predictions — Live integration ETA 2026-09.`,
   },
 };
 
@@ -82,7 +83,7 @@ export default function MlbPostseasonHubEn() {
     "@type": "WebPage",
     name: "MLB Postseason Bracket",
     description:
-      "MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + 14-factor model series predictions.",
+      `MLB Postseason 4 rounds (Wild Card / Division Series / League Championship / World Series) bracket + ${MLB_FACTOR_COUNTS.total}-factor model series predictions.`,
     url: `${SITE_URL}/en/mlb/postseason`,
     inLanguage: "en-US",
     isPartOf: {
@@ -114,7 +115,7 @@ export default function MlbPostseasonHubEn() {
           After the regular season ends — 4-round playoff: Wild Card / Division Series / League Championship / World Series.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          ETA 2026-09 — Live series-by-series 14-factor predictions + bracket visualization activates immediately after the regular season.
+          ETA 2026-09 — Live series-by-series {MLB_FACTOR_COUNTS.total}-factor predictions + bracket visualization activates immediately after the regular season.
         </p>
       </header>
 
@@ -129,10 +130,10 @@ export default function MlbPostseasonHubEn() {
           Progress Status
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
-          <li>MLB 162-game full ingestion + 14-factor model — <strong>Complete</strong></li>
+          <li>MLB 162-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
           <li>30-team standings + season game-back tracking — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
           <li>Wild Card race tracking — <strong>ETA 2026-08</strong> (<Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link>)</li>
-          <li>Postseason bracket + per-series 14-factor predictions — <strong>ETA 2026-09</strong></li>
+          <li>Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions — <strong>ETA 2026-09</strong></li>
         </ul>
       </section>
 
@@ -168,7 +169,7 @@ export default function MlbPostseasonHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ This hub = broken NAV link recovery layer (cycle 1029). Live Postseason bracket + per-series 14-factor predictions = ETA 2026-09 (activates immediately after regular season ends).
+          ※ This hub = broken NAV link recovery layer (cycle 1029). Live Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions = ETA 2026-09 (activates immediately after regular season ends).
         </p>
         <p>
           ※ Related: <Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link> · <Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link> · <Link href="/en/mlb" className="underline">/en/mlb</Link> hub.

@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB 30 Team profiles | MoneyBall Score";
+export const alt = `MLB 30 Team profiles — ${MLB_FACTOR_COUNTS.total} Factor | MoneyBall Score`;
 
 export default function EnMlbTeamTwitterImage() {
   return new ImageResponse(
@@ -56,7 +57,7 @@ export default function EnMlbTeamTwitterImage() {
             display: "flex",
           }}
         >
-          AL 15 + NL 15 · season prediction records · 14-factor model · park factor
+          AL 15 + NL 15 · season prediction records · {MLB_FACTOR_COUNTS.total}-factor model · park factor
         </div>
 
         <div

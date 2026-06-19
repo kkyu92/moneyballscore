@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB Postseason bracket | MoneyBall Score";
+export const alt = `MLB Postseason bracket — ${MLB_FACTOR_COUNTS.total} Factor series | MoneyBall Score`;
 
 export default function EnMlbPostseasonOgImage() {
   return new ImageResponse(
@@ -56,7 +57,7 @@ export default function EnMlbPostseasonOgImage() {
             display: "flex",
           }}
         >
-          WC · DS · LCS · WS · 4-round bracket · 14-factor series prediction
+          WC · DS · LCS · WS · 4-round bracket · {MLB_FACTOR_COUNTS.total}-factor series prediction
         </div>
 
         <div

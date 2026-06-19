@@ -167,8 +167,9 @@ describe('/en/mlb/factors — 14 factor weights', () => {
     expect(PAGE).toMatch(/@moneyball\/kbo-data/);
   });
 
-  it('14 factors title in metadata', () => {
-    expect(PAGE).toMatch(/14.*[Ff]actor/);
+  it('factor count from MLB_FACTOR_COUNTS registry (silent drift wave 75)', () => {
+    expect(PAGE).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(PAGE).not.toMatch(/[^{]14[- ]?[Ff]actor/);
   });
 });
 

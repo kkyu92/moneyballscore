@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,7 +12,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 export async function generateMetadata({ params }: { params: Promise<{ date: string }> }): Promise<Metadata> {
   const { date } = await params;
   const title = `MLB Games — ${date} Predictions | MoneyBall Score`;
-  const description = `${date} MLB game predictions using 14-factor analysis + confidence scores.`;
+  const description = `${date} MLB game predictions using ${MLB_FACTOR_COUNTS.total}-factor analysis + confidence scores.`;
   return {
     title,
     description,

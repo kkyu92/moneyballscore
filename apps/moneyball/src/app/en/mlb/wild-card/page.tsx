@@ -6,6 +6,7 @@ import {
   type MlbTeamCode,
   type MlbLeagueSide,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -15,7 +16,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 export const metadata: Metadata = {
   title: "MLB Wild Card Race — AL/NL Wild Card Contenders | MoneyBall Score",
   description:
-    "MLB AL/NL Wild Card race — 3 spots per league. Late-season game-back tracking + 14-factor model base. Live data integration ETA 2026-08.",
+    `MLB AL/NL Wild Card race — 3 spots per league. Late-season game-back tracking + ${MLB_FACTOR_COUNTS.total}-factor model base. Live data integration ETA 2026-08.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/wild-card`,
     languages: {
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MLB Wild Card Race | MoneyBall Score",
     description:
-      "MLB AL/NL Wild Card 3-spot race + 14-factor model base — Live data ETA 2026-08.",
+      `MLB AL/NL Wild Card 3-spot race + ${MLB_FACTOR_COUNTS.total}-factor model base — Live data ETA 2026-08.`,
     url: `${SITE_URL}/en/mlb/wild-card`,
     type: "website",
     locale: "en_US",
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MLB Wild Card Race | MoneyBall Score",
     description:
-      "MLB AL/NL Wild Card 3-spot race + 14-factor model base — Live data ETA 2026-08.",
+      `MLB AL/NL Wild Card 3-spot race + ${MLB_FACTOR_COUNTS.total}-factor model base — Live data ETA 2026-08.`,
   },
 };
 
@@ -72,7 +73,7 @@ export default function MlbWildCardHubEn() {
           AL/NL both leagues — Wild Card 3-spot race. Of the remaining 10 teams outside the 6 division leaders, 3 per league advance.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          ETA 2026-08 — Late-season game-back / Magic Number tracking + 14-factor model live data integration.
+          ETA 2026-08 — Late-season game-back / Magic Number tracking + {MLB_FACTOR_COUNTS.total}-factor model live data integration.
         </p>
       </header>
 
@@ -87,7 +88,7 @@ export default function MlbWildCardHubEn() {
           Progress Status
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
-          <li>MLB 162-game full ingestion + 14-factor model — <strong>Complete</strong></li>
+          <li>MLB 162-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
           <li>30-team standings (AL/NL × E/C/W 6 divisions) — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
           <li>Wild Card 3-spot race tracking + live game-back — <strong>ETA 2026-08</strong></li>
           <li>Postseason bracket (WC / DS / LCS / WS) visualization — <strong>ETA 2026-09</strong></li>
