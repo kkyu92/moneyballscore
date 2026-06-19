@@ -75,6 +75,7 @@ export type { DebateResult, GameContext, TeamArgument, JudgeVerdict, Calibration
 // LLM Agent context layer (plan #23 Step 1, cycle 1225)
 export {
   MetricRegistry,
+  FANGRAPHS_AUX_METRICS,
   getProductionMetrics,
   isMetricValueValid,
   renderMetricForLLM,

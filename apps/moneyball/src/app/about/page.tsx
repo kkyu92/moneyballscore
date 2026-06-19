@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
+import {
+  FANGRAPHS_AUX_METRICS,
+  MetricRegistry,
+} from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
@@ -94,6 +98,15 @@ const FACTORS: Array<{
   },
 ];
 
+// MetricRegistry + FANGRAPHS_AUX_METRICS source-of-truth — silent drift family
+// wave 69 (cycle 1269). hardcoded "FIP, xFIP, WAR, wOBA, SFR, Elo" + "wRC+, ISO, BB%/K%"
+// → registry filter (methodology page wave 68 패턴 정합).
+const FANCYSTATS_PRODUCTION_LABEL = Object.values(MetricRegistry)
+  .filter((m) => m.source === "fancystats" && m.weight_v18 > 0)
+  .map((m) => m.ko_name)
+  .join(", ");
+const FANGRAPHS_AUX_LABEL = FANGRAPHS_AUX_METRICS.join(", ");
+
 const DATA_SOURCES = [
   {
     name: "KBO 공식",
@@ -104,13 +117,13 @@ const DATA_SOURCES = [
   {
     name: "KBO Fancy Stats",
     url: "kbofancystats.com",
-    desc: "FIP, xFIP, WAR, wOBA, SFR, Elo 레이팅 (robots.txt 제한 없음)",
+    desc: `${FANCYSTATS_PRODUCTION_LABEL} (robots.txt 제한 없음)`,
     color: "bg-accent",
   },
   {
     name: "FanGraphs",
     url: "fangraphs.com",
-    desc: "wRC+, ISO, BB%/K% (보조 검증용)",
+    desc: `${FANGRAPHS_AUX_LABEL} (보조 검증용)`,
     color: "bg-brand-300",
   },
 ];

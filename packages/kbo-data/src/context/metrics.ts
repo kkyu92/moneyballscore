@@ -201,6 +201,17 @@ export const MetricRegistry = {
 /** 등록된 metric slug 리터럴 union. */
 export type MetricSlug = keyof typeof MetricRegistry;
 
+/**
+ * FanGraphs KBO 보조 검증용 metric 라벨 — 본 모델 가중치엔 미진입 (production weight=0).
+ *
+ * methodology / about 페이지 데이터 소스 설명 단일 source-of-truth — silent drift family
+ * wave 69 (cycle 1269). hardcoded "wRC+ · ISO · BB%/K%" 다중 페이지 drift 차단.
+ *
+ * MetricRegistry 는 `WeightKey` 와 1:1 매핑 (production / shadow factor 만) — fangraphs
+ * 보조 metric 은 가중치 0 이라 weight key 가 없으므로 본 constant 분리.
+ */
+export const FANGRAPHS_AUX_METRICS = ['wRC+', 'ISO', 'BB%/K%'] as const;
+
 /** Production-active (weight_v18 > 0) metric 만 필터. */
 export function getProductionMetrics(): readonly MetricDefinition[] {
   return Object.values(MetricRegistry).filter((m) => m.weight_v18 > 0);
