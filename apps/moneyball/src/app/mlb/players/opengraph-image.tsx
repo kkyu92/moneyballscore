@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB Statcast 4 — xwOBA · Barrel · Hard hit · Launch | MoneyBall Score";
+export const alt = `MLB Statcast ${MLB_FACTOR_COUNTS.statcast} — xwOBA · Barrel · Hard hit · Launch | MoneyBall Score`;
 
 export default function MlbPlayersHubOgImage() {
   return new ImageResponse(
@@ -44,7 +45,7 @@ export default function MlbPlayersHubOgImage() {
             lineHeight: 1,
           }}
         >
-          Statcast 4
+          Statcast {MLB_FACTOR_COUNTS.statcast}
         </div>
 
         <div
@@ -96,7 +97,7 @@ export default function MlbPlayersHubOgImage() {
           }}
         >
           <span>moneyballscore.vercel.app/mlb/players</span>
-          <span>Statcast 4 · 30 teams</span>
+          <span>Statcast {MLB_FACTOR_COUNTS.statcast} · 30 teams</span>
         </div>
       </div>
     ),

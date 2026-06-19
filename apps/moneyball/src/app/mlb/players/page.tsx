@@ -7,16 +7,19 @@ import {
   type MlbLeagueSide,
   type MlbDivisionSide,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
+const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
+const FACTOR_KBO = MLB_FACTOR_COUNTS.kbo;
+const FACTOR_STATCAST = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
-  title: "MLB Statcast 4 팩터 — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score",
-  description:
-    "MLB 14팩터 본선 안 Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + 30팀 측정 status. 팀별 Statcast 측정 데이터 연동 ETA carry-over.",
+  title: `MLB Statcast ${FACTOR_STATCAST} 팩터 — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score`,
+  description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + 30팀 측정 status. 팀별 Statcast 측정 데이터 연동 ETA carry-over.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/players`,
     languages: {
@@ -25,16 +28,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MLB Statcast 4 팩터 | MoneyBall Score",
-    description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14팩터 본선 Statcast 4.",
+    title: `MLB Statcast ${FACTOR_STATCAST} 팩터 | MoneyBall Score`,
+    description: `xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB ${FACTOR_TOTAL}팩터 본선 Statcast ${FACTOR_STATCAST}.`,
     url: `${SITE_URL}/mlb/players`,
     type: "website",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB Statcast 4 팩터 | MoneyBall Score",
-    description: "xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB 14팩터 본선 Statcast 4.",
+    title: `MLB Statcast ${FACTOR_STATCAST} 팩터 | MoneyBall Score`,
+    description: `xwOBA · Barrel% · Hard Hit% · Launch Angle — MLB ${FACTOR_TOTAL}팩터 본선 Statcast ${FACTOR_STATCAST}.`,
   },
 };
 
@@ -59,7 +62,7 @@ const STATCAST_FACTORS: readonly StatcastFactor[] = [
     range: "0.200 ~ 0.500",
     description:
       "타구의 발사 각도 + 타구 속도로 추정한 기대 wOBA. 운 (수비/구장/날씨) 제거 후 진짜 컨택 품질.",
-    why: "wOBA 가 실제 결과를 측정하면, xwOBA 는 결과 잡음 제거 후 컨택 실력. 14팩터 본선 안 Statcast 1번 가중치.",
+    why: `wOBA 가 실제 결과를 측정하면, xwOBA 는 결과 잡음 제거 후 컨택 실력. ${FACTOR_TOTAL}팩터 본선 안 Statcast 1번 가중치.`,
     source: "Baseball Savant — Statcast Era 2015~",
   },
   {
@@ -106,9 +109,8 @@ export default function MlbPlayersHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "MLB Statcast 4 팩터",
-    description:
-      "MLB 14팩터 본선 안 Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + 30팀 측정 status.",
+    name: `MLB Statcast ${FACTOR_STATCAST} 팩터`,
+    description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + 30팀 측정 status.`,
     url: `${SITE_URL}/mlb/players`,
     mainEntity: {
       "@type": "ItemList",
@@ -139,17 +141,17 @@ export default function MlbPlayersHub() {
       <Breadcrumb
         items={[
           { href: "/mlb", label: "MLB 분석" },
-          { label: "Statcast 4 팩터" },
+          { label: `Statcast ${FACTOR_STATCAST} 팩터` },
         ]}
       />
 
       <header className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">MLB Statcast 4 팩터</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">MLB Statcast {FACTOR_STATCAST} 팩터</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          MLB 14팩터 본선 = KBO 10 (FIP / xFIP / wOBA / 불펜 FIP / 최근폼 / WAR / 상대전적 / 구장보정 / Elo / 수비 SFR) + Statcast 4.
+          MLB {FACTOR_TOTAL}팩터 본선 = KBO {FACTOR_KBO} (FIP / xFIP / wOBA / 불펜 FIP / 최근폼 / WAR / 상대전적 / 구장보정 / Elo / 수비 SFR) + Statcast {FACTOR_STATCAST}.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          현재 표시: 4 팩터 설명 + 30팀 진입 path. 팀별 Statcast 실측 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 라이브 데이터 연동 = 별도 datasource 통합 carry-over.
+          현재 표시: {FACTOR_STATCAST} 팩터 설명 + 30팀 진입 path. 팀별 Statcast 실측 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 라이브 데이터 연동 = 별도 datasource 통합 carry-over.
         </p>
       </header>
 
@@ -158,7 +160,7 @@ export default function MlbPlayersHub() {
           id="statcast-factors-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Statcast 4 팩터 설명
+          Statcast {FACTOR_STATCAST} 팩터 설명
         </h2>
         <ol className="grid md:grid-cols-2 gap-4">
           {STATCAST_FACTORS.map((factor, idx) => (
@@ -196,7 +198,7 @@ export default function MlbPlayersHub() {
           </span>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          각 팀 카드 → 팀 프로필 (현재: 시즌 placeholder + 14팩터 explainer + 홈구장 파크팩터). Statcast 실측 수치는 팀 프로필 안 carry-over 박제.
+          각 팀 카드 → 팀 프로필 (현재: 시즌 placeholder + {FACTOR_TOTAL}팩터 explainer + 홈구장 파크팩터). Statcast 실측 수치는 팀 프로필 안 carry-over 박제.
         </p>
         {LEAGUES.map((league) => (
           <div key={league} className="space-y-4" aria-labelledby={`mlb-${league}-statcast`}>
@@ -250,7 +252,7 @@ export default function MlbPlayersHub() {
           ※ Statcast 측정 출처: <a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener noreferrer" className="underline">Baseball Savant</a> (MLB Advanced Media). 스크래퍼: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
         </p>
         <p>
-          ※ 본 hub = 14팩터 본선 안 Statcast 4 의 설명 layer. 라이브 팀별 실측 데이터 = 별도 ingestion 통합 시 박제. KBO 10팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.
+          ※ 본 hub = {FACTOR_TOTAL}팩터 본선 안 Statcast {FACTOR_STATCAST} 의 설명 layer. 라이브 팀별 실측 데이터 = 별도 ingestion 통합 시 박제. KBO {FACTOR_KBO}팩터 = <Link href="/mlb/factors" className="underline">/mlb/factors</Link>.
         </p>
       </footer>
     </main>
