@@ -85,10 +85,18 @@ export function getSeasonPhase(date: Date): SeasonPhase {
  * 페이지 (about / standings / glossary / teams/recent) 모두 10경기 기준. cycle 1240
  * silent drift wave 48 = TIME_WINDOWS 가 7 로 박제되어 LLM agent prompt 가 잘못된
  * 윈도우 문구를 받던 패턴 정정.
+ *
+ * `h2h_recent_games.games = 5` — rivalry-memory.ts 가 LLM prompt 에 직접 주입하는
+ * "최근 N 경기 head-to-head" 게임 수. h2h_window (30일) 와 별도 — h2h_window 는
+ * predictor 가 사용하는 date-based 누적 윈도우, h2h_recent_games 는 agent prompt
+ * 안 example 박제용 (token budget MAX_BLOCK_CHARS=600 와 같이 작아야 함). cycle
+ * 1241 silent drift wave 49 = rivalry-memory.ts RECENT_GAMES_LIMIT 가 hard-coded
+ * 5 로 박제되어 TIME_WINDOWS context layer 미참조 패턴 정정.
  */
 export const TIME_WINDOWS = Object.freeze({
   recent_form: { games: 10, ko: '최근 10경기' },
   h2h_window: { days: 30, ko: '최근 30일 상대 전적' },
+  h2h_recent_games: { games: 5, ko: '최근 5경기 상대 전적' },
   season: { days: 180, ko: '시즌 누적' },
 } as const);
 
