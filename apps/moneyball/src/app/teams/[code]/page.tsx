@@ -6,6 +6,7 @@ import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { TeamEloChart } from "@/components/teams/TeamEloChart";
 import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
@@ -212,7 +213,7 @@ export default async function TeamPage({ params }: PageProps) {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              선발 FIP
+              {FACTOR_LABELS_TECHNICAL.sp_fip}
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtFip(profile.factorAverages.spFip)}
@@ -220,7 +221,7 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              타선 wOBA
+              {FACTOR_LABELS_TECHNICAL.lineup_woba}
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtWoba(profile.factorAverages.lineupWoba)}
@@ -228,7 +229,7 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              불펜 FIP
+              {FACTOR_LABELS_TECHNICAL.bullpen_fip}
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtFip(profile.factorAverages.bullpenFip)}
@@ -236,7 +237,7 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              최근 폼
+              {FACTOR_LABELS_TECHNICAL.recent_form}
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtPct(profile.factorAverages.recentForm)}
@@ -244,7 +245,7 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Elo
+              {FACTOR_LABELS_TECHNICAL.elo}
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtElo(profile.factorAverages.elo)}
