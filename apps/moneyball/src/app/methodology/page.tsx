@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HOME_ADVANTAGE } from "@moneyball/shared";
-import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
+import {
+  MetricRegistry,
+  FANGRAPHS_AUX_METRICS,
+  type MetricSlug,
+} from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -139,6 +143,10 @@ const PRODUCTION_METRIC_COUNT = Object.values(MetricRegistry).filter(
   (m) => m.weight_v18 > 0,
 ).length;
 
+// FanGraphs 보조 metric 라벨 — silent drift family wave 69 (cycle 1269).
+// hardcoded "wRC+ · ISO · BB%/K%" methodology + about 다중 drift → 단일 constant.
+const FANGRAPHS_METRIC_LABEL = `${FANGRAPHS_AUX_METRICS.join(" · ")} (보조)`;
+
 const JSONLD = {
   "@context": "https://schema.org",
   "@type": "Article",
@@ -265,7 +273,7 @@ export default function MethodologyPage() {
                 </span>
               </h3>
               <span className="text-xs text-gray-500 dark:text-brand-400">
-                wRC+ · ISO · BB%/K% (보조)
+                {FANGRAPHS_METRIC_LABEL}
               </span>
             </div>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
