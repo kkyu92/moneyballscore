@@ -7,6 +7,7 @@ import {
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
@@ -17,6 +18,9 @@ interface PageProps {
 }
 
 const SITE_URL = "https://moneyballscore.vercel.app";
+const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
+const FACTOR_KBO = MLB_FACTOR_COUNTS.kbo;
+const FACTOR_STATCAST = MLB_FACTOR_COUNTS.statcast;
 
 function isMlbTeamCode(v: string): v is MlbTeamCode {
   return v in MLB_TEAMS;
@@ -83,7 +87,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isMlbTeamCode(id)) return {};
   const team = MLB_TEAMS[id];
   const title = `${team.name} Statcast — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score`;
-  const description = `${team.name} (${team.league} ${team.division}) Statcast 4 factor deep-dive. xwOBA · Barrel% · Hard Hit% · Launch Angle team measurement progress + individual player layer ETA carry-over.`;
+  const description = `${team.name} (${team.league} ${team.division}) Statcast ${FACTOR_STATCAST} factor deep-dive. xwOBA · Barrel% · Hard Hit% · Launch Angle team measurement progress + individual player layer ETA carry-over.`;
 
   return {
     title,
@@ -126,7 +130,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
     inLanguage: "en-US",
     name: team.name,
     sport: "Baseball",
-    description: `${team.name} Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) measurements + individual player layer ETA.`,
+    description: `${team.name} Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) measurements + individual player layer ETA.`,
     location: { "@type": "Place", name: team.stadium },
     memberOf: {
       "@type": "SportsOrganization",
@@ -182,7 +186,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
           Park factor {team.parkPf}
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          This page = Statcast 4 factor (xwOBA · Barrel% · Hard Hit% · Launch Angle) deep-dive layer. Season stat summary ={" "}
+          This page = Statcast {FACTOR_STATCAST} factor (xwOBA · Barrel% · Hard Hit% · Launch Angle) deep-dive layer. Season stat summary ={" "}
           <Link href={`/en/mlb/team/${id}`} className="underline">
             /en/mlb/team/{id}
           </Link>
@@ -195,7 +199,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
           id="statcast-team-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Team Statcast 4 Factors (Measurement ETA)
+          Team Statcast {FACTOR_STATCAST} Factors (Measurement ETA)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Currently shown = factor definitions + ranges. Team season measurements (Baseball Savant aggregates) integration ETA carry-over. Measurement layer = `mlb-base.ts` factor pipeline + `baseball-savant.ts` scraper.
@@ -248,7 +252,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
             <Link href="/en/mlb/factors" className="underline">
               /en/mlb/factors
             </Link>{" "}
-            14-factor model layer reference.
+            {FACTOR_TOTAL}-factor model layer reference.
           </p>
         </div>
       </section>
@@ -268,7 +272,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
             >
               <p className="font-semibold text-brand-700 dark:text-brand-100">Team Profile →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Season stats + prediction accuracy + 14-factor averages
+                Season stats + prediction accuracy + {FACTOR_TOTAL}-factor averages
               </p>
             </Link>
           </li>
@@ -277,9 +281,9 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
               href="/en/mlb/factors"
               className="block rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md hover:border-brand-500/50 transition-all"
             >
-              <p className="font-semibold text-brand-700 dark:text-brand-100">14-Factor Model →</p>
+              <p className="font-semibold text-brand-700 dark:text-brand-100">{FACTOR_TOTAL}-Factor Model →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                KBO 10 + Statcast 4 weights + sources
+                KBO {FACTOR_KBO} + Statcast {FACTOR_STATCAST} weights + sources
               </p>
             </Link>
           </li>
@@ -290,7 +294,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
             >
               <p className="font-semibold text-brand-700 dark:text-brand-100">30-Team Hub →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Statcast 4 factor explainer + 30-team entries
+                Statcast {FACTOR_STATCAST} factor explainer + 30-team entries
               </p>
             </Link>
           </li>

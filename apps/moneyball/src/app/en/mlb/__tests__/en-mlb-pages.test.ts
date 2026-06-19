@@ -118,6 +118,35 @@ describe('/en/mlb/players — Statcast hub', () => {
   it('links to /en/mlb/players/[id] dynamic routes', () => {
     expect(PAGE).toMatch(/\/en\/mlb\/players\/\$\{/);
   });
+
+  it('imports MLB_FACTOR_COUNTS from @moneyball/kbo-data (wave 74)', () => {
+    expect(PAGE).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(PAGE).toMatch(/@moneyball\/kbo-data/);
+    expect(PAGE).toMatch(/FACTOR_TOTAL\s*=\s*MLB_FACTOR_COUNTS\.total/);
+  });
+
+  it('no hardcoded "14-factor" / "Statcast 4" / "KBO 10" (silent drift wave 74)', () => {
+    expect(PAGE).not.toMatch(/14-factor/);
+    expect(PAGE).not.toMatch(/Statcast 4 [FfLE]/);
+    expect(PAGE).not.toMatch(/KBO 10 \(/);
+  });
+});
+
+describe('/en/mlb/players opengraph + twitter images — MLB_FACTOR_COUNTS (wave 74)', () => {
+  const OG = src('players/opengraph-image.tsx');
+  const TW = src('players/twitter-image.tsx');
+
+  it('opengraph imports MLB_FACTOR_COUNTS', () => {
+    expect(OG).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(OG).toMatch(/@moneyball\/kbo-data/);
+    expect(OG).not.toMatch(/Statcast 4 Factors/);
+  });
+
+  it('twitter imports MLB_FACTOR_COUNTS', () => {
+    expect(TW).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(TW).toMatch(/@moneyball\/kbo-data/);
+    expect(TW).not.toMatch(/Statcast 4 Factors/);
+  });
 });
 
 // ── Factors (/en/mlb/factors) ─────────────────────────────────────────
@@ -292,5 +321,18 @@ describe('/en/mlb/players/[id] — Statcast team profile', () => {
   it('notFound for invalid team code', () => {
     expect(PAGE).toMatch(/notFound/);
     expect(PAGE).toMatch(/isMlbTeamCode/);
+  });
+
+  it('imports MLB_FACTOR_COUNTS from @moneyball/kbo-data (wave 74)', () => {
+    expect(PAGE).toMatch(/MLB_FACTOR_COUNTS/);
+    expect(PAGE).toMatch(/@moneyball\/kbo-data/);
+    expect(PAGE).toMatch(/FACTOR_STATCAST\s*=\s*MLB_FACTOR_COUNTS\.statcast/);
+  });
+
+  it('no hardcoded "Statcast 4" / "14-factor" / "KBO 10 + Statcast 4" (silent drift wave 74)', () => {
+    expect(PAGE).not.toMatch(/Statcast 4 [fFtT(]/);
+    expect(PAGE).not.toMatch(/14-factor/);
+    expect(PAGE).not.toMatch(/14-Factor/);
+    expect(PAGE).not.toMatch(/KBO 10 \+ Statcast 4/);
   });
 });
