@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MLB 14 Factor weights | MoneyBall Score";
+export const alt = `MLB ${MLB_FACTOR_COUNTS.total} Factor weights | MoneyBall Score`;
 
 export default function EnMlbFactorsTwitterImage() {
   return new ImageResponse(
@@ -44,7 +45,7 @@ export default function EnMlbFactorsTwitterImage() {
             lineHeight: 1,
           }}
         >
-          14 Model Factors
+          {MLB_FACTOR_COUNTS.total} Model Factors
         </div>
 
         <div
@@ -56,7 +57,7 @@ export default function EnMlbFactorsTwitterImage() {
             display: "flex",
           }}
         >
-          KBO 10 + Statcast 4 · weights · sources · application method
+          KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast} · weights · sources · application method
         </div>
 
         <div
@@ -96,7 +97,7 @@ export default function EnMlbFactorsTwitterImage() {
           }}
         >
           <span>moneyballscore.vercel.app/en/mlb/factors</span>
-          <span>EN · KO · 14 factors</span>
+          <span>EN · KO · {MLB_FACTOR_COUNTS.total} factors</span>
         </div>
       </div>
     ),

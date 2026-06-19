@@ -56,6 +56,9 @@ export type { BigMatchCandidate, BigMatchResult, BigMatchMode } from './big-matc
 // MLB 14팩터 본선
 export {
   MLB_BASE_WEIGHTS,
+  MLB_KBO_FACTOR_KEYS,
+  MLB_STATCAST_FACTOR_KEYS,
+  MLB_FACTOR_COUNTS,
   HOME_ELO_BONUS_VALUE,
   computeMlbProbability,
 } from './factors/mlb-base';

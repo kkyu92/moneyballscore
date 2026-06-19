@@ -1,41 +1,34 @@
 import { describe, it, expect } from 'vitest';
-import { MLB_BASE_WEIGHTS } from '@moneyball/kbo-data';
+import {
+  MLB_BASE_WEIGHTS,
+  MLB_KBO_FACTOR_KEYS,
+  MLB_STATCAST_FACTOR_KEYS,
+  MLB_FACTOR_COUNTS,
+} from '@moneyball/kbo-data';
 
 describe('/mlb/factors weight invariants', () => {
-  it('exposes 15 weight keys (KBO 10 + Statcast 4 + home_elo_bonus)', () => {
-    expect(Object.keys(MLB_BASE_WEIGHTS).length).toBe(15);
+  it('exposes weight keys = KBO + Statcast + home_elo_bonus', () => {
+    expect(Object.keys(MLB_BASE_WEIGHTS).length).toBe(MLB_FACTOR_COUNTS.total + 1);
   });
 
-  it('KBO 10 factor keys all present', () => {
-    const kboKeys = [
-      'sp_fip',
-      'sp_xfip',
-      'lineup_woba',
-      'bullpen_fip',
-      'recent_form',
-      'war',
-      'head_to_head',
-      'park_factor',
-      'elo',
-      'defense_sfr',
-    ] as const;
-    for (const key of kboKeys) {
+  it('KBO factor keys all present', () => {
+    for (const key of MLB_KBO_FACTOR_KEYS) {
       expect(MLB_BASE_WEIGHTS).toHaveProperty(key);
       expect(MLB_BASE_WEIGHTS[key]).toBeGreaterThan(0);
     }
   });
 
-  it('Statcast 4 factor keys all present', () => {
-    const statcastKeys = [
-      'lineup_xwoba',
-      'lineup_barrel_pct',
-      'sp_xwoba_against',
-      'woba_std',
-    ] as const;
-    for (const key of statcastKeys) {
+  it('Statcast factor keys all present', () => {
+    for (const key of MLB_STATCAST_FACTOR_KEYS) {
       expect(MLB_BASE_WEIGHTS).toHaveProperty(key);
       expect(MLB_BASE_WEIGHTS[key]).toBeGreaterThan(0);
     }
+  });
+
+  it('MLB_FACTOR_COUNTS derived from registry arrays', () => {
+    expect(MLB_FACTOR_COUNTS.kbo).toBe(MLB_KBO_FACTOR_KEYS.length);
+    expect(MLB_FACTOR_COUNTS.statcast).toBe(MLB_STATCAST_FACTOR_KEYS.length);
+    expect(MLB_FACTOR_COUNTS.total).toBe(MLB_KBO_FACTOR_KEYS.length + MLB_STATCAST_FACTOR_KEYS.length);
   });
 
   it('home_elo_bonus present + value > 0', () => {

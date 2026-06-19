@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MetricRegistry } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
+const TOTAL = MLB_FACTOR_COUNTS.total;
+const KBO_N = MLB_FACTOR_COUNTS.kbo;
+const STAT_N = MLB_FACTOR_COUNTS.statcast;
+const TITLE_KO = `MLB ${TOTAL}팩터 본선 가중치 | MoneyBall Score`;
+const SUMMARY_KO = `KBO ${KBO_N} + Statcast ${STAT_N} 의 ${TOTAL}팩터 본선 = MLB 예측 모델의 기반 가중치 표.`;
+
 export const metadata: Metadata = {
-  title: "MLB 14팩터 본선 — 가중치 + 설명 + 출처 | MoneyBall Score",
+  title: `MLB ${TOTAL}팩터 본선 — 가중치 + 설명 + 출처 | MoneyBall Score`,
   description:
-    "MLB 14팩터 본선 가중치 표 — KBO 10 (FIP · xFIP · wOBA · 불펜FIP · 최근폼 · WAR · 상대전적 · 구장보정 · Elo · 수비SFR) + Statcast 4 (xwOBA · Barrel% · xwOBA-against · wOBA std). 각 팩터 정의 + 출처 + 적용 방식.",
+    `MLB ${TOTAL}팩터 본선 가중치 표 — KBO ${KBO_N} (FIP · xFIP · wOBA · 불펜FIP · 최근폼 · WAR · 상대전적 · 구장보정 · Elo · 수비SFR) + Statcast ${STAT_N} (xwOBA · Barrel% · xwOBA-against · wOBA std). 각 팩터 정의 + 출처 + 적용 방식.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/factors`,
     languages: {
@@ -19,16 +25,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MLB 14팩터 본선 가중치 | MoneyBall Score",
-    description: "KBO 10 + Statcast 4 의 14팩터 본선 = MLB 예측 모델의 기반 가중치 표.",
+    title: TITLE_KO,
+    description: SUMMARY_KO,
     url: `${SITE_URL}/mlb/factors`,
     type: "website",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB 14팩터 본선 가중치 | MoneyBall Score",
-    description: "KBO 10 + Statcast 4 의 14팩터 본선 = MLB 예측 모델의 기반 가중치 표.",
+    title: TITLE_KO,
+    description: SUMMARY_KO,
   },
 };
 
@@ -232,9 +238,9 @@ export default function MlbFactorsHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    headline: "MLB 14팩터 본선 가중치 + 설명",
+    headline: `MLB ${TOTAL}팩터 본선 가중치 + 설명`,
     description:
-      "MLB 14팩터 본선 = KBO 10 + Statcast 4. 각 팩터의 가중치 / 정의 / 출처 / 적용 방식.",
+      `MLB ${TOTAL}팩터 본선 = KBO ${KBO_N} + Statcast ${STAT_N}. 각 팩터의 가중치 / 정의 / 출처 / 적용 방식.`,
     url: `${SITE_URL}/mlb/factors`,
     author: { "@type": "Organization", name: "MoneyBall Score" },
     about: { "@type": "Thing", name: "MLB sabermetrics prediction model" },
@@ -250,18 +256,18 @@ export default function MlbFactorsHub() {
       <Breadcrumb
         items={[
           { href: "/mlb", label: "MLB 분석" },
-          { label: "14팩터 본선" },
+          { label: `${TOTAL}팩터 본선` },
         ]}
       />
 
       <header className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">MLB 14팩터 본선</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">MLB {TOTAL}팩터 본선</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          KBO 10팩터 (FIP · xFIP · wOBA · 불펜 FIP · 최근폼 · WAR · 상대전적 · 구장보정 · Elo · 수비 SFR) +{" "}
+          KBO {KBO_N}팩터 (FIP · xFIP · wOBA · 불펜 FIP · 최근폼 · WAR · 상대전적 · 구장보정 · Elo · 수비 SFR) +{" "}
           <Link href="/mlb/players" className="underline">
-            Statcast 4
+            Statcast {STAT_N}
           </Link>{" "}
-          (xwOBA · Barrel% · xwOBA-against · wOBA σ) = 14팩터.
+          (xwOBA · Barrel% · xwOBA-against · wOBA σ) = {TOTAL}팩터.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           가중치 합 = {weightPercent(sum)} (홈 보너스 {weightPercent(MLB_BASE_WEIGHTS.home_elo_bonus)} 포함). 본 가중치 ={" "}
@@ -333,10 +339,10 @@ export default function MlbFactorsHub() {
           id="kbo-10-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          KBO 10팩터 (동등)
+          KBO {KBO_N}팩터 (동등)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          KBO 모델 v1.8 의 10팩터를 MLB 도메인에 그대로 매핑. data source 만 statsapi.mlb / FanGraphs MLB 로 교체.
+          KBO 모델 v1.8 의 {KBO_N}팩터를 MLB 도메인에 그대로 매핑. data source 만 statsapi.mlb / FanGraphs MLB 로 교체.
         </p>
         <ol className="space-y-4">
           {KBO_10_FACTORS.map((factor, idx) => (
@@ -373,10 +379,10 @@ export default function MlbFactorsHub() {
           id="statcast-4-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Statcast 4팩터 (MLB 전용 layer)
+          Statcast {STAT_N}팩터 (MLB 전용 layer)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          MLB Statcast Era (2015~) 가 제공하는 batted-ball 측정 layer = KBO 모델에 없는 4팩터. 자세한 팀별 측정 ={" "}
+          MLB Statcast Era (2015~) 가 제공하는 batted-ball 측정 layer = KBO 모델에 없는 {STAT_N}팩터. 자세한 팀별 측정 ={" "}
           <Link href="/mlb/players" className="underline">
             /mlb/players
           </Link>
@@ -444,7 +450,7 @@ export default function MlbFactorsHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ 본 가중치 = MLB v1.0 (KBO v1.8 매핑 + Statcast 4 추가). 모델 진화 시 갱신.
+          ※ 본 가중치 = MLB v1.0 (KBO v1.8 매핑 + Statcast {STAT_N} 추가). 모델 진화 시 갱신.
         </p>
         <p>
           ※ 가중치 source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C 학습 cohort = walk-forward expanding window (milestone n=27 / 60 / 150 / 300 / 1000 / 2430).
