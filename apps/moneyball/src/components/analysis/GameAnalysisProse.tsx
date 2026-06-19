@@ -1,5 +1,8 @@
 import { josa, shortTeamName, type TeamCode } from '@moneyball/shared';
 import { explainFactor, type FactorRawDetails } from '@/lib/analysis/factor-explanations';
+import { FACTOR_LABELS_TECHNICAL } from '@/lib/predictions/factorLabels';
+
+const SUMMARY_FACTOR_KEYS = ['sp_fip', 'lineup_woba', 'elo', 'recent_form'] as const;
 
 interface GameAnalysisProseProps {
   homeTeam: TeamCode;
@@ -86,7 +89,7 @@ export function GameAnalysisProse({
         10개 세이버메트릭스 팩터를 종합한 정량 모델은 {confidenceLabel}으로{' '}
         {favored}
         {josa(favored, '이', '가')} {marginPp > 0 ? `${marginPp}%p 앞선다` : '팽팽하다'}고 평가한다.
-        선발 FIP·타선 wOBA·팀 Elo·최근 폼을 가중합산한 결과이며, 당일 선발 변경이나 돌발 변수는 반영되지 않는다.
+        {SUMMARY_FACTOR_KEYS.map((k) => FACTOR_LABELS_TECHNICAL[k]).join('·')}을 가중합산한 결과이며, 당일 선발 변경이나 돌발 변수는 반영되지 않는다.
       </p>
     </section>
   );

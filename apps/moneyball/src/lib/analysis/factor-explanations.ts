@@ -107,8 +107,8 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         const weightStr = `${weightPct}%`;
         narrative =
           favor === "neutral"
-            ? `양 선발 FIP 격차 ${diffStr}${ro(diffStr)} 크지 않아 결정적 요소는 아니다.`
-            : `선발 FIP에서 ${better}${josa(better, "이", "가")} ${diffStr} 낮아 방어력 우위. 가중치 ${weightStr}${ro(weightStr)} 이번 예측에 ${contribSign}${contribPp}%p 기여.`;
+            ? `양 ${FACTOR_LABELS[key]} 격차 ${diffStr}${ro(diffStr)} 크지 않아 결정적 요소는 아니다.`
+            : `${FACTOR_LABELS[key]}에서 ${better}${josa(better, "이", "가")} ${diffStr} 낮아 방어력 우위. 가중치 ${weightStr}${ro(weightStr)} 이번 예측에 ${contribSign}${contribPp}%p 기여.`;
       }
       break;
     }
@@ -198,10 +198,10 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         const awayWinPctStr = `${awayWinPct}`;
         narrative =
           favor === "neutral"
-            ? `올 시즌 상대전적 ${homeWinPct}:${awayWinPct}${ro(awayWinPctStr)} 거의 호각.`
-            : `상대전적에서 ${favorTeam}${josa(favorTeam ?? "", "이", "가")} ${favor === "home" ? homeWinPct : awayWinPct}% 승률로 앞선다.`;
+            ? `올 시즌 ${FACTOR_LABELS[key]} ${homeWinPct}:${awayWinPct}${ro(awayWinPctStr)} 거의 호각.`
+            : `${FACTOR_LABELS[key]}에서 ${favorTeam}${josa(favorTeam ?? "", "이", "가")} ${favor === "home" ? homeWinPct : awayWinPct}% 승률로 앞선다.`;
       } else {
-        narrative = "올 시즌 첫 대결이라 상대전적 데이터 없음.";
+        narrative = `올 시즌 첫 대결이라 ${FACTOR_LABELS[key]} 데이터 없음.`;
       }
       break;
     }
@@ -315,7 +315,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
       const better =
         homePct > 50 ? input.homeTeamName : input.awayTeamName;
       const advPct = Math.abs(homePct - 50);
-      summary += ` 올 시즌 상대전적은 ${better}${josa(better, "이", "가")} ${50 + advPct}% 승률로 강세.`;
+      summary += ` 올 시즌 ${FACTOR_LABELS.head_to_head}은 ${better}${josa(better, "이", "가")} ${50 + advPct}% 승률로 강세.`;
     }
   }
 
