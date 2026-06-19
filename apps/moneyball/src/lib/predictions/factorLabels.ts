@@ -1,7 +1,22 @@
+import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
+
 // factor axis favorable threshold. 0.5=중립 / >NEUTRAL_HI=홈 / <NEUTRAL_LO=원정.
 // FactorBreakdown / determineFavor / topFavoringFactors / selectTopFactors 공유 source.
 export const NEUTRAL_LO = 0.45;
 export const NEUTRAL_HI = 0.55;
+
+const PRODUCTION_SLUGS: MetricSlug[] = [
+  "sp_fip",
+  "sp_xfip",
+  "lineup_woba",
+  "bullpen_fip",
+  "recent_form",
+  "war",
+  "head_to_head",
+  "park_factor",
+  "elo",
+  "sfr",
+];
 
 export const FACTOR_LABELS: Record<string, string> = {
   sp_fip: "선발 투수력",
@@ -16,18 +31,11 @@ export const FACTOR_LABELS: Record<string, string> = {
   sfr: "수비력",
 };
 
-export const FACTOR_LABELS_TECHNICAL: Record<string, string> = {
-  sp_fip: "선발 FIP",
-  sp_xfip: "선발 xFIP",
-  lineup_woba: "타선 wOBA",
-  bullpen_fip: "불펜 FIP",
-  recent_form: "최근 10경기 폼",
-  war: "WAR 누적",
-  head_to_head: "상대전적",
-  park_factor: "구장 보정",
-  elo: "Elo 레이팅",
-  sfr: "수비 SFR",
-};
+// MetricRegistry.ko_name 단일 source — silent drift 차단 (cycle 1244 wave 52).
+// glossary lib + methodology FACTOR_WEIGHTS + LLM agent prompt 와 동일 source.
+export const FACTOR_LABELS_TECHNICAL: Record<string, string> = Object.fromEntries(
+  PRODUCTION_SLUGS.map((slug) => [slug, MetricRegistry[slug].ko_name]),
+);
 
 export const FACTOR_GLOSSARY_ANCHORS: Record<string, string> = {
   sp_fip: "fip",
