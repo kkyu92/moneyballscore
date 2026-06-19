@@ -116,6 +116,18 @@ export type {
   MetricObservation,
 } from './context/agent-context';
 
+// LLM Agent 회귀 가드 + 측정 harness (plan #23 Step 4, cycle 1228)
+export {
+  extractMetricPairsFromText,
+  measureHallucinations,
+  estimatePromptTokens,
+  measureContextTokenBudget,
+} from './context/measurement';
+export type {
+  HallucinationStats,
+  TokenBudgetStats,
+} from './context/measurement';
+
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
 
