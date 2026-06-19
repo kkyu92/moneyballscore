@@ -1,6 +1,7 @@
 import { KBO_TEAMS, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
+import { MetricRegistry } from '../context/metrics';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
 import { validateTeamArgument, resolveValidationMode } from './validator';
@@ -54,15 +55,15 @@ ${isHome ? '홈' : '원정'} 경기입니다.
 
 [${KBO_TEAMS[myTeam].name} 데이터]
 선발투수: ${mySP ? `${mySP.name} (FIP ${mySP.fip}, xFIP ${mySP.xfip}, K/9 ${mySP.kPer9})` : '미확정'}
-팀 wOBA: ${myStats.woba} | 불펜 FIP: ${myStats.bullpenFip} | WAR: ${myStats.totalWar}
-수비 SFR: ${myStats.sfr} | Elo: ${myElo.elo} | 최근폼: ${Math.round(myForm * 100)}%
+팀 wOBA: ${myStats.woba} | ${MetricRegistry.bullpen_fip.ko_name}: ${myStats.bullpenFip} | WAR: ${myStats.totalWar}
+수비 SFR: ${myStats.sfr} | Elo: ${myElo.elo} | ${MetricRegistry.recent_form.ko_name}: ${Math.round(myForm * 100)}%
 
 [${KBO_TEAMS[opponent].name} 데이터]
 선발투수: ${oppSP ? `${oppSP.name} (FIP ${oppSP.fip}, xFIP ${oppSP.xfip}, K/9 ${oppSP.kPer9})` : '미확정'}
-팀 wOBA: ${oppStats.woba} | 불펜 FIP: ${oppStats.bullpenFip} | WAR: ${oppStats.totalWar}
-수비 SFR: ${oppStats.sfr} | Elo: ${oppElo.elo} | 최근폼: ${Math.round(oppForm * 100)}%
+팀 wOBA: ${oppStats.woba} | ${MetricRegistry.bullpen_fip.ko_name}: ${oppStats.bullpenFip} | WAR: ${oppStats.totalWar}
+수비 SFR: ${oppStats.sfr} | Elo: ${oppElo.elo} | ${MetricRegistry.recent_form.ko_name}: ${Math.round(oppForm * 100)}%
 
-상대전적: ${context.headToHead.wins}승 ${context.headToHead.losses}패
+${MetricRegistry.head_to_head.ko_name}: ${context.headToHead.wins}승 ${context.headToHead.losses}패
 파크팩터: ${context.parkFactor}
 ${rivalryBlock && rivalryBlock.trim().length > 0 ? '\n' + rivalryBlock + '\n' : ''}
 ${KBO_TEAMS[myTeam].name}의 관점에서 분석하세요.`;
