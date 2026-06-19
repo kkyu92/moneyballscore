@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE } from "@moneyball/shared";
+import { HOME_ADVANTAGE, KBO_FACTOR_COUNT } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -13,7 +13,7 @@ import { GLOSSARY_TERM_COUNT } from "../glossary/data";
 const TOC_ITEMS = [
   { id: "principles", label: "핵심 원칙" },
   { id: "data-sources", label: "데이터 소스" },
-  { id: "weights", label: "10팩터 가중치" },
+  { id: "weights", label: `${KBO_FACTOR_COUNT}팩터 가중치` },
   { id: "agents", label: "AI 에이전트" },
   { id: "verification", label: "검증 방법" },
   { id: "history", label: "모델 진화" },
@@ -22,21 +22,18 @@ const TOC_ITEMS = [
 
 export const metadata: Metadata = {
   title: "예측 방법론",
-  description:
-    "MoneyBall Score 가 KBO 승부예측을 만드는 전체 과정. 세이버메트릭스 10팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증. 데이터 소스 3종, 가중치 도출 근거, 모델 진화 history 를 한 페이지에서 확인.",
+  description: `MoneyBall Score 가 KBO 승부예측을 만드는 전체 과정. 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증. 데이터 소스 3종, 가중치 도출 근거, 모델 진화 history 를 한 페이지에서 확인.`,
   alternates: { canonical: "https://moneyballscore.vercel.app/methodology" },
   openGraph: {
     title: "예측 방법론 | MoneyBall Score",
-    description:
-      "세이버메트릭스 10팩터 + AI 에이전트 토론 + 적중률 검증. 가중치 도출 근거와 모델 진화 history 전체 공개.",
+    description: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 + AI 에이전트 토론 + 적중률 검증. 가중치 도출 근거와 모델 진화 history 전체 공개.`,
     url: "https://moneyballscore.vercel.app/methodology",
     type: "article",
   },
   twitter: {
     card: "summary_large_image",
     title: "예측 방법론 | MoneyBall Score",
-    description:
-      "세이버메트릭스 10팩터 + AI 에이전트 토론. 가중치 근거 + 모델 진화 history 전체 공개.",
+    description: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 + AI 에이전트 토론. 가중치 근거 + 모델 진화 history 전체 공개.`,
   },
 };
 
@@ -152,8 +149,7 @@ const JSONLD = {
   "@context": "https://schema.org",
   "@type": "Article",
   headline: "MoneyBall Score 예측 방법론",
-  description:
-    "세이버메트릭스 10팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증 방법론 전체 공개.",
+  description: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증 방법론 전체 공개.`,
   url: "https://moneyballscore.vercel.app/methodology",
   publisher: {
     "@type": "Organization",
@@ -182,7 +178,7 @@ export default function MethodologyPage() {
         <h1 className="text-3xl font-bold">예측 방법론</h1>
         <p className="text-base text-gray-600 dark:text-brand-300 leading-relaxed">
           MoneyBall Score 의 KBO 승부예측은 직관이나 감으로 만들지 않습니다. 세
-          가지 데이터 소스에서 매일 자동 수집한 세이버메트릭스 지표 10개를
+          가지 데이터 소스에서 매일 자동 수집한 세이버메트릭스 지표 {KBO_FACTOR_COUNT}개를
           가중합산한 뒤, AI 에이전트 3개가 토론하여 최종 승률을 결정합니다.
           매 경기 종료 후 실제 결과와 비교하여 적중률을 측정하고, 정해진 검증
           표본이 쌓이면 가중치를 재조정합니다. 이 페이지는 그 전체 과정을
@@ -290,7 +286,7 @@ export default function MethodologyPage() {
 
       <section id="weights" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
-          3. 10팩터 가중합산 (v1.8)
+          3. {KBO_FACTOR_COUNT}팩터 가중합산 (v1.8)
         </h2>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
           각 팩터를 -1 ~ +1 범위로 정규화한 뒤 가중치를 곱해 합산합니다. 결과에

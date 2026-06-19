@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, type TeamCode, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
@@ -160,7 +160,7 @@ export default async function InsightsHubPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI 인사이트</h1>
         <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
           KBO 경기 AI 심판 에이전트가 매 경기 남긴 300-500자 reasoning 을 시간 역순으로 모아봤습니다.
-          정량 세이버메트릭스 모델 (10팩터) 위에 홈/원정 에이전트 토론 → 심판 종합의 결과입니다.
+          정량 세이버메트릭스 모델 ({KBO_FACTOR_COUNT}팩터) 위에 홈/원정 에이전트 토론 → 심판 종합의 결과입니다.
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           최근 {insights.length}건. 일자 카드를 누르면 해당 일자 전체 예측으로 이동합니다.

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import {
+  KBO_FACTOR_COUNT,
   KBO_TEAMS,
   assertSelectOk,
   shortTeamName,
@@ -124,7 +125,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const home = shortTeamName(game.home_team?.code as TeamCode);
   const away = shortTeamName(game.away_team?.code as TeamCode);
   const title = `${away} vs ${home} AI 분석 — ${game.game_date}`;
-  const description = `${game.game_date} ${away} vs ${home} 세이버메트릭스 기반 AI 승부예측 분석. FIP, wOBA, Elo 등 10팩터 정량 모델 + 에이전트 토론.`;
+  const description = `${game.game_date} ${away} vs ${home} 세이버메트릭스 기반 AI 승부예측 분석. FIP, wOBA, Elo 등 ${KBO_FACTOR_COUNT}팩터 정량 모델 + 에이전트 토론.`;
 
   return {
     title,
@@ -475,7 +476,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* 3. 팩터별 정량 해설 — 가중치 순 10팩터 × 1-2줄 한국어 서술 */}
+      {/* 3. 팩터별 정량 해설 — 가중치 순 KBO_FACTOR_COUNT 팩터 × 1-2줄 한국어 서술 */}
       {preGame.factors && (
         <DetailedFactorAnalysis
           homeTeam={homeTeam}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { KBO_TEAMS, shortTeamName } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, KBO_TEAMS, shortTeamName } from "@moneyball/shared";
 import {
   getSeriesByTopic,
   listSeriesTopics,
@@ -114,7 +114,7 @@ export default async function SeriesTopicPage({ params }: Props) {
         </h1>
         <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
           {team1Name}와 {team2Name}의 모든 경기에 대한 AI 심판 에이전트 reasoning 시계열입니다.
-          정량 세이버메트릭스 모델 (10팩터) + 홈/원정 에이전트 토론 + 심판 종합 결과를 시간 역순으로 모았습니다.
+          정량 세이버메트릭스 모델 ({KBO_FACTOR_COUNT}팩터) + 홈/원정 에이전트 토론 + 심판 종합 결과를 시간 역순으로 모았습니다.
         </p>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
           <span>총 {entries.length}경기</span>

@@ -1,4 +1,4 @@
-import { shortTeamName, type TeamCode } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, shortTeamName, type TeamCode } from "@moneyball/shared";
 import type { DebateTimelineData } from "@/lib/insights/loader";
 import { AgentVoteCard, type AgentRole } from "./AgentVoteCard";
 
@@ -53,7 +53,7 @@ export function DebateTimeline({
       role: "quant",
       homeWinProb: debate.quantHomeProb,
       predictedWinner: debate.quantHomeProb >= 0.5 ? homeTeam : awayTeam,
-      note: `세이버메트릭스 10팩터 합산. 홈 ${quantHomePct}% / 원정 ${100 - quantHomePct}%.`,
+      note: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 합산. 홈 ${quantHomePct}% / 원정 ${100 - quantHomePct}%.`,
       title: "1. 정량 모델 baseline",
     });
   }

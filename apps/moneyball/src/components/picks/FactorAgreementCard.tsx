@@ -1,11 +1,11 @@
 'use client';
 
 /**
- * FactorAgreementCard — 사용자 픽 vs AI 10 factor 일치도 시각화 (cycle 1021 c9).
+ * FactorAgreementCard — 사용자 픽 vs AI KBO_FACTOR_COUNT factor 일치도 시각화 (cycle 1021 c9).
  *
  * 사용자 가시 가치:
  *   - "AI 와 의견 다를 때" 카드 (전체 정답률 비교) 보다 한 단계 깊은 reasoning surface.
- *   - 어느 factor (선발/타선/Elo/구장 등 10개) 가 내 의견 방향으로 leaned 했는지 가시.
+ *   - 어느 factor (선발/타선/Elo/구장 등 KBO_FACTOR_COUNT 개) 가 내 의견 방향으로 leaned 했는지 가시.
  *   - 사용자가 "내가 잘 보는 factor / 못 보는 factor" 자가 인식.
  *
  * 표시 조건:
@@ -13,6 +13,7 @@
  *   - withMe / againstMe 양쪽 모두 비면 미렌더.
  */
 
+import { KBO_FACTOR_COUNT } from '@moneyball/shared';
 import type { FactorAgreement, FactorAgreementRow } from '@/lib/picks/buildPicksStats';
 import { FACTOR_LABELS, FACTOR_TIPS } from '@/lib/predictions/factorLabels';
 
@@ -65,7 +66,7 @@ export function FactorAgreementCard({ agreement }: Props) {
       </header>
 
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-        10개 팩터 중 내 픽 방향으로 기운 비율. {MIN_FACTOR_SAMPLES}경기 미만 팩터는 제외.
+        {KBO_FACTOR_COUNT}개 팩터 중 내 픽 방향으로 기운 비율. {MIN_FACTOR_SAMPLES}경기 미만 팩터는 제외.
       </p>
 
       {withMeTop.length > 0 && (

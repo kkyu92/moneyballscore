@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { KBO_FACTOR_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "MoneyBall Score 방법론 - 세이버메트릭스 10팩터 정량 모델";
+export const alt = `MoneyBall Score 방법론 - 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델`;
 
 export default function Image() {
   return new ImageResponse(
@@ -57,7 +58,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          세이버메트릭스 10팩터 정량 모델
+          세이버메트릭스 {KBO_FACTOR_COUNT}팩터 정량 모델
         </div>
 
         <div
@@ -68,7 +69,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["10팩터 가중합산", "FIP / xFIP / wOBA", "Elo / WAR / SFR", "3소스 자동 수집"].map((tag) => (
+          {[`${KBO_FACTOR_COUNT}팩터 가중합산`, "FIP / xFIP / wOBA", "Elo / WAR / SFR", "3소스 자동 수집"].map((tag) => (
             <div
               key={tag}
               style={{
