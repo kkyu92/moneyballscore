@@ -120,7 +120,7 @@ export default async function GameDetail({ params }: PageParams) {
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">14 factor breakdown</h2>
+        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{MLB_FACTOR_COUNTS.total} factor breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <FactorRow slug="sp_fip" home={pred.home_sp_fip} away={pred.away_sp_fip} />
           <FactorRow slug="lineup_woba" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />

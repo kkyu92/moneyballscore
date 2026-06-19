@@ -47,7 +47,7 @@ export function pairsForTeam(team: TeamCode): MatchupPair[] {
 }
 
 /**
- * 10팀 × 9상대 / 2 = 45개 canonical 쌍 전체.
+ * N × (N-1) / 2 = N choose 2 canonical 쌍 전체 (N = KBO_TEAM_COUNT).
  * 인덱스 페이지 · sitemap 생성에 사용.
  */
 export function allPairs(): MatchupPair[] {

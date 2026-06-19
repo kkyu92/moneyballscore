@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
@@ -82,7 +83,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/standings", label: "AL/NL 순위" },
       { href: "/mlb/team", label: "팀 프로필" },
       { href: "/mlb/players", label: "Statcast 선수" },
-      { href: "/mlb/factors", label: "14팩터 가중치" },
+      { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터 가중치` },
       { href: "/mlb/wild-card", label: "Wild Card race" },
       { href: "/mlb/postseason", label: "Postseason 브래킷" },
     ],
