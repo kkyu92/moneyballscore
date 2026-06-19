@@ -13,6 +13,7 @@
 import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
+import { MetricRegistry, type MetricSlug } from '../context/metrics';
 import { callLLM } from './llm';
 import {
   validateFactorAttribution,
@@ -46,27 +47,22 @@ export function isWeightedFactor(factor: string): boolean {
   return WEIGHTED_FACTOR_BASES.has(canonicalizeFactorKey(factor));
 }
 
-// LLM prompt-level constraint. 사후 filter (factorErrors 배열) 만으론 reasoning 본문의 0% factor
-// 거론 통과 — prompt 에 0% factor 명시 + 추론 금지 규칙 박제로 모델 가중치 ↔ LLM reasoning 일관성 보장.
-const ZERO_WEIGHT_FACTOR_LABELS_KO: Record<string, string> = {
-  head_to_head: '상대전적',
-  park_factor: '구장보정',
-  sfr: '수비SFR',
-};
-
 // shadow-only factor (park_weather, umpire_sz 등) 는 production weight=0 가 의도된 상태 +
 // LLM input 에 자체적으로 미노출 → "0% 거론 금지" 룰의 대상 아님. ACTIVE_FACTOR_KEYS 만
 // 검사해서 production-active factor 가 0% 로 떨어질 때만 prompt 에 박제 (cycle 1013 M-F1).
 const ACTIVE_FACTOR_SET = new Set<string>(ACTIVE_FACTOR_KEYS);
 
+// LLM prompt-level constraint. 사후 filter (factorErrors 배열) 만으론 reasoning 본문의 0% factor
+// 거론 통과 — prompt 에 0% factor 명시 + 추론 금지 규칙 박제로 모델 가중치 ↔ LLM reasoning 일관성 보장.
+// MetricRegistry.ko_name 단일 source (silent drift 차단).
 export function getZeroWeightFactorPromptList(
   weights: Record<string, number> = DEFAULT_WEIGHTS,
 ): string {
   return Object.entries(weights)
     .filter(([k, w]) => (w as number) === 0 && ACTIVE_FACTOR_SET.has(k))
     .map(([k]) => {
-      const ko = ZERO_WEIGHT_FACTOR_LABELS_KO[k];
-      return ko ? `${k} (${ko})` : k;
+      const m = MetricRegistry[k as MetricSlug];
+      return m ? `${k} (${m.ko_name})` : k;
     })
     .join(', ');
 }
