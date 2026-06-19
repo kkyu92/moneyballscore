@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -90,7 +91,13 @@ export default async function Image({ params }: Props) {
             gap: 12,
           }}
         >
-          {["FIP", "xFIP", "K%", "BB%", "최근 폼"].map((tag) => (
+          {[
+            FACTOR_LABELS_TECHNICAL.sp_fip,
+            FACTOR_LABELS_TECHNICAL.sp_xfip,
+            "K%",
+            "BB%",
+            FACTOR_LABELS_TECHNICAL.recent_form,
+          ].map((tag) => (
             <div
               key={tag}
               style={{
