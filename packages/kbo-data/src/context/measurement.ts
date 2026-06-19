@@ -143,3 +143,91 @@ export function measureContextTokenBudget(ac: AgentContext, budget: number = 120
     within_budget: estimated <= budget,
   };
 }
+
+/**
+ * 단일 judge 판정 record — pre/post context layer Brier delta 측정 입력.
+ *
+ * `home_win_prob` 은 home 팀 승리 확률 (0~1). judge agent 가 away 팀 픽 시
+ * 호출자가 `1 - confidence` 로 변환 후 입력 — 본 모듈은 normalized 입력 가정.
+ * `actual_home_win` = 실제 home 승리 여부.
+ */
+export interface JudgmentRecord {
+  home_win_prob: number;
+  actual_home_win: boolean;
+}
+
+/** 단일 cohort Brier 통계. */
+export interface BrierStats {
+  n: number;
+  brier_mean: number;
+  accuracy: number;
+}
+
+/**
+ * Context Layer 도입 전후 Brier delta 측정 결과.
+ *
+ *   - `delta_brier` = post - pre. **음수 = post (context layer) 가 더 정확**.
+ *   - `delta_accuracy` = post - pre. **양수 = post 가 더 정확**.
+ *   - `improvement` = delta_brier < 0 (Brier 기준 개선).
+ *   - plan #23 Step 4 기대치 = delta_brier ≤ 0 (회귀 X). 양수면 회귀 — 후속 cycle
+ *     에서 context payload 축소 / agent prompt 재검토 trigger.
+ */
+export interface ContextLayerBrierDelta {
+  pre: BrierStats;
+  post: BrierStats;
+  delta_brier: number;
+  delta_accuracy: number;
+  improvement: boolean;
+}
+
+/**
+ * judge agent 판정 cohort 의 Brier mean + accuracy 측정.
+ *
+ * Brier = mean((home_win_prob - actual_home_win)^2). 0 = 완벽, 0.25 = 50/50 random,
+ * 1 = 완벽 반대. accuracy = (# (home_win_prob >= 0.5) == actual_home_win) / n.
+ * 빈 cohort = {n:0, brier_mean:0, accuracy:0} 반환 (호출자가 분모 검증).
+ */
+export function measureBrierStats(records: ReadonlyArray<JudgmentRecord>): BrierStats {
+  if (records.length === 0) return { n: 0, brier_mean: 0, accuracy: 0 };
+
+  let sumSq = 0;
+  let correct = 0;
+  for (const r of records) {
+    const outcome = r.actual_home_win ? 1 : 0;
+    sumSq += (r.home_win_prob - outcome) ** 2;
+    const picked = r.home_win_prob >= 0.5;
+    if (picked === r.actual_home_win) correct += 1;
+  }
+  return {
+    n: records.length,
+    brier_mean: sumSq / records.length,
+    accuracy: correct / records.length,
+  };
+}
+
+/**
+ * Context Layer 도입 전후 두 cohort 비교 — pre/post Brier + accuracy delta.
+ *
+ * 사용 예: pre = context layer 통합 전 cycle 1228 이전 judge 판정 cohort,
+ * post = cycle 1232~1234 통합 후 judge 판정 cohort. 양쪽 동일 score 산출 방식
+ * (home_win_prob normalized) 가정 — 호출자가 query 시 정합 보장.
+ *
+ * 표본 floor 권장: pre/post 각 n ≥ 30 — 미만 시 단건 noise dominant. 본 함수는
+ * floor 검증 X (pure stat) — 호출자가 사후 검증.
+ */
+export function measureContextLayerBrierDelta(
+  pre: ReadonlyArray<JudgmentRecord>,
+  post: ReadonlyArray<JudgmentRecord>,
+): ContextLayerBrierDelta {
+  const preStats = measureBrierStats(pre);
+  const postStats = measureBrierStats(post);
+  const deltaBrier = postStats.brier_mean - preStats.brier_mean;
+  const deltaAccuracy = postStats.accuracy - preStats.accuracy;
+  return {
+    pre: preStats,
+    post: postStats,
+    delta_brier: deltaBrier,
+    delta_accuracy: deltaAccuracy,
+    improvement: deltaBrier < 0,
+  };
+}
