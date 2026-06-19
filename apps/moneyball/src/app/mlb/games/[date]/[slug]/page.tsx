@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk } from "@moneyball/shared";
+import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
 
 export const revalidate = 1800;
 
@@ -121,8 +122,8 @@ export default async function GameDetail({ params }: PageParams) {
       <section>
         <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">14 factor breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
-          <FactorRow label="선발 FIP" home={pred.home_sp_fip} away={pred.away_sp_fip} />
-          <FactorRow label="타선 wOBA" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
+          <FactorRow slug="sp_fip" home={pred.home_sp_fip} away={pred.away_sp_fip} />
+          <FactorRow slug="lineup_woba" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
           <FactorRow label="타선 xwOBA" home={pred.home_lineup_xwoba} away={pred.away_lineup_xwoba} />
           <FactorRow label="Barrel%" home={pred.home_lineup_barrel_pct} away={pred.away_lineup_barrel_pct} />
         </dl>
@@ -131,10 +132,21 @@ export default async function GameDetail({ params }: PageParams) {
   );
 }
 
-function FactorRow({ label, home, away }: { label: string; home: number | null; away: number | null }) {
+function FactorRow({
+  slug,
+  label,
+  home,
+  away,
+}: {
+  slug?: MetricSlug;
+  label?: string;
+  home: number | null;
+  away: number | null;
+}) {
+  const resolved = slug ? MetricRegistry[slug].ko_name : label;
   return (
     <div className="border border-brand-200 dark:border-brand-800 rounded p-3">
-      <dt className="text-xs text-brand-500 dark:text-brand-400">{label}</dt>
+      <dt className="text-xs text-brand-500 dark:text-brand-400">{resolved}</dt>
       <dd className="font-mono mt-1 text-brand-700 dark:text-brand-100">{home ?? '—'} / {away ?? '—'}</dd>
     </div>
   );
