@@ -94,7 +94,7 @@ describe('getSeasonPhase', () => {
 
 describe('TIME_WINDOWS', () => {
   it('predictor / retro / agent 공유 표준 값', () => {
-    expect(TIME_WINDOWS.recent_form.games).toBe(7);
+    expect(TIME_WINDOWS.recent_form.games).toBe(10);
     expect(TIME_WINDOWS.h2h_window.days).toBe(30);
     expect(TIME_WINDOWS.season.days).toBe(180);
   });
@@ -158,7 +158,7 @@ describe('renderTimeWindowsForLLM', () => {
     expect(s).toContain('recent_form');
     expect(s).toContain('h2h_window');
     expect(s).toContain('season');
-    expect(s).toContain('최근 7경기');
+    expect(s).toContain('최근 10경기');
   });
 });
 

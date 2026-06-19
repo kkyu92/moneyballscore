@@ -10,7 +10,7 @@
  *     (1.0 = 중립) 로 환산한 LLM 친화 표현만 추가 — parkPf 변경은 shared 에서 일어남.
  *   - 라이벌리 source = `@moneyball/shared` `KBO_RIVALRIES` (`isRivalry`). 본 모듈은
  *     LLM prompt 친화 한 줄 문자열 박제만 — 라이벌리 정의는 shared 에서 일어남.
- *   - 시간 윈도우 = predictor / retro / agent 가 사용하는 기준 (최근 7경기 / 30일 H2H /
+ *   - 시간 윈도우 = predictor / retro / agent 가 사용하는 기준 (최근 10경기 / 30일 H2H /
  *     180일 시즌) 을 LLM 이 동일 표현으로 참조하도록 박제.
  *
  * Step 3 (buildAgentContext) 에서 본 모듈 + MetricRegistry + AgentContext 결합.
@@ -77,9 +77,17 @@ export function getSeasonPhase(date: Date): SeasonPhase {
   return 'offseason';
 }
 
-/** 분석 시간 윈도우 — predictor / retro / LLM agent 가 공유. */
+/**
+ * 분석 시간 윈도우 — predictor / retro / LLM agent 가 공유.
+ *
+ * `recent_form.games = 10` — KBO 공식 ranking 테이블의 "최근10경기" 컬럼 (W/L 카운트)
+ * 가 실제 source. scraper (`kbo-official.ts`) + `homeRecentForm` 필드 + 사용자 가시
+ * 페이지 (about / standings / glossary / teams/recent) 모두 10경기 기준. cycle 1240
+ * silent drift wave 48 = TIME_WINDOWS 가 7 로 박제되어 LLM agent prompt 가 잘못된
+ * 윈도우 문구를 받던 패턴 정정.
+ */
 export const TIME_WINDOWS = Object.freeze({
-  recent_form: { games: 7, ko: '최근 7경기' },
+  recent_form: { games: 10, ko: '최근 10경기' },
   h2h_window: { days: 30, ko: '최근 30일 상대 전적' },
   season: { days: 180, ko: '시즌 누적' },
 } as const);
@@ -128,7 +136,7 @@ export function renderSeasonForLLM(date: Date): string {
 /**
  * 시간 윈도우 한 줄 — LLM 이 분석 단위를 mismatch 없이 참조하도록.
  *
- * 예: "분석 윈도우 — 최근 폼: 최근 7경기 / H2H: 최근 30일 상대 전적 / 시즌: 시즌 누적."
+ * 예: "분석 윈도우 — 최근 폼: 최근 10경기 / H2H: 최근 30일 상대 전적 / 시즌: 시즌 누적."
  */
 export function renderTimeWindowsForLLM(): string {
   const parts = (Object.keys(TIME_WINDOWS) as TimeWindowKey[]).map((k) => `${k}: ${TIME_WINDOWS[k].ko}`);
