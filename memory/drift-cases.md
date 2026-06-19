@@ -347,9 +347,9 @@ Supabase REST: "code": "42703", "message": "column games.home_team_code does not
 | 사례 10+13 (Turbopack/ESM transitive build fail) | 2회 | 빌드 시스템 | cycle 866 |
 | 사례 11 (predict_final silent silent drop) | 1회 + monitoring | cron mode fallback | cycle 819 alert 박제 |
 | 사례 15 (agent 토론 fail rate L1+L2+L3) | 1회 | LLM nondeterminism + 외부 API | cycle 986 |
-| **사례 16 (plan frontmatter status field stale)** | 2회 (plan #17 + #18) | develop-cycle retro layer | cycle 1050 |
+| **사례 16 (plan frontmatter status field stale)** | 3회 (plan #17 + #18 + #23) | develop-cycle retro layer | cycle 1248 |
 
-**streak**: ~525 cycle (cycle 525~1050 silent drift family detection + fix patterns 유지)
+**streak**: ~723 cycle (cycle 525~1248 silent drift family detection + fix patterns 유지)
 
 ---
 
@@ -360,6 +360,9 @@ Supabase REST: "code": "42703", "message": "column games.home_team_code does not
 **evidence (cycle 1050 발견 시점)**:
 - **plan #17** (cycle 1032 ship → PR #1407 `docs(decisions): plan #17 feature flag PoC scope 1-pager`) → status `approved` 18 cycle gap stale → cycle 1050 갱신 `doc_only_shipped_cycle_1032_pending_user_step_a`
 - **plan #18** (cycle 1039 ship → PR #1415 `docs(decisions): plan #18 외부 인프라 장애 방어 1-pager`) → status `approved` 11 cycle gap stale → cycle 1050 갱신 `doc_only_shipped_cycle_1039_pending_user_step_b`
+
+**재발 evidence (cycle 1248)**:
+- **plan #23** (LLM 분석 에이전트용 executable context layer) — Step 1~4 모두 ship 완료 (cycle 1225 PR #2010 / cycle 1226 PR #2011 / cycle 1227 PR #2012 / cycle 1228 PR #2013 / cycle 1235 PR #2021 / cycle 1239 PR #2024) + wave 41~54 silent drift cleanup 14 회 ship (cycle 1230~1246) → frontmatter `status: approved` 24 cycle gap stale (cycle 1224 plan 박제 → cycle 1248 발견) → cycle 1248 갱신 `completed_steps_1_4_shipped_through_cycle_1239_plus_waves_41_54_through_cycle_1246`. 발견 trigger = 본 cycle 진단 단계 unprocessed plan lookup 시 status=approved 자연 매칭 → 이미 풀-수렴 plan 재처리 risk 인지.
 
 **대조 evidence (정상 status 갱신 케이스)**:
 - plan #11 → `completed_autonomy_pending_user_step_4_5`
