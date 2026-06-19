@@ -105,6 +105,17 @@ export type {
   TimeWindowKey,
 } from './context/domain';
 
+// LLM Agent 표준 ContextPayload (plan #23 Step 3, cycle 1227)
+export {
+  buildAgentContext,
+  renderContextForLLM,
+} from './context/agent-context';
+export type {
+  AgentContext,
+  AgentGameMeta,
+  MetricObservation,
+} from './context/agent-context';
+
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
 
