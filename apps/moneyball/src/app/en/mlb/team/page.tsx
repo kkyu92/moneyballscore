@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -15,9 +16,9 @@ export const revalidate = 21600;
 const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
-  title: "MLB Teams — 30 Team Season Stats | MoneyBall Score",
+  title: `MLB Teams — ${MLB_TEAM_COUNT} Team Season Stats | MoneyBall Score`,
   description:
-    `MLB 30 teams (AL 15 + NL 15) season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.`,
+    `MLB ${MLB_TEAM_COUNT} teams (AL 15 + NL 15) season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/team`,
     languages: {
@@ -26,16 +27,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MLB Teams — 30 Profiles | MoneyBall Score",
-    description: `MLB 30 team season prediction records + ${MLB_FACTOR_COUNTS.total} factors`,
+    title: `MLB Teams — ${MLB_TEAM_COUNT} Profiles | MoneyBall Score`,
+    description: `MLB ${MLB_TEAM_COUNT} team season prediction records + ${MLB_FACTOR_COUNTS.total} factors`,
     url: `${SITE_URL}/en/mlb/team`,
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB Teams — 30 Profiles | MoneyBall Score",
-    description: `MLB 30 team season prediction records + ${MLB_FACTOR_COUNTS.total} factors`,
+    title: `MLB Teams — ${MLB_TEAM_COUNT} Profiles | MoneyBall Score`,
+    description: `MLB ${MLB_TEAM_COUNT} team season prediction records + ${MLB_FACTOR_COUNTS.total} factors`,
   },
 };
 
@@ -51,12 +52,12 @@ export default function MlbTeamsHubEn() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "MLB Team Profiles",
-    description: `MLB 30 team season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model · Home ballpark park factor`,
+    description: `MLB ${MLB_TEAM_COUNT} team season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model · Home ballpark park factor`,
     url: `${SITE_URL}/en/mlb/team`,
     inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: 30,
+      numberOfItems: MLB_TEAM_COUNT,
       itemListElement: (Object.keys(MLB_TEAMS) as MlbTeamCode[]).map((code, i) => {
         const team = MLB_TEAMS[code];
         return {
@@ -91,7 +92,7 @@ export default function MlbTeamsHubEn() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB Team Profiles</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL 15 teams + NL 15 teams = 30 total. Season prediction records · {MLB_FACTOR_COUNTS.total}-factor model (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.
+          AL 15 teams + NL 15 teams = {MLB_TEAM_COUNT} total. Season prediction records · {MLB_FACTOR_COUNTS.total}-factor model (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.
         </p>
       </header>
 
