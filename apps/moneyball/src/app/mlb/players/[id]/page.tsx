@@ -7,6 +7,7 @@ import {
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
@@ -83,7 +84,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isMlbTeamCode(id)) return {};
   const team = MLB_TEAMS[id];
   const title = `${team.name} Statcast — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score`;
-  const description = `${team.name} (${team.league} ${team.division}) Statcast 4 팩터 deep-dive. xwOBA · Barrel% · Hard Hit% · Launch Angle 팀별 측정 진척 + 선수별 layer ETA carry-over.`;
+  const description = `${team.name} (${team.league} ${team.division}) Statcast ${MLB_FACTOR_COUNTS.statcast} 팩터 deep-dive. xwOBA · Barrel% · Hard Hit% · Launch Angle 팀별 측정 진척 + 선수별 layer ETA carry-over.`;
 
   return {
     title,
@@ -125,7 +126,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
     url: pageUrl,
     name: team.name,
     sport: "Baseball",
-    description: `${team.name} Statcast 4 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 측정 + 선수별 layer ETA.`,
+    description: `${team.name} Statcast ${MLB_FACTOR_COUNTS.statcast} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 측정 + 선수별 layer ETA.`,
     location: { "@type": "Place", name: team.stadium },
     memberOf: {
       "@type": "SportsOrganization",
@@ -180,7 +181,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
           파크팩터 {team.parkPf}
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          본 페이지 = Statcast 4 팩터 (xwOBA · Barrel% · Hard Hit% · Launch Angle) deep-dive layer. 시즌 stat 요약 ={" "}
+          본 페이지 = Statcast {MLB_FACTOR_COUNTS.statcast} 팩터 (xwOBA · Barrel% · Hard Hit% · Launch Angle) deep-dive layer. 시즌 stat 요약 ={" "}
           <Link href={`/mlb/team/${id}`} className="underline">
             /mlb/team/{id}
           </Link>
@@ -193,7 +194,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
           id="statcast-team-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          팀 Statcast 4 팩터 (측정 ETA)
+          팀 Statcast {MLB_FACTOR_COUNTS.statcast} 팩터 (측정 ETA)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
           현재 표시 = 팩터 정의 + range. 팀별 시즌 실측 (Baseball Savant 집계) 연동 ETA carry-over. 측정 layer = `mlb-base.ts` factor pipeline + `baseball-savant.ts` scraper.
@@ -246,7 +247,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
             <Link href="/mlb/factors" className="underline">
               /mlb/factors
             </Link>{" "}
-            14팩터 본선 layer 참조.
+            {MLB_FACTOR_COUNTS.total}팩터 본선 layer 참조.
           </p>
         </div>
       </section>
@@ -266,7 +267,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
             >
               <p className="font-semibold text-brand-700 dark:text-brand-100">팀 프로필 →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                시즌 stat + 예측 적중률 + 14팩터 평균
+                시즌 stat + 예측 적중률 + {MLB_FACTOR_COUNTS.total}팩터 평균
               </p>
             </Link>
           </li>
@@ -275,9 +276,9 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
               href="/mlb/factors"
               className="block rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md hover:border-brand-500/50 transition-all"
             >
-              <p className="font-semibold text-brand-700 dark:text-brand-100">14팩터 본선 →</p>
+              <p className="font-semibold text-brand-700 dark:text-brand-100">{MLB_FACTOR_COUNTS.total}팩터 본선 →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                KBO 10 + Statcast 4 가중치 + 출처
+                KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast} 가중치 + 출처
               </p>
             </Link>
           </li>
@@ -288,7 +289,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
             >
               <p className="font-semibold text-brand-700 dark:text-brand-100">30팀 hub →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Statcast 4 팩터 explainer + 30팀 진입
+                Statcast {MLB_FACTOR_COUNTS.statcast} 팩터 explainer + 30팀 진입
               </p>
             </Link>
           </li>

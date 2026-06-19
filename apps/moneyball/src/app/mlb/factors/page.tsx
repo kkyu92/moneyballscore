@@ -60,7 +60,7 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
     range: "1.50 ~ 6.00",
     description:
       "투수의 삼진 · 볼넷 · 홈런 만으로 추정한 ERA. 야수 영향 제거 = 진짜 투수 실력. 낮을수록 유리.",
-    why: "선발 투수 매치업이 단일 경기 최대 영향 = 14팩터 본선 안 가중치 2위.",
+    why: `선발 투수 매치업이 단일 경기 최대 영향 = ${TOTAL}팩터 본선 안 가중치 2위.`,
     source: "FanGraphs MLB · KBO Fancy Stats",
   },
   {

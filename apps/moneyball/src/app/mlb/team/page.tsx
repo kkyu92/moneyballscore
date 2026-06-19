@@ -7,6 +7,7 @@ import {
   type MlbLeagueSide,
   type MlbDivisionSide,
 } from "@moneyball/shared";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -15,8 +16,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "MLB 팀 프로필 — 30팀 시즌 stat | MoneyBall Score",
-  description:
-    "MLB 30팀 (AL 15 + NL 15) 시즌 예측 기록 · 14팩터 (KBO 10 + Statcast 4) · 홈구장 파크팩터.",
+  description: `MLB 30팀 (AL 15 + NL 15) 시즌 예측 기록 · ${MLB_FACTOR_COUNTS.total}팩터 (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · 홈구장 파크팩터.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/team`,
     languages: {
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "MLB 팀 프로필 30팀 | MoneyBall Score",
-    description: "MLB 30팀 시즌 예측 기록 + 14팩터",
+    description: `MLB 30팀 시즌 예측 기록 + ${MLB_FACTOR_COUNTS.total}팩터`,
     url: `${SITE_URL}/mlb/team`,
     type: "website",
     locale: "ko_KR",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB 팀 프로필 30팀 | MoneyBall Score",
-    description: "MLB 30팀 시즌 예측 기록 + 14팩터",
+    description: `MLB 30팀 시즌 예측 기록 + ${MLB_FACTOR_COUNTS.total}팩터`,
   },
 };
 
@@ -50,7 +50,7 @@ export default function MlbTeamsHub() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "MLB 팀 프로필",
-    description: "MLB 30팀 시즌 예측 기록 · 14팩터 · 홈구장 파크팩터",
+    description: `MLB 30팀 시즌 예측 기록 · ${MLB_FACTOR_COUNTS.total}팩터 · 홈구장 파크팩터`,
     url: `${SITE_URL}/mlb/team`,
     mainEntity: {
       "@type": "ItemList",
@@ -88,7 +88,7 @@ export default function MlbTeamsHub() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB 팀 프로필</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL 15팀 + NL 15팀 = 30팀. 시즌 예측 기록 · 14팩터 (KBO 10 + Statcast 4) · 홈구장 파크팩터.
+          AL 15팀 + NL 15팀 = 30팀. 시즌 예측 기록 · {MLB_FACTOR_COUNTS.total}팩터 (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · 홈구장 파크팩터.
         </p>
       </header>
 

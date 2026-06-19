@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -56,7 +57,7 @@ export default function MlbTeamHubTwitterImage() {
             display: "flex",
           }}
         >
-          AL 15 + NL 15 · 시즌 예측 기록 · 14팩터 · 홈구장 park factor
+          AL 15 + NL 15 · 시즌 예측 기록 · {MLB_FACTOR_COUNTS.total}팩터 · 홈구장 park factor
         </div>
 
         <div
