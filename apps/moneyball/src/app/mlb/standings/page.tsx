@@ -3,6 +3,8 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
+  MLB_DIVISION_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -14,9 +16,8 @@ export const revalidate = 21600;
 const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
-  title: "MLB AL/NL 순위 — 6 division standings | MoneyBall Score",
-  description:
-    "MLB AL/NL × East/Central/West 6 division 팀 구성 및 파크팩터 분포. 시즌 순위는 추후 라이브 연동 carry-over.",
+  title: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division standings | MoneyBall Score`,
+  description: `MLB AL/NL × East/Central/West ${MLB_DIVISION_COUNT} division 팀 구성 및 파크팩터 분포. 시즌 순위는 추후 라이브 연동 carry-over.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/standings`,
     languages: {
@@ -25,16 +26,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MLB AL/NL 순위 — 6 division | MoneyBall Score",
-    description: "AL/NL × East/Central/West 6 division 팀 구성 및 파크팩터.",
+    title: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division | MoneyBall Score`,
+    description: `AL/NL × East/Central/West ${MLB_DIVISION_COUNT} division 팀 구성 및 파크팩터.`,
     url: `${SITE_URL}/mlb/standings`,
     type: "website",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB AL/NL 순위 — 6 division | MoneyBall Score",
-    description: "AL/NL × East/Central/West 6 division 팀 구성 및 파크팩터.",
+    title: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division | MoneyBall Score`,
+    description: `AL/NL × East/Central/West ${MLB_DIVISION_COUNT} division 팀 구성 및 파크팩터.`,
   },
 };
 
@@ -65,13 +66,12 @@ export default function MlbStandingsHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "MLB AL/NL 순위 — 6 division",
-    description:
-      "MLB AL/NL × East/Central/West 6 division 팀 구성. 시즌 순위 라이브 연동은 추후 carry-over.",
+    name: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division`,
+    description: `MLB AL/NL × East/Central/West ${MLB_DIVISION_COUNT} division 팀 구성. 시즌 순위 라이브 연동은 추후 carry-over.`,
     url: `${SITE_URL}/mlb/standings`,
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: 30,
+      numberOfItems: MLB_TEAM_COUNT,
       itemListElement: (Object.keys(MLB_TEAMS) as MlbTeamCode[]).map((code, i) => {
         const team = MLB_TEAMS[code];
         return {
@@ -105,7 +105,7 @@ export default function MlbStandingsHub() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB AL/NL 순위</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL/NL × East/Central/West 6 division · 30팀. 시즌 라이브 순위 연동은 추후 합류.
+          AL/NL × East/Central/West {MLB_DIVISION_COUNT} division · {MLB_TEAM_COUNT}팀. 시즌 라이브 순위 연동은 추후 합류.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           현재 표시: 팀 구성 + 홈구장 파크팩터. 시즌 W/L/GB 등 라이브 record 는 별도 datasource 통합 시 박제.
