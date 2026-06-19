@@ -3,6 +3,8 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
+  MLB_DIVISION_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
 } from "@moneyball/shared";
@@ -68,7 +70,7 @@ export default function MlbWildCardHub() {
           ⭐ MLB Wild Card race
         </h1>
         <p className="text-base text-gray-600 dark:text-gray-300">
-          AL/NL 양리그 — Wild Card 3장 진출 경쟁. division 1위 6팀 외 잔여 10팀 가운데 양리그 3팀씩 진출.
+          AL/NL 양리그 — Wild Card 3장 진출 경쟁. division 1위 {MLB_DIVISION_COUNT}팀 외 잔여 {MLB_TEAM_COUNT - MLB_DIVISION_COUNT}팀 가운데 양리그 3팀씩 진출.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
           ETA 2026-08 — 9월 막판 game-back / Magic Number 추적 + {FACTOR_TOTAL}팩터 본선 base 라이브 데이터 통합.
@@ -87,7 +89,7 @@ export default function MlbWildCardHub() {
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
           <li>MLB 162game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
-          <li>30팀 standings (AL/NL × E/C/W 6 division) — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
+          <li>{MLB_TEAM_COUNT}팀 standings (AL/NL × E/C/W {MLB_DIVISION_COUNT} division) — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
           <li>Wild Card 3장 진출 경쟁 추적 + game-back 라이브 — <strong>ETA 2026-08</strong></li>
           <li>Postseason 브라켓 (WC / DS / LCS / WS) 시각화 — <strong>ETA 2026-09</strong></li>
         </ul>
@@ -98,10 +100,10 @@ export default function MlbWildCardHub() {
           id="wc-pool-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Wild Card 후보 pool — AL/NL division 1위 6팀 외
+          Wild Card 후보 pool — AL/NL division 1위 {MLB_DIVISION_COUNT}팀 외
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          각 리그 15팀 중 division 1위 3팀 = 자동 진출. 잔여 12팀 가운데 승률 top 3 = Wild Card 진출. 본 hub 는 30팀 진입 path 만 박제 — 라이브 game-back 데이터는 ETA 도달 시 활성.
+          각 리그 {MLB_TEAM_COUNT / 2}팀 중 division 1위 3팀 = 자동 진출. 잔여 {MLB_TEAM_COUNT / 2 - 3}팀 가운데 승률 top 3 = Wild Card 진출. 본 hub 는 {MLB_TEAM_COUNT}팀 진입 path 만 박제 — 라이브 game-back 데이터는 ETA 도달 시 활성.
         </p>
         {LEAGUES.map((league) => {
           const codes = leagueAllCodes(league);

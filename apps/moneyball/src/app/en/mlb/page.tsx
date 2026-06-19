@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
@@ -15,7 +16,7 @@ const STAT_N = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
   title: `MLB Analysis — ${TOTAL}-Factor Sabermetrics + Statcast | MoneyBall Score`,
-  description: `MLB 30-team 162-game analysis with a ${TOTAL}-factor model (KBO ${KBO_N} + Statcast ${STAT_N}). Data-driven win predictions in Korean and English.`,
+  description: `MLB ${MLB_TEAM_COUNT}-team 162-game analysis with a ${TOTAL}-factor model (KBO ${KBO_N} + Statcast ${STAT_N}). Data-driven win predictions in Korean and English.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb`,
     languages: { en: `${SITE_URL}/en/mlb`, ko: `${SITE_URL}/mlb` },
@@ -79,7 +80,7 @@ export default async function MlbHubEn() {
         </Link>
         <Link href="/en/mlb/standings" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Team Standings</h3>
-          <p className="text-xs text-brand-500 mt-1">AL/NL 6 divisions</p>
+          <p className="text-xs text-brand-500 mt-1">AL/NL {MLB_DIVISION_COUNT} divisions</p>
         </Link>
         <Link href="/en/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast Deep-Dive</h3>

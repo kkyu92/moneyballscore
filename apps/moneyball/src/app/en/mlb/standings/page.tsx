@@ -3,6 +3,8 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
+  MLB_DIVISION_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -107,7 +109,7 @@ export default function MlbStandingsHubEn() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB AL/NL Standings</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL/NL × East/Central/West 6 divisions · 30 teams. Live season standings integration coming soon.
+          AL/NL × East/Central/West {MLB_DIVISION_COUNT} divisions · {MLB_TEAM_COUNT} teams. Live season standings integration coming soon.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           Currently shown: team composition + home ballpark park factors. Live season W/L/GB records = pending separate datasource integration.

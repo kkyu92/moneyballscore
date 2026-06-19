@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -56,7 +57,7 @@ export default function EnMlbStandingsOgImage() {
             display: "flex",
           }}
         >
-          AL/NL · East/Central/West · 6 divisions · 30 teams · park factor
+          AL/NL · East/Central/West · {MLB_DIVISION_COUNT} divisions · {MLB_TEAM_COUNT} teams · park factor
         </div>
 
         <div
@@ -96,7 +97,7 @@ export default function EnMlbStandingsOgImage() {
           }}
         >
           <span>moneyballscore.vercel.app/en/mlb/standings</span>
-          <span>EN · KO · 30 teams</span>
+          <span>EN · KO · {MLB_TEAM_COUNT} teams</span>
         </div>
       </div>
     ),

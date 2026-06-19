@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_TEAM_COUNT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -59,7 +60,7 @@ export default function EnMlbHubOgImage() {
             display: "flex",
           }}
         >
-          {TOTAL}-factor model · Statcast · 30 teams · 162 games
+          {TOTAL}-factor model · Statcast · {MLB_TEAM_COUNT} teams · 162 games
         </div>
 
         <div

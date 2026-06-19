@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
@@ -15,7 +16,7 @@ const STAT_N = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
   title: `MLB 분석 — 세이버메트릭스 ${TOTAL}팩터 + Statcast | MoneyBall Score`,
-  description: `MLB 30개 구단 162경기 분석 + ${TOTAL}팩터 모델 (KBO ${KBO_N} + Statcast ${STAT_N}) 기반 승부예측. 한국어/영어 페이지 제공.`,
+  description: `MLB ${MLB_TEAM_COUNT}개 구단 162경기 분석 + ${TOTAL}팩터 모델 (KBO ${KBO_N} + Statcast ${STAT_N}) 기반 승부예측. 한국어/영어 페이지 제공.`,
   alternates: {
     canonical: `${SITE_URL}/mlb`,
     languages: { 'en': `${SITE_URL}/en/mlb`, 'ko': `${SITE_URL}/mlb` },
@@ -75,7 +76,7 @@ export default async function MlbHub() {
         </Link>
         <Link href="/mlb/standings" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">팀 순위</h3>
-          <p className="text-xs text-brand-500 mt-1">AL/NL 6 디비전</p>
+          <p className="text-xs text-brand-500 mt-1">AL/NL {MLB_DIVISION_COUNT} 디비전</p>
         </Link>
         <Link href="/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast deep-dive</h3>
