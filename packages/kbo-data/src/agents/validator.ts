@@ -32,6 +32,7 @@
 
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
+import { MetricRegistry } from '../context/metrics';
 import type { GameContext, TeamArgument } from './types';
 
 // ============================================
@@ -248,7 +249,7 @@ const CLAIM_TYPE_SIGNALS: Array<{ type: string; patterns: RegExp[] }> = [
   // 3. 팩터 기여도 해석
   { type: 'factor_contribution', patterns: [/팩터|기여|가중치|모델|v1\.5|v2/] },
   // 4. 상대전적 요약
-  { type: 'head_to_head', patterns: [/상대전적|최근\s*\d+경기|\d+승\s*\d+패/] },
+  { type: 'head_to_head', patterns: [/상대\s*전적|최근\s*\d+경기|\d+승\s*\d+패/] },
   // 5. 통계 추론 — 파크팩터·경향 해석
   { type: 'stat_inference', patterns: [/파크팩터|PF|억제|경향|추세/] },
 ];
@@ -464,9 +465,9 @@ export function buildInjectionText(context: GameContext): string {
     `경기: ${awayName} @ ${homeName}`,
     `시간: ${game.gameTime}`,
     `구장: ${game.stadium} / 파크팩터 ${parkFactor}`,
-    `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | 불펜FIP ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | 최근폼 ${homeFormPct}%`,
-    `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | 불펜FIP ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | 최근폼 ${awayFormPct}%`,
-    `상대전적 ${headToHead.wins}승 ${headToHead.losses}패`,
+    `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | ${MetricRegistry.recent_form.ko_name} ${homeFormPct}%`,
+    `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | ${MetricRegistry.recent_form.ko_name} ${awayFormPct}%`,
+    `${MetricRegistry.head_to_head.ko_name} ${headToHead.wins}승 ${headToHead.losses}패`,
   ].join('\n');
 }
 

@@ -33,7 +33,7 @@ describe('buildUserMessage (v4-3 Task 2 rivalry 주입)', () => {
     const msg = buildUserMessage('LG', makeContext());
     expect(msg).not.toContain('과거 맥락');
     expect(msg).toContain('LG');
-    expect(msg).toContain('상대전적');
+    expect(msg).toContain('상대 전적');
   });
 
   it('rivalryBlock 빈 문자열 — 과거 맥락 섹션 생략 (빈 헤더 방지)', () => {
