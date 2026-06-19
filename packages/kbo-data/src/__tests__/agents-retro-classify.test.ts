@@ -157,4 +157,62 @@ describe('buildMemoryForTeam', () => {
     expect(m!.type).toBe('strength');
     expect(m!.content).toContain('OB');
   });
+
+  // wave 46 (cycle 1236): MetricRegistry ko_name 결합 — context layer 단일 source 정렬
+  it('content 에 MetricRegistry ko_name 결합 (prefixed key)', () => {
+    const m = buildMemoryForTeam({
+      factors: { home_sp_fip: 0.75 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: false,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).not.toBeNull();
+    expect(m!.content).toContain('선발 FIP');
+    expect(m!.content).toContain('home_sp_fip');
+  });
+
+  it('content 에 MetricRegistry ko_name 결합 (unprefixed predictor slug)', () => {
+    const m = buildMemoryForTeam({
+      factors: { lineup_woba: 0.7 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: true,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).not.toBeNull();
+    expect(m!.content).toContain('타선 wOBA');
+    expect(m!.content).toContain('lineup_woba');
+  });
+
+  it('head_to_head_rate alias → MetricRegistry.head_to_head ko_name 결합', () => {
+    const m = buildMemoryForTeam({
+      factors: { head_to_head_rate: 0.75 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: true,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).not.toBeNull();
+    expect(m!.content).toContain('상대 전적');
+    expect(m!.content).toContain('head_to_head_rate');
+  });
+
+  it('미등록 factor key → raw key fallback (ko_name X)', () => {
+    const m = buildMemoryForTeam({
+      factors: { unknown_factor_xyz: 0.7 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: true,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).not.toBeNull();
+    expect(m!.content).toContain('unknown_factor_xyz');
+    // ko_name 후보 (선발 / 타선 등) 미포함 — raw key 직접
+    expect(m!.content).not.toMatch(/선발|타선|불펜|WAR|폼/);
+  });
 });

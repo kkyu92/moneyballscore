@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -142,8 +143,38 @@ export function addDays(date: string, days: number): string {
 }
 
 /**
+ * plan #23 Step 5 wave 46 (cycle 1236): factor key → MetricRegistry 정의 lookup.
+ *
+ * predictor.ts 는 unprefixed slug (예: `sp_fip` / `head_to_head`) 박제,
+ * postview LLM canonicalize 통과 시 prefixed key (예: `home_sp_fip`) 박제 가능.
+ * head_to_head_rate / h2h_* alias 도 MetricRegistry.head_to_head 매핑.
+ * war_total alias → MetricRegistry.war.
+ *
+ * 매칭 X 시 null — buildMemoryForTeam 에서 raw key fallback.
+ */
+function lookupMetric(factorKey: string): MetricDefinition | null {
+  const candidates: string[] = [];
+  if (factorKey.startsWith('home_')) candidates.push(factorKey.slice(5));
+  else if (factorKey.startsWith('away_')) candidates.push(factorKey.slice(5));
+  candidates.push(factorKey);
+  if (factorKey.includes('head_to_head') || factorKey.includes('h2h')) {
+    candidates.push('head_to_head');
+  }
+  if (factorKey.endsWith('war_total')) candidates.push('war');
+  const registry = MetricRegistry as Record<string, MetricDefinition>;
+  for (const slug of candidates) {
+    if (registry[slug]) return registry[slug];
+  }
+  return null;
+}
+
+/**
  * 팀 관점의 maxBias factor → memory row 생성 (순수 함수)
  * factors가 비어있거나 모든 bias ≤ 0 이면 null 반환.
+ *
+ * wave 46 (cycle 1236): MetricRegistry ko_name 결합 — `LG: sp_fip +0.12` →
+ * `LG: 선발 FIP (sp_fip) +0.12`. team-agent 가 rivalry-memory.ts 통해 본 content 를
+ * prompt 안 소비할 때 LLM semantic decode 부담 ↓ + context layer 단일 source 정렬.
  */
 export function buildMemoryForTeam(params: {
   factors: Record<string, number>;
@@ -174,8 +205,11 @@ export function buildMemoryForTeam(params: {
     teamWon,
   });
 
+  const metric = lookupMetric(maxBias);
+  const slugLabel = metric ? `${metric.ko_name} (${maxBias})` : maxBias;
+
   const sign = factorValue > 0.5 ? '+' : '';
-  const content = `${teamCode}: ${maxBias} ${sign}${(factorValue - 0.5).toFixed(2)} (${type}, vs ${opponentCode} ${date})`;
+  const content = `${teamCode}: ${slugLabel} ${sign}${(factorValue - 0.5).toFixed(2)} (${type}, vs ${opponentCode} ${date})`;
 
   return {
     type,
