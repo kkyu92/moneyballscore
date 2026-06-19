@@ -63,3 +63,25 @@ describe('buildUserMessage (v4-3 Task 2 rivalry 주입)', () => {
     expect(msg).toContain('과거 맥락');
   });
 });
+
+describe('buildUserMessage (plan #23 Step 5 wave 44 context layer 통합)', () => {
+  it('context block prepended — production metric + 도메인 hint 박제', () => {
+    const msg = buildUserMessage('LG', makeContext());
+    expect(msg).toContain('[경기]');
+    expect(msg).toContain('[도메인 컨텍스트]');
+    expect(msg).toContain('[정량 메트릭 — 10팩터]');
+    expect(msg).toContain('[상대 전적 + 최근 폼]');
+  });
+
+  it('context block 안 metric 측정치 박제 — sp_fip / lineup_woba / elo', () => {
+    const msg = buildUserMessage('LG', makeContext());
+    expect(msg).toContain('선발 FIP');
+    expect(msg).toContain('타선 wOBA');
+    expect(msg).toContain('Elo');
+  });
+
+  it('context block 이 기존 inline 데이터보다 먼저 박제', () => {
+    const msg = buildUserMessage('LG', makeContext());
+    expect(msg.indexOf('[경기]')).toBeLessThan(msg.indexOf('오늘 경기'));
+  });
+});
