@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_DIVISIONS,
+  MLB_TEAM_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -19,7 +20,7 @@ const FACTOR_STATCAST = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
   title: `MLB Statcast ${FACTOR_STATCAST} 팩터 — xwOBA · Barrel% · Hard Hit% · Launch Angle | MoneyBall Score`,
-  description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + 30팀 측정 status. 팀별 Statcast 측정 데이터 연동 ETA carry-over.`,
+  description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + ${MLB_TEAM_COUNT}팀 측정 status. 팀별 Statcast 측정 데이터 연동 ETA carry-over.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/players`,
     languages: {
@@ -110,7 +111,7 @@ export default function MlbPlayersHub() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: `MLB Statcast ${FACTOR_STATCAST} 팩터`,
-    description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + 30팀 측정 status.`,
+    description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + ${MLB_TEAM_COUNT}팀 측정 status.`,
     url: `${SITE_URL}/mlb/players`,
     mainEntity: {
       "@type": "ItemList",
@@ -151,7 +152,7 @@ export default function MlbPlayersHub() {
           MLB {FACTOR_TOTAL}팩터 본선 = KBO {FACTOR_KBO} (FIP / xFIP / wOBA / 불펜 FIP / 최근폼 / WAR / 상대전적 / 구장보정 / Elo / 수비 SFR) + Statcast {FACTOR_STATCAST}.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          현재 표시: {FACTOR_STATCAST} 팩터 설명 + 30팀 진입 path. 팀별 Statcast 실측 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 라이브 데이터 연동 = 별도 datasource 통합 carry-over.
+          현재 표시: {FACTOR_STATCAST} 팩터 설명 + {MLB_TEAM_COUNT}팀 진입 path. 팀별 Statcast 실측 (xwOBA · Barrel% · Hard Hit% · Launch Angle) 라이브 데이터 연동 = 별도 datasource 통합 carry-over.
         </p>
       </header>
 
@@ -191,7 +192,7 @@ export default function MlbPlayersHub() {
       <section className="space-y-4" aria-labelledby="teams-heading">
         <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-2">
           <h2 id="teams-heading" className="text-xl font-bold">
-            30팀 진입
+            {MLB_TEAM_COUNT}팀 진입
           </h2>
           <span className="text-xs px-2 py-1 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 shrink-0">
             팀별 측정 ETA

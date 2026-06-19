@@ -55,9 +55,9 @@ describe("mlb/team/page.tsx hub — 30팀 division grid", () => {
     expect(HUB_SRC).toMatch(/National League/);
   });
 
-  it("CollectionPage JSON-LD 30 item", () => {
+  it("CollectionPage JSON-LD MLB_TEAM_COUNT item (wave 81 registry swap)", () => {
     expect(HUB_SRC).toMatch(/"@type":\s*"CollectionPage"/);
-    expect(HUB_SRC).toMatch(/numberOfItems:\s*30/);
+    expect(HUB_SRC).toMatch(/numberOfItems:\s*MLB_TEAM_COUNT/);
   });
 
   it("Breadcrumb 2 단계 (MLB 분석 → 팀)", () => {

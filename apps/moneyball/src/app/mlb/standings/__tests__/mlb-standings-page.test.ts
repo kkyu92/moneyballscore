@@ -22,9 +22,9 @@ describe("mlb/standings/page.tsx — Plan B Tier C+D Task 6 (cycle 1027)", () =>
     expect(PAGE_SRC).toMatch(/\{ label: "AL\/NL 순위" \}/);
   });
 
-  it("CollectionPage JSON-LD 30 item", () => {
+  it("CollectionPage JSON-LD MLB_TEAM_COUNT item (wave 81 registry swap)", () => {
     expect(PAGE_SRC).toMatch(/"@type":\s*"CollectionPage"/);
-    expect(PAGE_SRC).toMatch(/numberOfItems:\s*30/);
+    expect(PAGE_SRC).toMatch(/numberOfItems:\s*MLB_TEAM_COUNT/);
   });
 
   it("revalidate = 21600 ISR (6h, /mlb/team hub 패턴 정합)", () => {

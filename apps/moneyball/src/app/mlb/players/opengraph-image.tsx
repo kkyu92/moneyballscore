@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { MLB_TEAM_COUNT } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
@@ -57,7 +58,7 @@ export default function MlbPlayersHubOgImage() {
             display: "flex",
           }}
         >
-          xwOBA · Barrel% · Hard hit% · Launch angle · 30팀 측정 status
+          xwOBA · Barrel% · Hard hit% · Launch angle · {MLB_TEAM_COUNT}팀 측정 status
         </div>
 
         <div
@@ -97,7 +98,7 @@ export default function MlbPlayersHubOgImage() {
           }}
         >
           <span>moneyballscore.vercel.app/mlb/players</span>
-          <span>Statcast {MLB_FACTOR_COUNTS.statcast} · 30 teams</span>
+          <span>Statcast {MLB_FACTOR_COUNTS.statcast} · {MLB_TEAM_COUNT} teams</span>
         </div>
       </div>
     ),

@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
+  MLB_TEAM_COUNT,
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
@@ -287,9 +288,9 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
               href="/mlb/players"
               className="block rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md hover:border-brand-500/50 transition-all"
             >
-              <p className="font-semibold text-brand-700 dark:text-brand-100">30팀 hub →</p>
+              <p className="font-semibold text-brand-700 dark:text-brand-100">{MLB_TEAM_COUNT}팀 hub →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Statcast {MLB_FACTOR_COUNTS.statcast} 팩터 explainer + 30팀 진입
+                Statcast {MLB_FACTOR_COUNTS.statcast} 팩터 explainer + {MLB_TEAM_COUNT}팀 진입
               </p>
             </Link>
           </li>
