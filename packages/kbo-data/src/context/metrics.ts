@@ -134,7 +134,7 @@ export const MetricRegistry = {
     slug: 'head_to_head',
     ko_name: '상대 전적',
     unit: 'percent',
-    description_ko: '최근 30일 상대 전적 승률 (%). H2H 약한 신호 — 가중치 3%.',
+    description_ko: '최근 30일 상대 전적 승률 (%). 표본 부족 약한 신호. weight_v18 필드 참조.',
     source: 'kbo',
     bounds: { min: 0, max: 100 },
     direction: 'higher-better',
