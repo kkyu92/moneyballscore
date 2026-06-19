@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const revalidate = 3600;
 
@@ -193,7 +194,7 @@ export default async function StandingsPage() {
         <section aria-labelledby="elo-trend-title">
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <div className="flex items-baseline justify-between mb-4">
-              <h2 id="elo-trend-title" className="text-base font-bold">팀별 Elo 레이팅 추이</h2>
+              <h2 id="elo-trend-title" className="text-base font-bold">팀별 {FACTOR_LABELS_TECHNICAL.elo} 추이</h2>
               <span className="text-xs text-gray-400 dark:text-gray-500">2026 시즌 · AI 예측 기반</span>
             </div>
             <EloTrendChart points={eloTrend.points} teams={eloTrend.teams} />

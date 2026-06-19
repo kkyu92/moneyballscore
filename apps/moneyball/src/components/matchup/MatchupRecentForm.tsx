@@ -3,6 +3,7 @@ import type {
   TeamRecentForm,
 } from "@/lib/teams/buildTeamRecentForm";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 interface Props {
   teamA: { shortName: string };
@@ -57,7 +58,7 @@ export function MatchupRecentForm({ teamA, teamB, formA, formB }: Props) {
     >
       <div className="flex items-baseline justify-between mb-4">
         <h2 id="matchup-form-title" className="text-lg font-bold">
-          최근 폼
+          {FACTOR_LABELS_TECHNICAL.recent_form}
         </h2>
         <span className="text-xs text-gray-400 dark:text-gray-500">
           최근 {Math.max(formA.totalGames, formB.totalGames)}경기 · 최신순
