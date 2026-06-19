@@ -3,6 +3,7 @@ import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
 import { scoreParkWeather, parkWeatherFactor } from '../factors/park-weather';
 import { umpireSZFactor } from '../factors/umpire-sz';
+import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 
 /**
  * 두 값을 0-1 범위로 정규화 (상대 비교)
@@ -176,24 +177,13 @@ function generateReasoning(
     .sort((a, b) => b.impact - a.impact)
     .slice(0, 3);
 
-  const factorNames: Record<string, string> = {
-    sp_fip: '선발투수 FIP',
-    sp_xfip: '선발투수 xFIP',
-    lineup_woba: '타선 wOBA',
-    bullpen_fip: '불펜 FIP',
-    recent_form: '최근 폼',
-    war: 'WAR',
-    head_to_head: '상대전적',
-    park_factor: '구장효과',
-    elo: 'Elo 레이팅',
-    sfr: '수비력(SFR)',
-    park_weather: '기상영향',
-    umpire_sz: '주심 SZ',
-  };
-
+  // plan #23 Step 5 wave 50 (cycle 1242): factor key → MetricRegistry.ko_name lookup.
+  // 직전 hard-code Record 12 entry → MetricRegistry 단일 source. 7/12 mismatch 박제
+  // (예: '선발투수 FIP' → '선발 FIP', '구장효과' → '구장 보정', '수비력(SFR)' → '수비 SFR').
+  const registry = MetricRegistry as Record<string, MetricDefinition>;
   const topFactors = contributions
     .map((c) => {
-      const name = factorNames[c.key] || c.key;
+      const name = registry[c.key]?.ko_name ?? c.key;
       const team = c.favorable === 'home' ? homeName : awayName;
       return `${name}(${team} 유리)`;
     })
