@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
+import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 const TOC_ITEMS = [
   { id: "model", label: "예측 모델" },
@@ -37,67 +38,56 @@ export const metadata: Metadata = {
 type FactorKey = keyof typeof DEFAULT_WEIGHTS;
 
 const FACTORS: Array<{
-  name: string;
   key: FactorKey;
   desc: string;
   source: string;
 }> = [
   {
-    name: "선발 투수력 (FIP)",
     key: "sp_fip",
     desc: "Fielding Independent Pitching. 수비와 무관한 투수 순수 실력 지표. ERA보다 미래 성적 예측에 정확.",
     source: "Fancy Stats",
   },
   {
-    name: "선발 잠재력 (xFIP)",
     key: "sp_xfip",
     desc: "Expected FIP. 홈런율을 리그 평균으로 정규화한 FIP. 운의 영향을 제거.",
     source: "Fancy Stats",
   },
   {
-    name: "타선 화력 (wOBA)",
     key: "lineup_woba",
     desc: "weighted On-Base Average. 단타/2루타/홈런 등 각 출루 방식에 가중치를 부여한 종합 타격 생산성.",
     source: "Fancy Stats",
   },
   {
-    name: "불펜 안정성 (FIP)",
     key: "bullpen_fip",
     desc: "중계/마무리 투수진의 종합 FIP. 선발 강판 후 경기 결과에 큰 영향.",
     source: "Fancy Stats",
   },
   {
-    name: "최근 폼",
     key: "recent_form",
     desc: "최근 10경기 승률. 시즌 전체 성적보다 현재 팀 상태를 반영.",
     source: "KBO 공식",
   },
   {
-    name: "팀 전력 (Elo)",
     key: "elo",
     desc: "체스에서 유래한 상대적 전력 수치. 강팀을 이기면 많이 오르고, 약팀에 지면 많이 내려감.",
     source: "Fancy Stats",
   },
   {
-    name: "WAR",
     key: "war",
     desc: "Wins Above Replacement. 대체 선수 대비 팀 승리 기여도 총합.",
     source: "Fancy Stats",
   },
   {
-    name: "수비력 (SFR)",
     key: "sfr",
     desc: "Sabermetric Fielding Runs. KBO Fancy Stats 수비 지표로 포지션별 기여도 합산. 수비력이 실점에 미치는 영향.",
     source: "Fancy Stats",
   },
   {
-    name: "상대전적",
     key: "head_to_head",
     desc: "시즌 상대전적 승률. 특정 팀 간 상성이 존재할 수 있음.",
     source: "KBO 공식",
   },
   {
-    name: "구장 보정",
     key: "park_factor",
     desc: "홈구장 특성 보정. 타자 친화 구장과 투수 친화 구장의 차이를 반영.",
     source: "KBO 공식",
@@ -267,7 +257,7 @@ export default function AboutPage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{factor.name}</h3>
+                  <h3 className="font-semibold">{FACTOR_LABELS_TECHNICAL[factor.key]}</h3>
                   <span className="text-xs text-gray-400 dark:text-gray-500">{factor.source}</span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{factor.desc}</p>
@@ -303,7 +293,7 @@ export default function AboutPage() {
                       제외
                     </span>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {factor.name}
+                      {FACTOR_LABELS_TECHNICAL[factor.key]}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 flex-1">
