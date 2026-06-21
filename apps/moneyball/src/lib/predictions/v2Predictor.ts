@@ -4,13 +4,11 @@
 // FACTOR_TOTAL + HOME_ADVANTAGE → clampWinnerProb (WINNER_PROB_CLAMP_MIN/MAX).
 // 본 모듈은 이미 저장된 pre_game predictions.factors JSONB 를 재가중치 적용해 미리보기 산출.
 
-import { V2_1_B_WEIGHTS as SHARED_V2_1_B_WEIGHTS, clampWinnerProb, NEUTRAL_FACTOR } from '@moneyball/shared';
+import { V2_1_B_WEIGHTS as SHARED_V2_1_B_WEIGHTS, clampWinnerProb, NEUTRAL_FACTOR, HOME_ADVANTAGE } from '@moneyball/shared';
 
 export const V2_1_B_WEIGHTS = SHARED_V2_1_B_WEIGHTS;
 
 export type V2WeightKey = keyof typeof V2_1_B_WEIGHTS;
-
-const HOME_ADVANTAGE = 0.015;
 
 export interface V2PreviewResult {
   homeWinProb: number;
