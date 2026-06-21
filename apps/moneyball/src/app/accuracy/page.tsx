@@ -15,6 +15,7 @@ import {
   assertSelectOk,
   shortTeamName,
   DEBATE_VERSION_PREGAME,
+  SUNDAY_CAP_CONFIDENCE,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -673,7 +674,7 @@ export default async function AccuracyPage() {
             <h2 className="text-lg font-bold">요일별 적중률</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               KST 기준. 요일에 따라 예측 난이도가 다를 수 있습니다. 막대 높이 ∝ 적중률.
-              일요일은 과적합 방지를 위해 AI 신뢰도 상한 45%를 적용합니다.
+              일요일은 과적합 방지를 위해 AI 신뢰도 상한 {Math.round(SUNDAY_CAP_CONFIDENCE * 100)}%를 적용합니다.
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -696,7 +697,7 @@ export default async function AccuracyPage() {
                   </span>
                   {d.day === 0 && (
                     <span className="text-[8px] leading-none bg-warning/15 text-warning rounded px-0.5 py-0.5 whitespace-nowrap">
-                      상한 45%
+                      상한 {Math.round(SUNDAY_CAP_CONFIDENCE * 100)}%
                     </span>
                   )}
                   <span
