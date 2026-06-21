@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -217,9 +217,9 @@ const HOME_BONUS: FactorRow = {
   label: "홈 어드밴티지 (Elo bonus)",
   shortLabel: "Home Elo bonus",
   category: "보너스",
-  range: "+24 Elo (~ +3.4%)",
+  range: `+${HOME_ELO_BONUS} Elo (~ +3.4%)`,
   description:
-    "홈팀에 가산되는 Elo bonus 24점 = 승률 약 +3.4% (Elo 400 변환 기준). 구장 친숙 + travel fatigue 차이 + 관중 layer.",
+    `홈팀에 가산되는 Elo bonus ${HOME_ELO_BONUS}점 = 승률 약 +3.4% (Elo 400 변환 기준). 구장 친숙 + travel fatigue 차이 + 관중 layer.`,
   why: "homefield advantage 의 정량화 layer. 매 경기 일관 박제.",
   source: `FiveThirtyEight Elo (MLB) · KBO 자체 측정 +${HOME_ADVANTAGE_PCT.toFixed(1)}%`,
 };
