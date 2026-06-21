@@ -13,6 +13,8 @@ import {
   LabelList,
 } from "recharts";
 
+import { MIN_VERIFIED_GAMES_HEDGE } from "@moneyball/shared";
+
 import type { ConfidenceBucketResult } from "@/lib/dashboard/buildConfidenceBuckets";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
@@ -27,10 +29,10 @@ export function ConfidenceBucketChart({ result }: ConfidenceBucketChartProps) {
       <div className="h-64 flex flex-col items-center justify-center text-center">
         <span className="text-4xl mb-3">🎯</span>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          검증 10경기 이상 쌓이면 확신 구간별 적중률이 표시됩니다.
+          검증 {MIN_VERIFIED_GAMES_HEDGE}경기 이상 쌓이면 확신 구간별 적중률이 표시됩니다.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          현재 {result.totalVerified}경기 검증 완료 (최소 10)
+          현재 {result.totalVerified}경기 검증 완료 (최소 {MIN_VERIFIED_GAMES_HEDGE})
         </p>
       </div>
     );

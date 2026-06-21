@@ -1,4 +1,8 @@
-import { classifyWinnerProb, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import {
+  classifyWinnerProb,
+  MIN_VERIFIED_GAMES_HEDGE,
+  WINNER_PROB_CONFIDENT,
+} from '@moneyball/shared';
 import type { MonthRange } from "./computeMonthRange";
 import { getPreviousMonth } from "./computeMonthRange";
 import {
@@ -77,7 +81,7 @@ function buildSummary(
   const pctLabel = `${Math.round(accuracyRate * 100)}%`;
   let text = `${month.label} 한 달 동안 총 ${verifiedGames}경기를 검증한 결과 ${correctGames}경기 적중 (${pctLabel})했습니다.`;
 
-  if (previousAccuracyRate != null && verifiedGames >= 10) {
+  if (previousAccuracyRate != null && verifiedGames >= MIN_VERIFIED_GAMES_HEDGE) {
     const diffPp = Math.round((accuracyRate - previousAccuracyRate) * 100);
     if (diffPp !== 0) {
       text += ` 전월 대비 ${diffPp > 0 ? "+" : ""}${diffPp}%p.`;
