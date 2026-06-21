@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, RECENT_FORM_GAMES, type TeamCode } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -71,7 +71,7 @@ export default async function Image({ params }: Props) {
             display: "flex",
           }}
         >
-          최근 10경기 예측 결과
+          최근 {RECENT_FORM_GAMES}경기 예측 결과
         </div>
 
         <div
@@ -82,7 +82,7 @@ export default async function Image({ params }: Props) {
             gap: 12,
           }}
         >
-          {["적중/실패", "신뢰도", "최근 10경기", "팀 트렌드", "FINAL"].map((tag) => (
+          {["적중/실패", "신뢰도", `최근 ${RECENT_FORM_GAMES}경기`, "팀 트렌드", "FINAL"].map((tag) => (
             <div
               key={tag}
               style={{

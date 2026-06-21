@@ -1,4 +1,5 @@
 import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
+import { RECENT_FORM_GAMES } from "@moneyball/shared";
 
 // factor axis favorable threshold. 0.5=중립 / >NEUTRAL_HI=홈 / <NEUTRAL_LO=원정.
 // FactorBreakdown / determineFavor / topFavoringFactors / selectTopFactors 공유 source.
@@ -55,7 +56,7 @@ export const FACTOR_TIPS: Record<string, string> = {
   sp_xfip: "운 요소를 제거한 선발투수 잠재력",
   lineup_woba: "타선의 종합 공격 생산성 (높을수록 강함)",
   bullpen_fip: "중계/마무리 투수진의 안정성",
-  recent_form: "최근 10경기 승률",
+  recent_form: `최근 ${RECENT_FORM_GAMES}경기 승률`,
   war: "대체선수 대비 팀 승리 기여도 합산",
   head_to_head: "올 시즌 두 팀 간 직접 대결 승률",
   park_factor: "홈구장이 타자/투수 중 누구에게 유리한지",

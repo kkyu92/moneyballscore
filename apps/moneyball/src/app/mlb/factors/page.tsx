@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -99,12 +99,12 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "recent_form",
-    label: `${MetricRegistry.recent_form.ko_name} (Last 10 Games)`,
+    label: `${MetricRegistry.recent_form.ko_name} (Last ${RECENT_FORM_GAMES} Games)`,
     shortLabel: MetricRegistry.recent_form.ko_name,
     category: "팀폼",
     range: "-3 ~ +3",
     description:
-      "최근 10경기 승률 - 시즌 승률 의 차분. 추세 (모멘텀) 측정. ±0 = 시즌 baseline, +0.3 = 큰 hot streak.",
+      `최근 ${RECENT_FORM_GAMES}경기 승률 - 시즌 승률 의 차분. 추세 (모멘텀) 측정. ±0 = 시즌 baseline, +0.3 = 큰 hot streak.`,
     why: "선수 컨디션 / 불펜 피로 / 라인업 hot zone 등 매일 변동 layer. fade or follow signal.",
     source: "statsapi.mlb.com (boxscore aggregate)",
   },

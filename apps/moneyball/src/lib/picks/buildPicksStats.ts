@@ -1,6 +1,6 @@
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
-import { getKSTWeekRange } from '@moneyball/shared';
+import { getKSTWeekRange, RECENT_FORM_GAMES } from '@moneyball/shared';
 
 export interface WeeklyStats {
   weekLabel: string;
@@ -52,7 +52,7 @@ export interface PicksStats {
   aiRate: number | null;
   currentStreak: number; // 현재 연속 정답 (가장 최근부터)
   pickingStreakDays: number; // 연속 픽 참여일 (KST 기준)
-  recentDots: boolean[]; // 최근 10경기 정답 여부 (가장 오래된→최근)
+  recentDots: boolean[]; // 최근 RECENT_FORM_GAMES경기 정답 여부 (가장 오래된→최근)
   trend: 'up' | 'down' | 'flat';
   // AI 와 다른 픽 (divergent) 통계 — 사용자의 독립 판단 가치 측정
   divergentResolved: number; // AI 와 다른 픽 + 결과 확정 (AI 예측 있는 경기만)
@@ -171,8 +171,8 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     }
   }
 
-  // 최근 10경기 dots
-  const recent10 = resolved.slice(0, 10).reverse(); // 오래된→최근 순으로 뒤집기
+  // 최근 RECENT_FORM_GAMES경기 dots
+  const recent10 = resolved.slice(0, RECENT_FORM_GAMES).reverse(); // 오래된→최근 순으로 뒤집기
   const recentDots = recent10.map((e) => e.myIsCorrect === true);
 
   // 추세: 최근 5 vs 이전 5
