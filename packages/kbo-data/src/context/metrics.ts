@@ -17,7 +17,7 @@
  *     단일 source 박제 후속 — Step 2/3 통합 시 glossary 가 본 레지스트리 참조하도록 정렬.
  */
 
-import { DEFAULT_WEIGHTS, type WeightKey } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, ELO_NEUTRAL, type WeightKey } from '@moneyball/shared';
 
 /** Metric 단위 카테고리. */
 export type MetricUnit = 'ratio' | 'rate' | 'count' | 'elo' | 'percent';
@@ -156,7 +156,7 @@ export const MetricRegistry = {
     slug: 'elo',
     ko_name: 'Elo 레이팅',
     unit: 'elo',
-    description_ko: 'Elo 레이팅 (1500 기준). 누적 승부 history 압축 — 시즌 누적 강도.',
+    description_ko: `Elo 레이팅 (${ELO_NEUTRAL} 기준). 누적 승부 history 압축 — 시즌 누적 강도.`,
     source: 'fancystats',
     bounds: { min: 1200, max: 1800 },
     direction: 'higher-better',
