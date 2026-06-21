@@ -7,6 +7,7 @@ import {
   SHADOW_WEIGHTS,
   SHADOW_SCORING_RULE,
   CURRENT_SCORING_RULE,
+  V2_PROMOTION_COHORT_N,
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
 import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";
@@ -20,10 +21,10 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/accuracy/shadow`;
 const DAY_LIMIT = 14;
 
-// noindex 내부 cohort evidence — n=150 도달 후 production 적용 결정 전까지 surface signal 차단.
+// noindex 내부 cohort evidence — n=V2_PROMOTION_COHORT_N 도달 후 production 적용 결정 전까지 surface signal 차단.
 export const metadata: Metadata = {
   title: "Shadow cohort 적중률",
-  description: `v1.8 (production) vs ${SHADOW_SCORING_RULE} 가중치 Brier delta + 적중률 delta 일별 누적. n=150 도달 후 prod 적용 결정.`,
+  description: `v1.8 (production) vs ${SHADOW_SCORING_RULE} 가중치 Brier delta + 적중률 delta 일별 누적. n=${V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.`,
   alternates: { canonical: PAGE_URL },
   robots: { index: false, follow: false },
 };
@@ -177,7 +178,7 @@ export default async function ShadowAccuracyPage() {
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           v1.8 (production) vs {SHADOW_SCORING_RULE} 가중치 일별 Brier + 적중률 delta. 동일
-          경기 동일 input 으로 quant 재계산 (debate LLM 호출 X, 비용 0). n=150 도달 후
+          경기 동일 input 으로 quant 재계산 (debate LLM 호출 X, 비용 0). n={V2_PROMOTION_COHORT_N} 도달 후
           production 적용 결정.
         </p>
         <div

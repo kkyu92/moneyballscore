@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { V2_PROMOTION_COHORT_N } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -271,7 +272,7 @@ export default function MlbFactorsHubEn() {
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           Weight total = {weightPercent(sum)} (including home bonus {weightPercent(MLB_BASE_WEIGHTS.home_elo_bonus)}). Weights defined in{" "}
-          <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Model will update after n=150 forward cohort milestone.
+          <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Model will update after n={V2_PROMOTION_COHORT_N} forward cohort milestone.
         </p>
       </header>
 
