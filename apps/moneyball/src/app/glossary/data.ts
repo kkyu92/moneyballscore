@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE } from '@moneyball/shared';
 import type { GlossaryCategorySlug } from '@/components/glossary/GlossaryCategoryFilter';
 
 export type GlossaryEntry = {
@@ -252,7 +252,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         definition:
           '시즌 동안 두 팀이 맞붙은 경기에서 승률. 특정 팀에 강한 상성(천적·먹잇감)이 통계적으로 존재할 수 있다.',
         range: '7할 이상 = 명확한 상성, 5할 근처 = 노이즈.',
-        modelUsage: `가중치 ${Math.round(DEFAULT_WEIGHTS.head_to_head * 100)}% (v1.8 축소)`,
+        modelUsage: `가중치 ${Math.round(DEFAULT_WEIGHTS.head_to_head * 100)}% (${CURRENT_SCORING_RULE} 축소)`,
         source: 'KBO 공식',
       },
       {

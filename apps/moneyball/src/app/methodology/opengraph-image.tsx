@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { CURRENT_SCORING_RULE } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -56,7 +57,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          v1.8 Sabermetric Model
+          {CURRENT_SCORING_RULE} Sabermetric Model
         </div>
 
         <div
