@@ -1,5 +1,6 @@
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
+import { NEUTRAL_HI, NEUTRAL_LO } from '@/lib/predictions/factorLabels';
 import { getKSTWeekRange, RECENT_FORM_GAMES } from '@moneyball/shared';
 
 export interface WeeklyStats {
@@ -290,10 +291,9 @@ export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
 // strong 한 reasoning surface — 사용자 자가 인식 (강점/약점 factor) 가능.
 // ---------------------------------------------------------------------------
 
-// factor lean threshold — predictions/factorLabels.ts 의 NEUTRAL_HI/LO 와 정합.
-// 0.5=중립. >0.55=홈 favor / <0.45=원정 favor. 사이 = 중립으로 분류.
-const FACTOR_NEUTRAL_LO = 0.45;
-const FACTOR_NEUTRAL_HI = 0.55;
+// factor lean threshold — predictions/factorLabels.ts 의 NEUTRAL_HI/LO 단일 source.
+// silent drift family wave 102 (cycle 1316) — 본 파일 local 재선언 → import 통합.
+// 0.5=중립. >NEUTRAL_HI=홈 favor / <NEUTRAL_LO=원정 favor. 사이 = 중립.
 
 export type FactorLean = 'home' | 'away' | 'neutral';
 
@@ -321,8 +321,8 @@ export interface FactorAgreement {
 
 /** factor value [0,1] → home/away/neutral classification. */
 function classifyFactorLean(value: number): FactorLean {
-  if (value > FACTOR_NEUTRAL_HI) return 'home';
-  if (value < FACTOR_NEUTRAL_LO) return 'away';
+  if (value > NEUTRAL_HI) return 'home';
+  if (value < NEUTRAL_LO) return 'away';
   return 'neutral';
 }
 
