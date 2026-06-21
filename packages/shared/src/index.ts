@@ -276,6 +276,14 @@ export type WeightKey = keyof typeof DEFAULT_WEIGHTS;
 export const HOME_ADVANTAGE = 0.015;
 
 /**
+ * HOME_ADVANTAGE 사용자 가시 % 표시 단일 source — silent drift family wave 91 박제.
+ * 사이트 전반 (methodology / about / glossary / mlb factors) "+1.5%" / "+1.5%p" 하드코딩
+ * 6 occurrence 를 본 derive value 로 swap. HOME_ADVANTAGE 변경 시 사용자 가시 layer
+ * silent drift 차단.
+ */
+export const HOME_ADVANTAGE_PCT = HOME_ADVANTAGE * 100;
+
+/**
  * Elo 모델용 홈 어드밴티지 — Elo point 단위 (NOT probability delta).
  *
  * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는

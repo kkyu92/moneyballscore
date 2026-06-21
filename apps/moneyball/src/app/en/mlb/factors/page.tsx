@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -219,7 +219,7 @@ const HOME_BONUS: FactorRow = {
   description:
     "Elo bonus of 24 points added to the home team = ~+3.4% win probability (Elo 400-point conversion). Covers ballpark familiarity, travel fatigue differential, and crowd factor.",
   why: "Quantifies home field advantage. Applied consistently to every game.",
-  source: "FiveThirtyEight Elo (MLB) · KBO own measurement +1.5%",
+  source: `FiveThirtyEight Elo (MLB) · KBO own measurement +${HOME_ADVANTAGE_PCT.toFixed(1)}%`,
 };
 
 function weightPercent(weight: number): string {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -248,7 +248,7 @@ export default function AboutPage() {
         </div>
         <p className="text-gray-600 dark:text-gray-300">
           세이버메트릭스 팩터를 3개 데이터 소스에서 수집하여 가중합산합니다.
-          홈팀 어드밴티지(+1.5%p, 최근 3시즌 2,180경기 실제 홈 승률 51.93% ±2.1%p 기준)를
+          홈팀 어드밴티지(+{HOME_ADVANTAGE_PCT.toFixed(1)}%p, 최근 3시즌 2,180경기 실제 홈 승률 51.93% ±2.1%p 기준)를
           추가 반영하며, 각 팩터를 상대 비교로 정규화한 후 최종 승리 확률을
           산출합니다. 1개월 운영 측정에서 가중치를 재조정해 {KBO_FACTOR_COUNT}개 팩터를
           모두 활용합니다.
@@ -277,7 +277,7 @@ export default function AboutPage() {
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">
-          활성 팩터 합계 {Math.round(activeWeightSum * 100)}% + 홈어드밴티지 {(HOME_ADVANTAGE * 100).toFixed(1)}%p.
+          활성 팩터 합계 {Math.round(activeWeightSum * 100)}% + 홈어드밴티지 {HOME_ADVANTAGE_PCT.toFixed(1)}%p.
           남은 {Math.round((1 - activeWeightSum - HOME_ADVANTAGE) * 100)}%는 경기 간
           무작위 변동성으로 설명되지 않는 영역.
         </p>
