@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_PREDICT_DAILY_TIME_KST } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
 interface Props {
@@ -218,7 +218,7 @@ function buildIntro(
     return `${date} KBO ${predicted.length}경기 승부예측${suffix} — 현재까지 ${verified.length}경기 검증 완료, 적중 ${correct.length}${tightestPhrase ? `. 가장 박빙 매치업: ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}.`;
   }
 
-  return `${date} KBO ${predicted.length}경기 승부예측${suffix}${tightestPhrase ? `. AI가 꼽은 가장 박빙 매치업은 ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}. 각 경기마다 10개 팩터 분석과 심판 에이전트 reasoning을 제공합니다.`;
+  return `${date} KBO ${predicted.length}경기 승부예측${suffix}${tightestPhrase ? `. AI가 꼽은 가장 박빙 매치업은 ${tightestPhrase}${tConfPct ? ` (${tConfPct}% 확신)` : ""}` : ""}. 각 경기마다 ${KBO_FACTOR_COUNT}개 팩터 분석과 심판 에이전트 reasoning을 제공합니다.`;
 }
 
 function buildArticleJsonLd(
