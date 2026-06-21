@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -218,7 +218,7 @@ export default function GuidePage() {
           >
             <h3 className="font-semibold mb-1">홈</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
-              오늘 경기 예측 카드. 매일 09:00 KST 갱신.
+              오늘 경기 예측 카드. 매일 {KBO_PREDICT_DAILY_TIME_KST} 갱신.
             </p>
           </Link>
           <Link

@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_PREDICT_DAILY_TIME_KST } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
 interface Props {
@@ -366,7 +366,7 @@ export default async function PredictionDatePage({ params }: Props) {
           <span>MoneyBall AI</span>
           <span aria-hidden>·</span>
           <time dateTime={`${date}T09:00:00+09:00`}>
-            {date} 09:00 KST
+            {date} {KBO_PREDICT_DAILY_TIME_KST}
           </time>
           {verified.length > 0 && (
             <>

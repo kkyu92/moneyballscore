@@ -206,6 +206,16 @@ export const KBO_FACTOR_COUNT = ACTIVE_FACTOR_KEYS.length;
 export const KBO_SEASON_YEAR = 2026;
 
 /**
+ * KBO 일일 예측 cron 갱신 시각 (KST) — guide / analysis (page + OG + Twitter) / about / predictions[date]
+ * 6 surface 에 "매일 09:00 KST 갱신" / "Daily 09:00 KST" 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 87 (cycle 1295) — wave 86 (KBO_SEASON_YEAR) 패턴 cron 시각 차원 확장.
+ * 실제 schedule = Cloudflare Worker moneyballscore-cron `'17 0-14 * * *'` UTC (KST 09:17~23:17).
+ * predict mode = 첫 fire 시각 = UTC 00:17 = KST 09:17 ≈ 09:00 KST 표기.
+ * cron 스케줄 변경 시 본 상수 + Cloudflare Worker 양쪽 동기.
+ */
+export const KBO_PREDICT_DAILY_TIME_KST = '09:00 KST';
+
+/**
  * v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%).
  * /v2-preview 사전 evidence + shadow cohort 베이스 가중치. cycle 1013 packages/shared 로
  * 이관 (이전 apps/moneyball/src/lib/predictions/v2Predictor.ts → 본 위치).
