@@ -51,9 +51,9 @@ function pickHighlights(rows: PredictionRow[]): WeeklyHighlight[] {
   if (mapped.length === 0) return [];
 
   // 3단계 tier 기반 badge — 예측 승자 적중 확률 기준.
-  //   박빙 적중 = tossup (winnerProb < 0.55) + 적중 → 작은 확률로 맞춘 경기
-  //   고확신 적중 = confident (winnerProb >= 0.65) + 적중 → 예측대로 맞춘 경기
-  //   대역전 실패 = confident OR lean (winnerProb >= 0.55) + 실패 → 빗나간 강한 예측
+  //   박빙 적중 = tossup (winnerProb < WINNER_PROB_LEAN) + 적중 → 작은 확률로 맞춘 경기
+  //   고확신 적중 = confident (winnerProb >= WINNER_PROB_CONFIDENT) + 적중 → 예측대로 맞춘 경기
+  //   대역전 실패 = confident OR lean (winnerProb >= WINNER_PROB_LEAN) + 실패 → 빗나간 강한 예측
   const closeHit = mapped
     .filter((h) => h.isCorrect && classifyWinnerProb(h.winnerProb) === 'tossup')
     .sort((a, b) => a.winnerProb - b.winnerProb)[0];

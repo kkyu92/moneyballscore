@@ -27,10 +27,10 @@ export interface ConfidenceBucketResult {
  * `|hwp-0.5|×2` 공식은 debate 에선 성립하지 않으므로 라벨도 confidence 수치로
  * 직접 표시 — "승률" 로 환산하지 않음 (홈팀 승률 관점 제거 2026-04-23).
  *
- *   confidence < 0.55  → 확신 낮음
- *   0.55 ~ 0.60        → 확신 보통
- *   0.60 ~ 0.65        → 확신 높음
- *   ≥ 0.65             → 확신 최상
+ *   confidence < WINNER_PROB_LEAN       → 확신 낮음
+ *   WINNER_PROB_LEAN ~ 0.60             → 확신 보통
+ *   0.60 ~ WINNER_PROB_CONFIDENT        → 확신 높음
+ *   ≥ WINNER_PROB_CONFIDENT             → 확신 최상
  *
  * 전체 검증 표본이 MIN_TOTAL 미만이면 gated=true 반환 (UI는 "집계 중" 렌더).
  * 경계값은 하한 포함 / 상한 미포함.

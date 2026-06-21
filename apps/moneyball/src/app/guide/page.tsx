@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -98,8 +98,8 @@ export default function GuidePage() {
           <li className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-2">⓶ 티어 (강한 예측 / 보통 / 박빙)</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              신뢰도 기반 자동 분류. 강한 예측 (≥0.65) · 보통 (0.55~0.65) · 박빙
-              (≤0.55). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합.
+              신뢰도 기반 자동 분류. 강한 예측 (≥{WINNER_PROB_CONFIDENT}) · 보통 ({WINNER_PROB_LEAN}~{WINNER_PROB_CONFIDENT}) · 박빙
+              (≤{WINNER_PROB_LEAN}). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합.
             </p>
           </li>
           <li className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">

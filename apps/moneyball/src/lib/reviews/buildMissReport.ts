@@ -95,7 +95,7 @@ function extractHomeWinProb(r: unknown): number {
 }
 
 /**
- * 강한 예측 / 유력 예측 (winnerProb ≥ 0.55, confident+lean 티어) 중 틀린 것 Top N.
+ * 강한 예측 / 유력 예측 (winnerProb ≥ WINNER_PROB_LEAN, confident+lean 티어) 중 틀린 것 Top N.
  * 각 항목에 pre_game reasoning + post_game judge reasoning + factor error 통합.
  */
 export async function buildMissReport(options: {
