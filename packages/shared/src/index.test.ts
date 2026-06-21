@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   KBO_TEAMS,
   KBO_TEAM_COUNT,
+  KBO_HEAD_TO_HEAD_PAIRS,
   KBO_FACTOR_COUNT,
   KBO_TEAM_SHORT_NAME,
   DEFAULT_WEIGHTS,
@@ -47,6 +48,11 @@ describe('KBO_TEAMS', () => {
   it('KBO_FACTOR_COUNT should match ACTIVE_FACTOR_KEYS length (silent drift wave 83 guard)', () => {
     expect(KBO_FACTOR_COUNT).toBe(ACTIVE_FACTOR_KEYS.length);
     expect(KBO_FACTOR_COUNT).toBe(10);
+  });
+
+  it('KBO_HEAD_TO_HEAD_PAIRS should derive from KBO_TEAM_COUNT (silent drift wave 107 guard)', () => {
+    expect(KBO_HEAD_TO_HEAD_PAIRS).toBe((KBO_TEAM_COUNT * (KBO_TEAM_COUNT - 1)) / 2);
+    expect(KBO_HEAD_TO_HEAD_PAIRS).toBe(45);
   });
 
   it('should have required fields for each team', () => {

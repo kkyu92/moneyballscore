@@ -82,6 +82,16 @@ export type TeamCode = keyof typeof KBO_TEAMS;
 export const KBO_TEAM_COUNT = Object.keys(KBO_TEAMS).length;
 
 /**
+ * KBO 팀 간 head-to-head 페어 조합 수 — matchup 허브 (page + opengraph-image + twitter-image)
+ * 3 surface 에 "45가지 맞대결 조합" / "45 head-to-head combos" 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 107 (cycle 1321) — wave 76 (KBO_TEAM_COUNT) / wave 83 (KBO_FACTOR_COUNT) /
+ * wave 86 (KBO_SEASON_YEAR) / wave 87 (KBO_PREDICT_DAILY_TIME_KST) 패턴의 KBO 팀 차원 derived 확장.
+ * C(KBO_TEAM_COUNT, 2) — KBO_TEAM_COUNT 변경 시 자동 동기.
+ */
+export const KBO_HEAD_TO_HEAD_PAIRS =
+  (KBO_TEAM_COUNT * (KBO_TEAM_COUNT - 1)) / 2;
+
+/**
  * 구장 짧은 이름 — UI 노출용. KBO_TEAMS.stadium 은 정식 명칭이라 UI 에 길고,
  * KBO 공식 API S_NM 은 짧은 지역명 ("대구", "잠실") 을 리턴. Naver basic
  * 응답처럼 stadium 필드가 비어 있을 때 fallback 용 상수.
