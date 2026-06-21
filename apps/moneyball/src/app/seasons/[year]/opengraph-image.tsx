@@ -37,7 +37,9 @@ export default async function Image({ params }: Props) {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 48 }}>⚾</span>
+          <span style={{ fontSize: 48,
+          display: "flex",
+        }}>⚾</span>
           <span>MoneyBall Score</span>
         </div>
 
@@ -48,7 +50,8 @@ export default async function Image({ params }: Props) {
             fontWeight: 800,
             letterSpacing: "-6px",
             lineHeight: 1,
-          }}
+          display: "flex",
+        }}
         >
           {year}
         </div>
@@ -82,7 +85,8 @@ export default async function Image({ params }: Props) {
                 borderRadius: 999,
                 fontSize: 26,
                 fontWeight: 600,
-              }}
+          display: "flex",
+        }}
             >
               {tag}
             </div>

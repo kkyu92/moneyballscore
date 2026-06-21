@@ -27,21 +27,31 @@ export default function LottoHubOgImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <span style={{ background: "#c5a23e", color: "#132d1a", fontSize: 14, fontWeight: 700, padding: "4px 12px", borderRadius: 6 }}>
+          <span style={{ background: "#c5a23e", color: "#132d1a", fontSize: 14, fontWeight: 700, padding: "4px 12px", borderRadius: 6,
+          display: "flex",
+        }}>
             {`제 ${drawNo}회`}
           </span>
-          <span style={{ color: "#8dcea0", fontSize: 14 }}>MoneyBall Score · 로또 통계 분석</span>
+          <span style={{ color: "#8dcea0", fontSize: 14,
+          display: "flex",
+        }}>MoneyBall Score · 로또 통계 분석</span>
         </div>
-        <div style={{ fontSize: 40, fontWeight: 800, marginBottom: 8 }}>
+        <div style={{ fontSize: 40, fontWeight: 800, marginBottom: 8,
+          display: "flex",
+        }}>
           {`${date} 추천 조합`}
         </div>
-        <div style={{ color: "#c4e8cf", fontSize: 16, marginBottom: 32 }}>
+        <div style={{ color: "#c4e8cf", fontSize: 16, marginBottom: 32,
+          display: "flex",
+        }}>
           256개 통계 규칙 통과 · 역대 미출현 조합 선별
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {top5.map((set, i) => (
             <div key={set.idx} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ background: "#c5a23e", color: "#132d1a", fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 4, minWidth: 28, textAlign: "center" }}>
+              <span style={{ background: "#c5a23e", color: "#132d1a", fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 4, minWidth: 28, textAlign: "center",
+          display: "flex",
+        }}>
                 {["A", "B", "C", "D", "E"][i]}
               </span>
               <div style={{ display: "flex", gap: 6 }}>
@@ -61,7 +71,9 @@ export default function LottoHubOgImage() {
                   </span>
                 ))}
               </div>
-              <span style={{ color: "#8dcea0", fontSize: 13 }}>{`합 ${set.sum}`}</span>
+              <span style={{ color: "#8dcea0", fontSize: 13,
+          display: "flex",
+        }}>{`합 ${set.sum}`}</span>
             </div>
           ))}
         </div>

@@ -105,7 +105,9 @@ export default async function Image({ params }: Props) {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 42 }}>⚾</span>
+          <span style={{ fontSize: 42,
+          display: "flex",
+        }}>⚾</span>
           <span>MoneyBall Score</span>
         </div>
 
@@ -124,11 +126,14 @@ export default async function Image({ params }: Props) {
               fontWeight: 800,
               letterSpacing: "-3px",
               lineHeight: 1,
-            }}
+          display: "flex",
+        }}
           >
             {og?.awayLabel ?? "KBO"}
           </span>
-          <span style={{ fontSize: 56, opacity: 0.5, fontWeight: 300 }}>
+          <span style={{ fontSize: 56, opacity: 0.5, fontWeight: 300,
+          display: "flex",
+        }}>
             vs
           </span>
           <span
@@ -137,7 +142,8 @@ export default async function Image({ params }: Props) {
               fontWeight: 800,
               letterSpacing: "-3px",
               lineHeight: 1,
-            }}
+          display: "flex",
+        }}
           >
             {og?.homeLabel ?? "Game"}
           </span>
@@ -172,7 +178,9 @@ export default async function Image({ params }: Props) {
               fontWeight: 700,
             }}
           >
-            <span style={{ fontSize: 26, opacity: 0.8, fontWeight: 400 }}>
+            <span style={{ fontSize: 26, opacity: 0.8, fontWeight: 400,
+          display: "flex",
+        }}>
               AI Pick:
             </span>
             <span>{`${og.winnerLabel} ${og.confPct}%`}</span>

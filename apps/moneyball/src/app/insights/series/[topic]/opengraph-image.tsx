@@ -65,9 +65,13 @@ export default async function Image({ params }: Props) {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 44 }}>⚾</span>
+          <span style={{ fontSize: 44,
+          display: "flex",
+        }}>⚾</span>
           <span>MoneyBall Score</span>
-          <span style={{ opacity: 0.6, fontSize: 24 }}>· KBO Series</span>
+          <span style={{ opacity: 0.6, fontSize: 24,
+          display: "flex",
+        }}>· KBO Series</span>
         </div>
 
         {/* Main matchup */}
@@ -96,7 +100,8 @@ export default async function Image({ params }: Props) {
                 fontSize: 56,
                 opacity: 0.65,
                 fontWeight: 600,
-              }}
+          display: "flex",
+        }}
             >
               VS
             </span>
@@ -108,7 +113,8 @@ export default async function Image({ params }: Props) {
               fontWeight: 500,
               opacity: 0.85,
               marginTop: 12,
-            }}
+          display: "flex",
+        }}
           >
             {team1En} vs {team2En}
           </div>
@@ -144,7 +150,8 @@ export default async function Image({ params }: Props) {
               padding: "10px 18px",
               border: "2px solid rgba(255,255,255,0.4)",
               borderRadius: 999,
-            }}
+          display: "flex",
+        }}
           >
             moneyballscore.vercel.app
           </div>
