@@ -16,11 +16,11 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "KBO 팀 순위",
-  description: `${KBO_SEASON_YEAR} KBO 리그 팀 순위표 — 승·무·패, 승률, 게임차, 최근10경기. 매시간 자동 업데이트.`,
+  description: `${KBO_SEASON_YEAR} KBO 리그 팀 순위표 — 승·무·패, 승률, 게임차, 최근${RECENT_FORM_GAMES}경기. 매시간 자동 업데이트.`,
   alternates: { canonical: `${SITE_URL}/standings` },
   openGraph: {
     title: `KBO 팀 순위 ${KBO_SEASON_YEAR}`,
-    description: `${KBO_SEASON_YEAR} KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.`,
+    description: `${KBO_SEASON_YEAR} KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근${RECENT_FORM_GAMES}경기 성적.`,
     url: `${SITE_URL}/standings`,
     type: "website",
     locale: "ko_KR",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: `KBO 팀 순위 ${KBO_SEASON_YEAR} | MoneyBall Score`,
-    description: `${KBO_SEASON_YEAR} KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.`,
+    description: `${KBO_SEASON_YEAR} KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근${RECENT_FORM_GAMES}경기 성적.`,
   },
 };
 
@@ -124,7 +124,7 @@ export default async function StandingsPage() {
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">패</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">승률</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">게임차</th>
-                  <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">최근10</th>
+                  <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">최근{RECENT_FORM_GAMES}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
