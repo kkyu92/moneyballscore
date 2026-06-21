@@ -199,6 +199,13 @@ export const ACTIVE_FACTOR_KEYS = [
 export const KBO_FACTOR_COUNT = ACTIVE_FACTOR_KEYS.length;
 
 /**
+ * 현재 KBO 시즌 연도 — standings / dashboard / OG image / metadata 의 "2026 KBO" / "2026 season" / "2026 시즌" 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 86 (cycle 1294) — wave 76 (KBO_TEAM_COUNT) / wave 83 (KBO_FACTOR_COUNT) 패턴의 KBO 시즌 차원 확장.
+ * 매 시즌 끝 (11월) 다음 연도 1 라인 갱신 → 사이트 전반 자동 동기.
+ */
+export const KBO_SEASON_YEAR = 2026;
+
+/**
  * v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%).
  * /v2-preview 사전 evidence + shadow cohort 베이스 가중치. cycle 1013 packages/shared 로
  * 이관 (이전 apps/moneyball/src/lib/predictions/v2Predictor.ts → 본 위치).

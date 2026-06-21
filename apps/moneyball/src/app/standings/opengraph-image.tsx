@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAM_COUNT } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_SEASON_YEAR } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -57,7 +57,7 @@ export default function StandingsHubOgImage() {
             display: "flex",
           }}
         >
-          2026 season · Live W/L · Games behind · L10
+          {KBO_SEASON_YEAR} season · Live W/L · Games behind · L10
         </div>
 
         <div
@@ -97,7 +97,7 @@ export default function StandingsHubOgImage() {
           }}
         >
           <span>moneyballscore.vercel.app/standings</span>
-          <span>Updated hourly · 2026 KBO</span>
+          <span>Updated hourly · {KBO_SEASON_YEAR} KBO</span>
         </div>
       </div>
     ),

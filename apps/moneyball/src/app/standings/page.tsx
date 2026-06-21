@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -16,11 +16,11 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "KBO 팀 순위",
-  description: "2026 KBO 리그 팀 순위표 — 승·무·패, 승률, 게임차, 최근10경기. 매시간 자동 업데이트.",
+  description: `${KBO_SEASON_YEAR} KBO 리그 팀 순위표 — 승·무·패, 승률, 게임차, 최근10경기. 매시간 자동 업데이트.`,
   alternates: { canonical: `${SITE_URL}/standings` },
   openGraph: {
-    title: "KBO 팀 순위 2026",
-    description: "2026 KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.",
+    title: `KBO 팀 순위 ${KBO_SEASON_YEAR}`,
+    description: `${KBO_SEASON_YEAR} KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.`,
     url: `${SITE_URL}/standings`,
     type: "website",
     locale: "ko_KR",
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "KBO 팀 순위 2026 | MoneyBall Score",
-    description: "2026 KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.",
+    title: `KBO 팀 순위 ${KBO_SEASON_YEAR} | MoneyBall Score`,
+    description: `${KBO_SEASON_YEAR} KBO 리그 실시간 팀 순위표. 승·무·패, 승률, 게임차, 최근10경기 성적.`,
   },
 };
 
@@ -68,8 +68,8 @@ export default async function StandingsPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "2026 KBO 팀 순위",
-    description: "2026 KBO 리그 팀 순위표",
+    name: `${KBO_SEASON_YEAR} KBO 팀 순위`,
+    description: `${KBO_SEASON_YEAR} KBO 리그 팀 순위표`,
     numberOfItems: standings.length,
     itemListElement: standings.map((row, i) => ({
       "@type": "ListItem",
@@ -88,7 +88,7 @@ export default async function StandingsPage() {
       <Breadcrumb items={[{ label: "팀 순위" }]} />
 
       <header className="space-y-2">
-        <h1 className="text-2xl font-bold">2026 KBO 팀 순위</h1>
+        <h1 className="text-2xl font-bold">{KBO_SEASON_YEAR} KBO 팀 순위</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           KBO 공식 집계 기준 · 매시간 갱신
         </p>
@@ -195,7 +195,7 @@ export default async function StandingsPage() {
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <div className="flex items-baseline justify-between mb-4">
               <h2 id="elo-trend-title" className="text-base font-bold">팀별 {FACTOR_LABELS_TECHNICAL.elo} 추이</h2>
-              <span className="text-xs text-gray-400 dark:text-gray-500">2026 시즌 · AI 예측 기반</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{KBO_SEASON_YEAR} 시즌 · AI 예측 기반</span>
             </div>
             <EloTrendChart points={eloTrend.points} teams={eloTrend.teams} />
             <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">

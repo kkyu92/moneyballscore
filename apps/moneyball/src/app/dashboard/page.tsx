@@ -13,6 +13,7 @@ import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsigh
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   KBO_FACTOR_COUNT,
+  KBO_SEASON_YEAR,
   KBO_TEAMS,
   assertSelectOk,
   pickTierEmoji,
@@ -201,7 +202,7 @@ export default async function DashboardPage() {
       <Breadcrumb items={[{ label: '대시보드' }]} />
       <section>
         <h1 className="text-3xl font-bold mb-2">대시보드</h1>
-        <p className="text-gray-500 dark:text-gray-400">2026 시즌 예측 성과 종합</p>
+        <p className="text-gray-500 dark:text-gray-400">{KBO_SEASON_YEAR} 시즌 예측 성과 종합</p>
       </section>
 
       {/* 모수 캡션 */}
