@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName } from '@moneyball/shared';
+import { shortTeamName, WINNER_PROB_LEAN_PCT } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -93,7 +93,7 @@ export default async function MissesReviewPage() {
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
           예측 시스템의 신뢰는 틀렸을 때 어떻게 설명하느냐에서 결정됩니다. 이
-          페이지는 MoneyBall Score가 55% 이상 확신으로 틀렸던 예측을 숨기지 않고
+          페이지는 MoneyBall Score가 {WINNER_PROB_LEAN_PCT}% 이상 확신으로 틀렸던 예측을 숨기지 않고
           사후 분석과 함께 공개합니다. 사후 에이전트가 지목한 편향 팩터와 양팀
           관점에서 &ldquo;pre_game이 놓친 것&rdquo;도 함께 기록됩니다.
         </p>

@@ -451,6 +451,23 @@ export const WINNER_PROB_CONFIDENT = 0.65;
 export const WINNER_PROB_LEAN = 0.55;
 
 /**
+ * 사용자 가시 % 표시 단일 source — silent drift family wave 108 (cycle 1324).
+ *
+ * tier threshold 의 사용자 가시 layer (reviews/misses 페이지 본문 + OG image tag +
+ * accuracy bucket range 라벨) "55%" / "65%" / "55~65%" / "65%~" / "~55%" /
+ * "≥ 65%" 5 occurrence 를 본 derive value 로 swap. WINNER_PROB_LEAN /
+ * WINNER_PROB_CONFIDENT 변경 시 사용자 가시 layer 자동 동기.
+ *
+ * 5 occurrence 분포 (cycle 1324 측정):
+ *   - reviews/misses/page.tsx 1건 ("55% 이상 확신")
+ *   - reviews/misses/opengraph-image.tsx 1건 ("신뢰도 ≥ 65%" — filter logic 55%
+ *     와 mismatch 였음. 본 swap 으로 logic 정합 복원)
+ *   - buildAccuracyData.ts 3건 (bucket range 라벨 '~55%' / '55~65%' / '65%~')
+ */
+export const WINNER_PROB_LEAN_PCT = Math.round(WINNER_PROB_LEAN * 100);
+export const WINNER_PROB_CONFIDENT_PCT = Math.round(WINNER_PROB_CONFIDENT * 100);
+
+/**
  * Sunday confidence cap — 일요일 경기 confidence > WINNER_PROB_LEAN(0.55) 시
  * 본 값으로 하향 (judge-agent.ts). 사용자 가시 표기 (about / methodology / guide)
  * 와 logic 양쪽 단일 source.

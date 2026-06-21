@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { WINNER_PROB_LEAN_PCT } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -70,7 +71,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["과대 평가 팩터", "사후 에이전트", "신뢰도 ≥ 65%", "Top Miss"].map((tag) => (
+          {["과대 평가 팩터", "사후 에이전트", `신뢰도 ≥ ${WINNER_PROB_LEAN_PCT}%`, "Top Miss"].map((tag) => (
             <div
               key={tag}
               style={{

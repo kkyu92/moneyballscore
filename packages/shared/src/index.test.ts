@@ -23,7 +23,9 @@ import {
   winnerProbOf,
   classifyWinnerProb,
   WINNER_PROB_CONFIDENT,
+  WINNER_PROB_CONFIDENT_PCT,
   WINNER_PROB_LEAN,
+  WINNER_PROB_LEAN_PCT,
   WINNER_PROB_CLAMP_MIN,
   WINNER_PROB_CLAMP_MAX,
   clampWinnerProb,
@@ -313,6 +315,13 @@ describe('classifyWinnerProb (3단계)', () => {
   it('WINNER_PROB_CONFIDENT = 0.65, WINNER_PROB_LEAN = 0.55 (Telegram B2 와 통일)', () => {
     expect(WINNER_PROB_CONFIDENT).toBe(0.65);
     expect(WINNER_PROB_LEAN).toBe(0.55);
+  });
+
+  it('WINNER_PROB_*_PCT = *100 derive (silent drift family wave 108 guard)', () => {
+    expect(WINNER_PROB_LEAN_PCT).toBe(55);
+    expect(WINNER_PROB_CONFIDENT_PCT).toBe(65);
+    expect(WINNER_PROB_LEAN_PCT).toBe(Math.round(WINNER_PROB_LEAN * 100));
+    expect(WINNER_PROB_CONFIDENT_PCT).toBe(Math.round(WINNER_PROB_CONFIDENT * 100));
   });
 
   it('SMALL_SAMPLE_N = 5 (sweep 51 source-of-truth)', () => {
