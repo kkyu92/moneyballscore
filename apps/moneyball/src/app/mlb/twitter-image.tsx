@@ -35,7 +35,9 @@ export default function MlbHubTwitterImage() {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 42 }}>⚾</span>
+          <span style={{ fontSize: 42,
+          display: "flex",
+        }}>⚾</span>
           <span>MoneyBall Score</span>
         </div>
 
@@ -46,7 +48,8 @@ export default function MlbHubTwitterImage() {
             fontWeight: 800,
             letterSpacing: "-3px",
             lineHeight: 1,
-          }}
+          display: "flex",
+        }}
         >
           MLB
         </div>

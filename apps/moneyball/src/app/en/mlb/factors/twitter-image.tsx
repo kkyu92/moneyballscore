@@ -32,7 +32,9 @@ export default function EnMlbFactorsTwitterImage() {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 42 }}>⚾</span>
+          <span style={{ fontSize: 42,
+          display: "flex",
+        }}>⚾</span>
           <span>MoneyBall Score · MLB</span>
         </div>
 
@@ -43,6 +45,7 @@ export default function EnMlbFactorsTwitterImage() {
             fontWeight: 800,
             letterSpacing: "-3px",
             lineHeight: 1,
+            display: "flex",
           }}
         >
           {MLB_FACTOR_COUNTS.total} Model Factors

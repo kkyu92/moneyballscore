@@ -115,7 +115,9 @@ export default async function Image({ params }: Props) {
             fontWeight: 600,
           }}
         >
-          <span style={{ fontSize: 42 }}>⚾</span>
+          <span style={{ fontSize: 42,
+          display: "flex",
+        }}>⚾</span>
           <span>MoneyBall Score</span>
         </div>
 
@@ -127,7 +129,8 @@ export default async function Image({ params }: Props) {
             fontWeight: 800,
             letterSpacing: "-3px",
             lineHeight: 1,
-          }}
+          display: "flex",
+        }}
         >
           {date}
         </div>
@@ -172,18 +175,30 @@ export default async function Image({ params }: Props) {
               {"Top Pick"}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-              <span style={{ fontSize: 44, fontWeight: 700, opacity: 0.7 }}>
+              <span style={{ fontSize: 44, fontWeight: 700, opacity: 0.7,
+          display: "flex",
+        }}>
                 {stats.topPick.awayCode}
               </span>
-              <span style={{ fontSize: 28, opacity: 0.5 }}>@</span>
-              <span style={{ fontSize: 44, fontWeight: 700, opacity: 0.7 }}>
+              <span style={{ fontSize: 28, opacity: 0.5,
+          display: "flex",
+        }}>@</span>
+              <span style={{ fontSize: 44, fontWeight: 700, opacity: 0.7,
+          display: "flex",
+        }}>
                 {stats.topPick.homeCode}
               </span>
-              <span style={{ fontSize: 28, opacity: 0.5 }}>{"->"}</span>
-              <span style={{ fontSize: 56, fontWeight: 800, color: "#c4e8cf" }}>
+              <span style={{ fontSize: 28, opacity: 0.5,
+          display: "flex",
+        }}>{"->"}</span>
+              <span style={{ fontSize: 56, fontWeight: 800, color: "#c4e8cf",
+          display: "flex",
+        }}>
                 {stats.topPick.winnerCode}
               </span>
-              <span style={{ fontSize: 44, fontWeight: 700 }}>
+              <span style={{ fontSize: 44, fontWeight: 700,
+          display: "flex",
+        }}>
                 {`${Math.round(stats.topPick.winnerProb * 100)}%`}
               </span>
             </div>
@@ -207,7 +222,9 @@ export default async function Image({ params }: Props) {
             }}
           >
             <span>{`Accuracy ${stats.rate}%`}</span>
-            <span style={{ opacity: 0.7, fontSize: 24 }}>
+            <span style={{ opacity: 0.7, fontSize: 24,
+          display: "flex",
+        }}>
               {`${stats.correctN}/${stats.verifiedN}`}
             </span>
           </div>
