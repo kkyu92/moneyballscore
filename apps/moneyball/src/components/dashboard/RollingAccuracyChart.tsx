@@ -11,6 +11,8 @@ import {
   ReferenceLine,
 } from "recharts";
 
+import { ACCURACY_BASELINE } from "@moneyball/shared";
+
 import type { RollingAccuracyPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
@@ -79,7 +81,7 @@ export function RollingAccuracyChart({
           }}
         />
         <ReferenceLine
-          y={0.5}
+          y={ACCURACY_BASELINE}
           stroke={neutral[400]}
           strokeDasharray="4 4"
           strokeOpacity={0.5}

@@ -12,6 +12,8 @@ import {
   Cell,
 } from "recharts";
 
+import { ACCURACY_BASELINE } from "@moneyball/shared";
+
 import type { WinnerProbBucket } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
@@ -91,7 +93,7 @@ export function WinnerProbBucketChart({ data }: WinnerProbBucketChartProps) {
           }}
         />
         <ReferenceLine
-          y={0.5}
+          y={ACCURACY_BASELINE}
           stroke={neutral[400]}
           strokeDasharray="4 4"
           strokeOpacity={0.4}
