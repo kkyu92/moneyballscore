@@ -11,6 +11,7 @@ import {
   Cell,
   ReferenceLine,
 } from "recharts";
+import { MIN_TEAM_PREDICTIONS } from "@moneyball/shared";
 import { chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartGradients, ChartTooltip } from "./ChartTooltip";
 
@@ -35,8 +36,8 @@ export function TeamPerformanceChart({ data }: TeamPerformanceChartProps) {
     return (
       <div className="h-64 flex flex-col items-center justify-center text-center">
         <span className="text-4xl mb-3">⚾</span>
-        <p className="text-sm text-gray-500 dark:text-gray-400">팀별 3경기 이상 검증되면 적중률 비교 차트가 표시됩니다.</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">각 팀 최소 3경기 예측 필요</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">팀별 {MIN_TEAM_PREDICTIONS}경기 이상 검증되면 적중률 비교 차트가 표시됩니다.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">각 팀 최소 {MIN_TEAM_PREDICTIONS}경기 예측 필요</p>
       </div>
     );
   }
