@@ -4,7 +4,9 @@ import {
   QUANT_POSTVIEW_VERSION,
   LLM_ACTIVE_VERSIONS,
   WINNER_PROB_CONFIDENT,
+  WINNER_PROB_CONFIDENT_PCT,
   WINNER_PROB_LEAN,
+  WINNER_PROB_LEAN_PCT,
   SUNDAY_CAP_CONFIDENCE,
   type ModelVersion,
   type ScoringRule,
@@ -569,9 +571,9 @@ export function buildScoringRuleWeekHeatmap(rows: PredRow[], weeksWindow = 4): S
 
 export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
   const tiers = [
-    { label: '낮은 확신', range: '~55%', min: 0, max: WINNER_PROB_LEAN },
-    { label: '보통 확신', range: '55~65%', min: WINNER_PROB_LEAN, max: WINNER_PROB_CONFIDENT },
-    { label: '높은 확신', range: '65%~', min: WINNER_PROB_CONFIDENT, max: 1.01 },
+    { label: '낮은 확신', range: `~${WINNER_PROB_LEAN_PCT}%`, min: 0, max: WINNER_PROB_LEAN },
+    { label: '보통 확신', range: `${WINNER_PROB_LEAN_PCT}~${WINNER_PROB_CONFIDENT_PCT}%`, min: WINNER_PROB_LEAN, max: WINNER_PROB_CONFIDENT },
+    { label: '높은 확신', range: `${WINNER_PROB_CONFIDENT_PCT}%~`, min: WINNER_PROB_CONFIDENT, max: 1.01 },
   ];
   return tiers.map(({ label, range, min, max }) => {
     const subset = rows.filter((r) => r.confidence >= min && r.confidence < max);
