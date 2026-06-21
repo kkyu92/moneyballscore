@@ -15,10 +15,9 @@ import {
   SHADOW_SCORING_RULE,
   SHADOW_V20_SCORING_RULE,
   clampWinnerProb,
+  NEUTRAL_FACTOR,
 } from '@moneyball/shared';
 import type { SupabaseClient } from '@supabase/supabase-js';
-
-const NEUTRAL_FACTOR = 0.5;
 
 export interface ShadowComputeResult {
   homeWinProb: number;
