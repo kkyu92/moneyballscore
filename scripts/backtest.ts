@@ -1,7 +1,7 @@
 import { fetchGames, DEFAULT_PARK_FACTORS } from '../packages/kbo-data/src/scrapers/kbo-official';
 import { fetchPitcherStats, fetchTeamStats, fetchEloRatings, findPitcher } from '../packages/kbo-data/src/scrapers/fancy-stats';
 import { predict } from '../packages/kbo-data/src/engine/predictor';
-import { toKSTDateString } from '../packages/shared/src/index';
+import { toKSTDateString, ELO_NEUTRAL, ELO_NEUTRAL_WIN_PCT } from '../packages/shared/src/index';
 import type { PredictionInput, ScrapedGame } from '../packages/kbo-data/src/types';
 
 const BACKTEST_SEASON = 2025;
@@ -64,7 +64,7 @@ async function main() {
       const awayElo = eloRatings.find((e) => e.team === game.awayTeam);
 
       const defaultTS = { team: game.homeTeam, woba: 0.320, bullpenFip: 4.0, totalWar: 12, sfr: 0 };
-      const defaultElo = { team: game.homeTeam, elo: 1500, winPct: 0.5 };
+      const defaultElo = { team: game.homeTeam, elo: ELO_NEUTRAL, winPct: ELO_NEUTRAL_WIN_PCT };
 
       const input: PredictionInput = {
         game,

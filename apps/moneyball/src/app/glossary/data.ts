@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, ELO_NEUTRAL, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from '@moneyball/shared';
 import type { GlossaryCategorySlug } from '@/components/glossary/GlossaryCategoryFilter';
 
 export type GlossaryEntry = {
@@ -229,7 +229,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         fullName: 'Elo Rating',
         definition:
           '체스에서 유래한 상대적 전력 점수. 강팀에게 이기면 많이 오르고 약팀에 지면 많이 내려간다. 매 경기 결과로 갱신.',
-        range: 'KBO 평균 1500. 1600+ = 상위권, 1400 이하 = 하위권.',
+        range: `KBO 평균 ${ELO_NEUTRAL}. 1600+ = 상위권, 1400 이하 = 하위권.`,
         modelUsage: `가중치 ${Math.round(DEFAULT_WEIGHTS.elo * 100)}% (정보가치 최강)`,
         source: 'KBO Fancy Stats',
       },

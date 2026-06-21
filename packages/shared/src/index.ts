@@ -322,6 +322,31 @@ export function clampWinnerProb(p: number): number {
 }
 
 /**
+ * Elo 중립 baseline — 신규 팀 / 데이터 부족 / season 시작 시점 초기값.
+ *
+ * silent drift family wave 94 (cycle 1305) — wave 91 (HOME_ADVANTAGE_PCT) /
+ * wave 92 (RECENT_FORM_GAMES) / wave 93 (WINNER_PROB_CLAMP) 패턴 정합.
+ *
+ * Elo 표준 chess 컨벤션 = 1500 baseline. KBO Fancy Stats / FanGraphs Elo / 본
+ * 모델 fallback 모두 동일. 변경 시 backtest / postview / mlb-pipeline /
+ * fancy-stats scraper / analysis fallback / glossary 사용자 가시 layer 모두
+ * 동기 (silent drift 차단).
+ *
+ * 9 occurrence 분포 (cycle 1305 측정):
+ *   - 사용자 가시 2건 (glossary "KBO 평균 1500" / context/metrics description "1500 기준")
+ *   - production fallback 5건 (postview-daily home/away / mlb-pipeline home+away /
+ *     fancy-stats baseline value / analysis page home/away)
+ *   - 코멘트 2건 (HOME_ELO_BONUS 도출 주석 "1500 vs 1500" / fancy-stats baseline 코멘트)
+ *
+ * winPct 0.5 baseline 은 paired (Elo neutral 일 때 win prob = 0.5). 함께 사용 시
+ * ELO_NEUTRAL_WIN_PCT 참조.
+ */
+export const ELO_NEUTRAL = 1500;
+
+/** Elo neutral 시 expected win probability (Elo logistic 항등식 결과). */
+export const ELO_NEUTRAL_WIN_PCT = 0.5;
+
+/**
  * Elo 모델용 홈 어드밴티지 — Elo point 단위 (NOT probability delta).
  *
  * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는

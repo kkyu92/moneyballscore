@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import {
   assertSelectOk,
   classifyWinnerProb,
+  ELO_NEUTRAL,
+  ELO_NEUTRAL_WIN_PCT,
   KBO_PREDICT_DAILY_TIME_KST,
   pickTierEmoji,
   PRODUCTION_COHORT_RULES,
@@ -121,11 +123,11 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       gameId: game.id,
       homeTeam: homeCode,
       awayTeam: awayCode,
-      homeElo: pred.home_elo ?? 1500,
-      awayElo: pred.away_elo ?? 1500,
-      homeRecentForm: pred.home_recent_form ?? 0.5,
-      awayRecentForm: pred.away_recent_form ?? 0.5,
-      confidence: pred.confidence ?? 0.5,
+      homeElo: pred.home_elo ?? ELO_NEUTRAL,
+      awayElo: pred.away_elo ?? ELO_NEUTRAL,
+      homeRecentForm: pred.home_recent_form ?? ELO_NEUTRAL_WIN_PCT,
+      awayRecentForm: pred.away_recent_form ?? ELO_NEUTRAL_WIN_PCT,
+      confidence: pred.confidence ?? ELO_NEUTRAL_WIN_PCT,
     });
 
     cards.push({

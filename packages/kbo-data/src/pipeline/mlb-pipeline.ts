@@ -25,6 +25,7 @@ import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
 } from './silent-drift-alert';
+import { ELO_NEUTRAL } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = ReturnType<typeof createClient<any, any, any>>;
@@ -143,7 +144,7 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       war: { home: 0, away: 0 },
       head_to_head: { homeWinRate: 0.5 },
       park_factor: 1.0,
-      elo: { home: 1500, away: 1500 },
+      elo: { home: ELO_NEUTRAL, away: ELO_NEUTRAL },
       defense_sfr: { home: 0, away: 0 },
       lineup_xwoba: { home: 0.320, away: 0.320 },
       lineup_barrel_pct: { home: 0.08, away: 0.08 },
