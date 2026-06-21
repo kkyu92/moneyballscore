@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -278,7 +278,7 @@ export default function GuidePage() {
           >
             <h3 className="font-semibold mb-1">예측 방법론</h3>
             <p className="text-xs text-gray-600 dark:text-brand-400">
-              v1.8 모델 가중치 + 데이터 소스 전체 공개.
+              {CURRENT_SCORING_RULE} 모델 가중치 + 데이터 소스 전체 공개.
             </p>
           </Link>
           <Link

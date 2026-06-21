@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { CURRENT_SCORING_RULE } from "@moneyball/shared";
 
 // 루트 Open Graph 이미지: 라우트별 자체 이미지가 없을 때 fallback.
 // satori(@vercel/og)는 CJK 폰트를 번들하지 않아 라틴 + 이모지 중심으로 설계.
@@ -97,7 +98,7 @@ export default function Image() {
           }}
         >
           <span>moneyballscore.vercel.app</span>
-          <span>Daily updates · v1.8</span>
+          <span>Daily updates · {CURRENT_SCORING_RULE}</span>
         </div>
       </div>
     ),

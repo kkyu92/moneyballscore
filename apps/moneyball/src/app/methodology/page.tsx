@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { HOME_ADVANTAGE, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -126,7 +126,7 @@ const VERSION_HISTORY = [
     version: "v2.0 (예정)",
     date: "n=150 도달 후",
     change:
-      "검증 표본 n=150 이상 누적 시 전면 가중치 재조정. v1.8 cohort 누적 진행 중 — 실시간 진척은 /accuracy 페이지 참조.",
+      `검증 표본 n=150 이상 누적 시 전면 가중치 재조정. ${CURRENT_SCORING_RULE} cohort 누적 진행 중 — 실시간 진척은 /accuracy 페이지 참조.`,
   },
 ];
 
@@ -286,7 +286,7 @@ export default function MethodologyPage() {
 
       <section id="weights" className="space-y-4 scroll-mt-20">
         <h2 className="text-2xl font-semibold border-b border-gray-200 dark:border-brand-700 pb-2">
-          3. {KBO_FACTOR_COUNT}팩터 가중합산 (v1.8)
+          3. {KBO_FACTOR_COUNT}팩터 가중합산 ({CURRENT_SCORING_RULE})
         </h2>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
           각 팩터를 -1 ~ +1 범위로 정규화한 뒤 가중치를 곱해 합산합니다. 결과에

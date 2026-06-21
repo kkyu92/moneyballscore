@@ -39,7 +39,14 @@ export type DebateVersion =
   | typeof DEBATE_VERSION_POSTVIEW
   | null;
 
-/** 현 가중치 버전. daily / live / postview 3-path 모두 본 상수 참조. */
+/**
+ * 현 가중치 버전. daily / live / postview 3-path 모두 본 상수 참조.
+ *
+ * silent drift family wave 88 (cycle 1296) — 사용자 가시 layer (OG image / 메서드론
+ * 페이지 헤딩 / 가이드 카드 / glossary 라벨) 의 hardcoded "v1.8" string 5개 + 메서드론
+ * 카드 v2.0 예정 행 본문 1개 → 본 상수 참조 swap. v2.0 promotion 시 본 상수 1개만
+ * 갱신하면 사용자 가시 layer 자동 동기.
+ */
 export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
 
 /**
