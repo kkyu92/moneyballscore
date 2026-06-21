@@ -347,6 +347,24 @@ export const ELO_NEUTRAL = 1500;
 export const ELO_NEUTRAL_WIN_PCT = 0.5;
 
 /**
+ * 결측 factor 의 neutral baseline — weighted sum 산출 시 미적용 factor 대체값.
+ *
+ * silent drift family wave 95 (cycle 1306) — wave 91 (HOME_ADVANTAGE_PCT) /
+ * wave 92 (RECENT_FORM_GAMES) / wave 93 (WINNER_PROB_CLAMP) / wave 94 (ELO_NEUTRAL)
+ * 패턴 정합.
+ *
+ * 의도: factor 값이 null/undefined 일 때 weightedSum += NEUTRAL_FACTOR * weight 로
+ * 처리. 0.5 = factor 가 "neutral" (홈팀 우위 X, 원정팀 우위 X) 가정. 변경 시
+ * v2Predictor / shadow-cohort 양쪽 동기 (silent drift 차단).
+ *
+ * 4 occurrence 분포 (cycle 1306 측정):
+ *   - production v2Predictor 1건 (apps/moneyball/src/lib/predictions/v2Predictor.ts)
+ *   - production shadow-cohort 2건 (packages/kbo-data/src/pipeline/shadow-cohort.ts)
+ *   - 선언 vs 사용 = 2 선언 (재선언) + 3 weightedSum 사용
+ */
+export const NEUTRAL_FACTOR = 0.5;
+
+/**
  * Elo 모델용 홈 어드밴티지 — Elo point 단위 (NOT probability delta).
  *
  * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는
