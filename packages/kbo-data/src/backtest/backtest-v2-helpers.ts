@@ -5,7 +5,7 @@
  * 본 helper = pure functions only (Sentry-free / supabase-free) — vitest deterministic.
  */
 
-import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL, V2_PROMOTION_COHORT_N } from '@moneyball/shared';
 
 const CLAMP_LO = 0.15;
 const CLAMP_HI = 0.85;
@@ -177,9 +177,9 @@ export function evaluateThreeWay(
     n += 1;
   }
 
-  if (n < 150) {
+  if (n < V2_PROMOTION_COHORT_N) {
     warnings.push(
-      `소표본 결정 X (test_n=${n} < 150) — 3-way comparison evidence pack only. learned weights production 적용 결정은 n=150 도달 후.`,
+      `소표본 결정 X (test_n=${n} < ${V2_PROMOTION_COHORT_N}) — 3-way comparison evidence pack only. learned weights production 적용 결정은 n=${V2_PROMOTION_COHORT_N} 도달 후.`,
     );
   }
 
@@ -285,9 +285,9 @@ export function evaluatePair(rows: BacktestPredictionRow[]): BacktestResult {
     n += 1;
   }
 
-  if (n < 150) {
+  if (n < V2_PROMOTION_COHORT_N) {
     warnings.push(
-      `소표본 결정 X (n=${n} < 150) — harness evidence pack only. v2.0 production 적용 결정은 n=150 도달 후.`,
+      `소표본 결정 X (n=${n} < ${V2_PROMOTION_COHORT_N}) — harness evidence pack only. v2.0 production 적용 결정은 n=${V2_PROMOTION_COHORT_N} 도달 후.`,
     );
   }
   if (n < 30) {
@@ -322,7 +322,7 @@ export function evaluatePair(rows: BacktestPredictionRow[]): BacktestResult {
     fancy_stats_elo_brier: null,
     fancy_stats_elo_note:
       'KBO Fancy Stats Elo public API 부재 — manual fetch + parse 별도 carry-over (plan #14 C1b Step 2 후속).',
-    walk_forward_status: n < 30 ? 'degenerate' : n < 150 ? 'expanded_window' : 'normal',
+    walk_forward_status: n < 30 ? 'degenerate' : n < V2_PROMOTION_COHORT_N ? 'expanded_window' : 'normal',
     warnings,
   };
 }
@@ -336,7 +336,7 @@ plan: #14 C1b
 
 ## 자가 검증 (CEO Alt A + Eng High #4)
 
-- **소표본 결정 X**: n=${r.cohort_n} < 150. 본 결과 = harness evidence pack only.
+- **소표본 결정 X**: n=${r.cohort_n} < ${V2_PROMOTION_COHORT_N}. 본 결과 = harness evidence pack only.
 - **walk-forward status**: ${r.walk_forward_status} (rule_definition_date=${RULE_DEFINITION_DATE}, v1.8 시작 2026-05-13)
 - **warnings**: ${r.warnings.length === 0 ? '없음' : r.warnings.join(' / ')}
 
@@ -367,7 +367,7 @@ recent_form: 0.10 → 0.13 (+0.03)
 
 ## 다음 단계
 
-- C1a v2.0-shadow row 누적 (cycle 1019 ship 후 자연 cron 박제) → n=150 도달 후 본 backtest 재실행 + production 전환 결정
+- C1a v2.0-shadow row 누적 (cycle 1019 ship 후 자연 cron 박제) → n=${V2_PROMOTION_COHORT_N} 도달 후 본 backtest 재실행 + production 전환 결정
 - Fancy Stats Elo baseline 비교 = plan #14 C1b Step 2 후속 (별도 cycle carry-over)
 `;
 }
