@@ -3,7 +3,7 @@ import { PredictionCardLive } from "@/components/predictions/PredictionCardLive"
 import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { MiniGameCard } from "@/components/shared/MiniGameCard";
 import { fetchStadiumWeather } from "@/lib/weather";
-import { KBO_FACTOR_COUNT, KBO_STADIUM_COORDS, KBO_STADIUM_SHORT } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, KBO_STADIUM_COORDS, KBO_STADIUM_SHORT } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { WeeklyTrendMini, type WeeklyTrendPoint } from "@/components/dashboard/WeeklyTrendMini";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
@@ -41,7 +41,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "KBO AI 승부예측 | MoneyBall Score",
-  description: `오늘 KBO 경기 AI 승부예측. 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터(FIP·wOBA·Elo·WAR) 기반 정량 모델 + AI 에이전트 토론 분석. 매일 오전 9시 업데이트.`,
+  description: `오늘 KBO 경기 AI 승부예측. 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터(FIP·wOBA·Elo·WAR) 기반 정량 모델 + AI 에이전트 토론 분석. 매일 ${KBO_PREDICT_DAILY_TIME_KST} 갱신.`,
   alternates: { canonical: "https://moneyballscore.vercel.app" },
   openGraph: {
     title: "KBO AI 승부예측 | MoneyBall Score",
