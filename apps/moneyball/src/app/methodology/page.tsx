@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N } from "@moneyball/shared";
+import { HOME_ADVANTAGE, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -120,7 +120,7 @@ const VERSION_HISTORY = [
     version: "v1.8",
     date: "2026-05-12 ~ 현재",
     change:
-      "head_to_head 5% → 3% (표본 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 0.55 초과 시 0.45 강등.",
+      `head_to_head 5% → 3% (표본 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 강등.`,
   },
   {
     version: "v2.0 (예정)",
