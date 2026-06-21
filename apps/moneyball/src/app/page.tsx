@@ -462,7 +462,7 @@ async function getRecentWeeksAccuracy(): Promise<WeeklyTrendPoint[]> {
   });
 }
 
-// Tier priority: confident (≥0.65) > lean (≥0.55) > tossup; highest wp within tier wins.
+// Tier priority: confident (≥WINNER_PROB_CONFIDENT) > lean (≥WINNER_PROB_LEAN) > tossup; highest wp within tier wins.
 function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
   if (!isBigMatchEnabled()) return null;
 
