@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from "@moneyball/shared";
+import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -327,7 +327,7 @@ export default function MethodologyPage() {
         </div>
         <p className="text-xs text-gray-500 dark:text-brand-400">
           홈팀 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}% 는 2023 ~ 2026
-          시즌 N=2180 경기 데이터에서 측정한 홈 승률 51.93% 기반. 통계적 의미를
+          시즌 N={HOME_WIN_RATE_SAMPLE_N} 경기 데이터에서 측정한 홈 승률 {HOME_WIN_RATE_PCT.toFixed(2)}% 기반. 통계적 의미를
           가지지 않을 만큼 작아 보수적으로 +{HOME_ADVANTAGE_PCT.toFixed(1)}% 만 반영.
         </p>
       </section>
