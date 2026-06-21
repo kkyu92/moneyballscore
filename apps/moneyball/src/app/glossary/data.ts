@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, HOME_ADVANTAGE_PCT } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from '@moneyball/shared';
 import type { GlossaryCategorySlug } from '@/components/glossary/GlossaryCategoryFilter';
 
 export type GlossaryEntry = {
@@ -239,7 +239,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         korean: '최근 폼',
         fullName: 'Recent Form',
         definition:
-          '최근 10경기 승률. 시즌 누적 성적보다 현재 팀 상태(부상자 복귀, 슬럼프 등)를 반영. 단기 모멘텀 지표.',
+          `최근 ${RECENT_FORM_GAMES}경기 승률. 시즌 누적 성적보다 현재 팀 상태(부상자 복귀, 슬럼프 등)를 반영. 단기 모멘텀 지표.`,
         range: '0.700+ = 상승세, 0.300 이하 = 슬럼프.',
         modelUsage: `가중치 ${Math.round(DEFAULT_WEIGHTS.recent_form * 100)}%`,
         source: 'KBO 공식',

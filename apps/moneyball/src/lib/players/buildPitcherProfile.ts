@@ -5,6 +5,7 @@ import {
   shortTeamName,
   type SelectResult,
   type TeamCode,
+  RECENT_FORM_GAMES,
 } from '@moneyball/shared';
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 
@@ -188,7 +189,7 @@ export async function buildPitcherProfile(
   }
 
   appearances.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
-  const recent = appearances.slice(0, 10);
+  const recent = appearances.slice(0, RECENT_FORM_GAMES);
 
   return {
     playerId: p.id,

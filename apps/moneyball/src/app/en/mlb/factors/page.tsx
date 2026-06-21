@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -97,12 +97,12 @@ const KBO_10_FACTORS: readonly FactorRow[] = [
   },
   {
     key: "recent_form",
-    label: "Recent Form (Last 10 Games)",
+    label: `Recent Form (Last ${RECENT_FORM_GAMES} Games)`,
     shortLabel: "Recent Form",
     category: "Form",
     range: "-3 ~ +3",
     description:
-      "Difference between last-10 win rate and season win rate. ±0 = season baseline, +0.3 = strong hot streak.",
+      `Difference between last-${RECENT_FORM_GAMES} win rate and season win rate. ±0 = season baseline, +0.3 = strong hot streak.`,
     why: "Captures player condition, bullpen fatigue, lineup hot zones, and other daily variables. Fade-or-follow signal.",
     source: "statsapi.mlb.com (boxscore aggregate)",
   },

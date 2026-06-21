@@ -8,6 +8,7 @@ import {
   shortTeamName,
   assertSelectOk,
   CURRENT_SCORING_RULE,
+  RECENT_FORM_GAMES,
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -15,14 +16,14 @@ import { TeamLogo } from '@/components/shared/TeamLogo';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
 
-// /teams/[code]/recent — 팀별 최근 10 final game + 우리 모델 예측 + 적중/실패.
+// /teams/[code]/recent — 팀별 최근 N final game + 우리 모델 예측 + 적중/실패.
 // cycle 1021 (b8) — 사용자 가시 entry route 추가. CURRENT_SCORING_RULE filter
 // (shadow row 제외, #1338 family). status='final' 만 표시 (예정 / 진행중 제외).
 
 export const revalidate = 1800;
 
 const SITE_URL = 'https://moneyballscore.vercel.app';
-const RECENT_LIMIT = 10;
+const RECENT_LIMIT = RECENT_FORM_GAMES;
 
 interface PageProps {
   params: Promise<{ code: string }>;
@@ -159,8 +160,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { code } = await params;
   if (!isTeamCode(code)) return {};
   const meta = KBO_TEAMS[code];
-  const title = `${meta.name} 최근 10경기 예측 — KBO`;
-  const description = `${meta.name} 최근 final 10경기에 대한 우리 모델 예측 + 적중/실패 + 스코어. 매 경기 클릭 시 팩터별 심층 분석으로 진입.`;
+  const title = `${meta.name} 최근 ${RECENT_FORM_GAMES}경기 예측 — KBO`;
+  const description = `${meta.name} 최근 final ${RECENT_FORM_GAMES}경기에 대한 우리 모델 예측 + 적중/실패 + 스코어. 매 경기 클릭 시 팩터별 심층 분석으로 진입.`;
   return {
     title,
     description,
@@ -206,7 +207,7 @@ export default async function TeamRecentPage({ params }: PageProps) {
         items={[
           { href: '/teams', label: '팀' },
           { href: `/teams/${code}`, label: teamName },
-          { label: '최근 10경기' },
+          { label: `최근 ${RECENT_FORM_GAMES}경기` },
         ]}
       />
 
@@ -214,7 +215,7 @@ export default async function TeamRecentPage({ params }: PageProps) {
         <div className="flex items-center gap-3 flex-wrap">
           <TeamLogo team={code} size={36} className="shrink-0" />
           <h1 className="text-2xl md:text-3xl font-bold">
-            {meta.name} 최근 10경기 예측
+            {meta.name} 최근 {RECENT_FORM_GAMES}경기 예측
           </h1>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-300">

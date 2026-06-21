@@ -1,4 +1,5 @@
 import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
+import { RECENT_FORM_GAMES } from "@moneyball/shared";
 import type { TeamFactorAverages } from "@/lib/teams/buildTeamFactorAverages";
 
 interface Props {
@@ -57,7 +58,7 @@ const FACTORS: FactorRow[] = [
     slug: "recent_form",
     direction: "higher",
     format: (v) => `${Math.round(v * 100)}%`,
-    hint: "최근 폼 — 최근 10경기 승률. 높을수록 우세.",
+    hint: `최근 폼 — 최근 ${RECENT_FORM_GAMES}경기 승률. 높을수록 우세.`,
     glossarySlug: "recent-form",
   },
   {

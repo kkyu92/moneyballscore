@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -65,7 +65,7 @@ const FACTORS: Array<{
   },
   {
     key: "recent_form",
-    desc: "최근 10경기 승률. 시즌 전체 성적보다 현재 팀 상태를 반영.",
+    desc: `최근 ${RECENT_FORM_GAMES}경기 승률. 시즌 전체 성적보다 현재 팀 상태를 반영.`,
     source: "KBO 공식",
   },
   {

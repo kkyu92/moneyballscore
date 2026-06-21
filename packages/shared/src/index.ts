@@ -284,6 +284,21 @@ export const HOME_ADVANTAGE = 0.015;
 export const HOME_ADVANTAGE_PCT = HOME_ADVANTAGE * 100;
 
 /**
+ * 최근 폼 (recent form) factor 의 슬라이스 윈도우 — KBO/MLB 공통 10경기.
+ * silent drift family wave 92 (cycle 1303) — wave 91 (HOME_ADVANTAGE_PCT) 패턴 정합.
+ *
+ * 사용자 가시 layer ("최근 10경기" / "Last 10 Games") + 코드 slice(0, 10) 양쪽
+ * 단일 source. 변경 시 자동 동기 (factor 정의 / UI / OG / glossary / picks dots).
+ *
+ * 18 occurrence 분포 (cycle 1303 측정):
+ *   - 한국어 사용자 가시 15건 (standings / about / glossary / methodology / mlb factors /
+ *     teams/[code]/recent / matchup factor compare / factor explanations / factor labels)
+ *   - 영어 사용자 가시 1건 (en/mlb/factors)
+ *   - 코드 slice 2건 (buildPicksStats recent10 / buildPitcherProfile recent)
+ */
+export const RECENT_FORM_GAMES = 10;
+
+/**
  * Elo 모델용 홈 어드밴티지 — Elo point 단위 (NOT probability delta).
  *
  * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는

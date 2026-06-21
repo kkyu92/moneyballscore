@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, josa, ro } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, josa, ro, RECENT_FORM_GAMES } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -170,8 +170,8 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         const diffPp = Math.round(diff * 100);
         narrative =
           favor === "neutral"
-            ? "최근 10경기 폼이 비슷해 모멘텀 변수는 중립."
-            : `${better}${josa(better, "이", "가")} 최근 10경기 승률에서 ${diffPp}%p 앞선다. 폼 모멘텀 우위.`;
+            ? `최근 ${RECENT_FORM_GAMES}경기 폼이 비슷해 모멘텀 변수는 중립.`
+            : `${better}${josa(better, "이", "가")} 최근 ${RECENT_FORM_GAMES}경기 승률에서 ${diffPp}%p 앞선다. 폼 모멘텀 우위.`;
       }
       break;
     }
