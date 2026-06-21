@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -393,7 +393,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-bold mb-3">업데이트 주기</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div className="p-3 bg-surface rounded-lg">
-            <p className="font-medium">매일 09:00 KST</p>
+            <p className="font-medium">매일 {KBO_PREDICT_DAILY_TIME_KST}</p>
             <p className="text-gray-500 dark:text-gray-400">오늘 경기 + 예측 예고 (Telegram)</p>
           </div>
           <div className="p-3 bg-surface rounded-lg">

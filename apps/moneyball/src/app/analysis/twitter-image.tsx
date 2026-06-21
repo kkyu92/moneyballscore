@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { KBO_PREDICT_DAILY_TIME_KST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -67,7 +68,7 @@ export default function AnalysisHubTwitterImage() {
             flexWrap: "wrap",
           }}
         >
-          {["Multi-agent debate", "Home vs away", "Umpire bias", "Daily 09:00 KST"].map((label) => (
+          {["Multi-agent debate", "Home vs away", "Umpire bias", `Daily ${KBO_PREDICT_DAILY_TIME_KST}`].map((label) => (
             <div
               key={label}
               style={{
