@@ -16,7 +16,7 @@
  * Step 4 (회귀 가드) = 본 모듈을 7 agent 가 실제 소비한 후 pre/post Brier delta 측정.
  */
 
-import type { TeamCode } from '@moneyball/shared';
+import { KBO_FACTOR_COUNT, type TeamCode } from '@moneyball/shared';
 import type { GameContext } from '../agents/types';
 import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWindowsForLLM, KBO_PARKS, TIME_WINDOWS, type ParkContext } from './domain';
 import { MetricRegistry, type MetricDefinition, type MetricSlug } from './metrics';
@@ -218,7 +218,7 @@ export function renderContextForLLM(ac: AgentContext): string {
   for (const hint of ac.domain_hints) lines.push(`  - ${hint}`);
   lines.push('');
 
-  lines.push('[정량 메트릭 — 10팩터]');
+  lines.push(`[정량 메트릭 — ${KBO_FACTOR_COUNT}팩터]`);
   for (const slug of Object.keys(ac.metrics) as MetricSlug[]) {
     const obs = ac.metrics[slug];
     if (!obs) continue;
