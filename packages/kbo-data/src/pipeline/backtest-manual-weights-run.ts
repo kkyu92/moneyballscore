@@ -27,7 +27,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, clampWinnerProb } from '@moneyball/shared';
 import {
   loadDecidedGames,
   fetchEloHistory,
@@ -158,7 +158,7 @@ function computeFactors(f: GameFeatures): Record<string, number> {
 /**
  * Manual scoring (predictor.ts 와 동일 formula).
  * weighted_sum = Σ factor × weight
- * prob = weighted_sum / FACTOR_TOTAL + HOME_ADV, clamp [0.15, 0.85].
+ * prob = weighted_sum / FACTOR_TOTAL + HOME_ADV, clampWinnerProb (WINNER_PROB_CLAMP_MIN/MAX).
  */
 function manualScore(
   f: GameFeatures,
@@ -170,8 +170,7 @@ function manualScore(
   for (const [key, w] of Object.entries(weights)) {
     weightedSum += (factors[key] ?? 0.5) * w;
   }
-  let prob = weightedSum / weightSum + HOME_ADVANTAGE;
-  return Math.max(0.15, Math.min(0.85, prob));
+  return clampWinnerProb(weightedSum / weightSum + HOME_ADVANTAGE);
 }
 
 /** v1.5 = 현재 prod DEFAULT_WEIGHTS (cycle 17 회귀 후 박제). */

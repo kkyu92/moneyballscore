@@ -20,6 +20,9 @@ import {
   classifyWinnerProb,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_LEAN,
+  WINNER_PROB_CLAMP_MIN,
+  WINNER_PROB_CLAMP_MAX,
+  clampWinnerProb,
   SMALL_SAMPLE_N,
   WINNER_TIER_LABEL,
   WINNER_TIER_EMOJI_POOL,
@@ -274,6 +277,19 @@ describe('classifyWinnerProb (3단계)', () => {
 
   it('SMALL_SAMPLE_N = 5 (sweep 51 source-of-truth)', () => {
     expect(SMALL_SAMPLE_N).toBe(5);
+  });
+
+  it('WINNER_PROB_CLAMP_MIN/MAX = 0.15 / 0.85 (silent drift family wave 93 guard)', () => {
+    expect(WINNER_PROB_CLAMP_MIN).toBe(0.15);
+    expect(WINNER_PROB_CLAMP_MAX).toBe(0.85);
+  });
+
+  it('clampWinnerProb — 범위 안 / 미만 / 초과 / 경계', () => {
+    expect(clampWinnerProb(0.5)).toBe(0.5);
+    expect(clampWinnerProb(0.1)).toBe(WINNER_PROB_CLAMP_MIN);
+    expect(clampWinnerProb(0.9)).toBe(WINNER_PROB_CLAMP_MAX);
+    expect(clampWinnerProb(WINNER_PROB_CLAMP_MIN)).toBe(WINNER_PROB_CLAMP_MIN);
+    expect(clampWinnerProb(WINNER_PROB_CLAMP_MAX)).toBe(WINNER_PROB_CLAMP_MAX);
   });
 
   it('winnerProb ≥ 0.65 → confident (🔥 강한 예측)', () => {

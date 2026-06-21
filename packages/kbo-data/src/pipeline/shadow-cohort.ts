@@ -14,11 +14,10 @@ import {
   HOME_ADVANTAGE,
   SHADOW_SCORING_RULE,
   SHADOW_V20_SCORING_RULE,
+  clampWinnerProb,
 } from '@moneyball/shared';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const CLAMP_LO = 0.15;
-const CLAMP_HI = 0.85;
 const NEUTRAL_FACTOR = 0.5;
 
 export interface ShadowComputeResult {
@@ -57,7 +56,7 @@ export function computeShadowPrediction(
   if (factorTotal === 0) return null;
 
   let homeWinProb = weightedSum / factorTotal + HOME_ADVANTAGE;
-  homeWinProb = Math.max(CLAMP_LO, Math.min(CLAMP_HI, homeWinProb));
+  homeWinProb = clampWinnerProb(homeWinProb);
 
   return {
     homeWinProb: Math.round(homeWinProb * 1000) / 1000,
@@ -203,7 +202,7 @@ export function computeShadowPredictionV20(
   if (factorTotal === 0) return null;
 
   let homeWinProb = weightedSum / factorTotal + HOME_ADVANTAGE;
-  homeWinProb = Math.max(CLAMP_LO, Math.min(CLAMP_HI, homeWinProb));
+  homeWinProb = clampWinnerProb(homeWinProb);
 
   return {
     homeWinProb: Math.round(homeWinProb * 1000) / 1000,

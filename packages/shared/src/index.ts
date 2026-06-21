@@ -299,6 +299,29 @@ export const HOME_ADVANTAGE_PCT = HOME_ADVANTAGE * 100;
 export const RECENT_FORM_GAMES = 10;
 
 /**
+ * 홈팀 승리 확률 clamp 범위 — predictor / v2Predictor / judge-agent / shadow-cohort /
+ * backtest / FactorWaterfallChart / mlb-base 모두 동일 [0.15, 0.85] 단일 source.
+ * silent drift family wave 93 (cycle 1304) — wave 91 (HOME_ADVANTAGE_PCT) / wave 92
+ * (RECENT_FORM_GAMES) 패턴 정합.
+ *
+ * 의도: 극단 회피 (모델 over-confidence 차단). 야구 본질적 불확실성 (15~85%) 안 유지.
+ *
+ * 17+ occurrence 분포 (cycle 1304 측정):
+ *   - 사용자 가시 2건 (methodology / about — "0.15 ~ 0.85 범위로 제한")
+ *   - UI clamp 3건 (FactorWaterfallChart waterfall + XAxis domain)
+ *   - production engine 5건 (predictor / v2Predictor / mlb-base / shadow-cohort / judge-agent parseResponse)
+ *   - backtest 4건 (backtest-manual-weights-run / backtest-bootstrap-ci-run / backtest/models DEFAULT_RESTRICTED clampLo/clampHi)
+ *   - judge agent prompt 2건 (system prompt + 규칙 — 사용자 가시 prompt layer)
+ */
+export const WINNER_PROB_CLAMP_MIN = 0.15;
+export const WINNER_PROB_CLAMP_MAX = 0.85;
+
+/** homeWinProb → [WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX] clamp helper. */
+export function clampWinnerProb(p: number): number {
+  return Math.max(WINNER_PROB_CLAMP_MIN, Math.min(WINNER_PROB_CLAMP_MAX, p));
+}
+
+/**
  * Elo 모델용 홈 어드밴티지 — Elo point 단위 (NOT probability delta).
  *
  * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는

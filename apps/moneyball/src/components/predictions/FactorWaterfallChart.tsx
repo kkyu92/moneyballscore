@@ -12,7 +12,7 @@
  * 통합: analysis/game/[id]/page.tsx 안 DetailedFactorAnalysis 다음 박제.
  */
 
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, type TeamCode, shortTeamName } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, type TeamCode, shortTeamName } from "@moneyball/shared";
 import {
   Bar,
   Cell,
@@ -86,8 +86,8 @@ function computeWaterfall(factors: Record<string, number>): WaterfallBar[] {
     cumulative = newCumulative;
   }
 
-  // clamp to [0.15, 0.85] (predictor.ts 정합)
-  const finalProb = Math.max(0.15, Math.min(0.85, cumulative));
+  // clamp — WINNER_PROB_CLAMP_MIN/MAX 단일 source (predictor.ts 정합)
+  const finalProb = clampWinnerProb(cumulative);
   bars.push({
     factor: "final",
     label: "최종 확률",
@@ -168,7 +168,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
           >
             <XAxis
               type="number"
-              domain={[0.15, 0.85]}
+              domain={[WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX]}
               tickFormatter={(v) => `${Math.round(v * 100)}%`}
               tick={{ fill: "var(--color-brand-500)", fontSize: 11 }}
               stroke="var(--color-brand-300)"

@@ -1,18 +1,16 @@
 // v2.1-B 가중치 — packages/shared 단일 source (cycle 1013 이관). 본 모듈은 backward-compat
 // re-export + apps/moneyball /v2-preview 의 quant 재계산 path.
 // 예측 산출 공식 = packages/kbo-data src/engine/predictor.ts 동일 — weightedSum /
-// FACTOR_TOTAL + HOME_ADVANTAGE → clamp [0.15, 0.85].
+// FACTOR_TOTAL + HOME_ADVANTAGE → clampWinnerProb (WINNER_PROB_CLAMP_MIN/MAX).
 // 본 모듈은 이미 저장된 pre_game predictions.factors JSONB 를 재가중치 적용해 미리보기 산출.
 
-import { V2_1_B_WEIGHTS as SHARED_V2_1_B_WEIGHTS } from '@moneyball/shared';
+import { V2_1_B_WEIGHTS as SHARED_V2_1_B_WEIGHTS, clampWinnerProb } from '@moneyball/shared';
 
 export const V2_1_B_WEIGHTS = SHARED_V2_1_B_WEIGHTS;
 
 export type V2WeightKey = keyof typeof V2_1_B_WEIGHTS;
 
 const HOME_ADVANTAGE = 0.015;
-const CLAMP_LO = 0.15;
-const CLAMP_HI = 0.85;
 const NEUTRAL_FACTOR = 0.5;
 
 export interface V2PreviewResult {
@@ -48,8 +46,7 @@ export function applyV2_1_BWeights(
 
   if (factorTotal === 0) return null;
 
-  let homeWinProb = weightedSum / factorTotal + HOME_ADVANTAGE;
-  homeWinProb = Math.max(CLAMP_LO, Math.min(CLAMP_HI, homeWinProb));
+  const homeWinProb = clampWinnerProb(weightedSum / factorTotal + HOME_ADVANTAGE);
 
   return { homeWinProb, weightedSum, factorTotal, appliedFactorCount, missingFactorKeys };
 }
