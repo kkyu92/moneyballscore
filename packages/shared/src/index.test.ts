@@ -7,6 +7,7 @@ import {
   DEFAULT_WEIGHTS,
   ACTIVE_FACTOR_KEYS,
   HOME_ADVANTAGE,
+  HOME_ADVANTAGE_PCT,
   getConfidenceColor,
   getAccuracyColor,
   shortTeamName,
@@ -104,6 +105,10 @@ describe('DEFAULT_WEIGHTS', () => {
 describe('HOME_ADVANTAGE', () => {
   it('should be 1.5% (data-measured from 2023+2024+2025+2026 N=2180)', () => {
     expect(HOME_ADVANTAGE).toBe(0.015);
+  });
+  it('HOME_ADVANTAGE_PCT derive = HOME_ADVANTAGE * 100', () => {
+    expect(HOME_ADVANTAGE_PCT).toBe(1.5);
+    expect(HOME_ADVANTAGE_PCT).toBeCloseTo(HOME_ADVANTAGE * 100, 10);
   });
 });
 

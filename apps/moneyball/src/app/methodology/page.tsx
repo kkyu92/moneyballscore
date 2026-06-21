@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
+import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -290,7 +290,7 @@ export default function MethodologyPage() {
         </h2>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
           각 팩터를 -1 ~ +1 범위로 정규화한 뒤 가중치를 곱해 합산합니다. 결과에
-          홈팀 어드밴티지 +{(HOME_ADVANTAGE * 100).toFixed(1)}% 를 더하여 최종
+          홈팀 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}% 를 더하여 최종
           승률 0 ~ 1 을 산출. 가중치 합계 = {(totalWeight * 100).toFixed(0)}%.
         </p>
         <div className="overflow-x-auto">
@@ -326,9 +326,9 @@ export default function MethodologyPage() {
           </table>
         </div>
         <p className="text-xs text-gray-500 dark:text-brand-400">
-          홈팀 어드밴티지 +{(HOME_ADVANTAGE * 100).toFixed(1)}% 는 2023 ~ 2026
+          홈팀 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}% 는 2023 ~ 2026
           시즌 N=2180 경기 데이터에서 측정한 홈 승률 51.93% 기반. 통계적 의미를
-          가지지 않을 만큼 작아 보수적으로 +1.5% 만 반영.
+          가지지 않을 만큼 작아 보수적으로 +{HOME_ADVANTAGE_PCT.toFixed(1)}% 만 반영.
         </p>
       </section>
 
