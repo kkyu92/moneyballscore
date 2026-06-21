@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
+import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -359,7 +359,7 @@ export default function MethodologyPage() {
             <h3 className="font-semibold mb-1">심판 에이전트 (Sonnet)</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               양측 주장을 비교 (Steelman 원칙) 하여 정량 모델 결과에 ±5% 보정.
-              승률을 0.15 ~ 0.85 범위로 제한 (극단 회피).
+              승률을 {WINNER_PROB_CLAMP_MIN} ~ {WINNER_PROB_CLAMP_MAX} 범위로 제한 (극단 회피).
             </p>
           </div>
         </div>

@@ -25,7 +25,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, clampWinnerProb } from '@moneyball/shared';
 import {
   loadDecidedGames,
   fetchEloHistory,
@@ -125,8 +125,7 @@ function manualScore(f: GameFeatures, weights: Record<string, number>): number {
   for (const [key, w] of Object.entries(weights)) {
     weightedSum += (factors[key] ?? 0.5) * w;
   }
-  const prob = weightedSum / weightSum + HOME_ADVANTAGE;
-  return Math.max(0.15, Math.min(0.85, prob));
+  return clampWinnerProb(weightedSum / weightSum + HOME_ADVANTAGE);
 }
 
 const WEIGHTS_V15: Record<string, number> = { ...DEFAULT_WEIGHTS };

@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_TEAMS } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_TEAMS, clampWinnerProb } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
 import { scoreParkWeather, parkWeatherFactor } from '../factors/park-weather';
@@ -136,8 +136,8 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
   // 홈 어드밴티지 적용
   homeWinProb += HOME_ADVANTAGE;
 
-  // 범위 제한 (0.15 ~ 0.85)
-  homeWinProb = Math.max(0.15, Math.min(0.85, homeWinProb));
+  // 범위 제한 — WINNER_PROB_CLAMP_MIN/MAX 단일 source (silent drift family wave 93)
+  homeWinProb = clampWinnerProb(homeWinProb);
 
   // 신뢰도: 0.5에서 멀수록 높음
   const confidence = Math.abs(homeWinProb - 0.5) * 2;

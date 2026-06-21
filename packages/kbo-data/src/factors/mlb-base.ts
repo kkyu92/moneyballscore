@@ -1,3 +1,5 @@
+import { clampWinnerProb } from '@moneyball/shared';
+
 export const MLB_BASE_WEIGHTS = {
   // KBO 10 동등
   sp_fip: 0.12,
@@ -88,6 +90,5 @@ export function computeMlbProbability(input: MlbFactorInputs): number {
 
   if (!Number.isFinite(homeAdvantage)) return 0.5;
 
-  const p = 0.5 + homeAdvantage;
-  return Math.max(0.15, Math.min(0.85, p));
+  return clampWinnerProb(0.5 + homeAdvantage);
 }

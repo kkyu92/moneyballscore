@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -160,7 +160,7 @@ const FAQS = [
   },
   {
     q: "왜 가끔 예측이 50:50 으로 표시되나요?",
-    a: "두 팀의 종합 전력이 거의 동일하다고 모델이 판단한 경우입니다. 박빙 경기는 변수가 많아 일부러 극단으로 보정하지 않습니다(심판 에이전트가 0.15 ~ 0.85 범위로 제한). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합합니다.",
+    a: `두 팀의 종합 전력이 거의 동일하다고 모델이 판단한 경우입니다. 박빙 경기는 변수가 많아 일부러 극단으로 보정하지 않습니다(심판 에이전트가 ${WINNER_PROB_CLAMP_MIN} ~ ${WINNER_PROB_CLAMP_MAX} 범위로 제한). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합합니다.`,
   },
   {
     q: "팀 페이지의 파크팩터(Park Factor) 는 무엇인가요?",

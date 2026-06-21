@@ -1,4 +1,4 @@
-import { HOME_ADVANTAGE, KBO_TEAMS } from '@moneyball/shared';
+import { HOME_ADVANTAGE, KBO_TEAMS, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { GameFeatures, Model } from './types';
 
@@ -22,7 +22,7 @@ export const modelCoinFlip: Model = () => 0.5;
 /** Elo 차 + 고정 홈어드밴티지 (51.5% 실측) → p(home). v1.5 의 elo + home_adv 부분만. */
 export const modelEloHomeAdv: Model = (f) => {
   const delta = f.homeElo - f.awayElo + HOME_ADV_ELO_DEFAULT;
-  return clamp(sigmoidElo(delta), 0.15, 0.85);
+  return clamp(sigmoidElo(delta), WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX);
 };
 
 /**
@@ -55,8 +55,8 @@ export const DEFAULT_RESTRICTED: RestrictedParams = {
   kPark: 2,
   homeAdvElo: HOME_ADV_ELO_DEFAULT,
   h2hMinN: 2,
-  clampLo: 0.15,
-  clampHi: 0.85,
+  clampLo: WINNER_PROB_CLAMP_MIN,
+  clampHi: WINNER_PROB_CLAMP_MAX,
 };
 
 /**
