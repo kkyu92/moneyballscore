@@ -15,6 +15,7 @@ import {
   KBO_FACTOR_COUNT,
   KBO_SEASON_YEAR,
   KBO_TEAMS,
+  MIN_TEAM_PREDICTIONS,
   assertSelectOk,
   pickTierEmoji,
   shortTeamName,
@@ -189,7 +190,7 @@ export default async function DashboardPage() {
   }
 
   const teamData = Array.from(teamMap.entries())
-    .filter(([, stats]) => stats.total >= 3)
+    .filter(([, stats]) => stats.total >= MIN_TEAM_PREDICTIONS)
     .map(([team, stats]) => ({
       team: shortTeamName(team as TeamCode),
       accuracy: Math.round((stats.correct / stats.total) * 1000) / 10,

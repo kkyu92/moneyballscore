@@ -513,6 +513,14 @@ export const BRIER_BASELINE = 0.25;
  */
 export const SMALL_SAMPLE_N = 5;
 
+/**
+ * 팀별 적중률 차트 표시 최소 검증 경기 수 — silent drift family wave 113
+ * (cycle 1329) — dashboard/page.tsx `stats.total >= 3` filter + TeamPerformanceChart
+ * UI hedge ("3경기 이상 검증" / "최소 3경기 예측") 단일 source. 본 상수가 single
+ * source. 변경 시 차트 빈 상태 라벨 자동 sync.
+ */
+export const MIN_TEAM_PREDICTIONS = 3;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
