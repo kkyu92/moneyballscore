@@ -645,7 +645,7 @@ export async function runDailyPipeline(
 
     // cycle 1127 plan-v17 candidate N Tier 2 — V2_MODEL_ENABLED=true 시 production
     // 가중치 SHADOW_V20_WEIGHTS swap. default OFF = DEFAULT_WEIGHTS (v1.8) 유지.
-    // n=150 v1.8 cohort 측정 완료 (ETA 2026-07-22, cycle 1098 갱신) 후 flag flip → v2.0 canary.
+    // n=150 v1.8 cohort 측정 완료 후 flag flip → v2.0 canary. live progress = /accuracy.
     const productionWeights = isV2ModelEnabled() ? SHADOW_V20_WEIGHTS : undefined;
     const quantResult = predict(input, { weights: productionWeights });
 

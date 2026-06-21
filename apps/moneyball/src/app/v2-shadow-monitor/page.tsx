@@ -85,7 +85,7 @@ export default function V2ShadowMonitorPage() {
         </p>
         <p className="text-sm text-brand-600 dark:text-brand-300 leading-relaxed">
           <strong className="text-brand-800 dark:text-brand-100">결정 임계</strong>{" "}
-          = v1.8 real cohort n=150 도달 (ETA 2026-07-22). 도달 후 era별 factor
+          = v1.8 real cohort n=150 도달. 도달 후 era별 factor
           backtest harness 실행 → v2.0 가중치 후보 평가 → 정식 적용 여부 결정.
           본 dashboard 는 cohort 갱신 시점마다 자동 갱신됩니다.
         </p>
