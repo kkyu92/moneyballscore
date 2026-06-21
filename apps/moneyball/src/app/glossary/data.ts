@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, ELO_NEUTRAL, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, RECENT_FORM_GAMES } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, ELO_NEUTRAL, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, RECENT_FORM_GAMES, BRIER_BASELINE } from '@moneyball/shared';
 import type { GlossaryCategorySlug } from '@/components/glossary/GlossaryCategoryFilter';
 
 export type GlossaryEntry = {
@@ -301,7 +301,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         fullName: 'Brier Score',
         definition:
           '예측 승률과 실제 결과(0 또는 1)의 제곱 오차 평균. 적중률만 보면 신뢰도 정보가 빠지지만 Brier 는 신뢰도까지 평가. 낮을수록 ↑정확.',
-        range: '0.25 = 동전 던지기 / 0.20 이하 = 우수. 우리 모델 ≈ 0.246 (n=119 기준).',
+        range: `${BRIER_BASELINE} = 동전 던지기 / 0.20 이하 = 우수. 우리 모델 ≈ 0.246 (n=119 기준).`,
         modelUsage: '모델 진화 결정 기준 — 새 가중치 후보 채택 여부 판정.',
         source: '내부 계산',
       },

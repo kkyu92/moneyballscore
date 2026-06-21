@@ -30,6 +30,8 @@ import {
   WINNER_TIER_LABEL,
   WINNER_TIER_EMOJI_POOL,
   pickTierEmoji,
+  ACCURACY_BASELINE,
+  BRIER_BASELINE,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -132,6 +134,18 @@ describe('HOME_WIN_RATE (silent drift wave 105)', () => {
     const rawAdvantagePp = HOME_WIN_RATE_PCT - 50;
     expect(rawAdvantagePp).toBeCloseTo(1.93, 10);
     expect(HOME_ADVANTAGE_PCT).toBeLessThan(rawAdvantagePp);
+  });
+});
+
+describe('BRIER_BASELINE (silent drift wave 106)', () => {
+  it('BRIER_BASELINE = 0.25 (coin-flip baseline)', () => {
+    expect(BRIER_BASELINE).toBe(0.25);
+  });
+  it('BRIER_BASELINE === ACCURACY_BASELINE ** 2 (수학적 정합: Brier = (p-y)² @ p=0.5)', () => {
+    expect(BRIER_BASELINE).toBeCloseTo(ACCURACY_BASELINE ** 2, 10);
+  });
+  it('toFixed(5) representation = "0.25000" (debug model-comparison footer 보장)', () => {
+    expect(BRIER_BASELINE.toFixed(5)).toBe('0.25000');
   });
 });
 

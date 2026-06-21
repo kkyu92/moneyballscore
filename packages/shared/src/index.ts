@@ -464,6 +464,20 @@ export const SUNDAY_CAP_CONFIDENCE = 0.45;
 export const ACCURACY_BASELINE = 0.5;
 
 /**
+ * Brier 점수 기준선 — coin-flip baseline (p=0.5 → Brier = 0.25). 사용자 가시
+ * 본문 (guide / methodology / accuracy / glossary / debug model-comparison /
+ * debug reliability) 의 "0.25 = 동전 던지기" / "0.25 = baseline" / "coin_flip
+ * baseline = 0.25000" 단일 source. ACCURACY_BASELINE (0.5 적중률) 의 Brier
+ * 차원 sibling — 두 baseline 함께 변경 X (Brier = (0.5 - 0/1)² = 0.25 = 0.5²).
+ *
+ * silent drift family wave 106 (cycle 1320) — 6 user-visible file 7 occurrence
+ * hardcoded `0.25` Brier baseline swap.
+ *
+ * derive: BRIER_BASELINE === ACCURACY_BASELINE ** 2 (수학적 정합 — test 자동 검증).
+ */
+export const BRIER_BASELINE = 0.25;
+
+/**
  * 소표본 hedge 임계 — verifiedN < SMALL_SAMPLE_N 시 적중률을 흐림 색 / "참고용"
  * 라벨로 노출. 본 임계는 통계적 유의성 (≥5경기) 보다는 사용자 UX 의 "표본 부족"
  * 자연어 경계. 팀별 (teams/[code]) + 선수별 (players hub) 동일 임계 사용 —

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from "@moneyball/shared";
+import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -383,7 +383,7 @@ export default function MethodologyPage() {
             <h3 className="font-semibold mb-2">Brier Score</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               예측 승률과 실제 결과 (0 또는 1) 의 제곱 오차 평균. 낮을수록
-              ↑정확. 0.25 = 동전 던지기 수준, 0.20 이하 = 우수. 실측치는{" "}
+              ↑정확. {BRIER_BASELINE} = 동전 던지기 수준, 0.20 이하 = 우수. 실측치는{" "}
               <Link href="/accuracy" className="text-brand-500 hover:underline">
                 /accuracy
               </Link>{" "}
