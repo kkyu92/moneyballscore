@@ -1,4 +1,4 @@
-import { clampWinnerProb } from '@moneyball/shared';
+import { clampWinnerProb, HOME_ELO_BONUS } from '@moneyball/shared';
 
 export const MLB_BASE_WEIGHTS = {
   // KBO 10 동등
@@ -47,7 +47,7 @@ export const MLB_FACTOR_COUNTS = {
   total: MLB_KBO_FACTOR_KEYS.length + MLB_STATCAST_FACTOR_KEYS.length,
 } as const;
 
-export const HOME_ELO_BONUS_VALUE = 24;
+export const HOME_ELO_BONUS_VALUE = HOME_ELO_BONUS;
 
 export interface MlbFactorInputs {
   sp_fip: { home: number; away: number };
