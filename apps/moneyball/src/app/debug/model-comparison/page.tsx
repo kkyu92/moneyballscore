@@ -10,6 +10,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { BRIER_BASELINE } from '@moneyball/shared';
 import {
   aggregateByModel,
   buildShadowRows,
@@ -298,7 +299,7 @@ export default async function ModelComparisonPage() {
       </section>
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t pt-4">
-        Brier score 낮을수록 좋음. coin_flip baseline = 0.25000. Acc 50% 는
+        Brier score 낮을수록 좋음. coin_flip baseline = {BRIER_BASELINE.toFixed(5)}. Acc 50% 는
         홈팀 승률 선 (v1.x 리그 평균 51.87%). 4-6주 축적 (N≥200) 후 통계적
         유의성 판단 가능.
       </footer>

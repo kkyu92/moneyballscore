@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { BRIER_BASELINE } from '@moneyball/shared';
 import { neutral, brand } from '@/lib/design-tokens';
 
 // /debug/reliability — 예측 신뢰도 reliability diagram
@@ -343,7 +344,7 @@ export default async function ReliabilityPage() {
             <p className="text-xs text-gray-500 dark:text-gray-400">
               세로 막대 = 95% Wald CI. 회색 점 = 표본 N &lt; 5 (해석 주의).
               Brier score: <span className="font-mono">{brier.toFixed(3)}</span>
-              (0 = perfect, 0.25 = 동전 던지기).
+              (0 = perfect, {BRIER_BASELINE} = 동전 던지기).
             </p>
           </section>
 

@@ -16,6 +16,7 @@ import {
   shortTeamName,
   DEBATE_VERSION_PREGAME,
   SUNDAY_CAP_CONFIDENCE,
+  BRIER_BASELINE,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -600,7 +601,7 @@ export default async function AccuracyPage() {
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-bold">Brier 추세 (모델 진화)</h2>
             <span className="text-xs text-gray-400 dark:text-gray-500">
-              낮을수록 정확. 0.25 = baseline
+              낮을수록 정확. {BRIER_BASELINE} = baseline
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
