@@ -6,6 +6,10 @@
 // 자율 영역 한도: CSV 박제 only (Step 3 사용자 Python sidecar 영역 inference 입력).
 // docs/research/tabpfn-data-prep.md schema 정합. cycle 1130 v17 candidate P.
 
+import { HOME_ADVANTAGE } from '@moneyball/shared';
+
+export { HOME_ADVANTAGE };
+
 export const REQUIRED_FACTORS = [
   'sp_fip',
   'sp_xfip',
@@ -18,8 +22,6 @@ export const REQUIRED_FACTORS = [
   'elo',
   'sfr',
 ] as const;
-
-export const HOME_ADVANTAGE = 0.015;
 
 export const CSV_HEADER = [
   'game_id',
