@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, V2_PROMOTION_COHORT_N, type TeamCode } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -14,11 +14,10 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/v2-preview`;
 const LIMIT = 30;
 
-// noindex 내부 미리보기 — N=150 도달 후 prod 적용 결정 전까지 surface signal 차단.
+// noindex 내부 미리보기 — N={V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정 전까지 surface signal 차단.
 export const metadata: Metadata = {
   title: "v2 시뮬레이션 미리보기",
-  description:
-    "v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 v1.8 예측 위에 재가중치 적용한 내부 미리보기. N=150 도달 후 prod 적용 결정.",
+  description: `v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 v1.8 예측 위에 재가중치 적용한 내부 미리보기. N=${V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.`,
   alternates: { canonical: PAGE_URL },
   robots: { index: false, follow: false },
 };
@@ -133,7 +132,7 @@ export default async function V2PreviewPage() {
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           v2.1-B 가중치 (backtest Brier 0.24830) 를 현 v1.8 예측에 재가중치 적용한 내부
-          미리보기. 실제 예측에 영향 X. N=150 도달 후 prod 적용 결정.
+          미리보기. 실제 예측에 영향 X. N={V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.
         </p>
         <div
           role="status"
@@ -143,7 +142,7 @@ export default async function V2PreviewPage() {
           <Link href="/predictions" className="underline">
             예측 기록
           </Link>{" "}
-          에서 확인하세요. 가중치는 N=150 도달 후 변경될 수 있습니다.
+          에서 확인하세요. 가중치는 N={V2_PROMOTION_COHORT_N} 도달 후 변경될 수 있습니다.
         </div>
       </header>
 
