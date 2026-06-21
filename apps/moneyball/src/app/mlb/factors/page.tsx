@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/kbo-data";
+import { V2_PROMOTION_COHORT_N } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
@@ -271,7 +272,7 @@ export default function MlbFactorsHub() {
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           가중치 합 = {weightPercent(sum)} (홈 보너스 {weightPercent(MLB_BASE_WEIGHTS.home_elo_bonus)} 포함). 본 가중치 ={" "}
-          <code>packages/kbo-data/src/factors/mlb-base.ts</code> 정의. 모델 진화 (n=150 forward cohort 후) 시 갱신.
+          <code>packages/kbo-data/src/factors/mlb-base.ts</code> 정의. 모델 진화 (n={V2_PROMOTION_COHORT_N} forward cohort 후) 시 갱신.
         </p>
       </header>
 

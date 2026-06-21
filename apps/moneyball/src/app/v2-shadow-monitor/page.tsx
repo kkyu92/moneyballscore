@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { loadLatestCohort } from "@/lib/v2-shadow-monitor/loader";
-import { KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, V2_PROMOTION_COHORT_N } from "@moneyball/shared";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
@@ -10,7 +10,7 @@ const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
 export const metadata: Metadata = {
   title: "v2 섀도우 모니터",
   description:
-    "v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=150 도달 시 v2.0 가중치 확정 결정을 위한 모델 진화 트랜스페어런시 dashboard.",
+    `v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정을 위한 모델 진화 트랜스페어런시 dashboard.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "v2 섀도우 모니터 | MoneyBall Score",
@@ -41,7 +41,7 @@ export default function V2ShadowMonitorPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score v2 섀도우 모니터",
     description:
-      "v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=150 도달 시 v2.0 가중치 확정 결정.",
+      `v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정.`,
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
     datePublished: "2026-06-01",
@@ -85,7 +85,7 @@ export default function V2ShadowMonitorPage() {
         </p>
         <p className="text-sm text-brand-600 dark:text-brand-300 leading-relaxed">
           <strong className="text-brand-800 dark:text-brand-100">결정 임계</strong>{" "}
-          = v1.8 real cohort n=150 도달. 도달 후 era별 factor
+          = v1.8 real cohort n={V2_PROMOTION_COHORT_N} 도달. 도달 후 era별 factor
           backtest harness 실행 → v2.0 가중치 후보 평가 → 정식 적용 여부 결정.
           본 dashboard 는 cohort 갱신 시점마다 자동 갱신됩니다.
         </p>

@@ -52,6 +52,7 @@ export {
   LLM_ACTIVE_VERSIONS,
   DEBATE_VERSION_PREGAME,
   DEBATE_VERSION_POSTVIEW,
+  V2_PROMOTION_COHORT_N,
 } from './model-version-labels';
 export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
 

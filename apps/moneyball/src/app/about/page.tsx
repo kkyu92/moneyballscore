@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, V2_PROMOTION_COHORT_N } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -172,7 +172,7 @@ const FAQS = [
   },
   {
     q: "모델 버전 v1.8 은 무엇을 의미하나요?",
-    a: "현재 가동 중인 가중치 조합 버전입니다. v1.8 (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 0.55 초과 시 0.45 로 강등(Sunday cap). 누적 검증 표본 n=150 도달 시 v2.0 전면 재조정 예정. 자세한 진화 history 는 /methodology 페이지 참조.",
+    a: `현재 가동 중인 가중치 조합 버전입니다. v1.8 (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 0.55 초과 시 0.45 로 강등(Sunday cap). 누적 검증 표본 n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 전면 재조정 예정. 자세한 진화 history 는 /methodology 페이지 참조.`,
   },
   {
     q: "픽 기록은 어떻게 시작하나요?",

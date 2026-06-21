@@ -106,3 +106,14 @@ export const LLM_ACTIVE_VERSIONS: ReadonlySet<ModelVersion> = new Set<ModelVersi
   LLM_DEBATE_VERSION,
   LLM_POSTVIEW_VERSION,
 ]);
+
+/**
+ * v2.0 가중치 확정 임계 cohort 표본 — n=150 도달 시 v2.0 promotion 결정.
+ *
+ * silent drift family wave 89 (cycle 1297) — 사용자 가시 layer (v2-shadow-monitor /
+ * methodology / about / accuracy/shadow / mlb factors KO+EN) 6 파일 11 occurrence
+ * hardcoded "n=150" → 본 상수 참조 swap. 임계 변경 (예: n=200 / n=100 재정의) 시
+ * 본 상수 1줄 갱신 = 사용자 가시 layer 자동 동기. v2.0 promotion 결정 직후 본 라벨
+ * 의미 deprecated (n=150 도달 후 era별 backtest harness 실행 → 가중치 후보 평가).
+ */
+export const V2_PROMOTION_COHORT_N = 150 as const;
