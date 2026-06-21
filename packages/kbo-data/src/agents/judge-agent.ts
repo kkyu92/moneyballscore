@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, KBO_TEAMS, WINNER_PROB_LEAN, errMsg } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, KBO_TEAMS, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
@@ -127,8 +127,8 @@ function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCode): Ju
  * 심판 에이전트: 양쪽 논거 + 정량 모델 + 회고 보정 → 최종 확률
  *
  * 후처리 거동:
- * - 일요일 confidence cap 0.45 (`context.game.date` 의 UTC 요일 == 0 + confidence > 0.55).
- *   medium tier(≥0.55) 오분류 차단 — low tier 명확 배치.
+ * - 일요일 confidence cap SUNDAY_CAP_CONFIDENCE (`context.game.date` 의 UTC 요일 == 0 + confidence > WINNER_PROB_LEAN).
+ *   medium tier(≥WINNER_PROB_LEAN) 오분류 차단 — low tier 명확 배치.
  * - reasoning validation: `validateJudgeReasoning` 위반 시 mask + Sentry tag + `validator_logs` row.
  * - `context` 미전달 (legacy 호출부) 시 두 후처리 모두 skip — 후방 호환.
  */
@@ -152,8 +152,8 @@ export async function runJudgeAgent(
   );
 
   // Sunday confidence cap: 일요일 과적합 방지 (n≈20 적중률 ~15%, W20 1/5=20%)
-  // cap 0.45: 0.55 경계는 medium tier(≥0.55) 오분류 → 실측 low 정확도가 medium tier 오염.
-  // 0.45 = low tier 명확 배치.
+  // cap SUNDAY_CAP_CONFIDENCE: WINNER_PROB_LEAN 경계는 medium tier 오분류 → 실측 low 정확도가 medium tier 오염.
+  // SUNDAY_CAP_CONFIDENCE = low tier 명확 배치.
   if (context && result.success && result.data && result.data.confidence > WINNER_PROB_LEAN) {
     const dow = new Date(context.game.date + 'T00:00:00Z').getUTCDay(); // 0=일요일
     if (dow === 0) {
@@ -161,10 +161,10 @@ export async function runJudgeAgent(
         ...result,
         data: {
           ...result.data,
-          confidence: 0.45,
+          confidence: SUNDAY_CAP_CONFIDENCE,
           calibrationApplied: result.data.calibrationApplied
-            ? `${result.data.calibrationApplied}; 일요일 상한 0.45`
-            : '일요일 상한 0.45',
+            ? `${result.data.calibrationApplied}; 일요일 상한 ${SUNDAY_CAP_CONFIDENCE}`
+            : `일요일 상한 ${SUNDAY_CAP_CONFIDENCE}`,
         },
       };
     }

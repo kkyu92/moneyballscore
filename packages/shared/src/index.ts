@@ -332,6 +332,18 @@ export const WINNER_PROB_CONFIDENT = 0.65;
 export const WINNER_PROB_LEAN = 0.55;
 
 /**
+ * Sunday confidence cap — 일요일 경기 confidence > WINNER_PROB_LEAN(0.55) 시
+ * 본 값으로 하향 (judge-agent.ts). 사용자 가시 표기 (about / methodology / guide)
+ * 와 logic 양쪽 단일 source.
+ *
+ * silent drift family wave 90 (cycle 1298) — wave 88 (CURRENT_SCORING_RULE) /
+ * wave 87 (KBO_PREDICT_DAILY_TIME_KST) 패턴의 Sunday cap 차원 확장.
+ *
+ * cycle 309 도입 — n≈20 적중률 ~15%, W20 1/5=20% 실측 → medium tier 오염 차단.
+ */
+export const SUNDAY_CAP_CONFIDENCE = 0.45;
+
+/**
  * 소표본 hedge 임계 — verifiedN < SMALL_SAMPLE_N 시 적중률을 흐림 색 / "참고용"
  * 라벨로 노출. 본 임계는 통계적 유의성 (≥5경기) 보다는 사용자 UX 의 "표본 부족"
  * 자연어 경계. 팀별 (teams/[code]) + 선수별 (players hub) 동일 임계 사용 —

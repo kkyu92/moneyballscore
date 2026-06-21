@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -160,7 +160,7 @@ export default function GuidePage() {
             같은 페이지 하단에서 모델 버전별 (v1.5 / v1.6 / v1.7-revert / v1.8) /
             요일별 (월~일) / 팀별 ({KBO_TEAM_COUNT}팀) 적중률을 분해해서 확인 가능. 예:
             일요일 경기 적중률이 낮다는 사실을 발견하여 Sunday cap (일요일
-            신뢰도 0.45 강등) 룰을 도입한 evidence 가 이 차트에 있습니다.
+            신뢰도 {SUNDAY_CAP_CONFIDENCE} 강등) 룰을 도입한 evidence 가 이 차트에 있습니다.
           </p>
         </div>
       </section>
