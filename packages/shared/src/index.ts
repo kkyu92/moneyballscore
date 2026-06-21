@@ -284,6 +284,26 @@ export const HOME_ADVANTAGE = 0.015;
 export const HOME_ADVANTAGE_PCT = HOME_ADVANTAGE * 100;
 
 /**
+ * HOME_ADVANTAGE 실측 데이터 박제 (silent drift family wave 105 — cycle 1319).
+ *
+ * 2026-04-21 측정 (2023+2024+2025+2026 N=2180): 홈 승률 51.93% ±2.10pp.
+ * 사용자 가시 layer (methodology / about / glossary) "51.93%" / "2,180경기" / "N=2180"
+ * / "±2.1%p" hardcoded 사용자 가시 string 4 occurrence 단일 source.
+ *
+ * HOME_ADVANTAGE (0.015) 와 derive 관계 = 보수적 박제 (실측 1.93pp 중 통계 noise 흡수
+ * → 1.5pp). 새 데이터 측정 시 본 3 constant 갱신 + 사용자 가시 layer 자동 동기.
+ *
+ * 4 occurrence 분포 (cycle 1319 측정):
+ *   - methodology page.tsx 1건 ("N=2180 경기 ... 홈 승률 51.93% 기반")
+ *   - about page.tsx 1건 ("2,180경기 실제 홈 승률 51.93% ±2.1%p 기준")
+ *   - glossary data.ts 1건 ("실측 (2023~2026 N=2180) 51.93% — 가산 1.93%p")
+ *   - 본 index.ts 코멘트 2건 (line 273 / line 384) = 단일 source 박제 위치 자체
+ */
+export const HOME_WIN_RATE_PCT = 51.93;
+export const HOME_WIN_RATE_SAMPLE_N = 2180;
+export const HOME_WIN_RATE_CI_PP = 2.10;
+
+/**
  * 최근 폼 (recent form) factor 의 슬라이스 윈도우 — KBO/MLB 공통 10경기.
  * silent drift family wave 92 (cycle 1303) — wave 91 (HOME_ADVANTAGE_PCT) 패턴 정합.
  *

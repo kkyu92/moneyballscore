@@ -8,6 +8,9 @@ import {
   ACTIVE_FACTOR_KEYS,
   HOME_ADVANTAGE,
   HOME_ADVANTAGE_PCT,
+  HOME_WIN_RATE_PCT,
+  HOME_WIN_RATE_SAMPLE_N,
+  HOME_WIN_RATE_CI_PP,
   getConfidenceColor,
   getAccuracyColor,
   shortTeamName,
@@ -112,6 +115,23 @@ describe('HOME_ADVANTAGE', () => {
   it('HOME_ADVANTAGE_PCT derive = HOME_ADVANTAGE * 100', () => {
     expect(HOME_ADVANTAGE_PCT).toBe(1.5);
     expect(HOME_ADVANTAGE_PCT).toBeCloseTo(HOME_ADVANTAGE * 100, 10);
+  });
+});
+
+describe('HOME_WIN_RATE (silent drift wave 105)', () => {
+  it('HOME_WIN_RATE_PCT = 51.93 (2023~2026 N=2180 measured)', () => {
+    expect(HOME_WIN_RATE_PCT).toBe(51.93);
+  });
+  it('HOME_WIN_RATE_SAMPLE_N = 2180', () => {
+    expect(HOME_WIN_RATE_SAMPLE_N).toBe(2180);
+  });
+  it('HOME_WIN_RATE_CI_PP = 2.10', () => {
+    expect(HOME_WIN_RATE_CI_PP).toBe(2.10);
+  });
+  it('HOME_ADVANTAGE 보수적 박제 vs raw 실측 (51.93 - 50 = 1.93pp, HOME_ADVANTAGE = 1.5pp ≈ noise 흡수)', () => {
+    const rawAdvantagePp = HOME_WIN_RATE_PCT - 50;
+    expect(rawAdvantagePp).toBeCloseTo(1.93, 10);
+    expect(HOME_ADVANTAGE_PCT).toBeLessThan(rawAdvantagePp);
   });
 });
 

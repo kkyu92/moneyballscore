@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, ELO_NEUTRAL, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, CURRENT_SCORING_RULE, ELO_NEUTRAL, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, RECENT_FORM_GAMES } from '@moneyball/shared';
 import type { GlossaryCategorySlug } from '@/components/glossary/GlossaryCategoryFilter';
 
 export type GlossaryEntry = {
@@ -273,7 +273,7 @@ export const CATEGORIES: GlossaryCategory[] = [
         fullName: 'Home Advantage',
         definition:
           `홈경기에서 유리한 정도. 친숙한 그라운드·이동 피로 없음·관중 응원 영향. 모든 정량 팩터 합산 후 별도로 +${HOME_ADVANTAGE_PCT.toFixed(1)}%p 가산.`,
-        range: '실측 (2023~2026 N=2180) 51.93% — 가산 1.93%p.',
+        range: `실측 (2023~2026 N=${HOME_WIN_RATE_SAMPLE_N}) ${HOME_WIN_RATE_PCT.toFixed(2)}% — 가산 ${(HOME_WIN_RATE_PCT - 50).toFixed(2)}%p.`,
         modelUsage: `+${HOME_ADVANTAGE_PCT.toFixed(1)}%p 고정 가산 (HOME_ADVANTAGE=${(HOME_ADVANTAGE_PCT / 100).toFixed(3)})`,
         source: '실측 데이터',
       },
