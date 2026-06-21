@@ -521,6 +521,20 @@ export const SMALL_SAMPLE_N = 5;
  */
 export const MIN_TEAM_PREDICTIONS = 3;
 
+/**
+ * 검증 경기 수 hedge 임계 — 누적 집계 rate / trend / 월간 delta 등 표시 직전
+ * 검증 표본이 본 임계 미만이면 UI 가림 (gated / 표시 안 함). 본 상수가 single
+ * source. 적용 surface:
+ *   - dashboard 확신 구간 차트 (buildConfidenceBuckets / ConfidenceBucketChart)
+ *   - AccuracyHeaderCard 최근 recent 추세 표시 (recentVerified ≥ N)
+ *   - buildMonthlyReview 전월 대비 delta 표시 (verifiedGames ≥ N)
+ *
+ * silent drift family wave 114 (cycle 1330) — 4 file 6 occurrence (코드 4 +
+ * 사용자 가시 string 2) 하드코딩 `10` swap. SMALL_SAMPLE_N (5, 팀/선수 차원
+ * 적중률 hedge) 와 별개 — 본 임계는 대시보드 차원 집계 표시 임계.
+ */
+export const MIN_VERIFIED_GAMES_HEDGE = 10;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

@@ -1,4 +1,8 @@
-import { WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN } from '@moneyball/shared';
+import {
+  MIN_VERIFIED_GAMES_HEDGE,
+  WINNER_PROB_CONFIDENT,
+  WINNER_PROB_LEAN,
+} from '@moneyball/shared';
 
 export interface ConfidenceBucketInput {
   confidence: number;
@@ -32,10 +36,9 @@ export interface ConfidenceBucketResult {
  *   0.60 ~ WINNER_PROB_CONFIDENT        → 확신 높음
  *   ≥ WINNER_PROB_CONFIDENT             → 확신 최상
  *
- * 전체 검증 표본이 MIN_TOTAL 미만이면 gated=true 반환 (UI는 "집계 중" 렌더).
+ * 전체 검증 표본이 MIN_VERIFIED_GAMES_HEDGE 미만이면 gated=true 반환 (UI는 "집계 중" 렌더).
  * 경계값은 하한 포함 / 상한 미포함.
  */
-const MIN_TOTAL = 10;
 
 const BUCKET_DEFS: Array<{ label: string; min: number; max: number }> = [
   { label: '확신 낮음', min: 0, max: WINNER_PROB_LEAN },
@@ -74,7 +77,7 @@ export function buildConfidenceBuckets(
 
   return {
     buckets,
-    gated: totalVerified < MIN_TOTAL,
+    gated: totalVerified < MIN_VERIFIED_GAMES_HEDGE,
     totalVerified,
   };
 }

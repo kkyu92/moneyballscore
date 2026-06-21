@@ -1,3 +1,5 @@
+import { MIN_VERIFIED_GAMES_HEDGE } from '@moneyball/shared';
+
 import { accuracyRateColorClass } from '@/lib/accuracy/buildAccuracyData';
 
 interface Props {
@@ -24,7 +26,7 @@ export function AccuracyHeaderCard({
   const showTrend =
     recentVerified !== undefined &&
     recentCorrect !== undefined &&
-    recentVerified >= 10 &&
+    recentVerified >= MIN_VERIFIED_GAMES_HEDGE &&
     totalVerified >= 30;
   const recentAccuracy = showTrend ? recentCorrect! / recentVerified! : 0;
   const deltaPp = showTrend
