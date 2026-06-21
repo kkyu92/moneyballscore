@@ -12,6 +12,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import {
+  ACCURACY_BASELINE,
   getAccuracyColor,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_LEAN,
@@ -112,7 +113,7 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
           margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
           barCategoryGap="20%"
         >
-          <ReferenceLine y={0.5} stroke={neutral[400]} strokeDasharray="3 2" strokeWidth={1} />
+          <ReferenceLine y={ACCURACY_BASELINE} stroke={neutral[400]} strokeDasharray="3 2" strokeWidth={1} />
           <Bar
             dataKey="rate"
             radius={[3, 3, 0, 0]}

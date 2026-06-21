@@ -433,6 +433,17 @@ export const WINNER_PROB_LEAN = 0.55;
 export const SUNDAY_CAP_CONFIDENCE = 0.45;
 
 /**
+ * 적중률 기준선 — "동전 50%" coin-flip baseline. 차트 ReferenceLine
+ * (RollingAccuracyChart / WeeklyTrendMini / WinnerProbBucketChart) + 색상 threshold
+ * (ScoringRuleDayHeatmap >=50% yellow) 단일 source. 사용자 가시 본문은 "동전"
+ * "50%" 표기 — 본 상수 변경 시 라벨도 sync.
+ *
+ * silent drift family wave 104 (cycle 1318) — 4 chart file 4 occurrence
+ * hardcoded `0.5` 재선언 swap.
+ */
+export const ACCURACY_BASELINE = 0.5;
+
+/**
  * 소표본 hedge 임계 — verifiedN < SMALL_SAMPLE_N 시 적중률을 흐림 색 / "참고용"
  * 라벨로 노출. 본 임계는 통계적 유의성 (≥5경기) 보다는 사용자 UX 의 "표본 부족"
  * 자연어 경계. 팀별 (teams/[code]) + 선수별 (players hub) 동일 임계 사용 —
