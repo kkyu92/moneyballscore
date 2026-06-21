@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { V2_PROMOTION_COHORT_N } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -98,7 +99,7 @@ export default function Image() {
           }}
         >
           <span>moneyballscore.vercel.app/v2-preview</span>
-          <span>Internal · N=150 Pending</span>
+          <span>Internal · N={V2_PROMOTION_COHORT_N} Pending</span>
         </div>
       </div>
     ),
