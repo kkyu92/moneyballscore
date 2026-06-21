@@ -3,7 +3,7 @@
 /**
  * FactorWaterfallChart — 10 factor contribution waterfall (cycle 1021 (a3)).
  *
- * neutral 0.5 baseline 시작 → 각 factor contribution 누적 → final home win prob.
+ * neutral NEUTRAL_FACTOR baseline 시작 → 각 factor contribution 누적 → final home win prob.
  * recharts ComposedChart 활용 (이미 dependency).
  *
  * 사용자 가시 가치: 모델 prob 도출 path 시각화 — 어느 factor 가 어느 방향
@@ -12,7 +12,7 @@
  * 통합: analysis/game/[id]/page.tsx 안 DetailedFactorAnalysis 다음 박제.
  */
 
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, type TeamCode, shortTeamName } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, NEUTRAL_FACTOR, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, type TeamCode, shortTeamName } from "@moneyball/shared";
 import {
   Bar,
   Cell,
@@ -46,13 +46,13 @@ interface WaterfallBar {
 // FACTOR_LABELS map 안 한국어 label 활용. neutral 시 0 contribution.
 function computeWaterfall(factors: Record<string, number>): WaterfallBar[] {
   const bars: WaterfallBar[] = [];
-  let cumulative = 0.5; // neutral start
+  let cumulative = NEUTRAL_FACTOR; // neutral start
 
   // home advantage 추가 (DEFAULT_WEIGHTS 안 factor X — 별도)
   bars.push({
     factor: "home_advantage",
     label: "홈팀 어드밴티지",
-    rawValue: 0.5 + HOME_ADVANTAGE,
+    rawValue: NEUTRAL_FACTOR + HOME_ADVANTAGE,
     weight: 0,
     contribution: HOME_ADVANTAGE,
     cumulative: cumulative + HOME_ADVANTAGE,
@@ -67,8 +67,8 @@ function computeWaterfall(factors: Record<string, number>): WaterfallBar[] {
     if (typeof rawValue !== "number" || !Number.isFinite(rawValue)) continue;
     if (weight === 0) continue; // shadow factor skip
 
-    // contribution = (rawValue - 0.5) × weight (home favor 기준)
-    const contribution = (rawValue - 0.5) * weight;
+    // contribution = (rawValue - NEUTRAL_FACTOR) × weight (home favor 기준)
+    const contribution = (rawValue - NEUTRAL_FACTOR) * weight;
     const direction: "home" | "away" | "neutral" =
       rawValue > NEUTRAL_HI ? "home" : rawValue < NEUTRAL_LO ? "away" : "neutral";
     const newCumulative = cumulative + contribution;
@@ -93,11 +93,11 @@ function computeWaterfall(factors: Record<string, number>): WaterfallBar[] {
     label: "최종 확률",
     rawValue: finalProb,
     weight: 0,
-    contribution: finalProb - 0.5,
+    contribution: finalProb - NEUTRAL_FACTOR,
     cumulative: finalProb,
-    base: 0.5,
+    base: NEUTRAL_FACTOR,
     end: finalProb,
-    direction: finalProb >= 0.5 ? "home" : "away",
+    direction: finalProb >= NEUTRAL_FACTOR ? "home" : "away",
   });
 
   return bars;
@@ -180,7 +180,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
               tick={{ fill: "var(--color-brand-600)", fontSize: 11 }}
               stroke="var(--color-brand-300)"
             />
-            <ReferenceLine x={0.5} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
+            <ReferenceLine x={NEUTRAL_FACTOR} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--color-brand-50)" }} />
             <Bar
               dataKey={(d: WaterfallBar) => [d.base, d.end]}

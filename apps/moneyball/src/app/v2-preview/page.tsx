@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, V2_PROMOTION_COHORT_N, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, type TeamCode } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -228,7 +228,7 @@ export default async function V2PreviewPage() {
                   {row.v21b.missingFactorKeys.length > 0 ? (
                     <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                       누락 factor {row.v21b.missingFactorKeys.length}개 →
-                      중립 0.5 적용 ({row.v21b.missingFactorKeys.join(", ")})
+                      중립 {NEUTRAL_FACTOR} 적용 ({row.v21b.missingFactorKeys.join(", ")})
                     </p>
                   ) : null}
                 </li>

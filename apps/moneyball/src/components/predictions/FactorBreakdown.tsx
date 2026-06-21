@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, NEUTRAL_FACTOR, shortTeamName, type TeamCode } from "@moneyball/shared";
 import {
   FACTOR_GLOSSARY_ANCHORS,
   FACTOR_LABELS,
@@ -124,12 +124,12 @@ function getStatLabel(
 
 /**
  * factor 의 win prob 기여도 (percentage point).
- * value ∈ [0,1], 0.5=중립. 0.5 에서 멀어진 만큼 × weight × 2 = home prob 변화 (-1 ~ +1).
+ * value ∈ [0,1], NEUTRAL_FACTOR=중립. NEUTRAL_FACTOR 에서 멀어진 만큼 × weight × 2 = home prob 변화 (-1 ~ +1).
  * 100 곱해서 %p 단위로 표시.
  * 음수 = away 유리, 양수 = home 유리.
  */
 export function contributionPp(value: number, weight: number): number {
-  return (value - 0.5) * weight * 2 * 100;
+  return (value - NEUTRAL_FACTOR) * weight * 2 * 100;
 }
 
 function labelFor(key: string): string {
@@ -213,8 +213,8 @@ export function FactorBreakdown({
           );
           const isMeasuring = value == null;
 
-          // value: 0=원정유리, 0.5=중립, 1=홈유리. null 시 중립으로 표시.
-          const safeValue = value ?? 0.5;
+          // value: 0=원정유리, NEUTRAL_FACTOR=중립, 1=홈유리. null 시 중립으로 표시.
+          const safeValue = value ?? NEUTRAL_FACTOR;
           const barPct = Math.round(safeValue * 100);
           const favorable = isMeasuring
             ? "measuring"
