@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
 import { LeaderboardSortControl } from './LeaderboardSortControl';
@@ -56,7 +57,7 @@ export function LeaderboardClient({ entries, aiBaseline }: Props) {
         <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-xl p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-brand-800 dark:text-brand-200">전국 순위에 도전하세요!</p>
-            <p className="text-xs text-brand-600 dark:text-brand-400">픽 5개 이상 완료하면 순위에 등장합니다</p>
+            <p className="text-xs text-brand-600 dark:text-brand-400">픽 {MIN_LEADERBOARD_PICKS}개 이상 완료하면 순위에 등장합니다</p>
           </div>
           <button
             onClick={() => setShowModal(true)}

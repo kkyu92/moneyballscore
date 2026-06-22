@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -176,7 +176,7 @@ const FAQS = [
   },
   {
     q: "픽 기록은 어떻게 시작하나요?",
-    a: "/picks 페이지에서 닉네임을 설정하면 매 경기마다 어느 팀이 이길지 미리 선택할 수 있습니다. 5건 이상 완료하면 /leaderboard 에 자동 등재되어 다른 사용자와 적중률을 겨룰 수 있고, 같은 경기에서 AI 모델과의 대결 성적도 함께 표시됩니다.",
+    a: `/picks 페이지에서 닉네임을 설정하면 매 경기마다 어느 팀이 이길지 미리 선택할 수 있습니다. ${MIN_LEADERBOARD_PICKS}건 이상 완료하면 /leaderboard 에 자동 등재되어 다른 사용자와 적중률을 겨룰 수 있고, 같은 경기에서 AI 모델과의 대결 성적도 함께 표시됩니다.`,
   },
   {
     q: "예측 결과는 어디에 저장되며 검색 가능한가요?",

@@ -552,6 +552,24 @@ export const MIN_VERIFIED_GAMES_HEDGE = 10;
 export const INSIGHTS_ISR_HOURS = 24;
 export const INSIGHTS_ISR_SECONDS = INSIGHTS_ISR_HOURS * 60 * 60;
 
+/**
+ * 리더보드 등장 최소 픽 완료 건수 — silent drift family wave 116 (cycle 1333).
+ * 동일 숫자 10 user-visible surface (5 TS files) + SQL DB view 8 occurrence (4 migrations).
+ *
+ * user-visible (10 surface):
+ *   - leaderboard/page.tsx: PERIOD_NOTE 3건 + 본문 2건
+ *   - guide/page.tsx: "5건 누적" / "픽 5건 이상 완료하면"
+ *   - about/page.tsx: FAQ "5건 이상 완료하면"
+ *   - LeaderboardClient.tsx: CTA "픽 5개 이상 완료하면"
+ *   - LeaderboardTable.tsx: empty state "픽 5개 이상 완료 후"
+ *   - MyPicksClient.tsx: CTA "픽 5개 이상 완료하면"
+ *
+ * SQL DB views (참고, SQL layer 는 TypeScript 상수 직접 참조 불가):
+ *   - migrations 024/026/027/032 leaderboard views: HAVING COUNT(*) >= 5
+ *   변경 시 SQL views 도 동기 필요 (새 migration CREATE OR REPLACE VIEW).
+ */
+export const MIN_LEADERBOARD_PICKS = 5;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
