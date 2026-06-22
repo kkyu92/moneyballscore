@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, PREDICTIONS_ISR_SECONDS } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
 interface Props {
@@ -154,7 +154,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
   return (data ?? []) as unknown as DateGame[];
 }
 
-export const revalidate = 300;
+export const revalidate = PREDICTIONS_ISR_SECONDS;
 
 function formatTeamName(code: TeamCode | undefined): string {
   if (!code) return "";
