@@ -5,6 +5,7 @@ import {
   classifyWinnerProb,
   KBO_FACTOR_COUNT,
   pickTierEmoji,
+  PREDICTIONS_ISR_SECONDS,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
 } from "@moneyball/shared";
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 300;
+export const revalidate = PREDICTIONS_ISR_SECONDS;
 
 interface TierCount {
   predicted: number;

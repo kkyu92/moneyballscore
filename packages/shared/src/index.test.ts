@@ -56,6 +56,8 @@ import {
   ACCURACY_ISR_SECONDS,
   SEASONS_ISR_MINUTES,
   SEASONS_ISR_SECONDS,
+  PREDICTIONS_ISR_MINUTES,
+  PREDICTIONS_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -139,6 +141,12 @@ describe('KBO_TEAMS', () => {
     expect(SEASONS_ISR_MINUTES).toBe(10);
     expect(SEASONS_ISR_SECONDS).toBe(SEASONS_ISR_MINUTES * 60);
     expect(SEASONS_ISR_SECONDS).toBe(600);
+  });
+
+  it('PREDICTIONS_ISR_SECONDS derives from PREDICTIONS_ISR_MINUTES (silent drift wave 130 guard)', () => {
+    expect(PREDICTIONS_ISR_MINUTES).toBe(5);
+    expect(PREDICTIONS_ISR_SECONDS).toBe(PREDICTIONS_ISR_MINUTES * 60);
+    expect(PREDICTIONS_ISR_SECONDS).toBe(300);
   });
 
   it('should have required fields for each team', () => {

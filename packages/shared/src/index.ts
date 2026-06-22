@@ -782,6 +782,22 @@ export const ACCURACY_ISR_SECONDS = ACCURACY_ISR_HOURS * 60 * 60;
 export const SEASONS_ISR_MINUTES = 10;
 export const SEASONS_ISR_SECONDS = SEASONS_ISR_MINUTES * 60;
 
+/**
+ * Predictions 페이지 ISR 갱신 주기 — silent drift family wave 130 (cycle 1349).
+ * 동일 magic 300 (5분) code-only silent drift. predictions/page.tsx +
+ * predictions/[date]/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.
+ * 경기 시작 직후 status (예정→진행→종료) 빠른 반영 위해 5분 통일. wave 121~129
+ * family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence):
+ *   - predictions/page.tsx: export const revalidate = 300
+ *   - predictions/[date]/page.tsx: export const revalidate = 300
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const PREDICTIONS_ISR_MINUTES = 5;
+export const PREDICTIONS_ISR_SECONDS = PREDICTIONS_ISR_MINUTES * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
