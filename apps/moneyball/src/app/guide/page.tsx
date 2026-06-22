@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN, BRIER_BASELINE } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN, BRIER_BASELINE, MIN_LEADERBOARD_PICKS } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -187,7 +187,7 @@ export default function GuidePage() {
             생각하는지&quot; 미리 선택. 경기 시작 전까지 변경 가능.
           </li>
           <li>
-            <strong>5건 누적</strong> — 픽 5건 이상 완료하면{" "}
+            <strong>{MIN_LEADERBOARD_PICKS}건 누적</strong> — 픽 {MIN_LEADERBOARD_PICKS}건 이상 완료하면{" "}
             <Link href="/leaderboard" className="text-brand-500 hover:underline">
               /leaderboard
             </Link>{" "}

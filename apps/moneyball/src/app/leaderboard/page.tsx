@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
@@ -39,9 +40,9 @@ const PERIOD_LABEL: Record<PeriodTab, string> = {
   all: '누적',
 };
 const PERIOD_NOTE: Record<PeriodTab, string> = {
-  monthly: '매월 1일 (KST) 초기화 · 픽 5개 이상 완료 시 등장',
-  season: '현재 KBO 시즌 누적 · 픽 5개 이상 완료 시 등장',
-  all: '전체 기간 누적 · 픽 5개 이상 완료 시 등장',
+  monthly: `매월 1일 (KST) 초기화 · 픽 ${MIN_LEADERBOARD_PICKS}개 이상 완료 시 등장`,
+  season: `현재 KBO 시즌 누적 · 픽 ${MIN_LEADERBOARD_PICKS}개 이상 완료 시 등장`,
+  all: `전체 기간 누적 · 픽 ${MIN_LEADERBOARD_PICKS}개 이상 완료 시 등장`,
 };
 
 function parsePeriod(raw: string | string[] | undefined): PeriodTab {
@@ -92,7 +93,7 @@ export default async function LeaderboardPage({
       <Breadcrumb items={[{ label: '픽 리더보드' }]} />
       <h1 className="text-2xl font-bold mb-2 mt-4">픽 리더보드</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-        KBO 팬들의 승부예측 적중률 순위입니다. 픽 5개 이상 완료 시 등장합니다.
+        KBO 팬들의 승부예측 적중률 순위입니다. 픽 {MIN_LEADERBOARD_PICKS}개 이상 완료 시 등장합니다.
       </p>
       <div className="mb-6 rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] p-4 text-sm space-y-2">
         <p className="text-gray-700 dark:text-gray-300">
@@ -100,7 +101,7 @@ export default async function LeaderboardPage({
           <Link href="/picks" className="text-brand-500 hover:underline">
             /picks
           </Link>{' '}
-          에서 닉네임 설정 → 매 경기 카드에서 어느 팀이 이길지 선택 → 5건 완료
+          에서 닉네임 설정 → 매 경기 카드에서 어느 팀이 이길지 선택 → {MIN_LEADERBOARD_PICKS}건 완료
           시 자동 등재. AI 모델과의 대결 성적도 함께 비교됩니다.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">

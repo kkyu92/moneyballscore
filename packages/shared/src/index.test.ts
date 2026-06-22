@@ -35,6 +35,7 @@ import {
   pickTierEmoji,
   ACCURACY_BASELINE,
   BRIER_BASELINE,
+  MIN_LEADERBOARD_PICKS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -55,6 +56,10 @@ describe('KBO_TEAMS', () => {
   it('KBO_HEAD_TO_HEAD_PAIRS should derive from KBO_TEAM_COUNT (silent drift wave 107 guard)', () => {
     expect(KBO_HEAD_TO_HEAD_PAIRS).toBe((KBO_TEAM_COUNT * (KBO_TEAM_COUNT - 1)) / 2);
     expect(KBO_HEAD_TO_HEAD_PAIRS).toBe(45);
+  });
+
+  it('MIN_LEADERBOARD_PICKS matches DB view HAVING clause (silent drift wave 116 guard)', () => {
+    expect(MIN_LEADERBOARD_PICKS).toBe(5);
   });
 
   it('should have required fields for each team', () => {

@@ -1,3 +1,4 @@
+import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
 interface Props {
@@ -25,7 +26,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
       <div className="text-center py-12 text-gray-400 dark:text-gray-500 text-sm">
         <p className="text-2xl mb-2">🏆</p>
         <p>아직 순위가 없습니다.</p>
-        <p className="text-xs mt-1">픽 5개 이상 완료 후 순위에 등장합니다.</p>
+        <p className="text-xs mt-1">픽 {MIN_LEADERBOARD_PICKS}개 이상 완료 후 순위에 등장합니다.</p>
       </div>
     );
   }
