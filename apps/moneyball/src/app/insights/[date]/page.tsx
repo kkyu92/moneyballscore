@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { DebateTimeline } from "@/components/insights/DebateTimeline";
-import { KBO_FACTOR_COUNT, shortTeamName } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, shortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS } from "@moneyball/shared";
 import {
   getInsightsForDate,
   isValidInsightsDate,
@@ -21,7 +21,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = 86400;
+export const revalidate = INSIGHTS_ISR_SECONDS;
 
 export async function generateStaticParams() {
   const dates = await listInsightsDates(90);
@@ -218,7 +218,7 @@ export default async function InsightsDatePage({ params }: Props) {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          {date} AI 인사이트는 ISR 24시간으로 갱신됩니다. 정량 모델 단독 표시는 에이전트 토론이 일시
+          {date} AI 인사이트는 ISR {INSIGHTS_ISR_HOURS}시간으로 갱신됩니다. 정량 모델 단독 표시는 에이전트 토론이 일시
           중단되어 정량 모델 결과만 노출된 경우입니다.
         </p>
       </footer>

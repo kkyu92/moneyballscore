@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 86400;
+export const revalidate = INSIGHTS_ISR_SECONDS;
 
 interface Verdict {
   reasoning?: string;
@@ -294,7 +294,7 @@ export default async function InsightsHubPage() {
 
       <footer className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)] text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          AI 인사이트는 매일 자동 갱신됩니다 (24시간 ISR). 정량 모델 단독 표시는 에이전트 토론이 일시 중단되어
+          AI 인사이트는 매일 자동 갱신됩니다 ({INSIGHTS_ISR_HOURS}시간 ISR). 정량 모델 단독 표시는 에이전트 토론이 일시 중단되어
           정량 모델 결과만 노출된 경우입니다.
         </p>
       </footer>
