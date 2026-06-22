@@ -40,6 +40,8 @@ import {
   STANDINGS_ISR_SECONDS,
   STANDINGS_REFRESH_LABEL_EN,
   STANDINGS_UPDATE_LABEL_EN,
+  FEED_ISR_HOURS,
+  FEED_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -75,6 +77,12 @@ describe('KBO_TEAMS', () => {
   it('STANDINGS_*_LABEL_EN derives from STANDINGS_ISR_HOURS (silent drift wave 120 guard)', () => {
     expect(STANDINGS_REFRESH_LABEL_EN).toBe('Hourly refresh');
     expect(STANDINGS_UPDATE_LABEL_EN).toBe('Updated hourly');
+  });
+
+  it('FEED_ISR_SECONDS derives from FEED_ISR_HOURS (silent drift wave 122 guard)', () => {
+    expect(FEED_ISR_HOURS).toBe(1);
+    expect(FEED_ISR_SECONDS).toBe(FEED_ISR_HOURS * 60 * 60);
+    expect(FEED_ISR_SECONDS).toBe(3600);
   });
 
   it('should have required fields for each team', () => {

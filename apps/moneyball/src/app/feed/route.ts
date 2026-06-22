@@ -1,11 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
-import { type TeamCode, shortTeamName, assertSelectOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import {
+  type TeamCode,
+  shortTeamName,
+  assertSelectOk,
+  errMsg,
+  PRODUCTION_COHORT_RULES,
+  FEED_ISR_SECONDS,
+} from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { parseChangelog } from '@/lib/changelog/parse';
 import { listInsightsDates } from '@/lib/insights/loader';
 
-export const revalidate = 3600;
+export const revalidate = FEED_ISR_SECONDS;
 
 const SITE_URL = 'https://moneyballscore.vercel.app';
 
@@ -26,9 +33,8 @@ export async function GET() {
   // 빈 RSS 응답 (review items 만 + game items 없음). 구독자 입장에서 RSS reader
   // 갱신 0건처럼 보여 silent drift. assertSelectOk 로 fail-loud 전환 — error
   // 시 throw → Next.js route handler 가 500 반환하여 RSS reader 가 명시적 실패
-  // 표시 + Sentry 캡처. 기존 stale RSS cache (revalidate=3600) 는 1시간 이내
-  // 그대로 유지 (Vercel CDN). silent drift family 시리즈 (cycle 141~148) 와
-  // 동일 패턴 통일.
+  // 표시 + Sentry 캡처. 기존 stale RSS cache (FEED_ISR_SECONDS) 는 그대로 유지
+  // (Vercel CDN). silent drift family 시리즈 (cycle 141~148) 와 동일 패턴 통일.
   const gamesResult = await supabase
     .from('games')
     .select(`
@@ -203,7 +209,7 @@ ${items.join('\n')}
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/rss+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      'Cache-Control': `public, max-age=${FEED_ISR_SECONDS}, s-maxage=${FEED_ISR_SECONDS}`,
     },
   });
 }
