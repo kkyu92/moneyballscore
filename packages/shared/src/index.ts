@@ -570,6 +570,25 @@ export const INSIGHTS_ISR_SECONDS = INSIGHTS_ISR_HOURS * 60 * 60;
  */
 export const MIN_LEADERBOARD_PICKS = 5;
 
+/**
+ * Rolling 적중률 윈도우 — silent drift family wave 117 (cycle 1334).
+ * 동일 숫자 30(window) + 90(total) user-visible 4 surface + 함수 default 2 occurrence +
+ * 주석 2 occurrence + 테스트 3 occurrence.
+ *
+ * user-visible (accuracy/page.tsx):
+ *   - 탭 라벨 '30일 rolling 추세'
+ *   - 차트 헤더 '30일 rolling 적중률 추세'
+ *   - 차트 부제 '최근 90일, window=30일'
+ *   - 차트 설명 '각 날짜의 직전 30일 평균 적중률'
+ *
+ * 함수 default (lib/accuracy/buildAccuracyData.ts):
+ *   - buildRollingAccuracy(rows, windowDays = 30, totalDays = 90)
+ *
+ * 변경 시 4 surface + 함수 default + RollingAccuracyChart 주석 자동 동기.
+ */
+export const ROLLING_ACCURACY_WINDOW_DAYS = 30;
+export const ROLLING_ACCURACY_TOTAL_DAYS = 90;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

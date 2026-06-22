@@ -8,6 +8,8 @@ import {
   WINNER_PROB_LEAN,
   WINNER_PROB_LEAN_PCT,
   SUNDAY_CAP_CONFIDENCE,
+  ROLLING_ACCURACY_WINDOW_DAYS,
+  ROLLING_ACCURACY_TOTAL_DAYS,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -420,9 +422,10 @@ export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
   return result;
 }
 
-// plan #14 C2 (a2 cycle 1021) — 30일 rolling window accuracy 추세.
-// 최근 90일 each day = 직전 30일 (해당 날짜 포함) 적중률 mean.
+// plan #14 C2 (a2 cycle 1021) — rolling window accuracy 추세.
+// totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean.
 // 사용자 신뢰도 직접 가시화 — Brier 보다 직관적.
+// wave 117 (cycle 1334): 30/90 hardcoded → ROLLING_ACCURACY_{WINDOW,TOTAL}_DAYS registry.
 export interface RollingAccuracyPoint {
   date: string;
   dateLabel: string;
@@ -432,8 +435,8 @@ export interface RollingAccuracyPoint {
 
 export function buildRollingAccuracy(
   rows: PredRow[],
-  windowDays = 30,
-  totalDays = 90,
+  windowDays: number = ROLLING_ACCURACY_WINDOW_DAYS,
+  totalDays: number = ROLLING_ACCURACY_TOTAL_DAYS,
   now: number = Date.now(),
 ): RollingAccuracyPoint[] {
   const KST_OFFSET_MS = 9 * 3600 * 1000;
