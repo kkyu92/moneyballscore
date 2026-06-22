@@ -38,6 +38,8 @@ import {
   MIN_LEADERBOARD_PICKS,
   STANDINGS_ISR_HOURS,
   STANDINGS_ISR_SECONDS,
+  STANDINGS_REFRESH_LABEL_EN,
+  STANDINGS_UPDATE_LABEL_EN,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -68,6 +70,11 @@ describe('KBO_TEAMS', () => {
     expect(STANDINGS_ISR_HOURS).toBe(1);
     expect(STANDINGS_ISR_SECONDS).toBe(STANDINGS_ISR_HOURS * 60 * 60);
     expect(STANDINGS_ISR_SECONDS).toBe(3600);
+  });
+
+  it('STANDINGS_*_LABEL_EN derives from STANDINGS_ISR_HOURS (silent drift wave 120 guard)', () => {
+    expect(STANDINGS_REFRESH_LABEL_EN).toBe('Hourly refresh');
+    expect(STANDINGS_UPDATE_LABEL_EN).toBe('Updated hourly');
   });
 
   it('should have required fields for each team', () => {

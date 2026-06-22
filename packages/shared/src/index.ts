@@ -621,6 +621,21 @@ export const STANDINGS_ISR_SECONDS = STANDINGS_ISR_HOURS * 60 * 60;
 export const CALENDAR_ISR_HOURS = 1;
 export const CALENDAR_ISR_SECONDS = CALENDAR_ISR_HOURS * 60 * 60;
 
+/**
+ * Standings OG/Twitter image 영문 갱신 라벨 — silent drift family wave 120 (cycle 1337).
+ * 동일 숫자 1(시간) hardcoded English surface 4 occurrence (twitter-image + opengraph-image).
+ *
+ * user-visible (standings/twitter-image.tsx + standings/opengraph-image.tsx, 4 surface):
+ *   - 칩 라벨 "Hourly refresh" (each file 1 = 2 total)
+ *   - 풋터 "Updated hourly · {KBO_SEASON_YEAR} KBO" (each file 1 = 2 total)
+ *
+ * STANDINGS_ISR_HOURS 값 변경 시 영문 라벨 자동 sync. wave 118 family 의 English 차원 closure.
+ */
+export const STANDINGS_REFRESH_LABEL_EN =
+  STANDINGS_ISR_HOURS === 1 ? 'Hourly refresh' : `${STANDINGS_ISR_HOURS}h refresh`;
+export const STANDINGS_UPDATE_LABEL_EN =
+  STANDINGS_ISR_HOURS === 1 ? 'Updated hourly' : `Updated every ${STANDINGS_ISR_HOURS}h`;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
