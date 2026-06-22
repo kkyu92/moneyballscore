@@ -699,6 +699,22 @@ export const MLB_ISR_HOURS = 6;
 export const MLB_ISR_SECONDS = MLB_ISR_HOURS * 60 * 60;
 
 /**
+ * MLB live/landing 페이지 ISR 갱신 주기 — silent drift family wave 132 (cycle 1352).
+ * 동일 magic 1800 (30분) code-only silent drift. en/mlb + mlb mirror 8 page.tsx 8 occurrence.
+ * MLB_ISR (6h, 정적 페이지: standings/players/factors/wild-card/postseason/team hub) 와 별도 —
+ * 빠른 갱신 필요한 live/landing 페이지 (landing + team detail + games hub + game detail) 는 30분.
+ * 사용자 가시 시간 literal surface 0. wave 121~131 family code-only 패턴 정합.
+ *
+ * 코드 (8 occurrence — KO/EN MLB live/landing 페이지):
+ *   - mlb/page.tsx + en/mlb/page.tsx (landing)
+ *   - mlb/team/[code]/page.tsx + en/mlb/team/[code]/page.tsx (team detail)
+ *   - mlb/games/[date]/page.tsx + en/mlb/games/[date]/page.tsx (games by date)
+ *   - mlb/games/[date]/[slug]/page.tsx + en/mlb/games/[date]/[slug]/page.tsx (game detail)
+ */
+export const MLB_LIVE_ISR_MINUTES = 30;
+export const MLB_LIVE_ISR_SECONDS = MLB_LIVE_ISR_MINUTES * 60;
+
+/**
  * KBO teams 페이지 ISR 갱신 주기 — silent drift family wave 125 (cycle 1344).
  * 동일 magic 1800 (30분) code-only silent drift. teams/[code]/page.tsx +
  * teams/[code]/recent/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.

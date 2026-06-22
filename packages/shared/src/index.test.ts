@@ -46,6 +46,8 @@ import {
   ADS_TXT_ISR_SECONDS,
   MLB_ISR_HOURS,
   MLB_ISR_SECONDS,
+  MLB_LIVE_ISR_MINUTES,
+  MLB_LIVE_ISR_SECONDS,
   TEAMS_ISR_MINUTES,
   TEAMS_ISR_SECONDS,
   PLAYERS_ISR_MINUTES,
@@ -147,6 +149,12 @@ describe('KBO_TEAMS', () => {
     expect(PREDICTIONS_ISR_MINUTES).toBe(5);
     expect(PREDICTIONS_ISR_SECONDS).toBe(PREDICTIONS_ISR_MINUTES * 60);
     expect(PREDICTIONS_ISR_SECONDS).toBe(300);
+  });
+
+  it('MLB_LIVE_ISR_SECONDS derives from MLB_LIVE_ISR_MINUTES (silent drift wave 132 guard)', () => {
+    expect(MLB_LIVE_ISR_MINUTES).toBe(30);
+    expect(MLB_LIVE_ISR_SECONDS).toBe(MLB_LIVE_ISR_MINUTES * 60);
+    expect(MLB_LIVE_ISR_SECONDS).toBe(1800);
   });
 
   it('should have required fields for each team', () => {

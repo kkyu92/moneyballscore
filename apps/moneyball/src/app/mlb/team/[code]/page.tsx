@@ -5,6 +5,7 @@ import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
   SMALL_SAMPLE_N,
+  MLB_LIVE_ISR_SECONDS,
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
@@ -14,7 +15,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = 1800;
+export const revalidate = MLB_LIVE_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ code: string }>;

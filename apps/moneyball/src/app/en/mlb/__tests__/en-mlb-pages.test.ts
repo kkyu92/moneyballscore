@@ -19,8 +19,9 @@ describe('/en/mlb — hub page', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb/);
   });
 
-  it('revalidate = 1800', () => {
-    expect(PAGE).toMatch(/export const revalidate = 1800/);
+  it('revalidate = MLB_LIVE_ISR_SECONDS (silent drift wave 132)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_LIVE_ISR_SECONDS/);
+    expect(PAGE).not.toMatch(/export const revalidate = 1800\b/);
   });
 
   it('links to all 6 subpages', () => {
@@ -228,8 +229,9 @@ describe('/en/mlb/games/[date] — dynamic date page', () => {
     expect(PAGE).toMatch(/\/mlb\/games\/\$\{date\}/);
   });
 
-  it('revalidate = 1800', () => {
-    expect(PAGE).toMatch(/export const revalidate = 1800/);
+  it('revalidate = MLB_LIVE_ISR_SECONDS (silent drift wave 132)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_LIVE_ISR_SECONDS/);
+    expect(PAGE).not.toMatch(/export const revalidate = 1800\b/);
   });
 
   it('date format guard — notFound on invalid date', () => {
@@ -283,8 +285,9 @@ describe('/en/mlb/team/[code] — team profile page', () => {
     expect(PAGE).toMatch(/\/mlb\/team\/\$\{/);
   });
 
-  it('revalidate = 1800', () => {
-    expect(PAGE).toMatch(/export const revalidate = 1800/);
+  it('revalidate = MLB_LIVE_ISR_SECONDS (silent drift wave 132)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_LIVE_ISR_SECONDS/);
+    expect(PAGE).not.toMatch(/export const revalidate = 1800\b/);
   });
 
   it('notFound for invalid team code', () => {
