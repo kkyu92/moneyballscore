@@ -535,6 +535,23 @@ export const MIN_TEAM_PREDICTIONS = 3;
  */
 export const MIN_VERIFIED_GAMES_HEDGE = 10;
 
+/**
+ * insights 페이지 ISR revalidate 주기 — silent drift family wave 115
+ * (cycle 1332) — apps/moneyball/src/app/insights/page.tsx + insights/[date]/page.tsx
+ * `export const revalidate = 86400` magic number + UI 사용자 가시 텍스트
+ * "24시간 ISR" / "ISR 24시간" 2 surface 단일 source. 본 상수가 single source.
+ * 변경 시 revalidate 값 + UI 텍스트 자동 sync.
+ *
+ * 적용 surface:
+ *   - insights/page.tsx (hub): revalidate = INSIGHTS_ISR_SECONDS + "매일 자동 갱신됩니다 ({INSIGHTS_ISR_HOURS}시간 ISR)"
+ *   - insights/[date]/page.tsx (detail): revalidate = INSIGHTS_ISR_SECONDS + "ISR {INSIGHTS_ISR_HOURS}시간으로 갱신됩니다"
+ *
+ * insights/series/[topic]/page.tsx 의 revalidate=3600 (1시간) 은 별개 — 시리즈 hub
+ * 갱신 주기가 다름 (본 상수 적용 X).
+ */
+export const INSIGHTS_ISR_HOURS = 24;
+export const INSIGHTS_ISR_SECONDS = INSIGHTS_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
