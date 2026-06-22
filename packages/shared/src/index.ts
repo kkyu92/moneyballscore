@@ -798,6 +798,24 @@ export const SEASONS_ISR_SECONDS = SEASONS_ISR_MINUTES * 60;
 export const PREDICTIONS_ISR_MINUTES = 5;
 export const PREDICTIONS_ISR_SECONDS = PREDICTIONS_ISR_MINUTES * 60;
 
+/**
+ * Dashboard / v2-preview 페이지 ISR 갱신 주기 — silent drift family wave 131 (cycle 1350).
+ * 동일 magic 86400 (24h) code-only silent drift. dashboard/page.tsx +
+ * v2-preview/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.
+ * dashboard = 매일 KST 23:00 verify cron 직후 `/api/revalidate` 자동 트리거 +
+ * 24h 안전망. v2-preview = backtest 결과 기반 내부 미리보기, 일 1회 갱신 충분.
+ * INSIGHTS·LOTTO_ARCHIVE_ISR (24h) 와 동일 단위지만 도메인 분리 (모델 성능 대시 vs 콘텐츠/추첨).
+ * wave 121~130 family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence):
+ *   - dashboard/page.tsx: export const revalidate = 86400
+ *   - v2-preview/page.tsx: export const revalidate = 86400
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const DASHBOARD_ISR_HOURS = 24;
+export const DASHBOARD_ISR_SECONDS = DASHBOARD_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

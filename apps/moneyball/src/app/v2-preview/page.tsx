@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, DASHBOARD_ISR_SECONDS, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, type TeamCode } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const revalidate = 86400;
+export const revalidate = DASHBOARD_ISR_SECONDS;
 
 interface ReasoningShape {
   debate?: { verdict?: { homeWinProb?: number; reasoning?: string } };
