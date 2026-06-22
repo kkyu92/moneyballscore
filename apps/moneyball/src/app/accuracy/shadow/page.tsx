@@ -8,6 +8,7 @@ import {
   SHADOW_SCORING_RULE,
   CURRENT_SCORING_RULE,
   V2_PROMOTION_COHORT_N,
+  ACCURACY_ISR_SECONDS,
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
 import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const revalidate = 3600;
+export const revalidate = ACCURACY_ISR_SECONDS;
 
 interface GameField {
   game_date: string;

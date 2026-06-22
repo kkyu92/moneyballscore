@@ -748,6 +748,23 @@ export const PLAYERS_ISR_SECONDS = PLAYERS_ISR_MINUTES * 60;
 export const LOTTO_ARCHIVE_ISR_HOURS = 24;
 export const LOTTO_ARCHIVE_ISR_SECONDS = LOTTO_ARCHIVE_ISR_HOURS * 60 * 60;
 
+/**
+ * Accuracy 대시보드 페이지 ISR 갱신 주기 — silent drift family wave 128 (cycle 1347).
+ * 동일 magic 3600 (1h) code-only silent drift. accuracy/page.tsx +
+ * accuracy/shadow/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.
+ * STANDINGS·FEED·ADS_TXT_ISR (1h) 와 동일 단위지만 도메인 분리 (대시보드 적중률 vs 표준).
+ * accuracy = production cohort 적중률 / shadow = v2 후보 비교. 동일 1h refresh.
+ * wave 121~127 family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence):
+ *   - accuracy/page.tsx: export const revalidate = 3600
+ *   - accuracy/shadow/page.tsx: export const revalidate = 3600
+ *
+ * 변경 시 revalidate 값 + 향후 사용자 가시 시간 라벨 자동 sync.
+ */
+export const ACCURACY_ISR_HOURS = 1;
+export const ACCURACY_ISR_SECONDS = ACCURACY_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

@@ -19,6 +19,7 @@ import {
   BRIER_BASELINE,
   ROLLING_ACCURACY_WINDOW_DAYS,
   ROLLING_ACCURACY_TOTAL_DAYS,
+  ACCURACY_ISR_SECONDS,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -81,7 +82,7 @@ const TOC_ITEMS = [
   { id: 'matchup', label: '상대 강약' },
 ];
 
-export const revalidate = 3600;
+export const revalidate = ACCURACY_ISR_SECONDS;
 
 // ── SVG 캘리브레이션 다이어그램 ───────────────────────────────
 const PLOT_SIZE = 400;
