@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LOTTO_ARCHIVE_ISR_SECONDS } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { listArchiveDates } from "@/lib/lotto/archive";
 
 export const dynamic = "force-static";
-export const revalidate = 86400;
+export const revalidate = LOTTO_ARCHIVE_ISR_SECONDS;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/lotto/archive`;

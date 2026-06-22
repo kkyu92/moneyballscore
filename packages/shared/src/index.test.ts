@@ -50,6 +50,8 @@ import {
   TEAMS_ISR_SECONDS,
   PLAYERS_ISR_MINUTES,
   PLAYERS_ISR_SECONDS,
+  LOTTO_ARCHIVE_ISR_HOURS,
+  LOTTO_ARCHIVE_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -115,6 +117,12 @@ describe('KBO_TEAMS', () => {
     expect(PLAYERS_ISR_MINUTES).toBe(30);
     expect(PLAYERS_ISR_SECONDS).toBe(PLAYERS_ISR_MINUTES * 60);
     expect(PLAYERS_ISR_SECONDS).toBe(1800);
+  });
+
+  it('LOTTO_ARCHIVE_ISR_SECONDS derives from LOTTO_ARCHIVE_ISR_HOURS (silent drift wave 127 guard)', () => {
+    expect(LOTTO_ARCHIVE_ISR_HOURS).toBe(24);
+    expect(LOTTO_ARCHIVE_ISR_SECONDS).toBe(LOTTO_ARCHIVE_ISR_HOURS * 60 * 60);
+    expect(LOTTO_ARCHIVE_ISR_SECONDS).toBe(86400);
   });
 
   it('should have required fields for each team', () => {
