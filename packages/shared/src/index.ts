@@ -606,6 +606,21 @@ export const ROLLING_ACCURACY_TOTAL_DAYS = 90;
 export const STANDINGS_ISR_HOURS = 1;
 export const STANDINGS_ISR_SECONDS = STANDINGS_ISR_HOURS * 60 * 60;
 
+/**
+ * Calendar 페이지 ISR 갱신 주기 — silent drift family wave 119 (cycle 1336).
+ * 동일 숫자 1(시간) user-visible 1 surface + revalidate code 1 occurrence.
+ *
+ * user-visible (calendar/page.tsx, 1 surface):
+ *   - 풋노트 "KST 기준 {monthLabel} (자동 갱신 1시간 주기)"
+ *
+ * 코드 (1 occurrence):
+ *   - export const revalidate = 3600
+ *
+ * 변경 시 revalidate 값 + UI 풋노트 자동 sync.
+ */
+export const CALENDAR_ISR_HOURS = 1;
+export const CALENDAR_ISR_SECONDS = CALENDAR_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

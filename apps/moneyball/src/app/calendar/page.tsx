@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { assertSelectOk, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, CALENDAR_ISR_SECONDS } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -10,7 +10,7 @@ import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks
 // cycle 1021 (b8) — 사용자 가시 entry route 추가. 월별 view + 각 cell 클릭 시
 // /predictions/[date] 진입. PRODUCTION_COHORT_RULES filter (v1.8 + v1.8-credit-fail, 사례 17 family wave 15).
 
-export const revalidate = 3600;
+export const revalidate = CALENDAR_ISR_SECONDS;
 
 const SITE_URL = 'https://moneyballscore.vercel.app';
 
@@ -320,7 +320,7 @@ export default async function CalendarPage() {
           ← 전체 예측 hub
         </Link>
         <span aria-hidden>·</span>
-        <span>KST 기준 {info.monthLabel} (자동 갱신 1시간 주기)</span>
+        <span>KST 기준 {info.monthLabel} (자동 갱신 {CALENDAR_ISR_HOURS}시간 주기)</span>
       </section>
 
       {monthTotal.total === 0 && (
