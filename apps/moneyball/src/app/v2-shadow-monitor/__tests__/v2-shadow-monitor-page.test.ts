@@ -2,6 +2,10 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { metadata as pageMetadata } from "@/app/v2-shadow-monitor/page";
+import {
+  V2_SHADOW_MONITOR_ISR_HOURS,
+  V2_SHADOW_MONITOR_ISR_SECONDS,
+} from "@moneyball/shared";
 
 const REPO_ROOT = process.cwd();
 const PAGE_SRC = readFileSync(
@@ -50,8 +54,9 @@ describe("/v2-shadow-monitor page shape", () => {
     expect(PAGE_SRC).toContain("application/ld+json");
   });
 
-  it("revalidate ISR 박제 (3600 = 1시간)", () => {
-    expect(PAGE_SRC).toMatch(/export const revalidate = 3600/);
+  it(`revalidate ISR 박제 (${V2_SHADOW_MONITOR_ISR_SECONDS} = ${V2_SHADOW_MONITOR_ISR_HOURS}시간)`, () => {
+    expect(PAGE_SRC).toMatch(/export const revalidate = V2_SHADOW_MONITOR_ISR_SECONDS/);
+    expect(V2_SHADOW_MONITOR_ISR_SECONDS).toBe(V2_SHADOW_MONITOR_ISR_HOURS * 60 * 60);
   });
 
   it("loader.loadLatestCohort import + cohort fallback 메시지", () => {
