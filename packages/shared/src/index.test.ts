@@ -36,6 +36,8 @@ import {
   ACCURACY_BASELINE,
   BRIER_BASELINE,
   MIN_LEADERBOARD_PICKS,
+  STANDINGS_ISR_HOURS,
+  STANDINGS_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -60,6 +62,12 @@ describe('KBO_TEAMS', () => {
 
   it('MIN_LEADERBOARD_PICKS matches DB view HAVING clause (silent drift wave 116 guard)', () => {
     expect(MIN_LEADERBOARD_PICKS).toBe(5);
+  });
+
+  it('STANDINGS_ISR_SECONDS derives from STANDINGS_ISR_HOURS (silent drift wave 118 guard)', () => {
+    expect(STANDINGS_ISR_HOURS).toBe(1);
+    expect(STANDINGS_ISR_SECONDS).toBe(STANDINGS_ISR_HOURS * 60 * 60);
+    expect(STANDINGS_ISR_SECONDS).toBe(3600);
   });
 
   it('should have required fields for each team', () => {

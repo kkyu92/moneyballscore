@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, STANDINGS_ISR_SECONDS } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -10,13 +10,13 @@ import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
-export const revalidate = 3600;
+export const revalidate = STANDINGS_ISR_SECONDS;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "KBO 팀 순위",
-  description: `${KBO_SEASON_YEAR} KBO 리그 팀 순위표 — 승·무·패, 승률, 게임차, 최근${RECENT_FORM_GAMES}경기. 매시간 자동 업데이트.`,
+  description: `${KBO_SEASON_YEAR} KBO 리그 팀 순위표 — 승·무·패, 승률, 게임차, 최근${RECENT_FORM_GAMES}경기. ${STANDINGS_ISR_HOURS}시간마다 자동 업데이트.`,
   alternates: { canonical: `${SITE_URL}/standings` },
   openGraph: {
     title: `KBO 팀 순위 ${KBO_SEASON_YEAR}`,
@@ -90,7 +90,7 @@ export default async function StandingsPage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">{KBO_SEASON_YEAR} KBO 팀 순위</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          KBO 공식 집계 기준 · 매시간 갱신
+          KBO 공식 집계 기준 · {STANDINGS_ISR_HOURS}시간마다 갱신
         </p>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
           현재 정규시즌 {KBO_TEAM_COUNT}팀의 승·무·패, 승률, 게임차, 최근 {RECENT_FORM_GAMES}경기 성적을
@@ -187,7 +187,7 @@ export default async function StandingsPage() {
       )}
 
       <p className="text-xs text-gray-400 dark:text-gray-500 text-right">
-        출처: KBO 공식 · 1시간마다 갱신
+        출처: KBO 공식 · {STANDINGS_ISR_HOURS}시간마다 갱신
       </p>
 
       {eloTrend.points.length > 0 && (
