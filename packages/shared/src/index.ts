@@ -765,6 +765,23 @@ export const LOTTO_ARCHIVE_ISR_SECONDS = LOTTO_ARCHIVE_ISR_HOURS * 60 * 60;
 export const ACCURACY_ISR_HOURS = 1;
 export const ACCURACY_ISR_SECONDS = ACCURACY_ISR_HOURS * 60 * 60;
 
+/**
+ * Seasons 페이지 ISR 갱신 주기 — silent drift family wave 129 (cycle 1348).
+ * 동일 magic 600 (10분) code-only silent drift. seasons/page.tsx +
+ * seasons/[year]/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.
+ * 진행 시즌 매일 경기 추가 반영. seasons/[year] 는 path 별 동적 revalidate 불가
+ * 라 진행 시즌 기준 10분 통일 (종료 시즌 페이지는 데이터 변동 없어 오버헤드 미미).
+ * wave 121~128 family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence):
+ *   - seasons/page.tsx: export const revalidate = 600
+ *   - seasons/[year]/page.tsx: export const revalidate = 600
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const SEASONS_ISR_MINUTES = 10;
+export const SEASONS_ISR_SECONDS = SEASONS_ISR_MINUTES * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
