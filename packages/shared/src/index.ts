@@ -636,6 +636,20 @@ export const STANDINGS_REFRESH_LABEL_EN =
 export const STANDINGS_UPDATE_LABEL_EN =
   STANDINGS_ISR_HOURS === 1 ? 'Updated hourly' : `Updated every ${STANDINGS_ISR_HOURS}h`;
 
+/**
+ * v2 shadow monitor 페이지 ISR 갱신 주기 — silent drift family wave 121 (cycle 1338).
+ * 동일 숫자 1(시간) code-only silent drift. page.tsx revalidate magic 3600 + test
+ * 박제 "3600 = 1시간" 주석. 사용자 가시 시간 literal surface 0.
+ *
+ * 코드 (1 page + 1 test occurrence):
+ *   - page.tsx: export const revalidate = 3600
+ *   - __tests__/v2-shadow-monitor-page.test.ts: PAGE_SRC.toMatch(/revalidate = 3600/) + "3600 = 1시간" label
+ *
+ * 변경 시 revalidate 값 + test matcher 자동 sync.
+ */
+export const V2_SHADOW_MONITOR_ISR_HOURS = 1;
+export const V2_SHADOW_MONITOR_ISR_SECONDS = V2_SHADOW_MONITOR_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

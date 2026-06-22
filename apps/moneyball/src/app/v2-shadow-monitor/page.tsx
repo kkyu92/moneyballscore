@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { loadLatestCohort } from "@/lib/v2-shadow-monitor/loader";
-import { KBO_FACTOR_COUNT, V2_PROMOTION_COHORT_N } from "@moneyball/shared";
+import {
+  KBO_FACTOR_COUNT,
+  V2_PROMOTION_COHORT_N,
+  V2_SHADOW_MONITOR_ISR_SECONDS,
+} from "@moneyball/shared";
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
@@ -26,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const revalidate = V2_SHADOW_MONITOR_ISR_SECONDS;
 
 function isPercentLikeColumn(label: string): boolean {
   return /acc|brier|%/i.test(label);
