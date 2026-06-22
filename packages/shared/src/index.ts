@@ -682,6 +682,22 @@ export const FEED_ISR_SECONDS = FEED_ISR_HOURS * 60 * 60;
 export const ADS_TXT_ISR_HOURS = 1;
 export const ADS_TXT_ISR_SECONDS = ADS_TXT_ISR_HOURS * 60 * 60;
 
+/**
+ * MLB 페이지 ISR 갱신 주기 — silent drift family wave 124 (cycle 1342).
+ * 동일 magic 21600 (6h) code-only silent drift. en/mlb/* + mlb/* 14 page.tsx +
+ * sitemap.ts 1 = 총 15 source occurrence (tests 3 file 별도).
+ * MLB 경기·통계 갱신 빈도 낮아 6h ISR. wave 120~123 family (STANDINGS/CALENDAR/
+ * V2_SHADOW_MONITOR/FEED/ADS_TXT) 와 동일 code-only 패턴.
+ *
+ * 코드 (14 occurrence — KO/EN MLB 페이지):
+ *   - mlb/{standings,team,players,players/[id],factors,postseason,wild-card}/page.tsx
+ *   - en/mlb/{standings,team,players,players/[id],factors,postseason,wild-card}/page.tsx
+ *
+ * sitemap.ts 의 21600 = 별도 semantic (전체 sitemap revalidate) — 본 registry 외.
+ */
+export const MLB_ISR_HOURS = 6;
+export const MLB_ISR_SECONDS = MLB_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

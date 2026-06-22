@@ -4,6 +4,7 @@ import {
   MLB_TEAMS,
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
+  MLB_ISR_SECONDS,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -11,7 +12,7 @@ import {
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-export const revalidate = 21600;
+export const revalidate = MLB_ISR_SECONDS;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;

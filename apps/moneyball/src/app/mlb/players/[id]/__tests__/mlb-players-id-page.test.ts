@@ -18,8 +18,8 @@ describe("mlb/players/[id]/page.tsx — plan #21 Step 1 (cycle 1092)", () => {
     expect(PAGE_SRC).toMatch(/MLB_TEAMS_PRE_RENDER\.map/);
   });
 
-  it("revalidate = 21600 ISR (6h)", () => {
-    expect(PAGE_SRC).toMatch(/export const revalidate = 21600/);
+  it("revalidate = MLB_ISR_SECONDS ISR (silent drift wave 124)", () => {
+    expect(PAGE_SRC).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it("Breadcrumb 3 단계 (MLB 분석 → Statcast 선수 → team)", () => {

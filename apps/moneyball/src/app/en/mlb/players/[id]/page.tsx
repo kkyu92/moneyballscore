@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
+  MLB_ISR_SECONDS,
   type MlbTeamCode,
   mlbShortTeamName,
 } from "@moneyball/shared";
@@ -11,7 +12,7 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = 21600;
+export const revalidate = MLB_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ id: string }>;

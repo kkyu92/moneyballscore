@@ -44,6 +44,8 @@ import {
   FEED_ISR_SECONDS,
   ADS_TXT_ISR_HOURS,
   ADS_TXT_ISR_SECONDS,
+  MLB_ISR_HOURS,
+  MLB_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -91,6 +93,12 @@ describe('KBO_TEAMS', () => {
     expect(ADS_TXT_ISR_HOURS).toBe(1);
     expect(ADS_TXT_ISR_SECONDS).toBe(ADS_TXT_ISR_HOURS * 60 * 60);
     expect(ADS_TXT_ISR_SECONDS).toBe(3600);
+  });
+
+  it('MLB_ISR_SECONDS derives from MLB_ISR_HOURS (silent drift wave 124 guard)', () => {
+    expect(MLB_ISR_HOURS).toBe(6);
+    expect(MLB_ISR_SECONDS).toBe(MLB_ISR_HOURS * 60 * 60);
+    expect(MLB_ISR_SECONDS).toBe(21600);
   });
 
   it('should have required fields for each team', () => {
