@@ -650,6 +650,22 @@ export const STANDINGS_UPDATE_LABEL_EN =
 export const V2_SHADOW_MONITOR_ISR_HOURS = 1;
 export const V2_SHADOW_MONITOR_ISR_SECONDS = V2_SHADOW_MONITOR_ISR_HOURS * 60 * 60;
 
+/**
+ * RSS feed route ISR + Cache-Control 갱신 주기 — silent drift family wave 122 (cycle 1339).
+ * 동일 숫자 1(시간) code-only silent drift. feed/route.ts revalidate magic 3600 (1) +
+ * Cache-Control max-age/s-maxage magic 3600 (2) + assertSelectOk 주석 "1시간 이내" (1) +
+ * "revalidate=3600" 주석 literal (1). 총 3 code occurrence + 1 comment surface.
+ * 사용자 가시 시간 literal surface 0 (RSS reader 표시되지 않음).
+ *
+ * 코드 (3 occurrence):
+ *   - feed/route.ts: export const revalidate = 3600 (line 8)
+ *   - feed/route.ts: Cache-Control max-age=3600, s-maxage=3600 (line 206)
+ *
+ * 변경 시 revalidate + Cache-Control 모두 자동 sync.
+ */
+export const FEED_ISR_HOURS = 1;
+export const FEED_ISR_SECONDS = FEED_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
