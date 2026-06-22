@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { KBO_TEAMS, SMALL_SAMPLE_N, type TeamCode, shortTeamName } from '@moneyball/shared';
+import {
+  KBO_TEAMS,
+  SMALL_SAMPLE_N,
+  TEAMS_ISR_SECONDS,
+  type TeamCode,
+  shortTeamName,
+} from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
@@ -13,7 +19,7 @@ import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter"
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = 1800;
+export const revalidate = TEAMS_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ code: string }>;

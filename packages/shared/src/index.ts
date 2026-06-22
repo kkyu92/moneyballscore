@@ -698,6 +698,22 @@ export const ADS_TXT_ISR_SECONDS = ADS_TXT_ISR_HOURS * 60 * 60;
 export const MLB_ISR_HOURS = 6;
 export const MLB_ISR_SECONDS = MLB_ISR_HOURS * 60 * 60;
 
+/**
+ * KBO teams 페이지 ISR 갱신 주기 — silent drift family wave 125 (cycle 1344).
+ * 동일 magic 1800 (30분) code-only silent drift. teams/[code]/page.tsx +
+ * teams/[code]/recent/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.
+ * MLB_ISR (6h) / STANDINGS·FEED·ADS_TXT·CALENDAR·V2_SHADOW_MONITOR_ISR (1h) 와
+ * 별개 30분 단위. wave 121~124 family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence):
+ *   - teams/[code]/page.tsx: export const revalidate = 1800
+ *   - teams/[code]/recent/page.tsx: export const revalidate = 1800
+ *
+ * 변경 시 revalidate 값 + 향후 사용자 가시 시간 라벨 자동 sync.
+ */
+export const TEAMS_ISR_MINUTES = 30;
+export const TEAMS_ISR_SECONDS = TEAMS_ISR_MINUTES * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
