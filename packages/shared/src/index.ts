@@ -589,6 +589,23 @@ export const MIN_LEADERBOARD_PICKS = 5;
 export const ROLLING_ACCURACY_WINDOW_DAYS = 30;
 export const ROLLING_ACCURACY_TOTAL_DAYS = 90;
 
+/**
+ * Standings 페이지 ISR 갱신 주기 — silent drift family wave 118 (cycle 1335).
+ * 동일 숫자 1(시간) user-visible 3 surface + revalidate code 1 occurrence.
+ *
+ * user-visible (standings/page.tsx, 3 surface):
+ *   - metadata.description "매시간 자동 업데이트"
+ *   - 헤더 부제 "KBO 공식 집계 기준 · 매시간 갱신"
+ *   - 풋노트 "출처: KBO 공식 · 1시간마다 갱신"
+ *
+ * 코드 (1 occurrence):
+ *   - export const revalidate = 3600
+ *
+ * 변경 시 revalidate 값 + UI 3 surface 자동 sync.
+ */
+export const STANDINGS_ISR_HOURS = 1;
+export const STANDINGS_ISR_SECONDS = STANDINGS_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
