@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LOTTO_ARCHIVE_ISR_SECONDS } from "@moneyball/shared";
 import { listArchiveDates, readArchiveVariants } from "@/lib/lotto/archive";
 import { parseLottoPicksMd, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -11,7 +12,7 @@ interface Props {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = 86400;
+export const revalidate = LOTTO_ARCHIVE_ISR_SECONDS;
 
 export async function generateStaticParams() {
   return listArchiveDates().map((date) => ({ date }));

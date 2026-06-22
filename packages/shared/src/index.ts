@@ -730,6 +730,24 @@ export const TEAMS_ISR_SECONDS = TEAMS_ISR_MINUTES * 60;
 export const PLAYERS_ISR_MINUTES = 30;
 export const PLAYERS_ISR_SECONDS = PLAYERS_ISR_MINUTES * 60;
 
+/**
+ * Lotto archive + methodology 페이지 ISR 갱신 주기 — silent drift family wave 127 (cycle 1346).
+ * 동일 magic 86400 (24h) code-only silent drift. lotto/archive/page.tsx +
+ * lotto/archive/[date]/page.tsx + lotto/methodology/page.tsx 3 page 3 occurrence.
+ * 사용자 가시 시간 literal surface 0. lotto 도메인 일별 정적 페이지 공유 갱신 주기.
+ * archive (과거 50조합 로그) + methodology (산출 방식 문서) semantic 다르지만
+ * 동일 24h refresh 주기 = 단일 registry. wave 121~126 family code-only 패턴 정합.
+ *
+ * 코드 (3 occurrence):
+ *   - lotto/archive/page.tsx: export const revalidate = 86400
+ *   - lotto/archive/[date]/page.tsx: export const revalidate = 86400
+ *   - lotto/methodology/page.tsx: export const revalidate = 86400
+ *
+ * 변경 시 revalidate 값 + 향후 사용자 가시 시간 라벨 자동 sync.
+ */
+export const LOTTO_ARCHIVE_ISR_HOURS = 24;
+export const LOTTO_ARCHIVE_ISR_SECONDS = LOTTO_ARCHIVE_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
