@@ -1,5 +1,10 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAM_COUNT, KBO_SEASON_YEAR } from "@moneyball/shared";
+import {
+  KBO_TEAM_COUNT,
+  KBO_SEASON_YEAR,
+  STANDINGS_REFRESH_LABEL_EN,
+  STANDINGS_UPDATE_LABEL_EN,
+} from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -71,7 +76,7 @@ export default function StandingsHubTwitterImage() {
             flexWrap: "wrap",
           }}
         >
-          {["Hourly refresh", "Elo trend", "Team accuracy", `${KBO_TEAM_COUNT} teams`].map((label) => (
+          {[STANDINGS_REFRESH_LABEL_EN, "Elo trend", "Team accuracy", `${KBO_TEAM_COUNT} teams`].map((label) => (
             <div
               key={label}
               style={{
@@ -100,7 +105,7 @@ export default function StandingsHubTwitterImage() {
           }}
         >
           <span>moneyballscore.vercel.app/standings</span>
-          <span>Updated hourly · {KBO_SEASON_YEAR} KBO</span>
+          <span>{STANDINGS_UPDATE_LABEL_EN} · {KBO_SEASON_YEAR} KBO</span>
         </div>
       </div>
     ),
