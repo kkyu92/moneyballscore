@@ -78,8 +78,8 @@ describe('/en/mlb/standings — page', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb\/standings/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('MLB_DIVISIONS import from @moneyball/shared', () => {
@@ -106,8 +106,8 @@ describe('/en/mlb/players — Statcast hub', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb\/players/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('Statcast 4 factor labels present', () => {
@@ -158,8 +158,8 @@ describe('/en/mlb/factors — 14 factor weights', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb\/factors/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('MLB_BASE_WEIGHTS import from @moneyball/kbo-data', () => {
@@ -182,8 +182,8 @@ describe('/en/mlb/wild-card — AL/NL wild card race', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb\/wild-card/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('AL + NL wild card mentioned', () => {
@@ -202,8 +202,8 @@ describe('/en/mlb/postseason — bracket page', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb\/postseason/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('4 rounds (WC/DS/LCS/WS) covered', () => {
@@ -251,8 +251,8 @@ describe('/en/mlb/team — 30 team hub', () => {
     expect(PAGE).toMatch(/ko:.*\/mlb\/team/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('CollectionPage JSON-LD', () => {
@@ -311,8 +311,8 @@ describe('/en/mlb/players/[id] — Statcast team profile', () => {
     expect(PAGE).toMatch(/\/mlb\/players\/\$\{/);
   });
 
-  it('revalidate = 21600', () => {
-    expect(PAGE).toMatch(/export const revalidate = 21600/);
+  it('revalidate = MLB_ISR_SECONDS (silent drift wave 124)', () => {
+    expect(PAGE).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
   });
 
   it('STATCAST_METRICS defined', () => {

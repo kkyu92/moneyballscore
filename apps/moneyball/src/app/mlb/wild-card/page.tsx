@@ -5,6 +5,7 @@ import {
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
+  MLB_ISR_SECONDS,
   type MlbTeamCode,
   type MlbLeagueSide,
 } from "@moneyball/shared";
@@ -13,7 +14,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
-export const revalidate = 21600;
+export const revalidate = MLB_ISR_SECONDS;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 
