@@ -6,7 +6,9 @@
  * 심사 전에는 placeholder 주석만 반환 — 크롤러에게 파일 존재 신호 제공.
  */
 
-export const revalidate = 3600;
+import { ADS_TXT_ISR_SECONDS } from "@moneyball/shared";
+
+export const revalidate = ADS_TXT_ISR_SECONDS;
 
 export function GET() {
   const publisherId = process.env.ADSENSE_PUBLISHER_ID?.trim();
@@ -27,7 +29,7 @@ export function GET() {
     status: 200,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      "Cache-Control": `public, max-age=${ADS_TXT_ISR_SECONDS}, s-maxage=${ADS_TXT_ISR_SECONDS}`,
     },
   });
 }

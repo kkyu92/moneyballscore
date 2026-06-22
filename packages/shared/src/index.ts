@@ -666,6 +666,22 @@ export const V2_SHADOW_MONITOR_ISR_SECONDS = V2_SHADOW_MONITOR_ISR_HOURS * 60 * 
 export const FEED_ISR_HOURS = 1;
 export const FEED_ISR_SECONDS = FEED_ISR_HOURS * 60 * 60;
 
+/**
+ * ads.txt route ISR + Cache-Control 갱신 주기 — silent drift family wave 123 (cycle 1341).
+ * 동일 숫자 1(시간) code-only silent drift. ads.txt/route.ts revalidate magic 3600 (1) +
+ * Cache-Control max-age=3600, s-maxage=3600 (2) = 총 3 code occurrence.
+ * 사용자 가시 시간 literal surface 0 (ads.txt 는 AdSense 크롤러만 read).
+ * wave 121 (v2-shadow-monitor) / wave 122 (feed/route.ts) 와 동일 code-only 패턴.
+ *
+ * 코드 (3 occurrence):
+ *   - ads.txt/route.ts: export const revalidate = 3600
+ *   - ads.txt/route.ts: Cache-Control max-age=3600, s-maxage=3600
+ *
+ * 변경 시 revalidate + Cache-Control 모두 자동 sync.
+ */
+export const ADS_TXT_ISR_HOURS = 1;
+export const ADS_TXT_ISR_SECONDS = ADS_TXT_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
