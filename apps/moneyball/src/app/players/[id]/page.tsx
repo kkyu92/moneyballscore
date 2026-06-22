@@ -7,9 +7,9 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PitcherFipTrend } from "@/components/players/PitcherFipTrend";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
-import { shortTeamName } from '@moneyball/shared';
+import { PLAYERS_ISR_SECONDS, shortTeamName } from '@moneyball/shared';
 
-export const revalidate = 1800;
+export const revalidate = PLAYERS_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ id: string }>;

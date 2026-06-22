@@ -714,6 +714,22 @@ export const MLB_ISR_SECONDS = MLB_ISR_HOURS * 60 * 60;
 export const TEAMS_ISR_MINUTES = 30;
 export const TEAMS_ISR_SECONDS = TEAMS_ISR_MINUTES * 60;
 
+/**
+ * Players 리더보드 ISR 갱신 주기 — silent drift family wave 126 (cycle 1345).
+ * 동일 magic 1800 (30분) code-only silent drift. players/page.tsx +
+ * players/[id]/page.tsx 2 page 2 occurrence. 사용자 가시 시간 literal surface 0.
+ * TEAMS_ISR (30분) 와 동일 단위지만 도메인 분리 (선수 리더보드 vs 팀 페이지).
+ * wave 121~125 family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence):
+ *   - players/page.tsx: export const revalidate = 1800
+ *   - players/[id]/page.tsx: export const revalidate = 1800
+ *
+ * 변경 시 revalidate 값 + 향후 사용자 가시 시간 라벨 자동 sync.
+ */
+export const PLAYERS_ISR_MINUTES = 30;
+export const PLAYERS_ISR_SECONDS = PLAYERS_ISR_MINUTES * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
