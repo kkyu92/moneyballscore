@@ -11,7 +11,10 @@ import {
   ReferenceLine,
 } from "recharts";
 
-import { ACCURACY_BASELINE } from "@moneyball/shared";
+import {
+  ACCURACY_BASELINE,
+  ROLLING_ACCURACY_WINDOW_DAYS,
+} from "@moneyball/shared";
 
 import type { RollingAccuracyPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral } from "@/lib/design-tokens";
@@ -23,13 +26,14 @@ interface RollingAccuracyChartProps {
 }
 
 /**
- * plan #14 C2 (a2 cycle 1021) — 30일 rolling window accuracy 추세 line chart.
- * 최근 90일 each day = 직전 30일 (해당 날짜 포함) 적중률 mean.
+ * plan #14 C2 (a2 cycle 1021) — rolling window accuracy 추세 line chart.
+ * totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean.
  * brand-500 line + 0.5 baseline (동전) reference. n<3 day = null (line 끊김 X via connectNulls).
+ * wave 117 (cycle 1334): 30 hardcoded → ROLLING_ACCURACY_WINDOW_DAYS registry.
  */
 export function RollingAccuracyChart({
   data,
-  windowDays = 30,
+  windowDays = ROLLING_ACCURACY_WINDOW_DAYS,
 }: RollingAccuracyChartProps) {
   const hasData = data.some((p) => p.windowAccuracy !== null);
   if (!hasData) {

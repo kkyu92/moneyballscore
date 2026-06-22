@@ -17,6 +17,8 @@ import {
   DEBATE_VERSION_PREGAME,
   SUNDAY_CAP_CONFIDENCE,
   BRIER_BASELINE,
+  ROLLING_ACCURACY_WINDOW_DAYS,
+  ROLLING_ACCURACY_TOTAL_DAYS,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -66,7 +68,7 @@ export const metadata: Metadata = {
 
 const TOC_ITEMS = [
   { id: 'calibration', label: '캘리브레이션' },
-  { id: 'rolling-accuracy', label: '30일 rolling 추세' },
+  { id: 'rolling-accuracy', label: `${ROLLING_ACCURACY_WINDOW_DAYS}일 rolling 추세` },
   { id: 'winner-prob-bucket', label: '확률 bucket 보정' },
   { id: 'cohort-comparison', label: 'cohort × 주차 비교' },
   { id: 'brier-trend', label: 'Brier 추세' },
@@ -531,20 +533,20 @@ export default async function AccuracyPage() {
         )}
       </section>
 
-      {/* 30일 rolling accuracy 추세 (plan #14 C2 a2 cycle 1021) */}
+      {/* rolling accuracy 추세 (plan #14 C2 a2 cycle 1021; wave 117 cycle 1334 registry) */}
       {rollingAccuracy.some((p) => p.windowAccuracy !== null) && (
         <section
           id="rolling-accuracy"
           className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
         >
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
-            <h2 className="text-lg font-bold">30일 rolling 적중률 추세</h2>
+            <h2 className="text-lg font-bold">{ROLLING_ACCURACY_WINDOW_DAYS}일 rolling 적중률 추세</h2>
             <span className="text-xs text-gray-400 dark:text-gray-500">
-              최근 90일, window=30일
+              최근 {ROLLING_ACCURACY_TOTAL_DAYS}일, window={ROLLING_ACCURACY_WINDOW_DAYS}일
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            각 날짜의 직전 30일 평균 적중률입니다. 한두 경기 운에 흔들리지 않고 모델의 실제
+            각 날짜의 직전 {ROLLING_ACCURACY_WINDOW_DAYS}일 평균 적중률입니다. 한두 경기 운에 흔들리지 않고 모델의 실제
             추세를 보여줍니다. 50% 기준선보다 위에 있으면 모델이 동전 던지기보다 낫다는 뜻입니다.
           </p>
           <RollingAccuracyChart data={rollingAccuracy} />
