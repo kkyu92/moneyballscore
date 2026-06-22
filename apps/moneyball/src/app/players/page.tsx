@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
+import { PLAYERS_ISR_SECONDS, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 1800;
+export const revalidate = PLAYERS_ISR_SECONDS;
 
 function fmtFip(v: number | null): string {
   return v != null ? v.toFixed(2) : "-";
