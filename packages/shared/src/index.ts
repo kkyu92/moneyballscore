@@ -1041,6 +1041,27 @@ export const SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS = 3000;
  */
 export const LLM_RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
 
+/**
+ * Lotto scraper fetch timeout schedule (ms) — silent drift family wave 149 (cycle 1378).
+ * scripts/lotto.ts 안 4 fetch site 의 AbortSignal.timeout 매직 리터럴 박제 분산.
+ * 동일 파일 안 sibling function 간 silent drift (한쪽 tune 시 다른쪽 stale 위험).
+ *
+ * 4 occurrence (scripts/lotto.ts, source 별 intent 다름):
+ *   - fetchFromCSV (line 57): GitHub raw CSV 대용량 다운로드 → 15s
+ *   - fetchRoundFromAPI (line 80): dhlottery 단일 회차 JSON API → 8s
+ *   - fetchFromLottolyzer (line 98): lottolyzer 페이지 HTML 스크랩 → 15s
+ *   - getLatestRound (line 127): lottolyzer 최신 회차 단행 HTML → 10s
+ *
+ * 4 source 모두 intent 다름 (CSV / API / scrape / latest) 이지만 timeout 값 일부
+ * 중복 (15s 2회). 명시적 const 박제로 향후 source 별 timeout tune 시 silent drift 차단.
+ * wave 148 (LLM_RETRY_BACKOFF_MS) 와 별도 카테고리 (LLM retry schedule vs HTTP fetch timeout)
+ * — 같은 silent drift pattern (literal value vs constant name 의미 박제).
+ */
+export const LOTTO_FETCH_TIMEOUT_CSV_MS = 15_000;
+export const LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS = 8_000;
+export const LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS = 15_000;
+export const LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS = 10_000;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
