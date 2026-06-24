@@ -171,12 +171,12 @@ export default function LottoHubPage() {
       {/* Hero */}
       <section
         className="rounded-2xl p-6 md:p-8 space-y-3"
-        style={{ background: "linear-gradient(135deg, #1a3d24 0%, #132d1a 100%)" }}
+        style={{ background: "linear-gradient(135deg, var(--color-brand-700) 0%, var(--color-brand-800) 100%)" }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           <span
             className="text-xs font-bold px-2 py-0.5 rounded"
-            style={{ background: "#c5a23e", color: "#132d1a" }}
+            style={{ background: "var(--color-accent)", color: "var(--color-brand-800)" }}
           >
             {drawNo ? `제 ${drawNo}회` : "최신"}
           </span>
@@ -192,7 +192,7 @@ export default function LottoHubPage() {
         </p>
         <div
           className="rounded-lg px-4 py-3 text-sm font-medium"
-          style={{ background: "#c5a23e22", borderLeft: "3px solid #c5a23e", color: "#e2c96b" }}
+          style={{ background: "color-mix(in srgb, var(--color-accent) 13%, transparent)", borderLeft: "3px solid var(--color-accent)", color: "var(--color-accent-light)" }}
         >
           통계 기반 조합 선정. 당첨 확률 향상 없음. 재미 + 통계 학습 용도.
         </div>
@@ -209,11 +209,11 @@ export default function LottoHubPage() {
             <div
               key={set.idx}
               className="rounded-xl p-4 border-2 relative"
-              style={{ borderColor: "#c5a23e", background: "var(--color-surface-card, #fff)" }}
+              style={{ borderColor: "var(--color-accent)", background: "var(--color-surface-card, #fff)" }}
             >
               <span
                 className="absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded"
-                style={{ background: "#c5a23e", color: "#132d1a" }}
+                style={{ background: "var(--color-accent)", color: "var(--color-brand-800)" }}
               >
                 추천 {LABEL[i]}
               </span>
