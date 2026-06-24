@@ -70,7 +70,7 @@ function SetCard({ set, rank }: { set: LottoSet; rank?: string }) {
       {rank && (
         <span
           className="inline-block text-xs font-bold px-2 py-0.5 rounded min-w-[2rem] text-center"
-          style={{ background: "#c5a23e", color: "#132d1a" }}
+          style={{ background: "var(--color-accent)", color: "var(--color-brand-800)" }}
         >
           {rank}
         </span>
@@ -110,13 +110,13 @@ export default async function LottoArchiveDatePage({ params }: Props) {
       {/* Hero */}
       <section
         className="rounded-2xl p-6 md:p-8 space-y-3"
-        style={{ background: "linear-gradient(135deg, #1a3d24 0%, #132d1a 100%)" }}
+        style={{ background: "linear-gradient(135deg, var(--color-brand-700) 0%, var(--color-brand-800) 100%)" }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           {parsed.drawNo && (
             <span
               className="text-xs font-bold px-2 py-0.5 rounded"
-              style={{ background: "#c5a23e", color: "#132d1a" }}
+              style={{ background: "var(--color-accent)", color: "var(--color-brand-800)" }}
             >
               제 {parsed.drawNo}회
             </span>
@@ -128,7 +128,7 @@ export default async function LottoArchiveDatePage({ params }: Props) {
         </p>
         <div
           className="rounded-lg px-4 py-3 text-sm font-medium"
-          style={{ background: "#c5a23e22", borderLeft: "3px solid #c5a23e", color: "#e2c96b" }}
+          style={{ background: "color-mix(in srgb, var(--color-accent) 13%, transparent)", borderLeft: "3px solid var(--color-accent)", color: "var(--color-accent-light)" }}
         >
           통계 기반 조합 선정. 당첨 확률 향상 없음. 재미 + 통계 학습 용도.
         </div>
@@ -143,11 +143,11 @@ export default async function LottoArchiveDatePage({ params }: Props) {
               <div
                 key={set.idx}
                 className="rounded-xl p-4 border-2 relative bg-white dark:bg-gray-900"
-                style={{ borderColor: "#c5a23e" }}
+                style={{ borderColor: "var(--color-accent)" }}
               >
                 <span
                   className="absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded"
-                  style={{ background: "#c5a23e", color: "#132d1a" }}
+                  style={{ background: "var(--color-accent)", color: "var(--color-brand-800)" }}
                 >
                   추천 {LABEL[i]}
                 </span>
