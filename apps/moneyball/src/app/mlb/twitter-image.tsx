@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { MLB_TEAM_COUNT } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_GRADIENT_NAVY_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -18,7 +19,7 @@ export default function MlbHubTwitterImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0a1429 0%, #112a52 50%, #1e3a7a 100%)",
+          background: MLB_GRADIENT_NAVY_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
