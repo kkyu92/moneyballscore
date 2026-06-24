@@ -16,6 +16,12 @@
 
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import {
+  LOTTO_FETCH_TIMEOUT_CSV_MS,
+  LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS,
+  LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS,
+  LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS,
+} from '../packages/shared/src/index';
 
 const DATA_FILE = join(__dirname, 'lotto-data.json');
 const FETCH_DELAY_MS = 300;
@@ -54,7 +60,7 @@ function parseCSVLine(line: string): string[] {
 
 async function fetchFromCSV(): Promise<LottoRound[]> {
   console.log('  GitHub CSV 다운로드 중 (1~1205회차)...');
-  const res = await fetch(CSV_URL, { signal: AbortSignal.timeout(15_000) });
+  const res = await fetch(CSV_URL, { signal: AbortSignal.timeout(LOTTO_FETCH_TIMEOUT_CSV_MS) });
   if (!res.ok) throw new Error(`CSV 실패: ${res.status}`);
   const text = await res.text();
   const rounds: LottoRound[] = [];
@@ -77,7 +83,7 @@ async function fetchFromCSV(): Promise<LottoRound[]> {
 async function fetchRoundFromAPI(round: number): Promise<LottoRound | null> {
   const url = `https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${round}`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8_000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS) });
     const data = await res.json() as Record<string, unknown>;
     if (data['returnValue'] !== 'success') return null;
     const numbers = [
@@ -95,7 +101,7 @@ async function fetchFromLottolyzer(neededRounds: Set<number>): Promise<LottoRoun
     const url = `https://en.lottolyzer.com/history/south-korea/6_slash_45-lotto/page/${page}/per-page/100`;
     let html: string;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+      const res = await fetch(url, { signal: AbortSignal.timeout(LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS) });
       html = await res.text();
     } catch { console.warn(`  lottolyzer 페이지 ${page} 실패`); break; }
 
@@ -124,7 +130,7 @@ async function fetchFromLottolyzer(neededRounds: Set<number>): Promise<LottoRoun
 async function getLatestRound(): Promise<number> {
   const url = 'https://en.lottolyzer.com/history/south-korea/6_slash_45-lotto/page/1/per-page/1';
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS) });
     const html = await res.text();
     const m = /<td>(\d{3,4})<\/td>/.exec(html);
     return m ? Number(m[1]) : 0;
