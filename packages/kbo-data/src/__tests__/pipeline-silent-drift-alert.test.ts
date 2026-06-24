@@ -95,4 +95,31 @@ describe('shouldAlertSilentDrift', () => {
       ),
     ).toBe(true);
   });
+
+  // cycle 1363 — postview cohort 확장 (사례 11 family).
+  // postview-daily 의 eligibleGames>0 + processed=0 = silent postview drop.
+  // gamesFound = eligibleGames / predictionsGenerated = processed 매핑.
+  it('postview mode + gamesFound>0 + predictionsGenerated=0 → alert (silent postview drop)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'postview', gamesFound: 3, predictionsGenerated: 0 })),
+    ).toBe(true);
+  });
+
+  it('postview mode + gamesFound>0 + predictionsGenerated>0 → alert 안 함 (정상 postview)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'postview', gamesFound: 3, predictionsGenerated: 2 })),
+    ).toBe(false);
+  });
+
+  it('postview mode + gamesFound=0 → alert 안 함 (eligible 경기 없음 정상)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'postview', gamesFound: 0, predictionsGenerated: 0 })),
+    ).toBe(false);
+  });
+
+  it('postview mode + processed partial (gamesFound > 0, predictionsGenerated > 0 단 < gamesFound) → alert 안 함 (1+ 박제 = 인프라 작동, 개별 game 실패는 errors 채널)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'postview', gamesFound: 5, predictionsGenerated: 1 })),
+    ).toBe(false);
+  });
 });

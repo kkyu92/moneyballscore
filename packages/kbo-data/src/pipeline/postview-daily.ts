@@ -35,6 +35,7 @@ import {
 import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
 import { decidePostviewModelVersion } from './model-version';
+import { captureSilentDriftAlert } from './silent-drift-alert';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -268,6 +269,23 @@ export async function runPostviewDaily(
     `processed=${result.processed} skipped=${result.skipped} ` +
     `errors=${result.errors.length} tokens=${result.totalTokens}`
   );
+
+  // cycle 1363 — silent drift alert. eligibleGames>0 + processed=0 → silent postview
+  // drop. spec docs/research/noise-filtering-pipeline-2026-06-24.md 후보 A Tier 1.
+  // 이전엔 console.log only → 사용자 가시 채널 부재 (predict_final / verify / mlb_* 만
+  // 박제, postview cron silent gap). gamesFound = eligibleGames / predictionsGenerated
+  // = processed 매핑.
+  try {
+    await captureSilentDriftAlert({
+      mode: 'postview',
+      date,
+      gamesFound: result.eligibleGames,
+      predictionsGenerated: result.processed,
+      errors: result.errors,
+    });
+  } catch (e) {
+    console.error('[postview-daily] captureSilentDriftAlert failed:', errMsg(e));
+  }
 
   return result;
 }

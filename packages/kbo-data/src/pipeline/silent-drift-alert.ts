@@ -16,6 +16,12 @@
 // 별도 채널. shadow factor (park_weather, umpire_sz) 활성 후 factor 분포가 비정상
 // 흐름 (예: weather 결측 30%↑ → 모든 park_weather=0.5 stuck) 사전 감지. cohort wiring
 // (M-V2) 의 evidence 누적 + 본 alert 가 함께 작동.
+//
+// cycle 1363 (2026-06-24) explore-idea (heavy) — postview cohort 확장 (spec
+// docs/research/noise-filtering-pipeline-2026-06-24.md 후보 A Tier 1). postview-daily
+// 의 eligibleGames>0 + processed=0 = silent postview drop 즉시 감지 Sentry warning.
+// 이전엔 postview cron silent 시 사용자 가시 채널 부재 (console.log only). 사례 11
+// family 확장 — predict_final / verify / mlb_* 외 postview 도 박제.
 
 import type { PipelineMode } from './daily';
 import { notifyError } from '../notify/telegram';
@@ -67,6 +73,14 @@ export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {
     return meta.verifiedCount === 0;
   }
 
+  // cycle 1363 — postview mode silent drop detection.
+  // postview-daily 의 eligibleGames>0 (pre_game 존재 + post_game 부재) + processed=0
+  // = silent postview drop. gamesFound = eligibleGames / predictionsGenerated = processed
+  // (postview-daily 호출 측에서 매핑 의무).
+  if (meta.mode === 'postview') {
+    return meta.predictionsGenerated === 0;
+  }
+
   // MLB scrape/train/measure modes — gamesFound>0 단 rowsInserted=0 → silent drop
   if (MLB_SCRAPE_MODES.has(meta.mode)) {
     return meta.predictionsGenerated === 0;
@@ -87,17 +101,22 @@ export async function captureSilentDriftAlert(
   if (process.env.NODE_ENV === 'test') return;
 
   const isVerify = meta.mode === 'verify';
+  const isPostview = meta.mode === 'postview';
   const isMlb = meta.mode.startsWith('mlb_');
   const message = isVerify
     ? 'verify_silent_drift'
-    : isMlb
-      ? `mlb_${meta.mode}_silent_drift`
-      : 'predict_final_silent_drift';
+    : isPostview
+      ? 'postview_silent_drift'
+      : isMlb
+        ? `mlb_${meta.mode}_silent_drift`
+        : 'predict_final_silent_drift';
   const pattern = isVerify
     ? 'silent_drift_family_case11_verify_extension'
-    : isMlb
-      ? 'silent_drift_family_mlb'
-      : 'silent_drift_family_case11';
+    : isPostview
+      ? 'silent_drift_family_case11_postview_extension'
+      : isMlb
+        ? 'silent_drift_family_mlb'
+        : 'silent_drift_family_case11';
 
   // Sentry warning channel (기존 — getClient 부재 시 silent skip).
   let Sentry: SentryModule | null = null;
