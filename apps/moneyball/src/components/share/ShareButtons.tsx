@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { COPY_FEEDBACK_RESET_MS } from "@moneyball/shared";
 
 interface ShareButtonsProps {
   /** 절대 URL — SSR에선 window 없으므로 서버에서 주입 */
@@ -105,7 +106,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_RESET_MS);
     } catch {
       setCopied(false);
     }

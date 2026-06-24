@@ -956,6 +956,20 @@ export const WEATHER_FETCH_REVALIDATE_SECONDS = 1800;
 export const KBO_SCORES_FETCH_REVALIDATE_SECONDS = 30;
 export const KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS = 3600;
 
+/**
+ * Clipboard copy 성공 후 "복사됨" 라벨 reset 까지 시간 — silent drift family wave 138
+ * (cycle 1360). 사용자 UX clipboard 복사 confirmation timing.
+ *
+ * 2 occurrence (2 component, 동일 UX intent — 복사 직후 ~2초 표시 후 자연 reset):
+ *   - components/picks/SharePicksButton.tsx: setTimeout(() => setCopied(false), 2000)
+ *   - components/share/ShareButtons.tsx: setTimeout(() => setCopied(false), 2000)
+ *
+ * 변경 시 두 share component 의 copy feedback timing 자동 sync.
+ * wave 121~137 family (page-level ISR / fetch revalidate) 와 별도 카테고리
+ * (client-side UX timing) — 같은 silent drift pattern (literal value vs constant name).
+ */
+export const COPY_FEEDBACK_RESET_MS = 2000;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
