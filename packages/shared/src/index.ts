@@ -859,6 +859,28 @@ export const REVIEWS_WEEKLY_ISR_SECONDS = REVIEWS_WEEKLY_ISR_MINUTES * 60;
 export const REVIEWS_MONTHLY_ISR_HOURS = 1;
 export const REVIEWS_MONTHLY_ISR_SECONDS = REVIEWS_MONTHLY_ISR_HOURS * 60 * 60;
 
+/**
+ * Analysis 도메인 페이지 ISR 갱신 주기 — silent drift family wave 134 (cycle 1356).
+ * analysis 도메인 2 page 2 tier code-only silent drift. 사용자 가시 시간 literal surface 0.
+ * - ANALYSIS_INDEX (1h): analysis/page.tsx — 오늘 전체 예측 hub + 빅매치 + 이번 주
+ *   listing. ACCURACY/FEED/STANDINGS_ISR (1h) 와 동일 hourly 단위. 매일 KBO_PREDICT_DAILY_TIME_KST
+ *   갱신 후 hour 단위 refresh
+ * - ANALYSIS_GAME (10분): analysis/game/[id]/page.tsx — 단일 경기 detail (agent
+ *   debate + factor waterfall + postview). predictions verified 직후 빠른 surface
+ *   필요 (PREDICTIONS_ISR 5분 의 2배 safe margin, REVIEWS_INDEX_ISR 와 동일)
+ * wave 121~133 family code-only 패턴 정합.
+ *
+ * 코드 (2 occurrence, 2 tier):
+ *   - analysis/page.tsx: revalidate magic 3600 → ANALYSIS_INDEX_ISR_SECONDS
+ *   - analysis/game/[id]/page.tsx: revalidate magic 600 → ANALYSIS_GAME_ISR_SECONDS
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const ANALYSIS_INDEX_ISR_HOURS = 1;
+export const ANALYSIS_INDEX_ISR_SECONDS = ANALYSIS_INDEX_ISR_HOURS * 60 * 60;
+export const ANALYSIS_GAME_ISR_MINUTES = 10;
+export const ANALYSIS_GAME_ISR_SECONDS = ANALYSIS_GAME_ISR_MINUTES * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
