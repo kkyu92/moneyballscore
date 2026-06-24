@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
+import { LEADERBOARD_ISR_SECONDS, MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
 import { fetchAiBaseline, fetchLeaderboard } from '@/lib/leaderboard/server';
 import type { LeaderboardMode } from '@/lib/leaderboard/types';
 
-export const revalidate = 30;
+export const revalidate = LEADERBOARD_ISR_SECONDS;
 
 export const metadata: Metadata = {
   title: '픽 리더보드 | 머니볼스코어',

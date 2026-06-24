@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   KBO_TEAMS,
   MLB_TEAM_COUNT,
+  SEARCH_ISR_SECONDS,
   assertSelectOk,
   type TeamCode,
   type SelectResult,
@@ -13,7 +14,7 @@ import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { SearchClient, type SearchEntry } from '@/components/search/SearchClient';
 import { TeamLogo } from '@/components/shared/TeamLogo';
 
-export const revalidate = 0;
+export const revalidate = SEARCH_ISR_SECONDS;
 
 interface PageProps {
   searchParams: Promise<{ q?: string }>;

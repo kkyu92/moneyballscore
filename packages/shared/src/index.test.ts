@@ -80,6 +80,8 @@ import {
   HOME_ISR_SECONDS,
   SITEMAP_ISR_HOURS,
   SITEMAP_ISR_SECONDS,
+  LEADERBOARD_ISR_SECONDS,
+  SEARCH_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -235,6 +237,14 @@ describe('KBO_TEAMS', () => {
     expect(SITEMAP_ISR_HOURS).toBe(6);
     expect(SITEMAP_ISR_SECONDS).toBe(SITEMAP_ISR_HOURS * 60 * 60);
     expect(SITEMAP_ISR_SECONDS).toBe(21600);
+  });
+
+  it('LEADERBOARD_ISR_SECONDS exposes leaderboard refresh tier (silent drift wave 136 guard)', () => {
+    expect(LEADERBOARD_ISR_SECONDS).toBe(30);
+  });
+
+  it('SEARCH_ISR_SECONDS pins dynamic semantic (silent drift wave 136 guard)', () => {
+    expect(SEARCH_ISR_SECONDS).toBe(0);
   });
 
   it('should have required fields for each team', () => {

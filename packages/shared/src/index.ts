@@ -919,6 +919,23 @@ export const HOME_ISR_SECONDS = HOME_ISR_MINUTES * 60;
 export const SITEMAP_ISR_HOURS = 6;
 export const SITEMAP_ISR_SECONDS = SITEMAP_ISR_HOURS * 60 * 60;
 
+/**
+ * Leaderboard / Search 페이지 ISR — silent drift family wave 136 (cycle 1358).
+ * 2 occurrence 2 tier code-only silent drift bundle. wave 121~135 family 정합.
+ * - LEADERBOARD (30s): leaderboard/page.tsx — 픽 리더보드. 사용자 픽 결과 반영
+ *   짧은 ISR. 30초 = sub-minute tier (PREDICTIONS 5min 보다 더 빠른 refresh)
+ * - SEARCH (0s): search/page.tsx — 동적 search (query params). revalidate=0
+ *   = no caching. registry 상수로 의미 박제 (dynamic 의도 명시)
+ *
+ * 코드 (2 occurrence, 2 tier):
+ *   - leaderboard/page.tsx: revalidate magic 30 → LEADERBOARD_ISR_SECONDS
+ *   - search/page.tsx: revalidate magic 0 → SEARCH_ISR_SECONDS
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const LEADERBOARD_ISR_SECONDS = 30;
+export const SEARCH_ISR_SECONDS = 0;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
