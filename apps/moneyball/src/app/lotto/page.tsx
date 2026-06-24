@@ -6,7 +6,7 @@ import { getLatestLottoPicks, ballColor, type LottoSet } from "@/lib/lotto/picks
 import { LOTTO_ISR_SECONDS } from "@moneyball/shared";
 
 export const dynamic = "force-static";
-export const revalidate = LOTTO_ISR_SECONDS;
+export const revalidate = 3600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/lotto`;

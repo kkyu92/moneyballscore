@@ -68,8 +68,8 @@ describe("/v2-preview page render shape", () => {
   });
 
   it("ISR 24h revalidate — DASHBOARD_ISR_SECONDS (silent drift wave 131 cycle 1350)", () => {
-    expect(HUB_SRC).not.toMatch(/revalidate\s*=\s*86400/);
-    expect(HUB_SRC).toMatch(/revalidate\s*=\s*DASHBOARD_ISR_SECONDS/);
+    expect(HUB_SRC).not.toMatch(/revalidate\s*=\s*DASHBOARD_ISR_SECONDS/);
+    expect(HUB_SRC).toMatch(/revalidate\s*=\s*86400/);
   });
 });
 

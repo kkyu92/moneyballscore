@@ -8,7 +8,7 @@
 
 import { ADS_TXT_ISR_SECONDS } from "@moneyball/shared";
 
-export const revalidate = ADS_TXT_ISR_SECONDS;
+export const revalidate = 3600;
 
 export function GET() {
   const publisherId = process.env.ADSENSE_PUBLISHER_ID?.trim();

@@ -20,7 +20,7 @@ import { KBO_TEAMS, MLB_TEAMS, SITEMAP_ISR_SECONDS, assertSelectOk, errMsg } fro
 // 비로소 유효. 빌드 시점 1회 생성 + 6시간 ISR. warmup cron 은 ISR miss 시 즉시
 // 재생성 트리거.
 
-export const revalidate = SITEMAP_ISR_SECONDS;
+export const revalidate = 21600;
 
 function createSitemapClient() {
   // cookie-free, no session — sitemap 전용. RLS 통과하는 public 데이터만 읽음.

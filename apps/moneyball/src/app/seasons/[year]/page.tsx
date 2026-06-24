@@ -10,7 +10,7 @@ import { SeasonStandingsSortControl } from "@/components/seasons/SeasonStandings
 // 진행 중인 시즌은 경기가 매일 추가되므로 10분마다 최신화, 종료 시즌은 1시간.
 // Next.js ISR 은 path별 다른 revalidate 를 동적으로 주지 못해 10분 (진행 시즌 기준)
 // 통일. 종료 시즌 페이지는 데이터 변동 없어서 오버헤드 미미.
-export const revalidate = SEASONS_ISR_SECONDS;
+export const revalidate = 600;
 
 interface PageProps {
   params: Promise<{ year: string }>;

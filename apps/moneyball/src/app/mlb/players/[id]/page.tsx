@@ -13,7 +13,7 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = MLB_ISR_SECONDS;
+export const revalidate = 21600;
 
 interface PageProps {
   params: Promise<{ id: string }>;

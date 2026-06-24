@@ -4,7 +4,7 @@ import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/
 import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, MLB_ISR_SECONDS } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-export const revalidate = MLB_ISR_SECONDS;
+export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 

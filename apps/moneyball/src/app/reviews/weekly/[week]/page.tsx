@@ -15,7 +15,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
 import { neutral } from "@/lib/design-tokens";
 
-export const revalidate = REVIEWS_WEEKLY_ISR_SECONDS;
+export const revalidate = 1800;
 
 interface PageProps {
   params: Promise<{ week: string }>;

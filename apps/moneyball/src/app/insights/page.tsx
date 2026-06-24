@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = INSIGHTS_ISR_SECONDS;
+export const revalidate = 86400;
 
 interface Verdict {
   reasoning?: string;

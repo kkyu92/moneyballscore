@@ -19,9 +19,9 @@ describe("mlb/team/[code]/page.tsx — Plan B Tier C+D Task 4 정합 (cycle 1026
     expect(PAGE_SRC).toMatch(/MLB_TEAMS_PRE_RENDER\.map/);
   });
 
-  it("revalidate = MLB_LIVE_ISR_SECONDS (silent drift wave 132)", () => {
-    expect(PAGE_SRC).toMatch(/export const revalidate = MLB_LIVE_ISR_SECONDS/);
-    expect(PAGE_SRC).not.toMatch(/export const revalidate = 1800\b/);
+  it("revalidate = 1800 (Next.js 16 Turbopack: literal required, was MLB_LIVE_ISR_SECONDS wave 132)", () => {
+    expect(PAGE_SRC).toMatch(/export const revalidate = 1800\b/);
+    expect(PAGE_SRC).not.toMatch(/export const revalidate = MLB_LIVE_ISR_SECONDS/);
   });
 
   it("Breadcrumb 3 단계 (MLB 분석 → 팀 → name)", () => {

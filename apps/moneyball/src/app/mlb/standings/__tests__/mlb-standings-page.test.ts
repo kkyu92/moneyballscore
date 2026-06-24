@@ -27,8 +27,8 @@ describe("mlb/standings/page.tsx — Plan B Tier C+D Task 6 (cycle 1027)", () =>
     expect(PAGE_SRC).toMatch(/numberOfItems:\s*MLB_TEAM_COUNT/);
   });
 
-  it("revalidate = MLB_ISR_SECONDS ISR (silent drift wave 124, /mlb/team hub 패턴 정합)", () => {
-    expect(PAGE_SRC).toMatch(/export const revalidate = MLB_ISR_SECONDS/);
+  it("revalidate = 21600 ISR (Next.js 16 Turbopack: literal required, was MLB_ISR_SECONDS wave 124)", () => {
+    expect(PAGE_SRC).toMatch(/export const revalidate = 21600\b/);
   });
 
   it("팀 link href = /mlb/team/${code}", () => {

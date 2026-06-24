@@ -82,7 +82,7 @@ const TOC_ITEMS = [
   { id: 'matchup', label: '상대 강약' },
 ];
 
-export const revalidate = ACCURACY_ISR_SECONDS;
+export const revalidate = 3600;
 
 // ── SVG 캘리브레이션 다이어그램 ───────────────────────────────
 const PLOT_SIZE = 400;

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = PLAYERS_ISR_SECONDS;
+export const revalidate = 1800;
 
 function fmtFip(v: number | null): string {
   return v != null ? v.toFixed(2) : "-";

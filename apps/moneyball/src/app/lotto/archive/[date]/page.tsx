@@ -12,7 +12,7 @@ interface Props {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = LOTTO_ARCHIVE_ISR_SECONDS;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   return listArchiveDates().map((date) => ({ date }));

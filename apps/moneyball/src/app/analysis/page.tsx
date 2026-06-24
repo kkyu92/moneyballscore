@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = ANALYSIS_INDEX_ISR_SECONDS;
+export const revalidate = 3600;
 
 interface TodayAllRow {
   id: number;

@@ -128,8 +128,8 @@ describe("/insights/[date] Article JSON-LD shape (regression guard)", () => {
   it("force-static + dynamicParams false + revalidate INSIGHTS_ISR_SECONDS ISR", () => {
     expect(DATE_SRC).toMatch(/dynamic\s*=\s*"force-static"/);
     expect(DATE_SRC).toMatch(/dynamicParams\s*=\s*false/);
-    expect(DATE_SRC).not.toMatch(/revalidate\s*=\s*86400/);
-    expect(DATE_SRC).toMatch(/revalidate\s*=\s*INSIGHTS_ISR_SECONDS/);
+    expect(DATE_SRC).not.toMatch(/revalidate\s*=\s*INSIGHTS_ISR_SECONDS/);
+    expect(DATE_SRC).toMatch(/revalidate\s*=\s*86400/);
   });
 
   it("generateStaticParams uses listInsightsDates(90)", () => {

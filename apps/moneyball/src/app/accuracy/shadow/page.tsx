@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const revalidate = ACCURACY_ISR_SECONDS;
+export const revalidate = 3600;
 
 interface GameField {
   game_date: string;

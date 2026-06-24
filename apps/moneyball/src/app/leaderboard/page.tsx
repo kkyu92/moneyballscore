@@ -7,7 +7,7 @@ import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
 import { fetchAiBaseline, fetchLeaderboard } from '@/lib/leaderboard/server';
 import type { LeaderboardMode } from '@/lib/leaderboard/types';
 
-export const revalidate = LEADERBOARD_ISR_SECONDS;
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: '픽 리더보드 | 머니볼스코어',

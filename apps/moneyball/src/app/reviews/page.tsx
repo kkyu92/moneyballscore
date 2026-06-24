@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = REVIEWS_INDEX_ISR_SECONDS;
+export const revalidate = 600;
 
 interface VerifiedPredictionRow {
   confidence: number;

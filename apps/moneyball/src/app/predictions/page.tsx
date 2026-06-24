@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = PREDICTIONS_ISR_SECONDS;
+export const revalidate = 300;
 
 interface TierCount {
   predicted: number;

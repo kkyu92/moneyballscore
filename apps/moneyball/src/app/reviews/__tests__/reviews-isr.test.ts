@@ -19,11 +19,9 @@ const MONTHLY_SRC = readFileSync(
 );
 
 describe("reviews REVIEWS_*_ISR_SECONDS source-of-truth guard (silent drift wave 133 cycle 1355)", () => {
-  it("reviews/page.tsx revalidate = 600 magic 부재 — REVIEWS_INDEX_ISR_SECONDS 사용", () => {
-    expect(INDEX_SRC).not.toMatch(/export\s+const\s+revalidate\s*=\s*600\b/);
-    expect(INDEX_SRC).toMatch(
-      /export\s+const\s+revalidate\s*=\s*REVIEWS_INDEX_ISR_SECONDS/,
-    );
+  it("reviews/page.tsx revalidate = 600 literal (Next.js 16 Turbopack: literal required)", () => {
+    expect(INDEX_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*600\b/);
+    // build guard: route segment revalidate must be literal not identifier (Next.js 16 Turbopack)
   });
 
   it("reviews/page.tsx REVIEWS_INDEX_ISR_SECONDS @moneyball/shared import 포함", () => {
@@ -32,11 +30,9 @@ describe("reviews REVIEWS_*_ISR_SECONDS source-of-truth guard (silent drift wave
     );
   });
 
-  it("reviews/misses/page.tsx revalidate = 1800 magic 부재 — REVIEWS_WEEKLY_ISR_SECONDS 사용", () => {
-    expect(MISSES_SRC).not.toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
-    expect(MISSES_SRC).toMatch(
-      /export\s+const\s+revalidate\s*=\s*REVIEWS_WEEKLY_ISR_SECONDS/,
-    );
+  it("reviews/misses/page.tsx revalidate = 1800 literal (Next.js 16 Turbopack: literal required)", () => {
+    expect(MISSES_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
+    // build guard: route segment revalidate must be literal not identifier (Next.js 16 Turbopack)
   });
 
   it("reviews/misses/page.tsx REVIEWS_WEEKLY_ISR_SECONDS @moneyball/shared import 포함", () => {
@@ -45,11 +41,9 @@ describe("reviews REVIEWS_*_ISR_SECONDS source-of-truth guard (silent drift wave
     );
   });
 
-  it("reviews/weekly/[week]/page.tsx revalidate = 1800 magic 부재 — REVIEWS_WEEKLY_ISR_SECONDS 사용", () => {
-    expect(WEEKLY_SRC).not.toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
-    expect(WEEKLY_SRC).toMatch(
-      /export\s+const\s+revalidate\s*=\s*REVIEWS_WEEKLY_ISR_SECONDS/,
-    );
+  it("reviews/weekly/[week]/page.tsx revalidate = 1800 literal (Next.js 16 Turbopack: literal required)", () => {
+    expect(WEEKLY_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
+    // build guard: route segment revalidate must be literal not identifier (Next.js 16 Turbopack)
   });
 
   it("reviews/weekly/[week]/page.tsx REVIEWS_WEEKLY_ISR_SECONDS @moneyball/shared import 포함", () => {
@@ -58,13 +52,9 @@ describe("reviews REVIEWS_*_ISR_SECONDS source-of-truth guard (silent drift wave
     );
   });
 
-  it("reviews/monthly/[month]/page.tsx revalidate = 3600 magic 부재 — REVIEWS_MONTHLY_ISR_SECONDS 사용", () => {
-    expect(MONTHLY_SRC).not.toMatch(
-      /export\s+const\s+revalidate\s*=\s*3600\b/,
-    );
-    expect(MONTHLY_SRC).toMatch(
-      /export\s+const\s+revalidate\s*=\s*REVIEWS_MONTHLY_ISR_SECONDS/,
-    );
+  it("reviews/monthly/[month]/page.tsx revalidate = 3600 literal (Next.js 16 Turbopack: literal required)", () => {
+    expect(MONTHLY_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*3600\b/);
+    // build guard: route segment revalidate must be literal not identifier (Next.js 16 Turbopack)
   });
 
   it("reviews/monthly/[month]/page.tsx REVIEWS_MONTHLY_ISR_SECONDS @moneyball/shared import 포함", () => {

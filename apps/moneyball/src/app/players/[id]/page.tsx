@@ -9,7 +9,7 @@ import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 import { PLAYERS_ISR_SECONDS, shortTeamName } from '@moneyball/shared';
 
-export const revalidate = PLAYERS_ISR_SECONDS;
+export const revalidate = 1800;
 
 interface PageProps {
   params: Promise<{ id: string }>;

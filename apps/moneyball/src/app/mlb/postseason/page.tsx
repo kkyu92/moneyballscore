@@ -4,7 +4,7 @@ import { MLB_TEAM_COUNT, MLB_ISR_SECONDS } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-export const revalidate = MLB_ISR_SECONDS;
+export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;

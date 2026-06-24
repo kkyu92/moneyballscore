@@ -12,7 +12,7 @@ import {
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-export const revalidate = MLB_ISR_SECONDS;
+export const revalidate = 21600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 

@@ -14,7 +14,7 @@ import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { SearchClient, type SearchEntry } from '@/components/search/SearchClient';
 import { TeamLogo } from '@/components/shared/TeamLogo';
 
-export const revalidate = SEARCH_ISR_SECONDS;
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   searchParams: Promise<{ q?: string }>;

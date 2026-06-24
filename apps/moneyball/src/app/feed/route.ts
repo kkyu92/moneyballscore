@@ -12,7 +12,7 @@ import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { parseChangelog } from '@/lib/changelog/parse';
 import { listInsightsDates } from '@/lib/insights/loader';
 
-export const revalidate = FEED_ISR_SECONDS;
+export const revalidate = 3600;
 
 const SITE_URL = 'https://moneyballscore.vercel.app';
 

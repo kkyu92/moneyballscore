@@ -154,7 +154,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
   return (data ?? []) as unknown as DateGame[];
 }
 
-export const revalidate = PREDICTIONS_ISR_SECONDS;
+export const revalidate = 300;
 
 function formatTeamName(code: TeamCode | undefined): string {
   if (!code) return "";

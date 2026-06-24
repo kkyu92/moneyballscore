@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = V2_SHADOW_MONITOR_ISR_SECONDS;
+export const revalidate = 3600;
 
 function isPercentLikeColumn(label: string): boolean {
   return /acc|brier|%/i.test(label);

@@ -55,7 +55,7 @@ describe("/v2-shadow-monitor page shape", () => {
   });
 
   it(`revalidate ISR 박제 (${V2_SHADOW_MONITOR_ISR_SECONDS} = ${V2_SHADOW_MONITOR_ISR_HOURS}시간)`, () => {
-    expect(PAGE_SRC).toMatch(/export const revalidate = V2_SHADOW_MONITOR_ISR_SECONDS/);
+    expect(PAGE_SRC).toMatch(/export const revalidate = 3600\b/);
     expect(V2_SHADOW_MONITOR_ISR_SECONDS).toBe(V2_SHADOW_MONITOR_ISR_HOURS * 60 * 60);
   });
 

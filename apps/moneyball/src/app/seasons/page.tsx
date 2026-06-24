@@ -4,7 +4,7 @@ import { SEASONS_ISR_SECONDS } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // 진행 시즌을 매일 반영하려면 인덱스도 짧게. 개별 시즌 페이지와 동일 10분.
-export const revalidate = SEASONS_ISR_SECONDS;
+export const revalidate = 600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const CURRENT_YEAR = new Date().getFullYear();

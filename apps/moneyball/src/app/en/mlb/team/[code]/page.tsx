@@ -15,7 +15,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = MLB_LIVE_ISR_SECONDS;
+export const revalidate = 1800;
 
 interface PageProps {
   params: Promise<{ code: string }>;

@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { listArchiveDates } from "@/lib/lotto/archive";
 
 export const dynamic = "force-static";
-export const revalidate = LOTTO_ARCHIVE_ISR_SECONDS;
+export const revalidate = 86400;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/lotto/archive`;

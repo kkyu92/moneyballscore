@@ -10,7 +10,7 @@ import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
-export const revalidate = STANDINGS_ISR_SECONDS;
+export const revalidate = 3600;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 

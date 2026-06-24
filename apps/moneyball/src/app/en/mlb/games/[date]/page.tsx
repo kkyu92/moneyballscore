@@ -6,7 +6,7 @@ import { MLB_LIVE_ISR_SECONDS } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 
-export const revalidate = MLB_LIVE_ISR_SECONDS;
+export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 

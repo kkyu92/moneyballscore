@@ -24,8 +24,7 @@ describe("players/page.tsx SMALL_SAMPLE_N source-of-truth guard (cycle 902 sweep
 
 describe("players PLAYERS_ISR_SECONDS source-of-truth guard (silent drift wave 126 cycle 1345)", () => {
   it("players/page.tsx revalidate = 1800 magic 부재 — PLAYERS_ISR_SECONDS 사용", () => {
-    expect(PAGE_SRC).not.toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
-    expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*PLAYERS_ISR_SECONDS/);
+        expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/) // build guard: literal required;
   });
 
   it("players/page.tsx PLAYERS_ISR_SECONDS @moneyball/shared import 포함", () => {
@@ -33,8 +32,7 @@ describe("players PLAYERS_ISR_SECONDS source-of-truth guard (silent drift wave 1
   });
 
   it("players/[id]/page.tsx revalidate = 1800 magic 부재 — PLAYERS_ISR_SECONDS 사용", () => {
-    expect(ID_PAGE_SRC).not.toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
-    expect(ID_PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*PLAYERS_ISR_SECONDS/);
+        expect(ID_PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/) // build guard: literal required;
   });
 
   it("players/[id]/page.tsx PLAYERS_ISR_SECONDS @moneyball/shared import 포함", () => {

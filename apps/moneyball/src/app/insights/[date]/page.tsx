@@ -21,7 +21,7 @@ const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = INSIGHTS_ISR_SECONDS;
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   const dates = await listInsightsDates(90);

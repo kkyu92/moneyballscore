@@ -22,7 +22,7 @@ import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare"
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 
-export const revalidate = MATCHUP_ISR_SECONDS;
+export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ teamA: string; teamB: string }>;

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const revalidate = DASHBOARD_ISR_SECONDS;
+export const revalidate = 86400;
 
 interface ReasoningShape {
   debate?: { verdict?: { homeWinProb?: number; reasoning?: string } };

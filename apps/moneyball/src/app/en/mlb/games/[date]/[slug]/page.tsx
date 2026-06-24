@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk, MLB_LIVE_ISR_SECONDS } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
-export const revalidate = MLB_LIVE_ISR_SECONDS;
+export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 

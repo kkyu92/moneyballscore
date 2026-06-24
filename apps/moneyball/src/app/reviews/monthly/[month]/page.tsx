@@ -14,7 +14,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MonthlyTeamStatsSortControl } from "@/components/reviews/MonthlyTeamStatsSortControl";
 import { neutral } from "@/lib/design-tokens";
 
-export const revalidate = REVIEWS_MONTHLY_ISR_SECONDS;
+export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ month: string }>;

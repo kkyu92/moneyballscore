@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = REVIEWS_WEEKLY_ISR_SECONDS;
+export const revalidate = 1800;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 

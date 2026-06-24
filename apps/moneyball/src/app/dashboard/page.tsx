@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 // 하루 경기 종료 시점 verify cron (KST 23:00 = UTC 14:00) 이 끝나면
 // `/api/revalidate` 가 자동 트리거되어 /dashboard 즉시 갱신.
 // revalidate 는 24h 안전망 — API 실패 시 다음 날 자연 갱신.
-export const revalidate = DASHBOARD_ISR_SECONDS;
+export const revalidate = 86400;
 
 interface OverviewRow {
   confidence: number;

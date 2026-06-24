@@ -19,7 +19,7 @@ import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter"
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = TEAMS_ISR_SECONDS;
+export const revalidate = 1800;
 
 interface PageProps {
   params: Promise<{ code: string }>;
