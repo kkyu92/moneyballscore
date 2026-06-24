@@ -1,12 +1,10 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS, shortTeamName, KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
+import { KBO_TEAMS, shortTeamName, KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS, SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
 import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
 import { captureKboScraperHtmlAlert } from './kbo-scraper-alert';
-
-const DELAY_MS = 2000;
 
 // YYYYMMDD → YYYY-MM-DD
 function formatDate(raw: string): string {
@@ -156,7 +154,7 @@ export async function fetchRecentForm(
     }
   });
 
-  await sleep(DELAY_MS);
+  await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   return total > 0 ? wins / total : 0.5;
 }
 
@@ -212,7 +210,7 @@ export async function fetchHeadToHead(
     }
   });
 
-  await sleep(DELAY_MS);
+  await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   return { wins, losses: Math.max(0, losses) };
 }
 

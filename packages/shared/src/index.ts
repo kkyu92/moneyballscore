@@ -1004,6 +1004,27 @@ export const SUPABASE_PAGE_SIZE = 1000;
  */
 export const BACKFILL_POLITE_DELAY_MS = 250;
 
+/**
+ * Scraper rate-limit polite delay (ms) — silent drift family wave 147 (cycle 1376).
+ * 외부 source HTTP 호출 간 throttle. 6 scraper 모두 동일 intent (rate-limit politeness)
+ * 였으나 3 다른 const 이름 (DELAY_MS / RATE_LIMIT_DELAY_MS / RATE_LIMIT_MS) +
+ * 1 다른 값 (fangraphs KBO 3000ms) silent drift.
+ *
+ * 6 occurrence (6 file, 동일 카테고리 — 외부 source 호출 throttle):
+ *   - packages/kbo-data/src/scrapers/kbo-official.ts: 2000ms (KBO 공식 schedule/result)
+ *   - packages/kbo-data/src/scrapers/fancy-stats.ts: 2000ms (KBO Fancy Stats)
+ *   - packages/kbo-data/src/scrapers/statsapi-mlb.ts: 2000ms (MLB StatsAPI, retry backoff base)
+ *   - packages/kbo-data/src/scrapers/baseball-savant.ts: 2000ms (Baseball Savant)
+ *   - packages/kbo-data/src/scrapers/fangraphs-mlb.ts: 2000ms (FanGraphs MLB)
+ *   - packages/kbo-data/src/scrapers/fangraphs.ts: 3000ms (FanGraphs KBO, 1.5x 예의)
+ *
+ * 변경 시 6 scraper sync. wave 142 (BACKFILL_POLITE_DELAY_MS 250ms) 와 별도 카테고리
+ * (백필 loop 안 delay vs 단발 호출 rate-limit) — 같은 silent drift pattern
+ * (literal value vs constant name 의미 박제).
+ */
+export const SCRAPER_RATE_LIMIT_DEFAULT_MS = 2000;
+export const SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS = 3000;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

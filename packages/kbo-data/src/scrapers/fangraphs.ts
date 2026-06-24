@@ -1,10 +1,10 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
+import { SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS } from '@moneyball/shared';
 import { KBO_USER_AGENT } from '../types';
 import { parseNumWithFallback, resolveTeamCode, sleep } from './fancy-stats';
 
 const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
-const DELAY_MS = 3000; // 예의상 3초
 
 // FG_TEAM_MAP / 자체 resolveTeamCode 삭제 — fancy-stats.resolveTeamCode 단일
 // 소스 derive. FS 매핑 테이블과 10팀 영문명 100% 동일했고, 자체 함수는
@@ -93,7 +93,7 @@ export async function fetchBatterLeaders(season: number): Promise<FanGraphsBatte
     }
   }
 
-  await sleep(DELAY_MS);
+  await sleep(SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS);
 
   const results: FanGraphsBatterData[] = [];
   for (const [team, data] of teamData) {

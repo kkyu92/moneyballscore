@@ -1,12 +1,11 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
 import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
-import { errMsg, ELO_NEUTRAL, ELO_NEUTRAL_WIN_PCT } from '@moneyball/shared';
+import { errMsg, ELO_NEUTRAL, ELO_NEUTRAL_WIN_PCT, SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
 import { KBO_USER_AGENT, TEAM_NAME_MAP, assertResponseOk } from '../types';
 import { fetchKboPitcherBasic } from './kbo-pitcher';
 
 const BASE_URL = 'https://www.kbofancystats.com';
-const DELAY_MS = 2000;
 
 // scrapers utility export — kbo-official.ts·fangraphs.ts 와 동일 위치에서
 // sleep + parseNum 통일. backfill-records.ts·llm.ts·llm-deepseek.ts 의 sleep 은
@@ -192,7 +191,7 @@ async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
   const html = await res.text();
   const pitchers = parsePitchersFromHtml(html);
 
-  await sleep(DELAY_MS);
+  await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   return pitchers;
 }
 
@@ -354,7 +353,7 @@ export async function fetchBatterStats(_season: number): Promise<BatterStats[]> 
 
   const html = await res.text();
   const batters = parseBattersFromHtml(html);
-  await sleep(DELAY_MS);
+  await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   return batters;
 }
 
@@ -497,7 +496,7 @@ export async function fetchEloRatings(_season: number): Promise<(EloRating & { w
     });
   }
 
-  await sleep(DELAY_MS);
+  await sleep(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   return ratings;
 }
 
