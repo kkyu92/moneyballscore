@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
+  ANALYSIS_INDEX_ISR_SECONDS,
   assertSelectOk,
   classifyWinnerProb,
   ELO_NEUTRAL,
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const revalidate = ANALYSIS_INDEX_ISR_SECONDS;
 
 interface TodayAllRow {
   id: number;

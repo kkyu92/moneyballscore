@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import {
+  ANALYSIS_GAME_ISR_SECONDS,
   KBO_FACTOR_COUNT,
   KBO_TEAMS,
   assertSelectOk,
@@ -28,7 +29,7 @@ import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { GameAnalysisProse } from '@/components/analysis/GameAnalysisProse';
 
-export const revalidate = 600;
+export const revalidate = ANALYSIS_GAME_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ id: string }>;

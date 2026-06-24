@@ -66,6 +66,10 @@ import {
   REVIEWS_WEEKLY_ISR_SECONDS,
   REVIEWS_MONTHLY_ISR_HOURS,
   REVIEWS_MONTHLY_ISR_SECONDS,
+  ANALYSIS_INDEX_ISR_HOURS,
+  ANALYSIS_INDEX_ISR_SECONDS,
+  ANALYSIS_GAME_ISR_MINUTES,
+  ANALYSIS_GAME_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -179,6 +183,18 @@ describe('KBO_TEAMS', () => {
     expect(REVIEWS_MONTHLY_ISR_HOURS).toBe(1);
     expect(REVIEWS_MONTHLY_ISR_SECONDS).toBe(REVIEWS_MONTHLY_ISR_HOURS * 60 * 60);
     expect(REVIEWS_MONTHLY_ISR_SECONDS).toBe(3600);
+  });
+
+  it('ANALYSIS_INDEX_ISR_SECONDS derives from ANALYSIS_INDEX_ISR_HOURS (silent drift wave 134 guard)', () => {
+    expect(ANALYSIS_INDEX_ISR_HOURS).toBe(1);
+    expect(ANALYSIS_INDEX_ISR_SECONDS).toBe(ANALYSIS_INDEX_ISR_HOURS * 60 * 60);
+    expect(ANALYSIS_INDEX_ISR_SECONDS).toBe(3600);
+  });
+
+  it('ANALYSIS_GAME_ISR_SECONDS derives from ANALYSIS_GAME_ISR_MINUTES (silent drift wave 134 guard)', () => {
+    expect(ANALYSIS_GAME_ISR_MINUTES).toBe(10);
+    expect(ANALYSIS_GAME_ISR_SECONDS).toBe(ANALYSIS_GAME_ISR_MINUTES * 60);
+    expect(ANALYSIS_GAME_ISR_SECONDS).toBe(600);
   });
 
   it('should have required fields for each team', () => {
