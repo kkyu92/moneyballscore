@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
+import { MLB_GRADIENT_STANDINGS_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -15,7 +16,7 @@ export default function EnMlbStandingsOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0c2027 0%, #115e59 50%, #0d9488 100%)",
+          background: MLB_GRADIENT_STANDINGS_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

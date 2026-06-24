@@ -41,3 +41,15 @@ export const chartCursorTint = "rgba(59, 130, 246, 0.06)";
 // brand.900 → brand.700 → brand.500 grandient (135deg) 가 22+ OG 라우트에 동일 반복.
 // 단일 source 박제 = silent drift family wave 141 차단.
 export const BRAND_GRADIENT_KBO_135 = `linear-gradient(135deg, ${brand[900]} 0%, ${brand[700]} 50%, ${brand[500]} 100%)`;
+
+// MLB section OG/twitter gradients — 같은 gradient 가 mlb/* 와 en/mlb/* 영역 mirror + og/twitter pair 로 2~5× 중복 박제.
+// silent drift family wave 144 (cycle 1371) — 9 section gradient registry.
+export const MLB_GRADIENT_NAVY_135 = "linear-gradient(135deg, #0a1429 0%, #112a52 50%, #1e3a7a 100%)";
+export const MLB_GRADIENT_WILD_CARD_135 = "linear-gradient(135deg, #1a0a29 0%, #4c1d6b 50%, #c026d3 100%)";
+export const MLB_GRADIENT_POSTSEASON_135 = "linear-gradient(135deg, #0a0a1e 0%, #1e1b4b 50%, #6d28d9 100%)";
+export const MLB_GRADIENT_STANDINGS_135 = "linear-gradient(135deg, #0c2027 0%, #115e59 50%, #0d9488 100%)";
+export const MLB_GRADIENT_TEAM_SKY_135 = "linear-gradient(135deg, #082f49 0%, #0c4a6e 50%, #0284c7 100%)";
+export const MLB_GRADIENT_PLAYERS_VIOLET_135 = "linear-gradient(135deg, #1a0a2e 0%, #581c87 50%, #a855f7 100%)";
+export const MLB_GRADIENT_PLAYERS_GREEN_135 = "linear-gradient(135deg, #052e16 0%, #14532d 50%, #16a34a 100%)";
+export const MLB_GRADIENT_GAMES_INDIGO_135 = "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)";
+export const NEUTRAL_GRADIENT_135 = "linear-gradient(135deg, #1a1d24 0%, #2d3140 50%, #4a4f63 100%)";

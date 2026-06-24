@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_GRADIENT_PLAYERS_GREEN_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -15,7 +16,7 @@ export default function EnMlbPlayersOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #052e16 0%, #14532d 50%, #16a34a 100%)",
+          background: MLB_GRADIENT_PLAYERS_GREEN_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
