@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk, errMsg } from '@moneyball/shared';
+import { assertSelectOk, errMsg, HOUR_MS } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -49,7 +49,7 @@ async function checkMode(
       };
     }
     const last = new Date(data.created_at);
-    const hoursSince = (Date.now() - last.getTime()) / 3_600_000;
+    const hoursSince = (Date.now() - last.getTime()) / HOUR_MS;
     return {
       status: hoursSince > staleHours ? 'stale' : 'ok',
       last_success_at: last.toISOString(),

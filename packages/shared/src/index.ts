@@ -1062,12 +1062,13 @@ export function getAccuracyColor(pct: number): string {
   return 'text-red-600';
 }
 
-// 시간 단위 상수 단일 source — silent drift family wave 145 통합 (cycle 1372).
+// 시간 단위 상수 단일 source — silent drift family wave 145 (KST/DAY/WEEK) + wave 146 (HOUR) 통합.
 // KST_OFFSET_MS = UTC → KST 변환 오프셋 (9시간 ms).
-// DAY_MS / WEEK_MS = 일/주 단위 ms 산술 helper.
-// 사용 예: new Date(now + KST_OFFSET_MS) / Date.now() - 30 * DAY_MS
-export const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-export const DAY_MS = 24 * 60 * 60 * 1000;
+// HOUR_MS / DAY_MS / WEEK_MS = 시/일/주 단위 ms 산술 helper.
+// 사용 예: new Date(now + KST_OFFSET_MS) / Date.now() - 30 * DAY_MS / elapsed / HOUR_MS
+export const HOUR_MS = 60 * 60 * 1000;
+export const KST_OFFSET_MS = 9 * HOUR_MS;
+export const DAY_MS = 24 * HOUR_MS;
 export const WEEK_MS = 7 * DAY_MS;
 
 // KST 기준 YYYY-MM-DD 문자열 생성
