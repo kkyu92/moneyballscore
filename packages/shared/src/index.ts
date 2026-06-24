@@ -1071,6 +1071,13 @@ export function toKSTDateString(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+// KST 기준 daysAgo 만큼 과거 일자 YYYY-MM-DD 문자열 (silent drift family wave 143 — not-found 페이지 3 file 중복 통합)
+export function kstDateOffset(daysAgo: number): string {
+  const now = new Date();
+  now.setUTCDate(now.getUTCDate() - daysAgo);
+  return toKSTDateString(now);
+}
+
 // KST 기준 한국어 날짜 표시 (예: 2026년 04월 14일)
 export function toKSTDisplayString(date: Date = new Date()): string {
   const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
