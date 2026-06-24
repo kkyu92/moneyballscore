@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { COPY_FEEDBACK_RESET_MS } from '@moneyball/shared';
 import type { PicksStats, WeeklyStats } from '@/lib/picks/buildPicksStats';
 
 const SITE_URL = 'https://moneyballscore.vercel.app/picks';
@@ -74,7 +75,7 @@ export function SharePicksButton({ stats, weekly }: Props) {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_RESET_MS);
     } catch {
       // clipboard 실패 → silent
     }
