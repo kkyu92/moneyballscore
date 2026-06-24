@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { KBO_TEAMS } from "@moneyball/shared";
 import { parseSeriesTopic } from "@/lib/insights/series";
+import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 동적 OG image — /insights/series/<topic>.
 // satori (@vercel/og) 는 CJK 폰트를 번들하지 않음 → 라틴 + 이모지 fallback.
@@ -48,7 +49,7 @@ export default async function Image({ params }: Props) {
           display: "flex",
           flexDirection: "column",
           background:
-            "linear-gradient(135deg, #0a1f12 0%, #1a3d24 50%, #2d6b3f 100%)",
+            BRAND_GRADIENT_KBO_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

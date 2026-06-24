@@ -14,6 +14,7 @@ import { ServiceWorkerRegister } from "@/components/shared/ServiceWorkerRegister
 import { PWAInstallButton } from "@/components/shared/PWAInstallButton";
 import { KofiWidget } from "@/components/shared/KofiWidget";
 import { KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { brand } from "@/lib/design-tokens";
 
 const GA_ID = "G-2886XKWG4Y";
 
@@ -79,8 +80,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#2d6b3f" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a1f12" },
+    { media: "(prefers-color-scheme: light)", color: brand[500] },
+    { media: "(prefers-color-scheme: dark)", color: brand[900] },
   ],
   colorScheme: "light dark",
 };

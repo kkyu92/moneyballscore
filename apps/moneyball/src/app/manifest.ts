@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { brand } from "@/lib/design-tokens";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -10,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#0a1f12",
-    theme_color: "#2d6b3f",
+    background_color: brand[900],
+    theme_color: brand[500],
     lang: "ko-KR",
     categories: ["sports", "news", "entertainment"],
     icons: [

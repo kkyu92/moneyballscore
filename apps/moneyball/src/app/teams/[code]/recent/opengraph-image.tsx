@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { KBO_TEAMS, RECENT_FORM_GAMES, type TeamCode } from "@moneyball/shared";
+import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -26,7 +27,7 @@ export default async function Image({ params }: Props) {
           display: "flex",
           flexDirection: "column",
           background:
-            "linear-gradient(135deg, #0a1f12 0%, #1a3d24 50%, #2d6b3f 100%)",
+            BRAND_GRADIENT_KBO_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
