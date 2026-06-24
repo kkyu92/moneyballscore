@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, shortTeamName, KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
 import type { ScrapedGame, KBOGameRaw } from '../types';
 import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
@@ -268,7 +268,7 @@ export async function fetchStandings(): Promise<StandingRow[]> {
   const url = `${BASE_URL}/Record/TeamRank/TeamRankDaily.aspx`;
   const res = await fetch(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
-    next: { revalidate: 3600 },
+    next: { revalidate: KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS },
   } as RequestInit);
 
   if (!res.ok) return [];

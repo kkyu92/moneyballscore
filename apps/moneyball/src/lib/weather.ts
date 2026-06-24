@@ -7,6 +7,8 @@
  * API: https://api.open-meteo.com/v1/forecast
  */
 
+import { WEATHER_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
+
 export interface WeatherSlot {
   tempC: number;
   precipPct: number; // 0-100
@@ -65,8 +67,8 @@ export async function fetchStadiumWeather(
   try {
     const res = await fetch(url, {
       // 서버 컴포넌트 fetch — Next.js 가 자동 dedupe/cache.
-      // revalidate 1800s = 30분. 과도한 호출 방지.
-      next: { revalidate: 1800 },
+      // 과도한 호출 방지. (registry: packages/shared 의 WEATHER_FETCH_REVALIDATE_SECONDS)
+      next: { revalidate: WEATHER_FETCH_REVALIDATE_SECONDS },
     });
     if (!res.ok) return null;
     const json = (await res.json()) as OpenMeteoResponse;

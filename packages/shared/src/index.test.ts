@@ -82,6 +82,9 @@ import {
   SITEMAP_ISR_SECONDS,
   LEADERBOARD_ISR_SECONDS,
   SEARCH_ISR_SECONDS,
+  WEATHER_FETCH_REVALIDATE_SECONDS,
+  KBO_SCORES_FETCH_REVALIDATE_SECONDS,
+  KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -245,6 +248,18 @@ describe('KBO_TEAMS', () => {
 
   it('SEARCH_ISR_SECONDS pins dynamic semantic (silent drift wave 136 guard)', () => {
     expect(SEARCH_ISR_SECONDS).toBe(0);
+  });
+
+  it('WEATHER_FETCH_REVALIDATE_SECONDS pins Open-Meteo upstream cache TTL (silent drift wave 137 guard)', () => {
+    expect(WEATHER_FETCH_REVALIDATE_SECONDS).toBe(1800);
+  });
+
+  it('KBO_SCORES_FETCH_REVALIDATE_SECONDS pins Naver live score upstream cache TTL (silent drift wave 137 guard)', () => {
+    expect(KBO_SCORES_FETCH_REVALIDATE_SECONDS).toBe(30);
+  });
+
+  it('KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS pins KBO scraper upstream cache TTL (silent drift wave 137 guard)', () => {
+    expect(KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS).toBe(3600);
   });
 
   it('should have required fields for each team', () => {

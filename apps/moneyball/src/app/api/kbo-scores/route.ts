@@ -1,5 +1,6 @@
 import { type NextRequest } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { KBO_SCORES_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
 
 const NAVER_API_URL = 'https://api-gw.sports.naver.com/schedule/games';
 const NAVER_HEADERS = {
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
 
     const res = await fetch(url, {
       headers: NAVER_HEADERS,
-      next: { revalidate: 30 },
+      next: { revalidate: KBO_SCORES_FETCH_REVALIDATE_SECONDS },
     });
 
     if (!res.ok) {

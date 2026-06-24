@@ -936,6 +936,26 @@ export const SITEMAP_ISR_SECONDS = SITEMAP_ISR_HOURS * 60 * 60;
 export const LEADERBOARD_ISR_SECONDS = 30;
 export const SEARCH_ISR_SECONDS = 0;
 
+/**
+ * 외부 API fetch 단의 revalidate (upstream HTTP cache TTL) — silent drift family
+ * wave 137 (cycle 1359). page-level ISR 과 별도 카테고리. `next: { revalidate: N }`
+ * fetch option 의 inline magic 통합.
+ *
+ * 3 occurrence, 3 file, 3 tier:
+ *   - weather.ts: Open-Meteo 날씨 fetch revalidate magic 1800 (30분)
+ *       → WEATHER_FETCH_REVALIDATE_SECONDS
+ *   - api/kbo-scores/route.ts: Naver KBO 실시간 스코어 fetch revalidate magic 30
+ *       → KBO_SCORES_FETCH_REVALIDATE_SECONDS (sub-minute tier — live game)
+ *   - kbo-data/scrapers/kbo-official.ts: KBO 공식 스크래퍼 fetch revalidate magic 3600
+ *       → KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS (1시간 tier)
+ *
+ * 변경 시 fetch revalidate 자동 sync. wave 121~136 family 의 page-level ISR
+ * 통합과 같은 silent drift pattern (literal value vs constant name 의미 박제).
+ */
+export const WEATHER_FETCH_REVALIDATE_SECONDS = 1800;
+export const KBO_SCORES_FETCH_REVALIDATE_SECONDS = 30;
+export const KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS = 3600;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
