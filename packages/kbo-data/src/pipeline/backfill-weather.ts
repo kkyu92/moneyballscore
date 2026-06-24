@@ -28,7 +28,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { KBO_STADIUM_COORDS, assertSelectOk, type TeamCode } from '@moneyball/shared';
+import { BACKFILL_POLITE_DELAY_MS, KBO_STADIUM_COORDS, assertSelectOk, type TeamCode } from '@moneyball/shared';
 import { fetchArchiveWeather } from '../scrapers/weather';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,7 +131,7 @@ async function main() {
     ok++;
 
     // Polite delay — archive API 제한 없다지만 과속 지양.
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, BACKFILL_POLITE_DELAY_MS));
   }
 
   console.log('');
