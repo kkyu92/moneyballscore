@@ -15,12 +15,11 @@
  * Auth: Bearer DEEPSEEK_API_KEY
  */
 
-import { errMsg } from '@moneyball/shared';
+import { errMsg, LLM_RETRY_BACKOFF_MS } from '@moneyball/shared';
 import type { AgentResult } from './types';
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-const MAX_ATTEMPTS = 3;
-const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
+const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length;
 
 interface DeepSeekCallOptions {
   model: 'haiku' | 'sonnet';
@@ -105,7 +104,7 @@ export async function callDeepSeek<T>(
         lastError = `DeepSeek ${res.status}: ${errText.slice(0, 200)}`;
 
         if (isRetryableStatus(res.status) && attempt < MAX_ATTEMPTS - 1) {
-          await sleep(RETRY_BACKOFF_MS[attempt]);
+          await sleep(LLM_RETRY_BACKOFF_MS[attempt]);
           continue;
         }
 
@@ -148,7 +147,7 @@ export async function callDeepSeek<T>(
     } catch (e) {
       lastError = errMsg(e);
       if (attempt < MAX_ATTEMPTS - 1) {
-        await sleep(RETRY_BACKOFF_MS[attempt]);
+        await sleep(LLM_RETRY_BACKOFF_MS[attempt]);
         continue;
       }
     }
