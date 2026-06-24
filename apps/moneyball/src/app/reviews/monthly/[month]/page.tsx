@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, REVIEWS_MONTHLY_ISR_SECONDS } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,
@@ -14,7 +14,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MonthlyTeamStatsSortControl } from "@/components/reviews/MonthlyTeamStatsSortControl";
 import { neutral } from "@/lib/design-tokens";
 
-export const revalidate = 3600;
+export const revalidate = REVIEWS_MONTHLY_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ month: string }>;

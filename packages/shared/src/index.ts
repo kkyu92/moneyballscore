@@ -832,6 +832,33 @@ export const PREDICTIONS_ISR_SECONDS = PREDICTIONS_ISR_MINUTES * 60;
 export const DASHBOARD_ISR_HOURS = 24;
 export const DASHBOARD_ISR_SECONDS = DASHBOARD_ISR_HOURS * 60 * 60;
 
+/**
+ * Reviews 도메인 페이지 ISR 갱신 주기 — silent drift family wave 133 (cycle 1355).
+ * reviews 도메인 4 page 3 tier code-only silent drift. 사용자 가시 시간 literal surface 0.
+ * - REVIEWS_INDEX (10분): reviews/page.tsx — 전체 hub listing, 새 verified prediction
+ *   유입 시 빠른 반영 필요 (PREDICTIONS_ISR 5분 의 2배 safe margin)
+ * - REVIEWS_WEEKLY (30분): reviews/weekly/[week] + reviews/misses — 주간 cycle
+ *   aligned 컨텐츠 (week range + 빗나간 highlight), TEAMS/PLAYERS/MLB_LIVE_ISR 와
+ *   동일 30분 단위. misses = "주간 회고: 크게 빗나간 예측" 으로 weekly-aligned semantic
+ * - REVIEWS_MONTHLY (1h): reviews/monthly/[month] — 월간 cycle aligned, ACCURACY/
+ *   FEED/STANDINGS_ISR (1h) 와 동일 hourly 단위
+ * wave 121~132 family code-only 패턴 정합.
+ *
+ * 코드 (4 occurrence, 3 tier):
+ *   - reviews/page.tsx: revalidate magic 600 → REVIEWS_INDEX_ISR_SECONDS
+ *   - reviews/misses/page.tsx: revalidate magic 1800 → REVIEWS_WEEKLY_ISR_SECONDS
+ *   - reviews/weekly/[week]/page.tsx: revalidate magic 1800 → REVIEWS_WEEKLY_ISR_SECONDS
+ *   - reviews/monthly/[month]/page.tsx: revalidate magic 3600 → REVIEWS_MONTHLY_ISR_SECONDS
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const REVIEWS_INDEX_ISR_MINUTES = 10;
+export const REVIEWS_INDEX_ISR_SECONDS = REVIEWS_INDEX_ISR_MINUTES * 60;
+export const REVIEWS_WEEKLY_ISR_MINUTES = 30;
+export const REVIEWS_WEEKLY_ISR_SECONDS = REVIEWS_WEEKLY_ISR_MINUTES * 60;
+export const REVIEWS_MONTHLY_ISR_HOURS = 1;
+export const REVIEWS_MONTHLY_ISR_SECONDS = REVIEWS_MONTHLY_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

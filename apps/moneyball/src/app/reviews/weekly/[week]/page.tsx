@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, REVIEWS_WEEKLY_ISR_SECONDS } from '@moneyball/shared';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
   buildWeeklyReview,
@@ -15,7 +15,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
 import { neutral } from "@/lib/design-tokens";
 
-export const revalidate = 1800;
+export const revalidate = REVIEWS_WEEKLY_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ week: string }>;
