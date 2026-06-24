@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { HOUR_MS } from '@moneyball/shared';
 
 type Row = { created_at: string };
 
@@ -45,7 +46,7 @@ async function callGet() {
 }
 
 function isoHoursAgo(hours: number): string {
-  return new Date(Date.now() - hours * 3_600_000).toISOString();
+  return new Date(Date.now() - hours * HOUR_MS).toISOString();
 }
 
 describe('GET /api/health/pipelines (cycle 1135 v18 candidate Z)', () => {

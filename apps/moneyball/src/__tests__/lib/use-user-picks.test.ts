@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { DAY_MS } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 
 const STORAGE_KEY = 'mb_user_picks_v1';
@@ -55,7 +56,7 @@ describe('useUserPicks', () => {
     const old: Record<string, unknown> = {
       '10': {
         pick: 'home',
-        pickedAt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString(),
+        pickedAt: new Date(Date.now() - 31 * DAY_MS).toISOString(),
       },
       '20': {
         pick: 'away',

@@ -6,6 +6,7 @@
  * 들어가도 first-write-wins (ON CONFLICT DO NOTHING) 으로 1회만 저장.
  */
 
+import { HOUR_MS } from '@moneyball/shared';
 import type { ScrapedGame } from '../types';
 
 export type ShouldPredictReason =
@@ -45,7 +46,7 @@ export function shouldPredictGame(
   allowLateWindow = false,
 ): ShouldPredictResult {
   const startMs = new Date(`${game.date}T${game.gameTime}+09:00`).getTime();
-  const hoursUntil = (startMs - nowMs) / 3_600_000;
+  const hoursUntil = (startMs - nowMs) / HOUR_MS;
 
   if (hoursUntil < 0 && !allowLateWindow) {
     return { shouldPredict: false, reason: 'window_too_late' };
