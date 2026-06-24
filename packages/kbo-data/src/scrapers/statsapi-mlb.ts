@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
 
 export interface MlbGame {
   gamePk: number;
@@ -11,7 +12,6 @@ export interface MlbGame {
 }
 
 const BASE_URL = 'https://statsapi.mlb.com/api/v1';
-const RATE_LIMIT_DELAY_MS = 2000;
 const MAX_RETRY = 3;
 
 function statusMap(detailedState: string): MlbGame['status'] {
@@ -38,7 +38,7 @@ async function fetchWithRetry(url: string, retry = 0): Promise<Response> {
     if (retry >= MAX_RETRY) {
       throw new Error(`rate limit retry exhausted: ${url}`);
     }
-    const delay = RATE_LIMIT_DELAY_MS * Math.pow(2, retry);
+    const delay = SCRAPER_RATE_LIMIT_DEFAULT_MS * Math.pow(2, retry);
     await new Promise((r) => setTimeout(r, delay));
     return fetchWithRetry(url, retry + 1);
   }

@@ -1,12 +1,12 @@
 import * as Sentry from '@sentry/nextjs';
+import { SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
 
-const RATE_LIMIT_MS = 2000;
 let lastFetchAt = 0;
 
 async function rateLimit() {
   const elapsed = Date.now() - lastFetchAt;
-  if (elapsed < RATE_LIMIT_MS) {
-    await new Promise((r) => setTimeout(r, RATE_LIMIT_MS - elapsed));
+  if (elapsed < SCRAPER_RATE_LIMIT_DEFAULT_MS) {
+    await new Promise((r) => setTimeout(r, SCRAPER_RATE_LIMIT_DEFAULT_MS - elapsed));
   }
   lastFetchAt = Date.now();
 }

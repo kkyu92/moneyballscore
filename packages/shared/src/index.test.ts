@@ -88,6 +88,8 @@ import {
   KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS,
   COPY_FEEDBACK_RESET_MS,
   SUPABASE_PAGE_SIZE,
+  SCRAPER_RATE_LIMIT_DEFAULT_MS,
+  SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -271,6 +273,15 @@ describe('KBO_TEAMS', () => {
 
   it('SUPABASE_PAGE_SIZE pins Supabase REST API .range() pagination batch size (silent drift wave 139 guard)', () => {
     expect(SUPABASE_PAGE_SIZE).toBe(1000);
+  });
+
+  it('SCRAPER_RATE_LIMIT_DEFAULT_MS pins outbound scraper polite delay default (silent drift wave 147 guard)', () => {
+    expect(SCRAPER_RATE_LIMIT_DEFAULT_MS).toBe(2000);
+  });
+
+  it('SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS pins FanGraphs KBO scraper polite delay override (silent drift wave 147 guard)', () => {
+    expect(SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS).toBe(3000);
+    expect(SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS).toBeGreaterThan(SCRAPER_RATE_LIMIT_DEFAULT_MS);
   });
 
   it('should have required fields for each team', () => {
