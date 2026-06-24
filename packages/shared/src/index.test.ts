@@ -16,6 +16,7 @@ import {
   getAccuracyColor,
   shortTeamName,
   toKSTDateString,
+  kstDateOffset,
   toKSTDisplayString,
   getKSTWeekRange,
   getKSTMondayUtcIso,
@@ -423,6 +424,29 @@ describe('toKSTDateString', () => {
     // UTC 2026-04-13 15:00 = KST 2026-04-14 00:00
     const result2 = toKSTDateString(new Date('2026-04-13T15:00:00Z'));
     expect(result2).toBe('2026-04-14');
+  });
+});
+
+describe('kstDateOffset (silent drift family wave 143)', () => {
+  it('should return YYYY-MM-DD format', () => {
+    const result = kstDateOffset(0);
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('daysAgo=0 should equal toKSTDateString today', () => {
+    expect(kstDateOffset(0)).toBe(toKSTDateString());
+  });
+
+  it('daysAgo=1 should be one day prior to today', () => {
+    const today = new Date();
+    today.setUTCDate(today.getUTCDate() - 1);
+    expect(kstDateOffset(1)).toBe(toKSTDateString(today));
+  });
+
+  it('daysAgo=-1 should be one day after today (negative offset = future)', () => {
+    const today = new Date();
+    today.setUTCDate(today.getUTCDate() + 1);
+    expect(kstDateOffset(-1)).toBe(toKSTDateString(today));
   });
 });
 

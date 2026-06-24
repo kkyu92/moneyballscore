@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { toKSTDateString } from "@moneyball/shared";
+import { toKSTDateString, kstDateOffset } from "@moneyball/shared";
 
 export const metadata: Metadata = {
   title: "해당 일자 예측을 찾을 수 없음",
@@ -8,15 +8,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-function ksTDateOffset(daysAgo: number): string {
-  const now = new Date();
-  now.setUTCDate(now.getUTCDate() - daysAgo);
-  return toKSTDateString(now);
-}
-
 export default function PredictionsDateNotFound() {
   const today = toKSTDateString();
-  const recentDates = [-1, 0, 1, 2, 3, 4, 5].map((d) => ksTDateOffset(d));
+  const recentDates = [-1, 0, 1, 2, 3, 4, 5].map((d) => kstDateOffset(d));
 
   return (
     <div className="max-w-3xl mx-auto py-16 px-4 text-center space-y-8">
