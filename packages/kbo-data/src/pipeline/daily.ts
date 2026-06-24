@@ -120,6 +120,7 @@ export type PipelineMode =
   | 'predict'
   | 'predict_final'
   | 'verify'
+  | 'postview'
   | 'mlb_statsapi_scrape'
   | 'mlb_fancy_scrape'
   | 'mlb_savant_scrape'
