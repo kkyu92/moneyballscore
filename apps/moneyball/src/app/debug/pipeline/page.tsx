@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { DAY_MS } from '@moneyball/shared';
 import {
   buildRejectReasonBreakdown,
   REJECT_REASON_LABEL,
@@ -73,8 +74,8 @@ interface ModeSubtotal {
 async function getPipelineStats() {
   const supabase = getAdminClient();
 
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * DAY_MS).toISOString();
+  const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS).toISOString();
 
   const { data: recentRuns, error: runsErr } = await supabase
     .from('pipeline_runs')

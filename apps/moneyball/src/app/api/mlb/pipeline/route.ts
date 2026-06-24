@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { errMsg } from '@moneyball/shared';
+import { errMsg, KST_OFFSET_MS } from '@moneyball/shared';
 import { runMlbPipeline } from '@moneyball/kbo-data';
 import type { MlbPipelineMode } from '@moneyball/kbo-data';
 
@@ -18,7 +18,7 @@ const VALID_MODES: MlbPipelineMode[] = [
 ];
 
 function todayKST(): string {
-  return new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
+  return new Date(Date.now() + KST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
 export async function POST(request: NextRequest) {

@@ -4,6 +4,8 @@
  * 스키마(`2026-W16`)를 위해 ISO 주차 사용.
  */
 
+import { DAY_MS, WEEK_MS } from '@moneyball/shared';
+
 export interface WeekRange {
   /** ISO 주차 문자열 e.g. "2026-W16" */
   weekId: string;
@@ -16,8 +18,6 @@ export interface WeekRange {
   /** 사람이 읽기 좋은 라벨 e.g. "2026년 4월 14일 ~ 20일" */
   label: string;
 }
-
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** 입력 Date를 해당 주의 월요일 00:00 UTC로 고정. */
 function toMondayUTC(d: Date): Date {
@@ -36,7 +36,7 @@ function isoWeekParts(d: Date): { year: number; week: number } {
   // ISO: 주 번호는 해당 주의 목요일이 속한 해 기준.
   // week 1은 항상 1월 4일을 포함하는 주 (ISO 8601 §3.2.2).
   const monday = toMondayUTC(d);
-  const thursday = new Date(monday.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const thursday = new Date(monday.getTime() + 3 * DAY_MS);
   const year = thursday.getUTCFullYear();
   const jan4 = new Date(Date.UTC(year, 0, 4));
   const week1Monday = toMondayUTC(jan4);
@@ -67,7 +67,7 @@ function buildLabel(start: Date, end: Date): string {
 
 export function getWeekRangeFromDate(d: Date): WeekRange {
   const monday = toMondayUTC(d);
-  const sunday = new Date(monday.getTime() + 6 * 24 * 60 * 60 * 1000);
+  const sunday = new Date(monday.getTime() + 6 * DAY_MS);
   const { year, week } = isoWeekParts(monday);
   return {
     weekId: `${year}-W${pad2(week)}`,
@@ -100,7 +100,7 @@ export function parseWeekId(weekId: string): WeekRange | null {
   const parts = isoWeekParts(targetMonday);
   if (parts.year !== year || parts.week !== week) return null;
 
-  const sunday = new Date(targetMonday.getTime() + 6 * 24 * 60 * 60 * 1000);
+  const sunday = new Date(targetMonday.getTime() + 6 * DAY_MS);
   return {
     weekId: `${year}-W${pad2(week)}`,
     year,

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { DAY_MS } from '@moneyball/shared';
 import { buildHallucinationStats, type ValidatorLogInput } from '@/lib/dashboard/buildHallucinationStats';
 
 // v4-4 Task 6: /debug/hallucination 대시보드
@@ -51,7 +52,7 @@ interface DashboardData {
 
 async function getStats(): Promise<DashboardData> {
   const supabase = getAdminClient();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS).toISOString();
 
   const { data: recent, error: recentErr } = await supabase
     .from('validator_logs')

@@ -23,6 +23,7 @@ vi.mock('@sentry/nextjs', () => ({
 
 vi.mock('@moneyball/shared', () => ({
   errMsg: (e: unknown) => (e instanceof Error ? e.message : String(e)),
+  KST_OFFSET_MS: 9 * 60 * 60 * 1000,
 }));
 
 // ── helpers ───────────────────────────────────────────────────────────────────

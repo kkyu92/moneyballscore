@@ -3,7 +3,7 @@ import {
   toKSTDateString, KBO_STADIUM_COORDS, errMsg, CURRENT_SCORING_RULE,
   PRODUCTION_COHORT_RULES,
   isV2ModelEnabled, isV21BShadowEnabled, isDebateEnabled,
-  SHADOW_V20_WEIGHTS,
+  SHADOW_V20_WEIGHTS, DAY_MS,
 } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
@@ -70,7 +70,7 @@ function getYesterdayKST(date: string): string {
   // d.getDate() uses local TZ (UTC on server) but KST midnight is UTC-prior-day
   // → setDate(getDate()-1) undershoots by 1. Subtract exact 24h then convert KST.
   const d = new Date(date + 'T00:00:00+09:00');
-  return toKSTDateString(new Date(d.getTime() - 86_400_000));
+  return toKSTDateString(new Date(d.getTime() - DAY_MS));
 }
 
 async function getKBOLeagueId(db: DB): Promise<number> {
@@ -289,7 +289,7 @@ export async function runDailyPipeline(
   const isFirstPredictRun = mode === 'predict' && new Date().getUTCHours() === 1;
   if (isFirstPredictRun) {
     try {
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const thirtyDaysAgo = new Date(Date.now() - 30 * DAY_MS).toISOString();
       // silent drift 가드 — `.error` 미체크 시 delete 실패 silent skip →
       // agent_memories / validator_logs 30일+ 무한 누적 + 다음 cron 재진입 시
       // memCount=null 로 console.log 분기도 skip = 무가시. assertWriteOk

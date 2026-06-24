@@ -15,7 +15,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { PRODUCTION_COHORT_RULES, DAY_MS } from '@moneyball/shared';
 
 const FACTORS_OF_INTEREST = ['sfr', 'head_to_head'] as const;
 const DAYS = 30;
@@ -76,7 +76,7 @@ async function main(): Promise<void> {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const cutoff = new Date(Date.now() - DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - DAYS * DAY_MS).toISOString();
 
   const { data, error } = await supabase
     .from('predictions')

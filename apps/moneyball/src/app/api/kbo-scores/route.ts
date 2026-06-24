@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { KBO_SCORES_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
+import { KBO_SCORES_FETCH_REVALIDATE_SECONDS, KST_OFFSET_MS } from '@moneyball/shared';
 
 const NAVER_API_URL = 'https://api-gw.sports.naver.com/schedule/games';
 const NAVER_HEADERS = {
@@ -83,7 +83,7 @@ function mapTeamCode(naverName: string): string {
 }
 
 function toKSTDate(): string {
-  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const kst = new Date(Date.now() + KST_OFFSET_MS);
   return kst.toISOString().split('T')[0];
 }
 

@@ -1,7 +1,7 @@
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
 import { NEUTRAL_HI, NEUTRAL_LO } from '@/lib/predictions/factorLabels';
-import { getKSTWeekRange, RECENT_FORM_GAMES } from '@moneyball/shared';
+import { DAY_MS, getKSTWeekRange, KST_OFFSET_MS, RECENT_FORM_GAMES } from '@moneyball/shared';
 
 export interface WeeklyStats {
   weekLabel: string;
@@ -126,7 +126,7 @@ export function buildWeeklyStats(entries: PickEntry[], now: Date = new Date()): 
 }
 
 function toKSTDate(iso: string): string {
-  const d = new Date(new Date(iso).getTime() + 9 * 3600 * 1000);
+  const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS);
   return d.toISOString().slice(0, 10);
 }
 
@@ -229,12 +229,12 @@ function getWeekStartStr(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00Z');
   const dow = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
   const daysSinceMon = dow === 0 ? 6 : dow - 1;
-  const monMs = d.getTime() - daysSinceMon * 86400000;
+  const monMs = d.getTime() - daysSinceMon * DAY_MS;
   return new Date(monMs).toISOString().slice(0, 10);
 }
 
 function makeWeekLabel(monStr: string): string {
-  const sunMs = new Date(monStr + 'T00:00:00Z').getTime() + 6 * 86400000;
+  const sunMs = new Date(monStr + 'T00:00:00Z').getTime() + 6 * DAY_MS;
   const sunStr = new Date(sunMs).toISOString().slice(0, 10);
   const monMonth = parseInt(monStr.slice(5, 7), 10);
   const monDay = parseInt(monStr.slice(8, 10), 10);

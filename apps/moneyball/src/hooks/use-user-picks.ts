@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { DAY_MS } from '@moneyball/shared';
 
 export type PickChoice = 'home' | 'away';
 
@@ -12,7 +13,7 @@ export interface UserPick {
 export type UserPicksStore = Record<string, UserPick>; // keys are String(gameId)
 
 const STORAGE_KEY = 'mb_user_picks_v1';
-const EXPIRY_MS = 30 * 24 * 60 * 60 * 1000;
+const EXPIRY_MS = 30 * DAY_MS;
 
 function readStore(): UserPicksStore {
   try {

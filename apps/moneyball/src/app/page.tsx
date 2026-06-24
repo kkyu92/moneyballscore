@@ -11,6 +11,7 @@ import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
   assertSelectOk,
   classifyWinnerProb,
+  DAY_MS,
   DEFAULT_WEIGHTS,
   HOME_ADVANTAGE,
   HOME_ISR_SECONDS,
@@ -228,7 +229,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
 
 async function getYesterdayResults(): Promise<YesterdayGame[]> {
   const supabase = await createClient();
-  const yesterdayDate = new Date(Date.now() - 86400000);
+  const yesterdayDate = new Date(Date.now() - DAY_MS);
   const yesterday = toKSTDateString(yesterdayDate);
 
   const result = await supabase
@@ -357,7 +358,7 @@ function classifyNoGameReason(
   const todayAnchor = new Date(`${today}T12:00:00Z`);
   const nextAnchor = new Date(`${next.date}T12:00:00Z`);
   const daysGap = Math.round(
-    (nextAnchor.getTime() - todayAnchor.getTime()) / (24 * 60 * 60 * 1000),
+    (nextAnchor.getTime() - todayAnchor.getTime()) / DAY_MS,
   );
   const dayOfWeek = todayAnchor.getUTCDay(); // 0=일, 1=월
 

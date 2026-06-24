@@ -1062,9 +1062,17 @@ export function getAccuracyColor(pct: number): string {
   return 'text-red-600';
 }
 
+// 시간 단위 상수 단일 source — silent drift family wave 145 통합 (cycle 1372).
+// KST_OFFSET_MS = UTC → KST 변환 오프셋 (9시간 ms).
+// DAY_MS / WEEK_MS = 일/주 단위 ms 산술 helper.
+// 사용 예: new Date(now + KST_OFFSET_MS) / Date.now() - 30 * DAY_MS
+export const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
+export const WEEK_MS = 7 * DAY_MS;
+
 // KST 기준 YYYY-MM-DD 문자열 생성
 export function toKSTDateString(date: Date = new Date()): string {
-  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const kst = new Date(date.getTime() + KST_OFFSET_MS);
   const year = kst.getUTCFullYear();
   const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
   const day = String(kst.getUTCDate()).padStart(2, '0');
@@ -1080,7 +1088,7 @@ export function kstDateOffset(daysAgo: number): string {
 
 // KST 기준 한국어 날짜 표시 (예: 2026년 04월 14일)
 export function toKSTDisplayString(date: Date = new Date()): string {
-  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const kst = new Date(date.getTime() + KST_OFFSET_MS);
   const year = kst.getUTCFullYear();
   const month = String(kst.getUTCMonth() + 1).padStart(2, '0');
   const day = String(kst.getUTCDate()).padStart(2, '0');
@@ -1090,9 +1098,9 @@ export function toKSTDisplayString(date: Date = new Date()): string {
 // KST 기준 이번 주 월요일~일요일 ISO date string range (cycle 457 통합 — picks/leaderboard silent drift family).
 // buildPicksStats.getKSTWeekRange + leaderboard/server.fetchAiBaseline weekly KST monday calc 단일 source.
 export function getKSTWeekRange(now: Date = new Date()): { start: string; end: string } {
-  const kstMs = now.getTime() + 9 * 60 * 60 * 1000;
-  const monMs = kstMs - ((new Date(kstMs).getUTCDay() + 6) % 7) * 86400000;
-  const sunMs = monMs + 6 * 86400000;
+  const kstMs = now.getTime() + KST_OFFSET_MS;
+  const monMs = kstMs - ((new Date(kstMs).getUTCDay() + 6) % 7) * DAY_MS;
+  const sunMs = monMs + 6 * DAY_MS;
   return {
     start: new Date(monMs).toISOString().slice(0, 10),
     end: new Date(sunMs).toISOString().slice(0, 10),
@@ -1101,23 +1109,23 @@ export function getKSTWeekRange(now: Date = new Date()): { start: string; end: s
 
 // KST 기준 이번 주 월요일 00:00 의 UTC ISO timestamp. Supabase `.gte(verified_at, ...)` SQL 필터용.
 export function getKSTMondayUtcIso(now: Date = new Date()): string {
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const kst = new Date(now.getTime() + KST_OFFSET_MS);
   const dow = kst.getUTCDay();
   const mondayOffset = dow === 0 ? 6 : dow - 1;
   const monday = new Date(kst);
   monday.setUTCDate(monday.getUTCDate() - mondayOffset);
   monday.setUTCHours(0, 0, 0, 0);
-  return new Date(monday.getTime() - 9 * 60 * 60 * 1000).toISOString();
+  return new Date(monday.getTime() - KST_OFFSET_MS).toISOString();
 }
 
 // KST 기준 이번 달 1일 00:00 의 UTC ISO timestamp. Supabase `.gte(verified_at, ...)` SQL 필터용.
 // cycle 1021 c10: leaderboard monthly 모드 신규. monthly view (migration 032) 와 동일 경계.
 export function getKSTMonthStartUtcIso(now: Date = new Date()): string {
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const kst = new Date(now.getTime() + KST_OFFSET_MS);
   const monthStart = new Date(kst);
   monthStart.setUTCDate(1);
   monthStart.setUTCHours(0, 0, 0, 0);
-  return new Date(monthStart.getTime() - 9 * 60 * 60 * 1000).toISOString();
+  return new Date(monthStart.getTime() - KST_OFFSET_MS).toISOString();
 }
 
 /**
