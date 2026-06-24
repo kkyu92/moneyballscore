@@ -60,6 +60,12 @@ import {
   SEASONS_ISR_SECONDS,
   PREDICTIONS_ISR_MINUTES,
   PREDICTIONS_ISR_SECONDS,
+  REVIEWS_INDEX_ISR_MINUTES,
+  REVIEWS_INDEX_ISR_SECONDS,
+  REVIEWS_WEEKLY_ISR_MINUTES,
+  REVIEWS_WEEKLY_ISR_SECONDS,
+  REVIEWS_MONTHLY_ISR_HOURS,
+  REVIEWS_MONTHLY_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -155,6 +161,24 @@ describe('KBO_TEAMS', () => {
     expect(MLB_LIVE_ISR_MINUTES).toBe(30);
     expect(MLB_LIVE_ISR_SECONDS).toBe(MLB_LIVE_ISR_MINUTES * 60);
     expect(MLB_LIVE_ISR_SECONDS).toBe(1800);
+  });
+
+  it('REVIEWS_INDEX_ISR_SECONDS derives from REVIEWS_INDEX_ISR_MINUTES (silent drift wave 133 guard)', () => {
+    expect(REVIEWS_INDEX_ISR_MINUTES).toBe(10);
+    expect(REVIEWS_INDEX_ISR_SECONDS).toBe(REVIEWS_INDEX_ISR_MINUTES * 60);
+    expect(REVIEWS_INDEX_ISR_SECONDS).toBe(600);
+  });
+
+  it('REVIEWS_WEEKLY_ISR_SECONDS derives from REVIEWS_WEEKLY_ISR_MINUTES (silent drift wave 133 guard)', () => {
+    expect(REVIEWS_WEEKLY_ISR_MINUTES).toBe(30);
+    expect(REVIEWS_WEEKLY_ISR_SECONDS).toBe(REVIEWS_WEEKLY_ISR_MINUTES * 60);
+    expect(REVIEWS_WEEKLY_ISR_SECONDS).toBe(1800);
+  });
+
+  it('REVIEWS_MONTHLY_ISR_SECONDS derives from REVIEWS_MONTHLY_ISR_HOURS (silent drift wave 133 guard)', () => {
+    expect(REVIEWS_MONTHLY_ISR_HOURS).toBe(1);
+    expect(REVIEWS_MONTHLY_ISR_SECONDS).toBe(REVIEWS_MONTHLY_ISR_HOURS * 60 * 60);
+    expect(REVIEWS_MONTHLY_ISR_SECONDS).toBe(3600);
   });
 
   it('should have required fields for each team', () => {

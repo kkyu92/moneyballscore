@@ -5,6 +5,7 @@ import {
   shortTeamName,
   winnerProbOf,
   assertSelectOk,
+  REVIEWS_INDEX_ISR_SECONDS,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 600;
+export const revalidate = REVIEWS_INDEX_ISR_SECONDS;
 
 interface VerifiedPredictionRow {
   confidence: number;
