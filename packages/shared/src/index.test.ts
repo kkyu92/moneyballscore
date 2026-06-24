@@ -86,6 +86,7 @@ import {
   KBO_SCORES_FETCH_REVALIDATE_SECONDS,
   KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS,
   COPY_FEEDBACK_RESET_MS,
+  SUPABASE_PAGE_SIZE,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -265,6 +266,10 @@ describe('KBO_TEAMS', () => {
 
   it('COPY_FEEDBACK_RESET_MS pins clipboard copy confirmation UX timing (silent drift wave 138 guard)', () => {
     expect(COPY_FEEDBACK_RESET_MS).toBe(2000);
+  });
+
+  it('SUPABASE_PAGE_SIZE pins Supabase REST API .range() pagination batch size (silent drift wave 139 guard)', () => {
+    expect(SUPABASE_PAGE_SIZE).toBe(1000);
   });
 
   it('should have required fields for each team', () => {

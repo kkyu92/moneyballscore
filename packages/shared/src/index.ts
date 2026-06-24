@@ -970,6 +970,24 @@ export const KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS = 3600;
  */
 export const COPY_FEEDBACK_RESET_MS = 2000;
 
+/**
+ * Supabase REST API .range() 페이지네이션 batch size — silent drift family wave 139
+ * (cycle 1361). Supabase 기본 1000 row cap 회피 시 사용하는 batch 크기.
+ *
+ * 6 occurrence (5 file, 동일 intent — supabase REST API pagination chunk):
+ *   - packages/kbo-data/src/pipeline/backfill-records.ts: loadDecidedGames (games)
+ *   - packages/kbo-data/src/backtest/loader.ts: loadDecidedGames (games)
+ *   - packages/kbo-data/src/backtest/loader.ts: loadGameRecords (game_records)
+ *   - apps/moneyball/src/app/debug/model-comparison/page.tsx: loadRows (predictions)
+ *   - apps/moneyball/src/app/debug/factor-correlation/page.tsx: 시즌 games 로드
+ *   - apps/moneyball/src/lib/seasons/buildSeasonSummary.ts: 시즌 games 로드
+ *
+ * 변경 시 6 pagination loop 자동 sync. wave 121~138 family (page-level ISR /
+ * fetch revalidate / clipboard UX timing) 와 별도 카테고리 (DB pagination batch
+ * size) — 같은 silent drift pattern (literal value vs constant name 의미 박제).
+ */
+export const SUPABASE_PAGE_SIZE = 1000;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

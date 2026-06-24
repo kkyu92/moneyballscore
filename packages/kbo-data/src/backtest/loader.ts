@@ -7,7 +7,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { TeamCode } from '@moneyball/shared';
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 import { calculateRecentForm, calculateHeadToHead } from '../engine/form';
 import type { FinishedGame } from '../engine/form';
 import { getEloAt } from './elo-history';
@@ -40,7 +40,7 @@ export async function loadDecidedGames(
   const out: BacktestGame[] = [];
   for (const season of opts.seasons) {
     // Supabase 기본 범위 제한을 피해 .range() 로 청크 조회
-    const pageSize = 1000;
+    const pageSize = SUPABASE_PAGE_SIZE;
     let start = 0;
     for (;;) {
       const { data, error } = await db
@@ -192,7 +192,7 @@ export async function loadGameRecords(
 ): Promise<GameRecordLite[]> {
   const out: GameRecordLite[] = [];
   for (const season of opts.seasons) {
-    const pageSize = 1000;
+    const pageSize = SUPABASE_PAGE_SIZE;
     let start = 0;
     for (;;) {
       const { data, error } = await db

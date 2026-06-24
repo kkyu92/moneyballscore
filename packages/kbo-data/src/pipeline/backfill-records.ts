@@ -12,7 +12,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, errMsg } from '@moneyball/shared';
+import { assertSelectOk, errMsg, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 
@@ -42,7 +42,7 @@ interface GameRow {
 
 async function loadDecidedGames(db: DB, season: number): Promise<GameRow[]> {
   const out: GameRow[] = [];
-  const pageSize = 1000;
+  const pageSize = SUPABASE_PAGE_SIZE;
   let from = 0;
   for (;;) {
     const result = await db

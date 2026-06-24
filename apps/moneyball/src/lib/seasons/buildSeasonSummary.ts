@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   KBO_TEAMS,
+  SUPABASE_PAGE_SIZE,
   assertSelectOk,
   type SelectResult,
   type TeamCode,
@@ -106,11 +107,11 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
     }
   }
 
-  // 시즌 전체 games (1000 row cap 회피 페이지네이션)
+  // 시즌 전체 games (Supabase 기본 row cap 회피 페이지네이션)
   const startDate = `${year}-01-01`;
   const endDate = `${year}-12-31`;
   const games: GameRow[] = [];
-  const pageSize = 1000;
+  const pageSize = SUPABASE_PAGE_SIZE;
   for (let from = 0; ; from += pageSize) {
     // assertSelectOk — games 페이지네이션 select error 시 fail-loud (기존엔
     // data=null silent break → 부분 페이지만 누적된 채 partial summary 반환 =
