@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { HOME_ADVANTAGE } from '@moneyball/shared';
+import { HOME_ADVANTAGE, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 
 // /debug/factor-correlation — 환경 변수 → 경기 결과 상관 분석
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
@@ -141,10 +141,10 @@ function precipLabel(g: GameRow): string | null {
 export default async function FactorCorrelationPage() {
   const db = getAdminClient();
 
-  // 2024+2025 백필 완료 + 2026 진행분. 완료 + winner 확정만. 1000 row cap
+  // 2024+2025 백필 완료 + 2026 진행분. 완료 + winner 확정만. Supabase 기본 row cap
   // 회피 위해 페이지네이션 수동 처리.
   const rawGames: GameRow[] = [];
-  const pageSize = 1000;
+  const pageSize = SUPABASE_PAGE_SIZE;
   for (let from = 0; ; from += pageSize) {
     const { data: chunk, error: chunkErr } = await db
       .from('games')

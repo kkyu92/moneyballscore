@@ -10,7 +10,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { BRIER_BASELINE } from '@moneyball/shared';
+import { BRIER_BASELINE, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 import {
   aggregateByModel,
   buildShadowRows,
@@ -42,7 +42,7 @@ async function loadRows(daysBack: number): Promise<PredictionRow[]> {
   const since = new Date(
     Date.now() - daysBack * 24 * 3600 * 1000,
   ).toISOString();
-  const pageSize = 1000;
+  const pageSize = SUPABASE_PAGE_SIZE;
   const out: PredictionRow[] = [];
   let from = 0;
   for (;;) {
