@@ -3,9 +3,10 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { getLatestLottoPicks, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
+import { LOTTO_ISR_SECONDS } from "@moneyball/shared";
 
 export const dynamic = "force-static";
-export const revalidate = 3600;
+export const revalidate = LOTTO_ISR_SECONDS;
 
 const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/lotto`;

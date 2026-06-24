@@ -70,6 +70,16 @@ import {
   ANALYSIS_INDEX_ISR_SECONDS,
   ANALYSIS_GAME_ISR_MINUTES,
   ANALYSIS_GAME_ISR_SECONDS,
+  MATCHUP_ISR_HOURS,
+  MATCHUP_ISR_SECONDS,
+  INSIGHTS_SERIES_ISR_HOURS,
+  INSIGHTS_SERIES_ISR_SECONDS,
+  LOTTO_ISR_HOURS,
+  LOTTO_ISR_SECONDS,
+  HOME_ISR_MINUTES,
+  HOME_ISR_SECONDS,
+  SITEMAP_ISR_HOURS,
+  SITEMAP_ISR_SECONDS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -195,6 +205,36 @@ describe('KBO_TEAMS', () => {
     expect(ANALYSIS_GAME_ISR_MINUTES).toBe(10);
     expect(ANALYSIS_GAME_ISR_SECONDS).toBe(ANALYSIS_GAME_ISR_MINUTES * 60);
     expect(ANALYSIS_GAME_ISR_SECONDS).toBe(600);
+  });
+
+  it('MATCHUP_ISR_SECONDS derives from MATCHUP_ISR_HOURS (silent drift wave 135 guard)', () => {
+    expect(MATCHUP_ISR_HOURS).toBe(1);
+    expect(MATCHUP_ISR_SECONDS).toBe(MATCHUP_ISR_HOURS * 60 * 60);
+    expect(MATCHUP_ISR_SECONDS).toBe(3600);
+  });
+
+  it('INSIGHTS_SERIES_ISR_SECONDS derives from INSIGHTS_SERIES_ISR_HOURS (silent drift wave 135 guard)', () => {
+    expect(INSIGHTS_SERIES_ISR_HOURS).toBe(1);
+    expect(INSIGHTS_SERIES_ISR_SECONDS).toBe(INSIGHTS_SERIES_ISR_HOURS * 60 * 60);
+    expect(INSIGHTS_SERIES_ISR_SECONDS).toBe(3600);
+  });
+
+  it('LOTTO_ISR_SECONDS derives from LOTTO_ISR_HOURS (silent drift wave 135 guard)', () => {
+    expect(LOTTO_ISR_HOURS).toBe(1);
+    expect(LOTTO_ISR_SECONDS).toBe(LOTTO_ISR_HOURS * 60 * 60);
+    expect(LOTTO_ISR_SECONDS).toBe(3600);
+  });
+
+  it('HOME_ISR_SECONDS derives from HOME_ISR_MINUTES (silent drift wave 135 guard)', () => {
+    expect(HOME_ISR_MINUTES).toBe(10);
+    expect(HOME_ISR_SECONDS).toBe(HOME_ISR_MINUTES * 60);
+    expect(HOME_ISR_SECONDS).toBe(600);
+  });
+
+  it('SITEMAP_ISR_SECONDS derives from SITEMAP_ISR_HOURS (silent drift wave 135 guard)', () => {
+    expect(SITEMAP_ISR_HOURS).toBe(6);
+    expect(SITEMAP_ISR_SECONDS).toBe(SITEMAP_ISR_HOURS * 60 * 60);
+    expect(SITEMAP_ISR_SECONDS).toBe(21600);
   });
 
   it('should have required fields for each team', () => {

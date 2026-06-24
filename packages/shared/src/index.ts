@@ -881,6 +881,44 @@ export const ANALYSIS_INDEX_ISR_SECONDS = ANALYSIS_INDEX_ISR_HOURS * 60 * 60;
 export const ANALYSIS_GAME_ISR_MINUTES = 10;
 export const ANALYSIS_GAME_ISR_SECONDS = ANALYSIS_GAME_ISR_MINUTES * 60;
 
+/**
+ * Matchup / Insights series / Lotto root / Home / Sitemap 페이지 ISR 갱신 주기 —
+ * silent drift family wave 135 (cycle 1357). 5 occurrence 5 tier (3 surface 1h +
+ * 1 surface 10min + 1 surface 6h) code-only silent drift bundle. 사용자 가시 시간
+ * literal surface 0. wave 121~134 family 정합.
+ * - MATCHUP (1h): matchup/[teamA]/[teamB]/page.tsx — 팀 vs 팀 매치업 프로필.
+ *   ACCURACY/FEED/STANDINGS/ANALYSIS_INDEX 동일 hourly 단위
+ * - INSIGHTS_SERIES (1h): insights/series/[topic]/page.tsx — 시리즈 topic
+ *   hub. force-static + dynamicParams=false. hour 단위 refresh
+ * - LOTTO_ROOT (1h): lotto/page.tsx — 최신 lotto picks landing. force-static.
+ *   archive 24h 보다 짧은 hourly (root = 최신 회차 picks 변경 빈도 ↑)
+ * - HOME (10min): page.tsx — root home hub. PREDICTIONS_ISR 5분 보다 2x safe
+ *   margin (predictions live update 후 home aggregation refresh)
+ * - SITEMAP (6h): sitemap.ts — Google Search Console crawl 대응 6h ISR.
+ *   anon Supabase client (cookie-free) 로 static prerender 강제. MLB_ISR 와
+ *   동일 6h 단위
+ * wave 121~134 family code-only 패턴 정합.
+ *
+ * 코드 (5 occurrence, 5 tier):
+ *   - matchup/[teamA]/[teamB]/page.tsx: revalidate magic 3600 → MATCHUP_ISR_SECONDS
+ *   - insights/series/[topic]/page.tsx: revalidate magic 3600 → INSIGHTS_SERIES_ISR_SECONDS
+ *   - lotto/page.tsx: revalidate magic 3600 → LOTTO_ISR_SECONDS
+ *   - page.tsx (root home): revalidate magic 600 → HOME_ISR_SECONDS
+ *   - sitemap.ts: revalidate magic 21600 → SITEMAP_ISR_SECONDS
+ *
+ * 변경 시 revalidate 값 자동 sync.
+ */
+export const MATCHUP_ISR_HOURS = 1;
+export const MATCHUP_ISR_SECONDS = MATCHUP_ISR_HOURS * 60 * 60;
+export const INSIGHTS_SERIES_ISR_HOURS = 1;
+export const INSIGHTS_SERIES_ISR_SECONDS = INSIGHTS_SERIES_ISR_HOURS * 60 * 60;
+export const LOTTO_ISR_HOURS = 1;
+export const LOTTO_ISR_SECONDS = LOTTO_ISR_HOURS * 60 * 60;
+export const HOME_ISR_MINUTES = 10;
+export const HOME_ISR_SECONDS = HOME_ISR_MINUTES * 60;
+export const SITEMAP_ISR_HOURS = 6;
+export const SITEMAP_ISR_SECONDS = SITEMAP_ISR_HOURS * 60 * 60;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { type TeamCode, shortTeamName, josa } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, MATCHUP_ISR_SECONDS } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,
@@ -22,7 +22,7 @@ import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare"
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 
-export const revalidate = 3600;
+export const revalidate = MATCHUP_ISR_SECONDS;
 
 interface PageProps {
   params: Promise<{ teamA: string; teamB: string }>;

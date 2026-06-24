@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { KBO_FACTOR_COUNT, KBO_TEAMS, shortTeamName } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, KBO_TEAMS, shortTeamName, INSIGHTS_SERIES_ISR_SECONDS } from "@moneyball/shared";
 import {
   getSeriesByTopic,
   listSeriesTopics,
@@ -20,7 +20,7 @@ interface Props {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = 3600;
+export const revalidate = INSIGHTS_SERIES_ISR_SECONDS;
 
 export async function generateStaticParams() {
   return listSeriesTopics().map((t) => ({ topic: t.slug }));
