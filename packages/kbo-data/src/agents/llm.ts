@@ -1,4 +1,4 @@
-import { errMsg } from '@moneyball/shared';
+import { errMsg, LLM_RETRY_BACKOFF_MS } from '@moneyball/shared';
 import type { AgentResult } from './types';
 import { callOllama } from './llm-ollama';
 import { callDeepSeek } from './llm-deepseek';
@@ -13,10 +13,10 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 //   - 기본 3 attempts 부족 (2026-05-19 5경기 fallback 재발 evidence)
 //   - 529 단독 attempts 4 로 확장: 2.5s → 5s → 10s → 20s = 총 37.5s window
 //   - 일반 5xx / 429 / 네트워크 에러 = 기존 3 attempts 유지 (overcompensate 회피)
-const RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
+// 일반 RETRY_BACKOFF_MS = shared 단일 registry (wave 148, cycle 1377).
 const OVERLOADED_BACKOFF_MS = [2500, 5000, 10000, 20000] as const;
 const OVERLOADED_BACKOFF_MULTIPLIER = 5; // 첫 3 attempt 일반 5xx 대비 배율 — 테스트 호환
-export const MAX_ATTEMPTS = RETRY_BACKOFF_MS.length;
+export const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length;
 export const MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length;
 
 export function backoffMs(attempt: number, status: number): number {
@@ -24,8 +24,8 @@ export function backoffMs(attempt: number, status: number): number {
     const idx = Math.min(attempt, OVERLOADED_BACKOFF_MS.length - 1);
     return OVERLOADED_BACKOFF_MS[idx];
   }
-  const idx = Math.min(attempt, RETRY_BACKOFF_MS.length - 1);
-  return RETRY_BACKOFF_MS[idx];
+  const idx = Math.min(attempt, LLM_RETRY_BACKOFF_MS.length - 1);
+  return LLM_RETRY_BACKOFF_MS[idx];
 }
 
 export interface LLMCallOptions {

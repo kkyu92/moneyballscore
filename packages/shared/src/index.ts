@@ -1025,6 +1025,22 @@ export const BACKFILL_POLITE_DELAY_MS = 250;
 export const SCRAPER_RATE_LIMIT_DEFAULT_MS = 2000;
 export const SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS = 3000;
 
+/**
+ * LLM backend retry exponential backoff schedule (ms) — silent drift family wave 148
+ * (cycle 1377). 일반 5xx / 429 / 네트워크 에러 재시도 시 attempt index 별 backoff.
+ *
+ * 2 occurrence (2 LLM backend module, 동일 intent — 일반 retry exponential backoff):
+ *   - packages/kbo-data/src/agents/llm.ts: Claude (Anthropic) backend
+ *   - packages/kbo-data/src/agents/llm-deepseek.ts: DeepSeek backend
+ *
+ * Array length (=3) 가 MAX_ATTEMPTS 도출 — derived `.length` 패턴 그대로 유지.
+ * 529 Overloaded 특수 backoff (OVERLOADED_BACKOFF_MS) 는 llm.ts 안 local 유지
+ * (Anthropic 전용 capacity 한계). wave 147 (SCRAPER_RATE_LIMIT_*) 와 별도 카테고리
+ * (LLM API retry vs 일반 scraper rate-limit) — 같은 silent drift pattern
+ * (literal array vs constant name 의미 박제).
+ */
+export const LLM_RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
