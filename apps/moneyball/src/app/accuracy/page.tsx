@@ -14,6 +14,7 @@ import { CohortComparisonHeatmap } from '@/components/dashboard/CohortComparison
 import {
   assertSelectOk,
   shortTeamName,
+  DAY_MS,
   DEBATE_VERSION_PREGAME,
   SUNDAY_CAP_CONFIDENCE,
   BRIER_BASELINE,
@@ -243,7 +244,7 @@ export default async function AccuracyPage() {
   // 가 silent. buildFallbackStats 는 양쪽 mv 모두 지원하므로 prediction_type 필터 확장.
   // cycle 460 polish-ui heavy — spec scope A: 30일 window + 일별 stacked bar 추가.
   // eslint-disable-next-line react-hooks/purity -- Server Component request-scoped Date.now() 의도된 동작
-  const fallbackWindowStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
 
   const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([

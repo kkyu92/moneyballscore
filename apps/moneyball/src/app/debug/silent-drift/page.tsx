@@ -8,7 +8,7 @@ import {
   FACTOR_ANOMALY_Z_THRESHOLD,
   type PredictionFactorRow,
 } from '@/lib/debug/factorDeltaStats';
-import { CURRENT_SCORING_RULE, SHADOW_SCORING_RULE } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, DAY_MS, SHADOW_SCORING_RULE } from '@moneyball/shared';
 
 // M14 — silent drift family alert dashboard (plan #10 Tier 1, cycle 947)
 // M-D cycle 1013 확장 — FactorDeltaTimeline 안 cohort 별 factor 평균 + z-score>3 anomaly 표기.
@@ -29,7 +29,7 @@ function getAdminClient() {
 
 async function getSilentDriftEvidence() {
   const supabase = getAdminClient();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * DAY_MS).toISOString();
 
   const { data, error } = await supabase
     .from('pipeline_runs')
@@ -55,7 +55,7 @@ interface PredictionsFactorRowRaw {
 
 async function getFactorTimeline() {
   const supabase = getAdminClient();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS).toISOString();
 
   const { data, error } = await supabase
     .from('predictions')

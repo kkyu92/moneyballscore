@@ -1,5 +1,7 @@
 // /debug/hallucination 대시보드 통계 집계 — validator_logs 행을 일자별/카테고리별로 분해.
 
+import { DAY_MS, KST_OFFSET_MS } from '@moneyball/shared';
+
 export interface ValidatorLogInput {
   severity: string;
   violation_type: string;
@@ -40,13 +42,11 @@ export interface HallucinationStats {
   daily: DayBucket[];
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 function toIsoDate(value: string): string {
   // KST 기준 일자 박제 — UTC 가 자정 직전이면 다음날로 분류 위해 +9h shift
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return 'unknown';
-  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  const kst = new Date(d.getTime() + KST_OFFSET_MS);
   return kst.toISOString().slice(0, 10);
 }
 
@@ -80,7 +80,7 @@ export function buildHallucinationStats(
   const dayMap = new Map<string, DayBucket>();
 
   // 빈 day bucket 미리 박제 (오늘 ~ N-1 일전, KST 기준)
-  const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const todayKst = new Date(now.getTime() + KST_OFFSET_MS);
   for (let i = 0; i < days; i++) {
     const d = new Date(todayKst.getTime() - i * DAY_MS);
     const key = d.toISOString().slice(0, 10);

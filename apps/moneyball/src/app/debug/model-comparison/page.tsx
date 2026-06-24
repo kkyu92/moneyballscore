@@ -10,7 +10,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { BRIER_BASELINE, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
+import { BRIER_BASELINE, DAY_MS, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 import {
   aggregateByModel,
   buildShadowRows,
@@ -40,7 +40,7 @@ function fmt(n: number | null, digits = 5): string {
 async function loadRows(daysBack: number): Promise<PredictionRow[]> {
   const db = getAdminClient();
   const since = new Date(
-    Date.now() - daysBack * 24 * 3600 * 1000,
+    Date.now() - daysBack * DAY_MS,
   ).toISOString();
   const pageSize = SUPABASE_PAGE_SIZE;
   const out: PredictionRow[] = [];
@@ -91,7 +91,7 @@ export default async function ModelComparisonPage() {
   // 날짜 × scoringRule pivot — 최근 14일만 화면 표시
   // server component: 매 요청마다 새 cutoff = 의도된 동작 (server-side dynamic)
   // eslint-disable-next-line react-hooks/purity
-  const cutoff = new Date(Date.now() - 14 * 24 * 3600 * 1000)
+  const cutoff = new Date(Date.now() - 14 * DAY_MS)
     .toISOString()
     .slice(0, 10);
   const recentDaily = daily

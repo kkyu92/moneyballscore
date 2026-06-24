@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { DAY_MS } from '@moneyball/shared';
 import {
   buildAgentFallbackCohort,
   type PredictionForFallback,
@@ -26,7 +27,7 @@ function getAdminClient() {
 
 async function getCohort() {
   const supabase = getAdminClient();
-  const since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const since = new Date(Date.now() - WINDOW_DAYS * DAY_MS).toISOString();
   const { data, error } = await supabase
     .from('predictions')
     .select('id, created_at, reasoning')

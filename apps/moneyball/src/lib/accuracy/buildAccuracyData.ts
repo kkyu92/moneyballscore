@@ -1,5 +1,7 @@
 import {
   ALL_SCORING_RULES,
+  DAY_MS,
+  KST_OFFSET_MS,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   LLM_ACTIVE_VERSIONS,
@@ -115,10 +117,9 @@ export function buildFallbackDailyTrend(
   days: number,
   now: number = Date.now(),
 ): FallbackDailyBucket[] {
-  const KST_OFFSET_MS = 9 * 3600 * 1000;
   const buckets = new Map<string, FallbackDailyBucket>();
   for (let i = days - 1; i >= 0; i--) {
-    const kstDate = new Date(now + KST_OFFSET_MS - i * 86_400_000);
+    const kstDate = new Date(now + KST_OFFSET_MS - i * DAY_MS);
     const dateISO = kstDate.toISOString().slice(0, 10);
     const [, m, d] = dateISO.split('-');
     buckets.set(dateISO, {
@@ -262,7 +263,7 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
   const acc = Array.from({ length: 7 }, (_, i) => ({ day: i, n: 0, hits: 0 }));
   for (const r of rows) {
     // verified_at은 UTC. KST = UTC+9
-    const kstMs = new Date(r.verified_at).getTime() + 9 * 3600 * 1000;
+    const kstMs = new Date(r.verified_at).getTime() + KST_OFFSET_MS;
     const dow = new Date(kstMs).getUTCDay();
     acc[dow].n += 1;
     if (r.is_correct) acc[dow].hits += 1;
@@ -305,7 +306,7 @@ export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[
   }
 
   for (const r of rows) {
-    const kstMs = new Date(r.verified_at).getTime() + 9 * 3600 * 1000;
+    const kstMs = new Date(r.verified_at).getTime() + KST_OFFSET_MS;
     const dow = new Date(kstMs).getUTCDay();
     const sr = r.scoring_rule ?? '';
 
@@ -341,7 +342,7 @@ export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[
 
 function getWeekStart(dateStr: string): string {
   // KST 기준으로 주 시작(월요일) 계산
-  const kstMs = new Date(dateStr).getTime() + 9 * 3600 * 1000;
+  const kstMs = new Date(dateStr).getTime() + KST_OFFSET_MS;
   const d = new Date(kstMs);
   const day = d.getUTCDay();
   const diff = day === 0 ? -6 : 1 - day;
@@ -439,7 +440,6 @@ export function buildRollingAccuracy(
   totalDays: number = ROLLING_ACCURACY_TOTAL_DAYS,
   now: number = Date.now(),
 ): RollingAccuracyPoint[] {
-  const KST_OFFSET_MS = 9 * 3600 * 1000;
   const daily = new Map<string, { hits: number; n: number }>();
   for (const r of rows) {
     const kstISO = new Date(new Date(r.verified_at).getTime() + KST_OFFSET_MS)
@@ -453,12 +453,12 @@ export function buildRollingAccuracy(
   const todayKstISO = new Date(now + KST_OFFSET_MS).toISOString().slice(0, 10);
   const points: RollingAccuracyPoint[] = [];
   for (let i = totalDays - 1; i >= 0; i--) {
-    const ms = new Date(todayKstISO + 'T00:00:00Z').getTime() - i * 86_400_000;
+    const ms = new Date(todayKstISO + 'T00:00:00Z').getTime() - i * DAY_MS;
     const dateISO = new Date(ms).toISOString().slice(0, 10);
     let hits = 0;
     let n = 0;
     for (let j = 0; j < windowDays; j++) {
-      const wMs = ms - j * 86_400_000;
+      const wMs = ms - j * DAY_MS;
       const wISO = new Date(wMs).toISOString().slice(0, 10);
       const cell = daily.get(wISO);
       if (cell) {
@@ -698,7 +698,7 @@ export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
         a.verified_at.localeCompare(b.verified_at),
       );
       const kstFmt = (d: Date) => {
-        const kst = new Date(d.getTime() + 9 * 3600 * 1000);
+        const kst = new Date(d.getTime() + KST_OFFSET_MS);
         return `${kst.getUTCMonth() + 1}/${kst.getUTCDate()}`;
       };
       const first = new Date(sorted[0].verified_at);

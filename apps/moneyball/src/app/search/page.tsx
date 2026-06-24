@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
+  DAY_MS,
   KBO_TEAMS,
   MLB_TEAM_COUNT,
   SEARCH_ISR_SECONDS,
@@ -239,7 +240,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
   try {
     const supabase = await createClient();
     const today = new Date();
-    const since = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
+    const since = new Date(today.getTime() - 90 * DAY_MS)
       .toISOString()
       .slice(0, 10);
     const datesResult = (await supabase

@@ -1,4 +1,4 @@
-import { toKSTDateString } from "@moneyball/shared";
+import { DAY_MS, toKSTDateString } from "@moneyball/shared";
 
 /**
  * 현재 시각 기준으로 KST 어제 날짜 (YYYY-MM-DD) 를 계산.
@@ -13,6 +13,6 @@ import { toKSTDateString } from "@moneyball/shared";
  */
 export function getYesterdayKSTDateString(now: Date = new Date()): string {
   const kstNow = new Date(now.getTime());
-  const yesterday = new Date(kstNow.getTime() - 24 * 60 * 60 * 1000);
+  const yesterday = new Date(kstNow.getTime() - DAY_MS);
   return toKSTDateString(yesterday);
 }

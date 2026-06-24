@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, CALENDAR_ISR_SECONDS } from '@moneyball/shared';
+import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, CALENDAR_ISR_SECONDS } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -34,7 +34,7 @@ interface MonthInfo {
 
 function getKstMonthInfo(now: Date = new Date()): MonthInfo {
   // KST = UTC+9
-  const kstMs = now.getTime() + 9 * 60 * 60 * 1000;
+  const kstMs = now.getTime() + KST_OFFSET_MS;
   const kst = new Date(kstMs);
   const year = kst.getUTCFullYear();
   const month = kst.getUTCMonth() + 1; // 1..12
