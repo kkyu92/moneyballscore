@@ -1,4 +1,5 @@
 import { KBO_TEAMS, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { brand } from "@/lib/design-tokens";
 
 export type AgentRole = "quant" | "home" | "away" | "calibration" | "judge";
 
@@ -80,7 +81,7 @@ export function AgentVoteCard({
   const meta = ROLE_META[role];
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
-  const homeColor = KBO_TEAMS[homeTeam]?.color ?? "#2d6b3f";
+  const homeColor = KBO_TEAMS[homeTeam]?.color ?? brand[500];
   const awayColor = KBO_TEAMS[awayTeam]?.color ?? "#c5872a";
 
   const hasProb = homeWinProb !== null && Number.isFinite(homeWinProb);

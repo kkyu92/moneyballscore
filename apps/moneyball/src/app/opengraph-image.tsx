@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 루트 Open Graph 이미지: 라우트별 자체 이미지가 없을 때 fallback.
 // satori(@vercel/og)는 CJK 폰트를 번들하지 않아 라틴 + 이모지 중심으로 설계.
@@ -18,7 +19,7 @@ export default function Image() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0a1f12 0%, #1a3d24 50%, #2d6b3f 100%)",
+          background: BRAND_GRADIENT_KBO_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

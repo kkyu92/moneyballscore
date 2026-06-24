@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { assertSelectOk, errMsg, type SelectResult } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
+import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 경기 분석 동적 OG 이미지: /analysis/game/[id] 경기별 소셜 공유.
 // satori(@vercel/og)는 CJK 폰트를 번들하지 않으므로 라틴 문자·숫자 중심으로 설계.
@@ -87,7 +88,7 @@ export default async function Image({ params }: Props) {
           display: "flex",
           flexDirection: "column",
           background:
-            "linear-gradient(135deg, #0a1f12 0%, #1a3d24 50%, #2d6b3f 100%)",
+            BRAND_GRADIENT_KBO_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

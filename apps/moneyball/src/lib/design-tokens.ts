@@ -36,3 +36,8 @@ export const surface = {
 } as const;
 
 export const chartCursorTint = "rgba(59, 130, 246, 0.06)";
+
+// next/og 의 satori 렌더러는 CSS 변수 미지원 — OG/icon 이미지에서 인라인 hex 가 필요.
+// brand.900 → brand.700 → brand.500 grandient (135deg) 가 22+ OG 라우트에 동일 반복.
+// 단일 source 박제 = silent drift family wave 141 차단.
+export const BRAND_GRADIENT_KBO_135 = `linear-gradient(135deg, ${brand[900]} 0%, ${brand[700]} 50%, ${brand[500]} 100%)`;
