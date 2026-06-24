@@ -988,6 +988,22 @@ export const COPY_FEEDBACK_RESET_MS = 2000;
  */
 export const SUPABASE_PAGE_SIZE = 1000;
 
+/**
+ * KBO 공식/날씨 archive API 백필 시 polite delay (ms) — silent drift family wave 142
+ * (cycle 1365). 외부 API 과속 회피용 throttle. 3 backfill pipeline 모두 동일 250ms.
+ *
+ * 3 occurrence (3 file, 동일 intent — backfill loop 안 외부 API 호출 간 polite gap):
+ *   - packages/kbo-data/src/pipeline/backfill-sp.ts: 선발투수 백필 (KBO 공식)
+ *   - packages/kbo-data/src/pipeline/backfill-season.ts: 시즌 일정 백필 (KBO 공식)
+ *   - packages/kbo-data/src/pipeline/backfill-weather.ts: 구장 날씨 백필 (OpenMeteo archive)
+ *
+ * 변경 시 3 backfill loop 자동 sync. wave 121~141 family (page-level ISR /
+ * fetch revalidate / clipboard UX timing / Supabase pagination / brand gradient hex)
+ * 와 별도 카테고리 (외부 API throttle delay) — 같은 silent drift pattern
+ * (literal value vs constant name 의미 박제).
+ */
+export const BACKFILL_POLITE_DELAY_MS = 250;
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */

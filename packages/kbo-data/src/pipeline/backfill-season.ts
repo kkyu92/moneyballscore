@@ -31,7 +31,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
-import { assertSelectOk, errMsg } from '@moneyball/shared';
+import { BACKFILL_POLITE_DELAY_MS, assertSelectOk, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -176,7 +176,7 @@ async function main() {
     }
 
     // Polite delay between day calls.
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, BACKFILL_POLITE_DELAY_MS));
   }
 
   console.log('');

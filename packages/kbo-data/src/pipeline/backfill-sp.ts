@@ -25,7 +25,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
+import { BACKFILL_POLITE_DELAY_MS, assertSelectOk, assertWriteOk, errMsg } from '@moneyball/shared';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -275,7 +275,7 @@ async function main() {
     }
 
     // Polite delay
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, BACKFILL_POLITE_DELAY_MS));
   }
 
   console.log(`📊 Naver games fetched: ${naverFetched}`);
