@@ -14,12 +14,12 @@
  * ```
  */
 
-import { KBO_TEAMS, type TeamCode, SITE_URL } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, SITE_URL, KBO_OFFICIAL_URL } from "@moneyball/shared";
 
 export { SITE_URL };
 export const SITE_NAME = "MoneyBall Score";
 export const ORG_NAME = "Korea Baseball Organization";
-export const ORG_URL = "https://www.koreabaseball.com";
+export const ORG_URL = KBO_OFFICIAL_URL;
 
 /** SportsEvent 입력 */
 export interface SportsEventInput {

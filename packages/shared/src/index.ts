@@ -1,5 +1,6 @@
 // 사이트 base URL — silent drift family wave 152 (cycle 1381) 단일 source.
-export { SITE_URL, SITE_HOST } from './site';
+// KBO 공식 도메인 — silent drift family wave 162 (cycle 1395) 단일 source.
+export { SITE_URL, SITE_HOST, KBO_OFFICIAL_URL, KBO_SCHEDULE_URL } from './site';
 
 // 사이트 연락 이메일 — silent drift family wave 159 (cycle 1391) 단일 source.
 // contact/page.tsx + privacy/page.tsx (mailto + 본문) 공유.
