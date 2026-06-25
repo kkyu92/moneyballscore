@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_URL } from "@moneyball/shared";
+import { SITE_URL, CONTACT_EMAIL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
@@ -54,7 +54,7 @@ const INQUIRY_TYPES = [
   },
 ];
 
-const EMAIL = "moneyballscore777@gmail.com";
+const EMAIL = CONTACT_EMAIL;
 
 export default function ContactPage() {
   return (
