@@ -1,4 +1,4 @@
-import { KBO_TEAMS, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, LLM_MAX_TOKENS_CALIBRATION, shortTeamName } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWindowsForLLM } from '../context/domain';
 import { callLLM } from './llm';
@@ -159,7 +159,7 @@ export async function runCalibrationAgent(
       model: 'haiku',
       systemPrompt: SYSTEM_PROMPT,
       userMessage: buildUserMessage(homeTeam, awayTeam, history),
-      maxTokens: 500,
+      maxTokens: LLM_MAX_TOKENS_CALIBRATION,
     },
     parseResponse
   );

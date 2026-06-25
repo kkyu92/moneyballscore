@@ -1060,6 +1060,26 @@ export const LLM_TEMPERATURE_JUDGE = 0.3;
 export const LLM_TEMPERATURE_TEAM = 0.5;
 
 /**
+ * LLM 에이전트 별 maxTokens 예산 — silent drift family wave 151 (cycle 1380).
+ * 4 agent file 에 산재한 5 magic literal → agent 별 const 이름 박제.
+ *
+ * 5 occurrence:
+ *   - agents/judge-agent.ts: 1500 (sonnet, 심판 판정 + factor-attribution 회고)
+ *   - agents/postview.ts (team): 600 (haiku, 팀 패배/승리 회고 단문)
+ *   - agents/postview.ts (judge): 1200 (sonnet, factor-level attribution 회고)
+ *   - agents/team-agent.ts: 800 (haiku, 팀 분석 예측 reasoning)
+ *   - agents/calibration-agent.ts: 500 (haiku, 편향 보정 힌트 단문)
+ *
+ * 상위 카테고리: wave 148 (LLM_RETRY_BACKOFF_MS) + wave 150 (LLM_TEMPERATURE_*).
+ * 동일 silent drift pattern (LLM 파라미터 literal → const name 의미 박제).
+ */
+export const LLM_MAX_TOKENS_JUDGE = 1500;
+export const LLM_MAX_TOKENS_POSTVIEW_TEAM = 600;
+export const LLM_MAX_TOKENS_POSTVIEW_JUDGE = 1200;
+export const LLM_MAX_TOKENS_TEAM = 800;
+export const LLM_MAX_TOKENS_CALIBRATION = 500;
+
+/**
  * Lotto scraper fetch timeout schedule (ms) — silent drift family wave 149 (cycle 1378).
  * scripts/lotto.ts 안 4 fetch site 의 AbortSignal.timeout 매직 리터럴 박제 분산.
  * 동일 파일 안 sibling function 간 silent drift (한쪽 tune 시 다른쪽 stale 위험).

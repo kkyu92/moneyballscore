@@ -90,6 +90,18 @@ import {
   SUPABASE_PAGE_SIZE,
   SCRAPER_RATE_LIMIT_DEFAULT_MS,
   SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS,
+  LLM_RETRY_BACKOFF_MS,
+  LLM_TEMPERATURE_JUDGE,
+  LLM_TEMPERATURE_TEAM,
+  LOTTO_FETCH_TIMEOUT_CSV_MS,
+  LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS,
+  LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS,
+  LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS,
+  LLM_MAX_TOKENS_JUDGE,
+  LLM_MAX_TOKENS_POSTVIEW_TEAM,
+  LLM_MAX_TOKENS_POSTVIEW_JUDGE,
+  LLM_MAX_TOKENS_TEAM,
+  LLM_MAX_TOKENS_CALIBRATION,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -282,6 +294,58 @@ describe('KBO_TEAMS', () => {
   it('SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS pins FanGraphs KBO scraper polite delay override (silent drift wave 147 guard)', () => {
     expect(SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS).toBe(3000);
     expect(SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS).toBeGreaterThan(SCRAPER_RATE_LIMIT_DEFAULT_MS);
+  });
+
+  it('LLM_RETRY_BACKOFF_MS pins LLM retry backoff schedule (silent drift wave 148 guard)', () => {
+    expect(LLM_RETRY_BACKOFF_MS).toEqual([500, 1000, 2000]);
+    expect(LLM_RETRY_BACKOFF_MS).toHaveLength(3);
+  });
+
+  it('LLM_TEMPERATURE_JUDGE pins judge agent temperature (silent drift wave 150 guard)', () => {
+    expect(LLM_TEMPERATURE_JUDGE).toBe(0.3);
+    expect(LLM_TEMPERATURE_JUDGE).toBeLessThan(LLM_TEMPERATURE_TEAM);
+  });
+
+  it('LLM_TEMPERATURE_TEAM pins team/calibration/postview agent temperature (silent drift wave 150 guard)', () => {
+    expect(LLM_TEMPERATURE_TEAM).toBe(0.5);
+  });
+
+  it('LOTTO_FETCH_TIMEOUT_CSV_MS pins lotto CSV download timeout (silent drift wave 149 guard)', () => {
+    expect(LOTTO_FETCH_TIMEOUT_CSV_MS).toBe(15_000);
+  });
+
+  it('LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS pins dhlottery API timeout (silent drift wave 149 guard)', () => {
+    expect(LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS).toBe(8_000);
+  });
+
+  it('LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS pins lottolyzer scrape timeout (silent drift wave 149 guard)', () => {
+    expect(LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS).toBe(15_000);
+  });
+
+  it('LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS pins lottolyzer latest round timeout (silent drift wave 149 guard)', () => {
+    expect(LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS).toBe(10_000);
+  });
+
+  it('LLM_MAX_TOKENS_JUDGE pins judge-agent token budget (silent drift wave 151 guard)', () => {
+    expect(LLM_MAX_TOKENS_JUDGE).toBe(1500);
+  });
+
+  it('LLM_MAX_TOKENS_POSTVIEW_TEAM pins postview team-agent token budget (silent drift wave 151 guard)', () => {
+    expect(LLM_MAX_TOKENS_POSTVIEW_TEAM).toBe(600);
+  });
+
+  it('LLM_MAX_TOKENS_POSTVIEW_JUDGE pins postview judge-agent token budget (silent drift wave 151 guard)', () => {
+    expect(LLM_MAX_TOKENS_POSTVIEW_JUDGE).toBe(1200);
+    expect(LLM_MAX_TOKENS_POSTVIEW_JUDGE).toBeGreaterThan(LLM_MAX_TOKENS_POSTVIEW_TEAM);
+  });
+
+  it('LLM_MAX_TOKENS_TEAM pins team-agent token budget (silent drift wave 151 guard)', () => {
+    expect(LLM_MAX_TOKENS_TEAM).toBe(800);
+  });
+
+  it('LLM_MAX_TOKENS_CALIBRATION pins calibration-agent token budget (silent drift wave 151 guard)', () => {
+    expect(LLM_MAX_TOKENS_CALIBRATION).toBe(500);
+    expect(LLM_MAX_TOKENS_CALIBRATION).toBeLessThan(LLM_MAX_TOKENS_TEAM);
   });
 
   it('should have required fields for each team', () => {

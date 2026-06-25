@@ -10,7 +10,7 @@
  * 기존 `pre_game` row는 절대 update 금지 (이력 보존).
  */
 
-import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS } from '@moneyball/shared';
+import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS, LLM_MAX_TOKENS_POSTVIEW_TEAM, LLM_MAX_TOKENS_POSTVIEW_JUDGE } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { MetricRegistry, type MetricSlug } from '../context/metrics';
@@ -231,7 +231,7 @@ async function runTeamPostviewAgent(
       model: 'haiku',
       systemPrompt: TEAM_POSTVIEW_SYSTEM,
       userMessage: buildTeamPostviewMessage(team, isWinner, context, actual, original),
-      maxTokens: 600,
+      maxTokens: LLM_MAX_TOKENS_POSTVIEW_TEAM,
     },
     (text) => parseTeamPostview(text, team)
   );
@@ -391,7 +391,7 @@ export async function runPostview(
       model: 'sonnet',
       systemPrompt: JUDGE_POSTVIEW_SYSTEM,
       userMessage: buildJudgePostviewMessage(context, actual, original, homePv, awayPv),
-      maxTokens: 1200,
+      maxTokens: LLM_MAX_TOKENS_POSTVIEW_JUDGE,
     },
     parseJudgePostview
   );

@@ -1,4 +1,4 @@
-import { KBO_TEAMS, errMsg } from '@moneyball/shared';
+import { KBO_TEAMS, LLM_MAX_TOKENS_TEAM, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { MetricRegistry } from '../context/metrics';
@@ -121,7 +121,7 @@ export async function runTeamAgent(
       model: 'haiku',
       systemPrompt: buildSystemPrompt(team, role),
       userMessage: buildUserMessage(team, context, rivalry.promptBlock),
-      maxTokens: 800,
+      maxTokens: LLM_MAX_TOKENS_TEAM,
     },
     (text) => parseResponse(text, team)
   );

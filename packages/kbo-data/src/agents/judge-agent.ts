@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, KBO_TEAMS, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, errMsg } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, KBO_TEAMS, LLM_MAX_TOKENS_JUDGE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
@@ -146,7 +146,7 @@ export async function runJudgeAgent(
       model: 'sonnet',
       systemPrompt: SYSTEM_PROMPT,
       userMessage: buildUserMessage(homeTeam, awayTeam, homeArg, awayArg, quantitativeProb, calibration, context),
-      maxTokens: 1500,
+      maxTokens: LLM_MAX_TOKENS_JUDGE,
     },
     (text) => parseResponse(text, homeTeam, awayTeam)
   );
