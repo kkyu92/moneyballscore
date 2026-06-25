@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, CALENDAR_ISR_SECONDS } from '@moneyball/shared';
+import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, CALENDAR_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -11,8 +11,6 @@ import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks
 // /predictions/[date] 진입. PRODUCTION_COHORT_RULES filter (v1.8 + v1.8-credit-fail, 사례 17 family wave 15).
 
 export const revalidate = 3600;
-
-const SITE_URL = 'https://moneyballscore.vercel.app';
 
 interface DayCell {
   date: string; // YYYY-MM-DD (KST)

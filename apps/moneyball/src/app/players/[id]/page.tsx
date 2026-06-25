@@ -7,15 +7,13 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PitcherFipTrend } from "@/components/players/PitcherFipTrend";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
-import { PLAYERS_ISR_SECONDS, shortTeamName } from '@moneyball/shared';
+import { PLAYERS_ISR_SECONDS, shortTeamName, SITE_URL } from '@moneyball/shared';
 
 export const revalidate = 1800;
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 function fmtFip(v: number | null): string {
   return v != null ? v.toFixed(2) : "-";

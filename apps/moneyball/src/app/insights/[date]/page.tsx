@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { DebateTimeline } from "@/components/insights/DebateTimeline";
-import { KBO_FACTOR_COUNT, shortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, shortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import {
   getInsightsForDate,
   isValidInsightsDate,
@@ -16,8 +16,6 @@ import { insightsStatusBadge } from "@/lib/insights/statusBadge";
 interface Props {
   params: Promise<{ date: string }>;
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;

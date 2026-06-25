@@ -1,3 +1,6 @@
+// 사이트 base URL — silent drift family wave 152 (cycle 1381) 단일 source.
+export { SITE_URL } from './site';
+
 // 라이벌리 정의 re-export (빅매치 rivalry_bonus 가산점 source)
 export { KBO_RIVALRIES, isRivalry } from './rivalries';
 

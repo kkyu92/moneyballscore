@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { type TeamCode, shortTeamName, josa, MATCHUP_ISR_SECONDS } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, MATCHUP_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,
@@ -27,8 +27,6 @@ export const revalidate = 3600;
 interface PageProps {
   params: Promise<{ teamA: string; teamB: string }>;
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export async function generateMetadata({
   params,
