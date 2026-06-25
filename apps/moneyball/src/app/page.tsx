@@ -100,7 +100,7 @@ interface HomeGame {
   predictions: HomePrediction[];
 }
 
-export const revalidate = 600;
+export const revalidate = HOME_ISR_SECONDS;
 
 // 분석 방법론 카드의 6 그룹 정의 — DEFAULT_WEIGHTS + HOME_ADVANTAGE 단일 source.
 // 라벨 텍스트는 그대로 두고 weight 숫자만 compute (가중치 변경 시 자동 동기).
