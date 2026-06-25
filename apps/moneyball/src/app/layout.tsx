@@ -13,14 +13,8 @@ import { WebVitalsReporter } from "@/components/shared/WebVitalsReporter";
 import { ServiceWorkerRegister } from "@/components/shared/ServiceWorkerRegister";
 import { PWAInstallButton } from "@/components/shared/PWAInstallButton";
 import { KofiWidget } from "@/components/shared/KofiWidget";
-import { KBO_FACTOR_COUNT, SITE_URL } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, SITE_URL, GA_MEASUREMENT_ID, ADSENSE_CLIENT_ID } from "@moneyball/shared";
 import { brand } from "@/lib/design-tokens";
-
-const GA_ID = "G-2886XKWG4Y";
-
-// pub ID는 metadata.verification.other["google-adsense-account"] 와 동일해야 함.
-// 단일 상수로 관리 — 두 곳 중 한쪽만 바꾸는 silent drift 방지.
-const ADSENSE_CLIENT = "ca-pub-9964930444224182";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,7 +62,7 @@ export const metadata: Metadata = {
     google: "KHDQrWaTIhknJ7pTsiGuEHz-uJMal-8b9bCyw2QL89w",
     other: {
       "naver-site-verification": "d319e640e7d38d160b4055873079ec14d652c749",
-      "google-adsense-account": ADSENSE_CLIENT,
+      "google-adsense-account": ADSENSE_CLIENT_ID,
     },
   },
   alternates: {
@@ -113,7 +107,7 @@ export default async function RootLayout({
         />
         <script
           async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
           crossOrigin="anonymous"
         />
       </head>
@@ -165,7 +159,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
-        <GoogleAnalytics gaId={GA_ID} />
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
         <WebVitalsReporter />
         <ServiceWorkerRegister />
         <PWAInstallButton />

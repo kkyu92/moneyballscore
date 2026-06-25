@@ -5,6 +5,14 @@ export { SITE_URL } from './site';
 // contact/page.tsx + privacy/page.tsx (mailto + 본문) 공유.
 export const CONTACT_EMAIL = 'moneyballscore777@gmail.com';
 
+// Google Analytics 측정 ID — silent drift family wave 160 (cycle 1392) 단일 source.
+// layout.tsx GoogleAnalytics gaId prop 단일 소비자.
+export const GA_MEASUREMENT_ID = 'G-2886XKWG4Y';
+
+// Google AdSense 발행자 ID — silent drift family wave 160 (cycle 1392) 단일 source.
+// layout.tsx metadata.verification + adsbygoogle script client param 2 소비자.
+export const ADSENSE_CLIENT_ID = 'ca-pub-9964930444224182';
+
 // 라이벌리 정의 re-export (빅매치 rivalry_bonus 가산점 source)
 export { KBO_RIVALRIES, isRivalry } from './rivalries';
 
