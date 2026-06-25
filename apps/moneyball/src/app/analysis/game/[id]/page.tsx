@@ -5,6 +5,7 @@ import {
   ANALYSIS_GAME_ISR_SECONDS,
   KBO_FACTOR_COUNT,
   KBO_TEAMS,
+  KBO_OFFICIAL_URL,
   assertSelectOk,
   shortTeamName,
   SITE_URL,
@@ -324,7 +325,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     organizer: {
       "@type": "SportsOrganization",
       name: "Korea Baseball Organization",
-      url: "https://www.koreabaseball.com",
+      url: KBO_OFFICIAL_URL,
     },
   };
 

@@ -1,8 +1,9 @@
-import type { TeamCode, GameStatus } from '@moneyball/shared';
+import { KBO_OFFICIAL_URL, KBO_SCHEDULE_URL, type TeamCode, type GameStatus } from '@moneyball/shared';
 
 // KBO 공식 사이트 base URL — kbo-live / kbo-official / kbo-pitcher 공유.
 // fangraphs / fancy-stats 는 다른 도메인이라 자체 BASE_URL 유지.
-export const KBO_BASE_URL = 'https://www.koreabaseball.com';
+// wave 162 (cycle 1395) — @moneyball/shared KBO_OFFICIAL_URL re-export.
+export const KBO_BASE_URL = KBO_OFFICIAL_URL;
 
 // 자체 식별 User-Agent — kbo-official / kbo-pitcher / fangraphs / fancy-stats 공유.
 // naver-record 는 모바일 페이지 차단 회피용 Mozilla UA + Referer 조합이라 별개 유지.
@@ -12,7 +13,8 @@ export const KBO_USER_AGENT = 'MoneyBall/1.0 (KBO Prediction Engine)';
 // /ws/Main.asmx/GetKboGameList Referer 없는 요청 응답을 KBO 메인 HTML
 // (IE conditional comment) 로 리턴하도록 변경. Referer 동봉 시만 정상 JSON,
 // UA 단독은 불충분. fetchGames / fetchLiveGames 공유.
-export const KBO_SCHEDULE_REFERER = 'https://www.koreabaseball.com/Schedule/Schedule.aspx';
+// wave 162 (cycle 1395) — @moneyball/shared KBO_SCHEDULE_URL re-export.
+export const KBO_SCHEDULE_REFERER = KBO_SCHEDULE_URL;
 
 // KBO API 응답 sanitize — kbo-live / kbo-official 공유.
 // KBO API 가 가끔 JSON body 뒤에 HTML 에러 페이지를 concat 해서 리턴 (응답 자체는 200).

@@ -6,7 +6,8 @@ import {
   SMALL_SAMPLE_N,
   TEAMS_ISR_SECONDS,
   type TeamCode,
-  shortTeamName, SITE_URL
+  shortTeamName, SITE_URL,
+  KBO_OFFICIAL_URL,
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
@@ -103,8 +104,8 @@ export default async function TeamPage({ params }: PageProps) {
     },
     memberOf: {
       "@type": "SportsOrganization",
-      "@id": "https://www.koreabaseball.com",
-      url: "https://www.koreabaseball.com",
+      "@id": KBO_OFFICIAL_URL,
+      url: KBO_OFFICIAL_URL,
       name: "KBO 리그",
       alternateName: "Korea Baseball Organization",
     },

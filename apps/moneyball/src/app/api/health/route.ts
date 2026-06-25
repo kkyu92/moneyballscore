@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { HEALTH_KBO_TIMEOUT_MS, assertSelectOk, errMsg } from '@moneyball/shared';
+import { HEALTH_KBO_TIMEOUT_MS, KBO_SCHEDULE_URL, assertSelectOk, errMsg } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -7,9 +7,9 @@ export const runtime = 'nodejs';
 type CheckStatus = 'ok' | 'warning' | 'error';
 type Check = { status: CheckStatus; detail?: string };
 
-// sync: packages/kbo-data/src/types.ts KBO_SCHEDULE_REFERER (cycle 769 사례 8 봇차단 회피)
-const KBO_API_URL = 'https://www.koreabaseball.com/Schedule/Schedule.aspx';
-const KBO_SCHEDULE_REFERER = 'https://www.koreabaseball.com/Schedule/Schedule.aspx';
+// KBO Schedule URL + Referer (cycle 769 사례 8 봇차단 회피) — wave 162 (cycle 1395) shared registry 통합
+const KBO_API_URL = KBO_SCHEDULE_URL;
+const KBO_SCHEDULE_REFERER = KBO_SCHEDULE_URL;
 const SHA_HEX_REGEX = /^[0-9a-f]{40}$/i;
 
 async function checkSupabase(): Promise<Check> {
