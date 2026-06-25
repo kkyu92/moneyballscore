@@ -265,7 +265,7 @@ describe("sitemap.ts — /lotto/archive static index entry 박제 (plan #6 Step 
 
   it("/lotto/archive static entry 박제 (priority 0.6 weekly)", () => {
     expect(src).toMatch(
-      /url:\s*`\$\{baseUrl\}\/lotto\/archive`[^}]*priority:\s*0\.6/,
+      /url:\s*`\$\{SITE_URL\}\/lotto\/archive`[^}]*priority:\s*0\.6/,
     );
   });
 

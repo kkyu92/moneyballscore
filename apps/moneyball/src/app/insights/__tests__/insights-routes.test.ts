@@ -202,14 +202,14 @@ describe("insights loader factors column (plan #5 Step 2 regression guard)", () 
 describe("sitemap.ts /insights URL coverage (regression guard)", () => {
   it("/insights hub URL priority 0.75 daily", () => {
     expect(SITEMAP_SRC).toMatch(
-      /url:\s*`\$\{baseUrl\}\/insights`,[\s\S]*?priority:\s*0\.75/,
+      /url:\s*`\$\{SITE_URL\}\/insights`,[\s\S]*?priority:\s*0\.75/,
     );
   });
 
   it("insightsDateRoutes dynamic 90 day entries push", () => {
     expect(SITEMAP_SRC).toMatch(/insightsDateRoutes/);
     expect(SITEMAP_SRC).toMatch(/listInsightsDates\(90\)/);
-    expect(SITEMAP_SRC).toMatch(/`\$\{baseUrl\}\/insights\/\$\{d\}`/);
+    expect(SITEMAP_SRC).toMatch(/`\$\{SITE_URL\}\/insights\/\$\{d\}`/);
   });
 });
 

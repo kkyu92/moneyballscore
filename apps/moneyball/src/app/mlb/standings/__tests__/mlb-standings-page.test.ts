@@ -51,7 +51,7 @@ describe("sitemap.ts — /mlb/standings entry", () => {
   it("/mlb/standings 정합 + priority/changeFrequency", () => {
     expect(SITEMAP_SRC).toMatch(/\/mlb\/standings/);
     expect(SITEMAP_SRC).toMatch(
-      /\$\{baseUrl\}\/mlb\/standings`,\s*lastModified:\s*now,\s*changeFrequency:\s*'daily'/,
+      /\$\{SITE_URL\}\/mlb\/standings`,\s*lastModified:\s*now,\s*changeFrequency:\s*'daily'/,
     );
   });
 });
