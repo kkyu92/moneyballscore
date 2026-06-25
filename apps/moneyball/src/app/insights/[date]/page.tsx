@@ -19,7 +19,7 @@ interface Props {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = 86400;
+export const revalidate = INSIGHTS_ISR_SECONDS;
 
 export async function generateStaticParams() {
   const dates = await listInsightsDates(90);

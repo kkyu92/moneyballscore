@@ -10,7 +10,7 @@ import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks
 // cycle 1021 (b8) — 사용자 가시 entry route 추가. 월별 view + 각 cell 클릭 시
 // /predictions/[date] 진입. PRODUCTION_COHORT_RULES filter (v1.8 + v1.8-credit-fail, 사례 17 family wave 15).
 
-export const revalidate = 3600;
+export const revalidate = CALENDAR_ISR_SECONDS;
 
 interface DayCell {
   date: string; // YYYY-MM-DD (KST)
