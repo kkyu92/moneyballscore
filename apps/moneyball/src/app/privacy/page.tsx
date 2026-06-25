@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_URL } from "@moneyball/shared";
+import { SITE_URL, CONTACT_EMAIL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
@@ -189,10 +189,10 @@ const SECTIONS = [
         <p className="mt-3">
           개인정보 관련 문의는{" "}
           <a
-            href="mailto:moneyballscore777@gmail.com"
+            href={`mailto:${CONTACT_EMAIL}`}
             className="text-brand-500 hover:underline"
           >
-            moneyballscore777@gmail.com
+            {CONTACT_EMAIL}
           </a>
           으로 연락 바랍니다.
         </p>
