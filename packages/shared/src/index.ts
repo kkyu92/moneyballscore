@@ -1042,6 +1042,24 @@ export const SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS = 3000;
 export const LLM_RETRY_BACKOFF_MS = [500, 1000, 2000] as const;
 
 /**
+ * LLM 호출 temperature — silent drift family wave 150 (cycle 1379).
+ * llm-deepseek.ts + llm-ollama.ts 2 backend 동일 조건식 중복:
+ *   `options.model === 'sonnet' ? 0.3 : 0.5`
+ *
+ * 2 occurrence (2 alternative LLM backend, 동일 intent — 역할별 temperature):
+ *   - packages/kbo-data/src/agents/llm-deepseek.ts: DeepSeek backend
+ *   - packages/kbo-data/src/agents/llm-ollama.ts: Ollama backend
+ *
+ * 주 Anthropic 백엔드 (llm.ts) 는 temperature 파라미터 미사용 (API default).
+ * JUDGE('sonnet' 역할) = 낮은 temperature (일관성 — 심판·factor-attribution).
+ * TEAM('haiku' 역할) = 높은 temperature (창의성 — team-agent·calibration·postview).
+ * wave 148 (LLM_RETRY_BACKOFF_MS 2 backend) 와 동일 카테고리 (LLM 파라미터 drift)
+ * — 같은 silent drift pattern (conditional literal vs constant name 의미 박제).
+ */
+export const LLM_TEMPERATURE_JUDGE = 0.3;
+export const LLM_TEMPERATURE_TEAM = 0.5;
+
+/**
  * Lotto scraper fetch timeout schedule (ms) — silent drift family wave 149 (cycle 1378).
  * scripts/lotto.ts 안 4 fetch site 의 AbortSignal.timeout 매직 리터럴 박제 분산.
  * 동일 파일 안 sibling function 간 silent drift (한쪽 tune 시 다른쪽 stale 위험).

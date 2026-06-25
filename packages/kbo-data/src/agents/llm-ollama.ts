@@ -16,7 +16,7 @@
  *   - tokensUsed는 eval_count (생성 토큰 수)로 근사. input token도 prompt_eval_count로 더함
  */
 
-import { errMsg } from '@moneyball/shared';
+import { errMsg, LLM_TEMPERATURE_JUDGE, LLM_TEMPERATURE_TEAM } from '@moneyball/shared';
 import type { AgentResult } from './types';
 
 const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
@@ -62,7 +62,7 @@ export async function callOllama<T>(
     stream: false,
     options: {
       num_predict: options.maxTokens,
-      temperature: options.model === 'sonnet' ? 0.3 : 0.5,
+      temperature: options.model === 'sonnet' ? LLM_TEMPERATURE_JUDGE : LLM_TEMPERATURE_TEAM,
     },
   });
 

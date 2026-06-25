@@ -15,7 +15,7 @@
  * Auth: Bearer DEEPSEEK_API_KEY
  */
 
-import { errMsg, LLM_RETRY_BACKOFF_MS } from '@moneyball/shared';
+import { errMsg, LLM_RETRY_BACKOFF_MS, LLM_TEMPERATURE_JUDGE, LLM_TEMPERATURE_TEAM } from '@moneyball/shared';
 import type { AgentResult } from './types';
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
@@ -73,8 +73,7 @@ export async function callDeepSeek<T>(
   const startTime = Date.now();
   const modelId = getDeepSeekModel(options.model);
 
-  // 심판 역할은 낮은 temperature (일관성), 팀 에이전트는 약간 창의적
-  const temperature = options.model === 'sonnet' ? 0.3 : 0.5;
+  const temperature = options.model === 'sonnet' ? LLM_TEMPERATURE_JUDGE : LLM_TEMPERATURE_TEAM;
 
   const body = JSON.stringify({
     model: modelId,
