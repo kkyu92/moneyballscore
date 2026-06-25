@@ -21,6 +21,7 @@ import {
   ROLLING_ACCURACY_WINDOW_DAYS,
   ROLLING_ACCURACY_TOTAL_DAYS,
   ACCURACY_ISR_SECONDS,
+  KST_TIMEZONE,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -381,7 +382,7 @@ export default async function AccuracyPage() {
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
-                timeZone: 'Asia/Seoul',
+                timeZone: KST_TIMEZONE,
               })}{' '}
               KST
             </p>

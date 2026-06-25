@@ -7,7 +7,7 @@
  * API: https://api.open-meteo.com/v1/forecast
  */
 
-import { WEATHER_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
+import { KST_TIMEZONE, WEATHER_FETCH_REVALIDATE_SECONDS } from '@moneyball/shared';
 
 export interface WeatherSlot {
   tempC: number;
@@ -61,7 +61,7 @@ export async function fetchStadiumWeather(
     `https://api.open-meteo.com/v1/forecast` +
     `?latitude=${lat}&longitude=${lng}` +
     `&hourly=temperature_2m,precipitation_probability,weather_code` +
-    `&timezone=Asia/Seoul` +
+    `&timezone=${KST_TIMEZONE}` +
     `&start_date=${date}&end_date=${date}`;
 
   try {

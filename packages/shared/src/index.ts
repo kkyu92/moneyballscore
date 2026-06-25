@@ -230,6 +230,20 @@ export const KBO_SEASON_YEAR = 2026;
 export const KBO_PREDICT_DAILY_TIME_KST = '09:00 KST';
 
 /**
+ * KST IANA timezone identifier — silent drift family wave 155 (cycle 1387).
+ * 'Asia/Seoul' literal sweep 단일 source. Open-Meteo `&timezone=` URL parameter +
+ * Intl.DateTimeFormat options.timeZone 양쪽 동일 IANA identifier 사용.
+ *
+ * 4 occurrence 분포 (cycle 1387 측정):
+ *   - apps/moneyball/src/app/accuracy/page.tsx 1건 (toLocaleString timeZone)
+ *   - apps/moneyball/src/lib/weather.ts 1건 (forecast URL &timezone=)
+ *   - packages/kbo-data/src/scrapers/weather.ts 2건 (archive + forecast URL &timezone=)
+ *
+ * MLB 전용 timezone (America/New_York 등) 도입 시 본 상수 분리 + 도메인별 swap.
+ */
+export const KST_TIMEZONE = 'Asia/Seoul';
+
+/**
  * v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%).
  * /v2-preview 사전 evidence + shadow cohort 베이스 가중치. cycle 1013 packages/shared 로
  * 이관 (이전 apps/moneyball/src/lib/predictions/v2Predictor.ts → 본 위치).

@@ -22,6 +22,8 @@
  *   }
  */
 
+import { KST_TIMEZONE } from '@moneyball/shared';
+
 export interface WeatherSnapshot {
   tempC: number;
   precipMm?: number;
@@ -155,7 +157,7 @@ export async function fetchArchiveWeather(
     `?latitude=${lat}&longitude=${lng}` +
     `&start_date=${date}&end_date=${date}` +
     `&hourly=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m` +
-    `&timezone=Asia/Seoul`;
+    `&timezone=${KST_TIMEZONE}`;
   const result = await fetchOpenMeteoHourly<NonNullable<ArchiveResponse['hourly']>>(url, date, hour);
   if (!result.ok) {
     logWeatherFail('archive', result);
@@ -181,7 +183,7 @@ export async function fetchForecastWeather(
     `?latitude=${lat}&longitude=${lng}` +
     `&start_date=${date}&end_date=${date}` +
     `&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m` +
-    `&timezone=Asia/Seoul`;
+    `&timezone=${KST_TIMEZONE}`;
   const result = await fetchOpenMeteoHourly<NonNullable<ForecastResponse['hourly']>>(url, date, hour);
   if (!result.ok) {
     logWeatherFail('forecast', result);
