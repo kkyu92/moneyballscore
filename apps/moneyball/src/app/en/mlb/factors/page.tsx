@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, MLB_ISR_SECONDS } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, MLB_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 const TOTAL = MLB_FACTOR_COUNTS.total;
 const KBO_N = MLB_FACTOR_COUNTS.kbo;

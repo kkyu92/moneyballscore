@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LEADERBOARD_ISR_SECONDS, MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
+import { LEADERBOARD_ISR_SECONDS, MIN_LEADERBOARD_PICKS, SITE_URL } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
@@ -28,8 +28,6 @@ export const metadata: Metadata = {
     description: '내 픽 적중률이 전국 몇 등인지 확인하세요!',
   },
 };
-
-const SITE_URL = 'https://moneyballscore.vercel.app';
 
 // cycle 1021 c10: URL search param 기반 탭. 'use client' 회피 + SEO 친화.
 type PeriodTab = Extract<LeaderboardMode, 'monthly' | 'season' | 'all'>;

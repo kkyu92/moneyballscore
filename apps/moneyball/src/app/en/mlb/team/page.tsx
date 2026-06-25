@@ -7,14 +7,12 @@ import {
   MLB_ISR_SECONDS,
   type MlbTeamCode,
   type MlbLeagueSide,
-  type MlbDivisionSide,
+  type MlbDivisionSide, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: `MLB Teams — ${MLB_TEAM_COUNT} Team Season Stats | MoneyBall Score`,

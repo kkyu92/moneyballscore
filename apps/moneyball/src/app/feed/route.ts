@@ -5,7 +5,7 @@ import {
   assertSelectOk,
   errMsg,
   PRODUCTION_COHORT_RULES,
-  FEED_ISR_SECONDS,
+  FEED_ISR_SECONDS, SITE_URL
 } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
@@ -13,8 +13,6 @@ import { parseChangelog } from '@/lib/changelog/parse';
 import { listInsightsDates } from '@/lib/insights/loader';
 
 export const revalidate = 3600;
-
-const SITE_URL = 'https://moneyballscore.vercel.app';
 
 function escapeXml(str: string): string {
   return str

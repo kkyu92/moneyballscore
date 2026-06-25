@@ -5,7 +5,7 @@ import {
   shortTeamName,
   winnerProbOf,
   assertSelectOk,
-  REVIEWS_INDEX_ISR_SECONDS,
+  REVIEWS_INDEX_ISR_SECONDS, SITE_URL
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -82,8 +82,6 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   const { data } = assertSelectOk(result, "reviews getVerifiedPredictions");
   return (data ?? []) as unknown as VerifiedPredictionRow[];
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export default async function ReviewsPage() {
   const predictions = await getVerifiedPredictions();

@@ -6,7 +6,7 @@ import {
   MLB_TEAMS_PRE_RENDER,
   MLB_ISR_SECONDS,
   type MlbTeamCode,
-  mlbShortTeamName,
+  mlbShortTeamName, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -18,7 +18,6 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 const FACTOR_KBO = MLB_FACTOR_COUNTS.kbo;
 const FACTOR_STATCAST = MLB_FACTOR_COUNTS.statcast;

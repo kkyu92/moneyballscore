@@ -8,7 +8,7 @@ import {
   SHADOW_SCORING_RULE,
   CURRENT_SCORING_RULE,
   V2_PROMOTION_COHORT_N,
-  ACCURACY_ISR_SECONDS,
+  ACCURACY_ISR_SECONDS, SITE_URL
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
 import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";
@@ -18,7 +18,6 @@ import {
   CALIBRATION_COLORS,
 } from "@/components/accuracy/CalibrationPlot";
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/accuracy/shadow`;
 const DAY_LIMIT = 14;
 

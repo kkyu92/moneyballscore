@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, KBO_TEAM_COUNT, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, KBO_TEAM_COUNT, type TeamCode, SITE_URL } from "@moneyball/shared";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -38,8 +38,6 @@ const TEAM_ORDER: TeamCode[] = [
   "NC",
   "WO",
 ];
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export default function TeamsIndexPage() {
   const jsonLd = {

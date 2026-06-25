@@ -14,9 +14,9 @@
  * ```
  */
 
-import { KBO_TEAMS, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, type TeamCode, SITE_URL } from "@moneyball/shared";
 
-export const SITE_URL = "https://moneyballscore.vercel.app";
+export { SITE_URL };
 export const SITE_NAME = "MoneyBall Score";
 export const ORG_NAME = "Korea Baseball Organization";
 export const ORG_URL = "https://www.koreabaseball.com";

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
-import { KBO_FACTOR_COUNT, LOTTO_ARCHIVE_ISR_SECONDS } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, LOTTO_ARCHIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import {
   LottoDataSchema,
   LottoScoreBacktestSchema,
@@ -16,7 +16,6 @@ import lottoScoreBacktestRaw from "../../../../data/lotto-score-backtest.json";
 export const dynamic = "force-static";
 export const revalidate = 86400;
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/lotto/methodology`;
 
 const TOC_ITEMS = [

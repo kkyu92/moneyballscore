@@ -7,7 +7,7 @@ import {
   MLB_DIVISION_COUNT,
   MLB_ISR_SECONDS,
   type MlbTeamCode,
-  type MlbLeagueSide,
+  type MlbLeagueSide, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -15,8 +15,6 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
 export const revalidate = 21600;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "MLB Wild Card race — AL/NL Wild Card 진출 경쟁 | MoneyBall Score",

@@ -9,7 +9,7 @@ import {
   assertSelectOk,
   CURRENT_SCORING_RULE,
   RECENT_FORM_GAMES,
-  TEAMS_ISR_SECONDS,
+  TEAMS_ISR_SECONDS, SITE_URL
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -23,7 +23,6 @@ import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks
 
 export const revalidate = 1800;
 
-const SITE_URL = 'https://moneyballscore.vercel.app';
 const RECENT_LIMIT = RECENT_FORM_GAMES;
 
 interface PageProps {

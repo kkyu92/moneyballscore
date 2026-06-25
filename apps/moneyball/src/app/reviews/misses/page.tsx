@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, WINNER_PROB_LEAN_PCT, REVIEWS_WEEKLY_ISR_SECONDS } from '@moneyball/shared';
+import { shortTeamName, WINNER_PROB_LEAN_PCT, REVIEWS_WEEKLY_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -31,8 +31,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 1800;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 const PREFIXED_VARIANTS = (["sp_fip", "bullpen_fip", "lineup_woba"] as const).flatMap(
   (slug) => [
