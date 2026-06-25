@@ -570,6 +570,19 @@ export const INSIGHTS_ISR_HOURS = 24;
 export const INSIGHTS_ISR_SECONDS = INSIGHTS_ISR_HOURS * 60 * 60;
 
 /**
+ * insights/v2-preview 페이지 list limit — silent drift family wave 158 (cycle 1390).
+ * 동일 magic number 30 prod 2 files (`const LIMIT = 30` 박제 literal).
+ *
+ * 적용 surface:
+ *   - insights/page.tsx: 최근 insights 시계열 30건 fetch
+ *   - v2-preview/page.tsx: v2 시뮬레이션 미리보기 최근 30건 fetch
+ *
+ * 변경 시 양쪽 자동 sync. 테스트 `insights-routes.test.ts` 의 regex check 도 본 상수
+ * 기준 갱신.
+ */
+export const INSIGHTS_LIMIT = 30;
+
+/**
  * 리더보드 등장 최소 픽 완료 건수 — silent drift family wave 116 (cycle 1333).
  * 동일 숫자 10 user-visible surface (5 TS files) + SQL DB view 8 occurrence (4 migrations).
  *

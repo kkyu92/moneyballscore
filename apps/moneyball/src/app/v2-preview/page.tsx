@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, DASHBOARD_ISR_SECONDS, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, type TeamCode, SITE_URL } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, DASHBOARD_ISR_SECONDS, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -11,7 +11,7 @@ import {
 } from "@/lib/predictions/v2Predictor";
 
 const PAGE_URL = `${SITE_URL}/v2-preview`;
-const LIMIT = 30;
+const LIMIT = INSIGHTS_LIMIT;
 
 // noindex 내부 미리보기 — N={V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정 전까지 surface signal 차단.
 export const metadata: Metadata = {
