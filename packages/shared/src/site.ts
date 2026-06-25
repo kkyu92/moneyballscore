@@ -4,3 +4,5 @@
 // metadataBase, canonical, og.url, JSON-LD url, RSS, sitemap, 외부 알림 (telegram) 공유.
 // 도메인 변경 또는 prod URL 전환 시 본 const 1곳만 갱신.
 export const SITE_URL = 'https://moneyballscore.vercel.app';
+// IndexNow HOST (hostname only, no protocol) — wave 161 (cycle 1394).
+export const SITE_HOST = 'moneyballscore.vercel.app';

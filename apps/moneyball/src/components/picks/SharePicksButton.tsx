@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { COPY_FEEDBACK_RESET_MS } from '@moneyball/shared';
+import { COPY_FEEDBACK_RESET_MS, SITE_URL } from '@moneyball/shared';
 import type { PicksStats, WeeklyStats } from '@/lib/picks/buildPicksStats';
 
-const SITE_URL = 'https://moneyballscore.vercel.app/picks';
+const PICKS_URL = `${SITE_URL}/picks`;
 
 interface Props {
   stats: PicksStats;
@@ -52,7 +52,7 @@ function buildShareText(stats: PicksStats, weekly?: WeeklyStats | null): string 
         : '';
   }
 
-  return `[머니볼스코어] AI와 픽 대결${verdict}${weeklyLine}\n${myLine}\n${aiLine}\n\nKBO 경기 AI 예측 → ${SITE_URL}`;
+  return `[머니볼스코어] AI와 픽 대결${verdict}${weeklyLine}\n${myLine}\n${aiLine}\n\nKBO 경기 AI 예측 → ${PICKS_URL}`;
 }
 
 export function SharePicksButton({ stats, weekly }: Props) {

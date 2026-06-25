@@ -6,6 +6,7 @@ import {
   KBO_FACTOR_COUNT,
   pickTierEmoji,
   PREDICTIONS_ISR_SECONDS,
+  SITE_URL,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
 } from "@moneyball/shared";
@@ -23,11 +24,11 @@ import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 export const metadata: Metadata = {
   title: "예측 기록",
   description: `KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색. 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델 + AI 에이전트 토론 기반.`,
-  alternates: { canonical: "https://moneyballscore.vercel.app/predictions" },
+  alternates: { canonical: `${SITE_URL}/predictions` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/predictions",
+    url: `${SITE_URL}/predictions`,
     siteName: "MoneyBall Score",
     title: "예측 기록 | MoneyBall Score",
     description: "KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색.",
@@ -206,7 +207,7 @@ export default async function PredictionsPage() {
     name: "KBO 예측 기록",
     description:
       "KBO 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색.",
-    url: "https://moneyballscore.vercel.app/predictions",
+    url: `${SITE_URL}/predictions`,
     inLanguage: "ko-KR",
     mainEntity: {
       "@type": "ItemList",
@@ -214,7 +215,7 @@ export default async function PredictionsPage() {
       itemListElement: dates.slice(0, 30).map((d, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://moneyballscore.vercel.app/predictions/${d.date}`,
+        url: `${SITE_URL}/predictions/${d.date}`,
         name: `${d.date} 예측 ${d.predicted}경기`,
       })),
     },
