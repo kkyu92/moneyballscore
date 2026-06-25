@@ -151,8 +151,9 @@ describe("/insights hub data fetch shape (regression guard)", () => {
     expect(HUB_SRC).toMatch(/\.eq\("prediction_type",\s*"pre_game"\)/);
   });
 
-  it("LIMIT 30 entries + over-fetch 4x", () => {
-    expect(HUB_SRC).toMatch(/const LIMIT = 30/);
+  it("LIMIT INSIGHTS_LIMIT (=30) entries + over-fetch 4x — silent drift wave 158 (cycle 1390) registry sync", () => {
+    expect(HUB_SRC).toMatch(/const LIMIT = INSIGHTS_LIMIT/);
+    expect(HUB_SRC).toMatch(/INSIGHTS_LIMIT/);
     expect(HUB_SRC).toMatch(/limit\(LIMIT \* 4\)/);
   });
 
