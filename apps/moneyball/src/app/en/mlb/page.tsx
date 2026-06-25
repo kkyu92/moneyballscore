@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, MLB_LIVE_ISR_SECONDS } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, MLB_LIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
 
 export const revalidate = 1800;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 const TOTAL = MLB_FACTOR_COUNTS.total;
 const KBO_N = MLB_FACTOR_COUNTS.kbo;

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SITE_URL } from '@moneyball/shared';
 
 export interface BreadcrumbItem {
   href?: string;
@@ -10,8 +11,6 @@ interface BreadcrumbProps {
   className?: string;
   locale?: 'ko' | 'en';
 }
-
-const SITE_URL = 'https://moneyballscore.vercel.app';
 
 export function Breadcrumb({ items, className = '', locale = 'ko' }: BreadcrumbProps) {
   if (items.length === 0) return null;

@@ -7,7 +7,7 @@ import {
   MLB_TEAM_COUNT,
   MLB_ISR_SECONDS,
   type MlbTeamCode,
-  mlbShortTeamName,
+  mlbShortTeamName, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -18,8 +18,6 @@ export const revalidate = 21600;
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 function isMlbTeamCode(v: string): v is MlbTeamCode {
   return v in MLB_TEAMS;

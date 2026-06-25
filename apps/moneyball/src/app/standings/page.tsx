@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, STANDINGS_ISR_SECONDS } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, STANDINGS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -11,8 +11,6 @@ import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySort
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const revalidate = 3600;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: "KBO 팀 순위",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, DASHBOARD_ISR_SECONDS, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, DASHBOARD_ISR_SECONDS, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, type TeamCode, SITE_URL } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -10,7 +10,6 @@ import {
   type V2PreviewResult,
 } from "@/lib/predictions/v2Predictor";
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/v2-preview`;
 const LIMIT = 30;
 

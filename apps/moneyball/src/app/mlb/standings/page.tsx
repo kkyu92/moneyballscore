@@ -8,13 +8,11 @@ import {
   MLB_ISR_SECONDS,
   type MlbTeamCode,
   type MlbLeagueSide,
-  type MlbDivisionSide,
+  type MlbDivisionSide, SITE_URL
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export const metadata: Metadata = {
   title: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division standings | MoneyBall Score`,

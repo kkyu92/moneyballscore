@@ -6,7 +6,7 @@ import {
   SMALL_SAMPLE_N,
   TEAMS_ISR_SECONDS,
   type TeamCode,
-  shortTeamName,
+  shortTeamName, SITE_URL
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
@@ -24,8 +24,6 @@ export const revalidate = 1800;
 interface PageProps {
   params: Promise<{ code: string }>;
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 function isTeamCode(v: string): v is TeamCode {
   return v in KBO_TEAMS;

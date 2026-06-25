@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, REVIEWS_MONTHLY_ISR_SECONDS } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, REVIEWS_MONTHLY_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,
@@ -19,8 +19,6 @@ export const revalidate = 3600;
 interface PageProps {
   params: Promise<{ month: string }>;
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export async function generateMetadata({
   params,

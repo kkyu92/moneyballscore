@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, MLB_LIVE_ISR_SECONDS } from "@moneyball/shared";
+import { assertSelectOk, MLB_LIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { MetricRegistry, type MetricSlug, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const revalidate = 1800;
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 interface PageParams {
   params: Promise<{ date: string; slug: string }>;

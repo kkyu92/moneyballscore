@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { shortTeamName, SEASONS_ISR_SECONDS } from "@moneyball/shared";
+import { shortTeamName, SEASONS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -16,7 +16,6 @@ interface PageProps {
   params: Promise<{ year: string }>;
 }
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const SUPPORTED_YEARS = [2023, 2024, 2025, 2026];
 
 export function generateStaticParams() {
