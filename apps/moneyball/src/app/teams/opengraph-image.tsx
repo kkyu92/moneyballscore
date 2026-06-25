@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAM_COUNT } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -99,7 +99,7 @@ export default function TeamsHubOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/teams</span>
+          <span>{SITE_HOST}/teams</span>
           <span>KBO · Team profile hub</span>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -98,7 +99,7 @@ export default function PicksHubTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/picks</span>
+          <span>{SITE_HOST}/picks</span>
           <span>KBO · 내 픽 vs AI</span>
         </div>
       </div>

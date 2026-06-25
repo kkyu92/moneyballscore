@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAM_COUNT } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -104,7 +104,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/seasons/{year}</span>
+          <span>{SITE_HOST}/seasons/{year}</span>
           <span>{KBO_TEAM_COUNT} Teams · Full Season</span>
         </div>
       </div>

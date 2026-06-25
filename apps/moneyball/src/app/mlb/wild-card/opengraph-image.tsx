@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_WILD_CARD_135 } from "@/lib/design-tokens";
 
@@ -100,7 +101,7 @@ export default function MlbWildCardOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb/wild-card</span>
+          <span>{SITE_HOST}/mlb/wild-card</span>
           <span>KO · EN · Live ETA 2026-08</span>
         </div>
       </div>

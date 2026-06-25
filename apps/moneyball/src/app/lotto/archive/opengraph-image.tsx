@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -97,7 +98,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/lotto/archive</span>
+          <span>{SITE_HOST}/lotto/archive</span>
           <span>로또 · 아카이브</span>
         </div>
       </div>

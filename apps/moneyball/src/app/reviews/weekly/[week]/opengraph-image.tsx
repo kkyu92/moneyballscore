@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -103,7 +104,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/reviews/weekly/{week}</span>
+          <span>{SITE_HOST}/reviews/weekly/{week}</span>
           <span>Weekly Cohort · Detail</span>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
@@ -126,7 +127,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/players/{id}</span>
+          <span>{SITE_HOST}/players/{id}</span>
           <span>Pitcher Profile · Sabermetrics</span>
         </div>
       </div>

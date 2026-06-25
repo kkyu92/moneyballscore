@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -98,7 +98,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/about</span>
+          <span>{SITE_HOST}/about</span>
           <span>소개 · 방법론</span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_TEAM_COUNT } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_GRADIENT_NAVY_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -103,7 +103,7 @@ export default function EnMlbHubOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/en/mlb</span>
+          <span>{SITE_HOST}/en/mlb</span>
           <span>EN · KO · Daily predictions</span>
         </div>
       </div>

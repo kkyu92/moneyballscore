@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_PLAYERS_GREEN_135 } from "@/lib/design-tokens";
 
@@ -100,7 +101,7 @@ export default function EnMlbPlayersOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/en/mlb/players</span>
+          <span>{SITE_HOST}/en/mlb/players</span>
           <span>EN · KO · Statcast {MLB_FACTOR_COUNTS.statcast}</span>
         </div>
       </div>

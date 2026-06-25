@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAMS } from "@moneyball/shared";
+import { KBO_TEAMS, SITE_HOST } from "@moneyball/shared";
 import { parseSeriesTopic } from "@/lib/insights/series";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
@@ -154,7 +154,7 @@ export default async function Image({ params }: Props) {
           display: "flex",
         }}
           >
-            moneyballscore.vercel.app
+            {SITE_HOST}
           </div>
         </div>
       </div>

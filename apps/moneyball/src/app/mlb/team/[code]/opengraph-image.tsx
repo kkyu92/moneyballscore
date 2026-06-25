@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAMS, type MlbTeamCode } from "@moneyball/shared";
+import { MLB_TEAMS, type MlbTeamCode, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
@@ -112,7 +112,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb/team/{code}</span>
+          <span>{SITE_HOST}/mlb/team/{code}</span>
           <span>Team Profile · {MLB_FACTOR_COUNTS.total} Factors</span>
         </div>
       </div>
