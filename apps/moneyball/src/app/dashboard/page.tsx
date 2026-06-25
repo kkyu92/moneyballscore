@@ -20,6 +20,7 @@ import {
   assertSelectOk,
   pickTierEmoji,
   shortTeamName,
+  SITE_URL,
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
@@ -30,11 +31,11 @@ import { neutral } from "@/lib/design-tokens";
 export const metadata: Metadata = {
   title: "대시보드",
   description: `KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 구간별 분포, ${KBO_FACTOR_COUNT}팩터 평균 가중치, Elo 추이, 모델 버전별 (v1.5 ~ v1.8) 성과 비교.`,
-  alternates: { canonical: "https://moneyballscore.vercel.app/dashboard" },
+  alternates: { canonical: `${SITE_URL}/dashboard` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/dashboard",
+    url: `${SITE_URL}/dashboard`,
     siteName: "MoneyBall Score",
     title: "대시보드 | MoneyBall Score",
     description: `KBO 승부예측 모델 성능 종합 대시보드 — 시즌 누적 적중률, 신뢰도 분포, ${KBO_FACTOR_COUNT}팩터 가중치, Elo 추이, 모델 버전별 성과 비교.`,

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from '@moneyball/shared';
 
 // plan #6 Step A — Alt 3 변형 (cycle 882~).
 //   - Googlebot + 일반 search engine: /lotto + /lotto/archive 색인 허용
@@ -39,6 +40,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/debug", "/api", "/search", "/lotto", "/lotto/archive", "/login", "/settings", "/community"],
       },
     ],
-    sitemap: "https://moneyballscore.vercel.app/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

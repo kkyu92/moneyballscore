@@ -8,11 +8,11 @@ export const metadata: Metadata = {
   title: "팀 프로필",
   description:
     `KBO ${KBO_TEAM_COUNT}팀의 시즌 예측 기록·적중률·주요 투수·구장 특성을 모은 팀 프로필 허브.`,
-  alternates: { canonical: "https://moneyballscore.vercel.app/teams" },
+  alternates: { canonical: `${SITE_URL}/teams` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/teams",
+    url: `${SITE_URL}/teams`,
     siteName: "MoneyBall Score",
     title: "팀 프로필 | MoneyBall Score",
     description:

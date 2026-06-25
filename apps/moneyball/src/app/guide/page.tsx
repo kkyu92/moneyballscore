@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN, BRIER_BASELINE, MIN_LEADERBOARD_PICKS } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN, BRIER_BASELINE, MIN_LEADERBOARD_PICKS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -15,12 +15,12 @@ export const metadata: Metadata = {
   title: "사용 가이드",
   description:
     "MoneyBall Score 사용법 — 예측 카드 해석법, 적중률 차트 읽는 법, 픽 기록 시작하기, 모델 버전 의미. KBO 승부예측 사이트 처음 사용자를 위한 단계별 가이드.",
-  alternates: { canonical: "https://moneyballscore.vercel.app/guide" },
+  alternates: { canonical: `${SITE_URL}/guide` },
   openGraph: {
     title: "사용 가이드 | MoneyBall Score",
     description:
       "예측 카드 해석 + 적중률 차트 읽기 + 픽 시작하기 + 모델 버전 의미. 처음 사용자를 위한 단계별 가이드.",
-    url: "https://moneyballscore.vercel.app/guide",
+    url: `${SITE_URL}/guide`,
     type: "article",
   },
   twitter: {
@@ -36,11 +36,11 @@ const GUIDE_JSONLD = {
   "@type": "Article",
   headline: "MoneyBall Score 사용 가이드",
   description: "예측 카드 해석 · 적중률 차트 · 픽 기록 시작 단계별 안내.",
-  url: "https://moneyballscore.vercel.app/guide",
+  url: `${SITE_URL}/guide`,
   publisher: {
     "@type": "Organization",
     name: "MoneyBall Score",
-    url: "https://moneyballscore.vercel.app",
+    url: SITE_URL,
   },
   inLanguage: "ko-KR",
 };

@@ -14,14 +14,15 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { SITE_URL } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const ALLOWED_ORIGINS = [
-  'https://moneyballscore.vercel.app',
-  'https://www.moneyballscore.vercel.app',
+  SITE_URL,
+  `https://www.${new URL(SITE_URL).host}`,
 ];
 
 const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

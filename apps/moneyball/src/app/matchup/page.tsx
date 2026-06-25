@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, KBO_TEAM_COUNT, KBO_HEAD_TO_HEAD_PAIRS, type TeamCode, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, KBO_TEAM_COUNT, KBO_HEAD_TO_HEAD_PAIRS, SITE_URL, type TeamCode, shortTeamName } from '@moneyball/shared';
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -9,11 +9,11 @@ export const metadata: Metadata = {
   title: "팀 간 매치업",
   description:
     `KBO ${KBO_TEAM_COUNT}팀의 ${KBO_HEAD_TO_HEAD_PAIRS}가지 맞대결 조합별 상대전적 · AI 예측 성과 허브.`,
-  alternates: { canonical: "https://moneyballscore.vercel.app/matchup" },
+  alternates: { canonical: `${SITE_URL}/matchup` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/matchup",
+    url: `${SITE_URL}/matchup`,
     siteName: "MoneyBall Score",
     title: "팀 간 매치업 | MoneyBall Score",
     description:
