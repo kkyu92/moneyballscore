@@ -1116,6 +1116,26 @@ export const LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS = 10_000;
  */
 export const NAVER_SPORTS_API_BASE = 'https://api-gw.sports.naver.com/schedule/games';
 
+/**
+ * User-Agent 문자열 registry — silent drift family wave 154 (cycle 1386).
+ *
+ * 5 file UA 드리프트:
+ *   - apps/moneyball/src/app/api/kbo-scores/route.ts  (Mozilla truncated)
+ *   - packages/kbo-data/src/scrapers/naver-record.ts  (Mozilla truncated)
+ *   - packages/kbo-data/src/scrapers/umpire.ts        (Mozilla full Chrome/120 — local NAVER_USER_AGENT)
+ *   - packages/kbo-data/src/backtest/elo-history.ts   (MoneyBall/1.0 KBO Backtest)
+ *   - packages/kbo-data/src/backtest/wayback-team-stats.ts (MoneyBall/1.0 KBO Backtest)
+ *
+ * Naver 모바일 API 봇 차단 회피용 = NAVER_BROWSER_USER_AGENT 통합 (3 file).
+ * Wayback / Fancy Stats 백테스트 = MONEYBALL_BACKTEST_USER_AGENT 통합 (2 file).
+ * KBO_USER_AGENT (kbo-data/types.ts) 는 도메인 분리 (자체 식별) 로 별개 유지.
+ * wave 152 (NAVER_SPORTS_API_BASE) 와 같은 Naver 카테고리지만 다른 차원
+ * (URL endpoint vs HTTP header). UA 통일 시 향후 차단 회피 차원 일괄 대응 가능.
+ */
+export const NAVER_BROWSER_USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+export const MONEYBALL_BACKTEST_USER_AGENT = 'MoneyBall/1.0 (KBO Backtest)';
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
@@ -1253,6 +1273,24 @@ export function getKSTMonthStartUtcIso(now: Date = new Date()): string {
  */
 export const FACTOR_ANOMALY_Z_THRESHOLD = 3;
 export const FACTOR_ANOMALY_MIN_SAMPLE = 5;
+
+/**
+ * Health check KBO API fetch timeout (wave 154, cycle 1386).
+ * AbortSignal.timeout() 에 전달. KBO official URL 응답 대기 최대 시간.
+ */
+export const HEALTH_KBO_TIMEOUT_MS = 5_000;
+
+/**
+ * Telegram Bot API 단일 메시지 최대 길이 (wave 154, cycle 1386).
+ * sendMessage text 파라미터 한도 = 4096 chars (공식 API 제한).
+ */
+export const TELEGRAM_MAX_MESSAGE_LENGTH = 4_096;
+
+/**
+ * 검색 입력 debounce 지연 (wave 154, cycle 1386).
+ * SearchClient 의 keyup → Fuse.js search 트리거 지연.
+ */
+export const SEARCH_DEBOUNCE_MS = 200;
 
 export interface FactorAnomaly {
   factorKey: string;

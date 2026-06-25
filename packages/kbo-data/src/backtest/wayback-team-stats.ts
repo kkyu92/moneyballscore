@@ -16,7 +16,7 @@
  * 결론은 왜곡되지 않음).
  */
 
-import type { TeamCode } from '@moneyball/shared';
+import { MONEYBALL_BACKTEST_USER_AGENT, type TeamCode } from '@moneyball/shared';
 import { resolveTeamCode } from '../scrapers/fancy-stats';
 
 export interface SeasonTeamStat {
@@ -73,7 +73,7 @@ export async function fetchSeasonTeamStats(season: number): Promise<SeasonStatsM
   if (!ts) throw new Error(`No Wayback snapshot for season ${season}`);
   const url = `https://web.archive.org/web/${ts}/https://www.kbofancystats.com/elo/`;
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Backtest)' },
+    headers: { 'User-Agent': MONEYBALL_BACKTEST_USER_AGENT },
   });
   if (!res.ok) throw new Error(`Wayback ${season} fetch failed: ${res.status}`);
   const html = await res.text();

@@ -17,10 +17,8 @@
  * naver-record.ts 의 fetchNaverRecord 와 동일 API. 본 파일은 umpire 필드만 추출.
  */
 
-import { NAVER_SPORTS_API_BASE } from '@moneyball/shared';
+import { NAVER_BROWSER_USER_AGENT, NAVER_SPORTS_API_BASE } from '@moneyball/shared';
 import { toNaverGameId } from './naver-record';
-const NAVER_USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 export interface GameUmpires {
   /** 주심 — strike zone bias 의 1차 영향 source */
@@ -95,7 +93,7 @@ export async function scrapeGameUmpires(
   const url = `${NAVER_SPORTS_API_BASE}/${naverGameId}/record`;
   const res = await fetch(url, {
     headers: {
-      'User-Agent': NAVER_USER_AGENT,
+      'User-Agent': NAVER_BROWSER_USER_AGENT,
       Referer: 'https://m.sports.naver.com/',
     },
   });

@@ -13,7 +13,7 @@
  *   - scoreBoard 이닝별 점수 (승패 패턴 분석)
  */
 
-import { NAVER_SPORTS_API_BASE } from '@moneyball/shared';
+import { NAVER_BROWSER_USER_AGENT, NAVER_SPORTS_API_BASE } from '@moneyball/shared';
 import { assertResponseOk } from '../types';
 
 export interface NaverPitcherRecord {
@@ -175,8 +175,7 @@ export async function fetchNaverRecord(
   const url = `${NAVER_SPORTS_API_BASE}/${naverGameId}/record`;
   const res = await fetch(url, {
     headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      'User-Agent': NAVER_BROWSER_USER_AGENT,
       Referer: 'https://m.sports.naver.com/',
       Accept: 'application/json',
     },

@@ -13,7 +13,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 
-import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, SEARCH_DEBOUNCE_MS, type TeamCode } from '@moneyball/shared';
 
 import { TeamLogo } from '@/components/shared/TeamLogo';
 
@@ -82,7 +82,6 @@ const KIND_LABEL: Record<SearchEntryKind, string> = {
 
 const KIND_ORDER: SearchEntryKind[] = ['team', 'player', 'date', 'page'];
 
-const DEBOUNCE_MS = 200;
 const MAX_RESULTS_PER_KIND = 8;
 const MAX_TOTAL_RESULTS = 24;
 
@@ -106,7 +105,7 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
   useEffect(() => {
     const trimmed = rawQ.trim();
     if (trimmed === debouncedQ) return;
-    const handle = setTimeout(() => setDebouncedQ(trimmed), DEBOUNCE_MS);
+    const handle = setTimeout(() => setDebouncedQ(trimmed), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
   }, [rawQ, debouncedQ]);
 

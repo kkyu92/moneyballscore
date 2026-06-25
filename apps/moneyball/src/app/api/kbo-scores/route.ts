@@ -1,12 +1,16 @@
 import { type NextRequest } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { KBO_SCORES_FETCH_REVALIDATE_SECONDS, KST_OFFSET_MS } from '@moneyball/shared';
+import {
+  KBO_SCORES_FETCH_REVALIDATE_SECONDS,
+  KST_OFFSET_MS,
+  NAVER_BROWSER_USER_AGENT,
+  NAVER_SPORTS_API_BASE,
+} from '@moneyball/shared';
 
-const NAVER_API_URL = 'https://api-gw.sports.naver.com/schedule/games';
+const NAVER_API_URL = NAVER_SPORTS_API_BASE;
 const NAVER_HEADERS = {
   'Referer': 'https://sports.naver.com/kbaseball/schedule/index',
-  'User-Agent':
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+  'User-Agent': NAVER_BROWSER_USER_AGENT,
 };
 
 // 네이버 팀코드 → 우리 TeamCode 매핑

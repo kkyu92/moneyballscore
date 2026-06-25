@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk, errMsg } from '@moneyball/shared';
+import { HEALTH_KBO_TIMEOUT_MS, assertSelectOk, errMsg } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,7 +11,6 @@ type Check = { status: CheckStatus; detail?: string };
 const KBO_API_URL = 'https://www.koreabaseball.com/Schedule/Schedule.aspx';
 const KBO_SCHEDULE_REFERER = 'https://www.koreabaseball.com/Schedule/Schedule.aspx';
 const SHA_HEX_REGEX = /^[0-9a-f]{40}$/i;
-const KBO_TIMEOUT_MS = 5000;
 
 async function checkSupabase(): Promise<Check> {
   try {
@@ -53,7 +52,7 @@ async function checkKboApi(): Promise<Check> {
     const res = await fetch(KBO_API_URL, {
       method: 'GET',
       headers: { Referer: KBO_SCHEDULE_REFERER },
-      signal: AbortSignal.timeout(KBO_TIMEOUT_MS),
+      signal: AbortSignal.timeout(HEALTH_KBO_TIMEOUT_MS),
     });
     if (res.status === 200) return { status: 'ok', detail: `HTTP ${res.status}` };
     return { status: 'warning', detail: `HTTP ${res.status}` };

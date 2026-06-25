@@ -8,7 +8,7 @@
  * 10개 현재팀 모두 커버 (일부 NC/KT 는 창단 시점부터).
  */
 
-import type { TeamCode } from '@moneyball/shared';
+import { MONEYBALL_BACKTEST_USER_AGENT, type TeamCode } from '@moneyball/shared';
 import { resolveTeamCode } from '../scrapers/fancy-stats';
 
 const ELOHISTORY_URL = 'https://www.kbofancystats.com/elohistory/';
@@ -105,7 +105,7 @@ export function getEloAt(
 /** 실제 Fancy Stats 에서 HTML 을 가져와 파싱. */
 export async function fetchEloHistory(): Promise<EloHistory> {
   const res = await fetch(ELOHISTORY_URL, {
-    headers: { 'User-Agent': 'MoneyBall/1.0 (KBO Backtest)' },
+    headers: { 'User-Agent': MONEYBALL_BACKTEST_USER_AGENT },
   });
   if (!res.ok) {
     throw new Error(`elohistory fetch failed: ${res.status}`);

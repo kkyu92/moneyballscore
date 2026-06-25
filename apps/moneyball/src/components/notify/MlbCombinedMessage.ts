@@ -18,8 +18,9 @@ export interface PreviewPayload {
   games: PreviewGame[];
 }
 
+import { TELEGRAM_MAX_MESSAGE_LENGTH } from '@moneyball/shared';
+
 const BIG_GAME_THRESHOLD = 0.65;
-const MAX_TELEGRAM_LENGTH = 4096;
 
 export function formatMlbCombinedMessage(
   payload: { recap: RecapPayload; preview: PreviewPayload },
@@ -47,29 +48,29 @@ export function formatMlbCombinedMessage(
 }
 
 export function splitMessage(text: string): string[] {
-  if (text.length <= MAX_TELEGRAM_LENGTH) return [text];
+  if (text.length <= TELEGRAM_MAX_MESSAGE_LENGTH) return [text];
 
   const parts: string[] = [];
   const lines = text.split('\n');
   let current = '';
 
   const flushOversize = (line: string) => {
-    if (line.length <= MAX_TELEGRAM_LENGTH) return [line];
+    if (line.length <= TELEGRAM_MAX_MESSAGE_LENGTH) return [line];
     const chunks: string[] = [];
-    for (let i = 0; i < line.length; i += MAX_TELEGRAM_LENGTH) {
-      chunks.push(line.slice(i, i + MAX_TELEGRAM_LENGTH));
+    for (let i = 0; i < line.length; i += TELEGRAM_MAX_MESSAGE_LENGTH) {
+      chunks.push(line.slice(i, i + TELEGRAM_MAX_MESSAGE_LENGTH));
     }
     return chunks;
   };
 
   for (const line of lines) {
-    if (line.length > MAX_TELEGRAM_LENGTH) {
+    if (line.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
       if (current) { parts.push(current); current = ''; }
       flushOversize(line).forEach((c) => parts.push(c));
       continue;
     }
     const sep = current ? 1 : 0;  // newline 박제 시점만 +1
-    if (current.length + sep + line.length > MAX_TELEGRAM_LENGTH) {
+    if (current.length + sep + line.length > TELEGRAM_MAX_MESSAGE_LENGTH) {
       parts.push(current);
       current = line;
     } else {
