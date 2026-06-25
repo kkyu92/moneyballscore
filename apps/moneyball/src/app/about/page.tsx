@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -20,11 +20,11 @@ const TOC_ITEMS = [
 export const metadata: Metadata = {
   title: "소개",
   description: `MoneyBall Score 승부예측 방법론. 세이버메트릭스 기반 ${KBO_FACTOR_COUNT}팩터 3소스 가중합산 정량 모델.`,
-  alternates: { canonical: "https://moneyballscore.vercel.app/about" },
+  alternates: { canonical: `${SITE_URL}/about` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/about",
+    url: `${SITE_URL}/about`,
     siteName: "MoneyBall Score",
     title: "소개 | MoneyBall Score",
     description: `MoneyBall Score 승부예측 방법론 — 세이버메트릭스 기반 ${KBO_FACTOR_COUNT}팩터 3소스 가중합산 정량 모델.`,

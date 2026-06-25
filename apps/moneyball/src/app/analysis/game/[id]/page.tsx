@@ -7,6 +7,7 @@ import {
   KBO_TEAMS,
   assertSelectOk,
   shortTeamName,
+  SITE_URL,
   type TeamCode,
   type SelectResult,
 } from '@moneyball/shared';
@@ -134,7 +135,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
-      url: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+      url: `${SITE_URL}/analysis/game/${gameId}`,
       type: 'article',
       locale: 'ko_KR',
       siteName: 'MoneyBall Score',
@@ -145,7 +146,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
     },
     alternates: {
-      canonical: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+      canonical: `${SITE_URL}/analysis/game/${gameId}`,
     },
   };
 }
@@ -293,7 +294,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       .filter(Boolean)
       .join(' '),
     publisher: { "@type": "Organization", name: "MoneyBall Score" },
-    mainEntityOfPage: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+    mainEntityOfPage: `${SITE_URL}/analysis/game/${gameId}`,
   };
 
   // SportsEvent 스키마 — Google 이 "스포츠 경기" 리치 결과 후보로 노출 (팀·일정·구장).
@@ -319,7 +320,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     location: { "@type": "Place", name: stadiumName },
     homeTeam: { "@type": "SportsTeam", name: homeFullName },
     awayTeam: { "@type": "SportsTeam", name: awayFullName },
-    url: `https://moneyballscore.vercel.app/analysis/game/${gameId}`,
+    url: `${SITE_URL}/analysis/game/${gameId}`,
     organizer: {
       "@type": "SportsOrganization",
       name: "Korea Baseball Organization",
@@ -593,7 +594,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
         <ShareButtons
-          url={`https://moneyballscore.vercel.app/analysis/game/${gameId}`}
+          url={`${SITE_URL}/analysis/game/${gameId}`}
           title={`${awayName} vs ${homeName} AI 승부예측 분석`}
           text={`${gameDate} ${awayName} vs ${homeName} 세이버메트릭스 기반 AI 분석`}
         />

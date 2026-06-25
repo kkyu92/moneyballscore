@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
+import { HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -23,11 +23,11 @@ const TOC_ITEMS = [
 export const metadata: Metadata = {
   title: "예측 방법론",
   description: `MoneyBall Score 가 KBO 승부예측을 만드는 전체 과정. 세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증. 데이터 소스 3종, 가중치 도출 근거, 모델 진화 history 를 한 페이지에서 확인.`,
-  alternates: { canonical: "https://moneyballscore.vercel.app/methodology" },
+  alternates: { canonical: `${SITE_URL}/methodology` },
   openGraph: {
     title: "예측 방법론 | MoneyBall Score",
     description: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 + AI 에이전트 토론 + 적중률 검증. 가중치 도출 근거와 모델 진화 history 전체 공개.`,
-    url: "https://moneyballscore.vercel.app/methodology",
+    url: `${SITE_URL}/methodology`,
     type: "article",
   },
   twitter: {
@@ -150,11 +150,11 @@ const JSONLD = {
   "@type": "Article",
   headline: "MoneyBall Score 예측 방법론",
   description: `세이버메트릭스 ${KBO_FACTOR_COUNT}팩터 정량 모델 + AI 에이전트 토론 + 적중률 검증 방법론 전체 공개.`,
-  url: "https://moneyballscore.vercel.app/methodology",
+  url: `${SITE_URL}/methodology`,
   publisher: {
     "@type": "Organization",
     name: "MoneyBall Score",
-    url: "https://moneyballscore.vercel.app",
+    url: SITE_URL,
   },
   inLanguage: "ko-KR",
 };

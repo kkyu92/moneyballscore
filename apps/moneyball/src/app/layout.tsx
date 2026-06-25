@@ -13,7 +13,7 @@ import { WebVitalsReporter } from "@/components/shared/WebVitalsReporter";
 import { ServiceWorkerRegister } from "@/components/shared/ServiceWorkerRegister";
 import { PWAInstallButton } from "@/components/shared/PWAInstallButton";
 import { KofiWidget } from "@/components/shared/KofiWidget";
-import { KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, SITE_URL } from "@moneyball/shared";
 import { brand } from "@/lib/design-tokens";
 
 const GA_ID = "G-2886XKWG4Y";
@@ -33,7 +33,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://moneyballscore.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     template: "%s | MoneyBall Score",
     default: "MoneyBall Score - 세이버메트릭스 기반 승부예측",
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     types: {
-      "application/rss+xml": "https://moneyballscore.vercel.app/feed",
+      "application/rss+xml": `${SITE_URL}/feed`,
     },
   },
 };
@@ -131,20 +131,20 @@ export default async function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "MoneyBall Score",
-              url: "https://moneyballscore.vercel.app",
+              url: SITE_URL,
               description: siteDescription,
               inLanguage: lang,
               publisher: {
                 "@type": "Organization",
                 name: "MoneyBall Score",
-                url: "https://moneyballscore.vercel.app",
+                url: SITE_URL,
               },
               potentialAction: {
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
                   urlTemplate:
-                    "https://moneyballscore.vercel.app/search?q={search_term_string}",
+                    `${SITE_URL}/search?q={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },

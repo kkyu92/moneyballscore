@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
@@ -7,11 +8,11 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 문의 및 제보. 데이터 오류 신고, 예측 관련 질문, 협업·제휴 제안, 개인정보 관련 요청.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://moneyballscore.vercel.app/contact" },
+  alternates: { canonical: `${SITE_URL}/contact` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/contact",
+    url: `${SITE_URL}/contact`,
     siteName: "MoneyBall Score",
     title: "문의 | MoneyBall Score",
     description:

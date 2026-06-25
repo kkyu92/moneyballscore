@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LOTTO_ARCHIVE_ISR_SECONDS } from "@moneyball/shared";
+import { LOTTO_ARCHIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { listArchiveDates, readArchiveVariants } from "@/lib/lotto/archive";
 import { parseLottoPicksMd, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -26,12 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `https://moneyballscore.vercel.app/lotto/archive/${date}` },
+    alternates: { canonical: `${SITE_URL}/lotto/archive/${date}` },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
     openGraph: {
       title,
       description,
-      url: `https://moneyballscore.vercel.app/lotto/archive/${date}`,
+      url: `${SITE_URL}/lotto/archive/${date}`,
       type: "article",
       locale: "ko_KR",
       siteName: "MoneyBall Score",

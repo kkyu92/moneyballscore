@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
@@ -7,11 +8,11 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score의 개인정보 수집·이용·보관에 관한 방침. 방문자 통계 수집 범위, 제3자 서비스 고지, 쿠키 사용 내역.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://moneyballscore.vercel.app/privacy" },
+  alternates: { canonical: `${SITE_URL}/privacy` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/privacy",
+    url: `${SITE_URL}/privacy`,
     siteName: "MoneyBall Score",
     title: "개인정보처리방침 | MoneyBall Score",
     description:

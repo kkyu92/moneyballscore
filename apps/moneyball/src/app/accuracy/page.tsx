@@ -16,6 +16,7 @@ import {
   shortTeamName,
   DAY_MS,
   DEBATE_VERSION_PREGAME,
+  SITE_URL,
   SUNDAY_CAP_CONFIDENCE,
   BRIER_BASELINE,
   ROLLING_ACCURACY_WINDOW_DAYS,
@@ -54,12 +55,12 @@ export const metadata: Metadata = {
   title: "AI 예측 적중 기록 | MoneyBall Score",
   description:
     "KBO 경기 AI 승부예측 성과 트래킹. 버전별 정확도·Brier 점수·팀별 적중률·캘리브레이션 분석. 세이버메트릭스 기반 정량 모델 v1.8.",
-  alternates: { canonical: "https://moneyballscore.vercel.app/accuracy" },
+  alternates: { canonical: `${SITE_URL}/accuracy` },
   openGraph: {
     title: "AI 예측 적중 기록 | MoneyBall Score",
     description:
       "KBO 경기 AI 승부예측 성과. Brier 점수·팀별 적중률·캘리브레이션 대시보드.",
-    url: "https://moneyballscore.vercel.app/accuracy",
+    url: `${SITE_URL}/accuracy`,
     type: "website",
   },
   twitter: {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const metadata: Metadata = {
@@ -7,11 +8,11 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score 이용약관. 서비스 성격, 면책, 예측 정확성 무보증, 스포츠 베팅 관련 고지, 분쟁 해결 조항.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://moneyballscore.vercel.app/terms" },
+  alternates: { canonical: `${SITE_URL}/terms` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/terms",
+    url: `${SITE_URL}/terms`,
     siteName: "MoneyBall Score",
     title: "이용약관 | MoneyBall Score",
     description:
