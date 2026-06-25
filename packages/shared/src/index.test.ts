@@ -81,6 +81,12 @@ import {
   HOME_ISR_SECONDS,
   SITEMAP_ISR_HOURS,
   SITEMAP_ISR_SECONDS,
+  CALENDAR_ISR_HOURS,
+  CALENDAR_ISR_SECONDS,
+  INSIGHTS_ISR_HOURS,
+  INSIGHTS_ISR_SECONDS,
+  V2_SHADOW_MONITOR_ISR_HOURS,
+  V2_SHADOW_MONITOR_ISR_SECONDS,
   LEADERBOARD_ISR_SECONDS,
   SEARCH_ISR_SECONDS,
   WEATHER_FETCH_REVALIDATE_SECONDS,
@@ -712,6 +718,24 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
     expect(KBO_TEAM_SHORT_NAME.SS).toBe('삼성');
     expect(KBO_TEAM_SHORT_NAME.KT).toBe('KT');
     expect(KBO_TEAM_SHORT_NAME.WO).toBe('키움');
+  });
+
+  it('CALENDAR_ISR_SECONDS derives from CALENDAR_ISR_HOURS (silent drift wave 163 guard)', () => {
+    expect(CALENDAR_ISR_HOURS).toBe(1);
+    expect(CALENDAR_ISR_SECONDS).toBe(CALENDAR_ISR_HOURS * 60 * 60);
+    expect(CALENDAR_ISR_SECONDS).toBe(3600);
+  });
+
+  it('INSIGHTS_ISR_SECONDS derives from INSIGHTS_ISR_HOURS (silent drift wave 163 guard)', () => {
+    expect(INSIGHTS_ISR_HOURS).toBe(24);
+    expect(INSIGHTS_ISR_SECONDS).toBe(INSIGHTS_ISR_HOURS * 60 * 60);
+    expect(INSIGHTS_ISR_SECONDS).toBe(86400);
+  });
+
+  it('V2_SHADOW_MONITOR_ISR_SECONDS derives from V2_SHADOW_MONITOR_ISR_HOURS (silent drift wave 163 guard)', () => {
+    expect(V2_SHADOW_MONITOR_ISR_HOURS).toBe(1);
+    expect(V2_SHADOW_MONITOR_ISR_SECONDS).toBe(V2_SHADOW_MONITOR_ISR_HOURS * 60 * 60);
+    expect(V2_SHADOW_MONITOR_ISR_SECONDS).toBe(3600);
   });
 
   it('shortTeamName helper — 유효 코드', () => {
