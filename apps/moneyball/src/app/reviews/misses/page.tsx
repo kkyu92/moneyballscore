@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   description:
     "MoneyBall Score가 고확신으로 틀렸던 예측들의 사후 분석. 어떤 팩터가 과대 평가됐는지, 사후 에이전트가 무엇을 지적했는지 공개.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://moneyballscore.vercel.app/reviews/misses" },
+  alternates: { canonical: `${SITE_URL}/reviews/misses` },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://moneyballscore.vercel.app/reviews/misses",
+    url: `${SITE_URL}/reviews/misses`,
     siteName: "MoneyBall Score",
     title: "회고: 크게 빗나간 예측 | MoneyBall Score",
     description: "MoneyBall Score가 고확신으로 틀렸던 예측의 사후 분석 — 과대 평가된 팩터와 사후 에이전트 지적.",

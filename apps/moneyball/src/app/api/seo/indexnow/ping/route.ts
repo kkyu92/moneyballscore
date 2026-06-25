@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import sitemap from '../../../../sitemap';
+import { SITE_HOST } from '@moneyball/shared';
 
 // IndexNow ping endpoint.
 // 매일 1회 cron 호출 → 본 앱 sitemap() 직접 호출 → URL 추출 → IndexNow API POST.
@@ -8,7 +9,7 @@ import sitemap from '../../../../sitemap';
 // spec: https://www.indexnow.org/documentation
 
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/IndexNow';
-const HOST = 'moneyballscore.vercel.app';
+const HOST = SITE_HOST;
 const MAX_URLS = 10000;
 
 export async function GET(request: NextRequest): Promise<Response> {

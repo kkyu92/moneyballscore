@@ -3,6 +3,8 @@
 // /api/version + Vercel env 비교 — 사례 9/10 family monitoring.
 // deploy-drift-alert.yml (cycle 838 PR #1195) 매시간 cron 의 본 메인 가시 view.
 
+import { SITE_URL } from '@moneyball/shared';
+
 export const dynamic = 'force-dynamic';
 
 interface VersionPayload {
@@ -17,7 +19,7 @@ interface VersionPayload {
 
 async function fetchProductionVersion(): Promise<VersionPayload | { error: string }> {
   try {
-    const res = await fetch('https://moneyballscore.vercel.app/api/version', {
+    const res = await fetch(`${SITE_URL}/api/version`, {
       cache: 'no-store',
     });
     if (!res.ok) return { error: `HTTP ${res.status}` };

@@ -3,6 +3,7 @@ import {
   shortTeamName,
   classifyWinnerProb,
   pickTierEmoji,
+  SITE_URL,
   WINNER_TIER_LABEL,
   winnerProbOf,
   LLM_ACTIVE_VERSIONS,
@@ -102,7 +103,7 @@ export async function notifyPredictions(
   }
 
   lines.push('');
-  lines.push(`🔗 <a href="https://moneyballscore.vercel.app/predictions/${result.date}">상세 보기</a>`);
+  lines.push(`🔗 <a href="${SITE_URL}/predictions/${result.date}">상세 보기</a>`);
 
   await sendMessage(lines.join('\n'));
 }
@@ -173,7 +174,7 @@ export async function notifyResults(
   }
 
   lines.push('');
-  lines.push(`🔗 <a href="https://moneyballscore.vercel.app/dashboard">대시보드</a>`);
+  lines.push(`🔗 <a href="${SITE_URL}/dashboard">대시보드</a>`);
 
   await sendMessage(lines.join('\n'));
 }
@@ -231,7 +232,7 @@ export async function notifyAnnounce(
     lines.push('<i>※ 선발투수 확정 시 순차 예측. 경기 시작까지 미확정이면 해당 경기는 "예측 기록 없음" 으로 표시.</i>');
     lines.push('');
   }
-  lines.push(`🔗 <a href="https://moneyballscore.vercel.app/">자세히</a>`);
+  lines.push(`🔗 <a href="${SITE_URL}/">자세히</a>`);
 
   await sendMessage(lines.join('\n'));
 }

@@ -1,5 +1,5 @@
 // 사이트 base URL — silent drift family wave 152 (cycle 1381) 단일 source.
-export { SITE_URL } from './site';
+export { SITE_URL, SITE_HOST } from './site';
 
 // 사이트 연락 이메일 — silent drift family wave 159 (cycle 1391) 단일 source.
 // contact/page.tsx + privacy/page.tsx (mailto + 본문) 공유.

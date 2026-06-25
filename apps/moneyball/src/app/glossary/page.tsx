@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SITE_URL } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { TableOfContents } from '@/components/shared/TableOfContents';
 import {
@@ -12,11 +13,11 @@ import { CATEGORIES, GLOSSARY_TERM_COUNT } from './data';
 export const metadata: Metadata = {
   title: '야구 통계 용어 사전',
   description: `KBO 승부예측에 쓰이는 세이버메트릭스 용어 사전. FIP, xFIP, wOBA, WAR, Elo, SFR, wRC+, ISO 등 ${GLOSSARY_TERM_COUNT}개 지표의 정의, 정상 범위, 우리 모델 가중치를 한 페이지에서 확인.`,
-  alternates: { canonical: 'https://moneyballscore.vercel.app/glossary' },
+  alternates: { canonical: `${SITE_URL}/glossary` },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: 'https://moneyballscore.vercel.app/glossary',
+    url: `${SITE_URL}/glossary`,
     siteName: 'MoneyBall Score',
     title: '야구 통계 용어 사전 | MoneyBall Score',
     description: `KBO 승부예측에 쓰이는 세이버메트릭스 용어 사전 — FIP, xFIP, wOBA, WAR, Elo, SFR, wRC+, ISO 등 ${GLOSSARY_TERM_COUNT}개 지표의 정의·정상 범위·모델 가중치.`,
@@ -51,11 +52,11 @@ export default function GlossaryPage() {
       'KBO 승부예측에 쓰이는 세이버메트릭스 지표 정의 모음',
     hasDefinedTerm: allEntries.map((e) => ({
       '@type': 'DefinedTerm',
-      '@id': `https://moneyballscore.vercel.app/glossary#${e.id}`,
+      '@id': `${SITE_URL}/glossary#${e.id}`,
       name: `${e.abbr} (${e.korean})`,
       alternateName: e.fullName,
       description: e.definition,
-      inDefinedTermSet: 'https://moneyballscore.vercel.app/glossary',
+      inDefinedTermSet: `${SITE_URL}/glossary`,
     })),
   };
 
