@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS } from "@moneyball/shared";
+import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/insights`;
 const LIMIT = 30;
 const PREVIEW_LENGTH = 280;

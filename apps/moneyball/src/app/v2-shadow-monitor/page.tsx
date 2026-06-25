@@ -6,9 +6,9 @@ import {
   KBO_FACTOR_COUNT,
   V2_PROMOTION_COHORT_N,
   V2_SHADOW_MONITOR_ISR_SECONDS,
+  SITE_URL,
 } from "@moneyball/shared";
 
-const SITE_URL = "https://moneyballscore.vercel.app";
 const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
 
 export const metadata: Metadata = {

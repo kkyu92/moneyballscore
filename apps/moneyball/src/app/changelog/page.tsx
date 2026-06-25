@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SITE_URL } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { parseChangelog } from '@/lib/changelog/parse';
 import { renderChangelogBody } from '@/lib/changelog/renderMarkdown';
 
-const SITE_URL = 'https://moneyballscore.vercel.app';
 const PAGE_URL = `${SITE_URL}/changelog`;
 
 export const metadata: Metadata = {

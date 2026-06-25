@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PLAYERS_ISR_SECONDS, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
+import { PLAYERS_ISR_SECONDS, SMALL_SAMPLE_N, type TeamCode, SITE_URL } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   title: "선수 리더보드",
   description:
     "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
-  alternates: { canonical: "https://moneyballscore.vercel.app/players" },
+  alternates: { canonical: `${SITE_URL}/players` },
   openGraph: {
     title: "KBO 선수 리더보드 | MoneyBall Score",
     description:
       "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
-    url: "https://moneyballscore.vercel.app/players",
+    url: `${SITE_URL}/players`,
     type: "website",
     locale: "ko_KR",
     siteName: "MoneyBall Score",
@@ -46,8 +46,6 @@ function fmtDec(v: number, digits = 3): string {
 function fmtWar(v: number): string {
   return v.toFixed(1);
 }
-
-const SITE_URL = "https://moneyballscore.vercel.app";
 
 export default async function PlayersIndexPage() {
   const [pitchers, batters] = await Promise.all([
