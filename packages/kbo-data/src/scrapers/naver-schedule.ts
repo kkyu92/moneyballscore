@@ -19,11 +19,9 @@
  */
 
 import type { TeamCode, GameStatus } from '@moneyball/shared';
-import { KBO_TEAMS } from '@moneyball/shared';
+import { KBO_TEAMS, NAVER_SPORTS_API_BASE } from '@moneyball/shared';
 import type { ScrapedGame } from '../types';
 import { assertResponseOk } from '../types';
-
-const NAVER_API = 'https://api-gw.sports.naver.com/schedule/games';
 
 interface NaverGame {
   gameId: string;              // "20260418LGSS02026" — 17자리 (뒤 4자리 연도)
@@ -137,7 +135,7 @@ export async function fetchNaverSchedule(
   fields: 'all' | 'basic' = 'basic',
 ): Promise<ScrapedGame[]> {
   const url =
-    `${NAVER_API}?fields=${fields}&upperCategoryId=kbaseball` +
+    `${NAVER_SPORTS_API_BASE}?fields=${fields}&upperCategoryId=kbaseball` +
     `&categoryId=kbo&fromDate=${fromDate}&toDate=${toDate}`;
 
   const res = await fetch(url, {

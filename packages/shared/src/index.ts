@@ -1103,6 +1103,19 @@ export const LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS = 8_000;
 export const LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS = 15_000;
 export const LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS = 10_000;
 
+/**
+ * Naver Sports API 경기 스케줄/기록 엔드포인트 base URL — silent drift family wave 152.
+ *
+ * 3 scraper 동일 URL 3개 로컬 이름 duplication (cycle 1381):
+ *   - naver-record.ts   RECORD_BASE (line 18)
+ *   - naver-schedule.ts NAVER_API   (line 26)
+ *   - umpire.ts         RECORD_BASE (line 22)
+ *
+ * API 엔드포인트 변경 시 3 파일 각개 수정 필요 → 단일 source 박제.
+ * wave 149 (LOTTO_FETCH_TIMEOUT_*) 와 별도 카테고리 (HTTP timeout vs URL endpoint).
+ */
+export const NAVER_SPORTS_API_BASE = 'https://api-gw.sports.naver.com/schedule/games';
+
 export type WinnerConfidenceTier = 'confident' | 'lean' | 'tossup';
 
 /** homeWinProb → 예측 승자 적중 확률. null-safe. */
