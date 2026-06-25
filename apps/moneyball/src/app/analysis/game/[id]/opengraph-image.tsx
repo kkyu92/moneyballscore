@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { assertSelectOk, errMsg, type SelectResult } from "@moneyball/shared";
+import { assertSelectOk, errMsg, type SelectResult, SITE_HOST } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
@@ -199,7 +199,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app</span>
+          <span>{SITE_HOST}</span>
           <span>AI Debate Engine · v2</span>
         </div>
       </div>

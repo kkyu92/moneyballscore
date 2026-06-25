@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -98,7 +99,7 @@ export default function CalendarHubOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/calendar</span>
+          <span>{SITE_HOST}/calendar</span>
           <span>KBO · Prediction calendar</span>
         </div>
       </div>

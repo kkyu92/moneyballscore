@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAM_COUNT, KBO_HEAD_TO_HEAD_PAIRS } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_HEAD_TO_HEAD_PAIRS, SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -99,7 +99,7 @@ export default function MatchupHubTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/matchup</span>
+          <span>{SITE_HOST}/matchup</span>
           <span>KBO · Head-to-head hub</span>
         </div>
       </div>

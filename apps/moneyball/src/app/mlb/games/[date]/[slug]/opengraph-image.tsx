@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_GAMES_INDIGO_135 } from "@/lib/design-tokens";
 
@@ -105,7 +106,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb/games/{date}/{slug}</span>
+          <span>{SITE_HOST}/mlb/games/{date}/{slug}</span>
           <span>KO · 경기 분석</span>
         </div>
       </div>

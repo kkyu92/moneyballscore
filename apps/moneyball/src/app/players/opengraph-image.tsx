@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const runtime = "nodejs";
@@ -104,7 +105,7 @@ export default function PlayersHubOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/players</span>
+          <span>{SITE_HOST}/players</span>
           <span>KBO · Player leaderboard</span>
         </div>
       </div>

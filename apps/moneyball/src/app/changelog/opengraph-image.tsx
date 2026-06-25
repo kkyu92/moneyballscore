@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -98,7 +99,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/changelog</span>
+          <span>{SITE_HOST}/changelog</span>
           <span>Auto-Compounded · Cycle by Cycle</span>
         </div>
       </div>

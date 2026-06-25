@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAM_COUNT } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_NAVY_135 } from "@/lib/design-tokens";
 
@@ -103,7 +103,7 @@ export default function MlbHubTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb</span>
+          <span>{SITE_HOST}/mlb</span>
           <span>KO · EN · Daily predictions</span>
         </div>
       </div>

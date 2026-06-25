@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
@@ -99,7 +100,7 @@ export default function EnMlbFactorsTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/en/mlb/factors</span>
+          <span>{SITE_HOST}/en/mlb/factors</span>
           <span>EN · KO · {MLB_FACTOR_COUNTS.total} factors</span>
         </div>
       </div>

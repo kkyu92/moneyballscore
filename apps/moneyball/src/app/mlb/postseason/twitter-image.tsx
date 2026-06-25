@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_POSTSEASON_135 } from "@/lib/design-tokens";
 
@@ -100,7 +101,7 @@ export default function MlbPostseasonTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb/postseason</span>
+          <span>{SITE_HOST}/mlb/postseason</span>
           <span>KO · EN · Live ETA 2026-09</span>
         </div>
       </div>

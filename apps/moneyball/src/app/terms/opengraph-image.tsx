@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 import { NEUTRAL_GRADIENT_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -98,7 +99,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/terms</span>
+          <span>{SITE_HOST}/terms</span>
           <span>이용약관 · 법적고지</span>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAMS, type MlbTeamCode } from "@moneyball/shared";
+import { MLB_TEAMS, type MlbTeamCode, SITE_HOST } from "@moneyball/shared";
 import { MLB_GRADIENT_PLAYERS_GREEN_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -112,7 +112,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/en/mlb/players/{id}</span>
+          <span>{SITE_HOST}/en/mlb/players/{id}</span>
           <span>MLB · Statcast Factors</span>
         </div>
       </div>

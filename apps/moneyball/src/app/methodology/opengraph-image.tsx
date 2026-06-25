@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { CURRENT_SCORING_RULE, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -99,7 +99,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/methodology</span>
+          <span>{SITE_HOST}/methodology</span>
           <span>10 Factors · AI Debate</span>
         </div>
       </div>

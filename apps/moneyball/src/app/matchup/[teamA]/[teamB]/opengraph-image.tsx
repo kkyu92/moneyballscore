@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { shortTeamName } from "@moneyball/shared";
+import { shortTeamName, SITE_HOST } from "@moneyball/shared";
 import { canonicalPair } from "@/lib/matchup/canonicalPair";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
@@ -144,7 +144,7 @@ export default async function Image({ params }: Props) {
           }}
         >
           <span>
-            moneyballscore.vercel.app/matchup/{teamA}/{teamB}
+            {SITE_HOST}/matchup/{teamA}/{teamB}
           </span>
           <span>Matchup · Sabermetrics</span>
         </div>

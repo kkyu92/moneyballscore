@@ -3,8 +3,7 @@ import {
   KBO_TEAM_COUNT,
   KBO_SEASON_YEAR,
   STANDINGS_REFRESH_LABEL_EN,
-  STANDINGS_UPDATE_LABEL_EN,
-} from "@moneyball/shared";
+  STANDINGS_UPDATE_LABEL_EN, SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -104,7 +103,7 @@ export default function StandingsHubTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/standings</span>
+          <span>{SITE_HOST}/standings</span>
           <span>{STANDINGS_UPDATE_LABEL_EN} · {KBO_SEASON_YEAR} KBO</span>
         </div>
       </div>

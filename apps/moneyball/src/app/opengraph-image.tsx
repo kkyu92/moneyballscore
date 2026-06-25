@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { CURRENT_SCORING_RULE, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 루트 Open Graph 이미지: 라우트별 자체 이미지가 없을 때 fallback.
@@ -102,7 +102,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app</span>
+          <span>{SITE_HOST}</span>
           <span>Daily updates · {CURRENT_SCORING_RULE}</span>
         </div>
       </div>

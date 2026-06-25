@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAM_COUNT } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_TEAM_SKY_135 } from "@/lib/design-tokens";
 
@@ -101,7 +101,7 @@ export default function EnMlbTeamOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/en/mlb/team</span>
+          <span>{SITE_HOST}/en/mlb/team</span>
           <span>EN · KO · {MLB_TEAM_COUNT} teams</span>
         </div>
       </div>

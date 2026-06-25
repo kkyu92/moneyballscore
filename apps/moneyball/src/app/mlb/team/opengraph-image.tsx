@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
@@ -100,7 +100,7 @@ export default function MlbTeamHubOgImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb/team</span>
+          <span>{SITE_HOST}/mlb/team</span>
           <span>{MLB_TEAM_COUNT} teams · {MLB_DIVISION_COUNT} divisions</span>
         </div>
       </div>

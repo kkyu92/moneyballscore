@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -102,7 +103,7 @@ export default async function Image({ params }: Props) {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/reviews/monthly/{month}</span>
+          <span>{SITE_HOST}/reviews/monthly/{month}</span>
           <span>Monthly Cohort · Detail</span>
         </div>
       </div>

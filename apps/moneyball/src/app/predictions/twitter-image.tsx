@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_FACTOR_COUNT } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -100,7 +100,7 @@ export default function PredictionsHubTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/predictions</span>
+          <span>{SITE_HOST}/predictions</span>
           <span>AI Debate Engine · v2</span>
         </div>
       </div>

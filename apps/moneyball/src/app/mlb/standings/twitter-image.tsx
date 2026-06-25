@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_GRADIENT_STANDINGS_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -100,7 +100,7 @@ export default function MlbStandingsTwitterImage() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/mlb/standings</span>
+          <span>{SITE_HOST}/mlb/standings</span>
           <span>KO · EN · {MLB_TEAM_COUNT} teams</span>
         </div>
       </div>

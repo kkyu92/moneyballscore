@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { V2_PROMOTION_COHORT_N } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -99,7 +99,7 @@ export default function Image() {
             opacity: 0.7,
           }}
         >
-          <span>moneyballscore.vercel.app/v2-preview</span>
+          <span>{SITE_HOST}/v2-preview</span>
           <span>Internal · N={V2_PROMOTION_COHORT_N} Pending</span>
         </div>
       </div>
