@@ -17,9 +17,8 @@
  * naver-record.ts 의 fetchNaverRecord 와 동일 API. 본 파일은 umpire 필드만 추출.
  */
 
+import { NAVER_SPORTS_API_BASE } from '@moneyball/shared';
 import { toNaverGameId } from './naver-record';
-
-const RECORD_BASE = 'https://api-gw.sports.naver.com/schedule/games';
 const NAVER_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
@@ -93,7 +92,7 @@ export async function scrapeGameUmpires(
   season: number,
 ): Promise<GameUmpires> {
   const naverGameId = toNaverGameId(externalGameId, season);
-  const url = `${RECORD_BASE}/${naverGameId}/record`;
+  const url = `${NAVER_SPORTS_API_BASE}/${naverGameId}/record`;
   const res = await fetch(url, {
     headers: {
       'User-Agent': NAVER_USER_AGENT,
