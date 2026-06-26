@@ -9,6 +9,7 @@ import {
   maskViolatedReasoning,
   notifyValidationViolations,
   resolveValidationMode,
+  captureJudgeParseFallback,
 } from './validator';
 import { logValidatorEvent } from './validator-logger';
 
@@ -93,7 +94,12 @@ function buildUserMessage(
   return msg;
 }
 
-function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCode): JudgeVerdict {
+export function parseResponse(
+  text: string,
+  homeTeam: TeamCode,
+  awayTeam: TeamCode,
+  context?: GameContext
+): JudgeVerdict {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found');
@@ -110,7 +116,17 @@ function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCode): Ju
       reasoning: String(parsed.reasoning || '').slice(0, 1000),
       predictedWinner: homeWinProb >= 0.5 ? homeTeam : awayTeam,
     };
-  } catch {
+  } catch (e) {
+    // cycle 1400 lesson P2: parseResponse catch 자체가 confidence=0.3 fallback 객체를 반환 →
+    // evaluateAndCaptureAgentFallback (`r.data == null` 검사) 미감지 → 22일 silent.
+    // 별도 Sentry 채널 (`judge_parse_fallback` tag) 로 명시 capture.
+    void captureJudgeParseFallback({
+      homeTeam,
+      awayTeam,
+      gameId: context?.game.externalGameId ?? null,
+      textExcerpt: text.slice(0, 300),
+      errorMessage: errMsg(e),
+    });
     return {
       homeWinProb: 0.5,
       confidence: 0.3,
@@ -148,7 +164,7 @@ export async function runJudgeAgent(
       userMessage: buildUserMessage(homeTeam, awayTeam, homeArg, awayArg, quantitativeProb, calibration, context),
       maxTokens: LLM_MAX_TOKENS_JUDGE,
     },
-    (text) => parseResponse(text, homeTeam, awayTeam)
+    (text) => parseResponse(text, homeTeam, awayTeam, context)
   );
 
   // Sunday confidence cap: 일요일 과적합 방지 (n≈20 적중률 ~15%, W20 1/5=20%)
