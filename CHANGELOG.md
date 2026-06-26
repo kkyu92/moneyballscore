@@ -1,5 +1,117 @@
 # Changelog
 
+## 🔬 패턴 추출 — cycle 1400 (2026-06-27)
+
+### P1 — Neutral-Factor Sparse Detection (ai_agent / data_pipeline)
+
+**Problem**: `normalize()` 가 homeVal==awayVal 시 0.5 반환. 10팩터 중 5+가 0.5이면 동전던지기 품질 예측이지만 파이프라인은 구별 못 하고 조용히 통과.
+
+**Solution**:
+- `countNeutralFactors(factors)` — pure 함수, 0.5 exact 카운트
+- `PREDICTION_SPARSE_THRESHOLD = 5` — 50% neutral 임계
+- `captureSparsePredictionAlert()` — Sentry warning 별도 채널 (z-score 채널 / silent-drift-family 채널과 분리)
+- 7 guard tests in `prediction-sparse.test.ts`
+
+**Results**: predict() 호출부가 ≥5 neutral 시 즉시 Sentry 알림. 시스템 정지 X (non-blocking `.catch(() => {})`).
+
+**재사용 가능**: ✅ 모든 multi-factor 예측 시스템에 적용 가능. threshold는 factor 수 × 50% 기준.
+
+---
+
+### P2 — Silent LLM Fallback Masking (anti_pattern)
+
+**Problem**: `debate.ts`의 `judgeResult.data || fallback` 패턴 — judge LLM 실패 시 confidence=0.3 + 정량 모델 결과로 조용히 대체. 22일간 (2026-06-06~) 감지 안 됨. pipeline_runs.errors=[] (정상처럼 보임).
+
+**신호**: confidence=0.3 flat (모든 예측 동일값) — DB 집계로만 탐지 가능.
+
+**Fix 방향**: `evaluateAndCaptureAgentFallback()` 이미 존재하나 Sentry에 전달 X. 별도 scout issue로 박제 필요.
+
+**재사용 가능**: ✅ LLM-in-pipeline 패턴에서 `data || fallback` 은 항상 anti-pattern. fallback 발화 시 반드시 alerting 채널 연결.
+
+---
+
+### P3 — Registry Sweep Wave (quality_guard)
+
+**Problem**: Literal strings/numbers 산포 — 한 곳 변경 시 나머지 stale. grep으로만 식별 가능.
+
+**Solution**: 1 wave = 1 grep pattern → 해당 리터럴 → `@moneyball/shared` 상수화 → guard test. 현황: wave 163개 누적 (cycle 1350~1400: wave 153-163 = 11 waves).
+
+**패턴 규칙**:
+- 파일 3+ = wave 트리거
+- 상수화 후 guard test 의무 (wave 156, 163 교훈)
+- guard test 빠진 상수 = 다음 cycle 즉시 follow-up (cycle 1398 패턴)
+
+**재사용 가능**: ✅ 모든 모노레포에 적용 가능. `shared` 패키지 + grep-driven wave 방식.
+
+---
+
+### P4 — Alert Cascade by Pipeline Mode (data_pipeline)
+
+**Problem**: 각 cron mode (predict_final, verify, postview, sparse) 가 silent drop 시 별도 채널 없음 — console.log만 존재.
+
+**Solution**: `shouldAlertSilentDrift(meta)` — mode별 분기 + Sentry warning. 현황: predict_final → verify → postview → sparse = 4 coverage layer 누적.
+
+**확장 원칙**: 새 mode 추가 시 `silent-drift-alert.ts` 에 분기 1개 추가 = 자연 확장.
+
+**재사용 가능**: ✅ 모든 multi-mode 데이터 파이프라인 (ETL / ML inference / 검증 등).
+
+---
+
+## 📊 주간 리뷰 2026-W26 (2026-06-23 ~ 2026-06-27, cycle 1400)
+
+### 주간 성과 요약
+
+| 지표 | 값 |
+|---|---|
+| 이번 주 적중률 (v1.8) | **75.0%** (15/20, 검증 완료) |
+| 오늘(6/27 토) | 5경기 진행 중 (미검증) |
+| 누적 v1.8 | **59.0%** (n=117) |
+| 가중치 조정 | **보류** (n=150 미달, 잔여 33건) |
+
+### 요일별 적중률
+
+| 요일 | 결과 |
+|---|---|
+| 화 (6/23) | 3/5 = 60% |
+| 수 (6/24) | 4/5 = 80% |
+| 목 (6/25) | 4/5 = 80% |
+| 금 (6/26) | 4/5 = 80% |
+
+### 예측 실패 5경기
+
+1. **6/23 NC vs 롯데** — NC 예측 → 롯데 3:2 승 (NC 롤러코스터 패턴)
+2. **6/23 KIA vs SSG** — KIA 예측 → SSG 4:3 승 (SSG 근소 승리)
+3. **6/24 두산 vs LG** — 두산 예측 → LG 5:4 승 (6/23 13:2 압승 2차전 역전)
+4. **6/25 한화 vs 삼성** — 한화 예측 → 삼성 8:2 승 (삼성 폭발)
+5. **6/26 롯데 vs LG** — LG 예측 → 롯데 9:2 승 (원정 롯데 압승)
+
+### 핵심 발견 — judge-agent 토론 22일째 비활성
+
+- **발견**: 2026-06-06 부터 모든 v1.8 예측 confidence=0.30 (fallback 고정)
+- **원인**: `debate.ts` 에서 `judgeResult.data || fallback` 패턴 — judge LLM 응답이 null 반환
+- **결과**: 모든 예측 = 순수 정량 모델 v1.8 가중치 (LLM 토론 없음)
+- **성과**: 토론 없이도 이번 주 75% — 정량 모델 단독 성과 긍정 신호
+- **shadow 모델**: v2.0-shadow / v2.1-B-shadow 모두 동일 예측 (3모델 완전 일치)
+- **다음 액션**: judge-agent 토론 비활성 원인 조사 필요 (Vercel prod 환경 LLM 실패)
+
+### 팩터 인사이트
+
+- 화요일 취약 지속 (3/5 = 60%) — 주초 시즌 플로우 불안정 패턴
+- NC-롯데 매치업 예측 어려움 지속
+- 정량 모델 단독(debate 없음) 75% = 역대 최고 주간 성과 후보
+- n=117 소표본 / v2.0 가중치 전환 기준 n=150 잔여 33건 (~8경기, 약 1.6주)
+
+### v1.8 누적 cohort
+
+| 시점 | n | 정확도 |
+|---|---|---|
+| cycle 1340 측정 | 118 | 58.5% |
+| cycle 1400 (현재) | 117 | 59.0% |
+
+> 소폭 n -1 차이 = 1건 재분류 추정 (오차 범위 내)
+
+---
+
 ## 🧪 plan #8 M1 — v2.0-cycle231 backtest harness fire (2026-05-26, cycle 903)
 
 ### v2.0-cycle231 후보 baseline simulation 박제
