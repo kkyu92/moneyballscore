@@ -4,6 +4,7 @@ import {
   PRODUCTION_COHORT_RULES,
   isV2ModelEnabled, isV21BShadowEnabled, isDebateEnabled,
   SHADOW_V20_WEIGHTS, DAY_MS,
+  countNeutralFactors, PREDICTION_SPARSE_THRESHOLD,
 } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { fetchForecastWeather } from '../scrapers/weather';
@@ -32,7 +33,7 @@ import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
-import { captureSilentDriftAlert } from './silent-drift-alert';
+import { captureSilentDriftAlert, captureSparsePredictionAlert } from './silent-drift-alert';
 import { shouldNotifyPipelineStatus } from './notify-status-predicate';
 import { insertShadowRow, insertShadowRowV20 } from './shadow-cohort';
 import {
@@ -649,6 +650,19 @@ export async function runDailyPipeline(
     // n=150 v1.8 cohort 측정 완료 후 flag flip → v2.0 canary. live progress = /accuracy.
     const productionWeights = isV2ModelEnabled() ? SHADOW_V20_WEIGHTS : undefined;
     const quantResult = predict(input, { weights: productionWeights });
+
+    // cycle 1399 scout #2348 — sparse data domain validation
+    const sparseNeutralCount = countNeutralFactors(quantResult.factors);
+    if (sparseNeutralCount >= PREDICTION_SPARSE_THRESHOLD) {
+      const cohort = productionWeights ? 'v2.0-shadow' : 'v1.8';
+      captureSparsePredictionAlert({
+        date,
+        game: `${game.homeTeam} vs ${game.awayTeam}`,
+        cohort,
+        neutralCount: sparseNeutralCount,
+        totalFactors: Object.keys(quantResult.factors).length,
+      }).catch(() => {});
+    }
 
     let finalWinner = quantResult.predictedWinner;
     let finalHomeProb = quantResult.homeWinProb;

@@ -177,6 +177,7 @@ export async function captureSilentDriftAlert(
 
 import {
   type FactorAnomaly,
+  PREDICTION_SPARSE_THRESHOLD,
 } from '@moneyball/shared';
 
 export interface FactorAnomalyAlertMeta {
@@ -222,6 +223,61 @@ export async function captureFactorAnomalyAlert(
           stddev: a.stdDev,
           zscore: a.zScore,
         })),
+      },
+    });
+  } catch {
+    // silent — main path 보호
+  }
+}
+
+// ============================================
+// scout issue #2348 cycle 1399 — sparse data prediction alert
+// ============================================
+// predict() 팩터 중 PREDICTION_SPARSE_THRESHOLD 이상이 0.5 neutral = 입력 데이터 희박.
+// 데이터 희박 예측은 사실상 coin flip 에 가깝고 도메인 지식 검증 불가.
+// captureFactorAnomalyAlert (z-score 시계열 이상) 와 별개 채널 — 단일 경기 품질 gate.
+
+export interface SparsePredictionAlertMeta {
+  date: string;
+  game: string; // "LT vs HH" 식 판독용
+  cohort: string;
+  neutralCount: number;
+  totalFactors: number;
+}
+
+/**
+ * sparse data prediction 감지 시 Sentry warning.
+ * neutralCount >= PREDICTION_SPARSE_THRESHOLD 시 호출 (호출부가 체크 후 전달).
+ */
+export async function captureSparsePredictionAlert(
+  meta: SparsePredictionAlertMeta,
+): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureMessage !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureMessage('prediction_sparse_data', {
+      level: 'warning',
+      tags: {
+        pattern: 'prediction_sparse_data',
+        cohort: meta.cohort,
+        date: meta.date,
+        neutral_count: String(meta.neutralCount),
+        sparse_threshold: String(PREDICTION_SPARSE_THRESHOLD),
+      },
+      extra: {
+        game: meta.game,
+        neutral_count: meta.neutralCount,
+        total_factors: meta.totalFactors,
+        sparse_ratio: `${meta.neutralCount}/${meta.totalFactors}`,
       },
     });
   } catch {

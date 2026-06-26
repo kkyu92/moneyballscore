@@ -382,6 +382,23 @@ export function clampWinnerProb(p: number): number {
 }
 
 /**
+ * 예측 sparse data 임계 — 10 팩터 중 이 수 이상이 0.5 (neutral) 이면 데이터 희박.
+ * scout issue #2348 (cycle 1399): 도메인 지식 검증 강화 — 입력 데이터 희박 예측 감지.
+ * normalize() 특성상 homeVal==awayVal==default → 0.5 exact. 5건 이상 = 50%+ 결측.
+ * wave 163 ISR magic number family 정합 — 단일 source (silent drift 차단).
+ */
+export const PREDICTION_SPARSE_THRESHOLD = 5;
+
+/**
+ * predict() 결과의 factors 안 neutral(0.5) 팩터 수 반환.
+ * Sentry-free (pure) — detectFactorAnomalies 패턴 정합.
+ * countNeutralFactors(result.factors) >= PREDICTION_SPARSE_THRESHOLD = 데이터 희박 경고.
+ */
+export function countNeutralFactors(factors: Record<string, number>): number {
+  return Object.values(factors).filter((v) => v === 0.5).length;
+}
+
+/**
  * Elo 중립 baseline — 신규 팀 / 데이터 부족 / season 시작 시점 초기값.
  *
  * silent drift family wave 94 (cycle 1305) — wave 91 (HOME_ADVANTAGE_PCT) /
