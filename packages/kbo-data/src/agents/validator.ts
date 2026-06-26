@@ -750,6 +750,56 @@ export function evaluateAndCaptureAgentFallback(
   return { agentsFailed, agentError };
 }
 
+export interface JudgeParseFailureMeta {
+  homeTeam: string;
+  awayTeam: string;
+  gameId: string | number | null;
+  textExcerpt: string;
+  errorMessage: string;
+}
+
+// judge parseResponse catch path (JSON parse 실패) 자체 silent fallback Sentry 별도 채널.
+// evaluateAndCaptureAgentFallback 은 `r.data == null` 만 감지하지만 parseResponse catch 는
+// confidence=0.3 fallback 객체를 정상 데이터처럼 반환 → 22일 silent (cycle 1400 lesson P2).
+export async function captureJudgeParseFallback(meta: JudgeParseFailureMeta): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  const backend = process.env.LLM_BACKEND ?? 'anthropic';
+
+  try {
+    Sentry.captureException(new Error(`judge_parse_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        judge_parse_fallback: 'true',
+        agent: 'judge',
+        backend,
+      },
+      extra: {
+        home_team: meta.homeTeam,
+        away_team: meta.awayTeam,
+        game_id: meta.gameId ?? 'unknown',
+        text_excerpt: meta.textExcerpt,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
 export async function captureAgentFallback(meta: AgentFailureMeta): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
 
