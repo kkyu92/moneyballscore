@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = ANALYSIS_INDEX_ISR_SECONDS;
+export const revalidate = 3600; // ANALYSIS_INDEX_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface TodayAllRow {
   id: number;

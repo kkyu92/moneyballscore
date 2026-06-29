@@ -19,7 +19,7 @@ interface Props {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = INSIGHTS_ISR_SECONDS;
+export const revalidate = 86400; // INSIGHTS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export async function generateStaticParams() {
   const dates = await listInsightsDates(90);

@@ -31,7 +31,7 @@ import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { GameAnalysisProse } from '@/components/analysis/GameAnalysisProse';
 
-export const revalidate = ANALYSIS_GAME_ISR_SECONDS;
+export const revalidate = 600; // ANALYSIS_GAME_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ id: string }>;
