@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 import { shortTeamName, type TeamCode } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
@@ -102,7 +103,11 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
           if (entry) setPoll(entry);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        Sentry.captureException(err, {
+          tags: { silent_drift_family: 'wave_166', component: 'PickButton', op: 'picks_poll_fetch' },
+        });
+      });
     return () => {
       cancelled = true;
     };
@@ -122,7 +127,11 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
         body: JSON.stringify({ game_id: gameId, pick: choice, device_id: deviceId }),
       })
         .then(() => fetchPoll())
-        .catch(() => {});
+        .catch((err) => {
+          Sentry.captureException(err, {
+            tags: { silent_drift_family: 'wave_166', component: 'PickButton', op: 'picks_submit' },
+          });
+        });
     },
     [gameId, setPick, fetchPoll],
   );

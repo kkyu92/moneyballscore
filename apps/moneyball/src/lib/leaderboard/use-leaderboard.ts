@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 const DEVICE_KEY = 'mb_device_id_v1';
 const NICKNAME_KEY = 'mb_nickname_v1';
@@ -83,7 +84,11 @@ export function useLeaderboard(): LeaderboardState {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ device_id: deviceId, nickname, picks }),
-    }).catch(() => {});
+    }).catch((err) => {
+      Sentry.captureException(err, {
+        tags: { silent_drift_family: 'wave_166', component: 'use-leaderboard', op: 'leaderboard_auto_sync' },
+      });
+    });
   }, [deviceId, nickname]);
 
   const join = useCallback(

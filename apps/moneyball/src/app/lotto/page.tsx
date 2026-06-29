@@ -3,10 +3,10 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { getLatestLottoPicks, getLatestLottoResult, ballColor, type LottoSet, type LottoResult } from "@/lib/lotto/picks-loader";
-import { LOTTO_ISR_SECONDS, LOTTO_TOP_PICK_COUNT, SITE_URL } from "@moneyball/shared";
+import { LOTTO_TOP_PICK_COUNT, SITE_URL } from "@moneyball/shared";
 
 export const dynamic = "force-static";
-export const revalidate = LOTTO_ISR_SECONDS;
+export const revalidate = 3600; // LOTTO_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const PAGE_URL = `${SITE_URL}/lotto`;
 

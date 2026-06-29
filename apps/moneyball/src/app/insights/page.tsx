@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS, INSIGHTS_LIMIT, SITE_URL } from "@moneyball/shared";
+import { assertSelectOk, KBO_FACTOR_COUNT, shortTeamName, type TeamCode, CURRENT_SCORING_RULE, INSIGHTS_ISR_HOURS, INSIGHTS_LIMIT, SITE_URL } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 import { selectTopFactors } from "@/lib/insights/topFactors";
 import { insightsStatusBadge } from "@/lib/insights/statusBadge";
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = INSIGHTS_ISR_SECONDS;
+export const revalidate = 86400; // INSIGHTS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface Verdict {
   reasoning?: string;

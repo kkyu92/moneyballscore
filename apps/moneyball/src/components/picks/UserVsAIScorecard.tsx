@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import { buildPickEntries, buildPicksStats } from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
@@ -38,7 +39,11 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
         const stats = buildPicksStats(entries);
         setCurrentStreak(stats.currentStreak);
       })
-      .catch(() => {});
+      .catch((err) => {
+        Sentry.captureException(err, {
+          tags: { silent_drift_family: 'wave_166', component: 'UserVsAIScorecard', op: 'picks_results_fetch' },
+        });
+      });
     return () => { cancelled = true; };
   }, [picks]);
 
