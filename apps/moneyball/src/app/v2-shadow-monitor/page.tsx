@@ -5,7 +5,6 @@ import { loadLatestCohort } from "@/lib/v2-shadow-monitor/loader";
 import {
   KBO_FACTOR_COUNT,
   V2_PROMOTION_COHORT_N,
-  V2_SHADOW_MONITOR_ISR_SECONDS,
   SITE_URL,
 } from "@moneyball/shared";
 

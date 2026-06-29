@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { LEADERBOARD_ISR_SECONDS, MIN_LEADERBOARD_PICKS, SITE_URL } from '@moneyball/shared';
+import { MIN_LEADERBOARD_PICKS, SITE_URL } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';

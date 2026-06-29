@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import * as Sentry from "@sentry/nextjs";
 import { assertSelectOk, errMsg, type SelectResult, SITE_HOST } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
@@ -70,6 +71,7 @@ async function getGameOg(gameId: number) {
     return { date: game.game_date, homeLabel, awayLabel, winnerLabel, confPct };
   } catch (err) {
     console.error(`opengraph-image[id] getGameOg(${gameId}) failed:`, errMsg(err));
+    Sentry.captureException(err, { tags: { component: 'opengraph-image', route: 'analysis/game/[id]' } });
     return null;
   }
 }
