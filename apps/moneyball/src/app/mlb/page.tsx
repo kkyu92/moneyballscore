@@ -6,7 +6,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
 
-export const revalidate = 1800;
+export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const TOTAL = MLB_FACTOR_COUNTS.total;
 const KBO_N = MLB_FACTOR_COUNTS.kbo;

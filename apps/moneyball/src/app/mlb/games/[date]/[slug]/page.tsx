@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk, MLB_LIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { MetricRegistry, type MetricSlug, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
-export const revalidate = 1800;
+export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageParams {
   params: Promise<{ date: string; slug: string }>;

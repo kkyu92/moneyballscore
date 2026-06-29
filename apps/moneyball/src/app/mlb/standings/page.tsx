@@ -12,7 +12,7 @@ import {
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-export const revalidate = 21600;
+export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division standings | MoneyBall Score`,
