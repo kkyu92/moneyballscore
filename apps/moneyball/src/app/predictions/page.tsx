@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 300;
+export const revalidate = 300; // PREDICTIONS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface TierCount {
   predicted: number;

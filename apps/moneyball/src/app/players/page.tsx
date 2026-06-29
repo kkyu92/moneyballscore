@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 1800;
+export const revalidate = 1800; // PLAYERS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 function fmtFip(v: number | null): string {
   return v != null ? v.toFixed(2) : "-";

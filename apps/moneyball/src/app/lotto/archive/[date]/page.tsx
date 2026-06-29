@@ -12,7 +12,7 @@ interface Props {
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-export const revalidate = 86400;
+export const revalidate = 86400; // LOTTO_ARCHIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export async function generateStaticParams() {
   return listArchiveDates().map((date) => ({ date }));

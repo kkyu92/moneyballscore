@@ -10,7 +10,7 @@ import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
-export const revalidate = 3600;
+export const revalidate = 3600; // STANDINGS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: "KBO 팀 순위",

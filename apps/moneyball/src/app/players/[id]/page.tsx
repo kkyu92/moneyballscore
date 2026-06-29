@@ -9,7 +9,7 @@ import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 import { PLAYERS_ISR_SECONDS, shortTeamName, SITE_URL } from '@moneyball/shared';
 
-export const revalidate = 1800;
+export const revalidate = 1800; // PLAYERS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ id: string }>;

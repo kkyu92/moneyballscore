@@ -152,7 +152,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
   return (data ?? []) as unknown as DateGame[];
 }
 
-export const revalidate = 300;
+export const revalidate = 300; // PREDICTIONS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 function formatTeamName(code: TeamCode | undefined): string {
   if (!code) return "";

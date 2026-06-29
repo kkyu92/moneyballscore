@@ -21,7 +21,7 @@ import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks
 // cycle 1021 (b8) — 사용자 가시 entry route 추가. CURRENT_SCORING_RULE filter
 // (shadow row 제외, #1338 family). status='final' 만 표시 (예정 / 진행중 제외).
 
-export const revalidate = 1800;
+export const revalidate = 1800; // TEAMS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const RECENT_LIMIT = RECENT_FORM_GAMES;
 

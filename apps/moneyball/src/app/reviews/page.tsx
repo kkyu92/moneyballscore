@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 600;
+export const revalidate = 600; // REVIEWS_INDEX_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface VerifiedPredictionRow {
   confidence: number;

@@ -14,7 +14,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MonthlyTeamStatsSortControl } from "@/components/reviews/MonthlyTeamStatsSortControl";
 import { neutral } from "@/lib/design-tokens";
 
-export const revalidate = 3600;
+export const revalidate = 3600; // REVIEWS_MONTHLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ month: string }>;

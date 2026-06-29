@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const revalidate = 86400;
+export const revalidate = 86400; // DASHBOARD_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface ReasoningShape {
   debate?: { verdict?: { homeWinProb?: number; reasoning?: string } };

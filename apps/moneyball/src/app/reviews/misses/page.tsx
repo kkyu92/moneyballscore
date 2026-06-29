@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 1800;
+export const revalidate = 1800; // REVIEWS_WEEKLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const PREFIXED_VARIANTS = (["sp_fip", "bullpen_fip", "lineup_woba"] as const).flatMap(
   (slug) => [
