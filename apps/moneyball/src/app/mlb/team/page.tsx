@@ -12,7 +12,7 @@ import {
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-export const revalidate = 21600;
+export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: `MLB 팀 프로필 — ${MLB_TEAM_COUNT}팀 시즌 stat | MoneyBall Score`,

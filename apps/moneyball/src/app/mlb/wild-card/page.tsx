@@ -14,7 +14,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
-export const revalidate = 21600;
+export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: "MLB Wild Card race — AL/NL Wild Card 진출 경쟁 | MoneyBall Score",

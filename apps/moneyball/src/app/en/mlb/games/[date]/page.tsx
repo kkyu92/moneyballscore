@@ -6,7 +6,7 @@ import { MLB_LIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 
-export const revalidate = 1800;
+export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export async function generateMetadata({ params }: { params: Promise<{ date: string }> }): Promise<Metadata> {
   const { date } = await params;

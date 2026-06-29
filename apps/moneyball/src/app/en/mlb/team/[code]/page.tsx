@@ -15,7 +15,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = 1800;
+export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ code: string }>;
