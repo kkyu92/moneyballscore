@@ -342,10 +342,10 @@ describe("plan #7 Step E — scripts/lotto.ts pick-md mode + markdown renderer",
     expect(src).toMatch(/function nextSaturdayKST\(/);
   });
 
-  it("markdown 출력 = 50조합 table + 추첨 후 비교 + 주의 섹션", () => {
+  it("markdown 출력 = N조합 table + 추첨 후 비교 + 주의 섹션 (cycle 1403 500 확장)", () => {
     const src = readFileSync(join(REPO_ROOT, "../../scripts/lotto.ts"), "utf-8");
     const renderFn = src.match(/export function renderPickMarkdown[\s\S]*?return head;/)?.[0] ?? "";
-    expect(renderFn).toContain("## 50세트 전체");
+    expect(renderFn).toContain("${setCount}세트 전체");
     expect(renderFn).toContain("## 추첨 후 비교 검증");
     expect(renderFn).toContain("## 주의");
     expect(renderFn).toContain("규칙 필터 통과 + 역대 당첨 제외");
