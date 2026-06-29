@@ -5,17 +5,20 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: 'pnpm'
@@ -28,6 +31,29 @@ jobs:
             --ignore GHSA-96hv-2xvq-fx4p \
             --ignore GHSA-vmh5-mc38-953g \
             --ignore GHSA-fx2h-pf6j-xcff
+
+      - name: Supply chain check
+        run: |
+          # CVE-2026-LGTM defense: check for supply chain attack patterns
+          # 1. Verify no non-npm registries in lockfile
+          if grep -E "^  resolution:" pnpm-lock.yaml | grep -v "registry.npmjs.org" | grep -q "tarball:"; then
+            echo "::error::Non-npmjs.org registry found in pnpm-lock.yaml"
+            exit 1
+          fi
+          # 2. Check workspace package.json files for suspicious lifecycle hooks
+          HOOKS=$(find . -name "package.json" -not -path "*/node_modules/*" \
+            -exec grep -l '"postinstall"\|"preinstall"\|"prepare"' {} \;)
+          if [ -n "$HOOKS" ]; then
+            echo "::warning::Lifecycle hooks found in: $HOOKS"
+          fi
+          # 3. Flag base64 blobs committed to repo (>100 chars, not in node_modules or pnpm-lock)
+          BASE64=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | \
+            xargs -I{} grep -lP '[A-Za-z0-9+/]{100,}={0,2}' {} 2>/dev/null | \
+            grep -v "pnpm-lock.yaml" | head -5 || true)
+          if [ -n "$BASE64" ]; then
+            echo "::warning::Possible base64 blobs in: $BASE64"
+          fi
+          echo "Supply chain check passed"
 
       - name: Type check
         run: pnpm type-check
