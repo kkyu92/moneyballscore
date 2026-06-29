@@ -1,0 +1,123 @@
+name: lotto-result-update
+
+# 매주 일요일 새벽 추첨 결과 자동 박제 → apps/moneyball/data/lotto-results/<draw-date>.md
+# 추첨 토 21:00 KST 직후 새벽 update. multi-fire 3회 — GH Actions schedule 41% skip mitigation.
+#
+# cron = '19 17,20,23 * * 6' (UTC 토 17:19 + 20:19 + 23:19 = KST 일 02:19 + 05:19 + 08:19)
+# - 추첨 (토 21:00 KST = UTC 12:00) 5+ 시간 후 첫 fire = 결과 publish + dhlottery API 안정성 확보
+# - 다른 cron 분 겹침 회피 (lotto-pick-update '19 0,3,6 * * 5' 와 분 동일, 시간 만 분리)
+#
+# 2026-06-29 사용자 요청 (cycle 1403): 500세트 확장 + 새벽 결과 정리 + 1등 미포함 차원 비교
+
+on:
+  schedule:
+    - cron: '19 17,20,23 * * 6'
+  workflow_dispatch:
+    inputs:
+      draw_no:
+        description: 'Draw number (defaults to latest)'
+        required: false
+
+concurrency:
+  group: lotto-result-update
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Update lotto cache
+        run: pnpm exec tsx scripts/lotto.ts update
+
+      - name: Resolve draw number
+        id: draw
+        run: |
+          set -e
+          if [ -n "${{ inputs.draw_no }}" ]; then
+            DRAW_NO="${{ inputs.draw_no }}"
+          else
+            DRAW_NO=$(node -e "const d=require('./scripts/lotto-data.json'); console.log(d[d.length-1].round)")
+          fi
+          echo "draw_no=$DRAW_NO" >> "$GITHUB_OUTPUT"
+          DRAW_DATE=$(node -e "const d=require('./scripts/lotto-data.json'); const r=d.find(x=>x.round===$DRAW_NO); console.log(r ? r.date : '')")
+          echo "draw_date=$DRAW_DATE" >> "$GITHUB_OUTPUT"
+          echo "Draw: $DRAW_NO ($DRAW_DATE)"
+
+      - name: Idempotent skip if result already exists
+        id: check
+        run: |
+          set -e
+          FILE="apps/moneyball/data/lotto-results/${{ steps.draw.outputs.draw_date }}.md"
+          if [ -f "$FILE" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$FILE already exists — idempotent skip"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate result markdown
+        if: steps.check.outputs.skip == 'false'
+        run: pnpm exec tsx scripts/lotto.ts result-md "${{ steps.draw.outputs.draw_no }}"
+
+      - name: Verify markdown saved
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          set -e
+          FILE="apps/moneyball/data/lotto-results/${{ steps.draw.outputs.draw_date }}.md"
+          if [ ! -f "$FILE" ]; then
+            echo "::error::Expected result markdown not created: $FILE"
+            exit 1
+          fi
+          LINE_COUNT=$(wc -l < "$FILE")
+          if [ "$LINE_COUNT" -lt 20 ]; then
+            echo "::error::Result markdown too short ($LINE_COUNT lines, expected ≥ 20)"
+            exit 1
+          fi
+          echo "✓ Saved $FILE ($LINE_COUNT lines)"
+
+      - name: Create PR
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          BRANCH="lotto/result-${{ steps.draw.outputs.draw_date }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add apps/moneyball/data/lotto-results/ scripts/lotto-data.json
+          git commit -m "data(lotto): ${{ steps.draw.outputs.draw_no }}회 결과 자동 박제 (cron)" || {
+            echo "::notice::no changes to commit"
+            exit 0
+          }
+          git push -u origin "$BRANCH"
+          PR_URL=$(gh pr create \
+            --title "data(lotto): ${{ steps.draw.outputs.draw_no }}회 추첨 결과 박제 (cron)" \
+            --body "추첨 토 21:00 KST 직후 새벽 자동 fire. 1등 미포함 시 차원별 비교 + 256 룰 PASS 자동 생성." \
+            --label "automated,lotto" 2>/dev/null || echo "")
+          if [ -n "$PR_URL" ]; then
+            PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            gh pr merge "$PR_NUM" --squash --auto --delete-branch
+            echo "::notice::PR $PR_URL queued for auto-merge"
+          fi

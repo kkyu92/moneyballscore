@@ -974,6 +974,14 @@ export const INSIGHTS_SERIES_ISR_HOURS = 1;
 export const INSIGHTS_SERIES_ISR_SECONDS = INSIGHTS_SERIES_ISR_HOURS * 60 * 60;
 export const LOTTO_ISR_HOURS = 1;
 export const LOTTO_ISR_SECONDS = LOTTO_ISR_HOURS * 60 * 60;
+
+/**
+ * Lotto pick count — primary pickMd 생성 세트 수.
+ * 2026-06-29 사용자 결정: 50 → 500 (10x 확장, 통계 학습 surface 확대).
+ * 추천 상위 카운트 = LOTTO_TOP_PICK_COUNT (10세트).
+ */
+export const LOTTO_PICK_COUNT = 500;
+export const LOTTO_TOP_PICK_COUNT = 10;
 export const HOME_ISR_MINUTES = 10;
 export const HOME_ISR_SECONDS = HOME_ISR_MINUTES * 60;
 export const SITEMAP_ISR_HOURS = 6;

@@ -78,6 +78,83 @@ export function getLatestLottoPicks(): LottoPicks | null {
   return { date, ...parseLottoPicksMd(raw) };
 }
 
+const RESULTS_DIR_ROOT = path.join(process.cwd(), "apps/moneyball/data/lotto-results");
+const RESULTS_DIR_FALLBACK = path.join(process.cwd(), "data/lotto-results");
+
+function getResultsDir(): string {
+  if (fs.existsSync(RESULTS_DIR_ROOT)) return RESULTS_DIR_ROOT;
+  return RESULTS_DIR_FALLBACK;
+}
+
+export interface LottoResult {
+  date: string;
+  drawNo: number | null;
+  winning: number[];
+  bonus: number | null;
+  tier1: number;
+  tier2: number;
+  tier3: number;
+  tier4: number;
+  tier5: number;
+  rulePass: number;
+  ruleFail: number;
+  topHas1st: boolean;
+  bodyMarkdown: string;
+}
+
+function parseResultMd(raw: string): Omit<LottoResult, "date"> | null {
+  const jsonMatch = raw.match(/JSON:\s*(\{[^\n]+\})/);
+  if (!jsonMatch) return null;
+  try {
+    const data = JSON.parse(jsonMatch[1]) as {
+      draw: number;
+      winning: number[];
+      bonus: number;
+      tier1: number;
+      tier2: number;
+      tier3: number;
+      tier4: number;
+      tier5: number;
+      rule_pass: number;
+      rule_fail: number;
+      top10_has_1st: boolean;
+    };
+    return {
+      drawNo: data.draw,
+      winning: data.winning,
+      bonus: data.bonus,
+      tier1: data.tier1,
+      tier2: data.tier2,
+      tier3: data.tier3,
+      tier4: data.tier4,
+      tier5: data.tier5,
+      rulePass: data.rule_pass,
+      ruleFail: data.rule_fail,
+      topHas1st: data.top10_has_1st,
+      bodyMarkdown: raw,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function getLatestLottoResult(): LottoResult | null {
+  const dir = getResultsDir();
+  if (!fs.existsSync(dir)) return null;
+  const files = fs
+    .readdirSync(dir)
+    .filter((f) => /^20\d{2}-\d{2}-\d{2}\.md$/.test(f))
+    .sort()
+    .reverse();
+  if (!files.length) return null;
+  const file = files[0];
+  const date = file.replace(/\.md$/, "");
+  const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+  const parsed = parseResultMd(raw);
+  if (!parsed) return null;
+  return { date, ...parsed };
+}
+
 export type LottoBallColor = "yellow" | "blue" | "red" | "gray" | "green";
 
 export function ballColor(n: number): LottoBallColor {

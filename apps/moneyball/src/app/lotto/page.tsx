@@ -2,34 +2,34 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { getLatestLottoPicks, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
-import { LOTTO_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import { getLatestLottoPicks, getLatestLottoResult, ballColor, type LottoSet, type LottoResult } from "@/lib/lotto/picks-loader";
+import { LOTTO_ISR_SECONDS, LOTTO_TOP_PICK_COUNT, SITE_URL } from "@moneyball/shared";
 
 export const dynamic = "force-static";
-export const revalidate = 3600;
+export const revalidate = LOTTO_ISR_SECONDS;
 
 const PAGE_URL = `${SITE_URL}/lotto`;
 
 export const metadata: Metadata = {
   title: "로또 통계 분석",
   description:
-    "256개 회피 규칙 기반 매주 50조합 통계 선별. 통계 학습 목적 — 당첨 확률 향상 없음.",
+    "256개 회피 규칙 기반 매주 500조합 통계 선별. 통계 학습 목적 — 당첨 확률 향상 없음.",
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "로또 통계 분석 | MoneyBall Score",
-    description: "256개 회피 규칙 기반 매주 50조합 통계 선별.",
+    description: "256개 회피 규칙 기반 매주 500조합 통계 선별.",
     url: PAGE_URL,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "로또 통계 분석 | MoneyBall Score",
-    description: "256개 회피 규칙 기반 50조합 통계 선별.",
+    description: "256개 회피 규칙 기반 500조합 통계 선별.",
   },
   robots: { index: true, follow: true },
 };
 
-const LABEL = ["A", "B", "C", "D", "E"] as const;
+const LABEL = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"] as const;
 const BALL_BG: Record<string, string> = {
   yellow: "bg-yellow-400 text-yellow-900",
   blue: "bg-blue-500 text-white",
@@ -142,8 +142,79 @@ function StatTable({ sets }: { sets: LottoSet[] }) {
   );
 }
 
+function ResultSection({ result }: { result: LottoResult }) {
+  const tierRows: Array<[string, number]> = [
+    ["1등 (6매칭)", result.tier1],
+    ["2등 (5+보너스)", result.tier2],
+    ["3등 (5매칭)", result.tier3],
+    ["4등 (4매칭)", result.tier4],
+    ["5등 (3매칭)", result.tier5],
+  ];
+  const totalHits = result.tier1 + result.tier2 + result.tier3 + result.tier4 + result.tier5;
+  return (
+    <section className="space-y-3 rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-5">
+      <div className="flex items-baseline gap-2 flex-wrap">
+        <h2 className="text-lg font-bold text-amber-900 dark:text-amber-100">
+          {result.drawNo}회 추첨 결과 정리
+        </h2>
+        <span className="text-xs text-amber-700 dark:text-amber-300">{result.date}</span>
+      </div>
+      <div className="flex items-center gap-1 flex-wrap">
+        <span className="text-xs font-medium text-amber-800 dark:text-amber-200 mr-1">당첨</span>
+        {result.winning.map((n) => (
+          <Ball key={n} n={n} />
+        ))}
+        {result.bonus !== null && (
+          <>
+            <span className="text-xs text-amber-800 dark:text-amber-200 mx-1">+</span>
+            <Ball n={result.bonus} />
+            <span className="text-xs text-amber-700 dark:text-amber-300">보너스</span>
+          </>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="rounded-lg bg-white/60 dark:bg-black/20 p-3">
+          <p className="text-xs font-semibold mb-2 text-amber-900 dark:text-amber-100">매칭 분포 ({totalHits}건)</p>
+          <table className="w-full text-xs">
+            <tbody>
+              {tierRows.map(([label, n]) => (
+                <tr key={label} className="border-b border-amber-200/40 dark:border-amber-700/40">
+                  <td className="py-0.5 text-amber-800 dark:text-amber-200">{label}</td>
+                  <td className="py-0.5 text-right font-bold tabular-nums text-amber-900 dark:text-amber-100">
+                    {n}건
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="rounded-lg bg-white/60 dark:bg-black/20 p-3 text-xs space-y-1">
+          <p className="text-amber-900 dark:text-amber-100">
+            <strong>256 룰 검증</strong>: {result.rulePass}/{result.rulePass + result.ruleFail} PASS
+            {result.ruleFail === 0 ? " — 모든 규칙 경계 정상" : ` — ${result.ruleFail}개 FAIL`}
+          </p>
+          <p className="text-amber-800 dark:text-amber-200">
+            <strong>1등 포함 여부</strong>: {result.topHas1st ? "추천 상위에 포함 ✓" : "상위 추천에 미포함 — 본 페이지 하단 차원별 비교 참조"}
+          </p>
+        </div>
+      </div>
+      <details className="rounded-lg border border-amber-300 dark:border-amber-700 bg-white/40 dark:bg-black/10">
+        <summary className="cursor-pointer px-3 py-2 text-xs font-medium select-none text-amber-900 dark:text-amber-100">
+          전체 분석 보기 (256 룰 / 차원별 비교)
+        </summary>
+        <div className="px-4 pb-4 pt-2">
+          <pre className="text-[10px] leading-relaxed whitespace-pre-wrap text-amber-900 dark:text-amber-100 font-mono">
+            {result.bodyMarkdown}
+          </pre>
+        </div>
+      </details>
+    </section>
+  );
+}
+
 export default function LottoHubPage() {
   const picks = getLatestLottoPicks();
+  const result = getLatestLottoResult();
 
   if (!picks || picks.sets.length === 0) {
     return (
@@ -160,8 +231,9 @@ export default function LottoHubPage() {
 
   const drawDate = picks.date;
   const drawNo = picks.drawNo;
-  const top5 = picks.sets.slice(0, 5);
-  const rest = picks.sets.slice(5);
+  const topPicks = picks.sets.slice(0, LOTTO_TOP_PICK_COUNT);
+  const rest = picks.sets.slice(LOTTO_TOP_PICK_COUNT);
+  const totalCount = picks.sets.length;
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-10 space-y-8">
@@ -180,7 +252,7 @@ export default function LottoHubPage() {
             {drawNo ? `제 ${drawNo}회` : "최신"}
           </span>
           <h1 className="text-xl font-bold text-white">
-            {drawDate} 토요일 추첨 50조합
+            {drawDate} 토요일 추첨 {totalCount}조합
           </h1>
         </div>
         <p className="text-sm text-white/70">
@@ -197,14 +269,17 @@ export default function LottoHubPage() {
         </div>
       </section>
 
-      {/* 추천 5세트 */}
+      {/* 직전 회차 추첨 결과 정리 (cron 새벽 자동 박제) */}
+      {result && result.drawNo !== picks.drawNo && <ResultSection result={result} />}
+
+      {/* 추천 상위 N세트 */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">추천 5세트</h2>
+        <h2 className="text-lg font-bold">추천 {LOTTO_TOP_PICK_COUNT}세트</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           기피점수 상위 — 역대 미출현 + 회피 조건 최고점 통과 조합
         </p>
         <div className="grid gap-3">
-          {top5.map((set, i) => (
+          {topPicks.map((set, i) => (
             <div
               key={set.idx}
               className="rounded-xl p-4 border-2 relative"
@@ -246,18 +321,18 @@ export default function LottoHubPage() {
 
       {/* 통계 */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">50세트 분포 통계</h2>
+        <h2 className="text-lg font-bold">{totalCount}세트 분포 통계</h2>
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
           <StatTable sets={picks.sets} />
         </div>
       </section>
 
-      {/* 전체 50조합 collapse */}
+      {/* 전체 N조합 collapse */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">전체 50조합</h2>
+        <h2 className="text-lg font-bold">전체 {totalCount}조합</h2>
         <details className="rounded-xl border border-gray-200 dark:border-gray-700">
           <summary className="cursor-pointer px-4 py-3 font-medium text-sm select-none hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl">
-            전체 50조합 보기 (클릭해서 열기)
+            전체 {totalCount}조합 보기 (클릭해서 열기)
           </summary>
           <div className="px-4 pb-4 pt-2 space-y-2">
             {rest.map((set) => (

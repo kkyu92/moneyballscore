@@ -21,6 +21,8 @@ import {
   LOTTO_FETCH_TIMEOUT_DHLOTTERY_MS,
   LOTTO_FETCH_TIMEOUT_LOTTOLYZER_MS,
   LOTTO_FETCH_TIMEOUT_LOTTOLYZER_LATEST_MS,
+  LOTTO_PICK_COUNT,
+  LOTTO_TOP_PICK_COUNT,
 } from '../packages/shared/src/index';
 
 const DATA_FILE = join(__dirname, 'lotto-data.json');
@@ -1670,13 +1672,12 @@ export function renderPickMarkdown(meta: {
   picks: PickEntry[];
 }): string {
   const elimPct = ((1 - meta.validCombinations / meta.totalCombinations) * 100).toFixed(2);
-  const top50 = meta.picks.slice(0, 50);
-
-  const rowsAll = top50.map((p, i) =>
+  const setCount = meta.picks.length;
+  const allRows = meta.picks.map((p, i) =>
     `| ${i + 1} | ${p.nums.join(' ')} | ${p.sum} | ${p.odd}:${6 - p.odd} | ${p.consec} | ${p.score.toFixed(1)} |`,
   ).join('\n');
 
-  const head = `# ${meta.drawDate} (토) 추첨 50세트 추천 (${meta.drawNo}회)
+  const head = `# ${meta.drawDate} (토) 추첨 ${setCount}세트 추천 (${meta.drawNo}회)
 
 **생성 시각**: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC (cron 자동 갱신)
 **필터링 룰**: ${meta.totalRules}개 100% 규칙 (cycle 444 saturation 도달)
@@ -1684,11 +1685,13 @@ export function renderPickMarkdown(meta: {
 **데이터 캐시**: 1~${meta.cachedRounds}회차
 **생성 명령**: \`pnpm tsx scripts/lotto.ts pick-md\` (후보 풀 ${meta.poolSize.toLocaleString()}개 / ${meta.attempts.toLocaleString()}회 시도)
 
-## 50세트 전체
+상위 ${LOTTO_TOP_PICK_COUNT}세트 = 기피점수 desc 추천. 전체 ${setCount}세트는 score desc 정렬.
+
+## ${setCount}세트 전체
 
 | # | 번호 | 합 | 홀:짝 | 연속쌍 | 기피점수 |
 |---|---|---|---|---|---|
-${rowsAll}
+${allRows}
 
 ## 추첨 후 비교 검증
 
@@ -1696,7 +1699,7 @@ ${meta.drawDate} 추첨 결과 (${meta.drawNo}회) 확정 후 매칭 수 기록 
 
 ## 주의
 
-- 50세트 추천 = **${meta.totalRules} 규칙 필터 통과 + 역대 당첨 제외 + 기피점수 sort**. 통계적 우위는 없음
+- ${setCount}세트 추천 = **${meta.totalRules} 규칙 필터 통과 + 역대 당첨 제외 + 기피점수 sort**. 통계적 우위는 없음
 - 본 비교 = **filter 효과 OOS 검증** 목적 (${meta.drawNo}회 미래 데이터 = 룰 셋에 미포함)
 - N=1 단건 결과로 결론 X. 누적 N≥10회 후 재평가
 `;
@@ -1706,7 +1709,7 @@ ${meta.drawDate} 추첨 결과 (${meta.drawNo}회) 확정 후 매칭 수 기록 
 function pickMd(rounds: LottoRound[], stats: Stats): void {
   const targetDate = process.argv[3] ?? nextSaturdayKST();
   const drawNo = process.argv[4] ?? (rounds.length + 1);
-  const { picks, poolSize, attempts } = buildCandidates(rounds, stats, 50);
+  const { picks, poolSize, attempts } = buildCandidates(rounds, stats, LOTTO_PICK_COUNT);
   const { valid, total } = countValid(stats);
   const md = renderPickMarkdown({
     drawDate: targetDate,
@@ -1722,7 +1725,7 @@ function pickMd(rounds: LottoRound[], stats: Stats): void {
   const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}.md`);
   writeFileSync(outPath, md);
   console.log(`박제: ${outPath}`);
-  console.log(`회차: ${drawNo} / 50세트 / 후보 풀 ${poolSize.toLocaleString()}`);
+  console.log(`회차: ${drawNo} / ${picks.length}세트 / 후보 풀 ${poolSize.toLocaleString()}`);
 }
 
 // ─── BALANCED STRATEGY (1등 historical 분포 median ±5 cutoff) ──────────────
@@ -2291,6 +2294,185 @@ JSON: {"draw": ${drwNo}, "passed_rules": ${passed}, "failed_rules": ${failed}, "
     writeFileSync(outPath, md);
     console.log(`박제: ${outPath}`);
     console.log(`회차: ${drwNo} / 4 variant 매칭 분포 + 256 rules PASS ${passed}/FAIL ${failed}`);
+    return;
+  }
+
+  // result-md — 추첨 후 새벽 자동 결과 정리 (2026-06-29 사용자 요청, cycle 1403)
+  // 입력: drawNo (선택, 미지정 시 latest+1 자동) — fetchRoundFromAPI 로 결과 fetch
+  // 출력: apps/moneyball/data/lotto-results/<drawDate>.md
+  // 내용: 당첨 번호 / top10 1등 포함 여부 / 등위별 매칭 / 256 룰 PASS / 1등 미포함 시 차원별 비교
+  if (mode === 'result-md') {
+    const targetDrwNo = process.argv[3] ? Number(process.argv[3]) : await getLatestRound();
+    if (!targetDrwNo || Number.isNaN(targetDrwNo)) {
+      console.error('사용법: pnpm tsx scripts/lotto.ts result-md [drawNo] [winningCsv] [bonus]');
+      process.exit(1);
+    }
+    // manual override (smoke / dhlottery 차단 환경): result-md 1229 "12,13,29,34,37,42" 16
+    let round: LottoRound | null = null;
+    const manualWinning = process.argv[4];
+    const manualBonus = process.argv[5];
+    if (manualWinning) {
+      const nums = manualWinning.split(',').map(s => Number(s.trim())).sort((a, b) => a - b);
+      if (nums.length === 6 && nums.every(n => n >= 1 && n <= 45) && manualBonus) {
+        round = { round: targetDrwNo, date: '', numbers: nums, bonus: Number(manualBonus) };
+        if (round.date === '') {
+          // estimate next Saturday for picks lookup; will rewrite below if picksFile match
+          const cached = rounds.find(r => r.round === targetDrwNo);
+          round.date = cached?.date ?? '';
+        }
+      }
+    }
+    if (!round) {
+      console.log(`결과 fetch: ${targetDrwNo}회 (dhlottery)`);
+      round = await fetchRoundFromAPI(targetDrwNo);
+    }
+    if (!round) {
+      console.error(`${targetDrwNo}회 미발표 또는 fetch 실패. 추첨 후 재시도.`);
+      process.exit(1);
+    }
+    const winning = [...round.numbers].sort((a, b) => a - b);
+    const winningSet = new Set(winning);
+    const drawDate = round.date;
+
+    // picks md load — drawNo 동일한 picks 파일 찾기
+    const picksDir = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks');
+    const picksFiles = require('fs').readdirSync(picksDir) as string[];
+    const picksFile = picksFiles
+      .filter((f: string) => /^20\d{2}-\d{2}-\d{2}\.md$/.test(f))
+      .find((f: string) => {
+        const md = readFileSync(join(picksDir, f), 'utf-8');
+        const m = md.match(/\((\d{3,4})회\)/);
+        return m && Number(m[1]) === targetDrwNo;
+      });
+    if (!picksFile) {
+      console.error(`${targetDrwNo}회 picks md 없음. pickMd 먼저 실행.`);
+      process.exit(1);
+    }
+    const picksMd = readFileSync(join(picksDir, picksFile), 'utf-8');
+    const picksDate = picksFile.replace(/\.md$/, '');
+
+    // picks 테이블 parse
+    const pickRows: { idx: number; nums: number[]; sum: number; odd: number; consec: number; score: number }[] = [];
+    for (const line of picksMd.split('\n')) {
+      const m = line.match(/^\|\s*(\d+)\s*\|\s*([0-9 ]+)\s*\|\s*(\d+)\s*\|\s*(\d+):(\d+)\s*\|\s*(\d+)\s*\|\s*([\d.-]+)\s*\|/);
+      if (!m) continue;
+      const nums = m[2].trim().split(/\s+/).map(Number).filter(n => n >= 1 && n <= 45);
+      if (nums.length !== 6) continue;
+      pickRows.push({
+        idx: Number(m[1]),
+        nums: nums.sort((a, b) => a - b),
+        sum: Number(m[3]),
+        odd: Number(m[4]),
+        consec: Number(m[6]),
+        score: Number(m[7]),
+      });
+    }
+
+    // 등위 매칭
+    const tierCounts = { tier1: 0, tier2: 0, tier3: 0, tier4: 0, tier5: 0 };
+    const matched: Array<{ idx: number; nums: number[]; match: number; tier: number; hits: number[] }> = [];
+    for (const p of pickRows) {
+      const hits = p.nums.filter(n => winningSet.has(n));
+      const m = hits.length;
+      let tier = 0;
+      if (m === 6) tier = 1;
+      else if (m === 5 && p.nums.includes(round.bonus)) tier = 2;
+      else if (m === 5) tier = 3;
+      else if (m === 4) tier = 4;
+      else if (m === 3) tier = 5;
+      if (tier > 0) {
+        if (tier === 1) tierCounts.tier1++;
+        else if (tier === 2) tierCounts.tier2++;
+        else if (tier === 3) tierCounts.tier3++;
+        else if (tier === 4) tierCounts.tier4++;
+        else if (tier === 5) tierCounts.tier5++;
+        matched.push({ idx: p.idx, nums: p.nums, match: m, tier, hits });
+      }
+    }
+    matched.sort((a, b) => a.tier - b.tier || a.idx - b.idx);
+
+    const topPicks = pickRows.slice(0, LOTTO_TOP_PICK_COUNT);
+    const topPickHas1st = topPicks.some(p => p.nums.every(n => winningSet.has(n)));
+
+    // 256 rules
+    let rulePassed = 0, ruleFailed = 0;
+    const ruleFailures: { name: string; val: number; lo: number | null; hi: number | null }[] = [];
+    for (const rule of RULES) {
+      const { pass, val } = checkRule(winning, rule, stats);
+      if (pass) rulePassed++;
+      else { ruleFailed++; ruleFailures.push({ name: rule.name, val, lo: rule.lo(stats), hi: rule.hi(stats) }); }
+    }
+
+    // 1등 미포함 시 차원별 비교 (top10 평균 vs 당첨 번호)
+    const winSum = sumNums(winning);
+    const winOdd = oddCount(winning);
+    const winConsec = consecPairs(winning);
+    const winSpan = numRange(winning);
+    const winMaxGap = maxGap(winning);
+    const mean = (xs: number[]) => xs.reduce((a, x) => a + x, 0) / Math.max(1, xs.length);
+    const topSums = topPicks.map(p => p.sum);
+    const topOdds = topPicks.map(p => p.odd);
+    const topConsecs = topPicks.map(p => p.consec);
+    const topSpans = topPicks.map(p => numRange(p.nums));
+    const topMaxGaps = topPicks.map(p => maxGap(p.nums));
+
+    const tierTable = `| 등위 | 조건 | 카운트 | 해당 pick |
+|---|---|---|---|
+| 1등 | 6 매칭 | ${tierCounts.tier1}건 | ${matched.filter(m => m.tier === 1).map(m => `#${m.idx}`).join(', ') || '-'} |
+| 2등 | 5 매칭 + 보너스 | ${tierCounts.tier2}건 | ${matched.filter(m => m.tier === 2).map(m => `#${m.idx}`).join(', ') || '-'} |
+| 3등 | 5 매칭 | ${tierCounts.tier3}건 | ${matched.filter(m => m.tier === 3).map(m => `#${m.idx}`).join(', ') || '-'} |
+| 4등 | 4 매칭 | ${tierCounts.tier4}건 | ${matched.filter(m => m.tier === 4).map(m => `#${m.idx}`).join(', ') || '-'} |
+| 5등 | 3 매칭 | ${tierCounts.tier5}건 | ${matched.filter(m => m.tier === 5).slice(0, 10).map(m => `#${m.idx}`).join(', ')}${tierCounts.tier5 > 10 ? ` (외 ${tierCounts.tier5 - 10}건)` : ''} |`;
+
+    const missAnalysis = topPickHas1st
+      ? `## 1등 포함 분석\n\n추천 ${LOTTO_TOP_PICK_COUNT}세트 안에 1등 조합 포함 ✓\n`
+      : `## 1등 미포함 — 차원별 비교 분석
+
+추첨 번호 \`${winning.join(' ')}\` 가 추천 ${LOTTO_TOP_PICK_COUNT}세트에 없습니다. 차원별 통계 비교:
+
+| 차원 | 당첨 번호 | 추천 top ${LOTTO_TOP_PICK_COUNT} 평균 | 차이 |
+|---|---|---|---|
+| 번호 합 | ${winSum} | ${mean(topSums).toFixed(1)} | ${(winSum - mean(topSums)).toFixed(1)} |
+| 홀수 개수 | ${winOdd} | ${mean(topOdds).toFixed(1)} | ${(winOdd - mean(topOdds)).toFixed(1)} |
+| 연속쌍 | ${winConsec} | ${mean(topConsecs).toFixed(1)} | ${(winConsec - mean(topConsecs)).toFixed(1)} |
+| 스팬 (max-min) | ${winSpan} | ${mean(topSpans).toFixed(1)} | ${(winSpan - mean(topSpans)).toFixed(1)} |
+| 최대 인접 간격 | ${winMaxGap} | ${mean(topMaxGaps).toFixed(1)} | ${(winMaxGap - mean(topMaxGaps)).toFixed(1)} |
+
+**256 규칙 PASS 여부**: ${ruleFailed === 0 ? `당첨 번호 자체는 256/256 PASS — 추천 score sort 가 1등 분포 매핑과 어긋난 것일 뿐, 룰 자체는 정상.` : `${ruleFailed}개 룰 FAIL — 룰 경계 재검토 필요.`}
+${ruleFailures.length > 0 ? `\n**FAIL 룰**: ${ruleFailures.map(f => `${f.name} (val=${f.val}, 범위=[${f.lo ?? '-∞'}, ${f.hi ?? '+∞'}])`).join(', ')}` : ''}
+`;
+
+    const md = `# ${targetDrwNo}회 (${drawDate}) 추첨 결과
+
+## 당첨 번호
+**${winning.join(' ')}** (보너스: ${round.bonus})
+
+## 256 룰 검증
+- **${rulePassed}/${RULES.length} PASS** ${ruleFailed === 0 ? '— 모든 규칙 경계 정상' : `— ${ruleFailed}개 FAIL`}
+
+## ${pickRows.length}세트 매칭 분석
+
+picks: \`${picksFile}\` (생성 cycle picks)
+
+${tierTable}
+
+${missAnalysis}
+
+## 메타
+
+- 추첨 결과 자동 fetch (dhlottery.co.kr API)
+- 생성: ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC (cron 새벽 자동)
+- picks file: \`apps/moneyball/data/lotto-picks/${picksFile}\` (${picksDate})
+
+JSON: {"draw": ${targetDrwNo}, "winning": [${winning.join(',')}], "bonus": ${round.bonus}, "tier1": ${tierCounts.tier1}, "tier2": ${tierCounts.tier2}, "tier3": ${tierCounts.tier3}, "tier4": ${tierCounts.tier4}, "tier5": ${tierCounts.tier5}, "rule_pass": ${rulePassed}, "rule_fail": ${ruleFailed}, "top10_has_1st": ${topPickHas1st}}
+`;
+
+    const resultsDir = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-results');
+    if (!existsSync(resultsDir)) require('fs').mkdirSync(resultsDir, { recursive: true });
+    const outPath = join(resultsDir, `${drawDate}.md`);
+    writeFileSync(outPath, md);
+    console.log(`박제: ${outPath}`);
+    console.log(`회차: ${targetDrwNo} / 당첨 ${winning.join(' ')} / 매칭 1등 ${tierCounts.tier1} / 5등 ${tierCounts.tier5} / 256 룰 PASS ${rulePassed}/${ruleFailed}`);
     return;
   }
 
