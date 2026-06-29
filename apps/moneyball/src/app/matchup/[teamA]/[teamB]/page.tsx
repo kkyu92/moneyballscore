@@ -22,7 +22,7 @@ import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare"
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 
-export const revalidate = 3600;
+export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ teamA: string; teamB: string }>;

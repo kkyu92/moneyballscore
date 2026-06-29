@@ -4,7 +4,7 @@ import { SEASONS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // 진행 시즌을 매일 반영하려면 인덱스도 짧게. 개별 시즌 페이지와 동일 10분.
-export const revalidate = 600;
+export const revalidate = 600; // SEASONS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const CURRENT_YEAR = new Date().getFullYear();
 

@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { listArchiveDates } from "@/lib/lotto/archive";
 
 export const dynamic = "force-static";
-export const revalidate = 86400;
+export const revalidate = 86400; // LOTTO_ARCHIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const PAGE_URL = `${SITE_URL}/lotto/archive`;
 

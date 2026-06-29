@@ -20,7 +20,7 @@ import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter"
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
-export const revalidate = 1800;
+export const revalidate = 1800; // TEAMS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ code: string }>;

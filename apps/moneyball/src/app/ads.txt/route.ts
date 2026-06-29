@@ -8,7 +8,7 @@
 
 import { ADS_TXT_ISR_SECONDS } from "@moneyball/shared";
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ADS_TXT_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export function GET() {
   const publisherId = process.env.ADSENSE_PUBLISHER_ID?.trim();

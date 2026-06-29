@@ -15,7 +15,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
 import { neutral } from "@/lib/design-tokens";
 
-export const revalidate = 1800;
+export const revalidate = 1800; // REVIEWS_WEEKLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
   params: Promise<{ week: string }>;

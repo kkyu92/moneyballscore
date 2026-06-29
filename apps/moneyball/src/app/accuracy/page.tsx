@@ -85,7 +85,7 @@ const TOC_ITEMS = [
   { id: 'matchup', label: '상대 강약' },
 ];
 
-export const revalidate = 3600;
+export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 // ── SVG 캘리브레이션 다이어그램 ───────────────────────────────
 const PLOT_SIZE = 400;

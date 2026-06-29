@@ -12,7 +12,7 @@ import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { parseChangelog } from '@/lib/changelog/parse';
 import { listInsightsDates } from '@/lib/insights/loader';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // FEED_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 function escapeXml(str: string): string {
   return str
