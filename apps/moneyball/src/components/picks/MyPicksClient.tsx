@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import {
@@ -171,8 +172,10 @@ export function MyPicksClient() {
         setWeeklyGroups(buildWeeklyHistory(e));
         setFactorAgreement(buildFactorAgreement(e));
       })
-      .catch(() => {
-        // show picks without results, surface a soft error notice
+      .catch((err) => {
+        Sentry.captureException(err, {
+          tags: { silent_drift_family: 'wave_167', component: 'MyPicksClient', op: 'picks_results_fetch' },
+        });
         const e = buildPickEntries(picks, []);
         setEntries(e);
         setStats(buildPicksStats(e));

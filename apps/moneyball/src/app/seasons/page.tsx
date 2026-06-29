@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SEASONS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import { SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // 진행 시즌을 매일 반영하려면 인덱스도 짧게. 개별 시즌 페이지와 동일 10분.

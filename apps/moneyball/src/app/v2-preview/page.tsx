@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, DASHBOARD_ISR_SECONDS, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL } from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,

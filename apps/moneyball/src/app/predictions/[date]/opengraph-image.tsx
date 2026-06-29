@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import * as Sentry from "@sentry/nextjs";
 import { assertSelectOk, errMsg, PRODUCTION_COHORT_RULES, SITE_HOST } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
@@ -82,6 +83,7 @@ async function getStats(date: string): Promise<{
     return { n, verifiedN: verifiedRows.length, correctN: correctRows.length, rate, topPick };
   } catch (err) {
     console.error(`opengraph-image getStats(${date}) failed:`, errMsg(err));
+    Sentry.captureException(err, { tags: { component: 'opengraph-image', route: 'predictions/[date]' } });
     return { n: 0, verifiedN: 0, correctN: 0, rate: null, topPick: null };
   }
 }

@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, PREDICTIONS_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 
 interface Props {
