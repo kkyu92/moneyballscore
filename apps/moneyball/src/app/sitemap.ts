@@ -6,7 +6,7 @@ import { allPairs } from '@/lib/matchup/canonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
-import { KBO_TEAMS, MLB_TEAMS, SITE_URL, SITEMAP_ISR_SECONDS, assertSelectOk, errMsg } from '@moneyball/shared';
+import { KBO_TEAMS, MLB_TEAMS, SITE_URL, assertSelectOk, errMsg } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
 //
@@ -20,7 +20,7 @@ import { KBO_TEAMS, MLB_TEAMS, SITE_URL, SITEMAP_ISR_SECONDS, assertSelectOk, er
 // 비로소 유효. 빌드 시점 1회 생성 + 6시간 ISR. warmup cron 은 ISR miss 시 즉시
 // 재생성 트리거.
 
-export const revalidate = SITEMAP_ISR_SECONDS;
+export const revalidate = 21600; // SITEMAP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 function createSitemapClient() {
   // cookie-free, no session — sitemap 전용. RLS 통과하는 public 데이터만 읽음.

@@ -746,6 +746,23 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
     expect(DASHBOARD_ISR_SECONDS).toBe(86400);
   });
 
+  it('MLB ISR constants (silent drift wave 165 sweep guard — mlb/ + en/mlb/ 22파일 comment 박제)', () => {
+    expect(MLB_ISR_HOURS).toBe(6);
+    expect(MLB_ISR_SECONDS).toBe(MLB_ISR_HOURS * 60 * 60);
+    expect(MLB_ISR_SECONDS).toBe(21600);
+    expect(MLB_LIVE_ISR_MINUTES).toBe(30);
+    expect(MLB_LIVE_ISR_SECONDS).toBe(MLB_LIVE_ISR_MINUTES * 60);
+    expect(MLB_LIVE_ISR_SECONDS).toBe(1800);
+  });
+
+  it('ISR literal sweep (silent drift wave 166 guard — 5 pages constant→literal)', () => {
+    expect(INSIGHTS_SERIES_ISR_SECONDS).toBe(3600);
+    expect(INSIGHTS_ISR_SECONDS).toBe(86400);
+    expect(SITEMAP_ISR_SECONDS).toBe(21600);
+    expect(LOTTO_ISR_SECONDS).toBe(3600);
+    expect(HOME_ISR_SECONDS).toBe(600);
+  });
+
   it('shortTeamName helper — 유효 코드', () => {
     expect(shortTeamName('HT')).toBe('KIA');
     expect(shortTeamName('OB')).toBe('두산');

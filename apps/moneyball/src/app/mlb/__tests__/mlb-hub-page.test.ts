@@ -51,6 +51,19 @@ describe('/mlb/opengraph-image + twitter-image — MLB_FACTOR_COUNTS', () => {
   });
 });
 
+describe('mlb/page.tsx ISR literal (wave 165 guard)', () => {
+  const PAGE = src('page.tsx');
+
+  it('revalidate = 1800 literal (MLB_LIVE_ISR_SECONDS, Turbopack static eval)', () => {
+    expect(PAGE).toMatch(/export const revalidate = 1800\b/);
+    expect(PAGE).not.toMatch(/export const revalidate = MLB_LIVE_ISR_SECONDS/);
+  });
+
+  it('ISR comment MLB_LIVE_ISR_SECONDS present', () => {
+    expect(PAGE).toMatch(/revalidate = 1800.*MLB_LIVE_ISR_SECONDS/);
+  });
+});
+
 describe('MLB_FACTOR_COUNTS invariant (shape lock)', () => {
   it('current shape = KBO 10 + Statcast 4 = 14 total (v1.8)', () => {
     // wave 72 시점 shape 확정. 변경 시 본 테스트 + 모든 hardcoded 텍스트 동기 확인.

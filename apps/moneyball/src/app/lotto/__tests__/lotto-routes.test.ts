@@ -379,6 +379,19 @@ describe("plan #7 Step F — /lotto hub AdSense surface signal grep (정체성 �
   }
 });
 
+describe("/lotto hub ISR literal (wave 166 guard — Turbopack static eval)", () => {
+  const src = readFileSync(LOTTO_HUB_SRC, "utf-8");
+
+  it("revalidate = 3600 literal (not LOTTO_ISR_SECONDS constant)", () => {
+    expect(src).toMatch(/export const revalidate = 3600\b/);
+    expect(src).not.toMatch(/export const revalidate = LOTTO_ISR_SECONDS/);
+  });
+
+  it("ISR comment LOTTO_ISR_SECONDS present", () => {
+    expect(src).toMatch(/revalidate = 3600.*LOTTO_ISR_SECONDS/);
+  });
+});
+
 describe("plan #7 Step F — /lotto hub 산문 콘텐츠 박제 (AdSense content quality)", () => {
   const src = readFileSync(LOTTO_HUB_SRC, "utf-8");
 
