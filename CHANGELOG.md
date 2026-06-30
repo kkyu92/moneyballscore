@@ -1,5 +1,40 @@
 # Changelog
 
+## 🔬 패턴 추출 — cycle 1422 (2026-06-30)
+
+### P5 — Team-Level Quantitative Overconfidence (data_pipeline / operational_analysis)
+
+**Problem**: 다요인 예측 모델에서 특정 팀의 정량 스탯(FIP/xFIP/Elo/wOBA)이 실제 시즌 성적보다 과도하게 우수하게 나타날 때, 모델이 해당 팀을 체계적으로 over-predict. 증상: v1.8 SSG 랜더스 예측 1/8 = 12% (거의 역예측 수준). 잘못된 예측 8건 중 7건이 SSG를 이긴다고 예측했으나 상대팀이 승.
+
+**Solution**:
+- `teamAccuracyRate(predictions, teamId)` — 팀별 예측 적중률 집계
+- 임계 플래그: `model_win_rate(team) > actual_win_rate(team) + 0.20` = overconfidence 경고
+- 이번 SSG 케이스: 모델이 SSG를 약 60% 확률로 예측 → 실제 시즌 승률은 ~40%대 추정
+- v2.0 가중치 조정 전 팀별 보정 계수(team_bias_correction) 적용 검토
+
+**Results**: W26 발견 (n=8 소표본). n=150 도달 후 전 팀 체계적 측정 예정. 지금은 관찰 마커만 박제.
+
+**재사용 가능**: ✅ 모든 스포츠 예측 모델. 팩터 기반 모델에서 개별 팀/선수의 "정량-성과 乖離"는 systematic bias 원인 1순위.
+
+---
+
+### P6 — Weekend Recovery Pattern (operational_analysis)
+
+**Problem**: 토요일(Sat) 이변 집중 → 일요일(Sun) 완벽 회복 패턴이 KBO 시즌 데이터에서 반복. v1.8 이번 주: 토 1/5 = 20% → 일 5/5 = 100%. 누적 요일별: 토 52% vs 일 71%.
+
+**Root cause 가설**: 4연전 구조(화~일)에서 3차전(토)이 심리적 분기점 — 홈 3연패 시 원정 흐름 급전환. 4차전(일) = 정규화.
+
+**Solution**: 
+- 요일 보정 계수 `DAY_OF_WEEK_WEIGHT` 상수 후보 (v2.0 가중치 조정 시)
+- 토요일 예측 신뢰도 티어 하향 (-5% 보정) 검토
+- 일요일: 보정 불필요 (71% = 전체 평균 이상)
+
+**Results**: 관찰 패턴 박제. v2.0 n=150 도달 후 통계 유의성 검증 필요 (N=25 소표본).
+
+**재사용 가능**: ✅ 연속 시리즈 구조를 가진 모든 스포츠. NBA 홈/원정 back-to-back, MLB 3~4게임 시리즈에도 동일 패턴 존재 가능.
+
+---
+
 ## 🔬 패턴 추출 — cycle 1400 (2026-06-27)
 
 ### P1 — Neutral-Factor Sparse Detection (ai_agent / data_pipeline)
