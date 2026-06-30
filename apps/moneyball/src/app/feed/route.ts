@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { createClient } from '@/lib/supabase/server';
 import {
   type TeamCode,
@@ -118,6 +119,7 @@ export async function GET() {
     insightsDates = await listInsightsDates(10);
   } catch (e) {
     console.warn("[feed] insights dates query failed:", errMsg(e));
+    Sentry.captureException(e, { tags: { silent_drift_family: 'wave_174', component: 'feed', op: 'insights-dates-query' } });
   }
   for (const date of insightsDates) {
     const link = `${SITE_URL}/insights/${date}`;

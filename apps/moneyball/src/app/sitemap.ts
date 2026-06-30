@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import * as Sentry from "@sentry/nextjs";
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
@@ -199,6 +200,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (e) {
     console.warn('[sitemap] insights dates query failed:', errMsg(e));
+    Sentry.captureException(e, { tags: { silent_drift_family: 'wave_174', component: 'sitemap', op: 'insights-dates-query' } });
   }
 
   try {
@@ -249,6 +251,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (e) {
     console.warn('[sitemap] games query failed, serving static routes only:', errMsg(e));
+    Sentry.captureException(e, { tags: { silent_drift_family: 'wave_174', component: 'sitemap', op: 'games-query' } });
   }
 
   // /lotto/archive/[date] 동적 URL — plan #6 Step A (cycle 882~). data/lotto-picks/ glob → 회차별 archive 색인 활성.
