@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@/lib/supabase/server';
 import {
   DAY_MS,
@@ -231,8 +232,8 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
         });
       }
     }
-  } catch {
-    // Index population is best-effort — silent fallback if DB unreachable.
+  } catch (err) {
+    Sentry.captureException(err, { tags: { silent_drift_family: 'wave_176', component: 'search', op: 'build-index-players' } });
   }
 
   // 4) Recent game dates — last 30 distinct (within 90 day window).
@@ -266,8 +267,8 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
         });
       }
     }
-  } catch {
-    // best-effort
+  } catch (err) {
+    Sentry.captureException(err, { tags: { silent_drift_family: 'wave_176', component: 'search', op: 'build-index-dates' } });
   }
 
   return entries;
