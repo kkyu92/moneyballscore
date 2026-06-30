@@ -21,6 +21,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare";
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -70,10 +71,10 @@ export default async function MatchupPage({ params }: PageProps) {
 
   const [profile, factorA, factorB, formA, formB] = await Promise.all([
     buildMatchupProfile(pair),
-    buildTeamFactorAverages(pair.codeA).catch(() => EMPTY_FACTOR_AVERAGES),
-    buildTeamFactorAverages(pair.codeB).catch(() => EMPTY_FACTOR_AVERAGES),
-    buildTeamRecentForm(pair.codeA, 5).catch(() => EMPTY_RECENT_FORM),
-    buildTeamRecentForm(pair.codeB, 5).catch(() => EMPTY_RECENT_FORM),
+    buildTeamFactorAverages(pair.codeA).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeA" })),
+    buildTeamFactorAverages(pair.codeB).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeB" })),
+    buildTeamRecentForm(pair.codeA, 5).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" })),
+    buildTeamRecentForm(pair.codeB, 5).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" })),
   ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 

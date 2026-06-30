@@ -19,6 +19,7 @@ import { TeamEloChart } from "@/components/teams/TeamEloChart";
 import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 1800; // TEAMS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -83,7 +84,7 @@ export default async function TeamPage({ params }: PageProps) {
 
   const [profile, eloTrend] = await Promise.all([
     buildTeamProfile(code),
-    buildTeamEloTrend(code).catch(() => ({ points: [] })),
+    buildTeamEloTrend(code).catch((err) => captureFallback(err, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" })),
   ]);
   if (!profile) notFound();
 
