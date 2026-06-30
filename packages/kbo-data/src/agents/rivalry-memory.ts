@@ -13,6 +13,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { assertSelectOk, errMsg, type TeamCode } from '@moneyball/shared';
 import { TIME_WINDOWS } from '../context/domain';
+import { captureRivalryMemoryFallback } from './validator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -79,7 +80,15 @@ export async function getRivalryBlock(params: {
     return { recentGames, memories, promptBlock };
   } catch (err) {
     // Supabase timeout/네트워크 등 — throw 금지, 빈 블록 반환
-    console.warn('[rivalry-memory] query failed, returning empty block:', errMsg(err));
+    const message = errMsg(err);
+    console.warn('[rivalry-memory] query failed, returning empty block:', message);
+    void captureRivalryMemoryFallback({
+      source: 'getRivalryBlock',
+      homeTeam: params.homeTeam,
+      awayTeam: params.awayTeam,
+      date: params.date,
+      errorMessage: message,
+    });
     return EMPTY_BLOCK;
   }
 }
@@ -118,10 +127,18 @@ async function fetchRecentH2H(
     const out = assertSelectOk<any[]>(result, 'rivalry-memory.fetchRecentH2H.games');
     data = out.data;
   } catch (e) {
+    const message = errMsg(e);
     console.error(
       '[rivalry-memory] fetchRecentH2H select failed:',
-      errMsg(e),
+      message,
     );
+    void captureRivalryMemoryFallback({
+      source: 'fetchRecentH2H',
+      homeTeam: home,
+      awayTeam: away,
+      date,
+      errorMessage: message,
+    });
     return [];
   }
 
@@ -169,10 +186,18 @@ async function fetchMemories(
     const out = assertSelectOk<any[]>(result, 'rivalry-memory.fetchMemories.agent_memories');
     data = out.data;
   } catch (e) {
+    const message = errMsg(e);
     console.error(
       '[rivalry-memory] fetchMemories select failed:',
-      errMsg(e),
+      message,
     );
+    void captureRivalryMemoryFallback({
+      source: 'fetchMemories',
+      homeTeam: home,
+      awayTeam: away,
+      date,
+      errorMessage: message,
+    });
     return [];
   }
 

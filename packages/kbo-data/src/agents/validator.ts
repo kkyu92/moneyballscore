@@ -800,6 +800,53 @@ export async function captureJudgeParseFallback(meta: JudgeParseFailureMeta): Pr
   }
 }
 
+export interface RivalryMemoryFailureMeta {
+  source: 'fetchRecentH2H' | 'fetchMemories' | 'getRivalryBlock';
+  homeTeam: string;
+  awayTeam: string;
+  date: string;
+  errorMessage: string;
+}
+
+// rivalry-memory.ts per-source tolerant 패턴 (console.error level up only, Sentry silent).
+// 운영 production Sentry 가시화 누락 → 빈 블록 fallback 이 "정상 매치업 컨텍스트" 로 위장 가능.
+// cycle 1425 wave 175 silent drift family — judge-agent (cycle 1400 P2) 와 동일 family.
+export async function captureRivalryMemoryFallback(meta: RivalryMemoryFailureMeta): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`rivalry_memory_fallback: ${meta.source}: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        rivalry_memory_fallback: 'true',
+        agent: 'rivalry-memory',
+        source: meta.source,
+      },
+      extra: {
+        home_team: meta.homeTeam,
+        away_team: meta.awayTeam,
+        date: meta.date,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
 export async function captureAgentFallback(meta: AgentFailureMeta): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
 
