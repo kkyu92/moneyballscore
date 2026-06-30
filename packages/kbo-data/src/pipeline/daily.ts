@@ -656,7 +656,7 @@ export async function runDailyPipeline(
     if (sparseNeutralCount >= PREDICTION_SPARSE_THRESHOLD) {
       const cohort = productionWeights ? 'v2.0-shadow' : 'v1.8';
       captureSparsePredictionAlert({
-        date,
+        date: targetDate,
         game: `${game.homeTeam} vs ${game.awayTeam}`,
         cohort,
         neutralCount: sparseNeutralCount,
