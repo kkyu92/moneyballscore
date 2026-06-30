@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
-import { buildAllTeamAccuracy, buildMatchupData } from '@/lib/standings/buildTeamAccuracy';
+import { buildAllTeamAccuracy, buildMatchupData, buildTeamBiasAnalysis } from '@/lib/standings/buildTeamAccuracy';
 import { TeamMatchupCards } from '@/components/accuracy/TeamMatchupCards';
+import { TeamBiasTable } from '@/components/accuracy/TeamBiasTable';
 import { ModelVersionHistory } from '@/components/accuracy/ModelVersionHistory';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { TableOfContents } from '@/components/shared/TableOfContents';
@@ -81,6 +82,7 @@ const TOC_ITEMS = [
   { id: 'confidence', label: 'AI 확신도' },
   { id: 'versions', label: '모델 버전별' },
   { id: 'teams', label: '팀별 성과' },
+  { id: 'bias', label: '팀별 예측 편향' },
   { id: 'matchup', label: '상대 강약' },
 ];
 
@@ -248,7 +250,7 @@ export default async function AccuracyPage() {
   const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
 
-  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, fallbackResult] = await Promise.all([
+  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult] = await Promise.all([
     supabase
       .from('predictions')
       .select('confidence, is_correct, verified_at, scoring_rule, model_version, reasoning->homeWinProb')
@@ -272,6 +274,7 @@ export default async function AccuracyPage() {
       .not('is_correct', 'is', null),
     buildAllTeamAccuracy(),
     buildMatchupData(),
+    buildTeamBiasAnalysis(),
     supabase
       .from('predictions')
       .select('model_version, predicted_at')
@@ -312,6 +315,7 @@ export default async function AccuracyPage() {
   const v18SubCohort = buildV18SubCohort(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
+  const standingsAvailable = biasRows.some((r) => r.actualWinPct != null);
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
@@ -916,6 +920,20 @@ export default async function AccuracyPage() {
               </tbody>
             </table>
           </div>
+        </section>
+      )}
+
+      {/* 팀별 예측 편향 분석 */}
+      {biasRows.length > 0 && (
+        <section id="bias" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">팀별 예측 편향 분석</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              모델이 특정 팀의 승리를 실제 승률 대비 얼마나 과잉/과소 예측하는지 보여줍니다.
+              편향 갭이 큰 팀은 모델 가중치 조정 후보입니다.
+            </p>
+          </div>
+          <TeamBiasTable rows={biasRows} standingsAvailable={standingsAvailable} />
         </section>
       )}
 

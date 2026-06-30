@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildAllTeamAccuracy } from "../buildTeamAccuracy";
+import { buildAllTeamAccuracy, buildTeamBiasAnalysis } from "../buildTeamAccuracy";
 
 interface MockOptions {
   error?: { message: string } | null;
@@ -24,6 +24,9 @@ let supabaseMock: ReturnType<typeof makeMock>;
 vi.mock("@/lib/supabase/server", () => ({
   createClient: () => Promise.resolve(supabaseMock),
 }));
+
+const { fetchStandingsMock } = vi.hoisted(() => ({ fetchStandingsMock: vi.fn() }));
+vi.mock("@moneyball/kbo-data", () => ({ fetchStandings: fetchStandingsMock }));
 
 describe("buildAllTeamAccuracy", () => {
   afterEach(() => vi.clearAllMocks());
@@ -90,5 +93,73 @@ describe("buildAllTeamAccuracy", () => {
     expect(builder.match).toHaveBeenCalledWith(
       expect.objectContaining({ debate_version: expect.any(String) }),
     );
+  });
+});
+
+describe("buildTeamBiasAnalysis", () => {
+  afterEach(() => vi.clearAllMocks());
+
+  it("biasGap = predictedWinRate - actualWinPct 계산 정확", async () => {
+    supabaseMock = makeMock({
+      data: [
+        // LG home (confidence=0.7 → LG predicted win), is_correct=true
+        { confidence: 0.7, is_correct: true,  game: { home_team: { code: "LG" }, away_team: { code: "HT" } } },
+        { confidence: 0.7, is_correct: true,  game: { home_team: { code: "LG" }, away_team: { code: "HT" } } },
+        { confidence: 0.7, is_correct: false, game: { home_team: { code: "LG" }, away_team: { code: "HT" } } },
+        { confidence: 0.7, is_correct: false, game: { home_team: { code: "LG" }, away_team: { code: "HT" } } },
+        { confidence: 0.7, is_correct: false, game: { home_team: { code: "LG" }, away_team: { code: "HT" } } },
+      ],
+    });
+    fetchStandingsMock.mockResolvedValue([
+      { teamCode: "LG", winPct: 0.4, rank: 1, games: 10, wins: 4, draws: 0, losses: 6, gamesBehind: 0, recent10: "" },
+      { teamCode: "HT", winPct: 0.5, rank: 2, games: 10, wins: 5, draws: 0, losses: 5, gamesBehind: 0, recent10: "" },
+    ]);
+
+    const result = await buildTeamBiasAnalysis();
+    const lg = result.find((r) => r.teamCode === "LG");
+    expect(lg).toBeDefined();
+    // LG home 5경기 모두 confidence=0.7 → predictedHomeWin=true → LG predictedWinN=5
+    expect(lg!.predictedWinRate).toBeCloseTo(1.0);
+    // biasGap = 1.0 - 0.4 = 0.6
+    expect(lg!.biasGap).toBeCloseTo(0.6);
+    // 결과는 |biasGap| 내림차순
+    for (let i = 0; i < result.length - 1; i++) {
+      expect(Math.abs(result[i].biasGap ?? 0)).toBeGreaterThanOrEqual(Math.abs(result[i + 1].biasGap ?? 0));
+    }
+  });
+
+  it("totalN < 5 → 필터 제거", async () => {
+    supabaseMock = makeMock({
+      data: [
+        { confidence: 0.6, is_correct: true, game: { home_team: { code: "SS" }, away_team: { code: "NC" } } },
+        { confidence: 0.6, is_correct: true, game: { home_team: { code: "SS" }, away_team: { code: "NC" } } },
+        { confidence: 0.6, is_correct: true, game: { home_team: { code: "SS" }, away_team: { code: "NC" } } },
+        // SS=4, NC=4 — 둘 다 n<5는 아니지만 4건이면 필터 아웃 (min=5)
+      ],
+    });
+    fetchStandingsMock.mockResolvedValue([]);
+
+    const result = await buildTeamBiasAnalysis();
+    // 3경기 → SS=3, NC=3 모두 totalN < 5 → 빈 배열
+    expect(result).toEqual([]);
+  });
+
+  it("fetchStandings 실패 → actualWinPct null + biasGap null 허용", async () => {
+    supabaseMock = makeMock({
+      data: Array.from({ length: 5 }, () => ({
+        confidence: 0.65,
+        is_correct: true,
+        game: { home_team: { code: "WO" }, away_team: { code: "SK" } },
+      })),
+    });
+    fetchStandingsMock.mockRejectedValue(new Error("network error"));
+
+    const result = await buildTeamBiasAnalysis();
+    expect(result.length).toBeGreaterThan(0);
+    // standings 실패 → actualWinPct=null, biasGap=null
+    result.forEach((r) => {
+      expect(r.actualWinPct).toBeNull();
+      expect(r.biasGap).toBeNull();
+    });
   });
 });
