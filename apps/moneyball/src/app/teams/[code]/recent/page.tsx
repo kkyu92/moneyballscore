@@ -9,7 +9,8 @@ import {
   assertSelectOk,
   CURRENT_SCORING_RULE,
   RECENT_FORM_GAMES,
-  SITE_URL
+  SITE_URL,
+  TEAMS_ISR_SECONDS,
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';

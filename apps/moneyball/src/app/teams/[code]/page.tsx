@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   KBO_TEAMS,
   SMALL_SAMPLE_N,
+  TEAMS_ISR_SECONDS,
   type TeamCode,
   shortTeamName, SITE_URL,
   KBO_OFFICIAL_URL,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { shortTeamName, SITE_URL } from "@moneyball/shared";
+import { shortTeamName, SITE_URL, SEASONS_ISR_SECONDS } from "@moneyball/shared";
 import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
