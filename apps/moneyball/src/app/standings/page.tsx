@@ -9,6 +9,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
 import { TeamAccuracySortControl } from "@/components/standings/TeamAccuracySortControl";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 3600; // STANDINGS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -59,8 +60,8 @@ function Recent10({ text }: { text: string }) {
 export default async function StandingsPage() {
   const [standings, teamAccuracy, eloTrend] = await Promise.all([
     buildStandings(),
-    buildAllTeamAccuracy().catch(() => []),
-    buildEloTrend().catch(() => ({ points: [], teams: [] })),
+    buildAllTeamAccuracy().catch((err) => captureFallback(err, [], { route: "/standings", source: "buildAllTeamAccuracy" })),
+    buildEloTrend().catch((err) => captureFallback(err, { points: [], teams: [] }, { route: "/standings", source: "buildEloTrend" })),
   ]);
 
   const jsonLd = {

@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { SITE_HOST } from "@moneyball/shared";
 import { buildPitcherProfile } from "@/lib/players/buildPitcherProfile";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -23,7 +24,7 @@ export default async function Image({ params }: Props) {
   let label = "Pitcher";
   let teamLabel = "KBO";
   if (playerId != null) {
-    const profile = await buildPitcherProfile(playerId).catch(() => null);
+    const profile = await buildPitcherProfile(playerId).catch((err) => captureFallback(err, null, { route: "/players/[id]/opengraph-image", source: "buildPitcherProfile" }));
     if (profile) {
       label = profile.nameKo;
       teamLabel = profile.teamName ?? "KBO";

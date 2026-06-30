@@ -37,6 +37,7 @@ import { YesterdayResultsSection, type YesterdayGame } from "@/components/predic
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { getRecentWeeks, getCurrentWeek } from "@/lib/reviews/computeWeekRange";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import Link from "next/link";
 
@@ -495,9 +496,9 @@ export default async function HomePage() {
     getSeasonAccuracy(),
     getWeekAheadSchedule(),
     getYesterdayResults(),
-    buildStandings().catch(() => []),
-    buildAllTeamAccuracy().catch(() => []),
-    getRecentWeeksAccuracy().catch(() => [] as WeeklyTrendPoint[]),
+    buildStandings().catch((err) => captureFallback(err, [], { route: "/", source: "buildStandings" })),
+    buildAllTeamAccuracy().catch((err) => captureFallback(err, [], { route: "/", source: "buildAllTeamAccuracy" })),
+    getRecentWeeksAccuracy().catch((err) => captureFallback(err, [] as WeeklyTrendPoint[], { route: "/", source: "getRecentWeeksAccuracy" })),
   ]);
   const teamAccuracyMap = new Map(teamAccuracyRows.map((r) => [r.teamCode, r]));
 
@@ -548,7 +549,7 @@ export default async function HomePage() {
   const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
   const bigMatchId = bigMatch?.id;
 
-  const divergenceGame = await getTodayDivergenceGame(games).catch(() => null);
+  const divergenceGame = await getTodayDivergenceGame(games).catch((err) => captureFallback(err, null, { route: "/", source: "getTodayDivergenceGame" }));
 
   return (
     <div className="space-y-8">
