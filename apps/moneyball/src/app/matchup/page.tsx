@@ -44,11 +44,10 @@ export default function MatchupIndexPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ label: '팀 간 매치업' }]} />
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold">팀 간 매치업</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          KBO {KBO_TEAM_COUNT}팀 × {KBO_HEAD_TO_HEAD_PAIRS}가지 맞대결 조합. 상대전적과 AI 예측 적중률을 조합별로
-          확인하세요.
+      <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
+        <h1 className="text-2xl font-bold">팀 간 매치업</h1>
+        <p className="text-sm text-white/70">
+          KBO {KBO_TEAM_COUNT}팀 × {KBO_HEAD_TO_HEAD_PAIRS}가지 맞대결 조합. 상대전적과 AI 예측 적중률을 조합별로 확인하세요.
         </p>
       </header>
 

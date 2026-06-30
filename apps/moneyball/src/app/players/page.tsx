@@ -106,9 +106,9 @@ export default async function PlayersIndexPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Breadcrumb items={[{ label: '선수 리더보드' }]} />
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold">선수 리더보드</h1>
-        <p className="text-gray-500 dark:text-gray-400">
+      <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
+        <h1 className="text-2xl font-bold">선수 리더보드</h1>
+        <p className="text-sm text-white/70">
           KBO 시즌 주요 선수 성과. 예측 엔진에 입력된 통계 기반.
         </p>
       </header>
