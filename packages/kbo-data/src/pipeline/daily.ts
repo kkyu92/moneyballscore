@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   toKSTDateString, KBO_STADIUM_COORDS, errMsg, CURRENT_SCORING_RULE,
@@ -193,6 +194,9 @@ export async function runDailyPipeline(
       }
     } catch (e) {
       console.error('[Pipeline] pipeline_runs insert failed:', errMsg(e));
+      Sentry.captureException(e, {
+        tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'pipeline_runs_insert' },
+      });
     }
 
     // Telegram status — predict 는 (predictions>0 || errors>0) 일 때만.
@@ -200,7 +204,12 @@ export async function runDailyPipeline(
     // (predicate 단일 source = notify-status-predicate.ts).
     if (shouldNotifyPipelineStatus(mode, result.predictionsGenerated, result.errors.length)) {
       try { await notifyPipelineStatus(result, durationMs); }
-      catch (e) { console.error('[Pipeline] notifyPipelineStatus failed:', errMsg(e)); }
+      catch (e) {
+        console.error('[Pipeline] notifyPipelineStatus failed:', errMsg(e));
+        Sentry.captureException(e, {
+          tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'notifyPipelineStatus' },
+        });
+      }
     }
 
     // silent drift family 사례 11 (cycle 813) — predict_final
@@ -220,6 +229,9 @@ export async function runDailyPipeline(
       });
     } catch (e) {
       console.error('[Pipeline] captureSilentDriftAlert failed:', errMsg(e));
+      Sentry.captureException(e, {
+        tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'captureSilentDriftAlert' },
+      });
     }
 
     return result;
@@ -425,7 +437,12 @@ export async function runDailyPipeline(
         results_sent_at: new Date().toISOString(),
         results_count: verifyResults.length,
       });
-    } catch (e) { console.error('[Pipeline] notifyResults failed:', errMsg(e)); }
+    } catch (e) {
+      console.error('[Pipeline] notifyResults failed:', errMsg(e));
+      Sentry.captureException(e, {
+        tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'notifyResults' },
+      });
+    }
 
     return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
   }
