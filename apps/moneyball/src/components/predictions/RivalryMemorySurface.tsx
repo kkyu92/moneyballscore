@@ -13,6 +13,7 @@
  */
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import * as Sentry from "@sentry/nextjs";
 import { KBO_TEAMS, shortTeamName, type TeamCode } from "@moneyball/shared";
 
 export interface MatchupMemory {
@@ -68,6 +69,9 @@ export async function fetchMatchupMemories(
 
     if (error) {
       console.warn("[RivalryMemorySurface] fetch failed:", error.message);
+      Sentry.captureException(new Error(error.message), {
+        tags: { silent_drift_family: 'wave_173', component: 'RivalryMemorySurface', op: 'fetchMatchupMemories.query' },
+      });
       return [];
     }
     if (!data) return [];
@@ -80,6 +84,9 @@ export async function fetchMatchupMemories(
     }));
   } catch (err) {
     console.warn("[RivalryMemorySurface] query exception:", err);
+    Sentry.captureException(err, {
+      tags: { silent_drift_family: 'wave_173', component: 'RivalryMemorySurface', op: 'fetchMatchupMemories.exception' },
+    });
     return [];
   }
 }
