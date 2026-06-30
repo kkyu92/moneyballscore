@@ -12,7 +12,7 @@ function gapColor(gap: number | null): string {
   if (gap == null) return "";
   if (gap > 0.15) return "text-red-600 dark:text-red-400 font-semibold";
   if (gap < -0.15) return "text-blue-600 dark:text-blue-400 font-semibold";
-  if (Math.abs(gap) <= 0.05) return "text-green-600 dark:text-green-400 font-semibold";
+  if (Math.abs(gap) <= 0.05) return "text-brand-600 dark:text-brand-400 font-semibold";
   return "";
 }
 
