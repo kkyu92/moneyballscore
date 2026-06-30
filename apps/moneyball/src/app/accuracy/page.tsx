@@ -21,7 +21,6 @@ import {
   BRIER_BASELINE,
   ROLLING_ACCURACY_WINDOW_DAYS,
   ROLLING_ACCURACY_TOTAL_DAYS,
-  ACCURACY_ISR_SECONDS,
   KST_TIMEZONE,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';

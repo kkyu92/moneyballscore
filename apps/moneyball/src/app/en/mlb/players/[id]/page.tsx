@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
-  MLB_ISR_SECONDS,
   type MlbTeamCode,
   mlbShortTeamName, SITE_URL
 } from "@moneyball/shared";

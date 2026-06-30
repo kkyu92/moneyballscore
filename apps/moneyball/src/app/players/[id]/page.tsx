@@ -7,7 +7,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PitcherFipTrend } from "@/components/players/PitcherFipTrend";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
-import { PLAYERS_ISR_SECONDS, shortTeamName, SITE_URL } from '@moneyball/shared';
+import {shortTeamName, SITE_URL } from '@moneyball/shared';
 
 export const revalidate = 1800; // PLAYERS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 

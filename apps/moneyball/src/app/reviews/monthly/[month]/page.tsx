@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, REVIEWS_MONTHLY_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,

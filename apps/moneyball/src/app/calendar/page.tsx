@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, CALENDAR_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
+import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';

@@ -12,7 +12,6 @@ import { buildConfidenceBuckets } from "@/lib/dashboard/buildConfidenceBuckets";
 import { buildModelTuningInsights } from "@/lib/dashboard/buildModelTuningInsights";
 import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import {
-  DASHBOARD_ISR_SECONDS,
   KBO_FACTOR_COUNT,
   KBO_SEASON_YEAR,
   KBO_TEAMS,

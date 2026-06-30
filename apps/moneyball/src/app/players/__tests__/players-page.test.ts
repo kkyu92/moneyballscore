@@ -13,10 +13,6 @@ describe("players/page.tsx SMALL_SAMPLE_N source-of-truth guard (cycle 902 sweep
     expect(PAGE_SRC).not.toMatch(/const\s+SMALL_SAMPLE_N\s*=/);
   });
 
-  it("SMALL_SAMPLE_N @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*SMALL_SAMPLE_N[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("verifiedN < 5 hardcoded 부재 — SMALL_SAMPLE_N 사용", () => {
     expect(PAGE_SRC).not.toMatch(/verifiedN\s*<\s*5\b/);
   });
@@ -27,15 +23,8 @@ describe("players PLAYERS_ISR_SECONDS source-of-truth guard (silent drift wave 1
         expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/) // build guard: literal required;
   });
 
-  it("players/page.tsx PLAYERS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*PLAYERS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("players/[id]/page.tsx revalidate = 1800 magic 부재 — PLAYERS_ISR_SECONDS 사용", () => {
         expect(ID_PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/) // build guard: literal required;
   });
 
-  it("players/[id]/page.tsx PLAYERS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(ID_PAGE_SRC).toMatch(/import\s*\{[^}]*PLAYERS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

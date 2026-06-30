@@ -11,7 +11,4 @@ describe("predictions PREDICTIONS_ISR_SECONDS source-of-truth guard (silent drif
     expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*300\b/);
   });
 
-  it("predictions/page.tsx PREDICTIONS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*PREDICTIONS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

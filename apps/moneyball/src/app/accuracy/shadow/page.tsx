@@ -7,8 +7,7 @@ import {
   SHADOW_WEIGHTS,
   SHADOW_SCORING_RULE,
   CURRENT_SCORING_RULE,
-  V2_PROMOTION_COHORT_N,
-  ACCURACY_ISR_SECONDS, SITE_URL
+  V2_PROMOTION_COHORT_N, SITE_URL
 } from "@moneyball/shared";
 import { shadowBrierDelta } from "@moneyball/kbo-data";
 import { pairProbForRow } from "@/lib/accuracy/shadow-pair-prob";

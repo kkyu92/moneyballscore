@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import {
-  ANALYSIS_GAME_ISR_SECONDS,
   KBO_FACTOR_COUNT,
   KBO_TEAMS,
   KBO_OFFICIAL_URL,

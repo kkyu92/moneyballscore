@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
-  ANALYSIS_INDEX_ISR_SECONDS,
   assertSelectOk,
   classifyWinnerProb,
   ELO_NEUTRAL,

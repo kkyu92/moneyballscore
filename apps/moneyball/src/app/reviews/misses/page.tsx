@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, WINNER_PROB_LEAN_PCT, REVIEWS_WEEKLY_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
+import { shortTeamName, WINNER_PROB_LEAN_PCT, SITE_URL } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";

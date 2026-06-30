@@ -12,15 +12,8 @@ describe("teams TEAMS_ISR_SECONDS source-of-truth guard (silent drift family wav
     expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
   });
 
-  it("teams/[code]/page.tsx TEAMS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*TEAMS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("teams/[code]/recent/page.tsx revalidate = 1800 literal (Next.js 16 Turbopack: literal required)", () => {
     expect(RECENT_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*1800\b/);
   });
 
-  it("teams/[code]/recent/page.tsx TEAMS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(RECENT_SRC).toMatch(/import\s*\{[^}]*TEAMS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

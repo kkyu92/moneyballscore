@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, REVIEWS_WEEKLY_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL } from '@moneyball/shared';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
   buildWeeklyReview,

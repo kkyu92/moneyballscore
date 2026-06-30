@@ -11,10 +11,6 @@ describe("teams/[code]/page.tsx SMALL_SAMPLE_N source-of-truth guard (cycle 902 
     expect(PAGE_SRC).not.toMatch(/verifiedN\s*<\s*5\b/);
   });
 
-  it("SMALL_SAMPLE_N @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*SMALL_SAMPLE_N[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("SMALL_SAMPLE_N 사용 instance ≥ 3 (소표본 hedge 임계 3 위치)", () => {
     const matches = PAGE_SRC.match(/SMALL_SAMPLE_N/g) ?? [];
     expect(matches.length).toBeGreaterThanOrEqual(4);

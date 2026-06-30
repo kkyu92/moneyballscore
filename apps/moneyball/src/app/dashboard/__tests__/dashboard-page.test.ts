@@ -15,15 +15,8 @@ describe("dashboard DASHBOARD_ISR_SECONDS source-of-truth guard (silent drift wa
         expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*86400\b/) // build guard: literal required;
   });
 
-  it("dashboard/page.tsx DASHBOARD_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*DASHBOARD_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("v2-preview/page.tsx revalidate = 86400 magic 부재 — DASHBOARD_ISR_SECONDS 사용", () => {
         expect(V2_PREVIEW_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*86400\b/) // build guard: literal required;
   });
 
-  it("v2-preview/page.tsx DASHBOARD_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(V2_PREVIEW_SRC).toMatch(/import\s*\{[^}]*DASHBOARD_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

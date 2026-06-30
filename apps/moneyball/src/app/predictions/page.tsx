@@ -5,7 +5,6 @@ import {
   classifyWinnerProb,
   KBO_FACTOR_COUNT,
   pickTierEmoji,
-  PREDICTIONS_ISR_SECONDS,
   SITE_URL,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,

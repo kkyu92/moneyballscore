@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
-import { KBO_FACTOR_COUNT, LOTTO_ARCHIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, SITE_URL } from "@moneyball/shared";
 import {
   LottoDataSchema,
   LottoScoreBacktestSchema,

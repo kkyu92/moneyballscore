@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LOTTO_ARCHIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import {SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { listArchiveDates } from "@/lib/lotto/archive";
 

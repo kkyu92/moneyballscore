@@ -16,20 +16,9 @@ describe("analysis ANALYSIS_*_ISR_SECONDS source-of-truth guard (silent drift wa
     // build guard: route segment revalidate must be literal not identifier (Next.js 16 Turbopack)
   });
 
-  it("analysis/page.tsx ANALYSIS_INDEX_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(INDEX_SRC).toMatch(
-      /import\s*\{[^}]*ANALYSIS_INDEX_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/,
-    );
-  });
-
   it("analysis/game/[id]/page.tsx revalidate = 600 literal (Next.js 16 Turbopack: literal required)", () => {
     expect(GAME_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*600\b/);
     // build guard: route segment revalidate must be literal not identifier (Next.js 16 Turbopack)
   });
 
-  it("analysis/game/[id]/page.tsx ANALYSIS_GAME_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(GAME_SRC).toMatch(
-      /import\s*\{[^}]*ANALYSIS_GAME_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/,
-    );
-  });
 });

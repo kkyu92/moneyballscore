@@ -12,15 +12,8 @@ describe("seasons SEASONS_ISR_SECONDS source-of-truth guard (silent drift family
     expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*600\b/);
   });
 
-  it("seasons/page.tsx SEASONS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*SEASONS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("seasons/[year]/page.tsx revalidate = 600 literal (Next.js 16 Turbopack: literal required)", () => {
     expect(YEAR_PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*600\b/);
   });
 
-  it("seasons/[year]/page.tsx SEASONS_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(YEAR_PAGE_SRC).toMatch(/import\s*\{[^}]*SEASONS_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

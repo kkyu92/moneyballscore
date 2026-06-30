@@ -5,7 +5,6 @@ import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
   SMALL_SAMPLE_N,
-  MLB_LIVE_ISR_SECONDS,
   type MlbTeamCode,
   mlbShortTeamName, SITE_URL
 } from "@moneyball/shared";

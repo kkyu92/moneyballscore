@@ -11,7 +11,4 @@ describe("ads.txt ADS_TXT_ISR_SECONDS source-of-truth guard (silent drift family
     expect(ROUTE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*3600\b/);
   });
 
-  it("ads.txt/route.ts ADS_TXT_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(ROUTE_SRC).toMatch(/import\s*\{[^}]*ADS_TXT_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

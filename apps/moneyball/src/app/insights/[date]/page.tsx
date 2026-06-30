@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JudgeReasoningCard } from "@/components/predictions/JudgeReasoningCard";
 import { FactorBreakdown } from "@/components/predictions/FactorBreakdown";
 import { DebateTimeline } from "@/components/insights/DebateTimeline";
-import { KBO_FACTOR_COUNT, shortTeamName, INSIGHTS_ISR_HOURS, INSIGHTS_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, shortTeamName, INSIGHTS_ISR_HOURS, SITE_URL } from "@moneyball/shared";
 import {
   getInsightsForDate,
   isValidInsightsDate,

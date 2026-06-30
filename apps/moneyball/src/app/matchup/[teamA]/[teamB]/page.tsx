@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { type TeamCode, shortTeamName, josa, MATCHUP_ISR_SECONDS, SITE_URL } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, SITE_URL } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,

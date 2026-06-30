@@ -12,15 +12,8 @@ describe("lotto/archive LOTTO_ARCHIVE_ISR_SECONDS source-of-truth guard (silent 
     expect(PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*86400\b/);
   });
 
-  it("lotto/archive/page.tsx LOTTO_ARCHIVE_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(PAGE_SRC).toMatch(/import\s*\{[^}]*LOTTO_ARCHIVE_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
-
   it("lotto/archive/[date]/page.tsx revalidate = 86400 literal (Next.js 16 Turbopack: literal required)", () => {
     expect(DATE_PAGE_SRC).toMatch(/export\s+const\s+revalidate\s*=\s*86400\b/);
   });
 
-  it("lotto/archive/[date]/page.tsx LOTTO_ARCHIVE_ISR_SECONDS @moneyball/shared import 포함", () => {
-    expect(DATE_PAGE_SRC).toMatch(/import\s*\{[^}]*LOTTO_ARCHIVE_ISR_SECONDS[^}]*\}\s*from\s*['"]@moneyball\/shared['"]/);
-  });
 });

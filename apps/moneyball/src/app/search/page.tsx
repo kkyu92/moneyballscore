@@ -5,7 +5,6 @@ import {
   DAY_MS,
   KBO_TEAMS,
   MLB_TEAM_COUNT,
-  SEARCH_ISR_SECONDS,
   assertSelectOk,
   type TeamCode,
   type SelectResult,

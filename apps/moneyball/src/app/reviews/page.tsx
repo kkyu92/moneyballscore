@@ -4,8 +4,7 @@ import {
   type TeamCode,
   shortTeamName,
   winnerProbOf,
-  assertSelectOk,
-  REVIEWS_INDEX_ISR_SECONDS, SITE_URL
+  assertSelectOk, SITE_URL
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";

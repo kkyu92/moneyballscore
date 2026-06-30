@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_TEAM_COUNT, MLB_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, SITE_URL } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 

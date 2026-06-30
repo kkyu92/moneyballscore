@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PLAYERS_ISR_SECONDS, SMALL_SAMPLE_N, type TeamCode, SITE_URL } from "@moneyball/shared";
+import {SMALL_SAMPLE_N, type TeamCode, SITE_URL } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";

@@ -4,7 +4,6 @@ import {
   MLB_TEAMS,
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
-  MLB_ISR_SECONDS,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide, SITE_URL

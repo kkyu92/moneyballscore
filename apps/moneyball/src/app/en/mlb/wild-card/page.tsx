@@ -5,7 +5,6 @@ import {
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
-  MLB_ISR_SECONDS,
   type MlbTeamCode,
   type MlbLeagueSide, SITE_URL
 } from "@moneyball/shared";

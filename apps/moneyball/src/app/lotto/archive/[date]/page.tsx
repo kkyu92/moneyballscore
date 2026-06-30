@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LOTTO_ARCHIVE_ISR_SECONDS, SITE_URL } from "@moneyball/shared";
+import {SITE_URL } from "@moneyball/shared";
 import { listArchiveDates, readArchiveVariants } from "@/lib/lotto/archive";
 import { parseLottoPicksMd, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
