@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk, type TeamCode } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
+import { fetchStandings, type StandingRow } from "@moneyball/kbo-data";
 
 export interface TeamAccuracyRow {
   teamCode: TeamCode;
@@ -33,6 +34,27 @@ interface PredRow {
     home_team: { code: string | null } | null;
     away_team: { code: string | null } | null;
   } | null;
+}
+
+interface BiasExtRow {
+  confidence: number | null;
+  is_correct: boolean | null;
+  game: {
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
+  } | null;
+}
+
+export interface TeamBiasRow {
+  teamCode: TeamCode;
+  totalN: number;
+  predictedWinN: number;
+  predictedWinRate: number | null;
+  verifiedN: number;
+  correctN: number;
+  accuracyRate: number | null;
+  actualWinPct: number | null;
+  biasGap: number | null; // predictedWinRate - actualWinPct
 }
 
 export async function buildAllTeamAccuracy(): Promise<TeamAccuracyRow[]> {
@@ -163,4 +185,76 @@ export async function buildMatchupData(): Promise<{
   );
 
   return { matchups, homeAway };
+}
+
+export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
+  const supabase = await createClient();
+
+  const [predResult, standings] = await Promise.all([
+    supabase
+      .from("predictions")
+      .select(
+        `
+        confidence,
+        is_correct,
+        game:games!predictions_game_id_fkey(
+          home_team:teams!games_home_team_id_fkey(code),
+          away_team:teams!games_away_team_id_fkey(code)
+        )
+      `,
+      )
+      .match(CURRENT_MODEL_FILTER)
+      .eq("prediction_type", "pre_game")
+      .not("is_correct", "is", null),
+    fetchStandings().catch((): StandingRow[] => []),
+  ]);
+
+  const { data } = assertSelectOk(predResult, "buildTeamBiasAnalysis");
+  if (!data || data.length === 0) return [];
+
+  const rows = data as unknown as BiasExtRow[];
+  const byTeam = new Map<string, { totalN: number; predictedWinN: number; verifiedN: number; correctN: number }>();
+
+  for (const row of rows) {
+    const homeCode = row.game?.home_team?.code;
+    const awayCode = row.game?.away_team?.code;
+    if (!homeCode || !awayCode) continue;
+    const predictedHomeWin = (row.confidence ?? 0.5) > 0.5;
+    const hit = row.is_correct === true;
+
+    for (const [code, isHome] of [[homeCode, true], [awayCode, false]] as [string, boolean][]) {
+      if (!byTeam.has(code)) byTeam.set(code, { totalN: 0, predictedWinN: 0, verifiedN: 0, correctN: 0 });
+      const entry = byTeam.get(code)!;
+      entry.totalN++;
+      entry.verifiedN++;
+      if (hit) entry.correctN++;
+      if (isHome ? predictedHomeWin : !predictedHomeWin) entry.predictedWinN++;
+    }
+  }
+
+  const standingsMap = new Map<string, number>();
+  for (const s of standings) standingsMap.set(s.teamCode, s.winPct);
+
+  return Array.from(byTeam.entries())
+    .map(([code, { totalN, predictedWinN, verifiedN, correctN }]) => {
+      const predictedWinRate = totalN > 0 ? predictedWinN / totalN : null;
+      const actualWinPct = standingsMap.get(code) ?? null;
+      const biasGap =
+        predictedWinRate != null && actualWinPct != null
+          ? predictedWinRate - actualWinPct
+          : null;
+      return {
+        teamCode: code as TeamCode,
+        totalN,
+        predictedWinN,
+        predictedWinRate,
+        verifiedN,
+        correctN,
+        accuracyRate: verifiedN > 0 ? correctN / verifiedN : null,
+        actualWinPct,
+        biasGap,
+      };
+    })
+    .filter((r) => r.totalN >= 5)
+    .sort((a, b) => Math.abs(b.biasGap ?? 0) - Math.abs(a.biasGap ?? 0));
 }
