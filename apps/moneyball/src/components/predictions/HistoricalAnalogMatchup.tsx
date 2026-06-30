@@ -13,6 +13,7 @@
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { shortTeamName, type TeamCode, CURRENT_SCORING_RULE } from "@moneyball/shared";
 
 interface AnalogRow {
@@ -85,6 +86,9 @@ export async function fetchHistoricalAnalogs(
 
     if (error) {
       console.warn("[HistoricalAnalogMatchup] fetch failed:", error.message);
+      Sentry.captureException(new Error(error.message), {
+        tags: { silent_drift_family: 'wave_173', component: 'HistoricalAnalogMatchup', op: 'fetchHistoricalAnalogs.query' },
+      });
       return [];
     }
     if (!data) return [];
@@ -104,6 +108,9 @@ export async function fetchHistoricalAnalogs(
       }));
   } catch (err) {
     console.warn("[HistoricalAnalogMatchup] query exception:", err);
+    Sentry.captureException(err, {
+      tags: { silent_drift_family: 'wave_173', component: 'HistoricalAnalogMatchup', op: 'fetchHistoricalAnalogs.exception' },
+    });
     return [];
   }
 }

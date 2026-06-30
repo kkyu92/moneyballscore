@@ -113,7 +113,10 @@ export function useLeaderboard(): LeaderboardState {
         } else {
           setSyncState('error');
         }
-      } catch {
+      } catch (err) {
+        Sentry.captureException(err, {
+          tags: { silent_drift_family: 'wave_173', component: 'use-leaderboard', op: 'leaderboard_join_sync' },
+        });
         setSyncState('error');
       }
     },
