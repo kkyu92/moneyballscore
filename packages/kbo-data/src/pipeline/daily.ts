@@ -34,7 +34,7 @@ import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
-import { captureSilentDriftAlert, captureSparsePredictionAlert } from './silent-drift-alert';
+import { captureSilentDriftAlert, captureSparsePredictionAlert, captureCreditExhaustedAlert } from './silent-drift-alert';
 import { shouldNotifyPipelineStatus } from './notify-status-predicate';
 import { insertShadowRow, insertShadowRowV20 } from './shadow-cohort';
 import {
@@ -232,6 +232,25 @@ export async function runDailyPipeline(
       Sentry.captureException(e, {
         tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'captureSilentDriftAlert' },
       });
+    }
+
+    // CREDIT_EXHAUSTED 감지 — debate fallback silent degradation 알림 (cycle 1446).
+    // predictions>0 이라 captureSilentDriftAlert 미발화 구간 → 별도 채널 보완.
+    // predict/predict_final mode 에서 1회만 발화 (최초 발화 cron 에서만).
+    if ((mode === 'predict' || mode === 'predict_final') && result.predictionsGenerated > 0) {
+      const creditErrors = result.errors.filter((e) => e.includes('CREDIT_EXHAUSTED'));
+      if (creditErrors.length > 0) {
+        try {
+          await captureCreditExhaustedAlert({
+            date: targetDate,
+            mode,
+            affectedGames: creditErrors.length,
+            errors: creditErrors,
+          });
+        } catch {
+          // silent — main path 보호
+        }
+      }
     }
 
     return result;
