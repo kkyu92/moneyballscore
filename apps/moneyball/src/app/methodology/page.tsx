@@ -123,10 +123,10 @@ const VERSION_HISTORY = [
       `head_to_head 5% → 3% (표본 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 강등.`,
   },
   {
-    version: "v2.0 (임계 도달, 결정 대기)",
+    version: "v2.0 (재조정 대기, v2.1-B rejected)",
     date: `n=${V2_PROMOTION_COHORT_N} crossed — /accuracy 참조`,
     change:
-      `임계 n=${V2_PROMOTION_COHORT_N} 달성 완료 — 전면 가중치 재조정 결정 대기 중. 실시간 cohort 진척은 /accuracy 페이지 참조.`,
+      `임계 n=${V2_PROMOTION_COHORT_N} 달성 완료 + v2.1-B shadow rejected (Brier 0.4635, n=52) — 전면 가중치 재조정 결정 대기 중. 실시간 cohort 진척은 /accuracy 페이지 참조.`,
   },
 ];
 

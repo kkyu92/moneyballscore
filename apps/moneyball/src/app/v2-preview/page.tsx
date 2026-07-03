@@ -13,7 +13,7 @@ import {
 const PAGE_URL = `${SITE_URL}/v2-preview`;
 const LIMIT = INSIGHTS_LIMIT;
 
-// noindex 내부 미리보기 — N={V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정 전까지 surface signal 차단.
+// noindex 내부 미리보기 — N={V2_PROMOTION_COHORT_N} 임계 달성 완료, v2.1-B rejected. surface signal 차단 유지.
 export const metadata: Metadata = {
   title: "v2 시뮬레이션 미리보기",
   description: `v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 ${CURRENT_SCORING_RULE} 예측 위에 재가중치 적용한 내부 미리보기. N=${V2_PROMOTION_COHORT_N} 임계 달성 완료 — v2.1-B rejected, v2.0 결정 대기.`,
