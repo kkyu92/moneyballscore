@@ -177,8 +177,8 @@ export default async function ShadowAccuracyPage() {
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {CURRENT_SCORING_RULE} (production) vs {SHADOW_SCORING_RULE} 가중치 일별 Brier + 적중률 delta. 동일
-          경기 동일 input 으로 quant 재계산 (debate LLM 호출 X, 비용 0). n={V2_PROMOTION_COHORT_N} 도달 후
-          production 적용 결정.
+          경기 동일 input 으로 quant 재계산 (debate LLM 호출 X, 비용 0). n={V2_PROMOTION_COHORT_N} 임계 달성 완료 —
+          v2.1-B rejected, v2.0 재조정 결정 대기.
         </p>
         <div
           role="status"
