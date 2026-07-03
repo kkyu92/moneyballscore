@@ -24,6 +24,7 @@ import {
   ROLLING_ACCURACY_TOTAL_DAYS,
   KST_TIMEZONE,
   CURRENT_SCORING_RULE,
+  PRODUCTION_ERA_HISTORY,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -615,7 +616,7 @@ export default async function AccuracyPage() {
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            scoring_rule 별 주차 Brier — v1.5 → v1.6 → v1.7-revert → v1.8 진화 추세 시각화.
+            scoring_rule 별 주차 Brier — {PRODUCTION_ERA_HISTORY.join(" → ")} 진화 추세 시각화.
           </p>
           <BrierTrendChart data={brierTrend} />
         </section>
