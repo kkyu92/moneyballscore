@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -341,7 +341,7 @@ export default function MlbFactorsHubEn() {
           KBO {KBO_N} Factors (Equivalent)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          The {KBO_N} factors from KBO model v1.8 mapped directly to the MLB domain. Only the data sources change — statsapi.mlb / FanGraphs MLB instead of KBO sources.
+          The {KBO_N} factors from KBO model {CURRENT_SCORING_RULE} mapped directly to the MLB domain. Only the data sources change — statsapi.mlb / FanGraphs MLB instead of KBO sources.
         </p>
         <ol className="space-y-4">
           {KBO_10_FACTORS.map((factor, idx) => (
@@ -449,7 +449,7 @@ export default function MlbFactorsHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ These weights = MLB v1.0 (KBO v1.8 mapping + Statcast {STAT_N} additions). Will update when model evolves.
+          ※ These weights = MLB v1.0 (KBO {CURRENT_SCORING_RULE} mapping + Statcast {STAT_N} additions). Will update when model evolves.
         </p>
         <p>
           ※ Weight source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C learning cohort = walk-forward expanding window (milestones n=27 / 60 / 150 / 300 / 1000 / 2430).

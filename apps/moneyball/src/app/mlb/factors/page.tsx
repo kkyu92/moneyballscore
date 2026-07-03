@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -341,7 +341,7 @@ export default function MlbFactorsHub() {
           KBO {KBO_N}팩터 (동등)
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          KBO 모델 v1.8 의 {KBO_N}팩터를 MLB 도메인에 그대로 매핑. data source 만 statsapi.mlb / FanGraphs MLB 로 교체.
+          KBO 모델 {CURRENT_SCORING_RULE} 의 {KBO_N}팩터를 MLB 도메인에 그대로 매핑. data source 만 statsapi.mlb / FanGraphs MLB 로 교체.
         </p>
         <ol className="space-y-4">
           {KBO_10_FACTORS.map((factor, idx) => (
@@ -449,7 +449,7 @@ export default function MlbFactorsHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ 본 가중치 = MLB v1.0 (KBO v1.8 매핑 + Statcast {STAT_N} 추가). 모델 진화 시 갱신.
+          ※ 본 가중치 = MLB v1.0 (KBO {CURRENT_SCORING_RULE} 매핑 + Statcast {STAT_N} 추가). 모델 진화 시 갱신.
         </p>
         <p>
           ※ 가중치 source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C 학습 cohort = walk-forward expanding window (milestone n=27 / 60 / 150 / 300 / 1000 / 2430).

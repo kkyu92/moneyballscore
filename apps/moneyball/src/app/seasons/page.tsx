@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_URL} from "@moneyball/shared";
+import { SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // 진행 시즌을 매일 반영하려면 인덱스도 짧게. 개별 시즌 페이지와 동일 10분.
@@ -74,7 +74,7 @@ export default function SeasonsIndexPage() {
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
           각 시즌 카드를 클릭하면 그 해의 정규시즌 + 포스트시즌 전체 결과,
           팀별 시즌 성적, 월별 득점 추이, 인상적인 경기 (역전·노히터·끝내기)
-          가 표시됩니다. 우리 예측 모델 (v1.5 ~ v1.8) 의 적중률은{" "}
+          가 표시됩니다. 우리 예측 모델 (v1.5 ~ {CURRENT_SCORING_RULE}) 의 적중률은{" "}
           <Link href="/accuracy" className="text-brand-500 hover:underline">
             /accuracy
           </Link>{" "}

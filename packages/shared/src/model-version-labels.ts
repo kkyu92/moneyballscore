@@ -64,6 +64,16 @@ export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
 export const PRODUCTION_COHORT_RULES: readonly ScoringRule[] = ['v1.8', 'v1.8-credit-fail'] as const;
 
 /**
+ * Production 진화 이력 (사용자 가시 layer — guide/accuracy Brier 추세 chart 설명).
+ * 순서 = 시간 순 (오래된 → 최신). shadow / credit-fail 제외 — 실제 prod era 만.
+ *
+ * silent drift family wave 182 (cycle 1443) — guide/page.tsx + accuracy/page.tsx 안
+ * "v1.5 → v1.6 → v1.7-revert → v1.8" 하드코딩 progression list 를 본 registry 로
+ * 통합. v2.0 promotion 시 본 tuple 에 'v2.0' append = 사용자 가시 layer 2곳 동기.
+ */
+export const PRODUCTION_ERA_HISTORY: readonly ScoringRule[] = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8'] as const;
+
+/**
  * Shadow cohort 라벨 — production 가중치 변경 X. quant only 재계산 (debate LLM 호출 X).
  * v2.1-B 가중치 (apps/moneyball/src/lib/predictions/v2Predictor.ts V2_1_B_WEIGHTS) +
  * shadow factor (park_weather, umpire_sz) weight>0 양쪽 evidence 누적.
