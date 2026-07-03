@@ -6,6 +6,7 @@ import {
   KBO_FACTOR_COUNT,
   V2_PROMOTION_COHORT_N,
   SITE_URL,
+  CURRENT_SCORING_RULE,
 } from "@moneyball/shared";
 
 const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
@@ -13,7 +14,7 @@ const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
 export const metadata: Metadata = {
   title: "v2 섀도우 모니터",
   description:
-    `v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정을 위한 모델 진화 트랜스페어런시 dashboard.`,
+    `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정을 위한 모델 진화 트랜스페어런시 dashboard.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "v2 섀도우 모니터 | MoneyBall Score",
@@ -44,7 +45,7 @@ export default function V2ShadowMonitorPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score v2 섀도우 모니터",
     description:
-      `v1.8 (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정.`,
+      `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정.`,
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
     datePublished: "2026-06-01",
@@ -82,13 +83,13 @@ export default function V2ShadowMonitorPage() {
         </h1>
         <p className="text-base text-brand-700 dark:text-brand-200 leading-relaxed">
           MoneyBall Score 의 모델 진화 과정을 모두 공개합니다. 현재 운용 중인
-          v1.8 가중치와 함께 v2.0-shadow · v2.1-B-shadow · v1.5 · v1.6 ·
+          {" "}{CURRENT_SCORING_RULE}{" "}가중치와 함께 v2.0-shadow · v2.1-B-shadow · v1.5 · v1.6 ·
           v1.7-revert era 별 적중률과 Brier 점수를 같은 cohort 위에서 비교하여,
           v2.0 가중치 확정 결정의 근거를 투명하게 박제합니다.
         </p>
         <p className="text-sm text-brand-600 dark:text-brand-300 leading-relaxed">
           <strong className="text-brand-800 dark:text-brand-100">결정 임계</strong>{" "}
-          = v1.8 real cohort n={V2_PROMOTION_COHORT_N} 도달. 도달 후 era별 factor
+          = {CURRENT_SCORING_RULE} real cohort n={V2_PROMOTION_COHORT_N} 도달. 도달 후 era별 factor
           backtest harness 실행 → v2.0 가중치 후보 평가 → 정식 적용 여부 결정.
           본 dashboard 는 cohort 갱신 시점마다 자동 갱신됩니다.
         </p>
