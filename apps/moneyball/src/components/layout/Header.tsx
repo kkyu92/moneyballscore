@@ -28,7 +28,7 @@ const KBO_NAV: NavItem[] = [
     items: [
       { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석", icon: "activity" },
       { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
-      { href: "/accuracy/shadow", label: "Shadow 적중률", description: "v2.1-B 섀도우 cohort 비교", icon: "bar-chart" },
+      { href: "/accuracy/shadow", label: "Shadow 적중률", description: "v2.1-B (rejected) cohort 아카이브", icon: "bar-chart" },
       { href: "/predictions", label: "예측 기록", description: "일자별 예측 아카이브", icon: "file-text" },
       { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표", icon: "bar-chart" },
     ],
