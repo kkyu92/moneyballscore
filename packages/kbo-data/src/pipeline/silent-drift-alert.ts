@@ -338,3 +338,69 @@ export async function captureSparsePredictionAlert(
     // silent — main path 보호
   }
 }
+
+// debate confidence flat 감지 임계 — max-min < 0.02 = 모든 예측이 사실상 동일 confidence.
+// P2 silent fallback 22일 패턴: judge parse fail 시 confidence=0.3 hardcode 반환.
+// captureJudgeParseFallback (per-game) 으로 개별 감지하지만 다수 게임 동시 flat 시
+// aggregate signal 이 더 명확 (cycle 1400 lesson P2 → 구조적 gap 박제).
+const CONFIDENCE_FLAT_SPREAD_THRESHOLD = 0.02;
+const CONFIDENCE_FLAT_MIN_GAMES = 3;
+
+/** debate confidence flat 여부 순수 판단 — 테스트 가능 헬퍼. */
+export function shouldConfidenceFlatAlert(confidences: number[]): boolean {
+  if (confidences.length < CONFIDENCE_FLAT_MIN_GAMES) return false;
+  const max = Math.max(...confidences);
+  const min = Math.min(...confidences);
+  return max - min < CONFIDENCE_FLAT_SPREAD_THRESHOLD;
+}
+
+/**
+ * debate confidence 분산 flat 감지 (P2 silent fallback aggregate signal).
+ * 하루 예측 confidences 전체가 CONFIDENCE_FLAT_SPREAD_THRESHOLD 이하 spread =
+ * judge agent 가 모든 경기에서 동일 fallback 값(0.3) 반환 중 → Sentry warning.
+ */
+export async function captureConfidenceFlatAlert(meta: {
+  date: string;
+  mode: string;
+  confidences: number[];
+}): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+  if (!shouldConfidenceFlatAlert(meta.confidences)) return;
+
+  const max = Math.max(...meta.confidences);
+  const min = Math.min(...meta.confidences);
+  const spread = max - min;
+
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureMessage !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  const mean = meta.confidences.reduce((a, b) => a + b, 0) / meta.confidences.length;
+
+  try {
+    Sentry.captureMessage('debate_confidence_flat', {
+      level: 'warning',
+      tags: {
+        pattern: 'debate_confidence_flat',
+        pipeline_mode: meta.mode,
+        date: meta.date,
+        game_count: String(meta.confidences.length),
+      },
+      extra: {
+        spread: spread.toFixed(4),
+        min: min.toFixed(3),
+        max: max.toFixed(3),
+        mean: mean.toFixed(3),
+        values: meta.confidences.map((c) => c.toFixed(3)),
+        threshold: CONFIDENCE_FLAT_SPREAD_THRESHOLD,
+      },
+    });
+  } catch {
+    // silent — main path 보호
+  }
+}

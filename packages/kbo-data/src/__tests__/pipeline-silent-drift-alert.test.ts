@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shouldAlertSilentDrift } from '../pipeline/silent-drift-alert';
+import { shouldAlertSilentDrift, shouldConfidenceFlatAlert } from '../pipeline/silent-drift-alert';
 import type { SilentDriftAlertMeta } from '../pipeline/silent-drift-alert';
 
 function makeMeta(overrides: Partial<SilentDriftAlertMeta> = {}): SilentDriftAlertMeta {
@@ -121,5 +121,35 @@ describe('shouldAlertSilentDrift', () => {
     expect(
       shouldAlertSilentDrift(makeMeta({ mode: 'postview', gamesFound: 5, predictionsGenerated: 1 })),
     ).toBe(false);
+  });
+});
+
+describe('shouldConfidenceFlatAlert — P2 aggregate signal', () => {
+  it('P2 패턴: 모든 confidence 0.3 flat → alert (spread=0)', () => {
+    expect(shouldConfidenceFlatAlert([0.3, 0.3, 0.3, 0.3, 0.3])).toBe(true);
+  });
+
+  it('spread=0.019 (임계 미만) → alert', () => {
+    expect(shouldConfidenceFlatAlert([0.3, 0.31, 0.319])).toBe(true);
+  });
+
+  it('spread=0.02 (임계 동일) → alert 안 함 (정상 다양성)', () => {
+    expect(shouldConfidenceFlatAlert([0.3, 0.32])).toBe(false);
+  });
+
+  it('spread > 0.02 → alert 안 함', () => {
+    expect(shouldConfidenceFlatAlert([0.3, 0.5, 0.7])).toBe(false);
+  });
+
+  it('games < 3 (CONFIDENCE_FLAT_MIN_GAMES 미달) → alert 안 함', () => {
+    expect(shouldConfidenceFlatAlert([0.3, 0.3])).toBe(false);
+  });
+
+  it('빈 배열 → alert 안 함', () => {
+    expect(shouldConfidenceFlatAlert([])).toBe(false);
+  });
+
+  it('정상 다양성 (quant-only, debate 없음) → alert 안 함', () => {
+    expect(shouldConfidenceFlatAlert([0.55, 0.62, 0.48, 0.71])).toBe(false);
   });
 });

@@ -34,7 +34,7 @@ import { decideModelVersion } from './model-version';
 import { buildFinalReasoning } from './final-reasoning';
 import { computeWinnerTeamId } from './winner-id';
 import { buildAccuracyUpdates } from './accuracy-update';
-import { captureSilentDriftAlert, captureSparsePredictionAlert, captureCreditExhaustedAlert } from './silent-drift-alert';
+import { captureSilentDriftAlert, captureSparsePredictionAlert, captureCreditExhaustedAlert, captureConfidenceFlatAlert } from './silent-drift-alert';
 import { shouldNotifyPipelineStatus } from './notify-status-predicate';
 import { insertShadowRow, insertShadowRowV20 } from './shadow-cohort';
 import {
@@ -523,6 +523,7 @@ export async function runDailyPipeline(
   }
 
   let predictionsGenerated = 0;
+  const predictionConfidences: number[] = [];
 
   // windowTargets 0 + predict mode → early return (Fancy Stats 불필요)
   // predict_final 은 gap 체크 위해 계속 진행
@@ -856,6 +857,7 @@ export async function runDailyPipeline(
     }
 
     predictionsGenerated++;
+    predictionConfidences.push(finalConfidence);
     console.log(
       `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`,
     );
@@ -969,6 +971,14 @@ export async function runDailyPipeline(
         }
       }
     }
+  }
+
+  // debate confidence flat 집계 감지 — P2 structural gap (daily aggregate 없음).
+  // predict/predict_final 에서 하루 예측 confidence 분산 < 0.02 시 Sentry warning.
+  if ((mode === 'predict' || mode === 'predict_final') && predictionConfidences.length >= 3) {
+    try {
+      await captureConfidenceFlatAlert({ date: targetDate, mode, confidences: predictionConfidences });
+    } catch { /* silent — alert 실패가 pipeline 영향 X */ }
   }
 
   // 하루 요약 알림 — daily_notifications flag 로 idempotent.
