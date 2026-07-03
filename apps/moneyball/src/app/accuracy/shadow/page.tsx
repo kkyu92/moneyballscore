@@ -23,7 +23,7 @@ const DAY_LIMIT = 14;
 // noindex 내부 cohort evidence — n=V2_PROMOTION_COHORT_N 도달 후 production 적용 결정 전까지 surface signal 차단.
 export const metadata: Metadata = {
   title: "Shadow cohort 적중률",
-  description: `v1.8 (production) vs ${SHADOW_SCORING_RULE} 가중치 Brier delta + 적중률 delta 일별 누적. n=${V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.`,
+  description: `${CURRENT_SCORING_RULE} (production) vs ${SHADOW_SCORING_RULE} 가중치 Brier delta + 적중률 delta 일별 누적. n=${V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.`,
   alternates: { canonical: PAGE_URL },
   robots: { index: false, follow: false },
 };
@@ -146,7 +146,7 @@ function fmtBrier(v: number): string {
 function deltaClass(delta: number): string {
   if (Math.abs(delta) < 0.001) return "text-gray-500 dark:text-gray-400";
   if (delta < 0) return "text-brand-600 dark:text-brand-400"; // shadow 우세
-  return "text-red-600 dark:text-red-400"; // v1.8 우세
+  return "text-red-600 dark:text-red-400"; // CURRENT_SCORING_RULE 우세
 }
 
 export default async function ShadowAccuracyPage() {
@@ -176,7 +176,7 @@ export default async function ShadowAccuracyPage() {
           Shadow cohort 적중률
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          v1.8 (production) vs {SHADOW_SCORING_RULE} 가중치 일별 Brier + 적중률 delta. 동일
+          {CURRENT_SCORING_RULE} (production) vs {SHADOW_SCORING_RULE} 가중치 일별 Brier + 적중률 delta. 동일
           경기 동일 input 으로 quant 재계산 (debate LLM 호출 X, 비용 0). n={V2_PROMOTION_COHORT_N} 도달 후
           production 적용 결정.
         </p>
@@ -195,7 +195,7 @@ export default async function ShadowAccuracyPage() {
           <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{totalN}</div>
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
-          <div className="text-xs text-gray-500 dark:text-gray-400">v1.8 평균 Brier</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{CURRENT_SCORING_RULE} 평균 Brier</div>
           <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
             {fmtBrier(avgV18)}
           </div>
@@ -236,14 +236,14 @@ export default async function ShadowAccuracyPage() {
         </h2>
         <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
           예측 확률 vs 실제 적중률. 대각선 위 = 잘 맞은 bucket, 대각선 아래 = 과신
-          (over-confident). v1.8 (production) vs {SHADOW_SCORING_RULE} (shadow) 두 모델
+          (over-confident). {CURRENT_SCORING_RULE} (production) vs {SHADOW_SCORING_RULE} (shadow) 두 모델
           calibration 차이 시각화.
         </p>
         <CalibrationPlot
           totalN={pairs.length}
           series={[
             {
-              label: "v1.8 (production)",
+              label: `${CURRENT_SCORING_RULE} (production)`,
               color: CALIBRATION_COLORS.v18,
               buckets: calibration.v18,
             },
@@ -271,10 +271,10 @@ export default async function ShadowAccuracyPage() {
                 <tr>
                   <th className="p-2">날짜</th>
                   <th className="p-2 text-right">n</th>
-                  <th className="p-2 text-right">v1.8 Brier</th>
+                  <th className="p-2 text-right">{CURRENT_SCORING_RULE} Brier</th>
                   <th className="p-2 text-right">{SHADOW_SCORING_RULE} Brier</th>
                   <th className="p-2 text-right">delta</th>
-                  <th className="p-2 text-right">v1.8 적중</th>
+                  <th className="p-2 text-right">{CURRENT_SCORING_RULE} 적중</th>
                   <th className="p-2 text-right">{SHADOW_SCORING_RULE} 적중</th>
                 </tr>
               </thead>
@@ -308,7 +308,7 @@ export default async function ShadowAccuracyPage() {
       </section>
 
       <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">
-        본 페이지는 shadow cohort 누적 진단용입니다. v1.8 production 가중치 변경 X.
+        본 페이지는 shadow cohort 누적 진단용입니다. {CURRENT_SCORING_RULE} production 가중치 변경 X.
       </p>
     </main>
   );
