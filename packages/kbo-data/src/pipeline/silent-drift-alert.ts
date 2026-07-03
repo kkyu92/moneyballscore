@@ -246,6 +246,60 @@ export interface SparsePredictionAlertMeta {
 }
 
 /**
+ * CREDIT_EXHAUSTED 감지 시 Sentry warning + Telegram 알림.
+ *
+ * predict mode 에서 debate agent 가 모두 CREDIT_EXHAUSTED 로 fallback 시
+ * predictions 는 생성되지만 LLM 토론 없이 quant-only (v1.8) 로 degraded.
+ * 기존 captureSilentDriftAlert 는 predictions>0 시 alert 미발화 →
+ * 사용자 가시 채널 부재 silent degradation 차단 (cycle 1446 박제).
+ */
+export async function captureCreditExhaustedAlert(meta: {
+  date: string;
+  mode: string;
+  affectedGames: number;
+  errors: string[];
+}): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    Sentry = null;
+  }
+  if (Sentry && typeof Sentry.captureMessage === 'function') {
+    const hasClient = typeof Sentry.getClient === 'function' ? !!Sentry.getClient() : true;
+    if (hasClient) {
+      try {
+        Sentry.captureMessage('credit_exhausted_debate_fallback', {
+          level: 'warning',
+          tags: {
+            pattern: 'credit_exhausted_debate_fallback',
+            pipeline_mode: meta.mode,
+            date: meta.date,
+          },
+          extra: {
+            affected_games: meta.affectedGames,
+            errors: meta.errors.slice(0, 5),
+          },
+        });
+      } catch {
+        // silent — main path 보호
+      }
+    }
+  }
+
+  try {
+    await notifyError(
+      `credit_exhausted ${meta.mode} ${meta.date}`,
+      `Anthropic API 잔액 부족 — ${meta.affectedGames}경기 debate fallback (quant-only). Plans & Billing 충전 필요.`,
+    );
+  } catch {
+    // telegram fail silent
+  }
+}
+
+/**
  * sparse data prediction 감지 시 Sentry warning.
  * neutralCount >= PREDICTION_SPARSE_THRESHOLD 시 호출 (호출부가 체크 후 전달).
  */
