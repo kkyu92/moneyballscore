@@ -89,8 +89,15 @@ export default function V2ShadowMonitorPage() {
         </p>
         <p className="text-sm text-brand-600 dark:text-brand-300 leading-relaxed">
           <strong className="text-brand-800 dark:text-brand-100">결정 임계</strong>{" "}
-          = {CURRENT_SCORING_RULE} real cohort n={V2_PROMOTION_COHORT_N} 도달. 도달 후 era별 factor
-          backtest harness 실행 → v2.0 가중치 후보 평가 → 정식 적용 여부 결정.
+          = {CURRENT_SCORING_RULE} real cohort n={V2_PROMOTION_COHORT_N} — 실측 cohort 진척 및
+          Brier drift 원인 분석은{" "}
+          <Link
+            href="/accuracy"
+            className="text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-100 underline"
+          >
+            /accuracy
+          </Link>
+          {" "}live 참조. 임계 crossed 시 era별 factor backtest harness 실행 → v2.0 가중치 후보 평가 → 정식 적용 여부 결정.
           본 dashboard 는 cohort 갱신 시점마다 자동 갱신됩니다.
         </p>
       </header>
