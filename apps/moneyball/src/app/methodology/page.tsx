@@ -126,7 +126,7 @@ const VERSION_HISTORY = [
     version: "v2.0 (예정)",
     date: `n=${V2_PROMOTION_COHORT_N} 도달 후`,
     change:
-      `검증 표본 n=${V2_PROMOTION_COHORT_N} 이상 누적 시 전면 가중치 재조정. ${CURRENT_SCORING_RULE} cohort 누적 진행 중 — 실시간 진척은 /accuracy 페이지 참조.`,
+      `검증 표본 n=${V2_PROMOTION_COHORT_N} 이상 누적 시 전면 가중치 재조정. 실시간 cohort 진척은 /accuracy 페이지 참조.`,
   },
 ];
 
