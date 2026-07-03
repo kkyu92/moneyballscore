@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { getLatestLottoPicks, getLatestLottoResult, ballColor, type LottoSet, type LottoResult } from "@/lib/lotto/picks-loader";
-import { LOTTO_TOP_PICK_COUNT, SITE_URL } from "@moneyball/shared";
+import { LOTTO_TOP_PICK_COUNT, LOTTO_PICK_COUNT, SITE_URL } from "@moneyball/shared";
 
 export const dynamic = "force-static";
 export const revalidate = 3600; // LOTTO_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -308,7 +308,7 @@ export default function LottoHubPage() {
         <p>
           선별 과정은 세 단계입니다. 먼저 약 800만 가지 조합 전체에서 256개 필터를 모두 통과하는
           후보를 추립니다. 이 중 역대 실제 추첨 결과와 완전히 일치하는 조합은 제외합니다.
-          남은 후보에서 필터 통과 점수가 높은 순서로 50세트를 확정합니다.
+          남은 후보에서 필터 통과 점수가 높은 순서로 {LOTTO_PICK_COUNT}세트를 확정합니다.
         </p>
         <p>
           <strong>합계</strong>는 6개 번호의 합으로 역대 추첨 분포의 중심(100~150 구간)에

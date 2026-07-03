@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { LOTTO_PICK_COUNT } from "@moneyball/shared";
 
 const ARCHIVE_DIR = path.join(process.cwd(), "apps/moneyball/data/lotto-picks");
 const ARCHIVE_DIR_FALLBACK = path.join(process.cwd(), "data/lotto-picks");
@@ -65,7 +66,7 @@ function readVariant(date: string, v: ArchiveVariant): ArchiveContent | null {
   if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, "utf8");
   const titleMatch = raw.match(/^#\s+(.+)$/m);
-  const title = titleMatch ? titleMatch[1].trim() : `${date} 추첨 50세트`;
+  const title = titleMatch ? titleMatch[1].trim() : `${date} 추첨 ${LOTTO_PICK_COUNT}세트`;
   return { date, raw, title };
 }
 
