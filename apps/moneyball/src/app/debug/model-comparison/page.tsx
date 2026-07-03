@@ -104,7 +104,7 @@ export default async function ModelComparisonPage() {
         <h1 className="text-2xl md:text-3xl font-bold">모델 비교 대시보드</h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-600 mt-1">
           최근 {daysBack}일 · {rows.length}건 · scoring_rule + model_version 조합별
-          성능 측정. 현재 v1.8 ship + v2.0-debate / v2.1-B shadow 누적 중.
+          성능 측정. 현재 v1.8 ship + v2.0-debate / v2.1-B shadow (rejected Brier 0.4635) 누적 아카이브.
         </p>
         {shadow.length > 0 && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
