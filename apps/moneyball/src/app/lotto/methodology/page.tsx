@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
-import { KBO_FACTOR_COUNT, SITE_URL } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, LOTTO_PICK_COUNT, SITE_URL } from "@moneyball/shared";
 import {
   LottoDataSchema,
   LottoScoreBacktestSchema,
@@ -291,7 +291,7 @@ export default function LottoMethodologyPage() {
         {oosLatest?.match_distribution && (
           <div className="bg-brand-900 border border-brand-800 rounded p-3 text-xs text-brand-300 space-y-2">
             <p className="text-brand-200 font-semibold">
-              직전 회차 ({oosLatest.draw}) 50세트 매칭 분포
+              직전 회차 ({oosLatest.draw}) {LOTTO_PICK_COUNT}세트 매칭 분포
             </p>
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-1">
               <li>5등 (3개): {oosLatest.match_distribution.tier_3}건</li>
@@ -322,7 +322,7 @@ export default function LottoMethodologyPage() {
                 {oosLatest.winning_score_breakdown.pool_rank_pct !== undefined && (
                   <>
                     . valid pool 안 추정 top{" "}
-                    {oosLatest.winning_score_breakdown.pool_rank_pct.toFixed(2)}% — 50세트 cutoff
+                    {oosLatest.winning_score_breakdown.pool_rank_pct.toFixed(2)}% — {LOTTO_PICK_COUNT}세트 cutoff
                     (top ~0.65%) 미달 = score 모델 약점 candidate.
                   </>
                 )}
@@ -344,7 +344,7 @@ export default function LottoMethodologyPage() {
         </h2>
         <p className="text-sm text-brand-300 leading-relaxed">
           N={formatNumber(scoreBacktest.n_rounds)} 회차 1등 조합 unpopularityScore
-          분포. 50세트 추천 모델 cutoff (valid pool 안 top 0.65%) 와 비교 시
+          분포. {LOTTO_PICK_COUNT}세트 추천 모델 cutoff (valid pool 안 top 0.65%) 와 비교 시
           historical 1등 조합 평균이 어느 percentile band 에 분포하는지 확인.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
