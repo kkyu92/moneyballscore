@@ -58,7 +58,7 @@ describe("/v2-preview page render shape", () => {
 
   it("v2.1-B 가중치 grid 박제", () => {
     expect(HUB_SRC).toContain("V2_1_B_WEIGHTS");
-    expect(HUB_SRC).toContain("v1.8 vs v2.1-B");
+    expect(HUB_SRC).toContain("{CURRENT_SCORING_RULE} vs v2.1-B");
   });
 
   it("관련 자료 nav 3 chip (methodology / accuracy / changelog)", () => {

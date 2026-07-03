@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL} from "@moneyball/shared";
+import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -16,7 +16,7 @@ const LIMIT = INSIGHTS_LIMIT;
 // noindex 내부 미리보기 — N={V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정 전까지 surface signal 차단.
 export const metadata: Metadata = {
   title: "v2 시뮬레이션 미리보기",
-  description: `v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 v1.8 예측 위에 재가중치 적용한 내부 미리보기. N=${V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.`,
+  description: `v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 ${CURRENT_SCORING_RULE} 예측 위에 재가중치 적용한 내부 미리보기. N=${V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.`,
   alternates: { canonical: PAGE_URL },
   robots: { index: false, follow: false },
 };
@@ -130,7 +130,7 @@ export default async function V2PreviewPage() {
           v2 시뮬레이션 미리보기
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          v2.1-B 가중치 (backtest Brier 0.24830) 를 현 v1.8 예측에 재가중치 적용한 내부
+          v2.1-B 가중치 (backtest Brier 0.24830) 를 현 {CURRENT_SCORING_RULE} 예측에 재가중치 적용한 내부
           미리보기. 실제 예측에 영향 X. N={V2_PROMOTION_COHORT_N} 도달 후 prod 적용 결정.
         </p>
         <div
@@ -147,7 +147,7 @@ export default async function V2PreviewPage() {
 
       <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
         <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          v1.8 vs v2.1-B 가중치
+          {CURRENT_SCORING_RULE} vs v2.1-B 가중치
         </h2>
         <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-5">
           {Object.entries(V2_1_B_WEIGHTS).map(([key, weight]) => (
@@ -163,7 +163,7 @@ export default async function V2PreviewPage() {
           ))}
         </div>
         <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-          v1.8 대비 변경 — sp_fip 15→16% · lineup_woba 15→17% · bullpen_fip 10→11% ·
+          {CURRENT_SCORING_RULE} 대비 변경 — sp_fip 15→16% · lineup_woba 15→17% · bullpen_fip 10→11% ·
           recent_form 10→12% · war 8→9% · head_to_head 3→2% · elo 10→9% · sfr 5→0% (sfr
           제외, Wayback 부분 회귀).
         </p>
@@ -204,7 +204,7 @@ export default async function V2PreviewPage() {
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
                     <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">v1.8 홈승률</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{CURRENT_SCORING_RULE} 홈승률</div>
                       <div className="font-semibold text-gray-900 dark:text-gray-100">
                         {fmtPct(row.v18Prob)}
                       </div>
