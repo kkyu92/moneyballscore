@@ -14,7 +14,7 @@ const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
 export const metadata: Metadata = {
   title: "v2 섀도우 모니터",
   description:
-    `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정을 위한 모델 진화 트랜스페어런시 dashboard.`,
+    `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성, v2.0 결정 대기 — 모델 진화 트랜스페어런시 dashboard.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "v2 섀도우 모니터 | MoneyBall Score",
@@ -45,7 +45,7 @@ export default function V2ShadowMonitorPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score v2 섀도우 모니터",
     description:
-      `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 가중치 확정 결정.`,
+      `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성, v2.0 결정 대기.`,
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
     datePublished: "2026-06-01",
