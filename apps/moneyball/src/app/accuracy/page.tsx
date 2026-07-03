@@ -23,6 +23,7 @@ import {
   ROLLING_ACCURACY_WINDOW_DAYS,
   ROLLING_ACCURACY_TOTAL_DAYS,
   KST_TIMEZONE,
+  CURRENT_SCORING_RULE,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -54,7 +55,7 @@ import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 export const metadata: Metadata = {
   title: "AI 예측 적중 기록 | MoneyBall Score",
   description:
-    "KBO 경기 AI 승부예측 성과 트래킹. 버전별 정확도·Brier 점수·팀별 적중률·캘리브레이션 분석. 세이버메트릭스 기반 정량 모델 v1.8.",
+    `KBO 경기 AI 승부예측 성과 트래킹. 버전별 정확도·Brier 점수·팀별 적중률·캘리브레이션 분석. 세이버메트릭스 기반 정량 모델 ${CURRENT_SCORING_RULE}.`,
   alternates: { canonical: `${SITE_URL}/accuracy` },
   openGraph: {
     title: "AI 예측 적중 기록 | MoneyBall Score",
@@ -850,7 +851,7 @@ export default async function AccuracyPage() {
         </section>
       )}
 
-      {/* 현 버전 (v1.8) 세부 분석 — AI 토론 활성 vs 정량 fallback */}
+      {/* CURRENT_SCORING_RULE 세부 분석 — AI 토론 활성 vs 정량 fallback */}
       {v18SubCohort.total > 0 && (
         <V18SubCohortPanel stats={v18SubCohort} />
       )}
@@ -1049,9 +1050,9 @@ function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
   return (
     <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
       <div>
-        <h2 className="text-lg font-bold">현 버전 (v1.8) 세부 분석</h2>
+        <h2 className="text-lg font-bold">{CURRENT_SCORING_RULE} 세부 분석</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          v1.8 가중치 안에서 AI 토론이 실제 활성화된 예측과 API 한도로 정량 fallback 처리된
+          {CURRENT_SCORING_RULE} 가중치 안에서 AI 토론이 실제 활성화된 예측과 API 한도로 정량 fallback 처리된
           예측을 분리. AI 토론 신뢰성을 별도 측정합니다.
         </p>
       </div>
