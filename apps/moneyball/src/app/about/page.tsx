@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
@@ -171,8 +171,8 @@ const FAQS = [
     a: "선발 투수가 경기 직전까지 확정되지 않거나, 우천 취소 발표, 데이터 소스 일시 장애 등의 경우 예측이 누락될 수 있습니다. 누락된 경기는 결과만 사후 기록되며 적중률 분모에 포함되지 않습니다(공정성).",
   },
   {
-    q: "모델 버전 v1.8 은 무엇을 의미하나요?",
-    a: `현재 가동 중인 가중치 조합 버전입니다. v1.8 (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 로 강등(Sunday cap). 누적 검증 표본 n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 전면 재조정 예정. 자세한 진화 history 는 /methodology 페이지 참조.`,
+    q: `모델 버전 ${CURRENT_SCORING_RULE} 은 무엇을 의미하나요?`,
+    a: `현재 가동 중인 가중치 조합 버전입니다. ${CURRENT_SCORING_RULE} (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 로 강등(Sunday cap). 누적 검증 표본 n=${V2_PROMOTION_COHORT_N} 도달 시 v2.0 전면 재조정 예정. 자세한 진화 history 는 /methodology 페이지 참조.`,
   },
   {
     q: "픽 기록은 어떻게 시작하나요?",
