@@ -69,23 +69,46 @@
 
 4. **Accuracy 상승 vs Brier 악화 역설** — post acc 67.4% (pre 58.5% 대비 +9pp) 인데 Brier 0.3723 (pre 0.2730 대비 +0.10). 모델이 winner 는 더 잘 맞추는데 confidence 는 near-coin-flip (~0.50) 로 압축 → Brier 계산 시 correct/wrong 무관 (conf-target)² ≈ 0.25 flat 근접. low tier Brier 0.3729 = 실측 conf 가 0.50 이상 (~0.55 근접) 이면 winner 잡을 때도 Brier 큰 값 유지.
 
-5. **원인 가설** (추정, 후속 조사 필요):
-   - a. 가중치 normalize/clip 로직에 최근 데이터 특성이 confidence spread 축소 유발
-   - b. 미드시즌 팀 밸런싱 (7월 초 = ASG 전후) 실측 equilibrium
-   - c. 개별 factor input 이 shrinkage (예: ELO 편차 감소, wOBA/FIP 팀간 격차 축소)
-   - d. 특정 코드 변경 (2026-06-12 부근 commit) 에 의한 side effect
+5. **원인 확인 (cycle 1455 추가)** — CREDIT_EXHAUSTED.
+   - 2026-06-12 ~ 현재: Anthropic API credits 소진 → debate_fallback_quant 경로.
+   - DB 실측: `confidence=0.300` EXACT 값 전체 173 rows (pre 는 0.55~0.62 varied).
+   - `debate.ts` fallback verdict: `{ homeWinProb: quantitativeProb, confidence: 0.3 }`.
+   - `confidence=0.3` 은 LLM 미사용 marker. 실제 quant homeWinProb 은 0.467~0.547.
+   - Brier 측정에서 `confidence=0.3` → `Math.max(0.5, 0.3)=0.5` → 모든 예측 Brier ≈ 0.25.
+   - **모델 실력 문제 X**. API 크레딧 재충전 시 즉시 회복 예상.
 
-## R8 사용자 결정 근거
+## cycle 1455 코드 fix
 
-- **v1.8 유지 옵션**: acc 67% 유지되므로 winner 판정은 개선. Brier 는 나빠졌지만 사용자 가시 layer (승부예측) 는 acc 로 판단 시 문제 X.
-- **v2.0 rebalance 옵션**: confidence spread 회복이 우선순위 — 단순 가중치 재조정 만으로는 부족. spread 압축 원인 (가설 5.a-d) 파악 후 rebalance 해야 유효.
-- **v2.1-B reject 확정**: cycle 1447 baseline (v2.1-B n=52 Brier 0.4635) 대비 v1.8 여전히 우월. reject 신호 유지.
+### daily.ts `home_win_prob` 박제
 
-**후속 조사 candidate** (사용자 결정 후):
-- rolling window 재분석 (window=15 로 좁혀 drift 시점 정밀 pinpoint)
-- 2026-06-10 ~ 2026-06-14 사이 commit sweep (predictor / weight / factor 관련 diff)
-- 개별 factor 별 pre/post 편차 측정 (ELO / wOBA / FIP)
+```typescript
+// 기존: home_win_prob 미박제 (KBO 항상 NULL)
+// 변경: home_win_prob: finalHomeProb (quant/debate verdict prob)
+```
+
+- `resolveWinnerProb` 가 `home_win_prob != null` 시 우선 사용 → Brier 정확화.
+- debate_fallback_quant 기간: finalHomeProb = quant prob (0.47~0.55) 반영.
+- confidence=0.3 marker 유지 (CREDIT_EXHAUSTED 감지 채널 보존).
+
+### 173 rows backfill 완료
+
+`scripts/backfill-home-win-prob.ts --apply`:
+- 173 rows: `home_win_prob = reasoning.homeWinProb` 업데이트.
+- 이후 Brier 측정: quant homeWinProb 기반 (더 정확).
+
+## R8 사용자 결정 근거 (업데이트)
+
+- **v1.8 유지**: Brier drift = API 크레딧 소진 artifact. 크레딧 재충전 시 회복.
+  acc 67.4% 상승은 실제 모델 성능 개선 신호 (quant model 이 정확도 유지 + 상승).
+- **v2.0 rebalance**: n=161 도달, threshold 충족. 단 현재 debate=0 상태에서
+  v2.0 calibration 측정 불가. 크레딧 재충전 → 새 n=20+ 측정 후 결정 권장.
+- **v2.1-B reject 확정**: Brier 0.4635 vs v1.8 0.2730. reject 유지.
+
+**사용자 action 필요 (최우선)**: Anthropic API credits 충전 (Plans & Billing).
+- 충전 후 즉시 정상 debate 재개 → confidence 분산 회복 → Brier 자연 회복.
+- 충전 없이 v2.0 rebalance 측정 불가.
 
 ---
 
-자동 생성 — op-analysis (heavy) Brier drift 원인 분석. R8 사용자 결정 (v2.0 rebalance / v1.8 유지 / v2.1-B reject) 근거 evidence.
+cycle 1454 자동 생성 + cycle 1455 root cause 확인 및 fix 박제.
+R8 사용자 결정: Anthropic 크레딧 충전 후 v2.0 rebalance 측정 진행 권장.

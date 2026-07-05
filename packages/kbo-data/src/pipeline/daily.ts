@@ -815,6 +815,10 @@ export async function runDailyPipeline(
       prediction_type: 'pre_game',
       predicted_winner: teamIdMap[result.predictedWinner],
       confidence: result.confidence,
+      // cycle 1455 op-analysis: home_win_prob 박제 — resolveWinnerProb 가 confidence 보다
+      // home_win_prob 우선 사용. debate_fallback_quant 시 confidence=0.3 (fallback marker)
+      // 대신 quant homeWinProb 로 Brier 정확화.
+      home_win_prob: finalHomeProb,
       home_sp_fip: input.homeSPStats?.fip ?? null,
       away_sp_fip: input.awaySPStats?.fip ?? null,
       home_sp_xfip: input.homeSPStats?.xfip ?? null,
