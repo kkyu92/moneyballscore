@@ -474,9 +474,18 @@ export default async function AnalysisIndexPage() {
     getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
   ]);
 
+  const simplifiedMode =
+    todayData.games.length >= 3 &&
+    todayData.games.reduce((s, g) => s + g.confidence, 0) / todayData.games.length <= 0.32;
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
       <Breadcrumb items={[{ label: 'AI 분석' }]} />
+      {simplifiedMode && (
+        <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          현재 분석 시스템이 간소화 모드로 운영 중입니다. 확률 수치는 통계 모델 기반이며, 상세 분석 텍스트는 일시 중단됩니다.
+        </div>
+      )}
       <header className="border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
         <h1 className="text-3xl font-bold mb-2">AI 분석 센터</h1>
         <p className="text-gray-600 dark:text-gray-300">

@@ -69,7 +69,7 @@ function emptyTierCounts(): Record<WinnerConfidenceTier, TierCount> {
 
 const TIER_ORDER: WinnerConfidenceTier[] = ['confident', 'lean', 'tossup'];
 
-async function getPredictionDates(): Promise<DateStat[]> {
+async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode: boolean }> {
   const supabase = await createClient();
 
   // LEFT JOIN: prediction 없는 편성 경기도 포함. pre_game 타입만 붙여서
@@ -86,7 +86,7 @@ async function getPredictionDates(): Promise<DateStat[]> {
     .limit(200);
   const { data } = assertSelectOk(result, 'predictions.getPredictionDates');
 
-  if (!data) return [];
+  if (!data) return { dates: [], simplifiedMode: false };
 
   // 날짜별 그룹핑. total = 편성 경기 (LEFT JOIN 총 game row).
   // predicted = prediction row 있는 경기. missing = total - predicted.
@@ -151,11 +151,27 @@ async function getPredictionDates(): Promise<DateStat[]> {
 
   // 예측 있는 날짜만 표시 — games 테이블에 2023-2025 백필 경기가 있어서
   // 모든 날짜 표시하면 "예측 0" 인 과거 날짜가 섞여 UX 혼란.
-  return Array.from(dateMap.values()).filter((d) => d.predicted > 0);
+  const dates = Array.from(dateMap.values()).filter((d) => d.predicted > 0);
+
+  // CREDIT_EXHAUSTED 간소화 모드 감지: 최근 예측 avg confidence ≤ 0.32
+  // (CREDIT_EXHAUSTED 시 모든 예측 conf=0.3 고정)
+  const recentConfs: number[] = [];
+  for (const game of data) {
+    const p = game.predictions?.[0] as { confidence?: number | null } | undefined;
+    if (p?.confidence !== null && p?.confidence !== undefined) {
+      recentConfs.push(p.confidence);
+      if (recentConfs.length >= 10) break;
+    }
+  }
+  const simplifiedMode =
+    recentConfs.length >= 3 &&
+    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= 0.32;
+
+  return { dates, simplifiedMode };
 }
 
 export default async function PredictionsPage() {
-  const dates = await getPredictionDates();
+  const { dates, simplifiedMode } = await getPredictionDates();
 
   const counts = {
     all: dates.length,
@@ -227,6 +243,11 @@ export default async function PredictionsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Breadcrumb items={[{ label: '예측 기록' }]} />
+      {simplifiedMode && (
+        <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          현재 분석 시스템이 간소화 모드로 운영 중입니다. 확률 수치는 통계 모델 기반이며, 상세 분석 텍스트는 일시 중단됩니다.
+        </div>
+      )}
       <h1 className="text-3xl font-bold">예측 기록</h1>
       <p className="text-gray-500 dark:text-gray-400">날짜별 승부예측 기록입니다.</p>
 
