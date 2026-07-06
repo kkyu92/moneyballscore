@@ -347,9 +347,9 @@ ${JSON.stringify(fit.rawWeights, null, 2)}
 
 ## 다음 단계
 
-- learned weights 절대값 신뢰 X — 상대 ordering 비교 + n=150 forward cohort 측정 후 production 적용 결정
-- v2.0 후보 weights 재설계 input (CEO-3 finding 후속) — learned weights 가 SHADOW_V20 보다 win 시 그 ordering 참고
-- plan #15 C1f (Statcast factor 13+ 후보) 와 분리 — 본 plan #16 = 기존 10 factor 위 학습 layer
+- **v1.8 유지 확정** (cycle 1460, 2026-07-06) — n=178 crossed n=150 threshold (cycle 1447) + plan #16 2차 fire 결과 Brier DEFAULT 0.2443 vs Learned 0.2458 (최대 차이 0.15% < 1pp 임계) = 통계적 유의차 없음 → 재조정 불필요
+- learned weights = historic diagnostic evidence — 절대값 신뢰 X (cross-version normalization drift 가설 부합, 4개 factor 0 clamp). production 재적용 결정 불필요 (v2.1-B rejected, 가중치 re-fit = 소진된 카드)
+- plan #16 archive 상태 — plan #15 C1f (Statcast factor 13+ 후보) 와 분리 유지
 `;
 }
 

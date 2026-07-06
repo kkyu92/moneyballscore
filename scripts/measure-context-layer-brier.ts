@@ -108,7 +108,7 @@ async function main() {
     lines.push('## ⚠️ 표본 부족 경고');
     lines.push('');
     lines.push(`pre/post 각 n ≥ ${floor} 권장 (measurement.ts 주석). 현재 pre=${delta.pre.n} / post=${delta.post.n}.`);
-    lines.push('자정 verify cron 누적 후 후속 cycle 재실행 권장 (n=150 도달 ETA 2026-07-02).');
+    lines.push('자정 verify cron 누적 후 후속 cycle 재실행 권장.');
     lines.push('');
   }
 
