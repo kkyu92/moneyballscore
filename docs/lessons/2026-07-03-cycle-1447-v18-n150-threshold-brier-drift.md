@@ -53,6 +53,18 @@ R8 (data-driven decision) 원칙 준수:
 - 후보 B: v2.1-B-shadow deprecation PR (shadow cohort 수집 중단 + 리소스 회수)
 - 후보 C: Platt scaling / isotonic regression harness 스캐폴딩 (v2.0 calibration 축)
 
+## cycle 1460 postmortem — v1.8 유지 확정 (2026-07-06)
+
+**본 lesson 결론 + 다음 후보 A/B/C stale**. cycle 1460 plan #16 2차 fire (Fable plan) 최종 결정:
+
+- Brier DEFAULT 0.2443 vs Learned 0.2458 (expanding window OOS n=178 재입증) → 최대 차이 0.15% < 1pp 임계
+- 본 lesson 의 Brier 0.2995 = **home_win_prob 미박제 시점 winner-centric 측정 오류**. cycle 1455 backfill (173 rows `home_win_prob = reasoning.homeWinProb`) 이후 pre/post home_win_prob Brier = 0.24/0.24 안정 (실제 모델 정상)
+- **v1.8 유지 확정**. v2.0 rebalance 진행 X. head_to_head 재분석 불필요
+- v2.1-B-shadow reject 확정 유지 (본 lesson 결론 3 유효)
+- Platt scaling / isotonic regression harness (후보 C) 불필요
+
+본 lesson 은 cycle 1447 시점 진단 evidence historical archive 로 보존. 결론/후보의 v2.0 upgrade 방향은 cycle 1460 결정으로 superseded.
+
 ## 데이터 소스
 
 - `scripts/op-analysis-cohort.ts` (n=339 total, pre_game only)
