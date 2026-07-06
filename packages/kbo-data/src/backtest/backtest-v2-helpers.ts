@@ -140,7 +140,8 @@ export interface ThreeWayResult {
  * factor 누락 시 NEUTRAL fallback (computeProb 공식 정합).
  *
  * 자가 의심: learned weights 가 win 한다고 production 적용 X — 소표본 noise 가능.
- * production ship 결정은 본 결과 + n=150 forward cohort 측정 + 사용자 판단.
+ * cycle 1460 plan #16 2차 fire evidence: n=178 test cohort → DEFAULT vs SHADOW_V20 Brier 차이
+ * < 0.01pp = v1.8 유지 확정. learned weights production ship = 소진된 카드 (v2.1-B rejected evidence).
  */
 export function evaluateThreeWay(
   rows: BacktestPredictionRow[],

@@ -18,8 +18,9 @@ export function isBigMatchEnabled(env: NodeJS.ProcessEnv = process.env): boolean
 
 /**
  * v2.0 cohort model. rollout flag (default false).
- * n=150 v1.8 cohort 측정 완료 후 활성 예정. live progress = /accuracy 페이지 참조.
- * 활성 시 production predict() 가 SHADOW_V20_WEIGHTS 사용 (cycle 1127 plan-v17 candidate N Tier 2 callsite swap).
+ * cycle 1447 (2026-07-06) — v1.8 유지 확정 (n=178 crossed n=150 threshold, plan #16 2차 fire 결과
+ * DEFAULT vs SHADOW_V20 Brier 차이 < 0.01pp). 본 flag 는 kill switch 로만 유지 (activation 계획 X,
+ * 신규 evidence 도래 시 재평가 path). 활성 시 production predict() 가 SHADOW_V20_WEIGHTS 사용.
  */
 export function isV2ModelEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.V2_MODEL_ENABLED === 'true';

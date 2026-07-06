@@ -3,7 +3,10 @@
  *
  * 동일 경기에 production (v1.8) row 와 shadow (v2.1-B-shadow) row 양쪽 누적.
  * shadow row 는 quant 재계산만 (debate LLM 호출 X, 비용 0). daily 일별 Brier delta
- * 측정 → /accuracy/shadow page 노출 → n=150 도달 후 production 적용 결정 evidence.
+ * 측정 → /accuracy/shadow page 노출.
+ *
+ * cycle 1447 (2026-07-06) — v2.1-B rejected (Brier 0.4635 vs v1.8 0.2714, n=52 소표본),
+ * v1.8 유지 확정. shadow wiring 유지 = 신규 evidence 도래 시 재평가 accumulator.
  *
  * 안전: shadow insert 실패해도 production v1.8 insert 영향 X (try/catch 격리).
  */
@@ -213,7 +216,8 @@ export function computeShadowPredictionV20(
 /**
  * v2.0-shadow row insert — production v1.8 insert + v2.1-B-shadow insert 직후 호출.
  * insertShadowRow 와 동일 패턴 (failure tolerant, throw X). v1.8 + v2.1-B-shadow path 영향 X.
- * plan #14 C1a (cycle 1019) — n=150 wait 시간 절반 evidence 누적.
+ * plan #14 C1a (cycle 1019) — v2.0 후보 backtest evidence accumulator.
+ * cycle 1460 plan #16 2차 fire (n=178) — DEFAULT vs SHADOW_V20 Brier 차이 < 0.01pp = v1.8 유지 확정.
  */
 export async function insertShadowRowV20(
   db: SupabaseClient,
