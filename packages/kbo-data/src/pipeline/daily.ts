@@ -182,7 +182,7 @@ export async function runDailyPipeline(
         games_found: result.gamesFound,
         predictions: result.predictionsGenerated,
         games_skipped: result.gamesSkipped,
-        errors: result.errors.length > 0 ? JSON.stringify(result.errors) : '[]',
+        errors: result.errors.length > 0 ? result.errors : [],
         skipped_detail:
           result.skippedDetail && result.skippedDetail.length > 0
             ? JSON.stringify(result.skippedDetail)
