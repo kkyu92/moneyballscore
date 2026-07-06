@@ -111,4 +111,14 @@
 ---
 
 cycle 1454 자동 생성 + cycle 1455 root cause 확인 및 fix 박제.
-R8 사용자 결정: Anthropic 크레딧 충전 후 v2.0 rebalance 측정 진행 권장.
+
+## cycle 1460 postmortem — v1.8 유지 확정 (2026-07-06)
+
+본 문서 R8 recommendation "Anthropic 크레딧 충전 후 v2.0 rebalance 측정 진행 권장" 은 **stale**. cycle 1460 plan #16 2차 fire (Fable plan) 결과 다음 확정:
+
+- Brier DEFAULT 0.2443 vs Learned 0.2458 (expanding window OOS n=27→178) → 최대 차이 0.15% < 1pp 임계
+- 사용자 가시 winner-centric Brier 0.3568 = **측정 오류** (Fable plan S2c evidence). home_win_prob 기반 Brier pre/post = 0.24/0.24 안정 = 실제 모델 정상
+- **최종 결정**: v1.8 유지. 전면 가중치 재조정 불필요. v2.0 rebalance 착수 불필요.
+- v2.1-B shadow (Brier 0.4635, n=52) reject 확정 유지.
+
+본 분석 자체 (drift 통계 유의성 / rolling window / tier collapse / CREDIT_EXHAUSTED 원인) 은 historical evidence 로 유효. R8 권장 사항만 cycle 1460 결정 정합 갱신 (v2.0 rebalance 진행 X).
