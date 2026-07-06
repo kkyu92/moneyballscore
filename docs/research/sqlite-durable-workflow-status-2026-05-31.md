@@ -1,9 +1,10 @@
 ---
 created_at: 2026-05-31
 cycle: 1067
+updated_cycle: 1470
 scout_issue: 1446
 related_plan: null
-status: carry-over scout (자율 영역 검토 closure, 사용자 결정 wait — 자율 ROI 낮음 결론)
+status: carry-over scout (자율 영역 검토 closure, 사용자 결정 wait — 자율 ROI 낮음 결론). **cycle 1470 갱신**: 자율 재 fire 조건 2 (v2.0 n=150 + 백테스트 harness scope) = cycle 1460 v1.8 유지 확정 (Brier <1pp) 으로 무효화 — v2.0 ship 시점 자체 소멸. 재 fire 조건 = 조건 1 (silent drop 누적) / 조건 3 (사용자 발화) / 조건 4 (Vercel platform 변동) 로 축소.
 ---
 
 # SQLite 내구성 워크플로 Scout #1446 — Status (cycle 1067)
@@ -58,7 +59,7 @@ A/B/C 모두 net 추가 인프라 또는 비용. 기사 핵심 motivation = "외
 | A: 현 상태 유지 (Supabase pipeline_runs only) | high — 작동 + silent drift alert 박제 | **default 권장** — 추가 작업 X |
 | B: step-level 로그 layer 추가 (pipeline_step_runs 신규 테이블, SQLite 아닌 Supabase) | medium — 부분 실패 복구 path 명확화, 그러나 현 mode 재시작 + cron idempotent insert 로 충분 가능성 ↑ | 사용자 결정 (silent drop 사례 누적 ≥ 3건 시 ROI 재평가) |
 | C: SQLite durable workflow 도입 | low — Vercel serverless 환경 미정합 + 외부 인프라 ROI 부족 | 도입 권장 X (블로커 1.3 참조) |
-| D: 별도 백테스트 harness 차원 SQLite 활용 | medium — local-only 백테스트 / shadow cohort 재처리 path 가능 (Vercel deploy path X) | v2.0 n=150 도달 + 사용자 결정 (잠재 후보, 현 cycle 자율 영역 X) |
+| D: 별도 백테스트 harness 차원 SQLite 활용 | medium — local-only 백테스트 / shadow cohort 재처리 path 가능 (Vercel deploy path X) | ~~v2.0 n=150 도달 + 사용자 결정~~ — **cycle 1460 v1.8 유지 확정으로 무효화** (v2.0 ship 시점 소멸). 재 fire = 사용자 발화 또는 조건 1 (silent drop 누적) |
 
 **자율 영역 권장**: option A default + option B 는 silent drop 사례 누적 시 fix-incident chain 자연 재평가. option C 자율 fire X (Vercel 환경 mismatch).
 
@@ -76,7 +77,7 @@ A/B/C 모두 net 추가 인프라 또는 비용. 기사 핵심 motivation = "외
 | 조건 | trigger | 발화 chain |
 |---|---|---|
 | 1. silent drop 사례 누적 ≥ 3건 (1주 안) | `pipeline_runs.status='error'` 1주 ≥ 3건 OR Sentry silent drift alert 누적 | fix-incident (heavy, step-level 로그 layer option B 검토) |
-| 2. v2.0 n=150 도달 + 백테스트 harness scope 등장 | `~/projects/moneyballscore/docs/research/v2.0-killswitch.md` "v2.0 ship" 박제 + 백테스트 코드 자율 fire 요청 | explore-idea (heavy, option D SQLite local-only backtest harness plan) |
+| ~~2. v2.0 n=150 도달 + 백테스트 harness scope 등장~~ (**무효화, cycle 1460 v1.8 유지 확정**) | ~~`~/projects/moneyballscore/docs/research/v2.0-killswitch.md` "v2.0 ship" 박제 + 백테스트 코드 자율 fire 요청~~ | ~~explore-idea (heavy, option D SQLite local-only backtest harness plan)~~ — v2.0 ship 시점 소멸 |
 | 3. 사용자 직접 요청 ("SQLite 도입 / step-level 로그 / 내구성 강화" 발화) | 사용자 발화 grep | explore-idea (heavy, expand-plan 박제 chain) |
 | 4. Vercel platform 변동 (SQLite native support 등) | Vercel changelog 자율 monitor X (사용자 영역) | 사용자 알림 시 재평가 |
 

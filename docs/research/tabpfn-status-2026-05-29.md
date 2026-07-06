@@ -1,10 +1,10 @@
 ---
 created_at: 2026-05-29
 cycle: 1049
-updated_cycle: 1078
+updated_cycle: 1470
 scout_issue: 1206
 related_plan: 12
-status: carry-over tracker (Step 1/2 evidence pack done, Step 3-5 user-domain wait, kill-switch ETA 2026-06-03 D-2)
+status: superseded — v1.8 유지 확정 (cycle 1460, 2026-07-06). n=150 gating crossed (cycle 1447 n=161) + Brier 0.2443 default vs 0.2458 learned 차이 <1pp = v2.0 upgrade 불필요 결론. plan #12 Step 3-5 사용자 결정 = 무기한 postpone (v2.0 ship 시점 자체 소멸). scout #1206 carry-over 채널 유지하되 자율 fire 조건 (v1.8 n=150 gating) 무효화.
 ---
 
 # TabPFN Scout #1206 — Status (cycle 1049)
@@ -20,13 +20,13 @@ scout #1206 (2026-05-21 박제) carry-over status snapshot. plan #12 Step 1/2 ev
 
 본 doc = Step 1/2 closure 후 carry-over 추적 — 신규 자율 작업 X.
 
-## 2. 사용자 영역 carry-over (gating)
+## 2. 사용자 영역 carry-over (gating — cycle 1460 v1.8 유지 확정으로 무효화)
 
-| Step | 내용 | gating | ETA |
+| Step | 내용 | gating | ETA (cycle 1470 정정) |
 |---|---|---|---|
-| 3 | Python sidecar 인프라 4 옵션 결정 (Vercel Python Fluid Compute / HuggingFace API / Self-hosted FastAPI / ONNX export) | 사용자 결정 | TBD (v1.8 n=150 도달 후 권장) |
-| 4 | TabPFN checkpoint download (~200MB) + verification | 사용자 영역 | Step 3 후 |
-| 5 | v2.0 A/B test harness production fire | v1.8 n=150 + 사용자 결정 | ~2026-08-04 (n=150 ETA) |
+| 3 | Python sidecar 인프라 4 옵션 결정 (Vercel Python Fluid Compute / HuggingFace API / Self-hosted FastAPI / ONNX export) | 사용자 결정 | **무기한 postpone** (v2.0 upgrade 불필요 결론, cycle 1460) |
+| 4 | TabPFN checkpoint download (~200MB) + verification | 사용자 영역 | **무기한 postpone** (Step 3 gating 소멸) |
+| 5 | v2.0 A/B test harness production fire | v1.8 n=150 + 사용자 결정 | **무효화** — n=150 crossed (cycle 1447 n=161) 하지만 v1.8 유지 확정 (Brier diff <1pp) |
 
 ## 3. v1.8 cohort progress (gating evidence)
 
@@ -39,11 +39,11 @@ scout #1206 (2026-05-21 박제) carry-over status snapshot. plan #12 Step 1/2 ev
 - kill-switch fire 조건: cohort_n ≥ 60 + accuracy 2pp+ 하회 + 3회 연속 (cycle 949~ 박제, `docs/research/v2.0-killswitch.md`)
   - **kill-switch threshold ETA**: real n=52 → n=60 까지 잔여 8건, 추정 2026-06-03 (~5일)
   - v1.8 main 44.4% vs v1.7-revert baseline 55.9% = **-11.5pp 하회 (1회 누적)** — 3회 연속 도달 시 kill-switch fire
-- n=150 ETA: 2026-08-04 (보수 추정 유지, velocity 1.80/day 가정 — cohort split 신규 등장은 분류 진화이지 prediction generation rate 변동 X)
+- n=150 ETA: ~~2026-08-04 (보수 추정 유지, velocity 1.80/day 가정 — cohort split 신규 등장은 분류 진화이지 prediction generation rate 변동 X)~~ — **cycle 1447 crossed n=161 (early arrival ~2026-07-06)**. cycle 1460 v1.8 유지 확정 (Brier 0.2443 default vs 0.2458 learned = <1pp diff) → v2.0 upgrade 불필요 결론, 본 gating 조건 자체 무효화
 
 ## 4. 본 cycle 결정 (explore-idea lite)
 
-- 본 메인 자율 fire X — plan #12 Step 3-5 = 사용자 영역, v1.8 n=150 gating
+- 본 메인 자율 fire X — plan #12 Step 3-5 = 사용자 영역, v1.8 n=150 gating (**cycle 1460 v1.8 유지 확정으로 무효화, 무기한 postpone**)
 - issue #1206 close 결정 X — carry-over 추적 채널 유지 (user-decision wait 명확화)
 - 신규 코드 / 신규 plan slot 박제 X — Step 1/2 evidence pack 충분
 
@@ -58,7 +58,7 @@ scout #1206 (2026-05-21 박제) carry-over status snapshot. plan #12 Step 1/2 ev
 ## 5. 다음 자율 fire 조건 (자가 의심 차단)
 
 - **v1.8 real n=60 도달 임박 (잔여 8건, ETA ~2026-06-03)** → kill-switch evidence check (operational-analysis chain 자연 fire trigger). v1.8 main -11.5pp 하회 1회 누적 → 추가 2회 연속 시 kill-switch fire 조건 충족
-- v1.8 cohort n=150 도달 시 v2.0 결정 시점 진입 → 사용자 결정 wait (Step 3 사용자 결정 후 본 메인 Step 4-5 자율 영역 진입)
+- ~~v1.8 cohort n=150 도달 시 v2.0 결정 시점 진입 → 사용자 결정 wait (Step 3 사용자 결정 후 본 메인 Step 4-5 자율 영역 진입)~~ — **cycle 1460 v1.8 유지 확정으로 본 조건 무효화**. 재 fire 조건 = 사용자 발화 ("TabPFN" / "v2.0 재검토" / "tabular model") 또는 Brier drift >1pp 신규 evidence (현재 <1pp)
 - 사용자 자연 발화 ("TabPFN" / "v2.0" / "tabular model") 시 본 doc 박제 evidence 안내
 
 ## 6. 참조
