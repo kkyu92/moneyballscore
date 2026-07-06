@@ -2,7 +2,7 @@
 plan_n: 15
 topic: factor 11/12 forward measurement + Fancy Stats Elo baseline + Statcast 신규 factor 13+ 후보
 target_chain: explore-idea
-status: approved
+status: completed — all phases shipped cycle 1036 (v2.0-backtest-evidence.md + plan #15 completed_at 2026-05-29). v2.0 upgrade 불필요 결론 (cycle 1460) 으로 factor 11/12 forward measurement 추가 분석 불필요. 본 autoplan-review = 역사 기록으로 보존.
 expiry: 2026-08-04T00:00:00Z
 created_at: 2026-05-28
 parent_plan: 14

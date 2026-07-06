@@ -3,7 +3,8 @@ created_at: 2026-05-26
 plan_n: 12
 step: 1
 cycle: 955
-status: draft (research evidence pack only)
+status: superseded — plan #12 Step 3-5 무기한 postpone (cycle 1460, 2026-07-06). v2.0 upgrade 불필요 결론 (Brier diff < 1pp, n=178) → v2.0 ship 시점 소멸 → Python sidecar 인프라 / TabPFN checkpoint / A/B test harness production fire 모두 무효화. 본 feasibility doc = 역사 기록으로 보존.
+updated_cycle: 1473
 ---
 
 # TabPFN Feasibility — KBO 승부예측 모델 후보 평가
