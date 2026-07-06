@@ -3,7 +3,7 @@ created_at: 2026-06-01
 cycle: 1080
 scout_issue: 1446
 related_plan: null
-status: carry-over scout (자율 영역 검토 closure, 사용자 결정 wait — 자율 ROI 낮음 결론 유지)
+status: carry-over scout (자율 영역 검토 closure, 사용자 결정 wait — 자율 ROI 낮음 결론 유지). **cycle 1474 갱신 (wave 204)**: 자율 재 fire 조건 2 (v2.0 n=150 + 백테스트 harness scope) = cycle 1460 v1.8 유지 확정 (Brier < 1pp) 으로 무효화 — v2.0 ship 시점 자체 소멸. 재 fire 조건 = 조건 1 (silent drop 누적) / 조건 3 (사용자 발화) / 조건 4 (Vercel platform 변동) 로 축소 (05-31 doc 정합).
 prev_status_doc: docs/research/sqlite-durable-workflow-status-2026-05-31.md
 gap_from_prev: 13 cycle (cycle 1067 → cycle 1080)
 ---
@@ -17,7 +17,7 @@ cycle 1067 status doc (`docs/research/sqlite-durable-workflow-status-2026-05-31.
 | 조건 | cycle 1067 baseline | cycle 1080 측정 | 발화 결정 |
 |---|---|---|---|
 | 1. silent drop 사례 ≥3건 1주 (`pipeline_runs.status='error'` OR Sentry silent drift alert) | 0건 (cycle 1067 baseline) | **0건** (cycle 1063~1080 18 cycle 동안 production silent drop 사례 0건 — silent drift family sweep 6~9 wave 는 code-level drift sweep, runtime pipeline error X) | fire X |
-| 2. v2.0 n=150 도달 + 백테스트 harness scope | n=94 (cycle 1067 baseline) | **n=67** (v1.8 cohort cycle 1079 op-analysis 측정, real n 별도 — v2.0 미달 유지) | fire X |
+| ~~2. v2.0 n=150 도달 + 백테스트 harness scope~~ (**cycle 1460 갱신: v1.8 유지 확정 (Brier < 1pp) 으로 무효화 — v2.0 ship 시점 소멸**) | n=94 (cycle 1067 baseline) | ~~**n=67**~~ | ~~fire X~~ **fire 조건 소멸 — 재 fire 조건 1/3/4 로 축소** |
 | 3. 사용자 직접 요청 ("SQLite / step-level 로그 / 내구성 강화") | 0건 | **0건** (cycle 1068~1079 18 cycle 발화 grep, 자연 발화 X) | fire X |
 | 4. Vercel platform 변동 (SQLite native support) | 0건 | **0건** (Vercel changelog 자율 monitor X, 사용자 영역) | fire X |
 

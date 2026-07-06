@@ -61,9 +61,11 @@ cycle 1032 plan #17 PoC scope 5 sub-step:
 
 ### 2.2 v2.0 ship 결정 시점 정합
 
-v2.0 ship 결정 = (a) v1.8 cohort n=150 도달 (ETA 2026-08-04, 잔여 ~64일 / velocity 1.80/day) **또는** (b) kill-switch fire (ETA 2026-06-15) 중 빠른 시점.
+~~v2.0 ship 결정 = (a) v1.8 cohort n=150 도달 (ETA 2026-08-04, 잔여 ~64일 / velocity 1.80/day) **또는** (b) kill-switch fire (ETA 2026-06-15) 중 빠른 시점.~~
 
-feature flag layer 박제 = v2.0 ship 시점 canary 10%/50% gradual rollout 가능. 미박제 시 = 0%→100% binary switch (현 상태).
+**cycle 1460 갱신 (2026-07-06)**: v1.8 유지 확정 (Brier diff < 1pp, n=161 crossed 후 upgrade 불필요 결론). v2.0 ship 시점 자체 소멸 — 본 섹션 무효화, feature flag 박제 ROI 소멸.
+
+~~feature flag layer 박제 = v2.0 ship 시점 canary 10%/50% gradual rollout 가능. 미박제 시 = 0%→100% binary switch (현 상태).~~
 
 **self_verification (cycle 887 plan #8 5축 rubric)**:
 - 가치: medium — v2.0 ship 시점 binary switch 위험 mitigation
@@ -84,6 +86,6 @@ Tier 2 = 자가 검증 후 fire 가능 (사용자 GO 후). 즉시 자율 X.
 ## 4. 다음 refresh trigger
 
 - AdSense reject monitor 결과 도래 (~2026-06-05) → reject 0 통과 시 plan #6/#7 Step C/D unlock 자율 영역 진입 → 본 doc 추가 refresh
-- v2.0 ship 결정 시점 → 사용자 Vercel Edge Config slot 박제 → Step A 5 step 자율 fire → 본 doc final closure
+- ~~v2.0 ship 결정 시점 → 사용자 Vercel Edge Config slot 박제 → Step A 5 step 자율 fire → 본 doc final closure~~ **cycle 1460 갱신: v1.8 유지 확정 (Brier < 1pp) — v2.0 ship 시점 소멸, 본 refresh trigger 무효화**
 - 사용자 자연 발화 ("feature flag" / "기능 플래그" / "canary" / "shadow rollout") → 본 doc evidence 안내
 - 자연 누적 (20+ cycle gap 재도래) → 다음 status refresh
