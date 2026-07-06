@@ -64,4 +64,4 @@ cycle 1074+ 진단 단계 첫 step → 본 doc read → silent drift family swee
 next_refresh_trigger:
 - 새 plan ship (cycle 1064 plan #20 후 신규 plan 박제 시) → 새 status field family wave 가능
 - AdSense reject monitor 통과 (~06-05) → plan #6/#7 Step C/D unlock 자연 박제 + 새 status_history wave
-- v2.0 ship 결정 (n=150 도달 후) → model_version 라벨 family wave 가능
+- ~~v2.0 ship 결정 (n=150 도달 후) → model_version 라벨 family wave 가능~~ **cycle 1460 갱신: v1.8 유지 확정 (Brier < 1pp, n=161 crossed) — v2.0 ship 시점 소멸, 본 trigger 무효화**

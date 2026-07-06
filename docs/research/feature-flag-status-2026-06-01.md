@@ -24,7 +24,7 @@ cycle 1079 op-analysis (lite) 결과 (`docs/research/v1.8-killswitch-evaluation-
 - **kill-switch fire X** — v1.8 production rule 유지
 - v1.8 main acc 44.4→57.1 (+12.7pp 회복, cycle 1061 -11.5pp 누적 RESET 부호 반전)
 
-본 측정 = feature flag layer 박제 ROI 평가 input. kill-switch fire X = v2.0 ship 시점 빠른 도래 evidence 없음. n=150 ETA 보수 추정 ~2026-07-17 (velocity 1.80/day, +40/3일 effect 미확정).
+~~본 측정 = feature flag layer 박제 ROI 평가 input. kill-switch fire X = v2.0 ship 시점 빠른 도래 evidence 없음. n=150 ETA 보수 추정 ~2026-07-17 (velocity 1.80/day, +40/3일 effect 미확정).~~ **cycle 1460 갱신: v1.8 유지 확정 (n=161 crossed, Brier < 1pp) — feature flag ROI 소멸, ETA 무의미**
 
 ### 1.2 AdSense monitor 진척 (D-4)
 
@@ -62,11 +62,13 @@ cycle 1032 plan #17 PoC scope 5 sub-step (`docs/decisions/feature-flag-poc-scope
 
 ### 2.2 v2.0 ship 결정 시점 정합
 
-v2.0 ship 결정 = (a) v1.8 cohort n=150 도달 (ETA ~2026-07-17 보수, 잔여 ~46일 / velocity 1.80/day) **또는** (b) kill-switch fire 중 빠른 시점.
+~~v2.0 ship 결정 = (a) v1.8 cohort n=150 도달 (ETA ~2026-07-17 보수, 잔여 ~46일 / velocity 1.80/day) **또는** (b) kill-switch fire 중 빠른 시점.~~
 
-cycle 1079 측정 결과 kill-switch fire X + v1.8 main +1.2pp 우위 = (b) 빠른 도래 가능성 ↓. (a) n=150 도달 이 우선 trigger 가능성 ↑.
+~~cycle 1079 측정 결과 kill-switch fire X + v1.8 main +1.2pp 우위 = (b) 빠른 도래 가능성 ↓. (a) n=150 도달 이 우선 trigger 가능성 ↑.~~
 
-feature flag layer 박제 = v2.0 ship 시점 canary 10%/50% gradual rollout 가능. 미박제 시 = 0%→100% binary switch (현 상태).
+**cycle 1460 갱신 (2026-07-06)**: v1.8 유지 확정 (Brier diff < 1pp, n=161 crossed 후 upgrade 불필요 결론). v2.0 ship 시점 자체 소멸 — 본 섹션 무효화, feature flag 박제 ROI 소멸.
+
+~~feature flag layer 박제 = v2.0 ship 시점 canary 10%/50% gradual rollout 가능. 미박제 시 = 0%→100% binary switch (현 상태).~~
 
 **self_verification (cycle 887 plan #8 5축 rubric, 정합 유지)**:
 - 가치: medium — v2.0 ship 시점 binary switch 위험 mitigation
@@ -87,7 +89,7 @@ Tier 2 = 자가 검증 후 fire 가능 (사용자 GO 후). 즉시 자율 X.
 ## 4. 다음 refresh trigger
 
 - **AdSense reject monitor 결과 도래 (~2026-06-05) → reject 0 통과 시 plan #6/#7 Step C/D unlock 자율 영역 진입** → 본 doc 추가 refresh (D-Day refresh)
-- v2.0 ship 결정 시점 → 사용자 Vercel Edge Config slot 박제 → Step A 5 step 자율 fire → 본 doc final closure
+- ~~v2.0 ship 결정 시점 → 사용자 Vercel Edge Config slot 박제 → Step A 5 step 자율 fire → 본 doc final closure~~ **cycle 1460 갱신: v1.8 유지 확정 (Brier < 1pp) — v2.0 ship 시점 소멸, 본 refresh trigger 무효화**
 - 사용자 자연 발화 ("feature flag" / "기능 플래그" / "canary" / "shadow rollout") → 본 doc evidence 안내
 - 자연 누적 (15+ cycle gap 재도래) → 다음 status refresh
 

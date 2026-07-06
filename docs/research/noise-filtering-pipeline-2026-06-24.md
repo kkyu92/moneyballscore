@@ -52,8 +52,8 @@ status: spec_only_pending_user_review
 | 후보 | scope | 1 cycle 안 처리 가능? | priority (자가 의심 차단 룰 정합 — rubric 적용) |
 |---|---|---|---|
 | A. cohort drift alert 확장 | pre_game / postview / shadow / mlb 각 silent_drift_alert 확장 (현 predict_final only) | yes (lite 코드 4 추가, 운영 가시 즉시) | Tier 1 — fix-incident heavy 차원 자연 fire 가능 |
-| B. factor 별 noise 측정 harness | head_to_head 5%→3% 패턴을 9개 factor 에 일반화. bootstrap CI + W측정 cron + 결과 → 가중치 후보 박제 | partial (harness add 1 cycle, 측정 run 별도 cycle, 가중치 결정은 n=150+ 도달 후) | Tier 3 — operational-analysis heavy 차원, n=150 도달 (v2.0 trigger) 동기 |
-| C. recent_form window heteroskedasticity 측정 | 선발 로테이션 안정/불안정 split + 5경기 window noise variance 측정. variable window 후보 도출 | no (1 cycle 안 측정 + 결과 검증 어려움) | Tier 3 — n=150 v2.0 후속 |
+| B. factor 별 noise 측정 harness | head_to_head 5%→3% 패턴을 9개 factor 에 일반화. bootstrap CI + W측정 cron + 결과 → 가중치 후보 박제 | partial (harness add 1 cycle, 측정 run 별도 cycle, 가중치 결정은 ~~n=150+ 도달 후~~ **v1.8 유지 확정 후 소멸 — cycle 1460**) | ~~Tier 3 — operational-analysis heavy 차원, n=150 도달 (v2.0 trigger) 동기~~ **cycle 1460 갱신: v1.8 유지 확정 (Brier < 1pp) 으로 v2.0 trigger 소멸. 가중치 re-fit = 소진된 카드 (v2.1-B reject evidence). 본 후보 = archive** |
+| C. recent_form window heteroskedasticity 측정 | 선발 로테이션 안정/불안정 split + 5경기 window noise variance 측정. variable window 후보 도출 | no (1 cycle 안 측정 + 결과 검증 어려움) | ~~Tier 3 — n=150 v2.0 후속~~ **cycle 1460 갱신: v2.0 후속 소멸 — 본 후보 = archive (사용자 발화 시 재개)** |
 | D. LLM hedge phrase quantification | postview reasoning text 안 "강하지만/약하지만" 류 vague phrase 카운트 → confidence calibration noise 측정 | yes (regex + reasoning sweep harness, 1 cycle) | Tier 2 — review-code heavy 또는 op-analysis heavy 자연 fire |
 | E. rivalry-memory eviction policy | memory pool size cap + LRU/TTL eviction 도입. context noise 축소 | yes (단순 cap, 1 cycle) | Tier 2 — fix-incident heavy 또는 review-code heavy 자연 fire |
 | F. agent_memory correct 학습 path 박제 | retro.ts 가 is_correct=true 사례의 reasoning path 도 학습 source 로 추가 | partial (logic 변경 + 측정은 별도) | Tier 2 — explore-idea heavy 후속 spec 분리 |
@@ -66,11 +66,11 @@ self_verification:
   baseline_noise_layers_present: 6  # 위 표 1
   baseline_noise_sources_diagnosed: 4 카테고리 × 3~6 sub = 약 20 candidate
   rubric_evaluation: |
-    가치: medium — 노이즈 mitigation 누적 = Brier 개선 가능성 + LLM reasoning quality 향상. 단 v1.8 cohort n=27 / acc 48.1% baseline 에서 노이즈 mitigation 효과 directly measurable 까지 n=150+ 필요 (자가 의심 차단 룰 — 작은 표본 결정 X)
+    가치: medium — 노이즈 mitigation 누적 = Brier 개선 가능성 + LLM reasoning quality 향상. ~~단 v1.8 cohort n=27 / acc 48.1% baseline 에서 노이즈 mitigation 효과 directly measurable 까지 n=150+ 필요~~ **cycle 1460 갱신: v1.8 유지 확정 (n=161 crossed, Brier < 1pp) — Tier 1/2 후보 A/D/E 만 유효, Tier 3 후보 B/C/F 는 archive**
     시간 비용: small (spec write 1 cycle) — heavy 진입 시 후보 별 1~3 cycle 추가
     risk: 1 — spec only, 코드 변경 X. heavy 진입 시 후보 별 risk 별도 평가
     자율 가능: partial — spec 박제 = 본 메인 자율 OK. heavy 후속 = 자율 (Tier 1/2) 또는 사용자 review 우선 (Tier 3)
-    의존성: 단일 — 사용자 review (이 direction 정렬 OK 여부). v2.0 cohort n=150 도달 동기 (Tier 3 후보들)
+    의존성: 단일 — 사용자 review (이 direction 정렬 OK 여부). ~~v2.0 cohort n=150 도달 동기 (Tier 3 후보들)~~ **cycle 1460 갱신: v2.0 cohort 동기 소멸 — Tier 3 후보 archive**
 ```
 
 ## 다음 cycle 후속 후보
@@ -84,4 +84,4 @@ self_verification:
 본 spec 은 lite mode 결과 — partial outcome. 사용자가:
 1. Direction 정렬 OK + 다음 cycle 후보 A/D/E 중 1+ 본 메인 자율 fire 권한 → 후속 cycle 에서 자연 heavy 진입
 2. Direction 정렬 X 또는 scope 조정 → 본 spec rewrite or archive
-3. v2.0 cohort n=150 도달 wait (Tier 3 후보 B/C/F) → 본 spec 보관, n=150 도달 cycle 자동 매핑
+3. ~~v2.0 cohort n=150 도달 wait (Tier 3 후보 B/C/F) → 본 spec 보관, n=150 도달 cycle 자동 매핑~~ **cycle 1460 갱신: v1.8 유지 확정으로 v2.0 wait 소멸 — Tier 3 후보 B/C/F archive. 사용자 발화 시 재개**
