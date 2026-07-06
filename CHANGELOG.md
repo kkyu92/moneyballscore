@@ -1,5 +1,66 @@
 # Changelog
 
+## 🎯 v1.8 유지 확정 결정 — n=178 임계 달성 (2026-07-06, cycles 1447/1450/1460)
+
+### 배경
+
+v1.8 (10팩터, 3소스) 는 2026-05-13 (cycle 355) 론칭 후 pre_game verified 예측 축적 시작. v2.0 upgrade 임계는 `n=150` — 세이버메트릭스 신뢰 구간 확보 표본 수. 42 cycle 만에 3 milestone 순차 도달.
+
+### 3 milestone 순차 도달
+
+**cycle 1447 (2026-07-03) — n=161 첫 crossing**:
+- v1.8 cohort n=150 threshold 첫 crossed (velocity 회복 ~0.87/cycle after phase 13-14 flatline)
+- 실측 acc 60.9%, Brier 0.2714 → 0.2995 (calibration drift 관찰)
+- v2.1-B shadow n=52 / 51.9% / Brier 0.4635 = 즉시 **reject**
+
+**cycle 1450 (2026-07-03) — 51th skill-evolution milestone (반세기+1)**:
+- trigger 3 단독 발화 (`cycle_n % 50 == 0`)
+- 20 consecutive milestone metric-only pattern 유지
+- silent drift family streak 992 cycle (cycle 458~1450, wave 186 시점)
+
+**cycle 1460 (2026-07-06) — v1.8 유지 확정 최종 결정**:
+- plan #16 2차 fire — expanding window OOS n=27→178 재입증
+- Brier DEFAULT 0.2443 vs Learned 0.2458 (최대 차이 0.15% < 1pp 임계)
+- Fable plan 진단: post-CREDIT_EXHAUSTED (2026-06-06~) Brier drift = 측정 오류 (Fable S2c evidence, home_win_prob Brier pre/post = 0.24/0.24 안정)
+- **최종 결정**: v1.8 유지. 전면 가중치 재조정 불필요.
+
+### 정합 sweep (waves 186~196, cycle 1459~1463)
+
+silent drift family sweep 11 wave 순차 정합:
+
+| Wave | Cycle | Surface | 정합 결과 |
+|---|---|---|---|
+| 186 | 1459 | fix(test): /accuracy guard | methodology v2.0 block 복원 |
+| 188 | 1459 | CI red 복원 | 후속 |
+| 192 | 1458 | v2.0 "재조정 결정 대기" | v1.8 유지 확정 정합 |
+| 193 | 1459 | CF Worker cron fire count + role count | 실제 값 정합 |
+| 194 | 1461 | CLAUDE.md v2.0 calibration | v1.8 유지 확정 정합 |
+| 195 | 1462 | packages/ src comments v2.0 | v1.8 유지 확정 정합 |
+| 196 | 1463 | TODOS.md/memory/dashboard v2.0 tracking | v1.8 유지 확정 정합 |
+
+### v2.1-B rejected 근거
+
+- N=52 소표본 → n=150 임계 미달
+- Brier 0.4635 = DEFAULT (0.2443) 대비 2배 열화
+- 가중치 re-fit = 소진된 카드 (v2.1-B 증거)
+
+### CREDIT_EXHAUSTED 상태 (2026-06-06~)
+
+- debate.ts judge LLM Anthropic credit 소진 → 100% fallback → confidence=0.3 flat
+- 22일간 감지 지연 (cycle 1400 P2 패턴 lesson)
+- pre_game Brier 정상 (home_win_prob 기반), post-CREDIT_EXHAUSTED winner-centric Brier drift = 측정 오류
+- 사용자 영역: Anthropic 크레딧 충전 pending
+
+### v1.8 유지 확정의 의미
+
+- 42 cycle × 178 예측 축적 = 세이버메트릭스 신뢰 구간 확보 첫 사례
+- 정량 evidence 기반 결정 (Brier / accuracy 실측) — 직관 배제
+- 다음 upgrade 결정 = 새 데이터 소스 또는 팩터 발견 시. 표본 수 재조건 X
+
+**재사용 가능**: ✅ 다요인 예측 모델의 upgrade 판단 = 표본 수 임계 + Brier delta < 1pp = 유지 확정. re-fit 은 새 신호 발견 시만.
+
+---
+
 ## 🔬 패턴 추출 — cycle 1422 (2026-06-30)
 
 ### P5 — Team-Level Quantitative Overconfidence (data_pipeline / operational_analysis)

@@ -164,7 +164,7 @@
 **v0.5.40~41 신규 (2026-05-12)**:
 - `apps/moneyball/src/app/accuracy/page.tsx` — 공개 AI 적중률 대시보드 (캘리브레이션 SVG / 주별 트렌드 / 팀별 성과, cycle 287)
 - 누적 검증 126건 (cycle 775 n=124 → +2건 모두 v1.8 in 9일 = velocity ~0.22/day, cycle 861 op-analysis lite 측정). v2.0 임계 n=150 까지 24건. 9일 expected 45 actual 32 = 13건 누락 (28.9% silent skip, 05-18 일요일 0건 + 05-20 사례 8 봇차단 0건 + 05-21 2건) — n=150 도달 추정 06월 말~07월 초.
-- **v1.8 적용 완료 (cycle 335)**: head_to_head 3% + elo 10%. 일요일 Sunday cap — 임계 0.55 초과 시 0.45 강등 (cycle 358 변경). 전면 v2.0 → n=150 도달 후
+- **v1.8 적용 완료 (cycle 335)**: head_to_head 3% + elo 10%. 일요일 Sunday cap — 임계 0.55 초과 시 0.45 강등 (cycle 358 변경). 전면 v2.0 → n=150 도달 후 결정 = **✅ v1.8 유지 확정 (cycle 1460)** — Brier DEFAULT 0.2443 vs Learned 0.2458 최대 차이 0.15% < 1pp, 재조정 불필요. v2.1-B rejected (n=52, Brier 0.4635).
 - **scoring_rule이 실질 가중치 버전 구분자** (cycle 341 확인): model_version='v2.0-debate'(에이전트 고정) vs scoring_rule(v1.5/v1.6/v1.7-revert/v1.8). v1.8 scoring_rule 첫 예측 = 2026-05-13부터
 - **scoring_rule 성과 (cycle 886 → cycle 1460 갱신, 2026-07-06 실측)**: v1.5(16건,75.0%) / v1.6(46건,37.0%) / v1.7-revert(32건,53.1%) / **v1.8 최종 n=178 60.9% accuracy, Brier 0.2443 (test cohort, cycle 1460 plan #16 2차 fire)**. v2.0 임계 n=150 threshold **crossed at cycle 1447** (n=161 → cycle 1460 n=178). **✅ v1.8 유지 확정 (cycle 1460)** — Brier DEFAULT 0.2443 vs Learned 0.2458 최대 차이 0.15% < 1pp 임계 → 재조정 불필요. v2.1-B rejected (n=52, Brier 0.4635). 상세 = TODOS.md "🎯 모델 v2.0 업그레이드 트래킹" 섹션 (cycle 1460 최종 갱신).
 - **요일별 누적 (cycle 886 갱신, 2026-05-25 측정)**: Tue 52.0%(25) / Wed 53.8%(13) / Thu 46.2%(26) / **Fri 59.1%(22) — 최강** / Sat 52.2%(23) / **Sun 33.3%(24) — Sunday cap 효과 +12.2pp 향상 (cycle 542 21.1% → 33.3%)**. cycle 542 → cycle 886 +13건 (Tue +5, Thu +2, Fri +1, Sat +1, Sun +5).
