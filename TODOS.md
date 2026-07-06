@@ -45,30 +45,36 @@
 
 **완료 조건 (MLB 작업 시작 trigger)**: 항목 1, 2, 4-Step E/F partial 자율 영역 closed. 잔존 carry-over = 항목 3 (사용자 영역) + 항목 4 Step C/D (gating) + 항목 5 (자연 누적). MLB 작업 시작 = 사용자 영역 통과 후 사용자 결정.
 
-## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07, **cycle 1098 갱신**)
+## 🎯 모델 v2.0 업그레이드 트래킹 (cycle 231 재검토, 2026-05-07, **cycle 1460 최종 갱신 / 결정 완료**)
 
-**현재 상태 (cycle 1138, 2026-06-10 측정)** — 아티팩트: `apps/moneyball/data/op-analysis-cohort/2026-06-10-cohort-cycle-1138.md`:
-- 총 n=254 (적중 138 / **54.3%**) — cycle 1098 n=220 → +34건 누적 (9일 / velocity 3.4/day 가속)
-- **v1.8 (real) n=76 (59.2%, Brier 0.2478)** — cycle 1098 n=42 → +34건 누적, 57.1% → 59.2% (+2.1pp). Brier 0.2416 → 0.2478 (소폭 변동)
-- v1.8-credit-fail n=25 (60.0%, Brier 0.2304) — frozen
-- v1.5=75.0%(16) / v1.6=37.0%(46, ⚠️ anomaly 잔존) / v1.7-revert=55.9%(34)
-- v2.0-shadow n=5 (60.0%, Brier 0.5616) / **v2.1-B-shadow n=52 (51.9%, Brier 0.4635)** — ⚠️ 전량 백필 아티팩트 (2026-05-25 일괄 삽입, SP null → conf≈0 붕괴 → 랜덤 수준). 가중치 신호 아님. 라이브 행(6/7~) verified 대기 필요. v2.0 설계 시 이 cohort 배제. debate_version=null → accuracy/page.tsx 오염 없음 확인
-- confidence tier: low 52.1% / mid 54.7% / **high 65.6%** — 고신뢰 신호 강함
-- 요일 weak: 일 44.1%/n=34 / 수 50.0%/n=22 — v2.0 가중치 후보 검토 시 요일 보정 검토
-- v2.0 임계 n=150 까지 (v1.8 real 기준) **잔여 74건** — ETA **2026-07-01** (velocity 3.4/day, cycle 1138 박제. 직전 ETA 2026-07-22 → 3주 단축)
+**✅ 최종 결정 (2026-07-06, cycle 1460)**: **v1.8 유지 확정** — 전면 재조정 불필요. v2.1-B **rejected**. v2.0 트래킹 섹션 closed.
 
-> 📜 **history**:
-> - cycle 1098 (2026-06-01 측정): n=220 / 53.2% / v1.8 n=42 (57.1%, Brier 0.2416)
-> - cycle 1038 (2026-05-29 측정): n=205 / 51.2% / v1.8 n=27 (44.4%, Brier 0.2487) — cycle 989/994 부터 real v1.8 cohort 분리 박제
-> - cycle 886 (2026-05-25 측정): n=133 / 48.9% / v1.8=48.7%(39, conflated cohort)
+**결정 근거**:
+- **n=178 임계 달성** (cycle 1447, > n=150 threshold) — v1.8 real cohort n=178 도달
+- **plan #16 2차 fire (cycle 1460)** — expanding window OOS n=178 재입증: Brier DEFAULT 0.2443 vs Learned 0.2458 (최대 차이 0.15% < 1pp 임계) → DEFAULT_WEIGHTS 유지 확정
+- **Fable plan 진단 (2026-07-06)** — Brier drift = CREDIT_EXHAUSTED 2026-06-06~ 측정 오류, 실제 모델 정상. home_win_prob Brier pre/post = 0.24/0.24 안정
+- **v2.1-B rejected** — n=52 / 51.9% / Brier 0.4635 (전량 백필 아티팩트, SP null → conf≈0 붕괴). 가중치 re-fit = 소진된 카드
+- **CREDIT_EXHAUSTED 2026-06-06~ 지속** — debate 100% fallback → conf=0.3. 사용자 Anthropic 크레딧 충전 carry-over
 
-**실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy
+**최종 실측 지표 (cycle 1460 test cohort n=178)**:
+- Brier DEFAULT 0.2443 / Brier SHADOW_V20 0.2442 / Brier Learned 0.2458 — 최대 차이 0.15%
+- accuracy 60.9% (cycle 1447 측정)
+- 가중치 재조정 효과 = 노이즈 수준
 
-> ✅ **v1.8 credit 복구 완료 (2026-05-16 08:06 KST, user action)**: ANTHROPIC_API_KEY credit 충전 완료. retro debate 분석은 결과 누수/방법론 위반으로 **비채택**. 앞으로 fire 되는 신규 경기 v1.8 debate 누적으로 정직한 n 증가. 검증 항목 — (1) 다음 predict cron UTC 01 (KST 10:00) 첫 fire 시 `totalTokens>0` + reasoning 텍스트 길이 정상 + mv='v2.0-debate' 라벨 / (2) postview path 도 동일 verify (mv='v2.0-postview'). silent fallback 재발 시 PR #372 family fix 정상 작동 → mv='v1.8' (강등 라벨) 노출. 5/13~5/15 fallback 기간 5건은 quant-only 라벨로 누적 유지 (역사 박제). 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+> 📜 **history 요약** (details = CHANGELOG.md):
+> - cycle 1460 (2026-07-06): plan #16 2차 fire n=178 재입증 → v1.8 유지 확정
+> - cycle 1447 (2026-07-03): v1.8 n=161 첫 threshold cross, Brier drift 진단 시작
+> - cycle 1138 (2026-06-10): v1.8 real n=76 (59.2%, Brier 0.2478)
+> - cycle 1098 (2026-06-01): v1.8 n=42 (57.1%, Brier 0.2416)
+> - cycle 1038 (2026-05-29): real v1.8 cohort 분리 박제 시작
 
-> ⚠️ **v1.6 anomaly (cycle 387 발견, 2026-05-14)**: v1.6 scoring_rule n=46 (2026-04-22~05-03) 전체 17/46 = **37.0%** (coinflip 13%p 이하). high conf 35.7% / low conf 37.5% 양쪽 random 이하 = v1.6 가중치 자체 역방향 신호 가능성. n=150+ 도달 후 op-analysis heavy 에서 era별 factor backtest 권장.
+> ⚠️ **v1.6 anomaly (cycle 387, 2026-05-14, 참고 유지)**: v1.6 scoring_rule n=46 (2026-04-22~05-03) = 37.0% (coinflip 13%p 이하). era별 factor backtest 후보로 유지 (v2.0 결정과 독립).
 
-### v2.0 가중치 후보 (재검토, cycle 231)
+**실측 정보가치 분석 완료** — cycle 231 operational-analysis heavy (아래 후보 = 역사 참고, 결정과 무관)
+
+> 📜 **credit 이력 (2026-05-16 → 2026-06-06)**: 2026-05-16 credit 복구 후 debate 정직 누적. 2026-06-06~ 재소진 (CREDIT_EXHAUSTED) → debate 100% fallback conf=0.3. Fable plan 진단으로 Brier drift 원인 확정. 사용자 Anthropic 크레딧 재충전 carry-over 대기. 상세 lesson: `docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md`
+
+### v2.0 가중치 후보 (재검토, cycle 231, ⚠️ **역사 참고 — v1.8 유지 확정 후 미채택**)
 
 > ⚠️ cycle 228 후보와 방향 상충. 실측 게임 아웃컴 기반 분석 우선.
 
@@ -101,14 +107,14 @@
 - W20 일요일 5/10: 4/5 오답, 고확신(≥55%) 경기 중 3건 모두 실패
 - head_to_head 0.0~0.33 낮은 구간에서 오히려 저확신 예측이 정답 (저확신 63.2% vs 고확신 37.5% 역전)
 
-**Action**: n=150 검증 도달 시 operational-analysis heavy 재실행 → 합계 100% 맞춰 최종 commit
+**Action**: ~~n=150 검증 도달 시 operational-analysis heavy 재실행~~ → **cycle 1460 재입증 완료, v1.8 유지 확정. 이 섹션 미채택 (역사 참고).**
 
-**🎯 cycle 354 operational-analysis lite (2026-05-13)**:
+**🎯 cycle 354 operational-analysis lite (2026-05-13, 역사 참고)**:
 - v1.7-revert 최종: 32건 53.1% (W20=27건 55.6%, W22=5건 40%)
 - **확신도 역전**: medium (55-64%) = 37.5% (8건) < low (<55%) = 58.3% (24건) — judge-agent 과보수 신호
 - high ≥65% = 0건 — judge-agent 가 고확신 발화 X (Sunday cap 0.45 + 보수적 calibration 누적)
 - 팀별 극단값: OB 85.7% (6/7) ↑ / SK 28.6% (2/7) ↓ (소표본 주의)
-- v1.8 시작: 2026-05-13 elo 10%↑ + head_to_head 3%↓. n=150 도달 후 heavy 재실행.
+- v1.8 시작: 2026-05-13 elo 10%↑ + head_to_head 3%↓. **cycle 1460 재입증 완료 (n=178 재입증 → v1.8 유지).**
 
 ---
 

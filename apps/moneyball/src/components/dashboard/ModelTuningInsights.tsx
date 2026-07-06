@@ -24,10 +24,10 @@ function fmtWeightPct(v: number): string {
 }
 
 /**
- * 각 팩터의 실제 예측 기여도를 검증하고 v2.0 가중치 제안을 표시.
+ * 각 팩터의 실제 예측 기여도와 편향 진단. v1.8 확정 후 역사 참고.
  *
- * - samples < minSamples: 현재 수치만 + "수집 중" 안내
- * - samples >= minSamples: correlation 기반 재분배된 proposed weight 포함
+ * - samples < minSamples: 현재 수치만 + 진단 안내
+ * - samples >= minSamples: correlation 기반 제안 가중치 포함 (v1.8 확정으로 채택 X)
  */
 export function ModelTuningInsights({ report }: Props) {
   const ready = report.totalSamples >= report.minSamples;
@@ -42,8 +42,8 @@ export function ModelTuningInsights({ report }: Props) {
           role="status"
           className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[var(--color-surface)] rounded px-3 py-2"
         >
-          샘플 {report.totalSamples}경기 · v2.0 가중치 제안은 {report.minSamples}
-          경기 이상에서 활성화됩니다. 현재는 팩터별 방향성·편향 진단만 표시.
+          샘플 {report.totalSamples}경기 · 팩터별 방향성·편향 진단 ({report.minSamples}
+          경기 이상에서 상관계수 기반 분석 활성화됩니다).
         </p>
       )}
 
@@ -163,7 +163,7 @@ export function ModelTuningInsights({ report }: Props) {
           </li>
           <li>
             <strong>제안 가중치</strong>: 현재 가중치 × max(상관계수, 0)로 유용성
-            점수 계산 후 기존 총 가중치 합 내에서 재분배. 모델 v2.0 튜닝 후보.
+            점수 계산 후 기존 총 가중치 합 내에서 재분배. v1.8 확정 후 역사 참고.
           </li>
         </ul>
       </details>
