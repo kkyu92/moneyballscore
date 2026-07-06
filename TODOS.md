@@ -35,12 +35,13 @@
    - ✅ **Step D** — `/lotto/archive/[date]` 번호 ball + gold hero + collapse + 자연어 표기. Breadcrumb /lotto→archive→date.
    - ✅ **Step E (cron 자동 갱신) + Step F partial** 기완료 (cycle 885). fix: pnpm tsx → pnpm exec tsx (CI 실패 4개 workflow 수정, cycle 1138).
    - ✅ **누락 picks 복구** — 2026-06-06 (1227회) + 2026-06-13 (1228회) 수동 박제 (cron 6/5 실패 복구).
-5. ⏳ **N≥10 누적 OOS** (자연 누적, ~07-25 ETA) — 현재 **N=7** (1224~1230). 모두 256/256 PASS. 메모리 `content-architecture-lotto-rule-oos-sample-floor.md` floor = N=5 preliminary / N=10 actionable. 매주 토 추첨 후 자연 누적 → N=10 도달 시 256 rules 통계적 우위 재평가 + score 모델 sum 가중치 튜닝 evidence 누적 (1등 catch 0/7 → N=10 시점 0/10 if 패턴 유지 = 튜닝 GO).
+5. ⏳ **N≥10 누적 OOS** (자연 누적, ~07-18 ETA) — 현재 **N=8** (1224~1231). 모두 256/256 PASS. 메모리 `content-architecture-lotto-rule-oos-sample-floor.md` floor = N=5 preliminary / N=10 actionable. 매주 토 추첨 후 자연 누적 → N=10 도달 시 256 rules 통계적 우위 재평가 + score 모델 sum 가중치 튜닝 evidence 누적 (1등 catch 0/8 → N=10 시점 0/10 if 패턴 유지 = 튜닝 GO).
    - 1226회 (2026-05-30) `4 6 13 17 26 28` — PASS 256/256, 4 variant 중 balanced #29 3매칭 (5등 tier_3 = 1건)
    - 1227회 (2026-06-06) `1 14 16 34 41 44` — PASS 256/256, 1 variant 0매칭
    - 1228회 (2026-06-13) `24 29 30 31 35 44` — PASS 256/256, **4등 3건 + 5등 3건** (best OOS 결과, ~60× over-perform for 4등)
    - 1229회 (2026-06-20) `12 13 29 34 37 42` — PASS 256/256, 5등 2건 (1.8× over-perform baseline) — cycle 1292 박제
    - 1230회 (2026-06-27) `3 8 9 22 28 42` — PASS 256/256, 최대 2매칭 (무당첨) — cycle 1414 박제
+   - 1231회 (2026-07-04) `4 13 14 18 31 38` — PASS 256/256, 최대 2매칭 (무당첨) — cycle 1462 박제
 
 **완료 조건 (MLB 작업 시작 trigger)**: 항목 1, 2, 4-Step E/F partial 자율 영역 closed. 잔존 carry-over = 항목 3 (사용자 영역) + 항목 4 Step C/D (gating) + 항목 5 (자연 누적). MLB 작업 시작 = 사용자 영역 통과 후 사용자 결정.
 
