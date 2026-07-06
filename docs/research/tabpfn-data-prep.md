@@ -3,7 +3,8 @@ created_at: 2026-05-26
 plan_n: 12
 step: 2
 cycle: 957
-status: draft (data prep + Python skeleton placeholder only — 실제 inference 사용자 영역)
+status: superseded — plan #12 Step 3-5 무기한 postpone (cycle 1460, 2026-07-06). v2.0 upgrade 불필요 결론 (Brier diff < 1pp, n=178) → Python sidecar / TabPFN checkpoint 사용자 결정 소멸. 본 data-prep doc = 역사 기록으로 보존.
+updated_cycle: 1473
 ---
 
 # TabPFN Data Prep — KBO 10팩터 CSV schema + Python script skeleton
