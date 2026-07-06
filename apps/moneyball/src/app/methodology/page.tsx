@@ -126,7 +126,7 @@ const VERSION_HISTORY = [
     version: "v2.0 (v2.1-B rejected — v1.8 유지 확정)",
     date: `n=${V2_PROMOTION_COHORT_N} crossed — 2026-07-06 결정`,
     change:
-      `임계 n=${V2_PROMOTION_COHORT_N} 달성 완료 + v2.1-B shadow rejected (Brier 0.4635, n=52) — home_win_prob Brier 0.24 pre/post 안정 (calibration 정상), 전면 재조정 불필요. v1.8 유지 확정.`,
+      `임계 n=${V2_PROMOTION_COHORT_N} 달성 완료 + v2.1-B shadow rejected (Brier 0.4635, n=52) — home_win_prob Brier 0.24 pre/post 안정 (calibration 정상), 전면 재조정 불필요. v1.8 유지 확정. 실시간 적중률 /accuracy 참조.`,
   },
 ];
 
