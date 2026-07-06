@@ -1,10 +1,12 @@
 # Decision 1-pager: feature flag PoC scope — Vercel Flags SDK + Edge Config
 
-**Status**: pending user decision
+**Status**: SUPERSEDED — 2026-07-06 (cycle 1466, silent drift family wave 199)
+**Closure**: v1.8 유지 확정 (cycle 1460) — v2.0 production rollout 미진행. feature flag canary rollout 필요성 소멸. 신규 모델 버전 결정 시 재평가.
+**Original Status (2026-05-29)**: pending user decision
 **Created**: 2026-05-29 (cycle 1032 plan #17 — scout #1370 carry-over)
 **Owner**: 사용자 (kyusikkyu@gmail.com)
 **Linked**: `~/.develop-cycle/plans/moneyballscore/17.md`, scout #1370, `docs/research/v2.0-killswitch.md`
-**Decision timing**: v2.0 ship 결정 시점 전 (n=150 ETA 2026-08-04 또는 kill-switch fire ETA 2026-06-15 중 빠른 시점) — **2026-06-15 권장 deadline**
+**Decision timing**: ~~v2.0 ship 결정 시점 전 (n=150 ETA 2026-08-04 또는 kill-switch fire ETA 2026-06-15 중 빠른 시점) — 2026-06-15 권장 deadline~~ (superseded)
 
 ## 결정 요청
 
