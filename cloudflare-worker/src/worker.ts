@@ -1,7 +1,7 @@
 /**
  * Moneyball Score — Cloudflare Cron Worker
  *
- * 여섯 가지 역할 (event.cron 분기):
+ * 일곱 가지 역할 (event.cron 분기):
  *  1) "17 0-14 * * *" — daily-pipeline cron trigger.
  *     UTC hour → mode 결정 후 /api/pipeline 호출.
  *  2) "17 0-14 * * *" 동시 — SP 확정 시각 측정 (KBO 공식 + Naver 두 소스).
@@ -15,6 +15,9 @@
  *  6) "37 * * * *" 중 UTC 토요일 15시 — pitcher-snapshot (KST 일요일 00:37).
  *     /api/snapshot-pitchers POST → pitcher_stats 주간 시점 snapshot.
  *     cron 슬롯 추가 없이 sitemap-warmup 분기 안에 조건 통합 (4/5 유지).
+ *  7) "17 18-21,10 * * *" — MLB pipeline (Plan C Task 4). UTC hour → mode
+ *     결정 후 /api/mlb/pipeline 호출. UTC 18-21 (KST 03-06) scrape 4회 +
+ *     UTC 10 (KST 19) predict_final 1회 = 5회/일. 별도 cron slot 소비.
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  *
