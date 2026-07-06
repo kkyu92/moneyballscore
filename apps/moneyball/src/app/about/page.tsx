@@ -172,7 +172,7 @@ const FAQS = [
   },
   {
     q: `모델 버전 ${CURRENT_SCORING_RULE} 은 무엇을 의미하나요?`,
-    a: `현재 가동 중인 가중치 조합 버전입니다. ${CURRENT_SCORING_RULE} (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 로 강등(Sunday cap). 누적 검증 표본 n=${V2_PROMOTION_COHORT_N} 달성 완료 — v2.0 재조정 결정 대기 중. 실시간 진척은 /accuracy 참조.`,
+    a: `현재 가동 중인 가중치 조합 버전입니다. ${CURRENT_SCORING_RULE} (2026-05-12 ~) 의 변경: head_to_head 가중치 5% → 3% 축소(표본 부족 노이즈 인정), elo 가중치 8% → 10% 확대(정보가치 ↑). 일요일 경기는 신뢰도 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 로 강등(Sunday cap). 누적 검증 표본 n=${V2_PROMOTION_COHORT_N} 달성 완료 — v2.1-B rejected, v1.8 유지 확정 (calibration 정상). 실시간 진척은 /accuracy 참조.`,
   },
   {
     q: "픽 기록은 어떻게 시작하나요?",

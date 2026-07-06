@@ -16,7 +16,7 @@ const LIMIT = INSIGHTS_LIMIT;
 // noindex 내부 미리보기 — N={V2_PROMOTION_COHORT_N} 임계 달성 완료, v2.1-B rejected. surface signal 차단 유지.
 export const metadata: Metadata = {
   title: "v2 시뮬레이션 미리보기",
-  description: `v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 ${CURRENT_SCORING_RULE} 예측 위에 재가중치 적용한 내부 미리보기. N=${V2_PROMOTION_COHORT_N} 임계 달성 완료 — v2.1-B rejected, v2.0 결정 대기.`,
+  description: `v2.1-B 가중치 시뮬레이션 — backtest 결과 (Brier 0.24830) 를 현 ${CURRENT_SCORING_RULE} 예측 위에 재가중치 적용한 내부 미리보기. N=${V2_PROMOTION_COHORT_N} 임계 달성 완료 — v2.1-B rejected, v1.8 유지 확정.`,
   alternates: { canonical: PAGE_URL },
   robots: { index: false, follow: false },
 };
@@ -131,7 +131,7 @@ export default async function V2PreviewPage() {
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           v2.1-B 가중치 (backtest Brier 0.24830) 를 현 {CURRENT_SCORING_RULE} 예측에 재가중치 적용한 내부
-          미리보기. 실제 예측에 영향 X. N={V2_PROMOTION_COHORT_N} 임계 달성 완료 — v2.1-B rejected, v2.0 결정 대기.
+          미리보기. 실제 예측에 영향 X. N={V2_PROMOTION_COHORT_N} 임계 달성 완료 — v2.1-B rejected, v1.8 유지 확정.
         </p>
         <div
           role="status"
@@ -141,7 +141,7 @@ export default async function V2PreviewPage() {
           <Link href="/predictions" className="underline">
             예측 기록
           </Link>{" "}
-          에서 확인하세요. 임계 달성 완료 — v2.1-B rejected (Brier 0.4635). v2.0 결정 대기 중.
+          에서 확인하세요. 임계 달성 완료 — v2.1-B rejected (Brier 0.4635). v1.8 유지 확정.
         </div>
       </header>
 
