@@ -1,0 +1,87 @@
+name: heartbeat-stale
+
+# develop-cycle heartbeat 감지 — pipeline_runs 마지막 성공 시각 기준.
+# 매 2시간 실행. 마지막 성공 pipeline run 이 26h 초과 경과 → ::error:: + exit 1.
+#
+# 감지 로직: Supabase pipeline_runs 테이블 status='success' 최신 created_at 조회.
+# 26h 임계: pipeline 매일 UTC 01~14:17 사이 다수 실행 → 하루 건너뛰면 26h 초과.
+#
+# cron '7 1,3,5,7,9,11,13,15,17,19,21,23 * * *' = UTC 홀수 시 7분 (2시간 간격).
+# health-alert '27 * * * *' / runtime-error-alert '23 * * * *' / deploy-drift '17 * * * *' 분 회피.
+
+on:
+  schedule:
+    - cron: '7 1,3,5,7,9,11,13,15,17,19,21,23 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: heartbeat-stale
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  stale-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check pipeline_runs freshness
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+
+          RESPONSE=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/pipeline_runs?select=created_at,status&status=eq.success&order=created_at.desc&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            -H "Accept: application/json" \
+            --max-time 20 || echo "HTTP_STATUS:000")
+
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1 | sed 's/HTTP_STATUS://')
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "status=$HTTP_STATUS"
+          echo "body=$BODY"
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::pipeline_runs 조회 실패 (HTTP $HTTP_STATUS) — Supabase 연결 이상 의심."
+            exit 1
+          fi
+
+          LAST_RUN=$(echo "$BODY" | python3 -c "
+          import sys, json
+          rows = json.load(sys.stdin)
+          if not rows:
+              print('')
+          else:
+              print(rows[0].get('created_at', ''))
+          " 2>/dev/null || echo "")
+
+          if [ -z "$LAST_RUN" ]; then
+            echo "::warning::pipeline_runs status=success 행 없음 — 파이프라인 미실행 상태."
+            exit 0
+          fi
+
+          echo "last_run=$LAST_RUN"
+
+          ELAPSED_H=$(python3 -c "
+          from datetime import datetime, timezone
+          last = datetime.fromisoformat('$LAST_RUN'.replace('Z', '+00:00'))
+          now = datetime.now(timezone.utc)
+          hours = (now - last).total_seconds() / 3600
+          print(f'{hours:.1f}')
+          " 2>/dev/null || echo "999")
+
+          echo "elapsed_hours=$ELAPSED_H"
+
+          STALE=$(python3 -c "print('yes' if float('$ELAPSED_H') > 26 else 'no')" 2>/dev/null || echo "yes")
+
+          if [ "$STALE" = "yes" ]; then
+            echo "::error::develop-cycle heartbeat stale — 마지막 성공 pipeline run: $LAST_RUN (${ELAPSED_H}h 경과). develop-cycle watch.sh 또는 CF Worker cron 이상 의심. wrangler tail + watch.log 확인 권장."
+            exit 1
+          fi
+
+          echo "::notice::pipeline_runs 최신 성공: $LAST_RUN (${ELAPSED_H}h 경과) — heartbeat 정상."

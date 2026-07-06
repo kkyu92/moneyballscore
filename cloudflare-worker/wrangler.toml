@@ -18,7 +18,7 @@ crons = [
 
 # vars 는 wrangler.toml 에 둬도 되지만 secrets 는 dashboard 또는
 # `wrangler secret put <NAME>` 으로 등록.
-# 등록 필요 secrets: CRON_SECRET, SUPABASE_SERVICE_KEY, GH_DISPATCH_PAT.
+# 등록 필요 secrets: CRON_SECRET, SUPABASE_SERVICE_KEY, GH_DISPATCH_PAT, SENTRY_DSN.
 [vars]
 PIPELINE_URL = "https://moneyballscore.vercel.app/api/pipeline"
 MLB_PIPELINE_URL = "https://moneyballscore.vercel.app/api/mlb/pipeline"

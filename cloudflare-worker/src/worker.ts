@@ -32,6 +32,36 @@ export interface Env {
   GH_DISPATCH_PAT: string;
   GH_REPO: string;
   MLB_PIPELINE_URL: string;
+  SENTRY_DSN?: string;
+}
+
+async function captureToSentry(dsn: string, err: unknown, context: string): Promise<void> {
+  try {
+    const url = new URL(dsn);
+    const publicKey = url.username;
+    const projectId = url.pathname.replace('/', '');
+    const endpoint = `${url.protocol}//${url.host}/api/${projectId}/store/`;
+    const eventId = crypto.randomUUID().replace(/-/g, '');
+    const message = err instanceof Error ? err.message : String(err);
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Sentry-Auth': `Sentry sentry_version=7, sentry_client=moneyball-cf-worker/1.0, sentry_key=${publicKey}`,
+      },
+      body: JSON.stringify({
+        event_id: eventId,
+        timestamp: new Date().toISOString(),
+        platform: 'javascript',
+        level: 'error',
+        logger: context,
+        message,
+        exception: err instanceof Error ? { values: [{ type: err.name, value: err.message }] } : undefined,
+      }),
+    });
+  } catch {
+    // never throw from error reporter
+  }
 }
 
 type PipelineMode = 'announce' | 'predict' | 'predict_final' | 'verify';
@@ -56,7 +86,9 @@ async function callPipeline(env: Env, mode: PipelineMode): Promise<void> {
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
-    console.error(`[Worker] pipeline ${mode} failed: ${resp.status} ${body.slice(0, 300)}`);
+    const msg = `pipeline ${mode} failed: ${resp.status} ${body.slice(0, 300)}`;
+    console.error(`[Worker] ${msg}`);
+    if (env.SENTRY_DSN) await captureToSentry(env.SENTRY_DSN, new Error(msg), 'callPipeline');
     return;
   }
   console.log(`[Worker] pipeline ${mode} ok`);
@@ -103,7 +135,9 @@ async function callMlbPipeline(env: Env, mode: MlbPipelineMode): Promise<void> {
   });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
-    console.error(`[Worker] mlb-pipeline ${mode} failed: ${resp.status} ${body.slice(0, 300)}`);
+    const msg = `mlb-pipeline ${mode} failed: ${resp.status} ${body.slice(0, 300)}`;
+    console.error(`[Worker] ${msg}`);
+    if (env.SENTRY_DSN) await captureToSentry(env.SENTRY_DSN, new Error(msg), 'callMlbPipeline');
     return;
   }
   console.log(`[Worker] mlb-pipeline ${mode} ok`);
@@ -295,13 +329,16 @@ async function runLiveUpdate(env: Env): Promise<void> {
     });
     if (!resp.ok) {
       const body = await resp.text().catch(() => '');
-      console.error(`[Worker] live-update failed: ${resp.status} ${body.slice(0, 200)}`);
+      const msg = `live-update failed: ${resp.status} ${body.slice(0, 200)}`;
+      console.error(`[Worker] ${msg}`);
+      if (env.SENTRY_DSN) await captureToSentry(env.SENTRY_DSN, new Error(msg), 'runLiveUpdate');
       return;
     }
     const data = (await resp.json().catch(() => ({}))) as { liveGames?: number };
     console.log(`[Worker] live-update ok: liveGames=${data.liveGames ?? '?'}`);
   } catch (e) {
     console.error('[Worker] live-update error:', e);
+    if (env.SENTRY_DSN) await captureToSentry(env.SENTRY_DSN, e, 'runLiveUpdate');
   }
 }
 
