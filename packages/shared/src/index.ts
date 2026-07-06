@@ -176,7 +176,9 @@ export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 //
 // 변경: head_to_head 5%→3% (-2pp) / elo 8%→10% (+2pp). 합계 0.85 유지.
 // Sunday cap (cycle 309) 와 동일 선례 — n=150 전 방향 명확 시 선제 적용.
-// n=150 도달 후 full v2.0 (elo 13%, bullpen_fip 14% 등) 재확정 예정.
+// cycle 1447 (2026-07-06) — n=178 crossed n=150 threshold, plan #16 2차 fire
+// DEFAULT vs SHADOW_V20 Brier 차이 < 0.01pp → v1.8 유지 확정.
+// v2.0 full 후보 (elo 13%, bullpen_fip 14% 등) 재확정 = 소진된 카드 (v2.1-B rejected Brier 0.4635 evidence).
 //
 // v1.8 가중치:
 //   선발FIP 15% / 선발xFIP 5% / 타선wOBA 15% / 불펜FIP 10% / 최근폼 10%
@@ -278,7 +280,9 @@ export const V2_1_B_WEIGHTS = {
 
 /**
  * Shadow cohort 가중치 — v2.1-B 베이스 + 신규 shadow factor (park_weather / umpire_sz) 활성.
- * scoring_rule='v2.1-B-shadow' row 의 quant 재계산에 사용. n=150 도달 후 production 적용 결정.
+ * scoring_rule='v2.1-B-shadow' row 의 quant 재계산에 사용.
+ * cycle 1447 (2026-07-06) — v2.1-B rejected (Brier 0.4635, n=52 소표본), v1.8 유지 확정.
+ * 본 shadow 가중치는 historic evidence marker (v2.1-B 후보 backtest 결과 박제) — production 적용 X.
  * 합계 0.90 (자체 FACTOR_TOTAL 로 정규화 — predictor.ts 와 동일 산출 공식).
  */
 export const SHADOW_WEIGHTS = {

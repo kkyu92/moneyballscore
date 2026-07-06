@@ -684,7 +684,8 @@ export async function runDailyPipeline(
 
     // cycle 1127 plan-v17 candidate N Tier 2 — V2_MODEL_ENABLED=true 시 production
     // 가중치 SHADOW_V20_WEIGHTS swap. default OFF = DEFAULT_WEIGHTS (v1.8) 유지.
-    // n=150 v1.8 cohort 측정 완료 후 flag flip → v2.0 canary. live progress = /accuracy.
+    // cycle 1447 (2026-07-06) — v1.8 유지 확정 (n=178 crossed threshold, plan #16 2차 fire
+    // DEFAULT vs SHADOW_V20 Brier 차이 < 0.01pp). flag flip 계획 X, 신규 evidence 도래 시 재평가.
     const productionWeights = isV2ModelEnabled() ? SHADOW_V20_WEIGHTS : undefined;
     const quantResult = predict(input, { weights: productionWeights });
 
@@ -913,7 +914,8 @@ export async function runDailyPipeline(
     // plan #14 C1a (cycle 1019) — v2.0-shadow row insert.
     // v1.8 → v2.1-B-shadow → v2.0-shadow ordering. 동일 game_id 에 cycle 231 박제 가중치
     // (elo 0.13 / bullpen_fip 0.14 / recent_form 0.13) 기반 v2.0 후보 row 별도 누적.
-    // failure tolerant (throw X) → v1.8 + v2.1-B-shadow path 영향 X. n=150 wait 시간 절반.
+    // failure tolerant (throw X) → v1.8 + v2.1-B-shadow path 영향 X.
+    // cycle 1460 plan #16 2차 fire (n=178) — DEFAULT vs SHADOW_V20 Brier 차이 < 0.01pp = v1.8 유지 확정.
     try {
       const shadowV20Result = await insertShadowRowV20(db, {
         gameId: dbGameId,

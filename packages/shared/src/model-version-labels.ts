@@ -84,8 +84,9 @@ export const SHADOW_SCORING_RULE: ScoringRule = 'v2.1-B-shadow';
 /**
  * v2.0 후보 가중치 shadow 라벨 — plan #14 C1a (cycle 1019, 2026-05-28).
  * cycle 231 박제 가중치 (elo 0.13 / bullpen_fip 0.14 / recent_form 0.13) shadow 실주행.
- * v1.8 production 영향 X (DEFAULT_WEIGHTS invariant 유지). day 1 부터 v2.0 표본 누적 →
- * n=150 wait 시간 절반 (CEO Critical #1 반영, plan #14 C1a).
+ * v1.8 production 영향 X (DEFAULT_WEIGHTS invariant 유지). cycle 1447 (2026-07-06) —
+ * n=178 crossed n=150 threshold, plan #16 2차 fire = DEFAULT vs SHADOW_V20 Brier 차이
+ * < 0.01pp = v1.8 유지 확정. 본 shadow 라벨은 신규 evidence 도래 시 재평가 accumulator.
  */
 export const SHADOW_V20_SCORING_RULE: ScoringRule = 'v2.0-shadow';
 
@@ -118,12 +119,15 @@ export const LLM_ACTIVE_VERSIONS: ReadonlySet<ModelVersion> = new Set<ModelVersi
 ]);
 
 /**
- * v2.0 가중치 확정 임계 cohort 표본 — n=150 도달 시 v2.0 promotion 결정.
+ * v2.0 가중치 확정 임계 cohort 표본 — v1.8 유지 확정 임계 (cycle 1447, 2026-07-06).
  *
  * silent drift family wave 89 (cycle 1297) — 사용자 가시 layer (v2-shadow-monitor /
  * methodology / about / accuracy/shadow / mlb factors KO+EN) 6 파일 11 occurrence
- * hardcoded "n=150" → 본 상수 참조 swap. 임계 변경 (예: n=200 / n=100 재정의) 시
- * 본 상수 1줄 갱신 = 사용자 가시 layer 자동 동기. v2.0 promotion 결정 직후 본 라벨
- * 의미 deprecated (n=150 도달 후 era별 backtest harness 실행 → 가중치 후보 평가).
+ * hardcoded "n=150" → 본 상수 참조 swap.
+ *
+ * cycle 1447 (2026-07-06) evidence: n=178 crossed n=150 threshold, plan #16 2차 fire
+ * DEFAULT vs SHADOW_V20 Brier 차이 < 0.01pp → v1.8 유지 확정. v2.1-B rejected (Brier 0.4635).
+ * 본 상수는 historic evidence marker (n=150 threshold 도달 지점 박제). 신규 evidence 도래
+ * 시 별도 임계 (예: n=300 / n=500) 재정의 path 유지.
  */
 export const V2_PROMOTION_COHORT_N = 150 as const;
