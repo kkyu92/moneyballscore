@@ -132,7 +132,7 @@ describe("buildStaleSnapshot", () => {
     expect(snap.markdown).toContain("# stale-data snapshot (2026-05-25)");
     expect(snap.markdown).toContain("## scoring_rule 성과");
     expect(snap.markdown).toContain("## 요일별 누적");
-    expect(snap.markdown).toContain("## v2.0 가중치 upgrade 진행");
+    expect(snap.markdown).toContain("## v1.8 cohort 누적 (v2.0 upgrade 결정 완료 — 유지 확정 cycle 1460)");
     expect(snap.markdown).toContain("v1.8 누적:");
     expect(snap.markdown).toContain("auto-commit risk 차단");
     expect(snap.markdown).toContain("CLAUDE.md 한줄 형식:");

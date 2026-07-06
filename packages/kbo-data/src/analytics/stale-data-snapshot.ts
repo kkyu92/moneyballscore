@@ -180,7 +180,7 @@ export function buildStaleSnapshot(input: StaleSnapshotInput): StaleSnapshot {
     lines.push(`CLAUDE.md 한줄 형식: ${oneLine}`);
   }
   lines.push("");
-  lines.push(`## v2.0 가중치 upgrade 진행`);
+  lines.push(`## v1.8 cohort 누적 (v2.0 upgrade 결정 완료 — 유지 확정 cycle 1460)`);
   lines.push("");
   lines.push(
     `- v1.8 누적: **${v18Progress.n}/${v18Progress.target}건** (${v18Progress.pct.toFixed(1)}%)`,
