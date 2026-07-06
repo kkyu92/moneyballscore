@@ -38,13 +38,13 @@
 | S2a | Elo pre/post Brier 대조 | ✅ 완료 (2026-07-06) | **Elo Δ=-0.0011 (안정)**: 리그 환경 변화 아님. 파이프라인 문제. |
 | S2b | idx=90 날짜(2026-06-14~16) ↔ git log 대조 | ✅ 완료 (2026-07-06) | **코드 버그 가설 약화**: onset 구간 commits = SEO fixes only. 예측 로직 변경 없음. cycle 1205(2026-06-16) Brier=0.2588(n=90) 아직 정상. |
 | S2c | post 구간 factor 입력 freshness 검사 | ✅ 완료 (2026-07-06) | **CREDIT_EXHAUSTED 2026-06-06~**: conf=0.3 fallback 96.4% → winner-centric Brier artifact. 실제 모델 이상 없음 |
-| S3 | watch.sh heartbeat — cycle 종료 Telegram ping | ⏳ 미착수 | last-heartbeat stale >2h → GH Action alert |
+| S3 | watch.sh heartbeat — cycle 종료 Telegram ping | ✅ 완료 (2026-07-06) | OK fire 시 `$DC_HOME/last-heartbeat` + Telegram 💚 ping. GH Action `heartbeat-stale.yml` 2h 간격 pipeline_runs 26h 임계 감시. |
 
 ### 중기 (2~4주)
 
 | # | 항목 | 상태 | 메모 |
 |---|---|---|---|
-| M1 | CF Worker → Sentry 직접 연결 | ⏳ 미착수 | console.error → Sentry captureException |
+| M1 | CF Worker → Sentry 직접 연결 | ✅ 완료 (2026-07-06) | `captureToSentry()` 경량 envelope HTTP (SDK 불필요). callPipeline/callMlbPipeline/runLiveUpdate 오류 경로 연결. `wrangler secret put SENTRY_DSN` 미실행 시 noop. |
 | M2 | Platt scaling calibration (v2.0-lite) | ❌ **취소** | S2a 결과: 모델 calibration 이상 없음. home_win_prob Brier 0.24 stable |
 | M3 | Brier 산정 단일 모듈화 | ✅ 완료 (2026-07-06) | brier.ts 신규 + op-analysis home_win_prob 전환 + daily.ts errors 직렬화 버그 수정 |
 
@@ -149,8 +149,8 @@ onset 구간(2026-06-13~16) git log:
 
 | # | 항목 | 상태 |
 |---|---|---|
-| S3 | watch.sh heartbeat | ⏳ 미착수 |
-| M1 | CF Worker → Sentry | ⏳ 미착수 |
+| S3 | watch.sh heartbeat | ✅ 완료 |
+| M1 | CF Worker → Sentry | ✅ 완료 (SENTRY_DSN secret 등록 필요) |
 
 ## 다음 세션 시작 시 체크리스트
 
