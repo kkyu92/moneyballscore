@@ -3,7 +3,7 @@ created_at: 2026-06-01
 cycle: 1091
 scout_issue: 1370
 related_plan: 17
-status: carry-over scout (v2.0 ship gating wait + AdSense monitor D-4)
+status: superseded — v1.8 유지 확정 (cycle 1460, 2026-07-06). n=150 gating condition crossed (cycle 1447 n=161) but upgrade decision = 불필요 (Brier diff < 1pp). plan #17 feature flag = v2.0 upgrade 불필요로 인해 종료.
 prior_doc: docs/research/feature-flag-status-2026-05-31.md (cycle 1072, gap=19)
 ---
 
