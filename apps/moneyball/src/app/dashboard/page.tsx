@@ -288,12 +288,11 @@ export default async function DashboardPage() {
         <FactorErrorTable rows={factorErrors} />
       </section>
 
-      {/* 모델 v2.0 튜닝 진단 */}
+      {/* 팩터 정확도 진단 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
-        <h2 className="text-lg font-bold mb-1">모델 v2.0 튜닝 진단</h2>
+        <h2 className="text-lg font-bold mb-1">팩터 정확도 진단</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          각 팩터가 실제 결과와 얼마나 일치했는지 정량 오차분석 · 샘플 누적 후
-          가중치 재보정 근거로 사용
+          각 팩터의 방향성·편향 분석 — v1.8 유지 확정 (n=178, Brier Δ&lt;0.01pp)
         </p>
         <ModelTuningInsights report={tuningReport} />
       </section>
