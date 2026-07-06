@@ -71,9 +71,9 @@ silent drift family sweep 11 wave 순차 정합:
 - `teamAccuracyRate(predictions, teamId)` — 팀별 예측 적중률 집계
 - 임계 플래그: `model_win_rate(team) > actual_win_rate(team) + 0.20` = overconfidence 경고
 - 이번 SSG 케이스: 모델이 SSG를 약 60% 확률로 예측 → 실제 시즌 승률은 ~40%대 추정
-- v2.0 가중치 조정 전 팀별 보정 계수(team_bias_correction) 적용 검토
+- 팀별 보정 계수(team_bias_correction) 적용 후속 검토 (v1.8 유지 확정 별도 layer, cycle 1460)
 
-**Results**: W26 발견 (n=8 소표본). n=150 도달 후 전 팀 체계적 측정 예정. 지금은 관찰 마커만 박제.
+**Results**: W26 발견 (n=8 소표본). n=178 임계 달성 후 v1.8 유지 확정 (cycle 1447/1460) — 전 팀 체계적 측정은 팀별 표본 확보 후 별도 진행. 지금은 관찰 마커만 박제.
 
 **재사용 가능**: ✅ 모든 스포츠 예측 모델. 팩터 기반 모델에서 개별 팀/선수의 "정량-성과 乖離"는 systematic bias 원인 1순위.
 
@@ -86,11 +86,11 @@ silent drift family sweep 11 wave 순차 정합:
 **Root cause 가설**: 4연전 구조(화~일)에서 3차전(토)이 심리적 분기점 — 홈 3연패 시 원정 흐름 급전환. 4차전(일) = 정규화.
 
 **Solution**: 
-- 요일 보정 계수 `DAY_OF_WEEK_WEIGHT` 상수 후보 (v2.0 가중치 조정 시)
+- 요일 보정 계수 `DAY_OF_WEEK_WEIGHT` 상수 후보 (v1.8 유지 확정 후속 별도 layer, cycle 1460)
 - 토요일 예측 신뢰도 티어 하향 (-5% 보정) 검토
 - 일요일: 보정 불필요 (71% = 전체 평균 이상)
 
-**Results**: 관찰 패턴 박제. v2.0 n=150 도달 후 통계 유의성 검증 필요 (N=25 소표본).
+**Results**: 관찰 패턴 박제. n=178 임계 달성 (cycle 1447) 후 v1.8 유지 확정 — 요일 단위 통계 유의성은 요일별 표본 확보 (현 N=25 소표본) 후 재검증.
 
 **재사용 가능**: ✅ 연속 시리즈 구조를 가진 모든 스포츠. NBA 홈/원정 back-to-back, MLB 3~4게임 시리즈에도 동일 패턴 존재 가능.
 
@@ -199,7 +199,7 @@ silent drift family sweep 11 wave 순차 정합:
 - 이번 주: 한화전 3경기 모두 SSG 예측 → 3경기 모두 한화 승
 - v1.8 전체: SSG 예측 시 적중 1건/8경기 = 거의 역예측 수준
 - 원인 가설: SSG 정량 스탯(FIP/xFIP/Elo)이 현 시즌 실제 성적보다 과도하게 우수 → 모델 overconfidence
-- v2.0 가중치 조정 시 SSG 관련 팩터 별도 검토 필요
+- SSG 관련 팩터 별도 검토 필요 (v1.8 유지 확정 후속 별도 layer, cycle 1460)
 
 **2. 토요일 이변 패턴 (4/5 = 80% 실패)**
 - 4개 경기 모두 원정팀 승리 (홈 어드밴티지 무력화)
@@ -237,7 +237,7 @@ silent drift family sweep 11 wave 순차 정합:
 | **cycle 1421 (6/30)** | **127** | **59.1%** |
 
 - 잔여 23경기 → v2.0 임계 n=150 (ETA: 약 4.6일, velocity ~5/day 추정)
-- 가중치 조정 **보류** — n=150 도달 후 SSG 편향 + 토요일 패턴 포함 전면 재조정
+- 가중치 조정 **보류** — cycle 1421 시점 기록. cycle 1447 n=161 threshold cross → cycle 1460 n=178 재입증 → **v1.8 유지 확정** (전면 재조정 불필요, SSG 편향 + 토요일 패턴은 별도 후속 layer 로 검토)
 
 ---
 
