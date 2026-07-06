@@ -35,9 +35,9 @@
 | # | 항목 | 상태 | 메모 |
 |---|---|---|---|
 | S1 | backfill-home-win-prob.ts 실행 → drift 재측정 | ✅ 완료 (2026-07-06) | 10행 업데이트. post 0.3723→0.3568 |
-| S2a | Elo pre/post Brier 대조 | ⏳ 미착수 | Elo도 악화 → 리그 환경 / Elo 정상 → 우리 버그 |
+| S2a | Elo pre/post Brier 대조 | ✅ 완료 (2026-07-06) | **Elo Δ=-0.0011 (안정)**: 리그 환경 변화 아님. 파이프라인 문제. |
 | S2b | idx=90 날짜(2026-06-14~16) ↔ git log 대조 | ✅ 완료 (2026-07-06) | **코드 버그 가설 약화**: onset 구간 commits = SEO fixes only. 예측 로직 변경 없음. cycle 1205(2026-06-16) Brier=0.2588(n=90) 아직 정상. |
-| S2c | post 구간 factor 입력 freshness 검사 | ⏳ 미착수 | FIP/wOBA 갱신일이 예측일과 맞는지. **우선순위 상승**: S2b 코드 변경 없어서 staleness 가능성 높아짐 |
+| S2c | post 구간 factor 입력 freshness 검사 | ✅ 완료 (2026-07-06) | **CREDIT_EXHAUSTED 2026-06-06~**: conf=0.3 fallback 96.4% → winner-centric Brier artifact. 실제 모델 이상 없음 |
 | S3 | watch.sh heartbeat — cycle 종료 Telegram ping | ⏳ 미착수 | last-heartbeat stale >2h → GH Action alert |
 
 ### 중기 (2~4주)
@@ -45,8 +45,8 @@
 | # | 항목 | 상태 | 메모 |
 |---|---|---|---|
 | M1 | CF Worker → Sentry 직접 연결 | ⏳ 미착수 | console.error → Sentry captureException |
-| M2 | Platt scaling calibration (v2.0-lite) | ⏳ S2 완료 후 착수 | 2 param, 주 1회 rolling window re-fit |
-| M3 | Brier 산정 단일 모듈화 | ⏳ 미착수 | winner-centric/squared-diff 혼선 재발 차단 |
+| M2 | Platt scaling calibration (v2.0-lite) | ❌ **취소** | S2a 결과: 모델 calibration 이상 없음. home_win_prob Brier 0.24 stable |
+| M3 | Brier 산정 단일 모듈화 | ✅ 완료 (2026-07-06) | brier.ts 신규 + op-analysis home_win_prob 전환 + daily.ts errors 직렬화 버그 수정 |
 
 ### 장기 (S2 결과 조건부)
 
@@ -135,11 +135,26 @@ onset 구간(2026-06-13~16) git log:
 
 ---
 
+## 최종 진단 요약 (2026-07-06 완료)
+
+| 항목 | 결과 |
+|---|---|
+| Brier drift 원인 | **측정 오류** — winner-centric Brier에 conf=0.3 fallback 섞임 |
+| 실제 모델 품질 | **정상** — home_win_prob Brier pre/post 0.24/0.24 (coin-flip 이하) |
+| Elo 비교 | Elo Δ=-0.0011 (안정) → 리그 환경 변화 아님 |
+| CREDIT_EXHAUSTED | **2026-06-06~지속** → debate 100% fallback → conf=0.3 |
+| **필요 액션** | **Anthropic Plans & Billing 크레딧 충전** (사용자 직접) |
+
+## 잔여 항목
+
+| # | 항목 | 상태 |
+|---|---|---|
+| S3 | watch.sh heartbeat | ⏳ 미착수 |
+| M1 | CF Worker → Sentry | ⏳ 미착수 |
+
 ## 다음 세션 시작 시 체크리스트
 
 1. `git log --oneline -5` — 최근 사이클 확인
-2. 이 파일 read — S2 상태 확인
-3. **S2c 우선 착수** (factor freshness): FIP/wOBA 입력 staleness 검사
-4. **S2a** (Elo 대조): pre/post 구간 Elo 예측 Brier 비교
-5. S3(heartbeat) 는 언제든 착수 가능 (Telegram 인프라 있음)
-6. M2(Platt) 는 S2 전체 완료 전 착수 금지
+2. 이 파일 read — 잔여 항목 확인
+3. Anthropic 크레딧 충전 여부 확인 → 충전됐으면 debate 재개 확인
+4. S3(heartbeat): watch.sh + GH Action stale 감지
