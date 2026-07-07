@@ -143,6 +143,10 @@ export function classifyAnthropicError(status: number, body: string): string {
  *
  * 로컬 개발에서 LLM_BACKEND=ollama 또는 LLM_BACKEND=deepseek 로 비용 절감 테스트 가능.
  * Vercel 프로덕션은 LLM_BACKEND 설정 안 하면 자동으로 claude 사용.
+ *
+ * CREDIT_EXHAUSTED 자동 failover: LLM_BACKEND_FALLBACK=deepseek|ollama 설정 시
+ * callClaude 가 CREDIT_EXHAUSTED 반환하면 fallback backend 로 자동 재시도.
+ * 미설정 시 기존 동작 유지 (하위 호환).
  */
 export async function callLLM<T>(
   options: LLMCallOptions,
@@ -155,7 +159,35 @@ export async function callLLM<T>(
   if (backend === 'deepseek') {
     return callDeepSeek(options, parseResponse);
   }
-  return callClaude(options, parseResponse);
+
+  const result = await callClaude(options, parseResponse);
+
+  // CREDIT_EXHAUSTED 자동 failover (사용자 env 설정 필요: LLM_BACKEND_FALLBACK + DEEPSEEK_API_KEY)
+  const fallbackRaw = process.env.LLM_BACKEND_FALLBACK?.toLowerCase();
+  if (
+    !result.success &&
+    typeof result.error === 'string' &&
+    result.error.startsWith('CREDIT_EXHAUSTED') &&
+    (fallbackRaw === 'deepseek' || fallbackRaw === 'ollama')
+  ) {
+    try {
+      const Sentry = (await import('@sentry/nextjs' as string)) as {
+        captureMessage?: (msg: string, opts: unknown) => void;
+      };
+      Sentry.captureMessage?.(`CREDIT_EXHAUSTED: fallback to ${fallbackRaw}`, {
+        level: 'warning',
+        tags: { credit_exhausted_fallback: fallbackRaw, model: options.model },
+      });
+    } catch {
+      // Sentry 미설정 환경 silent skip
+    }
+    if (fallbackRaw === 'ollama') {
+      return callOllama(options, parseResponse);
+    }
+    return callDeepSeek(options, parseResponse);
+  }
+
+  return result;
 }
 
 /**

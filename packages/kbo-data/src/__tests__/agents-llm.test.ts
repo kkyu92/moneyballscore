@@ -246,6 +246,54 @@ describe('callLLM retry/backoff', () => {
     expect(fetchMock).toHaveBeenCalledTimes(MAX_ATTEMPTS);
   });
 
+  // LLM_BACKEND_FALLBACK — CREDIT_EXHAUSTED 자동 failover (cycle 1491)
+  it('CREDIT_EXHAUSTED + LLM_BACKEND_FALLBACK=deepseek → deepseek 재시도 (no key = deepseek 에러)', async () => {
+    const creditErrorBody = {
+      type: 'error',
+      error: { type: 'invalid_request_error', message: 'Your credit balance is too low to access the Anthropic API.' },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(creditErrorBody, 400));
+    global.fetch = fetchMock as unknown as typeof fetch;
+    process.env.LLM_BACKEND_FALLBACK = 'deepseek';
+    delete process.env.DEEPSEEK_API_KEY;
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    const result = await promise;
+
+    // callDeepSeek 는 DEEPSEEK_API_KEY 없으면 fetch 호출 없이 즉시 에러 반환
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('DEEPSEEK_API_KEY');
+    // claude fetch 1번만 (deepseek 는 key 없어 fetch 미호출)
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    delete process.env.LLM_BACKEND_FALLBACK;
+  });
+
+  it('CREDIT_EXHAUSTED + no LLM_BACKEND_FALLBACK → 원본 에러 반환 (하위 호환)', async () => {
+    const creditErrorBody = {
+      type: 'error',
+      error: { type: 'invalid_request_error', message: 'Your credit balance is too low to access the Anthropic API.' },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(creditErrorBody, 400));
+    global.fetch = fetchMock as unknown as typeof fetch;
+    delete process.env.LLM_BACKEND_FALLBACK;
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    const result = await promise;
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('CREDIT_EXHAUSTED');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   // cycle 461 — credit balance too low 실제 incident → raw JSON leak 차단 검증
   it('credit balance too low 400 → CREDIT_EXHAUSTED 분류 (raw JSON leak 차단)', async () => {
     const creditErrorBody = {
