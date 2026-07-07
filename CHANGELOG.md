@@ -1,5 +1,53 @@
 # Changelog
 
+## 🔁 재사용 가능 패턴 — 2026-07-07 extract-pattern (cycle 1499)
+
+### P1: LLM Provider CREDIT_EXHAUSTED 자동 failover `ai_agent`
+
+**Problem**: Anthropic API credit 소진 → 예측이 conf=0.3 flat 으로 silently degraded. 22일 감지 지연 (2026-06-06~06-28).
+
+**Solution**: `LLM_BACKEND_FALLBACK=deepseek|ollama` env 설정 + `callLLM()` 안 CREDIT_EXHAUSTED 체크 후 secondary backend 자동 재시도 + Sentry warning 캡처.
+
+**Results**: 운영자 개입 없이 자동 복구. Sentry warning alert 즉각 발화.
+
+**재사용**: Anthropic API 사용하는 모든 LLM 파이프라인. env 2개 설정만으로 활성화.
+
+---
+
+### P2: LLM 백엔드 관측성 레이어 (DB 컬럼 + 이벤트 테이블) `ai_agent`
+
+**Problem**: primary vs fallback LLM 품질 차이 측정 불가. Brier drift 원인 진단 불가.
+
+**Solution**: `predictions.llm_backend VARCHAR(16)` + `llm_fallback_events` 이벤트 테이블 (ts, model, fallback_to, pipeline_run_id FK).
+
+**Results**: pre/post-CE Brier 코호트 분리 (Fable S2c — 0.24/0.24 안정). winner-centric Brier drift = 측정 오류 확인.
+
+**재사용**: 멀티 백엔드 LLM 파이프라인 모두. 컬럼 1개 + 이벤트 테이블 1개로 완전 관측성.
+
+---
+
+### P3: LLM 다운그레이드 구간 UI — 팩터 배지 폴백 `content_auto`
+
+**Problem**: CE 구간 conf=0.3 flat → 분석 UI 에 근거 없음 → 사용자 가치 0.
+
+**Solution**: `factors` 컬럼에서 `|score - 0.5|` 기준 상위 2개 팩터를 UI 배지로 렌더링 (debate 없어도 항상 표시).
+
+**Results**: LLM 다운타임 중 정량 분석 근거 유지. UX graceful degradation.
+
+**재사용**: confidence score 기반 예측 UI. LLM outage 구간 폴백 패턴.
+
+---
+
+### Anti-P1: conf=0.3 flat 무음 감지 지연 `anti_pattern`
+
+**Problem**: CREDIT_EXHAUSTED → conf=0.3 + agentError 텍스트만 → 알림 없음 → 22일 미감지.
+
+**Root cause**: 파이프라인 외형 정상 (예측 생성 + 검증 진행) → alert 미발화. "degraded but working" = 가장 감지 어려운 패턴.
+
+**Fix**: conf histogram 이상치 (`conf=0.3 비율 > 80% in 7일`) Sentry alert 추가 권장.
+
+---
+
 ## 📊 주간 리뷰 — 2026-W27 (06-29~07-05) / 2026-07-07 weekly-review
 
 ### 이번 주 성과 요약
