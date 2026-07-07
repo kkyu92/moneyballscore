@@ -76,7 +76,7 @@ MoneyBall Score 의 다음 6개월 리소스 배분 결정:
 ## (B) KBO 우선 강화 비용
 
 ### v1.8 → v2.0 가중치
-- n=150 forward cohort wait (cycle 989 측정 = n=27, velocity 1.80/day, ETA 2026-08-04 약 68일)
+- n=150 forward cohort wait (cycle 989 측정 = n=27, velocity 1.80/day, ETA 2026-08-04 약 68일) ← stale: n=178 crossed (cycle 1447), v1.8 유지 확정 (cycle 1460) — wait 종료
 - v2.0-shadow scoring 실주행 cohort 박제 시작 (cycle 1019 C1a ship 완료)
 - walk-forward Brier delta + Fancy Stats Elo baseline 비교 (cycle 1019 C1b ship 완료, harness 박제)
 - **추가 비용**: ~0 (현 패턴 유지 + cron 자동 fire)
@@ -109,7 +109,7 @@ MoneyBall Score 의 다음 6개월 리소스 배분 결정:
 | 개발 cost | ~3 sprint (scraper / schema / agent 적응) | ~2~3 cycle (본 메인 자율 fire) |
 | 사용자 가시 가치 | demand 측정 필요 (현 waitlist N 미측정) | v2.0 accuracy / AdSense 광고 / IA 직접 |
 | commitment escalation risk | 높음 (인제스트 시작 후 중단 시 sunk cost) | 낮음 (cycle 단위 fire) |
-| 데이터 신선도 evidence | demand 측정 wait | v1.8 cohort 박제 (n=27 → n=150 ETA 2026-08-04) |
+| 데이터 신선도 evidence | demand 측정 wait | v1.8 cohort 박제 (n=27 → n=150 ETA 2026-08-04) ← stale: n=178 도달 (cycle 1447), v1.8 유지 확정 (cycle 1460) |
 | AdSense 심사 path | 사용자 영역 (간접) | 사용자 영역 (간접) |
 
 ## 추천 (본 메인 시각, 사용자 결정 wait)

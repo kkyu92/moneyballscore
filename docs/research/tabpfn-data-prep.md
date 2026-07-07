@@ -251,7 +251,7 @@ if __name__ == "__main__":
 | 2 | data prep CSV schema + Python skeleton placeholder | **DONE (본 문서)** | **957** |
 | 3 | Python sidecar 인프라 4 옵션 결정 | carry-over (사용자 영역) | TBD |
 | 4 | KBO 데이터 backfill + TabPFN checkpoint download + verification | carry-over (사용자 영역) | TBD |
-| 5 | v2.0 A/B test harness production fire | carry-over (사용자 영역, gating v1.8 cohort n=150 ≈ 07-05 ETA) | TBD |
+| 5 | v2.0 A/B test harness production fire | ~~carry-over (사용자 영역, gating v1.8 cohort n=150 ≈ 07-05 ETA)~~ ← stale: v2.0 upgrade 불필요 (cycle 1460 v1.8 유지 확정), Step 5 소멸 | ~~TBD~~ |
 
 본 plan #12 = Step 1~2 closure 후 status=completed_autonomy_pending_user_step_3_5 (expiry 2026-08-26, cycle 1037 frontmatter 갱신). Step 3~5 = 사용자 영역 carry-over, v1.8 n=150 도달 후 사용자 결정 시점에 자연 fire 또는 archive.
 
@@ -270,6 +270,6 @@ if __name__ == "__main__":
 - HOME_ADVANTAGE: `packages/shared/src/index.ts:137` (0.015, 2026-04-21 N=2180 측정)
 - predictions.factors JSONB schema: cycle 287 박제 + cycle 873 PR #1229 column 정합
 - scoring_rule semantics: cycle 341 박제 + cycle 886 갱신 (v1.5 75.0% / v1.6 37.0% / v1.7-revert 53.1% / v1.8 48.7%)
-- n=150 ETA: cycle 949 op-analysis 정정 (~07-05 ETA, velocity 2.8/day, cycle 886 7-10일 산정 오류 정정)
+- n=150 ETA: cycle 949 op-analysis 정정 (~07-05 ETA, velocity 2.8/day, cycle 886 7-10일 산정 오류 정정) ← stale: n=178 crossed (cycle 1447), v1.8 유지 확정 (cycle 1460)
 - `feedback_data_only_claims` — Brier/LogLoss/적중률 측정 숫자 의무
 - silent drift family 사례 11 — predict_final silent silent drop carry-over (cycle 819 PR #1179 alert channel)
