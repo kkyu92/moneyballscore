@@ -8,7 +8,7 @@
 **Linked**: `~/.develop-cycle/plans/moneyballscore/15.md` (plan #15 C1f), parent plan #14
 **Decision timing**: ~~**2026-06-30 (캘린더 hard deadline)** 또는 n=150 도달 (ETA 2026-08-04) 또는 v2.0 production ship 결정 시점 중 가장 빠름~~ (deadline 경과, ESCALATED)
 
-> ⚠️ **캘린더 trigger 추가 (autoplan CEO-4 finding 후속)**: 이전 trigger 2건 (n=150 + v2.0 ship) = 둘 다 같은 blocked event 의존 → 무기한 deferral risk. 캘린더 hard deadline 2026-06-30 추가로 강제 재검토 보장. 본 날짜까지 미결정 시 자동 escalation (carry-over plan 박제 + 사용자 알림).
+> ⚠️ **캘린더 trigger 역사 기록 (autoplan CEO-4 finding 후속)**: 이전 trigger 2건 (n=150 + v2.0 ship) = 둘 다 같은 blocked event 의존 → 무기한 deferral risk. 캘린더 hard deadline 2026-06-30 추가로 강제 재검토 보장 시도. → **2026-06-30 경과 시점 미결정** (silent drift family wave 199 cycle 1466 발견) → **ESCALATED status 박제 완료**. 이후 n=150 = n=178 crossed (cycle 1447) + v2.0 결정 = v1.8 유지 확정 (cycle 1460) 양쪽 resolved → 신규 트리거 = 사용자 결정 대기.
 
 ## 결정 요청
 
