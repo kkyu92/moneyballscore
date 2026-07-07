@@ -25,6 +25,7 @@ import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { YesterdayStatusFilter } from '@/components/analysis/YesterdayStatusFilter';
 import { ThisWeekStatusFilter } from '@/components/analysis/ThisWeekStatusFilter';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
+import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
 
 export const metadata: Metadata = {
   title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 이번 주 경기',
@@ -61,6 +62,7 @@ interface TodayAllRow {
     prediction_type: string;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
+    factors: Record<string, number> | null;
   }>;
 }
 
@@ -72,6 +74,7 @@ interface TodayGameCard {
   predictedWinnerCode: TeamCode | null;
   homeWinProb: number;
   confidence: number;
+  topFactors: Array<{ label: string; favoredCode: TeamCode }>;
 }
 
 interface TodayAnalysisData {
@@ -94,7 +97,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
-        prediction_type, reasoning,
+        prediction_type, reasoning, factors,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
     `)
@@ -131,6 +134,18 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       confidence: pred.confidence ?? ELO_NEUTRAL_WIN_PCT,
     });
 
+    const topFactors: TodayGameCard['topFactors'] = [];
+    if (pred.factors) {
+      const sorted = Object.entries(pred.factors)
+        .filter(([key]) => key in FACTOR_LABELS)
+        .map(([key, val]) => ({ key, impact: Math.abs((val as number) - 0.5), favorable: (val as number) > 0.5 ? homeCode : awayCode }))
+        .sort((a, b) => b.impact - a.impact)
+        .slice(0, 2);
+      for (const f of sorted) {
+        topFactors.push({ label: FACTOR_LABELS[f.key], favoredCode: f.favorable });
+      }
+    }
+
     cards.push({
       gameId: game.id,
       gameTime: game.game_time,
@@ -139,6 +154,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
       homeWinProb: winnerProbOf(pred.reasoning?.homeWinProb),
       confidence: pred.confidence ?? 0.5,
+      topFactors,
     });
   }
 
@@ -604,6 +620,18 @@ export default async function AnalysisIndexPage() {
                         </div>
                       )}
                     </div>
+                    {g.topFactors.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {g.topFactors.map((f, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                          >
+                            {f.label}: {shortTeamName(f.favoredCode)}↑
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </Link>
                 </li>
               );
