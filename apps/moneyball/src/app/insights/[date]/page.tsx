@@ -100,8 +100,8 @@ export default async function InsightsDatePage({ params }: Props) {
       />
 
       <header className="space-y-3">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{date} AI 인사이트</h1>
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+        <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">{date} AI 인사이트</h1>
+        <p className="text-gray-700 dark:text-brand-300 leading-relaxed">
           {date} KBO 경기의 AI 심판 에이전트가 남긴 reasoning 모음입니다.
           정량 세이버메트릭스 모델 ({KBO_FACTOR_COUNT}팩터) 위에 홈/원정 에이전트 토론 → 심판 종합 결과를
           {entries.length}경기 보여드립니다.
@@ -148,7 +148,7 @@ export default async function InsightsDatePage({ params }: Props) {
               className="scroll-mt-20 rounded-xl border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] p-5 space-y-4"
             >
               <div className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="font-semibold text-gray-900 dark:text-white">
+                <span className="font-semibold text-brand-900 dark:text-brand-100">
                   {awayName} vs {homeName}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.cls}`}>

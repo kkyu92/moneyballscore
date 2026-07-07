@@ -156,7 +156,7 @@ export default async function InsightsHubPage() {
       <Breadcrumb items={[{ label: "AI 인사이트" }]} />
 
       <header className="space-y-3">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">AI 인사이트</h1>
+        <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">AI 인사이트</h1>
         <p className="text-gray-700 dark:text-brand-300 leading-relaxed">
           KBO 경기 AI 심판 에이전트가 매 경기 남긴 300-500자 reasoning 을 시간 역순으로 모아봤습니다.
           정량 세이버메트릭스 모델 ({KBO_FACTOR_COUNT}팩터) 위에 홈/원정 에이전트 토론 → 심판 종합의 결과입니다.

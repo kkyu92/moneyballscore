@@ -78,7 +78,7 @@ export default function V2ShadowMonitorPage() {
       <Breadcrumb items={[{ label: "v2 섀도우 모니터" }]} />
 
       <header className="space-y-4">
-        <h1 className="text-3xl font-bold text-brand-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">
           v2 섀도우 모니터
         </h1>
         <p className="text-base text-brand-700 dark:text-brand-200 leading-relaxed">
@@ -112,7 +112,7 @@ export default function V2ShadowMonitorPage() {
       {latest && (
         <section className="space-y-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-brand-200 dark:border-brand-800 pb-3">
-            <h2 className="text-xl font-semibold text-brand-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-brand-900 dark:text-brand-100">
               {latest.doc.title || "최신 cohort"}
             </h2>
             <p className="text-xs text-brand-500 dark:text-brand-400 font-mono">
@@ -134,7 +134,7 @@ export default function V2ShadowMonitorPage() {
             >
               <h3
                 id={`section-${table.heading.replace(/\s+/g, "-")}`}
-                className="text-base font-semibold text-brand-900 dark:text-white"
+                className="text-base font-semibold text-brand-900 dark:text-brand-100"
               >
                 {table.heading}
               </h3>
@@ -190,7 +190,7 @@ export default function V2ShadowMonitorPage() {
       )}
 
       <section className="rounded-md border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-900/40 px-4 py-5 space-y-3 text-sm text-brand-800 dark:text-brand-200">
-        <h2 className="text-base font-semibold text-brand-900 dark:text-white">
+        <h2 className="text-base font-semibold text-brand-900 dark:text-brand-100">
           더 자세히 알아보기
         </h2>
         <ul className="space-y-1.5 list-disc pl-5 marker:text-brand-400">
