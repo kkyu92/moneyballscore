@@ -1,5 +1,7 @@
 # cycle 1258 explore-idea (lite) — post-wave-60 silent drift family saturation + post-saturation redirect direction spec
 
+> **⚠️ STALE (cycle 1460 결정 후)** — v1.8 유지 확정 (2026-07-06). 본 spec 의 "v2.0 n=150 ETA / transition 준비" Direction B 전체 superseded.
+
 **chain**: explore-idea (lite)
 **trigger**: (1) improvement saturation 13/15 (review-code 9 + fix-incident 2 + polish-ui 0 + info-arch 1 + skill-evolution 1 + explore-idea 1 + op-analysis 1, saturation = review/fix/polish/info-arch = 13) + (2) cycle 1257 next_rec = explore-idea (heavy) — "review-code heavy 14/20 dominance. 새 product direction 점검 필요" + (3) explore-idea last fire cycle 1248 (10 cycle ago, lite hygiene fix 사례 16)
 **mode**: lite — spec write only (자동 fire 환경 office-hours skip + 메인 자율 추론 + carry-over evidence + heavy 1 cycle 안 ship 부담 차단)

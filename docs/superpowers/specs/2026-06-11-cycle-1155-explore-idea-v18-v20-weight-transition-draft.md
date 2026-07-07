@@ -1,9 +1,11 @@
 # cycle 1155 explore-idea (lite) — v1.8 → v2.0 가중치 전환 spec draft
 
+> **⚠️ STALE (cycle 1460 결정 후)** — v1.8 유지 확정 (2026-07-06). v2.0 전환 없음. 본 spec의 n=150 fire trigger / 가중치 후보 / transition plan 전체 superseded. v2.1-B rejected (Brier 0.4635). 가중치 re-fit 불필요 확정.
+
 **chain**: explore-idea (lite)
 **trigger**: 직전 15 cycle saturation 12/15 (review-code 6 + fix-incident 3 + polish-ui 2 + info-arch 1) + explore-idea last fire cycle 1139 (16 cycle ago)
 **mode**: lite — spec write only (carry-over evidence + v1.8 cohort 데이터 기반 priori)
-**status**: draft (n=150 fire trigger 도달 시 final 확정 path)
+**status**: ~~draft (n=150 fire trigger 도달 시 final 확정 path)~~ **SUPERSEDED — v1.8 유지 확정 (cycle 1460)**
 
 ---
 

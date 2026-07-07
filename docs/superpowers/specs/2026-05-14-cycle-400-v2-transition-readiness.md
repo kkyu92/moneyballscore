@@ -1,7 +1,7 @@
 ---
 cycle: 400
 chain: explore-idea (lite, spec-only)
-status: draft (사용자 review 대기)
+status: SUPERSEDED — v1.8 유지 확정 (cycle 1460, 2026-07-06)
 created: 2026-05-14
 related:
   - docs/lessons/2026-05-14-anthropic-credit-silent-fallback-v18.md (cycle 383)
@@ -10,6 +10,8 @@ related:
 ---
 
 # v2.0 transition readiness — credit recovery 후 v1.8 누적 → n=150 임계 → v2.0 가중치 전환 메커니즘
+
+> **⚠️ STALE (cycle 1460 결정 후)** — v1.8 유지 확정 (2026-07-06). n=178 달성 → Brier 0.2443 안정 → v2.0 전환 불필요 확정. 본 spec의 Phase A/B/C (n=150 임계 / 가중치 전환 메커니즘) 전체 superseded.
 
 ## 배경
 

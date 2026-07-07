@@ -1,8 +1,10 @@
 # v2.0 전진 roadmap — n=119 → n=150 path + v1.8 real-debate platinum tier 검증
 
+> **⚠️ STALE (cycle 1460 결정 후)** — v1.8 유지 확정 (2026-07-06). n=178 달성 후 v2.0 전환 불필요 확정. 본 roadmap의 Step A/B/C (n=150 path) 전체 superseded.
+
 **Cycle**: 605 (2026-05-18)
 **Chain**: explore-idea (lite, improvement saturation trigger 7 = 13/15 ≥ 12 충족)
-**Status**: spec 박제 + 사용자 review 대기 (partial)
+**Status**: ~~spec 박제 + 사용자 review 대기 (partial)~~ **SUPERSEDED — v1.8 유지 확정 (cycle 1460)**
 
 ---
 

@@ -78,7 +78,7 @@ trigger: 사용자 "사이클 5번 더 돌리고 영향 보고" 요청 (cycle 10
 ## 자가 의심 (cycle 124/618 룰 정합)
 
 - baseline 측정 = artifact size (LOC / route count / file existence). **사용자 가치 evidence X**.
-- 진짜 사용자 영향 = (1) production /accuracy/shadow Brier delta 자연 누적 (2) v1.8 n=150 도달 후 v2.0 결정 (3) AdSense reject signal 0 통과 후 plan #7 Step C/D ship.
+- 진짜 사용자 영향 = (1) production /accuracy/shadow Brier delta 자연 누적 (2) ~~v1.8 n=150 도달 후 v2.0 결정~~ **← stale (cycle 1460: v1.8 유지 확정, v2.0 전환 없음)** (3) AdSense reject signal 0 통과 후 plan #7 Step C/D ship.
 - artifact size 증가 ≠ 사용자 가치. cycle 86~122 ship 0 streak 박제 사례 = artifact 누적이 가치 아닌 evidence.
 - 본 baseline = 진척 추적 도구, 종합 보고 = artifact + 자연 누적 evidence + 사용자 영역 결정 wait 분리 명시 필요.
 
@@ -184,7 +184,7 @@ ship PR = 2건 (#1332 baseline doc / #1333 workflow). review-code dominance 3/5 
 #### 자연 누적 wait 잔여 (본 메인 자율 X)
 
 1. **shadow forward cohort OOS** — 5/29 KST 10:00 cron 자연 누적 시작. n=10 도달 시 v2.1-B-shadow first OOS evidence (현 backfill n=49 + forward 0)
-2. **v1.8 cohort n=150 ETA** — 본 baseline 시점 추정. 직전 측정 cycle 946 = 3.55/day velocity / 잔여 111건 / ETA 2026-06-26. cycle 989/994 측정 갱신 ETA 2026-08-04. 도달 시 v2.0 전환 결정
+2. **v1.8 cohort n=150 ETA** — 본 baseline 시점 추정. 직전 측정 cycle 946 = 3.55/day velocity / 잔여 111건 / ETA 2026-06-26. cycle 989/994 측정 갱신 ETA 2026-08-04. ~~도달 시 v2.0 전환 결정~~ **← stale (cycle 1460: n=178 달성, v1.8 유지 확정)**
 3. **L6 lotto OOS n=10 ETA** — 2026-07-21 (8 토 × 7일 1226회 5/30 부터). 자연 누적
 
 #### 사용자 영역 wait 잔여 (carry-over 박제 채널)
@@ -204,7 +204,7 @@ ship PR = 2건 (#1332 baseline doc / #1333 workflow). review-code dominance 3/5 
 - 5 cycle 4축 Δ 합 = 가시 production 영향 0. observability +10 routes = 미래 silent failure 방지 capacity (현 시점 사용자 가치 evidence X — 다음 silent 500 재발 시 즉시 감지 → MTTR 단축이 후행 evidence)
 - chain 4/5 lite (review-code 3 + op-analysis 1) = 점진 sweep + baseline 박제. 본 메인 자율 영역 closed loop 자연 동작 evidence
 - chain 1/5 heavy (explore-idea 1018) = scout #1327 신규 plan 박제 + Tier 1 ship 1건 → 본 메인 자율 영역 점진 progress evidence
-- 진짜 사용자 영향 = (1) production /accuracy/shadow forward OOS Brier delta 자연 누적 (2) v1.8 n=150 도달 후 v2.0 결정 (3) plan #7 AdSense monitor 통과 후 Step C/D ship — 모두 사용자 영역 wait 또는 자연 누적 wait. 5 cycle 안 본 evidence 추가 X = 정상 (자가 의심 차단 룰)
+- 진짜 사용자 영향 = (1) production /accuracy/shadow forward OOS Brier delta 자연 누적 (2) ~~v1.8 n=150 도달 후 v2.0 결정~~ **← stale (cycle 1460: v1.8 유지 확정)** (3) plan #7 AdSense monitor 통과 후 Step C/D ship — 모두 사용자 영역 wait 또는 자연 누적 wait. 5 cycle 안 본 evidence 추가 X = 정상 (자가 의심 차단 룰)
 
 #### 사용자 결정 요청 없음
 

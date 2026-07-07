@@ -2,6 +2,7 @@
 cycle: 1276
 chain: explore-idea (lite)
 mode: lite
+v2_status: SUPERSEDED — v1.8 유지 확정 (cycle 1460, 2026-07-06)
 trigger_source:
   - improvement_saturation: "직전 15 cycle (1261-1275) 안 review-code 12 + info-arch 0 + fix-incident 0 + polish-ui 0 = 12/15 ≥ 12 → trigger fire (chain pool explore-idea trigger 4)"
   - 2_chain_alternation_lock: "직전 8 cycle (1268-1275) distinct chain = {review-code, lotto} = 2 ≤ 2 → lock fire (cycle 225 룰). review-code + lotto 후보 제외"
