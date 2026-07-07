@@ -10,10 +10,10 @@ self_verification:
   rubric: "(가치 / 시간 비용 / risk / 자율 가능 / 의존성) 5축"
   baseline_v18: "n=25 verified / accuracy 44.00% (2026-05-28 cycle 1021 C1c Step B 측정)"
   baseline_v21B_shadow: "n=47 verified / accuracy 51.06% (cohort_n=0 walk-forward degenerate 단 production cohort 측정)"
-  baseline_v20_shadow: "n=0 verified / day 1 누적 시작 (cycle 1019 C1a 박제, ETA 2026-08-04 n=150)"
+  baseline_v20_shadow: "n=0 verified / day 1 누적 시작 (cycle 1019 C1a 박제, ~~ETA 2026-08-04 n=150~~ **cycle 1490 갱신 (wave 215): n=178 crossed cycle 1447 → v1.8 유지 확정 cycle 1460, v2.0 shadow rejected**)"
   rubric_evaluation: |
-    가치: high (shadow factor 11/12 +7pp 차이 evidence 누적 시 v2.0 production ship 결정 input)
-    시간 비용: large (n=150 wait = 68일 + Statcast scraper 작업)
+    가치: ~~high~~ **cycle 1490 갱신 (wave 215): closed — v2.0 upgrade 불필요 (v1.8 유지 확정)**
+    시간 비용: ~~large (n=150 wait = 68일 + Statcast scraper 작업)~~ **cycle 1490 갱신 (wave 215): n=178 crossed, wait 소멸**
     risk: 1 (소표본 noise — n=25/47/0 비교 결정 X)
     자율 가능: partial (harness 본 메인 자율 fire / Fancy Stats Elo manual parser 본 메인 자율 / Statcast scraper 본 메인 자율 + 6주 forward 측정 wait)
     의존성: 단일 (plan #14 C1a/C1b ship 결과 활용)
@@ -63,7 +63,7 @@ plan #14 C1b harness 가 ship 됐지만 (PR #1335) 1회 fire 결과 = walk-forwa
 ### Phase 3 — C1f Statcast-식 factor 13+ 후보 검토 (1-pager)
 
 1. `docs/decisions/statcast-factor-13-scope.md` 박제 — (a) MLB Statcast API 이식 비용 (`statsapi.mlb.com` 형식, 단 MLB-KBO 매핑 X = 한국 선수에 적용 어려움) vs (b) KBO Fancy Stats batted ball 데이터 활용 비용 비교 + 추천 + 사용자 결정 wait
-2. 사용자 결정 시점 = n=150 도달 (ETA 2026-08-04) 또는 v2.0 production ship 결정 시점 중 먼저
+2. ~~사용자 결정 시점 = n=150 도달 (ETA 2026-08-04) 또는 v2.0 production ship 결정 시점 중 먼저~~ **cycle 1490 갱신 (wave 215)**: n=178 crossed (cycle 1447) + v1.8 유지 확정 (cycle 1460) — gating 소멸.
 3. commit `docs(decisions): Statcast factor 13+ scope 1-pager` + branch develop-cycle/plan-15-c1f + PR + R7 머지
 
 ## Risks
@@ -89,7 +89,7 @@ cycle 1021 (2026-05-28): plan #14 C1b 첫 fire 결과 = walk-forward degenerate 
 ## 자가 의심 (plan #8 패턴 정합)
 
 - v1.8 (clean) n=25 vs v2.1-B-shadow n=47 비교 결정 X — 소표본 noise
-- v2.0-shadow n=0 = forward cohort wait (ETA 2026-08-04 n=150)
+- ~~v2.0-shadow n=0 = forward cohort wait (ETA 2026-08-04 n=150)~~ **cycle 1490 갱신 (wave 215)**: n=178 crossed (cycle 1447), v2.0 shadow rejected, wait 소멸.
 - 본 plan 의 sub-step 결과 모두 "evidence pack only" 라벨 강제 — production ship 결정 input 으로만 사용
 
 ## autoplan 사후 review (2026-05-28 — cycle 1021 후속)
