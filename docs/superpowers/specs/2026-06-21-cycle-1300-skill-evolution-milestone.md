@@ -59,7 +59,7 @@ trigger 3 단독 (cycle_n % 50 == 0). 17 consecutive milestone metric-only patte
 
 - phase 14 (cycle 1250) real n=~95~100 추정 → phase 15 (cycle 1288 측정) real n=108 / acc 59.3% / Brier 0.2714
 - velocity 약화 가속: cycle 1263 n=104 → cycle 1288 n=108 = +4 over 25 cycles (~0.16건/cycle, cohort 사실상 flatline)
-- v2.0 (n=150) fire 미달 72% (n=108/150) — flatline 지속 시 ETA 큰 slip (phase 14 ETA 2026-07-15~7-25 대비 훨씬 더 지연)
+- ~~v2.0 (n=150) fire 미달 72% (n=108/150) — flatline 지속 시 ETA 큰 slip (phase 14 ETA 2026-07-15~7-25 대비 훨씬 더 지연)~~ **← stale (cycle 1460: n=178 달성, v1.8 유지 확정)**
 - cycle 1288 metric flatline 자체 = cohort 수렴 안정 신호
 
 ## plan 처리 status
@@ -70,7 +70,7 @@ trigger 3 단독 (cycle_n % 50 == 0). 17 consecutive milestone metric-only patte
 
 ## 다음 milestone
 
-cycle 1350 (trigger 3, % 50 == 0, 18 consecutive milestone metric-only pattern 예정, 49th 자가 진화). v2.0 (n=150) flatline 지속 시 ETA 큰 slip — cycle 1350 시점 cohort 진척 재측정. silent drift family wave 91+ 후속 grep evidence cycle 1299 시점 0건 = 자연 종료 신호, 다음 cycle 부터 chain 분포 redistribution 가능성.
+cycle 1350 (trigger 3, % 50 == 0, 18 consecutive milestone metric-only pattern 예정, 49th 자가 진화). ~~v2.0 (n=150) flatline 지속 시 ETA 큰 slip — cycle 1350 시점 cohort 진척 재측정.~~ **← stale (cycle 1460: v1.8 유지 확정)** silent drift family wave 91+ 후속 grep evidence cycle 1299 시점 0건 = 자연 종료 신호, 다음 cycle 부터 chain 분포 redistribution 가능성.
 
 ## 비파괴 보장
 
