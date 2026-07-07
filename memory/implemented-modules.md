@@ -163,7 +163,7 @@
 
 **v0.5.40~41 신규 (2026-05-12)**:
 - `apps/moneyball/src/app/accuracy/page.tsx` — 공개 AI 적중률 대시보드 (캘리브레이션 SVG / 주별 트렌드 / 팀별 성과, cycle 287)
-- 누적 검증 126건 (cycle 775 n=124 → +2건 모두 v1.8 in 9일 = velocity ~0.22/day, cycle 861 op-analysis lite 측정). v2.0 임계 n=150 까지 24건. 9일 expected 45 actual 32 = 13건 누락 (28.9% silent skip, 05-18 일요일 0건 + 05-20 사례 8 봇차단 0건 + 05-21 2건) — n=150 도달 추정 06월 말~07월 초.
+- 누적 검증 126건 (cycle 775 n=124 → +2건 모두 v1.8 in 9일 = velocity ~0.22/day, cycle 861 op-analysis lite 측정). v2.0 임계 n=150 까지 24건. 9일 expected 45 actual 32 = 13건 누락 (28.9% silent skip, 05-18 일요일 0건 + 05-20 사례 8 봇차단 0건 + 05-21 2건) — n=150 도달 추정 06월 말~07월 초. ← stale: n=150 threshold actualized cycle 1447 (2026-07-03, n=161) + cycle 1460 재입증 n=178 → v1.8 유지 확정 (Brier < 1pp).
 - **v1.8 적용 완료 (cycle 335)**: head_to_head 3% + elo 10%. 일요일 Sunday cap — 임계 0.55 초과 시 0.45 강등 (cycle 358 변경). 전면 v2.0 → n=150 도달 후 결정 = **✅ v1.8 유지 확정 (cycle 1460)** — Brier DEFAULT 0.2443 vs Learned 0.2458 최대 차이 0.15% < 1pp, 재조정 불필요. v2.1-B rejected (n=52, Brier 0.4635).
 - **scoring_rule이 실질 가중치 버전 구분자** (cycle 341 확인): model_version='v2.0-debate'(에이전트 고정) vs scoring_rule(v1.5/v1.6/v1.7-revert/v1.8). v1.8 scoring_rule 첫 예측 = 2026-05-13부터
 - **scoring_rule 성과 (cycle 886 → cycle 1460 갱신, 2026-07-06 실측)**: v1.5(16건,75.0%) / v1.6(46건,37.0%) / v1.7-revert(32건,53.1%) / **v1.8 최종 n=178 60.9% accuracy, Brier 0.2443 (test cohort, cycle 1460 plan #16 2차 fire)**. v2.0 임계 n=150 threshold **crossed at cycle 1447** (n=161 → cycle 1460 n=178). **✅ v1.8 유지 확정 (cycle 1460)** — Brier DEFAULT 0.2443 vs Learned 0.2458 최대 차이 0.15% < 1pp 임계 → 재조정 불필요. v2.1-B rejected (n=52, Brier 0.4635). 상세 = TODOS.md "🎯 모델 v2.0 업그레이드 트래킹" 섹션 (cycle 1460 최종 갱신).
@@ -202,8 +202,8 @@
   - `012_search_and_query_indexes.sql` — **(v0.5.20)** 검색 인덱스 + pg_trgm GIN
   - `013_predictions_metadata.sql` — **(v0.5.22)** `predictions.predicted_at` + `daily_notifications` 테이블 (하루 요약 idempotent)
   - `014_pipeline_runs_skipped_detail.sql` — **(PLAN_v5 후속)** `pipeline_runs.skipped_detail` JSONB — shouldPredictGame reason enum 보존. skip 사유 사후 판독 가능 (사례: 4/18 LT-HH 17:00).
-  - `015_games_weather.sql` — **(2026-04-22)** `games.weather` JSONB — 경기별 날씨 스냅샷. Open-Meteo Historical API 백필 + live-update forward 저장. v2.0 날씨 팩터 연구 source.
-  - `016_pitcher_stats_snapshots.sql` — **(2026-04-22)** `pitcher_stats` snapshot — 주간 cron (일요일 자정 KST) Fancy Stats + KBO 공식 upsert + `captured_at`. "경기 시점의 SP FIP" 시점별 팩터 가능. factor-correlation 분석 + v2.0 튜닝 구조적 제약 해소.
+  - `015_games_weather.sql` — **(2026-04-22)** `games.weather` JSONB — 경기별 날씨 스냅샷. Open-Meteo Historical API 백필 + live-update forward 저장. ~~v2.0 날씨 팩터 연구 source.~~ ← stale: cycle 1460 v1.8 유지 확정 (Brier < 1pp), v2.0 upgrade 불필요 → 날씨 팩터 연구 미채택 (역사 참고).
+  - `016_pitcher_stats_snapshots.sql` — **(2026-04-22)** `pitcher_stats` snapshot — 주간 cron (일요일 자정 KST) Fancy Stats + KBO 공식 upsert + `captured_at`. "경기 시점의 SP FIP" 시점별 팩터 가능. factor-correlation 분석 + ~~v2.0 튜닝 구조적 제약 해소.~~ ← stale: cycle 1460 v1.8 유지 확정 (Brier < 1pp), v2.0 튜닝 자체 불필요 → 구조적 제약 해소 목적 소멸 (역사 참고).
   - `017_game_records.sql` — **(2026-04-22)** 경기별 boxscore 테이블 — Naver `/schedule/games/{gameId}/record` 응답 저장 (타자 폼/투수 이닝·투구수/scoreBoard 이닝별 점수). JSONB raw 전체 보존.
   - `018_daily_notifications_flags.sql` — **(2026-04-23)** `daily_notifications` announce_sent + results_sent BOOLEAN — GitHub Actions schedule cron 간헐 2회 fire (UTC 14 → 14:03+14:49) 중복 발송 차단. notifyAnnounce + notifyResults idempotent 장치.
   - `019_widen_pipeline_runs_mode.sql` — **(2026-04-27)** mode VARCHAR(10)→VARCHAR(20). 'predict_final' overflow silent fail 차단 (사례 3 재발).
