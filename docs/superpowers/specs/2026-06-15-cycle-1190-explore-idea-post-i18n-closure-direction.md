@@ -100,7 +100,7 @@
 
 **가설**: 11 review-code 누적 = i18n silent leak family sweep dominance. dominance-positive streak 인정 룰 (cycle 135 박제) — 단일 chain 성공 streak ≠ 2-chain lock. saturation trigger 가 본 streak false positive.
 
-**chain 매핑**: 본 cycle outcome=retro-only 박제. v2.0 가중치 확정 데이터 (n=150 도달) 대기.
+**chain 매핑**: 본 cycle outcome=retro-only 박제. ~~v2.0 가중치 확정 데이터 (n=150 도달) 대기.~~ **← stale (cycle 1460, 2026-07-06)**: n=178 도달 (cycle 1447) + plan #16 2차 fire 결과 v1.8 유지 확정 (Brier 차이 0.15% < 1pp) — v2.0 가중치 확정 자체 미도래, "대기" 상태 자연 해소 (v1.8 유지 = decision made).
 
 **ROI**: low (carry-over 박제 명확 부재 시 retro-only 자연. 하지만 본 spec write 자체가 carry-over → next cycle direction A 또는 B input)
 
