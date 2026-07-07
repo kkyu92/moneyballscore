@@ -11,10 +11,12 @@ updated_cycle: 1473
 
 ## 1. 배경
 
-- **목적**: v1.8 (weighted-average 10팩터 sabermetric) 후 v2.0 후보 모델 evidence pack 준비.
+> ⚠️ **SUPERSEDED (2026-07-06 cycle 1460)**: v1.8 유지 확정 → v2.0 후보 모델 evidence pack 목적 소멸. gating trigger (n=150 도달 = n=178 crossed cycle 1447 + v2.0 결정 = v1.8 유지) 양쪽 resolved. Step 3-5 production fire = 무기한 postpone. 아래 배경 = 역사 기록.
+
+- **목적** (~~active~~ superseded): v1.8 (weighted-average 10팩터 sabermetric) 후 v2.0 후보 모델 evidence pack 준비.
 - **trigger**: scout #1206 (2026-05-21 박제) — TabPFN foundation model 통합 가능성 carry-over.
-- **gating**: v1.8 cohort `n=150` 임계 도달 (~07-05 ETA, cycle 949 op-analysis 측정) 후 v2.0 결정 시점.
-- **자율 영역**: research + 적합성 평가 (Step 1~2). 실제 inference / 통합 / production fire = 사용자 영역 (Step 3~5).
+- **gating** (resolved): v1.8 cohort `n=150` 임계 도달 (~07-05 ETA, cycle 949 op-analysis 측정) 후 v2.0 결정 시점. → n=178 도달 (cycle 1447) + v1.8 유지 확정 (cycle 1460) = 양쪽 resolved.
+- **자율 영역**: research + 적합성 평가 (Step 1~2 완료). 실제 inference / 통합 / production fire = 사용자 영역 (Step 3~5, v1.8 유지 결정 이후 무기한 postpone).
 
 ## 2. TabPFN 개요
 

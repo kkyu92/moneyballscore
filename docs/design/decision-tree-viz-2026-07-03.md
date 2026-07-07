@@ -3,7 +3,7 @@
 - 생성 cycle: 1435 (2026-07-03)
 - chain: explore-idea (lite)
 - 관련 hub-dispatch issue: #2527
-- status: spec-only (즉시 구현 X — defer 조건 박제)
+- status: SUPERSEDED (2026-07-06 cycle 1460) — gating trigger v2.0 (n≥150) = resolved (n=178 도달 cycle 1447 + v1.8 유지 확정 cycle 1460). 시나리오 B "v2.0 가중치 조정 근거" = 소진된 카드 (Fable plan). DT feature importance 활용 = 사용자 신규 trigger 대기.
 
 ## Scout 요약
 
@@ -28,7 +28,7 @@
 | 시나리오 | 설명 | 난이도 | 현재 적용 여부 |
 |---|---|---|---|
 | A. 비교 모델 | 수집된 경기 결과(n건) 로 sklearn DT 학습 → supertree 시각화 → 어떤 팩터가 가장 분기점인지 파악 | 중 | ❌ n<150, 데이터 부족 |
-| B. 특징 중요도 검증 | DT feature importance vs 현재 v1.8 가중치 비교 → 가중치 조정 근거 추가 | 중 | ❌ v2.0 전 유의미 X |
+| B. 특징 중요도 검증 | DT feature importance vs 현재 v1.8 가중치 비교 → ~~가중치 조정 근거~~ (SUPERSEDED: v1.8 유지 확정 2026-07-06 → 조정 근거 목적 소멸) | 중 | ❌ 목적 소멸 |
 | C. 앱 내 시각화 | 웹 앱에서 예측 근거를 트리 형식으로 사용자에게 노출 | 상 | ❌ 아키텍처 재설계 필요 |
 
 ## 5축 자가 검증
@@ -57,18 +57,19 @@ self_verification:
 
 ## 권장사항
 
-**Defer — v2.0 (n≥150) 도달 시 자동 trigger**
+~~**Defer — v2.0 (n≥150) 도달 시 자동 trigger**~~ **(SUPERSEDED 2026-07-06)** — gating trigger 양쪽 resolved (n=178 crossed cycle 1447, v1.8 유지 확정 cycle 1460). "v2.0 가중치 조정 근거" 목적 소멸 (Fable plan: 가중치 re-fit = 소진된 카드).
 
-1. **v2.0 시점 추가 업무**: `scripts/explore-decision-tree.py` 작성 (sklearn DT + supertree 시각화 분석, production 반영 X, Jupyter 로컬 실행)
-2. **목적**: v1.8 가중치 vs DT feature importance 비교 → v2.0 가중치 조정 근거 1개 추가
-3. **현 n≈120, 잔여 30건 (ETA ~2026-08-04)** → v2.0 cycle 에서 자연 병합
+**신규 trigger 대기 상태**:
+1. ~~`scripts/explore-decision-tree.py` 작성 (v2.0 가중치 조정 근거)~~ = 목적 소멸
+2. DT feature importance = 참고 지식 layer 로만 활용 가능 (production 반영 X)
+3. 사용자 신규 trigger (예: 신규 factor 후보 evaluation, Fancy Stats Elo baseline 검증 방식 재설계) 도달 시 재검토
 
-**즉시 실행 불필요 이유**:
+**역사 기록 (즉시 실행 불필요 이유 — n<150 시점)**:
 - n<150 → DT 학습 시 과적합 위험 (소표본 + 10 팩터)
 - Jupyter 환경 미구성 → 부가 세팅 비용 > 현 단계 인사이트 가치
 - 웹 앱 시각화는 별도 아키텍처 결정 필요 (TypeScript 중심 리포에 Python DT 노출 경로 설계)
 
 ## next actions
 
-- [ ] v2.0 (n≥150) 도달 → `operational-analysis (heavy)` cycle 에서 시나리오 A 병합 검토
-- [ ] 그 시점 `pnpm add -D scikit-learn-like (pyodide?)` 또는 `scripts/explore-dt.py` 추가 여부 결정
+- [x] ~~v2.0 (n≥150) 도달 → `operational-analysis (heavy)` cycle 에서 시나리오 A 병합 검토~~ = SUPERSEDED (v1.8 유지 확정 = 시나리오 A 병합 X)
+- [ ] 사용자 신규 trigger 발생 시 재검토 (예: 신규 factor 검증 / Fancy Stats Elo baseline 재설계)
