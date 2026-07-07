@@ -71,7 +71,7 @@ export default function ChangelogPage() {
       <Breadcrumb items={[{ label: '변경 로그' }]} />
 
       <header className="space-y-4">
-        <h1 className="text-3xl font-bold text-brand-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-brand-900 dark:text-brand-100">
           변경 로그
         </h1>
         <p className="text-base text-brand-700 dark:text-brand-200 leading-relaxed">
@@ -82,20 +82,20 @@ export default function ChangelogPage() {
         <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
           <div className="rounded-lg bg-brand-50 dark:bg-brand-900 px-4 py-3">
             <dt className="text-brand-500 dark:text-brand-400">총 변경 항목</dt>
-            <dd className="mt-1 text-lg font-semibold text-brand-900 dark:text-white">
+            <dd className="mt-1 text-lg font-semibold text-brand-900 dark:text-brand-100">
               {entries.length}건
             </dd>
           </div>
           <div className="rounded-lg bg-brand-50 dark:bg-brand-900 px-4 py-3">
             <dt className="text-brand-500 dark:text-brand-400">사이클 기록</dt>
-            <dd className="mt-1 text-lg font-semibold text-brand-900 dark:text-white">
+            <dd className="mt-1 text-lg font-semibold text-brand-900 dark:text-brand-100">
               {totalCycles}건
             </dd>
           </div>
           {latestDate && (
             <div className="rounded-lg bg-brand-50 dark:bg-brand-900 px-4 py-3">
               <dt className="text-brand-500 dark:text-brand-400">최근 갱신</dt>
-              <dd className="mt-1 text-lg font-semibold text-brand-900 dark:text-white">
+              <dd className="mt-1 text-lg font-semibold text-brand-900 dark:text-brand-100">
                 {latestDate}
               </dd>
             </div>
@@ -150,7 +150,7 @@ export default function ChangelogPage() {
             className="rounded-xl border border-brand-200 dark:border-brand-800 bg-white dark:bg-brand-950 p-5 sm:p-6 scroll-mt-20"
           >
             <header className="mb-3 space-y-1.5">
-              <h2 className="text-lg sm:text-xl font-semibold text-brand-900 dark:text-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-brand-900 dark:text-brand-100">
                 {entry.title}
               </h2>
               {(entry.date || entry.cycle !== null) && (
