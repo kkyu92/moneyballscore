@@ -7,6 +7,8 @@ trigger: 사용자 "사이클 5번 더 돌리고 영향 보고" 요청 (cycle 10
 
 # 사용자 요구 4축 영향 baseline (cycle 1014)
 
+> **⚠️ STALE (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. n=178 재입증 (Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 0.15% < 1pp 임계) + v2.1-B rejected (Brier 0.4635, n=52). 본 baseline table 안 "#10 머니볼 Tier 2~4 → v1.8 n=150 도달 시점 fire" carry-over 항목 = v2.0 upgrade 불필요 결론으로 superseded. 자율 fire trigger 자체 소멸. baseline evidence 는 cycle 1014 스냅샷 historical archive 로 보존.
+
 본 doc = cycle 1014 op-analysis lite 의 baseline 측정. cycle 1015~1018 = fresh process 가 본 doc 갱신 + 마지막 cycle (1018) retro 안 종합 보고 carry-over.
 
 ## 4축 정의 (사용자 명시)

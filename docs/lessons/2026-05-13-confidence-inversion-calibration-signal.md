@@ -1,5 +1,7 @@
 # Anti-Pattern: 고확신 예측의 역설적 저성과 — 보정 미분류 신호
 
+> **⚠️ STALE 부분 (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. n=178 재입증 (cycle 1460 plan #16 2차 fire, Brier DEFAULT 0.2443 vs Learned 0.2458 차이 <1pp). 본 lesson § "n=150 도달 시 ECE 측정 + calibration curve 생성 예정" 은 cycle 1460 재입증 (n=178) 으로 대체 — Fable plan 진단 결과 post-CREDIT_EXHAUSTED (2026-06-06~) Brier drift = winner-centric 측정 오류 (home_win_prob Brier pre/post 0.24 안정) 확정. Platt scaling 불필요. cycle 339 n=94 confidence inversion 진단 evidence 는 historical archive 로 보존.
+
 **카테고리**: anti_pattern / ai_agent  
 **발견**: cycle 339 (2026-05-13), n=94 누적 분석
 
@@ -25,7 +27,7 @@
 
 1. **Confidence 압축**: 최종 confidence = `0.5 + (raw_confidence - 0.5) * 0.7` — 극단값 완화
 2. **저확신 트랙 별도 관리**: confidence < 0.35 예측을 "모델 불확실" 트랙으로 분리, 다른 전략 적용
-3. **n=150 도달 후 calibration plot**: Expected Calibration Error(ECE) 측정 → 어느 구간에서 overconfidence 발생하는지 정확히 파악
+3. **n=150 도달 후 calibration plot**: Expected Calibration Error(ECE) 측정 → 어느 구간에서 overconfidence 발생하는지 정확히 파악 ← stale: n=178 도달 (cycle 1447), v1.8 유지 확정 (cycle 1460) — Brier diff < 1pp, Platt scaling 불필요 결론
 4. **임시 대응 (현재)**: 일요일 confidence_clamp 0.55 (cycle 309) — 요일별 적용 방향
 
 ## Results
@@ -45,4 +47,4 @@ ML 분류 모델 일반:
 
 - 전체 Brier score: 0.2501 (n=89 기준, cycle 333)
 - 이상적 Brier: <0.25 → 현재 살짝 초과
-- n=150 도달 시 ECE 측정 + calibration curve 생성 예정
+- n=150 도달 시 ECE 측정 + calibration curve 생성 예정 ← stale: n=178 도달 (cycle 1447), v1.8 유지 확정 (cycle 1460) — calibration 재검토 불필요

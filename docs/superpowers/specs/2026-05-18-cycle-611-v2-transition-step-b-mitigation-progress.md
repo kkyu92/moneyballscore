@@ -1,8 +1,10 @@
 # v2.0 전진 progress — Step A 완료 / Step B mitigation A 적용 / Step C timeline 추정
 
+> **⚠️ STALE (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. n=178 재입증 (Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 0.15% < 1pp 임계) + v2.1-B rejected (Brier 0.4635, n=52). 본 spec 안 "Step C n=150 도달 시 v2.0 가중치 확정 — backtest harness + factor 정보가치 재측정" / cycle 추천 매핑 "n=150 도달 시 op-analysis heavy" 전체 superseded — v2.0 upgrade 불필요 확정. Step A/B mitigation progress evidence + n=125~150 baseline 추정은 historical archive 로 보존.
+
 **Cycle**: 611 (2026-05-18)
 **Chain**: explore-idea (lite, improvement saturation trigger = 12/15 ≥ 12 충족)
-**Status**: spec 박제 + 사용자 review 대기 (partial)
+**Status**: ~~spec 박제 + 사용자 review 대기 (partial)~~ **SUPERSEDED — v1.8 유지 확정 (cycle 1460)**
 **Parent**: `2026-05-18-cycle-605-v2-transition-roadmap.md`
 
 ---
