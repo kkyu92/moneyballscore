@@ -4,6 +4,7 @@ import { KBO_TEAMS, shortTeamName, KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS, SCRAPE
 import type { ScrapedGame, KBOGameRaw } from '../types';
 import { KBO_BASE_URL as BASE_URL, KBO_USER_AGENT, KBO_SCHEDULE_REFERER, assertResponseOk, resolveKoreanTeamCode, sanitizeKboJsonResponse } from '../types';
 import { sleep } from './fancy-stats';
+import { fetchWithRetry } from './fetch-with-retry';
 import { captureKboScraperHtmlAlert } from './kbo-scraper-alert';
 
 // YYYYMMDD → YYYY-MM-DD
@@ -19,7 +20,7 @@ export async function fetchGames(date: string): Promise<ScrapedGame[]> {
   // date: YYYY-MM-DD → YYYYMMDD (KBO API 포맷)
   const yyyymmdd = date.replace(/-/g, '');
 
-  const res = await fetch(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
+  const res = await fetchWithRetry(`${BASE_URL}/ws/Main.asmx/GetKboGameList`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -128,7 +129,7 @@ export async function fetchRecentForm(
   const teamName = KBO_TEAMS[teamCode].name;
 
   const url = `${BASE_URL}/Record/TeamRank/TeamRankDaily.aspx`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
@@ -178,7 +179,7 @@ export async function fetchHeadToHead(
 ): Promise<{ wins: number; losses: number }> {
   // KBO 공식 상대전적 페이지
   const url = `${BASE_URL}/Record/TeamRank/TeamRankVs.aspx`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
@@ -264,7 +265,7 @@ export interface StandingRow {
  */
 export async function fetchStandings(): Promise<StandingRow[]> {
   const url = `${BASE_URL}/Record/TeamRank/TeamRankDaily.aspx`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
     next: { revalidate: KBO_OFFICIAL_FETCH_REVALIDATE_SECONDS },
   } as RequestInit);

@@ -4,6 +4,7 @@ import type { PitcherStats, TeamStats, EloRating, BatterStats } from '../types';
 import { errMsg, ELO_NEUTRAL, ELO_NEUTRAL_WIN_PCT, SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
 import { KBO_USER_AGENT, TEAM_NAME_MAP, assertResponseOk } from '../types';
 import { fetchKboPitcherBasic } from './kbo-pitcher';
+import { fetchWithRetry } from './fetch-with-retry';
 
 const BASE_URL = 'https://www.kbofancystats.com';
 
@@ -182,7 +183,7 @@ export function parsePitchersFromHtml(html: string): PitcherStats[] {
  */
 async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
   const url = `${BASE_URL}/leaders/`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
@@ -345,7 +346,7 @@ export function parseBattersFromHtml(html: string): BatterStats[] {
  */
 export async function fetchBatterStats(_season: number): Promise<BatterStats[]> {
   const url = `${BASE_URL}/leaders/`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
@@ -436,7 +437,7 @@ export function hasAnyFallback(flags: FancyStatsFallbacks): boolean {
  */
 export async function fetchEloRatings(_season: number): Promise<(EloRating & { woba: number; fip: number; sfr: number })[]> {
   const url = `${BASE_URL}/elo/`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'User-Agent': KBO_USER_AGENT },
   });
 
