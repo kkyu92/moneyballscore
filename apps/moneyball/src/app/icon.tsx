@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
+import { BRAND_GRADIENT_KBO_135, neutral } from "@/lib/design-tokens";
 
 export const contentType = "image/png";
 
@@ -49,7 +49,7 @@ export default function Icon({ id }: { id: string }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#ffffff",
+            color: neutral.white,
             fontSize: `${fontSize}px`,
             fontWeight: 900,
             letterSpacing: "-0.04em",

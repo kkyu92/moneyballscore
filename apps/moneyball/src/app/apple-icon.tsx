@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
+import { BRAND_GRADIENT_KBO_135, neutral } from "@/lib/design-tokens";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -23,7 +23,7 @@ export default function AppleIcon() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#ffffff",
+            color: neutral.white,
             fontSize: "82px",
             fontWeight: 900,
             letterSpacing: "-0.04em",
