@@ -87,7 +87,7 @@ postview path 가 predict path 보다 안정. 차이:
 ## 후속
 
 - 다음 fix-incident heavy trigger (사용자 자연 발화 또는 23 cycle 후 주기 보정) 시 본 spec H5 (rate limit + cron stagger) 우선 검증
-- n=150 도달 (v1.8 real-debate 표본 ≥ 31건 추가) 시 op-analysis heavy 가중치 v2.0 확정 — 본 lesson H3/H5 분리 측정 통합
+- ~~n=150 도달 (v1.8 real-debate 표본 ≥ 31건 추가) 시 op-analysis heavy 가중치 v2.0 확정 — 본 lesson H3/H5 분리 측정 통합~~ **cycle 1493 갱신 (wave 217): closed — v1.8 유지 확정 (cycle 1460, n=178 crossed, Brier default 0.2443 vs learned 0.2458 diff <1pp) → v2.0 upgrade 불필요, 본 후속 trigger 무효화.**
 
 ## 관련
 

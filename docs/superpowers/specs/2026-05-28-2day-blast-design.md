@@ -196,7 +196,7 @@ Cross-track 무관:
 
 ## 자가 의심 차단
 
-- shadow cohort = evidence 누적만, v2.0 확정 결정 X (n=150 도달 후 결정)
+- ~~shadow cohort = evidence 누적만, v2.0 확정 결정 X (n=150 도달 후 결정)~~ **cycle 1493 갱신 (wave 217): closed — v2.1-B shadow rejected (cycle 1181, n=52, accuracy 51.9%, Brier 0.4635) + v1.8 유지 확정 (cycle 1460, n=178 crossed, Brier diff <1pp) → v2.0 upgrade 불필요, shadow cohort trigger 소멸.**
 - 신규 factor 가중치 = 0 (DEFAULT_WEIGHTS 안), shadow 에서만 weight>0
 - TabPFN = stub 박제만, 사용자 GPU 결정 carry-over
 - IA 리그 셀렉터 = MLB 풀 인제스트 X (slot 만 박제)

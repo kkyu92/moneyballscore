@@ -25,7 +25,7 @@ cycle 1021 carry-over — plan #14 C1b harness (cohort_n=0 walk-forward degenera
 
 ## Problem
 
-plan #14 C1b harness 가 ship 됐지만 (PR #1335) 1회 fire 결과 = walk-forward degenerate (rule_definition_date 2026-05-12 vs v1.8 시작 5/13, train set ≈ 0). 실제 evidence pack 0 — n=150 forward cohort wait 또는 expanding/rolling time CV pattern 대체 필요. 또한 Fancy Stats Elo baseline = public API 부재로 manual fetch + parser carry-over. Statcast-식 신규 factor 후보 (xwOBA / Barrel% / Hard Hit%) 는 KBO Pitch-by-pitch 미수집 = 별도 scraper.
+plan #14 C1b harness 가 ship 됐지만 (PR #1335) 1회 fire 결과 = walk-forward degenerate (rule_definition_date 2026-05-12 vs v1.8 시작 5/13, train set ≈ 0). 실제 evidence pack 0 — ~~n=150 forward cohort wait~~ 또는 expanding/rolling time CV pattern 대체 필요. 또한 Fancy Stats Elo baseline = public API 부재로 manual fetch + parser carry-over. Statcast-식 신규 factor 후보 (xwOBA / Barrel% / Hard Hit%) 는 KBO Pitch-by-pitch 미수집 = 별도 scraper. **cycle 1493 갱신 (wave 217): closed — v1.8 유지 확정 (cycle 1460, n=178 crossed, Brier default 0.2443 vs learned 0.2458 diff <1pp) → v2.0 upgrade 불필요, n=150 wait trigger 무효화.**
 
 ## Scope (initial)
 
@@ -107,8 +107,10 @@ subagent 2 voice 발견 통합.
   이미 존재. C1d 진짜 가치 = silent-drift fix (`status='completed' → 'final'`),
   parser 신규 X. 자가 의심 룰 (CLAUDE.md feedback_question_own_defaults) 위반
 - **CEO-3 wrong problem** — v2.0 후보 accuracy -3.7pp = REFUTES v2.0. 더 많은
-  harness 짓는 대신 candidate weights 재설계 필요. 6-month regret = n=150 wait
-  후 still underperform, 68일 sunk cost
+  harness 짓는 대신 candidate weights 재설계 필요. ~~6-month regret = n=150 wait
+  후 still underperform, 68일 sunk cost~~ **cycle 1493 갱신 (wave 217): closed —
+  v1.8 유지 확정 (cycle 1460) → v2.0 upgrade 불필요, 재설계 자체 소진된 카드
+  (v2.1-B rejected n=52 Brier 0.4635 evidence).**
 - **Eng-C1 expanding mode theatre** — `scripts/backtest-v2-candidate.ts:122-128`
   `cohort = split.test` 만, train set 자체 X 사용. walk-forward 와 동일 결과.
   label 자체 misleading
@@ -129,8 +131,10 @@ subagent 2 voice 발견 통합.
   window > span silent all / empty cohort silent doc 박제
 
 **MEDIUM (2건)**:
-- **CEO-4 C1f 1-pager too easy deferral** — Statcast 결정 trigger (n=150 또는
-  v2.0 ship) = 둘 다 같은 blocked event. 캘린더 bound trigger 필요
+- **CEO-4 C1f 1-pager too easy deferral** — Statcast 결정 trigger ~~(n=150 또는
+  v2.0 ship) = 둘 다 같은 blocked event. 캘린더 bound trigger 필요~~ **cycle 1493
+  갱신 (wave 217): closed — v1.8 유지 확정 (Brier diff <1pp) → v2.0 ship 불필요,
+  Statcast 결정 trigger 자체 무효화.**
 - **CEO-6 walk-forward leakage** — Eng-C1 와 연결. expanding window
   scoring-rule boundary mixing = sophisticated way to lie to ourselves faster
 
