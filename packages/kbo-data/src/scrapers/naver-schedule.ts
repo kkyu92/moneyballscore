@@ -22,6 +22,7 @@ import type { TeamCode, GameStatus } from '@moneyball/shared';
 import { KBO_TEAMS, NAVER_SPORTS_API_BASE } from '@moneyball/shared';
 import type { ScrapedGame } from '../types';
 import { assertResponseOk } from '../types';
+import { fetchWithRetry } from './fetch-with-retry';
 
 interface NaverGame {
   gameId: string;              // "20260418LGSS02026" — 17자리 (뒤 4자리 연도)
@@ -138,7 +139,7 @@ export async function fetchNaverSchedule(
     `${NAVER_SPORTS_API_BASE}?fields=${fields}&upperCategoryId=kbaseball` +
     `&categoryId=kbo&fromDate=${fromDate}&toDate=${toDate}`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { Accept: 'application/json' },
   });
 
