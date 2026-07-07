@@ -10,14 +10,16 @@
 
 **(B) KBO 우선 강화 채택** — v1.8 → v2.0 cohort 박제 (이미 진행 중) + IA 강화 + AdSense 심사 + factor 11/12 forward backtest. cost ~$0, 본 메인 자율 fire 권한 ↑.
 
+> **v2.0 upgrade 결과 (2026-07-06, cycle 1460)**: n=178 도달 (cycle 1447) + plan #16 2차 fire → DEFAULT vs SHADOW_V20 Brier 차이 0.15% < 1pp → **v1.8 유지 확정**. v2.1-B rejected (Brier 0.4635, n=52). v2.0 전면 재조정 불필요. ← stale (cycle 1460 최종 결정)
+
 **(A) MLB 풀 인제스트 = 보류** — `/mlb` waitlist demand 측정 후 재검토 (N >= 30 또는 N >= 100 충족 시 escalation 룰 정합).
 
 ## 결정 후 자율 진행 영역 (본 메인)
 
 | 영역 | status |
 |---|---|
-| v1.8 → v2.0 cohort 박제 | 진행 중 (plan #14 C1a/C1b + plan #15 C1d/C1e ship). n=150 wait (ETA 2026-08-04) |
-| factor 11/12 forward backtest | 진행 중 (plan #15 harness fire — n=27 evidence pack) |
+| v1.8 → v2.0 cohort 박제 | **완료 — v1.8 유지 확정 (cycle 1460, 2026-07-06). n=178 도달 (cycle 1447), Brier diff < 1pp → upgrade 불필요** (plan #14 C1a/C1b + plan #15 C1d/C1e ship 완료 + plan #16 2차 fire 결정) |
+| factor 11/12 forward backtest | 완료 (plan #15 harness fire — n=27 evidence pack ship, cycle 1036) |
 | IA 강화 | 진행 중 (plan #14 C2 Step 2a/2b/4 ship — Radix MegaMenu + axe-core) |
 | `/mlb` hub 유지 | 시안 spec only (DESIGN.md `## Future / MLB IA` 박제 유지) |
 | AdSense 심사 | 사용자 영역 (domain 구매 권유 X 룰 정합) |
