@@ -19,7 +19,7 @@
  *
  * Cron: .github/workflows/pitcher-snapshot.yml — 주간 일요일 KST 00시.
  *   월 ~4 snapshot, 시즌 말까지 ~30 snapshot 누적. factor-correlation 시점별
- *   분석 + v2.0 튜닝 재료.
+ *   분석 + v1.8 cohort 모니터링 재료 (v1.8 유지 확정, cycle 1460).
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';

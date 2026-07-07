@@ -28,7 +28,7 @@ export function isV2ModelEnabled(env: NodeJS.ProcessEnv = process.env): boolean 
 
 /**
  * v2.1-B shadow cohort. kill switch (default true).
- * 현재 shadow path 활성 (v2.1-B 후보 가중치 병렬 측정).
+ * v2.1-B rejected (Brier 0.4635, n=52, cycle 1447) — 후보 평가 완료. shadow path = 신규 evidence 도래 시 재평가 accumulator.
  * `V21B_SHADOW_ENABLED=false` 박제 시 shadow 즉시 차단 (운영 incident kill switch).
  */
 export function isV21BShadowEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
