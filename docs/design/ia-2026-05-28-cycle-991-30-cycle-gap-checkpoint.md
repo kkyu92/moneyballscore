@@ -59,9 +59,9 @@ $ grep -L "Breadcrumb" apps/moneyball/src/app/**/page.tsx
 ```
 
 = v1.8 (현재 prod 모델) + v2.0 (미리보기) 양립 노출. cycle 961 carry-over 항목 "Header NAV description mix 통일" 재평가:
-- v1.8 cohort n=27 (cycle 989 측정, 5/28 첫 측정 window) / v2.0 threshold n=150 ETA ~07-05 (~38일 후, velocity 1.8/day)
-- v2.0 도입까지 v1.8 노출 = stale 아닌 정체성 신호. /v2-preview 가 transition surface 흡수
-- → 정합 유지, 정책 신호 carry-over
+- ~~v1.8 cohort n=27 (cycle 989 측정, 5/28 첫 측정 window) / v2.0 threshold n=150 ETA ~07-05 (~38일 후, velocity 1.8/day)~~ ← stale ETA (cycle 1460 v1.8 유지 확정, n=178 crossed, Brier diff < 1pp — v2.0 도입 소멸)
+- ~~v2.0 도입까지 v1.8 노출 = stale 아닌 정체성 신호. /v2-preview 가 transition surface 흡수~~ ← stale framing (v2.0 도입 없음, /v2-preview surface 정체성 재검토는 별도 IA cycle)
+- → 정합 유지, 정책 신호 carry-over (v2.0 도입 시 점진 정정 자연 → v1.8 유지 확정으로 /methodology "v1.8" description = 정합 완료)
 
 ## Carry-over 3건 재평가
 
@@ -69,7 +69,7 @@ $ grep -L "Breadcrumb" apps/moneyball/src/app/**/page.tsx
 |---|---|---|---|
 | 1 | 헤더 메가메뉴 본격 전환 (전체 그리드 hover panel) | 변화 X | carry-over 유지 — 별 cycle scope (UI 디자인 + 인터랙션 spec 필요) |
 | 2 | /reviews 중복 등록 mental model 결정 | 변화 X | carry-over 유지 — 사용자 자율 결정 영역 |
-| 3 | Header NAV description mix 통일 (`/methodology` "v1.8") | /v2-preview "v2.0" 양립 surface 박제됨 | **정합 신호 명확 — 정책 carry-over 유지** (v2.0 도입 시 점진 정정 자연) |
+| 3 | Header NAV description mix 통일 (`/methodology` "v1.8") | /v2-preview "v2.0" 양립 surface 박제됨 | **정합 완료** (cycle 1460 v1.8 유지 확정 — /methodology "v1.8" description = 안정 정체성. /v2-preview surface 정체성 재검토는 별도 IA cycle) |
 
 ## 자가 검증 rubric (cycle 887 plan #8 패턴 정합)
 

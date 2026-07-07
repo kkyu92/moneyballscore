@@ -114,7 +114,7 @@ Cross-vendor outage detection layer:
 | 결정 항목 | 옵션 | 본 메인 추천 |
 |---|---|---|
 | Healthchecks.io 가입 | go / skip | **go** (free tier, silent fallback, plan #17 패턴 정합) |
-| Step B fire 시점 | 즉시 / n=150 이후 / kill-switch fire 후 | **즉시** (lite scope, plan #17 SDK 통합 동일 시점) |
+| Step B fire 시점 | 즉시 / ~~n=150 이후~~ / kill-switch fire 후 | **즉시** (lite scope, plan #17 SDK 통합 동일 시점) ← `n=150 이후` 옵션 stale (cycle 1460 v1.8 유지 확정, n=178 crossed, Brier diff < 1pp — v2.0 gating 소멸) |
 | Step C (Cloudflare Workers) | 별도 plan 박제 / skip | **별도 plan 박제** (cross-vendor layer 1회 발생 시 데이터 누락 차단 가치) |
 
 ## 6. cost 분석
