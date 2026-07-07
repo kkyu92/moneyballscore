@@ -4,7 +4,8 @@ source_issue: 2145
 source_link: hub-dispatch Scout 2026-06-24 (geeknews "노이즈 병목: 더 많은 정보라는 미묘한 함정")
 cycle: 1353
 target_chain: explore-idea (lite — spec only, partial)
-status: spec_only_pending_user_review
+status: partially_superseded — Tier 1/2 후보 A/D/E 만 유효, Tier 3 후보 B/C/F archive (cycle 1460 v1.8 유지 확정 후 v2.0 cohort 동기 소멸). 사용자 review = Tier 1/2 3 후보만 유효 대상.
+updated_cycle: 1491
 ---
 
 ## Origin
