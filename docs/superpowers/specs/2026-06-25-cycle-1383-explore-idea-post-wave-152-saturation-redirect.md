@@ -9,6 +9,8 @@ draft_origin: cycle 1382 (untracked spec — wave 152 2nd Naver API 자연 redir
 
 # cycle 1383 — explore-idea (lite) post-wave-152 saturation redirect
 
+> **⚠️ STALE (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. n=178 재입증 (Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 0.15% < 1pp 임계) + v2.1-B rejected. 본 spec § Direction C line "v2.0 임계 n=150 잔여 ~30건" forward claim 은 cycle 1447 n=161 첫 crossed → cycle 1460 plan #16 2차 fire 결과 v1.8 유지 확정으로 superseded — v2.0 upgrade 자체 불필요. saturation redirect audit evidence + Direction A~G 진단은 historical archive 로 보존.
+
 ## 1. context
 
 silent drift family wave streak: wave 41~152 (112 wave 누적, cycle 1199 → cycle 1382). 본 saturation 단계 = post-wave-143 redirect (cycle 1370) 후 13 cycle 안 wave 144~152 9 신규 family 자연 재발 → cycle 1383 saturation 재검토.
