@@ -127,7 +127,7 @@ cycle 611 spec line 88~92 의 매핑 갱신:
 | 625~628 (W23 D2~D5) | operational-analysis lite + saturation 발생 시 본 spec 후보 A~E 자율 fire | lite | 매일 D+1 baseline 누적 + sub-cohort 분리 측정 |
 | **626~628 (mitigation A 4~7일 window)** | **operational-analysis lite + mitigation A 효과 측정** | lite | 2026-05-22~25 = `agentError` hallucinated_number:hard 빈도 측정 (cycle 611 spec § Step B) |
 | 629~641 | op-analysis lite 반복 + 필요 시 mitigation D/C 적용 (fix-incident heavy) | lite + heavy | n=125 / 130 / 135 단계별 baseline |
-| n=150 도달 시 | operational-analysis | **heavy** | v2.0 가중치 확정 (cycle 611 spec § Step C) |
+| ~~n=150 도달 시~~ **← stale (cycle 1460, 2026-07-06)** | ~~operational-analysis~~ | ~~**heavy**~~ | ~~v2.0 가중치 확정 (cycle 611 spec § Step C)~~ **cycle 1447 n=161 첫 crossed → cycle 1460 plan #16 2차 fire (Brier 차이 0.15% < 1pp) → v1.8 유지 확정 (v2.0 upgrade 자체 불필요)** |
 
 ## 위험 & 가드
 

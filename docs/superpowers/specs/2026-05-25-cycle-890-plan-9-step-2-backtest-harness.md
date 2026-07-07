@@ -209,7 +209,7 @@ export function makeModelWithCandidates(
 | Step 4 | GameFeatures 확장 (9 신규 field optional) + Model 확장 + base factor 영향 0 regression guard | Step 3 | 892 |
 | Step 5 | immediate 7 factor backfill script (scripts/factor-backfill-back-to-back.ts / -weather.ts / -travel.ts / -series.ts / -streak.ts) + 박제 데이터 검증 | Step 4 | 893~895 |
 | Step 6 | backtest harness fire (immediate 7 factor 가중치 grid search) + 신규 factor 가치 측정 (brier delta + accuracy delta + bootstrap CI) | Step 5 | 896~898 |
-| Step 7 | 우수 factor 1-2개 선정 + v2.0 가중치 후보 박제 + plan #10 entry | Step 6 + n=150 도달 | 899+ |
+| ~~Step 7~~ **← stale (cycle 1460, 2026-07-06)** | ~~우수 factor 1-2개 선정 + v2.0 가중치 후보 박제 + plan #10 entry~~ **cycle 1447 n=161 첫 crossed → cycle 1460 plan #16 2차 fire (Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 < 1pp) → v1.8 유지 확정. v2.0 후보 박제 자체 무기한 postpone.** | ~~Step 6 + n=150 도달~~ | ~~899+~~ |
 
 ## stop 조건 (본 cycle)
 
@@ -220,7 +220,7 @@ export function makeModelWithCandidates(
 
 - pitcher_stats cron 활성 (현재 미운영) — sp_rest_days factor 진입 path 박제 시 필요
 - umpire 데이터 수집 path 박제 (KBO 공식 미공개 — 별도 scrape source 필요) — umpire_strike_zone_bias factor 진입 path 박제 시 필요
-- n=150 도달 (현재 n=133, +17건 필요, ~7~10일) — v2.0 가중치 prod 적용 시점
+- ~~n=150 도달 (현재 n=133, +17건 필요, ~7~10일) — v2.0 가중치 prod 적용 시점~~ **← stale (cycle 1460, 2026-07-06)**: n=161 첫 crossed (cycle 1447, +7~10일 → +47 cycle slip) + plan #16 2차 fire → v1.8 유지 확정 = v2.0 가중치 prod 적용 시점 자체 미도래 (v2.0 upgrade 자체 불필요).
 
 ## 자가 의심 차단
 
