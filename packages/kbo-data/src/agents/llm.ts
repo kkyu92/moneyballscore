@@ -154,10 +154,12 @@ export async function callLLM<T>(
 ): Promise<AgentResult<T>> {
   const backend = getBackend(options.model);
   if (backend === 'ollama') {
-    return callOllama(options, parseResponse);
+    const r = await callOllama(options, parseResponse);
+    return { ...r, llmBackend: 'ollama' };
   }
   if (backend === 'deepseek') {
-    return callDeepSeek(options, parseResponse);
+    const r = await callDeepSeek(options, parseResponse);
+    return { ...r, llmBackend: 'deepseek' };
   }
 
   const result = await callClaude(options, parseResponse);
@@ -182,12 +184,14 @@ export async function callLLM<T>(
       // Sentry 미설정 환경 silent skip
     }
     if (fallbackRaw === 'ollama') {
-      return callOllama(options, parseResponse);
+      const r = await callOllama(options, parseResponse);
+      return { ...r, llmBackend: 'ollama', creditExhaustedFallback: true };
     }
-    return callDeepSeek(options, parseResponse);
+    const r = await callDeepSeek(options, parseResponse);
+    return { ...r, llmBackend: 'deepseek', creditExhaustedFallback: true };
   }
 
-  return result;
+  return { ...result, llmBackend: 'claude' };
 }
 
 /**
