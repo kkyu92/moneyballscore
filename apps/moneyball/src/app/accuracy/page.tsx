@@ -932,7 +932,7 @@ export default async function AccuracyPage() {
             <h2 className="text-lg font-bold">팀별 예측 편향 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               모델이 특정 팀의 승리를 실제 승률 대비 얼마나 과잉/과소 예측하는지 보여줍니다.
-              편향 갭이 큰 팀은 모델 가중치 조정 후보입니다.
+              편향 갭이 큰 팀은 모델 진단 참고 지표입니다 (v1.8 유지 확정).
             </p>
           </div>
           <TeamBiasTable rows={biasRows} standingsAvailable={standingsAvailable} />
