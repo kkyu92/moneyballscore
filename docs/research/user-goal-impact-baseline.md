@@ -195,7 +195,7 @@ ship PR = 2건 (#1332 baseline doc / #1333 workflow). review-code dominance 3/5 
 |---|---|---|
 | #4 TabPFN | Step 2~5 (inference 채널 결정 / scripts 작성 / PoC fire / 결정) | 자체 GPU 없음 + 자율 결제 금지 |
 | #7 lotto Step C/D | AdSense reject signal 14일 monitor 후 fire | 사용자 영역 monitor |
-| #10 머니볼 Tier 2~4 | v1.8 n=150 도달 시점 fire | 자연 누적 wait |
+| #10 머니볼 Tier 2~4 | ~~v1.8 n=150 도달 시점 fire~~ ← stale (cycle 1460: v1.8 유지 확정, n=178 도달 cycle 1447, Brier diff <1pp — fire trigger 소멸) | 자연 누적 wait (fire 조건 소멸) |
 | #11 외부 인프라 Step 4~5 | 외부 SaaS free tier 결정 / multi-region | 외부 SaaS 결정 |
 | #12 TabPFN Step 3~5 | Python sidecar / model checkpoint / 운영 결정 | 인프라 결정 |
 | #13 비상 관리 도구 Step 4~5 | 외부 healthcheck SaaS / /admin 라우트 결정 | 외부 SaaS + 사용자 의사 |
