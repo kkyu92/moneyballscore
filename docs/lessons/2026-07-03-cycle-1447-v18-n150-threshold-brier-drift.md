@@ -4,6 +4,8 @@
 **차원**: operational-analysis (lite)
 **cycle**: 1447 (25-cycle gap trigger 7 after cycle 1422)
 
+> **⚠️ STALE (cycle 1460 결정 후)** — 본 lesson 의 "v2.0 upgrade 결정 대기 carry-over" / "v2.0 upgrade 시 Platt scaling" / "v2.0 upgrade 시 Brier calibration 축 우선" / "head_to_head 재분석" / "후보 A/B/C" 는 모두 cycle 1460 plan #16 2차 fire (Fable plan) 결과 v1.8 유지 확정으로 superseded. Brier 0.2995 은 winner-centric 측정 오류 (실제 home_win_prob Brier 0.24 안정). 상세 = 본 문서 line 56 "cycle 1460 postmortem" 섹션 참조. cycle 1447 진단 evidence 는 historical archive 로 보존.
+
 ## 발견
 
 ### 1. v1.8 cohort n=161 → v2.0 upgrade threshold (150) 초과

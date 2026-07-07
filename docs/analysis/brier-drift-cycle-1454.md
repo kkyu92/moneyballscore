@@ -98,15 +98,17 @@
 
 ## R8 사용자 결정 근거 (업데이트)
 
+> **⚠️ STALE — 본 섹션 recommendation 은 cycle 1460 결정 (v1.8 유지 확정) 으로 superseded. 아래 "cycle 1460 postmortem" 참조.**
+
 - **v1.8 유지**: Brier drift = API 크레딧 소진 artifact. 크레딧 재충전 시 회복.
   acc 67.4% 상승은 실제 모델 성능 개선 신호 (quant model 이 정확도 유지 + 상승).
-- **v2.0 rebalance**: n=161 도달, threshold 충족. 단 현재 debate=0 상태에서
-  v2.0 calibration 측정 불가. 크레딧 재충전 → 새 n=20+ 측정 후 결정 권장.
+- ~~**v2.0 rebalance**: n=161 도달, threshold 충족. 단 현재 debate=0 상태에서
+  v2.0 calibration 측정 불가. 크레딧 재충전 → 새 n=20+ 측정 후 결정 권장.~~ **← stale (cycle 1460: v2.0 rebalance 불필요 확정)**
 - **v2.1-B reject 확정**: Brier 0.4635 vs v1.8 0.2730. reject 유지.
 
-**사용자 action 필요 (최우선)**: Anthropic API credits 충전 (Plans & Billing).
-- 충전 후 즉시 정상 debate 재개 → confidence 분산 회복 → Brier 자연 회복.
-- 충전 없이 v2.0 rebalance 측정 불가.
+~~**사용자 action 필요 (최우선)**: Anthropic API credits 충전 (Plans & Billing).~~ **← stale (Fable plan S2c: CREDIT_EXHAUSTED 는 Brier drift 원인 X, 측정 오류가 원인. 크레딧 재충전 필요성 소멸)**
+- ~~충전 후 즉시 정상 debate 재개 → confidence 분산 회복 → Brier 자연 회복.~~
+- ~~충전 없이 v2.0 rebalance 측정 불가.~~
 
 ---
 
