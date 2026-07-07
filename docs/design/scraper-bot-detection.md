@@ -117,4 +117,4 @@ if (res.status === 403 || res.status === 429) {
 ## 다음 cycle 후속 후보
 
 - **UA 전략 결정 후**: `KBO_HTML_USER_AGENT` + Referer 헤더 추가 (fix-incident 또는 polish-ui chain)
-- **n=150+ 도달 후**: operational-analysis heavy — v2.0 가중치 확정 (TODOS 참조)
+- ~~**n=150+ 도달 후**: operational-analysis heavy — v2.0 가중치 확정 (TODOS 참조)~~ ← stale (cycle 1460 v1.8 유지 확정, n=178 crossed, Brier diff < 1pp — v2.0 가중치 확정 후속 소멸)
