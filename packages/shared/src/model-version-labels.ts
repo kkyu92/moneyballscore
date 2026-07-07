@@ -45,7 +45,8 @@ export type DebateVersion =
  * silent drift family wave 88 (cycle 1296) — 사용자 가시 layer (OG image / 메서드론
  * 페이지 헤딩 / 가이드 카드 / glossary 라벨) 의 hardcoded "v1.8" string 5개 + 메서드론
  * 카드 v2.0 예정 행 본문 1개 → 본 상수 참조 swap. v2.0 promotion 시 본 상수 1개만
- * 갱신하면 사용자 가시 layer 자동 동기.
+ * 갱신하면 사용자 가시 layer 자동 동기. ← stale (wave 220 cycle 1503): v1.8 유지 확정
+ * (cycle 1460, 2026-07-06), v2.0 promotion 계획 없음 (v2.1-B rejected Brier 0.4635).
  */
 export const CURRENT_SCORING_RULE: ScoringRule = 'v1.8';
 
@@ -70,6 +71,7 @@ export const PRODUCTION_COHORT_RULES: readonly ScoringRule[] = ['v1.8', 'v1.8-cr
  * silent drift family wave 182 (cycle 1443) — guide/page.tsx + accuracy/page.tsx 안
  * "v1.5 → v1.6 → v1.7-revert → v1.8" 하드코딩 progression list 를 본 registry 로
  * 통합. v2.0 promotion 시 본 tuple 에 'v2.0' append = 사용자 가시 layer 2곳 동기.
+ * ← stale (wave 220 cycle 1503): v1.8 유지 확정 (cycle 1460), v2.0 신규 prod era 박제 X.
  */
 export const PRODUCTION_ERA_HISTORY: readonly ScoringRule[] = ['v1.5', 'v1.6', 'v1.7-revert', 'v1.8'] as const;
 
@@ -108,6 +110,8 @@ export const QUANT_LIVE_VERSION: ModelVersion = `${CURRENT_SCORING_RULE}-live`;
 // 본 상수 1줄 변경 = decideModelVersion / decidePostviewModelVersion 본체 +
 // telegram LLM_ACTIVE_VERSIONS + buildAccuracyData LLM_ACTIVE_VERSIONS +
 // compareModels 분기 5곳 자동 전파. silent drift family streak 22 cycle 째.
+// ← stale (wave 220 cycle 1503): v2.1 bump 계획 없음 — v1.8 유지 확정 (cycle 1460),
+// LLM 라벨 v2.0-debate / v2.0-postview 고정 (버전 bump trigger 소멸).
 /** LLM debate 활성 라벨 — pre_game 경로 (LLM 성공 시). */
 export const LLM_DEBATE_VERSION: ModelVersion = 'v2.0-debate';
 /** LLM postview 활성 라벨 — postview 경로 (agents 성공 시). */
