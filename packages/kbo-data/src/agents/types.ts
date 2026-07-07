@@ -53,6 +53,10 @@ export interface AgentResult<T> {
   model: string;
   tokensUsed: number;
   durationMs: number;
+  /** 실제 사용된 LLM 백엔드 (claude / deepseek / ollama). CREDIT_EXHAUSTED failover 추적용. */
+  llmBackend?: string;
+  /** CREDIT_EXHAUSTED → fallback 활성화 여부. true = 원래 claude → fallback backend 로 전환됨. */
+  creditExhaustedFallback?: boolean;
 }
 
 // 전체 토론 결과
@@ -67,4 +71,8 @@ export interface DebateResult {
   totalDurationMs: number;
   agentsFailed: boolean;   // 에이전트 1개 이상 fallback 사용 (API 오류)
   agentError: string | null; // 첫 번째 에러 메시지 (ANTHROPIC credit 부족 등)
+  /** 심판 에이전트가 실제 사용한 백엔드. CREDIT_EXHAUSTED failover 추적용. */
+  judgeBackend?: string;
+  /** 심판 에이전트에서 CREDIT_EXHAUSTED → fallback 활성화됨. */
+  judgeCreditExhaustedFallback?: boolean;
 }

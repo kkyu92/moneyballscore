@@ -716,6 +716,8 @@ export async function runDailyPipeline(
     });
 
     let debateSucceeded = false;
+    let judgeBackend: string | undefined;
+    let judgeCreditExhaustedFallback: boolean | undefined;
     // cycle 1127 plan-v17 candidate N Tier 2 — DEBATE_ENABLED=false (kill switch) 시 LLM debate
     // path 즉시 차단 → QUANT_PREGAME fallback only. Anthropic credit 소진 / 비용 controlling.
     if (process.env.ANTHROPIC_API_KEY && isDebateEnabled()) {
@@ -730,6 +732,8 @@ export async function runDailyPipeline(
         };
         const history = await getPredictionHistory(db);
         const debate = await runDebate(gameContext, quantResult.homeWinProb, history);
+        judgeBackend = debate.judgeBackend;
+        judgeCreditExhaustedFallback = debate.judgeCreditExhaustedFallback;
 
         finalWinner = debate.verdict.predictedWinner;
         finalHomeProb = debate.verdict.homeWinProb;
@@ -845,6 +849,7 @@ export async function runDailyPipeline(
       reasoning: finalReasoning,
       factors: result.factors,
       predicted_at: new Date().toISOString(),
+      llm_backend: judgeBackend ?? 'claude',
     };
 
     // INSERT with UNIQUE(game_id, prediction_type) — race 시 23505 catch.
@@ -866,6 +871,26 @@ export async function runDailyPipeline(
     console.log(
       `[Pipeline] ${game.homeTeam} vs ${game.awayTeam}: ${result.predictedWinner} (${Math.round(result.homeWinProb * 100)}%)`,
     );
+
+    // CREDIT_EXHAUSTED fallover 발생 시 llm_fallback_events 기록 (cycle 1495 Layer B)
+    if (judgeCreditExhaustedFallback && judgeBackend) {
+      const predictionId = insertResult.data?.[0]?.id ?? null;
+      void (async () => {
+        try {
+          const { error: fallbackErr } = await db.from('llm_fallback_events').insert({
+            model: 'sonnet',
+            fallback_to: judgeBackend,
+            prediction_id: predictionId,
+            error_snippet: 'CREDIT_EXHAUSTED',
+          });
+          if (fallbackErr) {
+            console.warn('[Pipeline] llm_fallback_events insert error:', fallbackErr.message);
+          }
+        } catch {
+          // silent — llm_fallback_events insert 실패가 prediction 생성 차단 X
+        }
+      })();
+    }
 
     // M-V2 shadow cohort row insert (cycle 1013) — production v1.8 insert 직후 동일 game_id 에
     // scoring_rule='v2.1-B-shadow' row 별도 누적. failure tolerant (throw X) → v1.8 path 영향 X.

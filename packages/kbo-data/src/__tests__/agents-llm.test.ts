@@ -269,6 +269,9 @@ describe('callLLM retry/backoff', () => {
     expect(result.error).toContain('DEEPSEEK_API_KEY');
     // claude fetch 1번만 (deepseek 는 key 없어 fetch 미호출)
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    // cycle 1495 observability: fallback backend + creditExhaustedFallback 박제
+    expect(result.llmBackend).toBe('deepseek');
+    expect(result.creditExhaustedFallback).toBe(true);
 
     delete process.env.LLM_BACKEND_FALLBACK;
   });
@@ -292,6 +295,28 @@ describe('callLLM retry/backoff', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('CREDIT_EXHAUSTED');
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    // fallback 미발화 시 llmBackend='claude', creditExhaustedFallback 미박제
+    expect(result.llmBackend).toBe('claude');
+    expect(result.creditExhaustedFallback).toBeUndefined();
+  });
+
+  // cycle 1495 observability: 정상 성공 시 llmBackend='claude' 박제
+  it('정상 성공 → llmBackend=claude 박제', async () => {
+    const successBody = {
+      content: [{ text: 'ok' }],
+      usage: { input_tokens: 10, output_tokens: 5 },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(successBody, 200));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const result = await callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.llmBackend).toBe('claude');
+    expect(result.creditExhaustedFallback).toBeUndefined();
   });
 
   // cycle 461 — credit balance too low 실제 incident → raw JSON leak 차단 검증

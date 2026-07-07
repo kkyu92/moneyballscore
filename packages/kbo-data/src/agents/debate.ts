@@ -113,5 +113,7 @@ export async function runDebate(
     totalDurationMs: Date.now() - startTime,
     agentsFailed,
     agentError,
+    judgeBackend: judgeResult.llmBackend,
+    judgeCreditExhaustedFallback: judgeResult.creditExhaustedFallback,
   };
 }
