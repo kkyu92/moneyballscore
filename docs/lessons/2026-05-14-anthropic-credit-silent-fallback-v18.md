@@ -93,4 +93,4 @@ v1.6 scoring_rule n=46 (2026-04-22~05-03):
 - high conf (≥0.55) n=14: 5/14 = 35.7%
 - low conf (<0.55) n=32: 12/32 = 37.5%
 
-12일 span 양쪽 conf bucket 모두 random 이하 → v1.6 가중치 자체가 역방향 신호 가능성. v2.0 가중치 후보 (TODOS.md) 와 비교 시 v1.6 의 sp_fip 15% / lineup_woba 15% 가 의심 영역. n=150+ 도달 후 op-analysis heavy 에서 v1.5/v1.6/v1.7-revert/v1.8 era 별 factor weight backtest 권장.
+12일 span 양쪽 conf bucket 모두 random 이하 → v1.6 가중치 자체가 역방향 신호 가능성. v2.0 가중치 후보 (TODOS.md) 와 비교 시 v1.6 의 sp_fip 15% / lineup_woba 15% 가 의심 영역. ~~n=150+ 도달 후 op-analysis heavy 에서 v1.5/v1.6/v1.7-revert/v1.8 era 별 factor weight backtest 권장.~~ ← stale (cycle 1460, 2026-07-06): n=178 도달 → v1.8 유지 확정 (Brier diff < 1pp). era별 factor backtest = 역사 참고 only, 재조정 불필요 결론.

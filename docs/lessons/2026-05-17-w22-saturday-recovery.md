@@ -40,7 +40,7 @@ n=20 binomial CI: 35% ± 21.5%p = [13.5%, 56.5%]. v1.7-revert 53.1% 가 v1.8 CI 
 cycle 490 결정 강화:
 1. **가중치 변경 No-go gate 유지**: scoring_rule 신규 fire 후 표본 n<30 시 변경 X
 2. **단발 요일 catastrophic anomaly 재평가**: W22 Thu 0/5 / Fri 1/5 = 추가 측정 evidence 부재 (다음 주 Thu/Fri 측정 필요). Sat 5/16 reversion 가 같은 주 안 자연 회복 첫 신호
-3. **v2.0 임계 n=150 까지 36건**: cycle 490 = 41건 잔여 → W22 추가 5건 → 36건. W23 (5/19~5/25) + W24 (5/26~6/1) 2주 후 도달 가능
+3. ~~**v2.0 임계 n=150 까지 36건**: cycle 490 = 41건 잔여 → W22 추가 5건 → 36건. W23 (5/19~5/25) + W24 (5/26~6/1) 2주 후 도달 가능~~ ← stale (cycle 1460): n=178 도달 (cycle 1447) → v1.8 유지 확정 (Brier diff < 1pp).
 
 ## Decision
 
@@ -51,4 +51,4 @@ cycle 490 결정 강화:
 ## Carry-over
 
 - cycle 517 진단 단계: 5/17 Sun verify 완료 후 W22 최종 n=30 + Sun 5건 측정
-- v2.0 임계 n=150 — W23~W24 2주 후 재평가 trigger
+- ~~v2.0 임계 n=150 — W23~W24 2주 후 재평가 trigger~~ ← stale (cycle 1460): 재평가 완료 — v1.8 유지 확정.

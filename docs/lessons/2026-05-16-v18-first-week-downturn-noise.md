@@ -35,7 +35,7 @@ n=15 binomial std error ≈ √(0.5*0.5/15) = 12.9%p. 95% CI = ±25%p. 26.7% ± 
 ## Decision
 
 - 가중치 유지 (head_to_head 3% / elo 10%)
-- v2.0 임계 n=150 까지 41건 — W23~W24 추가 누적 후 재평가
+- ~~v2.0 임계 n=150 까지 41건 — W23~W24 추가 누적 후 재평가~~ ← stale (cycle 1460, 2026-07-06): n=178 도달 (cycle 1447) + plan #16 2차 fire → v1.8 유지 확정 (Brier diff < 1pp). 재평가 완료 — 가중치 재조정 불필요.
 - Sun cap (0.55 초과 시 0.45 강등) 효과 측정 보류 — Sun 표본 14건 (cycle 378 측정 대비 변동 X)
 
 ## Avoidance

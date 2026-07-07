@@ -72,7 +72,7 @@ n=150 임계 도달 즉시 v2.0 backtest harness 실행 → bootstrap CI 측정 
 ## 다음 op-analysis trigger
 
 - **즉시 (cycle 836+)**: review-code (heavy) — TODOS.md sync
-- **n=150 도달 시 (예상 cycle 840~850)**: operational-analysis (heavy) — v2.0 backtest harness 실행
+- ~~**n=150 도달 시 (예상 cycle 840~850)**: operational-analysis (heavy) — v2.0 backtest harness 실행~~ ← stale (cycle 1460): n=178 도달 (cycle 1447) + plan #16 2차 fire (Fable plan) → v1.8 유지 확정 (Brier diff < 1pp). backtest harness = 완료. 재조정 불필요.
 - **30-cycle 주기 보정 (cycle 860 도달)**: operational-analysis (lite) 자동 fire trigger
 
 ## 메타 — silent stale drift family layer 박제
