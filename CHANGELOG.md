@@ -50,7 +50,7 @@
 
 ### 배경
 
-v1.8 (10팩터, 3소스) 는 2026-05-13 (cycle 355) 론칭 후 pre_game verified 예측 축적 시작. v2.0 upgrade 임계는 `n=150` — 세이버메트릭스 신뢰 구간 확보 표본 수. 42 cycle 만에 3 milestone 순차 도달.
+v1.8 (10팩터, 3소스) 는 2026-05-13 (cycle 355) 론칭 후 pre_game verified 예측 축적 시작. v2.0 upgrade 임계는 `n=150` — 세이버메트릭스 신뢰 구간 확보 표본 수. 42 cycle 만에 3 milestone 순차 도달. ← 최종 결정: cycle 1460 v1.8 유지 확정 (n=178 재입증, Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 0.15% < 1pp) → v2.0 upgrade 불필요.
 
 ### 3 milestone 순차 도달
 
