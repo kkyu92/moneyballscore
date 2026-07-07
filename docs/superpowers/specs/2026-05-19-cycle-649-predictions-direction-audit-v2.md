@@ -1,5 +1,7 @@
 # /predictions 7~11번째 candidate audit — saturation v2
 
+> **⚠️ STALE 부분 (cycle 1460 결정 후, 2026-07-06)** — 후보 5/5 fire 자체는 완료 (F/G/H/I/J ship). 본 spec 안 "n=150 도달 시 op-analysis heavy → v2.0 가중치 확정 (cycle 611 spec § Step C)" cycle 추천 매핑 라인만 superseded (v1.8 유지 확정, v2.0 upgrade 불필요). 5 후보 fire evidence 는 historical archive 로 완결 보존.
+
 **Cycle**: 649 (2026-05-19)
 **Chain**: explore-idea (lite, improvement saturation trigger 7 = 13/15 ≥ 12 충족)
 **Status**: spec 5/5 후보 fire 완료 — F (cycle 658) / I (cycle 660) / G (cycle 661) / J (다른 cycle ship 완료) / **H (cycle 670 ship PR #959)**. cycle 668 review-code (lite, heavy 모드) 에서 stale claim 정정. cycle 671 review-code (lite, heavy 모드) 에서 H fire 완료 박제 동기.

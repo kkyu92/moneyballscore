@@ -88,7 +88,7 @@
 
 **2순위**: (A) MLB Statcast 이식 — MLB 풀 인제스트 결정 시 자연 escalation
 
-**보류 옵션**: 현 12 factor 유지 + v2.0 가중치 튜닝 only (n=150 도달 후 결정)
+**보류 옵션**: 현 12 factor 유지 + v2.0 가중치 튜닝 only (n=150 도달 후 결정 ← stale: n=178 crossed (cycle 1447), v1.8 유지 확정 (cycle 1460) — v2.0 가중치 튜닝 불필요 결론)
 
 ## 결정 후 다음 action
 
@@ -101,7 +101,7 @@
 
 **보류 결정 시**:
 1. plan #15 C1d/C1e 만 fire (Fancy Stats Elo parser + walk-forward 대체)
-2. n=150 도달 후 v2.0 가중치 결정 시점에 재검토
+2. n=150 도달 후 v2.0 가중치 결정 시점에 재검토 ← stale: v2.0 가중치 결정 완료 (v1.8 유지 확정 cycle 1460, 재조정 불필요)
 
 ## Next action
 

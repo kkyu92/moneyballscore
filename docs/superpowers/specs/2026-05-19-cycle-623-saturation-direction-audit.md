@@ -1,8 +1,10 @@
 # 12 cycle small-fix saturation 의식 — v2 transition 대기 window 안 사용자 가치 후보 audit
 
+> **⚠️ STALE (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. n=178 재입증 (Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 0.15% < 1pp 임계) + v2.1-B rejected. 본 spec 안 "n=150 도달 시 v2.0 가중치 확정" (op-analysis heavy) / "v2 transition 대기 window" premise / cycle 611 spec § Step C 참조 전체 superseded — v2.0 upgrade 불필요 확정. 후보 A~E audit evidence + saturation direction 진단은 historical archive 로 보존.
+
 **Cycle**: 623 (2026-05-19)
 **Chain**: explore-idea (lite, improvement saturation trigger 7 = 12/15 ≥ 12 충족)
-**Status**: spec 박제 + 사용자 review 대기 (partial)
+**Status**: ~~spec 박제 + 사용자 review 대기 (partial)~~ **SUPERSEDED — v1.8 유지 확정 (cycle 1460)**
 **Parent**: `2026-05-18-cycle-611-v2-transition-step-b-mitigation-progress.md`
 
 ---

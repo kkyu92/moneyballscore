@@ -1,5 +1,7 @@
 # cycle 835 operational-analysis (lite) — TODOS.md vs CLAUDE.md silent stale drift
 
+> **⚠️ STALE 부분 (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. 본 lesson § "n=150 도달 시 (예상 cycle 840~850): operational-analysis (heavy) — v2.0 backtest harness 실행" 예측 라인만 superseded (v2.0 upgrade 불필요 확정). 실제 n=150 crossing = cycle 1447 (n=161, 예측 cycle 840~850 보다 ~600 cycle 늦음), 이후 cycle 1460 재입증 (Brier <1pp) 으로 upgrade 불필요 결론. TODOS.md vs CLAUDE.md drift 진단 methodology 는 유효 — historical archive 로 보존.
+
 **Date**: 2026-05-21
 **Cycle**: 835
 **Chain**: operational-analysis (lite, 14d gap + alternation lock break)

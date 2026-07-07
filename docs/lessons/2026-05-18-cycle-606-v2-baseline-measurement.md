@@ -1,5 +1,7 @@
 # v2.0 전진 Step A — n=119 baseline 정확 측정
 
+> **⚠️ STALE (cycle 1460 결정 후, 2026-07-06)** — v1.8 유지 확정. n=178 재입증 (Brier DEFAULT 0.2443 vs Learned 0.2458, 차이 0.15% < 1pp 임계) + v2.1-B rejected. 본 lesson § "Step C (n=150 도달 시, operational-analysis heavy): backtest harness 위 factor 정보가치 재측정 + v2.0 가중치 확정" 전체 superseded — v2.0 upgrade 불필요 확정. n=119 baseline 측정 evidence 는 historical archive 로 보존.
+
 **Cycle**: 606 (2026-05-18)
 **Chain**: operational-analysis (lite)
 **Outcome**: SUCCESS (baseline 박제, 신규 코드 X)
@@ -60,7 +62,7 @@ W23 (5/19~5/25) ~ W24 (5/26~6/1) 2주 후 도달 추정 (KBO 시즌 진행 5건/
 
 - **Step B (cycle 605 spec 명시, fix-incident heavy)**: H5 (rate limit + 동시 호출) 검증 — `agentError detail 분류` (Sentry breadcrumbs / cloudflare-worker 로그 우선), cron stagger 실험
 - **operational-analysis 5건 단위 baseline**: n=125 / n=130 / n=135 / n=140 / n=145 단계별 lite 재측정 가능
-- **Step C (n=150 도달 시, operational-analysis heavy)**: backtest harness 위 factor 정보가치 재측정 + v2.0 가중치 확정
+- **Step C (n=150 도달 시, operational-analysis heavy)**: backtest harness 위 factor 정보가치 재측정 + v2.0 가중치 확정 ← stale: n=178 crossed (cycle 1447), v1.8 유지 확정 (cycle 1460) — v2.0 가중치 확정 = 재조정 불필요 결론
 
 ## 박제 evidence path
 
