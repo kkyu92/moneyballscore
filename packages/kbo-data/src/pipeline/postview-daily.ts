@@ -11,7 +11,8 @@
  *   - games.status='final' AND pre_game 예측 존재 AND post_game row 없음 조회
  *   - 각 경기에 runPostview 호출 후 predictions 테이블에 post_game row insert
  *   - 기존 pre_game row는 절대 update 금지 (이력 보존)
- *   - 중복 호출 안전: `onConflict: game_id,prediction_type`로 no-op
+ *   - 중복 호출 안전: `onConflict: game_id,prediction_type,scoring_rule`로 no-op
+ *     (mig 030 이후 predictions UNIQUE = composite 3-col)
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -253,7 +254,7 @@ export async function runPostviewDaily(
           },
           factors: original.factors, // pre_game factors 복사 (변경 없음)
         },
-        { onConflict: 'game_id,prediction_type' }
+        { onConflict: 'game_id,prediction_type,scoring_rule' }
       );
       assertWriteOk(upsertResult, 'postview-daily.runPostviewDaily.predictions.post_game');
 
