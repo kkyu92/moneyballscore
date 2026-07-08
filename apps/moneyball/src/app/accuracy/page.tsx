@@ -52,6 +52,8 @@ import {
   buildScoringRuleWeekHeatmap,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
+import { buildFactorAccuracy, type FactorPredRow } from '@/lib/accuracy/buildFactorAccuracy';
+import { FactorAccuracyTable } from '@/components/accuracy/FactorAccuracyTable';
 
 export const metadata: Metadata = {
   title: "AI 예측 적중 기록 | MoneyBall Score",
@@ -86,6 +88,7 @@ const TOC_ITEMS = [
   { id: 'teams', label: '팀별 성과' },
   { id: 'bias', label: '팀별 예측 편향' },
   { id: 'matchup', label: '상대 강약' },
+  { id: 'factor-accuracy', label: '팩터별 적중률' },
 ];
 
 export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -252,7 +255,7 @@ export default async function AccuracyPage() {
   const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
 
-  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult] = await Promise.all([
+  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult, factorResult] = await Promise.all([
     supabase
       .from('predictions')
       .select('confidence, is_correct, verified_at, scoring_rule, model_version, reasoning->homeWinProb')
@@ -283,6 +286,14 @@ export default async function AccuracyPage() {
       .in('prediction_type', ['pre_game', 'post_game'])
       .gte('predicted_at', fallbackWindowStart)
       .order('predicted_at', { ascending: false }),
+    supabase
+      .from('predictions')
+      .select('factors, is_correct, home_win_prob')
+      .eq('prediction_type', 'pre_game')
+      .eq('scoring_rule', CURRENT_SCORING_RULE)
+      .not('is_correct', 'is', null)
+      .not('factors', 'is', null)
+      .not('home_win_prob', 'is', null),
   ]);
 
   const communityStats = computeCommunityVsAI(
@@ -318,6 +329,10 @@ export default async function AccuracyPage() {
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
   const standingsAvailable = biasRows.some((r) => r.actualWinPct != null);
+
+  const factorAccuracyRows = buildFactorAccuracy(
+    ((factorResult.data ?? []) as FactorPredRow[])
+  );
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
@@ -954,6 +969,20 @@ export default async function AccuracyPage() {
             homeAway={matchupData.homeAway}
             teamAccuracy={teamRows}
           />
+        </section>
+      )}
+
+      {/* 팩터별 적중률 */}
+      {factorAccuracyRows.length > 0 && (
+        <section id="factor-accuracy" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">팩터별 적중률</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              10개 세이버메트릭스 팩터가 각각 경기 결과를 얼마나 잘 예측했는지 분석합니다.
+              팩터 값이 특정 팀을 유리하다고 판단했을 때, 그 팀이 실제로 이긴 비율입니다.
+            </p>
+          </div>
+          <FactorAccuracyTable rows={factorAccuracyRows} overallN={n} />
         </section>
       )}
 
