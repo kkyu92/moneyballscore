@@ -17,6 +17,7 @@
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { parseTabpfnOutputCsv, buildTabpfnPredictionInsert } from '../apps/moneyball/src/lib/tabpfn-import';
+import { DB_CONSTRAINTS } from '../packages/kbo-data/src/pipeline/db-constraints';
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -109,7 +110,7 @@ async function main(): Promise<void> {
 
     const { error } = await db
       .from('predictions')
-      .upsert(payload, { onConflict: 'game_id,prediction_type,scoring_rule' });
+      .upsert(payload, { onConflict: DB_CONSTRAINTS.predictions });
 
     if (error) {
       console.error(`[tabpfn-import] upsert game ${row.game_id}: ${error.message}`);

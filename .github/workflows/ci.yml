@@ -59,7 +59,7 @@ jobs:
         run: pnpm type-check
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint && pnpm run lint:scripts
 
       - name: Test
         run: pnpm test
