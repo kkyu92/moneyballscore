@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { LeaderboardSyncPayload } from '@/lib/leaderboard/types';
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
   const { error } = await supabase
     .from('user_picks')
-    .upsert(rows, { onConflict: 'device_id,game_id', ignoreDuplicates: false });
+    .upsert(rows, { onConflict: DB_CONSTRAINTS.userPicks, ignoreDuplicates: false });
 
   if (error) {
     Sentry.captureException(error, {
