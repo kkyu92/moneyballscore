@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { BRAND_GRADIENT_KBO_135, neutral } from "@/lib/design-tokens";
+import { neutral, BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const contentType = "image/png";
 

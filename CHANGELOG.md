@@ -1,5 +1,133 @@
 # Changelog
 
+## v0.5.50.0 — 2026-07-08 (cycle 1517)
+
+### 신규 기능
+- **팩터별 적중률 섹션** (`/accuracy`) — v1.8 cohort n=178 기준, 10 팩터 각각의 실측 적중률 바 차트 + 기준선(60.9%) 표 (cycle 1516, PR #2599)
+
+### 데이터·파이프라인
+- onConflict 드리프트 방어 Scope D: `scripts/` 경로 `DB_CONSTRAINTS` 참조 + root ESLint 차단 (cycle 1515, PR #2598)
+- `apps/moneyball` onConflict `DB_CONSTRAINTS` + ESLint 확장 (cycle 1513, PR #2596)
+- `DB_CONSTRAINTS` 단일 소스 + onConflict ESLint 방어 (cycle 1512, PR #2595)
+
+### 분석 인사이트 (cycle 1517)
+- W27 최종: 26/26 resolved, 57.7% (CHANGELOG 기재 22/54.5% 갱신)
+- 팩터 실측: sp_fip/xFIP 65.7% 최강, sfr 50.0% 노이즈 수준 (n=300)
+- **⚠️ WAR (8%) + park_factor (4%) = 12% 가중치 사문화 확인** (데이터 결손 — fix-incident carry-over)
+
+---
+
+## 📊 주간 리뷰 — 2026-W28 (07-06~07-12) / 2026-07-08 weekly-review (cycle 1517)
+
+### 이번 주 성과 요약 (진행 중, 7/6~7/7 2일 기준)
+
+| 지표 | 수치 |
+|---|---|
+| 검증 완료 | 5 경기 (진행 중, 주 종료 후 업데이트 예정) |
+| 정확도 | **40.0%** (2/5) — 소표본, 주 초반 |
+| CREDIT_EXHAUSTED | 계속 (32일+) → conf=0.3 flat |
+| 동적 리뷰 | `/reviews/weekly/2026-W28` (자동 집계) |
+
+### W27 최종 업데이트 (CHANGELOG 기재 22/54.5% → 최종 26/57.7%)
+
+추가 verify 실행으로 7/5(일) 3경기 + 검증 지연분 총 4경기 추가 확인:
+- 최종: 26 resolved, **57.7%** (12+/26 → 15/26)
+- 6/29 (월): 0/0 (경기 없음) → 6/30 (화): 3/4 (75%) → 7/1 (수): 0/4 (0%) → 7/2 (목): 5/5 (100%) → 7/3 (금): 2/5 (40%) → 7/4 (토): 3/5 (60%) → 7/5 (일): 2/3 (67%)
+
+### 팩터별 적중률 기준선 갱신 (n=300 resolved with factors)
+
+| 팩터 | 가중치 | n | 적중률 | 상태 |
+|---|---|---|---|---|
+| 선발 FIP | 15% | 102 | **65.7%** | 최강 신호 |
+| 선발 xFIP | 5% | 102 | **65.7%** | 최강 신호 |
+| 불펜 FIP | 10% | 101 | 60.4% | 양호 |
+| 타선 wOBA | 15% | 51 | 58.8% | 양호 |
+| 상대 전적 | 3% | 132 | 54.5% | 약한 신호 |
+| 최근 폼 | 10% | 161 | 53.4% | 노이즈 수준 |
+| 수비 SFR | 5% | 176 | **50.0%** | 랜덤 수준 |
+| WAR | 8% | — | — | **⚠️ 데이터 결손** |
+| 구장 보정 | 4% | — | — | **⚠️ 키 미스매치** |
+| Elo 레이팅 | 10% | 1 | — | 소표본 (팀 간 Elo 차이 미미) |
+
+### ⚠️ Silent Data Bug 발견 — WAR + park_factor 12% 가중치 사문화
+
+**발견 시점**: 2026-07-08, cycle 1517 op-analysis
+
+**WAR (8% 가중치)**:
+- `team_season_stats.total_war = 0.0` 전 팀 공통 → `normalize(0, 0, true) = 0.5` 고착
+- 원인: WAR 스크래퍼 미구현 또는 KBO Fancy Stats WAR 파싱 실패
+- 영향: 8% 가중치가 완전히 중립값으로 소비 → 무기여
+
+**park_factor (4% 가중치)**:
+- `games.stadium` = "고척", "사직", "잠실" 등 **단축명**
+- `DEFAULT_PARK_FACTORS` 키 = "서울고척스카이돔", "부산사직야구장", "서울종합운동장 야구장" 등 **전체명**
+- 매핑 0% → 항상 default 1.0 → `0.5 + (1.0-1)*2 = 0.5` 고착
+- 영향: 4% 가중치 완전 소비 → 무기여
+
+**총 영향**: 12%/85% = **약 14% 유효 가중치 사문화**. v1.8 Brier 0.2443은 이 상태 기준 측정값.
+두 버그 수정 시 Brier 개선 기대 (추정 미미~+0.5pp — 별도 fix-incident + 측정 필요).
+
+**carry-over**: fix-incident (heavy) — WAR 스크래퍼 + stadium 키 정합 두 작업 묶음.
+
+### 가중치 조정 결정
+
+**변경 없음** — v1.8 유지 (cycle 1460 확정)
+- WAR/park_factor 버그는 가중치 조정 대상 아님 (데이터 수집 문제)
+- 수정 후 재측정이 올바른 순서 — 버그 fix → Brier delta 측정 → 필요 시 조정
+
+---
+
+## 🔁 재사용 가능 패턴 — 2026-07-08 extract-pattern (cycle 1517)
+
+### P5: DB_CONSTRAINTS 단일 소스 + ESLint 차단 `quality_guard` `data_pipeline`
+
+**Problem**: Supabase upsert `onConflict` 인자를 raw string literal로 작성 → DB migration이 UNIQUE constraint 컬럼을 바꿀 때 사용처 전체를 직접 grep/수정해야 함. 누락 시 silent drift (실패하지 않고 잘못된 키로 upsert → 중복 삽입). mig 030 이후 12개 사이트 중 2개(postview-daily, live)가 5개 사이클(1509~1513) 동안 미정합.
+
+**Solution**:
+1. `packages/kbo-data/src/pipeline/db-constraints.ts` — UNIQUE constraint 컬럼을 `DB_CONSTRAINTS` 상수 딕셔너리로 export (단일 소스)
+2. `eslint.config.mjs` `no-restricted-syntax` — `Property[key.name='onConflict'][value.type='Literal']` 패턴을 CI error로 차단
+3. CI `pnpm lint` step에 추가 → merge 시 raw string 신규 사용 자동 블록
+
+**Results**: 12개 사이트 일괄 동기화. migration 변경 시 db-constraints.ts 1파일만 수정. CI가 raw string 재발을 자동 차단.
+
+**재사용**: Supabase/PostgreSQL + TypeScript 프로젝트 범용. onConflict뿐 아니라 index name, table name 상수화에도 동일 패턴 적용 가능.
+
+---
+
+### P6: 모델 팩터 실측 적중률 집계 `ai_agent`
+
+**Problem**: 예측 모델에 10개 팩터가 있고 각각 가중치가 있지만, 팩터별 실제 예측 기여도를 측정하는 방법이 없음 → 가중치 조정 근거를 Brier score 하나에만 의존. 어떤 팩터가 진짜 신호이고 어떤 게 노이즈인지 모름.
+
+**Solution**:
+- `predictions.factors` JSONB 컬럼에 팩터별 [0,1] 정규화값 저장
+- `is_correct` + `home_win_prob`의 XOR로 실제 홈팀 승리 여부 도출
+- 중립 범위(0.48~0.52) 팩터 제외, 방향성이 있는 경우만 집계
+- `buildFactorAccuracy()` → 팩터별 `correct/total` 비율 + UI 진행 바 테이블
+
+**Results** (n=300 resolved, cycle 1517):
+- sp_fip / sp_xfip: **65.7%** (최강 신호)
+- bullpen_fip: 60.4%, lineup_woba: 58.8% (양호)
+- sfr: **50.0%** (랜덤 수준 → 가중치 5% 재검토 근거)
+- WAR/park_factor: 데이터 결손으로 집계 불가 (별도 버그)
+
+**재사용**: 모든 수치 예측 모델 (feature attribution) — DB에 factor breakdown 저장하면 추가 코드 없이 사후 분석 가능. `(model_output >= 0.5) === actual_outcome` XOR 패턴 범용.
+
+---
+
+### Anti-P2: 데이터 수집 결손이 모델 가중치를 사문화 `anti_pattern`
+
+**Problem**: WAR (8% 가중치)와 park_factor (4% 가중치) = 12%가 예측에 기여 0.
+- WAR: `team_season_stats.total_war = 0.0` 전 팀 공통 → `normalize(0, 0) = 0.5` (중립)
+- park_factor: `games.stadium` = "사직" (단축명) vs `DEFAULT_PARK_FACTORS` 키 = "부산사직야구장" (전체명) → 매핑 실패 → default 1.0 → 0.5 (중립)
+
+**Root cause**: 스크래퍼가 데이터를 수집하지 못해도 파이프라인은 정상 완료 (default fallback 사용). 예측도 정상 생성. 아무런 경고 없음.
+
+**Fix 방향**: (1) DB 조회 후 `totalWar=0` 전 팀 → Sentry warning (2) stadium 키 정합 로직 추가 (단축명 → 전체명 매핑 또는 DB 컬럼 정규화)
+
+**재사용**: 외부 데이터소스를 DB에 캐싱하는 모든 파이프라인. "fallback이 항상 neutral값이면 가중치가 사문화된다"는 패턴 — sparse prediction alert (`countNeutralFactors >= threshold`) 이미 구현됨, WAR/park_factor를 이 임계에 포함해야 함.
+
+---
+
 ## 🔁 재사용 가능 패턴 — 2026-07-07 extract-pattern (cycle 1499)
 
 ### P1: LLM Provider CREDIT_EXHAUSTED 자동 failover `ai_agent`
