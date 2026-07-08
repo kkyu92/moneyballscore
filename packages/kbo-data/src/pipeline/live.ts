@@ -215,7 +215,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
           inning: game.inning,
           adjusted_prob: adjustedHomeProb,
         },
-      }, { onConflict: 'game_id,prediction_type' });
+      }, { onConflict: 'game_id,prediction_type,scoring_rule' });
       assertWriteOk(inGameUpsertResult, 'live.runLiveUpdate.predictions.in_game');
 
       updated++;
