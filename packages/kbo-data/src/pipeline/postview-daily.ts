@@ -311,7 +311,7 @@ async function lookupTeamCodeById(db: DB, teamId: number | null): Promise<TeamCo
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildMinimalContext(game: any, homeCode: TeamCode, awayCode: TeamCode): GameContext {
-  const parkFactor = DEFAULT_PARK_FACTORS[homeCode] ?? 1.0;
+  const parkFactor = DEFAULT_PARK_FACTORS[game.stadium ?? ''] ?? 1.0;
 
   return {
     game: {

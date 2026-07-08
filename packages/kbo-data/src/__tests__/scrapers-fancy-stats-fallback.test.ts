@@ -72,21 +72,33 @@ describe('hasAnyFallback', () => {
   });
 });
 
-describe('fetchTeamStats totalWar=0 stub 가시화', () => {
+describe('fetchTeamStats leaders WAR 집계', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
   let fetchSpy: ReturnType<typeof vi.spyOn>;
 
+  const eloHtml = `<html><body><table><tbody>
+    <tr><td>1</td><td>LG Twins</td><td>1550</td><td>0.330</td><td>4.10</td><td>0.5</td><td>1</td></tr>
+    <tr><td>2</td><td>KT Wiz</td><td>1480</td><td>0.310</td><td>4.30</td><td>0.2</td><td>2</td></tr>
+  </tbody></table></body></html>`;
+
+  // /leaders/ 타자 WAR 테이블 (table 0) + 빈 나머지 3 테이블
+  const leadersHtml = `<html><body>
+    <table><tbody>
+      <tr><td>1</td><td>홍길동</td><td>LG Twins</td><td>27</td><td>OF</td><td>3.2</td></tr>
+      <tr><td>2</td><td>이민재</td><td>LG Twins</td><td>25</td><td>1B</td><td>2.1</td></tr>
+      <tr><td>3</td><td>박지수</td><td>KT Wiz</td><td>30</td><td>SS</td><td>1.8</td></tr>
+    </tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+    <table><tbody></tbody></table>
+  </body></html>`;
+
   beforeEach(() => {
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        `<html><body><table><tbody>
-          <tr><td>1</td><td>LG Twins</td><td>1550</td><td>0.330</td><td>4.10</td><td>0.5</td><td>1</td></tr>
-          <tr><td>2</td><td>KT Wiz</td><td>1480</td><td>0.310</td><td>4.30</td><td>-0.2</td><td>2</td></tr>
-        </tbody></table></body></html>`,
-        { status: 200 },
-      ),
-    );
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation((url: unknown) => {
+      const html = String(url).includes('/leaders/') ? leadersHtml : eloHtml;
+      return Promise.resolve(new Response(html, { status: 200 }));
+    });
   });
 
   afterEach(() => {
@@ -94,18 +106,18 @@ describe('fetchTeamStats totalWar=0 stub 가시화', () => {
     fetchSpy.mockRestore();
   });
 
-  it('호출 결과 모든 팀 totalWar=0 stub + console.warn 1회 가시화', async () => {
+  it('totalWar = leaders 타자 WAR 팀별 합산 (stub 0 아님)', async () => {
     const result = await fetchTeamStats(2026);
-    expect(result.every((t) => t.totalWar === 0)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
+    const lg = result.find((t) => t.team === 'LG');
+    const kt = result.find((t) => t.team === 'KT');
+    expect(lg?.totalWar).toBeCloseTo(5.3, 1);
+    expect(kt?.totalWar).toBeCloseTo(1.8, 1);
+    // stub 경고 없음 (leaders 수집 구현)
     const stubWarns = warnSpy.mock.calls.filter(
       (call: unknown[]) => typeof call[0] === 'string' && call[0].includes('totalWar=0 stub'),
     );
-    expect(stubWarns.length).toBe(1);
-    expect(stubWarns[0][1]).toMatchObject({
-      teamCount: result.length,
-      teams: expect.arrayContaining(result.map((t) => t.team)),
-    });
+    expect(stubWarns.length).toBe(0);
   });
 });
 
