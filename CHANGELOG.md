@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.5.50.0 — 2026-07-08 (cycle 1517)
+
+### 신규 기능
+- **팩터별 적중률 섹션** (`/accuracy`) — v1.8 cohort n=178 기준, 10 팩터 각각의 실측 적중률 바 차트 + 기준선(60.9%) 표 (cycle 1516, PR #2599)
+
+### 데이터·파이프라인
+- onConflict 드리프트 방어 Scope D: `scripts/` 경로 `DB_CONSTRAINTS` 참조 + root ESLint 차단 (cycle 1515, PR #2598)
+- `apps/moneyball` onConflict `DB_CONSTRAINTS` + ESLint 확장 (cycle 1513, PR #2596)
+- `DB_CONSTRAINTS` 단일 소스 + onConflict ESLint 방어 (cycle 1512, PR #2595)
+
+### 분석 인사이트 (cycle 1517)
+- W27 최종: 26/26 resolved, 57.7% (CHANGELOG 기재 22/54.5% 갱신)
+- 팩터 실측: sp_fip/xFIP 65.7% 최강, sfr 50.0% 노이즈 수준 (n=300)
+- **⚠️ WAR (8%) + park_factor (4%) = 12% 가중치 사문화 확인** (데이터 결손 — fix-incident carry-over)
+
+---
+
 ## 📊 주간 리뷰 — 2026-W28 (07-06~07-12) / 2026-07-08 weekly-review (cycle 1517)
 
 ### 이번 주 성과 요약 (진행 중, 7/6~7/7 2일 기준)
