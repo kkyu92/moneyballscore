@@ -7,6 +7,7 @@ import { CURRENT_SCORING_RULE, QUANT_LIVE_VERSION } from './model-version';
 import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 import { extractReasoningHomeWinProb } from '../types';
+import { DB_CONSTRAINTS } from './db-constraints';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -215,7 +216,7 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
           inning: game.inning,
           adjusted_prob: adjustedHomeProb,
         },
-      }, { onConflict: 'game_id,prediction_type,scoring_rule' });
+      }, { onConflict: DB_CONSTRAINTS.predictions });
       assertWriteOk(inGameUpsertResult, 'live.runLiveUpdate.predictions.in_game');
 
       updated++;

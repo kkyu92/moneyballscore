@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
+import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -64,7 +65,7 @@ export async function updateCalibration(
       correct_predictions: stats.correct,
       actual_accuracy: accuracy,
       last_updated: new Date().toISOString(),
-    }, { onConflict: 'bucket,season' });
+    }, { onConflict: DB_CONSTRAINTS.retroBuckets });
     assertWriteOk(upsertResult, `retro.updateCalibration.calibration_buckets.${bucket}`);
   }
 
@@ -300,7 +301,7 @@ export async function generateAgentMemories(date: string, dbInjected?: DB) {
             source_game_id: game.id,
             valid_until: newValidUntil,
           },
-          { onConflict: 'team_code,memory_type,content' }
+          { onConflict: DB_CONSTRAINTS.agentMemories }
         );
         assertWriteOk(upsertResult, `retro.generateAgentMemories.agent_memories.${t.code}`);
       } catch (e) {

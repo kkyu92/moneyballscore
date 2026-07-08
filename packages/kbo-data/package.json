@@ -7,7 +7,7 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "echo 'no lint configured yet'"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@moneyball/shared": "workspace:*",
@@ -16,7 +16,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5"
+    "eslint": "^9",
+    "typescript": "^5",
+    "typescript-eslint": "^8"
   },
   "peerDependencies": {
     "@sentry/nextjs": "^10"

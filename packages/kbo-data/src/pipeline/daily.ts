@@ -37,6 +37,7 @@ import { buildAccuracyUpdates } from './accuracy-update';
 import { captureSilentDriftAlert, captureSparsePredictionAlert, captureCreditExhaustedAlert, captureConfidenceFlatAlert } from './silent-drift-alert';
 import { shouldNotifyPipelineStatus } from './notify-status-predicate';
 import { insertShadowRow, insertShadowRowV20 } from './shadow-cohort';
+import { DB_CONSTRAINTS } from './db-constraints';
 import {
   computePredictionHistory,
   type PredictionHistoryRow,
@@ -396,7 +397,7 @@ export async function runDailyPipeline(
 
   const { data: upserted, error: upsertErr } = await db
     .from('games')
-    .upsert(gamesPayload, { onConflict: 'league_id,external_game_id' })
+    .upsert(gamesPayload, { onConflict: DB_CONSTRAINTS.games })
     .select('id, external_game_id');
 
   if (upsertErr) {
@@ -580,7 +581,7 @@ export async function runDailyPipeline(
           bullpen_fip: ts.bullpenFip, sfr: ts.sfr,
           elo_rating: elo?.elo ?? null, elo_win_pct: elo?.winPct ?? null,
           total_war: ts.totalWar, last_synced: new Date().toISOString(),
-        }, { onConflict: 'team_id,season' });
+        }, { onConflict: DB_CONSTRAINTS.teamSeasonStats });
         assertWriteOk(upsertResult, 'daily.team_season_stats.upsert');
       } catch (e) {
         errors.push(`team_season_stats ${ts.team}: ${errMsg(e)}`);
@@ -1503,7 +1504,7 @@ async function prefetchSchedule(
 
   const { error } = await db
     .from('games')
-    .upsert(payload, { onConflict: 'league_id,external_game_id' });
+    .upsert(payload, { onConflict: DB_CONSTRAINTS.games });
 
   if (error) {
     return {

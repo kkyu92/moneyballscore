@@ -3,6 +3,7 @@ import { assertSelectOk, assertWriteOk } from '@moneyball/shared';
 import { fetchBatterStats } from '../scrapers/fancy-stats';
 import { notifyError } from '../notify/telegram';
 import type { BatterStats } from '../types';
+import { DB_CONSTRAINTS } from './db-constraints';
 
 // 시즌 중 Fancy Stats /leaders/가 노출하는 최소 타자 수.
 // 4 테이블 union 기준 관찰값은 보통 10-20명. 아래로 떨어지면 셀렉터 깨졌을 가능성 강함.
@@ -177,7 +178,7 @@ export async function syncBatterStats(
           ops: b.ops,
           last_synced: new Date().toISOString(),
         },
-        { onConflict: 'player_id,season' },
+        { onConflict: DB_CONSTRAINTS.syncBatterStats },
       );
 
     if (statErr) {
