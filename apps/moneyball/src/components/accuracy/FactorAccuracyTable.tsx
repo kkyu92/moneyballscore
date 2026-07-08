@@ -1,7 +1,5 @@
 import type { FactorAccuracyRow } from '@/lib/accuracy/buildFactorAccuracy';
 
-const BASELINE_ACCURACY = 0.609; // v1.8 전체 적중률 n=178 (cycle 1447 측정)
-
 function AccuracyBar({ accuracy, baseline }: { accuracy: number; baseline: number }) {
   const pct = Math.round(accuracy * 100);
   const basePct = Math.round(baseline * 100);
@@ -34,14 +32,15 @@ function AccuracyBar({ accuracy, baseline }: { accuracy: number; baseline: numbe
   );
 }
 
-export function FactorAccuracyTable({ rows, overallN }: { rows: FactorAccuracyRow[]; overallN: number }) {
+export function FactorAccuracyTable({ rows, overallN, overallAcc }: { rows: FactorAccuracyRow[]; overallN: number; overallAcc: number }) {
   if (rows.length === 0) return null;
+  const baselinePct = Math.round(overallAcc * 100);
 
   return (
     <div className="space-y-3">
       <p className="text-xs text-gray-500 dark:text-gray-400">
         팩터 값이 0.45~0.55 중립 범위 밖인 경기만 집계.
-        기준선({Math.round(BASELINE_ACCURACY * 100)}%) 초과 팩터 =
+        기준선({baselinePct}%) 초과 팩터 =
         <span className="text-brand-600 dark:text-brand-400"> 모델 기여</span> /
         미달 =
         <span className="text-amber-600 dark:text-amber-400"> 잡음 가능성</span>.
@@ -75,7 +74,7 @@ export function FactorAccuracyTable({ rows, overallN }: { rows: FactorAccuracyRo
                   {r.n} <span className="text-gray-300 dark:text-gray-600">({r.homeN}/{r.awayN})</span>
                 </td>
                 <td className="py-2.5">
-                  <AccuracyBar accuracy={r.accuracy} baseline={BASELINE_ACCURACY} />
+                  <AccuracyBar accuracy={r.accuracy} baseline={overallAcc} />
                 </td>
               </tr>
             ))}
@@ -84,7 +83,7 @@ export function FactorAccuracyTable({ rows, overallN }: { rows: FactorAccuracyRo
       </div>
 
       <p className="text-[10px] text-gray-400 dark:text-gray-600">
-        ∣ 기준선 = 전체 적중률 {Math.round(BASELINE_ACCURACY * 100)}% (v1.8 cohort n={overallN}) ∣ 홈/원정 = 해당 팩터가 홈/원정팀 유리로 분류된 게임 수
+        ∣ 기준선 = 전체 적중률 {baselinePct}% (v1.8 cohort n={overallN}) ∣ 홈/원정 = 해당 팩터가 홈/원정팀 유리로 분류된 게임 수
       </p>
     </div>
   );

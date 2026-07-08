@@ -982,7 +982,7 @@ export default async function AccuracyPage() {
               팩터 값이 특정 팀을 유리하다고 판단했을 때, 그 팀이 실제로 이긴 비율입니다.
             </p>
           </div>
-          <FactorAccuracyTable rows={factorAccuracyRows} overallN={n} />
+          <FactorAccuracyTable rows={factorAccuracyRows} overallN={n} overallAcc={overallAcc} />
         </section>
       )}
 
