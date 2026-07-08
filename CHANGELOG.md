@@ -60,6 +60,57 @@
 
 ---
 
+## 🔁 재사용 가능 패턴 — 2026-07-08 extract-pattern (cycle 1517)
+
+### P5: DB_CONSTRAINTS 단일 소스 + ESLint 차단 `quality_guard` `data_pipeline`
+
+**Problem**: Supabase upsert `onConflict` 인자를 raw string literal로 작성 → DB migration이 UNIQUE constraint 컬럼을 바꿀 때 사용처 전체를 직접 grep/수정해야 함. 누락 시 silent drift (실패하지 않고 잘못된 키로 upsert → 중복 삽입). mig 030 이후 12개 사이트 중 2개(postview-daily, live)가 5개 사이클(1509~1513) 동안 미정합.
+
+**Solution**:
+1. `packages/kbo-data/src/pipeline/db-constraints.ts` — UNIQUE constraint 컬럼을 `DB_CONSTRAINTS` 상수 딕셔너리로 export (단일 소스)
+2. `eslint.config.mjs` `no-restricted-syntax` — `Property[key.name='onConflict'][value.type='Literal']` 패턴을 CI error로 차단
+3. CI `pnpm lint` step에 추가 → merge 시 raw string 신규 사용 자동 블록
+
+**Results**: 12개 사이트 일괄 동기화. migration 변경 시 db-constraints.ts 1파일만 수정. CI가 raw string 재발을 자동 차단.
+
+**재사용**: Supabase/PostgreSQL + TypeScript 프로젝트 범용. onConflict뿐 아니라 index name, table name 상수화에도 동일 패턴 적용 가능.
+
+---
+
+### P6: 모델 팩터 실측 적중률 집계 `ai_agent`
+
+**Problem**: 예측 모델에 10개 팩터가 있고 각각 가중치가 있지만, 팩터별 실제 예측 기여도를 측정하는 방법이 없음 → 가중치 조정 근거를 Brier score 하나에만 의존. 어떤 팩터가 진짜 신호이고 어떤 게 노이즈인지 모름.
+
+**Solution**:
+- `predictions.factors` JSONB 컬럼에 팩터별 [0,1] 정규화값 저장
+- `is_correct` + `home_win_prob`의 XOR로 실제 홈팀 승리 여부 도출
+- 중립 범위(0.48~0.52) 팩터 제외, 방향성이 있는 경우만 집계
+- `buildFactorAccuracy()` → 팩터별 `correct/total` 비율 + UI 진행 바 테이블
+
+**Results** (n=300 resolved, cycle 1517):
+- sp_fip / sp_xfip: **65.7%** (최강 신호)
+- bullpen_fip: 60.4%, lineup_woba: 58.8% (양호)
+- sfr: **50.0%** (랜덤 수준 → 가중치 5% 재검토 근거)
+- WAR/park_factor: 데이터 결손으로 집계 불가 (별도 버그)
+
+**재사용**: 모든 수치 예측 모델 (feature attribution) — DB에 factor breakdown 저장하면 추가 코드 없이 사후 분석 가능. `(model_output >= 0.5) === actual_outcome` XOR 패턴 범용.
+
+---
+
+### Anti-P2: 데이터 수집 결손이 모델 가중치를 사문화 `anti_pattern`
+
+**Problem**: WAR (8% 가중치)와 park_factor (4% 가중치) = 12%가 예측에 기여 0.
+- WAR: `team_season_stats.total_war = 0.0` 전 팀 공통 → `normalize(0, 0) = 0.5` (중립)
+- park_factor: `games.stadium` = "사직" (단축명) vs `DEFAULT_PARK_FACTORS` 키 = "부산사직야구장" (전체명) → 매핑 실패 → default 1.0 → 0.5 (중립)
+
+**Root cause**: 스크래퍼가 데이터를 수집하지 못해도 파이프라인은 정상 완료 (default fallback 사용). 예측도 정상 생성. 아무런 경고 없음.
+
+**Fix 방향**: (1) DB 조회 후 `totalWar=0` 전 팀 → Sentry warning (2) stadium 키 정합 로직 추가 (단축명 → 전체명 매핑 또는 DB 컬럼 정규화)
+
+**재사용**: 외부 데이터소스를 DB에 캐싱하는 모든 파이프라인. "fallback이 항상 neutral값이면 가중치가 사문화된다"는 패턴 — sparse prediction alert (`countNeutralFactors >= threshold`) 이미 구현됨, WAR/park_factor를 이 임계에 포함해야 함.
+
+---
+
 ## 🔁 재사용 가능 패턴 — 2026-07-07 extract-pattern (cycle 1499)
 
 ### P1: LLM Provider CREDIT_EXHAUSTED 자동 failover `ai_agent`
