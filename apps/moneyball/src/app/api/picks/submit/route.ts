@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
+import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     .from('pick_poll_events')
     .upsert(
       { game_id, pick, device_id, picked_at: new Date().toISOString() },
-      { onConflict: 'device_id,game_id' },
+      { onConflict: DB_CONSTRAINTS.pickPollEvents },
     );
 
   if (error) {

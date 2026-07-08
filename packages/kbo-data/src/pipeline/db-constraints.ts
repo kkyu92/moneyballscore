@@ -21,6 +21,8 @@ export const DB_CONSTRAINTS = {
   savedGames: 'game_id',
   mlbGames: 'external_game_id',
   syncBatterStats: 'player_id,season',
+  pickPollEvents: 'device_id,game_id',
+  userPicks: 'device_id,game_id',
 } as const;
 
 export type DbConstraintKey = keyof typeof DB_CONSTRAINTS;

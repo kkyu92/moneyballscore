@@ -140,6 +140,10 @@ export type {
 // 알림
 export { notifyPredictions, notifyResults, notifyError, notifyPipelineStatus } from './notify/telegram';
 
+// DB UNIQUE constraint 단일 소스 (silent drift 방어)
+export { DB_CONSTRAINTS } from './pipeline/db-constraints';
+export type { DbConstraintKey } from './pipeline/db-constraints';
+
 // 공유 re-export
 export { KBO_TEAMS, DEFAULT_WEIGHTS, HOME_ADVANTAGE } from '@moneyball/shared';
 export {
