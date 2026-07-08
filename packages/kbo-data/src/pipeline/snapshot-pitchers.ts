@@ -26,6 +26,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { assertSelectOk, assertWriteOk, errMsg, type TeamCode } from '@moneyball/shared';
 import { fetchPitcherStats } from '../scrapers/fancy-stats';
 import type { PitcherStats } from '../types';
+import { DB_CONSTRAINTS } from './db-constraints';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -169,7 +170,7 @@ export async function snapshotPitcherStats(opts: SnapshotOptions = {}): Promise<
       try {
         const upsertResult = await db
           .from('pitcher_stats')
-          .upsert(payload, { onConflict: 'player_id,season,captured_at' });
+          .upsert(payload, { onConflict: DB_CONSTRAINTS.snapshotPitchers });
         assertWriteOk(upsertResult, 'snapshot-pitchers.pitcher_stats.upsert');
       } catch (e) {
         console.error(`  ❌ ${s.name} (${s.team}): ${errMsg(e)}`);

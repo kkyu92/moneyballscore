@@ -37,6 +37,7 @@ import type { GameContext } from '../agents/types';
 import { DEFAULT_PARK_FACTORS } from '../scrapers/kbo-official';
 import { decidePostviewModelVersion } from './model-version';
 import { captureSilentDriftAlert } from './silent-drift-alert';
+import { DB_CONSTRAINTS } from './db-constraints';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -254,7 +255,7 @@ export async function runPostviewDaily(
           },
           factors: original.factors, // pre_game factors 복사 (변경 없음)
         },
-        { onConflict: 'game_id,prediction_type,scoring_rule' }
+        { onConflict: DB_CONSTRAINTS.predictions }
       );
       assertWriteOk(upsertResult, 'postview-daily.runPostviewDaily.predictions.post_game');
 

@@ -6,6 +6,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { assertWriteOk, errMsg } from '@moneyball/shared';
 import type { NaverRecord } from '../scrapers/naver-record';
+import { DB_CONSTRAINTS } from './db-constraints';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -71,7 +72,7 @@ export async function saveGameRecord(
   try {
     const upsertResult = await db
       .from('game_records')
-      .upsert(payload, { onConflict: 'game_id' })
+      .upsert(payload, { onConflict: DB_CONSTRAINTS.savedGames })
       .select('id, created_at, updated_at');
     assertWriteOk(upsertResult, 'save-game-record.game_records.upsert');
     data = upsertResult.data as { id: number; created_at: string; updated_at: string }[] | null;

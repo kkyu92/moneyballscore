@@ -26,6 +26,7 @@ import {
   captureSilentDriftAlert,
 } from './silent-drift-alert';
 import { ELO_NEUTRAL } from '@moneyball/shared';
+import { DB_CONSTRAINTS } from './db-constraints';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = ReturnType<typeof createClient<any, any, any>>;
@@ -101,7 +102,7 @@ async function runStatsApiScrape(db: DB, date: string): Promise<{ gamesFound: nu
 
   const { error } = await db
     .from('mlb_schedule')
-    .upsert(rows, { onConflict: 'external_game_id' });
+    .upsert(rows, { onConflict: DB_CONSTRAINTS.mlbGames });
 
   if (error) {
     errors.push(`mlb_schedule upsert: ${error.message}`);
