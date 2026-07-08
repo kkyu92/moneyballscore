@@ -93,7 +93,7 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
   const [rawQ, setRawQ] = useState(initialQuery);
   const [debouncedQ, setDebouncedQ] = useState(initialQuery.trim());
   const [activeIndex, setActiveIndex] = useState(-1);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialQuery.trim().length > 0);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -101,11 +101,14 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
   // Build Fuse once per entries-set. entries is stable for the page lifetime.
   const fuse = useMemo(() => new Fuse(entries, FUSE_OPTIONS), [entries]);
 
-  // Debounce 200ms — keystroke spam mitigation.
+  // Debounce 200ms — keystroke spam mitigation. Also syncs open state.
   useEffect(() => {
     const trimmed = rawQ.trim();
     if (trimmed === debouncedQ) return;
-    const handle = setTimeout(() => setDebouncedQ(trimmed), SEARCH_DEBOUNCE_MS);
+    const handle = setTimeout(() => {
+      setDebouncedQ(trimmed);
+      setOpen(trimmed.length > 0);
+    }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
   }, [rawQ, debouncedQ]);
 
@@ -148,15 +151,12 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
     return out;
   }, [grouped]);
 
-  // Reset active index when results change.
-  useEffect(() => {
+  // Reset activeIndex when flat changes — update-during-render pattern.
+  const [prevFlat, setPrevFlat] = useState(flat);
+  if (prevFlat !== flat) {
+    setPrevFlat(flat);
     setActiveIndex(flat.length > 0 ? 0 : -1);
-  }, [flat]);
-
-  // Mark list "open" whenever we have a query.
-  useEffect(() => {
-    setOpen(debouncedQ.length > 0);
-  }, [debouncedQ]);
+  }
 
   const goToEntry = useCallback(
     (entry: SearchEntry) => {
