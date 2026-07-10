@@ -20,10 +20,10 @@ import {
 const PAGE_URL = `${SITE_URL}/accuracy/shadow`;
 const DAY_LIMIT = 14;
 
-// noindex 내부 cohort evidence — n=V2_PROMOTION_COHORT_N 임계 crossed (cycle 1447 n=161), v2.1-B rejected (Brier 0.4635), v1.8 유지 확정.
+// noindex 내부 cohort evidence — shadow 가중치 실험 기록. v1.8 유지 확정.
 export const metadata: Metadata = {
   title: "Shadow cohort 적중률",
-  description: `${CURRENT_SCORING_RULE} (production) vs ${SHADOW_SCORING_RULE} 가중치 Brier delta + 적중률 delta 일별 누적. n=${V2_PROMOTION_COHORT_N} crossed 완료 (cycle 1447 n=161). v2.1-B rejected (Brier 0.4635), v1.8 유지 확정.`,
+  description: `${CURRENT_SCORING_RULE} (production) vs ${SHADOW_SCORING_RULE} 가중치 Brier delta + 적중률 delta 일별 누적. n=${V2_PROMOTION_COHORT_N} 임계 초과 — 가중치 v1.8 유지 확정.`,
   alternates: { canonical: PAGE_URL },
   robots: { index: false, follow: false },
 };
@@ -178,7 +178,7 @@ export default async function ShadowAccuracyPage() {
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {CURRENT_SCORING_RULE} (production) vs {SHADOW_SCORING_RULE} 가중치 일별 Brier + 적중률 delta. 동일
           경기 동일 input 으로 quant 재계산 (debate LLM 호출 X, 비용 0). n={V2_PROMOTION_COHORT_N} 임계 달성 완료 —
-          v2.1-B rejected, v1.8 유지 확정.
+          가중치 v1.8 유지 확정.
         </p>
         <div
           role="status"
@@ -213,7 +213,7 @@ export default async function ShadowAccuracyPage() {
 
       <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
         <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          SHADOW_WEIGHTS (v2.1-B + shadow factor — rejected Brier 0.4635)
+          Shadow 실험 가중치 구성
         </h2>
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
           {Object.entries(SHADOW_WEIGHTS).map(([key, weight]) => (

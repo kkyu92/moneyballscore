@@ -24,10 +24,11 @@ describe('silent drift wave 191 — v2-shadow-monitor + methodology + accuracy/s
     expect(src).toMatch(/v2\.1-B shadow rejected \(Brier 0\.4635, n=52\)/);
   });
 
-  it('accuracy/shadow/page.tsx: body "도달 후 production 적용 결정" 미래시제 제거', () => {
+  it('accuracy/shadow/page.tsx: body "도달 후 production 적용 결정" 미래시제 제거 + 가중치 v1.8 확정 반영', () => {
     const src = readFileSync(join(ROOT, 'src/app/accuracy/shadow/page.tsx'), 'utf8');
     expect(src).not.toMatch(/도달 후\s+production 적용 결정/);
-    expect(src).toMatch(/v2\.1-B rejected/);
+    expect(src).not.toMatch(/v2\.1-B rejected/);
+    expect(src).toMatch(/가중치 v1\.8 유지 확정/);
   });
 
   it('v2-preview/page.tsx: noindex 주석 "도달 후 prod 적용 결정 전까지" 미래시제 제거', () => {

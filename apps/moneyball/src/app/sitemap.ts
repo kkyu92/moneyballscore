@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/mlb/factors`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/mlb/wild-card`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/mlb/postseason`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
-    // /en/mlb/* English mirror static routes — Plan B Task 17 (cycle 1162)
+    // /en/mlb/* English mirror static routes
     { url: `${SITE_URL}/en/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/en/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
     { url: `${SITE_URL}/en/mlb/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
@@ -79,12 +79,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
-    // /lotto hub — plan #7 Step C (cycle 1138). weekly 갱신.
+    // /lotto hub — weekly 갱신.
     { url: `${SITE_URL}/lotto`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
-    // /lotto/methodology — 통계 분석 방법론. /lotto/archive/[date] 는 plan #6 Step A (cycle 882~) 부터
-    // indexable 활성 — lottoArchiveRoutes (아래) 가 동적 URL 추가. AdSense crawler 는 robots.ts 차단.
+    // /lotto/methodology — 통계 분석 방법론. /lotto/archive/[date] 는 lottoArchiveRoutes (아래) 가 동적 URL 추가.
+    // AdSense crawler 는 robots.ts 차단.
     { url: `${SITE_URL}/lotto/methodology`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
-    // /lotto/archive — 회차 list index page (plan #6 Step B, cycle 883~). lottoArchiveRoutes 동적 URL 와
+    // /lotto/archive — 회차 list index page. lottoArchiveRoutes 동적 URL 와
     // 별도 layer (index page 자체).
     { url: `${SITE_URL}/lotto/archive`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
   ];
@@ -121,7 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // MLB 30팀 프로필 URL — Plan B Tier C+D Task 4 (cycle 1026 ship)
+  // MLB 30팀 프로필 URL
   const mlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/mlb/team/${code}`,
@@ -131,7 +131,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // MLB 30팀 Statcast deep-dive URL — plan #21 Step 1 (cycle 1092 ship)
+  // MLB 30팀 Statcast deep-dive URL
   const mlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/mlb/players/${code}`,
@@ -141,7 +141,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // /en/mlb/team/[code] 30팀 English mirror — Plan B Task 17 (cycle 1162)
+  // /en/mlb/team/[code] 30팀 English mirror
   const enMlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/en/mlb/team/${code}`,
@@ -151,7 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // /en/mlb/players/[id] 30팀 English mirror Statcast — Plan B Task 17 (cycle 1162)
+  // /en/mlb/players/[id] 30팀 English mirror Statcast
   const enMlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/en/mlb/players/${code}`,
@@ -254,7 +254,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     Sentry.captureException(e, { tags: { silent_drift_family: 'wave_174', component: 'sitemap', op: 'games-query' } });
   }
 
-  // /lotto/archive/[date] 동적 URL — plan #6 Step A (cycle 882~). data/lotto-picks/ glob → 회차별 archive 색인 활성.
+  // /lotto/archive/[date] 동적 URL — data/lotto-picks/ glob → 회차별 archive 색인 활성.
   // priority 0.6 weekly + lastModified = 추첨일 20:45 KST (KBO 추첨 시각).
   const lottoArchiveRoutes: MetadataRoute.Sitemap = listArchiveDates().map(
     (date) => ({
