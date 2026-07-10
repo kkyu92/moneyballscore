@@ -3,11 +3,12 @@
  * Files: opengraph-image.tsx / debug/* pages / methodology + about + mlb/* pages / lib/predictions + design-tokens + tabpfn
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-const APP = path.resolve(__dirname, '../../..');
-const read = (rel: string) => fs.readFileSync(path.join(APP, rel), 'utf8');
+const APP = join(__dirname, '../../..');
+const read = (rel: string) => readFileSync(join(APP, rel), 'utf8');
 
 describe('wave-240: stale cycle-ref annotations removed', () => {
   describe('opengraph-image.tsx', () => {
