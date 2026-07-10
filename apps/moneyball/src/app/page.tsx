@@ -177,12 +177,14 @@ interface NextSchedule {
 
 interface WeekGameDay {
   date: string;
+  isToday: boolean;
   games: Array<{
     id: number;
     gameTime: string;
     homeTeam: TeamCode;
     awayTeam: TeamCode;
     homeWinPct?: number;
+    isPredicted: boolean; // true = full model, false = Elo estimate
   }>;
 }
 
@@ -194,7 +196,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
   until.setUTCDate(until.getUTCDate() + 7);
   const untilStr = until.toISOString().slice(0, 10);
 
-  const [scheduleResult, eloResult] = await Promise.all([
+  const [scheduleResult, eloResult, todayPredResult] = await Promise.all([
     supabase
       .from('games')
       .select(`
@@ -202,7 +204,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
         home_team:teams!games_home_team_id_fkey(code),
         away_team:teams!games_away_team_id_fkey(code)
       `)
-      .gt('game_date', today)
+      .gte('game_date', today)
       .lte('game_date', untilStr)
       .eq('status', 'scheduled')
       .order('game_date', { ascending: true })
@@ -222,10 +224,31 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
       .not('home_elo', 'is', null)
       .order('id', { ascending: false })
       .limit(60),
+    // Today's full model predictions: use home_win_prob where available
+    supabase
+      .from('predictions')
+      .select('game_id, home_win_prob')
+      .eq('prediction_type', 'pre_game')
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
+      .not('home_win_prob', 'is', null)
+      .gte('created_at', `${today}T00:00:00Z`)
+      .lte('created_at', `${today}T23:59:59Z`)
+      .limit(10),
   ]);
 
   const { data } = assertSelectOk(scheduleResult, 'home.getWeekAheadSchedule');
   if (!data || data.length === 0) return [];
+
+  // game_id → home_win_prob for today's pre_game predictions
+  const todayPredMap = new Map<number, number>();
+  if (todayPredResult.data) {
+    type TodayPredRow = { game_id: number; home_win_prob: number | null };
+    for (const row of todayPredResult.data as unknown as TodayPredRow[]) {
+      if (row.game_id != null && row.home_win_prob != null) {
+        todayPredMap.set(row.game_id, row.home_win_prob);
+      }
+    }
+  }
 
   // Build team → latest Elo map from recent predictions
   const eloMap = new Map<string, number>();
@@ -246,22 +269,36 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
   for (const r of rows) {
     if (!r.home_team?.code || !r.away_team?.code) continue;
     const date = r.game_date;
-    if (!byDate.has(date)) byDate.set(date, { date, games: [] });
+    const isToday = date === today;
+    if (!byDate.has(date)) byDate.set(date, { date, isToday, games: [] });
     const homeCode = r.home_team.code as TeamCode;
     const awayCode = r.away_team.code as TeamCode;
-    const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
-    const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
-    const homeWinPct = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
+
+    // Use full model home_win_prob for today (if predictions ran), else Elo estimate
+    const modelWinPct = isToday ? todayPredMap.get(r.id) : undefined;
+    let homeWinPct: number;
+    let isPredicted: boolean;
+    if (modelWinPct != null) {
+      homeWinPct = modelWinPct;
+      isPredicted = true;
+    } else {
+      const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
+      const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
+      homeWinPct = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
+      isPredicted = false;
+    }
+
     byDate.get(date)!.games.push({
       id: r.id,
       gameTime: (r.game_time ?? '').slice(0, 5) || '18:30',
       homeTeam: homeCode,
       awayTeam: awayCode,
       homeWinPct,
+      isPredicted,
     });
   }
 
-  return Array.from(byDate.values()).slice(0, 5);
+  return Array.from(byDate.values()).slice(0, 6);
 }
 
 async function getYesterdayResults(): Promise<YesterdayGame[]> {
@@ -853,14 +890,14 @@ export default async function HomePage() {
           </div>
           <div className="overflow-x-auto -mx-1 px-1">
             <div className="flex gap-3 min-w-max pb-1">
-              {weekSchedule.map(({ date, games: dayGames }) => (
-                <div key={date} className="w-48 shrink-0">
+              {weekSchedule.map(({ date, games: dayGames, isToday }) => (
+                <div key={date} className={`w-48 shrink-0 ${isToday ? 'ring-1 ring-brand-500/30 dark:ring-brand-400/20 rounded-xl p-2 -m-2' : ''}`}>
                   <Link
                     href={`/predictions/${date}`}
                     className="flex items-baseline gap-1.5 mb-2 group"
                   >
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 group-hover:text-brand-600 transition-colors">
-                      {formatKoreanWeekday(date)}요일
+                    <span className={`text-sm font-semibold group-hover:text-brand-600 transition-colors ${isToday ? 'text-brand-600 dark:text-brand-400' : 'text-gray-700 dark:text-gray-200'}`}>
+                      {isToday ? '오늘' : `${formatKoreanWeekday(date)}요일`}
                     </span>
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {date.slice(5).replace('-', '/')}
@@ -873,7 +910,7 @@ export default async function HomePage() {
                     {dayGames.map((g) => (
                       <div
                         key={g.id}
-                        className="flex items-center justify-between bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg px-2.5 py-2 text-xs"
+                        className={`flex items-center justify-between rounded-lg px-2.5 py-2 text-xs ${isToday ? 'bg-brand-50 dark:bg-brand-900/20' : 'bg-gray-50 dark:bg-[var(--color-surface)]'}`}
                       >
                         <span className="text-gray-600 dark:text-gray-300 w-12 truncate">
                           {shortTeamName(g.awayTeam)}
@@ -887,7 +924,9 @@ export default async function HomePage() {
                         </span>
                         {g.homeWinPct != null && (
                           <span className={`text-[9px] tabular-nums ml-1 font-medium shrink-0 ${
-                            g.homeWinPct >= 0.5
+                            g.isPredicted
+                              ? 'text-[#c5a23e] dark:text-[#e2c96b]'
+                              : g.homeWinPct >= 0.5
                               ? 'text-brand-600 dark:text-brand-400'
                               : 'text-orange-500 dark:text-orange-400'
                           }`}>
