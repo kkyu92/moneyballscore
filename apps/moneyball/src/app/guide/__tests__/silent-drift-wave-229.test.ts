@@ -4,7 +4,7 @@ import { join } from 'path';
 
 const GUIDE_SRC = readFileSync(join(__dirname, '../page.tsx'), 'utf-8');
 
-describe('silent drift wave 228 — guide page dev jargon 제거', () => {
+describe('silent drift wave 229 — guide page dev jargon 제거 (cycle 1527)', () => {
   it('guide does not say "실측치" (dev jargon → "실제 수치")', () => {
     expect(GUIDE_SRC).not.toContain('실측치');
   });
