@@ -1,5 +1,5 @@
 /**
- * MegaMenu 12 case 시각 검증 — plan #14 C2 Step 4 후속 (cycle 1021 plan #14 carry-over).
+ * MegaMenu 12 case 시각 검증.
  *
  * docs/design/megamenu-state-matrix.md 12 case 의 시각 상태를 Playwright screenshot
  * 으로 박제. design review baseline + visual regression detection.

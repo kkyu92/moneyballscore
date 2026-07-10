@@ -15,7 +15,7 @@ const ROW_LABEL: Record<string, string> = {
 };
 
 /**
- * plan #14 C2 (a2 cycle 1021) — scoring_rule × 주차 (최근 4주) cohort heatmap.
+ * scoring_rule × 주차 (최근 4주) cohort heatmap.
  * DESIGN.md brand color scale (brand-100 low / brand-700 high). ScoringRuleDayHeatmap (요일 축)
  * 자매 view — 시간 축 cohort 비교.
  */

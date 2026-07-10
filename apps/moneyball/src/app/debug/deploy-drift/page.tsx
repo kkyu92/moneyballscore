@@ -1,4 +1,4 @@
-// M15 — deploy drift dashboard (plan #10 Tier 1, cycle 947)
+// M15 — deploy drift dashboard
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
 // /api/version + Vercel env 비교 — 사례 9/10 family monitoring.
 // deploy-drift-alert.yml (cycle 838 PR #1195) 매시간 cron 의 본 메인 가시 view.

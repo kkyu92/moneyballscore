@@ -26,10 +26,10 @@ interface RollingAccuracyChartProps {
 }
 
 /**
- * plan #14 C2 (a2 cycle 1021) — rolling window accuracy 추세 line chart.
+ * rolling window accuracy 추세 line chart.
  * totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean.
  * brand-500 line + 0.5 baseline (동전) reference. n<3 day = null (line 끊김 X via connectNulls).
- * wave 117 (cycle 1334): 30 hardcoded → ROLLING_ACCURACY_WINDOW_DAYS registry.
+ * window = ROLLING_ACCURACY_WINDOW_DAYS (shared registry).
  */
 export function RollingAccuracyChart({
   data,

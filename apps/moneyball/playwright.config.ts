@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright E2E config — plan #14 C2 Step 4 후속 (cycle 1021 plan #14 C2 carry-over).
+ * Playwright E2E config — MegaMenu + Hreflang E2E 테스트.
  *
  * MegaMenu Radix interaction (hover/click/Esc/outside-click/arrow-keys/Home/End/
  * focus-trap) jsdom 안 simulate 불가 → 실제 browser interaction 검증.

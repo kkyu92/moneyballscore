@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 type CheckStatus = 'ok' | 'warning' | 'error';
 type Check = { status: CheckStatus; detail?: string };
 
-// KBO Schedule URL + Referer (cycle 769 사례 8 봇차단 회피) — wave 162 (cycle 1395) shared registry 통합
+// KBO Schedule URL + Referer — 봇차단 회피용 (shared registry 통합)
 const KBO_API_URL = KBO_SCHEDULE_URL;
 const KBO_SCHEDULE_REFERER = KBO_SCHEDULE_URL;
 const SHA_HEX_REGEX = /^[0-9a-f]{40}$/i;

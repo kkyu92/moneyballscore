@@ -11,7 +11,7 @@ import {
 //
 // pipeline_runs 최근 30일 표시. mode 별 subtotal + 이번 주 GAP 강조.
 // /debug/hallucination 패턴 답습.
-// M16 (plan #10 Tier 1, cycle 947): skipped_detail reject reason cohort.
+// M16: skipped_detail reject reason cohort.
 
 export const dynamic = 'force-dynamic';
 
@@ -346,7 +346,7 @@ export default async function PipelineDashboard() {
             </section>
           )}
 
-          {/* M16 — Reject Reason 분포 (plan #10 Tier 1, cycle 947) */}
+          {/* M16 — Reject Reason 분포 */}
           {stats.rejectReasons && stats.rejectReasons.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3">Reject Reason 분포 (skipped_detail)</h2>

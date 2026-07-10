@@ -1,12 +1,10 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from '@moneyball/shared';
 
-// plan #6 Step A — Alt 3 변형 (cycle 882~).
+// robots.txt 정책:
 //   - Googlebot + 일반 search engine: /lotto + /lotto/archive 색인 허용
-//     (검색 색인 활성 = 사용자 명시 의도 정합)
 //   - AdSense crawler (Mediapartners-Google + AdsBot-Google): /lotto + /lotto/archive
-//     **전 sub-tree** Disallow 명시 (gambling-adjacent 차단, KBO AdSense 심사 5개월
-//     sunk cost 보호 — autoplan CEO + Design subagent 합의 user_challenge_1).
+//     **전 sub-tree** Disallow (gambling-adjacent 차단, AdSense 심사 정책).
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
@@ -16,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         // /debug: BASIC auth 내부 대시보드 (색인 가치 0)
         // /api: JSON 엔드포인트 (색인 가치 0)
         // /search: 쿼리 조합 무한 (robots meta 로도 noindex 이미 처리)
-        // /login /settings /community: placeholder (plan #21 Step 2, defense-in-depth)
+        // /login /settings /community: placeholder (색인 가치 0)
         disallow: ["/debug", "/api", "/search", "/login", "/settings", "/community"],
       },
       {

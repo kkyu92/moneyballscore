@@ -3,7 +3,7 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe (plan #19 Step 1, cycle 1043 + cycle 1064 plan #20 /calendar 추가):
+// Sitemap wireframe:
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
 // │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │

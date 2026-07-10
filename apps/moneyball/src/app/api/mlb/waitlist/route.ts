@@ -1,15 +1,13 @@
 /**
- * MLB waitlist 가입 endpoint (plan #1 Step 4).
+ * MLB waitlist 가입 endpoint.
  *
- * 보안 layer (plan #1 Phase 2+3 critical gap):
+ * 보안 layer:
  *   1. CSRF / Origin — `request.headers.get('origin')` 가 허용 host 정합 시만 진행 (403)
  *   2. Honeypot — body `_hp` 채워지면 silent 200 (bot 차단)
  *   3. Email validate — RFC 5322 simplified regex + length 5-254 (DB CHECK defense in depth)
  *   4. Service role insert — anon insert denied (RLS), API route 만 service role bypass
  *   5. Email enumeration 보호 — ON CONFLICT (league,email) DO NOTHING + duplicate/신규 동일 200
- *   6. Sentry — error path 만 capture + flush 2000ms await (드리프트 사례 6 패턴)
- *
- * Rate limit (Vercel KV sliding window) = plan #1 Step 6 별도 cycle carry-over.
+ *   6. Sentry — error path 만 capture + flush 2000ms await
  */
 
 import { type NextRequest, NextResponse } from 'next/server';

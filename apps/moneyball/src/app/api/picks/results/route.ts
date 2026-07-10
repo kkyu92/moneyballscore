@@ -17,7 +17,7 @@ export interface PickGameResult {
   ai_confidence: number | null;
   ai_is_correct: boolean | null;
   /**
-   * factors map (cycle 1021 c9) — per-factor home-win prob [0,1] (0.5=중립).
+   * factors map — per-factor home-win prob [0,1] (0.5=중립).
    * pre_game + CURRENT_SCORING_RULE row 만 pick. null = pre_game prediction 미생성
    * or factors 비어있음 / scoring_rule mismatch.
    */
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createClient();
 
-  // cycle 1021 c9: predictions 안 factors + prediction_type + scoring_rule 추가 select.
+  // predictions 안 factors + prediction_type + scoring_rule select.
   // server-side 에서 pre_game + CURRENT_SCORING_RULE row 만 pick (shadow row 차단).
   const result = await supabase
     .from('games')

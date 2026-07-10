@@ -3,7 +3,6 @@
 /**
  * MobileNav — viewport < md hamburger 패턴 + Radix Accordion 안 NavGroup 접기/펼치기.
  *
- * cycle 1021 plan #14 C2 Step 2c — 기존 NavGroup 모두 펼쳐서 표시하던 패턴 →
  * Radix Accordion (WAI-ARIA Authoring Practices accordion pattern 자동) 으로
  * 그룹별 접기/펼치기. 사용자가 원하는 카테고리만 빠르게 진입.
  *

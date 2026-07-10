@@ -10,7 +10,7 @@ import {
 } from '@/lib/debug/factorDeltaStats';
 import { CURRENT_SCORING_RULE, DAY_MS, SHADOW_SCORING_RULE } from '@moneyball/shared';
 
-// M14 — silent drift family alert dashboard (plan #10 Tier 1, cycle 947)
+// M14 — silent drift family alert dashboard
 // M-D cycle 1013 확장 — FactorDeltaTimeline 안 cohort 별 factor 평균 + z-score>3 anomaly 표기.
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
 // silent-drift-alert.ts (cycle 819 + 886) trigger evidence 누적 시각화.

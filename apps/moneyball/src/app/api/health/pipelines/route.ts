@@ -6,8 +6,6 @@ export const runtime = 'nodejs';
 
 // Cloudflare Workers Cron '17 0-14 * * *' (UTC 0-14 = KST 9-23) →
 // 4 mode 별 마지막 success 기대 freshness 임계. silent skip detection 강화.
-// cycle 1135 explore-idea (lite, v18 candidate Z runtime smoke route 확장)
-// plan #13 step 4-5 carry-over.
 const PIPELINE_MODES = [
   { mode: 'announce', stale_hours: 28 },
   { mode: 'predict', stale_hours: 15 },

@@ -1,5 +1,5 @@
 /**
- * MegaMenu Radix interaction E2E — plan #14 C2 Step 4 후속 (cycle 1021 plan #14 carry-over).
+ * MegaMenu Radix interaction E2E.
  *
  * docs/design/megamenu-state-matrix.md 12 case 중 jsdom 안 simulate 불가한
  * interaction 핵심 6 case 검증:

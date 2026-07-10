@@ -32,7 +32,7 @@ interface BucketRow {
 }
 
 /**
- * plan #14 C2 (a2 cycle 1021) — winner prob bucket × 실제 적중률 calibration evidence.
+ * winner prob bucket × 실제 적중률 calibration evidence.
  * 4 bucket (50-60% / 60-70% / 70-80% / 80%+).
  * brand color (well-calibrated) / warning (over-confident: predicted > actual + 0.05).
  */

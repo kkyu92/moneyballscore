@@ -1,9 +1,5 @@
 /**
- * Hreflang alternates E2E — plan #21 Step 3 (cycle 1094).
- *
- * 5 MLB page × 2 hreflang (en + ko) = 10 link assertion.
- * /en/mlb/* 영문 mirror 박제 wait — link target 404 OK (현재 시점).
- * 영문 mirror 박제 후 link target 200 assertion 갱신 carry-over.
+ * Hreflang alternates E2E — 5 MLB page × 2 hreflang (en + ko) = 10 link assertion.
  */
 
 import { test, expect } from "@playwright/test";
