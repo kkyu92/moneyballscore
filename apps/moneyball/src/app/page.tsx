@@ -105,8 +105,6 @@ export const revalidate = 600; // HOME_ISR_SECONDS (Next.js 16 Turbopack: litera
 
 // 분석 방법론 카드의 6 그룹 정의 — DEFAULT_WEIGHTS + HOME_ADVANTAGE 단일 source.
 // 라벨 텍스트는 그대로 두고 weight 숫자만 compute (가중치 변경 시 자동 동기).
-// v1.8 변경 (cycle 335) 직후 page.tsx 라벨 미갱신 silent drift (Elo+WAR "16%" → 실제 18%,
-// 최근폼+h2h "15%" → 실제 13%) 재발 차단 (cycle 469 fix).
 const METHODOLOGY_GROUPS: Array<{
   label: string;
   keys: WeightKey[];

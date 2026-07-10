@@ -27,13 +27,7 @@ function escapeXml(str: string): string {
 export async function GET() {
   const supabase = await createClient();
 
-  // assertSelectOk — cycle 149 silent drift family detection. RSS feed select 가
-  // .error 시 data=null silent fallback → feedGames=[] → game items 0건 silent
-  // 빈 RSS 응답 (review items 만 + game items 없음). 구독자 입장에서 RSS reader
-  // 갱신 0건처럼 보여 silent drift. assertSelectOk 로 fail-loud 전환 — error
-  // 시 throw → Next.js route handler 가 500 반환하여 RSS reader 가 명시적 실패
-  // 표시 + Sentry 캡처. 기존 stale RSS cache (FEED_ISR_SECONDS) 는 그대로 유지
-  // (Vercel CDN). silent drift family 시리즈 (cycle 141~148) 와 동일 패턴 통일.
+  // assertSelectOk — DB 오류 시 data=null silent fallback 차단. fail-loud → 500 반환 + Sentry 캡처.
   const gamesResult = await supabase
     .from('games')
     .select(`
@@ -87,10 +81,7 @@ export async function GET() {
       <pubDate>${missesPubDate}</pubDate>
     </item>`);
 
-  // /changelog 최근 10건 RSS item — date 있는 entry 만, 시간 역순. cycle 810
-  // v13-E 박제. 구독자가 사이클별 변경 이력 (가중치 튜닝 / 신규 기능 / SEO /
-  // AdSense / 적중률 분석) 을 RSS reader 에서 즉시 받음. layout.tsx alternates
-  // (cycle ?) + feed/route.ts items 두 layer 모두 박제해야 구독 가치 노출.
+  // /changelog 최근 10건 RSS item — date 있는 entry 만, 시간 역순.
   const changelogEntries = parseChangelog()
     .filter((e) => e.date !== null)
     .slice(0, 10);

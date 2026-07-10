@@ -66,10 +66,7 @@ async function searchPlayers(q: string): Promise<PlayerHit[]> {
   if (q.length < 1) return [];
   const supabase = await createClient();
   const pattern = `%${q}%`;
-  // assertSelectOk — cycle 155 silent drift family detection. players select
-  // 가 .error 미체크 → DB 오류 시 data=null silent fallback → 빈 검색 결과
-  // ("검색 결과가 없습니다") 가 사용자에게 노출 (실제로는 DB 오류, ilike pattern
-  // 정상이어도 가시 X). cycle 152~154 family 자연 후속. nested FK select 의
+  // assertSelectOk — DB 오류 시 data=null silent fallback 차단. nested FK select 의
   // PostgrestResponseSuccess 추론 (team:[] array) 우회 위해 SelectResult cast.
   const result = (await supabase
     .from('players')
@@ -112,10 +109,7 @@ async function searchDates(q: string): Promise<DateHit[]> {
     .select('game_date')
     .order('game_date', { ascending: false })
     .limit(60);
-  // assertSelectOk — cycle 155 silent drift family detection. games select 가
-  // .error 미체크 → DB 오류 시 data=null silent fallback → 검색 일자 결과 0건
-  // 위장 ("검색 결과가 없습니다") 가 사용자에게 노출 (실제로는 DB 오류, 정상
-  // 일자 query 도 빈 결과로 위장). cycle 152~154 family 자연 후속.
+  // assertSelectOk — DB 오류 시 data=null silent fallback 차단.
   const result = (from === to
     ? await query.eq('game_date', from)
     : await query.gte('game_date', from).lt('game_date', to)) as SelectResult<
@@ -208,8 +202,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
     });
   }
 
-  // 3) Players — top N by `id` (proxy for recency). assertSelectOk for
-  //    silent-drift detection (cycle 155 family).
+  // 3) Players — top N by `id` (proxy for recency). assertSelectOk for DB error detection.
   try {
     const supabase = await createClient();
     const playersResult = (await supabase

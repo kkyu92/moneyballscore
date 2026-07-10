@@ -20,8 +20,8 @@ interface BrierTrendChartProps {
   data: BrierTrendPoint[];
 }
 
-// scoring_rule 색상 매핑 — DESIGN.md semantic + brand token 정합 (cycle 887 polish-ui).
-// 의미 매핑: v1.5 = neutral (baseline) / v1.6 = error (anomaly) / v1.7-revert = warning (revert) / v1.8 = brand (current) / all = brand 강조.
+// scoring_rule 색상 매핑 — DESIGN.md semantic + brand token 정합.
+// v1.5 = neutral (baseline) / v1.6 = error (anomaly) / v1.7-revert = warning (revert) / v1.8 = brand (current) / all = brand 강조.
 const SR_COLOR_MAP: Record<string, string> = {
   all: brand[600],
   "v1.5": neutral[500], // baseline
