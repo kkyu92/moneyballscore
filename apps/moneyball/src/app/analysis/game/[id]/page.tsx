@@ -400,7 +400,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* 2a. AI 토론 timeline 5 step 시각화 — 정량 baseline → 홈/원정 옹호 → 보정 → 심판 (cycle 1021 (a1)) */}
+      {/* 2a. AI 토론 timeline 5 step 시각화 — 정량 baseline → 홈/원정 옹호 → 보정 → 심판 */}
       {debate && verdict && !isQuantOnlyFallback && (() => {
         const timelineData: DebateTimelineData = {
           quantHomeProb: debate.quantitativeProb ?? null,
@@ -488,7 +488,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         />
       )}
 
-      {/* 3.5 팩터 누적 영향 waterfall chart — 모델 prob 도출 path 시각화 (cycle 1021 (a3)) */}
+      {/* 3.5 팩터 누적 영향 waterfall chart — 모델 prob 도출 path 시각화 */}
       {preGame.factors && (
         <FactorWaterfallChart
           homeTeam={homeTeam}
@@ -504,7 +504,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         asOfDate={gameDate}
       />
 
-      {/* 3b. 최근 같은 대결 — 우리 모델 과거 예측 vs 실제 결과 (a4, cycle 1021) */}
+      {/* 3b. 최근 같은 대결 — 우리 모델 과거 예측 vs 실제 결과 */}
       {game.home_team_id != null && game.away_team_id != null && (
         <HistoricalAnalogMatchup
           homeTeam={homeTeam}

@@ -552,7 +552,7 @@ export default async function AccuracyPage() {
         )}
       </section>
 
-      {/* rolling accuracy 추세 (plan #14 C2 a2 cycle 1021; wave 117 cycle 1334 registry) */}
+      {/* rolling accuracy 추세 */}
       {rollingAccuracy.some((p) => p.windowAccuracy !== null) && (
         <section
           id="rolling-accuracy"
@@ -632,7 +632,6 @@ export default async function AccuracyPage() {
         </section>
       )}
 
-      {/* M13 — scoring_rule × 요일 heatmap (plan #10 Tier 1, cycle 947) */}
       {scoringRuleDayHeatmap.length > 0 && rows.length >= 10 && (
         <section
           id="scoring-rule-day-heatmap"
@@ -645,7 +644,7 @@ export default async function AccuracyPage() {
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            scoring_rule × 요일 (KST) 적중률 매트릭스 — v1.6 anomaly cohort + Sunday cap (cycle 358) 효과 시각화.
+            요일별 scoring rule 코호트 × 적중률 매트릭스.
           </p>
           <ScoringRuleDayHeatmap data={scoringRuleDayHeatmap} />
         </section>

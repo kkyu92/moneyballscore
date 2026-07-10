@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 };
 
-// cycle 1021 c10: URL search param 기반 탭. 'use client' 회피 + SEO 친화.
+// URL search param 기반 탭. 'use client' 회피 + SEO 친화.
 type PeriodTab = Extract<LeaderboardMode, 'monthly' | 'season' | 'all'>;
 const PERIODS: ReadonlyArray<PeriodTab> = ['monthly', 'season', 'all'];
 const PERIOD_LABEL: Record<PeriodTab, string> = {
@@ -140,7 +140,6 @@ export default async function LeaderboardPage({
         </p>
       </div>
 
-      {/* cycle 1021 Tier 1 carry-over B: Hall of Fame (top 3 medal) */}
       {entries.length > 0 && (
         <div className="mb-5">
           <HallOfFame entries={entries} periodLabel={PERIOD_LABEL[period]} />

@@ -7,8 +7,6 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
 
 // /calendar — 현재 월 (KST) 의 daily prediction count + accuracy heatmap.
-// cycle 1021 (b8) — 사용자 가시 entry route 추가. 월별 view + 각 cell 클릭 시
-// /predictions/[date] 진입. PRODUCTION_COHORT_RULES filter (v1.8 + v1.8-credit-fail, 사례 17 family wave 15).
 
 export const revalidate = 3600; // CALENDAR_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -121,8 +119,7 @@ async function getMonthHeatmap(info: MonthInfo): Promise<DayCell[]> {
   const supabase = await createClient();
 
   // assertSelectOk — silent drift family detection. PRODUCTION_COHORT_RULES filter
-  // (v1.8 + v1.8-credit-fail) — 사용자 가시 layer, credit-fail row 분리 후 정합 복원
-  // (사례 17 family wave 15, cycle 1096).
+  // (v1.8 + v1.8-credit-fail) — credit-fail row 분리 후 사용자 가시 정합 복원.
   const result = await supabase
     .from('predictions')
     .select(
