@@ -376,7 +376,6 @@ export function buildWeeklyTrend(rows: PredRow[]): WeekBucket[] {
     });
 }
 
-// plan #8 Tier 1 M5+M10 — Brier score 시계열 + scoring_rule 분리.
 export interface BrierTrendPoint {
   date: string; // YYYY-MM-DD (week start, ISO)
   weekLabel: string;
@@ -423,10 +422,7 @@ export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
   return result;
 }
 
-// plan #14 C2 (a2 cycle 1021) — rolling window accuracy 추세.
-// totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean.
-// 사용자 신뢰도 직접 가시화 — Brier 보다 직관적.
-// wave 117 (cycle 1334): 30/90 hardcoded → ROLLING_ACCURACY_{WINDOW,TOTAL}_DAYS registry.
+// totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean. Brier 보다 직관적.
 export interface RollingAccuracyPoint {
   date: string;
   dateLabel: string;
@@ -477,7 +473,6 @@ export function buildRollingAccuracy(
   return points;
 }
 
-// plan #14 C2 (a2 cycle 1021) — winner prob bucket × 실제 적중률 calibration evidence.
 export interface WinnerProbBucket {
   label: string;
   range: string;
@@ -512,7 +507,6 @@ export function buildWinnerProbBuckets(rows: PredRow[]): WinnerProbBucket[] {
   });
 }
 
-// plan #14 C2 (a2 cycle 1021) — scoring_rule × 주차 (최근 4주) accuracy 매트릭스.
 export interface ScoringRuleWeekCell {
   scoringRule: string;
   weekStart: string;

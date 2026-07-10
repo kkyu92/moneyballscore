@@ -208,7 +208,7 @@ export default function MethodologyPage() {
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
-            <h3 className="font-semibold mb-2">③ 실측 검증</h3>
+            <h3 className="font-semibold mb-2">③ 결과 검증</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               매 경기 종료 후 적중률을 누적. 누적 표본 n=178 달성 + v1.8 유지 확정 (2026-07-06). 실시간 적중률 /accuracy 참조.
             </p>
@@ -382,7 +382,7 @@ export default function MethodologyPage() {
             <h3 className="font-semibold mb-2">Brier Score</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
               예측 승률과 실제 결과 (0 또는 1) 의 제곱 오차 평균. 낮을수록
-              ↑정확. {BRIER_BASELINE} = 동전 던지기 수준, 0.20 이하 = 우수. 실측치는{" "}
+              ↑정확. {BRIER_BASELINE} = 동전 던지기 수준, 0.20 이하 = 우수. 실제 점수는{" "}
               <Link href="/accuracy" className="text-brand-500 hover:underline">
                 /accuracy
               </Link>{" "}

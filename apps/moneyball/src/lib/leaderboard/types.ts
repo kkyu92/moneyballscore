@@ -17,8 +17,7 @@ export interface LeaderboardSyncPayload {
   }>;
 }
 
-// cycle 1021 c10: 시즌별 분할 — monthly/season/all 3 mode 신규.
-// weekly 는 backward compat 위해 유지 (기존 호출처 점진적 마이그레이션 대비).
+// weekly 는 backward compat 위해 유지 (기존 호출처 마이그레이션 대비).
 export type LeaderboardMode = 'weekly' | 'monthly' | 'season' | 'all';
 
 export interface AiBaseline {

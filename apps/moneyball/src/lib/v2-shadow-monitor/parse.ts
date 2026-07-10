@@ -1,5 +1,4 @@
 // op-analysis-cohort md 파서 — h1 / paragraph / h2 / table 만 처리.
-// cycle 1103 explore-idea heavy (cycle 1102 spec 후보 E v2-shadow-monitor dashboard ship).
 
 export interface CohortTable {
   heading: string;

@@ -1,16 +1,13 @@
 "use client";
 
 /**
- * MegaMenu — shadcn `<NavigationMenu>` wrapper (plan #19 Step 2, cycle 1044).
+ * MegaMenu — shadcn `<NavigationMenu>` wrapper.
  *
- * cycle 1042 = shadcn navigation-menu 컴포넌트 박제 (apps/moneyball/src/components/ui/navigation-menu.tsx).
- * cycle 1044 = MegaMenu 가 shadcn wrapper 직접 사용으로 마이그레이션.
- *
- * 기존 Radix 직접 사용 → shadcn wrapper. WAI-ARIA Authoring Practices menubar
- * pattern 자동 적용 + viewport 패턴 (panel content 단일 컨테이너 + 자동 size).
+ * WAI-ARIA Authoring Practices menubar pattern 자동 적용 + viewport 패턴
+ * (panel content 단일 컨테이너 + 자동 size).
  *
  * spec: docs/design/megamenu-state-matrix.md (12 case 상태 매트릭스).
- * focus-visible: outline-2 outline-brand-500 (plan #19 Step 2 명시).
+ * focus-visible: outline-2 outline-brand-500.
  *
  * Server / Client 분리: SiteHeader RSC 유지 + 본 컴포넌트 'use client' 격리.
  */

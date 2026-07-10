@@ -15,12 +15,8 @@ export function isNavGroup(item: NavItem): item is NavGroup {
   return "items" in item;
 }
 
-// KBO_NAV — cycle 1064 plan #20 polish: 22 link / 5 group → 11 link / 3 group (50% 압축).
-// cycle 1129 v17 candidate O: 예측·기록 group + /accuracy/shadow (12 link total, group count unchanged).
-// 의도: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
-// 더보기 8 link dumping ground 해체 → Footer "도움말" column 단독 노출 (이미 박제 완료).
-// /insights /calendar /seasons → Footer "리뷰·시즌"/"도움말" column 단독 노출.
-// 결과: 1 top-level (오늘) + 3 group (예측·기록 5 / 팀·선수 4 / 커뮤니티 2) = 4 hover zone.
+// KBO_NAV: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
+// 1 top-level (오늘) + 3 group (예측·기록 5 / 팀·선수 4 / 커뮤니티 2) = 4 hover zone.
 const KBO_NAV: NavItem[] = [
   { href: "/", label: "오늘" },
   {

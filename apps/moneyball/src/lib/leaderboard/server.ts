@@ -7,8 +7,6 @@ import {
 } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from './types';
 
-// cycle 1021 c10: monthly / all 신규 view (migration 032).
-// season / weekly = 기존 (027) — backward compat.
 const VIEW_BY_MODE: Record<LeaderboardMode, string> = {
   weekly: 'leaderboard_weekly',
   monthly: 'leaderboard_monthly',
