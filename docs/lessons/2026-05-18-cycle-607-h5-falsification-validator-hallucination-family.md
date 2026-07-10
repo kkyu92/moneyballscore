@@ -112,13 +112,13 @@ daily.ts:636       decideModelVersion → mv='v1.8' 강등 라벨
   - 5건 credit (이미 해결)
   - 5건 schema parity null path (cycle 386 후속)
 - v1.8 25건 중 silent fallback 17건 / real-debate 10건 분리 (cycle 606 박제 정확)
-- v2.0 가중치 확정 (n=150 임계 도달 후) 시 real-debate sub-cohort 만 사용 (cycle 606 권장 유지)
+- ~~v2.0 가중치 확정 (n=150 임계 도달 후) 시 real-debate sub-cohort 만 사용 (cycle 606 권장 유지)~~ ← stale: v2.0 upgrade 불필요 (cycle 1460 plan #16, v1.8 유지 확정 2026-07-06)
 
 ## carry-over (cycle 608+)
 
 - mitigation option A (prompt 단일 line) 다음 cycle 후보 — review-code (heavy) 또는 fix-incident (heavy) 차원
 - 5/14 5건 schema parity 부재 path 추가 조사 (cycle 386 fix 가 cover 못 한 sub-path) — cycle 608+ fix-incident 후보
-- v1.8 강등 라벨 세분화 (option D) v2.0 전진 prerequisite 후보
+- ~~v1.8 강등 라벨 세분화 (option D) v2.0 전진 prerequisite 후보~~ ← stale: v2.0 전진 소멸 (cycle 1460 v1.8 유지 확정)
 
 ## 관련
 
