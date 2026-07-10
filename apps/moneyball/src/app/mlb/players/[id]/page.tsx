@@ -311,7 +311,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
           (MLB Advanced Media). 스크래퍼: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
         </p>
         <p>
-          ※ 실측 데이터 연동 시점 = MLB 풀 인제스트 결정 후 (cycle 1091 시점 보류 — 사용자 영역).
+          ※ 실측 데이터 연동 준비 중.
         </p>
       </footer>
     </main>

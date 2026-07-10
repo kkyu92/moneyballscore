@@ -42,10 +42,7 @@ export default async function MlbHub() {
     .eq('games.game_date', today)
     .order('game_id', { ascending: true });
 
-  // MLB backend migrations (033 league column / 034 statcast factors / 035-037)
-  // prod 미적용 상태 (033 broken index 트랜잭션 롤백). 별도 fix-incident heavy
-  // cycle 에서 fix migration 박제. 그동안 hub 는 0 경기 fallback 으로 200 유지
-  // (cycle 1149 사례 14 family 재발 fix — runtime-error-alert cron 10회 연속 fail).
+  // MLB backend migrations 033-037 적용 완료 (cycle 1151). query 에러 시 fallback.
   const todayGames = result.error ? null : result.data;
   if (result.error) {
     console.warn(`[MlbHub] predictions query failed: ${result.error.message}`);

@@ -47,9 +47,7 @@ export default async function MlbHubEn() {
     .eq('games.game_date', today)
     .order('game_id', { ascending: true });
 
-  // MLB backend migrations (033 league column / 034 statcast factors / 035-037)
-  // prod not yet applied (033 broken index transaction rollback). fix-incident heavy
-  // cycle will fix migrations. Hub renders 0-game fallback for 200 status in the meantime.
+  // MLB backend migrations 033-037 applied (cycle 1151). Fallback on query error.
   const todayGames = result.error ? null : result.data;
   if (result.error) {
     console.warn(`[MlbHubEn] predictions query failed: ${result.error.message}`);

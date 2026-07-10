@@ -316,7 +316,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
           (MLB Advanced Media). Scraper: <code>packages/kbo-data/src/scrapers/baseball-savant.ts</code>.
         </p>
         <p>
-          ※ Live measurement integration = pending MLB full ingestion decision (cycle 1091 deferred — user domain).
+          ※ Live player performance metrics integration coming soon.
         </p>
       </footer>
     </main>
