@@ -10,11 +10,10 @@ import {
 } from '@/lib/debug/factorDeltaStats';
 import { CURRENT_SCORING_RULE, DAY_MS, SHADOW_SCORING_RULE } from '@moneyball/shared';
 
-// M14 — silent drift family alert dashboard
-// M-D cycle 1013 확장 — FactorDeltaTimeline 안 cohort 별 factor 평균 + z-score>3 anomaly 표기.
+// silent drift family alert dashboard
+// FactorDeltaTimeline — cohort 별 factor 평균 + z-score>3 anomaly 표기.
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
-// silent-drift-alert.ts (cycle 819 + 886) trigger evidence 누적 시각화.
-// 사례 11 family monitoring + factor anomaly (cycle 1013) monitoring.
+// silent-drift-alert trigger evidence 누적 시각화 + factor anomaly monitoring.
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +85,7 @@ export default async function SilentDriftDashboard() {
       <header className="border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-bold mb-1">Silent Drift Dashboard</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          silent-drift-alert.ts (cycle 819 + 886) trigger evidence — 사례 11 family monitoring · BASIC auth
+          silent-drift-alert trigger evidence monitoring · BASIC auth
         </p>
       </header>
 
@@ -129,7 +128,7 @@ export default async function SilentDriftDashboard() {
             <section>
               <h2 className="text-lg font-bold mb-3">predict_final silent drift event</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                games_found {`>`} 0 + predictions=0 (existingPredictionsCount proxy — cycle 864 false positive 정정 후 cover&lt;games_found 조건). cycle 819 PR #1179 alert channel.
+                games_found {`>`} 0 + predictions=0 (existingPredictionsCount proxy — cover&lt;games_found 조건). Sentry alert channel.
               </p>
               <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
                 <table className="w-full text-sm">
@@ -160,7 +159,7 @@ export default async function SilentDriftDashboard() {
             <section>
               <h2 className="text-lg font-bold mb-3">verify silent drift event</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                games_found {`>`} 0 + predictions=0 proxy. cycle 886 PR #1220 verify extension.
+                games_found {`>`} 0 + predictions=0 proxy (verify extension).
               </p>
               <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
                 <table className="w-full text-sm">
@@ -193,9 +192,9 @@ export default async function SilentDriftDashboard() {
             </div>
           )}
 
-          {/* M-D cycle 1013 — FactorDeltaTimeline (7일 cohort 별 factor 평균 + z-score>3 anomaly) */}
+          {/* FactorDeltaTimeline */}
           <section>
-            <h2 className="text-lg font-bold mb-2">FactorDeltaTimeline (7일, cycle 1013)</h2>
+            <h2 className="text-lg font-bold mb-2">FactorDeltaTimeline (7일)</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
               v1.8 vs {SHADOW_SCORING_RULE} cohort 별 factor 평균 시계열 + z-score &gt;{' '}
               {FACTOR_ANOMALY_Z_THRESHOLD} anomaly 강조. shadow factor (park_weather, umpire_sz)

@@ -1,7 +1,7 @@
 // M15 — deploy drift dashboard
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
 // /api/version + Vercel env 비교 — 사례 9/10 family monitoring.
-// deploy-drift-alert.yml (cycle 838 PR #1195) 매시간 cron 의 본 메인 가시 view.
+// deploy-drift-alert.yml 매시간 cron 의 본 메인 가시 view.
 
 import { SITE_URL } from '@moneyball/shared';
 
@@ -101,10 +101,10 @@ export default async function DeployDriftDashboard() {
       )}
 
       <section className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-xl p-4 text-xs text-blue-700 dark:text-blue-300">
-        <p className="font-medium mb-1">사례 9 family carry-over (cycle 838~)</p>
+        <p className="font-medium mb-1">사례 9 family carry-over</p>
         <p>
           auto-deploy 채널 silent skip 발생 시 — (1) 24h quota reset 후 수동 `vercel --prod --yes` (2) prebuilt path
-          `vercel build --prod --yes` + `vercel deploy --prebuilt --prod --yes` (cycle 884 박제, build quota 절약)
+          `vercel build --prod --yes` + `vercel deploy --prebuilt --prod --yes` (build quota 절약)
           (3) vercel.com dashboard webhook + git connection 점검 (영구 fix, 사용자 영역). deploy-drift-alert.yml 매시간
           cron `&apos;17 * * * *&apos;` 자동 fire.
         </p>

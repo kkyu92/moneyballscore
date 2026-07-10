@@ -14,14 +14,14 @@ interface FactorRow {
     TeamFactorAverages,
     "spFip" | "lineupWoba" | "bullpenFip" | "recentForm" | "elo"
   >;
-  /** MetricRegistry slug — label 단일 source (silent drift wave 57, cycle 1253) */
+  /** MetricRegistry slug — label 단일 source */
   slug: MetricSlug;
   /** "lower" = 낮을수록 우세, "higher" = 높을수록 우세 */
   direction: "lower" | "higher";
   format: (v: number) => string;
-  /** native title 툴팁 — 비전문가용 약어 풀이 + 의미 (cycle 629) */
+  /** native title 툴팁 — 비전문가용 약어 풀이 + 의미 */
   hint: string;
-  /** /glossary anchor slug (cycle 631) */
+  /** /glossary anchor slug */
   glossarySlug: string;
 }
 

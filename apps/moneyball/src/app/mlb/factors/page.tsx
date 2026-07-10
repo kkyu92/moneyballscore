@@ -48,7 +48,7 @@ type FactorRow = {
   source: string;
 };
 
-// KBO 10 factor 라벨 = MetricRegistry.ko_name 단일 source — silent drift wave 60 (cycle 1256 박제).
+// KBO 10 factor 라벨 = MetricRegistry.ko_name 단일 source — silent drift wave 60.
 // MLB MLB_BASE_WEIGHTS.defense_sfr key = MetricRegistry.sfr slug 매핑.
 const KBO_10_FACTORS: readonly FactorRow[] = [
   {

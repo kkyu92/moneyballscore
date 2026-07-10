@@ -5,12 +5,10 @@ import {
   type PredictionForFallback,
 } from '@/lib/debug/agentFallbackStats';
 
-// cycle 986 — /debug/agent-fallback dashboard.
+// /debug/agent-fallback dashboard.
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher).
 // predictions.reasoning.debate 직접 read 후 fullDebate / agentsFailed / quantOnly
-// 일자별 분포 + agentError 카테고리 시각화. L1 (PR #1323 validator 야구 도메인) +
-// L2 (PR #1324 529 backoff 확장) + L3 (PR #1325 prompt strict 강화) 통합 효과
-// 5/27 cron fire 이후 실시간 monitoring channel.
+// 일자별 분포 + agentError 카테고리 시각화.
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +60,7 @@ export default async function AgentFallbackDebugPage() {
         <h1 className="text-2xl font-bold">Agent Fallback Dashboard</h1>
         <p className="text-sm text-gray-500 mt-1">
           직전 {cohort.windowDays}일 pre_game predictions의 AI 토론 fullDebate / agentsFailed / quantOnly 분포.
-          L1+L2+L3 (cycle 986) 통합 효과 monitoring.
+          L1+L2+L3 통합 효과 monitoring.
         </p>
       </header>
 

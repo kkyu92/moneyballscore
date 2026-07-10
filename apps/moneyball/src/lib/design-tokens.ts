@@ -43,7 +43,7 @@ export const chartCursorTint = "rgba(59, 130, 246, 0.06)";
 export const BRAND_GRADIENT_KBO_135 = `linear-gradient(135deg, ${brand[900]} 0%, ${brand[700]} 50%, ${brand[500]} 100%)`;
 
 // MLB section OG/twitter gradients — 같은 gradient 가 mlb/* 와 en/mlb/* 영역 mirror + og/twitter pair 로 2~5× 중복 박제.
-// silent drift family wave 144 (cycle 1371) — 9 section gradient registry.
+// silent drift family wave 144 — 9 section gradient registry.
 export const MLB_GRADIENT_NAVY_135 = "linear-gradient(135deg, #0a1429 0%, #112a52 50%, #1e3a7a 100%)";
 export const MLB_GRADIENT_WILD_CARD_135 = "linear-gradient(135deg, #1a0a29 0%, #4c1d6b 50%, #c026d3 100%)";
 export const MLB_GRADIENT_POSTSEASON_135 = "linear-gradient(135deg, #0a0a1e 0%, #1e1b4b 50%, #6d28d9 100%)";

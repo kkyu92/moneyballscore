@@ -14,7 +14,7 @@ const MEDAL_LABEL: Record<MedalRank, string> = {
 };
 
 /**
- * cycle 1021 c10 (Tier 1 carry-over B): Hall of Fame 섹션 — 현재 active tab 의
+ * Hall of Fame 섹션 — 현재 active tab 의
  * top 3 medal display. SVG 인라인 메달 (gold / silver / brand). DESIGN.md brand-* +
  * accent token 정합. emoji 사용자 명시 허가 wait — svg 안전 path.
  *

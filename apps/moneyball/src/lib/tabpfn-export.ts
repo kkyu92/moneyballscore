@@ -4,7 +4,7 @@
 // predictions JOIN games row 1건을 CSV 한 줄로 평탄화 + 결측/이상 row drop 판정.
 //
 // 자율 영역 한도: CSV 박제 only (Step 3 사용자 Python sidecar 영역 inference 입력).
-// docs/research/tabpfn-data-prep.md schema 정합. cycle 1130 v17 candidate P.
+// docs/research/tabpfn-data-prep.md schema 정합. v17 candidate P.
 
 import { HOME_ADVANTAGE } from '@moneyball/shared';
 

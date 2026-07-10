@@ -33,7 +33,7 @@ function formatAdjustment(value: number): string {
  * 마지막 step (judge) = highlight + verdict reasoning 전체 노출.
  *
  * 정량 모델 → 양 옹호 → 보정 → 심판 흐름이 한눈에 보여, 단순 "AI 가 X팀 60%
- * 예측" 문구보다 "왜" 가 더 잘 전달됨. cycle 1021 (b7) carry-over.
+ * 예측" 문구보다 "왜" 가 더 잘 전달됨.
  */
 export function DebateTimeline({
   homeTeam,

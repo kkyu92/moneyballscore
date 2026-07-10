@@ -17,7 +17,7 @@ import { HOME_ADVANTAGE, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 
-// HOME_ADVANTAGE 단일 source 라벨 — 매직 넘버 silent drift 차단 (cycle 470)
+// HOME_ADVANTAGE 단일 source 라벨 — 매직 넘버 silent drift 차단.
 const ASSUMED_HOME_WIN_RATE = 0.5 + HOME_ADVANTAGE;
 const HOME_ADV_PCT_LABEL = `+${(HOME_ADVANTAGE * 100).toFixed(1)}%p`;
 const ASSUMED_HOME_WIN_RATE_LABEL = `${(ASSUMED_HOME_WIN_RATE * 100).toFixed(1)}%`;

@@ -1,4 +1,4 @@
-// TabPFN inference output CSV reader — cycle 1137 v18 candidate Y.
+// TabPFN inference output CSV reader — v18 candidate Y.
 //
 // Python inference output format (2-column CSV):
 //   game_id,tabpfn_home_win_prob

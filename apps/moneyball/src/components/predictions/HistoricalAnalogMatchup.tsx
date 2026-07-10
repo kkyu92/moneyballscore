@@ -1,7 +1,7 @@
 /**
  * HistoricalAnalogMatchup — 같은 두 팀 (home, away) 과거 대결 3건 자동 매핑.
  *
- * cycle 1021 (a4) carry-over — 사용자 가시 KBO 강화. analysis/game/[id] 안 section.
+ * analysis/game/[id] 안 section.
  *
  * source: games + predictions inner join, status='final', CURRENT_SCORING_RULE filter,
  * (home_team_id IN [home, away] AND away_team_id IN [home, away]), 본 게임 제외,
