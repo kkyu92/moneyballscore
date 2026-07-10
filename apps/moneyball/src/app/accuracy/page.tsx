@@ -246,11 +246,6 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 export default async function AccuracyPage() {
   const supabase = await createClient();
 
-  // cycle 384 fix-incident heavy — LLM 토론 활성 vs 정량 fallback 가시화용 query.
-  // CURRENT_MODEL_FILTER (debate_version=v2-persona4) 제거 — fallback row 도 포함해서 비율 측정.
-  // cycle 385 review-code heavy — pre_game 만 query 하면 postview fallback 분류 (v1.8-postview)
-  // 가 silent. buildFallbackStats 는 양쪽 mv 모두 지원하므로 prediction_type 필터 확장.
-  // cycle 460 polish-ui heavy — spec scope A: 30일 window + 일별 stacked bar 추가.
   // eslint-disable-next-line react-hooks/purity -- Server Component request-scoped Date.now() 의도된 동작
   const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
@@ -947,7 +942,7 @@ export default async function AccuracyPage() {
             <h2 className="text-lg font-bold">팀별 예측 편향 분석</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               모델이 특정 팀의 승리를 실제 승률 대비 얼마나 과잉/과소 예측하는지 보여줍니다.
-              편향 갭이 큰 팀은 모델 진단 참고 지표입니다 (v1.8 유지 확정).
+              편향 갭이 큰 팀은 모델 진단 참고 지표입니다.
             </p>
           </div>
           <TeamBiasTable rows={biasRows} standingsAvailable={standingsAvailable} />
@@ -999,8 +994,6 @@ export default async function AccuracyPage() {
   );
 }
 
-// cycle 460 polish-ui heavy — spec scope A: AI 토론 vs 정량 fallback 일별 stacked bar.
-// LLM 활성 = brand-500, fallback = amber-500. 빈 날 = 회색 미니 바.
 function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
   const maxTotal = trend.reduce((m, b) => Math.max(m, b.total), 0);
   if (maxTotal === 0) return null;
@@ -1071,9 +1064,6 @@ function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
   );
 }
 
-// cycle 627 explore-idea heavy — spec 623 candidate A: 현 버전 (v1.8) 세부 분석.
-// AI 토론 활성 (model_version='v2.0-debate') vs 정량 fallback ('v1.8' 강등 라벨).
-// 사용자 가시 — AI 토론 신뢰성 + 사용률 공개.
 function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
   const realDebatePct =
     stats.total > 0 ? Math.round((stats.realDebate.n / stats.total) * 100) : 0;

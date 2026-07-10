@@ -292,7 +292,7 @@ export default async function DashboardPage() {
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-lg font-bold mb-1">팩터 정확도 진단</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          각 팩터의 방향성·편향 분석 — v1.8 유지 확정 (n=178, Brier Δ&lt;0.01pp)
+          각 팩터의 방향성·편향 분석
         </p>
         <ModelTuningInsights report={tuningReport} />
       </section>

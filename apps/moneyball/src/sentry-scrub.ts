@@ -34,7 +34,6 @@ const SENSITIVE_KEYS = new Set<string>([
   'username', 'display_name', 'avatar_url',
   // 외부 플랫폼 ID
   'discord_id', 'slack_user_id', 'webhook_url',
-  // cycle 442 — env 변수 키 정확 매칭 (Sentry/PII spec C-2 SENSITIVE_KEYS 감사).
   // process.env.* 가 extra/contexts.runtime.env 로 dump 되면 키 전체가 객체 key 가 됨.
   // 'token' 같은 base 키만으론 'TELEGRAM_BOT_TOKEN'.toLowerCase() 가 매칭 X (정확 매칭).
   'supabase_service_role_key', 'service_role_key', 'service_role',
@@ -47,14 +46,12 @@ const SENSITIVE_KEYS = new Set<string>([
   'webhook_secret', 'auth_token',
 ]);
 
-// cycle 442 — suffix 매칭 (Sentry/PII spec C-2 후속).
-// 동적 prefix 키 회귀 차단 (e.g. `MY_CLIENT_SECRET`, `X_BOT_TOKEN`).
+// suffix 매칭 — 동적 prefix 키 회귀 차단 (e.g. `MY_CLIENT_SECRET`, `X_BOT_TOKEN`).
 // 보수 list — `_key`/`_id` 는 false positive (`region_key`, `game_id`) 위험으로 제외.
 const SENSITIVE_KEY_SUFFIXES = ['_token', '_secret', '_password', '_passwd'];
 
-// cycle 527 — URL 값 스크럽 (PII spec C-3: GH issue #742).
-// 기존 scrubObject 는 key-based 만. breadcrumb data.to / data.url / event.request.url
-// 등은 key 가 'url'/'to' 라 통과 → 값에 임베디드된 ?token=... ?session=... silent 노출.
+// URL 값 스크럽 — breadcrumb data.to / data.url / event.request.url 등 key-based 필터 통과 후
+// 값에 임베디드된 ?token=... ?session=... silent 노출 차단.
 // 해당 key 들 만 대상 — 모든 문자열에 URL 파서 돌리면 false positive 위험.
 const URL_VALUE_KEYS = new Set<string>([
   'url',
@@ -160,7 +157,6 @@ export function scrubSentryEvent(event: ErrorEvent): ErrorEvent | null {
   if (event.extra) {
     event.extra = scrubObject(event.extra) as ErrorEvent['extra'];
   }
-  // cycle 437 review-code heavy — sentry/PII spec (cycle 433) Y/C 후속.
   // event.request 와 event.breadcrumbs 누락 시 url 쿼리·헤더·navigation history 의 PII 가
   // 대시보드 기본 스크러버 의존만으로 노출 가능. 코드 강제 적용.
   if (event.request) {

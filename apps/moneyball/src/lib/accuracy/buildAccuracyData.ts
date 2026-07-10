@@ -630,10 +630,6 @@ function isScoringRule(s: string): s is ScoringRule {
   return (VERSION_ORDER as readonly string[]).includes(s);
 }
 
-// cycle 627 explore-idea heavy — spec 623 candidate A: v1.8 sub-cohort split.
-// v1.8 scoring_rule 안 LLM debate 활성 (model_version='v2.0-debate') vs quant
-// fallback (model_version!='v2.0-debate', 보통 'v1.8') 2분할. 사용자 가시
-// 사용률 + 적중률 sub-cohort 공개.
 export interface SubCohortBucket {
   label: string;
   n: number;
