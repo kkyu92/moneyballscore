@@ -95,8 +95,8 @@ const FACTORS: Array<{
   },
 ];
 
-// MetricRegistry + FANGRAPHS_AUX_METRICS source-of-truth — silent drift family
-// wave 69 (cycle 1269). hardcoded "FIP, xFIP, WAR, wOBA, SFR, Elo" + "wRC+, ISO, BB%/K%"
+// MetricRegistry + FANGRAPHS_AUX_METRICS source-of-truth — silent drift family wave 69.
+// hardcoded "FIP, xFIP, WAR, wOBA, SFR, Elo" + "wRC+, ISO, BB%/K%"
 // → registry filter (methodology page wave 68 패턴 정합).
 const FANCYSTATS_PRODUCTION_LABEL = Object.values(MetricRegistry)
   .filter((m) => m.source === "fancystats" && m.weight_v18 > 0)

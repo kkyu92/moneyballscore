@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * cycle 1021 c10: 시즌별 분할 — 탭 자체는 page.tsx (Server Component) 의 URL
+ * 시즌별 분할 — 탭 자체는 page.tsx (Server Component) 의 URL
  * search param 기반 <Link>. 본 컴포넌트는 진입 / 동기화 / 내 순위 강조 + 정렬
  * 칩 + 모달 처리만 담당. 기존 weekly/season 토글 로직 (localStorage
  * useSyncExternalStore) 제거 — SEO 친화 + 'use client' 최소화.

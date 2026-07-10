@@ -130,7 +130,7 @@ const VERSION_HISTORY = [
   },
 ];
 
-// MetricRegistry source filter 단일 source-of-truth — silent drift family wave 68 (cycle 1268).
+// MetricRegistry source filter 단일 source-of-truth — silent drift family wave 68.
 // hardcoded "FIP · xFIP · WAR · wOBA · SFR · Elo" (bullpen_fip 누락) → MetricRegistry dynamic.
 const FANCYSTATS_PRODUCTION_METRICS = Object.values(MetricRegistry)
   .filter((m) => m.source === "fancystats" && m.weight_v18 > 0)
@@ -141,7 +141,7 @@ const PRODUCTION_METRIC_COUNT = Object.values(MetricRegistry).filter(
   (m) => m.weight_v18 > 0,
 ).length;
 
-// FanGraphs 보조 metric 라벨 — silent drift family wave 69 (cycle 1269).
+// FanGraphs 보조 metric 라벨 — silent drift family wave 69.
 // hardcoded "wRC+ · ISO · BB%/K%" methodology + about 다중 drift → 단일 constant.
 const FANGRAPHS_METRIC_LABEL = `${FANGRAPHS_AUX_METRICS.join(" · ")} (보조)`;
 

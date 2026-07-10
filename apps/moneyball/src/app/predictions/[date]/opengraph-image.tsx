@@ -6,7 +6,7 @@ import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 동적 Open Graph 이미지: /predictions/YYYY-MM-DD 각 날짜별로 생성.
 // satori(@vercel/og) CJK 폰트 X — 라틴 문자·숫자 중심.
-// cycle 1021 (c12) 강화 — top pick (highest winner prob) 카드 추가.
+// top pick (highest winner prob) 카드 포함.
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -30,10 +30,8 @@ async function getStats(date: string): Promise<{
   rate: number | null;
   topPick: TopPickRow | null;
 }> {
-  // assertSelectOk — cycle 151 silent drift family. cycle 1021 (c12) — top pick
-  // 추출 위해 winner/game team code + reasoning JSONB 추가.
-  // scoring_rule filter — shadow row 제외 + production cohort 양쪽 포함 (cycle
-  // 1022 hotfix: credit-fail 분리된 row 도 사용자 가시 OG image 박제 의무).
+  // assertSelectOk — fail-loud on DB error (silent drift prevention).
+  // scoring_rule filter — shadow row 제외 + production cohort 양쪽 포함.
   try {
     const supabase = await createClient();
     const result = await supabase
@@ -62,7 +60,7 @@ async function getStats(date: string): Promise<{
     const correctRows = verifiedRows.filter((p) => p.is_correct === true);
     const rate = verifiedRows.length > 0 ? Math.round((correctRows.length / verifiedRows.length) * 100) : null;
 
-    // cycle 1021 (c12) — top pick = highest winner prob (max(hwp, 1-hwp))
+    // top pick = highest winner prob (max(hwp, 1-hwp))
     let topPick: TopPickRow | null = null;
     let topProb = 0;
     for (const p of preds) {
@@ -124,7 +122,7 @@ export default async function Image({ params }: Props) {
           <span>MoneyBall Score</span>
         </div>
 
-        {/* Date — hero (cycle 1021 (c12) — top pick 카드 박제 시 sub headline 압축) */}
+        {/* Date — hero (top pick 카드 시 sub headline 압축) */}
         <div
           style={{
             marginTop: 48,
@@ -151,7 +149,7 @@ export default async function Image({ params }: Props) {
           {`${stats.n} KBO Predictions`}
         </div>
 
-        {/* Top pick card — cycle 1021 (c12) */}
+        {/* Top pick card */}
         {stats.topPick && (
           <div
             style={{

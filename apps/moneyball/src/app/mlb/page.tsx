@@ -42,7 +42,7 @@ export default async function MlbHub() {
     .eq('games.game_date', today)
     .order('game_id', { ascending: true });
 
-  // MLB backend migrations 033-037 적용 완료 (cycle 1151). query 에러 시 fallback.
+  // MLB backend migrations 033-037 적용 완료. query 에러 시 fallback.
   const todayGames = result.error ? null : result.data;
   if (result.error) {
     console.warn(`[MlbHub] predictions query failed: ${result.error.message}`);

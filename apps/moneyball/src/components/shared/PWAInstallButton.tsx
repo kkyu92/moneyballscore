@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
- * Floating "앱 설치" 버튼 (cycle 1021 Tier 2 E PWA install prompt scope).
+ * Floating "앱 설치" 버튼.
  *
  * - beforeinstallprompt event fired + 미설치 상태에서만 노출.
  * - 사용자 "나중에" (dismiss) 시 sessionStorage 박제로 본 세션 내 재노출 X.

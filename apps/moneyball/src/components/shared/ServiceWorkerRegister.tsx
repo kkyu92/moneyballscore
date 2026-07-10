@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 
 /**
- * Service worker 등록 (cycle 1021 Tier 2 E PWA install prompt scope).
+ * Service worker 등록.
  *
  * - production 만 활성. dev/test 환경에선 HMR 충돌 + cache stale 회피 위해 silent skip.
  * - register 실패 시 silent — PWA 미지원 브라우저 fallback (Safari 16.3 이하 등).

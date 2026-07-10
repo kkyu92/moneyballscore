@@ -164,7 +164,7 @@ export default function MlbPostseasonHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ 본 hub = Header NAV 깨진 link 회수 layer (cycle 1029). 라이브 Postseason 브라켓 + 시리즈별 {FACTOR_TOTAL}팩터 예측 = ETA 2026-09 (정규시즌 종료 직후 활성).
+          ※ 본 hub = Header NAV 깨진 link 회수 layer. 라이브 Postseason 브라켓 + 시리즈별 {FACTOR_TOTAL}팩터 예측 = ETA 2026-09 (정규시즌 종료 직후 활성).
         </p>
         <p>
           ※ 관련: <Link href="/mlb/wild-card" className="underline">/mlb/wild-card</Link> · <Link href="/mlb/standings" className="underline">/mlb/standings</Link> · <Link href="/mlb" className="underline">/mlb</Link> hub.

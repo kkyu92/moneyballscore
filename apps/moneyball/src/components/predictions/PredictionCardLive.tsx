@@ -6,7 +6,7 @@
  * Naver 실시간 응답이 빠르기 때문에 메인 카드 섹션과 상단 미니 카드
  * (LiveScoreboard) 간 싱크 차이 제거.
  *
- * `gameDate` 옵션 (cycle 1021 Tier 1 A): KST date 명시 전달 시
+ * `gameDate` 옵션: KST date 명시 전달 시
  * useKboScores 가 오늘이 아니면 SWR polling 자동 차단. predictions/[date]
  * 아카이브 페이지가 Naver API spam 없이 같은 컴포넌트 재사용 가능.
  *

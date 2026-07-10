@@ -2,10 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { DAY_MS } from '@moneyball/shared';
 import { buildHallucinationStats, type ValidatorLogInput } from '@/lib/dashboard/buildHallucinationStats';
 
-// v4-4 Task 6: /debug/hallucination 대시보드
-// middleware.ts BASIC auth로 보호됨
-// Eng 리뷰 A3 validator_logs 테이블 (migration 011)
-// cycle 28 — buildHallucinationStats 분리 + 일자별 추세 + 비율 추가 (P3)
+// /debug/hallucination 대시보드
+// middleware.ts BASIC auth로 보호됨. validator_logs 테이블 (migration 011).
+// buildHallucinationStats — 일자별 추세 + 비율.
 //
 // Service role 직접 사용: validator_logs는 RLS로 service role만 접근 가능.
 // 일반 anon key로는 권한 없음. middleware BASIC auth가 이미 페이지 보호 중.
@@ -224,7 +223,7 @@ export default async function HallucinationDashboard() {
               </div>
             </div>
 
-            <CategoryList title="Agent별 분포 (cycle 30)" data={stats.byAgent} />
+            <CategoryList title="Agent별 분포" data={stats.byAgent} />
             <CategoryList title="사유별 분포" data={stats.byType} />
             <CategoryList title="Backend별 분포" data={stats.byBackend} />
           </section>

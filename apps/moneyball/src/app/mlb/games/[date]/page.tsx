@@ -69,7 +69,7 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
     .eq('games.game_date', date)
     .order('game_id', { ascending: true });
 
-  // MLB backend migrations 033-037 적용 완료 (cycle 1151). query 에러 시 fallback.
+  // MLB backend migrations 033-037 적용 완료. query 에러 시 fallback.
   if (result.error) {
     console.warn(`[MlbGames] predictions query failed: ${result.error.message}`);
   }

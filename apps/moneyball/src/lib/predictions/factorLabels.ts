@@ -32,7 +32,7 @@ export const FACTOR_LABELS: Record<string, string> = {
   sfr: "수비력",
 };
 
-// MetricRegistry.ko_name 단일 source — silent drift 차단 (cycle 1244 wave 52).
+// MetricRegistry.ko_name 단일 source — silent drift 차단 (wave 52).
 // glossary lib + methodology FACTOR_WEIGHTS + LLM agent prompt 와 동일 source.
 export const FACTOR_LABELS_TECHNICAL: Record<string, string> = Object.fromEntries(
   PRODUCTION_SLUGS.map((slug) => [slug, MetricRegistry[slug].ko_name]),

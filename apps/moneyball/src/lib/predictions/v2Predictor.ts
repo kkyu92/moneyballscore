@@ -1,4 +1,4 @@
-// v2.1-B 가중치 — packages/shared 단일 source (cycle 1013 이관). 본 모듈은 backward-compat
+// v2.1-B 가중치 — packages/shared 단일 source. 본 모듈은 backward-compat
 // re-export + apps/moneyball /v2-preview 의 quant 재계산 path.
 // 예측 산출 공식 = packages/kbo-data src/engine/predictor.ts 동일 — weightedSum /
 // FACTOR_TOTAL + HOME_ADVANTAGE → clampWinnerProb (WINNER_PROB_CLAMP_MIN/MAX).

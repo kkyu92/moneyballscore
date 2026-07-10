@@ -145,7 +145,7 @@ export default function MlbWildCardHub() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ 본 hub = Header NAV 깨진 link 회수 layer (cycle 1029). 라이브 Wild Card race 데이터 통합 = ETA 2026-08 (정규시즌 9월 막판 game-back 측정 활성).
+          ※ 본 hub = Header NAV 깨진 link 회수 layer. 라이브 Wild Card race 데이터 통합 = ETA 2026-08 (정규시즌 9월 막판 game-back 측정 활성).
         </p>
         <p>
           ※ 관련: <Link href="/mlb/standings" className="underline">/mlb/standings</Link> · <Link href="/mlb/postseason" className="underline">/mlb/postseason</Link> · <Link href="/mlb" className="underline">/mlb</Link> hub.

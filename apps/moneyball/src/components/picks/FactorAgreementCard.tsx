@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * FactorAgreementCard — 사용자 픽 vs AI KBO_FACTOR_COUNT factor 일치도 시각화 (cycle 1021 c9).
+ * FactorAgreementCard — 사용자 픽 vs AI KBO_FACTOR_COUNT factor 일치도 시각화.
  *
  * 사용자 가시 가치:
  *   - "AI 와 의견 다를 때" 카드 (전체 정답률 비교) 보다 한 단계 깊은 reasoning surface.
