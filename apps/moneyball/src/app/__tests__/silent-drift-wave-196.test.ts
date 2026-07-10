@@ -62,10 +62,10 @@ describe('silent drift wave 196 — TODOS.md + memory/implemented-modules.md v2.
     expect(src).not.toMatch(/모델 v2\.0 튜닝 진단/);
   });
 
-  it('dashboard/page.tsx: 팩터 정확도 진단 + v1.8 유지 확정 반영', () => {
+  it('dashboard/page.tsx: 팩터 정확도 진단 유지 + v1.8 dev jargon 제거 (wave-226 clean)', () => {
     const src = readFileSync(join(REPO_ROOT, 'apps/moneyball/src/app/dashboard/page.tsx'), 'utf8');
     expect(src).toMatch(/팩터 정확도 진단/);
-    expect(src).toMatch(/v1\.8 유지 확정/);
+    expect(src).not.toContain('v1.8 유지 확정 (n=178, Brier');
   });
 
   it('ModelTuningInsights.tsx: "v2.0 가중치 제안" 활성화 문구 stale 제거', () => {
