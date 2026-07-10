@@ -11,12 +11,6 @@ import {
 import type { ModelVersion, TeamCode } from '@moneyball/shared';
 import type { PipelineResult, ScrapedGame } from '../types';
 
-// cycle 463 polish-ui scope D — Telegram daily summary 마지막 line "AI 토론 N/M 정상"
-// 노출. mv ∈ LLM_ACTIVE_VERSIONS = LLM 활성, mv = QUANT_PREGAME_VERSION 등 = quant
-// fallback. 분류 시맨틱은 apps/moneyball/src/lib/accuracy/buildAccuracyData.ts 동일.
-// silent quality drift 차단 — 사용자가 fallback 비율 직접 인지.
-// cycle 477 review-code heavy — LLM_ACTIVE_VERSIONS set 중복 박제 단일 source 화.
-
 const TELEGRAM_API = 'https://api.telegram.org/bot';
 
 function getConfig() {
@@ -60,7 +54,7 @@ export async function notifyPredictions(
     predictedWinner: TeamCode;
     confidence: number;
     homeWinProb: number;
-    // cycle 463 polish-ui scope D — fallback 비율 표시용. null = 옛 row (분류 X).
+    // fallback 비율 표시용. null = 옛 row (분류 X).
     modelVersion?: ModelVersion | null;
   }>
 ) {
@@ -83,7 +77,7 @@ export async function notifyPredictions(
     lines.push(`${emoji} <b>${label}</b> ${away} vs ${home} → <b>${winner}</b> ${pct}%`);
   }
 
-  // cycle 463 polish-ui scope D — AI 토론 정상 비율. mv 박제된 row 만 분모 (옛 row 제외).
+  // AI 토론 정상 비율. mv 박제된 row 만 분모 (옛 row 제외).
   const labeled = predictions.filter((p) => p.modelVersion != null);
   if (labeled.length > 0) {
     const llmActive = labeled.filter(
@@ -166,8 +160,7 @@ export async function notifyResults(
     } else if (r.isCorrect) {
       lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home}`);
     } else {
-      // cycle 639 polish-ui scope D — Telegram 가독성. ❌ row 에 우리 예측 명시.
-      // 사용자가 score 만 보고 어느 팀을 예측했는지 역추론해야 하는 번거로움 차단.
+      // Telegram 가독성 — ❌ row 에 우리 예측 명시 (score 만으로 역추론 번거로움 차단).
       const predicted = shortTeamName(r.predictedWinner);
       lines.push(`${mark} ${away} ${r.awayScore}:${r.homeScore} ${home} (예측 ${predicted})`);
     }
