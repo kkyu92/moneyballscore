@@ -14,7 +14,9 @@ import {
   classifyWinnerProb,
   DAY_MS,
   DEFAULT_WEIGHTS,
+  ELO_NEUTRAL,
   HOME_ADVANTAGE,
+  HOME_ELO_BONUS,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
   toKSTDateString,
@@ -180,6 +182,7 @@ interface WeekGameDay {
     gameTime: string;
     homeTeam: TeamCode;
     awayTeam: TeamCode;
+    homeWinPct?: number;
   }>;
 }
 
@@ -191,22 +194,51 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
   until.setUTCDate(until.getUTCDate() + 7);
   const untilStr = until.toISOString().slice(0, 10);
 
-  const result = await supabase
-    .from('games')
-    .select(`
-      id, game_date, game_time,
-      home_team:teams!games_home_team_id_fkey(code),
-      away_team:teams!games_away_team_id_fkey(code)
-    `)
-    .gt('game_date', today)
-    .lte('game_date', untilStr)
-    .eq('status', 'scheduled')
-    .order('game_date', { ascending: true })
-    .order('game_time', { ascending: true })
-    .limit(60);
-  const { data } = assertSelectOk(result, 'home.getWeekAheadSchedule');
+  const [scheduleResult, eloResult] = await Promise.all([
+    supabase
+      .from('games')
+      .select(`
+        id, game_date, game_time,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      `)
+      .gt('game_date', today)
+      .lte('game_date', untilStr)
+      .eq('status', 'scheduled')
+      .order('game_date', { ascending: true })
+      .order('game_time', { ascending: true })
+      .limit(60),
+    supabase
+      .from('predictions')
+      .select(`
+        home_elo, away_elo,
+        game:games!predictions_game_id_fkey(
+          home_team:teams!games_home_team_id_fkey(code),
+          away_team:teams!games_away_team_id_fkey(code)
+        )
+      `)
+      .eq('prediction_type', 'pre_game')
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
+      .not('home_elo', 'is', null)
+      .order('id', { ascending: false })
+      .limit(60),
+  ]);
 
+  const { data } = assertSelectOk(scheduleResult, 'home.getWeekAheadSchedule');
   if (!data || data.length === 0) return [];
+
+  // Build team → latest Elo map from recent predictions
+  const eloMap = new Map<string, number>();
+  if (eloResult.data) {
+    type EloRow = { home_elo: number | null; away_elo: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
+    for (const row of eloResult.data as unknown as EloRow[]) {
+      const homeCode = row.game?.home_team?.code;
+      const awayCode = row.game?.away_team?.code;
+      if (homeCode && row.home_elo != null && !eloMap.has(homeCode)) eloMap.set(homeCode, row.home_elo);
+      if (awayCode && row.away_elo != null && !eloMap.has(awayCode)) eloMap.set(awayCode, row.away_elo);
+      if (eloMap.size >= 10) break;
+    }
+  }
 
   type WeekRow = { id: number; game_date: string; game_time: string | null; home_team: { code: string } | null; away_team: { code: string } | null };
   const rows = data as unknown as WeekRow[];
@@ -215,11 +247,17 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
     if (!r.home_team?.code || !r.away_team?.code) continue;
     const date = r.game_date;
     if (!byDate.has(date)) byDate.set(date, { date, games: [] });
+    const homeCode = r.home_team.code as TeamCode;
+    const awayCode = r.away_team.code as TeamCode;
+    const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
+    const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
+    const homeWinPct = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
     byDate.get(date)!.games.push({
       id: r.id,
       gameTime: (r.game_time ?? '').slice(0, 5) || '18:30',
-      homeTeam: r.home_team.code as TeamCode,
-      awayTeam: r.away_team.code as TeamCode,
+      homeTeam: homeCode,
+      awayTeam: awayCode,
+      homeWinPct,
     });
   }
 
@@ -847,6 +885,17 @@ export default async function HomePage() {
                         <span className="text-gray-400 dark:text-gray-500 text-[10px] ml-1.5 tabular-nums shrink-0">
                           {g.gameTime}
                         </span>
+                        {g.homeWinPct != null && (
+                          <span className={`text-[9px] tabular-nums ml-1 font-medium shrink-0 ${
+                            g.homeWinPct >= 0.5
+                              ? 'text-brand-600 dark:text-brand-400'
+                              : 'text-orange-500 dark:text-orange-400'
+                          }`}>
+                            {g.homeWinPct >= 0.5
+                              ? `홈${Math.round(g.homeWinPct * 100)}%`
+                              : `원${Math.round((1 - g.homeWinPct) * 100)}%`}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>

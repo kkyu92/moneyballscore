@@ -1,4 +1,4 @@
-// M16 — pipeline_runs.skipped_detail JSONB cohort split (plan #10 Tier 1, cycle 947)
+// M16 — pipeline_runs.skipped_detail JSONB cohort split.
 // reason enum: window_too_early / window_too_late / not_scheduled / sp_unconfirmed / already_predicted
 // shouldPredictGame (schedule.ts) reject reason 분포 시각화.
 

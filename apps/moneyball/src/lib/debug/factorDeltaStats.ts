@@ -1,5 +1,5 @@
 /**
- * M-D Factor Delta Timeline 통계 helper (cycle 1013).
+ * M-D Factor Delta Timeline 통계 helper.
  *
  * predictions.factors JSONB 7일 분 → factor 별 cohort (scoring_rule) 분리 + z-score
  * anomaly 표시. silent-drift dashboard 안 FactorDeltaTimeline 컴포넌트 source.

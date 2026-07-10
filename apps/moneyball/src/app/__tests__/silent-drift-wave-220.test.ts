@@ -25,15 +25,18 @@ describe('silent drift wave 220 — v2.0 promotion stale forward claims 정합 (
     expect(USER_GOAL_BASELINE).toMatch(/자연 누적 wait \(fire 조건 소멸\)/);
   });
 
-  it('model-version-labels: CURRENT_SCORING_RULE JSDoc "v2.0 promotion" stale annotation 박제', () => {
-    expect(MODEL_VERSION_LABELS).toMatch(/v2\.0 promotion 시 본 상수 1개만.*← stale \(wave 220 cycle 1503\): v1\.8 유지 확정/s);
+  it('model-version-labels: CURRENT_SCORING_RULE JSDoc stale "v2.0 promotion" 문구 제거 완료 (wave-239)', () => {
+    expect(MODEL_VERSION_LABELS).not.toMatch(/v2\.0 promotion 시 본 상수 1개만/);
+    expect(MODEL_VERSION_LABELS).toMatch(/v1\.8 유지 확정 \(cycle 1460/);
   });
 
-  it('model-version-labels: PRODUCTION_ERA_HISTORY JSDoc "v2.0 promotion append" stale annotation 박제', () => {
-    expect(MODEL_VERSION_LABELS).toMatch(/v2\.0 promotion 시 본 tuple 에 'v2\.0' append.*← stale \(wave 220 cycle 1503\): v1\.8 유지 확정 \(cycle 1460\), v2\.0 신규 prod era 박제 X\./s);
+  it('model-version-labels: PRODUCTION_ERA_HISTORY JSDoc stale "v2.0 promotion append" 문구 제거 완료 (wave-239)', () => {
+    expect(MODEL_VERSION_LABELS).not.toMatch(/v2\.0 promotion 시 본 tuple 에 'v2\.0' append/);
+    expect(MODEL_VERSION_LABELS).toMatch(/v1\.8 유지 확정 \(cycle 1460\)/);
   });
 
-  it('model-version-labels: LLM_DEBATE_VERSION comment "v2.1 bump" stale annotation 박제', () => {
-    expect(MODEL_VERSION_LABELS).toMatch(/← stale \(wave 220 cycle 1503\): v2\.1 bump 계획 없음 — v1\.8 유지 확정 \(cycle 1460\)/);
+  it('model-version-labels: LLM_DEBATE_VERSION comment stale "← stale" 마커 제거 완료 (wave-239)', () => {
+    expect(MODEL_VERSION_LABELS).not.toMatch(/← stale \(wave 220 cycle 1503\)/);
+    expect(MODEL_VERSION_LABELS).toMatch(/LLM 라벨 v2\.0-debate \/ v2\.0-postview 고정/);
   });
 });
