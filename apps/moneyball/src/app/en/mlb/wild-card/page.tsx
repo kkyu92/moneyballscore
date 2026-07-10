@@ -147,7 +147,7 @@ export default function MlbWildCardHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ This hub = broken NAV link recovery layer (cycle 1029). Live Wild Card race data integration = ETA 2026-08 (late regular season game-back tracking activates).
+          ※ Live Wild Card race data integration = ETA 2026-08 (late regular season game-back tracking activates).
         </p>
         <p>
           ※ Related: <Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link> · <Link href="/en/mlb/postseason" className="underline">/en/mlb/postseason</Link> · <Link href="/en/mlb" className="underline">/en/mlb</Link> hub.

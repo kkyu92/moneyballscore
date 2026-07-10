@@ -10,7 +10,7 @@ interface ScoringRuleDayHeatmapProps {
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일
 const DAY_LABELS_KO = ['월', '화', '수', '목', '금', '토', '일'];
 
-// cell 배경 색상 — DESIGN.md brand/semantic 정합 (BrierTrendChart 패턴 정합 cycle 887).
+// cell 배경 색상 — DESIGN.md brand/semantic 정합. BrierTrendChart 와 동일 패턴.
 // >=60% brand / >=50% yellow / <50% red / null = neutral (소표본 N<3).
 function cellBgClass(acc: number | null): string {
   if (acc === null) return "bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400";
@@ -106,7 +106,7 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
         </tbody>
       </table>
       <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
-        색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 &lt;50% / 회색 N&lt;3 소표본. v1.6 anomaly + Sunday cap (cycle 358) 효과 시각화.
+        색상 — 녹색 ≥60% / 노랑 ≥50% / 빨강 &lt;50% / 회색 N&lt;3 소표본. v1.6 anomaly + Sunday cap 효과 시각화.
       </p>
     </div>
   );

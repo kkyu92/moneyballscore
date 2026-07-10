@@ -356,7 +356,7 @@ export function MyPicksClient() {
         );
       })()}
 
-      {/* 팩터 일치도 — 10 factor 중 내 픽 방향 lean 비율 (cycle 1021 c9) */}
+      {/* 팩터 일치도 — 10 factor 중 내 픽 방향 lean 비율 */}
       {factorAgreement && <FactorAgreementCard agreement={factorAgreement} />}
 
       {/* 주차별 트렌드 차트 */}

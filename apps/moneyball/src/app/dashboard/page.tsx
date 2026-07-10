@@ -66,11 +66,7 @@ interface OverviewRow {
 
 async function getOverview(): Promise<OverviewRow[]> {
   const supabase = await createClient();
-  // assertSelectOk — cycle 153 silent drift family detection. predictions select
-  // 가 .error 미체크 → DB 오류 시 data=null silent fallback → overview=[] silent
-  // 위장 → "검증 완료 0경기" / 누적 적중률 0% 가 사용자에게 노출 (실제로는 DB
-  // 오류). cycle 152 buildModelTuningInsights / cycle 148 analysis page 동일
-  // family. assertSelectOk 로 fail-loud → /dashboard error.tsx boundary 처리.
+  // assertSelectOk — DB 오류 시 data=null silent fallback 차단. fail-loud → /dashboard error.tsx boundary 처리.
   const result = (await supabase
     .from("predictions")
     .select(
