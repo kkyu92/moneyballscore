@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, KBO_TEAMS, type TeamCode } from "@moneyball/shared";
-import { CURRENT_DEBATE_VERSION } from "@/config/model";
+import {
+  assertSelectOk,
+  KBO_TEAMS,
+  PRODUCTION_COHORT_RULES,
+  type TeamCode,
+} from "@moneyball/shared";
 
 export interface EloDataPoint {
   date: string;
@@ -19,7 +23,6 @@ interface EloGameRow {
   predictions: Array<{
     home_elo: number | null;
     away_elo: number | null;
-    debate_version: string | null;
   }>;
 }
 
@@ -35,11 +38,11 @@ export async function buildEloTrend(): Promise<EloTrendData> {
       game_date,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
-      predictions!inner(home_elo, away_elo, debate_version)
+      predictions!inner(home_elo, away_elo)
     `)
     .gte("game_date", SEASON_START)
     .eq("predictions.prediction_type", "pre_game")
-    .eq("predictions.debate_version", CURRENT_DEBATE_VERSION)
+    .in("predictions.scoring_rule", [...PRODUCTION_COHORT_RULES])
     .not("predictions.home_elo", "is", null)
     .order("game_date", { ascending: true })
     .limit(600);
