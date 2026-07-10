@@ -7,6 +7,7 @@ import { KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, KBO_STADIUM_COORDS, KBO_S
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { WeeklyTrendMini, type WeeklyTrendPoint } from "@/components/dashboard/WeeklyTrendMini";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
+import { TopStatPickCard } from "@/components/predictions/TopStatPickCard";
 import { LiveScoreboard } from "@/components/live/LiveScoreboard";
 import {
   assertSelectOk,
@@ -464,6 +465,28 @@ async function getRecentWeeksAccuracy(): Promise<WeeklyTrendPoint[]> {
   });
 }
 
+// Stat-only top pick: highest |homeWinProb - 0.5| among scheduled games with quant prob.
+// Used as hero fallback when BigMatchDebateCard is unavailable (CREDIT_EXHAUSTED / feature flag off).
+function selectTopStatPick(games: HomeGame[]): { game: HomeGame; homeWinProb: number } | null {
+  let best: { game: HomeGame; homeWinProb: number } | null = null;
+  let bestEdge = 0;
+
+  for (const game of games) {
+    if (game.status !== 'scheduled') continue;
+    const pred = game.predictions?.[0];
+    const hwp = pred?.reasoning?.homeWinProb;
+    if (hwp == null) continue;
+    const edge = Math.abs(hwp - 0.5);
+    // Only surface when the model has a meaningful lean (≥ lean tier threshold).
+    if (edge >= 0.05 && edge > bestEdge) {
+      bestEdge = edge;
+      best = { game, homeWinProb: hwp };
+    }
+  }
+
+  return best;
+}
+
 // Tier priority: confident (≥WINNER_PROB_CONFIDENT) > lean (≥WINNER_PROB_LEAN) > tossup; highest wp within tier wins.
 function selectBigMatchFromGames(games: HomeGame[]): HomeGame | null {
   if (!isBigMatchEnabled()) return null;
@@ -549,6 +572,8 @@ export default async function HomePage() {
   const hasBigMatchHero = bigMatch && bigMatchDebate?.verdict;
   const bigMatchId = bigMatch?.id;
 
+  const topStatPick = hasBigMatchHero ? null : selectTopStatPick(games);
+
   const divergenceGame = await getTodayDivergenceGame(games).catch((err) => captureFallback(err, null, { route: "/", source: "getTodayDivergenceGame" }));
 
   return (
@@ -576,7 +601,15 @@ export default async function HomePage() {
             isQuantOnlyFallback={presented?.isFallback ?? false}
           />
         );
-      })() : (
+      })() : topStatPick ? (
+        <TopStatPickCard
+          gameId={topStatPick.game.id}
+          homeTeam={topStatPick.game.home_team?.code as TeamCode}
+          awayTeam={topStatPick.game.away_team?.code as TeamCode}
+          homeWinProb={topStatPick.homeWinProb}
+          date={today}
+        />
+      ) : (
         <section className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
           <p className="text-brand-300 text-sm mb-1">{today}</p>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</h1>
