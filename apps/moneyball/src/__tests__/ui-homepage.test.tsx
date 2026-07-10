@@ -700,3 +700,67 @@ describe('PredictionCard — judgeReasoning', () => {
     expect(screen.queryByText('주요 근거')).not.toBeInTheDocument();
   });
 });
+
+// ────────────────────────────────────────────────────────────────────────────
+// isPredicted computation guard (wave-242 — cycle 1541)
+// getWeekAheadSchedule 내 핵심 로직 회귀 방지
+// ────────────────────────────────────────────────────────────────────────────
+describe('getWeekAheadSchedule — isPredicted computation', () => {
+  const ELO_NEUTRAL = 1500;
+  const HOME_ELO_BONUS = 50;
+
+  function computeGameWinPct(
+    gameId: number,
+    isToday: boolean,
+    todayPredMap: Map<number, number>,
+    eloMap: Map<string, number>,
+    homeCode: string,
+    awayCode: string,
+  ): { homeWinPct: number; isPredicted: boolean } {
+    const modelWinPct = isToday ? todayPredMap.get(gameId) : undefined;
+    if (modelWinPct != null) {
+      return { homeWinPct: modelWinPct, isPredicted: true };
+    }
+    const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
+    const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
+    const homeWinPct = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
+    return { homeWinPct, isPredicted: false };
+  }
+
+  it('오늘 + 모델 예측 있음 → isPredicted=true, homeWinPct=모델 값', () => {
+    const todayPredMap = new Map([[101, 0.63]]);
+    const eloMap = new Map<string, number>();
+    const result = computeGameWinPct(101, true, todayPredMap, eloMap, 'OB', 'LG');
+    expect(result.isPredicted).toBe(true);
+    expect(result.homeWinPct).toBe(0.63);
+  });
+
+  it('오늘 + 모델 예측 없음 → isPredicted=false, homeWinPct=Elo 계산', () => {
+    const todayPredMap = new Map<number, number>();
+    const eloMap = new Map([['OB', 1550], ['LG', 1480]]);
+    const result = computeGameWinPct(102, true, todayPredMap, eloMap, 'OB', 'LG');
+    expect(result.isPredicted).toBe(false);
+    // homeElo=1550, awayElo=1480, bonus=50: 1/(1+10^((1480-1550-50)/400))
+    const expected = 1 / (1 + Math.pow(10, (1480 - 1550 - HOME_ELO_BONUS) / 400));
+    expect(result.homeWinPct).toBeCloseTo(expected, 6);
+  });
+
+  it('미래 경기(isToday=false) → 모델 예측 있어도 isPredicted=false, Elo 사용', () => {
+    const todayPredMap = new Map([[103, 0.75]]);
+    const eloMap = new Map([['SS', 1600], ['HH', 1450]]);
+    const result = computeGameWinPct(103, false, todayPredMap, eloMap, 'SS', 'HH');
+    expect(result.isPredicted).toBe(false);
+    const expected = 1 / (1 + Math.pow(10, (1450 - 1600 - HOME_ELO_BONUS) / 400));
+    expect(result.homeWinPct).toBeCloseTo(expected, 6);
+  });
+
+  it('Elo 미등록 팀 → ELO_NEUTRAL fallback 사용', () => {
+    const todayPredMap = new Map<number, number>();
+    const eloMap = new Map<string, number>();
+    const result = computeGameWinPct(104, true, todayPredMap, eloMap, 'NC', 'KT');
+    expect(result.isPredicted).toBe(false);
+    // both ELO_NEUTRAL → homeWinPct = 1/(1+10^(-bonus/400))
+    const expected = 1 / (1 + Math.pow(10, -HOME_ELO_BONUS / 400));
+    expect(result.homeWinPct).toBeCloseTo(expected, 6);
+  });
+});
