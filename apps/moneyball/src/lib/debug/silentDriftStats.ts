@@ -1,6 +1,6 @@
-// M14 — silent drift family alert evidence cohort (plan #10 Tier 1, cycle 947)
-// pipeline_runs 의 predict_final + verify mode 안 silent silent drop event 누적.
-// silent-drift-alert.ts (cycle 819 + 886) trigger condition 동일 replay.
+// M14 — silent drift family alert evidence cohort.
+// pipeline_runs 의 predict_final + verify mode 안 silent drop event 누적.
+// silent-drift-alert.ts trigger condition 동일 replay.
 
 export interface PipelineRunForDrift {
   mode: string;

@@ -1,5 +1,5 @@
 /**
- * /accuracy/shadow pair prob 추출 — silent drift fix (cycle 1013).
+ * /accuracy/shadow pair prob 추출 — shadow row reasoning 에서 home_win_prob 분리.
  *
  * 직전 path: page.tsx 가 모든 row 의 reasoning 텍스트에서 regex `/(\d{2,3})%/` 로
  * NN% 매칭 → shadow row 의 reasoning 이 `[v2.1-B-shadow quant only] ${v1.8 reasoning}`

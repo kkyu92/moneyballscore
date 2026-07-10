@@ -45,10 +45,8 @@ export async function buildBatterLeaderboard(options: {
   const season = options.season ?? new Date().getFullYear();
 
   const supabase = await createClient();
-  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
-  // 차원 (players) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
-  // → 빈 leaderboard 위장, 사용자엔 "선수 없음" 으로 보임). 호출 site (page) 가
-  // catch 결정.
+  // error 시 fail-loud (기존엔 data=null silent fallback → 빈 leaderboard 위장,
+  // 사용자엔 "선수 없음" 으로 보임). 호출 site (page) 가 catch 결정.
   const queryResult = (await supabase
     .from("batter_stats")
     .select(

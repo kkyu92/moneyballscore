@@ -107,9 +107,8 @@ export async function buildMissReport(options: {
   // reasoning.homeWinProb 는 JSONB 필드라 서버 필터링 대신 is_correct=false
   // 전부 가져와 클라이언트에서 winnerProb tier 로 필터. limit 여유분 fetch
   // 후 tier 통과 건만 N 개 pick.
-  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
-  // 차원 (reviews) 첫 진입. error 시 fail-loud (기존엔 data=null silent fallback
-  // → 빈 miss list → "틀린 예측 없음" 위장 = 사용자엔 모델이 완벽한 것처럼 보임).
+  // predictions select error 시 fail-loud (기존엔 data=null silent fallback →
+  // 빈 miss list → "틀린 예측 없음" 위장 = 사용자엔 모델이 완벽한 것처럼 보임).
   const preResult = (await supabase
     .from("predictions")
     .select(

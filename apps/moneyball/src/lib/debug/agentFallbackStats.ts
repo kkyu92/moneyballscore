@@ -1,4 +1,4 @@
-// cycle 986 — /debug/agent-fallback dashboard 데이터 가공.
+// /debug/agent-fallback dashboard 데이터 가공.
 // predictions.reasoning.debate 직접 read 후 분류:
 //   fullDebate (judge+homeArg+awayArg 모두 정상) /
 //   agentsFailed (debate.agentsFailed=true) /

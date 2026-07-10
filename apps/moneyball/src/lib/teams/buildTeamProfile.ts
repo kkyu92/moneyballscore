@@ -92,10 +92,10 @@ export async function buildTeamProfile(
 
   const supabase = await createClient();
 
-  // assertSelectOk — cycle 151 silent drift family detection. teams select 가 .error
-  // 미체크 시 DB 오류에도 teamRow=null silent fallback → 빈 프로필 반환되어 사용자에게
-  // "팀 데이터 없음" 표시 (실제로는 DB 오류). assertSelectOk 로 fail-loud 전환 — error
-  // 시 page boundary 가 처리. .maybeSingle() 빈 row 정상 케이스는 data=null 그대로.
+  // teams select .error 미체크 시 DB 오류에도 teamRow=null silent fallback →
+  // 빈 프로필 반환되어 사용자에게 "팀 데이터 없음" 표시 (실제로는 DB 오류).
+  // assertSelectOk fail-loud 전환 — error 시 page boundary 가 처리.
+  // .maybeSingle() 빈 row 정상 케이스는 data=null 그대로.
   const teamResult = await supabase
     .from("teams")
     .select("id")
@@ -137,10 +137,10 @@ export async function buildTeamProfile(
   // 이전엔 전체 pre_game predictions 풀스캔 후 JS 필터 → 매번 수천 row 가져옴.
   // 이제 games 테이블에서 (home_team_id=teamId OR away_team_id=teamId) 만 select.
   //
-  // assertSelectOk — cycle 151 silent drift family detection. 기존 `const { data }` 직접
-  // destruct 시 DB 오류에 data=null silent fallback → 빈 recentGames/topPitchers 반환되어
-  // 사용자가 "이 팀 데이터 없음" 으로 오해 (실제로는 DB 오류). predictions!inner inner-join
-  // 정합성 (pre_game 없는 game 의도적 제외) 은 그대로, .error 만 fail-loud 로.
+  // 기존 `const { data }` 직접 destruct 시 DB 오류에 data=null silent fallback →
+  // 빈 recentGames/topPitchers 반환되어 사용자가 "이 팀 데이터 없음" 으로 오해
+  // (실제로는 DB 오류). predictions!inner inner-join 정합성 (pre_game 없는 game
+  // 의도적 제외) 은 그대로, .error 만 fail-loud 로.
   const gamesResult = await supabase
     .from("games")
     .select(

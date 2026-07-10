@@ -77,10 +77,8 @@ export async function buildPitcherProfile(
 ): Promise<PitcherProfile | null> {
   const supabase = await createClient();
 
-  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
-  // 차원 (players) 첫 진입. player select error 시 fail-loud (기존엔 silent
-  // null → 페이지에서 "선수 없음" 위장. RLS / connection 실패가 정상 404 와
-  // 구분 안 됨).
+  // player select error 시 fail-loud (기존엔 silent null → 페이지에서 "선수 없음" 위장.
+  // RLS / connection 실패가 정상 404 와 구분 안 됨).
   const playerResult = (await supabase
     .from("players")
     .select(

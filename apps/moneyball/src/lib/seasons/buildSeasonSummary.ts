@@ -86,10 +86,8 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
   const db = createAdminClient();
 
   // teams id → (code, name) 매핑
-  // assertSelectOk — cycle 173 silent drift family apps/moneyball lib sub-dir
-  // 차원 (seasons) 첫 진입. teams select error 시 fail-loud (기존엔 data=null
-  // silent fallback → null SeasonSummary → 페이지에서 "시즌 데이터 없음"
-  // 위장 = 정상 빈 시즌 vs DB 오류 구분 안 됨).
+  // teams select error 시 fail-loud (기존엔 data=null silent fallback →
+  // null SeasonSummary → 페이지에서 "시즌 데이터 없음" 위장).
   type TeamRowRaw = { id: number; code: string; name_ko: string };
   const teamsResult = (await db
     .from("teams")

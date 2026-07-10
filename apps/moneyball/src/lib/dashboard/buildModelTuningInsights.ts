@@ -24,10 +24,9 @@ interface TuningRow {
  */
 export async function buildModelTuningInsights(): Promise<FactorAccuracyReport> {
   const supabase = await createClient();
-  // assertSelectOk — cycle 152 silent drift family detection. predictions select 가
-  // .error 미체크 → DB 오류 시 data=null silent fallback → 빈 sample 배열 → "수집 중"
-  // report 가 사용자에게 노출 (실제로는 DB 오류). assertSelectOk 로 fail-loud 전환 →
-  // /dashboard page boundary (error.tsx) 가 처리.
+  // predictions select .error 미체크 → DB 오류 시 data=null silent fallback →
+  // 빈 sample 배열 → "수집 중" report 가 사용자에게 노출 (실제로는 DB 오류).
+  // assertSelectOk fail-loud 전환 → /dashboard page boundary (error.tsx) 가 처리.
   const result = await supabase
     .from("predictions")
     .select(

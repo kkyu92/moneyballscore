@@ -207,7 +207,6 @@ export function composePayload(
   const rawTitle = `${excType}: ${excValue}`;
   const stack = formatStack(e.exception);
   const tags = e.tags ?? [];
-  // cycle 528 — URL value scrub (sentry-scrub cycle 527 카운터파트).
   // requestUrl / web_url 의 ?token=… ?session=… 같은 민감 query param 값은
   // scrubPII 의 텍스트 regex (JWT/hex/sk_*/UUID) 와 매칭 안 되는 짧은 토큰일 때
   // silent 노출. URL 필드는 정의상 URL 이므로 scrubUrlString 무조건 적용.

@@ -30,7 +30,7 @@ export interface PickEntry {
   aiIsCorrect: boolean | null;
   aiPredictedHome: boolean | null;
   /**
-   * AI factor breakdown (cycle 1021 c9) — per-factor home-win prob [0,1] (0.5=중립).
+   * AI factor breakdown — per-factor home-win prob [0,1] (0.5=중립).
    * pre_game + CURRENT_SCORING_RULE 만. null = factors 없음 (pre_game prediction
    * 누락 / shadow only).
    */
@@ -284,7 +284,7 @@ export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
 }
 
 // ---------------------------------------------------------------------------
-// Factor Agreement (cycle 1021 c9) — 사용자 픽 vs AI factor 별 일치 분석.
+// Factor Agreement — 사용자 픽 vs AI factor 별 일치 분석.
 //
 // 사용자 가시 가치: 사용자가 "내 의견이 어느 팩터에서 데이터와 일치하는가" 를
 // factor 단위 (선발/타선/Elo 등 10 factor) 로 즉시 확인. 단순 prob 차이 보다
@@ -292,7 +292,7 @@ export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
 // ---------------------------------------------------------------------------
 
 // factor lean threshold — predictions/factorLabels.ts 의 NEUTRAL_HI/LO 단일 source.
-// silent drift family wave 102 (cycle 1316) — 본 파일 local 재선언 → import 통합.
+// silent drift family wave 102 — 본 파일 local 재선언 → import 통합.
 // 0.5=중립. >NEUTRAL_HI=홈 favor / <NEUTRAL_LO=원정 favor. 사이 = 중립.
 
 export type FactorLean = 'home' | 'away' | 'neutral';
