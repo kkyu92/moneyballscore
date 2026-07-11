@@ -12,8 +12,6 @@
  *   2. 이전 버전을 보존할 /archive/[version] 또는 블로그 포스트 작성
  *   3. CHANGELOG에 "성과 집계 모수 리셋" 명시
  *
- * cycle 479 review-code heavy — debate_version literal 단일 source 통합
- * (silent drift family streak 24 cycle 째).
  */
 import { DEBATE_VERSION_PREGAME } from '@moneyball/shared';
 

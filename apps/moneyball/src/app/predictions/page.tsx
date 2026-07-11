@@ -75,7 +75,7 @@ async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode
   // LEFT JOIN: prediction 없는 편성 경기도 포함. pre_game 타입만 붙여서
   // post_game row 가 있어도 예측 카운트 이중집계 방지.
   // games 테이블 컬럼 = home_team_id / away_team_id (FK to teams). teams.code
-  // 가 KBO team code. cycle 869 사례 14 fix — silent drift family 잔존 instance.
+  // 가 KBO team code.
   const result = await supabase
     .from('games')
     .select(
