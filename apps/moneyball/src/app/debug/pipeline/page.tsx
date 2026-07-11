@@ -6,7 +6,7 @@ import {
   type RejectReasonCell,
 } from '@/lib/debug/pipelineStats';
 
-// PLAN_v5 Phase 3 — /debug/pipeline 대시보드
+// /debug/pipeline 대시보드
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
 //
 // pipeline_runs 최근 30일 표시. mode 별 subtotal + 이번 주 GAP 강조.
@@ -181,7 +181,7 @@ export default async function PipelineDashboard() {
       <header className="border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-bold mb-1">Pipeline Dashboard</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          최근 30일 pipeline_runs · 내부용 · BASIC auth 보호 · PLAN_v5 Phase 3
+          최근 30일 pipeline_runs · 내부용 · BASIC auth 보호
         </p>
       </header>
 

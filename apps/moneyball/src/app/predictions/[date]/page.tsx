@@ -115,11 +115,8 @@ interface DateGame {
 async function getGamePredictions(date: string): Promise<DateGame[]> {
   const supabase = await createClient();
 
-  // assertSelectOk — cycle 154 silent drift family detection. games select 가
-  // .error 미체크 → DB 오류 시 data=null silent fallback → 빈 배열 위장 → 사용자
-  // 에게 "예측 데이터가 없습니다" 가짜 노출 (실제로는 DB 오류). cycle 148 analysis
-  // / cycle 153 dashboard 동일 family. assertSelectOk 로 fail-loud → error.tsx
-  // boundary 처리.
+  // assertSelectOk — DB 오류 시 data=null silent fallback → 빈 배열 위장 → 사용자
+  // 에게 "예측 데이터가 없습니다" 가짜 노출 차단. fail-loud → error.tsx boundary.
   const result = await supabase
     .from("games")
     .select(
@@ -313,9 +310,7 @@ export default async function PredictionDatePage({ params }: Props) {
   // pred 존재 + is_correct 값이 명시적으로 true/false 인 경우만 verified.
   const predicted = games.filter((g) => !!g.predictions?.[0]);
   const cancelled = predicted.filter((g) => g.status === 'postponed');
-  // PLAN_v5 이전 cron 이 놓친 경기 — final 인데 prediction row 없음.
-  // UI 에서 "예측 기록 없음" 명시, backfill 은 하지 않음 (결과 알면서
-  // 예측 추가하면 데이터 오염).
+  // final 인데 prediction row 없음 — backfill X (결과 알면서 예측 추가하면 데이터 오염).
   const missing = games.filter((g) => !g.predictions?.[0]);
   // verified 는 취소 제외 (postponed 는 is_correct 영구 null).
   const verified = predicted.filter(
@@ -402,7 +397,7 @@ export default async function PredictionDatePage({ params }: Props) {
             const homeCode = game.home_team?.code as TeamCode;
             const awayCode = game.away_team?.code as TeamCode;
 
-            // 예측 없음 (PLAN_v5 이전 cron 놓침) — PlaceholderCard 로 명시.
+            // 예측 없음 — PlaceholderCard 로 명시.
             // game.status 에 따라 "경기 종료 · 예측 미기록" / "예측 준비중"
             // 등 자동 분기.
             if (!pred) {
