@@ -16,7 +16,7 @@ function mockKboApi(payload: unknown) {
   } as unknown as Response);
 }
 
-describe('fetchGames — status 파싱 regression 보호 (PLAN_v5 Phase 4)', () => {
+describe('fetchGames — status 파싱 regression 보호', () => {
   beforeEach(() => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });

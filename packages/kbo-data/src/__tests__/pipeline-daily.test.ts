@@ -1,5 +1,5 @@
 /**
- * PLAN_v5 Phase 4 §7.2 — daily.ts 4-mode 통합 테스트
+ * daily.ts 4-mode 통합 테스트
  *
  * 커버 범위:
  *  - announce / predict / predict_final / verify 모드 분기

@@ -182,7 +182,7 @@ export async function notifyError(context: string, error: string) {
 }
 
 /**
- * PLAN_v5 §4.4 — 하루 시작 09:00 KST 예고 알림.
+ * 하루 시작 09:00 KST 예고 알림.
  * 오늘 편성 + 예측 생성 예상 시각 안내.
  */
 export async function notifyAnnounce(

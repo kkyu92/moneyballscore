@@ -1,5 +1,5 @@
 /**
- * PLAN_v5 Phase 2.5 — 우리 DB 의 games 테이블 기반 recent form / h2h 계산.
+ * DB 의 games 테이블 기반 recent form / h2h 계산.
  *
  * 기존 `fetchRecentForm` (KBO 공식 TeamRankDaily 스크래핑) 은 당일 결과
  * 포함 여부를 제어할 수 없어 주말 낮+저녁 혼합편성에서 stat 누수 위험.
