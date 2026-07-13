@@ -385,7 +385,7 @@ export interface BrierTrendPoint {
   weekLabel: string;
   n: number;
   brier: number | null;
-  scoringRule: string; // 'all' | 'v1.5' | 'v1.6' | 'v1.7-revert' | 'v1.8' | 'v1.8-credit-fail'
+  scoringRule: string; // SCORING_RULE_HEATMAP_ROWS 값 ('all' | ...PRODUCTION_ERA_HISTORY | 'v1.8-credit-fail')
 }
 
 export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {

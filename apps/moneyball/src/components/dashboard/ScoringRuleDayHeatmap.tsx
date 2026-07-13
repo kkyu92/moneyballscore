@@ -19,13 +19,12 @@ function cellBgClass(acc: number | null): string {
   return "bg-red-400 text-white dark:bg-red-500";
 }
 
-const ROW_LABEL: Record<string, string> = {
-  all: "전체",
-  "v1.5": "v1.5",
-  "v1.6": "v1.6",
-  "v1.7-revert": "v1.7-revert",
-  "v1.8": "v1.8",
-};
+// silent drift family wave 257 (cycle 1563) — 하드코딩 era 리스트 → SCORING_RULE_HEATMAP_ROWS
+// derive. 'all' aggregate 만 특수 라벨 ("전체"), 나머지는 identity. 신규 prod era 추가 시
+// PRODUCTION_ERA_HISTORY 한 곳만 갱신 → ROW_LABEL 자동 반영. CohortComparisonHeatmap 정합.
+const ROW_LABEL: Record<string, string> = Object.fromEntries(
+  SCORING_RULE_HEATMAP_ROWS.map((sr) => [sr, sr === "all" ? "전체" : sr]),
+);
 
 export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
   if (data.length === 0) {
