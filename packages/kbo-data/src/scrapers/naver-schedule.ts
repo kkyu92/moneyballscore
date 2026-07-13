@@ -88,7 +88,7 @@ function extractGameTime(gameDateTime: string): string {
 }
 
 /**
- * KBO 10팀 코드 중 하나인지 검증. 2군·이벤트 경기 혼입 방지.
+ * KBO 팀 (KBO_TEAM_COUNT) 코드 중 하나인지 검증. 2군·이벤트 경기 혼입 방지.
  * `KBO_TEAMS` (packages/shared) 단일 소스에서 derive — 팀 추가/변경 시 자동 반영.
  */
 const VALID_TEAM_CODES = new Set<TeamCode>(Object.keys(KBO_TEAMS) as TeamCode[]);
