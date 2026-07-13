@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
+  MLB_TEAM_COUNT,
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
   type MlbTeamCode,
@@ -291,9 +292,9 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
               href="/en/mlb/players"
               className="block rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md hover:border-brand-500/50 transition-all"
             >
-              <p className="font-semibold text-brand-700 dark:text-brand-100">30-Team Hub →</p>
+              <p className="font-semibold text-brand-700 dark:text-brand-100">{MLB_TEAM_COUNT}-Team Hub →</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Statcast {FACTOR_STATCAST} factor explainer + 30-team entries
+                Statcast {FACTOR_STATCAST} factor explainer + {MLB_TEAM_COUNT}-team entries
               </p>
             </Link>
           </li>
