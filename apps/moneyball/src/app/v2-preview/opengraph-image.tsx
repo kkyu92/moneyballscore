@@ -5,7 +5,7 @@ import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "v2 Simulation Preview - MoneyBall Score Internal Weight Reweight";
+export const alt = "v2 Simulation Preview - MoneyBall Score Internal · v2.1-B Rejected · v1.8 Retained";
 
 export default function Image() {
   return new ImageResponse(
@@ -61,7 +61,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          v2.1-B Weight Simulation (Internal)
+          v2.1-B Simulation · Rejected (Internal)
         </div>
 
         <div
@@ -72,7 +72,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["Brier 0.24830", "v2.1-B", "Reweight", "sfr 0", "h2h 2"].map((tag) => (
+          {["v2.1-B Rejected", "v1.8 Retained", `n=${V2_PROMOTION_COHORT_N}`, "Shadow Brier 0.4635"].map((tag) => (
             <div
               key={tag}
               style={{
@@ -100,7 +100,7 @@ export default function Image() {
           }}
         >
           <span>{SITE_HOST}/v2-preview</span>
-          <span>Internal · N={V2_PROMOTION_COHORT_N} Pending</span>
+          <span>Internal · N={V2_PROMOTION_COHORT_N} Crossed · Rejected</span>
         </div>
       </div>
     ),
