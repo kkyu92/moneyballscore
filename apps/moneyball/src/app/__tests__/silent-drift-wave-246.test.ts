@@ -1,12 +1,11 @@
 /**
  * wave-246 regression guard — methodology page 사용자 가시 n stale drift.
  *
- * Root: cycle 1460 test cohort n=178 (broader plan #16 2차 fire) vs
- *       cycle 1545 DB 실측 n=165 (verified pre_game 직접 쿼리, weekly-review).
- *       측정 기준 불일치 -13 gap = carry-over.
+ * wave-246 (cycle 1548) 은 n=178 → n=165 replace 로 완료됐지만,
+ * 하드코딩 n 자체가 stale drift 재발 root (cycle 1549 wave-247 superseded).
  *
- * 사용자 가시 methodology page 는 DB 실측값 n=165 노출 (cycle 1545 재측정 기반).
- * 히스토릭 comment refs (packages 안 src ts 파일) 안 cycle 1460 evidence 로 n=178 유지 OK.
+ * wave-247 (cycle 1549): 하드코딩 n=X 제거, /accuracy 실시간 참조로 전환.
+ * 본 wave-246 test 는 재발 방지 최소 assertion 유지 (v1.8 유지 확정 label + n=178 없음).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -19,12 +18,9 @@ const METHODOLOGY_SRC = readFileSync(
   'utf-8',
 );
 
-describe('wave-246: methodology page n stale drift', () => {
+describe('wave-246: methodology page n stale drift (superseded by wave-247)', () => {
   it('no stale n=178 user-facing ref', () => {
     expect(METHODOLOGY_SRC).not.toContain('n=178');
-  });
-  it('current DB 실측 n=165 present', () => {
-    expect(METHODOLOGY_SRC).toContain('n=165');
   });
   it('v1.8 유지 확정 label preserved', () => {
     expect(METHODOLOGY_SRC).toContain('v1.8 유지 확정');
