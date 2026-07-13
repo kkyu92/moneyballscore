@@ -12,7 +12,7 @@ import {
   ReferenceLine,
 } from "recharts";
 
-import { PRODUCTION_ERA_HISTORY } from "@moneyball/shared";
+import { CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY } from "@moneyball/shared";
 
 import type { BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
@@ -23,13 +23,15 @@ interface BrierTrendChartProps {
 }
 
 // scoring_rule 색상 매핑 — DESIGN.md semantic + brand token 정합.
-// v1.5 = neutral (baseline) / v1.6 = error (anomaly) / v1.7-revert = warning (revert) / v1.8 = brand (current) / all = brand 강조.
+// v1.5 = neutral (baseline) / v1.6 = error (anomaly) / v1.7-revert = warning (revert) / CURRENT_SCORING_RULE = brand (current) / all = brand 강조.
+// silent drift wave-260 (cycle 1566) — "current" 라벨 하드코딩 'v1.8' → CURRENT_SCORING_RULE computed key.
+// CURRENT_SCORING_RULE bump 시 chart 색상 매핑 자동 반영.
 const SR_COLOR_MAP: Record<string, string> = {
   all: brand[600],
   "v1.5": neutral[500], // baseline
   "v1.6": semantic.error, // anomaly (n=46 37%)
   "v1.7-revert": semantic.warning, // revert
-  "v1.8": brand[500], // current
+  [CURRENT_SCORING_RULE]: brand[500], // current
 };
 
 // silent drift wave-255 (cycle 1559) — hardcoded era list → PRODUCTION_ERA_HISTORY registry.
