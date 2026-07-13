@@ -13,7 +13,7 @@ import { HOME_ADVANTAGE, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
 //   2. 구장별 평균 득점 환경
 //   3. 낮/밤, 요일, 기온, 바람, 강수
 //   4. 팀별 홈/원정 승률 편차 — 균일 가정 검증
-//   5. 매치업 매트릭스 10×9 — 팀 간 상성
+//   5. 매치업 매트릭스 KBO_TEAM_COUNT×(KBO_TEAM_COUNT-1) — 팀 간 상성
 
 export const dynamic = 'force-dynamic';
 
@@ -468,7 +468,7 @@ function TeamSplitSection({
 }
 
 /**
- * 매치업 매트릭스 10×9 — 홈팀(행) × 원정팀(열) 홈 승률.
+ * 매치업 매트릭스 KBO_TEAM_COUNT×(KBO_TEAM_COUNT-1) — 홈팀(행) × 원정팀(열) 홈 승률.
  * 각 셀 N ~50 (3 시즌) CI ±14%p 로 개별 셀은 노이즈 큼. 하지만 row 평균과의
  * 편차가 극단적 (>15%p) 인 셀은 "팀 상성" 가능성. 리그 평균 (HOME_ADVANTAGE 단일 source) 대비 색상.
  */

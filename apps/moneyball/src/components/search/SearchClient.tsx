@@ -28,7 +28,7 @@ function isTeamCode(code: string | null | undefined): code is TeamCode {
  * (page.tsx) 는 URL `?q=` 진입 / no-JS / SEO fallback 유지. 본 컴포넌트는
  * input mount 직후 fuzzy match 를 실시간 렌더 → submit 없이 결과 확인 가능.
  *
- * 인덱스 = teams (10) + players (server fetch top N) + dates (recent 90)
+ * 인덱스 = teams (KBO_TEAM_COUNT) + players (server fetch top N) + dates (recent 90)
  * + pages (about / methodology 등 static slug).
  *
  * 키보드 nav: ArrowUp/Down 으로 결과 이동, Enter 로 진입, Esc 로 결과 닫기.
