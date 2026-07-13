@@ -599,7 +599,7 @@ export async function runDailyPipeline(
     const homeElo = eloRatings.find((e) => e.team === game.homeTeam);
     const awayElo = eloRatings.find((e) => e.team === game.awayTeam);
 
-    // teamStats / eloRatings 미스 = silent fallback. fancy-stats 가 10팀
+    // teamStats / eloRatings 미스 = silent fallback. fancy-stats 가 KBO_TEAM_COUNT
     // 미만이면 위 Fancy Stats scraperIssues 가드에서 errors 박제됐지만, 단일
     // 팀 누락은 그 가드 통과 → 본 console.warn 으로 Sentry 가시화.
     const missing: string[] = [];

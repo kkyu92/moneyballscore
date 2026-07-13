@@ -7,7 +7,7 @@ import { parseNumWithFallback, resolveTeamCode, sleep } from './fancy-stats';
 const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
 
 // FG_TEAM_MAP / 자체 resolveTeamCode 삭제 — fancy-stats.resolveTeamCode 단일
-// 소스 derive. FS 매핑 테이블과 10팀 영문명 100% 동일했고, 자체 함수는
+// 소스 derive. FS 매핑 테이블과 KBO_TEAM_COUNT 팀 영문명 100% 동일했고, 자체 함수는
 // case-sensitive only + 빈 입력 가드 부재였음. fancy-stats:35 가 이미
 // case-insensitive + 빈 입력 가드 ("Kia Tigers" drift 사고 박제 후속)
 // → fangraphs 도 같은 패턴 자동 상속.
