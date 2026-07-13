@@ -5,6 +5,7 @@ import {
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   LLM_ACTIVE_VERSIONS,
+  PRODUCTION_ERA_HISTORY,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_CONFIDENT_PCT,
   WINNER_PROB_LEAN,
@@ -291,7 +292,10 @@ export interface ScoringRuleDayCell {
   accuracy: number | null;
 }
 
-export const SCORING_RULE_HEATMAP_ROWS = ['all', 'v1.5', 'v1.6', 'v1.7-revert', 'v1.8', 'v1.8-credit-fail'];
+// silent drift family wave 256 (cycle 1562) — 하드코딩 era 리스트 → PRODUCTION_ERA_HISTORY
+// registry + 'all' aggregate + 'v1.8-credit-fail' cohort split. 신규 prod era 추가 시
+// PRODUCTION_ERA_HISTORY 한 곳만 갱신 → heatmap 자동 반영. wave-255 (BrierTrendChart) 정합.
+export const SCORING_RULE_HEATMAP_ROWS: readonly string[] = ['all', ...PRODUCTION_ERA_HISTORY, 'v1.8-credit-fail'];
 export const SMALL_SAMPLE_THRESHOLD = 3;
 
 export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[] {
