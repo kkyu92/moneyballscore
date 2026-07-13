@@ -1066,6 +1066,14 @@ function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
 function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
   const realDebatePct =
     stats.total > 0 ? Math.round((stats.realDebate.n / stats.total) * 100) : 0;
+  const bothMeasured =
+    stats.realDebate.accuracy !== null &&
+    stats.fallback.accuracy !== null &&
+    stats.realDebate.n >= 10 &&
+    stats.fallback.n >= 10;
+  const deltaPp = bothMeasured
+    ? (stats.realDebate.accuracy! - stats.fallback.accuracy!) * 100
+    : null;
   return (
     <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
       <div>
@@ -1091,6 +1099,16 @@ function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
           accent="amber"
         />
       </div>
+      {deltaPp !== null && (
+        <p className="text-xs text-gray-600 dark:text-gray-300" data-testid="v18-subcohort-delta">
+          AI 토론 활성 예측이 정량 fallback 대비{' '}
+          <span className={`font-semibold ${deltaPp >= 0 ? 'text-brand-500' : 'text-red-400'}`}>
+            {deltaPp >= 0 ? '+' : ''}
+            {deltaPp.toFixed(1)}pp
+          </span>{' '}
+          {deltaPp >= 0 ? '더 정확' : '덜 정확'}합니다.
+        </p>
+      )}
       <p className="text-xs text-gray-400 dark:text-gray-500">
         AI 토론 사용률 = {realDebatePct}% ({stats.realDebate.n}/{stats.total}). 표본이 작은
         구간은 신뢰구간이 넓습니다 (±15~25%p).
