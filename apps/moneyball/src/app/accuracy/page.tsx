@@ -17,6 +17,8 @@ import {
   shortTeamName,
   DAY_MS,
   DEBATE_VERSION_PREGAME,
+  LLM_DEBATE_VERSION,
+  LLM_POSTVIEW_VERSION,
   SITE_URL,
   SUNDAY_CAP_CONFIDENCE,
   BRIER_BASELINE,
@@ -1086,7 +1088,7 @@ function V18SubCohortPanel({ stats }: { stats: V18SubCohortStats }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <SubCohortCard
           label="AI 토론 활성"
-          subLabel="model_version: v2.0-debate"
+          subLabel={`model_version: ${LLM_DEBATE_VERSION} | ${LLM_POSTVIEW_VERSION}`}
           bucket={stats.realDebate}
           totalN={stats.total}
           accent="brand"
