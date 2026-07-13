@@ -7,14 +7,25 @@ import {
   V2_PROMOTION_COHORT_N,
   SITE_URL,
   CURRENT_SCORING_RULE,
+  PRODUCTION_ERA_HISTORY,
+  SHADOW_V20_SCORING_RULE,
+  SHADOW_SCORING_RULE,
 } from "@moneyball/shared";
 
 const PAGE_URL = `${SITE_URL}/v2-shadow-monitor`;
 
+// silent drift wave-261 (cycle 1568) — metadata description era 리스트 하드코딩
+// → SHADOW_V20_SCORING_RULE / SHADOW_SCORING_RULE / PRODUCTION_ERA_HISTORY 상수 derive.
+const HISTORIC_ERAS_LABEL = PRODUCTION_ERA_HISTORY.filter(
+  (r) => r !== CURRENT_SCORING_RULE,
+).join(" / ");
+const SHADOW_LABELS = `${SHADOW_V20_SCORING_RULE} / ${SHADOW_SCORING_RULE}`;
+const ERA_COVERAGE_LABEL = `${SHADOW_LABELS} / ${HISTORIC_ERAS_LABEL}`;
+
 export const metadata: Metadata = {
   title: "v2 섀도우 모니터",
   description:
-    `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성 — v2.1-B rejected (Brier 0.4635), v1.8 유지 확정 — 모델 진화 트랜스페어런시 dashboard.`,
+    `${CURRENT_SCORING_RULE} (prod) 와 ${ERA_COVERAGE_LABEL} era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성 — v2.1-B rejected (Brier 0.4635), v1.8 유지 확정 — 모델 진화 트랜스페어런시 dashboard.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "v2 섀도우 모니터 | MoneyBall Score",
@@ -45,7 +56,7 @@ export default function V2ShadowMonitorPage() {
     "@id": PAGE_URL,
     headline: "MoneyBall Score v2 섀도우 모니터",
     description:
-      `${CURRENT_SCORING_RULE} (prod) 와 v2.0-shadow / v2.1-B-shadow / v1.5 / v1.6 / v1.7-revert era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성 — v2.1-B rejected, v1.8 유지 확정.`,
+      `${CURRENT_SCORING_RULE} (prod) 와 ${ERA_COVERAGE_LABEL} era 별 적중률·Brier 점수 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성 — v2.1-B rejected, v1.8 유지 확정.`,
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
     datePublished: "2026-06-01",
