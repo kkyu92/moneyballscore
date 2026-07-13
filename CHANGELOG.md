@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.51.1 — 2026-07-13 (cycle 1545)
+
+### 분석 인사이트
+- **W28 최종 weekly-review** — 13경기 53.8% (CE 40% / 비CE 62.5%) + 홈팀 69.2% 강세. 올스타 브레이크(07-10~07-13) 확인 (cycle 1545)
+- **v1.8 누적 실측** — n=165, 58.8% 전체 / CE 71/126=56.3% / 비CE 26/39=66.7% (DB 직접 쿼리)
+- **패턴 추출 3건** — CE 희석 / Elo fallback 홈보정 미작동 / scoring_rule 필터 quality guard (gstack learnings.jsonl 등록)
+
+---
+
 ## 📐 재사용 패턴 — 2026-07-13 extract-pattern (cycle 1545)
 
 | # | 카테고리 | 패턴 키 | 핵심 |

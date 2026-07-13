@@ -176,7 +176,7 @@ Key routing rules:
 - Elo baseline: KBO Fancy Stats Elo 예측과 비교하여 모델 성능 측정
 - **v1.8 변경 (cycle 335, 2026-05-12)**: head_to_head 5%→3% (W20/W21 noise, 37.5% 실측) + elo 8%→10% (정보가치 Δ=+0.30 최강)
 - **v2.0 결정 완료 (2026-07-06)**: v1.8 유지 확정 — n=178 임계 달성 (cycle 1447, > n=150 threshold) + plan #16 expanding window OOS n=178 재입증 (Brier DEFAULT 0.2443 vs Learned 0.2458, 최대 차이 0.15% < 1pp 임계, cycle 1460) + Fable plan 진단 (Brier drift = CREDIT_EXHAUSTED 2026-06-06~ 측정 오류, 실제 모델 정상). 전면 재조정 불필요. v2.1-B rejected (Brier 0.4635, n=52). 가중치 re-fit = 소진된 카드 (v2.1-B 증거). CREDIT_EXHAUSTED 2026-06-06~ 지속 → debate 100% fallback → conf=0.3 (사용자 Anthropic 크레딧 충전 필요).
-- **Calibration 현황** (n=178 verified pre_game, cycle 1460 갱신): Brier 0.2443 (home_win_prob 기반 DEFAULT_WEIGHTS, cycle 1460) / accuracy 60.9% (cycle 1447 측정) / CREDIT_EXHAUSTED post 구간 winner-centric Brier 0.3568 = 측정 오류 (Fable plan S2c 확인, home_win_prob Brier pre/post = 0.24/0.24 안정). v1.8 유지 확정, Platt scaling 불필요.
+- **Calibration 현황** (n=178 verified pre_game, cycle 1460 갱신 / DB 실측 n=165, cycle 1545 확인): Brier 0.2443 (home_win_prob 기반 DEFAULT_WEIGHTS, cycle 1460) / accuracy 60.9% (cycle 1447 측정) / CREDIT_EXHAUSTED post 구간 winner-centric Brier 0.3568 = 측정 오류 (Fable plan S2c 확인, home_win_prob Brier pre/post = 0.24/0.24 안정). v1.8 유지 확정, Platt scaling 불필요. **⚠️ n 불일치**: cycle 1460 측정 n=178 vs cycle 1545 DB 실측 n=165 (-13) — 원인 미규명 (shadow/postview 포함 여부 차이 가설). CE/비CE 분리: CE 56.3% (71/126) / 비CE 66.7% (26/39).
 
 ## 데이터 소스
 - **KBO 공식** (koreabaseball.com): 경기일정, 선발확정, 결과, 최근폼, 상대전적, 구장별 기록
