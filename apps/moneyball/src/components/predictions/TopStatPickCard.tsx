@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { shortTeamName, winnerProbOf, type TeamCode } from '@moneyball/shared';
+import { KBO_FACTOR_COUNT, shortTeamName, winnerProbOf, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from '../shared/TeamLogo';
 
 interface TopStatPickCardProps {
@@ -49,7 +49,7 @@ export function TopStatPickCard({ gameId, homeTeam, awayTeam, homeWinProb, date 
         </span>
       </div>
 
-      <p className="text-brand-200 text-sm mb-4">세이버메트릭스 10팩터 정량 분석</p>
+      <p className="text-brand-200 text-sm mb-4">세이버메트릭스 {KBO_FACTOR_COUNT}팩터 정량 분석</p>
 
       <Link
         href={`/analysis/game/${gameId}`}
