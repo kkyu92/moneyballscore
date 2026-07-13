@@ -118,8 +118,8 @@ async function getMonthHeatmap(info: MonthInfo): Promise<DayCell[]> {
   const cells = buildEmptyGrid(info);
   const supabase = await createClient();
 
-  // assertSelectOk — silent drift family detection. PRODUCTION_COHORT_RULES filter
-  // (v1.8 + v1.8-credit-fail) — credit-fail row 분리 후 사용자 가시 정합 복원.
+  // assertSelectOk — silent drift family detection. PRODUCTION_COHORT_RULES 참조
+  // (registry = @moneyball/shared/model-version-labels) — credit-fail row 분리 후 사용자 가시 정합 복원.
   const result = await supabase
     .from('predictions')
     .select(
