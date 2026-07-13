@@ -1,5 +1,6 @@
 import {
   ALL_SCORING_RULES,
+  CURRENT_SCORING_RULE,
   DAY_MS,
   KST_OFFSET_MS,
   QUANT_PREGAME_VERSION,
@@ -643,7 +644,7 @@ export interface V18SubCohortStats {
 }
 
 export function buildV18SubCohort(rows: PredRow[]): V18SubCohortStats {
-  const v18Rows = rows.filter((r) => r.scoring_rule === 'v1.8');
+  const v18Rows = rows.filter((r) => r.scoring_rule === CURRENT_SCORING_RULE);
   const realDebateRows = v18Rows.filter(
     (r) => r.model_version != null && LLM_ACTIVE_VERSIONS.has(r.model_version as ModelVersion),
   );

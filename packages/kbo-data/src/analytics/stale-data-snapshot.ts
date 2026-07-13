@@ -8,6 +8,8 @@
  * 사용자 / 본 메인이 사이클 retro 시 snapshot 보고 수동 갱신.
  */
 
+import { CURRENT_SCORING_RULE } from '@moneyball/shared';
+
 export interface PredRowMin {
   is_correct: boolean | null;
   scoring_rule: string | null;
@@ -124,7 +126,7 @@ export function buildStaleSnapshot(input: StaleSnapshotInput): StaleSnapshot {
     });
   }
 
-  const v18Rows = verified.filter((r) => r.scoring_rule === "v1.8");
+  const v18Rows = verified.filter((r) => r.scoring_rule === CURRENT_SCORING_RULE);
   const v18Progress = {
     n: v18Rows.length,
     target: v18Target,
@@ -155,8 +157,8 @@ export function buildStaleSnapshot(input: StaleSnapshotInput): StaleSnapshot {
     lines.push("");
     const oneLine = scoringRules
       .map((s) =>
-        s.rule === "v1.8"
-          ? `**v1.8(${s.total}건, ${s.acc.toFixed(1)}%, Brier ${s.brier.toFixed(4)})**`
+        s.rule === CURRENT_SCORING_RULE
+          ? `**${CURRENT_SCORING_RULE}(${s.total}건, ${s.acc.toFixed(1)}%, Brier ${s.brier.toFixed(4)})**`
           : `${s.rule}(${s.total}건, ${s.acc.toFixed(1)}%)`,
       )
       .join(" / ");
