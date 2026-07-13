@@ -32,7 +32,7 @@ function isTeamCode(v: string): v is TeamCode {
   return v in KBO_TEAMS;
 }
 
-// KBO 10팀 모두 정적 빌드.
+// KBO 팀 (KBO_TEAM_COUNT) 모두 정적 빌드.
 export function generateStaticParams(): { code: TeamCode }[] {
   return (Object.keys(KBO_TEAMS) as TeamCode[]).map((code) => ({ code }));
 }
