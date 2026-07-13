@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_TEAM_COUNT, SITE_URL } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_GAMES_PER_TEAM, SITE_URL } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -125,7 +125,7 @@ export default function MlbPostseasonHub() {
           준비 진행 status
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
-          <li>MLB 162game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
+          <li>MLB {MLB_GAMES_PER_TEAM}game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
           <li>{MLB_TEAM_COUNT}팀 standings + 시즌 game-back 추적 — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
           <li>Wild Card race 추적 — <strong>ETA 2026-08</strong> (<Link href="/mlb/wild-card" className="underline">/mlb/wild-card</Link>)</li>
           <li>Postseason 브라켓 + 시리즈별 {FACTOR_TOTAL}팩터 예측 — <strong>ETA 2026-09</strong></li>

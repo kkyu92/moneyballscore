@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_GAMES_PER_TEAM, SITE_HOST } from "@moneyball/shared";
 import { MLB_GRADIENT_NAVY_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -64,7 +64,7 @@ export default function EnMlbHubTwitterImage() {
             display: "flex",
           }}
         >
-          {TOTAL}-factor model · Statcast · {MLB_TEAM_COUNT} teams · 162 games
+          {TOTAL}-factor model · Statcast · {MLB_TEAM_COUNT} teams · {MLB_GAMES_PER_TEAM} games
         </div>
 
         <div

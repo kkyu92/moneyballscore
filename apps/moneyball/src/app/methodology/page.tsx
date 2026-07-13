@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, CURRENT_SCORING_RULE, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
+import {HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, KBO_REGULAR_SEASON_GAMES, MLB_REGULAR_SEASON_GAMES, CURRENT_SCORING_RULE, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -446,7 +446,7 @@ export default function MethodologyPage() {
             가중치에 반영되지 않습니다.
           </li>
           <li>
-            KBO 한 시즌 720 경기 (정규 시즌) 의 표본은 메이저리그 (2430 경기) 의
+            KBO 한 시즌 {KBO_REGULAR_SEASON_GAMES} 경기 (정규 시즌) 의 표본은 메이저리그 ({MLB_REGULAR_SEASON_GAMES} 경기) 의
             1/3 수준. 통계 모델의 정밀도 한계가 명확.
           </li>
           <li>

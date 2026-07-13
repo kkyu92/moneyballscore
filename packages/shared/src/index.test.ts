@@ -3,6 +3,11 @@ import {
   KBO_TEAMS,
   KBO_TEAM_COUNT,
   KBO_HEAD_TO_HEAD_PAIRS,
+  KBO_GAMES_PER_TEAM,
+  KBO_REGULAR_SEASON_GAMES,
+  MLB_TEAM_COUNT,
+  MLB_GAMES_PER_TEAM,
+  MLB_REGULAR_SEASON_GAMES,
   KBO_FACTOR_COUNT,
   KBO_TEAM_SHORT_NAME,
   DEFAULT_WEIGHTS,
@@ -130,6 +135,18 @@ describe('KBO_TEAMS', () => {
   it('KBO_HEAD_TO_HEAD_PAIRS should derive from KBO_TEAM_COUNT (silent drift wave 107 guard)', () => {
     expect(KBO_HEAD_TO_HEAD_PAIRS).toBe((KBO_TEAM_COUNT * (KBO_TEAM_COUNT - 1)) / 2);
     expect(KBO_HEAD_TO_HEAD_PAIRS).toBe(45);
+  });
+
+  it('KBO_REGULAR_SEASON_GAMES should derive from KBO_TEAM_COUNT * KBO_GAMES_PER_TEAM / 2 (silent drift wave 266 guard)', () => {
+    expect(KBO_GAMES_PER_TEAM).toBe(144);
+    expect(KBO_REGULAR_SEASON_GAMES).toBe((KBO_TEAM_COUNT * KBO_GAMES_PER_TEAM) / 2);
+    expect(KBO_REGULAR_SEASON_GAMES).toBe(720);
+  });
+
+  it('MLB_REGULAR_SEASON_GAMES should derive from MLB_TEAM_COUNT * MLB_GAMES_PER_TEAM / 2 (silent drift wave 266 guard)', () => {
+    expect(MLB_GAMES_PER_TEAM).toBe(162);
+    expect(MLB_REGULAR_SEASON_GAMES).toBe((MLB_TEAM_COUNT * MLB_GAMES_PER_TEAM) / 2);
+    expect(MLB_REGULAR_SEASON_GAMES).toBe(2430);
   });
 
   it('MIN_LEADERBOARD_PICKS matches DB view HAVING clause (silent drift wave 116 guard)', () => {

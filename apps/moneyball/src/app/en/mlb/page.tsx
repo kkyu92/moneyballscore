@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_URL } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, MLB_GAMES_PER_TEAM, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
@@ -14,14 +14,14 @@ const STAT_N = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
   title: `MLB Analysis — ${TOTAL}-Factor Sabermetrics + Statcast | MoneyBall Score`,
-  description: `MLB ${MLB_TEAM_COUNT}-team 162-game analysis with a ${TOTAL}-factor model (KBO ${KBO_N} + Statcast ${STAT_N}). Data-driven win predictions in Korean and English.`,
+  description: `MLB ${MLB_TEAM_COUNT}-team ${MLB_GAMES_PER_TEAM}-game analysis with a ${TOTAL}-factor model (KBO ${KBO_N} + Statcast ${STAT_N}). Data-driven win predictions in Korean and English.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb`,
     languages: { en: `${SITE_URL}/en/mlb`, ko: `${SITE_URL}/mlb` },
   },
   openGraph: {
     title: "MLB Analysis | MoneyBall Score",
-    description: `MLB 162-game analysis + ${TOTAL}-factor model + Statcast`,
+    description: `MLB ${MLB_GAMES_PER_TEAM}-game analysis + ${TOTAL}-factor model + Statcast`,
     url: `${SITE_URL}/en/mlb`,
     type: "website",
     locale: "en_US",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB Analysis | MoneyBall Score",
-    description: `MLB 162-game analysis + ${TOTAL}-factor model + Statcast`,
+    description: `MLB ${MLB_GAMES_PER_TEAM}-game analysis + ${TOTAL}-factor model + Statcast`,
   },
 };
 
@@ -65,7 +65,7 @@ export default async function MlbHubEn() {
           MLB Analysis
         </h1>
         <p className="text-base text-brand-600 dark:text-brand-300">
-          162-game season analysis · {TOTAL}-factor model (KBO {KBO_N} + Statcast {STAT_N}) · data-driven weights
+          {MLB_GAMES_PER_TEAM}-game season analysis · {TOTAL}-factor model (KBO {KBO_N} + Statcast {STAT_N}) · data-driven weights
         </p>
       </section>
 

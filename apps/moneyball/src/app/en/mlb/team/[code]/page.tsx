@@ -6,7 +6,8 @@ import {
   MLB_TEAMS_PRE_RENDER,
   SMALL_SAMPLE_N,
   type MlbTeamCode,
-  mlbShortTeamName, SITE_URL
+  mlbShortTeamName,
+  MLB_GAMES_PER_TEAM, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
@@ -324,7 +325,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           size="lg"
           icon="⚾"
           title={`No MLB prediction records yet for ${profile.shortName}`}
-          description="Records will appear automatically as MLB 162-game season data accumulates."
+          description={`Records will appear automatically as MLB ${MLB_GAMES_PER_TEAM}-game season data accumulates.`}
         />
       )}
 
