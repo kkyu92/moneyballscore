@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_PLAYERS_GREEN_135 } from "@/lib/design-tokens";
 
@@ -62,7 +62,7 @@ export default function EnMlbPlayersOgImage() {
             display: "flex",
           }}
         >
-          xwOBA · Barrel% · Hard Hit% · Launch Angle · 30-team measurement layer
+          xwOBA · Barrel% · Hard Hit% · Launch Angle · {MLB_TEAM_COUNT}-team measurement layer
         </div>
 
         <div
