@@ -27,8 +27,8 @@ describe('wave-247: methodology page 하드코딩 n=X 제거', () => {
     expect(METHODOLOGY_SRC).not.toMatch(/n=178 verified pre_game/);
     expect(METHODOLOGY_SRC).not.toMatch(/n=187/);
   });
-  it('n=150+ 임계 라벨 present', () => {
-    expect(METHODOLOGY_SRC).toContain('n=150+');
+  it('임계 n= 라벨: V2_PROMOTION_COHORT_N 상수 참조 present (wave-262 → 하드코딩 150 → registry)', () => {
+    expect(METHODOLOGY_SRC).toMatch(/V2_PROMOTION_COHORT_N/);
   });
   it('/accuracy 실시간 참조 present', () => {
     expect(METHODOLOGY_SRC).toContain('/accuracy');

@@ -210,7 +210,7 @@ export default function MethodologyPage() {
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-2">③ 결과 검증</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              매 경기 종료 후 적중률을 누적. n=150+ 임계 도달 (2026-07-06) 이후 v1.8 유지 확정. 최신 표본과 실시간 적중률은 /accuracy 참조.
+              매 경기 종료 후 적중률을 누적. n={V2_PROMOTION_COHORT_N}+ 임계 도달 (2026-07-06) 이후 v1.8 유지 확정. 최신 표본과 실시간 적중률은 /accuracy 참조.
             </p>
           </div>
         </div>
