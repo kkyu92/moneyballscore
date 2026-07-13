@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {SITE_URL } from "@moneyball/shared";
+import { LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
 import { listArchiveDates, readArchiveVariants } from "@/lib/lotto/archive";
 import { parseLottoPicksMd, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -124,7 +124,7 @@ export default async function LottoArchiveDatePage({ params }: Props) {
           <h1 className="text-xl font-bold text-white">{date} 50조합 기록</h1>
         </div>
         <p className="text-sm text-white/70">
-          256개 통계 규칙 통과 조합 선별 아카이브. OOS 검증 자료.
+          {LOTTO_RULE_COUNT}개 통계 규칙 통과 조합 선별 아카이브. OOS 검증 자료.
         </p>
         <div
           className="rounded-lg px-4 py-3 text-sm font-medium"

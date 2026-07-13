@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { LOTTO_RULE_COUNT, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -72,7 +72,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["256 Rules", "OOS Brier", "Saturation", "Cycles", "Stats"].map(
+          {[`${LOTTO_RULE_COUNT} Rules`, "OOS Brier", "Saturation", "Cycles", "Stats"].map(
             (tag) => (
               <div
                 key={tag}

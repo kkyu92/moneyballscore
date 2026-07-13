@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { LOTTO_RULE_COUNT, SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -76,7 +76,7 @@ export default async function Image({ params }: Props) {
             gap: 12,
           }}
         >
-          {["256 Rules", "Avoidance", "OOS", "Stats", "Archive"].map((tag) => (
+          {[`${LOTTO_RULE_COUNT} Rules`, "Avoidance", "OOS", "Stats", "Archive"].map((tag) => (
             <div
               key={tag}
               style={{

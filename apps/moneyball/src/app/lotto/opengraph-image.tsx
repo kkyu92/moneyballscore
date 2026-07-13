@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { LOTTO_RULE_COUNT } from "@moneyball/shared";
 import { getLatestLottoPicks } from "@/lib/lotto/picks-loader";
 
 export const runtime = "nodejs";
@@ -44,7 +45,7 @@ export default function LottoHubOgImage() {
         <div style={{ color: "#c4e8cf", fontSize: 16, marginBottom: 32,
           display: "flex",
         }}>
-          256개 통계 규칙 통과 · 역대 미출현 조합 선별
+          {`${LOTTO_RULE_COUNT}개 통계 규칙 통과 · 역대 미출현 조합 선별`}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {top5.map((set, i) => (
