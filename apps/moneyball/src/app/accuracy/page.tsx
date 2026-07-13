@@ -27,6 +27,7 @@ import {
   KST_TIMEZONE,
   CURRENT_SCORING_RULE,
   PRODUCTION_ERA_HISTORY,
+  KBO_FACTOR_COUNT,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -974,7 +975,7 @@ export default async function AccuracyPage() {
           <div>
             <h2 className="text-lg font-bold">팩터별 적중률</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              10개 세이버메트릭스 팩터가 각각 경기 결과를 얼마나 잘 예측했는지 분석합니다.
+              {KBO_FACTOR_COUNT}개 세이버메트릭스 팩터가 각각 경기 결과를 얼마나 잘 예측했는지 분석합니다.
               팩터 값이 특정 팀을 유리하다고 판단했을 때, 그 팀이 실제로 이긴 비율입니다.
             </p>
           </div>
