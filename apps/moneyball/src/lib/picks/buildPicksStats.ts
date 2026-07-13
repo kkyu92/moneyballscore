@@ -287,7 +287,7 @@ export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
 // Factor Agreement — 사용자 픽 vs AI factor 별 일치 분석.
 //
 // 사용자 가시 가치: 사용자가 "내 의견이 어느 팩터에서 데이터와 일치하는가" 를
-// factor 단위 (선발/타선/Elo 등 10 factor) 로 즉시 확인. 단순 prob 차이 보다
+// factor 단위 (선발/타선/Elo 등, ACTIVE_FACTOR_KEYS 기준) 로 즉시 확인. 단순 prob 차이 보다
 // strong 한 reasoning surface — 사용자 자가 인식 (강점/약점 factor) 가능.
 // ---------------------------------------------------------------------------
 
@@ -315,7 +315,7 @@ export interface FactorAgreementRow {
 export interface FactorAgreement {
   // 측정 가능 (aiFactors != null + isResolved + aiPredictedHome != null) entries 수
   measuredCount: number;
-  // factor key → 집계. DEFAULT_WEIGHTS 안 10 factor key.
+  // factor key → 집계. DEFAULT_WEIGHTS / ACTIVE_FACTOR_KEYS 안 factor key.
   byFactor: FactorAgreementRow[];
 }
 

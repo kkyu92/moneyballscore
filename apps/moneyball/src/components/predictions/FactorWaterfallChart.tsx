@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * FactorWaterfallChart — 10 factor contribution waterfall.
+ * FactorWaterfallChart — ACTIVE_FACTOR_KEYS contribution waterfall.
  *
  * neutral NEUTRAL_FACTOR baseline 시작 → 각 factor contribution 누적 → final home win prob.
  * recharts ComposedChart 활용 (이미 dependency).
