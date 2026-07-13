@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {SITE_URL } from "@moneyball/shared";
+import { LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { listArchiveDates } from "@/lib/lotto/archive";
 
@@ -11,13 +11,11 @@ const PAGE_URL = `${SITE_URL}/lotto/archive`;
 
 export const metadata: Metadata = {
   title: "로또 통계 아카이브",
-  description:
-    "토요일 추첨일별 50조합 통계 분석 아카이브. 256개 회피 규칙을 통과한 조합 기록. 통계 학습 자료 — 행동/베팅/구매 권유 X.",
+  description: `토요일 추첨일별 50조합 통계 분석 아카이브. ${LOTTO_RULE_COUNT}개 회피 규칙을 통과한 조합 기록. 통계 학습 자료 — 행동/베팅/구매 권유 X.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "로또 통계 아카이브 | MoneyBall Score",
-    description:
-      "토요일 추첨일별 50조합 통계 분석 아카이브. 256개 회피 규칙 통과 조합 기록.",
+    description: `토요일 추첨일별 50조합 통계 분석 아카이브. ${LOTTO_RULE_COUNT}개 회피 규칙 통과 조합 기록.`,
     url: PAGE_URL,
     type: "website",
   },
@@ -40,8 +38,7 @@ export default function LottoArchiveIndexPage() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     headline: "로또 통계 아카이브",
-    description:
-      "토요일 추첨일별 50조합 통계 분석 아카이브 — 256개 회피 규칙 통과 조합 기록.",
+    description: `토요일 추첨일별 50조합 통계 분석 아카이브 — ${LOTTO_RULE_COUNT}개 회피 규칙 통과 조합 기록.`,
     url: PAGE_URL,
     mainEntityOfPage: PAGE_URL,
     inLanguage: "ko-KR",
@@ -87,7 +84,7 @@ export default function LottoArchiveIndexPage() {
           로또 통계 아카이브
         </h1>
         <p className="text-sm text-brand-300">
-          토요일 추첨일별 50조합 통계 분석 기록입니다. 256개 회피 규칙을 통과한
+          토요일 추첨일별 50조합 통계 분석 기록입니다. {LOTTO_RULE_COUNT}개 회피 규칙을 통과한
           조합만 박제됩니다. 당첨 확률 향상 X · 행동/베팅/구매 권유 X · 통계
           학습 자료.
         </p>

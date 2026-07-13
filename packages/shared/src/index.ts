@@ -987,6 +987,18 @@ export const LOTTO_ISR_SECONDS = LOTTO_ISR_HOURS * 60 * 60;
  */
 export const LOTTO_PICK_COUNT = 500;
 export const LOTTO_TOP_PICK_COUNT = 10;
+
+/**
+ * Lotto 회피 규칙 갯수 — 사용자 가시 metadata / OG / methodology / archive
+ * 하드코딩 "256" 리터럴 단일 source (silent drift family wave 262 / cycle 1569).
+ * 실제 규칙 배열 = `scripts/lotto.ts` RULES.length (Node CLI runtime).
+ * 데이터 반영 = `apps/moneyball/data/lotto-data.json` `rules_total` 필드.
+ * lotto chain saturation 후 신규 rule 추가 시 3곳 동시 bump 의무:
+ *   1. scripts/lotto.ts RULES 배열
+ *   2. data/lotto-data.json rules_total (script 재실행으로 자동 갱신)
+ *   3. LOTTO_RULE_COUNT (본 상수)
+ */
+export const LOTTO_RULE_COUNT = 256;
 export const HOME_ISR_MINUTES = 10;
 export const HOME_ISR_SECONDS = HOME_ISR_MINUTES * 60;
 export const SITEMAP_ISR_HOURS = 6;

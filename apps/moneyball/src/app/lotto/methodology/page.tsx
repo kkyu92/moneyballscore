@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
-import { KBO_FACTOR_COUNT, LOTTO_PICK_COUNT, SITE_URL } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, LOTTO_PICK_COUNT, LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
 import {
   LottoDataSchema,
   LottoScoreBacktestSchema,
@@ -30,20 +30,18 @@ const TOC_ITEMS = [
 
 export const metadata: Metadata = {
   title: "Lotto 통계 방법론",
-  description:
-    "MoneyBall Score KBO 분석 방법론을 응용한 6/45 패턴 통계 검증. 256+ rules saturation, Brier-like OOS 측정, 사이클 단위 진화 history. 본 페이지는 통계/분석 자료이며 당첨/베팅/예측을 제공하지 않습니다.",
+  description: `MoneyBall Score KBO 분석 방법론을 응용한 6/45 패턴 통계 검증. ${LOTTO_RULE_COUNT}+ rules saturation, Brier-like OOS 측정, 사이클 단위 진화 history. 본 페이지는 통계/분석 자료이며 당첨/베팅/예측을 제공하지 않습니다.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "Lotto 통계 방법론 | MoneyBall Score",
-    description:
-      "KBO 세이버메트릭스 방법론을 패턴 통계 검증에 응용. 256+ rules, OOS 측정, 사이클 진화 history.",
+    description: `KBO 세이버메트릭스 방법론을 패턴 통계 검증에 응용. ${LOTTO_RULE_COUNT}+ rules, OOS 측정, 사이클 진화 history.`,
     url: PAGE_URL,
     type: "article",
   },
   twitter: {
     card: "summary_large_image",
     title: "Lotto 통계 방법론 | MoneyBall Score",
-    description: "256+ rules, OOS 검증, 사이클 단위 진화 history.",
+    description: `${LOTTO_RULE_COUNT}+ rules, OOS 검증, 사이클 단위 진화 history.`,
   },
 };
 
@@ -197,7 +195,7 @@ export default function LottoMethodologyPage() {
         <ol className="space-y-2 text-sm text-brand-200 list-decimal pl-5">
           <li>
             <strong className="text-brand-100">규칙 누적 검증</strong> — 6/45
-            조합 공간 (총 8,145,060 가지) 에 256+ rules 를 누적 적용. 각
+            조합 공간 (총 8,145,060 가지) 에 {LOTTO_RULE_COUNT}+ rules 를 누적 적용. 각
             규칙은 과거 회차 검증 결과 PASS 시 보존, FAIL 시 수정 또는 제거.
           </li>
           <li>
@@ -207,7 +205,7 @@ export default function LottoMethodologyPage() {
           </li>
           <li>
             <strong className="text-brand-100">사이클 단위 진화</strong> —
-            매 추첨 직후 신규 규칙 후보 검증 + 기존 256 rule validation +
+            매 추첨 직후 신규 규칙 후보 검증 + 기존 {LOTTO_RULE_COUNT} rule validation +
             countValid delta 측정.
           </li>
         </ol>

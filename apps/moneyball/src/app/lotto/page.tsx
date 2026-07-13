@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { getLatestLottoPicks, getLatestLottoResult, ballColor, type LottoSet, type LottoResult } from "@/lib/lotto/picks-loader";
-import { LOTTO_TOP_PICK_COUNT, LOTTO_PICK_COUNT, SITE_URL } from "@moneyball/shared";
+import { LOTTO_TOP_PICK_COUNT, LOTTO_PICK_COUNT, LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
 
 export const dynamic = "force-static";
 export const revalidate = 3600; // LOTTO_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -12,19 +12,18 @@ const PAGE_URL = `${SITE_URL}/lotto`;
 
 export const metadata: Metadata = {
   title: "로또 통계 분석",
-  description:
-    "256개 회피 규칙 기반 매주 500조합 통계 선별. 통계 학습 목적 — 당첨 확률 향상 없음.",
+  description: `${LOTTO_RULE_COUNT}개 회피 규칙 기반 매주 ${LOTTO_PICK_COUNT}조합 통계 선별. 통계 학습 목적 — 당첨 확률 향상 없음.`,
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "로또 통계 분석 | MoneyBall Score",
-    description: "256개 회피 규칙 기반 매주 500조합 통계 선별.",
+    description: `${LOTTO_RULE_COUNT}개 회피 규칙 기반 매주 ${LOTTO_PICK_COUNT}조합 통계 선별.`,
     url: PAGE_URL,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "로또 통계 분석 | MoneyBall Score",
-    description: "256개 회피 규칙 기반 500조합 통계 선별.",
+    description: `${LOTTO_RULE_COUNT}개 회피 규칙 기반 ${LOTTO_PICK_COUNT}조합 통계 선별.`,
   },
   robots: { index: true, follow: true },
 };
@@ -190,7 +189,7 @@ function ResultSection({ result }: { result: LottoResult }) {
         </div>
         <div className="rounded-lg bg-white/60 dark:bg-black/20 p-3 text-xs space-y-1">
           <p className="text-amber-900 dark:text-amber-100">
-            <strong>256 룰 검증</strong>: {result.rulePass}/{result.rulePass + result.ruleFail} PASS
+            <strong>{LOTTO_RULE_COUNT} 룰 검증</strong>: {result.rulePass}/{result.rulePass + result.ruleFail} PASS
             {result.ruleFail === 0 ? " — 모든 규칙 경계 정상" : ` — ${result.ruleFail}개 FAIL`}
           </p>
           <p className="text-amber-800 dark:text-amber-200">
@@ -200,7 +199,7 @@ function ResultSection({ result }: { result: LottoResult }) {
       </div>
       <details className="rounded-lg border border-amber-300 dark:border-amber-700 bg-white/40 dark:bg-black/10">
         <summary className="cursor-pointer px-3 py-2 text-xs font-medium select-none text-amber-900 dark:text-amber-100">
-          전체 분석 보기 (256 룰 / 차원별 비교)
+          전체 분석 보기 ({LOTTO_RULE_COUNT} 룰 / 차원별 비교)
         </summary>
         <div className="px-4 pb-4 pt-2">
           <pre className="text-[10px] leading-relaxed whitespace-pre-wrap text-amber-900 dark:text-amber-100 font-mono">
@@ -256,7 +255,7 @@ export default function LottoHubPage() {
           </h1>
         </div>
         <p className="text-sm text-white/70">
-          역대 추첨 데이터 기반 256개 통계 규칙을 통과한 조합 선별.{" "}
+          역대 추첨 데이터 기반 {LOTTO_RULE_COUNT}개 통계 규칙을 통과한 조합 선별.{" "}
           <Link href="/lotto/methodology" className="underline hover:text-white/90">
             방법론 보기 →
           </Link>
@@ -301,12 +300,12 @@ export default function LottoHubPage() {
       <section className="space-y-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
         <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">조합 선별 방식</h2>
         <p>
-          1회부터 현재까지 누적된 로또 6/45 역대 추첨 결과를 분석해 256개 통계 필터를 도출합니다.
+          1회부터 현재까지 누적된 로또 6/45 역대 추첨 결과를 분석해 {LOTTO_RULE_COUNT}개 통계 필터를 도출합니다.
           각 규칙은 역대 추첨에서 유독 자주 또는 드물게 확인되는 패턴 — 번호 합계 구간,
           홀짝 구성 비율, 연속 번호 쌍 수, 번호 간격 등 — 을 정량화한 조건입니다.
         </p>
         <p>
-          선별 과정은 세 단계입니다. 먼저 약 800만 가지 조합 전체에서 256개 필터를 모두 통과하는
+          선별 과정은 세 단계입니다. 먼저 약 800만 가지 조합 전체에서 {LOTTO_RULE_COUNT}개 필터를 모두 통과하는
           후보를 추립니다. 이 중 역대 실제 추첨 결과와 완전히 일치하는 조합은 제외합니다.
           남은 후보에서 필터 통과 점수가 높은 순서로 {LOTTO_PICK_COUNT}세트를 확정합니다.
         </p>
