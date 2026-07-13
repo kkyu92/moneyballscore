@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   toKSTDateString, KBO_STADIUM_COORDS, errMsg, CURRENT_SCORING_RULE,
-  PRODUCTION_COHORT_RULES,
+  PRODUCTION_COHORT_RULES, SHADOW_V20_SCORING_RULE,
   isV2ModelEnabled, isV21BShadowEnabled, isDebateEnabled,
   SHADOW_V20_WEIGHTS, DAY_MS,
   countNeutralFactors, PREDICTION_SPARSE_THRESHOLD,
@@ -693,7 +693,7 @@ export async function runDailyPipeline(
     // cycle 1399 scout #2348 — sparse data domain validation
     const sparseNeutralCount = countNeutralFactors(quantResult.factors);
     if (sparseNeutralCount >= PREDICTION_SPARSE_THRESHOLD) {
-      const cohort = productionWeights ? 'v2.0-shadow' : 'v1.8';
+      const cohort = productionWeights ? SHADOW_V20_SCORING_RULE : CURRENT_SCORING_RULE;
       captureSparsePredictionAlert({
         date: targetDate,
         game: `${game.homeTeam} vs ${game.awayTeam}`,
