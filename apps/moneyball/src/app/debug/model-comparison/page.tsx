@@ -10,7 +10,12 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { BRIER_BASELINE, DAY_MS, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
+import {
+  BRIER_BASELINE,
+  DAY_MS,
+  LLM_DEBATE_VERSION,
+  SUPABASE_PAGE_SIZE,
+} from '@moneyball/shared';
 import {
   aggregateByModel,
   buildShadowRows,
@@ -104,11 +109,11 @@ export default async function ModelComparisonPage() {
         <h1 className="text-2xl md:text-3xl font-bold">모델 비교 대시보드</h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 dark:text-gray-600 mt-1">
           최근 {daysBack}일 · {rows.length}건 · scoring_rule + model_version 조합별
-          성능 측정. 현재 v1.8 ship + v2.0-debate / v2.1-B shadow (rejected Brier 0.4635) 누적 아카이브.
+          성능 측정. 현재 v1.8 ship + {LLM_DEBATE_VERSION} / v2.1-B shadow (rejected Brier 0.4635) 누적 아카이브.
         </p>
         {shadow.length > 0 && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Shadow run: {shadow.length}건 v2.0-debate row 에서 정량 확률 추출 →{' '}
+            Shadow run: {shadow.length}건 {LLM_DEBATE_VERSION} row 에서 정량 확률 추출 →{' '}
             <span className="font-mono">quant-only-shadow</span> 그룹으로 표시
             (LLM debate 덮기 전 순수 정량 모델 비교용).
           </p>
