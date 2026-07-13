@@ -1,5 +1,17 @@
 # Changelog
 
+## 📐 재사용 패턴 — 2026-07-13 extract-pattern (cycle 1545)
+
+| # | 카테고리 | 패턴 키 | 핵심 |
+|---|---|---|---|
+| P1 | anti_pattern | `credit-exhausted-dilutes-accuracy` | CE conf=0.3 예측이 정상 예측 희석 → scoring_rule 분리 집계 필수 |
+| P2 | ai_agent | `elo-fallback-home-advantage-neutralized` | CE fallback에서 hwp 밴드 좁아지면 홈 보정 +1.5%가 방향 역전 못 함 |
+| P3 | quality_guard | `db-filter-scoring-rule-not-model-version` | debate_version 필터 → CE 누락. PRODUCTION_COHORT_RULES IN 패턴이 안전 |
+
+→ gstack learnings.jsonl 등록 완료 (`~/.gstack/projects/kkyu92-moneyballscore/learnings.jsonl`)
+
+---
+
 ## v0.5.51.0 — 2026-07-08 (cycle 1520)
 
 ### 데이터·파이프라인
