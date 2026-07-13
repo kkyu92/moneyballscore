@@ -4,6 +4,8 @@ import {
   MLB_TEAMS,
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
+  MLB_AL_TEAM_COUNT,
+  MLB_NL_TEAM_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide, SITE_URL
@@ -15,7 +17,7 @@ export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: liter
 
 export const metadata: Metadata = {
   title: `MLB 팀 프로필 — ${MLB_TEAM_COUNT}팀 시즌 stat | MoneyBall Score`,
-  description: `MLB ${MLB_TEAM_COUNT}팀 (AL 15 + NL 15) 시즌 예측 기록 · ${MLB_FACTOR_COUNTS.total}팩터 (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · 홈구장 파크팩터.`,
+  description: `MLB ${MLB_TEAM_COUNT}팀 (AL ${MLB_AL_TEAM_COUNT} + NL ${MLB_NL_TEAM_COUNT}) 시즌 예측 기록 · ${MLB_FACTOR_COUNTS.total}팩터 (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · 홈구장 파크팩터.`,
   alternates: {
     canonical: `${SITE_URL}/mlb/team`,
     languages: {
@@ -87,7 +89,7 @@ export default function MlbTeamsHub() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB 팀 프로필</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL 15팀 + NL 15팀 = {MLB_TEAM_COUNT}팀. 시즌 예측 기록 · {MLB_FACTOR_COUNTS.total}팩터 (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · 홈구장 파크팩터.
+          AL {MLB_AL_TEAM_COUNT}팀 + NL {MLB_NL_TEAM_COUNT}팀 = {MLB_TEAM_COUNT}팀. 시즌 예측 기록 · {MLB_FACTOR_COUNTS.total}팩터 (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · 홈구장 파크팩터.
         </p>
       </header>
 
