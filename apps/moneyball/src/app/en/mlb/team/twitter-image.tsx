@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_AL_TEAM_COUNT, MLB_NL_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_TEAM_SKY_135 } from "@/lib/design-tokens";
 
@@ -62,7 +62,7 @@ export default function EnMlbTeamTwitterImage() {
             display: "flex",
           }}
         >
-          AL 15 + NL 15 · season prediction records · {MLB_FACTOR_COUNTS.total}-factor model · park factor
+          AL {MLB_AL_TEAM_COUNT} + NL {MLB_NL_TEAM_COUNT} · season prediction records · {MLB_FACTOR_COUNTS.total}-factor model · park factor
         </div>
 
         <div
