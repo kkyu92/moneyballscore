@@ -56,8 +56,8 @@ export interface PredictionRow {
 /**
  * reasoning JSONB 에서 홈팀 승리 확률 추출.
  * v1.5/v1.6 정량: `reasoning.homeWinProb`.
- * v2.0-debate: `reasoning.debate.verdict.homeWinProb` 우선, fallback `reasoning.homeWinProb`.
- * v2.0-postview: 동일 fallback.
+ * LLM_DEBATE_VERSION: `reasoning.debate.verdict.homeWinProb` 우선, fallback `reasoning.homeWinProb`.
+ * LLM_POSTVIEW_VERSION: 동일 fallback.
  */
 export function extractHomeWinProb(reasoning: unknown): number | null {
   if (!reasoning || typeof reasoning !== 'object') return null;
@@ -72,7 +72,7 @@ export function extractHomeWinProb(reasoning: unknown): number | null {
 /**
  * Shadow run: debate 가 덮기 전의 v1.6 순수 정량 확률 (daily.ts 가 2026-04-22
  * 이후 `reasoning.quantitativeHomeWinProb` 로 병행 저장). v1.6-pure vs
- * v2.0-debate Brier 비교에 사용.
+ * LLM_DEBATE_VERSION Brier 비교에 사용.
  */
 export function extractPureQuantProb(reasoning: unknown): number | null {
   if (!reasoning || typeof reasoning !== 'object') return null;
@@ -122,7 +122,7 @@ function buildCalibration(
 }
 
 /**
- * v2.0-debate row 에서 quantitativeHomeWinProb 을 shadow group 으로 추출.
+ * LLM_DEBATE_VERSION row 에서 quantitativeHomeWinProb 을 shadow group 으로 추출.
  * 원래 row 는 그대로 두고 **가상 row 복사본** 을 `quant-only-shadow` 로 라벨.
  * Agent 가 덮기 전의 pure 정량 모델 Brier 측정용 (scoring_rule 은 원본 상속).
  */

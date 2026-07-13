@@ -1,8 +1,8 @@
 /**
  * /debug/model-comparison — 모델 버전별 성능 비교 대시보드.
  *
- * 목적: v1.5 → v1.8 / v2.0-debate 진화 효과를 데이터로 측정. scoring_rule +
- * model_version 조합별 N / 적중률 / Brier / Calibration 제시. v2.0-debate row
+ * 목적: v1.5 → v1.8 / LLM_DEBATE_VERSION 진화 효과를 데이터로 측정. scoring_rule +
+ * model_version 조합별 N / 적중률 / Brier / Calibration 제시. LLM_DEBATE_VERSION row
  * 의 정량 확률은 quant-only-shadow 그룹으로 분리 표시 (LLM debate 덮기 전 순수
  * 정량 모델 비교용).
  *
@@ -86,7 +86,7 @@ async function loadRows(daysBack: number): Promise<PredictionRow[]> {
 export default async function ModelComparisonPage() {
   const daysBack = 90;
   const rows = await loadRows(daysBack);
-  // Shadow run: v2.0-debate row 에서 quantitativeHomeWinProb 추출 →
+  // Shadow run: LLM_DEBATE_VERSION row 에서 quantitativeHomeWinProb 추출 →
   // quant-only-shadow 가상 그룹 생성. debate 가 덮기 전의 순수 정량 확률과 비교 가능.
   const shadow = buildShadowRows(rows);
   const combined = [...rows, ...shadow];
