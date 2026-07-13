@@ -1,7 +1,7 @@
 /**
- * PLAN_v5 Phase 4 §7.2 — 홈페이지 렌더 가드 (R3)
+ * 홈페이지 렌더 가드
  *
- * 가드 R3: `predictions!inner` → `predictions(...)` (LEFT JOIN 동일 효과) 전환.
+ * `predictions!inner` → `predictions(...)` (LEFT JOIN 동일 효과) 전환.
  * 예측 없는 경기 (predictions=[]) 가 홈 카드 목록에서 사라지면 안 됨.
  * 대신 PlaceholderCard 가 status/SP 분기와 함께 렌더되어야 함.
  *
