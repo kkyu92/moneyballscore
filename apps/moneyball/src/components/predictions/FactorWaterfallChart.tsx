@@ -12,7 +12,7 @@
  * 통합: analysis/game/[id]/page.tsx 안 DetailedFactorAnalysis 다음 박제.
  */
 
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, NEUTRAL_FACTOR, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, type TeamCode, shortTeamName } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, NEUTRAL_FACTOR, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, type TeamCode, shortTeamName } from "@moneyball/shared";
 import {
   Bar,
   Cell,
@@ -206,7 +206,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
         </ResponsiveContainer>
       </div>
       <p className="text-[10px] text-brand-400 dark:text-brand-500 mt-3 text-center">
-        {awayName} @ {homeName} · 가중치 합 = 1.0 / 홈 어드밴티지 +1.5pp 별도 / 최종 [15%, 85%] clamp
+        {awayName} @ {homeName} · 가중치 합 = 1.0 / 홈 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}pp 별도 / 최종 [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
       </p>
     </section>
   );
