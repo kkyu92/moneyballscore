@@ -2,7 +2,7 @@
  * agent-context.ts tests — plan #23 Step 3.
  *
  * 검증 축:
- *   - buildAgentContext: GameContext → AgentContext 변환 정합 (10팩터 metric 박제,
+ *   - buildAgentContext: GameContext → AgentContext 변환 정합 (ACTIVE_FACTOR_KEYS metric 박제,
  *     선발 null 시 sp_fip/xfip skip, h2h total=0 시 50/50 fallback, park context 동기)
  *   - renderContextForLLM: 필수 섹션 박제 (게임 메타 / 도메인 hint / 정량 메트릭 /
  *     H2H + 최근 폼) + 라이벌리 매치 시 hint 동봉
