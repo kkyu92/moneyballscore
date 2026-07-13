@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_URL } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, MLB_GAMES_PER_TEAM, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
@@ -14,14 +14,14 @@ const STAT_N = MLB_FACTOR_COUNTS.statcast;
 
 export const metadata: Metadata = {
   title: `MLB 분석 — 세이버메트릭스 ${TOTAL}팩터 + Statcast | MoneyBall Score`,
-  description: `MLB ${MLB_TEAM_COUNT}개 구단 162경기 분석 + ${TOTAL}팩터 모델 (KBO ${KBO_N} + Statcast ${STAT_N}) 기반 승부예측. 한국어/영어 페이지 제공.`,
+  description: `MLB ${MLB_TEAM_COUNT}개 구단 ${MLB_GAMES_PER_TEAM}경기 분석 + ${TOTAL}팩터 모델 (KBO ${KBO_N} + Statcast ${STAT_N}) 기반 승부예측. 한국어/영어 페이지 제공.`,
   alternates: {
     canonical: `${SITE_URL}/mlb`,
     languages: { 'en': `${SITE_URL}/en/mlb`, 'ko': `${SITE_URL}/mlb` },
   },
   openGraph: {
     title: "MLB 분석 | MoneyBall Score",
-    description: `MLB 162경기 분석 + ${TOTAL}팩터 모델 + Statcast`,
+    description: `MLB ${MLB_GAMES_PER_TEAM}경기 분석 + ${TOTAL}팩터 모델 + Statcast`,
     url: `${SITE_URL}/mlb`,
     type: "website",
   },
@@ -60,7 +60,7 @@ export default async function MlbHub() {
           MLB 분석
         </h1>
         <p className="text-base text-brand-600 dark:text-brand-300">
-          162경기 시즌 분석 · {TOTAL}팩터 모델 (KBO {KBO_N} + Statcast {STAT_N}) · 데이터 기반 학습 가중치
+          {MLB_GAMES_PER_TEAM}경기 시즌 분석 · {TOTAL}팩터 모델 (KBO {KBO_N} + Statcast {STAT_N}) · 데이터 기반 학습 가중치
         </p>
       </section>
 

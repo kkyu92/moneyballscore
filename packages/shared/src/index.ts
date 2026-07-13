@@ -109,6 +109,37 @@ export const KBO_HEAD_TO_HEAD_PAIRS =
   (KBO_TEAM_COUNT * (KBO_TEAM_COUNT - 1)) / 2;
 
 /**
+ * KBO 팀당 정규시즌 경기 수 — 리그 정책 상수 (10팀 * 상대팀 9 * 16회 = 144).
+ * silent drift family wave 266 (cycle 1573) — wave 107 (KBO_HEAD_TO_HEAD_PAIRS) 패턴의
+ * KBO 시즌 스케줄 차원 확장. 리그 스케줄 변경 시 본 상수 1 라인 갱신.
+ */
+export const KBO_GAMES_PER_TEAM = 144;
+
+/**
+ * KBO 한 시즌 총 경기 수 — methodology 표본 크기 설명 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 266 (cycle 1573) — (KBO_TEAM_COUNT * KBO_GAMES_PER_TEAM) / 2.
+ * KBO_TEAM_COUNT 또는 KBO_GAMES_PER_TEAM 변경 시 자동 동기.
+ */
+export const KBO_REGULAR_SEASON_GAMES =
+  (KBO_TEAM_COUNT * KBO_GAMES_PER_TEAM) / 2;
+
+/**
+ * MLB 팀당 정규시즌 경기 수 — 리그 정책 상수 (30팀 * 162경기).
+ * silent drift family wave 266 (cycle 1573) — mlb/OG/twitter/page/wild-card/postseason/team
+ * 10 file 17 surface "162 games" / "162경기" / "162-game" / "162game" 하드코딩 sweep 용 단일 source.
+ * 리그 스케줄 변경 시 본 상수 1 라인 갱신.
+ */
+export const MLB_GAMES_PER_TEAM = 162;
+
+/**
+ * MLB 한 시즌 총 경기 수 — methodology 표본 크기 설명 하드코딩 sweep 용 단일 source.
+ * silent drift family wave 266 (cycle 1573) — (MLB_TEAM_COUNT * MLB_GAMES_PER_TEAM) / 2.
+ * MLB_TEAM_COUNT 또는 MLB_GAMES_PER_TEAM 변경 시 자동 동기.
+ */
+export const MLB_REGULAR_SEASON_GAMES =
+  (MLB_TEAM_COUNT * MLB_GAMES_PER_TEAM) / 2;
+
+/**
  * 구장 짧은 이름 — UI 노출용. KBO_TEAMS.stadium 은 정식 명칭이라 UI 에 길고,
  * KBO 공식 API S_NM 은 짧은 지역명 ("대구", "잠실") 을 리턴. Naver basic
  * 응답처럼 stadium 필드가 비어 있을 때 fallback 용 상수.

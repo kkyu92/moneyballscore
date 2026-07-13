@@ -5,6 +5,7 @@ import {
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
+  MLB_GAMES_PER_TEAM,
   type MlbTeamCode,
   type MlbLeagueSide, SITE_URL
 } from "@moneyball/shared";
@@ -86,7 +87,7 @@ export default function MlbWildCardHub() {
           준비 진행 status
         </h2>
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
-          <li>MLB 162game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
+          <li>MLB {MLB_GAMES_PER_TEAM}game 풀 인제스트 + {FACTOR_TOTAL}팩터 본선 — <strong>박제 완료</strong></li>
           <li>{MLB_TEAM_COUNT}팀 standings (AL/NL × E/C/W {MLB_DIVISION_COUNT} division) — <strong>박제 완료</strong> (<Link href="/mlb/standings" className="underline">/mlb/standings</Link>)</li>
           <li>Wild Card 3장 진출 경쟁 추적 + game-back 라이브 — <strong>ETA 2026-08</strong></li>
           <li>Postseason 브라켓 (WC / DS / LCS / WS) 시각화 — <strong>ETA 2026-09</strong></li>

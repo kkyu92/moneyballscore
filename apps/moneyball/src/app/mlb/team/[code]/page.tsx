@@ -6,7 +6,8 @@ import {
   MLB_TEAMS_PRE_RENDER,
   SMALL_SAMPLE_N,
   type MlbTeamCode,
-  mlbShortTeamName, SITE_URL
+  mlbShortTeamName,
+  MLB_GAMES_PER_TEAM, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
@@ -322,7 +323,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
           size="lg"
           icon="⚾"
           title={`${profile.shortName}의 MLB 예측 기록이 아직 없습니다`}
-          description="MLB 162game 시즌 데이터가 누적되면 자동으로 집계됩니다."
+          description={`MLB ${MLB_GAMES_PER_TEAM}game 시즌 데이터가 누적되면 자동으로 집계됩니다.`}
         />
       )}
 
