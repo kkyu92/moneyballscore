@@ -111,7 +111,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
-  // 10팀 프로필 URL
+  // KBO 팀 프로필 URL (KBO_TEAM_COUNT)
   const teamProfileRoutes: MetadataRoute.Sitemap = Object.keys(KBO_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/teams/${code}`,
@@ -121,7 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // MLB 30팀 프로필 URL
+  // MLB 팀 프로필 URL (MLB_TEAM_COUNT)
   const mlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/mlb/team/${code}`,
@@ -131,7 +131,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // MLB 30팀 Statcast deep-dive URL
+  // MLB 팀 Statcast deep-dive URL (MLB_TEAM_COUNT)
   const mlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/mlb/players/${code}`,
@@ -141,7 +141,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // /en/mlb/team/[code] 30팀 English mirror
+  // /en/mlb/team/[code] English mirror (MLB_TEAM_COUNT)
   const enMlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/en/mlb/team/${code}`,
@@ -151,7 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // /en/mlb/players/[id] 30팀 English mirror Statcast
+  // /en/mlb/players/[id] English mirror Statcast (MLB_TEAM_COUNT)
   const enMlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
       url: `${SITE_URL}/en/mlb/players/${code}`,
