@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_HOST } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_AL_TEAM_COUNT, MLB_NL_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const runtime = "nodejs";
@@ -61,7 +61,7 @@ export default function MlbTeamHubOgImage() {
             display: "flex",
           }}
         >
-          AL 15 + NL 15 · 시즌 예측 기록 · {MLB_FACTOR_COUNTS.total}팩터 · 홈구장 park factor
+          AL {MLB_AL_TEAM_COUNT} + NL {MLB_NL_TEAM_COUNT} · 시즌 예측 기록 · {MLB_FACTOR_COUNTS.total}팩터 · 홈구장 park factor
         </div>
 
         <div

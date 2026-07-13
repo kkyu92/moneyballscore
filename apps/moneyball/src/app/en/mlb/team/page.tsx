@@ -4,6 +4,8 @@ import {
   MLB_TEAMS,
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
+  MLB_AL_TEAM_COUNT,
+  MLB_NL_TEAM_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide, SITE_URL
@@ -16,7 +18,7 @@ export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: liter
 export const metadata: Metadata = {
   title: `MLB Teams — ${MLB_TEAM_COUNT} Team Season Stats | MoneyBall Score`,
   description:
-    `MLB ${MLB_TEAM_COUNT} teams (AL 15 + NL 15) season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.`,
+    `MLB ${MLB_TEAM_COUNT} teams (AL ${MLB_AL_TEAM_COUNT} + NL ${MLB_NL_TEAM_COUNT}) season prediction records · ${MLB_FACTOR_COUNTS.total}-factor model (KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/team`,
     languages: {
@@ -90,7 +92,7 @@ export default function MlbTeamsHubEn() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB Team Profiles</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL 15 teams + NL 15 teams = {MLB_TEAM_COUNT} total. Season prediction records · {MLB_FACTOR_COUNTS.total}-factor model (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.
+          AL {MLB_AL_TEAM_COUNT} teams + NL {MLB_NL_TEAM_COUNT} teams = {MLB_TEAM_COUNT} total. Season prediction records · {MLB_FACTOR_COUNTS.total}-factor model (KBO {MLB_FACTOR_COUNTS.kbo} + Statcast {MLB_FACTOR_COUNTS.statcast}) · Home ballpark park factor.
         </p>
       </header>
 
