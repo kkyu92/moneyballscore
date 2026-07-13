@@ -34,6 +34,13 @@ export const MLB_TEAM_COUNT = Object.keys(_MLB_TEAMS).length;
 export const MLB_DIVISION_COUNT =
   Object.keys(_MLB_DIVISIONS.AL).length + Object.keys(_MLB_DIVISIONS.NL).length;
 
+// MLB 리그별 팀 수 — silent drift family wave 268 (cycle 1576) "AL 15팀 + NL 15팀" 하드코딩 sweep 단일 source.
+// MLB_DIVISIONS 변경 (팀 이동 / expansion) 시 자동 동기.
+export const MLB_AL_TEAM_COUNT =
+  Object.values(_MLB_DIVISIONS.AL).reduce((sum, arr) => sum + arr.length, 0);
+export const MLB_NL_TEAM_COUNT =
+  Object.values(_MLB_DIVISIONS.NL).reduce((sum, arr) => sum + arr.length, 0);
+
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
 export { hasJongsung, josa, ro } from './korean';
 
