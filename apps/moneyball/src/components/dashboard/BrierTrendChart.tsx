@@ -12,6 +12,8 @@ import {
   ReferenceLine,
 } from "recharts";
 
+import { PRODUCTION_ERA_HISTORY } from "@moneyball/shared";
+
 import type { BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
@@ -30,7 +32,9 @@ const SR_COLOR_MAP: Record<string, string> = {
   "v1.8": brand[500], // current
 };
 
-const SR_ORDER = ["all", "v1.5", "v1.6", "v1.7-revert", "v1.8"];
+// silent drift wave-255 (cycle 1559) — hardcoded era list → PRODUCTION_ERA_HISTORY registry.
+// 신규 era 추가 시 packages/shared/src/model-version-labels.ts 1줄 = chart line 자동 반영.
+const SR_ORDER = ["all", ...PRODUCTION_ERA_HISTORY];
 
 interface PivotRow {
   weekLabel: string;
