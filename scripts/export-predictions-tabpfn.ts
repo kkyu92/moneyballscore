@@ -12,7 +12,7 @@
  * scope filter (data-prep.md §2.2):
  *   - prediction_type = 'pre_game'
  *   - is_correct IS NOT NULL
- *   - factors IS NOT NULL + 10팩터 key 모두 존재 (drop NaN row)
+ *   - factors IS NOT NULL + ACTIVE_FACTOR_KEYS key 모두 존재 (drop NaN row)
  *   - games.status = 'final' + winner_team_id IS NOT NULL
  *
  * 자율 영역 한도: CSV 박제 only. TabPFN inference / checkpoint download 사용자 영역.
