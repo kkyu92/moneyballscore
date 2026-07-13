@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_SHADOW_C_MILESTONES } from "@moneyball/kbo-data";
 import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -452,7 +452,7 @@ export default function MlbFactorsHubEn() {
           ※ These weights = MLB v1.0 (KBO {CURRENT_SCORING_RULE} mapping + Statcast {STAT_N} additions). Will update when model evolves.
         </p>
         <p>
-          ※ Weight source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C learning cohort = walk-forward expanding window (milestones n=27 / 60 / 150 / 300 / 1000 / 2430).
+          ※ Weight source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C learning cohort = walk-forward expanding window (milestones n={MLB_SHADOW_C_MILESTONES.join(" / ")}).
         </p>
         <p>
           ※ KBO model = <Link href="/methodology" className="underline">/methodology</Link>. Statcast team measurements ={" "}

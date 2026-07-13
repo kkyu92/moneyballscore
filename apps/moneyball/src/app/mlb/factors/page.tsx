@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MetricRegistry } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_SHADOW_C_MILESTONES, MetricRegistry } from "@moneyball/kbo-data";
 import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -452,7 +452,7 @@ export default function MlbFactorsHub() {
           ※ 본 가중치 = MLB v1.0 (KBO {CURRENT_SCORING_RULE} 매핑 + Statcast {STAT_N} 추가). 모델 진화 시 갱신.
         </p>
         <p>
-          ※ 가중치 source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C 학습 cohort = walk-forward expanding window (milestone n=27 / 60 / 150 / 300 / 1000 / 2430).
+          ※ 가중치 source: <code>packages/kbo-data/src/factors/mlb-base.ts</code>. Shadow C 학습 cohort = walk-forward expanding window (milestone n={MLB_SHADOW_C_MILESTONES.join(" / ")}).
         </p>
         <p>
           ※ KBO 모델 = <Link href="/methodology" className="underline">/methodology</Link>. Statcast 팀별 측정 ={" "}
