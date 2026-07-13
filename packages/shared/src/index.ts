@@ -425,7 +425,7 @@ export function clampWinnerProb(p: number): number {
 }
 
 /**
- * 예측 sparse data 임계 — 10 팩터 중 이 수 이상이 0.5 (neutral) 이면 데이터 희박.
+ * 예측 sparse data 임계 — ACTIVE_FACTOR_KEYS 중 이 수 이상이 0.5 (neutral) 이면 데이터 희박.
  * scout issue #2348 (cycle 1399): 도메인 지식 검증 강화 — 입력 데이터 희박 예측 감지.
  * normalize() 특성상 homeVal==awayVal==default → 0.5 exact. 5건 이상 = 50%+ 결측.
  * wave 163 ISR magic number family 정합 — 단일 source (silent drift 차단).
