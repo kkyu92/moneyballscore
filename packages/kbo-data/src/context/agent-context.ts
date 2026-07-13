@@ -201,7 +201,7 @@ function formatMetricLine(slug: MetricSlug, obs: MetricObservation): string {
  * 구성:
  *   - 게임 메타 (날짜 / 시간 / 팀 / 선발)
  *   - 도메인 hint 4종 (구장 / 라이벌리 / 시즌 / 시간 윈도우)
- *   - production metric 측정치 + 정의 (10팩터 한 줄씩)
+ *   - production metric 측정치 + 정의 (ACTIVE_FACTOR_KEYS 한 줄씩)
  *   - 최근 폼 + 상대 전적 (raw 숫자 형태)
  *
  * Token budget: 약 800~1200 tokens (한국어 기준). max ±20% budget 안 (plan #23

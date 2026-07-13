@@ -24,13 +24,13 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
 
 /**
  * 예측 엔진 v1.8.
- * 10팩터 가중합산으로 홈팀 승리 확률 계산.
+ * ACTIVE_FACTOR_KEYS 가중합산으로 홈팀 승리 확률 계산.
  *
  * v1.6 (Wayback 백테스트로 park/h2h/sfr → 0) 은 cycle 14/16 prod 측정에서
  * v1.5 75% vs v1.6 36.96% 격차 38pp 확인 후 cycle 17 (커밋 81e3208) 회귀.
  * v1.8 (cycle 335): head_to_head 5%→3% (noise 감소), elo 8%→10% (정보가치 Δ+0.30 최강).
  * 현 활성 가중치는 packages/shared/src/index.ts DEFAULT_WEIGHTS 단일 출처
- * (sp_fip 0.15 / lineup_woba 0.15 / elo 0.10 / h2h 0.03 / park 0.04 / sfr 0.05 등 10 팩터 모두 활성).
+ * (sp_fip 0.15 / lineup_woba 0.15 / elo 0.10 / h2h 0.03 / park 0.04 / sfr 0.05 등 ACTIVE_FACTOR_KEYS 모두 활성).
  */
 export type PredictWeights = Readonly<Record<string, number>>;
 

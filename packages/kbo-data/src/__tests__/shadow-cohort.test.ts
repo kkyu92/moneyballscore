@@ -303,7 +303,7 @@ describe('insertShadowRowV20 (plan #14 C1a — v2.0-shadow row insert)', () => {
   it('SHADOW_WEIGHTS (v2.1-B-shadow) 와 SHADOW_V20_WEIGHTS 별개 const (Eng Critical #1)', () => {
     // v2.1-B-shadow = SHADOW_WEIGHTS (park_weather/umpire_sz 포함)
     expect(Object.keys(SHADOW_WEIGHTS)).toContain('park_weather');
-    // v2.0-shadow = SHADOW_V20_WEIGHTS (production 10 factor only)
+    // v2.0-shadow = SHADOW_V20_WEIGHTS (production ACTIVE_FACTOR_KEYS only)
     expect(Object.keys(SHADOW_V20_WEIGHTS)).not.toContain('park_weather');
   });
 });

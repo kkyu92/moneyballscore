@@ -179,7 +179,7 @@ export async function insertShadowRow(
  * v2.0-shadow compute — SHADOW_V20_WEIGHTS 기반 (plan #14 C1a, cycle 1019).
  * computeShadowPrediction 와 동일 산출 공식 (weightedSum / FACTOR_TOTAL + HOME_ADVANTAGE → clamp).
  * SHADOW_V20_WEIGHTS = v1.8 base + 3 factor bump (elo/bullpen_fip/recent_form).
- * shadow factor (park_weather/umpire_sz) X — production 10 factor 만 사용.
+ * shadow factor (park_weather/umpire_sz) X — production ACTIVE_FACTOR_KEYS 만 사용.
  */
 export function computeShadowPredictionV20(
   factors: Record<string, number> | null | undefined,

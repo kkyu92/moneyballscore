@@ -24,7 +24,7 @@ import type {
 import type { EloHistory } from './elo-history';
 
 // =============================================================================
-// Zod schema — base 10 factor + candidate 9 factor enum
+// Zod schema — base ACTIVE_FACTOR_KEYS + candidate 9 factor enum
 // =============================================================================
 
 export const BASE_FACTORS = [

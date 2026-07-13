@@ -104,7 +104,7 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
 }
 
 /**
- * GameFeatures → 10 factor [0,1] 매핑. predictor.ts 와 동일 logic.
+ * GameFeatures → ACTIVE_FACTOR_KEYS [0,1] 매핑. predictor.ts 와 동일 logic.
  * Wayback backtest 에 sp_xfip / bullpen_fip / war 없음 → 0.5 (중립).
  */
 function computeFactors(f: GameFeatures): Record<string, number> {
