@@ -510,6 +510,15 @@ export const NEUTRAL_FACTOR = 0.5;
 export const HOME_ELO_BONUS = 24;
 
 /**
+ * HOME_ELO_BONUS 를 승률 percentage 로 변환한 approximate 표시값.
+ *
+ * Elo 400-point conversion: 1 / (1 + 10^(-24/400)) - 0.5 ≈ 0.0345 = 3.45%.
+ * 사용자 가시 factors 페이지 표시 = "약 +3.4%" (소수점 1자리 approximate).
+ * HOME_ELO_BONUS 갱신 시 본 상수 동기 갱신 필요 (silent drift wave 272 guard).
+ */
+export const HOME_ELO_BONUS_WIN_PROB_PCT = 3.4;
+
+/**
  * Game status literal — DB 실제 값 단일 source of truth.
  *
  * cycle 1019 plan #14 C1b 박제 시점 'completed' literal 박제 → cycle 1021

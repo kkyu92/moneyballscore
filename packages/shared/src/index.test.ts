@@ -14,6 +14,8 @@ import {
   ACTIVE_FACTOR_KEYS,
   HOME_ADVANTAGE,
   HOME_ADVANTAGE_PCT,
+  HOME_ELO_BONUS,
+  HOME_ELO_BONUS_WIN_PROB_PCT,
   HOME_WIN_RATE_PCT,
   HOME_WIN_RATE_SAMPLE_N,
   HOME_WIN_RATE_CI_PP,
@@ -147,6 +149,15 @@ describe('KBO_TEAMS', () => {
     expect(MLB_GAMES_PER_TEAM).toBe(162);
     expect(MLB_REGULAR_SEASON_GAMES).toBe((MLB_TEAM_COUNT * MLB_GAMES_PER_TEAM) / 2);
     expect(MLB_REGULAR_SEASON_GAMES).toBe(2430);
+  });
+
+  it('HOME_ELO_BONUS_WIN_PROB_PCT tracks HOME_ELO_BONUS Elo→prob approximation (silent drift wave 272 guard)', () => {
+    expect(HOME_ELO_BONUS).toBe(24);
+    expect(HOME_ELO_BONUS_WIN_PROB_PCT).toBe(3.4);
+    const winProb = 1 / (1 + Math.pow(10, -HOME_ELO_BONUS / 400));
+    const derivedPct = (winProb - 0.5) * 100;
+    expect(derivedPct).toBeGreaterThan(HOME_ELO_BONUS_WIN_PROB_PCT - 0.2);
+    expect(derivedPct).toBeLessThan(HOME_ELO_BONUS_WIN_PROB_PCT + 0.2);
   });
 
   it('MIN_LEADERBOARD_PICKS matches DB view HAVING clause (silent drift wave 116 guard)', () => {

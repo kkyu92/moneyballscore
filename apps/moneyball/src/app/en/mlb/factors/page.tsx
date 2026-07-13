@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_SHADOW_C_MILESTONES } from "@moneyball/kbo-data";
-import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, HOME_ELO_BONUS_WIN_PROB_PCT, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -213,9 +213,9 @@ const HOME_BONUS: FactorRow = {
   label: "Home Advantage (Elo Bonus)",
   shortLabel: "Home Elo Bonus",
   category: "Bonus",
-  range: `+${HOME_ELO_BONUS} Elo (~ +3.4%)`,
+  range: `+${HOME_ELO_BONUS} Elo (~ +${HOME_ELO_BONUS_WIN_PROB_PCT}%)`,
   description:
-    `Elo bonus of ${HOME_ELO_BONUS} points added to the home team = ~+3.4% win probability (Elo 400-point conversion). Covers ballpark familiarity, travel fatigue differential, and crowd factor.`,
+    `Elo bonus of ${HOME_ELO_BONUS} points added to the home team = ~+${HOME_ELO_BONUS_WIN_PROB_PCT}% win probability (Elo 400-point conversion). Covers ballpark familiarity, travel fatigue differential, and crowd factor.`,
   why: "Quantifies home field advantage. Applied consistently to every game.",
   source: `FiveThirtyEight Elo (MLB) · KBO own measurement +${HOME_ADVANTAGE_PCT.toFixed(1)}%`,
 };
