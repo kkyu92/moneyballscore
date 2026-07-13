@@ -72,7 +72,7 @@ export default function MlbStandingsHubEn() {
     inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: 30,
+      numberOfItems: MLB_TEAM_COUNT,
       itemListElement: (Object.keys(MLB_TEAMS) as MlbTeamCode[]).map((code, i) => {
         const team = MLB_TEAMS[code];
         return {
