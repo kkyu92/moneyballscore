@@ -41,7 +41,6 @@ import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { getRecentWeeks, getCurrentWeek } from "@/lib/reviews/computeWeekRange";
 import { captureFallback } from "@/lib/observability/captureFallback";
-import { CURRENT_DEBATE_VERSION, CURRENT_MODEL_FILTER } from "@/config/model";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -466,7 +465,6 @@ async function getSeasonAccuracy(): Promise<{
     .from('predictions')
     .select('is_correct, reasoning')
     .eq('prediction_type', 'pre_game')
-    .match(CURRENT_MODEL_FILTER)
     .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .not('is_correct', 'is', null);
   const { data } = assertSelectOk(predResult, 'home.getSeasonAccuracy');
@@ -503,7 +501,6 @@ async function getRecentWeeksAccuracy(): Promise<WeeklyTrendPoint[]> {
     .select('game_date, predictions!inner(is_correct)')
     .gte('game_date', startDate)
     .eq('predictions.prediction_type', 'pre_game')
-    .eq('predictions.debate_version', CURRENT_DEBATE_VERSION)
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .not('predictions.is_correct', 'is', null);
 
