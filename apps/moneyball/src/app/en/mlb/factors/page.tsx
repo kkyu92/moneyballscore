@@ -48,7 +48,7 @@ type FactorRow = {
   source: string;
 };
 
-const KBO_10_FACTORS: readonly FactorRow[] = [
+const KBO_FACTORS: readonly FactorRow[] = [
   {
     key: "sp_fip",
     label: "SP FIP (Fielding Independent Pitching)",
@@ -229,7 +229,7 @@ function totalWeight(): number {
 }
 
 export default function MlbFactorsHubEn() {
-  const allFactors: FactorRow[] = [...KBO_10_FACTORS, ...STATCAST_4_FACTORS];
+  const allFactors: FactorRow[] = [...KBO_FACTORS, ...STATCAST_4_FACTORS];
   const sum = totalWeight();
 
   const jsonLd = {
@@ -344,7 +344,7 @@ export default function MlbFactorsHubEn() {
           The {KBO_N} factors from KBO model {CURRENT_SCORING_RULE} mapped directly to the MLB domain. Only the data sources change — statsapi.mlb / FanGraphs MLB instead of KBO sources.
         </p>
         <ol className="space-y-4">
-          {KBO_10_FACTORS.map((factor, idx) => (
+          {KBO_FACTORS.map((factor, idx) => (
             <li
               key={factor.key}
               id={factor.key}

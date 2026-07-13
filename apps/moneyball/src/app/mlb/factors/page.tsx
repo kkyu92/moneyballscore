@@ -50,7 +50,7 @@ type FactorRow = {
 
 // KBO ACTIVE_FACTOR_KEYS 라벨 = MetricRegistry.ko_name 단일 source — silent drift wave 60.
 // MLB MLB_BASE_WEIGHTS.defense_sfr key = MetricRegistry.sfr slug 매핑.
-const KBO_10_FACTORS: readonly FactorRow[] = [
+const KBO_FACTORS: readonly FactorRow[] = [
   {
     key: "sp_fip",
     label: `${MetricRegistry.sp_fip.ko_name} (Fielding Independent Pitching)`,
@@ -231,7 +231,7 @@ function totalWeight(): number {
 }
 
 export default function MlbFactorsHub() {
-  const allFactors: FactorRow[] = [...KBO_10_FACTORS, ...STATCAST_4_FACTORS];
+  const allFactors: FactorRow[] = [...KBO_FACTORS, ...STATCAST_4_FACTORS];
   const sum = totalWeight();
 
   const jsonLd = {
@@ -344,7 +344,7 @@ export default function MlbFactorsHub() {
           KBO 모델 {CURRENT_SCORING_RULE} 의 {KBO_N}팩터를 MLB 도메인에 그대로 매핑. data source 만 statsapi.mlb / FanGraphs MLB 로 교체.
         </p>
         <ol className="space-y-4">
-          {KBO_10_FACTORS.map((factor, idx) => (
+          {KBO_FACTORS.map((factor, idx) => (
             <li
               key={factor.key}
               id={factor.key}
