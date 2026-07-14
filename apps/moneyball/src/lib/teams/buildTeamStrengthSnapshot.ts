@@ -3,6 +3,7 @@ import {
   assertSelectOk,
   KBO_TEAMS,
   shortTeamName,
+  TEAM_STRENGTH_SNAPSHOT_LIMIT,
   type TeamCode,
 } from '@moneyball/shared';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
@@ -49,7 +50,7 @@ export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
     .eq('prediction_type', 'pre_game')
     .not('home_elo', 'is', null)
     .order('created_at', { ascending: false })
-    .limit(200);
+    .limit(TEAM_STRENGTH_SNAPSHOT_LIMIT);
 
   const { data } = assertSelectOk(result, 'buildTeamStrengthSnapshot');
   if (!data || data.length === 0) return [];
