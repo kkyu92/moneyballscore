@@ -9,6 +9,7 @@ import {
   type TeamCode,
   shortTeamName, SITE_URL,
   KBO_OFFICIAL_URL,
+  ACCURACY_GOOD_RATE,
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
@@ -178,7 +179,7 @@ export default async function TeamPage({ params }: PageProps) {
               className={`text-2xl font-bold mt-1 font-mono ${
                 profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N
                   ? "text-gray-400 dark:text-gray-500"
-                  : (profile.accuracyRate ?? 0) >= 0.6
+                  : (profile.accuracyRate ?? 0) >= ACCURACY_GOOD_RATE
                     ? "text-brand-600 dark:text-brand-400"
                     : (profile.accuracyRate ?? 0) >= 0.5
                       ? "text-yellow-600 dark:text-yellow-400"

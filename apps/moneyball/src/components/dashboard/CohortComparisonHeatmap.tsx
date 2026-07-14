@@ -1,3 +1,4 @@
+import { ACCURACY_GOOD_RATE } from "@moneyball/shared";
 import type { ScoringRuleWeekCell } from "@/lib/accuracy/buildAccuracyData";
 import { SCORING_RULE_HEATMAP_ROWS } from "@/lib/accuracy/buildAccuracyData";
 
@@ -21,7 +22,7 @@ function cellBgClass(acc: number | null): string {
   if (acc === null)
     return "bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400";
   if (acc >= 0.7) return "bg-brand-700 text-white";
-  if (acc >= 0.6) return "bg-brand-500 text-white";
+  if (acc >= ACCURACY_GOOD_RATE) return "bg-brand-500 text-white";
   if (acc >= 0.5)
     return "bg-brand-300 text-neutral-900 dark:bg-brand-400 dark:text-neutral-900";
   return "bg-brand-100 text-neutral-700 dark:bg-brand-50 dark:text-neutral-800";

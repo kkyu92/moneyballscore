@@ -1,4 +1,4 @@
-import { ACCURACY_BASELINE } from "@moneyball/shared";
+import { ACCURACY_BASELINE, ACCURACY_GOOD_RATE } from "@moneyball/shared";
 
 import type { ScoringRuleDayCell } from "@/lib/accuracy/buildAccuracyData";
 import { SCORING_RULE_HEATMAP_ROWS } from "@/lib/accuracy/buildAccuracyData";
@@ -14,7 +14,7 @@ const DAY_LABELS_KO = ['월', '화', '수', '목', '금', '토', '일'];
 // >=60% brand / >=50% yellow / <50% red / null = neutral (소표본 N<3).
 function cellBgClass(acc: number | null): string {
   if (acc === null) return "bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400";
-  if (acc >= 0.6) return "bg-brand-500 text-white dark:bg-brand-600";
+  if (acc >= ACCURACY_GOOD_RATE) return "bg-brand-500 text-white dark:bg-brand-600";
   if (acc >= ACCURACY_BASELINE) return "bg-yellow-400 text-neutral-900 dark:bg-yellow-500";
   return "bg-red-400 text-white dark:bg-red-500";
 }

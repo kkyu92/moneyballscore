@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE } from '@moneyball/shared';
 import {
   parseMonthId,
   getRecentMonths,
@@ -188,7 +188,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
             <p className="text-sm text-gray-500 dark:text-gray-400">적중률</p>
             <p
               className={`text-3xl font-bold mt-1 ${
-                review.accuracyRate >= 0.6
+                review.accuracyRate >= ACCURACY_GOOD_RATE
                   ? "text-brand-600 dark:text-brand-400"
                   : review.accuracyRate >= 0.5
                     ? "text-yellow-600 dark:text-yellow-400"

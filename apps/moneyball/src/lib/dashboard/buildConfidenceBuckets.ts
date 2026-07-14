@@ -2,6 +2,7 @@ import {
   MIN_VERIFIED_GAMES_HEDGE,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_LEAN,
+  WINNER_PROB_MID,
 } from '@moneyball/shared';
 
 export interface ConfidenceBucketInput {
@@ -32,8 +33,8 @@ export interface ConfidenceBucketResult {
  * 직접 표시 — "승률" 로 환산하지 않음 (홈팀 승률 관점 제거 2026-04-23).
  *
  *   confidence < WINNER_PROB_LEAN       → 확신 낮음
- *   WINNER_PROB_LEAN ~ 0.60             → 확신 보통
- *   0.60 ~ WINNER_PROB_CONFIDENT        → 확신 높음
+ *   WINNER_PROB_LEAN ~ WINNER_PROB_MID  → 확신 보통
+ *   WINNER_PROB_MID ~ WINNER_PROB_CONFIDENT → 확신 높음
  *   ≥ WINNER_PROB_CONFIDENT             → 확신 최상
  *
  * 전체 검증 표본이 MIN_VERIFIED_GAMES_HEDGE 미만이면 gated=true 반환 (UI는 "집계 중" 렌더).
@@ -42,8 +43,8 @@ export interface ConfidenceBucketResult {
 
 const BUCKET_DEFS: Array<{ label: string; min: number; max: number }> = [
   { label: '확신 낮음', min: 0, max: WINNER_PROB_LEAN },
-  { label: '확신 보통', min: WINNER_PROB_LEAN, max: 0.6 },
-  { label: '확신 높음', min: 0.6, max: WINNER_PROB_CONFIDENT },
+  { label: '확신 보통', min: WINNER_PROB_LEAN, max: WINNER_PROB_MID },
+  { label: '확신 높음', min: WINNER_PROB_MID, max: WINNER_PROB_CONFIDENT },
   { label: '확신 최상', min: WINNER_PROB_CONFIDENT, max: 1.01 },
 ];
 

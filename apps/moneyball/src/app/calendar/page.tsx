@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL } from '@moneyball/shared';
+import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL, ACCURACY_GOOD_RATE } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -191,7 +191,7 @@ function accuracyClass(rate: number | null, verifiedN: number): string {
   if (rate == null || verifiedN === 0) {
     return 'bg-gray-50 dark:bg-[var(--color-surface-card)] text-gray-400 dark:text-gray-500';
   }
-  if (rate >= 0.6) return 'bg-brand-500/15 text-brand-600 dark:text-brand-300';
+  if (rate >= ACCURACY_GOOD_RATE) return 'bg-brand-500/15 text-brand-600 dark:text-brand-300';
   if (rate >= 0.5) return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300';
   return 'bg-red-500/10 text-red-600 dark:text-red-300';
 }

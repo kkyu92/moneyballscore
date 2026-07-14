@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { type TeamCode, shortTeamName, josa, SITE_URL } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, SITE_URL, ACCURACY_GOOD_RATE } from '@moneyball/shared';
 import {
   canonicalPair,
   pairsForTeam,
@@ -205,7 +205,7 @@ export default async function MatchupPage({ params }: PageProps) {
           <div className="flex items-baseline gap-3">
             <p
               className={`text-3xl font-bold font-mono ${
-                (predictionAccuracy.rate ?? 0) >= 0.6
+                (predictionAccuracy.rate ?? 0) >= ACCURACY_GOOD_RATE
                   ? "text-brand-600 dark:text-brand-400"
                   : (predictionAccuracy.rate ?? 0) >= 0.5
                     ? "text-yellow-600 dark:text-yellow-400"

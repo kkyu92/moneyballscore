@@ -9,7 +9,7 @@ import {
   PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   mlbShortTeamName,
-  MLB_GAMES_PER_TEAM, SITE_URL
+  MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
@@ -168,7 +168,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
               className={`text-2xl font-bold mt-1 font-mono ${
                 profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N
                   ? "text-gray-400 dark:text-gray-500"
-                  : (profile.accuracyRate ?? 0) >= 0.6
+                  : (profile.accuracyRate ?? 0) >= ACCURACY_GOOD_RATE
                     ? "text-brand-600 dark:text-brand-400"
                     : (profile.accuracyRate ?? 0) >= 0.5
                       ? "text-yellow-600 dark:text-yellow-400"

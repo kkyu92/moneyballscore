@@ -582,6 +582,15 @@ export const WINNER_PROB_LEAN_PCT = Math.round(WINNER_PROB_LEAN * 100);
 export const WINNER_PROB_CONFIDENT_PCT = Math.round(WINNER_PROB_CONFIDENT * 100);
 
 /**
+ * WP 티어 중간 경계 — lean/confident 버킷 구분선.
+ * buildConfidenceBuckets 의 "확신 보통" (LEAN~MID) / "확신 높음" (MID~CONFIDENT) 분할.
+ *
+ * silent drift family wave 308 (cycle 1639) — buildConfidenceBuckets.ts
+ * `max: 0.6` / `min: 0.6` hardcoded swap.
+ */
+export const WINNER_PROB_MID = 0.6;
+
+/**
  * Sunday confidence cap — 일요일 경기 confidence > WINNER_PROB_LEAN(0.55) 시
  * 본 값으로 하향 (judge-agent.ts). 사용자 가시 표기 (about / methodology / guide)
  * 와 logic 양쪽 단일 source.
@@ -636,6 +645,15 @@ export const ACCURACY_BASELINE_PCT = Math.round(ACCURACY_BASELINE * 100);
  * `accuracyPct >= 60` hardcoded swap.
  */
 export const ACCURACY_GOOD_PCT = 60;
+
+/**
+ * 적중률 "좋음" 색상 임계 (소수) — accuracyRate >= ACCURACY_GOOD_RATE 시 green.
+ * ACCURACY_GOOD_PCT 의 소수 파생 — 변경 시 자동 동기.
+ *
+ * silent drift family wave 308 (cycle 1639) — 9 callsites
+ * `rate >= 0.6` / `accuracyRate >= 0.6` / `acc >= 0.6` hardcoded swap.
+ */
+export const ACCURACY_GOOD_RATE = ACCURACY_GOOD_PCT / 100;
 
 /**
  * 요약 바 표시 최소 예측 경기 수 — predicted < SUMMARY_BAR_MIN_GAMES 시
