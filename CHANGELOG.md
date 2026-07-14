@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.51.6 — 2026-07-14 (cycle 1633)
+
+### wave-304 explore-idea: /standings Elo 레이팅 컬럼 추가
+- **현재 Elo 컬럼** — /standings 순위표에 AI 모델 현재 팀 전력 Elo 레이팅 컬럼 신규 추가
+- **eloTrend 재활용** — 기존 `buildEloTrend()` 마지막 포인트에서 팀별 Elo 추출 (신규 DB 쿼리 0건)
+- **시각적 차별화** — ELO_NEUTRAL(1500) 초과 = brand색, 미만 = gray
+- **설명 문구** — "Elo 컬럼 = AI 모델 현재 팀 전력 평가 (1500 기준)"
+- **explore-idea-wave-304.test.ts** — 5 tests PASS / 총 1970 tests PASS
+
+---
+
 ## v0.5.51.5 — 2026-07-14 (cycle 1632)
 
 ### wave-303 silent drift family sweep
