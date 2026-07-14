@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { KBO_FACTOR_COUNT, shortTeamName, winnerProbOf, type TeamCode } from '@moneyball/shared';
+import { KBO_FACTOR_COUNT, shortTeamName, winnerProbOf, ELO_NEUTRAL_WIN_PCT, type TeamCode } from '@moneyball/shared';
 import { TeamLogo } from '../shared/TeamLogo';
 
 interface TopStatPickCardProps {
@@ -12,7 +12,7 @@ interface TopStatPickCardProps {
 
 export function TopStatPickCard({ gameId, homeTeam, awayTeam, homeWinProb, date }: TopStatPickCardProps) {
   const winProb = winnerProbOf(homeWinProb);
-  const isHomeFavored = homeWinProb >= 0.5;
+  const isHomeFavored = homeWinProb >= ELO_NEUTRAL_WIN_PCT;
   const favoredTeam = isHomeFavored ? homeTeam : awayTeam;
   const underdogTeam = isHomeFavored ? awayTeam : homeTeam;
   const pct = Math.round(winProb * 100);

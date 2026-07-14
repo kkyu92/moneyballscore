@@ -12,6 +12,7 @@ import {
   pickTierEmoji,
   WINNER_TIER_LABEL,
   confToWinProb,
+  CLOSE_GAME_MARGIN,
 } from '@moneyball/shared';
 import {
   canonicalPair,
@@ -108,7 +109,7 @@ export default async function MatchupPage({ params }: PageProps) {
       g.status === "final" &&
       g.homeScore != null &&
       g.awayScore != null &&
-      Math.abs(g.homeScore - g.awayScore) <= 1,
+      Math.abs(g.homeScore - g.awayScore) <= CLOSE_GAME_MARGIN,
   ).length;
 
   const otherMatchupsA = pairsForTeam(tA.code).filter(
@@ -431,7 +432,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
               g.status === "final" && g.homeScore != null && g.awayScore != null
                 ? Math.abs(g.homeScore - g.awayScore)
                 : null;
-            const isClose = margin != null && margin <= 1;
+            const isClose = margin != null && margin <= CLOSE_GAME_MARGIN;
             const homeName = shortTeamName(g.homeCode);
             const awayName = shortTeamName(g.awayCode);
             const predName = g.predictedWinnerCode
