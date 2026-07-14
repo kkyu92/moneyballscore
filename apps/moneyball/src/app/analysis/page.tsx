@@ -13,7 +13,7 @@ import {
   ELO_NEUTRAL_WIN_PCT,
   HOME_ELO_BONUS,
   KBO_PREDICT_DAILY_TIME_KST,
-
+  RECENT_FORM_GAMES,
   pickTierEmoji,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
@@ -31,6 +31,8 @@ import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { YesterdayStatusFilter } from '@/components/analysis/YesterdayStatusFilter';
 import { ThisWeekStatusFilter } from '@/components/analysis/ThisWeekStatusFilter';
+import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
+import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
 
@@ -591,7 +593,7 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -601,6 +603,7 @@ export default async function AnalysisIndexPage() {
     getBestPickOfWeek(currentWeek.startDate, currentWeek.endDate),
     getBestPickOfWeek(currentMonth.startDate, currentMonth.endDate),
     getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
+    buildTeamStrengthSnapshot(),
   ]);
 
   const simplifiedMode =
@@ -833,6 +836,24 @@ export default async function AnalysisIndexPage() {
               );
             })}
           </div>
+        </section>
+      )}
+
+      {/* 팀 전력 현황 — wave-317 (cycle 1648) */}
+      {teamStrengthRows.length > 0 && (
+        <section aria-labelledby="team-strength-title">
+          <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+            <h2 id="team-strength-title" className="text-xl font-bold">
+              📊 팀 전력 현황
+            </h2>
+            <Link href="/standings" className="text-sm text-brand-600 hover:underline">
+              순위표 →
+            </Link>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            Elo 레이팅 + 최근 {RECENT_FORM_GAMES}경기 승률 기준 — 팀 이름 클릭 시 상세 프로필
+          </p>
+          <TeamStrengthGrid rows={teamStrengthRows} />
         </section>
       )}
 

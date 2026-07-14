@@ -1931,3 +1931,20 @@ export const CE_MIN_SAMPLES = 3;
  * 1점 차 이내 = 접전 경기. 변경 시 2 callsite 자동 동기.
  */
 export const CLOSE_GAME_MARGIN = 1;
+
+/**
+ * 팀 전력 현황 최근 폼 "강세" 임계 — wave-317 (cycle 1648).
+ * TeamStrengthGrid 컴포넌트에서 recent_form ≥ 본 값 = 강세(brand color) 표시.
+ * RECENT_FORM_GAMES(10) 기준 최근 10경기 승률. ACCURACY_GOOD_RATE(0.6, AI 적중률
+ * 임계) 와 수치 동일하나 의미 다름 — 팀 승률 vs AI 예측 적중률 별개 개념.
+ * 변경 시 TeamStrengthGrid + buildTeamStrengthSnapshot callsite 자동 동기.
+ */
+export const TEAM_STRENGTH_FORM_STRONG = 0.6;
+
+/**
+ * 팀 전력 현황 최근 폼 "약세" 임계 — wave-317 (cycle 1648).
+ * TeamStrengthGrid 컴포넌트에서 recent_form ≤ 본 값 = 약세(muted) 표시.
+ * TEAM_STRENGTH_FORM_STRONG (0.6) 의 하한 sibling.
+ * 변경 시 TeamStrengthGrid + buildTeamStrengthSnapshot callsite 자동 동기.
+ */
+export const TEAM_STRENGTH_FORM_WEAK = 0.4;
