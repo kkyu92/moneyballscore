@@ -1835,3 +1835,27 @@ export const CALIBRATION_AXIS_MIN = 0.4;
  * confidence 축 1.0 상한.
  */
 export const CALIBRATION_AXIS_MAX = 1.0;
+
+/**
+ * CREDIT_EXHAUSTED 간소화 모드 감지 임계값 — silent drift family wave 307 (cycle 1638).
+ * 동일 숫자 0.32 hardcoded 3 surface:
+ *   - app/analysis/page.tsx: avg game confidence ≤ 0.32 → simplifiedMode
+ *   - app/predictions/page.tsx: recentConfs avg ≤ 0.32 → simplifiedMode
+ *   - app/predictions/[date]/page.tsx: recentConfs avg ≤ 0.32 → simplifiedMode
+ *
+ * CREDIT_EXHAUSTED 시 모든 예측 confidence = 0.3 고정 → 평균도 ≈0.3.
+ * 0.32 임계값 = 0.3 고정 케이스 포착 + 정상 예측(0.52~0.63) 오감지 방지.
+ * 변경 시 3 callsite 자동 동기.
+ */
+export const CE_DETECT_THRESHOLD = 0.32;
+
+/**
+ * CREDIT_EXHAUSTED 감지를 위한 최소 표본 수 — CE_DETECT_THRESHOLD 참조.
+ * 동일 숫자 3 hardcoded 3 surface:
+ *   - app/analysis/page.tsx: todayData.games.length >= 3
+ *   - app/predictions/page.tsx: recentConfs.length >= 3
+ *   - app/predictions/[date]/page.tsx: recentConfs.length >= 3
+ *
+ * 단일 예측 이상치 오판 방지용 최소 표본 (경기 수). 변경 시 3 callsite 자동 동기.
+ */
+export const CE_MIN_SAMPLES = 3;

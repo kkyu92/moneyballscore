@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
 
@@ -328,8 +328,8 @@ export default async function PredictionDatePage({ params }: Props) {
     .map((g) => g.predictions[0]?.confidence)
     .filter((c): c is number => c != null);
   const simplifiedMode =
-    recentConfs.length >= 3 &&
-    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= 0.32;
+    recentConfs.length >= CE_MIN_SAMPLES &&
+    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= CE_DETECT_THRESHOLD;
 
   // 카드 정렬: 검증완료 → 검증대기 → 기록없음 → 취소. 정렬 안에서는 game_time.
   const sortedGames = [...games].sort((a, b) => {
