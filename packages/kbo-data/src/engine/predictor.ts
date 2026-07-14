@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, KBO_TEAMS, clampWinnerProb } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, ELO_NEUTRAL_WIN_PCT, HOME_ADVANTAGE, KBO_TEAMS, clampWinnerProb } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { PredictionInput, PredictionResult } from '../types';
 import { scoreParkWeather, parkWeatherFactor } from '../factors/park-weather';
@@ -139,11 +139,11 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
   // 범위 제한 — WINNER_PROB_CLAMP_MIN/MAX 단일 source (silent drift family wave 93)
   homeWinProb = clampWinnerProb(homeWinProb);
 
-  // 신뢰도: 0.5에서 멀수록 높음
-  const confidence = Math.abs(homeWinProb - 0.5) * 2;
+  // 신뢰도: ELO_NEUTRAL_WIN_PCT에서 멀수록 높음
+  const confidence = Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * 2;
 
   // 승자 결정
-  const predictedWinner: TeamCode = homeWinProb >= 0.5
+  const predictedWinner: TeamCode = homeWinProb >= ELO_NEUTRAL_WIN_PCT
     ? input.game.homeTeam
     : input.game.awayTeam;
 
@@ -189,6 +189,6 @@ function generateReasoning(
     })
     .join(', ');
 
-  const winner = homeWinProb >= 0.5 ? homeName : awayName;
+  const winner = homeWinProb >= ELO_NEUTRAL_WIN_PCT ? homeName : awayName;
   return `${winner} 승리 예측 (${pct}%). 주요 근거: ${topFactors}.`;
 }

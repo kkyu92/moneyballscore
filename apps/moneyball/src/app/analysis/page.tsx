@@ -785,13 +785,13 @@ export default async function AnalysisIndexPage() {
                     {dayGames.map((g) => {
                       const homeName = shortTeamName(g.homeCode);
                       const awayName = shortTeamName(g.awayCode);
-                      const favoredHome = g.homeWinProb >= 0.5;
+                      const favoredHome = g.homeWinProb >= ELO_NEUTRAL_WIN_PCT;
                       const favoredCode = favoredHome ? g.homeCode : g.awayCode;
                       const favoredName = shortTeamName(favoredCode);
                       const winPct = Math.round((favoredHome ? g.homeWinProb : 1 - g.homeWinProb) * 100);
                       // wave-313: model prediction badge
                       const hasModel = g.modelHomeWinProb != null;
-                      const mFavoredHome = hasModel ? g.modelHomeWinProb! >= 0.5 : favoredHome;
+                      const mFavoredHome = hasModel ? g.modelHomeWinProb! >= ELO_NEUTRAL_WIN_PCT : favoredHome;
                       const mFavoredName = shortTeamName(mFavoredHome ? g.homeCode : g.awayCode);
                       const mWinPct = hasModel
                         ? Math.round((mFavoredHome ? g.modelHomeWinProb! : 1 - g.modelHomeWinProb!) * 100)

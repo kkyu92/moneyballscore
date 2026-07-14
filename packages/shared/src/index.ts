@@ -1921,3 +1921,13 @@ export const CE_DETECT_THRESHOLD = 0.32;
  * 단일 예측 이상치 오판 방지용 최소 표본 (경기 수). 변경 시 3 callsite 자동 동기.
  */
 export const CE_MIN_SAMPLES = 3;
+
+/**
+ * 접전 경기 판정 기준 점수 차 — silent drift family wave 315 (cycle 1646).
+ * 동일 숫자 1 hardcoded 2 surface:
+ *   - app/matchup/[teamA]/[teamB]/page.tsx: Math.abs(homeScore - awayScore) <= 1 (closeCount 계산)
+ *   - app/matchup/[teamA]/[teamB]/page.tsx: margin <= 1 (isClose row 판정)
+ *
+ * 1점 차 이내 = 접전 경기. 변경 시 2 callsite 자동 동기.
+ */
+export const CLOSE_GAME_MARGIN = 1;
