@@ -1,4 +1,6 @@
-export const MIN_POLL_TOTAL = 3;
+import { MIN_POLL_TOTAL } from '@moneyball/shared';
+
+export { MIN_POLL_TOTAL };
 
 export interface CommunityVsAIResult {
   communityGames: number;

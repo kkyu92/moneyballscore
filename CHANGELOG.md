@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.51.7 — 2026-07-14 (cycle 1634)
+
+### wave-305 silent drift family sweep
+- **MIN_POLL_TOTAL** — picks/buildCommunityAccuracy.ts (exported) + components/picks/PickButton.tsx (local copy) → 단일 source (`@moneyball/shared`)
+- **CALIBRATION_BUCKET_WIDTH/START/COUNT** — lib/accuracy/buildAccuracyData.ts + app/debug/reliability/page.tsx (identical 3-tuple) → 단일 source (`@moneyball/shared`)
+
+2 constant groups → 4 callsites. 1978 tests PASS.
+
+---
+
 ## v0.5.51.6 — 2026-07-14 (cycle 1633)
 
 ### wave-304 explore-idea: /standings Elo 레이팅 컬럼 추가

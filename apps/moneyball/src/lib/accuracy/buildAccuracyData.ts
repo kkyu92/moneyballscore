@@ -14,6 +14,9 @@ import {
   SUNDAY_CAP_CONFIDENCE,
   ROLLING_ACCURACY_WINDOW_DAYS,
   ROLLING_ACCURACY_TOTAL_DAYS,
+  CALIBRATION_BUCKET_WIDTH,
+  CALIBRATION_BUCKET_START,
+  CALIBRATION_BUCKET_COUNT,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -211,9 +214,9 @@ export interface ConfidenceTier {
   ci95Half: number;
 }
 
-const BUCKET_WIDTH = 0.05;
-const BUCKET_START = 0.5;
-const BUCKET_COUNT = 10;
+const BUCKET_WIDTH = CALIBRATION_BUCKET_WIDTH;
+const BUCKET_START = CALIBRATION_BUCKET_START;
+const BUCKET_COUNT = CALIBRATION_BUCKET_COUNT;
 
 export function bucketize(rows: PredRow[]): Bucket[] {
   const acc = Array.from({ length: BUCKET_COUNT }, () => ({

@@ -3,11 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
-import { shortTeamName, type TeamCode } from '@moneyball/shared';
+import { shortTeamName, type TeamCode, MIN_POLL_TOTAL } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
 
-const MIN_POLL_TOTAL = 3;
 const DEVICE_KEY = 'mb_device_id_v1';
 
 function getOrCreateDeviceId(): string {
