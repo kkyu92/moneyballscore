@@ -11,6 +11,7 @@ import {
   winnerProbOf,
   pickTierEmoji,
   WINNER_TIER_LABEL,
+  confToWinProb,
 } from '@moneyball/shared';
 import {
   canonicalPair,
@@ -479,7 +480,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
                   {predName ?? "—"}
                   {g.confidence != null && (
                     <span className="text-gray-400 dark:text-gray-500 ml-1">
-                      ({Math.round((0.5 + g.confidence / 2) * 100)}%)
+                      ({Math.round(confToWinProb(g.confidence) * 100)}%)
                     </span>
                   )}
                 </td>

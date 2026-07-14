@@ -10,6 +10,7 @@ import {
   CURRENT_SCORING_RULE,
   RECENT_FORM_GAMES,
   SITE_URL,
+  confToWinProb,
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -280,7 +281,7 @@ export default async function TeamRecentPage({ params }: PageProps) {
                     : `${r.opponentName} 승`;
                   const confPct =
                     r.confidence != null
-                      ? Math.round((0.5 + r.confidence / 2) * 100)
+                      ? Math.round(confToWinProb(r.confidence) * 100)
                       : null;
 
                   return (

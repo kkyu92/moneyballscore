@@ -9,7 +9,8 @@ import {
   PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   mlbShortTeamName,
-  MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE
+  MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE,
+  confToWinProb,
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
@@ -301,7 +302,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
                         {predictionLabel}
                         {r.confidence != null && (
                           <span className="text-gray-400 dark:text-gray-500 ml-1">
-                            ({Math.round((0.5 + r.confidence / 2) * 100)}%)
+                            ({Math.round(confToWinProb(r.confidence) * 100)}%)
                           </span>
                         )}
                       </td>

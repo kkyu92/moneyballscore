@@ -29,6 +29,7 @@ import {
   getKSTMondayUtcIso,
   getKSTMonthStartUtcIso,
   winnerProbOf,
+  confToWinProb,
   classifyWinnerProb,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_CONFIDENT_PCT,
@@ -683,6 +684,18 @@ describe('winnerProbOf', () => {
   it('null / undefined 는 0.5 로 폴백', () => {
     expect(winnerProbOf(null)).toBe(0.5);
     expect(winnerProbOf(undefined)).toBe(0.5);
+  });
+});
+
+describe('confToWinProb — wave-310 single source (cycle 1641)', () => {
+  it('confidence=0 → 0.5 (중립)', () => {
+    expect(confToWinProb(0)).toBe(0.5);
+  });
+  it('confidence=1 → 1.0 (최고)', () => {
+    expect(confToWinProb(1)).toBe(1.0);
+  });
+  it('confidence=0.5 → 0.75', () => {
+    expect(confToWinProb(0.5)).toBe(0.75);
   });
 });
 

@@ -1413,6 +1413,15 @@ export function winnerProbOf(homeWinProb: number | null | undefined): number {
   return Math.max(homeWinProb, 1 - homeWinProb);
 }
 
+/**
+ * DB confidence (0~1) → winner probability (0.5~1).
+ * confidence=0 → 50% (중립), confidence=1 → 100% (확실).
+ * homeWinProb 부재 시 fallback. 7 callsites — wave-310 single source.
+ */
+export function confToWinProb(confidence: number): number {
+  return 0.5 + confidence / 2;
+}
+
 /** homeWinProb → 3단계 tier. null 은 tossup 으로 간주. */
 export function classifyWinnerProb(
   homeWinProb: number | null | undefined,

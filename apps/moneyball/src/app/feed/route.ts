@@ -6,7 +6,8 @@ import {
   assertSelectOk,
   errMsg,
   PRODUCTION_COHORT_RULES,
-  FEED_ISR_SECONDS, FEED_GAME_LIMIT, SITE_URL
+  FEED_ISR_SECONDS, FEED_GAME_LIMIT, SITE_URL,
+  confToWinProb,
 } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
@@ -157,7 +158,7 @@ export async function GET() {
     const hwp = pred.reasoning?.homeWinProb;
     const winnerProb = hwp != null
       ? Math.max(hwp, 1 - hwp)
-      : 0.5 + pred.confidence / 2;
+      : confToWinProb(pred.confidence);
     const pct = Math.round(winnerProb * 100);
 
     const isFinal = game.status === 'final';

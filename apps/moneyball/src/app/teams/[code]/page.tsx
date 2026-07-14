@@ -10,6 +10,7 @@ import {
   shortTeamName, SITE_URL,
   KBO_OFFICIAL_URL,
   ACCURACY_GOOD_RATE,
+  confToWinProb,
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
@@ -497,7 +498,7 @@ export default async function TeamPage({ params }: PageProps) {
                         {predictionLabel}
                         {r.confidence != null && (
                           <span className="text-gray-400 dark:text-gray-500 ml-1">
-                            ({Math.round((0.5 + r.confidence / 2) * 100)}%)
+                            ({Math.round(confToWinProb(r.confidence) * 100)}%)
                           </span>
                         )}
                       </td>

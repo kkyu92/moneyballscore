@@ -3,6 +3,7 @@ import {
   PREDICTION_CARD_TOP_FACTORS,
   shortTeamName,
   type TeamCode,
+  confToWinProb,
 } from "@moneyball/shared";
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
@@ -78,7 +79,7 @@ export function PredictionCard({
   // debate가 50% 미만으로 낮춰도 predicted_winner는 유지 (적중 판정 일관성)
   const confidencePct = winProb
     ? Math.round(winProb * 100)
-    : Math.round((0.5 + confidence / 2) * 100);
+    : Math.round(confToWinProb(confidence) * 100);
 
   const cardClass = isBigMatch
     ? "bg-white dark:bg-[var(--color-surface-card)] rounded-xl border-2 border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30 p-5 hover:shadow-lg transition-shadow relative"
