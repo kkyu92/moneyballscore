@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.51.3 — 2026-07-14 (cycle 1629)
+
+### wave-301 WinProbBar
+- **PredictionCard 승률 분할 바** — 예측 카드에 홈/원정 승리 확률 시각화 바 추가 (`home_win_prob` DB 컬럼 fallback 포함)
+- **CREDIT_EXHAUSTED 대응** — LLM debate 비활성 시 `home_win_prob` (순수 세이버메트릭스 모델 확률) 를 winProb fallback 으로 사용
+- **KBO 관례 준수** — 원정(좌) / 홈(우) 방향 정렬, 바 오른쪽 앵커 채움
+
+---
+
 ## v0.5.51.2 — 2026-07-14 (cycle 1613)
 
 ### 분석 인사이트
