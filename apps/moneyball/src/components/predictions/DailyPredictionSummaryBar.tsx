@@ -1,4 +1,11 @@
-import { shortTeamName, WINNER_PROB_CONFIDENT, type TeamCode } from '@moneyball/shared';
+import {
+  shortTeamName,
+  WINNER_PROB_CONFIDENT,
+  SUMMARY_BAR_MIN_GAMES,
+  ACCURACY_GOOD_PCT,
+  ACCURACY_BASELINE_PCT,
+  type TeamCode,
+} from '@moneyball/shared';
 import { TeamLogo } from '@/components/shared/TeamLogo';
 
 interface TopPick {
@@ -22,7 +29,7 @@ export function DailyPredictionSummaryBar({
   correctCount,
   topPick,
 }: DailyPredictionSummaryBarProps) {
-  if (predictedCount < 2) return null;
+  if (predictedCount < SUMMARY_BAR_MIN_GAMES) return null;
 
   const accuracyPct =
     verifiedCount > 0 ? Math.round((correctCount / verifiedCount) * 100) : null;
@@ -79,9 +86,9 @@ export function DailyPredictionSummaryBar({
       {accuracyPct !== null && (
         <span
           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-medium ${
-            accuracyPct >= 60
+            accuracyPct >= ACCURACY_GOOD_PCT
               ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-              : accuracyPct >= 50
+              : accuracyPct >= ACCURACY_BASELINE_PCT
                 ? 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
           }`}

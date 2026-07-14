@@ -619,6 +619,34 @@ export const ACCURACY_BASELINE = 0.5;
 export const BRIER_BASELINE = 0.25;
 
 /**
+ * 적중률 기준선 % 표기 — ACCURACY_BASELINE (0.5) 의 % 파생. UI 색상 threshold
+ * (DailyPredictionSummaryBar >= 50% neutral / gray 구간) 단일 source.
+ * ACCURACY_BASELINE 변경 시 자동 동기.
+ *
+ * silent drift family wave 300 (cycle 1628) — DailyPredictionSummaryBar.tsx
+ * `accuracyPct >= 50` hardcoded swap.
+ */
+export const ACCURACY_BASELINE_PCT = Math.round(ACCURACY_BASELINE * 100);
+
+/**
+ * 적중률 "좋음" 색상 임계 — accuracyPct >= ACCURACY_GOOD_PCT 시 green 배지.
+ * DailyPredictionSummaryBar 요약 바 green/gray/red 3단계 색상 단일 source.
+ *
+ * silent drift family wave 300 (cycle 1628) — DailyPredictionSummaryBar.tsx
+ * `accuracyPct >= 60` hardcoded swap.
+ */
+export const ACCURACY_GOOD_PCT = 60;
+
+/**
+ * 요약 바 표시 최소 예측 경기 수 — predicted < SUMMARY_BAR_MIN_GAMES 시
+ * DailyPredictionSummaryBar 숨김. 단일 경기 날 빈 요약 노출 방지.
+ *
+ * silent drift family wave 300 (cycle 1628) — DailyPredictionSummaryBar.tsx
+ * `predictedCount < 2` hardcoded swap.
+ */
+export const SUMMARY_BAR_MIN_GAMES = 2;
+
+/**
  * 소표본 hedge 임계 — verifiedN < SMALL_SAMPLE_N 시 적중률을 흐림 색 / "참고용"
  * 라벨로 노출. 본 임계는 통계적 유의성 (≥5경기) 보다는 사용자 UX 의 "표본 부족"
  * 자연어 경계. 팀별 (teams/[code]) + 선수별 (players hub) 동일 임계 사용 —
