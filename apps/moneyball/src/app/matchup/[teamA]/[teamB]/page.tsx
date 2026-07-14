@@ -193,7 +193,7 @@ export default async function MatchupPage({ params }: PageProps) {
                     </div>
                     <div className="flex-1 h-3 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden relative">
                       <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-brand-500/70"
+                        className="absolute inset-y-0 right-0 rounded-full bg-brand-500/70"
                         style={{ width: `${homeWinProbPct}%` }}
                       />
                     </div>
