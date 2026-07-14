@@ -11,7 +11,7 @@
  */
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { KBO_TEAMS, assertSelectOk, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, assertSelectOk, INSIGHTS_SERIES_LIMIT, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 
 const TEAM_CODES = Object.keys(KBO_TEAMS) as TeamCode[];
@@ -113,7 +113,7 @@ function extractCode(field: SeriesGameRow["home_team"]): string | null {
 /** topic 의 모든 예측 — 최신순. */
 export async function getSeriesByTopic(
   topic: SeriesTopic,
-  limit = 60,
+  limit = INSIGHTS_SERIES_LIMIT,
 ): Promise<SeriesEntry[]> {
   const supabase = createSeriesClient();
   const result = await supabase

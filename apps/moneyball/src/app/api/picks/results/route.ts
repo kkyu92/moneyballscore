@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@/lib/supabase/server';
-import { CURRENT_SCORING_RULE, assertSelectOk } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, assertSelectOk, PICKS_RESULTS_IDS_LIMIT } from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     .split(',')
     .map((s) => parseInt(s.trim(), 10))
     .filter((n) => !isNaN(n) && n > 0)
-    .slice(0, 200); // 상한 보호
+    .slice(0, PICKS_RESULTS_IDS_LIMIT); // 상한 보호
 
   if (ids.length === 0) return NextResponse.json([] as PickGameResult[]);
 

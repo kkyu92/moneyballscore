@@ -14,7 +14,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
-import { shortTeamName, type TeamCode, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { shortTeamName, type TeamCode, CURRENT_SCORING_RULE, ANALOG_MATCHUP_LIMIT } from "@moneyball/shared";
 
 interface AnalogRow {
   gameId: number;
@@ -59,7 +59,7 @@ export async function fetchHistoricalAnalogs(
   awayTeamId: number,
   currentGameId: number,
   asOfDate: string,
-  limit = 3,
+  limit = ANALOG_MATCHUP_LIMIT,
 ): Promise<AnalogRow[]> {
   try {
     const supabase = createPublicClient();

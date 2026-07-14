@@ -1661,3 +1661,77 @@ export function detectFactorAnomalies(
 export function errMsg(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
+
+/**
+ * Fuse.js 클라이언트 검색 결과 상한 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 60 hardcoded 1 surface:
+ *   - components/search/SearchClient.tsx: fuse.search(q, { limit: 60 })
+ *
+ * 검색어 입력 시 Fuse.js 가 반환할 최대 히트 수. 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_FUSE_LIMIT = 60;
+
+/**
+ * 인사이트 시리즈 페이지 쿼리 한도 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 60 hardcoded 1 surface:
+ *   - lib/insights/series.ts: getSeriesByTopic(topic, limit = 60)
+ *
+ * 시리즈 페이지에 표시할 예측 건수 상한. 변경 시 본 상수 1곳만 갱신.
+ */
+export const INSIGHTS_SERIES_LIMIT = 60;
+
+/**
+ * PredictionCard 주요 근거 표시 수 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 2 hardcoded 1 surface:
+ *   - components/predictions/PredictionCard.tsx: topFavoringFactors(factors, isHome, 2)
+ *
+ * 예측 카드 하단 "주요 근거" 섹션에 표시할 상위 팩터 수. 변경 시 본 상수 1곳만 갱신.
+ */
+export const PREDICTION_CARD_TOP_FACTORS = 2;
+
+/**
+ * PredictionCardLive 상위 팩터 표시 수 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 1 hardcoded 1 surface:
+ *   - components/predictions/PredictionCardLive.tsx: topFavoringFactors(..., isHomePredicted, 1)
+ *
+ * 라이브 예측 카드 AI 힌트에 표시할 상위 팩터 수 (라이브 특성상 1개 압축). 변경 시 본 상수 1곳만 갱신.
+ */
+export const PREDICTION_CARD_LIVE_TOP_FACTORS = 1;
+
+/**
+ * 과거 유사 대전 기본 조회 수 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 3 hardcoded 2 surface:
+ *   - components/predictions/HistoricalAnalogMatchup.tsx: limit = 3 (default param)
+ *   - components/predictions/HistoricalAnalogMatchup.tsx: doc comment "limit 3"
+ *
+ * 예측 상세 페이지 유사 대전 기록 표시 수. 변경 시 본 상수 1곳만 갱신.
+ */
+export const ANALOG_MATCHUP_LIMIT = 3;
+
+/**
+ * 라이벌 기억 기본 조회 수 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 3 hardcoded 2 surface:
+ *   - components/predictions/RivalryMemorySurface.tsx: fetchMatchupMemories limit = 3
+ *   - components/predictions/RivalryMemorySurface.tsx: RivalryMemorySurface limit = 3
+ *
+ * 예측 카드 라이벌 메모리 섹션에 표시할 agent_memories 건수. 변경 시 본 상수 1곳만 갱신.
+ */
+export const RIVALRY_MEMORY_LIMIT = 3;
+
+/**
+ * Picks 결과 조회 게임 ID 상한 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 200 hardcoded 1 surface:
+ *   - app/api/picks/results/route.ts: ids.slice(0, 200)
+ *
+ * 단일 요청에 조회할 최대 게임 ID 수. 변경 시 본 상수 1곳만 갱신.
+ */
+export const PICKS_RESULTS_IDS_LIMIT = 200;
+
+/**
+ * Picks 폴 조회 게임 ID 상한 — silent drift family wave 302 (cycle 1630).
+ * 동일 숫자 50 hardcoded 1 surface:
+ *   - app/api/picks/poll/route.ts: ids.slice(0, 50)
+ *
+ * 단일 투표 결과 조회 요청의 최대 게임 ID 수. 변경 시 본 상수 1곳만 갱신.
+ */
+export const PICKS_POLL_IDS_LIMIT = 50;

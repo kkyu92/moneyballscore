@@ -15,6 +15,7 @@
  * (해당 페이지는 예측 기록 열람 용도, 투표 진입점 X).
  */
 
+import { PREDICTION_CARD_LIVE_TOP_FACTORS } from '@moneyball/shared';
 import { useKboScores } from '@/hooks/use-kbo-scores';
 import { PredictionCard, type PredictionCardProps } from './PredictionCard';
 import { PickButton } from '@/components/picks/PickButton';
@@ -30,7 +31,7 @@ function buildAiHintProps(props: PredictionCardProps) {
   const isHomePredicted = props.predictedWinner === props.homeTeam;
   const aiPredictedWinner: 'home' | 'away' = isHomePredicted ? 'home' : 'away';
   const topFactors = props.factors
-    ? topFavoringFactors(props.factors, isHomePredicted, 1)
+    ? topFavoringFactors(props.factors, isHomePredicted, PREDICTION_CARD_LIVE_TOP_FACTORS)
     : [];
   const aiTopFactor = topFactors[0] ? `${topFactors[0]} 우세` : undefined;
   return { aiPredictedWinner, aiWinProb: props.winProb, aiTopFactor };

@@ -13,7 +13,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 
-import { KBO_TEAMS, SEARCH_DEBOUNCE_MS, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, SEARCH_DEBOUNCE_MS, SEARCH_FUSE_LIMIT, type TeamCode } from '@moneyball/shared';
 
 import { TeamLogo } from '@/components/shared/TeamLogo';
 
@@ -120,7 +120,7 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
   // Compute results — fuse search + group by kind + cap per-kind.
   const results = useMemo(() => {
     if (!debouncedQ) return [];
-    const hits = fuse.search(debouncedQ, { limit: 60 });
+    const hits = fuse.search(debouncedQ, { limit: SEARCH_FUSE_LIMIT });
     return hits.map((h) => h.item);
   }, [fuse, debouncedQ]);
 

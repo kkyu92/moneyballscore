@@ -1,5 +1,6 @@
 import {
   getConfidenceColor,
+  PREDICTION_CARD_TOP_FACTORS,
   shortTeamName,
   type TeamCode,
 } from "@moneyball/shared";
@@ -338,7 +339,7 @@ export function PredictionCard({
 
       {(() => {
         const isHome = predictedWinner === homeTeam;
-        const top = factors ? topFavoringFactors(factors, isHome, 2) : [];
+        const top = factors ? topFavoringFactors(factors, isHome, PREDICTION_CARD_TOP_FACTORS) : [];
         if (top.length === 0 && !judgeReasoning) return null;
         return (
           <div className="mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">

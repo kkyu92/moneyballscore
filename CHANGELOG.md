@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.5.51.4 — 2026-07-14 (cycle 1630)
+
+### wave-302 silent drift family sweep
+- **SEARCH_FUSE_LIMIT** — SearchClient Fuse.js 히트 상한 60 → 단일 source (`packages/shared`)
+- **INSIGHTS_SERIES_LIMIT** — insights/series 쿼리 한도 60 → 단일 source
+- **PREDICTION_CARD_TOP_FACTORS** — PredictionCard 주요 근거 2개 → 단일 source
+- **PREDICTION_CARD_LIVE_TOP_FACTORS** — PredictionCardLive AI 힌트 팩터 1개 → 단일 source
+- **ANALOG_MATCHUP_LIMIT** — HistoricalAnalogMatchup 유사 대전 3건 → 단일 source
+- **RIVALRY_MEMORY_LIMIT** — RivalryMemorySurface 라이벌 메모리 3건 → 단일 source (2 callsite)
+- **PICKS_RESULTS_IDS_LIMIT** — picks/results API ID 상한 200 → 단일 source
+- **PICKS_POLL_IDS_LIMIT** — picks/poll API ID 상한 50 → 단일 source
+
+---
+
 ## v0.5.51.3 — 2026-07-14 (cycle 1629)
 
 ### wave-301 WinProbBar

@@ -14,7 +14,7 @@
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import * as Sentry from "@sentry/nextjs";
-import { KBO_TEAMS, shortTeamName, type TeamCode } from "@moneyball/shared";
+import { KBO_TEAMS, shortTeamName, type TeamCode, RIVALRY_MEMORY_LIMIT } from "@moneyball/shared";
 
 export interface MatchupMemory {
   teamCode: TeamCode;
@@ -54,7 +54,7 @@ export async function fetchMatchupMemories(
   homeTeam: TeamCode,
   awayTeam: TeamCode,
   asOfDate: string,
-  limit = 3,
+  limit = RIVALRY_MEMORY_LIMIT,
 ): Promise<MatchupMemory[]> {
   try {
     const supabase = createMemoryClient();
@@ -96,7 +96,7 @@ export async function RivalryMemorySurface({
   awayTeam,
   asOfDate,
   memories: memoriesProp,
-  limit = 3,
+  limit = RIVALRY_MEMORY_LIMIT,
 }: Props) {
   const asOf = asOfDate ?? new Date().toISOString().slice(0, 10);
   const memories =

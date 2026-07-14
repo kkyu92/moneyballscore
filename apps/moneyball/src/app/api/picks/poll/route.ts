@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { PICKS_POLL_IDS_LIMIT } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     .split(',')
     .map((s) => parseInt(s.trim(), 10))
     .filter((n) => !isNaN(n) && n > 0)
-    .slice(0, 50);
+    .slice(0, PICKS_POLL_IDS_LIMIT);
 
   if (ids.length === 0) return NextResponse.json({} as PickPollResult);
 
