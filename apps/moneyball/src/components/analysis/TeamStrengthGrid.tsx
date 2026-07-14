@@ -3,6 +3,7 @@ import {
   ELO_DISPLAY_NEUTRAL_BAND,
   ELO_NEUTRAL,
   RECENT_FORM_GAMES,
+  TEAM_STRENGTH_ELO_DELTA_WINDOW,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
 } from '@moneyball/shared';
@@ -31,6 +32,30 @@ function EloTag({ elo }: { elo: number }) {
         ({sign}
         {Math.round(delta)})
       </span>
+    </span>
+  );
+}
+
+function EloDeltaTag({ eloChange }: { eloChange?: number }) {
+  if (eloChange === undefined) return null;
+  const rounded = Math.round(eloChange);
+  if (rounded === 0) {
+    return (
+      <span className="font-mono text-[10px] tabular-nums text-gray-400 dark:text-gray-500 ml-1">
+        {/* TEAM_STRENGTH_ELO_DELTA_WINDOW 경기 기준 변화 없음 */}—
+      </span>
+    );
+  }
+  const isUp = rounded > 0;
+  return (
+    <span
+      className={`font-mono text-[10px] tabular-nums ml-1 ${
+        isUp ? 'text-brand-500 dark:text-brand-400' : 'text-red-400 dark:text-red-500'
+      }`}
+      title={`최근 ${TEAM_STRENGTH_ELO_DELTA_WINDOW}경기 Elo 변화`}
+    >
+      {isUp ? '↑' : '↓'}
+      {Math.abs(rounded)}
     </span>
   );
 }
@@ -90,7 +115,10 @@ export function TeamStrengthGrid({ rows }: Props) {
               {row.teamName}
             </span>
           </div>
-          <EloTag elo={row.elo} />
+          <div className="flex items-center gap-0.5">
+            <EloTag elo={row.elo} />
+            <EloDeltaTag eloChange={row.eloChange} />
+          </div>
           <FormBar form={row.recentForm} />
         </Link>
       ))}

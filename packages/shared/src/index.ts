@@ -1714,6 +1714,18 @@ export const ANALYSIS_UPCOMING_LIMIT = 30;
  */
 export const TEAM_STRENGTH_SNAPSHOT_LIMIT = 200;
 
+/**
+ * 팀 전력 스냅샷 Elo 변화 윈도우 (경기 수).
+ *
+ * 현재 Elo 와 ELO_DELTA_WINDOW 경기 전 Elo 의 차이 = 팀 전력 추세 (↑↓).
+ * TEAM_STRENGTH_SNAPSHOT_LIMIT(200) 대비 충분히 작아야 함 (200 / 10팀 = 20경기 여유).
+ *
+ * 1 occurrence 분포 (cycle 1650 측정):
+ *   - apps/moneyball/src/lib/teams/buildTeamStrengthSnapshot.ts 1건
+ *   - apps/moneyball/src/app/__tests__/silent-drift-wave-319.test.ts 1건 (guard)
+ */
+export const TEAM_STRENGTH_ELO_DELTA_WINDOW = 5;
+
 export interface FactorAnomaly {
   factorKey: string;
   value: number;

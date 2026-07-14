@@ -3,6 +3,7 @@ import {
   assertSelectOk,
   KBO_TEAMS,
   shortTeamName,
+  TEAM_STRENGTH_ELO_DELTA_WINDOW,
   TEAM_STRENGTH_SNAPSHOT_LIMIT,
   type TeamCode,
 } from '@moneyball/shared';
@@ -14,6 +15,8 @@ export interface TeamStrengthRow {
   elo: number;
   recentForm: number;
   gameDate: string;
+  /** Elo 변화량 (최근 TEAM_STRENGTH_ELO_DELTA_WINDOW 경기 전 대비). 데이터 부족 시 undefined. */
+  eloChange?: number;
 }
 
 interface SnapshotPredRow {
@@ -56,45 +59,54 @@ export async function buildTeamStrengthSnapshot(): Promise<TeamStrengthRow[]> {
   if (!data || data.length === 0) return [];
 
   const rows = data as unknown as SnapshotPredRow[];
-  const seen = new Map<string, TeamStrengthRow>();
+  const seenCurrent = new Map<string, TeamStrengthRow>();
+  const teamCount = new Map<string, number>(); // per-team prediction count (desc order)
+  const eloOld = new Map<string, number>(); // Elo at TEAM_STRENGTH_ELO_DELTA_WINDOW games ago
 
   for (const row of rows) {
     const homeCode = row.game?.home_team?.code;
     const awayCode = row.game?.away_team?.code;
     const gameDate = row.game?.game_date ?? '';
 
-    if (
-      homeCode &&
-      !seen.has(homeCode) &&
-      row.home_elo != null &&
-      row.home_recent_form != null
-    ) {
-      seen.set(homeCode, {
-        teamCode: homeCode as TeamCode,
-        teamName: shortTeamName(homeCode as TeamCode),
-        elo: row.home_elo,
-        recentForm: row.home_recent_form,
-        gameDate,
-      });
+    if (homeCode && row.home_elo != null && row.home_recent_form != null) {
+      const cnt = (teamCount.get(homeCode) ?? 0) + 1;
+      teamCount.set(homeCode, cnt);
+
+      if (cnt === 1) {
+        seenCurrent.set(homeCode, {
+          teamCode: homeCode as TeamCode,
+          teamName: shortTeamName(homeCode as TeamCode),
+          elo: row.home_elo,
+          recentForm: row.home_recent_form,
+          gameDate,
+        });
+      } else if (cnt === TEAM_STRENGTH_ELO_DELTA_WINDOW) {
+        eloOld.set(homeCode, row.home_elo);
+      }
     }
 
-    if (
-      awayCode &&
-      !seen.has(awayCode) &&
-      row.away_elo != null &&
-      row.away_recent_form != null
-    ) {
-      seen.set(awayCode, {
-        teamCode: awayCode as TeamCode,
-        teamName: shortTeamName(awayCode as TeamCode),
-        elo: row.away_elo,
-        recentForm: row.away_recent_form,
-        gameDate,
-      });
-    }
+    if (awayCode && row.away_elo != null && row.away_recent_form != null) {
+      const cnt = (teamCount.get(awayCode) ?? 0) + 1;
+      teamCount.set(awayCode, cnt);
 
-    if (seen.size === Object.keys(KBO_TEAMS).length) break;
+      if (cnt === 1) {
+        seenCurrent.set(awayCode, {
+          teamCode: awayCode as TeamCode,
+          teamName: shortTeamName(awayCode as TeamCode),
+          elo: row.away_elo,
+          recentForm: row.away_recent_form,
+          gameDate,
+        });
+      } else if (cnt === TEAM_STRENGTH_ELO_DELTA_WINDOW) {
+        eloOld.set(awayCode, row.away_elo);
+      }
+    }
   }
 
-  return Array.from(seen.values()).sort((a, b) => b.elo - a.elo);
+  return Array.from(seenCurrent.values())
+    .sort((a, b) => b.elo - a.elo)
+    .map((row) => ({
+      ...row,
+      eloChange: eloOld.has(row.teamCode) ? row.elo - eloOld.get(row.teamCode)! : undefined,
+    }));
 }
