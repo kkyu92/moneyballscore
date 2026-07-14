@@ -1,4 +1,4 @@
-import { HOME_ADVANTAGE, KBO_TEAMS, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from '@moneyball/shared';
+import { ELO_DIVIDER, HOME_ADVANTAGE, KBO_TEAMS, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import type { GameFeatures, Model } from './types';
 
@@ -6,14 +6,14 @@ import type { GameFeatures, Model } from './types';
  * 실측 홈 어드밴티지 0.015 (51.5%) 를 Elo pt 단위로 환산한 값.
  * 동일 Elo 2팀 기준 pHome = 0.5 + 0.015 = 0.515 → delta ≈ 10.4 Elo pt.
  */
-const HOME_ADV_ELO_DEFAULT = 400 * Math.log10((0.5 + HOME_ADVANTAGE) / (0.5 - HOME_ADVANTAGE));
+const HOME_ADV_ELO_DEFAULT = ELO_DIVIDER * Math.log10((0.5 + HOME_ADVANTAGE) / (0.5 - HOME_ADVANTAGE));
 
 function clamp(x: number, lo: number, hi: number): number {
   return x < lo ? lo : x > hi ? hi : x;
 }
 
 function sigmoidElo(deltaElo: number): number {
-  return 1 / (1 + Math.pow(10, -deltaElo / 400));
+  return 1 / (1 + Math.pow(10, -deltaElo / ELO_DIVIDER));
 }
 
 /** 최소 baseline: 모두 0.5. */

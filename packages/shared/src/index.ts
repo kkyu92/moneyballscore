@@ -531,6 +531,26 @@ export const NEUTRAL_FACTOR = 0.5;
 export const HOME_ELO_BONUS = 24;
 
 /**
+ * Elo rating 표준 scale factor — Elo logistic 공식 `1 / (1 + 10^(diff / ELO_DIVIDER))`.
+ *
+ * silent drift family wave 312 (cycle 1643) — analysis/page.tsx:405 (wave-311 신규)
+ * + page.tsx:291 + backtest-v2-helpers.ts + models.ts + logistic.ts + mlb-base.ts
+ * 6 callsite sweep.
+ *
+ * 400 = chess 표준 Elo divider (1 ELO_DIVIDER diff → 10배 승률비). KBO/MLB/체스 공통.
+ * 변경 X 예정 (물리 상수급) — 단일 source 박제로 grep 용이성 + typo 차단.
+ *
+ * 6 occurrence 분포 (cycle 1643 측정):
+ *   - apps/moneyball/src/app/analysis/page.tsx 1건 (wave-311 Elo winProb)
+ *   - apps/moneyball/src/app/page.tsx 1건 (home scheduled game Elo)
+ *   - packages/kbo-data/src/backtest/backtest-v2-helpers.ts 1건 (computeEloProb)
+ *   - packages/kbo-data/src/backtest/models.ts 1건 (sigmoidElo)
+ *   - packages/kbo-data/src/backtest/logistic.ts 1건 (vectorize eloDiff)
+ *   - packages/kbo-data/src/factors/mlb-base.ts 1건 (MLB Elo factor)
+ */
+export const ELO_DIVIDER = 400;
+
+/**
  * HOME_ELO_BONUS 를 승률 percentage 로 변환한 approximate 표시값.
  *
  * Elo 400-point conversion: 1 / (1 + 10^(-24/400)) - 0.5 ≈ 0.0345 = 3.45%.
