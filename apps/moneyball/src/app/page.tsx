@@ -68,6 +68,7 @@ interface HomePrediction {
   confidence: number;
   prediction_type: string;
   reasoning: { debate?: HomeDebate; homeWinProb?: number } | null;
+  home_win_prob: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
   home_lineup_woba: number | null;
@@ -144,6 +145,7 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
       away_sp:players!games_away_sp_id_fkey(name_ko),
       predictions(
         predicted_winner, confidence, prediction_type, reasoning,
+        home_win_prob,
         home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
         is_correct, actual_winner, factors, model_version,
         winner:teams!predictions_predicted_winner_fkey(code)
@@ -752,7 +754,7 @@ export default async function HomePage() {
                   </div>
                 );
               }
-              const homeWinProbRaw = pred.reasoning?.homeWinProb;
+              const homeWinProbRaw = pred.reasoning?.homeWinProb ?? pred.home_win_prob ?? null;
               const winProb =
                 homeWinProbRaw != null
                   ? pred.winner?.code === homeCode

@@ -246,6 +246,34 @@ export function PredictionCard({
         </div>
       </div>
 
+      {winProb != null && !isFinal && !isPostponed && (() => {
+        const homeWinPct = predictedWinner === homeTeam
+          ? Math.round(winProb * 100)
+          : 100 - Math.round(winProb * 100);
+        const awayWinPct = 100 - homeWinPct;
+        return (
+          <div className="mt-3 mb-1">
+            <div
+              className="relative h-1.5 w-full rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700"
+              role="meter"
+              aria-label={`원정 ${awayWinPct}% 홈 ${homeWinPct}%`}
+              aria-valuenow={homeWinPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="absolute right-0 top-0 h-full bg-brand-500 dark:bg-brand-400"
+                style={{ width: `${homeWinPct}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-0.5 text-[10px] text-gray-400 dark:text-gray-500 leading-none">
+              <span>원정 {awayWinPct}%</span>
+              <span>홈 {homeWinPct}%</span>
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="border-t border-gray-100 dark:border-[var(--color-border)] pt-3 grid grid-cols-2 gap-2 text-sm">
         {homeSPName && awaySPName && (
           <div className="col-span-2 flex justify-between text-gray-600 dark:text-gray-300">

@@ -72,6 +72,7 @@ interface DatePrediction {
   predicted_winner: number | null;
   confidence: number;
   prediction_type: string;
+  home_win_prob: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
   home_sp_xfip: number | null;
@@ -130,6 +131,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
       away_sp:players!games_away_sp_id_fkey(name_ko),
       predictions(
         predicted_winner, confidence, prediction_type,
+        home_win_prob,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba,
         home_bullpen_fip, away_bullpen_fip,
@@ -482,7 +484,7 @@ export default async function PredictionDatePage({ params }: Props) {
 
             const sportsEventJsonLd = buildSportsEventJsonLd(game, date);
             const verdict = getVerdict(pred.reasoning);
-            const homeWinProbRaw = getHomeWinProb(pred.reasoning);
+            const homeWinProbRaw = getHomeWinProb(pred.reasoning) ?? pred.home_win_prob ?? undefined;
             const winProb =
               typeof homeWinProbRaw === "number"
                 ? pred.winner?.code === homeCode
