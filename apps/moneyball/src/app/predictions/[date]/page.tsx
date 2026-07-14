@@ -10,8 +10,9 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
+import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -341,6 +342,28 @@ export default async function PredictionDatePage({ params }: Props) {
     return (a.game_time ?? '').localeCompare(b.game_time ?? '');
   });
 
+  // 최고 자신감 픽 — 취소 제외 predicted 중 confidence 최대값.
+  // confidence: 0-1 (0=박빙/50%, 1=100%). winProbPct = 0.5 + conf/2 * 100.
+  const topPickGame = predicted
+    .filter((g) => g.status !== 'postponed' && (g.predictions[0]?.confidence ?? 0) > 0.1)
+    .sort((a, b) => (b.predictions[0]?.confidence ?? 0) - (a.predictions[0]?.confidence ?? 0))[0];
+  const topPick = topPickGame
+    ? (() => {
+        const p = topPickGame.predictions[0];
+        const conf = p.confidence;
+        const winProbPct = Math.round((0.5 + conf / 2) * 100);
+        const teamCode = p.winner?.code as TeamCode | undefined;
+        if (!teamCode) return null;
+        return {
+          teamCode,
+          winProbPct,
+          isConfident: winProbPct / 100 >= WINNER_PROB_CONFIDENT,
+          isVerified: topPickGame.status !== 'postponed' && p.is_correct != null,
+          isCorrect: p.is_correct,
+        };
+      })()
+    : null;
+
   const intro = buildIntro(date, games, predicted, verified, correct, cancelled, missing);
   const articleJsonLd = buildArticleJsonLd(
     date, games, predicted, verified, correct, cancelled, missing,
@@ -405,6 +428,13 @@ export default async function PredictionDatePage({ params }: Props) {
         </div>
         <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300 pt-2">{intro}</p>
       </header>
+
+      <DailyPredictionSummaryBar
+        predictedCount={predicted.length}
+        verifiedCount={verified.length}
+        correctCount={correct.length}
+        topPick={topPick}
+      />
 
       {games.length > 0 ? (
         <div className="space-y-6">
