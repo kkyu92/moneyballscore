@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { KBO_TEAMS, SITE_HOST } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, KBO_TEAMS, SITE_HOST } from "@moneyball/shared";
 import { parseSeriesTopic } from "@/lib/insights/series";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
@@ -140,7 +140,7 @@ export default async function Image({ params }: Props) {
               gap: 6,
             }}
           >
-            <span>📊 AI Sabermetrics · 10 Factors</span>
+            <span>{`📊 AI Sabermetrics · ${KBO_FACTOR_COUNT} Factors`}</span>
             <span>🎯 Series Reasoning Timeline</span>
           </div>
           <div

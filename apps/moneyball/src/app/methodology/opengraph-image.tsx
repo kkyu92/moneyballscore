@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { CURRENT_SCORING_RULE, SITE_HOST } from "@moneyball/shared";
+import { CURRENT_SCORING_RULE, KBO_FACTOR_COUNT, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
@@ -72,7 +72,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["FIP", "wOBA", "WAR", "Elo", "10 Factors"].map((tag) => (
+          {["FIP", "wOBA", "WAR", "Elo", `${KBO_FACTOR_COUNT} Factors`].map((tag) => (
             <div
               key={tag}
               style={{
@@ -100,7 +100,7 @@ export default function Image() {
           }}
         >
           <span>{SITE_HOST}/methodology</span>
-          <span>10 Factors · AI Debate</span>
+          <span>{`${KBO_FACTOR_COUNT} Factors · AI Debate`}</span>
         </div>
       </div>
     ),
