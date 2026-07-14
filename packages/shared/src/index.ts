@@ -1785,3 +1785,36 @@ export const NICKNAME_MAX_CHARS = 12;
  * 투표 제출 요청의 device_id 최대 문자 수 (UUID 36자 + 여유). 변경 시 본 상수 1곳만 갱신.
  */
 export const DEVICE_ID_MAX_LENGTH = 64;
+
+/**
+ * 커뮤니티 픽 최소 투표 수 — silent drift family wave 305 (cycle 1634).
+ * 동일 숫자 3 hardcoded 2 surface:
+ *   - lib/picks/buildCommunityAccuracy.ts: if (total < 3) continue  (exported, library)
+ *   - components/picks/PickButton.tsx: const MIN_POLL_TOTAL = 3  (local copy, no import)
+ *
+ * 투표 집계 시 노출 기준: 총 투표수 < 3 이면 분포 비공개. 변경 시 본 상수 1곳만 갱신.
+ */
+export const MIN_POLL_TOTAL = 3;
+
+/**
+ * 캘리브레이션 bucket 폭 — silent drift family wave 305 (cycle 1634).
+ * 동일 숫자 0.05 / 0.5 / 10 hardcoded 2 surface:
+ *   - lib/accuracy/buildAccuracyData.ts: BUCKET_WIDTH/START/COUNT (bucketize 함수 내)
+ *   - app/debug/reliability/page.tsx: BUCKET_WIDTH/START/COUNT (로컬 bucketize 사본)
+ *
+ * confidence 0.5~1.0 구간을 10개 5% 폭 bucket 으로 분할. 캘리브레이션 플롯 공통 스키마.
+ * 변경 시 두 callsite 자동 동기.
+ */
+export const CALIBRATION_BUCKET_WIDTH = 0.05;
+
+/**
+ * 캘리브레이션 bucket 시작 confidence 값 — CALIBRATION_BUCKET_WIDTH 참조.
+ * 현재 모델 confidence 대부분 0.5~0.7 구간이므로 0.5 에서 시작.
+ */
+export const CALIBRATION_BUCKET_START = 0.5;
+
+/**
+ * 캘리브레이션 bucket 개수 — CALIBRATION_BUCKET_WIDTH / CALIBRATION_BUCKET_START 참조.
+ * 0.5~1.0 (0.5 range) / 0.05 (width) = 10 칸.
+ */
+export const CALIBRATION_BUCKET_COUNT = 10;

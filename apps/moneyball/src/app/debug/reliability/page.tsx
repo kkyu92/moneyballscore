@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { BRIER_BASELINE } from '@moneyball/shared';
+import { BRIER_BASELINE, CALIBRATION_BUCKET_WIDTH, CALIBRATION_BUCKET_START, CALIBRATION_BUCKET_COUNT } from '@moneyball/shared';
 import { neutral, brand } from '@/lib/design-tokens';
 
 // /debug/reliability — 예측 신뢰도 reliability diagram
@@ -44,11 +44,9 @@ interface Bucket {
   ci95Half: number;
 }
 
-// 5% 폭 bucket. 현재 모델 confidence 대부분 0.5~0.7 구간이므로 0.5~1.0 을 10칸
-// 으로. N=0 bucket 은 렌더 시 제외.
-const BUCKET_WIDTH = 0.05;
-const BUCKET_START = 0.5;
-const BUCKET_COUNT = 10;
+const BUCKET_WIDTH = CALIBRATION_BUCKET_WIDTH;
+const BUCKET_START = CALIBRATION_BUCKET_START;
+const BUCKET_COUNT = CALIBRATION_BUCKET_COUNT;
 
 function bucketize(rows: PredRow[]): Bucket[] {
   const acc: Array<{ sumConf: number; n: number; hits: number }> = Array.from(
