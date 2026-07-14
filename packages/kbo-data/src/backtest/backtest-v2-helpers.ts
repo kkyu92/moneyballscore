@@ -5,7 +5,7 @@
  * 본 helper = pure functions only (Sentry-free / supabase-free) — vitest deterministic.
  */
 
-import { DEFAULT_WEIGHTS, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL, V2_PROMOTION_COHORT_N } from '@moneyball/shared';
+import { DEFAULT_WEIGHTS, ELO_DIVIDER, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL, V2_PROMOTION_COHORT_N } from '@moneyball/shared';
 
 const CLAMP_LO = 0.15;
 const CLAMP_HI = 0.85;
@@ -44,7 +44,7 @@ export type TeamEloMap = Map<number, number>;
  */
 export function computeEloProb(homeElo: number, awayElo: number): number {
   const adjustedDiff = awayElo - homeElo - HOME_ELO_BONUS;
-  return 1 / (1 + Math.pow(10, adjustedDiff / 400));
+  return 1 / (1 + Math.pow(10, adjustedDiff / ELO_DIVIDER));
 }
 
 /**

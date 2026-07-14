@@ -5,6 +5,7 @@
  * Hessian diagonal 로 계수별 SE 근사 계산 → 95% CI 비교.
  */
 
+import { ELO_DIVIDER } from '@moneyball/shared';
 import type { GameFeatures } from './types';
 
 export interface LogisticModel {
@@ -42,7 +43,7 @@ function dot(x: number[], w: number[]): number {
  * 각 축을 대략 [-1, 1] 근방으로 스케일링 — 수렴 안정성.
  */
 export function vectorize(f: GameFeatures): number[] {
-  const eloDiff = (f.homeElo - f.awayElo) / 400; // Elo 400 = 10배 승률비
+  const eloDiff = (f.homeElo - f.awayElo) / ELO_DIVIDER;
   const hForm = f.homeForm ?? 0.5;
   const aForm = f.awayForm ?? 0.5;
   const formDiff = hForm - aForm; // 보통 ±0.3

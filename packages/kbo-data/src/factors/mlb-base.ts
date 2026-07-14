@@ -1,4 +1,4 @@
-import { clampWinnerProb, HOME_ELO_BONUS } from '@moneyball/shared';
+import { clampWinnerProb, ELO_DIVIDER, HOME_ELO_BONUS } from '@moneyball/shared';
 
 export const MLB_BASE_WEIGHTS = {
   // KBO 10 동등
@@ -80,7 +80,7 @@ export function computeMlbProbability(input: MlbFactorInputs): number {
     + MLB_BASE_WEIGHTS.war * (safe(input.war.home) - safe(input.war.away)) * 0.01
     + MLB_BASE_WEIGHTS.head_to_head * (safe(input.head_to_head.homeWinRate, 0.5) - 0.5)
     + MLB_BASE_WEIGHTS.park_factor * (safe(input.park_factor, 1.0) - 1.0)
-    + MLB_BASE_WEIGHTS.elo * ((safe(input.elo.home) + HOME_ELO_BONUS_VALUE - safe(input.elo.away)) / 400)
+    + MLB_BASE_WEIGHTS.elo * ((safe(input.elo.home) + HOME_ELO_BONUS_VALUE - safe(input.elo.away)) / ELO_DIVIDER)
     + MLB_BASE_WEIGHTS.defense_sfr * (safe(input.defense_sfr.home) - safe(input.defense_sfr.away)) * 0.01
     + MLB_BASE_WEIGHTS.lineup_xwoba * (safe(input.lineup_xwoba.home) - safe(input.lineup_xwoba.away)) * 5
     + MLB_BASE_WEIGHTS.lineup_barrel_pct * (safe(input.lineup_barrel_pct.home) - safe(input.lineup_barrel_pct.away)) * 0.01

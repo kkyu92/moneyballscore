@@ -8,10 +8,12 @@ import {
   CE_DETECT_THRESHOLD,
   CE_MIN_SAMPLES,
   classifyWinnerProb,
+  ELO_DIVIDER,
   ELO_NEUTRAL,
   ELO_NEUTRAL_WIN_PCT,
   HOME_ELO_BONUS,
   KBO_PREDICT_DAILY_TIME_KST,
+  KBO_TEAM_COUNT,
   pickTierEmoji,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
@@ -389,7 +391,7 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       const ac = row.game?.away_team?.code;
       if (hc && row.home_elo != null && !eloMap.has(hc)) eloMap.set(hc, row.home_elo);
       if (ac && row.away_elo != null && !eloMap.has(ac)) eloMap.set(ac, row.away_elo);
-      if (eloMap.size >= 10) break;
+      if (eloMap.size >= KBO_TEAM_COUNT) break;
     }
   }
 
@@ -402,7 +404,7 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
     if (!homeCode || !awayCode) continue;
     const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
     const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
-    const homeWinProb = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
+    const homeWinProb = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / ELO_DIVIDER));
     result.push({
       gameId: r.id,
       gameDate: r.game_date,

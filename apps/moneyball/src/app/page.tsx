@@ -14,6 +14,7 @@ import {
   classifyWinnerProb,
   DAY_MS,
   DEFAULT_WEIGHTS,
+  ELO_DIVIDER,
   ELO_NEUTRAL,
   HOME_ADVANTAGE,
   HOME_ELO_BONUS,
@@ -288,7 +289,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
     } else {
       const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
       const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
-      homeWinPct = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
+      homeWinPct = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / ELO_DIVIDER));
       isPredicted = false;
     }
 
