@@ -751,6 +751,38 @@ export default async function AnalysisIndexPage() {
                         </div>
                       )}
                     </div>
+                    {/* wave-323: 승부 확률 바 */}
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <span className={`text-[10px] font-mono tabular-nums w-7 shrink-0 text-right ${
+                        winnerCode === g.homeCode
+                          ? 'text-brand-500 dark:text-brand-400 font-semibold'
+                          : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                        {Math.round(g.homeWinProb * 100)}%
+                      </span>
+                      <div
+                        className="relative flex-1 h-1 rounded-full bg-orange-100 dark:bg-orange-900/30 overflow-hidden"
+                        title={`홈 ${Math.round(g.homeWinProb * 100)}% · 원정 ${Math.round((1 - g.homeWinProb) * 100)}%`}
+                      >
+                        <div
+                          className={`absolute left-0 top-0 h-full rounded-full ${
+                            tier === 'confident'
+                              ? 'bg-brand-500 dark:bg-brand-400'
+                              : tier === 'lean'
+                                ? 'bg-brand-400 dark:bg-brand-500'
+                                : 'bg-gray-300 dark:bg-gray-600'
+                          }`}
+                          style={{ width: `${Math.round(g.homeWinProb * 100)}%` }}
+                        />
+                      </div>
+                      <span className={`text-[10px] font-mono tabular-nums w-7 shrink-0 ${
+                        winnerCode !== g.homeCode
+                          ? 'text-orange-500 dark:text-orange-400 font-semibold'
+                          : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                        {Math.round((1 - g.homeWinProb) * 100)}%
+                      </span>
+                    </div>
                     {g.topFactors.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {g.topFactors.map((f, i) => (
