@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, KBO_TEAM_COUNT, type TeamCode, SITE_URL } from "@moneyball/shared";
+import { KBO_TEAMS, KBO_TEAM_COUNT, SMALL_SAMPLE_N, type TeamCode, SITE_URL } from "@moneyball/shared";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { buildAllTeamAccuracy, type TeamAccuracyRow } from "@/lib/standings/buildTeamAccuracy";
+import { captureFallback } from "@/lib/observability/captureFallback";
+
+export const revalidate = 1800; // TEAMS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: "팀 프로필",
@@ -39,7 +43,14 @@ const TEAM_ORDER: TeamCode[] = [
   "WO",
 ];
 
-export default function TeamsIndexPage() {
+export default async function TeamsIndexPage() {
+  const rows: TeamAccuracyRow[] = await buildAllTeamAccuracy().catch((err) =>
+    captureFallback(err, [] as TeamAccuracyRow[], { source: "teams-hub-accuracy" }),
+  );
+
+  const accMap = new Map<TeamCode, TeamAccuracyRow>();
+  for (const row of rows) accMap.set(row.teamCode, row);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -91,6 +102,11 @@ export default function TeamsIndexPage() {
               : team.parkPf <= 95
                 ? "투수 친화"
                 : "중립";
+          const acc = accMap.get(code);
+          const hasData = acc && acc.verifiedN > 0;
+          const isReliable = hasData && acc.verifiedN >= SMALL_SAMPLE_N;
+          const accPct = acc?.accuracyRate != null ? Math.round(acc.accuracyRate * 100) : null;
+
           return (
             <Link
               key={code}
@@ -109,6 +125,13 @@ export default function TeamsIndexPage() {
               <p className="text-xs text-gray-400 dark:text-gray-500">
                 파크팩터 {team.parkPf} · {parkAdvantage}
               </p>
+              {hasData && accPct !== null && (
+                <p className={`text-xs font-medium ${isReliable ? 'text-brand-500 dark:text-brand-300' : 'text-gray-400 dark:text-gray-500'}`}>
+                  AI 적중률 {accPct}%
+                  <span className="font-normal ml-1">(n={acc.verifiedN})</span>
+                  {!isReliable && <span className="ml-1">참고용</span>}
+                </p>
+              )}
             </Link>
           );
         })}
