@@ -22,6 +22,7 @@ import {
   SITE_URL,
   STANDINGS_BOTTOM_TIER,
   STANDINGS_TOP_TIER,
+  VENUE_RECORD_MIN_GAMES,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -633,12 +634,28 @@ export default async function AnalysisIndexPage() {
   const recordMap = new Map<TeamCode, { wins: number; losses: number }>(
     (standingsRows as StandingRow[]).map((r) => [r.teamCode, { wins: r.wins, losses: r.losses }]),
   );
+  // wave-329: 홈/원정 성적 맵 (homeWins/homeLosses parsed from column 8)
+  const venueMap = new Map<TeamCode, { homeWins: number; homeLosses: number; awayWins: number; awayLosses: number }>(
+    (standingsRows as StandingRow[])
+      .filter((r) => r.homeWins !== undefined && r.homeLosses !== undefined)
+      .map((r) => [
+        r.teamCode,
+        {
+          homeWins: r.homeWins!,
+          homeLosses: r.homeLosses!,
+          awayWins: Math.max(0, r.wins - r.homeWins!),
+          awayLosses: Math.max(0, r.losses - r.homeLosses!),
+        },
+      ]),
+  );
   const gamesWithRank = todayData.games.map((g) => ({
     ...g,
     homeRank: rankMap.get(g.homeCode),
     awayRank: rankMap.get(g.awayCode),
     homeRecord: recordMap.get(g.homeCode),
     awayRecord: recordMap.get(g.awayCode),
+    homeTeamVenue: venueMap.get(g.homeCode),
+    awayTeamVenue: venueMap.get(g.awayCode),
   }));
 
   const simplifiedMode =
@@ -880,18 +897,40 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
-                          {/* wave-327: 시즌 성적 배지 */}
-                          {g.homeRecord && g.awayRecord && (
-                            <>
-                              <span className="text-gray-300 dark:text-gray-700">·</span>
-                              <span className="text-gray-400 dark:text-gray-500">
-                                {g.awayRecord.wins}승{g.awayRecord.losses}패
-                                <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
-                                {g.homeRecord.wins}승{g.homeRecord.losses}패
-                                <span className="text-gray-300 dark:text-gray-600"> (원/홈)</span>
-                              </span>
-                            </>
-                          )}
+                          {/* wave-329: 홈/원정 성적 배지 (wave-327 시즌 성적 → 구장별 성적으로 업그레이드) */}
+                          {(() => {
+                            const hv = g.homeTeamVenue;
+                            const av = g.awayTeamVenue;
+                            if (!hv || !av) return null;
+                            if (hv.homeWins + hv.homeLosses < VENUE_RECORD_MIN_GAMES) return null;
+                            if (av.awayWins + av.awayLosses < VENUE_RECORD_MIN_GAMES) return null;
+                            const awayWinRate = av.awayWins / (av.awayWins + av.awayLosses);
+                            const homeWinRate = hv.homeWins / (hv.homeWins + hv.homeLosses);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className="text-gray-400 dark:text-gray-500">
+                                  원{' '}
+                                  <span className={
+                                    awayWinRate >= 0.6
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : awayWinRate <= 0.4
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }>{av.awayWins}승{av.awayLosses}패</span>
+                                  <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                  홈{' '}
+                                  <span className={
+                                    homeWinRate >= 0.6
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : homeWinRate <= 0.4
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }>{hv.homeWins}승{hv.homeLosses}패</span>
+                                </span>
+                              </>
+                            );
+                          })()}
                         </div>
                       );
                     })()}
