@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import {
+  ELO_NEUTRAL_WIN_PCT,
   KBO_FACTOR_COUNT,
   KBO_TEAMS,
   KBO_OFFICIAL_URL,
@@ -259,7 +260,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     awaySfr: preGame.away_sfr,
   };
 
-  const homeWinProbForOverview = verdict?.homeWinProb ?? 0.5;
+  const homeWinProbForOverview = verdict?.homeWinProb ?? ELO_NEUTRAL_WIN_PCT;
   const verdictPresented = verdict
     ? presentJudgeReasoningWithFallback(verdict.reasoning)
     : undefined;
