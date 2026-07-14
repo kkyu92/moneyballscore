@@ -2030,3 +2030,19 @@ export const STANDINGS_BOTTOM_TIER = 8;
  * KBO 10팀 × 144경기 = 팀당 홈 72경기. 7경기 = 약 10% 진행 시점부터 표시.
  */
 export const VENUE_RECORD_MIN_GAMES = 7;
+
+/**
+ * 홈/원정 성적 배지 강세 승률 임계 — wave-330 (cycle 1664).
+ * winRate >= 본 값 시 brand color (강세) 표시.
+ * 60% = 10경기 기준 6승4패, KBO 상위권 구장 성적 기준.
+ * 변경 시 analysis/page.tsx callsite (homeWinRate / awayWinRate) 자동 동기.
+ */
+export const VENUE_WIN_RATE_HIGH = 0.6;
+
+/**
+ * 홈/원정 성적 배지 약세 승률 임계 — wave-330 (cycle 1664).
+ * winRate <= 본 값 시 orange color (약세) 표시.
+ * 40% = 10경기 기준 4승6패, KBO 하위권 구장 성적 기준.
+ * VENUE_WIN_RATE_HIGH 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const VENUE_WIN_RATE_LOW = 0.4;

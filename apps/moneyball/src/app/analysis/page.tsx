@@ -23,6 +23,8 @@ import {
   STANDINGS_BOTTOM_TIER,
   STANDINGS_TOP_TIER,
   VENUE_RECORD_MIN_GAMES,
+  VENUE_WIN_RATE_HIGH,
+  VENUE_WIN_RATE_LOW,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -912,18 +914,18 @@ export default async function AnalysisIndexPage() {
                                 <span className="text-gray-400 dark:text-gray-500">
                                   원{' '}
                                   <span className={
-                                    awayWinRate >= 0.6
+                                    awayWinRate >= VENUE_WIN_RATE_HIGH
                                       ? 'text-brand-500 dark:text-brand-400'
-                                      : awayWinRate <= 0.4
+                                      : awayWinRate <= VENUE_WIN_RATE_LOW
                                         ? 'text-orange-500 dark:text-orange-400'
                                         : ''
                                   }>{av.awayWins}승{av.awayLosses}패</span>
                                   <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                   홈{' '}
                                   <span className={
-                                    homeWinRate >= 0.6
+                                    homeWinRate >= VENUE_WIN_RATE_HIGH
                                       ? 'text-brand-500 dark:text-brand-400'
-                                      : homeWinRate <= 0.4
+                                      : homeWinRate <= VENUE_WIN_RATE_LOW
                                         ? 'text-orange-500 dark:text-orange-400'
                                         : ''
                                   }>{hv.homeWins}승{hv.homeLosses}패</span>
