@@ -1,4 +1,4 @@
-import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
+import { MIN_LEADERBOARD_PICKS, USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
 interface Props {
@@ -136,8 +136,8 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
         </div>
       </div>
 
-      {entries.length >= 50 && (
-        <p className="text-xs text-center text-gray-400 dark:text-gray-500">상위 50명만 표시됩니다</p>
+      {entries.length >= USER_LEADERBOARD_DISPLAY_LIMIT && (
+        <p className="text-xs text-center text-gray-400 dark:text-gray-500">상위 {USER_LEADERBOARD_DISPLAY_LIMIT}명만 표시됩니다</p>
       )}
     </div>
   );

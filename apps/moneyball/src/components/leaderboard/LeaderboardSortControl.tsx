@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import { USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
 
 export type LeaderboardSortMode = 'accuracy' | 'streak' | 'sample';
 
@@ -47,12 +48,12 @@ function writeSort(value: LeaderboardSortMode): void {
 }
 
 const STREAK_ORDER_CSS = Array.from(
-  { length: 50 },
+  { length: USER_LEADERBOARD_DISPLAY_LIMIT },
   (_, i) => `[data-leaderboard-list] [data-streak-rank="${i}"]{order:${i};}`,
 ).join('');
 
 const SAMPLE_ORDER_CSS = Array.from(
-  { length: 50 },
+  { length: USER_LEADERBOARD_DISPLAY_LIMIT },
   (_, i) => `[data-leaderboard-list] [data-sample-rank="${i}"]{order:${i};}`,
 ).join('');
 

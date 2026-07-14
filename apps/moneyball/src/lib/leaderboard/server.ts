@@ -4,6 +4,7 @@ import {
   assertSelectOk,
   getKSTMondayUtcIso,
   getKSTMonthStartUtcIso,
+  USER_LEADERBOARD_DISPLAY_LIMIT,
 } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry, LeaderboardMode } from './types';
 
@@ -16,7 +17,7 @@ const VIEW_BY_MODE: Record<LeaderboardMode, string> = {
 
 export async function fetchLeaderboard(
   mode: LeaderboardMode,
-  limit = 50
+  limit = USER_LEADERBOARD_DISPLAY_LIMIT
 ): Promise<LeaderboardEntry[]> {
   const supabase = await createClient();
   const view = VIEW_BY_MODE[mode];

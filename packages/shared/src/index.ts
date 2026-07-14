@@ -702,6 +702,15 @@ export const MIN_LEADERBOARD_PICKS = 5;
 export const LEADERBOARD_TOP_N = 10;
 
 /**
+ * User leaderboard display limit — silent drift family wave 289 (cycle 1616).
+ * Hardcoded 50 occurrence 3건:
+ *   - lib/leaderboard/server.ts: limit = 50 default
+ *   - components/leaderboard/LeaderboardTable.tsx: entries.length >= 50
+ *   - components/leaderboard/LeaderboardSortControl.tsx: { length: 50 } CSS order gen ×2
+ */
+export const USER_LEADERBOARD_DISPLAY_LIMIT = 50;
+
+/**
  * Rolling 적중률 윈도우 — silent drift family wave 117 (cycle 1334).
  * 동일 숫자 30(window) + 90(total) user-visible 4 surface + 함수 default 2 occurrence +
  * 주석 2 occurrence + 테스트 3 occurrence.
