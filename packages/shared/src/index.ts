@@ -2023,3 +2023,10 @@ export const STANDINGS_TOP_TIER = 3;
  * KBO 10개 팀 기준 8~10위 = 하위 30%. 변경 시 analysis/page.tsx callsite 자동 동기.
  */
 export const STANDINGS_BOTTOM_TIER = 8;
+
+/**
+ * 홈/원정 성적 배지 최소 경기 수 — wave-329 (cycle 1663).
+ * homeWins + homeLosses < 본 값이면 배지 숨김 (시즌 초 소표본 노이즈 차단).
+ * KBO 10팀 × 144경기 = 팀당 홈 72경기. 7경기 = 약 10% 진행 시점부터 표시.
+ */
+export const VENUE_RECORD_MIN_GAMES = 7;

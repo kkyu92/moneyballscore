@@ -255,6 +255,9 @@ export interface StandingRow {
   winPct: number;
   gamesBehind: number | null;
   recent10: string;
+  /** wave-329: 홈 성적 (column 8 파싱). undefined = 파싱 실패 */
+  homeWins?: number;
+  homeLosses?: number;
 }
 
 /**
@@ -294,9 +297,26 @@ export async function fetchStandings(): Promise<StandingRow[]> {
     const winPct = parseFloat(winPctText) || 0;
     const gbText = cells.eq(7).text().trim();
     const gamesBehind = gbText === '-' || gbText === '' ? null : parseFloat(gbText) || 0;
+
+    // wave-329: column 8 = 홈 성적 ("7-3" or "7승3패" or "7-3-0")
+    const homeText = cells.eq(8).text().trim();
+    let homeWins: number | undefined;
+    let homeLosses: number | undefined;
+    const dashMatch = homeText.match(/^(\d+)-(\d+)/);
+    if (dashMatch) {
+      homeWins = parseInt(dashMatch[1], 10);
+      homeLosses = parseInt(dashMatch[2], 10);
+    } else {
+      const korMatch = homeText.match(/(\d+)승(\d+)패/);
+      if (korMatch) {
+        homeWins = parseInt(korMatch[1], 10);
+        homeLosses = parseInt(korMatch[2], 10);
+      }
+    }
+
     const recent10 = cells.eq(9).text().trim();
 
-    rows.push({ rank, teamCode, games, wins, draws, losses, winPct, gamesBehind, recent10 });
+    rows.push({ rank, teamCode, games, wins, draws, losses, winPct, gamesBehind, recent10, homeWins, homeLosses });
   });
 
   return rows;
