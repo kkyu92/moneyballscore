@@ -2009,3 +2009,17 @@ export const PICKS_TREND_THRESHOLD = 0.1;
  * 변경 시 factor-explanations.ts callsite 자동 동기.
  */
 export const FACTOR_CONTRIBUTION_SCALE = 200;
+
+/**
+ * KBO 순위 배지 상위권 임계 — wave-325 (cycle 1657).
+ * analysis/page.tsx 경기 카드에서 순위 ≤ 본 값 = 상위권(brand color) 표시.
+ * KBO 10개 팀 기준 1~3위 = 상위 30%. 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const STANDINGS_TOP_TIER = 3;
+
+/**
+ * KBO 순위 배지 하위권 임계 — wave-325 (cycle 1657).
+ * analysis/page.tsx 경기 카드에서 순위 ≥ 본 값 = 하위권(orange color) 표시.
+ * KBO 10개 팀 기준 8~10위 = 하위 30%. 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const STANDINGS_BOTTOM_TIER = 8;

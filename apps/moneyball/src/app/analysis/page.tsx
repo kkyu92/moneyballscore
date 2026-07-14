@@ -20,6 +20,8 @@ import {
   PRODUCTION_COHORT_RULES,
   shortTeamName,
   SITE_URL,
+  STANDINGS_BOTTOM_TIER,
+  STANDINGS_TOP_TIER,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -749,17 +751,17 @@ export default async function AnalysisIndexPage() {
                             {g.homeRank !== undefined && g.awayRank !== undefined && (
                               <span className="ml-2">
                                 <span className={
-                                  g.awayRank <= 3
+                                  g.awayRank <= STANDINGS_TOP_TIER
                                     ? 'text-brand-500 dark:text-brand-400'
-                                    : g.awayRank >= 8
+                                    : g.awayRank >= STANDINGS_BOTTOM_TIER
                                       ? 'text-orange-500 dark:text-orange-400'
                                       : ''
                                 }>{g.awayRank}위</span>
                                 <span className="text-gray-300 dark:text-gray-600 mx-0.5">vs</span>
                                 <span className={
-                                  g.homeRank <= 3
+                                  g.homeRank <= STANDINGS_TOP_TIER
                                     ? 'text-brand-500 dark:text-brand-400'
-                                    : g.homeRank >= 8
+                                    : g.homeRank >= STANDINGS_BOTTOM_TIER
                                       ? 'text-orange-500 dark:text-orange-400'
                                       : ''
                                 }>{g.homeRank}위</span>
