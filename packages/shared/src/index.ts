@@ -106,6 +106,14 @@ export type TeamCode = keyof typeof KBO_TEAMS;
 export const KBO_TEAM_COUNT = Object.keys(KBO_TEAMS).length;
 
 /**
+ * 구장 유형 분류 임계값 — parkPf ≥ PARK_FACTOR_HITTER_MIN = 타자 친화, ≤ PARK_FACTOR_PITCHER_MAX = 투수 친화.
+ * silent drift family wave 298 (cycle 1626) — teams/mlb 8파일 16 occurrence sweep 단일 source.
+ * KBO_TEAMS.SS=108 / SK=105 (타자 친화) / WO=92 / LG=95 / OB=95 (투수 친화) 기준 정합.
+ */
+export const PARK_FACTOR_HITTER_MIN = 105;
+export const PARK_FACTOR_PITCHER_MAX = 95;
+
+/**
  * KBO 팀 간 head-to-head 페어 조합 수 — matchup 허브 (page + opengraph-image + twitter-image)
  * 3 surface 에 "45가지 맞대결 조합" / "45 head-to-head combos" 하드코딩 sweep 용 단일 source.
  * silent drift family wave 107 (cycle 1321) — wave 76 (KBO_TEAM_COUNT) / wave 83 (KBO_FACTOR_COUNT) /

@@ -5,6 +5,8 @@ import {
   MLB_DIVISIONS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide, SITE_URL
@@ -49,8 +51,8 @@ function divisionLabel(league: MlbLeagueSide, division: MlbDivisionSide) {
 }
 
 function parkTone(parkPf: number): "hitter" | "pitcher" | "neutral" {
-  if (parkPf >= 105) return "hitter";
-  if (parkPf <= 95) return "pitcher";
+  if (parkPf >= PARK_FACTOR_HITTER_MIN) return "hitter";
+  if (parkPf <= PARK_FACTOR_PITCHER_MAX) return "pitcher";
   return "neutral";
 }
 

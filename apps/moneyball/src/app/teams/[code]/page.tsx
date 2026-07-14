@@ -4,6 +4,8 @@ import Link from "next/link";
 import {
   KBO_TEAMS,
   SMALL_SAMPLE_N,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type TeamCode,
   shortTeamName, SITE_URL,
   KBO_OFFICIAL_URL,
@@ -115,9 +117,9 @@ export default async function TeamPage({ params }: PageProps) {
   };
 
   const parkAdvantage =
-    profile.parkPf >= 105
+    profile.parkPf >= PARK_FACTOR_HITTER_MIN
       ? "타자 친화"
-      : profile.parkPf <= 95
+      : profile.parkPf <= PARK_FACTOR_PITCHER_MAX
         ? "투수 친화"
         : "중립";
 

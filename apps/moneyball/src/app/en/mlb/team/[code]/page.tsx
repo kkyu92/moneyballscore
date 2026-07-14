@@ -5,6 +5,8 @@ import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
   SMALL_SAMPLE_N,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   mlbShortTeamName,
   MLB_GAMES_PER_TEAM, SITE_URL
@@ -107,7 +109,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
   };
 
   const parkAdvantage =
-    profile.parkPf >= 105 ? "Hitter-friendly" : profile.parkPf <= 95 ? "Pitcher-friendly" : "Neutral";
+    profile.parkPf >= PARK_FACTOR_HITTER_MIN ? "Hitter-friendly" : profile.parkPf <= PARK_FACTOR_PITCHER_MAX ? "Pitcher-friendly" : "Neutral";
 
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-4">

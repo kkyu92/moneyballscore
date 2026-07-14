@@ -6,6 +6,8 @@ import {
   MLB_TEAM_COUNT,
   MLB_AL_TEAM_COUNT,
   MLB_NL_TEAM_COUNT,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide, SITE_URL
@@ -109,9 +111,9 @@ export default function MlbTeamsHub() {
                   {codes.map((code) => {
                     const team = MLB_TEAMS[code];
                     const parkAdvantage =
-                      team.parkPf >= 105
+                      team.parkPf >= PARK_FACTOR_HITTER_MIN
                         ? "타자 친화"
-                        : team.parkPf <= 95
+                        : team.parkPf <= PARK_FACTOR_PITCHER_MAX
                           ? "투수 친화"
                           : "중립";
                     return (

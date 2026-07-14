@@ -6,6 +6,8 @@ import {
   MLB_TEAM_COUNT,
   MLB_AL_TEAM_COUNT,
   MLB_NL_TEAM_COUNT,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide, SITE_URL
@@ -112,9 +114,9 @@ export default function MlbTeamsHubEn() {
                   {codes.map((code) => {
                     const team = MLB_TEAMS[code];
                     const parkAdvantage =
-                      team.parkPf >= 105
+                      team.parkPf >= PARK_FACTOR_HITTER_MIN
                         ? "Hitter-friendly"
-                        : team.parkPf <= 95
+                        : team.parkPf <= PARK_FACTOR_PITCHER_MAX
                           ? "Pitcher-friendly"
                           : "Neutral";
                     return (

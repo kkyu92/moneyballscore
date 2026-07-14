@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAMS, KBO_TEAM_COUNT, SMALL_SAMPLE_N, type TeamCode, SITE_URL } from "@moneyball/shared";
+import { KBO_TEAMS, KBO_TEAM_COUNT, SMALL_SAMPLE_N, PARK_FACTOR_HITTER_MIN, PARK_FACTOR_PITCHER_MAX, type TeamCode, SITE_URL } from "@moneyball/shared";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { buildAllTeamAccuracy, type TeamAccuracyRow } from "@/lib/standings/buildTeamAccuracy";
@@ -97,9 +97,9 @@ export default async function TeamsIndexPage() {
         {TEAM_ORDER.map((code) => {
           const team = KBO_TEAMS[code];
           const parkAdvantage =
-            team.parkPf >= 105
+            team.parkPf >= PARK_FACTOR_HITTER_MIN
               ? "타자 친화"
-              : team.parkPf <= 95
+              : team.parkPf <= PARK_FACTOR_PITCHER_MAX
                 ? "투수 친화"
                 : "중립";
           const acc = accMap.get(code);
