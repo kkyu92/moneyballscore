@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import {
   assertSelectOk,
-  KBO_TEAMS,
   shortTeamName,
   TEAM_STRENGTH_ELO_DELTA_WINDOW,
   TEAM_STRENGTH_SNAPSHOT_LIMIT,
