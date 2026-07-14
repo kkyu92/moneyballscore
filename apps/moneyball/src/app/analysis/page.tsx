@@ -336,6 +336,7 @@ interface UpcomingScheduledGame {
   homeCode: TeamCode;
   awayCode: TeamCode;
   homeWinProb: number;
+  modelHomeWinProb: number | null; // wave-313: full-model prediction (null = not yet generated)
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -367,7 +368,7 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
     supabase
       .from('predictions')
       .select(`
-        home_elo, away_elo,
+        game_id, home_elo, away_elo, home_win_prob,
         game:games!predictions_game_id_fkey(
           home_team:teams!games_home_team_id_fkey(code),
           away_team:teams!games_away_team_id_fkey(code)
@@ -384,14 +385,17 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
   if (!scheduleData || scheduleData.length === 0) return [];
 
   const eloMap = new Map<string, number>();
+  const modelProbMap = new Map<number, number>(); // wave-313: game_id → home_win_prob
   if (eloResult.data) {
-    type EloRow = { home_elo: number | null; away_elo: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
+    type EloRow = { game_id: number | null; home_elo: number | null; away_elo: number | null; home_win_prob: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
     for (const row of eloResult.data as unknown as EloRow[]) {
       const hc = row.game?.home_team?.code;
       const ac = row.game?.away_team?.code;
       if (hc && row.home_elo != null && !eloMap.has(hc)) eloMap.set(hc, row.home_elo);
       if (ac && row.away_elo != null && !eloMap.has(ac)) eloMap.set(ac, row.away_elo);
-      if (eloMap.size >= KBO_TEAM_COUNT) break;
+      if (row.game_id != null && row.home_win_prob != null && !modelProbMap.has(row.game_id)) {
+        modelProbMap.set(row.game_id, row.home_win_prob);
+      }
     }
   }
 
@@ -412,6 +416,7 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       homeCode,
       awayCode,
       homeWinProb,
+      modelHomeWinProb: modelProbMap.get(r.id) ?? null,
     });
   }
   return result;
@@ -782,26 +787,42 @@ export default async function AnalysisIndexPage() {
                       const favoredCode = favoredHome ? g.homeCode : g.awayCode;
                       const favoredName = shortTeamName(favoredCode);
                       const winPct = Math.round((favoredHome ? g.homeWinProb : 1 - g.homeWinProb) * 100);
+                      // wave-313: model prediction badge
+                      const hasModel = g.modelHomeWinProb != null;
+                      const mFavoredHome = hasModel ? g.modelHomeWinProb! >= 0.5 : favoredHome;
+                      const mFavoredName = shortTeamName(mFavoredHome ? g.homeCode : g.awayCode);
+                      const mWinPct = hasModel
+                        ? Math.round((mFavoredHome ? g.modelHomeWinProb! : 1 - g.modelHomeWinProb!) * 100)
+                        : winPct;
                       return (
                         <li key={g.gameId}>
-                          <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] px-3 py-2.5 text-sm">
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                                {awayName} @ {homeName}
-                              </p>
-                              {g.gameTime && (
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 tabular-nums">
-                                  {g.gameTime.slice(0, 5)}
+                          <Link href={`/analysis/game/${g.gameId}`} className="block">
+                            <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-300 dark:hover:border-brand-600 transition-colors px-3 py-2.5 text-sm">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                  {awayName} @ {homeName}
                                 </p>
-                              )}
+                                {g.gameTime && (
+                                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 tabular-nums">
+                                    {g.gameTime.slice(0, 5)}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="ml-3 shrink-0 text-right">
+                                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+                                  {hasModel ? mFavoredName : favoredName} {hasModel ? mWinPct : winPct}%
+                                </p>
+                                <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                                  {hasModel ? '모델 예측' : 'Elo 기반'}
+                                </p>
+                                {hasModel && (
+                                  <p className="text-[10px] text-gray-300 dark:text-gray-600 mt-0.5">
+                                    Elo: {favoredName} {winPct}%
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                            <div className="ml-3 shrink-0 text-right">
-                              <p className="text-xs font-semibold text-brand-600 dark:text-brand-400">
-                                {favoredName} {winPct}%
-                              </p>
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500">예상 우세</p>
-                            </div>
-                          </div>
+                          </Link>
                         </li>
                       );
                     })}
