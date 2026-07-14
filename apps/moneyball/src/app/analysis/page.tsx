@@ -8,6 +8,7 @@ import {
   CE_DETECT_THRESHOLD,
   CE_MIN_SAMPLES,
   classifyWinnerProb,
+  ELO_DISPLAY_NEUTRAL_BAND,
   ELO_DIVIDER,
   ELO_NEUTRAL,
   ELO_NEUTRAL_WIN_PCT,
@@ -18,6 +19,8 @@ import {
   PRODUCTION_COHORT_RULES,
   shortTeamName,
   SITE_URL,
+  TEAM_STRENGTH_FORM_STRONG,
+  TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
   winnerProbOf,
   WINNER_PROB_CONFIDENT,
@@ -84,6 +87,11 @@ interface TodayGameCard {
   homeWinProb: number;
   confidence: number;
   topFactors: Array<{ label: string; favoredCode: TeamCode }>;
+  /** wave-321: Elo & 폼 비교 배지 */
+  homeElo?: number;
+  awayElo?: number;
+  homeRecentForm?: number;
+  awayRecentForm?: number;
 }
 
 interface TodayAnalysisData {
@@ -164,6 +172,10 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       homeWinProb: winnerProbOf(pred.reasoning?.homeWinProb),
       confidence: pred.confidence ?? 0.5,
       topFactors,
+      homeElo: pred.home_elo ?? undefined,
+      awayElo: pred.away_elo ?? undefined,
+      homeRecentForm: pred.home_recent_form ?? undefined,
+      awayRecentForm: pred.away_recent_form ?? undefined,
     });
   }
 
@@ -750,6 +762,52 @@ export default async function AnalysisIndexPage() {
                         ))}
                       </div>
                     )}
+                    {/* wave-321: Elo & 폼 비교 배지 */}
+                    {g.homeElo !== undefined && g.awayElo !== undefined && (() => {
+                      const eloDelta = g.homeElo - g.awayElo;
+                      const absEloDelta = Math.abs(eloDelta);
+                      const eloNeutral = absEloDelta <= ELO_DISPLAY_NEUTRAL_BAND;
+                      const eloFavorsHome = eloDelta > ELO_DISPLAY_NEUTRAL_BAND;
+                      const eloLabel = eloNeutral
+                        ? 'Elo 균형'
+                        : `Elo △${absEloDelta} ${shortTeamName(eloFavorsHome ? g.homeCode : g.awayCode)} 우위`;
+                      const eloColorClass = eloNeutral
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : eloFavorsHome
+                          ? 'text-brand-500 dark:text-brand-400'
+                          : 'text-orange-500 dark:text-orange-400';
+                      const homeForm = g.homeRecentForm;
+                      const awayForm = g.awayRecentForm;
+                      return (
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-[10px] font-mono tabular-nums">
+                          <span className={`font-sans font-medium ${eloColorClass}`}>{eloLabel}</span>
+                          {homeForm !== undefined && awayForm !== undefined && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">·</span>
+                              <span className="text-gray-400 dark:text-gray-500">
+                                폼{' '}
+                                <span className={
+                                  homeForm >= TEAM_STRENGTH_FORM_STRONG
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : homeForm <= TEAM_STRENGTH_FORM_WEAK
+                                      ? 'text-orange-500 dark:text-orange-400'
+                                      : 'text-gray-500 dark:text-gray-400'
+                                }>{(homeForm * 100).toFixed(0)}%</span>
+                                {' / '}
+                                <span className={
+                                  awayForm >= TEAM_STRENGTH_FORM_STRONG
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : awayForm <= TEAM_STRENGTH_FORM_WEAK
+                                      ? 'text-orange-500 dark:text-orange-400'
+                                      : 'text-gray-500 dark:text-gray-400'
+                                }>{(awayForm * 100).toFixed(0)}%</span>
+                                <span className="text-gray-400 dark:text-gray-500"> (홈/원정)</span>
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </Link>
                 </li>
               );
