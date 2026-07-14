@@ -10,6 +10,7 @@ import {
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
+import { buildTeamUpcoming } from "@/lib/teams/buildTeamUpcoming";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
@@ -81,9 +82,10 @@ export default async function TeamPage({ params }: PageProps) {
   const { code } = await params;
   if (!isTeamCode(code)) notFound();
 
-  const [profile, eloTrend] = await Promise.all([
+  const [profile, eloTrend, upcoming] = await Promise.all([
     buildTeamProfile(code),
     buildTeamEloTrend(code).catch((err) => captureFallback(err, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" })),
+    buildTeamUpcoming(code).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamUpcoming" })),
   ]);
   if (!profile) notFound();
 
@@ -329,6 +331,89 @@ export default async function TeamPage({ params }: PageProps) {
           })}
         </div>
       </section>
+
+      {upcoming.length > 0 && (
+        <section
+          aria-labelledby="team-upcoming-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <h2 id="team-upcoming-title" className="text-lg font-bold">
+              예정 경기 · 예측
+            </h2>
+            <Link
+              href="/predictions"
+              className="text-xs text-brand-500 hover:text-brand-600 transition-colors"
+            >
+              전체 예측 →
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
+                  <th className="py-2 pr-3 font-medium">일자</th>
+                  <th className="py-2 pr-3 font-medium">상대</th>
+                  <th className="py-2 pr-3 font-medium text-right">홈/원정</th>
+                  <th className="py-2 font-medium text-right">모델 예측</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcoming.map((u) => {
+                  const ourWinProb =
+                    u.homeWinProb != null
+                      ? u.isHome
+                        ? u.homeWinProb
+                        : 1 - u.homeWinProb
+                      : null;
+                  const probPct =
+                    ourWinProb != null ? Math.round(ourWinProb * 100) : null;
+                  const timeStr = u.gameTime ? u.gameTime.slice(0, 5) : null;
+                  return (
+                    <tr
+                      key={u.gameId}
+                      className="border-b border-gray-100 dark:border-[var(--color-border)]"
+                    >
+                      <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
+                        <Link
+                          href={`/predictions/${u.gameDate}`}
+                          className="hover:text-brand-500"
+                        >
+                          {u.gameDate}
+                        </Link>
+                        {timeStr && (
+                          <span className="text-gray-400 dark:text-gray-500 ml-1">
+                            {timeStr}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2 pr-3">
+                        <Link
+                          href={`/analysis/game/${u.gameId}`}
+                          className="hover:text-brand-500"
+                        >
+                          {u.opponentName}
+                        </Link>
+                      </td>
+                      <td className="py-2 pr-3 text-xs text-right text-gray-600 dark:text-gray-300">
+                        {u.isHome ? "홈" : "원정"}
+                      </td>
+                      <td className="py-2 text-right text-xs text-gray-700 dark:text-gray-200">
+                        {u.predictedAsWinner ? "우리 팀 승" : "상대 팀 승"}
+                        {probPct != null && (
+                          <span className="text-gray-400 dark:text-gray-500 ml-1">
+                            ({probPct}%)
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {profile.recentGames.length > 0 && (() => {
         const homeN = profile.recentGames.filter((r) => r.isHome).length;

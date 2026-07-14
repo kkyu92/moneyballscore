@@ -402,6 +402,13 @@ export const HOME_WIN_RATE_CI_PP = 2.10;
 export const RECENT_FORM_GAMES = 10;
 
 /**
+ * 팀 프로필 페이지 — 예정 경기 최대 표시 수 (silent drift family wave 295).
+ * /teams/[code] 의 "예정 경기 · 예측" 섹션에서 status='scheduled' 게임을 최대 7개 표시.
+ * RECENT_FORM_GAMES (10) 보다 짧게 — 예정 경기는 pipeline 생성 범위 (1~3일) 한정.
+ */
+export const TEAM_UPCOMING_LIMIT = 7;
+
+/**
  * 홈팀 승리 확률 clamp 범위 — predictor / v2Predictor / judge-agent / shadow-cohort /
  * backtest / FactorWaterfallChart / mlb-base 모두 동일 [0.15, 0.85] 단일 source.
  * silent drift family wave 93 (cycle 1304) — wave 91 (HOME_ADVANTAGE_PCT) / wave 92
