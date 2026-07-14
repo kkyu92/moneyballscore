@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, ACCURACY_BASELINE, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { fetchStandings, type StandingRow } from "@moneyball/kbo-data";
 
@@ -219,7 +219,7 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
     const homeCode = row.game?.home_team?.code;
     const awayCode = row.game?.away_team?.code;
     if (!homeCode || !awayCode) continue;
-    const predictedHomeWin = (row.confidence ?? 0.5) > 0.5;
+    const predictedHomeWin = (row.confidence ?? ACCURACY_BASELINE) > ACCURACY_BASELINE;
     const hit = row.is_correct === true;
 
     for (const [code, isHome] of [[homeCode, true], [awayCode, false]] as [string, boolean][]) {
@@ -255,6 +255,6 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
         biasGap,
       };
     })
-    .filter((r) => r.totalN >= 5)
+    .filter((r) => r.totalN >= SMALL_SAMPLE_N)
     .sort((a, b) => Math.abs(b.biasGap ?? 0) - Math.abs(a.biasGap ?? 0));
 }

@@ -5,6 +5,8 @@ import {
   MLB_TEAMS,
   MLB_TEAMS_PRE_RENDER,
   SMALL_SAMPLE_N,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   mlbShortTeamName,
   MLB_GAMES_PER_TEAM, SITE_URL
@@ -106,7 +108,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
   };
 
   const parkAdvantage =
-    profile.parkPf >= 105 ? "타자 친화" : profile.parkPf <= 95 ? "투수 친화" : "중립";
+    profile.parkPf >= PARK_FACTOR_HITTER_MIN ? "타자 친화" : profile.parkPf <= PARK_FACTOR_PITCHER_MAX ? "투수 친화" : "중립";
 
   return (
     <article className="max-w-4xl mx-auto space-y-6 py-4">
