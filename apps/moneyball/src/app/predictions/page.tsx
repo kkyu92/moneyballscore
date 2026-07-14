@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
+  CE_DETECT_THRESHOLD,
+  CE_MIN_SAMPLES,
   classifyWinnerProb,
   KBO_FACTOR_COUNT,
   pickTierEmoji,
@@ -165,8 +167,8 @@ async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode
     }
   }
   const simplifiedMode =
-    recentConfs.length >= 3 &&
-    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= 0.32;
+    recentConfs.length >= CE_MIN_SAMPLES &&
+    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= CE_DETECT_THRESHOLD;
 
   return { dates, simplifiedMode };
 }

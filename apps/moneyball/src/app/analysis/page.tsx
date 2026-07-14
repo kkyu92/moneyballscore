@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import {
   ANALYSIS_TOP_FACTORS_LIMIT,
   assertSelectOk,
+  CE_DETECT_THRESHOLD,
+  CE_MIN_SAMPLES,
   classifyWinnerProb,
   ELO_NEUTRAL,
   ELO_NEUTRAL_WIN_PCT,
@@ -492,8 +494,8 @@ export default async function AnalysisIndexPage() {
   ]);
 
   const simplifiedMode =
-    todayData.games.length >= 3 &&
-    todayData.games.reduce((s, g) => s + g.confidence, 0) / todayData.games.length <= 0.32;
+    todayData.games.length >= CE_MIN_SAMPLES &&
+    todayData.games.reduce((s, g) => s + g.confidence, 0) / todayData.games.length <= CE_DETECT_THRESHOLD;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
