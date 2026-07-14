@@ -1661,6 +1661,15 @@ export const SEARCH_INDEX_DATE_FETCH_LIMIT = 200;
  */
 export const PREDICTIONS_HISTORY_LIMIT = 200;
 
+/**
+ * 분석 페이지 이번 주 남은 경기 쿼리 한도 — silent drift family wave 311 (cycle 1642).
+ * 동일 숫자 30 hardcoded 1 surface:
+ *   - app/analysis/page.tsx: getThisWeekRemainingGames() games .limit(30)
+ *
+ * KBO 하루 최대 5경기 × 6일 = 30. 변경 시 본 상수 1곳만 갱신.
+ */
+export const ANALYSIS_UPCOMING_LIMIT = 30;
+
 export interface FactorAnomaly {
   factorKey: string;
   value: number;

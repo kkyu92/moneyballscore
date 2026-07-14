@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
   ANALYSIS_TOP_FACTORS_LIMIT,
+  ANALYSIS_UPCOMING_LIMIT,
   assertSelectOk,
   CE_DETECT_THRESHOLD,
   CE_MIN_SAMPLES,
   classifyWinnerProb,
   ELO_NEUTRAL,
   ELO_NEUTRAL_WIN_PCT,
+  HOME_ELO_BONUS,
   KBO_PREDICT_DAILY_TIME_KST,
   pickTierEmoji,
   PRODUCTION_COHORT_RULES,
@@ -325,6 +327,94 @@ async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
   return cards;
 }
 
+interface UpcomingScheduledGame {
+  gameId: number;
+  gameDate: string;
+  gameTime: string | null;
+  homeCode: TeamCode;
+  awayCode: TeamCode;
+  homeWinProb: number;
+}
+
+async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
+  const today = toKSTDateString();
+  const currentWeek = getCurrentWeek();
+  if (currentWeek.endDate <= today) return [];
+
+  const supabase = await createClient();
+  // tomorrow = today + 1 day
+  const tomorrowDate = new Date(`${today}T12:00:00Z`);
+  tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+  const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
+  if (tomorrowStr > currentWeek.endDate) return [];
+
+  const [scheduleResult, eloResult] = await Promise.all([
+    supabase
+      .from('games')
+      .select(`
+        id, game_date, game_time,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
+      `)
+      .eq('status', 'scheduled')
+      .gte('game_date', tomorrowStr)
+      .lte('game_date', currentWeek.endDate)
+      .order('game_date', { ascending: true })
+      .order('game_time', { ascending: true })
+      .limit(ANALYSIS_UPCOMING_LIMIT),
+    supabase
+      .from('predictions')
+      .select(`
+        home_elo, away_elo,
+        game:games!predictions_game_id_fkey(
+          home_team:teams!games_home_team_id_fkey(code),
+          away_team:teams!games_away_team_id_fkey(code)
+        )
+      `)
+      .eq('prediction_type', 'pre_game')
+      .in('scoring_rule', PRODUCTION_COHORT_RULES)
+      .not('home_elo', 'is', null)
+      .order('id', { ascending: false })
+      .limit(ANALYSIS_UPCOMING_LIMIT),
+  ]);
+
+  const { data: scheduleData } = assertSelectOk(scheduleResult, 'analysis getThisWeekRemainingGames');
+  if (!scheduleData || scheduleData.length === 0) return [];
+
+  const eloMap = new Map<string, number>();
+  if (eloResult.data) {
+    type EloRow = { home_elo: number | null; away_elo: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
+    for (const row of eloResult.data as unknown as EloRow[]) {
+      const hc = row.game?.home_team?.code;
+      const ac = row.game?.away_team?.code;
+      if (hc && row.home_elo != null && !eloMap.has(hc)) eloMap.set(hc, row.home_elo);
+      if (ac && row.away_elo != null && !eloMap.has(ac)) eloMap.set(ac, row.away_elo);
+      if (eloMap.size >= 10) break;
+    }
+  }
+
+  type ScheduleRow = { id: number; game_date: string; game_time: string | null; home_team: { code: string } | null; away_team: { code: string } | null };
+  const rows = scheduleData as unknown as ScheduleRow[];
+  const result: UpcomingScheduledGame[] = [];
+  for (const r of rows) {
+    const homeCode = r.home_team?.code as TeamCode | undefined;
+    const awayCode = r.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
+    const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
+    const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
+    const homeWinProb = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / 400));
+    result.push({
+      gameId: r.id,
+      gameDate: r.game_date,
+      gameTime: r.game_time,
+      homeCode,
+      awayCode,
+      homeWinProb,
+    });
+  }
+  return result;
+}
+
 function groupByDate(games: ThisWeekGameCard[]): Array<{ date: string; games: ThisWeekGameCard[] }> {
   const map = new Map<string, ThisWeekGameCard[]>();
   for (const g of games) {
@@ -336,6 +426,18 @@ function groupByDate(games: ThisWeekGameCard[]): Array<{ date: string; games: Th
     .sort(([a], [b]) => b.localeCompare(a))
     .map(([date, gs]) => ({ date, gs: gs }))
     .map(({ date, gs }) => ({ date, games: gs }));
+}
+
+function groupUpcomingByDate(games: UpcomingScheduledGame[]): Array<{ date: string; games: UpcomingScheduledGame[] }> {
+  const map = new Map<string, UpcomingScheduledGame[]>();
+  for (const g of games) {
+    const existing = map.get(g.gameDate) ?? [];
+    existing.push(g);
+    map.set(g.gameDate, existing);
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, gs]) => ({ date, games: gs }));
 }
 
 interface PeriodStats {
@@ -482,10 +584,11 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
+    getThisWeekRemainingGames(),
     getPeriodStats(currentWeek.startDate, currentWeek.endDate),
     getPeriodStats(currentMonth.startDate, currentMonth.endDate),
     getBestPickOfWeek(currentWeek.startDate, currentWeek.endDate),
@@ -640,6 +743,71 @@ export default async function AnalysisIndexPage() {
               );
             })}
           </ul>
+        </section>
+      )}
+
+      {/* 이번 주 남은 경기 — wave-311 (cycle 1642) */}
+      {thisWeekRemainingGames.length > 0 && (
+        <section aria-labelledby="this-week-remaining-title">
+          <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+            <h2 id="this-week-remaining-title" className="text-xl font-bold">
+              📆 이번 주 남은 경기
+            </h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">Elo 기반 예비 예측</span>
+          </div>
+          <div className="space-y-4">
+            {groupUpcomingByDate(thisWeekRemainingGames).map(({ date, games: dayGames }) => {
+              const [, mm, dd] = date.split('-');
+              const dateLabel = `${Number(mm)}월 ${Number(dd)}일`;
+              return (
+                <div key={date}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      {dateLabel}
+                    </p>
+                    <Link
+                      href={`/predictions/${date}`}
+                      className="text-xs text-brand-600 hover:underline"
+                    >
+                      예측 보기 →
+                    </Link>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {dayGames.map((g) => {
+                      const homeName = shortTeamName(g.homeCode);
+                      const awayName = shortTeamName(g.awayCode);
+                      const favoredHome = g.homeWinProb >= 0.5;
+                      const favoredCode = favoredHome ? g.homeCode : g.awayCode;
+                      const favoredName = shortTeamName(favoredCode);
+                      const winPct = Math.round((favoredHome ? g.homeWinProb : 1 - g.homeWinProb) * 100);
+                      return (
+                        <li key={g.gameId}>
+                          <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] px-3 py-2.5 text-sm">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                {awayName} @ {homeName}
+                              </p>
+                              {g.gameTime && (
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 tabular-nums">
+                                  {g.gameTime.slice(0, 5)}
+                                </p>
+                              )}
+                            </div>
+                            <div className="ml-3 shrink-0 text-right">
+                              <p className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+                                {favoredName} {winPct}%
+                              </p>
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500">예상 우세</p>
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
         </section>
       )}
 

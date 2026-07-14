@@ -123,6 +123,7 @@ import {
   LLM_MAX_TOKENS_POSTVIEW_JUDGE,
   LLM_MAX_TOKENS_TEAM,
   LLM_MAX_TOKENS_CALIBRATION,
+  ANALYSIS_UPCOMING_LIMIT,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -684,6 +685,12 @@ describe('winnerProbOf', () => {
   it('null / undefined 는 0.5 로 폴백', () => {
     expect(winnerProbOf(null)).toBe(0.5);
     expect(winnerProbOf(undefined)).toBe(0.5);
+  });
+});
+
+describe('ANALYSIS_UPCOMING_LIMIT — wave-311 single source (cycle 1642)', () => {
+  it('ANALYSIS_UPCOMING_LIMIT = 30 (KBO 하루 5경기 × 6일)', () => {
+    expect(ANALYSIS_UPCOMING_LIMIT).toBe(30);
   });
 });
 
