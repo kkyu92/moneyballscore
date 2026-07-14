@@ -551,6 +551,20 @@ export const HOME_ELO_BONUS = 24;
 export const ELO_DIVIDER = 400;
 
 /**
+ * Elo 표시용 중립 밴드 — delta 절댓값 이 이하이면 "중립" 색상 처리.
+ *
+ * silent drift family wave 318 (cycle 1649) — TeamStrengthGrid.tsx:18
+ * `Math.abs(delta) <= 10` literal sweep.
+ *
+ * 10 = ELO_NEUTRAL(1500) ± 10 point 범위. 이 범위 내 팀은 Gray 표시 (강팀/약팀 X).
+ * 변경 시 본 상수 1곳만 갱신.
+ *
+ * 1 occurrence 분포 (cycle 1649 측정):
+ *   - apps/moneyball/src/components/analysis/TeamStrengthGrid.tsx 1건
+ */
+export const ELO_DISPLAY_NEUTRAL_BAND = 10;
+
+/**
  * HOME_ELO_BONUS 를 승률 percentage 로 변환한 approximate 표시값.
  *
  * Elo 400-point conversion: 1 / (1 + 10^(-24/400)) - 0.5 ≈ 0.0345 = 3.45%.
@@ -1689,6 +1703,16 @@ export const PREDICTIONS_HISTORY_LIMIT = 200;
  * KBO 하루 최대 5경기 × 6일 = 30. 변경 시 본 상수 1곳만 갱신.
  */
 export const ANALYSIS_UPCOMING_LIMIT = 30;
+
+/**
+ * 팀 전력 스냅샷 쿼리 한도 — silent drift family wave 318 (cycle 1649).
+ * 동일 숫자 200 hardcoded 1 surface:
+ *   - lib/teams/buildTeamStrengthSnapshot.ts: predictions .limit(200)
+ *
+ * 예측 최근 200건 = KBO 10팀 × 약 20경기 버퍼 (팀별 최신 Elo/recentForm 추출 충분).
+ * 변경 시 본 상수 1곳만 갱신.
+ */
+export const TEAM_STRENGTH_SNAPSHOT_LIMIT = 200;
 
 export interface FactorAnomaly {
   factorKey: string;

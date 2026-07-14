@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {
+  ELO_DISPLAY_NEUTRAL_BAND,
   ELO_NEUTRAL,
   RECENT_FORM_GAMES,
   TEAM_STRENGTH_FORM_STRONG,
@@ -15,7 +16,7 @@ interface Props {
 function EloTag({ elo }: { elo: number }) {
   const delta = elo - ELO_NEUTRAL;
   const isStrong = delta > 0;
-  const isNeutral = Math.abs(delta) <= 10;
+  const isNeutral = Math.abs(delta) <= ELO_DISPLAY_NEUTRAL_BAND;
   const sign = delta > 0 ? '+' : '';
   const colorClass = isNeutral
     ? 'text-gray-500 dark:text-gray-400'
