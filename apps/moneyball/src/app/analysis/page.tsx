@@ -28,7 +28,7 @@ import {
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
-import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
+import { selectBigMatch, fetchStandings, type BigMatchCandidate, type StandingRow } from '@moneyball/kbo-data';
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { getCurrentMonth } from '@/lib/reviews/computeMonthRange';
@@ -93,6 +93,9 @@ interface TodayGameCard {
   awayElo?: number;
   homeRecentForm?: number;
   awayRecentForm?: number;
+  /** wave-325: 현재 KBO 순위 배지 */
+  homeRank?: number;
+  awayRank?: number;
 }
 
 interface TodayAnalysisData {
@@ -606,7 +609,7 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -617,7 +620,18 @@ export default async function AnalysisIndexPage() {
     getBestPickOfWeek(currentMonth.startDate, currentMonth.endDate),
     getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
     buildTeamStrengthSnapshot(),
+    fetchStandings(),
   ]);
+
+  // wave-325: 현재 KBO 순위 맵
+  const rankMap = new Map<TeamCode, number>(
+    (standingsRows as StandingRow[]).map((r) => [r.teamCode, r.rank]),
+  );
+  const gamesWithRank = todayData.games.map((g) => ({
+    ...g,
+    homeRank: rankMap.get(g.homeCode),
+    awayRank: rankMap.get(g.awayCode),
+  }));
 
   const simplifiedMode =
     todayData.games.length >= CE_MIN_SAMPLES &&
@@ -700,7 +714,7 @@ export default async function AnalysisIndexPage() {
             </Link>
           </div>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {todayData.games.map((g) => {
+            {gamesWithRank.map((g) => {
               const homeName = shortTeamName(g.homeCode);
               const awayName = shortTeamName(g.awayCode);
               const winnerCode = g.predictedWinnerCode;
@@ -730,6 +744,26 @@ export default async function AnalysisIndexPage() {
                             {g.gameTime.substring(0, 5)}
                             {isBig && (
                               <span className="ml-2 text-[var(--color-accent)] font-semibold">⭐ 빅매치</span>
+                            )}
+                            {/* wave-325: 현재 KBO 순위 배지 */}
+                            {g.homeRank !== undefined && g.awayRank !== undefined && (
+                              <span className="ml-2">
+                                <span className={
+                                  g.awayRank <= 3
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : g.awayRank >= 8
+                                      ? 'text-orange-500 dark:text-orange-400'
+                                      : ''
+                                }>{g.awayRank}위</span>
+                                <span className="text-gray-300 dark:text-gray-600 mx-0.5">vs</span>
+                                <span className={
+                                  g.homeRank <= 3
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : g.homeRank >= 8
+                                      ? 'text-orange-500 dark:text-orange-400'
+                                      : ''
+                                }>{g.homeRank}위</span>
+                              </span>
                             )}
                           </p>
                         )}
