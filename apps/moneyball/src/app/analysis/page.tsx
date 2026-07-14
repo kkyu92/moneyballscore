@@ -12,6 +12,7 @@ import {
   ELO_DIVIDER,
   ELO_NEUTRAL,
   ELO_NEUTRAL_WIN_PCT,
+  NEUTRAL_FACTOR,
   HOME_ELO_BONUS,
   KBO_PREDICT_DAILY_TIME_KST,
   RECENT_FORM_GAMES,
@@ -155,7 +156,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
     if (pred.factors) {
       const sorted = Object.entries(pred.factors)
         .filter(([key]) => key in FACTOR_LABELS)
-        .map(([key, val]) => ({ key, impact: Math.abs((val as number) - 0.5), favorable: (val as number) > 0.5 ? homeCode : awayCode }))
+        .map(([key, val]) => ({ key, impact: Math.abs((val as number) - NEUTRAL_FACTOR), favorable: (val as number) > NEUTRAL_FACTOR ? homeCode : awayCode }))
         .sort((a, b) => b.impact - a.impact)
         .slice(0, ANALYSIS_TOP_FACTORS_LIMIT);
       for (const f of sorted) {
@@ -170,7 +171,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awayCode,
       predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
       homeWinProb: winnerProbOf(pred.reasoning?.homeWinProb),
-      confidence: pred.confidence ?? 0.5,
+      confidence: pred.confidence ?? ELO_NEUTRAL_WIN_PCT,
       topFactors,
       homeElo: pred.home_elo ?? undefined,
       awayElo: pred.away_elo ?? undefined,
@@ -551,7 +552,7 @@ async function getBestPickOfWeek(startDate: string, endDate: string): Promise<Be
     homeScore: row.game.home_score,
     awayScore: row.game.away_score,
     predictedWinnerCode: winnerCode,
-    confidence: row.confidence ?? 0.5,
+    confidence: row.confidence ?? ELO_NEUTRAL_WIN_PCT,
     homeWinProb: winnerProbOf(row.reasoning?.homeWinProb),
   };
 }
