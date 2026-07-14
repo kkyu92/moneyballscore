@@ -1984,3 +1984,28 @@ export const TEAM_STRENGTH_FORM_STRONG = 0.6;
  * 변경 시 TeamStrengthGrid + buildTeamStrengthSnapshot callsite 자동 동기.
  */
 export const TEAM_STRENGTH_FORM_WEAK = 0.4;
+
+/**
+ * 내 픽 추세 계산 반기 윈도우 — wave-320 (cycle 1652).
+ * buildPicksStats 추세 로직: 최근 RECENT_FORM_GAMES 경기를 PICKS_TREND_HALF 씩 양분.
+ * (최근 5경기 승률) vs (이전 5경기 승률) 비교로 up/down/flat 분류.
+ * RECENT_FORM_GAMES(10) / 2 = 5. 변경 시 buildPicksStats callsite 자동 동기.
+ */
+export const PICKS_TREND_HALF = 5;
+
+/**
+ * 내 픽 추세 up/down 판정 임계 — wave-320 (cycle 1652).
+ * (최근 5경기 승률) - (이전 5경기 승률) > PICKS_TREND_THRESHOLD → up.
+ * 반대 방향 > 임계 → down. 10% 차이 미만 = flat.
+ * 변경 시 buildPicksStats callsite 자동 동기.
+ */
+export const PICKS_TREND_THRESHOLD = 0.1;
+
+/**
+ * 팩터 기여도 percentage-points 환산 스케일 — wave-320 (cycle 1652).
+ * contributionPp 공식: (factorValue - 0.5) * weight * FACTOR_CONTRIBUTION_SCALE.
+ * factorValue ∈ [0, 1], 편차 범위 [-0.5, +0.5] × 2 × 100 = [-100, +100] pp.
+ * 200 = 2 * 100 (반기 → 전체 확률 범위 환산 × 퍼센트 단위 변환).
+ * 변경 시 factor-explanations.ts callsite 자동 동기.
+ */
+export const FACTOR_CONTRIBUTION_SCALE = 200;

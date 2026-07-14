@@ -1,7 +1,14 @@
 import type { PickGameResult } from '@/app/api/picks/results/route';
 import type { UserPicksStore } from '@/hooks/use-user-picks';
 import { NEUTRAL_HI, NEUTRAL_LO } from '@/lib/predictions/factorLabels';
-import { DAY_MS, getKSTWeekRange, KST_OFFSET_MS, RECENT_FORM_GAMES } from '@moneyball/shared';
+import {
+  DAY_MS,
+  getKSTWeekRange,
+  KST_OFFSET_MS,
+  PICKS_TREND_HALF,
+  PICKS_TREND_THRESHOLD,
+  RECENT_FORM_GAMES,
+} from '@moneyball/shared';
 
 export interface WeeklyStats {
   weekLabel: string;
@@ -176,13 +183,13 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
   const recent10 = resolved.slice(0, RECENT_FORM_GAMES).reverse(); // 오래된→최근 순으로 뒤집기
   const recentDots = recent10.map((e) => e.myIsCorrect === true);
 
-  // 추세: 최근 5 vs 이전 5
+  // 추세: 최근 PICKS_TREND_HALF vs 이전 PICKS_TREND_HALF
   let trend: 'up' | 'down' | 'flat' = 'flat';
-  if (resolved.length >= 10) {
-    const r5 = resolved.slice(0, 5).filter((e) => e.myIsCorrect).length / 5;
-    const p5 = resolved.slice(5, 10).filter((e) => e.myIsCorrect).length / 5;
-    if (r5 - p5 > 0.1) trend = 'up';
-    else if (p5 - r5 > 0.1) trend = 'down';
+  if (resolved.length >= RECENT_FORM_GAMES) {
+    const r5 = resolved.slice(0, PICKS_TREND_HALF).filter((e) => e.myIsCorrect).length / PICKS_TREND_HALF;
+    const p5 = resolved.slice(PICKS_TREND_HALF, RECENT_FORM_GAMES).filter((e) => e.myIsCorrect).length / PICKS_TREND_HALF;
+    if (r5 - p5 > PICKS_TREND_THRESHOLD) trend = 'up';
+    else if (p5 - r5 > PICKS_TREND_THRESHOLD) trend = 'down';
   }
 
   // divergent / agreed 분기 — AI 예측 있는 경기만 (aiPredictedHome != null)

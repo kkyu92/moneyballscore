@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, josa, ro, RECENT_FORM_GAMES } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, ro, RECENT_FORM_GAMES } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -54,7 +54,7 @@ function determineFavor(value: number): "home" | "away" | "neutral" {
 }
 
 function contributionPp(value: number, weight: number): number {
-  return Math.round((value - 0.5) * weight * 200);
+  return Math.round((value - 0.5) * weight * FACTOR_CONTRIBUTION_SCALE);
 }
 
 function fmtFip(v: number | null | undefined): string {
@@ -298,7 +298,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   else if (prob >= 0.6 || prob <= 0.4) tags.push("우세 뚜렷");
 
   let summary = "";
-  const marginPp = Math.round(Math.abs(prob - 0.5) * 200);
+  const marginPp = Math.round(Math.abs(prob - 0.5) * FACTOR_CONTRIBUTION_SCALE);
   const favored = prob > 0.5 ? input.homeTeamName : input.awayTeamName;
 
   if (marginPp <= 10) {
