@@ -1,5 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk, errMsg, HOUR_MS } from '@moneyball/shared';
+import {
+  assertSelectOk,
+  errMsg,
+  HOUR_MS,
+  PIPELINE_STALE_HOURS_DEFAULT,
+  PIPELINE_PREDICT_STALE_HOURS,
+} from '@moneyball/shared';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -7,10 +13,10 @@ export const runtime = 'nodejs';
 // Cloudflare Workers Cron '17 0-14 * * *' (UTC 0-14 = KST 9-23) →
 // 4 mode 별 마지막 success 기대 freshness 임계. silent skip detection 강화.
 const PIPELINE_MODES = [
-  { mode: 'announce', stale_hours: 28 },
-  { mode: 'predict', stale_hours: 15 },
-  { mode: 'predict_final', stale_hours: 28 },
-  { mode: 'verify', stale_hours: 28 },
+  { mode: 'announce', stale_hours: PIPELINE_STALE_HOURS_DEFAULT },
+  { mode: 'predict', stale_hours: PIPELINE_PREDICT_STALE_HOURS },
+  { mode: 'predict_final', stale_hours: PIPELINE_STALE_HOURS_DEFAULT },
+  { mode: 'verify', stale_hours: PIPELINE_STALE_HOURS_DEFAULT },
 ] as const;
 
 type ModeStatus = 'ok' | 'stale' | 'error' | 'never';

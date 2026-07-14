@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
+import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { LeaderboardSyncPayload } from '@/lib/leaderboard/types';
 
-// 닉네임 검증: 2~12자, 기본 XSS 방지
+// 닉네임 검증: NICKNAME_MIN_CHARS~NICKNAME_MAX_CHARS자, 기본 XSS 방지
 function isValidNickname(n: string): boolean {
   if (typeof n !== 'string') return false;
   const trimmed = n.trim();
-  if (trimmed.length < 2 || trimmed.length > 12) return false;
+  if (trimmed.length < NICKNAME_MIN_CHARS || trimmed.length > NICKNAME_MAX_CHARS) return false;
   if (/<|>|&|"|'|`/.test(trimmed)) return false;
   return true;
 }
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid device_id' }, { status: 400 });
   }
   if (!isValidNickname(nickname)) {
-    return NextResponse.json({ error: 'nickname must be 2~12 chars' }, { status: 400 });
+    return NextResponse.json({ error: `nickname must be ${NICKNAME_MIN_CHARS}~${NICKNAME_MAX_CHARS} chars` }, { status: 400 });
   }
   if (!Array.isArray(picks) || picks.length === 0) {
     return NextResponse.json({ synced: 0 });

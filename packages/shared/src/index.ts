@@ -1735,3 +1735,53 @@ export const PICKS_RESULTS_IDS_LIMIT = 200;
  * 단일 투표 결과 조회 요청의 최대 게임 ID 수. 변경 시 본 상수 1곳만 갱신.
  */
 export const PICKS_POLL_IDS_LIMIT = 50;
+
+/**
+ * 파이프라인 staleness 기본 임계 (시간) — silent drift family wave 303 (cycle 1632).
+ * 동일 숫자 28 hardcoded 3 surface:
+ *   - app/api/health/pipelines/route.ts: { mode: 'announce', stale_hours: 28 }
+ *   - app/api/health/pipelines/route.ts: { mode: 'predict_final', stale_hours: 28 }
+ *   - app/api/health/pipelines/route.ts: { mode: 'verify', stale_hours: 28 }
+ *
+ * Cron '17 0-14 * * *' (UTC) 기준 announce / predict_final / verify 모드의 최대
+ * stale 허용 시간. 28h = 24h 주기 + 4h tolerance. 변경 시 본 상수 1곳만 갱신.
+ */
+export const PIPELINE_STALE_HOURS_DEFAULT = 28;
+
+/**
+ * predict 파이프라인 staleness 임계 (시간) — silent drift family wave 303 (cycle 1632).
+ * 동일 숫자 15 hardcoded 1 surface:
+ *   - app/api/health/pipelines/route.ts: { mode: 'predict', stale_hours: 15 }
+ *
+ * predict 모드는 매일 오전 실행 → 15h = 12h 주기 + 3h tolerance. 변경 시 본 상수 1곳만 갱신.
+ */
+export const PIPELINE_PREDICT_STALE_HOURS = 15;
+
+/**
+ * 닉네임 최소 글자 수 — silent drift family wave 303 (cycle 1632).
+ * 동일 숫자 2 hardcoded 2 surface:
+ *   - app/api/leaderboard/sync/route.ts: trimmed.length < 2
+ *   - app/api/leaderboard/sync/route.ts: error 'nickname must be 2~12 chars'
+ *
+ * 리더보드 닉네임 입력 최소 길이. 변경 시 본 상수 + UI 오류 메시지 동기 갱신.
+ */
+export const NICKNAME_MIN_CHARS = 2;
+
+/**
+ * 닉네임 최대 글자 수 — silent drift family wave 303 (cycle 1632).
+ * 동일 숫자 12 hardcoded 2 surface:
+ *   - app/api/leaderboard/sync/route.ts: trimmed.length > 12
+ *   - app/api/leaderboard/sync/route.ts: error 'nickname must be 2~12 chars'
+ *
+ * 리더보드 닉네임 입력 최대 길이. 변경 시 본 상수 + UI 오류 메시지 동기 갱신.
+ */
+export const NICKNAME_MAX_CHARS = 12;
+
+/**
+ * device_id 최대 길이 — silent drift family wave 303 (cycle 1632).
+ * 동일 숫자 64 hardcoded 1 surface:
+ *   - app/api/picks/submit/route.ts: device_id.length > 64
+ *
+ * 투표 제출 요청의 device_id 최대 문자 수 (UUID 36자 + 여유). 변경 시 본 상수 1곳만 갱신.
+ */
+export const DEVICE_ID_MAX_LENGTH = 64;
