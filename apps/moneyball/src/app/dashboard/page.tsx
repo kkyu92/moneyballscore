@@ -21,6 +21,7 @@ import {
   shortTeamName,
   SITE_URL,
   CURRENT_SCORING_RULE,
+  DASHBOARD_FACTOR_TOP_N,
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
@@ -96,7 +97,7 @@ async function getFactorErrors(): Promise<FactorErrorRow[]> {
     .select("factor, error_count, avg_bias")
     .gte("error_count", 2)
     .order("error_count", { ascending: false })
-    .limit(5)) as SelectResult<FactorErrorRow[]>;
+    .limit(DASHBOARD_FACTOR_TOP_N)) as SelectResult<FactorErrorRow[]>;
 
   const { data } = assertSelectOk(result, "dashboard getFactorErrors");
   return (data ?? []) as FactorErrorRow[];
@@ -275,11 +276,11 @@ export default async function DashboardPage() {
         <TeamPerformanceChart data={teamData} />
       </section>
 
-      {/* 팩터 오답 Top 5 */}
+      {/* 팩터 오답 Top N */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <h2 className="text-lg font-bold mb-1">가장 자주 틀린 팩터</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          사후 분석에서 편향이 컸던 팩터 Top 5 · 막대 길이는 평균 편향 크기
+          사후 분석에서 편향이 컸던 팩터 Top {DASHBOARD_FACTOR_TOP_N} · 막대 길이는 평균 편향 크기
         </p>
         <FactorErrorTable rows={factorErrors} />
       </section>

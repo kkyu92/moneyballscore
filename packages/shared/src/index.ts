@@ -711,6 +711,14 @@ export const LEADERBOARD_TOP_N = 10;
 export const USER_LEADERBOARD_DISPLAY_LIMIT = 50;
 
 /**
+ * Dashboard 팩터 오답 Top N — silent drift family wave 290 (cycle 1618).
+ * Hardcoded 5 occurrence 3건:
+ *   - app/dashboard/page.tsx: .limit(5) DB 쿼리
+ *   - app/dashboard/page.tsx: "Top 5" UI 텍스트 ×2 (주석 + 본문)
+ */
+export const DASHBOARD_FACTOR_TOP_N = 5;
+
+/**
  * Rolling 적중률 윈도우 — silent drift family wave 117 (cycle 1334).
  * 동일 숫자 30(window) + 90(total) user-visible 4 surface + 함수 default 2 occurrence +
  * 주석 2 occurrence + 테스트 3 occurrence.
