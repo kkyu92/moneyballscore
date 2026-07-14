@@ -5,6 +5,7 @@ import {
   classifyWinnerProb,
   KBO_FACTOR_COUNT,
   pickTierEmoji,
+  PREDICTIONS_HISTORY_LIMIT,
   SITE_URL,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
@@ -83,7 +84,7 @@ async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode
     )
     .eq('predictions.prediction_type', 'pre_game')
     .order('game_date', { ascending: false })
-    .limit(200);
+    .limit(PREDICTIONS_HISTORY_LIMIT);
   const { data } = assertSelectOk(result, 'predictions.getPredictionDates');
 
   if (!data) return { dates: [], simplifiedMode: false };

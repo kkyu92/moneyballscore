@@ -17,6 +17,9 @@ import {
   ELO_NEUTRAL,
   HOME_ADVANTAGE,
   HOME_ELO_BONUS,
+  HOME_NEXT_GAMES_LIMIT,
+  HOME_TODAY_PRED_LIMIT,
+  HOME_WEEK_SCHEDULE_LIMIT,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
   toKSTDateString,
@@ -208,7 +211,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
       .eq('status', 'scheduled')
       .order('game_date', { ascending: true })
       .order('game_time', { ascending: true })
-      .limit(60),
+      .limit(HOME_WEEK_SCHEDULE_LIMIT),
     supabase
       .from('predictions')
       .select(`
@@ -222,7 +225,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
       .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .not('home_elo', 'is', null)
       .order('id', { ascending: false })
-      .limit(60),
+      .limit(HOME_WEEK_SCHEDULE_LIMIT),
     // Today's full model predictions: use home_win_prob where available
     supabase
       .from('predictions')
@@ -232,7 +235,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
       .not('home_win_prob', 'is', null)
       .gte('created_at', `${today}T00:00:00Z`)
       .lte('created_at', `${today}T23:59:59Z`)
-      .limit(10),
+      .limit(HOME_TODAY_PRED_LIMIT),
   ]);
 
   const { data } = assertSelectOk(scheduleResult, 'home.getWeekAheadSchedule');
@@ -337,7 +340,7 @@ async function getNextScheduledGames(): Promise<NextSchedule | null> {
     .in('status', ['scheduled', 'live'])
     .order('game_date', { ascending: true })
     .order('game_time', { ascending: true })
-    .limit(30);
+    .limit(HOME_NEXT_GAMES_LIMIT);
   const { data } = assertSelectOk(gamesResult, 'home.getNextScheduledGames');
 
   if (!data || data.length === 0) return null;

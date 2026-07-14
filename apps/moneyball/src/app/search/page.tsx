@@ -8,6 +8,9 @@ import {
   MLB_TEAM_COUNT,
   SEARCH_DATE_DISPLAY_LIMIT,
   SEARCH_DATE_INDEX_LIMIT,
+  SEARCH_DATE_QUERY_LIMIT,
+  SEARCH_INDEX_DATE_FETCH_LIMIT,
+  SEARCH_INDEX_PLAYER_FETCH_LIMIT,
   SEARCH_PLAYER_RESULT_LIMIT,
   assertSelectOk,
   type TeamCode,
@@ -111,7 +114,7 @@ async function searchDates(q: string): Promise<DateHit[]> {
     .from('games')
     .select('game_date')
     .order('game_date', { ascending: false })
-    .limit(60);
+    .limit(SEARCH_DATE_QUERY_LIMIT);
   // assertSelectOk — DB 오류 시 data=null silent fallback 차단.
   const result = (from === to
     ? await query.eq('game_date', from)
@@ -212,7 +215,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
       .from('players')
       .select('id, name_ko, name_en, position, team:teams!players_team_id_fkey(code, name_ko)')
       .order('id', { ascending: false })
-      .limit(200)) as SelectResult<PlayerHit[]>;
+      .limit(SEARCH_INDEX_PLAYER_FETCH_LIMIT)) as SelectResult<PlayerHit[]>;
     const { data: players } = assertSelectOk(playersResult, 'search.index.players');
     if (players) {
       for (const p of players) {
@@ -244,7 +247,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
       .select('game_date')
       .gte('game_date', since)
       .order('game_date', { ascending: false })
-      .limit(200)) as SelectResult<Array<{ game_date: string }>>;
+      .limit(SEARCH_INDEX_DATE_FETCH_LIMIT)) as SelectResult<Array<{ game_date: string }>>;
     const { data: dates } = assertSelectOk(datesResult, 'search.index.dates');
     if (dates) {
       const seen = new Set<string>();

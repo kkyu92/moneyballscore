@@ -1504,6 +1504,70 @@ export const SEARCH_DATE_DISPLAY_LIMIT = 15;
  */
 export const SEARCH_DATE_INDEX_LIMIT = 30;
 
+/**
+ * 홈 주간 일정 쿼리 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 60 hardcoded 2 surface:
+ *   - app/page.tsx: getWeekAheadSchedule() games .limit(60)
+ *   - app/page.tsx: getWeekAheadSchedule() predictions ELO .limit(60)
+ *
+ * 주간 일정 조회 한도 변경 시 본 상수 1곳만 갱신.
+ */
+export const HOME_WEEK_SCHEDULE_LIMIT = 60;
+
+/**
+ * 홈 오늘 예측 쿼리 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 10 hardcoded 1 surface:
+ *   - app/page.tsx: getWeekAheadSchedule() todayPred .limit(10)
+ *
+ * KBO 하루 최대 경기 수(5) × 2 버퍼. 변경 시 본 상수 1곳만 갱신.
+ */
+export const HOME_TODAY_PRED_LIMIT = 10;
+
+/**
+ * 홈 다음 예정 경기 쿼리 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 30 hardcoded 1 surface:
+ *   - app/page.tsx: getNextScheduledGames() .limit(30)
+ *
+ * 다음 예정 경기 조회 한도 변경 시 본 상수 1곳만 갱신.
+ */
+export const HOME_NEXT_GAMES_LIMIT = 30;
+
+/**
+ * 검색 날짜 쿼리 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 60 hardcoded 1 surface:
+ *   - app/search/page.tsx: searchDates() .limit(60)
+ *
+ * 날짜 검색 쿼리 한도 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_DATE_QUERY_LIMIT = 60;
+
+/**
+ * 검색 인덱스 플레이어 fetch 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 200 hardcoded 1 surface:
+ *   - app/search/page.tsx: buildSearchIndex() players .limit(200)
+ *
+ * 플레이어 인덱스 fetch 한도 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_INDEX_PLAYER_FETCH_LIMIT = 200;
+
+/**
+ * 검색 인덱스 날짜 fetch 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 200 hardcoded 1 surface:
+ *   - app/search/page.tsx: buildSearchIndex() dates .limit(200)
+ *
+ * 날짜 인덱스 raw fetch 한도(SEARCH_DATE_INDEX_LIMIT × 버퍼). 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_INDEX_DATE_FETCH_LIMIT = 200;
+
+/**
+ * 예측 날짜 이력 쿼리 한도 — silent drift family wave 293 (cycle 1621).
+ * 동일 숫자 200 hardcoded 1 surface:
+ *   - app/predictions/page.tsx: getPredictionDates() .limit(200)
+ *
+ * KBO 시즌 약 130경기일 기준 버퍼. 변경 시 본 상수 1곳만 갱신.
+ */
+export const PREDICTIONS_HISTORY_LIMIT = 200;
+
 export interface FactorAnomaly {
   factorKey: string;
   value: number;
