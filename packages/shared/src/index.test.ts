@@ -44,6 +44,7 @@ import {
   ACCURACY_BASELINE,
   BRIER_BASELINE,
   MIN_LEADERBOARD_PICKS,
+  LEADERBOARD_TOP_N,
   STANDINGS_ISR_HOURS,
   STANDINGS_ISR_SECONDS,
   STANDINGS_REFRESH_LABEL_EN,
@@ -162,6 +163,10 @@ describe('KBO_TEAMS', () => {
 
   it('MIN_LEADERBOARD_PICKS matches DB view HAVING clause (silent drift wave 116 guard)', () => {
     expect(MIN_LEADERBOARD_PICKS).toBe(5);
+  });
+
+  it('LEADERBOARD_TOP_N exposes players leaderboard display count (silent drift wave 288 guard)', () => {
+    expect(LEADERBOARD_TOP_N).toBe(10);
   });
 
   it('STANDINGS_ISR_SECONDS derives from STANDINGS_ISR_HOURS (silent drift wave 118 guard)', () => {

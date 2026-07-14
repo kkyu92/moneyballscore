@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { SITE_HOST, LEADERBOARD_TOP_N } from "@moneyball/shared";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const runtime = "nodejs";
@@ -61,7 +61,7 @@ export default function PlayersHubOgImage() {
             display: "flex",
           }}
         >
-          KBO 선수 리더보드 · 선발 투수 FIP · 타자 WAR · Top 10
+          {`KBO 선수 리더보드 · 선발 투수 FIP · 타자 WAR · Top ${LEADERBOARD_TOP_N}`}
         </div>
 
         <div
@@ -76,7 +76,7 @@ export default function PlayersHubOgImage() {
             FACTOR_LABELS_TECHNICAL.sp_fip,
             FACTOR_LABELS_TECHNICAL.war,
             FACTOR_LABELS_TECHNICAL.lineup_woba,
-            "Top 10",
+            `Top ${LEADERBOARD_TOP_N}`,
           ].map((label) => (
             <div
               key={label}

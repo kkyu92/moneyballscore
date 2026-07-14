@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {SMALL_SAMPLE_N, type TeamCode, SITE_URL } from "@moneyball/shared";
+import {SMALL_SAMPLE_N, type TeamCode, SITE_URL, LEADERBOARD_TOP_N } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -9,12 +9,12 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 export const metadata: Metadata = {
   title: "선수 리더보드",
   description:
-    "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
+    `KBO 주요 선수 성과 리더보드. 선발 투수 Top ${LEADERBOARD_TOP_N} (평균 FIP) · 타자 Top ${LEADERBOARD_TOP_N} (시즌 WAR) 집계.`,
   alternates: { canonical: `${SITE_URL}/players` },
   openGraph: {
     title: "KBO 선수 리더보드 | MoneyBall Score",
     description:
-      "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR) 집계.",
+      `KBO 주요 선수 성과 리더보드. 선발 투수 Top ${LEADERBOARD_TOP_N} (평균 FIP) · 타자 Top ${LEADERBOARD_TOP_N} (시즌 WAR) 집계.`,
     url: `${SITE_URL}/players`,
     type: "website",
     locale: "ko_KR",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "KBO 선수 리더보드 | MoneyBall Score",
     description:
-      "KBO 주요 선수 성과 리더보드. 선발 투수 Top 10 · 타자 Top 10.",
+      `KBO 주요 선수 성과 리더보드. 선발 투수 Top ${LEADERBOARD_TOP_N} · 타자 Top ${LEADERBOARD_TOP_N}.`,
   },
 };
 
@@ -49,8 +49,8 @@ function fmtWar(v: number): string {
 
 export default async function PlayersIndexPage() {
   const [pitchers, batters] = await Promise.all([
-    buildPitcherLeaderboard({ limit: 10, minAppearances: 1 }),
-    buildBatterLeaderboard({ limit: 10 }),
+    buildPitcherLeaderboard({ limit: LEADERBOARD_TOP_N, minAppearances: 1 }),
+    buildBatterLeaderboard({ limit: LEADERBOARD_TOP_N }),
   ]);
 
   const jsonLd = {
@@ -58,7 +58,7 @@ export default async function PlayersIndexPage() {
     "@type": "CollectionPage",
     name: "KBO 선수 리더보드",
     description:
-      "KBO 주요 선수 성과 리더보드 — 선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR).",
+      `KBO 주요 선수 성과 리더보드 — 선발 투수 Top ${LEADERBOARD_TOP_N} (평균 FIP) · 타자 Top ${LEADERBOARD_TOP_N} (시즌 WAR).`,
     url: `${SITE_URL}/players`,
     mainEntity: [
       {

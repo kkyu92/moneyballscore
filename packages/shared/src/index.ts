@@ -683,6 +683,25 @@ export const INSIGHTS_LIMIT = 30;
 export const MIN_LEADERBOARD_PICKS = 5;
 
 /**
+ * 선수 리더보드 표시 인원 — silent drift family wave 288 (cycle 1615).
+ * 동일 숫자 10 이 players/page.tsx limit 2 surface + OG image 2 surface +
+ * twitter image 2 surface + 메타 description 4 surface = 총 10 occurrence.
+ *
+ * user-visible (players/page.tsx):
+ *   - metadata.description '선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR)'
+ *   - openGraph.description '선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR)'
+ *   - twitter.description '선발 투수 Top 10 · 타자 Top 10'
+ *   - JSON-LD description '선발 투수 Top 10 (평균 FIP) · 타자 Top 10 (시즌 WAR)'
+ * data fetch (players/page.tsx):
+ *   - buildPitcherLeaderboard({ limit: 10 })
+ *   - buildBatterLeaderboard({ limit: 10 })
+ * OG/twitter image tag (opengraph-image.tsx, twitter-image.tsx):
+ *   - "Top 10" tag label 각 1 surface
+ *   - "... · Top 10" 설명 텍스트 각 1 surface
+ */
+export const LEADERBOARD_TOP_N = 10;
+
+/**
  * Rolling 적중률 윈도우 — silent drift family wave 117 (cycle 1334).
  * 동일 숫자 30(window) + 90(total) user-visible 4 surface + 함수 default 2 occurrence +
  * 주석 2 occurrence + 테스트 3 occurrence.

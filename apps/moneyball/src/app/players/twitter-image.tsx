@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { SITE_HOST, LEADERBOARD_TOP_N } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -60,7 +60,7 @@ export default function PlayersHubTwitterImage() {
             display: "flex",
           }}
         >
-          KBO 선수 리더보드 · 선발 투수 FIP · 타자 WAR · Top 10
+          {`KBO 선수 리더보드 · 선발 투수 FIP · 타자 WAR · Top ${LEADERBOARD_TOP_N}`}
         </div>
 
         <div
@@ -71,7 +71,7 @@ export default function PlayersHubTwitterImage() {
             flexWrap: "wrap",
           }}
         >
-          {["Pitcher FIP", "Batter WAR", "wOBA", "Top 10"].map((label) => (
+          {["Pitcher FIP", "Batter WAR", "wOBA", `Top ${LEADERBOARD_TOP_N}`].map((label) => (
             <div
               key={label}
               style={{
