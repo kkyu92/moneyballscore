@@ -1477,6 +1477,33 @@ export const TELEGRAM_MAX_MESSAGE_LENGTH = 4_096;
  */
 export const SEARCH_DEBOUNCE_MS = 200;
 
+/**
+ * 검색 플레이어 결과 한도 — silent drift family wave 292 (cycle 1620).
+ * 동일 숫자 15 hardcoded 1 surface:
+ *   - app/search/page.tsx: searchPlayers() .limit(15)
+ *
+ * 플레이어 검색 결과 최대 수 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_PLAYER_RESULT_LIMIT = 15;
+
+/**
+ * 검색 날짜 결과 표시 한도 — silent drift family wave 292 (cycle 1620).
+ * 동일 숫자 15 hardcoded 1 surface:
+ *   - app/search/page.tsx: dateHits.slice(0, 15) UI 표시
+ *
+ * 날짜 검색 결과 최대 표시 수 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_DATE_DISPLAY_LIMIT = 15;
+
+/**
+ * 검색 날짜 인덱스 distinct 한도 — silent drift family wave 292 (cycle 1620).
+ * 동일 숫자 30 hardcoded 1 surface:
+ *   - app/search/page.tsx: seen.size > 30 (buildSearchIndex 내 최근 날짜)
+ *
+ * 인덱스 날짜 수 변경 시 본 상수 1곳만 갱신.
+ */
+export const SEARCH_DATE_INDEX_LIMIT = 30;
+
 export interface FactorAnomaly {
   factorKey: string;
   value: number;

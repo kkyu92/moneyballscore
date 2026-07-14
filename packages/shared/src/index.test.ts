@@ -46,6 +46,9 @@ import {
   MIN_LEADERBOARD_PICKS,
   LEADERBOARD_TOP_N,
   USER_LEADERBOARD_DISPLAY_LIMIT,
+  SEARCH_PLAYER_RESULT_LIMIT,
+  SEARCH_DATE_DISPLAY_LIMIT,
+  SEARCH_DATE_INDEX_LIMIT,
   STANDINGS_ISR_HOURS,
   STANDINGS_ISR_SECONDS,
   STANDINGS_REFRESH_LABEL_EN,
@@ -172,6 +175,18 @@ describe('KBO_TEAMS', () => {
 
   it('USER_LEADERBOARD_DISPLAY_LIMIT exposes user leaderboard display limit (silent drift wave 289 guard)', () => {
     expect(USER_LEADERBOARD_DISPLAY_LIMIT).toBe(50);
+  });
+
+  it('SEARCH_PLAYER_RESULT_LIMIT exposes player search result limit (silent drift wave 292 guard)', () => {
+    expect(SEARCH_PLAYER_RESULT_LIMIT).toBe(15);
+  });
+
+  it('SEARCH_DATE_DISPLAY_LIMIT exposes date search display limit (silent drift wave 292 guard)', () => {
+    expect(SEARCH_DATE_DISPLAY_LIMIT).toBe(15);
+  });
+
+  it('SEARCH_DATE_INDEX_LIMIT exposes date index distinct limit (silent drift wave 292 guard)', () => {
+    expect(SEARCH_DATE_INDEX_LIMIT).toBe(30);
   });
 
   it('STANDINGS_ISR_SECONDS derives from STANDINGS_ISR_HOURS (silent drift wave 118 guard)', () => {

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { MIN_LEADERBOARD_PICKS, SITE_URL } from '@moneyball/shared';
+import { LEADERBOARD_TOP_N, MIN_LEADERBOARD_PICKS, SITE_URL } from '@moneyball/shared';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { HallOfFame } from '@/components/leaderboard/HallOfFame';
 import { LeaderboardClient } from '@/components/leaderboard/LeaderboardClient';
@@ -74,7 +74,7 @@ export default async function LeaderboardPage({
       '@type': 'ItemList',
       name: `${PERIOD_LABEL[period]} 리더보드`,
       numberOfItems: entries.length,
-      itemListElement: entries.slice(0, 10).map((e, i) => ({
+      itemListElement: entries.slice(0, LEADERBOARD_TOP_N).map((e, i) => ({
         '@type': 'ListItem',
         position: i + 1,
         name: e.nickname ?? `참가자 ${i + 1}`,

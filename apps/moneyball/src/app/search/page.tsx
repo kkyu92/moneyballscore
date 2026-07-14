@@ -6,6 +6,9 @@ import {
   DAY_MS,
   KBO_TEAMS,
   MLB_TEAM_COUNT,
+  SEARCH_DATE_DISPLAY_LIMIT,
+  SEARCH_DATE_INDEX_LIMIT,
+  SEARCH_PLAYER_RESULT_LIMIT,
   assertSelectOk,
   type TeamCode,
   type SelectResult,
@@ -74,7 +77,7 @@ async function searchPlayers(q: string): Promise<PlayerHit[]> {
       'id, name_ko, name_en, position, team:teams!players_team_id_fkey(code, name_ko)',
     )
     .or(`name_ko.ilike.${pattern},name_en.ilike.${pattern}`)
-    .limit(15)) as SelectResult<PlayerHit[]>;
+    .limit(SEARCH_PLAYER_RESULT_LIMIT)) as SelectResult<PlayerHit[]>;
   const { data } = assertSelectOk(result, 'search.players');
   return data ?? [];
 }
@@ -248,7 +251,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
       for (const row of dates) {
         if (seen.has(row.game_date)) continue;
         seen.add(row.game_date);
-        if (seen.size > 30) break;
+        if (seen.size > SEARCH_DATE_INDEX_LIMIT) break;
         entries.push({
           kind: 'date',
           id: `date:${row.game_date}`,
@@ -387,7 +390,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
             경기 일자 ({dateHits.length})
           </h2>
           <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-            {dateHits.slice(0, 15).map((d) => (
+            {dateHits.slice(0, SEARCH_DATE_DISPLAY_LIMIT).map((d) => (
               <li key={d.game_date}>
                 <Link
                   href={`/predictions/${d.game_date}`}
