@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { CURRENT_SCORING_RULE, SITE_HOST } from "@moneyball/shared";
+import { CURRENT_SCORING_RULE, KBO_FACTOR_COUNT, SITE_HOST } from "@moneyball/shared";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
 // 루트 Open Graph 이미지: 라우트별 자체 이미지가 없을 때 fallback.
@@ -75,7 +75,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {["wOBA", "FIP", "WAR", "Elo", "10 Factors"].map((tag) => (
+          {["wOBA", "FIP", "WAR", "Elo", `${KBO_FACTOR_COUNT} Factors`].map((tag) => (
             <div
               key={tag}
               style={{
