@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.51.8 — 2026-07-14 (cycle 1650)
+
+### wave-319 explore-idea: 팀 전력 Elo 변화 추세
+- **TEAM_STRENGTH_ELO_DELTA_WINDOW = 5** — 팀 전력 Elo 변화 윈도우 상수 신규 추가 (`@moneyball/shared`)
+- **eloChange 산출** — `buildTeamStrengthSnapshot`: 최근 5경기 기준 Elo delta 계산 (현재 Elo − 5경기 전 Elo)
+- **EloDeltaTag** — `TeamStrengthGrid` 팀 카드에 ↑N (green) / ↓N (red) / — (flat) 추세 화살표 추가
+
+---
+
 ## extract-pattern — 2026-07-14 (cycle 1636)
 
 ### 재사용 패턴 3개 추출
