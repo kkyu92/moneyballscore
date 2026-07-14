@@ -862,21 +862,21 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 폼{' '}
                                 <span className={
-                                  homeForm >= TEAM_STRENGTH_FORM_STRONG
-                                    ? 'text-brand-500 dark:text-brand-400'
-                                    : homeForm <= TEAM_STRENGTH_FORM_WEAK
-                                      ? 'text-orange-500 dark:text-orange-400'
-                                      : 'text-gray-500 dark:text-gray-400'
-                                }>{(homeForm * 100).toFixed(0)}%</span>
-                                {' / '}
-                                <span className={
                                   awayForm >= TEAM_STRENGTH_FORM_STRONG
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : awayForm <= TEAM_STRENGTH_FORM_WEAK
                                       ? 'text-orange-500 dark:text-orange-400'
                                       : 'text-gray-500 dark:text-gray-400'
                                 }>{(awayForm * 100).toFixed(0)}%</span>
-                                <span className="text-gray-400 dark:text-gray-500"> (홈/원정)</span>
+                                {' / '}
+                                <span className={
+                                  homeForm >= TEAM_STRENGTH_FORM_STRONG
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : homeForm <= TEAM_STRENGTH_FORM_WEAK
+                                      ? 'text-orange-500 dark:text-orange-400'
+                                      : 'text-gray-500 dark:text-gray-400'
+                                }>{(homeForm * 100).toFixed(0)}%</span>
+                                <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
                             </>
                           )}
