@@ -25,6 +25,8 @@ import {
   VENUE_RECORD_MIN_GAMES,
   VENUE_WIN_RATE_HIGH,
   VENUE_WIN_RATE_LOW,
+  RECENT10_HOT_WINS,
+  RECENT10_COLD_WINS,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -101,6 +103,9 @@ interface TodayGameCard {
   /** wave-325: 현재 KBO 순위 배지 */
   homeRank?: number;
   awayRank?: number;
+  /** wave-331: 최근 10경기 배지 */
+  homeRecent10?: { wins: number; losses: number };
+  awayRecent10?: { wins: number; losses: number };
 }
 
 interface TodayAnalysisData {
@@ -636,6 +641,18 @@ export default async function AnalysisIndexPage() {
   const recordMap = new Map<TeamCode, { wins: number; losses: number }>(
     (standingsRows as StandingRow[]).map((r) => [r.teamCode, { wins: r.wins, losses: r.losses }]),
   );
+  // wave-331: 최근 10경기 맵 (recent10 string "7승3패" → {wins, losses})
+  function parseRecent10(text: string): { wins: number; losses: number } | null {
+    const wm = text.match(/(\d+)승/);
+    const lm = text.match(/(\d+)패/);
+    if (!wm || !lm) return null;
+    return { wins: parseInt(wm[1], 10), losses: parseInt(lm[1], 10) };
+  }
+  const recent10Map = new Map<TeamCode, { wins: number; losses: number }>(
+    (standingsRows as StandingRow[])
+      .map((r) => [r.teamCode, parseRecent10(r.recent10)])
+      .filter((entry): entry is [TeamCode, { wins: number; losses: number }] => entry[1] !== null),
+  );
   // wave-329: 홈/원정 성적 맵 (homeWins/homeLosses parsed from column 8)
   const venueMap = new Map<TeamCode, { homeWins: number; homeLosses: number; awayWins: number; awayLosses: number }>(
     (standingsRows as StandingRow[])
@@ -658,6 +675,8 @@ export default async function AnalysisIndexPage() {
     awayRecord: recordMap.get(g.awayCode),
     homeTeamVenue: venueMap.get(g.homeCode),
     awayTeamVenue: venueMap.get(g.awayCode),
+    homeRecent10: recent10Map.get(g.homeCode),
+    awayRecent10: recent10Map.get(g.awayCode),
   }));
 
   const simplifiedMode =
@@ -929,6 +948,36 @@ export default async function AnalysisIndexPage() {
                                         ? 'text-orange-500 dark:text-orange-400'
                                         : ''
                                   }>{hv.homeWins}승{hv.homeLosses}패</span>
+                                </span>
+                              </>
+                            );
+                          })()}
+                          {/* wave-331: 최근 10경기 배지 */}
+                          {(() => {
+                            const ar = g.awayRecent10;
+                            const hr = g.homeRecent10;
+                            if (!ar || !hr) return null;
+                            if (ar.wins + ar.losses < 10 || hr.wins + hr.losses < 10) return null;
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className="text-gray-400 dark:text-gray-500">
+                                  최근{' '}
+                                  <span className={
+                                    ar.wins >= RECENT10_HOT_WINS
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : ar.wins <= RECENT10_COLD_WINS
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }>{ar.wins}승{ar.losses}패</span>
+                                  <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                  <span className={
+                                    hr.wins >= RECENT10_HOT_WINS
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : hr.wins <= RECENT10_COLD_WINS
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }>{hr.wins}승{hr.losses}패</span>
                                 </span>
                               </>
                             );

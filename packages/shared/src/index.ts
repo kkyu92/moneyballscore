@@ -2046,3 +2046,18 @@ export const VENUE_WIN_RATE_HIGH = 0.6;
  * VENUE_WIN_RATE_HIGH 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const VENUE_WIN_RATE_LOW = 0.4;
+
+/**
+ * 최근 10경기 배지 hot 임계 — wave-331 (cycle 1665).
+ * recent10 wins >= 본 값 시 brand color (핫) 표시.
+ * 7승3패 = 70% win rate = KBO 상위권 최근 폼.
+ */
+export const RECENT10_HOT_WINS = 7;
+
+/**
+ * 최근 10경기 배지 cold 임계 — wave-331 (cycle 1665).
+ * recent10 wins <= 본 값 시 orange color (콜드) 표시.
+ * 3승7패 = 30% win rate = KBO 하위권 최근 폼.
+ * RECENT10_HOT_WINS 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const RECENT10_COLD_WINS = 3;
