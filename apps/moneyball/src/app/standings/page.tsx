@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, SITE_URL } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -64,6 +64,15 @@ export default async function StandingsPage() {
     buildEloTrend().catch((err) => captureFallback(err, { points: [], teams: [] }, { route: "/standings", source: "buildEloTrend" })),
   ]);
 
+  // 현재 Elo: eloTrend 마지막 데이터 포인트에서 팀별 추출 (신규 DB 쿼리 0건)
+  const currentEloMap = new Map<string, number>();
+  const lastEloPoint = eloTrend.points[eloTrend.points.length - 1];
+  if (lastEloPoint) {
+    for (const [key, val] of Object.entries(lastEloPoint)) {
+      if (key !== 'date' && typeof val === 'number') currentEloMap.set(key, val);
+    }
+  }
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -93,8 +102,7 @@ export default async function StandingsPage() {
         </p>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
           현재 정규시즌 {KBO_TEAM_COUNT}팀의 승·무·패, 승률, 게임차, 최근 {RECENT_FORM_GAMES}경기 성적을
-          실시간으로 표시. 같은 페이지 하단에서 우리 모델이 본 팀별 적중률 +
-          Elo 레이팅 30일 추이를 차트로 공개합니다. 모델 방법론은{" "}
+          실시간으로 표시. Elo 컬럼 = AI 모델 현재 팀 전력 평가 ({ELO_NEUTRAL} 기준 — 높을수록 강팀). 하단에서 팀별 적중률 + 30일 Elo 추이 차트도 확인하세요. 모델 방법론은{" "}
           <Link
             href="/methodology"
             className="text-brand-500 hover:underline"
@@ -124,12 +132,15 @@ export default async function StandingsPage() {
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">승률</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">게임차</th>
                   <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">최근{RECENT_FORM_GAMES}</th>
+                  <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums" title={`Elo 레이팅 (기준: ${ELO_NEUTRAL})`}>Elo</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {standings.map((row) => {
                   const isTop3 = row.rank <= 3;
                   const isLast = row.rank === standings.length;
+                  const currentElo = currentEloMap.get(row.teamCode);
+                  const eloAboveNeutral = currentElo != null && currentElo >= ELO_NEUTRAL;
                   return (
                     <tr
                       key={row.teamCode}
@@ -175,6 +186,15 @@ export default async function StandingsPage() {
                       </td>
                       <td className="px-3 py-3 text-center">
                         {row.recent10 ? <Recent10 text={row.recent10} /> : <span className="text-gray-300 dark:text-gray-600">-</span>}
+                      </td>
+                      <td className="px-3 py-3 text-right tabular-nums font-mono text-xs">
+                        {currentElo != null ? (
+                          <span className={eloAboveNeutral ? "text-brand-600 dark:text-brand-400 font-semibold" : "text-gray-500 dark:text-gray-400"}>
+                            {Math.round(currentElo)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 dark:text-gray-600">-</span>
+                        )}
                       </td>
                     </tr>
                   );
