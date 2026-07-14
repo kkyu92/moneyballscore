@@ -1,5 +1,26 @@
 # Changelog
 
+## extract-pattern — 2026-07-14 (cycle 1636)
+
+### 재사용 패턴 3개 추출
+1. **Feature-Drift Cycle** (`quality_guard`) — 신규 기능 추가 → 1 cycle 내 constants 추출. 102+ waves 누적 (cycle 458~1636). `docs/lessons/2026-07-14-feature-drift-cycle-pattern.md`
+2. **CE-Fallback Visibility** (`ai_agent`) — LLM 크레딧 소진 시 UI 노티스 + `home_win_prob` fallback. 품질 저하 22.5pp 사용자 가시화.
+3. **Accuracy Cohort Split** (`data_pipeline`) — A/B 없이 CE/비CE 자연 실험 코호트로 LLM 기여 +5.0pp 정량화.
+
+---
+
+## op-analysis — 2026-07-14 (cycle 1636, 2026-W28 주간 리뷰)
+
+### 2026-W28 (7/7-7/13) 예측 성과 요약
+- **이번 주**: 7/13 = 53.8% (2건 미검증, 올스타 브레이크 7/10-15)
+- **CE vs LLM**: 7/7 CREDIT_EXHAUSTED 40% vs 7/8-9 LLM active 62.5% (+22.5pp) — 3번째 재확인
+- **홈 예측 우위**: hwp>0.5(홈) 5/7=71% vs hwp<0.5(원정) 2/6=33% (소표본, n=13)
+- **누적 v1.8**: n=187, acc=59.9%, Brier=0.2488 (올스타 브레이크 신규 데이터 없음)
+- **가중치 변경**: 없음 (v1.8 유지 확정 — cycle 1460)
+- **시즌 재개**: 7/16 (5경기, 새 matchup 구성)
+
+---
+
 ## v0.5.51.7 — 2026-07-14 (cycle 1634)
 
 ### wave-305 silent drift family sweep
