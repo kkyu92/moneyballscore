@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, WINNER_PROB_LEAN_PCT, SITE_URL } from '@moneyball/shared';
+import { shortTeamName, WINNER_PROB_LEAN_PCT, SITE_URL, MISS_REPORT_LIMIT } from '@moneyball/shared';
 import { buildMissReport } from "@/lib/reviews/buildMissReport";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -55,7 +55,7 @@ function fmtSignedBias(v: number): string {
 }
 
 export default async function MissesReviewPage() {
-  const items = await buildMissReport({ limit: 10 });
+  const items = await buildMissReport({ limit: MISS_REPORT_LIMIT });
 
   // 날짜 desc 순위 — confidence default 도착 순서에서 gameDate desc rank 계산.
   // MissesSortControl 가 '최신순' 활성 시 CSS variable 로 flex order 토글.
@@ -67,7 +67,7 @@ export default async function MissesReviewPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "회고: 크게 빗나간 예측 Top 10",
+    headline: `회고: 크게 빗나간 예측 Top ${MISS_REPORT_LIMIT}`,
     description:
       "MoneyBall Score가 고확신으로 틀렸던 예측들의 사후 분석 모음",
     datePublished: new Date().toISOString(),
@@ -234,7 +234,7 @@ export default async function MissesReviewPage() {
       <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
         <ShareButtons
           url={`${SITE_URL}/reviews/misses`}
-          title="회고: 크게 빗나간 예측 Top 10"
+          title={`회고: 크게 빗나간 예측 Top ${MISS_REPORT_LIMIT}`}
           text="MoneyBall Score가 고확신으로 틀렸던 예측들의 사후 분석"
         />
       </footer>

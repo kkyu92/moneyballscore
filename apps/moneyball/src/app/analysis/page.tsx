@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import {
+  ANALYSIS_TOP_FACTORS_LIMIT,
   assertSelectOk,
   classifyWinnerProb,
   ELO_NEUTRAL,
@@ -140,7 +141,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
         .filter(([key]) => key in FACTOR_LABELS)
         .map(([key, val]) => ({ key, impact: Math.abs((val as number) - 0.5), favorable: (val as number) > 0.5 ? homeCode : awayCode }))
         .sort((a, b) => b.impact - a.impact)
-        .slice(0, 2);
+        .slice(0, ANALYSIS_TOP_FACTORS_LIMIT);
       for (const f of sorted) {
         topFactors.push({ label: FACTOR_LABELS[f.key], favoredCode: f.favorable });
       }

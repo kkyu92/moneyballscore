@@ -3,6 +3,7 @@ import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   assertSelectOk,
   classifyWinnerProb,
+  MISS_REPORT_LIMIT,
   shortTeamName,
   winnerProbOf,
   type SelectResult,
@@ -101,7 +102,7 @@ function extractHomeWinProb(r: unknown): number {
 export async function buildMissReport(options: {
   limit?: number;
 } = {}): Promise<MissReportItem[]> {
-  const limit = options.limit ?? 10;
+  const limit = options.limit ?? MISS_REPORT_LIMIT;
   const supabase = await createClient();
 
   // reasoning.homeWinProb 는 JSONB 필드라 서버 필터링 대신 is_correct=false

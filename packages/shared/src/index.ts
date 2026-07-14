@@ -726,6 +726,13 @@ export const USER_LEADERBOARD_DISPLAY_LIMIT = 50;
 export const DASHBOARD_FACTOR_TOP_N = 5;
 
 /**
+ * Analysis 페이지 게임 카드 상위 팩터 표시 수 — silent drift family wave 296 (cycle 1624).
+ * Hardcoded 2 occurrence 1건:
+ *   - app/analysis/page.tsx: topFactors 배열 .slice(0, 2)
+ */
+export const ANALYSIS_TOP_FACTORS_LIMIT = 2;
+
+/**
  * Rolling 적중률 윈도우 — silent drift family wave 117 (cycle 1334).
  * 동일 숫자 30(window) + 90(total) user-visible 4 surface + 함수 default 2 occurrence +
  * 주석 2 occurrence + 테스트 3 occurrence.
@@ -1033,6 +1040,16 @@ export const REVIEWS_MONTHLY_ISR_SECONDS = REVIEWS_MONTHLY_ISR_HOURS * 60 * 60;
  *   - app/reviews/page.tsx: .limit(REVIEWS_RECENT_LIMIT)
  */
 export const REVIEWS_RECENT_LIMIT = 100;
+
+/**
+ * 크게 빗나간 예측 (misses) 표시 한도 — silent drift family wave 296 (cycle 1624).
+ * Hardcoded 10 occurrence 3건:
+ *   - app/reviews/misses/page.tsx: buildMissReport({ limit: 10 })
+ *   - app/reviews/misses/page.tsx: JSON-LD headline "Top 10"
+ *   - app/reviews/misses/page.tsx: ShareButtons title "Top 10"
+ * 한도 변경 시 headline/share title 자동 동기 (template literal 참조).
+ */
+export const MISS_REPORT_LIMIT = 10;
 
 /**
  * Analysis 도메인 페이지 ISR 갱신 주기 — silent drift family wave 134 (cycle 1356).
