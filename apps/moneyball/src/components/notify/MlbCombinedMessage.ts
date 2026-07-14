@@ -18,9 +18,7 @@ export interface PreviewPayload {
   games: PreviewGame[];
 }
 
-import { TELEGRAM_MAX_MESSAGE_LENGTH } from '@moneyball/shared';
-
-const BIG_GAME_THRESHOLD = 0.65;
+import { TELEGRAM_MAX_MESSAGE_LENGTH, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 
 export function formatMlbCombinedMessage(
   payload: { recap: RecapPayload; preview: PreviewPayload },
@@ -37,7 +35,7 @@ export function formatMlbCombinedMessage(
   if (payload.preview.games.length > 0) {
     lines.push(`[MLB preview] ${payload.preview.date} 새벽 경기`);
     payload.preview.games.forEach((g) => {
-      const isBig = g.bigGame || g.confidence > BIG_GAME_THRESHOLD;
+      const isBig = g.bigGame || g.confidence > WINNER_PROB_CONFIDENT;
       const mark = isBig ? '⭐ ' : '';
       const conf = Math.round(g.confidence * 100);
       lines.push(`${mark}${g.home} vs ${g.away} → ${g.predicted} ${conf}%`);
