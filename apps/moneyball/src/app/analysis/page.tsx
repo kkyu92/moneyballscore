@@ -629,10 +629,16 @@ export default async function AnalysisIndexPage() {
   const rankMap = new Map<TeamCode, number>(
     (standingsRows as StandingRow[]).map((r) => [r.teamCode, r.rank]),
   );
+  // wave-327: 시즌 성적 맵
+  const recordMap = new Map<TeamCode, { wins: number; losses: number }>(
+    (standingsRows as StandingRow[]).map((r) => [r.teamCode, { wins: r.wins, losses: r.losses }]),
+  );
   const gamesWithRank = todayData.games.map((g) => ({
     ...g,
     homeRank: rankMap.get(g.homeCode),
     awayRank: rankMap.get(g.awayCode),
+    homeRecord: recordMap.get(g.homeCode),
+    awayRecord: recordMap.get(g.awayCode),
   }));
 
   const simplifiedMode =
@@ -871,6 +877,18 @@ export default async function AnalysisIndexPage() {
                                       : 'text-gray-500 dark:text-gray-400'
                                 }>{(awayForm * 100).toFixed(0)}%</span>
                                 <span className="text-gray-400 dark:text-gray-500"> (홈/원정)</span>
+                              </span>
+                            </>
+                          )}
+                          {/* wave-327: 시즌 성적 배지 */}
+                          {g.homeRecord && g.awayRecord && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">·</span>
+                              <span className="text-gray-400 dark:text-gray-500">
+                                {g.awayRecord.wins}승{g.awayRecord.losses}패
+                                <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                {g.homeRecord.wins}승{g.homeRecord.losses}패
+                                <span className="text-gray-300 dark:text-gray-600"> (원/홈)</span>
                               </span>
                             </>
                           )}
