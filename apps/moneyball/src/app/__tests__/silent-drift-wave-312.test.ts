@@ -18,9 +18,8 @@ describe('silent drift wave 312 — ELO_DIVIDER single source (cycle 1643)', () 
     expect(src).not.toMatch(/\/ 400;/);
   });
 
-  it('analysis/page.tsx uses KBO_TEAM_COUNT (no inline 10 team count)', () => {
+  it('analysis/page.tsx has no inline 10 for team count (KBO_TEAM_COUNT removed by wave-313)', () => {
     const src = readFileSync(join(ROOT, 'src/app/analysis/page.tsx'), 'utf8');
-    expect(src).toContain('KBO_TEAM_COUNT');
     expect(src).not.toContain('eloMap.size >= 10');
   });
 

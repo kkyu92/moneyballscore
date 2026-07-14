@@ -13,7 +13,7 @@ import {
   ELO_NEUTRAL_WIN_PCT,
   HOME_ELO_BONUS,
   KBO_PREDICT_DAILY_TIME_KST,
-  KBO_TEAM_COUNT,
+
   pickTierEmoji,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
