@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { BRIER_BASELINE, CALIBRATION_BUCKET_WIDTH, CALIBRATION_BUCKET_START, CALIBRATION_BUCKET_COUNT } from '@moneyball/shared';
+import { BRIER_BASELINE, CALIBRATION_BUCKET_WIDTH, CALIBRATION_BUCKET_START, CALIBRATION_BUCKET_COUNT, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX } from '@moneyball/shared';
 import { neutral, brand } from '@/lib/design-tokens';
 
 // /debug/reliability — 예측 신뢰도 reliability diagram
@@ -112,15 +112,11 @@ const PAD_RIGHT = 30;
 const VW = PLOT_SIZE + PAD_LEFT + PAD_RIGHT;
 const VH = PLOT_SIZE + PAD_TOP + PAD_BOTTOM;
 
-// 축 범위 0.4 ~ 1.0 (시각 여유 — 현재 데이터 0.52 ~ 0.63 이지만 여유 공간 필요).
-const AXIS_MIN = 0.4;
-const AXIS_MAX = 1.0;
-
 function x(v: number): number {
-  return PAD_LEFT + ((v - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * PLOT_SIZE;
+  return PAD_LEFT + ((v - CALIBRATION_AXIS_MIN) / (CALIBRATION_AXIS_MAX - CALIBRATION_AXIS_MIN)) * PLOT_SIZE;
 }
 function y(v: number): number {
-  return PAD_TOP + PLOT_SIZE - ((v - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * PLOT_SIZE;
+  return PAD_TOP + PLOT_SIZE - ((v - CALIBRATION_AXIS_MIN) / (CALIBRATION_AXIS_MAX - CALIBRATION_AXIS_MIN)) * PLOT_SIZE;
 }
 
 function ReliabilityChart({ buckets }: { buckets: Bucket[] }) {
@@ -181,10 +177,10 @@ function ReliabilityChart({ buckets }: { buckets: Bucket[] }) {
 
       {/* diagonal — perfect calibration */}
       <line
-        x1={x(AXIS_MIN)}
-        y1={y(AXIS_MIN)}
-        x2={x(AXIS_MAX)}
-        y2={y(AXIS_MAX)}
+        x1={x(CALIBRATION_AXIS_MIN)}
+        y1={y(CALIBRATION_AXIS_MIN)}
+        x2={x(CALIBRATION_AXIS_MAX)}
+        y2={y(CALIBRATION_AXIS_MAX)}
         stroke="currentColor"
         strokeOpacity="0.25"
         strokeDasharray="4 4"
@@ -201,9 +197,9 @@ function ReliabilityChart({ buckets }: { buckets: Bucket[] }) {
 
       {/* 50% baseline */}
       <line
-        x1={x(AXIS_MIN)}
+        x1={x(CALIBRATION_AXIS_MIN)}
         y1={y(0.5)}
-        x2={x(AXIS_MAX)}
+        x2={x(CALIBRATION_AXIS_MAX)}
         y2={y(0.5)}
         stroke="currentColor"
         strokeOpacity="0.1"

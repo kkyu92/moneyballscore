@@ -28,6 +28,8 @@ import {
   CURRENT_SCORING_RULE,
   PRODUCTION_ERA_HISTORY,
   KBO_FACTOR_COUNT,
+  CALIBRATION_AXIS_MIN,
+  CALIBRATION_AXIS_MAX,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -104,14 +106,11 @@ const PAD_TOP = 25;
 const PAD_RIGHT = 25;
 const VW = PLOT_SIZE + PAD_LEFT + PAD_RIGHT;
 const VH = PLOT_SIZE + PAD_TOP + PAD_BOTTOM;
-const AXIS_MIN = 0.4;
-const AXIS_MAX = 1.0;
-
 function px(v: number): number {
-  return PAD_LEFT + ((v - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * PLOT_SIZE;
+  return PAD_LEFT + ((v - CALIBRATION_AXIS_MIN) / (CALIBRATION_AXIS_MAX - CALIBRATION_AXIS_MIN)) * PLOT_SIZE;
 }
 function py(v: number): number {
-  return PAD_TOP + PLOT_SIZE - ((v - AXIS_MIN) / (AXIS_MAX - AXIS_MIN)) * PLOT_SIZE;
+  return PAD_TOP + PLOT_SIZE - ((v - CALIBRATION_AXIS_MIN) / (CALIBRATION_AXIS_MAX - CALIBRATION_AXIS_MIN)) * PLOT_SIZE;
 }
 
 function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
@@ -166,10 +165,10 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 
       {/* 완벽 보정 대각선 */}
       <line
-        x1={px(AXIS_MIN)}
-        y1={py(AXIS_MIN)}
-        x2={px(AXIS_MAX)}
-        y2={py(AXIS_MAX)}
+        x1={px(CALIBRATION_AXIS_MIN)}
+        y1={py(CALIBRATION_AXIS_MIN)}
+        x2={px(CALIBRATION_AXIS_MAX)}
+        y2={py(CALIBRATION_AXIS_MAX)}
         stroke="currentColor"
         strokeOpacity="0.2"
         strokeDasharray="4 4"
@@ -180,9 +179,9 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
 
       {/* 동전 50% 기준선 */}
       <line
-        x1={px(AXIS_MIN)}
+        x1={px(CALIBRATION_AXIS_MIN)}
         y1={py(0.5)}
-        x2={px(AXIS_MAX)}
+        x2={px(CALIBRATION_AXIS_MAX)}
         y2={py(0.5)}
         stroke="currentColor"
         strokeOpacity="0.08"

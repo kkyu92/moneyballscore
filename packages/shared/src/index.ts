@@ -1818,3 +1818,20 @@ export const CALIBRATION_BUCKET_START = 0.5;
  * 0.5~1.0 (0.5 range) / 0.05 (width) = 10 칸.
  */
 export const CALIBRATION_BUCKET_COUNT = 10;
+
+/**
+ * 캘리브레이션 차트 SVG 축 최솟값 — silent drift family wave 306 (cycle 1637).
+ * 동일 숫자 0.4 hardcoded 2 surface:
+ *   - app/accuracy/page.tsx: AXIS_MIN (SVG px/py 계산)
+ *   - app/debug/reliability/page.tsx: AXIS_MIN (SVG x/y 계산)
+ *
+ * confidence 축 0.4 시작 — 현재 데이터 0.52~0.63 구간이지만 시각 여유 공간.
+ * 변경 시 두 callsite 자동 동기.
+ */
+export const CALIBRATION_AXIS_MIN = 0.4;
+
+/**
+ * 캘리브레이션 차트 SVG 축 최댓값 — CALIBRATION_AXIS_MIN 참조.
+ * confidence 축 1.0 상한.
+ */
+export const CALIBRATION_AXIS_MAX = 1.0;
