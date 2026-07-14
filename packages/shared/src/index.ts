@@ -815,6 +815,16 @@ export const FEED_ISR_HOURS = 1;
 export const FEED_ISR_SECONDS = FEED_ISR_HOURS * 60 * 60;
 
 /**
+ * RSS feed 게임 조회 한도 — silent drift family wave 291 (cycle 1619).
+ * feed/route.ts getRssGames Supabase 쿼리 .limit(50) 1 occurrence.
+ * 피드 항목 수 변경 시 본 상수 1곳만 갱신.
+ *
+ * 코드 (1 occurrence):
+ *   - app/feed/route.ts: .limit(FEED_GAME_LIMIT)
+ */
+export const FEED_GAME_LIMIT = 50;
+
+/**
  * ads.txt route ISR + Cache-Control 갱신 주기 — silent drift family wave 123 (cycle 1341).
  * 동일 숫자 1(시간) code-only silent drift. ads.txt/route.ts revalidate magic 3600 (1) +
  * Cache-Control max-age=3600, s-maxage=3600 (2) = 총 3 code occurrence.
@@ -1006,6 +1016,16 @@ export const REVIEWS_WEEKLY_ISR_MINUTES = 30;
 export const REVIEWS_WEEKLY_ISR_SECONDS = REVIEWS_WEEKLY_ISR_MINUTES * 60;
 export const REVIEWS_MONTHLY_ISR_HOURS = 1;
 export const REVIEWS_MONTHLY_ISR_SECONDS = REVIEWS_MONTHLY_ISR_HOURS * 60 * 60;
+
+/**
+ * Reviews 페이지 verified prediction 조회 한도 — silent drift family wave 291 (cycle 1619).
+ * reviews/page.tsx getVerifiedPredictions Supabase 쿼리 .limit(100) 1 occurrence.
+ * 조회 한도 변경 시 본 상수 1곳만 갱신.
+ *
+ * 코드 (1 occurrence):
+ *   - app/reviews/page.tsx: .limit(REVIEWS_RECENT_LIMIT)
+ */
+export const REVIEWS_RECENT_LIMIT = 100;
 
 /**
  * Analysis 도메인 페이지 ISR 갱신 주기 — silent drift family wave 134 (cycle 1356).

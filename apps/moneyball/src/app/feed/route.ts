@@ -6,7 +6,7 @@ import {
   assertSelectOk,
   errMsg,
   PRODUCTION_COHORT_RULES,
-  FEED_ISR_SECONDS, SITE_URL
+  FEED_ISR_SECONDS, FEED_GAME_LIMIT, SITE_URL
 } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
@@ -43,7 +43,7 @@ export async function GET() {
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_date', { ascending: false })
     .order('game_time', { ascending: true })
-    .limit(50);
+    .limit(FEED_GAME_LIMIT);
   const { data: games } = assertSelectOk(gamesResult, 'feed getRssGames');
 
   const reviewItems: string[] = [];

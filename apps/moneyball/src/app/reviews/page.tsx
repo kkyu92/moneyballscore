@@ -4,7 +4,7 @@ import {
   type TeamCode,
   shortTeamName,
   winnerProbOf,
-  assertSelectOk, SITE_URL
+  assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -74,7 +74,7 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
     .eq('prediction_type', 'pre_game')
     .not('is_correct', 'is', null)
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(REVIEWS_RECENT_LIMIT);
 
   const { data } = assertSelectOk(result, "reviews getVerifiedPredictions");
   return (data ?? []) as unknown as VerifiedPredictionRow[];
