@@ -318,6 +318,16 @@ export default async function PredictionDatePage({ params }: Props) {
   );
   const correct = verified.filter((g) => g.predictions[0].is_correct === true);
 
+  // CREDIT_EXHAUSTED 간소화 모드 감지: 예측 avg confidence ≤ 0.32
+  // (CREDIT_EXHAUSTED 시 모든 예측 conf=0.3 고정)
+  const recentConfs = predicted
+    .slice(0, 10)
+    .map((g) => g.predictions[0]?.confidence)
+    .filter((c): c is number => c != null);
+  const simplifiedMode =
+    recentConfs.length >= 3 &&
+    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= 0.32;
+
   // 카드 정렬: 검증완료 → 검증대기 → 기록없음 → 취소. 정렬 안에서는 game_time.
   const sortedGames = [...games].sort((a, b) => {
     const rank = (g: DateGame) => {
@@ -349,6 +359,12 @@ export default async function PredictionDatePage({ params }: Props) {
           { label: date },
         ]}
       />
+
+      {simplifiedMode && (
+        <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          AI 에이전트 심층 분석이 일시 중단됩니다. 통계 기반 승부예측은 계속 제공됩니다.
+        </div>
+      )}
 
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{date} 승부예측</h1>
