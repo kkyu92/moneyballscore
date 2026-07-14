@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
+import { DEVICE_ID_MAX_LENGTH } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
   if (pick !== 'home' && pick !== 'away') {
     return NextResponse.json({ error: 'invalid pick' }, { status: 400 });
   }
-  if (typeof device_id !== 'string' || device_id.length === 0 || device_id.length > 64) {
+  if (typeof device_id !== 'string' || device_id.length === 0 || device_id.length > DEVICE_ID_MAX_LENGTH) {
     return NextResponse.json({ error: 'invalid device_id' }, { status: 400 });
   }
 

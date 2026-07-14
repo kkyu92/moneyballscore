@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.5.51.5 — 2026-07-14 (cycle 1632)
+
+### wave-303 silent drift family sweep
+- **PIPELINE_STALE_HOURS_DEFAULT** — health/pipelines stale_hours 28 (×3) → 단일 source (`packages/shared`)
+- **PIPELINE_PREDICT_STALE_HOURS** — health/pipelines predict stale_hours 15 → 단일 source
+- **NICKNAME_MIN_CHARS** — leaderboard/sync nickname 최소 길이 2 → 단일 source
+- **NICKNAME_MAX_CHARS** — leaderboard/sync nickname 최대 길이 12 → 단일 source
+- **DEVICE_ID_MAX_LENGTH** — picks/submit device_id 최대 길이 64 → 단일 source
+- **wave-302 test 보완** — `silent-drift-wave-302.test.ts` 누락 backfill (cycle 1630 ship 미포함)
+
+5 constants → 3 callsites. wave-302 test backfill. 1965 tests PASS.
+
 ## v0.5.51.4 — 2026-07-14 (cycle 1630)
 
 ### wave-302 silent drift family sweep
