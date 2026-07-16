@@ -368,3 +368,64 @@ describe("buildGameOverview — tag/summary 임계값 align (silent drift 차단
     expect(result.summary).toContain("20%p 크게 앞서는 우세 경기");
   });
 });
+
+describe("buildGameOverview — wave-351 Elo 강세 배지 (silent drift 차단)", () => {
+  it("홈팀 Elo 50+ 우위: 홈팀 Elo 강세 태그", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.55,
+      homeElo: 1560,
+      awayElo: 1500,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.tags).toContain("KIA Elo 강세");
+    expect(result.tags).not.toContain("NC Elo 강세");
+  });
+
+  it("원정팀 Elo 50+ 우위: 원정팀 Elo 강세 태그", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.45,
+      homeElo: 1490,
+      awayElo: 1550,
+      homeTeamName: "삼성",
+      awayTeamName: "LG",
+    });
+    expect(result.tags).toContain("LG Elo 강세");
+    expect(result.tags).not.toContain("삼성 Elo 강세");
+  });
+
+  it("Elo 차이 49 (< 50): 태그 미표시", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.52,
+      homeElo: 1549,
+      awayElo: 1500,
+      homeTeamName: "두산",
+      awayTeamName: "키움",
+    });
+    expect(result.tags).not.toContain("두산 Elo 강세");
+    expect(result.tags).not.toContain("키움 Elo 강세");
+  });
+
+  it("Elo 정확히 50: 홈팀 강세 태그 표시 (경계값)", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.54,
+      homeElo: 1550,
+      awayElo: 1500,
+      homeTeamName: "SSG",
+      awayTeamName: "롯데",
+    });
+    expect(result.tags).toContain("SSG Elo 강세");
+  });
+
+  it("Elo null: 태그 미표시", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.55,
+      homeElo: null,
+      awayElo: 1500,
+      homeTeamName: "한화",
+      awayTeamName: "KT",
+    });
+    expect(result.tags).not.toContain("한화 Elo 강세");
+    expect(result.tags).not.toContain("KT Elo 강세");
+  });
+});

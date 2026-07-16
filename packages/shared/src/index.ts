@@ -565,6 +565,18 @@ export const ELO_DIVIDER = 400;
 export const ELO_DISPLAY_NEUTRAL_BAND = 10;
 
 /**
+ * buildGameOverview "Elo 강세" 태그 임계 — wave-351 (cycle 1688).
+ *
+ * 50 Elo point diff ≈ 57% vs 43% win probability (ELO_DIVIDER=400 기준).
+ * KBO 시즌 팀 레이팅 범위 ~1400~1600 (200 point span) 내 의미 있는 tier 차이.
+ * 변경 시 factor-explanations.ts buildGameOverview callsite 동기 필요.
+ *
+ * 1 occurrence 분포 (cycle 1688 최초 박제):
+ *   - apps/moneyball/src/lib/analysis/factor-explanations.ts 1건
+ */
+export const ELO_GAP_STRONG = 50;
+
+/**
  * HOME_ELO_BONUS 를 승률 percentage 로 변환한 approximate 표시값.
  *
  * Elo 400-point conversion: 1 / (1 + 10^(-24/400)) - 0.5 ≈ 0.0345 = 3.45%.
