@@ -55,6 +55,7 @@ import {
   LINEUP_WOBA_DUEL_MIN,
   SFR_DUEL_MIN,
   SP_FIP_DUEL_MIN,
+  SP_XFIP_DUEL_MIN,
   COMPOSITE_DUEL_THRESHOLD,
   COMPOSITE_DUEL_MIN_VALID,
   KBO_TEAMS,
@@ -1239,6 +1240,25 @@ export default async function AnalysisIndexPage() {
                                     : 'text-orange-500 dark:text-orange-400'
                                 }`}>
                                   선발 {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
+                          {/* wave-371: 선발 xFIP 직접 대결 배지 */}
+                          {g.homeSPXfip != null && g.awaySPXfip != null && (() => {
+                            const gap = g.awaySPXfip - g.homeSPXfip;
+                            if (Math.abs(gap) < SP_XFIP_DUEL_MIN) return null;
+                            const favoredHome = gap > 0;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  xFIP {favoredName} 강세
                                 </span>
                               </>
                             );

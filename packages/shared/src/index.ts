@@ -2416,6 +2416,14 @@ export const LINEUP_WOBA_DUEL_MIN = 0.020;
 export const SP_FIP_DUEL_MIN = 0.5;
 
 /**
+ * 선발투수 xFIP 직접 대결 배지 최소 차이 임계 — wave-371 (cycle 1711).
+ * |awaySPXfip - homeSPXfip| ≥ 본 값 시 "xFIP {팀} 강세" 배지 표시.
+ * xFIP 낮을수록 유리 (FIP 동일 방향). SP_FIP_DUEL_MIN 과 동일 0.5.
+ * 변경 시 analysis/page.tsx wave-371 callsite 자동 동기.
+ */
+export const SP_XFIP_DUEL_MIN = 0.5;
+
+/**
  * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708).
  * wOBA/SFR/불펜FIP/선발FIP/WAR 5개 직접 대결 결과 집계 시
  * 한 팀이 본 값 이상 팩터에서 우세 → "N팩터 우세" 배지 표시.
