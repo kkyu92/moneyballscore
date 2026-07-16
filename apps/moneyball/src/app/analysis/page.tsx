@@ -33,6 +33,8 @@ import {
   H2H_WEAK_RATE,
   SP_FIP_STRONG,
   SP_FIP_WEAK,
+  LINEUP_WOBA_STRONG_TAG,
+  LINEUP_WOBA_WEAK_TAG,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -88,6 +90,8 @@ interface TodayAllRow {
     away_recent_form: number | null;
     home_sp_fip: number | null;
     away_sp_fip: number | null;
+    home_lineup_woba: number | null;
+    away_lineup_woba: number | null;
     prediction_type: string;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
@@ -124,6 +128,9 @@ interface TodayGameCard {
   /** wave-337: 선발투수 FIP 배지 */
   homeSPFip?: number;
   awaySPFip?: number;
+  /** wave-339: 타선 wOBA 배지 */
+  homeLineupWoba?: number;
+  awayLineupWoba?: number;
 }
 
 interface TodayAnalysisData {
@@ -146,7 +153,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
-        home_sp_fip, away_sp_fip,
+        home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
         prediction_type, reasoning, factors,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
@@ -229,6 +236,8 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awaySP: spData?.awaySP,
       homeSPFip: pred.home_sp_fip ?? undefined,
       awaySPFip: pred.away_sp_fip ?? undefined,
+      homeLineupWoba: pred.home_lineup_woba ?? undefined,
+      awayLineupWoba: pred.away_lineup_woba ?? undefined,
     });
   }
 
@@ -1121,6 +1130,35 @@ export default async function AnalysisIndexPage() {
                                     {g.homeSPFip.toFixed(2)}
                                   </span>
                                 )}
+                              </span>
+                            </>
+                          )}
+                          {/* wave-339: 타선 wOBA 배지 */}
+                          {(g.awayLineupWoba != null || g.homeLineupWoba != null) && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">·</span>
+                              <span className="text-gray-400 dark:text-gray-500">
+                                타선{' '}
+                                {g.awayLineupWoba != null ? (
+                                  <span className={`font-mono tabular-nums ${
+                                    g.awayLineupWoba >= LINEUP_WOBA_STRONG_TAG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.awayLineupWoba <= LINEUP_WOBA_WEAK_TAG
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }`}>{g.awayLineupWoba.toFixed(3)}</span>
+                                ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                                <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                {g.homeLineupWoba != null ? (
+                                  <span className={`font-mono tabular-nums ${
+                                    g.homeLineupWoba >= LINEUP_WOBA_STRONG_TAG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.homeLineupWoba <= LINEUP_WOBA_WEAK_TAG
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }`}>{g.homeLineupWoba.toFixed(3)}</span>
+                                ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                                <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
                             </>
                           )}
