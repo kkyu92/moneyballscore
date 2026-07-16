@@ -2047,6 +2047,38 @@ export const CE_DETECT_THRESHOLD = 0.32;
 export const CE_MIN_SAMPLES = 3;
 
 /**
+ * CREDIT_EXHAUSTED 발생 시 judge-agent parse 실패 fallback confidence — CE_DETECT_THRESHOLD 참조.
+ * 동일 숫자 0.3 hardcoded callsite:
+ *   - packages/kbo-data/src/agents/judge-agent.ts: parseResponse catch fallback `confidence: 0.3`
+ *
+ * CE_DETECT_THRESHOLD(0.32) 설계 기반 = 이 값(0.3)이 고정 출력될 때 평균도 ≈0.3.
+ * 변경 시 CE_DETECT_THRESHOLD 도 동기 필요.
+ */
+export const LLM_FALLBACK_CONFIDENCE = 0.3;
+
+/**
+ * retro.ts 보정 버킷 low→mid 경계 — silent drift family wave-364 (cycle 1704).
+ * 동일 숫자 0.60 hardcoded 3 surface:
+ *   - packages/kbo-data/src/agents/retro.ts: buckets.low.maxConf = 0.60
+ *   - packages/kbo-data/src/agents/retro.ts: buckets.mid.minConf = 0.60
+ *   - packages/kbo-data/src/agents/retro.ts: winProb < 0.60 버킷 분류
+ *
+ * 승리확률 0.60 미만 = 낮은 확신(low bucket). 변경 시 3 callsite 자동 동기.
+ */
+export const CONF_WIN_PROB_BUCKET_MID = 0.60;
+
+/**
+ * retro.ts 보정 버킷 mid→high 경계 — CONF_WIN_PROB_BUCKET_MID 참조.
+ * 동일 숫자 0.75 hardcoded 3 surface:
+ *   - packages/kbo-data/src/agents/retro.ts: buckets.mid.maxConf = 0.75
+ *   - packages/kbo-data/src/agents/retro.ts: buckets.high.minConf = 0.75
+ *   - packages/kbo-data/src/agents/retro.ts: winProb < 0.75 버킷 분류
+ *
+ * 승리확률 0.60~0.75 = 중간 확신(mid bucket). 변경 시 3 callsite 자동 동기.
+ */
+export const CONF_WIN_PROB_BUCKET_HIGH = 0.75;
+
+/**
  * 접전 경기 판정 기준 점수 차 — silent drift family wave 315 (cycle 1646).
  * 동일 숫자 1 hardcoded 2 surface:
  *   - app/matchup/[teamA]/[teamB]/page.tsx: Math.abs(homeScore - awayScore) <= 1 (closeCount 계산)

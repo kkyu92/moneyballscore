@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, ELO_NEUTRAL_WIN_PCT, KBO_TEAMS, LLM_MAX_TOKENS_JUDGE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, errMsg } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, ELO_NEUTRAL_WIN_PCT, KBO_TEAMS, LLM_FALLBACK_CONFIDENCE, LLM_MAX_TOKENS_JUDGE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
@@ -128,8 +128,8 @@ export function parseResponse(
       errorMessage: errMsg(e),
     });
     return {
-      homeWinProb: 0.5,
-      confidence: 0.3,
+      homeWinProb: ELO_NEUTRAL_WIN_PCT,
+      confidence: LLM_FALLBACK_CONFIDENCE,
       homeArgSummary: '',
       awayArgSummary: '',
       calibrationApplied: null,

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH } from '@moneyball/shared';
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 
@@ -41,15 +41,15 @@ export async function updateCalibration(
   if (!predictions || predictions.length === 0) return;
 
   const buckets = {
-    low: { total: 0, correct: 0, minConf: 0.00, maxConf: 0.60 },
-    mid: { total: 0, correct: 0, minConf: 0.60, maxConf: 0.75 },
-    high: { total: 0, correct: 0, minConf: 0.75, maxConf: 1.00 },
+    low: { total: 0, correct: 0, minConf: 0.00, maxConf: CONF_WIN_PROB_BUCKET_MID },
+    mid: { total: 0, correct: 0, minConf: CONF_WIN_PROB_BUCKET_MID, maxConf: CONF_WIN_PROB_BUCKET_HIGH },
+    high: { total: 0, correct: 0, minConf: CONF_WIN_PROB_BUCKET_HIGH, maxConf: 1.00 },
   };
 
   for (const pred of predictions) {
     // confidence를 승리확률로 변환 (0.5 + confidence/2)
     const winProb = 0.5 + (pred.confidence as number) / 2;
-    const bucket = winProb < 0.60 ? 'low' : winProb < 0.75 ? 'mid' : 'high';
+    const bucket = winProb < CONF_WIN_PROB_BUCKET_MID ? 'low' : winProb < CONF_WIN_PROB_BUCKET_HIGH ? 'mid' : 'high';
     buckets[bucket].total++;
     if (pred.is_correct) buckets[bucket].correct++;
   }
