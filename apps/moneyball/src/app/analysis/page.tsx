@@ -806,6 +806,12 @@ export default async function AnalysisIndexPage() {
         },
       ]),
   );
+  // wave-377: 탑픽 배지 — winnerProb 기준 최대값 게임 (confident 티어만)
+  const bestPickGameId = [...todayData.games]
+    .sort((a, b) => winnerProbOf(b.homeWinProb) - winnerProbOf(a.homeWinProb))
+    .find((g) => classifyWinnerProb(g.homeWinProb) === 'confident')
+    ?.gameId ?? null;
+
   const gamesWithRank = todayData.games.map((g) => {
     // wave-333: 올 시즌 상대전적 (canonical pair key)
     const [h2hA, h2hB] = [g.homeCode as string, g.awayCode as string].sort();
@@ -825,6 +831,8 @@ export default async function AnalysisIndexPage() {
       awayRecent10: recent10Map.get(g.awayCode),
       h2hHomeWins: h2hTotal >= H2H_MIN_GAMES ? h2hHomeWins : undefined,
       h2hAwayWins: h2hTotal >= H2H_MIN_GAMES ? h2hAwayWins : undefined,
+      /** wave-377: 오늘의 탑픽 (confident 티어 + 최고 winnerProb) */
+      isTopPick: g.gameId === bestPickGameId,
     };
   });
 
@@ -919,6 +927,7 @@ export default async function AnalysisIndexPage() {
                 : Math.round((1 - g.homeWinProb) * 100);
               const tier = classifyWinnerProb(g.homeWinProb);
               const isBig = g.gameId === todayData.bigMatchId;
+              const isTopPick = g.isTopPick;
               // wave-347: 경기 유형 배지 — avgSPFip < SP_AVG_FIP_DUEL = 투수전, avgWoba > LINEUP_AVG_WOBA_HITTER = 타격전
               const avgSpFip =
                 g.awaySPFip != null && g.homeSPFip != null
@@ -941,7 +950,9 @@ export default async function AnalysisIndexPage() {
                     className={`block rounded-xl border p-4 hover:shadow-md transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
                       isBig
                         ? 'bg-white dark:bg-[var(--color-surface-card)] border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20'
-                        : 'bg-white dark:bg-[var(--color-surface-card)] border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 dark:hover:border-brand-500'
+                        : isTopPick
+                          ? 'bg-white dark:bg-[var(--color-surface-card)] border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30'
+                          : 'bg-white dark:bg-[var(--color-surface-card)] border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 dark:hover:border-brand-500'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -954,6 +965,10 @@ export default async function AnalysisIndexPage() {
                             {g.gameTime.substring(0, 5)}
                             {isBig && (
                               <span className="ml-2 text-[var(--color-accent)] font-semibold">⭐ 빅매치</span>
+                            )}
+                            {/* wave-377: 오늘의 탑픽 배지 */}
+                            {isTopPick && !isBig && (
+                              <span className="ml-2 text-amber-500 dark:text-amber-400 font-semibold">★ 탑픽</span>
                             )}
                             {/* wave-325: 현재 KBO 순위 배지 */}
                             {g.homeRank !== undefined && g.awayRank !== undefined && (
