@@ -16,7 +16,7 @@
  * Step 4 (회귀 가드) = 본 모듈을 7 agent 가 실제 소비한 후 pre/post Brier delta 측정.
  */
 
-import { KBO_FACTOR_COUNT, type TeamCode } from '@moneyball/shared';
+import { ELO_NEUTRAL_WIN_PCT, KBO_FACTOR_COUNT, type TeamCode } from '@moneyball/shared';
 import type { GameContext } from '../agents/types';
 import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWindowsForLLM, KBO_PARKS, TIME_WINDOWS, type ParkContext } from './domain';
 import { MetricRegistry, type MetricDefinition, type MetricSlug } from './metrics';
@@ -138,7 +138,7 @@ export function buildAgentContext(ctx: GameContext, today: Date = new Date()): A
   };
 
   const h2hTotal = ctx.headToHead.wins + ctx.headToHead.losses;
-  const h2hHomeWinPct = h2hTotal > 0 ? Number(((ctx.headToHead.wins / h2hTotal) * 100).toFixed(1)) : 50.0;
+  const h2hHomeWinPct = h2hTotal > 0 ? Number(((ctx.headToHead.wins / h2hTotal) * 100).toFixed(1)) : ELO_NEUTRAL_WIN_PCT * 100;
   metrics.head_to_head = {
     home: h2hHomeWinPct,
     away: Number((100 - h2hHomeWinPct).toFixed(1)),

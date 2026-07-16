@@ -1045,7 +1045,7 @@ export default async function AnalysisIndexPage() {
                           {/* wave-333: 올 시즌 상대전적 배지 */}
                           {g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined && (() => {
                             const total = g.h2hHomeWins + g.h2hAwayWins;
-                            const homeRate = total > 0 ? g.h2hHomeWins / total : 0.5;
+                            const homeRate = g.h2hHomeWins / total;
                             return (
                               <>
                                 <span className="text-gray-300 dark:text-gray-700">·</span>
