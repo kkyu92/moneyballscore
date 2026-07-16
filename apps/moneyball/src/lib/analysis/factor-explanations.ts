@@ -1,4 +1,4 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, WAR_STRONG, WAR_WEAK } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -299,6 +299,9 @@ export interface GameOverviewInput {
   /** wave-346: 팀 WAR 태그 */
   homeWar?: number | null;
   awayWar?: number | null;
+  /** wave-349: 최근 폼 태그 */
+  homeRecentForm?: number | null;
+  awayRecentForm?: number | null;
   homeTeamName: string;
   awayTeamName: string;
   h2hRate?: number | null;
@@ -340,6 +343,16 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
     const awayWeak = input.awayWar <= WAR_WEAK;
     if (homeStrong && awayWeak) tags.push(`${input.homeTeamName} 전력 우세`);
     else if (awayStrong && homeWeak) tags.push(`${input.awayTeamName} 전력 우세`);
+  }
+
+  // wave-349: 최근 폼 태그 — TEAM_STRENGTH_FORM_STRONG/WEAK 임계값 기준 핫/부진 팀 명시
+  if (input.homeRecentForm != null) {
+    if (input.homeRecentForm >= TEAM_STRENGTH_FORM_STRONG) tags.push(`${input.homeTeamName} 최근 핫`);
+    else if (input.homeRecentForm <= TEAM_STRENGTH_FORM_WEAK) tags.push(`${input.homeTeamName} 최근 부진`);
+  }
+  if (input.awayRecentForm != null) {
+    if (input.awayRecentForm >= TEAM_STRENGTH_FORM_STRONG) tags.push(`${input.awayTeamName} 최근 핫`);
+    else if (input.awayRecentForm <= TEAM_STRENGTH_FORM_WEAK) tags.push(`${input.awayTeamName} 최근 부진`);
   }
 
   const prob = input.homeWinProb;
