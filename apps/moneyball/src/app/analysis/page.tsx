@@ -28,6 +28,9 @@ import {
   RECENT10_MIN_GAMES,
   RECENT10_HOT_WINS,
   RECENT10_COLD_WINS,
+  H2H_MIN_GAMES,
+  H2H_DOMINANT_RATE,
+  H2H_WEAK_RATE,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -107,6 +110,9 @@ interface TodayGameCard {
   /** wave-331: 최근 10경기 배지 */
   homeRecent10?: { wins: number; losses: number };
   awayRecent10?: { wins: number; losses: number };
+  /** wave-333: 올 시즌 상대전적 배지 (홈팀 기준 승수/패수) */
+  h2hHomeWins?: number;
+  h2hAwayWins?: number;
 }
 
 interface TodayAnalysisData {
@@ -617,10 +623,50 @@ async function getUpsetPickOfMonth(startDate: string, endDate: string): Promise<
   };
 }
 
+interface H2HRaw {
+  home_team: { code: string } | null;
+  away_team: { code: string } | null;
+  winner_team: { code: string } | null;
+}
+
+async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> {
+  const supabase = await createClient();
+  const today = toKSTDateString();
+  const season = today.substring(0, 4);
+
+  const result = (await supabase
+    .from('games')
+    .select(`
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
+      winner_team:teams!games_winner_team_id_fkey(code)
+    `)
+    .gte('game_date', `${season}-01-01`)
+    .lt('game_date', today)
+    .not('winner_team_id', 'is', null)) as SelectResult<H2HRaw[]>;
+
+  const { data } = assertSelectOk(result, 'analysis getSeasonH2HData');
+  const pairMap = new Map<string, Record<string, number>>();
+
+  for (const row of (data as unknown as H2HRaw[]) ?? []) {
+    const homeCode = row.home_team?.code;
+    const awayCode = row.away_team?.code;
+    const winnerCode = row.winner_team?.code;
+    if (!homeCode || !awayCode || !winnerCode) continue;
+    const [a, b] = [homeCode, awayCode].sort();
+    const key = `${a}:${b}`;
+    const pair = pairMap.get(key) ?? {};
+    pair[winnerCode] = (pair[winnerCode] ?? 0) + 1;
+    pairMap.set(key, pair);
+  }
+
+  return pairMap;
+}
+
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -632,6 +678,7 @@ export default async function AnalysisIndexPage() {
     getUpsetPickOfMonth(currentMonth.startDate, currentMonth.endDate),
     buildTeamStrengthSnapshot(),
     fetchStandings(),
+    getSeasonH2HData(),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -668,17 +715,29 @@ export default async function AnalysisIndexPage() {
         },
       ]),
   );
-  const gamesWithRank = todayData.games.map((g) => ({
-    ...g,
-    homeRank: rankMap.get(g.homeCode),
-    awayRank: rankMap.get(g.awayCode),
-    homeRecord: recordMap.get(g.homeCode),
-    awayRecord: recordMap.get(g.awayCode),
-    homeTeamVenue: venueMap.get(g.homeCode),
-    awayTeamVenue: venueMap.get(g.awayCode),
-    homeRecent10: recent10Map.get(g.homeCode),
-    awayRecent10: recent10Map.get(g.awayCode),
-  }));
+  const gamesWithRank = todayData.games.map((g) => {
+    // wave-333: 올 시즌 상대전적 (canonical pair key)
+    const [h2hA, h2hB] = [g.homeCode as string, g.awayCode as string].sort();
+    const h2hKey = `${h2hA}:${h2hB}`;
+    const h2hPair = h2hMap.get(h2hKey) ?? {};
+    const h2hHomeWins = h2hPair[g.homeCode] ?? 0;
+    const h2hAwayWins = h2hPair[g.awayCode] ?? 0;
+    const h2hTotal = h2hHomeWins + h2hAwayWins;
+
+    return {
+      ...g,
+      homeRank: rankMap.get(g.homeCode),
+      awayRank: rankMap.get(g.awayCode),
+      homeRecord: recordMap.get(g.homeCode),
+      awayRecord: recordMap.get(g.awayCode),
+      homeTeamVenue: venueMap.get(g.homeCode),
+      awayTeamVenue: venueMap.get(g.awayCode),
+      homeRecent10: recent10Map.get(g.homeCode),
+      awayRecent10: recent10Map.get(g.awayCode),
+      h2hHomeWins: h2hTotal >= H2H_MIN_GAMES ? h2hHomeWins : undefined,
+      h2hAwayWins: h2hTotal >= H2H_MIN_GAMES ? h2hAwayWins : undefined,
+    };
+  });
 
   const simplifiedMode =
     todayData.games.length >= CE_MIN_SAMPLES &&
@@ -979,6 +1038,28 @@ export default async function AnalysisIndexPage() {
                                         ? 'text-orange-500 dark:text-orange-400'
                                         : ''
                                   }>{hr.wins}승{hr.losses}패</span>
+                                </span>
+                              </>
+                            );
+                          })()}
+                          {/* wave-333: 올 시즌 상대전적 배지 */}
+                          {g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined && (() => {
+                            const total = g.h2hHomeWins + g.h2hAwayWins;
+                            const homeRate = total > 0 ? g.h2hHomeWins / total : 0.5;
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className="text-gray-400 dark:text-gray-500">
+                                  상대{' '}
+                                  <span className={
+                                    homeRate >= H2H_DOMINANT_RATE
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : homeRate <= H2H_WEAK_RATE
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : ''
+                                  }>{g.h2hHomeWins}승</span>
+                                  {g.h2hAwayWins}패
+                                  <span className="text-gray-300 dark:text-gray-600"> (홈)</span>
                                 </span>
                               </>
                             );

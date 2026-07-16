@@ -2068,3 +2068,15 @@ export const RECENT10_HOT_WINS = 7;
  * RECENT10_HOT_WINS 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const RECENT10_COLD_WINS = 3;
+
+/** wave-333: 상대전적 배지 — 최소 과거 대결 수 (미만 시 배지 숨김) */
+export const H2H_MIN_GAMES = 3;
+
+/** wave-333: 상대전적 배지 — 홈팀 우세 기준 (승률 60% 이상 → brand color) */
+export const H2H_DOMINANT_RATE = 0.6;
+
+/**
+ * H2H_DOMINANT_RATE 의 보수. 변경 시 양쪽 동시 조정.
+ * 홈팀 열세 기준 (승률 40% 이하 → orange color)
+ */
+export const H2H_WEAK_RATE = 0.4;
