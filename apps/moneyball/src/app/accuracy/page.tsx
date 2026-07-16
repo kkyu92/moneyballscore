@@ -31,6 +31,9 @@ import {
   CALIBRATION_AXIS_MIN,
   CALIBRATION_AXIS_MAX,
   ACC_OUTLIER_GAP,
+  ACCURACY_OK_RATE,
+  ACCURACY_WARN_RATE,
+  ACCURACY_OK_PCT,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -709,9 +712,9 @@ export default async function AccuracyPage() {
               const colorClass =
                 acc === null
                   ? 'bg-gray-200 dark:bg-gray-700'
-                  : acc >= 0.55
+                  : acc >= ACCURACY_OK_RATE
                     ? 'bg-brand-500'
-                    : acc >= 0.45
+                    : acc >= ACCURACY_WARN_RATE
                       ? 'bg-neutral-400'
                       : 'bg-red-400 dark:bg-red-500';
               return (
@@ -810,7 +813,7 @@ export default async function AccuracyPage() {
                         className={`text-2xl font-bold ${
                           isInverted
                             ? 'text-warning'
-                            : pct >= 55
+                            : pct >= ACCURACY_OK_PCT
                             ? 'text-brand-600 dark:text-brand-400'
                             : 'text-red-600 dark:text-red-400'
                         }`}

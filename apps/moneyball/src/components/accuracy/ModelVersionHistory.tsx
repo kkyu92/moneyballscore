@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE } from '@moneyball/shared';
+import { ACCURACY_OK_PCT, ACCURACY_WARN_PCT, CURRENT_SCORING_RULE } from '@moneyball/shared';
 import type { VersionHistoryRow } from '@/lib/accuracy/buildAccuracyData';
 
 interface Props {
@@ -30,17 +30,17 @@ export function ModelVersionHistory({ versions }: Props) {
               const barColor =
                 pct === null || v.n === 0
                   ? 'bg-gray-200 dark:bg-gray-700'
-                  : pct >= 55
+                  : pct >= ACCURACY_OK_PCT
                     ? 'bg-brand-500'
-                    : pct >= 45
+                    : pct >= ACCURACY_WARN_PCT
                       ? 'bg-gray-400 dark:bg-gray-500'
                       : 'bg-red-400 dark:bg-red-500';
               const textColor =
                 pct === null || v.n === 0
                   ? 'text-gray-400 dark:text-gray-500'
-                  : pct >= 55
+                  : pct >= ACCURACY_OK_PCT
                     ? 'text-brand-500 dark:text-brand-400'
-                    : pct >= 45
+                    : pct >= ACCURACY_WARN_PCT
                       ? 'text-gray-600 dark:text-gray-300'
                       : 'text-red-600 dark:text-red-400';
 

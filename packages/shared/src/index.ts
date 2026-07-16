@@ -740,6 +740,42 @@ export const ACCURACY_GOOD_PCT = 60;
 export const ACCURACY_GOOD_RATE = ACCURACY_GOOD_PCT / 100;
 
 /**
+ * 적중률 "양호" 색상 임계 (정수 %) — accuracyPct >= ACCURACY_OK_PCT 시 brand 색.
+ * ACCURACY_GOOD_PCT(60) 보다 낮은 표시용 임계 — DOW 요일별 막대차트 / 모델버전 히스토리
+ * 3단계 색상 (brand / neutral / red) 단일 source.
+ *
+ * silent drift family wave 360 (cycle 1698) — accuracy/page.tsx + ModelVersionHistory.tsx
+ * `pct >= 55` / `acc >= 0.55` hardcoded swap. 3 callsites → 단일 source.
+ */
+export const ACCURACY_OK_PCT = 55;
+
+/**
+ * 적중률 "경고" 색상 임계 (정수 %) — accuracyPct >= ACCURACY_WARN_PCT 시 neutral 색.
+ * ACCURACY_OK_PCT 의 대칭 하한 — ACCURACY_WARN_PCT < acc < ACCURACY_OK_PCT = neutral.
+ * ACCURACY_OK_PCT 변경 시 대칭 동기 필요.
+ *
+ * silent drift family wave 360 (cycle 1698) — accuracy/page.tsx + ModelVersionHistory.tsx
+ * `pct >= 45` / `acc >= 0.45` hardcoded swap. 3 callsites → 단일 source.
+ */
+export const ACCURACY_WARN_PCT = 45;
+
+/**
+ * 적중률 "양호" 색상 임계 (소수) — ACCURACY_OK_PCT 파생. 변경 시 자동 동기.
+ *
+ * silent drift family wave 360 (cycle 1698) — accuracy/page.tsx
+ * `acc >= 0.55` hardcoded swap.
+ */
+export const ACCURACY_OK_RATE = ACCURACY_OK_PCT / 100;
+
+/**
+ * 적중률 "경고" 색상 임계 (소수) — ACCURACY_WARN_PCT 파생. 변경 시 자동 동기.
+ *
+ * silent drift family wave 360 (cycle 1698) — accuracy/page.tsx
+ * `acc >= 0.45` hardcoded swap.
+ */
+export const ACCURACY_WARN_RATE = ACCURACY_WARN_PCT / 100;
+
+/**
  * 요약 바 표시 최소 예측 경기 수 — predicted < SUMMARY_BAR_MIN_GAMES 시
  * DailyPredictionSummaryBar 숨김. 단일 경기 날 빈 요약 노출 방지.
  *
