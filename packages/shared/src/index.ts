@@ -2300,6 +2300,14 @@ export const WAR_STRONG = 20.0;
 export const WAR_WEAK = 8.0;
 
 /**
+ * WAR 직접 대결 배지 최소 차이 — wave-367 (cycle 1707).
+ * |homeWar - awayWar| ≥ 본 값 시 "WAR [팀] 강세" 배지 표시.
+ * 5.0 = KBO 팀 WAR 범위(8~25) 기준 의미있는 격차 (~33% gap at midrange 14).
+ * 변경 시 analysis/page.tsx wave-367 callsite 동시 조정.
+ */
+export const WAR_DUEL_MIN = 5.0;
+
+/**
  * 경기 유형 배지 임계값 — wave-347 (cycle 1684).
  * 양 팀 선발투수 FIP 평균이 본 값 미만 = "투수전 예상" 태그 표시.
  * SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 중간 지점.
