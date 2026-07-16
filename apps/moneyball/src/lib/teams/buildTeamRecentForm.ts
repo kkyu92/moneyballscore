@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, MATCHUP_RECENT_FORM_GAMES, type TeamCode } from "@moneyball/shared";
 
 export type GameResult = "W" | "L" | "T";
 
@@ -36,7 +36,7 @@ interface GameRow {
  */
 export async function buildTeamRecentForm(
   teamCode: TeamCode,
-  limit = 5,
+  limit = MATCHUP_RECENT_FORM_GAMES,
 ): Promise<TeamRecentForm> {
   const supabase = await createClient();
 

@@ -7,6 +7,8 @@ import {
   josa,
   SITE_URL,
   ACCURACY_GOOD_RATE,
+  ACCURACY_BASELINE,
+  MATCHUP_RECENT_FORM_GAMES,
   classifyWinnerProb,
   winnerProbOf,
   pickTierEmoji,
@@ -86,8 +88,8 @@ export default async function MatchupPage({ params }: PageProps) {
     buildMatchupProfile(pair),
     buildTeamFactorAverages(pair.codeA).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeA" })),
     buildTeamFactorAverages(pair.codeB).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeB" })),
-    buildTeamRecentForm(pair.codeA, 5).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" })),
-    buildTeamRecentForm(pair.codeB, 5).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" })),
+    buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" })),
+    buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" })),
     buildMatchupUpcoming(pair).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupUpcoming" })),
   ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
@@ -299,7 +301,7 @@ export default async function MatchupPage({ params }: PageProps) {
               className={`text-3xl font-bold font-mono ${
                 (predictionAccuracy.rate ?? 0) >= ACCURACY_GOOD_RATE
                   ? "text-brand-600 dark:text-brand-400"
-                  : (predictionAccuracy.rate ?? 0) >= 0.5
+                  : (predictionAccuracy.rate ?? 0) >= ACCURACY_BASELINE
                     ? "text-yellow-600 dark:text-yellow-400"
                     : "text-red-600 dark:text-red-400"
               }`}

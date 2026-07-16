@@ -455,6 +455,14 @@ export const TEAM_UPCOMING_LIMIT = 7;
 export const MATCHUP_UPCOMING_LIMIT = 3;
 
 /**
+ * 매치업 페이지 최근 폼 표시 경기 수 — /matchup/[teamA]/[teamB] recent form section.
+ * RECENT_FORM_GAMES(10, 예측 모델용) 와 별개 — display compact 5경기.
+ * buildTeamRecentForm default + matchup page callsite 단일 source.
+ * silent drift family wave-362 (cycle 1700).
+ */
+export const MATCHUP_RECENT_FORM_GAMES = 5;
+
+/**
  * 홈팀 승리 확률 clamp 범위 — predictor / v2Predictor / judge-agent / shadow-cohort /
  * backtest / FactorWaterfallChart / mlb-base 모두 동일 [0.15, 0.85] 단일 source.
  * silent drift family wave 93 (cycle 1304) — wave 91 (HOME_ADVANTAGE_PCT) / wave 92
