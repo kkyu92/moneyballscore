@@ -1,5 +1,18 @@
 # Changelog
 
+## op-analysis — 2026-07-16 (cycle 1690, W29 시즌 재개 첫 날)
+
+### W29 현황 분석 (올스타 브레이크 종료)
+- **시즌 재개**: 7/16 KBO 5경기 (올스타 브레이크 7/10-15 종료). 오늘부터 새 데이터 누적 시작
+- **누적 v1.8**: n=187 (올스타 브레이크 동안 frozen), acc=59.9%, Brier=0.2488 — 브레이크 기간 변동 없음
+- **CREDIT_EXHAUSTED**: 6th recurrence 지속 (~6/6 이후). debate=None, conf=0.3 flat → CE 구간 예측 정확도 ~56%
+- **비CE 성능 기준선**: 66.7% (누적) / 62.5% (W28 비CE) — 크레딧 충전 시 회복 예상 기준
+- **Form weight 주의**: 최근폼 10% 가중치가 6일 브레이크 후 첫 주 예측에 사전 freeze 상태. 휴식 후 팀 상태 불확실성 ↑
+- **가중치 변경**: 없음 (v1.8 유지 확정 — cycle 1460). W29 결과 축적 후 재측정 예정
+- **Feature-Drift Cycle lock**: review-code ↔ explore-idea 8 consecutive → 2-chain lock 탐지, 본 cycle op-analysis로 자연 해제
+
+---
+
 ## v0.5.51.8 — 2026-07-14 (cycle 1650)
 
 ### wave-319 explore-idea: 팀 전력 Elo 변화 추세
