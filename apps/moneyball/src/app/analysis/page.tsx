@@ -37,6 +37,8 @@ import {
   LINEUP_WOBA_WEAK_TAG,
   BULLPEN_FIP_STRONG,
   BULLPEN_FIP_WEAK,
+  SFR_STRONG,
+  SFR_WEAK,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -96,6 +98,8 @@ interface TodayAllRow {
     away_lineup_woba: number | null;
     home_bullpen_fip: number | null;
     away_bullpen_fip: number | null;
+    home_sfr: number | null;
+    away_sfr: number | null;
     prediction_type: string;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
@@ -138,6 +142,9 @@ interface TodayGameCard {
   /** wave-341: 불펜 FIP 배지 */
   homeBullpenFip?: number;
   awayBullpenFip?: number;
+  /** wave-343: 수비 SFR 배지 */
+  homeSfr?: number;
+  awaySfr?: number;
 }
 
 interface TodayAnalysisData {
@@ -161,7 +168,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       predictions!inner(
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
         home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
-        home_bullpen_fip, away_bullpen_fip,
+        home_bullpen_fip, away_bullpen_fip, home_sfr, away_sfr,
         prediction_type, reasoning, factors,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
@@ -248,6 +255,8 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awayLineupWoba: pred.away_lineup_woba ?? undefined,
       homeBullpenFip: pred.home_bullpen_fip ?? undefined,
       awayBullpenFip: pred.away_bullpen_fip ?? undefined,
+      homeSfr: pred.home_sfr ?? undefined,
+      awaySfr: pred.away_sfr ?? undefined,
     });
   }
 
@@ -1196,6 +1205,35 @@ export default async function AnalysisIndexPage() {
                                         ? 'text-orange-500 dark:text-orange-400'
                                         : 'text-gray-400 dark:text-gray-500'
                                   }`}>{g.homeBullpenFip.toFixed(2)}</span>
+                                ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                                <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
+                              </span>
+                            </>
+                          )}
+                          {/* wave-343: 수비 SFR 배지 */}
+                          {(g.awaySfr != null || g.homeSfr != null) && (g.awaySfr !== 0 || g.homeSfr !== 0) && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">·</span>
+                              <span className="text-gray-400 dark:text-gray-500">
+                                수비{' '}
+                                {g.awaySfr != null ? (
+                                  <span className={`font-mono tabular-nums text-[10px] ${
+                                    g.awaySfr >= SFR_STRONG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.awaySfr <= SFR_WEAK
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>{g.awaySfr >= 0 ? '+' : ''}{g.awaySfr.toFixed(1)}</span>
+                                ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                                <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                {g.homeSfr != null ? (
+                                  <span className={`font-mono tabular-nums text-[10px] ${
+                                    g.homeSfr >= SFR_STRONG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.homeSfr <= SFR_WEAK
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
