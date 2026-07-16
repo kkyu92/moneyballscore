@@ -5,11 +5,7 @@
  * 본 helper = pure functions only (Sentry-free / supabase-free) — vitest deterministic.
  */
 
-import { DEFAULT_WEIGHTS, ELO_DIVIDER, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL, V2_PROMOTION_COHORT_N } from '@moneyball/shared';
-
-const CLAMP_LO = 0.15;
-const CLAMP_HI = 0.85;
-const NEUTRAL_FACTOR = 0.5;
+import { DEFAULT_WEIGHTS, ELO_DIVIDER, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL, V2_PROMOTION_COHORT_N, NEUTRAL_FACTOR, clampWinnerProb } from '@moneyball/shared';
 
 /** cycle 231 박제 시점 = 2026-05-12. v1.8 본격 production 시작 = 2026-05-13. */
 export const RULE_DEFINITION_DATE = '2026-05-12';
@@ -239,7 +235,7 @@ export function computeProb(
   }
   if (factorTotal === 0) return null;
   let prob = weightedSum / factorTotal + HOME_ADVANTAGE;
-  prob = Math.max(CLAMP_LO, Math.min(CLAMP_HI, prob));
+  prob = clampWinnerProb(prob);
   return Math.round(prob * 1000) / 1000;
 }
 
