@@ -30,6 +30,7 @@ import {
   KBO_FACTOR_COUNT,
   CALIBRATION_AXIS_MIN,
   CALIBRATION_AXIS_MAX,
+  ACC_OUTLIER_GAP,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -892,7 +893,7 @@ export default async function AccuracyPage() {
                     const isOutlier =
                       t.accuracyRate !== null &&
                       t.verifiedN >= 3 &&
-                      overallAcc - t.accuracyRate > 0.15;
+                      overallAcc - t.accuracyRate > ACC_OUTLIER_GAP;
                     return (
                       <tr
                         key={t.teamCode}
