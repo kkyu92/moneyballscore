@@ -25,6 +25,7 @@ import {
   VENUE_RECORD_MIN_GAMES,
   VENUE_WIN_RATE_HIGH,
   VENUE_WIN_RATE_LOW,
+  RECENT10_MIN_GAMES,
   RECENT10_HOT_WINS,
   RECENT10_COLD_WINS,
   TEAM_STRENGTH_FORM_STRONG,
@@ -957,7 +958,7 @@ export default async function AnalysisIndexPage() {
                             const ar = g.awayRecent10;
                             const hr = g.homeRecent10;
                             if (!ar || !hr) return null;
-                            if (ar.wins + ar.losses < 10 || hr.wins + hr.losses < 10) return null;
+                            if (ar.wins + ar.losses < RECENT10_MIN_GAMES || hr.wins + hr.losses < RECENT10_MIN_GAMES) return null;
                             return (
                               <>
                                 <span className="text-gray-300 dark:text-gray-700">·</span>

@@ -2048,6 +2048,13 @@ export const VENUE_WIN_RATE_HIGH = 0.6;
 export const VENUE_WIN_RATE_LOW = 0.4;
 
 /**
+ * 최근 10경기 배지 최소 경기 수 — wave-332 (cycle 1666).
+ * ar.wins + ar.losses < 본 값이면 배지 숨김 (시즌 초반 소표본 노이즈 차단).
+ * 최근 10경기 트래킹 단위와 동일 — 10경기 미만이면 "최근 10경기" 의미 없음.
+ */
+export const RECENT10_MIN_GAMES = 10;
+
+/**
  * 최근 10경기 배지 hot 임계 — wave-331 (cycle 1665).
  * recent10 wins >= 본 값 시 brand color (핫) 표시.
  * 7승3패 = 70% win rate = KBO 상위권 최근 폼.
