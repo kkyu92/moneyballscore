@@ -2365,3 +2365,12 @@ export const TOP_STAT_PICK_EDGE_MIN = 0.05;
  * 변경 시 analysis/page.tsx wave-355 callsite 자동 동기.
  */
 export const LINEUP_WOBA_DUEL_MIN = 0.020;
+
+/**
+ * 선발투수 FIP 직접 대결 배지 최소 차이 임계 — wave-363 (cycle 1702).
+ * |awaySPFip - homeSPFip| ≥ 본 값 시 "선발 {팀} 강세" 배지 표시.
+ * FIP 낮을수록 유리. 0.5 = SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 범위(1.0)의 절반.
+ * 선발 투수 1인 기준 FIP 0.5 차 = KBO 리그 에이스-평균 경계 수준.
+ * 변경 시 analysis/page.tsx wave-363 callsite 자동 동기.
+ */
+export const SP_FIP_DUEL_MIN = 0.5;
