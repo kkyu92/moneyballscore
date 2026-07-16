@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, ELO_NEUTRAL_WIN_PCT, type TeamCode } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, ELO_NEUTRAL_WIN_PCT, LLM_FALLBACK_CONFIDENCE, type TeamCode } from '@moneyball/shared';
 import { runTeamAgent } from './team-agent';
 import { runJudgeAgent } from './judge-agent';
 import { runCalibrationAgent, type PredictionHistory } from './calibration-agent';
@@ -74,7 +74,7 @@ export async function runDebate(
   // fallback: 심판 실패 시 정량 모델 결과 사용
   const verdict = judgeResult.data || {
     homeWinProb: quantitativeProb,
-    confidence: 0.3,
+    confidence: LLM_FALLBACK_CONFIDENCE,
     homeArgSummary: homeArg.reasoning,
     awayArgSummary: awayArg.reasoning,
     calibrationApplied: null,

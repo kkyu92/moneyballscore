@@ -2047,9 +2047,8 @@ export const CE_DETECT_THRESHOLD = 0.32;
 export const CE_MIN_SAMPLES = 3;
 
 /**
- * CREDIT_EXHAUSTED 발생 시 judge-agent parse 실패 fallback confidence — CE_DETECT_THRESHOLD 참조.
- * 동일 숫자 0.3 hardcoded callsite:
- *   - packages/kbo-data/src/agents/judge-agent.ts: parseResponse catch fallback `confidence: 0.3`
+ * CREDIT_EXHAUSTED 발생 시 judge-agent/debate parse 실패 fallback confidence — CE_DETECT_THRESHOLD 참조.
+ * hardcoded 0.3 callsite: 없음 (judge-agent.ts + debate.ts 모두 본 상수 사용 — silent drift wave-374, cycle 1715).
  *
  * CE_DETECT_THRESHOLD(0.32) 설계 기반 = 이 값(0.3)이 고정 출력될 때 평균도 ≈0.3.
  * 변경 시 CE_DETECT_THRESHOLD 도 동기 필요.
