@@ -2113,3 +2113,19 @@ export const LINEUP_WOBA_STRONG_TAG = 0.34;
  * LINEUP_WOBA_STRONG_TAG 의 보수. 변경 시 analysis/page.tsx + factor-explanations.ts callsite 동시 조정.
  */
 export const LINEUP_WOBA_WEAK_TAG = 0.30;
+
+/**
+ * 불펜 FIP 배지 강세 임계 — wave-341 (cycle 1676).
+ * bullpen_fip < 본 값 시 brand color (강세) 표시.
+ * 4.00 = KBO 강한 불펜 수준 (리그 평균 불펜 FIP ~4.50 기준 상위 25%).
+ * 변경 시 analysis/page.tsx + factor-explanations.ts callsite 자동 동기.
+ */
+export const BULLPEN_FIP_STRONG = 4.0;
+
+/**
+ * 불펜 FIP 배지 약세 임계 — wave-341 (cycle 1676).
+ * bullpen_fip > 본 값 시 orange color (약세) 표시.
+ * 5.00 = KBO 약한 불펜 수준 (리그 평균 불펜 FIP ~4.50 기준 하위 25%).
+ * BULLPEN_FIP_STRONG 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const BULLPEN_FIP_WEAK = 5.0;

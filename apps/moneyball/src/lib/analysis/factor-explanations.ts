@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SP_FIP_STRONG } from "@moneyball/shared";
+import { BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SP_FIP_STRONG } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -268,6 +268,9 @@ export interface GameOverviewInput {
   awaySPFip?: number | null;
   homeWoba?: number | null;
   awayWoba?: number | null;
+  /** wave-341: 불펜 FIP 배지 */
+  homeBullpenFip?: number | null;
+  awayBullpenFip?: number | null;
   homeTeamName: string;
   awayTeamName: string;
   h2hRate?: number | null;
@@ -293,6 +296,13 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   if (avgSpFip != null && avgSpFip <= SP_FIP_STRONG) tags.push("투수전 예상");
   if (avgWoba != null && avgWoba >= LINEUP_WOBA_STRONG_TAG) tags.push("타격전 예상");
   if (avgWoba != null && avgWoba <= LINEUP_WOBA_WEAK_TAG) tags.push("저득점 예상");
+
+  // wave-341: 불펜 우세 태그 — 양팀 FIP 차이 ≥ 1.0 시 불펜 우세 팀 명시
+  if (input.homeBullpenFip != null && input.awayBullpenFip != null) {
+    const diff = input.awayBullpenFip - input.homeBullpenFip;
+    if (diff >= 1.0) tags.push(`${input.homeTeamName} 불펜 우세`);
+    else if (diff <= -1.0) tags.push(`${input.awayTeamName} 불펜 우세`);
+  }
 
   const prob = input.homeWinProb;
   if (prob >= NEUTRAL_LO && prob <= NEUTRAL_HI) tags.push("박빙");

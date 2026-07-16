@@ -272,6 +272,8 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     awaySPFip: preGame.away_sp_fip,
     homeWoba: preGame.home_lineup_woba,
     awayWoba: preGame.away_lineup_woba,
+    homeBullpenFip: preGame.home_bullpen_fip,
+    awayBullpenFip: preGame.away_bullpen_fip,
     h2hRate: preGame.head_to_head_rate,
     homeTeamName: homeName,
     awayTeamName: awayName,
