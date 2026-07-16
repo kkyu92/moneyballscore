@@ -10,7 +10,7 @@
  * 기존 `pre_game` row는 절대 update 금지 (이력 보존).
  */
 
-import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS, LLM_MAX_TOKENS_POSTVIEW_TEAM, LLM_MAX_TOKENS_POSTVIEW_JUDGE } from '@moneyball/shared';
+import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS, LLM_MAX_TOKENS_POSTVIEW_TEAM, LLM_MAX_TOKENS_POSTVIEW_JUDGE, NEUTRAL_FACTOR } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { MetricRegistry, type MetricSlug } from '../context/metrics';
@@ -173,7 +173,7 @@ function buildTeamPostviewMessage(
   const awayName = KBO_TEAMS[context.game.awayTeam].name;
 
   const factorLines = Object.entries(original.factors)
-    .map(([k, v]) => `  ${k}: ${v.toFixed(3)} (편향 ${(v - 0.5).toFixed(3)})`)
+    .map(([k, v]) => `  ${k}: ${v.toFixed(3)} (편향 ${(v - NEUTRAL_FACTOR).toFixed(3)})`)
     .join('\n');
 
   // plan #23 Step 5 wave 45 (cycle 1234): context layer 통합 — production weight>0 메트릭 +
@@ -276,7 +276,7 @@ function buildJudgePostviewMessage(
   const awayName = KBO_TEAMS[context.game.awayTeam].name;
 
   const factorLines = Object.entries(original.factors)
-    .map(([k, v]) => `  ${k}: ${v.toFixed(3)} (편향 ${(v - 0.5).toFixed(3)})`)
+    .map(([k, v]) => `  ${k}: ${v.toFixed(3)} (편향 ${(v - NEUTRAL_FACTOR).toFixed(3)})`)
     .join('\n');
 
   // plan #23 Step 5 wave 45 (cycle 1234): context layer 통합 — judge-postview 도 production weight>0
@@ -479,7 +479,7 @@ export function deriveFactorErrorsFallback(
     .filter(([k]) => isWeightedFactor(k))
     .map(([k, v]) => ({
       factor: canonicalizeFactorKey(k),
-      bias: v - 0.5,
+      bias: v - NEUTRAL_FACTOR,
     }));
 
   // 결과와 반대 방향 편향만 (홈승인데 <0.5 편향, 또는 홈패인데 >0.5 편향)
