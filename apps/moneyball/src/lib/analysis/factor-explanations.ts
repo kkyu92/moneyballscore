@@ -1,4 +1,4 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_FIP_STRONG } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_FIP_STRONG, WAR_STRONG, WAR_WEAK } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -187,10 +187,20 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         const diff = Math.abs(details.awayWar - details.homeWar);
         const better =
           details.awayWar > details.homeWar ? awayTeamName : homeTeamName;
+        const betterWar =
+          details.awayWar > details.homeWar ? details.awayWar : details.homeWar;
+        const worserWar =
+          details.awayWar < details.homeWar ? details.awayWar : details.homeWar;
+        const warQual =
+          betterWar >= WAR_STRONG
+            ? " (강세 전력)"
+            : worserWar <= WAR_WEAK
+              ? " (약세 전력)"
+              : "";
         narrative =
           favor === "neutral"
             ? "팀 WAR 누적이 근접해 전력치는 팽팽."
-            : `${better}의 WAR 누적이 ${diff.toFixed(1)} 많다. 대체선수 대비 승리 기여도에서 앞섬.`;
+            : `${better}의 WAR 누적이 ${diff.toFixed(1)} 많다${warQual}. 대체선수 대비 승리 기여도에서 앞섬.`;
       }
       break;
     }
@@ -286,6 +296,9 @@ export interface GameOverviewInput {
   /** wave-341: 불펜 FIP 배지 */
   homeBullpenFip?: number | null;
   awayBullpenFip?: number | null;
+  /** wave-346: 팀 WAR 태그 */
+  homeWar?: number | null;
+  awayWar?: number | null;
   homeTeamName: string;
   awayTeamName: string;
   h2hRate?: number | null;
@@ -317,6 +330,16 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
     const diff = input.awayBullpenFip - input.homeBullpenFip;
     if (diff >= BULLPEN_FIP_DIFF_MIN) tags.push(`${input.homeTeamName} 불펜 우세`);
     else if (diff <= -BULLPEN_FIP_DIFF_MIN) tags.push(`${input.awayTeamName} 불펜 우세`);
+  }
+
+  // wave-346: WAR 우세 태그 — 한 팀이 WAR_STRONG 이상 & 상대가 WAR_WEAK 이하 시 전력 차 명시
+  if (input.homeWar != null && input.awayWar != null) {
+    const homeStrong = input.homeWar >= WAR_STRONG;
+    const awayStrong = input.awayWar >= WAR_STRONG;
+    const homeWeak = input.homeWar <= WAR_WEAK;
+    const awayWeak = input.awayWar <= WAR_WEAK;
+    if (homeStrong && awayWeak) tags.push(`${input.homeTeamName} 전력 우세`);
+    else if (awayStrong && homeWeak) tags.push(`${input.awayTeamName} 전력 우세`);
   }
 
   const prob = input.homeWinProb;
