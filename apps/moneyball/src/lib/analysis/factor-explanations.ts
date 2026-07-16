@@ -1,4 +1,4 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SP_FIP_STRONG } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_FIP_STRONG } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -153,10 +153,15 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
           details.awayBullpenFip < details.homeBullpenFip
             ? awayTeamName
             : homeTeamName;
+        const betterFip =
+          details.awayBullpenFip < details.homeBullpenFip
+            ? details.awayBullpenFip
+            : details.homeBullpenFip;
+        const strongQual = betterFip <= BULLPEN_FIP_STRONG ? " (강세 불펜)" : "";
         narrative =
           favor === "neutral"
             ? "불펜 안정성에서 큰 격차 없음."
-            : `${better} 불펜의 FIP${josa("FIP", "이", "가")} ${diff.toFixed(2)} 낮다. 후반 리드 지키기 우위 (${weightPct}% 가중).`;
+            : `${better} 불펜의 FIP${josa("FIP", "이", "가")} ${diff.toFixed(2)} 낮다${strongQual}. 후반 리드 지키기 우위 (${weightPct}% 가중).`;
       }
       break;
     }
@@ -240,10 +245,20 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
         const diff = Math.abs(details.awaySfr - details.homeSfr);
         const better =
           details.awaySfr > details.homeSfr ? awayTeamName : homeTeamName;
+        const betterSfr =
+          details.awaySfr > details.homeSfr ? details.awaySfr : details.homeSfr;
+        const worserSfr =
+          details.awaySfr < details.homeSfr ? details.awaySfr : details.homeSfr;
+        const sfrQual =
+          betterSfr >= SFR_STRONG
+            ? " (강세 수비)"
+            : worserSfr <= SFR_WEAK
+              ? " (약세 수비)"
+              : "";
         narrative =
           favor === "neutral"
             ? "수비 SFR 차이 미미."
-            : `${better} 수비가 SFR ${diff.toFixed(1)}점 우위. 실점 방어 기여 높음.`;
+            : `${better} 수비가 SFR ${diff.toFixed(1)}점 우위${sfrQual}. 실점 방어 기여 높음.`;
       }
       break;
     }
