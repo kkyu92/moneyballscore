@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, TEAM_BIAS_NEUTRAL } from '@moneyball/shared';
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 
@@ -47,8 +47,8 @@ export async function updateCalibration(
   };
 
   for (const pred of predictions) {
-    // confidence를 승리확률로 변환 (0.5 + confidence/2)
-    const winProb = 0.5 + (pred.confidence as number) / 2;
+    // confidence를 승리확률로 변환 (ELO_NEUTRAL_WIN_PCT + confidence/2)
+    const winProb = ELO_NEUTRAL_WIN_PCT + (pred.confidence as number) / 2;
     const bucket = winProb < CONF_WIN_PROB_BUCKET_MID ? 'low' : winProb < CONF_WIN_PROB_BUCKET_HIGH ? 'mid' : 'high';
     buckets[bucket].total++;
     if (pred.is_correct) buckets[bucket].correct++;
@@ -119,11 +119,11 @@ export function classifyMemoryType(params: {
     return 'matchup';
   }
 
-  const bias = Math.abs(factorValue - 0.5);
-  if (bias <= 0.05) return 'pattern';
+  const bias = Math.abs(factorValue - NEUTRAL_FACTOR);
+  if (bias <= TEAM_BIAS_NEUTRAL) return 'pattern';
 
   // 팀에게 유리했던 팩터인지 판단
-  const favorsTeam = teamSide === 'home' ? factorValue > 0.5 : factorValue < 0.5;
+  const favorsTeam = teamSide === 'home' ? factorValue > NEUTRAL_FACTOR : factorValue < NEUTRAL_FACTOR;
 
   // 이 팀이 이겼고 factor도 유리했으면 → strength (반영 잘됨)
   // 이 팀이 졌는데 factor가 유리했으면 → weakness (반영 부족)
@@ -190,7 +190,7 @@ export function buildMemoryForTeam(params: {
   let maxBias = '';
   let maxBiasVal = 0;
   for (const [key, val] of Object.entries(factors)) {
-    const bias = Math.abs(val - 0.5);
+    const bias = Math.abs(val - NEUTRAL_FACTOR);
     if (bias > maxBiasVal) {
       maxBiasVal = bias;
       maxBias = key;
@@ -209,8 +209,8 @@ export function buildMemoryForTeam(params: {
   const metric = lookupMetric(maxBias);
   const slugLabel = metric ? `${metric.ko_name} (${maxBias})` : maxBias;
 
-  const sign = factorValue > 0.5 ? '+' : '';
-  const content = `${teamCode}: ${slugLabel} ${sign}${(factorValue - 0.5).toFixed(2)} (${type}, vs ${opponentCode} ${date})`;
+  const sign = factorValue > NEUTRAL_FACTOR ? '+' : '';
+  const content = `${teamCode}: ${slugLabel} ${sign}${(factorValue - NEUTRAL_FACTOR).toFixed(2)} (${type}, vs ${opponentCode} ${date})`;
 
   return {
     type,
