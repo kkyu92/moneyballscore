@@ -2247,3 +2247,20 @@ export const WIN_PROB_DOMINANT_HI = 0.6;
  * 변경 시 factor-explanations.ts buildGameOverview callsite 자동 동기.
  */
 export const WIN_PROB_DOMINANT_LO = 0.4;
+
+/**
+ * 선발 xFIP-FIP 갭 배지 — wave-353 (cycle 1691).
+ * xFIP - FIP > 본 값 시 FIP 회귀 위험 신호 (↑ 표시).
+ * FIP 보다 xFIP 가 높다 = 홈런 허용률 정상화 시 성적 악화 가능.
+ * 0.5 = KBO 투수 성적 유의미 갭 수준 (FIP ≈ xFIP 오차 범위 ~±0.3 초과).
+ * 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const SP_XFIP_GAP_REGRESS = 0.5;
+
+/**
+ * 선발 xFIP-FIP 갭 배지 — wave-353 (cycle 1691).
+ * FIP - xFIP > 본 값 시 FIP 반등 가능 신호 (↓ 표시).
+ * FIP 보다 xFIP 가 낮다 = 홈런 허용 재수 없어 FIP 불리, 개선 가능.
+ * SP_XFIP_GAP_REGRESS 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const SP_XFIP_GAP_BOUNCE = 0.5;

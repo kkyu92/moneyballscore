@@ -48,6 +48,8 @@ import {
   toKSTDateString,
   winnerProbOf,
   WINNER_PROB_CONFIDENT,
+  SP_XFIP_GAP_REGRESS,
+  SP_XFIP_GAP_BOUNCE,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -98,6 +100,8 @@ interface TodayAllRow {
     away_recent_form: number | null;
     home_sp_fip: number | null;
     away_sp_fip: number | null;
+    home_sp_xfip: number | null;
+    away_sp_xfip: number | null;
     home_lineup_woba: number | null;
     away_lineup_woba: number | null;
     home_bullpen_fip: number | null;
@@ -142,6 +146,9 @@ interface TodayGameCard {
   /** wave-337: 선발투수 FIP 배지 */
   homeSPFip?: number;
   awaySPFip?: number;
+  /** wave-353: 선발투수 xFIP 갭 배지 */
+  homeSPXfip?: number;
+  awaySPXfip?: number;
   /** wave-339: 타선 wOBA 배지 */
   homeLineupWoba?: number;
   awayLineupWoba?: number;
@@ -176,7 +183,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
-        home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip, home_lineup_woba, away_lineup_woba,
         home_bullpen_fip, away_bullpen_fip, home_sfr, away_sfr,
         home_war_total, away_war_total,
         prediction_type, reasoning, factors,
@@ -261,6 +268,8 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awaySP: spData?.awaySP,
       homeSPFip: pred.home_sp_fip ?? undefined,
       awaySPFip: pred.away_sp_fip ?? undefined,
+      homeSPXfip: pred.home_sp_xfip ?? undefined,
+      awaySPXfip: pred.away_sp_xfip ?? undefined,
       homeLineupWoba: pred.home_lineup_woba ?? undefined,
       awayLineupWoba: pred.away_lineup_woba ?? undefined,
       homeBullpenFip: pred.home_bullpen_fip ?? undefined,
@@ -1171,6 +1180,14 @@ export default async function AnalysisIndexPage() {
                                     {g.awaySPFip.toFixed(2)}
                                   </span>
                                 )}
+                                {/* wave-353: 선발 xFIP 갭 배지 (원정) */}
+                                {g.awaySPFip != null && g.awaySPXfip != null && (
+                                  g.awaySPXfip - g.awaySPFip > SP_XFIP_GAP_REGRESS ? (
+                                    <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                                  ) : g.awaySPFip - g.awaySPXfip > SP_XFIP_GAP_BOUNCE ? (
+                                    <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                                  ) : null
+                                )}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 <span className="text-gray-600 dark:text-gray-300">{g.homeSP ?? '미확정'}</span>
                                 {g.homeSPFip != null && (
@@ -1183,6 +1200,14 @@ export default async function AnalysisIndexPage() {
                                   }`}>
                                     {g.homeSPFip.toFixed(2)}
                                   </span>
+                                )}
+                                {/* wave-353: 선발 xFIP 갭 배지 (홈) */}
+                                {g.homeSPFip != null && g.homeSPXfip != null && (
+                                  g.homeSPXfip - g.homeSPFip > SP_XFIP_GAP_REGRESS ? (
+                                    <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                                  ) : g.homeSPFip - g.homeSPXfip > SP_XFIP_GAP_BOUNCE ? (
+                                    <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                                  ) : null
                                 )}
                               </span>
                             </>
