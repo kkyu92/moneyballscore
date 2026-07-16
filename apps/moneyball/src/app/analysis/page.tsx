@@ -67,6 +67,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
+import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
 export const metadata: Metadata = {
   title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 이번 주 경기',
@@ -1392,6 +1393,18 @@ export default async function AnalysisIndexPage() {
                       );
                     })()}
                   </Link>
+                  {/* wave-361: 매치업 심층 분석 딥링크 — battle badge 강세 신호 → matchup 상세 연결 (cycle 1699) */}
+                  {(() => {
+                    const pair = canonicalPair(g.awayCode, g.homeCode);
+                    if (!pair) return null;
+                    return (
+                      <div className="mt-1.5 px-1 flex justify-end">
+                        <Link href={pair.path} className="text-xs text-brand-600 dark:text-brand-400 hover:underline">
+                          매치업 심층 분석 →
+                        </Link>
+                      </div>
+                    );
+                  })()}
                 </li>
               );
             })}
