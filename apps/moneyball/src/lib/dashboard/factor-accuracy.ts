@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, NEUTRAL_FACTOR } from "@moneyball/shared";
 import { NEUTRAL_HI, NEUTRAL_LO } from "@/lib/predictions/factorLabels";
 
 export interface FactorSample {
@@ -68,7 +68,7 @@ function computeFactorStat(
     signedSum += error;
     if (v < NEUTRAL_LO || v > NEUTRAL_HI) {
       dirN += 1;
-      const predictedHome = v > 0.5;
+      const predictedHome = v > NEUTRAL_FACTOR;
       const actualHome = actual === 1;
       if (predictedHome === actualHome) dirCorrect += 1;
     }

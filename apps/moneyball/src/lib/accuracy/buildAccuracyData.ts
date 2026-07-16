@@ -17,6 +17,8 @@ import {
   CALIBRATION_BUCKET_WIDTH,
   CALIBRATION_BUCKET_START,
   CALIBRATION_BUCKET_COUNT,
+  NEUTRAL_FACTOR,
+  PICKS_TREND_THRESHOLD,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -156,9 +158,9 @@ export function buildFallbackDailyTrend(
 function resolveWinnerProb(r: PredRow): number {
   if (r.homeWinProb != null) {
     const hwp = Number(r.homeWinProb);
-    return hwp >= 0.5 ? hwp : 1 - hwp;
+    return hwp >= NEUTRAL_FACTOR ? hwp : 1 - hwp;
   }
-  return Math.max(0.5, r.confidence);
+  return Math.max(NEUTRAL_FACTOR, r.confidence);
 }
 
 export interface VersionHistoryRow {
@@ -601,7 +603,7 @@ export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
     const prev = dots.slice(0, half).filter(Boolean).length / half;
     const last = dots.slice(-half).filter(Boolean).length / half;
     const diff = last - prev;
-    trend = diff >= 0.1 ? 'up' : diff <= -0.1 ? 'down' : 'flat';
+    trend = diff >= PICKS_TREND_THRESHOLD ? 'up' : diff <= -PICKS_TREND_THRESHOLD ? 'down' : 'flat';
   }
   return { dots, hits, total, trend };
 }
