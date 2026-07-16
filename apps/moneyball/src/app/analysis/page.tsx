@@ -42,6 +42,7 @@ import {
   SFR_WEAK,
   WAR_STRONG,
   WAR_WEAK,
+  WAR_DUEL_MIN,
   SP_AVG_FIP_DUEL,
   LINEUP_AVG_WOBA_HITTER,
   TEAM_STRENGTH_FORM_STRONG,
@@ -1475,6 +1476,25 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
+                          {/* wave-367: WAR 직접 대결 배지 */}
+                          {g.homeWar != null && g.awayWar != null && (() => {
+                            const gap = g.homeWar - g.awayWar;
+                            if (Math.abs(gap) < WAR_DUEL_MIN) return null;
+                            const favoredHome = gap > 0;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  WAR {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
                         </div>
                       );
                     })()}
