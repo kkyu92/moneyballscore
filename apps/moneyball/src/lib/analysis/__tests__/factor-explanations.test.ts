@@ -7,6 +7,13 @@ import {
   NEUTRAL_HI,
   NEUTRAL_LO,
 } from "@/lib/predictions/factorLabels";
+import {
+  PARK_FACTOR_NARRATIVE_HITTER_MIN,
+  PARK_FACTOR_NARRATIVE_PITCHER_MAX,
+  H2H_NARRATIVE_DOMINANT_PCT_GAP,
+  FACTOR_CONTRIBUTION_SCALE,
+  WIN_PROB_DOMINANT_HI,
+} from "@moneyball/shared";
 
 describe("explainFactor", () => {
   it("sp_fip: away가 낮으면 away 유리 + 서술에 팀명 + 격차 포함", () => {
@@ -427,5 +434,83 @@ describe("buildGameOverview — wave-351 Elo 강세 배지 (silent drift 차단)
     });
     expect(result.tags).not.toContain("한화 Elo 강세");
     expect(result.tags).not.toContain("KT Elo 강세");
+  });
+});
+
+describe("buildGameOverview — wave-352 상수 추출 silent drift 차단", () => {
+  it("OVERVIEW_CLOSE_PP 파생: (NEUTRAL_HI - 0.5) * FACTOR_CONTRIBUTION_SCALE = 10", () => {
+    const derived = Math.round((NEUTRAL_HI - 0.5) * FACTOR_CONTRIBUTION_SCALE);
+    expect(derived).toBe(10);
+  });
+
+  it("OVERVIEW_DOMINANT_PP 파생: (WIN_PROB_DOMINANT_HI - 0.5) * FACTOR_CONTRIBUTION_SCALE = 20", () => {
+    const derived = Math.round((WIN_PROB_DOMINANT_HI - 0.5) * FACTOR_CONTRIBUTION_SCALE);
+    expect(derived).toBe(20);
+  });
+
+  it("park_factor narrative — PARK_FACTOR_NARRATIVE_HITTER_MIN 경계 (1.02): 타자 친화 미표시", () => {
+    const result = explainFactor({
+      key: "park_factor",
+      factorValue: 0.54,
+      details: { parkFactor: PARK_FACTOR_NARRATIVE_HITTER_MIN },
+      homeTeamName: "LG",
+      awayTeamName: "두산",
+    });
+    expect(result.narrative).toBe("중립 구장. 구장 보정 영향 최소.");
+  });
+
+  it("park_factor narrative — PARK_FACTOR_NARRATIVE_HITTER_MIN 초과 (1.03): 타자 친화 표시", () => {
+    const result = explainFactor({
+      key: "park_factor",
+      factorValue: 0.56,
+      details: { parkFactor: PARK_FACTOR_NARRATIVE_HITTER_MIN + 0.01 },
+      homeTeamName: "LG",
+      awayTeamName: "두산",
+    });
+    expect(result.narrative).toContain("타자 친화 구장");
+  });
+
+  it("park_factor narrative — PARK_FACTOR_NARRATIVE_PITCHER_MAX 경계 (0.98): 투수 친화 미표시", () => {
+    const result = explainFactor({
+      key: "park_factor",
+      factorValue: 0.46,
+      details: { parkFactor: PARK_FACTOR_NARRATIVE_PITCHER_MAX },
+      homeTeamName: "LG",
+      awayTeamName: "두산",
+    });
+    expect(result.narrative).toBe("중립 구장. 구장 보정 영향 최소.");
+  });
+
+  it("park_factor narrative — PARK_FACTOR_NARRATIVE_PITCHER_MAX 미만 (0.97): 투수 친화 표시", () => {
+    const result = explainFactor({
+      key: "park_factor",
+      factorValue: 0.44,
+      details: { parkFactor: PARK_FACTOR_NARRATIVE_PITCHER_MAX - 0.01 },
+      homeTeamName: "LG",
+      awayTeamName: "두산",
+    });
+    expect(result.narrative).toContain("투수 친화 구장");
+  });
+
+  it("H2H narrative — gap < H2H_NARRATIVE_DOMINANT_PCT_GAP (19pp): 강세 문구 미추가", () => {
+    const h2hRate = (50 + (H2H_NARRATIVE_DOMINANT_PCT_GAP - 1)) / 100;
+    const result = buildGameOverview({
+      homeWinProb: 0.52,
+      homeTeamName: "LG",
+      awayTeamName: "두산",
+      h2hRate,
+    });
+    expect(result.summary).not.toContain("승률로 강세");
+  });
+
+  it("H2H narrative — gap >= H2H_NARRATIVE_DOMINANT_PCT_GAP (20pp): 강세 문구 추가", () => {
+    const h2hRate = (50 + H2H_NARRATIVE_DOMINANT_PCT_GAP) / 100;
+    const result = buildGameOverview({
+      homeWinProb: 0.52,
+      homeTeamName: "LG",
+      awayTeamName: "두산",
+      h2hRate,
+    });
+    expect(result.summary).toContain("승률로 강세");
   });
 });
