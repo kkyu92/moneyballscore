@@ -1109,6 +1109,35 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
+                          {/* wave-375: 상대전적 직접 대결 배지 */}
+                          {g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined && (() => {
+                            const total = g.h2hHomeWins + g.h2hAwayWins;
+                            if (total === 0) return null;
+                            const homeRate = g.h2hHomeWins / total;
+                            if (homeRate >= H2H_DOMINANT_RATE) {
+                              const favoredName = shortTeamName(g.homeCode);
+                              return (
+                                <>
+                                  <span className="text-gray-300 dark:text-gray-700">·</span>
+                                  <span className="font-medium text-brand-500 dark:text-brand-400">
+                                    상대전적 {favoredName} 강세
+                                  </span>
+                                </>
+                              );
+                            }
+                            if (homeRate <= H2H_WEAK_RATE) {
+                              const favoredName = shortTeamName(g.awayCode);
+                              return (
+                                <>
+                                  <span className="text-gray-300 dark:text-gray-700">·</span>
+                                  <span className="font-medium text-orange-500 dark:text-orange-400">
+                                    상대전적 {favoredName} 강세
+                                  </span>
+                                </>
+                              );
+                            }
+                            return null;
+                          })()}
                           {/* wave-329: 홈/원정 성적 배지 (wave-327 시즌 성적 → 구장별 성적으로 업그레이드) */}
                           {(() => {
                             const hv = g.homeTeamVenue;
