@@ -2137,3 +2137,19 @@ export const BULLPEN_FIP_WEAK = 5.0;
  * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite 동기.
  */
 export const BULLPEN_FIP_DIFF_MIN = 1.0;
+
+/**
+ * 수비 SFR 배지 강세 임계 — wave-343 (cycle 1678).
+ * sfr ≥ 본 값 시 brand color (강세) 표시.
+ * 10.0 = KBO 상위권 수비 수준 (리그 평균 SFR ~0 기준 상위 25%).
+ * 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const SFR_STRONG = 10.0;
+
+/**
+ * 수비 SFR 배지 약세 임계 — wave-343 (cycle 1678).
+ * sfr ≤ 본 값 시 orange color (약세) 표시.
+ * -10.0 = KBO 하위권 수비 수준 (리그 평균 SFR ~0 기준 하위 25%).
+ * SFR_STRONG 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const SFR_WEAK = -10.0;
