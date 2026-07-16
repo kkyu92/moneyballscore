@@ -57,6 +57,10 @@ import {
   SP_FIP_DUEL_MIN,
   COMPOSITE_DUEL_THRESHOLD,
   COMPOSITE_DUEL_MIN_VALID,
+  KBO_TEAMS,
+  KBO_STADIUM_SHORT,
+  PARK_FACTOR_HITTER_MIN,
+  PARK_FACTOR_PITCHER_MAX,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -1500,6 +1504,26 @@ export default async function AnalysisIndexPage() {
                                     : 'text-orange-500 dark:text-orange-400'
                                 }`}>
                                   WAR {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
+                          {/* wave-369: 구장 팩터 배지 — 홈팀 구장 유형 (타자 친화 / 투수 친화) */}
+                          {(() => {
+                            const parkPf = KBO_TEAMS[g.homeCode]?.parkPf;
+                            if (parkPf === undefined) return null;
+                            const isHitterFriendly = parkPf >= PARK_FACTOR_HITTER_MIN;
+                            const isPitcherFriendly = parkPf <= PARK_FACTOR_PITCHER_MAX;
+                            if (!isHitterFriendly && !isPitcherFriendly) return null;
+                            const city = KBO_STADIUM_SHORT[g.homeCode];
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={isHitterFriendly
+                                  ? 'text-orange-500 dark:text-orange-400'
+                                  : 'text-brand-500 dark:text-brand-400'
+                                }>
+                                  {city} {isHitterFriendly ? '타자 친화' : '투수 친화'}
                                 </span>
                               </>
                             );
