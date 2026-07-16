@@ -1,9 +1,14 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, ELO_GAP_STRONG, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK, WIN_PROB_DOMINANT_HI, WIN_PROB_DOMINANT_LO } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, ELO_GAP_STRONG, FACTOR_CONTRIBUTION_SCALE, H2H_NARRATIVE_DOMINANT_PCT_GAP, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, PARK_FACTOR_NARRATIVE_HITTER_MIN, PARK_FACTOR_NARRATIVE_PITCHER_MAX, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK, WIN_PROB_DOMINANT_HI, WIN_PROB_DOMINANT_LO } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
   NEUTRAL_LO,
 } from "@/lib/predictions/factorLabels";
+
+// wave-352: buildGameOverview summary 분기 임계 — NEUTRAL_HI / WIN_PROB_DOMINANT_HI 기반 derived.
+// 하드코딩 10 / 20 을 단일 source 로 격상.
+const OVERVIEW_CLOSE_PP = Math.round((NEUTRAL_HI - 0.5) * FACTOR_CONTRIBUTION_SCALE);
+const OVERVIEW_DOMINANT_PP = Math.round((WIN_PROB_DOMINANT_HI - 0.5) * FACTOR_CONTRIBUTION_SCALE);
 
 export interface FactorRawDetails {
   homeSPFip?: number | null;
@@ -224,9 +229,9 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
       if (details.parkFactor != null) {
         awayLabel = details.parkFactor.toFixed(2);
         homeLabel = details.parkFactor.toFixed(2);
-        if (details.parkFactor > 1.02) {
+        if (details.parkFactor > PARK_FACTOR_NARRATIVE_HITTER_MIN) {
           narrative = `파크팩터 ${details.parkFactor.toFixed(2)}로 타자 친화 구장. 득점 인플레이션 영향.`;
-        } else if (details.parkFactor < 0.98) {
+        } else if (details.parkFactor < PARK_FACTOR_NARRATIVE_PITCHER_MAX) {
           narrative = `파크팩터 ${details.parkFactor.toFixed(2)}로 투수 친화 구장. 득점 디플레이션.`;
         } else {
           narrative = "중립 구장. 구장 보정 영향 최소.";
@@ -373,9 +378,9 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   const marginPp = Math.round(Math.abs(prob - 0.5) * FACTOR_CONTRIBUTION_SCALE);
   const favored = prob > 0.5 ? input.homeTeamName : input.awayTeamName;
 
-  if (marginPp <= 10) {
+  if (marginPp <= OVERVIEW_CLOSE_PP) {
     summary = `${input.awayTeamName} vs ${input.homeTeamName} — 승률 격차 ${marginPp}%p의 접전. 초반 득점이 승부를 가를 가능성.`;
-  } else if (marginPp < 20) {
+  } else if (marginPp < OVERVIEW_DOMINANT_PP) {
     summary = `${favored} 승률이 ${marginPp}%p 앞선다. 핵심 팩터가 그대로 작동하면 예측대로, 변수 한 두 개만 틀어져도 역전 가능.`;
   } else {
     summary = `${favored} 승률이 ${marginPp}%p 크게 앞서는 우세 경기. 이변이 나오려면 복수 팩터가 반대로 움직여야 한다.`;
@@ -383,7 +388,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
 
   if (input.h2hRate != null) {
     const homePct = Math.round(input.h2hRate * 100);
-    if (Math.abs(homePct - 50) >= 20) {
+    if (Math.abs(homePct - 50) >= H2H_NARRATIVE_DOMINANT_PCT_GAP) {
       const better =
         homePct > 50 ? input.homeTeamName : input.awayTeamName;
       const advPct = Math.abs(homePct - 50);

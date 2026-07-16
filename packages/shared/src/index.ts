@@ -114,6 +114,38 @@ export const PARK_FACTOR_HITTER_MIN = 105;
 export const PARK_FACTOR_PITCHER_MAX = 95;
 
 /**
+ * buildGameOverview park_factor 케이스 narrative 임계 — DEFAULT_PARK_FACTORS 의 decimal ratio 기준.
+ * wave-352 (cycle 1689) silent drift 추출.
+ *
+ * PARK_FACTOR_HITTER_MIN(105)/PITCHER_MAX(95) 와 단위 다름:
+ *   - KBO_TEAMS.parkPf = index-100 형식 (105, 95 등)
+ *   - DEFAULT_PARK_FACTORS = decimal ratio 형식 (1.05, 0.95 등)
+ *   - narrative 임계는 decimal ratio 기준 더 보수적 값 사용 (1.02 / 0.98)
+ *     → 잠실(1.02), 대구(1.03), 광주(1.05) 3구장만 "타자 친화" 표시
+ *     → 대전(0.97), 고척(0.95) 2구장만 "투수 친화" 표시
+ *
+ * 변경 시 factor-explanations.ts park_factor 케이스 narrative 동기 필요.
+ *
+ * 2 occurrence 분포 (cycle 1689 최초 박제):
+ *   - apps/moneyball/src/lib/analysis/factor-explanations.ts 2건
+ */
+export const PARK_FACTOR_NARRATIVE_HITTER_MIN = 1.02;
+export const PARK_FACTOR_NARRATIVE_PITCHER_MAX = 0.98;
+
+/**
+ * buildGameOverview H2H summary 내 강세 팀 언급 임계 — |homePct - 50| ≥ 이 값 시 H2H 강세 문구 추가.
+ * wave-352 (cycle 1689) silent drift 추출.
+ *
+ * homePct = Math.round(h2hRate * 100). 50+20=70 이상 승률 = "강세" 표현.
+ * WIN_PROB_DOMINANT_HI(0.6, 60%) 보다 높은 임계 — H2H 시즌 기록은 표본 소음이 크므로
+ * 70%+ 이상 명확한 패턴에만 narrative 추가 (false positives 억제).
+ *
+ * 1 occurrence 분포 (cycle 1689 최초 박제):
+ *   - apps/moneyball/src/lib/analysis/factor-explanations.ts 1건
+ */
+export const H2H_NARRATIVE_DOMINANT_PCT_GAP = 20;
+
+/**
  * KBO 팀 간 head-to-head 페어 조합 수 — matchup 허브 (page + opengraph-image + twitter-image)
  * 3 surface 에 "45가지 맞대결 조합" / "45 head-to-head combos" 하드코딩 sweep 용 단일 source.
  * silent drift family wave 107 (cycle 1321) — wave 76 (KBO_TEAM_COUNT) / wave 83 (KBO_FACTOR_COUNT) /
