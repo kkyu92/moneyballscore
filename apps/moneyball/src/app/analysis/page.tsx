@@ -707,10 +707,6 @@ export default async function AnalysisIndexPage() {
   const rankMap = new Map<TeamCode, number>(
     (standingsRows as StandingRow[]).map((r) => [r.teamCode, r.rank]),
   );
-  // wave-327: 시즌 성적 맵
-  const recordMap = new Map<TeamCode, { wins: number; losses: number }>(
-    (standingsRows as StandingRow[]).map((r) => [r.teamCode, { wins: r.wins, losses: r.losses }]),
-  );
   // wave-331: 최근 10경기 맵 (recent10 string "7승3패" → {wins, losses})
   function parseRecent10(text: string): { wins: number; losses: number } | null {
     const wm = text.match(/(\d+)승/);
@@ -750,8 +746,6 @@ export default async function AnalysisIndexPage() {
       ...g,
       homeRank: rankMap.get(g.homeCode),
       awayRank: rankMap.get(g.awayCode),
-      homeRecord: recordMap.get(g.homeCode),
-      awayRecord: recordMap.get(g.awayCode),
       homeTeamVenue: venueMap.get(g.homeCode),
       awayTeamVenue: venueMap.get(g.awayCode),
       homeRecent10: recent10Map.get(g.homeCode),
