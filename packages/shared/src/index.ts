@@ -2200,6 +2200,14 @@ export const SFR_STRONG = 10.0;
 export const SFR_WEAK = -10.0;
 
 /**
+ * 수비 SFR 직접 대결 배지 최소 격차 — wave-357 (cycle 1695).
+ * |homeSfr - awaySfr| >= 본 값 시 "수비 {팀} 강세" 배지 표시.
+ * 5.0 = SFR_STRONG(10.0) 의 절반 — 한 팀이 뚜렷한 수비 우위 최소 기준.
+ * 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const SFR_DUEL_MIN = 5.0;
+
+/**
  * 팀 WAR 배지 강세 임계 — wave-345 (cycle 1682).
  * war_total ≥ 본 값 시 brand color (강세) 표시.
  * 20.0 = KBO 상위권 팀 시즌 누적 WAR (리그 평균 ~14 기준 상위 25%).
