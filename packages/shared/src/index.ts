@@ -2186,3 +2186,20 @@ export const SP_AVG_FIP_DUEL = 4.0;
  * 변경 시 analysis/page.tsx gameTypeTag 계산 callsite 동시 조정.
  */
 export const LINEUP_AVG_WOBA_HITTER = 0.32;
+
+/**
+ * 예측 승률 "우세 뚜렷" 태그 상한 임계 — wave-350 (cycle 1687).
+ * buildGameOverview: homeWinProb ≥ 본 값 = "우세 뚜렷" 태그 표시.
+ * 60% 이상 = 홈팀이 명확한 우위. TEAM_STRENGTH_FORM_STRONG(0.6) / H2H_DOMINANT_RATE(0.6) 와
+ * 수치 동일하나 의미 다름 — 팀 폼/상대전적 승률 vs AI 예측 확률 별개 개념.
+ * 변경 시 factor-explanations.ts buildGameOverview callsite 자동 동기.
+ */
+export const WIN_PROB_DOMINANT_HI = 0.6;
+
+/**
+ * 예측 승률 "우세 뚜렷" 태그 하한 임계 — wave-350 (cycle 1687).
+ * buildGameOverview: homeWinProb ≤ 본 값 = "우세 뚜렷" 태그 표시 (원정팀 우세).
+ * 40% 이하 = 원정팀이 명확한 우위. WIN_PROB_DOMINANT_HI 의 보수.
+ * 변경 시 factor-explanations.ts buildGameOverview callsite 자동 동기.
+ */
+export const WIN_PROB_DOMINANT_LO = 0.4;
