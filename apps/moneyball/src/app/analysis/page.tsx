@@ -54,6 +54,8 @@ import {
   LINEUP_WOBA_DUEL_MIN,
   SFR_DUEL_MIN,
   SP_FIP_DUEL_MIN,
+  COMPOSITE_DUEL_THRESHOLD,
+  COMPOSITE_DUEL_MIN_VALID,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -1376,6 +1378,70 @@ export default async function AnalysisIndexPage() {
                                     : 'text-orange-500 dark:text-orange-400'
                                 }`}>
                                   수비 {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
+                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP 4팩터 직접 대결 집계 */}
+                          {(() => {
+                            type DuelResult = 'home' | 'away' | null;
+                            const wobaResult: DuelResult =
+                              g.homeLineupWoba != null && g.awayLineupWoba != null
+                                ? g.homeLineupWoba - g.awayLineupWoba >= LINEUP_WOBA_DUEL_MIN
+                                  ? 'home'
+                                  : g.awayLineupWoba - g.homeLineupWoba >= LINEUP_WOBA_DUEL_MIN
+                                    ? 'away'
+                                    : null
+                                : null;
+                            const sfrResult: DuelResult =
+                              g.homeSfr != null && g.awaySfr != null
+                                ? g.homeSfr - g.awaySfr >= SFR_DUEL_MIN
+                                  ? 'home'
+                                  : g.awaySfr - g.homeSfr >= SFR_DUEL_MIN
+                                    ? 'away'
+                                    : null
+                                : null;
+                            const bullpenResult: DuelResult =
+                              g.homeBullpenFip != null && g.awayBullpenFip != null
+                                ? g.awayBullpenFip - g.homeBullpenFip >= BULLPEN_FIP_DIFF_MIN
+                                  ? 'home'
+                                  : g.homeBullpenFip - g.awayBullpenFip >= BULLPEN_FIP_DIFF_MIN
+                                    ? 'away'
+                                    : null
+                                : null;
+                            const spFipResult: DuelResult =
+                              g.homeSPFip != null && g.awaySPFip != null
+                                ? g.awaySPFip - g.homeSPFip >= SP_FIP_DUEL_MIN
+                                  ? 'home'
+                                  : g.homeSPFip - g.awaySPFip >= SP_FIP_DUEL_MIN
+                                    ? 'away'
+                                    : null
+                                : null;
+                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult];
+                            const validCount = results.filter(
+                              (_, i) => [
+                                g.homeLineupWoba != null && g.awayLineupWoba != null,
+                                g.homeSfr != null && g.awaySfr != null,
+                                g.homeBullpenFip != null && g.awayBullpenFip != null,
+                                g.homeSPFip != null && g.awaySPFip != null,
+                              ][i]
+                            ).length;
+                            if (validCount < COMPOSITE_DUEL_MIN_VALID) return null;
+                            const homeWins = results.filter((r) => r === 'home').length;
+                            const awayWins = results.filter((r) => r === 'away').length;
+                            if (homeWins < COMPOSITE_DUEL_THRESHOLD && awayWins < COMPOSITE_DUEL_THRESHOLD) return null;
+                            const favoredHome = homeWins >= COMPOSITE_DUEL_THRESHOLD;
+                            const count = favoredHome ? homeWins : awayWins;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  {favoredName} {count}팩터 우세
                                 </span>
                               </>
                             );
