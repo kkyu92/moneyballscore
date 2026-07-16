@@ -50,6 +50,7 @@ import {
   WINNER_PROB_CONFIDENT,
   SP_XFIP_GAP_REGRESS,
   SP_XFIP_GAP_BOUNCE,
+  LINEUP_WOBA_DUEL_MIN,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -1241,6 +1242,25 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
+                          {/* wave-355: 타선 wOBA 직접 대결 배지 */}
+                          {g.homeLineupWoba != null && g.awayLineupWoba != null && (() => {
+                            const gap = g.homeLineupWoba - g.awayLineupWoba;
+                            if (Math.abs(gap) < LINEUP_WOBA_DUEL_MIN) return null;
+                            const favoredHome = gap > 0;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  타선 {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
                           {/* wave-341: 불펜 FIP 배지 */}
                           {(g.awayBullpenFip != null || g.homeBullpenFip != null) && (
                             <>

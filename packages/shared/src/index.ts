@@ -2304,3 +2304,12 @@ export const ACC_OUTLIER_GAP = 0.15;
  * 변경 시 page.tsx selectTopStatPick callsite 자동 동기.
  */
 export const TOP_STAT_PICK_EDGE_MIN = 0.05;
+
+/**
+ * 타선 wOBA 직접 대결 배지 최소 차이 임계 — wave-355 (cycle 1693).
+ * |homeLineupWoba - awayLineupWoba| ≥ 본 값 시 "타선 홈/원정 강세" 태그 표시.
+ * 0.020 = 20 wOBA 포인트 = KBO 리그 내 타선 유의미한 차이 수준
+ * (LINEUP_WOBA_WEAK_TAG~LINEUP_WOBA_STRONG_TAG 범위 0.040 의 절반).
+ * 변경 시 analysis/page.tsx wave-355 callsite 자동 동기.
+ */
+export const LINEUP_WOBA_DUEL_MIN = 0.020;
