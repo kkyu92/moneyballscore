@@ -1,4 +1,4 @@
-import { DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, ro, RECENT_FORM_GAMES, SP_FIP_STRONG } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SP_FIP_STRONG } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -292,6 +292,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
 
   if (avgSpFip != null && avgSpFip <= SP_FIP_STRONG) tags.push("투수전 예상");
   if (avgWoba != null && avgWoba >= LINEUP_WOBA_STRONG_TAG) tags.push("타격전 예상");
+  if (avgWoba != null && avgWoba <= LINEUP_WOBA_WEAK_TAG) tags.push("저득점 예상");
 
   const prob = input.homeWinProb;
   if (prob >= NEUTRAL_LO && prob <= NEUTRAL_HI) tags.push("박빙");

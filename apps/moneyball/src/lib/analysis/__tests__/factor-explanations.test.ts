@@ -275,6 +275,18 @@ describe("buildGameOverview", () => {
     expect(result.tags).toContain("타격전 예상");
   });
 
+  it("저득점: 양 타선 wOBA 평균 낮을 때 태그 (wave-340)", () => {
+    const result = buildGameOverview({
+      homeWinProb: 0.5,
+      homeWoba: 0.29,
+      awayWoba: 0.30,
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.tags).toContain("저득점 예상");
+    expect(result.tags).not.toContain("타격전 예상");
+  });
+
   it("h2h 강세: 상대전적 서술 추가", () => {
     const result = buildGameOverview({
       homeWinProb: 0.55,
