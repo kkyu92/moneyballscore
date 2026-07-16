@@ -2455,3 +2455,11 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
  * WAR은 optional(항상 가용 X) — 4/5 이상 유효 시 집계.
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
+
+/**
+ * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
+ * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
+ * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
+ * 변경 시 analysis/page.tsx wave-373 callsite 자동 동기.
+ */
+export const RECENT_FORM_DUEL_MIN = 0.10;

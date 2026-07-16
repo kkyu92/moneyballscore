@@ -58,6 +58,7 @@ import {
   SP_XFIP_DUEL_MIN,
   COMPOSITE_DUEL_THRESHOLD,
   COMPOSITE_DUEL_MIN_VALID,
+  RECENT_FORM_DUEL_MIN,
   KBO_TEAMS,
   KBO_STADIUM_SHORT,
   PARK_FACTOR_HITTER_MIN,
@@ -1089,6 +1090,25 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
+                          {/* wave-373: 최근폼 직접 대결 배지 */}
+                          {g.homeRecentForm != null && g.awayRecentForm != null && (() => {
+                            const gap = g.homeRecentForm - g.awayRecentForm;
+                            if (Math.abs(gap) < RECENT_FORM_DUEL_MIN) return null;
+                            const favoredHome = gap > 0;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-sans font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  폼 {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
                           {/* wave-329: 홈/원정 성적 배지 (wave-327 시즌 성적 → 구장별 성적으로 업그레이드) */}
                           {(() => {
                             const hv = g.homeTeamVenue;
