@@ -1,4 +1,4 @@
-import { KBO_TEAMS, LLM_MAX_TOKENS_TEAM, errMsg } from '@moneyball/shared';
+import { AGENT_PARSE_CONFIDENCE_DEFAULT, KBO_TEAMS, LLM_MAX_TOKENS_TEAM, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { MetricRegistry } from '../context/metrics';
@@ -80,7 +80,7 @@ function parseResponse(text: string, team: TeamCode): TeamArgument {
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 5) : [],
       opponentWeaknesses: Array.isArray(parsed.opponentWeaknesses) ? parsed.opponentWeaknesses.slice(0, 3) : [],
       keyFactor: String(parsed.keyFactor || ''),
-      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0.5)),
+      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || AGENT_PARSE_CONFIDENCE_DEFAULT)),
       reasoning: String(parsed.reasoning || '').slice(0, 500),
     };
   } catch {
@@ -89,7 +89,7 @@ function parseResponse(text: string, team: TeamCode): TeamArgument {
       strengths: ['데이터 분석 중'],
       opponentWeaknesses: [],
       keyFactor: '종합 전력',
-      confidence: 0.5,
+      confidence: AGENT_PARSE_CONFIDENCE_DEFAULT,
       reasoning: text.slice(0, 200),
     };
   }

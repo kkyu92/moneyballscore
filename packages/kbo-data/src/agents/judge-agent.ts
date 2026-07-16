@@ -1,4 +1,4 @@
-import { CURRENT_SCORING_RULE, ELO_NEUTRAL_WIN_PCT, KBO_TEAMS, LLM_FALLBACK_CONFIDENCE, LLM_MAX_TOKENS_JUDGE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, errMsg } from '@moneyball/shared';
+import { AGENT_PARSE_CONFIDENCE_DEFAULT, CURRENT_SCORING_RULE, ELO_NEUTRAL_WIN_PCT, KBO_TEAMS, LLM_FALLBACK_CONFIDENCE, LLM_MAX_TOKENS_JUDGE, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_LEAN, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, clampWinnerProb, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { callLLM } from './llm';
@@ -105,11 +105,11 @@ export function parseResponse(
     if (!jsonMatch) throw new Error('No JSON found');
     const parsed = JSON.parse(jsonMatch[0]);
 
-    const homeWinProb = clampWinnerProb(Number(parsed.homeWinProb) || 0.5);
+    const homeWinProb = clampWinnerProb(Number(parsed.homeWinProb) || ELO_NEUTRAL_WIN_PCT);
 
     return {
       homeWinProb,
-      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0.5)),
+      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || AGENT_PARSE_CONFIDENCE_DEFAULT)),
       homeArgSummary: String(parsed.homeArgSummary || ''),
       awayArgSummary: String(parsed.awayArgSummary || ''),
       calibrationApplied: parsed.calibrationApplied || null,

@@ -2057,6 +2057,23 @@ export const CE_MIN_SAMPLES = 3;
 export const LLM_FALLBACK_CONFIDENCE = 0.3;
 
 /**
+ * agent parse 성공 시 confidence 기본값 — silent drift family wave-372 (cycle 1713).
+ * LLM 이 confidence 미반환 시 judge-agent/team-agent 사용. LLM_FALLBACK_CONFIDENCE(0.3, parse 실패) 와 구별.
+ * 동일 숫자 0.5 hardcoded 4 callsite:
+ *   - packages/kbo-data/src/agents/judge-agent.ts: parseResponse homeWinProb fallback, confidence fallback
+ *   - packages/kbo-data/src/agents/team-agent.ts: parseTeamVerdict confidence fallback, catch fallback
+ */
+export const AGENT_PARSE_CONFIDENCE_DEFAULT = 0.5;
+
+/**
+ * retro.ts 팀 메모리 생성 시 confidence 기본값 — silent drift family wave-372 (cycle 1713).
+ * buildTeamMemoryEntry: 오답 예측 factor 패턴 학습 메모리의 신뢰도. LLM 추론 아닌 통계 기반 = 0.6.
+ * 동일 숫자 0.6 hardcoded 1 callsite:
+ *   - packages/kbo-data/src/agents/retro.ts: buildTeamMemoryEntry confidence: 0.6
+ */
+export const RETRO_MEMORY_CONFIDENCE = 0.6;
+
+/**
  * retro.ts 보정 버킷 low→mid 경계 — silent drift family wave-364 (cycle 1704).
  * 동일 숫자 0.60 hardcoded 3 surface:
  *   - packages/kbo-data/src/agents/retro.ts: buckets.low.maxConf = 0.60

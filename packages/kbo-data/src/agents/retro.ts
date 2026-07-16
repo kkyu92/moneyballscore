@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, TEAM_BIAS_NEUTRAL } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, RETRO_MEMORY_CONFIDENCE, TEAM_BIAS_NEUTRAL } from '@moneyball/shared';
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 
@@ -215,7 +215,7 @@ export function buildMemoryForTeam(params: {
   return {
     type,
     content,
-    confidence: 0.6,
+    confidence: RETRO_MEMORY_CONFIDENCE,
   };
 }
 
