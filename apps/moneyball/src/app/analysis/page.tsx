@@ -37,6 +37,7 @@ import {
   LINEUP_WOBA_WEAK_TAG,
   BULLPEN_FIP_STRONG,
   BULLPEN_FIP_WEAK,
+  BULLPEN_FIP_DIFF_MIN,
   SFR_STRONG,
   SFR_WEAK,
   WAR_STRONG,
@@ -1291,6 +1292,25 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
+                          {/* wave-359: 불펜 FIP 직접 대결 배지 */}
+                          {g.homeBullpenFip != null && g.awayBullpenFip != null && (() => {
+                            const gap = g.awayBullpenFip - g.homeBullpenFip;
+                            if (Math.abs(gap) < BULLPEN_FIP_DIFF_MIN) return null;
+                            const favoredHome = gap > 0;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  불펜 {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
                           {/* wave-343: 수비 SFR 배지 */}
                           {(g.awaySfr != null || g.homeSfr != null) && (g.awaySfr !== 0 || g.homeSfr !== 0) && (
                             <>
