@@ -26,6 +26,7 @@ import {
   toKSTDateString,
   toKSTDisplayString,
   winnerProbOf,
+  TOP_STAT_PICK_EDGE_MIN,
   type TeamCode,
   type WeightKey,
 } from "@moneyball/shared";
@@ -554,7 +555,7 @@ function selectTopStatPick(games: HomeGame[]): { game: HomeGame; homeWinProb: nu
     if (hwp == null) continue;
     const edge = Math.abs(hwp - 0.5);
     // Only surface when the model has a meaningful lean (≥ lean tier threshold).
-    if (edge >= 0.05 && edge > bestEdge) {
+    if (edge >= TOP_STAT_PICK_EDGE_MIN && edge > bestEdge) {
       bestEdge = edge;
       best = { game, homeWinProb: hwp };
     }

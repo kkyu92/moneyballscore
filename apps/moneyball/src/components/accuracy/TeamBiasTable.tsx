@@ -1,18 +1,18 @@
-import { shortTeamName } from "@moneyball/shared";
+import { shortTeamName, TEAM_BIAS_OVERFIT, TEAM_BIAS_HIGHLIGHT, TEAM_BIAS_NEUTRAL } from "@moneyball/shared";
 import type { TeamBiasRow } from "@/lib/standings/buildTeamAccuracy";
 
 function biasLabel(gap: number | null): { text: string; cls: string } | null {
   if (gap == null) return null;
-  if (gap > 0.20) return { text: "과잉예측", cls: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300" };
-  if (gap < -0.20) return { text: "과소예측", cls: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" };
+  if (gap > TEAM_BIAS_OVERFIT) return { text: "과잉예측", cls: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300" };
+  if (gap < -TEAM_BIAS_OVERFIT) return { text: "과소예측", cls: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" };
   return null;
 }
 
 function gapColor(gap: number | null): string {
   if (gap == null) return "";
-  if (gap > 0.15) return "text-red-600 dark:text-red-400 font-semibold";
-  if (gap < -0.15) return "text-blue-600 dark:text-blue-400 font-semibold";
-  if (Math.abs(gap) <= 0.05) return "text-brand-600 dark:text-brand-400 font-semibold";
+  if (gap > TEAM_BIAS_HIGHLIGHT) return "text-red-600 dark:text-red-400 font-semibold";
+  if (gap < -TEAM_BIAS_HIGHLIGHT) return "text-blue-600 dark:text-blue-400 font-semibold";
+  if (Math.abs(gap) <= TEAM_BIAS_NEUTRAL) return "text-brand-600 dark:text-brand-400 font-semibold";
   return "";
 }
 

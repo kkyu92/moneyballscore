@@ -2264,3 +2264,43 @@ export const SP_XFIP_GAP_REGRESS = 0.5;
  * SP_XFIP_GAP_REGRESS 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const SP_XFIP_GAP_BOUNCE = 0.5;
+
+/**
+ * 팀별 예측 편향 갭 — wave-354 (cycle 1692).
+ * |예측 승률 - 실제 승률| > 본 값 시 "과잉예측"/"과소예측" 레이블 표시.
+ * 20pp = KBO 시즌 단위 팀별 편향의 유의미한 과잉/과소 수준.
+ * 변경 시 TeamBiasTable.tsx biasLabel callsite 자동 동기.
+ */
+export const TEAM_BIAS_OVERFIT = 0.20;
+
+/**
+ * 팀별 예측 편향 강조 임계 — wave-354 (cycle 1692).
+ * |예측 승률 - 실제 승률| > 본 값 시 적색/청색 강조 표시.
+ * 15pp = 경계 수준 (TEAM_BIAS_OVERFIT=20pp 미만, 주의 필요 구간).
+ * 변경 시 TeamBiasTable.tsx gapColor callsite 자동 동기.
+ */
+export const TEAM_BIAS_HIGHLIGHT = 0.15;
+
+/**
+ * 팀별 예측 편향 중립 구간 — wave-354 (cycle 1692).
+ * |예측 승률 - 실제 승률| ≤ 본 값 시 브랜드 색(정상) 표시.
+ * 5pp = 오차 범위 내 (중립).
+ * 변경 시 TeamBiasTable.tsx gapColor callsite 자동 동기.
+ */
+export const TEAM_BIAS_NEUTRAL = 0.05;
+
+/**
+ * 팀별 적중률 이상치 갭 — wave-354 (cycle 1692).
+ * 전체 적중률 - 팀 적중률 > 본 값 시 "이상치" 레이블 표시.
+ * 15pp = 팀 차원 성능 이상치 유의 수준.
+ * 변경 시 accuracy/page.tsx isOutlier callsite 자동 동기.
+ */
+export const ACC_OUTLIER_GAP = 0.15;
+
+/**
+ * 통계 기반 최우선 경기 선택 최소 엣지 — wave-354 (cycle 1692).
+ * |homeWinProb - 0.5| ≥ 본 값인 경기만 TopStatPick 후보로 집계.
+ * WINNER_PROB_LEAN(0.55) - 0.5 = 0.05 유도값. WINNER_PROB_LEAN 변경 시 함께 조정.
+ * 변경 시 page.tsx selectTopStatPick callsite 자동 동기.
+ */
+export const TOP_STAT_PICK_EDGE_MIN = 0.05;
