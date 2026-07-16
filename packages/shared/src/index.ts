@@ -2153,3 +2153,19 @@ export const SFR_STRONG = 10.0;
  * SFR_STRONG 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const SFR_WEAK = -10.0;
+
+/**
+ * 팀 WAR 배지 강세 임계 — wave-345 (cycle 1682).
+ * war_total ≥ 본 값 시 brand color (강세) 표시.
+ * 20.0 = KBO 상위권 팀 시즌 누적 WAR (리그 평균 ~14 기준 상위 25%).
+ * 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const WAR_STRONG = 20.0;
+
+/**
+ * 팀 WAR 배지 약세 임계 — wave-345 (cycle 1682).
+ * war_total ≤ 본 값 시 orange color (약세) 표시.
+ * 8.0 = KBO 하위권 팀 시즌 누적 WAR (리그 평균 ~14 기준 하위 25%).
+ * WAR_STRONG 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const WAR_WEAK = 8.0;

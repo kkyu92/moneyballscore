@@ -39,6 +39,8 @@ import {
   BULLPEN_FIP_WEAK,
   SFR_STRONG,
   SFR_WEAK,
+  WAR_STRONG,
+  WAR_WEAK,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -100,6 +102,8 @@ interface TodayAllRow {
     away_bullpen_fip: number | null;
     home_sfr: number | null;
     away_sfr: number | null;
+    home_war_total: number | null;
+    away_war_total: number | null;
     prediction_type: string;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
@@ -145,6 +149,9 @@ interface TodayGameCard {
   /** wave-343: 수비 SFR 배지 */
   homeSfr?: number;
   awaySfr?: number;
+  /** wave-345: 팀 WAR 배지 */
+  homeWar?: number;
+  awayWar?: number;
 }
 
 interface TodayAnalysisData {
@@ -169,6 +176,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
         home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
         home_bullpen_fip, away_bullpen_fip, home_sfr, away_sfr,
+        home_war_total, away_war_total,
         prediction_type, reasoning, factors,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
@@ -257,6 +265,8 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awayBullpenFip: pred.away_bullpen_fip ?? undefined,
       homeSfr: pred.home_sfr ?? undefined,
       awaySfr: pred.away_sfr ?? undefined,
+      homeWar: pred.home_war_total ?? undefined,
+      awayWar: pred.away_war_total ?? undefined,
     });
   }
 
@@ -1234,6 +1244,35 @@ export default async function AnalysisIndexPage() {
                                         ? 'text-orange-500 dark:text-orange-400'
                                         : 'text-gray-400 dark:text-gray-500'
                                   }`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
+                                ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                                <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
+                              </span>
+                            </>
+                          )}
+                          {/* wave-345: 팀 WAR 배지 */}
+                          {(g.awayWar != null || g.homeWar != null) && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">·</span>
+                              <span className="text-gray-400 dark:text-gray-500">
+                                WAR{' '}
+                                {g.awayWar != null ? (
+                                  <span className={`font-mono tabular-nums text-[10px] ${
+                                    g.awayWar >= WAR_STRONG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.awayWar <= WAR_WEAK
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>{g.awayWar.toFixed(1)}</span>
+                                ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                                <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                {g.homeWar != null ? (
+                                  <span className={`font-mono tabular-nums text-[10px] ${
+                                    g.homeWar >= WAR_STRONG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.homeWar <= WAR_WEAK
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>{g.homeWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
