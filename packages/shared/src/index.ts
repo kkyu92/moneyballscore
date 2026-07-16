@@ -2129,3 +2129,11 @@ export const BULLPEN_FIP_STRONG = 4.0;
  * BULLPEN_FIP_STRONG 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const BULLPEN_FIP_WEAK = 5.0;
+
+/**
+ * 불펜 FIP 우세 태그 최소 차이 임계 — wave-342 (cycle 1677).
+ * |awayBullpenFip - homeBullpenFip| ≥ 본 값 시 불펜 우세 팀 태그 표시.
+ * 1.0 = FIP 1점 차 = KBO 강/약 불펜 경계 차이 수준.
+ * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite 동기.
+ */
+export const BULLPEN_FIP_DIFF_MIN = 1.0;
