@@ -3,6 +3,7 @@ import {
   NEUTRAL_HI,
   NEUTRAL_LO,
 } from "@/lib/predictions/factorLabels";
+import { NEUTRAL_FACTOR } from "@moneyball/shared";
 
 export const TOP_FACTOR_LIMIT = 3;
 export { NEUTRAL_HI, NEUTRAL_LO };
@@ -26,7 +27,7 @@ export function selectTopFactors(
       key,
       label: FACTOR_LABELS[key],
       value,
-      dist: Math.abs(value - 0.5),
+      dist: Math.abs(value - NEUTRAL_FACTOR),
     }))
     .sort((a, b) => b.dist - a.dist)
     .slice(0, limit)

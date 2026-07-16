@@ -19,6 +19,10 @@ import {
   CALIBRATION_BUCKET_COUNT,
   NEUTRAL_FACTOR,
   PICKS_TREND_THRESHOLD,
+  ACCURACY_GOOD_RATE,
+  ACCURACY_GOOD_PCT,
+  ACCURACY_BASELINE,
+  ACCURACY_BASELINE_PCT,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -28,8 +32,8 @@ import {
 // asPercent=true 일 때 rate 가 0~100 정수 (예: 65) / false 일 때 0~1 소수 (예: 0.65).
 // caller: AccuracyHeaderCard / predictions/page.tsx tier row / reviews/page.tsx hero stat (sweep 51 통합).
 export function accuracyRateColorClass(rate: number, asPercent = false): string {
-  const high = asPercent ? 60 : 0.6;
-  const mid = asPercent ? 50 : 0.5;
+  const high = asPercent ? ACCURACY_GOOD_PCT : ACCURACY_GOOD_RATE;
+  const mid = asPercent ? ACCURACY_BASELINE_PCT : ACCURACY_BASELINE;
   if (rate >= high) return 'text-brand-600 dark:text-brand-400';
   if (rate >= mid) return 'text-yellow-600 dark:text-yellow-400';
   return 'text-red-600 dark:text-red-400';

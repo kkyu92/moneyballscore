@@ -720,6 +720,16 @@ export const ACCURACY_BASELINE = 0.5;
 export const BRIER_BASELINE = 0.25;
 
 /**
+ * Brier 캘리브레이션 "잘 보정됨" 판정 gap 임계 — Math.abs(calibrationGap) < 임계 시
+ * "잘 보정됨" 레이블 표시 (accuracy/page.tsx calibrationGap StatCard).
+ * 0.03 = ±3pp 이내 = 예측 확률과 실제 적중률 차이가 작음.
+ *
+ * silent drift family wave 378 (cycle 1720) — accuracy/page.tsx
+ * `Math.abs(gap) < 0.03` inline swap.
+ */
+export const BRIER_CALIBRATION_OK_GAP = 0.03;
+
+/**
  * 적중률 기준선 % 표기 — ACCURACY_BASELINE (0.5) 의 % 파생. UI 색상 threshold
  * (DailyPredictionSummaryBar >= 50% neutral / gray 구간) 단일 source.
  * ACCURACY_BASELINE 변경 시 자동 동기.

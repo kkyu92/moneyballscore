@@ -34,6 +34,9 @@ import {
   ACCURACY_OK_RATE,
   ACCURACY_WARN_RATE,
   ACCURACY_OK_PCT,
+  ACCURACY_BASELINE,
+  ACCURACY_WEAK_RATE,
+  BRIER_CALIBRATION_OK_GAP,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -365,7 +368,7 @@ export default async function AccuracyPage() {
           label="전체 적중률"
           value={`${(overallAcc * 100).toFixed(1)}%`}
           sub={`${correct}/${n} 적중`}
-          accent={overallAcc >= 0.5}
+          accent={overallAcc >= ACCURACY_BASELINE}
         />
         <StatCard
           label="Brier Score"
@@ -376,7 +379,7 @@ export default async function AccuracyPage() {
           label="보정 오차"
           value={`${gap >= 0 ? '+' : ''}${(gap * 100).toFixed(1)}%p`}
           sub={
-            Math.abs(gap) < 0.03 ? '잘 보정됨' : gap > 0 ? '과신 경향' : '저신 경향'
+            Math.abs(gap) < BRIER_CALIBRATION_OK_GAP ? '잘 보정됨' : gap > 0 ? '과신 경향' : '저신 경향'
           }
         />
       </section>
@@ -729,9 +732,9 @@ export default async function AccuracyPage() {
                   )}
                   <span
                     className={`text-sm font-bold font-mono ${
-                      acc !== null && acc >= 0.5
+                      acc !== null && acc >= ACCURACY_BASELINE
                         ? 'text-brand-500'
-                        : acc !== null && acc < 0.4
+                        : acc !== null && acc < ACCURACY_WEAK_RATE
                           ? 'text-red-400 dark:text-red-500'
                           : ''
                     }`}

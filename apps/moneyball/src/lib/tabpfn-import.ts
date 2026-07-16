@@ -9,6 +9,8 @@
 // Storage: predictions table, scoring_rule='tabpfn-shadow', reasoning.homeWinProb.
 // Retrieval: /accuracy/shadow page, pairProbForRow 'tabpfn-shadow' path.
 
+import { NEUTRAL_FACTOR } from '@moneyball/shared';
+
 export const TABPFN_OUTPUT_HEADER = 'game_id,tabpfn_home_win_prob';
 
 export type TabpfnOutputRow = {
@@ -98,7 +100,7 @@ export function buildTabpfnPredictionInsert(
     prediction_type: 'pre_game',
     reasoning: { homeWinProb: row.tabpfn_home_win_prob },
     predicted_winner: null,
-    // confidence = distance from 0.5 (calibration proxy)
-    confidence: Math.abs(row.tabpfn_home_win_prob - 0.5) * 2,
+    // confidence = distance from neutral (calibration proxy)
+    confidence: Math.abs(row.tabpfn_home_win_prob - NEUTRAL_FACTOR) * 2,
   };
 }
