@@ -278,6 +278,8 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     awayWar: preGame.away_war_total,
     homeRecentForm: preGame.home_recent_form,
     awayRecentForm: preGame.away_recent_form,
+    homeElo: preGame.home_elo,
+    awayElo: preGame.away_elo,
     h2hRate: preGame.head_to_head_rate,
     homeTeamName: homeName,
     awayTeamName: awayName,

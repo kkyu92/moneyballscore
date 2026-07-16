@@ -1,4 +1,4 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK, WIN_PROB_DOMINANT_HI, WIN_PROB_DOMINANT_LO } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, ELO_GAP_STRONG, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK, WIN_PROB_DOMINANT_HI, WIN_PROB_DOMINANT_LO } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -302,6 +302,9 @@ export interface GameOverviewInput {
   /** wave-349: 최근 폼 태그 */
   homeRecentForm?: number | null;
   awayRecentForm?: number | null;
+  /** wave-351: Elo 강세 배지 */
+  homeElo?: number | null;
+  awayElo?: number | null;
   homeTeamName: string;
   awayTeamName: string;
   h2hRate?: number | null;
@@ -353,6 +356,13 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   if (input.awayRecentForm != null) {
     if (input.awayRecentForm >= TEAM_STRENGTH_FORM_STRONG) tags.push(`${input.awayTeamName} 최근 핫`);
     else if (input.awayRecentForm <= TEAM_STRENGTH_FORM_WEAK) tags.push(`${input.awayTeamName} 최근 부진`);
+  }
+
+  // wave-351: Elo 강세 배지 — ELO_GAP_STRONG(50) 이상 격차 시 우위 팀 명시
+  if (input.homeElo != null && input.awayElo != null) {
+    const eloDiff = input.homeElo - input.awayElo;
+    if (eloDiff >= ELO_GAP_STRONG) tags.push(`${input.homeTeamName} Elo 강세`);
+    else if (eloDiff <= -ELO_GAP_STRONG) tags.push(`${input.awayTeamName} Elo 강세`);
   }
 
   const prob = input.homeWinProb;
