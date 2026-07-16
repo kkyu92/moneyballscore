@@ -1,4 +1,4 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, WAR_STRONG, WAR_WEAK, WIN_PROB_DOMINANT_HI, WIN_PROB_DOMINANT_LO } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -357,7 +357,7 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
 
   const prob = input.homeWinProb;
   if (prob >= NEUTRAL_LO && prob <= NEUTRAL_HI) tags.push("박빙");
-  else if (prob >= 0.6 || prob <= 0.4) tags.push("우세 뚜렷");
+  else if (prob >= WIN_PROB_DOMINANT_HI || prob <= WIN_PROB_DOMINANT_LO) tags.push("우세 뚜렷");
 
   let summary = "";
   const marginPp = Math.round(Math.abs(prob - 0.5) * FACTOR_CONTRIBUTION_SCALE);
