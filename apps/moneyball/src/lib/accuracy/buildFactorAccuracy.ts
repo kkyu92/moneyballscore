@@ -1,3 +1,4 @@
+import { NEUTRAL_FACTOR } from '@moneyball/shared';
 import { FACTOR_LABELS, NEUTRAL_LO, NEUTRAL_HI } from '@/lib/predictions/factorLabels';
 
 const FACTOR_KEYS = [
@@ -36,13 +37,13 @@ export function buildFactorAccuracy(rows: FactorPredRow[]): FactorAccuracyRow[] 
     if (!row.factors || row.home_win_prob == null) continue;
     // Derive actual outcome — model always picks team with higher homeWinProb.
     // is_correct=true → predicted winner actually won.
-    const homeActuallyWon = (row.home_win_prob >= 0.5) === row.is_correct;
+    const homeActuallyWon = (row.home_win_prob >= NEUTRAL_FACTOR) === row.is_correct;
 
     for (const key of FACTOR_KEYS) {
       const val = row.factors[key];
       if (val == null) continue;
       if (val >= NEUTRAL_LO && val <= NEUTRAL_HI) continue; // near-neutral — skip
-      const factorSaysHome = val > 0.5;
+      const factorSaysHome = val > NEUTRAL_FACTOR;
       const s = stats[key];
       s.total++;
       if (factorSaysHome === homeActuallyWon) s.correct++;

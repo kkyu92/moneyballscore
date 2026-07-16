@@ -1,4 +1,5 @@
 import {
+  ACCURACY_WARN_RATE,
   classifyWinnerProb,
   MIN_VERIFIED_GAMES_HEDGE,
   WINNER_PROB_CONFIDENT,
@@ -94,7 +95,7 @@ function buildSummary(
 
   if (accuracyRate >= WINNER_PROB_CONFIDENT) {
     text += " 모델의 견조한 퍼포먼스가 유지됐습니다.";
-  } else if (accuracyRate <= 0.45) {
+  } else if (accuracyRate <= ACCURACY_WARN_RATE) {
     text += " 변수 많은 달이었으며, 팩터 편향 분석 결과는 다음 튜닝 근거로 축적됩니다.";
   }
 

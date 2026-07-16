@@ -4,6 +4,7 @@ import {
   assertSelectOk,
   classifyWinnerProb,
   MISS_REPORT_LIMIT,
+  NEUTRAL_FACTOR,
   shortTeamName,
   winnerProbOf,
   type SelectResult,
@@ -88,10 +89,10 @@ function extractPreGameReasoning(r: unknown): string | null {
 }
 
 function extractHomeWinProb(r: unknown): number {
-  if (!r || typeof r !== "object") return 0.5;
+  if (!r || typeof r !== "object") return NEUTRAL_FACTOR;
   const shape = r as ReasoningPreShape;
   const hwp = shape.debate?.verdict?.homeWinProb ?? shape.homeWinProb;
-  if (typeof hwp !== "number" || Number.isNaN(hwp)) return 0.5;
+  if (typeof hwp !== "number" || Number.isNaN(hwp)) return NEUTRAL_FACTOR;
   return hwp;
 }
 
