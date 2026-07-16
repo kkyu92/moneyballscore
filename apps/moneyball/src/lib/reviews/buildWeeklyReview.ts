@@ -1,4 +1,4 @@
-import { classifyWinnerProb, shortTeamName, type TeamCode } from '@moneyball/shared';
+import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, shortTeamName, type TeamCode } from '@moneyball/shared';
 import type { WeekRange } from "./computeWeekRange";
 import {
   buildFactorInsights,
@@ -103,9 +103,9 @@ function buildSummary(
     }
   }
 
-  if (accuracyRate >= 0.7) {
+  if (accuracyRate >= ACCURACY_STRONG_RATE) {
     text += " 모델의 이번 주 퍼포먼스가 강했습니다.";
-  } else if (accuracyRate <= 0.4) {
+  } else if (accuracyRate <= ACCURACY_WEAK_RATE) {
     text += " 이번 주는 모델이 고전한 구간으로, 팩터 편향 분석을 통해 튜닝 근거를 축적하고 있습니다.";
   }
 

@@ -13,7 +13,7 @@
  * (winner_team_id === home_team_id) 와 (p - y)^2 평균.
  */
 
-import { LLM_DEBATE_VERSION } from '@moneyball/shared';
+import { LLM_DEBATE_VERSION, NEUTRAL_FACTOR } from '@moneyball/shared';
 
 export interface CalibrationBucket {
   lo: number;
@@ -152,7 +152,7 @@ function inferShadowCorrectness(
   pHome: number,
 ): boolean | null {
   if (!row.game || row.game.winner_team_id === null) return null;
-  const predictedHome = pHome >= 0.5;
+  const predictedHome = pHome >= NEUTRAL_FACTOR;
   const actualHome = row.game.winner_team_id === row.game.home_team_id;
   return predictedHome === actualHome;
 }

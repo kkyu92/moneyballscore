@@ -784,6 +784,38 @@ export const ACCURACY_OK_RATE = ACCURACY_OK_PCT / 100;
 export const ACCURACY_WARN_RATE = ACCURACY_WARN_PCT / 100;
 
 /**
+ * 주간 리뷰 "강한 퍼포먼스" 적중률 임계 — accuracyRate >= ACCURACY_STRONG_RATE 시
+ * "모델의 이번 주 퍼포먼스가 강했습니다" 텍스트 노출.
+ *
+ * silent drift family wave 376 (cycle 1718) — buildWeeklyReview.ts `0.7` 인라인 swap.
+ */
+export const ACCURACY_STRONG_RATE = 0.7;
+
+/**
+ * 주간 리뷰 "고전 구간" 적중률 임계 — accuracyRate <= ACCURACY_WEAK_RATE 시
+ * "모델이 고전한 구간" 텍스트 노출.
+ *
+ * silent drift family wave 376 (cycle 1718) — buildWeeklyReview.ts `0.4` 인라인 swap.
+ */
+export const ACCURACY_WEAK_RATE = 0.4;
+
+/**
+ * 팩터 상관계수 양방향 임계 — s.correlation >= FACTOR_CORR_POSITIVE_MIN 시 "positive"
+ * 방향 레이블. factor insight 방향 분류 단일 source.
+ *
+ * silent drift family wave 376 (cycle 1718) — reviews/shared.ts `0.2` 인라인 swap.
+ */
+export const FACTOR_CORR_POSITIVE_MIN = 0.2;
+
+/**
+ * 팩터 상관계수 음방향 임계 — s.correlation <= FACTOR_CORR_NEGATIVE_MAX 시 "negative"
+ * 방향 레이블. FACTOR_CORR_POSITIVE_MIN 과 사이 구간 = "weak".
+ *
+ * silent drift family wave 376 (cycle 1718) — reviews/shared.ts `-0.1` 인라인 swap.
+ */
+export const FACTOR_CORR_NEGATIVE_MAX = -0.1;
+
+/**
  * 요약 바 표시 최소 예측 경기 수 — predicted < SUMMARY_BAR_MIN_GAMES 시
  * DailyPredictionSummaryBar 숨김. 단일 경기 날 빈 요약 노출 방지.
  *

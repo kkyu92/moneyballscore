@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
+  FACTOR_CORR_NEGATIVE_MAX,
+  FACTOR_CORR_POSITIVE_MIN,
   KBO_TEAMS,
   assertSelectOk,
   shortTeamName,
@@ -194,9 +196,9 @@ export function buildFactorInsights(
       correlation: s.correlation,
       directionalAccuracy: s.directionalAccuracy,
       direction:
-        s.correlation >= 0.2
+        s.correlation >= FACTOR_CORR_POSITIVE_MIN
           ? "positive"
-          : s.correlation <= -0.1
+          : s.correlation <= FACTOR_CORR_NEGATIVE_MAX
             ? "negative"
             : "weak",
     };
