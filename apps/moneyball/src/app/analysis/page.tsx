@@ -1383,7 +1383,7 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP 4팩터 직접 대결 집계 */}
+                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR 5팩터 직접 대결 집계 (wave-368: WAR 추가) */}
                           {(() => {
                             type DuelResult = 'home' | 'away' | null;
                             const wobaResult: DuelResult =
@@ -1418,13 +1418,22 @@ export default async function AnalysisIndexPage() {
                                     ? 'away'
                                     : null
                                 : null;
-                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult];
+                            const warResult: DuelResult =
+                              g.homeWar != null && g.awayWar != null
+                                ? g.homeWar - g.awayWar >= WAR_DUEL_MIN
+                                  ? 'home'
+                                  : g.awayWar - g.homeWar >= WAR_DUEL_MIN
+                                    ? 'away'
+                                    : null
+                                : null;
+                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult];
                             const validCount = results.filter(
                               (_, i) => [
                                 g.homeLineupWoba != null && g.awayLineupWoba != null,
                                 g.homeSfr != null && g.awaySfr != null,
                                 g.homeBullpenFip != null && g.awayBullpenFip != null,
                                 g.homeSPFip != null && g.awaySPFip != null,
+                                g.homeWar != null && g.awayWar != null,
                               ][i]
                             ).length;
                             if (validCount < COMPOSITE_DUEL_MIN_VALID) return null;
