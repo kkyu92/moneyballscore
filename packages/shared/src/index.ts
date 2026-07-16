@@ -2303,7 +2303,7 @@ export const WAR_WEAK = 8.0;
  * WAR 직접 대결 배지 최소 차이 — wave-367 (cycle 1707).
  * |homeWar - awayWar| ≥ 본 값 시 "WAR [팀] 강세" 배지 표시.
  * 5.0 = KBO 팀 WAR 범위(8~25) 기준 의미있는 격차 (~33% gap at midrange 14).
- * 변경 시 analysis/page.tsx wave-367 callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-367/종합 우세(wave-368) callsite 동시 조정.
  */
 export const WAR_DUEL_MIN = 5.0;
 
@@ -2416,16 +2416,17 @@ export const LINEUP_WOBA_DUEL_MIN = 0.020;
 export const SP_FIP_DUEL_MIN = 0.5;
 
 /**
- * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705).
- * wOBA/SFR/불펜FIP/선발FIP 4개 직접 대결 결과 집계 시
+ * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708).
+ * wOBA/SFR/불펜FIP/선발FIP/WAR 5개 직접 대결 결과 집계 시
  * 한 팀이 본 값 이상 팩터에서 우세 → "N팩터 우세" 배지 표시.
- * 3/4 = 명확한 다수 우세 기준.
+ * 3/5 이상 = 명확한 다수 우세 기준.
  */
 export const COMPOSITE_DUEL_THRESHOLD = 3;
 
 /**
- * 종합 우세 배지 최소 유효 팩터 수 — wave-365 (cycle 1705).
+ * 종합 우세 배지 최소 유효 팩터 수 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708).
  * null pair 포함 시 집계 신뢰도 보장을 위해
  * 유효(non-null) 팩터 쌍이 본 값 미만이면 배지 표시 안 함.
+ * WAR은 optional(항상 가용 X) — 4/5 이상 유효 시 집계.
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
