@@ -2080,3 +2080,19 @@ export const H2H_DOMINANT_RATE = 0.6;
  * 홈팀 열세 기준 (승률 40% 이하 → orange color)
  */
 export const H2H_WEAK_RATE = 0.4;
+
+/**
+ * 선발투수 FIP 배지 강세 임계 — wave-337 (cycle 1672).
+ * sp_fip < 본 값 시 brand color (강세) 표시.
+ * 3.50 = KBO 에이스 수준 (리그 평균 ~4.0 기준 상위 15%).
+ * 변경 시 analysis/page.tsx callsite 자동 동기.
+ */
+export const SP_FIP_STRONG = 3.5;
+
+/**
+ * 선발투수 FIP 배지 약세 임계 — wave-337 (cycle 1672).
+ * sp_fip > 본 값 시 orange color (약세) 표시.
+ * 4.50 = KBO 평균 이상 (리그 평균 ~4.0 기준 하위 35%).
+ * SP_FIP_STRONG 의 보수. 변경 시 양쪽 동시 조정.
+ */
+export const SP_FIP_WEAK = 4.5;

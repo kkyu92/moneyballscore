@@ -31,6 +31,8 @@ import {
   H2H_MIN_GAMES,
   H2H_DOMINANT_RATE,
   H2H_WEAK_RATE,
+  SP_FIP_STRONG,
+  SP_FIP_WEAK,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -84,6 +86,8 @@ interface TodayAllRow {
     away_elo: number | null;
     home_recent_form: number | null;
     away_recent_form: number | null;
+    home_sp_fip: number | null;
+    away_sp_fip: number | null;
     prediction_type: string;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
@@ -117,6 +121,9 @@ interface TodayGameCard {
   /** wave-335: 선발투수 배지 */
   homeSP?: string;
   awaySP?: string;
+  /** wave-337: 선발투수 FIP 배지 */
+  homeSPFip?: number;
+  awaySPFip?: number;
 }
 
 interface TodayAnalysisData {
@@ -139,6 +146,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         confidence, home_elo, away_elo, home_recent_form, away_recent_form,
+        home_sp_fip, away_sp_fip,
         prediction_type, reasoning, factors,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
@@ -219,6 +227,8 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awayRecentForm: pred.away_recent_form ?? undefined,
       homeSP: spData?.homeSP,
       awaySP: spData?.awaySP,
+      homeSPFip: pred.home_sp_fip ?? undefined,
+      awaySPFip: pred.away_sp_fip ?? undefined,
     });
   }
 
@@ -1080,15 +1090,37 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-335: 선발투수 배지 */}
+                          {/* wave-335/337: 선발투수 이름 + FIP 배지 */}
                           {(g.awaySP || g.homeSP) && (
                             <>
                               <span className="text-gray-300 dark:text-gray-700">·</span>
                               <span className="text-gray-400 dark:text-gray-500">
                                 선발{' '}
                                 <span className="text-gray-600 dark:text-gray-300">{g.awaySP ?? '미확정'}</span>
+                                {g.awaySPFip != null && (
+                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${
+                                    g.awaySPFip < SP_FIP_STRONG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.awaySPFip > SP_FIP_WEAK
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>
+                                    {g.awaySPFip.toFixed(2)}
+                                  </span>
+                                )}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 <span className="text-gray-600 dark:text-gray-300">{g.homeSP ?? '미확정'}</span>
+                                {g.homeSPFip != null && (
+                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${
+                                    g.homeSPFip < SP_FIP_STRONG
+                                      ? 'text-brand-500 dark:text-brand-400'
+                                      : g.homeSPFip > SP_FIP_WEAK
+                                        ? 'text-orange-500 dark:text-orange-400'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>
+                                    {g.homeSPFip.toFixed(2)}
+                                  </span>
+                                )}
                               </span>
                             </>
                           )}
