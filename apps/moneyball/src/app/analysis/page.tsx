@@ -75,6 +75,7 @@ export const revalidate = 3600; // ANALYSIS_INDEX_ISR_SECONDS (Next.js 16 Turbop
 interface TodayAllRow {
   id: number;
   game_time: string | null;
+  external_game_id: string | null;
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
@@ -113,6 +114,9 @@ interface TodayGameCard {
   /** wave-333: 올 시즌 상대전적 배지 (홈팀 기준 승수/패수) */
   h2hHomeWins?: number;
   h2hAwayWins?: number;
+  /** wave-335: 선발투수 배지 */
+  homeSP?: string;
+  awaySP?: string;
 }
 
 interface TodayAnalysisData {
@@ -130,7 +134,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
   const gamesResult = (await supabase
     .from('games')
     .select(`
-      id, game_time,
+      id, game_time, external_game_id,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
@@ -151,6 +155,21 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
   }
 
   const rows = rawGames as unknown as TodayAllRow[];
+
+  // wave-335: 선발투수 배지 — sp_confirmation_log 에서 오늘 선발투수 이름 조회
+  const spResult = await supabase
+    .from('sp_confirmation_log')
+    .select('external_game_id, home_sp_name, away_sp_name')
+    .eq('game_date', today)
+    .order('observed_at', { ascending: false });
+  const spMap = new Map<string, { homeSP: string; awaySP: string }>();
+  for (const row of (spResult.data ?? []) as Array<{ external_game_id: string; home_sp_name: string | null; away_sp_name: string | null }>) {
+    if (!row.external_game_id || spMap.has(row.external_game_id)) continue;
+    if (row.home_sp_name && row.away_sp_name) {
+      spMap.set(row.external_game_id, { homeSP: row.home_sp_name, awaySP: row.away_sp_name });
+    }
+  }
+
   const candidates: BigMatchCandidate[] = [];
   const cards: TodayGameCard[] = [];
 
@@ -184,6 +203,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       }
     }
 
+    const spData = game.external_game_id ? spMap.get(game.external_game_id) : undefined;
     cards.push({
       gameId: game.id,
       gameTime: game.game_time,
@@ -197,6 +217,8 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awayElo: pred.away_elo ?? undefined,
       homeRecentForm: pred.home_recent_form ?? undefined,
       awayRecentForm: pred.away_recent_form ?? undefined,
+      homeSP: spData?.homeSP,
+      awaySP: spData?.awaySP,
     });
   }
 
@@ -1064,6 +1086,18 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
+                          {/* wave-335: 선발투수 배지 */}
+                          {(g.awaySP || g.homeSP) && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">·</span>
+                              <span className="text-gray-400 dark:text-gray-500">
+                                선발{' '}
+                                <span className="text-gray-600 dark:text-gray-300">{g.awaySP ?? '미확정'}</span>
+                                <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
+                                <span className="text-gray-600 dark:text-gray-300">{g.homeSP ?? '미확정'}</span>
+                              </span>
+                            </>
+                          )}
                         </div>
                       );
                     })()}
