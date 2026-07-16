@@ -2169,3 +2169,19 @@ export const WAR_STRONG = 20.0;
  * WAR_STRONG 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const WAR_WEAK = 8.0;
+
+/**
+ * 경기 유형 배지 임계값 — wave-347 (cycle 1684).
+ * 양 팀 선발투수 FIP 평균이 본 값 미만 = "투수전 예상" 태그 표시.
+ * SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 중간 지점.
+ * 변경 시 analysis/page.tsx gameTypeTag 계산 callsite 동시 조정.
+ */
+export const SP_AVG_FIP_DUEL = 4.0;
+
+/**
+ * SP_AVG_FIP_DUEL 의 sibling.
+ * 양 팀 타선 wOBA 평균이 본 값 초과 = "타격전 예상" 태그 표시.
+ * LINEUP_WOBA_WEAK_TAG(0.30)~LINEUP_WOBA_STRONG_TAG(0.34) 중간 지점.
+ * 변경 시 analysis/page.tsx gameTypeTag 계산 callsite 동시 조정.
+ */
+export const LINEUP_AVG_WOBA_HITTER = 0.32;

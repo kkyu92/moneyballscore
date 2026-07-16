@@ -41,6 +41,8 @@ import {
   SFR_WEAK,
   WAR_STRONG,
   WAR_WEAK,
+  SP_AVG_FIP_DUEL,
+  LINEUP_AVG_WOBA_HITTER,
   TEAM_STRENGTH_FORM_STRONG,
   TEAM_STRENGTH_FORM_WEAK,
   toKSTDateString,
@@ -894,6 +896,21 @@ export default async function AnalysisIndexPage() {
                 : Math.round((1 - g.homeWinProb) * 100);
               const tier = classifyWinnerProb(g.homeWinProb);
               const isBig = g.gameId === todayData.bigMatchId;
+              // wave-347: 경기 유형 배지 — avgSPFip < SP_AVG_FIP_DUEL = 투수전, avgWoba > LINEUP_AVG_WOBA_HITTER = 타격전
+              const avgSpFip =
+                g.awaySPFip != null && g.homeSPFip != null
+                  ? (g.awaySPFip + g.homeSPFip) / 2
+                  : null;
+              const avgLineupWoba =
+                g.awayLineupWoba != null && g.homeLineupWoba != null
+                  ? (g.awayLineupWoba + g.homeLineupWoba) / 2
+                  : null;
+              const gameTypeTag =
+                avgSpFip != null && avgSpFip < SP_AVG_FIP_DUEL
+                  ? ('투수전 예상' as const)
+                  : avgLineupWoba != null && avgLineupWoba > LINEUP_AVG_WOBA_HITTER
+                    ? ('타격전 예상' as const)
+                    : null;
               return (
                 <li key={g.gameId}>
                   <Link
@@ -934,6 +951,14 @@ export default async function AnalysisIndexPage() {
                                       : ''
                                 }>{g.homeRank}위</span>
                               </span>
+                            )}
+                            {/* wave-347: 경기 유형 배지 */}
+                            {gameTypeTag && (
+                              <span className={`ml-2 font-medium ${
+                                gameTypeTag === '투수전 예상'
+                                  ? 'text-brand-600 dark:text-brand-400'
+                                  : 'text-orange-500 dark:text-orange-400'
+                              }`}>{gameTypeTag}</span>
                             )}
                           </p>
                         )}
