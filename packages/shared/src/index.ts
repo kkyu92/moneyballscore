@@ -2085,7 +2085,7 @@ export const H2H_WEAK_RATE = 0.4;
  * 선발투수 FIP 배지 강세 임계 — wave-337 (cycle 1672).
  * sp_fip < 본 값 시 brand color (강세) 표시.
  * 3.50 = KBO 에이스 수준 (리그 평균 ~4.0 기준 상위 15%).
- * 변경 시 analysis/page.tsx callsite 자동 동기.
+ * 변경 시 analysis/page.tsx + factor-explanations.ts callsite 자동 동기.
  */
 export const SP_FIP_STRONG = 3.5;
 
@@ -2096,3 +2096,11 @@ export const SP_FIP_STRONG = 3.5;
  * SP_FIP_STRONG 의 보수. 변경 시 양쪽 동시 조정.
  */
 export const SP_FIP_WEAK = 4.5;
+
+/**
+ * buildGameOverview "타격전 예상" 태그 임계 — wave-338 (cycle 1673).
+ * avgWoba >= 본 값 시 "타격전 예상" 태그 부여.
+ * 0.34 = KBO 상위 타선 수준 (리그 평균 wOBA ~0.31 기준 상위 20%).
+ * 변경 시 factor-explanations.ts callsite 자동 동기.
+ */
+export const LINEUP_WOBA_STRONG_TAG = 0.34;
