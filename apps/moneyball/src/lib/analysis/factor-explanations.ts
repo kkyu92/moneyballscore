@@ -1,4 +1,4 @@
-import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_FIP_STRONG, WAR_STRONG, WAR_WEAK } from "@moneyball/shared";
+import { BULLPEN_FIP_DIFF_MIN, BULLPEN_FIP_STRONG, DEFAULT_WEIGHTS, FACTOR_CONTRIBUTION_SCALE, josa, LINEUP_AVG_WOBA_HITTER, LINEUP_WOBA_WEAK_TAG, ro, RECENT_FORM_GAMES, SFR_STRONG, SFR_WEAK, SP_AVG_FIP_DUEL, WAR_STRONG, WAR_WEAK } from "@moneyball/shared";
 import {
   FACTOR_LABELS_TECHNICAL as FACTOR_LABELS,
   NEUTRAL_HI,
@@ -321,8 +321,8 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
       ? (input.homeWoba + input.awayWoba) / 2
       : null;
 
-  if (avgSpFip != null && avgSpFip <= SP_FIP_STRONG) tags.push("투수전 예상");
-  if (avgWoba != null && avgWoba >= LINEUP_WOBA_STRONG_TAG) tags.push("타격전 예상");
+  if (avgSpFip != null && avgSpFip < SP_AVG_FIP_DUEL) tags.push("투수전 예상");
+  if (avgWoba != null && avgWoba > LINEUP_AVG_WOBA_HITTER) tags.push("타격전 예상");
   if (avgWoba != null && avgWoba <= LINEUP_WOBA_WEAK_TAG) tags.push("저득점 예상");
 
   // wave-341: 불펜 우세 태그 — 양팀 FIP 차이 ≥ BULLPEN_FIP_DIFF_MIN 시 불펜 우세 팀 명시
