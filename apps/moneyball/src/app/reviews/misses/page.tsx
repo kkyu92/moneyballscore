@@ -7,7 +7,7 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MissesSortControl } from "@/components/reviews/MissesSortControl";
 import { MetricRegistry } from "@moneyball/kbo-data";
-import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const metadata: Metadata = {
   title: "회고: 크게 빗나간 예측",
@@ -178,7 +178,13 @@ export default async function MissesReviewPage() {
                             {fmtSignedBias(fe.predictedBias)}
                           </span>
                           <span className="text-gray-700 dark:text-gray-200">
-                            <strong>{factorLabel(fe.factor)}</strong>
+                            {/* 카드 전체가 <Link>로 래핑되어 있어 내부 <Link> 중첩 불가.
+                                anchor 있는 팩터는 dotted-underline으로 정의된 용어임을 시각 표시. */}
+                            <strong
+                              className={FACTOR_GLOSSARY_ANCHORS[fe.factor] ? 'underline decoration-dotted underline-offset-2' : ''}
+                            >
+                              {factorLabel(fe.factor)}
+                            </strong>
                             {fe.diagnosis && (
                               <>
                                 <span className="text-gray-400 dark:text-gray-500 mx-1">

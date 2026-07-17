@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.54.0 — 2026-07-17 (cycle 1748)
+
+### wave-403 review-code: reviews/misses 편향 지목 팩터 glossary Link
+- **silent drift fix** — `reviews/misses/page.tsx` 편향 지목 팩터 레이블 `<strong>` → glossary Link (wave-400 FactorBreakdown + wave-401 FactorAgreementCard 동일 패턴 미적용)
+- `FACTOR_GLOSSARY_ANCHORS` import 추가, anchor 존재 시 `<Link href="/glossary#anchor">` 렌더
+- 알 수 없는 factor (legacy/shadow) → `<strong>` fallback 유지
+- **wave-403-misses-factor-glossary-link.test.ts**: 5 tests 박제
+- 281 test files / 2446 tests PASS. TypeScript clean.
+
+---
+
 ## v0.5.53.0 — 2026-07-17 (cycle 1747)
 
 ### wave-402 explore-idea: 팩터 수렴 픽 상대 강점 팩터 칩
