@@ -1013,7 +1013,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1156,6 +1156,58 @@ export default async function AnalysisIndexPage() {
                               : ''
                         }>
                           {shortTeamName(pick.homeCode)} {pick.homeSPFip.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    {/* wave-409: 불펜 FIP 대결 — bullpen_fip 수렴 팩터 포함 시 원정·홈 불펜 FIP 수치 표시 */}
+                    {pick.homeBullpenFip != null && pick.awayBullpenFip != null &&
+                      (favoredSlugs.includes('bullpen_fip') || unfavoredSlugs.includes('bullpen_fip')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        불펜{' '}
+                        <span className={
+                          pick.awayBullpenFip < BULLPEN_FIP_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.awayBullpenFip > BULLPEN_FIP_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {pick.awayBullpenFip.toFixed(2)}
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.homeBullpenFip < BULLPEN_FIP_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.homeBullpenFip > BULLPEN_FIP_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {pick.homeBullpenFip.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    {/* wave-409: 타선 wOBA 대결 — lineup_woba 수렴 팩터 포함 시 원정·홈 타선 wOBA 수치 표시 */}
+                    {pick.awayLineupWoba != null && pick.homeLineupWoba != null &&
+                      (favoredSlugs.includes('lineup_woba') || unfavoredSlugs.includes('lineup_woba')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        타선{' '}
+                        <span className={
+                          pick.awayLineupWoba >= LINEUP_WOBA_STRONG_TAG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.awayLineupWoba <= LINEUP_WOBA_WEAK_TAG
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {pick.awayLineupWoba.toFixed(3)}
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.homeLineupWoba >= LINEUP_WOBA_STRONG_TAG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.homeLineupWoba <= LINEUP_WOBA_WEAK_TAG
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {pick.homeLineupWoba.toFixed(3)}
                         </span>
                       </div>
                     )}
