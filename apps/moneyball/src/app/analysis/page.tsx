@@ -1011,7 +1011,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1129,6 +1129,32 @@ export default async function AnalysisIndexPage() {
                             </span>
                           )
                         ))}
+                      </div>
+                    )}
+                    {/* wave-407: 선발 FIP 대결 — sp_fip 수렴 팩터 포함 시 원정·홈 FIP 수치 표시 */}
+                    {pick.homeSPFip != null && pick.awaySPFip != null &&
+                      (favoredSlugs.includes('sp_fip') || unfavoredSlugs.includes('sp_fip')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        선발{' '}
+                        <span className={
+                          pick.awaySPFip < SP_FIP_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.awaySPFip > SP_FIP_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {pick.awaySPFip.toFixed(2)}
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.homeSPFip < SP_FIP_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.homeSPFip > SP_FIP_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {pick.homeSPFip.toFixed(2)}
+                        </span>
                       </div>
                     )}
                   </li>
