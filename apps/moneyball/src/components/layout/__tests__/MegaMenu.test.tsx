@@ -68,7 +68,7 @@ describe("MegaMenu", () => {
         items: [
           { href: "/analysis", label: "AI 분석", description: "에이전트 토론" },
           { href: "/accuracy", label: "적중 기록", description: "AI 성과" },
-          { href: "/accuracy/shadow", label: "Shadow 적중률", description: "v2.1-B cohort" },
+          { href: "/insights", label: "AI 인사이트", description: "reasoning 아카이브" },
           { href: "/predictions", label: "예측 기록", description: "일자별" },
           { href: "/dashboard", label: "모델 성능", description: "Brier" },
         ],
