@@ -57,6 +57,7 @@ export interface CompositeDuelResult {
  * analysis/page.tsx 인라인 COMPOSITE_DUEL JSX 로직을 추출하여 data layer에서 재사용.
  * Mirrors: wave-365 wOBA/SFR/bullpen/spFIP + wave-368 WAR + wave-379 Elo +
  *          wave-381 form + wave-383 H2H + wave-386 xFIP + wave-388 park.
+ *          wave-394: homeFavoredSlugs/awayFavoredSlugs 슬러그 집계 추가.
  */
 export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult {
   const wobaResult: DuelResult =
