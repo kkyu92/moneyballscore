@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { WAR_STRONG, WAR_WEAK, SP_FIP_STRONG, SP_FIP_WEAK } from '@moneyball/shared';
 
 // wave-413: WAR 대결 + xFIP 대결 표시 — 팩터 수렴 픽 섹션
