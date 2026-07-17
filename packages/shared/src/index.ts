@@ -2482,18 +2482,18 @@ export const SP_FIP_DUEL_MIN = 0.5;
 export const SP_XFIP_DUEL_MIN = 0.5;
 
 /**
- * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723), wave-383 상대전적 추가 (cycle 1725).
- * wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적 8개 직접 대결 결과 집계 시
+ * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723), wave-383 상대전적 추가 (cycle 1725), wave-386 선발xFIP 추가 (cycle 1729).
+ * wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적/선발xFIP 9개 직접 대결 결과 집계 시
  * 한 팀이 본 값 이상 팩터에서 우세 → "N팩터 우세" 배지 표시.
- * 3/8 이상 = 명확한 다수 우세 기준.
+ * 3/9 이상 = 명확한 다수 우세 기준.
  */
 export const COMPOSITE_DUEL_THRESHOLD = 3;
 
 /**
- * 종합 우세 배지 최소 유효 팩터 수 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723), wave-383 상대전적 추가 (cycle 1725).
+ * 종합 우세 배지 최소 유효 팩터 수 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723), wave-383 상대전적 추가 (cycle 1725), wave-386 선발xFIP 추가 (cycle 1729).
  * null pair 포함 시 집계 신뢰도 보장을 위해
  * 유효(non-null) 팩터 쌍이 본 값 미만이면 배지 표시 안 함.
- * WAR/Elo/최근폼/상대전적 4개 optional(항상 가용 X) — 4/8 이상 유효 시 집계.
+ * WAR/Elo/최근폼/상대전적/선발xFIP 5개 optional(항상 가용 X) — 4/9 이상 유효 시 집계.
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
