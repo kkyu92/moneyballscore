@@ -64,6 +64,7 @@ import {
   KBO_STADIUM_SHORT,
   PARK_FACTOR_HITTER_MIN,
   PARK_FACTOR_PITCHER_MAX,
+  PARK_FACTOR_DELTA_MIN,
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_TOP_GAMES,
   FACTOR_PICK_STRONG,
@@ -1104,7 +1105,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1623,7 +1624,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                       </div>
                     )}
-                    {/* wave-414: 구장 대결 — park_factor 수렴 팩터 포함 시 홈구장 특성 표시 · wave-422: 구장명 + parkNote 표시 */}
+                    {/* wave-414: 구장 대결 — park_factor 수렴 팩터 포함 시 홈구장 특성 표시 · wave-422: 구장명 + parkNote 표시 · wave-450: PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 */}
                     {(favoredSlugs.includes('park_factor') || unfavoredSlugs.includes('park_factor')) && (() => {
                       const teamMeta = KBO_TEAMS[pick.homeCode];
                       if (!teamMeta) return null;
@@ -1631,6 +1632,7 @@ export default async function AnalysisIndexPage() {
                       const isHitterFriendly = parkPf >= PARK_FACTOR_HITTER_MIN;
                       const isPitcherFriendly = parkPf <= PARK_FACTOR_PITCHER_MAX;
                       const stadiumShort = KBO_STADIUM_SHORT[pick.homeCode];
+                      const parkDelta = parkPf - 100;
                       return (
                         <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                           구장{' '}
@@ -1646,6 +1648,12 @@ export default async function AnalysisIndexPage() {
                           }>
                             {parkNote}
                           </span>
+                          {/* wave-450: PF 편차(Δ) — PARK_FACTOR_DELTA_MIN(3) 이상 시 수치 명시 */}
+                          {Math.abs(parkDelta) >= PARK_FACTOR_DELTA_MIN && (
+                            <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                              Δ{parkDelta > 0 ? `+${parkDelta}` : parkDelta}
+                            </span>
+                          )}
                         </div>
                       );
                     })()}
