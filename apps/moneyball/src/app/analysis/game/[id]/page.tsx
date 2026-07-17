@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
@@ -37,6 +38,7 @@ import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import type { FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { GameAnalysisProse } from '@/components/analysis/GameAnalysisProse';
+import { FACTOR_LABELS_SHORT, FACTOR_GLOSSARY_ANCHORS } from '@/lib/predictions/factorLabels';
 
 export const revalidate = 600; // ANALYSIS_GAME_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -437,6 +439,33 @@ export default async function GameAnalysisPage({ params }: PageProps) {
             <span className="font-semibold">{favoredName} 우세</span>
             <span className="font-mono text-xs">{ratio}</span>
             <span className="font-mono text-xs opacity-60" title="우세 팩터 가중치 합 / 전체 팩터 가중치">가중{favoredWeightPct}%</span>
+            {/* wave-454: 우세 팩터 칩 — 수렴 팩터 slug → 단축 레이블 + 용어집 링크 */}
+            {favoredSlugs.map((slug) => {
+              const chipLabel = FACTOR_LABELS_SHORT[slug];
+              if (!chipLabel) return null;
+              const anchor = FACTOR_GLOSSARY_ANCHORS[slug];
+              const chipClass = isComplete
+                ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
+                : isWeightStrong
+                  ? 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-700/50'
+                  : 'bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/40';
+              return anchor ? (
+                <Link
+                  key={slug}
+                  href={`/glossary#${anchor}`}
+                  className={`inline-block text-xs px-1.5 py-0.5 rounded transition-colors ${chipClass}`}
+                >
+                  {chipLabel}
+                </Link>
+              ) : (
+                <span
+                  key={slug}
+                  className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400"
+                >
+                  {chipLabel}
+                </span>
+              );
+            })}
           </div>
         );
       })()}
