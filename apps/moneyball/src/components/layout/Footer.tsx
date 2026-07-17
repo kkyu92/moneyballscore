@@ -10,11 +10,11 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 // │ /         /picks    /standings /reviews   /method.. /mlb      /lotto/.. │
 // │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/ar │
 // │ /accuracy            /players   /reviews/m /glossary /mlb/team           │
-// │ /dashboard           /matchup   /reviews/. /insights /mlb/play..         │
-// │ /predictions                     /seasons   /v2-prev. /mlb/wc..           │
-// │ /calendar                                    /change.. /mlb/post..         │
-// │                                              /about                       │
-// │                                              /search                      │
+// │ /dashboard           /matchup   /reviews/. /v2-shad. /mlb/play..         │
+// │ /insights                        /seasons   /acc/shad /mlb/wc..           │
+// │ /predictions                                /change.. /mlb/post..         │
+// │ /calendar                                   /about                       │
+// │                                             /search                      │
 // └──────────────────────────────────────────────────────────────────────────┘
 //   Desktop (≥ lg, 1024px) : 5 column grid (always expanded, 7 column wrap to 2 row)
 //   Tablet  (≥ sm, 640px)  : 3 column grid
@@ -31,6 +31,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/analysis", label: "AI 분석" },
       { href: "/accuracy", label: "AI 적중 기록" },
       { href: "/dashboard", label: "모델 성능" },
+      { href: "/insights", label: "AI 인사이트" },
       { href: "/predictions", label: "예측 기록" },
       { href: "/calendar", label: "월별 캘린더" },
     ],
@@ -67,8 +68,6 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/methodology", label: "예측 방법론" },
       { href: "/guide", label: "사용 가이드" },
       { href: "/glossary", label: "용어 사전" },
-      { href: "/insights", label: "AI 인사이트" },
-      { href: "/v2-preview", label: "v2 시뮬레이션 미리보기" },
       { href: "/v2-shadow-monitor", label: "v2 섀도우 모니터" },
       { href: "/accuracy/shadow", label: "Shadow 적중률" },
       { href: "/changelog", label: "변경 로그" },

@@ -95,9 +95,9 @@ describe("/v2-preview OG/Twitter image File Convention", () => {
 });
 
 describe("Footer 도움말 group entry", () => {
-  it("'v2 시뮬레이션 미리보기' entry 박제", () => {
-    expect(FOOTER_SRC).toContain('"/v2-preview"');
-    expect(FOOTER_SRC).toContain("v2 시뮬레이션 미리보기");
+  it("noindex /v2-preview 는 footer 공개 sitemap 미포함 (cycle 1771 IA cleanup)", () => {
+    expect(FOOTER_SRC).not.toContain('"/v2-preview"');
+    expect(FOOTER_SRC).not.toContain("v2 시뮬레이션 미리보기");
   });
 });
 
