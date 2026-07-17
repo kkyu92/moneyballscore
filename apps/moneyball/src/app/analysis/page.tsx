@@ -973,18 +973,32 @@ export default async function AnalysisIndexPage() {
                   ? (pick.compositeDuelHomeSlugs ?? [])
                   : (pick.compositeDuelAwaySlugs ?? []);
                 const favoredLabels = favoredSlugs.map((s) => FACTOR_LABELS[s]).filter(Boolean);
+                // wave-396: 모델 확신도 + 팩터-모델 합치 여부
+                const favoredCode = favoredHome ? pick.homeCode : pick.awayCode;
+                const modelAgrees = pick.predictedWinnerCode != null && pick.predictedWinnerCode === favoredCode;
+                const probPct = favoredHome
+                  ? Math.round(pick.homeWinProb * 100)
+                  : Math.round((1 - pick.homeWinProb) * 100);
                 return (
                   <li key={pick.gameId} className="text-sm text-gray-900 dark:text-gray-100">
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <Link
+                      href={`/analysis/game/${pick.gameId}`}
+                      className="flex items-center gap-1.5 flex-wrap hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500"
+                    >
                       <span className={`font-semibold ${favoredHome ? 'text-brand-600 dark:text-brand-400' : 'text-orange-500 dark:text-orange-400'}`}>
                         {favoredName}
                       </span>
                       <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{ratio}</span>
+                      {pick.predictedWinnerCode != null && (
+                        <span className={`font-mono text-xs ${modelAgrees ? 'text-brand-500 dark:text-brand-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                          {probPct}%
+                        </span>
+                      )}
                       <span className="text-gray-400 dark:text-gray-500">—</span>
                       <span className="text-gray-600 dark:text-gray-300">
                         {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
                       </span>
-                    </div>
+                    </Link>
                     {favoredLabels.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {favoredLabels.map((label) => (
