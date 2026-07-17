@@ -34,11 +34,9 @@ describe("/v2-shadow-monitor metadata", () => {
     );
   });
 
-  it("indexable — robots noindex 명시 X (사용자 가시 dashboard)", () => {
+  it("noindex — 결론된 실험 archive (v1.8 확정 이후, cycle 1802 IA)", () => {
     const r = pageMetadata.robots;
-    if (typeof r === "object" && r !== null) {
-      expect(r.index).not.toBe(false);
-    }
+    expect(typeof r === "object" && r !== null && r.index === false).toBe(true);
   });
 
   it("og + twitter card 박제", () => {
@@ -78,7 +76,12 @@ describe("/v2-shadow-monitor Footer + sitemap 진입 path", () => {
     expect(FOOTER_SRC).toMatch(/"v2 섀도우 모니터"/);
   });
 
-  it("sitemap staticRoutes 에 entry 박제", () => {
-    expect(SITEMAP_SRC).toContain("/v2-shadow-monitor");
+  it("sitemap staticRoutes 에서 제거 — noindex archive (cycle 1802 IA)", () => {
+    // v2-shadow-monitor noindex 처리 → sitemap active route 제외 (comment 라인 허용)
+    const activeRoutes = SITEMAP_SRC
+      .split("\n")
+      .filter((l) => !l.trim().startsWith("//"))
+      .join("\n");
+    expect(activeRoutes).not.toContain('"/v2-shadow-monitor"');
   });
 });
