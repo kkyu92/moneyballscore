@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { COMPOSITE_DUEL_MIN_VALID, COMPOSITE_DUEL_THRESHOLD, WAR_DUEL_MIN } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
-const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
 
 describe('wave-368 — 종합 우세 배지 WAR 팩터 추가 (cycle 1708)', () => {
   it('COMPOSITE_DUEL_THRESHOLD = 3 단일 소스 가드', () => {

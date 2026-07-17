@@ -14,7 +14,6 @@ import {
 } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
-const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
 
 /** 7팩터 직접 대결 집계 로직 재현 — analysis/page.tsx wave-381 */
 function computeComposite(g: {
