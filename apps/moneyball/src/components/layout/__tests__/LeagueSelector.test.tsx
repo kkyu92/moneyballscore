@@ -94,14 +94,15 @@ describe("LeagueSelector", () => {
       isNavGroup(item) ? item.label : item.label,
     );
 
-    // 신규 박제된 NAV 라벨 (4 top-level: 오늘 + 예측·기록 + 팀·선수 + 커뮤니티)
+    // 신규 박제된 NAV 라벨 (5 top-level: 오늘 + 예측·기록 + 팀·선수 + 리뷰·시즌 + 커뮤니티)
     expect(labels).toContain("오늘");
     expect(labels).toContain("예측·기록");
     expect(labels).toContain("팀·선수");
+    expect(labels).toContain("리뷰·시즌");
     expect(labels).toContain("커뮤니티");
 
-    // top-level 4 items
-    expect(labels.length).toBe(4);
+    // top-level 5 items (cycle 1749: 리뷰·시즌 그룹 추가)
+    expect(labels.length).toBe(5);
 
     // 해체된 그룹 (더보기 dumping ground 해체)
     expect(labels).not.toContain("더보기");

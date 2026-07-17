@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.54.1 — 2026-07-17 (cycle 1749)
+
+### wave-404 info-architecture-review: /reviews 헤더 KBO_NAV 리뷰·시즌 그룹
+- **IA fix** — 2-chain alternation lock (review-code↔explore-idea 8사이클) 탈출 + trigger 7 발화
+- `/reviews` 섹션 (예측 리뷰·빗나간 예측·시즌 기록): Footer "리뷰·시즌"에만 존재, 헤더 KBO_NAV 완전 부재
+- `Header.tsx` KBO_NAV: 3그룹→4그룹 (예측·기록 / 팀·선수 / **리뷰·시즌** / 커뮤니티)
+- 리뷰·시즌: `/reviews`(예측 리뷰) + `/reviews/misses`(빗나간 예측) + `/seasons`(시즌 기록) 3 items
+- MobileNav = `LEAGUE_NAVS` 참조 자동 반영
+- `LeagueSelector.test.tsx`: top-level 4→5 업데이트
+- 281 test files / 2446 tests PASS. TypeScript clean.
+
+---
+
 ## v0.5.54.0 — 2026-07-17 (cycle 1748)
 
 ### wave-403 review-code: reviews/misses 편향 지목 팩터 glossary Link
