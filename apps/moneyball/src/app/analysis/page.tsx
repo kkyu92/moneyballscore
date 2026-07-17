@@ -954,7 +954,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -980,6 +980,13 @@ export default async function AnalysisIndexPage() {
                   ? (pick.compositeDuelHomeSlugs ?? [])
                   : (pick.compositeDuelAwaySlugs ?? []);
                 const favoredChips = favoredSlugs
+                  .map((s) => ({ slug: s, label: FACTOR_LABELS[s], anchor: FACTOR_GLOSSARY_ANCHORS[s] }))
+                  .filter((c) => c.label);
+                // wave-402: 상대 팀 강점 팩터 칩 (비수렴 팩터 — 상대방이 이기는 팩터)
+                const unfavoredSlugs = favoredHome
+                  ? (pick.compositeDuelAwaySlugs ?? [])
+                  : (pick.compositeDuelHomeSlugs ?? []);
+                const unfavoredChips = unfavoredSlugs
                   .map((s) => ({ slug: s, label: FACTOR_LABELS[s], anchor: FACTOR_GLOSSARY_ANCHORS[s] }))
                   .filter((c) => c.label);
                 // wave-396: 모델 확신도 + 팩터-모델 합치 여부
@@ -1030,6 +1037,29 @@ export default async function AnalysisIndexPage() {
                             <span
                               key={slug}
                               className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
+                            >
+                              {label}
+                            </span>
+                          )
+                        ))}
+                      </div>
+                    )}
+                    {/* wave-402: 상대 팀 강점 팩터 칩 (비수렴 — 10:0 완전수렴 시 미표시) */}
+                    {unfavoredChips.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {unfavoredChips.map(({ slug, label, anchor }) => (
+                          anchor ? (
+                            <Link
+                              key={slug}
+                              href={`/glossary#${anchor}`}
+                              className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"
+                            >
+                              {label}
+                            </Link>
+                          ) : (
+                            <span
+                              key={slug}
+                              className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400"
                             >
                               {label}
                             </span>
