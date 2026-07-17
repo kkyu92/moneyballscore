@@ -13,9 +13,10 @@
  *   - withMe / againstMe 양쪽 모두 비면 미렌더.
  */
 
+import Link from 'next/link';
 import { KBO_FACTOR_COUNT } from '@moneyball/shared';
 import type { FactorAgreement, FactorAgreementRow } from '@/lib/picks/buildPicksStats';
-import { FACTOR_LABELS, FACTOR_TIPS } from '@/lib/predictions/factorLabels';
+import { FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS, FACTOR_TIPS } from '@/lib/predictions/factorLabels';
 
 interface Props {
   agreement: FactorAgreement;
@@ -104,18 +105,29 @@ export function FactorAgreementCard({ agreement }: Props) {
 function FactorRow({ row, tone }: { row: FactorAgreementRow; tone: 'with' | 'against' }) {
   const label = FACTOR_LABELS[row.factor] ?? row.factor;
   const tip = FACTOR_TIPS[row.factor];
+  const anchor = FACTOR_GLOSSARY_ANCHORS[row.factor];
   const denom = row.withMyPick + row.againstMyPick;
   const pct = row.agreementRate !== null ? Math.round(row.agreementRate * 100) : null;
   const barWidth = pct !== null ? `${Math.max(4, Math.min(100, pct))}%` : '0%';
 
   return (
     <li className="flex items-center gap-3">
-      <span
-        className="w-20 text-xs text-gray-700 dark:text-gray-200 shrink-0 truncate"
-        title={tip ?? label}
-      >
-        {label}
-      </span>
+      {anchor ? (
+        <Link
+          href={`/glossary#${anchor}`}
+          className="w-20 text-xs text-gray-700 dark:text-gray-200 shrink-0 truncate hover:text-brand-500 hover:underline underline-offset-2"
+          title={tip ?? label}
+        >
+          {label}
+        </Link>
+      ) : (
+        <span
+          className="w-20 text-xs text-gray-700 dark:text-gray-200 shrink-0 truncate"
+          title={tip ?? label}
+        >
+          {label}
+        </span>
+      )}
       <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-[var(--color-surface)] overflow-hidden relative">
         <div
           className={`absolute inset-y-0 left-0 ${
