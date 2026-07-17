@@ -2553,8 +2553,8 @@ export const FACTOR_PICK_TOP_GAMES = 3;
 export const FACTOR_PICK_STRONG = 8;
 
 /**
- * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814).
- * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상, game/[id]/page.tsx = amber 배경 배지 + amber 칩.
+ * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816).
+ * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상, game/[id]/page.tsx = amber 배경 배지 + amber 칩. false 시 상대 팀 우세 팩터 칩 표시 (wave-456).
  * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
  */
 export const FACTOR_PICK_COMPLETE = 10;
