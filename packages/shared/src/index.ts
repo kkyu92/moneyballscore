@@ -2498,8 +2498,8 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
 /**
- * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734).
- * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시.
+ * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734), wave-392 top-3 복수 표시 (cycle 1736).
+ * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시. 최대 3경기 표시.
  * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
  */
 export const FACTOR_PICK_MIN_FACTORS = 7;

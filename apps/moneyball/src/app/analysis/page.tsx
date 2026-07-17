@@ -1544,15 +1544,16 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365→wave-391: 종합 우세 배지 (computeCompositeDuel 재사용) */}
+                          {/* wave-365→wave-393: 종합 우세 배지 (compositeDuelScore 기준 우세 팀 결정) */}
                           {(() => {
                             const hw = g.compositeDuelHomeWins;
                             const aw = g.compositeDuelAwayWins;
                             if (hw == null || aw == null) return null;
-                            const favoredHome = hw >= COMPOSITE_DUEL_THRESHOLD;
-                            const favoredAway = aw >= COMPOSITE_DUEL_THRESHOLD;
-                            if (!favoredHome && !favoredAway) return null;
+                            const score = g.compositeDuelScore!;
+                            if (score === 0) return null;
+                            const favoredHome = score > 0;
                             const count = favoredHome ? hw : aw;
+                            if (count < COMPOSITE_DUEL_THRESHOLD) return null;
                             const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
                             return (
                               <>
