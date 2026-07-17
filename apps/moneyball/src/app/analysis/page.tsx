@@ -68,6 +68,8 @@ import {
   FACTOR_PICK_TOP_GAMES,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
+  FACTOR_PICK_WEIGHT_TOTAL,
+  DEFAULT_WEIGHTS,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -1013,7 +1015,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1055,6 +1057,9 @@ export default async function AnalysisIndexPage() {
                 const unfavoredChips = unfavoredSlugs
                   .map((s) => ({ slug: s, label: FACTOR_LABELS[s], anchor: FACTOR_GLOSSARY_ANCHORS[s] }))
                   .filter((c) => c.label);
+                // wave-420: 가중 우위 — favoredSlugs 의 DEFAULT_WEIGHTS 합 / FACTOR_PICK_WEIGHT_TOTAL
+                const favoredWeight = favoredSlugs.reduce((sum, slug) => sum + (DEFAULT_WEIGHTS[slug as keyof typeof DEFAULT_WEIGHTS] ?? 0), 0);
+                const favoredWeightPct = Math.round(favoredWeight / FACTOR_PICK_WEIGHT_TOTAL * 100);
                 // wave-396: 모델 확신도 + 팩터-모델 합치 여부
                 const favoredCode = favoredHome ? pick.homeCode : pick.awayCode;
                 const modelAgrees = pick.predictedWinnerCode != null && pick.predictedWinnerCode === favoredCode;
@@ -1071,6 +1076,10 @@ export default async function AnalysisIndexPage() {
                         {favoredName}
                       </span>
                       <span className={ratioColorClass}>{ratio}</span>
+                      {/* wave-420: 가중 우위 % — 팩터 수 아닌 가중치 비율로 수렴 강도 표현 */}
+                      <span className="font-mono text-xs text-gray-400 dark:text-gray-500" title="우세 팩터 가중치 합 / 전체 팩터 가중치 (0.85)">
+                        가중{favoredWeightPct}%
+                      </span>
                       {pick.predictedWinnerCode != null && (
                         <span className={`font-mono text-xs ${modelAgrees ? 'text-brand-500 dark:text-brand-400' : 'text-gray-400 dark:text-gray-500'}`}>
                           {probPct}%
