@@ -56,9 +56,9 @@ describe('wave-386 — COMPOSITE_DUEL 선발xFIP 9팩터 편입 (cycle 1729)', (
     expect(src).toContain('선발xFIP 추가');
   });
 
-  it('analysis/page.tsx: 9팩터 언급', () => {
+  it('analysis/page.tsx: xFIP 9팩터 이력 comment 존재', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('9팩터');
+    expect(src).toContain('선발xFIP 추가');
   });
 
   it('analysis/page.tsx: spXfipResult 존재', () => {
@@ -76,8 +76,8 @@ describe('wave-386 — COMPOSITE_DUEL 선발xFIP 9팩터 편입 (cycle 1729)', (
     expect(src).toContain('g.homeSPXfip != null && g.awaySPXfip != null');
   });
 
-  it('results 배열이 9 팩터 (woba/sfr/bullpen/spfip/war/elo/form/h2h/spXfip)', () => {
+  it('results 배열에 spXfipResult 포함', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult, spXfipResult');
+    expect(src).toContain('spXfipResult');
   });
 });

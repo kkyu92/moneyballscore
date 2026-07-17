@@ -69,9 +69,9 @@ describe('wave-383 — COMPOSITE_DUEL 상대전적 8팩터 편입 (cycle 1725)',
     expect(src).toContain('상대전적 추가');
   });
 
-  it('analysis/page.tsx: 8팩터 이상 언급 (wave-386 이후 9팩터로 갱신)', () => {
+  it('analysis/page.tsx: 상대전적 이력 comment 존재', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src.includes('8팩터') || src.includes('9팩터')).toBe(true);
+    expect(src).toContain('상대전적 추가');
   });
 
   it('analysis/page.tsx: h2hResult 존재', () => {

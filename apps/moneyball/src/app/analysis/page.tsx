@@ -1472,7 +1472,7 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적/선발xFIP 9팩터 직접 대결 집계 (wave-368: WAR 추가, wave-379: Elo 추가, wave-381: 최근폼 추가, wave-383: 상대전적 추가, wave-386: 선발xFIP 추가) */}
+                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적/선발xFIP/구장보정 10팩터 직접 대결 집계 (wave-368: WAR 추가, wave-379: Elo 추가, wave-381: 최근폼 추가, wave-383: 상대전적 추가, wave-386: 선발xFIP 추가, wave-388: 구장보정 추가) */}
                           {(() => {
                             type DuelResult = 'home' | 'away' | null;
                             const wobaResult: DuelResult =
@@ -1548,7 +1548,14 @@ export default async function AnalysisIndexPage() {
                                     ? 'away'
                                     : null
                                 : null;
-                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult, spXfipResult];
+                            const parkResult: DuelResult = (() => {
+                              const pf = KBO_TEAMS[g.homeCode]?.parkPf;
+                              if (pf === undefined) return null;
+                              if (pf >= PARK_FACTOR_HITTER_MIN) return 'home';
+                              if (pf <= PARK_FACTOR_PITCHER_MAX) return 'away';
+                              return null;
+                            })();
+                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult, spXfipResult, parkResult];
                             const validCount = results.filter(
                               (_, i) => [
                                 g.homeLineupWoba != null && g.awayLineupWoba != null,
@@ -1560,6 +1567,7 @@ export default async function AnalysisIndexPage() {
                                 g.homeRecentForm !== undefined && g.awayRecentForm !== undefined,
                                 g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined,
                                 g.homeSPXfip != null && g.awaySPXfip != null,
+                                KBO_TEAMS[g.homeCode]?.parkPf !== undefined,
                               ][i]
                             ).length;
                             if (validCount < COMPOSITE_DUEL_MIN_VALID) return null;
