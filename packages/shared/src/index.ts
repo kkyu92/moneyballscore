@@ -2263,7 +2263,8 @@ export const H2H_WEAK_RATE = 0.4;
  * 선발투수 FIP 배지 강세 임계 — wave-337 (cycle 1672).
  * sp_fip < 본 값 시 brand color (강세) 표시.
  * 3.50 = KBO 에이스 수준 (리그 평균 ~4.0 기준 상위 15%).
- * 변경 시 analysis/page.tsx + factor-explanations.ts callsite 자동 동기.
+ * wave-413 에서 xFIP 배지 임계로도 재사용 (FIP/xFIP 동일 단위, cycle 1761).
+ * 변경 시 analysis/page.tsx (FIP + xFIP 양쪽) + factor-explanations.ts callsite 자동 동기.
  */
 export const SP_FIP_STRONG = 3.5;
 
@@ -2271,7 +2272,8 @@ export const SP_FIP_STRONG = 3.5;
  * 선발투수 FIP 배지 약세 임계 — wave-337 (cycle 1672).
  * sp_fip > 본 값 시 orange color (약세) 표시.
  * 4.50 = KBO 평균 이상 (리그 평균 ~4.0 기준 하위 35%).
- * SP_FIP_STRONG 의 보수. 변경 시 양쪽 동시 조정.
+ * wave-413 에서 xFIP 배지 임계로도 재사용 (FIP/xFIP 동일 단위, cycle 1761).
+ * SP_FIP_STRONG 의 보수. 변경 시 양쪽 동시 조정 (FIP + xFIP 양쪽 반영).
  */
 export const SP_FIP_WEAK = 4.5;
 
@@ -2345,7 +2347,7 @@ export const SFR_DUEL_MIN = 5.0;
  * 팀 WAR 배지 강세 임계 — wave-345 (cycle 1682).
  * war_total ≥ 본 값 시 brand color (강세) 표시.
  * 20.0 = KBO 상위권 팀 시즌 누적 WAR (리그 평균 ~14 기준 상위 25%).
- * 변경 시 analysis/page.tsx callsite 자동 동기.
+ * 변경 시 analysis/page.tsx + factor-explanations.ts callsite 자동 동기.
  */
 export const WAR_STRONG = 20.0;
 

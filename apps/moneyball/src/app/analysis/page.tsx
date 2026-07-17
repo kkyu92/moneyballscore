@@ -166,7 +166,7 @@ interface TodayGameCard {
   /** wave-337: 선발투수 FIP 배지 */
   homeSPFip?: number;
   awaySPFip?: number;
-  /** wave-353: 선발투수 xFIP 갭 배지 */
+  /** wave-353: 선발투수 xFIP 갭 배지 · wave-413: 팩터 수렴 픽 xFIP 대결 수치 표시 */
   homeSPXfip?: number;
   awaySPXfip?: number;
   /** wave-339: 타선 wOBA 배지 */
