@@ -521,6 +521,78 @@ interface UpcomingScheduledGame {
   modelHomeWinProb: number | null; // wave-313: full-model prediction (null = not yet generated)
 }
 
+/** wave-424: 최근 N건 팩터 수렴 픽 성적 (rolling window — 주별 경계 없음) */
+async function getRecentConvergencePickRecord(limit = 10): Promise<{ wins: number; losses: number; total: number }> {
+  const today = toKSTDateString();
+  const supabase = await createClient();
+  const cutoff = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  const gamesResult = (await supabase
+    .from('games')
+    .select(`
+      id, game_date, game_time, home_score, away_score,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
+      predictions!inner(
+        prediction_type,
+        home_elo, away_elo, home_recent_form, away_recent_form,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_sfr, away_sfr, home_war_total, away_war_total
+      )
+    `)
+    .gte('game_date', cutoff)
+    .lt('game_date', today)
+    .not('home_score', 'is', null)
+    .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
+    .order('game_date', { ascending: false })
+    .order('game_time', { ascending: true })) as SelectResult<ThisWeekGameRow[]>;
+
+  const { data } = assertSelectOk(gamesResult, 'analysis getRecentConvergencePickRecord');
+  if (!data) return { wins: 0, losses: 0, total: 0 };
+
+  let wins = 0, losses = 0, count = 0;
+  for (const row of data as unknown as ThisWeekGameRow[]) {
+    if (count >= limit) break;
+    const pred = row.predictions?.[0];
+    if (!pred || row.home_score === null || row.away_score === null) continue;
+    const homeCode = row.home_team?.code as TeamCode | undefined;
+    const awayCode = row.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
+
+    const duel = computeCompositeDuel({
+      homeCode,
+      homeLineupWoba: pred.home_lineup_woba,
+      awayLineupWoba: pred.away_lineup_woba,
+      homeSfr: pred.home_sfr,
+      awaySfr: pred.away_sfr,
+      homeBullpenFip: pred.home_bullpen_fip,
+      awayBullpenFip: pred.away_bullpen_fip,
+      homeSPFip: pred.home_sp_fip,
+      awaySPFip: pred.away_sp_fip,
+      homeSPXfip: pred.home_sp_xfip,
+      awaySPXfip: pred.away_sp_xfip,
+      homeWar: pred.home_war_total,
+      awayWar: pred.away_war_total,
+      homeElo: pred.home_elo ?? undefined,
+      awayElo: pred.away_elo ?? undefined,
+      homeRecentForm: pred.home_recent_form ?? undefined,
+      awayRecentForm: pred.away_recent_form ?? undefined,
+    });
+
+    if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) continue;
+    if (Math.abs(duel.netScore) < FACTOR_PICK_MIN_FACTORS) continue;
+
+    const favoredHome = duel.netScore > 0;
+    const favWon = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
+    if (favWon) wins++; else losses++;
+    count++;
+  }
+
+  return { wins, losses, total: count };
+}
+
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
   const today = toKSTDateString();
   const currentWeek = getCurrentWeek();
@@ -813,7 +885,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -826,6 +898,7 @@ export default async function AnalysisIndexPage() {
     buildTeamStrengthSnapshot(),
     fetchStandings(),
     getSeasonH2HData(),
+    getRecentConvergencePickRecord(10),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -1023,11 +1096,23 @@ export default async function AnalysisIndexPage() {
               <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400">
                 팩터 수렴 경기{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
               </h2>
-              {(weeklyConvergenceRecord.wins + weeklyConvergenceRecord.losses) > 0 && (
-                <span className="text-[11px] tabular-nums text-brand-600 dark:text-brand-400">
-                  이번 주 {weeklyConvergenceRecord.wins}승 {weeklyConvergenceRecord.losses}패
-                </span>
-              )}
+              {/* wave-424: 성적 라인 — 이번 주 성적 + 최근 10경기 rolling */}
+              <div className="flex items-center gap-2">
+                {(weeklyConvergenceRecord.wins + weeklyConvergenceRecord.losses) > 0 && (
+                  <span className="text-[11px] tabular-nums text-brand-600 dark:text-brand-400">
+                    이번 주 {weeklyConvergenceRecord.wins}승 {weeklyConvergenceRecord.losses}패
+                  </span>
+                )}
+                {recentConvergenceRecord.total > 0 && (
+                  <span
+                    className="text-[11px] tabular-nums text-gray-400 dark:text-gray-500"
+                    title={`최근 ${recentConvergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
+                  >
+                    최근{recentConvergenceRecord.total}경기 {recentConvergenceRecord.wins}승{recentConvergenceRecord.losses}패{' '}
+                    ({Math.round(recentConvergenceRecord.wins / recentConvergenceRecord.total * 100)}%)
+                  </span>
+                )}
+              </div>
             </div>
             <ul className="space-y-2">
               {factorPickGames.map((pick) => {
