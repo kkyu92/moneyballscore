@@ -7,7 +7,7 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MissesSortControl } from "@/components/reviews/MissesSortControl";
 import { MetricRegistry } from "@moneyball/kbo-data";
-import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 
 export const metadata: Metadata = {
   title: "회고: 크게 빗나간 예측",
@@ -178,7 +178,16 @@ export default async function MissesReviewPage() {
                             {fmtSignedBias(fe.predictedBias)}
                           </span>
                           <span className="text-gray-700 dark:text-gray-200">
-                            <strong>{factorLabel(fe.factor)}</strong>
+                            {FACTOR_GLOSSARY_ANCHORS[fe.factor] ? (
+                              <Link
+                                href={`/glossary#${FACTOR_GLOSSARY_ANCHORS[fe.factor]}`}
+                                className="font-semibold hover:underline underline-offset-2 hover:text-brand-500 dark:hover:text-brand-400"
+                              >
+                                {factorLabel(fe.factor)}
+                              </Link>
+                            ) : (
+                              <strong>{factorLabel(fe.factor)}</strong>
+                            )}
                             {fe.diagnosis && (
                               <>
                                 <span className="text-gray-400 dark:text-gray-500 mx-1">
