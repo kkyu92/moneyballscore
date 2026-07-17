@@ -2498,6 +2498,13 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
 /**
+ * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734).
+ * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시.
+ * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
+ */
+export const FACTOR_PICK_MIN_FACTORS = 7;
+
+/**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
