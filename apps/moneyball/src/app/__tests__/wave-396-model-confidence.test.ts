@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 // wave-396: 팩터 수렴 픽 — 모델 확신도 probPct + 팩터-모델 합치 여부 로직 박제
-// analysis/page.tsx line 976-979
+// analysis/page.tsx line 976-981
 // probPct = 우세 팀 승률 (favoredHome ? homeWinProb : 1 - homeWinProb)
 // modelAgrees = predictedWinnerCode === favoredCode
 
