@@ -2549,7 +2549,7 @@ export const FACTOR_PICK_WEIGHT_TOTAL = ACTIVE_FACTOR_KEYS.reduce<number>(
 );
 
 /**
- * 팩터 수렴 픽 rolling 성적 최근 경기 수 — wave-424 (cycle 1778).
+ * 팩터 수렴 픽 rolling 성적 최근 경기 수 — wave-425 (cycle 1778).
  * getRecentConvergencePickRecord 기본 window 크기.
  * 주별 경계 없이 최근 N건 완료 수렴 픽 집계 → 올스타 브레이크 등 주별 경계 0건 방어.
  * RECENT_FORM_GAMES(10, 예측 모델용) 와 별개 — display 전용 rolling window.
@@ -2557,7 +2557,7 @@ export const FACTOR_PICK_WEIGHT_TOTAL = ACTIVE_FACTOR_KEYS.reduce<number>(
 export const CONVERGENCE_RECORD_RECENT_LIMIT = 10;
 
 /**
- * 팩터 수렴 픽 rolling 성적 lookback 기간 (일) — wave-424 (cycle 1778).
+ * 팩터 수렴 픽 rolling 성적 lookback 기간 (일) — wave-425 (cycle 1778).
  * getRecentConvergencePickRecord 에서 game_date >= today - N days 쿼리 범위.
  * 45일 = 시즌 중 약 6주 — 충분한 경기 수(최소 20경기) 확보하면서 stale 데이터 방어.
  */
