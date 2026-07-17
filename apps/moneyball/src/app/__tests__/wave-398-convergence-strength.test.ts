@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { FACTOR_PICK_MIN_FACTORS } from '@moneyball/shared';
+import { FACTOR_PICK_MIN_FACTORS, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from '@moneyball/shared';
 
 // wave-398: 팩터 수렴 픽 수렴 강도 색상 등급 로직 박제
 // analysis/page.tsx — convStrength = Math.abs(compositeDuelScore)
-// 7 = 임계(FACTOR_PICK_MIN_FACTORS), 8-9 = 강, 10 = 완전수렴(gold)
+// 7 = 임계(FACTOR_PICK_MIN_FACTORS), 8-9 = 강(FACTOR_PICK_STRONG), 10 = 완전수렴(FACTOR_PICK_COMPLETE, gold)
 //
 // ratioColorClass:
-//   convStrength >= 10 → accent(gold)
-//   convStrength >= 8  → brand-500(green)
-//   else               → gray-500
+//   convStrength >= FACTOR_PICK_COMPLETE(10) → accent(gold)
+//   convStrength >= FACTOR_PICK_STRONG(8)    → brand-500(green)
+//   else                                     → gray-500
 
 function getConvergenceColorTier(compositeDuelScore: number): 'gold' | 'brand' | 'gray' {
   const convStrength = Math.abs(compositeDuelScore);
-  if (convStrength >= 10) return 'gold';
-  if (convStrength >= 8) return 'brand';
+  if (convStrength >= FACTOR_PICK_COMPLETE) return 'gold';
+  if (convStrength >= FACTOR_PICK_STRONG) return 'brand';
   return 'gray';
 }
 
