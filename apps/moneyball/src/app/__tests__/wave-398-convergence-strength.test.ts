@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { FACTOR_PICK_MIN_FACTORS } from '@moneyball/shared';
 
 // wave-398: 팩터 수렴 픽 수렴 강도 색상 등급 로직 박제
 // analysis/page.tsx — convStrength = Math.abs(compositeDuelScore)
@@ -8,9 +9,6 @@ import { describe, it, expect } from 'vitest';
 //   convStrength >= 10 → accent(gold)
 //   convStrength >= 8  → brand-500(green)
 //   else               → gray-500
-
-// FACTOR_PICK_MIN_FACTORS = 7 (packages/shared/src/index.ts)
-const FACTOR_PICK_MIN_FACTORS = 7;
 
 function getConvergenceColorTier(compositeDuelScore: number): 'gold' | 'brand' | 'gray' {
   const convStrength = Math.abs(compositeDuelScore);
