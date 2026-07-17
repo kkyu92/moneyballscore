@@ -173,7 +173,7 @@ interface TodayGameCard {
   /** wave-337: 선발투수 FIP 배지 */
   homeSPFip?: number;
   awaySPFip?: number;
-  /** wave-353: 선발투수 xFIP 갭 배지 · wave-413: 팩터 수렴 픽 xFIP 대결 수치 표시 */
+  /** wave-353: 선발투수 xFIP 갭 배지 · wave-413: 팩터 수렴 픽 xFIP 대결 수치 표시 · wave-440: 수렴 픽 xFIP 행 회귀/반등 방향 표시 */
   homeSPXfip?: number;
   awaySPXfip?: number;
   /** wave-339: 타선 wOBA 배지 */
@@ -1104,7 +1104,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1422,7 +1422,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                       </div>
                     )}
-                    {/* wave-413: xFIP 대결 — sp_xfip 수렴 팩터 포함 시 원정·홈 선발 xFIP 수치 표시 · wave-417: SP 이름 표시 (sp_confirmation_log 기준, 미확인 시 팀명 fallback) */}
+                    {/* wave-413: xFIP 대결 — sp_xfip 수렴 팩터 포함 시 원정·홈 선발 xFIP 수치 표시 · wave-417: SP 이름 표시 (sp_confirmation_log 기준, 미확인 시 팀명 fallback) · wave-440: FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 */}
                     {pick.awaySPXfip != null && pick.homeSPXfip != null &&
                       (favoredSlugs.includes('sp_xfip') || unfavoredSlugs.includes('sp_xfip')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
@@ -1436,6 +1436,14 @@ export default async function AnalysisIndexPage() {
                         }>
                           {pick.awaySP ?? shortTeamName(pick.awayCode)} {pick.awaySPXfip.toFixed(2)}
                         </span>
+                        {/* wave-440: 원정 SP FIP-xFIP 갭 방향 (wave-353 일반 카드와 동일 로직) */}
+                        {pick.awaySPFip != null && (
+                          pick.awaySPXfip - pick.awaySPFip > SP_XFIP_GAP_REGRESS
+                            ? <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                            : pick.awaySPFip - pick.awaySPXfip > SP_XFIP_GAP_BOUNCE
+                              ? <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                              : null
+                        )}
                         {' · '}
                         <span className={
                           pick.homeSPXfip < SP_FIP_STRONG
@@ -1446,6 +1454,14 @@ export default async function AnalysisIndexPage() {
                         }>
                           {pick.homeSP ?? shortTeamName(pick.homeCode)} {pick.homeSPXfip.toFixed(2)}
                         </span>
+                        {/* wave-440: 홈 SP FIP-xFIP 갭 방향 (wave-353 일반 카드와 동일 로직) */}
+                        {pick.homeSPFip != null && (
+                          pick.homeSPXfip - pick.homeSPFip > SP_XFIP_GAP_REGRESS
+                            ? <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                            : pick.homeSPFip - pick.homeSPXfip > SP_XFIP_GAP_BOUNCE
+                              ? <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                              : null
+                        )}
                       </div>
                     )}
                     {/* wave-414: 수비 SFR 대결 — sfr 수렴 팩터 포함 시 원정·홈 SFR 수치 표시 */}
