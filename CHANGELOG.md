@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.53.0 — 2026-07-17 (cycle 1747)
+
+### wave-402 explore-idea: 팩터 수렴 픽 상대 강점 팩터 칩
+- **unfavoredChips** — 팩터 수렴 픽 섹션에 상대 팀이 이기는 팩터 칩 표시 (`analysis/page.tsx`)
+- **방향 로직**: favoredHome=true → unfavoredSlugs=compositeDuelAwaySlugs, false → compositeDuelHomeSlugs
+- **glossary 링크**: 상대 칩도 FACTOR_GLOSSARY_ANCHORS 포함 (wave-400 favored 패턴 정합)
+- **스타일 대비**: 우세 팩터 brand-100(green), 상대 강점 gray-100(gray) — 즉각적 시각 구분
+- **표시 조건**: unfavoredChips.length > 0 (10:0 완전수렴 시 미표시)
+- **wave-402-unfavored-chips.test.ts**: 8 tests 박제
+- 280 test files / 2441 tests PASS. TypeScript clean.
+
+---
+
 ## op-analysis — 2026-07-16 (cycle 1690, W29 시즌 재개 첫 날)
 
 ### W29 현황 분석 (올스타 브레이크 종료)
