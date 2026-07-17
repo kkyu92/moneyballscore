@@ -11,7 +11,14 @@ import {
   SITE_URL,
   type TeamCode,
   type SelectResult,
+  FACTOR_PICK_MIN_FACTORS,
+  FACTOR_PICK_COMPLETE,
+  COMPOSITE_DUEL_MIN_VALID,
+  DEFAULT_WEIGHTS,
+  FACTOR_PICK_WEIGHT_TOTAL,
+  CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
 } from '@moneyball/shared';
+import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
@@ -285,6 +292,30 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     awayTeamName: awayName,
   });
 
+  // wave-452: 팩터 수렴 픽 배지 계산
+  const convergenceDuel = computeCompositeDuel({
+    homeCode: homeTeam,
+    homeLineupWoba: preGame.home_lineup_woba,
+    awayLineupWoba: preGame.away_lineup_woba,
+    homeSfr: preGame.home_sfr,
+    awaySfr: preGame.away_sfr,
+    homeBullpenFip: preGame.home_bullpen_fip,
+    awayBullpenFip: preGame.away_bullpen_fip,
+    homeSPFip: preGame.home_sp_fip,
+    awaySPFip: preGame.away_sp_fip,
+    homeSPXfip: preGame.home_sp_xfip,
+    awaySPXfip: preGame.away_sp_xfip,
+    homeWar: preGame.home_war_total,
+    awayWar: preGame.away_war_total,
+    homeElo: preGame.home_elo ?? undefined,
+    awayElo: preGame.away_elo ?? undefined,
+    homeRecentForm: preGame.home_recent_form ?? undefined,
+    awayRecentForm: preGame.away_recent_form ?? undefined,
+  });
+  const isConvergencePick =
+    convergenceDuel.validCount >= COMPOSITE_DUEL_MIN_VALID &&
+    Math.abs(convergenceDuel.netScore) >= FACTOR_PICK_MIN_FACTORS;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -376,6 +407,39 @@ export default async function GameAnalysisPage({ params }: PageProps) {
 
       {/* 0. 경기 개요 — 태그 + 1-2줄 요약 */}
       <GameOverview tags={overview.tags} summary={overview.summary} />
+
+      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 */}
+      {isConvergencePick && (() => {
+        const favoredHome = convergenceDuel.netScore > 0;
+        const hw = convergenceDuel.homeWins;
+        const aw = convergenceDuel.awayWins;
+        const favoredName = shortTeamName(favoredHome ? homeTeam : awayTeam);
+        const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        const convStrength = Math.abs(convergenceDuel.netScore);
+        const favoredSlugs = favoredHome
+          ? convergenceDuel.homeFavoredSlugs
+          : convergenceDuel.awayFavoredSlugs;
+        const favoredWeight = favoredSlugs.reduce(
+          (sum, slug) => sum + (DEFAULT_WEIGHTS[slug as keyof typeof DEFAULT_WEIGHTS] ?? 0),
+          0,
+        );
+        const favoredWeightPct = Math.round((favoredWeight / FACTOR_PICK_WEIGHT_TOTAL) * 100);
+        const isWeightStrong = favoredWeightPct >= CONVERGENCE_BADGE_WEIGHT_STRONG_PCT;
+        const isComplete = convStrength >= FACTOR_PICK_COMPLETE;
+        const badgeClass = isComplete
+          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50 text-amber-700 dark:text-amber-300'
+          : isWeightStrong
+            ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800/50 text-brand-700 dark:text-brand-300'
+            : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-600 dark:text-gray-400';
+        return (
+          <div className={`rounded-lg border px-4 py-2.5 text-sm flex items-center gap-2 flex-wrap ${badgeClass}`}>
+            <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 수렴 픽</span>
+            <span className="font-semibold">{favoredName} 우세</span>
+            <span className="font-mono text-xs">{ratio}</span>
+            <span className="font-mono text-xs opacity-60" title="우세 팩터 가중치 합 / 전체 팩터 가중치">가중{favoredWeightPct}%</span>
+          </div>
+        );
+      })()}
 
       {/* 0a. AI 종합 분석 요약 — factor 서술형 prose (AdSense content quality) */}
       {preGame.factors && (

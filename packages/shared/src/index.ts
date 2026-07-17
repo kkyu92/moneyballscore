@@ -2591,3 +2591,11 @@ export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
  * 변경 시 analysis/page.tsx wave-373 callsite + wave-381 COMPOSITE_DUEL callsite + wave-448 격차(Δ) callsite 동시 조정.
  */
 export const RECENT_FORM_DUEL_MIN = 0.10;
+
+/**
+ * wave-452: 게임 상세 페이지 팩터 수렴 픽 배지 가중 우위 강조 임계값 (%).
+ * favoredWeightPct >= 본 값 시 brand 색상 배지 강조 (가중치 기반 강수렴 시각화).
+ * FACTOR_PICK_STRONG(8팩터)·FACTOR_PICK_COMPLETE(10팩터) 와 별개 — 팩터 수 아닌 가중 비율 기준.
+ * 변경 시 analysis/game/[id]/page.tsx wave-452 callsite 동시 조정.
+ */
+export const CONVERGENCE_BADGE_WEIGHT_STRONG_PCT = 70;

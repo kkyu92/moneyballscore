@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.54.2 — 2026-07-18 (cycle 1812)
+
+### feat(analysis): wave-452 — 팩터 수렴 픽 배지 게임 상세 페이지 표시
+
+- `/analysis/game/[id]` 에 팩터 수렴 픽 배지 추가
+- `|netScore| >= FACTOR_PICK_MIN_FACTORS(7)` 인 경기: GameOverview 아래 배지 표시
+- 가중 우위 70%+ (CONVERGENCE_BADGE_WEIGHT_STRONG_PCT) → brand 색상, 완전수렴(10팩터) → amber 색상
+- `CONVERGENCE_BADGE_WEIGHT_STRONG_PCT = 70` 신규 상수 (packages/shared)
+- `computeCompositeDuel` game/[id]/page.tsx 에 첫 통합
+- wave-452 JSDoc 동기화 테스트 7건 추가 (299/299 PASS)
+
 ## op-analysis — 2026-07-17 (cycle 1779, W30 팀별 정확도 분석)
 
 ### 예측 캘리브레이션 현황 (n=192 갱신)
