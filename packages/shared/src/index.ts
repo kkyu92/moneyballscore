@@ -2482,18 +2482,18 @@ export const SP_FIP_DUEL_MIN = 0.5;
 export const SP_XFIP_DUEL_MIN = 0.5;
 
 /**
- * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722).
- * wOBA/SFR/불펜FIP/선발FIP/WAR/Elo 6개 직접 대결 결과 집계 시
+ * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723).
+ * wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼 7개 직접 대결 결과 집계 시
  * 한 팀이 본 값 이상 팩터에서 우세 → "N팩터 우세" 배지 표시.
- * 3/6 이상 = 명확한 다수 우세 기준.
+ * 3/7 이상 = 명확한 다수 우세 기준.
  */
 export const COMPOSITE_DUEL_THRESHOLD = 3;
 
 /**
- * 종합 우세 배지 최소 유효 팩터 수 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722).
+ * 종합 우세 배지 최소 유효 팩터 수 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723).
  * null pair 포함 시 집계 신뢰도 보장을 위해
  * 유효(non-null) 팩터 쌍이 본 값 미만이면 배지 표시 안 함.
- * WAR/Elo는 optional(항상 가용 X) — 4/6 이상 유효 시 집계.
+ * WAR/Elo/최근폼 3개 optional(항상 가용 X) — 4/7 이상 유효 시 집계.
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
@@ -2501,6 +2501,6 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
- * 변경 시 analysis/page.tsx wave-373 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-373 callsite + wave-381 COMPOSITE_DUEL callsite 동시 조정.
  */
 export const RECENT_FORM_DUEL_MIN = 0.10;
