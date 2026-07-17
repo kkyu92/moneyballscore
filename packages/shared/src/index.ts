@@ -2506,6 +2506,7 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
  * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734), wave-392 top-3 복수 표시 (cycle 1736).
  * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시. FACTOR_PICK_TOP_GAMES 경기까지 표시.
  * · wave-415 오늘 AI 예측 카드 인라인 배지 isPickGame 조건 (cycle 1766): |compositeDuelScore| ≥ 본 값 시 배지 표시.
+ * · wave-416 팩터-모델 합치 isPickModelAgree 조건 (cycle 1769): isPickGame 통해 간접 의존.
  * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
  */
 export const FACTOR_PICK_MIN_FACTORS = 7;
