@@ -164,6 +164,9 @@ interface TodayGameCard {
   /** wave-333: 올 시즌 상대전적 배지 (홈팀 기준 승수/패수) · wave-414: 팩터 수렴 픽 대결 행 표시 · wave-428: 패수 추가 */
   h2hHomeWins?: number;
   h2hAwayWins?: number;
+  /** wave-329: 홈/원정 시즌 기록 배지 · wave-434: 팩터 수렴 픽 상세 행 */
+  homeTeamVenue?: { homeWins: number; homeLosses: number; awayWins: number; awayLosses: number };
+  awayTeamVenue?: { homeWins: number; homeLosses: number; awayWins: number; awayLosses: number };
   /** wave-335: 선발투수 배지 */
   homeSP?: string;
   awaySP?: string;
