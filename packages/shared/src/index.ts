@@ -2534,6 +2534,13 @@ export const FACTOR_PICK_STRONG = 8;
 export const FACTOR_PICK_COMPLETE = 10;
 
 /**
+ * 팩터 수렴 픽 가중 우위 총합 기준 — wave-420 (cycle 1773).
+ * DEFAULT_WEIGHTS 의 active 10팩터 합계 (park_weather/umpire_sz 제외).
+ * favoredSlugs.reduce(sum, DEFAULT_WEIGHTS[slug]) / FACTOR_PICK_WEIGHT_TOTAL * 100 = 가중 우위 %.
+ */
+export const FACTOR_PICK_WEIGHT_TOTAL = 0.85;
+
+/**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
