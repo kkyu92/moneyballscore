@@ -954,7 +954,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -968,6 +968,13 @@ export default async function AnalysisIndexPage() {
                 const aw = pick.compositeDuelAwayWins!;
                 const favoredName = shortTeamName(favoredHome ? pick.homeCode : pick.awayCode);
                 const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+                // wave-398: 수렴 강도 (|netScore|) — 7=임계, 8-9=강, 10=완전수렴
+                const convStrength = Math.abs(pick.compositeDuelScore!);
+                const ratioColorClass = convStrength >= 10
+                  ? 'font-mono text-xs text-[var(--color-accent)] dark:text-[#e2c96b]'
+                  : convStrength >= 8
+                    ? 'font-mono text-xs text-brand-500 dark:text-brand-400'
+                    : 'font-mono text-xs text-gray-500 dark:text-gray-400';
                 // wave-394: 우세 팩터 레이블 (favored team 기준)
                 const favoredSlugs = favoredHome
                   ? (pick.compositeDuelHomeSlugs ?? [])
@@ -988,7 +995,7 @@ export default async function AnalysisIndexPage() {
                       <span className={`font-semibold ${favoredHome ? 'text-brand-600 dark:text-brand-400' : 'text-orange-500 dark:text-orange-400'}`}>
                         {favoredName}
                       </span>
-                      <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{ratio}</span>
+                      <span className={ratioColorClass}>{ratio}</span>
                       {pick.predictedWinnerCode != null && (
                         <span className={`font-mono text-xs ${modelAgrees ? 'text-brand-500 dark:text-brand-400' : 'text-gray-400 dark:text-gray-500'}`}>
                           {probPct}%
@@ -998,6 +1005,12 @@ export default async function AnalysisIndexPage() {
                       <span className="text-gray-600 dark:text-gray-300">
                         {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
                       </span>
+                      {/* wave-398: 경기 시간 */}
+                      {pick.gameTime && (
+                        <span className="font-mono text-xs text-gray-400 dark:text-gray-500">
+                          {pick.gameTime.substring(0, 5)}
+                        </span>
+                      )}
                     </Link>
                     {favoredLabels.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
