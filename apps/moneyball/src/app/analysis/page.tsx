@@ -1013,7 +1013,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1434,6 +1434,12 @@ export default async function AnalysisIndexPage() {
                   : avgLineupWoba != null && avgLineupWoba > LINEUP_AVG_WOBA_HITTER
                     ? ('타격전 예상' as const)
                     : null;
+              // wave-415: 팩터 수렴 배지 — compositeDuelScore 기준 수렴 픽 여부
+              const pickConvStrength = g.compositeDuelScore !== null ? Math.abs(g.compositeDuelScore) : 0;
+              const isPickGame = pickConvStrength >= FACTOR_PICK_MIN_FACTORS;
+              const pickFavoredHome = (g.compositeDuelScore ?? 0) > 0;
+              const pickFavoredCount = isPickGame ? (pickFavoredHome ? g.compositeDuelHomeWins! : g.compositeDuelAwayWins!) : 0;
+              const pickAgainstCount = isPickGame ? (pickFavoredHome ? g.compositeDuelAwayWins! : g.compositeDuelHomeWins!) : 0;
               return (
                 <li key={g.gameId}>
                   <Link
@@ -1488,6 +1494,18 @@ export default async function AnalysisIndexPage() {
                                   ? 'text-brand-600 dark:text-brand-400'
                                   : 'text-orange-500 dark:text-orange-400'
                               }`}>{gameTypeTag}</span>
+                            )}
+                            {/* wave-415: 팩터 수렴 배지 — 수렴 픽 경기 인라인 강도 표시 */}
+                            {isPickGame && (
+                              <span className={`ml-2 font-mono font-semibold ${
+                                pickConvStrength >= FACTOR_PICK_COMPLETE
+                                  ? 'text-[var(--color-accent)] dark:text-[#e2c96b]'
+                                  : pickConvStrength >= FACTOR_PICK_STRONG
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-gray-500 dark:text-gray-400'
+                              }`}>
+                                팩터 {pickFavoredCount}:{pickAgainstCount}
+                              </span>
                             )}
                           </p>
                         )}
