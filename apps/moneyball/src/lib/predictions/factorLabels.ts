@@ -32,7 +32,7 @@ export const FACTOR_LABELS: Record<string, string> = {
   sfr: "수비력",
 };
 
-/** wave-430: 종합 우세 배지 인라인 나열용 — 한두 글자 단축 레이블 */
+/** wave-430: 종합 우세 배지 인라인 나열용 + wave-454 game/[id] 팩터 칩 (cycle 1814) — 한두 글자 단축 레이블 */
 export const FACTOR_LABELS_SHORT: Record<string, string> = {
   sp_fip: "선발",
   sp_xfip: "잠재력",
@@ -52,6 +52,7 @@ export const FACTOR_LABELS_TECHNICAL: Record<string, string> = Object.fromEntrie
   PRODUCTION_SLUGS.map((slug) => [slug, MetricRegistry[slug].ko_name]),
 );
 
+/** wave-454: game/[id] 팩터 칩 용어집 링크 anchor 맵 (cycle 1814) — slug → /glossary#{anchor} */
 export const FACTOR_GLOSSARY_ANCHORS: Record<string, string> = {
   sp_fip: "fip",
   sp_xfip: "xfip",
