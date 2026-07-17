@@ -1472,7 +1472,7 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼 7팩터 직접 대결 집계 (wave-368: WAR 추가, wave-379: Elo 추가, wave-381: 최근폼 추가) */}
+                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적 8팩터 직접 대결 집계 (wave-368: WAR 추가, wave-379: Elo 추가, wave-381: 최근폼 추가, wave-383: 상대전적 추가) */}
                           {(() => {
                             type DuelResult = 'home' | 'away' | null;
                             const wobaResult: DuelResult =
@@ -1531,7 +1531,16 @@ export default async function AnalysisIndexPage() {
                                     ? 'away'
                                     : null
                                 : null;
-                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult];
+                            const h2hResult: DuelResult =
+                              g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined
+                                ? (() => {
+                                    const homeRate = g.h2hHomeWins! / (g.h2hHomeWins! + g.h2hAwayWins!);
+                                    if (homeRate >= H2H_DOMINANT_RATE) return 'home';
+                                    if (homeRate <= H2H_WEAK_RATE) return 'away';
+                                    return null;
+                                  })()
+                                : null;
+                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult];
                             const validCount = results.filter(
                               (_, i) => [
                                 g.homeLineupWoba != null && g.awayLineupWoba != null,
@@ -1541,6 +1550,7 @@ export default async function AnalysisIndexPage() {
                                 g.homeWar != null && g.awayWar != null,
                                 g.homeElo !== undefined && g.awayElo !== undefined,
                                 g.homeRecentForm !== undefined && g.awayRecentForm !== undefined,
+                                g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined,
                               ][i]
                             ).length;
                             if (validCount < COMPOSITE_DUEL_MIN_VALID) return null;
