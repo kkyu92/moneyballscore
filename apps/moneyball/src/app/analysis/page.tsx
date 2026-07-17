@@ -150,7 +150,7 @@ interface TodayGameCard {
   homeWinProb: number;
   confidence: number;
   topFactors: Array<{ label: string; favoredCode: TeamCode }>;
-  /** wave-321: Elo & 폼 비교 배지 */
+  /** wave-321: Elo & 폼 비교 배지 · wave-444: 팩터 수렴 픽 Elo 행 격차(Δ) 표시 */
   homeElo?: number;
   awayElo?: number;
   homeRecentForm?: number;
@@ -185,7 +185,7 @@ interface TodayGameCard {
   /** wave-343: 수비 SFR 배지 */
   homeSfr?: number;
   awaySfr?: number;
-  /** wave-345: 팀 WAR 배지 */
+  /** wave-345: 팀 WAR 배지 · wave-444: 팩터 수렴 픽 WAR 행 격차(Δ) 표시 */
   homeWar?: number;
   awayWar?: number;
 }
@@ -1104,7 +1104,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1356,7 +1356,7 @@ export default async function AnalysisIndexPage() {
                         )}
                       </div>
                     )}
-                    {/* wave-411: Elo 대결 — elo 수렴 팩터 포함 시 원정·홈 Elo 수치 표시 */}
+                    {/* wave-411: Elo 대결 — elo 수렴 팩터 포함 시 원정·홈 Elo 수치 표시 · wave-444: 격차(Δ) ≥ ELO_GAP_STRONG(50) 시 표시 */}
                     {pick.awayElo != null && pick.homeElo != null &&
                       (favoredSlugs.includes('elo') || unfavoredSlugs.includes('elo')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
@@ -1380,6 +1380,12 @@ export default async function AnalysisIndexPage() {
                         }>
                           {shortTeamName(pick.homeCode)} {Math.round(pick.homeElo)}
                         </span>
+                        {/* wave-444: Elo 격차(Δ) — ELO_GAP_STRONG(50) 이상 시 수치 명시 */}
+                        {Math.abs(pick.awayElo - pick.homeElo) >= ELO_GAP_STRONG && (
+                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                            Δ{Math.round(Math.abs(pick.awayElo - pick.homeElo))}
+                          </span>
+                        )}
                       </div>
                     )}
                     {/* wave-411: 최근폼 대결 — recent_form 수렴 팩터 포함 시 원정·홈 최근폼 수치 표시 · wave-426: 최근 10경기 구체 승패 추가 */}
@@ -1408,7 +1414,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                       </div>
                     )}
-                    {/* wave-413: WAR 대결 — war 수렴 팩터 포함 시 원정·홈 팀 WAR 수치 표시 */}
+                    {/* wave-413: WAR 대결 — war 수렴 팩터 포함 시 원정·홈 팀 WAR 수치 표시 · wave-444: 격차(Δ) ≥ WAR_DUEL_MIN(5.0) 시 표시 */}
                     {pick.awayWar != null && pick.homeWar != null &&
                       (favoredSlugs.includes('war') || unfavoredSlugs.includes('war')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
@@ -1432,6 +1438,12 @@ export default async function AnalysisIndexPage() {
                         }>
                           {shortTeamName(pick.homeCode)} {pick.homeWar.toFixed(1)}
                         </span>
+                        {/* wave-444: WAR 격차(Δ) — WAR_DUEL_MIN(5.0) 이상 시 수치 명시 */}
+                        {Math.abs(pick.awayWar - pick.homeWar) >= WAR_DUEL_MIN && (
+                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                            Δ{Math.abs(pick.awayWar - pick.homeWar).toFixed(1)}
+                          </span>
+                        )}
                       </div>
                     )}
                     {/* wave-413: xFIP 대결 — sp_xfip 수렴 팩터 포함 시 원정·홈 선발 xFIP 수치 표시 · wave-417: SP 이름 표시 (sp_confirmation_log 기준, 미확인 시 팀명 fallback) · wave-440: FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 */}
