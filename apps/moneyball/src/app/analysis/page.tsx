@@ -170,7 +170,7 @@ interface TodayGameCard {
   /** wave-335: 선발투수 배지 · wave-438: 팩터 수렴 픽 SP 비수렴 시 이름 표시 */
   homeSP?: string;
   awaySP?: string;
-  /** wave-337: 선발투수 FIP 배지 · wave-440: 팩터 수렴 픽 xFIP 행 회귀/반등 방향 표시 (FIP-xFIP 갭 계산용) */
+  /** wave-337: 선발투수 FIP 배지 · wave-440: 팩터 수렴 픽 xFIP 행 회귀/반등 방향 표시 (FIP-xFIP 갭 계산용) · wave-446: 팩터 수렴 픽 선발 FIP 행 격차(Δ) 표시 */
   homeSPFip?: number;
   awaySPFip?: number;
   /** wave-353: 선발투수 xFIP 갭 배지 · wave-413: 팩터 수렴 픽 xFIP 대결 수치 표시 · wave-440: 수렴 픽 xFIP 행 회귀/반등 방향 표시 */
@@ -182,7 +182,7 @@ interface TodayGameCard {
   /** wave-341: 불펜 FIP 배지 · wave-442: 팩터 수렴 픽 불펜 FIP 행 격차(Δ) 표시 */
   homeBullpenFip?: number;
   awayBullpenFip?: number;
-  /** wave-343: 수비 SFR 배지 */
+  /** wave-343: 수비 SFR 배지 · wave-446: 팩터 수렴 픽 수비 SFR 행 격차(Δ) 표시 */
   homeSfr?: number;
   awaySfr?: number;
   /** wave-345: 팀 WAR 배지 · wave-444: 팩터 수렴 픽 WAR 행 격차(Δ) 표시 */
@@ -1104,7 +1104,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1266,7 +1266,7 @@ export default async function AnalysisIndexPage() {
                         <span className="text-gray-600 dark:text-gray-300">{pick.homeSP}</span>
                       </div>
                     )}
-                    {/* wave-407: 선발 FIP 대결 — sp_fip 수렴 팩터 포함 시 원정·홈 FIP 수치 표시 · wave-417: SP 이름 표시 (sp_confirmation_log 기준, 미확인 시 팀명 fallback) */}
+                    {/* wave-407: 선발 FIP 대결 — sp_fip 수렴 팩터 포함 시 원정·홈 FIP 수치 표시 · wave-417: SP 이름 표시 (sp_confirmation_log 기준, 미확인 시 팀명 fallback) · wave-446: 격차(Δ) ≥ SP_FIP_DUEL_MIN(0.5) 시 표시 */}
                     {pick.homeSPFip != null && pick.awaySPFip != null &&
                       (favoredSlugs.includes('sp_fip') || unfavoredSlugs.includes('sp_fip')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
@@ -1290,6 +1290,12 @@ export default async function AnalysisIndexPage() {
                         }>
                           {pick.homeSP ?? shortTeamName(pick.homeCode)} {pick.homeSPFip.toFixed(2)}
                         </span>
+                        {/* wave-446: 선발 FIP 격차(Δ) — SP_FIP_DUEL_MIN(0.5) 이상 시 수치 명시 */}
+                        {Math.abs(pick.awaySPFip - pick.homeSPFip) >= SP_FIP_DUEL_MIN && (
+                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                            Δ{Math.abs(pick.awaySPFip - pick.homeSPFip).toFixed(2)}
+                          </span>
+                        )}
                       </div>
                     )}
                     {/* wave-409: 불펜 FIP 대결 — bullpen_fip 수렴 팩터 포함 시 원정·홈 불펜 FIP 수치 표시 · wave-442: 격차(Δ) ≥ BULLPEN_FIP_DIFF_MIN(1.0) 시 표시 */}
@@ -1488,7 +1494,7 @@ export default async function AnalysisIndexPage() {
                         )}
                       </div>
                     )}
-                    {/* wave-414: 수비 SFR 대결 — sfr 수렴 팩터 포함 시 원정·홈 SFR 수치 표시 */}
+                    {/* wave-414: 수비 SFR 대결 — sfr 수렴 팩터 포함 시 원정·홈 SFR 수치 표시 · wave-446: 격차(Δ) ≥ SFR_DUEL_MIN(5.0) 시 표시 */}
                     {pick.awaySfr != null && pick.homeSfr != null &&
                       (favoredSlugs.includes('sfr') || unfavoredSlugs.includes('sfr')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
@@ -1512,6 +1518,12 @@ export default async function AnalysisIndexPage() {
                         }>
                           {shortTeamName(pick.homeCode)} {pick.homeSfr >= 0 ? '+' : ''}{pick.homeSfr.toFixed(1)}
                         </span>
+                        {/* wave-446: 수비 SFR 격차(Δ) — SFR_DUEL_MIN(5.0) 이상 시 수치 명시 */}
+                        {Math.abs(pick.awaySfr - pick.homeSfr) >= SFR_DUEL_MIN && (
+                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                            Δ{Math.abs(pick.awaySfr - pick.homeSfr).toFixed(1)}
+                          </span>
+                        )}
                       </div>
                     )}
                     {/* wave-414: 상대전적 대결 — head_to_head 수렴 팩터 포함 시 원정·홈 시즌 승수 표시 · wave-428: 패수 추가 · wave-429: IIFE 패턴 정합 */}
