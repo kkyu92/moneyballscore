@@ -26,9 +26,9 @@ describe('wave-368 — 종합 우세 배지 WAR 팩터 추가 (cycle 1708)', () 
     expect(src).toContain('WAR_DUEL_MIN');
   });
 
-  it('analysis/page.tsx: results 배열에 warResult 포함', () => {
+  it('analysis/page.tsx: results 배열에 warResult 포함 (wave-379: eloResult 추가로 배열 확장)', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('[wobaResult, sfrResult, bullpenResult, spFipResult, warResult]');
+    expect(src).toContain('wobaResult, sfrResult, bullpenResult, spFipResult, warResult');
   });
 
   it('종합 우세 배지: THRESHOLD ≤ MIN_VALID (3 ≤ 4) — 유효한 조건', () => {
