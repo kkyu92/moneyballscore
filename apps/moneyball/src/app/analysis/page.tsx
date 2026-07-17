@@ -873,11 +873,11 @@ export default async function AnalysisIndexPage() {
     };
   });
 
-  // wave-390: 팩터 수렴 픽 — |netScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기 중 최대 우세
-  const factorPickGameId = [...gamesWithRank]
+  // wave-392: 팩터 수렴 픽 — |netScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기, 최대 우세 순 top 3
+  const factorPickGames = [...gamesWithRank]
     .filter((g) => g.compositeDuelScore !== null && Math.abs(g.compositeDuelScore!) >= FACTOR_PICK_MIN_FACTORS)
     .sort((a, b) => Math.abs(b.compositeDuelScore!) - Math.abs(a.compositeDuelScore!))
-    .find(Boolean)?.gameId ?? null;
+    .slice(0, 3);
 
   const simplifiedMode =
     todayData.games.length >= CE_MIN_SAMPLES &&
@@ -948,27 +948,35 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* wave-390: 팩터 수렴 픽 */}
-      {factorPickGameId !== null && (() => {
-        const pick = gamesWithRank.find((g) => g.gameId === factorPickGameId);
-        if (!pick || pick.compositeDuelScore === null) return null;
-        const favoredHome = pick.compositeDuelScore > 0;
-        const count = Math.abs(pick.compositeDuelScore);
-        const favoredName = shortTeamName(favoredHome ? pick.homeCode : pick.awayCode);
-        return (
-          <section aria-labelledby="factor-pick-title">
-            <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
-              <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-1">
-                팩터 수렴 경기
-              </h2>
-              <p className="text-sm text-gray-900 dark:text-gray-100">
-                <span className="font-semibold">{favoredName}</span>이 {count}/10팩터 우세 —{' '}
-                {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
-              </p>
-            </div>
-          </section>
-        );
-      })()}
+      {/* wave-392: 팩터 수렴 픽 — 복수 경기, homeWins:awayWins 비율 */}
+      {factorPickGames.length > 0 && (
+        <section aria-labelledby="factor-pick-title">
+          <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
+            <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-2">
+              팩터 수렴 경기{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
+            </h2>
+            <ul className="space-y-1">
+              {factorPickGames.map((pick) => {
+                const favoredHome = pick.compositeDuelScore! > 0;
+                const hw = pick.compositeDuelHomeWins!;
+                const aw = pick.compositeDuelAwayWins!;
+                const favoredName = shortTeamName(favoredHome ? pick.homeCode : pick.awayCode);
+                const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+                return (
+                  <li key={pick.gameId} className="text-sm text-gray-900 dark:text-gray-100">
+                    <span className={`font-semibold ${favoredHome ? 'text-brand-600 dark:text-brand-400' : 'text-orange-500 dark:text-orange-400'}`}>
+                      {favoredName}
+                    </span>{' '}
+                    <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{ratio}</span>
+                    {' '}—{' '}
+                    {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* 오늘 전체 AI 예측 — 확신 순 정렬 */}
       {todayData.games.length > 0 && (
