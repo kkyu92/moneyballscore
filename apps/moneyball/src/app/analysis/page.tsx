@@ -1315,6 +1315,79 @@ export default async function AnalysisIndexPage() {
                         </span>
                       </div>
                     )}
+                    {/* wave-414: 수비 SFR 대결 — sfr 수렴 팩터 포함 시 원정·홈 SFR 수치 표시 */}
+                    {pick.awaySfr != null && pick.homeSfr != null &&
+                      (favoredSlugs.includes('sfr') || unfavoredSlugs.includes('sfr')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        수비{' '}
+                        <span className={
+                          pick.awaySfr >= SFR_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.awaySfr <= SFR_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {pick.awaySfr >= 0 ? '+' : ''}{pick.awaySfr.toFixed(1)}
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.homeSfr >= SFR_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.homeSfr <= SFR_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {pick.homeSfr >= 0 ? '+' : ''}{pick.homeSfr.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                    {/* wave-414: 상대전적 대결 — head_to_head 수렴 팩터 포함 시 원정·홈 시즌 승수 표시 */}
+                    {pick.h2hAwayWins !== undefined && pick.h2hHomeWins !== undefined &&
+                      (favoredSlugs.includes('head_to_head') || unfavoredSlugs.includes('head_to_head')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        상대전적{' '}
+                        <span className={
+                          pick.h2hAwayWins / (pick.h2hAwayWins + pick.h2hHomeWins) >= H2H_DOMINANT_RATE
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.h2hAwayWins / (pick.h2hAwayWins + pick.h2hHomeWins) <= H2H_WEAK_RATE
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {pick.h2hAwayWins}승
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.h2hHomeWins / (pick.h2hAwayWins + pick.h2hHomeWins) >= H2H_DOMINANT_RATE
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.h2hHomeWins / (pick.h2hAwayWins + pick.h2hHomeWins) <= H2H_WEAK_RATE
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {pick.h2hHomeWins}승
+                        </span>
+                      </div>
+                    )}
+                    {/* wave-414: 구장 대결 — park_factor 수렴 팩터 포함 시 홈구장 특성 표시 */}
+                    {(favoredSlugs.includes('park_factor') || unfavoredSlugs.includes('park_factor')) && (() => {
+                      const parkPf = KBO_TEAMS[pick.homeCode]?.parkPf;
+                      if (parkPf === undefined) return null;
+                      const isHitterFriendly = parkPf >= PARK_FACTOR_HITTER_MIN;
+                      const isPitcherFriendly = parkPf <= PARK_FACTOR_PITCHER_MAX;
+                      return (
+                        <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                          구장{' '}
+                          <span className={
+                            isHitterFriendly
+                              ? 'text-brand-500 dark:text-brand-400'
+                              : isPitcherFriendly
+                                ? 'text-orange-500 dark:text-orange-400'
+                                : ''
+                          }>
+                            PF {parkPf} {isHitterFriendly ? '타자친화' : isPitcherFriendly ? '투수친화' : '중립'}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </li>
                 );
               })}
