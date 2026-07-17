@@ -170,7 +170,7 @@ interface TodayGameCard {
   /** wave-335: 선발투수 배지 · wave-438: 팩터 수렴 픽 SP 비수렴 시 이름 표시 */
   homeSP?: string;
   awaySP?: string;
-  /** wave-337: 선발투수 FIP 배지 */
+  /** wave-337: 선발투수 FIP 배지 · wave-440: 팩터 수렴 픽 xFIP 행 회귀/반등 방향 표시 (FIP-xFIP 갭 계산용) */
   homeSPFip?: number;
   awaySPFip?: number;
   /** wave-353: 선발투수 xFIP 갭 배지 · wave-413: 팩터 수렴 픽 xFIP 대결 수치 표시 · wave-440: 수렴 픽 xFIP 행 회귀/반등 방향 표시 */
