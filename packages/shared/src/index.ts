@@ -2534,11 +2534,14 @@ export const FACTOR_PICK_STRONG = 8;
 export const FACTOR_PICK_COMPLETE = 10;
 
 /**
- * 팩터 수렴 픽 가중 우위 총합 기준 — wave-420 (cycle 1773).
- * DEFAULT_WEIGHTS 의 active 10팩터 합계 (park_weather/umpire_sz 제외).
+ * 팩터 수렴 픽 가중 우위 총합 기준 — wave-420 (cycle 1773), wave-421 파생값 전환 (cycle 1774).
+ * ACTIVE_FACTOR_KEYS DEFAULT_WEIGHTS 합 파생 — DEFAULT_WEIGHTS 변경 시 자동 동기 (park_weather/umpire_sz 제외).
  * favoredSlugs.reduce(sum, DEFAULT_WEIGHTS[slug]) / FACTOR_PICK_WEIGHT_TOTAL * 100 = 가중 우위 %.
  */
-export const FACTOR_PICK_WEIGHT_TOTAL = 0.85;
+export const FACTOR_PICK_WEIGHT_TOTAL = ACTIVE_FACTOR_KEYS.reduce<number>(
+  (acc, key) => acc + DEFAULT_WEIGHTS[key],
+  0
+);
 
 /**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
