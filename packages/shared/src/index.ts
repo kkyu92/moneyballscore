@@ -2502,6 +2502,7 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
  * null pair 포함 시 집계 신뢰도 보장을 위해
  * 유효(non-null) 팩터 쌍이 본 값 미만이면 배지 표시 안 함.
  * WAR/Elo/최근폼/상대전적/선발xFIP/구장보정 6개 optional(항상 가용 X) — 4/10 이상 유효 시 집계.
+ * · wave-424 rolling 성적 getRecentConvergencePickRecord (cycle 1778): 동일 조건 재사용.
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
@@ -2510,6 +2511,7 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
  * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시. FACTOR_PICK_TOP_GAMES 경기까지 표시.
  * · wave-415 오늘 AI 예측 카드 인라인 배지 isPickGame 조건 (cycle 1766): |compositeDuelScore| ≥ 본 값 시 배지 표시.
  * · wave-416 팩터-모델 합치 isPickModelAgree 조건 (cycle 1769): isPickGame 통해 간접 의존.
+ * · wave-424 rolling 성적 getRecentConvergencePickRecord (cycle 1778): |duel.netScore| ≥ 본 값 시 rolling 집계 포함.
  * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
  */
 export const FACTOR_PICK_MIN_FACTORS = 7;
@@ -2545,6 +2547,21 @@ export const FACTOR_PICK_WEIGHT_TOTAL = ACTIVE_FACTOR_KEYS.reduce<number>(
   (acc, key) => acc + DEFAULT_WEIGHTS[key],
   0
 );
+
+/**
+ * 팩터 수렴 픽 rolling 성적 최근 경기 수 — wave-424 (cycle 1778).
+ * getRecentConvergencePickRecord 기본 window 크기.
+ * 주별 경계 없이 최근 N건 완료 수렴 픽 집계 → 올스타 브레이크 등 주별 경계 0건 방어.
+ * RECENT_FORM_GAMES(10, 예측 모델용) 와 별개 — display 전용 rolling window.
+ */
+export const CONVERGENCE_RECORD_RECENT_LIMIT = 10;
+
+/**
+ * 팩터 수렴 픽 rolling 성적 lookback 기간 (일) — wave-424 (cycle 1778).
+ * getRecentConvergencePickRecord 에서 game_date >= today - N days 쿼리 범위.
+ * 45일 = 시즌 중 약 6주 — 충분한 경기 수(최소 20경기) 확보하면서 stale 데이터 방어.
+ */
+export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
 
 /**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).

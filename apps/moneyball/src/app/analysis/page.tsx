@@ -69,6 +69,8 @@ import {
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   FACTOR_PICK_WEIGHT_TOTAL,
+  CONVERGENCE_RECORD_RECENT_LIMIT,
+  CONVERGENCE_RECORD_LOOKBACK_DAYS,
   DEFAULT_WEIGHTS,
   type SelectResult,
   type TeamCode,
@@ -522,10 +524,10 @@ interface UpcomingScheduledGame {
 }
 
 /** wave-424: 최근 N건 팩터 수렴 픽 성적 (rolling window — 주별 경계 없음) */
-async function getRecentConvergencePickRecord(limit = 10): Promise<{ wins: number; losses: number; total: number }> {
+async function getRecentConvergencePickRecord(limit = CONVERGENCE_RECORD_RECENT_LIMIT): Promise<{ wins: number; losses: number; total: number }> {
   const today = toKSTDateString();
   const supabase = await createClient();
-  const cutoff = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const cutoff = new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const gamesResult = (await supabase
     .from('games')
@@ -898,7 +900,7 @@ export default async function AnalysisIndexPage() {
     buildTeamStrengthSnapshot(),
     fetchStandings(),
     getSeasonH2HData(),
-    getRecentConvergencePickRecord(10),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -1108,7 +1110,7 @@ export default async function AnalysisIndexPage() {
                     className="text-[11px] tabular-nums text-gray-400 dark:text-gray-500"
                     title={`최근 ${recentConvergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
                   >
-                    최근{recentConvergenceRecord.total}경기 {recentConvergenceRecord.wins}승{recentConvergenceRecord.losses}패{' '}
+                    최근 {recentConvergenceRecord.total}경기 {recentConvergenceRecord.wins}승{recentConvergenceRecord.losses}패{' '}
                     ({Math.round(recentConvergenceRecord.wins / recentConvergenceRecord.total * 100)}%)
                   </span>
                 )}
