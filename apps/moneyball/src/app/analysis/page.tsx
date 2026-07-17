@@ -64,6 +64,7 @@ import {
   KBO_STADIUM_SHORT,
   PARK_FACTOR_HITTER_MIN,
   PARK_FACTOR_PITCHER_MAX,
+  FACTOR_PICK_MIN_FACTORS,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -77,6 +78,7 @@ import { ThisWeekStatusFilter } from '@/components/analysis/ThisWeekStatusFilter
 import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
+import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
@@ -821,6 +823,32 @@ export default async function AnalysisIndexPage() {
     const h2hHomeWins = h2hPair[g.homeCode] ?? 0;
     const h2hAwayWins = h2hPair[g.awayCode] ?? 0;
     const h2hTotal = h2hHomeWins + h2hAwayWins;
+    const h2hHomeArg = h2hTotal >= H2H_MIN_GAMES ? h2hHomeWins : undefined;
+    const h2hAwayArg = h2hTotal >= H2H_MIN_GAMES ? h2hAwayWins : undefined;
+
+    // wave-390: COMPOSITE_DUEL 10팩터 net score
+    const duel = computeCompositeDuel({
+      homeCode: g.homeCode,
+      homeLineupWoba: g.homeLineupWoba,
+      awayLineupWoba: g.awayLineupWoba,
+      homeSfr: g.homeSfr,
+      awaySfr: g.awaySfr,
+      homeBullpenFip: g.homeBullpenFip,
+      awayBullpenFip: g.awayBullpenFip,
+      homeSPFip: g.homeSPFip,
+      awaySPFip: g.awaySPFip,
+      homeSPXfip: g.homeSPXfip,
+      awaySPXfip: g.awaySPXfip,
+      homeWar: g.homeWar,
+      awayWar: g.awayWar,
+      homeElo: g.homeElo,
+      awayElo: g.awayElo,
+      homeRecentForm: g.homeRecentForm,
+      awayRecentForm: g.awayRecentForm,
+      h2hHomeWins: h2hHomeArg,
+      h2hAwayWins: h2hAwayArg,
+    });
+    const compositeDuelScore = duel.validCount >= COMPOSITE_DUEL_MIN_VALID ? duel.netScore : null;
 
     return {
       ...g,
@@ -830,12 +858,20 @@ export default async function AnalysisIndexPage() {
       awayTeamVenue: venueMap.get(g.awayCode),
       homeRecent10: recent10Map.get(g.homeCode),
       awayRecent10: recent10Map.get(g.awayCode),
-      h2hHomeWins: h2hTotal >= H2H_MIN_GAMES ? h2hHomeWins : undefined,
-      h2hAwayWins: h2hTotal >= H2H_MIN_GAMES ? h2hAwayWins : undefined,
+      h2hHomeWins: h2hHomeArg,
+      h2hAwayWins: h2hAwayArg,
       /** wave-377: 오늘의 탑픽 (confident 티어 + 최고 winnerProb) */
       isTopPick: g.gameId === bestPickGameId,
+      /** wave-390: COMPOSITE_DUEL 10팩터 net score (null = 데이터 부족) */
+      compositeDuelScore,
     };
   });
+
+  // wave-390: 팩터 수렴 픽 — |netScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기 중 최대 우세
+  const factorPickGameId = [...gamesWithRank]
+    .filter((g) => g.compositeDuelScore !== null && Math.abs(g.compositeDuelScore!) >= FACTOR_PICK_MIN_FACTORS)
+    .sort((a, b) => Math.abs(b.compositeDuelScore!) - Math.abs(a.compositeDuelScore!))
+    .find(Boolean)?.gameId ?? null;
 
   const simplifiedMode =
     todayData.games.length >= CE_MIN_SAMPLES &&
@@ -905,6 +941,28 @@ export default async function AnalysisIndexPage() {
           </div>
         )}
       </section>
+
+      {/* wave-390: 팩터 수렴 픽 */}
+      {factorPickGameId !== null && (() => {
+        const pick = gamesWithRank.find((g) => g.gameId === factorPickGameId);
+        if (!pick || pick.compositeDuelScore === null) return null;
+        const favoredHome = pick.compositeDuelScore > 0;
+        const count = Math.abs(pick.compositeDuelScore);
+        const favoredName = shortTeamName(favoredHome ? pick.homeCode : pick.awayCode);
+        return (
+          <section aria-labelledby="factor-pick-title">
+            <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
+              <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-1">
+                팩터 수렴 경기
+              </h2>
+              <p className="text-sm text-gray-900 dark:text-gray-100">
+                <span className="font-semibold">{favoredName}</span>이 {count}/10팩터 우세 —{' '}
+                {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
+              </p>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* 오늘 전체 AI 예측 — 확신 순 정렬 */}
       {todayData.games.length > 0 && (
