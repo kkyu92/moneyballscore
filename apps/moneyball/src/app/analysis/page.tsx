@@ -161,7 +161,7 @@ interface TodayGameCard {
   /** wave-331: 최근 10경기 배지 */
   homeRecent10?: { wins: number; losses: number };
   awayRecent10?: { wins: number; losses: number };
-  /** wave-333: 올 시즌 상대전적 배지 (홈팀 기준 승수/패수) */
+  /** wave-333: 올 시즌 상대전적 배지 (홈팀 기준 승수/패수) · wave-414: 팩터 수렴 픽 대결 행 표시 · wave-428: 패수 추가 */
   h2hHomeWins?: number;
   h2hAwayWins?: number;
   /** wave-335: 선발투수 배지 */
@@ -1443,32 +1443,37 @@ export default async function AnalysisIndexPage() {
                         </span>
                       </div>
                     )}
-                    {/* wave-414: 상대전적 대결 — head_to_head 수렴 팩터 포함 시 원정·홈 시즌 승수 표시 · wave-428: 패수 추가 */}
+                    {/* wave-414: 상대전적 대결 — head_to_head 수렴 팩터 포함 시 원정·홈 시즌 승수 표시 · wave-428: 패수 추가 · wave-429: IIFE 패턴 정합 */}
                     {pick.h2hAwayWins !== undefined && pick.h2hHomeWins !== undefined &&
-                      (favoredSlugs.includes('head_to_head') || unfavoredSlugs.includes('head_to_head')) && (
-                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
-                        상대전적{' '}
-                        <span className={
-                          pick.h2hAwayWins / (pick.h2hAwayWins + pick.h2hHomeWins) >= H2H_DOMINANT_RATE
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.h2hAwayWins / (pick.h2hAwayWins + pick.h2hHomeWins) <= H2H_WEAK_RATE
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
-                          {shortTeamName(pick.awayCode)} {pick.h2hAwayWins}승{pick.h2hHomeWins}패
-                        </span>
-                        {' · '}
-                        <span className={
-                          pick.h2hHomeWins / (pick.h2hAwayWins + pick.h2hHomeWins) >= H2H_DOMINANT_RATE
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.h2hHomeWins / (pick.h2hAwayWins + pick.h2hHomeWins) <= H2H_WEAK_RATE
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
-                          {shortTeamName(pick.homeCode)} {pick.h2hHomeWins}승{pick.h2hAwayWins}패
-                        </span>
-                      </div>
-                    )}
+                      (favoredSlugs.includes('head_to_head') || unfavoredSlugs.includes('head_to_head')) && (() => {
+                        const h2hTotal = pick.h2hAwayWins! + pick.h2hHomeWins!;
+                        const awayRate = pick.h2hAwayWins! / h2hTotal;
+                        const homeRate = pick.h2hHomeWins! / h2hTotal;
+                        return (
+                          <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                            상대전적{' '}
+                            <span className={
+                              awayRate >= H2H_DOMINANT_RATE
+                                ? 'text-brand-500 dark:text-brand-400'
+                                : awayRate <= H2H_WEAK_RATE
+                                  ? 'text-orange-500 dark:text-orange-400'
+                                  : ''
+                            }>
+                              {shortTeamName(pick.awayCode)} {pick.h2hAwayWins}승{pick.h2hHomeWins}패
+                            </span>
+                            {' · '}
+                            <span className={
+                              homeRate >= H2H_DOMINANT_RATE
+                                ? 'text-brand-500 dark:text-brand-400'
+                                : homeRate <= H2H_WEAK_RATE
+                                  ? 'text-orange-500 dark:text-orange-400'
+                                  : ''
+                            }>
+                              {shortTeamName(pick.homeCode)} {pick.h2hHomeWins}승{pick.h2hAwayWins}패
+                            </span>
+                          </div>
+                        );
+                      })()}
                     {/* wave-414: 구장 대결 — park_factor 수렴 팩터 포함 시 홈구장 특성 표시 · wave-422: 구장명 + parkNote 표시 */}
                     {(favoredSlugs.includes('park_factor') || unfavoredSlugs.includes('park_factor')) && (() => {
                       const teamMeta = KBO_TEAMS[pick.homeCode];
