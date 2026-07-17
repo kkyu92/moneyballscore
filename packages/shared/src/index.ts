@@ -81,7 +81,8 @@ export {
 export type { ScoringRule, ModelVersion, DebateVersion } from './model-version-labels';
 
 // KBO 팀 코드 (KBO 공식 API 코드 기준)
-// parkPf / parkNote: 구장 보정 계수 (100 = 중립, 100+ 타자 친화, 100- 투수 친화).
+// parkPf: 구장 보정 계수 index (100 = 중립, 100+ 타자 친화, 100- 투수 친화).
+// parkNote: 사용자 가시 구장 특성 설명 — 팩터 수렴 픽 구장 대결 UI 표시 (wave-422).
 // `~/moneyball_debate/personas/teams.yaml` 기반.
 export const KBO_TEAMS = {
   SK: { name: 'SSG 랜더스', stadium: '인천SSG랜더스필드', color: '#CE0E2D', parkPf: 105, parkNote: '타자 친화 (짧은 펜스)' },
@@ -190,6 +191,8 @@ export const MLB_REGULAR_SEASON_GAMES =
  * 구장 짧은 이름 — UI 노출용. KBO_TEAMS.stadium 은 정식 명칭이라 UI 에 길고,
  * KBO 공식 API S_NM 은 짧은 지역명 ("대구", "잠실") 을 리턴. Naver basic
  * 응답처럼 stadium 필드가 비어 있을 때 fallback 용 상수.
+ * wave-422 (cycle 1775): 팩터 수렴 픽 구장 대결 카드 주 표시 경로로 승격 —
+ * park_factor 수렴 팩터 포함 시 `{stadiumShort} {parkNote}` 형식으로 구장명 표시.
  */
 export const KBO_STADIUM_SHORT: Record<TeamCode, string> = {
   SK: '인천', HT: '광주', LG: '잠실', OB: '잠실',
