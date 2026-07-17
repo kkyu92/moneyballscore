@@ -176,10 +176,10 @@ interface TodayGameCard {
   /** wave-353: 선발투수 xFIP 갭 배지 · wave-413: 팩터 수렴 픽 xFIP 대결 수치 표시 · wave-440: 수렴 픽 xFIP 행 회귀/반등 방향 표시 */
   homeSPXfip?: number;
   awaySPXfip?: number;
-  /** wave-339: 타선 wOBA 배지 */
+  /** wave-339: 타선 wOBA 배지 · wave-442: 팩터 수렴 픽 타선 wOBA 행 격차(Δ) 표시 */
   homeLineupWoba?: number;
   awayLineupWoba?: number;
-  /** wave-341: 불펜 FIP 배지 */
+  /** wave-341: 불펜 FIP 배지 · wave-442: 팩터 수렴 픽 불펜 FIP 행 격차(Δ) 표시 */
   homeBullpenFip?: number;
   awayBullpenFip?: number;
   /** wave-343: 수비 SFR 배지 */

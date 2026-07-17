@@ -2321,7 +2321,7 @@ export const BULLPEN_FIP_WEAK = 5.0;
  * 불펜 FIP 우세 태그 최소 차이 임계 — wave-342 (cycle 1677).
  * |awayBullpenFip - homeBullpenFip| ≥ 본 값 시 불펜 우세 팀 태그 표시.
  * 1.0 = FIP 1점 차 = KBO 강/약 불펜 경계 차이 수준.
- * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite 동기.
+ * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442 callsite 동기.
  */
 export const BULLPEN_FIP_DIFF_MIN = 1.0;
 
@@ -2468,7 +2468,7 @@ export const TOP_STAT_PICK_EDGE_MIN = 0.05;
  * |homeLineupWoba - awayLineupWoba| ≥ 본 값 시 "타선 홈/원정 강세" 태그 표시.
  * 0.020 = 20 wOBA 포인트 = KBO 리그 내 타선 유의미한 차이 수준
  * (LINEUP_WOBA_WEAK_TAG~LINEUP_WOBA_STRONG_TAG 범위 0.040 의 절반).
- * 변경 시 analysis/page.tsx wave-355 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-355/442 callsite 자동 동기.
  */
 export const LINEUP_WOBA_DUEL_MIN = 0.020;
 
