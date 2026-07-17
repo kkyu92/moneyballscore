@@ -59,6 +59,7 @@ import {
   COMPOSITE_DUEL_THRESHOLD,
   COMPOSITE_DUEL_MIN_VALID,
   RECENT_FORM_DUEL_MIN,
+  ELO_GAP_STRONG,
   KBO_TEAMS,
   KBO_STADIUM_SHORT,
   PARK_FACTOR_HITTER_MIN,
@@ -1471,7 +1472,7 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR 5팩터 직접 대결 집계 (wave-368: WAR 추가) */}
+                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR/Elo 6팩터 직접 대결 집계 (wave-368: WAR 추가, wave-379: Elo 추가) */}
                           {(() => {
                             type DuelResult = 'home' | 'away' | null;
                             const wobaResult: DuelResult =
@@ -1514,7 +1515,15 @@ export default async function AnalysisIndexPage() {
                                     ? 'away'
                                     : null
                                 : null;
-                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult];
+                            const eloResult: DuelResult =
+                              g.homeElo !== undefined && g.awayElo !== undefined
+                                ? g.homeElo - g.awayElo >= ELO_GAP_STRONG
+                                  ? 'home'
+                                  : g.awayElo - g.homeElo >= ELO_GAP_STRONG
+                                    ? 'away'
+                                    : null
+                                : null;
+                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult];
                             const validCount = results.filter(
                               (_, i) => [
                                 g.homeLineupWoba != null && g.awayLineupWoba != null,
@@ -1522,6 +1531,7 @@ export default async function AnalysisIndexPage() {
                                 g.homeBullpenFip != null && g.awayBullpenFip != null,
                                 g.homeSPFip != null && g.awaySPFip != null,
                                 g.homeWar != null && g.awayWar != null,
+                                g.homeElo !== undefined && g.awayElo !== undefined,
                               ][i]
                             ).length;
                             if (validCount < COMPOSITE_DUEL_MIN_VALID) return null;
@@ -1588,6 +1598,25 @@ export default async function AnalysisIndexPage() {
                                     : 'text-orange-500 dark:text-orange-400'
                                 }`}>
                                   WAR {favoredName} 강세
+                                </span>
+                              </>
+                            );
+                          })()}
+                          {/* wave-379: Elo 직접 대결 배지 — Elo 격차 ELO_GAP_STRONG(50) 이상 시 우세 팀 강조 */}
+                          {g.homeElo !== undefined && g.awayElo !== undefined && (() => {
+                            const gap = g.homeElo - g.awayElo;
+                            if (Math.abs(gap) < ELO_GAP_STRONG) return null;
+                            const favoredHome = gap > 0;
+                            const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            return (
+                              <>
+                                <span className="text-gray-300 dark:text-gray-700">·</span>
+                                <span className={`font-medium ${
+                                  favoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  Elo {favoredName} 강세
                                 </span>
                               </>
                             );
