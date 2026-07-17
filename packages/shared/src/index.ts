@@ -609,13 +609,17 @@ export const ELO_DISPLAY_NEUTRAL_BAND = 10;
 
 /**
  * buildGameOverview "Elo 강세" 태그 임계 — wave-351 (cycle 1688).
+ * wave-379: analysis/page.tsx Elo 직접 대결 배지. wave-390: computeCompositeDuel.ts composite 계산.
+ * wave-444: analysis/page.tsx 팩터 수렴 픽 Elo 행 격차(Δ) 표시.
  *
  * 50 Elo point diff ≈ 57% vs 43% win probability (ELO_DIVIDER=400 기준).
  * KBO 시즌 팀 레이팅 범위 ~1400~1600 (200 point span) 내 의미 있는 tier 차이.
- * 변경 시 factor-explanations.ts buildGameOverview callsite 동기 필요.
+ * 변경 시 factor-explanations.ts + analysis/page.tsx wave-379/444 + computeCompositeDuel.ts callsite 동기.
  *
- * 1 occurrence 분포 (cycle 1688 최초 박제):
- *   - apps/moneyball/src/lib/analysis/factor-explanations.ts 1건
+ * 3 파일 callsite (cycle 1803 갱신):
+ *   - apps/moneyball/src/lib/analysis/factor-explanations.ts (wave-351)
+ *   - apps/moneyball/src/lib/analysis/computeCompositeDuel.ts (wave-390)
+ *   - apps/moneyball/src/app/analysis/page.tsx (wave-379/444)
  */
 export const ELO_GAP_STRONG = 50;
 
@@ -2367,9 +2371,10 @@ export const WAR_WEAK = 8.0;
 
 /**
  * WAR 직접 대결 배지 최소 차이 — wave-367 (cycle 1707).
+ * wave-390: computeCompositeDuel.ts composite 계산. wave-444: analysis/page.tsx 격차(Δ) 표시.
  * |homeWar - awayWar| ≥ 본 값 시 "WAR [팀] 강세" 배지 표시.
  * 5.0 = KBO 팀 WAR 범위(8~25) 기준 의미있는 격차 (~33% gap at midrange 14).
- * 변경 시 analysis/page.tsx wave-367/종합 우세(wave-368) callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-367/444 + computeCompositeDuel.ts callsite 동시 조정.
  */
 export const WAR_DUEL_MIN = 5.0;
 
