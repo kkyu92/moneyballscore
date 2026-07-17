@@ -2250,12 +2250,15 @@ export const RECENT10_COLD_WINS = 3;
 /** wave-333: 상대전적 배지 — 최소 과거 대결 수 (미만 시 배지 숨김) */
 export const H2H_MIN_GAMES = 3;
 
-/** wave-333: 상대전적 배지 — 홈팀 우세 기준 (승률 60% 이상 → brand color) */
+/**
+ * 상대전적 우세 기준 — wave-333 (홈팀 배지), wave-414 (팩터 수렴 픽 홈/원정 양팀).
+ * 승률 60% 이상 → brand color (우세). 홈·원정 어느 팀에도 동일 임계 적용.
+ */
 export const H2H_DOMINANT_RATE = 0.6;
 
 /**
  * H2H_DOMINANT_RATE 의 보수. 변경 시 양쪽 동시 조정.
- * 홈팀 열세 기준 (승률 40% 이하 → orange color)
+ * 상대전적 열세 기준 — 승률 40% 이하 → orange color (홈/원정 양팀).
  */
 export const H2H_WEAK_RATE = 0.4;
 
