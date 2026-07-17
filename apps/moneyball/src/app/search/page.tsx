@@ -152,7 +152,6 @@ const STATIC_PAGES: Array<{
   { slug: '/players', label: '선수 목록', keywords: 'players 선수목록' },
   { slug: '/insights', label: '인사이트', keywords: 'insights 인사이트 ai-judge' },
   { slug: '/dashboard', label: '대시보드', keywords: 'dashboard 대시보드 stats' },
-  { slug: '/v2-preview', label: 'v2 미리보기', keywords: 'v2 preview 시뮬레이션 미리보기 가중치' },
   { slug: '/v2-shadow-monitor', label: 'v2 섀도우 모니터', keywords: 'v2 shadow monitor 섀도우 모니터' },
   { slug: '/methodology', label: '방법론', keywords: 'methodology 방법론 모델' },
   { slug: '/glossary', label: '용어집', keywords: 'glossary 용어집 fip woba war' },

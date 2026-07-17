@@ -106,3 +106,14 @@ describe("sitemap noindex 정합", () => {
     expect(SITEMAP_SRC).not.toContain("v2-preview");
   });
 });
+
+describe("search/page.tsx noindex 정합 (wave-418 cycle 1771 IA cleanup)", () => {
+  const SEARCH_SRC = readFileSync(
+    join(REPO_ROOT, "src/app/search/page.tsx"),
+    "utf8",
+  );
+  it("noindex /v2-preview 는 search PAGES 미포함", () => {
+    expect(SEARCH_SRC).not.toContain("'/v2-preview'");
+    expect(SEARCH_SRC).not.toContain('"/v2-preview"');
+  });
+});
