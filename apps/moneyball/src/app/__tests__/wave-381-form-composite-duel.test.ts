@@ -13,8 +13,6 @@ import {
   RECENT_FORM_DUEL_MIN,
 } from '@moneyball/shared';
 
-const ROOT = join(__dirname, '../../..');
-
 /** 7팩터 직접 대결 집계 로직 재현 — analysis/page.tsx wave-381 */
 function computeComposite(g: {
   homeLineupWoba?: number | null;
