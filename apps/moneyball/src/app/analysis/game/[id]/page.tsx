@@ -410,7 +410,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       {/* 0. 경기 개요 — 태그 + 1-2줄 요약 */}
       <GameOverview tags={overview.tags} summary={overview.summary} />
 
-      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 */}
+      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 · wave-456: 상대 팀 우세 팩터 칩 + 모델-합치 칩 */}
       {isConvergencePick && (() => {
         const favoredHome = convergenceDuel.netScore > 0;
         const hw = convergenceDuel.homeWins;
@@ -433,39 +433,79 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           : isWeightStrong
             ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800/50 text-brand-700 dark:text-brand-300'
             : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 text-gray-600 dark:text-gray-400';
+        // wave-456: 상대 팀 우세 팩터 + 모델-합치
+        const opponentSlugs = favoredHome
+          ? convergenceDuel.awayFavoredSlugs
+          : convergenceDuel.homeFavoredSlugs;
+        const favoredTeam = favoredHome ? homeTeam : awayTeam;
+        const modelAgrees = verdict?.predictedWinner === favoredTeam;
         return (
-          <div className={`rounded-lg border px-4 py-2.5 text-sm flex items-center gap-2 flex-wrap ${badgeClass}`}>
-            <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 수렴 픽</span>
-            <span className="font-semibold">{favoredName} 우세</span>
-            <span className="font-mono text-xs">{ratio}</span>
-            <span className="font-mono text-xs opacity-60" title="우세 팩터 가중치 합 / 전체 팩터 가중치">가중{favoredWeightPct}%</span>
-            {/* wave-454: 우세 팩터 칩 — 수렴 팩터 slug → 단축 레이블 + 용어집 링크 */}
-            {favoredSlugs.map((slug) => {
-              const chipLabel = FACTOR_LABELS_SHORT[slug];
-              if (!chipLabel) return null;
-              const anchor = FACTOR_GLOSSARY_ANCHORS[slug];
-              const chipClass = isComplete
-                ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
-                : isWeightStrong
-                  ? 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-700/50'
-                  : 'bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/40';
-              return anchor ? (
-                <Link
-                  key={slug}
-                  href={`/glossary#${anchor}`}
-                  className={`inline-block text-xs px-1.5 py-0.5 rounded transition-colors ${chipClass}`}
-                >
-                  {chipLabel}
-                </Link>
-              ) : (
-                <span
-                  key={slug}
-                  className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400"
-                >
-                  {chipLabel}
+          <div className={`rounded-lg border px-4 py-2.5 text-sm ${badgeClass}`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 수렴 픽</span>
+              <span className="font-semibold">{favoredName} 우세</span>
+              <span className="font-mono text-xs">{ratio}</span>
+              <span className="font-mono text-xs opacity-60" title="우세 팩터 가중치 합 / 전체 팩터 가중치">가중{favoredWeightPct}%</span>
+              {/* wave-456: 모델-합치 칩 — 모델 예측과 팩터 수렴 방향 일치 시 */}
+              {modelAgrees && verdict && (
+                <span className="inline-block text-xs px-1 py-0 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-medium">
+                  ✓ 합치
                 </span>
-              );
-            })}
+              )}
+              {/* wave-454: 우세 팩터 칩 — 수렴 팩터 slug → 단축 레이블 + 용어집 링크 */}
+              {favoredSlugs.map((slug) => {
+                const chipLabel = FACTOR_LABELS_SHORT[slug];
+                if (!chipLabel) return null;
+                const anchor = FACTOR_GLOSSARY_ANCHORS[slug];
+                const chipClass = isComplete
+                  ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
+                  : isWeightStrong
+                    ? 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-700/50'
+                    : 'bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/40';
+                return anchor ? (
+                  <Link
+                    key={slug}
+                    href={`/glossary#${anchor}`}
+                    className={`inline-block text-xs px-1.5 py-0.5 rounded transition-colors ${chipClass}`}
+                  >
+                    {chipLabel}
+                  </Link>
+                ) : (
+                  <span
+                    key={slug}
+                    className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400"
+                  >
+                    {chipLabel}
+                  </span>
+                );
+              })}
+            </div>
+            {/* wave-456: 상대 팀 우세 팩터 칩 — 비수렴 팩터 (완전수렴 시 미표시) */}
+            {!isComplete && opponentSlugs.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {opponentSlugs.map((slug) => {
+                  const chipLabel = FACTOR_LABELS_SHORT[slug];
+                  if (!chipLabel) return null;
+                  const anchor = FACTOR_GLOSSARY_ANCHORS[slug];
+                  return anchor ? (
+                    <Link
+                      key={slug}
+                      href={`/glossary#${anchor}`}
+                      className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"
+                    >
+                      {chipLabel}
+                    </Link>
+                  ) : (
+                    <span
+                      key={slug}
+                      className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400"
+                    >
+                      {chipLabel}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })()}
