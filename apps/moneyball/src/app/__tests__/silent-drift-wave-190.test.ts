@@ -35,9 +35,10 @@ describe('silent drift wave 190 — /accuracy/shadow + debug/model-comparison + 
     expect(src).toMatch(/누적 아카이브/);
   });
 
-  it('components/layout/Header.tsx: "/accuracy/shadow" description "v2.1-B 섀도우 cohort 비교" stale 제거', () => {
+  it('components/layout/Header.tsx: "/accuracy/shadow" header nav 제거 (v2.1-B rejected artifact → footer only, wave-384 IA cleanup)', () => {
     const src = readFileSync(join(ROOT, 'src/components/layout/Header.tsx'), 'utf8');
     expect(src).not.toMatch(/v2\.1-B 섀도우 cohort 비교/);
-    expect(src).toMatch(/v2\.1-B \(rejected\) cohort 아카이브/);
+    // accuracy/shadow 는 header KBO_NAV 에서 제거 (footer exhaustive sitemap 에만 유지)
+    expect(src).not.toMatch(/href: ["']\/accuracy\/shadow["']/);
   });
 });

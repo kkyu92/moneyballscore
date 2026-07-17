@@ -17,6 +17,7 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 
 // KBO_NAV: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
 // 1 top-level (오늘) + 3 group (예측·기록 5 / 팀·선수 4 / 커뮤니티 2) = 4 hover zone.
+// accuracy/shadow (v2.1-B rejected) → footer only (wave-384 IA cleanup)
 const KBO_NAV: NavItem[] = [
   { href: "/", label: "오늘" },
   {
@@ -24,7 +25,7 @@ const KBO_NAV: NavItem[] = [
     items: [
       { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석", icon: "activity" },
       { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
-      { href: "/accuracy/shadow", label: "Shadow 적중률", description: "v2.1-B (rejected) cohort 아카이브", icon: "bar-chart" },
+      { href: "/insights", label: "AI 인사이트", description: "심판 에이전트 reasoning 아카이브", icon: "database" },
       { href: "/predictions", label: "예측 기록", description: "일자별 예측 아카이브", icon: "file-text" },
       { href: "/dashboard", label: "모델 성능", description: "Brier·캘리브레이션 지표", icon: "bar-chart" },
     ],
