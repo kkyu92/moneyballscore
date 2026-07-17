@@ -15,20 +15,17 @@ describe('wave-368 — 종합 우세 배지 WAR 팩터 추가 (cycle 1708)', () 
     expect(COMPOSITE_DUEL_MIN_VALID).toBe(4);
   });
 
-  it('WAR_DUEL_MIN 종합 우세 배지 callsite 참조 (wave-368 주석 포함)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  it('computeCompositeDuel.ts: wave-368 WAR 팩터 포함', () => {
+    const src = readFileSync(join(ROOT, 'src/lib/analysis/computeCompositeDuel.ts'), 'utf8');
     expect(src).toContain('wave-368');
-  });
-
-  it('analysis/page.tsx: warResult 변수 종합 우세 배지 안 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('warResult');
     expect(src).toContain('WAR_DUEL_MIN');
   });
 
-  it('analysis/page.tsx: results 배열에 warResult 포함 (wave-379: eloResult 추가로 배열 확장)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('wobaResult, sfrResult, bullpenResult, spFipResult, warResult');
+  it('computeCompositeDuel.ts: results 배열에 warResult 포함', () => {
+    const src = readFileSync(join(ROOT, 'src/lib/analysis/computeCompositeDuel.ts'), 'utf8');
+    expect(src).toContain('warResult');
+    expect(src).toContain('eloResult');
   });
 
   it('종합 우세 배지: THRESHOLD ≤ MIN_VALID (3 ≤ 4) — 유효한 조건', () => {

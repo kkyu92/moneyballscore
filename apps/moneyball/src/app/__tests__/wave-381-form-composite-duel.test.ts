@@ -116,17 +116,18 @@ describe('wave-381 — 종합 우세 배지 최근폼 편입 (7팩터)', () => {
     expect(RECENT_FORM_DUEL_MIN).toBe(0.10);
   });
 
-  it('analysis/page.tsx: wave-381 최근폼 COMPOSITE 편입 callsite', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  it('computeCompositeDuel.ts: wave-381 최근폼 팩터 포함', () => {
+    const src = readFileSync(join(__dirname, '../../../src/lib/analysis/computeCompositeDuel.ts'), 'utf8');
     expect(src).toContain('wave-381');
     expect(src).toContain('formResult');
     expect(src).toContain('g.homeRecentForm !== undefined && g.awayRecentForm !== undefined');
     expect(src).toContain('RECENT_FORM_DUEL_MIN');
   });
 
-  it('analysis/page.tsx: COMPOSITE_DUEL results 배열에 formResult 포함', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult');
+  it('computeCompositeDuel.ts: results 배열에 formResult 포함', () => {
+    const src = readFileSync(join(__dirname, '../../../src/lib/analysis/computeCompositeDuel.ts'), 'utf8');
+    expect(src).toContain('formResult');
+    expect(src).toContain('h2hResult');
   });
 
   it('최근폼 포함 홈 우세 7팩터 → 홈팀 7팩터 우세 배지', () => {

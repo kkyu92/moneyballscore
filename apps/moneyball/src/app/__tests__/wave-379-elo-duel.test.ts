@@ -48,23 +48,16 @@ describe('wave-379 — Elo 직접 대결 배지 (cycle 1721)', () => {
     expect(src).toContain('Elo {favoredName} 강세');
   });
 
-  it('wave-365 종합 우세에 Elo 6번째 팩터 포함', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf-8');
-    expect(src).toContain('wave-379: Elo 추가');
+  it('computeCompositeDuel.ts: wave-379 Elo 팩터 포함', () => {
+    const src = readFileSync(join(ROOT, 'src/lib/analysis/computeCompositeDuel.ts'), 'utf-8');
+    expect(src).toContain('wave-379');
     expect(src).toContain('eloResult');
-    // wave-365 섹션 추출 (wave-365 부터 wave-379 직접 대결 배지 시작까지)
-    const start = src.indexOf('wave-365');
-    const end = src.indexOf('wave-379: Elo 직접 대결');
-    const compositeSection = src.slice(start, end);
-    expect(compositeSection).toContain('eloResult');
-    expect(compositeSection).toContain('ELO_GAP_STRONG');
+    expect(src).toContain('ELO_GAP_STRONG');
   });
 
-  it('종합 우세 6팩터 배열에 eloResult 포함', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf-8');
-    const start = src.indexOf('wave-365');
-    const end = src.indexOf('wave-379: Elo 직접 대결');
-    const compositeSection = src.slice(start, end);
-    expect(compositeSection).toContain('wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult');
+  it('computeCompositeDuel.ts: results 배열에 eloResult 포함', () => {
+    const src = readFileSync(join(ROOT, 'src/lib/analysis/computeCompositeDuel.ts'), 'utf-8');
+    expect(src).toContain('eloResult');
+    expect(src).toContain('warResult');
   });
 });

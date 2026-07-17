@@ -63,35 +63,18 @@ describe('wave-383 — COMPOSITE_DUEL 상대전적 8팩터 편입 (cycle 1725)',
     expect(computeH2hResult(undefined, 5)).toBeNull();
   });
 
-  it('analysis/page.tsx: wave-383 comment 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  it('computeCompositeDuel.ts: wave-383 H2H 팩터 포함', () => {
+    const src = readFileSync(join(__dirname, '../../../src/lib/analysis/computeCompositeDuel.ts'), 'utf8');
     expect(src).toContain('wave-383');
-    expect(src).toContain('상대전적 추가');
-  });
-
-  it('analysis/page.tsx: 상대전적 이력 comment 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('상대전적 추가');
-  });
-
-  it('analysis/page.tsx: h2hResult 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('h2hResult');
-  });
-
-  it('analysis/page.tsx: H2H_DOMINANT_RATE 사용 (COMPOSITE_DUEL 내)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('H2H_DOMINANT_RATE');
     expect(src).toContain('H2H_WEAK_RATE');
-  });
-
-  it('analysis/page.tsx: h2hHomeWins/h2hAwayWins validCount 조건 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined');
   });
 
-  it('results 배열에 h2hResult 포함', () => {
+  it('analysis/page.tsx: computeCompositeDuel 헬퍼 통해 H2H 팩터 사용', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('h2hResult');
+    expect(src).toContain('computeCompositeDuel');
+    expect(src).toContain('h2hHomeWins: h2hHomeArg');
   });
 });

@@ -5,6 +5,7 @@ import { PARK_FACTOR_HITTER_MIN, PARK_FACTOR_PITCHER_MAX, KBO_TEAMS } from '@mon
 
 const ROOT = join(__dirname, '../../..');
 const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
+const COMPUTE_DUEL = join(ROOT, 'src/lib/analysis/computeCompositeDuel.ts');
 
 /** 10팩터 COMPOSITE_DUEL 구장보정 팩터 로직 재현 */
 function computeParkResult(
@@ -66,39 +67,30 @@ describe('wave-388 — COMPOSITE_DUEL 구장보정 10팩터 편입 (cycle 1732)'
     expect(computeParkResult('HH')).toBeNull();
   });
 
-  it('analysis/page.tsx: wave-388 comment 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  it('computeCompositeDuel.ts: wave-388 구장보정 팩터 포함', () => {
+    const src = readFileSync(COMPUTE_DUEL, 'utf8');
     expect(src).toContain('wave-388');
-    expect(src).toContain('구장보정 추가');
+    expect(src).toContain('parkResult');
+    expect(src).toContain('PARK_FACTOR_HITTER_MIN');
+    expect(src).toContain('PARK_FACTOR_PITCHER_MAX');
+    expect(src).toContain("KBO_TEAMS[g.homeCode]?.parkPf !== undefined");
+  });
+
+  it('computeCompositeDuel.ts: 10팩터 results 배열에 spXfipResult + parkResult 포함', () => {
+    const src = readFileSync(COMPUTE_DUEL, 'utf8');
+    expect(src).toContain('spXfipResult');
+    expect(src).toContain('parkResult');
+  });
+
+  it('analysis/page.tsx: computeCompositeDuel 헬퍼 사용 (wave-391 추출)', () => {
+    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+    expect(src).toContain('computeCompositeDuel');
+    expect(src).toContain('compositeDuelHomeWins');
+    expect(src).toContain('compositeDuelAwayWins');
   });
 
   it('analysis/page.tsx: 10팩터 언급', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('10팩터');
-  });
-
-  it('analysis/page.tsx: parkResult 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('parkResult');
-  });
-
-  it('analysis/page.tsx: PARK_FACTOR_HITTER_MIN 사용 (COMPOSITE_DUEL 내)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('PARK_FACTOR_HITTER_MIN');
-  });
-
-  it('analysis/page.tsx: PARK_FACTOR_PITCHER_MAX 사용 (COMPOSITE_DUEL 내)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('PARK_FACTOR_PITCHER_MAX');
-  });
-
-  it('results 배열이 10 팩터 (...spXfipResult, parkResult)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('spXfipResult, parkResult');
-  });
-
-  it('validCount 조건에 KBO_TEAMS parkPf 체크 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain("KBO_TEAMS[g.homeCode]?.parkPf !== undefined");
   });
 });

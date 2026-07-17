@@ -848,7 +848,10 @@ export default async function AnalysisIndexPage() {
       h2hHomeWins: h2hHomeArg,
       h2hAwayWins: h2hAwayArg,
     });
-    const compositeDuelScore = duel.validCount >= COMPOSITE_DUEL_MIN_VALID ? duel.netScore : null;
+    const valid = duel.validCount >= COMPOSITE_DUEL_MIN_VALID;
+    const compositeDuelScore = valid ? duel.netScore : null;
+    const compositeDuelHomeWins = valid ? duel.homeWins : null;
+    const compositeDuelAwayWins = valid ? duel.awayWins : null;
 
     return {
       ...g,
@@ -864,6 +867,9 @@ export default async function AnalysisIndexPage() {
       isTopPick: g.gameId === bestPickGameId,
       /** wave-390: COMPOSITE_DUEL 10팩터 net score (null = 데이터 부족) */
       compositeDuelScore,
+      /** wave-391: 종합 우세 배지 렌더링용 홈/원정 팩터 수 */
+      compositeDuelHomeWins,
+      compositeDuelAwayWins,
     };
   });
 
@@ -1530,110 +1536,15 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365: 종합 우세 배지 — wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적/선발xFIP/구장보정 10팩터 직접 대결 집계 (wave-368: WAR 추가, wave-379: Elo 추가, wave-381: 최근폼 추가, wave-383: 상대전적 추가, wave-386: 선발xFIP 추가, wave-388: 구장보정 추가) */}
+                          {/* wave-365→wave-391: 종합 우세 배지 (computeCompositeDuel 재사용) */}
                           {(() => {
-                            type DuelResult = 'home' | 'away' | null;
-                            const wobaResult: DuelResult =
-                              g.homeLineupWoba != null && g.awayLineupWoba != null
-                                ? g.homeLineupWoba - g.awayLineupWoba >= LINEUP_WOBA_DUEL_MIN
-                                  ? 'home'
-                                  : g.awayLineupWoba - g.homeLineupWoba >= LINEUP_WOBA_DUEL_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const sfrResult: DuelResult =
-                              g.homeSfr != null && g.awaySfr != null
-                                ? g.homeSfr - g.awaySfr >= SFR_DUEL_MIN
-                                  ? 'home'
-                                  : g.awaySfr - g.homeSfr >= SFR_DUEL_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const bullpenResult: DuelResult =
-                              g.homeBullpenFip != null && g.awayBullpenFip != null
-                                ? g.awayBullpenFip - g.homeBullpenFip >= BULLPEN_FIP_DIFF_MIN
-                                  ? 'home'
-                                  : g.homeBullpenFip - g.awayBullpenFip >= BULLPEN_FIP_DIFF_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const spFipResult: DuelResult =
-                              g.homeSPFip != null && g.awaySPFip != null
-                                ? g.awaySPFip - g.homeSPFip >= SP_FIP_DUEL_MIN
-                                  ? 'home'
-                                  : g.homeSPFip - g.awaySPFip >= SP_FIP_DUEL_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const warResult: DuelResult =
-                              g.homeWar != null && g.awayWar != null
-                                ? g.homeWar - g.awayWar >= WAR_DUEL_MIN
-                                  ? 'home'
-                                  : g.awayWar - g.homeWar >= WAR_DUEL_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const eloResult: DuelResult =
-                              g.homeElo !== undefined && g.awayElo !== undefined
-                                ? g.homeElo - g.awayElo >= ELO_GAP_STRONG
-                                  ? 'home'
-                                  : g.awayElo - g.homeElo >= ELO_GAP_STRONG
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const formResult: DuelResult =
-                              g.homeRecentForm !== undefined && g.awayRecentForm !== undefined
-                                ? g.homeRecentForm - g.awayRecentForm >= RECENT_FORM_DUEL_MIN
-                                  ? 'home'
-                                  : g.awayRecentForm - g.homeRecentForm >= RECENT_FORM_DUEL_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const h2hResult: DuelResult =
-                              g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined
-                                ? (() => {
-                                    const homeRate = g.h2hHomeWins! / (g.h2hHomeWins! + g.h2hAwayWins!);
-                                    if (homeRate >= H2H_DOMINANT_RATE) return 'home';
-                                    if (homeRate <= H2H_WEAK_RATE) return 'away';
-                                    return null;
-                                  })()
-                                : null;
-                            const spXfipResult: DuelResult =
-                              g.homeSPXfip != null && g.awaySPXfip != null
-                                ? g.awaySPXfip - g.homeSPXfip >= SP_XFIP_DUEL_MIN
-                                  ? 'home'
-                                  : g.homeSPXfip - g.awaySPXfip >= SP_XFIP_DUEL_MIN
-                                    ? 'away'
-                                    : null
-                                : null;
-                            const parkResult: DuelResult = (() => {
-                              const pf = KBO_TEAMS[g.homeCode]?.parkPf;
-                              if (pf === undefined) return null;
-                              if (pf >= PARK_FACTOR_HITTER_MIN) return 'home';
-                              if (pf <= PARK_FACTOR_PITCHER_MAX) return 'away';
-                              return null;
-                            })();
-                            const results = [wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult, spXfipResult, parkResult];
-                            const validCount = results.filter(
-                              (_, i) => [
-                                g.homeLineupWoba != null && g.awayLineupWoba != null,
-                                g.homeSfr != null && g.awaySfr != null,
-                                g.homeBullpenFip != null && g.awayBullpenFip != null,
-                                g.homeSPFip != null && g.awaySPFip != null,
-                                g.homeWar != null && g.awayWar != null,
-                                g.homeElo !== undefined && g.awayElo !== undefined,
-                                g.homeRecentForm !== undefined && g.awayRecentForm !== undefined,
-                                g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined,
-                                g.homeSPXfip != null && g.awaySPXfip != null,
-                                KBO_TEAMS[g.homeCode]?.parkPf !== undefined,
-                              ][i]
-                            ).length;
-                            if (validCount < COMPOSITE_DUEL_MIN_VALID) return null;
-                            const homeWins = results.filter((r) => r === 'home').length;
-                            const awayWins = results.filter((r) => r === 'away').length;
-                            if (homeWins < COMPOSITE_DUEL_THRESHOLD && awayWins < COMPOSITE_DUEL_THRESHOLD) return null;
-                            const favoredHome = homeWins >= COMPOSITE_DUEL_THRESHOLD;
-                            const count = favoredHome ? homeWins : awayWins;
+                            const hw = g.compositeDuelHomeWins;
+                            const aw = g.compositeDuelAwayWins;
+                            if (hw == null || aw == null) return null;
+                            const favoredHome = hw >= COMPOSITE_DUEL_THRESHOLD;
+                            const favoredAway = aw >= COMPOSITE_DUEL_THRESHOLD;
+                            if (!favoredHome && !favoredAway) return null;
+                            const count = favoredHome ? hw : aw;
                             const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
                             return (
                               <>

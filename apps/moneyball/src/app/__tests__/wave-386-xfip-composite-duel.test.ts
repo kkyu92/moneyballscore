@@ -50,34 +50,17 @@ describe('wave-386 — COMPOSITE_DUEL 선발xFIP 9팩터 편입 (cycle 1729)', (
     expect(computeSpXfipResult(3.5, null)).toBeNull();
   });
 
-  it('analysis/page.tsx: wave-386 comment 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  it('computeCompositeDuel.ts: wave-386 xFIP 팩터 포함', () => {
+    const src = readFileSync(join(__dirname, '../../../src/lib/analysis/computeCompositeDuel.ts'), 'utf8');
     expect(src).toContain('wave-386');
-    expect(src).toContain('선발xFIP 추가');
-  });
-
-  it('analysis/page.tsx: xFIP 9팩터 이력 comment 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('선발xFIP 추가');
-  });
-
-  it('analysis/page.tsx: spXfipResult 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('spXfipResult');
-  });
-
-  it('analysis/page.tsx: SP_XFIP_DUEL_MIN 사용 (COMPOSITE_DUEL 내)', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('SP_XFIP_DUEL_MIN');
-  });
-
-  it('analysis/page.tsx: homeSPXfip/awaySPXfip validCount 조건 존재', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('g.homeSPXfip != null && g.awaySPXfip != null');
   });
 
-  it('results 배열에 spXfipResult 포함', () => {
+  it('analysis/page.tsx: computeCompositeDuel 헬퍼 통해 xFIP 팩터 사용', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('spXfipResult');
+    expect(src).toContain('computeCompositeDuel');
+    expect(src).toContain('homeSPXfip: g.homeSPXfip');
   });
 });
