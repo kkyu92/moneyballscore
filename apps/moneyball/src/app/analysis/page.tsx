@@ -979,6 +979,8 @@ export default async function AnalysisIndexPage() {
     /** wave-394: 우세 팩터 slug 배열 (팩터 수렴 픽 레이블 표시용) */
     const compositeDuelHomeSlugs = valid ? duel.homeFavoredSlugs : null;
     const compositeDuelAwaySlugs = valid ? duel.awayFavoredSlugs : null;
+    /** wave-432: 유효 팩터 수 (null 데이터/임계 미달 팩터 제외, 최대 10) */
+    const compositeDuelValidCount = valid ? duel.validCount : null;
 
     return {
       ...g,
@@ -1000,6 +1002,8 @@ export default async function AnalysisIndexPage() {
       /** wave-394: 우세 팩터 slug 배열 */
       compositeDuelHomeSlugs,
       compositeDuelAwaySlugs,
+      /** wave-432: 유효 팩터 수 (데이터 보유 팩터 수, 최대 10) */
+      compositeDuelValidCount,
     };
   });
 
@@ -1090,7 +1094,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1163,6 +1167,12 @@ export default async function AnalysisIndexPage() {
                         {favoredName}
                       </span>
                       <span className={ratioColorClass}>{ratio}</span>
+                      {/* wave-432: 유효 팩터 수 — 데이터 보유 팩터 수 (최대 10), 타이/null 팩터 맥락 */}
+                      {pick.compositeDuelValidCount != null && (
+                        <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500" title={`${pick.compositeDuelValidCount}개 팩터 데이터 기준`}>
+                          ({pick.compositeDuelValidCount}팩터)
+                        </span>
+                      )}
                       {/* wave-420: 가중 우위 % — 팩터 수 아닌 가중치 비율로 수렴 강도 표현 */}
                       <span className="font-mono text-xs text-gray-400 dark:text-gray-500" title="우세 팩터 가중치 합 / 전체 팩터 가중치 (0.85)">
                         가중{favoredWeightPct}%
