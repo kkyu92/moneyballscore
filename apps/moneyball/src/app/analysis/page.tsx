@@ -79,7 +79,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
+import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
 export const metadata: Metadata = {
@@ -954,7 +954,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -975,11 +975,13 @@ export default async function AnalysisIndexPage() {
                   : convStrength >= 8
                     ? 'font-mono text-xs text-brand-500 dark:text-brand-400'
                     : 'font-mono text-xs text-gray-500 dark:text-gray-400';
-                // wave-394: 우세 팩터 레이블 (favored team 기준)
+                // wave-394: 우세 팩터 레이블 (favored team 기준) · wave-400: glossary 링크
                 const favoredSlugs = favoredHome
                   ? (pick.compositeDuelHomeSlugs ?? [])
                   : (pick.compositeDuelAwaySlugs ?? []);
-                const favoredLabels = favoredSlugs.map((s) => FACTOR_LABELS[s]).filter(Boolean);
+                const favoredChips = favoredSlugs
+                  .map((s) => ({ slug: s, label: FACTOR_LABELS[s], anchor: FACTOR_GLOSSARY_ANCHORS[s] }))
+                  .filter((c) => c.label);
                 // wave-396: 모델 확신도 + 팩터-모델 합치 여부
                 const favoredCode = favoredHome ? pick.homeCode : pick.awayCode;
                 const modelAgrees = pick.predictedWinnerCode != null && pick.predictedWinnerCode === favoredCode;
@@ -1012,15 +1014,26 @@ export default async function AnalysisIndexPage() {
                         </span>
                       )}
                     </Link>
-                    {favoredLabels.length > 0 && (
+                    {/* wave-400: 팩터 칩 glossary 링크 */}
+                    {favoredChips.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {favoredLabels.map((label) => (
-                          <span
-                            key={label}
-                            className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
-                          >
-                            {label}
-                          </span>
+                        {favoredChips.map(({ slug, label, anchor }) => (
+                          anchor ? (
+                            <Link
+                              key={slug}
+                              href={`/glossary#${anchor}`}
+                              className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-800/60 transition-colors"
+                            >
+                              {label}
+                            </Link>
+                          ) : (
+                            <span
+                              key={slug}
+                              className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
+                            >
+                              {label}
+                            </span>
+                          )
                         ))}
                       </div>
                     )}
