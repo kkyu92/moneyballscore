@@ -2572,6 +2572,6 @@ export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
- * 변경 시 analysis/page.tsx wave-373 callsite + wave-381 COMPOSITE_DUEL callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-373 callsite + wave-381 COMPOSITE_DUEL callsite + wave-448 격차(Δ) callsite 동시 조정.
  */
 export const RECENT_FORM_DUEL_MIN = 0.10;
