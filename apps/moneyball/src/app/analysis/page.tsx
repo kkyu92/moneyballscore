@@ -1013,7 +1013,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1208,6 +1208,58 @@ export default async function AnalysisIndexPage() {
                               : ''
                         }>
                           {shortTeamName(pick.homeCode)} {pick.homeLineupWoba.toFixed(3)}
+                        </span>
+                      </div>
+                    )}
+                    {/* wave-411: Elo 대결 — elo 수렴 팩터 포함 시 원정·홈 Elo 수치 표시 */}
+                    {pick.awayElo != null && pick.homeElo != null &&
+                      (favoredSlugs.includes('elo') || unfavoredSlugs.includes('elo')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        Elo{' '}
+                        <span className={
+                          pick.awayElo > ELO_NEUTRAL + ELO_DISPLAY_NEUTRAL_BAND
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.awayElo < ELO_NEUTRAL - ELO_DISPLAY_NEUTRAL_BAND
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {Math.round(pick.awayElo)}
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.homeElo > ELO_NEUTRAL + ELO_DISPLAY_NEUTRAL_BAND
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.homeElo < ELO_NEUTRAL - ELO_DISPLAY_NEUTRAL_BAND
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {Math.round(pick.homeElo)}
+                        </span>
+                      </div>
+                    )}
+                    {/* wave-411: 최근폼 대결 — recent_form 수렴 팩터 포함 시 원정·홈 최근폼 수치 표시 */}
+                    {pick.awayRecentForm != null && pick.homeRecentForm != null &&
+                      (favoredSlugs.includes('recent_form') || unfavoredSlugs.includes('recent_form')) && (
+                      <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+                        최근폼{' '}
+                        <span className={
+                          pick.awayRecentForm >= TEAM_STRENGTH_FORM_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.awayRecentForm <= TEAM_STRENGTH_FORM_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.awayCode)} {(pick.awayRecentForm * 100).toFixed(0)}%
+                        </span>
+                        {' · '}
+                        <span className={
+                          pick.homeRecentForm >= TEAM_STRENGTH_FORM_STRONG
+                            ? 'text-brand-500 dark:text-brand-400'
+                            : pick.homeRecentForm <= TEAM_STRENGTH_FORM_WEAK
+                              ? 'text-orange-500 dark:text-orange-400'
+                              : ''
+                        }>
+                          {shortTeamName(pick.homeCode)} {(pick.homeRecentForm * 100).toFixed(0)}%
                         </span>
                       </div>
                     )}
