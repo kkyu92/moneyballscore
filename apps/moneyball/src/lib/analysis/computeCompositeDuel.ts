@@ -43,6 +43,7 @@ export interface CompositeDuelInput {
 export interface CompositeDuelResult {
   homeWins: number;
   awayWins: number;
+  /** wave-390: 유효 팩터 수 (null/임계 미달 팩터 제외) */
   validCount: number;
   /** Net advantage: positive = home favored, negative = away favored */
   netScore: number;
@@ -58,6 +59,7 @@ export interface CompositeDuelResult {
  * Mirrors: wave-365 wOBA/SFR/bullpen/spFIP + wave-368 WAR + wave-379 Elo +
  *          wave-381 form + wave-383 H2H + wave-386 xFIP + wave-388 park.
  *          wave-394: homeFavoredSlugs/awayFavoredSlugs 슬러그 집계 추가.
+ *          wave-432: validCount 표시층 사용 (compositeDuelValidCount).
  */
 export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult {
   const wobaResult: DuelResult =
