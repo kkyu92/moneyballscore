@@ -65,6 +65,7 @@ import {
   PARK_FACTOR_HITTER_MIN,
   PARK_FACTOR_PITCHER_MAX,
   FACTOR_PICK_MIN_FACTORS,
+  FACTOR_PICK_TOP_GAMES,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -923,11 +924,11 @@ export default async function AnalysisIndexPage() {
     };
   });
 
-  // wave-392: 팩터 수렴 픽 — |netScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기, 최대 우세 순 top 3
+  // wave-392: 팩터 수렴 픽 — |netScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기, 최대 우세 순 top FACTOR_PICK_TOP_GAMES
   const factorPickGames = [...gamesWithRank]
     .filter((g) => g.compositeDuelScore !== null && Math.abs(g.compositeDuelScore!) >= FACTOR_PICK_MIN_FACTORS)
     .sort((a, b) => Math.abs(b.compositeDuelScore!) - Math.abs(a.compositeDuelScore!))
-    .slice(0, 3);
+    .slice(0, FACTOR_PICK_TOP_GAMES);
 
   // wave-405: 이번 주 팩터 수렴 픽 성적 — 종료된 수렴 경기 승/패 집계
   const weeklyConvergenceRecord = thisWeekPreviousGames.reduce(

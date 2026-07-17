@@ -2499,10 +2499,17 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
 
 /**
  * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734), wave-392 top-3 복수 표시 (cycle 1736).
- * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시. 최대 3경기 표시.
+ * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시. FACTOR_PICK_TOP_GAMES 경기까지 표시.
  * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
  */
 export const FACTOR_PICK_MIN_FACTORS = 7;
+
+/**
+ * 팩터 수렴 픽 최대 표시 경기 수 — wave-392 (cycle 1736), wave-406 상수 추출 (cycle 1752).
+ * analysis/page.tsx factorPickGames .slice(0, FACTOR_PICK_TOP_GAMES).
+ * 수렴도 내림차순 정렬 후 상위 N경기만 표시.
+ */
+export const FACTOR_PICK_TOP_GAMES = 3;
 
 /**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).

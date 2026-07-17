@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FACTOR_PICK_MIN_FACTORS } from '@moneyball/shared';
+import { FACTOR_PICK_MIN_FACTORS, FACTOR_PICK_TOP_GAMES } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
 const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
@@ -18,7 +18,7 @@ function selectFactorPickGames(games: MockGame[]): MockGame[] {
   return [...games]
     .filter((g) => g.compositeDuelScore !== null && Math.abs(g.compositeDuelScore) >= FACTOR_PICK_MIN_FACTORS)
     .sort((a, b) => Math.abs(b.compositeDuelScore!) - Math.abs(a.compositeDuelScore!))
-    .slice(0, 3);
+    .slice(0, FACTOR_PICK_TOP_GAMES);
 }
 
 /** wave-392 비율 문자열 재현 */
@@ -39,9 +39,10 @@ describe('wave-392 — 팩터 수렴 픽 복수 표시 + 비율 (cycle 1736)', (
     expect(src).toContain('factorPickGames');
   });
 
-  it('analysis page 소스에 .slice(0, 3) 박제', () => {
+  it('analysis page 소스에 FACTOR_PICK_TOP_GAMES 사용 박제 (wave-406 상수 추출)', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf-8');
-    expect(src).toContain('.slice(0, 3)');
+    expect(src).toContain('FACTOR_PICK_TOP_GAMES');
+    expect(src).not.toContain('.slice(0, 3)');
   });
 
   it('analysis page 소스에 복수 경기 count 표시 박제', () => {
