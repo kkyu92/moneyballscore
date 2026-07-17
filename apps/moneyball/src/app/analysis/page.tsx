@@ -852,6 +852,9 @@ export default async function AnalysisIndexPage() {
     const compositeDuelScore = valid ? duel.netScore : null;
     const compositeDuelHomeWins = valid ? duel.homeWins : null;
     const compositeDuelAwayWins = valid ? duel.awayWins : null;
+    /** wave-394: 우세 팩터 slug 배열 (팩터 수렴 픽 레이블 표시용) */
+    const compositeDuelHomeSlugs = valid ? duel.homeFavoredSlugs : null;
+    const compositeDuelAwaySlugs = valid ? duel.awayFavoredSlugs : null;
 
     return {
       ...g,
@@ -870,6 +873,9 @@ export default async function AnalysisIndexPage() {
       /** wave-391: 종합 우세 배지 렌더링용 홈/원정 팩터 수 */
       compositeDuelHomeWins,
       compositeDuelAwayWins,
+      /** wave-394: 우세 팩터 slug 배열 */
+      compositeDuelHomeSlugs,
+      compositeDuelAwaySlugs,
     };
   });
 
@@ -955,21 +961,42 @@ export default async function AnalysisIndexPage() {
             <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-2">
               팩터 수렴 경기{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
             </h2>
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {factorPickGames.map((pick) => {
                 const favoredHome = pick.compositeDuelScore! > 0;
                 const hw = pick.compositeDuelHomeWins!;
                 const aw = pick.compositeDuelAwayWins!;
                 const favoredName = shortTeamName(favoredHome ? pick.homeCode : pick.awayCode);
                 const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+                // wave-394: 우세 팩터 레이블 (favored team 기준)
+                const favoredSlugs = favoredHome
+                  ? (pick.compositeDuelHomeSlugs ?? [])
+                  : (pick.compositeDuelAwaySlugs ?? []);
+                const favoredLabels = favoredSlugs.map((s) => FACTOR_LABELS[s]).filter(Boolean);
                 return (
                   <li key={pick.gameId} className="text-sm text-gray-900 dark:text-gray-100">
-                    <span className={`font-semibold ${favoredHome ? 'text-brand-600 dark:text-brand-400' : 'text-orange-500 dark:text-orange-400'}`}>
-                      {favoredName}
-                    </span>{' '}
-                    <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{ratio}</span>
-                    {' '}—{' '}
-                    {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`font-semibold ${favoredHome ? 'text-brand-600 dark:text-brand-400' : 'text-orange-500 dark:text-orange-400'}`}>
+                        {favoredName}
+                      </span>
+                      <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{ratio}</span>
+                      <span className="text-gray-400 dark:text-gray-500">—</span>
+                      <span className="text-gray-600 dark:text-gray-300">
+                        {shortTeamName(pick.awayCode)} vs {shortTeamName(pick.homeCode)}
+                      </span>
+                    </div>
+                    {favoredLabels.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {favoredLabels.map((label) => (
+                          <span
+                            key={label}
+                            className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
+                          >
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </li>
                 );
               })}

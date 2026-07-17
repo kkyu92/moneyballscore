@@ -46,6 +46,10 @@ export interface CompositeDuelResult {
   validCount: number;
   /** Net advantage: positive = home favored, negative = away favored */
   netScore: number;
+  /** wave-394: slugs of factors favoring home team */
+  homeFavoredSlugs: string[];
+  /** wave-394: slugs of factors favoring away team */
+  awayFavoredSlugs: string[];
 }
 
 /**
@@ -145,40 +149,32 @@ export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult
     return null;
   })();
 
-  const results = [
-    wobaResult,
-    sfrResult,
-    bullpenResult,
-    spFipResult,
-    warResult,
-    eloResult,
-    formResult,
-    h2hResult,
-    spXfipResult,
-    parkResult,
+  // wave-394: factor entries with slugs for label display
+  const factorEntries: Array<{ slug: string; result: DuelResult; valid: boolean }> = [
+    { slug: 'lineup_woba', result: wobaResult, valid: g.homeLineupWoba != null && g.awayLineupWoba != null },
+    { slug: 'sfr', result: sfrResult, valid: g.homeSfr != null && g.awaySfr != null },
+    { slug: 'bullpen_fip', result: bullpenResult, valid: g.homeBullpenFip != null && g.awayBullpenFip != null },
+    { slug: 'sp_fip', result: spFipResult, valid: g.homeSPFip != null && g.awaySPFip != null },
+    { slug: 'war', result: warResult, valid: g.homeWar != null && g.awayWar != null },
+    { slug: 'elo', result: eloResult, valid: g.homeElo !== undefined && g.awayElo !== undefined },
+    { slug: 'recent_form', result: formResult, valid: g.homeRecentForm !== undefined && g.awayRecentForm !== undefined },
+    { slug: 'head_to_head', result: h2hResult, valid: g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined },
+    { slug: 'sp_xfip', result: spXfipResult, valid: g.homeSPXfip != null && g.awaySPXfip != null },
+    { slug: 'park_factor', result: parkResult, valid: KBO_TEAMS[g.homeCode]?.parkPf !== undefined },
   ];
 
-  const validFlags = [
-    g.homeLineupWoba != null && g.awayLineupWoba != null,
-    g.homeSfr != null && g.awaySfr != null,
-    g.homeBullpenFip != null && g.awayBullpenFip != null,
-    g.homeSPFip != null && g.awaySPFip != null,
-    g.homeWar != null && g.awayWar != null,
-    g.homeElo !== undefined && g.awayElo !== undefined,
-    g.homeRecentForm !== undefined && g.awayRecentForm !== undefined,
-    g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined,
-    g.homeSPXfip != null && g.awaySPXfip != null,
-    KBO_TEAMS[g.homeCode]?.parkPf !== undefined,
-  ];
-
-  const validCount = validFlags.filter(Boolean).length;
-  const homeWins = results.filter((r) => r === 'home').length;
-  const awayWins = results.filter((r) => r === 'away').length;
+  const validCount = factorEntries.filter((e) => e.valid).length;
+  const homeWins = factorEntries.filter((e) => e.result === 'home').length;
+  const awayWins = factorEntries.filter((e) => e.result === 'away').length;
+  const homeFavoredSlugs = factorEntries.filter((e) => e.result === 'home').map((e) => e.slug);
+  const awayFavoredSlugs = factorEntries.filter((e) => e.result === 'away').map((e) => e.slug);
 
   return {
     homeWins,
     awayWins,
     validCount,
     netScore: validCount >= COMPOSITE_DUEL_MIN_VALID ? homeWins - awayWins : 0,
+    homeFavoredSlugs,
+    awayFavoredSlugs,
   };
 }
