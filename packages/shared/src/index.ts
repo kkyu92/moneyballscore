@@ -2349,7 +2349,7 @@ export const SFR_WEAK = -10.0;
  * 수비 SFR 직접 대결 배지 최소 격차 — wave-357 (cycle 1695).
  * |homeSfr - awaySfr| >= 본 값 시 "수비 {팀} 강세" 배지 표시.
  * 5.0 = SFR_STRONG(10.0) 의 절반 — 한 팀이 뚜렷한 수비 우위 최소 기준.
- * 변경 시 analysis/page.tsx callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-357/446 callsite 자동 동기.
  */
 export const SFR_DUEL_MIN = 5.0;
 
@@ -2482,7 +2482,7 @@ export const LINEUP_WOBA_DUEL_MIN = 0.020;
  * |awaySPFip - homeSPFip| ≥ 본 값 시 "선발 {팀} 강세" 배지 표시.
  * FIP 낮을수록 유리. 0.5 = SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 범위(1.0)의 절반.
  * 선발 투수 1인 기준 FIP 0.5 차 = KBO 리그 에이스-평균 경계 수준.
- * 변경 시 analysis/page.tsx wave-363 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-363/446 callsite 자동 동기.
  */
 export const SP_FIP_DUEL_MIN = 0.5;
 
