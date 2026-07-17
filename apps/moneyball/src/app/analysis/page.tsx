@@ -681,6 +681,13 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
   return result;
 }
 
+/** wave-436: 순위 → color class. STANDINGS_TOP_TIER ↓ green, STANDINGS_BOTTOM_TIER ↑ orange */
+function standingsRankClass(rank: number): string {
+  if (rank <= STANDINGS_TOP_TIER) return 'text-brand-500 dark:text-brand-400';
+  if (rank >= STANDINGS_BOTTOM_TIER) return 'text-orange-500 dark:text-orange-400';
+  return '';
+}
+
 function groupByDate(games: ThisWeekGameCard[]): Array<{ date: string; games: ThisWeekGameCard[] }> {
   const map = new Map<string, ThisWeekGameCard[]>();
   for (const g of games) {
@@ -1532,23 +1539,11 @@ export default async function AnalysisIndexPage() {
                     {pick.homeRank !== undefined && pick.awayRank !== undefined && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         순위{' '}
-                        <span className={
-                          pick.awayRank <= STANDINGS_TOP_TIER
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awayRank >= STANDINGS_BOTTOM_TIER
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={standingsRankClass(pick.awayRank)}>
                           {shortTeamName(pick.awayCode)} {pick.awayRank}위
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeRank <= STANDINGS_TOP_TIER
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeRank >= STANDINGS_BOTTOM_TIER
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={standingsRankClass(pick.homeRank)}>
                           {shortTeamName(pick.homeCode)} {pick.homeRank}위
                         </span>
                       </div>
@@ -1669,21 +1664,9 @@ export default async function AnalysisIndexPage() {
                             {/* wave-325: 현재 KBO 순위 배지 */}
                             {g.homeRank !== undefined && g.awayRank !== undefined && (
                               <span className="ml-2">
-                                <span className={
-                                  g.awayRank <= STANDINGS_TOP_TIER
-                                    ? 'text-brand-500 dark:text-brand-400'
-                                    : g.awayRank >= STANDINGS_BOTTOM_TIER
-                                      ? 'text-orange-500 dark:text-orange-400'
-                                      : ''
-                                }>{g.awayRank}위</span>
+                                <span className={standingsRankClass(g.awayRank)}>{g.awayRank}위</span>
                                 <span className="text-gray-300 dark:text-gray-600 mx-0.5">vs</span>
-                                <span className={
-                                  g.homeRank <= STANDINGS_TOP_TIER
-                                    ? 'text-brand-500 dark:text-brand-400'
-                                    : g.homeRank >= STANDINGS_BOTTOM_TIER
-                                      ? 'text-orange-500 dark:text-orange-400'
-                                      : ''
-                                }>{g.homeRank}위</span>
+                                <span className={standingsRankClass(g.homeRank)}>{g.homeRank}위</span>
                               </span>
                             )}
                             {/* wave-347: 경기 유형 배지 */}
