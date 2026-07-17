@@ -124,6 +124,8 @@ import {
   LLM_MAX_TOKENS_TEAM,
   LLM_MAX_TOKENS_CALIBRATION,
   ANALYSIS_UPCOMING_LIMIT,
+  FACTOR_PICK_MIN_FACTORS,
+  FACTOR_PICK_TOP_GAMES,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -846,5 +848,10 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
     expect(shortTeamName(undefined)).toBe('');
     expect(shortTeamName('')).toBe('');
     expect(shortTeamName('UNKNOWN')).toBe('UNKNOWN');
+  });
+
+  it('FACTOR_PICK_TOP_GAMES — 팩터 수렴 픽 최대 경기 수 (silent drift wave 406 guard)', () => {
+    expect(FACTOR_PICK_MIN_FACTORS).toBe(7);
+    expect(FACTOR_PICK_TOP_GAMES).toBe(3);
   });
 });
