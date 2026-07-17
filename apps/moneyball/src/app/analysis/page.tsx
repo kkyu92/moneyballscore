@@ -66,6 +66,8 @@ import {
   PARK_FACTOR_PITCHER_MAX,
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_TOP_GAMES,
+  FACTOR_PICK_STRONG,
+  FACTOR_PICK_COMPLETE,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -1032,11 +1034,11 @@ export default async function AnalysisIndexPage() {
                 const aw = pick.compositeDuelAwayWins!;
                 const favoredName = shortTeamName(favoredHome ? pick.homeCode : pick.awayCode);
                 const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
-                // wave-398: 수렴 강도 (|netScore|) — 7=임계, 8-9=강, 10=완전수렴
+                // wave-398: 수렴 강도 (|netScore|) — FACTOR_PICK_MIN_FACTORS(7)=임계, FACTOR_PICK_STRONG(8)=강, FACTOR_PICK_COMPLETE(10)=완전수렴
                 const convStrength = Math.abs(pick.compositeDuelScore!);
-                const ratioColorClass = convStrength >= 10
+                const ratioColorClass = convStrength >= FACTOR_PICK_COMPLETE
                   ? 'font-mono text-xs text-[var(--color-accent)] dark:text-[#e2c96b]'
-                  : convStrength >= 8
+                  : convStrength >= FACTOR_PICK_STRONG
                     ? 'font-mono text-xs text-brand-500 dark:text-brand-400'
                     : 'font-mono text-xs text-gray-500 dark:text-gray-400';
                 // wave-394: 우세 팩터 레이블 (favored team 기준) · wave-400: glossary 링크

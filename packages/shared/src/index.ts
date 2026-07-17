@@ -2512,6 +2512,21 @@ export const FACTOR_PICK_MIN_FACTORS = 7;
 export const FACTOR_PICK_TOP_GAMES = 3;
 
 /**
+ * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755).
+ * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상을 brand(파랑)로 표시.
+ * 10팩터 중 8개 이상 한쪽 팀 우세 = 80% 팩터 정렬.
+ * FACTOR_PICK_MIN_FACTORS(7)=임계, FACTOR_PICK_STRONG(8)=강, FACTOR_PICK_COMPLETE(10)=완전수렴.
+ */
+export const FACTOR_PICK_STRONG = 8;
+
+/**
+ * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755).
+ * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상을 accent(골드)로 표시.
+ * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
+ */
+export const FACTOR_PICK_COMPLETE = 10;
+
+/**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
