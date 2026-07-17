@@ -40,13 +40,10 @@ describe('computeCompositeDuel', () => {
     expect(result.netScore).toBe(0);
   });
 
-  it('applies park factor for hitter-friendly park', () => {
-    // KIA = Gwangju (parkPf >= 105 → home win)
+  it('applies park factor without throwing for any valid TeamCode', () => {
     const result = computeCompositeDuel({
-      homeCode: 'KIA',
+      homeCode: 'OB',
     });
-    // parkResult should be 'home' if KIA's parkPf >= PARK_FACTOR_HITTER_MIN
-    // At minimum check it doesn't throw and valid park factor is counted
     expect(result.validCount).toBeGreaterThanOrEqual(0);
     expect(typeof result.netScore).toBe('number');
   });
