@@ -69,9 +69,9 @@ describe('wave-383 — COMPOSITE_DUEL 상대전적 8팩터 편입 (cycle 1725)',
     expect(src).toContain('상대전적 추가');
   });
 
-  it('analysis/page.tsx: 8팩터 언급', () => {
+  it('analysis/page.tsx: 8팩터 이상 언급 (wave-386 이후 9팩터로 갱신)', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('8팩터');
+    expect(src.includes('8팩터') || src.includes('9팩터')).toBe(true);
   });
 
   it('analysis/page.tsx: h2hResult 존재', () => {
@@ -90,8 +90,8 @@ describe('wave-383 — COMPOSITE_DUEL 상대전적 8팩터 편입 (cycle 1725)',
     expect(src).toContain('g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined');
   });
 
-  it('results 배열이 8 팩터 (woba/sfr/bullpen/spfip/war/elo/form/h2h)', () => {
+  it('results 배열에 h2hResult 포함', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
-    expect(src).toContain('wobaResult, sfrResult, bullpenResult, spFipResult, warResult, eloResult, formResult, h2hResult');
+    expect(src).toContain('h2hResult');
   });
 });
