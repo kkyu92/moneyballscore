@@ -16,8 +16,9 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 }
 
 // KBO_NAV: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
-// 1 top-level (오늘) + 3 group (예측·기록 5 / 팀·선수 4 / 커뮤니티 2) = 4 hover zone.
+// 1 top-level (오늘) + 4 group (예측·기록 5 / 팀·선수 4 / 리뷰·시즌 3 / 커뮤니티 2) = 5 hover zone.
 // accuracy/shadow (v2.1-B rejected) → footer only (wave-384 IA cleanup)
+// reviews section (wave-403) → 리뷰·시즌 그룹 추가 (cycle 1749 IA)
 const KBO_NAV: NavItem[] = [
   { href: "/", label: "오늘" },
   {
@@ -37,6 +38,14 @@ const KBO_NAV: NavItem[] = [
       { href: "/teams", label: "팀", description: `KBO ${KBO_TEAM_COUNT}구단 프로필·통계`, icon: "shield" },
       { href: "/players", label: "선수", description: "선수 세이버메트릭스 지표", icon: "user" },
       { href: "/matchup", label: "매치업", description: "팀간 맞대결 이력 분석", icon: "arrows-swap" },
+    ],
+  },
+  {
+    label: "리뷰·시즌",
+    items: [
+      { href: "/reviews", label: "예측 리뷰", description: "주간·월간 적중률 추이 · 팀별 분해", icon: "bar-chart" },
+      { href: "/reviews/misses", label: "빗나간 예측", description: "고확신 오예측 사후 분석", icon: "target" },
+      { href: "/seasons", label: "시즌 기록", description: "역대 시즌별 기록", icon: "database" },
     ],
   },
   {
