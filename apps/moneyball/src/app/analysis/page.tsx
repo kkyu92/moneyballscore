@@ -1013,7 +1013,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1074,6 +1074,12 @@ export default async function AnalysisIndexPage() {
                       {pick.predictedWinnerCode != null && (
                         <span className={`font-mono text-xs ${modelAgrees ? 'text-brand-500 dark:text-brand-400' : 'text-gray-400 dark:text-gray-500'}`}>
                           {probPct}%
+                        </span>
+                      )}
+                      {/* wave-416: 팩터-모델 합치 칩 */}
+                      {modelAgrees && (
+                        <span className="inline-block text-xs px-1 py-0 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-medium">
+                          ✓ 합치
                         </span>
                       )}
                       <span className="text-gray-400 dark:text-gray-500">—</span>
@@ -1440,6 +1446,10 @@ export default async function AnalysisIndexPage() {
               const pickFavoredHome = (g.compositeDuelScore ?? 0) > 0;
               const pickFavoredCount = isPickGame ? (pickFavoredHome ? g.compositeDuelHomeWins! : g.compositeDuelAwayWins!) : 0;
               const pickAgainstCount = isPickGame ? (pickFavoredHome ? g.compositeDuelAwayWins! : g.compositeDuelHomeWins!) : 0;
+              // wave-416: 팩터-모델 합치 — 수렴 픽 우세 팀과 모델 예측 팀이 일치
+              const isPickModelAgree = isPickGame &&
+                g.predictedWinnerCode != null &&
+                g.predictedWinnerCode === (pickFavoredHome ? g.homeCode : g.awayCode);
               return (
                 <li key={g.gameId}>
                   <Link
@@ -1449,7 +1459,11 @@ export default async function AnalysisIndexPage() {
                         ? 'bg-white dark:bg-[var(--color-surface-card)] border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20'
                         : isTopPick
                           ? 'bg-white dark:bg-[var(--color-surface-card)] border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30'
-                          : 'bg-white dark:bg-[var(--color-surface-card)] border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 dark:hover:border-brand-500'
+                          : isPickModelAgree
+                            ? 'bg-white dark:bg-[var(--color-surface-card)] border-brand-300 dark:border-brand-700/60 ring-1 ring-brand-300/30 dark:ring-brand-700/20'
+                            : isPickGame
+                              ? 'bg-white dark:bg-[var(--color-surface-card)] border-brand-200 dark:border-brand-800/50 hover:border-brand-500 dark:hover:border-brand-500'
+                              : 'bg-white dark:bg-[var(--color-surface-card)] border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 dark:hover:border-brand-500'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">

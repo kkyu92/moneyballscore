@@ -126,6 +126,8 @@ import {
   ANALYSIS_UPCOMING_LIMIT,
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_TOP_GAMES,
+  FACTOR_PICK_STRONG,
+  FACTOR_PICK_COMPLETE,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -853,5 +855,12 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
   it('FACTOR_PICK_TOP_GAMES — 팩터 수렴 픽 최대 경기 수 (silent drift wave 406 guard)', () => {
     expect(FACTOR_PICK_MIN_FACTORS).toBe(7);
     expect(FACTOR_PICK_TOP_GAMES).toBe(3);
+  });
+
+  it('FACTOR_PICK_STRONG/COMPLETE — 수렴 강도 임계 (silent drift wave 416 guard)', () => {
+    expect(FACTOR_PICK_STRONG).toBe(8);
+    expect(FACTOR_PICK_COMPLETE).toBe(10);
+    expect(FACTOR_PICK_STRONG).toBeGreaterThan(FACTOR_PICK_MIN_FACTORS);
+    expect(FACTOR_PICK_COMPLETE).toBeGreaterThan(FACTOR_PICK_STRONG);
   });
 });
