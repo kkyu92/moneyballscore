@@ -954,7 +954,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* wave-392: 팩터 수렴 픽 — 복수 경기, homeWins:awayWins 비율 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
