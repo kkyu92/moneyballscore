@@ -32,6 +32,20 @@ export const FACTOR_LABELS: Record<string, string> = {
   sfr: "수비력",
 };
 
+/** wave-430: 종합 우세 배지 인라인 나열용 — 한두 글자 단축 레이블 */
+export const FACTOR_LABELS_SHORT: Record<string, string> = {
+  sp_fip: "선발",
+  sp_xfip: "잠재력",
+  lineup_woba: "타선",
+  bullpen_fip: "불펜",
+  recent_form: "폼",
+  war: "WAR",
+  head_to_head: "상대전적",
+  park_factor: "구장",
+  elo: "Elo",
+  sfr: "수비",
+};
+
 // MetricRegistry.ko_name 단일 source — silent drift 차단 (wave 52).
 // glossary lib + methodology FACTOR_WEIGHTS + LLM agent prompt 와 동일 source.
 export const FACTOR_LABELS_TECHNICAL: Record<string, string> = Object.fromEntries(

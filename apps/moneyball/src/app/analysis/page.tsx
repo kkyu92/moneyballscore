@@ -86,7 +86,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS } from '@/lib/predictions/factorLabels';
+import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
 export const metadata: Metadata = {
@@ -1090,7 +1090,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -2100,7 +2100,7 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-365→wave-393: 종합 우세 배지 (compositeDuelScore 기준 우세 팀 결정) */}
+                          {/* wave-365→wave-393→wave-430: 종합 우세 배지 + 우세 팩터 항목 나열 */}
                           {(() => {
                             const hw = g.compositeDuelHomeWins;
                             const aw = g.compositeDuelAwayWins;
@@ -2111,6 +2111,9 @@ export default async function AnalysisIndexPage() {
                             const count = favoredHome ? hw : aw;
                             if (count < COMPOSITE_DUEL_THRESHOLD) return null;
                             const favoredName = shortTeamName(favoredHome ? g.homeCode : g.awayCode);
+                            // wave-430: 우세 팩터 항목 단축 레이블 나열
+                            const slugs = (favoredHome ? g.compositeDuelHomeSlugs : g.compositeDuelAwaySlugs) ?? [];
+                            const factorInline = slugs.map((s) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
                             return (
                               <>
                                 <span className="text-gray-300 dark:text-gray-700">·</span>
@@ -2121,6 +2124,11 @@ export default async function AnalysisIndexPage() {
                                 }`}>
                                   {favoredName} {count}팩터 우세
                                 </span>
+                                {factorInline && (
+                                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                                    {' '}({factorInline})
+                                  </span>
+                                )}
                               </>
                             );
                           })()}
