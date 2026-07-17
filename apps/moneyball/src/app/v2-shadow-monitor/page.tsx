@@ -26,6 +26,7 @@ export const metadata: Metadata = {
   title: "v2 섀도우 모니터",
   description:
     `${CURRENT_SCORING_RULE} (prod) 와 ${ERA_COVERAGE_LABEL} era 별 적중률과 Brier 점수를 모두 공개. n=${V2_PROMOTION_COHORT_N} 임계 달성 — v2.1-B rejected (Brier 0.4635), v1.8 유지 확정 — 모델 진화 트랜스페어런시 dashboard.`,
+  robots: { index: false },
   alternates: { canonical: PAGE_URL },
   openGraph: {
     title: "v2 섀도우 모니터 | MoneyBall Score",
