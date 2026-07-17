@@ -2499,6 +2499,16 @@ export const SP_FIP_DUEL_MIN = 0.5;
 export const SP_XFIP_DUEL_MIN = 0.5;
 
 /**
+ * 구장 행 PF 편차(Δ) 표시 최소 임계 — wave-450 (cycle 1810).
+ * |parkPf - 100| ≥ 본 값 시 "Δ+X" / "Δ-X" 수치 명시.
+ * parkPf 100 = 중립 기준. 3 = 타자/투수 친화 최소 의미 차이.
+ * 적용 팀 예: SS(Δ+8) / WO(Δ-8) / SK(Δ+5) / LG(Δ-5) / LT(Δ+3).
+ * 비적용 팀: HT(0) / NC(0) / HH(Δ+1) / KT(Δ-2).
+ * 변경 시 analysis/page.tsx wave-450 callsite 자동 동기.
+ */
+export const PARK_FACTOR_DELTA_MIN = 3;
+
+/**
  * 종합 우세 배지 팩터 임계 — wave-365 (cycle 1705), wave-368 WAR 추가 (cycle 1708), wave-379 Elo 추가 (cycle 1722), wave-381 최근폼 추가 (cycle 1723), wave-383 상대전적 추가 (cycle 1725), wave-386 선발xFIP 추가 (cycle 1729), wave-388 구장보정 추가 (cycle 1732).
  * wOBA/SFR/불펜FIP/선발FIP/WAR/Elo/최근폼/상대전적/선발xFIP/구장보정 10개 직접 대결 결과 집계 시
  * 한 팀이 본 값 이상 팩터에서 우세 → "N팩터 우세" 배지 표시.
