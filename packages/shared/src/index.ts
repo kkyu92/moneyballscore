@@ -2505,6 +2505,7 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
 /**
  * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734), wave-392 top-3 복수 표시 (cycle 1736).
  * |homeWins - awayWins| ≥ 본 값 시 "팩터 수렴 픽" 섹션 표시. FACTOR_PICK_TOP_GAMES 경기까지 표시.
+ * · wave-415 오늘 AI 예측 카드 인라인 배지 isPickGame 조건 (cycle 1766): |compositeDuelScore| ≥ 본 값 시 배지 표시.
  * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
  */
 export const FACTOR_PICK_MIN_FACTORS = 7;
@@ -2517,7 +2518,7 @@ export const FACTOR_PICK_MIN_FACTORS = 7;
 export const FACTOR_PICK_TOP_GAMES = 3;
 
 /**
- * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755).
+ * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766).
  * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상을 brand(파랑)로 표시.
  * 10팩터 중 8개 이상 한쪽 팀 우세 = 80% 팩터 정렬.
  * FACTOR_PICK_MIN_FACTORS(7)=임계, FACTOR_PICK_STRONG(8)=강, FACTOR_PICK_COMPLETE(10)=완전수렴.
@@ -2525,7 +2526,7 @@ export const FACTOR_PICK_TOP_GAMES = 3;
 export const FACTOR_PICK_STRONG = 8;
 
 /**
- * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755).
+ * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766).
  * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상을 accent(골드)로 표시.
  * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
  */
