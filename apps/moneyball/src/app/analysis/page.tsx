@@ -394,6 +394,8 @@ interface ThisWeekGameCard {
   predictedWinnerCode: TeamCode | null;
   confidence: number | null;
   isCorrect: boolean | null;
+  /** wave-405: 팩터 수렴 net score (null = 데이터 부족) */
+  convergenceNetScore: number | null;
 }
 
 interface ThisWeekGameRow {
@@ -409,6 +411,22 @@ interface ThisWeekGameRow {
     confidence: number | null;
     is_correct: boolean | null;
     predicted_winner_team: { code: string | null } | null;
+    home_elo: number | null;
+    away_elo: number | null;
+    home_recent_form: number | null;
+    away_recent_form: number | null;
+    home_sp_fip: number | null;
+    away_sp_fip: number | null;
+    home_sp_xfip: number | null;
+    away_sp_xfip: number | null;
+    home_lineup_woba: number | null;
+    away_lineup_woba: number | null;
+    home_bullpen_fip: number | null;
+    away_bullpen_fip: number | null;
+    home_sfr: number | null;
+    away_sfr: number | null;
+    home_war_total: number | null;
+    away_war_total: number | null;
   }>;
 }
 
@@ -426,6 +444,10 @@ async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         prediction_type, confidence, is_correct,
+        home_elo, away_elo, home_recent_form, away_recent_form,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_sfr, away_sfr, home_war_total, away_war_total,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
     `)
@@ -447,6 +469,27 @@ async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
     const homeCode = row.home_team?.code as TeamCode | undefined;
     const awayCode = row.away_team?.code as TeamCode | undefined;
     if (!homeCode || !awayCode) continue;
+    // wave-405: 이번 주 팩터 수렴 성적 — 과거 경기에도 동일 로직 적용 (H2H 제외)
+    const weekDuel = computeCompositeDuel({
+      homeCode,
+      homeLineupWoba: pred.home_lineup_woba,
+      awayLineupWoba: pred.away_lineup_woba,
+      homeSfr: pred.home_sfr,
+      awaySfr: pred.away_sfr,
+      homeBullpenFip: pred.home_bullpen_fip,
+      awayBullpenFip: pred.away_bullpen_fip,
+      homeSPFip: pred.home_sp_fip,
+      awaySPFip: pred.away_sp_fip,
+      homeSPXfip: pred.home_sp_xfip,
+      awaySPXfip: pred.away_sp_xfip,
+      homeWar: pred.home_war_total,
+      awayWar: pred.away_war_total,
+      homeElo: pred.home_elo ?? undefined,
+      awayElo: pred.away_elo ?? undefined,
+      homeRecentForm: pred.home_recent_form ?? undefined,
+      awayRecentForm: pred.away_recent_form ?? undefined,
+    });
+    const weekDuelValid = weekDuel.validCount >= COMPOSITE_DUEL_MIN_VALID;
     cards.push({
       gameId: row.id,
       gameDate: row.game_date,
@@ -457,6 +500,7 @@ async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
       predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
       confidence: pred.confidence,
       isCorrect: pred.is_correct,
+      convergenceNetScore: weekDuelValid ? weekDuel.netScore : null,
     });
   }
   return cards;
@@ -885,6 +929,18 @@ export default async function AnalysisIndexPage() {
     .sort((a, b) => Math.abs(b.compositeDuelScore!) - Math.abs(a.compositeDuelScore!))
     .slice(0, 3);
 
+  // wave-405: 이번 주 팩터 수렴 픽 성적 — 종료된 수렴 경기 승/패 집계
+  const weeklyConvergenceRecord = thisWeekPreviousGames.reduce(
+    (acc, g) => {
+      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_MIN_FACTORS) return acc;
+      if (g.homeScore === null || g.awayScore === null) return acc;
+      const favoredHome = g.convergenceNetScore > 0;
+      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
+      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
+    },
+    { wins: 0, losses: 0 },
+  );
+
   const simplifiedMode =
     todayData.games.length >= CE_MIN_SAMPLES &&
     todayData.games.reduce((s, g) => s + g.confidence, 0) / todayData.games.length <= CE_DETECT_THRESHOLD;
@@ -954,13 +1010,20 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
-            <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-2">
-              팩터 수렴 경기{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
-            </h2>
+            <div className="flex items-baseline justify-between mb-2">
+              <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+                팩터 수렴 경기{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
+              </h2>
+              {(weeklyConvergenceRecord.wins + weeklyConvergenceRecord.losses) > 0 && (
+                <span className="text-[11px] tabular-nums text-brand-600 dark:text-brand-400">
+                  이번 주 {weeklyConvergenceRecord.wins}승 {weeklyConvergenceRecord.losses}패
+                </span>
+              )}
+            </div>
             <ul className="space-y-2">
               {factorPickGames.map((pick) => {
                 const favoredHome = pick.compositeDuelScore! > 0;
