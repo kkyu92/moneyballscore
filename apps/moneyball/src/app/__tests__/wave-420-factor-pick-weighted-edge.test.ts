@@ -11,12 +11,13 @@ describe('wave-420 — FACTOR_PICK_WEIGHT_TOTAL 상수', () => {
     expect(FACTOR_PICK_WEIGHT_TOTAL).toBe(0.85);
   });
 
-  it('FACTOR_PICK_WEIGHT_TOTAL = ACTIVE_FACTOR_KEYS DEFAULT_WEIGHTS 합계', () => {
+  it('ACTIVE_FACTOR_KEYS DEFAULT_WEIGHTS 합계 = 정확히 0.85 (부동소수점 정합)', () => {
+    // wave-421: FACTOR_PICK_WEIGHT_TOTAL 은 파생값. 가중치 변경 시 합계 = 0.85 유지 필요.
     const sum = ACTIVE_FACTOR_KEYS.reduce<number>(
-      (acc, key) => acc + (DEFAULT_WEIGHTS[key as keyof typeof DEFAULT_WEIGHTS] ?? 0),
+      (acc, key) => acc + DEFAULT_WEIGHTS[key],
       0
     );
-    expect(Math.round(sum * 100) / 100).toBe(FACTOR_PICK_WEIGHT_TOTAL);
+    expect(sum).toBe(0.85);
   });
 });
 
