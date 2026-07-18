@@ -74,6 +74,7 @@ import {
   CONVERGENCE_RECORD_RECENT_LIMIT,
   TOPFACTOR_STRONG_IMPACT,
   TOPFACTOR_COMPLETE_IMPACT,
+  TOPFACTOR_IMPACT_MIN_DISPLAY,
   DEFAULT_WEIGHTS,
   type SelectResult,
   type TeamCode,
@@ -1786,6 +1787,7 @@ export default async function AnalysisIndexPage() {
                       </span>
                     </div>
                     {/* wave-469: topFactors 배지 3-tier 색상 — impact 기반 (TOPFACTOR_COMPLETE_IMPACT=amber / TOPFACTOR_STRONG_IMPACT=brand / 기본=gray) */}
+                    {/* wave-471: impact %p 수치 표시 — impact >= TOPFACTOR_IMPACT_MIN_DISPLAY 시 "+n" 노출 */}
                     {g.topFactors.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {g.topFactors.map((f, i) => {
@@ -1794,12 +1796,13 @@ export default async function AnalysisIndexPage() {
                             : f.impact >= TOPFACTOR_STRONG_IMPACT
                               ? 'bg-brand-100 dark:bg-brand-800/40 text-brand-600 dark:text-brand-400'
                               : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400';
+                          const impactPp = Math.round(f.impact * 100);
                           return (
                             <span
                               key={i}
                               className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${tierClass}`}
                             >
-                              {f.label}: {shortTeamName(f.favoredCode)}↑
+                              {f.label}: {shortTeamName(f.favoredCode)}{f.impact >= TOPFACTOR_IMPACT_MIN_DISPLAY ? ` +${impactPp}` : ''}↑
                             </span>
                           );
                         })}

@@ -2614,3 +2614,5 @@ export const CONVERGENCE_BADGE_WEIGHT_STRONG_PCT = 70;
 export const TOPFACTOR_STRONG_IMPACT = 0.18;
 /** wave-469: topFactors 배지 amber 임계 — impact ≥ 0.30 (factor value ≥ 0.80 or ≤ 0.20). */
 export const TOPFACTOR_COMPLETE_IMPACT = 0.30;
+/** wave-471: topFactors 배지 impact %p 수치 표시 최소 임계 — impact ≥ 0.05 (5pp) 시 "+n" 수치 노출. */
+export const TOPFACTOR_IMPACT_MIN_DISPLAY = 0.05;
