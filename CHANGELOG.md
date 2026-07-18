@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.54.4 — 2026-07-18 (wave-471: 분석 목록 메인 게임 카드 topFactors 배지 impact %p 수치 표시)
+
+### feat(analysis): topFactors 배지 impact %p 수치 표시 (cycle 1833)
+
+- `TOPFACTOR_IMPACT_MIN_DISPLAY = 0.05` 상수 추가 (`packages/shared`)
+- topFactors 배지에 impact %p 수치 노출: `선발FIP: 한화 +12↑` (impact ≥ 5pp 시)
+- `impactPp = Math.round(f.impact * 100)` — color tier 에 quantitative 수치 추가
+- wave-471 테스트 11개 추가 (`wave-471-topfactor-impact-display.test.ts`)
+
+---
+
 ## v0.5.54.3 — 2026-07-18 (wave-469: 분석 목록 메인 게임 카드 topFactors 배지 3-tier 색상)
 
 ### feat(analysis): topFactors 배지 3-tier 색상 시스템 (cycle 1831)
