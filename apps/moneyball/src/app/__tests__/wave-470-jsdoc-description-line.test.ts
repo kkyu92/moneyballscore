@@ -3,7 +3,6 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
   TOPFACTOR_STRONG_IMPACT,
-  TOPFACTOR_COMPLETE_IMPACT,
   NEUTRAL_FACTOR,
 } from '@moneyball/shared';
 
