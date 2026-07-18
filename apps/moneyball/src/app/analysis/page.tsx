@@ -72,6 +72,8 @@ import {
   FACTOR_PICK_WEIGHT_TOTAL,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
+  TOPFACTOR_STRONG_IMPACT,
+  TOPFACTOR_COMPLETE_IMPACT,
   DEFAULT_WEIGHTS,
   type SelectResult,
   type TeamCode,
@@ -151,7 +153,8 @@ interface TodayGameCard {
   predictedWinnerCode: TeamCode | null;
   homeWinProb: number;
   confidence: number;
-  topFactors: Array<{ label: string; favoredCode: TeamCode }>;
+  /** wave-469: impact 포함 — |factor value - NEUTRAL_FACTOR|, 3-tier 색상 기준. */
+  topFactors: Array<{ label: string; favoredCode: TeamCode; impact: number }>;
   /** wave-321: Elo & 폼 비교 배지 · wave-444: 팩터 수렴 픽 Elo 행 격차(Δ) 표시 */
   homeElo?: number;
   awayElo?: number;
@@ -275,7 +278,7 @@ async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
         .sort((a, b) => b.impact - a.impact)
         .slice(0, ANALYSIS_TOP_FACTORS_LIMIT);
       for (const f of sorted) {
-        topFactors.push({ label: FACTOR_LABELS[f.key], favoredCode: f.favorable });
+        topFactors.push({ label: FACTOR_LABELS[f.key], favoredCode: f.favorable, impact: f.impact });
       }
     }
 
@@ -1782,16 +1785,24 @@ export default async function AnalysisIndexPage() {
                         {Math.round((1 - g.homeWinProb) * 100)}%
                       </span>
                     </div>
+                    {/* wave-469: topFactors 배지 3-tier 색상 — impact 기반 (TOPFACTOR_COMPLETE_IMPACT=amber / TOPFACTOR_STRONG_IMPACT=brand / 기본=gray) */}
                     {g.topFactors.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {g.topFactors.map((f, i) => (
-                          <span
-                            key={i}
-                            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                          >
-                            {f.label}: {shortTeamName(f.favoredCode)}↑
-                          </span>
-                        ))}
+                        {g.topFactors.map((f, i) => {
+                          const tierClass = f.impact >= TOPFACTOR_COMPLETE_IMPACT
+                            ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300'
+                            : f.impact >= TOPFACTOR_STRONG_IMPACT
+                              ? 'bg-brand-100 dark:bg-brand-800/40 text-brand-600 dark:text-brand-400'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400';
+                          return (
+                            <span
+                              key={i}
+                              className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${tierClass}`}
+                            >
+                              {f.label}: {shortTeamName(f.favoredCode)}↑
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
                     {/* wave-321: Elo & 폼 비교 배지 */}
