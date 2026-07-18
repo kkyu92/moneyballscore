@@ -2605,7 +2605,7 @@ export const RECENT_FORM_DUEL_MIN = 0.10;
 export const CONVERGENCE_BADGE_WEIGHT_STRONG_PCT = 70;
 
 /**
- * wave-469: 분석 목록 메인 게임 카드 topFactors 배지 3-tier 색상 임계값.
+ * wave-469: 분析 목록 메인 게임 카드 topFactors 배지 brand 임계 — impact ≥ 0.18 (factor value ≥ 0.68 or ≤ 0.32).
  * impact = |factor value - NEUTRAL_FACTOR| (0 ~ 0.5 범위).
  * TOPFACTOR_STRONG_IMPACT(0.18) ≤ impact < TOPFACTOR_COMPLETE_IMPACT(0.30) → brand 색상.
  * impact ≥ TOPFACTOR_COMPLETE_IMPACT(0.30) → amber 색상.
