@@ -1669,9 +1669,7 @@ export default async function AnalysisIndexPage() {
               const pickConvStrength = g.compositeDuelScore !== null ? Math.abs(g.compositeDuelScore) : 0;
               const isPickGame = pickConvStrength >= FACTOR_PICK_MIN_FACTORS;
               const pickFavoredHome = (g.compositeDuelScore ?? 0) > 0;
-              const pickFavoredCount = isPickGame ? (pickFavoredHome ? g.compositeDuelHomeWins! : g.compositeDuelAwayWins!) : 0;
-              const pickAgainstCount = isPickGame ? (pickFavoredHome ? g.compositeDuelAwayWins! : g.compositeDuelHomeWins!) : 0;
-              // wave-473: 팩터 균형 — 비수렴 경기에도 팩터 N:M 표시
+              // wave-473: 팩터 균형 — 비수렴 경기에도 팩터 N:M 표시 (favored-first 포맷)
               const factorHasData = g.compositeDuelHomeWins != null && g.compositeDuelAwayWins != null;
               const factorFavoredCount = factorHasData
                 ? (pickFavoredHome ? g.compositeDuelHomeWins! : g.compositeDuelAwayWins!)
