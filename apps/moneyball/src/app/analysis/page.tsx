@@ -1669,8 +1669,14 @@ export default async function AnalysisIndexPage() {
               const pickConvStrength = g.compositeDuelScore !== null ? Math.abs(g.compositeDuelScore) : 0;
               const isPickGame = pickConvStrength >= FACTOR_PICK_MIN_FACTORS;
               const pickFavoredHome = (g.compositeDuelScore ?? 0) > 0;
-              const pickFavoredCount = isPickGame ? (pickFavoredHome ? g.compositeDuelHomeWins! : g.compositeDuelAwayWins!) : 0;
-              const pickAgainstCount = isPickGame ? (pickFavoredHome ? g.compositeDuelAwayWins! : g.compositeDuelHomeWins!) : 0;
+              // wave-473: 팩터 균형 — 비수렴 경기에도 팩터 N:M 표시 (favored-first 포맷)
+              const factorHasData = g.compositeDuelHomeWins != null && g.compositeDuelAwayWins != null;
+              const factorFavoredCount = factorHasData
+                ? (pickFavoredHome ? g.compositeDuelHomeWins! : g.compositeDuelAwayWins!)
+                : null;
+              const factorAgainstCount = factorHasData
+                ? (pickFavoredHome ? g.compositeDuelAwayWins! : g.compositeDuelHomeWins!)
+                : null;
               // wave-416: 팩터-모델 합치 — 수렴 픽 우세 팀과 모델 예측 팀이 일치
               const isPickModelAgree = isPickGame &&
                 g.predictedWinnerCode != null &&
@@ -1722,16 +1728,20 @@ export default async function AnalysisIndexPage() {
                                   : 'text-orange-500 dark:text-orange-400'
                               }`}>{gameTypeTag}</span>
                             )}
-                            {/* wave-415: 팩터 수렴 배지 — 수렴 픽 경기 인라인 강도 표시 */}
-                            {isPickGame && (
-                              <span className={`ml-2 font-mono font-semibold ${
-                                pickConvStrength >= FACTOR_PICK_COMPLETE
-                                  ? 'text-[var(--color-accent)] dark:text-[#e2c96b]'
-                                  : pickConvStrength >= FACTOR_PICK_STRONG
-                                    ? 'text-brand-500 dark:text-brand-400'
-                                    : 'text-gray-500 dark:text-gray-400'
+                            {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) */}
+                            {factorFavoredCount != null && (
+                              <span className={`ml-2 font-mono ${
+                                isPickGame
+                                  ? `font-semibold ${
+                                      pickConvStrength >= FACTOR_PICK_COMPLETE
+                                        ? 'text-[var(--color-accent)] dark:text-[#e2c96b]'
+                                        : pickConvStrength >= FACTOR_PICK_STRONG
+                                          ? 'text-brand-500 dark:text-brand-400'
+                                          : 'text-gray-500 dark:text-gray-400'
+                                    }`
+                                  : 'text-gray-400 dark:text-gray-500'
                               }`}>
-                                팩터 {pickFavoredCount}:{pickAgainstCount}
+                                팩터 {factorFavoredCount}:{factorAgainstCount}
                               </span>
                             )}
                           </p>

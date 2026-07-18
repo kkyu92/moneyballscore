@@ -2533,6 +2533,7 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
  * · wave-415 오늘 AI 예측 카드 인라인 배지 isPickGame 조건 (cycle 1766): |compositeDuelScore| ≥ 본 값 시 배지 표시.
  * · wave-416 팩터-모델 합치 isPickModelAgree 조건 (cycle 1769): isPickGame 통해 간접 의존.
  * · wave-424 rolling 성적 getRecentConvergencePickRecord (cycle 1778): |duel.netScore| ≥ 본 값 시 rolling 집계 포함.
+ * · wave-473 비수렴 경기 팩터 균형 표시 (cycle 1835): 이 임계 미달 경기에도 factorFavoredCount/factorAgainstCount 산출 후 gray 색상으로 팩터 N:M 표시.
  * 10팩터 중 7개 이상 한쪽 팀 우세 = 70% 팩터 정렬.
  */
 export const FACTOR_PICK_MIN_FACTORS = 7;
