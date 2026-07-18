@@ -1034,7 +1034,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1094,6 +1094,8 @@ export default async function AnalysisIndexPage() {
                 // wave-459: 3-tier 칩 색상 — DESIGN.md wave-458 정합 (isComplete/isWeightStrong)
                 const isComplete = convStrength >= FACTOR_PICK_COMPLETE;
                 const isWeightStrong = !isComplete && favoredWeightPct >= CONVERGENCE_BADGE_WEIGHT_STRONG_PCT;
+                // wave-465: 수렴 단계 레이블 — game/[id] wave-463 동일 기준 (factor count), 분석 목록 적용
+                const isStrong = !isComplete && convStrength >= FACTOR_PICK_STRONG;
                 const favoredChipClass = isComplete
                   ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
                   : isWeightStrong
@@ -1134,6 +1136,17 @@ export default async function AnalysisIndexPage() {
                       {modelAgrees && (
                         <span className={`inline-block text-xs px-1 py-0 rounded font-medium ${isComplete ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300' : 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'}`}>
                           ✓ 합치
+                        </span>
+                      )}
+                      {/* wave-465: 수렴 단계 레이블 칩 — 완전수렴(amber) / 강수렴(brand) · game/[id] wave-463 동일 패턴, 분석 목록 적용 */}
+                      {isComplete && (
+                        <span className="inline-block text-xs px-1 py-0 rounded font-medium bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300">
+                          완전수렴
+                        </span>
+                      )}
+                      {isStrong && (
+                        <span className="inline-block text-xs px-1 py-0 rounded font-medium bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+                          강수렴
                         </span>
                       )}
                       <span className="text-gray-400 dark:text-gray-500">—</span>
