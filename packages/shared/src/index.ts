@@ -2553,8 +2553,8 @@ export const FACTOR_PICK_TOP_GAMES = 3;
 export const FACTOR_PICK_STRONG = 8;
 
 /**
- * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816). · wave-459 analysis/page.tsx isComplete chip 색상 (cycle 1819).
- * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상·amber 칩 (wave-459), game/[id]/page.tsx = amber 배경 배지 + amber 칩. false 시 상대 팀 우세 팩터 칩 표시 (wave-456).
+ * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816). · wave-459 analysis/page.tsx isComplete chip 색상 (cycle 1819). · wave-461 game/[id]/page.tsx 합치 칩(✓ 합치) amber 3-tier 색상 (cycle 1822).
+ * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상·amber 칩 (wave-459), game/[id]/page.tsx = amber 배경 배지 + amber 칩 + 합치 칩 amber (wave-461). false 시 상대 팀 우세 팩터 칩 표시 (wave-456).
  * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
  */
 export const FACTOR_PICK_COMPLETE = 10;
@@ -2574,6 +2574,7 @@ export const FACTOR_PICK_WEIGHT_TOTAL = ACTIVE_FACTOR_KEYS.reduce<number>(
  * getRecentConvergencePickRecord 기본 window 크기.
  * 주별 경계 없이 최근 N건 완료 수렴 픽 집계 → 올스타 브레이크 등 주별 경계 0건 방어.
  * RECENT_FORM_GAMES(10, 예측 모델용) 와 별개 — display 전용 rolling window.
+ * · wave-461 convergenceRecord.ts lib 분리 — analysis/page.tsx + game/[id]/page.tsx 양쪽 사용 (cycle 1822).
  */
 export const CONVERGENCE_RECORD_RECENT_LIMIT = 10;
 
@@ -2581,6 +2582,7 @@ export const CONVERGENCE_RECORD_RECENT_LIMIT = 10;
  * 팩터 수렴 픽 rolling 성적 lookback 기간 (일) — wave-425 (cycle 1778).
  * getRecentConvergencePickRecord 에서 game_date >= today - N days 쿼리 범위.
  * 45일 = 시즌 중 약 6주 — 충분한 경기 수(최소 20경기) 확보하면서 stale 데이터 방어.
+ * · wave-461 convergenceRecord.ts lib 분리 — game/[id]/page.tsx 성적 라인 쿼리 확장 (cycle 1822).
  */
 export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
 
