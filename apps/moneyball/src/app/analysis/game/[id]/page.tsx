@@ -20,6 +20,7 @@ import {
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
+import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
@@ -318,6 +319,11 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     convergenceDuel.validCount >= COMPOSITE_DUEL_MIN_VALID &&
     Math.abs(convergenceDuel.netScore) >= FACTOR_PICK_MIN_FACTORS;
 
+  // wave-461: 수렴 픽 성적 라인 — 게임 상세 배지에 최근 N경기 적중 현황 표시
+  const convergenceRecord = isConvergencePick
+    ? await getRecentConvergencePickRecord()
+    : { wins: 0, losses: 0, total: 0 };
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -410,7 +416,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       {/* 0. 경기 개요 — 태그 + 1-2줄 요약 */}
       <GameOverview tags={overview.tags} summary={overview.summary} />
 
-      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 · wave-456: 상대 팀 우세 팩터 칩 + 모델-합치 칩 */}
+      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 · wave-456: 상대 팀 우세 팩터 칩 + 모델-합치 칩 · wave-461: 합치 칩 3-tier 색상 + 성적 라인 */}
       {isConvergencePick && (() => {
         const favoredHome = convergenceDuel.netScore > 0;
         const hw = convergenceDuel.homeWins;
@@ -446,9 +452,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
               <span className="font-semibold">{favoredName} 우세</span>
               <span className="font-mono text-xs">{ratio}</span>
               <span className="font-mono text-xs opacity-60" title="우세 팩터 가중치 합 / 전체 팩터 가중치">가중{favoredWeightPct}%</span>
-              {/* wave-456: 모델-합치 칩 — 모델 예측과 팩터 수렴 방향 일치 시 */}
+              {/* wave-456: 모델-합치 칩 — 모델 예측과 팩터 수렴 방향 일치 시 · wave-461: 3-tier 색상 (isComplete=amber / else brand) */}
               {modelAgrees && verdict && (
-                <span className="inline-block text-xs px-1 py-0 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-medium">
+                <span className={`inline-block text-xs px-1 py-0 rounded font-medium ${isComplete ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300' : 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'}`}>
                   ✓ 합치
                 </span>
               )}
@@ -505,6 +511,16 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                   );
                 })}
               </div>
+            )}
+            {/* wave-461: 수렴 픽 성적 라인 — 최근 N경기 적중 현황 */}
+            {convergenceRecord.total > 0 && (
+              <p
+                className="mt-1.5 text-[11px] tabular-nums opacity-60"
+                title={`최근 ${convergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
+              >
+                최근 {convergenceRecord.total}경기 {convergenceRecord.wins}승{convergenceRecord.losses}패{' '}
+                ({Math.round(convergenceRecord.wins / convergenceRecord.total * 100)}%)
+              </p>
             )}
           </div>
         );
