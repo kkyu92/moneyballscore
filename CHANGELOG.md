@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.5.54.5 — 2026-07-18 (wave-472: TOPFACTOR_IMPACT_MIN_DISPLAY JSDoc description line 정정)
+
+### fix(context): TOPFACTOR_IMPACT_MIN_DISPLAY JSDoc description line 정정 (cycle 1834)
+
+- `TOPFACTOR_IMPACT_MIN_DISPLAY` JSDoc description line 정밀화
+  - `"impact %p 수치 표시 최소 임계"` → `"수치 노출 임계"` (모호한 "%p" 표현 제거, 중복 "최소" 제거)
+  - `"(5pp) 시 '+n' 수치 노출"` → `"(impactPp=Math.round(impact*100) ≥ 5) 시 '+{impactPp}' 표시"` (계산식 + 실제 출력 포맷 명시)
+  - callsite 동시 조정 안내 추가: `변경 시 analysis/page.tsx wave-471 impact 수치 callsite 동시 조정`
+- wave-472 테스트 5개 추가 (`wave-472-topfactor-impact-min-jsdoc.test.ts`)
+
+---
+
 ## v0.5.54.4 — 2026-07-18 (wave-471: 분석 목록 메인 게임 카드 topFactors 배지 impact %p 수치 표시)
 
 ### feat(analysis): topFactors 배지 impact %p 수치 표시 (cycle 1833)
