@@ -112,13 +112,14 @@ describe('wave-415: analysis/page.tsx 상수 import 확인', () => {
     expect(src).toContain('FACTOR_PICK_COMPLETE');
   });
 
-  it('wave-415 배지 JSX 존재 — isPickGame + pickConvStrength + 팩터 수렴 레이블', () => {
+  it('wave-415·473 배지 JSX 존재 — isPickGame + pickConvStrength + 팩터 N:M 레이블', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf-8');
     expect(src).toContain('isPickGame');
     expect(src).toContain('pickConvStrength');
-    expect(src).toContain('pickFavoredCount');
-    expect(src).toContain('pickAgainstCount');
+    // wave-473: pickFavoredCount/pickAgainstCount → factorFavoredCount/factorAgainstCount 로 rename
+    expect(src).toContain('factorFavoredCount');
+    expect(src).toContain('factorAgainstCount');
     expect(src).toContain('wave-415');
-    expect(src).toContain('팩터 {pickFavoredCount}:{pickAgainstCount}');
+    expect(src).toContain('팩터 {factorFavoredCount}:{factorAgainstCount}');
   });
 });

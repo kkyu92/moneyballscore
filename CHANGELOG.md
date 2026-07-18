@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.5.55.1 — 2026-07-18 (wave-474: FACTOR_PICK_MIN_FACTORS JSDoc wave-473 bullet description line 정정)
+
+### fix(context): FACTOR_PICK_MIN_FACTORS JSDoc wave-473 bullet description line 정정 (cycle 1836)
+
+- `FACTOR_PICK_MIN_FACTORS` JSDoc wave-473 bullet 정밀화
+  - 구 표현 `"이 임계 미달 경기에도 factorFavoredCount/factorAgainstCount 산출 후 gray 색상으로"` → 두 경로 명시
+  - 실제 조건 `factorFavoredCount != null` = homeWins/awayWins non-null 전체 경기 표시 (수렴+비수렴)
+  - 수렴(isPickGame) colored·bold / 비수렴 gray 양 경로 명시
+  - favored-first 포맷 명시
+  - callsite 동시 조정 안내 추가: `변경 시 analysis/page.tsx wave-415·473 factorHasData callsite 동시 조정`
+- wave-415 테스트 wave-473 rename 반영: `pickFavoredCount/pickAgainstCount` → `factorFavoredCount/factorAgainstCount`
+- wave-474 테스트 6개 추가 (`wave-474-factor-nm-balance-jsdoc.test.ts`)
+
+---
+
 ## v0.5.54.5 — 2026-07-18 (wave-472: TOPFACTOR_IMPACT_MIN_DISPLAY JSDoc description line 정정)
 
 ### fix(context): TOPFACTOR_IMPACT_MIN_DISPLAY JSDoc description line 정정 (cycle 1834)
