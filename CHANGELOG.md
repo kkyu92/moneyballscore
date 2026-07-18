@@ -1,5 +1,67 @@
 # Changelog
 
+## op-analysis — 2026-07-18 (cycle 1830, W30 시즌 재개 첫 주 완결)
+
+### 주간 예측 성과 분석 (7/14~7/18)
+
+#### 이번 주 성과 (KBO 재개 첫 주, 7/16~7/17 결과 확정)
+- **이번 주 (7/13 주, 9경기)**: 2/9 = **22.2%** ⚠️ — 올스타 브레이크 복귀 첫 주 전체 저조
+- **직전 주 (7/6 주, 올스타 직전)**: 7/13 = **53.8%**
+- **6월~7월 누적 (154경기)**: 90/154 = **58.4%** — v1.8 baseline 59.9%와 근사 (안정)
+
+#### 올스타 Cold Start 패턴 연장 확인
+| 시점 | n | acc | 비고 |
+|---|---|---|---|
+| 올스타 전 5주 누적 | 145 | 59.4% | baseline |
+| 올스타 직후 첫 날 (7/16) | 5 | 40.0% | cycle 1779 박제 |
+| 올스타 직후 첫 주 전체 (7/16~7/17) | **9** | **22.2%** | **← 이번 주 신규 측정** |
+- cycle 1779: "첫 날 40%, 2-3경기 후 회복 예상" → 실제로는 첫 주 전체 22%로 더 깊음
+- Cold Start 기간: 단일 경기가 아니라 **최소 9경기(첫 주 전체)** 지속됨을 확인
+
+#### 이번 주 오예측 패턴
+| 예측 | 실제 | 반복 |
+|---|---|---|
+| HH(한화) 승 | WO(키움) 승 | 2/2 반복 |
+| LG 승 | KT 승 | 2/2 반복 |
+| NC 승 | OB 승 | 1회 |
+| KIA 승 | SSG 승 | 1회 |
+- HH vs WO: 모델이 한화를 2연속 과대평가 (브레이크 후 키움 상승세 미반영)
+- LG vs KT: 동일. KT의 복귀 후 에이스 선발 순서 리셋 미반영
+
+#### 운영 상태 (pipeline 14일 all-green)
+- pipeline_runs: 모두 success, errors=0 (7/4~7/18)
+- CREDIT_EXHAUSTED: 6th recurrence 지속 (~6/6~). conf mean=0.271, median=0.300
+- 고확신 예측(conf>=0.65): 0/100 (CE fallback으로 제로)
+- 가중치 변경: 없음 (v1.8 유지 확정)
+
+#### 가중치 조정 판단
+- **변경 없음** — Cold Start 구간은 소표본 노이즈. 7/18+ 추가 데이터 누적 후 재측정
+- CREDIT_EXHAUSTED 6th recurrence → Anthropic 크레딧 충전 시 debate 복구 요청
+
+---
+
+## extract-pattern — 2026-07-18 (cycle 1830, anti_pattern + data_pipeline)
+
+### Pattern 1: 올스타 Cold Start 기간 연장 (anti_pattern) — cycle 1779 갱신
+- **Problem**: 올스타 복귀 첫 날 40% 기록 → cycle 1779에서 "2-3경기 후 회복" 예상했으나, 실제 첫 주 전체(9경기)가 22%로 더 깊고 길었음
+- **Solution**: Cold Start 범위를 "첫 날"이 아닌 **"첫 주 전체(최소 9경기)"**로 정정. UI에 올스타 복귀 첫 주 예측에 "조정 구간" 배지/경고 표시 권고
+- **Results**: n=9이라 통계적 확정은 불가. 7/18~7/25 추가 9경기 결과로 패턴 재검증 필요
+- **Reusable**: KBO 올스타(7일 휴식) 후 최소 1주 예측 신뢰도 조정 기간. MLB All-Star Break / 한국프로야구 시즌 간격 동일 적용
+
+### Pattern 2: 반복 오예측 팀 쌍 — 브레이크 후 선발 순서 리셋 미반영 (anti_pattern)
+- **Problem**: HH vs WO 2연속, LG vs KT 2연속 오예측 → 같은 팀 쌍에서 같은 방향 실수 반복
+- **Root cause**: 브레이크 후 에이스 선발 순서 리셋. 최근폼(10%) 가중치가 브레이크 전 6일치 데이터 기반 → 복귀 직후 선발 정보 불일치
+- **Solution (carry-over)**: 올스타 복귀 첫 시리즈 경기에서 선발 FIP/xFIP 가중치 임시 상향(15%→20%), recent_form 임시 하향(10%→5%) 고려. 미구현 — 다음 올스타 이전 구현 목표
+- **Reusable**: 시즌 중 장기 휴식 있는 스포츠 리그 예측 모델 공통 패턴
+
+### Pattern 3: 파이프라인 멱등성 다중 실행 — preds=0 은 오류 아님 (data_pipeline)
+- **Problem**: predict 모드가 하루 10+ 회 실행, 대부분 preds=0 / games=5 → 대시보드에서 "에러처럼" 보임
+- **Solution**: upsert 로직이 기존 예측 skip → preds=0 = "이미 존재, skip" (정상). 로깅 개선 권고: `preds_new=0 preds_existing=5` 형태로 구분
+- **Results**: pipeline_runs 14일 all-green. 실제 오류 없음
+- **Reusable**: idempotent ML prediction pipeline — "생성 건수=0" 과 "오류로 생성 불가" 를 구분하는 로깅 패턴
+
+---
+
 ## v0.5.54.2 — 2026-07-18 (cycle 1812)
 
 ### feat(analysis): wave-452 — 팩터 수렴 픽 배지 게임 상세 페이지 표시
