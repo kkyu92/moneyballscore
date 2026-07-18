@@ -2553,8 +2553,8 @@ export const FACTOR_PICK_TOP_GAMES = 3;
 export const FACTOR_PICK_STRONG = 8;
 
 /**
- * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816).
- * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상, game/[id]/page.tsx = amber 배경 배지 + amber 칩. false 시 상대 팀 우세 팩터 칩 표시 (wave-456).
+ * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816). · wave-459 analysis/page.tsx isComplete chip 색상 (cycle 1819).
+ * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상·amber 칩 (wave-459), game/[id]/page.tsx = amber 배경 배지 + amber 칩. false 시 상대 팀 우세 팩터 칩 표시 (wave-456).
  * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
  */
 export const FACTOR_PICK_COMPLETE = 10;
@@ -2593,10 +2593,10 @@ export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
 export const RECENT_FORM_DUEL_MIN = 0.10;
 
 /**
- * wave-452: 게임 상세 페이지 팩터 수렴 픽 배지 가중 우위 강조 임계값 (%). · wave-454 chip brand 색상 (cycle 1814).
+ * wave-452: 게임 상세 페이지 팩터 수렴 픽 배지 가중 우위 강조 임계값 (%). · wave-454 chip brand 색상 (cycle 1814). · wave-459 analysis/page.tsx isWeightStrong chip 색상 (cycle 1819).
  * favoredWeightPct >= 본 값 시 brand 색상 배지·칩 강조 (가중치 기반 강수렴 시각화).
  * 단, FACTOR_PICK_COMPLETE(10팩터) 조건 우선 → amber 배지·칩. brand 는 isComplete=false 일 때만 적용.
  * FACTOR_PICK_STRONG(8팩터)·FACTOR_PICK_COMPLETE(10팩터) 와 별개 — 팩터 수 아닌 가중 비율 기준.
- * 변경 시 analysis/game/[id]/page.tsx wave-452 배지 callsite + wave-454 chip callsite 동시 조정.
+ * 변경 시 analysis/game/[id]/page.tsx wave-452 배지 callsite + wave-454 chip callsite + analysis/page.tsx wave-459 chip callsite 동시 조정.
  */
 export const CONVERGENCE_BADGE_WEIGHT_STRONG_PCT = 70;
