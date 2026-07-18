@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.54.3 — 2026-07-18 (wave-469: 분석 목록 메인 게임 카드 topFactors 배지 3-tier 색상)
+
+### feat(analysis): topFactors 배지 3-tier 색상 시스템 (cycle 1831)
+
+- `TOPFACTOR_STRONG_IMPACT = 0.18` / `TOPFACTOR_COMPLETE_IMPACT = 0.30` 상수 추가 (`packages/shared`)
+- `TodayGameCard.topFactors` 타입에 `impact: number` 필드 박제
+- amber tier: `impact >= 0.30` → `text-amber-700 dark:text-amber-300`
+- brand tier: `impact >= 0.18` → `text-brand-600 dark:text-brand-400`
+- gray tier: default (기존 스타일 유지)
+- wave-469 테스트 10개 추가 (`wave-469-topfactor-badge-tier.test.ts`)
+
+---
+
 ## op-analysis — 2026-07-18 (cycle 1830, W30 시즌 재개 첫 주 완결)
 
 ### 주간 예측 성과 분석 (7/14~7/18)
