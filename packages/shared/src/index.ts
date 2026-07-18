@@ -2545,10 +2545,11 @@ export const FACTOR_PICK_MIN_FACTORS = 7;
 export const FACTOR_PICK_TOP_GAMES = 3;
 
 /**
- * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766).
+ * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-463 game/[id] "강수렴" 레이블 칩 (cycle 1823).
  * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상을 brand(파랑)로 표시.
+ * wave-463: isStrong = !isComplete && convStrength ≥ 8 → "강수렴" 텍스트 레이블 칩 표시.
  * 10팩터 중 8개 이상 한쪽 팀 우세 = 80% 팩터 정렬.
- * FACTOR_PICK_MIN_FACTORS(7)=임계, FACTOR_PICK_STRONG(8)=강, FACTOR_PICK_COMPLETE(10)=완전수렴.
+ * FACTOR_PICK_MIN_FACTORS(7)=임계, FACTOR_PICK_STRONG(8)=강수렴, FACTOR_PICK_COMPLETE(10)=완전수렴.
  */
 export const FACTOR_PICK_STRONG = 8;
 

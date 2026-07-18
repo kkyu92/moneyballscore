@@ -13,6 +13,7 @@ import {
   type TeamCode,
   type SelectResult,
   FACTOR_PICK_MIN_FACTORS,
+  FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   COMPOSITE_DUEL_MIN_VALID,
   DEFAULT_WEIGHTS,
@@ -416,7 +417,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       {/* 0. 경기 개요 — 태그 + 1-2줄 요약 */}
       <GameOverview tags={overview.tags} summary={overview.summary} />
 
-      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 · wave-456: 상대 팀 우세 팩터 칩 + 모델-합치 칩 · wave-461: 합치 칩 3-tier 색상 + 성적 라인 */}
+      {/* wave-452: 팩터 수렴 픽 배지 — |netScore| >= FACTOR_PICK_MIN_FACTORS 시 표시 · wave-456: 상대 팀 우세 팩터 칩 + 모델-합치 칩 · wave-461: 합치 칩 3-tier 색상 + 성적 라인 · wave-463: 수렴 단계 레이블 칩 (완전수렴/강수렴) */}
       {isConvergencePick && (() => {
         const favoredHome = convergenceDuel.netScore > 0;
         const hw = convergenceDuel.homeWins;
@@ -434,6 +435,8 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         const favoredWeightPct = Math.round((favoredWeight / FACTOR_PICK_WEIGHT_TOTAL) * 100);
         const isWeightStrong = favoredWeightPct >= CONVERGENCE_BADGE_WEIGHT_STRONG_PCT;
         const isComplete = convStrength >= FACTOR_PICK_COMPLETE;
+        // wave-463: 수렴 단계 — isStrong = !isComplete && convStrength ≥ FACTOR_PICK_STRONG(8)
+        const isStrong = !isComplete && convStrength >= FACTOR_PICK_STRONG;
         const badgeClass = isComplete
           ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50 text-amber-700 dark:text-amber-300'
           : isWeightStrong
@@ -449,6 +452,17 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           <div className={`rounded-lg border px-4 py-2.5 text-sm ${badgeClass}`}>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 수렴 픽</span>
+              {/* wave-463: 수렴 단계 레이블 — 완전수렴(amber) / 강수렴(brand) */}
+              {isComplete && (
+                <span className="inline-block text-xs px-1.5 py-0 rounded font-semibold bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300">
+                  완전수렴
+                </span>
+              )}
+              {isStrong && (
+                <span className="inline-block text-xs px-1.5 py-0 rounded font-semibold bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300">
+                  강수렴
+                </span>
+              )}
               <span className="font-semibold">{favoredName} 우세</span>
               <span className="font-mono text-xs">{ratio}</span>
               <span className="font-mono text-xs opacity-60" title="우세 팩터 가중치 합 / 전체 팩터 가중치">가중{favoredWeightPct}%</span>
