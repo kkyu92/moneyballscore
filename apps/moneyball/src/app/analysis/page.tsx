@@ -72,7 +72,6 @@ import {
   FACTOR_PICK_WEIGHT_TOTAL,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
-  CONVERGENCE_RECORD_LOOKBACK_DAYS,
   DEFAULT_WEIGHTS,
   type SelectResult,
   type TeamCode,
@@ -88,6 +87,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
+import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
@@ -526,78 +526,6 @@ interface UpcomingScheduledGame {
   awayCode: TeamCode;
   homeWinProb: number;
   modelHomeWinProb: number | null; // wave-313: full-model prediction (null = not yet generated)
-}
-
-/** wave-424: 최근 N건 팩터 수렴 픽 성적 (rolling window — 주별 경계 없음) */
-async function getRecentConvergencePickRecord(limit = CONVERGENCE_RECORD_RECENT_LIMIT): Promise<{ wins: number; losses: number; total: number }> {
-  const today = toKSTDateString();
-  const supabase = await createClient();
-  const cutoff = new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-
-  const gamesResult = (await supabase
-    .from('games')
-    .select(`
-      id, game_date, game_time, home_score, away_score,
-      home_team:teams!games_home_team_id_fkey(code),
-      away_team:teams!games_away_team_id_fkey(code),
-      predictions!inner(
-        prediction_type,
-        home_elo, away_elo, home_recent_form, away_recent_form,
-        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
-        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
-        home_sfr, away_sfr, home_war_total, away_war_total
-      )
-    `)
-    .gte('game_date', cutoff)
-    .lt('game_date', today)
-    .not('home_score', 'is', null)
-    .eq('predictions.prediction_type', 'pre_game')
-    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
-    .order('game_date', { ascending: false })
-    .order('game_time', { ascending: true })) as SelectResult<ThisWeekGameRow[]>;
-
-  const { data } = assertSelectOk(gamesResult, 'analysis getRecentConvergencePickRecord');
-  if (!data) return { wins: 0, losses: 0, total: 0 };
-
-  let wins = 0, losses = 0, count = 0;
-  for (const row of data as unknown as ThisWeekGameRow[]) {
-    if (count >= limit) break;
-    const pred = row.predictions?.[0];
-    if (!pred || row.home_score === null || row.away_score === null) continue;
-    const homeCode = row.home_team?.code as TeamCode | undefined;
-    const awayCode = row.away_team?.code as TeamCode | undefined;
-    if (!homeCode || !awayCode) continue;
-
-    const duel = computeCompositeDuel({
-      homeCode,
-      homeLineupWoba: pred.home_lineup_woba,
-      awayLineupWoba: pred.away_lineup_woba,
-      homeSfr: pred.home_sfr,
-      awaySfr: pred.away_sfr,
-      homeBullpenFip: pred.home_bullpen_fip,
-      awayBullpenFip: pred.away_bullpen_fip,
-      homeSPFip: pred.home_sp_fip,
-      awaySPFip: pred.away_sp_fip,
-      homeSPXfip: pred.home_sp_xfip,
-      awaySPXfip: pred.away_sp_xfip,
-      homeWar: pred.home_war_total,
-      awayWar: pred.away_war_total,
-      homeElo: pred.home_elo ?? undefined,
-      awayElo: pred.away_elo ?? undefined,
-      homeRecentForm: pred.home_recent_form ?? undefined,
-      awayRecentForm: pred.away_recent_form ?? undefined,
-    });
-
-    if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) continue;
-    if (Math.abs(duel.netScore) < FACTOR_PICK_MIN_FACTORS) continue;
-
-    const favoredHome = duel.netScore > 0;
-    const favWon = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
-    if (favWon) wins++; else losses++;
-    count++;
-  }
-
-  return { wins, losses, total: count };
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -1106,7 +1034,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
@@ -1202,9 +1130,9 @@ export default async function AnalysisIndexPage() {
                           {probPct}%
                         </span>
                       )}
-                      {/* wave-416: 팩터-모델 합치 칩 */}
+                      {/* wave-416: 팩터-모델 합치 칩 · wave-461: 3-tier 색상 (isComplete=amber / else brand) */}
                       {modelAgrees && (
-                        <span className="inline-block text-xs px-1 py-0 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-medium">
+                        <span className={`inline-block text-xs px-1 py-0 rounded font-medium ${isComplete ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300' : 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'}`}>
                           ✓ 합치
                         </span>
                       )}
