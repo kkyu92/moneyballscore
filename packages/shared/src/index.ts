@@ -2603,3 +2603,14 @@ export const RECENT_FORM_DUEL_MIN = 0.10;
  * 변경 시 analysis/game/[id]/page.tsx wave-452 배지 callsite + wave-454 chip callsite + analysis/page.tsx wave-459 chip callsite 동시 조정.
  */
 export const CONVERGENCE_BADGE_WEIGHT_STRONG_PCT = 70;
+
+/**
+ * wave-469: 분석 목록 메인 게임 카드 topFactors 배지 3-tier 색상 임계값.
+ * impact = |factor value - NEUTRAL_FACTOR| (0 ~ 0.5 범위).
+ * TOPFACTOR_STRONG_IMPACT(0.18) ≤ impact < TOPFACTOR_COMPLETE_IMPACT(0.30) → brand 색상.
+ * impact ≥ TOPFACTOR_COMPLETE_IMPACT(0.30) → amber 색상.
+ * 변경 시 analysis/page.tsx topFactors 렌더 callsite (wave-469) 동시 조정.
+ */
+export const TOPFACTOR_STRONG_IMPACT = 0.18;
+/** wave-469: topFactors 배지 amber 임계 — impact ≥ 0.30 (factor value ≥ 0.80 or ≤ 0.20). */
+export const TOPFACTOR_COMPLETE_IMPACT = 0.30;
