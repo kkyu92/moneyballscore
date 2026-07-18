@@ -953,6 +953,11 @@ export default async function AnalysisIndexPage() {
     .sort((a, b) => Math.abs(b.compositeDuelScore!) - Math.abs(a.compositeDuelScore!))
     .slice(0, FACTOR_PICK_TOP_GAMES);
 
+  // wave-467: 섹션 tier — 완전수렴(amber)/기본(brand) upgrade. game/[id] badgeClass amber 패턴을 섹션 container 차원으로 적용.
+  const sectionHasComplete = factorPickGames.some(
+    (g) => Math.abs(g.compositeDuelScore!) >= FACTOR_PICK_COMPLETE,
+  );
+
   // wave-405: 이번 주 팩터 수렴 픽 성적 — 종료된 수렴 경기 승/패 집계
   const weeklyConvergenceRecord = thisWeekPreviousGames.reduce(
     (acc, g) => {
@@ -1034,18 +1039,21 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) · wave-467: 섹션 border/bg amber upgrade (완전수렴 경기 있을 시) */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
-          <div className="rounded-lg border border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 px-4 py-3">
+          {/* wave-467: 섹션 container — sectionHasComplete 시 amber (game/[id] badgeClass amber 패턴을 섹션 차원 적용) */}
+          <div className={`rounded-lg border px-4 py-3 ${sectionHasComplete ? 'border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/20' : 'border-brand-200 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20'}`}>
             <div className="flex items-baseline justify-between mb-2">
-              <h2 id="factor-pick-title" className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+              {/* wave-467: 제목 텍스트 — sectionHasComplete 시 amber */}
+              <h2 id="factor-pick-title" className={`text-xs font-semibold ${sectionHasComplete ? 'text-amber-700 dark:text-amber-300' : 'text-brand-600 dark:text-brand-400'}`}>
                 팩터 수렴 경기{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
               </h2>
               {/* wave-424: 성적 라인 — 이번 주 성적 + 최근 10경기 rolling */}
               <div className="flex items-center gap-2">
+                {/* wave-467: 이번 주 성적 텍스트 — sectionHasComplete 시 amber */}
                 {(weeklyConvergenceRecord.wins + weeklyConvergenceRecord.losses) > 0 && (
-                  <span className="text-[11px] tabular-nums text-brand-600 dark:text-brand-400">
+                  <span className={`text-[11px] tabular-nums ${sectionHasComplete ? 'text-amber-700 dark:text-amber-300' : 'text-brand-600 dark:text-brand-400'}`}>
                     이번 주 {weeklyConvergenceRecord.wins}승 {weeklyConvergenceRecord.losses}패
                   </span>
                 )}

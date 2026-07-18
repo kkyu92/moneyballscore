@@ -1,4 +1,4 @@
-# 팩터 수렴 배지 시스템 (wave-452~459, 2026-07-18)
+# 팩터 수렴 배지 시스템 (wave-452~467, 2026-07-18)
 
 게임 상세 페이지의 팩터 수렴 픽 배지 + 팩터 칩 3-tier 컬러 시스템.
 
@@ -52,13 +52,23 @@ amber 토큰 vs 커스텀 골드:
 
 ## 구현 위치
 
-- `apps/moneyball/src/app/analysis/game/[id]/page.tsx` (wave-452/454/456 — 배지+칩 3-tier)
-- `apps/moneyball/src/app/analysis/page.tsx` (wave-459 — 목록 수렴 픽 칩 3-tier 색상)
+- `apps/moneyball/src/app/analysis/game/[id]/page.tsx` (wave-452/454/456/461/463 — 배지+칩 3-tier + 성적라인 + 레이블칩)
+- `apps/moneyball/src/app/analysis/page.tsx` (wave-459/461/465/467 — 목록 수렴 픽 칩 3-tier + 레이블칩 + 섹션 border/bg tier)
 - `apps/moneyball/src/app/predictions/page.tsx` (탑픽 amber 강조)
+
+## wave-467 — 섹션 border/bg tier (2026-07-18, cycle 1828)
+
+`sectionHasComplete = factorPickGames.some(g => |g.compositeDuelScore| >= FACTOR_PICK_COMPLETE)` 시 섹션 container amber 업그레이드.
+
+| sectionHasComplete | border | bg | 제목 텍스트 | 이번 주 성적 텍스트 |
+|---|---|---|---|---|
+| true | `border-amber-200 dark:border-amber-700/50` | `bg-amber-50 dark:bg-amber-900/20` | `text-amber-700 dark:text-amber-300` | `text-amber-700 dark:text-amber-300` |
+| false | `border-brand-200 dark:border-brand-800/50` | `bg-brand-50 dark:bg-brand-900/20` | `text-brand-600 dark:text-brand-400` | `text-brand-600 dark:text-brand-400` |
+
+game/[id] 페이지의 `badgeClass` amber (isComplete) 패턴을 분석 목록 섹션 container 차원으로 확장.
 
 ## 다음 cycle 후속 후보
 
 - 수렴 배지 컴포넌트 분리 (inline JSX → `ConvergenceBadge.tsx`) — DRY (analysis/game + analysis 2 위치)
 - amber tier bg/text token → CSS 변수화 (`--color-convergence-complete-bg` 등) — DESIGN.md token 정합
 - Reduced-motion 가드: 칩 hover transition 누락 확인
-- ✓ 합치 칩 3-tier 색상 적용 (현재 항상 brand-100)
