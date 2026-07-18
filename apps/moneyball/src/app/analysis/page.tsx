@@ -70,6 +70,7 @@ import {
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   FACTOR_PICK_WEIGHT_TOTAL,
+  CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
   CONVERGENCE_RECORD_LOOKBACK_DAYS,
   DEFAULT_WEIGHTS,
@@ -1162,6 +1163,14 @@ export default async function AnalysisIndexPage() {
                 // wave-420: 가중 우위 — favoredSlugs 의 DEFAULT_WEIGHTS 합 / FACTOR_PICK_WEIGHT_TOTAL
                 const favoredWeight = favoredSlugs.reduce((sum, slug) => sum + (DEFAULT_WEIGHTS[slug as keyof typeof DEFAULT_WEIGHTS] ?? 0), 0);
                 const favoredWeightPct = Math.round(favoredWeight / FACTOR_PICK_WEIGHT_TOTAL * 100);
+                // wave-459: 3-tier 칩 색상 — DESIGN.md wave-458 정합 (isComplete/isWeightStrong)
+                const isComplete = convStrength >= FACTOR_PICK_COMPLETE;
+                const isWeightStrong = !isComplete && favoredWeightPct >= CONVERGENCE_BADGE_WEIGHT_STRONG_PCT;
+                const favoredChipClass = isComplete
+                  ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
+                  : isWeightStrong
+                    ? 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-700/50'
+                    : 'bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/40';
                 // wave-396: 모델 확신도 + 팩터-모델 합치 여부
                 const favoredCode = favoredHome ? pick.homeCode : pick.awayCode;
                 const modelAgrees = pick.predictedWinnerCode != null && pick.predictedWinnerCode === favoredCode;
@@ -1210,7 +1219,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                       )}
                     </Link>
-                    {/* wave-400: 팩터 칩 glossary 링크 */}
+                    {/* wave-400: 팩터 칩 glossary 링크 · wave-459: 3-tier 칩 색상 (isComplete=amber / isWeightStrong=brand / default=gray) */}
                     {favoredChips.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1">
                         {favoredChips.map(({ slug, label, anchor }) => (
@@ -1218,14 +1227,14 @@ export default async function AnalysisIndexPage() {
                             <Link
                               key={slug}
                               href={`/glossary#${anchor}`}
-                              className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-800/60 transition-colors"
+                              className={`inline-block text-xs px-1.5 py-0.5 rounded transition-colors ${favoredChipClass}`}
                             >
                               {label}
                             </Link>
                           ) : (
                             <span
                               key={slug}
-                              className="inline-block text-xs px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
+                              className={`inline-block text-xs px-1.5 py-0.5 rounded ${favoredChipClass}`}
                             >
                               {label}
                             </span>
