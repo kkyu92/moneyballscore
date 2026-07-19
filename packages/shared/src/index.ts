@@ -2078,6 +2078,16 @@ export const DEVICE_ID_MAX_LENGTH = 64;
 export const MIN_POLL_TOTAL = 3;
 
 /**
+ * AI vs 커뮤니티 픽 괴리 최소 임계 (pp) — silent drift family wave-500 (cycle 1867).
+ * 동일 숫자 20 hardcoded 2 surface:
+ *   - app/page.tsx: if (delta >= 20) — getDivergenceGame 함수 내 AI vs 커뮤니티 최대 괴리 탐색
+ *   - components/picks/PickButton.tsx: Math.abs(aiHomePct - homePct) >= 20 — showDivergence 조건
+ *
+ * AI 홈팀 확률 vs 커뮤니티 픽 비율 차이가 이 값 이상이면 괴리 표시. 변경 시 본 상수 1곳만 갱신.
+ */
+export const COMMUNITY_DIVERGE_MIN = 20;
+
+/**
  * 캘리브레이션 bucket 폭 — silent drift family wave 305 (cycle 1634).
  * 동일 숫자 0.05 / 0.5 / 10 hardcoded 2 surface:
  *   - lib/accuracy/buildAccuracyData.ts: BUCKET_WIDTH/START/COUNT (bucketize 함수 내)

@@ -1,3 +1,16 @@
+## v0.5.61.5 — 2026-07-20 (cycle 1867, wave-500: COMMUNITY_DIVERGE_MIN 상수 추출 + MIN_POLL_TOTAL swap)
+
+### fix(context): wave-500 — COMMUNITY_DIVERGE_MIN 상수 추출, MIN_POLL_TOTAL swap (cycle 1867)
+
+- `COMMUNITY_DIVERGE_MIN = 20` 신규 추출 (`packages/shared/src/index.ts`)
+  - `· wave-500 community diverge min 상수 swap (cycle 1867): app/page.tsx delta >= 20 → COMMUNITY_DIVERGE_MIN, total < 3 → MIN_POLL_TOTAL. PickButton.tsx showDivergence >= 20 → COMMUNITY_DIVERGE_MIN. 3 file 하드코딩 3건 swap.`
+- `app/page.tsx` — `MIN_POLL_TOTAL` + `COMMUNITY_DIVERGE_MIN` import + swap 2건
+- `components/picks/PickButton.tsx` — `COMMUNITY_DIVERGE_MIN` import + `showDivergence` swap
+- wave-500 테스트 추가 (`wave-500-community-diverge-min-constant-swap.test.ts`) — 11 PASS
+- v0.5.61.5
+
+---
+
 ## v0.5.61.4 — 2026-07-20 (cycle 1866, wave-499: analysis 오늘 AI 예측 SP FIP 직접 대결 배지)
 
 ### feat(analysis): wave-499 — analysis 오늘 AI 예측 카드 SP FIP 직접 대결 배지 (cycle 1866)

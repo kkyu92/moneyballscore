@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
-import { shortTeamName, type TeamCode, MIN_POLL_TOTAL } from '@moneyball/shared';
+import { shortTeamName, type TeamCode, MIN_POLL_TOTAL, COMMUNITY_DIVERGE_MIN } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
 
@@ -45,7 +45,7 @@ function PollBar({
 }) {
   const homePct = poll.total > 0 ? Math.round((poll.home / poll.total) * 100) : 50;
   const awayPct = 100 - homePct;
-  const showDivergence = aiHomePct != null && Math.abs(aiHomePct - homePct) >= 20;
+  const showDivergence = aiHomePct != null && Math.abs(aiHomePct - homePct) >= COMMUNITY_DIVERGE_MIN;
 
   return (
     <div className="mt-2 px-1 space-y-1">

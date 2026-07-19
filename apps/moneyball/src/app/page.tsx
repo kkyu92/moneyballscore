@@ -3,7 +3,7 @@ import { PredictionCardLive } from "@/components/predictions/PredictionCardLive"
 import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { MiniGameCard } from "@/components/shared/MiniGameCard";
 import { fetchStadiumWeather } from "@/lib/weather";
-import { KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, KBO_STADIUM_COORDS, KBO_STADIUM_SHORT, SITE_URL } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, KBO_STADIUM_COORDS, KBO_STADIUM_SHORT, SITE_URL, MIN_POLL_TOTAL, COMMUNITY_DIVERGE_MIN } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { WeeklyTrendMini, type WeeklyTrendPoint } from "@/components/dashboard/WeeklyTrendMini";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
@@ -405,7 +405,7 @@ async function getTodayDivergenceGame(games: HomeGame[]): Promise<DivergenceGame
     const poll = pollMap.get(g.id);
     if (!poll) continue;
     const total = poll.home + poll.away;
-    if (total < 3) continue;
+    if (total < MIN_POLL_TOTAL) continue; // wave-500: MIN_POLL_TOTAL + COMMUNITY_DIVERGE_MIN swap
 
     const communityHomePct = Math.round((poll.home / total) * 100);
     const pred = g.predictions[0];
@@ -415,7 +415,7 @@ async function getTodayDivergenceGame(games: HomeGame[]): Promise<DivergenceGame
     const aiHomePct = Math.round(hwp * 100);
 
     const delta = Math.abs(aiHomePct - communityHomePct);
-    if (delta >= 20 && delta > maxDelta) {
+    if (delta >= COMMUNITY_DIVERGE_MIN && delta > maxDelta) {
       maxDelta = delta;
       best = {
         gameId: g.id,
