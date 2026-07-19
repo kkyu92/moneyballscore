@@ -2429,8 +2429,9 @@ export const SFR_WEAK = -10.0;
  * 수비 SFR 직접 대결 배지 최소 격차 — wave-357 (cycle 1695).
  * |homeSfr - awaySfr| >= 본 값 시 "수비 {팀} 강세" 배지 표시.
  * 5.0 = SFR_STRONG(10.0) 의 절반 — 한 팀이 뚜렷한 수비 우위 최소 기준.
- * 변경 시 analysis/page.tsx wave-357/446 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-357/446/510 + computeCompositeDuel.ts callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
+ * wave-510: analysis/page.tsx AI 예측 카드 직접 대결 배지 (cycle 1877).
  */
 export const SFR_DUEL_MIN = 5.0;
 
@@ -2687,8 +2688,9 @@ export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
- * 변경 시 analysis/page.tsx wave-373 + computeCompositeDuel.ts (wave-381) + analysis/page.tsx wave-448 격차(Δ) callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-373/511 + computeCompositeDuel.ts (wave-381) + analysis/page.tsx wave-448 격차(Δ) callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts 파일명 명시 (cycle 1876).
+ * wave-511: analysis/page.tsx AI 예측 카드 직접 대결 배지 (cycle 1877).
  */
 export const RECENT_FORM_DUEL_MIN = 0.10;
 
