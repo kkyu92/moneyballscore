@@ -20,6 +20,7 @@ import {
   HOME_WIN_RATE_SAMPLE_N,
   HOME_WIN_RATE_CI_PP,
   getConfidenceColor,
+  getConfidenceTierLabel,
   getAccuracyColor,
   shortTeamName,
   toKSTDateString,
@@ -529,6 +530,23 @@ describe('getConfidenceColor', () => {
   it('should return gray for < 55', () => {
     expect(getConfidenceColor(54)).toBe('text-gray-600');
     expect(getConfidenceColor(0)).toBe('text-gray-600');
+  });
+});
+
+describe('getConfidenceTierLabel', () => {
+  it('returns 강한 예측 for >= 65', () => {
+    expect(getConfidenceTierLabel(65)).toBe('강한 예측');
+    expect(getConfidenceTierLabel(80)).toBe('강한 예측');
+  });
+
+  it('returns 보통 for >= 55 and < 65', () => {
+    expect(getConfidenceTierLabel(55)).toBe('보통');
+    expect(getConfidenceTierLabel(64)).toBe('보통');
+  });
+
+  it('returns 박빙 for < 55', () => {
+    expect(getConfidenceTierLabel(54)).toBe('박빙');
+    expect(getConfidenceTierLabel(0)).toBe('박빙');
   });
 });
 

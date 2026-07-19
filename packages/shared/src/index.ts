@@ -1636,6 +1636,17 @@ export function getConfidenceColor(pct: number): string {
   return 'text-gray-600';
 }
 
+/**
+ * 신뢰도 % → 사용자 가시 티어 라벨 (wave-491, cycle 1856).
+ *   강한 예측 (≥ 65%) / 보통 (55~64%) / 박빙 (< 55%)
+ * WINNER_PROB_CONFIDENT_PCT / WINNER_PROB_LEAN_PCT 와 동일 임계 사용.
+ */
+export function getConfidenceTierLabel(pct: number): string {
+  if (pct >= 65) return '강한 예측';
+  if (pct >= 55) return '보통';
+  return '박빙';
+}
+
 // 적중률 → Tailwind 색상 클래스 (낮은 값에 빨간색)
 export function getAccuracyColor(pct: number): string {
   if (pct >= 65) return 'text-green-600';
