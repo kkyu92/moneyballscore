@@ -21,11 +21,13 @@ import {
   HOME_NEXT_GAMES_LIMIT,
   HOME_TODAY_PRED_LIMIT,
   HOME_WEEK_SCHEDULE_LIMIT,
+  pickTierEmoji,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
   toKSTDateString,
   toKSTDisplayString,
   winnerProbOf,
+  WINNER_TIER_LABEL,
   TOP_STAT_PICK_EDGE_MIN,
   type TeamCode,
   type WeightKey,
@@ -651,6 +653,20 @@ export default async function HomePage() {
 
   const topStatPick = hasBigMatchHero ? null : selectTopStatPick(games);
 
+  // wave-495: 오늘 예측 신뢰도 티어 분포 — 홈 카드 신규 (홈 오늘 경기 수 카드 대체)
+  const todayTierDist = games.reduce(
+    (acc, g) => {
+      const pred = g.predictions?.[0];
+      const hwp = pred?.home_win_prob ?? pred?.reasoning?.homeWinProb ?? null;
+      if (hwp == null) return acc;
+      const tier = classifyWinnerProb(hwp);
+      acc[tier]++;
+      acc.total++;
+      return acc;
+    },
+    { confident: 0, lean: 0, tossup: 0, total: 0 } as { confident: number; lean: number; tossup: number; total: number },
+  );
+
   const divergenceGame = await getTodayDivergenceGame(games).catch((err) => captureFallback(err, null, { route: "/", source: "getTodayDivergenceGame" }));
 
   return (
@@ -706,10 +722,31 @@ export default async function HomePage() {
         />
         <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
-            오늘 경기 수
+            오늘 예측
           </h3>
-          <span className="text-4xl font-bold">{games.length}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">경기</span>
+          <div className="flex items-end gap-2 mb-4">
+            <span className="text-4xl font-bold">{games.length}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">경기</span>
+          </div>
+          {todayTierDist.total > 0 ? (
+            <ul className="space-y-1.5 text-xs" aria-label="오늘 예측 신뢰도 분포">
+              {(['confident', 'lean', 'tossup'] as const).filter((tier) => todayTierDist[tier] > 0).map((tier) => (
+                <li key={tier} className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                  <span className="flex items-center gap-1.5">
+                    <span>{pickTierEmoji(tier)}</span>
+                    <span>{WINNER_TIER_LABEL[tier]}</span>
+                  </span>
+                  <span className="font-medium text-gray-700 dark:text-gray-200">
+                    {todayTierDist[tier]}경기
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              예측 대기 중
+            </p>
+          )}
         </div>
         <WeeklyTrendMini weeks={weeklyTrend} />
       </section>
