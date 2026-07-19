@@ -2404,7 +2404,8 @@ export const BULLPEN_FIP_WEAK = 5.0;
  * 불펜 FIP 우세 태그 최소 차이 임계 — wave-342 (cycle 1677).
  * |awayBullpenFip - homeBullpenFip| ≥ 본 값 시 불펜 우세 팀 태그 표시.
  * 1.0 = FIP 1점 차 = KBO 강/약 불펜 경계 차이 수준.
- * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442/504 callsite 동기.
+ * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442/504 + computeCompositeDuel.ts callsite 동기.
+ * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  */
 export const BULLPEN_FIP_DIFF_MIN = 1.0;
 
@@ -2428,7 +2429,8 @@ export const SFR_WEAK = -10.0;
  * 수비 SFR 직접 대결 배지 최소 격차 — wave-357 (cycle 1695).
  * |homeSfr - awaySfr| >= 본 값 시 "수비 {팀} 강세" 배지 표시.
  * 5.0 = SFR_STRONG(10.0) 의 절반 — 한 팀이 뚜렷한 수비 우위 최소 기준.
- * 변경 시 analysis/page.tsx wave-357/446 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-357/446 + computeCompositeDuel.ts callsite 동시 조정.
+ * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  */
 export const SFR_DUEL_MIN = 5.0;
 
@@ -2555,7 +2557,8 @@ export const TOP_STAT_PICK_EDGE_MIN = 0.05;
  * |homeLineupWoba - awayLineupWoba| ≥ 본 값 시 "타선 홈/원정 강세" 태그 표시.
  * 0.020 = 20 wOBA 포인트 = KBO 리그 내 타선 유의미한 차이 수준
  * (LINEUP_WOBA_WEAK_TAG~LINEUP_WOBA_STRONG_TAG 범위 0.040 의 절반).
- * 변경 시 analysis/page.tsx wave-355/442/501 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-355/442/501 + computeCompositeDuel.ts callsite 동시 조정.
+ * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  */
 export const LINEUP_WOBA_DUEL_MIN = 0.020;
 
@@ -2564,7 +2567,8 @@ export const LINEUP_WOBA_DUEL_MIN = 0.020;
  * |awaySPFip - homeSPFip| ≥ 본 값 시 "선발 {팀} 강세" 배지 표시.
  * FIP 낮을수록 유리. 0.5 = SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 범위(1.0)의 절반.
  * 선발 투수 1인 기준 FIP 0.5 차 = KBO 리그 에이스-평균 경계 수준.
- * 변경 시 analysis/page.tsx wave-363/446/499 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-363/446/499 + computeCompositeDuel.ts callsite 동시 조정.
+ * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  */
 export const SP_FIP_DUEL_MIN = 0.5;
 
@@ -2572,7 +2576,8 @@ export const SP_FIP_DUEL_MIN = 0.5;
  * 선발투수 xFIP 직접 대결 배지 최소 차이 임계 — wave-371 (cycle 1711).
  * |awaySPXfip - homeSPXfip| ≥ 본 값 시 "xFIP {팀} 강세" 배지 표시.
  * xFIP 낮을수록 유리 (FIP 동일 방향). SP_FIP_DUEL_MIN 과 동일 0.5.
- * 변경 시 analysis/page.tsx wave-371 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-371 + computeCompositeDuel.ts callsite 동시 조정.
+ * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  */
 export const SP_XFIP_DUEL_MIN = 0.5;
 
@@ -2682,7 +2687,8 @@ export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
- * 변경 시 analysis/page.tsx wave-373 callsite + wave-381 COMPOSITE_DUEL callsite + wave-448 격차(Δ) callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-373 + computeCompositeDuel.ts (wave-381) + analysis/page.tsx wave-448 격차(Δ) callsite 동시 조정.
+ * wave-509: computeCompositeDuel.ts 파일명 명시 (cycle 1876).
  */
 export const RECENT_FORM_DUEL_MIN = 0.10;
 
