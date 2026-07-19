@@ -1,3 +1,16 @@
+## v0.5.61.7 — 2026-07-20 (cycle 1871, wave-504: analysis 오늘 AI 예측 불펜FIP 직접 대결 배지)
+
+### feat(analysis): wave-504 — analysis 오늘 AI 예측 카드 불펜FIP 직접 대결 배지 (cycle 1871)
+
+- `analysis/page.tsx` 오늘 AI 예측 카드에 불펜FIP 우위 배지 추가
+  - `|homeBullpenFip - awayBullpenFip| >= BULLPEN_FIP_DIFF_MIN(1.0)` 시 우위 팀명 + Δ격차 표시
+  - 낮은 FIP = 불펜 우위 — 홈 불펜 우위 = brand-500, 원정 불펜 우위 = orange-500
+  - wOBA 타선 배지(wave-501) 직후 위치 — SP FIP(투수)/wOBA(타선)/불펜FIP(불펜) 3-배지 완성
+- wave-504 테스트 추가 (`wave-504-analysis-bullpen-fip-duel-badge.test.ts`) — 10 PASS
+- v0.5.61.7
+
+---
+
 ## v0.5.61.6 — 2026-07-20 (cycle 1868, wave-501: analysis 오늘 AI 예측 wOBA 타선 직접 대결 배지)
 
 ### feat(analysis): wave-501 — analysis 오늘 AI 예측 카드 wOBA 타선 직접 대결 배지 (cycle 1868)
