@@ -535,6 +535,8 @@ interface UpcomingScheduledGame {
   factorFavoredCount: number | null;
   factorAgainstCount: number | null;
   convergenceNetScore: number | null;
+  /** wave-484: 비수렴 경기 단축 레이블 (wave-480 DETAIL / wave-482 LIST TODAY 대칭) */
+  factorFavoredSlugs: string[] | null;
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -638,6 +640,7 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
     let factorFavoredCount: number | null = null;
     let factorAgainstCount: number | null = null;
     let convergenceNetScore: number | null = null;
+    let factorFavoredSlugs: string[] | null = null;
     const fd = factorDataMap.get(r.id);
     if (fd) {
       const duel = computeCompositeDuel({
@@ -656,6 +659,8 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
         const favoredHome = duel.netScore > 0;
         factorFavoredCount = favoredHome ? duel.homeWins : duel.awayWins;
         factorAgainstCount = favoredHome ? duel.awayWins : duel.homeWins;
+        // wave-484: 비수렴 단축 레이블 — 우세 팩터 slug 박제
+        factorFavoredSlugs = favoredHome ? duel.homeFavoredSlugs : duel.awayFavoredSlugs;
       }
     }
     result.push({
@@ -669,6 +674,7 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       factorFavoredCount,
       factorAgainstCount,
       convergenceNetScore,
+      factorFavoredSlugs,
     });
   }
   return result;
@@ -2504,7 +2510,7 @@ export default async function AnalysisIndexPage() {
                                     Elo: {favoredName} {winPct}%
                                   </p>
                                 )}
-                                {/* wave-475: 팩터 N:M 균형 — 데이터 있는 예정 경기에 오늘 경기와 동일 패턴 적용 */}
+                                {/* wave-475: 팩터 N:M 균형 — 데이터 있는 예정 경기에 오늘 경기와 동일 패턴 적용 · wave-484: 비수렴 경기 단축 레이블 (wave-480 DETAIL / wave-482 LIST TODAY 대칭) */}
                                 {g.factorFavoredCount != null && (
                                   <p className={`text-xs font-mono mt-0.5 ${
                                     g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE
@@ -2514,6 +2520,17 @@ export default async function AnalysisIndexPage() {
                                         : 'text-gray-400 dark:text-gray-500'
                                   }`}>
                                     팩터 {g.factorFavoredCount}:{g.factorAgainstCount}
+                                    {(() => {
+                                      const isPickGame = g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_MIN_FACTORS;
+                                      if (isPickGame) return null;
+                                      const slugs = g.factorFavoredSlugs ?? [];
+                                      const factorLabels = slugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT).map((s: string) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
+                                      return factorLabels ? (
+                                        <span className="text-[10px] font-sans font-normal">
+                                          {' '}({factorLabels})
+                                        </span>
+                                      ) : null;
+                                    })()}
                                   </p>
                                 )}
                               </div>

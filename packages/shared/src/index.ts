@@ -2535,6 +2535,7 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
  * analysis/game/[id]/page.tsx wave-478 badge: favoredSlugs.slice(0, 본 값) → FACTOR_LABELS_SHORT 매핑 인라인 표시.
  * 3 이하 유지 권장 — 4+ 시 배지 줄바꿈 발생.
  * · wave-482 analysis/page.tsx 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1845): analysis/page.tsx — !isPickGame: (pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs).slice(0, 본 값) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL 대칭).
+ * · wave-484 analysis/page.tsx 이번 주 남은 경기 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1847): UpcomingScheduledGame.factorFavoredSlugs 박제 — !isPickGame: factorFavoredSlugs.slice(0, 본 값) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480/482 3-way 대칭 완성).
  */
 export const COMPOSITE_DUEL_FACTOR_LABEL_LIMIT = 3;
 
