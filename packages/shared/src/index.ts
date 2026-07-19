@@ -873,6 +873,20 @@ export const MIN_TEAM_PREDICTIONS = 3;
 export const MIN_VERIFIED_GAMES_HEDGE = 10;
 
 /**
+ * 통계 신뢰도 최소 표본 수 — 30 = 중심극한정리 실용 임계.
+ *
+ * 적용 surface:
+ *   - AccuracyHeaderCard 누적 추세 표시 조건 (totalVerified ≥ N)
+ *   - accuracy/page.tsx 구간별 CI 표시 조건 (bucket.n < N 시 CI 노출)
+ *   - ModelVersionHistory 버전별 CI 표시 조건 (v.n < N 시 CI 노출)
+ *
+ * silent drift family wave 496 (cycle 1862) — 3 file 3 occurrence
+ * 하드코딩 `30` swap. MIN_VERIFIED_GAMES_HEDGE (10, 최근 창 hedge) 와 별개
+ * — 본 임계는 CLT 기반 전체 표본 신뢰도 임계.
+ */
+export const STATS_RELIABLE_MIN_N = 30;
+
+/**
  * insights 페이지 ISR revalidate 주기 — silent drift family wave 115
  * (cycle 1332) — apps/moneyball/src/app/insights/page.tsx + insights/[date]/page.tsx
  * `export const revalidate = 86400` magic number + UI 사용자 가시 텍스트

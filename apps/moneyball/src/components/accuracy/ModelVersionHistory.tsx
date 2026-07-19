@@ -1,4 +1,4 @@
-import { ACCURACY_OK_PCT, ACCURACY_WARN_PCT, CURRENT_SCORING_RULE } from '@moneyball/shared';
+import { ACCURACY_OK_PCT, ACCURACY_WARN_PCT, CURRENT_SCORING_RULE, STATS_RELIABLE_MIN_N } from '@moneyball/shared';
 import type { VersionHistoryRow } from '@/lib/accuracy/buildAccuracyData';
 
 interface Props {
@@ -25,7 +25,7 @@ export function ModelVersionHistory({ versions }: Props) {
           <tbody>
             {versions.map((v) => {
               const pct = v.accuracy !== null ? Math.round(v.accuracy * 100) : null;
-              const ciPct = v.n > 0 && v.n < 30 ? Math.round(v.ci95Half * 100) : null;
+              const ciPct = v.n > 0 && v.n < STATS_RELIABLE_MIN_N ? Math.round(v.ci95Half * 100) : null;
               const isActive = v.version === CURRENT_SCORING_RULE;
               const barColor =
                 pct === null || v.n === 0

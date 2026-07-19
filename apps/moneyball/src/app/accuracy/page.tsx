@@ -37,6 +37,7 @@ import {
   ACCURACY_BASELINE,
   ACCURACY_WEAK_RATE,
   BRIER_CALIBRATION_OK_GAP,
+  STATS_RELIABLE_MIN_N,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -1162,7 +1163,7 @@ function SubCohortCard({
       {pct !== null ? (
         <div className="flex items-baseline gap-2">
           <p className={`text-3xl font-bold font-mono ${valueCls}`}>{pct}%</p>
-          {ciPct !== null && bucket.n < 30 && (
+          {ciPct !== null && bucket.n < STATS_RELIABLE_MIN_N && (
             <span className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}%p CI</span>
           )}
         </div>
