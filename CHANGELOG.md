@@ -1,3 +1,15 @@
+## v0.5.61.3 — 2026-07-20 (cycle 1865, wave-498: ACCURACY_GREAT_PCT 상수 추출 — getAccuracyColor 65 swap)
+
+### fix(context): wave-498 — ACCURACY_GREAT_PCT 상수 추출, getAccuracyColor `65` 인라인 swap (cycle 1865)
+
+- `ACCURACY_GREAT_PCT = 65` 신규 추출 (`packages/shared/src/index.ts`)
+  - `· wave-498 getAccuracyColor 65 상수 swap (cycle 1865): shared/src/index.ts — getAccuracyColor \`pct >= 65\` → \`pct >= ACCURACY_GREAT_PCT\` + \`pct >= 55\` → \`pct >= ACCURACY_OK_PCT\` 참조. ACCURACY_GREAT_PCT=65 신규 JSDoc 박제.`
+- `getAccuracyColor` JSDoc 추가 + 상수 참조 (`packages/shared/src/index.ts`)
+- wave-498 테스트 추가 (`wave-498-accuracy-great-pct-constant-swap.test.ts`) — 7 PASS
+- v0.5.61.3
+
+---
+
 ## v0.5.61.2 — 2026-07-20 (cycle 1854, wave-490: countFavoringFactors JSDoc wave-489 bullet 추가)
 
 ### fix(context): wave-490 — countFavoringFactors JSDoc wave-489 bullet 추가 (cycle 1854)
