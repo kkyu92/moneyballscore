@@ -1,4 +1,16 @@
 # Changelog
+## v0.5.57.0 — 2026-07-20 (wave-478: game/[id] 비수렴 경기 팩터 N:M 균형 배지)
+
+### feat(analysis): wave-478 — analysis/game/[id] 비수렴 경기에도 팩터 N:M 균형 배지 표시 (cycle 1840)
+
+- `analysis/game/[id]` 상세 페이지에 팩터 수렴 픽 미해당 경기에도 팩터 N:M 균형 배지 추가
+  - 조건: `!isConvergencePick && convergenceDuel.validCount >= COMPOSITE_DUEL_MIN_VALID`
+  - 표시: `[우세팀 이름] 우세 · 팩터 N:M` (회색 border/bg — wave-473 analysis LIST 스타일 미러)
+  - 동점(`netScore === 0`) 시: `균형 · 팩터 N:N` 표시
+- wave-473(analysis 목록 비수렴 N:M) → wave-478(game 상세 비수렴 N:M) 대칭 완성
+
+---
+
 ## v0.5.56.1 — 2026-07-20 (wave-476: FACTOR_PICK_STRONG JSDoc wave-475 bullet description line 정정)
 
 ### fix(context): wave-476 — FACTOR_PICK_STRONG JSDoc wave-475 bullet description line 정정 (cycle 1838)

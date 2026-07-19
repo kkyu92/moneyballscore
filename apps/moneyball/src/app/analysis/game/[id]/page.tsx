@@ -540,6 +540,29 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         );
       })()}
 
+      {/* wave-478: 비수렴 경기에도 팩터 N:M 균형 배지 표시 — wave-473이 analysis LIST에 한 것을 game DETAIL에 적용 */}
+      {!isConvergencePick && convergenceDuel.validCount >= COMPOSITE_DUEL_MIN_VALID && (() => {
+        const favoredHome = convergenceDuel.netScore > 0;
+        const isTied = convergenceDuel.netScore === 0;
+        const hw = convergenceDuel.homeWins;
+        const aw = convergenceDuel.awayWins;
+        const favoredName = isTied ? null : shortTeamName(favoredHome ? homeTeam : awayTeam);
+        const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        return (
+          <div className="rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/30 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 균형</span>
+              {favoredName ? (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">{favoredName} 우세</span>
+              ) : (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">균형</span>
+              )}
+              <span className="font-mono text-xs">팩터 {ratio}</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 0a. AI 종합 분석 요약 — factor 서술형 prose (AdSense content quality) */}
       {preGame.factors && (
         <GameAnalysisProse
