@@ -2526,8 +2526,16 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
  * · wave-424 rolling 성적 getRecentConvergencePickRecord (cycle 1778): 동일 조건 재사용.
  * · wave-475 예정 경기 팩터 N:M 표시 (cycle 1837): getThisWeekRemainingGames computeCompositeDuel gate — validCount ≥ 본 값 시 UpcomingScheduledGame.factorFavoredCount/factorAgainstCount/convergenceNetScore 박제.
  * · wave-478 game/[id] 비수렴 경기 팩터 N:M 균형 배지 (cycle 1840): analysis/game/[id]/page.tsx — !isConvergencePick 경기에서 validCount ≥ 본 값 시 N:M 균형 배지 표시 (wave-473 LIST 대칭).
+ * · wave-480 game/[id] 비수렴 N:M 배지 팩터 레이블 표시 (cycle 1843): analysis/game/[id]/page.tsx — COMPOSITE_DUEL_FACTOR_LABEL_LIMIT 수 만큼 favoredSlugs → FACTOR_LABELS_SHORT 인라인 표시 (wave-430 LIST 수렴 패턴 대칭).
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
+
+/**
+ * 비수렴 경기 팩터 N:M 배지 — 우세 팩터 단축 레이블 최대 표시 수 — wave-480 (cycle 1843).
+ * analysis/game/[id]/page.tsx wave-478 badge: favoredSlugs.slice(0, 본 값) → FACTOR_LABELS_SHORT 매핑 인라인 표시.
+ * 3 이하 유지 권장 — 4+ 시 배지 줄바꿈 발생.
+ */
+export const COMPOSITE_DUEL_FACTOR_LABEL_LIMIT = 3;
 
 /**
  * 팩터 수렴 픽 최소 팩터 우세 수 — wave-390 (cycle 1734), wave-392 top-3 복수 표시 (cycle 1736).

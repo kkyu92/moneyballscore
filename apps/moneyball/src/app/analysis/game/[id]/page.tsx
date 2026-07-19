@@ -16,6 +16,7 @@ import {
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   COMPOSITE_DUEL_MIN_VALID,
+  COMPOSITE_DUEL_FACTOR_LABEL_LIMIT,
   DEFAULT_WEIGHTS,
   FACTOR_PICK_WEIGHT_TOTAL,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
@@ -541,6 +542,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       })()}
 
       {/* wave-478: 비수렴 경기에도 팩터 N:M 균형 배지 표시 — wave-473이 analysis LIST에 한 것을 game DETAIL에 적용 */}
+      {/* wave-480: 우세 팩터 단축 레이블 인라인 표시 — wave-430(LIST 수렴) 패턴을 DETAIL 비수렴에 적용 */}
       {!isConvergencePick && convergenceDuel.validCount >= COMPOSITE_DUEL_MIN_VALID && (() => {
         const favoredHome = convergenceDuel.netScore > 0;
         const isTied = convergenceDuel.netScore === 0;
@@ -548,6 +550,11 @@ export default async function GameAnalysisPage({ params }: PageProps) {
         const aw = convergenceDuel.awayWins;
         const favoredName = isTied ? null : shortTeamName(favoredHome ? homeTeam : awayTeam);
         const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        const favoredSlugs = isTied
+          ? []
+          : (favoredHome ? convergenceDuel.homeFavoredSlugs : convergenceDuel.awayFavoredSlugs)
+              .slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT);
+        const factorInline = favoredSlugs.map((s) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
         return (
           <div className="rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/30 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-2 flex-wrap">
@@ -558,6 +565,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                 <span className="font-semibold text-gray-700 dark:text-gray-300">균형</span>
               )}
               <span className="font-mono text-xs">팩터 {ratio}</span>
+              {factorInline && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorInline})</span>
+              )}
             </div>
           </div>
         );

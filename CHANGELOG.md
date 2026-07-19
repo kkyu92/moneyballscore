@@ -1,4 +1,18 @@
 # Changelog
+## v0.5.58.0 — 2026-07-20 (wave-480: game/[id] 비수렴 N:M 배지 팩터 레이블 표시)
+
+### feat(analysis): wave-480 — analysis/game/[id] 비수렴 N:M 배지 우세 팩터 단축 레이블 인라인 표시 (cycle 1843)
+
+- `analysis/game/[id]` 상세 페이지 비수렴 N:M 균형 배지에 우세 팩터 단축 레이블 추가 (wave-430 LIST 수렴 패턴 대칭)
+  - wave-478 배지 `{favoredName} 우세 · 팩터 N:M` → `{favoredName} 우세 · 팩터 N:M · (선발·타선·Elo)` 형식
+  - `convergenceDuel.homeFavoredSlugs` / `awayFavoredSlugs` → `FACTOR_LABELS_SHORT` 매핑
+  - `COMPOSITE_DUEL_FACTOR_LABEL_LIMIT = 3` 최대 슬러그 수 (줄바꿈 방지)
+- 신규 상수 `COMPOSITE_DUEL_FACTOR_LABEL_LIMIT = 3` 패키지 공유 (`@moneyball/shared`)
+- wave-480 테스트 8개 추가 (`wave-480-composite-duel-factor-label-limit.test.ts`)
+- v0.5.58.0
+
+---
+
 ## v0.5.57.1 — 2026-07-20 (wave-479: COMPOSITE_DUEL_MIN_VALID JSDoc wave-478 bullet 추가)
 
 ### fix(context): wave-479 — COMPOSITE_DUEL_MIN_VALID JSDoc wave-478 bullet description line 정정 (cycle 1841)
