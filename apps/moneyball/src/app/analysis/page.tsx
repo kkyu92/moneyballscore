@@ -530,6 +530,10 @@ interface UpcomingScheduledGame {
   awayCode: TeamCode;
   homeWinProb: number;
   modelHomeWinProb: number | null; // wave-313: full-model prediction (null = not yet generated)
+  /** wave-475: 팩터 N:M 균형 — computeCompositeDuel 기준 (null = 데이터 부족) */
+  factorFavoredCount: number | null;
+  factorAgainstCount: number | null;
+  convergenceNetScore: number | null;
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -562,6 +566,10 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       .from('predictions')
       .select(`
         game_id, home_elo, away_elo, home_win_prob,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_sfr, away_sfr, home_war_total, away_war_total,
+        home_recent_form, away_recent_form,
         game:games!predictions_game_id_fkey(
           home_team:teams!games_home_team_id_fkey(code),
           away_team:teams!games_away_team_id_fkey(code)
@@ -579,8 +587,19 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
 
   const eloMap = new Map<string, number>();
   const modelProbMap = new Map<number, number>(); // wave-313: game_id → home_win_prob
+  // wave-475: game_id → factor columns for composite duel computation
+  type FactorData475 = {
+    homeSpFip: number | null; awaySpFip: number | null;
+    homeSpXfip: number | null; awaySpXfip: number | null;
+    homeLineupWoba: number | null; awayLineupWoba: number | null;
+    homeBullpenFip: number | null; awayBullpenFip: number | null;
+    homeSfr: number | null; awaySfr: number | null;
+    homeWar: number | null; awayWar: number | null;
+    homeRecentForm: number | null; awayRecentForm: number | null;
+  };
+  const factorDataMap = new Map<number, FactorData475>();
   if (eloResult.data) {
-    type EloRow = { game_id: number | null; home_elo: number | null; away_elo: number | null; home_win_prob: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
+    type EloRow = { game_id: number | null; home_elo: number | null; away_elo: number | null; home_win_prob: number | null; home_sp_fip: number | null; away_sp_fip: number | null; home_sp_xfip: number | null; away_sp_xfip: number | null; home_lineup_woba: number | null; away_lineup_woba: number | null; home_bullpen_fip: number | null; away_bullpen_fip: number | null; home_sfr: number | null; away_sfr: number | null; home_war_total: number | null; away_war_total: number | null; home_recent_form: number | null; away_recent_form: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
     for (const row of eloResult.data as unknown as EloRow[]) {
       const hc = row.game?.home_team?.code;
       const ac = row.game?.away_team?.code;
@@ -588,6 +607,18 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       if (ac && row.away_elo != null && !eloMap.has(ac)) eloMap.set(ac, row.away_elo);
       if (row.game_id != null && row.home_win_prob != null && !modelProbMap.has(row.game_id)) {
         modelProbMap.set(row.game_id, row.home_win_prob);
+      }
+      // wave-475: store factor data per game_id (first occurrence only, latest prediction)
+      if (row.game_id != null && !factorDataMap.has(row.game_id)) {
+        factorDataMap.set(row.game_id, {
+          homeSpFip: row.home_sp_fip, awaySpFip: row.away_sp_fip,
+          homeSpXfip: row.home_sp_xfip, awaySpXfip: row.away_sp_xfip,
+          homeLineupWoba: row.home_lineup_woba, awayLineupWoba: row.away_lineup_woba,
+          homeBullpenFip: row.home_bullpen_fip, awayBullpenFip: row.away_bullpen_fip,
+          homeSfr: row.home_sfr, awaySfr: row.away_sfr,
+          homeWar: row.home_war_total, awayWar: row.away_war_total,
+          homeRecentForm: row.home_recent_form, awayRecentForm: row.away_recent_form,
+        });
       }
     }
   }
@@ -602,6 +633,30 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
     const homeElo = eloMap.get(homeCode) ?? ELO_NEUTRAL;
     const awayElo = eloMap.get(awayCode) ?? ELO_NEUTRAL;
     const homeWinProb = 1 / (1 + Math.pow(10, (awayElo - homeElo - HOME_ELO_BONUS) / ELO_DIVIDER));
+    // wave-475: compute factor N:M for upcoming games
+    let factorFavoredCount: number | null = null;
+    let factorAgainstCount: number | null = null;
+    let convergenceNetScore: number | null = null;
+    const fd = factorDataMap.get(r.id);
+    if (fd) {
+      const duel = computeCompositeDuel({
+        homeCode,
+        homeLineupWoba: fd.homeLineupWoba, awayLineupWoba: fd.awayLineupWoba,
+        homeSfr: fd.homeSfr, awaySfr: fd.awaySfr,
+        homeBullpenFip: fd.homeBullpenFip, awayBullpenFip: fd.awayBullpenFip,
+        homeSPFip: fd.homeSpFip, awaySPFip: fd.awaySpFip,
+        homeSPXfip: fd.homeSpXfip, awaySPXfip: fd.awaySpXfip,
+        homeWar: fd.homeWar, awayWar: fd.awayWar,
+        homeElo: eloMap.get(homeCode), awayElo: eloMap.get(awayCode),
+        homeRecentForm: fd.homeRecentForm ?? undefined, awayRecentForm: fd.awayRecentForm ?? undefined,
+      });
+      if (duel.validCount >= COMPOSITE_DUEL_MIN_VALID) {
+        convergenceNetScore = duel.netScore;
+        const favoredHome = duel.netScore > 0;
+        factorFavoredCount = favoredHome ? duel.homeWins : duel.awayWins;
+        factorAgainstCount = favoredHome ? duel.awayWins : duel.homeWins;
+      }
+    }
     result.push({
       gameId: r.id,
       gameDate: r.game_date,
@@ -610,6 +665,9 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       awayCode,
       homeWinProb,
       modelHomeWinProb: modelProbMap.get(r.id) ?? null,
+      factorFavoredCount,
+      factorAgainstCount,
+      convergenceNetScore,
     });
   }
   return result;
@@ -2434,6 +2492,18 @@ export default async function AnalysisIndexPage() {
                                 {hasModel && (
                                   <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5">
                                     Elo: {favoredName} {winPct}%
+                                  </p>
+                                )}
+                                {/* wave-475: 팩터 N:M 균형 — 데이터 있는 예정 경기에 오늘 경기와 동일 패턴 적용 */}
+                                {g.factorFavoredCount != null && (
+                                  <p className={`text-xs font-mono mt-0.5 ${
+                                    g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE
+                                      ? 'text-[var(--color-accent)] dark:text-[#e2c96b] font-semibold'
+                                      : g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_STRONG
+                                        ? 'text-brand-500 dark:text-brand-400 font-semibold'
+                                        : 'text-gray-400 dark:text-gray-500'
+                                  }`}>
+                                    팩터 {g.factorFavoredCount}:{g.factorAgainstCount}
                                   </p>
                                 )}
                               </div>

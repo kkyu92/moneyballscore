@@ -1,4 +1,21 @@
 # Changelog
+## v0.5.56.0 — 2026-07-20 (wave-475: 예정 경기 팩터 N:M 균형 표시)
+
+### feat(analysis): wave-475 — 이번 주 남은 예정 경기에 팩터 N:M 균형 표시 (cycle 1837)
+
+- `UpcomingScheduledGame` 인터페이스에 `factorFavoredCount`, `factorAgainstCount`, `convergenceNetScore` 추가
+- `getThisWeekRemainingGames` 에서 factor 컬럼 쿼리 (home_sp_fip/away_sp_fip/home_sp_xfip 등 8개) 추가
+- `computeCompositeDuel` 통해 game_id별 팩터 N:M 계산 — `validCount >= COMPOSITE_DUEL_MIN_VALID(4)` gate
+- 예정 경기 카드 UI: `팩터 N:M` 표시, 오늘 경기와 동일 3-tier 색상 적용
+  - amber (골드): `|convergenceNetScore| >= FACTOR_PICK_COMPLETE(10)`
+  - brand (파랑): `|convergenceNetScore| >= FACTOR_PICK_STRONG(8)`
+  - gray: 데이터 있으나 낮은 수렴
+- `packages/shared/src/index.ts` JSDoc 3개 상수 wave-475 bullet 추가 (COMPOSITE_DUEL_MIN_VALID / FACTOR_PICK_STRONG / FACTOR_PICK_COMPLETE)
+- wave-475 테스트 8개 추가 (`wave-475-upcoming-games-factor-nm.test.ts`)
+
+---
+
+
 
 ## v0.5.55.1 — 2026-07-18 (wave-474: FACTOR_PICK_MIN_FACTORS JSDoc wave-473 bullet description line 정정)
 

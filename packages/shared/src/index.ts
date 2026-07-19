@@ -2524,6 +2524,7 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
  * 유효(non-null) 팩터 쌍이 본 값 미만이면 배지 표시 안 함.
  * WAR/Elo/최근폼/상대전적/선발xFIP/구장보정 6개 optional(항상 가용 X) — 4/10 이상 유효 시 집계.
  * · wave-424 rolling 성적 getRecentConvergencePickRecord (cycle 1778): 동일 조건 재사용.
+ * · wave-475 예정 경기 팩터 N:M 표시 (cycle 1837): getThisWeekRemainingGames computeCompositeDuel gate — validCount ≥ 본 값 시 UpcomingScheduledGame.factorFavoredCount/factorAgainstCount/convergenceNetScore 박제.
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
@@ -2546,7 +2547,7 @@ export const FACTOR_PICK_MIN_FACTORS = 7;
 export const FACTOR_PICK_TOP_GAMES = 3;
 
 /**
- * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-463 game/[id] "강수렴" 레이블 칩 (cycle 1823). · wave-465 analysis/page.tsx "강수렴" 레이블 칩 (cycle 1825). · wave-467 analysis/page.tsx sectionHasComplete=false 조건 (cycle 1828).
+ * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-463 game/[id] "강수렴" 레이블 칩 (cycle 1823). · wave-465 analysis/page.tsx "강수렴" 레이블 칩 (cycle 1825). · wave-467 analysis/page.tsx sectionHasComplete=false 조건 (cycle 1828). · wave-475 예정 경기 팩터 N:M 색상 brand 티어 (cycle 1837): |convergenceNetScore| ≥ 본 값 시 text-brand-500.
  * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상 brand(파랑) + '강수렴' 레이블 칩 (isComplete=false 전제) 표시.
  * wave-463: isStrong = !isComplete && convStrength ≥ 8 → "강수렴" 텍스트 레이블 칩 표시 (game/[id]). wave-465: 동일 기준 analysis/page.tsx 적용. wave-467: sectionHasComplete = factorPickGames.some ≥ FACTOR_PICK_COMPLETE 조건 false 분기 (brand 유지).
  * 10팩터 중 8개 이상 한쪽 팀 우세 = 80% 팩터 정렬.
@@ -2555,7 +2556,7 @@ export const FACTOR_PICK_TOP_GAMES = 3;
 export const FACTOR_PICK_STRONG = 8;
 
 /**
- * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816). · wave-459 analysis/page.tsx isComplete chip 색상 (cycle 1819). · wave-461 game/[id]/page.tsx 합치 칩(✓ 합치) amber 3-tier 색상 (cycle 1822). · wave-463 game/[id]/page.tsx '완전수렴' 레이블 칩 (cycle 1823). · wave-465 analysis/page.tsx '완전수렴' 레이블 칩 (cycle 1825). · wave-467 analysis/page.tsx sectionHasComplete — 섹션 border/bg amber upgrade (cycle 1828).
+ * 팩터 수렴 픽 완전 수렴 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-452 game/[id] amber 배지 (cycle 1812). · wave-454 chip amber 색상 (cycle 1814). · wave-456 !isComplete opponent chip 조건 (cycle 1816). · wave-459 analysis/page.tsx isComplete chip 색상 (cycle 1819). · wave-461 game/[id]/page.tsx 합치 칩(✓ 합치) amber 3-tier 색상 (cycle 1822). · wave-463 game/[id]/page.tsx '완전수렴' 레이블 칩 (cycle 1823). · wave-465 analysis/page.tsx '완전수렴' 레이블 칩 (cycle 1825). · wave-467 analysis/page.tsx sectionHasComplete — 섹션 border/bg amber upgrade (cycle 1828). · wave-475 예정 경기 팩터 N:M 색상 amber 티어 (cycle 1837): |convergenceNetScore| ≥ 본 값 시 text-[var(--color-accent)] 골드 색상.
  * |compositeDuelScore| ≥ 본 값 시: analysis/page.tsx = accent(골드) 색상·amber 칩·'완전수렴' 레이블 칩 (wave-459/wave-465) + 섹션 container amber border/bg + 제목/성적 텍스트 amber (wave-467), game/[id]/page.tsx = amber 배경 배지 + amber 칩 + 합치 칩 amber + '완전수렴' 레이블 칩 (wave-461/wave-463). false 시 상대 팀 우세 팩터 칩 표시 (wave-456).
  * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
  */
