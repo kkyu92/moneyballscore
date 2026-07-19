@@ -817,6 +817,14 @@ export const ACCURACY_STRONG_RATE = 0.7;
 export const ACCURACY_WEAK_RATE = 0.4;
 
 /**
+ * 적중률 색상 "우수" 임계 (정수 %) — getAccuracyColor green 기준.
+ * ACCURACY_GOOD_PCT(60)보다 높은 "우수" 단계 — tier 과거 적중률 인라인 색상 단일 source.
+ *
+ * silent drift family wave 498 (cycle 1865) — getAccuracyColor `65` 인라인 swap.
+ */
+export const ACCURACY_GREAT_PCT = 65;
+
+/**
  * 팩터 상관계수 양방향 임계 — s.correlation >= FACTOR_CORR_POSITIVE_MIN 시 "positive"
  * 방향 레이블. factor insight 방향 분류 단일 source.
  *
@@ -1669,10 +1677,15 @@ export function getConfidenceTierLabel(pct: number): string {
   return '박빙';
 }
 
-// 적중률 → Tailwind 색상 클래스 (낮은 값에 빨간색)
+/**
+ * 적중률 % → Tailwind 텍스트 색상 클래스 (green / yellow / red 3단계).
+ * ACCURACY_GREAT_PCT(65) 이상 = green / ACCURACY_OK_PCT(55) 이상 = yellow / 이하 = red.
+ *
+ * silent drift family wave 498 (cycle 1865) — `65` / `55` 인라인 → ACCURACY_GREAT_PCT / ACCURACY_OK_PCT 상수 참조.
+ */
 export function getAccuracyColor(pct: number): string {
-  if (pct >= 65) return 'text-green-600';
-  if (pct >= 55) return 'text-yellow-600';
+  if (pct >= ACCURACY_GREAT_PCT) return 'text-green-600';
+  if (pct >= ACCURACY_OK_PCT) return 'text-yellow-600';
   return 'text-red-600';
 }
 
