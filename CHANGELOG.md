@@ -1,3 +1,15 @@
+## v0.5.60.1 — 2026-07-20 (cycle 1848, wave-485: FACTOR_LABELS_SHORT JSDoc wave-484 bullet 추가)
+
+### fix(context): wave-485 — FACTOR_LABELS_SHORT JSDoc wave-484 bullet description line 추가 (cycle 1848)
+
+- `FACTOR_LABELS_SHORT` JSDoc wave-484 bullet 추가 (`apps/moneyball/src/lib/predictions/factorLabels.ts`)
+  - `· wave-484 analysis/page.tsx 이번 주 남은 경기 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1847): analysis/page.tsx — !isPickGame: factorFavoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL/wave-482 LIST TODAY 3-way 대칭 완성).`
+  - wave-480/482/484 3-way 대칭 문서화 완성 (FACTOR_LABELS_SHORT JSDoc에 3개 bullet 전부 박제)
+- wave-485 테스트 6개 추가 (`wave-485-factor-labels-short-jsdoc-wave484-bullet.test.ts`)
+- v0.5.60.1
+
+---
+
 ## v0.5.60 — 2026-07-20 (wave-484: analysis LIST 이번 주 남은 경기 비수렴 N:M 배지 팩터 레이블 표시)
 
 ### feat(analysis): wave-484 — 이번 주 남은 경기 비수렴 N:M 배지 우세 팩터 단축 레이블 표시 (cycle 1847)
