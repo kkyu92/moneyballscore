@@ -1,3 +1,18 @@
+## v0.5.59 — 2026-07-20 (wave-482: analysis LIST 비수렴 N:M 배지 팩터 레이블 표시)
+
+### feat(analysis): wave-482 — 분석 목록 비수렴 게임 팩터 N:M 배지에 우세 팩터 단축 레이블 표시 (cycle 1845)
+
+- `analysis/page.tsx` 비수렴 경기 팩터 N:M 배지에 우세 팩터 단축 레이블 추가 (wave-480 DETAIL→LIST 대칭)
+  - `!isPickGame` 분기: 비수렴 경기에만 적용 (수렴 픽 경기는 wave-430 픽 섹션에서 이미 레이블 표시)
+  - `pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs` → `FACTOR_LABELS_SHORT` 매핑 인라인 표시
+  - `COMPOSITE_DUEL_FACTOR_LABEL_LIMIT = 3` 적용 (wave-480과 동일 상수 재사용)
+  - 형식: `팩터 N:M (선발·타선·Elo)` — gray text-[10px] font-sans
+- `COMPOSITE_DUEL_FACTOR_LABEL_LIMIT` JSDoc wave-482 bullet 추가 (`packages/shared/src/index.ts`)
+- wave-482 테스트 9개 추가 (`wave-482-analysis-list-nonconvergent-factor-labels.test.ts`)
+- v0.5.59
+
+---
+
 # Changelog
 ## v0.5.58.1 — 2026-07-20 (cycle 1844, wave-481: FACTOR_LABELS_SHORT JSDoc wave-480 bullet 추가)
 

@@ -58,6 +58,7 @@ import {
   SP_XFIP_DUEL_MIN,
   COMPOSITE_DUEL_THRESHOLD,
   COMPOSITE_DUEL_MIN_VALID,
+  COMPOSITE_DUEL_FACTOR_LABEL_LIMIT,
   RECENT_FORM_DUEL_MIN,
   ELO_GAP_STRONG,
   KBO_TEAMS,
@@ -1786,7 +1787,7 @@ export default async function AnalysisIndexPage() {
                                   : 'text-orange-500 dark:text-orange-400'
                               }`}>{gameTypeTag}</span>
                             )}
-                            {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) */}
+                            {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) · wave-482: 비수렴 팩터 단축 레이블 표시 (wave-480 DETAIL→LIST 대칭) */}
                             {factorFavoredCount != null && (
                               <span className={`ml-2 font-mono ${
                                 isPickGame
@@ -1800,6 +1801,15 @@ export default async function AnalysisIndexPage() {
                                   : 'text-gray-400 dark:text-gray-500'
                               }`}>
                                 팩터 {factorFavoredCount}:{factorAgainstCount}
+                                {!isPickGame && (() => {
+                                  const slugs = (pickFavoredHome ? g.compositeDuelHomeSlugs : g.compositeDuelAwaySlugs) ?? [];
+                                  const factorLabels = slugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT).map((s: string) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
+                                  return factorLabels ? (
+                                    <span className="text-[10px] font-sans font-normal">
+                                      {' '}({factorLabels})
+                                    </span>
+                                  ) : null;
+                                })()}
                               </span>
                             )}
                           </p>

@@ -2534,6 +2534,7 @@ export const COMPOSITE_DUEL_MIN_VALID = 4;
  * 비수렴 경기 팩터 N:M 배지 — 우세 팩터 단축 레이블 최대 표시 수 — wave-480 (cycle 1843).
  * analysis/game/[id]/page.tsx wave-478 badge: favoredSlugs.slice(0, 본 값) → FACTOR_LABELS_SHORT 매핑 인라인 표시.
  * 3 이하 유지 권장 — 4+ 시 배지 줄바꿈 발생.
+ * · wave-482 analysis/page.tsx 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1845): !isPickGame 분기 — 동일 상수 재사용 (wave-480 DETAIL↔LIST 대칭).
  */
 export const COMPOSITE_DUEL_FACTOR_LABEL_LIMIT = 3;
 
