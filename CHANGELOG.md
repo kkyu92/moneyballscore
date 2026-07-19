@@ -1,3 +1,19 @@
+## v0.5.60 — 2026-07-20 (wave-484: analysis LIST 이번 주 남은 경기 비수렴 N:M 배지 팩터 레이블 표시)
+
+### feat(analysis): wave-484 — 이번 주 남은 경기 비수렴 N:M 배지 우세 팩터 단축 레이블 표시 (cycle 1847)
+
+- `UpcomingScheduledGame.factorFavoredSlugs: string[] | null` 필드 추가 (`analysis/page.tsx`)
+  - `getThisWeekRemainingGames()` 에서 `computeCompositeDuel` 결과 `homeFavoredSlugs/awayFavoredSlugs` 추출 박제
+- 이번 주 남은 경기 렌더링 비수렴 단축 레이블 표시 (`wave-475` 섹션 확장)
+  - `!isPickGame` 분기: `g.convergenceNetScore < FACTOR_PICK_MIN_FACTORS` 시 비수렴 경기에만 적용
+  - `g.factorFavoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT)` → `FACTOR_LABELS_SHORT` 매핑 인라인 표시
+  - 형식: `팩터 N:M (선발·Elo·불펜)` — gray text-[10px] font-sans (wave-482 TODAY 대칭)
+- `COMPOSITE_DUEL_FACTOR_LABEL_LIMIT` JSDoc wave-484 bullet 추가 (`packages/shared/src/index.ts`)
+- wave-484 테스트 12개 추가 (`wave-484-analysis-list-upcoming-nonconvergent-factor-labels.test.ts`)
+- v0.5.60 (wave-480 DETAIL / wave-482 LIST TODAY / wave-484 LIST UPCOMING 3-way 대칭 완성)
+
+---
+
 ## v0.5.59.1 — 2026-07-20 (cycle 1846, wave-483: COMPOSITE_DUEL_FACTOR_LABEL_LIMIT JSDoc wave-482 bullet 정정)
 
 ### fix(context): wave-483 — COMPOSITE_DUEL_FACTOR_LABEL_LIMIT JSDoc wave-482 bullet description line 정정 (cycle 1846)
