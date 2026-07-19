@@ -623,12 +623,12 @@ export const ELO_DISPLAY_NEUTRAL_BAND = 10;
  *
  * 50 Elo point diff ≈ 57% vs 43% win probability (ELO_DIVIDER=400 기준).
  * KBO 시즌 팀 레이팅 범위 ~1400~1600 (200 point span) 내 의미 있는 tier 차이.
- * 변경 시 factor-explanations.ts + analysis/page.tsx wave-379/444 + computeCompositeDuel.ts callsite 동기.
+ * 변경 시 factor-explanations.ts + analysis/page.tsx wave-379/444/506 + computeCompositeDuel.ts callsite 동기.
  *
- * 3 파일 callsite (cycle 1803 갱신):
+ * 3 파일 callsite (cycle 1874 갱신):
  *   - apps/moneyball/src/lib/analysis/factor-explanations.ts (wave-351)
  *   - apps/moneyball/src/lib/analysis/computeCompositeDuel.ts (wave-390)
- *   - apps/moneyball/src/app/analysis/page.tsx (wave-379/444)
+ *   - apps/moneyball/src/app/analysis/page.tsx (wave-379/444/506)
  */
 export const ELO_GAP_STRONG = 50;
 
@@ -2404,7 +2404,7 @@ export const BULLPEN_FIP_WEAK = 5.0;
  * 불펜 FIP 우세 태그 최소 차이 임계 — wave-342 (cycle 1677).
  * |awayBullpenFip - homeBullpenFip| ≥ 본 값 시 불펜 우세 팀 태그 표시.
  * 1.0 = FIP 1점 차 = KBO 강/약 불펜 경계 차이 수준.
- * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442 callsite 동기.
+ * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442/504 callsite 동기.
  */
 export const BULLPEN_FIP_DIFF_MIN = 1.0;
 
@@ -2554,7 +2554,7 @@ export const TOP_STAT_PICK_EDGE_MIN = 0.05;
  * |homeLineupWoba - awayLineupWoba| ≥ 본 값 시 "타선 홈/원정 강세" 태그 표시.
  * 0.020 = 20 wOBA 포인트 = KBO 리그 내 타선 유의미한 차이 수준
  * (LINEUP_WOBA_WEAK_TAG~LINEUP_WOBA_STRONG_TAG 범위 0.040 의 절반).
- * 변경 시 analysis/page.tsx wave-355/442 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-355/442/501 callsite 자동 동기.
  */
 export const LINEUP_WOBA_DUEL_MIN = 0.020;
 
@@ -2563,7 +2563,7 @@ export const LINEUP_WOBA_DUEL_MIN = 0.020;
  * |awaySPFip - homeSPFip| ≥ 본 값 시 "선발 {팀} 강세" 배지 표시.
  * FIP 낮을수록 유리. 0.5 = SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 범위(1.0)의 절반.
  * 선발 투수 1인 기준 FIP 0.5 차 = KBO 리그 에이스-평균 경계 수준.
- * 변경 시 analysis/page.tsx wave-363/446 callsite 자동 동기.
+ * 변경 시 analysis/page.tsx wave-363/446/499 callsite 자동 동기.
  */
 export const SP_FIP_DUEL_MIN = 0.5;
 
