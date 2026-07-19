@@ -711,6 +711,16 @@ export const WINNER_PROB_MID = 0.6;
 export const SUNDAY_CAP_CONFIDENCE = 0.45;
 
 /**
+ * 최고 자신감 픽 표시 최소 confidence 임계 — predictions/[date] 의 top pick 배너에
+ * 표시할 예측의 최소 confidence. 0.1 미만(= 55% 미만 실질 win prob) 은 박빙으로
+ * 취급 → top pick 후보에서 제외.
+ *
+ * silent drift family wave 505 (cycle 1872) — predictions/[date]/page.tsx
+ * `> 0.1` 인라인 swap.
+ */
+export const TOP_PICK_CONF_MIN = 0.1;
+
+/**
  * 적중률 기준선 — "동전 50%" coin-flip baseline. 차트 ReferenceLine
  * (RollingAccuracyChart / WeeklyTrendMini / WinnerProbBucketChart) + 색상 threshold
  * (ScoringRuleDayHeatmap >=50% yellow) 단일 source. 사용자 가시 본문은 "동전"

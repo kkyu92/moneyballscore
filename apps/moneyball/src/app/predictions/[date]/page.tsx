@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, confToWinProb, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
 
@@ -205,7 +205,7 @@ function buildIntro(
   const tAway = formatTeamName(tightest?.away_team?.code as TeamCode);
   const tConf = tightest?.predictions?.[0]?.confidence;
   const tConfPct =
-    typeof tConf === "number" ? Math.round((0.5 + tConf / 2) * 100) : null;
+    typeof tConf === "number" ? Math.round(confToWinProb(tConf) * 100) : null;
   const tightestPhrase = tAway && tHome ? `${tAway} vs ${tHome}` : "";
 
   if (allVerified && rate !== null) {
@@ -345,15 +345,15 @@ export default async function PredictionDatePage({ params }: Props) {
   });
 
   // 최고 자신감 픽 — 취소 제외 predicted 중 confidence 최대값.
-  // confidence: 0-1 (0=박빙/50%, 1=100%). winProbPct = 0.5 + conf/2 * 100.
+  // confidence: 0-1 (0=박빙/50%, 1=100%). winProbPct = confToWinProb(conf) * 100.
   const topPickGame = predicted
-    .filter((g) => g.status !== 'postponed' && (g.predictions[0]?.confidence ?? 0) > 0.1)
+    .filter((g) => g.status !== 'postponed' && (g.predictions[0]?.confidence ?? 0) > TOP_PICK_CONF_MIN)
     .sort((a, b) => (b.predictions[0]?.confidence ?? 0) - (a.predictions[0]?.confidence ?? 0))[0];
   const topPick = topPickGame
     ? (() => {
         const p = topPickGame.predictions[0];
         const conf = p.confidence;
-        const winProbPct = Math.round((0.5 + conf / 2) * 100);
+        const winProbPct = Math.round(confToWinProb(conf) * 100);
         const teamCode = p.winner?.code as TeamCode | undefined;
         if (!teamCode) return null;
         return {

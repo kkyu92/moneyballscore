@@ -1,3 +1,17 @@
+## v0.5.61.8 — 2026-07-20 (cycle 1872, wave-505: predictions/[date] confToWinProb + TOP_PICK_CONF_MIN 상수 추출)
+
+### fix(context): wave-505 — predictions/[date]/page.tsx confToWinProb 인라인 수식 swap + TOP_PICK_CONF_MIN 추출 (cycle 1872)
+
+- `predictions/[date]/page.tsx` 인라인 수식 → 상수/함수 swap (silent drift family wave 505)
+  - `(0.5 + tConf / 2) * 100` → `confToWinProb(tConf) * 100` (tightest 박빙 경기 승률 계산, line ~208)
+  - `> 0.1` → `> TOP_PICK_CONF_MIN` (최고 자신감 픽 필터 임계, line ~350)
+  - `(0.5 + conf / 2) * 100` → `confToWinProb(conf) * 100` (topPick 승률 계산, line ~356)
+- `TOP_PICK_CONF_MIN = 0.1` 신규 상수 (`packages/shared/src/index.ts`) — 예측 페이지 top pick 필터 최소 confidence 단일 source
+- wave-505 테스트 추가 (`wave-505-predictions-conftowinprob-swap.test.ts`) — 11 PASS
+- v0.5.61.8
+
+---
+
 ## v0.5.61.7 — 2026-07-20 (cycle 1871, wave-504: analysis 오늘 AI 예측 불펜FIP 직접 대결 배지)
 
 ### feat(analysis): wave-504 — analysis 오늘 AI 예측 카드 불펜FIP 직접 대결 배지 (cycle 1871)
