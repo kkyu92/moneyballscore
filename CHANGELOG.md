@@ -1,3 +1,29 @@
+## v0.5.61.1 — 2026-07-20 (cycle 1850, wave-487: COMPOSITE_DUEL_MIN_VALID JSDoc wave-482/484 bullet 추가)
+
+### fix(context): wave-487 — COMPOSITE_DUEL_MIN_VALID JSDoc wave-482/484 bullet description line 추가 (cycle 1850)
+
+- `COMPOSITE_DUEL_MIN_VALID` JSDoc wave-482/484 bullet 추가 (`packages/shared/src/index.ts`)
+  - `· wave-482 analysis/page.tsx 비수렴 LIST 배지 (cycle 1845): analysis/page.tsx — duel.validCount ≥ 본 값 시 factorFavoredCount/factorAgainstCount/convergenceNetScore 박제 (wave-478 game/[id] LIST 대칭).`
+  - `· wave-484 analysis/page.tsx 이번 주 남은 경기 비수렴 레이블 (cycle 1847): analysis/page.tsx — duel.validCount ≥ 본 값 시 factorFavoredSlugs 박제 — 비수렴 단축 레이블 gate (wave-480 game/[id] 레이블 대칭).`
+  - wave-480/482/484 3-way analysis/page.tsx gate 문서화 완성
+- wave-487 테스트 추가 (`wave-487-composite-duel-min-valid-jsdoc.test.ts`)
+- v0.5.61.1
+
+---
+
+## v0.5.61 — 2026-07-20 (cycle 1849, wave-486: matchup/[teamA]/[teamB] 팩터 N:M 종합 배지 표시)
+
+### feat(analysis): wave-486 — matchup/[teamA]/[teamB] 팩터 N:M 종합 배지 표시 (cycle 1849)
+
+- `MatchupFactorCompare`: 5팩터 비교 후 우세 팀 + N:M ratio + FACTOR_LABELS_SHORT 인라인 표시
+  - wave-480 DETAIL / wave-482 LIST 패턴을 matchup 페이지에 적용
+  - `aWinSlugs/bWinSlugs` 집계 → 우세 팀 이름 · 팩터 균형 배지 · 단축 레이블 (gray)
+- `FACTOR_LABELS_SHORT` JSDoc wave-486 bullet 추가 (`apps/moneyball/src/lib/predictions/factorLabels.ts`)
+- wave-486 테스트 12개 추가 (`wave-486-matchup-factor-duel-badge.test.ts`)
+- v0.5.61
+
+---
+
 ## v0.5.60.1 — 2026-07-20 (cycle 1848, wave-485: FACTOR_LABELS_SHORT JSDoc wave-484 bullet 추가)
 
 ### fix(context): wave-485 — FACTOR_LABELS_SHORT JSDoc wave-484 bullet description line 추가 (cycle 1848)
