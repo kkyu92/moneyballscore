@@ -1,3 +1,17 @@
+## v0.5.59.1 — 2026-07-20 (cycle 1846, wave-483: COMPOSITE_DUEL_FACTOR_LABEL_LIMIT JSDoc wave-482 bullet 정정)
+
+### fix(context): wave-483 — COMPOSITE_DUEL_FACTOR_LABEL_LIMIT JSDoc wave-482 bullet description line 정정 (cycle 1846)
+
+- `COMPOSITE_DUEL_FACTOR_LABEL_LIMIT` JSDoc wave-482 bullet 정밀화 (`packages/shared/src/index.ts`)
+  - `!isPickGame 분기 — 동일 상수 재사용 (wave-480 DETAIL↔LIST 대칭).` → `analysis/page.tsx — !isPickGame: (pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs).slice(0, 본 값) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL 대칭).`
+- `FACTOR_LABELS_SHORT` JSDoc wave-482 bullet 추가 (`apps/moneyball/src/lib/predictions/factorLabels.ts`)
+  - `· wave-482 analysis/page.tsx 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1845): analysis/page.tsx — !isPickGame: (pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs).slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL 대칭).`
+  - wave-480 DETAIL↔wave-482 LIST 대칭 문서화 완성 (FACTOR_LABELS_SHORT JSDoc에 DETAIL+LIST 양쪽 bullet 박제)
+- wave-483 테스트 5개 추가 (`wave-483-composite-duel-factor-label-limit-jsdoc.test.ts`)
+- v0.5.59.1
+
+---
+
 ## v0.5.59 — 2026-07-20 (wave-482: analysis LIST 비수렴 N:M 배지 팩터 레이블 표시)
 
 ### feat(analysis): wave-482 — 분석 목록 비수렴 게임 팩터 N:M 배지에 우세 팩터 단축 레이블 표시 (cycle 1845)

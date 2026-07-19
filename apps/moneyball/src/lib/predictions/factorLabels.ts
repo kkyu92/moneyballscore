@@ -35,6 +35,7 @@ export const FACTOR_LABELS: Record<string, string> = {
 /**
  * wave-430: 종합 우세 배지 인라인 나열용 + wave-454 game/[id] 팩터 칩 (cycle 1814) · wave-456 상대 팀 우세 팩터 칩 (cycle 1816) — 한두 글자 단축 레이블.
  * · wave-480 game/[id] 비수렴 N:M 배지 팩터 레이블 표시 (cycle 1843): analysis/game/[id]/page.tsx — favoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-430 LIST 수렴 패턴 대칭).
+ * · wave-482 analysis/page.tsx 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1845): analysis/page.tsx — !isPickGame: (pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs).slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL 대칭).
  */
 export const FACTOR_LABELS_SHORT: Record<string, string> = {
   sp_fip: "선발",
