@@ -1,4 +1,4 @@
-import { MIN_VERIFIED_GAMES_HEDGE, WINNER_TIER_LABEL, pickTierEmoji } from '@moneyball/shared';
+import { MIN_VERIFIED_GAMES_HEDGE, STATS_RELIABLE_MIN_N, WINNER_TIER_LABEL, pickTierEmoji } from '@moneyball/shared';
 
 import { accuracyRateColorClass } from '@/lib/accuracy/buildAccuracyData';
 
@@ -39,7 +39,7 @@ export function AccuracyHeaderCard({
     recentVerified !== undefined &&
     recentCorrect !== undefined &&
     recentVerified >= MIN_VERIFIED_GAMES_HEDGE &&
-    totalVerified >= 30;
+    totalVerified >= STATS_RELIABLE_MIN_N;
   const recentAccuracy = showTrend ? recentCorrect! / recentVerified! : 0;
   const deltaPp = showTrend
     ? Math.round((recentAccuracy - accuracy) * 100)
