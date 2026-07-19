@@ -714,7 +714,17 @@ export default async function HomePage() {
       )}
 
       {/* 적중률 요약 */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">적중률 현황</h2>
+          <Link
+            href="/accuracy"
+            className="text-sm text-brand-600 hover:text-brand-800 hover:underline"
+          >
+            전체 보기 →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <AccuracySummary
           total={accuracy.total}
           correct={accuracy.correct}
@@ -759,6 +769,7 @@ export default async function HomePage() {
           )}
         </div>
         <WeeklyTrendMini weeks={weeklyTrend} />
+        </div>
       </section>
 
       {/* 예측 카드 목록 */}
