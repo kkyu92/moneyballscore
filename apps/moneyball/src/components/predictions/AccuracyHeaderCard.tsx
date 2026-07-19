@@ -21,8 +21,6 @@ interface Props {
   };
 }
 
-const TIER_BREAKDOWN_MIN = 10;
-
 export function AccuracyHeaderCard({
   totalPredicted,
   totalVerified,
@@ -54,7 +52,7 @@ export function AccuracyHeaderCard({
         : 'text-gray-700 dark:text-gray-300';
   const trendSign = deltaPp > 0 ? '+' : '';
 
-  // 티어 breakdown: 각 티어 verified ≥ TIER_BREAKDOWN_MIN 인 것만 표시
+  // 티어 breakdown: 각 티어 verified ≥ MIN_VERIFIED_GAMES_HEDGE 인 것만 표시
   const tiers = tierAccuracy
     ? (
         [
@@ -62,7 +60,7 @@ export function AccuracyHeaderCard({
           { key: 'lean', ...tierAccuracy.lean },
           { key: 'tossup', ...tierAccuracy.tossup },
         ] as const
-      ).filter((t) => t.verified >= TIER_BREAKDOWN_MIN)
+      ).filter((t) => t.verified >= MIN_VERIFIED_GAMES_HEDGE)
     : [];
 
   return (
