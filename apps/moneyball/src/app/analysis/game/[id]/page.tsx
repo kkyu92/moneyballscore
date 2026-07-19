@@ -776,6 +776,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           { href: `/teams/${awayTeam}`, label: `${awayName} 팀 프로필`, hint: '시즌 통계 + 적중률' },
           ...(pair ? [{ href: pair.path, label: `${shortTeamName(awayTeam)} vs ${shortTeamName(homeTeam)} 매치업`, hint: '상대전적 + 예측 성과' }] : []),
           { href: `/predictions/${gameDate}`, label: `${gameDate} 전체 예측`, hint: '같은 날짜 다른 경기' },
+          ...(isPast ? [{ href: `/insights/${gameDate}`, label: `${gameDate} AI 인사이트`, hint: 'AI 심판 에이전트 reasoning 아카이브' }] : []),
         ];
         return <RelatedLinks title="관련 페이지" items={items} />;
       })()}
