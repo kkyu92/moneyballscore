@@ -1629,21 +1629,29 @@ export function pickTierEmoji(tier: WinnerConfidenceTier): string {
   return pool[0] ?? '';
 }
 
-// 신뢰도 → Tailwind 색상 클래스
+/**
+ * 신뢰도 % → Tailwind 색상 클래스.
+ * WINNER_PROB_CONFIDENT_PCT / WINNER_PROB_LEAN_PCT 임계 단일 source.
+ *
+ * silent drift family wave 492 (cycle 1858) — getConfidenceColor + getConfidenceTierLabel
+ * magic `65` / `55` hardcoded swap → 상수 참조.
+ */
 export function getConfidenceColor(pct: number): string {
-  if (pct >= 65) return 'text-green-600';
-  if (pct >= 55) return 'text-yellow-600';
+  if (pct >= WINNER_PROB_CONFIDENT_PCT) return 'text-green-600';
+  if (pct >= WINNER_PROB_LEAN_PCT) return 'text-yellow-600';
   return 'text-gray-600';
 }
 
 /**
  * 신뢰도 % → 사용자 가시 티어 라벨 (wave-491, cycle 1856).
- *   강한 예측 (≥ 65%) / 보통 (55~64%) / 박빙 (< 55%)
+ *   강한 예측 (≥ WINNER_PROB_CONFIDENT_PCT) / 보통 (LEAN~CONFIDENT) / 박빙 (< LEAN)
  * WINNER_PROB_CONFIDENT_PCT / WINNER_PROB_LEAN_PCT 와 동일 임계 사용.
+ *
+ * silent drift family wave 492 (cycle 1858) — magic `65` / `55` → 상수 참조.
  */
 export function getConfidenceTierLabel(pct: number): string {
-  if (pct >= 65) return '강한 예측';
-  if (pct >= 55) return '보통';
+  if (pct >= WINNER_PROB_CONFIDENT_PCT) return '강한 예측';
+  if (pct >= WINNER_PROB_LEAN_PCT) return '보통';
   return '박빙';
 }
 
