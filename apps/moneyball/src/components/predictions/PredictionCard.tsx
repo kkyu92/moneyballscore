@@ -8,7 +8,7 @@ import {
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
 import type { WeatherSlot } from "@/lib/weather";
-import { FACTOR_LABELS_TECHNICAL, topFavoringFactors } from "@/lib/predictions/factorLabels";
+import { FACTOR_LABELS_TECHNICAL, topFavoringFactors, countFavoringFactors } from "@/lib/predictions/factorLabels";
 
 export interface PredictionCardProps {
   homeTeam: TeamCode;
@@ -342,6 +342,8 @@ export function PredictionCard({
         const isHome = predictedWinner === homeTeam;
         const top = factors ? topFavoringFactors(factors, isHome, PREDICTION_CARD_TOP_FACTORS) : [];
         if (top.length === 0 && !judgeReasoning) return null;
+        const { predictedN, otherM } = factors ? countFavoringFactors(factors, isHome) : { predictedN: 0, otherM: 0 };
+        const showRatio = factors != null && predictedN + otherM >= 2;
         return (
           <div className="mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">
             {top.length > 0 && (
@@ -349,6 +351,9 @@ export function PredictionCard({
                 <span className="font-medium text-gray-500 dark:text-gray-400">주요 근거</span>
                 {" "}
                 {top.join(" · ")} 우위
+                {showRatio && (
+                  <>{" "}<span className="font-mono text-[10px] text-gray-300 dark:text-gray-600">팩터 {predictedN}:{otherM}</span></>
+                )}
               </p>
             )}
             {judgeReasoning && (
