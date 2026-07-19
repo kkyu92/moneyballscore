@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { KBO_TEAMS, KBO_STADIUM_SHORT, type TeamCode } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
 const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');

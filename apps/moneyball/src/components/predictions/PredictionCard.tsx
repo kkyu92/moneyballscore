@@ -352,7 +352,7 @@ export function PredictionCard({
                 {" "}
                 {top.join(" · ")} 우위
                 {showRatio && (
-                  <>{" "}<span className="font-mono text-[10px] text-gray-300 dark:text-gray-600">팩터 {predictedN}:{otherM}</span></>
+                  <>{" "}<span className="font-mono text-[10px] text-gray-400 dark:text-gray-500" title={`예측팀 우세 팩터 ${predictedN}개 · 상대팀 우세 팩터 ${otherM}개`}>팩터 {predictedN}:{otherM}</span></>
                 )}
               </p>
             )}
