@@ -208,6 +208,29 @@ export default async function PredictionsPage() {
     { predicted: 0, verified: 0, correct: 0 },
   );
 
+  // 티어별 누적 적중률 — AccuracyHeaderCard 에 breakdown 전달 (wave-493)
+  const tierTotals = dates.reduce(
+    (acc, d) => ({
+      confident: {
+        verified: acc.confident.verified + d.tiers.confident.verified,
+        correct: acc.confident.correct + d.tiers.confident.correct,
+      },
+      lean: {
+        verified: acc.lean.verified + d.tiers.lean.verified,
+        correct: acc.lean.correct + d.tiers.lean.correct,
+      },
+      tossup: {
+        verified: acc.tossup.verified + d.tiers.tossup.verified,
+        correct: acc.tossup.correct + d.tiers.tossup.correct,
+      },
+    }),
+    {
+      confident: { verified: 0, correct: 0 },
+      lean: { verified: 0, correct: 0 },
+      tossup: { verified: 0, correct: 0 },
+    },
+  );
+
   // 최근 N건 trend — dates 는 game_date desc 정렬. verified 누적 ≥ 20 도달 시
   // 멈춤. 본 chip = 전체 적중률 대비 최근 ±%p diff 노출 (헤더 카드 안).
   const RECENT_TARGET = 20;
@@ -261,6 +284,7 @@ export default async function PredictionsPage() {
           totalCorrect={totals.correct}
           recentVerified={recentVerified}
           recentCorrect={recentCorrect}
+          tierAccuracy={tierTotals}
         />
       )}
 
