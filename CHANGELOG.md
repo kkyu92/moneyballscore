@@ -1,4 +1,16 @@
 # Changelog
+## v0.5.56.1 — 2026-07-20 (wave-476: FACTOR_PICK_STRONG JSDoc wave-475 bullet description line 정정)
+
+### fix(context): wave-476 — FACTOR_PICK_STRONG JSDoc wave-475 bullet description line 정정 (cycle 1838)
+
+- `FACTOR_PICK_STRONG` JSDoc wave-475 bullet 정밀화
+  - 구 표현 `|convergenceNetScore| ≥ 본 값 시 text-brand-500.` → `(isComplete=false 전제)` 추가
+  - brand 색상은 FACTOR_PICK_COMPLETE 미만일 때만 적용 (amber 우선) — 전제 조건 명시
+  - description line `(isComplete=false 전제)` 와 bullet 일관성 확보
+- wave-476 테스트 4개 추가 (`wave-476-factor-pick-strong-jsdoc.test.ts`)
+
+---
+
 ## v0.5.56.0 — 2026-07-20 (wave-475: 예정 경기 팩터 N:M 균형 표시)
 
 ### feat(analysis): wave-475 — 이번 주 남은 예정 경기에 팩터 N:M 균형 표시 (cycle 1837)
