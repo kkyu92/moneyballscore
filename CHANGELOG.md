@@ -1,3 +1,20 @@
+## v0.5.61.9 — 2026-07-20 (cycle 1876, wave-509: 6-constant JSDoc computeCompositeDuel.ts callsite sync)
+
+### fix(context): wave-509 — LINEUP_WOBA_DUEL_MIN/SFR_DUEL_MIN/BULLPEN_FIP_DIFF_MIN/SP_FIP_DUEL_MIN/SP_XFIP_DUEL_MIN/RECENT_FORM_DUEL_MIN JSDoc computeCompositeDuel.ts callsite 누락 수정 (cycle 1876)
+
+- 6개 DUEL 상수 JSDoc "변경 시" 라인에 `computeCompositeDuel.ts` callsite 누락 (silent drift family wave-509)
+  - `LINEUP_WOBA_DUEL_MIN`: wave-355/442/501 → wave-355/442/501 + computeCompositeDuel.ts
+  - `SFR_DUEL_MIN`: wave-357/446 → wave-357/446 + computeCompositeDuel.ts
+  - `BULLPEN_FIP_DIFF_MIN`: wave-359/442/504 → wave-359/442/504 + computeCompositeDuel.ts
+  - `SP_FIP_DUEL_MIN`: wave-363/446/499 → wave-363/446/499 + computeCompositeDuel.ts
+  - `SP_XFIP_DUEL_MIN`: wave-371 → wave-371 + computeCompositeDuel.ts
+  - `RECENT_FORM_DUEL_MIN`: "wave-381 COMPOSITE_DUEL callsite" → computeCompositeDuel.ts (wave-381) 명시
+- WAR_DUEL_MIN / ELO_GAP_STRONG 은 기존 정상
+- wave-509 테스트 추가 (`wave-509-composite-duel-jsdoc-callsite-sync.test.ts`) — 18 PASS
+- v0.5.61.9
+
+---
+
 ## v0.5.61.8 — 2026-07-20 (cycle 1872, wave-505: predictions/[date] confToWinProb + TOP_PICK_CONF_MIN 상수 추출)
 
 ### fix(context): wave-505 — predictions/[date]/page.tsx confToWinProb 인라인 수식 swap + TOP_PICK_CONF_MIN 추출 (cycle 1872)
