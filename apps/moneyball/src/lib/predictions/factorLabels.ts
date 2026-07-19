@@ -38,6 +38,7 @@ export const FACTOR_LABELS: Record<string, string> = {
  * · wave-482 analysis/page.tsx 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1845): analysis/page.tsx — !isPickGame: (pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs).slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL 대칭).
  * · wave-484 analysis/page.tsx 이번 주 남은 경기 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1847): analysis/page.tsx — !isPickGame: factorFavoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL/wave-482 LIST TODAY 3-way 대칭 완성).
  * · wave-486 matchup/[teamA]/[teamB] 팩터 N:M 종합 배지 (cycle 1849): MatchupFactorCompare.tsx — 5팩터 비교 후 팀A/B 우세 팩터 수 집계 → N:M 종합 verdict + 우세 팩터 단축 레이블 인라인 표시 (wave-480 DETAIL / wave-482 LIST 패턴 matchup 페이지 적용).
+ * · wave-488 PredictionCard 팩터 N:M 카운트 인라인 (cycle 1852): PredictionCard.tsx — countFavoringFactors(factors, isHome) → {predictedN, otherM} 집계 → "팩터 N:M" font-mono 인라인 표시 (홈 예측 카드 + 아카이브 예측 카드 대칭 적용).
  */
 export const FACTOR_LABELS_SHORT: Record<string, string> = {
   sp_fip: "선발",
@@ -84,6 +85,26 @@ export const FACTOR_TIPS: Record<string, string> = {
   elo: "상대적 팀 전력 수치 (강팀 이기면 크게 오름)",
   sfr: "수비가 실점 방어에 기여하는 정도",
 };
+
+/**
+ * wave-488: factors 맵에서 예측 팀·상대 팀 각각의 우세 팩터 수 반환.
+ * predictedN = 예측 팀 우세 팩터 수 (isHome ? value>NEUTRAL_HI : value<NEUTRAL_LO)
+ * otherM    = 상대 팀 우세 팩터 수 (isHome ? value<NEUTRAL_LO : value>NEUTRAL_HI)
+ * PredictionCard 인라인 "팩터 N:M" 표시 source.
+ */
+export function countFavoringFactors(
+  factors: Record<string, number>,
+  isHomePredicted: boolean,
+): { predictedN: number; otherM: number } {
+  const valid = Object.entries(factors).filter(([key]) => key in FACTOR_LABELS);
+  const predictedN = valid.filter(([, v]) =>
+    isHomePredicted ? v > NEUTRAL_HI : v < NEUTRAL_LO,
+  ).length;
+  const otherM = valid.filter(([, v]) =>
+    isHomePredicted ? v < NEUTRAL_LO : v > NEUTRAL_HI,
+  ).length;
+  return { predictedN, otherM };
+}
 
 /**
  * factors 맵에서 predictedWinner 쪽으로 가장 강하게 기울어진 top-N 팩터 이름 반환.
