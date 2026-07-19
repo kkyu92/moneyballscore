@@ -8,6 +8,7 @@ import {
   PRODUCTION_COHORT_RULES,
   FEED_ISR_SECONDS, FEED_GAME_LIMIT, SITE_URL,
   confToWinProb,
+  KBO_DEFAULT_GAME_TIME,
 } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
@@ -171,7 +172,7 @@ export async function GET() {
       ? `${awayName} ${game.away_score} : ${game.home_score} ${homeName}. AI 예측: ${winnerName} 승 (${pct}%).`
       : `${game.game_date} ${game.game_time?.slice(0, 5)} 경기. AI 예측: ${winnerName} 승 (${pct}%).`;
 
-    const pubDate = new Date(`${game.game_date}T${game.game_time ?? '18:30'}+09:00`).toUTCString();
+    const pubDate = new Date(`${game.game_date}T${game.game_time ?? KBO_DEFAULT_GAME_TIME}+09:00`).toUTCString();
 
     return `    <item>
       <title>${escapeXml(title)}</title>

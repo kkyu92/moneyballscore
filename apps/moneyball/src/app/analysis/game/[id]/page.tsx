@@ -20,6 +20,7 @@ import {
   DEFAULT_WEIGHTS,
   FACTOR_PICK_WEIGHT_TOTAL,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
+  KBO_DEFAULT_GAME_TIME,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
@@ -356,7 +357,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
       default: return 'https://schema.org/EventScheduled';
     }
   })();
-  const startDateIso = `${gameDate}T${(game.game_time || '18:30').slice(0, 5)}:00+09:00`;
+  const startDateIso = `${gameDate}T${(game.game_time || KBO_DEFAULT_GAME_TIME).slice(0, 5)}:00+09:00`;
   const sportsEventLd = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",

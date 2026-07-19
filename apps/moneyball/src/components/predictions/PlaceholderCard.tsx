@@ -1,4 +1,4 @@
-import { shortTeamName, type TeamCode } from "@moneyball/shared";
+import { KBO_DEFAULT_GAME_TIME, shortTeamName, type TeamCode } from "@moneyball/shared";
 import { TeamLogo } from "../shared/TeamLogo";
 import { estimatePredictionTime } from "@/lib/predictions/estimateTime";
 
@@ -43,7 +43,7 @@ export function PlaceholderCard({
 
   // 스크린리더용 카드 요약 — 매치업 + 시각 + 상태를 한 문장으로.
   // 시각적으로는 같은 정보가 분산돼 있어 SR 사용자가 토막으로 듣게 됨.
-  const displayTime = gameTime ?? "18:30";
+  const displayTime = gameTime ?? KBO_DEFAULT_GAME_TIME;
   const ariaLabel = `${shortTeamName(awayTeam)} 대 ${shortTeamName(homeTeam)} (홈) · ${displayTime} · ${statusMsg}`;
 
   return (

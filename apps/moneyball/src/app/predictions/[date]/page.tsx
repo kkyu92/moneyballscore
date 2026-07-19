@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
 
@@ -276,7 +276,7 @@ function buildArticleJsonLd(
 function buildSportsEventJsonLd(game: DateGame, date: string) {
   const homeTeam = formatTeamName(game.home_team?.code as TeamCode);
   const awayTeam = formatTeamName(game.away_team?.code as TeamCode);
-  const gameTime = game.game_time ?? "18:30";
+  const gameTime = game.game_time ?? KBO_DEFAULT_GAME_TIME;
   const startDate = `${date}T${gameTime}+09:00`;
   const isFinal = game.status === "final";
 

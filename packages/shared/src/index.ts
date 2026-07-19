@@ -341,6 +341,15 @@ export const KBO_PREDICT_DAILY_TIME_KST = '09:00 KST';
 export const KST_TIMEZONE = 'Asia/Seoul';
 
 /**
+ * KBO 경기 시작 시간 기본값 — game_time null/empty fallback.
+ * silent drift family wave-503 (cycle 1870) — 9 surface 하드코딩 sweep 단일 source.
+ * 해당 위치: analysis/game/[id]/page.tsx / feed/route.ts / page.tsx(3건) /
+ *   predictions/[date]/page.tsx / PredictionCard.tsx / PlaceholderCard.tsx / json-ld.ts.
+ * KBO 평균 경기 시작 18:30 KST (주중 기준). 변경 시 모든 fallback 자동 동기.
+ */
+export const KBO_DEFAULT_GAME_TIME = '18:30';
+
+/**
  * v2.1-B 가중치 — plan #8 backtest 결과 (partial Wayback 회귀, sfr 0 / h2h 2%).
  * /v2-preview 사전 evidence + shadow cohort 베이스 가중치. cycle 1013 packages/shared 로
  * 이관 (이전 apps/moneyball/src/lib/predictions/v2Predictor.ts → 본 위치).

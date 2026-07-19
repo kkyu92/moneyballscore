@@ -1,6 +1,7 @@
 import {
   getConfidenceColor,
   getConfidenceTierLabel,
+  KBO_DEFAULT_GAME_TIME,
   PREDICTION_CARD_TOP_FACTORS,
   shortTeamName,
   type TeamCode,
@@ -98,7 +99,7 @@ export function PredictionCard({
 
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? "18:30"}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? KBO_DEFAULT_GAME_TIME}</span>
           {isLive && (
             <span
               className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400 px-1.5 py-0.5 rounded-full"

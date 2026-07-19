@@ -14,7 +14,7 @@
  * ```
  */
 
-import { KBO_TEAMS, type TeamCode, SITE_URL, KBO_OFFICIAL_URL } from "@moneyball/shared";
+import { KBO_DEFAULT_GAME_TIME, KBO_TEAMS, type TeamCode, SITE_URL, KBO_OFFICIAL_URL } from "@moneyball/shared";
 
 export { SITE_URL };
 export const SITE_NAME = "MoneyBall Score";
@@ -57,7 +57,7 @@ export function buildSportsEventJsonLd(input: SportsEventInput) {
   const homeFullName = KBO_TEAMS[input.homeTeam].name;
   const awayFullName = KBO_TEAMS[input.awayTeam].name;
   const stadium = input.stadium ?? KBO_TEAMS[input.homeTeam].stadium;
-  const time = (input.gameTime ?? "18:30").slice(0, 5);
+  const time = (input.gameTime ?? KBO_DEFAULT_GAME_TIME).slice(0, 5);
   const startDateIso = `${input.gameDate}T${time}:00+09:00`;
   const url = input.url ?? `${SITE_URL}/analysis/game/${input.gameId}`;
 

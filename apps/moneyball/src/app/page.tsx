@@ -3,7 +3,7 @@ import { PredictionCardLive } from "@/components/predictions/PredictionCardLive"
 import { PlaceholderCardLive } from "@/components/predictions/PlaceholderCardLive";
 import { MiniGameCard } from "@/components/shared/MiniGameCard";
 import { fetchStadiumWeather } from "@/lib/weather";
-import { KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, KBO_STADIUM_COORDS, KBO_STADIUM_SHORT, SITE_URL, MIN_POLL_TOTAL, COMMUNITY_DIVERGE_MIN } from "@moneyball/shared";
+import { KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, KBO_STADIUM_COORDS, KBO_STADIUM_SHORT, SITE_URL, MIN_POLL_TOTAL, COMMUNITY_DIVERGE_MIN } from "@moneyball/shared";
 import { AccuracySummary } from "@/components/dashboard/AccuracySummary";
 import { WeeklyTrendMini, type WeeklyTrendPoint } from "@/components/dashboard/WeeklyTrendMini";
 import { BigMatchDebateCard } from "@/components/analysis/BigMatchDebateCard";
@@ -299,7 +299,7 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
 
     byDate.get(date)!.games.push({
       id: r.id,
-      gameTime: (r.game_time ?? '').slice(0, 5) || '18:30',
+      gameTime: (r.game_time ?? '').slice(0, 5) || KBO_DEFAULT_GAME_TIME,
       homeTeam: homeCode,
       awayTeam: awayCode,
       homeWinPct,
@@ -361,7 +361,7 @@ async function getNextScheduledGames(): Promise<NextSchedule | null> {
     games: sameDate
       .map((g) => ({
         id: g.id,
-        gameTime: (g.game_time ?? '').slice(0, 5) || '18:30',
+        gameTime: (g.game_time ?? '').slice(0, 5) || KBO_DEFAULT_GAME_TIME,
         stadium: g.stadium,
         homeTeam: g.home_team?.code as TeamCode,
         awayTeam: g.away_team?.code as TeamCode,
@@ -636,7 +636,7 @@ export default async function HomePage() {
         if (!homeCode) return [g.id, null] as const;
         const coords = KBO_STADIUM_COORDS[homeCode];
         if (!coords) return [g.id, null] as const;
-        const hour = Number((g.game_time ?? '18:30').slice(0, 2));
+        const hour = Number((g.game_time ?? KBO_DEFAULT_GAME_TIME).slice(0, 2));
         const w = await fetchStadiumWeather(
           coords.lat, coords.lng, todayKST, hour,
         );
