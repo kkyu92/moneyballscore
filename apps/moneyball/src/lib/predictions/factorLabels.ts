@@ -91,6 +91,7 @@ export const FACTOR_TIPS: Record<string, string> = {
  * predictedN = 예측 팀 우세 팩터 수 (isHome ? value>NEUTRAL_HI : value<NEUTRAL_LO)
  * otherM    = 상대 팀 우세 팩터 수 (isHome ? value<NEUTRAL_LO : value>NEUTRAL_HI)
  * PredictionCard 인라인 "팩터 N:M" 표시 source.
+ * · wave-489 PredictionCard N:M 색상 정합 (cycle 1853): PredictionCard.tsx — text-gray-300 dark:text-gray-600 → text-gray-400 dark:text-gray-500 (WCAG 대비 개선) + title tooltip 추가 ("예측팀 우세 팩터 N개 · 상대팀 우세 팩터 M개").
  */
 export function countFavoringFactors(
   factors: Record<string, number>,

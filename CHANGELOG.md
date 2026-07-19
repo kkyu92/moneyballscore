@@ -1,3 +1,14 @@
+## v0.5.61.2 — 2026-07-20 (cycle 1854, wave-490: countFavoringFactors JSDoc wave-489 bullet 추가)
+
+### fix(context): wave-490 — countFavoringFactors JSDoc wave-489 bullet 추가 (cycle 1854)
+
+- `countFavoringFactors` JSDoc wave-489 bullet 추가 (`apps/moneyball/src/lib/predictions/factorLabels.ts`)
+  - `· wave-489 PredictionCard N:M 색상 정합 (cycle 1853): PredictionCard.tsx — text-gray-300 dark:text-gray-600 → text-gray-400 dark:text-gray-500 (WCAG 대비 개선) + title tooltip 추가 ("예측팀 우세 팩터 N개 · 상대팀 우세 팩터 M개").`
+- wave-490 테스트 추가 (`wave-490-prediction-card-nm-color-tooltip-jsdoc.test.ts`)
+- v0.5.61.2
+
+---
+
 ## v0.5.61.1 — 2026-07-20 (cycle 1850, wave-487: COMPOSITE_DUEL_MIN_VALID JSDoc wave-482/484 bullet 추가)
 
 ### fix(context): wave-487 — COMPOSITE_DUEL_MIN_VALID JSDoc wave-482/484 bullet description line 추가 (cycle 1850)
