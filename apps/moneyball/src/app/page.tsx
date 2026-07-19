@@ -16,6 +16,7 @@ import {
   DEFAULT_WEIGHTS,
   ELO_DIVIDER,
   ELO_NEUTRAL,
+  getAccuracyColor,
   HOME_ADVANTAGE,
   HOME_ELO_BONUS,
   HOME_NEXT_GAMES_LIMIT,
@@ -730,17 +731,26 @@ export default async function HomePage() {
           </div>
           {todayTierDist.total > 0 ? (
             <ul className="space-y-1.5 text-xs" aria-label="오늘 예측 신뢰도 분포">
-              {(['confident', 'lean', 'tossup'] as const).filter((tier) => todayTierDist[tier] > 0).map((tier) => (
-                <li key={tier} className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                  <span className="flex items-center gap-1.5">
-                    <span>{pickTierEmoji(tier)}</span>
-                    <span>{WINNER_TIER_LABEL[tier]}</span>
-                  </span>
-                  <span className="font-medium text-gray-700 dark:text-gray-200">
-                    {todayTierDist[tier]}경기
-                  </span>
-                </li>
-              ))}
+              {(['confident', 'lean', 'tossup'] as const).filter((tier) => todayTierDist[tier] > 0).map((tier) => {
+                const stat = accuracy.tierRates[tier];
+                const histPct = stat.total > 0 ? Math.round((stat.correct / stat.total) * 100) : null;
+                return (
+                  <li key={tier} className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                    <span className="flex items-center gap-1.5">
+                      <span>{pickTierEmoji(tier)}</span>
+                      <span>{WINNER_TIER_LABEL[tier]}</span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium text-gray-700 dark:text-gray-200">{todayTierDist[tier]}경기</span>
+                      {histPct != null && (
+                        <span className={`text-[10px] ${getAccuracyColor(histPct)}`} title={`${WINNER_TIER_LABEL[tier]} 과거 적중률 ${histPct}% (${stat.correct}/${stat.total})`}>
+                          {histPct}%
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="text-xs text-gray-400 dark:text-gray-500">
