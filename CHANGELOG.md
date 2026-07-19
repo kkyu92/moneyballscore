@@ -1,3 +1,16 @@
+## v0.5.61.6 — 2026-07-20 (cycle 1868, wave-501: analysis 오늘 AI 예측 wOBA 타선 직접 대결 배지)
+
+### feat(analysis): wave-501 — analysis 오늘 AI 예측 카드 wOBA 타선 직접 대결 배지 (cycle 1868)
+
+- `analysis/page.tsx` 오늘 AI 예측 카드에 wOBA 타선 우위 배지 추가
+  - `|homeLineupWoba - awayLineupWoba| >= LINEUP_WOBA_DUEL_MIN(0.020)` 시 우위 팀명 + Δ격차 표시
+  - 홈 타선 우위 = brand-500, 원정 타선 우위 = orange-500
+  - SP FIP(투수) 배지 직후 위치 — 투수/타선 쌍 완성
+- wave-501 테스트 추가 (`wave-501-analysis-woba-duel-badge.test.ts`) — 10 PASS
+- v0.5.61.6
+
+---
+
 ## v0.5.61.5 — 2026-07-20 (cycle 1867, wave-500: COMMUNITY_DIVERGE_MIN 상수 추출 + MIN_POLL_TOTAL swap)
 
 ### fix(context): wave-500 — COMMUNITY_DIVERGE_MIN 상수 추출, MIN_POLL_TOTAL swap (cycle 1867)
