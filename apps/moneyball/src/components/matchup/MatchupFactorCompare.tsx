@@ -1,6 +1,7 @@
 import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
 import { RECENT_FORM_GAMES } from "@moneyball/shared";
 import type { TeamFactorAverages } from "@/lib/teams/buildTeamFactorAverages";
+import { FACTOR_LABELS_SHORT } from "@/lib/predictions/factorLabels";
 
 interface Props {
   teamA: { shortName: string };
@@ -164,6 +165,41 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
           );
         })}
       </div>
+
+      {/* wave-486: N:M 팩터 균형 배지 — 5팩터 비교 후 종합 verdict 표시 (wave-480 DETAIL / wave-482 LIST 패턴 적용) */}
+      {(() => {
+        const results = FACTORS.map((f) => ({
+          slug: f.slug,
+          winner: compare(factorA[f.key], factorB[f.key], f.direction),
+        }));
+        const aWinSlugs = results.filter((r) => r.winner === 'a').map((r) => r.slug as string);
+        const bWinSlugs = results.filter((r) => r.winner === 'b').map((r) => r.slug as string);
+        const aN = aWinSlugs.length;
+        const bN = bWinSlugs.length;
+        if (aN + bN === 0) return null;
+        const favoredA = aN > bN;
+        const isTied = aN === bN;
+        const favoredName = isTied ? null : (favoredA ? teamA.shortName : teamB.shortName);
+        const favoredSlugs = favoredA ? aWinSlugs : bWinSlugs;
+        const ratio = favoredA ? `${aN}:${bN}` : isTied ? `${aN}:${bN}` : `${bN}:${aN}`;
+        const factorLabels = favoredSlugs.map((s) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
+        return (
+          <div className="mt-3 rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/30 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 균형</span>
+              {favoredName ? (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">{favoredName} 우세</span>
+              ) : (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">균형</span>
+              )}
+              <span className="font-mono text-xs">팩터 {ratio}</span>
+              {factorLabels && !isTied && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorLabels})</span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <p className="mt-4 text-xs text-gray-400 dark:text-gray-500 text-center">
         예측 전 시점 시즌 평균 · 진한 색이 우세 팩터

@@ -37,6 +37,7 @@ export const FACTOR_LABELS: Record<string, string> = {
  * · wave-480 game/[id] 비수렴 N:M 배지 팩터 레이블 표시 (cycle 1843): analysis/game/[id]/page.tsx — favoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-430 LIST 수렴 패턴 대칭).
  * · wave-482 analysis/page.tsx 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1845): analysis/page.tsx — !isPickGame: (pickFavoredHome ? compositeDuelHomeSlugs : compositeDuelAwaySlugs).slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL 대칭).
  * · wave-484 analysis/page.tsx 이번 주 남은 경기 비수렴 LIST 배지 팩터 레이블 표시 (cycle 1847): analysis/page.tsx — !isPickGame: factorFavoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-480 DETAIL/wave-482 LIST TODAY 3-way 대칭 완성).
+ * · wave-486 matchup/[teamA]/[teamB] 팩터 N:M 종합 배지 (cycle 1849): MatchupFactorCompare.tsx — 5팩터 비교 후 팀A/B 우세 팩터 수 집계 → N:M 종합 verdict + 우세 팩터 단축 레이블 인라인 표시 (wave-480 DETAIL / wave-482 LIST 패턴 matchup 페이지 적용).
  */
 export const FACTOR_LABELS_SHORT: Record<string, string> = {
   sp_fip: "선발",
