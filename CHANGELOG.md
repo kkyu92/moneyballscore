@@ -1,4 +1,16 @@
 # Changelog
+## v0.5.57.1 — 2026-07-20 (wave-479: COMPOSITE_DUEL_MIN_VALID JSDoc wave-478 bullet 추가)
+
+### fix(context): wave-479 — COMPOSITE_DUEL_MIN_VALID JSDoc wave-478 bullet description line 정정 (cycle 1841)
+
+- `COMPOSITE_DUEL_MIN_VALID` JSDoc wave-478 bullet 추가
+  - `· wave-478 game/[id] 비수렴 경기 팩터 N:M 균형 배지 (cycle 1840): analysis/game/[id]/page.tsx — !isConvergencePick 경기에서 validCount ≥ 본 값 시 N:M 균형 배지 표시 (wave-473 LIST 대칭).`
+  - wave-473(LIST) → wave-478(DETAIL) 대칭 완성 문서화
+- wave-479 테스트 5개 추가 (`wave-479-composite-duel-min-valid-jsdoc.test.ts`)
+- v0.5.57.1
+
+---
+
 ## v0.5.57.0 — 2026-07-20 (wave-478: game/[id] 비수렴 경기 팩터 N:M 균형 배지)
 
 ### feat(analysis): wave-478 — analysis/game/[id] 비수렴 경기에도 팩터 N:M 균형 배지 표시 (cycle 1840)

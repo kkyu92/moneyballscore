@@ -2525,6 +2525,7 @@ export const COMPOSITE_DUEL_THRESHOLD = 3;
  * WAR/Elo/최근폼/상대전적/선발xFIP/구장보정 6개 optional(항상 가용 X) — 4/10 이상 유효 시 집계.
  * · wave-424 rolling 성적 getRecentConvergencePickRecord (cycle 1778): 동일 조건 재사용.
  * · wave-475 예정 경기 팩터 N:M 표시 (cycle 1837): getThisWeekRemainingGames computeCompositeDuel gate — validCount ≥ 본 값 시 UpcomingScheduledGame.factorFavoredCount/factorAgainstCount/convergenceNetScore 박제.
+ * · wave-478 game/[id] 비수렴 경기 팩터 N:M 균형 배지 (cycle 1840): analysis/game/[id]/page.tsx — !isConvergencePick 경기에서 validCount ≥ 본 값 시 N:M 균형 배지 표시 (wave-473 LIST 대칭).
  */
 export const COMPOSITE_DUEL_MIN_VALID = 4;
 
