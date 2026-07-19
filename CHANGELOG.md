@@ -1,3 +1,14 @@
+## v0.5.61.4 — 2026-07-20 (cycle 1866, wave-499: analysis 오늘 AI 예측 SP FIP 직접 대결 배지)
+
+### feat(analysis): wave-499 — analysis 오늘 AI 예측 카드 SP FIP 직접 대결 배지 (cycle 1866)
+
+- `analysis/page.tsx` 오늘 AI 예측 카드 게임타임 행에 SP FIP 우위 팀 배지 추가
+  - `· wave-499 analysis SP FIP 직접 대결 배지 (cycle 1866): analysis/page.tsx — |homeSPFip - awaySPFip| >= SP_FIP_DUEL_MIN(0.5) 시 우위 팀명 + Δ격차 표시. 홈 우위 = brand-500, 원정 우위 = orange-500. wave-347 gameTypeTag (투수전/타격전) 이후 위치 — 투수전/SP우위 상호보완 정보.`
+- wave-499 테스트 추가 (`wave-499-analysis-sp-fip-duel-badge.test.ts`) — 9 PASS
+- v0.5.61.4
+
+---
+
 ## v0.5.61.3 — 2026-07-20 (cycle 1865, wave-498: ACCURACY_GREAT_PCT 상수 추출 — getAccuracyColor 65 swap)
 
 ### fix(context): wave-498 — ACCURACY_GREAT_PCT 상수 추출, getAccuracyColor `65` 인라인 swap (cycle 1865)
