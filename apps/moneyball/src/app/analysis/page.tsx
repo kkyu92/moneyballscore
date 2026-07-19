@@ -1873,6 +1873,38 @@ export default async function AnalysisIndexPage() {
                                 </span>
                               );
                             })()}
+                            {/* wave-510: 수비SFR 직접 대결 배지 — |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo/WAR 배지에 수비 배지 추가 */}
+                            {g.homeSfr != null && g.awaySfr != null && (() => {
+                              const sfrDelta = g.homeSfr - g.awaySfr;
+                              if (Math.abs(sfrDelta) < SFR_DUEL_MIN) return null;
+                              const sfrFavoredHome = sfrDelta > 0;
+                              const favoredName = shortTeamName(sfrFavoredHome ? g.homeCode : g.awayCode);
+                              return (
+                                <span className={`ml-2 font-medium ${
+                                  sfrFavoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  SFR {favoredName} △{Math.abs(sfrDelta).toFixed(1)}
+                                </span>
+                              );
+                            })()}
+                            {/* wave-511: 최근폼 직접 대결 배지 — |Δ폼| >= RECENT_FORM_DUEL_MIN(0.10) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo/WAR/SFR 배지에 최근폼 배지 추가 */}
+                            {g.homeRecentForm != null && g.awayRecentForm != null && (() => {
+                              const formDelta = g.homeRecentForm - g.awayRecentForm;
+                              if (Math.abs(formDelta) < RECENT_FORM_DUEL_MIN) return null;
+                              const formFavoredHome = formDelta > 0;
+                              const favoredName = shortTeamName(formFavoredHome ? g.homeCode : g.awayCode);
+                              return (
+                                <span className={`ml-2 font-medium ${
+                                  formFavoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  폼 {favoredName} △{(Math.abs(formDelta) * 100).toFixed(0)}%
+                                </span>
+                              );
+                            })()}
                             {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) · wave-482: 비수렴 팩터 단축 레이블 표시 (wave-480 DETAIL→LIST 대칭) */}
                             {factorFavoredCount != null && (
                               <span className={`ml-2 font-mono ${
