@@ -2327,6 +2327,12 @@ JSON: {"draw": ${drwNo}, "passed_rules": ${passed}, "failed_rules": ${failed}, "
       round = await fetchRoundFromAPI(targetDrwNo);
     }
     if (!round) {
+      // dhlottery 차단 환경 (GH Actions IP 등) → lottolyzer fallback
+      console.log(`dhlottery 실패 → lottolyzer fallback...`);
+      const fallback = await fetchFromLottolyzer(new Set([targetDrwNo]));
+      if (fallback.length > 0) round = fallback[0];
+    }
+    if (!round) {
       console.error(`${targetDrwNo}회 미발표 또는 fetch 실패. 추첨 후 재시도.`);
       process.exit(1);
     }
