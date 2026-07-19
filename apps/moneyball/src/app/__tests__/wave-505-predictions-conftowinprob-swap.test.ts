@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { confToWinProb, TOP_PICK_CONF_MIN } from '@moneyball/shared';
