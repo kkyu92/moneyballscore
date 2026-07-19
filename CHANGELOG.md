@@ -1,4 +1,16 @@
 # Changelog
+## v0.5.58.1 — 2026-07-20 (cycle 1844, wave-481: FACTOR_LABELS_SHORT JSDoc wave-480 bullet 추가)
+
+### fix(context): wave-481 — FACTOR_LABELS_SHORT JSDoc wave-480 bullet description line 정정 (cycle 1844)
+
+- `FACTOR_LABELS_SHORT` JSDoc wave-480 bullet 추가 (`apps/moneyball/src/lib/predictions/factorLabels.ts`)
+  - `· wave-480 game/[id] 비수렴 N:M 배지 팩터 레이블 표시 (cycle 1843): analysis/game/[id]/page.tsx — favoredSlugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT) → FACTOR_LABELS_SHORT 매핑 인라인 표시 (wave-430 LIST 수렴 패턴 대칭).`
+  - wave-430 LIST 수렴 → wave-480 DETAIL 비수렴 대칭 완성 문서화
+- wave-481 테스트 5개 추가 (`wave-481-factor-labels-short-jsdoc.test.ts`)
+- v0.5.58.1
+
+---
+
 ## v0.5.58.0 — 2026-07-20 (wave-480: game/[id] 비수렴 N:M 배지 팩터 레이블 표시)
 
 ### feat(analysis): wave-480 — analysis/game/[id] 비수렴 N:M 배지 우세 팩터 단축 레이블 인라인 표시 (cycle 1843)
