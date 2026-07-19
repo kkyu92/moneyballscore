@@ -2451,9 +2451,10 @@ export const WAR_WEAK = 8.0;
 /**
  * WAR 직접 대결 배지 최소 차이 — wave-367 (cycle 1707).
  * wave-390: computeCompositeDuel.ts composite 계산. wave-444: analysis/page.tsx 격차(Δ) 표시.
+ * wave-508: analysis/page.tsx AI 예측 카드 직접 대결 배지 (cycle 1875).
  * |homeWar - awayWar| ≥ 본 값 시 "WAR [팀] 강세" 배지 표시.
  * 5.0 = KBO 팀 WAR 범위(8~25) 기준 의미있는 격차 (~33% gap at midrange 14).
- * 변경 시 analysis/page.tsx wave-367/444 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-367/444/508 + computeCompositeDuel.ts callsite 동시 조정.
  */
 export const WAR_DUEL_MIN = 5.0;
 

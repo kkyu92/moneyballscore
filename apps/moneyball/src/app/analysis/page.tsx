@@ -1857,6 +1857,22 @@ export default async function AnalysisIndexPage() {
                                 </span>
                               );
                             })()}
+                            {/* wave-508: WAR 직접 대결 배지 — |ΔWAR| >= WAR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo 배지에 누적 팀 가치 배지 추가 */}
+                            {g.homeWar != null && g.awayWar != null && (() => {
+                              const warDelta = g.homeWar - g.awayWar;
+                              if (Math.abs(warDelta) < WAR_DUEL_MIN) return null;
+                              const warFavoredHome = warDelta > 0;
+                              const favoredName = shortTeamName(warFavoredHome ? g.homeCode : g.awayCode);
+                              return (
+                                <span className={`ml-2 font-medium ${
+                                  warFavoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  WAR {favoredName} △{Math.abs(warDelta).toFixed(1)}
+                                </span>
+                              );
+                            })()}
                             {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) · wave-482: 비수렴 팩터 단축 레이블 표시 (wave-480 DETAIL→LIST 대칭) */}
                             {factorFavoredCount != null && (
                               <span className={`ml-2 font-mono ${
