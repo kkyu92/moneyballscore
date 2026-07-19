@@ -1,0 +1,55 @@
+
+=== H4 검증 — Manual 가중합 vs Logistic 학습 (Test 2024) ===
+
+[1/4] Elo history + Wayback 시즌 말 stats 다운로드…
+  season 2023: 10 teams
+  season 2024: 10 teams
+
+[2/4] games 로드…
+  train (2023) N=722, test (2024) N=727
+
+[3/4] Manual 가중합 적용 (Test 2024)…
+
+[4/4] Logistic 학습 (대조군)…
+  4-feature: λ=0.01, 7-feature: λ=0.01
+
+=== 결과 비교 (Test 2024 N=727) ===
+
+  coin_flip(0.5)                     Brier 0.25000  LogLoss 0.69315  Acc 51.44%
+  Manual v1.5 (h2h/park/sfr ON)      Brier 0.24974  LogLoss 0.69264  Acc 52.82%
+  Manual v1.6 (h2h/park/sfr OFF)     Brier 0.24886  LogLoss 0.69086  Acc 53.37%
+  Manual v2.1-A (sfr/h2h 2%, conservative) Brier 0.24854  LogLoss 0.69023  Acc 52.96%
+  Manual v2.1-B (sfr 0/h2h 2, partial Wayback) Brier 0.24830  LogLoss 0.68975  Acc 52.82%
+  Manual v2.1-C (h2h/park/sfr 0, pure Wayback) Brier 0.24885  LogLoss 0.69084  Acc 53.09%
+  Manual v2.0-cycle231 (elo/bullpen/form +) Brier 0.24977  LogLoss 0.69271  Acc 52.82%
+  Logistic 4-feature                 Brier 0.24980  LogLoss 0.69276  Acc 52.41%
+  Logistic 7-feature                 Brier 0.24661  LogLoss 0.68635  Acc 56.40%
+
+=== cycle 56 spec section 3 — v2.1 후보 비교 ===
+
+  v1.5 - v2.1-A ΔBrier: +0.00120 (A 우수)
+  v1.5 - v2.1-B ΔBrier: +0.00143 (B 우수)
+  v1.5 - v2.1-C ΔBrier: +0.00089 (미미)
+
+=== plan #8 M1 — v2.0-cycle231 후보 비교 ===
+
+  v1.5 - v2.0-cycle231 ΔBrier: -0.00003 (미미)
+  ⚠️ 한계: bullpen_fip +4pp 매핑 불가 (0.5 중립). sp_fip/lineup/form/elo Δ 만 reflect.
+
+=== H4 결론 ===
+
+  Manual v1.5 - v1.6 ΔBrier: +0.00088
+  → v1.5 ≈ v1.6 backtest 안 차이 미미 (|Δ| < 0.001) — H4 약함.
+
+  Manual v1.5 - Logistic 7f ΔBrier: +0.00313
+  → Logistic 학습 모델이 Manual 가산보다 우수.
+    H4 약화 — 모델 구조보단 다른 원인 (H2/H3) 의심.
+
+  매핑 가능 weight 합: 0.62 (sp_fip+lineup_woba+recent_form+h2h+park+elo+sfr)
+  매핑 불가 weight 합: 0.23 (sp_xfip+bullpen_fip+war = 0.5 중립)
+  본 manual 모델 ≠ prod 100% 동일 — H4 의 핵심 질문만 답.
+
+  📦 결과 박제: /home/runner/work/apps/moneyball/data/v2-backtest-results.json
+
+=== 완료 ===
+
