@@ -1,5 +1,6 @@
 import {
   getConfidenceColor,
+  getConfidenceTierLabel,
   PREDICTION_CARD_TOP_FACTORS,
   shortTeamName,
   type TeamCode,
@@ -200,6 +201,10 @@ export function PredictionCard({
               {confidencePct}%
             </span>
           </div>
+          {/* wave-491: 신뢰도 티어 라벨 — 사용자 즉시 인식 (강한 예측/보통/박빙) */}
+          <p className={`text-[10px] font-medium mt-0.5 ${getConfidenceColor(confidencePct)}`}>
+            {getConfidenceTierLabel(confidencePct)}
+          </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {shortTeamName(predictedWinner)} 승 예측
           </p>
