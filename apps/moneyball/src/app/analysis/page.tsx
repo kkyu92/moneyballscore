@@ -2742,10 +2742,11 @@ export default async function AnalysisIndexPage() {
                   ⚡ 수렴 픽 {strongUpcomingPickCount}개 예정
                 </span>
               )}
-              {/* wave-541: 이번 주 강수렴 픽 성적 — 종료 경기 승/패 */}
+              {/* wave-541: 이번 주 강수렴 픽 성적 — 종료 경기 승/패. ⚡ 항상 표시로 컨텍스트 앵커링 */}
               {(weeklyStrongConvergenceRecord.wins + weeklyStrongConvergenceRecord.losses) > 0 && (
-                <span className="text-xs tabular-nums text-brand-600 dark:text-brand-400">
-                  이번 주 {weeklyStrongConvergenceRecord.wins}승 {weeklyStrongConvergenceRecord.losses}패
+                <span className="inline-flex items-center gap-0.5 text-xs tabular-nums text-brand-600 dark:text-brand-400">
+                  <span className="not-italic">⚡</span>
+                  {weeklyStrongConvergenceRecord.wins}승 {weeklyStrongConvergenceRecord.losses}패
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
@@ -2806,7 +2807,7 @@ export default async function AnalysisIndexPage() {
                         ↗ {shortTeamName(favoredCode)}
                       </span>
                       {g.gameOverviewSummary && (
-                        <span className="text-gray-500 dark:text-gray-400 truncate min-w-0">
+                        <span className="text-gray-500 dark:text-gray-400 truncate min-w-0" title={g.gameOverviewSummary}>
                           {g.gameOverviewSummary}
                         </span>
                       )}
@@ -2884,7 +2885,7 @@ export default async function AnalysisIndexPage() {
                                 )}
                                 {/* wave-537: 수렴 픽 경기 한 줄 요약 */}
                                 {(isTopUpcomingPick || isStrongUpcomingPick) && g.gameOverviewSummary && (
-                                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
                                     {g.gameOverviewSummary}
                                   </p>
                                 )}
