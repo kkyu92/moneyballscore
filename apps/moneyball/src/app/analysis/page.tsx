@@ -1554,6 +1554,14 @@ export default async function AnalysisIndexPage() {
                         )}
                       </div>
                     )}
+                    {/* wave-535: WAR 미집계 배지 — homeWar=0 or awayWar=0 = Fancy Stats top-50 데이터 갭. 예측 WAR neutral(wave-533)과 UI 일치. */}
+                    {pick.homeWar != null && pick.awayWar != null && (pick.homeWar === 0 || pick.awayWar === 0) && (
+                      <div className="mt-1 text-[10px] text-gray-400 dark:text-gray-500">
+                        WAR 미집계{pick.homeWar === 0 && pick.awayWar === 0
+                          ? ''
+                          : ` (${pick.homeWar === 0 ? shortTeamName(pick.homeCode) : shortTeamName(pick.awayCode)})`}
+                      </div>
+                    )}
                     {/* wave-413: xFIP 대결 — sp_xfip 수렴 팩터 포함 시 원정·홈 선발 xFIP 수치 표시 · wave-417: SP 이름 표시 (sp_confirmation_log 기준, 미확인 시 팀명 fallback) · wave-440: FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 */}
                     {pick.awaySPXfip != null && pick.homeSPXfip != null &&
                       (favoredSlugs.includes('sp_xfip') || unfavoredSlugs.includes('sp_xfip')) && (
@@ -1925,8 +1933,8 @@ export default async function AnalysisIndexPage() {
                                 </span>
                               );
                             })()}
-                            {/* wave-508: WAR 직접 대결 배지 — |ΔWAR| >= WAR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo 배지에 누적 팀 가치 배지 추가 */}
-                            {g.homeWar != null && g.awayWar != null && (() => {
+                            {/* wave-508: WAR 직접 대결 배지 — |ΔWAR| >= WAR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo 배지에 누적 팀 가치 배지 추가 · wave-535: WAR=0 data gap guard */}
+                            {g.homeWar != null && g.awayWar != null && g.homeWar > 0 && g.awayWar > 0 && (() => {
                               const warDelta = g.homeWar - g.awayWar;
                               if (Math.abs(warDelta) < WAR_DUEL_MIN) return null;
                               const warFavoredHome = warDelta > 0;
