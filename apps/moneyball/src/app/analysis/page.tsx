@@ -1015,7 +1015,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1042,6 +1042,8 @@ export default async function AnalysisIndexPage() {
     getConvergencePickTeamStats(),
     // wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 홈 지목 vs 어웨이 지목 시 각각 실제 승률
     getConvergencePickHomeAwaySplit(),
+    // wave-561: 완전수렴(FACTOR_PICK_COMPLETE=10팩터) 시즌 성적 — 강수렴 상위 tier 정확도 검증
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_COMPLETE, KBO_SEASON_START_DATE),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2929,6 +2931,25 @@ export default async function AnalysisIndexPage() {
                     {awayPct}%
                   </span>
                   <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+                </span>
+              </div>
+            );
+          })()}
+          {/* wave-561: 강수렴 픽 완전수렴(10팩터) 시즌 성적 — FACTOR_PICK_COMPLETE 임계 정확도 (강수렴 상위 tier) */}
+          {seasonCompleteConvergenceRecord.total > 0 && (() => {
+            const pct = Math.round(seasonCompleteConvergenceRecord.wins / seasonCompleteConvergenceRecord.total * 100);
+            return (
+              <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
+                <span className="text-xs text-gray-500 dark:text-gray-400">🎯 완전수렴:</span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                  title={`10팩터 완전수렴 픽 ${seasonCompleteConvergenceRecord.total}경기: ${seasonCompleteConvergenceRecord.wins}승 ${seasonCompleteConvergenceRecord.losses}패 (${pct}%)`}
+                >
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">10팩터</span>
+                  <span className={`tabular-nums font-medium ${pct >= ACCURACY_GOOD_PCT ? 'text-green-600 dark:text-green-400' : pct <= CONVERGENCE_BADGE_LOW_PCT ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                    {pct}%
+                  </span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({seasonCompleteConvergenceRecord.total}경기)</span>
                 </span>
               </div>
             );
