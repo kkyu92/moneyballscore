@@ -1905,6 +1905,22 @@ export default async function AnalysisIndexPage() {
                                 </span>
                               );
                             })()}
+                            {/* wave-513: xFIP 직접 대결 배지 — |ΔxFIP| >= SP_XFIP_DUEL_MIN(0.5) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo/WAR/SFR/최근폼 배지에 선발xFIP 배지 추가 */}
+                            {g.homeSPXfip != null && g.awaySPXfip != null && (() => {
+                              const xfipDelta = g.homeSPXfip - g.awaySPXfip;
+                              if (Math.abs(xfipDelta) < SP_XFIP_DUEL_MIN) return null;
+                              const xfipFavoredHome = xfipDelta < 0;
+                              const favoredName = shortTeamName(xfipFavoredHome ? g.homeCode : g.awayCode);
+                              return (
+                                <span className={`ml-2 font-medium ${
+                                  xfipFavoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  xFIP {favoredName} △{Math.abs(xfipDelta).toFixed(1)}
+                                </span>
+                              );
+                            })()}
                             {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) · wave-482: 비수렴 팩터 단축 레이블 표시 (wave-480 DETAIL→LIST 대칭) */}
                             {factorFavoredCount != null && (
                               <span className={`ml-2 font-mono ${
