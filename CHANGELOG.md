@@ -1,3 +1,14 @@
+## v0.5.61.24 — 2026-07-20 (cycle 1922, wave-550: 어제 경기 강수렴 픽 배지)
+
+### feat(analysis): wave-550 — 어제 경기 강수렴 픽 배지 (cycle 1922)
+
+- `analysis/page.tsx` `YesterdayGameCard`: `convergenceNetScore: number | null` 필드 추가
+- `YesterdayGameRow`: 팩터 필드 추가 (`home_elo`, `away_elo`, `home_recent_form`, `away_recent_form`, `home_sp_fip`, `away_sp_fip`, `home_sp_xfip`, `away_sp_xfip`, `home_lineup_woba`, `away_lineup_woba`, `home_bullpen_fip`, `away_bullpen_fip`, `home_sfr`, `away_sfr`, `home_war_total`, `away_war_total`)
+- `getYesterdayGames`: 팩터 필드 SELECT 추가 + `computeCompositeDuel` 로 `convergenceNetScore` 산출 (`ThisWeekGameCard` wave-405 패턴 동일)
+- "어제 경기 분석" 카드: `|convergenceNetScore| >= FACTOR_PICK_COMPLETE(10)` → ★, `>= FACTOR_PICK_STRONG(8)` → ⚡ 배지 표시
+- 테스트 13건 추가 (`wave-550-yesterday-convergence-badge.test.ts`)
+- v0.5.61.24
+
 ## v0.5.61.23 — 2026-07-20 (cycle 1915, wave-544: 강수렴 픽 rolling 성적)
 
 ### feat(analysis): wave-544 — 강수렴 픽 rolling 성적 (cycle 1915)

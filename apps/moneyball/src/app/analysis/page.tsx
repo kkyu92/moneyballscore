@@ -344,6 +344,8 @@ interface YesterdayGameCard {
   predictedWinnerCode: TeamCode | null;
   homeWinProb: number;
   isCorrect: boolean | null;
+  /** wave-550: 팩터 수렴 net score (null = 데이터 부족) */
+  convergenceNetScore: number | null;
 }
 
 interface YesterdayGameRow {
@@ -357,6 +359,22 @@ interface YesterdayGameRow {
     is_correct: boolean | null;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
+    home_elo: number | null;
+    away_elo: number | null;
+    home_recent_form: number | null;
+    away_recent_form: number | null;
+    home_sp_fip: number | null;
+    away_sp_fip: number | null;
+    home_sp_xfip: number | null;
+    away_sp_xfip: number | null;
+    home_lineup_woba: number | null;
+    away_lineup_woba: number | null;
+    home_bullpen_fip: number | null;
+    away_bullpen_fip: number | null;
+    home_sfr: number | null;
+    away_sfr: number | null;
+    home_war_total: number | null;
+    away_war_total: number | null;
   }>;
 }
 
@@ -372,6 +390,10 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
         prediction_type, is_correct, reasoning,
+        home_elo, away_elo, home_recent_form, away_recent_form,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_sfr, away_sfr, home_war_total, away_war_total,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
     `)
@@ -391,6 +413,27 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
     const homeCode = row.home_team?.code as TeamCode | undefined;
     const awayCode = row.away_team?.code as TeamCode | undefined;
     if (!homeCode || !awayCode) continue;
+    // wave-550: 어제 경기에도 팩터 수렴 점수 계산 (ThisWeekGameCard 패턴 동일)
+    const yesterdayDuel = computeCompositeDuel({
+      homeCode,
+      homeLineupWoba: pred.home_lineup_woba,
+      awayLineupWoba: pred.away_lineup_woba,
+      homeSfr: pred.home_sfr,
+      awaySfr: pred.away_sfr,
+      homeBullpenFip: pred.home_bullpen_fip,
+      awayBullpenFip: pred.away_bullpen_fip,
+      homeSPFip: pred.home_sp_fip,
+      awaySPFip: pred.away_sp_fip,
+      homeSPXfip: pred.home_sp_xfip,
+      awaySPXfip: pred.away_sp_xfip,
+      homeWar: pred.home_war_total,
+      awayWar: pred.away_war_total,
+      homeElo: pred.home_elo ?? undefined,
+      awayElo: pred.away_elo ?? undefined,
+      homeRecentForm: pred.home_recent_form ?? undefined,
+      awayRecentForm: pred.away_recent_form ?? undefined,
+    });
+    const yesterdayDuelValid = yesterdayDuel.validCount >= COMPOSITE_DUEL_MIN_VALID;
     cards.push({
       gameId: row.id,
       homeCode,
@@ -400,6 +443,7 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
       predictedWinnerCode: (pred.predicted_winner_team?.code as TeamCode | null) ?? null,
       homeWinProb: winnerProbOf(pred.reasoning?.homeWinProb),
       isCorrect: pred.is_correct,
+      convergenceNetScore: yesterdayDuelValid ? yesterdayDuel.netScore : null,
     });
   }
   return cards;
@@ -3216,6 +3260,10 @@ export default async function AnalysisIndexPage() {
                 : Math.round((1 - g.homeWinProb) * 100);
               const yesterdayStatus =
                 g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
+              // wave-550: 어제 경기 수렴 픽 배지
+              const convScore = g.convergenceNetScore;
+              const isYesterdayTopPick = convScore != null && Math.abs(convScore) >= FACTOR_PICK_COMPLETE;
+              const isYesterdayStrongPick = convScore != null && Math.abs(convScore) >= FACTOR_PICK_STRONG;
               return (
                 <li key={g.gameId} data-yesterday-status={yesterdayStatus}>
                   <Link
@@ -3226,6 +3274,12 @@ export default async function AnalysisIndexPage() {
                       <div className="min-w-0">
                         <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                           {awayName} {g.awayScore ?? '-'} : {g.homeScore ?? '-'} {homeName}
+                          {isYesterdayTopPick && (
+                            <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★</span>
+                          )}
+                          {!isYesterdayTopPick && isYesterdayStrongPick && (
+                            <span className="ml-1.5 text-brand-500 dark:text-brand-400 font-semibold not-italic">⚡</span>
+                          )}
                         </p>
                         {winnerName && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
