@@ -71,9 +71,14 @@ describe("/v2-shadow-monitor page shape", () => {
 });
 
 describe("/v2-shadow-monitor Footer + sitemap 진입 path", () => {
-  it("Footer '도움말' column 에 link 박제", () => {
-    expect(FOOTER_SRC).toContain("/v2-shadow-monitor");
-    expect(FOOTER_SRC).toMatch(/"v2 섀도우 모니터"/);
+  it("Footer active link 에서 제거 — noindex archive (cycle 1929 IA wave-556)", () => {
+    // cycle 1929: footer noindex 2건 제거 (/v2-shadow-monitor, /accuracy/shadow)
+    // comment 라인 제외 후 active href 검사
+    const activeLines = FOOTER_SRC
+      .split("\n")
+      .filter((l) => !l.trim().startsWith("//"))
+      .join("\n");
+    expect(activeLines).not.toContain('"/v2-shadow-monitor"');
   });
 
   it("sitemap staticRoutes 에서 제거 — noindex archive (cycle 1802 IA)", () => {
