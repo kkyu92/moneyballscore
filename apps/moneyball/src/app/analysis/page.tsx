@@ -2943,9 +2943,9 @@ export default async function AnalysisIndexPage() {
                 <span className="text-xs text-gray-500 dark:text-gray-400">🎯 완전수렴:</span>
                 <span
                   className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
-                  title={`10팩터 완전수렴 픽 ${seasonCompleteConvergenceRecord.total}경기: ${seasonCompleteConvergenceRecord.wins}승 ${seasonCompleteConvergenceRecord.losses}패 (${pct}%)`}
+                  title={`${FACTOR_PICK_COMPLETE}팩터 완전수렴 픽 ${seasonCompleteConvergenceRecord.total}경기: ${seasonCompleteConvergenceRecord.wins}승 ${seasonCompleteConvergenceRecord.losses}패 (${pct}%)`}
                 >
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">10팩터</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">{FACTOR_PICK_COMPLETE}팩터</span>
                   <span className={`tabular-nums font-medium ${pct >= ACCURACY_GOOD_PCT ? 'text-green-600 dark:text-green-400' : pct <= CONVERGENCE_BADGE_LOW_PCT ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
                     {pct}%
                   </span>
