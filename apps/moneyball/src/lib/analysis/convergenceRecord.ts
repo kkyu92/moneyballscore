@@ -9,6 +9,7 @@ import {
   FACTOR_PICK_STRONG,
   KBO_SEASON_START_DATE,
   PRODUCTION_COHORT_RULES,
+  CONVERGENCE_TEAM_STATS_MIN_PICKS,
   type TeamCode,
   type SelectResult,
 } from '@moneyball/shared';
@@ -192,4 +193,106 @@ export async function getConvergencePickBestStreak(
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
   const results = await fetchConvergencePickResults(KBO_SEASON_START_DATE, Number.MAX_SAFE_INTEGER, minFactors);
   return computeConvergenceBestStreak(results);
+}
+
+// wave-557: 강수렴 픽 팀별 시즌 성적 — DB 독립 순수 함수 (테스트 가능)
+// results: { favoredTeam, won } 배열 (fetchConvergencePickDetailedResults 출력)
+// minPicks: 표시 최소 경기 수 (소표본 노이즈 차단)
+// 반환: 총 경기 수 내림차순 정렬 (같으면 승 수 내림차순)
+export function computeConvergenceTeamStats(
+  results: Array<{ favoredTeam: TeamCode; won: boolean }>,
+  minPicks = CONVERGENCE_TEAM_STATS_MIN_PICKS,
+): Array<{ teamCode: TeamCode; wins: number; losses: number }> {
+  const map = new Map<TeamCode, { wins: number; losses: number }>();
+  for (const r of results) {
+    const s = map.get(r.favoredTeam) ?? { wins: 0, losses: 0 };
+    if (r.won) s.wins++;
+    else s.losses++;
+    map.set(r.favoredTeam, s);
+  }
+  return Array.from(map.entries())
+    .map(([teamCode, { wins, losses }]) => ({ teamCode, wins, losses }))
+    .filter(s => s.wins + s.losses >= minPicks)
+    .sort((a, b) => {
+      const totalDiff = (b.wins + b.losses) - (a.wins + a.losses);
+      return totalDiff !== 0 ? totalDiff : b.wins - a.wins;
+    });
+}
+
+async function fetchConvergencePickDetailedResults(
+  cutoff: string,
+  minFactors: number,
+): Promise<Array<{ favoredTeam: TeamCode; won: boolean }>> {
+  const today = toKSTDateString();
+  const supabase = await createClient();
+  const gamesResult = (await supabase
+    .from('games')
+    .select(`
+      id, game_date, game_time, home_score, away_score,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
+      predictions!inner(
+        prediction_type,
+        home_elo, away_elo, home_recent_form, away_recent_form,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_sfr, away_sfr, home_war_total, away_war_total
+      )
+    `)
+    .gte('game_date', cutoff)
+    .lt('game_date', today)
+    .not('home_score', 'is', null)
+    .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
+    .order('game_date', { ascending: false })
+    .order('game_time', { ascending: true })) as SelectResult<ConvergenceGameRow[]>;
+
+  const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults');
+  if (!data) return [];
+
+  const results: Array<{ favoredTeam: TeamCode; won: boolean }> = [];
+  for (const row of data as unknown as ConvergenceGameRow[]) {
+    const pred = row.predictions?.[0];
+    if (!pred || row.home_score === null || row.away_score === null) continue;
+    const homeCode = row.home_team?.code as TeamCode | undefined;
+    const awayCode = row.away_team?.code as TeamCode | undefined;
+    if (!homeCode || !awayCode) continue;
+
+    const duel = computeCompositeDuel({
+      homeCode,
+      homeLineupWoba: pred.home_lineup_woba,
+      awayLineupWoba: pred.away_lineup_woba,
+      homeSfr: pred.home_sfr,
+      awaySfr: pred.away_sfr,
+      homeBullpenFip: pred.home_bullpen_fip,
+      awayBullpenFip: pred.away_bullpen_fip,
+      homeSPFip: pred.home_sp_fip,
+      awaySPFip: pred.away_sp_fip,
+      homeSPXfip: pred.home_sp_xfip,
+      awaySPXfip: pred.away_sp_xfip,
+      homeWar: pred.home_war_total,
+      awayWar: pred.away_war_total,
+      homeElo: pred.home_elo ?? undefined,
+      awayElo: pred.away_elo ?? undefined,
+      homeRecentForm: pred.home_recent_form ?? undefined,
+      awayRecentForm: pred.away_recent_form ?? undefined,
+    });
+
+    if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) continue;
+    if (Math.abs(duel.netScore) < minFactors) continue;
+
+    const favoredHome = duel.netScore > 0;
+    const favoredTeam = favoredHome ? homeCode : awayCode;
+    const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
+    results.push({ favoredTeam, won });
+  }
+
+  return results;
+}
+
+export async function getConvergencePickTeamStats(
+  minFactors = FACTOR_PICK_STRONG,
+): Promise<Array<{ teamCode: TeamCode; wins: number; losses: number }>> {
+  const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
+  return computeConvergenceTeamStats(results);
 }
