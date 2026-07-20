@@ -537,6 +537,12 @@ interface UpcomingScheduledGame {
   convergenceNetScore: number | null;
   /** wave-484: 비수렴 경기 단축 레이블 (wave-480 DETAIL / wave-482 LIST TODAY 대칭) */
   factorFavoredSlugs: string[] | null;
+  /** wave-517: SP FIP 직접 대결 배지용 (가중치 1위, 15%) */
+  homeSPFip: number | null;
+  awaySPFip: number | null;
+  /** wave-517: wOBA 타선 직접 대결 배지용 (가중치 1위 공동, 15%) */
+  homeLineupWoba: number | null;
+  awayLineupWoba: number | null;
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -675,6 +681,11 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       factorAgainstCount,
       convergenceNetScore,
       factorFavoredSlugs,
+      // wave-517: SP FIP + wOBA 직접 대결 배지용
+      homeSPFip: fd?.homeSpFip ?? null,
+      awaySPFip: fd?.awaySpFip ?? null,
+      homeLineupWoba: fd?.homeLineupWoba ?? null,
+      awayLineupWoba: fd?.awayLineupWoba ?? null,
     });
   }
   return result;
@@ -2702,6 +2713,38 @@ export default async function AnalysisIndexPage() {
                                     })()}
                                   </p>
                                 )}
+                                {/* wave-517: SP FIP 직접 대결 배지 — |ΔFIP| >= SP_FIP_DUEL_MIN 시 우위 팀명 + 격차 표시 (가중치 1위 15%) */}
+                                {g.homeSPFip != null && g.awaySPFip != null && (() => {
+                                  const spDelta = g.homeSPFip - g.awaySPFip;
+                                  if (Math.abs(spDelta) < SP_FIP_DUEL_MIN) return null;
+                                  const spFavoredHome = spDelta < 0;
+                                  const favoredName = shortTeamName(spFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      spFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      SP {favoredName} △{Math.abs(spDelta).toFixed(1)}
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-517: wOBA 타선 직접 대결 배지 — |ΔwOBA| >= LINEUP_WOBA_DUEL_MIN 시 우위 팀명 + 격차 표시 (가중치 1위 공동 15%) */}
+                                {g.homeLineupWoba != null && g.awayLineupWoba != null && (() => {
+                                  const wobaDelta = g.homeLineupWoba - g.awayLineupWoba;
+                                  if (Math.abs(wobaDelta) < LINEUP_WOBA_DUEL_MIN) return null;
+                                  const wobaFavoredHome = wobaDelta > 0;
+                                  const favoredName = shortTeamName(wobaFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      wobaFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      타선 {favoredName} △{Math.abs(wobaDelta).toFixed(3)}
+                                    </span>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </Link>
