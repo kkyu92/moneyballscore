@@ -2736,6 +2736,14 @@ export const CONVERGENCE_TEAM_STATS_MIN_PICKS = 3;
 export const CONVERGENCE_HOME_AWAY_MIN_PICKS = 5;
 
 /**
+ * wave-560: 강수렴 픽 홈/어웨이·팀별 성적 배지 "낮음" 색상 임계 (%).
+ * convergence pick 승률 ≤ 본 값 시 red 배지 (랜덤 이하 — 반대 팀이 유력한 신호).
+ * 상한 임계 = ACCURACY_GOOD_PCT(60). 이 값 미만 ~ ACCURACY_GOOD_PCT 미만 = neutral(gray).
+ * 변경 시 analysis/page.tsx wave-557/559 팀별·홈어웨이 배지 callsite 동시 조정.
+ */
+export const CONVERGENCE_BADGE_LOW_PCT = 40;
+
+/**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.

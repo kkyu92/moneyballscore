@@ -71,6 +71,8 @@ import {
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   FACTOR_PICK_WEIGHT_TOTAL,
+  ACCURACY_GOOD_PCT,
+  CONVERGENCE_BADGE_LOW_PCT,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
@@ -2891,7 +2893,7 @@ export default async function AnalysisIndexPage() {
                     title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 강수렴 픽 ${total}경기`}
                   >
                     <span className="font-medium text-gray-700 dark:text-gray-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${pct >= 60 ? 'text-green-600 dark:text-green-400' : pct <= 40 ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    <span className={`tabular-nums ${pct >= ACCURACY_GOOD_PCT ? 'text-green-600 dark:text-green-400' : pct <= CONVERGENCE_BADGE_LOW_PCT ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
                       {pct}%
                     </span>
                   </span>
@@ -2913,7 +2915,7 @@ export default async function AnalysisIndexPage() {
                   title={`홈팀 지목 ${homeTotal}경기: ${convergenceHomeAwaySplit.home.wins}승 ${convergenceHomeAwaySplit.home.losses}패 (${homePct}%)`}
                 >
                   <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
-                  <span className={`tabular-nums font-medium ${homePct >= 60 ? 'text-green-600 dark:text-green-400' : homePct <= 40 ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                  <span className={`tabular-nums font-medium ${homePct >= ACCURACY_GOOD_PCT ? 'text-green-600 dark:text-green-400' : homePct <= CONVERGENCE_BADGE_LOW_PCT ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
                     {homePct}%
                   </span>
                   <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
@@ -2923,7 +2925,7 @@ export default async function AnalysisIndexPage() {
                   title={`어웨이팀 지목 ${awayTotal}경기: ${convergenceHomeAwaySplit.away.wins}승 ${convergenceHomeAwaySplit.away.losses}패 (${awayPct}%)`}
                 >
                   <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
-                  <span className={`tabular-nums font-medium ${awayPct >= 60 ? 'text-green-600 dark:text-green-400' : awayPct <= 40 ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                  <span className={`tabular-nums font-medium ${awayPct >= ACCURACY_GOOD_PCT ? 'text-green-600 dark:text-green-400' : awayPct <= CONVERGENCE_BADGE_LOW_PCT ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
                     {awayPct}%
                   </span>
                   <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
