@@ -967,7 +967,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -982,6 +982,8 @@ export default async function AnalysisIndexPage() {
     getSeasonH2HData(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG),
+    // wave-546: 이번 달 강수렴 픽 성적 — startDate 지정으로 limit 무시 전체 집계
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG, currentMonth.startDate),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2759,6 +2761,16 @@ export default async function AnalysisIndexPage() {
                   최근 {recentStrongConvergenceRecord.total}경기{' '}
                   {recentStrongConvergenceRecord.wins}승{recentStrongConvergenceRecord.losses}패
                   {' '}({Math.round(recentStrongConvergenceRecord.wins / recentStrongConvergenceRecord.total * 100)}%)
+                </span>
+              )}
+              {/* wave-546: 이번 달 강수렴 픽 성적 — 월간 전체 집계 */}
+              {monthlyStrongConvergenceRecord.total > 0 && (
+                <span
+                  className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                  title={`이번 달 강수렴 픽 성적 (${currentMonth.label})`}
+                >
+                  이달 {monthlyStrongConvergenceRecord.wins}승{monthlyStrongConvergenceRecord.losses}패
+                  {' '}({Math.round(monthlyStrongConvergenceRecord.wins / monthlyStrongConvergenceRecord.total * 100)}%)
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>

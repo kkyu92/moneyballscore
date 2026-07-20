@@ -44,12 +44,15 @@ interface ConvergenceGameRow {
 export async function getRecentConvergencePickRecord(
   limit = CONVERGENCE_RECORD_RECENT_LIMIT,
   minFactors = FACTOR_PICK_MIN_FACTORS,
+  // wave-546: 월간 성적용 — 지정 시 lookback days 무시하고 이 날짜부터 조회 (limit 도 무시)
+  startDate?: string,
 ): Promise<{ wins: number; losses: number; total: number }> {
   const today = toKSTDateString();
   const supabase = await createClient();
-  const cutoff = new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
+  const cutoff = startDate ?? new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
+  const effectiveLimit = startDate != null ? Number.MAX_SAFE_INTEGER : limit;
 
   const gamesResult = (await supabase
     .from('games')
@@ -78,7 +81,7 @@ export async function getRecentConvergencePickRecord(
 
   let wins = 0, losses = 0, count = 0;
   for (const row of data as unknown as ConvergenceGameRow[]) {
-    if (count >= limit) break;
+    if (count >= effectiveLimit) break;
     const pred = row.predictions?.[0];
     if (!pred || row.home_score === null || row.away_score === null) continue;
     const homeCode = row.home_team?.code as TeamCode | undefined;
