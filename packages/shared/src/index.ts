@@ -627,12 +627,13 @@ export const ELO_DISPLAY_NEUTRAL_BAND = 10;
  *
  * 50 Elo point diff ≈ 57% vs 43% win probability (ELO_DIVIDER=400 기준).
  * KBO 시즌 팀 레이팅 범위 ~1400~1600 (200 point span) 내 의미 있는 tier 차이.
- * 변경 시 factor-explanations.ts + analysis/page.tsx wave-379/444/506 + computeCompositeDuel.ts callsite 동기.
+ * 변경 시 factor-explanations.ts + analysis/page.tsx wave-379/444/506/521 + computeCompositeDuel.ts callsite 동기.
+ * wave-521: analysis/page.tsx 이번 주 남은 경기 카드 Elo 직접 대결 배지 callsite 추가 (cycle 1891).
  *
- * 3 파일 callsite (cycle 1874 갱신):
+ * 3 파일 callsite (cycle 1891 갱신):
  *   - apps/moneyball/src/lib/analysis/factor-explanations.ts (wave-351)
  *   - apps/moneyball/src/lib/analysis/computeCompositeDuel.ts (wave-390)
- *   - apps/moneyball/src/app/analysis/page.tsx (wave-379/444/506)
+ *   - apps/moneyball/src/app/analysis/page.tsx (wave-379/444/506/521)
  */
 export const ELO_GAP_STRONG = 50;
 
@@ -2418,8 +2419,9 @@ export const BULLPEN_FIP_WEAK = 5.0;
  * 불펜 FIP 우세 태그 최소 차이 임계 — wave-342 (cycle 1677).
  * |awayBullpenFip - homeBullpenFip| ≥ 본 값 시 불펜 우세 팀 태그 표시.
  * 1.0 = FIP 1점 차 = KBO 강/약 불펜 경계 차이 수준.
- * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442/504 + computeCompositeDuel.ts callsite 동기.
+ * BULLPEN_FIP_STRONG/WEAK 과 연동 — 변경 시 factor-explanations.ts buildGameOverview callsite + analysis/page.tsx wave-359/442/504/521 + computeCompositeDuel.ts callsite 동기.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
+ * wave-521: analysis/page.tsx 이번 주 남은 경기 카드 불펜FIP 직접 대결 배지 callsite 추가 (cycle 1891).
  */
 export const BULLPEN_FIP_DIFF_MIN = 1.0;
 
@@ -2443,9 +2445,10 @@ export const SFR_WEAK = -10.0;
  * 수비 SFR 직접 대결 배지 최소 격차 — wave-357 (cycle 1695).
  * |homeSfr - awaySfr| >= 본 값 시 "수비 {팀} 강세" 배지 표시.
  * 5.0 = SFR_STRONG(10.0) 의 절반 — 한 팀이 뚜렷한 수비 우위 최소 기준.
- * 변경 시 analysis/page.tsx wave-357/446/510 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-357/446/510/521 + computeCompositeDuel.ts callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  * wave-510: analysis/page.tsx AI 예측 카드 직접 대결 배지 (cycle 1877).
+ * wave-521: analysis/page.tsx 이번 주 남은 경기 카드 수비SFR 직접 대결 배지 callsite 추가 (cycle 1891).
  */
 export const SFR_DUEL_MIN = 5.0;
 
@@ -2471,7 +2474,8 @@ export const WAR_WEAK = 8.0;
  * wave-508: analysis/page.tsx AI 예측 카드 직접 대결 배지 (cycle 1875).
  * |homeWar - awayWar| ≥ 본 값 시 "WAR [팀] 강세" 배지 표시.
  * 5.0 = KBO 팀 WAR 범위(8~25) 기준 의미있는 격차 (~33% gap at midrange 14).
- * 변경 시 analysis/page.tsx wave-367/444/508 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-367/444/508/521 + computeCompositeDuel.ts callsite 동시 조정.
+ * wave-521: analysis/page.tsx 이번 주 남은 경기 카드 WAR 직접 대결 배지 callsite 추가 (cycle 1891).
  */
 export const WAR_DUEL_MIN = 5.0;
 
@@ -2593,9 +2597,10 @@ export const SP_FIP_DUEL_MIN = 0.5;
  * 선발투수 xFIP 직접 대결 배지 최소 차이 임계 — wave-371 (cycle 1711).
  * |awaySPXfip - homeSPXfip| ≥ 본 값 시 "xFIP {팀} 강세" 배지 표시.
  * xFIP 낮을수록 유리 (FIP 동일 방향). SP_FIP_DUEL_MIN 과 동일 0.5.
- * 변경 시 analysis/page.tsx wave-371/wave-513 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-371/513/521 + computeCompositeDuel.ts callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
  * wave-513: analysis/page.tsx 오늘 AI 예측 카드 직접 대결 배지 callsite 추가 (cycle 1880).
+ * wave-521: analysis/page.tsx 이번 주 남은 경기 카드 xFIP 직접 대결 배지 callsite 추가 (cycle 1891).
  */
 export const SP_XFIP_DUEL_MIN = 0.5;
 
@@ -2705,9 +2710,10 @@ export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.
- * 변경 시 analysis/page.tsx wave-373/511 + computeCompositeDuel.ts (wave-381) + analysis/page.tsx wave-448 격차(Δ) callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-373/511/521 + computeCompositeDuel.ts (wave-381) + analysis/page.tsx wave-448 격차(Δ) callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts 파일명 명시 (cycle 1876).
  * wave-511: analysis/page.tsx AI 예측 카드 직접 대결 배지 (cycle 1877).
+ * wave-521: analysis/page.tsx 이번 주 남은 경기 카드 최근폼 직접 대결 배지 callsite 추가 (cycle 1891).
  */
 export const RECENT_FORM_DUEL_MIN = 0.10;
 
