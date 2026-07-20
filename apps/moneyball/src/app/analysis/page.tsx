@@ -74,6 +74,7 @@ import {
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
+  KBO_SEASON_START_DATE,
   TOPFACTOR_STRONG_IMPACT,
   TOPFACTOR_COMPLETE_IMPACT,
   TOPFACTOR_IMPACT_MIN_DISPLAY,
@@ -967,7 +968,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -984,6 +985,8 @@ export default async function AnalysisIndexPage() {
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG),
     // wave-546: 이번 달 강수렴 픽 성적 — startDate 지정으로 limit 무시 전체 집계
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG, currentMonth.startDate),
+    // wave-548: 이번 시즌 강수렴 픽 성적 — KBO_SEASON_START_DATE 부터 전체 집계
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG, KBO_SEASON_START_DATE),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2771,6 +2774,16 @@ export default async function AnalysisIndexPage() {
                 >
                   이달 {monthlyStrongConvergenceRecord.wins}승{monthlyStrongConvergenceRecord.losses}패
                   {' '}({Math.round(monthlyStrongConvergenceRecord.wins / monthlyStrongConvergenceRecord.total * 100)}%)
+                </span>
+              )}
+              {/* wave-548: 이번 시즌 강수렴 픽 성적 — KBO_SEASON_START_DATE 이후 전체 */}
+              {seasonStrongConvergenceRecord.total > 0 && (
+                <span
+                  className="text-xs tabular-nums text-gray-300 dark:text-gray-600"
+                  title={`${KBO_SEASON_START_DATE.slice(0, 4)} 시즌 전체 강수렴 픽 성적 (${KBO_SEASON_START_DATE} 이후)`}
+                >
+                  시즌 {seasonStrongConvergenceRecord.wins}승{seasonStrongConvergenceRecord.losses}패
+                  {' '}({Math.round(seasonStrongConvergenceRecord.wins / seasonStrongConvergenceRecord.total * 100)}%)
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>

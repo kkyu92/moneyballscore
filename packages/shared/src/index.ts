@@ -321,6 +321,13 @@ export const KBO_FACTOR_COUNT = ACTIVE_FACTOR_KEYS.length;
 export const KBO_SEASON_YEAR = 2026;
 
 /**
+ * wave-548: KBO 시즌 예측 시작일 — 이번 시즌 강수렴 픽 성적 집계 기준일.
+ * 사이트 첫 예측 시작 시점 (4월 초) 기준 단일 source.
+ * KBO_SEASON_YEAR 파생 — 매 시즌 KBO_SEASON_YEAR 1 라인 갱신 시 자동 동기.
+ */
+export const KBO_SEASON_START_DATE = `${KBO_SEASON_YEAR}-04-01`;
+
+/**
  * KBO 일일 예측 cron 갱신 시각 (KST) — guide / analysis (page + OG + Twitter) / about / predictions[date]
  * 6 surface 에 "매일 09:00 KST 갱신" / "Daily 09:00 KST" 하드코딩 sweep 용 단일 source.
  * silent drift family wave 87 (cycle 1295) — wave 86 (KBO_SEASON_YEAR) 패턴 cron 시각 차원 확장.
