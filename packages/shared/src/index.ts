@@ -2664,7 +2664,7 @@ export const FACTOR_PICK_MIN_FACTORS = 7;
 export const FACTOR_PICK_TOP_GAMES = 3;
 
 /**
- * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-463 game/[id] "강수렴" 레이블 칩 (cycle 1823). · wave-465 analysis/page.tsx "강수렴" 레이블 칩 (cycle 1825). · wave-467 analysis/page.tsx sectionHasComplete=false 조건 (cycle 1828). · wave-475 예정 경기 팩터 N:M 색상 brand 티어 (cycle 1837): |convergenceNetScore| ≥ 본 값 시 text-brand-500 (isComplete=false 전제).
+ * 팩터 수렴 픽 강세 임계 — wave-408 (cycle 1755). · wave-415 배지 색상 (cycle 1766). · wave-463 game/[id] "강수렴" 레이블 칩 (cycle 1823). · wave-465 analysis/page.tsx "강수렴" 레이블 칩 (cycle 1825). · wave-467 analysis/page.tsx sectionHasComplete=false 조건 (cycle 1828). · wave-475 예정 경기 팩터 N:M 색상 brand 티어 (cycle 1837): |convergenceNetScore| ≥ 본 값 시 text-brand-500 (isComplete=false 전제). · wave-523 analysis/page.tsx topUpcomingPickGameId 이번 주 수렴 TOP픽 배지 (cycle 1892): |convergenceNetScore| ≥ 본 값 = 이번 주 남은 경기 ★ TOP픽 배지 후보.
  * |compositeDuelScore| ≥ 본 값 시 수렴 강도 색상 brand(파랑) + '강수렴' 레이블 칩 (isComplete=false 전제) 표시.
  * wave-463: isStrong = !isComplete && convStrength ≥ 8 → "강수렴" 텍스트 레이블 칩 표시 (game/[id]). wave-465: 동일 기준 analysis/page.tsx 적용. wave-467: sectionHasComplete = factorPickGames.some ≥ FACTOR_PICK_COMPLETE 조건 false 분기 (brand 유지).
  * 10팩터 중 8개 이상 한쪽 팀 우세 = 80% 팩터 정렬.
