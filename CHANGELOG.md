@@ -1,3 +1,22 @@
+## v0.5.61.17 — 2026-07-20 (cycle 1906, wave-535: WAR 데이터 갭 guard — computeCompositeDuel WAR=0 UI 일치)
+
+### fix(context): wave-535 — WAR 데이터 갭 guard (computeCompositeDuel WAR=0, cycle 1906)
+
+- `computeCompositeDuel`: `homeWar=0 || awayWar=0` 시 WAR factor `valid=false` + `warResult=null`
+  - predictor wave-533 (WAR=0 neutral) 과 UI 일치
+  - Fancy Stats top-50 데이터 갭 팀 (Doosan/KT/Lotte/Kiwoom) 맥락에서 WAR 오분류 차단
+  - 이전: homeWar=15.0 vs awayWar=0.0 → `warResult='home'` (misleading) → 수렴 점수 영향
+  - 이후: WAR=0 시 `valid=false` → 수렴 점수에서 WAR 제외 (예측 엔진과 동일)
+- `analysis/page.tsx` 팩터 수렴 픽 섹션: WAR=0 팀 존재 시 "WAR 미집계" 미표시 배지 추가
+  - `homeWar === 0 || awayWar === 0` → `"WAR 미집계 (팀명)"` gray 마이크로 텍스트
+  - 단일 팀 갭: 팀명 명시 / 양쪽 갭: 팀명 생략
+- `analysis/page.tsx` 이번 주 남은 경기 WAR 직접 대결 배지 (wave-508): WAR=0 guard 추가
+  - `g.homeWar > 0 && g.awayWar > 0` 조건 → 갭 팀 포함 경기에서 WAR 배지 미노출
+- 테스트 (`wave-535-war-data-gap.test.ts`): 9 PASS
+- v0.5.61.17
+
+---
+
 ## v0.5.61.16 — 2026-07-20 (cycle 1898, wave-529: 이번 주 남은 경기 TOP픽/강수렴 픽 수렴 방향 팀명 표시)
 
 ### feat(analysis): wave-529 — 이번 주 남은 경기 TOP픽/강수렴 픽 수렴 방향 팀명 표시 (cycle 1898)

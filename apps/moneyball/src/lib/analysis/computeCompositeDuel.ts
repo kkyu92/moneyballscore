@@ -98,8 +98,10 @@ export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult
           : null
       : null;
 
+  // wave-535: WAR=0 = Fancy Stats top-50 데이터 갭 (predictor wave-533 와 동일 guard).
+  // WAR=0 시 valid=false — 예측 엔진 neutral(0.5)과 UI 일치.
   const warResult: DuelResult =
-    g.homeWar != null && g.awayWar != null
+    g.homeWar != null && g.awayWar != null && g.homeWar > 0 && g.awayWar > 0
       ? g.homeWar - g.awayWar >= WAR_DUEL_MIN
         ? 'home'
         : g.awayWar - g.homeWar >= WAR_DUEL_MIN
@@ -158,7 +160,7 @@ export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult
     { slug: 'sfr', result: sfrResult, valid: g.homeSfr != null && g.awaySfr != null },
     { slug: 'bullpen_fip', result: bullpenResult, valid: g.homeBullpenFip != null && g.awayBullpenFip != null },
     { slug: 'sp_fip', result: spFipResult, valid: g.homeSPFip != null && g.awaySPFip != null },
-    { slug: 'war', result: warResult, valid: g.homeWar != null && g.awayWar != null },
+    { slug: 'war', result: warResult, valid: g.homeWar != null && g.awayWar != null && g.homeWar > 0 && g.awayWar > 0 },
     { slug: 'elo', result: eloResult, valid: g.homeElo !== undefined && g.awayElo !== undefined },
     { slug: 'recent_form', result: formResult, valid: g.homeRecentForm !== undefined && g.awayRecentForm !== undefined },
     { slug: 'head_to_head', result: h2hResult, valid: g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined },
