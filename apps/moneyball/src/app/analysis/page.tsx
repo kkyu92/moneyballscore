@@ -1015,7 +1015,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1046,6 +1046,8 @@ export default async function AnalysisIndexPage() {
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_COMPLETE, KBO_SEASON_START_DATE),
     // wave-563: 완전수렴 픽 현재 연속 streak (🔥 N연승 / ❄️ N연패)
     getConvergencePickStreak(FACTOR_PICK_COMPLETE),
+    // wave-565: 완전수렴 픽 시즌 최장 streak — 현재 streak 비교 컨텍스트 (wave-554 완전수렴 차원)
+    getConvergencePickBestStreak(FACTOR_PICK_COMPLETE),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2960,6 +2962,15 @@ export default async function AnalysisIndexPage() {
                     title={`완전수렴 픽 현재 ${completeConvergenceStreak.length}연${completeConvergenceStreak.type === 'win' ? '승' : '패'} 중`}
                   >
                     {completeConvergenceStreak.type === 'win' ? '🔥' : '❄️'} {completeConvergenceStreak.length}연{completeConvergenceStreak.type === 'win' ? '승' : '패'}
+                  </span>
+                )}
+                {/* wave-565: 완전수렴 픽 시즌 최장 streak — 현재 streak 비교 컨텍스트 (wave-554 강수렴 패턴 동기) */}
+                {completeBestStreak !== null && (
+                  <span
+                    className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                    title={`${KBO_SEASON_YEAR} 시즌 완전수렴 픽 최장 ${completeBestStreak.length}연${completeBestStreak.type === 'win' ? '승' : '패'}`}
+                  >
+                    최장 {completeBestStreak.length}연{completeBestStreak.type === 'win' ? '승' : '패'}
                   </span>
                 )}
               </div>
