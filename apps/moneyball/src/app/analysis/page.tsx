@@ -2745,6 +2745,52 @@ export default async function AnalysisIndexPage() {
                                     </span>
                                   );
                                 })()}
+                                {/* wave-519: H2H 직접 대결 배지 — 홈 승률 >= H2H_DOMINANT_RATE(0.6) 시 홈팀 우세, <= H2H_WEAK_RATE(0.4) 시 원정팀 우세 · wave-517 SP FIP/wOBA 배지에 이어 이번 주 카드 10팩터 확장 */}
+                                {(() => {
+                                  const [h2hA, h2hB] = [g.homeCode as string, g.awayCode as string].sort();
+                                  const h2hKey = `${h2hA}:${h2hB}`;
+                                  const h2hPair = h2hMap.get(h2hKey) ?? {};
+                                  const h2hHomeWins = h2hPair[g.homeCode] ?? 0;
+                                  const h2hAwayWins = h2hPair[g.awayCode] ?? 0;
+                                  const h2hTotal = h2hHomeWins + h2hAwayWins;
+                                  if (h2hTotal < H2H_MIN_GAMES) return null;
+                                  const homeRate = h2hHomeWins / h2hTotal;
+                                  const h2hFavoredHome = homeRate >= H2H_DOMINANT_RATE;
+                                  const h2hFavoredAway = homeRate <= H2H_WEAK_RATE;
+                                  if (!h2hFavoredHome && !h2hFavoredAway) return null;
+                                  const favoredName = shortTeamName(h2hFavoredHome ? g.homeCode : g.awayCode);
+                                  const [wins, losses] = h2hFavoredHome
+                                    ? [h2hHomeWins, h2hAwayWins]
+                                    : [h2hAwayWins, h2hHomeWins];
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      h2hFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      H2H {favoredName} {wins}승{losses}패
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-519: 구장 직접 대결 배지 — parkPf >= PARK_FACTOR_HITTER_MIN(105) 시 홈팀 유리(타자 친화), <= PARK_FACTOR_PITCHER_MAX(95) 시 원정팀 유리(투수 친화) · 10팩터 배지 이번 주 카드 완성 */}
+                                {(() => {
+                                  const pf = KBO_TEAMS[g.homeCode]?.parkPf;
+                                  if (pf === undefined) return null;
+                                  const parkFavoredHome = pf >= PARK_FACTOR_HITTER_MIN;
+                                  const parkFavoredAway = pf <= PARK_FACTOR_PITCHER_MAX;
+                                  if (!parkFavoredHome && !parkFavoredAway) return null;
+                                  const favoredName = shortTeamName(parkFavoredHome ? g.homeCode : g.awayCode);
+                                  const parkType = parkFavoredHome ? '타자친화' : '투수친화';
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      parkFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      구장 {favoredName} {parkType}
+                                    </span>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </Link>
