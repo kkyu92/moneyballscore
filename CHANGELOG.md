@@ -1,3 +1,17 @@
+## v0.5.61.11 — 2026-07-20 (cycle 1883, wave-516: H2H·구장 직접 대결 배지 JSDoc callsite sync)
+
+### fix(context): wave-516 — H2H_DOMINANT_RATE/H2H_WEAK_RATE/PARK_FACTOR_HITTER_MIN/PARK_FACTOR_PITCHER_MAX JSDoc wave-515 callsite 미박제 수정 (cycle 1883)
+
+- wave-515 가 analysis/page.tsx 에 H2H·구장 직접 대결 배지 신규 callsite 추가했으나 JSDoc 미박제
+  - `H2H_DOMINANT_RATE`: wave-516 analysis/page.tsx 직접 대결 배지 callsite 추가
+  - `H2H_WEAK_RATE`: wave-516 analysis/page.tsx 직접 대결 배지 callsite 추가
+  - `PARK_FACTOR_HITTER_MIN`: wave-516 analysis/page.tsx 직접 대결 배지 callsite 추가
+  - `PARK_FACTOR_PITCHER_MAX`: 동일 (PARK_FACTOR_HITTER_MIN JSDoc 공유)
+- wave-516 테스트 추가 (`wave-516-h2h-park-duel-badge-jsdoc-callsite-sync.test.ts`) — 12 PASS
+- v0.5.61.11
+
+---
+
 ## v0.5.61.10 — 2026-07-20 (cycle 1881, wave-514: H2H/park factor JSDoc computeCompositeDuel.ts callsite sync)
 
 ### fix(context): wave-514 — H2H_DOMINANT_RATE/H2H_WEAK_RATE/PARK_FACTOR_HITTER_MIN/PARK_FACTOR_PITCHER_MAX JSDoc computeCompositeDuel.ts callsite 누락 수정 (cycle 1881)
