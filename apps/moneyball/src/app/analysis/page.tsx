@@ -1087,6 +1087,12 @@ export default async function AnalysisIndexPage() {
 
   const hasAnyModelPrediction = thisWeekRemainingGames.some((g) => g.modelHomeWinProb != null);
 
+  // wave-523: 이번 주 남은 경기 수렴 TOP 픽 — |convergenceNetScore| 최대 경기 (threshold >= FACTOR_PICK_STRONG)
+  const topUpcomingPickGameId = thisWeekRemainingGames
+    .filter((g) => g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_STRONG)
+    .sort((a, b) => Math.abs(b.convergenceNetScore!) - Math.abs(a.convergenceNetScore!))
+    .at(0)?.gameId ?? null;
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
       <Breadcrumb items={[{ label: 'AI 분석' }]} />
@@ -2695,10 +2701,16 @@ export default async function AnalysisIndexPage() {
                       const mWinPct = hasModel
                         ? Math.round((mFavoredHome ? g.modelHomeWinProb! : 1 - g.modelHomeWinProb!) * 100)
                         : winPct;
+                      // wave-523: 이번 주 수렴 TOP 픽 배지
+                      const isTopUpcomingPick = topUpcomingPickGameId !== null && g.gameId === topUpcomingPickGameId;
                       return (
                         <li key={g.gameId}>
                           <Link href={`/analysis/game/${g.gameId}`} className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-                            <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-300 dark:hover:border-brand-600 transition-colors px-3 py-2.5 text-sm">
+                            <div className={`flex items-center justify-between rounded-xl transition-colors px-3 py-2.5 text-sm ${
+                              isTopUpcomingPick
+                                ? 'bg-white dark:bg-[var(--color-surface-card)] border border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30'
+                                : 'bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-300 dark:hover:border-brand-600'
+                            }`}>
                               <div className="min-w-0 flex-1">
                                 <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                                   {awayName} @ {homeName}
@@ -2706,7 +2718,12 @@ export default async function AnalysisIndexPage() {
                                 {g.gameTime && (
                                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 tabular-nums">
                                     {g.gameTime.slice(0, 5)}
+                                    {/* wave-523: 이번 주 수렴 TOP 픽 배지 — |convergenceNetScore| 최대 예정 경기 */}
+                                    {isTopUpcomingPick && <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ TOP픽</span>}
                                   </p>
+                                )}
+                                {!g.gameTime && isTopUpcomingPick && (
+                                  <p className="text-xs text-amber-500 dark:text-amber-400 mt-0.5 font-semibold">★ TOP픽</p>
                                 )}
                               </div>
                               <div className="ml-3 shrink-0 text-right">

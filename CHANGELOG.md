@@ -1,3 +1,18 @@
+## v0.5.61.14 — 2026-07-20 (cycle 1892, wave-523: 이번 주 남은 경기 수렴 TOP 픽 배지)
+
+### feat(analysis): wave-523 — 이번 주 남은 경기 수렴 TOP 픽 배지 (cycle 1892)
+
+- "이번 주 남은 경기" 카드 중 `|convergenceNetScore| >= FACTOR_PICK_STRONG(8)` 최대 경기에 `★ TOP픽` 배지 표시
+  - 오늘 AI 예측의 `★ 탑픽` 배지와 대칭 구조
+  - 상단 찾기 로직: `thisWeekRemainingGames.filter(>= FACTOR_PICK_STRONG).sort(|score| desc).at(0)`
+  - 카드 스타일: amber border + ring (오늘 탑픽과 동일 시각 처리)
+  - 게임 시간 없는 경우에도 TOP픽 배지 별도 라인 표시
+- `topUpcomingPickGameId` null 시 모든 카드 기본 스타일 유지
+- wave-523 테스트 추가 (`wave-523-upcoming-top-pick-badge.test.ts`) — 13 PASS
+- v0.5.61.14
+
+---
+
 ## v0.5.61.13 — 2026-07-20 (cycle 1890, wave-521: 이번 주 남은 경기 카드 6팩터 배지 완성)
 
 ### feat(analysis): wave-521 — analysis 이번 주 남은 경기 카드 불펜FIP·Elo·WAR·SFR·최근폼·xFIP 직접 대결 배지 (cycle 1890)
