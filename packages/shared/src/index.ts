@@ -2707,6 +2707,14 @@ export const CONVERGENCE_RECORD_RECENT_LIMIT = 10;
 export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
 
 /**
+ * 이번 주 남은 경기 팀별 수렴 우위 현황 최대 표시 팀 수 — wave-531 (cycle 1900).
+ * analysis/page.tsx thisWeekRemainingGames 에서 |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기의 우세 팀 집계.
+ * 수렴 픽 우위 경기 수 내림차순 정렬 후 상위 N팀만 표시.
+ * 변경 시 analysis/page.tsx wave-531 upcomingConvergenceTeams 슬라이스 callsite 동시 조정.
+ */
+export const UPCOMING_CONVERGENCE_TEAM_LIMIT = 5;
+
+/**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.

@@ -73,6 +73,7 @@ import {
   FACTOR_PICK_WEIGHT_TOTAL,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
+  UPCOMING_CONVERGENCE_TEAM_LIMIT,
   TOPFACTOR_STRONG_IMPACT,
   TOPFACTOR_COMPLETE_IMPACT,
   TOPFACTOR_IMPACT_MIN_DISPLAY,
@@ -1100,6 +1101,17 @@ export default async function AnalysisIndexPage() {
       .map((g) => g.gameId)
   );
   const strongUpcomingPickCount = strongUpcomingPickGameIds.size;
+
+  // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
+  const teamConvergenceCountMap = new Map<TeamCode, number>();
+  for (const g of thisWeekRemainingGames) {
+    if (g.convergenceNetScore == null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_MIN_FACTORS) continue;
+    const favoredCode = g.convergenceNetScore > 0 ? g.homeCode : g.awayCode;
+    teamConvergenceCountMap.set(favoredCode, (teamConvergenceCountMap.get(favoredCode) ?? 0) + 1);
+  }
+  const upcomingConvergenceTeams = [...teamConvergenceCountMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
@@ -2685,6 +2697,23 @@ export default async function AnalysisIndexPage() {
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
             </div>
           </div>
+          {/* wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 팀 집계 */}
+          {upcomingConvergenceTeams.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
+              <span className="text-xs text-gray-500 dark:text-gray-400">📈 수렴 픽 우세 팀:</span>
+              {upcomingConvergenceTeams.map(([code, count]) => (
+                <span
+                  key={code}
+                  className="inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300"
+                >
+                  {shortTeamName(code as TeamCode)}
+                  {count > 1 && (
+                    <span className="text-[10px] text-brand-500/70 dark:text-brand-400/70">×{count}</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="space-y-4">
             {groupUpcomingByDate(thisWeekRemainingGames).map(({ date, games: dayGames }) => {
               const [, mm, dd] = date.split('-');

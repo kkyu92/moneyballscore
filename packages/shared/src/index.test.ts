@@ -129,6 +129,7 @@ import {
   FACTOR_PICK_TOP_GAMES,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
+  UPCOMING_CONVERGENCE_TEAM_LIMIT,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -880,5 +881,10 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
     expect(FACTOR_PICK_COMPLETE).toBe(10);
     expect(FACTOR_PICK_STRONG).toBeGreaterThan(FACTOR_PICK_MIN_FACTORS);
     expect(FACTOR_PICK_COMPLETE).toBeGreaterThan(FACTOR_PICK_STRONG);
+  });
+
+  it('UPCOMING_CONVERGENCE_TEAM_LIMIT — 이번 주 남은 경기 수렴 우위 팀 최대 표시 (silent drift wave 531 guard)', () => {
+    expect(UPCOMING_CONVERGENCE_TEAM_LIMIT).toBe(5);
+    expect(UPCOMING_CONVERGENCE_TEAM_LIMIT).toBeGreaterThan(0);
   });
 });
