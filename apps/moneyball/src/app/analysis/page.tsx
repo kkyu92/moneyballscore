@@ -1015,7 +1015,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1044,6 +1044,8 @@ export default async function AnalysisIndexPage() {
     getConvergencePickHomeAwaySplit(),
     // wave-561: 완전수렴(FACTOR_PICK_COMPLETE=10팩터) 시즌 성적 — 강수렴 상위 tier 정확도 검증
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_COMPLETE, KBO_SEASON_START_DATE),
+    // wave-563: 완전수렴 픽 현재 연속 streak (🔥 N연승 / ❄️ N연패)
+    getConvergencePickStreak(FACTOR_PICK_COMPLETE),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2935,7 +2937,7 @@ export default async function AnalysisIndexPage() {
               </div>
             );
           })()}
-          {/* wave-561: 강수렴 픽 완전수렴(10팩터) 시즌 성적 — FACTOR_PICK_COMPLETE 임계 정확도 (강수렴 상위 tier) */}
+          {/* wave-561: 강수렴 픽 완전수렴(10팩터) 시즌 성적 · wave-563: 완전수렴 픽 연속 streak — FACTOR_PICK_COMPLETE 임계 정확도 (강수렴 상위 tier) */}
           {seasonCompleteConvergenceRecord.total > 0 && (() => {
             const pct = Math.round(seasonCompleteConvergenceRecord.wins / seasonCompleteConvergenceRecord.total * 100);
             return (
@@ -2951,6 +2953,15 @@ export default async function AnalysisIndexPage() {
                   </span>
                   <span className="text-gray-400 dark:text-gray-500 tabular-nums">({seasonCompleteConvergenceRecord.total}경기)</span>
                 </span>
+                {/* wave-563: 완전수렴 픽 현재 연속 streak — 2연승 이상 🔥, 2연패 이상 ❄️ */}
+                {completeConvergenceStreak !== null && (
+                  <span
+                    className={`text-xs font-semibold tabular-nums ${completeConvergenceStreak.type === 'win' ? 'text-amber-500 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}
+                    title={`완전수렴 픽 현재 ${completeConvergenceStreak.length}연${completeConvergenceStreak.type === 'win' ? '승' : '패'} 중`}
+                  >
+                    {completeConvergenceStreak.type === 'win' ? '🔥' : '❄️'} {completeConvergenceStreak.length}연{completeConvergenceStreak.type === 'win' ? '승' : '패'}
+                  </span>
+                )}
               </div>
             );
           })()}
