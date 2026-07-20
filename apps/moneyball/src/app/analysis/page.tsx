@@ -97,11 +97,11 @@ import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
 export const metadata: Metadata = {
   title: 'AI 분석 — 오늘 전체 예측 + 빅매치 + 이번 주 경기',
-  description: `오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론 (홈/원정 옹호 + 심판 보정), 팩터별 강약점, 이번 주 전체 경기 신뢰도 정렬. 매일 ${KBO_PREDICT_DAILY_TIME_KST} 갱신.`,
+  description: `오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론 (홈/원정 옹호 + 심판 보정), 팩터 수렴 픽, 이번 주 남은 경기 배지. 매일 ${KBO_PREDICT_DAILY_TIME_KST} 갱신.`,
   alternates: { canonical: `${SITE_URL}/analysis` },
   openGraph: {
     title: 'AI 분석 — 오늘 KBO 전체 경기 예측 | MoneyBall Score',
-    description: `오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론, 팩터별 강약점, 이번 주 신뢰도 정렬. 매일 ${KBO_PREDICT_DAILY_TIME_KST} 갱신.`,
+    description: `오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론, 팩터 수렴 픽, 이번 주 남은 경기 배지. 매일 ${KBO_PREDICT_DAILY_TIME_KST} 갱신.`,
     url: `${SITE_URL}/analysis`,
     type: 'website',
     locale: 'ko_KR',
@@ -110,7 +110,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'AI 분석 — 오늘 KBO 전체 경기 예측 | MoneyBall Score',
-    description: '오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론, 팩터별 강약점, 이번 주 신뢰도 정렬.',
+    description: '오늘 KBO 전체 경기 AI 분석 — 빅매치 에이전트 토론, 팩터 수렴 픽, 이번 주 남은 경기 배지.',
   },
 };
 

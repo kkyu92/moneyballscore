@@ -24,7 +24,7 @@ const KBO_NAV: NavItem[] = [
   {
     label: "예측·기록",
     items: [
-      { href: "/analysis", label: "AI 분석", description: "에이전트 토론·경기 분석", icon: "activity" },
+      { href: "/analysis", label: "AI 분석", description: "에이전트 토론·팩터 수렴 픽", icon: "activity" },
       { href: "/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
       { href: "/insights", label: "AI 인사이트", description: "심판 에이전트 reasoning 아카이브", icon: "database" },
       { href: "/predictions", label: "예측 기록", description: "일자별 예측 아카이브", icon: "file-text" },
