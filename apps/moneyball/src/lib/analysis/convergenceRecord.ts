@@ -44,7 +44,8 @@ interface ConvergenceGameRow {
 export async function getRecentConvergencePickRecord(
   limit = CONVERGENCE_RECORD_RECENT_LIMIT,
   minFactors = FACTOR_PICK_MIN_FACTORS,
-  // wave-546: 월간 성적용 — 지정 시 lookback days 무시하고 이 날짜부터 조회 (limit 도 무시)
+  // wave-546/548: startDate 지정 시 lookback days 무시하고 이 날짜부터 전체 조회 (limit 도 무시).
+  // 월간 성적 (currentMonth.startDate) / 시즌 전체 성적 (KBO_SEASON_START_DATE) 양쪽 사용.
   startDate?: string,
 ): Promise<{ wins: number; losses: number; total: number }> {
   const today = toKSTDateString();

@@ -75,6 +75,7 @@ import {
   CONVERGENCE_RECORD_RECENT_LIMIT,
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
   KBO_SEASON_START_DATE,
+  KBO_SEASON_YEAR,
   TOPFACTOR_STRONG_IMPACT,
   TOPFACTOR_COMPLETE_IMPACT,
   TOPFACTOR_IMPACT_MIN_DISPLAY,
@@ -2780,7 +2781,7 @@ export default async function AnalysisIndexPage() {
               {seasonStrongConvergenceRecord.total > 0 && (
                 <span
                   className="text-xs tabular-nums text-gray-300 dark:text-gray-600"
-                  title={`${KBO_SEASON_START_DATE.slice(0, 4)} 시즌 전체 강수렴 픽 성적 (${KBO_SEASON_START_DATE} 이후)`}
+                  title={`${KBO_SEASON_YEAR} 시즌 전체 강수렴 픽 성적 (${KBO_SEASON_START_DATE} 이후)`}
                 >
                   시즌 {seasonStrongConvergenceRecord.wins}승{seasonStrongConvergenceRecord.losses}패
                   {' '}({Math.round(seasonStrongConvergenceRecord.wins / seasonStrongConvergenceRecord.total * 100)}%)
