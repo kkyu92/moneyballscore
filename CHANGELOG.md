@@ -1,3 +1,15 @@
+## v0.5.61.31 — 2026-07-21 (cycle 1933, wave-559: 강수렴 픽 홈/어웨이 분리 성적 배지)
+
+### feat(analysis): wave-559 — 강수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1933)
+
+**신규: 강수렴 픽 홈 지목 vs 어웨이 지목 성적 분리**
+- `packages/shared`: `CONVERGENCE_HOME_AWAY_MIN_PICKS=5` 상수 추가
+- `convergenceRecord.ts`: `fetchConvergencePickDetailedResults` 확장 (`favoredHome: boolean` 필드 추가) + `computeConvergenceHomeAwaySplit()` (순수 함수) + `getConvergencePickHomeAwaySplit()` 추가
+- `analysis/page.tsx`: wave-559 홈/어웨이 분리 배지 — 🏟️ 홈 지목(🏠) vs 어웨이 지목(✈️) 각 승률 + 경기 수 컬러 코드
+- 테스트: `wave-559-convergence-pick-home-away-split.test.ts` 11 cases (빈/소표본/집계/경계값)
+
+---
+
 ## v0.5.61.30 — 2026-07-21 (cycle 1931, wave-557: 강수렴 픽 팀별 시즌 성적)
 
 ### feat(analysis): wave-557 — 강수렴 픽 팀별 시즌 성적 배지 (cycle 1931)
