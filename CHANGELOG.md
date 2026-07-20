@@ -1,3 +1,21 @@
+## v0.5.61.13 — 2026-07-20 (cycle 1890, wave-521: 이번 주 남은 경기 카드 6팩터 배지 완성)
+
+### feat(analysis): wave-521 — analysis 이번 주 남은 경기 카드 불펜FIP·Elo·WAR·SFR·최근폼·xFIP 직접 대결 배지 (cycle 1890)
+
+- "이번 주 남은 경기" 카드에 누락 6팩터 직접 대결 배지 추가 (wave-517/519 SP FIP + wOBA + H2H + 구장에 이어 10팩터 완성)
+  - `불펜FIP` 배지: |ΔFIP| >= BULLPEN_FIP_DIFF_MIN(1.0) 시 우위 팀명 + 격차 표시
+  - `Elo` 배지: |ΔElo| >= ELO_GAP_STRONG(50) 시 우위 팀명 + 격차 표시
+  - `WAR` 배지: |ΔWAR| >= WAR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시
+  - `수비SFR` 배지: |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시
+  - `최근폼` 배지: |Δ폼| >= RECENT_FORM_DUEL_MIN(0.10) 시 우위 팀명 + 격차 표시
+  - `xFIP` 배지: |ΔxFIP| >= SP_XFIP_DUEL_MIN(0.5) 시 우위 팀명 + 격차 표시
+- `UpcomingScheduledGame` 인터페이스에 12개 필드 추가 (6쌍 home/away)
+- `getThisWeekRemainingGames()` result.push에 factorDataMap + eloMap 데이터 전달
+- wave-521 테스트 추가 (`wave-521-upcoming-remaining-6badge.test.ts`) — 26 PASS
+- v0.5.61.13
+
+---
+
 ## v0.5.61.12 — 2026-07-20 (cycle 1885, wave-518: SP FIP·wOBA 이번 주 남은 경기 카드 JSDoc callsite sync)
 
 ### fix(context): wave-518 — SP_FIP_DUEL_MIN·LINEUP_WOBA_DUEL_MIN JSDoc wave-517 이번 주 남은 경기 카드 callsite 미박제 수정 (cycle 1885)

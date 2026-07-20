@@ -543,6 +543,24 @@ interface UpcomingScheduledGame {
   /** wave-517: wOBA 타선 직접 대결 배지용 (가중치 1위 공동, 15%) */
   homeLineupWoba: number | null;
   awayLineupWoba: number | null;
+  /** wave-521: 불펜FIP 직접 대결 배지용 (가중치 10%) */
+  homeBullpenFip: number | null;
+  awayBullpenFip: number | null;
+  /** wave-521: Elo 직접 대결 배지용 (가중치 10%) */
+  homeElo: number | null;
+  awayElo: number | null;
+  /** wave-521: WAR 직접 대결 배지용 (가중치 8%) */
+  homeWar: number | null;
+  awayWar: number | null;
+  /** wave-521: 수비SFR 직접 대결 배지용 (가중치 5%) */
+  homeSfr: number | null;
+  awaySfr: number | null;
+  /** wave-521: 최근폼 직접 대결 배지용 (가중치 10%) */
+  homeRecentForm: number | null;
+  awayRecentForm: number | null;
+  /** wave-521: xFIP 직접 대결 배지용 (가중치 5%) */
+  homeSPXfip: number | null;
+  awaySPXfip: number | null;
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -686,6 +704,19 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       awaySPFip: fd?.awaySpFip ?? null,
       homeLineupWoba: fd?.homeLineupWoba ?? null,
       awayLineupWoba: fd?.awayLineupWoba ?? null,
+      // wave-521: 불펜FIP + Elo + WAR + SFR + 최근폼 + xFIP 직접 대결 배지용
+      homeBullpenFip: fd?.homeBullpenFip ?? null,
+      awayBullpenFip: fd?.awayBullpenFip ?? null,
+      homeElo: eloMap.get(homeCode) ?? null,
+      awayElo: eloMap.get(awayCode) ?? null,
+      homeWar: fd?.homeWar ?? null,
+      awayWar: fd?.awayWar ?? null,
+      homeSfr: fd?.homeSfr ?? null,
+      awaySfr: fd?.awaySfr ?? null,
+      homeRecentForm: fd?.homeRecentForm ?? null,
+      awayRecentForm: fd?.awayRecentForm ?? null,
+      homeSPXfip: fd?.homeSpXfip ?? null,
+      awaySPXfip: fd?.awaySpXfip ?? null,
     });
   }
   return result;
@@ -2772,7 +2803,7 @@ export default async function AnalysisIndexPage() {
                                     </span>
                                   );
                                 })()}
-                                {/* wave-519: 구장 직접 대결 배지 — parkPf >= PARK_FACTOR_HITTER_MIN(105) 시 홈팀 유리(타자 친화), <= PARK_FACTOR_PITCHER_MAX(95) 시 원정팀 유리(투수 친화) · 10팩터 배지 이번 주 카드 완성 */}
+                                {/* wave-519: 구장 직접 대결 배지 — parkPf >= PARK_FACTOR_HITTER_MIN(105) 시 홈팀 유리(타자 친화), <= PARK_FACTOR_PITCHER_MAX(95) 시 원정팀 유리(투수 친화) */}
                                 {(() => {
                                   const pf = KBO_TEAMS[g.homeCode]?.parkPf;
                                   if (pf === undefined) return null;
@@ -2788,6 +2819,102 @@ export default async function AnalysisIndexPage() {
                                         : 'text-orange-500 dark:text-orange-400'
                                     }`}>
                                       구장 {favoredName} {parkType}
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-521: 불펜FIP 직접 대결 배지 — |ΔFIP| >= BULLPEN_FIP_DIFF_MIN(1.0) 시 우위 팀명 + 격차 표시 */}
+                                {g.homeBullpenFip != null && g.awayBullpenFip != null && (() => {
+                                  const bullpenDelta = g.homeBullpenFip - g.awayBullpenFip;
+                                  if (Math.abs(bullpenDelta) < BULLPEN_FIP_DIFF_MIN) return null;
+                                  const bullpenFavoredHome = bullpenDelta < 0;
+                                  const favoredName = shortTeamName(bullpenFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      bullpenFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      불펜 {favoredName} △{Math.abs(bullpenDelta).toFixed(1)}
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-521: Elo 직접 대결 배지 — |ΔElo| >= ELO_GAP_STRONG(50) 시 우위 팀명 + 격차 표시 */}
+                                {g.homeElo != null && g.awayElo != null && (() => {
+                                  const eloDelta = g.homeElo - g.awayElo;
+                                  if (Math.abs(eloDelta) < ELO_GAP_STRONG) return null;
+                                  const eloFavoredHome = eloDelta > 0;
+                                  const favoredName = shortTeamName(eloFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      eloFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      Elo {favoredName} △{Math.round(Math.abs(eloDelta))}
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-521: WAR 직접 대결 배지 — |ΔWAR| >= WAR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 */}
+                                {g.homeWar != null && g.awayWar != null && (() => {
+                                  const warDelta = g.homeWar - g.awayWar;
+                                  if (Math.abs(warDelta) < WAR_DUEL_MIN) return null;
+                                  const warFavoredHome = warDelta > 0;
+                                  const favoredName = shortTeamName(warFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      warFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      WAR {favoredName} △{Math.abs(warDelta).toFixed(1)}
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-521: 수비SFR 직접 대결 배지 — |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 */}
+                                {g.homeSfr != null && g.awaySfr != null && (() => {
+                                  const sfrDelta = g.homeSfr - g.awaySfr;
+                                  if (Math.abs(sfrDelta) < SFR_DUEL_MIN) return null;
+                                  const sfrFavoredHome = sfrDelta > 0;
+                                  const favoredName = shortTeamName(sfrFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      sfrFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      SFR {favoredName} △{Math.abs(sfrDelta).toFixed(1)}
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-521: 최근폼 직접 대결 배지 — |Δ폼| >= RECENT_FORM_DUEL_MIN(0.10) 시 우위 팀명 + 격차 표시 */}
+                                {g.homeRecentForm != null && g.awayRecentForm != null && (() => {
+                                  const formDelta = g.homeRecentForm - g.awayRecentForm;
+                                  if (Math.abs(formDelta) < RECENT_FORM_DUEL_MIN) return null;
+                                  const formFavoredHome = formDelta > 0;
+                                  const favoredName = shortTeamName(formFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      formFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      폼 {favoredName} △{(Math.abs(formDelta) * 100).toFixed(0)}%
+                                    </span>
+                                  );
+                                })()}
+                                {/* wave-521: xFIP 직접 대결 배지 — |ΔxFIP| >= SP_XFIP_DUEL_MIN(0.5) 시 우위 팀명 + 격차 표시 · 이번 주 남은 경기 카드 10팩터 배지 완성 */}
+                                {g.homeSPXfip != null && g.awaySPXfip != null && (() => {
+                                  const xfipDelta = g.homeSPXfip - g.awaySPXfip;
+                                  if (Math.abs(xfipDelta) < SP_XFIP_DUEL_MIN) return null;
+                                  const xfipFavoredHome = xfipDelta < 0;
+                                  const favoredName = shortTeamName(xfipFavoredHome ? g.homeCode : g.awayCode);
+                                  return (
+                                    <span className={`text-[10px] font-medium ml-1 ${
+                                      xfipFavoredHome
+                                        ? 'text-brand-500 dark:text-brand-400'
+                                        : 'text-orange-500 dark:text-orange-400'
+                                    }`}>
+                                      xFIP {favoredName} △{Math.abs(xfipDelta).toFixed(1)}
                                     </span>
                                   );
                                 })()}
