@@ -1,3 +1,18 @@
+## v0.5.61.15 — 2026-07-20 (cycle 1894, wave-525: 이번 주 남은 경기 수렴 픽 복수 강조)
+
+### feat(analysis): wave-525 — 이번 주 남은 경기 수렴 픽 복수 강조 (cycle 1894)
+
+- `FACTOR_PICK_STRONG(8)` 이상 모든 예정 경기를 강조 — TOP픽(amber) + 기타 강수렴(brand) 3-tier 구분
+  - TOP픽(`★ TOP픽`): amber border + ring, amber 배지 (wave-523 유지)
+  - 강수렴 픽(`⚡ 픽`): brand border, brand 배지 (wave-525 신규)
+  - 일반 경기: 기존 gray border (변경 없음)
+- 섹션 헤더에 `수렴 픽 N개 예정` 카운트 배지 추가 (강수렴 픽 ≥ 1 시)
+- `strongUpcomingPickGameIds` (Set) + `strongUpcomingPickCount` (number) 로직 추가
+- wave-525 테스트 추가 (`wave-525-upcoming-strong-pick-multi-highlight.test.ts`) — 13 PASS
+- v0.5.61.15
+
+---
+
 ## v0.5.61.14 — 2026-07-20 (cycle 1892, wave-523: 이번 주 남은 경기 수렴 TOP 픽 배지)
 
 ### feat(analysis): wave-523 — 이번 주 남은 경기 수렴 TOP 픽 배지 (cycle 1892)

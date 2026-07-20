@@ -1093,6 +1093,14 @@ export default async function AnalysisIndexPage() {
     .sort((a, b) => Math.abs(b.convergenceNetScore!) - Math.abs(a.convergenceNetScore!))
     .at(0)?.gameId ?? null;
 
+  // wave-525: 강수렴 픽 복수 후보 Set — FACTOR_PICK_STRONG 이상 모든 경기 (TOP픽 포함)
+  const strongUpcomingPickGameIds = new Set(
+    thisWeekRemainingGames
+      .filter((g) => g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_STRONG)
+      .map((g) => g.gameId)
+  );
+  const strongUpcomingPickCount = strongUpcomingPickGameIds.size;
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-6">
       <Breadcrumb items={[{ label: 'AI 분석' }]} />
@@ -2667,7 +2675,15 @@ export default async function AnalysisIndexPage() {
             <h2 id="this-week-remaining-title" className="text-xl font-bold">
               📆 이번 주 남은 경기
             </h2>
-            <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
+            {/* wave-525: 강수렴 픽 복수 카운트 배지 */}
+            <div className="flex items-center gap-2">
+              {strongUpcomingPickCount > 0 && (
+                <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+                  수렴 픽 {strongUpcomingPickCount}개 예정
+                </span>
+              )}
+              <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
+            </div>
           </div>
           <div className="space-y-4">
             {groupUpcomingByDate(thisWeekRemainingGames).map(({ date, games: dayGames }) => {
@@ -2703,13 +2719,17 @@ export default async function AnalysisIndexPage() {
                         : winPct;
                       // wave-523: 이번 주 수렴 TOP 픽 배지
                       const isTopUpcomingPick = topUpcomingPickGameId !== null && g.gameId === topUpcomingPickGameId;
+                      // wave-525: 강수렴 픽 (TOP픽 제외 FACTOR_PICK_STRONG 이상)
+                      const isStrongUpcomingPick = !isTopUpcomingPick && strongUpcomingPickGameIds.has(g.gameId);
                       return (
                         <li key={g.gameId}>
                           <Link href={`/analysis/game/${g.gameId}`} className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
                             <div className={`flex items-center justify-between rounded-xl transition-colors px-3 py-2.5 text-sm ${
                               isTopUpcomingPick
                                 ? 'bg-white dark:bg-[var(--color-surface-card)] border border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30'
-                                : 'bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-300 dark:hover:border-brand-600'
+                                : isStrongUpcomingPick
+                                  ? 'bg-white dark:bg-[var(--color-surface-card)] border border-brand-300 dark:border-brand-700/60'
+                                  : 'bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-300 dark:hover:border-brand-600'
                             }`}>
                               <div className="min-w-0 flex-1">
                                 <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
@@ -2720,10 +2740,16 @@ export default async function AnalysisIndexPage() {
                                     {g.gameTime.slice(0, 5)}
                                     {/* wave-523: 이번 주 수렴 TOP 픽 배지 — |convergenceNetScore| 최대 예정 경기 */}
                                     {isTopUpcomingPick && <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ TOP픽</span>}
+                                    {/* wave-525: 강수렴 픽 배지 — TOP픽 외 FACTOR_PICK_STRONG 이상 */}
+                                    {isStrongUpcomingPick && <span className="ml-1.5 text-brand-500 dark:text-brand-400 font-semibold not-italic">⚡ 픽</span>}
                                   </p>
                                 )}
                                 {!g.gameTime && isTopUpcomingPick && (
                                   <p className="text-xs text-amber-500 dark:text-amber-400 mt-0.5 font-semibold">★ TOP픽</p>
+                                )}
+                                {/* wave-525: 게임시간 없는 경우 강수렴 픽 배지 */}
+                                {!g.gameTime && isStrongUpcomingPick && (
+                                  <p className="text-xs text-brand-500 dark:text-brand-400 mt-0.5 font-semibold">⚡ 픽</p>
                                 )}
                               </div>
                               <div className="ml-3 shrink-0 text-right">
