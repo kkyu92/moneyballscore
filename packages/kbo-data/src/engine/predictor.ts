@@ -81,11 +81,13 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
   );
 
   // 6. WAR (높을수록 좋음)
-  factors.war = normalize(
-    input.homeTeamStats.totalWar,
-    input.awayTeamStats.totalWar,
-    true
-  );
+  // totalWar=0 on one side = Fancy Stats top-50 limit data gap, not genuine 0.
+  // Asymmetric zero → comparison unfair → neutral (cycle 1904, wave-533).
+  const homeWar = input.homeTeamStats.totalWar;
+  const awayWar = input.awayTeamStats.totalWar;
+  factors.war = (homeWar > 0 && awayWar > 0)
+    ? normalize(homeWar, awayWar, true)
+    : 0.5;
 
   // 7. 상대전적 (홈팀 승률)
   const h2hTotal = input.headToHead.wins + input.headToHead.losses;
