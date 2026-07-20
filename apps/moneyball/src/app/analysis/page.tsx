@@ -94,7 +94,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1013,7 +1013,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1036,6 +1036,8 @@ export default async function AnalysisIndexPage() {
     getConvergencePickStreak(FACTOR_PICK_STRONG),
     // wave-554: 강수렴 픽 시즌 최장 streak — 현재 streak 비교 컨텍스트
     getConvergencePickBestStreak(),
+    // wave-557: 강수렴 픽 팀별 시즌 성적 — 팀이 강수렴 픽으로 지목됐을 때 실제 승률
+    getConvergencePickTeamStats(),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2871,6 +2873,28 @@ export default async function AnalysisIndexPage() {
                   )}
                 </span>
               ))}
+            </div>
+          )}
+          {/* wave-557: 강수렴 픽 팀별 시즌 성적 — 팀이 강수렴 픽으로 지목됐을 때 실제 승률 (CONVERGENCE_TEAM_STATS_MIN_PICKS 경기 이상) */}
+          {convergenceTeamStats.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
+              <span className="text-xs text-gray-500 dark:text-gray-400">🏅 팀별 수렴 적중:</span>
+              {convergenceTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
+                const total = stat.wins + stat.losses;
+                const pct = Math.round(stat.wins / total * 100);
+                return (
+                  <span
+                    key={stat.teamCode}
+                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 강수렴 픽 ${total}경기`}
+                  >
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{shortTeamName(stat.teamCode)}</span>
+                    <span className={`tabular-nums ${pct >= 60 ? 'text-green-600 dark:text-green-400' : pct <= 40 ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                      {pct}%
+                    </span>
+                  </span>
+                );
+              })}
             </div>
           )}
           {/* wave-539: 이번 주 강수렴 픽 미리보기 — TOP픽 우선, 나머지 수렴 강도 순 compact 카드 */}

@@ -1,3 +1,15 @@
+## v0.5.61.30 — 2026-07-21 (cycle 1931, wave-557: 강수렴 픽 팀별 시즌 성적)
+
+### feat(analysis): wave-557 — 강수렴 픽 팀별 시즌 성적 배지 (cycle 1931)
+
+**신규: 강수렴 픽 팀별 시즌 적중 현황**
+- `convergenceRecord.ts`: `computeConvergenceTeamStats()` (순수 함수) + `getConvergencePickTeamStats()` 추가
+- `packages/shared`: `CONVERGENCE_TEAM_STATS_MIN_PICKS=3` 상수 추가
+- `analysis/page.tsx`: wave-557 팀별 수렴 적중 배지 — 시즌 전체 강수렴 픽 팀별 W/L + 승률(%) 색상 코드
+- 테스트: `wave-557-convergence-pick-team-stats.test.ts` 9 cases (집계 정확성 / 정렬 / minPicks 필터)
+
+---
+
 ## v0.5.61.29 — 2026-07-21 (cycle 1930, op-analysis lite: CE-Accuracy Trap 패턴 박제)
 
 ### operational-analysis (lite): cycle 1930 — v1.8 성과 측정 + CE 패턴 추출
