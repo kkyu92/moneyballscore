@@ -3,18 +3,17 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe:
+// Sitemap wireframe (cycle 1929 갱신 — noindex 2건 제거: /v2-shadow-monitor, /accuracy/shadow):
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
 // │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
 // │ /         /picks    /standings /reviews   /method.. /mlb      /lotto/.. │
 // │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/ar │
 // │ /accuracy            /players   /reviews/m /glossary /mlb/team           │
-// │ /dashboard           /matchup   /reviews/. /v2-shad. /mlb/play..         │
-// │ /insights                        /seasons   /acc/shad /mlb/wc..           │
-// │ /predictions                                /change.. /mlb/post..         │
-// │ /calendar                                   /about                       │
-// │                                             /search                      │
+// │ /dashboard           /matchup   /reviews/. /change.. /mlb/play..         │
+// │ /insights                        /seasons   /about    /mlb/fact..         │
+// │ /predictions                                /search   /mlb/wc..           │
+// │ /calendar                                             /mlb/post..         │
 // └──────────────────────────────────────────────────────────────────────────┘
 //   Desktop (≥ lg, 1024px) : 5 column grid (always expanded, 7 column wrap to 2 row)
 //   Tablet  (≥ sm, 640px)  : 3 column grid
@@ -68,8 +67,6 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/methodology", label: "예측 방법론" },
       { href: "/guide", label: "사용 가이드" },
       { href: "/glossary", label: "용어 사전" },
-      { href: "/v2-shadow-monitor", label: "v2 섀도우 모니터" },
-      { href: "/accuracy/shadow", label: "Shadow 적중률" },
       { href: "/changelog", label: "변경 로그" },
       { href: "/about", label: "소개" },
       { href: "/search", label: "검색" },
