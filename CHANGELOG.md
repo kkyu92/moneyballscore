@@ -1,3 +1,14 @@
+## v0.5.61.18 — 2026-07-20 (cycle 1907, wave-536: factor-explanations WAR=0 data gap guard)
+
+### fix(context): wave-536 — factor-explanations WAR=0 data gap guard (cycle 1907)
+
+- `buildGameOverview`: `homeWar=0 || awayWar=0` 시 "전력 우세" 태그 오출력 차단
+- `explainFactor` WAR: WAR=0 팀 → "XXX WAR 미집계 — 예측에서 중립 처리됨." 내러티브
+- wave-536 테스트 7 PASS
+- v0.5.61.18
+
+---
+
 ## v0.5.61.17 — 2026-07-20 (cycle 1906, wave-535: WAR 데이터 갭 guard — computeCompositeDuel WAR=0 UI 일치)
 
 ### fix(context): wave-535 — WAR 데이터 갭 guard (computeCompositeDuel WAR=0, cycle 1906)
