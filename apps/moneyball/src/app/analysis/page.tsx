@@ -2751,6 +2751,54 @@ export default async function AnalysisIndexPage() {
               ))}
             </div>
           )}
+          {/* wave-539: 이번 주 강수렴 픽 미리보기 — TOP픽 우선, 나머지 수렴 강도 순 compact 카드 */}
+          {strongUpcomingPickCount > 0 && (() => {
+            const strongPickGames = thisWeekRemainingGames
+              .filter(g => strongUpcomingPickGameIds.has(g.gameId))
+              .sort((a, b) => {
+                if (a.gameId === topUpcomingPickGameId) return -1;
+                if (b.gameId === topUpcomingPickGameId) return 1;
+                return Math.abs(b.convergenceNetScore!) - Math.abs(a.convergenceNetScore!);
+              });
+            return (
+              <div className="mb-4 space-y-1.5">
+                {strongPickGames.map(g => {
+                  const isTop = g.gameId === topUpcomingPickGameId;
+                  const [, mm, dd] = g.gameDate.split('-');
+                  const dateShort = `${Number(mm)}.${Number(dd)}`;
+                  const favoredHome = (g.convergenceNetScore ?? 0) > 0;
+                  const favoredCode = favoredHome ? g.homeCode : g.awayCode;
+                  return (
+                    <Link
+                      key={g.gameId}
+                      href={`/analysis/game/${g.gameId}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
+                        isTop
+                          ? 'bg-amber-50 dark:bg-amber-900/25 border border-amber-200 dark:border-amber-700/40'
+                          : 'bg-brand-50 dark:bg-brand-900/25 border border-brand-200 dark:border-brand-800/40'
+                      }`}
+                    >
+                      <span className={`shrink-0 ${isTop ? 'text-amber-500 dark:text-amber-400' : 'text-brand-500 dark:text-brand-400'}`}>
+                        {isTop ? '★' : '⚡'}
+                      </span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100 shrink-0">
+                        {shortTeamName(g.awayCode)} @ {shortTeamName(g.homeCode)}
+                      </span>
+                      <span className="text-gray-400 dark:text-gray-500 shrink-0 tabular-nums">{dateShort}</span>
+                      <span className={`font-medium shrink-0 ${isTop ? 'text-amber-600 dark:text-amber-400' : 'text-brand-600 dark:text-brand-400'}`}>
+                        ↗ {shortTeamName(favoredCode)}
+                      </span>
+                      {g.gameOverviewSummary && (
+                        <span className="text-gray-500 dark:text-gray-400 truncate min-w-0">
+                          {g.gameOverviewSummary}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })()}
           <div className="space-y-4">
             {groupUpcomingByDate(thisWeekRemainingGames).map(({ date, games: dayGames }) => {
               const [, mm, dd] = date.split('-');

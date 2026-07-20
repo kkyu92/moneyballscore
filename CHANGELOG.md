@@ -1,3 +1,15 @@
+## v0.5.61.21 — 2026-07-20 (cycle 1910, wave-539: 이번 주 강수렴 픽 미리보기 블록)
+
+### feat(analysis): wave-539 — 이번 주 남은 경기 강수렴 픽 미리보기 블록 (cycle 1910)
+
+- `analysis/page.tsx` "이번 주 남은 경기" 섹션: 날짜 그룹 위에 강수렴 픽 compact 카드 추가
+- `strongUpcomingPickGameIds` 필터 + TOP픽 우선 정렬 (topUpcomingPickGameId 비교)
+- 각 카드: ★/⚡ 배지 + 팀명 + 날짜(mm.dd) + ↗ 수렴 방향 팀명 + gameOverviewSummary
+- TOP픽 amber / 강수렴 픽 brand 색상 분기
+- `strongUpcomingPickCount > 0` 조건 가드 (수렴 픽 없는 날 빈 블록 차단)
+- 테스트 9건 추가 (wave-539-upcoming-pick-preview.test.ts)
+- v0.5.61.21
+
 ## v0.5.61.20 — 2026-07-20 (cycle 1909, wave-538: summary 생성 조건 FACTOR_PICK_STRONG 정합)
 
 ### fix(context): wave-538 — gameOverviewSummary 생성 조건 FACTOR_PICK_STRONG(8) 정합 (cycle 1909)
