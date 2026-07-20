@@ -1,3 +1,15 @@
+## v0.5.61.12 — 2026-07-20 (cycle 1885, wave-518: SP FIP·wOBA 이번 주 남은 경기 카드 JSDoc callsite sync)
+
+### fix(context): wave-518 — SP_FIP_DUEL_MIN·LINEUP_WOBA_DUEL_MIN JSDoc wave-517 이번 주 남은 경기 카드 callsite 미박제 수정 (cycle 1885)
+
+- wave-517 가 analysis/page.tsx 이번 주 남은 경기 카드에 SP_FIP_DUEL_MIN·LINEUP_WOBA_DUEL_MIN 신규 callsite 추가했으나 JSDoc 미박제
+  - `SP_FIP_DUEL_MIN`: "변경 시" wave-363/446/499 → wave-363/446/499/517 + wave-517 callsite 주석 추가
+  - `LINEUP_WOBA_DUEL_MIN`: "변경 시" wave-355/442/501 → wave-355/442/501/517 + wave-517 callsite 주석 추가
+- wave-518 테스트 추가 (`wave-518-upcoming-duel-badge-jsdoc-callsite-sync.test.ts`) — 11 PASS
+- v0.5.61.12
+
+---
+
 ## v0.5.61.11 — 2026-07-20 (cycle 1883, wave-516: H2H·구장 직접 대결 배지 JSDoc callsite sync)
 
 ### fix(context): wave-516 — H2H_DOMINANT_RATE/H2H_WEAK_RATE/PARK_FACTOR_HITTER_MIN/PARK_FACTOR_PITCHER_MAX JSDoc wave-515 callsite 미박제 수정 (cycle 1883)

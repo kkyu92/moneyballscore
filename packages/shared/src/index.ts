@@ -2565,8 +2565,9 @@ export const TOP_STAT_PICK_EDGE_MIN = 0.05;
  * |homeLineupWoba - awayLineupWoba| ≥ 본 값 시 "타선 홈/원정 강세" 태그 표시.
  * 0.020 = 20 wOBA 포인트 = KBO 리그 내 타선 유의미한 차이 수준
  * (LINEUP_WOBA_WEAK_TAG~LINEUP_WOBA_STRONG_TAG 범위 0.040 의 절반).
- * 변경 시 analysis/page.tsx wave-355/442/501 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-355/442/501/517 + computeCompositeDuel.ts callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
+ * wave-517: analysis/page.tsx 이번 주 남은 경기 카드 callsite 추가 (cycle 1885).
  */
 export const LINEUP_WOBA_DUEL_MIN = 0.020;
 
@@ -2575,8 +2576,9 @@ export const LINEUP_WOBA_DUEL_MIN = 0.020;
  * |awaySPFip - homeSPFip| ≥ 본 값 시 "선발 {팀} 강세" 배지 표시.
  * FIP 낮을수록 유리. 0.5 = SP_FIP_STRONG(3.5)~SP_FIP_WEAK(4.5) 범위(1.0)의 절반.
  * 선발 투수 1인 기준 FIP 0.5 차 = KBO 리그 에이스-평균 경계 수준.
- * 변경 시 analysis/page.tsx wave-363/446/499 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-363/446/499/517 + computeCompositeDuel.ts callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
+ * wave-517: analysis/page.tsx 이번 주 남은 경기 카드 callsite 추가 (cycle 1885).
  */
 export const SP_FIP_DUEL_MIN = 0.5;
 
