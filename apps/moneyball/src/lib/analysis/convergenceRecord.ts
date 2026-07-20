@@ -147,8 +147,10 @@ export function computeConvergenceStreak(
   return { type: firstWon ? 'win' : 'loss', length: len };
 }
 
+// wave-555: default FACTOR_PICK_STRONG(8) — wave-552 callsite 동기
+// (wave-552 analysis/page.tsx getConvergencePickStreak(FACTOR_PICK_STRONG) 명시, wave-554 getConvergencePickBestStreak default 동일 기준)
 export async function getConvergencePickStreak(
-  minFactors = FACTOR_PICK_MIN_FACTORS,
+  minFactors = FACTOR_PICK_STRONG,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
   const cutoff = new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
     .toISOString()
@@ -159,7 +161,7 @@ export async function getConvergencePickStreak(
 
 // wave-554: 강수렴 픽 시즌 최장 streak — 순수 함수 (테스트 가능)
 // results: 최신순 정렬된 경기 결과 배열 (true=강수렴 방향 적중)
-// 반환: 시즌 전체에서 가장 긴 연속 streak (승 or 패 중 더 긴 것), 2경기 미만이면 null
+// 반환: 시즌 전체에서 가장 긴 연속 streak (승 or 패 중 더 긴 것, 동점 시 win 우선), 2경기 미만이면 null
 export function computeConvergenceBestStreak(
   results: boolean[],
 ): { type: 'win' | 'loss'; length: number } | null {

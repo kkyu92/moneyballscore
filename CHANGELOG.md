@@ -1,3 +1,13 @@
+## v0.5.61.28 — 2026-07-21 (cycle 1927, wave-555: getConvergencePickStreak default param 동기)
+
+### fix(context): wave-555 — getConvergencePickStreak default param 동기 guard test (cycle 1927)
+
+- `convergenceRecord.ts` `getConvergencePickStreak` default `FACTOR_PICK_MIN_FACTORS`(7) → `FACTOR_PICK_STRONG`(8) 정합
+  (wave-552 callsite `analysis/page.tsx getConvergencePickStreak(FACTOR_PICK_STRONG)` 명시, wave-554 `getConvergencePickBestStreak` default 동일 기준)
+- `computeConvergenceBestStreak` comment: "동점 시 win 우선" 명시 추가 (wave-552 테스트 불변 정합)
+- 테스트 6건 추가 (`wave-555-convergence-streak-default-guard.test.ts`)
+- v0.5.61.28
+
 ## v0.5.61.27 — 2026-07-20 (cycle 1926, wave-554: 강수렴 픽 시즌 최장 streak 기록)
 
 ### feat(analysis): wave-554 — 강수렴 픽 시즌 최장 streak 기록 (cycle 1926)
