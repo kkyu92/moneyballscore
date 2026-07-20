@@ -1,3 +1,17 @@
+## v0.5.61.10 — 2026-07-20 (cycle 1881, wave-514: H2H/park factor JSDoc computeCompositeDuel.ts callsite sync)
+
+### fix(context): wave-514 — H2H_DOMINANT_RATE/H2H_WEAK_RATE/PARK_FACTOR_HITTER_MIN/PARK_FACTOR_PITCHER_MAX JSDoc computeCompositeDuel.ts callsite 누락 수정 (cycle 1881)
+
+- wave-509 JSDoc sync 에서 누락된 4개 상수 computeCompositeDuel.ts callsite 박제
+  - `H2H_DOMINANT_RATE`: 변경 시 라인 → computeCompositeDuel.ts callsite 추가
+  - `H2H_WEAK_RATE`: 변경 시 라인 → computeCompositeDuel.ts callsite 추가
+  - `PARK_FACTOR_HITTER_MIN`: 변경 시 라인 + computeCompositeDuel.ts callsite 추가
+  - `PARK_FACTOR_PITCHER_MAX`: 동일 (PARK_FACTOR_HITTER_MIN JSDoc 공유)
+- wave-514 테스트 추가 (`wave-514-h2h-park-jsdoc-callsite-sync.test.ts`) — 12 PASS
+- v0.5.61.10
+
+---
+
 ## v0.5.61.9 — 2026-07-20 (cycle 1876, wave-509: 6-constant JSDoc computeCompositeDuel.ts callsite sync)
 
 ### fix(context): wave-509 — LINEUP_WOBA_DUEL_MIN/SFR_DUEL_MIN/BULLPEN_FIP_DIFF_MIN/SP_FIP_DUEL_MIN/SP_XFIP_DUEL_MIN/RECENT_FORM_DUEL_MIN JSDoc computeCompositeDuel.ts callsite 누락 수정 (cycle 1876)
