@@ -1,3 +1,15 @@
+## v0.5.61.25 — 2026-07-20 (cycle 1924, wave-552: 강수렴 픽 연속 streak 배지)
+
+### feat(analysis): wave-552 — 강수렴 픽 연속 streak 배지 (cycle 1924)
+
+- `convergenceRecord.ts` `computeConvergenceStreak(results: boolean[])` 순수 함수 추가
+  (최신순 boolean[] → `{ type: 'win' | 'loss'; length: number } | null`, 2연속 미만 → null)
+- `getConvergencePickStreak(minFactors)` async 함수 추가 — DB 조회 후 `computeConvergenceStreak` 호출
+- `analysis/page.tsx` 이번 주 남은 경기 헤더: `convergenceStreak !== null` 시 배지 표시
+  (`🔥 N연승` amber/warm, `❄️ N연패` sky/cool — streak 2 이상만 표시)
+- 테스트 16건 추가 (`wave-552-convergence-streak.test.ts`)
+- v0.5.61.25
+
 ## v0.5.61.24 — 2026-07-20 (cycle 1922, wave-550: 어제 경기 강수렴 픽 배지)
 
 ### feat(analysis): wave-550 — 어제 경기 강수렴 픽 배지 (cycle 1922)
