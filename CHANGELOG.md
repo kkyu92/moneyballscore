@@ -1,3 +1,12 @@
+## v0.5.61.22 — 2026-07-20 (cycle 1911, wave-540: groupByDate 더블 map chain fix)
+
+### fix(context): wave-540 — groupByDate 더블 map chain 제거 (cycle 1911)
+
+- `analysis/page.tsx` `groupByDate`: 불필요한 중간 `.map(([date, gs]) => ({ date, gs: gs }))` 제거
+- 단일 `.map(([date, gs]) => ({ date, games: gs }))` — `groupUpcomingByDate` 와 동일 패턴
+- 테스트 `wave-540-group-by-date-map-chain.test.ts` 3건 추가 (silent drift guard)
+- v0.5.61.22
+
 ## v0.5.61.21 — 2026-07-20 (cycle 1910, wave-539: 이번 주 강수렴 픽 미리보기 블록)
 
 ### feat(analysis): wave-539 — 이번 주 남은 경기 강수렴 픽 미리보기 블록 (cycle 1910)

@@ -768,8 +768,7 @@ function groupByDate(games: ThisWeekGameCard[]): Array<{ date: string; games: Th
   }
   return Array.from(map.entries())
     .sort(([a], [b]) => b.localeCompare(a))
-    .map(([date, gs]) => ({ date, gs: gs }))
-    .map(({ date, gs }) => ({ date, games: gs }));
+    .map(([date, gs]) => ({ date, games: gs }));
 }
 
 function groupUpcomingByDate(games: UpcomingScheduledGame[]): Array<{ date: string; games: UpcomingScheduledGame[] }> {
