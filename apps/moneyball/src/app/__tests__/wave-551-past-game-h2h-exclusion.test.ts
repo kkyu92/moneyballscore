@@ -17,11 +17,14 @@ import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 // 불변 (주석 동기 wave-549 패턴):
 //   getYesterdayGames  comment: "(ThisWeekPreviousGames 패턴 동일, H2H 제외)"  [wave-551 fix]
 //   getThisWeekPreviousGames comment: "(H2H 제외)"                             [wave-405 기존]
+//
+// 팀 코드: SSG 랜더스 = SK (parkPf=105, 타자 친화)
+//          한화 이글스 = HH (parkPf=101, 중립~약 타자)
+//          NC 다이노스 = NC (parkPf=100, 중립)
 
 describe('wave-551: 과거 경기 computeCompositeDuel H2H 제외 guard', () => {
   describe('H2H 필드 미전달 → h2h valid=false, validCount 최대 9', () => {
     it('h2hHomeWins/h2hAwayWins 미전달 → h2h 팩터 valid=false (validCount < 10)', () => {
-      // 10팩터 모두 데이터 있는 완전 케이스에서 h2h 미전달
       const withoutH2h = computeCompositeDuel({
         homeCode: 'LG',
         homeLineupWoba: 0.340,
@@ -94,7 +97,7 @@ describe('wave-551: 과거 경기 computeCompositeDuel H2H 제외 guard', () => 
     });
 
     it('H2H 미전달 → validCount <= 9 (10팩터 중 H2H 1개 제외)', () => {
-      // 올바른 SFR 범위 사용 (정수 단위)
+      // NC (창원, parkPf=100 중립) → park=null → validCount 최대 8
       const result = computeCompositeDuel({
         homeCode: 'NC',
         homeLineupWoba: 0.350,
@@ -115,16 +118,17 @@ describe('wave-551: 과거 경기 computeCompositeDuel H2H 제외 guard', () => 
         awayRecentForm: 1,
         // h2h 미전달 → H2H valid=false
       });
-      // H2H 제외 → validCount <= 9 (park 포함 여부 따라 8~9)
+      // H2H 제외 → validCount <= 9
       expect(result.validCount).toBeLessThanOrEqual(9);
     });
   });
 
   describe('과거 경기 배지 조건 — H2H 제외 최대 validCount=9', () => {
     it('H2H 미전달 → |netScore| <= 9 (H2H 없이 최대 9팩터 유효)', () => {
-      // SFR 올바른 범위(정수 단위) + 명확한 차이로 8~9팩터 홈 유리
+      // SK(SSG, parkPf=105 타자 친화) + 8 non-h2h 팩터 홈 유리 + park 홈 유리
+      // → validCount=9 (park 포함), netScore=9
       const result = computeCompositeDuel({
-        homeCode: 'SSG',
+        homeCode: 'SK',  // SSG 랜더스 (인천, parkPf=105 >= 105 → park=home)
         homeLineupWoba: 0.350,
         awayLineupWoba: 0.310,
         homeSfr: 35,
@@ -147,9 +151,9 @@ describe('wave-551: 과거 경기 computeCompositeDuel H2H 제외 guard', () => 
       expect(Math.abs(result.netScore)).toBeLessThanOrEqual(9);
     });
 
-    it('8팩터 홈 유리 + h2h 미전달 → |netScore| >= FACTOR_PICK_STRONG(8)', () => {
-      // SFR 올바른 범위(정수 단위) 사용
-      // HH(한화) 대전 구장: parkPf 확인 → 중립이면 validCount=8
+    it('8팩터 홈 유리 + h2h 미전달 → netScore >= FACTOR_PICK_STRONG(8)', () => {
+      // HH(한화, parkPf=101, 105 미만 → park=null)
+      // → 8팩터(wOBA/SFR/bullpenFIP/spFIP/xFIP/WAR/Elo/폼) 홈 유리, validCount=8
       const result = computeCompositeDuel({
         homeCode: 'HH',
         homeLineupWoba: 0.350,
@@ -169,11 +173,10 @@ describe('wave-551: 과거 경기 computeCompositeDuel H2H 제외 guard', () => 
         homeRecentForm: 9,
         awayRecentForm: 1,      // 폼 diff=8 >= RECENT_FORM_DUEL_MIN=0.10 → home
         // h2h 미전달 → 과거 경기 패턴
-        // park: HH(대전) parkPf 중립이면 park=null → validCount=8, netScore=8
-        //       hitter-friendly 이면 validCount=9, netScore=9
+        // park: HH parkPf=101 < 105 → park=null → validCount=8, netScore=8
       });
       if (result.validCount >= COMPOSITE_DUEL_MIN_VALID) {
-        // 8팩터 홈 유리 + park(중립/친화 무관) → netScore = homeWins >= 8
+        // 8팩터 전부 홈 유리 → netScore = 8 >= FACTOR_PICK_STRONG(8)
         expect(result.netScore).toBeGreaterThanOrEqual(FACTOR_PICK_STRONG);
       }
     });
