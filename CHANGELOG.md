@@ -1,3 +1,27 @@
+## v0.5.61.29 — 2026-07-21 (cycle 1930, op-analysis lite: CE-Accuracy Trap 패턴 박제)
+
+### operational-analysis (lite): cycle 1930 — v1.8 성과 측정 + CE 패턴 추출
+
+**현황 (2026-07-21 기준)**
+- v1.8 누적: n=205, acc=57.1%, Brier≈0.2518
+- 최근 50건: debate=null 100% (CREDIT_EXHAUSTED 6th recurrence 지속)
+- 최근 20건: 6/20 (30%) — CE fallback 심화 구간
+
+**패턴 P1: CE-Accuracy Trap (anti_pattern)**
+- 저확신(<0.3) n=26 acc=38.5% vs 고확신(≥0.5) n=47 acc=61.7% → 23.2pp 격차
+- CREDIT_EXHAUSTED → debate disabled → confidence 0.3 flat or quant noise → accuracy crash
+- 대응: 사용자 Anthropic 크레딧 충전 필요 (7th recurrence 예방)
+
+**패턴 P2: Debate-less Quant Degradation (ai_agent)**
+- debate_version=null 50/50 (최근 전체) — 순수 quant 구간 성능 격리 필요
+- CE 기간 별도 cohort 추적 (v1.8-credit-fail scoring_rule)
+
+**패턴 P3: Off-Day False Alarm (quality_guard)**
+- 7/20 games=0 → predict preds=0 (정상). alert 전 games count 교차 확인 필요
+- pipeline_runs.preds=0 단독 alert = off-day 오탐 위험
+
+---
+
 ## v0.5.61.28 — 2026-07-21 (cycle 1927, wave-555: getConvergencePickStreak default param 동기)
 
 ### fix(context): wave-555 — getConvergencePickStreak default param 동기 guard test (cycle 1927)
