@@ -82,15 +82,15 @@ describe('wave-557: computeConvergenceTeamStats', () => {
         { favoredTeam: 'LG' as const, won: true },
         { favoredTeam: 'LG' as const, won: false },
         { favoredTeam: 'LG' as const, won: false },
-        // SSG: 4경기
-        { favoredTeam: 'SSG' as const, won: true },
-        { favoredTeam: 'SSG' as const, won: true },
-        { favoredTeam: 'SSG' as const, won: true },
-        { favoredTeam: 'SSG' as const, won: false },
+        // SS(SSG): 4경기
+        { favoredTeam: 'SS' as const, won: true },
+        { favoredTeam: 'SS' as const, won: true },
+        { favoredTeam: 'SS' as const, won: true },
+        { favoredTeam: 'SS' as const, won: false },
       ];
       const stats = computeConvergenceTeamStats(results, 3);
       expect(stats[0].teamCode).toBe('LG');   // 5경기
-      expect(stats[1].teamCode).toBe('SSG');  // 4경기
+      expect(stats[1].teamCode).toBe('SS');   // 4경기
       expect(stats[2].teamCode).toBe('KT');   // 3경기
     });
 
