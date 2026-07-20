@@ -1,3 +1,13 @@
+## v0.5.61.26 — 2026-07-20 (cycle 1925, wave-553: fetchConvergencePickResults 중복 추출)
+
+### fix(context): wave-553 — fetchConvergencePickResults 중복 추출 guard test (cycle 1925)
+
+- `convergenceRecord.ts`: `getRecentConvergencePickRecord` + `getConvergencePickStreak` 공유 DB 쿼리 + 루프 로직 (~80줄) → `fetchConvergencePickResults` private helper 추출
+- `getRecentConvergencePickRecord`: helper 위임 후 `wins = filter(r=>r).length` / `losses = length - wins` (명시적 불변)
+- `getConvergencePickStreak`: helper 위임 후 `computeConvergenceStreak` 호출
+- 테스트 4건 추가 (`wave-553-convergence-pick-results.test.ts`)
+- v0.5.61.26
+
 ## v0.5.61.25 — 2026-07-20 (cycle 1924, wave-552: 강수렴 픽 연속 streak 배지)
 
 ### feat(analysis): wave-552 — 강수렴 픽 연속 streak 배지 (cycle 1924)
