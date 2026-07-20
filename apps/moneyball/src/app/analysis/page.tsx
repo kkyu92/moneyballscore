@@ -74,6 +74,7 @@ import {
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   CONVERGENCE_RECORD_RECENT_LIMIT,
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
+  CONVERGENCE_HOME_AWAY_MIN_PICKS,
   KBO_SEASON_START_DATE,
   KBO_SEASON_YEAR,
   TOPFACTOR_STRONG_IMPACT,
@@ -94,7 +95,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1013,7 +1014,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1038,6 +1039,8 @@ export default async function AnalysisIndexPage() {
     getConvergencePickBestStreak(),
     // wave-557: 강수렴 픽 팀별 시즌 성적 — 팀이 강수렴 픽으로 지목됐을 때 실제 승률
     getConvergencePickTeamStats(),
+    // wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 홈 지목 vs 어웨이 지목 시 각각 실제 승률
+    getConvergencePickHomeAwaySplit(),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2897,6 +2900,38 @@ export default async function AnalysisIndexPage() {
               })}
             </div>
           )}
+          {/* wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 홈 지목(🏠) vs 어웨이 지목(✈️) 각 승률 비교 (CONVERGENCE_HOME_AWAY_MIN_PICKS 경기 이상) */}
+          {convergenceHomeAwaySplit !== null && (() => {
+            const homeTotal = convergenceHomeAwaySplit.home.wins + convergenceHomeAwaySplit.home.losses;
+            const awayTotal = convergenceHomeAwaySplit.away.wins + convergenceHomeAwaySplit.away.losses;
+            const homePct = Math.round(convergenceHomeAwaySplit.home.wins / homeTotal * 100);
+            const awayPct = Math.round(convergenceHomeAwaySplit.away.wins / awayTotal * 100);
+            return (
+              <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
+                <span className="text-xs text-gray-500 dark:text-gray-400">🏟️ 홈/어웨이 수렴:</span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                  title={`홈팀 지목 ${homeTotal}경기: ${convergenceHomeAwaySplit.home.wins}승 ${convergenceHomeAwaySplit.home.losses}패 (${homePct}%)`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
+                  <span className={`tabular-nums font-medium ${homePct >= 60 ? 'text-green-600 dark:text-green-400' : homePct <= 40 ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                    {homePct}%
+                  </span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                  title={`어웨이팀 지목 ${awayTotal}경기: ${convergenceHomeAwaySplit.away.wins}승 ${convergenceHomeAwaySplit.away.losses}패 (${awayPct}%)`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
+                  <span className={`tabular-nums font-medium ${awayPct >= 60 ? 'text-green-600 dark:text-green-400' : awayPct <= 40 ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                    {awayPct}%
+                  </span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+                </span>
+              </div>
+            );
+          })()}
           {/* wave-539: 이번 주 강수렴 픽 미리보기 — TOP픽 우선, 나머지 수렴 강도 순 compact 카드 */}
           {strongUpcomingPickCount > 0 && (() => {
             const strongPickGames = thisWeekRemainingGames

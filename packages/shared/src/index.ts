@@ -2729,6 +2729,13 @@ export const UPCOMING_CONVERGENCE_TEAM_LIMIT = 5;
 export const CONVERGENCE_TEAM_STATS_MIN_PICKS = 3;
 
 /**
+ * wave-559: 강수렴 픽 홈/어웨이 분리 성적 최소 경기 수 임계.
+ * 홈 지목 또는 어웨이 지목 경기가 본 값 미만이면 표시 생략 (소표본 노이즈 차단).
+ * 변경 시 convergenceRecord.ts getConvergencePickHomeAwaySplit + analysis/page.tsx wave-559 callsite 동시 조정.
+ */
+export const CONVERGENCE_HOME_AWAY_MIN_PICKS = 5;
+
+/**
  * 최근폼 직접 대결 배지 최소 차이 임계 — wave-373 (cycle 1714).
  * |homeRecentForm - awayRecentForm| ≥ 본 값 시 "폼 {팀} 강세" 배지 표시.
  * 최근폼 = 최근 RECENT_FORM_GAMES(10) 경기 승률. 10pp 차 = 2경기 차 수준.

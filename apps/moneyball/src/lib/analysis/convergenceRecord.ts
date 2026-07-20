@@ -10,6 +10,7 @@ import {
   KBO_SEASON_START_DATE,
   PRODUCTION_COHORT_RULES,
   CONVERGENCE_TEAM_STATS_MIN_PICKS,
+  CONVERGENCE_HOME_AWAY_MIN_PICKS,
   type TeamCode,
   type SelectResult,
 } from '@moneyball/shared';
@@ -222,7 +223,7 @@ export function computeConvergenceTeamStats(
 async function fetchConvergencePickDetailedResults(
   cutoff: string,
   minFactors: number,
-): Promise<Array<{ favoredTeam: TeamCode; won: boolean }>> {
+): Promise<Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean }>> {
   const today = toKSTDateString();
   const supabase = await createClient();
   const gamesResult = (await supabase
@@ -250,7 +251,7 @@ async function fetchConvergencePickDetailedResults(
   const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults');
   if (!data) return [];
 
-  const results: Array<{ favoredTeam: TeamCode; won: boolean }> = [];
+  const results: Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean }> = [];
   for (const row of data as unknown as ConvergenceGameRow[]) {
     const pred = row.predictions?.[0];
     if (!pred || row.home_score === null || row.away_score === null) continue;
@@ -284,10 +285,39 @@ async function fetchConvergencePickDetailedResults(
     const favoredHome = duel.netScore > 0;
     const favoredTeam = favoredHome ? homeCode : awayCode;
     const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
-    results.push({ favoredTeam, won });
+    results.push({ favoredTeam, favoredHome, won });
   }
 
   return results;
+}
+
+// wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 순수 함수 (테스트 가능)
+// results: { favoredHome, won } 배열 (fetchConvergencePickDetailedResults 출력)
+// minPicks: 홈 또는 어웨이 지목 경기 수가 이 값 미만이면 null 반환 (소표본 노이즈 차단)
+export function computeConvergenceHomeAwaySplit(
+  results: Array<{ favoredHome: boolean; won: boolean }>,
+  minPicks = CONVERGENCE_HOME_AWAY_MIN_PICKS,
+): { home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null {
+  let homeWins = 0, homeLosses = 0, awayWins = 0, awayLosses = 0;
+  for (const r of results) {
+    if (r.favoredHome) {
+      if (r.won) homeWins++; else homeLosses++;
+    } else {
+      if (r.won) awayWins++; else awayLosses++;
+    }
+  }
+  if (homeWins + homeLosses < minPicks || awayWins + awayLosses < minPicks) return null;
+  return {
+    home: { wins: homeWins, losses: homeLosses },
+    away: { wins: awayWins, losses: awayLosses },
+  };
+}
+
+export async function getConvergencePickHomeAwaySplit(
+  minFactors = FACTOR_PICK_STRONG,
+): Promise<{ home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null> {
+  const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
+  return computeConvergenceHomeAwaySplit(results);
 }
 
 export async function getConvergencePickTeamStats(
