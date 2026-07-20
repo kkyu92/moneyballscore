@@ -2675,11 +2675,11 @@ export default async function AnalysisIndexPage() {
             <h2 id="this-week-remaining-title" className="text-xl font-bold">
               📆 이번 주 남은 경기
             </h2>
-            {/* wave-525: 강수렴 픽 복수 카운트 배지 */}
+            {/* wave-525: 강수렴 픽 복수 카운트 배지 · wave-527: pill badge 스타일 */}
             <div className="flex items-center gap-2">
               {strongUpcomingPickCount > 0 && (
-                <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">
-                  수렴 픽 {strongUpcomingPickCount}개 예정
+                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+                  ⚡ 수렴 픽 {strongUpcomingPickCount}개 예정
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
@@ -2726,9 +2726,9 @@ export default async function AnalysisIndexPage() {
                           <Link href={`/analysis/game/${g.gameId}`} className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
                             <div className={`flex items-center justify-between rounded-xl transition-colors px-3 py-2.5 text-sm ${
                               isTopUpcomingPick
-                                ? 'bg-white dark:bg-[var(--color-surface-card)] border border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30'
+                                ? 'bg-white dark:bg-[var(--color-surface-card)] border border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30 hover:border-amber-400 dark:hover:border-amber-600/70'
                                 : isStrongUpcomingPick
-                                  ? 'bg-white dark:bg-[var(--color-surface-card)] border border-brand-300 dark:border-brand-700/60'
+                                  ? 'bg-white dark:bg-[var(--color-surface-card)] border border-brand-300 dark:border-brand-700/60 hover:border-brand-400 dark:hover:border-brand-600'
                                   : 'bg-gray-50 dark:bg-[var(--color-surface)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-300 dark:hover:border-brand-600'
                             }`}>
                               <div className="min-w-0 flex-1">
@@ -2787,6 +2787,8 @@ export default async function AnalysisIndexPage() {
                                     })()}
                                   </p>
                                 )}
+                                {/* wave-517~521: 10팩터 직접 대결 배지 · wave-527: flex-wrap 컨테이너로 정렬 */}
+                                <div className="flex flex-wrap gap-x-1 gap-y-0.5 justify-end mt-1">
                                 {/* wave-517: SP FIP 직접 대결 배지 — |ΔFIP| >= SP_FIP_DUEL_MIN 시 우위 팀명 + 격차 표시 (가중치 1위 15%) */}
                                 {g.homeSPFip != null && g.awaySPFip != null && (() => {
                                   const spDelta = g.homeSPFip - g.awaySPFip;
@@ -2794,7 +2796,7 @@ export default async function AnalysisIndexPage() {
                                   const spFavoredHome = spDelta < 0;
                                   const favoredName = shortTeamName(spFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       spFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2810,7 +2812,7 @@ export default async function AnalysisIndexPage() {
                                   const wobaFavoredHome = wobaDelta > 0;
                                   const favoredName = shortTeamName(wobaFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       wobaFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2837,7 +2839,7 @@ export default async function AnalysisIndexPage() {
                                     ? [h2hHomeWins, h2hAwayWins]
                                     : [h2hAwayWins, h2hHomeWins];
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       h2hFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2856,7 +2858,7 @@ export default async function AnalysisIndexPage() {
                                   const favoredName = shortTeamName(parkFavoredHome ? g.homeCode : g.awayCode);
                                   const parkType = parkFavoredHome ? '타자친화' : '투수친화';
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       parkFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2872,7 +2874,7 @@ export default async function AnalysisIndexPage() {
                                   const bullpenFavoredHome = bullpenDelta < 0;
                                   const favoredName = shortTeamName(bullpenFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       bullpenFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2888,7 +2890,7 @@ export default async function AnalysisIndexPage() {
                                   const eloFavoredHome = eloDelta > 0;
                                   const favoredName = shortTeamName(eloFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       eloFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2904,7 +2906,7 @@ export default async function AnalysisIndexPage() {
                                   const warFavoredHome = warDelta > 0;
                                   const favoredName = shortTeamName(warFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       warFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2920,7 +2922,7 @@ export default async function AnalysisIndexPage() {
                                   const sfrFavoredHome = sfrDelta > 0;
                                   const favoredName = shortTeamName(sfrFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       sfrFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2936,7 +2938,7 @@ export default async function AnalysisIndexPage() {
                                   const formFavoredHome = formDelta > 0;
                                   const favoredName = shortTeamName(formFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       formFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2952,7 +2954,7 @@ export default async function AnalysisIndexPage() {
                                   const xfipFavoredHome = xfipDelta < 0;
                                   const favoredName = shortTeamName(xfipFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ml-1 ${
+                                    <span className={`text-[10px] font-medium ${
                                       xfipFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2961,6 +2963,7 @@ export default async function AnalysisIndexPage() {
                                     </span>
                                   );
                                 })()}
+                                </div>
                               </div>
                             </div>
                           </Link>
