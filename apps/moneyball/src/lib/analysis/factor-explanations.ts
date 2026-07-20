@@ -190,23 +190,30 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
       awayLabel = fmtWar(details.awayWar);
       homeLabel = fmtWar(details.homeWar);
       if (details.awayWar != null && details.homeWar != null) {
-        const diff = Math.abs(details.awayWar - details.homeWar);
-        const better =
-          details.awayWar > details.homeWar ? awayTeamName : homeTeamName;
-        const betterWar =
-          details.awayWar > details.homeWar ? details.awayWar : details.homeWar;
-        const worserWar =
-          details.awayWar < details.homeWar ? details.awayWar : details.homeWar;
-        const warQual =
-          betterWar >= WAR_STRONG
-            ? " (강세 전력)"
-            : worserWar <= WAR_WEAK
-              ? " (약세 전력)"
-              : "";
-        narrative =
-          favor === "neutral"
-            ? "팀 WAR 누적이 근접해 전력치는 팽팽."
-            : `${better}의 WAR 누적이 ${diff.toFixed(1)} 많다${warQual}. 대체선수 대비 승리 기여도에서 앞섬.`;
+        // wave-536: WAR=0 = Fancy Stats top-50 데이터 갭 (predictor wave-533 guard 동일).
+        // 예측 neutral(0.5) 과 내러티브 일치.
+        if (details.homeWar === 0 || details.awayWar === 0) {
+          const gapTeam = details.homeWar === 0 ? homeTeamName : awayTeamName;
+          narrative = `${gapTeam} WAR 미집계 — 예측에서 중립 처리됨.`;
+        } else {
+          const diff = Math.abs(details.awayWar - details.homeWar);
+          const better =
+            details.awayWar > details.homeWar ? awayTeamName : homeTeamName;
+          const betterWar =
+            details.awayWar > details.homeWar ? details.awayWar : details.homeWar;
+          const worserWar =
+            details.awayWar < details.homeWar ? details.awayWar : details.homeWar;
+          const warQual =
+            betterWar >= WAR_STRONG
+              ? " (강세 전력)"
+              : worserWar <= WAR_WEAK
+                ? " (약세 전력)"
+                : "";
+          narrative =
+            favor === "neutral"
+              ? "팀 WAR 누적이 근접해 전력치는 팽팽."
+              : `${better}의 WAR 누적이 ${diff.toFixed(1)} 많다${warQual}. 대체선수 대비 승리 기여도에서 앞섬.`;
+        }
       }
       break;
     }
@@ -345,7 +352,8 @@ export function buildGameOverview(input: GameOverviewInput): GameOverview {
   }
 
   // wave-346: WAR 우세 태그 — 한 팀이 WAR_STRONG 이상 & 상대가 WAR_WEAK 이하 시 전력 차 명시
-  if (input.homeWar != null && input.awayWar != null) {
+  // wave-536: WAR=0 guard — Fancy Stats top-50 데이터 갭 (predictor wave-533 + computeCompositeDuel wave-535 와 동일)
+  if (input.homeWar != null && input.awayWar != null && input.homeWar > 0 && input.awayWar > 0) {
     const homeStrong = input.homeWar >= WAR_STRONG;
     const awayStrong = input.awayWar >= WAR_STRONG;
     const homeWeak = input.homeWar <= WAR_WEAK;
