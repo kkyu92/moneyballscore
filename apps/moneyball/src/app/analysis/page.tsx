@@ -2953,10 +2953,10 @@ export default async function AnalysisIndexPage() {
                   </span>
                   <span className="text-gray-400 dark:text-gray-500 tabular-nums">({seasonCompleteConvergenceRecord.total}경기)</span>
                 </span>
-                {/* wave-563: 완전수렴 픽 현재 연속 streak — 2연승 이상 🔥, 2연패 이상 ❄️ */}
+                {/* wave-564: 완전수렴 픽 현재 연속 streak — 2연승 이상 🔥, 2연패 이상 ❄️ (amber-600 = 섹션 내 '10팩터' label 색상 동기, wave-562 패턴) */}
                 {completeConvergenceStreak !== null && (
                   <span
-                    className={`text-xs font-semibold tabular-nums ${completeConvergenceStreak.type === 'win' ? 'text-amber-500 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}
+                    className={`text-xs font-semibold tabular-nums ${completeConvergenceStreak.type === 'win' ? 'text-amber-600 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}
                     title={`완전수렴 픽 현재 ${completeConvergenceStreak.length}연${completeConvergenceStreak.type === 'win' ? '승' : '패'} 중`}
                   >
                     {completeConvergenceStreak.type === 'win' ? '🔥' : '❄️'} {completeConvergenceStreak.length}연{completeConvergenceStreak.type === 'win' ? '승' : '패'}

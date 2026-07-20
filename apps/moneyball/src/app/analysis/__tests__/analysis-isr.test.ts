@@ -34,3 +34,17 @@ describe("wave-561 완전수렴 배지 FACTOR_PICK_COMPLETE 동기 guard (silent
     expect(INDEX_SRC).not.toMatch(/>10팩터<\/span>/);
   });
 });
+
+describe("wave-564 완전수렴 streak badge amber-600 동기 guard (silent drift wave-563 cycle 1937, polish cycle 1939)", () => {
+  it("completeConvergenceStreak win badge = text-amber-600 (섹션 내 팩터 label amber-600 동기)", () => {
+    // 완전수렴 섹션 내 'text-amber-600 dark:text-amber-400 font-medium' (팩터 label, wave-561)과
+    // streak win badge 색상 통일 — wave-563 에서 wave-552(강수렴, amber-500) 복사 시 tier 조정 누락 fix.
+    // 강수렴 streak = text-amber-500 / 완전수렴 streak = text-amber-600 — 색상 tier 구분 유지.
+    expect(INDEX_SRC).toContain("completeConvergenceStreak.type === 'win' ? 'text-amber-600 dark:text-amber-400'");
+  });
+
+  it("completeConvergenceStreak win badge = text-amber-500 없음 (강수렴 tier 색상 역류 차단)", () => {
+    // complete convergence 섹션에서 amber-500 win badge 재발 차단 (wave-552 복사 오류 패턴)
+    expect(INDEX_SRC).not.toContain("completeConvergenceStreak.type === 'win' ? 'text-amber-500");
+  });
+});
