@@ -1921,6 +1921,47 @@ export default async function AnalysisIndexPage() {
                                 </span>
                               );
                             })()}
+                            {/* wave-515: 상대전적 직접 대결 배지 — 홈 승률 >= H2H_DOMINANT_RATE(0.6) 시 홈팀 우세, <= H2H_WEAK_RATE(0.4) 시 원정팀 우세 · SP FIP/wOBA/불펜FIP/Elo/WAR/SFR/최근폼/xFIP 배지에 상대전적 배지 추가 */}
+                            {g.h2hHomeWins !== undefined && g.h2hAwayWins !== undefined && (() => {
+                              const h2hTotal = g.h2hHomeWins + g.h2hAwayWins;
+                              if (h2hTotal === 0) return null;
+                              const homeRate = g.h2hHomeWins / h2hTotal;
+                              const h2hFavoredHome = homeRate >= H2H_DOMINANT_RATE;
+                              const h2hFavoredAway = homeRate <= H2H_WEAK_RATE;
+                              if (!h2hFavoredHome && !h2hFavoredAway) return null;
+                              const favoredName = shortTeamName(h2hFavoredHome ? g.homeCode : g.awayCode);
+                              const [wins, losses] = h2hFavoredHome
+                                ? [g.h2hHomeWins, g.h2hAwayWins]
+                                : [g.h2hAwayWins, g.h2hHomeWins];
+                              return (
+                                <span className={`ml-2 font-medium ${
+                                  h2hFavoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  H2H {favoredName} {wins}승{losses}패
+                                </span>
+                              );
+                            })()}
+                            {/* wave-515: 구장 직접 대결 배지 — parkPf >= PARK_FACTOR_HITTER_MIN(105) 시 홈팀 유리(타자 친화), <= PARK_FACTOR_PITCHER_MAX(95) 시 원정팀 유리(투수 친화) · 10팩터 배지 완성 */}
+                            {(() => {
+                              const pf = KBO_TEAMS[g.homeCode]?.parkPf;
+                              if (pf === undefined) return null;
+                              const parkFavoredHome = pf >= PARK_FACTOR_HITTER_MIN;
+                              const parkFavoredAway = pf <= PARK_FACTOR_PITCHER_MAX;
+                              if (!parkFavoredHome && !parkFavoredAway) return null;
+                              const favoredName = shortTeamName(parkFavoredHome ? g.homeCode : g.awayCode);
+                              const parkType = parkFavoredHome ? '타자친화' : '투수친화';
+                              return (
+                                <span className={`ml-2 font-medium ${
+                                  parkFavoredHome
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-orange-500 dark:text-orange-400'
+                                }`}>
+                                  구장 {favoredName} {parkType}
+                                </span>
+                              );
+                            })()}
                             {/* wave-415: 팩터 수렴 배지 · wave-473: 비수렴 경기에도 팩터 N:M 표시 (gray) · wave-482: 비수렴 팩터 단축 레이블 표시 (wave-480 DETAIL→LIST 대칭) */}
                             {factorFavoredCount != null && (
                               <span className={`ml-2 font-mono ${
