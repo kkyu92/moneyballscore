@@ -138,6 +138,69 @@ describe('가중치 합산', () => {
 
 });
 
+describe('WAR data gap guard (cycle 1904, wave-533)', () => {
+  it('홈팀 totalWar > 0, 원정팀 totalWar = 0 → war 팩터 = 0.5 (데이터 갭 중립)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 5.3, sfr: -0.3 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 0, sfr: -7.5 },
+    }));
+    expect(result.factors.war).toBe(0.5);
+  });
+
+  it('원정팀 totalWar > 0, 홈팀 totalWar = 0 → war 팩터 = 0.5 (데이터 갭 중립)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 0, sfr: 2.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 8.5, sfr: 1.0 },
+    }));
+    expect(result.factors.war).toBe(0.5);
+  });
+
+  it('양팀 모두 totalWar > 0 → war 팩터 정상 계산 (홈팀 우세 시 > 0.5)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 12.2, sfr: 2.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 5.0, sfr: 1.0 },
+    }));
+    expect(result.factors.war).toBeGreaterThan(0.5);
+    expect(result.factors.war).toBeLessThan(1.0);
+  });
+
+  it('양팀 모두 totalWar = 0 → war 팩터 = 0.5 (기존 동작 유지)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 0, sfr: 2.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 0, sfr: 1.0 },
+    }));
+    expect(result.factors.war).toBe(0.5);
+  });
+
+  it('post-break LG vs KT 시나리오 — war=0 중립 vs war 유효 비교', () => {
+    // cycle 1903 lesson: LG(home, war=5.3) vs KT(away, war=0) 데이터 갭
+    // 데이터 갭(awayWar=0) → war=0.5 (중립)
+    // 홈팀 WAR 큰 유효 데이터(homeWar=12) vs 원정팀 소(awayWar=3) → war > 0.5
+    const withGap = predict(makeInput({
+      homeElo: { team: 'LG', elo: 1545, winPct: 0.57 },
+      awayElo: { team: 'OB', elo: 1525, winPct: 0.53 },
+      homeTeamStats: { team: 'LG', woba: 0.315, bullpenFip: 4.1, totalWar: 12.2, sfr: -0.3 },
+      awayTeamStats: { team: 'OB', woba: 0.325, bullpenFip: 4.3, totalWar: 0, sfr: -7.5 },
+      homeRecentForm: 0.4,
+      awayRecentForm: 0.7,
+    }));
+    const withData = predict(makeInput({
+      homeElo: { team: 'LG', elo: 1545, winPct: 0.57 },
+      awayElo: { team: 'OB', elo: 1525, winPct: 0.53 },
+      homeTeamStats: { team: 'LG', woba: 0.315, bullpenFip: 4.1, totalWar: 12.2, sfr: -0.3 },
+      awayTeamStats: { team: 'OB', woba: 0.325, bullpenFip: 4.3, totalWar: 3.0, sfr: -7.5 },
+      homeRecentForm: 0.4,
+      awayRecentForm: 0.7,
+    }));
+    // 데이터 갭 시 war=0.5 (중립)
+    expect(withGap.factors.war).toBe(0.5);
+    // 유효 데이터 시 war > 0.5 (홈팀 WAR 12 vs 원정팀 WAR 3 → 홈팀 유리)
+    expect(withData.factors.war).toBeGreaterThan(0.5);
+    // 데이터 갭 보정 시 homeWinProb 이 유효 데이터 케이스보다 낮음 (홈 과대평가 제거)
+    expect(withGap.homeWinProb).toBeLessThan(withData.homeWinProb);
+  });
+});
+
 describe('predict opts.weights (cycle 1127 plan-v17 candidate N — V2_MODEL_ENABLED swap)', () => {
   it('opts 미지정 → DEFAULT_WEIGHTS 사용 (기존 동작 유지)', () => {
     const baseline = predict(makeInput());
