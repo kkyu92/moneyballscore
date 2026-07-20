@@ -2577,8 +2577,9 @@ export const SP_FIP_DUEL_MIN = 0.5;
  * 선발투수 xFIP 직접 대결 배지 최소 차이 임계 — wave-371 (cycle 1711).
  * |awaySPXfip - homeSPXfip| ≥ 본 값 시 "xFIP {팀} 강세" 배지 표시.
  * xFIP 낮을수록 유리 (FIP 동일 방향). SP_FIP_DUEL_MIN 과 동일 0.5.
- * 변경 시 analysis/page.tsx wave-371 + computeCompositeDuel.ts callsite 동시 조정.
+ * 변경 시 analysis/page.tsx wave-371/wave-513 + computeCompositeDuel.ts callsite 동시 조정.
  * wave-509: computeCompositeDuel.ts callsite 추가 (cycle 1876).
+ * wave-513: analysis/page.tsx 오늘 AI 예측 카드 직접 대결 배지 callsite 추가 (cycle 1880).
  */
 export const SP_XFIP_DUEL_MIN = 0.5;
 
