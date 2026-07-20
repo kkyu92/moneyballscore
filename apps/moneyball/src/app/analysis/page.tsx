@@ -94,7 +94,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1013,7 +1013,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1034,6 +1034,8 @@ export default async function AnalysisIndexPage() {
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG, KBO_SEASON_START_DATE),
     // wave-552: 강수렴 픽 현재 연속 streak (🔥 N연승 / ❄️ N연패)
     getConvergencePickStreak(FACTOR_PICK_STRONG),
+    // wave-554: 강수렴 픽 시즌 최장 streak — 현재 streak 비교 컨텍스트
+    getConvergencePickBestStreak(),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2809,6 +2811,15 @@ export default async function AnalysisIndexPage() {
                   title={`강수렴 픽 현재 ${convergenceStreak.length}연${convergenceStreak.type === 'win' ? '승' : '패'} 중`}
                 >
                   {convergenceStreak.type === 'win' ? '🔥' : '❄️'} {convergenceStreak.length}연{convergenceStreak.type === 'win' ? '승' : '패'}
+                </span>
+              )}
+              {/* wave-554: 강수렴 픽 시즌 최장 streak — 현재 streak 비교 컨텍스트 */}
+              {convergenceBestStreak !== null && (
+                <span
+                  className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                  title={`${KBO_SEASON_YEAR} 시즌 강수렴 픽 최장 ${convergenceBestStreak.length}연${convergenceBestStreak.type === 'win' ? '승' : '패'}`}
+                >
+                  최장 {convergenceBestStreak.length}연{convergenceBestStreak.type === 'win' ? '승' : '패'}
                 </span>
               )}
               {/* wave-544: 강수렴 픽 rolling 성적 — 최근 N경기 승/패 + 승률 */}

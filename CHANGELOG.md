@@ -1,3 +1,15 @@
+## v0.5.61.27 — 2026-07-20 (cycle 1926, wave-554: 강수렴 픽 시즌 최장 streak 기록)
+
+### feat(analysis): wave-554 — 강수렴 픽 시즌 최장 streak 기록 (cycle 1926)
+
+- `convergenceRecord.ts` `computeConvergenceBestStreak(results: boolean[])` 순수 함수 추가
+  (전체 배열에서 최장 연속 구간 탐색 — 현재 streak 아닌 시즌 역대 최장)
+- `getConvergencePickBestStreak(minFactors?)` async 함수 추가 — `KBO_SEASON_START_DATE` 기준 전체 조회 후 최장 계산
+- `analysis/page.tsx` 이번 주 남은 경기 헤더: `convergenceBestStreak !== null` 시 '최장 N연승/패' 배지 표시
+  (현재 streak 🔥/❄️ 바로 뒤, 회색 dimmer 스타일 — 시즌 최장 비교 컨텍스트)
+- 테스트 19건 추가 (`wave-554-convergence-best-streak.test.ts`)
+- v0.5.61.27
+
 ## v0.5.61.26 — 2026-07-20 (cycle 1925, wave-553: fetchConvergencePickResults 중복 추출)
 
 ### fix(context): wave-553 — fetchConvergencePickResults 중복 추출 guard test (cycle 1925)

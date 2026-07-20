@@ -6,6 +6,8 @@ import {
   CONVERGENCE_RECORD_RECENT_LIMIT,
   COMPOSITE_DUEL_MIN_VALID,
   FACTOR_PICK_MIN_FACTORS,
+  FACTOR_PICK_STRONG,
+  KBO_SEASON_START_DATE,
   PRODUCTION_COHORT_RULES,
   type TeamCode,
   type SelectResult,
@@ -153,4 +155,39 @@ export async function getConvergencePickStreak(
     .slice(0, 10);
   const results = await fetchConvergencePickResults(cutoff, Number.MAX_SAFE_INTEGER, minFactors);
   return computeConvergenceStreak(results);
+}
+
+// wave-554: 강수렴 픽 시즌 최장 streak — 순수 함수 (테스트 가능)
+// results: 최신순 정렬된 경기 결과 배열 (true=강수렴 방향 적중)
+// 반환: 시즌 전체에서 가장 긴 연속 streak (승 or 패 중 더 긴 것), 2경기 미만이면 null
+export function computeConvergenceBestStreak(
+  results: boolean[],
+): { type: 'win' | 'loss'; length: number } | null {
+  if (results.length === 0) return null;
+  let bestWin = 0;
+  let bestLoss = 0;
+  let curr = 1;
+  for (let i = 1; i < results.length; i++) {
+    if (results[i] === results[i - 1]) {
+      curr++;
+    } else {
+      if (results[i - 1]) bestWin = Math.max(bestWin, curr);
+      else bestLoss = Math.max(bestLoss, curr);
+      curr = 1;
+    }
+  }
+  if (results[results.length - 1]) bestWin = Math.max(bestWin, curr);
+  else bestLoss = Math.max(bestLoss, curr);
+  const best = Math.max(bestWin, bestLoss);
+  if (best < 2) return null;
+  return bestWin >= bestLoss
+    ? { type: 'win', length: bestWin }
+    : { type: 'loss', length: bestLoss };
+}
+
+export async function getConvergencePickBestStreak(
+  minFactors = FACTOR_PICK_STRONG,
+): Promise<{ type: 'win' | 'loss'; length: number } | null> {
+  const results = await fetchConvergencePickResults(KBO_SEASON_START_DATE, Number.MAX_SAFE_INTEGER, minFactors);
+  return computeConvergenceBestStreak(results);
 }
