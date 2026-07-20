@@ -1130,6 +1130,18 @@ export default async function AnalysisIndexPage() {
   );
   const strongUpcomingPickCount = strongUpcomingPickGameIds.size;
 
+  // wave-541: 이번 주 강수렴 픽 성적 — |convergenceNetScore| ≥ FACTOR_PICK_STRONG 인 종료 경기 승/패 집계
+  const weeklyStrongConvergenceRecord = thisWeekPreviousGames.reduce(
+    (acc, g) => {
+      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_STRONG) return acc;
+      if (g.homeScore === null || g.awayScore === null) return acc;
+      const favoredHome = g.convergenceNetScore > 0;
+      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
+      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
+    },
+    { wins: 0, losses: 0 },
+  );
+
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();
   for (const g of thisWeekRemainingGames) {
@@ -2723,11 +2735,17 @@ export default async function AnalysisIndexPage() {
             <h2 id="this-week-remaining-title" className="text-xl font-bold">
               📆 이번 주 남은 경기
             </h2>
-            {/* wave-525: 강수렴 픽 복수 카운트 배지 · wave-527: pill badge 스타일 */}
+            {/* wave-525: 강수렴 픽 복수 카운트 배지 · wave-527: pill badge 스타일 · wave-541: 이번 주 강수렴 픽 성적 */}
             <div className="flex items-center gap-2">
               {strongUpcomingPickCount > 0 && (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                   ⚡ 수렴 픽 {strongUpcomingPickCount}개 예정
+                </span>
+              )}
+              {/* wave-541: 이번 주 강수렴 픽 성적 — 종료 경기 승/패 */}
+              {(weeklyStrongConvergenceRecord.wins + weeklyStrongConvergenceRecord.losses) > 0 && (
+                <span className="text-xs tabular-nums text-brand-600 dark:text-brand-400">
+                  이번 주 {weeklyStrongConvergenceRecord.wins}승 {weeklyStrongConvergenceRecord.losses}패
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
