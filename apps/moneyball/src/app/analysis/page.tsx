@@ -721,9 +721,10 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       awayRecentForm: fd?.awayRecentForm ?? null,
       homeSPXfip: fd?.homeSpXfip ?? null,
       awaySPXfip: fd?.awaySpXfip ?? null,
-      // wave-537: 수렴 픽 경기에만 buildGameOverview summary 생성
+      // wave-537: TOP픽/강수렴픽(FACTOR_PICK_STRONG=8) 경기에만 buildGameOverview summary 생성
+      // wave-538: FACTOR_PICK_MIN_FACTORS(7) → FACTOR_PICK_STRONG(8) — UI 표시 조건과 일치
       gameOverviewSummary: (() => {
-        if (convergenceNetScore == null || Math.abs(convergenceNetScore) < FACTOR_PICK_MIN_FACTORS) return null;
+        if (convergenceNetScore == null || Math.abs(convergenceNetScore) < FACTOR_PICK_STRONG) return null;
         const homeTeamName = KBO_TEAMS[homeCode]?.name ?? homeCode;
         const awayTeamName = KBO_TEAMS[awayCode]?.name ?? awayCode;
         const winProb = modelProbMap.get(r.id) ?? homeWinProb;

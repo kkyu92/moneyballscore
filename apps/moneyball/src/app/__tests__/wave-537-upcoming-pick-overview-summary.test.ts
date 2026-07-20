@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { FACTOR_PICK_MIN_FACTORS } from '@moneyball/shared';
+import { FACTOR_PICK_MIN_FACTORS, FACTOR_PICK_STRONG } from '@moneyball/shared';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 
 // wave-537 (cycle 1908): 이번 주 남은 경기 수렴 픽 카드에 buildGameOverview summary 한 줄 표시.
-// UpcomingScheduledGame 인터페이스에 gameOverviewSummary 추가 + 수렴 픽 경기에만 생성.
-// 비수렴 경기(|netScore| < FACTOR_PICK_MIN_FACTORS)는 null.
+// UpcomingScheduledGame 인터페이스에 gameOverviewSummary 추가 + TOP픽/강수렴픽 경기에만 생성.
+// wave-538 (cycle 1909): summary 생성 조건 FACTOR_PICK_MIN_FACTORS(7) → FACTOR_PICK_STRONG(8)
+// — UI 표시 조건 isTopUpcomingPick||isStrongUpcomingPick 과 정합.
 
 const PAGE_SRC = readFileSync(join(__dirname, '../../app/analysis/page.tsx'), 'utf8');
 
@@ -20,8 +21,9 @@ describe('wave-537 — 이번 주 남은 경기 수렴 픽 카드 buildGameOverv
     expect(PAGE_SRC).toContain('buildGameOverview');
   });
 
-  it('analysis/page.tsx: FACTOR_PICK_MIN_FACTORS 조건으로 summary 생성 분기', () => {
-    expect(PAGE_SRC).toContain('FACTOR_PICK_MIN_FACTORS');
+  it('analysis/page.tsx: FACTOR_PICK_STRONG 조건으로 summary 생성 분기 (wave-538)', () => {
+    // wave-538: FACTOR_PICK_STRONG(8) = UI 표시 조건과 동일
+    expect(PAGE_SRC).toContain('FACTOR_PICK_STRONG');
     expect(PAGE_SRC).toContain('gameOverviewSummary');
   });
 
@@ -60,8 +62,10 @@ describe('wave-537 — 이번 주 남은 경기 수렴 픽 카드 buildGameOverv
     expect(typeof result.summary).toBe('string');
   });
 
-  it('FACTOR_PICK_MIN_FACTORS: 7이어야 summary 생성 조건과 일치', () => {
-    expect(FACTOR_PICK_MIN_FACTORS).toBe(7);
+  it('FACTOR_PICK_STRONG: 8이어야 summary 생성 조건과 일치 (wave-538 정합)', () => {
+    // wave-538: summary 생성 임계 = FACTOR_PICK_STRONG (UI isTopUpcomingPick||isStrongUpcomingPick 과 일치)
+    expect(FACTOR_PICK_MIN_FACTORS).toBe(7); // 일반 수렴 임계 변경 없음
+    expect(FACTOR_PICK_STRONG).toBe(8);      // summary 생성 조건
   });
 
   it('buildGameOverview: WAR=0 (data gap) 있는 경기도 summary 반환 (wave-536 guard 연계)', () => {

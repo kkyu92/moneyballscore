@@ -1,3 +1,13 @@
+## v0.5.61.20 — 2026-07-20 (cycle 1909, wave-538: summary 생성 조건 FACTOR_PICK_STRONG 정합)
+
+### fix(context): wave-538 — gameOverviewSummary 생성 조건 FACTOR_PICK_STRONG(8) 정합 (cycle 1909)
+
+- `analysis/page.tsx` wave-537 IIFE: `FACTOR_PICK_MIN_FACTORS(7)` → `FACTOR_PICK_STRONG(8)`
+- UI 표시 조건 `isTopUpcomingPick||isStrongUpcomingPick`(score≥8) 과 생성 조건 일치
+- score=7 경기 불필요 summary 생성 차단
+- 테스트 wave-537 test 갱신 (FACTOR_PICK_STRONG 조건 반영)
+- v0.5.61.20
+
 ## v0.5.61.19 — 2026-07-20 (cycle 1908, wave-537: 이번 주 남은 경기 수렴 픽 카드 buildGameOverview summary)
 
 ### feat(analysis): wave-537 — 이번 주 남은 경기 수렴 픽 카드 buildGameOverview summary (cycle 1908)
