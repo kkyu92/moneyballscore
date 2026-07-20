@@ -112,6 +112,7 @@ export const KBO_TEAM_COUNT = Object.keys(KBO_TEAMS).length;
  * KBO_TEAMS.SS=108 / SK=105 (타자 친화) / WO=92 / LG=95 / OB=95 (투수 친화) 기준 정합.
  * 변경 시 analysis/page.tsx + computeCompositeDuel.ts callsite 동시 조정.
  * wave-514: computeCompositeDuel.ts park factor callsite 추가 (cycle 1881).
+ * wave-516: analysis/page.tsx 오늘 AI 예측 카드 직접 대결 배지 callsite 추가 (cycle 1883).
  */
 export const PARK_FACTOR_HITTER_MIN = 105;
 export const PARK_FACTOR_PITCHER_MAX = 95;
@@ -2340,6 +2341,7 @@ export const H2H_MIN_GAMES = 3;
  * wave-448: H2H_DOMINANT_RATE − H2H_WEAK_RATE(= 0.20) 를 상대전적 비율 격차(Δ) 임계로 사용.
  * 변경 시 analysis/page.tsx wave-448 격차(Δ) + computeCompositeDuel.ts callsite 동시 조정.
  * wave-514: computeCompositeDuel.ts H2H factor callsite 추가 (cycle 1881).
+ * wave-516: analysis/page.tsx 오늘 AI 예측 카드 직접 대결 배지 callsite 추가 (cycle 1883).
  */
 export const H2H_DOMINANT_RATE = 0.6;
 
@@ -2349,6 +2351,7 @@ export const H2H_DOMINANT_RATE = 0.6;
  * wave-448: H2H_DOMINANT_RATE − H2H_WEAK_RATE(= 0.20) 를 상대전적 비율 격차(Δ) 임계로 사용.
  * 변경 시 analysis/page.tsx wave-448 격차(Δ) + computeCompositeDuel.ts callsite 동시 조정.
  * wave-514: computeCompositeDuel.ts H2H factor callsite 추가 (cycle 1881).
+ * wave-516: analysis/page.tsx 오늘 AI 예측 카드 직접 대결 배지 callsite 추가 (cycle 1883).
  */
 export const H2H_WEAK_RATE = 0.4;
 
