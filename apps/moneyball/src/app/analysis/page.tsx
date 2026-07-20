@@ -413,7 +413,7 @@ async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
     const homeCode = row.home_team?.code as TeamCode | undefined;
     const awayCode = row.away_team?.code as TeamCode | undefined;
     if (!homeCode || !awayCode) continue;
-    // wave-550: 어제 경기에도 팩터 수렴 점수 계산 (ThisWeekGameCard 패턴 동일)
+    // wave-550: 어제 경기에도 팩터 수렴 점수 계산 (ThisWeekPreviousGames 패턴 동일, H2H 제외)
     const yesterdayDuel = computeCompositeDuel({
       homeCode,
       homeLineupWoba: pred.home_lineup_woba,
