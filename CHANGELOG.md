@@ -1,3 +1,19 @@
+## v0.5.61.16 — 2026-07-20 (cycle 1898, wave-529: 이번 주 남은 경기 TOP픽/강수렴 픽 수렴 방향 팀명 표시)
+
+### feat(analysis): wave-529 — 이번 주 남은 경기 TOP픽/강수렴 픽 수렴 방향 팀명 표시 (cycle 1898)
+
+- `isTopUpcomingPick || isStrongUpcomingPick` 카드에 팩터 수렴 방향 팀명 표시
+  - `convergenceNetScore > 0` → 홈팀, `<= 0` → 원정팀
+  - TOP픽 카드: `↗ [팀명]` amber 색상 (`text-amber-600 dark:text-amber-400`)
+  - 강수렴 픽 카드: `↗ [팀명]` brand 색상 (`text-brand-600 dark:text-brand-400`)
+  - 일반 경기 카드: 표시 없음 (기존 동일)
+  - `convergenceNetScore = null` 시 미표시 (null guard)
+- 팩터 N:M 비율 아래 (10팩터 배지 위) 배치 — 수렴 강도 표시 라인 직후
+- wave-529 테스트 추가 (`wave-529-upcoming-pick-convergence-direction.test.ts`) — 9 PASS
+- v0.5.61.16
+
+---
+
 ## v0.5.61.15 — 2026-07-20 (cycle 1894, wave-525: 이번 주 남은 경기 수렴 픽 복수 강조)
 
 ### feat(analysis): wave-525 — 이번 주 남은 경기 수렴 픽 복수 강조 (cycle 1894)

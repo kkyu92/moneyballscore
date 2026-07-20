@@ -2787,6 +2787,16 @@ export default async function AnalysisIndexPage() {
                                     })()}
                                   </p>
                                 )}
+                                {/* wave-529: 이번 주 남은 경기 수렴 방향 팀명 — TOP픽/강수렴 픽 카드에 팩터가 가리키는 팀 표시 */}
+                                {(isTopUpcomingPick || isStrongUpcomingPick) && g.convergenceNetScore != null && (
+                                  <p className={`text-[10px] font-semibold mt-0.5 ${
+                                    isTopUpcomingPick
+                                      ? 'text-amber-600 dark:text-amber-400'
+                                      : 'text-brand-600 dark:text-brand-400'
+                                  }`}>
+                                    ↗ {shortTeamName(g.convergenceNetScore > 0 ? g.homeCode : g.awayCode)}
+                                  </p>
+                                )}
                                 {/* wave-517~521: 10팩터 직접 대결 배지 · wave-527: flex-wrap 컨테이너로 정렬 */}
                                 <div className="flex flex-wrap gap-x-1 gap-y-0.5 justify-end mt-1">
                                 {/* wave-517: SP FIP 직접 대결 배지 — |ΔFIP| >= SP_FIP_DUEL_MIN 시 우위 팀명 + 격차 표시 (가중치 1위 15%) */}
