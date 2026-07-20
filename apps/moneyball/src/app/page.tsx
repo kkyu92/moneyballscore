@@ -675,43 +675,51 @@ export default async function HomePage() {
       {/* 실시간 스코어 */}
       <LiveScoreboard />
 
-      {/* 고확신 예측 Hero — 오늘 가장 강한 확신 경기 1건 (flag enabled 시) */}
-      {hasBigMatchHero ? (() => {
-        const presented = presentJudgeReasoningWithFallback(
-          bigMatchDebate.verdict?.reasoning,
-        );
-        return (
-          <BigMatchDebateCard
-            gameId={bigMatch.id}
-            homeTeam={bigMatch.home_team?.code as TeamCode}
-            awayTeam={bigMatch.away_team?.code as TeamCode}
-            homeWinProb={bigMatchDebate.verdict?.homeWinProb ?? 0.5}
-            predictedWinner={bigMatchDebate.verdict?.predictedWinner as TeamCode}
-            reasoning={presented?.text ?? ''}
-            homeConfidence={bigMatchDebate.homeArgument?.confidence}
-            awayConfidence={bigMatchDebate.awayArgument?.confidence}
-            homeKeyFactor={bigMatchDebate.homeArgument?.keyFactor}
-            awayKeyFactor={bigMatchDebate.awayArgument?.keyFactor}
-            isQuantOnlyFallback={presented?.isFallback ?? false}
+      {/* 빅매치 · AI 분석 허브 — wave-530: 홈 → /analysis 진입 경로 */}
+      <section aria-labelledby="bigmatch-hero-title" className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 id="bigmatch-hero-title" className="text-xl font-bold">오늘 빅매치</h2>
+          <Link href="/analysis" className="text-sm text-brand-600 hover:text-brand-800 hover:underline">
+            AI 분석 전체 →
+          </Link>
+        </div>
+        {hasBigMatchHero ? (() => {
+          const presented = presentJudgeReasoningWithFallback(
+            bigMatchDebate.verdict?.reasoning,
+          );
+          return (
+            <BigMatchDebateCard
+              gameId={bigMatch.id}
+              homeTeam={bigMatch.home_team?.code as TeamCode}
+              awayTeam={bigMatch.away_team?.code as TeamCode}
+              homeWinProb={bigMatchDebate.verdict?.homeWinProb ?? 0.5}
+              predictedWinner={bigMatchDebate.verdict?.predictedWinner as TeamCode}
+              reasoning={presented?.text ?? ''}
+              homeConfidence={bigMatchDebate.homeArgument?.confidence}
+              awayConfidence={bigMatchDebate.awayArgument?.confidence}
+              homeKeyFactor={bigMatchDebate.homeArgument?.keyFactor}
+              awayKeyFactor={bigMatchDebate.awayArgument?.keyFactor}
+              isQuantOnlyFallback={presented?.isFallback ?? false}
+            />
+          );
+        })() : topStatPick ? (
+          <TopStatPickCard
+            gameId={topStatPick.game.id}
+            homeTeam={topStatPick.game.home_team?.code as TeamCode}
+            awayTeam={topStatPick.game.away_team?.code as TeamCode}
+            homeWinProb={topStatPick.homeWinProb}
+            date={today}
           />
-        );
-      })() : topStatPick ? (
-        <TopStatPickCard
-          gameId={topStatPick.game.id}
-          homeTeam={topStatPick.game.home_team?.code as TeamCode}
-          awayTeam={topStatPick.game.away_team?.code as TeamCode}
-          homeWinProb={topStatPick.homeWinProb}
-          date={today}
-        />
-      ) : (
-        <section className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
-          <p className="text-brand-300 text-sm mb-1">{today}</p>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</h1>
-          <p className="text-brand-200">
-            KBO {games.length}경기 세이버메트릭스 기반 분석
-          </p>
-        </section>
-      )}
+        ) : (
+          <div className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white">
+            <p className="text-brand-300 text-sm mb-1">{today}</p>
+            <p className="text-3xl md:text-4xl font-bold mb-2">오늘의 승부예측</p>
+            <p className="text-brand-200">
+              KBO {games.length}경기 세이버메트릭스 기반 분석
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* 적중률 요약 */}
       <section className="space-y-4">
