@@ -967,7 +967,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -981,6 +981,7 @@ export default async function AnalysisIndexPage() {
     fetchStandings(),
     getSeasonH2HData(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_STRONG),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2747,6 +2748,17 @@ export default async function AnalysisIndexPage() {
                 <span className="inline-flex items-center gap-0.5 text-xs tabular-nums text-brand-600 dark:text-brand-400">
                   <span className="not-italic">⚡</span>
                   {weeklyStrongConvergenceRecord.wins}승 {weeklyStrongConvergenceRecord.losses}패
+                </span>
+              )}
+              {/* wave-544: 강수렴 픽 rolling 성적 — 최근 N경기 승/패 + 승률 */}
+              {recentStrongConvergenceRecord.total > 0 && (
+                <span
+                  className="text-xs tabular-nums text-gray-500 dark:text-gray-400"
+                  title={`최근 ${recentStrongConvergenceRecord.total}경기 강수렴 픽 적중 현황`}
+                >
+                  최근 {recentStrongConvergenceRecord.total}경기{' '}
+                  {recentStrongConvergenceRecord.wins}승{recentStrongConvergenceRecord.losses}패
+                  {' '}({Math.round(recentStrongConvergenceRecord.wins / recentStrongConvergenceRecord.total * 100)}%)
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>

@@ -43,6 +43,7 @@ interface ConvergenceGameRow {
 
 export async function getRecentConvergencePickRecord(
   limit = CONVERGENCE_RECORD_RECENT_LIMIT,
+  minFactors = FACTOR_PICK_MIN_FACTORS,
 ): Promise<{ wins: number; losses: number; total: number }> {
   const today = toKSTDateString();
   const supabase = await createClient();
@@ -105,7 +106,7 @@ export async function getRecentConvergencePickRecord(
     });
 
     if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) continue;
-    if (Math.abs(duel.netScore) < FACTOR_PICK_MIN_FACTORS) continue;
+    if (Math.abs(duel.netScore) < minFactors) continue;
 
     const favoredHome = duel.netScore > 0;
     const favWon = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;

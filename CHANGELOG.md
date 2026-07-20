@@ -1,3 +1,13 @@
+## v0.5.61.23 — 2026-07-20 (cycle 1915, wave-544: 강수렴 픽 rolling 성적)
+
+### feat(analysis): wave-544 — 강수렴 픽 rolling 성적 (cycle 1915)
+
+- `convergenceRecord.ts` `getRecentConvergencePickRecord`: `minFactors` 옵션 파라미터 추가 (기본값 FACTOR_PICK_MIN_FACTORS=7, 하위 호환)
+- `analysis/page.tsx` Promise.all: `recentStrongConvergenceRecord` 추가 (`FACTOR_PICK_STRONG=8` 필터)
+- 강수렴 픽 성적 배지: "이번 주 강수렴 픽" 배지 뒤 "최근 N경기 X승Y패 (Z%)" 표시
+- 수렴 픽 없는 구간 `total=0` → UI 표시 안 함 (조건 가드)
+- v0.5.61.23
+
 ## v0.5.61.22 — 2026-07-20 (cycle 1911, wave-540: groupByDate 더블 map chain fix)
 
 ### fix(context): wave-540 — groupByDate 더블 map chain 제거 (cycle 1911)
