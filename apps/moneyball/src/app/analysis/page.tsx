@@ -93,6 +93,7 @@ import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
+import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 
@@ -562,6 +563,8 @@ interface UpcomingScheduledGame {
   /** wave-521: xFIP 직접 대결 배지용 (가중치 5%) */
   homeSPXfip: number | null;
   awaySPXfip: number | null;
+  /** wave-537: 수렴 픽 경기 한 줄 요약 (buildGameOverview summary) */
+  gameOverviewSummary: string | null;
 }
 
 async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -718,6 +721,31 @@ async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
       awayRecentForm: fd?.awayRecentForm ?? null,
       homeSPXfip: fd?.homeSpXfip ?? null,
       awaySPXfip: fd?.awaySpXfip ?? null,
+      // wave-537: 수렴 픽 경기에만 buildGameOverview summary 생성
+      gameOverviewSummary: (() => {
+        if (convergenceNetScore == null || Math.abs(convergenceNetScore) < FACTOR_PICK_MIN_FACTORS) return null;
+        const homeTeamName = KBO_TEAMS[homeCode]?.name ?? homeCode;
+        const awayTeamName = KBO_TEAMS[awayCode]?.name ?? awayCode;
+        const winProb = modelProbMap.get(r.id) ?? homeWinProb;
+        const { summary } = buildGameOverview({
+          homeWinProb: winProb,
+          homeSPFip: fd?.homeSpFip ?? null,
+          awaySPFip: fd?.awaySpFip ?? null,
+          homeWoba: fd?.homeLineupWoba ?? null,
+          awayWoba: fd?.awayLineupWoba ?? null,
+          homeBullpenFip: fd?.homeBullpenFip ?? null,
+          awayBullpenFip: fd?.awayBullpenFip ?? null,
+          homeWar: fd?.homeWar ?? null,
+          awayWar: fd?.awayWar ?? null,
+          homeRecentForm: fd?.homeRecentForm ?? null,
+          awayRecentForm: fd?.awayRecentForm ?? null,
+          homeElo: eloMap.get(homeCode) ?? null,
+          awayElo: eloMap.get(awayCode) ?? null,
+          homeTeamName,
+          awayTeamName,
+        });
+        return summary;
+      })(),
     });
   }
   return result;
@@ -2787,6 +2815,12 @@ export default async function AnalysisIndexPage() {
                                 {/* wave-525: 게임시간 없는 경우 강수렴 픽 배지 */}
                                 {!g.gameTime && isStrongUpcomingPick && (
                                   <p className="text-xs text-brand-500 dark:text-brand-400 mt-0.5 font-semibold">⚡ 픽</p>
+                                )}
+                                {/* wave-537: 수렴 픽 경기 한 줄 요약 */}
+                                {(isTopUpcomingPick || isStrongUpcomingPick) && g.gameOverviewSummary && (
+                                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+                                    {g.gameOverviewSummary}
+                                  </p>
                                 )}
                               </div>
                               <div className="ml-3 shrink-0 text-right">

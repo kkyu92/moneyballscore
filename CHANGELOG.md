@@ -1,3 +1,17 @@
+## v0.5.61.19 — 2026-07-20 (cycle 1908, wave-537: 이번 주 남은 경기 수렴 픽 카드 buildGameOverview summary)
+
+### feat(analysis): wave-537 — 이번 주 남은 경기 수렴 픽 카드 buildGameOverview summary (cycle 1908)
+
+- `analysis/page.tsx` `UpcomingScheduledGame`: `gameOverviewSummary: string | null` 필드 추가
+- `getThisWeekRemainingGames`: 수렴 픽 경기(`|convergenceNetScore| >= FACTOR_PICK_MIN_FACTORS`)에 `buildGameOverview` 호출 → `summary` 생성, 비수렴 경기 `null`
+- `analysis/page.tsx` UI: TOP픽(`★ TOP픽`)/강수렴픽(`⚡ 픽`) 카드 왼쪽 하단에 overview summary 한 줄 표시
+  - `text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug`
+  - wave-536 WAR=0 data gap guard 연계 (buildGameOverview 내부 guard 자동 적용)
+- 테스트 (`wave-537-upcoming-pick-overview-summary.test.ts`): 8 PASS
+- v0.5.61.19
+
+---
+
 ## v0.5.61.18 — 2026-07-20 (cycle 1907, wave-536: factor-explanations WAR=0 data gap guard)
 
 ### fix(context): wave-536 — factor-explanations WAR=0 data gap guard (cycle 1907)
