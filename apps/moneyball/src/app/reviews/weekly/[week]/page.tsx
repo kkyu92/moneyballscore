@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT } from '@moneyball/shared';
 import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
@@ -154,8 +154,8 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
   // wave-584: 강수렴/완전수렴 픽 주간 성적 — startDate~endDate 범위 한정
   const [review, strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
     buildWeeklyReview(range),
-    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_STRONG, range.startDate, range.endDate),
-    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
   ]);
   const url = `${SITE_URL}/reviews/weekly/${week}`;
 

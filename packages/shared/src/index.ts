@@ -2714,6 +2714,14 @@ export const CONVERGENCE_RECORD_RECENT_LIMIT = 10;
 export const CONVERGENCE_RECORD_LOOKBACK_DAYS = 45;
 
 /**
+ * 팩터 수렴 픽 날짜 범위 기준 전체 집계 sentinel — wave-589 (cycle 1966).
+ * getRecentConvergencePickRecord(limit, ...) 에서 startDate 가 제공되면 함수 내부가
+ * effectiveLimit = Number.MAX_SAFE_INTEGER 로 자동 덮어씀 (convergenceRecord.ts L143).
+ * 주간/월간/시즌 리뷰 페이지에서 날짜 범위 내 모든 수렴 픽을 조회할 때 사용.
+ */
+export const CONVERGENCE_RECORD_ALL_LIMIT = Number.MAX_SAFE_INTEGER;
+
+/**
  * 이번 주 남은 경기 팀별 수렴 우위 현황 최대 표시 팀 수 — wave-531 (cycle 1900).
  * analysis/page.tsx thisWeekRemainingGames 에서 |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기의 우세 팀 집계.
  * 수렴 픽 우위 경기 수 내림차순 정렬 후 상위 N팀만 표시.

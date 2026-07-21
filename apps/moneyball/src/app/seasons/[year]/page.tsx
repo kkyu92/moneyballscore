@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from "@moneyball/shared";
+import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT } from "@moneyball/shared";
 import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
 import { getRecentConvergencePickRecord, computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -68,8 +68,8 @@ export default async function SeasonPage({ params }: PageProps) {
   const seasonStartDate = `${y}-04-01`;
   const seasonEndDate = summary.isOngoing ? undefined : `${y}-11-30`;
   const [strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
-    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
-    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
   ]);
 
   // 월별 차트 max 계산 (bar 폭 정규화)
