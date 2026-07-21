@@ -2,7 +2,8 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from '@moneyball/shared';
+import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
   buildWeeklyReview,
@@ -150,7 +151,12 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
   const range = parseWeekId(week);
   if (!range) notFound();
 
-  const review = await buildWeeklyReview(range);
+  // wave-584: 강수렴/완전수렴 픽 주간 성적 — startDate~endDate 범위 한정
+  const [review, strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+    buildWeeklyReview(range),
+    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+  ]);
   const url = `${SITE_URL}/reviews/weekly/${week}`;
 
   // confidence desc 순위 — date default 도착 순서에서 confidence desc rank 계산.
@@ -255,6 +261,41 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
             >
               {pctLabel}
             </p>
+          </div>
+        </section>
+      )}
+
+      {/* wave-584: 수렴 픽 주간 성적 — 강수렴/완전수렴 W-L 카드 */}
+      {(strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0) && (
+        <section aria-labelledby="weekly-convergence-title" className="space-y-3">
+          <h2 id="weekly-convergence-title" className="text-xl font-bold">
+            수렴 픽 성적
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {strongConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5 space-y-1">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className="text-2xl font-bold">
+                  {strongConvergenceRecord.wins}승 {strongConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {strongConvergenceRecord.total}경기 ·{' '}
+                  {Math.round((strongConvergenceRecord.wins / strongConvergenceRecord.total) * 100)}% 적중
+                </p>
+              </div>
+            )}
+            {completeConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/40 p-5 space-y-1">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className="text-2xl font-bold">
+                  {completeConvergenceRecord.wins}승 {completeConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {completeConvergenceRecord.total}경기 ·{' '}
+                  {Math.round((completeConvergenceRecord.wins / completeConvergenceRecord.total) * 100)}% 적중
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}
