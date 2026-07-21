@@ -350,6 +350,18 @@ export function computeWinRateColorClass(
   return neutralClass;
 }
 
+// wave-578: 이번 주 남은 경기 수렴 픽 ID Set — threshold 파라미터화 (wave-525/577 동일 패턴 통합)
+export function computeUpcomingPickGameIds(
+  games: Array<{ gameId: number; convergenceNetScore: number | null }>,
+  threshold: number,
+): Set<number> {
+  return new Set(
+    games
+      .filter((g) => g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= threshold)
+      .map((g) => g.gameId),
+  );
+}
+
 // wave-568: 이번 주 수렴 픽 성적 집계 — 순수 함수 (wave-405/541/567 동일 reduce 통합)
 // threshold: FACTOR_PICK_MIN_FACTORS / FACTOR_PICK_STRONG / FACTOR_PICK_COMPLETE 중 1개
 // games: convergenceNetScore + homeScore + awayScore 포함 경기 배열 (종료 경기만 의미 있음)

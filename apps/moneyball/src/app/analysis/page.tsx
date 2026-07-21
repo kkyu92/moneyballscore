@@ -94,7 +94,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeWeeklyConvergenceRecord, computeWinRatePct, computeWinRateColorClass, computeWinProbPct } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeWinRatePct, computeWinRateColorClass, computeWinProbPct } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1187,19 +1187,13 @@ export default async function AnalysisIndexPage() {
     .at(0)?.gameId ?? null;
 
   // wave-525: 강수렴 픽 복수 후보 Set — FACTOR_PICK_STRONG 이상 모든 경기 (TOP픽 포함)
-  const strongUpcomingPickGameIds = new Set(
-    thisWeekRemainingGames
-      .filter((g) => g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_STRONG)
-      .map((g) => g.gameId)
-  );
+  // wave-578: computeUpcomingPickGameIds 순수 함수 추출
+  const strongUpcomingPickGameIds = computeUpcomingPickGameIds(thisWeekRemainingGames, FACTOR_PICK_STRONG);
   const strongUpcomingPickCount = strongUpcomingPickGameIds.size;
 
   // wave-577: 완전수렴 픽 이번 주 남은 경기 — FACTOR_PICK_COMPLETE 이상 경기 Set
-  const completeUpcomingPickGameIds = new Set(
-    thisWeekRemainingGames
-      .filter((g) => g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE)
-      .map((g) => g.gameId)
-  );
+  // wave-578: computeUpcomingPickGameIds 순수 함수 추출
+  const completeUpcomingPickGameIds = computeUpcomingPickGameIds(thisWeekRemainingGames, FACTOR_PICK_COMPLETE);
   const completeUpcomingPickCount = completeUpcomingPickGameIds.size;
 
   // wave-541: 이번 주 강수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
