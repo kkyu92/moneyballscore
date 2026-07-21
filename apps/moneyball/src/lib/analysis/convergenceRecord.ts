@@ -327,3 +327,22 @@ export async function getConvergencePickTeamStats(
   const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
   return computeConvergenceTeamStats(results);
 }
+
+// wave-568: 이번 주 수렴 픽 성적 집계 — 순수 함수 (wave-405/541/567 동일 reduce 통합)
+// threshold: FACTOR_PICK_MIN_FACTORS / FACTOR_PICK_STRONG / FACTOR_PICK_COMPLETE 중 1개
+// games: convergenceNetScore + homeScore + awayScore 포함 경기 배열 (종료 경기만 의미 있음)
+export function computeWeeklyConvergenceRecord(
+  games: Array<{ convergenceNetScore: number | null; homeScore: number | null; awayScore: number | null }>,
+  threshold: number,
+): { wins: number; losses: number } {
+  return games.reduce(
+    (acc, g) => {
+      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < threshold) return acc;
+      if (g.homeScore === null || g.awayScore === null) return acc;
+      const favoredHome = g.convergenceNetScore > 0;
+      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
+      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
+    },
+    { wins: 0, losses: 0 },
+  );
+}

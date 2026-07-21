@@ -96,7 +96,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeWeeklyConvergenceRecord } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1165,17 +1165,8 @@ export default async function AnalysisIndexPage() {
     (g) => Math.abs(g.compositeDuelScore!) >= FACTOR_PICK_COMPLETE,
   );
 
-  // wave-405: 이번 주 팩터 수렴 픽 성적 — 종료된 수렴 경기 승/패 집계
-  const weeklyConvergenceRecord = thisWeekPreviousGames.reduce(
-    (acc, g) => {
-      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_MIN_FACTORS) return acc;
-      if (g.homeScore === null || g.awayScore === null) return acc;
-      const favoredHome = g.convergenceNetScore > 0;
-      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
-      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
-    },
-    { wins: 0, losses: 0 },
-  );
+  // wave-405: 이번 주 팩터 수렴 픽 성적 — 종료된 수렴 경기 승/패 집계 (wave-568: computeWeeklyConvergenceRecord 통합)
+  const weeklyConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_MIN_FACTORS);
 
   const simplifiedMode =
     todayData.games.length >= CE_MIN_SAMPLES &&
@@ -1197,29 +1188,11 @@ export default async function AnalysisIndexPage() {
   );
   const strongUpcomingPickCount = strongUpcomingPickGameIds.size;
 
-  // wave-541: 이번 주 강수렴 픽 성적 — |convergenceNetScore| ≥ FACTOR_PICK_STRONG 인 종료 경기 승/패 집계
-  const weeklyStrongConvergenceRecord = thisWeekPreviousGames.reduce(
-    (acc, g) => {
-      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_STRONG) return acc;
-      if (g.homeScore === null || g.awayScore === null) return acc;
-      const favoredHome = g.convergenceNetScore > 0;
-      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
-      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
-    },
-    { wins: 0, losses: 0 },
-  );
+  // wave-541: 이번 주 강수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
+  const weeklyStrongConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_STRONG);
 
-  // wave-567: 이번 주 완전수렴 픽 성적 — FACTOR_PICK_COMPLETE 임계 종료 경기 승/패 집계 (강수렴 wave-541 패턴 동기)
-  const weeklyCompleteConvergenceRecord = thisWeekPreviousGames.reduce(
-    (acc, g) => {
-      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_COMPLETE) return acc;
-      if (g.homeScore === null || g.awayScore === null) return acc;
-      const favoredHome = g.convergenceNetScore > 0;
-      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
-      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
-    },
-    { wins: 0, losses: 0 },
-  );
+  // wave-567: 이번 주 완전수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
+  const weeklyCompleteConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_COMPLETE);
 
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();
