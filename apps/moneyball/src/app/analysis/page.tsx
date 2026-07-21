@@ -1013,7 +1013,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1052,6 +1052,8 @@ export default async function AnalysisIndexPage() {
     getConvergencePickTeamStats(FACTOR_PICK_COMPLETE),
     // wave-573: 완전수렴 픽 홈/어웨이 분리 성적 — 강수렴 wave-559 패턴 동기 (FACTOR_PICK_COMPLETE 임계)
     getConvergencePickHomeAwaySplit(FACTOR_PICK_COMPLETE),
+    // wave-575: 완전수렴 픽 직전 N경기 성적 — 강수렴 wave-544 패턴 동기 (FACTOR_PICK_COMPLETE 임계, 날짜 무관 rolling)
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_COMPLETE),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -1272,7 +1274,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) · wave-467: 섹션 border/bg amber upgrade (완전수렴 경기 있을 시) · wave-571: 완전수렴 픽 팀별 시즌 성적 (강수렴 wave-557 패턴 동기) · wave-573: 완전수렴 픽 홈/어웨이 분리 성적 (강수렴 wave-559 패턴 동기) */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) · wave-467: 섹션 border/bg amber upgrade (완전수렴 경기 있을 시) · wave-571: 완전수렴 픽 팀별 시즌 성적 (강수렴 wave-557 패턴 동기) · wave-573: 완전수렴 픽 홈/어웨이 분리 성적 (강수렴 wave-559 패턴 동기) · wave-575: 완전수렴 픽 직전 N경기 rolling 성적 (강수렴 wave-544 패턴 동기) */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           {/* wave-467: 섹션 container — sectionHasComplete 시 amber (game/[id] badgeClass amber 패턴을 섹션 차원 적용) */}
@@ -2928,7 +2930,7 @@ export default async function AnalysisIndexPage() {
               </div>
             );
           })()}
-          {/* wave-561: 강수렴 픽 완전수렴(10팩터) 시즌 성적 · wave-563: 완전수렴 픽 연속 streak — FACTOR_PICK_COMPLETE 임계 정확도 (강수렴 상위 tier) */}
+          {/* wave-561: 강수렴 픽 완전수렴(10팩터) 시즌 성적 · wave-563: 완전수렴 픽 연속 streak · wave-575: 직전 N경기 rolling — FACTOR_PICK_COMPLETE 임계 정확도 (강수렴 상위 tier) */}
           {seasonCompleteConvergenceRecord.total > 0 && (() => {
             const pct = computeWinRatePct(seasonCompleteConvergenceRecord.wins, seasonCompleteConvergenceRecord.total);
             return (
@@ -2979,6 +2981,17 @@ export default async function AnalysisIndexPage() {
                   >
                     이달 {monthlyCompleteConvergenceRecord.wins}승{monthlyCompleteConvergenceRecord.losses}패
                     {' '}({computeWinRatePct(monthlyCompleteConvergenceRecord.wins, monthlyCompleteConvergenceRecord.total)}%)
+                  </span>
+                )}
+                {/* wave-575: 완전수렴 픽 직전 N경기 성적 — 강수렴 wave-544 패턴 동기 (날짜 무관 rolling) */}
+                {recentCompleteConvergenceRecord.total > 0 && (
+                  <span
+                    className="text-xs tabular-nums text-gray-500 dark:text-gray-400"
+                    title={`최근 ${recentCompleteConvergenceRecord.total}경기 완전수렴 픽 적중 현황`}
+                  >
+                    최근 {recentCompleteConvergenceRecord.total}경기{' '}
+                    {recentCompleteConvergenceRecord.wins}승{recentCompleteConvergenceRecord.losses}패
+                    {' '}({computeWinRatePct(recentCompleteConvergenceRecord.wins, recentCompleteConvergenceRecord.total)}%)
                   </span>
                 )}
               </div>
