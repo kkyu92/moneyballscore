@@ -4,7 +4,8 @@ import {
   type TeamCode,
   shortTeamName,
   winnerProbOf,
-  assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL
+  assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL,
+  FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -13,6 +14,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
+import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -81,7 +83,11 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
 }
 
 export default async function ReviewsPage() {
-  const predictions = await getVerifiedPredictions();
+  const [predictions, strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+    getVerifiedPredictions(),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE),
+  ]);
   const recentWeeks = getRecentWeeks(4);
   const recentMonths = getRecentMonths(3);
 
@@ -199,6 +205,41 @@ export default async function ReviewsPage() {
           </span>
         </Link>
       </section>
+
+      {/* wave-590: 수렴 픽 전체 성적 — 강수렴/완전수렴 누적 W-L 카드 */}
+      {(strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0) && (
+        <section aria-labelledby="reviews-convergence-title" className="space-y-3">
+          <h2 id="reviews-convergence-title" className="text-lg font-bold">
+            수렴 픽 전체 성적
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {strongConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5 space-y-1">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className="text-2xl font-bold">
+                  {strongConvergenceRecord.wins}승 {strongConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {strongConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+            {completeConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/40 p-5 space-y-1">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className="text-2xl font-bold">
+                  {completeConvergenceRecord.wins}승 {completeConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {completeConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {total > 0 ? (
         <>
