@@ -23,7 +23,7 @@ import {
   KBO_DEFAULT_GAME_TIME,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
@@ -535,7 +535,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                 title={`최근 ${convergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
               >
                 최근 {convergenceRecord.total}경기 {convergenceRecord.wins}승{convergenceRecord.losses}패{' '}
-                ({Math.round(convergenceRecord.wins / convergenceRecord.total * 100)}%)
+                ({computeWinRatePct(convergenceRecord.wins, convergenceRecord.total)}%)
               </p>
             )}
           </div>

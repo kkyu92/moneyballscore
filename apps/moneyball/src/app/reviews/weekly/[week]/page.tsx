@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from '@moneyball/shared';
-import { getRecentConvergencePickRecord } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
   buildWeeklyReview,
@@ -280,7 +280,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {strongConvergenceRecord.total}경기 ·{' '}
-                  {Math.round((strongConvergenceRecord.wins / strongConvergenceRecord.total) * 100)}% 적중
+                  {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
                 </p>
               </div>
             )}
@@ -292,7 +292,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {completeConvergenceRecord.total}경기 ·{' '}
-                  {Math.round((completeConvergenceRecord.wins / completeConvergenceRecord.total) * 100)}% 적중
+                  {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
                 </p>
               </div>
             )}
