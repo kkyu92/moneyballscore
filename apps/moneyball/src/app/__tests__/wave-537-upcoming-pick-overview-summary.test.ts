@@ -27,8 +27,9 @@ describe('wave-537 — 이번 주 남은 경기 수렴 픽 카드 buildGameOverv
     expect(PAGE_SRC).toContain('gameOverviewSummary');
   });
 
-  it('analysis/page.tsx: UI — isTopUpcomingPick/isStrongUpcomingPick 카드에 gameOverviewSummary 렌더링', () => {
-    expect(PAGE_SRC).toContain('isTopUpcomingPick || isStrongUpcomingPick) && g.gameOverviewSummary');
+  it('analysis/page.tsx: UI — isTopUpcomingPick/isCompleteUpcomingPick/isStrongUpcomingPick 카드에 gameOverviewSummary 렌더링', () => {
+    // wave-577: 완전수렴 픽도 summary 표시 조건에 추가됨
+    expect(PAGE_SRC).toContain('isTopUpcomingPick || isCompleteUpcomingPick || isStrongUpcomingPick) && g.gameOverviewSummary');
     expect(PAGE_SRC).toContain('wave-537');
   });
 

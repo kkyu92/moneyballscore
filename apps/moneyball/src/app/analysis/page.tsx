@@ -1194,6 +1194,14 @@ export default async function AnalysisIndexPage() {
   );
   const strongUpcomingPickCount = strongUpcomingPickGameIds.size;
 
+  // wave-577: 완전수렴 픽 이번 주 남은 경기 — FACTOR_PICK_COMPLETE 이상 경기 Set
+  const completeUpcomingPickGameIds = new Set(
+    thisWeekRemainingGames
+      .filter((g) => g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE)
+      .map((g) => g.gameId)
+  );
+  const completeUpcomingPickCount = completeUpcomingPickGameIds.size;
+
   // wave-541: 이번 주 강수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
   const weeklyStrongConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_STRONG);
 
@@ -1274,7 +1282,7 @@ export default async function AnalysisIndexPage() {
         )}
       </section>
 
-      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) · wave-467: 섹션 border/bg amber upgrade (완전수렴 경기 있을 시) · wave-571: 완전수렴 픽 팀별 시즌 성적 (강수렴 wave-557 패턴 동기) · wave-573: 완전수렴 픽 홈/어웨이 분리 성적 (강수렴 wave-559 패턴 동기) · wave-575: 완전수렴 픽 직전 N경기 rolling 성적 (강수렴 wave-544 패턴 동기) */}
+      {/* 팩터 수렴 픽 — wave-392: 복수 경기 · wave-394: 팩터 레이블 · wave-396: 모델 확신도 · wave-398: 수렴 강도 색상 + 경기 시간 · wave-400: 팩터 칩 glossary 링크 · wave-402: 상대 강점 팩터 칩 · wave-405: 이번 주 성적 라인 · wave-407: 선발 FIP 대결 · wave-409: 불펜 FIP + 타선 wOBA 대결 · wave-411: Elo + 최근폼 대결 · wave-413: WAR + xFIP 대결 · wave-414: SFR + 상대전적 + 구장 대결 · wave-416: 팩터-모델 합치 칩 · wave-417: SP FIP/xFIP 대결 투수 이름 표시 · wave-420: 가중 우위 % 표시 · wave-422: 구장 대결 구장명 + parkNote 표시 · wave-424: 수렴 성적 rolling 표시 · wave-426: 최근폼 행 최근 10경기 구체 승패 추가 · wave-428: 상대전적 행 패수 추가 · wave-430: 종합 우세 배지 우세 팩터 항목 나열 · wave-432: 유효 팩터 수 표시 · wave-434: 홈/원정 시즌 기록 표시 · wave-436: KBO 순위 표시 · wave-438: SP 비수렴 시 선발투수 이름 표시 · wave-440: xFIP 행 FIP-xFIP 갭 기반 회귀(↑)/반등(↓) 방향 표시 · wave-442: 불펜 FIP 행 격차(Δ) + 타선 wOBA 행 격차(Δ) 표시 · wave-444: Elo 행 격차(Δ) + WAR 행 격차(Δ) 표시 · wave-446: 선발 FIP 행 격차(Δ) + 수비 SFR 행 격차(Δ) 표시 · wave-448: 최근폼 행 격차(Δ) + 상대전적 비율 격차(Δ) 표시 · wave-450: 구장 행 PF 편차(Δ) ≥ PARK_FACTOR_DELTA_MIN(3) 시 수치 명시 · wave-461: 합치 칩 3-tier 색상 (isComplete=amber) · wave-465: 수렴 단계 레이블 칩 (완전수렴/강수렴) · wave-467: 섹션 border/bg amber upgrade (완전수렴 경기 있을 시) · wave-571: 완전수렴 픽 팀별 시즌 성적 (강수렴 wave-557 패턴 동기) · wave-573: 완전수렴 픽 홈/어웨이 분리 성적 (강수렴 wave-559 패턴 동기) · wave-575: 완전수렴 픽 직전 N경기 rolling 성적 (강수렴 wave-544 패턴 동기) · wave-577: 이번 주 남은 경기 완전수렴 픽 강조 (헤더 amber 배지 + 게임 카드 레이블 + compact preview 레이블) */}
       {factorPickGames.length > 0 && (
         <section aria-labelledby="factor-pick-title">
           {/* wave-467: 섹션 container — sectionHasComplete 시 amber (game/[id] badgeClass amber 패턴을 섹션 차원 적용) */}
@@ -2795,6 +2803,12 @@ export default async function AnalysisIndexPage() {
             </h2>
             {/* wave-525: 강수렴 픽 복수 카운트 배지 · wave-527: pill badge 스타일 · wave-541: 이번 주 강수렴 픽 성적 */}
             <div className="flex items-center gap-2">
+              {/* wave-577: 완전수렴 픽 이번 주 남은 경기 강조 — FACTOR_PICK_COMPLETE 경기 수 amber 배지 */}
+              {completeUpcomingPickCount > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+                  ★ 완전수렴 {completeUpcomingPickCount}개 예정
+                </span>
+              )}
               {strongUpcomingPickCount > 0 && (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                   ⚡ 수렴 픽 {strongUpcomingPickCount}개 예정
@@ -3064,6 +3078,9 @@ export default async function AnalysisIndexPage() {
               <div className="mb-4 space-y-1.5">
                 {strongPickGames.map(g => {
                   const isTop = g.gameId === topUpcomingPickGameId;
+                  // wave-577: 완전수렴 여부 (FACTOR_PICK_COMPLETE)
+                  const isComplete = completeUpcomingPickGameIds.has(g.gameId);
+                  const isAmber = isTop || isComplete;
                   const [, mm, dd] = g.gameDate.split('-');
                   const dateShort = `${Number(mm)}.${Number(dd)}`;
                   const favoredHome = (g.convergenceNetScore ?? 0) > 0;
@@ -3073,19 +3090,23 @@ export default async function AnalysisIndexPage() {
                       key={g.gameId}
                       href={`/analysis/game/${g.gameId}`}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:opacity-80 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
-                        isTop
+                        isAmber
                           ? 'bg-amber-50 dark:bg-amber-900/25 border border-amber-200 dark:border-amber-700/40'
                           : 'bg-brand-50 dark:bg-brand-900/25 border border-brand-200 dark:border-brand-800/40'
                       }`}
                     >
-                      <span className={`shrink-0 ${isTop ? 'text-amber-500 dark:text-amber-400' : 'text-brand-500 dark:text-brand-400'}`}>
-                        {isTop ? '★' : '⚡'}
+                      <span className={`shrink-0 ${isAmber ? 'text-amber-500 dark:text-amber-400' : 'text-brand-500 dark:text-brand-400'}`}>
+                        {isAmber ? '★' : '⚡'}
                       </span>
+                      {/* wave-577: 완전수렴 레이블 표시 */}
+                      {isComplete && (
+                        <span className="shrink-0 text-amber-600 dark:text-amber-400 font-semibold">완전수렴</span>
+                      )}
                       <span className="font-semibold text-gray-900 dark:text-gray-100 shrink-0">
                         {shortTeamName(g.awayCode)} @ {shortTeamName(g.homeCode)}
                       </span>
                       <span className="text-gray-400 dark:text-gray-500 shrink-0 tabular-nums">{dateShort}</span>
-                      <span className={`font-medium shrink-0 ${isTop ? 'text-amber-600 dark:text-amber-400' : 'text-brand-600 dark:text-brand-400'}`}>
+                      <span className={`font-medium shrink-0 ${isAmber ? 'text-amber-600 dark:text-amber-400' : 'text-brand-600 dark:text-brand-400'}`}>
                         ↗ {shortTeamName(favoredCode)}
                       </span>
                       {g.gameOverviewSummary && (
@@ -3135,11 +3156,13 @@ export default async function AnalysisIndexPage() {
                       const isTopUpcomingPick = topUpcomingPickGameId !== null && g.gameId === topUpcomingPickGameId;
                       // wave-525: 강수렴 픽 (TOP픽 제외 FACTOR_PICK_STRONG 이상)
                       const isStrongUpcomingPick = !isTopUpcomingPick && strongUpcomingPickGameIds.has(g.gameId);
+                      // wave-577: 완전수렴 픽 (FACTOR_PICK_COMPLETE 이상)
+                      const isCompleteUpcomingPick = completeUpcomingPickGameIds.has(g.gameId);
                       return (
                         <li key={g.gameId}>
                           <Link href={`/analysis/game/${g.gameId}`} className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
                             <div className={`flex items-center justify-between rounded-xl transition-colors px-3 py-2.5 text-sm ${
-                              isTopUpcomingPick
+                              isTopUpcomingPick || isCompleteUpcomingPick
                                 ? 'bg-white dark:bg-[var(--color-surface-card)] border border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30 hover:border-amber-400 dark:hover:border-amber-600/70'
                                 : isStrongUpcomingPick
                                   ? 'bg-white dark:bg-[var(--color-surface-card)] border border-brand-300 dark:border-brand-700/60 hover:border-brand-400 dark:hover:border-brand-600'
@@ -3152,21 +3175,31 @@ export default async function AnalysisIndexPage() {
                                 {g.gameTime && (
                                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 tabular-nums">
                                     {g.gameTime.slice(0, 5)}
-                                    {/* wave-523: 이번 주 수렴 TOP 픽 배지 — |convergenceNetScore| 최대 예정 경기 */}
-                                    {isTopUpcomingPick && <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ TOP픽</span>}
-                                    {/* wave-525: 강수렴 픽 배지 — TOP픽 외 FACTOR_PICK_STRONG 이상 */}
+                                    {/* wave-577: 완전수렴 TOP픽 / 완전수렴 / TOP픽 레이블 — 완전수렴이 TOP픽과 중복 시 "★ 완전수렴 TOP픽" */}
+                                    {isTopUpcomingPick && isCompleteUpcomingPick && <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ 완전수렴 TOP픽</span>}
+                                    {isTopUpcomingPick && !isCompleteUpcomingPick && <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ TOP픽</span>}
+                                    {/* wave-577: 완전수렴이지만 TOP픽은 아닌 경우 */}
+                                    {!isTopUpcomingPick && isCompleteUpcomingPick && <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ 완전수렴</span>}
+                                    {/* wave-525: 강수렴 픽 배지 — TOP픽·완전수렴 외 FACTOR_PICK_STRONG 이상 */}
                                     {isStrongUpcomingPick && <span className="ml-1.5 text-brand-500 dark:text-brand-400 font-semibold not-italic">⚡ 픽</span>}
                                   </p>
                                 )}
-                                {!g.gameTime && isTopUpcomingPick && (
+                                {!g.gameTime && isTopUpcomingPick && isCompleteUpcomingPick && (
+                                  <p className="text-xs text-amber-500 dark:text-amber-400 mt-0.5 font-semibold">★ 완전수렴 TOP픽</p>
+                                )}
+                                {!g.gameTime && isTopUpcomingPick && !isCompleteUpcomingPick && (
                                   <p className="text-xs text-amber-500 dark:text-amber-400 mt-0.5 font-semibold">★ TOP픽</p>
+                                )}
+                                {/* wave-577: 완전수렴이지만 게임시간 없고 TOP픽 아닌 경우 */}
+                                {!g.gameTime && !isTopUpcomingPick && isCompleteUpcomingPick && (
+                                  <p className="text-xs text-amber-500 dark:text-amber-400 mt-0.5 font-semibold">★ 완전수렴</p>
                                 )}
                                 {/* wave-525: 게임시간 없는 경우 강수렴 픽 배지 */}
                                 {!g.gameTime && isStrongUpcomingPick && (
                                   <p className="text-xs text-brand-500 dark:text-brand-400 mt-0.5 font-semibold">⚡ 픽</p>
                                 )}
                                 {/* wave-537: 수렴 픽 경기 한 줄 요약 */}
-                                {(isTopUpcomingPick || isStrongUpcomingPick) && g.gameOverviewSummary && (
+                                {(isTopUpcomingPick || isCompleteUpcomingPick || isStrongUpcomingPick) && g.gameOverviewSummary && (
                                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
                                     {g.gameOverviewSummary}
                                   </p>

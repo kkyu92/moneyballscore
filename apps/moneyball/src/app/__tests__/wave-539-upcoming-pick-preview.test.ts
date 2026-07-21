@@ -27,14 +27,14 @@ describe('wave-539 — 이번 주 강수렴 픽 미리보기 블록', () => {
   it('analysis/page.tsx: gameOverviewSummary 렌더링', () => {
     // 미리보기 블록 안에서 gameOverviewSummary 표시
     const idx539 = PAGE_SRC.indexOf('wave-539');
-    const after539 = PAGE_SRC.slice(idx539, idx539 + 2500);
+    const after539 = PAGE_SRC.slice(idx539, idx539 + 3500);
     expect(after539).toContain('gameOverviewSummary');
   });
 
   it('analysis/page.tsx: 날짜 단축 표기 (mm.dd 형식)', () => {
     // dateShort = `${Number(mm)}.${Number(dd)}`
     const idx539 = PAGE_SRC.indexOf('wave-539');
-    const after539 = PAGE_SRC.slice(idx539, idx539 + 2500);
+    const after539 = PAGE_SRC.slice(idx539, idx539 + 3500);
     expect(after539).toContain('dateShort');
     expect(after539).toContain('Number(mm)');
     expect(after539).toContain('Number(dd)');
@@ -42,14 +42,14 @@ describe('wave-539 — 이번 주 강수렴 픽 미리보기 블록', () => {
 
   it('analysis/page.tsx: ↗ 수렴 방향 팀명 표시', () => {
     const idx539 = PAGE_SRC.indexOf('wave-539');
-    const after539 = PAGE_SRC.slice(idx539, idx539 + 2500);
+    const after539 = PAGE_SRC.slice(idx539, idx539 + 3500);
     expect(after539).toContain('↗');
     expect(after539).toContain('favoredCode');
   });
 
   it('analysis/page.tsx: TOP픽 amber / 강픽 brand 색상 분기', () => {
     const idx539 = PAGE_SRC.indexOf('wave-539');
-    const after539 = PAGE_SRC.slice(idx539, idx539 + 2500);
+    const after539 = PAGE_SRC.slice(idx539, idx539 + 3500);
     expect(after539).toContain('amber');
     expect(after539).toContain('brand');
     expect(after539).toContain('isTop');
@@ -57,7 +57,7 @@ describe('wave-539 — 이번 주 강수렴 픽 미리보기 블록', () => {
 
   it('analysis/page.tsx: strongUpcomingPickCount 조건으로 블록 렌더 가드', () => {
     const idx539 = PAGE_SRC.indexOf('wave-539');
-    const after539 = PAGE_SRC.slice(idx539, idx539 + 2500);
+    const after539 = PAGE_SRC.slice(idx539, idx539 + 3500);
     expect(after539).toContain('strongUpcomingPickCount > 0');
   });
 
