@@ -1015,7 +1015,7 @@ async function getSeasonH2HData(): Promise<Map<string, Record<string, number>>> 
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -1048,6 +1048,8 @@ export default async function AnalysisIndexPage() {
     getConvergencePickStreak(FACTOR_PICK_COMPLETE),
     // wave-565: 완전수렴 픽 시즌 최장 streak — 현재 streak 비교 컨텍스트 (wave-554 완전수렴 차원)
     getConvergencePickBestStreak(FACTOR_PICK_COMPLETE),
+    // wave-569: 이번 달 완전수렴 픽 성적 — 강수렴 wave-546 패턴 동기
+    getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_COMPLETE, currentMonth.startDate),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -2965,6 +2967,16 @@ export default async function AnalysisIndexPage() {
                     title={`이번 주 완전수렴 픽 ${weeklyCompleteConvergenceRecord.wins}승 ${weeklyCompleteConvergenceRecord.losses}패`}
                   >
                     이번 주 {weeklyCompleteConvergenceRecord.wins}승 {weeklyCompleteConvergenceRecord.losses}패
+                  </span>
+                )}
+                {/* wave-569: 이번 달 완전수렴 픽 성적 — 강수렴 wave-546 패턴 동기 */}
+                {monthlyCompleteConvergenceRecord.total > 0 && (
+                  <span
+                    className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                    title={`이번 달 완전수렴 픽 성적 (${currentMonth.label})`}
+                  >
+                    이달 {monthlyCompleteConvergenceRecord.wins}승{monthlyCompleteConvergenceRecord.losses}패
+                    {' '}({Math.round(monthlyCompleteConvergenceRecord.wins / monthlyCompleteConvergenceRecord.total * 100)}%)
                   </span>
                 )}
               </div>
