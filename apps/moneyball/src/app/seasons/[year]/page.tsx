@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { shortTeamName, SITE_URL} from "@moneyball/shared";
+import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from "@moneyball/shared";
 import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
+import { getRecentConvergencePickRecord, computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { SeasonStandingsSortControl } from "@/components/seasons/SeasonStandingsSortControl";
@@ -63,6 +64,13 @@ export default async function SeasonPage({ params }: PageProps) {
 
   const summary = await buildSeasonSummary(y);
   if (!summary) notFound();
+
+  const seasonStartDate = `${y}-04-01`;
+  const seasonEndDate = summary.isOngoing ? undefined : `${y}-11-30`;
+  const [strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+  ]);
 
   // 월별 차트 max 계산 (bar 폭 정규화)
   const maxMonthRuns = Math.max(1, ...summary.byMonth.map((m) => m.avgRuns));
@@ -147,6 +155,41 @@ export default async function SeasonPage({ params }: PageProps) {
           <Stat label="홈 승률" value={fmtPct(summary.leagueHomeWinRate)} suffix={`N=${summary.decidedGames} · 무승부 ${summary.draws}`} />
         </div>
       </section>
+
+      {/* wave-588: 수렴 픽 시즌 성적 — 강수렴/완전수렴 W-L 카드 */}
+      {(strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0) && (
+        <section aria-labelledby="season-convergence-title" className="space-y-3">
+          <h2 id="season-convergence-title" className="text-xl font-bold">
+            수렴 픽 시즌 성적
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {strongConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5 space-y-1">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className="text-2xl font-bold">
+                  {strongConvergenceRecord.wins}승 {strongConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {strongConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+            {completeConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/40 p-5 space-y-1">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className="text-2xl font-bold">
+                  {completeConvergenceRecord.wins}승 {completeConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {completeConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* 팀 순위 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
