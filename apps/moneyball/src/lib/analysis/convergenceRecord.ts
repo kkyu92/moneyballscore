@@ -7,6 +7,7 @@ import {
   COMPOSITE_DUEL_MIN_VALID,
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_STRONG,
+  FACTOR_PICK_COMPLETE,
   KBO_SEASON_START_DATE,
   PRODUCTION_COHORT_RULES,
   CONVERGENCE_TEAM_STATS_MIN_PICKS,
@@ -379,6 +380,18 @@ export function computeWeeklyConvergenceRecord(
     },
     { wins: 0, losses: 0 },
   );
+}
+
+// wave-583: convergenceNetScore → isTopPick(완전수렴) / isStrongPick(강수렴) 플래그 — wave-579/581 어제/이번주 경기 동일 2줄 패턴 추출
+export function computeConvergencePickFlags(
+  convergenceNetScore: number | null,
+): { isTopPick: boolean; isStrongPick: boolean } {
+  if (convergenceNetScore == null) return { isTopPick: false, isStrongPick: false };
+  const abs = Math.abs(convergenceNetScore);
+  return {
+    isTopPick: abs >= FACTOR_PICK_COMPLETE,
+    isStrongPick: abs >= FACTOR_PICK_STRONG,
+  };
 }
 
 // wave-580: isCorrect 사전 집계 기반 수렴 픽 결과 집계 — computeWeeklyConvergenceRecord(homeScore/awayScore) 와 구분

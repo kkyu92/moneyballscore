@@ -94,7 +94,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromIsCorrect, computeWinRatePct, computeWinRateColorClass, computeWinProbPct } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromIsCorrect, computeWinRatePct, computeWinRateColorClass, computeWinProbPct, computeConvergencePickFlags } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -3499,10 +3499,8 @@ export default async function AnalysisIndexPage() {
                 : computeWinProbPct(1 - g.homeWinProb);
               const yesterdayStatus =
                 g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
-              // wave-550: 어제 경기 수렴 픽 배지
-              const convScore = g.convergenceNetScore;
-              const isYesterdayTopPick = convScore != null && Math.abs(convScore) >= FACTOR_PICK_COMPLETE;
-              const isYesterdayStrongPick = convScore != null && Math.abs(convScore) >= FACTOR_PICK_STRONG;
+              // wave-550: 어제 경기 수렴 픽 배지 (wave-583: computeConvergencePickFlags 추출)
+              const { isTopPick: isYesterdayTopPick, isStrongPick: isYesterdayStrongPick } = computeConvergencePickFlags(g.convergenceNetScore);
               return (
                 <li key={g.gameId} data-yesterday-status={yesterdayStatus}>
                   <Link
@@ -3590,10 +3588,8 @@ export default async function AnalysisIndexPage() {
                         : null;
                       const thisWeekStatus =
                         g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
-                      // wave-581: 이번 주 경기 아카이브 완전수렴/강수렴 레이블 — wave-579 어제 경기 패턴 동기
-                      const thisWeekConvScore = g.convergenceNetScore;
-                      const isThisWeekTopPick = thisWeekConvScore != null && Math.abs(thisWeekConvScore) >= FACTOR_PICK_COMPLETE;
-                      const isThisWeekStrongPick = thisWeekConvScore != null && Math.abs(thisWeekConvScore) >= FACTOR_PICK_STRONG;
+                      // wave-581: 이번 주 경기 아카이브 완전수렴/강수렴 레이블 (wave-583: computeConvergencePickFlags 추출)
+                      const { isTopPick: isThisWeekTopPick, isStrongPick: isThisWeekStrongPick } = computeConvergencePickFlags(g.convergenceNetScore);
                       return (
                         <li key={g.gameId} data-this-week-status={thisWeekStatus}>
                           <Link
