@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FACTOR_PICK_COMPLETE, CONVERGENCE_TEAM_STATS_MIN_PICKS } from '@moneyball/shared';
+import { FACTOR_PICK_COMPLETE, CONVERGENCE_TEAM_STATS_MIN_PICKS, type TeamCode } from '@moneyball/shared';
 import { computeConvergenceTeamStats, computeConvergenceHomeAwaySplit } from '@/lib/analysis/convergenceRecord';
 
 // wave-571: 완전수렴 픽 팀별 시즌 성적 guard
@@ -28,9 +28,9 @@ describe('wave-571: 완전수렴 픽 팀별 시즌 성적 guard', () => {
   describe('minPicks 필터 (CONVERGENCE_TEAM_STATS_MIN_PICKS 미달 팀 제외)', () => {
     it('minPicks=3 기준 경기 수 미달 팀 제외', () => {
       const result = computeConvergenceTeamStats([
-        { favoredTeam: 'HH' as any, won: true },
-        { favoredTeam: 'HH' as any, won: false },
-        { favoredTeam: 'OB' as any, won: true }, // 1경기만 → 제외
+        { favoredTeam: 'HH' as TeamCode, won: true },
+        { favoredTeam: 'HH' as TeamCode, won: false },
+        { favoredTeam: 'OB' as TeamCode, won: true }, // 1경기만 → 제외
       ], 3);
       expect(result.every(s => s.wins + s.losses >= 3)).toBe(true);
       expect(result.find(s => s.teamCode === 'OB')).toBeUndefined();
@@ -40,12 +40,12 @@ describe('wave-571: 완전수렴 픽 팀별 시즌 성적 guard', () => {
   describe('집계 정확성', () => {
     it('팀별 승패 집계 + 승리 수 내림차순 정렬', () => {
       const result = computeConvergenceTeamStats([
-        { favoredTeam: 'HH' as any, won: true },
-        { favoredTeam: 'HH' as any, won: true },
-        { favoredTeam: 'HH' as any, won: false },
-        { favoredTeam: 'OB' as any, won: true },
-        { favoredTeam: 'OB' as any, won: false },
-        { favoredTeam: 'OB' as any, won: false },
+        { favoredTeam: 'HH' as TeamCode, won: true },
+        { favoredTeam: 'HH' as TeamCode, won: true },
+        { favoredTeam: 'HH' as TeamCode, won: false },
+        { favoredTeam: 'OB' as TeamCode, won: true },
+        { favoredTeam: 'OB' as TeamCode, won: false },
+        { favoredTeam: 'OB' as TeamCode, won: false },
       ], 1);
       const hh = result.find(s => s.teamCode === 'HH');
       const ob = result.find(s => s.teamCode === 'OB');
@@ -55,10 +55,10 @@ describe('wave-571: 완전수렴 픽 팀별 시즌 성적 guard', () => {
 
     it('경기 수 동점 시 wins 많은 팀 우선', () => {
       const result = computeConvergenceTeamStats([
-        { favoredTeam: 'SK' as any, won: true },
-        { favoredTeam: 'SK' as any, won: true },
-        { favoredTeam: 'LG' as any, won: true },
-        { favoredTeam: 'LG' as any, won: false },
+        { favoredTeam: 'SK' as TeamCode, won: true },
+        { favoredTeam: 'SK' as TeamCode, won: true },
+        { favoredTeam: 'LG' as TeamCode, won: true },
+        { favoredTeam: 'LG' as TeamCode, won: false },
       ], 1);
       expect(result[0].teamCode).toBe('SK');
     });
