@@ -1326,6 +1326,17 @@ export const REVIEWS_MONTHLY_ISR_SECONDS = REVIEWS_MONTHLY_ISR_HOURS * 60 * 60;
 export const REVIEWS_RECENT_LIMIT = 100;
 
 /**
+ * Reviews 허브 내비게이션 최근 주/월 표시 수 — silent drift family wave 591 (cycle 1969).
+ * reviews/page.tsx 허브 내비게이션 바 표시 수:
+ *   - app/reviews/page.tsx: getRecentWeeks(4) → REVIEWS_HUB_RECENT_WEEKS
+ *   - app/reviews/page.tsx: getRecentMonths(3) → REVIEWS_HUB_RECENT_MONTHS
+ *   - app/reviews/weekly/[week]/page.tsx: getRecentWeeks(4) → REVIEWS_HUB_RECENT_WEEKS
+ * 변경 시 허브 내비게이션 주/월 링크 수 자동 sync.
+ */
+export const REVIEWS_HUB_RECENT_WEEKS = 4;
+export const REVIEWS_HUB_RECENT_MONTHS = 3;
+
+/**
  * 크게 빗나간 예측 (misses) 표시 한도 — silent drift family wave 296 (cycle 1624).
  * Hardcoded 10 occurrence 3건:
  *   - app/reviews/misses/page.tsx: buildMissReport({ limit: 10 })
