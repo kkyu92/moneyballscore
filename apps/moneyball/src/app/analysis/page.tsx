@@ -3705,7 +3705,7 @@ export default async function AnalysisIndexPage() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {currentWeek.label}
                 {weeklyStats.total > 0
-                  ? ` · ${weeklyStats.total}경기 중 ${weeklyStats.correct}적중 (${Math.round((weeklyStats.correct / weeklyStats.total) * 100)}%)`
+                  ? ` · ${weeklyStats.total}경기 중 ${weeklyStats.correct}적중 (${computeWinRatePct(weeklyStats.correct, weeklyStats.total)}%)`
                   : ' · 이번 주 검증된 경기를 기다리는 중'}
               </p>
             </div>
@@ -3823,7 +3823,7 @@ export default async function AnalysisIndexPage() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {currentMonth.label}
                 {monthlyStats.total > 0
-                  ? ` · ${monthlyStats.total}경기 중 ${monthlyStats.correct}적중 (${Math.round((monthlyStats.correct / monthlyStats.total) * 100)}%)`
+                  ? ` · ${monthlyStats.total}경기 중 ${monthlyStats.correct}적중 (${computeWinRatePct(monthlyStats.correct, monthlyStats.total)}%)`
                   : ' · 이번 달 검증된 경기를 기다리는 중'}
               </p>
             </div>
