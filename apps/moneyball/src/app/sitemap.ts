@@ -121,6 +121,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // KBO 팀별 최근 N경기 URL (KBO_TEAM_COUNT) — /teams/[code]/recent
+  const teamRecentRoutes: MetadataRoute.Sitemap = Object.keys(KBO_TEAMS).map(
+    (code) => ({
+      url: `${SITE_URL}/teams/${code}/recent`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }),
+  );
+
   // MLB 팀 프로필 URL (MLB_TEAM_COUNT)
   const mlbTeamProfileRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
@@ -282,6 +292,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...weeklyReviewRoutes,
     ...monthlyReviewRoutes,
     ...teamProfileRoutes,
+    ...teamRecentRoutes,
     ...mlbTeamProfileRoutes,
     ...mlbPlayersDetailRoutes,
     ...enMlbTeamProfileRoutes,
