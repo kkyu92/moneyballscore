@@ -53,10 +53,13 @@ async function fetchConvergencePickResults(
   cutoff: string,
   limit: number,
   minFactors: number,
+  // wave-584: endDate 지정 시 해당 날짜까지만 조회 (주간 리뷰 수렴 픽 성적 용).
+  // 미지정 시 기존 동작 (today 미만).
+  endDate?: string,
 ): Promise<boolean[]> {
   const today = toKSTDateString();
   const supabase = await createClient();
-  const gamesResult = (await supabase
+  let query = supabase
     .from('games')
     .select(`
       id, game_date, game_time, home_score, away_score,
@@ -71,12 +74,17 @@ async function fetchConvergencePickResults(
       )
     `)
     .gte('game_date', cutoff)
-    .lt('game_date', today)
     .not('home_score', 'is', null)
     .eq('predictions.prediction_type', 'pre_game')
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_date', { ascending: false })
-    .order('game_time', { ascending: true })) as SelectResult<ConvergenceGameRow[]>;
+    .order('game_time', { ascending: true });
+  if (endDate != null) {
+    query = query.lte('game_date', endDate);
+  } else {
+    query = query.lt('game_date', today);
+  }
+  const gamesResult = (await query) as unknown as SelectResult<ConvergenceGameRow[]>;
 
   const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickResults');
   if (!data) return [];
@@ -126,12 +134,14 @@ export async function getRecentConvergencePickRecord(
   // wave-546/548: startDate 지정 시 lookback days 무시하고 이 날짜부터 전체 조회 (limit 도 무시).
   // 월간 성적 (currentMonth.startDate) / 시즌 전체 성적 (KBO_SEASON_START_DATE) 양쪽 사용.
   startDate?: string,
+  // wave-584: endDate 지정 시 해당 날짜까지만 조회 (주간 리뷰 수렴 픽 성적 용).
+  endDate?: string,
 ): Promise<{ wins: number; losses: number; total: number }> {
   const cutoff = startDate ?? new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
   const effectiveLimit = startDate != null ? Number.MAX_SAFE_INTEGER : limit;
-  const results = await fetchConvergencePickResults(cutoff, effectiveLimit, minFactors);
+  const results = await fetchConvergencePickResults(cutoff, effectiveLimit, minFactors, endDate);
   const wins = results.filter(r => r).length;
   return { wins, losses: results.length - wins, total: results.length };
 }
