@@ -328,6 +328,11 @@ export async function getConvergencePickTeamStats(
   return computeConvergenceTeamStats(results);
 }
 
+// wave-570: wins/total 승률 % — Math.round(wins / total * 100) 9회 중복 추출
+export function computeWinRatePct(wins: number, total: number): number {
+  return Math.round(wins / total * 100);
+}
+
 // wave-568: 이번 주 수렴 픽 성적 집계 — 순수 함수 (wave-405/541/567 동일 reduce 통합)
 // threshold: FACTOR_PICK_MIN_FACTORS / FACTOR_PICK_STRONG / FACTOR_PICK_COMPLETE 중 1개
 // games: convergenceNetScore + homeScore + awayScore 포함 경기 배열 (종료 경기만 의미 있음)
