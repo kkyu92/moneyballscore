@@ -3590,6 +3590,10 @@ export default async function AnalysisIndexPage() {
                         : null;
                       const thisWeekStatus =
                         g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
+                      // wave-581: 이번 주 경기 아카이브 완전수렴/강수렴 레이블 — wave-579 어제 경기 패턴 동기
+                      const thisWeekConvScore = g.convergenceNetScore;
+                      const isThisWeekTopPick = thisWeekConvScore != null && Math.abs(thisWeekConvScore) >= FACTOR_PICK_COMPLETE;
+                      const isThisWeekStrongPick = thisWeekConvScore != null && Math.abs(thisWeekConvScore) >= FACTOR_PICK_STRONG;
                       return (
                         <li key={g.gameId} data-this-week-status={thisWeekStatus}>
                           <Link
@@ -3600,6 +3604,13 @@ export default async function AnalysisIndexPage() {
                               <div className="min-w-0">
                                 <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                                   {awayName} {g.awayScore ?? '-'} : {g.homeScore ?? '-'} {homeName}
+                                  {/* wave-581: 완전수렴/강수렴 레이블 — wave-579 어제 경기 패턴 동기 */}
+                                  {isThisWeekTopPick && (
+                                    <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ 완전수렴</span>
+                                  )}
+                                  {!isThisWeekTopPick && isThisWeekStrongPick && (
+                                    <span className="ml-1.5 text-brand-500 dark:text-brand-400 font-semibold not-italic">⚡</span>
+                                  )}
                                 </p>
                                 {winnerName && confPct !== null && (
                                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
