@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE } from '@moneyball/shared';
+import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 import {
   parseMonthId,
   getRecentMonths,
@@ -95,7 +96,12 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   const range = parseMonthId(month);
   if (!range) notFound();
 
-  const review = await buildMonthlyReview(range);
+  // wave-586: 강수렴/완전수렴 픽 월간 성적 — startDate~endDate 범위 한정
+  const [review, strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+    buildMonthlyReview(range),
+    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getRecentConvergencePickRecord(Number.MAX_SAFE_INTEGER, FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+  ]);
   const url = `${SITE_URL}/reviews/monthly/${month}`;
 
   const recent = getRecentMonths(6)
@@ -222,6 +228,41 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
                 전월 데이터 부족
               </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* wave-586: 수렴 픽 월간 성적 — 강수렴/완전수렴 W-L 카드 */}
+      {(strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0) && (
+        <section aria-labelledby="monthly-convergence-title" className="space-y-3">
+          <h2 id="monthly-convergence-title" className="text-xl font-bold">
+            수렴 픽 성적
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {strongConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className="text-2xl font-bold mt-1">
+                  {strongConvergenceRecord.wins}승 {strongConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {strongConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+            {completeConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/30 p-5">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className="text-2xl font-bold mt-1">
+                  {completeConvergenceRecord.wins}승 {completeConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {completeConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                </p>
+              </div>
             )}
           </div>
         </section>
