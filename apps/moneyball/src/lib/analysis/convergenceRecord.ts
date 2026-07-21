@@ -12,6 +12,8 @@ import {
   CONVERGENCE_TEAM_STATS_MIN_PICKS,
   CONVERGENCE_HOME_AWAY_MIN_PICKS,
   CONVERGENCE_STREAK_MIN_LENGTH,
+  ACCURACY_GOOD_PCT,
+  CONVERGENCE_BADGE_LOW_PCT,
   type TeamCode,
   type SelectResult,
 } from '@moneyball/shared';
@@ -331,6 +333,16 @@ export async function getConvergencePickTeamStats(
 // wave-570: wins/total 승률 % — Math.round(wins / total * 100) 9회 중복 추출
 export function computeWinRatePct(wins: number, total: number): number {
   return Math.round(wins / total * 100);
+}
+
+// wave-574: 승률 pct → Tailwind 색상 클래스 — ACCURACY_GOOD_PCT/CONVERGENCE_BADGE_LOW_PCT 7회 inline ternary 추출
+export function computeWinRateColorClass(
+  pct: number,
+  neutralClass = 'text-gray-500 dark:text-gray-400',
+): string {
+  if (pct >= ACCURACY_GOOD_PCT) return 'text-green-600 dark:text-green-400';
+  if (pct <= CONVERGENCE_BADGE_LOW_PCT) return 'text-red-500 dark:text-red-400';
+  return neutralClass;
 }
 
 // wave-568: 이번 주 수렴 픽 성적 집계 — 순수 함수 (wave-405/541/567 동일 reduce 통합)
