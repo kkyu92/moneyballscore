@@ -94,7 +94,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeWinRatePct, computeWinRateColorClass, computeWinProbPct } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromIsCorrect, computeWinRatePct, computeWinRateColorClass, computeWinProbPct } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1202,19 +1202,8 @@ export default async function AnalysisIndexPage() {
   // wave-567: 이번 주 완전수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
   const weeklyCompleteConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_COMPLETE);
 
-  // wave-579: 어제 완전수렴 픽 결과 집계 — 강수렴 wave-550 패턴 동기, 결과 확정 경기만 (isCorrect != null)
-  const yesterdayCompleteConvergenceRecord = yesterdayGames.reduce(
-    (acc, g) => {
-      const isComplete = g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE;
-      if (!isComplete || g.isCorrect === null) return acc;
-      return {
-        wins: acc.wins + (g.isCorrect ? 1 : 0),
-        losses: acc.losses + (g.isCorrect ? 0 : 1),
-        total: acc.total + 1,
-      };
-    },
-    { wins: 0, losses: 0, total: 0 }
-  );
+  // wave-580: computeConvergenceRecordFromIsCorrect 추출 (wave-579 인라인 reduce → 순수 함수)
+  const yesterdayCompleteConvergenceRecord = computeConvergenceRecordFromIsCorrect(yesterdayGames, FACTOR_PICK_COMPLETE);
 
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();

@@ -380,3 +380,23 @@ export function computeWeeklyConvergenceRecord(
     { wins: 0, losses: 0 },
   );
 }
+
+// wave-580: isCorrect 사전 집계 기반 수렴 픽 결과 집계 — computeWeeklyConvergenceRecord(homeScore/awayScore) 와 구분
+// isCorrect=null 미종료 경기 제외. total 포함 반환 (어제 배지 표시 조건)
+export function computeConvergenceRecordFromIsCorrect(
+  games: Array<{ convergenceNetScore: number | null; isCorrect: boolean | null }>,
+  threshold: number,
+): { wins: number; losses: number; total: number } {
+  return games.reduce(
+    (acc, g) => {
+      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < threshold) return acc;
+      if (g.isCorrect === null) return acc;
+      return {
+        wins: acc.wins + (g.isCorrect ? 1 : 0),
+        losses: acc.losses + (g.isCorrect ? 0 : 1),
+        total: acc.total + 1,
+      };
+    },
+    { wins: 0, losses: 0, total: 0 },
+  );
+}
