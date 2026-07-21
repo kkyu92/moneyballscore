@@ -6,6 +6,7 @@ import {
   winnerProbOf,
   assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL,
   FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
+  REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -88,8 +89,8 @@ export default async function ReviewsPage() {
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE),
   ]);
-  const recentWeeks = getRecentWeeks(4);
-  const recentMonths = getRecentMonths(3);
+  const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
+  const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
 
   const total = predictions.length;
   const correct = predictions.filter((p) => p.is_correct).length;

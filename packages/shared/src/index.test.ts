@@ -130,6 +130,8 @@ import {
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
+  REVIEWS_HUB_RECENT_WEEKS,
+  REVIEWS_HUB_RECENT_MONTHS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -886,5 +888,12 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
   it('UPCOMING_CONVERGENCE_TEAM_LIMIT — 이번 주 남은 경기 수렴 우위 팀 최대 표시 (silent drift wave 531 guard)', () => {
     expect(UPCOMING_CONVERGENCE_TEAM_LIMIT).toBe(5);
     expect(UPCOMING_CONVERGENCE_TEAM_LIMIT).toBeGreaterThan(0);
+  });
+
+  it('REVIEWS_HUB_RECENT_WEEKS/MONTHS — 리뷰 허브 내비게이션 주/월 표시 수 (silent drift wave 591 guard)', () => {
+    expect(REVIEWS_HUB_RECENT_WEEKS).toBe(4);
+    expect(REVIEWS_HUB_RECENT_MONTHS).toBe(3);
+    expect(REVIEWS_HUB_RECENT_WEEKS).toBeGreaterThan(0);
+    expect(REVIEWS_HUB_RECENT_MONTHS).toBeGreaterThan(0);
   });
 });
