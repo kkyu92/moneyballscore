@@ -1202,6 +1202,20 @@ export default async function AnalysisIndexPage() {
   // wave-567: 이번 주 완전수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
   const weeklyCompleteConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_COMPLETE);
 
+  // wave-579: 어제 완전수렴 픽 결과 집계 — 강수렴 wave-550 패턴 동기, 결과 확정 경기만 (isCorrect != null)
+  const yesterdayCompleteConvergenceRecord = yesterdayGames.reduce(
+    (acc, g) => {
+      const isComplete = g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE;
+      if (!isComplete || g.isCorrect === null) return acc;
+      return {
+        wins: acc.wins + (g.isCorrect ? 1 : 0),
+        losses: acc.losses + (g.isCorrect ? 0 : 1),
+        total: acc.total + 1,
+      };
+    },
+    { wins: 0, losses: 0, total: 0 }
+  );
+
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();
   for (const g of thisWeekRemainingGames) {
@@ -3002,6 +3016,15 @@ export default async function AnalysisIndexPage() {
                     {' '}({computeWinRatePct(recentCompleteConvergenceRecord.wins, recentCompleteConvergenceRecord.total)}%)
                   </span>
                 )}
+                {/* wave-579: 어제 완전수렴 픽 결과 배지 — 강수렴 wave-550 어제 경기 배지 패턴 동기 */}
+                {yesterdayCompleteConvergenceRecord.total > 0 && (
+                  <span
+                    className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                    title={`어제 완전수렴 픽 ${yesterdayCompleteConvergenceRecord.wins}승 ${yesterdayCompleteConvergenceRecord.losses}패`}
+                  >
+                    어제 {yesterdayCompleteConvergenceRecord.wins}승{yesterdayCompleteConvergenceRecord.losses}패
+                  </span>
+                )}
               </div>
             );
           })()}
@@ -3501,8 +3524,9 @@ export default async function AnalysisIndexPage() {
                       <div className="min-w-0">
                         <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                           {awayName} {g.awayScore ?? '-'} : {g.homeScore ?? '-'} {homeName}
+                          {/* wave-579: 완전수렴 텍스트 레이블 — wave-577 이번 주 남은 경기 패턴 동기 */}
                           {isYesterdayTopPick && (
-                            <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★</span>
+                            <span className="ml-1.5 text-amber-500 dark:text-amber-400 font-semibold not-italic">★ 완전수렴</span>
                           )}
                           {!isYesterdayTopPick && isYesterdayStrongPick && (
                             <span className="ml-1.5 text-brand-500 dark:text-brand-400 font-semibold not-italic">⚡</span>
