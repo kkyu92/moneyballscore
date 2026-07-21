@@ -7,6 +7,7 @@ import {
   assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL,
   FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
+  KBO_SEASON_YEAR,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -15,7 +16,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
-import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -84,10 +85,24 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
 }
 
 export default async function ReviewsPage() {
-  const [predictions, strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+  const [
+    predictions,
+    strongConvergenceRecord,
+    completeConvergenceRecord,
+    strongConvergenceStreak,
+    bestConvergenceStreak,
+    completeConvergenceStreak,
+    completeBestStreak,
+  ] = await Promise.all([
     getVerifiedPredictions(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE),
+    // wave-592: 강수렴 픽 현재 streak + 시즌 최장 streak
+    getConvergencePickStreak(FACTOR_PICK_STRONG),
+    getConvergencePickBestStreak(),
+    // wave-592: 완전수렴 픽 현재 streak + 시즌 최장 streak
+    getConvergencePickStreak(FACTOR_PICK_COMPLETE),
+    getConvergencePickBestStreak(FACTOR_PICK_COMPLETE),
   ]);
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
   const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
@@ -236,6 +251,47 @@ export default async function ReviewsPage() {
                   {completeConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
                 </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* wave-592: 수렴 픽 스트리크 — 강수렴/완전수렴 현재 + 시즌 최장 카드 */}
+      {(strongConvergenceStreak !== null || completeConvergenceStreak !== null) && (
+        <section aria-labelledby="reviews-streak-title" className="space-y-3">
+          <h2 id="reviews-streak-title" className="text-lg font-bold">
+            수렴 픽 스트리크
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 강수렴 픽 스트리크 */}
+            {strongConvergenceStreak !== null && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5 space-y-1">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽 현재</p>
+                <p className={`text-2xl font-bold ${strongConvergenceStreak.type === 'win' ? 'text-amber-500 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}>
+                  {strongConvergenceStreak.type === 'win' ? '🔥' : '❄️'}{' '}
+                  {strongConvergenceStreak.length}연{strongConvergenceStreak.type === 'win' ? '승' : '패'}
+                </p>
+                {bestConvergenceStreak !== null && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {KBO_SEASON_YEAR} 최장 {bestConvergenceStreak.length}연{bestConvergenceStreak.type === 'win' ? '승' : '패'}
+                  </p>
+                )}
+              </div>
+            )}
+            {/* 완전수렴 픽 스트리크 */}
+            {completeConvergenceStreak !== null && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/40 p-5 space-y-1">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽 현재</p>
+                <p className={`text-2xl font-bold ${completeConvergenceStreak.type === 'win' ? 'text-amber-600 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}>
+                  {completeConvergenceStreak.type === 'win' ? '🔥' : '❄️'}{' '}
+                  {completeConvergenceStreak.length}연{completeConvergenceStreak.type === 'win' ? '승' : '패'}
+                </p>
+                {completeBestStreak !== null && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {KBO_SEASON_YEAR} 최장 {completeBestStreak.length}연{completeBestStreak.type === 'win' ? '승' : '패'}
+                  </p>
+                )}
               </div>
             )}
           </div>
