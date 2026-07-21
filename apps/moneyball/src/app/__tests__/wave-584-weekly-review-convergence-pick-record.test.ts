@@ -1,6 +1,7 @@
 // wave-584: 주간 리뷰 수렴 픽 성적 — getRecentConvergencePickRecord endDate 파라미터 + 주간 리뷰 UI 표시 박제
 // getRecentConvergencePickRecord(limit, minFactors, startDate, endDate) 시그니처 및 weekly review 페이지 callsite 박제.
 
+import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
