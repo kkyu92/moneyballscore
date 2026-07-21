@@ -11,6 +11,7 @@ import {
   PRODUCTION_COHORT_RULES,
   CONVERGENCE_TEAM_STATS_MIN_PICKS,
   CONVERGENCE_HOME_AWAY_MIN_PICKS,
+  CONVERGENCE_STREAK_MIN_LENGTH,
   type TeamCode,
   type SelectResult,
 } from '@moneyball/shared';
@@ -145,7 +146,7 @@ export function computeConvergenceStreak(
     if (results[i] !== firstWon) break;
     len++;
   }
-  if (len < 2) return null;
+  if (len < CONVERGENCE_STREAK_MIN_LENGTH) return null;
   return { type: firstWon ? 'win' : 'loss', length: len };
 }
 
@@ -183,7 +184,7 @@ export function computeConvergenceBestStreak(
   if (results[results.length - 1]) bestWin = Math.max(bestWin, curr);
   else bestLoss = Math.max(bestLoss, curr);
   const best = Math.max(bestWin, bestLoss);
-  if (best < 2) return null;
+  if (best < CONVERGENCE_STREAK_MIN_LENGTH) return null;
   return bestWin >= bestLoss
     ? { type: 'win', length: bestWin }
     : { type: 'loss', length: bestLoss };
