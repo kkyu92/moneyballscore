@@ -335,6 +335,11 @@ export function computeWinRatePct(wins: number, total: number): number {
   return Math.round(wins / total * 100);
 }
 
+// wave-576: homeWinProb(0-1) → % 정수 — Math.round(prob * 100) 17회 중복 추출
+export function computeWinProbPct(prob: number): number {
+  return Math.round(prob * 100);
+}
+
 // wave-574: 승률 pct → Tailwind 색상 클래스 — ACCURACY_GOOD_PCT/CONVERGENCE_BADGE_LOW_PCT 7회 inline ternary 추출
 export function computeWinRateColorClass(
   pct: number,

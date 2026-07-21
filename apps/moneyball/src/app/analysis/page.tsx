@@ -94,7 +94,7 @@ import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeWeeklyConvergenceRecord, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeWeeklyConvergenceRecord, computeWinRatePct, computeWinRateColorClass, computeWinProbPct } from '@/lib/analysis/convergenceRecord';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
@@ -1348,8 +1348,8 @@ export default async function AnalysisIndexPage() {
                 const favoredCode = favoredHome ? pick.homeCode : pick.awayCode;
                 const modelAgrees = pick.predictedWinnerCode != null && pick.predictedWinnerCode === favoredCode;
                 const probPct = favoredHome
-                  ? Math.round(pick.homeWinProb * 100)
-                  : Math.round((1 - pick.homeWinProb) * 100);
+                  ? computeWinProbPct(pick.homeWinProb)
+                  : computeWinProbPct(1 - pick.homeWinProb);
                 return (
                   <li key={pick.gameId} className="text-sm text-gray-900 dark:text-gray-100">
                     <Link
@@ -1884,8 +1884,8 @@ export default async function AnalysisIndexPage() {
               const winnerCode = g.predictedWinnerCode;
               const winnerName = winnerCode ? shortTeamName(winnerCode) : null;
               const winnerPct = winnerCode === g.homeCode
-                ? Math.round(g.homeWinProb * 100)
-                : Math.round((1 - g.homeWinProb) * 100);
+                ? computeWinProbPct(g.homeWinProb)
+                : computeWinProbPct(1 - g.homeWinProb);
               const tier = classifyWinnerProb(g.homeWinProb);
               const isBig = g.gameId === todayData.bigMatchId;
               const isTopPick = g.isTopPick;
@@ -2188,11 +2188,11 @@ export default async function AnalysisIndexPage() {
                           ? 'text-brand-500 dark:text-brand-400 font-semibold'
                           : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        {Math.round(g.homeWinProb * 100)}%
+                        {computeWinProbPct(g.homeWinProb)}%
                       </span>
                       <div
                         className="relative flex-1 h-1 rounded-full bg-orange-100 dark:bg-orange-900/30 overflow-hidden"
-                        title={`홈 ${Math.round(g.homeWinProb * 100)}% · 원정 ${Math.round((1 - g.homeWinProb) * 100)}%`}
+                        title={`홈 ${computeWinProbPct(g.homeWinProb)}% · 원정 ${computeWinProbPct(1 - g.homeWinProb)}%`}
                       >
                         <div
                           className={`absolute left-0 top-0 h-full rounded-full ${
@@ -2202,7 +2202,7 @@ export default async function AnalysisIndexPage() {
                                 ? 'bg-brand-400 dark:bg-brand-500'
                                 : 'bg-gray-300 dark:bg-gray-600'
                           }`}
-                          style={{ width: `${Math.round(g.homeWinProb * 100)}%` }}
+                          style={{ width: `${computeWinProbPct(g.homeWinProb)}%` }}
                         />
                       </div>
                       <span className={`text-[10px] font-mono tabular-nums w-7 shrink-0 ${
@@ -2210,7 +2210,7 @@ export default async function AnalysisIndexPage() {
                           ? 'text-orange-500 dark:text-orange-400 font-semibold'
                           : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        {Math.round((1 - g.homeWinProb) * 100)}%
+                        {computeWinProbPct(1 - g.homeWinProb)}%
                       </span>
                     </div>
                     {/* wave-469: topFactors 배지 3-tier 색상 — impact 기반 (TOPFACTOR_COMPLETE_IMPACT=amber / TOPFACTOR_STRONG_IMPACT=brand / 기본=gray) */}
@@ -3123,13 +3123,13 @@ export default async function AnalysisIndexPage() {
                       const favoredHome = g.homeWinProb >= ELO_NEUTRAL_WIN_PCT;
                       const favoredCode = favoredHome ? g.homeCode : g.awayCode;
                       const favoredName = shortTeamName(favoredCode);
-                      const winPct = Math.round((favoredHome ? g.homeWinProb : 1 - g.homeWinProb) * 100);
+                      const winPct = computeWinProbPct(favoredHome ? g.homeWinProb : 1 - g.homeWinProb);
                       // wave-313: model prediction badge
                       const hasModel = g.modelHomeWinProb != null;
                       const mFavoredHome = hasModel ? g.modelHomeWinProb! >= ELO_NEUTRAL_WIN_PCT : favoredHome;
                       const mFavoredName = shortTeamName(mFavoredHome ? g.homeCode : g.awayCode);
                       const mWinPct = hasModel
-                        ? Math.round((mFavoredHome ? g.modelHomeWinProb! : 1 - g.modelHomeWinProb!) * 100)
+                        ? computeWinProbPct(mFavoredHome ? g.modelHomeWinProb! : 1 - g.modelHomeWinProb!)
                         : winPct;
                       // wave-523: 이번 주 수렴 TOP 픽 배지
                       const isTopUpcomingPick = topUpcomingPickGameId !== null && g.gameId === topUpcomingPickGameId;
@@ -3456,8 +3456,8 @@ export default async function AnalysisIndexPage() {
                 ? shortTeamName(g.predictedWinnerCode)
                 : null;
               const winnerPct = g.predictedWinnerCode === g.homeCode
-                ? Math.round(g.homeWinProb * 100)
-                : Math.round((1 - g.homeWinProb) * 100);
+                ? computeWinProbPct(g.homeWinProb)
+                : computeWinProbPct(1 - g.homeWinProb);
               const yesterdayStatus =
                 g.isCorrect === true ? 'correct' : g.isCorrect === false ? 'wrong' : 'pending';
               // wave-550: 어제 경기 수렴 픽 배지
@@ -3623,16 +3623,16 @@ export default async function AnalysisIndexPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   예측: {shortTeamName(bestPickOfWeek.predictedWinnerCode)}{' '}
                   {bestPickOfWeek.predictedWinnerCode === bestPickOfWeek.homeCode
-                    ? Math.round(bestPickOfWeek.homeWinProb * 100)
-                    : Math.round((1 - bestPickOfWeek.homeWinProb) * 100)}%
+                    ? computeWinProbPct(bestPickOfWeek.homeWinProb)
+                    : computeWinProbPct(1 - bestPickOfWeek.homeWinProb)}%
                 </p>
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">
-                  {Math.round(
-                    (bestPickOfWeek.predictedWinnerCode === bestPickOfWeek.homeCode
+                  {computeWinProbPct(
+                    bestPickOfWeek.predictedWinnerCode === bestPickOfWeek.homeCode
                       ? bestPickOfWeek.homeWinProb
-                      : 1 - bestPickOfWeek.homeWinProb) * 100,
+                      : 1 - bestPickOfWeek.homeWinProb,
                   )}%
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">확신도</p>
@@ -3694,16 +3694,16 @@ export default async function AnalysisIndexPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   예측: {shortTeamName(bestPickOfMonth.predictedWinnerCode)}{' '}
                   {bestPickOfMonth.predictedWinnerCode === bestPickOfMonth.homeCode
-                    ? Math.round(bestPickOfMonth.homeWinProb * 100)
-                    : Math.round((1 - bestPickOfMonth.homeWinProb) * 100)}%
+                    ? computeWinProbPct(bestPickOfMonth.homeWinProb)
+                    : computeWinProbPct(1 - bestPickOfMonth.homeWinProb)}%
                 </p>
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">
-                  {Math.round(
-                    (bestPickOfMonth.predictedWinnerCode === bestPickOfMonth.homeCode
+                  {computeWinProbPct(
+                    bestPickOfMonth.predictedWinnerCode === bestPickOfMonth.homeCode
                       ? bestPickOfMonth.homeWinProb
-                      : 1 - bestPickOfMonth.homeWinProb) * 100,
+                      : 1 - bestPickOfMonth.homeWinProb,
                   )}%
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">확신도</p>
@@ -3741,16 +3741,16 @@ export default async function AnalysisIndexPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   예측: {shortTeamName(upsetPickOfMonth.predictedWinnerCode)}{' '}
                   {upsetPickOfMonth.predictedWinnerCode === upsetPickOfMonth.homeCode
-                    ? Math.round(upsetPickOfMonth.homeWinProb * 100)
-                    : Math.round((1 - upsetPickOfMonth.homeWinProb) * 100)}% → 실패
+                    ? computeWinProbPct(upsetPickOfMonth.homeWinProb)
+                    : computeWinProbPct(1 - upsetPickOfMonth.homeWinProb)}% → 실패
                 </p>
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-2xl font-bold text-error">
-                  {Math.round(
-                    (upsetPickOfMonth.predictedWinnerCode === upsetPickOfMonth.homeCode
+                  {computeWinProbPct(
+                    upsetPickOfMonth.predictedWinnerCode === upsetPickOfMonth.homeCode
                       ? upsetPickOfMonth.homeWinProb
-                      : 1 - upsetPickOfMonth.homeWinProb) * 100,
+                      : 1 - upsetPickOfMonth.homeWinProb,
                   )}%
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">확신했는데</p>

@@ -49,8 +49,9 @@ describe('wave-323 — 승부 확률 바 (cycle 1655)', () => {
   it('analysis/page.tsx: wave-323 bar uses homeWinProb single source (no hardcoded pct)', () => {
     const src = readFileSync(ANALYSIS_PAGE, 'utf8');
     expect(src).toContain('wave-323');
-    expect(src).toContain('homeWinProb * 100');
-    expect(src).toContain('(1 - g.homeWinProb) * 100');
+    // wave-576: Math.round(homeWinProb * 100) → computeWinProbPct 추출 후 패턴 갱신
+    expect(src).toContain('computeWinProbPct(g.homeWinProb)');
+    expect(src).toContain('computeWinProbPct(1 - g.homeWinProb)');
   });
 
   it('analysis/page.tsx: bar tier classes use classifyWinnerProb result (no raw threshold)', () => {
