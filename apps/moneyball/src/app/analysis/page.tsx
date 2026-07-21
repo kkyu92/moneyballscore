@@ -1209,6 +1209,18 @@ export default async function AnalysisIndexPage() {
     { wins: 0, losses: 0 },
   );
 
+  // wave-567: 이번 주 완전수렴 픽 성적 — FACTOR_PICK_COMPLETE 임계 종료 경기 승/패 집계 (강수렴 wave-541 패턴 동기)
+  const weeklyCompleteConvergenceRecord = thisWeekPreviousGames.reduce(
+    (acc, g) => {
+      if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < FACTOR_PICK_COMPLETE) return acc;
+      if (g.homeScore === null || g.awayScore === null) return acc;
+      const favoredHome = g.convergenceNetScore > 0;
+      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
+      return { wins: acc.wins + (favWon ? 1 : 0), losses: acc.losses + (favWon ? 0 : 1) };
+    },
+    { wins: 0, losses: 0 },
+  );
+
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();
   for (const g of thisWeekRemainingGames) {
@@ -2971,6 +2983,15 @@ export default async function AnalysisIndexPage() {
                     title={`${KBO_SEASON_YEAR} 시즌 완전수렴 픽 최장 ${completeBestStreak.length}연${completeBestStreak.type === 'win' ? '승' : '패'}`}
                   >
                     최장 {completeBestStreak.length}연{completeBestStreak.type === 'win' ? '승' : '패'}
+                  </span>
+                )}
+                {/* wave-567: 완전수렴 픽 이번 주 성적 — 강수렴 wave-541 패턴 동기 */}
+                {(weeklyCompleteConvergenceRecord.wins + weeklyCompleteConvergenceRecord.losses) > 0 && (
+                  <span
+                    className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                    title={`이번 주 완전수렴 픽 ${weeklyCompleteConvergenceRecord.wins}승 ${weeklyCompleteConvergenceRecord.losses}패`}
+                  >
+                    이번 주 {weeklyCompleteConvergenceRecord.wins}승 {weeklyCompleteConvergenceRecord.losses}패
                   </span>
                 )}
               </div>
