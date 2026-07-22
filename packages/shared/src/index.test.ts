@@ -132,6 +132,7 @@ import {
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS,
   REVIEWS_HUB_RECENT_MONTHS,
+  WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS,
   MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
 } from './index';
 
@@ -901,5 +902,10 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
   it('MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS — 월간 리뷰 상세 내비게이션 조회 폭, 현재+4 표시에 필요한 최소 5보다 커야 함 (silent drift wave 593 guard)', () => {
     expect(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS).toBe(6);
     expect(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS).toBeGreaterThanOrEqual(5);
+  });
+
+  it('WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS — 주간 리뷰 상세 내비게이션 조회 폭, 현재+3 표시에 필요한 최소 4 이상 + REVIEWS_HUB_RECENT_WEEKS 와 독립 (silent drift wave 595 guard)', () => {
+    expect(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS).toBe(4);
+    expect(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS).toBeGreaterThanOrEqual(4);
   });
 });
