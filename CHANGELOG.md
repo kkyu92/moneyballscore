@@ -1,3 +1,15 @@
+## v0.5.62.4 — 2026-07-22 (cycle 1983, wave-600: 월간 리뷰 수렴 픽 홈/어웨이 분리 성적 배지)
+
+### feat(analysis): wave-600 — /reviews/monthly/[month] 수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1983)
+
+**신규: 월간 상세 리뷰 강수렴/완전수렴 픽 홈/어웨이 분리 성적**
+- `/reviews` 허브(wave-597)에만 존재하던 홈/어웨이 분리 성적이 `/reviews/monthly/[month]` 상세 페이지엔 없었던 gap 발견 — wave-586(월간 W-L)/wave-594(월간 스트리크) 뒤 이어서 충족. weekly 상세는 월간 대비 표본이 작아(강수렴 픽 주당 3~5건) `CONVERGENCE_HOME_AWAY_MIN_PICKS`(=5) 문턱을 못 넘는 달이 많아 이번엔 monthly 만 우선 적용
+- `convergenceRecord.ts`: `fetchConvergencePickDetailedResults` 에 `endDate` optional param 추가 (`fetchConvergencePickResults` wave-584 동일 패턴) + `getConvergencePickHomeAwaySplit` 에 `startDate`/`endDate` optional param 추가 (`getRecentConvergencePickRecord` wave-546/584 동일 패턴) — 순수 함수 `computeConvergenceHomeAwaySplit` 변경 없이 재사용
+- `monthly/[month]/page.tsx`: 월간 스트리크 섹션 뒤 배치, `range.startDate`/`range.endDate` 로 조회 범위 한정 — 표본 부족(`< CONVERGENCE_HOME_AWAY_MIN_PICKS`) 달은 자동 숨김
+- 테스트: `wave-600-monthly-convergence-home-away-split.test.ts` 9 cases (순수 함수 2 + 페이지 wiring 7)
+
+---
+
 ## v0.5.62.3 — 2026-07-22 (cycle 1979, wave-599: /reviews 허브 요일별 수렴 픽 성적 배지)
 
 ### feat(analysis): wave-599 — /reviews 허브 수렴 픽 요일별 분리 성적 배지 (cycle 1979)

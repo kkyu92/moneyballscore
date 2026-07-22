@@ -244,10 +244,13 @@ export function computeConvergenceTeamStats(
 async function fetchConvergencePickDetailedResults(
   cutoff: string,
   minFactors: number,
+  // wave-600: endDate 지정 시 해당 날짜까지만 조회 (월간 리뷰 홈/어웨이 분리 성적 용, fetchConvergencePickResults wave-584 동일 패턴).
+  // 미지정 시 기존 동작 (today 미만).
+  endDate?: string,
 ): Promise<Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }>> {
   const today = toKSTDateString();
   const supabase = await createClient();
-  const gamesResult = (await supabase
+  let query = supabase
     .from('games')
     .select(`
       id, game_date, game_time, home_score, away_score,
@@ -262,12 +265,17 @@ async function fetchConvergencePickDetailedResults(
       )
     `)
     .gte('game_date', cutoff)
-    .lt('game_date', today)
     .not('home_score', 'is', null)
     .eq('predictions.prediction_type', 'pre_game')
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
     .order('game_date', { ascending: false })
-    .order('game_time', { ascending: true })) as SelectResult<ConvergenceGameRow[]>;
+    .order('game_time', { ascending: true });
+  if (endDate != null) {
+    query = query.lte('game_date', endDate);
+  } else {
+    query = query.lt('game_date', today);
+  }
+  const gamesResult = (await query) as unknown as SelectResult<ConvergenceGameRow[]>;
 
   const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults');
   if (!data) return [];
@@ -336,8 +344,11 @@ export function computeConvergenceHomeAwaySplit(
 
 export async function getConvergencePickHomeAwaySplit(
   minFactors = FACTOR_PICK_STRONG,
+  // wave-600: startDate/endDate 지정 시 해당 범위만 조회 (월간 리뷰 용). 미지정 시 기존 동작 (시즌 전체).
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null> {
-  const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
+  const results = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
   return computeConvergenceHomeAwaySplit(results);
 }
 

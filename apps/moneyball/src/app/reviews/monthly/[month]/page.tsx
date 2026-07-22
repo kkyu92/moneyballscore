@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SMALL_SAMPLE_N, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
-import { getRecentConvergencePickRecord, computeWinRatePct, getConvergencePickStreak, getConvergencePickBestStreak } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, computeWinRatePct, computeWinRateColorClass, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickHomeAwaySplit } from '@/lib/analysis/convergenceRecord';
 import {
   parseMonthId,
   getRecentMonths,
@@ -59,6 +59,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
 
   // wave-586: 강수렴/완전수렴 픽 월간 성적 — startDate~endDate 범위 한정
   // wave-594: 강수렴/완전수렴 픽 월간 스트리크 (범위 내 마감 streak + 범위 내 최장 streak)
+  // wave-600: 강수렴/완전수렴 픽 월간 홈/어웨이 분리 성적 (reviews 허브 wave-597 재사용, 월 범위 한정)
   const [
     review,
     strongConvergenceRecord,
@@ -67,6 +68,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
     strongConvergenceBestStreak,
     completeConvergenceStreak,
     completeConvergenceBestStreak,
+    strongHomeAwaySplit,
+    completeHomeAwaySplit,
   ] = await Promise.all([
     buildMonthlyReview(range),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, range.startDate, range.endDate),
@@ -75,6 +78,8 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
     getConvergencePickBestStreak(FACTOR_PICK_STRONG, range.startDate, range.endDate),
     getConvergencePickStreak(FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
     getConvergencePickBestStreak(FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getConvergencePickHomeAwaySplit(FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getConvergencePickHomeAwaySplit(FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
   ]);
   const url = `${SITE_URL}/reviews/monthly/${month}`;
 
@@ -278,6 +283,69 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
               </div>
             )}
           </div>
+        </section>
+      )}
+
+      {/* wave-600: 수렴 픽 월간 홈/어웨이 분리 성적 배지 — 강수렴/완전수렴 (reviews 허브 wave-597 재사용, 월 범위 한정) */}
+      {(strongHomeAwaySplit !== null || completeHomeAwaySplit !== null) && (
+        <section aria-labelledby="monthly-home-away-title" className="space-y-2">
+          <h2 id="monthly-home-away-title" className="text-lg font-bold">
+            홈/어웨이 지목 성적
+          </h2>
+          {strongHomeAwaySplit !== null && (() => {
+            const homeTotal = strongHomeAwaySplit.home.wins + strongHomeAwaySplit.home.losses;
+            const awayTotal = strongHomeAwaySplit.away.wins + strongHomeAwaySplit.away.losses;
+            const homePct = computeWinRatePct(strongHomeAwaySplit.home.wins, homeTotal);
+            const awayPct = computeWinRatePct(strongHomeAwaySplit.away.wins, awayTotal);
+            return (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">🏅 강수렴:</span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                  title={`홈팀 지목 ${homeTotal}경기: ${strongHomeAwaySplit.home.wins}승 ${strongHomeAwaySplit.home.losses}패 (${homePct}%)`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct)}`}>{homePct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                  title={`어웨이팀 지목 ${awayTotal}경기: ${strongHomeAwaySplit.away.wins}승 ${strongHomeAwaySplit.away.losses}패 (${awayPct}%)`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct)}`}>{awayPct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+                </span>
+              </div>
+            );
+          })()}
+          {completeHomeAwaySplit !== null && (() => {
+            const homeTotal = completeHomeAwaySplit.home.wins + completeHomeAwaySplit.home.losses;
+            const awayTotal = completeHomeAwaySplit.away.wins + completeHomeAwaySplit.away.losses;
+            const homePct = computeWinRatePct(completeHomeAwaySplit.home.wins, homeTotal);
+            const awayPct = computeWinRatePct(completeHomeAwaySplit.away.wins, awayTotal);
+            return (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">★ 완전수렴:</span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                  title={`홈팀 지목 ${homeTotal}경기: ${completeHomeAwaySplit.home.wins}승 ${completeHomeAwaySplit.home.losses}패 (${homePct}%)`}
+                >
+                  <span className="text-amber-600 dark:text-amber-400">🏠홈</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct)}`}>{homePct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                  title={`어웨이팀 지목 ${awayTotal}경기: ${completeHomeAwaySplit.away.wins}승 ${completeHomeAwaySplit.away.losses}패 (${awayPct}%)`}
+                >
+                  <span className="text-amber-600 dark:text-amber-400">✈️원정</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct)}`}>{awayPct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+                </span>
+              </div>
+            );
+          })()}
         </section>
       )}
 
