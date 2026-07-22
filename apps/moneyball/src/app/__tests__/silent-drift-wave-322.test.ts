@@ -4,7 +4,9 @@ import { join } from 'node:path';
 import { ELO_NEUTRAL_WIN_PCT, NEUTRAL_FACTOR } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
-const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
+// cycle 1984 review-code(heavy): getTodayAnalysisData (topFactors impact 계산) 는
+// analysis/page.tsx 데이터 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동.
+const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/analysis-data.ts');
 const GAME_PAGE = join(ROOT, 'src/app/analysis/game/[id]/page.tsx');
 
 describe('silent drift wave 322 — NEUTRAL_FACTOR + ELO_NEUTRAL_WIN_PCT single source (cycle 1654)', () => {

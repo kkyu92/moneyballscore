@@ -4,7 +4,9 @@ import { join } from 'node:path';
 import { STANDINGS_BOTTOM_TIER, STANDINGS_TOP_TIER } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
-const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
+// cycle 1984 review-code(heavy): standingsRankClass 는 analysis/page.tsx 데이터 레이어
+// 분리 리팩터로 analysis/analysis-data.ts 로 이동.
+const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/analysis-data.ts');
 
 describe('silent drift wave 326 — STANDINGS_TOP_TIER + STANDINGS_BOTTOM_TIER single source (cycle 1658)', () => {
   it('STANDINGS_TOP_TIER = 3 (KBO 상위권 1~3위)', () => {

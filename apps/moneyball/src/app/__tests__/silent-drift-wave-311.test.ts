@@ -10,14 +10,16 @@ describe('silent drift wave 311 — ANALYSIS_UPCOMING_LIMIT single source (cycle
     expect(ANALYSIS_UPCOMING_LIMIT).toBe(30);
   });
 
-  it('analysis/page.tsx imports ANALYSIS_UPCOMING_LIMIT (no inline 30 hardcoded)', () => {
-    const src = readFileSync(join(ROOT, 'src/app/analysis/page.tsx'), 'utf8');
+  // cycle 1984 review-code(heavy): getThisWeekRemainingGames 는 analysis/page.tsx 데이터 레이어
+  // 분리 리팩터로 analysis/analysis-data.ts 로 이동.
+  it('analysis/analysis-data.ts imports ANALYSIS_UPCOMING_LIMIT (no inline 30 hardcoded)', () => {
+    const src = readFileSync(join(ROOT, 'src/app/analysis/analysis-data.ts'), 'utf8');
     expect(src).toContain('ANALYSIS_UPCOMING_LIMIT');
     expect(src).not.toMatch(/\.limit\(30\)/);
   });
 
-  it('analysis/page.tsx imports HOME_ELO_BONUS (no inline hardcoded Elo bonus)', () => {
-    const src = readFileSync(join(ROOT, 'src/app/analysis/page.tsx'), 'utf8');
+  it('analysis/analysis-data.ts imports HOME_ELO_BONUS (no inline hardcoded Elo bonus)', () => {
+    const src = readFileSync(join(ROOT, 'src/app/analysis/analysis-data.ts'), 'utf8');
     expect(src).toContain('HOME_ELO_BONUS');
     expect(src).not.toMatch(/awayElo - homeElo - 24/);
   });

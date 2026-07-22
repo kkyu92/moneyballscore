@@ -45,9 +45,11 @@ describe('silent drift wave 296 — MISS_REPORT_LIMIT + ANALYSIS_TOP_FACTORS_LIM
     expect(ANALYSIS_TOP_FACTORS_LIMIT).toBe(2);
   });
 
-  it('analysis/page.tsx uses ANALYSIS_TOP_FACTORS_LIMIT (no hardcoded .slice(0, 2))', () => {
+  it('analysis/analysis-data.ts uses ANALYSIS_TOP_FACTORS_LIMIT (no hardcoded .slice(0, 2))', () => {
+    // cycle 1984 review-code(heavy): getTodayAnalysisData 는 analysis/page.tsx 데이터 레이어
+    // 분리 리팩터로 analysis/analysis-data.ts 로 이동.
     const src = readFileSync(
-      join(ROOT, 'src/app/analysis/page.tsx'),
+      join(ROOT, 'src/app/analysis/analysis-data.ts'),
       'utf8',
     );
     expect(src).toContain('ANALYSIS_TOP_FACTORS_LIMIT');

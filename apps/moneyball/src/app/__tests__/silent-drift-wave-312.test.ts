@@ -11,8 +11,10 @@ describe('silent drift wave 312 — ELO_DIVIDER single source (cycle 1643)', () 
     expect(ELO_DIVIDER).toBe(400);
   });
 
-  it('analysis/page.tsx uses ELO_DIVIDER (no inline 400)', () => {
-    const src = readFileSync(join(ROOT, 'src/app/analysis/page.tsx'), 'utf8');
+  // cycle 1984 review-code(heavy): getThisWeekRemainingGames (ELO_DIVIDER 사용처) 는
+  // analysis/page.tsx 데이터 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동.
+  it('analysis/analysis-data.ts uses ELO_DIVIDER (no inline 400)', () => {
+    const src = readFileSync(join(ROOT, 'src/app/analysis/analysis-data.ts'), 'utf8');
     expect(src).toContain('ELO_DIVIDER');
     expect(src).not.toMatch(/\/ 400[^;]/);
     expect(src).not.toMatch(/\/ 400;/);

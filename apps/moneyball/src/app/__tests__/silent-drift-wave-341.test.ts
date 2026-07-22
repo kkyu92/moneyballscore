@@ -33,8 +33,10 @@ describe('silent drift wave-341 — 불펜 FIP 배지 single source (cycle 1676)
     expect(src).toContain('BULLPEN_FIP_WEAK');
   });
 
-  it('analysis/page.tsx: fetches home_bullpen_fip and away_bullpen_fip', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  // cycle 1984 review-code(heavy): DB fetch 는 analysis/page.tsx 데이터 레이어 분리 리팩터로
+  // analysis/analysis-data.ts 로 이동.
+  it('analysis/analysis-data.ts: fetches home_bullpen_fip and away_bullpen_fip', () => {
+    const src = readFileSync(join(ROOT, 'src/app/analysis/analysis-data.ts'), 'utf8');
     expect(src).toContain('home_bullpen_fip');
     expect(src).toContain('away_bullpen_fip');
   });

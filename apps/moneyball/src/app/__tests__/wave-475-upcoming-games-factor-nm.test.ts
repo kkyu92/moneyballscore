@@ -15,10 +15,11 @@ const sharedSrc = readFileSync(
   'utf8',
 );
 
-const pageSrc = readFileSync(
-  join(__dirname, '../analysis/page.tsx'),
-  'utf8',
-);
+// cycle 1984 review-code(heavy): UpcomingScheduledGame 인터페이스 + getThisWeekRemainingGames 는
+// analysis/page.tsx 데이터 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동, UI 렌더는 page.tsx 에 남음 — 둘 다 검사.
+const pageSrc =
+  readFileSync(join(__dirname, '../analysis/page.tsx'), 'utf8') +
+  readFileSync(join(__dirname, '../analysis/analysis-data.ts'), 'utf8');
 
 describe('wave-475 — 예정 경기 팩터 N:M 균형 표시', () => {
   it('COMPOSITE_DUEL_MIN_VALID JSDoc wave-475 bullet 존재', () => {

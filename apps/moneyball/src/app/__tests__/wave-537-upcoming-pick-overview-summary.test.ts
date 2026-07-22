@@ -9,7 +9,11 @@ import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 // wave-538 (cycle 1909): summary 생성 조건 FACTOR_PICK_MIN_FACTORS(7) → FACTOR_PICK_STRONG(8)
 // — UI 표시 조건 isTopUpcomingPick||isStrongUpcomingPick 과 정합.
 
-const PAGE_SRC = readFileSync(join(__dirname, '../../app/analysis/page.tsx'), 'utf8');
+// cycle 1984 review-code(heavy): gameOverviewSummary 필드 + buildGameOverview 호출은 analysis/page.tsx
+// 데이터 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동, UI 렌더는 page.tsx 에 남음 — 둘 다 검사.
+const PAGE_SRC =
+  readFileSync(join(__dirname, '../../app/analysis/page.tsx'), 'utf8') +
+  readFileSync(join(__dirname, '../../app/analysis/analysis-data.ts'), 'utf8');
 
 describe('wave-537 — 이번 주 남은 경기 수렴 픽 카드 buildGameOverview summary', () => {
   it('UpcomingScheduledGame: gameOverviewSummary 필드 정의됨', () => {

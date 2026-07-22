@@ -5,6 +5,9 @@ import { SP_FIP_DUEL_MIN, SFR_DUEL_MIN } from '@moneyball/shared';
 
 const ROOT = join(__dirname, '../../..');
 const ANALYSIS_PAGE = join(ROOT, 'src/app/analysis/page.tsx');
+// cycle 1984 review-code(heavy): UpcomingScheduledGame 인터페이스 JSDoc (wave-446 필드 주석) 은
+// analysis/page.tsx 데이터 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동.
+const ANALYSIS_DATA = join(ROOT, 'src/app/analysis/analysis-data.ts');
 
 // wave-446: 팩터 수렴 픽 선발 FIP + 수비 SFR 격차(Δ) 표시 — cycle 1805.
 // 선발 FIP 행: |awaySPFip - homeSPFip| ≥ SP_FIP_DUEL_MIN(0.5) 시 Δ 수치 표시.
@@ -47,11 +50,13 @@ describe('wave-446 — analysis/page.tsx JSX 정합성', () => {
   });
 
   it('SP FIP JSDoc wave-446 참조', () => {
-    expect(pageContent).toContain('wave-446: 팩터 수렴 픽 선발 FIP 행 격차(Δ) 표시');
+    const dataContent = readFileSync(ANALYSIS_DATA, 'utf8');
+    expect(dataContent).toContain('wave-446: 팩터 수렴 픽 선발 FIP 행 격차(Δ) 표시');
   });
 
   it('SFR JSDoc wave-446 참조', () => {
-    expect(pageContent).toContain('wave-446: 팩터 수렴 픽 수비 SFR 행 격차(Δ) 표시');
+    const dataContent = readFileSync(ANALYSIS_DATA, 'utf8');
+    expect(dataContent).toContain('wave-446: 팩터 수렴 픽 수비 SFR 행 격차(Δ) 표시');
   });
 });
 

@@ -35,8 +35,10 @@ describe('silent drift wave-343 — 수비 SFR 배지 단일 소스 (cycle 1678)
     expect(src).toContain('SFR_WEAK');
   });
 
-  it('analysis/page.tsx: fetches home_sfr and away_sfr', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  // cycle 1984 review-code(heavy): DB fetch 는 analysis/page.tsx 데이터 레이어 분리 리팩터로
+  // analysis/analysis-data.ts 로 이동.
+  it('analysis/analysis-data.ts: fetches home_sfr and away_sfr', () => {
+    const src = readFileSync(join(ROOT, 'src/app/analysis/analysis-data.ts'), 'utf8');
     expect(src).toContain('home_sfr');
     expect(src).toContain('away_sfr');
   });
