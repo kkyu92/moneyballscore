@@ -1,3 +1,14 @@
+## v0.5.62.5 — 2026-07-22 (cycle 1986, wave-601: 주간 리뷰 수렴 픽 홈/어웨이 분리 성적 배지)
+
+### feat(analysis): wave-601 — /reviews/weekly/[week] 수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1986)
+
+**신규: 주간 상세 리뷰 강수렴/완전수렴 픽 홈/어웨이 분리 성적**
+- wave-600(월간)이 명시적으로 미룬 gap 충족 — 주간 상세는 표본이 작아(강수렴 픽 주당 3~5건) `CONVERGENCE_HOME_AWAY_MIN_PICKS`(=5) 문턱을 못 넘는 주가 많지만, 월간과 동일한 gating(`null` 시 섹션 자동 숨김)이라 표본 부족 주는 그냥 안 보이고 충분한 주만 자연 노출
+- `reviews/weekly/[week]/page.tsx`: `getConvergencePickHomeAwaySplit(FACTOR_PICK_STRONG/COMPLETE, range.startDate, range.endDate)` Promise.all 추가 — 월간 wave-600 JSX 섹션 그대로 재사용 (신규 로직 0, 순수 함수/API 변경 없음)
+- 테스트: `wave-601-weekly-convergence-home-away-split.test.ts` 9 cases (wave-600 test 구조 동일 이식)
+
+---
+
 ## v0.5.62.4 — 2026-07-22 (cycle 1983, wave-600: 월간 리뷰 수렴 픽 홈/어웨이 분리 성적 배지)
 
 ### feat(analysis): wave-600 — /reviews/monthly/[month] 수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1983)
