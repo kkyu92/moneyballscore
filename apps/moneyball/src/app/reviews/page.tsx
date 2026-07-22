@@ -7,13 +7,14 @@ import {
   assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL,
   FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
-  KBO_SEASON_YEAR, UPCOMING_CONVERGENCE_TEAM_LIMIT, WEEKDAY_LABELS_KO,
+  KBO_SEASON_YEAR, WEEKDAY_LABELS_KO,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
+import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, getConvergencePickDayOfWeekSplit, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
@@ -314,51 +315,11 @@ export default async function ReviewsPage() {
       )}
 
       {/* wave-596: 수렴 픽 팀별 시즌 성적 배지 — 강수렴/완전수렴 (analysis/page.tsx wave-557 재사용) */}
-      {(strongTeamStats.length > 0 || completeTeamStats.length > 0) && (
-        <section aria-labelledby="reviews-team-stats-title" className="space-y-2">
-          <h2 id="reviews-team-stats-title" className="text-lg font-bold">
-            팀별 수렴 픽 성적
-          </h2>
-          {strongTeamStats.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-gray-500 dark:text-gray-400">🏅 강수렴:</span>
-              {strongTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
-                const teamTotal = stat.wins + stat.losses;
-                const pct = computeWinRatePct(stat.wins, teamTotal);
-                return (
-                  <span
-                    key={`strong-${stat.teamCode}`}
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
-                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 강수렴 픽 ${teamTotal}경기`}
-                  >
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-          {completeTeamStats.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-gray-500 dark:text-gray-400">★ 완전수렴:</span>
-              {completeTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
-                const teamTotal = stat.wins + stat.losses;
-                const pct = computeWinRatePct(stat.wins, teamTotal);
-                return (
-                  <span
-                    key={`complete-${stat.teamCode}`}
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
-                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 완전수렴 픽 ${teamTotal}경기`}
-                  >
-                    <span className="font-medium text-amber-700 dark:text-amber-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
+      <ConvergenceTeamStatsBadges
+        titleId="reviews-team-stats-title"
+        strongTeamStats={strongTeamStats}
+        completeTeamStats={completeTeamStats}
+      />
 
       {/* wave-597: 수렴 픽 홈/어웨이 분리 성적 배지 — 강수렴/완전수렴 (analysis/page.tsx wave-559/573 재사용) */}
       {(strongHomeAwaySplit !== null || completeHomeAwaySplit !== null) && (

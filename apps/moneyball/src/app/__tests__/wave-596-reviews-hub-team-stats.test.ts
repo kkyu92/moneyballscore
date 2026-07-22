@@ -16,11 +16,6 @@ describe('wave-596: /reviews 허브 수렴 픽 팀별 성적 배지', () => {
     expect(reviewsHubSrc).toContain('getConvergencePickTeamStats');
   });
 
-  it('UPCOMING_CONVERGENCE_TEAM_LIMIT / computeWinRateColorClass 임포트됨', () => {
-    expect(reviewsHubSrc).toContain('UPCOMING_CONVERGENCE_TEAM_LIMIT');
-    expect(reviewsHubSrc).toContain('computeWinRateColorClass');
-  });
-
   it('강수렴/완전수렴 팀별 성적 Promise.all 병렬 조회됨', () => {
     expect(reviewsHubSrc).toContain('strongTeamStats');
     expect(reviewsHubSrc).toContain('completeTeamStats');
@@ -28,21 +23,11 @@ describe('wave-596: /reviews 허브 수렴 픽 팀별 성적 배지', () => {
     expect(reviewsHubSrc).toContain('getConvergencePickTeamStats(FACTOR_PICK_COMPLETE)');
   });
 
-  it('팀별 수렴 픽 성적 섹션 존재함', () => {
+  // cycle 1992: 배지 렌더링(라벨/limit/숨김 가드)은 hub+monthly+weekly 3-way 중복이라
+  // ConvergenceTeamStatsBadges 공용 컴포넌트로 추출됨 — detail 검증은
+  // wave-603 테스트의 "ConvergenceTeamStatsBadges 공용 컴포넌트" describe 참조.
+  it('팀별 수렴 픽 성적 섹션 titleId 로 ConvergenceTeamStatsBadges 렌더링함', () => {
+    expect(reviewsHubSrc).toContain('ConvergenceTeamStatsBadges');
     expect(reviewsHubSrc).toContain('reviews-team-stats-title');
-    expect(reviewsHubSrc).toContain('팀별 수렴 픽 성적');
-  });
-
-  it('강수렴 배지 라벨 존재함', () => {
-    expect(reviewsHubSrc).toContain('🏅 강수렴:');
-  });
-
-  it('완전수렴 배지 라벨 + amber 테마 존재함', () => {
-    expect(reviewsHubSrc).toContain('★ 완전수렴:');
-    expect(reviewsHubSrc).toContain('bg-amber-50 dark:bg-amber-900/20');
-  });
-
-  it('배지 표시 개수는 UPCOMING_CONVERGENCE_TEAM_LIMIT 로 제한됨', () => {
-    expect(reviewsHubSrc).toContain('slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT)');
   });
 });

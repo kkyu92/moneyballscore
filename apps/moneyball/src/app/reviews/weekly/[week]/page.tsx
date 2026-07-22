@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS, UPCOMING_CONVERGENCE_TEAM_LIMIT } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS } from '@moneyball/shared';
 import { getRecentConvergencePickRecord, computeWinRatePct, computeWinRateColorClass, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickHomeAwaySplit, getConvergencePickTeamStats } from '@/lib/analysis/convergenceRecord';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
@@ -14,6 +14,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
 import { HighlightCard } from "@/components/reviews/HighlightCard";
+import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
 import { neutral } from "@/lib/design-tokens";
 
 export const revalidate = 1800; // REVIEWS_WEEKLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -386,51 +387,11 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
       )}
 
       {/* wave-603: 수렴 픽 주간 팀별 분리 성적 배지 — 강수렴/완전수렴 (reviews 허브 wave-596 재사용, 주 범위 한정) */}
-      {(strongTeamStats.length > 0 || completeTeamStats.length > 0) && (
-        <section aria-labelledby="weekly-team-stats-title" className="space-y-2">
-          <h2 id="weekly-team-stats-title" className="text-lg font-bold">
-            팀별 수렴 픽 성적
-          </h2>
-          {strongTeamStats.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-gray-500 dark:text-gray-400">🏅 강수렴:</span>
-              {strongTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
-                const teamTotal = stat.wins + stat.losses;
-                const pct = computeWinRatePct(stat.wins, teamTotal);
-                return (
-                  <span
-                    key={`strong-${stat.teamCode}`}
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
-                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 강수렴 픽 ${teamTotal}경기`}
-                  >
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-          {completeTeamStats.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-gray-500 dark:text-gray-400">★ 완전수렴:</span>
-              {completeTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
-                const teamTotal = stat.wins + stat.losses;
-                const pct = computeWinRatePct(stat.wins, teamTotal);
-                return (
-                  <span
-                    key={`complete-${stat.teamCode}`}
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
-                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 완전수렴 픽 ${teamTotal}경기`}
-                  >
-                    <span className="font-medium text-amber-700 dark:text-amber-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
+      <ConvergenceTeamStatsBadges
+        titleId="weekly-team-stats-title"
+        strongTeamStats={strongTeamStats}
+        completeTeamStats={completeTeamStats}
+      />
 
       {review.highlights.length > 0 && (
         <section aria-labelledby="weekly-highlights-title" className="space-y-4">
