@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, REVIEWS_HUB_RECENT_WEEKS } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS } from '@moneyball/shared';
 import { getRecentConvergencePickRecord, computeWinRatePct, getConvergencePickStreak, getConvergencePickBestStreak } from '@/lib/analysis/convergenceRecord';
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
@@ -180,7 +180,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
     .sort((a, b) => (b.confidence ?? -1) - (a.confidence ?? -1))
     .forEach((g, idx) => confRankMap.set(g.gameId, idx));
 
-  const recent = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS)
+  const recent = getRecentWeeks(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS)
     .filter((w) => w.weekId !== range.weekId)
     .slice(-3);
 

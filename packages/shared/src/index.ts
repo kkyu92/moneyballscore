@@ -1330,11 +1330,26 @@ export const REVIEWS_RECENT_LIMIT = 100;
  * reviews/page.tsx 허브 내비게이션 바 표시 수:
  *   - app/reviews/page.tsx: getRecentWeeks(4) → REVIEWS_HUB_RECENT_WEEKS
  *   - app/reviews/page.tsx: getRecentMonths(3) → REVIEWS_HUB_RECENT_MONTHS
- *   - app/reviews/weekly/[week]/page.tsx: getRecentWeeks(4) → REVIEWS_HUB_RECENT_WEEKS
  * 변경 시 허브 내비게이션 주/월 링크 수 자동 sync.
+ * (weekly/monthly 리뷰 상세 페이지 자체 nav 는 별도 목적 — WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS /
+ * MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS 참조. 본 상수와 우연히 값이 같아도 재사용 금지.)
  */
 export const REVIEWS_HUB_RECENT_WEEKS = 4;
 export const REVIEWS_HUB_RECENT_MONTHS = 3;
+
+/**
+ * 주간 리뷰 상세 페이지 관련 주 내비게이션 조회 폭 — silent drift family wave 595 (cycle 1973).
+ * app/reviews/weekly/[week]/page.tsx 가 "현재 주 제외 최근 3주" 링크를 보여주려면
+ * 최소 4주(현재+3)를 조회해야 함. REVIEWS_HUB_RECENT_WEEKS(4)와 값이 우연히 같아 그대로
+ * 재사용되어 왔으나(wave-591), 둘은 다른 목적 — 허브 nav 표시 수를 바꾸면 이 상세 페이지
+ * nav 가 최소 요구치(4) 아래로 떨어져 3주 미만 표시되는 silent 하위 발생 가능. wave-593
+ * (MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS) 와 동일 family — 값이 우연히 REVIEWS_HUB_RECENT_MONTHS(3)와
+ * 달랐던 monthly 는 이미 분리됐으나, 값이 우연히 같았던(4=4) weekly 는 미분리 상태로 남아있었음.
+ *
+ * 코드 (1 occurrence):
+ *   - app/reviews/weekly/[week]/page.tsx: getRecentWeeks(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS).slice(-3)
+ */
+export const WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS = 4;
 
 /**
  * 월간 리뷰 상세 페이지 관련 월 내비게이션 조회 폭 — silent drift family wave 593 (cycle 1971).
