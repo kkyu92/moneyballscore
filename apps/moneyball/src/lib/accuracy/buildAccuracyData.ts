@@ -23,6 +23,7 @@ import {
   ACCURACY_GOOD_PCT,
   ACCURACY_BASELINE,
   ACCURACY_BASELINE_PCT,
+  WEEKDAY_LABELS_KO,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -267,7 +268,6 @@ export function calibrationGap(rows: PredRow[]): number {
   return avgConf - acc;
 }
 
-const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일 순서
 
 export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
@@ -281,7 +281,7 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
   }
   return DOW_ORDER.map((day) => ({
     day,
-    dayLabel: DAY_LABELS[day],
+    dayLabel: WEEKDAY_LABELS_KO[day],
     n: acc[day].n,
     hits: acc[day].hits,
     accuracy: acc[day].n > 0 ? acc[day].hits / acc[day].n : null,
@@ -344,7 +344,7 @@ export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[
       out.push({
         scoringRule: sr,
         day,
-        dayLabel: DAY_LABELS[day],
+        dayLabel: WEEKDAY_LABELS_KO[day],
         n: cell.n,
         hits: cell.hits,
         accuracy: cell.n >= SMALL_SAMPLE_THRESHOLD ? cell.hits / cell.n : null,

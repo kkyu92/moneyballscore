@@ -28,9 +28,9 @@ describe('wave-599: /reviews 허브 요일별 분리 성적 배지', () => {
     expect(reviewsHubSrc).toContain('요일별 수렴 픽 성적');
   });
 
-  it('요일 라벨 배열 존재함 (일~토)', () => {
+  it('요일 라벨 상수 @moneyball/shared 에서 임포트됨 (review-code cycle 1980: 4곳 중복 통합)', () => {
     expect(reviewsHubSrc).toContain('WEEKDAY_LABELS_KO');
-    expect(reviewsHubSrc).toContain("['일', '월', '화', '수', '목', '금', '토']");
+    expect(reviewsHubSrc).toMatch(/WEEKDAY_LABELS_KO[\s\S]*?from '@moneyball\/shared'/);
   });
 
   it('강수렴 배지 라벨 존재함', () => {
