@@ -16,7 +16,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -95,6 +95,8 @@ export default async function ReviewsPage() {
     completeBestStreak,
     strongTeamStats,
     completeTeamStats,
+    strongHomeAwaySplit,
+    completeHomeAwaySplit,
   ] = await Promise.all([
     getVerifiedPredictions(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
@@ -108,6 +110,9 @@ export default async function ReviewsPage() {
     // wave-596: 강수렴/완전수렴 픽 팀별 시즌 성적 (analysis/page.tsx wave-557 재사용)
     getConvergencePickTeamStats(FACTOR_PICK_STRONG),
     getConvergencePickTeamStats(FACTOR_PICK_COMPLETE),
+    // wave-597: 강수렴/완전수렴 픽 홈/어웨이 분리 성적 (analysis/page.tsx wave-559/573 재사용)
+    getConvergencePickHomeAwaySplit(FACTOR_PICK_STRONG),
+    getConvergencePickHomeAwaySplit(FACTOR_PICK_COMPLETE),
   ]);
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
   const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
@@ -347,6 +352,69 @@ export default async function ReviewsPage() {
               })}
             </div>
           )}
+        </section>
+      )}
+
+      {/* wave-597: 수렴 픽 홈/어웨이 분리 성적 배지 — 강수렴/완전수렴 (analysis/page.tsx wave-559/573 재사용) */}
+      {(strongHomeAwaySplit !== null || completeHomeAwaySplit !== null) && (
+        <section aria-labelledby="reviews-home-away-title" className="space-y-2">
+          <h2 id="reviews-home-away-title" className="text-lg font-bold">
+            홈/어웨이 지목 성적
+          </h2>
+          {strongHomeAwaySplit !== null && (() => {
+            const homeTotal = strongHomeAwaySplit.home.wins + strongHomeAwaySplit.home.losses;
+            const awayTotal = strongHomeAwaySplit.away.wins + strongHomeAwaySplit.away.losses;
+            const homePct = computeWinRatePct(strongHomeAwaySplit.home.wins, homeTotal);
+            const awayPct = computeWinRatePct(strongHomeAwaySplit.away.wins, awayTotal);
+            return (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">🏅 강수렴:</span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                  title={`홈팀 지목 ${homeTotal}경기: ${strongHomeAwaySplit.home.wins}승 ${strongHomeAwaySplit.home.losses}패 (${homePct}%)`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct)}`}>{homePct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                  title={`어웨이팀 지목 ${awayTotal}경기: ${strongHomeAwaySplit.away.wins}승 ${strongHomeAwaySplit.away.losses}패 (${awayPct}%)`}
+                >
+                  <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct)}`}>{awayPct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+                </span>
+              </div>
+            );
+          })()}
+          {completeHomeAwaySplit !== null && (() => {
+            const homeTotal = completeHomeAwaySplit.home.wins + completeHomeAwaySplit.home.losses;
+            const awayTotal = completeHomeAwaySplit.away.wins + completeHomeAwaySplit.away.losses;
+            const homePct = computeWinRatePct(completeHomeAwaySplit.home.wins, homeTotal);
+            const awayPct = computeWinRatePct(completeHomeAwaySplit.away.wins, awayTotal);
+            return (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400">★ 완전수렴:</span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                  title={`홈팀 지목 ${homeTotal}경기: ${completeHomeAwaySplit.home.wins}승 ${completeHomeAwaySplit.home.losses}패 (${homePct}%)`}
+                >
+                  <span className="text-amber-600 dark:text-amber-400">🏠홈</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct)}`}>{homePct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
+                </span>
+                <span
+                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                  title={`어웨이팀 지목 ${awayTotal}경기: ${completeHomeAwaySplit.away.wins}승 ${completeHomeAwaySplit.away.losses}패 (${awayPct}%)`}
+                >
+                  <span className="text-amber-600 dark:text-amber-400">✈️원정</span>
+                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct)}`}>{awayPct}%</span>
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+                </span>
+              </div>
+            );
+          })()}
         </section>
       )}
 
