@@ -2781,6 +2781,13 @@ export const CONVERGENCE_TEAM_STATS_MIN_PICKS = 3;
 export const CONVERGENCE_HOME_AWAY_MIN_PICKS = 5;
 
 /**
+ * wave-599: 강수렴 픽 요일별 분리 성적 최소 경기 수 임계.
+ * 특정 요일 지목 경기가 본 값 미만이면 표시 생략 (소표본 노이즈 차단, CONVERGENCE_TEAM_STATS_MIN_PICKS 동일 기준 — 7개 요일 버킷도 팀 버킷과 유사한 표본 분산).
+ * 변경 시 convergenceRecord.ts getConvergencePickDayOfWeekSplit + reviews/page.tsx wave-599 callsite 동시 조정.
+ */
+export const CONVERGENCE_DAY_OF_WEEK_MIN_PICKS = 3;
+
+/**
  * wave-566: 수렴 픽 streak 최소 길이 임계 — 2경기 이상 연속 시만 streak 표시.
  * computeConvergenceStreak / computeConvergenceBestStreak 양쪽 공통 기준.
  * 1경기 단발 = streak 의미 없음 → null 반환. 2연승/2연패부터 배지 표시.

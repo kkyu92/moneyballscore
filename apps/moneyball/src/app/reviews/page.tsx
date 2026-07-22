@@ -16,7 +16,10 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, getConvergencePickDayOfWeekSplit, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
+
+// wave-599: 요일 인덱스(0=일~6=토) → 한글 라벨
+const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",
@@ -97,6 +100,8 @@ export default async function ReviewsPage() {
     completeTeamStats,
     strongHomeAwaySplit,
     completeHomeAwaySplit,
+    strongDayOfWeekSplit,
+    completeDayOfWeekSplit,
   ] = await Promise.all([
     getVerifiedPredictions(),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG),
@@ -113,6 +118,9 @@ export default async function ReviewsPage() {
     // wave-597: 강수렴/완전수렴 픽 홈/어웨이 분리 성적 (analysis/page.tsx wave-559/573 재사용)
     getConvergencePickHomeAwaySplit(FACTOR_PICK_STRONG),
     getConvergencePickHomeAwaySplit(FACTOR_PICK_COMPLETE),
+    // wave-599: 강수렴/완전수렴 픽 요일별 분리 성적 — 페이지 metadata "팀별·요일별 분해" 미구현분 충족
+    getConvergencePickDayOfWeekSplit(FACTOR_PICK_STRONG),
+    getConvergencePickDayOfWeekSplit(FACTOR_PICK_COMPLETE),
   ]);
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
   const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
@@ -415,6 +423,53 @@ export default async function ReviewsPage() {
               </div>
             );
           })()}
+        </section>
+      )}
+
+      {/* wave-599: 수렴 픽 요일별 분리 성적 배지 — 강수렴/완전수렴 (본 페이지 metadata "팀별·요일별 분해" 공약 충족) */}
+      {(strongDayOfWeekSplit.length > 0 || completeDayOfWeekSplit.length > 0) && (
+        <section aria-labelledby="reviews-day-of-week-title" className="space-y-2">
+          <h2 id="reviews-day-of-week-title" className="text-lg font-bold">
+            요일별 수렴 픽 성적
+          </h2>
+          {strongDayOfWeekSplit.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-gray-500 dark:text-gray-400">🏅 강수렴:</span>
+              {strongDayOfWeekSplit.map(stat => {
+                const dayTotal = stat.wins + stat.losses;
+                const pct = computeWinRatePct(stat.wins, dayTotal);
+                return (
+                  <span
+                    key={`strong-day-${stat.dayIndex}`}
+                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
+                    title={`${WEEKDAY_LABELS_KO[stat.dayIndex]}요일: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 강수렴 픽 ${dayTotal}경기`}
+                  >
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{WEEKDAY_LABELS_KO[stat.dayIndex]}</span>
+                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+          {completeDayOfWeekSplit.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-gray-500 dark:text-gray-400">★ 완전수렴:</span>
+              {completeDayOfWeekSplit.map(stat => {
+                const dayTotal = stat.wins + stat.losses;
+                const pct = computeWinRatePct(stat.wins, dayTotal);
+                return (
+                  <span
+                    key={`complete-day-${stat.dayIndex}`}
+                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                    title={`${WEEKDAY_LABELS_KO[stat.dayIndex]}요일: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 완전수렴 픽 ${dayTotal}경기`}
+                  >
+                    <span className="font-medium text-amber-700 dark:text-amber-300">{WEEKDAY_LABELS_KO[stat.dayIndex]}</span>
+                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
 

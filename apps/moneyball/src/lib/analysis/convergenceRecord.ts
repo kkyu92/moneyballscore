@@ -12,6 +12,7 @@ import {
   PRODUCTION_COHORT_RULES,
   CONVERGENCE_TEAM_STATS_MIN_PICKS,
   CONVERGENCE_HOME_AWAY_MIN_PICKS,
+  CONVERGENCE_DAY_OF_WEEK_MIN_PICKS,
   CONVERGENCE_STREAK_MIN_LENGTH,
   ACCURACY_GOOD_PCT,
   CONVERGENCE_BADGE_LOW_PCT,
@@ -243,7 +244,7 @@ export function computeConvergenceTeamStats(
 async function fetchConvergencePickDetailedResults(
   cutoff: string,
   minFactors: number,
-): Promise<Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean }>> {
+): Promise<Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }>> {
   const today = toKSTDateString();
   const supabase = await createClient();
   const gamesResult = (await supabase
@@ -271,7 +272,7 @@ async function fetchConvergencePickDetailedResults(
   const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults');
   if (!data) return [];
 
-  const results: Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean }> = [];
+  const results: Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }> = [];
   for (const row of data as unknown as ConvergenceGameRow[]) {
     const pred = row.predictions?.[0];
     if (!pred || row.home_score === null || row.away_score === null) continue;
@@ -305,7 +306,7 @@ async function fetchConvergencePickDetailedResults(
     const favoredHome = duel.netScore > 0;
     const favoredTeam = favoredHome ? homeCode : awayCode;
     const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
-    results.push({ favoredTeam, favoredHome, won });
+    results.push({ favoredTeam, favoredHome, won, gameDate: row.game_date });
   }
 
   return results;
@@ -345,6 +346,41 @@ export async function getConvergencePickTeamStats(
 ): Promise<Array<{ teamCode: TeamCode; wins: number; losses: number }>> {
   const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
   return computeConvergenceTeamStats(results);
+}
+
+// wave-599: YYYY-MM-DD → 요일 인덱스 (0=일 ~ 6=토) — 순수 함수, 타임존 무관 (달력 구성요소 직접 조립)
+function weekdayIndexOf(dateStr: string): number {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).getDay();
+}
+
+// wave-599: 강수렴 픽 요일별 분리 성적 — 순수 함수 (테스트 가능)
+// results: { gameDate, won } 배열 (fetchConvergencePickDetailedResults 출력)
+// minPicks: 표시 최소 경기 수 (소표본 노이즈 차단)
+// 반환: 요일 인덱스(0=일~6=토) 오름차순 정렬 (팀별/홈어웨이와 달리 요일은 자연 순서 유지)
+export function computeConvergenceDayOfWeekSplit(
+  results: Array<{ gameDate: string; won: boolean }>,
+  minPicks = CONVERGENCE_DAY_OF_WEEK_MIN_PICKS,
+): Array<{ dayIndex: number; wins: number; losses: number }> {
+  const map = new Map<number, { wins: number; losses: number }>();
+  for (const r of results) {
+    const dayIndex = weekdayIndexOf(r.gameDate);
+    const s = map.get(dayIndex) ?? { wins: 0, losses: 0 };
+    if (r.won) s.wins++;
+    else s.losses++;
+    map.set(dayIndex, s);
+  }
+  return Array.from(map.entries())
+    .map(([dayIndex, { wins, losses }]) => ({ dayIndex, wins, losses }))
+    .filter(s => s.wins + s.losses >= minPicks)
+    .sort((a, b) => a.dayIndex - b.dayIndex);
+}
+
+export async function getConvergencePickDayOfWeekSplit(
+  minFactors = FACTOR_PICK_STRONG,
+): Promise<Array<{ dayIndex: number; wins: number; losses: number }>> {
+  const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
+  return computeConvergenceDayOfWeekSplit(results);
 }
 
 // wave-570: wins/total 승률 % — Math.round(wins / total * 100) 9회 중복 추출

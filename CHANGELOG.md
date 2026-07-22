@@ -1,3 +1,16 @@
+## v0.5.62.3 — 2026-07-22 (cycle 1979, wave-599: /reviews 허브 요일별 수렴 픽 성적 배지)
+
+### feat(analysis): wave-599 — /reviews 허브 수렴 픽 요일별 분리 성적 배지 (cycle 1979)
+
+**신규: `/reviews` 허브 강수렴/완전수렴 픽 요일별(일~토) 성적 분리**
+- 본 페이지 metadata 가 이미 "주간·월간·전체 시즌 적중률 추이, 팀별·요일별 분해" 로 공약했지만 요일별 분해는 미구현 상태였던 gap 발견 — wave-596(팀별)/wave-597(홈어웨이) 뒤 이어서 충족
+- `convergenceRecord.ts`: `computeConvergenceDayOfWeekSplit`(순수 함수) + `getConvergencePickDayOfWeekSplit` 신규 — `fetchConvergencePickDetailedResults` 반환값에 `gameDate` 필드 추가해 재사용
+- `CONVERGENCE_DAY_OF_WEEK_MIN_PICKS`(=3) 신규 상수 — 요일별 소표본 노이즈 차단 (팀별 성적과 동일 임계)
+- `reviews/page.tsx`: wave-597(홈/어웨이) 섹션 뒤 배치, `WEEKDAY_LABELS_KO` 라벨 배열로 일~토 배지 표시
+- 테스트: `wave-599-convergence-pick-day-of-week-split.test.ts` 8 cases (순수 함수) + `wave-599-reviews-hub-day-of-week-split.test.ts` 6 cases (페이지 wiring)
+
+---
+
 ## v0.5.62.2 — 2026-07-22 (cycle 1977, wave-598: 리뷰 하이라이트 배지 silent drift + 중복 통합)
 
 ### style(design): wave-598 — 리뷰 하이라이트 "박빙 적중" purple 색상 DESIGN.md 박제 + HighlightCard 중복 통합 (cycle 1977)
