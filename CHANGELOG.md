@@ -1,3 +1,16 @@
+## v0.5.62.6 — 2026-07-22 (cycle 1988, wave-602: 월간 리뷰 수렴 픽 요일별 분리 성적 배지)
+
+### feat(analysis): wave-602 — /reviews/monthly/[month] 수렴 픽 요일별 분리 성적 배지 (cycle 1988)
+
+**신규: 월간 상세 리뷰 강수렴/완전수렴 픽 요일별(일~토) 분리 성적**
+- `/reviews` 허브(wave-599)에만 존재하던 요일별 분리 성적이 `/reviews/monthly/[month]` 상세 페이지엔 없었던 gap 발견 — wave-600/601(홈/어웨이 monthly+weekly 확장) 뒤 이어서 요일별도 monthly 확장
+- `convergenceRecord.ts`: `getConvergencePickDayOfWeekSplit` 에 `startDate`/`endDate` optional param 추가 (wave-600 홈/어웨이 동일 패턴) — 순수 함수 `computeConvergenceDayOfWeekSplit` 변경 없이 재사용
+- `monthly/[month]/page.tsx`: 홈/어웨이 섹션 뒤 배치, `range.startDate`/`range.endDate` 로 조회 범위 한정 — 표본 부족(`< CONVERGENCE_DAY_OF_WEEK_MIN_PICKS`) 요일은 자동 숨김
+- **weekly 확장은 의도적으로 제외**: 한 주엔 요일당 경기가 최대 1~2개뿐이라 `CONVERGENCE_DAY_OF_WEEK_MIN_PICKS`(=3) 문턱을 구조적으로 못 넘음 (홈/어웨이처럼 "가끔" 작은 표본이 아니라 항상 부족) — 섹션이 영구히 숨겨지는 죽은 코드가 되므로 스코프에서 제외
+- 테스트: `wave-602-monthly-convergence-day-of-week-split.test.ts` 9 cases (순수 함수 2 + monthly 페이지 wiring 6 + weekly 미도입 확인 1)
+
+---
+
 ## v0.5.62.5 — 2026-07-22 (cycle 1986, wave-601: 주간 리뷰 수렴 픽 홈/어웨이 분리 성적 배지)
 
 ### feat(analysis): wave-601 — /reviews/weekly/[week] 수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1986)
