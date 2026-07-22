@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const ANALYSIS_SRC = readFileSync(
-  join(__dirname, '../../app/analysis/page.tsx'),
-  'utf8',
-);
+// cycle 1984 review-code(heavy): modelHomeWinProb 필드/eloResult 쿼리/modelProbMap 은 analysis/page.tsx
+// 데이터 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동, 배지 렌더링은 page.tsx 에 남음 — 둘 다 검사.
+const ANALYSIS_SRC =
+  readFileSync(join(__dirname, '../../app/analysis/page.tsx'), 'utf8') +
+  readFileSync(join(__dirname, '../../app/analysis/analysis-data.ts'), 'utf8');
 
 describe('explore-idea wave-313 — 이번 주 남은 경기 모델 예측 배지 + 게임 링크 (cycle 1644)', () => {
   it('UpcomingScheduledGame has modelHomeWinProb field', () => {

@@ -13,10 +13,11 @@ const sharedSrc = readFileSync(
   join(__dirname, '../../../../../packages/shared/src/index.ts'),
   'utf8',
 );
-const analysisListSrc = readFileSync(
-  join(__dirname, '../analysis/page.tsx'),
-  'utf8',
-);
+// cycle 1984 review-code(heavy): TodayGameCard 타입/topFactors push 는 analysis/page.tsx 데이터
+// 레이어 분리 리팩터로 analysis/analysis-data.ts 로 이동, tier 색상 렌더링은 page.tsx 에 남음 — 둘 다 검사.
+const analysisListSrc =
+  readFileSync(join(__dirname, '../analysis/page.tsx'), 'utf8') +
+  readFileSync(join(__dirname, '../analysis/analysis-data.ts'), 'utf8');
 
 describe('wave-469 — topFactors 배지 3-tier 색상', () => {
   it('TOPFACTOR_STRONG_IMPACT 는 NEUTRAL_FACTOR 기준 양수 임계 (0~0.5 범위)', () => {

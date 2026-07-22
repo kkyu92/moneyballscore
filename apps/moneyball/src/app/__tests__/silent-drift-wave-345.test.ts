@@ -27,8 +27,10 @@ describe('silent drift wave-345 — 팀 WAR 배지 단일 소스 (cycle 1682)', 
     expect(src).not.toMatch(/<=\s*8\.0/);
   });
 
-  it('analysis/page.tsx: fetches home_war_total and away_war_total', () => {
-    const src = readFileSync(ANALYSIS_PAGE, 'utf8');
+  // cycle 1984 review-code(heavy): DB fetch 는 analysis/page.tsx 데이터 레이어 분리 리팩터로
+  // analysis/analysis-data.ts 로 이동.
+  it('analysis/analysis-data.ts: fetches home_war_total and away_war_total', () => {
+    const src = readFileSync(join(ROOT, 'src/app/analysis/analysis-data.ts'), 'utf8');
     expect(src).toContain('home_war_total');
     expect(src).toContain('away_war_total');
   });
