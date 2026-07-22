@@ -354,8 +354,11 @@ export async function getConvergencePickHomeAwaySplit(
 
 export async function getConvergencePickTeamStats(
   minFactors = FACTOR_PICK_STRONG,
+  // wave-603: startDate/endDate 지정 시 해당 범위만 조회 (월간/주간 리뷰 용, getConvergencePickHomeAwaySplit wave-600 동일 패턴). 미지정 시 기존 동작 (시즌 전체).
+  startDate?: string,
+  endDate?: string,
 ): Promise<Array<{ teamCode: TeamCode; wins: number; losses: number }>> {
-  const results = await fetchConvergencePickDetailedResults(KBO_SEASON_START_DATE, minFactors);
+  const results = await fetchConvergencePickDetailedResults(startDate ?? KBO_SEASON_START_DATE, minFactors, endDate);
   return computeConvergenceTeamStats(results);
 }
 
