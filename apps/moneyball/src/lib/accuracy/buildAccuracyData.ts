@@ -24,6 +24,7 @@ import {
   ACCURACY_BASELINE,
   ACCURACY_BASELINE_PCT,
   WEEKDAY_LABELS_KO,
+  WEEKDAY_ORDER_MON_FIRST,
   type ModelVersion,
   type ScoringRule,
 } from '@moneyball/shared';
@@ -268,8 +269,6 @@ export function calibrationGap(rows: PredRow[]): number {
   return avgConf - acc;
 }
 
-const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일 순서
-
 export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
   const acc = Array.from({ length: 7 }, (_, i) => ({ day: i, n: 0, hits: 0 }));
   for (const r of rows) {
@@ -279,7 +278,7 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
     acc[dow].n += 1;
     if (r.is_correct) acc[dow].hits += 1;
   }
-  return DOW_ORDER.map((day) => ({
+  return WEEKDAY_ORDER_MON_FIRST.map((day) => ({
     day,
     dayLabel: WEEKDAY_LABELS_KO[day],
     n: acc[day].n,
@@ -339,7 +338,7 @@ export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[
 
   const out: ScoringRuleDayCell[] = [];
   for (const sr of SCORING_RULE_HEATMAP_ROWS) {
-    for (const day of DOW_ORDER) {
+    for (const day of WEEKDAY_ORDER_MON_FIRST) {
       const cell = acc.get(keyOf(sr, day))!;
       out.push({
         scoringRule: sr,

@@ -2802,6 +2802,14 @@ export const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토
 export const WEEKDAY_LABELS_KO_MON_FIRST = ['월', '화', '수', '목', '금', '토', '일'] as const;
 
 /**
+ * JS Date.getDay() 인덱스(0=일~6=토)를 월요일 시작 순서로 재배열하기 위한 인덱스 배열.
+ * review-code(heavy) cycle 1989: buildAccuracyData.ts (DOW_ORDER) / ScoringRuleDayHeatmap.tsx (DAY_ORDER)
+ * 2곳에 동일 숫자 배열이 독립 중복 정의되어 있던 걸 통합 — WEEKDAY_LABELS_KO_MON_FIRST 와 짝을 이루는
+ * 인덱스 버전 (cycle 1980/1987 라벨 문자열 family 와 동일 패턴, 표현만 숫자).
+ */
+export const WEEKDAY_ORDER_MON_FIRST = [1, 2, 3, 4, 5, 6, 0] as const;
+
+/**
  * wave-566: 수렴 픽 streak 최소 길이 임계 — 2경기 이상 연속 시만 streak 표시.
  * computeConvergenceStreak / computeConvergenceBestStreak 양쪽 공통 기준.
  * 1경기 단발 = streak 의미 없음 → null 반환. 2연승/2연패부터 배지 표시.
