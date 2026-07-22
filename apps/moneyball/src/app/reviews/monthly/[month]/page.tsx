@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
-import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, computeWinRatePct, getConvergencePickStreak, getConvergencePickBestStreak } from '@/lib/analysis/convergenceRecord';
 import {
   parseMonthId,
   getRecentMonths,
@@ -97,10 +97,23 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   if (!range) notFound();
 
   // wave-586: 강수렴/완전수렴 픽 월간 성적 — startDate~endDate 범위 한정
-  const [review, strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+  // wave-594: 강수렴/완전수렴 픽 월간 스트리크 (범위 내 마감 streak + 범위 내 최장 streak)
+  const [
+    review,
+    strongConvergenceRecord,
+    completeConvergenceRecord,
+    strongConvergenceStreak,
+    strongConvergenceBestStreak,
+    completeConvergenceStreak,
+    completeConvergenceBestStreak,
+  ] = await Promise.all([
     buildMonthlyReview(range),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, range.startDate, range.endDate),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getConvergencePickStreak(FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getConvergencePickBestStreak(FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getConvergencePickStreak(FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getConvergencePickBestStreak(FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
   ]);
   const url = `${SITE_URL}/reviews/monthly/${month}`;
 
@@ -262,6 +275,45 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                   {completeConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
                 </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* wave-594: 수렴 픽 월간 스트리크 — 강수렴/완전수렴 범위 내 마감 streak + 범위 내 최장 streak */}
+      {(strongConvergenceStreak !== null || completeConvergenceStreak !== null) && (
+        <section aria-labelledby="monthly-streak-title" className="space-y-3">
+          <h2 id="monthly-streak-title" className="text-xl font-bold">
+            수렴 픽 스트리크
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {strongConvergenceStreak !== null && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className={`text-2xl font-bold mt-1 ${strongConvergenceStreak.type === 'win' ? 'text-amber-500 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}>
+                  {strongConvergenceStreak.type === 'win' ? '🔥' : '❄️'}{' '}
+                  {strongConvergenceStreak.length}연{strongConvergenceStreak.type === 'win' ? '승' : '패'}
+                </p>
+                {strongConvergenceBestStreak !== null && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    이번 달 최장 {strongConvergenceBestStreak.length}연{strongConvergenceBestStreak.type === 'win' ? '승' : '패'}
+                  </p>
+                )}
+              </div>
+            )}
+            {completeConvergenceStreak !== null && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/30 p-5">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className={`text-2xl font-bold mt-1 ${completeConvergenceStreak.type === 'win' ? 'text-amber-600 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}>
+                  {completeConvergenceStreak.type === 'win' ? '🔥' : '❄️'}{' '}
+                  {completeConvergenceStreak.length}연{completeConvergenceStreak.type === 'win' ? '승' : '패'}
+                </p>
+                {completeConvergenceBestStreak !== null && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    이번 달 최장 {completeConvergenceBestStreak.length}연{completeConvergenceBestStreak.type === 'win' ? '승' : '패'}
+                  </p>
+                )}
               </div>
             )}
           </div>

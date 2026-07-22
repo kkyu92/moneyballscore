@@ -165,13 +165,16 @@ export function computeConvergenceStreak(
 
 // wave-555: default FACTOR_PICK_STRONG(8) — wave-552 callsite 동기
 // (wave-552 analysis/page.tsx getConvergencePickStreak(FACTOR_PICK_STRONG) 명시, wave-554 getConvergencePickBestStreak default 동일 기준)
+// wave-594: startDate/endDate 지정 시 그 범위 내 현재(=범위 마지막) streak (주간/월간 리뷰 상세 페이지 용). 미지정 시 기존 lookback-days 동작.
 export async function getConvergencePickStreak(
   minFactors = FACTOR_PICK_STRONG,
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const cutoff = new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
+  const cutoff = startDate ?? new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
-  const results = await fetchConvergencePickResults(cutoff, Number.MAX_SAFE_INTEGER, minFactors);
+  const results = await fetchConvergencePickResults(cutoff, Number.MAX_SAFE_INTEGER, minFactors, endDate);
   return computeConvergenceStreak(results);
 }
 
@@ -203,10 +206,13 @@ export function computeConvergenceBestStreak(
     : { type: 'loss', length: bestLoss };
 }
 
+// wave-594: startDate/endDate 지정 시 그 범위 내 최장 streak (주간/월간 리뷰 상세 페이지 용). 미지정 시 기존 시즌 전체 동작.
 export async function getConvergencePickBestStreak(
   minFactors = FACTOR_PICK_STRONG,
+  startDate: string = KBO_SEASON_START_DATE,
+  endDate?: string,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const results = await fetchConvergencePickResults(KBO_SEASON_START_DATE, Number.MAX_SAFE_INTEGER, minFactors);
+  const results = await fetchConvergencePickResults(startDate, Number.MAX_SAFE_INTEGER, minFactors, endDate);
   return computeConvergenceBestStreak(results);
 }
 
