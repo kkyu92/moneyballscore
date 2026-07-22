@@ -18,6 +18,12 @@ const weeklySrc = readFileSync(
   join(__dirname, '../reviews/weekly/[week]/page.tsx'),
   'utf-8',
 );
+// cycle 1993: 요일별 배지 렌더링(라벨/가드)은 2-way 중복(hub+monthly) 이라
+// ConvergenceDayOfWeekBadges 공용 컴포넌트로 추출됨 — 렌더링 detail 은 컴포넌트 소스에서 검증.
+const badgesComponentSrc = readFileSync(
+  join(__dirname, '../../components/reviews/ConvergenceDayOfWeekBadges.tsx'),
+  'utf-8',
+);
 
 describe('wave-602: getConvergencePickDayOfWeekSplit startDate/endDate 하위호환', () => {
   it('optional param 미지정 시 기존 시그니처와 동일하게 함수 참조 가능 (arity 변경 X 강제 X)', () => {
@@ -50,25 +56,29 @@ describe('wave-602: /reviews/monthly/[month] 수렴 픽 요일별 분리 성적 
     expect(monthlySrc).toContain('getConvergencePickDayOfWeekSplit(FACTOR_PICK_COMPLETE, range.startDate, range.endDate)');
   });
 
-  it('요일별 수렴 픽 성적 섹션 존재함', () => {
+  it('ConvergenceDayOfWeekBadges 컴포넌트에 titleId + split 전달함', () => {
+    expect(monthlySrc).toContain('ConvergenceDayOfWeekBadges');
     expect(monthlySrc).toContain('monthly-day-of-week-title');
-    expect(monthlySrc).toContain('요일별 수렴 픽 성적');
+  });
+
+  it('요일별 수렴 픽 성적 섹션 존재함', () => {
+    expect(badgesComponentSrc).toContain('요일별 수렴 픽 성적');
   });
 
   it('강수렴 배지 라벨 존재함', () => {
-    expect(monthlySrc).toContain('🏅 강수렴:');
+    expect(badgesComponentSrc).toContain('🏅 강수렴:');
   });
 
   it('완전수렴 배지 라벨 + amber 테마 존재함', () => {
-    expect(monthlySrc).toContain('★ 완전수렴:');
+    expect(badgesComponentSrc).toContain('★ 완전수렴:');
   });
 
   it('WEEKDAY_LABELS_KO 로 요일 라벨 표시함', () => {
-    expect(monthlySrc).toContain('WEEKDAY_LABELS_KO[stat.dayIndex]');
+    expect(badgesComponentSrc).toContain('WEEKDAY_LABELS_KO[stat.dayIndex]');
   });
 
   it('빈 배열 시 섹션 숨김 가드 존재함', () => {
-    expect(monthlySrc).toContain('strongDayOfWeekSplit.length > 0 || completeDayOfWeekSplit.length > 0');
+    expect(badgesComponentSrc).toContain('strongSplit.length === 0 && completeSplit.length === 0');
   });
 });
 
