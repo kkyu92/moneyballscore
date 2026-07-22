@@ -7,13 +7,13 @@ import { getRecentConvergencePickRecord, computeWinRatePct, getConvergencePickSt
 import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import {
   buildWeeklyReview,
-  type WeeklyHighlight,
   type WeeklyGameResult,
 } from "@/lib/reviews/buildWeeklyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
+import { HighlightCard } from "@/components/reviews/HighlightCard";
 import { neutral } from "@/lib/design-tokens";
 
 export const revalidate = 1800; // REVIEWS_WEEKLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -51,46 +51,6 @@ export async function generateMetadata({
       description,
     },
   };
-}
-
-function HighlightCard({ h }: { h: WeeklyHighlight }) {
-  const winnerName = h.predictedWinnerCode
-    ? shortTeamName(h.predictedWinnerCode)
-    : null;
-  const badgeClass =
-    h.badge === "박빙 적중"
-      ? "bg-purple-500/15 text-purple-600 dark:text-purple-300"
-      : h.badge === "고확신 적중"
-        ? "bg-brand-500/15 text-brand-600 dark:text-brand-300"
-        : "bg-red-500/15 text-red-600 dark:text-red-300";
-  return (
-    <Link
-      href={`/analysis/game/${h.gameId}`}
-      className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <span
-          className={`text-xs font-bold px-2.5 py-1 rounded-full ${badgeClass}`}
-        >
-          {h.badge}
-        </span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          {h.gameDate}
-        </span>
-      </div>
-      <p className="text-base font-semibold">
-        {h.awayName}
-        <span className="font-mono mx-2">
-          {h.awayScore ?? "-"} : {h.homeScore ?? "-"}
-        </span>
-        {h.homeName}
-      </p>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        예측 {winnerName ?? ""} {Math.round(h.winnerProb * 100)}%{" "}
-        · {h.isCorrect ? "적중" : "빗나감"}
-      </p>
-    </Link>
-  );
 }
 
 function GameResultRow({ g, style }: { g: WeeklyGameResult; style?: CSSProperties }) {
@@ -359,7 +319,7 @@ export default async function WeeklyReviewPage({ params }: PageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {review.highlights.map((h) => (
-              <HighlightCard key={h.gameId} h={h} />
+              <HighlightCard key={h.gameId} h={h} showResultSuffix />
             ))}
           </div>
         </section>
