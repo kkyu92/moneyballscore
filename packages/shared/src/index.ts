@@ -2795,6 +2795,13 @@ export const CONVERGENCE_DAY_OF_WEEK_MIN_PICKS = 3;
 export const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토'] as const;
 
 /**
+ * 한글 요일 라벨 (월요일 시작 — 캘린더 그리드 / 히트맵 열 순서용, WEEKDAY_LABELS_KO 와 별개 순서).
+ * review-code(heavy) cycle 1987: calendar/page.tsx / ScoringRuleDayHeatmap.tsx 2곳 독립 중복 정의 통합 —
+ * cycle 1980 WEEKDAY_LABELS_KO 통합과 동일 family, 순서만 다름(월요일 시작).
+ */
+export const WEEKDAY_LABELS_KO_MON_FIRST = ['월', '화', '수', '목', '금', '토', '일'] as const;
+
+/**
  * wave-566: 수렴 픽 streak 최소 길이 임계 — 2경기 이상 연속 시만 streak 표시.
  * computeConvergenceStreak / computeConvergenceBestStreak 양쪽 공통 기준.
  * 1경기 단발 = streak 의미 없음 → null 반환. 2연승/2연패부터 배지 표시.

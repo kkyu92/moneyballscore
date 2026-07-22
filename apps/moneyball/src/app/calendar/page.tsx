@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL, ACCURACY_GOOD_RATE } from '@moneyball/shared';
+import { assertSelectOk, KST_OFFSET_MS, PRODUCTION_COHORT_RULES, CALENDAR_ISR_HOURS, SITE_URL, ACCURACY_GOOD_RATE, WEEKDAY_LABELS_KO_MON_FIRST } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -220,7 +220,7 @@ export default async function CalendarPage() {
       ? Math.round((monthTotal.correct / monthTotal.verified) * 100)
       : null;
 
-  const weekHeaders = ['월', '화', '수', '목', '금', '토', '일'];
+  const weekHeaders = WEEKDAY_LABELS_KO_MON_FIRST;
 
   const related: RelatedLink[] = [
     { href: '/predictions', label: '예측 hub', hint: '전체 카드 모음' },

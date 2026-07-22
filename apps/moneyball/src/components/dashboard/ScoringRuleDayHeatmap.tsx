@@ -1,4 +1,4 @@
-import { ACCURACY_BASELINE, ACCURACY_GOOD_RATE } from "@moneyball/shared";
+import { ACCURACY_BASELINE, ACCURACY_GOOD_RATE, WEEKDAY_LABELS_KO_MON_FIRST } from "@moneyball/shared";
 
 import type { ScoringRuleDayCell } from "@/lib/accuracy/buildAccuracyData";
 import { SCORING_RULE_HEATMAP_ROWS } from "@/lib/accuracy/buildAccuracyData";
@@ -8,7 +8,7 @@ interface ScoringRuleDayHeatmapProps {
 }
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // 월~일
-const DAY_LABELS_KO = ['월', '화', '수', '목', '금', '토', '일'];
+const DAY_LABELS_KO = WEEKDAY_LABELS_KO_MON_FIRST;
 
 // cell 배경 색상 — DESIGN.md brand/semantic 정합. BrierTrendChart 와 동일 패턴.
 // >=60% brand / >=50% yellow / <50% red / null = neutral (소표본 N<3).
