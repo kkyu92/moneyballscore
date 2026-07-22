@@ -1,3 +1,19 @@
+## v0.5.62.0 — 2026-07-22 (cycle 1975, review-code: CHANGELOG/version 재동기화 — wave-560~596 catch-up)
+
+### fix(context): CHANGELOG.md silent drift — wave-559 (cycle 1933) 이후 41 cycle 미갱신 발견 (cycle 1975)
+
+`apps/moneyball/package.json` 는 wave-596(cycle 1974) 까지 커밋되며 실제 0.5.61.31 그대로 멈춰있었고, CHANGELOG.md 최신 항목도 wave-559 에서 정지 — 그 사이 37개 wave(560~596, cycle 1934~1974) 가 버전/체인지로그 기록 없이 머지됨. 루트 `package.json` 은 그보다도 앞선 0.5.61.27 에서 멈춰 두 파일 간 불일치까지 존재. ship 워크플로 관례(매 wave = 버전 bump + CHANGELOG 항목) 가 이 구간에서 silent skip.
+
+**catch-up 요약 (wave-560~596, cycle 1934~1974) — 완전수렴 픽(10팩터) 기능 확장 물결**:
+- **feat(analysis) 신규 배지 19건**: 완전수렴 시즌/streak/최장streak/이번주/이번달/팀별·홈어웨이/직전N경기 rolling/아카이브 레이블/어제결과/주간·월간·시즌 리뷰 카드/`/reviews` 허브 전체·스트리크·팀별 카드 (wave-561/563/565/567/569/571-573/575/577/579/581/584/586/588/590/592/594/596)
+- **fix(context) 상수화/순수함수 추출 17건**: `ACCURACY_GOOD_PCT`/`CONVERGENCE_BADGE_LOW_PCT`/`CONVERGENCE_STREAK_MIN_LENGTH`/`CONVERGENCE_RECORD_ALL_LIMIT`/`REVIEWS_HUB_RECENT_WEEKS`/`MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS`/`WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS` 등 신규 상수 + `computeWinRatePct`/`computeWinRateColorClass`/`computeWinProbPct`/`computeWeeklyConvergenceRecord`/`computeUpcomingPickGameIds`/`computeConvergenceRecordFromIsCorrect`/`computeConvergencePickFlags` 등 순수 함수 추출 (silent drift family sweep, wave-560/562/564/566/568/570/574/576/578/580/583/585/587/589/591/593/595)
+- **fix(ia)**: `/teams/[code]/recent` sitemap 누락 수정 (wave-582, cycle 1959)
+- 테스트 스위트 wave-559 시점 대비 대폭 증가 (개별 wave 커밋 메시지에 케이스 수 기록)
+
+**조치**: `apps/moneyball/package.json` + 루트 `package.json` 버전 0.5.62.0 로 동기화 통일. 다음 wave 부터 per-wave CHANGELOG 항목 + 버전 bump 관례 재개.
+
+---
+
 ## v0.5.61.31 — 2026-07-21 (cycle 1933, wave-559: 강수렴 픽 홈/어웨이 분리 성적 배지)
 
 ### feat(analysis): wave-559 — 강수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1933)
