@@ -1,3 +1,15 @@
+## v0.5.62.2 — 2026-07-22 (cycle 1977, wave-598: 리뷰 하이라이트 배지 silent drift + 중복 통합)
+
+### style(design): wave-598 — 리뷰 하이라이트 "박빙 적중" purple 색상 DESIGN.md 박제 + HighlightCard 중복 통합 (cycle 1977)
+
+**polish-ui — 2-chain alternation lock(explore-idea/review-code) 탈출, 14 신규 라우트 7일 내 추가 + polish-ui 20 cycle 미발화 자연 trigger**
+
+- `/reviews/weekly`, `/reviews/monthly` 두 페이지에 동일 정의된 `HighlightCard` 컴포넌트(배지 3종 색상 로직 포함) 를 `components/reviews/HighlightCard.tsx` 로 통합 — `showResultSuffix` prop 으로 주간 전용 "· 적중/빗나감" 접미사만 분기
+- "박빙 적중" 배지의 `purple-500` 색상이 도입 커밋(`81f3b83c`/`6db0459c`) 이후 DESIGN.md Decisions Log 미기재 상태로 방치된 silent drift 발견 — 색상은 의도된 3rd-tier 구분(승패 이분법 밖 "박빙" 상태, wave-452~456 amber tier 와 동일 패턴) 이므로 변경 없이 문서화만 보강
+- 테스트: 기존 `reviews-monthly-page`/`reviews-weekly-page` 스위트 4 cases + `/reviews` 전체 11 cases 통과 (회귀 없음)
+
+---
+
 ## v0.5.62.1 — 2026-07-22 (cycle 1976, wave-597: /reviews 허브 홈/어웨이 분리 성적 배지)
 
 ### feat(analysis): wave-597 — /reviews 허브 수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1976)
