@@ -30,6 +30,7 @@ import {
   winnerProbOf,
   WINNER_TIER_LABEL,
   TOP_STAT_PICK_EDGE_MIN,
+  WEEKDAY_LABELS_KO,
   type TeamCode,
   type WeightKey,
 } from "@moneyball/shared";
@@ -458,8 +459,7 @@ function formatKoreanWeekday(dateStr: string): string {
   // 서버 timezone (Vercel UTC) 무관하게 날짜 문자열 그대로의 요일.
   // UTC 정오 앵커 + getUTCDay 로 하루 밀리지 않음.
   const d = new Date(`${dateStr}T12:00:00Z`);
-  const days = ['일', '월', '화', '수', '목', '금', '토'];
-  return days[d.getUTCDay()];
+  return WEEKDAY_LABELS_KO[d.getUTCDay()];
 }
 
 async function getSeasonAccuracy(): Promise<{

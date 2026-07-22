@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { HOME_ADVANTAGE, SUPABASE_PAGE_SIZE } from '@moneyball/shared';
+import { HOME_ADVANTAGE, SUPABASE_PAGE_SIZE, WEEKDAY_LABELS_KO } from '@moneyball/shared';
 
 // /debug/factor-correlation — 환경 변수 → 경기 결과 상관 분석
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
@@ -103,11 +103,9 @@ function makeSplit<K extends string>(
   return rows.sort((x, y) => y.n - x.n);
 }
 
-const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
-
 function weekdayOf(date: string): string {
   const d = new Date(date + 'T00:00:00+09:00');
-  return WEEKDAY_KO[d.getUTCDay()];
+  return WEEKDAY_LABELS_KO[d.getUTCDay()];
 }
 
 function tempBucket(t: number | undefined): string | null {
@@ -307,7 +305,7 @@ export default async function FactorCorrelationPage() {
       <SplitSection title="3. 낮 vs 밤" rows={dayNightSplit} overall={homeWinRate} showRuns />
       <SplitSection
         title="4. 요일별"
-        rows={WEEKDAY_KO.map((d) => weekdaySplit.find((r) => r.key === d)).filter(
+        rows={WEEKDAY_LABELS_KO.map((d) => weekdaySplit.find((r) => r.key === d)).filter(
           (r): r is SplitRow => !!r,
         )}
         overall={homeWinRate}

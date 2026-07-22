@@ -7,7 +7,7 @@ import {
   assertSelectOk, REVIEWS_RECENT_LIMIT, SITE_URL,
   FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
-  KBO_SEASON_YEAR, UPCOMING_CONVERGENCE_TEAM_LIMIT,
+  KBO_SEASON_YEAR, UPCOMING_CONVERGENCE_TEAM_LIMIT, WEEKDAY_LABELS_KO,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -17,9 +17,6 @@ import { ReviewsResultFilter } from "@/components/reviews/ReviewsResultFilter";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, getConvergencePickDayOfWeekSplit, computeWinRatePct, computeWinRateColorClass } from '@/lib/analysis/convergenceRecord';
-
-// wave-599: 요일 인덱스(0=일~6=토) → 한글 라벨
-const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
 export const metadata: Metadata = {
   title: "예측 결과 리뷰",

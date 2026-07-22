@@ -2788,6 +2788,13 @@ export const CONVERGENCE_HOME_AWAY_MIN_PICKS = 5;
 export const CONVERGENCE_DAY_OF_WEEK_MIN_PICKS = 3;
 
 /**
+ * 한글 요일 라벨 (0=일 ~ 6=토, JS Date.getDay()/getUTCDay() 인덱스와 동일 순서).
+ * review-code(heavy) cycle 1980: page.tsx / debug/factor-correlation / buildAccuracyData.ts / reviews/page.tsx
+ * 4곳에 동일 배열이 독립 중복 정의되어 있던 걸 통합 (각 파일의 요일 인덱스 산출 방식 — UTC 정오 앵커 / +09:00 오프셋 / KST_OFFSET_MS / 로컬 Date 조립 — 은 파일별 타임존 처리 사정이 달라 그대로 유지, 라벨 배열만 단일화).
+ */
+export const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토'] as const;
+
+/**
  * wave-566: 수렴 픽 streak 최소 길이 임계 — 2경기 이상 연속 시만 streak 표시.
  * computeConvergenceStreak / computeConvergenceBestStreak 양쪽 공통 기준.
  * 1경기 단발 = streak 의미 없음 → null 반환. 2연승/2연패부터 배지 표시.
