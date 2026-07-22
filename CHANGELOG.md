@@ -1,3 +1,15 @@
+## v0.5.62.7 — 2026-07-22 (cycle 1990, wave-603: 월간/주간 리뷰 수렴 픽 팀별 분리 성적 배지)
+
+### feat(analysis): wave-603 — /reviews/monthly/[month] + /reviews/weekly/[week] 수렴 픽 팀별 분리 성적 배지 (cycle 1990)
+
+**신규: 월간/주간 상세 리뷰 강수렴/완전수렴 픽 팀별 분리 성적**
+- `/reviews` 허브(wave-596)에만 존재하던 팀별 분리 성적이 `/reviews/monthly/[month]` + `/reviews/weekly/[week]` 상세 페이지엔 없었던 gap 발견 — 홈/어웨이(wave-600/601)·요일별(wave-599/602)은 이미 monthly/weekly로 확장됐지만 팀별만 허브에 갇혀 있던 마지막 잔여
+- `convergenceRecord.ts`: `getConvergencePickTeamStats` 에 `startDate`/`endDate` optional param 추가 (`getConvergencePickHomeAwaySplit` wave-600 동일 패턴) — 순수 함수 `computeConvergenceTeamStats` 변경 없이 재사용, 자체 `minPicks` gating(`CONVERGENCE_TEAM_STATS_MIN_PICKS`)으로 소표본 팀 자동 숨김
+- `monthly/[month]/page.tsx` + `weekly/[week]/page.tsx`: 요일별/홈어웨이 섹션 뒤 배치, `range.startDate`/`range.endDate` 로 조회 범위 한정, `UPCOMING_CONVERGENCE_TEAM_LIMIT` 로 표시 개수 제한 — 팀별 분리는 홈/어웨이처럼 표본이 "가끔" 부족한 유형이라 weekly도 monthly와 동일하게 적용 (요일별과 달리 구조적 배제 대상 아님)
+- 테스트: `wave-603-monthly-weekly-convergence-team-stats-split.test.ts` 16 cases (순수 함수 2 + monthly/weekly 페이지 wiring 각 7)
+
+---
+
 ## v0.5.62.6 — 2026-07-22 (cycle 1988, wave-602: 월간 리뷰 수렴 픽 요일별 분리 성적 배지)
 
 ### feat(analysis): wave-602 — /reviews/monthly/[month] 수렴 픽 요일별 분리 성적 배지 (cycle 1988)
