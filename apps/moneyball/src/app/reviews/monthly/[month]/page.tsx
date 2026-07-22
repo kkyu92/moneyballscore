@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
 import { getRecentConvergencePickRecord, computeWinRatePct, getConvergencePickStreak, getConvergencePickBestStreak } from '@/lib/analysis/convergenceRecord';
 import {
   parseMonthId,
