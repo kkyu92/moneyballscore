@@ -132,6 +132,7 @@ import {
   UPCOMING_CONVERGENCE_TEAM_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS,
   REVIEWS_HUB_RECENT_MONTHS,
+  MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -895,5 +896,10 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
     expect(REVIEWS_HUB_RECENT_MONTHS).toBe(3);
     expect(REVIEWS_HUB_RECENT_WEEKS).toBeGreaterThan(0);
     expect(REVIEWS_HUB_RECENT_MONTHS).toBeGreaterThan(0);
+  });
+
+  it('MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS — 월간 리뷰 상세 내비게이션 조회 폭, 현재+4 표시에 필요한 최소 5보다 커야 함 (silent drift wave 593 guard)', () => {
+    expect(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS).toBe(6);
+    expect(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS).toBeGreaterThanOrEqual(5);
   });
 });
