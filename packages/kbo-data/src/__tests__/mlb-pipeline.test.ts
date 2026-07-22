@@ -30,6 +30,22 @@ vi.mock('../scrapers/statsapi-mlb', () => ({
   ]),
 }));
 
+vi.mock('../scrapers/fangraphs-mlb', () => ({
+  fetchFangraphsMlbTeams: vi.fn().mockResolvedValue([
+    {
+      teamCode: 'NYY', woba: 0.320, fip: 3.80, xfip: 3.90, war: 25.0,
+      ldPct: 21.0, gbPct: 42.0, fbPct: 37.0, iffbPct: 9.0,
+      hrFbPct: 12.0, pullPct: 40.0, centPct: 35.0, oppoPct: 25.0,
+    },
+  ]),
+}));
+
+vi.mock('../scrapers/baseball-savant', () => ({
+  fetchSavantTeamStatcast: vi.fn().mockResolvedValue([
+    { teamCode: 'NYY', xwoba: 0.325, barrelPct: 9.5, hardHitPct: 42.0, launchAngle: 12.0 },
+  ]),
+}));
+
 vi.mock('../factors/mlb-base', () => ({
   computeMlbProbability: vi.fn().mockReturnValue(0.55),
 }));
@@ -74,20 +90,44 @@ describe('runMlbPipeline', () => {
     assertResultShape(result, 'mlb_statsapi_scrape');
   });
 
-  it('mlb_fancy_scrape — stub, throw 없음, rows_inserted=0', async () => {
+  it('mlb_fancy_scrape — fetchFangraphsMlbTeams → mlb_team_stats upsert (cycle 1985 wiring)', async () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     const result = await runMlbPipeline('mlb_fancy_scrape', DATE, TRIGGERED_BY);
     assertResultShape(result, 'mlb_fancy_scrape');
-    expect(result.rows_inserted).toBe(0);
+    expect(result.games_found).toBe(1);
+    expect(result.rows_inserted).toBe(1);
     expect(result.errors).toHaveLength(0);
   });
 
-  it('mlb_savant_scrape — stub, throw 없음, rows_inserted=0', async () => {
+  it('mlb_savant_scrape — fetchSavantTeamStatcast → mlb_team_stats upsert (cycle 1985 wiring)', async () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     const result = await runMlbPipeline('mlb_savant_scrape', DATE, TRIGGERED_BY);
     assertResultShape(result, 'mlb_savant_scrape');
-    expect(result.rows_inserted).toBe(0);
+    expect(result.games_found).toBe(1);
+    expect(result.rows_inserted).toBe(1);
     expect(result.errors).toHaveLength(0);
+  });
+
+  it('mlb_fancy_scrape — upsert onConflict team_code,season + season derived from date', async () => {
+    const upsertCalls: Array<{ table: string; rows: unknown; onConflict: string }> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => ({
+        upsert: vi.fn((rows: unknown, opts: { onConflict: string }) => {
+          upsertCalls.push({ table, rows, onConflict: opts.onConflict });
+          return Promise.resolve({ error: null });
+        }),
+        insert: vi.fn().mockResolvedValue({ error: null }),
+      })),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_fancy_scrape', DATE, TRIGGERED_BY);
+
+    const call = upsertCalls.find((c) => c.table === 'mlb_team_stats');
+    expect(call).toBeDefined();
+    expect(call?.onConflict).toBe('team_code,season');
+    expect((call?.rows as Array<{ season: number }>)[0].season).toBe(2026);
   });
 
   it('mlb_predict_final — throw 없음, result shape 정상', async () => {
