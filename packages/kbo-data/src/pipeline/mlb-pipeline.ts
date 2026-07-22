@@ -2,7 +2,9 @@
 //
 // Plan C Task 2 — MLB 7 mode 실행 + silent drift alert 연동.
 // mlb_statsapi_scrape: fetchMlbSchedule → games DB upsert (league='mlb').
-// mlb_fancy_scrape / mlb_savant_scrape: stub (스크래퍼 미구현, TODO).
+// mlb_fancy_scrape: fetchFangraphsMlbTeams → mlb_team_stats upsert (cycle 1985 wiring — 스크래퍼는
+//   이미 구현/테스트됨, 이전엔 pipeline 미연결 stub 이었음).
+// mlb_savant_scrape: fetchSavantTeamStatcast → mlb_team_stats upsert (동일 cycle 1985 wiring).
 // mlb_predict_final: computeMlbProbability → predictions DB insert.
 // mlb_combined_notify: Telegram combined 메시지 (mlb_combined_notify route 통해 발송).
 // mlb_shadow_train: trainShadowWeights → milestone check + walk_forward_brier insert.
@@ -13,6 +15,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { fetchMlbSchedule } from '../scrapers/statsapi-mlb';
+import { fetchFangraphsMlbTeams } from '../scrapers/fangraphs-mlb';
+import { fetchSavantTeamStatcast } from '../scrapers/baseball-savant';
 import { computeMlbProbability } from '../factors/mlb-base';
 import {
   trainShadowWeights,
@@ -110,6 +114,98 @@ async function runStatsApiScrape(db: DB, date: string): Promise<{ gamesFound: nu
   }
 
   return { gamesFound: games.length, rowsInserted: rows.length, errors };
+}
+
+// ─────────────────────────────────────────────
+// mlb_fancy_scrape
+// ─────────────────────────────────────────────
+async function runFancyScrape(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
+  const errors: string[] = [];
+  const season = parseInt(date.slice(0, 4), 10);
+
+  let teams: Awaited<ReturnType<typeof fetchFangraphsMlbTeams>> = [];
+  try {
+    teams = await fetchFangraphsMlbTeams(season);
+  } catch (e) {
+    errors.push(`fetchFangraphsMlbTeams: ${e instanceof Error ? e.message : String(e)}`);
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
+
+  if (teams.length === 0) {
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
+
+  const now = new Date().toISOString();
+  const rows = teams.map((t) => ({
+    team_code: t.teamCode,
+    season,
+    woba: t.woba,
+    fip: t.fip,
+    xfip: t.xfip,
+    war: t.war,
+    ld_pct: t.ldPct,
+    gb_pct: t.gbPct,
+    fb_pct: t.fbPct,
+    iffb_pct: t.iffbPct,
+    hr_fb_pct: t.hrFbPct,
+    pull_pct: t.pullPct,
+    cent_pct: t.centPct,
+    oppo_pct: t.oppoPct,
+    fancy_synced_at: now,
+  }));
+
+  const { error } = await db
+    .from('mlb_team_stats')
+    .upsert(rows, { onConflict: DB_CONSTRAINTS.mlbTeamStats });
+
+  if (error) {
+    errors.push(`mlb_team_stats upsert (fancy): ${error.message}`);
+    return { gamesFound: teams.length, rowsInserted: 0, errors };
+  }
+
+  return { gamesFound: teams.length, rowsInserted: rows.length, errors };
+}
+
+// ─────────────────────────────────────────────
+// mlb_savant_scrape
+// ─────────────────────────────────────────────
+async function runSavantScrape(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
+  const errors: string[] = [];
+  const season = parseInt(date.slice(0, 4), 10);
+
+  let teams: Awaited<ReturnType<typeof fetchSavantTeamStatcast>> = [];
+  try {
+    teams = await fetchSavantTeamStatcast(season);
+  } catch (e) {
+    errors.push(`fetchSavantTeamStatcast: ${e instanceof Error ? e.message : String(e)}`);
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
+
+  if (teams.length === 0) {
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
+
+  const now = new Date().toISOString();
+  const rows = teams.map((t) => ({
+    team_code: t.teamCode,
+    season,
+    xwoba: t.xwoba,
+    barrel_pct: t.barrelPct,
+    hard_hit_pct: t.hardHitPct,
+    launch_angle: t.launchAngle,
+    savant_synced_at: now,
+  }));
+
+  const { error } = await db
+    .from('mlb_team_stats')
+    .upsert(rows, { onConflict: DB_CONSTRAINTS.mlbTeamStats });
+
+  if (error) {
+    errors.push(`mlb_team_stats upsert (savant): ${error.message}`);
+    return { gamesFound: teams.length, rowsInserted: 0, errors };
+  }
+
+  return { gamesFound: teams.length, rowsInserted: rows.length, errors };
 }
 
 // ─────────────────────────────────────────────
@@ -379,18 +475,20 @@ export async function runMlbPipeline(
       errors = r.errors;
       break;
     }
-    case 'mlb_fancy_scrape':
-      // stub — FanGraphs MLB scraper 미구현 (TODO)
-      gamesFound = 0;
-      rowsInserted = 0;
-      errors = [];
+    case 'mlb_fancy_scrape': {
+      const r = await runFancyScrape(db, date);
+      gamesFound = r.gamesFound;
+      rowsInserted = r.rowsInserted;
+      errors = r.errors;
       break;
-    case 'mlb_savant_scrape':
-      // stub — Baseball Savant scraper 미구현 (TODO)
-      gamesFound = 0;
-      rowsInserted = 0;
-      errors = [];
+    }
+    case 'mlb_savant_scrape': {
+      const r = await runSavantScrape(db, date);
+      gamesFound = r.gamesFound;
+      rowsInserted = r.rowsInserted;
+      errors = r.errors;
       break;
+    }
     case 'mlb_predict_final': {
       const r = await runPredictFinal(db, date);
       gamesFound = r.gamesFound;
