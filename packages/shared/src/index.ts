@@ -1337,6 +1337,17 @@ export const REVIEWS_HUB_RECENT_WEEKS = 4;
 export const REVIEWS_HUB_RECENT_MONTHS = 3;
 
 /**
+ * 월간 리뷰 상세 페이지 관련 월 내비게이션 조회 폭 — silent drift family wave 593 (cycle 1971).
+ * app/reviews/monthly/[month]/page.tsx 가 "현재 월 제외 최근 4개월" 링크를 보여주려면
+ * 최소 5개월(현재+4)을 조회해야 함. REVIEWS_HUB_RECENT_MONTHS(3)는 이 용도에 부족해
+ * 재사용 불가 — 별도 상수로 분리 (두 상수를 같은 값으로 착각해 동기화하는 실수 방지).
+ *
+ * 코드 (1 occurrence):
+ *   - app/reviews/monthly/[month]/page.tsx: getRecentMonths(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS).slice(-4)
+ */
+export const MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS = 6;
+
+/**
  * 크게 빗나간 예측 (misses) 표시 한도 — silent drift family wave 296 (cycle 1624).
  * Hardcoded 10 occurrence 3건:
  *   - app/reviews/misses/page.tsx: buildMissReport({ limit: 10 })

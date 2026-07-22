@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, shortTeamName, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
 import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
 import {
   parseMonthId,
@@ -104,7 +104,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
   ]);
   const url = `${SITE_URL}/reviews/monthly/${month}`;
 
-  const recent = getRecentMonths(6)
+  const recent = getRecentMonths(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS)
     .filter((m) => m.monthId !== range.monthId)
     .slice(-4);
 
