@@ -1,3 +1,15 @@
+## v0.5.62.1 — 2026-07-22 (cycle 1976, wave-597: /reviews 허브 홈/어웨이 분리 성적 배지)
+
+### feat(analysis): wave-597 — /reviews 허브 수렴 픽 홈/어웨이 분리 성적 배지 (cycle 1976)
+
+**신규: `/reviews` 허브 강수렴/완전수렴 픽 홈 지목 vs 어웨이 지목 성적 분리**
+- analysis/page.tsx wave-559(강수렴)/573(완전수렴) `computeConvergenceHomeAwaySplit`/`getConvergencePickHomeAwaySplit` 재사용
+- `reviews/page.tsx`: wave-596(팀별 성적) 섹션 뒤 배치 — 🏠홈 지목 vs ✈️원정 지목 각 승률 + 경기 수 컬러 코드
+- `CONVERGENCE_HOME_AWAY_MIN_PICKS` 미만 시 null 가드 (소표본 노이즈 차단)
+- 테스트: `wave-597-reviews-hub-home-away-split.test.ts` 7 cases
+
+---
+
 ## v0.5.62.0 — 2026-07-22 (cycle 1975, review-code: CHANGELOG/version 재동기화 — wave-560~596 catch-up)
 
 ### fix(context): CHANGELOG.md silent drift — wave-559 (cycle 1933) 이후 41 cycle 미갱신 발견 (cycle 1975)
