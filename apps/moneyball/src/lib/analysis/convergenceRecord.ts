@@ -356,6 +356,44 @@ export function computeWinRateColorClass(
   return neutralClass;
 }
 
+// wave-604: 팩터 수치 → brand/orange 색상 클래스 — analysis/page.tsx 내 24+ 회 inline ternary 추출
+// (wave-574가 승률 pct 버전만 추출하고 원본 팩터 수치 버전은 누락됐던 것 정리)
+// 클수록 강세 (>=/<=, 원본 comparator 유지)
+export function statColorClassHigherBetter(
+  value: number,
+  strong: number,
+  weak: number,
+  fallback = '',
+): string {
+  if (value >= strong) return 'text-brand-500 dark:text-brand-400';
+  if (value <= weak) return 'text-orange-500 dark:text-orange-400';
+  return fallback;
+}
+
+// 클수록 강세, strict comparator (>/< — Elo neutral-band 처럼 경계값 자체는 중립 처리하는 케이스)
+export function statColorClassHigherBetterStrict(
+  value: number,
+  strong: number,
+  weak: number,
+  fallback = '',
+): string {
+  if (value > strong) return 'text-brand-500 dark:text-brand-400';
+  if (value < weak) return 'text-orange-500 dark:text-orange-400';
+  return fallback;
+}
+
+// 작을수록 강세 (</> — SP FIP/xFIP, 불펜 FIP 등 낮은 수치가 좋은 지표)
+export function statColorClassLowerBetter(
+  value: number,
+  strong: number,
+  weak: number,
+  fallback = '',
+): string {
+  if (value < strong) return 'text-brand-500 dark:text-brand-400';
+  if (value > weak) return 'text-orange-500 dark:text-orange-400';
+  return fallback;
+}
+
 // wave-578: 이번 주 남은 경기 수렴 픽 ID Set — threshold 파라미터화 (wave-525/577 동일 패턴 통합)
 export function computeUpcomingPickGameIds(
   games: Array<{ gameId: number; convergenceNetScore: number | null }>,
