@@ -79,7 +79,7 @@ import { ThisWeekStatusFilter } from '@/components/analysis/ThisWeekStatusFilter
 import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromIsCorrect, computeWinRatePct, computeWinRateColorClass, computeWinProbPct, computeConvergencePickFlags } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromIsCorrect, computeWinRatePct, computeWinRateColorClass, computeWinProbPct, computeConvergencePickFlags, statColorClassHigherBetter, statColorClassHigherBetterStrict, statColorClassLowerBetter } from '@/lib/analysis/convergenceRecord';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 import {
@@ -639,23 +639,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('sp_fip') || unfavoredSlugs.includes('sp_fip')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         선발{' '}
-                        <span className={
-                          pick.awaySPFip < SP_FIP_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awaySPFip > SP_FIP_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassLowerBetter(pick.awaySPFip, SP_FIP_STRONG, SP_FIP_WEAK)}>
                           {pick.awaySP ?? shortTeamName(pick.awayCode)} {pick.awaySPFip.toFixed(2)}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeSPFip < SP_FIP_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeSPFip > SP_FIP_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassLowerBetter(pick.homeSPFip, SP_FIP_STRONG, SP_FIP_WEAK)}>
                           {pick.homeSP ?? shortTeamName(pick.homeCode)} {pick.homeSPFip.toFixed(2)}
                         </span>
                         {/* wave-446: 선발 FIP 격차(Δ) — SP_FIP_DUEL_MIN(0.5) 이상 시 수치 명시 */}
@@ -671,23 +659,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('bullpen_fip') || unfavoredSlugs.includes('bullpen_fip')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         불펜{' '}
-                        <span className={
-                          pick.awayBullpenFip < BULLPEN_FIP_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awayBullpenFip > BULLPEN_FIP_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassLowerBetter(pick.awayBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK)}>
                           {shortTeamName(pick.awayCode)} {pick.awayBullpenFip.toFixed(2)}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeBullpenFip < BULLPEN_FIP_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeBullpenFip > BULLPEN_FIP_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassLowerBetter(pick.homeBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK)}>
                           {shortTeamName(pick.homeCode)} {pick.homeBullpenFip.toFixed(2)}
                         </span>
                         {/* wave-442: 불펜 FIP 격차(Δ) — BULLPEN_FIP_DIFF_MIN(1.0) 이상 시 수치 명시 */}
@@ -703,23 +679,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('lineup_woba') || unfavoredSlugs.includes('lineup_woba')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         타선{' '}
-                        <span className={
-                          pick.awayLineupWoba >= LINEUP_WOBA_STRONG_TAG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awayLineupWoba <= LINEUP_WOBA_WEAK_TAG
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.awayLineupWoba, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG)}>
                           {shortTeamName(pick.awayCode)} {pick.awayLineupWoba.toFixed(3)}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeLineupWoba >= LINEUP_WOBA_STRONG_TAG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeLineupWoba <= LINEUP_WOBA_WEAK_TAG
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.homeLineupWoba, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG)}>
                           {shortTeamName(pick.homeCode)} {pick.homeLineupWoba.toFixed(3)}
                         </span>
                         {/* wave-442: 타선 wOBA 격차(Δ) — LINEUP_WOBA_DUEL_MIN(0.020) 이상 시 수치 명시 */}
@@ -735,23 +699,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('elo') || unfavoredSlugs.includes('elo')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         Elo{' '}
-                        <span className={
-                          pick.awayElo > ELO_NEUTRAL + ELO_DISPLAY_NEUTRAL_BAND
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awayElo < ELO_NEUTRAL - ELO_DISPLAY_NEUTRAL_BAND
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetterStrict(pick.awayElo, ELO_NEUTRAL + ELO_DISPLAY_NEUTRAL_BAND, ELO_NEUTRAL - ELO_DISPLAY_NEUTRAL_BAND)}>
                           {shortTeamName(pick.awayCode)} {Math.round(pick.awayElo)}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeElo > ELO_NEUTRAL + ELO_DISPLAY_NEUTRAL_BAND
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeElo < ELO_NEUTRAL - ELO_DISPLAY_NEUTRAL_BAND
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetterStrict(pick.homeElo, ELO_NEUTRAL + ELO_DISPLAY_NEUTRAL_BAND, ELO_NEUTRAL - ELO_DISPLAY_NEUTRAL_BAND)}>
                           {shortTeamName(pick.homeCode)} {Math.round(pick.homeElo)}
                         </span>
                         {/* wave-444: Elo 격차(Δ) — ELO_GAP_STRONG(50) 이상 시 수치 명시 */}
@@ -767,23 +719,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('recent_form') || unfavoredSlugs.includes('recent_form')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         최근폼{' '}
-                        <span className={
-                          pick.awayRecentForm >= TEAM_STRENGTH_FORM_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awayRecentForm <= TEAM_STRENGTH_FORM_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.awayRecentForm, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK)}>
                           {shortTeamName(pick.awayCode)} {(pick.awayRecentForm * 100).toFixed(0)}%{pick.awayRecent10 ? ` ${pick.awayRecent10.wins}승${pick.awayRecent10.losses}패` : ''}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeRecentForm >= TEAM_STRENGTH_FORM_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeRecentForm <= TEAM_STRENGTH_FORM_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.homeRecentForm, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK)}>
                           {shortTeamName(pick.homeCode)} {(pick.homeRecentForm * 100).toFixed(0)}%{pick.homeRecent10 ? ` ${pick.homeRecent10.wins}승${pick.homeRecent10.losses}패` : ''}
                         </span>
                         {/* wave-448: 최근폼 격차(Δ) — RECENT_FORM_DUEL_MIN(0.10) 이상 시 수치 명시 */}
@@ -799,23 +739,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('war') || unfavoredSlugs.includes('war')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         WAR{' '}
-                        <span className={
-                          pick.awayWar >= WAR_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awayWar <= WAR_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.awayWar, WAR_STRONG, WAR_WEAK)}>
                           {shortTeamName(pick.awayCode)} {pick.awayWar.toFixed(1)}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeWar >= WAR_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeWar <= WAR_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.homeWar, WAR_STRONG, WAR_WEAK)}>
                           {shortTeamName(pick.homeCode)} {pick.homeWar.toFixed(1)}
                         </span>
                         {/* wave-444: WAR 격차(Δ) — WAR_DUEL_MIN(5.0) 이상 시 수치 명시 */}
@@ -839,13 +767,7 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('sp_xfip') || unfavoredSlugs.includes('sp_xfip')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         xFIP{' '}
-                        <span className={
-                          pick.awaySPXfip < SP_FIP_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awaySPXfip > SP_FIP_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassLowerBetter(pick.awaySPXfip, SP_FIP_STRONG, SP_FIP_WEAK)}>
                           {pick.awaySP ?? shortTeamName(pick.awayCode)} {pick.awaySPXfip.toFixed(2)}
                         </span>
                         {/* wave-440: 원정 SP FIP-xFIP 갭 방향 (wave-353 일반 카드와 동일 로직) */}
@@ -857,13 +779,7 @@ export default async function AnalysisIndexPage() {
                               : null
                         )}
                         {' · '}
-                        <span className={
-                          pick.homeSPXfip < SP_FIP_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeSPXfip > SP_FIP_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassLowerBetter(pick.homeSPXfip, SP_FIP_STRONG, SP_FIP_WEAK)}>
                           {pick.homeSP ?? shortTeamName(pick.homeCode)} {pick.homeSPXfip.toFixed(2)}
                         </span>
                         {/* wave-440: 홈 SP FIP-xFIP 갭 방향 (wave-353 일반 카드와 동일 로직) */}
@@ -881,23 +797,11 @@ export default async function AnalysisIndexPage() {
                       (favoredSlugs.includes('sfr') || unfavoredSlugs.includes('sfr')) && (
                       <div className="mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
                         수비{' '}
-                        <span className={
-                          pick.awaySfr >= SFR_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.awaySfr <= SFR_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.awaySfr, SFR_STRONG, SFR_WEAK)}>
                           {shortTeamName(pick.awayCode)} {pick.awaySfr >= 0 ? '+' : ''}{pick.awaySfr.toFixed(1)}
                         </span>
                         {' · '}
-                        <span className={
-                          pick.homeSfr >= SFR_STRONG
-                            ? 'text-brand-500 dark:text-brand-400'
-                            : pick.homeSfr <= SFR_WEAK
-                              ? 'text-orange-500 dark:text-orange-400'
-                              : ''
-                        }>
+                        <span className={statColorClassHigherBetter(pick.homeSfr, SFR_STRONG, SFR_WEAK)}>
                           {shortTeamName(pick.homeCode)} {pick.homeSfr >= 0 ? '+' : ''}{pick.homeSfr.toFixed(1)}
                         </span>
                         {/* wave-446: 수비 SFR 격차(Δ) — SFR_DUEL_MIN(5.0) 이상 시 수치 명시 */}
@@ -1433,21 +1337,9 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-300 dark:text-gray-700">·</span>
                               <span className="text-gray-400 dark:text-gray-500">
                                 폼{' '}
-                                <span className={
-                                  awayForm >= TEAM_STRENGTH_FORM_STRONG
-                                    ? 'text-brand-500 dark:text-brand-400'
-                                    : awayForm <= TEAM_STRENGTH_FORM_WEAK
-                                      ? 'text-orange-500 dark:text-orange-400'
-                                      : 'text-gray-500 dark:text-gray-400'
-                                }>{(awayForm * 100).toFixed(0)}%</span>
+                                <span className={statColorClassHigherBetter(awayForm, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, 'text-gray-500 dark:text-gray-400')}>{(awayForm * 100).toFixed(0)}%</span>
                                 {' / '}
-                                <span className={
-                                  homeForm >= TEAM_STRENGTH_FORM_STRONG
-                                    ? 'text-brand-500 dark:text-brand-400'
-                                    : homeForm <= TEAM_STRENGTH_FORM_WEAK
-                                      ? 'text-orange-500 dark:text-orange-400'
-                                      : 'text-gray-500 dark:text-gray-400'
-                                }>{(homeForm * 100).toFixed(0)}%</span>
+                                <span className={statColorClassHigherBetter(homeForm, TEAM_STRENGTH_FORM_STRONG, TEAM_STRENGTH_FORM_WEAK, 'text-gray-500 dark:text-gray-400')}>{(homeForm * 100).toFixed(0)}%</span>
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
                             </>
@@ -1594,13 +1486,7 @@ export default async function AnalysisIndexPage() {
                                 선발{' '}
                                 <span className="text-gray-600 dark:text-gray-300">{g.awaySP ?? '미확정'}</span>
                                 {g.awaySPFip != null && (
-                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${
-                                    g.awaySPFip < SP_FIP_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.awaySPFip > SP_FIP_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>
+                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.awaySPFip, SP_FIP_STRONG, SP_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>
                                     {g.awaySPFip.toFixed(2)}
                                   </span>
                                 )}
@@ -1615,13 +1501,7 @@ export default async function AnalysisIndexPage() {
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 <span className="text-gray-600 dark:text-gray-300">{g.homeSP ?? '미확정'}</span>
                                 {g.homeSPFip != null && (
-                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${
-                                    g.homeSPFip < SP_FIP_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.homeSPFip > SP_FIP_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>
+                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.homeSPFip, SP_FIP_STRONG, SP_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>
                                     {g.homeSPFip.toFixed(2)}
                                   </span>
                                 )}
@@ -1681,23 +1561,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 타선{' '}
                                 {g.awayLineupWoba != null ? (
-                                  <span className={`font-mono tabular-nums ${
-                                    g.awayLineupWoba >= LINEUP_WOBA_STRONG_TAG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.awayLineupWoba <= LINEUP_WOBA_WEAK_TAG
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : ''
-                                  }`}>{g.awayLineupWoba.toFixed(3)}</span>
+                                  <span className={`font-mono tabular-nums ${statColorClassHigherBetter(g.awayLineupWoba, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG)}`}>{g.awayLineupWoba.toFixed(3)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeLineupWoba != null ? (
-                                  <span className={`font-mono tabular-nums ${
-                                    g.homeLineupWoba >= LINEUP_WOBA_STRONG_TAG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.homeLineupWoba <= LINEUP_WOBA_WEAK_TAG
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : ''
-                                  }`}>{g.homeLineupWoba.toFixed(3)}</span>
+                                  <span className={`font-mono tabular-nums ${statColorClassHigherBetter(g.homeLineupWoba, LINEUP_WOBA_STRONG_TAG, LINEUP_WOBA_WEAK_TAG)}`}>{g.homeLineupWoba.toFixed(3)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
@@ -1729,23 +1597,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 불펜{' '}
                                 {g.awayBullpenFip != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${
-                                    g.awayBullpenFip < BULLPEN_FIP_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.awayBullpenFip > BULLPEN_FIP_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>{g.awayBullpenFip.toFixed(2)}</span>
+                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.awayBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayBullpenFip.toFixed(2)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeBullpenFip != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${
-                                    g.homeBullpenFip < BULLPEN_FIP_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.homeBullpenFip > BULLPEN_FIP_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>{g.homeBullpenFip.toFixed(2)}</span>
+                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.homeBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeBullpenFip.toFixed(2)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
@@ -1777,23 +1633,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 수비{' '}
                                 {g.awaySfr != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${
-                                    g.awaySfr >= SFR_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.awaySfr <= SFR_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>{g.awaySfr >= 0 ? '+' : ''}{g.awaySfr.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.awaySfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awaySfr >= 0 ? '+' : ''}{g.awaySfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeSfr != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${
-                                    g.homeSfr >= SFR_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.homeSfr <= SFR_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.homeSfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
@@ -1857,23 +1701,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 WAR{' '}
                                 {g.awayWar != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${
-                                    g.awayWar >= WAR_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.awayWar <= WAR_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>{g.awayWar.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.awayWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeWar != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${
-                                    g.homeWar >= WAR_STRONG
-                                      ? 'text-brand-500 dark:text-brand-400'
-                                      : g.homeWar <= WAR_WEAK
-                                        ? 'text-orange-500 dark:text-orange-400'
-                                        : 'text-gray-400 dark:text-gray-500'
-                                  }`}>{g.homeWar.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.homeWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
