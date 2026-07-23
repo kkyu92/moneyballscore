@@ -50,6 +50,9 @@ interface ConvergenceGameRow {
   }>;
 }
 
+// cycle 1997: fetchConvergencePickDetailedResults (하단) 와 쿼리 구성 + duel 계산 루프가
+// 완전 동일했던 중복 제거 — boolean[] 소비자는 detailed 결과의 `won` 필드만 취해 파생.
+// detailed 는 이미 같은 정렬(game_date desc, game_time asc) 이라 slice(0, limit) 이 기존 early-break 와 동치.
 async function fetchConvergencePickResults(
   cutoff: string,
   limit: number,
@@ -58,75 +61,8 @@ async function fetchConvergencePickResults(
   // 미지정 시 기존 동작 (today 미만).
   endDate?: string,
 ): Promise<boolean[]> {
-  const today = toKSTDateString();
-  const supabase = await createClient();
-  let query = supabase
-    .from('games')
-    .select(`
-      id, game_date, game_time, home_score, away_score,
-      home_team:teams!games_home_team_id_fkey(code),
-      away_team:teams!games_away_team_id_fkey(code),
-      predictions!inner(
-        prediction_type,
-        home_elo, away_elo, home_recent_form, away_recent_form,
-        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
-        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
-        home_sfr, away_sfr, home_war_total, away_war_total
-      )
-    `)
-    .gte('game_date', cutoff)
-    .not('home_score', 'is', null)
-    .eq('predictions.prediction_type', 'pre_game')
-    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
-    .order('game_date', { ascending: false })
-    .order('game_time', { ascending: true });
-  if (endDate != null) {
-    query = query.lte('game_date', endDate);
-  } else {
-    query = query.lt('game_date', today);
-  }
-  const gamesResult = (await query) as unknown as SelectResult<ConvergenceGameRow[]>;
-
-  const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickResults');
-  if (!data) return [];
-
-  const results: boolean[] = [];
-  for (const row of data as unknown as ConvergenceGameRow[]) {
-    if (results.length >= limit) break;
-    const pred = row.predictions?.[0];
-    if (!pred || row.home_score === null || row.away_score === null) continue;
-    const homeCode = row.home_team?.code as TeamCode | undefined;
-    const awayCode = row.away_team?.code as TeamCode | undefined;
-    if (!homeCode || !awayCode) continue;
-
-    const duel = computeCompositeDuel({
-      homeCode,
-      homeLineupWoba: pred.home_lineup_woba,
-      awayLineupWoba: pred.away_lineup_woba,
-      homeSfr: pred.home_sfr,
-      awaySfr: pred.away_sfr,
-      homeBullpenFip: pred.home_bullpen_fip,
-      awayBullpenFip: pred.away_bullpen_fip,
-      homeSPFip: pred.home_sp_fip,
-      awaySPFip: pred.away_sp_fip,
-      homeSPXfip: pred.home_sp_xfip,
-      awaySPXfip: pred.away_sp_xfip,
-      homeWar: pred.home_war_total,
-      awayWar: pred.away_war_total,
-      homeElo: pred.home_elo ?? undefined,
-      awayElo: pred.away_elo ?? undefined,
-      homeRecentForm: pred.home_recent_form ?? undefined,
-      awayRecentForm: pred.away_recent_form ?? undefined,
-    });
-
-    if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) continue;
-    if (Math.abs(duel.netScore) < minFactors) continue;
-
-    const favoredHome = duel.netScore > 0;
-    results.push(favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score);
-  }
-
-  return results;
+  const detailed = await fetchConvergencePickDetailedResults(cutoff, minFactors, endDate);
+  return detailed.slice(0, limit).map(r => r.won);
 }
 
 export async function getRecentConvergencePickRecord(
