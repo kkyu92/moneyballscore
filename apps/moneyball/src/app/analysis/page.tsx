@@ -117,6 +117,68 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600; // ANALYSIS_INDEX_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
+// cycle 1995: 강수렴(wave-557)/완전수렴(wave-571) 팀별 배지가 label/색상만 다른 동일 구조로 중복되던 것 통합
+// (reviews 3-way 통합과 동일 silent drift family — 여긴 section/h2 래퍼가 없는 페이지 내 compact 스타일이라
+// components/reviews/ConvergenceTeamStatsBadges 재사용 대신 로컬 헬퍼로 분리)
+function renderConvergenceTeamBadgeRow(
+  stats: { teamCode: TeamCode; wins: number; losses: number }[],
+  opts: { label: string; titleSuffix: string; badgeBgClass: string; nameClass: string },
+) {
+  if (stats.length === 0) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
+      <span className="text-xs text-gray-500 dark:text-gray-400">{opts.label}</span>
+      {stats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
+        const total = stat.wins + stat.losses;
+        const pct = computeWinRatePct(stat.wins, total);
+        return (
+          <span
+            key={stat.teamCode}
+            className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${opts.badgeBgClass}`}
+            title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — ${opts.titleSuffix} ${total}경기`}
+          >
+            <span className={`font-medium ${opts.nameClass}`}>{shortTeamName(stat.teamCode)}</span>
+            <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>{pct}%</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// cycle 1995: 강수렴(wave-559)/완전수렴(wave-573) 홈/어웨이 배지 동일 구조 중복 통합 (위 team badge row 동일 패턴)
+function renderConvergenceHomeAwayBadgeRow(
+  split: { home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null,
+  opts: { label: string; badgeBgClass: string; pctFallbackClass: string },
+) {
+  if (split === null) return null;
+  const homeTotal = split.home.wins + split.home.losses;
+  const awayTotal = split.away.wins + split.away.losses;
+  const homePct = computeWinRatePct(split.home.wins, homeTotal);
+  const awayPct = computeWinRatePct(split.away.wins, awayTotal);
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
+      <span className="text-xs text-gray-500 dark:text-gray-400">{opts.label}</span>
+      <span
+        className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${opts.badgeBgClass}`}
+        title={`홈팀 지목 ${homeTotal}경기: ${split.home.wins}승 ${split.home.losses}패 (${homePct}%)`}
+      >
+        <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
+        <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct, opts.pctFallbackClass)}`}>{homePct}%</span>
+        <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
+      </span>
+      <span
+        className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${opts.badgeBgClass}`}
+        title={`어웨이팀 지목 ${awayTotal}경기: ${split.away.wins}승 ${split.away.losses}패 (${awayPct}%)`}
+      >
+        <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
+        <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct, opts.pctFallbackClass)}`}>{awayPct}%</span>
+        <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
+      </span>
+    </div>
+  );
+}
+
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
@@ -1995,59 +2057,18 @@ export default async function AnalysisIndexPage() {
             </div>
           )}
           {/* wave-557: 강수렴 픽 팀별 시즌 성적 — 팀이 강수렴 픽으로 지목됐을 때 실제 승률 (CONVERGENCE_TEAM_STATS_MIN_PICKS 경기 이상) */}
-          {convergenceTeamStats.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400">🏅 팀별 수렴 적중:</span>
-              {convergenceTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
-                const total = stat.wins + stat.losses;
-                const pct = computeWinRatePct(stat.wins, total);
-                return (
-                  <span
-                    key={stat.teamCode}
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
-                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 강수렴 픽 ${total}경기`}
-                  >
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>
-                      {pct}%
-                    </span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
+          {renderConvergenceTeamBadgeRow(convergenceTeamStats, {
+            label: '🏅 팀별 수렴 적중:',
+            titleSuffix: '강수렴 픽',
+            badgeBgClass: 'bg-gray-100 dark:bg-gray-800/60',
+            nameClass: 'text-gray-700 dark:text-gray-300',
+          })}
           {/* wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 홈 지목(🏠) vs 어웨이 지목(✈️) 각 승률 비교 (CONVERGENCE_HOME_AWAY_MIN_PICKS 경기 이상) */}
-          {convergenceHomeAwaySplit !== null && (() => {
-            const homeTotal = convergenceHomeAwaySplit.home.wins + convergenceHomeAwaySplit.home.losses;
-            const awayTotal = convergenceHomeAwaySplit.away.wins + convergenceHomeAwaySplit.away.losses;
-            const homePct = computeWinRatePct(convergenceHomeAwaySplit.home.wins, homeTotal);
-            const awayPct = computeWinRatePct(convergenceHomeAwaySplit.away.wins, awayTotal);
-            return (
-              <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
-                <span className="text-xs text-gray-500 dark:text-gray-400">🏟️ 홈/어웨이 수렴:</span>
-                <span
-                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
-                  title={`홈팀 지목 ${homeTotal}경기: ${convergenceHomeAwaySplit.home.wins}승 ${convergenceHomeAwaySplit.home.losses}패 (${homePct}%)`}
-                >
-                  <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
-                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct, 'text-gray-600 dark:text-gray-300')}`}>
-                    {homePct}%
-                  </span>
-                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
-                </span>
-                <span
-                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60"
-                  title={`어웨이팀 지목 ${awayTotal}경기: ${convergenceHomeAwaySplit.away.wins}승 ${convergenceHomeAwaySplit.away.losses}패 (${awayPct}%)`}
-                >
-                  <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
-                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct, 'text-gray-600 dark:text-gray-300')}`}>
-                    {awayPct}%
-                  </span>
-                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
-                </span>
-              </div>
-            );
-          })()}
+          {renderConvergenceHomeAwayBadgeRow(convergenceHomeAwaySplit, {
+            label: '🏟️ 홈/어웨이 수렴:',
+            badgeBgClass: 'bg-gray-100 dark:bg-gray-800/60',
+            pctFallbackClass: 'text-gray-600 dark:text-gray-300',
+          })}
           {/* wave-561: 강수렴 픽 완전수렴(10팩터) 시즌 성적 · wave-563: 완전수렴 픽 연속 streak · wave-575: 직전 N경기 rolling — FACTOR_PICK_COMPLETE 임계 정확도 (강수렴 상위 tier) */}
           {seasonCompleteConvergenceRecord.total > 0 && (() => {
             const pct = computeWinRatePct(seasonCompleteConvergenceRecord.wins, seasonCompleteConvergenceRecord.total);
@@ -2125,59 +2146,18 @@ export default async function AnalysisIndexPage() {
             );
           })()}
           {/* wave-571: 완전수렴 픽 팀별 시즌 성적 — 강수렴 wave-557 패턴 동기 (FACTOR_PICK_COMPLETE 임계) */}
-          {completeTeamStats.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400">🏅 완전수렴 팀별:</span>
-              {completeTeamStats.slice(0, UPCOMING_CONVERGENCE_TEAM_LIMIT).map(stat => {
-                const total = stat.wins + stat.losses;
-                const pct = computeWinRatePct(stat.wins, total);
-                return (
-                  <span
-                    key={stat.teamCode}
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
-                    title={`${shortTeamName(stat.teamCode)}: ${stat.wins}승 ${stat.losses}패 (${pct}%) — 완전수렴 픽 ${total}경기`}
-                  >
-                    <span className="font-medium text-amber-700 dark:text-amber-300">{shortTeamName(stat.teamCode)}</span>
-                    <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>
-                      {pct}%
-                    </span>
-                  </span>
-                );
-              })}
-            </div>
-          )}
+          {renderConvergenceTeamBadgeRow(completeTeamStats, {
+            label: '🏅 완전수렴 팀별:',
+            titleSuffix: '완전수렴 픽',
+            badgeBgClass: 'bg-amber-50 dark:bg-amber-900/20',
+            nameClass: 'text-amber-700 dark:text-amber-300',
+          })}
           {/* wave-573: 완전수렴 픽 홈/어웨이 분리 성적 — 강수렴 wave-559 패턴 동기 (FACTOR_PICK_COMPLETE 임계) */}
-          {completeHomeAwaySplit !== null && (() => {
-            const homeTotal = completeHomeAwaySplit.home.wins + completeHomeAwaySplit.home.losses;
-            const awayTotal = completeHomeAwaySplit.away.wins + completeHomeAwaySplit.away.losses;
-            const homePct = computeWinRatePct(completeHomeAwaySplit.home.wins, homeTotal);
-            const awayPct = computeWinRatePct(completeHomeAwaySplit.away.wins, awayTotal);
-            return (
-              <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
-                <span className="text-xs text-gray-500 dark:text-gray-400">🏟️ 완전수렴 홈/어웨이:</span>
-                <span
-                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
-                  title={`홈팀 지목 ${homeTotal}경기: ${completeHomeAwaySplit.home.wins}승 ${completeHomeAwaySplit.home.losses}패 (${homePct}%)`}
-                >
-                  <span className="text-gray-500 dark:text-gray-400">🏠홈</span>
-                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(homePct, 'text-amber-600 dark:text-amber-400')}`}>
-                    {homePct}%
-                  </span>
-                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({homeTotal})</span>
-                </span>
-                <span
-                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
-                  title={`어웨이팀 지목 ${awayTotal}경기: ${completeHomeAwaySplit.away.wins}승 ${completeHomeAwaySplit.away.losses}패 (${awayPct}%)`}
-                >
-                  <span className="text-gray-500 dark:text-gray-400">✈️원정</span>
-                  <span className={`tabular-nums font-medium ${computeWinRateColorClass(awayPct, 'text-amber-600 dark:text-amber-400')}`}>
-                    {awayPct}%
-                  </span>
-                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">({awayTotal})</span>
-                </span>
-              </div>
-            );
-          })()}
+          {renderConvergenceHomeAwayBadgeRow(completeHomeAwaySplit, {
+            label: '🏟️ 완전수렴 홈/어웨이:',
+            badgeBgClass: 'bg-amber-50 dark:bg-amber-900/20',
+            pctFallbackClass: 'text-amber-600 dark:text-amber-400',
+          })}
           {/* wave-539: 이번 주 강수렴 픽 미리보기 — TOP픽 우선, 나머지 수렴 강도 순 compact 카드 */}
           {strongUpcomingPickCount > 0 && (() => {
             const strongPickGames = thisWeekRemainingGames
