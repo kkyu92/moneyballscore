@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CURRENT_SCORING_RULE } from '@moneyball/shared';
 import {
   brierScore,
+  buildBrierTrend,
   buildConfidenceTiers,
   buildDayOfWeek,
   buildFallbackStats,
@@ -360,6 +361,47 @@ describe('buildWeeklyTrend', () => {
     const result = buildWeeklyTrend(rows);
     // KST 기준 2026-05-04 → 주 시작 월요일 2026-05-04 → "5/4 주"
     expect(result[0].weekLabel).toBe('5/4 주');
+  });
+});
+
+// cycle 1999 review-code (heavy) — buildBrierTrend 가 brierScore/buildVersionHistory 와
+// 달리 resolveWinnerProb 대신 raw confidence 사용 (silent drift, 테스트 부재로 미검출).
+describe('buildBrierTrend', () => {
+  it('빈 배열 → 빈 배열', () => {
+    expect(buildBrierTrend([])).toEqual([]);
+  });
+
+  it('homeWinProb 존재 시 confidence 아닌 resolveWinnerProb 로 brier 계산 (silent drift regression)', () => {
+    // confidence=1 이지만 homeWinProb=0.6 → resolveWinnerProb 는 0.6 사용해야 함.
+    // 과거 버그: raw confidence(1) 사용 시 brier=0, 정정 후 brier=(0.6-1)^2=0.16
+    const rows = [
+      { confidence: 1, is_correct: true, verified_at: '2026-05-04T01:00:00Z', scoring_rule: 'v1.8', homeWinProb: 0.6 },
+    ];
+    const result = buildBrierTrend(rows);
+    const allCell = result.find((c) => c.scoringRule === 'all');
+    expect(allCell?.brier).toBeCloseTo(0.16);
+  });
+
+  it('homeWinProb null → confidence fallback (NEUTRAL_FACTOR 하한 적용)', () => {
+    const rows = [
+      { confidence: 0.6, is_correct: true, verified_at: '2026-05-04T01:00:00Z', scoring_rule: 'v1.8', homeWinProb: null },
+    ];
+    const result = buildBrierTrend(rows);
+    const allCell = result.find((c) => c.scoringRule === 'all');
+    expect(allCell?.brier).toBeCloseTo((0.6 - 1) ** 2);
+  });
+
+  it('all + scoring_rule 별 cell 둘 다 누적', () => {
+    const rows = [
+      { confidence: 0.6, is_correct: true, verified_at: '2026-05-04T01:00:00Z', scoring_rule: 'v1.8' },
+      { confidence: 0.6, is_correct: false, verified_at: '2026-05-05T01:00:00Z', scoring_rule: 'v1.8' },
+    ];
+    const result = buildBrierTrend(rows);
+    const allCell = result.find((c) => c.scoringRule === 'all');
+    const v18Cell = result.find((c) => c.scoringRule === 'v1.8');
+    expect(allCell?.n).toBe(2);
+    expect(v18Cell?.n).toBe(2);
+    expect(allCell?.brier).toBeCloseTo(v18Cell!.brier!);
   });
 });
 

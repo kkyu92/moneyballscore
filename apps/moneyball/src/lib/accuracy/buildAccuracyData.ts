@@ -404,8 +404,7 @@ export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
     const wk = getWeekStart(r.verified_at);
     const sr = r.scoring_rule ?? 'unknown';
     const target = r.is_correct ? 1 : 0;
-    const conf = r.confidence;
-    const brierContribution = (conf - target) ** 2;
+    const brierContribution = (resolveWinnerProb(r) - target) ** 2;
     if (!buckets.has(wk)) buckets.set(wk, new Map());
     const wkMap = buckets.get(wk)!;
     for (const key of ['all', sr]) {
