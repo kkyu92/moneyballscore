@@ -378,3 +378,25 @@ Supabase REST: "code": "42703", "message": "column games.home_team_code does not
 - 사례 9 (vercel auto-deploy alias) — 운영 인프라 silent
 - plan #N stale ref drift (cycle 1047+1048 13 occurrence, auto-memory `silent-drift-family-plan-number-stale-ref.md`) — plan body 미래 plan number 가정 stale
 - 사례 16 = plan frontmatter status field stale — develop-cycle retro layer 자체 silent
+
+---
+
+### 사례 17 — pnpm-lock.yaml turbo specifier mismatch → CI 23-cycle + Vercel production 24h 이중 silent (cycle 1996 신규)
+
+cycle 1971 "build: devDependencies 패치 버전 갱신" (turbo `^2.10.4`→`^2.10.5`) 커밋이 `pnpm-lock.yaml` 의 `importers.'.'.devDependencies.turbo.specifier` 를 `^2.10.5` 로 남겼으나, `pnpm.overrides.turbo` (`>=2.9.14`) 존재 시 pnpm 이 override 를 authoritative specifier 로 재계산 — `pnpm install --frozen-lockfile` 검증 시 `ERR_PNPM_OUTDATED_LOCKFILE` 불일치 발생.
+
+**이중 blast radius**:
+- **GH Actions CI**: cycle 1971 08:33:46 ~ cycle 1994 까지 main CI **100% red 23 cycle 연속**. develop-cycle 이 CI 상태 확인 없이 direct commit + policy retro 로만 진행해 완전히 미발견.
+- **Vercel production 빌드**: 동일 `pnpm install --frozen-lockfile` 스텝을 Vercel 빌드도 사용 → 2026-07-22 08시경부터 프로덕션 배포 시도 **13회 이상 전부 Error**, production alias 는 cycle 1971 커밋 (`0b4d4b6`) 에 24시간+ 고정 (신규 기능/수정 사용자 가시 반영 완전 중단).
+
+**발견 경로**: cycle 1995 review-code(heavy) 진단 중 CI 확인하여 `4042151a fix(ci)` 로 lockfile 재동기화 (CI red 23-cycle 원인 규명 + 수정). 그러나 이 fix 커밋도 review-code 로 chain_selected 된 채 넘어가 retro 요약에 반영 안 됨 — **동일 fix 가 production 24h drift 도 함께 해소한다는 사실은 cycle 1996 fix-incident 재진단 (`deploy-drift-alert` 스케줄 workflow 2026-07-21 23:09 ~ 2026-07-23 06:38 사이 대부분 `failure`, `vercel ls --prod` 13+ Error deploy) 에서야 확인.**
+
+**핵심 gap — develop-cycle 진단 source 맹점**: fix-incident chain 의 진단 source 목록 (`pipeline_runs` 7일 gap / GH issue / Sentry / 사용자 신고 / debug commit)에 **GH Actions workflow 실행 상태 (`gh run list`) 나 Vercel 배포 상태 (`vercel ls --prod`) 자체가 없음**. `pipeline_runs` DB 는 크론 예측 파이프라인만 반영 — CI/CD 빌드 파이프라인 실패는 별도 신호계열이라 24 cycle (cycle 1972~1995) 동안 완전 blind. `deploy-drift-alert` GH Actions workflow 는 정확히 이 gap 을 메우기 위해 cycle 838 에 박제됐으나, **workflow failure 자체가 GH 이메일 알림에만 의존 — develop-cycle 자동 진단 루틴이 능동적으로 `gh run list` 를 확인하지 않는 한 32시간 연속 failure 도 자체적으로는 포착 못함.**
+
+**fix (cycle 1996 적용)**: SKILL.md fix-incident 진단 source 표에 `gh run list --limit 10` (scheduled workflow 최근 실패 확인) 항목 추가 — pipeline_runs 만으로는 CI/CD 계열 incident 커버 불가.
+
+**검증 (cycle 1996)**: `pnpm install --frozen-lockfile` 로컬 재실행 → `Lockfile is up to date` (재발 없음 확인). `curl /api/version` → `fa49970` = main HEAD 일치 (production 24h drift 완전 회복, 최신 배포 `Ready`).
+
+**관련 family**:
+- 사례 9 (vercel auto-deploy alias) — 운영 인프라 silent, 유사하지만 원인은 alias swap 실패 (본 사례는 build 단계 자체 실패로 원인 상이)
+- 사례 10+13 (Turbopack/ESM build fail) — 빌드 시스템 계열, 본 사례와 동일 layer (CI/CD 파이프라인 자체가 진단 source 표에 없다는 구조적 맹점 공유)
