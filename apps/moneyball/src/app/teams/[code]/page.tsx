@@ -11,16 +11,20 @@ import {
   KBO_OFFICIAL_URL,
   ACCURACY_GOOD_RATE,
   confToWinProb,
+  FACTOR_PICK_STRONG,
+  FACTOR_PICK_COMPLETE,
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
 import { buildTeamUpcoming } from "@/lib/teams/buildTeamUpcoming";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
+import { getConvergencePickTeamStats } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { TeamEloChart } from "@/components/teams/TeamEloChart";
 import { TeamRecentGamesFilter } from "@/components/teams/TeamRecentGamesFilter";
+import { TeamConvergencePickRecord } from "@/components/teams/TeamConvergencePickRecord";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { captureFallback } from "@/lib/observability/captureFallback";
@@ -86,12 +90,18 @@ export default async function TeamPage({ params }: PageProps) {
   const { code } = await params;
   if (!isTeamCode(code)) notFound();
 
-  const [profile, eloTrend, upcoming] = await Promise.all([
+  const [profile, eloTrend, upcoming, strongTeamStats, completeTeamStats] = await Promise.all([
     buildTeamProfile(code),
     buildTeamEloTrend(code).catch((err) => captureFallback(err, { points: [] }, { route: "/teams/[code]", source: "buildTeamEloTrend" })),
     buildTeamUpcoming(code).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "buildTeamUpcoming" })),
+    // wave-607: 팀별 강수렴/완전수렴 픽 성적 — analysis/seasons/reviews 허브·monthly·weekly 재사용
+    getConvergencePickTeamStats(FACTOR_PICK_STRONG).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(strong)" })),
+    getConvergencePickTeamStats(FACTOR_PICK_COMPLETE).catch((err) => captureFallback(err, [], { route: "/teams/[code]", source: "getConvergencePickTeamStats(complete)" })),
   ]);
   if (!profile) notFound();
+
+  const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
+  const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
 
   const teamUrl = `${SITE_URL}/teams/${code}`;
   const logoUrl = `${SITE_URL}/logos/${code}.png`;
@@ -213,6 +223,12 @@ export default async function TeamPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      <TeamConvergencePickRecord
+        titleId="team-convergence-title"
+        strongStat={teamStrongStat}
+        completeStat={teamCompleteStat}
+      />
 
       <section
         aria-labelledby="team-factors-title"
