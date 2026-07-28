@@ -9,6 +9,8 @@ import {
   getConvergencePickHomeAwaySplit,
   getConvergencePickDayOfWeekSplit,
   getConvergencePickTeamStats,
+  getConvergencePickStreak,
+  getConvergencePickBestStreak,
 } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -16,6 +18,7 @@ import { SeasonStandingsSortControl } from "@/components/seasons/SeasonStandings
 import { ConvergenceHomeAwayBadges } from "@/components/reviews/ConvergenceHomeAwayBadges";
 import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayOfWeekBadges";
 import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
+import { ConvergenceStreakBadges } from "@/components/reviews/ConvergenceStreakBadges";
 
 // 진행 중인 시즌은 경기가 매일 추가되므로 10분마다 최신화, 종료 시즌은 1시간.
 // Next.js ISR 은 path별 다른 revalidate 를 동적으로 주지 못해 10분 (진행 시즌 기준)
@@ -87,6 +90,10 @@ export default async function SeasonPage({ params }: PageProps) {
     completeDayOfWeekSplit,
     strongTeamStats,
     completeTeamStats,
+    strongConvergenceStreak,
+    strongConvergenceBestStreak,
+    completeConvergenceStreak,
+    completeConvergenceBestStreak,
   ] = await Promise.all([
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
@@ -96,6 +103,11 @@ export default async function SeasonPage({ params }: PageProps) {
     getConvergencePickDayOfWeekSplit(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
     getConvergencePickTeamStats(FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
     getConvergencePickTeamStats(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+    // wave-606: /seasons/[year] 에 없던 수렴 픽 스트리크 gap (monthly wave-594 재사용, 시즌 범위 한정)
+    getConvergencePickStreak(FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getConvergencePickBestStreak(FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getConvergencePickStreak(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+    getConvergencePickBestStreak(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
   ]);
 
   // 월별 차트 max 계산 (bar 폭 정규화)
@@ -232,6 +244,13 @@ export default async function SeasonPage({ params }: PageProps) {
         titleId="season-team-stats-title"
         strongTeamStats={strongTeamStats}
         completeTeamStats={completeTeamStats}
+      />
+      <ConvergenceStreakBadges
+        titleId="season-streak-title"
+        strongStreak={strongConvergenceStreak}
+        strongBestStreak={strongConvergenceBestStreak}
+        completeStreak={completeConvergenceStreak}
+        completeBestStreak={completeConvergenceBestStreak}
       />
 
       {/* 팀 순위 */}
