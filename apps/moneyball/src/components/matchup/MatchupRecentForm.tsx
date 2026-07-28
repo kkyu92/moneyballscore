@@ -4,6 +4,7 @@ import type {
 } from "@/lib/teams/buildTeamRecentForm";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+import { computeWinProbPct } from "@/lib/analysis/convergenceRecord";
 
 interface Props {
   teamA: { shortName: string };
@@ -39,7 +40,7 @@ function ResultBoxes({ results }: { results: GameResult[] }) {
 
 function formatWinRate(rate: number | null): string {
   if (rate == null) return "-";
-  return `${Math.round(rate * 100)}%`;
+  return `${computeWinProbPct(rate)}%`;
 }
 
 function summary(form: TeamRecentForm): string {
