@@ -400,3 +400,19 @@ cycle 1971 "build: devDependencies 패치 버전 갱신" (turbo `^2.10.4`→`^2.
 **관련 family**:
 - 사례 9 (vercel auto-deploy alias) — 운영 인프라 silent, 유사하지만 원인은 alias swap 실패 (본 사례는 build 단계 자체 실패로 원인 상이)
 - 사례 10+13 (Turbopack/ESM build fail) — 빌드 시스템 계열, 본 사례와 동일 layer (CI/CD 파이프라인 자체가 진단 source 표에 없다는 구조적 맹점 공유)
+
+---
+
+### 사례 18 — retro "머지 진행" 완료형 서술 vs 실제 미실행 → PR 5일 open 방치 (cycle 2001 신규)
+
+cycle 2000 이 R7 자동 머지 (`gh pr merge --auto`) 실패를 감지 (repo GraphQL `enablePullRequestAutoMerge` 비활성) → lesson 커밋 (`23c9639f`) 으로 원인 박제 + retro summary 에 "CI green 확인 후 --squash 로 수동 머지 진행" 이라고 **과거형 완료 서술**로 기록. 그러나 실제로는 `gh pr merge` 명령이 그 세션 안에서 실행되지 않은 채 signal 박제 → 세션 종료. PR #2856 은 CI green (2026-07-23 08:30 완료) 상태로 **5일간 (2026-07-23~07-28) open 방치** — 그 사이 watch loop 도 유휴 (laptop sleep 추정, watch.log 08:20:57 → 05:22:20 5일 gap).
+
+**발견 경로**: cycle 2001 진단 단계에서 cycle 2000 json 의 `execution.results.pr` 필드가 "수동 --squash merge 진행" 이라 적혀있길래 `gh pr view 2856 --json state,mergedAt` 로 실측 대조 → `state: OPEN`, `mergedAt: null` 불일치 확인. CLAUDE.md R5 "체크포인트 주장을 현실과 대조" 원칙 그대로 적중한 사례.
+
+**핵심 gap**: retro 서술에서 "~할 예정" (의도) 과 "~했다" (완료) 를 혼동 — 완료형으로 적었지만 그 자리에서 명령을 실제 실행하지 않음. develop-cycle 자체 실행 layer 의 self-referential silent drift (사례 15 "retro 박제 layer silent" 와 유사하지만, 본 사례는 retro 는 박제됐으나 **그 안의 서술 내용이 현실과 불일치**하는 새 변종).
+
+**fix (cycle 2001)**: `gh pr merge 2856 --squash --delete-branch` 즉시 실행 → merged 확인. SKILL.md "commit + PR" 섹션에 mitigation 추가 — retro 에 머지 완료형 서술 적기 전 `gh pr view <#> --json state,mergedAt` 로 `state=MERGED` 실측 확인 의무화.
+
+**관련 family**:
+- 사례 15 (develop-cycle 자체 retro 박제 layer silent) — 같은 자기참조 layer, 본 사례는 retro 존재하되 내용 불일치라는 점에서 상이
+- 사례 17 (pnpm-lock CI+prod 이중 silent) — R7/CI 관련 develop-cycle 진단 맹점 계열
