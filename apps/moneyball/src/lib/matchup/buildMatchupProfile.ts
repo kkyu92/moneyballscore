@@ -8,6 +8,7 @@ import {
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
+import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import type { MatchupPair } from "./canonicalPair";
 
 export interface MatchupGame {
@@ -142,7 +143,7 @@ function buildSummary(profile: {
 
   // 예측 성과
   if (predictionAccuracy.verified >= 3 && predictionAccuracy.rate !== null) {
-    const pct = Math.round(predictionAccuracy.rate * 100);
+    const pct = computeWinRatePct(predictionAccuracy.correct, predictionAccuracy.verified);
     text += ` 이 매치업에서 AI 예측은 ${predictionAccuracy.correct}/${predictionAccuracy.verified}경기 적중 (${pct}%).`;
   }
 
