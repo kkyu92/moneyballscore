@@ -1,5 +1,6 @@
 import type { SeasonHeadToHead } from "@/lib/matchup/buildSeasonHeadToHead";
 import type { TeamCode } from "@moneyball/shared";
+import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 
 // wave-609: /matchup/[teamA]/[teamB] 시즌별 상대전적 요약 —
 // 기존 "경기 기록"(전체 게임 리스트, 시즌 flat dump)에는 시즌 단위 승패 트렌드가 없었음.
@@ -35,13 +36,13 @@ export function MatchupSeasonHeadToHead({
             <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden flex">
               <div
                 style={{
-                  width: `${(s.aWins / s.played) * 100}%`,
+                  width: `${computeWinRatePct(s.aWins, s.played)}%`,
                   backgroundColor: teamA.color,
                 }}
               />
               <div
                 style={{
-                  width: `${(s.bWins / s.played) * 100}%`,
+                  width: `${computeWinRatePct(s.bWins, s.played)}%`,
                   backgroundColor: teamB.color,
                 }}
               />
