@@ -1,3 +1,15 @@
+## v0.5.62.10 — 2026-07-28 (cycle 2017, wave-611: 매치업 페이지 평균 득점 마진)
+
+### feat(analysis): wave-611 — /matchup/[teamA]/[teamB] 맞대결 평균 득점 마진 (cycle 2017)
+
+**신규: 매치업 요약 문장에 "평균 득점차" 문구**
+- 매치업 페이지에 상대전적/스트릭/수렴 픽 성적은 있었지만 "이 두 팀이 맞붙으면 보통 몇 점차로 갈리는지"는 어디에도 없던 gap
+- `buildMatchupProfile.ts`: 신규 순수 함수 `computeMatchupAvgMargin(games)` — `buildMatchupProfile` 이 이미 조회한 games 배열만으로 계산, 신규 DB 조회 없음. `status==='final'` + 점수 non-null 경기만 필터해 `|home-away|` 절대값 마진 평균 (승패 방향 무관), 소수 첫째 자리 반올림. 표본 1경기 미만은 null
+- `buildSummary()` 에 `avgMargin` 파라미터 추가 — 기존 상대전적/리드팀/예측성과/스트릭 문장 뒤에 "이 맞대결의 평균 득점차는 X.X점입니다" 문장 추가 (신규 UI 섹션·컴포넌트 없이 기존 요약 카드 재사용)
+- 테스트: `wave-611-matchup-avg-margin.test.ts` 6 cases (표본 부족/null 점수 제외/반올림/홈원정 무관 절대값/final 필터)
+
+---
+
 ## v0.5.62.9 — 2026-07-28 (cycle 2015, wave-610: 매치업 페이지 맞대결 최근 연승/연패 스트릭)
 
 ### feat(analysis): wave-610 — /matchup/[teamA]/[teamB] 맞대결 최근 연승/연패 스트릭 (cycle 2015)

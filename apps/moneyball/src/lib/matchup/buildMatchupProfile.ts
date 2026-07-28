@@ -68,6 +68,7 @@ export interface MatchupProfile {
   };
   games: MatchupGame[];
   streak: MatchupStreak | null;
+  avgMargin: MatchupAvgMargin | null;
   summary: string;
 }
 
@@ -144,6 +145,33 @@ export function computeMatchupStreak(
   return { teamCode: streakCode, length };
 }
 
+/** 맞대결 평균 득점 마진 최소 표본 — 1경기만으론 "평균"이라 부르기 애매해 배제 */
+const MATCHUP_AVG_MARGIN_MIN_GAMES = 2;
+
+export interface MatchupAvgMargin {
+  avgMargin: number;
+  sampleSize: number;
+}
+
+/**
+ * 두 팀 맞대결 한정 평균 득점 마진 (승패 무관, final 경기 |home-away| 점수차 평균).
+ * games 는 buildMatchupProfile 이 이미 조회한 배열 재사용, 신규 DB 조회 없음.
+ */
+export function computeMatchupAvgMargin(
+  games: MatchupGame[],
+): MatchupAvgMargin | null {
+  const margins = games
+    .filter(
+      (g) => g.status === "final" && g.homeScore != null && g.awayScore != null,
+    )
+    .map((g) => Math.abs((g.homeScore as number) - (g.awayScore as number)));
+
+  if (margins.length < MATCHUP_AVG_MARGIN_MIN_GAMES) return null;
+
+  const avg = margins.reduce((sum, m) => sum + m, 0) / margins.length;
+  return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
+}
+
 function buildSummary(profile: {
   teamA: MatchupProfile["teamA"];
   teamB: MatchupProfile["teamB"];
@@ -151,8 +179,10 @@ function buildSummary(profile: {
   sideStats: MatchupProfile["sideStats"];
   predictionAccuracy: MatchupProfile["predictionAccuracy"];
   streak: MatchupStreak | null;
+  avgMargin: MatchupAvgMargin | null;
 }): string {
-  const { teamA, teamB, finalGames, sideStats, predictionAccuracy, streak } = profile;
+  const { teamA, teamB, finalGames, sideStats, predictionAccuracy, streak, avgMargin } =
+    profile;
 
   if (finalGames === 0) {
     return `${teamA.shortName} vs ${teamB.shortName} 상대전적 — 아직 올 시즌 완료된 경기가 없습니다. 경기가 치러지면 여기에 결과와 AI 예측 성과가 기록됩니다.`;
@@ -187,6 +217,11 @@ function buildSummary(profile: {
   if (streak) {
     const streakTeam = streak.teamCode === teamA.code ? teamA : teamB;
     text += ` 최근 맞대결에서 ${streakTeam.shortName}${josa(streakTeam.shortName, "이", "가")} ${streak.length}연승 중입니다.`;
+  }
+
+  // 평균 득점 마진
+  if (avgMargin) {
+    text += ` 이 맞대결의 평균 득점차는 ${avgMargin.avgMargin}점입니다.`;
   }
 
   return text;
@@ -252,6 +287,7 @@ export async function buildMatchupProfile(
       predictionAccuracy: { verified: 0, correct: 0, rate: null },
       games: [],
       streak: null,
+      avgMargin: null,
       summary: buildSummary({
         teamA,
         teamB,
@@ -262,6 +298,7 @@ export async function buildMatchupProfile(
         },
         predictionAccuracy: { verified: 0, correct: 0, rate: null },
         streak: null,
+        avgMargin: null,
       }),
     };
   }
@@ -428,6 +465,7 @@ export async function buildMatchupProfile(
   const predictionAccuracy = { verified, correct, rate };
   const sideStats = { a: sideA, b: sideB };
   const streak = computeMatchupStreak(games);
+  const avgMargin = computeMatchupAvgMargin(games);
   const summary = buildSummary({
     teamA,
     teamB,
@@ -435,6 +473,7 @@ export async function buildMatchupProfile(
     sideStats,
     predictionAccuracy,
     streak,
+    avgMargin,
   });
 
   return {
@@ -447,6 +486,7 @@ export async function buildMatchupProfile(
     predictionAccuracy,
     games,
     streak,
+    avgMargin,
     summary,
   };
 }
