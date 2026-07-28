@@ -1,5 +1,12 @@
 # TODOS
 
+## 🔔 사용자 확인 필요: PR/issue close 8+1건 (cycle 2009, 2026-07-28)
+
+fix-incident cycle 2009 가 8일 방치된 hub lesson-pending reminder 8건(#2857-2864) + dependabot PR #2840 을 root cause 규명 완료. close 액션은 타 작성자(dependabot)/허브 리마인더 영역이라 자동 진행 대상 아님(Bash 권한 거부 확인).
+
+- PR #2840 (dependabot eslint 9.39.4→10.8.0 bump): close 권장 — eslint-plugin-react peerDep 상한 초과로 CI 항상 실패, `.github/dependabot.yml` 에 ignore 규칙 추가함(PR #2872 merged)
+- reminder #2857-2864 (8건): close 권장 — 6건은 2026-07-21 야간 Vercel 배포 지연(외부/일시, 재발 0), 2건은 이미 in-cycle 해소
+
 ## ✅ MLB backend migrations 033-037 prod 적용 완료 (cycle 1151, 2026-06-10)
 
 **root cause fix-incident heavy 완료** — cycle 1149 lite mitigation (empty fallback) 위 root cause 정리.
