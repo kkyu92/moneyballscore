@@ -24,6 +24,7 @@ import {
 } from "@/lib/matchup/canonicalPair";
 import { buildMatchupProfile } from "@/lib/matchup/buildMatchupProfile";
 import { buildMatchupUpcoming } from "@/lib/matchup/buildMatchupUpcoming";
+import { buildSeasonHeadToHead } from "@/lib/matchup/buildSeasonHeadToHead";
 import {
   buildTeamFactorAverages,
   EMPTY_FACTOR_AVERAGES,
@@ -40,6 +41,7 @@ import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare"
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 import { MatchupConvergencePickRecord } from "@/components/matchup/MatchupConvergencePickRecord";
+import { MatchupSeasonHeadToHead } from "@/components/matchup/MatchupSeasonHeadToHead";
 import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -111,6 +113,8 @@ export default async function MatchupPage({ params }: PageProps) {
   const pastGames = games.filter(
     (g) => !g.gameDate.startsWith(currentYear) && g.status === "final",
   ).sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+
+  const seasonH2H = buildSeasonHeadToHead(games, tA.code, tB.code);
 
   const closeCount = games.filter(
     (g) =>
@@ -329,6 +333,13 @@ export default async function MatchupPage({ params }: PageProps) {
         teamB={{ code: tB.code, shortName: tB.shortName }}
         strongStats={strongH2HStats}
         completeStats={completeH2HStats}
+      />
+
+      <MatchupSeasonHeadToHead
+        titleId="matchup-season-h2h-title"
+        teamA={{ code: tA.code, shortName: tA.shortName, color: tA.color }}
+        teamB={{ code: tB.code, shortName: tB.shortName, color: tB.color }}
+        seasons={seasonH2H}
       />
 
       {games.length > 0 && (
