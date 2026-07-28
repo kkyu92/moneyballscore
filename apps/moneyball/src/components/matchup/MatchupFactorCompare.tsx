@@ -2,6 +2,7 @@ import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
 import { RECENT_FORM_GAMES } from "@moneyball/shared";
 import type { TeamFactorAverages } from "@/lib/teams/buildTeamFactorAverages";
 import { FACTOR_LABELS_SHORT } from "@/lib/predictions/factorLabels";
+import { computeWinProbPct } from "@/lib/analysis/convergenceRecord";
 
 interface Props {
   teamA: { shortName: string };
@@ -58,7 +59,7 @@ const FACTORS: FactorRow[] = [
     key: "recentForm",
     slug: "recent_form",
     direction: "higher",
-    format: (v) => `${Math.round(v * 100)}%`,
+    format: (v) => `${computeWinProbPct(v)}%`,
     hint: `최근 폼 — 최근 ${RECENT_FORM_GAMES}경기 승률. 높을수록 우세.`,
     glossarySlug: "recent-form",
   },
