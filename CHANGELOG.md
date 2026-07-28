@@ -1,3 +1,15 @@
+## v0.5.62.9 — 2026-07-28 (cycle 2015, wave-610: 매치업 페이지 맞대결 최근 연승/연패 스트릭)
+
+### feat(analysis): wave-610 — /matchup/[teamA]/[teamB] 맞대결 최근 연승/연패 스트릭 (cycle 2015)
+
+**신규: 매치업 요약 문장에 "최근 맞대결 N연승" 스트릭 문구**
+- 매치업 페이지에 경기 기록/시즌별 상대전적/수렴 픽 성적은 있었지만 "지금 이 맞대결에서 어느 팀이 몇 연승 중인지"는 어디에도 없던 gap
+- `buildMatchupProfile.ts`: 신규 순수 함수 `computeMatchupStreak(games)` — `buildMatchupProfile` 이 이미 조회한 games 배열(game_date 내림차순)만으로 계산, 신규 DB 조회 없음. `status==='final'` 로 먼저 필터해 예정 경기(미래 날짜라 배열 앞쪽에 올 수 있음)를 배제한 뒤 최근 경기부터 연속 동일 승자 카운트. 무승부는 스트릭을 끊음. 최소 길이 2 미만은 null (1승만으론 "스트릭" 아님)
+- `buildSummary()` 에 `streak` 파라미터 추가 — 기존 상대전적/리드팀/예측성과 문장 뒤에 "최근 맞대결에서 X가 N연승 중입니다" 문장 추가 (신규 UI 섹션·컴포넌트 없이 기존 요약 카드 재사용)
+- 테스트: `wave-610-matchup-h2h-streak.test.ts` 6 cases (무승부/1승/3연승/예정경기 정렬 안전/스트릭 도중 무승부 케이스 포함)
+
+---
+
 ## v0.5.62.8 — 2026-07-28 (cycle 2010, wave-608: 매치업 페이지 두 팀 한정 수렴 픽 성적 배지)
 
 ### feat(analysis): wave-608 — /matchup/[teamA]/[teamB] 두 팀 맞대결 한정 수렴 픽 성적 (cycle 2010)
