@@ -218,42 +218,120 @@ async function fetchConvergencePickDetailedResults(
 
   const results: Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }> = [];
   for (const row of data as unknown as ConvergenceGameRow[]) {
-    const pred = row.predictions?.[0];
-    if (!pred || row.home_score === null || row.away_score === null) continue;
-    const homeCode = row.home_team?.code as TeamCode | undefined;
-    const awayCode = row.away_team?.code as TeamCode | undefined;
-    if (!homeCode || !awayCode) continue;
-
-    const duel = computeCompositeDuel({
-      homeCode,
-      homeLineupWoba: pred.home_lineup_woba,
-      awayLineupWoba: pred.away_lineup_woba,
-      homeSfr: pred.home_sfr,
-      awaySfr: pred.away_sfr,
-      homeBullpenFip: pred.home_bullpen_fip,
-      awayBullpenFip: pred.away_bullpen_fip,
-      homeSPFip: pred.home_sp_fip,
-      awaySPFip: pred.away_sp_fip,
-      homeSPXfip: pred.home_sp_xfip,
-      awaySPXfip: pred.away_sp_xfip,
-      homeWar: pred.home_war_total,
-      awayWar: pred.away_war_total,
-      homeElo: pred.home_elo ?? undefined,
-      awayElo: pred.away_elo ?? undefined,
-      homeRecentForm: pred.home_recent_form ?? undefined,
-      awayRecentForm: pred.away_recent_form ?? undefined,
-    });
-
-    if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) continue;
-    if (Math.abs(duel.netScore) < minFactors) continue;
-
-    const favoredHome = duel.netScore > 0;
-    const favoredTeam = favoredHome ? homeCode : awayCode;
-    const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
-    results.push({ favoredTeam, favoredHome, won, gameDate: row.game_date });
+    const evaluated = evaluateConvergencePickRow(row, minFactors);
+    if (evaluated) results.push(evaluated);
   }
 
   return results;
+}
+
+// wave-608: fetchConvergencePickDetailedResults 의 행별 판정 로직 (composite duel 계산 →
+// minFactors 게이팅 → favoredTeam/won 산출) 을 공유 헬퍼로 추출 — /matchup/[teamA]/[teamB]
+// 두 팀 한정 조회(fetchConvergencePickDetailedResultsForPair)와 동일 판정 로직 재사용, 중복 회피.
+function evaluateConvergencePickRow(
+  row: ConvergenceGameRow,
+  minFactors: number,
+): { favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string } | null {
+  const pred = row.predictions?.[0];
+  if (!pred || row.home_score === null || row.away_score === null) return null;
+  const homeCode = row.home_team?.code as TeamCode | undefined;
+  const awayCode = row.away_team?.code as TeamCode | undefined;
+  if (!homeCode || !awayCode) return null;
+
+  const duel = computeCompositeDuel({
+    homeCode,
+    homeLineupWoba: pred.home_lineup_woba,
+    awayLineupWoba: pred.away_lineup_woba,
+    homeSfr: pred.home_sfr,
+    awaySfr: pred.away_sfr,
+    homeBullpenFip: pred.home_bullpen_fip,
+    awayBullpenFip: pred.away_bullpen_fip,
+    homeSPFip: pred.home_sp_fip,
+    awaySPFip: pred.away_sp_fip,
+    homeSPXfip: pred.home_sp_xfip,
+    awaySPXfip: pred.away_sp_xfip,
+    homeWar: pred.home_war_total,
+    awayWar: pred.away_war_total,
+    homeElo: pred.home_elo ?? undefined,
+    awayElo: pred.away_elo ?? undefined,
+    homeRecentForm: pred.home_recent_form ?? undefined,
+    awayRecentForm: pred.away_recent_form ?? undefined,
+  });
+
+  if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) return null;
+  if (Math.abs(duel.netScore) < minFactors) return null;
+
+  const favoredHome = duel.netScore > 0;
+  const favoredTeam = favoredHome ? homeCode : awayCode;
+  const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
+  return { favoredTeam, favoredHome, won, gameDate: row.game_date };
+}
+
+// wave-608: /matchup/[teamA]/[teamB] 두 팀이 맞붙은 경기만 한정 조회 — buildMatchupProfile
+// 의 team id 조회 + or() 필터 패턴 재사용, 판정 로직은 evaluateConvergencePickRow 공유.
+async function fetchConvergencePickDetailedResultsForPair(
+  idA: number,
+  idB: number,
+  minFactors: number,
+): Promise<Array<{ favoredTeam: TeamCode; won: boolean }>> {
+  const supabase = await createClient();
+  const orFilter =
+    `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
+    `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
+
+  const gamesResult = (await supabase
+    .from('games')
+    .select(`
+      id, game_date, game_time, home_score, away_score,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
+      predictions!inner(
+        prediction_type, scoring_rule,
+        home_elo, away_elo, home_recent_form, away_recent_form,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_sfr, away_sfr, home_war_total, away_war_total
+      )
+    `)
+    .or(orFilter)
+    .not('home_score', 'is', null)
+    .eq('predictions.prediction_type', 'pre_game')
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)) as unknown as SelectResult<ConvergenceGameRow[]>;
+
+  const { data } = assertSelectOk(gamesResult, `fetchConvergencePickDetailedResultsForPair ${idA} vs ${idB}`);
+  if (!data) return [];
+
+  const results: Array<{ favoredTeam: TeamCode; won: boolean }> = [];
+  for (const row of data as unknown as ConvergenceGameRow[]) {
+    const evaluated = evaluateConvergencePickRow(row, minFactors);
+    if (evaluated) results.push({ favoredTeam: evaluated.favoredTeam, won: evaluated.won });
+  }
+
+  return results;
+}
+
+// wave-608: 두 팀 매치업 한정 강수렴/완전수렴 픽 성적 — /matchup/[teamA]/[teamB] 전용.
+// analysis/seasons/reviews/teams 5곳엔 이미 팀별 수렴 픽 성적이 있었지만 시즌 전체 기준이라
+// "이 두 팀이 맞붙었을 때" 는 없던 gap. team id 조회 실패(교류전 등 팀 미등록) 시 빈 배열.
+export async function getConvergencePickHeadToHeadRecord(
+  codeA: TeamCode,
+  codeB: TeamCode,
+  minFactors = FACTOR_PICK_STRONG,
+): Promise<Array<{ teamCode: TeamCode; wins: number; losses: number }>> {
+  const supabase = await createClient();
+  const teamsResult = (await supabase
+    .from('teams')
+    .select('id, code')
+    .in('code', [codeA, codeB])) as SelectResult<Array<{ id: number; code: string }>>;
+  const { data: teamRows } = assertSelectOk(teamsResult, `getConvergencePickHeadToHeadRecord teams ${codeA} vs ${codeB}`);
+  const idByCode = new Map<string, number>();
+  for (const t of teamRows ?? []) idByCode.set(t.code, t.id);
+  const idA = idByCode.get(codeA);
+  const idB = idByCode.get(codeB);
+  if (idA == null || idB == null) return [];
+
+  const results = await fetchConvergencePickDetailedResultsForPair(idA, idB, minFactors);
+  return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
 }
 
 // wave-559: 강수렴 픽 홈/어웨이 분리 성적 — 순수 함수 (테스트 가능)

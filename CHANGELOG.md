@@ -1,3 +1,16 @@
+## v0.5.62.8 — 2026-07-28 (cycle 2010, wave-608: 매치업 페이지 두 팀 한정 수렴 픽 성적 배지)
+
+### feat(analysis): wave-608 — /matchup/[teamA]/[teamB] 두 팀 맞대결 한정 수렴 픽 성적 (cycle 2010)
+
+**신규: 매치업 상세 페이지 강수렴/완전수렴 픽 "이 두 팀 한정" 성적**
+- analysis/seasons/reviews-hub/monthly/weekly/teams 6곳엔 이미 (시즌 전체 기준) 수렴 픽 팀별 분리 성적이 있었지만, `/matchup/[teamA]/[teamB]` 는 AI 예측 정확도(이 매치업 한정)는 있어도 "이 두 팀이 맞붙었을 때 모델의 강수렴/완전수렴 픽 성적"은 없던 gap
+- `convergenceRecord.ts`: 신규 `getConvergencePickHeadToHeadRecord(codeA, codeB, minFactors)` — `buildMatchupProfile` 의 team id 조회 + `or()` 필터 패턴 재사용, 두 팀이 맞붙은 경기만 한정 조회. 판정 로직(composite duel 계산 → minFactors 게이팅 → favoredTeam/won 산출)은 `evaluateConvergencePickRow` 공유 헬퍼로 추출해 기존 `fetchConvergencePickDetailedResults` 와 중복 없이 재사용, 집계는 기존 `computeConvergenceTeamStats` 그대로 재사용 (신규 계산 로직 없음)
+- `MatchupConvergencePickRecord.tsx`: 신규 컴포넌트 — `TeamConvergencePickRecord`(wave-607) 와 동일 표시 패턴(강수렴 🏅/완전수렴 ★ 배지), 두 팀 모두 표시하되 양쪽 다 표본 없으면 렌더 skip
+- `matchup/[teamA]/[teamB]/page.tsx`: "AI 예측 성과 (이 매치업 한정)" 섹션 뒤, 경기 목록 앞에 배치
+- 테스트: `wave-608-matchup-head-to-head-convergence-record.test.ts` 6 cases
+
+---
+
 ## v0.5.62.7 — 2026-07-22 (cycle 1990, wave-603: 월간/주간 리뷰 수렴 픽 팀별 분리 성적 배지)
 
 ### feat(analysis): wave-603 — /reviews/monthly/[month] + /reviews/weekly/[week] 수렴 픽 팀별 분리 성적 배지 (cycle 1990)
