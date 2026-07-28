@@ -15,6 +15,8 @@ import {
   WINNER_TIER_LABEL,
   confToWinProb,
   CLOSE_GAME_MARGIN,
+  FACTOR_PICK_STRONG,
+  FACTOR_PICK_COMPLETE,
 } from '@moneyball/shared';
 import {
   canonicalPair,
@@ -30,12 +32,14 @@ import {
   buildTeamRecentForm,
   EMPTY_RECENT_FORM,
 } from "@/lib/teams/buildTeamRecentForm";
+import { getConvergencePickHeadToHeadRecord } from "@/lib/analysis/convergenceRecord";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare";
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
+import { MatchupConvergencePickRecord } from "@/components/matchup/MatchupConvergencePickRecord";
 import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -84,13 +88,15 @@ export default async function MatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const [profile, factorA, factorB, formA, formB, upcomingMatchup] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, upcomingMatchup, strongH2HStats, completeH2HStats] = await Promise.all([
     buildMatchupProfile(pair),
     buildTeamFactorAverages(pair.codeA).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeA" })),
     buildTeamFactorAverages(pair.codeB).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeB" })),
     buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeA" })),
     buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES).catch((err) => captureFallback(err, EMPTY_RECENT_FORM, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamRecentForm.codeB" })),
     buildMatchupUpcoming(pair).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupUpcoming" })),
+    getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_STRONG).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(strong)" })),
+    getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_COMPLETE).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(complete)" })),
   ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
@@ -316,6 +322,14 @@ export default async function MatchupPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <MatchupConvergencePickRecord
+        titleId="matchup-convergence-title"
+        teamA={{ code: tA.code, shortName: tA.shortName }}
+        teamB={{ code: tB.code, shortName: tB.shortName }}
+        strongStats={strongH2HStats}
+        completeStats={completeH2HStats}
+      />
 
       {games.length > 0 && (
         <section
