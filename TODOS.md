@@ -73,6 +73,8 @@ fix-incident cycle 2009 가 8일 방치된 hub lesson-pending reminder 8건(#285
 
 **✅ 축 B (HOME_ADVANTAGE 조건부 보정) 종결 (2026-07-22, cycle 1994)**: 착수 조건 N≥100 CE cohort 최초 충족 (n=162). CE(순 quant) 실제 홈승률 49.4% vs 예측 평균 51.9% (상향 근거 없음), 박빙구간[0.47,0.53] 실제 홈승률 50.6% (동전던지기 수준, 조건부 boost 근거 없음) → **B-3 무변경 확정**. 상세: `docs/op-analysis/cohorts/2026-07-22-cycle1994-axis-b-home-advantage.md`. 비CE 홈승률 편향(+13.4pp, n=47)은 표본 부족으로 별도 관찰 항목 이월.
 
+**🧊 비CE 표본 동결 확인 (2026-07-28, cycle 2019 op-analysis lite 재측정)**: 총 n=255 (CE 208 / 비CE 47) — 비CE 표본 cycle 1994 측정 대비 **증가 0건** (여전히 47). CE는 209→255 (+46건 계속 누적) vs 비CE 완전 정체 = CREDIT_EXHAUSTED 지속으로 debate 정직 실행 자체가 발생하지 않고 있음을 재확인 (fallback 100% 지속, conf=0.3 flat). CE 55.3%(115/208, Brier 0.3237) vs 비CE 63.8%(30/47, Brier 0.2534) — 격차 수치 동일 유지(비CE n 불변이라 당연). **결론: 비CE 편향 재평가는 사용자 크레딧 충전 전까지 구조적으로 진전 불가** — 다음 op-analysis 사이클에서 재측정해도 크레딧 미충전 시 동일 결과 반복 예상. 크레딧 충전 신호(사용자 발화 또는 non-CE row 신규 발생) 전까지 이 항목 fire 우선순위 하향 권장.
+
 > 📜 **history 요약** (details = CHANGELOG.md):
 > - cycle 1460 (2026-07-06): plan #16 2차 fire n=178 재입증 → v1.8 유지 확정
 > - cycle 1447 (2026-07-03): v1.8 n=161 첫 threshold cross, Brier drift 진단 시작
