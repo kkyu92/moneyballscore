@@ -67,6 +67,7 @@ export interface MatchupProfile {
     rate: number | null;
   };
   games: MatchupGame[];
+  streak: MatchupStreak | null;
   summary: string;
 }
 
@@ -109,14 +110,49 @@ function makeSideStat(
   };
 }
 
+/** 맞대결 최근 연승/연패 스트릭 최소 길이 — 1승만으론 "스트릭"이라 부르기 애매해 배제 */
+const MATCHUP_STREAK_MIN_LENGTH = 2;
+
+export interface MatchupStreak {
+  teamCode: TeamCode;
+  length: number;
+}
+
+/**
+ * 두 팀 맞대결 한정 최근 연승/연패.
+ * games 는 buildMatchupProfile 안에서 game_date 내림차순 정렬 후 전달되지만,
+ * 정렬 자체는 예정 경기(미래 날짜)가 최근 완료 경기보다 앞에 올 수 있어
+ * status==='final' 필터로 먼저 걸러낸 뒤 상대 순서를 그대로 사용.
+ */
+export function computeMatchupStreak(
+  games: MatchupGame[],
+): MatchupStreak | null {
+  const finals = games.filter((g) => g.status === "final");
+  if (finals.length === 0) return null;
+
+  // 가장 최근 완료 경기가 무승부(승자 없음)면 진행 중인 스트릭 없음
+  const streakCode = finals[0].actualWinnerCode;
+  if (!streakCode) return null;
+
+  let length = 0;
+  for (const g of finals) {
+    if (g.actualWinnerCode !== streakCode) break;
+    length += 1;
+  }
+
+  if (length < MATCHUP_STREAK_MIN_LENGTH) return null;
+  return { teamCode: streakCode, length };
+}
+
 function buildSummary(profile: {
   teamA: MatchupProfile["teamA"];
   teamB: MatchupProfile["teamB"];
   finalGames: number;
   sideStats: MatchupProfile["sideStats"];
   predictionAccuracy: MatchupProfile["predictionAccuracy"];
+  streak: MatchupStreak | null;
 }): string {
-  const { teamA, teamB, finalGames, sideStats, predictionAccuracy } = profile;
+  const { teamA, teamB, finalGames, sideStats, predictionAccuracy, streak } = profile;
 
   if (finalGames === 0) {
     return `${teamA.shortName} vs ${teamB.shortName} 상대전적 — 아직 올 시즌 완료된 경기가 없습니다. 경기가 치러지면 여기에 결과와 AI 예측 성과가 기록됩니다.`;
@@ -145,6 +181,12 @@ function buildSummary(profile: {
   if (predictionAccuracy.verified >= 3 && predictionAccuracy.rate !== null) {
     const pct = computeWinRatePct(predictionAccuracy.correct, predictionAccuracy.verified);
     text += ` 이 매치업에서 AI 예측은 ${predictionAccuracy.correct}/${predictionAccuracy.verified}경기 적중 (${pct}%).`;
+  }
+
+  // 맞대결 연승/연패 스트릭
+  if (streak) {
+    const streakTeam = streak.teamCode === teamA.code ? teamA : teamB;
+    text += ` 최근 맞대결에서 ${streakTeam.shortName}${josa(streakTeam.shortName, "이", "가")} ${streak.length}연승 중입니다.`;
   }
 
   return text;
@@ -209,6 +251,7 @@ export async function buildMatchupProfile(
       },
       predictionAccuracy: { verified: 0, correct: 0, rate: null },
       games: [],
+      streak: null,
       summary: buildSummary({
         teamA,
         teamB,
@@ -218,6 +261,7 @@ export async function buildMatchupProfile(
           b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
         },
         predictionAccuracy: { verified: 0, correct: 0, rate: null },
+        streak: null,
       }),
     };
   }
@@ -383,12 +427,14 @@ export async function buildMatchupProfile(
 
   const predictionAccuracy = { verified, correct, rate };
   const sideStats = { a: sideA, b: sideB };
+  const streak = computeMatchupStreak(games);
   const summary = buildSummary({
     teamA,
     teamB,
     finalGames,
     sideStats,
     predictionAccuracy,
+    streak,
   });
 
   return {
@@ -400,6 +446,7 @@ export async function buildMatchupProfile(
     sideStats,
     predictionAccuracy,
     games,
+    streak,
     summary,
   };
 }
