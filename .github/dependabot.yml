@@ -29,6 +29,14 @@ updates:
           - "vitest*"
           - "@vitest/*"
           - "playwright*"
+    # eslint 10.x: eslint-plugin-react@7.37.5 (eslint-config-next 16.2.12 최신도 동일) peerDependency
+    # 가 "^3 || ... || ^9.7" 까지만 지원 — eslint 10 적용 시 "react/display-name" 규칙 로딩 자체가
+    # TypeError (contextOrFilename.getFilename is not a function) 로 깨짐 (cycle 2009 fix-incident 확인,
+    # PR #2616/#2840 양쪽 CI 실패 재현). eslint-config-next 가 eslint-plugin-react 를 8.x 로 올리기 전까진
+    # major bump PR 자체가 항상 실패 → dependabot 이 반복 생성하는 노이즈 차단.
+    ignore:
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
 
   - package-ecosystem: github-actions
     directory: /
