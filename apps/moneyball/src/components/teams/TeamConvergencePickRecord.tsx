@@ -32,42 +32,36 @@ export function TeamConvergencePickRecord({
         이 팀이 모델의 강수렴(8팩터+) 또는 완전수렴(10팩터) 픽으로 지목됐을 때의 실제 결과
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        {strongStat && (
-          <span
-            className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800/60"
-            title={`강수렴 픽 ${strongStat.wins + strongStat.losses}경기`}
-          >
-            <span className="text-gray-500 dark:text-gray-400">🏅 강수렴</span>
-            <span className="font-mono font-semibold">
-              {strongStat.wins}승 {strongStat.losses}패
-            </span>
+        {strongStat && (() => {
+          const pct = computeWinRatePct(strongStat.wins, strongStat.wins + strongStat.losses);
+          return (
             <span
-              className={`tabular-nums ${computeWinRateColorClass(
-                computeWinRatePct(strongStat.wins, strongStat.wins + strongStat.losses),
-              )}`}
+              className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800/60"
+              title={`강수렴 픽 ${strongStat.wins + strongStat.losses}경기`}
             >
-              ({computeWinRatePct(strongStat.wins, strongStat.wins + strongStat.losses)}%)
+              <span className="text-gray-500 dark:text-gray-400">🏅 강수렴</span>
+              <span className="font-mono font-semibold">
+                {strongStat.wins}승 {strongStat.losses}패
+              </span>
+              <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>({pct}%)</span>
             </span>
-          </span>
-        )}
-        {completeStat && (
-          <span
-            className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded bg-amber-50 dark:bg-amber-900/20"
-            title={`완전수렴 픽 ${completeStat.wins + completeStat.losses}경기`}
-          >
-            <span className="text-amber-700 dark:text-amber-300">★ 완전수렴</span>
-            <span className="font-mono font-semibold">
-              {completeStat.wins}승 {completeStat.losses}패
-            </span>
+          );
+        })()}
+        {completeStat && (() => {
+          const pct = computeWinRatePct(completeStat.wins, completeStat.wins + completeStat.losses);
+          return (
             <span
-              className={`tabular-nums ${computeWinRateColorClass(
-                computeWinRatePct(completeStat.wins, completeStat.wins + completeStat.losses),
-              )}`}
+              className="inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded bg-amber-50 dark:bg-amber-900/20"
+              title={`완전수렴 픽 ${completeStat.wins + completeStat.losses}경기`}
             >
-              ({computeWinRatePct(completeStat.wins, completeStat.wins + completeStat.losses)}%)
+              <span className="text-amber-700 dark:text-amber-300">★ 완전수렴</span>
+              <span className="font-mono font-semibold">
+                {completeStat.wins}승 {completeStat.losses}패
+              </span>
+              <span className={`tabular-nums ${computeWinRateColorClass(pct)}`}>({pct}%)</span>
             </span>
-          </span>
-        )}
+          );
+        })()}
       </div>
     </section>
   );
