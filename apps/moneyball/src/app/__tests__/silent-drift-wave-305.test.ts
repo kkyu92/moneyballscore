@@ -59,16 +59,27 @@ describe('silent drift wave 305 — picks/calibration constants (cycle 1634)', (
     expect(src).not.toMatch(/^const BUCKET_COUNT\s*=\s*10/m);
   });
 
-  it('debug/reliability/page.tsx imports CALIBRATION_BUCKET_* from shared (no local def)', () => {
+  it('debug/reliability/page.tsx reuses bucketize/brierScore/calibrationGap from buildAccuracyData (no local reimplementation, cycle 2002)', () => {
     const src = readFileSync(
       join(ROOT, 'src/app/debug/reliability/page.tsx'),
       'utf8',
     );
-    expect(src).toContain('CALIBRATION_BUCKET_WIDTH');
-    expect(src).toContain('CALIBRATION_BUCKET_START');
-    expect(src).toContain('CALIBRATION_BUCKET_COUNT');
-    expect(src).not.toMatch(/^const BUCKET_WIDTH\s*=\s*0\.05/m);
-    expect(src).not.toMatch(/^const BUCKET_START\s*=\s*0\.5/m);
-    expect(src).not.toMatch(/^const BUCKET_COUNT\s*=\s*10/m);
+    expect(src).toContain('@/lib/accuracy/buildAccuracyData');
+    expect(src).toContain('bucketize');
+    expect(src).toContain('brierScore');
+    expect(src).toContain('calibrationGap');
+    expect(src).toContain('resolveWinnerProb');
+    expect(src).not.toMatch(/^function bucketize/m);
+    expect(src).not.toMatch(/^function brierScore/m);
+    expect(src).not.toMatch(/^function calibrationGap/m);
+    expect(src).not.toMatch(/CALIBRATION_BUCKET_WIDTH/);
+  });
+
+  it('debug/reliability/page.tsx query selects reasoning->homeWinProb (cycle 2002 silent drift fix — prior version only fetched raw confidence, causing the same drift buildBrierTrend had before cycle 1999)', () => {
+    const src = readFileSync(
+      join(ROOT, 'src/app/debug/reliability/page.tsx'),
+      'utf8',
+    );
+    expect(src).toMatch(/reasoning->homeWinProb/);
   });
 });

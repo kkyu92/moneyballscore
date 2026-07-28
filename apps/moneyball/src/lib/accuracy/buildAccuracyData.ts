@@ -161,7 +161,7 @@ export function buildFallbackDailyTrend(
   return Array.from(buckets.values());
 }
 
-function resolveWinnerProb(r: PredRow): number {
+export function resolveWinnerProb(r: PredRow): number {
   if (r.homeWinProb != null) {
     const hwp = Number(r.homeWinProb);
     return hwp >= NEUTRAL_FACTOR ? hwp : 1 - hwp;

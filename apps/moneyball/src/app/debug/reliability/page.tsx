@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import { BRIER_BASELINE, CALIBRATION_BUCKET_WIDTH, CALIBRATION_BUCKET_START, CALIBRATION_BUCKET_COUNT, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX } from '@moneyball/shared';
+import { BRIER_BASELINE, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX } from '@moneyball/shared';
 import { neutral, brand } from '@/lib/design-tokens';
+import { bucketize, brierScore, calibrationGap, resolveWinnerProb, type PredRow, type Bucket } from '@/lib/accuracy/buildAccuracyData';
 
 // /debug/reliability — 예측 신뢰도 reliability diagram
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
@@ -28,80 +29,6 @@ function getAdminClient() {
   });
 }
 
-interface PredRow {
-  confidence: number;
-  is_correct: boolean;
-  verified_at: string;
-}
-
-interface Bucket {
-  lower: number;
-  upper: number;
-  n: number;
-  hits: number;
-  avgConf: number;
-  hitRate: number;
-  ci95Half: number;
-}
-
-const BUCKET_WIDTH = CALIBRATION_BUCKET_WIDTH;
-const BUCKET_START = CALIBRATION_BUCKET_START;
-const BUCKET_COUNT = CALIBRATION_BUCKET_COUNT;
-
-function bucketize(rows: PredRow[]): Bucket[] {
-  const acc: Array<{ sumConf: number; n: number; hits: number }> = Array.from(
-    { length: BUCKET_COUNT },
-    () => ({ sumConf: 0, n: 0, hits: 0 }),
-  );
-  for (const r of rows) {
-    const idx = Math.min(
-      BUCKET_COUNT - 1,
-      Math.max(0, Math.floor((r.confidence - BUCKET_START) / BUCKET_WIDTH)),
-    );
-    acc[idx].sumConf += r.confidence;
-    acc[idx].n += 1;
-    if (r.is_correct) acc[idx].hits += 1;
-  }
-  const out: Bucket[] = [];
-  for (let i = 0; i < BUCKET_COUNT; i++) {
-    const b = acc[i];
-    if (b.n === 0) continue;
-    const lower = BUCKET_START + i * BUCKET_WIDTH;
-    const upper = lower + BUCKET_WIDTH;
-    const hitRate = b.hits / b.n;
-    // Wald 95% CI — small-sample 에서는 Wilson score 가 더 정확하지만 Wald 로 시작.
-    const ci95Half = 1.96 * Math.sqrt((hitRate * (1 - hitRate)) / b.n);
-    out.push({
-      lower,
-      upper,
-      n: b.n,
-      hits: b.hits,
-      avgConf: b.sumConf / b.n,
-      hitRate,
-      ci95Half,
-    });
-  }
-  return out;
-}
-
-/** Brier score — 낮을수록 좋음 (0 = perfect, 0.25 = 동전). */
-function brierScore(rows: PredRow[]): number {
-  if (rows.length === 0) return 0;
-  let sum = 0;
-  for (const r of rows) {
-    const outcome = r.is_correct ? 1 : 0;
-    sum += (r.confidence - outcome) ** 2;
-  }
-  return sum / rows.length;
-}
-
-/** Calibration gap = |avg conf − overall accuracy|. 0 에 가까우면 잘 보정됨. */
-function calibrationGap(rows: PredRow[]): number {
-  if (rows.length === 0) return 0;
-  const avgConf = rows.reduce((s, r) => s + r.confidence, 0) / rows.length;
-  const acc = rows.filter((r) => r.is_correct).length / rows.length;
-  return avgConf - acc; // +: 과신 / −: 저신
-}
 
 // SVG 좌표계 — 500x500 plot area + 좌/하 labels 여유.
 const PLOT_SIZE = 500;
@@ -272,7 +199,7 @@ export default async function ReliabilityPage() {
   const db = getAdminClient();
   const { data, error } = await db
     .from('predictions')
-    .select('confidence, is_correct, verified_at')
+    .select('confidence, is_correct, verified_at, reasoning->homeWinProb')
     .not('verified_at', 'is', null)
     .not('is_correct', 'is', null)
     .order('verified_at', { ascending: true });
@@ -290,7 +217,7 @@ export default async function ReliabilityPage() {
   const n = rows.length;
   const correct = rows.filter((r) => r.is_correct).length;
   const overallAcc = n > 0 ? correct / n : 0;
-  const avgConf = n > 0 ? rows.reduce((s, r) => s + r.confidence, 0) / n : 0;
+  const avgConf = n > 0 ? rows.reduce((s, r) => s + resolveWinnerProb(r), 0) / n : 0;
   const gap = calibrationGap(rows);
   const brier = brierScore(rows);
 
