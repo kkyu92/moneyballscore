@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, ACCURACY_BASELINE, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { fetchStandings, type StandingRow } from "@moneyball/kbo-data";
 
@@ -37,10 +37,10 @@ interface PredRow {
 }
 
 interface BiasExtRow {
-  confidence: number | null;
+  predicted_winner: number | null;
   is_correct: boolean | null;
   game: {
-    home_team: { code: string | null } | null;
+    home_team: { id: number | null; code: string | null } | null;
     away_team: { code: string | null } | null;
   } | null;
 }
@@ -195,10 +195,10 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
       .from("predictions")
       .select(
         `
-        confidence,
+        predicted_winner,
         is_correct,
         game:games!predictions_game_id_fkey(
-          home_team:teams!games_home_team_id_fkey(code),
+          home_team:teams!games_home_team_id_fkey(id, code),
           away_team:teams!games_away_team_id_fkey(code)
         )
       `,
@@ -216,10 +216,11 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
   const byTeam = new Map<string, { totalN: number; predictedWinN: number; verifiedN: number; correctN: number }>();
 
   for (const row of rows) {
+    const homeId = row.game?.home_team?.id;
     const homeCode = row.game?.home_team?.code;
     const awayCode = row.game?.away_team?.code;
-    if (!homeCode || !awayCode) continue;
-    const predictedHomeWin = (row.confidence ?? ACCURACY_BASELINE) > ACCURACY_BASELINE;
+    if (!homeCode || !awayCode || homeId == null) continue;
+    const predictedHomeWin = row.predicted_winner === homeId;
     const hit = row.is_correct === true;
 
     for (const [code, isHome] of [[homeCode, true], [awayCode, false]] as [string, boolean][]) {
