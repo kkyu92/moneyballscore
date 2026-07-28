@@ -1,3 +1,16 @@
+## v0.5.62.11 — 2026-07-28 (cycle 2020, wave-612: 매치업 페이지 Elo 레이팅 추이 비교)
+
+### feat(analysis): wave-612 — /matchup/[teamA]/[teamB] 두 팀 Elo 레이팅 추이 비교 차트 (cycle 2020)
+
+**신규: 매치업 페이지에 두 팀 Elo 추이 비교선 차트**
+- `/teams/[code]` 는 이미 `TeamEloChart` (단일 팀 Elo 추이 + 리그 평균 점선) 를 갖고 있었지만, 매치업 페이지는 FactorCompare 에서 현재 시점 Elo 스냅샷 비교만 있고 "시즌 동안 두 팀 Elo 격차가 어떻게 변해왔는지" 추이는 없던 gap
+- `buildMatchupEloTrend.ts`: 신규 함수 `buildMatchupEloTrend(codeA, codeB)` — 기존 `buildEloTrend()` (standings, 전체 팀 Elo 시계열) 재사용, 신규 DB 조회 없음. 두 팀 코드만 추출해 `{date, eloA, eloB}` 매핑, 양쪽 다 없는 날짜만 스킵 (한쪽만 있으면 유지 — 대시보드 연속성)
+- `MatchupEloChart.tsx`: 신규 클라이언트 컴포넌트 — `TeamEloChart` 와 동일 recharts LineChart 패턴, 팀 컬러 2선 (connectNulls, 리그 평균선 없음 — 두 팀 비교가 핵심이라 제외)
+- `matchup/[teamA]/[teamB]/page.tsx`: `MatchupFactorCompare` 바로 뒤에 배치 (Elo 스냅샷 비교 다음 자연스럽게 추이 이어짐)
+- 테스트: `buildMatchupEloTrend.test.ts` 5 cases (빈 데이터/양쪽 있음/한쪽만 있음/양쪽 없음 스킵/에러 catch)
+
+---
+
 ## v0.5.62.10 — 2026-07-28 (cycle 2017, wave-611: 매치업 페이지 평균 득점 마진)
 
 ### feat(analysis): wave-611 — /matchup/[teamA]/[teamB] 맞대결 평균 득점 마진 (cycle 2017)

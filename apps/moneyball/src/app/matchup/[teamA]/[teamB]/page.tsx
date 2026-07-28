@@ -24,6 +24,7 @@ import {
 } from "@/lib/matchup/canonicalPair";
 import { buildMatchupProfile } from "@/lib/matchup/buildMatchupProfile";
 import { buildMatchupUpcoming } from "@/lib/matchup/buildMatchupUpcoming";
+import { buildMatchupEloTrend } from "@/lib/matchup/buildMatchupEloTrend";
 import { buildSeasonHeadToHead } from "@/lib/matchup/buildSeasonHeadToHead";
 import {
   buildTeamFactorAverages,
@@ -38,6 +39,7 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { MatchupFactorCompare } from "@/components/matchup/MatchupFactorCompare";
+import { MatchupEloChart } from "@/components/matchup/MatchupEloChart";
 import { MatchupRecentForm } from "@/components/matchup/MatchupRecentForm";
 import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 import { MatchupConvergencePickRecord } from "@/components/matchup/MatchupConvergencePickRecord";
@@ -90,7 +92,7 @@ export default async function MatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const [profile, factorA, factorB, formA, formB, upcomingMatchup, strongH2HStats, completeH2HStats] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, upcomingMatchup, strongH2HStats, completeH2HStats, eloTrend] = await Promise.all([
     buildMatchupProfile(pair),
     buildTeamFactorAverages(pair.codeA).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeA" })),
     buildTeamFactorAverages(pair.codeB).catch((err) => captureFallback(err, EMPTY_FACTOR_AVERAGES, { route: "/matchup/[teamA]/[teamB]", source: "buildTeamFactorAverages.codeB" })),
@@ -99,6 +101,7 @@ export default async function MatchupPage({ params }: PageProps) {
     buildMatchupUpcoming(pair).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupUpcoming" })),
     getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_STRONG).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(strong)" })),
     getConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, FACTOR_PICK_COMPLETE).catch((err) => captureFallback(err, [], { route: "/matchup/[teamA]/[teamB]", source: "getConvergencePickHeadToHeadRecord(complete)" })),
+    buildMatchupEloTrend(pair.codeA, pair.codeB).catch((err) => captureFallback(err, { points: [] }, { route: "/matchup/[teamA]/[teamB]", source: "buildMatchupEloTrend" })),
   ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
@@ -290,6 +293,25 @@ export default async function MatchupPage({ params }: PageProps) {
         factorA={factorA}
         factorB={factorB}
       />
+
+      {eloTrend.points.length > 0 && (
+        <section
+          aria-labelledby="matchup-elo-trend-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="matchup-elo-trend-title" className="text-lg font-bold mb-1">
+            Elo 레이팅 추이 비교
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            시즌 경기별 두 팀의 Elo 변화
+          </p>
+          <MatchupEloChart
+            points={eloTrend.points}
+            teamA={{ shortName: tA.shortName, color: tA.color }}
+            teamB={{ shortName: tB.shortName, color: tB.color }}
+          />
+        </section>
+      )}
 
       <MatchupRecentForm
         teamA={{ shortName: tA.shortName }}
