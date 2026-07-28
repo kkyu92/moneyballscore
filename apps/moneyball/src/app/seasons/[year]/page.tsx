@@ -3,10 +3,19 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT } from "@moneyball/shared";
 import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
-import { getRecentConvergencePickRecord, computeWinRatePct } from "@/lib/analysis/convergenceRecord";
+import {
+  getRecentConvergencePickRecord,
+  computeWinRatePct,
+  getConvergencePickHomeAwaySplit,
+  getConvergencePickDayOfWeekSplit,
+  getConvergencePickTeamStats,
+} from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { SeasonStandingsSortControl } from "@/components/seasons/SeasonStandingsSortControl";
+import { ConvergenceHomeAwayBadges } from "@/components/reviews/ConvergenceHomeAwayBadges";
+import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayOfWeekBadges";
+import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
 
 // 진행 중인 시즌은 경기가 매일 추가되므로 10분마다 최신화, 종료 시즌은 1시간.
 // Next.js ISR 은 path별 다른 revalidate 를 동적으로 주지 못해 10분 (진행 시즌 기준)
@@ -67,9 +76,26 @@ export default async function SeasonPage({ params }: PageProps) {
 
   const seasonStartDate = `${y}-04-01`;
   const seasonEndDate = summary.isOngoing ? undefined : `${y}-11-30`;
-  const [strongConvergenceRecord, completeConvergenceRecord] = await Promise.all([
+  // wave-605: 수렴 픽 시즌 홈/어웨이·요일별·팀별 분리 성적 (monthly wave-600/602/603 재사용, 시즌 범위 한정 —
+  // /seasons/[year] 에만 없던 gap. 순수 함수/컴포넌트 변경 없음, startDate/endDate 파라미터 그대로 재사용)
+  const [
+    strongConvergenceRecord,
+    completeConvergenceRecord,
+    strongHomeAwaySplit,
+    completeHomeAwaySplit,
+    strongDayOfWeekSplit,
+    completeDayOfWeekSplit,
+    strongTeamStats,
+    completeTeamStats,
+  ] = await Promise.all([
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_ALL_LIMIT, FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+    getConvergencePickHomeAwaySplit(FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getConvergencePickHomeAwaySplit(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+    getConvergencePickDayOfWeekSplit(FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getConvergencePickDayOfWeekSplit(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
+    getConvergencePickTeamStats(FACTOR_PICK_STRONG, seasonStartDate, seasonEndDate),
+    getConvergencePickTeamStats(FACTOR_PICK_COMPLETE, seasonStartDate, seasonEndDate),
   ]);
 
   // 월별 차트 max 계산 (bar 폭 정규화)
@@ -190,6 +216,23 @@ export default async function SeasonPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      {/* wave-605: 수렴 픽 시즌 홈/어웨이·요일별·팀별 분리 성적 배지 (monthly wave-600/602/603 재사용) */}
+      <ConvergenceHomeAwayBadges
+        titleId="season-home-away-title"
+        strongSplit={strongHomeAwaySplit}
+        completeSplit={completeHomeAwaySplit}
+      />
+      <ConvergenceDayOfWeekBadges
+        titleId="season-day-of-week-title"
+        strongSplit={strongDayOfWeekSplit}
+        completeSplit={completeDayOfWeekSplit}
+      />
+      <ConvergenceTeamStatsBadges
+        titleId="season-team-stats-title"
+        strongTeamStats={strongTeamStats}
+        completeTeamStats={completeTeamStats}
+      />
 
       {/* 팀 순위 */}
       <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
