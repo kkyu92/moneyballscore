@@ -70,6 +70,7 @@ export interface MatchupProfile {
   streak: MatchupStreak | null;
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
+  blowout: MatchupBlowoutStats | null;
   summary: string;
 }
 
@@ -208,6 +209,36 @@ export function computeMatchupAvgMargin(
   return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
 }
 
+/** 콜드게임(대량 득점차) 판정 기준 — |home-away| 10점 이상 */
+const MATCHUP_BLOWOUT_MARGIN = 10;
+/** 콜드게임 횟수 최소 표본 — 1~2경기 중 콜드게임 유무는 "이 맞대결 성향"이라 부르기 애매해 배제 */
+const MATCHUP_BLOWOUT_MIN_GAMES = 3;
+
+export interface MatchupBlowoutStats {
+  count: number;
+  sampleSize: number;
+}
+
+/**
+ * 두 팀 맞대결 중 콜드게임(|home-away| >= MATCHUP_BLOWOUT_MARGIN) 횟수.
+ * computeMatchupAvgMargin 과 동일하게 games 배열만 재사용 (신규 DB 조회 없음).
+ * "평균 득점차"는 있었지만 "몇 번이나 크게 벌어졌는지" 빈도는 없던 gap.
+ */
+export function computeMatchupBlowoutCount(
+  games: MatchupGame[],
+): MatchupBlowoutStats | null {
+  const finals = games.filter(
+    (g) => g.status === "final" && g.homeScore != null && g.awayScore != null,
+  );
+  if (finals.length < MATCHUP_BLOWOUT_MIN_GAMES) return null;
+
+  const count = finals.filter(
+    (g) => Math.abs((g.homeScore as number) - (g.awayScore as number)) >= MATCHUP_BLOWOUT_MARGIN,
+  ).length;
+
+  return { count, sampleSize: finals.length };
+}
+
 function buildSummary(profile: {
   teamA: MatchupProfile["teamA"];
   teamB: MatchupProfile["teamB"];
@@ -217,6 +248,7 @@ function buildSummary(profile: {
   streak: MatchupStreak | null;
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
+  blowout: MatchupBlowoutStats | null;
 }): string {
   const {
     teamA,
@@ -227,6 +259,7 @@ function buildSummary(profile: {
     streak,
     avgMargin,
     recentRecord,
+    blowout,
   } = profile;
 
   if (finalGames === 0) {
@@ -273,6 +306,12 @@ function buildSummary(profile: {
   if (recentRecord && finalGames > recentRecord.sampleSize) {
     const { aWins, bWins, sampleSize } = recentRecord;
     text += ` 최근 ${sampleSize}경기 맞대결에서는 ${teamA.shortName} ${aWins}승, ${teamB.shortName} ${bWins}승입니다.`;
+  }
+
+  // 콜드게임 빈도 — 0건이면 "대량 득점차 없이 팽팽했다"는 의미 자체는 있으나
+  // avgMargin 문장과 중복 인상을 줘 count > 0 일 때만 언급
+  if (blowout && blowout.count > 0) {
+    text += ` 이 중 ${blowout.count}경기는 ${MATCHUP_BLOWOUT_MARGIN}점차 이상 콜드게임이었습니다.`;
   }
 
   return text;
@@ -340,6 +379,7 @@ export async function buildMatchupProfile(
       streak: null,
       avgMargin: null,
       recentRecord: null,
+      blowout: null,
       summary: buildSummary({
         teamA,
         teamB,
@@ -352,6 +392,7 @@ export async function buildMatchupProfile(
         streak: null,
         avgMargin: null,
         recentRecord: null,
+        blowout: null,
       }),
     };
   }
@@ -520,6 +561,7 @@ export async function buildMatchupProfile(
   const streak = computeMatchupStreak(games);
   const avgMargin = computeMatchupAvgMargin(games);
   const recentRecord = computeMatchupRecentRecord(games, teamA.code, teamB.code);
+  const blowout = computeMatchupBlowoutCount(games);
   const summary = buildSummary({
     teamA,
     teamB,
@@ -529,6 +571,7 @@ export async function buildMatchupProfile(
     streak,
     avgMargin,
     recentRecord,
+    blowout,
   });
 
   return {
@@ -543,6 +586,7 @@ export async function buildMatchupProfile(
     streak,
     avgMargin,
     recentRecord,
+    blowout,
     summary,
   };
 }

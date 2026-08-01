@@ -1,3 +1,15 @@
+## v0.5.62.13 — 2026-08-01 (cycle 2024, wave-614: 매치업 페이지 콜드게임 횟수)
+
+### feat(analysis): wave-614 — /matchup/[teamA]/[teamB] 콜드게임(대량 득점차) 횟수 (cycle 2024)
+
+**신규: 매치업 요약 문장에 "콜드게임 몇 번" 빈도**
+- 매치업 페이지에 평균 득점차(wave-611)는 있었지만 "몇 번이나 크게 벌어졌는지" 빈도는 없던 gap — 평균은 이상치에 묻혀 "가끔 크게 터지는 맞대결"인지 "항상 비슷하게 갈리는 맞대결"인지 구분이 안 됨
+- `buildMatchupProfile.ts`: 신규 순수 함수 `computeMatchupBlowoutCount(games)` — `buildMatchupProfile` 이 이미 조회한 games 배열만으로 계산, 신규 DB 조회 없음. `status==='final'` + 점수 non-null 필터 후 `|home-away| >= 10`(콜드게임 기준) 경기 수 카운트, 최소 3경기 미만 표본은 null (avgMargin/recentRecord 보다 약간 높은 기준 — "빈도"는 표본이 너무 적으면 오해 소지)
+- `buildSummary()`: `blowout.count > 0` 일 때만 문장 추가 (0건이면 언급 자체가 노이즈라 skip, 기존 avgMargin 문장 뒤에 배치)
+- 테스트: `wave-614-matchup-blowout-count.test.ts` 7 cases (표본 부족/점수 null 제외/경계값 10점/홈원정 무관 절대값/final 필터/count=0 처리)
+
+---
+
 ## v0.5.62.12 — 2026-08-01 (cycle 2021, wave-613: 매치업 페이지 최근 N경기 상대전적)
 
 ### feat(analysis): wave-613 — /matchup/[teamA]/[teamB] 최근 5경기 한정 상대전적 (cycle 2021)
