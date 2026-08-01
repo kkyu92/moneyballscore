@@ -4,6 +4,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { getLatestLottoPicks, getLatestLottoResult, ballColor, type LottoSet, type LottoResult } from "@/lib/lotto/picks-loader";
 import { LOTTO_TOP_PICK_COUNT, LOTTO_PICK_COUNT, LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
+import { CopyAllButton } from "./CopyAllButton";
 
 export const dynamic = "force-static";
 export const revalidate = 3600; // LOTTO_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -328,7 +329,10 @@ export default function LottoHubPage() {
 
       {/* 전체 N조합 collapse */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">전체 {totalCount}조합</h2>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="text-lg font-bold">전체 {totalCount}조합</h2>
+          <CopyAllButton sets={picks.sets} />
+        </div>
         <details className="rounded-xl border border-gray-200 dark:border-gray-700">
           <summary className="cursor-pointer px-4 py-3 font-medium text-sm select-none hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl">
             전체 {totalCount}조합 보기 (클릭해서 열기)
