@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared';
+import type { TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
   playerId: number;
@@ -20,14 +21,6 @@ export interface TeamRecentGame {
   ourScore: number | null;
   opponentScore: number | null;
   status: string | null;
-}
-
-export interface TeamFactorAverages {
-  spFip: number | null;
-  lineupWoba: number | null;
-  bullpenFip: number | null;
-  recentForm: number | null;
-  elo: number | null;
 }
 
 export interface TeamProfile {
@@ -127,6 +120,7 @@ export async function buildTeamProfile(
         bullpenFip: null,
         recentForm: null,
         elo: null,
+        sampleN: 0,
       },
       topPitchers: [],
       recentGames: [],
@@ -365,6 +359,7 @@ export async function buildTeamProfile(
       bullpenFip: safeAvg(bullpenSum, bullpenN),
       recentForm: safeAvg(formSum, formN),
       elo: safeAvg(eloSum, eloN),
+      sampleN: predictedGames,
     },
     topPitchers,
     recentGames,

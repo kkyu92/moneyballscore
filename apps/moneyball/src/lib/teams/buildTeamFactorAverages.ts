@@ -43,8 +43,9 @@ export const EMPTY_FACTOR_AVERAGES: TeamFactorAverages = {
 
 /**
  * 팀 시즌 평균 팩터값 (선발 FIP / 타선 wOBA / 불펜 FIP / 최근 폼 / Elo).
- * buildTeamProfile 의 factorAverages 부분을 별도 함수로 추출 — 매치업 페이지에서
- * 두 팀 비교용으로 재사용.
+ * 매치업 페이지 두 팀 비교 전용 — 별도 쿼리로 팩터 평균만 가볍게 조회.
+ * buildTeamProfile.ts 도 동일 5팩터 평균을 자체 계산하지만 (topPitchers/recentGames
+ * 와 같은 쿼리에서 함께 뽑아내야 해서) 별개 구현 유지 — TeamFactorAverages 타입만 공유.
  */
 export async function buildTeamFactorAverages(
   teamCode: TeamCode,
