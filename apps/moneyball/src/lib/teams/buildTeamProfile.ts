@@ -193,6 +193,8 @@ interface PredRow {
   predicted_winner: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
+  home_sp_xfip: number | null;
+  away_sp_xfip: number | null;
   home_lineup_woba: number | null;
   away_lineup_woba: number | null;
   home_bullpen_fip: number | null;
@@ -201,6 +203,10 @@ interface PredRow {
   away_recent_form: number | null;
   home_elo: number | null;
   away_elo: number | null;
+  home_sfr: number | null;
+  away_sfr: number | null;
+  home_war_total: number | null;
+  away_war_total: number | null;
   game: {
     id: number;
     game_date: string;
@@ -261,10 +267,13 @@ export async function buildTeamProfile(
       accuracyRate: null,
       factorAverages: {
         spFip: null,
+        spXfip: null,
         lineupWoba: null,
         bullpenFip: null,
         recentForm: null,
         elo: null,
+        sfr: null,
+        warTotal: null,
         sampleN: 0,
       },
       topPitchers: [],
@@ -297,10 +306,13 @@ export async function buildTeamProfile(
         predictions!inner(
           confidence, is_correct, predicted_winner,
           home_sp_fip, away_sp_fip,
+          home_sp_xfip, away_sp_xfip,
           home_lineup_woba, away_lineup_woba,
           home_bullpen_fip, away_bullpen_fip,
           home_recent_form, away_recent_form,
           home_elo, away_elo,
+          home_sfr, away_sfr,
+          home_war_total, away_war_total,
           prediction_type
         )
       `,
@@ -317,6 +329,8 @@ export async function buildTeamProfile(
       predicted_winner: number | null;
       home_sp_fip: number | null;
       away_sp_fip: number | null;
+      home_sp_xfip: number | null;
+      away_sp_xfip: number | null;
       home_lineup_woba: number | null;
       away_lineup_woba: number | null;
       home_bullpen_fip: number | null;
@@ -325,6 +339,10 @@ export async function buildTeamProfile(
       away_recent_form: number | null;
       home_elo: number | null;
       away_elo: number | null;
+      home_sfr: number | null;
+      away_sfr: number | null;
+      home_war_total: number | null;
+      away_war_total: number | null;
     }>;
   };
 
@@ -340,6 +358,8 @@ export async function buildTeamProfile(
       predicted_winner: pred.predicted_winner,
       home_sp_fip: pred.home_sp_fip,
       away_sp_fip: pred.away_sp_fip,
+      home_sp_xfip: pred.home_sp_xfip,
+      away_sp_xfip: pred.away_sp_xfip,
       home_lineup_woba: pred.home_lineup_woba,
       away_lineup_woba: pred.away_lineup_woba,
       home_bullpen_fip: pred.home_bullpen_fip,
@@ -348,6 +368,10 @@ export async function buildTeamProfile(
       away_recent_form: pred.away_recent_form,
       home_elo: pred.home_elo,
       away_elo: pred.away_elo,
+      home_sfr: pred.home_sfr,
+      away_sfr: pred.away_sfr,
+      home_war_total: pred.home_war_total,
+      away_war_total: pred.away_war_total,
       game: {
         id: g.id,
         game_date: g.game_date,
@@ -373,6 +397,8 @@ export async function buildTeamProfile(
 
   let spFipSum = 0;
   let spFipN = 0;
+  let spXfipSum = 0;
+  let spXfipN = 0;
   let wobaSum = 0;
   let wobaN = 0;
   let bullpenSum = 0;
@@ -381,6 +407,10 @@ export async function buildTeamProfile(
   let formN = 0;
   let eloSum = 0;
   let eloN = 0;
+  let sfrSum = 0;
+  let sfrN = 0;
+  let warSum = 0;
+  let warN = 0;
 
   const pitcherAcc = new Map<
     number,
@@ -399,14 +429,21 @@ export async function buildTeamProfile(
     predictedGames += 1;
 
     const spFip = isHome ? r.home_sp_fip : r.away_sp_fip;
+    const spXfip = isHome ? r.home_sp_xfip : r.away_sp_xfip;
     const woba = isHome ? r.home_lineup_woba : r.away_lineup_woba;
     const bullpen = isHome ? r.home_bullpen_fip : r.away_bullpen_fip;
     const form = isHome ? r.home_recent_form : r.away_recent_form;
     const elo = isHome ? r.home_elo : r.away_elo;
+    const sfr = isHome ? r.home_sfr : r.away_sfr;
+    const war = isHome ? r.home_war_total : r.away_war_total;
 
     if (spFip != null) {
       spFipSum += spFip;
       spFipN += 1;
+    }
+    if (spXfip != null) {
+      spXfipSum += spXfip;
+      spXfipN += 1;
     }
     if (woba != null) {
       wobaSum += woba;
@@ -423,6 +460,14 @@ export async function buildTeamProfile(
     if (elo != null) {
       eloSum += elo;
       eloN += 1;
+    }
+    if (sfr != null) {
+      sfrSum += sfr;
+      sfrN += 1;
+    }
+    if (war != null) {
+      warSum += war;
+      warN += 1;
     }
 
     const predictedThisTeam =
@@ -508,10 +553,13 @@ export async function buildTeamProfile(
     accuracyRate: verifiedN > 0 ? correctN / verifiedN : null,
     factorAverages: {
       spFip: safeAvg(spFipSum, spFipN),
+      spXfip: safeAvg(spXfipSum, spXfipN),
       lineupWoba: safeAvg(wobaSum, wobaN),
       bullpenFip: safeAvg(bullpenSum, bullpenN),
       recentForm: safeAvg(formSum, formN),
       elo: safeAvg(eloSum, eloN),
+      sfr: safeAvg(sfrSum, sfrN),
+      warTotal: safeAvg(warSum, warN),
       sampleN: predictedGames,
     },
     topPitchers,

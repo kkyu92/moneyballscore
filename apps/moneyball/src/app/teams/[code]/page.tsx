@@ -56,6 +56,10 @@ function fmtElo(v: number | null): string {
   return v != null ? v.toFixed(0) : "-";
 }
 
+function fmtDecimal1(v: number | null): string {
+  return v != null ? v.toFixed(1) : "-";
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -237,13 +241,21 @@ export default async function TeamPage({ params }: PageProps) {
         <h2 id="team-factors-title" className="text-lg font-bold mb-3">
           시즌 평균 팩터값
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-sm">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {FACTOR_LABELS_TECHNICAL.sp_fip}
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtFip(profile.factorAverages.spFip)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {FACTOR_LABELS_TECHNICAL.sp_xfip}
+            </p>
+            <p className="font-mono font-semibold mt-1">
+              {fmtFip(profile.factorAverages.spXfip)}
             </p>
           </div>
           <div>
@@ -276,6 +288,22 @@ export default async function TeamPage({ params }: PageProps) {
             </p>
             <p className="font-mono font-semibold mt-1">
               {fmtElo(profile.factorAverages.elo)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {FACTOR_LABELS_TECHNICAL.sfr}
+            </p>
+            <p className="font-mono font-semibold mt-1">
+              {fmtDecimal1(profile.factorAverages.sfr)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {FACTOR_LABELS_TECHNICAL.war}
+            </p>
+            <p className="font-mono font-semibold mt-1">
+              {fmtDecimal1(profile.factorAverages.warTotal)}
             </p>
           </div>
         </div>
