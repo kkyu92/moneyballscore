@@ -3,6 +3,7 @@ import {
   KBO_TEAMS,
   assertSelectOk,
   computeAvgMarginFromFinalGames,
+  computeMarginCountFromFinalGames,
   josa,
   ro,
   shortTeamName,
@@ -225,20 +226,20 @@ export interface MatchupBlowoutStats {
  * 두 팀 맞대결 중 콜드게임(|home-away| >= MATCHUP_BLOWOUT_MARGIN) 횟수.
  * computeMatchupAvgMargin 과 동일하게 games 배열만 재사용 (신규 DB 조회 없음).
  * "평균 득점차"는 있었지만 "몇 번이나 크게 벌어졌는지" 빈도는 없던 gap.
+ * 계산 로직 자체는 packages/shared 단일 source (computeMarginCountFromFinalGames) —
+ * cycle 2036 review-code heavy, buildTeamProfile.computeTeamBlowoutCount 과 독립 중복 통합.
  */
 export function computeMatchupBlowoutCount(
   games: MatchupGame[],
 ): MatchupBlowoutStats | null {
-  const finals = games.filter(
-    (g) => g.status === "final" && g.homeScore != null && g.awayScore != null,
+  return computeMarginCountFromFinalGames(
+    games,
+    (g) => g.status === "final",
+    (g) => g.homeScore,
+    (g) => g.awayScore,
+    (margin) => margin >= MATCHUP_BLOWOUT_MARGIN,
+    MATCHUP_BLOWOUT_MIN_GAMES,
   );
-  if (finals.length < MATCHUP_BLOWOUT_MIN_GAMES) return null;
-
-  const count = finals.filter(
-    (g) => Math.abs((g.homeScore as number) - (g.awayScore as number)) >= MATCHUP_BLOWOUT_MARGIN,
-  ).length;
-
-  return { count, sampleSize: finals.length };
 }
 
 /** 박빙 승부(한 점차) 판정 기준 — |home-away| == 1 */
@@ -255,20 +256,20 @@ export interface MatchupCloseGameStats {
  * 두 팀 맞대결 중 박빙 승부(|home-away| === MATCHUP_CLOSE_GAME_MARGIN) 횟수.
  * computeMatchupBlowoutCount 의 대칭 지표 — "큰 점수차" 빈도는 있었지만
  * "얼마나 팽팽했는지" 빈도는 없던 gap. games 배열만 재사용 (신규 DB 조회 없음).
+ * 계산 로직 자체는 packages/shared 단일 source (computeMarginCountFromFinalGames) —
+ * cycle 2036 review-code heavy, buildTeamProfile.computeTeamCloseGameCount 과 독립 중복 통합.
  */
 export function computeMatchupCloseGameCount(
   games: MatchupGame[],
 ): MatchupCloseGameStats | null {
-  const finals = games.filter(
-    (g) => g.status === "final" && g.homeScore != null && g.awayScore != null,
+  return computeMarginCountFromFinalGames(
+    games,
+    (g) => g.status === "final",
+    (g) => g.homeScore,
+    (g) => g.awayScore,
+    (margin) => margin === MATCHUP_CLOSE_GAME_MARGIN,
+    MATCHUP_CLOSE_GAME_MIN_GAMES,
   );
-  if (finals.length < MATCHUP_CLOSE_GAME_MIN_GAMES) return null;
-
-  const count = finals.filter(
-    (g) => Math.abs((g.homeScore as number) - (g.awayScore as number)) === MATCHUP_CLOSE_GAME_MARGIN,
-  ).length;
-
-  return { count, sampleSize: finals.length };
 }
 
 /** 맞대결 홈/원정 편중 판정 — 벤뉴(홈/원정)당 최소 표본 (avgMargin 과 동일 기준선) */

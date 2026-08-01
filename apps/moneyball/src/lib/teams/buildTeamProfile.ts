@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames } from '@moneyball/shared';
 import type { TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -87,21 +87,21 @@ export interface TeamBlowoutStats {
  * 이 팀이 시즌 전체에서 콜드게임(|자팀-상대| >= TEAM_BLOWOUT_MARGIN) 을 겪은 횟수.
  * buildMatchupProfile 의 computeMatchupBlowoutCount 는 두 팀 맞대결 한정 —
  * "이 팀이 모든 상대 포함 시즌 전체에서" 몇 번이나 콜드게임을 겪었는지는 없던 gap.
- * teamGames 배열만 재사용 (신규 DB 조회 없음).
+ * teamGames 배열만 재사용 (신규 DB 조회 없음). 계산 로직 자체는 packages/shared 단일 source
+ * (computeMarginCountFromFinalGames) — cycle 2036 review-code heavy, matchup 쪽
+ * computeMatchupBlowoutCount 과 독립 중복 통합.
  */
 export function computeTeamBlowoutCount(
   games: TeamRecentGame[],
 ): TeamBlowoutStats | null {
-  const finals = games.filter(
-    (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
+  return computeMarginCountFromFinalGames(
+    games,
+    (g) => g.status === "final",
+    (g) => g.ourScore,
+    (g) => g.opponentScore,
+    (margin) => margin >= TEAM_BLOWOUT_MARGIN,
+    TEAM_BLOWOUT_MIN_GAMES,
   );
-  if (finals.length < TEAM_BLOWOUT_MIN_GAMES) return null;
-
-  const count = finals.filter(
-    (g) => Math.abs((g.ourScore as number) - (g.opponentScore as number)) >= TEAM_BLOWOUT_MARGIN,
-  ).length;
-
-  return { count, sampleSize: finals.length };
 }
 
 /** 박빙 승부(한 점차) 판정 기준 — matchup computeMatchupCloseGameCount 과 동일 |자팀-상대| == 1 */
@@ -117,20 +117,20 @@ export interface TeamCloseGameStats {
 /**
  * 이 팀이 시즌 전체에서 박빙 승부(|자팀-상대| === TEAM_CLOSE_GAME_MARGIN) 를 겪은 횟수.
  * computeTeamBlowoutCount 의 대칭 지표 — teamGames 배열만 재사용 (신규 DB 조회 없음).
+ * 계산 로직 자체는 packages/shared 단일 source (computeMarginCountFromFinalGames) —
+ * cycle 2036 review-code heavy, matchup 쪽 computeMatchupCloseGameCount 과 독립 중복 통합.
  */
 export function computeTeamCloseGameCount(
   games: TeamRecentGame[],
 ): TeamCloseGameStats | null {
-  const finals = games.filter(
-    (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
+  return computeMarginCountFromFinalGames(
+    games,
+    (g) => g.status === "final",
+    (g) => g.ourScore,
+    (g) => g.opponentScore,
+    (margin) => margin === TEAM_CLOSE_GAME_MARGIN,
+    TEAM_CLOSE_GAME_MIN_GAMES,
   );
-  if (finals.length < TEAM_CLOSE_GAME_MIN_GAMES) return null;
-
-  const count = finals.filter(
-    (g) => Math.abs((g.ourScore as number) - (g.opponentScore as number)) === TEAM_CLOSE_GAME_MARGIN,
-  ).length;
-
-  return { count, sampleSize: finals.length };
 }
 
 interface PredRow {
