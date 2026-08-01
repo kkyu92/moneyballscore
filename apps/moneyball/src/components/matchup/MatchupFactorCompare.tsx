@@ -14,7 +14,14 @@ interface Props {
 interface FactorRow {
   key: keyof Pick<
     TeamFactorAverages,
-    "spFip" | "lineupWoba" | "bullpenFip" | "recentForm" | "elo"
+    | "spFip"
+    | "spXfip"
+    | "lineupWoba"
+    | "bullpenFip"
+    | "recentForm"
+    | "elo"
+    | "sfr"
+    | "warTotal"
   >;
   /** MetricRegistry slug — label 단일 source */
   slug: MetricSlug;
@@ -36,6 +43,15 @@ const FACTORS: FactorRow[] = [
     hint:
       "FIP — Fielding Independent Pitching. 선발투수가 직접 통제할 수 있는 결과(삼진·볼넷·홈런)만 본 평균자책점 지표. 낮을수록 우세.",
     glossarySlug: "fip",
+  },
+  {
+    key: "spXfip",
+    slug: "sp_xfip",
+    direction: "lower",
+    format: (v) => v.toFixed(2),
+    hint:
+      "xFIP — HR/FB 를 리그 평균으로 정규화한 FIP. 운 요소를 제거한 선발투수 잠재력. 낮을수록 우세.",
+    glossarySlug: "xfip",
   },
   {
     key: "lineupWoba",
@@ -71,6 +87,24 @@ const FACTORS: FactorRow[] = [
     hint:
       "Elo — 체스에서 유래한 상대평가 레이팅. KBO Fancy Stats 기준. 높을수록 강팀.",
     glossarySlug: "elo",
+  },
+  {
+    key: "sfr",
+    slug: "sfr",
+    direction: "higher",
+    format: (v) => v.toFixed(1),
+    hint:
+      "수비 SFR — 수비 능력(Shifts/Fielding Runs) 시즌 누적. 양수 = 평균 이상 수비. 높을수록 우세.",
+    glossarySlug: "sfr",
+  },
+  {
+    key: "warTotal",
+    slug: "war",
+    direction: "higher",
+    format: (v) => v.toFixed(1),
+    hint:
+      "팀 WAR — 대체선수 대비 팀 승리 기여도(선발+타선) 시즌 누적. 높을수록 우세.",
+    glossarySlug: "war",
   },
 ];
 

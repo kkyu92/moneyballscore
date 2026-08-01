@@ -85,6 +85,8 @@ describe("buildTeamFactorAverages", () => {
         {
           home_sp_fip: 3.0,
           away_sp_fip: 5.0,
+          home_sp_xfip: 3.2,
+          away_sp_xfip: 5.1,
           home_lineup_woba: 0.350,
           away_lineup_woba: 0.300,
           home_bullpen_fip: 4.0,
@@ -93,6 +95,10 @@ describe("buildTeamFactorAverages", () => {
           away_recent_form: 0.4,
           home_elo: 1550,
           away_elo: 1480,
+          home_sfr: 5.0,
+          away_sfr: -2.0,
+          home_war_total: 12.0,
+          away_war_total: 8.0,
           prediction_type: "pre_game",
           game: { home_team_id: HT_ID, away_team_id: 99 },
         },
@@ -100,6 +106,8 @@ describe("buildTeamFactorAverages", () => {
         {
           home_sp_fip: 4.0,
           away_sp_fip: 3.5,
+          home_sp_xfip: 4.1,
+          away_sp_xfip: 3.7,
           home_lineup_woba: 0.310,
           away_lineup_woba: 0.340,
           home_bullpen_fip: 4.2,
@@ -108,6 +116,10 @@ describe("buildTeamFactorAverages", () => {
           away_recent_form: 0.6,
           home_elo: 1500,
           away_elo: 1530,
+          home_sfr: 1.0,
+          away_sfr: 3.0,
+          home_war_total: 10.0,
+          away_war_total: 14.0,
           prediction_type: "pre_game",
           game: { home_team_id: 99, away_team_id: HT_ID },
         },
@@ -120,11 +132,15 @@ describe("buildTeamFactorAverages", () => {
     expect(avg.sampleN).toBe(2);
     // home: 3.0, away: 3.5 → avg 3.25
     expect(avg.spFip).toBeCloseTo(3.25, 5);
+    // home: 3.2, away: 3.7 → avg 3.45
+    expect(avg.spXfip).toBeCloseTo(3.45, 5);
     // home: 0.350, away: 0.340 → avg 0.345
     expect(avg.lineupWoba).toBeCloseTo(0.345, 5);
     expect(avg.bullpenFip).toBeCloseTo(3.9, 5); // 4.0+3.8 / 2
     expect(avg.recentForm).toBeCloseTo(0.65, 5); // 0.7+0.6 / 2
     expect(avg.elo).toBeCloseTo(1540, 5); // 1550+1530 / 2
+    expect(avg.sfr).toBeCloseTo(4.0, 5); // home:5.0, away:3.0 → avg 4.0
+    expect(avg.warTotal).toBeCloseTo(13.0, 5); // home:12.0, away:14.0 → avg 13.0
   });
 
   it("null 팩터 값 — sampleN 은 카운트하되 평균 계산엔 제외", async () => {
@@ -134,6 +150,8 @@ describe("buildTeamFactorAverages", () => {
         {
           home_sp_fip: 3.0,
           away_sp_fip: 5.0,
+          home_sp_xfip: null,
+          away_sp_xfip: null,
           home_lineup_woba: null,
           away_lineup_woba: null,
           home_bullpen_fip: null,
@@ -142,6 +160,10 @@ describe("buildTeamFactorAverages", () => {
           away_recent_form: null,
           home_elo: 1500,
           away_elo: null,
+          home_sfr: null,
+          away_sfr: null,
+          home_war_total: null,
+          away_war_total: null,
           prediction_type: "pre_game",
           game: { home_team_id: HT_ID, away_team_id: 99 },
         },
@@ -153,9 +175,12 @@ describe("buildTeamFactorAverages", () => {
 
     expect(avg.sampleN).toBe(1);
     expect(avg.spFip).toBe(3.0);
+    expect(avg.spXfip).toBeNull();
     expect(avg.lineupWoba).toBeNull();
     expect(avg.bullpenFip).toBeNull();
     expect(avg.recentForm).toBeNull();
     expect(avg.elo).toBe(1500);
+    expect(avg.sfr).toBeNull();
+    expect(avg.warTotal).toBeNull();
   });
 });
