@@ -2380,6 +2380,18 @@ export const RECENT10_HOT_WINS = 7;
 export const RECENT10_COLD_WINS = 3;
 
 /**
+ * KBO 순위표 recent10 문자열 ("7승3패") → {wins, losses} 파싱 — single source.
+ * apps/moneyball analysis/page.tsx + standings/page.tsx 양쪽에 동일 정규식이 독립 중복돼있던 것 통합
+ * (cycle 2032 review-code heavy). 승/패 둘 다 매칭 안 되면 null (malformed source, 표시측이 fallback 처리).
+ */
+export function parseRecent10Record(text: string): { wins: number; losses: number } | null {
+  const wm = text.match(/(\d+)승/);
+  const lm = text.match(/(\d+)패/);
+  if (!wm || !lm) return null;
+  return { wins: parseInt(wm[1], 10), losses: parseInt(lm[1], 10) };
+}
+
+/**
  * wave-333: 상대전적 배지 — 최소 과거 대결 수 (미만 시 배지 숨김).
  * wave-515: analysis/page.tsx 오늘 AI 예측 카드 H2H 직접 대결 배지 callsite 추가 (cycle 1883).
  * wave-519: analysis/page.tsx 이번 주 남은 경기 카드 H2H 직접 대결 배지 callsite 추가 (cycle 1889).

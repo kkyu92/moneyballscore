@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -44,10 +44,7 @@ function formatGB(gb: number | null): string {
 }
 
 function Recent10({ text }: { text: string }) {
-  const wm = text.match(/(\d+)승/);
-  const lm = text.match(/(\d+)패/);
-  const wins = wm ? parseInt(wm[1], 10) : 0;
-  const losses = lm ? parseInt(lm[1], 10) : 0;
+  const { wins, losses } = parseRecent10Record(text) ?? { wins: 0, losses: 0 };
   return (
     <span className="tabular-nums text-xs font-mono">
       <span className="text-brand-600 dark:text-brand-400">{wins}승</span>
