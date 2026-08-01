@@ -47,16 +47,18 @@ for n in $(seq "$FROM_CYCLE" "$TO_CYCLE"); do
   HAS_JSON=0
   HAS_COMMIT=0
   [ -f "$CYCLES_DIR/$n.json" ] && HAS_JSON=1
-  if git log --all --oneline --grep="policy: cycle $n " 2>/dev/null | head -1 | grep -q .; then
+  # commit 컨벤션 2회 변경 이력: "policy: cycle N retro —" (구) → "policy: cycle-retro N —" (신)
+  # 구 패턴만 매칭하던 grep 이 컨벤션 변경 후 100% false positive 유발 (본 스크립트 자체가 사례 15 재발 대상이 됨)
+  if git log --all --oneline -E --grep="policy: cycle-retro $n[[:space:]]|policy: cycle $n retro" 2>/dev/null | head -1 | grep -q .; then
     HAS_COMMIT=1
   fi
 
   if [ $HAS_JSON -eq 0 ] && [ $HAS_COMMIT -eq 0 ]; then
     DRIFT_CYCLES+=("$n")
   elif [ $HAS_JSON -eq 1 ] && [ $HAS_COMMIT -eq 0 ]; then
-    COMMIT_ONLY+=("$n")
-  elif [ $HAS_JSON -eq 0 ] && [ $HAS_COMMIT -eq 1 ]; then
     JSON_ONLY+=("$n")
+  elif [ $HAS_JSON -eq 0 ] && [ $HAS_COMMIT -eq 1 ]; then
+    COMMIT_ONLY+=("$n")
   fi
 done
 
