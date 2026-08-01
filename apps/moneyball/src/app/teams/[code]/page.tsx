@@ -467,6 +467,12 @@ export default async function TeamPage({ params }: PageProps) {
                 `박빙 승부(1점차) ${profile.closeGame.count}회 (${profile.closeGame.sampleSize}경기 중)`}
             </p>
           ) : null}
+          {profile.homeAwayEdge && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              홈/원정 성적 편차 — 홈 {profile.homeAwayEdge.homeWins}승/{profile.homeAwayEdge.homeGames}경기,
+              원정 {profile.homeAwayEdge.awayWins}승/{profile.homeAwayEdge.awayGames}경기로 차이가 뚜렷합니다
+            </p>
+          )}
           <TeamRecentGamesFilter counts={filterCounts} />
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">

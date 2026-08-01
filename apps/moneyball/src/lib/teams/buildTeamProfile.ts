@@ -43,6 +43,7 @@ export interface TeamProfile {
   avgMargin: TeamAvgMargin | null;
   blowout: TeamBlowoutStats | null;
   closeGame: TeamCloseGameStats | null;
+  homeAwayEdge: TeamHomeAwaySplit | null;
 }
 
 /** 팀 시즌 평균 득점 마진 최소 표본 — matchup computeMatchupAvgMargin 과 동일 기준 */
@@ -133,6 +134,59 @@ export function computeTeamCloseGameCount(
   );
 }
 
+/** 팀 홈/원정 승률 편차 최소 표본 (벤뉴별) — matchup computeMatchupHomeAwayEdge 과 동일 기준 */
+const TEAM_HOME_AWAY_MIN_GAMES_PER_VENUE = 2;
+/** 편차 최소 격차(%p) — matchup computeMatchupHomeAwayEdge 과 동일 기준 */
+const TEAM_HOME_AWAY_MIN_GAP_PCT = 40;
+
+export interface TeamHomeAwaySplit {
+  homeWins: number;
+  homeGames: number;
+  awayWins: number;
+  awayGames: number;
+}
+
+/**
+ * 이 팀의 시즌 전체 홈/원정 승률 편차. buildMatchupProfile 의
+ * computeMatchupHomeAwayEdge 는 두 팀 맞대결 한정 벤뉴 편차 — "이 팀이 모든 상대
+ * 포함 시즌 전체에서" 홈/원정 성적이 뚜렷하게 다른지는 없던 gap. teamGames 배열만
+ * 재사용 (신규 DB 조회 없음).
+ */
+export function computeTeamHomeAwayEdge(
+  games: TeamRecentGame[],
+): TeamHomeAwaySplit | null {
+  let homeWins = 0;
+  let homeGames = 0;
+  let awayWins = 0;
+  let awayGames = 0;
+
+  for (const g of games) {
+    if (g.status !== "final") continue;
+    if (g.ourScore == null || g.opponentScore == null) continue;
+    const won = g.ourScore > g.opponentScore;
+    if (g.isHome) {
+      homeGames += 1;
+      if (won) homeWins += 1;
+    } else {
+      awayGames += 1;
+      if (won) awayWins += 1;
+    }
+  }
+
+  if (
+    homeGames < TEAM_HOME_AWAY_MIN_GAMES_PER_VENUE ||
+    awayGames < TEAM_HOME_AWAY_MIN_GAMES_PER_VENUE
+  ) {
+    return null;
+  }
+
+  const homeRate = (homeWins / homeGames) * 100;
+  const awayRate = (awayWins / awayGames) * 100;
+  if (Math.abs(homeRate - awayRate) < TEAM_HOME_AWAY_MIN_GAP_PCT) return null;
+
+  return { homeWins, homeGames, awayWins, awayGames };
+}
+
 interface PredRow {
   confidence: number | null;
   is_correct: boolean | null;
@@ -218,6 +272,7 @@ export async function buildTeamProfile(
       avgMargin: null,
       blowout: null,
       closeGame: null,
+      homeAwayEdge: null,
     };
   }
 
@@ -434,6 +489,7 @@ export async function buildTeamProfile(
   const avgMargin = computeTeamAvgMargin(teamGames);
   const blowout = computeTeamBlowoutCount(teamGames);
   const closeGame = computeTeamCloseGameCount(teamGames);
+  const homeAwayEdge = computeTeamHomeAwayEdge(teamGames);
 
   return {
     code: teamCode,
@@ -463,5 +519,6 @@ export async function buildTeamProfile(
     avgMargin,
     blowout,
     closeGame,
+    homeAwayEdge,
   };
 }
