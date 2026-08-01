@@ -373,6 +373,8 @@ export default async function AnalysisIndexPage() {
 
   // wave-580: computeConvergenceRecordFromIsCorrect 추출 (wave-579 인라인 reduce → 순수 함수)
   const yesterdayCompleteConvergenceRecord = computeConvergenceRecordFromIsCorrect(yesterdayGames, FACTOR_PICK_COMPLETE);
+  // wave-615: 어제 강수렴 픽 결과 배지 — 완전수렴 wave-579 패턴 강수렴 tier 역동기 (비대칭 gap fix)
+  const yesterdayStrongConvergenceRecord = computeConvergenceRecordFromIsCorrect(yesterdayGames, FACTOR_PICK_STRONG);
 
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();
@@ -1866,6 +1868,15 @@ export default async function AnalysisIndexPage() {
                 >
                   시즌 {seasonStrongConvergenceRecord.wins}승{seasonStrongConvergenceRecord.losses}패
                   {' '}({computeWinRatePct(seasonStrongConvergenceRecord.wins, seasonStrongConvergenceRecord.total)}%)
+                </span>
+              )}
+              {/* wave-615: 어제 강수렴 픽 결과 배지 — 완전수렴 wave-579 패턴 강수렴 tier 역동기 */}
+              {yesterdayStrongConvergenceRecord.total > 0 && (
+                <span
+                  className="text-xs tabular-nums text-gray-300 dark:text-gray-600"
+                  title={`어제 강수렴 픽 ${yesterdayStrongConvergenceRecord.wins}승 ${yesterdayStrongConvergenceRecord.losses}패`}
+                >
+                  어제 {yesterdayStrongConvergenceRecord.wins}승{yesterdayStrongConvergenceRecord.losses}패
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-500">{hasAnyModelPrediction ? '모델 + Elo 예비 예측' : 'Elo 기반 예비 예측'}</span>
