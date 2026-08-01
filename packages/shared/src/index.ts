@@ -1430,10 +1430,11 @@ export const LOTTO_ISR_SECONDS = LOTTO_ISR_HOURS * 60 * 60;
 
 /**
  * Lotto pick count — primary pickMd 생성 세트 수.
- * 2026-06-29 사용자 결정: 50 → 500 (10x 확장, 통계 학습 surface 확대).
+ * 2026-06-29 사용자 결정: 50 → 500 (10x 확장).
+ * 2026-07-31 사용자 결정: 500 → 1000 (2x 확장, 통계 학습 surface 확대).
  * 추천 상위 카운트 = LOTTO_TOP_PICK_COUNT (10세트).
  */
-export const LOTTO_PICK_COUNT = 500;
+export const LOTTO_PICK_COUNT = 1000;
 export const LOTTO_TOP_PICK_COUNT = 10;
 
 /**

@@ -1676,6 +1676,12 @@ export function renderPickMarkdown(meta: {
   const allRows = meta.picks.map((p, i) =>
     `| ${i + 1} | ${p.nums.join(' ')} | ${p.sum} | ${p.odd}:${6 - p.odd} | ${p.consec} | ${p.score.toFixed(1)} |`,
   ).join('\n');
+  const copyPasteBlock = meta.picks.map((p) =>
+    p.nums.map((n) => n.toString().padStart(2, '0')).join(','),
+  ).join('\n');
+  const copyPasteSpaceBlock = meta.picks.map((p) =>
+    p.nums.map((n) => n.toString().padStart(2, '0')).join(' '),
+  ).join('\n');
 
   const head = `# ${meta.drawDate} (토) 추첨 ${setCount}세트 추천 (${meta.drawNo}회)
 
@@ -1686,6 +1692,18 @@ export function renderPickMarkdown(meta: {
 **생성 명령**: \`pnpm tsx scripts/lotto.ts pick-md\` (후보 풀 ${meta.poolSize.toLocaleString()}개 / ${meta.attempts.toLocaleString()}회 시도)
 
 상위 ${LOTTO_TOP_PICK_COUNT}세트 = 기피점수 desc 추천. 전체 ${setCount}세트는 score desc 정렬.
+
+## 📋 복사용 (콤마 구분, ${setCount}줄)
+
+\`\`\`
+${copyPasteBlock}
+\`\`\`
+
+## 📋 복사용 (스페이스 구분, ${setCount}줄)
+
+\`\`\`
+${copyPasteSpaceBlock}
+\`\`\`
 
 ## ${setCount}세트 전체
 
