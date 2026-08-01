@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   KBO_TEAMS,
   assertSelectOk,
+  computeAvgMarginFromFinalGames,
   josa,
   ro,
   shortTeamName,
@@ -195,20 +196,19 @@ export interface MatchupAvgMargin {
 /**
  * 두 팀 맞대결 한정 평균 득점 마진 (승패 무관, final 경기 |home-away| 점수차 평균).
  * games 는 buildMatchupProfile 이 이미 조회한 배열 재사용, 신규 DB 조회 없음.
+ * 계산 로직 자체는 packages/shared 단일 source (computeAvgMarginFromFinalGames) —
+ * cycle 2034 review-code heavy, buildTeamProfile.computeTeamAvgMargin 과 독립 중복 통합.
  */
 export function computeMatchupAvgMargin(
   games: MatchupGame[],
 ): MatchupAvgMargin | null {
-  const margins = games
-    .filter(
-      (g) => g.status === "final" && g.homeScore != null && g.awayScore != null,
-    )
-    .map((g) => Math.abs((g.homeScore as number) - (g.awayScore as number)));
-
-  if (margins.length < MATCHUP_AVG_MARGIN_MIN_GAMES) return null;
-
-  const avg = margins.reduce((sum, m) => sum + m, 0) / margins.length;
-  return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
+  return computeAvgMarginFromFinalGames(
+    games,
+    (g) => g.status === "final",
+    (g) => g.homeScore,
+    (g) => g.awayScore,
+    MATCHUP_AVG_MARGIN_MIN_GAMES,
+  );
 }
 
 /** 콜드게임(대량 득점차) 판정 기준 — |home-away| 10점 이상 */

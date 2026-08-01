@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames } from '@moneyball/shared';
 import type { TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -55,22 +55,20 @@ export interface TeamAvgMargin {
  * 팀의 시즌 전체 평균 득점 마진 (승패 무관, final 경기 |자팀-상대| 점수차 평균).
  * buildMatchupProfile 의 computeMatchupAvgMargin 은 두 팀 맞대결 한정 —
  * 이 팀의 "모든 상대 포함 시즌 전체" 평균 마진은 없던 gap. teamGames 배열만
- * 재사용 (신규 DB 조회 없음).
+ * 재사용 (신규 DB 조회 없음). 계산 로직 자체는 packages/shared 단일 source
+ * (computeAvgMarginFromFinalGames) — cycle 2034 review-code heavy, matchup 쪽
+ * computeMatchupAvgMargin 과 독립 중복 통합.
  */
 export function computeTeamAvgMargin(
   games: TeamRecentGame[],
 ): TeamAvgMargin | null {
-  const margins = games
-    .filter(
-      (g) =>
-        g.status === "final" && g.ourScore != null && g.opponentScore != null,
-    )
-    .map((g) => Math.abs((g.ourScore as number) - (g.opponentScore as number)));
-
-  if (margins.length < TEAM_AVG_MARGIN_MIN_GAMES) return null;
-
-  const avg = margins.reduce((sum, m) => sum + m, 0) / margins.length;
-  return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
+  return computeAvgMarginFromFinalGames(
+    games,
+    (g) => g.status === "final",
+    (g) => g.ourScore,
+    (g) => g.opponentScore,
+    TEAM_AVG_MARGIN_MIN_GAMES,
+  );
 }
 
 interface PredRow {

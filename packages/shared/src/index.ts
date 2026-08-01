@@ -2391,6 +2391,34 @@ export function parseRecent10Record(text: string): { wins: number; losses: numbe
   return { wins: parseInt(wm[1], 10), losses: parseInt(lm[1], 10) };
 }
 
+export interface AvgMarginResult {
+  avgMargin: number;
+  sampleSize: number;
+}
+
+/**
+ * final 경기의 |scoreA - scoreB| 점수차 평균 — single source.
+ * buildMatchupProfile.computeMatchupAvgMargin + buildTeamProfile.computeTeamAvgMargin
+ * 양쪽에 동일 로직(final 필터 → abs diff → round*10/10)이 독립 중복돼있던 것 통합
+ * (cycle 2034 review-code heavy). minGames 미만 표본은 null.
+ */
+export function computeAvgMarginFromFinalGames<T>(
+  games: T[],
+  isFinal: (g: T) => boolean,
+  scoreA: (g: T) => number | null,
+  scoreB: (g: T) => number | null,
+  minGames = 2,
+): AvgMarginResult | null {
+  const margins = games
+    .filter((g) => isFinal(g) && scoreA(g) != null && scoreB(g) != null)
+    .map((g) => Math.abs((scoreA(g) as number) - (scoreB(g) as number)));
+
+  if (margins.length < minGames) return null;
+
+  const avg = margins.reduce((sum, m) => sum + m, 0) / margins.length;
+  return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
+}
+
 /**
  * wave-333: 상대전적 배지 — 최소 과거 대결 수 (미만 시 배지 숨김).
  * wave-515: analysis/page.tsx 오늘 AI 예측 카드 H2H 직접 대결 배지 callsite 추가 (cycle 1883).
