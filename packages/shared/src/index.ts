@@ -2419,6 +2419,38 @@ export function computeAvgMarginFromFinalGames<T>(
   return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
 }
 
+export interface MarginCountResult {
+  count: number;
+  sampleSize: number;
+}
+
+/**
+ * final 경기 중 |scoreA - scoreB| 점수차가 predicate 조건을 만족하는 횟수 — single source.
+ * buildMatchupProfile.{computeMatchupBlowoutCount,computeMatchupCloseGameCount} +
+ * buildTeamProfile.{computeTeamBlowoutCount,computeTeamCloseGameCount} 4곳에
+ * 동일 로직(final 필터 → abs diff → predicate count)이 독립 중복돼있던 것 통합
+ * (cycle 2036 review-code heavy). minGames 미만 표본은 null.
+ */
+export function computeMarginCountFromFinalGames<T>(
+  games: T[],
+  isFinal: (g: T) => boolean,
+  scoreA: (g: T) => number | null,
+  scoreB: (g: T) => number | null,
+  predicate: (margin: number) => boolean,
+  minGames: number,
+): MarginCountResult | null {
+  const finals = games.filter(
+    (g) => isFinal(g) && scoreA(g) != null && scoreB(g) != null,
+  );
+  if (finals.length < minGames) return null;
+
+  const count = finals.filter((g) =>
+    predicate(Math.abs((scoreA(g) as number) - (scoreB(g) as number))),
+  ).length;
+
+  return { count, sampleSize: finals.length };
+}
+
 /**
  * wave-333: 상대전적 배지 — 최소 과거 대결 수 (미만 시 배지 숨김).
  * wave-515: analysis/page.tsx 오늘 AI 예측 카드 H2H 직접 대결 배지 callsite 추가 (cycle 1883).
