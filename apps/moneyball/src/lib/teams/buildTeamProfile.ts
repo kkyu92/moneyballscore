@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames } from '@moneyball/shared';
-import type { TeamFactorAverages } from "./buildTeamFactorAverages";
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective } from '@moneyball/shared';
+import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
   playerId: number;
@@ -265,17 +265,7 @@ export async function buildTeamProfile(
       verifiedN: 0,
       correctN: 0,
       accuracyRate: null,
-      factorAverages: {
-        spFip: null,
-        spXfip: null,
-        lineupWoba: null,
-        bullpenFip: null,
-        recentForm: null,
-        elo: null,
-        sfr: null,
-        warTotal: null,
-        sampleN: 0,
-      },
+      factorAverages: EMPTY_FACTOR_AVERAGES,
       topPitchers: [],
       recentGames: [],
       avgMargin: null,
@@ -395,22 +385,7 @@ export async function buildTeamProfile(
   let verifiedN = 0;
   let correctN = 0;
 
-  let spFipSum = 0;
-  let spFipN = 0;
-  let spXfipSum = 0;
-  let spXfipN = 0;
-  let wobaSum = 0;
-  let wobaN = 0;
-  let bullpenSum = 0;
-  let bullpenN = 0;
-  let formSum = 0;
-  let formN = 0;
-  let eloSum = 0;
-  let eloN = 0;
-  let sfrSum = 0;
-  let sfrN = 0;
-  let warSum = 0;
-  let warN = 0;
+  const factorPerspectives: FactorPerspective[] = [];
 
   const pitcherAcc = new Map<
     number,
@@ -437,38 +412,16 @@ export async function buildTeamProfile(
     const sfr = isHome ? r.home_sfr : r.away_sfr;
     const war = isHome ? r.home_war_total : r.away_war_total;
 
-    if (spFip != null) {
-      spFipSum += spFip;
-      spFipN += 1;
-    }
-    if (spXfip != null) {
-      spXfipSum += spXfip;
-      spXfipN += 1;
-    }
-    if (woba != null) {
-      wobaSum += woba;
-      wobaN += 1;
-    }
-    if (bullpen != null) {
-      bullpenSum += bullpen;
-      bullpenN += 1;
-    }
-    if (form != null) {
-      formSum += form;
-      formN += 1;
-    }
-    if (elo != null) {
-      eloSum += elo;
-      eloN += 1;
-    }
-    if (sfr != null) {
-      sfrSum += sfr;
-      sfrN += 1;
-    }
-    if (war != null) {
-      warSum += war;
-      warN += 1;
-    }
+    factorPerspectives.push({
+      spFip,
+      spXfip,
+      lineupWoba: woba,
+      bullpenFip: bullpen,
+      recentForm: form,
+      elo,
+      sfr,
+      warTotal: war,
+    });
 
     const predictedThisTeam =
       r.predicted_winner != null && r.predicted_winner === teamId;
@@ -531,6 +484,7 @@ export async function buildTeamProfile(
   const recentGames = teamGames
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
     .slice(0, 8);
+  const factorAverages = computeFactorAveragesFromPerspectives(factorPerspectives);
   const avgMargin = computeTeamAvgMargin(teamGames);
   const blowout = computeTeamBlowoutCount(teamGames);
   const closeGame = computeTeamCloseGameCount(teamGames);
@@ -551,17 +505,7 @@ export async function buildTeamProfile(
     verifiedN,
     correctN,
     accuracyRate: verifiedN > 0 ? correctN / verifiedN : null,
-    factorAverages: {
-      spFip: safeAvg(spFipSum, spFipN),
-      spXfip: safeAvg(spXfipSum, spXfipN),
-      lineupWoba: safeAvg(wobaSum, wobaN),
-      bullpenFip: safeAvg(bullpenSum, bullpenN),
-      recentForm: safeAvg(formSum, formN),
-      elo: safeAvg(eloSum, eloN),
-      sfr: safeAvg(sfrSum, sfrN),
-      warTotal: safeAvg(warSum, warN),
-      sampleN: predictedGames,
-    },
+    factorAverages,
     topPitchers,
     recentGames,
     avgMargin,
