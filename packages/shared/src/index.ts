@@ -2451,6 +2451,98 @@ export function computeMarginCountFromFinalGames<T>(
   return { count, sampleSize: finals.length };
 }
 
+export interface FactorPerspective {
+  spFip: number | null;
+  spXfip: number | null;
+  lineupWoba: number | null;
+  bullpenFip: number | null;
+  recentForm: number | null;
+  elo: number | null;
+  sfr: number | null;
+  warTotal: number | null;
+}
+
+export interface FactorAveragesResult extends FactorPerspective {
+  sampleN: number;
+}
+
+/**
+ * 8팩터(FIP/xFIP/wOBA/불펜FIP/최근폼/Elo/SFR/WAR) 팀 관점 평균 — single source.
+ * buildTeamFactorAverages + buildTeamProfile 양쪽에 동일 로직(8개 sum/count 누적 +
+ * safeAvg)이 독립 중복돼있던 것 통합 (cycle 2040 review-code heavy). 호출부가
+ * 각자 쿼리 결과를 팀 관점(isHome 판정 완료) perspective 배열로 매핑해서 전달.
+ */
+export function computeFactorAveragesFromPerspectives(
+  perspectives: FactorPerspective[],
+): FactorAveragesResult {
+  let spFipSum = 0,
+    spFipN = 0;
+  let spXfipSum = 0,
+    spXfipN = 0;
+  let wobaSum = 0,
+    wobaN = 0;
+  let bullpenSum = 0,
+    bullpenN = 0;
+  let formSum = 0,
+    formN = 0;
+  let eloSum = 0,
+    eloN = 0;
+  let sfrSum = 0,
+    sfrN = 0;
+  let warSum = 0,
+    warN = 0;
+
+  for (const p of perspectives) {
+    if (p.spFip != null) {
+      spFipSum += p.spFip;
+      spFipN += 1;
+    }
+    if (p.spXfip != null) {
+      spXfipSum += p.spXfip;
+      spXfipN += 1;
+    }
+    if (p.lineupWoba != null) {
+      wobaSum += p.lineupWoba;
+      wobaN += 1;
+    }
+    if (p.bullpenFip != null) {
+      bullpenSum += p.bullpenFip;
+      bullpenN += 1;
+    }
+    if (p.recentForm != null) {
+      formSum += p.recentForm;
+      formN += 1;
+    }
+    if (p.elo != null) {
+      eloSum += p.elo;
+      eloN += 1;
+    }
+    if (p.sfr != null) {
+      sfrSum += p.sfr;
+      sfrN += 1;
+    }
+    if (p.warTotal != null) {
+      warSum += p.warTotal;
+      warN += 1;
+    }
+  }
+
+  const safeAvg = (sum: number, n: number): number | null =>
+    n > 0 ? sum / n : null;
+
+  return {
+    spFip: safeAvg(spFipSum, spFipN),
+    spXfip: safeAvg(spXfipSum, spXfipN),
+    lineupWoba: safeAvg(wobaSum, wobaN),
+    bullpenFip: safeAvg(bullpenSum, bullpenN),
+    recentForm: safeAvg(formSum, formN),
+    elo: safeAvg(eloSum, eloN),
+    sfr: safeAvg(sfrSum, sfrN),
+    warTotal: safeAvg(warSum, warN),
+    sampleN: perspectives.length,
+  };
+}
+
 /**
  * wave-333: 상대전적 배지 — 최소 과거 대결 수 (미만 시 배지 숨김).
  * wave-515: analysis/page.tsx 오늘 AI 예측 카드 H2H 직접 대결 배지 callsite 추가 (cycle 1883).
