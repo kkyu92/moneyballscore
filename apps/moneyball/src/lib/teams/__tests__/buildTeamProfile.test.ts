@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { computeTeamHomeAwayEdge } from "../buildTeamProfile";
+import type { TeamRecentGame } from "../buildTeamProfile";
 
 // cycle 151 silent drift family — buildTeamProfile.ts 의 supabase select `.error` 미체크
 // 회귀 차단. 기존엔 `const { data: teamRow }` / `const { data }` 직접 destruct → DB
@@ -44,6 +46,66 @@ function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
     }),
   };
 }
+
+function makeGame(overrides: Partial<TeamRecentGame>): TeamRecentGame {
+  return {
+    gameId: 1,
+    gameDate: "2026-08-01",
+    isHome: true,
+    opponentCode: null,
+    opponentName: null,
+    predictedAsWinner: false,
+    confidence: null,
+    isCorrect: null,
+    ourScore: null,
+    opponentScore: null,
+    status: "final",
+    ...overrides,
+  };
+}
+
+describe("computeTeamHomeAwayEdge", () => {
+  it("홈 100% 원정 0% (표본 충족, 격차 40%p 이상) → 편차 반환", () => {
+    const games: TeamRecentGame[] = [
+      makeGame({ isHome: true, ourScore: 5, opponentScore: 1 }),
+      makeGame({ isHome: true, ourScore: 4, opponentScore: 2 }),
+      makeGame({ isHome: false, ourScore: 1, opponentScore: 5 }),
+      makeGame({ isHome: false, ourScore: 2, opponentScore: 4 }),
+    ];
+    const result = computeTeamHomeAwayEdge(games);
+    expect(result).toEqual({ homeWins: 2, homeGames: 2, awayWins: 0, awayGames: 2 });
+  });
+
+  it("홈/원정 승률 격차 40%p 미만 → null", () => {
+    const games: TeamRecentGame[] = [
+      makeGame({ isHome: true, ourScore: 5, opponentScore: 1 }),
+      makeGame({ isHome: true, ourScore: 1, opponentScore: 5 }),
+      makeGame({ isHome: false, ourScore: 5, opponentScore: 1 }),
+      makeGame({ isHome: false, ourScore: 1, opponentScore: 5 }),
+    ];
+    expect(computeTeamHomeAwayEdge(games)).toBeNull();
+  });
+
+  it("벤뉴별 표본 2 미만 → null (표본 부족)", () => {
+    const games: TeamRecentGame[] = [
+      makeGame({ isHome: true, ourScore: 5, opponentScore: 1 }),
+      makeGame({ isHome: false, ourScore: 1, opponentScore: 5 }),
+    ];
+    expect(computeTeamHomeAwayEdge(games)).toBeNull();
+  });
+
+  it("final 아닌 경기 / score null 은 집계 제외", () => {
+    const games: TeamRecentGame[] = [
+      makeGame({ isHome: true, ourScore: 5, opponentScore: 1 }),
+      makeGame({ isHome: true, ourScore: 4, opponentScore: 2 }),
+      makeGame({ isHome: true, status: "scheduled", ourScore: null, opponentScore: null }),
+      makeGame({ isHome: false, ourScore: 1, opponentScore: 5 }),
+      makeGame({ isHome: false, ourScore: 2, opponentScore: 4 }),
+    ];
+    const result = computeTeamHomeAwayEdge(games);
+    expect(result).toEqual({ homeWins: 2, homeGames: 2, awayWins: 0, awayGames: 2 });
+  });
+});
 
 let supabaseMock: ReturnType<typeof makeSupabaseMock>;
 
