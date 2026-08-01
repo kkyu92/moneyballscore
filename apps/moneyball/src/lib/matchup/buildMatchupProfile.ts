@@ -71,6 +71,7 @@ export interface MatchupProfile {
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
   blowout: MatchupBlowoutStats | null;
+  closeGame: MatchupCloseGameStats | null;
   homeAwayEdge: MatchupHomeAwaySplit | null;
   summary: string;
 }
@@ -240,6 +241,36 @@ export function computeMatchupBlowoutCount(
   return { count, sampleSize: finals.length };
 }
 
+/** 박빙 승부(한 점차) 판정 기준 — |home-away| == 1 */
+const MATCHUP_CLOSE_GAME_MARGIN = 1;
+/** 박빙 승부 횟수 최소 표본 — blowout 과 동일 기준 (1~2경기 중 유무는 "성향"이라 부르기 애매) */
+const MATCHUP_CLOSE_GAME_MIN_GAMES = 3;
+
+export interface MatchupCloseGameStats {
+  count: number;
+  sampleSize: number;
+}
+
+/**
+ * 두 팀 맞대결 중 박빙 승부(|home-away| === MATCHUP_CLOSE_GAME_MARGIN) 횟수.
+ * computeMatchupBlowoutCount 의 대칭 지표 — "큰 점수차" 빈도는 있었지만
+ * "얼마나 팽팽했는지" 빈도는 없던 gap. games 배열만 재사용 (신규 DB 조회 없음).
+ */
+export function computeMatchupCloseGameCount(
+  games: MatchupGame[],
+): MatchupCloseGameStats | null {
+  const finals = games.filter(
+    (g) => g.status === "final" && g.homeScore != null && g.awayScore != null,
+  );
+  if (finals.length < MATCHUP_CLOSE_GAME_MIN_GAMES) return null;
+
+  const count = finals.filter(
+    (g) => Math.abs((g.homeScore as number) - (g.awayScore as number)) === MATCHUP_CLOSE_GAME_MARGIN,
+  ).length;
+
+  return { count, sampleSize: finals.length };
+}
+
 /** 맞대결 홈/원정 편중 판정 — 벤뉴(홈/원정)당 최소 표본 (avgMargin 과 동일 기준선) */
 const MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE = 2;
 /** 홈/원정 승률 차이가 이 %p 이상이어야 "편중" 으로 언급 — 우연한 소표본 노이즈 배제 */
@@ -323,6 +354,7 @@ function buildSummary(profile: {
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
   blowout: MatchupBlowoutStats | null;
+  closeGame: MatchupCloseGameStats | null;
   homeAwayEdge: MatchupHomeAwaySplit | null;
 }): string {
   const {
@@ -335,6 +367,7 @@ function buildSummary(profile: {
     avgMargin,
     recentRecord,
     blowout,
+    closeGame,
     homeAwayEdge,
   } = profile;
 
@@ -388,6 +421,11 @@ function buildSummary(profile: {
   // avgMargin 문장과 중복 인상을 줘 count > 0 일 때만 언급
   if (blowout && blowout.count > 0) {
     text += ` 이 중 ${blowout.count}경기는 ${MATCHUP_BLOWOUT_MARGIN}점차 이상 콜드게임이었습니다.`;
+  }
+
+  // 박빙 승부 빈도 — 0건이면 blowout 문장과 중복 인상이라 count > 0 일 때만 언급
+  if (closeGame && closeGame.count > 0) {
+    text += ` ${closeGame.count}경기는 ${MATCHUP_CLOSE_GAME_MARGIN}점차 박빙 승부였습니다.`;
   }
 
   // 홈/원정 편중 — 벤뉴별 표본 확보 + 승률 차이가 뚜렷할 때만 언급
@@ -464,6 +502,7 @@ export async function buildMatchupProfile(
       avgMargin: null,
       recentRecord: null,
       blowout: null,
+      closeGame: null,
       homeAwayEdge: null,
       summary: buildSummary({
         teamA,
@@ -478,6 +517,7 @@ export async function buildMatchupProfile(
         avgMargin: null,
         recentRecord: null,
         blowout: null,
+        closeGame: null,
         homeAwayEdge: null,
       }),
     };
@@ -648,6 +688,7 @@ export async function buildMatchupProfile(
   const avgMargin = computeMatchupAvgMargin(games);
   const recentRecord = computeMatchupRecentRecord(games, teamA.code, teamB.code);
   const blowout = computeMatchupBlowoutCount(games);
+  const closeGame = computeMatchupCloseGameCount(games);
   const homeAwayEdge = computeMatchupHomeAwayEdge(games, teamA.code, teamB.code);
   const summary = buildSummary({
     teamA,
@@ -659,6 +700,7 @@ export async function buildMatchupProfile(
     avgMargin,
     recentRecord,
     blowout,
+    closeGame,
     homeAwayEdge,
   });
 
@@ -675,6 +717,7 @@ export async function buildMatchupProfile(
     avgMargin,
     recentRecord,
     blowout,
+    closeGame,
     homeAwayEdge,
     summary,
   };
