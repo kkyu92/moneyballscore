@@ -135,6 +135,7 @@ import {
   WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS,
   MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
   parseRecent10Record,
+  computeAvgMarginFromFinalGames,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -921,5 +922,52 @@ describe('parseRecent10Record', () => {
     expect(parseRecent10Record('')).toBeNull();
     expect(parseRecent10Record('7승')).toBeNull();
     expect(parseRecent10Record('3패')).toBeNull();
+  });
+});
+
+describe('computeAvgMarginFromFinalGames', () => {
+  type G = { status: string; a: number | null; b: number | null };
+  const isFinal = (g: G) => g.status === 'final';
+  const scoreA = (g: G) => g.a;
+  const scoreB = (g: G) => g.b;
+
+  it('averages |a-b| across final games with both scores present', () => {
+    const games: G[] = [
+      { status: 'final', a: 5, b: 2 },
+      { status: 'final', a: 3, b: 3 },
+      { status: 'final', a: 1, b: 6 },
+    ];
+    expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB)).toEqual({
+      avgMargin: 2.7,
+      sampleSize: 3,
+    });
+  });
+
+  it('excludes non-final and null-score games from both filter and count', () => {
+    const games: G[] = [
+      { status: 'final', a: 5, b: 2 },
+      { status: 'scheduled', a: 1, b: 1 },
+      { status: 'final', a: null, b: 4 },
+      { status: 'final', a: 4, b: 1 },
+    ];
+    expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB)).toEqual({
+      avgMargin: 3,
+      sampleSize: 2,
+    });
+  });
+
+  it('returns null under the minGames threshold (default 2)', () => {
+    const games: G[] = [{ status: 'final', a: 5, b: 2 }];
+    expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB)).toBeNull();
+    expect(computeAvgMarginFromFinalGames([], isFinal, scoreA, scoreB)).toBeNull();
+  });
+
+  it('respects a custom minGames threshold', () => {
+    const games: G[] = [
+      { status: 'final', a: 5, b: 2 },
+      { status: 'final', a: 3, b: 1 },
+    ];
+    expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB, 3)).toBeNull();
+    expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB, 2)).not.toBeNull();
   });
 });
