@@ -71,6 +71,7 @@ export interface MatchupProfile {
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
   blowout: MatchupBlowoutStats | null;
+  homeAwayEdge: MatchupHomeAwaySplit | null;
   summary: string;
 }
 
@@ -239,6 +240,79 @@ export function computeMatchupBlowoutCount(
   return { count, sampleSize: finals.length };
 }
 
+/** 맞대결 홈/원정 편중 판정 — 벤뉴(홈/원정)당 최소 표본 (avgMargin 과 동일 기준선) */
+const MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE = 2;
+/** 홈/원정 승률 차이가 이 %p 이상이어야 "편중" 으로 언급 — 우연한 소표본 노이즈 배제 */
+const MATCHUP_HOME_AWAY_MIN_GAP_PCT = 40;
+
+export interface MatchupHomeAwaySplit {
+  teamCode: TeamCode;
+  homeWins: number;
+  homeGames: number;
+  awayWins: number;
+  awayGames: number;
+}
+
+function venueSplit(
+  games: MatchupGame[],
+  code: TeamCode,
+): { homeWins: number; homeGames: number; awayWins: number; awayGames: number } {
+  let homeWins = 0;
+  let homeGames = 0;
+  let awayWins = 0;
+  let awayGames = 0;
+  for (const g of games) {
+    if (g.status !== "final") continue;
+    if (g.homeCode === code) {
+      homeGames += 1;
+      if (g.actualWinnerCode === code) homeWins += 1;
+    } else if (g.awayCode === code) {
+      awayGames += 1;
+      if (g.actualWinnerCode === code) awayWins += 1;
+    }
+  }
+  return { homeWins, homeGames, awayWins, awayGames };
+}
+
+/**
+ * 두 팀 맞대결 중 한 팀이 홈/원정에 따라 뚜렷하게 다른 성적을 보이는지 판정.
+ * sideStats(전체 wins) 는 홈/원정 승수만 노출(팀별 성과 카드) 하고 벤뉴별 표본(경기 수)
+ * 은 계산하지 않아 "편중이 뚜렷한지"는 못 봤던 gap. games 배열만 재사용 (신규 DB 조회 없음).
+ * 두 팀 모두 조건 충족 시 격차가 더 큰 쪽 1팀만 반환 (문장 노이즈 방지).
+ */
+export function computeMatchupHomeAwayEdge(
+  games: MatchupGame[],
+  teamACode: TeamCode,
+  teamBCode: TeamCode,
+): MatchupHomeAwaySplit | null {
+  const candidates: Array<{ code: TeamCode; gapPct: number } & ReturnType<typeof venueSplit>> = [];
+  for (const code of [teamACode, teamBCode]) {
+    const split = venueSplit(games, code);
+    if (
+      split.homeGames < MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE ||
+      split.awayGames < MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE
+    ) {
+      continue;
+    }
+    const homeRate = (split.homeWins / split.homeGames) * 100;
+    const awayRate = (split.awayWins / split.awayGames) * 100;
+    candidates.push({ code, gapPct: Math.abs(homeRate - awayRate), ...split });
+  }
+
+  if (candidates.length === 0) return null;
+
+  const best = candidates.reduce((a, b) => (b.gapPct > a.gapPct ? b : a));
+  if (best.gapPct < MATCHUP_HOME_AWAY_MIN_GAP_PCT) return null;
+
+  return {
+    teamCode: best.code,
+    homeWins: best.homeWins,
+    homeGames: best.homeGames,
+    awayWins: best.awayWins,
+    awayGames: best.awayGames,
+  };
+}
+
 function buildSummary(profile: {
   teamA: MatchupProfile["teamA"];
   teamB: MatchupProfile["teamB"];
@@ -249,6 +323,7 @@ function buildSummary(profile: {
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
   blowout: MatchupBlowoutStats | null;
+  homeAwayEdge: MatchupHomeAwaySplit | null;
 }): string {
   const {
     teamA,
@@ -260,6 +335,7 @@ function buildSummary(profile: {
     avgMargin,
     recentRecord,
     blowout,
+    homeAwayEdge,
   } = profile;
 
   if (finalGames === 0) {
@@ -312,6 +388,14 @@ function buildSummary(profile: {
   // avgMargin 문장과 중복 인상을 줘 count > 0 일 때만 언급
   if (blowout && blowout.count > 0) {
     text += ` 이 중 ${blowout.count}경기는 ${MATCHUP_BLOWOUT_MARGIN}점차 이상 콜드게임이었습니다.`;
+  }
+
+  // 홈/원정 편중 — 벤뉴별 표본 확보 + 승률 차이가 뚜렷할 때만 언급
+  if (homeAwayEdge) {
+    const edgeTeam = homeAwayEdge.teamCode === teamA.code ? teamA : teamB;
+    text +=
+      ` ${edgeTeam.shortName}${josa(edgeTeam.shortName, "은", "는")} 이 맞대결에서 홈 ${homeAwayEdge.homeWins}승/${homeAwayEdge.homeGames}경기, ` +
+      `원정 ${homeAwayEdge.awayWins}승/${homeAwayEdge.awayGames}경기로 홈/원정 성적 차이가 뚜렷합니다.`;
   }
 
   return text;
@@ -380,6 +464,7 @@ export async function buildMatchupProfile(
       avgMargin: null,
       recentRecord: null,
       blowout: null,
+      homeAwayEdge: null,
       summary: buildSummary({
         teamA,
         teamB,
@@ -393,6 +478,7 @@ export async function buildMatchupProfile(
         avgMargin: null,
         recentRecord: null,
         blowout: null,
+        homeAwayEdge: null,
       }),
     };
   }
@@ -562,6 +648,7 @@ export async function buildMatchupProfile(
   const avgMargin = computeMatchupAvgMargin(games);
   const recentRecord = computeMatchupRecentRecord(games, teamA.code, teamB.code);
   const blowout = computeMatchupBlowoutCount(games);
+  const homeAwayEdge = computeMatchupHomeAwayEdge(games, teamA.code, teamB.code);
   const summary = buildSummary({
     teamA,
     teamB,
@@ -572,6 +659,7 @@ export async function buildMatchupProfile(
     avgMargin,
     recentRecord,
     blowout,
+    homeAwayEdge,
   });
 
   return {
@@ -587,6 +675,7 @@ export async function buildMatchupProfile(
     avgMargin,
     recentRecord,
     blowout,
+    homeAwayEdge,
     summary,
   };
 }
