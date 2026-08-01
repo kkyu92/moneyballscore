@@ -40,6 +40,37 @@ export interface TeamProfile {
   factorAverages: TeamFactorAverages;
   topPitchers: TeamPitcherRow[];
   recentGames: TeamRecentGame[];
+  avgMargin: TeamAvgMargin | null;
+}
+
+/** 팀 시즌 평균 득점 마진 최소 표본 — matchup computeMatchupAvgMargin 과 동일 기준 */
+const TEAM_AVG_MARGIN_MIN_GAMES = 2;
+
+export interface TeamAvgMargin {
+  avgMargin: number;
+  sampleSize: number;
+}
+
+/**
+ * 팀의 시즌 전체 평균 득점 마진 (승패 무관, final 경기 |자팀-상대| 점수차 평균).
+ * buildMatchupProfile 의 computeMatchupAvgMargin 은 두 팀 맞대결 한정 —
+ * 이 팀의 "모든 상대 포함 시즌 전체" 평균 마진은 없던 gap. teamGames 배열만
+ * 재사용 (신규 DB 조회 없음).
+ */
+export function computeTeamAvgMargin(
+  games: TeamRecentGame[],
+): TeamAvgMargin | null {
+  const margins = games
+    .filter(
+      (g) =>
+        g.status === "final" && g.ourScore != null && g.opponentScore != null,
+    )
+    .map((g) => Math.abs((g.ourScore as number) - (g.opponentScore as number)));
+
+  if (margins.length < TEAM_AVG_MARGIN_MIN_GAMES) return null;
+
+  const avg = margins.reduce((sum, m) => sum + m, 0) / margins.length;
+  return { avgMargin: Math.round(avg * 10) / 10, sampleSize: margins.length };
 }
 
 interface PredRow {
@@ -124,6 +155,7 @@ export async function buildTeamProfile(
       },
       topPitchers: [],
       recentGames: [],
+      avgMargin: null,
     };
   }
 
@@ -337,6 +369,7 @@ export async function buildTeamProfile(
   const recentGames = teamGames
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
     .slice(0, 8);
+  const avgMargin = computeTeamAvgMargin(teamGames);
 
   return {
     code: teamCode,
@@ -363,5 +396,6 @@ export async function buildTeamProfile(
     },
     topPitchers,
     recentGames,
+    avgMargin,
   };
 }

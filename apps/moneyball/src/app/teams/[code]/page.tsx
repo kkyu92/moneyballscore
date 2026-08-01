@@ -452,6 +452,11 @@ export default async function TeamPage({ params }: PageProps) {
           <h2 id="team-recent-title" className="text-lg font-bold">
             최근 예측 기록
           </h2>
+          {profile.avgMargin && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              시즌 평균 득점 마진 {profile.avgMargin.avgMargin}점 ({profile.avgMargin.sampleSize}경기)
+            </p>
+          )}
           <TeamRecentGamesFilter counts={filterCounts} />
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
