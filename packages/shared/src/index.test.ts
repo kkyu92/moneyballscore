@@ -134,6 +134,7 @@ import {
   REVIEWS_HUB_RECENT_MONTHS,
   WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS,
   MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
+  parseRecent10Record,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -907,5 +908,18 @@ describe('KBO_TEAM_SHORT_NAME + shortTeamName', () => {
   it('WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS — 주간 리뷰 상세 내비게이션 조회 폭, 현재+3 표시에 필요한 최소 4 이상 + REVIEWS_HUB_RECENT_WEEKS 와 독립 (silent drift wave 595 guard)', () => {
     expect(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS).toBe(4);
     expect(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('parseRecent10Record', () => {
+  it('parses "N승M패" into {wins, losses}', () => {
+    expect(parseRecent10Record('7승3패')).toEqual({ wins: 7, losses: 3 });
+    expect(parseRecent10Record('0승10패')).toEqual({ wins: 0, losses: 10 });
+  });
+
+  it('returns null when either 승/패 count is missing (malformed source string)', () => {
+    expect(parseRecent10Record('')).toBeNull();
+    expect(parseRecent10Record('7승')).toBeNull();
+    expect(parseRecent10Record('3패')).toBeNull();
   });
 });

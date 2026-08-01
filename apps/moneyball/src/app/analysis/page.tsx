@@ -68,6 +68,7 @@ import {
   TOPFACTOR_COMPLETE_IMPACT,
   TOPFACTOR_IMPACT_MIN_DISPLAY,
   DEFAULT_WEIGHTS,
+  parseRecent10Record,
   type TeamCode,
 } from '@moneyball/shared';
 import { fetchStandings, type StandingRow } from '@moneyball/kbo-data';
@@ -229,16 +230,10 @@ export default async function AnalysisIndexPage() {
   const rankMap = new Map<TeamCode, number>(
     (standingsRows as StandingRow[]).map((r) => [r.teamCode, r.rank]),
   );
-  // wave-331: 최근 10경기 맵 (recent10 string "7승3패" → {wins, losses})
-  function parseRecent10(text: string): { wins: number; losses: number } | null {
-    const wm = text.match(/(\d+)승/);
-    const lm = text.match(/(\d+)패/);
-    if (!wm || !lm) return null;
-    return { wins: parseInt(wm[1], 10), losses: parseInt(lm[1], 10) };
-  }
+  // wave-331: 최근 10경기 맵 (recent10 string "7승3패" → {wins, losses}, parseRecent10Record = shared single source)
   const recent10Map = new Map<TeamCode, { wins: number; losses: number }>(
     (standingsRows as StandingRow[])
-      .map((r) => [r.teamCode, parseRecent10(r.recent10)])
+      .map((r) => [r.teamCode, parseRecent10Record(r.recent10)])
       .filter((entry): entry is [TeamCode, { wins: number; losses: number }] => entry[1] !== null),
   );
   // wave-329: 홈/원정 성적 맵 (homeWins/homeLosses parsed from column 8)
