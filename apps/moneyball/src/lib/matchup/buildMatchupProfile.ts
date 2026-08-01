@@ -69,6 +69,7 @@ export interface MatchupProfile {
   games: MatchupGame[];
   streak: MatchupStreak | null;
   avgMargin: MatchupAvgMargin | null;
+  recentRecord: MatchupRecentRecord | null;
   summary: string;
 }
 
@@ -145,6 +146,41 @@ export function computeMatchupStreak(
   return { teamCode: streakCode, length };
 }
 
+/** 맞대결 최근 N경기 한정 상대전적 — 시즌 전체 기록(sideStats)과 달리 최근 폼만 반영 */
+const MATCHUP_RECENT_RECORD_WINDOW = 5;
+/** 최근 기록 최소 표본 — 1경기만으론 "최근 전적"이라 부르기 애매해 배제 (avgMargin 과 동일 기준) */
+const MATCHUP_RECENT_RECORD_MIN_GAMES = 2;
+
+export interface MatchupRecentRecord {
+  aWins: number;
+  bWins: number;
+  sampleSize: number;
+}
+
+/**
+ * 두 팀 맞대결 한정 최근 N경기 상대전적 (기본 5경기).
+ * sideStats(전체 시즌 기록) / computeMatchupStreak(연속 연승·연패) 와 달리
+ * "최근 N경기 중 몇 승씩" 형태의 폼 스냅샷. games 는 이미 game_date 내림차순 정렬 —
+ * status==='final' 필터 후 앞에서부터 window 개수만 사용.
+ */
+export function computeMatchupRecentRecord(
+  games: MatchupGame[],
+  teamACode: TeamCode,
+  teamBCode: TeamCode,
+): MatchupRecentRecord | null {
+  const finals = games.filter((g) => g.status === "final");
+  const recent = finals.slice(0, MATCHUP_RECENT_RECORD_WINDOW);
+  if (recent.length < MATCHUP_RECENT_RECORD_MIN_GAMES) return null;
+
+  let aWins = 0;
+  let bWins = 0;
+  for (const g of recent) {
+    if (g.actualWinnerCode === teamACode) aWins += 1;
+    else if (g.actualWinnerCode === teamBCode) bWins += 1;
+  }
+  return { aWins, bWins, sampleSize: recent.length };
+}
+
 /** 맞대결 평균 득점 마진 최소 표본 — 1경기만으론 "평균"이라 부르기 애매해 배제 */
 const MATCHUP_AVG_MARGIN_MIN_GAMES = 2;
 
@@ -180,9 +216,18 @@ function buildSummary(profile: {
   predictionAccuracy: MatchupProfile["predictionAccuracy"];
   streak: MatchupStreak | null;
   avgMargin: MatchupAvgMargin | null;
+  recentRecord: MatchupRecentRecord | null;
 }): string {
-  const { teamA, teamB, finalGames, sideStats, predictionAccuracy, streak, avgMargin } =
-    profile;
+  const {
+    teamA,
+    teamB,
+    finalGames,
+    sideStats,
+    predictionAccuracy,
+    streak,
+    avgMargin,
+    recentRecord,
+  } = profile;
 
   if (finalGames === 0) {
     return `${teamA.shortName} vs ${teamB.shortName} 상대전적 — 아직 올 시즌 완료된 경기가 없습니다. 경기가 치러지면 여기에 결과와 AI 예측 성과가 기록됩니다.`;
@@ -222,6 +267,12 @@ function buildSummary(profile: {
   // 평균 득점 마진
   if (avgMargin) {
     text += ` 이 맞대결의 평균 득점차는 ${avgMargin.avgMargin}점입니다.`;
+  }
+
+  // 최근 N경기 한정 상대전적 — 전체 시즌 기록과 표본이 다를 때만 (동일하면 위 문장과 중복이라 skip)
+  if (recentRecord && finalGames > recentRecord.sampleSize) {
+    const { aWins, bWins, sampleSize } = recentRecord;
+    text += ` 최근 ${sampleSize}경기 맞대결에서는 ${teamA.shortName} ${aWins}승, ${teamB.shortName} ${bWins}승입니다.`;
   }
 
   return text;
@@ -288,6 +339,7 @@ export async function buildMatchupProfile(
       games: [],
       streak: null,
       avgMargin: null,
+      recentRecord: null,
       summary: buildSummary({
         teamA,
         teamB,
@@ -299,6 +351,7 @@ export async function buildMatchupProfile(
         predictionAccuracy: { verified: 0, correct: 0, rate: null },
         streak: null,
         avgMargin: null,
+        recentRecord: null,
       }),
     };
   }
@@ -466,6 +519,7 @@ export async function buildMatchupProfile(
   const sideStats = { a: sideA, b: sideB };
   const streak = computeMatchupStreak(games);
   const avgMargin = computeMatchupAvgMargin(games);
+  const recentRecord = computeMatchupRecentRecord(games, teamA.code, teamB.code);
   const summary = buildSummary({
     teamA,
     teamB,
@@ -474,6 +528,7 @@ export async function buildMatchupProfile(
     predictionAccuracy,
     streak,
     avgMargin,
+    recentRecord,
   });
 
   return {
@@ -487,6 +542,7 @@ export async function buildMatchupProfile(
     games,
     streak,
     avgMargin,
+    recentRecord,
     summary,
   };
 }

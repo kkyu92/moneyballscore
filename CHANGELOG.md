@@ -1,3 +1,15 @@
+## v0.5.62.12 — 2026-08-01 (cycle 2021, wave-613: 매치업 페이지 최근 N경기 상대전적)
+
+### feat(analysis): wave-613 — /matchup/[teamA]/[teamB] 최근 5경기 한정 상대전적 (cycle 2021)
+
+**신규: 매치업 요약 문장에 "최근 폼" 상대전적**
+- 매치업 페이지에 전체 시즌 기록(sideStats)과 연속 연승/연패(streak wave-610)는 있었지만 "최근 5경기만 보면 최근 흐름이 어떤지"는 없던 gap — 시즌 전체 기록에 묻혀 최근 폼 변화가 안 보임
+- `buildMatchupProfile.ts`: 신규 순수 함수 `computeMatchupRecentRecord(games, teamACode, teamBCode)` — `buildMatchupProfile` 이 이미 조회한 games 배열만으로 계산, 신규 DB 조회 없음. `status==='final'` 필터 후 game_date 내림차순 정렬된 배열 앞에서부터 최근 5경기(window)만 집계, 최소 2경기 미만 표본은 null (avgMargin 과 동일 기준)
+- `buildSummary()`: 전체 시즌 표본과 최근 표본이 다를 때만 (`finalGames > recentRecord.sampleSize`) 문장 추가 — 표본이 같으면 위 "올 시즌 상대전적" 문장과 완전 중복이라 skip
+- 테스트: `wave-613-matchup-recent-record.test.ts` 6 cases (표본 없음/1경기 부족/5경기 window/window 초과분 제외/예정 경기 제외/무승부 표본 처리)
+
+---
+
 ## v0.5.62.11 — 2026-07-28 (cycle 2020, wave-612: 매치업 페이지 Elo 레이팅 추이 비교)
 
 ### feat(analysis): wave-612 — /matchup/[teamA]/[teamB] 두 팀 Elo 레이팅 추이 비교 차트 (cycle 2020)
