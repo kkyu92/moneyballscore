@@ -457,6 +457,16 @@ export default async function TeamPage({ params }: PageProps) {
               시즌 평균 득점 마진 {profile.avgMargin.avgMargin}점 ({profile.avgMargin.sampleSize}경기)
             </p>
           )}
+          {(profile.blowout && profile.blowout.count > 0) ||
+          (profile.closeGame && profile.closeGame.count > 0) ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {profile.blowout && profile.blowout.count > 0 &&
+                `콜드게임(10점차 이상) ${profile.blowout.count}회 (${profile.blowout.sampleSize}경기 중)`}
+              {profile.blowout && profile.blowout.count > 0 && profile.closeGame && profile.closeGame.count > 0 && " · "}
+              {profile.closeGame && profile.closeGame.count > 0 &&
+                `박빙 승부(1점차) ${profile.closeGame.count}회 (${profile.closeGame.sampleSize}경기 중)`}
+            </p>
+          ) : null}
           <TeamRecentGamesFilter counts={filterCounts} />
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">

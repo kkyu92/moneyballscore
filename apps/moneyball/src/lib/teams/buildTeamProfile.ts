@@ -41,6 +41,8 @@ export interface TeamProfile {
   topPitchers: TeamPitcherRow[];
   recentGames: TeamRecentGame[];
   avgMargin: TeamAvgMargin | null;
+  blowout: TeamBlowoutStats | null;
+  closeGame: TeamCloseGameStats | null;
 }
 
 /** 팀 시즌 평균 득점 마진 최소 표본 — matchup computeMatchupAvgMargin 과 동일 기준 */
@@ -69,6 +71,66 @@ export function computeTeamAvgMargin(
     (g) => g.opponentScore,
     TEAM_AVG_MARGIN_MIN_GAMES,
   );
+}
+
+/** 콜드게임(대량 득점차) 판정 기준 — matchup computeMatchupBlowoutCount 과 동일 |자팀-상대| 10점 이상 */
+const TEAM_BLOWOUT_MARGIN = 10;
+/** 콜드게임 횟수 최소 표본 — 1~2경기 중 콜드게임 유무는 "이 팀 성향"이라 부르기 애매해 배제 */
+const TEAM_BLOWOUT_MIN_GAMES = 3;
+
+export interface TeamBlowoutStats {
+  count: number;
+  sampleSize: number;
+}
+
+/**
+ * 이 팀이 시즌 전체에서 콜드게임(|자팀-상대| >= TEAM_BLOWOUT_MARGIN) 을 겪은 횟수.
+ * buildMatchupProfile 의 computeMatchupBlowoutCount 는 두 팀 맞대결 한정 —
+ * "이 팀이 모든 상대 포함 시즌 전체에서" 몇 번이나 콜드게임을 겪었는지는 없던 gap.
+ * teamGames 배열만 재사용 (신규 DB 조회 없음).
+ */
+export function computeTeamBlowoutCount(
+  games: TeamRecentGame[],
+): TeamBlowoutStats | null {
+  const finals = games.filter(
+    (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
+  );
+  if (finals.length < TEAM_BLOWOUT_MIN_GAMES) return null;
+
+  const count = finals.filter(
+    (g) => Math.abs((g.ourScore as number) - (g.opponentScore as number)) >= TEAM_BLOWOUT_MARGIN,
+  ).length;
+
+  return { count, sampleSize: finals.length };
+}
+
+/** 박빙 승부(한 점차) 판정 기준 — matchup computeMatchupCloseGameCount 과 동일 |자팀-상대| == 1 */
+const TEAM_CLOSE_GAME_MARGIN = 1;
+/** 박빙 승부 횟수 최소 표본 — blowout 과 동일 기준 */
+const TEAM_CLOSE_GAME_MIN_GAMES = 3;
+
+export interface TeamCloseGameStats {
+  count: number;
+  sampleSize: number;
+}
+
+/**
+ * 이 팀이 시즌 전체에서 박빙 승부(|자팀-상대| === TEAM_CLOSE_GAME_MARGIN) 를 겪은 횟수.
+ * computeTeamBlowoutCount 의 대칭 지표 — teamGames 배열만 재사용 (신규 DB 조회 없음).
+ */
+export function computeTeamCloseGameCount(
+  games: TeamRecentGame[],
+): TeamCloseGameStats | null {
+  const finals = games.filter(
+    (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
+  );
+  if (finals.length < TEAM_CLOSE_GAME_MIN_GAMES) return null;
+
+  const count = finals.filter(
+    (g) => Math.abs((g.ourScore as number) - (g.opponentScore as number)) === TEAM_CLOSE_GAME_MARGIN,
+  ).length;
+
+  return { count, sampleSize: finals.length };
 }
 
 interface PredRow {
@@ -154,6 +216,8 @@ export async function buildTeamProfile(
       topPitchers: [],
       recentGames: [],
       avgMargin: null,
+      blowout: null,
+      closeGame: null,
     };
   }
 
@@ -368,6 +432,8 @@ export async function buildTeamProfile(
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
     .slice(0, 8);
   const avgMargin = computeTeamAvgMargin(teamGames);
+  const blowout = computeTeamBlowoutCount(teamGames);
+  const closeGame = computeTeamCloseGameCount(teamGames);
 
   return {
     code: teamCode,
@@ -395,5 +461,7 @@ export async function buildTeamProfile(
     topPitchers,
     recentGames,
     avgMargin,
+    blowout,
+    closeGame,
   };
 }
