@@ -3,13 +3,13 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe (cycle 1959 갱신 — /teams/[code]/recent sitemap 추가, Footer 컬럼 변경 없음):
+// Sitemap wireframe (cycle 2022 갱신 — /lotto 최상위 hub 로또 컬럼 추가, 기존 /calendar 패턴과 동일 gap):
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
 // │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
-// │ /         /picks    /standings /reviews   /method.. /mlb      /lotto/.. │
-// │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/ar │
-// │ /accuracy            /players   /reviews/m /glossary /mlb/team           │
+// │ /         /picks    /standings /reviews   /method.. /mlb      /lotto     │
+// │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/me. │
+// │ /accuracy            /players   /reviews/m /glossary /mlb/team /lotto/ar │
 // │ /dashboard           /matchup   /reviews/. /change.. /mlb/play..         │
 // │ /insights                        /seasons   /about    /mlb/fact..         │
 // │ /predictions                                /search   /mlb/wc..           │
@@ -87,6 +87,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
   {
     title: "로또",
     links: [
+      { href: "/lotto", label: "이번 주 조합" },
       { href: "/lotto/methodology", label: "통계 방법론" },
       { href: "/lotto/archive", label: "아카이브" },
     ],
