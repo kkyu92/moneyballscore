@@ -62,7 +62,7 @@ export interface TeamAvgMargin {
  * computeMatchupAvgMargin 과 독립 중복 통합.
  */
 export function computeTeamAvgMargin(
-  games: TeamRecentGame[],
+  games: StreakGame[],
 ): TeamAvgMargin | null {
   return computeAvgMarginFromFinalGames(
     games,
@@ -87,7 +87,7 @@ export interface TeamBlowoutStats {
  * computeMatchupBlowoutCount 과 독립 중복 통합.
  */
 export function computeTeamBlowoutCount(
-  games: TeamRecentGame[],
+  games: StreakGame[],
 ): TeamBlowoutStats | null {
   return computeMarginCountFromFinalGames(
     games,
@@ -111,7 +111,7 @@ export interface TeamCloseGameStats {
  * cycle 2036 review-code heavy, matchup 쪽 computeMatchupCloseGameCount 과 독립 중복 통합.
  */
 export function computeTeamCloseGameCount(
-  games: TeamRecentGame[],
+  games: StreakGame[],
 ): TeamCloseGameStats | null {
   return computeMarginCountFromFinalGames(
     games,
@@ -136,8 +136,11 @@ export interface TeamHomeAwaySplit {
  * 포함 시즌 전체에서" 홈/원정 성적이 뚜렷하게 다른지는 없던 gap. teamGames 배열만
  * 재사용 (신규 DB 조회 없음).
  */
+/** computeTeamHomeAwayEdge 이 실제로 읽는 필드만 (KBO/MLB TeamRecentGame 양쪽 구조적 호환). */
+export type HomeAwayGame = StreakGame & { isHome: boolean };
+
 export function computeTeamHomeAwayEdge(
-  games: TeamRecentGame[],
+  games: HomeAwayGame[],
 ): TeamHomeAwaySplit | null {
   let homeWins = 0;
   let homeGames = 0;
@@ -229,7 +232,7 @@ export interface TeamRecentRecord {
  * 최근 폼 전체를 못 보여줌). games 는 game_date 내림차순 정렬 전달 (streak 과 동일 계약).
  */
 export function computeTeamRecentRecord(
-  games: TeamRecentGame[],
+  games: StreakGame[],
 ): TeamRecentRecord | null {
   const finals = games.filter(
     (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,

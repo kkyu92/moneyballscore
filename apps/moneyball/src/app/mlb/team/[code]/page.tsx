@@ -261,6 +261,32 @@ export default async function MlbTeamPage({ params }: PageProps) {
               최근 {profile.streak.length}{profile.streak.result === "win" ? "연승" : "연패"} 중입니다
             </p>
           )}
+          {profile.avgMargin && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              시즌 평균 득점 마진 {profile.avgMargin.avgMargin}점 ({profile.avgMargin.sampleSize}경기)
+            </p>
+          )}
+          {(profile.blowout && profile.blowout.count > 0) ||
+          (profile.closeGame && profile.closeGame.count > 0) ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {profile.blowout && profile.blowout.count > 0 &&
+                `콜드게임(10점차 이상) ${profile.blowout.count}회 (${profile.blowout.sampleSize}경기 중)`}
+              {profile.blowout && profile.blowout.count > 0 && profile.closeGame && profile.closeGame.count > 0 && " · "}
+              {profile.closeGame && profile.closeGame.count > 0 &&
+                `박빙 승부(1점차) ${profile.closeGame.count}회 (${profile.closeGame.sampleSize}경기 중)`}
+            </p>
+          ) : null}
+          {profile.homeAwayEdge && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              홈/원정 성적 편차 — 홈 {profile.homeAwayEdge.homeWins}승/{profile.homeAwayEdge.homeGames}경기,
+              원정 {profile.homeAwayEdge.awayWins}승/{profile.homeAwayEdge.awayGames}경기로 차이가 뚜렷합니다
+            </p>
+          )}
+          {profile.recentRecord && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              최근 {profile.recentRecord.sampleSize}경기 {profile.recentRecord.wins}승 {profile.recentRecord.losses}패
+            </p>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>

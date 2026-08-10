@@ -196,12 +196,30 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
 
     // streak — KBO buildTeamProfile.computeTeamStreak 재사용 (LAD 두 경기 모두 승)
     expect(profile?.streak).toEqual({ result: 'win', length: 2 });
+
+    // avgMargin — KBO computeTeamAvgMargin 재사용 (LAD 두 경기 모두 마진 2점, MIN_GAMES=2 충족)
+    expect(profile?.avgMargin).toEqual({ avgMargin: 2, sampleSize: 2 });
+
+    // blowout/closeGame — MIN_GAMES=3 미충족 (샘플 2경기) → null
+    expect(profile?.blowout).toBeNull();
+    expect(profile?.closeGame).toBeNull();
+
+    // homeAwayEdge — VENUE_SPLIT_MIN_GAMES_PER_VENUE=2 미충족 (LAD 홈 1경기/원정 1경기) → null
+    expect(profile?.homeAwayEdge).toBeNull();
+
+    // recentRecord — MIN_GAMES=2 충족, LAD 두 경기 모두 승
+    expect(profile?.recentRecord).toEqual({ wins: 2, losses: 0, sampleSize: 2 });
   });
 
-  it('teams row 부재 → streak null (emptyProfile)', async () => {
+  it('teams row 부재 → streak/avgMargin/blowout/closeGame/homeAwayEdge/recentRecord null (emptyProfile)', async () => {
     supabaseMock = makeSupabaseMock({ teamRow: null });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
     const profile = await buildMlbTeamProfile('LAD');
     expect(profile?.streak).toBeNull();
+    expect(profile?.avgMargin).toBeNull();
+    expect(profile?.blowout).toBeNull();
+    expect(profile?.closeGame).toBeNull();
+    expect(profile?.homeAwayEdge).toBeNull();
+    expect(profile?.recentRecord).toBeNull();
   });
 });
