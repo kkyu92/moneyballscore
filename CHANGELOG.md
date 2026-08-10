@@ -1,3 +1,21 @@
+## v0.5.62.14 — 2026-08-10 (cycle 2044, op-analysis lite: CE dominance 100% escalation)
+
+### operational-analysis (lite): cycle 2044 — v1.8 성과 측정 + CE dominance 심화 패턴
+
+**현황 (2026-08-10 기준, 25-cycle 주기 트리거 자동 발화 — 마지막 발화 cycle 2019)**
+- v1.8 누적: n=259 (+72 vs cycle 1549 n=187), acc=54.4% (-5.5pp vs 59.9%), 신뢰도(confidence) 기반 Brier=0.3211 (home_win_prob 기반 Brier와 다른 산식 — 사례 반복 확인, 측정 오류 아님 별개 지표)
+- 최근 50건 / 최근 20건 모두 `debate_version=null` **100%** — cycle 1930 측정 시 최근 20건 중 30% (6/20) 였던 CE 비율이 100%로 심화
+- `llm_fallback_events` 테이블 (cycle 1495 박제, `LLM_BACKEND_FALLBACK` 자동 failover 기록용) 전체 기간 **0건** — fallback backend 미설정 또는 미작동, CREDIT_EXHAUSTED 발생 시 순수 quant-only 로 떨어짐 확인
+
+**패턴 P1 후속 (CE-Accuracy Trap 심화, anti_pattern, cycle 1930 최초 박제)**
+- CE 비율 30%→100% 심화와 누적 정확도 59.9%→54.4% 하락이 같은 방향 — 인과 단정은 X (여전히 사용자 크레딧 미충전 상태 지속 중이라 신규 evidence 아님), 다만 심화 정도가 이전 측정보다 뚜렷해짐
+- 대응 동일: 사용자 Anthropic 크레딧 충전 필요. 가중치 재조정 (v1.8 유지 확정 결정 변경) 은 여전히 부적절 — CE fallback 자체가 원인이라 가중치 문제 아님
+
+**결정 없음 (lite scope)**: 가중치 re-fit 소진된 카드 (v2.1-B 증거) 유지. 측정만 박제, 코드 변경 없음.
+- weekly cron (`op-analysis-weekly.yml`, plan #8 Tier 1 M7) 이미 동일 cohort-split 을 매주 자동 측정 중 — 본 cycle 은 25-gap 주기 트리거 재확인 + CE dominance 심화 추세 명시적 박제 목적
+
+---
+
 ## v0.5.62.13 — 2026-08-01 (cycle 2024, wave-614: 매치업 페이지 콜드게임 횟수)
 
 ### feat(analysis): wave-614 — /matchup/[teamA]/[teamB] 콜드게임(대량 득점차) 횟수 (cycle 2024)
