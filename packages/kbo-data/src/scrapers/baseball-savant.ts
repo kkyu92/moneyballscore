@@ -141,10 +141,11 @@ async function fetchStatcastQuality(season: number): Promise<StatcastRow[]> {
 }
 
 export async function fetchSavantTeamStatcast(season: number): Promise<SavantTeam[]> {
-  const [expected, statcast] = await Promise.all([
-    fetchExpectedStats(season),
-    fetchStatcastQuality(season),
-  ]);
+  // 순차 호출 필수 — rateLimit() 의 lastFetchAt 이 모듈 전역 mutable 상태라
+  // Promise.all 로 동시 호출 시 TOCTOU race (두 호출 모두 elapsed 를 독립 검사 후 갱신) 발생.
+  // 같은 호스트(Savant) 호출이라 직렬화가 rate-limit 의도에도 부합.
+  const expected = await fetchExpectedStats(season);
+  const statcast = await fetchStatcastQuality(season);
 
   const statcastByTeam = new Map(statcast.map((r) => [r.teamCode, r]));
 
