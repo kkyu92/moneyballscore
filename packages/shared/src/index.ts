@@ -3063,3 +3063,11 @@ export const MARGIN_CLOSE_GAME_MIN_GAMES = 3;
 export const VENUE_SPLIT_MIN_GAMES_PER_VENUE = 2;
 /** 홈/원정 승률 차이가 이 %p 이상이어야 "편중" 으로 언급 — 우연한 소표본 노이즈 배제. */
 export const VENUE_SPLIT_MIN_GAP_PCT = 40;
+
+/**
+ * explore-idea(heavy) cycle 2049: 투수 프로필 페이지에 이 선수가 선발 등판한 경기의
+ * 팀 실제 승/패 기록(팀 예측 적중률 accuracyRate 와는 별개 지표)이 없던 gap — appearances
+ * 안 ourScore/opponentScore 는 이미 조회돼있었지만 W/L 집계가 없어 미사용이었음.
+ * 1경기만으론 "이 투수 등판 시 성적"이라 부르기 애매해 배제 (RECENT_RECORD_MIN_GAMES 와 동일 기준).
+ */
+export const PITCHER_TEAM_RECORD_MIN_GAMES = 2;

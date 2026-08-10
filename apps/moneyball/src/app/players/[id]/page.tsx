@@ -187,6 +187,13 @@ export default async function PlayerProfilePage({ params }: PageProps) {
         </div>
       </section>
 
+      {profile.teamRecord && (
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {profile.nameKo}이(가) 선발 등판한 경기에서 팀은 {profile.teamRecord.wins}승{" "}
+          {profile.teamRecord.losses}패를 기록했습니다 ({profile.teamRecord.sampleSize}경기).
+        </p>
+      )}
+
       {(() => {
         const trendPoints = buildPitcherFipTrend(profile.recent);
         if (trendPoints.length < 3) return null;

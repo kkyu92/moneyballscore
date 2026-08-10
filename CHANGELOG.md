@@ -1,3 +1,11 @@
+## v0.5.62.16 — 2026-08-10 (cycle 2049, explore-idea: 투수 프로필 선발 등판 시 팀 실제 승/패 기록)
+
+### feat(analysis): wave-624 — 선수 프로필 페이지에 "이 투수 선발 등판 시 팀 실제 승/패" 추가
+
+`buildPitcherProfile` 이 이미 조회해오던 `ourScore`/`opponentScore`/`status` 를 W/L 집계 없이 방치하고 있던 gap. `accuracyRate`(AI 예측 적중 여부)와는 별개로, 이 투수가 선발 등판했을 때 팀이 실제로 몇 승 몇 패였는지는 없던 지표. `computePitcherTeamRecord` 신규 함수(신규 DB 조회 없이 기존 appearances 배열만 재사용) + `PITCHER_TEAM_RECORD_MIN_GAMES=2` (`packages/shared`, RECENT_RECORD_MIN_GAMES 와 동일 기준) 로 최소 표본 미만은 배제. `/players/[id]` 페이지에 한 줄 요약 문장 렌더링. 신규 테스트 4건 (`computePitcherTeamRecord.test.ts`).
+
+---
+
 ## v0.5.62.15 — 2026-08-10 (cycle 2047, fix-incident: VERSION/package.json/CHANGELOG 3-way 재동기화 — wave-615~623 catch-up)
 
 ### fix(context): VERSION 파일 213-cycle 미갱신 + wave-615~623 CHANGELOG silent skip 발견 (cycle 2047)
