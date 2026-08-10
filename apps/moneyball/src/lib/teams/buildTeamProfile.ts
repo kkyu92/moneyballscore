@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES, MARGIN_AVG_MIN_GAMES, MARGIN_BLOWOUT_THRESHOLD, MARGIN_BLOWOUT_MIN_GAMES, MARGIN_CLOSE_GAME_THRESHOLD, MARGIN_CLOSE_GAME_MIN_GAMES, VENUE_SPLIT_MIN_GAMES_PER_VENUE, VENUE_SPLIT_MIN_GAP_PCT } from '@moneyball/shared';
 import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -48,9 +48,6 @@ export interface TeamProfile {
   recentRecord: TeamRecentRecord | null;
 }
 
-/** 팀 시즌 평균 득점 마진 최소 표본 — matchup computeMatchupAvgMargin 과 동일 기준 */
-const TEAM_AVG_MARGIN_MIN_GAMES = 2;
-
 export interface TeamAvgMargin {
   avgMargin: number;
   sampleSize: number;
@@ -72,14 +69,9 @@ export function computeTeamAvgMargin(
     (g) => g.status === "final",
     (g) => g.ourScore,
     (g) => g.opponentScore,
-    TEAM_AVG_MARGIN_MIN_GAMES,
+    MARGIN_AVG_MIN_GAMES,
   );
 }
-
-/** 콜드게임(대량 득점차) 판정 기준 — matchup computeMatchupBlowoutCount 과 동일 |자팀-상대| 10점 이상 */
-const TEAM_BLOWOUT_MARGIN = 10;
-/** 콜드게임 횟수 최소 표본 — 1~2경기 중 콜드게임 유무는 "이 팀 성향"이라 부르기 애매해 배제 */
-const TEAM_BLOWOUT_MIN_GAMES = 3;
 
 export interface TeamBlowoutStats {
   count: number;
@@ -87,7 +79,7 @@ export interface TeamBlowoutStats {
 }
 
 /**
- * 이 팀이 시즌 전체에서 콜드게임(|자팀-상대| >= TEAM_BLOWOUT_MARGIN) 을 겪은 횟수.
+ * 이 팀이 시즌 전체에서 콜드게임(|자팀-상대| >= MARGIN_BLOWOUT_THRESHOLD) 을 겪은 횟수.
  * buildMatchupProfile 의 computeMatchupBlowoutCount 는 두 팀 맞대결 한정 —
  * "이 팀이 모든 상대 포함 시즌 전체에서" 몇 번이나 콜드게임을 겪었는지는 없던 gap.
  * teamGames 배열만 재사용 (신규 DB 조회 없음). 계산 로직 자체는 packages/shared 단일 source
@@ -102,15 +94,10 @@ export function computeTeamBlowoutCount(
     (g) => g.status === "final",
     (g) => g.ourScore,
     (g) => g.opponentScore,
-    (margin) => margin >= TEAM_BLOWOUT_MARGIN,
-    TEAM_BLOWOUT_MIN_GAMES,
+    (margin) => margin >= MARGIN_BLOWOUT_THRESHOLD,
+    MARGIN_BLOWOUT_MIN_GAMES,
   );
 }
-
-/** 박빙 승부(한 점차) 판정 기준 — matchup computeMatchupCloseGameCount 과 동일 |자팀-상대| == 1 */
-const TEAM_CLOSE_GAME_MARGIN = 1;
-/** 박빙 승부 횟수 최소 표본 — blowout 과 동일 기준 */
-const TEAM_CLOSE_GAME_MIN_GAMES = 3;
 
 export interface TeamCloseGameStats {
   count: number;
@@ -118,7 +105,7 @@ export interface TeamCloseGameStats {
 }
 
 /**
- * 이 팀이 시즌 전체에서 박빙 승부(|자팀-상대| === TEAM_CLOSE_GAME_MARGIN) 를 겪은 횟수.
+ * 이 팀이 시즌 전체에서 박빙 승부(|자팀-상대| === MARGIN_CLOSE_GAME_THRESHOLD) 를 겪은 횟수.
  * computeTeamBlowoutCount 의 대칭 지표 — teamGames 배열만 재사용 (신규 DB 조회 없음).
  * 계산 로직 자체는 packages/shared 단일 source (computeMarginCountFromFinalGames) —
  * cycle 2036 review-code heavy, matchup 쪽 computeMatchupCloseGameCount 과 독립 중복 통합.
@@ -131,15 +118,10 @@ export function computeTeamCloseGameCount(
     (g) => g.status === "final",
     (g) => g.ourScore,
     (g) => g.opponentScore,
-    (margin) => margin === TEAM_CLOSE_GAME_MARGIN,
-    TEAM_CLOSE_GAME_MIN_GAMES,
+    (margin) => margin === MARGIN_CLOSE_GAME_THRESHOLD,
+    MARGIN_CLOSE_GAME_MIN_GAMES,
   );
 }
-
-/** 팀 홈/원정 승률 편차 최소 표본 (벤뉴별) — matchup computeMatchupHomeAwayEdge 과 동일 기준 */
-const TEAM_HOME_AWAY_MIN_GAMES_PER_VENUE = 2;
-/** 편차 최소 격차(%p) — matchup computeMatchupHomeAwayEdge 과 동일 기준 */
-const TEAM_HOME_AWAY_MIN_GAP_PCT = 40;
 
 export interface TeamHomeAwaySplit {
   homeWins: number;
@@ -176,15 +158,15 @@ export function computeTeamHomeAwayEdge(
   }
 
   if (
-    homeGames < TEAM_HOME_AWAY_MIN_GAMES_PER_VENUE ||
-    awayGames < TEAM_HOME_AWAY_MIN_GAMES_PER_VENUE
+    homeGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE ||
+    awayGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE
   ) {
     return null;
   }
 
   const homeRate = (homeWins / homeGames) * 100;
   const awayRate = (awayWins / awayGames) * 100;
-  if (Math.abs(homeRate - awayRate) < TEAM_HOME_AWAY_MIN_GAP_PCT) return null;
+  if (Math.abs(homeRate - awayRate) < VENUE_SPLIT_MIN_GAP_PCT) return null;
 
   return { homeWins, homeGames, awayWins, awayGames };
 }
