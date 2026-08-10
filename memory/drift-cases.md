@@ -416,3 +416,21 @@ cycle 2000 이 R7 자동 머지 (`gh pr merge --auto`) 실패를 감지 (repo Gr
 **관련 family**:
 - 사례 15 (develop-cycle 자체 retro 박제 layer silent) — 같은 자기참조 layer, 본 사례는 retro 존재하되 내용 불일치라는 점에서 상이
 - 사례 17 (pnpm-lock CI+prod 이중 silent) — R7/CI 관련 develop-cycle 진단 맹점 계열
+
+---
+
+### 사례 19 — skill-evolution trigger 3 (milestone) silent skip → 50 cycle 자가 진화 공백 (cycle 2051 발견, retroactive cycle 2000)
+
+cycle 2000 이 `(milestone)` 라벨로 실행됐으나 cycle_state JSON 의 diagnosis 에 trigger 5 (직전 20 cycle chain 0회 발화) 평가만 기록되고, trigger 3 (`cycle_n % 50 == 0`) 평가나 `skill-evolution-pending` marker 박제 자체가 어디에도 없음 — explore-idea(heavy) 로 곧바로 진행. 이전 milestone (1900→1901, 1950→1951 등) 은 모두 retro 에 "milestone deferred X→X+1 via marker 파일 정상 박제" 를 명시했던 것과 대조.
+
+**blast radius**: cycle 2000~2049 (50 cycle) 동안 `chain_selected` 에 `skill-evolution` 매칭 0건 — 다음 마커는 cycle 2050 (`2050 % 50 == 0`) 이 되어서야 정상 박제됨. 그 사이 SKILL.md/MIGRATION-PATH.md 자가 진화 갱신도 50 cycle 통째로 공백.
+
+**발견 경로**: cycle 2051 forced skill-evolution (cycle 2050 marker 소비) 진행 중 MIGRATION-PATH.md 최신 항목이 "Next: cycle 2000" 에서 멈춰 있고 그 이후 항목이 없음을 발견 → cycle 2000.json 직접 read 로 trigger 3 평가 누락 확인.
+
+**핵심 gap**: trigger 5(0회 발화 chain) 평가가 "충족 X" 로 나오면 그 사이클 전체를 정상 진행으로 착각하기 쉬운 구조 — trigger 3 는 트리거 5 와 무관하게 항상 독립 평가돼야 하는데 실제로는 trigger 5 평가에 딸려 암묵적으로 skip 됨.
+
+**fix (cycle 2051)**: SKILL.md skill-evolution trigger 표 3번 행에 "다른 trigger 와 독립적으로 항상 먼저 체크" 명시 추가. MIGRATION-PATH.md 에 cycle 2000(retroactive gap 기록)/cycle 2050(정상 phase 28 요약) 항목 append.
+
+**관련 family**:
+- 사례 15 (develop-cycle 자체 retro 박제 layer silent) — 같은 자기참조 layer, 본 사례는 retro/JSON 자체는 박제되나 **트리거 평가 스텝 자체가 빠졌다**는 점에서 새 변종
+- 사례 18 (retro 완료형 서술 vs 미실행) — 같은 cycle 2000~2001 구간에서 동시 발생한 별개 self-referential drift (머지 vs marker, 서로 독립)
