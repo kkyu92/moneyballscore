@@ -6,6 +6,7 @@ import {
   type SelectResult,
   type TeamCode,
   RECENT_FORM_GAMES,
+  PITCHER_TEAM_RECORD_MIN_GAMES,
 } from '@moneyball/shared';
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 
@@ -39,6 +40,36 @@ export interface PitcherProfile {
   verifiedN: number;
   accuracyRate: number | null;
   recent: PitcherAppearance[];
+  teamRecord: PitcherTeamRecord | null;
+}
+
+export interface PitcherTeamRecord {
+  wins: number;
+  losses: number;
+  sampleSize: number;
+}
+
+/**
+ * 이 투수가 선발 등판한 경기의 팀 실제 승/패 (final 기준). accuracyRate 는 AI 예측
+ * 적중 여부이고, 본 지표는 예측과 무관한 실제 결과 — 별개 관심사. appearances 는
+ * buildPitcherProfile 안에서 이미 ourScore/opponentScore 를 담고 있어 신규 DB 조회 없음.
+ */
+export function computePitcherTeamRecord(
+  appearances: PitcherAppearance[],
+): PitcherTeamRecord | null {
+  let wins = 0;
+  let losses = 0;
+
+  for (const a of appearances) {
+    if (a.status !== "final") continue;
+    if (a.ourScore == null || a.opponentScore == null) continue;
+    if (a.ourScore > a.opponentScore) wins += 1;
+    else if (a.ourScore < a.opponentScore) losses += 1;
+  }
+
+  const sampleSize = wins + losses;
+  if (sampleSize < PITCHER_TEAM_RECORD_MIN_GAMES) return null;
+  return { wins, losses, sampleSize };
 }
 
 interface PlayerRow {
@@ -188,6 +219,7 @@ export async function buildPitcherProfile(
 
   appearances.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
   const recent = appearances.slice(0, RECENT_FORM_GAMES);
+  const teamRecord = computePitcherTeamRecord(appearances);
 
   return {
     playerId: p.id,
@@ -204,5 +236,6 @@ export async function buildPitcherProfile(
     verifiedN,
     accuracyRate: verifiedN > 0 ? correctN / verifiedN : null,
     recent,
+    teamRecord,
   };
 }
