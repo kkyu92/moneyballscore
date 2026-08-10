@@ -1,3 +1,9 @@
+## v0.5.62.22 — 2026-08-10 (cycle 2058, fix-incident: CI red on main — baseball-savant rate-limit race + root package.json version drift)
+
+### fix(mlb): Savant scraper rate-limit race condition + version-sync drift
+
+cycle 2057 이 "Savant scraper 스키마 복구" 를 SUCCESS 로 박제했으나 그 병합 커밋(5bbc8f5c) 자체의 CI 가 red — `baseball-savant.test.ts` 2개 테스트가 간헐적으로 실패(로컬 재현 시 매번 다른 테스트가 실패). 원인 = 스키마가 아니라 `fetchSavantTeamStatcast` 가 `fetchExpectedStats`/`fetchStatcastQuality` 를 `Promise.all` 로 동시 호출하면서 두 함수가 공유하는 모듈 전역 `lastFetchAt`(rate limiter 상태) 을 각자 독립적으로 read-then-write — real timer(`setTimeout`) 기반이라 어느 쪽 `fetch()` 가 먼저 실제로 resolve 되는지 비결정적. 테스트가 `mockResolvedValueOnce` 를 호출 순서대로 쌓아두므로, race 로 순서가 뒤바뀌면 `fetchStatcastQuality` 가 `fetchExpectedStats` 용 CSV(반대로 컬럼 shape 이 다름)를 받아 "CSV format 변경" 오탐. 실제 스키마 문제 아님 — 두 호출을 순차(`await` 직렬)로 바꿔 해결(같은 호스트 호출이라 직렬화가 rate-limit 의도에도 더 부합, 프로덕션에서도 존재하던 TOCTOU race 동시 제거). 부수적으로 `version-sync-guard.test.ts` 가 잡은 루트 `package.json`(0.5.62.20) vs `apps/moneyball/package.json`(0.5.62.21) 버전 drift(cycle 2056 ship 시 루트 미갱신) 도 정정. `pnpm test` 전량 통과(kbo-data savant 테스트 5연속 재실행 flake 0), `pnpm lint` clean, `pnpm --filter @moneyball/shared type-check` / `pnpm --filter moneyball type-check` / `pnpm --filter @moneyball/kbo-data type-check` 통과. 사례 18 (retro "완료" 서술 전 실측 확인 의무) 정합 — 이번 cycle 은 머지 전 CI green 실제 확인 후에만 SUCCESS 박제.
+
 ## v0.5.62.21 — 2026-08-10 (cycle 2056, explore-idea (heavy): plan #24 Phase 2a — MLB 매치업 시즌 평균 팩터 비교)
 
 ### feat(analysis): wave-629 — `/mlb/matchup/[teamA]/[teamB]` 시즌 평균 팩터 비교 섹션 (KO+EN)
