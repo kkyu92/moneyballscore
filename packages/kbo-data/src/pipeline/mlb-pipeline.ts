@@ -29,8 +29,29 @@ import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
 } from './silent-drift-alert';
-import { ELO_NEUTRAL } from '@moneyball/shared';
+import { ELO_NEUTRAL, MLB_TEAMS } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
+
+// mlb_predict_final 실측 데이터 fallback 기본값 — mlb_team_stats row 부재(스크래퍼 미가동/미커버 팀) 시에만 사용.
+// cycle 2057 이전엔 이 값들이 항상, 무조건 쓰였음 (모든 MLB 예측 home_win_prob 고정 0.556 — 사례 20).
+const MLB_STAT_DEFAULTS = {
+  woba: 0.320,
+  fip: 4.0,
+  xfip: 4.0,
+  war: 0,
+  xwoba: 0.320,
+  barrelPct: 8,
+} as const;
+
+interface MlbTeamStatsRow {
+  team_code: string;
+  woba: number | null;
+  fip: number | null;
+  xfip: number | null;
+  war: number | null;
+  xwoba: number | null;
+  barrel_pct: number | null;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = ReturnType<typeof createClient<any, any, any>>;
@@ -213,6 +234,7 @@ async function runSavantScrape(db: DB, date: string): Promise<{ gamesFound: numb
 // ─────────────────────────────────────────────
 async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
   const errors: string[] = [];
+  const season = parseInt(date.slice(0, 4), 10);
 
   // Load today's MLB games from mlb_schedule
   const { data: games, error: gErr } = await db
@@ -231,21 +253,37 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
+  // mlb_team_stats 실측 조회 (cycle 2057 wiring — mlb_fancy_scrape/mlb_savant_scrape 가 채워둔 값을
+  // 이제야 소비. row 부재 팀/컬럼은 MLB_STAT_DEFAULTS fallback — 부분 데이터도 안전.
+  const { data: statsRows } = await db
+    .from('mlb_team_stats')
+    .select('team_code, woba, fip, xfip, war, xwoba, barrel_pct')
+    .eq('season', season);
+
+  const statsByTeam = new Map<string, MlbTeamStatsRow>();
+  for (const row of (statsRows ?? []) as MlbTeamStatsRow[]) {
+    statsByTeam.set(row.team_code, row);
+  }
+
   const predictionRows = gameList.map((g) => {
+    const home = statsByTeam.get(g.home_team_code);
+    const away = statsByTeam.get(g.away_team_code);
+    const homeParkPf = (MLB_TEAMS as Record<string, { parkPf: number }>)[g.home_team_code]?.parkPf;
+
     const prob = computeMlbProbability({
-      sp_fip: { home: 4.0, away: 4.0 },
-      sp_xfip: { home: 4.0, away: 4.0 },
-      lineup_woba: { home: 0.320, away: 0.320 },
-      bullpen_fip: { home: 4.0, away: 4.0 },
+      sp_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
+      sp_xfip: { home: home?.xfip ?? MLB_STAT_DEFAULTS.xfip, away: away?.xfip ?? MLB_STAT_DEFAULTS.xfip },
+      lineup_woba: { home: home?.woba ?? MLB_STAT_DEFAULTS.woba, away: away?.woba ?? MLB_STAT_DEFAULTS.woba },
+      bullpen_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
       recent_form: { home: 50, away: 50 },
-      war: { home: 0, away: 0 },
+      war: { home: home?.war ?? MLB_STAT_DEFAULTS.war, away: away?.war ?? MLB_STAT_DEFAULTS.war },
       head_to_head: { homeWinRate: 0.5 },
-      park_factor: 1.0,
+      park_factor: homeParkPf != null ? homeParkPf / 100 : 1.0,
       elo: { home: ELO_NEUTRAL, away: ELO_NEUTRAL },
       defense_sfr: { home: 0, away: 0 },
-      lineup_xwoba: { home: 0.320, away: 0.320 },
-      lineup_barrel_pct: { home: 0.08, away: 0.08 },
-      sp_xwoba_against: { home: 0.320, away: 0.320 },
+      lineup_xwoba: { home: home?.xwoba ?? MLB_STAT_DEFAULTS.xwoba, away: away?.xwoba ?? MLB_STAT_DEFAULTS.xwoba },
+      lineup_barrel_pct: { home: home?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct, away: away?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct },
+      sp_xwoba_against: { home: MLB_STAT_DEFAULTS.xwoba, away: MLB_STAT_DEFAULTS.xwoba },
       woba_std: { home: 0.030, away: 0.030 },
     });
     return {
