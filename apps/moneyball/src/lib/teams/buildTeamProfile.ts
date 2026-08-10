@@ -40,6 +40,7 @@ export interface TeamProfile {
   factorAverages: TeamFactorAverages;
   topPitchers: TeamPitcherRow[];
   recentGames: TeamRecentGame[];
+  streak: TeamStreak | null;
   avgMargin: TeamAvgMargin | null;
   blowout: TeamBlowoutStats | null;
   closeGame: TeamCloseGameStats | null;
@@ -187,6 +188,44 @@ export function computeTeamHomeAwayEdge(
   return { homeWins, homeGames, awayWins, awayGames };
 }
 
+/** 팀 연승/연패 스트릭 최소 길이 — matchup computeMatchupStreak 과 동일 기준 (1승만으론 애매) */
+const TEAM_STREAK_MIN_LENGTH = 2;
+
+export interface TeamStreak {
+  result: "win" | "loss";
+  length: number;
+}
+
+/**
+ * 이 팀의 시즌 전체(모든 상대 포함) 최근 연승/연패.
+ * buildMatchupProfile 의 computeMatchupStreak 은 두 팀 맞대결 한정 스트릭 —
+ * "이 팀이 모든 상대 포함 최근 전체 흐름에서" 몇 연승/연패 중인지는 없던 gap.
+ * teamGames 는 buildTeamProfile 안에서 game_date 내림차순 정렬 후 전달.
+ */
+export function computeTeamStreak(games: TeamRecentGame[]): TeamStreak | null {
+  const finals = games.filter(
+    (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
+  );
+  if (finals.length === 0) return null;
+
+  const first = finals[0];
+  if (first.ourScore === first.opponentScore) return null; // 무승부는 스트릭 없음
+
+  const result: "win" | "loss" =
+    (first.ourScore as number) > (first.opponentScore as number) ? "win" : "loss";
+
+  let length = 0;
+  for (const g of finals) {
+    if (g.ourScore === g.opponentScore) break;
+    const won = (g.ourScore as number) > (g.opponentScore as number);
+    if ((won ? "win" : "loss") !== result) break;
+    length += 1;
+  }
+
+  if (length < TEAM_STREAK_MIN_LENGTH) return null;
+  return { result, length };
+}
+
 interface PredRow {
   confidence: number | null;
   is_correct: boolean | null;
@@ -268,6 +307,7 @@ export async function buildTeamProfile(
       factorAverages: EMPTY_FACTOR_AVERAGES,
       topPitchers: [],
       recentGames: [],
+      streak: null,
       avgMargin: null,
       blowout: null,
       closeGame: null,
@@ -485,6 +525,7 @@ export async function buildTeamProfile(
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
     .slice(0, 8);
   const factorAverages = computeFactorAveragesFromPerspectives(factorPerspectives);
+  const streak = computeTeamStreak(teamGames);
   const avgMargin = computeTeamAvgMargin(teamGames);
   const blowout = computeTeamBlowoutCount(teamGames);
   const closeGame = computeTeamCloseGameCount(teamGames);
@@ -508,6 +549,7 @@ export async function buildTeamProfile(
     factorAverages,
     topPitchers,
     recentGames,
+    streak,
     avgMargin,
     blowout,
     closeGame,
