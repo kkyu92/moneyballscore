@@ -193,5 +193,15 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(profile?.recentGames[0].gameDate).toBe('2026-05-22');
     expect(profile?.recentGames[0].opponentCode).toBe('SFG');
     expect(profile?.recentGames[0].isHome).toBe(false);
+
+    // streak — KBO buildTeamProfile.computeTeamStreak 재사용 (LAD 두 경기 모두 승)
+    expect(profile?.streak).toEqual({ result: 'win', length: 2 });
+  });
+
+  it('teams row 부재 → streak null (emptyProfile)', async () => {
+    supabaseMock = makeSupabaseMock({ teamRow: null });
+    const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
+    const profile = await buildMlbTeamProfile('LAD');
+    expect(profile?.streak).toBeNull();
   });
 });

@@ -258,6 +258,11 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           <h2 id="mlb-team-recent-title" className="text-lg font-bold">
             Recent Prediction History
           </h2>
+          {profile.streak && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              On a {profile.streak.length}-game {profile.streak.result === "win" ? "win" : "losing"} streak
+            </p>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>

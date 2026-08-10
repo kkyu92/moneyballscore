@@ -6,6 +6,7 @@ import {
   mlbTeamDivision,
   assertSelectOk,
 } from '@moneyball/shared';
+import { computeTeamStreak, type TeamStreak } from '@/lib/teams/buildTeamProfile';
 
 export interface MlbTeamRecentGame {
   gameId: number;
@@ -49,6 +50,7 @@ export interface MlbTeamProfile {
   accuracyRate: number | null;
   factorAverages: MlbTeamFactorAverages;
   recentGames: MlbTeamRecentGame[];
+  streak: TeamStreak | null;
 }
 
 interface GameRow {
@@ -135,6 +137,7 @@ export async function buildMlbTeamProfile(
       lineupBarrelPct: null,
     },
     recentGames: [],
+    streak: null,
   };
 
   if (teamId == null) return emptyProfile;
@@ -240,6 +243,7 @@ export async function buildMlbTeamProfile(
   const recentGames = teamGames
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
     .slice(0, 8);
+  const streak = computeTeamStreak(teamGames);
 
   return {
     ...emptyProfile,
@@ -259,5 +263,6 @@ export async function buildMlbTeamProfile(
       lineupBarrelPct: safeAvg(barrelSum, barrelN),
     },
     recentGames,
+    streak,
   };
 }

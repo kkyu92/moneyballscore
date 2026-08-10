@@ -256,6 +256,11 @@ export default async function MlbTeamPage({ params }: PageProps) {
           <h2 id="mlb-team-recent-title" className="text-lg font-bold">
             최근 예측 기록
           </h2>
+          {profile.streak && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              최근 {profile.streak.length}{profile.streak.result === "win" ? "연승" : "연패"} 중입니다
+            </p>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
