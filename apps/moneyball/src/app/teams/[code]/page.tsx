@@ -506,6 +506,11 @@ export default async function TeamPage({ params }: PageProps) {
               원정 {profile.homeAwayEdge.awayWins}승/{profile.homeAwayEdge.awayGames}경기로 차이가 뚜렷합니다
             </p>
           )}
+          {profile.recentRecord && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              최근 {profile.recentRecord.sampleSize}경기 {profile.recentRecord.wins}승 {profile.recentRecord.losses}패
+            </p>
+          )}
           <TeamRecentGamesFilter counts={filterCounts} />
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
