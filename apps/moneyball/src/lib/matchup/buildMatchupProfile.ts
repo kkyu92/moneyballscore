@@ -9,6 +9,7 @@ import {
   shortTeamName,
   type SelectResult,
   type TeamCode,
+  WIN_LOSS_STREAK_MIN_LENGTH,
 } from "@moneyball/shared";
 import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import type { MatchupPair } from "./canonicalPair";
@@ -117,9 +118,6 @@ function makeSideStat(
   };
 }
 
-/** 맞대결 최근 연승/연패 스트릭 최소 길이 — 1승만으론 "스트릭"이라 부르기 애매해 배제 */
-const MATCHUP_STREAK_MIN_LENGTH = 2;
-
 export interface MatchupStreak {
   teamCode: TeamCode;
   length: number;
@@ -147,7 +145,7 @@ export function computeMatchupStreak(
     length += 1;
   }
 
-  if (length < MATCHUP_STREAK_MIN_LENGTH) return null;
+  if (length < WIN_LOSS_STREAK_MIN_LENGTH) return null;
   return { teamCode: streakCode, length };
 }
 

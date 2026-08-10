@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH } from '@moneyball/shared';
 import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -188,9 +188,6 @@ export function computeTeamHomeAwayEdge(
   return { homeWins, homeGames, awayWins, awayGames };
 }
 
-/** 팀 연승/연패 스트릭 최소 길이 — matchup computeMatchupStreak 과 동일 기준 (1승만으론 애매) */
-const TEAM_STREAK_MIN_LENGTH = 2;
-
 export interface TeamStreak {
   result: "win" | "loss";
   length: number;
@@ -222,7 +219,7 @@ export function computeTeamStreak(games: TeamRecentGame[]): TeamStreak | null {
     length += 1;
   }
 
-  if (length < TEAM_STREAK_MIN_LENGTH) return null;
+  if (length < WIN_LOSS_STREAK_MIN_LENGTH) return null;
   return { result, length };
 }
 
