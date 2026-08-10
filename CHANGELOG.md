@@ -1,3 +1,11 @@
+## v0.5.62.18 — 2026-08-10 (cycle 2052, explore-idea: MLB 팀 프로필 avgMargin/blowout/closeGame/homeAwayEdge/recentRecord parity)
+
+### feat(analysis): wave-626 — MLB 팀 프로필에 KBO parity 나머지 5개 팩터 추가
+
+cycle 2050 이 streak 1개만 우선 처리(스코프 절제)하고 남긴 5개 parity gap(avgMargin/blowout/closeGame/homeAwayEdge/recentRecord) 을 한 번에 처리. `computeTeamStreak` 때 확립한 "실제로 읽는 필드만 요구하는 구조적 타입으로 좁혀 KBO/MLB 양쪽 재사용" 패턴을 그대로 반복 — `computeTeamAvgMargin`/`computeTeamBlowoutCount`/`computeTeamCloseGameCount`/`computeTeamRecentRecord` 파라미터를 기존 `StreakGame` 타입으로, `computeTeamHomeAwayEdge` 는 `isHome` 을 더한 신규 `HomeAwayGame` 타입으로 좁힘. 신규 `MLB_` 접두 중복 함수 0건 — KBO buildTeamProfile.ts 안 5개 함수를 MLB 쪽에서 그대로 import 재사용. `/mlb/team/[code]` KO/EN 양쪽 페이지에 4줄 요약 렌더링(마진/콜드게임·박빙/홈원정편차/최근전적). 신규 테스트 assertion 10건 (`buildMlbTeamProfile.test.ts`) — MLB 팀 profile 의 6개 팩터(streak 포함) parity 완결.
+
+---
+
 ## v0.5.62.17 — 2026-08-10 (cycle 2050, explore-idea: MLB 팀 프로필 연승/연패 스트릭 parity)
 
 ### feat(analysis): wave-625 — MLB 팀 프로필에 KBO parity 연승/연패 스트릭 추가

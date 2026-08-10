@@ -263,6 +263,32 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
               On a {profile.streak.length}-game {profile.streak.result === "win" ? "win" : "losing"} streak
             </p>
           )}
+          {profile.avgMargin && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Avg. run margin this season: {profile.avgMargin.avgMargin} runs ({profile.avgMargin.sampleSize} games)
+            </p>
+          )}
+          {(profile.blowout && profile.blowout.count > 0) ||
+          (profile.closeGame && profile.closeGame.count > 0) ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {profile.blowout && profile.blowout.count > 0 &&
+                `${profile.blowout.count} blowouts (10+ run margin) out of ${profile.blowout.sampleSize} games`}
+              {profile.blowout && profile.blowout.count > 0 && profile.closeGame && profile.closeGame.count > 0 && " · "}
+              {profile.closeGame && profile.closeGame.count > 0 &&
+                `${profile.closeGame.count} one-run games out of ${profile.closeGame.sampleSize} games`}
+            </p>
+          ) : null}
+          {profile.homeAwayEdge && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Clear home/away split — {profile.homeAwayEdge.homeWins}-{profile.homeAwayEdge.homeGames - profile.homeAwayEdge.homeWins} at home,{" "}
+              {profile.homeAwayEdge.awayWins}-{profile.homeAwayEdge.awayGames - profile.homeAwayEdge.awayWins} on the road
+            </p>
+          )}
+          {profile.recentRecord && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {profile.recentRecord.wins}-{profile.recentRecord.losses} in the last {profile.recentRecord.sampleSize} games
+            </p>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>

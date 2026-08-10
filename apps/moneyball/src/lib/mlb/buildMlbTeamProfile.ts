@@ -6,7 +6,20 @@ import {
   mlbTeamDivision,
   assertSelectOk,
 } from '@moneyball/shared';
-import { computeTeamStreak, type TeamStreak } from '@/lib/teams/buildTeamProfile';
+import {
+  computeTeamStreak,
+  type TeamStreak,
+  computeTeamAvgMargin,
+  type TeamAvgMargin,
+  computeTeamBlowoutCount,
+  type TeamBlowoutStats,
+  computeTeamCloseGameCount,
+  type TeamCloseGameStats,
+  computeTeamHomeAwayEdge,
+  type TeamHomeAwaySplit,
+  computeTeamRecentRecord,
+  type TeamRecentRecord,
+} from '@/lib/teams/buildTeamProfile';
 
 export interface MlbTeamRecentGame {
   gameId: number;
@@ -51,6 +64,11 @@ export interface MlbTeamProfile {
   factorAverages: MlbTeamFactorAverages;
   recentGames: MlbTeamRecentGame[];
   streak: TeamStreak | null;
+  avgMargin: TeamAvgMargin | null;
+  blowout: TeamBlowoutStats | null;
+  closeGame: TeamCloseGameStats | null;
+  homeAwayEdge: TeamHomeAwaySplit | null;
+  recentRecord: TeamRecentRecord | null;
 }
 
 interface GameRow {
@@ -138,6 +156,11 @@ export async function buildMlbTeamProfile(
     },
     recentGames: [],
     streak: null,
+    avgMargin: null,
+    blowout: null,
+    closeGame: null,
+    homeAwayEdge: null,
+    recentRecord: null,
   };
 
   if (teamId == null) return emptyProfile;
@@ -244,6 +267,11 @@ export async function buildMlbTeamProfile(
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
     .slice(0, 8);
   const streak = computeTeamStreak(teamGames);
+  const avgMargin = computeTeamAvgMargin(teamGames);
+  const blowout = computeTeamBlowoutCount(teamGames);
+  const closeGame = computeTeamCloseGameCount(teamGames);
+  const homeAwayEdge = computeTeamHomeAwayEdge(teamGames);
+  const recentRecord = computeTeamRecentRecord(teamGames);
 
   return {
     ...emptyProfile,
@@ -264,5 +292,10 @@ export async function buildMlbTeamProfile(
     },
     recentGames,
     streak,
+    avgMargin,
+    blowout,
+    closeGame,
+    homeAwayEdge,
+    recentRecord,
   };
 }
