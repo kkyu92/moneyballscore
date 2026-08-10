@@ -1,3 +1,19 @@
+## v0.5.62.15 — 2026-08-10 (cycle 2047, fix-incident: VERSION/package.json/CHANGELOG 3-way 재동기화 — wave-615~623 catch-up)
+
+### fix(context): VERSION 파일 213-cycle 미갱신 + wave-615~623 CHANGELOG silent skip 발견 (cycle 2047)
+
+루트 `VERSION` 파일이 wave-472(cycle 1834) 이후 `0.5.54.5` 로 고정된 채 213 cycle 방치 — cycle 1975 catch-up (wave-560~596, v0.5.62.0) 당시에도 package.json 2종만 동기화되고 VERSION 파일은 빠짐. `gstack-version-bump classify --base main` 실행 시 `DRIFT_UNEXPECTED` (VERSION=0.5.54.5 vs package.json=0.5.62.4) 확인 — ship 워크플로 Step 12 가 이 상태를 만나면 STOP 해야 하는 케이스. 동시에 wave-559 catch-up 이후 재개된 "매 wave = CHANGELOG 항목" 관례가 wave-615(cycle 2026)부터 wave-623(cycle 2046)까지 9개 wave + 3개 review-code 상수 통합 refactor 동안 다시 silent skip (루트 package.json 도 wave-600(cycle 1983) 이후 0.5.62.4 에서 정지, apps/moneyball package.json 은 wave-614(cycle 2024) 이후 0.5.62.13 에서 정지 — 서로 다른 시점에 각각 멈춰 3-way 불일치).
+
+**catch-up 요약 (wave-615~623, cycle 2026~2046)**:
+- **feat(analysis) 9건**: 강수렴 어제결과 배지 완전수렴 tier 비대칭 gap fix(615) / 매치업 홈·원정 편중 판정(616) / 매치업 박빙 승부 횟수(617) / 팀 프로필 시즌 평균 득점 마진(618) / 팀 프로필 콜드게임·박빙 승부 횟수(619) / 팀 프로필 홈·원정 성적 편차(620) / 팀 시즌 팩터 평균 xFIP·SFR·WAR 추가(621) / 팀 프로필 최근 연승·연패 스트릭(622) / 팀 프로필 최근 5경기 성적(623)
+- **refactor(shared) 단일 source 통합 3건 (silent drift family sweep 연장)**: `parseRecent10Record`(wave-617 직후) / `computeAvgMarginFromFinalGames`(wave-618 직후) / `computeFactorAveragesFromPerspectives`(wave-621 직후) / `WIN_LOSS_STREAK_MIN_LENGTH`(wave-622 직후) / `RECENT_RECORD_WINDOW`(wave-623 직후, matchup·team 양쪽 window=5/min=2 통일)
+
+**조치**:
+- `package.json`(루트) + `apps/moneyball/package.json` + `VERSION` 3파일 `0.5.62.15` 통일
+- 신규 guard test (`version-sync-guard.test.ts`) 추가 — 3파일 버전 문자열 불일치 시 실패, 재발 차단 (cycle 1975 catch-up 이 guard 없이 재발한 것과 동일 실수 방지)
+
+---
+
 ## v0.5.62.14 — 2026-08-10 (cycle 2044, op-analysis lite: CE dominance 100% escalation)
 
 ### operational-analysis (lite): cycle 2044 — v1.8 성과 측정 + CE dominance 심화 패턴
