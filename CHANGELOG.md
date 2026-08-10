@@ -1,3 +1,11 @@
+## v0.5.62.20 — 2026-08-10 (cycle 2055, review-code (heavy): MLB/KBO 매치업 streak/recentRecord/homeAwayEdge dedup)
+
+### refactor(matchup): streak/recentRecord/homeAwayEdge 3개 계산 함수 packages/shared 단일 source 통합
+
+cycle 2054 가 plan #24 Phase 1 MVP 를 risk 최소화 위해 MLB 전용 병렬 구현으로 fire 하며 명시적으로 남긴 dedup 대상 — `buildMatchupProfile.ts`(KBO) 와 `buildMlbMatchupProfile.ts`(MLB) 양쪽에 `computeMatchupStreak`/`computeMlbMatchupStreak`, `computeMatchupRecentRecord`/`computeMlbMatchupRecentRecord`, `computeMatchupHomeAwayEdge`/`computeMlbMatchupHomeAwayEdge`(+ 내부 `venueSplit` 헬퍼) 가 TeamCode 타입만 다르고 완전히 동일한 로직으로 독립 중복돼있던 것을 확인. cycle 2034/2036 이 확립한 패턴(`computeAvgMarginFromFinalGames`/`computeMarginCountFromFinalGames` generic 함수, `packages/shared/src/index.ts`)을 그대로 따라 `computeMatchupStreakFromGames`/`computeMatchupRecentRecordFromGames`/`computeMatchupHomeAwayEdgeFromGames` 3개 generic 함수(+ 비공개 `matchupVenueSplit` 헬퍼)를 shared 에 신규 추가 — 두 팀 코드 타입을 제네릭 파라미터 `C` 로 좁혀 KBO/MLB 어느 쪽에도 강제 의존하지 않음. 양쪽 builder 의 기존 export 함수 이름/시그니처/동작은 변경 없이 내부만 새 shared 함수로 위임하는 thin wrapper 로 교체 — 호출부(page.tsx, 컴포넌트, 테스트) 수정 0건. `pnpm --filter @moneyball/shared type-check` / `pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec vitest run` 419 files/3715 tests 전량 통과(카운트 변화 없음 — 동작 불변 순수 리팩터), `pnpm --filter moneyball lint` clean.
+
+---
+
 ## v0.5.62.19 — 2026-08-10 (cycle 2054, explore-idea (heavy): plan #24 Phase 1 — MLB 팀 간 매치업 신규 라우트)
 
 ### feat(analysis): wave-627 — `/mlb/matchup/[teamA]/[teamB]` 신규 라우트 (KBO 매치업 parity Phase 1 MVP)

@@ -2451,6 +2451,161 @@ export function computeMarginCountFromFinalGames<T>(
   return { count, sampleSize: finals.length };
 }
 
+export interface MatchupStreakResult<C> {
+  teamCode: C;
+  length: number;
+}
+
+/**
+ * 두 팀 맞대결 한정 최근 연승/연패 — single source.
+ * buildMatchupProfile.computeMatchupStreak + buildMlbMatchupProfile.computeMlbMatchupStreak
+ * 양쪽에 동일 로직(final 필터 → 가장 최근 완료 경기 승자 기준 연속 길이)이 독립
+ * 중복돼있던 것 통합 (cycle 2055 review-code heavy). games 는 이미 game_date 내림차순
+ * 정렬 후 전달 — status==='final' 필터로 예정 경기를 먼저 걸러낸 뒤 순서 그대로 사용.
+ */
+export function computeMatchupStreakFromGames<
+  C,
+  T extends { status: string | null; actualWinnerCode: C | null },
+>(games: T[], minLength: number): MatchupStreakResult<C> | null {
+  const finals = games.filter((g) => g.status === "final");
+  if (finals.length === 0) return null;
+
+  const streakCode = finals[0].actualWinnerCode;
+  if (!streakCode) return null;
+
+  let length = 0;
+  for (const g of finals) {
+    if (g.actualWinnerCode !== streakCode) break;
+    length += 1;
+  }
+
+  if (length < minLength) return null;
+  return { teamCode: streakCode, length };
+}
+
+export interface MatchupRecentRecordResult {
+  aWins: number;
+  bWins: number;
+  sampleSize: number;
+}
+
+/**
+ * 두 팀 맞대결 한정 최근 N경기 상대전적 — single source.
+ * buildMatchupProfile.computeMatchupRecentRecord + buildMlbMatchupProfile.computeMlbMatchupRecentRecord
+ * 양쪽에 동일 로직이 독립 중복돼있던 것 통합 (cycle 2055 review-code heavy). games 는
+ * 이미 game_date 내림차순 정렬 후 전달 — final 필터 후 앞에서부터 window 개수만 사용.
+ */
+export function computeMatchupRecentRecordFromGames<
+  C,
+  T extends { status: string | null; actualWinnerCode: C | null },
+>(
+  games: T[],
+  teamACode: C,
+  teamBCode: C,
+  window: number,
+  minGames: number,
+): MatchupRecentRecordResult | null {
+  const finals = games.filter((g) => g.status === "final");
+  const recent = finals.slice(0, window);
+  if (recent.length < minGames) return null;
+
+  let aWins = 0;
+  let bWins = 0;
+  for (const g of recent) {
+    if (g.actualWinnerCode === teamACode) aWins += 1;
+    else if (g.actualWinnerCode === teamBCode) bWins += 1;
+  }
+  return { aWins, bWins, sampleSize: recent.length };
+}
+
+export interface MatchupHomeAwaySplitResult<C> {
+  teamCode: C;
+  homeWins: number;
+  homeGames: number;
+  awayWins: number;
+  awayGames: number;
+}
+
+function matchupVenueSplit<
+  C,
+  T extends {
+    status: string | null;
+    homeCode: C;
+    awayCode: C;
+    actualWinnerCode: C | null;
+  },
+>(
+  games: T[],
+  code: C,
+): { homeWins: number; homeGames: number; awayWins: number; awayGames: number } {
+  let homeWins = 0;
+  let homeGames = 0;
+  let awayWins = 0;
+  let awayGames = 0;
+  for (const g of games) {
+    if (g.status !== "final") continue;
+    if (g.homeCode === code) {
+      homeGames += 1;
+      if (g.actualWinnerCode === code) homeWins += 1;
+    } else if (g.awayCode === code) {
+      awayGames += 1;
+      if (g.actualWinnerCode === code) awayWins += 1;
+    }
+  }
+  return { homeWins, homeGames, awayWins, awayGames };
+}
+
+/**
+ * 두 팀 맞대결 중 한 팀이 홈/원정에 따라 뚜렷하게 다른 성적을 보이는지 판정 — single source.
+ * buildMatchupProfile.computeMatchupHomeAwayEdge + buildMlbMatchupProfile.computeMlbMatchupHomeAwayEdge
+ * 양쪽에 동일 로직(venueSplit 포함)이 독립 중복돼있던 것 통합 (cycle 2055 review-code
+ * heavy). 두 팀 모두 조건 충족 시 격차가 더 큰 쪽 1팀만 반환 (문장 노이즈 방지).
+ */
+export function computeMatchupHomeAwayEdgeFromGames<
+  C,
+  T extends {
+    status: string | null;
+    homeCode: C;
+    awayCode: C;
+    actualWinnerCode: C | null;
+  },
+>(
+  games: T[],
+  teamACode: C,
+  teamBCode: C,
+  minGamesPerVenue: number,
+  minGapPct: number,
+): MatchupHomeAwaySplitResult<C> | null {
+  const candidates: Array<
+    { code: C; gapPct: number } & ReturnType<typeof matchupVenueSplit<C, T>>
+  > = [];
+  for (const code of [teamACode, teamBCode]) {
+    const split = matchupVenueSplit(games, code);
+    if (
+      split.homeGames < minGamesPerVenue ||
+      split.awayGames < minGamesPerVenue
+    ) {
+      continue;
+    }
+    const homeRate = (split.homeWins / split.homeGames) * 100;
+    const awayRate = (split.awayWins / split.awayGames) * 100;
+    candidates.push({ code, gapPct: Math.abs(homeRate - awayRate), ...split });
+  }
+
+  if (candidates.length === 0) return null;
+
+  const best = candidates.reduce((a, b) => (b.gapPct > a.gapPct ? b : a));
+  if (best.gapPct < minGapPct) return null;
+
+  return {
+    teamCode: best.code,
+    homeWins: best.homeWins,
+    homeGames: best.homeGames,
+    awayWins: best.awayWins,
+    awayGames: best.awayGames,
+  };
+}
+
 export interface FactorPerspective {
   spFip: number | null;
   spXfip: number | null;

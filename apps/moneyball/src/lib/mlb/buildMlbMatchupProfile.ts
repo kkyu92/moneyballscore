@@ -4,6 +4,9 @@ import {
   assertSelectOk,
   computeAvgMarginFromFinalGames,
   computeMarginCountFromFinalGames,
+  computeMatchupHomeAwayEdgeFromGames,
+  computeMatchupRecentRecordFromGames,
+  computeMatchupStreakFromGames,
   josa,
   MARGIN_AVG_MIN_GAMES,
   MARGIN_BLOWOUT_MIN_GAMES,
@@ -137,25 +140,14 @@ export interface MlbMatchupStreak {
 }
 
 /**
- * 두 팀 맞대결 한정 최근 연승/연패. KBO computeMatchupStreak 과 동일 로직.
+ * 두 팀 맞대결 한정 최근 연승/연패. 계산 로직은 packages/shared 단일 source
+ * (computeMatchupStreakFromGames) — cycle 2055 review-code heavy, KBO
+ * computeMatchupStreak 과 독립 중복 통합.
  */
 export function computeMlbMatchupStreak(
   games: MlbMatchupGame[],
 ): MlbMatchupStreak | null {
-  const finals = games.filter((g) => g.status === "final");
-  if (finals.length === 0) return null;
-
-  const streakCode = finals[0].actualWinnerCode;
-  if (!streakCode) return null;
-
-  let length = 0;
-  for (const g of finals) {
-    if (g.actualWinnerCode !== streakCode) break;
-    length += 1;
-  }
-
-  if (length < WIN_LOSS_STREAK_MIN_LENGTH) return null;
-  return { teamCode: streakCode, length };
+  return computeMatchupStreakFromGames(games, WIN_LOSS_STREAK_MIN_LENGTH);
 }
 
 export interface MlbMatchupRecentRecord {
@@ -165,24 +157,22 @@ export interface MlbMatchupRecentRecord {
 }
 
 /**
- * 두 팀 맞대결 한정 최근 N경기 상대전적. KBO computeMatchupRecentRecord 과 동일 로직.
+ * 두 팀 맞대결 한정 최근 N경기 상대전적. 계산 로직은 packages/shared 단일 source
+ * (computeMatchupRecentRecordFromGames) — cycle 2055 review-code heavy, KBO
+ * computeMatchupRecentRecord 과 독립 중복 통합.
  */
 export function computeMlbMatchupRecentRecord(
   games: MlbMatchupGame[],
   teamACode: MlbTeamCode,
   teamBCode: MlbTeamCode,
 ): MlbMatchupRecentRecord | null {
-  const finals = games.filter((g) => g.status === "final");
-  const recent = finals.slice(0, RECENT_RECORD_WINDOW);
-  if (recent.length < RECENT_RECORD_MIN_GAMES) return null;
-
-  let aWins = 0;
-  let bWins = 0;
-  for (const g of recent) {
-    if (g.actualWinnerCode === teamACode) aWins += 1;
-    else if (g.actualWinnerCode === teamBCode) bWins += 1;
-  }
-  return { aWins, bWins, sampleSize: recent.length };
+  return computeMatchupRecentRecordFromGames(
+    games,
+    teamACode,
+    teamBCode,
+    RECENT_RECORD_WINDOW,
+    RECENT_RECORD_MIN_GAMES,
+  );
 }
 
 export interface MlbMatchupAvgMargin {
@@ -258,61 +248,23 @@ export interface MlbMatchupHomeAwaySplit {
   awayGames: number;
 }
 
-function venueSplit(
-  games: MlbMatchupGame[],
-  code: MlbTeamCode,
-): { homeWins: number; homeGames: number; awayWins: number; awayGames: number } {
-  let homeWins = 0;
-  let homeGames = 0;
-  let awayWins = 0;
-  let awayGames = 0;
-  for (const g of games) {
-    if (g.status !== "final") continue;
-    if (g.homeCode === code) {
-      homeGames += 1;
-      if (g.actualWinnerCode === code) homeWins += 1;
-    } else if (g.awayCode === code) {
-      awayGames += 1;
-      if (g.actualWinnerCode === code) awayWins += 1;
-    }
-  }
-  return { homeWins, homeGames, awayWins, awayGames };
-}
-
 /**
- * 두 팀 맞대결 중 홈/원정 편차 판정. KBO computeMatchupHomeAwayEdge 와 동일 로직.
+ * 두 팀 맞대결 중 홈/원정 편차 판정. 계산 로직은 packages/shared 단일 source
+ * (computeMatchupHomeAwayEdgeFromGames) — cycle 2055 review-code heavy, KBO
+ * computeMatchupHomeAwayEdge 와 독립 중복 통합.
  */
 export function computeMlbMatchupHomeAwayEdge(
   games: MlbMatchupGame[],
   teamACode: MlbTeamCode,
   teamBCode: MlbTeamCode,
 ): MlbMatchupHomeAwaySplit | null {
-  const candidates: Array<{ code: MlbTeamCode; gapPct: number } & ReturnType<typeof venueSplit>> = [];
-  for (const code of [teamACode, teamBCode]) {
-    const split = venueSplit(games, code);
-    if (
-      split.homeGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE ||
-      split.awayGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE
-    ) {
-      continue;
-    }
-    const homeRate = (split.homeWins / split.homeGames) * 100;
-    const awayRate = (split.awayWins / split.awayGames) * 100;
-    candidates.push({ code, gapPct: Math.abs(homeRate - awayRate), ...split });
-  }
-
-  if (candidates.length === 0) return null;
-
-  const best = candidates.reduce((a, b) => (b.gapPct > a.gapPct ? b : a));
-  if (best.gapPct < VENUE_SPLIT_MIN_GAP_PCT) return null;
-
-  return {
-    teamCode: best.code,
-    homeWins: best.homeWins,
-    homeGames: best.homeGames,
-    awayWins: best.awayWins,
-    awayGames: best.awayGames,
-  };
+  return computeMatchupHomeAwayEdgeFromGames(
+    games,
+    teamACode,
+    teamBCode,
+    VENUE_SPLIT_MIN_GAMES_PER_VENUE,
+    VENUE_SPLIT_MIN_GAP_PCT,
+  );
 }
 
 function buildSummary(profile: {
