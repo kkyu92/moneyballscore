@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES } from '@moneyball/shared';
 import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -224,11 +224,6 @@ export function computeTeamStreak(games: TeamRecentGame[]): TeamStreak | null {
   return { result, length };
 }
 
-/** 팀 최근 N경기 한정 성적 window — matchup computeMatchupRecentRecord 과 동일 기준 */
-const TEAM_RECENT_RECORD_WINDOW = 5;
-/** 최근 기록 최소 표본 — matchup computeMatchupRecentRecord 과 동일 기준 */
-const TEAM_RECENT_RECORD_MIN_GAMES = 2;
-
 export interface TeamRecentRecord {
   wins: number;
   losses: number;
@@ -248,8 +243,8 @@ export function computeTeamRecentRecord(
   const finals = games.filter(
     (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
   );
-  const recent = finals.slice(0, TEAM_RECENT_RECORD_WINDOW);
-  if (recent.length < TEAM_RECENT_RECORD_MIN_GAMES) return null;
+  const recent = finals.slice(0, RECENT_RECORD_WINDOW);
+  if (recent.length < RECENT_RECORD_MIN_GAMES) return null;
 
   let wins = 0;
   let losses = 0;

@@ -3031,3 +3031,14 @@ export const TOPFACTOR_STRONG_IMPACT = 0.18;
 export const TOPFACTOR_COMPLETE_IMPACT = 0.30;
 /** wave-471: topFactors 배지 수치 노출 임계 — impact ≥ 0.05 (impactPp=Math.round(impact*100) ≥ 5) 시 '+{impactPp}' 표시. 변경 시 analysis/page.tsx wave-471 impact 수치 callsite 동시 조정. */
 export const TOPFACTOR_IMPACT_MIN_DISPLAY = 0.05;
+
+/**
+ * review-code(heavy) cycle 2046: buildMatchupProfile.ts (MATCHUP_RECENT_RECORD_WINDOW) /
+ * buildTeamProfile.ts (TEAM_RECENT_RECORD_WINDOW) 양쪽에 "최근 5경기 폼 스냅샷"
+ * 이라는 동일 기준(=5)이 주석으로만 서로 참조하며 독립 정의되어 있던 걸 통합.
+ * computeMatchupRecentRecord / computeTeamRecentRecord 자체는 리턴 타입이 달라
+ * (aWins/bWins vs wins/losses) 로직 통합은 부적절 — window/최소표본 임계값만 단일 source.
+ */
+export const RECENT_RECORD_WINDOW = 5;
+/** 최근 기록 최소 표본 — 1경기만으론 "최근 전적"이라 부르기 애매해 배제. RECENT_RECORD_WINDOW 와 동일 cycle 2046 통합. */
+export const RECENT_RECORD_MIN_GAMES = 2;

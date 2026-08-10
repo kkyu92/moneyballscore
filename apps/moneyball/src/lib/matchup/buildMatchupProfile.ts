@@ -5,6 +5,8 @@ import {
   computeAvgMarginFromFinalGames,
   computeMarginCountFromFinalGames,
   josa,
+  RECENT_RECORD_MIN_GAMES,
+  RECENT_RECORD_WINDOW,
   ro,
   shortTeamName,
   type SelectResult,
@@ -149,11 +151,6 @@ export function computeMatchupStreak(
   return { teamCode: streakCode, length };
 }
 
-/** 맞대결 최근 N경기 한정 상대전적 — 시즌 전체 기록(sideStats)과 달리 최근 폼만 반영 */
-const MATCHUP_RECENT_RECORD_WINDOW = 5;
-/** 최근 기록 최소 표본 — 1경기만으론 "최근 전적"이라 부르기 애매해 배제 (avgMargin 과 동일 기준) */
-const MATCHUP_RECENT_RECORD_MIN_GAMES = 2;
-
 export interface MatchupRecentRecord {
   aWins: number;
   bWins: number;
@@ -172,8 +169,8 @@ export function computeMatchupRecentRecord(
   teamBCode: TeamCode,
 ): MatchupRecentRecord | null {
   const finals = games.filter((g) => g.status === "final");
-  const recent = finals.slice(0, MATCHUP_RECENT_RECORD_WINDOW);
-  if (recent.length < MATCHUP_RECENT_RECORD_MIN_GAMES) return null;
+  const recent = finals.slice(0, RECENT_RECORD_WINDOW);
+  if (recent.length < RECENT_RECORD_MIN_GAMES) return null;
 
   let aWins = 0;
   let bWins = 0;
