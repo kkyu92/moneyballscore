@@ -4,6 +4,9 @@ import {
   assertSelectOk,
   computeAvgMarginFromFinalGames,
   computeMarginCountFromFinalGames,
+  computeMatchupHomeAwayEdgeFromGames,
+  computeMatchupRecentRecordFromGames,
+  computeMatchupStreakFromGames,
   josa,
   MARGIN_AVG_MIN_GAMES,
   MARGIN_BLOWOUT_MIN_GAMES,
@@ -134,28 +137,14 @@ export interface MatchupStreak {
 
 /**
  * 두 팀 맞대결 한정 최근 연승/연패.
- * games 는 buildMatchupProfile 안에서 game_date 내림차순 정렬 후 전달되지만,
- * 정렬 자체는 예정 경기(미래 날짜)가 최근 완료 경기보다 앞에 올 수 있어
- * status==='final' 필터로 먼저 걸러낸 뒤 상대 순서를 그대로 사용.
+ * 계산 로직 자체는 packages/shared 단일 source (computeMatchupStreakFromGames) —
+ * cycle 2055 review-code heavy, buildMlbMatchupProfile.computeMlbMatchupStreak 과
+ * 독립 중복 통합.
  */
 export function computeMatchupStreak(
   games: MatchupGame[],
 ): MatchupStreak | null {
-  const finals = games.filter((g) => g.status === "final");
-  if (finals.length === 0) return null;
-
-  // 가장 최근 완료 경기가 무승부(승자 없음)면 진행 중인 스트릭 없음
-  const streakCode = finals[0].actualWinnerCode;
-  if (!streakCode) return null;
-
-  let length = 0;
-  for (const g of finals) {
-    if (g.actualWinnerCode !== streakCode) break;
-    length += 1;
-  }
-
-  if (length < WIN_LOSS_STREAK_MIN_LENGTH) return null;
-  return { teamCode: streakCode, length };
+  return computeMatchupStreakFromGames(games, WIN_LOSS_STREAK_MIN_LENGTH);
 }
 
 export interface MatchupRecentRecord {
@@ -167,25 +156,22 @@ export interface MatchupRecentRecord {
 /**
  * 두 팀 맞대결 한정 최근 N경기 상대전적 (기본 5경기).
  * sideStats(전체 시즌 기록) / computeMatchupStreak(연속 연승·연패) 와 달리
- * "최근 N경기 중 몇 승씩" 형태의 폼 스냅샷. games 는 이미 game_date 내림차순 정렬 —
- * status==='final' 필터 후 앞에서부터 window 개수만 사용.
+ * "최근 N경기 중 몇 승씩" 형태의 폼 스냅샷. 계산 로직 자체는 packages/shared
+ * 단일 source (computeMatchupRecentRecordFromGames) — cycle 2055 review-code
+ * heavy, buildMlbMatchupProfile.computeMlbMatchupRecentRecord 과 독립 중복 통합.
  */
 export function computeMatchupRecentRecord(
   games: MatchupGame[],
   teamACode: TeamCode,
   teamBCode: TeamCode,
 ): MatchupRecentRecord | null {
-  const finals = games.filter((g) => g.status === "final");
-  const recent = finals.slice(0, RECENT_RECORD_WINDOW);
-  if (recent.length < RECENT_RECORD_MIN_GAMES) return null;
-
-  let aWins = 0;
-  let bWins = 0;
-  for (const g of recent) {
-    if (g.actualWinnerCode === teamACode) aWins += 1;
-    else if (g.actualWinnerCode === teamBCode) bWins += 1;
-  }
-  return { aWins, bWins, sampleSize: recent.length };
+  return computeMatchupRecentRecordFromGames(
+    games,
+    teamACode,
+    teamBCode,
+    RECENT_RECORD_WINDOW,
+    RECENT_RECORD_MIN_GAMES,
+  );
 }
 
 export interface MatchupAvgMargin {
@@ -269,64 +255,25 @@ export interface MatchupHomeAwaySplit {
   awayGames: number;
 }
 
-function venueSplit(
-  games: MatchupGame[],
-  code: TeamCode,
-): { homeWins: number; homeGames: number; awayWins: number; awayGames: number } {
-  let homeWins = 0;
-  let homeGames = 0;
-  let awayWins = 0;
-  let awayGames = 0;
-  for (const g of games) {
-    if (g.status !== "final") continue;
-    if (g.homeCode === code) {
-      homeGames += 1;
-      if (g.actualWinnerCode === code) homeWins += 1;
-    } else if (g.awayCode === code) {
-      awayGames += 1;
-      if (g.actualWinnerCode === code) awayWins += 1;
-    }
-  }
-  return { homeWins, homeGames, awayWins, awayGames };
-}
-
 /**
  * 두 팀 맞대결 중 한 팀이 홈/원정에 따라 뚜렷하게 다른 성적을 보이는지 판정.
  * sideStats(전체 wins) 는 홈/원정 승수만 노출(팀별 성과 카드) 하고 벤뉴별 표본(경기 수)
- * 은 계산하지 않아 "편중이 뚜렷한지"는 못 봤던 gap. games 배열만 재사용 (신규 DB 조회 없음).
- * 두 팀 모두 조건 충족 시 격차가 더 큰 쪽 1팀만 반환 (문장 노이즈 방지).
+ * 은 계산하지 않아 "편중이 뚜렷한지"는 못 봤던 gap. 계산 로직 자체는 packages/shared
+ * 단일 source (computeMatchupHomeAwayEdgeFromGames) — cycle 2055 review-code heavy,
+ * buildMlbMatchupProfile.computeMlbMatchupHomeAwayEdge 과 독립 중복 통합.
  */
 export function computeMatchupHomeAwayEdge(
   games: MatchupGame[],
   teamACode: TeamCode,
   teamBCode: TeamCode,
 ): MatchupHomeAwaySplit | null {
-  const candidates: Array<{ code: TeamCode; gapPct: number } & ReturnType<typeof venueSplit>> = [];
-  for (const code of [teamACode, teamBCode]) {
-    const split = venueSplit(games, code);
-    if (
-      split.homeGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE ||
-      split.awayGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE
-    ) {
-      continue;
-    }
-    const homeRate = (split.homeWins / split.homeGames) * 100;
-    const awayRate = (split.awayWins / split.awayGames) * 100;
-    candidates.push({ code, gapPct: Math.abs(homeRate - awayRate), ...split });
-  }
-
-  if (candidates.length === 0) return null;
-
-  const best = candidates.reduce((a, b) => (b.gapPct > a.gapPct ? b : a));
-  if (best.gapPct < VENUE_SPLIT_MIN_GAP_PCT) return null;
-
-  return {
-    teamCode: best.code,
-    homeWins: best.homeWins,
-    homeGames: best.homeGames,
-    awayWins: best.awayWins,
-    awayGames: best.awayGames,
-  };
+  return computeMatchupHomeAwayEdgeFromGames(
+    games,
+    teamACode,
+    teamBCode,
+    VENUE_SPLIT_MIN_GAMES_PER_VENUE,
+    VENUE_SPLIT_MIN_GAP_PCT,
+  );
 }
 
 function buildSummary(profile: {
