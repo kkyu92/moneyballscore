@@ -14,6 +14,7 @@ import {
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
+import { mlbPairsForTeam } from "@/lib/mlb/mlbCanonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
@@ -362,6 +363,19 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           description={`Records will appear automatically as MLB ${MLB_GAMES_PER_TEAM}-game season data accumulates.`}
         />
       )}
+
+      {(() => {
+        const matchups: RelatedLink[] = mlbPairsForTeam(code)
+          .slice(0, 9)
+          .map((p) => {
+            const opponent = p.codeA === code ? p.codeB : p.codeA;
+            return {
+              href: `/en${p.path}`,
+              label: `vs ${mlbShortTeamName(opponent)}`,
+            };
+          });
+        return <RelatedLinks title="Matchups" items={matchups} />;
+      })()}
 
       {(() => {
         const others: RelatedLink[] = (Object.keys(MLB_TEAMS) as MlbTeamCode[])

@@ -1,3 +1,11 @@
+## v0.5.62.19 — 2026-08-10 (cycle 2054, explore-idea (heavy): plan #24 Phase 1 — MLB 팀 간 매치업 신규 라우트)
+
+### feat(analysis): wave-627 — `/mlb/matchup/[teamA]/[teamB]` 신규 라우트 (KBO 매치업 parity Phase 1 MVP)
+
+cycle 2052 가 MLB 팀 프로필 6팩터 parity 를 완결한 뒤 "매치업(2팀 맞대결) 기능이 MLB 에 없다"는 갭을 발견 (KBO `/matchup/[teamA]/[teamB]` 는 709줄 빌더+547줄 페이지+6개 하위 모듈 성숙 기능, MLB 는 0줄). cycle 2053 이 규모(30팀=435pairs, KBO 대비 9.7배)상 1 cycle 완결 불가 판단하고 plan #24 로 Phase 1/2/3 분해 — 이번 cycle 이 Phase 1 MVP 를 fire. risk 최소화 위해 KBO 코드를 건드리지 않는 MLB 전용 병렬 구현으로 시작(후속 review-code(heavy) dedup 대상, cycle 2034/2036/2043/2046/2048 통합 순서 정합): `mlbCanonicalPair.ts`(canonicalPair 병렬, 435 pairs) + `buildMlbMatchupProfile.ts`(buildMatchupProfile 구조 복제, TeamCode 비의존 3개 계산 함수는 packages/shared 단일 source 그대로 재사용) + `/mlb/matchup/[teamA]/[teamB]` KO/EN page.tsx(헤더+요약+팀별 성과+경기 기록 테이블, factor compare/elo trend/recent form/convergence pick/season h2h 는 Phase 2/3 제외) + `/mlb/team/[code]` KO/EN 양쪽 페이지에 진입 링크("다른 팀과 매치업") 추가(orphan page 방지). sitemap.xml 은 435pairs 미포함 유지(plan #24 명시 옵션 — RelatedLinks 크로스링크로 discoverable). 신규 테스트 20건(`mlbCanonicalPair.test.ts` 12건 + `buildMlbMatchupProfile.test.ts` 5건). generateStaticParams 미사용(KBO 매치업과 동일 순수 dynamic + ISR revalidate=3600 패턴).
+
+---
+
 ## v0.5.62.18 — 2026-08-10 (cycle 2052, explore-idea: MLB 팀 프로필 avgMargin/blowout/closeGame/homeAwayEdge/recentRecord parity)
 
 ### feat(analysis): wave-626 — MLB 팀 프로필에 KBO parity 나머지 5개 팩터 추가
