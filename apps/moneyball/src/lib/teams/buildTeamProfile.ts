@@ -45,6 +45,7 @@ export interface TeamProfile {
   blowout: TeamBlowoutStats | null;
   closeGame: TeamCloseGameStats | null;
   homeAwayEdge: TeamHomeAwaySplit | null;
+  recentRecord: TeamRecentRecord | null;
 }
 
 /** 팀 시즌 평균 득점 마진 최소 표본 — matchup computeMatchupAvgMargin 과 동일 기준 */
@@ -223,6 +224,44 @@ export function computeTeamStreak(games: TeamRecentGame[]): TeamStreak | null {
   return { result, length };
 }
 
+/** 팀 최근 N경기 한정 성적 window — matchup computeMatchupRecentRecord 과 동일 기준 */
+const TEAM_RECENT_RECORD_WINDOW = 5;
+/** 최근 기록 최소 표본 — matchup computeMatchupRecentRecord 과 동일 기준 */
+const TEAM_RECENT_RECORD_MIN_GAMES = 2;
+
+export interface TeamRecentRecord {
+  wins: number;
+  losses: number;
+  sampleSize: number;
+}
+
+/**
+ * 이 팀의 시즌 전체(모든 상대 포함) 최근 N경기 한정 성적 (기본 5경기).
+ * buildMatchupProfile 의 computeMatchupRecentRecord 는 두 팀 맞대결 한정 —
+ * "이 팀이 모든 상대 포함 최근 N경기만 보면 몇 승 몇 패인지"는 없던 gap
+ * (computeTeamStreak 은 연속 여부만 잡고, 중간에 무승부/스트릭 끊김이 있으면
+ * 최근 폼 전체를 못 보여줌). games 는 game_date 내림차순 정렬 전달 (streak 과 동일 계약).
+ */
+export function computeTeamRecentRecord(
+  games: TeamRecentGame[],
+): TeamRecentRecord | null {
+  const finals = games.filter(
+    (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
+  );
+  const recent = finals.slice(0, TEAM_RECENT_RECORD_WINDOW);
+  if (recent.length < TEAM_RECENT_RECORD_MIN_GAMES) return null;
+
+  let wins = 0;
+  let losses = 0;
+  for (const g of recent) {
+    const our = g.ourScore as number;
+    const opp = g.opponentScore as number;
+    if (our > opp) wins += 1;
+    else if (our < opp) losses += 1;
+  }
+  return { wins, losses, sampleSize: recent.length };
+}
+
 interface PredRow {
   confidence: number | null;
   is_correct: boolean | null;
@@ -309,6 +348,7 @@ export async function buildTeamProfile(
       blowout: null,
       closeGame: null,
       homeAwayEdge: null,
+      recentRecord: null,
     };
   }
 
@@ -527,6 +567,7 @@ export async function buildTeamProfile(
   const blowout = computeTeamBlowoutCount(teamGames);
   const closeGame = computeTeamCloseGameCount(teamGames);
   const homeAwayEdge = computeTeamHomeAwayEdge(teamGames);
+  const recentRecord = computeTeamRecentRecord(teamGames);
 
   return {
     code: teamCode,
@@ -551,5 +592,6 @@ export async function buildTeamProfile(
     blowout,
     closeGame,
     homeAwayEdge,
+    recentRecord,
   };
 }
