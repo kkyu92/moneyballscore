@@ -5,12 +5,19 @@ import {
   computeAvgMarginFromFinalGames,
   computeMarginCountFromFinalGames,
   josa,
+  MARGIN_AVG_MIN_GAMES,
+  MARGIN_BLOWOUT_MIN_GAMES,
+  MARGIN_BLOWOUT_THRESHOLD,
+  MARGIN_CLOSE_GAME_MIN_GAMES,
+  MARGIN_CLOSE_GAME_THRESHOLD,
   RECENT_RECORD_MIN_GAMES,
   RECENT_RECORD_WINDOW,
   ro,
   shortTeamName,
   type SelectResult,
   type TeamCode,
+  VENUE_SPLIT_MIN_GAMES_PER_VENUE,
+  VENUE_SPLIT_MIN_GAP_PCT,
   WIN_LOSS_STREAK_MIN_LENGTH,
 } from "@moneyball/shared";
 import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
@@ -181,9 +188,6 @@ export function computeMatchupRecentRecord(
   return { aWins, bWins, sampleSize: recent.length };
 }
 
-/** 맞대결 평균 득점 마진 최소 표본 — 1경기만으론 "평균"이라 부르기 애매해 배제 */
-const MATCHUP_AVG_MARGIN_MIN_GAMES = 2;
-
 export interface MatchupAvgMargin {
   avgMargin: number;
   sampleSize: number;
@@ -203,14 +207,9 @@ export function computeMatchupAvgMargin(
     (g) => g.status === "final",
     (g) => g.homeScore,
     (g) => g.awayScore,
-    MATCHUP_AVG_MARGIN_MIN_GAMES,
+    MARGIN_AVG_MIN_GAMES,
   );
 }
-
-/** 콜드게임(대량 득점차) 판정 기준 — |home-away| 10점 이상 */
-const MATCHUP_BLOWOUT_MARGIN = 10;
-/** 콜드게임 횟수 최소 표본 — 1~2경기 중 콜드게임 유무는 "이 맞대결 성향"이라 부르기 애매해 배제 */
-const MATCHUP_BLOWOUT_MIN_GAMES = 3;
 
 export interface MatchupBlowoutStats {
   count: number;
@@ -218,7 +217,7 @@ export interface MatchupBlowoutStats {
 }
 
 /**
- * 두 팀 맞대결 중 콜드게임(|home-away| >= MATCHUP_BLOWOUT_MARGIN) 횟수.
+ * 두 팀 맞대결 중 콜드게임(|home-away| >= MARGIN_BLOWOUT_THRESHOLD) 횟수.
  * computeMatchupAvgMargin 과 동일하게 games 배열만 재사용 (신규 DB 조회 없음).
  * "평균 득점차"는 있었지만 "몇 번이나 크게 벌어졌는지" 빈도는 없던 gap.
  * 계산 로직 자체는 packages/shared 단일 source (computeMarginCountFromFinalGames) —
@@ -232,15 +231,10 @@ export function computeMatchupBlowoutCount(
     (g) => g.status === "final",
     (g) => g.homeScore,
     (g) => g.awayScore,
-    (margin) => margin >= MATCHUP_BLOWOUT_MARGIN,
-    MATCHUP_BLOWOUT_MIN_GAMES,
+    (margin) => margin >= MARGIN_BLOWOUT_THRESHOLD,
+    MARGIN_BLOWOUT_MIN_GAMES,
   );
 }
-
-/** 박빙 승부(한 점차) 판정 기준 — |home-away| == 1 */
-const MATCHUP_CLOSE_GAME_MARGIN = 1;
-/** 박빙 승부 횟수 최소 표본 — blowout 과 동일 기준 (1~2경기 중 유무는 "성향"이라 부르기 애매) */
-const MATCHUP_CLOSE_GAME_MIN_GAMES = 3;
 
 export interface MatchupCloseGameStats {
   count: number;
@@ -248,7 +242,7 @@ export interface MatchupCloseGameStats {
 }
 
 /**
- * 두 팀 맞대결 중 박빙 승부(|home-away| === MATCHUP_CLOSE_GAME_MARGIN) 횟수.
+ * 두 팀 맞대결 중 박빙 승부(|home-away| === MARGIN_CLOSE_GAME_THRESHOLD) 횟수.
  * computeMatchupBlowoutCount 의 대칭 지표 — "큰 점수차" 빈도는 있었지만
  * "얼마나 팽팽했는지" 빈도는 없던 gap. games 배열만 재사용 (신규 DB 조회 없음).
  * 계산 로직 자체는 packages/shared 단일 source (computeMarginCountFromFinalGames) —
@@ -262,15 +256,10 @@ export function computeMatchupCloseGameCount(
     (g) => g.status === "final",
     (g) => g.homeScore,
     (g) => g.awayScore,
-    (margin) => margin === MATCHUP_CLOSE_GAME_MARGIN,
-    MATCHUP_CLOSE_GAME_MIN_GAMES,
+    (margin) => margin === MARGIN_CLOSE_GAME_THRESHOLD,
+    MARGIN_CLOSE_GAME_MIN_GAMES,
   );
 }
-
-/** 맞대결 홈/원정 편중 판정 — 벤뉴(홈/원정)당 최소 표본 (avgMargin 과 동일 기준선) */
-const MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE = 2;
-/** 홈/원정 승률 차이가 이 %p 이상이어야 "편중" 으로 언급 — 우연한 소표본 노이즈 배제 */
-const MATCHUP_HOME_AWAY_MIN_GAP_PCT = 40;
 
 export interface MatchupHomeAwaySplit {
   teamCode: TeamCode;
@@ -316,8 +305,8 @@ export function computeMatchupHomeAwayEdge(
   for (const code of [teamACode, teamBCode]) {
     const split = venueSplit(games, code);
     if (
-      split.homeGames < MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE ||
-      split.awayGames < MATCHUP_HOME_AWAY_MIN_GAMES_PER_VENUE
+      split.homeGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE ||
+      split.awayGames < VENUE_SPLIT_MIN_GAMES_PER_VENUE
     ) {
       continue;
     }
@@ -329,7 +318,7 @@ export function computeMatchupHomeAwayEdge(
   if (candidates.length === 0) return null;
 
   const best = candidates.reduce((a, b) => (b.gapPct > a.gapPct ? b : a));
-  if (best.gapPct < MATCHUP_HOME_AWAY_MIN_GAP_PCT) return null;
+  if (best.gapPct < VENUE_SPLIT_MIN_GAP_PCT) return null;
 
   return {
     teamCode: best.code,
@@ -416,12 +405,12 @@ function buildSummary(profile: {
   // 콜드게임 빈도 — 0건이면 "대량 득점차 없이 팽팽했다"는 의미 자체는 있으나
   // avgMargin 문장과 중복 인상을 줘 count > 0 일 때만 언급
   if (blowout && blowout.count > 0) {
-    text += ` 이 중 ${blowout.count}경기는 ${MATCHUP_BLOWOUT_MARGIN}점차 이상 콜드게임이었습니다.`;
+    text += ` 이 중 ${blowout.count}경기는 ${MARGIN_BLOWOUT_THRESHOLD}점차 이상 콜드게임이었습니다.`;
   }
 
   // 박빙 승부 빈도 — 0건이면 blowout 문장과 중복 인상이라 count > 0 일 때만 언급
   if (closeGame && closeGame.count > 0) {
-    text += ` ${closeGame.count}경기는 ${MATCHUP_CLOSE_GAME_MARGIN}점차 박빙 승부였습니다.`;
+    text += ` ${closeGame.count}경기는 ${MARGIN_CLOSE_GAME_THRESHOLD}점차 박빙 승부였습니다.`;
   }
 
   // 홈/원정 편중 — 벤뉴별 표본 확보 + 승률 차이가 뚜렷할 때만 언급

@@ -3042,3 +3042,24 @@ export const TOPFACTOR_IMPACT_MIN_DISPLAY = 0.05;
 export const RECENT_RECORD_WINDOW = 5;
 /** 최근 기록 최소 표본 — 1경기만으론 "최근 전적"이라 부르기 애매해 배제. RECENT_RECORD_WINDOW 와 동일 cycle 2046 통합. */
 export const RECENT_RECORD_MIN_GAMES = 2;
+
+/**
+ * review-code(heavy) cycle 2048: buildMatchupProfile.ts / buildTeamProfile.ts 양쪽에
+ * computeAvgMarginFromFinalGames·computeMarginCountFromFinalGames 호출 시 넘기는
+ * minGames/margin 임계값이 (MATCHUP 접두어, TEAM 접두어만 다르고) 동일 값으로 독립 중복
+ * 정의돼있던 것 통합. 헬퍼 함수 자체는 cycle 2034/2036 에 이미 단일 source화됐으나
+ * 호출부 상수는 남아있던 잔여 gap.
+ */
+export const MARGIN_AVG_MIN_GAMES = 2;
+/** 콜드게임(대량 득점차) 판정 기준 — |scoreA - scoreB| 10점 이상. MARGIN_AVG_MIN_GAMES 와 동일 cycle 2048 통합. */
+export const MARGIN_BLOWOUT_THRESHOLD = 10;
+/** 콜드게임 횟수 최소 표본 — 1~2경기 중 콜드게임 유무는 "성향"이라 부르기 애매해 배제. */
+export const MARGIN_BLOWOUT_MIN_GAMES = 3;
+/** 박빙 승부(한 점차) 판정 기준 — |scoreA - scoreB| == 1. */
+export const MARGIN_CLOSE_GAME_THRESHOLD = 1;
+/** 박빙 승부 횟수 최소 표본 — blowout 과 동일 기준. */
+export const MARGIN_CLOSE_GAME_MIN_GAMES = 3;
+/** 홈/원정 편중 판정 — 벤뉴(홈/원정)당 최소 표본. */
+export const VENUE_SPLIT_MIN_GAMES_PER_VENUE = 2;
+/** 홈/원정 승률 차이가 이 %p 이상이어야 "편중" 으로 언급 — 우연한 소표본 노이즈 배제. */
+export const VENUE_SPLIT_MIN_GAP_PCT = 40;
