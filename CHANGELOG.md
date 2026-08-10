@@ -1,3 +1,11 @@
+## v0.5.62.17 — 2026-08-10 (cycle 2050, explore-idea: MLB 팀 프로필 연승/연패 스트릭 parity)
+
+### feat(analysis): wave-625 — MLB 팀 프로필에 KBO parity 연승/연패 스트릭 추가
+
+KBO `buildTeamProfile.computeTeamStreak` (cycle 1834 wave-472) 이후 KBO 쪽 팀/매치업 프로필에 streak/avgMargin/blowout/closeGame/homeAwayEdge/recentRecord 6개 팩터가 순차 추가됐지만, MLB `buildMlbTeamProfile` 은 여전히 recentGames + factorAverages 만 보유 — 6개 팩터 모두 parity gap. 이번 cycle 은 그 중 연승/연패 스트릭 1개만 우선 처리 (스코프 절제, 나머지 5개는 다음 explore-idea carry-over). `computeTeamStreak` 이 실제로 읽는 필드(`status`/`ourScore`/`opponentScore`)만 요구하는 `StreakGame` 구조적 타입으로 파라미터를 좁혀, KBO `TeamRecentGame` 과 MLB `MlbTeamRecentGame` 양쪽이 신규 `MLB_` 접두 중복 함수 없이 동일 함수를 그대로 재사용 (이 리포에서 반복된 "동일 로직 접두어만 다르게 중복" silent drift family 를 애초에 만들지 않는 방향). `/mlb/team/[code]` KO/EN 양쪽 페이지에 한 줄 요약 렌더링. 신규 테스트 2건 (`buildMlbTeamProfile.test.ts`).
+
+---
+
 ## v0.5.62.16 — 2026-08-10 (cycle 2049, explore-idea: 투수 프로필 선발 등판 시 팀 실제 승/패 기록)
 
 ### feat(analysis): wave-624 — 선수 프로필 페이지에 "이 투수 선발 등판 시 팀 실제 승/패" 추가

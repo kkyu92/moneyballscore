@@ -176,13 +176,22 @@ export interface TeamStreak {
   length: number;
 }
 
+/** computeTeamStreak 이 실제로 읽는 필드만 (KBO/MLB TeamRecentGame 양쪽 구조적 호환). */
+export type StreakGame = {
+  status: string | null;
+  ourScore: number | null;
+  opponentScore: number | null;
+};
+
 /**
  * 이 팀의 시즌 전체(모든 상대 포함) 최근 연승/연패.
  * buildMatchupProfile 의 computeMatchupStreak 은 두 팀 맞대결 한정 스트릭 —
  * "이 팀이 모든 상대 포함 최근 전체 흐름에서" 몇 연승/연패 중인지는 없던 gap.
  * teamGames 는 buildTeamProfile 안에서 game_date 내림차순 정렬 후 전달.
+ * KBO_TEAMS/MLB_TEAMS 양쪽 TeamRecentGame 타입이 구조적으로 호환되므로
+ * buildMlbTeamProfile 도 본 함수를 그대로 재사용 (신규 MLB_ 접두 중복 함수 X).
  */
-export function computeTeamStreak(games: TeamRecentGame[]): TeamStreak | null {
+export function computeTeamStreak(games: StreakGame[]): TeamStreak | null {
   const finals = games.filter(
     (g) => g.status === "final" && g.ourScore != null && g.opponentScore != null,
   );
