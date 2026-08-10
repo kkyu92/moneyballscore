@@ -18,12 +18,19 @@ import {
   buildMlbMatchupProfile,
   type MlbMatchupGame,
 } from "@/lib/mlb/buildMlbMatchupProfile";
+import {
+  buildMlbTeamFactorAverages,
+  EMPTY_MLB_FACTOR_AVERAGES,
+} from "@/lib/mlb/buildMlbTeamFactorAverages";
+import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // plan #24 Phase 1 MVP — KBO /matchup/[teamA]/[teamB] parity 축소판.
-// header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. factor compare / elo trend /
-// recent form / convergence pick / season h2h 는 Phase 2/3 (multi-cycle carry-over).
+// header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend / recent form /
+// convergence pick / season h2h 는 Phase 2b/3 (multi-cycle carry-over).
+// Phase 2a (이번 cycle) — 시즌 평균 팩터 비교(MlbMatchupFactorCompare) 추가.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
@@ -75,7 +82,21 @@ export default async function MlbMatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const profile = await buildMlbMatchupProfile(pair);
+  const [profile, factorA, factorB] = await Promise.all([
+    buildMlbMatchupProfile(pair),
+    buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
+      captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
+        route: "/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbTeamFactorAverages.codeA",
+      }),
+    ),
+    buildMlbTeamFactorAverages(pair.codeB).catch((err) =>
+      captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
+        route: "/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbTeamFactorAverages.codeB",
+      }),
+    ),
+  ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -164,6 +185,13 @@ export default async function MlbMatchupPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <MlbMatchupFactorCompare
+        teamA={{ shortName: tA.shortName }}
+        teamB={{ shortName: tB.shortName }}
+        factorA={factorA}
+        factorB={factorB}
+      />
 
       {predictionAccuracy.verified > 0 && (
         <section
