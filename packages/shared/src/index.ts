@@ -2983,6 +2983,15 @@ export const WEEKDAY_ORDER_MON_FIRST = [1, 2, 3, 4, 5, 6, 0] as const;
 export const CONVERGENCE_STREAK_MIN_LENGTH = 2;
 
 /**
+ * review-code(heavy) cycle 2043: buildTeamProfile.ts (TEAM_STREAK_MIN_LENGTH) /
+ * buildMatchupProfile.ts (MATCHUP_STREAK_MIN_LENGTH) 양쪽에 "1승/1패만으론 스트릭 아님"
+ * 이라는 동일 기준(=2)이 주석으로만 서로 참조하며 독립 정의되어 있던 걸 통합.
+ * 두 함수 자체(computeTeamStreak / computeMatchupStreak)는 리턴 타입이 달라
+ * (win/loss 결과 vs 상대 teamCode) 로직 통합은 부적절 — 임계값만 단일 source.
+ */
+export const WIN_LOSS_STREAK_MIN_LENGTH = 2;
+
+/**
  * wave-560: 강수렴 픽 홈/어웨이·팀별 성적 배지 "낮음" 색상 임계 (%).
  * convergence pick 승률 ≤ 본 값 시 red 배지 (랜덤 이하 — 반대 팀이 유력한 신호).
  * 상한 임계 = ACCURACY_GOOD_PCT(60). 이 값 미만 ~ ACCURACY_GOOD_PCT 미만 = neutral(gray).
