@@ -1,3 +1,11 @@
+## v0.5.62.21 — 2026-08-10 (cycle 2056, explore-idea (heavy): plan #24 Phase 2a — MLB 매치업 시즌 평균 팩터 비교)
+
+### feat(analysis): wave-629 — `/mlb/matchup/[teamA]/[teamB]` 시즌 평균 팩터 비교 섹션 (KO+EN)
+
+cycle 2055 가 dedup 을 마친 후 명시적으로 남긴 plan #24 Phase 2 carry-over 중 팩터 비교 부분을 fire. KBO `MatchupFactorCompare`(8팩터: FIP/xFIP/wOBA/불펜FIP/최근폼/Elo/SFR/WAR, `buildTeamFactorAverages`)를 그대로 재사용하지 않고 MLB 전용 `buildMlbTeamFactorAverages.ts` + `MlbMatchupFactorCompare.tsx` 를 신규 작성 — `buildMlbTeamProfile.ts` 가 이미 확립한 MLB 7팩터 shape(spFip/lineupWoba/bullpenFip/recentForm/elo/lineupXwoba/lineupBarrelPct, xFIP·SFR·WAR 는 MLB 파이프라인 자체가 미수집)와 `packages/shared`의 KBO 전용 8필드 `FactorPerspective`/`computeFactorAveragesFromPerspectives` 형태가 달라 무리한 공용화 대신 risk 최소화 병렬 구현 선택(plan #24 체크리스트에 명시된 "MLB 전용 복제로 시작 후 review-code(heavy) 로 후속 통합" 순서 그대로 적용). `MetricRegistry`에 xwoba/barrel_pct slug 가 없어(KBO 10팩터 registry 전용) 라벨/힌트는 컴포넌트 로컬로 관리. KBO matchup 은 EN 페이지 자체가 없지만 MLB matchup 은 Phase 1 부터 KO/EN 양쪽 라우트가 있어 `MlbMatchupFactorCompare` 에 `locale` prop(ko/en) 을 추가해 최초부터 parity 유지(KBO 쪽엔 없던 신규 패턴). 신규 테스트 5건 (`buildMlbTeamFactorAverages.test.ts`). `pnpm --filter @moneyball/shared type-check` / `pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec vitest run` 420 files/3720 tests 전량 통과, `pnpm --filter moneyball lint` clean. Elo 추이 차트(Phase 2b)는 MLB 전용 Elo trend 쿼리(scoring_rule cohort 필터 미확정)가 필요해 스코프 절제 — 다음 explore-idea carry-over.
+
+---
+
 ## v0.5.62.20 — 2026-08-10 (cycle 2055, review-code (heavy): MLB/KBO 매치업 streak/recentRecord/homeAwayEdge dedup)
 
 ### refactor(matchup): streak/recentRecord/homeAwayEdge 3개 계산 함수 packages/shared 단일 source 통합

@@ -18,10 +18,16 @@ import {
   buildMlbMatchupProfile,
   type MlbMatchupGame,
 } from "@/lib/mlb/buildMlbMatchupProfile";
+import {
+  buildMlbTeamFactorAverages,
+  EMPTY_MLB_FACTOR_AVERAGES,
+} from "@/lib/mlb/buildMlbTeamFactorAverages";
+import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
+import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
-// EN mirror of /mlb/matchup/[teamA]/[teamB] — plan #24 Phase 1 MVP.
+// EN mirror of /mlb/matchup/[teamA]/[teamB] — plan #24 Phase 1 MVP + Phase 2a factor compare.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
@@ -101,7 +107,21 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     redirect(`/en${pair.path}`);
   }
 
-  const profile = await buildMlbMatchupProfile(pair);
+  const [profile, factorA, factorB] = await Promise.all([
+    buildMlbMatchupProfile(pair),
+    buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
+      captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbTeamFactorAverages.codeA",
+      }),
+    ),
+    buildMlbTeamFactorAverages(pair.codeB).catch((err) =>
+      captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbTeamFactorAverages.codeB",
+      }),
+    ),
+  ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
   const summary = buildSummaryEn(profile);
 
@@ -191,6 +211,14 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <MlbMatchupFactorCompare
+        teamA={{ shortName: tA.shortName }}
+        teamB={{ shortName: tB.shortName }}
+        factorA={factorA}
+        factorB={factorB}
+        locale="en"
+      />
 
       {predictionAccuracy.verified > 0 && (
         <section
