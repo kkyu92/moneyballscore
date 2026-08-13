@@ -183,4 +183,45 @@ describe("buildMlbTeamFactorAverages", () => {
     expect(avg.lineupXwoba).toBeNull();
     expect(avg.lineupBarrelPct).toBeNull();
   });
+
+  // cycle 2081 fix-incident (heavy) — mlb_schedule 은 StatsAPI 컨벤션(TB/CWS/KC/SD/SF/AZ/WSH)
+  // 저장, teamCode 인자는 canonical(Baseball-Reference, 예: TBR). 정규화 없이 그대로 필터링하면
+  // 이 7팀은 항상 0건 매칭 → EMPTY_MLB_FACTOR_AVERAGES silent 반환.
+  it("teamCode=TBR(StatsAPI 컨벤션 TB) → DB 쿼리 필터가 TB 사용 + 팩터 평균 정상 계산 (regression: cycle 2081)", async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: "700001", home_team_code: "TB", away_team_code: "BOS" }],
+      preds: [
+        {
+          external_game_id: "700001",
+          home_sp_fip: 3.2,
+          away_sp_fip: 4.4,
+          home_lineup_woba: 0.33,
+          away_lineup_woba: 0.31,
+          home_bullpen_fip: 3.6,
+          away_bullpen_fip: 4.1,
+          home_recent_form: 0.55,
+          away_recent_form: 0.45,
+          home_elo: 1510,
+          away_elo: 1470,
+          home_lineup_xwoba: 0.32,
+          away_lineup_xwoba: 0.30,
+          home_lineup_barrel_pct: 8.8,
+          away_lineup_barrel_pct: 7.5,
+          prediction_type: "pre_game",
+        },
+      ],
+    });
+
+    const { buildMlbTeamFactorAverages } = await import("../buildMlbTeamFactorAverages");
+    const avg = await buildMlbTeamFactorAverages("TBR");
+
+    // DB 쿼리 필터는 StatsAPI 코드(TB)로 나가야 함 — canonical(TBR) 그대로면 항상 0건 매칭.
+    const scheduleFrom = supabaseMock.from("mlb_schedule") as unknown as { or: ReturnType<typeof vi.fn> };
+    expect(scheduleFrom.or).toHaveBeenCalledWith("home_team_code.eq.TB,away_team_code.eq.TB");
+
+    // TB(home) === dbTeamCode(TB) 정상 매칭 → home 관점 팩터 사용.
+    expect(avg.sampleN).toBe(1);
+    expect(avg.spFip).toBe(3.2);
+    expect(avg.lineupWoba).toBe(0.33);
+  });
 });

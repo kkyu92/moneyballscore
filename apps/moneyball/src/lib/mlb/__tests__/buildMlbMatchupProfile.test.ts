@@ -263,3 +263,51 @@ describe("buildMlbMatchupProfile — mlb_schedule row 없음 → 빈 프로필 (
     expect(profile.streak).toBeNull();
   });
 });
+
+// cycle 2081 fix-incident (heavy) — mlb_schedule 은 StatsAPI 컨벤션(TB/CWS/KC/SD/SF/AZ/WSH) 저장,
+// pair.codeA/codeB(URL 파생)는 Baseball-Reference 표준(TBR 등). 정규화 없이 canonical 코드로
+// 그대로 `.or(home_team_code.eq.TBR,...)` 필터링하면 DB 실측과 항상 불일치 — 이 7팀이 낀
+// 모든 매치업 페이지(/mlb/matchup/*)가 항상 "0경기"만 보여주던 silent 버그.
+describe("buildMlbMatchupProfile — StatsAPI 컨벤션 팀 코드 정규화 (regression: cycle 2081)", () => {
+  it("pair 에 TBR 포함 시 DB 쿼리 필터는 StatsAPI 코드(TB) 사용 + 경기/승패 정상 집계", async () => {
+    const schedule: ScheduleFixture[] = [
+      {
+        id: 9301,
+        external_game_id: "9301",
+        game_date: "2026-04-20",
+        status: "final",
+        home_score: 4,
+        away_score: 1,
+        // DB 실측 값 — StatsAPI 컨벤션(TB=TBR)
+        home_team_code: "TB",
+        away_team_code: "NYY",
+      },
+    ];
+    const preds: PredFixture[] = [
+      { external_game_id: "9301", home_win_prob: 0.65, prediction_type: "pre_game" },
+    ];
+    supabaseMock = makeSupabaseMock(schedule, preds);
+
+    const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
+    const pair = mlbCanonicalPair("NYY", "TBR")!; // 알파벳 정렬: codeA=NYY, codeB=TBR
+    const profile = await buildMlbMatchupProfile(pair);
+
+    // DB 쿼리 필터는 StatsAPI 코드(TB)로 나가야 함 — canonical(TBR) 그대로면 항상 0건 매칭.
+    const scheduleFrom = supabaseMock.from("mlb_schedule") as unknown as {
+      or: ReturnType<typeof vi.fn>;
+    };
+    expect(scheduleFrom.or).toHaveBeenCalledWith(
+      "and(home_team_code.eq.NYY,away_team_code.eq.TB),and(home_team_code.eq.TB,away_team_code.eq.NYY)",
+    );
+
+    expect(profile.totalGames).toBe(1);
+    expect(profile.finalGames).toBe(1);
+    expect(profile.games[0].homeCode).toBe("TBR"); // canonical 정규화됨 (raw 'TB' 아님)
+    expect(profile.games[0].awayCode).toBe("NYY");
+    expect(profile.games[0].actualWinnerCode).toBe("TBR");
+    // sideStats 는 canonical teamA/teamB.code 로 매칭 — 정규화 실패 시 항상 0승 0패.
+    const sideTBR = profile.sideStats.a.teamCode === "TBR" ? profile.sideStats.a : profile.sideStats.b;
+    expect(sideTBR.wins).toBe(1);
+    expect(sideTBR.homeWins).toBe(1);
+  });
+});

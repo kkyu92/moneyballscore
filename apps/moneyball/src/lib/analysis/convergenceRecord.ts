@@ -21,6 +21,8 @@ import {
   type TeamCode,
   type MlbTeamCode,
   type SelectResult,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel';
@@ -362,9 +364,13 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
   minFactors: number,
 ): Promise<Array<{ favoredTeam: MlbTeamCode; won: boolean }>> {
   const supabase = await createClient();
+  // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
+  // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
+  const dbCodeA = toMlbStatsApiCode(codeA);
+  const dbCodeB = toMlbStatsApiCode(codeB);
   const orFilter =
-    `and(home_team_code.eq.${codeA},away_team_code.eq.${codeB}),` +
-    `and(home_team_code.eq.${codeB},away_team_code.eq.${codeA})`;
+    `and(home_team_code.eq.${dbCodeA},away_team_code.eq.${dbCodeB}),` +
+    `and(home_team_code.eq.${dbCodeB},away_team_code.eq.${dbCodeA})`;
 
   const scheduleResult = (await supabase
     .from('mlb_schedule')
@@ -411,8 +417,9 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
   for (const row of scheduleRows) {
     const pred = predByExternalId.get(row.external_game_id);
     if (!pred || row.home_score === null || row.away_score === null) continue;
-    const homeCode = row.home_team_code as MlbTeamCode;
-    const awayCode = row.away_team_code as MlbTeamCode;
+    // DB 원본(StatsAPI 컨벤션) → canonical 정규화. 이후 MLB_TEAMS 조회/canonical 코드 비교 안전.
+    const homeCode = normalizeMlbTeamCode(row.home_team_code) ?? (row.home_team_code as MlbTeamCode);
+    const awayCode = normalizeMlbTeamCode(row.away_team_code) ?? (row.away_team_code as MlbTeamCode);
 
     const duel = computeMlbCompositeDuel({
       homeCode,

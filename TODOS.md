@@ -1,10 +1,12 @@
 # TODOS
 
-## ✅ plan #25 Phase 1 완료 — MLB Elo K-factor 엔진 + 백필 (cycle 2080, 2026-08-13)
+## ✅ MLB_TEAMS StatsAPI/Baseball-Reference 7팀 코드 불일치 — 5개 callsite 정규화 완료 (cycle 2081, 2026-08-13, 사례 27)
 
-`packages/kbo-data/src/factors/mlb-elo.ts`(MLB_ELO_K=4, FiveThirtyEight/Nate Silver 인용) + migration 046 `mlb_team_elo`(prod 적용 완료) + `scripts/backfill-mlb-elo.ts`(prod 실행 완료, 30팀 현재 rating 도출 — CHC 1533 최고 / ATH 1456 최저). Elo 값은 아직 어디에도 소비 안 됨(mlb-pipeline.ts `ELO_NEUTRAL` placeholder 불변) — Phase 2(자동 갱신+UI 차트)/Phase 3(예측 반영, op-analysis 게이트) 대기. 상세 = `~/.develop-cycle/plans/moneyballscore/25.md`.
+cycle 2080 발견 이슈(park factor silent neutral fallback) 실측 확대 조사 결과 — DB 실측(`mlb_schedule` 759 rows)으로 확인한 7팀 alias(`TB`/`CWS`/`KC`/`SD`/`SF`/`AZ`/`WSH` → `TBR`/`CHW`/`KCR`/`SDP`/`SFG`/`ARI`/`WSN`)가 **park factor 뿐 아니라 매치업/팀 페이지 DB 쿼리 필터 전체를 깨뜨리고 있었음** — canonical 코드로 `.or(home_team_code.eq.TBR,...)` 필터링 시 DB 실측(`TB`)과 불일치해 이 7팀이 낀 모든 매치업(`/mlb/matchup/*`)·팀(`/mlb/team/*`) 페이지가 항상 "0경기"만 반환(silent empty, park factor 보다 심각).
 
-**신규 발견 (범위 밖 flag)**: 백필 중 `mlb_schedule` 팀 코드(MLB StatsAPI 컨벤션: `TB`/`CWS`/`KC`/`SD`/`SF`/`AZ`/`WSH`)가 `packages/shared/src/mlb-teams.ts` `MLB_TEAMS` 키(Baseball-Reference 컨벤션: `TBR`/`CHW`/`KCR`/`SDP`/`SFG`/`ARI`/`WSN`)와 7팀 불일치 확인 — `mlb-pipeline.ts:272` `MLB_TEAMS[g.home_team_code]?.parkPf` 조회가 이 7팀에 대해 항상 undefined→neutral(1.0) fallback, 즉 **park factor 가 7/30팀 예측에서 계속 미적용**(silent, 사례 3/22 family 와 동일 구조 — DB 에러 없이 조용히 neutral 대체). 별도 fix-incident(heavy) 필요 — MLB_TEAMS 키를 StatsAPI 컨벤션으로 통일하거나 alias map 추가, 전체 callsite(mlb-teams.ts consumer 전수) 재검토.
+`packages/shared/src/mlb-teams.ts`에 `MLB_STATSAPI_TEAM_ALIASES` + `normalizeMlbTeamCode`(DB→canonical)/`toMlbStatsApiCode`(canonical→DB) 양방향 변환 추가 후 5개 callsite 수정: `mlb-pipeline.ts`(park factor), `convergenceRecord.ts`(수렴픽 OR필터+homeCode), `buildMlbMatchupProfile.ts`(매치업 OR필터+homeCode/awayCode), `buildMlbTeamProfile.ts`(팀페이지 OR필터+isHome/opponentCode), `buildMlbTeamFactorAverages.ts`(팩터평균 OR필터+isHome). 회귀 테스트 6건 추가(각 callsite StatsAPI 코드 입력 시 정상 동작 검증). type-check/lint/test(전체 4527 tests) 전량 통과.
+
+**범위 밖 미확인 (낮은 우선순위)**: `buildMlbPlayerProfile.ts:131`의 `teams.code`(curated seed 테이블, 스크래퍼 직접 소비 아님)는 컨벤션 미확인 — 별도 조사 필요 시 후속.
 
 ## ✅ lotto cron 자동화 4주 연속 silent 실패 — root cause 해소, 실측 fire 확인만 대기 (cycle 2072, 2026-08-13, 사례 26)
 

@@ -67,9 +67,38 @@ export const MLB_DIVISIONS = {
 // 5팀 pre-render — Task 4 generateStaticParams. 인기/시청자 트래픽 기준.
 export const MLB_TEAMS_PRE_RENDER: readonly MlbTeamCode[] = ['LAD', 'NYY', 'BOS', 'CHC', 'SFG'] as const;
 
+// mlb_schedule/mlb_team_stats/mlb_team_elo 는 StatsAPI team.abbreviation 원본을 그대로 저장하는데
+// (scrapers/statsapi-mlb.ts), 이 7팀만 MLB_TEAMS 의 Baseball-Reference 3-letter 표준 키와 다름 —
+// DB 실측(cycle 2081): TB/CWS/KC/SD/SF/AZ/WSH. normalizeMlbTeamCode/toMlbStatsApiCode 로 양방향 변환.
+export const MLB_STATSAPI_TEAM_ALIASES: Record<string, MlbTeamCode> = {
+  TB: 'TBR',
+  CWS: 'CHW',
+  KC: 'KCR',
+  SD: 'SDP',
+  SF: 'SFG',
+  AZ: 'ARI',
+  WSH: 'WSN',
+};
+
+// DB에서 읽은 팀 코드(StatsAPI 또는 canonical) → canonical MLB_TEAMS 키. 매칭 실패 시 undefined.
+export function normalizeMlbTeamCode(code: string | null | undefined): MlbTeamCode | undefined {
+  if (!code) return undefined;
+  if (code in MLB_TEAMS) return code as MlbTeamCode;
+  return MLB_STATSAPI_TEAM_ALIASES[code];
+}
+
+// canonical MLB_TEAMS 키 → DB 저장 값(StatsAPI convention). alias 없는 팀은 코드 동일 — DB 쿼리 필터 박제 전용.
+export function toMlbStatsApiCode(code: MlbTeamCode): string {
+  for (const [statsApiCode, canonical] of Object.entries(MLB_STATSAPI_TEAM_ALIASES)) {
+    if (canonical === code) return statsApiCode;
+  }
+  return code;
+}
+
 export function mlbShortTeamName(code: MlbTeamCode | string | null | undefined): string {
   if (!code) return '';
-  if (code in MLB_TEAMS) return MLB_TEAMS[code as MlbTeamCode].shortName;
+  const canonical = normalizeMlbTeamCode(code);
+  if (canonical) return MLB_TEAMS[canonical].shortName;
   return String(code);
 }
 

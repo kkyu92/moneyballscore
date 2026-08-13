@@ -4,6 +4,8 @@ import {
   type MlbTeamCode,
   mlbShortTeamName,
   mlbTeamDivision,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
   assertSelectOk,
 } from '@moneyball/shared';
 import {
@@ -160,10 +162,13 @@ export async function buildMlbTeamProfile(
     recentRecord: null,
   };
 
+  // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
+  // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
+  const dbTeamCode = toMlbStatsApiCode(teamCode);
   const scheduleResult = await supabase
     .from('mlb_schedule')
     .select('id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
-    .or(`home_team_code.eq.${teamCode},away_team_code.eq.${teamCode}`);
+    .or(`home_team_code.eq.${dbTeamCode},away_team_code.eq.${dbTeamCode}`);
 
   const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamProfile mlb_schedule');
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
@@ -223,8 +228,8 @@ export async function buildMlbTeamProfile(
   for (const { schedule: g, pred } of games) {
     if (!pred) continue;
 
-    const isHome = g.home_team_code === teamCode;
-    const isAway = g.away_team_code === teamCode;
+    const isHome = g.home_team_code === dbTeamCode;
+    const isAway = g.away_team_code === dbTeamCode;
     if (!isHome && !isAway) continue;
 
     predictedGames += 1;
@@ -266,7 +271,7 @@ export async function buildMlbTeamProfile(
       if (isCorrect) correctN += 1;
     }
 
-    const opponentCode = (isHome ? g.away_team_code : g.home_team_code) as MlbTeamCode;
+    const opponentCode = normalizeMlbTeamCode(isHome ? g.away_team_code : g.home_team_code) ?? null;
 
     teamGames.push({
       gameId: g.id,
