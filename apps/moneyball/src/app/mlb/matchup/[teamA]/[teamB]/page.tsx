@@ -31,7 +31,9 @@ import {
 } from "@/lib/teams/buildTeamRecentForm";
 import { buildMlbSeasonHeadToHead } from "@/lib/mlb/buildMlbSeasonHeadToHead";
 import { getMlbConvergencePickHeadToHeadRecord } from "@/lib/analysis/convergenceRecord";
+import { buildMlbMatchupEloTrend } from "@/lib/mlb/buildMlbMatchupEloTrend";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
+import { MlbMatchupEloChart } from "@/components/matchup/MlbMatchupEloChart";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
 import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
 import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchupConvergencePickRecord";
@@ -40,12 +42,13 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // plan #24 Phase 1 MVP — KBO /matchup/[teamA]/[teamB] parity 축소판.
-// header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend 는 Phase 2b (MLB
-// Elo rating 시스템 부재로 block, cycle 2057 확인).
+// header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend 는 원래 MLB Elo
+// rating 시스템 부재로 block(cycle 2057) → plan #25 로 분리 구현 완료(migration 046/047,
+// mlb_team_elo_history) → Phase 2b step 2(이번 cycle) 에서 MlbMatchupEloChart 로 노출.
 // Phase 2a (cycle 2056) — 시즌 평균 팩터 비교(MlbMatchupFactorCompare) 추가.
 // Phase 3a (cycle 2060) — 최근 폼(MlbMatchupRecentForm) 추가.
 // Phase 3b (cycle 2063) — 시즌별 상대전적(MlbMatchupSeasonHeadToHead) 추가.
-// Phase 3c (이번 cycle) — 수렴 픽 성적(MlbMatchupConvergencePickRecord) 추가. MLB 전용
+// Phase 3c (cycle 2064) — 수렴 픽 성적(MlbMatchupConvergencePickRecord) 추가. MLB 전용
 // composite duel(computeMlbCompositeDuel) + cohort 상수(MLB_PRODUCTION_COHORT_RULES) 신규.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -98,7 +101,7 @@ export default async function MlbMatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats, eloTrend] = await Promise.all([
     buildMlbMatchupProfile(pair),
     buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
@@ -134,6 +137,12 @@ export default async function MlbMatchupPage({ params }: PageProps) {
       captureFallback(err, [], {
         route: "/mlb/matchup/[teamA]/[teamB]",
         source: "getMlbConvergencePickHeadToHeadRecord(complete)",
+      }),
+    ),
+    buildMlbMatchupEloTrend(pair.codeA, pair.codeB).catch((err) =>
+      captureFallback(err, { points: [] }, {
+        route: "/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbMatchupEloTrend",
       }),
     ),
   ]);
@@ -233,6 +242,25 @@ export default async function MlbMatchupPage({ params }: PageProps) {
         factorA={factorA}
         factorB={factorB}
       />
+
+      {eloTrend.points.length > 0 && (
+        <section
+          aria-labelledby="mlb-matchup-elo-trend-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="mlb-matchup-elo-trend-title" className="text-lg font-bold mb-1">
+            Elo 레이팅 추이 비교
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            시즌 경기별 두 팀의 Elo 변화
+          </p>
+          <MlbMatchupEloChart
+            points={eloTrend.points}
+            teamA={{ shortName: tA.shortName, color: tA.color }}
+            teamB={{ shortName: tB.shortName, color: tB.color }}
+          />
+        </section>
+      )}
 
       <MlbMatchupRecentForm
         teamA={{ shortName: tA.shortName }}
