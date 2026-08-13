@@ -468,3 +468,21 @@ cycle 2000 이 `(milestone)` 라벨로 실행됐으나 cycle_state JSON 의 diag
 - 사례 3/22 (VARCHAR overflow / silent .error 미체크) — "에러 없이 조용히 fallback/empty 값으로 대체" 라는 동일 상위 패턴, 본 사례는 원인이 두 팀 코드 컨벤션의 타입 미분리(캐스팅 신뢰)라는 점에서 신규 root cause
 - 사례 1 (그린필드 가정 차단) — 신규 기능(plan #25 Phase 1) 백필 도중 "이미 존재하는" 데이터(`mlb_schedule`)의 실제 값을 검증 안 하고 새 코드를 얹었다가 기존 데이터와의 컨벤션 불일치를 뒤늦게 발견한 변형
 - 본 사례 자체가 "한 곳만 고치면 끝" 이라는 스코프 판단이 위험함을 보여주는 사례 — 최초 발견(cycle 2080) 은 1개 callsite 였지만 같은 root cause 로 5개 callsite 가 깨져 있었음. 향후 코드 컨벤션 불일치 발견 시 grep 전수 조사 필수(본 사례가 Explore agent 활용 패턴의 근거)
+
+---
+
+### 사례 28 — Cloudflare Worker cron dispatch 가 설정 파일과 코드 양쪽에 같은 문자열을 하드코딩 → 한쪽만 바꾸면 silent 전면 미발화 (cycle 2082 자체 발견+예방)
+
+`cloudflare-worker/wrangler.toml` 의 cron trigger 표현식(`crons = [...]`)과 `worker.ts` 의 `scheduled` 핸들러 안 `cronExpr === '<문자열>'` 분기 조건이 **완전히 동일한 문자열을 두 파일에 각각 하드코딩**하는 구조. Cloudflare 가 매 cron fire 시 `event.cron` 으로 실제 설정된 표현식을 그대로 넘겨주기 때문에, `wrangler.toml` 의 표현식만 바꾸고 `worker.ts` 쪽 `===` 비교 문자열을 안 바꾸면 두 문자열이 영원히 안 맞아 해당 분기(및 그 안의 모든 하위 로직) 가 배포 후 조용히 전혀 실행되지 않음 — 에러도, 로그도, silent-drift alert 도 안 뜸(분기 자체에 진입을 못 하니 그 안의 alert 로직도 실행 안 됨).
+
+**발견 경로**: cycle 2082 explore-idea(heavy) 로 plan #25 Phase 2(`mlb_elo_update` 신규 pipeline mode) 작업 중 cron 스케줄에 UTC 22 슬롯을 추가하려고 `wrangler.toml` 의 MLB pipeline cron 표현식을 `"17 18-21,10 * * *"` → `"17 18-22,10 * * *"` 로 넓혔음. 배포 전 `worker.ts` 를 다시 훑다가 `decideMlbMode()` 옆의 dispatch 분기가 `cronExpr === '17 18-21,10 * * *'` 로 **똑같은 문자열을 별도로 하드코딩**하고 있음을 발견 — 두 파일을 동기화하지 않은 채 배포됐다면 MLB pipeline 전체(신규 `mlb_elo_update` 뿐 아니라 기존 `mlb_statsapi_scrape`/`mlb_fancy_scrape`/`mlb_savant_scrape`/`mlb_predict_final` 도 포함) 가 silent 미발화됐을 뻔함 — 사례 20(`gh pr create` 라벨 부재 silent swallow) 과 유사한 "설정 변경이 코드의 암묵적 가정을 깨뜨리는" 패턴이지만, 본 사례는 GH Actions 가 아닌 Cloudflare Workers cron 레이어에서 최초 식별.
+
+**핵심 gap**: cron 표현식이라는 "설정값"이 실질적으로는 라우팅 키(dispatch key)로 코드에 재사용되는데, 이 관계가 타입 시스템이나 단일 source-of-truth 로 강제되지 않고 순수 문자열 리터럴 완전 일치(`===`)에 의존 — `wrangler.toml`(배포 설정, 코드 리뷰 시 놓치기 쉬운 파일)과 `worker.ts`(로직 코드) 사이 어떤 정적 검증도 없어 컴파일/린트/테스트 어느 것도 두 파일의 불일치를 잡아주지 못함. 유닛 테스트가 있었어도 `event.cron` mock 값을 테스트 코드에서 임의로 지정하므로 이 특정 mismatch(설정 파일 실제 값 vs 코드 하드코딩 값의 drift)는 안 걸림 — 오직 "두 파일을 직접 눈으로 대조" 해야만 잡히는 카테고리.
+
+**fix (cycle 2082, 배포 전 예방)**: `worker.ts` 의 `cronExpr === '17 18-21,10 * * *'` 을 `'17 18-22,10 * * *'` 로 동시 갱신 + JSDoc 주석(7번 항목) 도 동기화. 기존 회귀 가드 테스트(`silent-drift-wave-193.test.ts`, cycle 1459 박제)가 정확히 이 두 파일의 특정 문자열을 정규식으로 검증하고 있어(당시엔 다른 migration 목적) 본 cycle 의 변경과 충돌 — 가드 테스트도 새 값(`18-22`, `6회/일`)으로 갱신. **아직 실제 fire 로 검증 전** — 다음 UTC 22(KST 07) cron fire 때 `mlb_elo_update` 모드가 정상 호출되는지 실측 확인 필요(Cloudflare Worker 배포 자체가 사례 25 로 현재 blocked 상태라 배포 후에나 가능).
+
+**예방적 후속 후보 (Tier 2, 별도 cycle)**: cron 문자열 하드코딩 이중화 자체를 제거 — 예를 들어 `worker.ts` 가 `wrangler.toml` 을 파싱해서 표현식을 읽거나, 두 파일이 공유하는 상수 모듈을 두는 방식. 근본 원인(두 파일 간 문자열 동기화 의존)을 없애지 않으면 다음 cron 슬롯 변경 시 동일 패턴 재발 가능.
+
+**관련 family**:
+- 사례 20(`gh pr create` 라벨 부재 silent swallow) — "설정(라벨/cron 표현식) 이 코드의 암묵적 가정과 안 맞으면 핵심 동작이 조용히 스킵되는데 실행 자체는 success 로 보임" 이라는 동일 상위 패턴, 본 사례는 GH Actions 워크플로가 아닌 Cloudflare Workers 레이어라는 점에서 신규 발생 지점
+- 사례 27(MLB_TEAMS 컨벤션 불일치) — "두 개의 서로 다른 문자열 표현이 같은 프로젝트 안에 공존하는데 타입 시스템이 구분 안 해줌" 이라는 점에서 유사 구조, 단 사례 27 은 사후 발견(버그가 이미 배포됨) 이고 본 사례는 배포 전 자체 발견으로 예방된 케이스 — silent drift family 안에서 "사전 예방" 성공 사례로 기록할 가치 있음
