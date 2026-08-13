@@ -1,0 +1,71 @@
+name: Deploy Cloudflare Worker
+
+# 사례 25 (cycle 2068): cloudflare-worker/ 배포가 로컬 `wrangler deploy` 단일 경로에만 의존 —
+# oauth refresh_token 이 2026-06-12 이후 만료/무효화되며 그 뒤 3개 commit(#2548 cron fire count fix,
+# Sentry capture, 오늘 mlb_schedule KST backfill fix)이 main 에는 있지만 실제 Worker 런타임엔 미배포로
+# 확인됨(로그: "Token refresh failed", refresh_token 발급일=oauth expiration_time=2026-06-12).
+# 로컬 세션 만료에 더 이상 의존하지 않도록 push 시 자동 배포로 전환.
+#
+# 필요 secret (사용자 1회 설정): CLOUDFLARE_API_TOKEN
+#   - Cloudflare dashboard → My Profile → API Tokens → Create Token
+#   - 권한: Account.Workers Scripts:Edit (해당 계정 한정)
+#   - repo secret 으로 등록: gh secret set CLOUDFLARE_API_TOKEN
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare-worker/**'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cloudflare-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deploy worker
+        working-directory: cloudflare-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: pnpm exec wrangler deploy
+
+      - name: Notify playbook on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PLAYBOOK_PAT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          TITLE="${WORKFLOW_NAME} 실패"
+          BODY="Workflow: ${WORKFLOW_NAME}
+          Run: ${RUN_URL}
+          Branch: ${BRANCH}
+          Commit: ${COMMIT_SHA}"
+          gh api repos/kkyu92/playbook/dispatches \
+            -f event_type=worker-error \
+            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[title]=${TITLE}" \
+            -f "client_payload[body]=${BODY}" \
+            -f "client_payload[type]=error-log" \
+            -f "client_payload[severity]=error" \
+            -f "client_payload[fingerprint]=cron-deploy-cloudflare-worker-failure" \
+            -f "client_payload[environment]=production" \
+            -f "client_payload[run_url]=${RUN_URL}"

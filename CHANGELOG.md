@@ -1,3 +1,13 @@
+## v0.5.62.27 — 2026-08-13 (cycle 2068, fix-incident (lite): Cloudflare Worker 배포 toolchain + auto-deploy CI 신규 (사례 25))
+
+### fix(infra): cloudflare-worker pnpm workspace 편입 + workerd build 승인 + wrangler 자동 배포 CI
+
+cycle 2067 retro carry-over — 로컬 `wrangler deploy` 가 `MODULE_NOT_FOUND` 로 실패하던 근본 원인 규명: `cloudflare-worker/`가 `pnpm-workspace.yaml` packages glob(`apps/*`, `packages/*`) 밖에 있어 `wrangler` 의존성이 root `.pnpm` store 에 정상 hoist 되지 않고 dangling symlink 만 남아 있었음. `pnpm-workspace.yaml` 에 `cloudflare-worker` 추가 + `package.json` `pnpm.onlyBuiltDependencies: ["workerd"]` 추가(native postinstall 승인)로 해결 — `wrangler --version`/`whoami` 정상 동작 확인, turbo 가 `moneyballscore-cron` 을 4번째 패키지로 인식(`type-check`/`test`/`lint` 전체 통과).
+
+추가로 로컬 wrangler 자체의 oauth refresh_token 이 2026-06-12 이후 무효화(non-interactive 환경에서 refresh 시 400 Bad Request)되어 있음을 발견 — git log 대조 결과 그 날짜 이후 `cloudflare-worker/src/worker.ts` 변경 3건(cron fire count fix, Sentry capture, 오늘 mlb_schedule KST backfill fix)이 실제 Worker 런타임에 미배포 상태로 추정. 로컬 세션 만료에 더 이상 의존하지 않도록 `.github/workflows/deploy-cloudflare-worker.yml` 신규 — `cloudflare-worker/**` push 시 `CLOUDFLARE_API_TOKEN` secret 으로 자동 `wrangler deploy`. secret 등록 및 급한 수동 배포는 사용자 영역 — `TODOS.md` carry-over 참조.
+
+`pnpm type-check` (4 packages) / `pnpm test` (421 files/3722 tests) / `pnpm lint` 전체 통과.
+
 ## v0.5.62.26 — 2026-08-13 (cycle 2065, fix-incident: MLB predictions 팩터 breakdown 컬럼 NULL + teams/games 데이터 모델 gap 발견)
 
 ### fix(mlb): predict_final 실측 팩터(fip/xfip/woba/war/xwoba/barrel_pct) breakdown 컬럼 영속화 (사례 21)
