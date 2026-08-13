@@ -121,6 +121,27 @@ describe('buildMlbPlayerProfile — silent drift family `.error` 미체크 회�
     expect(profile?.pitcherStats).toEqual([]);
   });
 
+  it('team.code가 StatsAPI alias(TB/CWS 등)여도 canonical 코드로 정규화 — 사례 27 family 회귀 가드', async () => {
+    supabaseMock = makeSupabaseMock({
+      playerRow: {
+        id: 2,
+        external_id: '12345',
+        name_ko: '테스트',
+        name_en: 'Test Player',
+        position: 'OF',
+        throws: 'R',
+        bats: 'R',
+        is_active: true,
+        team: { code: 'TB' },
+      },
+      batterRows: [],
+    });
+    const { buildMlbPlayerProfile } = await import('../buildMlbPlayerProfile');
+    const profile = await buildMlbPlayerProfile(2);
+    expect(profile?.teamCode).toBe('TBR');
+    expect(profile?.teamName).toBe('Rays');
+  });
+
   it('batter_stats select error → assertSelectOk throw', async () => {
     supabaseMock = makeSupabaseMock({
       playerRow: {

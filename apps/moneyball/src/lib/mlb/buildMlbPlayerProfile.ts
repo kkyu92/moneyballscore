@@ -3,6 +3,7 @@ import {
   MLB_TEAMS,
   type MlbTeamCode,
   mlbShortTeamName,
+  normalizeMlbTeamCode,
   assertSelectOk,
 } from '@moneyball/shared';
 
@@ -127,7 +128,7 @@ export async function buildMlbPlayerProfile(
   if (!playerRow) return null;
 
   const p = playerRow as unknown as PlayerRow;
-  const teamCode = (p.team?.code as MlbTeamCode | null) ?? null;
+  const teamCode = normalizeMlbTeamCode(p.team?.code) ?? null;
   const teamName = teamCode && MLB_TEAMS[teamCode]
     ? mlbShortTeamName(teamCode)
     : null;
