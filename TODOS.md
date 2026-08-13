@@ -1,5 +1,22 @@
 # TODOS
 
+## ✅ PR #2887 (Footer 로또 hub 보강) 12일 silent 미머지 — R7 위반 발견+머지 (cycle 2088, 2026-08-13, 사례 18 family)
+
+open PR 진단 중 `develop-cycle/ia-footer-lotto-hub-cycle-2022` (cycle 2022, 2026-08-01
+생성)가 CI green + `mergeStateStatus: CLEAN` + `mergeable: true` 상태로 12일간 그대로
+방치돼 있었음 — CLAUDE.md R7("본 메인 PR + CI green → 묻지 않고 즉시 머지") 위반,
+`memory/drift-cases.md` 사례 18(retro 완료형 서술과 실제 명령 실행 혼동)과 동일
+family — 당시 cycle 2022 가 PR 생성 후 `--auto` 플래그 결과를 확인하지 않고 다음
+cycle으로 넘어간 것으로 추정(원인 cycle 자체는 로그 부재로 확정 불가). 본 cycle이
+`gh pr view --json mergeable,mergeStateStatus` 실측 후 `gh pr merge --squash
+--delete-branch` 실행 + `state=MERGED`(commit `0703639`) 확인. 다른 open PR 9건 중
+develop-cycle 산출물은 이 1건뿐(나머지 8건은 dependabot — 정책상 자동 진행 대상 아님).
+
+**후속 후보 (Tier 2)**: cycle 2001이 이미 `/commits` API fallback 등으로 사례 18 재발
+차단을 시도했으나 이번 건은 애초에 R7 자동 머지 명령 자체가 실행 안 된 케이스 —
+PR 생성 직후 `--auto` 활성화가 silent 누락되는 경로가 남아있을 가능성. 다음 review-code
+heavy fire 시 develop-cycle 워커의 PR 생성 → auto-merge 활성화 배선 지점 재확인 후보.
+
 ## ✅ buildMlbPlayerProfile.ts teams.code 정규화 누락 — 사례 27 family 선제 수정 (cycle 2087, 2026-08-13)
 
 cycle 2081(사례 27)이 5개 callsite에 `normalizeMlbTeamCode()`를 적용하며
