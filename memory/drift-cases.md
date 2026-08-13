@@ -451,3 +451,20 @@ cycle 2000 이 `(milestone)` 라벨로 실행됐으나 cycle_state JSON 의 diag
 - 사례 17 (CI/CD 파이프라인 실패가 `pipeline_runs` DB 진단 밖) — run 자체 실패 감지 필요성을 박제했지만, 본 사례는 run 이 success 인데 내부 단계만 조용히 skip 되는 한 단계 더 깊은 맹점
 - 사례 18 (retro 완료형 서술 vs 실제 미실행) — 본 사례 fix 검증 시 동일한 "실측 확인 (`gh pr view --json state,mergedAt`)" 절차 재사용
 - 사례 18 (retro 완료형 서술 vs 미실행) — 같은 cycle 2000~2001 구간에서 동시 발생한 별개 self-referential drift (머지 vs marker, 서로 독립)
+
+---
+
+### 사례 27 — MLB_TEAMS StatsAPI/Baseball-Reference 7팀 코드 컨벤션 불일치 → park factor + 매치업/팀페이지 DB 쿼리 5개 callsite silent 버그 (cycle 2081 발견)
+
+`mlb_schedule`/`mlb_team_stats`/`mlb_team_elo` 는 MLB StatsAPI 의 `team.abbreviation` 원본을 그대로 저장(`scrapers/statsapi-mlb.ts`)하는데, `packages/shared/src/mlb-teams.ts` 의 `MLB_TEAMS` 키는 Baseball-Reference 3-letter 표준 — 정확히 7팀에서 두 컨벤션이 다름: `TB`/`CWS`/`KC`/`SD`/`SF`/`AZ`/`WSH`(StatsAPI, DB 실측) ↔ `TBR`/`CHW`/`KCR`/`SDP`/`SFG`/`ARI`/`WSN`(Baseball-Reference, MLB_TEAMS 키). cycle 2080 이 plan #25 Phase 1 백필 중 park factor 조회(`MLB_TEAMS[g.home_team_code]?.parkPf`) 1곳만 발견해 TODOS 에 "범위 밖 flag" 로 남겼는데, cycle 2081 fix-incident(heavy) 로 실측 확대 조사한 결과 같은 root cause 가 **DB 쿼리 필터 자체**(`.or(home_team_code.eq.<canonical>,...)`) 를 깨뜨리는 훨씬 심각한 버그를 5곳에서 유발하고 있었음 — canonical 코드로 필터링하면 DB 실측(`TB` 등)과 항상 불일치해 이 7팀이 낀 모든 매치업(`/mlb/matchup/*`)·팀(`/mlb/team/*`) 페이지가 항상 "0경기"만 반환(silent empty, park factor 보다 영향 범위 큼 — 페이지 전체가 죄다 비어 보임).
+
+**발견 경로**: cycle 2080 TODOS flag(park factor 1곳) 를 fix-incident(heavy) 로 착수 → 실측 검증 위해 `pnpm tsx` 로 직접 supabase 쿼리 실행해 `mlb_schedule` distinct 팀 코드 759 rows 전수 확인(`AZ`/`CWS`/`KC`/`SD`/`SF`/`TB`/`WSH` 7개가 `MLB_TEAMS` 키에 없음을 확인) → Explore agent 로 `MLB_TEAMS`/`MlbTeamCode` 전체 callsite 매핑 요청 → agent 가 park factor 외 `computeMlbCompositeDuel.ts`(수렴픽 duel 계산) 를 추가 발견 → 직접 코드 read 로 `convergenceRecord.ts`/`buildMlbMatchupProfile.ts`/`buildMlbTeamProfile.ts`/`buildMlbTeamFactorAverages.ts` 4개 파일에서 동일 패턴(canonical 코드로 DB `.or()` 필터링 + `===` 비교)이 반복됨을 확인.
+
+**핵심 gap**: 두 개의 서로 다른 "3-letter 팀 코드" 컨벤션이 같은 프로젝트 안에 공존(스크래핑 원본 그대로 저장하는 DB 레이어 vs 큐레이션된 정적 참조 테이블)할 때, 타입 시스템(`MlbTeamCode`)이 둘을 구분하지 않아 컴파일러가 전혀 잡아주지 못함 — `row.home_team_code as MlbTeamCode` 캐스팅이 5곳 모두에서 "믿고 캐스팅"으로 처리돼 있었음. 기존 테스트 fixture 들도 전부 canonical 코드(`SFG`/`WSN` 등)만 사용해 실제 DB 값(`TB` 등)을 한 번도 mock 하지 않아 버그가 4개 파일의 기존 테스트 스위트 전체를 통과하면서 은닉됨.
+
+**fix (cycle 2081)**: `packages/shared/src/mlb-teams.ts` 에 `MLB_STATSAPI_TEAM_ALIASES`(7팀 alias map, DB 실측으로 검증) + `normalizeMlbTeamCode`(DB→canonical)/`toMlbStatsApiCode`(canonical→DB) 양방향 변환 함수 추가. `mlbShortTeamName` 내부에서 정규화 경유하도록 수정(별도 callsite 변경 없이 opponent 이름 표시 오류도 같이 해소). 5개 callsite 수정 — PR #2931(`4ab223b0`) 로 머지, `gh pr view --json state,mergedAt` 로 `MERGED` 실측 확인(사례 18 mitigation). 회귀 테스트 6건은 실제 DB 값(`TB`/`SF` 등)을 mock 입력으로 사용해 정규화 없이는 fail 하는 구조로 작성 — 향후 재발 시 테스트가 즉시 잡음.
+
+**관련 family**:
+- 사례 3/22 (VARCHAR overflow / silent .error 미체크) — "에러 없이 조용히 fallback/empty 값으로 대체" 라는 동일 상위 패턴, 본 사례는 원인이 두 팀 코드 컨벤션의 타입 미분리(캐스팅 신뢰)라는 점에서 신규 root cause
+- 사례 1 (그린필드 가정 차단) — 신규 기능(plan #25 Phase 1) 백필 도중 "이미 존재하는" 데이터(`mlb_schedule`)의 실제 값을 검증 안 하고 새 코드를 얹었다가 기존 데이터와의 컨벤션 불일치를 뒤늦게 발견한 변형
+- 본 사례 자체가 "한 곳만 고치면 끝" 이라는 스코프 판단이 위험함을 보여주는 사례 — 최초 발견(cycle 2080) 은 1개 callsite 였지만 같은 root cause 로 5개 callsite 가 깨져 있었음. 향후 코드 컨벤션 불일치 발견 시 grep 전수 조사 필수(본 사례가 Explore agent 활용 패턴의 근거)
