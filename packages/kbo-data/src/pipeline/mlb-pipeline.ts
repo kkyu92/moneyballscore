@@ -295,6 +295,28 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       // 승자 정보는 home_win_prob + mlb_schedule.home/away_team_code 로 derive.
       predicted_winner: null,
       scoring_rule: 'mlb_v0.1',
+      // cycle 2065 fix — computeMlbProbability 입력으로만 쓰이고 저장은 안 되던 실측
+      // 팩터 값을 breakdown 컬럼에 영속화. buildMlbTeamFactorAverages / computeCompositeDuel
+      // MLB 버전(plan #24 Phase 2a/3c)이 이 컬럼을 읽는데 전량 NULL이라 항상 빈 값이었음
+      // (사례 21, DB 실측: home_sp_fip 등 non-null count 0/N). team stats row 부재 시
+      // MLB_STAT_DEFAULTS 로 대체된 값(가짜)은 저장 X — null 유지해 null-guard 가 유효
+      // 팩터 수에서 자연 제외(기존 computeCompositeDuel 설계와 동일 원칙).
+      // elo/recent_form/head_to_head/sfr 은 MLB 미구현 placeholder(계산 입력용 중립값)라
+      // 계속 미저장 — 실제 데이터 없는 컬럼에 가짜 숫자 심지 않음.
+      home_sp_fip: home?.fip ?? null,
+      away_sp_fip: away?.fip ?? null,
+      home_sp_xfip: home?.xfip ?? null,
+      away_sp_xfip: away?.xfip ?? null,
+      home_lineup_woba: home?.woba ?? null,
+      away_lineup_woba: away?.woba ?? null,
+      home_bullpen_fip: home?.fip ?? null,
+      away_bullpen_fip: away?.fip ?? null,
+      home_war_total: home?.war ?? null,
+      away_war_total: away?.war ?? null,
+      home_lineup_xwoba: home?.xwoba ?? null,
+      away_lineup_xwoba: away?.xwoba ?? null,
+      home_lineup_barrel_pct: home?.barrel_pct ?? null,
+      away_lineup_barrel_pct: away?.barrel_pct ?? null,
     };
   });
 

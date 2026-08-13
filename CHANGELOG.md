@@ -1,3 +1,15 @@
+## v0.5.62.26 — 2026-08-13 (cycle 2065, fix-incident: MLB predictions 팩터 breakdown 컬럼 NULL + teams/games 데이터 모델 gap 발견)
+
+### fix(mlb): predict_final 실측 팩터(fip/xfip/woba/war/xwoba/barrel_pct) breakdown 컬럼 영속화 (사례 21)
+
+plan #24 Phase 3c(수렴 픽 H2H MLB 버전) 착수 전 3-step 실측 확인 중 발견 — `mlb-pipeline.ts` runPredictFinal 이 `mlb_team_stats` 실측값을 `computeMlbProbability` 입력으로만 쓰고 `predictions.home_sp_fip`/`home_lineup_woba`/`home_war_total`/`home_bullpen_fip`/`home_lineup_xwoba`/`home_lineup_barrel_pct` 등 breakdown 컬럼엔 저장하지 않음 — DB 실측 결과 전량(0/755) NULL. `buildMlbTeamFactorAverages`(Phase 2a, `/mlb/matchup` 팩터 비교 섹션)가 이 컬럼을 읽는데 항상 빈 값("-" vs "-")으로 표시되던 원인. fix: predictionRows insert 시 위 14개 breakdown 컬럼을 실측값(팀 stats row 부재 시 가짜 default 대신 null — 기존 `computeCompositeDuel` null-guard 설계와 동일 원칙)으로 함께 저장. elo/recent_form/head_to_head/sfr 은 MLB 미구현 placeholder(계산 입력용 중립값일 뿐 실데이터 아님)라 계속 미저장. 회귀 테스트 신규 1건(`mlb-pipeline.test.ts`) — 실측 stats 보유 팀은 값 영속화, row 부재 팀은 null 유지 검증. 과거 755건 backfill 스크립트(`scripts/backfill-mlb-factor-breakdown.ts`) 작성 + 적용 — `mlb_schedule` 조회를 `.in()` 700+ 항목 단일 쿼리로 시도하면 PostgREST 가 에러 없이 일부만 반환하는 현상 실측 확인(배치 100개로 회피). 적용 결과 578/755건 `home_lineup_xwoba`/`home_lineup_barrel_pct`(Savant 소스) 영속화 완료 — `fip`/`xfip`/`woba`/`war`(FanGraphs 소스)는 cycle 2059 스크레이퍼 수정 이후 첫 정기 스크랩(오늘 야간) 전까지 `mlb_team_stats` 자체가 전량 NULL이라 이번엔 backfill 불가(다음 스크랩 후 재실행 권장).
+
+### 🚨 발견 (fix 범위 밖, TODOS.md + plan #24 carry-over): teams/games 데이터 모델 gap — MLB matchup/team 페이지 프로덕션에서 항상 빈 화면 (사례 22)
+
+위 fix 를 실측으로 검증하던 중 `/mlb/matchup/*`·`/mlb/team/*` 자체가 Phase 1(cycle 2054)부터 지금까지 프로덕션에서 항상 0경기로 렌더링되고 있었음을 발견 — `curl https://moneyballscore.vercel.app/mlb/matchup/NYM/PHI` → "아직 올 시즌 완료된 경기가 없습니다", `/mlb/team/PHI` → "예측 경기: 0"(실제 predictions 755건 존재). 원인: `buildMlbMatchupProfile.ts`/`buildMlbTeamProfile.ts` 가 KBO 패턴(`teams` 테이블 FK)을 그대로 복제했는데 `teams` 테이블에 MLB 팀 row 가 0건(전체 10건 = KBO 10팀뿐)이고, `games` 테이블에도 MLB 경기 row 가 0건(MLB 파이프라인은 `mlb_schedule`+`predictions.external_game_id` 로만 기록하는 별개 모델). 위 breakdown 컬럼 fix 는 정확하지만 이 gap 이 해결되기 전엔 화면에 영향 없음(모든 섹션이 `finalGames>0`/`games.length>0` guard 뒤). Tier 3(large) 스코프 판단 — 이번 cycle 범위 밖, 별도 fix-incident(heavy) 또는 plan 분리로 다음 우선 처리 필요. 상세 = `TODOS.md` 최상단 + plan #24 "🚨 CRITICAL" 섹션.
+
+`pnpm --filter @moneyball/kbo-data type-check` / `pnpm --filter @moneyball/kbo-data exec vitest run`(83 files/1085 tests 전량 통과) / `pnpm --filter moneyball type-check` / `pnpm --filter moneyball lint` 통과.
+
 ## v0.5.62.25 — 2026-08-13 (cycle 2063, explore-idea (heavy): plan #24 Phase 3b — MLB matchup 시즌별 상대전적)
 
 ### feat(analysis): wave-631 — `/mlb/matchup/[teamA]/[teamB]` 시즌별 상대전적 섹션 (KO+EN)
