@@ -2,12 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import {
   MLB_TEAMS,
   assertSelectOk,
+  buildMatchupSummaryText,
   computeAvgMarginFromFinalGames,
   computeMarginCountFromFinalGames,
   computeMatchupHomeAwayEdgeFromGames,
   computeMatchupRecentRecordFromGames,
   computeMatchupStreakFromGames,
-  josa,
   MARGIN_AVG_MIN_GAMES,
   MARGIN_BLOWOUT_MIN_GAMES,
   MARGIN_BLOWOUT_THRESHOLD,
@@ -15,7 +15,6 @@ import {
   MARGIN_CLOSE_GAME_THRESHOLD,
   RECENT_RECORD_MIN_GAMES,
   RECENT_RECORD_WINDOW,
-  ro,
   mlbShortTeamName,
   type SelectResult,
   type MlbTeamCode,
@@ -23,7 +22,6 @@ import {
   VENUE_SPLIT_MIN_GAP_PCT,
   WIN_LOSS_STREAK_MIN_LENGTH,
 } from "@moneyball/shared";
-import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import type { MlbMatchupPair } from "./mlbCanonicalPair";
 
 // KBO buildMatchupProfile.ts 병렬 구현 (plan #24 Phase 1 — risk 최소화 위해 MLB 전용 복제로 시작,
@@ -262,6 +260,11 @@ export function computeMlbMatchupHomeAwayEdge(
   );
 }
 
+/**
+ * 계산 로직 자체는 packages/shared 단일 source (buildMatchupSummaryText) —
+ * cycle 2071 review-code heavy, buildMatchupProfile.buildSummary 과 독립
+ * 중복 통합. blowoutSuffix("대량득점차 경기였습니다.")만 리그별로 다름.
+ */
 function buildSummary(profile: {
   teamA: MlbMatchupProfile["teamA"];
   teamB: MlbMatchupProfile["teamB"];
@@ -275,77 +278,12 @@ function buildSummary(profile: {
   closeGame: MlbMatchupCloseGameStats | null;
   homeAwayEdge: MlbMatchupHomeAwaySplit | null;
 }): string {
-  const {
-    teamA,
-    teamB,
-    finalGames,
-    sideStats,
-    predictionAccuracy,
-    streak,
-    avgMargin,
-    recentRecord,
-    blowout,
-    closeGame,
-    homeAwayEdge,
-  } = profile;
-
-  if (finalGames === 0) {
-    return `${teamA.shortName} vs ${teamB.shortName} 상대전적 — 아직 올 시즌 완료된 경기가 없습니다. 경기가 치러지면 여기에 결과와 AI 예측 성과가 기록됩니다.`;
-  }
-
-  const aWin = sideStats.a.wins;
-  const bWin = sideStats.b.wins;
-  const draw = finalGames - aWin - bWin;
-
-  let text = `${teamA.shortName}${josa(teamA.shortName, "과", "와")} ${teamB.shortName}의 올 시즌 상대전적은 ${aWin}승 ${bWin}패`;
-  if (draw > 0) text += ` ${draw}무`;
-  text += `입니다.`;
-
-  if (aWin !== bWin) {
-    const leader = aWin > bWin ? teamA : teamB;
-    const leaderWin = Math.max(aWin, bWin);
-    const loserWin = Math.min(aWin, bWin);
-    const score = `${leaderWin}-${loserWin}`;
-    text += ` ${leader.shortName}${josa(leader.shortName, "이", "가")} ${score}${ro(score)} 앞섭니다.`;
-  } else {
-    text += ` 호각입니다.`;
-  }
-
-  if (predictionAccuracy.verified >= 3 && predictionAccuracy.rate !== null) {
-    const pct = computeWinRatePct(predictionAccuracy.correct, predictionAccuracy.verified);
-    text += ` 이 매치업에서 AI 예측은 ${predictionAccuracy.correct}/${predictionAccuracy.verified}경기 적중 (${pct}%).`;
-  }
-
-  if (streak) {
-    const streakTeam = streak.teamCode === teamA.code ? teamA : teamB;
-    text += ` 최근 맞대결에서 ${streakTeam.shortName}${josa(streakTeam.shortName, "이", "가")} ${streak.length}연승 중입니다.`;
-  }
-
-  if (avgMargin) {
-    text += ` 이 맞대결의 평균 득점차는 ${avgMargin.avgMargin}점입니다.`;
-  }
-
-  if (recentRecord && finalGames > recentRecord.sampleSize) {
-    const { aWins, bWins, sampleSize } = recentRecord;
-    text += ` 최근 ${sampleSize}경기 맞대결에서는 ${teamA.shortName} ${aWins}승, ${teamB.shortName} ${bWins}승입니다.`;
-  }
-
-  if (blowout && blowout.count > 0) {
-    text += ` 이 중 ${blowout.count}경기는 ${MARGIN_BLOWOUT_THRESHOLD}점차 이상 대량득점차 경기였습니다.`;
-  }
-
-  if (closeGame && closeGame.count > 0) {
-    text += ` ${closeGame.count}경기는 ${MARGIN_CLOSE_GAME_THRESHOLD}점차 박빙 승부였습니다.`;
-  }
-
-  if (homeAwayEdge) {
-    const edgeTeam = homeAwayEdge.teamCode === teamA.code ? teamA : teamB;
-    text +=
-      ` ${edgeTeam.shortName}${josa(edgeTeam.shortName, "은", "는")} 이 맞대결에서 홈 ${homeAwayEdge.homeWins}승/${homeAwayEdge.homeGames}경기, ` +
-      `원정 ${homeAwayEdge.awayWins}승/${homeAwayEdge.awayGames}경기로 홈/원정 성적 차이가 뚜렷합니다.`;
-  }
-
-  return text;
+  return buildMatchupSummaryText({
+    ...profile,
+    blowoutSuffix: "대량득점차 경기였습니다.",
+    blowoutThreshold: MARGIN_BLOWOUT_THRESHOLD,
+    closeGameThreshold: MARGIN_CLOSE_GAME_THRESHOLD,
+  });
 }
 
 /**

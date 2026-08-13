@@ -43,6 +43,7 @@ export const MLB_NL_TEAM_COUNT =
 
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
 export { hasJongsung, josa, ro } from './korean';
+import { josa, ro } from './korean';
 
 // Server-side feature flags (apps + pipelines 공유 단일 source — cycle 1127 plan-v17 candidate N Tier 2 callsite swap)
 export {
@@ -2606,6 +2607,108 @@ export function computeMatchupHomeAwayEdgeFromGames<
     awayWins: best.awayWins,
     awayGames: best.awayGames,
   };
+}
+
+/**
+ * 두 팀 맞대결 요약 문장(한국어) — single source.
+ * buildMatchupProfile.buildSummary + buildMlbMatchupProfile.buildSummary 양쪽에
+ * 동일 로직(콜드게임 wording 1건만 차이)이 독립 중복돼있던 것 통합 (cycle 2071
+ * review-code heavy). blowoutSuffix 만 리그별로 다름 (KBO "콜드게임이었습니다" / MLB
+ * "대량득점차 경기였습니다" — 명사 batchim 에 따라 이었/였 conjugation 이 달라 label+접미사
+ * 전체를 caller 가 넘김, josa() 로 자동 처리 불가한 case).
+ */
+export function buildMatchupSummaryText<C>(profile: {
+  teamA: { code: C; shortName: string };
+  teamB: { code: C; shortName: string };
+  finalGames: number;
+  sideStats: { a: { wins: number }; b: { wins: number } };
+  predictionAccuracy: { verified: number; rate: number | null; correct: number };
+  streak: MatchupStreakResult<C> | null;
+  avgMargin: { avgMargin: number } | null;
+  recentRecord: MatchupRecentRecordResult | null;
+  blowout: { count: number } | null;
+  closeGame: { count: number } | null;
+  homeAwayEdge: MatchupHomeAwaySplitResult<C> | null;
+  blowoutSuffix: string;
+  blowoutThreshold: number;
+  closeGameThreshold: number;
+}): string {
+  const {
+    teamA,
+    teamB,
+    finalGames,
+    sideStats,
+    predictionAccuracy,
+    streak,
+    avgMargin,
+    recentRecord,
+    blowout,
+    closeGame,
+    homeAwayEdge,
+    blowoutSuffix,
+    blowoutThreshold,
+    closeGameThreshold,
+  } = profile;
+
+  if (finalGames === 0) {
+    return `${teamA.shortName} vs ${teamB.shortName} 상대전적 — 아직 올 시즌 완료된 경기가 없습니다. 경기가 치러지면 여기에 결과와 AI 예측 성과가 기록됩니다.`;
+  }
+
+  const aWin = sideStats.a.wins;
+  const bWin = sideStats.b.wins;
+  const draw = finalGames - aWin - bWin;
+
+  let text = `${teamA.shortName}${josa(teamA.shortName, "과", "와")} ${teamB.shortName}의 올 시즌 상대전적은 ${aWin}승 ${bWin}패`;
+  if (draw > 0) text += ` ${draw}무`;
+  text += `입니다.`;
+
+  if (aWin !== bWin) {
+    const leader = aWin > bWin ? teamA : teamB;
+    const leaderWin = Math.max(aWin, bWin);
+    const loserWin = Math.min(aWin, bWin);
+    const score = `${leaderWin}-${loserWin}`;
+    text += ` ${leader.shortName}${josa(leader.shortName, "이", "가")} ${score}${ro(score)} 앞섭니다.`;
+  } else {
+    text += ` 호각입니다.`;
+  }
+
+  if (predictionAccuracy.verified >= 3 && predictionAccuracy.rate !== null) {
+    const pct = Math.round(
+      (predictionAccuracy.correct / predictionAccuracy.verified) * 100,
+    );
+    text += ` 이 매치업에서 AI 예측은 ${predictionAccuracy.correct}/${predictionAccuracy.verified}경기 적중 (${pct}%).`;
+  }
+
+  if (streak) {
+    const streakTeam = streak.teamCode === teamA.code ? teamA : teamB;
+    text += ` 최근 맞대결에서 ${streakTeam.shortName}${josa(streakTeam.shortName, "이", "가")} ${streak.length}연승 중입니다.`;
+  }
+
+  if (avgMargin) {
+    text += ` 이 맞대결의 평균 득점차는 ${avgMargin.avgMargin}점입니다.`;
+  }
+
+  if (recentRecord && finalGames > recentRecord.sampleSize) {
+    const { aWins, bWins, sampleSize } = recentRecord;
+    text += ` 최근 ${sampleSize}경기 맞대결에서는 ${teamA.shortName} ${aWins}승, ${teamB.shortName} ${bWins}승입니다.`;
+  }
+
+  if (blowout && blowout.count > 0) {
+    text += ` 이 중 ${blowout.count}경기는 ${blowoutThreshold}점차 이상 ${blowoutSuffix}`;
+  }
+
+  if (closeGame && closeGame.count > 0) {
+    text += ` ${closeGame.count}경기는 ${closeGameThreshold}점차 박빙 승부였습니다.`;
+  }
+
+  if (homeAwayEdge) {
+    const edgeTeam = homeAwayEdge.teamCode === teamA.code ? teamA : teamB;
+    text +=
+      ` ${edgeTeam.shortName}${josa(edgeTeam.shortName, "은", "는")} 이 맞대결에서 홈 ${homeAwayEdge.homeWins}승/${homeAwayEdge.homeGames}경기, ` +
+      `원정 ${homeAwayEdge.awayWins}승/${homeAwayEdge.awayGames}경기로 홈/원정 성적 차이가 뚜렷합니다.`;
+  }
+
+  return text;
 }
 
 export interface SeasonHeadToHeadYear<C> {

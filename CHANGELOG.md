@@ -1,3 +1,15 @@
+## v0.5.62.30 — 2026-08-13 (cycle 2071, review-code (heavy): matchup 요약 문장 빌더 KBO/MLB 중복 통합 + VERSION drift 수정)
+
+### refactor(analysis): buildMatchupSummaryText 단일 source 통합 (KBO buildMatchupProfile + MLB buildMlbMatchupProfile)
+
+plan #24 phase 완결(cycle 2070) 이후 review-code(heavy) — cycle 2070 retro 가 명시한 5개 MLB-parallel 빌더 파일 dedup 후보를 직접 read. 대부분(`buildSeasonHeadToHead`/`computeConvergenceTeamStats`/6개 소통계 헬퍼)은 이미 cycle 2055/2064 review-code 로 `packages/shared` 단일 source 통합 완료돼 있었음(추가 조치 불필요). 남은 실제 후보 1건 — 두 파일의 `buildSummary`(맞대결 요약 문장) 함수가 "콜드게임"(KBO) vs "대량득점차 경기"(MLB) 단어 1건만 다르고 나머지 로직 전부 byte-identical. `packages/shared/src/index.ts` 에 `buildMatchupSummaryText<C>` 신규(구조적 타입, `blowoutSuffix` 파라미터로 리그별 표현 차이 처리 — "콜드게임이었습니다." vs "대량득점차 경기였습니다." 조사 conjugation 차이까지 caller 가 전체 접미사로 넘겨 처리) — 양쪽 파일의 `buildSummary` 는 이제 얇은 wrapper. `computeCompositeDuel`(10팩터 vs MLB 6팩터)과 `buildTeamFactorAverages`(다른 DB 조인 스키마: `teams`+`games` FK vs `mlb_schedule`+`predictions` string-code)는 genuine 로직 차이라 병합 보류(risk 판단).
+
+### fix(build): 루트 package.json 이 apps/moneyball/package.json·VERSION·CHANGELOG 대비 1버전 stale (cycle 2070 ship 시 누락)
+
+`pnpm --filter moneyball exec vitest run` 실행 중 `version-sync-guard.test.ts` 실패로 발견 — 루트 `package.json` 이 `0.5.62.28` 로 남아 있고 나머지(VERSION/moneyball/CHANGELOG)는 이미 `0.5.62.29`(cycle 2070). 본 cycle 변경분과 함께 `0.5.62.30` 로 동기화. cycle 2069 (VERSION 파일 stale) 와 동일 family — root package.json 도 매 ship 시 함께 bump 필요.
+
+`pnpm type-check` (4 packages) / `pnpm --filter moneyball lint` 통과.
+
 ## v0.5.62.29 — 2026-08-13 (cycle 2070, explore-idea (heavy): plan #24 Phase 3c — MLB 매치업 수렴 픽 H2H)
 
 ### feat(analysis): wave-633 — MLB 매치업 수렴 픽 성적 (이 매치업 한정, KO+EN)

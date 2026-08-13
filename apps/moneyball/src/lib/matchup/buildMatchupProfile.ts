@@ -2,12 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import {
   KBO_TEAMS,
   assertSelectOk,
+  buildMatchupSummaryText,
   computeAvgMarginFromFinalGames,
   computeMarginCountFromFinalGames,
   computeMatchupHomeAwayEdgeFromGames,
   computeMatchupRecentRecordFromGames,
   computeMatchupStreakFromGames,
-  josa,
   MARGIN_AVG_MIN_GAMES,
   MARGIN_BLOWOUT_MIN_GAMES,
   MARGIN_BLOWOUT_THRESHOLD,
@@ -15,7 +15,6 @@ import {
   MARGIN_CLOSE_GAME_THRESHOLD,
   RECENT_RECORD_MIN_GAMES,
   RECENT_RECORD_WINDOW,
-  ro,
   shortTeamName,
   type SelectResult,
   type TeamCode,
@@ -23,7 +22,6 @@ import {
   VENUE_SPLIT_MIN_GAP_PCT,
   WIN_LOSS_STREAK_MIN_LENGTH,
 } from "@moneyball/shared";
-import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import type { MatchupPair } from "./canonicalPair";
 
 export interface MatchupGame {
@@ -276,6 +274,11 @@ export function computeMatchupHomeAwayEdge(
   );
 }
 
+/**
+ * 계산 로직 자체는 packages/shared 단일 source (buildMatchupSummaryText) —
+ * cycle 2071 review-code heavy, buildMlbMatchupProfile.buildSummary 과 독립
+ * 중복 통합. blowoutLabel("콜드게임")만 리그별로 다름.
+ */
 function buildSummary(profile: {
   teamA: MatchupProfile["teamA"];
   teamB: MatchupProfile["teamB"];
@@ -289,86 +292,12 @@ function buildSummary(profile: {
   closeGame: MatchupCloseGameStats | null;
   homeAwayEdge: MatchupHomeAwaySplit | null;
 }): string {
-  const {
-    teamA,
-    teamB,
-    finalGames,
-    sideStats,
-    predictionAccuracy,
-    streak,
-    avgMargin,
-    recentRecord,
-    blowout,
-    closeGame,
-    homeAwayEdge,
-  } = profile;
-
-  if (finalGames === 0) {
-    return `${teamA.shortName} vs ${teamB.shortName} 상대전적 — 아직 올 시즌 완료된 경기가 없습니다. 경기가 치러지면 여기에 결과와 AI 예측 성과가 기록됩니다.`;
-  }
-
-  const aWin = sideStats.a.wins;
-  const bWin = sideStats.b.wins;
-  const draw = finalGames - aWin - bWin;
-
-  let text = `${teamA.shortName}${josa(teamA.shortName, "과", "와")} ${teamB.shortName}의 올 시즌 상대전적은 ${aWin}승 ${bWin}패`;
-  if (draw > 0) text += ` ${draw}무`;
-  text += `입니다.`;
-
-  // 리드 팀
-  if (aWin !== bWin) {
-    const leader = aWin > bWin ? teamA : teamB;
-    const leaderWin = Math.max(aWin, bWin);
-    const loserWin = Math.min(aWin, bWin);
-    const score = `${leaderWin}-${loserWin}`;
-    text += ` ${leader.shortName}${josa(leader.shortName, "이", "가")} ${score}${ro(score)} 앞섭니다.`;
-  } else {
-    text += ` 호각입니다.`;
-  }
-
-  // 예측 성과
-  if (predictionAccuracy.verified >= 3 && predictionAccuracy.rate !== null) {
-    const pct = computeWinRatePct(predictionAccuracy.correct, predictionAccuracy.verified);
-    text += ` 이 매치업에서 AI 예측은 ${predictionAccuracy.correct}/${predictionAccuracy.verified}경기 적중 (${pct}%).`;
-  }
-
-  // 맞대결 연승/연패 스트릭
-  if (streak) {
-    const streakTeam = streak.teamCode === teamA.code ? teamA : teamB;
-    text += ` 최근 맞대결에서 ${streakTeam.shortName}${josa(streakTeam.shortName, "이", "가")} ${streak.length}연승 중입니다.`;
-  }
-
-  // 평균 득점 마진
-  if (avgMargin) {
-    text += ` 이 맞대결의 평균 득점차는 ${avgMargin.avgMargin}점입니다.`;
-  }
-
-  // 최근 N경기 한정 상대전적 — 전체 시즌 기록과 표본이 다를 때만 (동일하면 위 문장과 중복이라 skip)
-  if (recentRecord && finalGames > recentRecord.sampleSize) {
-    const { aWins, bWins, sampleSize } = recentRecord;
-    text += ` 최근 ${sampleSize}경기 맞대결에서는 ${teamA.shortName} ${aWins}승, ${teamB.shortName} ${bWins}승입니다.`;
-  }
-
-  // 콜드게임 빈도 — 0건이면 "대량 득점차 없이 팽팽했다"는 의미 자체는 있으나
-  // avgMargin 문장과 중복 인상을 줘 count > 0 일 때만 언급
-  if (blowout && blowout.count > 0) {
-    text += ` 이 중 ${blowout.count}경기는 ${MARGIN_BLOWOUT_THRESHOLD}점차 이상 콜드게임이었습니다.`;
-  }
-
-  // 박빙 승부 빈도 — 0건이면 blowout 문장과 중복 인상이라 count > 0 일 때만 언급
-  if (closeGame && closeGame.count > 0) {
-    text += ` ${closeGame.count}경기는 ${MARGIN_CLOSE_GAME_THRESHOLD}점차 박빙 승부였습니다.`;
-  }
-
-  // 홈/원정 편중 — 벤뉴별 표본 확보 + 승률 차이가 뚜렷할 때만 언급
-  if (homeAwayEdge) {
-    const edgeTeam = homeAwayEdge.teamCode === teamA.code ? teamA : teamB;
-    text +=
-      ` ${edgeTeam.shortName}${josa(edgeTeam.shortName, "은", "는")} 이 맞대결에서 홈 ${homeAwayEdge.homeWins}승/${homeAwayEdge.homeGames}경기, ` +
-      `원정 ${homeAwayEdge.awayWins}승/${homeAwayEdge.awayGames}경기로 홈/원정 성적 차이가 뚜렷합니다.`;
-  }
-
-  return text;
+  return buildMatchupSummaryText({
+    ...profile,
+    blowoutSuffix: "콜드게임이었습니다.",
+    blowoutThreshold: MARGIN_BLOWOUT_THRESHOLD,
+    closeGameThreshold: MARGIN_CLOSE_GAME_THRESHOLD,
+  });
 }
 
 /**
