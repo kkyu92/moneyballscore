@@ -1,5 +1,38 @@
 # TODOS
 
+## ⚠️ Cloudflare Worker 자동 배포 CI — 사례 25 재발, node 버전 수정했으나 CLOUDFLARE_API_TOKEN 미설정으로 여전히 미배포 (cycle 2090, 2026-08-13, 사용자 액션 필요)
+
+cycle 2068(사례 25)이 "로컬 wrangler oauth 세션이 2026-06-12 이후 만료돼 그 뒤
+worker.ts 변경 3건이 ~2개월 silent 미배포"를 발견하고 push 시 자동
+`wrangler deploy` CI(`deploy-cloudflare-worker.yml`)를 신설했으나, 신설 후
+첫 실제 실행 2건(cycle 2089 커밋, plan#25 mlb_elo_update 커밋) 모두
+`gh run list`로 확인 결과 **failure** — `wrangler requires at least Node.js
+v22.0.0`(workflow 가 `node-version: 20` 사용, `cloudflare-worker/package.json`
+의 `wrangler ^4.108.0` 은 engines.node >=22.0.0 요구). 즉 사례 25 의 CI 도입
+자체가 한 번도 성공한 적 없이 오늘 하루 2연속 실패.
+
+**본 cycle 조치**: `deploy-cloudflare-worker.yml` node-version 20→24 로 수정
+(CI 전역 다른 job 들과 정렬)+ push, `gh workflow run` 으로 수동 재실행해
+실측 확인 — node 에러는 해소됐으나 **다음 단계에서 새 에러 노출**:
+`CLOUDFLARE_API_TOKEN environment variable` 미설정 (`gh secret list` 확인
+결과 해당 secret 자체가 리포에 없음). 로컬 `wrangler whoami` 도 "auth token
+expired, non-interactive" — 로컬 세션도 여전히 죽어있어 로컬 fallback 배포도
+불가.
+
+**사용자 액션 필요 (내가 대신 못 함 — Cloudflare 계정 접근 필요)**:
+1. Cloudflare dashboard → My Profile → API Tokens → Create Token
+   (권한: Account → Workers Scripts:Edit, 해당 계정 한정)
+2. `gh secret set CLOUDFLARE_API_TOKEN` (repo: kkyu92/moneyballscore) 로 등록
+3. 등록 후 `gh workflow run "Deploy Cloudflare Worker" --ref main` 으로
+   1회 수동 fire → `gh run list --workflow="Deploy Cloudflare Worker"` 로
+   success 확인
+
+**영향 범위 실측 필요**: 위 조치 전까진 cycle 2068 이후 worker.ts 를 건드린
+모든 커밋(cron Sentry alert 승격 cycle 2089, mlb_elo_update cron dispatch
+plan#25)이 production Cloudflare Worker 런타임에 반영 안 된 상태로 추정 —
+특히 mlb_elo_update 매일 cron 이 실제로 fire 되는지는 secret 등록 후
+재확인 필요 (배포 안 됐으면 해당 cron slot 자체가 아예 없는 것과 동일).
+
 ## ✅ worker.ts unknown-cron 분기 silent log → Sentry alert 승격 (cycle 2089, 2026-08-13, 사례 9 family)
 
 `cloudflare-worker/src/worker.ts` scheduled() 최종 else (event.cron 이 4개 알려진
