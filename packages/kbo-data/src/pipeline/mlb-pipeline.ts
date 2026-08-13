@@ -26,7 +26,7 @@ import {
   type TrainingSample,
   type BrierInput,
 } from '../factors/mlb-shadow-c';
-import { computeMlbEloRatings } from '../factors/mlb-elo';
+import { computeMlbEloRatings, computeMlbEloHistory } from '../factors/mlb-elo';
 import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
@@ -564,6 +564,23 @@ async function runEloUpdate(db: DB, _date: string): Promise<{ gamesFound: number
   if (uErr) {
     errors.push(`mlb_team_elo upsert: ${uErr.message}`);
     return { gamesFound: gameList.length, rowsInserted: 0, errors };
+  }
+
+  // plan #25 Phase 2b step 1 (cycle 2083) — mlb_team_elo 와 같은 재생 결과에서
+  // 경기별 사후 rating 시계열도 함께 upsert (matchup Elo 추이 차트 소비용).
+  // 시즌 진행에 따라 row 수가 커져(팀 30 × 경기 최대 ~162) 500건씩 chunk.
+  const historyRows = computeMlbEloHistory(gameList);
+  const ELO_HISTORY_CHUNK = 500;
+  for (let i = 0; i < historyRows.length; i += ELO_HISTORY_CHUNK) {
+    const chunk = historyRows.slice(i, i + ELO_HISTORY_CHUNK);
+    const { error: hErr } = await db
+      .from('mlb_team_elo_history')
+      .upsert(chunk, { onConflict: DB_CONSTRAINTS.mlbTeamEloHistory });
+
+    if (hErr) {
+      errors.push(`mlb_team_elo_history upsert: ${hErr.message}`);
+      break;
+    }
   }
 
   return { gamesFound: gameList.length, rowsInserted: upsertRows.length, errors };

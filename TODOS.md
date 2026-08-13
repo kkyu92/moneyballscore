@@ -1,5 +1,48 @@
 # TODOS
 
+## 🚨 최우선 carry-over: Vercel 배포 일일 100건 quota 소진 — production 이 4ab223b0(cycle 2081)에 고정 (cycle 2083, 2026-08-13)
+
+당일 develop-cycle 누적 fire(cycle 2065~2082, 18회 PR merge)가 Vercel free tier 일일
+배포 100건 cap 을 소진 — `d3caf0e7`(cycle 2082, mlb_elo_update 파이프라인)/`d757ab0d`/
+`b651a3cc` 3개 commit 이 main 에 push 됐지만 Vercel 배포 기록 자체가 없음(canceled 도
+아니고 완전 누락, `curl .../api/version` 실측 = 여전히 `4ab223b0`). `vercel deploy --prod`
+수동 시도 결과 `"Resource is limited - try again in 24 hours (code: api-deployments-free-per-day)"`
+확정 — GH 웹훅/git 연동 문제 아님. 기존 `feedback_deploy_strategy.md`(auto-memory) 경고
+("Vercel 일 100회 제한, push는 묶어서") 가 실측으로 소진된 첫 사례.
+
+**영향**: cron(mlb_elo_update 포함 MLB/KBO 파이프라인 전체)이 quota reset 전까지 최신
+코드로 갱신 안 됨 — Cloudflare Worker 배포 지연(사례 25, 아래)과 별개의 신규 정지 지점.
+Elo history backfill 은 Vercel 우회(Supabase 직접 스크립트)로 완료해 영향 없음.
+
+**예상 quota reset**: 최초 소진 시점(cycle 2082 push, 22:06:55 KST) 기준 24시간 =
+~2026-08-14 22:07 KST. 그 전까진 main 에 push 해도 배포 안 됨 — 다음 cycle 들이 이
+사실을 인지하고 (1) reset 전엔 배포가 안 되는 걸 전제로 진단할 것(코드는 정상인데
+prod 만 stale — false negative 로 "배포됐는데도 반영 안 됨" 오진 방지) (2) reset 후
+누적된 여러 commit 이 한꺼번에 배포될 것(순서상 마지막 push 만 실제 반영, 중간
+push 들은 스킵되는 Vercel 배치 특성 고려).
+
+**후속 후보 (Tier 2, 별도 cycle)**: develop-cycle 이 PR 마다 매번 개별 push+merge 하는
+현 구조가 quota 소진의 구조적 원인 — cycle 다수를 batch 로 묶어 push 빈도를 낮추는
+방안(예: N cycle 마다 1회 push)이 근본 완화책이나 develop-cycle skill 의 "1 cycle = 1
+commit" 원칙과 충돌 여지 있어 사용자 결정 필요.
+
+## ✅ plan #25 Phase 2b step 1 — MLB Elo 히스토리 테이블(matchup Elo 추이 차트용) + 1회성 backfill 완료 (cycle 2083, 2026-08-13)
+
+cycle 2082 가 발견한 blocker(`mlb_team_elo` 가 현재 스냅샷만 저장 — 시계열 없음)를
+plan #25.md 권장 옵션 1(히스토리 로그 테이블 신규)로 해소. migration 047
+`mlb_team_elo_history`(team_code/game_date/season/elo_rating, UNIQUE(team_code,
+game_date)) 신규 + `computeMlbEloHistory()`(mlb-elo.ts, `computeMlbEloRatings()`와
+재생 루프 공유) + `runEloUpdate()` 매일 history 도 함께 upsert 배선.
+
+**실측 중 버그 발견+수정**: 더블헤더 시 배치 upsert 가 Postgres
+`ON CONFLICT DO UPDATE command cannot affect row a second time` 로 전체 reject —
+`computeMlbEloHistory()`가 반환 전 (team_code, game_date) dedupe 하도록 수정.
+`scripts/backfill-mlb-elo.ts --apply` 로 748경기 전체 재생 → 1,472건 1회성 backfill
+완료(DB 실측 확인, Vercel quota 소진과 무관하게 Supabase 직접 스크립트로 완료).
+
+**Phase 2b step 2(스코프 밖, 다음 explore-idea heavy fire 후보)**: `MlbMatchupEloChart.tsx`
+신규(KBO `MatchupEloChart` 병렬 복제) + 매치업 페이지 배선 — 데이터 소스만 확보된 상태.
+
 ## ✅ plan #25 Phase 2 step 1 — MLB Elo 매일 자동 갱신 파이프라인 완료, 매치업 차트는 신규 blocker 발견 (cycle 2082, 2026-08-13)
 
 `mlb_team_elo`(migration 046, cycle 2080) 는 지금까지 1회성 백필 스크립트로만 갱신됐음 — 매일 자동 갱신 경로가 없어 결과가 확정될수록 rating 이 stale 해지는 구조. `packages/kbo-data/src/factors/mlb-elo.ts` 에 `computeMlbEloRatings()` 순수 함수를 추출(backfill 스크립트와 로직 공유, 회귀 테스트 7건)해 신규 pipeline mode `mlb_elo_update` 를 만들고(`mlb-pipeline.ts`), `wrangler.toml`/`worker.ts`/API route 3곳에 배선(cron: UTC 22 = KST 07, 신규 slot 소비 없이 기존 MLB hour range 확장). **매일 전체 재생 방식**(증분 아님)을 택한 이유는 `mlb_team_elo` 에 "이 경기 이미 반영" 처리 로그가 없어 증분 삽입은 cron 재실행 시 이중 반영 위험 — 전체 재생은 팀당 최대 ~162경기라 비용 낮고 항상 idempotent.

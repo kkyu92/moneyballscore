@@ -79,7 +79,28 @@ export interface MlbTeamEloState {
 }
 
 /**
- * mlb_schedule status='final' 경기를 시간순 재생해 팀별 현재 Elo rating 도출.
+ * 경기별 사후 rating 스냅샷 (plan #25 Phase 2b step 1, cycle 2083) — matchup Elo 추이
+ * 차트 소비용. mlb_team_elo 가 UNIQUE(team_code, season) 현재 스냅샷만 저장해 KBO
+ * (predictions.home_elo/away_elo 가 매 경기 row 에 쌓여 시계열 자연 발생) 와 달리
+ * historical 시계열이 없던 blocker(cycle 2082 발견) 를 해소.
+ */
+export interface MlbEloHistoryEntry {
+  team_code: string;
+  game_date: string;
+  season: number;
+  elo_rating: number;
+}
+
+interface MlbEloReplayResult {
+  states: Map<string, MlbTeamEloState>;
+  history: MlbEloHistoryEntry[];
+}
+
+/**
+ * mlb_schedule status='final' 경기를 시간순 재생해 팀별 현재 Elo rating(states) 과
+ * 경기별 사후 rating 스냅샷(history) 을 동시 산출. computeMlbEloRatings/
+ * computeMlbEloHistory 양쪽이 같은 루프를 공유(drift 차단).
+ *
  * 매 fire 시 전체 히스토리를 처음부터 재생 — 증분 갱신(단일 날짜만 적용) 대신
  * 전체 재계산을 택한 이유: mlb_team_elo 에 "이 경기는 이미 반영됨" 을 표시하는 처리
  * 로그가 없어 증분 방식은 재실행(cron retry 등) 시 이중 반영 위험이 있음. 매 팀
@@ -90,11 +111,12 @@ export interface MlbTeamEloState {
  * mlb_team_elo 는 원본 그대로 저장하는 기존 컨벤션 유지 (packages/shared/mlb-teams.ts
  * MLB_STATSAPI_TEAM_ALIASES 주석 참조, 정규화는 소비 시점에 normalizeMlbTeamCode 로).
  */
-export function computeMlbEloRatings(
+function replayMlbGames(
   games: readonly MlbFinalGameForElo[],
   k: number = MLB_ELO_K,
-): Map<string, MlbTeamEloState> {
+): MlbEloReplayResult {
   const states = new Map<string, MlbTeamEloState>();
+  const history: MlbEloHistoryEntry[] = [];
   const ratingOf = (team: string) => states.get(team)?.eloRating ?? MLB_ELO_INITIAL_RATING;
 
   for (const g of games) {
@@ -122,7 +144,38 @@ export function computeMlbEloRatings(
       gamesPlayed: (states.get(g.away_team_code)?.gamesPlayed ?? 0) + 1,
       season,
     });
+
+    history.push({ team_code: g.home_team_code, game_date: g.game_date, season, elo_rating: updated.home });
+    history.push({ team_code: g.away_team_code, game_date: g.game_date, season, elo_rating: updated.away });
   }
 
-  return states;
+  return { states, history };
+}
+
+export function computeMlbEloRatings(
+  games: readonly MlbFinalGameForElo[],
+  k: number = MLB_ELO_K,
+): Map<string, MlbTeamEloState> {
+  return replayMlbGames(games, k).states;
+}
+
+/**
+ * 팀×경기일 사후 rating 시계열 산출 (matchup Elo 추이 차트 소비용).
+ * 더블헤더(같은 팀, 같은 game_date 2경기)는 (team_code, game_date) 키로 dedupe해
+ * 마지막(2차전 이후) rating 만 남김 — 차트 목적상 일별 granularity 충분해 허용된
+ * 단순화. dedupe 를 여기서 미리 해야 하는 이유(cycle 2083 실측 발견): DB 저장이
+ * UNIQUE(team_code, game_date) 단일 배치 upsert 라 같은 conflict key 가 한 요청 안에
+ * 2번 나오면 Postgres 가 "ON CONFLICT DO UPDATE command cannot affect row a second
+ * time" 로 전체 배치를 reject — 소비 시점(DB upsert) 이 아니라 산출 시점에 dedupe.
+ */
+export function computeMlbEloHistory(
+  games: readonly MlbFinalGameForElo[],
+  k: number = MLB_ELO_K,
+): MlbEloHistoryEntry[] {
+  const { history } = replayMlbGames(games, k);
+  const deduped = new Map<string, MlbEloHistoryEntry>();
+  for (const entry of history) {
+    deduped.set(`${entry.team_code}|${entry.game_date}`, entry);
+  }
+  return Array.from(deduped.values());
 }
