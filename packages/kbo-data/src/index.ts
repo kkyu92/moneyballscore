@@ -67,6 +67,16 @@ export type { MlbFactorInputs } from './factors/mlb-base';
 // MLB Shadow C 학습 milestone (walk-forward expanding window)
 export { MILESTONE_TRIGGERS as MLB_SHADOW_C_MILESTONES } from './factors/mlb-shadow-c';
 
+// MLB Elo K-factor 갱신 엔진 (plan #25 Phase 1)
+export {
+  MLB_ELO_K,
+  MLB_ELO_K_POSTSEASON,
+  MLB_ELO_INITIAL_RATING,
+  expectedHomeWinProb,
+  updateMlbElo,
+} from './factors/mlb-elo';
+export type { MlbEloUpdateResult } from './factors/mlb-elo';
+
 // MLB 파이프라인
 export { runMlbPipeline } from './pipeline/mlb-pipeline';
 export type { MlbPipelineMode, MlbPipelineResult } from './pipeline/mlb-pipeline';

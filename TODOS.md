@@ -1,5 +1,11 @@
 # TODOS
 
+## ✅ plan #25 Phase 1 완료 — MLB Elo K-factor 엔진 + 백필 (cycle 2080, 2026-08-13)
+
+`packages/kbo-data/src/factors/mlb-elo.ts`(MLB_ELO_K=4, FiveThirtyEight/Nate Silver 인용) + migration 046 `mlb_team_elo`(prod 적용 완료) + `scripts/backfill-mlb-elo.ts`(prod 실행 완료, 30팀 현재 rating 도출 — CHC 1533 최고 / ATH 1456 최저). Elo 값은 아직 어디에도 소비 안 됨(mlb-pipeline.ts `ELO_NEUTRAL` placeholder 불변) — Phase 2(자동 갱신+UI 차트)/Phase 3(예측 반영, op-analysis 게이트) 대기. 상세 = `~/.develop-cycle/plans/moneyballscore/25.md`.
+
+**신규 발견 (범위 밖 flag)**: 백필 중 `mlb_schedule` 팀 코드(MLB StatsAPI 컨벤션: `TB`/`CWS`/`KC`/`SD`/`SF`/`AZ`/`WSH`)가 `packages/shared/src/mlb-teams.ts` `MLB_TEAMS` 키(Baseball-Reference 컨벤션: `TBR`/`CHW`/`KCR`/`SDP`/`SFG`/`ARI`/`WSN`)와 7팀 불일치 확인 — `mlb-pipeline.ts:272` `MLB_TEAMS[g.home_team_code]?.parkPf` 조회가 이 7팀에 대해 항상 undefined→neutral(1.0) fallback, 즉 **park factor 가 7/30팀 예측에서 계속 미적용**(silent, 사례 3/22 family 와 동일 구조 — DB 에러 없이 조용히 neutral 대체). 별도 fix-incident(heavy) 필요 — MLB_TEAMS 키를 StatsAPI 컨벤션으로 통일하거나 alias map 추가, 전체 callsite(mlb-teams.ts consumer 전수) 재검토.
+
 ## ✅ lotto cron 자동화 4주 연속 silent 실패 — root cause 해소, 실측 fire 확인만 대기 (cycle 2072, 2026-08-13, 사례 26)
 
 `lotto-pick-update.yml`/`lotto-result-update.yml` 의 `gh pr create --label "automated,lotto"` 가 존재하지 않는 `lotto` label 참조로 4주 연속(`lotto/pick-2026-08-01`, `pick-2026-08-08`, `result-2026-07-25`, `result-2026-08-01`) PR 생성 자체가 실패 — 데이터는 branch 에 push 됐지만 main 에 반영 안 됨. `gh label create lotto` 로 root cause 해소 완료. 데이터 손실 2건(1235회 결과, 1236회 50조합)은 고아 branch 에서 cherry-pick 복구, 나머지 2건(이미 다른 커밋으로 대체)은 branch 삭제.
