@@ -127,23 +127,47 @@ function decideMlbMode(scheduledTime: number): MlbPipelineMode | null {
   return null;
 }
 
-async function callMlbPipeline(env: Env, mode: MlbPipelineMode): Promise<void> {
+async function callMlbPipeline(env: Env, mode: MlbPipelineMode, date?: string): Promise<void> {
+  const body: Record<string, string> = { mode, triggeredBy: 'cron' };
+  if (date) body.date = date;
+
   const resp = await fetch(env.MLB_PIPELINE_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${env.CRON_SECRET}`,
     },
-    body: JSON.stringify({ mode, triggeredBy: 'cron' }),
+    body: JSON.stringify(body),
   });
   if (!resp.ok) {
-    const body = await resp.text().catch(() => '');
-    const msg = `mlb-pipeline ${mode} failed: ${resp.status} ${body.slice(0, 300)}`;
+    const respBody = await resp.text().catch(() => '');
+    const msg = `mlb-pipeline ${mode}${date ? ` date=${date}` : ''} failed: ${resp.status} ${respBody.slice(0, 300)}`;
     console.error(`[Worker] ${msg}`);
     if (env.SENTRY_DSN) await captureToSentry(env.SENTRY_DSN, new Error(msg), 'callMlbPipeline');
     return;
   }
-  console.log(`[Worker] mlb-pipeline ${mode} ok`);
+  console.log(`[Worker] mlb-pipeline ${mode}${date ? ` date=${date}` : ''} ok`);
+}
+
+/**
+ * mlb_statsapi_scrape 는 매 cron fire 시 "오늘 KST" 단일 날짜만 스크랩 —
+ * 스크랩 시점에 안 끝난 경기(대부분)는 status='scheduled' 로 영구 고정,
+ * 재스크랩 경로가 없어 final 전환이 전혀 반영 안 됨 (사례 23).
+ * 최근 3일(D, D-1, D-2) 을 매번 재스크랩해 이후 fire 에서 상태 전환을 catch-up.
+ */
+function recentKstDates(scheduledTime: number, days: number): string[] {
+  const dates: string[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(scheduledTime + 9 * 3600_000 - i * 24 * 3600_000);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+  return dates;
+}
+
+async function callMlbStatsApiBackfill(env: Env, scheduledTime: number): Promise<void> {
+  for (const date of recentKstDates(scheduledTime, 3)) {
+    await callMlbPipeline(env, 'mlb_statsapi_scrape', date);
+  }
 }
 
 interface SpLogRow {
@@ -423,7 +447,9 @@ export default {
     } else if (cronExpr === '17 18-21,10 * * *') {
       // MLB pipeline cron: UTC 18-21 (KST 03-06, 새벽 scrape) + UTC 10 (KST 19, predict)
       const mlbMode = decideMlbMode(event.scheduledTime);
-      if (mlbMode) {
+      if (mlbMode === 'mlb_statsapi_scrape') {
+        ctx.waitUntil(callMlbStatsApiBackfill(env, event.scheduledTime));
+      } else if (mlbMode) {
         ctx.waitUntil(callMlbPipeline(env, mlbMode));
       } else {
         console.log(`[Worker] MLB: no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping`);
