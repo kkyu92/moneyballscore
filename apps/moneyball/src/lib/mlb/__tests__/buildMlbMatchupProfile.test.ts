@@ -1,62 +1,60 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mlbCanonicalPair } from "../mlbCanonicalPair";
 
-type GameFixture = {
+// cycle 2066 fix (사례 22 후속) — `teams`/`games` FK 는 MLB row 가 0건이라 이 빌더가
+// 항상 빈 프로필만 반환하던 버그를 `mlb_schedule`+`predictions`(external_game_id) 직접
+// 조회로 교체. 본 테스트도 새 쿼리 shape 에 맞춰 재작성 — `predicted_winner`/`is_correct`
+// 컬럼이 아니라 `home_win_prob` + 실제 스코어에서 derive 되는 걸 검증.
+
+type ScheduleFixture = {
   id: number;
+  external_game_id: string;
   game_date: string;
   status: string | null;
   home_score: number | null;
   away_score: number | null;
-  home_team_id: number;
-  away_team_id: number;
-  winner_team_id: number | null;
-  home_team: { id: number; code: string };
-  away_team: { id: number; code: string };
-  winner: { code: string } | null;
-  predictions: Array<{
-    confidence: number | null;
-    is_correct: boolean | null;
-    predicted_winner: number | null;
-    predicted_winner_team: { code: string } | null;
-    prediction_type: string;
-  }>;
+  home_team_code: string;
+  away_team_code: string;
 };
 
-const NYY_ID = 101;
-const BOS_ID = 102;
+type PredFixture = {
+  external_game_id: string;
+  home_win_prob: number | null;
+  prediction_type: string;
+};
 
 interface SupabaseMockOptions {
-  teamsError?: { message: string } | null;
-  gamesError?: { message: string } | null;
+  scheduleError?: { message: string } | null;
+  predsError?: { message: string } | null;
 }
 
-function makeSupabaseMock(games: GameFixture[], opts: SupabaseMockOptions = {}) {
-  const teamsBuilder = {
-    select: vi.fn().mockReturnThis(),
-    in: vi.fn().mockResolvedValue({
-      data: opts.teamsError
-        ? null
-        : [
-            { id: NYY_ID, code: "NYY" },
-            { id: BOS_ID, code: "BOS" },
-          ],
-      error: opts.teamsError ?? null,
-    }),
+function makeSupabaseMock(
+  schedule: ScheduleFixture[],
+  preds: PredFixture[] = [],
+  opts: SupabaseMockOptions = {},
+) {
+  const scheduleOrResult = {
+    data: opts.scheduleError ? null : schedule,
+    error: opts.scheduleError ?? null,
   };
-  const gamesOrResult = {
-    data: opts.gamesError ? null : games,
-    error: opts.gamesError ?? null,
-  };
-  const gamesBuilder = {
+  const scheduleBuilder = {
     select: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnValue({
-      order: vi.fn().mockResolvedValue(gamesOrResult),
+      order: vi.fn().mockResolvedValue(scheduleOrResult),
+    }),
+  };
+  const predsBuilder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockResolvedValue({
+      data: opts.predsError ? null : preds,
+      error: opts.predsError ?? null,
     }),
   };
   return {
     from: vi.fn((table: string) => {
-      if (table === "teams") return teamsBuilder;
-      if (table === "games") return gamesBuilder;
+      if (table === "mlb_schedule") return scheduleBuilder;
+      if (table === "predictions") return predsBuilder;
       throw new Error(`unexpected table: ${table}`);
     }),
   };
@@ -81,23 +79,19 @@ describe("buildMlbMatchupProfile — pre_game prediction 누락 final 경기 rec
   });
 
   it("final 경기 + pre_game prediction 부재 → wins 카운트 진행 (silent drop X)", async () => {
-    const games: GameFixture[] = [
+    const schedule: ScheduleFixture[] = [
       {
         id: 9001,
+        external_game_id: "9001",
         game_date: "2026-04-15",
         status: "final",
         home_score: 5,
         away_score: 3,
-        home_team_id: NYY_ID,
-        away_team_id: BOS_ID,
-        winner_team_id: NYY_ID,
-        home_team: { id: NYY_ID, code: "NYY" },
-        away_team: { id: BOS_ID, code: "BOS" },
-        winner: { code: "NYY" },
-        predictions: [],
+        home_team_code: "NYY",
+        away_team_code: "BOS",
       },
     ];
-    supabaseMock = makeSupabaseMock(games);
+    supabaseMock = makeSupabaseMock(schedule, []);
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
@@ -119,31 +113,22 @@ describe("buildMlbMatchupProfile — pre_game prediction 누락 final 경기 rec
   });
 
   it("final 경기 + pre_game prediction 있음 → wins + verified 모두 카운트", async () => {
-    const games: GameFixture[] = [
+    const schedule: ScheduleFixture[] = [
       {
         id: 9002,
+        external_game_id: "9002",
         game_date: "2026-04-16",
         status: "final",
         home_score: 5,
         away_score: 3,
-        home_team_id: NYY_ID,
-        away_team_id: BOS_ID,
-        winner_team_id: NYY_ID,
-        home_team: { id: NYY_ID, code: "NYY" },
-        away_team: { id: BOS_ID, code: "BOS" },
-        winner: { code: "NYY" },
-        predictions: [
-          {
-            confidence: 0.6,
-            is_correct: true,
-            predicted_winner: NYY_ID,
-            predicted_winner_team: { code: "NYY" },
-            prediction_type: "pre_game",
-          },
-        ],
+        home_team_code: "NYY",
+        away_team_code: "BOS",
       },
     ];
-    supabaseMock = makeSupabaseMock(games);
+    const preds: PredFixture[] = [
+      { external_game_id: "9002", home_win_prob: 0.6, prediction_type: "pre_game" },
+    ];
+    supabaseMock = makeSupabaseMock(schedule, preds);
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
@@ -162,67 +147,46 @@ describe("buildMlbMatchupProfile — pre_game prediction 누락 final 경기 rec
   });
 
   it("혼합 — final(prediction 있음) + final(prediction 없음) + scheduled → record 정확", async () => {
-    const games: GameFixture[] = [
+    const schedule: ScheduleFixture[] = [
       {
         id: 9101,
+        external_game_id: "9101",
         game_date: "2026-04-10",
         status: "final",
         home_score: 5,
         away_score: 3,
-        home_team_id: NYY_ID,
-        away_team_id: BOS_ID,
-        winner_team_id: NYY_ID,
-        home_team: { id: NYY_ID, code: "NYY" },
-        away_team: { id: BOS_ID, code: "BOS" },
-        winner: { code: "NYY" },
-        predictions: [
-          {
-            confidence: 0.55,
-            is_correct: true,
-            predicted_winner: NYY_ID,
-            predicted_winner_team: { code: "NYY" },
-            prediction_type: "pre_game",
-          },
-        ],
+        home_team_code: "NYY",
+        away_team_code: "BOS",
       },
       {
         id: 9102,
+        external_game_id: "9102",
         game_date: "2026-04-12",
         status: "final",
         home_score: 1,
         away_score: 6,
-        home_team_id: BOS_ID,
-        away_team_id: NYY_ID,
-        winner_team_id: NYY_ID,
-        home_team: { id: BOS_ID, code: "BOS" },
-        away_team: { id: NYY_ID, code: "NYY" },
-        winner: { code: "NYY" },
-        predictions: [],
+        home_team_code: "BOS",
+        away_team_code: "NYY",
       },
       {
         id: 9103,
+        external_game_id: "9103",
         game_date: "2026-05-15",
         status: "scheduled",
         home_score: null,
         away_score: null,
-        home_team_id: NYY_ID,
-        away_team_id: BOS_ID,
-        winner_team_id: null,
-        home_team: { id: NYY_ID, code: "NYY" },
-        away_team: { id: BOS_ID, code: "BOS" },
-        winner: null,
-        predictions: [
-          {
-            confidence: 0.5,
-            is_correct: null,
-            predicted_winner: BOS_ID,
-            predicted_winner_team: { code: "BOS" },
-            prediction_type: "pre_game",
-          },
-        ],
+        home_team_code: "NYY",
+        away_team_code: "BOS",
       },
     ];
-    supabaseMock = makeSupabaseMock(games);
+    const preds: PredFixture[] = [
+      // game 9101 — NYY(홈) 예측 승 → 실제도 NYY 승 → correct
+      { external_game_id: "9101", home_win_prob: 0.55, prediction_type: "pre_game" },
+      // game 9102 — prediction 없음 (missingPredictionFinalCount 대상)
+      // game 9103 — BOS(원정) 예측 승 (scheduled, 아직 결과 없음 → is_correct=null)
+      { external_game_id: "9103", home_win_prob: 0.45, prediction_type: "pre_game" },
+    ];
+    supabaseMock = makeSupabaseMock(schedule, preds);
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
@@ -248,44 +212,46 @@ describe("buildMlbMatchupProfile — pre_game prediction 누락 final 경기 rec
 });
 
 describe("buildMlbMatchupProfile — silent drift family `.error` 미체크 회귀 가드", () => {
-  it("teams select error → assertSelectOk throw (silent 빈 프로필 fallback 차단)", async () => {
-    supabaseMock = makeSupabaseMock([], {
-      teamsError: { message: "connection refused" },
+  it("mlb_schedule select error → assertSelectOk throw (silent 빈 프로필 fallback 차단)", async () => {
+    supabaseMock = makeSupabaseMock([], [], {
+      scheduleError: { message: "connection refused" },
     });
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
     await expect(buildMlbMatchupProfile(pair)).rejects.toThrow(
-      /buildMlbMatchupProfile teams .* select failed: connection refused/,
+      /buildMlbMatchupProfile mlb_schedule .* select failed: connection refused/,
     );
   });
 
-  it("games select error → assertSelectOk throw (silent 빈 record 위장 차단)", async () => {
-    supabaseMock = makeSupabaseMock([], {
-      gamesError: { message: "syntax error at or near 'and'" },
+  it("predictions select error → assertSelectOk throw (silent 빈 record 위장 차단)", async () => {
+    const schedule: ScheduleFixture[] = [
+      {
+        id: 9201,
+        external_game_id: "9201",
+        game_date: "2026-04-15",
+        status: "final",
+        home_score: 5,
+        away_score: 3,
+        home_team_code: "NYY",
+        away_team_code: "BOS",
+      },
+    ];
+    supabaseMock = makeSupabaseMock(schedule, [], {
+      predsError: { message: "syntax error at or near 'and'" },
     });
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;
     await expect(buildMlbMatchupProfile(pair)).rejects.toThrow(
-      /buildMlbMatchupProfile games .* select failed: syntax error/,
+      /buildMlbMatchupProfile predictions .* select failed: syntax error/,
     );
   });
 });
 
-describe("buildMlbMatchupProfile — teams row 없음 → 빈 프로필 (throw X)", () => {
-  it("teams row 0건 → 빈 프로필 반환", async () => {
-    supabaseMock = {
-      from: vi.fn((table: string) => {
-        if (table === "teams") {
-          return {
-            select: vi.fn().mockReturnThis(),
-            in: vi.fn().mockResolvedValue({ data: [], error: null }),
-          };
-        }
-        throw new Error(`unexpected table: ${table}`);
-      }),
-    };
+describe("buildMlbMatchupProfile — mlb_schedule row 없음 → 빈 프로필 (throw X)", () => {
+  it("mlb_schedule row 0건 → 빈 프로필 반환", async () => {
+    supabaseMock = makeSupabaseMock([], []);
 
     const { buildMlbMatchupProfile } = await import("../buildMlbMatchupProfile");
     const pair = mlbCanonicalPair("NYY", "BOS")!;

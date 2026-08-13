@@ -1,34 +1,35 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const NYY_ID = 1;
+// cycle 2066 fix (사례 22 후속) — `teams`/`games` FK 는 MLB row 가 0건이라 이 빌더가
+// 항상 EMPTY_MLB_FACTOR_AVERAGES 만 반환하던 버그를 `mlb_schedule`+`predictions`
+// (external_game_id) 직접 조회로 교체. 본 테스트도 새 쿼리 shape 에 맞춰 재작성.
 
 interface SupabaseMockOptions {
-  teamsError?: { message: string } | null;
+  scheduleError?: { message: string } | null;
   predsError?: { message: string } | null;
-  teamRow?: { id: number } | null;
+  schedule?: unknown[];
   preds?: unknown[];
 }
 
 function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
-  const teamsBuilder = {
+  const scheduleBuilder = {
     select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn().mockResolvedValue({
-      data: opts.teamsError ? null : (opts.teamRow ?? { id: NYY_ID }),
-      error: opts.teamsError ?? null,
+    or: vi.fn().mockResolvedValue({
+      data: opts.scheduleError ? null : (opts.schedule ?? []),
+      error: opts.scheduleError ?? null,
     }),
   };
   const predsBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    or: vi.fn().mockResolvedValue({
+    in: vi.fn().mockResolvedValue({
       data: opts.predsError ? null : (opts.preds ?? []),
       error: opts.predsError ?? null,
     }),
   };
   return {
     from: vi.fn((table: string) => {
-      if (table === "teams") return teamsBuilder;
+      if (table === "mlb_schedule") return scheduleBuilder;
       if (table === "predictions") return predsBuilder;
       throw new Error(`unexpected table: ${table}`);
     }),
@@ -46,19 +47,26 @@ describe("buildMlbTeamFactorAverages", () => {
     vi.clearAllMocks();
   });
 
-  it("teams select error → assertSelectOk throw", async () => {
+  it("mlb_schedule select error → assertSelectOk throw", async () => {
     supabaseMock = makeSupabaseMock({
-      teamsError: { message: "connection refused" },
+      scheduleError: { message: "connection refused" },
     });
 
     const { buildMlbTeamFactorAverages } = await import("../buildMlbTeamFactorAverages");
     await expect(buildMlbTeamFactorAverages("NYY")).rejects.toThrow(
-      /buildMlbTeamFactorAverages teams .* select failed: connection refused/,
+      /buildMlbTeamFactorAverages mlb_schedule .* select failed: connection refused/,
     );
   });
 
   it("predictions select error → assertSelectOk throw", async () => {
     supabaseMock = makeSupabaseMock({
+      schedule: [
+        {
+          external_game_id: "700001",
+          home_team_code: "NYY",
+          away_team_code: "BOS",
+        },
+      ],
       predsError: { message: "syntax error" },
     });
 
@@ -68,8 +76,8 @@ describe("buildMlbTeamFactorAverages", () => {
     );
   });
 
-  it("teams 빈 row → EMPTY_MLB_FACTOR_AVERAGES", async () => {
-    supabaseMock = makeSupabaseMock({ teamRow: null });
+  it("mlb_schedule 빈 rows → EMPTY_MLB_FACTOR_AVERAGES", async () => {
+    supabaseMock = makeSupabaseMock({ schedule: [] });
 
     const { buildMlbTeamFactorAverages } = await import("../buildMlbTeamFactorAverages");
     const avg = await buildMlbTeamFactorAverages("NYY");
@@ -79,10 +87,14 @@ describe("buildMlbTeamFactorAverages", () => {
 
   it("정상 — 홈/원정 팀별 7팩터 평균 (홈 1경기 + 원정 1경기)", async () => {
     supabaseMock = makeSupabaseMock({
-      teamRow: { id: NYY_ID },
+      schedule: [
+        { external_game_id: "700001", home_team_code: "NYY", away_team_code: "BOS" },
+        { external_game_id: "700002", home_team_code: "BOS", away_team_code: "NYY" },
+      ],
       preds: [
         // NYY 홈
         {
+          external_game_id: "700001",
           home_sp_fip: 3.0,
           away_sp_fip: 5.0,
           home_lineup_woba: 0.35,
@@ -98,10 +110,10 @@ describe("buildMlbTeamFactorAverages", () => {
           home_lineup_barrel_pct: 9.5,
           away_lineup_barrel_pct: 7.0,
           prediction_type: "pre_game",
-          game: { home_team_id: NYY_ID, away_team_id: 99 },
         },
         // NYY 원정
         {
+          external_game_id: "700002",
           home_sp_fip: 4.0,
           away_sp_fip: 3.5,
           home_lineup_woba: 0.31,
@@ -117,7 +129,6 @@ describe("buildMlbTeamFactorAverages", () => {
           home_lineup_barrel_pct: 8.0,
           away_lineup_barrel_pct: 10.5,
           prediction_type: "pre_game",
-          game: { home_team_id: 99, away_team_id: NYY_ID },
         },
       ],
     });
@@ -137,9 +148,10 @@ describe("buildMlbTeamFactorAverages", () => {
 
   it("null 팩터 값 — sampleN 은 카운트하되 평균 계산엔 제외", async () => {
     supabaseMock = makeSupabaseMock({
-      teamRow: { id: NYY_ID },
+      schedule: [{ external_game_id: "700001", home_team_code: "NYY", away_team_code: "BOS" }],
       preds: [
         {
+          external_game_id: "700001",
           home_sp_fip: 3.0,
           away_sp_fip: 5.0,
           home_lineup_woba: null,
@@ -155,7 +167,6 @@ describe("buildMlbTeamFactorAverages", () => {
           home_lineup_barrel_pct: null,
           away_lineup_barrel_pct: null,
           prediction_type: "pre_game",
-          game: { home_team_id: NYY_ID, away_team_id: 99 },
         },
       ],
     });

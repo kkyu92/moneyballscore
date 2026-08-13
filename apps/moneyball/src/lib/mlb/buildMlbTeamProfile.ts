@@ -71,35 +71,35 @@ export interface MlbTeamProfile {
   recentRecord: TeamRecentRecord | null;
 }
 
-interface GameRow {
+interface ScheduleRow {
   id: number;
+  external_game_id: string;
   game_date: string;
   status: string | null;
   home_score: number | null;
   away_score: number | null;
-  home_team_id: number | null;
-  away_team_id: number | null;
-  home_team: { code: string | null } | null;
-  away_team: { code: string | null } | null;
-  predictions: Array<{
-    confidence: number | null;
-    is_correct: boolean | null;
-    predicted_winner: number | null;
-    home_sp_fip: number | null;
-    away_sp_fip: number | null;
-    home_lineup_woba: number | null;
-    away_lineup_woba: number | null;
-    home_bullpen_fip: number | null;
-    away_bullpen_fip: number | null;
-    home_recent_form: number | null;
-    away_recent_form: number | null;
-    home_elo: number | null;
-    away_elo: number | null;
-    home_lineup_xwoba: number | null;
-    away_lineup_xwoba: number | null;
-    home_lineup_barrel_pct: number | null;
-    away_lineup_barrel_pct: number | null;
-  }>;
+  home_team_code: string;
+  away_team_code: string;
+}
+
+interface PredRow {
+  external_game_id: string | null;
+  home_win_prob: number | null;
+  home_sp_fip: number | null;
+  away_sp_fip: number | null;
+  home_lineup_woba: number | null;
+  away_lineup_woba: number | null;
+  home_bullpen_fip: number | null;
+  away_bullpen_fip: number | null;
+  home_recent_form: number | null;
+  away_recent_form: number | null;
+  home_elo: number | null;
+  away_elo: number | null;
+  home_lineup_xwoba: number | null;
+  away_lineup_xwoba: number | null;
+  home_lineup_barrel_pct: number | null;
+  away_lineup_barrel_pct: number | null;
+  prediction_type: string | null;
 }
 
 function safeAvg(sum: number, n: number): number | null {
@@ -108,8 +108,15 @@ function safeAvg(sum: number, n: number): number | null {
 
 // Plan B Tier C+D Task 3 — MLB 팀 프로필 빌더. KBO buildTeamProfile.ts 패턴 정합:
 // - assertSelectOk wrap (silent drift family 차단)
-// - games inner join predictions (pre_game 만)
+// - mlb_schedule + predictions(external_game_id) 조인 (pre_game 만)
 // - 14 factor (KBO 10 + Statcast 4 부분 — xwOBA / Barrel%) 집계
+//
+// cycle 2066 fix (사례 22 후속) — `teams`/`games` FK 는 MLB row 가 0건이라
+// teamId 가 항상 null 이 되어 이 함수가 항상 emptyProfile 만 반환했음(프로덕션
+// 렌더 검증 없이 테스트만 통과해 온 silent drift). MLB 는 `mlb_schedule`(팀 코드
+// string) + `predictions`(`external_game_id`, `league='mlb'`) 로만 실제 기록됨.
+// `predicted_winner`/`is_correct`/`confidence` 컬럼도 MLB 는 전량 NULL(파이프라인이
+// 안 씀, mlb-pipeline.ts 주석 참조) — `home_win_prob` + 실제 스코어로 직접 derive.
 export async function buildMlbTeamProfile(
   teamCode: MlbTeamCode,
 ): Promise<MlbTeamProfile | null> {
@@ -117,16 +124,6 @@ export async function buildMlbTeamProfile(
   if (!meta) return null;
 
   const supabase = await createClient();
-
-  const teamResult = await supabase
-    .from('teams')
-    .select('id')
-    .eq('code', teamCode)
-    .maybeSingle();
-
-  const { data: teamRow } = assertSelectOk(teamResult, 'buildMlbTeamProfile teams');
-
-  const teamId = (teamRow as { id: number } | null)?.id ?? null;
   const division = mlbTeamDivision(teamCode);
 
   const emptyProfile: MlbTeamProfile = {
@@ -163,36 +160,50 @@ export async function buildMlbTeamProfile(
     recentRecord: null,
   };
 
-  if (teamId == null) return emptyProfile;
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
+    .or(`home_team_code.eq.${teamCode},away_team_code.eq.${teamCode}`);
 
-  const gamesResult = await supabase
-    .from('games')
+  const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamProfile mlb_schedule');
+  const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
+
+  if (scheduleRows.length === 0) return emptyProfile;
+
+  const scheduleByExternalId = new Map<string, ScheduleRow>();
+  for (const s of scheduleRows) {
+    scheduleByExternalId.set(s.external_game_id, s);
+  }
+
+  const predResult = await supabase
+    .from('predictions')
     .select(
       `
-        id, game_date, status, home_score, away_score,
-        home_team_id, away_team_id,
-        home_team:teams!games_home_team_id_fkey(code),
-        away_team:teams!games_away_team_id_fkey(code),
-        predictions!inner(
-          confidence, is_correct, predicted_winner,
-          home_sp_fip, away_sp_fip,
-          home_lineup_woba, away_lineup_woba,
-          home_bullpen_fip, away_bullpen_fip,
-          home_recent_form, away_recent_form,
-          home_elo, away_elo,
-          home_lineup_xwoba, away_lineup_xwoba,
-          home_lineup_barrel_pct, away_lineup_barrel_pct,
-          prediction_type, league
-        )
+        external_game_id, home_win_prob,
+        home_sp_fip, away_sp_fip,
+        home_lineup_woba, away_lineup_woba,
+        home_bullpen_fip, away_bullpen_fip,
+        home_recent_form, away_recent_form,
+        home_elo, away_elo,
+        home_lineup_xwoba, away_lineup_xwoba,
+        home_lineup_barrel_pct, away_lineup_barrel_pct,
+        prediction_type
       `,
     )
-    .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
-    .eq('predictions.prediction_type', 'pre_game')
-    .eq('predictions.league', 'mlb');
+    .eq('prediction_type', 'pre_game')
+    .eq('league', 'mlb')
+    .in('external_game_id', Array.from(scheduleByExternalId.keys()));
 
-  const { data } = assertSelectOk(gamesResult, 'buildMlbTeamProfile games');
+  const { data } = assertSelectOk(predResult, 'buildMlbTeamProfile predictions');
 
-  const games = (data ?? []) as unknown as GameRow[];
+  const predByExternalId = new Map<string, PredRow>();
+  for (const p of (data ?? []) as PredRow[]) {
+    if (p.external_game_id) predByExternalId.set(p.external_game_id, p);
+  }
+
+  const games: Array<{ schedule: ScheduleRow; pred: PredRow | null }> = scheduleRows.map(
+    (schedule) => ({ schedule, pred: predByExternalId.get(schedule.external_game_id) ?? null }),
+  );
 
   let predictedGames = 0;
   let predictedWins = 0;
@@ -209,12 +220,11 @@ export async function buildMlbTeamProfile(
 
   const teamGames: MlbTeamRecentGame[] = [];
 
-  for (const g of games) {
-    const pred = g.predictions?.[0];
+  for (const { schedule: g, pred } of games) {
     if (!pred) continue;
 
-    const isHome = g.home_team_id === teamId;
-    const isAway = g.away_team_id === teamId;
+    const isHome = g.home_team_code === teamCode;
+    const isAway = g.away_team_code === teamCode;
     if (!isHome && !isAway) continue;
 
     predictedGames += 1;
@@ -235,18 +245,28 @@ export async function buildMlbTeamProfile(
     if (xwoba != null) { xwobaSum += xwoba; xwobaN += 1; }
     if (barrel != null) { barrelSum += barrel; barrelN += 1; }
 
+    // predicted_winner/is_correct/confidence 컬럼은 MLB 전량 NULL(파이프라인이 안 씀) —
+    // home_win_prob + 실제 스코어로 직접 derive.
+    const predictedHomeWin = pred.home_win_prob != null ? pred.home_win_prob >= 0.5 : null;
     const predictedThisTeam =
-      pred.predicted_winner != null && pred.predicted_winner === teamId;
+      predictedHomeWin != null && (isHome ? predictedHomeWin : !predictedHomeWin);
     if (predictedThisTeam) predictedWins += 1;
 
-    if (pred.is_correct != null) {
+    const hasFinalScore = g.status === 'final' && g.home_score != null && g.away_score != null;
+    const actualHomeWin = hasFinalScore ? g.home_score! > g.away_score! : null;
+    const isCorrect =
+      predictedHomeWin != null && actualHomeWin != null
+        ? predictedHomeWin === actualHomeWin
+        : null;
+    const confidence =
+      pred.home_win_prob != null ? Math.max(pred.home_win_prob, 1 - pred.home_win_prob) : null;
+
+    if (isCorrect != null) {
       verifiedN += 1;
-      if (pred.is_correct) correctN += 1;
+      if (isCorrect) correctN += 1;
     }
 
-    const opponentCode = isHome
-      ? (g.away_team?.code as MlbTeamCode | null)
-      : (g.home_team?.code as MlbTeamCode | null);
+    const opponentCode = (isHome ? g.away_team_code : g.home_team_code) as MlbTeamCode;
 
     teamGames.push({
       gameId: g.id,
@@ -255,8 +275,8 @@ export async function buildMlbTeamProfile(
       opponentCode,
       opponentName: opponentCode ? mlbShortTeamName(opponentCode) : null,
       predictedAsWinner: predictedThisTeam,
-      confidence: pred.confidence,
-      isCorrect: pred.is_correct,
+      confidence,
+      isCorrect,
       ourScore: isHome ? g.home_score : g.away_score,
       opponentScore: isHome ? g.away_score : g.home_score,
       status: g.status,
