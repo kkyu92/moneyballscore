@@ -68,6 +68,8 @@ export {
   SHADOW_SCORING_RULE,
   SHADOW_V20_SCORING_RULE,
   TABPFN_SCORING_RULE,
+  MLB_SCORING_RULE,
+  MLB_PRODUCTION_COHORT_RULES,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   QUANT_LIVE_VERSION,
@@ -3054,6 +3056,24 @@ export const FACTOR_PICK_STRONG = 8;
  * 10팩터 전부 한쪽 팀 우세 = 100% 팩터 정렬.
  */
 export const FACTOR_PICK_COMPLETE = 10;
+
+/**
+ * MLB composite duel 최소 유효 팩터 수 — plan #24 Phase 3c (cycle 2070).
+ * MLB 는 elo/recent_form/head_to_head/sfr 4팩터가 미구현(전량 null)이라 KBO 10팩터 중
+ * 6팩터(lineup_woba/bullpen_fip/sp_fip/sp_xfip/war/park_factor)만 유효 가능 —
+ * COMPOSITE_DUEL_MIN_VALID(4/10)와 동일 비율(40%)로 스케일.
+ */
+export const MLB_COMPOSITE_DUEL_MIN_VALID = 3;
+
+/**
+ * MLB 팩터 수렴 픽 강수렴 임계 — 유효 최대 6팩터 기준 5/6(83%) ≈ KBO FACTOR_PICK_STRONG(8/10=80%).
+ */
+export const MLB_FACTOR_PICK_STRONG = 5;
+
+/**
+ * MLB 팩터 수렴 픽 완전수렴 임계 — 유효 최대 6팩터 전부 한쪽 우세.
+ */
+export const MLB_FACTOR_PICK_COMPLETE = 6;
 
 /**
  * 팩터 수렴 픽 가중 우위 총합 기준 — wave-420 (cycle 1773), wave-421 파생값 전환 (cycle 1774).

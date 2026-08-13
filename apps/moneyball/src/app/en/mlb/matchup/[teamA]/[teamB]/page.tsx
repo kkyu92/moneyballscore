@@ -8,6 +8,8 @@ import {
   confToWinProb,
   CLOSE_GAME_MARGIN,
   MATCHUP_RECENT_FORM_GAMES,
+  MLB_FACTOR_PICK_STRONG,
+  MLB_FACTOR_PICK_COMPLETE,
   mlbShortTeamName,
   type MlbTeamCode,
 } from "@moneyball/shared";
@@ -28,9 +30,11 @@ import {
   EMPTY_RECENT_FORM,
 } from "@/lib/teams/buildTeamRecentForm";
 import { buildMlbSeasonHeadToHead } from "@/lib/mlb/buildMlbSeasonHeadToHead";
+import { getMlbConvergencePickHeadToHeadRecord } from "@/lib/analysis/convergenceRecord";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
 import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
+import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchupConvergencePickRecord";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -115,7 +119,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     redirect(`/en${pair.path}`);
   }
 
-  const [profile, factorA, factorB, formA, formB] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats] = await Promise.all([
     buildMlbMatchupProfile(pair),
     buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
@@ -139,6 +143,18 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
       captureFallback(err, EMPTY_RECENT_FORM, {
         route: "/en/mlb/matchup/[teamA]/[teamB]",
         source: "buildTeamRecentForm.codeB",
+      }),
+    ),
+    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_STRONG).catch((err) =>
+      captureFallback(err, [], {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "getMlbConvergencePickHeadToHeadRecord(strong)",
+      }),
+    ),
+    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_COMPLETE).catch((err) =>
+      captureFallback(err, [], {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "getMlbConvergencePickHeadToHeadRecord(complete)",
       }),
     ),
   ]);
@@ -246,6 +262,15 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
         teamB={{ shortName: tB.shortName }}
         formA={formA}
         formB={formB}
+        locale="en"
+      />
+
+      <MlbMatchupConvergencePickRecord
+        titleId="mlb-matchup-convergence-title-en"
+        teamA={{ code: tA.code, shortName: tA.shortName }}
+        teamB={{ code: tB.code, shortName: tB.shortName }}
+        strongStats={strongH2HStats}
+        completeStats={completeH2HStats}
         locale="en"
       />
 

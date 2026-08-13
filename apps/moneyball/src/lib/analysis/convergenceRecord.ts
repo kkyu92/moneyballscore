@@ -5,11 +5,13 @@ import {
   CONVERGENCE_RECORD_LOOKBACK_DAYS,
   CONVERGENCE_RECORD_RECENT_LIMIT,
   COMPOSITE_DUEL_MIN_VALID,
+  MLB_COMPOSITE_DUEL_MIN_VALID,
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
   KBO_SEASON_START_DATE,
   PRODUCTION_COHORT_RULES,
+  MLB_PRODUCTION_COHORT_RULES,
   CONVERGENCE_TEAM_STATS_MIN_PICKS,
   CONVERGENCE_HOME_AWAY_MIN_PICKS,
   CONVERGENCE_DAY_OF_WEEK_MIN_PICKS,
@@ -17,9 +19,11 @@ import {
   ACCURACY_GOOD_PCT,
   CONVERGENCE_BADGE_LOW_PCT,
   type TeamCode,
+  type MlbTeamCode,
   type SelectResult,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
+import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel';
 
 interface ConvergenceGameRow {
   id: number;
@@ -157,11 +161,11 @@ export async function getConvergencePickBestStreak(
 // results: { favoredTeam, won } 배열 (fetchConvergencePickDetailedResults 출력)
 // minPicks: 표시 최소 경기 수 (소표본 노이즈 차단)
 // 반환: 총 경기 수 내림차순 정렬 (같으면 승 수 내림차순)
-export function computeConvergenceTeamStats(
-  results: Array<{ favoredTeam: TeamCode; won: boolean }>,
+export function computeConvergenceTeamStats<T extends string = TeamCode>(
+  results: Array<{ favoredTeam: T; won: boolean }>,
   minPicks = CONVERGENCE_TEAM_STATS_MIN_PICKS,
-): Array<{ teamCode: TeamCode; wins: number; losses: number }> {
-  const map = new Map<TeamCode, { wins: number; losses: number }>();
+): Array<{ teamCode: T; wins: number; losses: number }> {
+  const map = new Map<T, { wins: number; losses: number }>();
   for (const r of results) {
     const s = map.get(r.favoredTeam) ?? { wins: 0, losses: 0 };
     if (r.won) s.wins++;
@@ -331,6 +335,124 @@ export async function getConvergencePickHeadToHeadRecord(
   if (idA == null || idB == null) return [];
 
   const results = await fetchConvergencePickDetailedResultsForPair(idA, idB, minFactors);
+  return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
+}
+
+interface MlbPredBreakdownRow {
+  external_game_id: string;
+  home_sp_fip: number | null;
+  away_sp_fip: number | null;
+  home_sp_xfip: number | null;
+  away_sp_xfip: number | null;
+  home_lineup_woba: number | null;
+  away_lineup_woba: number | null;
+  home_bullpen_fip: number | null;
+  away_bullpen_fip: number | null;
+  home_war_total: number | null;
+  away_war_total: number | null;
+}
+
+// plan #24 Phase 3c (cycle 2070): getConvergencePickHeadToHeadRecord 의 MLB 버전.
+// KBO 는 games(팀 FK) 모델이라 teams.id 조회 → games.home_team_id 필터로 두 팀을 특정하지만
+// MLB 는 mlb_schedule(팀 코드 string) + predictions.external_game_id 모델이라 buildMlbMatchupProfile
+// 과 동일하게 or() 필터를 팀 코드 문자열에 직접 건다 — teams 테이블 조회 자체가 불필요.
+async function fetchMlbConvergencePickDetailedResultsForPair(
+  codeA: MlbTeamCode,
+  codeB: MlbTeamCode,
+  minFactors: number,
+): Promise<Array<{ favoredTeam: MlbTeamCode; won: boolean }>> {
+  const supabase = await createClient();
+  const orFilter =
+    `and(home_team_code.eq.${codeA},away_team_code.eq.${codeB}),` +
+    `and(home_team_code.eq.${codeB},away_team_code.eq.${codeA})`;
+
+  const scheduleResult = (await supabase
+    .from('mlb_schedule')
+    .select('id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
+    .or(orFilter)
+    .not('home_score', 'is', null)
+    .eq('status', 'final')) as SelectResult<
+    Array<{
+      id: number;
+      external_game_id: string;
+      game_date: string;
+      status: string | null;
+      home_score: number | null;
+      away_score: number | null;
+      home_team_code: string;
+      away_team_code: string;
+    }>
+  >;
+  const { data: scheduleRows } = assertSelectOk(
+    scheduleResult,
+    `fetchMlbConvergencePickDetailedResultsForPair schedule ${codeA} vs ${codeB}`,
+  );
+  if (!scheduleRows || scheduleRows.length === 0) return [];
+
+  const predResult = (await supabase
+    .from('predictions')
+    .select(`
+      external_game_id,
+      home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+      home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+      home_war_total, away_war_total
+    `)
+    .eq('prediction_type', 'pre_game')
+    .eq('league', 'mlb')
+    .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
+    .in('external_game_id', scheduleRows.map((s) => s.external_game_id))) as SelectResult<MlbPredBreakdownRow[]>;
+  const { data: predRows } = assertSelectOk(
+    predResult,
+    `fetchMlbConvergencePickDetailedResultsForPair predictions ${codeA} vs ${codeB}`,
+  );
+  const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
+
+  const results: Array<{ favoredTeam: MlbTeamCode; won: boolean }> = [];
+  for (const row of scheduleRows) {
+    const pred = predByExternalId.get(row.external_game_id);
+    if (!pred || row.home_score === null || row.away_score === null) continue;
+    const homeCode = row.home_team_code as MlbTeamCode;
+    const awayCode = row.away_team_code as MlbTeamCode;
+
+    const duel = computeMlbCompositeDuel({
+      homeCode,
+      homeLineupWoba: pred.home_lineup_woba,
+      awayLineupWoba: pred.away_lineup_woba,
+      homeBullpenFip: pred.home_bullpen_fip,
+      awayBullpenFip: pred.away_bullpen_fip,
+      homeSPFip: pred.home_sp_fip,
+      awaySPFip: pred.away_sp_fip,
+      homeSPXfip: pred.home_sp_xfip,
+      awaySPXfip: pred.away_sp_xfip,
+      homeWar: pred.home_war_total,
+      awayWar: pred.away_war_total,
+    });
+
+    if (duel.validCount < MLB_COMPOSITE_DUEL_MIN_VALID) continue;
+    if (Math.abs(duel.netScore) < minFactors) continue;
+
+    const favoredHome = duel.netScore > 0;
+    const favoredTeam = favoredHome ? homeCode : awayCode;
+    const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
+    results.push({ favoredTeam, won });
+  }
+
+  return results;
+}
+
+/**
+ * MLB 두 팀 맞대결 한정 강수렴/완전수렴 픽 성적 — getConvergencePickHeadToHeadRecord(KBO) 대응.
+ * MLB_FACTOR_PICK_STRONG(5)/MLB_FACTOR_PICK_COMPLETE(6) 는 유효 6팩터 기준 임계 —
+ * KBO FACTOR_PICK_STRONG(8)/FACTOR_PICK_COMPLETE(10) 을 그대로 쓰면 MLB netScore 최대치(6)를
+ * 넘는 임계라 항상 빈 배열만 반환하는 dead 게이트가 됨(cycle 2070 확인) — 호출부는
+ * MLB_FACTOR_PICK_STRONG/MLB_FACTOR_PICK_COMPLETE 를 minFactors 로 넘겨야 함.
+ */
+export async function getMlbConvergencePickHeadToHeadRecord(
+  codeA: MlbTeamCode,
+  codeB: MlbTeamCode,
+  minFactors: number,
+): Promise<Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>> {
+  const results = await fetchMlbConvergencePickDetailedResultsForPair(codeA, codeB, minFactors);
   return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
 }
 

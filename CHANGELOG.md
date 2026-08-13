@@ -1,3 +1,15 @@
+## v0.5.62.29 — 2026-08-13 (cycle 2070, explore-idea (heavy): plan #24 Phase 3c — MLB 매치업 수렴 픽 H2H)
+
+### feat(analysis): wave-633 — MLB 매치업 수렴 픽 성적 (이 매치업 한정, KO+EN)
+
+plan #24 Phase 3c 잔여(cycle 2063 확인된 blocker) 3-step 착수 — (a) `packages/shared` 에 `MLB_SCORING_RULE`/`MLB_PRODUCTION_COHORT_RULES` 신규(KBO `PRODUCTION_COHORT_RULES` 필터를 MLB predictions 에 그대로 쓰면 항상 빈 배열이던 gap 해소), (b) `computeMlbCompositeDuel.ts` 신규(KBO `computeCompositeDuel` 병렬 복제, `MLB_TEAMS[...].parkPf` 재사용, elo/recent_form/head_to_head/sfr 4팩터는 MLB 미구현이라 파라미터 자체를 뺌), (c) `getMlbConvergencePickHeadToHeadRecord` + `MlbMatchupConvergencePickRecord.tsx`(locale prop) 신규, KO+EN `/mlb/matchup` 페이지 wiring.
+
+구현 중 신규 발견 — KBO `FACTOR_PICK_STRONG`(8)/`FACTOR_PICK_COMPLETE`(10)을 그대로 쓰면 MLB netScore 최대치가 6(유효 팩터 6개 한계)이라 임계를 넘지 못해 항상 빈 배열만 반환하는 dead 게이트가 됨 — `MLB_FACTOR_PICK_STRONG`(5)/`MLB_FACTOR_PICK_COMPLETE`(6)/`MLB_COMPOSITE_DUEL_MIN_VALID`(3)를 KBO 대비 동일 비율로 신규 정의해 해소. `computeConvergenceTeamStats`(KBO 전용 `TeamCode` 하드코딩)를 `<T extends string>` generic 으로 전환(순수 함수, 런타임 동작 변화 없음)해 MLB 재사용 시 중복 함수 작성 회피.
+
+plan #24 전체 phase 완결 — Phase 1/2a/3a/3b/3c 모두 shipped, Phase 2b(MLB Elo 시스템 부재)만 명시적 blocked 잔존.
+
+테스트 12건 신규(`computeMlbCompositeDuel.test.ts` 5건 + `plan24-phase3c-mlb-convergence-record.test.ts` 7건). `pnpm type-check`(4 packages) / `pnpm --filter moneyball lint` / `pnpm --filter moneyball exec vitest run`(423 files/3736 tests) / `pnpm --filter @moneyball/kbo-data exec vitest run`(83 files/1085 tests) 전체 통과.
+
 ## v0.5.62.28 — 2026-08-13 (cycle 2069, info-architecture-review (heavy): MLB matchup 435 pairs sitemap 누락 + VERSION/package.json drift 발견+수정)
 
 ### fix(seo): MLB 매치업 435쌍 sitemap 미반영 + en 미러 sitemap 누락 (30-cycle gap checkpoint 신규 발견)

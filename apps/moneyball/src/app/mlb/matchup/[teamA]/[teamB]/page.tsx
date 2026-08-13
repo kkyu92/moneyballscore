@@ -8,6 +8,8 @@ import {
   confToWinProb,
   CLOSE_GAME_MARGIN,
   MATCHUP_RECENT_FORM_GAMES,
+  MLB_FACTOR_PICK_STRONG,
+  MLB_FACTOR_PICK_COMPLETE,
   mlbShortTeamName,
   type MlbTeamCode,
 } from "@moneyball/shared";
@@ -28,20 +30,23 @@ import {
   EMPTY_RECENT_FORM,
 } from "@/lib/teams/buildTeamRecentForm";
 import { buildMlbSeasonHeadToHead } from "@/lib/mlb/buildMlbSeasonHeadToHead";
+import { getMlbConvergencePickHeadToHeadRecord } from "@/lib/analysis/convergenceRecord";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
 import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
+import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchupConvergencePickRecord";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // plan #24 Phase 1 MVP — KBO /matchup/[teamA]/[teamB] parity 축소판.
 // header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend 는 Phase 2b (MLB
-// Elo rating 시스템 부재로 block, cycle 2057 확인). convergence pick 는 Phase 3 잔여
-// carry-over(MLB composite duel + MLB 전용 scoring cohort 상수 신규 필요, cycle 2063 확인).
+// Elo rating 시스템 부재로 block, cycle 2057 확인).
 // Phase 2a (cycle 2056) — 시즌 평균 팩터 비교(MlbMatchupFactorCompare) 추가.
 // Phase 3a (cycle 2060) — 최근 폼(MlbMatchupRecentForm) 추가.
-// Phase 3b (이번 cycle) — 시즌별 상대전적(MlbMatchupSeasonHeadToHead) 추가.
+// Phase 3b (cycle 2063) — 시즌별 상대전적(MlbMatchupSeasonHeadToHead) 추가.
+// Phase 3c (이번 cycle) — 수렴 픽 성적(MlbMatchupConvergencePickRecord) 추가. MLB 전용
+// composite duel(computeMlbCompositeDuel) + cohort 상수(MLB_PRODUCTION_COHORT_RULES) 신규.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
@@ -93,7 +98,7 @@ export default async function MlbMatchupPage({ params }: PageProps) {
     redirect(pair.path);
   }
 
-  const [profile, factorA, factorB, formA, formB] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats] = await Promise.all([
     buildMlbMatchupProfile(pair),
     buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
@@ -117,6 +122,18 @@ export default async function MlbMatchupPage({ params }: PageProps) {
       captureFallback(err, EMPTY_RECENT_FORM, {
         route: "/mlb/matchup/[teamA]/[teamB]",
         source: "buildTeamRecentForm.codeB",
+      }),
+    ),
+    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_STRONG).catch((err) =>
+      captureFallback(err, [], {
+        route: "/mlb/matchup/[teamA]/[teamB]",
+        source: "getMlbConvergencePickHeadToHeadRecord(strong)",
+      }),
+    ),
+    getMlbConvergencePickHeadToHeadRecord(pair.codeA, pair.codeB, MLB_FACTOR_PICK_COMPLETE).catch((err) =>
+      captureFallback(err, [], {
+        route: "/mlb/matchup/[teamA]/[teamB]",
+        source: "getMlbConvergencePickHeadToHeadRecord(complete)",
       }),
     ),
   ]);
@@ -222,6 +239,14 @@ export default async function MlbMatchupPage({ params }: PageProps) {
         teamB={{ shortName: tB.shortName }}
         formA={formA}
         formB={formB}
+      />
+
+      <MlbMatchupConvergencePickRecord
+        titleId="mlb-matchup-convergence-title"
+        teamA={{ code: tA.code, shortName: tA.shortName }}
+        teamB={{ code: tB.code, shortName: tB.shortName }}
+        strongStats={strongH2HStats}
+        completeStats={completeH2HStats}
       />
 
       <MlbMatchupSeasonHeadToHead
