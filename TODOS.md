@@ -1,12 +1,26 @@
 # TODOS
 
-## 🚨 최우선 carry-over: MLB matchup/team 페이지 프로덕션에서 항상 빈 화면 (cycle 2065, 2026-08-13, 사례 22)
+## 🚨 최우선 carry-over: Cloudflare Worker 배포가 ~2개월간 로컬 wrangler 세션 만료로 미배포 (cycle 2068, 2026-08-13, 사례 25)
 
-`/mlb/matchup/[teamA]/[teamB]` 와 `/mlb/team/[code]` 가 Phase 1(cycle 2054)부터 지금까지 **항상 0경기로 렌더링** — `teams` DB 테이블에 MLB 30팀 row 가 0건(KBO 10팀만 존재) + `games` 테이블에도 MLB 경기 row 가 0건(MLB 파이프라인은 `mlb_schedule`+`predictions.external_game_id` 로만 기록, KBO 식 `games`+`teams` FK 모델 자체를 안 씀). 빌더 코드(`buildMlbMatchupProfile.ts`/`buildMlbTeamProfile.ts`)가 KBO 패턴을 그대로 복제하며 존재하지 않는 FK 를 조회 → 항상 조기 return 빈 프로필. 실측: `curl https://moneyballscore.vercel.app/mlb/matchup/NYM/PHI` → "아직 올 시즌 완료된 경기가 없습니다".
+`cloudflare-worker/` (Worker `moneyballscore-cron`, 모든 cron 의 primary trigger)가 로컬 `wrangler deploy` 단일 경로에만 의존 — `~/Library/Preferences/.wrangler/config/default.toml` 의 oauth `expiration_time`/`refresh_token` 발급일이 **2026-06-12** 로 고정, 이후 refresh 시도 시 `400 Bad Request`("Token refresh failed") 로 non-interactive 환경에서 재인증 불가 확인. git log 대조 결과 `cloudflare-worker/src/worker.ts` 의 마지막 성공 배포 추정 시점 = 2026-06-12 commit `b1be1aac`(MLB cron trigger 추가) — 그 뒤 3개 commit 이 main 에는 있지만 **실제 Worker 런타임엔 미배포 추정**:
+  - `6be40626`/`b7380691` (2026-07-06): Sentry capture + cron fire count 정합 fix
+  - `643dba4e` (2026-08-13, 이번 cycle 직전, 사례 23/24): `mlb_schedule` KST backfill 로직 — 이 fix 가 배포 안 되면 `mlb_schedule.status` 가 다시 'scheduled' 에 고착될 위험
 
-- 상세 분석 + 3-step 후속안 = `~/.develop-cycle/plans/moneyballscore/24.md` "🚨 CRITICAL" 섹션 (plan #24)
-- 별개로 발견한 이슈(이번 cycle 에서 fix + backfill 완료) — `mlb-pipeline.ts` predict_final 이 실측 팩터 계산에만 쓰고 `predictions.home_sp_fip` 등 breakdown 컬럼 저장 안 함(전량 NULL). 단 위 teams/games gap 해결 전까진 화면에 영향 없음(모든 섹션이 `finalGames>0` guard 뒤).
-- 다음 heavy fix-incident 또는 별도 plan 이 최우선 처리 권장 — plan #24 Phase 3c(수렴 픽 H2H)는 이 gap 해결 전까지 보류.
+**이번 cycle 조치 (자율 영역 완료)**:
+- root cause 1 = `cloudflare-worker/`가 `pnpm-workspace.yaml` packages glob 밖에 있어 `wrangler` 등 의존성이 root `.pnpm` store 에 정상 hoist 안 됨(symlink dangling, `MODULE_NOT_FOUND`) → `pnpm-workspace.yaml` 에 `cloudflare-worker` 추가 + `package.json` `pnpm.onlyBuiltDependencies: ["workerd"]` 추가로 `wrangler --version`/`whoami` 정상 동작 확인 (`type-check`/`test`/`lint` 전체 통과, turbo 4 packages 인식)
+- root cause 2 (auth) = 사용자 영역, 아래 참조
+- `.github/workflows/deploy-cloudflare-worker.yml` 신규 — `cloudflare-worker/**` push 시 자동 `wrangler deploy` (CI, `CLOUDFLARE_API_TOKEN` secret 사용). 로컬 세션 만료에 더 이상 의존하지 않는 구조로 전환.
+
+**🔔 사용자 확인/조치 필요**:
+1. GH repo secret `CLOUDFLARE_API_TOKEN` 등록 필요 — Cloudflare dashboard → My Profile → API Tokens → Create Token (권한: Account.Workers Scripts:Edit). 등록 전까진 신규 workflow 실행 시 실패.
+2. 위 secret 등록 전 급하게 최신 코드를 배포해야 한다면 로컬에서 `cd cloudflare-worker && npx wrangler login`(브라우저 인증) → `npx wrangler deploy` 1회 수동 실행 필요 — 본 메인은 non-interactive 환경이라 브라우저 OAuth 대행 불가.
+3. secret 등록 후 다음 `cloudflare-worker/**` 변경 push 시 자동 배포되는지 Actions 탭에서 1회 확인 권장.
+
+## MLB matchup/team 페이지 teams/games FK gap — RLS + backfill fix 완료, 배포 상태만 미확인 (cycle 2065~2067, 사례 22/23/24)
+
+`/mlb/matchup/[teamA]/[teamB]`, `/mlb/team/[code]` 가 Phase 1(cycle 2054)부터 항상 빈 화면이던 문제는 cycle 2066(빌더 재작성)+2067(RLS anon 정책 + KST backfill)로 **root cause 코드 fix 완료 + prod curl 재검증 통과**(`/mlb/matchup/NYM/PHI` 실제 렌더링 확인). 단, worker.ts 의 KST backfill cron 로직이 위 사례 25 미배포 이슈로 실제 Cloudflare Worker 에는 아직 반영 안 됐을 수 있음 — 위 사례 25 배포 완료 후 며칠 뒤 `mlb_schedule.status`가 수동 개입 없이 자동으로 'final' 전환되는지 재확인 필요.
+
+- 상세 분석 = `~/.develop-cycle/plans/moneyballscore/24.md` "🚨 CRITICAL" 섹션 (plan #24, Phase 3c 는 이 gap 및 사례 25 배포 확인 후 재개)
 
 ## 🔔 사용자 확인 필요: PR/issue close 8+1건 (cycle 2009, 2026-07-28)
 

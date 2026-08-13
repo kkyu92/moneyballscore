@@ -21,6 +21,9 @@
   },
   "packageManager": "pnpm@10.33.0",
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "workerd"
+    ],
     "overrides": {
       "fast-uri": ">=3.1.2",
       "postcss": ">=8.5.10",
@@ -42,5 +45,5 @@
       ]
     }
   },
-  "version": "0.5.62.26"
+  "version": "0.5.62.27"
 }
