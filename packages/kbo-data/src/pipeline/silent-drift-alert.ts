@@ -49,6 +49,7 @@ const MLB_SCRAPE_MODES = new Set<string>([
   'mlb_savant_scrape',
   'mlb_shadow_train',
   'mlb_walk_forward_measure',
+  'mlb_elo_update',
 ]);
 
 export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {

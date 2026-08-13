@@ -14,6 +14,7 @@ vi.mock('@supabase/supabase-js', () => ({
       insert: vi.fn().mockResolvedValue({ error: null }),
       eq: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
     })),
   })),
 }));
@@ -153,6 +154,58 @@ describe('runMlbPipeline', () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     const result = await runMlbPipeline('mlb_walk_forward_measure', DATE, TRIGGERED_BY);
     assertResultShape(result, 'mlb_walk_forward_measure');
+  });
+
+  it('mlb_elo_update — throw 없음, result shape 정상 (plan #25 Phase 2, cycle 2082)', async () => {
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_elo_update', DATE, TRIGGERED_BY);
+    assertResultShape(result, 'mlb_elo_update');
+  });
+
+  it('mlb_elo_update — mlb_schedule final 전체 재생 → mlb_team_elo upsert onConflict team_code,season (plan #25 Phase 2, cycle 2082)', async () => {
+    const upsertCalls: Array<{ table: string; rows: unknown; onConflict: string }> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    type QueryBuilder = {
+      select: ReturnType<typeof vi.fn>;
+      eq: ReturnType<typeof vi.fn>;
+      order: ReturnType<typeof vi.fn>;
+      upsert: ReturnType<typeof vi.fn>;
+      insert: ReturnType<typeof vi.fn>;
+    };
+    const builder: QueryBuilder = {
+      select: vi.fn(() => builder),
+      eq: vi.fn(() => builder),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          { game_date: '2026-04-01', home_team_code: 'LAD', away_team_code: 'SF', home_score: 5, away_score: 2 },
+        ],
+        error: null,
+      }),
+      upsert: vi.fn((rows: unknown, opts: { onConflict: string }) => {
+        upsertCalls.push({ table: 'mlb_team_elo', rows, onConflict: opts.onConflict });
+        return Promise.resolve({ error: null });
+      }),
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn(() => builder),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_elo_update', DATE, TRIGGERED_BY);
+
+    expect(result.games_found).toBe(1);
+    expect(result.rows_inserted).toBe(2); // LAD + SF
+    expect(result.errors).toHaveLength(0);
+
+    const call = upsertCalls.find((c) => c.table === 'mlb_team_elo');
+    expect(call).toBeDefined();
+    expect(call?.onConflict).toBe('team_code,season');
+    const rows = call?.rows as Array<{ team_code: string; season: number; games_played: number }>;
+    expect(rows.find((r) => r.team_code === 'LAD')?.season).toBe(2026);
+    expect(rows.find((r) => r.team_code === 'LAD')?.games_played).toBe(1);
   });
 
   it('mlb_predict_final — predictions insert 모든 row predicted_winner=null (regression: cycle 1180 PHI integer cast fix)', async () => {

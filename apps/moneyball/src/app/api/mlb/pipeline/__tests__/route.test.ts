@@ -107,6 +107,7 @@ describe('POST /api/mlb/pipeline', () => {
     'mlb_combined_notify',
     'mlb_shadow_train',
     'mlb_walk_forward_measure',
+    'mlb_elo_update',
   ] as const)('%s → runMlbPipeline 호출됨', async (mode) => {
     const { POST } = await import('../route');
     const { runMlbPipeline } = await import('@moneyball/kbo-data');
