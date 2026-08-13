@@ -1,3 +1,11 @@
+## v0.5.62.33 — 2026-08-13 (cycle 2077, review-code (heavy): MLB scoring_rule hardcoded literal → MLB_SCORING_RULE 상수 통합)
+
+### refactor(mlb): mlb-pipeline.ts — hardcoded `'mlb_v0.1'` 5곳 → `MLB_SCORING_RULE` 상수
+
+`packages/shared/src/model-version-labels.ts` 가 plan #24 Phase 3c(cycle 2063)에서 `MLB_SCORING_RULE`/`MLB_PRODUCTION_COHORT_RULES` 를 신규 정의하면서 주석에 "`mlb-pipeline.ts` 의 단일 hardcoded literal 을 이 상수로 통합" 이라 명시했지만 실제 통합은 누락 — `mlb-pipeline.ts` 는 여전히 5곳(`runPredictFinal` insert/delete, `runShadowTrain`/`runWalkForwardMeasure` select 필터)에 `'mlb_v0.1'` 리터럴을 직접 하드코딩 중이었음. `apps/moneyball/src/lib/analysis/convergenceRecord.ts` 는 이미 상수를 올바르게 사용 중이라 두 소스가 갈라진 상태(KBO `PRODUCTION_COHORT_RULES` 하드코딩 family, wave 11~17 과 동일 구조의 MLB 신규 인스턴스). 값 자체는 동일해 현재 동작 변화 없음 — MLB 가 KBO 처럼 scoring_rule 버전이 분기되는 시점(예: `mlb_v0.1-credit-fail` 같은 cohort 분리)에 5곳 중 일부만 갱신되는 silent drift 재발을 사전 차단.
+
+`pnpm type-check`(4 packages) / `pnpm --filter @moneyball/kbo-data exec vitest run`(83 files/1085 tests) / `pnpm lint` 전체 통과. 신규 테스트 없음(리터럴→상수 치환, 동작 불변).
+
 ## v0.5.62.32 — 2026-08-13 (cycle 2074, operational-analysis (heavy): CE fallback 실측 정정 — brier-drift 스크립트 판별 버그)
 
 ### fix(scripts): op-analysis-brier-drift.ts — CE fallback 판별을 `confidence===0.3`→`debate_version IS NULL` 로 통일

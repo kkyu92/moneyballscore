@@ -29,7 +29,7 @@ import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
 } from './silent-drift-alert';
-import { ELO_NEUTRAL, MLB_TEAMS } from '@moneyball/shared';
+import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
 
 // mlb_predict_final 실측 데이터 fallback 기본값 — mlb_team_stats row 부재(스크래퍼 미가동/미커버 팀) 시에만 사용.
@@ -294,7 +294,7 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       // predicted_winner = INT REFERENCES teams(id) — KBO 전용. MLB 팀 row 부재 → null.
       // 승자 정보는 home_win_prob + mlb_schedule.home/away_team_code 로 derive.
       predicted_winner: null,
-      scoring_rule: 'mlb_v0.1',
+      scoring_rule: MLB_SCORING_RULE,
       // cycle 2065 fix — computeMlbProbability 입력으로만 쓰이고 저장은 안 되던 실측
       // 팩터 값을 breakdown 컬럼에 영속화. buildMlbTeamFactorAverages / computeCompositeDuel
       // MLB 버전(plan #24 Phase 2a/3c)이 이 컬럼을 읽는데 전량 NULL이라 항상 빈 값이었음
@@ -326,7 +326,7 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     .delete()
     .eq('league', 'mlb')
     .eq('mlb_game_date', date)
-    .eq('scoring_rule', 'mlb_v0.1');
+    .eq('scoring_rule', MLB_SCORING_RULE);
 
   if (dErr) {
     errors.push(`predictions delete: ${dErr.message}`);
@@ -384,7 +384,7 @@ async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: numbe
     .from('predictions')
     .select('external_game_id, home_win_prob')
     .eq('league', 'mlb')
-    .eq('scoring_rule', 'mlb_v0.1')
+    .eq('scoring_rule', MLB_SCORING_RULE)
     .in('external_game_id', gameIds);
 
   if (pErr) {
@@ -446,7 +446,7 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
     .from('predictions')
     .select('external_game_id, home_win_prob')
     .eq('league', 'mlb')
-    .eq('scoring_rule', 'mlb_v0.1')
+    .eq('scoring_rule', MLB_SCORING_RULE)
     .eq('mlb_game_date', date);
 
   if (pErr) {
@@ -496,7 +496,7 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
   const { error: bErr } = await db.from('walk_forward_brier').insert({
     date,
     league: 'mlb',
-    scoring_rule: 'mlb_v0.1',
+    scoring_rule: MLB_SCORING_RULE,
     brier_score: brier,
     sample_count: finalRows.length,
   });
