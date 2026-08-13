@@ -579,6 +579,15 @@ async function runEloUpdate(db: DB, _date: string): Promise<{ gamesFound: number
 
     if (hErr) {
       errors.push(`mlb_team_elo_history upsert: ${hErr.message}`);
+      // rowsInserted 는 mlb_team_elo(팀 수, 이미 성공) 기준이라 history 실패와 무관하게
+      // >0 유지 — 아래 pipeline_runs.status 계산(hasErrors && rowsInserted===0 시만
+      // 'error')과 captureSilentDriftAlert(predictionsGenerated===0 시만 발화) 양쪽이
+      // 이 실패를 구조적으로 못 잡음(둘 다 rowsInserted/predictionsGenerated 만 봄).
+      // 실측: cycle 2083 발견 더블헤더 dedupe 버그처럼 향후 유사 실패가 status='success'
+      // 로 완전 silent 될 위험 — 여기서 직접 Sentry 발화로 재발 차단.
+      Sentry.captureException(new Error(`mlb_team_elo_history upsert error: ${hErr.message}`), {
+        tags: { silent_drift_family: 'wave_178', component: 'pipeline-mlb', op: 'mlb_team_elo_history_upsert' },
+      });
       break;
     }
   }
