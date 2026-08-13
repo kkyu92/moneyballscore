@@ -1,5 +1,25 @@
 # TODOS
 
+## ✅ worker.ts unknown-cron 분기 silent log → Sentry alert 승격 (cycle 2089, 2026-08-13, 사례 9 family)
+
+`cloudflare-worker/src/worker.ts` scheduled() 최종 else (event.cron 이 4개 알려진
+cron 문자열 어디에도 안 맞는 경우) 이 `console.log` 만 하고 끝나던 것을 발견 —
+cycle 2081(사례 27) 이 실제로 겪었던 `wrangler.toml` "18-21" vs worker.ts
+"18-22" hour range 불일치처럼 두 파일이 drift 나면 해당 cron slot(daily-pipeline
+/ sitemap-warmup / live-update / MLB pipeline 중 하나) 전체가 배포 후 영구
+silent skip 되고 Cloudflare Worker 로그는 능동 monitor 대상이 아니라 아무도
+모름. 다른 실패 경로들(callPipeline/callMlbPipeline/runLiveUpdate)과 동일하게
+`env.SENTRY_DSN` 있으면 `captureToSentry` 호출하도록 승격. type-check +
+lint 통과. wrangler.toml 실제 값 재확인 결과 현재는 4개 문자열 모두 일치
+(cycle 2081 이 이미 동기화) — 본 fix 는 재발 시 즉시 alert 만 추가, 문자열
+자체 dedup(진짜 구조적 제거)은 별도 후속 후보로 유지.
+
+**후속 후보 (Tier 3, 별도 cycle)**: wrangler.toml crons 배열과 worker.ts
+if/else 문자열 비교가 근본적으로 두 파일 수동 동기화에 의존 — TOML 이라 TS
+상수 import 불가. 진짜 제거하려면 event.cron 을 파싱해 최소 minute+hour 로
+matching 하거나, wrangler.toml 을 코드 생성 소스로 만드는 tooling 필요. ROI
+낮음(alert 승격으로 즉시 위험은 이미 차단), 사용자 판단 시 fire.
+
 ## ✅ PR #2887 (Footer 로또 hub 보강) 12일 silent 미머지 — R7 위반 발견+머지 (cycle 2088, 2026-08-13, 사례 18 family)
 
 open PR 진단 중 `develop-cycle/ia-footer-lotto-hub-cycle-2022` (cycle 2022, 2026-08-01
