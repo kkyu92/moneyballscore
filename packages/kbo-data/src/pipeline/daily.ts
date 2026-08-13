@@ -130,7 +130,8 @@ export type PipelineMode =
   | 'mlb_predict_final'
   | 'mlb_combined_notify'
   | 'mlb_shadow_train'
-  | 'mlb_walk_forward_measure';
+  | 'mlb_walk_forward_measure'
+  | 'mlb_elo_update';
 
 /**
  * 통합 파이프라인 엔트리.

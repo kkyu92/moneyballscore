@@ -15,9 +15,10 @@
  *  6) "37 * * * *" 중 UTC 토요일 15시 — pitcher-snapshot (KST 일요일 00:37).
  *     /api/snapshot-pitchers POST → pitcher_stats 주간 시점 snapshot.
  *     cron 슬롯 추가 없이 sitemap-warmup 분기 안에 조건 통합 (4/5 유지).
- *  7) "17 18-21,10 * * *" — MLB pipeline (Plan C Task 4). UTC hour → mode
- *     결정 후 /api/mlb/pipeline 호출. UTC 18-21 (KST 03-06) scrape 4회 +
- *     UTC 10 (KST 19) predict_final 1회 = 5회/일. 별도 cron slot 소비.
+ *  7) "17 18-22,10 * * *" — MLB pipeline (Plan C Task 4 + plan #25 Phase 2). UTC hour
+ *     → mode 결정 후 /api/mlb/pipeline 호출. UTC 18-21 (KST 03-06) scrape 4회 +
+ *     UTC 22 (KST 07) elo_update 1회 + UTC 10 (KST 19) predict_final 1회 = 6회/일.
+ *     별도 cron slot 소비.
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  *
@@ -107,7 +108,8 @@ type MlbPipelineMode =
   | 'mlb_predict_final'
   | 'mlb_combined_notify'
   | 'mlb_shadow_train'
-  | 'mlb_walk_forward_measure';
+  | 'mlb_walk_forward_measure'
+  | 'mlb_elo_update';
 
 /**
  * UTC hour → MlbPipelineMode 결정.
@@ -115,6 +117,7 @@ type MlbPipelineMode =
  * UTC 19 (KST 04) → fancy_scrape
  * UTC 20 (KST 05) → savant_scrape
  * UTC 21 (KST 06) → shadow_train
+ * UTC 22 (KST 07) → elo_update (plan #25 Phase 2, cycle 2082 — mlb_team_elo 매일 자동 재생)
  * UTC 10 (KST 19) → predict_final (predict + notify 통합)
  */
 function decideMlbMode(scheduledTime: number): MlbPipelineMode | null {
@@ -123,6 +126,7 @@ function decideMlbMode(scheduledTime: number): MlbPipelineMode | null {
   if (utcHour === 19) return 'mlb_fancy_scrape';
   if (utcHour === 20) return 'mlb_savant_scrape';
   if (utcHour === 21) return 'mlb_shadow_train';
+  if (utcHour === 22) return 'mlb_elo_update';
   if (utcHour === 10) return 'mlb_predict_final';
   return null;
 }
@@ -444,8 +448,8 @@ export default {
       }
     } else if (cronExpr === '*/10 9-15 * * *') {
       ctx.waitUntil(runLiveUpdate(env));
-    } else if (cronExpr === '17 18-21,10 * * *') {
-      // MLB pipeline cron: UTC 18-21 (KST 03-06, 새벽 scrape) + UTC 10 (KST 19, predict)
+    } else if (cronExpr === '17 18-22,10 * * *') {
+      // MLB pipeline cron: UTC 18-21 (KST 03-06, 새벽 scrape) + UTC 22 (KST 07, elo update) + UTC 10 (KST 19, predict)
       const mlbMode = decideMlbMode(event.scheduledTime);
       if (mlbMode === 'mlb_statsapi_scrape') {
         ctx.waitUntil(callMlbStatsApiBackfill(env, event.scheduledTime));

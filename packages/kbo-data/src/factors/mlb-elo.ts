@@ -57,3 +57,72 @@ export function updateMlbElo(
 
 /** 백필/신규 팀 초기 rating — packages/shared ELO_NEUTRAL 재사용 (drift 차단). */
 export const MLB_ELO_INITIAL_RATING = ELO_NEUTRAL;
+
+/**
+ * All-Star Game (home/away_team_code='NL'/'AL') 은 실제 franchise 가 아닌 리그 올스타
+ * 혼성팀 — 팀별 Elo 신호로 부적합해 재생에서 제외 (실측: external_game_id=823443, 2026-07-14).
+ */
+const MLB_ELO_EXHIBITION_CODES = new Set(['AL', 'NL']);
+
+export interface MlbFinalGameForElo {
+  game_date: string;
+  home_team_code: string;
+  away_team_code: string;
+  home_score: number | null;
+  away_score: number | null;
+}
+
+export interface MlbTeamEloState {
+  eloRating: number;
+  gamesPlayed: number;
+  season: number;
+}
+
+/**
+ * mlb_schedule status='final' 경기를 시간순 재생해 팀별 현재 Elo rating 도출.
+ * 매 fire 시 전체 히스토리를 처음부터 재생 — 증분 갱신(단일 날짜만 적용) 대신
+ * 전체 재계산을 택한 이유: mlb_team_elo 에 "이 경기는 이미 반영됨" 을 표시하는 처리
+ * 로그가 없어 증분 방식은 재실행(cron retry 등) 시 이중 반영 위험이 있음. 매 팀
+ * 시즌당 최대 ~162경기라 전체 재생 비용은 낮음 (Phase 1 백필 스크립트와 동일 로직,
+ * Phase 2 자동 갱신 파이프라인 모드에서도 재사용 — 코드 중복 방지, cycle 2082).
+ *
+ * team_code 는 games 배열에 들어온 그대로(StatsAPI convention) 사용 — mlb_schedule/
+ * mlb_team_elo 는 원본 그대로 저장하는 기존 컨벤션 유지 (packages/shared/mlb-teams.ts
+ * MLB_STATSAPI_TEAM_ALIASES 주석 참조, 정규화는 소비 시점에 normalizeMlbTeamCode 로).
+ */
+export function computeMlbEloRatings(
+  games: readonly MlbFinalGameForElo[],
+  k: number = MLB_ELO_K,
+): Map<string, MlbTeamEloState> {
+  const states = new Map<string, MlbTeamEloState>();
+  const ratingOf = (team: string) => states.get(team)?.eloRating ?? MLB_ELO_INITIAL_RATING;
+
+  for (const g of games) {
+    if (MLB_ELO_EXHIBITION_CODES.has(g.home_team_code) || MLB_ELO_EXHIBITION_CODES.has(g.away_team_code)) {
+      continue;
+    }
+    if (g.home_score == null || g.away_score == null || g.home_score === g.away_score) {
+      // 무승부/스코어 미기재(취소·서스펜드 등) — 갱신 skip.
+      continue;
+    }
+
+    const homeElo = ratingOf(g.home_team_code);
+    const awayElo = ratingOf(g.away_team_code);
+    const homeWon = g.home_score > g.away_score;
+    const updated = updateMlbElo(homeElo, awayElo, homeWon, k);
+    const season = parseInt(g.game_date.slice(0, 4), 10);
+
+    states.set(g.home_team_code, {
+      eloRating: updated.home,
+      gamesPlayed: (states.get(g.home_team_code)?.gamesPlayed ?? 0) + 1,
+      season,
+    });
+    states.set(g.away_team_code, {
+      eloRating: updated.away,
+      gamesPlayed: (states.get(g.away_team_code)?.gamesPlayed ?? 0) + 1,
+      season,
+    });
+  }
+
+  return states;
+}

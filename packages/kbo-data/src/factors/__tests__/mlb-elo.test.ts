@@ -5,6 +5,8 @@ import {
   MLB_ELO_INITIAL_RATING,
   expectedHomeWinProb,
   updateMlbElo,
+  computeMlbEloRatings,
+  type MlbFinalGameForElo,
 } from '../mlb-elo';
 
 describe('mlb-elo constants', () => {
@@ -76,5 +78,73 @@ describe('updateMlbElo', () => {
     const rRegular = updateMlbElo(1500, 1500, true, MLB_ELO_K);
     const rPostseason = updateMlbElo(1500, 1500, true, MLB_ELO_K_POSTSEASON);
     expect(rPostseason.home - 1500).toBeGreaterThan(rRegular.home - 1500);
+  });
+});
+
+describe('computeMlbEloRatings (plan #25 Phase 2, cycle 2082)', () => {
+  const game = (
+    home: string,
+    away: string,
+    homeScore: number | null,
+    awayScore: number | null,
+    date = '2026-04-01',
+  ): MlbFinalGameForElo => ({
+    game_date: date,
+    home_team_code: home,
+    away_team_code: away,
+    home_score: homeScore,
+    away_score: awayScore,
+  });
+
+  it('신규 팀은 초기 rating(ELO_NEUTRAL)에서 시작해 갱신', () => {
+    const states = computeMlbEloRatings([game('LAD', 'SF', 5, 2)]);
+    expect(states.get('LAD')!.eloRating).toBeGreaterThan(MLB_ELO_INITIAL_RATING);
+    expect(states.get('SF')!.eloRating).toBeLessThan(MLB_ELO_INITIAL_RATING);
+    expect(states.get('LAD')!.gamesPlayed).toBe(1);
+  });
+
+  it('동일 두 팀 연속 경기 — rating 누적 갱신 (순서 의존)', () => {
+    const states = computeMlbEloRatings([
+      game('LAD', 'SF', 5, 2),
+      game('SF', 'LAD', 3, 1),
+    ]);
+    expect(states.get('LAD')!.gamesPlayed).toBe(2);
+    expect(states.get('SF')!.gamesPlayed).toBe(2);
+  });
+
+  it('All-Star Game(AL/NL) 은 재생에서 제외', () => {
+    const states = computeMlbEloRatings([game('AL', 'NL', 5, 3)]);
+    expect(states.size).toBe(0);
+  });
+
+  it('무승부/스코어 결측 경기는 skip', () => {
+    const states = computeMlbEloRatings([
+      game('LAD', 'SF', 3, 3),
+      game('LAD', 'SF', null, null),
+    ]);
+    expect(states.size).toBe(0);
+  });
+
+  it('season = game_date 연도 (마지막 반영 경기 기준)', () => {
+    const states = computeMlbEloRatings([game('LAD', 'SF', 5, 2, '2026-05-10')]);
+    expect(states.get('LAD')!.season).toBe(2026);
+  });
+
+  it('StatsAPI raw team_code 그대로 key 사용 (정규화 안 함 — DB 컨벤션 유지)', () => {
+    const states = computeMlbEloRatings([game('TB', 'CWS', 4, 1)]);
+    expect(states.has('TB')).toBe(true);
+    expect(states.has('CWS')).toBe(true);
+    expect(states.has('TBR')).toBe(false);
+  });
+
+  it('zero-sum — 매 경기 후 전체 rating 합 불변', () => {
+    const games = [
+      game('LAD', 'SF', 5, 2, '2026-04-01'),
+      game('SF', 'LAD', 1, 6, '2026-04-02'),
+      game('LAD', 'SF', 3, 3, '2026-04-03'),
+    ];
+    const states = computeMlbEloRatings(games);
+    const total = states.get('LAD')!.eloRating + states.get('SF')!.eloRating;
+    expect(total).toBeCloseTo(2 * MLB_ELO_INITIAL_RATING, 6);
   });
 });

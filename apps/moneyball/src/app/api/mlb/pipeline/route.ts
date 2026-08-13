@@ -15,6 +15,7 @@ const VALID_MODES: MlbPipelineMode[] = [
   'mlb_combined_notify',
   'mlb_shadow_train',
   'mlb_walk_forward_measure',
+  'mlb_elo_update',
 ];
 
 function todayKST(): string {

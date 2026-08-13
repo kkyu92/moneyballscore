@@ -18,7 +18,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { updateMlbElo, MLB_ELO_INITIAL_RATING, DB_CONSTRAINTS } from '@moneyball/kbo-data';
+import { computeMlbEloRatings, DB_CONSTRAINTS } from '@moneyball/kbo-data';
 
 const APPLY = process.argv.includes('--apply');
 
@@ -59,48 +59,15 @@ async function main() {
     return;
   }
 
-  const elo = new Map<string, number>();
-  const gamesPlayed = new Map<string, number>();
-  const latestSeason = new Map<string, number>();
+  const states = computeMlbEloRatings(games);
+  const gamesApplied = Array.from(states.values()).reduce((sum, s) => sum + s.gamesPlayed, 0) / 2;
+  const skipped = games.length - gamesApplied;
 
-  const ratingOf = (team: string) => elo.get(team) ?? MLB_ELO_INITIAL_RATING;
-
-  // All-Star Game (home/away_team_code='NL'/'AL') 은 실제 franchise 가 아닌 리그 올스타
-  // 혼성팀 — 팀별 Elo 신호로 부적합해 제외 (실측: external_game_id=823443, 2026-07-14).
-  const EXHIBITION_CODES = new Set(['AL', 'NL']);
-
-  let skipped = 0;
-  for (const g of games) {
-    if (EXHIBITION_CODES.has(g.home_team_code) || EXHIBITION_CODES.has(g.away_team_code)) {
-      skipped += 1;
-      continue;
-    }
-    if (g.home_score == null || g.away_score == null || g.home_score === g.away_score) {
-      // 무승부/스코어 미기재(취소·서스펜드 등) — 갱신 skip.
-      skipped += 1;
-      continue;
-    }
-    const homeElo = ratingOf(g.home_team_code);
-    const awayElo = ratingOf(g.away_team_code);
-    const homeWon = g.home_score > g.away_score;
-
-    const updated = updateMlbElo(homeElo, awayElo, homeWon);
-    elo.set(g.home_team_code, updated.home);
-    elo.set(g.away_team_code, updated.away);
-
-    gamesPlayed.set(g.home_team_code, (gamesPlayed.get(g.home_team_code) ?? 0) + 1);
-    gamesPlayed.set(g.away_team_code, (gamesPlayed.get(g.away_team_code) ?? 0) + 1);
-
-    const season = parseInt(g.game_date.slice(0, 4), 10);
-    latestSeason.set(g.home_team_code, season);
-    latestSeason.set(g.away_team_code, season);
-  }
-
-  const ranked = Array.from(elo.entries()).sort((a, b) => b[1] - a[1]);
-  console.log(`재생 완료 — 경기 ${games.length - skipped}건 반영 (skip ${skipped}건, 무승부/스코어 없음)`);
+  const ranked = Array.from(states.entries()).sort((a, b) => b[1].eloRating - a[1].eloRating);
+  console.log(`재생 완료 — 경기 ${gamesApplied}건 반영 (skip ${skipped}건, 무승부/스코어 없음)`);
   console.log('현재 rating (내림차순):');
-  for (const [team, rating] of ranked) {
-    console.log(`  ${team.padEnd(4)} ${rating.toFixed(2).padStart(8)}  (${gamesPlayed.get(team) ?? 0} games)`);
+  for (const [team, s] of ranked) {
+    console.log(`  ${team.padEnd(4)} ${s.eloRating.toFixed(2).padStart(8)}  (${s.gamesPlayed} games)`);
   }
 
   if (!APPLY) {
@@ -109,11 +76,11 @@ async function main() {
   }
 
   const now = new Date().toISOString();
-  const upsertRows = Array.from(elo.entries()).map(([team_code, elo_rating]) => ({
+  const upsertRows = Array.from(states.entries()).map(([team_code, s]) => ({
     team_code,
-    season: latestSeason.get(team_code)!,
-    elo_rating,
-    games_played: gamesPlayed.get(team_code) ?? 0,
+    season: s.season,
+    elo_rating: s.eloRating,
+    games_played: s.gamesPlayed,
     updated_at: now,
   }));
 

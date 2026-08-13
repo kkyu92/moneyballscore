@@ -26,6 +26,7 @@ import {
   type TrainingSample,
   type BrierInput,
 } from '../factors/mlb-shadow-c';
+import { computeMlbEloRatings } from '../factors/mlb-elo';
 import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
@@ -64,7 +65,8 @@ export type MlbPipelineMode =
   | 'mlb_predict_final'
   | 'mlb_combined_notify'
   | 'mlb_shadow_train'
-  | 'mlb_walk_forward_measure';
+  | 'mlb_walk_forward_measure'
+  | 'mlb_elo_update';
 
 export interface MlbPipelineResult {
   mode: MlbPipelineMode;
@@ -83,6 +85,7 @@ const MLB_MODES = new Set<MlbPipelineMode>([
   'mlb_combined_notify',
   'mlb_shadow_train',
   'mlb_walk_forward_measure',
+  'mlb_elo_update',
 ]);
 
 function createAdminClient(): DB {
@@ -512,6 +515,61 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
 }
 
 // ─────────────────────────────────────────────
+// mlb_elo_update (plan #25 Phase 2, cycle 2082)
+// ─────────────────────────────────────────────
+async function runEloUpdate(db: DB, _date: string): Promise<{ gamesFound: number; rowsInserted: number; errors: string[] }> {
+  const errors: string[] = [];
+
+  // 매 fire 시 mlb_schedule final 전체를 재생 (증분 갱신 X) — mlb_team_elo 에
+  // "이 경기 이미 반영" 을 나타내는 처리 로그가 없어 증분 방식은 재실행 시 이중
+  // 반영 위험. computeMlbEloRatings 가 backfill 스크립트와 동일 로직 재사용
+  // (scripts/backfill-mlb-elo.ts, cycle 2080/2082).
+  const { data: games, error: gErr } = await db
+    .from('mlb_schedule')
+    .select('game_date, home_team_code, away_team_code, home_score, away_score')
+    .eq('status', 'final')
+    .order('game_datetime_utc', { ascending: true });
+
+  if (gErr) {
+    errors.push(`mlb_schedule select: ${gErr.message}`);
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
+
+  const gameList = (games ?? []) as Array<{
+    game_date: string;
+    home_team_code: string;
+    away_team_code: string;
+    home_score: number | null;
+    away_score: number | null;
+  }>;
+
+  if (gameList.length === 0) {
+    return { gamesFound: 0, rowsInserted: 0, errors };
+  }
+
+  const states = computeMlbEloRatings(gameList);
+  const now = new Date().toISOString();
+  const upsertRows = Array.from(states.entries()).map(([team_code, s]) => ({
+    team_code,
+    season: s.season,
+    elo_rating: s.eloRating,
+    games_played: s.gamesPlayed,
+    updated_at: now,
+  }));
+
+  const { error: uErr } = await db
+    .from('mlb_team_elo')
+    .upsert(upsertRows, { onConflict: DB_CONSTRAINTS.mlbTeamElo });
+
+  if (uErr) {
+    errors.push(`mlb_team_elo upsert: ${uErr.message}`);
+    return { gamesFound: gameList.length, rowsInserted: 0, errors };
+  }
+
+  return { gamesFound: gameList.length, rowsInserted: upsertRows.length, errors };
+}
+
+// ─────────────────────────────────────────────
 // main orchestrator
 // ─────────────────────────────────────────────
 export async function runMlbPipeline(
@@ -574,6 +632,13 @@ export async function runMlbPipeline(
     }
     case 'mlb_walk_forward_measure': {
       const r = await runWalkForwardMeasure(db, date);
+      gamesFound = r.gamesFound;
+      rowsInserted = r.rowsInserted;
+      errors = r.errors;
+      break;
+    }
+    case 'mlb_elo_update': {
+      const r = await runEloUpdate(db, date);
       gamesFound = r.gamesFound;
       rowsInserted = r.rowsInserted;
       errors = r.errors;
