@@ -578,8 +578,11 @@ export async function runDailyPipeline(
       if (!teamId) continue;
       const elo = eloRatings.find((e) => e.team === ts.team);
       // silent drift 가드 — .error 미체크 시 RLS / FK / type cast 실패 silent
-      // skip → team_season_stats 누락 → 예측 input 의 woba/bullpenFip 영구 0
-      // 또는 stale. assertWriteOk fail-loud.
+      // skip 가능. 단 team_season_stats 는 write-only 감사 테이블 (본 파이프라인
+      // 예측 루프는 아래 604-606줄에서 이 upsert 와 무관한 동일 in-memory
+      // teamStats/eloRatings 를 그대로 읽어 예측 input 이 이 write 실패로
+      // 0/stale 되지는 않음 — 실제 영향받는 소비자는 scripts/op-analysis-war-check.ts
+      // 등 수동 분석 스크립트). assertWriteOk fail-loud 는 그 감사 데이터 무결성 보장용.
       try {
         const upsertResult = await db.from('team_season_stats').upsert({
           team_id: teamId, season: CURRENT_SEASON,
