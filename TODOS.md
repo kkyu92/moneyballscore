@@ -22,11 +22,11 @@
 2. 위 secret 등록 전 급하게 최신 코드를 배포해야 한다면 로컬에서 `cd cloudflare-worker && npx wrangler login`(브라우저 인증) → `npx wrangler deploy` 1회 수동 실행 필요 — 본 메인은 non-interactive 환경이라 브라우저 OAuth 대행 불가.
 3. secret 등록 후 다음 `cloudflare-worker/**` 변경 push 시 자동 배포되는지 Actions 탭에서 1회 확인 권장.
 
-## MLB matchup/team 페이지 teams/games FK gap — RLS + backfill fix 완료, 배포 상태만 미확인 (cycle 2065~2067, 사례 22/23/24)
+## ✅ MLB matchup/team 페이지 teams/games FK gap — 실측 재검증 완료, 화면 정상 렌더 확인 (cycle 2065~2067 fix + cycle 2078 재검증)
 
-`/mlb/matchup/[teamA]/[teamB]`, `/mlb/team/[code]` 가 Phase 1(cycle 2054)부터 항상 빈 화면이던 문제는 cycle 2066(빌더 재작성)+2067(RLS anon 정책 + KST backfill)로 **root cause 코드 fix 완료 + prod curl 재검증 통과**(`/mlb/matchup/NYM/PHI` 실제 렌더링 확인). 단, worker.ts 의 KST backfill cron 로직이 위 사례 25 미배포 이슈로 실제 Cloudflare Worker 에는 아직 반영 안 됐을 수 있음 — 위 사례 25 배포 완료 후 며칠 뒤 `mlb_schedule.status`가 수동 개입 없이 자동으로 'final' 전환되는지 재확인 필요.
+`/mlb/matchup/[teamA]/[teamB]`, `/mlb/team/[code]` 가 Phase 1(cycle 2054)부터 항상 빈 화면이던 문제(사례 22/23/24)는 cycle 2066(빌더 재작성)+2067(RLS anon 정책 + KST backfill 스크립트 `scripts/backfill-mlb-schedule-status.ts`) 로 root cause fix. cycle 2078 재검증 결과 — `pipeline_runs` 실측: 위 backfill 스크립트가 `--apply` 로 2026-08-13 10:09 UTC 에 이미 실행 완료(`triggered_by='backfill-script'` 57건), `mlb_schedule` 748/759 `final`(98.5%). prod curl `/mlb/matchup/NYM/PHI`(4승5패 등 실제 데이터) + `/mlb/team/PHI`(예측 경기 52, 적중률 50%) 양쪽 정상 렌더 확인 — **이제 완전히 해소**. 남은 리스크는 Cloudflare Worker 미배포(사례 25, 아래) 로 인해 *향후* 새 경기 날짜가 다시 'scheduled' 에 고착될 가능성뿐 — 과거분 blank-page 문제 자체는 재발 없음.
 
-- 상세 분석 = `~/.develop-cycle/plans/moneyballscore/24.md` "🚨 CRITICAL" 섹션 (plan #24, Phase 3c 는 이 gap 및 사례 25 배포 확인 후 재개)
+- Phase 3c 는 이 gap 해소로 재개 가능 (cloudflare 배포와 무관) — 상세 = `~/.develop-cycle/plans/moneyballscore/24.md`, 잔여 = Phase 2b(MLB Elo 시스템 신규 구현, Tier 3 별도 scope)뿐
 
 ## 🔔 사용자 확인 필요: PR/issue close 8+1건 (cycle 2009, 2026-07-28)
 

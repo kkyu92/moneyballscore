@@ -1,4 +1,14 @@
-## v0.5.62.33 — 2026-08-13 (cycle 2077, review-code (heavy): MLB scoring_rule hardcoded literal → MLB_SCORING_RULE 상수 통합)
+## v0.5.62.34 — 2026-08-13 (cycle 2078, review-code (heavy): pipeline_runs insert 실패 silent — VARCHAR overflow 재발 경로 Sentry 미연동)
+
+### fix(pipeline): daily.ts + mlb-pipeline.ts — pipeline_runs insert `.error` 경로 Sentry capture 추가
+
+TODOS 최우선 carry-over(lotto cron 실측/Cloudflare secret) 재확인은 여전히 시간·사용자 대기라 이번 cycle도 착수 불가. 대신 plan #24 CRITICAL Part 2("`mlb_schedule` 전량 scheduled 고정, backfill 필요")를 실측 재검증하러 프로덕션 `/api/mlb/pipeline` 를 CRON_SECRET(prod, `vercel env pull` 로 실제 값 확인 — `.env.local` 값과 다름)로 직접 호출하다 발견: `mlb_schedule` 은 이미 748/759 `final`(cycle 2067 커밋된 `scripts/backfill-mlb-schedule-status.ts --apply` 가 오늘 10:09 UTC 실행 완료 — `/mlb/matchup/NYM/PHI`, `/mlb/team/PHI` curl 재검증으로 실제 데이터 렌더링 확인됨), TODOS.md/plan #24 의 "CRITICAL 배포 대기" 서술은 stale.
+
+검증 도중 내가 보낸 테스트 호출(`triggeredBy: 'cycle-2078-backfill-test'`, 25자)이 실제 스크랩(games_found:15)은 성공했지만 해당 `pipeline_runs` 로그 행은 DB에 전혀 없음을 발견 — `pipeline_runs.triggered_by` 는 `VARCHAR(20)`(mig 004)인데 `mlb-pipeline.ts`/API route 모두 길이 검증 없이 임의 문자열을 그대로 insert, supabase-js 는 overflow 를 throw 없이 `.error` 로만 리턴해 `console.error` 만 찍히고 종료(사례 3 재발 경로, 이번엔 MLB + `triggered_by` 필드). KBO `daily.ts` 도 동일 경로가 있었으나 그 `insertErr` branch 조차 Sentry 미연동(주석은 "사례 3 재발 차단"이라 적어놓고 실제로는 `catch(e)` 의 thrown-exception 경로만 Sentry, `.error` 경로는 여전히 console.error 뿐이었음) — 두 파일 모두 `insertErr`/`.then(({error})=>...)` branch 에 `Sentry.captureException` 추가(`silent_drift_family: 'wave_177'` 태그 유지, KBO 기존 태그와 통일). `apps/moneyball/src/app/api/mlb/pipeline/route.ts` 는 경계에서 `triggeredBy.slice(0, 20)` clamp 추가해 재발 자체를 차단.
+
+`pnpm type-check`(4 packages) / `pnpm --filter @moneyball/kbo-data exec vitest run`(83 files/1085 tests) / `pnpm --filter moneyball exec vitest run`(mlb/pipeline route, 16 tests) / `pnpm lint` 전체 통과. 신규 테스트 없음(기존 insert 실패 시나리오는 unit test 로 supabase mock error injection 필요해 스코프 초과 — Sentry capture 자체는 로직 분기 추가만, 기존 `insertErr`/`e` 존재 여부 분기 흐름 불변이라 회귀 위험 낮음).
+
+
 
 ### refactor(mlb): mlb-pipeline.ts — hardcoded `'mlb_v0.1'` 5곳 → `MLB_SCORING_RULE` 상수
 

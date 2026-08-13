@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const rawMode = body.mode as string | undefined;
   const rawDate = body.date as string | undefined;
-  const triggeredBy = (body.triggeredBy as string) || 'api';
+  // pipeline_runs.triggered_by 는 VARCHAR(20) — 초과 시 supabase-js insert 가 throw
+  // 없이 .error 리턴해 로그 자체가 silent 누락 (cycle 2078 발견). 경계에서 clamp.
+  const triggeredBy = ((body.triggeredBy as string) || 'api').slice(0, 20);
 
   // mode 검증
   if (!rawMode || !VALID_MODES.includes(rawMode as MlbPipelineMode)) {
