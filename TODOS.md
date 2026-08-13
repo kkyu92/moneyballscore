@@ -1,5 +1,13 @@
 # TODOS
 
+## 🚨 최우선 carry-over: MLB matchup/team 페이지 프로덕션에서 항상 빈 화면 (cycle 2065, 2026-08-13, 사례 22)
+
+`/mlb/matchup/[teamA]/[teamB]` 와 `/mlb/team/[code]` 가 Phase 1(cycle 2054)부터 지금까지 **항상 0경기로 렌더링** — `teams` DB 테이블에 MLB 30팀 row 가 0건(KBO 10팀만 존재) + `games` 테이블에도 MLB 경기 row 가 0건(MLB 파이프라인은 `mlb_schedule`+`predictions.external_game_id` 로만 기록, KBO 식 `games`+`teams` FK 모델 자체를 안 씀). 빌더 코드(`buildMlbMatchupProfile.ts`/`buildMlbTeamProfile.ts`)가 KBO 패턴을 그대로 복제하며 존재하지 않는 FK 를 조회 → 항상 조기 return 빈 프로필. 실측: `curl https://moneyballscore.vercel.app/mlb/matchup/NYM/PHI` → "아직 올 시즌 완료된 경기가 없습니다".
+
+- 상세 분석 + 3-step 후속안 = `~/.develop-cycle/plans/moneyballscore/24.md` "🚨 CRITICAL" 섹션 (plan #24)
+- 별개로 발견한 이슈(이번 cycle 에서 fix + backfill 완료) — `mlb-pipeline.ts` predict_final 이 실측 팩터 계산에만 쓰고 `predictions.home_sp_fip` 등 breakdown 컬럼 저장 안 함(전량 NULL). 단 위 teams/games gap 해결 전까진 화면에 영향 없음(모든 섹션이 `finalGames>0` guard 뒤).
+- 다음 heavy fix-incident 또는 별도 plan 이 최우선 처리 권장 — plan #24 Phase 3c(수렴 픽 H2H)는 이 gap 해결 전까지 보류.
+
 ## 🔔 사용자 확인 필요: PR/issue close 8+1건 (cycle 2009, 2026-07-28)
 
 fix-incident cycle 2009 가 8일 방치된 hub lesson-pending reminder 8건(#2857-2864) + dependabot PR #2840 을 root cause 규명 완료. close 액션은 타 작성자(dependabot)/허브 리마인더 영역이라 자동 진행 대상 아님(Bash 권한 거부 확인).
