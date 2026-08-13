@@ -1,3 +1,15 @@
+## v0.5.62.31 — 2026-08-13 (cycle 2072, fix-incident (heavy): VERSION 3-way drift 재발 근절 스크립트 + lotto cron silent 실패 (사례 26))
+
+### fix(build): scripts/bump-version.sh — VERSION/root package.json/apps/moneyball/package.json 원샷 동기화
+
+cycle 2068(VERSION stale)·cycle 2070(root package.json stale) 이 2 cycle 만에 재발 — `version-sync-guard.test.ts`(cycle 2047)는 드리프트를 1 cycle 늦게 잡아낼 뿐, 근본 원인(매 ship 시 3개 파일을 손으로 각각 edit)은 그대로였음. `scripts/bump-version.sh <version>` 신규 — VERSION + 루트 `package.json` + `apps/moneyball/package.json` 3개를 한 커맨드로 동기화(Node.js JSON round-trip, key 순서/포맷 보존). `pnpm bump-version` alias 추가. CHANGELOG 상단 헤딩은 산문 콘텐츠라 여전히 수동 — 나머지 3개 machine-checked 필드만 커버.
+
+### fix(cron): lotto 자동화 4주 연속 silent 실패 — repo 에 `lotto` label 부재 (사례 26)
+
+`gh run list` 로 스케줄 workflow 상태 점검(CLAUDE.md 사례 17 재확인 습관) 중 발견 — `lotto-pick-update.yml`/`lotto-result-update.yml` 의 `gh pr create --label "automated,lotto"` 가 매번 label `lotto` 미존재로 실패 → `|| echo ""` fallback 이 에러를 삼켜 PR 자체가 생성 안 됨 → 데이터는 커밋+push 까지만 되고 branch 가 고아로 남아 main 에 영영 반영 안 됨. 4주 연속(`lotto/pick-2026-08-01`, `lotto/pick-2026-08-08`, `lotto/result-2026-07-25`, `lotto/result-2026-08-01`) 재발 확인. `lotto` label 신규 생성으로 root cause 해소. 데이터 자체 손실 2건(1235회 결과, 1236회 50조합)은 고아 브랜치에서 cherry-pick 복구(직접 main push, 커밋 187fb4db/f888a201) — 나머지 2건은 이후 수동 lotto chain 커밋으로 이미 대체돼 폐기(고아 branch 4개 전부 삭제).
+
+`pnpm type-check` (4 packages) / `pnpm --filter moneyball lint` / `pnpm --filter moneyball exec vitest run` 통과.
+
 ## v0.5.62.30 — 2026-08-13 (cycle 2071, review-code (heavy): matchup 요약 문장 빌더 KBO/MLB 중복 통합 + VERSION drift 수정)
 
 ### refactor(analysis): buildMatchupSummaryText 단일 source 통합 (KBO buildMatchupProfile + MLB buildMlbMatchupProfile)

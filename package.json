@@ -9,6 +9,7 @@
     "type-check": "turbo type-check",
     "test": "turbo test",
     "clean": "turbo clean",
+    "bump-version": "sh scripts/bump-version.sh",
     "prepare": "sh scripts/install-hooks.sh"
   },
   "devDependencies": {
@@ -45,5 +46,5 @@
       ]
     }
   },
-  "version": "0.5.62.30"
+  "version": "0.5.62.31"
 }
