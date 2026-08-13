@@ -75,7 +75,7 @@
 3. 팀·선수 (4 link)
 4. 리뷰·시즌 (5 link)
 5. 도움말 (8 link)
-6. 로또 (2 link)
+6. 로또 (3 link, cycle 2022 갱신 — `/lotto` 최상위 hub 추가)
 
 **누락 / 회피**:
 - /search 도움말 컬럼 안 (검색 = 도움말 fallback) — spec 정합
