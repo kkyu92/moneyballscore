@@ -1,3 +1,9 @@
+## v0.5.62.25 — 2026-08-13 (cycle 2063, explore-idea (heavy): plan #24 Phase 3b — MLB matchup 시즌별 상대전적)
+
+### feat(analysis): wave-631 — `/mlb/matchup/[teamA]/[teamB]` 시즌별 상대전적 섹션 (KO+EN)
+
+plan #24 Phase 3 잔여 2건(수렴 픽 기록 / 시즌별 H2H) 중 시즌별 H2H 를 먼저 fire — 실측 확인 결과 `buildSeasonHeadToHead.ts` 는 `MatchupGame[]` 을 입력받는 순수 함수(DB 쿼리 없음, `gameDate`/`actualWinnerCode`/`status` 필드만 사용)라 KBO 코드를 건드리지 않고 `MlbTeamCode` 타입으로 그대로 병렬 복제 가능(`buildMlbSeasonHeadToHead.ts` 신규) — `buildMlbMatchupProfile` 이 이미 조회한 `games` 배열을 그대로 소비해 추가 DB 쿼리 0. UI 는 KBO `MatchupSeasonHeadToHead.tsx` 가 "시즌별 상대전적"/"승" 등 한글 하드코딩이라 EN 라우트 재사용 불가 — `MlbMatchupRecentForm.tsx` 의 `locale` prop 패턴을 그대로 따라 `MlbMatchupSeasonHeadToHead.tsx` 신규 작성, KO/EN 양쪽 `/mlb/matchup` 페이지의 최근 폼 섹션 다음에 배치. 반대로 남은 수렴 픽 기록(`getConvergencePickHeadToHeadRecord`)은 실측 결과 단순 타입 좁히기로 안 됨을 확인 — `computeCompositeDuel` 자체가 `TeamCode`/`KBO_TEAMS` 하드코딩이고, 무엇보다 쿼리 필터 `PRODUCTION_COHORT_RULES = ['v1.8', 'v1.8-credit-fail']` 가 KBO scoring_rule 전용이라 MLB(`scoring_rule='mlb_v0.1'`) 에 그대로 쓰면 항상 빈 배열 반환 — MLB 전용 cohort 상수 + `computeMlbCompositeDuel` 신규 필요(plan #24 Phase 3c 로 carry-over, 3-step 착수 순서 박제). 테스트 3건 신규(`buildMlbSeasonHeadToHead.test.ts`, KBO 원본 테스트 케이스 이식). `pnpm --filter @moneyball/shared type-check` / `pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec vitest run` 421 files/3723 tests 전량 통과, `pnpm --filter moneyball lint` clean.
+
 ## v0.5.62.24 — 2026-08-13 (cycle 2060, explore-idea (heavy): plan #24 Phase 3a — MLB matchup 최근 폼)
 
 ### feat(analysis): wave-630 — `/mlb/matchup/[teamA]/[teamB]` 최근 폼 섹션 (KO+EN)
