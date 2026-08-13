@@ -4,6 +4,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
 import { allPairs } from '@/lib/matchup/canonicalPair';
+import { mlbAllPairs } from '@/lib/mlb/mlbCanonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
@@ -161,6 +162,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // MLB 435개 canonical 팀 매치업 URL (30 choose 2) — plan #24 Phase 3b 라우트, sitemap 미반영 gap (cycle 2069 info-arch)
+  const mlbMatchupRoutes: MetadataRoute.Sitemap = mlbAllPairs().map((p) => ({
+    url: `${SITE_URL}${p.path}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.5,
+  }));
+
+  // /en/mlb/matchup/[teamA]/[teamB] English mirror (435 pairs)
+  const enMlbMatchupRoutes: MetadataRoute.Sitemap = mlbAllPairs().map((p) => ({
+    url: `${SITE_URL}/en${p.path}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.45,
+  }));
+
   // /en/mlb/players/[id] English mirror Statcast (MLB_TEAM_COUNT)
   const enMlbPlayersDetailRoutes: MetadataRoute.Sitemap = Object.keys(MLB_TEAMS).map(
     (code) => ({
@@ -298,6 +315,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...enMlbTeamProfileRoutes,
     ...enMlbPlayersDetailRoutes,
     ...matchupRoutes,
+    ...mlbMatchupRoutes,
+    ...enMlbMatchupRoutes,
     ...predictionDateRoutes,
     ...playerRoutes,
     ...analysisRoutes,

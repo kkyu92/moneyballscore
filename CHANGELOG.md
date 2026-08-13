@@ -1,3 +1,15 @@
+## v0.5.62.28 — 2026-08-13 (cycle 2069, info-architecture-review (heavy): MLB matchup 435 pairs sitemap 누락 + VERSION/package.json drift 발견+수정)
+
+### fix(seo): MLB 매치업 435쌍 sitemap 미반영 + en 미러 sitemap 누락 (30-cycle gap checkpoint 신규 발견)
+
+info-architecture-review 30-cycle gap trigger(마지막 발화 cycle 2038, gap 31) 진단 중 발견 — `/mlb/matchup/[teamA]/[teamB]` 라우트(plan #24 Phase 3b, cycle 2063~2064 신규 shipped)가 `sitemap.ts` 에 전혀 반영되지 않고 있었음. 크로스링크(`mlbPairsForTeam`, 팀 페이지 RelatedLinks)로 진입은 가능하나 검색엔진 sitemap 발견 경로가 없던 gap. `mlbCanonicalPair.ts` 에 이미 존재하던 `mlbAllPairs()`(30 choose 2 = 435쌍)를 `sitemap.ts` 에 연결 — `mlbMatchupRoutes`(435) + `enMlbMatchupRoutes`(en 미러 435) 신규 추가, 기존 KBO `matchupRoutes`/MLB 팀 프로필 sitemap 패턴과 동일 구조. breadcrumb 누락 grep(14건) + header/footer coverage 재확인 — 전부 기존 확인된 false positive(debug/*, community, login, home, reviews stub), 신규 IA 갭 없음.
+
+### fix(build): VERSION 파일이 package.json 대비 1버전 stale (cycle 2068 ship 시 누락)
+
+`pnpm test` 전체 실행 중 `version-sync-guard.test.ts` 실패로 발견 — 루트 `VERSION` 파일이 `0.5.62.26` 로 남아 있고 `apps/moneyball/package.json` 은 이미 `0.5.62.27`(cycle 2068 ship). 본 cycle 변경분과 함께 `0.5.62.28` 로 동기화.
+
+`pnpm type-check` (4 packages) / `pnpm test` (421 files/3722 tests) 통과 확인.
+
 ## v0.5.62.27 — 2026-08-13 (cycle 2068, fix-incident (lite): Cloudflare Worker 배포 toolchain + auto-deploy CI 신규 (사례 25))
 
 ### fix(infra): cloudflare-worker pnpm workspace 편입 + workerd build 승인 + wrangler 자동 배포 CI

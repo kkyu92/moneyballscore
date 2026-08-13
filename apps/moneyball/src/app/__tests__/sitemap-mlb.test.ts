@@ -68,6 +68,17 @@ describe('sitemap MLB URL coverage', () => {
     expect(lad).toBeDefined();
     expect(lad?.priority).toBeGreaterThan(0);
   });
+
+  it('includes /mlb/matchup/[teamA]/[teamB] 435 canonical pairs (30 choose 2, plan #24 Phase 3b — cycle 2069 info-arch gap fix)', async () => {
+    const urls = await sitemap();
+    const matchupUrls = urls.filter((u) =>
+      /\/mlb\/matchup\/[A-Z]{2,3}\/[A-Z]{2,3}$/.test(u.url) && !u.url.includes('/en/mlb/'),
+    );
+    expect(matchupUrls.length).toBe(435);
+    const sample = matchupUrls.find((u) => u.url.endsWith('/mlb/matchup/LAD/NYY'));
+    expect(sample).toBeDefined();
+    expect(sample?.priority).toBeGreaterThan(0);
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {
@@ -105,5 +116,12 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
     const enPlayers = urls.filter((u) => /\/en\/mlb\/players\/[A-Z]{2,3}$/.test(u.url));
     expect(enPlayers.length).toBe(30);
     expect(enPlayers.find((u) => u.url.endsWith('/en/mlb/players/NYY'))).toBeDefined();
+  });
+
+  it('/en/mlb/matchup/[teamA]/[teamB] 435 dynamic pairs present (cycle 2069 info-arch gap fix)', async () => {
+    const urls = await sitemap();
+    const enMatchup = urls.filter((u) => /\/en\/mlb\/matchup\/[A-Z]{2,3}\/[A-Z]{2,3}$/.test(u.url));
+    expect(enMatchup.length).toBe(435);
+    expect(enMatchup.find((u) => u.url.endsWith('/en/mlb/matchup/LAD/NYY'))).toBeDefined();
   });
 });
