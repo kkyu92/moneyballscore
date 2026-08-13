@@ -2606,6 +2606,35 @@ export function computeMatchupHomeAwayEdgeFromGames<
   };
 }
 
+export interface SeasonHeadToHeadYear<C> {
+  year: string;
+  aWins: number;
+  bWins: number;
+  played: number;
+}
+
+/**
+ * 시즌(연도)별 두 팀 맞대결 승패 요약 — single source.
+ * buildSeasonHeadToHead(KBO) + buildMlbSeasonHeadToHead(MLB) 양쪽에 동일 로직이
+ * 독립 중복돼있던 것 통합 (cycle 2064 review-code heavy). 최신 연도 먼저 정렬.
+ */
+export function computeSeasonHeadToHeadFromGames<
+  C,
+  T extends { status: string | null; actualWinnerCode: C | null; gameDate: string },
+>(games: T[], codeA: C, codeB: C): SeasonHeadToHeadYear<C>[] {
+  const byYear = new Map<string, SeasonHeadToHeadYear<C>>();
+  for (const g of games) {
+    if (g.status !== "final" || !g.actualWinnerCode) continue;
+    const year = g.gameDate.slice(0, 4);
+    const bucket = byYear.get(year) ?? { year, aWins: 0, bWins: 0, played: 0 };
+    bucket.played += 1;
+    if (g.actualWinnerCode === codeA) bucket.aWins += 1;
+    else if (g.actualWinnerCode === codeB) bucket.bWins += 1;
+    byYear.set(year, bucket);
+  }
+  return [...byYear.values()].sort((a, b) => b.year.localeCompare(a.year));
+}
+
 export interface FactorPerspective {
   spFip: number | null;
   spXfip: number | null;
@@ -2622,80 +2651,63 @@ export interface FactorAveragesResult extends FactorPerspective {
 }
 
 /**
+ * 임의 숫자 필드 목록의 팀 관점 평균 — single source.
+ * KBO computeFactorAveragesFromPerspectives(8필드) + MLB buildMlbTeamFactorAverages
+ * (7필드, xwOBA/Barrel% 등 필드셋 자체가 달라 리그별 sum/count 누적 로직이 독립
+ * 중복돼있던 것 통합 (cycle 2064 review-code heavy). 리그마다 필드셋이 달라
+ * FactorPerspective 처럼 고정 shape 대신 field 목록을 인자로 받는 generic 형태.
+ */
+export function computeNumericAveragesFromPerspectives<K extends string>(
+  perspectives: ReadonlyArray<Record<K, number | null>>,
+  fields: readonly K[],
+): Record<K, number | null> & { sampleN: number } {
+  const sums = {} as Record<K, number>;
+  const counts = {} as Record<K, number>;
+  for (const f of fields) {
+    sums[f] = 0;
+    counts[f] = 0;
+  }
+  for (const p of perspectives) {
+    for (const f of fields) {
+      const v = p[f];
+      if (v != null) {
+        sums[f] += v;
+        counts[f] += 1;
+      }
+    }
+  }
+  const averages = {} as Record<K, number | null>;
+  for (const f of fields) {
+    averages[f] = counts[f] > 0 ? sums[f] / counts[f] : null;
+  }
+  return { ...averages, sampleN: perspectives.length };
+}
+
+const KBO_FACTOR_FIELDS = [
+  "spFip",
+  "spXfip",
+  "lineupWoba",
+  "bullpenFip",
+  "recentForm",
+  "elo",
+  "sfr",
+  "warTotal",
+] as const satisfies readonly (keyof FactorPerspective)[];
+
+/**
  * 8팩터(FIP/xFIP/wOBA/불펜FIP/최근폼/Elo/SFR/WAR) 팀 관점 평균 — single source.
  * buildTeamFactorAverages + buildTeamProfile 양쪽에 동일 로직(8개 sum/count 누적 +
  * safeAvg)이 독립 중복돼있던 것 통합 (cycle 2040 review-code heavy). 호출부가
  * 각자 쿼리 결과를 팀 관점(isHome 판정 완료) perspective 배열로 매핑해서 전달.
+ * 실제 sum/count 누적은 computeNumericAveragesFromPerspectives (cycle 2064) 로 위임.
  */
 export function computeFactorAveragesFromPerspectives(
   perspectives: FactorPerspective[],
 ): FactorAveragesResult {
-  let spFipSum = 0,
-    spFipN = 0;
-  let spXfipSum = 0,
-    spXfipN = 0;
-  let wobaSum = 0,
-    wobaN = 0;
-  let bullpenSum = 0,
-    bullpenN = 0;
-  let formSum = 0,
-    formN = 0;
-  let eloSum = 0,
-    eloN = 0;
-  let sfrSum = 0,
-    sfrN = 0;
-  let warSum = 0,
-    warN = 0;
-
-  for (const p of perspectives) {
-    if (p.spFip != null) {
-      spFipSum += p.spFip;
-      spFipN += 1;
-    }
-    if (p.spXfip != null) {
-      spXfipSum += p.spXfip;
-      spXfipN += 1;
-    }
-    if (p.lineupWoba != null) {
-      wobaSum += p.lineupWoba;
-      wobaN += 1;
-    }
-    if (p.bullpenFip != null) {
-      bullpenSum += p.bullpenFip;
-      bullpenN += 1;
-    }
-    if (p.recentForm != null) {
-      formSum += p.recentForm;
-      formN += 1;
-    }
-    if (p.elo != null) {
-      eloSum += p.elo;
-      eloN += 1;
-    }
-    if (p.sfr != null) {
-      sfrSum += p.sfr;
-      sfrN += 1;
-    }
-    if (p.warTotal != null) {
-      warSum += p.warTotal;
-      warN += 1;
-    }
-  }
-
-  const safeAvg = (sum: number, n: number): number | null =>
-    n > 0 ? sum / n : null;
-
-  return {
-    spFip: safeAvg(spFipSum, spFipN),
-    spXfip: safeAvg(spXfipSum, spXfipN),
-    lineupWoba: safeAvg(wobaSum, wobaN),
-    bullpenFip: safeAvg(bullpenSum, bullpenN),
-    recentForm: safeAvg(formSum, formN),
-    elo: safeAvg(eloSum, eloN),
-    sfr: safeAvg(sfrSum, sfrN),
-    warTotal: safeAvg(warSum, warN),
-    sampleN: perspectives.length,
-  };
+  return computeNumericAveragesFromPerspectives(
+    perspectives,
+    KBO_FACTOR_FIELDS,
+  ) as FactorAveragesResult;
 }
 
 /**
