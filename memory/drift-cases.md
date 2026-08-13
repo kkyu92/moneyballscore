@@ -486,3 +486,20 @@ cycle 2000 이 `(milestone)` 라벨로 실행됐으나 cycle_state JSON 의 diag
 **관련 family**:
 - 사례 20(`gh pr create` 라벨 부재 silent swallow) — "설정(라벨/cron 표현식) 이 코드의 암묵적 가정과 안 맞으면 핵심 동작이 조용히 스킵되는데 실행 자체는 success 로 보임" 이라는 동일 상위 패턴, 본 사례는 GH Actions 워크플로가 아닌 Cloudflare Workers 레이어라는 점에서 신규 발생 지점
 - 사례 27(MLB_TEAMS 컨벤션 불일치) — "두 개의 서로 다른 문자열 표현이 같은 프로젝트 안에 공존하는데 타입 시스템이 구분 안 해줌" 이라는 점에서 유사 구조, 단 사례 27 은 사후 발견(버그가 이미 배포됨) 이고 본 사례는 배포 전 자체 발견으로 예방된 케이스 — silent drift family 안에서 "사전 예방" 성공 사례로 기록할 가치 있음
+
+---
+
+### 사례 29 — Vercel 배포 일일 100건 quota 소진 → main push 3건이 배포 기록 자체 없이 누락 (cycle 2083 발견)
+
+develop-cycle 이 매 cycle 마다 PR 1건 + squash merge 1건을 만드는 구조(R4/R7)라 push 빈도가 높은데, 이게 Vercel free tier 의 **일일 배포 100건 cap** 을 실제로 소진시킨 최초 사례. cycle 2082(`d3caf0e7`)/그 뒤 두 policy·lesson commit(`d757ab0d`/`b651a3cc`) 이 main 에 push 됐지만 Vercel API(`GET /v6/deployments`) 조회 결과 이 3개 commit 에 대한 배포 레코드가 **완전히 없음**(canceled 도 아니고 아예 생성 자체가 안 됨) — `curl .../api/version` 실측으로 production 이 그 이전 commit(`4ab223b0`, cycle 2081)에 멈춰 있음을 먼저 발견했고, GH Actions(`gh run list`)에는 Vercel 배포 워크플로 자체가 없어(네이티브 git 연동이라 Actions 로그에 안 남음) 원인 특정이 한 단계 더 필요했음.
+
+**발견 경로**: cycle 2083 explore-idea(heavy) 가 plan #25 Phase 2b 작업 결과를 prod API(`/api/mlb/pipeline`)로 실측 검증하려다 `mlb_elo_update` mode 가 "invalid mode" 로 거부됨을 발견 → `/api/version` 확인으로 production 이 stale 함을 확정 → `vercel ls --prod`/`vercel inspect` 로 최신 프로덕션 배포 시각이 3개 commit 이전임을 확인 → Vercel REST API 를 CLI 토큰(`~/Library/Application Support/com.vercel.cli/auth.json`)으로 직접 조회해 해당 commit SHA 들에 대한 배포 레코드 자체가 없음을 확정 → `vercel deploy --prod` 를 직접 실행해 `"Resource is limited - try again in 24 hours (code: api-deployments-free-per-day)"` 에러로 root cause 확정 (GH 웹훅/git 연동 장애가 아니었음).
+
+**핵심 gap**: 기존 `deploy-drift-alert.yml`(cycle 838, 매시간 git HEAD vs `/api/version` 비교)이 "gap ≥ 1시간" 을 alert 조건으로 두고 있어 발견 당시(push 후 약 15~20분 경과)엔 아직 alert 가 안 뜬 시점 — 이 mitigation 이 "배포가 언젠가는 될 것" 을 가정한 지연 감지 설계인데, quota 소진처럼 **배포가 24시간 동안 아예 안 될 수 있는 경우**엔 이 설계가 오탐/누락 없이도 "아직 안 떴을 뿐" 상태로 조용히 방치될 위험이 있음(1시간 뒤엔 결국 뜨지만, 그 사이 여러 cycle 이 "배포됐다" 는 잘못된 가정으로 계속 진행할 수 있었음). 기존 auto-memory `feedback_deploy_strategy.md` 가 "Vercel 일 100회 제한, push는 묶어서" 라고 이미 경고했었는데 develop-cycle skill 자체의 "1 cycle = 1 commit + 1 PR + 1 merge" 원칙(R4/R7)과 구조적으로 충돌해 실제 소진이 발생.
+
+**fix (cycle 2083, 부분적)**: Elo history backfill 은 Vercel 을 거치지 않는 Supabase 직접 스크립트(`scripts/backfill-mlb-elo.ts --apply`)로 우회 완료 — 데이터 자체는 quota 와 무관하게 채워짐. `TODOS.md` 최상단에 quota 소진 사실 + 예상 reset 시각(~2026-08-14 22:07 KST) + "reset 전엔 prod 가 stale 한 게 정상" 을 명시해 다음 cycle 들의 오진(코드는 정상인데 반영 안 되는 걸 "배포 실패" 로 재진단) 방지. **완전한 구조적 fix 는 미착수** — develop-cycle 의 push 빈도 자체를 낮추는 방안(N cycle 배치)은 R4/R7 원칙과 충돌해 사용자 결정 필요 (TODOS.md Tier 2 후속 후보로 flag).
+
+**관련 family**:
+- 사례 25(Cloudflare Worker 로컬 wrangler 세션 만료로 ~2개월 미배포) — "배포 파이프라인 자체가 코드 변경과 무관하게 막혀 있어 merge 는 성공해도 실제 반영은 안 됨" 이라는 동일 상위 패턴. 사례 25 는 Cloudflare Worker(cron primary trigger), 본 사례는 Vercel(웹앱 + API route) — 서로 다른 두 배포 대상이 동시에 각자 이유로 지연 상태였던 셈(같은 날 기준 이중 정지 지점)
+- 사례 18(retro 완료형 서술 vs 실제 미실행) — "머지됐다" 와 "실제 반영(배포)됐다" 를 혼동하면 안 된다는 동일 원칙의 배포 레이어 변형 — 본 사례 이후 develop-cycle retro 는 "merge 완료" 와 "prod 반영" 을 별개 사실로 구분해 서술해야 함
+- CLAUDE.md 세션 시작 스캔 룰("X 가 배포됨 → git log + 실제 파일 존재 확인")의 연장 — 이번엔 "merge 됐다" 를 "배포됐다" 로 자동 치환하지 않고 `/api/version` 실측으로 직접 대조한 것이 발견의 핵심이었음
