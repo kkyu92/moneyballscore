@@ -13,6 +13,7 @@
 // packages/kbo-data 는 apps/moneyball 를 import 못함 → mlb_combined_notify
 // stub 처리 (API route 에서 직접 처리).
 
+import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@supabase/supabase-js';
 import { fetchMlbSchedule } from '../scrapers/statsapi-mlb';
 import { fetchFangraphsMlbTeams } from '../scrapers/fangraphs-mlb';
@@ -592,7 +593,15 @@ export async function runMlbPipeline(
     errors: hasErrors ? errors : [],
     triggered_by: triggeredBy,
   }).then(({ error: e }) => {
-    if (e) console.error(`[MLB] pipeline_runs insert failed: ${e.message}`);
+    if (e) {
+      console.error(`[MLB] pipeline_runs insert failed: ${e.message}`);
+      // KBO daily.ts 사례 3 (VARCHAR overflow silent) 와 동일 실패 경로 — throw 안 하고
+      // .error 리턴이라 Sentry 없인 console.error 만 남고 silent (cycle 2078 발견,
+      // triggered_by VARCHAR(20) 초과 값으로 재현: 25자 값 insert 시 이 branch 로 옴).
+      Sentry.captureException(new Error(`pipeline_runs insert error: ${e.message}`), {
+        tags: { silent_drift_family: 'wave_177', component: 'pipeline-mlb', op: 'pipeline_runs_insert' },
+      });
+    }
   });
 
   // Silent drift alert — MLB modes 매핑

@@ -192,6 +192,11 @@ export async function runDailyPipeline(
       });
       if (insertErr) {
         console.error('[Pipeline] pipeline_runs insert error:', insertErr);
+        // 사례 3 (VARCHAR overflow) 은 여기로 옴 — throw 안 하고 .error 리턴이라
+        // 위 catch(e) 는 못 잡음. Sentry 없인 console.error 만 남고 silent (cycle 2078 발견).
+        Sentry.captureException(new Error(`pipeline_runs insert error: ${insertErr.message}`), {
+          tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'pipeline_runs_insert' },
+        });
       }
     } catch (e) {
       console.error('[Pipeline] pipeline_runs insert failed:', errMsg(e));
