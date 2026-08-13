@@ -96,6 +96,19 @@ export const SHADOW_V20_SCORING_RULE: ScoringRule = 'v2.0-shadow';
  */
 export const TABPFN_SCORING_RULE: ScoringRule = 'tabpfn-shadow';
 
+/**
+ * MLB predictions.scoring_rule 라벨 — packages/kbo-data/src/pipeline/mlb-pipeline.ts
+ * 단일 hardcoded literal 'mlb_v0.1' 을 이 상수로 통합 (plan #24 Phase 3c). KBO
+ * ScoringRule 유니언과 분리 — MLB 는 아직 버전 진화가 없어 단일 값이지만, KBO
+ * PRODUCTION_COHORT_RULES 패턴을 그대로 필터에 쓰면 KBO 전용 필터(v1.8 등)라
+ * MLB predictions 를 전량 배제하는 gap 이 있었음(cycle 2063 확인, getConvergencePickHeadToHeadRecord
+ * MLB 버전 blocker).
+ */
+export const MLB_SCORING_RULE = 'mlb_v0.1' as const;
+
+/** MLB 전용 cohort 필터 — 위 MLB_SCORING_RULE 1개 원소 배열. KBO PRODUCTION_COHORT_RULES 대응. */
+export const MLB_PRODUCTION_COHORT_RULES: readonly string[] = [MLB_SCORING_RULE] as const;
+
 /** Quant fallback 라벨 — pre_game 경로 (ScoringRule 그대로). */
 export const QUANT_PREGAME_VERSION: ModelVersion = CURRENT_SCORING_RULE;
 /** Quant fallback 라벨 — postview 경로. */
