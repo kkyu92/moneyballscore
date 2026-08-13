@@ -27,16 +27,21 @@ import {
   buildTeamRecentForm,
   EMPTY_RECENT_FORM,
 } from "@/lib/teams/buildTeamRecentForm";
+import { buildMlbSeasonHeadToHead } from "@/lib/mlb/buildMlbSeasonHeadToHead";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
+import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
 // plan #24 Phase 1 MVP — KBO /matchup/[teamA]/[teamB] parity 축소판.
-// header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend / recent form /
-// convergence pick / season h2h 는 Phase 2b/3 (multi-cycle carry-over).
-// Phase 2a (이번 cycle) — 시즌 평균 팩터 비교(MlbMatchupFactorCompare) 추가.
+// header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend 는 Phase 2b (MLB
+// Elo rating 시스템 부재로 block, cycle 2057 확인). convergence pick 는 Phase 3 잔여
+// carry-over(MLB composite duel + MLB 전용 scoring cohort 상수 신규 필요, cycle 2063 확인).
+// Phase 2a (cycle 2056) — 시즌 평균 팩터 비교(MlbMatchupFactorCompare) 추가.
+// Phase 3a (cycle 2060) — 최근 폼(MlbMatchupRecentForm) 추가.
+// Phase 3b (이번 cycle) — 시즌별 상대전적(MlbMatchupSeasonHeadToHead) 추가.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface PageProps {
@@ -128,6 +133,7 @@ export default async function MlbMatchupPage({ params }: PageProps) {
 
   const otherMatchupsA = mlbPairsForTeam(tA.code).filter((p) => p.path !== pair.path);
   const otherMatchupsB = mlbPairsForTeam(tB.code).filter((p) => p.path !== pair.path);
+  const seasonHeadToHead = buildMlbSeasonHeadToHead(games, tA.code, tB.code);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -216,6 +222,13 @@ export default async function MlbMatchupPage({ params }: PageProps) {
         teamB={{ shortName: tB.shortName }}
         formA={formA}
         formB={formB}
+      />
+
+      <MlbMatchupSeasonHeadToHead
+        titleId="mlb-matchup-season-h2h-title"
+        teamA={tA}
+        teamB={tB}
+        seasons={seasonHeadToHead}
       />
 
       {predictionAccuracy.verified > 0 && (

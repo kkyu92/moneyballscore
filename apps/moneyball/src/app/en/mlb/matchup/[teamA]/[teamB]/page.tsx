@@ -27,8 +27,10 @@ import {
   buildTeamRecentForm,
   EMPTY_RECENT_FORM,
 } from "@/lib/teams/buildTeamRecentForm";
+import { buildMlbSeasonHeadToHead } from "@/lib/mlb/buildMlbSeasonHeadToHead";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
+import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -154,6 +156,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
 
   const otherMatchupsA = mlbPairsForTeam(tA.code).filter((p) => p.path !== pair.path);
   const otherMatchupsB = mlbPairsForTeam(tB.code).filter((p) => p.path !== pair.path);
+  const seasonHeadToHead = buildMlbSeasonHeadToHead(games, tA.code, tB.code);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -243,6 +246,14 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
         teamB={{ shortName: tB.shortName }}
         formA={formA}
         formB={formB}
+        locale="en"
+      />
+
+      <MlbMatchupSeasonHeadToHead
+        titleId="mlb-matchup-season-h2h-title-en"
+        teamA={tA}
+        teamB={tB}
+        seasons={seasonHeadToHead}
         locale="en"
       />
 
