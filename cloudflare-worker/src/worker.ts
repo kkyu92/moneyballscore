@@ -459,7 +459,9 @@ export default {
         console.log(`[Worker] MLB: no mode for utcHour=${new Date(event.scheduledTime).getUTCHours()}, skipping`);
       }
     } else {
-      console.log(`[Worker] unknown cron: ${cronExpr}`);
+      const msg = `[Worker] unknown cron: ${cronExpr} — wrangler.toml crons 배열과 worker.ts 분기 문자열 drift 가능성, 전체 pipeline silent skip 위험`;
+      console.log(msg);
+      if (env.SENTRY_DSN) ctx.waitUntil(captureToSentry(env.SENTRY_DSN, new Error(msg), 'scheduled'));
     }
   },
 
