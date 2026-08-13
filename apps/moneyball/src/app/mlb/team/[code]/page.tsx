@@ -14,10 +14,13 @@ import {
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
+import { buildMlbTeamEloTrend } from "@/lib/mlb/buildMlbTeamEloTrend";
 import { mlbPairsForTeam } from "@/lib/mlb/mlbCanonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
+import { MlbTeamEloChart } from "@/components/teams/MlbTeamEloChart";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -86,6 +89,10 @@ export default async function MlbTeamPage({ params }: PageProps) {
 
   const profile = await buildMlbTeamProfile(code);
   if (!profile) notFound();
+
+  const eloTrend = await buildMlbTeamEloTrend(code).catch((err) =>
+    captureFallback(err, { points: [] }, { route: "/mlb/team/[code]", source: "buildMlbTeamEloTrend" }),
+  );
 
   const teamUrl = `${SITE_URL}/mlb/team/${code}`;
   const logoUrl = `${SITE_URL}/logos/mlb/${code}.png`;
@@ -248,6 +255,21 @@ export default async function MlbTeamPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {eloTrend.points.length > 0 && (
+        <section
+          aria-labelledby="mlb-team-elo-trend-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="mlb-team-elo-trend-title" className="text-lg font-bold mb-1">
+            Elo 레이팅 추이
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            시즌 경기별 Elo 변화 · 점선은 리그 평균
+          </p>
+          <MlbTeamEloChart points={eloTrend.points} teamCode={code} />
+        </section>
+      )}
 
       {profile.recentGames.length > 0 && (
         <section
