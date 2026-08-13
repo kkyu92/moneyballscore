@@ -7,6 +7,7 @@ import {
   ACCURACY_BASELINE,
   confToWinProb,
   CLOSE_GAME_MARGIN,
+  MATCHUP_RECENT_FORM_GAMES,
   mlbShortTeamName,
   type MlbTeamCode,
 } from "@moneyball/shared";
@@ -22,7 +23,12 @@ import {
   buildMlbTeamFactorAverages,
   EMPTY_MLB_FACTOR_AVERAGES,
 } from "@/lib/mlb/buildMlbTeamFactorAverages";
+import {
+  buildTeamRecentForm,
+  EMPTY_RECENT_FORM,
+} from "@/lib/teams/buildTeamRecentForm";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
+import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -107,7 +113,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     redirect(`/en${pair.path}`);
   }
 
-  const [profile, factorA, factorB] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB] = await Promise.all([
     buildMlbMatchupProfile(pair),
     buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
@@ -119,6 +125,18 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
         route: "/en/mlb/matchup/[teamA]/[teamB]",
         source: "buildMlbTeamFactorAverages.codeB",
+      }),
+    ),
+    buildTeamRecentForm(pair.codeA, MATCHUP_RECENT_FORM_GAMES).catch((err) =>
+      captureFallback(err, EMPTY_RECENT_FORM, {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "buildTeamRecentForm.codeA",
+      }),
+    ),
+    buildTeamRecentForm(pair.codeB, MATCHUP_RECENT_FORM_GAMES).catch((err) =>
+      captureFallback(err, EMPTY_RECENT_FORM, {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "buildTeamRecentForm.codeB",
       }),
     ),
   ]);
@@ -217,6 +235,14 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
         teamB={{ shortName: tB.shortName }}
         factorA={factorA}
         factorB={factorB}
+        locale="en"
+      />
+
+      <MlbMatchupRecentForm
+        teamA={{ shortName: tA.shortName }}
+        teamB={{ shortName: tB.shortName }}
+        formA={formA}
+        formB={formB}
         locale="en"
       />
 
