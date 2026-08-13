@@ -26,6 +26,20 @@ push 들은 스킵되는 Vercel 배치 특성 고려).
 방안(예: N cycle 마다 1회 push)이 근본 완화책이나 develop-cycle skill 의 "1 cycle = 1
 commit" 원칙과 충돌 여지 있어 사용자 결정 필요.
 
+## ✅ plan #25 Phase 2b step 2 — MlbMatchupEloChart 배선, Phase 1~2b 전체 완결 (cycle 2085, 2026-08-13)
+
+`mlb_team_elo_history`(migration 047, cycle 2083 backfill 1,472건)를 소비하는
+`buildMlbMatchupEloTrend` + `MlbMatchupEloChart`(KBO `MatchupEloChart` 병렬 복제) 신규,
+`/mlb/matchup/[teamA]/[teamB]` 페이지 `MlbMatchupFactorCompare` 다음에 배선. 테스트
+4건(alias 정규화 merge/편측 null/빈 결과/select error throw) + type-check/lint 전량
+통과. Vercel quota 소진(아래 참조)과 무관하게 main merge — 코드 정확성은 배포 상태와
+독립, quota reset 후 자동 반영.
+
+**plan #25 전체 종료** (`~/.develop-cycle/plans/moneyballscore/25.md` status:
+`phase2b_complete`). 잔여 Phase 3(예측 반영, `ELO_NEUTRAL` placeholder → 실제 rating)는
+op-analysis heavy backtest 로 Brier 개선 실측 전 자율 flip 금지 — 별도 사용자 결정
+필요한 항목으로 이월, 다음 op-analysis heavy fire 시 후보 재검토.
+
 ## ✅ plan #25 Phase 2b step 1 — MLB Elo 히스토리 테이블(matchup Elo 추이 차트용) + 1회성 backfill 완료 (cycle 2083, 2026-08-13)
 
 cycle 2082 가 발견한 blocker(`mlb_team_elo` 가 현재 스냅샷만 저장 — 시계열 없음)를
