@@ -1,3 +1,15 @@
+## v0.5.62.35 — 2026-08-13 (cycle 2080, explore-idea (heavy): plan #25 Phase 1 — MLB Elo K-factor 엔진 신규 구현)
+
+### feat(mlb): MLB Elo rating 시스템 Phase 1 — K-factor 갱신 엔진 + 백필 스크립트
+
+plan #24 Phase 2b(matchup Elo 추이 차트)가 "MLB 는 팀별 Elo rating 을 계산/저장한 적이 없음"으로 BLOCKED(cycle 2057) → plan #25 로 분리(cycle 2079 explore-idea lite). Explore agent 실측 결과 KBO 도 자체 K-factor 갱신 로직이 리포에 없음(KBO Fancy Stats 외부 스크랩 스냅샷을 그대로 저장하는 구조) 확인되어 신규 설계 필요 — `packages/kbo-data/src/factors/mlb-elo.ts` 신규: `updateMlbElo(homeElo, awayElo, homeWon, k)` 가 `newElo = oldElo + K * (actual - expected)` zero-sum 갱신을 수행, `expected` 는 기존 `computeMlbProbability` 의 elo 팩터와 동일 공식(`ELO_DIVIDER`/`HOME_ELO_BONUS` 재사용) 재구현(backtest 전용 모듈에 대한 production 의존 회피). K 값은 임의 선택 대신 FiveThirtyEight MLB Elo 모델 공개 문헌 인용(`MLB_ELO_K=4`, Nate Silver "a K factor of four is ideal for major league baseball", 포스트시즌 `MLB_ELO_K_POSTSEASON=6`) — CLAUDE.md "데이터로만 이야기" 룰 준수.
+
+신규 테이블 `mlb_team_elo`(마이그레이션 046, team_code/season/elo_rating/games_played, RLS+anon read policy 생성 시점부터 포함 — `mlb_schedule` 038 migration 이 RLS 를 빠뜨렸던 사례 24 재발 차단) + `scripts/backfill-mlb-elo.ts`(`mlb_schedule` status='final' 경기를 시간순 재생해 전 팀 `ELO_NEUTRAL=1500` 출발 rating 도출, `--apply` 플래그 진단/적용 분리, `backfill-mlb-schedule-status.ts` 패턴 정합).
+
+**Phase 1 스코프 한정** — 여기서 만든 rating 은 아직 어디에도 소비되지 않음(mlb-pipeline.ts 의 `ELO_NEUTRAL` placeholder 는 미변경). Phase 2(자동 갱신+UI 차트)/Phase 3(예측 반영, op-analysis heavy backtest 게이트 필수)는 별도 cycle. 상세 = `~/.develop-cycle/plans/moneyballscore/25.md`.
+
+`pnpm type-check`(4 packages) / `pnpm --filter @moneyball/kbo-data exec vitest run`(84 files/1097 tests, 신규 12 tests) / `pnpm lint` / `pnpm lint:scripts` 전체 통과. 신규 migration test(`046_mlb_team_elo.test.ts`, root vitest 직접 실행 — `038_mlb_schedule.test.ts` 와 동일하게 turbo 파이프라인 밖 standalone 컨벤션).
+
 ## v0.5.62.34 — 2026-08-13 (cycle 2078, review-code (heavy): pipeline_runs insert 실패 silent — VARCHAR overflow 재발 경로 Sentry 미연동)
 
 ### fix(pipeline): daily.ts + mlb-pipeline.ts — pipeline_runs insert `.error` 경로 Sentry capture 추가
