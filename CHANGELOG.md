@@ -1,3 +1,11 @@
+## v0.5.62.32 — 2026-08-13 (cycle 2074, operational-analysis (heavy): CE fallback 실측 정정 — brier-drift 스크립트 판별 버그)
+
+### fix(scripts): op-analysis-brier-drift.ts — CE fallback 판별을 `confidence===0.3`→`debate_version IS NULL` 로 통일
+
+TODOS carry-over(lotto cron 실측 대기 / Cloudflare secret 사용자 영역) 재확인은 시간 경과 필요해 재확인 가치 낮음 판단 → op-analysis(heavy) 로 신선 데이터 직접 측정. `scripts/op-analysis-brier-drift.ts`(cycle 1456 도입) 재실행 결과 post 구간 CE fallback 39.1% 로 보고 — 직전 cycle 1550 이 이미 정의한 `scoring_rule='v1.8' AND debate_version IS NULL`(P4 패턴) 대신 `confidence===0.3` 하드코딩을 쓰고 있어 실측과 괴리 의심, 직접 diff 쿼리로 확인. daily.ts 의 debate_fallback_quant 경로(`agentsFailed` 시 fall-through)는 confidence 를 0.3 고정이 아니라 quant 원본 그대로 흘려보내(0에 가까운 값 다수) — `confidence===0.3` 기준은 실제 fallback 표본을 대부분 놓침. `debate_version IS NULL` 기준 재측정 = post 99.3%(150/151), 월별 CE율 5월 53.7%→6월 86.4%→7월 99.0%→8월 100.0%(n=294). 기존 CLAUDE.md "debate 100% fallback" 서술이 맞았고, 39.1% 보고치가 측정 버그였음 — 개선된 적 없음. `isCE()` 헬퍼로 `op-analysis-ce-cohort.ts`(cycle 1550) 와 판별 기준 통일. Brier 수치 자체(pre 0.2434 / post 0.2514, bootstrap CI overlap)는 변화 없음 — 모델 자체는 여전히 안정.
+
+`pnpm type-check` (4 packages, 캐시) 통과. 신규 테스트 없음(1회성 분석 스크립트, 기존 컨벤션 동일).
+
 ## v0.5.62.31 — 2026-08-13 (cycle 2072, fix-incident (heavy): VERSION 3-way drift 재발 근절 스크립트 + lotto cron silent 실패 (사례 26))
 
 ### fix(build): scripts/bump-version.sh — VERSION/root package.json/apps/moneyball/package.json 원샷 동기화

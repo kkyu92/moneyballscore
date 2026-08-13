@@ -6,6 +6,14 @@
  * confidence=0.3 fallback marker 가 섞여 Brier 기계적 악화. 측정 오류였음.
  * home_win_prob Brier pre/post = 0.24 (stable, coin-flip 이하) — 모델 정상.
  *
+ * cycle 2074 fix — CE fallback rate 를 `confidence === 0.3` 로 판별하던 게 자체 버그.
+ * daily.ts 의 debate_fallback_quant 경로는 finalConfidence 를 하드코딩 0.3 이 아니라
+ * quant 결과 그대로 흘려보냄(자연히 0에 가까운 값 다수) — `confidence===0.3` 는
+ * 실제 fallback 의 극히 일부만 잡아 post 구간 fallback 율을 39.1% 로 심각히 과소측정
+ * (실측 = debate_version IS NULL 기준 99.3%). op-analysis-ce-cohort.ts(cycle 1550, P4
+ * 패턴)가 이미 정의한 `scoring_rule='v1.8-credit-fail' OR (scoring_rule='v1.8' AND
+ * debate_version IS NULL)` 기준으로 통일 — 본 스크립트만 별도 stale 기준을 쓰고 있었음.
+ *
  * 사용:
  *   cd apps/moneyball && set -a && source .env.local && set +a
  *   pnpm exec tsx ../../scripts/op-analysis-brier-drift.ts <out-path>
@@ -19,7 +27,13 @@ interface PredRow {
   confidence: number | null;
   verified_at: string | null;
   home_win_prob: number | null;
+  debate_version: string | null;
   home_won: 0 | 1;  // derived: actual_winner === games.home_team_id
+}
+
+// op-analysis-ce-cohort.ts(cycle 1550) 와 동일 정의 — 단일 source 유지.
+function isCE(r: Pick<PredRow, "debate_version">): boolean {
+  return !r.debate_version;
 }
 
 const TIER_BOUNDS = [
@@ -51,7 +65,7 @@ async function main() {
   const { data, error } = await supabase
     .from("predictions")
     .select(`
-      is_correct, confidence, verified_at, home_win_prob, actual_winner,
+      is_correct, confidence, verified_at, home_win_prob, actual_winner, debate_version,
       games!inner(home_team_id)
     `)
     .eq("prediction_type", "pre_game")
@@ -68,6 +82,7 @@ async function main() {
     confidence: r.confidence,
     verified_at: r.verified_at,
     home_win_prob: r.home_win_prob,
+    debate_version: r.debate_version,
     home_won: (r.actual_winner === r.games?.home_team_id ? 1 : 0) as 0 | 1,
   }));
 
@@ -103,9 +118,9 @@ async function main() {
   const preCI = brierBootstrapCI(toBrierRows(pre));
   const postCI = brierBootstrapCI(toBrierRows(post));
 
-  // CREDIT_EXHAUSTED fallback rate
-  const preFallback = pre.filter(r => r.confidence === 0.3).length;
-  const postFallback = post.filter(r => r.confidence === 0.3).length;
+  // CREDIT_EXHAUSTED fallback rate — debate_version IS NULL 기준 (isCE 참조)
+  const preFallback = pre.filter(isCE).length;
+  const postFallback = post.filter(isCE).length;
 
   // confidence tier subgroup — tier 기준은 confidence 유지 (home_win_prob 기준 Brier 계산)
   const preByTier: Record<string, { n: number; acc: number; brier: number }> = {};
@@ -139,7 +154,7 @@ async function main() {
   lines.push(`- n = ${n}`);
   lines.push(`- accuracy = ${(overallAcc * 100).toFixed(1)}%`);
   lines.push(`- Brier = ${overall.toFixed(4)}`);
-  lines.push(`- conf=0.3 fallback (CREDIT_EXHAUSTED): pre ${preFallback}/${pre.length} (${(preFallback/pre.length*100).toFixed(1)}%) | post ${postFallback}/${post.length} (${(postFallback/post.length*100).toFixed(1)}%)`);
+  lines.push(`- CE fallback (debate_version IS NULL, CREDIT_EXHAUSTED): pre ${preFallback}/${pre.length} (${(preFallback/pre.length*100).toFixed(1)}%) | post ${postFallback}/${post.length} (${(postFallback/post.length*100).toFixed(1)}%)`);
   lines.push("");
   lines.push("## pre/post threshold split (n=118 baseline vs 나머지)");
   lines.push("");
@@ -191,7 +206,7 @@ async function main() {
   console.log(`pre  (${pre.length}): Brier=${preBrier.toFixed(4)} CI=[${preCI?.lo.toFixed(4)}, ${preCI?.hi.toFixed(4)}]`);
   console.log(`post (${post.length}): Brier=${postBrier.toFixed(4)} CI=[${postCI?.lo.toFixed(4)}, ${postCI?.hi.toFixed(4)}]`);
   console.log(`CI overlap: ${overlap ? "YES" : "NO"}`);
-  console.log(`conf=0.3 fallback rate: pre ${(preFallback/pre.length*100).toFixed(1)}% | post ${(postFallback/post.length*100).toFixed(1)}%`);
+  console.log(`CE fallback rate (debate_version IS NULL): pre ${(preFallback/pre.length*100).toFixed(1)}% | post ${(postFallback/post.length*100).toFixed(1)}%`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
