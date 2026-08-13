@@ -217,4 +217,61 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     // recentRecord — MIN_GAMES=2 충족, LAD 두 경기 모두 승
     expect(profile?.recentRecord).toEqual({ wins: 2, losses: 0, sampleSize: 2 });
   });
+
+  // cycle 2081 fix-incident (heavy) — mlb_schedule 은 StatsAPI 컨벤션(TB/CWS/KC/SD/SF/AZ/WSH)
+  // 저장, MLB_TEAMS 키는 Baseball-Reference 표준(TBR/CHW/KCR/SDP/SFG/ARI/WSN). 정규화 없이
+  // canonical teamCode('TBR')로 그대로 `.or(home_team_code.eq.TBR,...)` 필터링하면 DB 실측
+  // 코드('TB')와 항상 불일치 — 이 7팀 team profile 페이지가 항상 0경기(빈 recentGames)만 반환.
+  it('teamCode=TBR(StatsAPI 컨벤션 TB) → DB 쿼리 필터가 TB 사용 + isHome/opponentCode 정상 정규화 (regression: cycle 2081)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        {
+          id: 3,
+          external_game_id: '700003',
+          game_date: '2026-06-01',
+          status: 'final',
+          home_score: 6,
+          away_score: 2,
+          // 실제 DB 실측 값 — StatsAPI 컨벤션(TB=TBR, SF=SFG)
+          home_team_code: 'TB',
+          away_team_code: 'SF',
+        },
+      ],
+      preds: [
+        {
+          external_game_id: '700003',
+          home_win_prob: 0.7,
+          home_sp_fip: 3.4,
+          away_sp_fip: 4.1,
+          home_lineup_woba: 0.32,
+          away_lineup_woba: 0.30,
+          home_bullpen_fip: 3.0,
+          away_bullpen_fip: 3.9,
+          home_recent_form: 0.6,
+          away_recent_form: 0.4,
+          home_elo: 1520,
+          away_elo: 1480,
+          home_lineup_xwoba: 0.33,
+          away_lineup_xwoba: 0.31,
+          home_lineup_barrel_pct: 9.0,
+          away_lineup_barrel_pct: 8.5,
+          prediction_type: 'pre_game',
+        },
+      ],
+    });
+    const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
+    const profile = await buildMlbTeamProfile('TBR');
+
+    // DB 쿼리 필터는 StatsAPI 코드(TB)로 나가야 함 — canonical(TBR) 그대로면 항상 0건 매칭.
+    const scheduleFrom = supabaseMock.from('mlb_schedule') as unknown as { or: ReturnType<typeof vi.fn> };
+    expect(scheduleFrom.or).toHaveBeenCalledWith('home_team_code.eq.TB,away_team_code.eq.TB');
+
+    expect(profile).toBeTruthy();
+    expect(profile?.predictedGames).toBe(1);
+    // TB(home) === dbTeamCode(TB) 정상 매칭 → isHome=true, opponentCode 는 SF → SFG 정규화.
+    expect(profile?.recentGames).toHaveLength(1);
+    expect(profile?.recentGames[0].isHome).toBe(true);
+    expect(profile?.recentGames[0].opponentCode).toBe('SFG');
+    expect(profile?.recentGames[0].opponentName).toBe('Giants');
+  });
 });

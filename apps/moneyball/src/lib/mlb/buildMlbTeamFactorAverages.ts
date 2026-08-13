@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
   computeNumericAveragesFromPerspectives,
+  toMlbStatsApiCode,
   type MlbTeamCode,
 } from "@moneyball/shared";
 
@@ -83,10 +84,13 @@ export async function buildMlbTeamFactorAverages(
 ): Promise<MlbTeamFactorAverages> {
   const supabase = await createClient();
 
+  // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
+  // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
+  const dbTeamCode = toMlbStatsApiCode(teamCode);
   const scheduleResult = await supabase
     .from("mlb_schedule")
     .select("external_game_id, home_team_code, away_team_code")
-    .or(`home_team_code.eq.${teamCode},away_team_code.eq.${teamCode}`);
+    .or(`home_team_code.eq.${dbTeamCode},away_team_code.eq.${dbTeamCode}`);
   const { data: scheduleData } = assertSelectOk(
     scheduleResult,
     `buildMlbTeamFactorAverages mlb_schedule ${teamCode}`,
@@ -130,8 +134,8 @@ export async function buildMlbTeamFactorAverages(
     if (!r.external_game_id) continue;
     const s = scheduleByExternalId.get(r.external_game_id);
     if (!s) continue;
-    const isHome = s.home_team_code === teamCode;
-    const isAway = s.away_team_code === teamCode;
+    const isHome = s.home_team_code === dbTeamCode;
+    const isAway = s.away_team_code === dbTeamCode;
     if (!isHome && !isAway) continue;
 
     perspectives.push({

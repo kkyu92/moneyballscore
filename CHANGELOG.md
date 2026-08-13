@@ -1,3 +1,17 @@
+## v0.5.62.36 — 2026-08-13 (cycle 2081, fix-incident (heavy): MLB_TEAMS StatsAPI/Baseball-Reference 7팀 코드 불일치 — park factor + 매치업/팀페이지 DB 쿼리 silent 버그 5개 callsite 수정)
+
+### fix(mlb): MLB_TEAMS 키(Baseball-Reference) vs mlb_schedule DB 값(StatsAPI) 7팀 불일치 정규화
+
+cycle 2080 이 발견한 park factor silent neutral fallback 이슈(TODOS 범위 밖 flag)를 실측 확대 조사한 결과, 같은 근본 원인(`TB`/`CWS`/`KC`/`SD`/`SF`/`AZ`/`WSH` StatsAPI 코드 vs `TBR`/`CHW`/`KCR`/`SDP`/`SFG`/`ARI`/`WSN` Baseball-Reference 표준 불일치)이 park factor 뿐 아니라 매치업(`/mlb/matchup/*`)·팀(`/mlb/team/*`) 페이지의 DB 쿼리 필터 자체를 깨뜨리고 있음을 확인 — canonical 코드로 `.or(home_team_code.eq.TBR,...)` 필터링 시 DB 실측(`TB`)과 항상 불일치해 이 7팀이 낀 모든 매치업/팀 페이지가 "0경기"만 반환하는 더 심각한 silent 버그(park factor 보다 영향 범위 큼).
+
+`packages/shared/src/mlb-teams.ts` 에 `MLB_STATSAPI_TEAM_ALIASES`(7팀 alias map) + `normalizeMlbTeamCode`(DB→canonical)/`toMlbStatsApiCode`(canonical→DB) 양방향 변환 함수 추가 — DB 실측(`mlb_schedule` 759 rows) 으로 distinct 코드 목록 확인 후 정확히 이 7팀만 alias 필요함을 검증. 5개 callsite 수정: `mlb-pipeline.ts`(park factor lookup), `convergenceRecord.ts`(수렴픽 OR 필터 + homeCode/awayCode 정규화), `buildMlbMatchupProfile.ts`(매치업 OR 필터 + homeCode/awayCode), `buildMlbTeamProfile.ts`(팀페이지 OR 필터 + isHome/isAway + opponentCode), `buildMlbTeamFactorAverages.ts`(팩터평균 OR 필터 + isHome/isAway). `mlbShortTeamName` 도 내부에서 정규화 경유하도록 수정 — 별도 callsite 변경 없이 opponent 이름 표시 오류(raw 코드 노출) 자동 해소.
+
+회귀 테스트 6건 추가(park factor 실측값 사용 확인, DB 쿼리 필터가 StatsAPI 코드로 나가는지 확인, isHome/opponentCode/sideStats 정규화 확인) — 각각 실제 DB 값(`TB`/`SF` 등)을 mock 입력으로 사용해 정규화 없이는 fail 하는 구조로 작성.
+
+`pnpm type-check`(4 packages) / `pnpm test`(전체 — shared 211 + kbo-data 1098 + moneyball 3739, 신규 8 tests) / `pnpm lint` 전체 통과.
+
+**범위 밖 미확인**: `buildMlbPlayerProfile.ts:131` 의 `teams.code`(curated seed 테이블) 컨벤션은 별도 확인 필요 — TODOS.md 에 flag.
+
 ## v0.5.62.35 — 2026-08-13 (cycle 2080, explore-idea (heavy): plan #25 Phase 1 — MLB Elo K-factor 엔진 신규 구현)
 
 ### feat(mlb): MLB Elo rating 시스템 Phase 1 — K-factor 갱신 엔진 + 백필 스크립트

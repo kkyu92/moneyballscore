@@ -30,7 +30,7 @@ import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
 } from './silent-drift-alert';
-import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE } from '@moneyball/shared';
+import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
 
 // mlb_predict_final 실측 데이터 fallback 기본값 — mlb_team_stats row 부재(스크래퍼 미가동/미커버 팀) 시에만 사용.
@@ -269,7 +269,8 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
   const predictionRows = gameList.map((g) => {
     const home = statsByTeam.get(g.home_team_code);
     const away = statsByTeam.get(g.away_team_code);
-    const homeParkPf = (MLB_TEAMS as Record<string, { parkPf: number }>)[g.home_team_code]?.parkPf;
+    const homeCanonicalCode = normalizeMlbTeamCode(g.home_team_code);
+    const homeParkPf = homeCanonicalCode ? MLB_TEAMS[homeCanonicalCode].parkPf : undefined;
 
     const prob = computeMlbProbability({
       sp_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },

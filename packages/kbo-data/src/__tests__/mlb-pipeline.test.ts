@@ -221,6 +221,55 @@ describe('runMlbPipeline', () => {
     }
   });
 
+  it('mlb_predict_final — home_team_code 가 StatsAPI 컨벤션(TB/CWS/KC/SD/SF/AZ/WSH)일 때도 park_factor 실측값 사용 (regression: cycle 2081 사례 — MLB_TEAMS 는 Baseball-Reference 키(TBR/CHW/KCR/SDP/SFG/ARI/WSN)라 정규화 없이 조회 시 7팀 전부 undefined→neutral(1.0) silent fallback)', async () => {
+    const { createClient } = await import('@supabase/supabase-js');
+    const scheduleGames = [
+      { external_game_id: '3001', home_team_code: 'TB', away_team_code: 'NYY' },
+    ];
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn(() => Promise.resolve({ error: null })),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { computeMlbProbability } = await import('../factors/mlb-base');
+    (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mockClear();
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    expect(computeMlbProbability).toHaveBeenCalledTimes(1);
+    const callArgs = (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+      park_factor: number;
+    };
+    // TB → TBR (parkPf 95) 정규화 실패 시 fallback 1.0 (neutral) — 정규화 성공하면 0.95
+    expect(callArgs.park_factor).toBe(0.95);
+  });
+
   it('mlb_predict_final — 실측 팩터(fip/xfip/woba/war/xwoba/barrel_pct) breakdown 컬럼 영속화 (cycle 2065 fix — 사례 21: computeMlbProbability 입력으로만 쓰이고 저장 안 되던 값이 predictions.home_sp_fip 등에 전량 NULL 로 남아 factor-averages/composite-duel MLB 버전이 항상 빈 값)', async () => {
     const insertedRows: Array<Record<string, unknown>> = [];
     const { createClient } = await import('@supabase/supabase-js');

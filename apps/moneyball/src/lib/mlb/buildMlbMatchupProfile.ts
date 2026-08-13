@@ -16,6 +16,8 @@ import {
   RECENT_RECORD_MIN_GAMES,
   RECENT_RECORD_WINDOW,
   mlbShortTeamName,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
   type SelectResult,
   type MlbTeamCode,
   VENUE_SPLIT_MIN_GAMES_PER_VENUE,
@@ -316,9 +318,13 @@ export async function buildMlbMatchupProfile(
 
   const supabase = await createClient();
 
+  // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
+  // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
+  const dbCodeA = toMlbStatsApiCode(pair.codeA);
+  const dbCodeB = toMlbStatsApiCode(pair.codeB);
   const orFilter =
-    `and(home_team_code.eq.${pair.codeA},away_team_code.eq.${pair.codeB}),` +
-    `and(home_team_code.eq.${pair.codeB},away_team_code.eq.${pair.codeA})`;
+    `and(home_team_code.eq.${dbCodeA},away_team_code.eq.${dbCodeB}),` +
+    `and(home_team_code.eq.${dbCodeB},away_team_code.eq.${dbCodeA})`;
 
   const scheduleResult = (await supabase
     .from("mlb_schedule")
@@ -408,8 +414,9 @@ export async function buildMlbMatchupProfile(
   let correct = 0;
 
   for (const g of scheduleRows) {
-    const homeCode = g.home_team_code as MlbTeamCode;
-    const awayCode = g.away_team_code as MlbTeamCode;
+    // DB 원본(StatsAPI 컨벤션) → canonical 정규화. 이후 teamA.code/teamB.code(canonical) 비교 안전.
+    const homeCode = normalizeMlbTeamCode(g.home_team_code) ?? (g.home_team_code as MlbTeamCode);
+    const awayCode = normalizeMlbTeamCode(g.away_team_code) ?? (g.away_team_code as MlbTeamCode);
     const pred = predByExternalId.get(g.external_game_id) ?? null;
 
     const predictedHomeWin = pred?.home_win_prob != null ? pred.home_win_prob >= 0.5 : null;

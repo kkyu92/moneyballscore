@@ -22,6 +22,9 @@ export {
   MLB_TEAMS,
   MLB_DIVISIONS,
   MLB_TEAMS_PRE_RENDER,
+  MLB_STATSAPI_TEAM_ALIASES,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
   mlbShortTeamName,
   mlbTeamDivision,
 } from './mlb-teams';

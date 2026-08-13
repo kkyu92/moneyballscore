@@ -3,6 +3,9 @@ import {
   MLB_TEAMS,
   MLB_DIVISIONS,
   MLB_TEAMS_PRE_RENDER,
+  MLB_STATSAPI_TEAM_ALIASES,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
   mlbShortTeamName,
   mlbTeamDivision,
   type MlbTeamCode,
@@ -83,6 +86,81 @@ describe('mlbShortTeamName', () => {
 
   it('미지 코드 → 그대로 문자열 (crash 방지)', () => {
     expect(mlbShortTeamName('XXX')).toBe('XXX');
+  });
+
+  it('StatsAPI 컨벤션 코드(DB 실측) → alias 경유 shortName (cycle 2081 사례)', () => {
+    expect(mlbShortTeamName('TB')).toBe('Rays');
+    expect(mlbShortTeamName('CWS')).toBe('White Sox');
+    expect(mlbShortTeamName('KC')).toBe('Royals');
+    expect(mlbShortTeamName('SD')).toBe('Padres');
+    expect(mlbShortTeamName('SF')).toBe('Giants');
+    expect(mlbShortTeamName('AZ')).toBe('Diamondbacks');
+    expect(mlbShortTeamName('WSH')).toBe('Nationals');
+  });
+});
+
+// cycle 2081 fix-incident (heavy) — mlb_schedule/mlb_team_stats/mlb_team_elo 는 StatsAPI
+// team.abbreviation 원본 저장(TB/CWS/KC/SD/SF/AZ/WSH), MLB_TEAMS 키는 Baseball-Reference
+// 표준(TBR/CHW/KCR/SDP/SFG/ARI/WSN) — 이 7팀 불일치로 park factor/matchup DB 쿼리가
+// silent 히 neutral fallback 또는 0건 매칭됐던 근본 원인. DB 실측(759 rows) 으로 확인한
+// distinct 코드 목록 = 정확히 이 7개 alias.
+describe('MLB_STATSAPI_TEAM_ALIASES', () => {
+  it('정확히 7팀 — DB 실측(cycle 2081) distinct 코드와 정합', () => {
+    expect(Object.keys(MLB_STATSAPI_TEAM_ALIASES).sort()).toEqual(
+      ['AZ', 'CWS', 'KC', 'SD', 'SF', 'TB', 'WSH'].sort(),
+    );
+  });
+
+  it('모든 alias 값이 MLB_TEAMS 유효 키', () => {
+    for (const canonical of Object.values(MLB_STATSAPI_TEAM_ALIASES)) {
+      expect(MLB_TEAMS[canonical]).toBeTruthy();
+    }
+  });
+});
+
+describe('normalizeMlbTeamCode', () => {
+  it('canonical 코드는 그대로 반환', () => {
+    expect(normalizeMlbTeamCode('LAD')).toBe('LAD');
+  });
+
+  it('StatsAPI alias 코드 → canonical 변환', () => {
+    expect(normalizeMlbTeamCode('TB')).toBe('TBR');
+    expect(normalizeMlbTeamCode('CWS')).toBe('CHW');
+    expect(normalizeMlbTeamCode('KC')).toBe('KCR');
+    expect(normalizeMlbTeamCode('SD')).toBe('SDP');
+    expect(normalizeMlbTeamCode('SF')).toBe('SFG');
+    expect(normalizeMlbTeamCode('AZ')).toBe('ARI');
+    expect(normalizeMlbTeamCode('WSH')).toBe('WSN');
+  });
+
+  it('null/undefined/미지 코드 → undefined', () => {
+    expect(normalizeMlbTeamCode(null)).toBeUndefined();
+    expect(normalizeMlbTeamCode(undefined)).toBeUndefined();
+    expect(normalizeMlbTeamCode('XXX')).toBeUndefined();
+  });
+});
+
+describe('toMlbStatsApiCode', () => {
+  it('alias 있는 7팀 → StatsAPI 코드 역변환', () => {
+    expect(toMlbStatsApiCode('TBR')).toBe('TB');
+    expect(toMlbStatsApiCode('CHW')).toBe('CWS');
+    expect(toMlbStatsApiCode('KCR')).toBe('KC');
+    expect(toMlbStatsApiCode('SDP')).toBe('SD');
+    expect(toMlbStatsApiCode('SFG')).toBe('SF');
+    expect(toMlbStatsApiCode('ARI')).toBe('AZ');
+    expect(toMlbStatsApiCode('WSN')).toBe('WSH');
+  });
+
+  it('alias 없는 팀은 코드 그대로', () => {
+    expect(toMlbStatsApiCode('LAD')).toBe('LAD');
+    expect(toMlbStatsApiCode('NYY')).toBe('NYY');
+  });
+
+  it('normalizeMlbTeamCode 와 왕복 일치(round-trip)', () => {
+    for (const [statsApiCode, canonical] of Object.entries(MLB_STATSAPI_TEAM_ALIASES)) {
+      expect(toMlbStatsApiCode(canonical)).toBe(statsApiCode);
+      expect(normalizeMlbTeamCode(statsApiCode)).toBe(canonical);
+    }
   });
 });
 
