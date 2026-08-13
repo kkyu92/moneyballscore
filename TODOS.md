@@ -1,5 +1,16 @@
 # TODOS
 
+## ✅ buildMlbPlayerProfile.ts teams.code 정규화 누락 — 사례 27 family 선제 수정 (cycle 2087, 2026-08-13)
+
+cycle 2081(사례 27)이 5개 callsite에 `normalizeMlbTeamCode()`를 적용하며
+`buildMlbPlayerProfile.ts:131`은 "teams.code 컨벤션 미확인"으로 범위 밖에 남겨뒀음.
+본 cycle이 DB 실측(service role 쿼리) — `players` 테이블에 MLB row가 아직 0건(현재
+미발현, 실제 버그 아님) 확인 후, StatsAPI alias 7팀(TB/CWS/KC/SD/SF/AZ/WSH) 코드로
+시딩 시작 시 `teamName`이 silent null 될 잠재 지점을 선제 차단 — 다른 5개 callsite와
+동일 패턴으로 `normalizeMlbTeamCode()` 적용 + alias 코드 회귀 테스트 1건 추가.
+type-check/lint/test(424 files/3745 tests) 전량 통과. Vercel quota blackout(아래 참조)
+기간이라 배포 검증은 무의미 — 코드 정확성 확인만으로 충분(quota reset 후 자동 반영).
+
 ## 🚨 최우선 carry-over: Vercel 배포 일일 100건 quota 소진 — production 이 4ab223b0(cycle 2081)에 고정 (cycle 2083, 2026-08-13)
 
 당일 develop-cycle 누적 fire(cycle 2065~2082, 18회 PR merge)가 Vercel free tier 일일
