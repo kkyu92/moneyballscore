@@ -1,5 +1,22 @@
 # TODOS
 
+## ✅ MLB 팀 프로필 페이지 Elo 추이 차트 parity gap 해소 (cycle 2091, 2026-08-13, explore-idea heavy)
+
+KBO `teams/[code]` 페이지엔 `TeamEloChart`(시즌 경기별 Elo + 리그 평균)가 있지만
+MLB `mlb/team/[code]` 페이지는 현재 Elo 숫자 한 값만 노출 — cycle 2083/2085
+(plan #25 Phase 2b)가 `mlb_team_elo_history` 테이블을 신설하고 matchup 페이지만
+소비했고 팀 프로필 페이지 소비가 빠져있던 parity gap.
+
+`buildMlbTeamEloTrend.ts` (KBO `buildTeamEloTrend` 병렬 구현, `mlb_team_elo_history`
+직접 조회 + StatsAPI alias 코드 정규화는 `buildMlbMatchupEloTrend` 패턴 재사용) +
+`MlbTeamEloChart.tsx` 신규, `mlb/team/[code]/page.tsx` 에 배선. 기존
+`mlb-team-code-page.test.ts` 의 `await buildMlbTeamProfile(code)` 리터럴 가드
+때문에 KBO 페이지처럼 `Promise.all` 병렬화 대신 순차 fetch 유지(사소한 성능
+trade-off, 가드 테스트 변경 없이 완료).
+
+테스트 4건 신규(빈 결과/에러/정규화/평균 계산) + 전체 스위트 3750건 통과 +
+lint/type-check 통과 확인 후 main 직push. CI 결과는 본 cycle retro 이후 확인.
+
 ## ⚠️ Cloudflare Worker 자동 배포 CI — 사례 25 재발, node 버전 수정했으나 CLOUDFLARE_API_TOKEN 미설정으로 여전히 미배포 (cycle 2090, 2026-08-13, 사용자 액션 필요)
 
 cycle 2068(사례 25)이 "로컬 wrangler oauth 세션이 2026-06-12 이후 만료돼 그 뒤
