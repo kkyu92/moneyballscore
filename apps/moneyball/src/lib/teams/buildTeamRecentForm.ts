@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, MATCHUP_RECENT_FORM_GAMES, type TeamCode } from "@moneyball/shared";
+import {
+  assertSelectOk,
+  MATCHUP_RECENT_FORM_GAMES,
+  type TeamCode,
+  type MlbTeamCode,
+} from "@moneyball/shared";
 
 export type GameResult = "W" | "L" | "T";
 
@@ -33,9 +38,11 @@ interface GameRow {
 /**
  * 팀의 최근 N개 final 경기 W/L/T 시퀀스. 매치업 페이지에서 두 팀의
  * 시즌 평균 팩터(buildTeamFactorAverages) 와 별개로 현재 분위기 표시용.
+ * KBO/MLB 무관 — teams/games 테이블을 team code 문자열로만 조회(리그별 분기 없음),
+ * MLB matchup 페이지(plan #24 Phase 3)도 그대로 재사용.
  */
 export async function buildTeamRecentForm(
-  teamCode: TeamCode,
+  teamCode: TeamCode | MlbTeamCode,
   limit = MATCHUP_RECENT_FORM_GAMES,
 ): Promise<TeamRecentForm> {
   const supabase = await createClient();

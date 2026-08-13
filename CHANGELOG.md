@@ -1,3 +1,9 @@
+## v0.5.62.24 — 2026-08-13 (cycle 2060, explore-idea (heavy): plan #24 Phase 3a — MLB matchup 최근 폼)
+
+### feat(analysis): wave-630 — `/mlb/matchup/[teamA]/[teamB]` 최근 폼 섹션 (KO+EN)
+
+cycle 2059 가 남긴 carry-over(cron 재실행 대기)는 아직 검증 불가(mlb_fancy_scrape cron 은 19:17 UTC, mlb_predict_final 은 다음날 — 이번 cycle 시각 08:28 UTC 로 즉시 확인 불가) — 대신 plan #24 Phase 3(최근 폼/수렴 픽 기록/시즌별 H2H) 첫 조각을 fire. `buildTeamRecentForm.ts` 실측 확인 결과 KBO 전용처럼 타입만 `TeamCode` 였지만 실제 로직은 `teams`/`games` 테이블을 team code 문자열로만 조회(리그 분기 전혀 없음) — plan #24 rubric 이 미리 표시한 "구조적 타입 좁히기 패턴" 그대로, 신규 빌더 복제 없이 파라미터 타입만 `TeamCode | MlbTeamCode` 로 넓혀 그대로 재사용(단일 호출부라 회귀 risk 없음, `pnpm --filter moneyball type-check` 로 확인). UI 는 KBO `MatchupRecentForm.tsx` 가 승/패/무 등 한글 하드코딩이라 EN 라우트 재사용 불가 — Phase 2a `MlbMatchupFactorCompare` 의 `locale` prop 패턴을 그대로 따라 `MlbMatchupRecentForm.tsx` 신규 작성, KO/EN 양쪽 `/mlb/matchup` 페이지에 팩터 비교 섹션 다음(KBO 페이지의 elo trend 자리 — Phase 2b 는 MLB Elo 시스템 부재로 block 상태라 스킵) 배치. 부수적으로 cycle 2059 ship 이 놓친 root `VERSION` 파일 drift(0.5.62.22 로 정체, package.json 양쪽은 0.5.62.23) 도 함께 정정(`version-sync-guard.test.ts` 가 잡음). `pnpm --filter @moneyball/shared type-check` / `pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec vitest run` 420 files/3720 tests 전량 통과, `pnpm --filter moneyball lint` clean. Phase 3 잔여(수렴 픽 기록/시즌별 H2H) 는 다음 explore-idea carry-over.
+
 ## v0.5.62.23 — 2026-08-13 (cycle 2059, fix-incident: mlb_fancy_scrape 15일 연속 무효 — FanGraphs Next.js SPA 개편 대응)
 
 ### fix(mlb): FanGraphs MLB scraper — HTML table selector → `__NEXT_DATA__` JSON 파싱 전환
