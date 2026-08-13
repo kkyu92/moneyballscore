@@ -503,3 +503,40 @@ develop-cycle 이 매 cycle 마다 PR 1건 + squash merge 1건을 만드는 구�
 - 사례 25(Cloudflare Worker 로컬 wrangler 세션 만료로 ~2개월 미배포) — "배포 파이프라인 자체가 코드 변경과 무관하게 막혀 있어 merge 는 성공해도 실제 반영은 안 됨" 이라는 동일 상위 패턴. 사례 25 는 Cloudflare Worker(cron primary trigger), 본 사례는 Vercel(웹앱 + API route) — 서로 다른 두 배포 대상이 동시에 각자 이유로 지연 상태였던 셈(같은 날 기준 이중 정지 지점)
 - 사례 18(retro 완료형 서술 vs 실제 미실행) — "머지됐다" 와 "실제 반영(배포)됐다" 를 혼동하면 안 된다는 동일 원칙의 배포 레이어 변형 — 본 사례 이후 develop-cycle retro 는 "merge 완료" 와 "prod 반영" 을 별개 사실로 구분해 서술해야 함
 - CLAUDE.md 세션 시작 스캔 룰("X 가 배포됨 → git log + 실제 파일 존재 확인")의 연장 — 이번엔 "merge 됐다" 를 "배포됐다" 로 자동 치환하지 않고 `/api/version` 실측으로 직접 대조한 것이 발견의 핵심이었음
+
+---
+
+### 사례 30 — 사례 25 의 "고쳤다" CI 도입 자체가 node 버전 + secret 미검증으로 첫 실행부터 2연속 failure (cycle 2090 발견+부분수리)
+
+cycle 2068(사례 25)이 "로컬 wrangler oauth 세션 만료로 worker.ts 변경 3건이 ~2개월
+silent 미배포"를 발견하고 push 시 자동 `wrangler deploy` CI 를 신설했으나, **그 CI 자체가
+신설 이후 실제 발화 2건(cycle 2089 Sentry alert 커밋, plan#25 mlb_elo_update 커밋) 모두
+failure** — `gh run list` 로 발견. 원인은 두 단계: (1) `deploy-cloudflare-worker.yml` 이
+`node-version: 20` 사용하는데 `cloudflare-worker/package.json` 의 `wrangler ^4.108.0`
+이 `engines.node >=22.0.0` 요구 — "Wrangler requires at least Node.js v22.0.0" 로
+즉시 exit 1. (2) node 버전을 24 로 고치고 `gh workflow run` 으로 재실행해 실측 확인한
+결과, 그 다음 단계에서 `CLOUDFLARE_API_TOKEN environment variable` 자체가 리포 secret
+에 없어(`gh secret list` 로 확인) 여전히 실패 — 로컬 `wrangler whoami` 도 세션 만료
+그대로라 로컬 fallback 도 불가능.
+
+**핵심 gap**: "배포 실패를 막는 fix 를 배포했다"는 사실 자체를 실제 fire 로 검증하지
+않고 커밋 시점에 success 로 간주 — 사례 25 의 fix PR(#2923) 이 merge 는 됐지만 CI 가
+정상 동작하는지 최소 1회 실측 확인(`gh workflow run` 수동 fire 또는 다음 자연 push
+후 `gh run list` 재확인)을 안 거쳐 22 cycle(2068→2090) 동안 "고쳐졌다"는 잘못된
+가정이 유지됨 — 사례 18(retro 완료형 서술 vs 실제 미실행)과 동일 상위 패턴의 CI
+인프라 버전.
+
+**fix (cycle 2090, 부분)**: node-version 20→24 (다른 job 들과 정렬, `gh workflow
+run` 으로 재발화해 node 에러 해소 실측 확인 — 에러 메시지가 node 버전 문제에서
+CLOUDFLARE_API_TOKEN 부재로 바뀐 것 자체가 fix 유효성의 증거). CLOUDFLARE_API_TOKEN
+등록은 Cloudflare 계정 접근이 필요해 본 메인이 자율 수행 불가 — TODOS.md 최상단에
+사용자 액션 3단계(토큰 발급 → `gh secret set` → 수동 재발화 검증) 명시.
+
+**관련 family**:
+- 사례 25 — 동일 배포 파이프라인, "root cause 규명" 은 됐으나 "고친 fix 자체의 검증"
+  이 빠진 것이 본 사례의 신규 지점
+- 사례 18 — "완료 서술 vs 실제 실행" 원칙의 CI 인프라 계층 재확인. PR/merge 뿐 아니라
+  "CI 를 신설/수정했다"는 주장도 최소 1회 실 fire 로 검증해야 함이 일반화 대상
+- 사례 29 — 같은 날 Vercel(웹앱 배포)과 Cloudflare Worker(cron 배포) 양쪽이 각자
+  다른 이유로 막혀 있었던 것과 마찬가지로, 배포 파이프라인은 "설정했다" 가 "작동한다"
+  를 보장하지 않는다는 동일 교훈이 세 번째로 반복
