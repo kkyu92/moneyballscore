@@ -1,5 +1,11 @@
 # TODOS
 
+## ✅ lotto cron 자동화 4주 연속 silent 실패 — root cause 해소, 실측 fire 확인만 대기 (cycle 2072, 2026-08-13, 사례 26)
+
+`lotto-pick-update.yml`/`lotto-result-update.yml` 의 `gh pr create --label "automated,lotto"` 가 존재하지 않는 `lotto` label 참조로 4주 연속(`lotto/pick-2026-08-01`, `pick-2026-08-08`, `result-2026-07-25`, `result-2026-08-01`) PR 생성 자체가 실패 — 데이터는 branch 에 push 됐지만 main 에 반영 안 됨. `gh label create lotto` 로 root cause 해소 완료. 데이터 손실 2건(1235회 결과, 1236회 50조합)은 고아 branch 에서 cherry-pick 복구, 나머지 2건(이미 다른 커밋으로 대체)은 branch 삭제.
+
+**남은 확인**: 다음 lotto-pick-update fire(매주 금, cron `19 0,3,6 * * 5`) 또는 lotto-result-update fire(매주 토, cron `19 17,20,23 * * 6`) 때 PR 이 정상 생성 + auto-merge 되는지 실측 확인 — 구조적 fix 는 완료했으나 아직 실제 fire 로 검증 전.
+
 ## 🚨 최우선 carry-over: Cloudflare Worker 배포가 ~2개월간 로컬 wrangler 세션 만료로 미배포 (cycle 2068, 2026-08-13, 사례 25)
 
 `cloudflare-worker/` (Worker `moneyballscore-cron`, 모든 cron 의 primary trigger)가 로컬 `wrangler deploy` 단일 경로에만 의존 — `~/Library/Preferences/.wrangler/config/default.toml` 의 oauth `expiration_time`/`refresh_token` 발급일이 **2026-06-12** 로 고정, 이후 refresh 시도 시 `400 Bad Request`("Token refresh failed") 로 non-interactive 환경에서 재인증 불가 확인. git log 대조 결과 `cloudflare-worker/src/worker.ts` 의 마지막 성공 배포 추정 시점 = 2026-06-12 commit `b1be1aac`(MLB cron trigger 추가) — 그 뒤 3개 commit 이 main 에는 있지만 **실제 Worker 런타임엔 미배포 추정**:
