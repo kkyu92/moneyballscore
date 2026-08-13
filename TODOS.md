@@ -26,7 +26,7 @@
 
 `/mlb/matchup/[teamA]/[teamB]`, `/mlb/team/[code]` 가 Phase 1(cycle 2054)부터 항상 빈 화면이던 문제(사례 22/23/24)는 cycle 2066(빌더 재작성)+2067(RLS anon 정책 + KST backfill 스크립트 `scripts/backfill-mlb-schedule-status.ts`) 로 root cause fix. cycle 2078 재검증 결과 — `pipeline_runs` 실측: 위 backfill 스크립트가 `--apply` 로 2026-08-13 10:09 UTC 에 이미 실행 완료(`triggered_by='backfill-script'` 57건), `mlb_schedule` 748/759 `final`(98.5%). prod curl `/mlb/matchup/NYM/PHI`(4승5패 등 실제 데이터) + `/mlb/team/PHI`(예측 경기 52, 적중률 50%) 양쪽 정상 렌더 확인 — **이제 완전히 해소**. 남은 리스크는 Cloudflare Worker 미배포(사례 25, 아래) 로 인해 *향후* 새 경기 날짜가 다시 'scheduled' 에 고착될 가능성뿐 — 과거분 blank-page 문제 자체는 재발 없음.
 
-- Phase 3c 는 이 gap 해소로 재개 가능 (cloudflare 배포와 무관) — 상세 = `~/.develop-cycle/plans/moneyballscore/24.md`, 잔여 = Phase 2b(MLB Elo 시스템 신규 구현, Tier 3 별도 scope)뿐
+- Phase 3c 는 이 gap 해소로 재개 가능 (cloudflare 배포와 무관) — 상세 = `~/.develop-cycle/plans/moneyballscore/24.md`. plan #24 전체 phase 완결 + close. 잔여 Phase 2b(MLB Elo rating 신규 구현)는 cycle 2079 (explore-idea lite) 가 `~/.develop-cycle/plans/moneyballscore/25.md` 로 분리 — Explore agent 실측 결과 KBO 도 자체 K-factor 갱신 로직 없음(외부 스크랩 스냅샷뿐, `team_season_stats.elo_rating` 은 dead schema) 확인되어 신규 엔진 설계 필요 (Tier 3, Phase 1 엔진+백필 / Phase 2 자동갱신+UI / Phase 3 예측반영은 op-analysis backtest 게이트 필수)
 
 ## 🔔 사용자 확인 필요: PR/issue close 8+1건 (cycle 2009, 2026-07-28)
 
