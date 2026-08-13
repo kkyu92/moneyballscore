@@ -433,4 +433,21 @@ cycle 2000 이 `(milestone)` 라벨로 실행됐으나 cycle_state JSON 의 diag
 
 **관련 family**:
 - 사례 15 (develop-cycle 자체 retro 박제 layer silent) — 같은 자기참조 layer, 본 사례는 retro/JSON 자체는 박제되나 **트리거 평가 스텝 자체가 빠졌다**는 점에서 새 변종
+
+---
+
+### 사례 20 — op-analysis-weekly cron `gh pr create` 라벨 부재 silent swallow → 9주 연속 PR 미생성 (cycle 2061 발견)
+
+`op-analysis-weekly.yml` 이 매주 cohort-split 데이터를 `data/op-analysis-<date>` 브랜치에 push 한 뒤 `gh pr create --label "automated,op-analysis"` 로 PR 을 열고 `gh pr merge --auto --delete-branch` 하는 구조. 그런데 리포에 `automated`/`op-analysis` 라벨이 애초에 존재하지 않아 `gh pr create` 가 항상 실패 — `2>/dev/null || echo ""` 가 그 실패를 삼켜 `PR_URL` 이 빈 문자열이 되고, `if [ -n "$PR_URL" ]` 가 조용히 skip, 워크플로 exit code 는 0 (success). 2026-06-15~08-10 매주 cron 9회 전부 이 경로 — `data/op-analysis-*` 브랜치 9개가 push 만 되고 main 에 머지된 적 없음. cohort-split 문서가 6/15 부터 stale, GH Actions UI 는 계속 초록 체크만 표시.
+
+**발견 경로**: cycle 2061 operational-analysis(heavy) 가 최신 cohort 데이터 (`c4c65cd0` 커밋 언급 스캔 시점 v1.8 n=259 acc 54.4%, 이전 memory 기록 n=187 acc 59.9% 대비 큰 하락) 를 로컬에서 재확인하려다 `git ls-tree HEAD` 에 해당 파일이 없음을 발견 → `git merge-base --is-ancestor` 로 해당 커밋이 main 의 ancestor 가 아님을 확인 → `git branch -a --contains` 로 orphan 브랜치 특정 → workflow yml 자체를 읽고 라벨 부재 + silent swallow 조합 원인 규명.
+
+**핵심 gap**: CLAUDE.md 가 이미 명시한 "cron silent error 시 endpoint 별 curl 진단 필수" 원칙이 이번엔 GH Actions 자체 UI (초록 체크) 에도 안 걸리는 케이스 — 실패가 `gh pr create` 내부 한 줄에서 흡수돼 워크플로 레벨에는 아무 신호도 남지 않음. 사례 17 (`gh run list` 로 CI/CD 파이프라인 실패 확인 필수) 도 "run 자체가 실패로 뜨는" 케이스만 다뤘는데, 본 사례는 run 이 success 로 뜨는데 그 안의 핵심 action (PR 생성) 만 조용히 빠진 한 단계 더 깊은 변종.
+
+**fix (cycle 2061)**: `gh label create automated` / `gh label create op-analysis` 로 라벨 생성 + workflow 의 `2>/dev/null || echo ""` swallow 제거 (`set -e` 하에서 실패 시 워크플로 자체가 fail 하도록) — PR #2918 로 머지, `gh pr view --json state,mergedAt` 로 `MERGED` 실측 확인 (사례 18 mitigation 그대로 적용). 동일 라벨+머지 경로로 PR #2918 자체가 성공한 것이 fix 의 실측 증거. orphan 브랜치 9개는 최신 스냅샷(2026-08-13)에 superseded 되므로 전부 `git push origin --delete` 로 정리.
+
+**관련 family**:
+- 사례 8/11 (cron silent skip — KBO 크롤러 봇 차단, predict_final window_too_late drop) — 같은 "cron 은 success 로 보이는데 핵심 동작이 빠짐" 패턴, 본 사례는 원인이 GH label 미생성이라는 점에서 신규 root cause
+- 사례 17 (CI/CD 파이프라인 실패가 `pipeline_runs` DB 진단 밖) — run 자체 실패 감지 필요성을 박제했지만, 본 사례는 run 이 success 인데 내부 단계만 조용히 skip 되는 한 단계 더 깊은 맹점
+- 사례 18 (retro 완료형 서술 vs 실제 미실행) — 본 사례 fix 검증 시 동일한 "실측 확인 (`gh pr view --json state,mergedAt`)" 절차 재사용
 - 사례 18 (retro 완료형 서술 vs 미실행) — 같은 cycle 2000~2001 구간에서 동시 발생한 별개 self-referential drift (머지 vs marker, 서로 독립)
