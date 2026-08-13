@@ -95,26 +95,21 @@ export interface MlbMatchupProfile {
   summary: string;
 }
 
-interface Row {
-  confidence: number | null;
-  is_correct: boolean | null;
-  predicted_winner: number | null;
-  predicted_winner_team: { code: string | null } | null;
-  /** null = pre_game prediction 부재 final 경기. record 카운트는 진행, 예측 정확도 카운트는 skip */
-  hasPrediction: boolean;
-  game: {
-    id: number;
-    game_date: string;
-    status: string | null;
-    home_score: number | null;
-    away_score: number | null;
-    home_team_id: number | null;
-    away_team_id: number | null;
-    winner_team_id: number | null;
-    home_team: { id: number; code: string | null } | null;
-    away_team: { id: number; code: string | null } | null;
-    winner: { code: string | null } | null;
-  } | null;
+interface ScheduleRow {
+  id: number;
+  external_game_id: string;
+  game_date: string;
+  status: string | null;
+  home_score: number | null;
+  away_score: number | null;
+  home_team_code: string;
+  away_team_code: string;
+}
+
+interface PredRow {
+  external_game_id: string | null;
+  home_win_prob: number | null;
+  prediction_type: string | null;
 }
 
 function makeSideStat(
@@ -355,9 +350,13 @@ function buildSummary(profile: {
 
 /**
  * 두 MLB 팀 간 매치업 프로필. KBO buildMatchupProfile 과 동일 구조 —
- * predictions + games 조인 → 두 팀이 맞붙은 경기만 필터링. teams.id 는 팀 코드별로
- * 유일하므로(KBO/MLB 코드 문자 겹치지 않음) 별도 league 필터 없이 team id 쌍으로 이미
- * MLB 경기만 걸러짐.
+ * `mlb_schedule`(팀 코드 string) + `predictions`(`external_game_id`, `league='mlb'`)
+ * 조인 → 두 팀이 맞붙은 경기만 필터링.
+ *
+ * cycle 2066 fix (사례 22 후속) — `teams`/`games` FK 는 MLB row 가 0건이라 idA/idB 가
+ * 항상 null 이 되어 이 함수가 항상 빈 프로필만 반환했음(Phase 1(cycle 2054)부터 지금까지
+ * 프로덕션 실측 미검증, 테스트만 통과). `predicted_winner`/`is_correct`/`confidence`
+ * 컬럼도 MLB 전량 NULL(파이프라인이 안 씀) — `home_win_prob` + 실제 스코어로 직접 derive.
  */
 export async function buildMlbMatchupProfile(
   pair: MlbMatchupPair,
@@ -379,142 +378,90 @@ export async function buildMlbMatchupProfile(
 
   const supabase = await createClient();
 
-  const teamsResult = (await supabase
-    .from("teams")
-    .select("id, code")
-    .in("code", [pair.codeA, pair.codeB])) as SelectResult<
-    Array<{ id: number; code: string }>
-  >;
-  const { data: teamRows } = assertSelectOk(
-    teamsResult,
-    `buildMlbMatchupProfile teams ${pair.codeA} vs ${pair.codeB}`,
-  );
-  const teamIdByCode = new Map<string, number>();
-  for (const t of teamRows ?? []) {
-    teamIdByCode.set(t.code, t.id);
-  }
-  const idA = teamIdByCode.get(pair.codeA);
-  const idB = teamIdByCode.get(pair.codeB);
+  const orFilter =
+    `and(home_team_code.eq.${pair.codeA},away_team_code.eq.${pair.codeB}),` +
+    `and(home_team_code.eq.${pair.codeB},away_team_code.eq.${pair.codeA})`;
 
-  if (idA == null || idB == null) {
-    return {
-      pair,
+  const scheduleResult = (await supabase
+    .from("mlb_schedule")
+    .select("id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code")
+    .or(orFilter)
+    .order("game_date", { ascending: false })) as SelectResult<ScheduleRow[]>;
+  const { data: scheduleData } = assertSelectOk(
+    scheduleResult,
+    `buildMlbMatchupProfile mlb_schedule ${pair.codeA} vs ${pair.codeB}`,
+  );
+  const scheduleRows = scheduleData ?? [];
+
+  const emptyResult: MlbMatchupProfile = {
+    pair,
+    teamA,
+    teamB,
+    totalGames: 0,
+    finalGames: 0,
+    sideStats: {
+      a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
+      b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
+    },
+    predictionAccuracy: { verified: 0, correct: 0, rate: null },
+    games: [],
+    streak: null,
+    avgMargin: null,
+    recentRecord: null,
+    blowout: null,
+    closeGame: null,
+    homeAwayEdge: null,
+    summary: buildSummary({
       teamA,
       teamB,
-      totalGames: 0,
       finalGames: 0,
       sideStats: {
         a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
         b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
       },
       predictionAccuracy: { verified: 0, correct: 0, rate: null },
-      games: [],
       streak: null,
       avgMargin: null,
       recentRecord: null,
       blowout: null,
       closeGame: null,
       homeAwayEdge: null,
-      summary: buildSummary({
-        teamA,
-        teamB,
-        finalGames: 0,
-        sideStats: {
-          a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
-          b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
-        },
-        predictionAccuracy: { verified: 0, correct: 0, rate: null },
-        streak: null,
-        avgMargin: null,
-        recentRecord: null,
-        blowout: null,
-        closeGame: null,
-        homeAwayEdge: null,
-      }),
-    };
-  }
-
-  const orFilter =
-    `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
-    `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
-
-  type GameRow = {
-    id: number;
-    game_date: string;
-    status: string | null;
-    home_score: number | null;
-    away_score: number | null;
-    home_team_id: number | null;
-    away_team_id: number | null;
-    winner_team_id: number | null;
-    home_team: { id: number; code: string | null } | null;
-    away_team: { id: number; code: string | null } | null;
-    winner: { code: string | null } | null;
-    predictions: Array<{
-      confidence: number | null;
-      is_correct: boolean | null;
-      predicted_winner: number | null;
-      predicted_winner_team: { code: string | null } | null;
-      prediction_type: string | null;
-    }> | null;
+    }),
   };
 
-  const gamesResult = (await supabase
-    .from("games")
-    .select(
-      `
-        id, game_date, status, home_score, away_score,
-        home_team_id, away_team_id, winner_team_id,
-        home_team:teams!games_home_team_id_fkey(id, code),
-        away_team:teams!games_away_team_id_fkey(id, code),
-        winner:teams!games_winner_team_id_fkey(code),
-        predictions(
-          confidence, is_correct, predicted_winner,
-          predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
-          prediction_type
-        )
-      `,
-    )
-    .or(orFilter)
-    .order("game_date", { ascending: false })) as SelectResult<GameRow[]>;
-  const { data: gamesData } = assertSelectOk(
-    gamesResult,
-    `buildMlbMatchupProfile games ${pair.codeA} vs ${pair.codeB}`,
+  if (scheduleRows.length === 0) return emptyResult;
+
+  const predResult = (await supabase
+    .from("predictions")
+    .select("external_game_id, home_win_prob, prediction_type")
+    .eq("prediction_type", "pre_game")
+    .eq("league", "mlb")
+    .in(
+      "external_game_id",
+      scheduleRows.map((s) => s.external_game_id),
+    )) as SelectResult<PredRow[]>;
+  const { data: predData } = assertSelectOk(
+    predResult,
+    `buildMlbMatchupProfile predictions ${pair.codeA} vs ${pair.codeB}`,
   );
 
-  const gameRows = gamesData ?? [];
-  const rows: Row[] = [];
+  const predByExternalId = new Map<string, PredRow>();
+  for (const p of predData ?? []) {
+    if (p.external_game_id) predByExternalId.set(p.external_game_id, p);
+  }
+
   let missingPredictionFinalCount = 0;
-  for (const g of gameRows) {
-    const pred =
-      g.predictions?.find((p) => p.prediction_type === "pre_game") ?? null;
-    if (!pred && g.status === "final") missingPredictionFinalCount += 1;
-    rows.push({
-      confidence: pred?.confidence ?? null,
-      is_correct: pred?.is_correct ?? null,
-      predicted_winner: pred?.predicted_winner ?? null,
-      predicted_winner_team: pred?.predicted_winner_team ?? null,
-      hasPrediction: pred !== null,
-      game: {
-        id: g.id,
-        game_date: g.game_date,
-        status: g.status,
-        home_score: g.home_score,
-        away_score: g.away_score,
-        home_team_id: g.home_team_id,
-        away_team_id: g.away_team_id,
-        winner_team_id: g.winner_team_id,
-        home_team: g.home_team,
-        away_team: g.away_team,
-        winner: g.winner,
-      },
-    });
+  for (const g of scheduleRows) {
+    if (!predByExternalId.has(g.external_game_id) && g.status === "final") {
+      missingPredictionFinalCount += 1;
+    }
   }
   if (missingPredictionFinalCount > 0) {
     console.warn(
       `[buildMlbMatchupProfile] ${pair.codeA} vs ${pair.codeB}: pre_game prediction 부재 final 경기 ${missingPredictionFinalCount}건 — record 카운트는 진행, AI 예측 정확도 카운트만 skip (silent drift 가시화)`,
     );
   }
+
   const games: MlbMatchupGame[] = [];
   const sideA = makeSideStat(teamA.code, teamA.shortName, teamA.color);
   const sideB = makeSideStat(teamB.code, teamB.shortName, teamB.color);
@@ -522,21 +469,26 @@ export async function buildMlbMatchupProfile(
   let verified = 0;
   let correct = 0;
 
-  for (const r of rows) {
-    const g = r.game;
-    if (!g) continue;
-    const homeTeamId = g.home_team_id;
-    const awayTeamId = g.away_team_id;
-    if (homeTeamId == null || awayTeamId == null) continue;
+  for (const g of scheduleRows) {
+    const homeCode = g.home_team_code as MlbTeamCode;
+    const awayCode = g.away_team_code as MlbTeamCode;
+    const pred = predByExternalId.get(g.external_game_id) ?? null;
 
-    const pairSet = new Set([homeTeamId, awayTeamId]);
-    if (!(pairSet.has(idA) && pairSet.has(idB))) continue;
+    const predictedHomeWin = pred?.home_win_prob != null ? pred.home_win_prob >= 0.5 : null;
+    const predictedCode: MlbTeamCode | null =
+      predictedHomeWin == null ? null : predictedHomeWin ? homeCode : awayCode;
 
-    const homeCode = g.home_team?.code as MlbTeamCode;
-    const awayCode = g.away_team?.code as MlbTeamCode;
-    const predictedCode =
-      (r.predicted_winner_team?.code as MlbTeamCode | null) ?? null;
-    const actualCode = (g.winner?.code as MlbTeamCode | null) ?? null;
+    const hasFinalScore = g.status === "final" && g.home_score != null && g.away_score != null;
+    const actualHomeWin = hasFinalScore ? g.home_score! > g.away_score! : null;
+    const actualCode: MlbTeamCode | null =
+      actualHomeWin == null ? null : actualHomeWin ? homeCode : awayCode;
+
+    const isCorrect =
+      predictedHomeWin != null && actualHomeWin != null
+        ? predictedHomeWin === actualHomeWin
+        : null;
+    const confidence =
+      pred?.home_win_prob != null ? Math.max(pred.home_win_prob, 1 - pred.home_win_prob) : null;
 
     games.push({
       gameId: g.id,
@@ -547,8 +499,8 @@ export async function buildMlbMatchupProfile(
       awayScore: g.away_score,
       predictedWinnerCode: predictedCode,
       actualWinnerCode: actualCode,
-      confidence: r.confidence,
-      isCorrect: r.is_correct,
+      confidence,
+      isCorrect,
       status: g.status,
     });
 
@@ -571,9 +523,9 @@ export async function buildMlbMatchupProfile(
     if (predictedCode === teamA.code) sideA.predictedToWin += 1;
     else if (predictedCode === teamB.code) sideB.predictedToWin += 1;
 
-    if (r.is_correct != null) {
+    if (isCorrect != null) {
       verified += 1;
-      if (r.is_correct) {
+      if (isCorrect) {
         correct += 1;
         if (predictedCode === teamA.code) sideA.predictedToWinAndCorrect += 1;
         else if (predictedCode === teamB.code)

@@ -2,49 +2,38 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Plan B Tier C+D Task 3 — buildMlbTeamProfile.ts 의 supabase select `.error` 미체크
 // silent drift family 회귀 차단. KBO buildTeamProfile.test.ts pattern 정합.
-
-const LAD_ID = 50;
+//
+// cycle 2066 fix (사례 22 후속) — `teams`/`games` FK 는 MLB row 가 0건이라 이 빌더가
+// 항상 빈 프로필만 반환하던 버그를 `mlb_schedule`+`predictions`(external_game_id) 직접
+// 조회로 교체. 본 테스트도 새 쿼리 shape 에 맞춰 재작성.
 
 interface SupabaseMockOptions {
-  teamsError?: { message: string } | null;
-  gamesError?: { message: string } | null;
-  teamRow?: { id: number } | null;
-  games?: unknown[];
+  scheduleError?: { message: string } | null;
+  predsError?: { message: string } | null;
+  schedule?: unknown[];
+  preds?: unknown[];
 }
 
 function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
-  const teamsBuilder = {
+  const scheduleBuilder = {
+    select: vi.fn().mockReturnThis(),
+    or: vi.fn().mockResolvedValue({
+      data: opts.scheduleError ? null : (opts.schedule ?? []),
+      error: opts.scheduleError ?? null,
+    }),
+  };
+  const predsBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn().mockResolvedValue({
-      data: opts.teamsError ? null : (opts.teamRow ?? { id: LAD_ID }),
-      error: opts.teamsError ?? null,
+    in: vi.fn().mockResolvedValue({
+      data: opts.predsError ? null : (opts.preds ?? []),
+      error: opts.predsError ?? null,
     }),
   };
-  const gamesBuilder = {
-    select: vi.fn().mockReturnThis(),
-    or: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockImplementation(function (this: typeof gamesBuilder) {
-      return gamesBuilder;
-    }),
-  };
-  // games chain: .or(...).eq(...).eq(...) → resolve at last .eq
-  let eqCount = 0;
-  gamesBuilder.eq = vi.fn().mockImplementation(() => {
-    eqCount += 1;
-    if (eqCount >= 2) {
-      return Promise.resolve({
-        data: opts.gamesError ? null : (opts.games ?? []),
-        error: opts.gamesError ?? null,
-      });
-    }
-    return gamesBuilder;
-  });
-
   return {
     from: vi.fn((table: string) => {
-      if (table === 'teams') return teamsBuilder;
-      if (table === 'games') return gamesBuilder;
+      if (table === 'mlb_schedule') return scheduleBuilder;
+      if (table === 'predictions') return predsBuilder;
       throw new Error(`unexpected table: ${table}`);
     }),
   };
@@ -69,28 +58,40 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(result).toBeNull();
   });
 
-  it('teams select error → assertSelectOk throw', async () => {
+  it('mlb_schedule select error → assertSelectOk throw', async () => {
     supabaseMock = makeSupabaseMock({
-      teamsError: { message: 'connection refused' },
+      scheduleError: { message: 'connection refused' },
     });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
     await expect(buildMlbTeamProfile('LAD')).rejects.toThrow(
-      /buildMlbTeamProfile teams select failed: connection refused/,
+      /buildMlbTeamProfile mlb_schedule select failed: connection refused/,
     );
   });
 
-  it('games select error → assertSelectOk throw', async () => {
+  it('predictions select error → assertSelectOk throw', async () => {
     supabaseMock = makeSupabaseMock({
-      gamesError: { message: 'syntax error at or near and' },
+      schedule: [
+        {
+          id: 1,
+          external_game_id: '700001',
+          game_date: '2026-05-20',
+          status: 'final',
+          home_score: 5,
+          away_score: 3,
+          home_team_code: 'LAD',
+          away_team_code: 'SFG',
+        },
+      ],
+      predsError: { message: 'syntax error at or near and' },
     });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
     await expect(buildMlbTeamProfile('LAD')).rejects.toThrow(
-      /buildMlbTeamProfile games select failed: syntax error/,
+      /buildMlbTeamProfile predictions select failed: syntax error/,
     );
   });
 
-  it('teams row 부재 → 빈 프로필 + meta 보존', async () => {
-    supabaseMock = makeSupabaseMock({ teamRow: null });
+  it('mlb_schedule 빈 rows → 빈 프로필 + meta 보존', async () => {
+    supabaseMock = makeSupabaseMock({ schedule: [] });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
     const profile = await buildMlbTeamProfile('LAD');
     expect(profile).toBeTruthy();
@@ -101,74 +102,78 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(profile?.predictedGames).toBe(0);
     expect(profile?.accuracyRate).toBeNull();
     expect(profile?.recentGames).toEqual([]);
+    expect(profile?.streak).toBeNull();
+    expect(profile?.avgMargin).toBeNull();
+    expect(profile?.blowout).toBeNull();
+    expect(profile?.closeGame).toBeNull();
+    expect(profile?.homeAwayEdge).toBeNull();
+    expect(profile?.recentRecord).toBeNull();
   });
 
-  it('games rows → 14 factor 집계 + accuracy 계산', async () => {
+  it('schedule + predictions rows → 14 factor 집계 + accuracy 계산', async () => {
     supabaseMock = makeSupabaseMock({
-      games: [
+      schedule: [
         {
           id: 1,
+          external_game_id: '700001',
           game_date: '2026-05-20',
           status: 'final',
           home_score: 5,
           away_score: 3,
-          home_team_id: LAD_ID,
-          away_team_id: 99,
-          home_team: { code: 'LAD' },
-          away_team: { code: 'SFG' },
-          predictions: [
-            {
-              confidence: 0.62,
-              is_correct: true,
-              predicted_winner: LAD_ID,
-              home_sp_fip: 3.5,
-              away_sp_fip: 4.0,
-              home_lineup_woba: 0.330,
-              away_lineup_woba: 0.310,
-              home_bullpen_fip: 3.2,
-              away_bullpen_fip: 3.8,
-              home_recent_form: 0.6,
-              away_recent_form: 0.4,
-              home_elo: 1550,
-              away_elo: 1490,
-              home_lineup_xwoba: 0.340,
-              away_lineup_xwoba: 0.320,
-              home_lineup_barrel_pct: 9.5,
-              away_lineup_barrel_pct: 8.0,
-            },
-          ],
+          home_team_code: 'LAD',
+          away_team_code: 'SFG',
         },
         {
           id: 2,
+          external_game_id: '700002',
           game_date: '2026-05-22',
           status: 'final',
           home_score: 2,
           away_score: 4,
-          home_team_id: 99,
-          away_team_id: LAD_ID,
-          home_team: { code: 'SFG' },
-          away_team: { code: 'LAD' },
-          predictions: [
-            {
-              confidence: 0.55,
-              is_correct: true,
-              predicted_winner: LAD_ID,
-              home_sp_fip: 4.2,
-              away_sp_fip: 3.3,
-              home_lineup_woba: 0.305,
-              away_lineup_woba: 0.335,
-              home_bullpen_fip: 4.0,
-              away_bullpen_fip: 3.1,
-              home_recent_form: 0.45,
-              away_recent_form: 0.65,
-              home_elo: 1485,
-              away_elo: 1560,
-              home_lineup_xwoba: 0.315,
-              away_lineup_xwoba: 0.345,
-              home_lineup_barrel_pct: 7.8,
-              away_lineup_barrel_pct: 10.0,
-            },
-          ],
+          home_team_code: 'SFG',
+          away_team_code: 'LAD',
+        },
+      ],
+      preds: [
+        {
+          // LAD 홈, home_win_prob=0.62 → LAD 예측 승 (실제도 승 → is_correct)
+          external_game_id: '700001',
+          home_win_prob: 0.62,
+          home_sp_fip: 3.5,
+          away_sp_fip: 4.0,
+          home_lineup_woba: 0.33,
+          away_lineup_woba: 0.31,
+          home_bullpen_fip: 3.2,
+          away_bullpen_fip: 3.8,
+          home_recent_form: 0.6,
+          away_recent_form: 0.4,
+          home_elo: 1550,
+          away_elo: 1490,
+          home_lineup_xwoba: 0.34,
+          away_lineup_xwoba: 0.32,
+          home_lineup_barrel_pct: 9.5,
+          away_lineup_barrel_pct: 8.0,
+          prediction_type: 'pre_game',
+        },
+        {
+          // LAD 원정, home_win_prob=0.45 → away(LAD) 예측 승 (실제도 승 → is_correct)
+          external_game_id: '700002',
+          home_win_prob: 0.45,
+          home_sp_fip: 4.2,
+          away_sp_fip: 3.3,
+          home_lineup_woba: 0.305,
+          away_lineup_woba: 0.335,
+          home_bullpen_fip: 4.0,
+          away_bullpen_fip: 3.1,
+          home_recent_form: 0.45,
+          away_recent_form: 0.65,
+          home_elo: 1485,
+          away_elo: 1560,
+          home_lineup_xwoba: 0.315,
+          away_lineup_xwoba: 0.345,
+          home_lineup_barrel_pct: 7.8,
+          away_lineup_barrel_pct: 10.0,
+          prediction_type: 'pre_game',
         },
       ],
     });
@@ -193,6 +198,8 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(profile?.recentGames[0].gameDate).toBe('2026-05-22');
     expect(profile?.recentGames[0].opponentCode).toBe('SFG');
     expect(profile?.recentGames[0].isHome).toBe(false);
+    expect(profile?.recentGames[0].isCorrect).toBe(true);
+    expect(profile?.recentGames[0].confidence).toBeCloseTo(0.55, 5);
 
     // streak — KBO buildTeamProfile.computeTeamStreak 재사용 (LAD 두 경기 모두 승)
     expect(profile?.streak).toEqual({ result: 'win', length: 2 });
@@ -209,17 +216,5 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
 
     // recentRecord — MIN_GAMES=2 충족, LAD 두 경기 모두 승
     expect(profile?.recentRecord).toEqual({ wins: 2, losses: 0, sampleSize: 2 });
-  });
-
-  it('teams row 부재 → streak/avgMargin/blowout/closeGame/homeAwayEdge/recentRecord null (emptyProfile)', async () => {
-    supabaseMock = makeSupabaseMock({ teamRow: null });
-    const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
-    const profile = await buildMlbTeamProfile('LAD');
-    expect(profile?.streak).toBeNull();
-    expect(profile?.avgMargin).toBeNull();
-    expect(profile?.blowout).toBeNull();
-    expect(profile?.closeGame).toBeNull();
-    expect(profile?.homeAwayEdge).toBeNull();
-    expect(profile?.recentRecord).toBeNull();
   });
 });
