@@ -1,3 +1,9 @@
+## v0.5.62.23 — 2026-08-13 (cycle 2059, fix-incident: mlb_fancy_scrape 15일 연속 무효 — FanGraphs Next.js SPA 개편 대응)
+
+### fix(mlb): FanGraphs MLB scraper — HTML table selector → `__NEXT_DATA__` JSON 파싱 전환
+
+정상 진단 흐름(open issue 0건, approved plan 0건, gap-trigger 미충족) 도중 `pipeline_runs` 실측 확인 — `mlb_fancy_scrape` 가 2026-07-29 부터 2026-08-13 까지 15일 연속 매일 error(초반 `fangraphs HTTP 403`, 2026-08-06 부터 `parse fail` 로 전환), `mlb_team_stats.fancy_synced_at` 전 row null 로 확인(반면 `savant_synced_at` 은 cycle 2058 수정 후 매일 정상 갱신 — savant 쪽은 무관). status=error 가 가시적이었음에도(silent 아님) 15일 미발견 — cron 상태를 능동적으로 확인하지 않으면 에러도 방치될 수 있음을 보여주는 사례. root cause = FanGraphs 가 major-league leaderboard 페이지를 ASP.NET(`table#LeaderBoard1_dg1_ctl00`) 에서 Next.js SPA(react-query) 로 전면 개편 — 서버 렌더 HTML 에 해당 테이블 자체가 더 이상 없고, 실 데이터는 `<script id="__NEXT_DATA__">` 안 `dehydratedState.queries` 에 JSON 으로 내장. `fetchFangraphsMlbTeams` 를 cheerio HTML 파싱에서 JSON 추출로 재작성 — `stats=bat`(woba/war/타구질 6종) + `stats=pit`(fip/xfip) 두 endpoint 를 팀 코드 기준 merge(배팅 endpoint 에는 애초 FIP/xFIP 가 없어 원 스크레이퍼 설계 자체가 근본적으로 깨져있었음 — KBO 쪽 `totalWar` 관례(타자 WAR 합산만, 투수 WAR 미포함) 와 동일하게 war 필드는 배팅 endpoint 값 그대로 사용). 두 endpoint 가 모듈 전역 rate limiter(`lastFetchAt`) 를 공유하므로 cycle 2058 이 고친 savant TOCTOU race 재발 방지 위해 순차 `await` 직렬화(Promise.all 금지). 실제 FanGraphs 라이브 fetch 로 30개 팀 전량 검증(로컬 sanity script, 커밋 제외). 테스트 5건 재작성(JSON mock 기반, bat/pit 매칭 실패 skip 케이스 추가). `pnpm test` 전량 통과(kbo-data 83 files/1084 tests), `pnpm --filter @moneyball/kbo-data type-check` / `pnpm --filter moneyball type-check` / `pnpm --filter moneyball lint` 통과.
+
 ## v0.5.62.22 — 2026-08-10 (cycle 2058, fix-incident: CI red on main — baseball-savant rate-limit race + root package.json version drift)
 
 ### fix(mlb): Savant scraper rate-limit race condition + version-sync drift
