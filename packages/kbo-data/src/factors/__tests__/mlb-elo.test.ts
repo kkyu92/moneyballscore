@@ -6,6 +6,7 @@ import {
   expectedHomeWinProb,
   updateMlbElo,
   computeMlbEloRatings,
+  computeMlbEloHistory,
   type MlbFinalGameForElo,
 } from '../mlb-elo';
 
@@ -146,5 +147,78 @@ describe('computeMlbEloRatings (plan #25 Phase 2, cycle 2082)', () => {
     const states = computeMlbEloRatings(games);
     const total = states.get('LAD')!.eloRating + states.get('SF')!.eloRating;
     expect(total).toBeCloseTo(2 * MLB_ELO_INITIAL_RATING, 6);
+  });
+});
+
+describe('computeMlbEloHistory (plan #25 Phase 2b step 1, cycle 2083)', () => {
+  const game = (
+    home: string,
+    away: string,
+    homeScore: number | null,
+    awayScore: number | null,
+    date = '2026-04-01',
+  ): MlbFinalGameForElo => ({
+    game_date: date,
+    home_team_code: home,
+    away_team_code: away,
+    home_score: homeScore,
+    away_score: awayScore,
+  });
+
+  it('경기 1건 = history 2 entry (home/away 각 1)', () => {
+    const history = computeMlbEloHistory([game('LAD', 'SF', 5, 2, '2026-04-01')]);
+    expect(history).toHaveLength(2);
+    expect(history.map((h) => h.team_code).sort()).toEqual(['LAD', 'SF']);
+  });
+
+  it('entry 의 elo_rating 이 computeMlbEloRatings 최종 states 와 일치 (단일 경기)', () => {
+    const games = [game('LAD', 'SF', 5, 2, '2026-04-01')];
+    const history = computeMlbEloHistory(games);
+    const states = computeMlbEloRatings(games);
+    const lad = history.find((h) => h.team_code === 'LAD')!;
+    expect(lad.elo_rating).toBeCloseTo(states.get('LAD')!.eloRating, 10);
+  });
+
+  it('연속 경기 시 history 가 시간순 사후 rating 누적 반영 (재계산 아님)', () => {
+    const games = [
+      game('LAD', 'SF', 5, 2, '2026-04-01'),
+      game('LAD', 'SF', 1, 3, '2026-04-02'),
+    ];
+    const history = computeMlbEloHistory(games);
+    const ladEntries = history.filter((h) => h.team_code === 'LAD');
+    expect(ladEntries).toHaveLength(2);
+    expect(ladEntries[0].elo_rating).not.toBeCloseTo(ladEntries[1].elo_rating, 5);
+    expect(ladEntries[0].game_date).toBe('2026-04-01');
+    expect(ladEntries[1].game_date).toBe('2026-04-02');
+  });
+
+  it('All-Star Game / 무승부·스코어 결측 경기는 history 에도 미포함', () => {
+    const history = computeMlbEloHistory([
+      game('AL', 'NL', 5, 3),
+      game('LAD', 'SF', 3, 3),
+      game('LAD', 'SF', null, null),
+    ]);
+    expect(history).toHaveLength(0);
+  });
+
+  it('season 필드가 game_date 연도와 일치', () => {
+    const history = computeMlbEloHistory([game('LAD', 'SF', 5, 2, '2026-05-10')]);
+    expect(history.every((h) => h.season === 2026)).toBe(true);
+  });
+
+  it('더블헤더(같은 팀, 같은 game_date 2경기) — dedupe 로 (team_code, game_date) 당 1 entry만 남고 2차전 rating 반영 (DB UNIQUE 배치 upsert 충돌 회피, cycle 2083 실측 발견)', () => {
+    const games = [
+      game('LAD', 'SF', 5, 2, '2026-04-01'),
+      game('LAD', 'SF', 1, 3, '2026-04-01'),
+    ];
+    const history = computeMlbEloHistory(games);
+    const ladEntries = history.filter((h) => h.team_code === 'LAD');
+    expect(ladEntries).toHaveLength(1);
+
+    const states = computeMlbEloRatings(games);
+    expect(ladEntries[0].elo_rating).toBeCloseTo(states.get('LAD')!.eloRating, 10);
+
+    const keys = history.map((h) => `${h.team_code}|${h.game_date}`);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });

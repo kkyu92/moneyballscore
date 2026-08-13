@@ -18,7 +18,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { computeMlbEloRatings, DB_CONSTRAINTS } from '@moneyball/kbo-data';
+import { computeMlbEloRatings, computeMlbEloHistory, DB_CONSTRAINTS } from '@moneyball/kbo-data';
 
 const APPLY = process.argv.includes('--apply');
 
@@ -94,6 +94,25 @@ async function main() {
   }
 
   console.log(`mlb_team_elo upsert 완료 — ${upsertRows.length}팀`);
+
+  // plan #25 Phase 2b step 1 (cycle 2083) — mlb_team_elo_history 1회성 backfill
+  // (신규 테이블, 지금까지 재생된 전체 시즌 경기의 사후 rating 시계열이 아직 없음).
+  // 매일 cron(mlb_elo_update)이 이후 자동 append 하나, 과거분은 여기서 1회 채움.
+  const historyRows = computeMlbEloHistory(games);
+  const HISTORY_CHUNK = 500;
+  for (let i = 0; i < historyRows.length; i += HISTORY_CHUNK) {
+    const chunk = historyRows.slice(i, i + HISTORY_CHUNK);
+    const { error: hErr } = await sb
+      .from('mlb_team_elo_history')
+      .upsert(chunk, { onConflict: DB_CONSTRAINTS.mlbTeamEloHistory });
+
+    if (hErr) {
+      console.error('mlb_team_elo_history upsert failed:', hErr.message);
+      process.exit(1);
+    }
+  }
+
+  console.log(`mlb_team_elo_history upsert 완료 — ${historyRows.length}건 (${Math.ceil(historyRows.length / HISTORY_CHUNK)} chunk)`);
 }
 
 main();

@@ -22,6 +22,7 @@ export const DB_CONSTRAINTS = {
   mlbGames: 'external_game_id',
   mlbTeamStats: 'team_code,season',
   mlbTeamElo: 'team_code,season',
+  mlbTeamEloHistory: 'team_code,game_date',
   syncBatterStats: 'player_id,season',
   pickPollEvents: 'device_id,game_id',
   userPicks: 'device_id,game_id',

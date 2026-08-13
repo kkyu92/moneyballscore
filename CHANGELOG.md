@@ -1,3 +1,57 @@
+## v0.5.62.37 — 2026-08-13 (cycle 2083, explore-idea (heavy): plan #25 Phase 2b step 1 — MLB Elo 히스토리 테이블 + 1회성 backfill, Vercel 배포 일일 100건 quota 소진 발견)
+
+### feat(mlb): mlb_team_elo_history 신규 — matchup Elo 추이 차트용 팀×경기일 시계열
+
+`mlb_team_elo`(migration 046)가 UNIQUE(team_code, season) 현재 rating 스냅샷만 저장해
+KBO(predictions.home_elo/away_elo 가 매 경기 row 에 쌓여 시계열 자연 발생)와 달리
+historical 시계열이 없던 blocker(cycle 2082 발견, plan #25 Phase 2b) 해소 — plan 문서가
+권장한 옵션 1(히스토리 로그 테이블 신규) 채택.
+
+`packages/kbo-data/src/factors/mlb-elo.ts`에 `computeMlbEloHistory()` 신규 — 기존
+`computeMlbEloRatings()`와 동일 재생 루프를 `replayMlbGames()` 내부 함수로 공유(drift
+차단)해 경기별 사후 rating 스냅샷을 산출. migration 047 `mlb_team_elo_history`
+(team_code/game_date/season/elo_rating, UNIQUE(team_code, game_date), RLS+anon read)
+신규. `mlb-pipeline.ts`의 `runEloUpdate()`가 매일 `mlb_team_elo` upsert 와 함께
+history row 도 함께 upsert(500건 chunk)하도록 배선.
+
+**실측 중 발견한 버그**: 더블헤더(같은 팀, 같은 game_date 2경기) 시 history 배열에 같은
+(team_code, game_date) 키가 2번 들어가 단일 배치 upsert 가 Postgres
+`ON CONFLICT DO UPDATE command cannot affect row a second time` 로 전체 배치 reject —
+로컬 backfill 1차 시도(`scripts/backfill-mlb-elo.ts --apply`)에서 실측으로 발견.
+`computeMlbEloHistory()`가 반환 전에 (team_code, game_date) 키로 dedupe(마지막 경기
+rating 유지)하도록 수정 — 소비 시점(DB upsert)이 아니라 산출 시점에 처리해 재발 차단.
+회귀 테스트 1건 추가.
+
+`scripts/backfill-mlb-elo.ts --apply` 실행으로 기존 748경기 전체를 재생해
+`mlb_team_elo_history`에 1,472건 1회성 backfill 완료(DB 실측 확인) — 이후는 매일
+`mlb_elo_update` cron 이 자동 append.
+
+Phase 2b step 2(신규 `MlbMatchupEloChart.tsx` + 매치업 페이지 배선)는 스코프 밖 —
+데이터 소스만 확보. 다음 explore-idea heavy fire 후보.
+
+### 🚨 신규 발견: Vercel 배포 일일 100건 quota 소진 — production 이 4ab223b0(cycle 2081)에 고정
+
+본 cycle 이 Phase 2b 실측 검증을 위해 prod API(`/api/mlb/pipeline`)를 호출하려다
+`mlb_elo_update` mode 가 "invalid mode"로 거부되는 것을 발견 — `/api/version` 확인 결과
+production 이 여전히 `4ab223b0`(cycle 2081 commit)을 서빙 중이었고, 그 이후 push된
+`d3caf0e7`(cycle 2082, mlb_elo_update 파이프라인)/`d757ab0d`/`b651a3cc` 3개 commit
+모두 Vercel 배포 기록 자체가 없음(Vercel API `deployments` 조회로 확인, canceled 도
+아니고 완전 누락). `vercel deploy --prod` 수동 시도 결과 원인 확정:
+`"Resource is limited - try again in 24 hours (more than 100, code: api-deployments-free-per-day)"`
+— GH 웹훅/git 연동 문제가 아니라 **당일 develop-cycle 누적 fire(cycle 2065~2082, 18회
+PR merge = 18+ deploy)가 Vercel free tier 일일 100건 배포 cap 을 소진**한 것.
+
+이미 존재하던 `feedback_deploy_strategy.md`(auto-memory) 경고("Vercel 일 100회 제한,
+push는 묶어서 사용자 요청 시만")가 실측으로 처음 확인된 사례 — 지금까지는 우려였을
+뿐 실제 소진은 이번이 처음. Elo history backfill 은 Vercel 우회(Supabase 직접 접근
+스크립트)로 완료했으나, **cron(mlb_elo_update 등 MLB/KBO 파이프라인 전체)이 quota
+reset(추정 ~2026-08-14 22:07 KST, 최초 소진 시점 기준 24시간) 전까지 최신 코드로
+갱신되지 않음** — Cloudflare Worker 배포 지연(사례 25)과 별개의 신규 정지 지점.
+TODOS.md 최상단에 carry-over 박제.
+
+`pnpm type-check`(4 packages)/`pnpm test`(전체 — kbo-data 1113 + shared 211 + moneyball
+3740)/`pnpm lint` 전체 통과.
+
 ## v0.5.62.36 — 2026-08-13 (cycle 2081, fix-incident (heavy): MLB_TEAMS StatsAPI/Baseball-Reference 7팀 코드 불일치 — park factor + 매치업/팀페이지 DB 쿼리 silent 버그 5개 callsite 수정)
 
 ### fix(mlb): MLB_TEAMS 키(Baseball-Reference) vs mlb_schedule DB 값(StatsAPI) 7팀 불일치 정규화
