@@ -407,8 +407,11 @@ game_date)) 신규 + `computeMlbEloHistory()`(mlb-elo.ts, `computeMlbEloRatings(
 `scripts/backfill-mlb-elo.ts --apply` 로 748경기 전체 재생 → 1,472건 1회성 backfill
 완료(DB 실측 확인, Vercel quota 소진과 무관하게 Supabase 직접 스크립트로 완료).
 
-**Phase 2b step 2(스코프 밖, 다음 explore-idea heavy fire 후보)**: `MlbMatchupEloChart.tsx`
-신규(KBO `MatchupEloChart` 병렬 복제) + 매치업 페이지 배선 — 데이터 소스만 확보된 상태.
+**Phase 2b step 2 — ✅ cycle 2085 에서 완료됨**: `MlbMatchupEloChart.tsx`
+신규(KBO `MatchupEloChart` 병렬 복제) + 매치업 페이지 배선 완료 (위 cycle 2085 항목
+참조). 본 pointer 는 stale carry-over였음 (cycle 2116 이 발견 정정 — cycle
+2110/2115 와 동일 silent-drift family: 완료된 항목의 "다음 fire 후보" pointer 를
+미정리 상태로 남겨 근거 없는 재작업 유발 위험).
 
 ## ✅ plan #25 Phase 2 step 1 — MLB Elo 매일 자동 갱신 파이프라인 완료, 매치업 차트는 신규 blocker 발견 (cycle 2082, 2026-08-13)
 
@@ -416,7 +419,7 @@ game_date)) 신규 + `computeMlbEloHistory()`(mlb-elo.ts, `computeMlbEloRatings(
 
 **cron 문자열 정확 일치 함정 자체 발견+수정**: `worker.ts` 의 dispatch 분기가 `cronExpr === '17 18-21,10 * * *'` string literal 완전 일치 조건이라, `wrangler.toml` 만 hour range 를 넓히고 이 문자열을 안 바꿨으면 배포 후 MLB pipeline 전체(신규 elo_update 뿐 아니라 기존 scrape/predict_final 도)가 silent 미발화됐을 뻔함 — 기존 `silent-drift-wave-193` 회귀 테스트가 정규식 검증이라 이 이중화 자체는 못 잡았음. 본 cycle 이 코드 리뷰 중 직접 발견해 두 파일 동기화. 후속 후보(Tier 2, 별도 cycle): cron 문자열 하드코딩 이중화 제거.
 
-**Phase 2b(matchup Elo 추이 차트) 는 신규 스키마 blocker 로 보류**: `mlb_team_elo` 가 `UNIQUE(team_code, season)` 현재 스냅샷만 저장 — KBO(`predictions.home_elo`/`away_elo` 가 매 경기 row 에 쌓여 시계열 자연 발생) 와 달리 historical 시계열이 없어 `MlbMatchupEloChart` 를 그대로 복제 불가. 옵션 3개(히스토리 로그 테이블 신규/on-demand 재계산/Phase 3 로 스코프 전환) 를 plan #25.md 에 박제 — 히스토리 테이블 신규가 권장안. 다음 explore-idea heavy fire 후보.
+**Phase 2b(matchup Elo 추이 차트) 는 신규 스키마 blocker 로 보류**: `mlb_team_elo` 가 `UNIQUE(team_code, season)` 현재 스냅샷만 저장 — KBO(`predictions.home_elo`/`away_elo` 가 매 경기 row 에 쌓여 시계열 자연 발생) 와 달리 historical 시계열이 없어 `MlbMatchupEloChart` 를 그대로 복제 불가. 옵션 3개(히스토리 로그 테이블 신규/on-demand 재계산/Phase 3 로 스코프 전환) 를 plan #25.md 에 박제 — 히스토리 테이블 신규 채택, cycle 2083(테이블+backfill)/2085(차트 배선)로 **완료됨** (본 pointer, cycle 2116 정정 — 위 항목과 동일 stale carry-over 재발).
 
 type-check(4 packages)/lint/test(kbo-data 1107 + moneyball 3740, 전체) 전량 통과. PR 머지 대기.
 
