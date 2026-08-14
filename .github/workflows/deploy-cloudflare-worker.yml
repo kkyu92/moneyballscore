@@ -38,11 +38,26 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Check CLOUDFLARE_API_TOKEN secret
+        id: check_secret
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "has_token=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_token=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy worker
+        if: steps.check_secret.outputs.has_token == 'true'
         working-directory: cloudflare-worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: pnpm exec wrangler deploy
+
+      - name: Warn on missing secret
+        if: steps.check_secret.outputs.has_token == 'false'
+        run: |
+          echo "::warning::CLOUDFLARE_API_TOKEN secret 미설정 — worker 배포 skip. 'gh secret set CLOUDFLARE_API_TOKEN' 으로 등록 필요 (TODOS.md cycle 2090 참조)"
 
       - name: Notify playbook on failure
         if: failure()

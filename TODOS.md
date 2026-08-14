@@ -1,5 +1,23 @@
 # TODOS
 
+## ✅ Cloudflare Worker CI 배포 실패 → 경고 downgrade, 매 push 마다 hub dispatch spam 차단 (cycle 2095, 2026-08-14, fix-incident lite)
+
+cycle 2090 이 root cause 규명(`CLOUDFLARE_API_TOKEN` secret 미설정, 사용자
+액션 필요) 했지만 workflow 자체는 그대로 hard fail 구조 — 그 뒤 cloudflare-worker/**
+건드리는 커밋(cycle 2089/2090/2094 등)마다 CI 가 매번 빨간 실패 + `Notify
+playbook on failure` step 이 매번 허브로 동일 fingerprint(`cron-deploy-cloudflare-worker-failure`)
+알림을 반복 dispatch — 이미 알려진 외부 차단 항목(사용자가 Cloudflare
+dashboard 에서 토큰 발급 후 `gh secret set` 해야 하는 1회성 액션)에 대해 매
+push 마다 동일 알림 재생산하는 노이즈였음.
+
+`.github/workflows/deploy-cloudflare-worker.yml` 에 `Check CLOUDFLARE_API_TOKEN
+secret` step 추가 — secret 부재 시 `Deploy worker` step skip + `::warning::`
+annotation 만 남기고 job 자체는 성공 처리. secret 있는 상태에서 실제 `wrangler
+deploy` 가 진짜로 실패하면 기존처럼 `failure()` 가 여전히 hub dispatch 발동 —
+"알려진 외부 블로커"와 "진짜 배포 실패"를 구분. `CLOUDFLARE_API_TOKEN` 등록은
+여전히 사용자 액션 필요 (TODOS.md 아래 cycle 2090 항목 참조, 본 fix 는 그
+등록 전까지의 CI 노이즈만 제거).
+
 ## ✅ cron 문자열 하드코딩 이중화 CI 가드 추가 (cycle 2094, 2026-08-14, review-code heavy)
 
 cycle 2082 가 발견한 근접 사례(TODOS.md 197행, `wrangler.toml` crons 배열과
