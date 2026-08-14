@@ -1,5 +1,24 @@
 # TODOS
 
+## ✅ review-code(heavy) — SearchForm 헤더 검색창 EN 텍스트 i18n (wave-628, cycle 2142, 2026-08-14)
+
+cycle 2141 explore-idea(heavy) 가 헤더 nav label/description/aria-label EN 치환을
+완료했다고 SUCCESS 박제했지만, 데스크톱 헤더에 항상 렌더되는 `SearchForm`(NavLinks
+안 `<SearchForm compact />`)은 nav 컴포넌트가 아니라 그 범위에서 누락 — `/en/mlb/*`
+페이지에서도 aria-label "사이트 검색"/placeholder "팀, 선수, 일자 검색…"/버튼
+"검색" KO 그대로 노출. 코드 직접 read 검증(review-code heavy) 로 발견.
+
+`SearchForm` 이 `usePathname` 으로 자체 isEn 판별(LeagueSelector/MobileNav 기존
+패턴 재사용) 후 aria-label/placeholder/버튼 텍스트 EN 치환. href(`/search`) 는
+`/en/search` 라우트 자체가 없어 대상 외(KBO/로또와 동일한 기존 스코프 제약 — 변경
+없음). 테스트 2건 추가(KO 유지 + EN 치환). lint/tsc/vitest(440 files/3849 tests,
++2 신규) 전체 green, direct commit+push to main (R4, PR 없음).
+
+**교훈**: nav 관련 i18n sweep 시 `Header.tsx`/`NavLinks.tsx`/`MobileNav.tsx`/
+`LeagueSelector.tsx` 외에도 헤더 nav 영역에 렌더되는 다른 shared 컴포넌트
+(SearchForm 등) 도 grep 대상 포함 필요 — "헤더 nav" 스코프를 파일명 기준으로만
+좁히면 실제 렌더 트리 기준 누락 발생.
+
 ## ✅ explore-idea(heavy) — 헤더/모바일메뉴/리그셀렉터 EN 텍스트 i18n (wave-627, cycle 2141, 2026-08-14)
 
 cycle 2139/2140 이 헤더 nav href locale 버그(EN 방문자 클릭 시 KO 이탈)를 고쳤지만,
