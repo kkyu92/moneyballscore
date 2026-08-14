@@ -1,5 +1,18 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — 헤더/모바일메뉴/리그셀렉터 EN 텍스트 i18n (wave-627, cycle 2141, 2026-08-14)
+
+cycle 2139/2140 이 헤더 nav href locale 버그(EN 방문자 클릭 시 KO 이탈)를 고쳤지만,
+href 만 고쳐지고 화면에 보이는 label/description/aria-label 텍스트는 여전히 KO
+하드코딩이던 gap(cycle 2140 retro carry-over) 해소. `NavLink`/`NavGroup` 에
+`enLabel`/`enDescription` 옵션 필드 추가 + `localizeNavItems()` 가 EN pathname 일 때
+치환(MLB_NAV 만 대상 — KBO/로또는 `/en` 대응 라우트 부재라 실사용 경로 노출 안 됨).
+Header 검색 아이콘/MobileNav 햄버거·nav/LeagueSelector tablist aria-label + 로또
+pill + MLB 베타 배지도 각 컴포넌트 기존 pathname 기반 isEn 판별로 EN 치환.
+layout.tsx 기존 isEn(x-pathname) 을 Header prop 으로 전달. Header/LeagueSelector
+테스트 4건 추가. lint/tsc/vitest(439 files/3847 tests) 전체 green, direct
+commit+push to main (R4, PR 없음).
+
 ## ✅ review-code(heavy) — /mlb/accuracy 검증 + 헤더 nav locale 이슈 발견 (cycle 2139, 2026-08-14)
 
 cycle 2138 신규 배선 `/mlb/accuracy`(KO/EN) 직접 코드 read 검증. `buildAllMlbTeamAccuracy`/
