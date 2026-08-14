@@ -1,5 +1,30 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — /mlb/accuracy AI 적중 기록 페이지 MVP (wave-626, cycle 2138, 2026-08-14)
+
+KBO `/accuracy`(14 TOC 섹션) 대응이 `/mlb` 허브의 소형 인라인 요약뿐이라 완전히 없던 gap
+발견. `buildMlbAccuracySummary`(이미 존재, `/mlb` 허브용)를 재사용해 MVP scope 로
+독립 라우트 배선:
+
+- 스탯 카드(검증 완료/적중률/Brier/보정오차) + 캘리브레이션 다이어그램 + 확신도별
+  tier 그리드 + 팀별 적중률 테이블 4섹션
+- `buildMlbAccuracySummary` 에 `calibrationGap` 기반 `gap` 필드 신규 추가 (KBO 보정오차
+  카드 정합, 기존 호출부 `/mlb`, `/en/mlb` 는 추가 필드라 영향 없음)
+- `buildAllMlbTeamAccuracy` 신규 — `mlb_schedule` home/away_team_code 직접 컬럼 집계
+  (KBO `buildAllTeamAccuracy` 의 games/teams FK join 불필요, `deriveMlbOutcome` 재사용)
+- `MlbAccuracyDashboard` 컴포넌트(locale prop, KO/EN 단일 컴포넌트) — 계산 로직은
+  `buildAccuracyData.ts` 의 PredRow/Bucket/ConfidenceTier 제네릭 함수 그대로 재사용
+  (KBO CalibrationChart/StatCard 는 별도 함수로 독립 작성, 기존 페이지 미변경 — 저risk)
+- `/mlb/accuracy`, `/en/mlb/accuracy` 페이지 + `sitemap.ts` + `/mlb` 허브 카드 + 헤더
+  메가메뉴("경기·팀" 그룹) 동기
+
+**후속 wave 후보** (Tier 3 large, 한 사이클 scope 초과라 보류): rolling accuracy 추세 /
+Brier trend / 요일별 적중률 / 팀별 예측 편향 / 상대팀별 강약 분석 / 팩터별 적중률.
+
+`pnpm lint` / `tsc --noEmit` / `vitest run`(438 files/3839 tests, 신규 9건 포함) 전체
+통과. main 직접 commit (R4, 11개 파일 — 신규 5 + 기존 확장 6, PR 없이 바로 merge —
+최근 explore-idea heavy 다수와 동일 패턴).
+
 ## ✅ lotto(lite) — 30-cycle gap 헬스체크, site 데이터 정합 확인 (cycle 2137, 2026-08-14)
 
 trigger 6 (마지막 lotto 발화 cycle 2106 이후 31 cycle 경과, ≥30 임계) 충족해 발화.
