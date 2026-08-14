@@ -1,5 +1,18 @@
 # TODOS
 
+## ✅ review-code(heavy) — /mlb/accuracy 검증 + 헤더 nav locale 이슈 발견 (cycle 2139, 2026-08-14)
+
+cycle 2138 신규 배선 `/mlb/accuracy`(KO/EN) 직접 코드 read 검증. `buildAllMlbTeamAccuracy`/
+`buildMlbAccuracySummary` 양쪽 cohort 필터(`MLB_PRODUCTION_COHORT_RULES`)+`deriveMlbOutcome`
+일관 사용, `MlbAccuracyDashboard` KO/EN STRINGS parity 정상, sitemap/header 배선 정상.
+타겟 vitest 재실행 9/9 pass. drift 없음, 코드 변경 불필요.
+
+**신규 발견 (site-wide, 이번 cycle 범위 밖)**: `Header.tsx` 의 `KBO_NAV`/`MLB_NAV` 전체
+href 가 로케일 비인식 하드코딩(예: `/mlb/accuracy`, `/accuracy`) — `NavLinks.tsx`/
+`MegaMenu.tsx` 어디에도 pathname 기반 `/en` prefix 로직 없음. `/en/mlb` 방문자가 헤더
+메가메뉴 클릭 시 KO 페이지로 이동. wave-626 신규 유입 아니라 기존 전체 nav 항목에
+이미 있던 구조적 gap. 다음 fix-incident 또는 info-architecture-review 후보로 기록.
+
 ## ✅ explore-idea(heavy) — /mlb/accuracy AI 적중 기록 페이지 MVP (wave-626, cycle 2138, 2026-08-14)
 
 KBO `/accuracy`(14 TOC 섹션) 대응이 `/mlb` 허브의 소형 인라인 요약뿐이라 완전히 없던 gap
