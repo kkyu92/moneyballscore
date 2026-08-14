@@ -1484,3 +1484,17 @@ family wave 11~17 재발 패턴과 동일 구조 예방).
 
 전체 3817/3817 pass, tsc/lint clean. main 직접 commit + push (R4/R7,
 단일 테스트 파일, PR 생략).
+
+## ✅ explore-idea(heavy) — MLB games 리스트 top pick 딥링크 (cycle 2132, 2026-08-14)
+
+cycle 2131 review-code(lite) 회고가 남긴 KBO/MLB parity gap 후속. KBO
+`predictions/[date]` 의 "최고 자신감 픽" (`topPick`, `TOP_PICK_CONF_MIN` 기반
+`confToWinProb`) 패턴을 MLB `games/[date]` KO/EN 리스트 페이지에 이식.
+
+- `TOP_PICK_MIN_WIN_PCT = round(confToWinProb(TOP_PICK_CONF_MIN) * 100) = 55`
+  (KBO 임계값 재사용, 신규 임계값 발명 없음)
+- 최고 win% 픽 카드에 앵커 딥링크(`#pick-<id>`) + ⭐ 배지 + ring 하이라이트
+- 신규 데이터 모델/마이그레이션 없음 — 기존 `home_win_prob` 로만 계산
+- wave-624 가드 테스트 신규 (KO/EN topPick 계산식 + 앵커 + 하이라이트 parity, 9 assertion)
+- `pnpm lint` / `tsc --noEmit` / `vitest run`(436 files, 3828 tests) 전부 clean
+- PR #2955 squash 머지 완료 (state=MERGED 실측 확인, commit 42235760)
