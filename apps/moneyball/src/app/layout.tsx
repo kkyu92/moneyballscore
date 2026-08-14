@@ -146,7 +146,7 @@ export default async function RootLayout({
           }}
         />
         <ThemeProvider>
-          <Header />
+          <Header isEn={isEn} />
           <main
             id="main"
             tabIndex={-1}

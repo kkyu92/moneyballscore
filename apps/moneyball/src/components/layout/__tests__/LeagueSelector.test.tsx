@@ -140,4 +140,22 @@ describe("LeagueSelector", () => {
     const kboTab = screen.getByRole("tab", { name: /KBO/ });
     expect(kboTab).toHaveAttribute("aria-selected", "false");
   });
+
+  it("EN pathname(/en/mlb/*) — aria-label 'League' + 로또 pill 'Lotto' + MLB 'Beta' badge (cycle 2141 nav label i18n)", () => {
+    mockedUsePathname.mockReturnValue("/en/mlb/team/NYY");
+    render(<LeagueSelector />);
+
+    expect(screen.getByRole("tablist")).toHaveAttribute("aria-label", "League");
+    expect(screen.getByRole("tab", { name: /Lotto/ })).toBeTruthy();
+    expect(screen.getByText("Beta")).toBeTruthy();
+    expect(screen.queryByText("베타")).toBeNull();
+  });
+
+  it("KO pathname — aria-label '리그 선택' + '로또'/'베타' KO 유지 (변경 없음)", () => {
+    mockedUsePathname.mockReturnValue("/lotto/methodology");
+    render(<LeagueSelector />);
+
+    expect(screen.getByRole("tablist")).toHaveAttribute("aria-label", "리그 선택");
+    expect(screen.getByRole("tab", { name: /로또/ })).toBeTruthy();
+  });
 });

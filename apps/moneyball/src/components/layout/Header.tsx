@@ -7,8 +7,15 @@ import { NavLinks } from "./NavLinks";
 import { LeagueSelector, type League } from "./LeagueSelector";
 import type { NavIconName } from "./nav-icon";
 
-export type NavLink = { href: string; label: string; description?: string; icon?: NavIconName };
-export type NavGroup = { label: string; items: NavLink[] };
+export type NavLink = {
+  href: string;
+  label: string;
+  enLabel?: string;
+  description?: string;
+  enDescription?: string;
+  icon?: NavIconName;
+};
+export type NavGroup = { label: string; enLabel?: string; items: NavLink[] };
 export type NavItem = NavLink | NavGroup;
 
 export function isNavGroup(item: NavItem): item is NavGroup {
@@ -24,14 +31,36 @@ function withLocale(href: string, isEn: boolean): string {
   return href;
 }
 
+// nav label/description 텍스트도 EN 라우트에서 KO 그대로 노출되던 버그 (cycle 2141 발견,
+// href 이탈 버그(cycle 2139/2140)와 별개 issue) — enLabel/enDescription 있으면 치환.
+function withLocaleText<T extends { label: string; enLabel?: string }>(item: T, isEn: boolean): T {
+  if (!isEn || !item.enLabel) return item;
+  return { ...item, label: item.enLabel };
+}
+
 export function localizeNavItems(items: NavItem[], pathname: string): NavItem[] {
   const isEn = pathname === "/en" || pathname.startsWith("/en/");
   if (!isEn) return items;
-  return items.map((item) =>
-    isNavGroup(item)
-      ? { ...item, items: item.items.map((sub) => ({ ...sub, href: withLocale(sub.href, isEn) })) }
-      : { ...item, href: withLocale(item.href, isEn) },
-  );
+  return items.map((item) => {
+    if (isNavGroup(item)) {
+      return withLocaleText(
+        {
+          ...item,
+          items: item.items.map((sub) =>
+            withLocaleText(
+              { ...sub, href: withLocale(sub.href, isEn), description: sub.enDescription ?? sub.description },
+              isEn,
+            ),
+          ),
+        },
+        isEn,
+      );
+    }
+    return withLocaleText(
+      { ...item, href: withLocale(item.href, isEn), description: item.enDescription ?? item.description },
+      isEn,
+    );
+  });
 }
 
 // KBO_NAV: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
@@ -78,19 +107,21 @@ const KBO_NAV: NavItem[] = [
 ];
 
 const MLB_NAV: NavItem[] = [
-  { href: "/mlb", label: "오늘" },
+  { href: "/mlb", label: "오늘", enLabel: "Today" },
   {
     label: "경기·팀",
+    enLabel: "Games & Teams",
     items: [
-      { href: "/mlb/standings", label: "AL/NL 순위", description: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
-      { href: "/mlb/team", label: "팀", description: `${MLB_TEAM_COUNT}팀 시즌 stat`, icon: "shield" },
-      { href: "/mlb/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
+      { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings", description: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
+      { href: "/mlb/team", label: "팀", enLabel: "Teams", description: `${MLB_TEAM_COUNT}팀 시즌 stat`, enDescription: `${MLB_TEAM_COUNT}-team season stats`, icon: "shield" },
+      { href: "/mlb/accuracy", label: "적중 기록", enLabel: "Accuracy Track Record", description: "AI 예측 성과 트래킹", enDescription: "AI prediction performance tracking", icon: "target" },
       { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
-      { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, icon: "file-text" },
+      { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, enLabel: `${MLB_FACTOR_COUNTS.total} Factors`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, enDescription: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} weights`, icon: "file-text" },
     ],
   },
   {
     label: "포스트시즌",
+    enLabel: "Postseason",
     items: [
       { href: "/mlb/wild-card", label: "Wild Card", description: "AL/NL Wild Card race", icon: "target" },
       { href: "/mlb/postseason", label: "Postseason", description: "WC / DS / LCS / WS bracket", icon: "award" },
@@ -112,7 +143,7 @@ export const LEAGUE_NAVS: Record<League, NavItem[]> = {
   lotto: [{ label: "로또", items: LOTTO_LINKS }],
 };
 
-export function Header() {
+export function Header({ isEn = false }: { isEn?: boolean } = {}) {
   return (
     <header className="border-b border-brand-700 bg-brand-800">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -128,7 +159,7 @@ export function Header() {
         <div className="flex items-center md:hidden">
           <Link
             href="/search"
-            aria-label="검색"
+            aria-label={isEn ? "Search" : "검색"}
             className="p-2 text-brand-200 hover:text-white"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

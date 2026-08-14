@@ -25,6 +25,7 @@ function isActive(href: string, pathname: string): boolean {
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() ?? "/";
+  const isEn = pathname === "/en" || pathname.startsWith("/en/");
   const league = leagueFromPath(pathname);
   const navItems = localizeNavItems(LEAGUE_NAVS[league], pathname);
 
@@ -39,7 +40,7 @@ export function MobileNav() {
       <button
         onClick={() => setOpen(!open)}
         className="p-2 min-h-11 min-w-11 text-brand-200 hover:text-white focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 rounded"
-        aria-label="메뉴"
+        aria-label={isEn ? "Menu" : "메뉴"}
         aria-expanded={open}
       >
         <svg
@@ -70,7 +71,7 @@ export function MobileNav() {
         <nav
           data-league={league}
           className="absolute top-16 left-0 right-0 bg-brand-800 border-b border-brand-700 shadow-lg z-50"
-          aria-label="모바일 메뉴"
+          aria-label={isEn ? "Mobile menu" : "모바일 메뉴"}
         >
           <LeagueSelector variant="mobile" onSelect={() => setOpen(false)} />
           <Accordion.Root

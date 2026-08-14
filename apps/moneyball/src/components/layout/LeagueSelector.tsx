@@ -8,14 +8,16 @@ export type League = "kbo" | "mlb" | "lotto";
 type LeagueDef = {
   id: League;
   label: string;
+  enLabel?: string;
   href: string;
   badge?: string;
+  enBadge?: string;
 };
 
 export const LEAGUES: readonly LeagueDef[] = [
   { id: "kbo", label: "KBO", href: "/" },
-  { id: "mlb", label: "MLB", href: "/mlb", badge: "베타" },
-  { id: "lotto", label: "로또", href: "/lotto/methodology" },
+  { id: "mlb", label: "MLB", href: "/mlb", badge: "베타", enBadge: "Beta" },
+  { id: "lotto", label: "로또", enLabel: "Lotto", href: "/lotto/methodology" },
 ] as const;
 
 export function leagueFromPath(pathname: string): League {
@@ -43,13 +45,14 @@ export function LeagueSelector({
 }) {
   const pathname = usePathname();
   const active = leagueFromPath(pathname ?? "/");
+  const isEn = (pathname ?? "/") === "/en" || (pathname ?? "/").startsWith("/en/");
 
   const isMobile = variant === "mobile";
 
   return (
     <div
       role="tablist"
-      aria-label="리그 선택"
+      aria-label={isEn ? "League" : "리그 선택"}
       className={
         isMobile
           ? "flex gap-1.5 px-6 py-3 border-b border-brand-700"
@@ -74,7 +77,7 @@ export function LeagueSelector({
                 : "bg-brand-700/40 text-brand-200 hover:bg-brand-700 hover:text-white"
             }`}
           >
-            <span>{league.label}</span>
+            <span>{isEn && league.enLabel ? league.enLabel : league.label}</span>
             {league.badge && (
               <span
                 className={`rounded-sm px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
@@ -83,7 +86,7 @@ export function LeagueSelector({
                     : "bg-brand-800/40 text-brand-300"
                 }`}
               >
-                {league.badge}
+                {isEn && league.enBadge ? league.enBadge : league.badge}
               </span>
             )}
           </Link>
