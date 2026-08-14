@@ -71,4 +71,42 @@ describe("Footer", () => {
       expect(link.className).toMatch(/focus-visible:/);
     }
   });
+
+  it("isEn=true 시 사이트맵/법적 고지 aria-label + column heading + tagline/disclaimer EN 치환", () => {
+    render(<Footer isEn />);
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByRole("navigation", { name: "Sitemap" })).toBeInTheDocument();
+    expect(within(footer).getByRole("navigation", { name: "Legal" })).toBeInTheDocument();
+    const titles = ["AI Predictions", "Community", "Teams & Players", "Reviews & Seasons", "Help", "MLB", "Lotto"];
+    for (const title of titles) {
+      expect(screen.getByRole("heading", { level: 2, name: title })).toBeInTheDocument();
+    }
+    expect(screen.getByText("Sabermetrics-based KBO game prediction service")).toBeInTheDocument();
+    expect(
+      screen.getByText("Predictions are statistical model estimates and do not guarantee actual results.")
+    ).toBeInTheDocument();
+  });
+
+  it("isEn=true 시 legal link 텍스트 EN 치환, href 는 /privacy /terms /contact 그대로 (no /en 대응 라우트)", () => {
+    render(<Footer isEn />);
+    const legal = screen.getByRole("navigation", { name: "Legal" });
+    expect(within(legal).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute("href", "/privacy");
+    expect(within(legal).getByRole("link", { name: "Terms of Service" })).toHaveAttribute("href", "/terms");
+    expect(within(legal).getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/contact");
+  });
+
+  it("isEn=true 시 MLB column href 만 /en 접두 치환, 나머지 column href 는 유지 (Header withLocale 과 동일 scope)", () => {
+    render(<Footer isEn />);
+    const mlbHeading = screen.getByRole("heading", { level: 2, name: "MLB" });
+    const mlbColumn = mlbHeading.closest("details") as HTMLElement;
+    expect(within(mlbColumn).getByRole("link", { name: "Today's Games" })).toHaveAttribute("href", "/en/mlb");
+    expect(within(mlbColumn).getByRole("link", { name: "AL/NL Standings" })).toHaveAttribute(
+      "href",
+      "/en/mlb/standings"
+    );
+
+    const aiHeading = screen.getByRole("heading", { level: 2, name: "AI Predictions" });
+    const aiColumn = aiHeading.closest("details") as HTMLElement;
+    expect(within(aiColumn).getByRole("link", { name: "Today's Games" })).toHaveAttribute("href", "/");
+  });
 });

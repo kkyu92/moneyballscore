@@ -251,7 +251,7 @@ describe("Footer SITEMAP — 로또 column 박제 (plan #6 Step B)", () => {
 
   it("도움말 column 안 /lotto/methodology entry 부재 (로또 column 으로 이동)", () => {
     const helpColumnMatch = src.match(
-      /title:\s*"도움말",\s*links:\s*\[([\s\S]*?)\]/,
+      /title:\s*"도움말",[\s\S]*?links:\s*\[([\s\S]*?)\]/,
     );
     expect(helpColumnMatch).toBeTruthy();
     if (helpColumnMatch) {
