@@ -1,5 +1,35 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB 월별 캘린더 히트맵 신규 + monthGrid 실측 버그 fix (cycle 2123, 2026-08-14)
+
+KBO `/calendar`(일별 예측 수 + 적중률 히트맵)를 MLB 로 병렬 복제(`/mlb/calendar`).
+MLB `predictions.is_correct` 는 전량 NULL(`deriveMlbOutcome.ts` 참조)이라
+`mlb_schedule` + `predictions(league=mlb)` 조인 후 직접 derive
+(`buildMlbAccuracySummary` 동일 패턴 재사용).
+
+- 월 grid 골격(`getKstMonthInfo`/`buildEmptyGrid`)을 `@/lib/calendar/monthGrid`
+  로 추출해 KBO/MLB 양쪽 공유. **추출 중 실제 프로덕션 버그 발견+수정**:
+  `new Date(iso + 'T00:00:00+09:00')` 로 KST 자정을 파싱한 뒤 `getUTCDay()`/
+  `getUTCDate()` 를 읽으면 그 인스턴트가 "전날 15:00 UTC" 로 변환돼 있어(KST=UTC+9),
+  (1) 캘린더 요일 정렬이 매달 1칸씩 밀림(예: 2026-08-01 토요일이 금요일 칸에 렌더)
+  (2) 다음달 패딩 로직(`d.setUTCDate(+1)` 후 같은 타임존 파싱 왕복)이 같은 UTC
+  날짜로 수렴해 트레일링 6칸이 전부 말일 날짜로 중복 렌더 — 두 결함 모두
+  `Date.UTC(y,m-1,d)` 컴포넌트 기반 순수 캘린더 연산으로 교체해 수정. KBO
+  `/calendar` 페이지가 이 골격을 그대로 써왔으므로 본 fix 로 KBO 페이지도
+  동시에 정정됨(별도 회귀 없음, 기존 `calendar-isr.test.ts` 그대로 pass).
+- `getMlbMonthHeatmap`(신규, `buildMlbCalendarHeatmap.ts`) — `mlb_schedule`
+  기간 조회 + `predictions` 조인, `status='final'` 경기만 verified/correct 집계,
+  미완료 경기는 total 만 카운트.
+- `/mlb` 허브에 캘린더 링크 카드 추가, `sitemap.ts` 에 `/mlb/calendar` 등록.
+- 테스트 4파일 신규(monthGrid 순수 로직 7건 — 버그 회귀 가드 포함 / MLB 히트맵
+  쿼리 mock 4건 / 페이지 source-guard 6건 / sitemap 1건). 전체 3807/3807 pass,
+  `tsc --noEmit` clean, lint clean.
+- PR #2953 squash 머지 완료(state=MERGED 실측 확인). local main 은 squash 전
+  원본 커밋을 이미 갖고 있어 origin/main(squash 커밋)과 hash 만 다르고 내용은
+  동일 — merge commit 으로 동기화(cycle 2118 `326ebb20` 과 동일 패턴).
+- **EN 미러(`/en/mlb/calendar`) 는 후속 cycle 후보로 남김** — 최근 KO→EN parity
+  는 별도 review-code cycle 로 처리해온 기존 패턴(cycle 2118→2119) 정합.
+
 ## ✅ review-code(heavy) — validator.ts 환각검사 소수점 percent 동기화 갭 fix (cycle 2122, 2026-08-14)
 
 cycle 2121 이 지목한 두 대형 파일 재점검. `analysis/page.tsx`(2802줄)는 v1.8 가중치
