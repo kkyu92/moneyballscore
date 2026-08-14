@@ -1,5 +1,33 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB 팀 프로필 시즌 전체 수렴 픽 성적 (wave-625, cycle 2135, 2026-08-14)
+
+`getConvergencePickTeamStats`/`TeamConvergencePickRecord`(KBO, wave-607)가 `/teams/[code]`에
+팀별 강수렴/완전수렴 픽 시즌 성적을 이미 표시하지만 `/mlb/team/[code]`에는 대응 기능이 없던
+gap 발견. `/mlb/matchup/[teamA]/[teamB]`에는 이미 두 팀 한정 집계
+(`MlbMatchupConvergencePickRecord`, plan #24 Phase 3c)가 있었는데, 팀 프로필 단독 페이지엔
+시즌 전체 집계 함수(`getMlbConvergencePickTeamStats`)자체가 없어 완전히 빠져 있었음.
+
+- `fetchMlbConvergencePickDetailedResults` 신규 — `mlb_schedule` 전체 스캔(`status='final'`)
+  + `predictions` 조인, KBO `fetchConvergencePickDetailedResults`의 MLB 대응
+  (`buildMlbAccuracySummary`와 동일한 cutoff-불필요 전량 스캔 패턴 재사용)
+- `evaluateMlbConvergencePickRow`로 판정 로직(duel 계산 → `minFactors` 게이팅 → 승패 산출)을
+  기존 pair-한정 fetch와 공유 추출 (KBO wave-608 `evaluateConvergencePickRow`와 동일 리팩터,
+  중복 회피)
+- `getMlbConvergencePickTeamStats` export — `computeConvergenceTeamStats`가 이미
+  generic(`MlbTeamCode` 지원, plan24-phase3c 테스트로 사전 검증됨)이라 로직 재사용만 필요
+- `MlbTeamConvergencePickRecord` 컴포넌트 신규 — `MlbMatchupConvergencePickRecord`의
+  `locale` prop 패턴 그대로 재사용 (KO/EN 단일 컴포넌트, 텍스트만 분기)
+- `mlb/team/[code]`, `en/mlb/team/[code]` 양쪽 페이지 factor averages 섹션 뒤·Elo 추이
+  섹션 앞에 배선 (KBO 배치 순서 정합)
+
+`pnpm lint` clean, `pnpm test` 3835/3835 pass(신규 14건 포함, `wave625-mlb-team-convergence-record.test.ts`),
+`tsc --noEmit` clean. main 직접 commit (R4, 5개 파일 — 신규 컴포넌트 1 + 신규 테스트 1 +
+lib 함수 확장 1 + 페이지 배선 2, PR 없이 바로 merge — 최근 explore-idea heavy 다수가
+동일 패턴). 2-chain alternation lock 미탐지(직전 8 사이클 distinct=5: review-code/
+operational-analysis/fix-incident/info-architecture-review/explore-idea). skill-evolution
+trigger 5개 전부 미충족(milestone 아님, review-code 10/20 fire).
+
 ## ✅ review-code(heavy) — wave-624 top-pick 딥링크 직접 코드 read 검증 (cycle 2133, 2026-08-14)
 
 cycle 2132 가 배포한 MLB games/[date] top-pick 딥링크(#2955)를 lint 가 아닌 실제 파일
