@@ -66,8 +66,11 @@ describe('wave-240: stale cycle-ref annotations removed', () => {
     it('no cycle 1151 ref', () => {
       expect(src).not.toMatch(/\(cycle 1151\)/);
     });
-    it('migration note preserved', () => {
-      expect(src).toMatch(/033-037 applied/);
+    it('mlb_game_date query fix preserved (cycle 2114 games!inner silent-empty fix)', () => {
+      expect(src).toMatch(/mlb_game_date/);
+    });
+    it('games!inner KBO-only join not reintroduced (cycle 2114 silent-empty fix)', () => {
+      expect(src).not.toMatch(/'games\.game_date'/);
     });
   });
 
@@ -76,8 +79,11 @@ describe('wave-240: stale cycle-ref annotations removed', () => {
     it('no cycle 1151 ref', () => {
       expect(src).not.toMatch(/\(cycle 1151\)/);
     });
-    it('migration note preserved', () => {
-      expect(src).toMatch(/033-037 applied/);
+    it('mlb_game_date query fix preserved (cycle 2114 games!inner silent-empty fix)', () => {
+      expect(src).toMatch(/mlb_game_date/);
+    });
+    it('games!inner KBO-only join not reintroduced (cycle 2114 silent-empty fix)', () => {
+      expect(src).not.toMatch(/'games\.game_date'/);
     });
   });
 
@@ -116,8 +122,11 @@ describe('wave-240: stale cycle-ref annotations removed', () => {
     it('no cycle 1151 ref', () => {
       expect(src).not.toMatch(/\(cycle 1151\)/);
     });
-    it('migration note preserved', () => {
-      expect(src).toMatch(/033-037 적용 완료/);
+    it('mlb_game_date query fix preserved (cycle 2114 games!inner silent-empty fix)', () => {
+      expect(src).toMatch(/mlb_game_date/);
+    });
+    it('games!inner KBO-only join not reintroduced (cycle 2114 silent-empty fix)', () => {
+      expect(src).not.toMatch(/'games\.game_date'/);
     });
   });
 
@@ -126,8 +135,11 @@ describe('wave-240: stale cycle-ref annotations removed', () => {
     it('no cycle 1151 ref', () => {
       expect(src).not.toMatch(/\(cycle 1151\)/);
     });
-    it('migration note preserved', () => {
-      expect(src).toMatch(/033-037 적용 완료/);
+    it('mlb_game_date query fix preserved (cycle 2114 games!inner silent-empty fix)', () => {
+      expect(src).toMatch(/mlb_game_date/);
+    });
+    it('games!inner KBO-only join not reintroduced (cycle 2114 silent-empty fix)', () => {
+      expect(src).not.toMatch(/'games\.game_date'/);
     });
   });
 
