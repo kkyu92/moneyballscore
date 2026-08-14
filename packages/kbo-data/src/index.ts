@@ -68,6 +68,10 @@ export type { MlbFactorInputs } from './factors/mlb-base';
 export { computeMlbWaterfall } from './factors/mlb-waterfall';
 export type { MlbWaterfallInput, MlbWaterfallBar, MlbWaterfallPair } from './factors/mlb-waterfall';
 
+// MLB 개별 경기 AI 종합 분석 요약 prose (analysis/game GameAnalysisProse parity — cycle 2110)
+export { buildMlbGameOverview } from './factors/mlb-overview';
+export type { MlbGameOverviewNarrative } from './factors/mlb-overview';
+
 // MLB Shadow C 학습 milestone (walk-forward expanding window)
 export { MILESTONE_TRIGGERS as MLB_SHADOW_C_MILESTONES } from './factors/mlb-shadow-c';
 

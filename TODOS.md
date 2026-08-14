@@ -1,5 +1,29 @@
 # TODOS
 
+## ✅ MLB 개별 경기 페이지(KO) "AI 종합 분석 요약" prose 추가 (cycle 2110, 2026-08-14, explore-idea heavy)
+
+TODOS cycle 2098/2099 항목이 남겨둔 "KBO 의 나머지 parity(waterfall/debate/verdict/postview)"
+후보 중 실제로 뜯어보니 debate/verdict/postview 는 KBO 전용 LLM 토론 파이프라인 산출물이고
+MLB 예측 파이프라인(`mlb-pipeline.ts`)엔 애초에 `reasoning`/`confidence`/`debate_version` 자체가
+없음(순수 정량 모델) — 컴포넌트 wiring 문제가 아니라 신규 LLM 파이프라인이 필요한 훨씬 큰
+스코프였음(자가 검증 rubric: 시간비용 large, 별도 plan 후보로 분리).
+
+대신 즉시 착수 가능한 작은 조각으로 스코프 축소: cycle 2104 가 이미 계산해둔
+`computeMlbWaterfall` bar(팩터별 기여도 pp + 방향)를 재사용해 KBO `GameAnalysisProse`
+패턴과 동일한 "AI 종합 분석 요약" prose 섹션을 순수 함수(`buildMlbGameOverview`,
+`packages/kbo-data/src/factors/mlb-overview.ts`) + 컴포넌트(`MlbGameOverview.tsx`)로
+신규 작성, MLB KO 게임 상세 페이지에 배선(점수 요약 섹션과 팩터 breakdown 섹션 사이).
+신규 DB 조회/계산 없음(bar 서버에서 1회 계산해 prose + 기존 waterfall chart 양쪽 재사용).
+회귀 테스트 4건 추가. `pnpm lint`/`tsc --noEmit`/`pnpm test`(427+86 files 전부) pass.
+
+**의도적으로 EN 미러엔 미배선** — waterfall bar label(`computeMlbWaterfall` 산출, 예:
+"선발 FIP")이 이미 한국어 하드코딩(기존 `MlbFactorWaterfallChart`도 EN 페이지에서 동일하게
+한국어 라벨 노출 중인 pre-existing 제약, 본 cycle 이 만든 gap 아님) — bar label 자체의
+locale-aware화(다음 explore-idea 후보) 없이 prose 만 영문 번역하면 문장 안에 한글 팩터명이
+섞이는 반쪽 결과라 skip. 다음 explore-idea heavy 후보로 재기록: (1) computeMlbWaterfall
+label 을 locale 파라미터 받도록 확장 (2) EN 버전 buildMlbGameOverview 문장 템플릿 (3) 그 후
+EN 페이지 배선.
+
 ## ✅ MLB EN 개별 경기 페이지 SportsEvent JSON-LD + Waterfall + ShareButtons/RelatedLinks KO parity 정정 (cycle 2109, 2026-08-14, review-code heavy)
 
 KO page.tsx 가 cycle 2099(SportsEvent JSON-LD)/2104(MlbFactorWaterfallChart)/2107
