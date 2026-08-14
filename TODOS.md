@@ -1,5 +1,26 @@
 # TODOS
 
+## ✅ operational-analysis(lite) — CE 전면 정체 지속 재확인 + predict cron 정상 동작 검증 (cycle 2121, 2026-08-14)
+
+`scripts/op-analysis-cohort.ts` 재실행(env 소싱 후 root 에서 정상 동작, cycle 2093 이
+지적한 node_modules desync 워크어라운드 불필요 — 이미 해소된 듯). 결과:
+
+- **전체 pre_game n=299** (v1.8 274 + v1.8-credit-fail 25) — cycle 2115(op-analysis
+  heavy, 6 사이클 전)측정 n=299 와 **완전 동일**. 6 사이클(수 일) 동안 신규 pre_game
+  예측이 정확히 0건 늘지 않은 것 아니라(cron 은 매일 돎), scoring_rule 분포가 안 변한 것 —
+  즉 CE(CREDIT_EXHAUSTED) 100% fallback 지속 확정 재확인. 비CE 표본은 cycle 1550 이후
+  n=47 로 계속 동결(신규 0건, 이번 cycle 도 동일). 사용자 Anthropic 크레딧 재충전 전까지
+  불변 상태 — 신규 발견 없음, CLAUDE.md 기존 서술과 정합.
+- **predict cron 정상 동작 실측 확인**: `pipeline_runs` 2026-08-14 `mode=predict` row
+  6건(01~06시 UTC, 매시 정각) 전부 `games_found=5 / predictions=0 / status=success`,
+  `skipped_detail` 사유 전부 `window_too_early` — 처음엔 "predictions=0 mismatch"
+  실측 alert 패턴(CLAUDE.md 사례 11)처럼 보였으나, KBO 저녁 19시 경기를 새벽 UTC 시간대
+  cron 이 매시 폴링하며 예측 생성 window 가 열리기 전이라 정상 skip 하는 설계 동작 —
+  실제 silent drop 아님(오탐 배제, 코드 변경 불필요).
+
+가중치 조정 불필요(v1.8 유지 확정 상태 변화 없음). 코드 변경 0 — 데이터 재측정 +
+cron 오탐 배제만.
+
 ## ✅ review-code baseline 재확인 — 신규 issue/fix 후보 부재, 기존 stale carry-over 4건 정정 (cycle 2120, 2026-08-14, review-code lite)
 
 cycle 2096 이후 24 사이클 만의 review-code 재점검. open hub-dispatch issue 0건, approved
