@@ -9,6 +9,7 @@ import {
   normalizeMlbTeamCode,
   toMlbStatsApiCode,
   mlbShortTeamName,
+  MLB_TEAMS,
   type MlbTeamCode,
 } from "@moneyball/shared";
 import { MetricRegistry, type MetricSlug, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
@@ -66,7 +67,15 @@ interface ScheduleRow {
   home_score: number | null;
   away_score: number | null;
   status: string;
+  game_datetime_utc: string;
 }
+
+const MLB_EVENT_STATUS: Record<string, string> = {
+  postponed: 'https://schema.org/EventPostponed',
+  final: 'https://schema.org/EventCompleted',
+  in_progress: 'https://schema.org/EventScheduled',
+  scheduled: 'https://schema.org/EventScheduled',
+};
 
 export default async function GameDetail({ params }: PageParams) {
   const { date, slug } = await params;
@@ -86,7 +95,7 @@ export default async function GameDetail({ params }: PageParams) {
   // + predictions(external_game_id, league='mlb') 조인으로만 조회 가능 (migration 038).
   const scheduleResult = await supabase
     .from('mlb_schedule')
-    .select('external_game_id, home_score, away_score, status')
+    .select('external_game_id, home_score, away_score, status, game_datetime_utc')
     .eq('game_date', date)
     .eq('home_team_code', dbHomeCode)
     .eq('away_team_code', dbAwayCode)
@@ -129,8 +138,36 @@ export default async function GameDetail({ params }: PageParams) {
   const winnerCode = mlbShortTeamName(homeWinProb >= 0.5 ? home : away);
   const conf = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
 
+  // SportsEvent 스키마 — KBO analysis/game/[id] 패턴 parity (Google 스포츠 리치 결과 후보).
+  const homeFullName = MLB_TEAMS[home].name;
+  const awayFullName = MLB_TEAMS[away].name;
+  const pageUrl = `${SITE_URL}/mlb/games/${date}/${slug}`;
+  const sportsEventLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${awayFullName} vs ${homeFullName}`,
+    startDate: schedule.game_datetime_utc,
+    sport: "Baseball",
+    eventStatus: MLB_EVENT_STATUS[schedule.status] ?? MLB_EVENT_STATUS.scheduled,
+    location: { "@type": "Place", name: MLB_TEAMS[home].stadium },
+    homeTeam: { "@type": "SportsTeam", name: homeFullName },
+    awayTeam: { "@type": "SportsTeam", name: awayFullName },
+    url: pageUrl,
+    organizer: {
+      "@type": "SportsOrganization",
+      "@id": "https://www.mlb.com",
+      url: "https://www.mlb.com",
+      name: "Major League Baseball",
+      alternateName: "MLB",
+    },
+  };
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventLd) }}
+      />
       <Breadcrumb items={[
         { label: 'MLB 분석', href: '/mlb' },
         { label: date, href: `/mlb/games/${date}` },

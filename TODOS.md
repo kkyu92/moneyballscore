@@ -1,6 +1,22 @@
 # TODOS
 
-## 🔭 explore-idea(lite) — MLB 개별 경기 분석 페이지 parity gap 발견 (cycle 2098, 2026-08-14)
+## ✅ MLB 개별 경기 분석 페이지 parity — SportsEvent JSON-LD 추가 + 진단 정정 (cycle 2099, 2026-08-14, explore-idea heavy)
+
+cycle 2098 이 "MLB 는 개별 경기 단위 분석 페이지가 아예 없음" 이라 진단했으나 **부정확** —
+`/mlb/games/[date]/[slug]/page.tsx` 가 이미 실존(route + `opengraph-image.tsx` +
+`twitter-image.tsx` + Breadcrumb + 5팩터 breakdown, 오늘 커밋 f4796c0b 에서 mlb_schedule
+조인 404 버그까지 수정됨). cycle 2098 sweep 이 이 라우트를 놓친 것으로 보임 — 신규 route
+family 를 또 만들면 중복이었을 것.
+
+실제 남은 gap 은 KBO `analysis/game/[id]` 대비 훨씬 작음: SportsEvent JSON-LD 부재
+(구조화 데이터 리치 결과 후보 누락)만 확인 → 추가 완료 (`MLB_TEAMS` name/stadium +
+`mlb_schedule.game_datetime_utc` + status→eventStatus 매핑, KBO 패턴 그대로 재사용).
+회귀 가드 테스트 1건 추가. Waterfall/debate/verdict/postview 등 KBO 의 나머지 parity 는
+여전히 large 스코프(MLB 전용 weight map/factor label/normalized-factor 빌더 신규 필요 —
+elo/sfr/recent_form/park_factor 는 game-row `factors` JSONB 에 아직 없음) — 다음
+explore-idea heavy 후보로 재기록, 단 "페이지 자체 부재" 프레이밍은 제거.
+
+## 🔭 explore-idea(lite) — MLB 개별 경기 분석 페이지 parity gap 발견 (cycle 2098, 2026-08-14, ⚠️ 진단 일부 정정 — 위 cycle 2099 항목 참조)
 
 MLB team_code alias family (cycle 2081/2087/2097) 진단 sweep 중 `normalizeMlbTeamCode`
 전체 callsite 를 훑어 추가 alias 버그는 없음을 확인(clean — `buildMlbTeamFactorAverages.ts`

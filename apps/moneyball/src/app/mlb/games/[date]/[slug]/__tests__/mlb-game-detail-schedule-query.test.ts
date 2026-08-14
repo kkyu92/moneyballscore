@@ -27,4 +27,9 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
   it("StatsAPI 팀 코드 정규화 없이 mlb_schedule 을 조회하지 않는다 (7팀 alias 사례 27 회귀 차단)", () => {
     expect(PAGE_SRC).toMatch(/toMlbStatsApiCode/);
   });
+
+  it("SportsEvent JSON-LD 를 렌더한다 (KBO analysis/game/[id] parity, cycle 2099 explore-idea)", () => {
+    expect(PAGE_SRC).toMatch(/"@type":\s*"SportsEvent"/);
+    expect(PAGE_SRC).toMatch(/application\/ld\+json/);
+  });
 });
