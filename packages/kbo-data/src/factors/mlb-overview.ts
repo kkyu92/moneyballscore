@@ -19,23 +19,31 @@ export interface MlbGameOverviewNarrative {
   situational: string[];
 }
 
-function toSentence(bar: MlbWaterfallBar, homeTeamName: string, awayTeamName: string): string | null {
+function toSentence(
+  bar: MlbWaterfallBar,
+  homeTeamName: string,
+  awayTeamName: string,
+  locale: 'ko' | 'en',
+): string | null {
   const pp = Math.round(bar.contribution * 1000) / 10;
   if (Math.abs(pp) < NARRATIVE_MIN_PP) return null;
   const team = bar.direction === 'home' ? homeTeamName : bar.direction === 'away' ? awayTeamName : null;
   if (!team) return null;
-  return `${bar.label}에서 ${team} 우세(${Math.abs(pp)}%p).`;
+  return locale === 'en'
+    ? `${team} has the edge in ${bar.label} (${Math.abs(pp)}pp).`
+    : `${bar.label}에서 ${team} 우세(${Math.abs(pp)}%p).`;
 }
 
 export function buildMlbGameOverview(
   bars: MlbWaterfallBar[],
   homeTeamName: string,
   awayTeamName: string,
+  locale: 'ko' | 'en' = 'ko',
 ): MlbGameOverviewNarrative {
   const build = (keys: Set<string>) =>
     bars
       .filter((b) => keys.has(b.factor))
-      .map((b) => toSentence(b, homeTeamName, awayTeamName))
+      .map((b) => toSentence(b, homeTeamName, awayTeamName, locale))
       .filter((s): s is string => s !== null);
 
   return {
