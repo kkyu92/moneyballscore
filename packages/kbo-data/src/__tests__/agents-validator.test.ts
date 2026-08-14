@@ -558,6 +558,30 @@ describe('buildInjectionText', () => {
     expect(text).toContain('70%');
     expect(text).toContain('40%');
   });
+
+  // cycle 2122 — team-agent buildUserMessage 가 prepend 하는 renderContextForLLM(buildAgentContext(...))
+  // 블록은 recent_form/head_to_head 를 .toFixed(1) 소수점 percent 로도 LLM 에 노출한다
+  // (agent-context.ts formatMetricLine + "[상대 전적 + 최근 폼]" 줄). buildInjectionText 가 정수
+  // 반올림만 동봉하면 LLM 이 실제 노출된 소수점 값을 그대로 인용해도 checkHallucinatedNumbers 가
+  // 오탐(hallucinated_number)한다 — 소수점 값도 injection text 에 포함돼야 회귀 차단.
+  it('recent_form/head_to_head 소수점 percent 도 동봉 (LLM 실제 노출 값 — agent-context.ts 와 동일 source)', () => {
+    const ctx = makeContext();
+    ctx.homeRecentForm = 0.653; // 65.3%
+    ctx.headToHead = { wins: 2, losses: 1 }; // 66.7% / 33.3%
+    const text = buildInjectionText(ctx);
+    expect(text).toContain('65.3');
+    expect(text).toContain('66.7');
+    expect(text).toContain('33.3');
+  });
+
+  it('LLM 이 소수점 recent_form/head_to_head 값 인용 시 환각 오탐 없음 (cycle 2122 fix)', () => {
+    const ctx = makeContext();
+    ctx.homeRecentForm = 0.653;
+    ctx.headToHead = { wins: 2, losses: 1 };
+    const injection = buildInjectionText(ctx);
+    const v = checkHallucinatedNumbers('최근폼 65.3% 우위, 상대전적 66.7% 승률 반영', injection);
+    expect(v).toHaveLength(0);
+  });
 });
 
 // ============================================

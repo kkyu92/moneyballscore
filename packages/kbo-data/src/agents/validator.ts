@@ -32,6 +32,7 @@
 
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
+import { buildAgentContext } from '../context/agent-context';
 import { MetricRegistry } from '../context/metrics';
 import type { GameContext, TeamArgument } from './types';
 
@@ -461,6 +462,16 @@ export function buildInjectionText(context: GameContext): string {
   const homeFormPct = Math.round(homeRecentForm * 100);
   const awayFormPct = Math.round(awayRecentForm * 100);
 
+  // buildUserMessage 가 prepend 하는 renderContextForLLM(buildAgentContext(...)) 블록은
+  // recent_form/head_to_head 를 .toFixed(1) 소수점 percent 로도 노출 (agent-context.ts
+  // formatMetricLine + "[상대 전적 + 최근 폼]" 줄). 위 정수 반올림만 넣으면 LLM 이 실제
+  // 본 소수점 값을 그대로 인용해도 환각으로 오탐 — 같은 source(buildAgentContext) 로 계산해 동봉.
+  const ac = buildAgentContext(context);
+  const decimalLines = [
+    `최근폼(소수) 홈 ${ac.metrics.recent_form?.home}% 원정 ${ac.metrics.recent_form?.away}%`,
+    `상대전적(소수) 홈 ${ac.metrics.head_to_head?.home}% 원정 ${ac.metrics.head_to_head?.away}%`,
+  ];
+
   return [
     `경기: ${awayName} @ ${homeName}`,
     `시간: ${game.gameTime}`,
@@ -468,6 +479,7 @@ export function buildInjectionText(context: GameContext): string {
     `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | ${MetricRegistry.recent_form.ko_name} ${homeFormPct}%`,
     `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | ${MetricRegistry.recent_form.ko_name} ${awayFormPct}%`,
     `${MetricRegistry.head_to_head.ko_name} ${headToHead.wins}승 ${headToHead.losses}패`,
+    ...decimalLines,
   ].join('\n');
 }
 
