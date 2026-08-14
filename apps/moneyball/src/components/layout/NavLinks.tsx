@@ -7,7 +7,7 @@
  */
 
 import { usePathname } from "next/navigation";
-import { LEAGUE_NAVS } from "./Header";
+import { LEAGUE_NAVS, localizeNavItems } from "./Header";
 import { leagueFromPath } from "./LeagueSelector";
 import { MegaMenu } from "./MegaMenu";
 import { SearchForm } from "@/components/shared/SearchForm";
@@ -16,7 +16,7 @@ import { ThemeToggle } from "./ThemeToggle";
 export function NavLinks() {
   const pathname = usePathname() ?? "/";
   const league = leagueFromPath(pathname);
-  const navItems = LEAGUE_NAVS[league];
+  const navItems = localizeNavItems(LEAGUE_NAVS[league], pathname);
 
   return (
     <div data-league={league} className="hidden md:flex items-center gap-5">

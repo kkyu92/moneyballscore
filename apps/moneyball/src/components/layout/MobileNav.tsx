@@ -13,7 +13,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LEAGUE_NAVS, isNavGroup } from "./Header";
+import { LEAGUE_NAVS, isNavGroup, localizeNavItems } from "./Header";
 import { LeagueSelector, leagueFromPath } from "./LeagueSelector";
 import { NavIcon } from "./nav-icon";
 
@@ -26,7 +26,7 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() ?? "/";
   const league = leagueFromPath(pathname);
-  const navItems = LEAGUE_NAVS[league];
+  const navItems = localizeNavItems(LEAGUE_NAVS[league], pathname);
 
   // 활성 route 가 속한 NavGroup 자동 펼치기 (default open)
   const defaultOpenGroups = navItems

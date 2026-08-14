@@ -25,6 +25,13 @@ export function leagueFromPath(pathname: string): League {
   return "kbo";
 }
 
+// MLB pill 만 /en 대응 라우트 존재 — EN 페이지에서 클릭 시 KO 로 이탈 방지 (cycle 2139/2140).
+function leagueHref(league: LeagueDef, pathname: string): string {
+  const isEn = pathname === "/en" || pathname.startsWith("/en/");
+  if (isEn && league.id === "mlb") return "/en/mlb";
+  return league.href;
+}
+
 type Variant = "desktop" | "mobile";
 
 export function LeagueSelector({
@@ -54,7 +61,7 @@ export function LeagueSelector({
         return (
           <Link
             key={league.id}
-            href={league.href}
+            href={leagueHref(league, pathname ?? "/")}
             role="tab"
             aria-selected={isActive}
             aria-current={isActive ? "page" : undefined}

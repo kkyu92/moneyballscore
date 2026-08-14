@@ -15,6 +15,25 @@ export function isNavGroup(item: NavItem): item is NavGroup {
   return "items" in item;
 }
 
+// EN 페이지(/en/mlb/*)에서 헤더 nav 가 KO href 를 그대로 써서 클릭 시 KO 페이지로
+// 이탈하던 버그 (cycle 2139 발견) — MLB nav 만 /en 대응 라우트 존재하므로 그것만 치환.
+function withLocale(href: string, isEn: boolean): string {
+  if (!isEn) return href;
+  if (href === "/mlb") return "/en/mlb";
+  if (href.startsWith("/mlb/")) return `/en${href}`;
+  return href;
+}
+
+export function localizeNavItems(items: NavItem[], pathname: string): NavItem[] {
+  const isEn = pathname === "/en" || pathname.startsWith("/en/");
+  if (!isEn) return items;
+  return items.map((item) =>
+    isNavGroup(item)
+      ? { ...item, items: item.items.map((sub) => ({ ...sub, href: withLocale(sub.href, isEn) })) }
+      : { ...item, href: withLocale(item.href, isEn) },
+  );
+}
+
 // KBO_NAV: Header = primary path only (Footer = exhaust, IA hierarchy 룰).
 // 1 top-level (오늘) + 4 group (예측·기록 5 / 팀·선수 4 / 리뷰·시즌 3 / 커뮤니티 2) = 5 hover zone.
 // accuracy/shadow (v2.1-B rejected) → footer only (wave-384 IA cleanup)
