@@ -1,0 +1,46 @@
+import type { MlbWaterfallBar } from './mlb-waterfall';
+
+// MLB 개별 경기 "AI 종합 분석 요약" prose — KBO GameAnalysisProse parity (cycle 2104
+// computeMlbWaterfall 이 이미 계산해둔 bar 를 재사용, 신규 팩터 계산/DB 조회 없음).
+// KBO 는 factors JSONB(debate 파이프라인 산출) 를 explainFactor 로 서술하지만 MLB 는
+// debate 단계 자체가 없어(순수 정량 pipeline, mlb-pipeline.ts) waterfall bar 의
+// contribution/direction 만으로 동일한 역할의 서술 생성.
+
+const PITCHING_FACTORS = new Set(['sp_fip', 'sp_xfip', 'bullpen_fip']);
+const BATTING_FACTORS = new Set(['lineup_woba', 'war', 'lineup_xwoba', 'lineup_barrel_pct']);
+const SITUATIONAL_FACTORS = new Set(['home_advantage', 'park_factor']);
+
+// contribution 이 이 pp 미만이면 "우세"로 서술할 만큼 유의미하지 않음 (neutral 처리).
+const NARRATIVE_MIN_PP = 0.1;
+
+export interface MlbGameOverviewNarrative {
+  pitching: string[];
+  batting: string[];
+  situational: string[];
+}
+
+function toSentence(bar: MlbWaterfallBar, homeTeamName: string, awayTeamName: string): string | null {
+  const pp = Math.round(bar.contribution * 1000) / 10;
+  if (Math.abs(pp) < NARRATIVE_MIN_PP) return null;
+  const team = bar.direction === 'home' ? homeTeamName : bar.direction === 'away' ? awayTeamName : null;
+  if (!team) return null;
+  return `${bar.label}에서 ${team} 우세(${Math.abs(pp)}%p).`;
+}
+
+export function buildMlbGameOverview(
+  bars: MlbWaterfallBar[],
+  homeTeamName: string,
+  awayTeamName: string,
+): MlbGameOverviewNarrative {
+  const build = (keys: Set<string>) =>
+    bars
+      .filter((b) => keys.has(b.factor))
+      .map((b) => toSentence(b, homeTeamName, awayTeamName))
+      .filter((s): s is string => s !== null);
+
+  return {
+    pitching: build(PITCHING_FACTORS),
+    batting: build(BATTING_FACTORS),
+    situational: build(SITUATIONAL_FACTORS),
+  };
+}
