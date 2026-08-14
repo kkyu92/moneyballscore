@@ -1,5 +1,38 @@
 # TODOS
 
+## 🔭 explore-idea(lite) — MLB 개별 경기 분석 페이지 parity gap 발견 (cycle 2098, 2026-08-14)
+
+MLB team_code alias family (cycle 2081/2087/2097) 진단 sweep 중 `normalizeMlbTeamCode`
+전체 callsite 를 훑어 추가 alias 버그는 없음을 확인(clean — `buildMlbTeamFactorAverages.ts`
+는 `toMlbStatsApiCode` 로 이미 올바르게 변환, `mlb-elo.ts` 의 ELO_NEUTRAL placeholder 는
+plan #25 Phase 3(예측 반영) 가 의도적으로 미착수 상태로 남겨둔 것 — 버그 아님, backtest
+게이트 대기 중).
+
+sweep 중 구조적 parity gap 발견: KBO 는 `/analysis/game/[id]` 개별 경기 상세 분석
+페이지(`FactorWaterfallChart` 팩터 기여도 waterfall 시각화 + OG/twitter image + 팀별
+공유 가능한 개별 URL)가 있는데, MLB 는 팀-쌍 단위 `/mlb/matchup/[teamA]/[teamB]`
+페이지만 있고 **개별 경기 단위 분석 페이지가 아예 없음**. `TopStatPickCard.tsx` 같은
+KBO "오늘의 픽" 카드가 `/analysis/game/${gameId}` 로 링크하는 패턴도 MLB 는 대응 없음.
+
+**self_verification** (5축 rubric):
+```yaml
+rubric: "(가치 / 시간 비용 / risk / 자율 가능 / 의존성) 5축"
+가치: medium — parity gap. 사용자 가시 요청/불만 없음, 구조적 완결성 목적
+시간비용: large — 신규 route family (external_game_id 키 다이나믹 경로, OG/twitter
+  image, loading/not-found 상태, 데이터 빌더, 회귀 테스트) — 단일 cycle heavy 로
+  수렴 어려움 (KBO analysis/game/[id] 자체가 opengraph-image.tsx/twitter-image.tsx/
+  not-found.tsx/loading.tsx 4개 보조 파일 + FactorWaterfallChart 213줄 포함)
+risk: 1 — 순수 additive, 기존 KBO 라우트/데이터 무영향
+자율가능: yes — 본 메인 fire 가능, 사용자 결정 불필요
+의존성: none — 기존 buildMlbMatchupProfile/factor 빌더 재사용 가능, 외부 결정 대기 X
+```
+
+**다음 explore-idea heavy fire 후보** — 위 스코프 그대로 착수 가능. 세부 설계 필요
+지점: (1) URL 스킴 (`/mlb/analysis/game/[externalGameId]` 등, team-pair matchup
+과 구분) (2) FactorWaterfallChart MLB 7팩터(FIP/xFIP/wOBA/불펜FIP/최근폼/Elo/SFR
+대신 MLB 실제 팩터셋: spFip/lineupWoba/bullpenFip/recentForm/elo/xwoba/barrelPct)
+재사용 가능성 (3) 완료된 경기만 (post_game) vs 예정 경기(pre_game) 라우팅 분기.
+
 ## ✅ MLB team_code alias 미정규화 → 실측 팩터(fip/woba/war 등) 30팀 중 사실상 전량 미반영 (cycle 2097, 2026-08-14, fix-incident/operational-analysis 겸 heavy)
 
 plan #25 Phase 3(MLB Elo 예측 반영) op-analysis heavy backtest 게이트를 착수하려
