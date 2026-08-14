@@ -1,5 +1,23 @@
 # TODOS
 
+## ✅ review-code(heavy) — validator.ts 환각검사 소수점 percent 동기화 갭 fix (cycle 2122, 2026-08-14)
+
+cycle 2121 이 지목한 두 대형 파일 재점검. `analysis/page.tsx`(2802줄)는 v1.8 가중치
+라벨/상수 전부 `@moneyball/shared` 참조 — 로컬 drift 없음(clean). `validator.ts`(887줄)
+에서 실제 silent drift 발견 + fix:
+
+- `buildInjectionText`(validator.ts)는 team-agent.ts `buildUserMessage`와 "동일 소스"
+  라고 주석에 명시했지만, plan #23 Step 3(cycle 1227/1233)가 prepend 한
+  `renderContextForLLM(buildAgentContext(...))` 블록은 recent_form/head_to_head 를
+  `.toFixed(1)` 소수점 percent(예: 65.3%, 66.7%)로도 LLM 에 노출하는데, `buildInjectionText`
+  는 정수 반올림(`Math.round`)만 동봉 — cycle 1233 이후 한번도 동기화 안 된 갭.
+- 결과: LLM 이 실제 노출된 소수점 값을 그대로 인용해도 `checkHallucinatedNumbers` 가
+  injection 안에서 못 찾아 `hallucinated_number` 오탐(warn/hard) 처리하던 버그.
+- fix: `buildAgentContext` 재사용해 동일 계산으로 소수점 값을 injection text 에 추가
+  (로직 복제 대신 단일 source). 회귀 가드 테스트 2건 추가.
+- PR #2952 squash 머지 완료(state=MERGED 실측 확인). 전체 테스트 1125/1125 pass,
+  tsc --noEmit clean.
+
 ## ✅ operational-analysis(lite) — CE 전면 정체 지속 재확인 + predict cron 정상 동작 검증 (cycle 2121, 2026-08-14)
 
 `scripts/op-analysis-cohort.ts` 재실행(env 소싱 후 root 에서 정상 동작, cycle 2093 이
