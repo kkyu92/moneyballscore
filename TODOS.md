@@ -1391,3 +1391,23 @@ moneyball` 추가로 production 도 turborepo affected-package 판정 따라 스
 
 **다음 관찰 포인트**: 다음 cycle(들)에서 deploy-drift-alert 정상 재개(성공)
 확인 — turbo-ignore 배포 후 실효성 monitor.
+
+## ✅ review-code(heavy) — MLB filter family 재검증 + wave 363 가드 테스트 (cycle 2127, 2026-08-14)
+
+cycle 2125/2126 retro carry-over(en/mlb/calendar 회귀 재점검) 를 실제 검증.
+결과: 회귀 없음. EN mirror 13/13 mlb 서브페이지 parity 완결 확인(find 전수
+대조), monthGrid.ts 의 Dec→Jan/윤년 경계는 이미 유닛테스트 커버(cycle 2123
+회귀 테스트로 발견+수정된 버그의 재발 방지 테스트 보유), MLB predictions
+쿼리 11개 사이트(page.tsx 6 + lib/mlb 5) 전수 재조회 결과 필터 누락 0곳
+(cycle 2124/2125 fix 6곳 모두 유지 확인).
+
+순수 재검증만으로 끝내지 않고 wave 363 가드 테스트 신규 추가 —
+lib/mlb + app/mlb + app/en/mlb 디렉토리를 동적 스캔해 `.from('predictions')`
+보유 파일이 모두 `MLB_PRODUCTION_COHORT_RULES`/`MLB_SCORING_RULE` 필터를
+갖는지 검증. 기존 wave 테스트(cycle 2124/2125)는 "이미 아는 파일" 개별
+mock 검증이라 향후 신규 predictions 쿼리 파일 추가 시 필터 누락을 못 잡음 —
+본 가드는 그 gap 을 구조적으로 막는다(KBO PRODUCTION_COHORT_RULES filter
+family wave 11~17 재발 패턴과 동일 구조 예방).
+
+전체 3817/3817 pass, tsc/lint clean. main 직접 commit + push (R4/R7,
+단일 테스트 파일, PR 생략).
