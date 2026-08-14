@@ -142,6 +142,10 @@ export default async function MlbHub() {
           <h3 className="font-bold text-brand-700 dark:text-brand-100">{TOTAL}팩터 설명</h3>
           <p className="text-xs text-brand-500 mt-1">가중치 + 홈팀 어드밴티지</p>
         </Link>
+        <Link href="/mlb/calendar" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">월별 캘린더</h3>
+          <p className="text-xs text-brand-500 mt-1">일별 예측 수 + 적중률 히트맵</p>
+        </Link>
       </section>
     </main>
   );

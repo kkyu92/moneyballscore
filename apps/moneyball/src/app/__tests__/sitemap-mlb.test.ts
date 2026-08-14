@@ -112,6 +112,13 @@ describe('sitemap MLB URL coverage', () => {
     expect(gameDetail).toBeDefined();
     expect(gameDetail?.priority).toBeGreaterThan(0);
   });
+
+  it('includes /mlb/calendar route (cycle 2123 explore-idea — KBO /calendar parity)', async () => {
+    const urls = await sitemap();
+    const calendar = urls.find((u) => u.url.endsWith('/mlb/calendar') && !u.url.includes('/en/'));
+    expect(calendar).toBeDefined();
+    expect(calendar?.priority).toBeGreaterThan(0);
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {
