@@ -1,5 +1,27 @@
 # TODOS
 
+## ✅ review-code(heavy) — MLB PRODUCTION_COHORT_RULES filter family gap fix (cycle 2124, 2026-08-14)
+
+cycle 2123 explore-idea heavy 가 만든 `buildMlbCalendarHeatmap.ts` 를 review 하다가
+predictions 쿼리에 `MLB_PRODUCTION_COHORT_RULES`(scoring_rule='mlb_v0.1') 필터가
+빠져 있는 걸 발견 — grep 으로 MLB predictions 쿼리 전수 확인한 결과 동일 패턴 3곳:
+
+- `buildMlbAccuracySummary.ts` (/mlb 허브 적중률 요약)
+- `buildMlbCalendarHeatmap.ts` (/mlb/calendar)
+- `buildMlbTeamProfile.ts` (팀 프로필)
+
+`convergenceRecord.ts` (cycle 2063 fix, plan #24 Phase 3c) 만 이 필터를 갖고
+있었고 나머지 3곳은 `league='mlb'` 만으로 필터링해 전체 scoring_rule 을 읽는
+상태였음. 현재 MLB 는 scoring_rule 이 `mlb_v0.1` 단일값이라 실제 데이터 오염은
+없지만, KBO 쪽이 v1.8-credit-fail / v2.1-B-shadow / v2.0-shadow / tabpfn-shadow 등
+shadow cohort 를 반복 도입해 온 이력(PRODUCTION_COHORT_RULES filter family,
+cycle 1100 wave 11~17)과 동일 구조 — MLB 에 shadow/backtest scoring_rule 이
+생기는 순간 이 3곳의 사용자 가시 accuracy/calendar/team-profile 집계에 silent
+로 섞이는 위험. 3곳 모두 `.in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)`
+필터 추가로 선제 정합, 관련 test mock 3파일도 이중 `.in()` 체이닝을 지원하는
+thenable 패턴으로 교체(실제 supabase-js 빌더 동작과 정합). 전체 3807/3807 pass,
+tsc/lint clean. main 직접 commit (R4, 소규모 일관성 fix — PR 없음).
+
 ## ✅ explore-idea(heavy) — MLB 월별 캘린더 히트맵 신규 + monthGrid 실측 버그 fix (cycle 2123, 2026-08-14)
 
 KBO `/calendar`(일별 예측 수 + 적중률 히트맵)를 MLB 로 병렬 복제(`/mlb/calendar`).
