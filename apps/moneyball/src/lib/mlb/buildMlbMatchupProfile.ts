@@ -25,6 +25,7 @@ import {
   WIN_LOSS_STREAK_MIN_LENGTH,
 } from "@moneyball/shared";
 import type { MlbMatchupPair } from "./mlbCanonicalPair";
+import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
 // KBO buildMatchupProfile.ts 병렬 구현 (plan #24 Phase 1 — risk 최소화 위해 MLB 전용 복제로 시작,
 // 후속 review-code(heavy) 에서 단일 source 통합 검토 대상. cycle 2034/2036/2043/2046/2048
@@ -418,22 +419,18 @@ export async function buildMlbMatchupProfile(
     const homeCode = normalizeMlbTeamCode(g.home_team_code) ?? (g.home_team_code as MlbTeamCode);
     const awayCode = normalizeMlbTeamCode(g.away_team_code) ?? (g.away_team_code as MlbTeamCode);
     const pred = predByExternalId.get(g.external_game_id) ?? null;
+    const hasFinalScore = g.status === "final" && g.home_score != null && g.away_score != null;
+    const { predictedHomeWin, actualHomeWin, isCorrect, confidence } = deriveMlbOutcome({
+      homeWinProb: pred?.home_win_prob,
+      hasFinalScore,
+      homeScore: g.home_score,
+      awayScore: g.away_score,
+    });
 
-    const predictedHomeWin = pred?.home_win_prob != null ? pred.home_win_prob >= 0.5 : null;
     const predictedCode: MlbTeamCode | null =
       predictedHomeWin == null ? null : predictedHomeWin ? homeCode : awayCode;
-
-    const hasFinalScore = g.status === "final" && g.home_score != null && g.away_score != null;
-    const actualHomeWin = hasFinalScore ? g.home_score! > g.away_score! : null;
     const actualCode: MlbTeamCode | null =
       actualHomeWin == null ? null : actualHomeWin ? homeCode : awayCode;
-
-    const isCorrect =
-      predictedHomeWin != null && actualHomeWin != null
-        ? predictedHomeWin === actualHomeWin
-        : null;
-    const confidence =
-      pred?.home_win_prob != null ? Math.max(pred.home_win_prob, 1 - pred.home_win_prob) : null;
 
     games.push({
       gameId: g.id,

@@ -22,6 +22,7 @@ import {
   computeTeamRecentRecord,
   type TeamRecentRecord,
 } from '@/lib/teams/buildTeamProfile';
+import { deriveMlbOutcome } from './deriveMlbOutcome';
 
 export interface MlbTeamRecentGame {
   gameId: number;
@@ -250,21 +251,16 @@ export async function buildMlbTeamProfile(
     if (xwoba != null) { xwobaSum += xwoba; xwobaN += 1; }
     if (barrel != null) { barrelSum += barrel; barrelN += 1; }
 
-    // predicted_winner/is_correct/confidence 컬럼은 MLB 전량 NULL(파이프라인이 안 씀) —
-    // home_win_prob + 실제 스코어로 직접 derive.
-    const predictedHomeWin = pred.home_win_prob != null ? pred.home_win_prob >= 0.5 : null;
+    const hasFinalScore = g.status === 'final' && g.home_score != null && g.away_score != null;
+    const { predictedHomeWin, isCorrect, confidence } = deriveMlbOutcome({
+      homeWinProb: pred.home_win_prob,
+      hasFinalScore,
+      homeScore: g.home_score,
+      awayScore: g.away_score,
+    });
     const predictedThisTeam =
       predictedHomeWin != null && (isHome ? predictedHomeWin : !predictedHomeWin);
     if (predictedThisTeam) predictedWins += 1;
-
-    const hasFinalScore = g.status === 'final' && g.home_score != null && g.away_score != null;
-    const actualHomeWin = hasFinalScore ? g.home_score! > g.away_score! : null;
-    const isCorrect =
-      predictedHomeWin != null && actualHomeWin != null
-        ? predictedHomeWin === actualHomeWin
-        : null;
-    const confidence =
-      pred.home_win_prob != null ? Math.max(pred.home_win_prob, 1 - pred.home_win_prob) : null;
 
     if (isCorrect != null) {
       verifiedN += 1;
