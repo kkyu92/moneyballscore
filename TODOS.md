@@ -1649,3 +1649,27 @@ cycle 2131 review-code(lite) 회고가 남긴 KBO/MLB parity gap 후속. KBO
 - wave-624 가드 테스트 신규 (KO/EN topPick 계산식 + 앵커 + 하이라이트 parity, 9 assertion)
 - `pnpm lint` / `tsc --noEmit` / `vitest run`(436 files, 3828 tests) 전부 clean
 - PR #2955 squash 머지 완료 (state=MERGED 실측 확인, commit 42235760)
+
+## ✅ fix-incident(heavy) — 헤더 nav EN 이탈 버그 (cycle 2140, 2026-08-14)
+
+cycle 2139 review-code(heavy) 가 발견한 site-wide 버그: `Header.tsx`
+`MLB_NAV` href 가 KO 경로(`/mlb/*`) 하드코딩이라 `/en/mlb/*` 방문자가
+헤더 메가메뉴 · 모바일 메뉴 · 리그 셀렉터 MLB pill 을 클릭하면 KO
+페이지로 이탈.
+
+- `Header.tsx`: `localizeNavItems()` 신규 — pathname 이 `/en/*` 일 때
+  MLB nav href 만 `/en` 접두로 치환 (EN 대응 라우트 8개 이미 전부 존재,
+  순수 매핑 문제였음). KBO_NAV 는 EN 라우트 부재라 무변경.
+- `NavLinks.tsx`/`MobileNav.tsx`: `LEAGUE_NAVS` 조회 후 `localizeNavItems`
+  통과하도록 소비 지점 수정.
+- `LeagueSelector.tsx`: MLB pill href 도 동일 로직(`leagueHref` 헬퍼).
+- `Header.test.ts` 신규 (localizeNavItems 4 case: KO 무변경 / EN 치환 /
+  정확 일치 경로 / KBO_NAV 무변경).
+- `pnpm lint` / `tsc --noEmit` / `vitest run`(439 files, 3843 tests) 전부
+  clean. main 직접 commit + push (R4, PR 생략 — 단일 논리 단위 4파일).
+
+후속 후보(스코프 밖, 이번엔 미포함): 헤더 nav label 자체가 여전히
+한국어 하드코딩(`오늘`/`경기·팀` 등) — EN 페이지에서도 KO 라벨 노출.
+컴포넌트 레벨(`MlbAccuracyDashboard` 등)엔 이미 `STRINGS[ko/en]` 패턴
+있으니 Header 레벨 확장은 후속 explore-idea/polish-ui 후보. aria-label
+("메뉴"/"검색"/"모바일 메뉴"/"리그 선택")도 동일 국제화 후속 대상.
