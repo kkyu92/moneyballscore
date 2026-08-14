@@ -1,5 +1,29 @@
 # TODOS
 
+## ✅ operational-analysis(heavy) — MLB Elo backtest, plan #25 Phase 3 게이트 (cycle 2128, 2026-08-14)
+
+plan #25(cycle 2080/2083)가 만든 `mlb_team_elo`/`mlb_team_elo_history`(748경기 재생
+1회성 backfill 완료)를 실 예측(`mlb-pipeline.ts` 의 `ELO_NEUTRAL` placeholder 대체)에
+반영해도 되는지 — plan #25 self_verification 이 명시한 "op-analysis heavy backtest
+게이트 통과 전 자율 flip 금지" 조건 검증.
+
+`scripts/op-analysis-mlb-elo-backtest.ts` 신규 — `mlb_schedule status='final'` 747경기
+(올스타 1건 제외)를 시간순 walk-forward 재생, 매 경기 **재생 이전** Elo rating 으로
+`expectedHomeWinProb` 계산해 실제 결과와 대조(production 미반영, 순수 backtest).
+
+- 전체 표본(n=747): Elo Brier 0.2478 vs 홈어드밴티지-only Brier 0.2494, accuracy
+  54.2% vs 52.5% — 방향은 Elo 우세지만 bootstrap 95% CI(2000회) 겹침
+- WARM cohort(양팀 10+경기 재생 후, cold-start 배제, n=595): Elo Brier 0.2471 vs
+  0.2494, accuracy 54.6% vs 52.4% — 마찬가지로 CI 겹침
+- 판정: 현재 표본에서 통계적으로 구분 불가 (v2.1-B reject 사례와 동일 패턴 — 소표본
+  결정 금지, CLAUDE.md "데이터로만 이야기")
+
+**결론**: Phase 3(모델 실 반영) 보류 확정, `ELO_NEUTRAL` placeholder 유지. plan #25
+archive(`~/.develop-cycle/plans/moneyballscore/_archive/25.md`) — Phase 1~3 전체
+종료, 재개는 시즌 진행에 따른 표본 누적 후 자연 재진단 (임의 재검증 n 목표 미설정).
+전체 3817/3817 pass, tsc/lint clean. main 직접 commit (R4, 코드 변경은 분석 스크립트
+1개 신규뿐 — production 경로 무변경).
+
 ## ✅ explore-idea(heavy) — /en/mlb/calendar EN mirror 신규 (cycle 2126, 2026-08-14)
 
 cycle 2123~2125 3개 사이클 연속 next_recommended_chain 으로 carry-over 된 gap —
