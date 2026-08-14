@@ -121,4 +121,23 @@ describe("LeagueSelector", () => {
     expect(leagueFromPath("/lotto")).toBe("lotto");
     expect(leagueFromPath("/lotto/methodology")).toBe("lotto");
   });
+
+  it("en/mlb 미러 경로도 MLB league 로 인식 (cycle 2130 IA 정정 — /en/mlb/* 가 KBO default 로 오분류되던 버그)", () => {
+    expect(leagueFromPath("/en/mlb")).toBe("mlb");
+    expect(leagueFromPath("/en/mlb/team/NYY")).toBe("mlb");
+    expect(leagueFromPath("/en/mlb/calendar")).toBe("mlb");
+    expect(leagueFromPath("/en/mlb/matchup/NYY/BOS")).toBe("mlb");
+    expect(leagueFromPath("/en/mlb/games/2026-08-14")).toBe("mlb");
+  });
+
+  it("pathname=/en/mlb 일 때 MLB pill active + sub-NAV 가 MLB 로 전환", () => {
+    mockedUsePathname.mockReturnValue("/en/mlb/team/NYY");
+    render(<LeagueSelector />);
+
+    const mlbTab = screen.getByRole("tab", { name: /MLB/ });
+    expect(mlbTab).toHaveAttribute("aria-selected", "true");
+
+    const kboTab = screen.getByRole("tab", { name: /KBO/ });
+    expect(kboTab).toHaveAttribute("aria-selected", "false");
+  });
 });
