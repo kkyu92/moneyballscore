@@ -1,6 +1,34 @@
 # TODOS
 
-## ✅ fix-incident(heavy) — Cloudflare Worker 배포 workflow silent-success 위장 정정 (cycle 2129, 2026-08-14, 사례 25 후속)
+## ✅ review-code(lite) — baseline 재확인, MLB filter/parity/R7 전수 클린 (cycle 2131, 2026-08-14)
+
+cycle 2120 이후 11 사이클 만의 review-code 재점검. open hub-dispatch issue 0건, approved
+plan 0건. 6개 축 직접 코드 read 로 재검증, 전부 클린:
+
+1. **MLB scoring_rule 필터 family** (cycle 2124/2125/2127 이 고친 `PRODUCTION_COHORT_RULES`
+   filter family gap) — 신규 MLB 라우트 6개(`mlb/page.tsx`, `mlb/games/[date]`,
+   `mlb/games/[date]/[slug]`, en 미러 3개) 전부 `.eq('scoring_rule', MLB_SCORING_RULE)`
+   로 올바르게 필터링 중 (KBO 전용 `PRODUCTION_COHORT_RULES` 와 별개인
+   `MLB_PRODUCTION_COHORT_RULES`/`MLB_SCORING_RULE` 상수가 이미 분리돼 있어 혼동 없음).
+2. **KO/EN 컴포넌트 태그 parity 전수 sweep** — `/mlb`, `/mlb/calendar`, `/mlb/team/[code]`,
+   `/mlb/matchup/[teamA]/[teamB]`, `/mlb/games/[date]`, `/mlb/games/[date]/[slug]` 6쌍
+   전부 `comm -23` grep diff 0 mismatch (cycle 2120 이 3쌍만 확인했던 것을 6쌍 전체로 확장).
+3. **R7 자동 머지 Tier 2 후속 후보** (TODOS.md cycle 2088 항목이 남긴 "--auto 활성화
+   silent 누락 가능성") — 최근 merged PR 15건(#2940~#2954) 전부 `createdAt`→`mergedAt`
+   간격 5~10초로 즉시 머지, open PR 8건 전부 dependabot(정책상 자동 대상 아님, develop-cycle
+   산출물 stuck PR 0건) — 실측상 우려 재현 안 됨, cycle 2022 1회성 이슈로 결론 유지.
+4. **normalizeMlbTeamCode 20 callsite 전수 확인** — team_code alias family(사례 27) 재발
+   없음. `buildMlbTeamFactorAverages.ts` 는 반대 방향 변환(`toMlbStatsApiCode`)을 쓰는
+   게 맞는 설계(mlb_schedule = StatsAPI 코드 컨벤션이라 정상).
+5. `pnpm lint` 전량 clean (4 packages, cache hit).
+6. **비대상 확인** (large scope, 이번 사이클 착수 X): 홈페이지/`picks`/`leaderboard`/
+   `insights` 는 KBO 전용으로 MLB 미포함 — 사용자 예측 게임(`leaderboard`)과 오늘의 픽
+   위젯 확장은 신규 UI+데이터 설계가 필요한 Tier 3 스코프라 skip, 다음 explore-idea
+   heavy 후보로만 기록(수요 신호 없음 — 자율 fire 보류).
+
+코드 변경 0 — 6개 축 전부 "이미 클린"이 성과. `pnpm test` 재실행 없음(코드 변경 없어
+skip, lint 만으로 baseline 충분).
+
 
 `gh secret list` 실측 — `CLOUDFLARE_API_TOKEN` 이 cycle 2068 안내 이후에도 여전히 미등록
 (사용자 조치 대기 그대로). 그런데 `deploy-cloudflare-worker.yml`의 최근 workflow_dispatch
