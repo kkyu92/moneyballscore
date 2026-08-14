@@ -42,4 +42,15 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/slug="sp_xfip"/);
     expect(PAGE_SRC).toMatch(/slug="war"/);
   });
+
+  // cycle 2107 explore-idea: KBO analysis/game/[id] 는 ShareButtons + RelatedLinks(팀 프로필/
+  // 매치업/같은 날짜 경기)가 있는데 MLB 는 없었음 — debate/verdict/postview 는 MLB predict_final
+  // 이 quant-only(plan #25 Phase 3 게이트)라 데이터 자체가 없어 parity 대상 아님, 이 두 컴포넌트만
+  // 순수 additive parity 대상.
+  it("ShareButtons + RelatedLinks 를 렌더한다 (KBO parity, cycle 2107)", () => {
+    expect(PAGE_SRC).toMatch(/<ShareButtons/);
+    expect(PAGE_SRC).toMatch(/<RelatedLinks/);
+    expect(PAGE_SRC).toMatch(/mlbCanonicalPair/);
+    expect(PAGE_SRC).toMatch(/\/mlb\/team\/\$\{home\}/);
+  });
 });

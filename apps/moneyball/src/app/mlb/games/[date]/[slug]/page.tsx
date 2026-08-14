@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
+import { ShareButtons } from "@/components/share/ShareButtons";
+import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
+import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
@@ -226,6 +229,25 @@ export default async function GameDetail({ params }: PageParams) {
           homeWinProb,
         }}
       />
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={pageUrl}
+          title={`${awayFullName} vs ${homeFullName} MLB AI 승부예측 분석`}
+          text={`${date} ${awayFullName} vs ${homeFullName} 세이버메트릭스 기반 AI 분석`}
+        />
+      </footer>
+
+      {(() => {
+        const pair = mlbCanonicalPair(home, away);
+        const items: RelatedLink[] = [
+          { href: `/mlb/team/${home}`, label: `${homeFullName} 팀 프로필`, hint: '시즌 통계' },
+          { href: `/mlb/team/${away}`, label: `${awayFullName} 팀 프로필`, hint: '시즌 통계' },
+          ...(pair ? [{ href: pair.path, label: `${mlbShortTeamName(away)} vs ${mlbShortTeamName(home)} 매치업`, hint: '팩터 비교 + 상대전적' }] : []),
+          { href: `/mlb/games/${date}`, label: `${date} 전체 경기`, hint: '같은 날짜 다른 경기' },
+        ];
+        return <RelatedLinks title="관련 페이지" items={items} />;
+      })()}
     </main>
   );
 }
