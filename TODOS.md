@@ -1,5 +1,22 @@
 # TODOS
 
+## ✅ MLB 개별 경기 페이지 FactorWaterfallChart 추가 — 메타데이터 "waterfall" 문구 실제 구현 (cycle 2104, 2026-08-14, explore-idea heavy)
+
+`generateMetadata` description 이 이미 "waterfall" 문구를 박제해뒀지만(cycle 2099 이전부터)
+실제 페이지엔 waterfall 시각화가 전혀 없었음 — 문구만 있고 구현 부재 (자체 발견 silent gap).
+`computeMlbProbability`(mlb-base.ts) 항들을 그대로 재현하는 순수함수 `computeMlbWaterfall`
+(`packages/kbo-data/src/factors/mlb-waterfall.ts`) 신규 작성 — sp_fip/sp_xfip/bullpen_fip/
+lineup_woba/war/lineup_xwoba/lineup_barrel_pct(predictions 실측 컬럼, null 이면 fabricate
+않고 bar skip) + park_factor(MLB_TEAMS[home].parkPf 정적값) + 홈 어드밴티지(elo 상수항 +
+home_elo_bonus 고정) → 최종 bar 는 `pred.home_win_prob` 자체(권위값). recent_form/
+head_to_head/elo(팀별)/defense_sfr/sp_xwoba_against/woba_std 는 mlb-pipeline.ts 가 항상
+중립 입력(plan #25 Phase 3 게이트, cycle 2097/2103 확인 — 기여도 항상 0)이라 차트 대상에서
+제외, 각주로 명시. `MlbFactorWaterfallChart.tsx` 컴포넌트(KBO FactorWaterfallChart.tsx 시각
+패턴 재사용)로 `/mlb/games/[date]/[slug]` 페이지에 배선. 회귀 테스트 3건 추가(중립 입력 →
+0 기여, null pair skip, 비대칭 매치업 → computeMlbProbability 값과 재구성 일치 확인).
+KBO waterfall/debate/verdict/postview 나머지 parity 는 여전히 large 스코프(TODOS cycle
+2099 항목 참조, 다음 explore-idea heavy 후보로 유지).
+
 ## ✅ MLB 개별 경기 분석 페이지 parity — SportsEvent JSON-LD 추가 + 진단 정정 (cycle 2099, 2026-08-14, explore-idea heavy)
 
 cycle 2098 이 "MLB 는 개별 경기 단위 분석 페이지가 아예 없음" 이라 진단했으나 **부정확** —

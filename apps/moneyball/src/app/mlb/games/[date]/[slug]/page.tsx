@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
 import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
@@ -209,6 +210,22 @@ export default async function GameDetail({ params }: PageParams) {
           <FactorRow label="Barrel%" home={pred.home_lineup_barrel_pct} away={pred.away_lineup_barrel_pct} />
         </dl>
       </section>
+
+      <MlbFactorWaterfallChart
+        homeTeam={home}
+        awayTeam={away}
+        input={{
+          sp_fip: { home: pred.home_sp_fip, away: pred.away_sp_fip },
+          sp_xfip: { home: pred.home_sp_xfip, away: pred.away_sp_xfip },
+          bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
+          lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
+          war: { home: pred.home_war_total, away: pred.away_war_total },
+          lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
+          lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
+          homeParkPf: MLB_TEAMS[home].parkPf,
+          homeWinProb,
+        }}
+      />
     </main>
   );
 }

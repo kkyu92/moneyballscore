@@ -64,6 +64,10 @@ export {
 } from './factors/mlb-base';
 export type { MlbFactorInputs } from './factors/mlb-base';
 
+// MLB 개별 경기 waterfall (analysis/game parity — cycle 2104)
+export { computeMlbWaterfall } from './factors/mlb-waterfall';
+export type { MlbWaterfallInput, MlbWaterfallBar, MlbWaterfallPair } from './factors/mlb-waterfall';
+
 // MLB Shadow C 학습 milestone (walk-forward expanding window)
 export { MILESTONE_TRIGGERS as MLB_SHADOW_C_MILESTONES } from './factors/mlb-shadow-c';
 
