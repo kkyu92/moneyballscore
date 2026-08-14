@@ -1,5 +1,17 @@
 # TODOS
 
+## ✅ MLB predicted/actual home-win 판정 로직 중복 제거 (cycle 2117, 2026-08-14, review-code heavy)
+
+`buildMlbTeamProfile.ts`/`buildMlbMatchupProfile.ts` 가 MLB `predictions.predicted_winner`/
+`is_correct`/`confidence` 컬럼(전량 NULL — 팀이 string 코드라 INT FK 컬럼과 안 맞아
+파이프라인이 의도적으로 안 씀)을 우회해 `home_win_prob` + 실제 스코어로 직접 correctness
+derive 하는 동일 로직을 각자 따로 구현 중이었음. DB 실측(`is_correct` 754/754 final games
+NULL)까지 확인하며 "MLB 정확도 검증이 아예 빠졌다"는 fix-incident 급 버그로 오인할 뻔했음 —
+실제론 이미 일관된 워크어라운드였을 뿐. 이 근접 오진단 자체가 중복 로직 위험 신호(한쪽만
+갱신되면 갈라짐, 다음 사람도 재오인 가능)라 판단해 `deriveMlbOutcome` 순수 함수로 통합,
+"버그 아님" 주석 명시. 회귀 테스트 6건 신규, vitest 429 files/3782 tests 전부 pass. PR #2949
+머지 실측 확인(gh pr view state=MERGED, bc5af7bc).
+
 ## ✅ MLB EN matchup 페이지 Elo 레이팅 추이 비교 차트 parity 정정 (cycle 2113, 2026-08-14, review-code heavy)
 
 cycle 2112(MlbTeamEloChart, team/[code])와 동일 silent-drift family — cycle 2085
