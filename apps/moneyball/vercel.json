@@ -1,3 +1,3 @@
 {
-  "ignoreCommand": "[ \"$VERCEL_ENV\" = 'preview' ]"
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = 'preview' ]; then exit 0; fi; npx turbo-ignore moneyball"
 }
