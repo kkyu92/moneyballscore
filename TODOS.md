@@ -1,5 +1,24 @@
 # TODOS
 
+## ✅ CE(CREDIT_EXHAUSTED) 완전 정체 재확인 — cycle 1550 이후 신규 비CE 0건 (cycle 2093, 2026-08-14, operational-analysis lite)
+
+`scripts/op-analysis-ce-cohort.ts` 재실행(cycle 1550 이후 543 사이클 만에 재측정,
+전량 스캔 — 날짜 필터/LIMIT 없음, `prediction_type=pre_game` + `scoring_rule IN
+('v1.8','v1.8-credit-fail')` + `is_correct NOT NULL`). 결과: 전체 n=299 (CE 252 /
+비CE 47) — **비CE 표본이 cycle 1550 측정치(n=47)와 정확히 동일** = 그 사이 543
+사이클 (~4개월) 동안 LLM debate 가 정상 작동(비CE)한 예측이 단 1건도 추가 안 됨.
+신규 87건(165→252)이 모두 CE. CE 점유율 77.8%→84.3% 상승.
+
+정확도/Brier 은 기존 패턴과 일치 유지: 전체 54.8%(164/299) / CE 53.2%(134/252)
+Brier 0.3339 / 비CE 63.8%(30/47) Brier 0.2534 — 격차 10.7pp (기존 10.4~10.8pp
+범위 내, 모델 자체 열화 아님). **전체 pooled 정확도가 60.9%→54.8% 로 보이는 건
+CE 점유율 상승에 따른 mix-shift 이며 CE/비CE 각 cohort 정확도는 안정** — CLAUDE.md
+"CE fallback rate 실측 정정" 결론과 정합.
+
+결론: 사용자 Anthropic 크레딧 미충전 상태가 (cycle 1550 시점 대비) 개선 없이
+완전 지속. 스크립트 코드 변경 없음(lite, 기존 harness 재실행만). 사용자 액션:
+Anthropic 크레딧 충전 시 LLM debate 정상 복구 예상.
+
 ## ✅ 프로덕션 배포 drift 실측 해소 + cycle 2091 회고 silent 누락 복원 (cycle 2092, 2026-08-14, fix-incident)
 
 `gh run list` 진단 — `deploy-drift-alert` 2연속 failure. 실측 확인 결과 main HEAD
