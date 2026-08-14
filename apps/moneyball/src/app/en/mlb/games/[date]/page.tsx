@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import {SITE_URL } from "@moneyball/shared";
+import { SITE_URL, MLB_SCORING_RULE, normalizeMlbTeamCode, assertSelectOk } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,15 +36,56 @@ export async function generateMetadata({ params }: { params: Promise<{ date: str
 }
 
 interface PredictionRow {
-  game_id: number;
-  predicted_winner: number | null;
-  confidence: number | null;
-  games: {
-    game_date: string;
-    home_team: { code: string | null } | null;
-    away_team: { code: string | null } | null;
-  } | null;
-  predicted_winner_team: { code: string | null } | null;
+  external_game_id: string;
+  homeCode: string;
+  awayCode: string;
+  winnerCode: string;
+  conf: number;
+}
+
+// MLB predictions have game_id=NULL (migration 038) — games!inner join is
+// KBO-only and always mismatches (silent empty list, cycle 2114 fix-incident).
+// Query predictions by mlb_game_date, then join mlb_schedule for team codes
+// (same 2-step pattern as the detail page/sitemap, silent drift family fix
+// cycle 1168).
+async function getMlbGamesForDate(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  date: string,
+): Promise<PredictionRow[]> {
+  const predResult = await supabase
+    .from('predictions')
+    .select('external_game_id, home_win_prob')
+    .eq('league', 'mlb')
+    .eq('scoring_rule', MLB_SCORING_RULE)
+    .eq('mlb_game_date', date)
+    .order('external_game_id', { ascending: true });
+  const { data: preds } = assertSelectOk(predResult, 'MlbGamesEn predictions');
+  if (!preds || preds.length === 0) return [];
+
+  const gameIds = preds.map((p) => p.external_game_id);
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_team_code, away_team_code')
+    .in('external_game_id', gameIds);
+  const { data: schedules } = assertSelectOk(scheduleResult, 'MlbGamesEn schedule');
+  const scheduleByGameId = new Map((schedules ?? []).map((s) => [s.external_game_id, s]));
+
+  const rows: PredictionRow[] = [];
+  for (const p of preds) {
+    const schedule = scheduleByGameId.get(p.external_game_id);
+    const homeCode = schedule ? normalizeMlbTeamCode(schedule.home_team_code) : null;
+    const awayCode = schedule ? normalizeMlbTeamCode(schedule.away_team_code) : null;
+    if (!homeCode || !awayCode) continue;
+    const homeWinProb = p.home_win_prob ?? 0.5;
+    rows.push({
+      external_game_id: p.external_game_id,
+      homeCode,
+      awayCode,
+      winnerCode: homeWinProb >= 0.5 ? homeCode : awayCode,
+      conf: Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100),
+    });
+  }
+  return rows;
 }
 
 export default async function MlbGamesEn({ params }: { params: Promise<{ date: string }> }) {
@@ -52,30 +93,7 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
   if (!/^20[2-9]\d-\d{2}-\d{2}$/.test(date)) notFound();
 
   const supabase = await createClient();
-  const result = await supabase
-    .from('predictions')
-    .select(`
-      game_id,
-      predicted_winner,
-      confidence,
-      games!inner(
-        game_date,
-        home_team:teams!games_home_team_id_fkey(code),
-        away_team:teams!games_away_team_id_fkey(code)
-      ),
-      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
-    `)
-    .eq('league', 'mlb')
-    .eq('games.game_date', date)
-    .order('game_id', { ascending: true });
-
-  // MLB backend migrations 033-037 applied. Fallback on query error.
-  if (result.error) {
-    console.warn(`[MlbGamesEn] predictions query failed: ${result.error.message}`);
-  }
-  const rows: PredictionRow[] = result.error
-    ? []
-    : (result.data ?? []) as unknown as PredictionRow[];
+  const rows = await getMlbGamesForDate(supabase, date);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -109,18 +127,14 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
       ) : (
         <ul className="space-y-3">
           {rows.map((p) => {
-            const homeCode = p.games?.home_team?.code ?? '?';
-            const awayCode = p.games?.away_team?.code ?? '?';
-            const winnerCode = p.predicted_winner_team?.code ?? '?';
-            const conf = p.confidence != null ? Math.round(p.confidence * 100) : 0;
             return (
-              <li key={p.game_id} className="rounded-lg border border-brand-200 dark:border-brand-800 p-4 hover:border-brand-400 transition-colors">
-                <Link href={`/en/mlb/games/${date}/${homeCode}-vs-${awayCode}`} className="flex items-center justify-between">
+              <li key={p.external_game_id} className="rounded-lg border border-brand-200 dark:border-brand-800 p-4 hover:border-brand-400 transition-colors">
+                <Link href={`/en/mlb/games/${date}/${p.homeCode}-vs-${p.awayCode}`} className="flex items-center justify-between">
                   <span className="font-semibold">
-                    {homeCode} vs {awayCode}
+                    {p.homeCode} vs {p.awayCode}
                   </span>
                   <span className="text-sm text-brand-600 dark:text-brand-300">
-                    {winnerCode} {conf}%
+                    {p.winnerCode} {p.conf}%
                   </span>
                 </Link>
               </li>

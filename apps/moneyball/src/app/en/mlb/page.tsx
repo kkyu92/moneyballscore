@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, MLB_GAMES_PER_TEAM, SITE_URL } from "@moneyball/shared";
+import { MLB_TEAM_COUNT, MLB_DIVISION_COUNT, MLB_GAMES_PER_TEAM, MLB_SCORING_RULE, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { LanguageSwitch } from "@/components/shared/LanguageSwitch";
 import { createClient } from "@/lib/supabase/server";
@@ -37,17 +37,16 @@ export default async function MlbHubEn() {
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
 
+  // MLB predictions have game_id=NULL (migration 038) — games!inner join is
+  // KBO-only and always mismatches (silent 0, cycle 2114 fix-incident). Filter
+  // directly on mlb_game_date instead.
   const result = await supabase
     .from('predictions')
-    .select(`
-      game_id,
-      games!inner(game_date, league)
-    `)
+    .select('external_game_id')
     .eq('league', 'mlb')
-    .eq('games.game_date', today)
-    .order('game_id', { ascending: true });
+    .eq('scoring_rule', MLB_SCORING_RULE)
+    .eq('mlb_game_date', today);
 
-  // MLB backend migrations 033-037 applied. Fallback on query error.
   const todayGames = result.error ? null : result.data;
   if (result.error) {
     console.warn(`[MlbHubEn] predictions query failed: ${result.error.message}`);
