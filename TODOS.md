@@ -1,5 +1,16 @@
 # TODOS
 
+## ✅ MLB EN 허브 모델 적중률 요약 섹션 parity 정정 (cycle 2119, 2026-08-14, review-code heavy)
+
+cycle 2118 explore-idea heavy 가 KO `/mlb` 허브에 신규 추가한 전체 모델 적중률 요약
+섹션이 의도적으로 EN 미러 미배선 상태 (KO/EN parity family 재발, cycle 2085/2091/2099/
+2104/2108/2109/2110/2112/2113 series 연속). `buildConfidenceTiers` 에 locale 파라미터
+추가(기본 'ko' 유지, KBO `/accuracy` 콜사이트 회귀 없음) 후 `buildMlbAccuracySummary`
+로 전파, `/en/mlb` 페이지에 영문 섹션 신규 배선. KBO 상세 대시보드 링크 카드는 EN
+미러(`/en/accuracy`) 부재로 제외, 2-column 통계 카드로 단순화. 회귀 테스트 1건 신규,
+vitest 430 files/3787 tests 전부 pass. PR #2951 머지 실측 확인(gh pr view state=MERGED,
+a57322bf).
+
 ## ✅ MLB 허브 전체 모델 적중률 요약 섹션 신규 (cycle 2118, 2026-08-14, explore-idea heavy)
 
 cycle 2117(review-code heavy)이 방금 통합한 `deriveMlbOutcome` 를 재사용해 MLB 허브(`/mlb`)에
