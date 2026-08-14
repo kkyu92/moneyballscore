@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
 // mlb/calendar/page.tsx 전용 — MLB predictions.is_correct 는 전량 NULL(deriveMlbOutcome.ts
@@ -45,6 +45,7 @@ export async function getMlbMonthHeatmap(
     .select('external_game_id, home_win_prob')
     .eq('prediction_type', 'pre_game')
     .eq('league', 'mlb')
+    .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in(
       'external_game_id',
       scheduleRows.map((s) => s.external_game_id),

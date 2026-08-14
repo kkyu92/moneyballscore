@@ -7,6 +7,7 @@ import {
   normalizeMlbTeamCode,
   toMlbStatsApiCode,
   assertSelectOk,
+  MLB_PRODUCTION_COHORT_RULES,
 } from '@moneyball/shared';
 import {
   computeTeamStreak,
@@ -198,6 +199,7 @@ export async function buildMlbTeamProfile(
     )
     .eq('prediction_type', 'pre_game')
     .eq('league', 'mlb')
+    .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', Array.from(scheduleByExternalId.keys()));
 
   const { data } = assertSelectOk(predResult, 'buildMlbTeamProfile predictions');

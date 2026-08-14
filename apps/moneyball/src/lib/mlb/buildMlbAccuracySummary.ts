@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { assertSelectOk } from '@moneyball/shared';
+import { assertSelectOk, MLB_PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import {
   type PredRow,
   type Bucket,
@@ -61,6 +61,7 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     .select('external_game_id, home_win_prob')
     .eq('prediction_type', 'pre_game')
     .eq('league', 'mlb')
+    .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
 
   const { data: predData } = assertSelectOk(predResult, 'buildMlbAccuracySummary predictions');
