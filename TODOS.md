@@ -1,5 +1,21 @@
 # TODOS
 
+## ✅ 프로덕션 배포 drift 실측 해소 + cycle 2091 회고 silent 누락 복원 (cycle 2092, 2026-08-14, fix-incident)
+
+`gh run list` 진단 — `deploy-drift-alert` 2연속 failure. 실측 확인 결과 main HEAD
+(fec9ab2f) 가 production(`6abecb9`) 보다 2 커밋 앞선 채 약 10시간 미배포 상태 —
+`vercel ls` 로 지난 10시간 신규 배포 자체가 0건 확인(quota 소진 이후 새 하루
+시작 시점과 겹침, cycle 2083 changelog 의 "Vercel 배포 일일 100건 quota 소진"
+후속). `vercel deploy --prod --yes` 수동 트리거로 정상 빌드+배포 완료, `/api/version`
+실측으로 production=main HEAD(fec9ab2f) 일치 확인.
+
+별도로 진단 중 cycle 2091(explore-idea heavy, MLB Elo 차트)의 `policy: cycle-retro`
+커밋 + `~/.develop-cycle/cycles/2091.json` 양쪽이 원래 시점에 박제 안 된 사실
+발견 — CLAUDE.md 사례 15(silent retro drift family) 재발, 이번엔 1-cycle 단일
+누락. commit `d0ed6c1a` body(subtype/cycle 라인) + TODOS.md 기존 기록으로 증거
+복원해 retroactive 커밋(`policy: cycle-retro 2091 ... (retroactive)`) + JSON
+양쪽 박제.
+
 ## ✅ MLB 팀 프로필 페이지 Elo 추이 차트 parity gap 해소 (cycle 2091, 2026-08-13, explore-idea heavy)
 
 KBO `teams/[code]` 페이지엔 `TeamEloChart`(시즌 경기별 Elo + 리그 평균)가 있지만
