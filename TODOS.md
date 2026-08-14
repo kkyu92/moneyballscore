@@ -1,5 +1,29 @@
 # TODOS
 
+## ✅ review-code(heavy) — wave-624 top-pick 딥링크 직접 코드 read 검증 (cycle 2133, 2026-08-14)
+
+cycle 2132 가 배포한 MLB games/[date] top-pick 딥링크(#2955)를 lint 가 아닌 실제 파일
+read 로 검증(heavy 모드 — cycle 2131 lite 성공 직후 heavy 권장 룰 적용):
+
+1. **TOP_PICK_MIN_WIN_PCT 수학 검증** — `confToWinProb(c) = 0.5 + c/2` 와
+   `winnerProbOf(homeWinProb) = max(homeWinProb, 1-homeWinProb)` 가 대수적으로 서로
+   역함수 관계임을 확인 → KBO 의 confidence-공간 임계값(`TOP_PICK_CONF_MIN=0.1`)을
+   MLB 의 win%-공간 임계값(55%)으로 환산한 것이 수치적으로 완전히 동등 — parity 주장이
+   근사가 아니라 정확한 등가임을 실측 확인.
+2. **KO/EN diff 대조** — `git show` 로 두 파일 diff 를 나란히 비교, 텍스트/href 외
+   로직·구조 100% 동일 확인.
+3. **wave-624 가드 테스트** 내용 확인 — 필터/정렬/앵커/하이라이트 4개 축 모두
+   assertion 존재, 실제 shipped 코드와 문자열 일치.
+4. **Breadcrumb 존재 확인** — `mlb/games/[date]`, `mlb/games/[date]/[slug]` KO/EN
+   4개 라우트 전부 존재 (`grep -L` 0 hit).
+5. Vercel 배포 상태 확인 — production 이 최신 커밋 대비 몇 분 지연이었으나 CI in_progress
+   상태였을 뿐 (일반 배포 파이프라인 지연, cycle 2083 quota 소진과는 무관 — 정상).
+
+버그 0건, 코드 변경 0 — heavy 모드로 수학적 정합성까지 검증했지만 실제로 완전히 clean.
+open hub-dispatch issue 0건, approved plan 0건 (plan #25 는 phase3_gate_not_passed 로
+archived, Phase 2b UI(MlbMatchupEloChart/MlbTeamEloChart)는 이미 별도 커밋으로 shipped
+확인 — 재작업 불필요). 2-chain alternation lock 미탐지(직전 8 사이클 distinct=5).
+
 ## ✅ review-code(lite) — baseline 재확인, MLB filter/parity/R7 전수 클린 (cycle 2131, 2026-08-14)
 
 cycle 2120 이후 11 사이클 만의 review-code 재점검. open hub-dispatch issue 0건, approved
