@@ -1,5 +1,24 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — /en/mlb/calendar EN mirror 신규 (cycle 2126, 2026-08-14)
+
+cycle 2123~2125 3개 사이클 연속 next_recommended_chain 으로 carry-over 된 gap —
+cycle 2123 이 신규 만든 `/mlb/calendar` 가 EN mirror 없이 배선됨. 다른 MLB
+서브페이지 8개(standings/players/factors/wild-card/postseason/team/games/matchup)
+는 모두 en/mlb/* 미러가 있었으나 calendar 만 누락 확인 (find 로 전수 대조).
+
+- `WEEKDAY_LABELS_EN_MON_FIRST` 상수 신규 (packages/shared) — 기존
+  `WEEKDAY_LABELS_KO_MON_FIRST` 짝. `MonthInfo.monthLabel` 필드는 KO 전용
+  (KBO calendar/page.tsx 와 공유) 이라 건드리지 않고, EN 페이지에서
+  `Intl.DateTimeFormat` 으로 로컬 계산하는 `monthLabelEn()` 헬퍼만 추가.
+- `en/mlb/calendar/page.tsx` 신규 — KO 페이지와 동일 `monthGrid`/
+  `getMlbMonthHeatmap` 재사용, 영문 카피만 별도.
+- `en/mlb/page.tsx` hub 카드 + `sitemap.ts` entry 배선.
+- KO 테스트(`mlb-calendar-page.test.ts`) parity 맞춘 신규 테스트 9건.
+
+전체 3816/3816 pass, tsc/lint clean. main 직접 commit + push (R4/R7, PR 생략 —
+단일 파일 세트, CI 로컬 pre-push hook 이 이미 lint+type-check 통과 확인).
+
 ## ✅ review-code(heavy) — MLB PRODUCTION_COHORT_RULES filter family gap fix, 잔여 2곳 (cycle 2125, 2026-08-14)
 
 cycle 2124 가 3곳 fix 했지만 grep 전수 조회(`from("predictions")` 전체 사이트) 결과
