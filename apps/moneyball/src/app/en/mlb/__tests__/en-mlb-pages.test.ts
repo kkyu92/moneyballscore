@@ -298,6 +298,12 @@ describe('/en/mlb/team/[code] — team profile page', () => {
   it('buildMlbTeamProfile imported', () => {
     expect(PAGE).toMatch(/buildMlbTeamProfile/);
   });
+
+  it('MlbTeamEloChart wired with locale="en" — KO parity (cycle 2091 added chart to KO only)', () => {
+    expect(PAGE).toMatch(/import\s*\{\s*MlbTeamEloChart\s*\}\s*from\s*['"]@\/components\/teams\/MlbTeamEloChart['"]/);
+    expect(PAGE).toMatch(/buildMlbTeamEloTrend/);
+    expect(PAGE).toMatch(/<MlbTeamEloChart points=\{eloTrend\.points\} teamCode=\{code\} locale="en" \/>/);
+  });
 });
 
 // ── Players [id] (/en/mlb/players/[id]) ──────────────────────────────
