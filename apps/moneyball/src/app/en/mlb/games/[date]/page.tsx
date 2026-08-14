@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { SITE_URL, MLB_SCORING_RULE, normalizeMlbTeamCode, assertSelectOk } from "@moneyball/shared";
+import { SITE_URL, MLB_SCORING_RULE, normalizeMlbTeamCode, assertSelectOk, TOP_PICK_CONF_MIN, confToWinProb } from "@moneyball/shared";
+
+// Same threshold as KBO predictions/[date] "top pick" (topPick) — win% form
+// of confToWinProb(TOP_PICK_CONF_MIN) (parity, cycle 2131 follow-up).
+const TOP_PICK_MIN_WIN_PCT = Math.round(confToWinProb(TOP_PICK_CONF_MIN) * 100);
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 
@@ -94,6 +98,9 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
 
   const supabase = await createClient();
   const rows = await getMlbGamesForDate(supabase, date);
+  const topPick = rows
+    .filter((p) => p.conf > TOP_PICK_MIN_WIN_PCT)
+    .sort((a, b) => b.conf - a.conf)[0];
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -105,6 +112,15 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
       <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         MLB Games — {date}
       </h1>
+
+      {topPick && (
+        <a
+          href={`#pick-${topPick.external_game_id}`}
+          className="inline-flex items-center gap-2 rounded-md border border-brand-400 dark:border-brand-600 bg-brand-50 dark:bg-brand-950/50 px-3 py-1.5 text-sm text-brand-700 dark:text-brand-200 hover:border-brand-500 transition-colors"
+        >
+          Top pick — {topPick.winnerCode} {topPick.conf}% jump to ↓
+        </a>
+      )}
 
       {rows.length === 0 ? (
         <div className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/50 p-6 space-y-3">
@@ -127,10 +143,20 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
       ) : (
         <ul className="space-y-3">
           {rows.map((p) => {
+            const isTopPick = p.external_game_id === topPick?.external_game_id;
             return (
-              <li key={p.external_game_id} className="rounded-lg border border-brand-200 dark:border-brand-800 p-4 hover:border-brand-400 transition-colors">
+              <li
+                key={p.external_game_id}
+                id={`pick-${p.external_game_id}`}
+                className={`rounded-lg border p-4 transition-colors ${
+                  isTopPick
+                    ? 'border-brand-500 dark:border-brand-400 ring-1 ring-brand-400 dark:ring-brand-500'
+                    : 'border-brand-200 dark:border-brand-800 hover:border-brand-400'
+                }`}
+              >
                 <Link href={`/en/mlb/games/${date}/${p.homeCode}-vs-${p.awayCode}`} className="flex items-center justify-between">
                   <span className="font-semibold">
+                    {isTopPick && <span className="mr-1.5" aria-label="top pick">⭐</span>}
                     {p.homeCode} vs {p.awayCode}
                   </span>
                   <span className="text-sm text-brand-600 dark:text-brand-300">
