@@ -8,7 +8,7 @@ import { mlbAllPairs } from '@/lib/mlb/mlbCanonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
-import { KBO_TEAMS, MLB_TEAMS, SITE_URL, assertSelectOk, errMsg } from '@moneyball/shared';
+import { KBO_TEAMS, MLB_TEAMS, SITE_URL, assertSelectOk, errMsg, MLB_SCORING_RULE, normalizeMlbTeamCode } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
 //
@@ -281,6 +281,59 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     Sentry.captureException(e, { tags: { silent_drift_family: 'wave_174', component: 'sitemap', op: 'games-query' } });
   }
 
+  // /mlb/games/[date] 날짜 색인 + /mlb/games/[date]/[slug] 개별 경기 상세 —
+  // KBO analysisRoutes(/analysis/game/[id]) parity gap (cycle 2100 info-arch,
+  // 개별 경기 페이지 자체는 cycle 2098/2099 이미 shipped 됐으나 sitemap 미반영이었음).
+  // predictions(league='mlb') 먼저 조회 후 mlb_schedule 조인 — schedule 만 있고
+  // prediction 없는 (미래 예정) 경기는 상세 페이지가 notFound() 라 sitemap 제외.
+  const mlbGameDateRoutes: MetadataRoute.Sitemap = [];
+  const mlbGameDetailRoutes: MetadataRoute.Sitemap = [];
+  const enMlbGameDateRoutes: MetadataRoute.Sitemap = [];
+  const enMlbGameDetailRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const mlbSupabase = createSitemapClient();
+    const mlbPredResult = await mlbSupabase
+      .from('predictions')
+      .select('external_game_id')
+      .eq('league', 'mlb')
+      .eq('scoring_rule', MLB_SCORING_RULE)
+      .limit(3000);
+    const { data: mlbPreds } = assertSelectOk(mlbPredResult, 'sitemap.mlb-predictions');
+    const mlbGameIds = (mlbPreds ?? []).map((p) => p.external_game_id);
+
+    if (mlbGameIds.length > 0) {
+      const mlbScheduleResult = await mlbSupabase
+        .from('mlb_schedule')
+        .select('game_date, home_team_code, away_team_code, updated_at')
+        .in('external_game_id', mlbGameIds)
+        .limit(3000);
+      const { data: mlbGames } = assertSelectOk(mlbScheduleResult, 'sitemap.mlb-schedule');
+
+      const seenMlbDates = new Set<string>();
+      for (const g of mlbGames ?? []) {
+        const homeCode = normalizeMlbTeamCode(g.home_team_code);
+        const awayCode = normalizeMlbTeamCode(g.away_team_code);
+        if (!homeCode || !awayCode) continue;
+
+        const lastMod = g.updated_at ? new Date(g.updated_at) : now;
+
+        if (!seenMlbDates.has(g.game_date)) {
+          seenMlbDates.add(g.game_date);
+          mlbGameDateRoutes.push({ url: `${SITE_URL}/mlb/games/${g.game_date}`, lastModified: lastMod, changeFrequency: 'daily', priority: 0.6 });
+          enMlbGameDateRoutes.push({ url: `${SITE_URL}/en/mlb/games/${g.game_date}`, lastModified: lastMod, changeFrequency: 'daily', priority: 0.55 });
+        }
+
+        const slug = `${homeCode}-vs-${awayCode}`;
+        mlbGameDetailRoutes.push({ url: `${SITE_URL}/mlb/games/${g.game_date}/${slug}`, lastModified: lastMod, changeFrequency: 'weekly', priority: 0.65 });
+        enMlbGameDetailRoutes.push({ url: `${SITE_URL}/en/mlb/games/${g.game_date}/${slug}`, lastModified: lastMod, changeFrequency: 'weekly', priority: 0.6 });
+      }
+    }
+  } catch (e) {
+    console.warn('[sitemap] mlb games query failed:', errMsg(e));
+    Sentry.captureException(e, { tags: { silent_drift_family: 'wave_624', component: 'sitemap', op: 'mlb-games-query' } });
+  }
+
   // /lotto/archive/[date] 동적 URL — data/lotto-picks/ glob → 회차별 archive 색인 활성.
   // priority 0.6 weekly + lastModified = 추첨일 20:45 KST (KBO 추첨 시각).
   const lottoArchiveRoutes: MetadataRoute.Sitemap = listArchiveDates().map(
@@ -320,6 +373,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...predictionDateRoutes,
     ...playerRoutes,
     ...analysisRoutes,
+    ...mlbGameDateRoutes,
+    ...mlbGameDetailRoutes,
+    ...enMlbGameDateRoutes,
+    ...enMlbGameDetailRoutes,
     ...insightsDateRoutes,
     ...insightsSeriesRoutes,
     ...lottoArchiveRoutes,

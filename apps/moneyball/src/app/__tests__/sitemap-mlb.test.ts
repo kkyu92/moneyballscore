@@ -1,15 +1,39 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock 외부 의존성 — Supabase 호출 + insights/lotto loader X
+// chainable + thenable builder — select/eq/in/order/limit 어떤 순서로 호출돼도
+// 동일 fixture 로 resolve (cycle 2100 info-arch: mlb 예측/스케줄 조인 쿼리가
+// 기존 select().order().limit() 체인과 다른 select().eq().eq()/.in().limit() 체인을 추가해
+// 기존 mock(.order 만 지원) 이 새 체인에서 `.eq is not a function` 로 깨지던 것 정정).
+function mlbSitemapFixture(table: string) {
+  if (table === 'predictions') return [{ external_game_id: 'mlb-fixture-1' }];
+  if (table === 'mlb_schedule') {
+    return [{
+      game_date: '2026-08-01',
+      home_team_code: 'NYY',
+      away_team_code: 'BOS',
+      updated_at: '2026-08-01T00:00:00Z',
+    }];
+  }
+  return [];
+}
+
+function makeQueryBuilder(data: unknown[]) {
+  const builder = {
+    select: () => builder,
+    eq: () => builder,
+    in: () => builder,
+    order: () => builder,
+    limit: () => builder,
+    maybeSingle: () => Promise.resolve({ data: data[0] ?? null }),
+    then: (resolve: (v: { data: unknown[] }) => void) => resolve({ data }),
+  };
+  return builder;
+}
+
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
-    from: () => ({
-      select: () => ({
-        order: () => ({
-          limit: () => Promise.resolve({ data: [] }),
-        }),
-      }),
-    }),
+    from: (table: string) => makeQueryBuilder(mlbSitemapFixture(table)),
   }),
 }));
 
@@ -79,6 +103,15 @@ describe('sitemap MLB URL coverage', () => {
     expect(sample).toBeDefined();
     expect(sample?.priority).toBeGreaterThan(0);
   });
+
+  it('includes /mlb/games/[date] date index + /mlb/games/[date]/[slug] game detail (cycle 2100 info-arch — KBO analysis/game/[id] parity gap fix)', async () => {
+    const urls = await sitemap();
+    const dateIndex = urls.find((u) => u.url.endsWith('/mlb/games/2026-08-01') && !u.url.includes('/en/'));
+    expect(dateIndex).toBeDefined();
+    const gameDetail = urls.find((u) => u.url.endsWith('/mlb/games/2026-08-01/NYY-vs-BOS'));
+    expect(gameDetail).toBeDefined();
+    expect(gameDetail?.priority).toBeGreaterThan(0);
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {
@@ -123,5 +156,11 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
     const enMatchup = urls.filter((u) => /\/en\/mlb\/matchup\/[A-Z]{2,3}\/[A-Z]{2,3}$/.test(u.url));
     expect(enMatchup.length).toBe(435);
     expect(enMatchup.find((u) => u.url.endsWith('/en/mlb/matchup/LAD/NYY'))).toBeDefined();
+  });
+
+  it('/en/mlb/games/[date]/[slug] mirror present (cycle 2100 info-arch)', async () => {
+    const urls = await sitemap();
+    const enGameDetail = urls.find((u) => u.url.endsWith('/en/mlb/games/2026-08-01/NYY-vs-BOS'));
+    expect(enGameDetail).toBeDefined();
   });
 });
