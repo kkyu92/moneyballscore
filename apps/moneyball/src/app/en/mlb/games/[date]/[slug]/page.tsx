@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
+import { ShareButtons } from "@/components/share/ShareButtons";
+import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
+import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
@@ -8,6 +12,8 @@ import {
   MLB_SCORING_RULE,
   normalizeMlbTeamCode,
   toMlbStatsApiCode,
+  mlbShortTeamName,
+  MLB_TEAMS,
   type MlbTeamCode,
 } from "@moneyball/shared";
 
@@ -36,7 +42,7 @@ const GAME_DETAIL_FACTOR_ROWS: Array<{
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
   const title = `${slug} ${date} Analysis | MoneyBall Score`;
-  const description = `${slug} ${GAME_DETAIL_FACTOR_ROWS.length}-factor breakdown.`;
+  const description = `${slug} ${GAME_DETAIL_FACTOR_ROWS.length}-factor breakdown + waterfall.`;
   return {
     title,
     description,
@@ -84,7 +90,16 @@ interface ScheduleRow {
   home_score: number | null;
   away_score: number | null;
   status: string;
+  game_datetime_utc: string;
 }
+
+// KO page.tsx(cycle 2099) 와 동일 — SportsEvent JSON-LD eventStatus 매핑.
+const MLB_EVENT_STATUS: Record<string, string> = {
+  postponed: 'https://schema.org/EventPostponed',
+  final: 'https://schema.org/EventCompleted',
+  in_progress: 'https://schema.org/EventScheduled',
+  scheduled: 'https://schema.org/EventScheduled',
+};
 
 export default async function GameDetailEn({ params }: PageParams) {
   const { date, slug } = await params;
@@ -104,7 +119,7 @@ export default async function GameDetailEn({ params }: PageParams) {
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
-    .select('external_game_id, home_score, away_score, status')
+    .select('external_game_id, home_score, away_score, status, game_datetime_utc')
     .eq('game_date', date)
     .eq('home_team_code', dbHomeCode)
     .eq('away_team_code', dbAwayCode)
@@ -149,8 +164,36 @@ export default async function GameDetailEn({ params }: PageParams) {
   const winnerCode = homeWinProb >= 0.5 ? home : away;
   const conf = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
 
+  // SportsEvent 스키마 — KO page.tsx(cycle 2099) parity.
+  const homeFullName = MLB_TEAMS[home].name;
+  const awayFullName = MLB_TEAMS[away].name;
+  const pageUrl = `${SITE_URL}/en/mlb/games/${date}/${slug}`;
+  const sportsEventLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${awayFullName} vs ${homeFullName}`,
+    startDate: schedule.game_datetime_utc,
+    sport: "Baseball",
+    eventStatus: MLB_EVENT_STATUS[schedule.status] ?? MLB_EVENT_STATUS.scheduled,
+    location: { "@type": "Place", name: MLB_TEAMS[home].stadium },
+    homeTeam: { "@type": "SportsTeam", name: homeFullName },
+    awayTeam: { "@type": "SportsTeam", name: awayFullName },
+    url: pageUrl,
+    organizer: {
+      "@type": "SportsOrganization",
+      "@id": "https://www.mlb.com",
+      url: "https://www.mlb.com",
+      name: "Major League Baseball",
+      alternateName: "MLB",
+    },
+  };
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventLd) }}
+      />
       <Breadcrumb items={[
         { label: 'MLB Analysis', href: '/en/mlb' },
         { label: date, href: `/en/mlb/games/${date}` },
@@ -185,6 +228,41 @@ export default async function GameDetailEn({ params }: PageParams) {
           ))}
         </dl>
       </section>
+
+      <MlbFactorWaterfallChart
+        homeTeam={home}
+        awayTeam={away}
+        input={{
+          sp_fip: { home: pred.home_sp_fip, away: pred.away_sp_fip },
+          sp_xfip: { home: pred.home_sp_xfip, away: pred.away_sp_xfip },
+          bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
+          lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
+          war: { home: pred.home_war_total, away: pred.away_war_total },
+          lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
+          lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
+          homeParkPf: MLB_TEAMS[home].parkPf,
+          homeWinProb,
+        }}
+      />
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={pageUrl}
+          title={`${awayFullName} vs ${homeFullName} MLB AI prediction analysis`}
+          text={`${date} ${awayFullName} vs ${homeFullName} sabermetrics-based AI analysis`}
+        />
+      </footer>
+
+      {(() => {
+        const pair = mlbCanonicalPair(home, away);
+        const items: RelatedLink[] = [
+          { href: `/en/mlb/team/${home}`, label: `${homeFullName} team profile`, hint: 'Season stats' },
+          { href: `/en/mlb/team/${away}`, label: `${awayFullName} team profile`, hint: 'Season stats' },
+          ...(pair ? [{ href: `/en${pair.path}`, label: `${mlbShortTeamName(away)} vs ${mlbShortTeamName(home)} matchup`, hint: 'Factor compare + head-to-head' }] : []),
+          { href: `/en/mlb/games/${date}`, label: `All games on ${date}`, hint: 'Other games same date' },
+        ];
+        return <RelatedLinks title="Related pages" items={items} />;
+      })()}
     </main>
   );
 }
