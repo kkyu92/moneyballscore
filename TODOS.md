@@ -1,5 +1,32 @@
 # TODOS
 
+## ✅ review-code baseline 재확인 — 신규 issue/fix 후보 부재, 기존 stale carry-over 4건 정정 (cycle 2120, 2026-08-14, review-code lite)
+
+cycle 2096 이후 24 사이클 만의 review-code 재점검. open hub-dispatch issue 0건, approved
+plan 0건(plan #25 Phase 3 은 op-analysis 게이트 대기 확정). 다음 4개 후보를 직접 코드
+read 로 재확인한 결과 전부 이미 닫힌 상태였음(신규 fix 불필요, TODOS.md 안 stale
+포인터만 존재):
+
+1. **MLB KO/EN 컴포넌트 태그 parity** — `/mlb`, `/mlb/team/[code]`,
+   `/mlb/matchup/[teamA]/[teamB]` 3쌍 `comm -23` grep diff 재실행 → 0 mismatch
+   (cycle 2119 가 마지막 gap 을 이미 닫음).
+2. **cron 문자열 하드코딩 이중화** (TODOS.md 456행 "Tier 2 후속 후보" 텍스트) —
+   `cloudflare-worker/src/__tests__/cron-sync.test.ts` 가 이미 cycle 2094 에 병합돼
+   wrangler.toml↔worker.ts 구조적 drift 를 CI 에서 가드 중. 456행 텍스트는 cycle 2094
+   이전 시점(cycle 2081) 항목 본문 안 stale 포인터.
+3. **DEFAULT_WEIGHTS vs CLAUDE.md v1.8 가중치 문서** — `packages/shared/src/index.ts`
+   실측 값(sp_fip 0.15/sp_xfip 0.05/lineup_woba 0.15/bullpen_fip 0.10/recent_form 0.10/
+   war 0.08/head_to_head 0.03/park_factor 0.04/elo 0.10/sfr 0.05, 합 0.85)이 CLAUDE.md
+   서술과 정확히 일치 — drift 없음.
+4. **`buildMlbPlayerProfile.ts:131` `teams.code` 컨벤션** (cycle 2081 "범위 밖 미확인,
+   낮은 우선순위" 후속) — 실제 코드 확인 결과 이미 `normalizeMlbTeamCode(p.team?.code)`
+   로 정규화 적용 중(cycle 2081 5-callsite fix 에 포함돼 있었음). 별도 조사 불필요했던
+   항목.
+
+Vercel 배포 quota 도 자연 회복 확인(deploy 목록 실측 — 최근 30~44분 내 Production Ready
+3건, `vercel ls`/`vercel inspect`). 코드 변경 0 — 4건 모두 "이미 닫힌 open item" 재확인이
+성과. `pnpm lint`/`pnpm test` 재실행 없음(코드 변경 없어 skip).
+
 ## ✅ MLB EN 허브 모델 적중률 요약 섹션 parity 정정 (cycle 2119, 2026-08-14, review-code heavy)
 
 cycle 2118 explore-idea heavy 가 KO `/mlb` 허브에 신규 추가한 전체 모델 적중률 요약
