@@ -1,5 +1,22 @@
 # TODOS
 
+## ✅ MLB EN 개별 경기 페이지 silent 404 정정 + 팩터 카운트 self-sync (cycle 2108, 2026-08-14, review-code heavy)
+
+`/en/mlb/games/[date]/[slug]` 가 `predictions.game_id` 를 KBO 전용 `games!inner` FK 조인으로
+조회 — MLB 예측 행은 `game_id=NULL`(migration 038, mlb-pipeline.ts:451)이라 이 조인은 항상
+미스매치. **존재하는 모든 MLB 경기에 대해 이 EN 페이지가 silent 404** 였음(KO 페이지는
+cycle 2099 에 이미 `mlb_schedule` + `external_game_id` 조인으로 고쳤으나 EN 미러는 그때
+동기 안 됨). `mlb_schedule`+`external_game_id`+팀코드 정규화 패턴으로 재작성, KO 와 동일
+7팩터 세트로 정렬(기존 4개 → 7개).
+
+부수 발견: KO/EN 양쪽 heading·description 이 "전체 모델 팩터 총합" 상수(14)를 그대로 써서
+실제 렌더 행(7개)과 표시 숫자 mismatch — cycle 2102 가 5→7행으로 늘렸지만 카운트 클레임
+자체는 안 고쳐 재발. `GAME_DETAIL_FACTOR_ROWS.length` 로 self-sync 시켜 행 추가/삭제 시
+자동 반영되도록 리팩터 — 하드코딩 카운트 재발을 구조적으로 차단. 회귀 가드 테스트 추가
+(EN 페이지 `games!inner` 재도입 차단 + 양쪽 self-sync 패턴 검증), 기존 `silent-drift-wave-78`
+테스트를 새 패턴에 맞춰 갱신. `pnpm lint`/`tsc --noEmit`/`pnpm test`(427 files, 3765 tests)
+전부 pass. PR #2939 CI green 후 자동 squash merge 완료.
+
 ## ✅ MLB 개별 경기 페이지 FactorWaterfallChart 추가 — 메타데이터 "waterfall" 문구 실제 구현 (cycle 2104, 2026-08-14, explore-idea heavy)
 
 `generateMetadata` description 이 이미 "waterfall" 문구를 박제해뒀지만(cycle 2099 이전부터)
