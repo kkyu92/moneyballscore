@@ -1,0 +1,30 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PAGE_SRC = readFileSync(resolve(__dirname, "../page.tsx"), "utf8");
+
+// cycle 2099 fix-incident: 이 페이지는 KBO 전용 games(FK) 스키마로 predictions.game_id 조인을
+// 시도해 MLB 행(game_id=NULL, migration 038) 전부와 항상 미스매치 — 실제 매치업 페이지가
+// 링크하는 모든 경기가 silent 404 였음. mlb_schedule + external_game_id 조인으로 재발 차단.
+describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)", () => {
+  it("mlb_schedule 테이블로 조회한다", () => {
+    expect(PAGE_SRC).toMatch(/\.from\(['"]mlb_schedule['"]\)/);
+  });
+
+  it("predictions 조회는 external_game_id + league='mlb' 키를 쓴다", () => {
+    expect(PAGE_SRC).toMatch(/external_game_id/);
+    expect(PAGE_SRC).toMatch(/\.eq\(['"]league['"],\s*['"]mlb['"]\)/);
+  });
+
+  it("KBO 전용 games!inner FK 조인을 재도입하지 않는다 (silent 404 회귀 차단)", () => {
+    expect(PAGE_SRC).not.toMatch(/games!inner/);
+    expect(PAGE_SRC).not.toMatch(/predicted_winner_team/);
+  });
+
+  it("StatsAPI 팀 코드 정규화 없이 mlb_schedule 을 조회하지 않는다 (7팀 alias 사례 27 회귀 차단)", () => {
+    expect(PAGE_SRC).toMatch(/toMlbStatsApiCode/);
+  });
+});

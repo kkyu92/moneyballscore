@@ -2,7 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, SITE_URL } from "@moneyball/shared";
+import {
+  assertSelectOk,
+  SITE_URL,
+  MLB_SCORING_RULE,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
+  mlbShortTeamName,
+  type MlbTeamCode,
+} from "@moneyball/shared";
 import { MetricRegistry, type MetricSlug, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -39,65 +47,87 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 }
 
 interface PredictionDetailRow {
-  game_id: number;
-  predicted_winner: number | null;
-  confidence: number | null;
+  external_game_id: string;
+  home_win_prob: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
+  home_bullpen_fip: number | null;
+  away_bullpen_fip: number | null;
   home_lineup_woba: number | null;
   away_lineup_woba: number | null;
   home_lineup_xwoba: number | null;
   away_lineup_xwoba: number | null;
   home_lineup_barrel_pct: number | null;
   away_lineup_barrel_pct: number | null;
-  games: {
-    game_date: string;
-    home_team: { code: string | null } | null;
-    away_team: { code: string | null } | null;
-  } | null;
-  predicted_winner_team: { code: string | null } | null;
+}
+
+interface ScheduleRow {
+  external_game_id: string;
+  home_score: number | null;
+  away_score: number | null;
+  status: string;
 }
 
 export default async function GameDetail({ params }: PageParams) {
   const { date, slug } = await params;
-  const [home, away] = slug.split('-vs-');
-  if (!home || !away) notFound();
+  const [homeParam, awayParam] = slug.split('-vs-');
+  if (!homeParam || !awayParam) notFound();
+
+  // slug 는 canonical(Baseball-Reference) 코드 — mlb_schedule 은 StatsAPI 원본 컨벤션 저장
+  // (7팀 alias, 사례 27). 정규화 없이 조회하면 그 7팀은 항상 미스매치로 silent 404.
+  const homeCode = normalizeMlbTeamCode(homeParam) ?? (homeParam as MlbTeamCode);
+  const awayCode = normalizeMlbTeamCode(awayParam) ?? (awayParam as MlbTeamCode);
+  const dbHomeCode = toMlbStatsApiCode(homeCode);
+  const dbAwayCode = toMlbStatsApiCode(awayCode);
 
   const supabase = await createClient();
-  const result = await supabase
+
+  // MLB 경기는 games(KBO FK 스키마) 에 존재하지 않음 — mlb_schedule(팀 코드 string)
+  // + predictions(external_game_id, league='mlb') 조인으로만 조회 가능 (migration 038).
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_score, away_score, status')
+    .eq('game_date', date)
+    .eq('home_team_code', dbHomeCode)
+    .eq('away_team_code', dbAwayCode)
+    .maybeSingle();
+  const { data: scheduleRaw } = assertSelectOk(scheduleResult, 'MlbGameDetail schedule');
+  const schedule = scheduleRaw as ScheduleRow | null;
+
+  if (!schedule) notFound();
+
+  const predResult = await supabase
     .from('predictions')
     .select(`
-      game_id,
-      predicted_winner,
-      confidence,
+      external_game_id,
+      home_win_prob,
       home_sp_fip,
       away_sp_fip,
+      home_bullpen_fip,
+      away_bullpen_fip,
       home_lineup_woba,
       away_lineup_woba,
       home_lineup_xwoba,
       away_lineup_xwoba,
       home_lineup_barrel_pct,
-      away_lineup_barrel_pct,
-      games!inner(
-        game_date,
-        home_team:teams!games_home_team_id_fkey(code),
-        away_team:teams!games_away_team_id_fkey(code)
-      ),
-      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+      away_lineup_barrel_pct
     `)
     .eq('league', 'mlb')
-    .eq('games.game_date', date)
-    .eq('games.home_team.code', home)
-    .eq('games.away_team.code', away)
+    .eq('scoring_rule', MLB_SCORING_RULE)
+    .eq('external_game_id', schedule.external_game_id)
     .maybeSingle();
-
-  const { data: predRaw } = assertSelectOk(result, 'MlbGameDetail prediction');
-  const pred = predRaw as unknown as PredictionDetailRow | null;
+  const { data: predRaw } = assertSelectOk(predResult, 'MlbGameDetail prediction');
+  const pred = predRaw as PredictionDetailRow | null;
 
   if (!pred) notFound();
 
-  const winnerCode = pred.predicted_winner_team?.code ?? '?';
-  const conf = pred.confidence != null ? Math.round(pred.confidence * 100) : 0;
+  // predicted_winner 컬럼은 KBO 전용 FK(INT REFERENCES teams(id)) — MLB 는 항상 NULL.
+  // 승자는 home_win_prob 로 derive (pipeline 이 실제 저장하는 유일한 확률 값).
+  const home = homeCode;
+  const away = awayCode;
+  const homeWinProb = pred.home_win_prob ?? 0.5;
+  const winnerCode = mlbShortTeamName(homeWinProb >= 0.5 ? home : away);
+  const conf = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -115,12 +145,18 @@ export default async function GameDetail({ params }: PageParams) {
         <div className="text-3xl font-bold text-brand-700 dark:text-brand-100">
           {winnerCode} {conf}%
         </div>
+        {schedule.status === 'final' && schedule.home_score != null && schedule.away_score != null && (
+          <p className="mt-2 text-sm text-brand-600 dark:text-brand-300 font-mono">
+            최종: {away} {schedule.away_score} - {schedule.home_score} {home}
+          </p>
+        )}
       </section>
 
       <section>
         <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{MLB_FACTOR_COUNTS.total} factor breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <FactorRow slug="sp_fip" home={pred.home_sp_fip} away={pred.away_sp_fip} />
+          <FactorRow slug="bullpen_fip" home={pred.home_bullpen_fip} away={pred.away_bullpen_fip} />
           <FactorRow slug="lineup_woba" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
           <FactorRow label="타선 xwOBA" home={pred.home_lineup_xwoba} away={pred.away_lineup_xwoba} />
           <FactorRow label="Barrel%" home={pred.home_lineup_barrel_pct} away={pred.away_lineup_barrel_pct} />
