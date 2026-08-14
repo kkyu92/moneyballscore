@@ -1,5 +1,18 @@
 # TODOS
 
+## ✅ MLB 허브 전체 모델 적중률 요약 섹션 신규 (cycle 2118, 2026-08-14, explore-idea heavy)
+
+cycle 2117(review-code heavy)이 방금 통합한 `deriveMlbOutcome` 를 재사용해 MLB 허브(`/mlb`)에
+전체 팀 무관 적중률 + Brier + 확신도별 3-tier 카드 섹션 신규 추가. `buildMlbAccuracySummary`
+가 `mlb_schedule`(status=final) + `predictions`(pre_game, league=mlb) 를 조회해 KBO `/accuracy`
+가 쓰는 `bucketize`/`brierScore`/`buildConfidenceTiers` 유틸을 그대로 재사용(PredRow shape 로
+매핑) — 로직 재구현 없이 기존 KBO 검증 로직을 그대로 재사용. 회귀 테스트 4건 신규, vitest
+430 files/3786 tests 전부 pass. PR #2950 머지 실측 확인(gh pr view state=MERGED, 3af46951).
+
+**의도적으로 EN 미러(`/en/mlb`)엔 미배선** — 지난 waterfall/Elo chart 케이스와 동일 관례,
+다음 explore-idea 또는 review-code heavy 후보로 재기록. 텍스트 라벨("적중률"/"확신도" 등)
+전량 하드코딩 한글이라 locale 파라미터 추가 필요.
+
 ## ✅ MLB predicted/actual home-win 판정 로직 중복 제거 (cycle 2117, 2026-08-14, review-code heavy)
 
 `buildMlbTeamProfile.ts`/`buildMlbMatchupProfile.ts` 가 MLB `predictions.predicted_winner`/
