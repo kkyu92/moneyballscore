@@ -21,6 +21,7 @@ export const LEAGUES: readonly LeagueDef[] = [
 export function leagueFromPath(pathname: string): League {
   if (pathname === "/lotto" || pathname.startsWith("/lotto/")) return "lotto";
   if (pathname === "/mlb" || pathname.startsWith("/mlb/")) return "mlb";
+  if (pathname === "/en/mlb" || pathname.startsWith("/en/mlb/")) return "mlb";
   return "kbo";
 }
 
