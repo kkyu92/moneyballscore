@@ -1,5 +1,28 @@
 # TODOS
 
+## ✅ cron 문자열 하드코딩 이중화 CI 가드 추가 (cycle 2094, 2026-08-14, review-code heavy)
+
+cycle 2082 가 발견한 근접 사례(TODOS.md 197행, `wrangler.toml` crons 배열과
+`worker.ts` dispatch 분기 문자열이 각자 하드코딩되어 한쪽만 바뀌면 전체 MLB/KBO
+pipeline 이 silent skip 될 뻔했던 건) 의 Tier 2 후속. 기존엔 production 실행 시
+"unknown cron" Sentry alert(cycle 2089) 만 있어 사후 감지 — CI 에서 사전 차단
+부재.
+
+`cloudflare-worker` 패키지에 `vitest` 신규 배선(`packages/kbo-data` 와 동일
+컨벤션, 명시적 devDependency 없이 root 의 vitest 를 node_modules 워크업으로
+재사용) + `src/__tests__/cron-sync.test.ts` 추가 — `wrangler.toml` 의 `crons`
+배열과 `worker.ts` 의 `cronExpr === '...'` 문자열 집합을 정규식으로 추출해 정확히
+일치하는지 assert. 검증: 임시로 문자열 1개를 어긋나게 만든 후 테스트가 실제로
+fail 하는 것 확인 후 원복(`git status` clean 재확인).
+
+`tsc --noEmit` 이 테스트 파일의 Node 내장 모듈(`node:fs` 등)을 타입 인식 못 해
+(worker.ts 자체는 edge-only 라 `tsconfig.json` 의 `types` 가
+`@cloudflare/workers-types` 만 허용 — 의도적 제한) 실패 — `types` 배열 자체를
+넓히면 `worker.ts` 가 실수로 Node API 를 쓰는 걸 막던 안전장치가 깨지므로,
+테스트 파일에만 `/// <reference types="node" />` + `@types/node` devDependency
+추가로 국한. `turbo test`/`type-check`/`lint` 전량 통과(4 packages, cloudflare-worker
+가 test task 신규 참여).
+
 ## ✅ CE(CREDIT_EXHAUSTED) 완전 정체 재확인 — cycle 1550 이후 신규 비CE 0건 (cycle 2093, 2026-08-14, operational-analysis lite)
 
 `scripts/op-analysis-ce-cohort.ts` 재실행(cycle 1550 이후 543 사이클 만에 재측정,
