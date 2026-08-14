@@ -31,7 +31,9 @@ import {
 } from "@/lib/teams/buildTeamRecentForm";
 import { buildMlbSeasonHeadToHead } from "@/lib/mlb/buildMlbSeasonHeadToHead";
 import { getMlbConvergencePickHeadToHeadRecord } from "@/lib/analysis/convergenceRecord";
+import { buildMlbMatchupEloTrend } from "@/lib/mlb/buildMlbMatchupEloTrend";
 import { MlbMatchupFactorCompare } from "@/components/matchup/MlbMatchupFactorCompare";
+import { MlbMatchupEloChart } from "@/components/matchup/MlbMatchupEloChart";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
 import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
 import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchupConvergencePickRecord";
@@ -119,7 +121,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     redirect(`/en${pair.path}`);
   }
 
-  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats, eloTrend] = await Promise.all([
     buildMlbMatchupProfile(pair),
     buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
@@ -155,6 +157,12 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
       captureFallback(err, [], {
         route: "/en/mlb/matchup/[teamA]/[teamB]",
         source: "getMlbConvergencePickHeadToHeadRecord(complete)",
+      }),
+    ),
+    buildMlbMatchupEloTrend(pair.codeA, pair.codeB).catch((err) =>
+      captureFallback(err, { points: [] }, {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbMatchupEloTrend",
       }),
     ),
   ]);
@@ -256,6 +264,25 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
         factorB={factorB}
         locale="en"
       />
+
+      {eloTrend.points.length > 0 && (
+        <section
+          aria-labelledby="mlb-matchup-elo-trend-title-en"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="mlb-matchup-elo-trend-title-en" className="text-lg font-bold mb-1">
+            Elo Rating Trend Comparison
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            Elo change by game for both teams this season
+          </p>
+          <MlbMatchupEloChart
+            points={eloTrend.points}
+            teamA={{ shortName: tA.shortName, color: tA.color }}
+            teamB={{ shortName: tB.shortName, color: tB.color }}
+          />
+        </section>
+      )}
 
       <MlbMatchupRecentForm
         teamA={{ shortName: tA.shortName }}

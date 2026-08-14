@@ -306,6 +306,17 @@ describe('/en/mlb/team/[code] — team profile page', () => {
   });
 });
 
+// ── Matchup [teamA]/[teamB] (/en/mlb/matchup/[teamA]/[teamB]) ─────────
+describe('/en/mlb/matchup/[teamA]/[teamB] — head-to-head page', () => {
+  const PAGE = src('matchup/[teamA]/[teamB]/page.tsx');
+
+  it('MlbMatchupEloChart wired — KO parity (cycle 2085 plan#25 added chart to KO only, EN missed)', () => {
+    expect(PAGE).toMatch(/import\s*\{\s*MlbMatchupEloChart\s*\}\s*from\s*['"]@\/components\/matchup\/MlbMatchupEloChart['"]/);
+    expect(PAGE).toMatch(/buildMlbMatchupEloTrend/);
+    expect(PAGE).toMatch(/<MlbMatchupEloChart/);
+  });
+});
+
 // ── Players [id] (/en/mlb/players/[id]) ──────────────────────────────
 describe('/en/mlb/players/[id] — Statcast team profile', () => {
   const PAGE = src('players/[id]/page.tsx');
