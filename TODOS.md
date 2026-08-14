@@ -1188,3 +1188,20 @@ HAVING count(*) > 1;
 - **확인 사항:** AI 콘텐츠 허용 범위, 자체 도메인 요건, 트래픽 최소 기준
 - **우선순위:** HIGH (KBO Daily 개발 방향에 영향)
 
+
+## ✅ Vercel 일일 배포 quota 소진 재발 — production 빌드 turbo-ignore 정정 (cycle 2114, 2026-08-14, fix-incident)
+
+deploy-drift-alert 실패(04:58 KST) 발견 → production 3 commit 뒤(7baa84a) 고정,
+main HEAD(fc3f5d2f) 미배포. `vercel ls` 로 지난 21시간 85개 배포 확인 — hobby
+100/day quota 근접, cycle 2083 quota 소진 family 재발(31 cycle 간격).
+
+근본원인: `apps/moneyball/vercel.json` ignoreCommand 가 `VERCEL_ENV=preview`
+일 때만 스킵 — main push (매 cycle 의 `policy: cycle-retro` TODOS.md-only
+커밋 포함) 는 항상 풀 production 빌드를 태워 quota 소진. `npx turbo-ignore
+moneyball` 추가로 production 도 turborepo affected-package 판정 따라 스킵.
+로컬 검증: TODOS.md-only 범위 `packages: []`(스킵) vs app 코드 포함 범위
+"affects moneyball"(빌드 진행) 양쪽 확인. PR #2947 머지 실측 확인
+(gh pr view state=MERGED, 723c5861).
+
+**다음 관찰 포인트**: 다음 cycle(들)에서 deploy-drift-alert 정상 재개(성공)
+확인 — turbo-ignore 배포 후 실효성 monitor.
