@@ -1,5 +1,19 @@
 # TODOS
 
+## ✅ MLB EN 개별 경기 페이지 SportsEvent JSON-LD + Waterfall + ShareButtons/RelatedLinks KO parity 정정 (cycle 2109, 2026-08-14, review-code heavy)
+
+KO page.tsx 가 cycle 2099(SportsEvent JSON-LD)/2104(MlbFactorWaterfallChart)/2107
+(ShareButtons+RelatedLinks) 에서 순차 추가한 4개 컴포넌트를 EN 미러(`/en/mlb/games/
+[date]/[slug]`)엔 그 중 어느 것도 동기하지 않았음 — cycle 2108 이 games!inner 조인
+silent-404 는 고쳤지만 그 사이 KO 에 쌓인 UI parity gap 은 발견 못함 (게시 후 사용자
+신고로는 안 드러나고 코드 read 로 두 파일 직접 diff 해야만 보이는 종류).
+
+EN page.tsx 에 4개 그대로 배선 — 텍스트만 영어. mlbCanonicalPair.path 는
+locale-agnostic 이라 `/en${pair.path}` prefix 재사용(기존 en/mlb/matchup 페이지
+ShareButtons 호출과 동일 관례). MLB_EVENT_STATUS 상수는 KO page.tsx 와 동일하게
+페이지 로컬 중복. 회귀 가드 테스트 3건 추가. `pnpm lint`/`tsc --noEmit`/`pnpm test`
+(427 files, 3768 tests) 전부 pass. PR #2940 CI green 후 자동 squash merge 완료.
+
 ## ✅ MLB EN 개별 경기 페이지 silent 404 정정 + 팩터 카운트 self-sync (cycle 2108, 2026-08-14, review-code heavy)
 
 `/en/mlb/games/[date]/[slug]` 가 `predictions.game_id` 를 KBO 전용 `games!inner` FK 조인으로
