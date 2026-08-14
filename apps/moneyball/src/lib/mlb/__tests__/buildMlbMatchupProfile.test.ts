@@ -46,10 +46,12 @@ function makeSupabaseMock(
   const predsBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    in: vi.fn().mockResolvedValue({
-      data: opts.predsError ? null : preds,
-      error: opts.predsError ?? null,
-    }),
+    in: vi.fn().mockReturnThis(),
+    then: (resolve: (v: { data: unknown; error: unknown }) => unknown) =>
+      resolve({
+        data: opts.predsError ? null : preds,
+        error: opts.predsError ?? null,
+      }),
   };
   return {
     from: vi.fn((table: string) => {

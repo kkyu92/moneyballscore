@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   MLB_TEAMS,
+  MLB_PRODUCTION_COHORT_RULES,
   assertSelectOk,
   buildMatchupSummaryText,
   computeAvgMarginFromFinalGames,
@@ -381,6 +382,7 @@ export async function buildMlbMatchupProfile(
     .select("external_game_id, home_win_prob, prediction_type")
     .eq("prediction_type", "pre_game")
     .eq("league", "mlb")
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)
     .in(
       "external_game_id",
       scheduleRows.map((s) => s.external_game_id),
