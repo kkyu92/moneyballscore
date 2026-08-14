@@ -32,4 +32,14 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/"@type":\s*"SportsEvent"/);
     expect(PAGE_SRC).toMatch(/application\/ld\+json/);
   });
+
+  // cycle 2102 review-code: home_sp_xfip/away_sp_xfip + home_war_total/away_war_total 는
+  // mlb-pipeline.ts 가 실제 값(placeholder 아님)으로 저장하는데 이 페이지가 select 에서
+  // 누락해 DB 에 있는 데이터를 안 보여주고 있었음 (14팩터 클레임 vs 5개만 렌더).
+  it("sp_xfip + war_total 팩터를 select + 렌더한다 (DB 실측 데이터 누락 회귀 차단)", () => {
+    expect(PAGE_SRC).toMatch(/home_sp_xfip/);
+    expect(PAGE_SRC).toMatch(/home_war_total/);
+    expect(PAGE_SRC).toMatch(/slug="sp_xfip"/);
+    expect(PAGE_SRC).toMatch(/slug="war"/);
+  });
 });

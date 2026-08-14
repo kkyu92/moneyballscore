@@ -52,10 +52,14 @@ interface PredictionDetailRow {
   home_win_prob: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
+  home_sp_xfip: number | null;
+  away_sp_xfip: number | null;
   home_bullpen_fip: number | null;
   away_bullpen_fip: number | null;
   home_lineup_woba: number | null;
   away_lineup_woba: number | null;
+  home_war_total: number | null;
+  away_war_total: number | null;
   home_lineup_xwoba: number | null;
   away_lineup_xwoba: number | null;
   home_lineup_barrel_pct: number | null;
@@ -112,10 +116,14 @@ export default async function GameDetail({ params }: PageParams) {
       home_win_prob,
       home_sp_fip,
       away_sp_fip,
+      home_sp_xfip,
+      away_sp_xfip,
       home_bullpen_fip,
       away_bullpen_fip,
       home_lineup_woba,
       away_lineup_woba,
+      home_war_total,
+      away_war_total,
       home_lineup_xwoba,
       away_lineup_xwoba,
       home_lineup_barrel_pct,
@@ -193,8 +201,10 @@ export default async function GameDetail({ params }: PageParams) {
         <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{MLB_FACTOR_COUNTS.total} factor breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <FactorRow slug="sp_fip" home={pred.home_sp_fip} away={pred.away_sp_fip} />
+          <FactorRow slug="sp_xfip" home={pred.home_sp_xfip} away={pred.away_sp_xfip} />
           <FactorRow slug="bullpen_fip" home={pred.home_bullpen_fip} away={pred.away_bullpen_fip} />
           <FactorRow slug="lineup_woba" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
+          <FactorRow slug="war" home={pred.home_war_total} away={pred.away_war_total} />
           <FactorRow label="타선 xwOBA" home={pred.home_lineup_xwoba} away={pred.away_lineup_xwoba} />
           <FactorRow label="Barrel%" home={pred.home_lineup_barrel_pct} away={pred.away_lineup_barrel_pct} />
         </dl>
