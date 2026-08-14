@@ -659,6 +659,29 @@ push 들은 스킵되는 Vercel 배치 특성 고려).
 방안(예: N cycle 마다 1회 push)이 근본 완화책이나 develop-cycle skill 의 "1 cycle = 1
 commit" 원칙과 충돌 여지 있어 사용자 결정 필요.
 
+### 🔁 재발 확인 (cycle 2134, fix-incident heavy, 2026-08-14 16:59 KST) — "단일 reset 시점" 모델 정정
+
+위 "예상 quota reset ~2026-08-14 22:07 KST" 서술은 **틀린 모델**이었음 — 실측(`vercel ls`)
+결과 quota 는 그 전에도 여러 차례 정상 회복돼 프로덕션 배포가 성공(16:12/16:32 KST 등,
+2h 내 다수 Ready 기록) 했다가, 오늘 cycle 2114~2133(20 사이클) 고빈도 push 로 **16:32
+KST 이후 다시 소진**됨 — `vercel deploy --prod --yes` 직접 실행으로 동일 에러
+(`"Resource is limited - try again in 24 hours (code: api-deployments-free-per-day)"`)
+재확인. 즉 이 한도는 고정 시각 1회 리셋이 아니라 **rolling 24h window** — 프로젝트가
+하루 100회를 넘길 만큼 push 하면 낡은 배포가 window 밖으로 빠질 때마다 슬롯이 열렸다
+바로 다시 막히는 상태가 반복됨 (오늘 cycle 수가 20+ 로 매우 높아 상시 포화 상태에 가까움).
+
+**현재 stale 상태**: production = `f7b2b61d`(cycle 2129 commit, `curl .../api/version`
+실측). 그 뒤 실제 코드 변경 커밋 2개가 아직 미반영: `270248ee`(cycle 2130, nav 정정)
++ `42235760`(cycle 2132, MLB top-pick 딥링크 feat, #2955). **오진 방지**: 다음 cycle
+들은 이 2개 커밋이 "배포됐는데 반영 안 됨" 이 아니라 "quota 로 배포 자체가 안 트리거됨"
+임을 전제할 것 — 코드는 정상, prod 만 지연.
+
+**신규 발견 gap**: `vercel-deploy-error-dispatch.yml` (deployment_status 이벤트 리슨) 은
+이 케이스를 못 잡음 — git 연동이 quota 로 배포 객체 자체를 생성 못하면 `deployment_status`
+webhook 이 애초에 발화 안 함 (실패한 배포가 아니라 "배포 시도 자체가 없음"). 기존
+alert 체계의 사각지대 — 별도 cycle 에서 "prod api/version 의 commit_sha 가 main HEAD
+대비 N 커밋 이상 뒤처짐" 을 직접 폴링하는 감지 방식 검토 후보 (Tier 2).
+
 ## ✅ plan #25 Phase 2b step 2 — MlbMatchupEloChart 배선, Phase 1~2b 전체 완결 (cycle 2085, 2026-08-13)
 
 `mlb_team_elo_history`(migration 047, cycle 2083 backfill 1,472건)를 소비하는
