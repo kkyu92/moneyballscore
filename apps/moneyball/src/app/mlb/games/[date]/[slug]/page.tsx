@@ -16,7 +16,7 @@ import {
   MLB_TEAMS,
   type MlbTeamCode,
 } from "@moneyball/shared";
-import { MetricRegistry, type MetricSlug, MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MetricRegistry, type MetricSlug } from "@moneyball/kbo-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -24,10 +24,32 @@ interface PageParams {
   params: Promise<{ date: string; slug: string }>;
 }
 
+// 실제 dl breakdown 에 렌더되는 팩터만 정의 (park_factor/home_advantage/recent_form 등
+// plan #25 Phase 3-gated placeholder 는 제외 — review-code heavy, cycle 2108: 이전엔
+// 전체 모델 팩터 총합 상수(14)를 그대로 heading/description 에 써서 표시 숫자와
+// 실제 7행 렌더 mismatch 가 있었음. cycle 2102 가 5→7행으로 늘렸지만 카운트 클레임
+// 자체는 안 고쳐 재발 — 배열 길이로 self-sync 시켜 재재발 차단).
+const GAME_DETAIL_FACTOR_ROWS: Array<{
+  slug?: MetricSlug;
+  label?: string;
+  homeKey: keyof PredictionDetailRow;
+  awayKey: keyof PredictionDetailRow;
+  statcast?: boolean;
+}> = [
+  { slug: 'sp_fip', homeKey: 'home_sp_fip', awayKey: 'away_sp_fip' },
+  { slug: 'sp_xfip', homeKey: 'home_sp_xfip', awayKey: 'away_sp_xfip' },
+  { slug: 'bullpen_fip', homeKey: 'home_bullpen_fip', awayKey: 'away_bullpen_fip' },
+  { slug: 'lineup_woba', homeKey: 'home_lineup_woba', awayKey: 'away_lineup_woba' },
+  { slug: 'war', homeKey: 'home_war_total', awayKey: 'away_war_total' },
+  { label: '타선 xwOBA', homeKey: 'home_lineup_xwoba', awayKey: 'away_lineup_xwoba', statcast: true },
+  { label: 'Barrel%', homeKey: 'home_lineup_barrel_pct', awayKey: 'away_lineup_barrel_pct', statcast: true },
+];
+const GAME_DETAIL_STATCAST_COUNT = GAME_DETAIL_FACTOR_ROWS.filter((r) => r.statcast).length;
+
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
   const title = `${slug} ${date} 분석 | MoneyBall Score`;
-  const description = `${slug} ${MLB_FACTOR_COUNTS.total}팩터 + Statcast ${MLB_FACTOR_COUNTS.statcast} + waterfall`;
+  const description = `${slug} ${GAME_DETAIL_FACTOR_ROWS.length}팩터 (Statcast ${GAME_DETAIL_STATCAST_COUNT}) + waterfall`;
   return {
     title,
     description,
@@ -202,15 +224,17 @@ export default async function GameDetail({ params }: PageParams) {
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{MLB_FACTOR_COUNTS.total} factor breakdown</h2>
+        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{GAME_DETAIL_FACTOR_ROWS.length} factor breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
-          <FactorRow slug="sp_fip" home={pred.home_sp_fip} away={pred.away_sp_fip} />
-          <FactorRow slug="sp_xfip" home={pred.home_sp_xfip} away={pred.away_sp_xfip} />
-          <FactorRow slug="bullpen_fip" home={pred.home_bullpen_fip} away={pred.away_bullpen_fip} />
-          <FactorRow slug="lineup_woba" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
-          <FactorRow slug="war" home={pred.home_war_total} away={pred.away_war_total} />
-          <FactorRow label="타선 xwOBA" home={pred.home_lineup_xwoba} away={pred.away_lineup_xwoba} />
-          <FactorRow label="Barrel%" home={pred.home_lineup_barrel_pct} away={pred.away_lineup_barrel_pct} />
+          {GAME_DETAIL_FACTOR_ROWS.map((row) => (
+            <FactorRow
+              key={row.homeKey}
+              slug={row.slug}
+              label={row.label}
+              home={pred[row.homeKey] as number | null}
+              away={pred[row.awayKey] as number | null}
+            />
+          ))}
         </dl>
       </section>
 

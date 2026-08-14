@@ -39,8 +39,17 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
   it("sp_xfip + war_total 팩터를 select + 렌더한다 (DB 실측 데이터 누락 회귀 차단)", () => {
     expect(PAGE_SRC).toMatch(/home_sp_xfip/);
     expect(PAGE_SRC).toMatch(/home_war_total/);
-    expect(PAGE_SRC).toMatch(/slug="sp_xfip"/);
-    expect(PAGE_SRC).toMatch(/slug="war"/);
+    expect(PAGE_SRC).toMatch(/slug: 'sp_xfip'/);
+    expect(PAGE_SRC).toMatch(/slug: 'war'/);
+  });
+
+  // cycle 2108 review-code heavy: heading/description 이 MLB_FACTOR_COUNTS.total(14, 전체
+  // 모델 상수)을 그대로 써서 "14팩터" 클레임 vs 실제 7행 렌더 mismatch — cycle 2102 가 5→7행
+  // 으로 늘렸지만 카운트 클레임 자체는 안 고쳐 재발. GAME_DETAIL_FACTOR_ROWS.length 로
+  // self-sync 시켜 향후 행 추가/삭제 시 자동 반영, 하드코딩 상수 재도입 차단.
+  it("heading 팩터 카운트가 실제 렌더 행 배열 길이로 self-sync 한다 (하드코딩 상수 재발 차단)", () => {
+    expect(PAGE_SRC).toMatch(/GAME_DETAIL_FACTOR_ROWS\.length/);
+    expect(PAGE_SRC).not.toMatch(/MLB_FACTOR_COUNTS/);
   });
 
   // cycle 2107 explore-idea: KBO analysis/game/[id] 는 ShareButtons + RelatedLinks(팀 프로필/
