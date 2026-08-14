@@ -1,5 +1,21 @@
 # TODOS
 
+## ✅ lotto(lite) — 30-cycle gap 헬스체크, site 데이터 정합 확인 (cycle 2137, 2026-08-14)
+
+trigger 6 (마지막 lotto 발화 cycle 2106 이후 31 cycle 경과, ≥30 임계) 충족해 발화.
+
+- `pnpm tsx scripts/lotto.ts count`: 유효조합 7,705,415 / 8,145,060 (5.40% 제거, PASS) —
+  cycle 2106 실측과 동일값, drift 없음
+- 우려했던 1236회(08-08) picks/result 부재는 `~/lotto_picks/` **개인 스크래치 dir 한정**
+  착시였음. 실제 site 콘텐츠(`apps/moneyball/data/lotto-picks/2026-08-08.md` +
+  `apps/moneyball/data/lotto-results/2026-08-08.md`) 는 cycle 2106 시점부터 이미 존재 —
+  256/256 룰 PASS, 5등 27건 매칭 확인 (재검증 결과 동일)
+- 1237회(08-15, 내일 21시 KST 추첨) picks 도 `apps/moneyball/data/lotto-picks/2026-08-15.md`
+  로 cycle 2041 에서 이미 생성됨 — 신규 pick 불필요
+- valid_delta=0 / new_rules=0 — 코드·데이터 변경 없음, 헬스체크만
+
+**다음 lotto 발화 후보**: 1237회(08-15) 추첨 이후 OOS 검증 (내일 이후 cycle).
+
 ## ✅ review-code(heavy) — wave-625 MLB 팀 프로필 수렴 픽 기능 정합성 검증 (cycle 2136, 2026-08-14)
 
 직전 cycle 2135 explore-idea(heavy)가 신규 배선한 `/mlb/team/[code]` 수렴 픽 성적 기능
