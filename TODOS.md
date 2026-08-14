@@ -1,5 +1,15 @@
 # TODOS
 
+## ✅ review-code(heavy) — MLB PRODUCTION_COHORT_RULES filter family gap fix, 잔여 2곳 (cycle 2125, 2026-08-14)
+
+cycle 2124 가 3곳 fix 했지만 grep 전수 조회(`from("predictions")` 전체 사이트) 결과
+`buildMlbMatchupProfile.ts`(매치업 페이지) / `buildMlbTeamFactorAverages.ts`(팀
+프로필 팩터 평균) 2곳이 여전히 `league='mlb'` 만으로 필터링 — 동일 gap. page.tsx
+6개는 이미 scoring_rule eq 단일 필터 보유해서 안전 확인. 이걸로 MLB predictions
+쿼리 전체 sweep 완료 (convergenceRecord.ts 포함 총 6곳 lib 레이어 모두 필터 일관).
+동일 패턴(`.in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)` + test mock thenable
+교체)으로 fix. 전체 3807/3807 pass, tsc/lint clean. main 직접 commit (R4).
+
 ## ✅ review-code(heavy) — MLB PRODUCTION_COHORT_RULES filter family gap fix (cycle 2124, 2026-08-14)
 
 cycle 2123 explore-idea heavy 가 만든 `buildMlbCalendarHeatmap.ts` 를 review 하다가
