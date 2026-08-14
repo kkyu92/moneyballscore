@@ -34,3 +34,25 @@ describe("en/mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 21
     expect(PAGE_SRC).not.toMatch(/MLB_FACTOR_COUNTS/);
   });
 });
+
+// cycle 2109 review-code heavy: KO page.tsx 가 cycle 2099(SportsEvent JSON-LD)/2104
+// (MlbFactorWaterfallChart)/2107(ShareButtons+RelatedLinks) 에서 순차 추가된 4개 컴포넌트를
+// EN 미러엔 한 번도 동기하지 않아 KO/EN parity gap silent 누적 (게시 후 발견 불가 — 두 페이지
+// 비교 diff 로만 드러남).
+describe("en/mlb/games/[date]/[slug] KO parity 회귀 가드 (cycle 2109)", () => {
+  it("SportsEvent JSON-LD 를 렌더한다 (KO parity, cycle 2099)", () => {
+    expect(PAGE_SRC).toMatch(/application\/ld\+json/);
+    expect(PAGE_SRC).toMatch(/"@type":\s*"SportsEvent"/);
+  });
+
+  it("MlbFactorWaterfallChart 를 렌더한다 (KO parity, cycle 2104)", () => {
+    expect(PAGE_SRC).toMatch(/<MlbFactorWaterfallChart/);
+  });
+
+  it("ShareButtons + RelatedLinks 를 렌더한다 (KO parity, cycle 2107)", () => {
+    expect(PAGE_SRC).toMatch(/<ShareButtons/);
+    expect(PAGE_SRC).toMatch(/<RelatedLinks/);
+    expect(PAGE_SRC).toMatch(/mlbCanonicalPair/);
+    expect(PAGE_SRC).toMatch(/\/en\/mlb\/team\/\$\{home\}/);
+  });
+});
