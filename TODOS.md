@@ -31,13 +31,13 @@ MLB 예측 파이프라인(`mlb-pipeline.ts`)엔 애초에 `reasoning`/`confiden
 신규 DB 조회/계산 없음(bar 서버에서 1회 계산해 prose + 기존 waterfall chart 양쪽 재사용).
 회귀 테스트 4건 추가. `pnpm lint`/`tsc --noEmit`/`pnpm test`(427+86 files 전부) pass.
 
-**의도적으로 EN 미러엔 미배선** — waterfall bar label(`computeMlbWaterfall` 산출, 예:
-"선발 FIP")이 이미 한국어 하드코딩(기존 `MlbFactorWaterfallChart`도 EN 페이지에서 동일하게
-한국어 라벨 노출 중인 pre-existing 제약, 본 cycle 이 만든 gap 아님) — bar label 자체의
-locale-aware화(다음 explore-idea 후보) 없이 prose 만 영문 번역하면 문장 안에 한글 팩터명이
-섞이는 반쪽 결과라 skip. 다음 explore-idea heavy 후보로 재기록: (1) computeMlbWaterfall
-label 을 locale 파라미터 받도록 확장 (2) EN 버전 buildMlbGameOverview 문장 템플릿 (3) 그 후
-EN 페이지 배선.
+**당시 의도적으로 EN 미러엔 미배선** — waterfall bar label 이 한국어 하드코딩이라 prose 만
+영문 번역하면 반쪽 결과라 skip, 다음 explore-idea heavy 후보로 재기록했던 항목.
+
+**✅ cycle 2111 에서 완료됨** — `computeMlbWaterfall`/`buildMlbGameOverview` 에 locale
+파라미터 추가 + EN 페이지 배선 완료(PR #2942, 08f1b29e). 본 항목은 stale carry-over였음
+(cycle 2115 가 재작업 착수 전 실제 커밋 read 로 발견 — TODOS.md 미정리가 근거 없는
+재작업을 유발할 뻔함, silent drift family 유사 패턴).
 
 ## ✅ MLB EN 개별 경기 페이지 SportsEvent JSON-LD + Waterfall + ShareButtons/RelatedLinks KO parity 정정 (cycle 2109, 2026-08-14, review-code heavy)
 
