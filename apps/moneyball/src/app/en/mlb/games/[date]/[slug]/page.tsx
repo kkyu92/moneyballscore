@@ -2,8 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
-import { assertSelectOk, SITE_URL } from "@moneyball/shared";
-import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import {
+  assertSelectOk,
+  SITE_URL,
+  MLB_SCORING_RULE,
+  normalizeMlbTeamCode,
+  toMlbStatsApiCode,
+  type MlbTeamCode,
+} from "@moneyball/shared";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -11,10 +17,26 @@ interface PageParams {
   params: Promise<{ date: string; slug: string }>;
 }
 
+// 실제 dl breakdown 에 렌더되는 팩터만 정의 — KO page.tsx(cycle 2108 review-code heavy)와
+// 동일 패턴, 카운트가 array.length 로 self-sync.
+const GAME_DETAIL_FACTOR_ROWS: Array<{
+  label: string;
+  homeKey: keyof PredictionDetailRow;
+  awayKey: keyof PredictionDetailRow;
+}> = [
+  { label: "SP FIP", homeKey: "home_sp_fip", awayKey: "away_sp_fip" },
+  { label: "SP xFIP", homeKey: "home_sp_xfip", awayKey: "away_sp_xfip" },
+  { label: "Bullpen FIP", homeKey: "home_bullpen_fip", awayKey: "away_bullpen_fip" },
+  { label: "Lineup wOBA", homeKey: "home_lineup_woba", awayKey: "away_lineup_woba" },
+  { label: "WAR", homeKey: "home_war_total", awayKey: "away_war_total" },
+  { label: "Lineup xwOBA", homeKey: "home_lineup_xwoba", awayKey: "away_lineup_xwoba" },
+  { label: "Barrel%", homeKey: "home_lineup_barrel_pct", awayKey: "away_lineup_barrel_pct" },
+];
+
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { date, slug } = await params;
   const title = `${slug} ${date} Analysis | MoneyBall Score`;
-  const description = `${slug} ${MLB_FACTOR_COUNTS.total}-factor breakdown + Statcast ${MLB_FACTOR_COUNTS.statcast} + waterfall prediction.`;
+  const description = `${slug} ${GAME_DETAIL_FACTOR_ROWS.length}-factor breakdown.`;
   return {
     title,
     description,
@@ -39,65 +61,93 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 }
 
 interface PredictionDetailRow {
-  game_id: number;
-  predicted_winner: number | null;
-  confidence: number | null;
+  external_game_id: string;
+  home_win_prob: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
+  home_sp_xfip: number | null;
+  away_sp_xfip: number | null;
+  home_bullpen_fip: number | null;
+  away_bullpen_fip: number | null;
   home_lineup_woba: number | null;
   away_lineup_woba: number | null;
+  home_war_total: number | null;
+  away_war_total: number | null;
   home_lineup_xwoba: number | null;
   away_lineup_xwoba: number | null;
   home_lineup_barrel_pct: number | null;
   away_lineup_barrel_pct: number | null;
-  games: {
-    game_date: string;
-    home_team: { code: string | null } | null;
-    away_team: { code: string | null } | null;
-  } | null;
-  predicted_winner_team: { code: string | null } | null;
+}
+
+interface ScheduleRow {
+  external_game_id: string;
+  home_score: number | null;
+  away_score: number | null;
+  status: string;
 }
 
 export default async function GameDetailEn({ params }: PageParams) {
   const { date, slug } = await params;
-  const [home, away] = slug.split('-vs-');
-  if (!home || !away) notFound();
+  const [homeParam, awayParam] = slug.split('-vs-');
+  if (!homeParam || !awayParam) notFound();
+
+  // KO page.tsx(cycle 2099/2108) 와 동일 이유 — MLB 는 games(KBO FK 스키마) 에 없고
+  // game_id=NULL(migration 038, mlb-pipeline.ts:451) 이라 KBO 전용 FK inner join 은 항상
+  // 미스매치. 이 EN 미러는 그 조인을 그대로 써서 모든 MLB 경기가 silent 404 였음
+  // (cycle 2108 review-code heavy 발견 — KO 는 cycle 2099 에 이미 고쳤지만 EN 미러는 미동기).
+  const homeCode = normalizeMlbTeamCode(homeParam) ?? (homeParam as MlbTeamCode);
+  const awayCode = normalizeMlbTeamCode(awayParam) ?? (awayParam as MlbTeamCode);
+  const dbHomeCode = toMlbStatsApiCode(homeCode);
+  const dbAwayCode = toMlbStatsApiCode(awayCode);
 
   const supabase = await createClient();
-  const result = await supabase
+
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_score, away_score, status')
+    .eq('game_date', date)
+    .eq('home_team_code', dbHomeCode)
+    .eq('away_team_code', dbAwayCode)
+    .maybeSingle();
+  const { data: scheduleRaw } = assertSelectOk(scheduleResult, 'MlbGameDetailEn schedule');
+  const schedule = scheduleRaw as ScheduleRow | null;
+
+  if (!schedule) notFound();
+
+  const predResult = await supabase
     .from('predictions')
     .select(`
-      game_id,
-      predicted_winner,
-      confidence,
+      external_game_id,
+      home_win_prob,
       home_sp_fip,
       away_sp_fip,
+      home_sp_xfip,
+      away_sp_xfip,
+      home_bullpen_fip,
+      away_bullpen_fip,
       home_lineup_woba,
       away_lineup_woba,
+      home_war_total,
+      away_war_total,
       home_lineup_xwoba,
       away_lineup_xwoba,
       home_lineup_barrel_pct,
-      away_lineup_barrel_pct,
-      games!inner(
-        game_date,
-        home_team:teams!games_home_team_id_fkey(code),
-        away_team:teams!games_away_team_id_fkey(code)
-      ),
-      predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+      away_lineup_barrel_pct
     `)
     .eq('league', 'mlb')
-    .eq('games.game_date', date)
-    .eq('games.home_team.code', home)
-    .eq('games.away_team.code', away)
+    .eq('scoring_rule', MLB_SCORING_RULE)
+    .eq('external_game_id', schedule.external_game_id)
     .maybeSingle();
-
-  const { data: predRaw } = assertSelectOk(result, 'MlbGameDetailEn prediction');
-  const pred = predRaw as unknown as PredictionDetailRow | null;
+  const { data: predRaw } = assertSelectOk(predResult, 'MlbGameDetailEn prediction');
+  const pred = predRaw as PredictionDetailRow | null;
 
   if (!pred) notFound();
 
-  const winnerCode = pred.predicted_winner_team?.code ?? '?';
-  const conf = pred.confidence != null ? Math.round(pred.confidence * 100) : 0;
+  const home = homeCode;
+  const away = awayCode;
+  const homeWinProb = pred.home_win_prob ?? 0.5;
+  const winnerCode = homeWinProb >= 0.5 ? home : away;
+  const conf = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -115,15 +165,24 @@ export default async function GameDetailEn({ params }: PageParams) {
         <div className="text-3xl font-bold text-brand-700 dark:text-brand-100">
           {winnerCode} {conf}%
         </div>
+        {schedule.status === 'final' && schedule.home_score != null && schedule.away_score != null && (
+          <p className="mt-2 text-sm text-brand-600 dark:text-brand-300 font-mono">
+            Final: {away} {schedule.away_score} - {schedule.home_score} {home}
+          </p>
+        )}
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{MLB_FACTOR_COUNTS.total} Factor Breakdown</h2>
+        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{GAME_DETAIL_FACTOR_ROWS.length} Factor Breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
-          <FactorRow label="SP FIP" home={pred.home_sp_fip} away={pred.away_sp_fip} />
-          <FactorRow label="Lineup wOBA" home={pred.home_lineup_woba} away={pred.away_lineup_woba} />
-          <FactorRow label="Lineup xwOBA" home={pred.home_lineup_xwoba} away={pred.away_lineup_xwoba} />
-          <FactorRow label="Barrel%" home={pred.home_lineup_barrel_pct} away={pred.away_lineup_barrel_pct} />
+          {GAME_DETAIL_FACTOR_ROWS.map((row) => (
+            <FactorRow
+              key={row.homeKey}
+              label={row.label}
+              home={pred[row.homeKey] as number | null}
+              away={pred[row.awayKey] as number | null}
+            />
+          ))}
         </dl>
       </section>
     </main>
