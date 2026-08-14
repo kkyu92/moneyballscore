@@ -270,9 +270,13 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
   }
 
   const predictionRows = gameList.map((g) => {
-    const home = statsByTeam.get(g.home_team_code);
-    const away = statsByTeam.get(g.away_team_code);
     const homeCanonicalCode = normalizeMlbTeamCode(g.home_team_code);
+    const awayCanonicalCode = normalizeMlbTeamCode(g.away_team_code);
+    // mlb_team_stats.team_code 는 canonical(Baseball-Reference) 컨벤션 — mlb_schedule 은
+    // StatsAPI 원본(7팀 alias, cycle 2081 사례27) 이라 정규화 없이 조회하면 그 7팀은 항상
+    // 미스매치로 MLB_STAT_DEFAULTS fallback (실측: home_sp_fip non-null 0/764, cycle 2097 발견).
+    const home = statsByTeam.get(homeCanonicalCode ?? g.home_team_code);
+    const away = statsByTeam.get(awayCanonicalCode ?? g.away_team_code);
     const homeParkPf = homeCanonicalCode ? MLB_TEAMS[homeCanonicalCode].parkPf : undefined;
 
     const prob = computeMlbProbability({

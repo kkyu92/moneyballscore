@@ -390,6 +390,65 @@ describe('runMlbPipeline', () => {
     expect(row.away_lineup_barrel_pct).toBeNull();
   });
 
+  it('mlb_predict_final — home_team_code 가 StatsAPI 컨벤션(WSH)이고 mlb_team_stats.team_code 는 canonical(WSN)일 때도 실측 팩터 매칭 (regression: cycle 2097 발견 — mlb_team_stats 는 canonical 컨벤션으로 저장돼(DB 실측) statsByTeam 조회를 정규화 없이 raw schedule 코드로 하면 TB/CWS/KC/SD/SF/AZ/WSH 7팀 전량 미스매치 → home_sp_fip 등 전량 NULL. DB 실측: predictions 전체 764건 중 home_sp_fip non-null 1건)', async () => {
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const scheduleGames = [
+      { external_game_id: '4001', home_team_code: 'WSH', away_team_code: 'NYM' },
+    ];
+    // mlb_team_stats 는 canonical 키(WSN)로 저장됨 — schedule 은 StatsAPI 원본(WSH)
+    const statsRows = [
+      { team_code: 'WSN', woba: 0.310, fip: 3.90, xfip: 4.05, war: 12.4, xwoba: 0.300, barrel_pct: 7.1 },
+    ];
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: statsRows, error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    expect(insertedRows.length).toBe(1);
+    const row = insertedRows[0];
+    // WSH(home) → WSN 정규화 성공 시 실측값 사용, 실패 시 전량 null 로 회귀
+    expect(row.home_sp_fip).toBe(3.90);
+    expect(row.home_sp_xfip).toBe(4.05);
+    expect(row.home_lineup_woba).toBe(0.310);
+    expect(row.home_bullpen_fip).toBe(3.90);
+    expect(row.home_war_total).toBe(12.4);
+    expect(row.home_lineup_xwoba).toBe(0.300);
+    expect(row.home_lineup_barrel_pct).toBe(7.1);
+  });
+
   it('mlb_walk_forward_measure — predictions 쿼리 컬럼 mlb_game_date 사용 (silent drift family fix, cycle 1168)', async () => {
     const eqCalls: Array<[string, unknown]> = [];
     const fromCalls: string[] = [];

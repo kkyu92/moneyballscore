@@ -20,6 +20,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { normalizeMlbTeamCode } from '@moneyball/shared';
 
 const APPLY = process.argv.includes('--apply');
 
@@ -101,8 +102,11 @@ async function main() {
   for (const row of predRows as PredictionRow[]) {
     const sched = scheduleByExternalId.get(row.external_game_id!);
     if (!sched) { missingSchedule++; continue; }
-    const home = statsByTeam.get(sched.home_team_code);
-    const away = statsByTeam.get(sched.away_team_code);
+    // mlb_team_stats.team_code 는 canonical 컨벤션, mlb_schedule 은 StatsAPI 원본(7팀 alias,
+    // cycle 2081 사례27) — 정규화 없이 조회하면 그 7팀은 항상 미스매치 (cycle 2097 발견,
+    // mlb-pipeline.ts runPredictFinal 과 동일 버그).
+    const home = statsByTeam.get(normalizeMlbTeamCode(sched.home_team_code) ?? sched.home_team_code);
+    const away = statsByTeam.get(normalizeMlbTeamCode(sched.away_team_code) ?? sched.away_team_code);
     if (!home && !away) { missingBothStats++; continue; }
     updates.push({
       id: row.id,

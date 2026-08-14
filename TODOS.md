@@ -1,5 +1,33 @@
 # TODOS
 
+## ✅ MLB team_code alias 미정규화 → 실측 팩터(fip/woba/war 등) 30팀 중 사실상 전량 미반영 (cycle 2097, 2026-08-14, fix-incident/operational-analysis 겸 heavy)
+
+plan #25 Phase 3(MLB Elo 예측 반영) op-analysis heavy backtest 게이트를 착수하려
+`predictions` league=mlb 실측 데이터를 조사하다 발견: `home_sp_fip` non-null 이
+764건 중 단 1건 — 거의 전량 MLB_STAT_DEFAULTS fallback. 원인 2가지 확인:
+
+1. **진짜 실측 원인 (신규 발견, fix)**: `mlb_team_stats.team_code` 는 canonical
+   (Baseball-Reference) 컨벤션으로 저장(DB 실측: CHW/KCR/SDP/SFG/TBR/ARI/WSN)되는데,
+   `mlb-pipeline.ts` `runPredictFinal` 의 `statsByTeam.get(g.home_team_code)` 가
+   `mlb_schedule` 의 StatsAPI 원본 코드(CWS/KC/SD/SF/TB/AZ/WSH)를 정규화 없이 그대로
+   조회 — cycle 2081 사례27 이 이미 발견해 `MlbMatchupEloChart`/park_factor 소비
+   경로에선 고쳤던 **동일 7팀 alias 버그가 실제 예측 파이프라인 핵심 조회 지점엔
+   미적용** 상태로 남아있었음. `normalizeMlbTeamCode()` 를 홈/원정 양쪽에 적용해 수정
+   (`packages/kbo-data/src/pipeline/mlb-pipeline.ts`) + 회귀 테스트 1건 추가
+   (WSH↔WSN 케이스, `mlb-pipeline.test.ts`). `scripts/backfill-mlb-factor-breakdown.ts`
+   (cycle 2065, 사례21) 도 동일 버그 보유 — 동일 수정.
+2. **763/764 건이 null 이었던 진짜 이유는 별개**: `mlb_team_stats` 자체가 최근까지
+   비어있었음 — `fancy_synced_at`/`savant_synced_at` 전량이 단일 배치 타임스탬프
+   (2026-08-13T19:18/20:18 UTC, 즉 어제 새벽 KST) 로 동일 — FanGraphs/Savant 스크랩이
+   최근에야 처음 성공(또는 처음 정상 반영)했다는 뜻. DET(alias 불필요, 정규 코드)
+   같은 팀도 그 이전 예측은 null 이었던 건 이 타이밍 때문(정상 동작, 버그 아님).
+
+수정 후 `scripts/backfill-mlb-factor-breakdown.ts --apply` 재실행 → 762/763건
+정상 backfill(30/30팀 stats 매칭 확인, DB 실측). `pnpm lint`/`pnpm test`
+(kbo-data 1114 + 전체 3750 tests) 전부 pass. plan #25 Phase 3 backtest 는 다음
+predict_final cron 실행분(오늘 이후, alias fix 반영) 이 쌓인 뒤 재착수 — 이번
+cycle 은 backtest 선행 조건(실측 팩터 데이터 정합성) 을 먼저 복구.
+
 ## ✅ review-code (lite) baseline 재확인, 신규 issue 0건 (cycle 2096, 2026-08-14)
 
 풀 스캔 결과 open hub-dispatch issue 0건, approved plan 0건, CI green, Vercel 배포
