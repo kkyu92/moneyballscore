@@ -1,5 +1,27 @@
 # TODOS
 
+## ✅ review-code(heavy) — wave-625 MLB 팀 프로필 수렴 픽 기능 정합성 검증 (cycle 2136, 2026-08-14)
+
+직전 cycle 2135 explore-idea(heavy)가 신규 배선한 `/mlb/team/[code]` 수렴 픽 성적 기능
+(Feature-Drift Cycle 패턴 — 신규 기능 직후 review-code 자연 교대)을 직접 코드 read로 검증:
+
+- `MlbTeamConvergencePickRecord.tsx` vs KBO 대응 `TeamConvergencePickRecord.tsx` — locale
+  분기 구조 동일, 텍스트만 분기 (parity 정상). description 문구가 KBO는 "(8팩터+)"/"(10팩터)"
+  명시하지만 MLB는 미명시 — 의도된 차이 (MLB_FACTOR_PICK_STRONG=5/COMPLETE=6, 다른 임계값이라
+  하드코딩 라벨 오해 방지)
+- `convergenceRecord.ts` `getMlbConvergencePickTeamStats`/`evaluateMlbConvergencePickRow` —
+  cycle 2081 silent-empty 버그(7팀 StatsAPI 코드 불일치)와 달리 team-code 필터 자체가 없는
+  전체 스캔 쿼리라 해당 버그 재발 경로 없음. `MLB_COMPOSITE_DUEL_MIN_VALID`/`MLB_FACTOR_PICK_STRONG`
+  /`MLB_FACTOR_PICK_COMPLETE`(3/5/6) 값이 plan24-phase3c 기존 배선과 일치
+- KO/EN 양쪽 `page.tsx` — `Promise.all` + `captureFallback` 패턴 동일, `MlbTeamConvergencePickRecord`
+  섹션 위치(factor averages 뒤, Elo 추이 앞) KO/EN 동일, EN은 `locale="en"` 명시 전달 확인
+- `wave625-mlb-team-convergence-record.test.ts` 7/7 pass 재확인
+
+**결론: drift 없음, 코드 정상.** 액션 불필요 (cycle 2105 "confirmed intentional" 패턴과 동일 —
+PR 없이 검증만으로 outcome=success). skill-evolution trigger 5개 전부 미충족 (직전 20 사이클
+표본 19, review-code 10/20 fire — 0회 발화 chain 없음). 2-chain lock 미탐지 (직전 8사이클
+distinct=5). ship-0 emergency 미충족 (직전 10사이클 전부 success).
+
 ## ✅ explore-idea(heavy) — MLB 팀 프로필 시즌 전체 수렴 픽 성적 (wave-625, cycle 2135, 2026-08-14)
 
 `getConvergencePickTeamStats`/`TeamConvergencePickRecord`(KBO, wave-607)가 `/teams/[code]`에
