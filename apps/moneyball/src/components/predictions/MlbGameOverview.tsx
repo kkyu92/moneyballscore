@@ -7,12 +7,13 @@ interface MlbGameOverviewProps {
   homeWinProb: number;
   bars: MlbWaterfallBar[];
   factorCount: number;
+  locale?: 'ko' | 'en';
 }
 
-export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorCount }: MlbGameOverviewProps) {
+export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorCount, locale = 'ko' }: MlbGameOverviewProps) {
   const homeName = mlbShortTeamName(homeTeam);
   const awayName = mlbShortTeamName(awayTeam);
-  const { pitching, batting, situational } = buildMlbGameOverview(bars, homeName, awayName);
+  const { pitching, batting, situational } = buildMlbGameOverview(bars, homeName, awayName, locale);
 
   if (pitching.length === 0 && batting.length === 0 && situational.length === 0) {
     return null;
@@ -20,6 +21,48 @@ export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorC
 
   const favored = homeWinProb >= 0.5 ? homeName : awayName;
   const marginPp = Math.round(Math.abs(homeWinProb - 0.5) * 200);
+
+  if (locale === 'en') {
+    const confidenceLabel = marginPp < 10 ? 'a close contest' : marginPp < 20 ? 'a slight edge' : 'a clear edge';
+    return (
+      <section
+        aria-labelledby="mlb-prose-summary-title"
+        className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl p-5 space-y-3 text-sm text-gray-700 dark:text-gray-200 leading-relaxed"
+      >
+        <h2 id="mlb-prose-summary-title" className="text-base font-bold text-gray-900 dark:text-gray-100">
+          AI Analysis Summary
+        </h2>
+
+        {pitching.length > 0 && (
+          <p>
+            <span className="font-medium">Pitching — </span>
+            {pitching.join(' ')}
+          </p>
+        )}
+
+        {batting.length > 0 && (
+          <p>
+            <span className="font-medium">Batting &amp; Roster — </span>
+            {batting.join(' ')}
+          </p>
+        )}
+
+        {situational.length > 0 && (
+          <p>
+            <span className="font-medium">Situational — </span>
+            {situational.join(' ')}
+          </p>
+        )}
+
+        <p>
+          Combining {factorCount} sabermetric factors, the quantitative model sees {confidenceLabel} with {favored}
+          {' '}
+          {marginPp > 0 ? `ahead by ${marginPp}pp.` : 'in a dead heat.'}
+        </p>
+      </section>
+    );
+  }
+
   const confidenceLabel = marginPp < 10 ? '박빙의 접전' : marginPp < 20 ? '소폭 우위' : '명확한 우위';
 
   return (

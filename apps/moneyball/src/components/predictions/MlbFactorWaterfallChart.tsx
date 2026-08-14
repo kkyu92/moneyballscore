@@ -23,6 +23,7 @@ interface Props {
   input: MlbWaterfallInput;
   homeTeam: MlbTeamCode;
   awayTeam: MlbTeamCode;
+  locale?: "ko" | "en";
 }
 
 interface TooltipPayloadEntry {
@@ -31,9 +32,10 @@ interface TooltipPayloadEntry {
 interface TooltipProps {
   active?: boolean;
   payload?: TooltipPayloadEntry[];
+  locale?: "ko" | "en";
 }
 
-function CustomTooltip({ active, payload }: TooltipProps) {
+function CustomTooltip({ active, payload, locale = "ko" }: TooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const bar = payload[0]?.payload;
   if (!bar) return null;
@@ -44,18 +46,18 @@ function CustomTooltip({ active, payload }: TooltipProps) {
       <div
         className={`font-semibold mt-1 ${bar.direction === "home" ? "text-brand-600" : bar.direction === "away" ? "text-red-600" : "text-brand-400"}`}
       >
-        영향: {ppSign}
+        {locale === "en" ? "Impact" : "영향"}: {ppSign}
         {(bar.contribution * 100).toFixed(2)}pp
       </div>
       <div className="text-brand-500 dark:text-brand-400 mt-1">
-        누적 prob: <span className="font-mono">{(bar.cumulative * 100).toFixed(1)}%</span>
+        {locale === "en" ? "Cumulative prob" : "누적 prob"}: <span className="font-mono">{(bar.cumulative * 100).toFixed(1)}%</span>
       </div>
     </div>
   );
 }
 
-export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam }: Props) {
-  const bars = computeMlbWaterfall(input);
+export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam, locale = "ko" }: Props) {
+  const bars = computeMlbWaterfall({ ...input, locale });
   const homeName = mlbShortTeamName(homeTeam);
   const awayName = mlbShortTeamName(awayTeam);
 
@@ -69,11 +71,12 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam }: Props) {
           id="mlb-factor-waterfall-heading"
           className="text-lg md:text-xl font-bold text-brand-700 dark:text-brand-100"
         >
-          팩터 누적 영향 (waterfall)
+          {locale === "en" ? "Cumulative Factor Impact (waterfall)" : "팩터 누적 영향 (waterfall)"}
         </h2>
         <p className="text-xs md:text-sm text-brand-500 dark:text-brand-400 mt-1">
-          중립 50% 시작 → 각 팩터 영향 누적 → 최종 {homeName} 승리 확률. 우(녹색)=홈 유리 / 좌(빨강)=원정 유리.
-          Elo/최근폼/상대전적/수비SFR 은 MLB 미구현 placeholder(항상 중립)라 본 차트엔 미표시.
+          {locale === "en"
+            ? `Starts at a neutral 50% → each factor's impact accumulates → final ${homeName} win probability. Right (green) = home favored / left (red) = away favored. Elo/recent form/head-to-head/defense SFR are unimplemented MLB placeholders (always neutral) and are omitted from this chart.`
+            : `중립 50% 시작 → 각 팩터 영향 누적 → 최종 ${homeName} 승리 확률. 우(녹색)=홈 유리 / 좌(빨강)=원정 유리. Elo/최근폼/상대전적/수비SFR 은 MLB 미구현 placeholder(항상 중립)라 본 차트엔 미표시.`}
         </p>
       </header>
       <div className="h-72">
@@ -98,7 +101,7 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam }: Props) {
               stroke="var(--color-brand-300)"
             />
             <ReferenceLine x={0.5} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--color-brand-50)" }} />
+            <Tooltip content={<CustomTooltip locale={locale} />} cursor={{ fill: "var(--color-brand-50)" }} />
             <Bar
               dataKey={(d: ReturnType<typeof computeMlbWaterfall>[number]) => [d.base, d.end]}
               fill="var(--color-brand-500)"
@@ -123,7 +126,7 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam }: Props) {
         </ResponsiveContainer>
       </div>
       <p className="text-[10px] text-brand-400 dark:text-brand-500 mt-3 text-center">
-        {awayName} @ {homeName} · 최종 [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
+        {awayName} @ {homeName} · {locale === "en" ? "final" : "최종"} [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
       </p>
     </section>
   );

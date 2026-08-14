@@ -82,4 +82,29 @@ describe('buildMlbGameOverview', () => {
     const allSentences = [...overview.pitching, ...overview.batting, ...overview.situational];
     expect(allSentences.some((s) => s.includes('최종 확률'))).toBe(false);
   });
+
+  it('locale="en" produces English sentences with English bar labels (no Korean leak)', () => {
+    const input: MlbWaterfallInput = {
+      sp_fip: { home: 3.2, away: 4.5 },
+      sp_xfip: { home: 3.4, away: 4.3 },
+      bullpen_fip: { home: 3.2, away: 4.5 },
+      lineup_woba: { home: 0.34, away: 0.30 },
+      war: { home: 4.0, away: 1.0 },
+      lineup_xwoba: { home: 0.33, away: 0.31 },
+      lineup_barrel_pct: { home: 9.0, away: 7.5 },
+      homeParkPf: 105,
+      homeWinProb: 0.62,
+      locale: 'en',
+    };
+    const bars = computeMlbWaterfall(input);
+    const enHome = 'Home Team';
+    const enAway = 'Away Team';
+    const overview = buildMlbGameOverview(bars, enHome, enAway, 'en');
+
+    expect(overview.pitching.length).toBeGreaterThan(0);
+    expect(overview.pitching.every((s) => s.includes(enHome) && s.includes('edge in'))).toBe(true);
+    expect(overview.batting.length).toBeGreaterThan(0);
+    const allSentences = [...overview.pitching, ...overview.batting, ...overview.situational];
+    expect(allSentences.some((s) => /[가-힣]/.test(s))).toBe(false); // no Korean characters leak through
+  });
 });

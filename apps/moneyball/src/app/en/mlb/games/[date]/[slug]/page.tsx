@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
+import { MlbGameOverview } from "@/components/predictions/MlbGameOverview";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { createClient } from "@/lib/supabase/server";
+import { computeMlbWaterfall, type MlbWaterfallInput } from "@moneyball/kbo-data";
 import {
   assertSelectOk,
   SITE_URL,
@@ -188,6 +190,21 @@ export default async function GameDetailEn({ params }: PageParams) {
     },
   };
 
+  // waterfall bar 1회 계산 (server) — MlbGameOverview prose + MlbFactorWaterfallChart(client)
+  // 양쪽이 동일 input 소비. KO page.tsx(cycle 2104/2110)와 동일 패턴.
+  const waterfallInput: MlbWaterfallInput = {
+    sp_fip: { home: pred.home_sp_fip, away: pred.away_sp_fip },
+    sp_xfip: { home: pred.home_sp_xfip, away: pred.away_sp_xfip },
+    bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
+    lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
+    war: { home: pred.home_war_total, away: pred.away_war_total },
+    lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
+    lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
+    homeParkPf: MLB_TEAMS[home].parkPf,
+    homeWinProb,
+  };
+  const waterfallBars = computeMlbWaterfall({ ...waterfallInput, locale: 'en' });
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
       <script
@@ -215,6 +232,15 @@ export default async function GameDetailEn({ params }: PageParams) {
         )}
       </section>
 
+      <MlbGameOverview
+        homeTeam={home}
+        awayTeam={away}
+        homeWinProb={homeWinProb}
+        bars={waterfallBars}
+        factorCount={GAME_DETAIL_FACTOR_ROWS.length}
+        locale="en"
+      />
+
       <section>
         <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{GAME_DETAIL_FACTOR_ROWS.length} Factor Breakdown</h2>
         <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -232,17 +258,8 @@ export default async function GameDetailEn({ params }: PageParams) {
       <MlbFactorWaterfallChart
         homeTeam={home}
         awayTeam={away}
-        input={{
-          sp_fip: { home: pred.home_sp_fip, away: pred.away_sp_fip },
-          sp_xfip: { home: pred.home_sp_xfip, away: pred.away_sp_xfip },
-          bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
-          lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
-          war: { home: pred.home_war_total, away: pred.away_war_total },
-          lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
-          lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
-          homeParkPf: MLB_TEAMS[home].parkPf,
-          homeWinProb,
-        }}
+        input={waterfallInput}
+        locale="en"
       />
 
       <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">

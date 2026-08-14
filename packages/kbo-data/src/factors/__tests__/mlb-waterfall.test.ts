@@ -71,4 +71,17 @@ describe('computeMlbWaterfall', () => {
     const rawSum = preFinal.end;
     expect(rawSum).toBeGreaterThan(homeWinProb - 1e-6); // asymmetric matchup pushes prob toward clamp ceiling
   });
+
+  it('locale="en" produces English bar labels; default/locale="ko" stays Korean', () => {
+    const koBars = computeMlbWaterfall(NEUTRAL);
+    const enBars = computeMlbWaterfall({ ...NEUTRAL, locale: 'en' });
+
+    expect(koBars.find((b) => b.factor === 'sp_fip')?.label).toBe('선발 FIP');
+    expect(enBars.find((b) => b.factor === 'sp_fip')?.label).toBe('SP FIP');
+    expect(enBars.find((b) => b.factor === 'home_advantage')?.label).toBe('Home Advantage');
+    expect(enBars.find((b) => b.factor === 'final')?.label).toBe('Final Probability');
+
+    // locale only swaps labels — contribution/cumulative math is identical.
+    expect(enBars.map((b) => b.contribution)).toEqual(koBars.map((b) => b.contribution));
+  });
 });
