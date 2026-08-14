@@ -1,0 +1,299 @@
+import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE } from '@moneyball/shared';
+import { neutral } from '@/lib/design-tokens';
+import type { Bucket, ConfidenceTier } from '@/lib/accuracy/buildAccuracyData';
+import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
+
+// KBO /accuracy 페이지의 CalibrationChart/StatCard 를 그대로 옮겨오지 않고 MLB 전용으로
+// 독립 작성 (wave-626, MVP scope — rolling accuracy/brier trend/요일별 등 나머지 섹션은
+// 후속 wave 후보로 남김). CALIBRATION_AXIS_MIN/MAX 등 상수만 KBO 와 공유.
+const PLOT_SIZE = 320;
+const PAD_LEFT = 48;
+const PAD_BOTTOM = 38;
+const PAD_TOP = 20;
+const PAD_RIGHT = 20;
+const VW = PLOT_SIZE + PAD_LEFT + PAD_RIGHT;
+const VH = PLOT_SIZE + PAD_TOP + PAD_BOTTOM;
+
+function px(v: number): number {
+  return PAD_LEFT + ((v - CALIBRATION_AXIS_MIN) / (CALIBRATION_AXIS_MAX - CALIBRATION_AXIS_MIN)) * PLOT_SIZE;
+}
+function py(v: number): number {
+  return PAD_TOP + PLOT_SIZE - ((v - CALIBRATION_AXIS_MIN) / (CALIBRATION_AXIS_MAX - CALIBRATION_AXIS_MIN)) * PLOT_SIZE;
+}
+
+interface Strings {
+  calibrationTitle: string;
+  calibrationDesc: string;
+  xAxisLabel: string;
+  yAxisLabel: string;
+  verifiedLabel: string;
+  accuracyLabel: string;
+  brierLabel: string;
+  gapLabel: string;
+  gapWellCalibrated: string;
+  gapOverconfident: string;
+  gapUnderconfident: string;
+  confidenceTitle: string;
+  teamTitle: string;
+  teamDesc: string;
+  teamHeader: string;
+  predictedHeader: string;
+  correctHeader: string;
+  accuracyHeader: string;
+  smallSample: string;
+  gamesUnit: (n: number) => string;
+}
+
+const STRINGS: Record<'ko' | 'en', Strings> = {
+  ko: {
+    calibrationTitle: '신뢰도 vs 실제 적중률',
+    calibrationDesc: 'AI가 60% 확신으로 예측하면 실제로 60%를 맞히는가? 대각선에 가까울수록 잘 보정된 AI입니다.',
+    xAxisLabel: 'AI 신뢰도 (confidence)',
+    yAxisLabel: '실제 적중률',
+    verifiedLabel: '검증 완료',
+    accuracyLabel: '전체 적중률',
+    brierLabel: 'Brier Score',
+    gapLabel: '보정 오차',
+    gapWellCalibrated: '잘 보정됨',
+    gapOverconfident: '과신 경향',
+    gapUnderconfident: '저신 경향',
+    confidenceTitle: 'AI 확신도별 분석',
+    teamTitle: '팀별 예측 성과',
+    teamDesc: '경기 관련 팀 기준. 홈/원정 구분 없이 집계.',
+    teamHeader: '팀',
+    predictedHeader: '예측',
+    correctHeader: '적중',
+    accuracyHeader: '적중률',
+    smallSample: '(샘플 부족)',
+    gamesUnit: (n) => `${n}경기`,
+  },
+  en: {
+    calibrationTitle: 'Confidence vs Actual Accuracy',
+    calibrationDesc: "When the AI says 60% confidence, does it actually win 60% of the time? Closer to the diagonal = better calibrated.",
+    xAxisLabel: 'AI confidence',
+    yAxisLabel: 'Actual accuracy',
+    verifiedLabel: 'Verified',
+    accuracyLabel: 'Overall accuracy',
+    brierLabel: 'Brier Score',
+    gapLabel: 'Calibration gap',
+    gapWellCalibrated: 'Well calibrated',
+    gapOverconfident: 'Overconfident',
+    gapUnderconfident: 'Underconfident',
+    confidenceTitle: 'Accuracy by AI Confidence',
+    teamTitle: 'Team Prediction Performance',
+    teamDesc: 'Counted for any team involved in the game, home or away.',
+    teamHeader: 'Team',
+    predictedHeader: 'Games',
+    correctHeader: 'Correct',
+    accuracyHeader: 'Accuracy',
+    smallSample: '(small sample)',
+    gamesUnit: (n) => `${n} games`,
+  },
+};
+
+const TEAM_TABLE_MIN_N = 3; // KBO /accuracy 팀별 테이블과 동일 (샘플 부족 임계, wave-626 정합)
+
+function MlbCalibrationChart({ buckets, locale }: { buckets: Bucket[]; locale: 'ko' | 'en' }) {
+  const s = STRINGS[locale];
+  const ticks = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+  return (
+    <svg
+      viewBox={`0 0 ${VW} ${VH}`}
+      className="w-full max-w-[480px] h-auto"
+      role="img"
+      aria-label={s.calibrationTitle}
+    >
+      {ticks.map((t) => (
+        <g key={t}>
+          <line x1={px(t)} y1={PAD_TOP} x2={px(t)} y2={PAD_TOP + PLOT_SIZE} stroke="currentColor" strokeOpacity="0.08" />
+          <text x={px(t)} y={PAD_TOP + PLOT_SIZE + 16} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.55">
+            {(t * 100).toFixed(0)}%
+          </text>
+          <line x1={PAD_LEFT} y1={py(t)} x2={PAD_LEFT + PLOT_SIZE} y2={py(t)} stroke="currentColor" strokeOpacity="0.08" />
+          <text x={PAD_LEFT - 6} y={py(t) + 3} textAnchor="end" fontSize="9" fill="currentColor" opacity="0.55">
+            {(t * 100).toFixed(0)}%
+          </text>
+        </g>
+      ))}
+      <line
+        x1={px(CALIBRATION_AXIS_MIN)}
+        y1={py(CALIBRATION_AXIS_MIN)}
+        x2={px(CALIBRATION_AXIS_MAX)}
+        y2={py(CALIBRATION_AXIS_MAX)}
+        stroke="currentColor"
+        strokeOpacity="0.2"
+        strokeDasharray="4 4"
+      />
+      {buckets.map((b) => {
+        const cx = px(b.avgConf);
+        const cy = py(b.hitRate);
+        const r = Math.max(4, Math.min(14, Math.sqrt(b.n) * 3));
+        const small = b.n < 5;
+        const colVar = small ? neutral[400] : 'var(--color-brand-500)';
+        return (
+          <g key={b.lower}>
+            <line
+              x1={cx}
+              y1={py(Math.min(1, b.hitRate + b.ci95Half))}
+              x2={cx}
+              y2={py(Math.max(0, b.hitRate - b.ci95Half))}
+              style={{ stroke: colVar }}
+              strokeWidth="1.5"
+              opacity="0.35"
+            />
+            <circle cx={cx} cy={cy} r={r} style={{ fill: colVar }} fillOpacity="0.8" />
+            <text x={cx} y={cy + 3} textAnchor="middle" fontSize="9" fontWeight="bold" fill="white">
+              {b.n}
+            </text>
+          </g>
+        );
+      })}
+      <text x={PAD_LEFT + PLOT_SIZE / 2} y={VH - 4} textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">
+        {s.xAxisLabel}
+      </text>
+      <text
+        x={11}
+        y={PAD_TOP + PLOT_SIZE / 2}
+        textAnchor="middle"
+        fontSize="10"
+        fill="currentColor"
+        opacity="0.6"
+        transform={`rotate(-90, 11, ${PAD_TOP + PLOT_SIZE / 2})`}
+      >
+        {s.yAxisLabel}
+      </text>
+    </svg>
+  );
+}
+
+function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
+  return (
+    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
+      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+      <p className={`text-2xl font-bold font-mono mt-1 ${accent ? 'text-brand-500' : ''}`}>{value}</p>
+      {sub && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+export function MlbAccuracyDashboard({
+  locale,
+  verifiedN,
+  correctN,
+  accuracyRate,
+  brier,
+  gap,
+  buckets,
+  confidenceTiers,
+  teamRows,
+}: {
+  locale: 'ko' | 'en';
+  verifiedN: number;
+  correctN: number;
+  accuracyRate: number | null;
+  brier: number | null;
+  gap: number | null;
+  buckets: Bucket[];
+  confidenceTiers: ConfidenceTier[];
+  teamRows: MlbTeamAccuracyRow[];
+}) {
+  const s = STRINGS[locale];
+
+  return (
+    <div className="space-y-8">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label={s.verifiedLabel} value={verifiedN.toString()} sub={s.gamesUnit(verifiedN)} />
+        <StatCard
+          label={s.accuracyLabel}
+          value={accuracyRate !== null ? `${(accuracyRate * 100).toFixed(1)}%` : '—'}
+          sub={`${correctN}/${verifiedN}`}
+          accent={accuracyRate !== null && accuracyRate >= ACCURACY_BASELINE}
+        />
+        <StatCard label={s.brierLabel} value={brier !== null ? brier.toFixed(3) : '—'} />
+        <StatCard
+          label={s.gapLabel}
+          value={gap !== null ? `${gap >= 0 ? '+' : ''}${(gap * 100).toFixed(1)}%p` : '—'}
+          sub={
+            gap === null
+              ? undefined
+              : Math.abs(gap) < BRIER_CALIBRATION_OK_GAP
+                ? s.gapWellCalibrated
+                : gap > 0
+                  ? s.gapOverconfident
+                  : s.gapUnderconfident
+          }
+        />
+      </section>
+
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+        <div>
+          <h2 className="text-lg font-bold">{s.calibrationTitle}</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.calibrationDesc}</p>
+        </div>
+        {verifiedN === 0 ? (
+          <p className="text-gray-400 dark:text-gray-500 text-sm py-8 text-center">—</p>
+        ) : (
+          <MlbCalibrationChart buckets={buckets} locale={locale} />
+        )}
+      </section>
+
+      {verifiedN >= 5 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+          <h2 className="text-lg font-bold">{s.confidenceTitle}</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {confidenceTiers.map((tier) => {
+              const pct = tier.accuracy !== null ? Math.round(tier.accuracy * 100) : null;
+              return (
+                <div key={tier.label} className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 space-y-1 text-center">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{tier.label}</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.range}</p>
+                  <p className={`text-2xl font-bold ${pct === null ? 'text-gray-300 dark:text-gray-600' : 'text-brand-600 dark:text-brand-400'}`}>
+                    {pct !== null ? `${pct}%` : '—'}
+                  </p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.n > 0 ? `${tier.hits}/${tier.n}` : ''}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {teamRows.length > 0 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">{s.teamTitle}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.teamDesc}</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[var(--color-border)]">
+                  <th className="py-2 pr-4 font-medium">{s.teamHeader}</th>
+                  <th className="py-2 pr-4 font-medium text-right">{s.predictedHeader}</th>
+                  <th className="py-2 pr-4 font-medium text-right">{s.correctHeader}</th>
+                  <th className="py-2 font-medium text-right">{s.accuracyHeader}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teamRows.map((t) => (
+                  <tr key={t.teamCode} className="border-b border-gray-200 dark:border-[var(--color-border)]">
+                    <td className="py-2 pr-4 font-medium">{mlbShortTeamName(t.teamCode)}</td>
+                    <td className="py-2 pr-4 text-right font-mono">{t.verifiedN}</td>
+                    <td className="py-2 pr-4 text-right font-mono">{t.correctN}</td>
+                    <td
+                      className={`py-2 text-right font-mono font-semibold ${
+                        t.accuracyRate !== null && t.accuracyRate >= ACCURACY_BASELINE ? 'text-brand-500' : t.verifiedN >= TEAM_TABLE_MIN_N ? 'text-red-400' : ''
+                      }`}
+                    >
+                      {t.verifiedN < TEAM_TABLE_MIN_N ? s.smallSample : t.accuracyRate !== null ? `${(t.accuracyRate * 100).toFixed(1)}%` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}

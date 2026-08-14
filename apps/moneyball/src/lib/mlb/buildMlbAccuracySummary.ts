@@ -6,6 +6,7 @@ import {
   type ConfidenceTier,
   bucketize,
   brierScore,
+  calibrationGap,
   buildConfidenceTiers,
 } from '@/lib/accuracy/buildAccuracyData';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
@@ -15,6 +16,7 @@ export interface MlbAccuracySummary {
   correctN: number;
   accuracyRate: number | null;
   brier: number | null;
+  gap: number | null;
   buckets: Bucket[];
   confidenceTiers: ConfidenceTier[];
 }
@@ -36,6 +38,7 @@ const EMPTY_SUMMARY: MlbAccuracySummary = {
   correctN: 0,
   accuracyRate: null,
   brier: null,
+  gap: null,
   buckets: [],
   confidenceTiers: [],
 };
@@ -100,6 +103,7 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     correctN,
     accuracyRate: correctN / rows.length,
     brier: brierScore(rows),
+    gap: calibrationGap(rows),
     buckets: bucketize(rows),
     confidenceTiers: buildConfidenceTiers(rows, locale),
   };

@@ -65,6 +65,7 @@ const MLB_NAV: NavItem[] = [
     items: [
       { href: "/mlb/standings", label: "AL/NL 순위", description: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
       { href: "/mlb/team", label: "팀", description: `${MLB_TEAM_COUNT}팀 시즌 stat`, icon: "shield" },
+      { href: "/mlb/accuracy", label: "적중 기록", description: "AI 예측 성과 트래킹", icon: "target" },
       { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, icon: "file-text" },
     ],

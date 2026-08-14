@@ -125,6 +125,10 @@ export default async function MlbHubEn() {
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Team Standings</h3>
           <p className="text-xs text-brand-500 mt-1">AL/NL {MLB_DIVISION_COUNT} divisions</p>
         </Link>
+        <Link href="/en/mlb/accuracy" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">AI Track Record</h3>
+          <p className="text-xs text-brand-500 mt-1">Accuracy · Brier · calibration · per-team</p>
+        </Link>
         <Link href="/en/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast Deep-Dive</h3>
           <p className="text-xs text-brand-500 mt-1">xwOBA / Barrel% / Launch Angle</p>

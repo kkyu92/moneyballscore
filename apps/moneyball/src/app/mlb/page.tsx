@@ -126,6 +126,10 @@ export default async function MlbHub() {
           <h3 className="font-bold text-brand-700 dark:text-brand-100">팀 순위</h3>
           <p className="text-xs text-brand-500 mt-1">AL/NL {MLB_DIVISION_COUNT} 디비전</p>
         </Link>
+        <Link href="/mlb/accuracy" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">AI 적중 기록</h3>
+          <p className="text-xs text-brand-500 mt-1">정확도·Brier·캘리브레이션·팀별 적중률</p>
+        </Link>
         <Link href="/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast deep-dive</h3>
           <p className="text-xs text-brand-500 mt-1">xwOBA / Barrel% / Launch Angle</p>

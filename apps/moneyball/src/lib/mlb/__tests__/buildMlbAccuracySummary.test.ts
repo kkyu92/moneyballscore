@@ -78,6 +78,8 @@ describe('buildMlbAccuracySummary', () => {
     expect(result.accuracyRate).toBe(0.5);
     expect(result.brier).toBeCloseTo(((0.7 - 1) ** 2 + (0.7 - 0) ** 2) / 2, 5);
     expect(result.confidenceTiers.length).toBe(3);
+    // avgConf(0.7) - acc(0.5) = 0.2 (/mlb/accuracy 보정 오차 카드 정합, wave-626)
+    expect(result.gap).toBeCloseTo(0.2, 5);
   });
 
   it('예측 없는 경기는 skip (external_game_id 매칭 없음)', async () => {
