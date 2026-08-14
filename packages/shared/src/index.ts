@@ -3260,6 +3260,11 @@ export const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토
 export const WEEKDAY_LABELS_KO_MON_FIRST = ['월', '화', '수', '목', '금', '토', '일'] as const;
 
 /**
+ * 영문 요일 라벨 (월요일 시작 — WEEKDAY_LABELS_KO_MON_FIRST EN 대응, /en/mlb/calendar 캘린더 그리드용).
+ */
+export const WEEKDAY_LABELS_EN_MON_FIRST = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+/**
  * JS Date.getDay() 인덱스(0=일~6=토)를 월요일 시작 순서로 재배열하기 위한 인덱스 배열.
  * review-code(heavy) cycle 1989: buildAccuracyData.ts (DOW_ORDER) / ScoringRuleDayHeatmap.tsx (DAY_ORDER)
  * 2곳에 동일 숫자 배열이 독립 중복 정의되어 있던 걸 통합 — WEEKDAY_LABELS_KO_MON_FIRST 와 짝을 이루는

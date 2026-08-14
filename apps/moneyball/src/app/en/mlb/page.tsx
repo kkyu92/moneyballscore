@@ -141,6 +141,10 @@ export default async function MlbHubEn() {
           <h3 className="font-bold text-brand-700 dark:text-brand-100">{TOTAL}-Factor Model</h3>
           <p className="text-xs text-brand-500 mt-1">Weights + home-field advantage</p>
         </Link>
+        <Link href="/en/mlb/calendar" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">Monthly Calendar</h3>
+          <p className="text-xs text-brand-500 mt-1">Daily prediction count + accuracy heatmap</p>
+        </Link>
       </section>
     </main>
   );
