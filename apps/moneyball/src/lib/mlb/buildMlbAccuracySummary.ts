@@ -44,7 +44,7 @@ const EMPTY_SUMMARY: MlbAccuracySummary = {
 // 함수들이 그대로 읽지만, MLB 는 전량 NULL(deriveMlbOutcome.ts 주석 참조) — 여기서
 // home_win_prob + 실제 스코어로 derive 후 동일 PredRow shape 로 매핑해 KBO 와 같은
 // bucketize/brierScore/buildConfidenceTiers 를 그대로 재사용(로직 중복 회피).
-export async function buildMlbAccuracySummary(): Promise<MlbAccuracySummary> {
+export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promise<MlbAccuracySummary> {
   const supabase = await createClient();
 
   const scheduleResult = await supabase
@@ -100,6 +100,6 @@ export async function buildMlbAccuracySummary(): Promise<MlbAccuracySummary> {
     accuracyRate: correctN / rows.length,
     brier: brierScore(rows),
     buckets: bucketize(rows),
-    confidenceTiers: buildConfidenceTiers(rows),
+    confidenceTiers: buildConfidenceTiers(rows, locale),
   };
 }

@@ -578,11 +578,14 @@ export function buildScoringRuleWeekHeatmap(rows: PredRow[], weeksWindow = 4): S
   return out;
 }
 
-export function buildConfidenceTiers(rows: PredRow[]): ConfidenceTier[] {
+export function buildConfidenceTiers(rows: PredRow[], locale: 'ko' | 'en' = 'ko'): ConfidenceTier[] {
+  const labels = locale === 'en'
+    ? ['Low confidence', 'Medium confidence', 'High confidence']
+    : ['낮은 확신', '보통 확신', '높은 확신'];
   const tiers = [
-    { label: '낮은 확신', range: `~${WINNER_PROB_LEAN_PCT}%`, min: 0, max: WINNER_PROB_LEAN },
-    { label: '보통 확신', range: `${WINNER_PROB_LEAN_PCT}~${WINNER_PROB_CONFIDENT_PCT}%`, min: WINNER_PROB_LEAN, max: WINNER_PROB_CONFIDENT },
-    { label: '높은 확신', range: `${WINNER_PROB_CONFIDENT_PCT}%~`, min: WINNER_PROB_CONFIDENT, max: 1.01 },
+    { label: labels[0], range: `~${WINNER_PROB_LEAN_PCT}%`, min: 0, max: WINNER_PROB_LEAN },
+    { label: labels[1], range: `${WINNER_PROB_LEAN_PCT}~${WINNER_PROB_CONFIDENT_PCT}%`, min: WINNER_PROB_LEAN, max: WINNER_PROB_CONFIDENT },
+    { label: labels[2], range: `${WINNER_PROB_CONFIDENT_PCT}%~`, min: WINNER_PROB_CONFIDENT, max: 1.01 },
   ];
   return tiers.map(({ label, range, min, max }) => {
     const subset = rows.filter((r) => r.confidence >= min && r.confidence < max);

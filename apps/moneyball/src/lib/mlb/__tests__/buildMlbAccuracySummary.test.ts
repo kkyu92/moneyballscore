@@ -87,4 +87,18 @@ describe('buildMlbAccuracySummary', () => {
     const result = await buildMlbAccuracySummary();
     expect(result.verifiedN).toBe(0);
   });
+
+  it("locale='en' 이면 confidenceTiers label 이 영문 (EN 허브 parity)", async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', game_date: '2026-08-01', home_score: 5, away_score: 2 }],
+      preds: [{ external_game_id: 'g1', home_win_prob: 0.7 }],
+    });
+    const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
+    const result = await buildMlbAccuracySummary('en');
+    expect(result.confidenceTiers.map((t) => t.label)).toEqual([
+      'Low confidence',
+      'Medium confidence',
+      'High confidence',
+    ]);
+  });
 });
