@@ -1,5 +1,20 @@
 # TODOS
 
+## ✅ MLB EN matchup 페이지 Elo 레이팅 추이 비교 차트 parity 정정 (cycle 2113, 2026-08-14, review-code heavy)
+
+cycle 2112(MlbTeamEloChart, team/[code])와 동일 silent-drift family — cycle 2085
+(plan#25 Phase 2b step 2)가 KO `/mlb/matchup/[teamA]/[teamB]` 에만
+`MlbMatchupEloChart` 추가, EN 미러엔 배선 안 함. KO/EN JSX 태그 grep diff로
+발견(`comm -23`로 KO 전용 컴포넌트 태그 나열 → matchup 페이지만 잔여).
+`buildMlbMatchupEloTrend` fetch + Promise.all 배선 + "Elo Rating Trend
+Comparison" 섹션 추가. 컴포넌트 자체는 팀명/색상만 렌더해 하드코딩 한글
+없음 — locale prop 불필요(MlbTeamEloChart 케이스와 차이점). 회귀 테스트
+1건 추가, vitest 428/3772 pass. PR #2945 머지 실측 확인(gh pr view
+state=MERGED, 7d8443f0).
+
+**다른 MLB KO/EN 페이지 쌍(factors/games/players/postseason/standings/team/
+wild-card) grep diff 완료 — 나머지 전부 컴포넌트 태그 일치, 추가 gap 없음.**
+
 ## ✅ MLB 개별 경기 페이지(KO) "AI 종합 분석 요약" prose 추가 (cycle 2110, 2026-08-14, explore-idea heavy)
 
 TODOS cycle 2098/2099 항목이 남겨둔 "KBO 의 나머지 parity(waterfall/debate/verdict/postview)"
