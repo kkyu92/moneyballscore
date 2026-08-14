@@ -22,14 +22,16 @@ import { neutral } from "@/lib/design-tokens";
 interface MlbTeamEloChartProps {
   points: MlbTeamEloPoint[];
   teamCode: MlbTeamCode;
+  locale?: "ko" | "en";
 }
 
-export function MlbTeamEloChart({ points, teamCode }: MlbTeamEloChartProps) {
+export function MlbTeamEloChart({ points, teamCode, locale = "ko" }: MlbTeamEloChartProps) {
   if (points.length === 0) return null;
 
   const team = MLB_TEAMS[teamCode];
   const teamColor = team.color;
   const teamName = team.shortName;
+  const leagueAvgLabel = locale === "en" ? "League Avg" : "리그 평균";
 
   let minElo = Infinity;
   let maxElo = -Infinity;
@@ -79,7 +81,7 @@ export function MlbTeamEloChart({ points, teamCode }: MlbTeamEloChartProps) {
                 formatRows={(payload) =>
                   (payload ?? []).map(
                     (p: { value: number; name: string; color: string }) => ({
-                      label: p.name === "elo" ? teamName : "리그 평균",
+                      label: p.name === "elo" ? teamName : leagueAvgLabel,
                       value: Number(p.value).toFixed(1),
                       color: p.color,
                     }),
@@ -89,7 +91,7 @@ export function MlbTeamEloChart({ points, teamCode }: MlbTeamEloChartProps) {
             )}
           />
           <Legend
-            formatter={(value) => (value === "elo" ? teamName : "리그 평균")}
+            formatter={(value) => (value === "elo" ? teamName : leagueAvgLabel)}
             wrapperStyle={{ fontSize: 11, color: neutral[500] }}
           />
           <Line
