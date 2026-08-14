@@ -1,5 +1,26 @@
 # TODOS
 
+## ✅ fix-incident(heavy) — Cloudflare Worker 배포 workflow silent-success 위장 정정 (cycle 2129, 2026-08-14, 사례 25 후속)
+
+`gh secret list` 실측 — `CLOUDFLARE_API_TOKEN` 이 cycle 2068 안내 이후에도 여전히 미등록
+(사용자 조치 대기 그대로). 그런데 `deploy-cloudflare-worker.yml`의 최근 workflow_dispatch
+run(00:28:25 KST)이 conclusion=`success`로 찍혀있어 처음엔 "배포 됐나?" 오인 위험 —
+`gh run view --log` 로 실제 로그 대조한 결과 `has_token=false` → deploy step skip →
+"Warn on missing secret" 이 `::warning::`만 찍고 종료해 **job 자체가 success 로 끝나는
+구조적 버그**였음. 더 심각한 부수 효과: `if: failure()`인 "Notify playbook on failure"
+단계도 이 때문에 한 번도 발화 못 해 hub-dispatch 알림 경로 자체가 죽어있었음 —
+2026-06-12 이후 ~2개월 동안 Worker 미배포 상태(사례 25)가 CI 상으로는 계속 초록불이라
+아무 알림도 못 갔던 root cause.
+
+`.github/workflows/deploy-cloudflare-worker.yml` "Warn on missing secret" →
+"Fail on missing secret"로 개명 + `exit 1` 추가 — secret 미설정 상태를 CI 색깔(빨강)과
+알림(playbook dispatch) 양쪽에 정확히 반영하도록 수정. 코드 자체 변경 아닌 workflow
+파일 단일 수정, 회귀 테스트 대상 없음(YAML). main 직접 commit (R4, 단일 논리 단위).
+
+**🔔 사용자 조치 여전히 필요**(변경 없음): `gh secret set CLOUDFLARE_API_TOKEN` 등록 —
+등록 전까지는 다음 `cloudflare-worker/**` push 때마다 CI 가 (의도대로) 빨간불로 정확히
+알려줄 것.
+
 ## ✅ operational-analysis(heavy) — MLB Elo backtest, plan #25 Phase 3 게이트 (cycle 2128, 2026-08-14)
 
 plan #25(cycle 2080/2083)가 만든 `mlb_team_elo`/`mlb_team_elo_history`(748경기 재생

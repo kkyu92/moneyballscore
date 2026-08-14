@@ -10,6 +10,11 @@ name: Deploy Cloudflare Worker
 #   - Cloudflare dashboard → My Profile → API Tokens → Create Token
 #   - 권한: Account.Workers Scripts:Edit (해당 계정 한정)
 #   - repo secret 으로 등록: gh secret set CLOUDFLARE_API_TOKEN
+#
+# cycle 2129 fix: secret 미설정 시 원래 ::warning:: 만 찍고 job 자체는 success 로
+# 끝났음(silent skip 이 green CI 로 위장) — 그 결과 "Notify playbook on failure" 단계
+# (if: failure())도 한 번도 fire 하지 않아 알림 경로 자체가 죽어있었음. exit 1 로 job 을
+# 명시적으로 fail 시켜 실제 상태(미배포)를 CI 색깔과 알림 양쪽에 정확히 반영.
 on:
   push:
     branches: [main]
@@ -54,10 +59,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: pnpm exec wrangler deploy
 
-      - name: Warn on missing secret
+      - name: Fail on missing secret
         if: steps.check_secret.outputs.has_token == 'false'
         run: |
-          echo "::warning::CLOUDFLARE_API_TOKEN secret 미설정 — worker 배포 skip. 'gh secret set CLOUDFLARE_API_TOKEN' 으로 등록 필요 (TODOS.md cycle 2090 참조)"
+          echo "::error::CLOUDFLARE_API_TOKEN secret 미설정 — worker 배포 skip. 'gh secret set CLOUDFLARE_API_TOKEN' 으로 등록 필요 (TODOS.md cycle 2090 참조)"
+          exit 1
 
       - name: Notify playbook on failure
         if: failure()
