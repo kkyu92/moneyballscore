@@ -9,6 +9,7 @@ import {
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
+  MLB_FACTOR_PICK_STRONG,
   KBO_SEASON_START_DATE,
   PRODUCTION_COHORT_RULES,
   MLB_PRODUCTION_COHORT_RULES,
@@ -415,36 +416,106 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
 
   const results: Array<{ favoredTeam: MlbTeamCode; won: boolean }> = [];
   for (const row of scheduleRows) {
-    const pred = predByExternalId.get(row.external_game_id);
-    if (!pred || row.home_score === null || row.away_score === null) continue;
-    // DB 원본(StatsAPI 컨벤션) → canonical 정규화. 이후 MLB_TEAMS 조회/canonical 코드 비교 안전.
-    const homeCode = normalizeMlbTeamCode(row.home_team_code) ?? (row.home_team_code as MlbTeamCode);
-    const awayCode = normalizeMlbTeamCode(row.away_team_code) ?? (row.away_team_code as MlbTeamCode);
-
-    const duel = computeMlbCompositeDuel({
-      homeCode,
-      homeLineupWoba: pred.home_lineup_woba,
-      awayLineupWoba: pred.away_lineup_woba,
-      homeBullpenFip: pred.home_bullpen_fip,
-      awayBullpenFip: pred.away_bullpen_fip,
-      homeSPFip: pred.home_sp_fip,
-      awaySPFip: pred.away_sp_fip,
-      homeSPXfip: pred.home_sp_xfip,
-      awaySPXfip: pred.away_sp_xfip,
-      homeWar: pred.home_war_total,
-      awayWar: pred.away_war_total,
-    });
-
-    if (duel.validCount < MLB_COMPOSITE_DUEL_MIN_VALID) continue;
-    if (Math.abs(duel.netScore) < minFactors) continue;
-
-    const favoredHome = duel.netScore > 0;
-    const favoredTeam = favoredHome ? homeCode : awayCode;
-    const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
-    results.push({ favoredTeam, won });
+    const evaluated = evaluateMlbConvergencePickRow(row, predByExternalId.get(row.external_game_id), minFactors);
+    if (evaluated) results.push(evaluated);
   }
 
   return results;
+}
+
+// wave-625: fetchMlbConvergencePickDetailedResultsForPair(두 팀 한정) 와
+// fetchMlbConvergencePickDetailedResults(전체 리그, 팀별 성적 집계용) 가 공유하는 판정 로직 —
+// KBO evaluateConvergencePickRow(wave-608) 의 MLB 대응.
+function evaluateMlbConvergencePickRow(
+  row: { home_score: number | null; away_score: number | null; home_team_code: string; away_team_code: string },
+  pred: MlbPredBreakdownRow | undefined,
+  minFactors: number,
+): { favoredTeam: MlbTeamCode; won: boolean } | null {
+  if (!pred || row.home_score === null || row.away_score === null) return null;
+  // DB 원본(StatsAPI 컨벤션) → canonical 정규화. 이후 MLB_TEAMS 조회/canonical 코드 비교 안전.
+  const homeCode = normalizeMlbTeamCode(row.home_team_code) ?? (row.home_team_code as MlbTeamCode);
+  const awayCode = normalizeMlbTeamCode(row.away_team_code) ?? (row.away_team_code as MlbTeamCode);
+
+  const duel = computeMlbCompositeDuel({
+    homeCode,
+    homeLineupWoba: pred.home_lineup_woba,
+    awayLineupWoba: pred.away_lineup_woba,
+    homeBullpenFip: pred.home_bullpen_fip,
+    awayBullpenFip: pred.away_bullpen_fip,
+    homeSPFip: pred.home_sp_fip,
+    awaySPFip: pred.away_sp_fip,
+    homeSPXfip: pred.home_sp_xfip,
+    awaySPXfip: pred.away_sp_xfip,
+    homeWar: pred.home_war_total,
+    awayWar: pred.away_war_total,
+  });
+
+  if (duel.validCount < MLB_COMPOSITE_DUEL_MIN_VALID) return null;
+  if (Math.abs(duel.netScore) < minFactors) return null;
+
+  const favoredHome = duel.netScore > 0;
+  const favoredTeam = favoredHome ? homeCode : awayCode;
+  const won = favoredHome ? row.home_score > row.away_score : row.away_score > row.home_score;
+  return { favoredTeam, won };
+}
+
+// wave-625: MLB 팀별 시즌 전체 강수렴/완전수렴 픽 성적 — getConvergencePickTeamStats(KBO) 대응.
+// KBO 는 KBO_SEASON_START_DATE 로 조회 범위를 한정하지만 MLB 는 buildMlbAccuracySummary 와
+// 동일 패턴(status='final' 전량 스캔, cutoff 불필요 — MLB 시즌 전체가 이미 KBO 대비 소표본).
+async function fetchMlbConvergencePickDetailedResults(
+  minFactors: number,
+): Promise<Array<{ favoredTeam: MlbTeamCode; won: boolean }>> {
+  const supabase = await createClient();
+
+  const scheduleResult = (await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_score, away_score, home_team_code, away_team_code')
+    .eq('status', 'final')) as SelectResult<
+    Array<{
+      external_game_id: string;
+      home_score: number | null;
+      away_score: number | null;
+      home_team_code: string;
+      away_team_code: string;
+    }>
+  >;
+  const { data: scheduleRows } = assertSelectOk(scheduleResult, 'fetchMlbConvergencePickDetailedResults schedule');
+  if (!scheduleRows || scheduleRows.length === 0) return [];
+
+  const predResult = (await supabase
+    .from('predictions')
+    .select(`
+      external_game_id,
+      home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+      home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+      home_war_total, away_war_total
+    `)
+    .eq('prediction_type', 'pre_game')
+    .eq('league', 'mlb')
+    .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
+    .in('external_game_id', scheduleRows.map((s) => s.external_game_id))) as SelectResult<MlbPredBreakdownRow[]>;
+  const { data: predRows } = assertSelectOk(predResult, 'fetchMlbConvergencePickDetailedResults predictions');
+  const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
+
+  const results: Array<{ favoredTeam: MlbTeamCode; won: boolean }> = [];
+  for (const row of scheduleRows) {
+    const evaluated = evaluateMlbConvergencePickRow(row, predByExternalId.get(row.external_game_id), minFactors);
+    if (evaluated) results.push(evaluated);
+  }
+
+  return results;
+}
+
+/**
+ * MLB 팀별 시즌 전체 강수렴/완전수렴 픽 성적 — getConvergencePickTeamStats(KBO) 대응.
+ * /mlb/team/[code] 전용 (wave-625). computeConvergenceTeamStats 는 generic 이라 MlbTeamCode 도
+ * 동일 로직 재사용 (plan24-phase3c 테스트가 이미 검증).
+ */
+export async function getMlbConvergencePickTeamStats(
+  minFactors = MLB_FACTOR_PICK_STRONG,
+): Promise<Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>> {
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
+  return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
 }
 
 /**

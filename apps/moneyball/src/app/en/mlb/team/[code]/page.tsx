@@ -11,15 +11,19 @@ import {
   mlbShortTeamName,
   MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE,
   confToWinProb,
+  MLB_FACTOR_PICK_STRONG,
+  MLB_FACTOR_PICK_COMPLETE,
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
 import { buildMlbTeamEloTrend } from "@/lib/mlb/buildMlbTeamEloTrend";
 import { mlbPairsForTeam } from "@/lib/mlb/mlbCanonicalPair";
+import { getMlbConvergencePickTeamStats } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { MlbTeamEloChart } from "@/components/teams/MlbTeamEloChart";
+import { MlbTeamConvergencePickRecord } from "@/components/teams/MlbTeamConvergencePickRecord";
 import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -93,6 +97,19 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
   const eloTrend = await buildMlbTeamEloTrend(code).catch((err) =>
     captureFallback(err, { points: [] }, { route: "/en/mlb/team/[code]", source: "buildMlbTeamEloTrend" }),
   );
+
+  // wave-625: 팀별 강수렴/완전수렴 픽 성적 — matchup 페이지의 두 팀 한정 집계와 별개로
+  // 시즌 전체 기준 (TeamConvergencePickRecord KBO wave-607 대응).
+  const [strongTeamStats, completeTeamStats] = await Promise.all([
+    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG).catch((err) =>
+      captureFallback(err, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(strong)" }),
+    ),
+    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE).catch((err) =>
+      captureFallback(err, [], { route: "/en/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" }),
+    ),
+  ]);
+  const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
+  const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
 
   const teamUrl = `${SITE_URL}/en/mlb/team/${code}`;
   const logoUrl = `${SITE_URL}/logos/mlb/${code}.png`;
@@ -257,6 +274,13 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      <MlbTeamConvergencePickRecord
+        titleId="mlb-team-convergence-title"
+        strongStat={teamStrongStat}
+        completeStat={teamCompleteStat}
+        locale="en"
+      />
 
       {eloTrend.points.length > 0 && (
         <section
