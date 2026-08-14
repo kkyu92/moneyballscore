@@ -1,5 +1,32 @@
 # TODOS
 
+## ✅ fix-incident(heavy) — Footer 전체 EN i18n 누락 수정 (wave-629, cycle 2143, 2026-08-14)
+
+cycle 2142 review-code(heavy) 가 SearchForm i18n 누락을 발견/수정하면서 nav i18n
+sweep 을 "헤더 nav 컴포넌트" 로 스코프 좁혀온 흐름의 연장 — 이번 cycle 진단 단계에서
+`isEn` grep 을 Header/MobileNav/LeagueSelector/SearchForm 외 shared 컴포넌트로
+확장하다가 Footer.tsx 에 isEn 자체가 아예 없는 것 발견. Footer 는 layout.tsx 가
+모든 페이지(including `/en/mlb/*`)에 항상 렌더 — nav 와 달리 league/locale 분기
+없이 7 column 전체 + tagline + legal nav + disclaimer 가 EN 방문자에게도 KO
+그대로 노출되던 더 넓은 범위의 gap.
+
+Footer isEn prop 추가(layout.tsx 배선). MLB column(7 link 전부 `/en/mlb/*` 라우트
+실존) 은 href 도 Header withLocale 과 동일 패턴으로 `/en` 접두 치환. 나머지 6
+column(AI 예측/커뮤니티/팀·선수/리뷰·시즌/도움말/로또, `/en` 대응 라우트 부재)은
+href 유지 + 텍스트만 enLabel/enTitle 치환 — SearchForm(cycle 2142)의 scope 판단과
+동일. tagline/사이트맵·법적고지 aria-label/개인정보처리방침·이용약관·문의 텍스트/
+disclaimer 전부 EN 치환. Footer 테스트 3건 추가, lotto-routes 테스트 정규식 1건
+완화(enTitle 필드 추가로 title→links 사이 문자열 간격 변화). lint/tsc/vitest
+(440 files/3852 tests, +3 신규) 전체 green, direct commit+push to main (R4).
+
+**교훈**: nav i18n sweep 범위를 "헤더 nav 컴포넌트" 파일명 기준으로 좁히면 layout.tsx
+가 무조건 렌더하는 다른 전역 chrome(Footer 등)이 계속 누락된다 — cycle 2142 교훈
+("렌더 트리 기준 grep, 파일명 패턴 의존 금지")이 이번에도 유효했고, 이번엔 그 교훈을
+실제로 적용해 header 밖 shared 컴포넌트(Footer/Breadcrumb)로 grep 범위를 넓혀 발견.
+다음 후속 후보: layout.tsx 직계 자식(CookieConsent, ThemeToggle 등) 전수 isEn grep
+완료 확인 — 이번 cycle 은 Footer/Breadcrumb 2개만 확인, CookieConsent 미확인.
+
+
 ## ✅ review-code(heavy) — SearchForm 헤더 검색창 EN 텍스트 i18n (wave-628, cycle 2142, 2026-08-14)
 
 cycle 2141 explore-idea(heavy) 가 헤더 nav label/description/aria-label EN 치환을
