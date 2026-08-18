@@ -540,3 +540,44 @@ CLOUDFLARE_API_TOKEN 부재로 바뀐 것 자체가 fix 유효성의 증거). CL
 - 사례 29 — 같은 날 Vercel(웹앱 배포)과 Cloudflare Worker(cron 배포) 양쪽이 각자
   다른 이유로 막혀 있었던 것과 마찬가지로, 배포 파이프라인은 "설정했다" 가 "작동한다"
   를 보장하지 않는다는 동일 교훈이 세 번째로 반복
+
+---
+
+### 사례 31 — 로컬 dev 전역 dynamic route 404 = stale Turbopack `.next` 캐시, 앱 버그 아님 (cycle 2172 발견+해소)
+
+cycle 2171(explore-idea heavy) 이 MLB parity 작업 실측 검증 중 `/mlb/team/LAD` 가
+로컬 dev 에서 404, prod 는 200 인 것을 발견해 fix-incident 후보로 flag. cycle 2172
+가 재현 조사한 결과 **MLB 뿐 아니라 KBO 쪽도 동일** — `/mlb/team/LAD`(valid)
+`/mlb/team/NYY`(valid) `/mlb/team/ZZZ`(invalid) `/mlb/players/1` `/mlb/matchup/LAD/NYY`
+`/teams/HH`(valid) `/players/1` `/matchup/HH/LG` 전부 로컬에서만 404. 유효/무효
+팀코드 무관하게 전부 404 = `notFound()` 앱 로직(개별 조건 분기)이 아니라 **라우터
+레벨에서 `[param]` 세그먼트 매칭 자체가 실패**하는 신호 — 응답 title 을 확인해
+확정(각 라우트 전용 `not-found.tsx`가 아니라 루트 `not-found.tsx` 가 렌더됨 = 해당
+라우트의 `page.tsx` 자체가 호출되지 않음).
+
+**발견 경로**: `buildMlbTeamProfile()` 코드 리뷰로 `!profile` 분기 원인 의심 →
+`meta`/`MLB_TEAMS` 확인 결과 LAD 정상 키 → dev 서버 기동 후 여러 valid/invalid
+코드로 curl 재현 → KBO 쪽 동일 패턴 nested dynamic route 로 교차 검증 → "전부
+동시에 404" 패턴 확인 후 코드 조사를 멈추고 `.next` 캐시 의심(`mv .next
+/tmp/backup && next dev` 재시작) → 재시작 후 동일 경로 전부 200 정상 복구,
+코드 변경 0.
+
+**핵심 gap**: "prod 는 정상, dev 만 문제" 라는 단서를 "코드에 dev-only 분기가
+있다" 는 가설로 잘못 좁혀 조사를 시작하기 쉬움 — 실제로는 반대로 "prod 는 build
+시 정적 생성(generateStaticParams pre-render) 이 끝난 경로라 dev 런타임 캐시
+문제의 영향을 안 받을 뿐" 이라 "prod 정상 = dev 캐시 무관" 추론이 성립하지
+않음. 개별 라우트 1개만 404 나는 경우(앱 로직 버그, notFound() 호출 조건 확인
+필요)와 **여러 무관한 라우트가 동시에** 404 나는 경우(라우터/캐시 문제, 코드
+조사 전 캐시 클리어부터)를 구분하는 게 진단 순서의 핵심 분기점.
+
+**fix (cycle 2172)**: 코드 변경 없음 — `.next` 캐시 삭제만으로 해소되는 로컬
+환경 문제였음을 확정. 재발 시 진단 순서 박제: (1) 여러 무관 라우트 동시 404
+확인 → (2) 응답 title 로 루트 vs 라우트별 not-found 구분 → (3) `.next` 캐시
+클리어 후 재현 여부 우선 확인 → (4) 그래도 재현되면 코드 조사 진입.
+
+**관련 family**:
+- CLAUDE.md 세션 시작 스캔 룰("체크포인트 주장을 현실과 대조")의 역방향 사례 —
+  여기선 "prod 정상" 이라는 실측 사실 자체가 오히려 dev 조사 방향을 잘못
+  좁히는 함정이 됐음. 실측이 항상 올바른 가설로 이어지는 건 아니고, 두
+  환경(dev/prod)의 구조적 차이(런타임 렌더 vs 빌드타임 정적 생성)를 먼저
+  이해해야 실측을 올바르게 해석할 수 있다는 교훈
