@@ -247,6 +247,9 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   const awayScore = game.away_score;
 
   const postReasoning = postGame?.reasoning ?? null;
+  const postviewJudgeReasoning = presentJudgeReasoningWithFallback(
+    postReasoning?.judgeReasoning,
+  );
 
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
@@ -791,7 +794,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
           homePostview={postReasoning.homePostview}
           awayPostview={postReasoning.awayPostview}
           factorErrors={postReasoning.factorErrors ?? []}
-          judgeReasoning={postReasoning.judgeReasoning ?? ''}
+          judgeReasoning={postviewJudgeReasoning?.text ?? ''}
         />
       )}
 
