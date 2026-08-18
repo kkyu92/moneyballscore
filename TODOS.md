@@ -1,5 +1,31 @@
 # TODOS
 
+## 🟢 review-code(heavy) — page.tsx 감사, 신규 버그 1건 fix (cycle 2188, 2026-08-18)
+
+carry-over — cycle 2187 review-code(heavy) 감사 결과 다음 후보로 명시 지목한
+`apps/moneyball/src/app/page.tsx` (1081줄, 홈페이지, 최근 감사 이력 없음) 감사.
+
+`getTodayDivergenceGame` (AI vs 커뮤니티 다이버전스 칩) 의 `pick_poll_events`
+쿼리만 `assertSelectOk` 가드 누락 — 같은 파일 다른 7개 쿼리는 전부 사용 중.
+Supabase 는 `.error` 체크 안 하면 throw 없이 `data=null` 로 silent return —
+호출부 `.catch(captureFallback)` 는 throw 안 하면 절대 안 걸림. 즉 RLS/DB 에러
+발생 시 다이버전스 칩이 알림 없이 그냥 사라짐 (사례 3/6 Supabase silent .error
+family 재발). `assertSelectOk` 추가로 fix (커밋 `6d0b5fa2`).
+
+그 외 홈페이지 전체 read — homeWinProb 필드 우선순위가 함수마다 다름
+(`reasoning.homeWinProb` only / `reasoning ?? home_win_prob` / `home_win_prob ?? reasoning`)
+이 처음엔 silent drift 후보로 보였으나, `daily.ts` `buildFinalReasoning` 이
+`reasoning.homeWinProb` 를 `home_win_prob` 컬럼과 항상 동일값으로 명시 박제하는
+설계(주석 확인) — 두 필드가 항상 같은 값이라 우선순위 차이가 실제 버그로
+이어지지 않음. 재조사 방지 위해 기록만.
+
+`pnpm --filter moneyball test`: 447 files/3891 tests green. `tsc --noEmit` clean.
+Direct main commit (배치 배포 패턴 유지, PR 없음).
+
+**다음 review-code(heavy) 후보**: `ScoringRuleDayHeatmap.tsx`/`buildScoringRuleWeekHeatmap`
+(wave-255/256 registry 정합 재확인) 또는 `apps/moneyball/src/app/analysis/analysis-data.ts`
+(analysis-data.ts 553줄+ home_win_prob join 로직, 최근 wave-313 배선 이후 미감사).
+
 ## 🟡 review-code(heavy) — buildAccuracyData.ts 감사, 신규 버그 미발견 (cycle 2187, 2026-08-18)
 
 no forced trigger — 직전 8 사이클 distinct chain=4 (2-chain lock 없음), gap-chain
