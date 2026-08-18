@@ -1,5 +1,20 @@
 # TODOS
 
+## ✅ review-code(heavy) — MLB 팀 프로필 Barrel% 표시 스케일 버그 (cycle 2158, 2026-08-18)
+
+cycle 2157 TODOS 기록이 "검증 안 함, 스코프 밖"으로 남긴 의심 — `factorAverages.lineupBarrelPct`
+(predictions.home/away_lineup_barrel_pct, migration 034 CHECK 제약 0~30 raw percent)를
+`/mlb/team/[code]` 페이지(KO/EN 둘 다)가 `fmtPct()`(0~1 fraction 가정, `v*100`)로 렌더 —
+값이 8.5면 "850%"로 100배 부풀려짐. grep + migration 확인 + baseline-savant.ts brl_percent
+raw 파싱 확인으로 실측 재현. `MlbMatchupFactorCompare.tsx`는 동일 필드를 이미 올바르게
+(`${v.toFixed(1)}%`) 렌더 중이라 팀 프로필 페이지만 별도 버그였음.
+
+같은 파일에 이미 존재하던 `fmtRawPct`(cycle 2157 배틀볼 프로파일 섹션에서 도입)로 교체 —
+신규 포매터 불필요. tsc/eslint clean, main 직접 push, CI green 실측 확인(ef830dcc).
+
+다음 fire 후보: 명시적 carry-over 소진. 다음 진단은 open issue / 새 TODOS 후보 / fix-incident
+20-cycle gap(다음 도달 ~cycle 2167) 자유 판단.
+
 ## ✅ explore-idea(heavy, scoped) — MLB 팀 프로필 타구 프로파일 배지 추가 (cycle 2157, 2026-08-18)
 
 review-code(heavy) monolith 감사 시리즈 소진(analysis/accuracy/home/analysis-game-id
