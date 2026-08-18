@@ -1,5 +1,38 @@
 # TODOS
 
+## 🟢 explore-idea(heavy) — MLB 요일별 scoring_rule cohort heatmap parity (cycle 2189, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음 — 직전 8사이클 distinct=4) — cycle 2188 retro alternation 힌트
+(explore-idea 또는 operational-analysis) + cycle 2186 이 남긴 backlog
+(ScoringRuleDayHeatmap/CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory
+중 MLB 미구현) 확인.
+
+TeamBiasTable 은 사전 확인 결과 즉시 제외 확정 — `/mlb/standings` 페이지가
+"시즌 순위는 추후 라이브 연동 carry-over" 라 명시, 실제 win% 소스 자체가 아직
+없음(placeholder). ModelVersionHistory 도 MLB 가 scoring_rule 버전 분화 없어
+스킵 유지. ScoringRuleDayHeatmap 은 BrierTrendChart 와 동일한 자연 degradation
+패턴(MLB PredRow 에 scoring_rule 필드 자체가 없어 `'all'` aggregate 만 채워짐)
+으로 안전하게 이식 가능해 이번 scope 로 선택.
+
+`buildMlbAccuracySummary()` 에 `buildScoringRuleDayHeatmap(rows)` 한 줄
+추가(신규 함수 없음, 기존 KBO 로직 그대로 재사용) → `scoringRuleDayHeatmap`
+필드 노출. `MlbAccuracyDashboard` 에 섹션 추가(조건:
+`scoringRuleDayHeatmap.some(c => c.n > 0) && verifiedN >= 10`, KBO
+`/accuracy` 의 `rows.length >= 10` 문턱과 동일 의도) + KO/EN `/mlb/accuracy`·
+`/en/mlb/accuracy` 양쪽 배선. `ScoringRuleDayHeatmap` 컴포넌트 자체는 KBO
+전용 한글 라벨 하드코딩("소표본"/"전체"/요일명) — locale prop 없음. 기존
+`BrierTrendChart` 도 동일 한계(EN 페이지에도 "전체" 노출) 확인 — 신규 결함
+아닌 기존 컨벤션 유지, 별도 fix 범위 밖.
+
+회귀 테스트 1건 추가(`scoring_rule 없는 MLB row → all aggregate 만 채워짐`
+검증). `pnpm --filter moneyball test`: 447 files/3892 tests green,
+`tsc --noEmit`/lint clean. 커밋 직접 main push(branch/PR 미생성, cycle 2180
+이후 직접 push 패턴 유지, origin 대비 누적 ahead, 배포는 사용자 요청 시 batch).
+
+**다음 후보(scope 밖, backlog 잔존)**: CohortComparisonHeatmap — 동일 자연
+degradation 패턴 적용 가능해 보임(사전 확인 권장), MLB 4주 cohort 비교 wiring.
+
 ## 🟢 review-code(heavy) — page.tsx 감사, 신규 버그 1건 fix (cycle 2188, 2026-08-18)
 
 carry-over — cycle 2187 review-code(heavy) 감사 결과 다음 후보로 명시 지목한
