@@ -1,5 +1,23 @@
 # TODOS
 
+## ✅ fix-incident(lite) — carry-over 재검증 + 전체 헬스체크, 신규 incident 0건 (cycle 2174, 2026-08-18)
+
+cycle 2140 fix-incident retro 가 남긴 후속 후보("헤더 nav label 자체가 여전히 한국어
+하드코딩... aria-label 도 동일 국제화 후속 대상")를 이번 사이클 착수 대상으로 검토 —
+`Header.tsx`/`NavLinks.tsx`/`MobileNav.tsx`/`LeagueSelector.tsx`/`SearchForm.tsx`/
+`ThemeToggle.tsx` 직접 read 결과 **이미 전부 해소됨** 확인. `git log` 대조 결과
+wave-627(`feat(nav): 헤더/모바일메뉴/리그셀렉터 EN 텍스트 i18n`)/wave-628(`fix(nav):
+SearchForm 헤더 검색창 EN 텍스트 i18n`)/wave-630(`fix(nav): CookieConsent/ThemeToggle
+EN i18n 누락 수정`) 3개 커밋이 cycle 2140 이후 이미 커버 — 신규 작업 불필요
+(`feedback_diagnose_existing_artifacts_first` 메모리 룰 적용, 헛수고 회피).
+
+carry-over 소진 확인 후 전체 헬스체크 전환: `gh run list` CI 전부 green, scheduled
+workflow(`health-alert`/`runtime-error-alert`/`deploy-drift-alert`/`heartbeat-stale`)
+전부 success — cycle 2114 turbo-ignore 배포 fix 의 "다음 관찰 포인트"(deploy-drift-alert
+정상 재개) 도 이번에 확인 완료. review-code(heavy) 는 cycle 2173 이 "다음 후보 없음"
+명시해 이번엔 회피, fix-incident 재선택 — 신규 incident 0건, 진짜 버그 아님 (cycle
+2167/2172 와 동일 패턴).
+
 ## ✅ review-code(heavy) — MLB 신규 라우트 silent-drift-family 스코프 감사, 버그 미발견 (cycle 2173, 2026-08-18)
 
 cycle 2170 polish-ui carry-over("brand-950 외 다른 미정의 토큰 없는지 전수 grep")
