@@ -75,10 +75,40 @@ jobs:
             exit 0
           }
           git push -u origin "$BRANCH"
-          PR_URL=$(gh pr create \
-            --title "data(op-analysis): ${DATE} weekly cohort split (cron)" \
-            --body "plan #8 Tier 1 M7 — weekly cohort 자동 측정. scoring_rule + 요일 + win_prob_tier 누적 markdown 박제." \
-            --label "automated,op-analysis")
+
+          PR_URL=""
+          for attempt in 1 2 3 4 5; do
+            if PR_URL=$(gh pr create \
+              --title "data(op-analysis): ${DATE} weekly cohort split (cron)" \
+              --body "plan #8 Tier 1 M7 — weekly cohort 자동 측정. scoring_rule + 요일 + win_prob_tier 누적 markdown 박제." \
+              --label "automated,op-analysis" 2>&1); then
+              break
+            fi
+            echo "::warning::gh pr create attempt ${attempt} failed: ${PR_URL}"
+            PR_URL=""
+            sleep $((attempt * 10))
+          done
+
+          if [ -z "$PR_URL" ]; then
+            echo "::error::gh pr create failed after retries — branch $BRANCH pushed but no PR. Recover manually: gh pr create --head $BRANCH"
+            exit 1
+          fi
+
           PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-          gh pr merge "$PR_NUM" --squash --auto --delete-branch
+
+          MERGED=false
+          for attempt in 1 2 3 4 5; do
+            if gh pr merge "$PR_NUM" --squash --auto --delete-branch; then
+              MERGED=true
+              break
+            fi
+            echo "::warning::gh pr merge attempt ${attempt} failed"
+            sleep $((attempt * 10))
+          done
+
+          if [ "$MERGED" != "true" ]; then
+            echo "::error::gh pr merge failed after retries — PR #$PR_NUM created but not queued for auto-merge. Recover manually: gh pr merge $PR_NUM --squash --auto --delete-branch"
+            exit 1
+          fi
+
           echo "::notice::PR $PR_URL queued for auto-merge"
