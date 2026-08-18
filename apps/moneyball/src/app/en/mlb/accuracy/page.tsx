@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@moneyball/shared";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
 import { buildAllMlbTeamAccuracy } from "@/lib/mlb/buildMlbTeamAccuracy";
+import { buildMlbFactorAccuracy } from "@/lib/mlb/buildMlbFactorAccuracy";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbAccuracyDashboard } from "@/components/accuracy/MlbAccuracyDashboard";
+import { FactorAccuracyTable } from "@/components/accuracy/FactorAccuracyTable";
 
 export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -24,9 +26,10 @@ export const metadata: Metadata = {
 };
 
 export default async function EnMlbAccuracyPage() {
-  const [summary, teamRows] = await Promise.all([
+  const [summary, teamRows, factorAccuracyRows] = await Promise.all([
     buildMlbAccuracySummary('en'),
     buildAllMlbTeamAccuracy(),
+    buildMlbFactorAccuracy('en'),
   ]);
 
   return (
@@ -51,6 +54,25 @@ export default async function EnMlbAccuracyPage() {
         confidenceTiers={summary.confidenceTiers}
         teamRows={teamRows}
       />
+
+      {factorAccuracyRows.length > 0 && (
+        <section id="factor-accuracy" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">Factor Accuracy</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              How well each sabermetric factor predicted the actual game outcome —
+              the rate at which the team a factor favored actually won.
+            </p>
+          </div>
+          <FactorAccuracyTable
+            rows={factorAccuracyRows}
+            overallN={summary.verifiedN}
+            overallAcc={summary.accuracyRate ?? 0}
+            sport="mlb"
+            locale="en"
+          />
+        </section>
+      )}
 
       <footer className="text-xs text-gray-400 dark:text-gray-500 space-y-1 border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
         <p>• All data on this page is computed automatically from actual MLB game results.</p>
