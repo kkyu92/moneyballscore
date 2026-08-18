@@ -1,5 +1,23 @@
 # TODOS
 
+## 🔴 fix-incident 후보 — verify cron 영구 봉인 버그, KBO 25경기 9일+ scheduled 고착 (cycle 2178 op-analysis lite 발견, 미해소)
+
+**사례 32** (`memory/drift-cases.md`) 참조. 요약: `packages/kbo-data/src/
+pipeline/daily.ts:420-465` verify 모드가 `getVerifyResults()` 0건 반환에도
+`results_sent` flag 를 세워버려(라인 462) 그 날짜를 영구 스킵 — 2026-08-05~
+08-09 KBO 게임 25건(id 9377-9381/9467-9471/9547-9551/9627-9631/9707-9711)이
+9일+ 지난 오늘까지 `status='scheduled'`, 0-0 score 고착. 전후 날짜는 정상
+`final` 전환.
+
+**다음 fix-incident 필수 3 step**:
+1. 실제 08-05~08-09 KBO 경기 개최 여부 확인 (우천취소/더블헤더 순연 가능성) →
+   열렸으면 결과 backfill, 취소면 `postponed` 로 상태 정정.
+2. `results_sent` 영구 봉인 로직(daily.ts:462) 재검토 — verified=0 날짜 재시도
+   유예 로직 추가.
+3. `silent-drift-alert.ts` 의 verify 분기가 이 5일간 실제 Sentry/Telegram 발화
+   했는지 확인 (이론상 매일 발화했어야 함 — 발화 안 했다면 alert 전송 경로 자체
+   silent fail 의심).
+
 ## 🟡 review-code(heavy) — silent-drift-family 스코프 감사 3축, 버그 미발견 (cycle 2177, 2026-08-18)
 
 no forced trigger (open issue/approved plan/gap-chain 전부 미충족, 2-chain lock 없음) — 자유

@@ -570,6 +570,45 @@ cycle 2171(explore-idea heavy) 이 MLB parity 작업 실측 검증 중 `/mlb/tea
 필요)와 **여러 무관한 라우트가 동시에** 404 나는 경우(라우터/캐시 문제, 코드
 조사 전 캐시 클리어부터)를 구분하는 게 진단 순서의 핵심 분기점.
 
+### 사례 32 — verify cron `results_sent` flag 가 0건 검증에도 영구 박제 → KBO 게임 25건 9일+ `scheduled` 고착 (cycle 2178 op-analysis lite 발견, 미해소)
+
+op-analysis(lite) CE cohort 재측정 중 `predictions` 테이블 pre_game v1.8 검증
+건수가 cycle 2146(n=311) 이후 cycle 2178 까지 32 사이클 동안 완전 동결 발견 →
+원인 추적 중 KBO `games` 테이블에서 **2026-08-05~08-09 (5일, 게임 25건, id
+9377-9381/9467-9471/9547-9551/9627-9631/9707-9711)** 이 오늘(2026-08-18)까지도
+`status='scheduled'`, `home_score=0/away_score=0` 로 고착된 걸 확인 (전후
+08-01~08-04, 08-11~ 은 정상적으로 `final` 전환).
+
+**근본 원인 (코드 read 로 확정, 수정은 미시행)**: `packages/kbo-data/src/
+pipeline/daily.ts:420-465` verify 모드가 `isNotificationSent(db, targetDate,
+'results_sent')` 로 이미 실행한 날짜는 즉시 skip — **단 `getVerifyResults()`
+가 0건을 반환해도 `markNotificationFlag(..., 'results_sent', ...)` 를 그대로
+호출해 flag 를 세운다** (라인 462, 주석 자체가 "verifyResults.length===0 이어도
+flag 는 설정 — 재실행 차단이 목적" 이라 명시). 즉 게임이 아직 KBO 사이트에서
+`final` 로 안 넘어온 시각(23:00 KST)에 verify 가 한 번 돌면 그 날짜는 **영구
+봉인** — 이후 게임이 실제로 끝나 스코어가 확정돼도 verify 가 다시 그 날짜를
+보러 가지 않는다. `pipeline_runs` 로그도 매일 `games_found=5 predictions=0
+errors=[] status=success` 를 5일 연속 반복해 겉보기엔 "정상 재시도" 처럼 보이나
+실은 매번 조기 return(라인 427) 하는 no-op.
+
+**silent-drift-alert.ts 관련**: `shouldAlertSilentDrift` 의 verify 분기
+(`verifiedCount===0 && gamesFound>0` → alert)는 이 케이스에 논리적으론 맞아야
+하는데, `verifiedCount.value` 초기값이 0({value:0}, daily.ts:170)이라 조기
+return 경로에서도 0 이 그대로 `finish()`→alert 로 전달돼 **매일 발화했어야
+함** — 그런데 5일간 아무 수정 커밋도 없음. Sentry/Telegram 실제 수신 여부는
+미확인 (다음 fix-incident 가 확인 필요 — 전송 자체가 silent fail 했을 수도,
+또는 발화했지만 이 세션들 사이 사용자가 안 본 걸 수도).
+
+**carry-over (다음 fix-incident 필수 확인)**:
+1. 실제로 08-05~08-09 KBO 경기가 열렸는지(우천취소/더블헤더로 순연 가능성)
+   확인 — 열렸다면 결과 backfill, 취소됐다면 `games.status='postponed'` 로
+   정정.
+2. `results_sent` flag 를 0건 검증 시에도 영구 세우는 로직(daily.ts:462) 이
+   의도된 설계인지 재검토 — 최소한 "verified=0 인 날짜는 N일 후 재시도" 유예
+   로직 필요.
+3. Sentry/Telegram alert 가 실제 발화했는지 로그/알림 이력 확인 — 발화 안
+   했다면 `captureSilentDriftAlert` 호출 경로 자체의 silent fail 의심.
+
 **fix (cycle 2172)**: 코드 변경 없음 — `.next` 캐시 삭제만으로 해소되는 로컬
 환경 문제였음을 확정. 재발 시 진단 순서 박제: (1) 여러 무관 라우트 동시 404
 확인 → (2) 응답 title 로 루트 vs 라우트별 not-found 구분 → (3) `.next` 캐시
