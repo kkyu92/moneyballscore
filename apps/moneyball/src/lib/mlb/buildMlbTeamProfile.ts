@@ -49,6 +49,17 @@ export interface MlbTeamFactorAverages {
   lineupBarrelPct: number | null;
 }
 
+// mlb_team_stats(migration 044) 가 FanGraphs/Savant 스크랩으로 채우지만 어느 UI 도
+// 소비하지 않던 타구 스프레이/타입 컬럼 — buildMlbTeamProfile 이 시즌 스냅샷째로 노출.
+export interface MlbBattedBallProfile {
+  pullPct: number | null;
+  centPct: number | null;
+  oppoPct: number | null;
+  gbPct: number | null;
+  fbPct: number | null;
+  hardHitPct: number | null;
+}
+
 export interface MlbTeamProfile {
   code: MlbTeamCode;
   name: string;
@@ -66,6 +77,7 @@ export interface MlbTeamProfile {
   correctN: number;
   accuracyRate: number | null;
   factorAverages: MlbTeamFactorAverages;
+  battedBallProfile: MlbBattedBallProfile | null;
   recentGames: MlbTeamRecentGame[];
   streak: TeamStreak | null;
   avgMargin: TeamAvgMargin | null;
@@ -104,6 +116,15 @@ interface PredRow {
   home_lineup_barrel_pct: number | null;
   away_lineup_barrel_pct: number | null;
   prediction_type: string | null;
+}
+
+interface BattedBallStatsRow {
+  pull_pct: number | null;
+  cent_pct: number | null;
+  oppo_pct: number | null;
+  gb_pct: number | null;
+  fb_pct: number | null;
+  hard_hit_pct: number | null;
 }
 
 function safeAvg(sum: number, n: number): number | null {
@@ -155,6 +176,7 @@ export async function buildMlbTeamProfile(
       lineupXwoba: null,
       lineupBarrelPct: null,
     },
+    battedBallProfile: null,
     recentGames: [],
     streak: null,
     avgMargin: null,
@@ -163,6 +185,28 @@ export async function buildMlbTeamProfile(
     homeAwayEdge: null,
     recentRecord: null,
   };
+
+  // mlb_team_stats.team_code 는 canonical(Baseball-Reference) 컨벤션 — teamCode 파라미터와
+  // 동일 컨벤션이라 정규화 없이 직접 매칭(mlb_schedule 과 달리 alias 변환 불필요).
+  const season = new Date().getFullYear();
+  const statsResult = await supabase
+    .from('mlb_team_stats')
+    .select('pull_pct, cent_pct, oppo_pct, gb_pct, fb_pct, hard_hit_pct')
+    .eq('team_code', teamCode)
+    .eq('season', season)
+    .maybeSingle();
+  const { data: statsRow } = assertSelectOk(statsResult, 'buildMlbTeamProfile mlb_team_stats');
+  const battedBall = statsRow as BattedBallStatsRow | null;
+  const battedBallProfile: MlbBattedBallProfile | null = battedBall
+    ? {
+        pullPct: battedBall.pull_pct,
+        centPct: battedBall.cent_pct,
+        oppoPct: battedBall.oppo_pct,
+        gbPct: battedBall.gb_pct,
+        fbPct: battedBall.fb_pct,
+        hardHitPct: battedBall.hard_hit_pct,
+      }
+    : null;
 
   // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
   // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
@@ -175,7 +219,7 @@ export async function buildMlbTeamProfile(
   const { data: scheduleData } = assertSelectOk(scheduleResult, 'buildMlbTeamProfile mlb_schedule');
   const scheduleRows = (scheduleData ?? []) as ScheduleRow[];
 
-  if (scheduleRows.length === 0) return emptyProfile;
+  if (scheduleRows.length === 0) return { ...emptyProfile, battedBallProfile };
 
   const scheduleByExternalId = new Map<string, ScheduleRow>();
   for (const s of scheduleRows) {
@@ -313,6 +357,7 @@ export async function buildMlbTeamProfile(
       lineupXwoba: safeAvg(xwobaSum, xwobaN),
       lineupBarrelPct: safeAvg(barrelSum, barrelN),
     },
+    battedBallProfile,
     recentGames,
     streak,
     avgMargin,

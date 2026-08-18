@@ -49,6 +49,11 @@ function fmtPct(v: number | null): string {
 function fmtElo(v: number | null): string {
   return v != null ? v.toFixed(0) : "-";
 }
+// mlb_team_stats pull/cent/oppo/gb/fb/hard_hit are already 0-100 scale (fangraphs-mlb.ts
+// `* 100`) — different scale from fmtPct (assumes 0-1 fraction), needs its own formatter.
+function fmtRawPct(v: number | null): string {
+  return v != null ? `${v.toFixed(1)}%` : "-";
+}
 
 export function generateStaticParams() {
   return MLB_TEAMS_PRE_RENDER.map((code) => ({ code }));
@@ -274,6 +279,43 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {profile.battedBallProfile && (
+        <section
+          aria-labelledby="mlb-team-batted-ball-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="mlb-team-batted-ball-title" className="text-lg font-bold mb-3">
+            Batted-Ball Profile
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Pull%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.pullPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Cent%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.centPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Oppo%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.oppoPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">GB%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.gbPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">FB%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.fbPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Hard-Hit%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.hardHitPct)}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       <MlbTeamConvergencePickRecord
         titleId="mlb-team-convergence-title"

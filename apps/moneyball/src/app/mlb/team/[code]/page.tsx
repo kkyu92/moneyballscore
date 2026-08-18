@@ -49,6 +49,11 @@ function fmtPct(v: number | null): string {
 function fmtElo(v: number | null): string {
   return v != null ? v.toFixed(0) : "-";
 }
+// mlb_team_stats 의 pull/cent/oppo/gb/fb/hard_hit 는 이미 0~100 스케일로 저장(fangraphs-mlb.ts
+// `* 100`) — fmtPct(0~1 fraction 가정)와 다른 스케일이라 별도 포매터 필요.
+function fmtRawPct(v: number | null): string {
+  return v != null ? `${v.toFixed(1)}%` : "-";
+}
 
 export function generateStaticParams() {
   return MLB_TEAMS_PRE_RENDER.map((code) => ({ code }));
@@ -272,6 +277,43 @@ export default async function MlbTeamPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {profile.battedBallProfile && (
+        <section
+          aria-labelledby="mlb-team-batted-ball-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5"
+        >
+          <h2 id="mlb-team-batted-ball-title" className="text-lg font-bold mb-3">
+            타구 프로파일
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">당겨치기%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.pullPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">가운데%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.centPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">밀어치기%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.oppoPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">땅볼%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.gbPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">뜬공%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.fbPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">강한 타구%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.hardHitPct)}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       <MlbTeamConvergencePickRecord
         titleId="mlb-team-convergence-title"

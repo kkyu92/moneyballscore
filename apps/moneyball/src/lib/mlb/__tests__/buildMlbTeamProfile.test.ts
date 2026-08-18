@@ -10,8 +10,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 interface SupabaseMockOptions {
   scheduleError?: { message: string } | null;
   predsError?: { message: string } | null;
+  statsError?: { message: string } | null;
   schedule?: unknown[];
   preds?: unknown[];
+  stats?: unknown | null;
 }
 
 function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
@@ -32,10 +34,20 @@ function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
         error: opts.predsError ?? null,
       }),
   };
+  // battedBallProfile — mlb_team_stats(migration 044) 단건 조회 (.maybeSingle())
+  const statsBuilder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: opts.statsError ? null : (opts.stats ?? null),
+      error: opts.statsError ?? null,
+    }),
+  };
   return {
     from: vi.fn((table: string) => {
       if (table === 'mlb_schedule') return scheduleBuilder;
       if (table === 'predictions') return predsBuilder;
+      if (table === 'mlb_team_stats') return statsBuilder;
       throw new Error(`unexpected table: ${table}`);
     }),
   };
@@ -110,6 +122,7 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
     expect(profile?.closeGame).toBeNull();
     expect(profile?.homeAwayEdge).toBeNull();
     expect(profile?.recentRecord).toBeNull();
+    expect(profile?.battedBallProfile).toBeNull();
   });
 
   it('schedule + predictions rows → 14 factor 집계 + accuracy 계산', async () => {
@@ -218,6 +231,44 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
 
     // recentRecord — MIN_GAMES=2 충족, LAD 두 경기 모두 승
     expect(profile?.recentRecord).toEqual({ wins: 2, losses: 0, sampleSize: 2 });
+
+    // mlb_team_stats row 미제공 → battedBallProfile null (row 부재 팀 안전 처리)
+    expect(profile?.battedBallProfile).toBeNull();
+  });
+
+  it('mlb_team_stats select error → assertSelectOk throw', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [],
+      statsError: { message: 'connection refused' },
+    });
+    const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
+    await expect(buildMlbTeamProfile('LAD')).rejects.toThrow(
+      /buildMlbTeamProfile mlb_team_stats select failed: connection refused/,
+    );
+  });
+
+  it('mlb_team_stats row 존재 → battedBallProfile 매핑 (0~100 raw scale 보존, fmtPct 와 다른 스케일)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [],
+      stats: {
+        pull_pct: 42.5,
+        cent_pct: 33.1,
+        oppo_pct: 24.4,
+        gb_pct: 45.0,
+        fb_pct: 35.0,
+        hard_hit_pct: 38.7,
+      },
+    });
+    const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
+    const profile = await buildMlbTeamProfile('LAD');
+    expect(profile?.battedBallProfile).toEqual({
+      pullPct: 42.5,
+      centPct: 33.1,
+      oppoPct: 24.4,
+      gbPct: 45.0,
+      fbPct: 35.0,
+      hardHitPct: 38.7,
+    });
   });
 
   // cycle 2081 fix-incident (heavy) — mlb_schedule 은 StatsAPI 컨벤션(TB/CWS/KC/SD/SF/AZ/WSH)
