@@ -1,7 +1,8 @@
 import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
-import type { Bucket, ConfidenceTier } from '@/lib/accuracy/buildAccuracyData';
+import type { Bucket, ConfidenceTier, WinnerProbBucket } from '@/lib/accuracy/buildAccuracyData';
 import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
+import { WinnerProbBucketChart } from '@/components/dashboard/WinnerProbBucketChart';
 
 // KBO /accuracy 페이지의 CalibrationChart/StatCard 를 그대로 옮겨오지 않고 MLB 전용으로
 // 독립 작성 (wave-626, MVP scope — rolling accuracy/brier trend/요일별 등 나머지 섹션은
@@ -34,6 +35,8 @@ interface Strings {
   gapOverconfident: string;
   gapUnderconfident: string;
   confidenceTitle: string;
+  winnerProbTitle: string;
+  winnerProbDesc: string;
   teamTitle: string;
   teamDesc: string;
   teamHeader: string;
@@ -58,6 +61,8 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     gapOverconfident: '과신 경향',
     gapUnderconfident: '저신 경향',
     confidenceTitle: 'AI 확신도별 분석',
+    winnerProbTitle: '확률 bucket 보정',
+    winnerProbDesc: 'AI가 예측한 승리 확률 구간별로 실제 적중률이 얼마나 일치하는지 보여줍니다.',
     teamTitle: '팀별 예측 성과',
     teamDesc: '경기 관련 팀 기준. 홈/원정 구분 없이 집계.',
     teamHeader: '팀',
@@ -80,6 +85,8 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     gapOverconfident: 'Overconfident',
     gapUnderconfident: 'Underconfident',
     confidenceTitle: 'Accuracy by AI Confidence',
+    winnerProbTitle: 'Win Probability Calibration',
+    winnerProbDesc: "Shows how closely the AI's predicted win probability buckets match actual outcomes.",
     teamTitle: 'Team Prediction Performance',
     teamDesc: 'Counted for any team involved in the game, home or away.',
     teamHeader: 'Team',
@@ -185,6 +192,7 @@ export function MlbAccuracyDashboard({
   gap,
   buckets,
   confidenceTiers,
+  winnerProbBuckets,
   teamRows,
 }: {
   locale: 'ko' | 'en';
@@ -195,6 +203,7 @@ export function MlbAccuracyDashboard({
   gap: number | null;
   buckets: Bucket[];
   confidenceTiers: ConfidenceTier[];
+  winnerProbBuckets: WinnerProbBucket[];
   teamRows: MlbTeamAccuracyRow[];
 }) {
   const s = STRINGS[locale];
@@ -236,6 +245,16 @@ export function MlbAccuracyDashboard({
           <MlbCalibrationChart buckets={buckets} locale={locale} />
         )}
       </section>
+
+      {verifiedN >= 5 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">{s.winnerProbTitle}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.winnerProbDesc}</p>
+          </div>
+          <WinnerProbBucketChart data={winnerProbBuckets} locale={locale} />
+        </section>
+      )}
 
       {verifiedN >= 5 && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">

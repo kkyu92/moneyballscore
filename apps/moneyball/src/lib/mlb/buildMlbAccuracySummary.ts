@@ -4,10 +4,12 @@ import {
   type PredRow,
   type Bucket,
   type ConfidenceTier,
+  type WinnerProbBucket,
   bucketize,
   brierScore,
   calibrationGap,
   buildConfidenceTiers,
+  buildWinnerProbBuckets,
 } from '@/lib/accuracy/buildAccuracyData';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
@@ -19,6 +21,7 @@ export interface MlbAccuracySummary {
   gap: number | null;
   buckets: Bucket[];
   confidenceTiers: ConfidenceTier[];
+  winnerProbBuckets: WinnerProbBucket[];
 }
 
 interface ScheduleFinalRow {
@@ -41,6 +44,7 @@ const EMPTY_SUMMARY: MlbAccuracySummary = {
   gap: null,
   buckets: [],
   confidenceTiers: [],
+  winnerProbBuckets: [],
 };
 
 // KBO `predictions.is_correct`/`confidence` 는 DB row 에 이미 채워져 buildAccuracyData
@@ -106,5 +110,6 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     gap: calibrationGap(rows),
     buckets: bucketize(rows),
     confidenceTiers: buildConfidenceTiers(rows, locale),
+    winnerProbBuckets: buildWinnerProbBuckets(rows),
   };
 }

@@ -20,6 +20,7 @@ import { ChartTooltip } from "./ChartTooltip";
 
 interface WinnerProbBucketChartProps {
   data: WinnerProbBucket[];
+  locale?: 'ko' | 'en';
 }
 
 interface BucketRow {
@@ -31,20 +32,38 @@ interface BucketRow {
   ci95Half: number;
 }
 
+const STRINGS = {
+  ko: {
+    empty: '확률 bucket 측정에는 더 많은 검증 예측이 필요합니다.',
+    yAxisLabel: '실제 적중률',
+    sample: '표본',
+    smallSample: (n: number) => `n=${n} (소표본)`,
+    avgPredicted: '예측 평균',
+    actualAccuracy: '실제 적중률',
+  },
+  en: {
+    empty: 'More verified predictions are needed to measure win probability buckets.',
+    yAxisLabel: 'Actual accuracy',
+    sample: 'Sample',
+    smallSample: (n: number) => `n=${n} (small sample)`,
+    avgPredicted: 'Predicted avg',
+    actualAccuracy: 'Actual accuracy',
+  },
+};
+
 /**
  * winner prob bucket × 실제 적중률 calibration evidence.
  * 4 bucket (50-60% / 60-70% / 70-80% / 80%+).
  * brand color (well-calibrated) / warning (over-confident: predicted > actual + 0.05).
  */
-export function WinnerProbBucketChart({ data }: WinnerProbBucketChartProps) {
+export function WinnerProbBucketChart({ data, locale = 'ko' }: WinnerProbBucketChartProps) {
+  const s = STRINGS[locale];
   const hasData = data.some((b) => b.n > 0);
   if (!hasData) {
     return (
       <div className="h-48 flex flex-col items-center justify-center text-center">
         <span className="text-3xl mb-2">📊</span>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          확률 bucket 측정에는 더 많은 검증 예측이 필요합니다.
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{s.empty}</p>
       </div>
     );
   }
@@ -85,7 +104,7 @@ export function WinnerProbBucketChart({ data }: WinnerProbBucketChartProps) {
           axisLine={false}
           tickFormatter={(v) => `${Math.round(v * 100)}%`}
           label={{
-            value: "실제 적중률",
+            value: s.yAxisLabel,
             angle: -90,
             position: "insideLeft",
             fontSize: 11,
@@ -113,12 +132,12 @@ export function WinnerProbBucketChart({ data }: WinnerProbBucketChartProps) {
                 if (row.actual === null) {
                   return [
                     {
-                      label: "표본",
-                      value: `n=${row.n} (소표본)`,
+                      label: s.sample,
+                      value: s.smallSample(row.n),
                       color: neutral[400],
                     },
                     {
-                      label: "예측 평균",
+                      label: s.avgPredicted,
                       value: `${(row.predicted * 100).toFixed(1)}%`,
                       color: items[0].color,
                     },
@@ -126,17 +145,17 @@ export function WinnerProbBucketChart({ data }: WinnerProbBucketChartProps) {
                 }
                 return [
                   {
-                    label: "예측 평균",
+                    label: s.avgPredicted,
                     value: `${(row.predicted * 100).toFixed(1)}%`,
                     color: items[0].color,
                   },
                   {
-                    label: "실제 적중률",
+                    label: s.actualAccuracy,
                     value: `${(row.actual * 100).toFixed(1)}% (±${(row.ci95Half * 100).toFixed(1)}%p)`,
                     color: items[0].color,
                   },
                   {
-                    label: "표본",
+                    label: s.sample,
                     value: `${row.hits}/${row.n}`,
                     color: items[0].color,
                   },

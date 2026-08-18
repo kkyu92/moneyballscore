@@ -52,6 +52,7 @@ export default async function EnMlbAccuracyPage() {
         gap={summary.gap}
         buckets={summary.buckets}
         confidenceTiers={summary.confidenceTiers}
+        winnerProbBuckets={summary.winnerProbBuckets}
         teamRows={teamRows}
       />
 
