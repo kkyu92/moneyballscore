@@ -1,5 +1,37 @@
 # TODOS
 
+## 🟢 fix-incident — KBO games.status 영구 'scheduled' 고착 family 발견 + backfill (cycle 2184, 2026-08-18, 사례 33)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음) — health-check 성격 진단(pipeline_runs 최근 7일 mismatch scan +
+mlb_fancy_scrape 최근 에러 확인) 중 announce/verify mode 의 "predictions=0" 은
+설계상 정상(games_skipped=0 이지만 애초에 예측 안 하는 모드)임을 확인한 뒤,
+`games` 테이블 자체를 직접 스캔해 **status='scheduled' 로 9일+ 고착된 경기가
+2026-04-14~2026-08-04 사이 9개 날짜 24경기** 존재함을 발견. 이는 사례 32
+(cycle 2179, verify cron 이 그날 게임 전부 안 끝나도 results_sent 영구 세우던
+버그)의 **fix 이전 historical fallout** — verify 모드가 구조적으로 "어제" 단
+하루만 재검증하고 과거 날짜로 절대 안 돌아가는 설계라, 한번 세팅되면
+(sealed 든 안 sealed 든) 재시도 기회가 영구히 없음. MLB 쪽엔 이미 동일 버그
+클래스(사례 23, cycle 2067)가 `backfill-mlb-schedule-status.ts` 로 처리된
+전례가 있었으나 KBO 쪽엔 대응 스크립트가 없었음.
+
+**fix**: `scripts/backfill-kbo-stuck-verify.ts` 신규(진단/--apply 모드,
+`backfill-mlb-schedule-status.ts` 패턴 이식) — 대상 날짜별 KBO API 재조회 →
+`games` upsert → 신규 final 경기의 `predictions.is_correct` 재계산
+(`buildAccuracyUpdates` 재사용). `daily_notifications` flag 는 건드리지 않음
+(Telegram 재알림 방지, 순수 데이터 정합성 fix). `computeWinnerTeamId` /
+`buildAccuracyUpdates` 를 `packages/kbo-data/src/index.ts` 에 신규 export
+(기존 daily.ts 내부 전용 함수를 스크립트가 재사용할 수 있도록).
+
+**결과**: 9개 날짜 중 3개(04-14/04-15/04-29, 15경기) 완전 해소, 나머지
+6개 날짜는 KBO API 자체가 여전히 'scheduled' 로 응답(9경기 잔존 — 우천취소
+등으로 재편성 없이 소멸된 경기로 추정, KBO 쪽 자체 데이터 갱신 없인 추가
+자동화 불가). `predictions.is_correct` 19건 신규 계산. `pnpm --filter
+@moneyball/kbo-data test`: 88 files / 1139 tests green, type-check(root +
+app) clean, lint clean. 잔존 9경기는 다음 fix-incident 후속 후보로 carry-over
+(KBO 공식 발표/뉴스로 우천취소 확정 여부 수동 확인 후 postponed 로 직접
+마킹하거나 영구 미해결로 인정).
+
 ## 🟢 info-architecture-review — MLB matchup 진입점 부재 발견 + fix, 435 pairs 도달 불가 상태 해소 (cycle 2183, 2026-08-18)
 
 trigger 9 (마지막 info-architecture-review 발화 이후 ≥30 사이클, 마지막 fire
