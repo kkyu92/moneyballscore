@@ -1,5 +1,21 @@
 # TODOS
 
+## ✅ explore-idea(heavy, scoped) — MLB 팀 프로필 타구 프로파일 잔여 4필드 추가 (cycle 2159, 2026-08-18)
+
+cycle 2157 이 mlb_team_stats(migration 044) 의 pull/cent/oppo/gb/fb/hard_hit 6개
+dead column 을 노출했으나, 같은 테이블의 ld_pct/iffb_pct/hr_fb_pct/launch_angle
+4개는 여전히 select 밖 dead data 였음. buildMlbTeamProfile select + 타입 확장,
+KO/EN `/mlb/team/[code]` 페이지 배지 4개 추가 (launch_angle 은 퍼센트 아닌 각도라
+신규 fmtDegree 포매터 사용 — fmtRawPct 오용 방지, cycle 2158 스케일 버그 재발 차단
+의식적 설계). review-code 관련 dead-end 리드 2건도 확인: KBO teams/[code] 는 batted
+ball 필드 자체 없음, mlb/matchup 페이지도 미사용 — family 재발 없음 결론.
+
+vitest 3870 passed / tsc·eslint clean / main 직접 push CI green 실측(run 32121229254).
+
+다음 fire 후보: mlb_team_stats 전체 컬럼 노출 완료로 이 dead-data 시리즈 소진.
+다음 진단은 open issue / fix-incident 20-cycle gap(cycle 2167 근접) / review-code
+자유 판단.
+
 ## ✅ review-code(heavy) — MLB 팀 프로필 Barrel% 표시 스케일 버그 (cycle 2158, 2026-08-18)
 
 cycle 2157 TODOS 기록이 "검증 안 함, 스코프 밖"으로 남긴 의심 — `factorAverages.lineupBarrelPct`
