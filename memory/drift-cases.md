@@ -609,6 +609,18 @@ return 경로에서도 0 이 그대로 `finish()`→alert 로 전달돼 **매일
 3. Sentry/Telegram alert 가 실제 발화했는지 로그/알림 이력 확인 — 발화 안
    했다면 `captureSilentDriftAlert` 호출 경로 자체의 silent fail 의심.
 
+**fix (cycle 2179, PR #2963)**: carry-over 1 — WebSearch 로 확인: 2026-08-05~09
+KBO 리그가 폭염으로 전 경기 임시 중단(08-06 긴급 실행위원회 결정, 08-11 재개),
+해당 25경기는 실제로 열리지 않음. `games.status='postponed'` + `home_score/
+away_score=null` 로 backfill, `daily_notifications.results_sent` 5일치 리셋
+(스크립트로 직접 DB 반영, 코드 배포와 무관한 1회성 정정). carry-over 2 —
+`daily.ts` verify 분기에 `allGamesTerminal` 가드 추가: 그날 fetchGames 로
+새로 받아온 게임 전부 `final`/`postponed` 이거나 `verifyResults>0` 일 때만
+`results_sent` flag 세움 (재현 재발 차단, 신규 vitest 2건 — scheduled 미종결
+시 flag 미기록 / final 종결 시 flag 기록). carry-over 3 (Sentry/Telegram 실제
+발화 여부)는 **미확인 상태 유지** — Sentry API 미인증 세션이라 확인 불가,
+다음 세션에서 Sentry 대시보드 직접 확인 필요.
+
 **fix (cycle 2172)**: 코드 변경 없음 — `.next` 캐시 삭제만으로 해소되는 로컬
 환경 문제였음을 확정. 재발 시 진단 순서 박제: (1) 여러 무관 라우트 동시 404
 확인 → (2) 응답 title 로 루트 vs 라우트별 not-found 구분 → (3) `.next` 캐시
