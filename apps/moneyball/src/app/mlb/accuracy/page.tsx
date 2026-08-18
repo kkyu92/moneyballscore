@@ -53,6 +53,7 @@ export default async function MlbAccuracyPage() {
         buckets={summary.buckets}
         confidenceTiers={summary.confidenceTiers}
         winnerProbBuckets={summary.winnerProbBuckets}
+        rollingAccuracy={summary.rollingAccuracy}
         teamRows={teamRows}
       />
 

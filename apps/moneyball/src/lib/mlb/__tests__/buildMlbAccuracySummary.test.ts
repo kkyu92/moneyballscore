@@ -86,6 +86,27 @@ describe('buildMlbAccuracySummary', () => {
     expect(bucket7080?.hits).toBe(1);
   });
 
+  it('rollingAccuracy — 오늘 기준 windowDays 안 n>=3 누적 시 non-null (RollingAccuracyChart parity, cycle 2181)', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', game_date: today, home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', game_date: today, home_score: 1, away_score: 3 },
+        { external_game_id: 'g3', game_date: today, home_score: 4, away_score: 0 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 },
+        { external_game_id: 'g2', home_win_prob: 0.7 },
+        { external_game_id: 'g3', home_win_prob: 0.6 },
+      ],
+    });
+    const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
+    const result = await buildMlbAccuracySummary();
+    const todayPoint = result.rollingAccuracy.find((p) => p.date === today);
+    expect(todayPoint?.windowN).toBe(3);
+    expect(todayPoint?.windowAccuracy).toBeCloseTo(2 / 3, 5);
+  });
+
   it('예측 없는 경기는 skip (external_game_id 매칭 없음)', async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [{ external_game_id: 'g1', game_date: '2026-08-01', home_score: 5, away_score: 2 }],

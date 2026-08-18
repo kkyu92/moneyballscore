@@ -23,7 +23,23 @@ import { ChartTooltip } from "./ChartTooltip";
 interface RollingAccuracyChartProps {
   data: RollingAccuracyPoint[];
   windowDays?: number;
+  locale?: 'ko' | 'en';
 }
+
+const STRINGS = {
+  ko: {
+    empty: (windowDays: number) => `${windowDays}일 rolling 적중률 측정에는 누적 표본이 더 필요합니다.`,
+    yAxisLabel: '적중률',
+    baseline: '동전 50%',
+    tooltipLabel: (windowDays: number) => `${windowDays}일 rolling`,
+  },
+  en: {
+    empty: () => 'More cumulative predictions are needed to measure rolling accuracy.',
+    yAxisLabel: 'Accuracy',
+    baseline: 'Coin flip 50%',
+    tooltipLabel: (windowDays: number) => `${windowDays}-day rolling`,
+  },
+};
 
 /**
  * rolling window accuracy 추세 line chart.
@@ -34,15 +50,15 @@ interface RollingAccuracyChartProps {
 export function RollingAccuracyChart({
   data,
   windowDays = ROLLING_ACCURACY_WINDOW_DAYS,
+  locale = 'ko',
 }: RollingAccuracyChartProps) {
+  const s = STRINGS[locale];
   const hasData = data.some((p) => p.windowAccuracy !== null);
   if (!hasData) {
     return (
       <div className="h-64 flex flex-col items-center justify-center text-center">
         <span className="text-4xl mb-3">📈</span>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {windowDays}일 rolling 적중률 측정에는 누적 표본이 더 필요합니다.
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{s.empty(windowDays)}</p>
       </div>
     );
   }
@@ -77,7 +93,7 @@ export function RollingAccuracyChart({
           axisLine={false}
           tickFormatter={(v) => `${Math.round(v * 100)}%`}
           label={{
-            value: "적중률",
+            value: s.yAxisLabel,
             angle: -90,
             position: "insideLeft",
             fontSize: 11,
@@ -90,7 +106,7 @@ export function RollingAccuracyChart({
           strokeDasharray="4 4"
           strokeOpacity={0.5}
           label={{
-            value: "동전 50%",
+            value: s.baseline,
             fontSize: 10,
             fill: neutral[400],
             position: "insideTopRight",
@@ -109,7 +125,7 @@ export function RollingAccuracyChart({
                 }>)
                   .filter((p) => p.value !== null && p.value !== undefined)
                   .map((p) => ({
-                    label: `${windowDays}일 rolling`,
+                    label: s.tooltipLabel(windowDays),
                     value: `${(p.value * 100).toFixed(1)}% (n=${p.payload.windowN})`,
                     color: p.color,
                   }))
