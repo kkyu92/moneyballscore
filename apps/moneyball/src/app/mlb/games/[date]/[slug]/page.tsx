@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbDetailedFactorAnalysis } from "@/components/predictions/MlbDetailedFactorAnalysis";
 import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
 import { MlbGameOverview } from "@/components/predictions/MlbGameOverview";
 import { MlbHistoricalAnalogMatchup } from "@/components/predictions/MlbHistoricalAnalogMatchup";
@@ -19,7 +20,7 @@ import {
   MLB_TEAMS,
   type MlbTeamCode,
 } from "@moneyball/shared";
-import { MetricRegistry, computeMlbWaterfall, type MetricSlug, type MlbWaterfallInput } from "@moneyball/kbo-data";
+import { computeMlbWaterfall, type MetricSlug, type MlbWaterfallInput } from "@moneyball/kbo-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -250,20 +251,12 @@ export default async function GameDetail({ params }: PageParams) {
         factorCount={GAME_DETAIL_FACTOR_ROWS.length}
       />
 
-      <section>
-        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{GAME_DETAIL_FACTOR_ROWS.length} factor breakdown</h2>
-        <dl className="grid grid-cols-2 gap-3 text-sm">
-          {GAME_DETAIL_FACTOR_ROWS.map((row) => (
-            <FactorRow
-              key={row.homeKey}
-              slug={row.slug}
-              label={row.label}
-              home={pred[row.homeKey] as number | null}
-              away={pred[row.awayKey] as number | null}
-            />
-          ))}
-        </dl>
-      </section>
+      <MlbDetailedFactorAnalysis
+        homeTeam={home}
+        awayTeam={away}
+        bars={waterfallBars}
+        values={waterfallInput}
+      />
 
       <MlbFactorWaterfallChart
         homeTeam={home}
@@ -306,22 +299,3 @@ export default async function GameDetail({ params }: PageParams) {
   );
 }
 
-function FactorRow({
-  slug,
-  label,
-  home,
-  away,
-}: {
-  slug?: MetricSlug;
-  label?: string;
-  home: number | null;
-  away: number | null;
-}) {
-  const resolved = slug ? MetricRegistry[slug].ko_name : label;
-  return (
-    <div className="border border-brand-200 dark:border-brand-800 rounded p-3">
-      <dt className="text-xs text-brand-500 dark:text-brand-400">{resolved}</dt>
-      <dd className="font-mono mt-1 text-brand-700 dark:text-brand-100">{home ?? '—'} / {away ?? '—'}</dd>
-    </div>
-  );
-}

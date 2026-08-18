@@ -11,7 +11,9 @@ const BATTING_FACTORS = new Set(['lineup_woba', 'war', 'lineup_xwoba', 'lineup_b
 const SITUATIONAL_FACTORS = new Set(['home_advantage', 'park_factor']);
 
 // contribution 이 이 pp 미만이면 "우세"로 서술할 만큼 유의미하지 않음 (neutral 처리).
-const NARRATIVE_MIN_PP = 0.1;
+// mlb-factor-detail.ts(DetailedFactorAnalysis parity)도 동일 임계 재사용 — 두 화면이
+// 서로 다른 "우세" 판정 기준을 갖는 drift 방지.
+export const NARRATIVE_MIN_PP = 0.1;
 
 export interface MlbGameOverviewNarrative {
   pitching: string[];
@@ -19,7 +21,9 @@ export interface MlbGameOverviewNarrative {
   situational: string[];
 }
 
-function toSentence(
+// mlb-factor-detail.ts 가 per-row 문장 생성에 그대로 재사용 (GameOverview 요약 문장과
+// 동일 wording 보장 — 화면마다 다른 문구로 갈라지는 drift 방지).
+export function toSentence(
   bar: MlbWaterfallBar,
   homeTeamName: string,
   awayTeamName: string,

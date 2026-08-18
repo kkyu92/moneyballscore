@@ -72,6 +72,10 @@ export type { MlbWaterfallInput, MlbWaterfallBar, MlbWaterfallPair } from './fac
 export { buildMlbGameOverview } from './factors/mlb-overview';
 export type { MlbGameOverviewNarrative } from './factors/mlb-overview';
 
+// MLB 개별 경기 팩터별 상세 해설 (analysis/game DetailedFactorAnalysis parity — cycle 2171)
+export { buildMlbFactorDetailRows } from './factors/mlb-factor-detail';
+export type { MlbFactorDetailRow } from './factors/mlb-factor-detail';
+
 // MLB Shadow C 학습 milestone (walk-forward expanding window)
 export { MILESTONE_TRIGGERS as MLB_SHADOW_C_MILESTONES } from './factors/mlb-shadow-c';
 
