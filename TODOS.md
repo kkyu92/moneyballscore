@@ -1,5 +1,31 @@
 # TODOS
 
+## 🟡 review-code(heavy) — buildAccuracyData.ts 감사, 신규 버그 미발견 (cycle 2187, 2026-08-18)
+
+no forced trigger — 직전 8 사이클 distinct chain=4 (2-chain lock 없음), gap-chain
+전부 미충족. cycle 2186 explore-idea 직후 Feature-Drift Cycle 자연 교대로
+review-code(heavy) 선택. 감사 대상 = `apps/moneyball/src/lib/accuracy/buildAccuracyData.ts`
+(758줄, 최근 BrierTrendChart 배선(cycle 2186)의 핵심 데이터 함수 — 신규 기능 직후
+감사 우선순위).
+
+전체 read 결과 신규 버그 없음. `buildBrierTrend`는 이미 cycle 1999 review-code가
+잡은 "raw confidence 대신 resolveWinnerProb 사용" silent drift fix가 정상 반영됨
+(테스트로 회귀 방지 중, line 406). 유일하게 의심스러웠던 지점 — `buildConfidenceTiers`가
+동일 패턴처럼 `resolveWinnerProb` 아닌 raw `r.confidence`를 그대로 씀 — 은 조사 결과
+버그 아님: `packages/kbo-data/src/agents/judge-agent.ts` `runJudgeAgent`의 Sunday cap
+(`SUNDAY_CAP_CONFIDENCE`)이 `confidence` 필드만 낮추고 `homeWinProb`는 원본 유지하는
+의도된 설계(일요일 medium tier 오분류 방지) — tier 분류는 raw confidence가 맞고,
+Brier score류(정밀 calibration 측정)만 resolveWinnerProb 써야 함. 재조사 방지 위해
+`buildConfidenceTiers` 위에 clarifying comment 추가(커밋 `7da64ac3`).
+
+`pnpm --filter moneyball test`: 447 files/3891 tests green (회귀 없음). 코드 로직
+변경 없음(comment only) — PR/branch 미생성, main 직접 push 없이 커밋만(batch 배포
+패턴 유지).
+
+**다음 review-code(heavy) 후보**: `apps/moneyball/src/app/page.tsx`(1081줄, 홈페이지,
+최근 감사 이력 없음) 또는 `ScoringRuleDayHeatmap.tsx`/`buildScoringRuleWeekHeatmap`
+(wave-255/256 registry 정합 재확인).
+
 ## 🟢 explore-idea(heavy) — MLB Brier Score 추이 차트 parity (cycle 2186, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
