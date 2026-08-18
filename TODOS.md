@@ -1,5 +1,22 @@
 # TODOS
 
+## ✅ lotto(lite) — 1237회 OOS 검증 + 1238회 count_smoke (cycle 2175, 2026-08-18)
+
+trigger 6 (마지막 lotto 발화 cycle 2145 → 30-cycle gap 도달) + trigger 3 (직전 1237회
+추첨 2026-08-15 이후 OOS 검증 박제 부재, `2026-08-15-result.md` 빈 파일) 동시 충족.
+
+`pnpm tsx scripts/lotto.ts count` 재실행 — 1237회차 캐시 확인, 256규칙 유효조합
+7,705,415/8,145,060 (제거 5.40%) 변화 없음. 1237회 당첨번호(10 20 23 34 37 40 +보너스36)
+대 cycle 2041 생성 50세트 매칭: 0개 8건 / 1개 28건 / 2개 13건 / **3개 일치 1건**
+(31번 세트 `10 34 38 39 40 41`, 5등 수준) / 4개+ 0건. 무작위 기댓값(3개+ 일치 ≈1.87%)
+수준 — 256규칙 필터 우위 증거 없음, 기존 결론 유지 (OOS 누적 N=10→11).
+
+1238회(2026-08-22) 50세트는 이미 cycle 2145 가 박제 완료(`2026-08-22-50sets.md`) —
+신규 픽 생성 불필요. `2026-08-15-result.md` 작성으로 OOS 검증 공백 해소.
+
+execution.results 5 field: count_smoke=OK(98.6s) / valid_delta=0(규칙 변경 없음) /
+new_rules=0 / pick_sample=기존 재사용(신규 생성 X) / self_verify=OK(매칭 분포 위 표).
+
 ## ✅ fix-incident(lite) — carry-over 재검증 + 전체 헬스체크, 신규 incident 0건 (cycle 2174, 2026-08-18)
 
 cycle 2140 fix-incident retro 가 남긴 후속 후보("헤더 nav label 자체가 여전히 한국어
