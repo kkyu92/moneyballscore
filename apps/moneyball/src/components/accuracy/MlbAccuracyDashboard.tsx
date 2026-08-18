@@ -1,10 +1,11 @@
 import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
-import type { Bucket, ConfidenceTier, WinnerProbBucket, RollingAccuracyPoint, BrierTrendPoint } from '@/lib/accuracy/buildAccuracyData';
+import type { Bucket, ConfidenceTier, WinnerProbBucket, RollingAccuracyPoint, BrierTrendPoint, ScoringRuleDayCell } from '@/lib/accuracy/buildAccuracyData';
 import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
 import { WinnerProbBucketChart } from '@/components/dashboard/WinnerProbBucketChart';
 import { RollingAccuracyChart } from '@/components/dashboard/RollingAccuracyChart';
 import { BrierTrendChart } from '@/components/dashboard/BrierTrendChart';
+import { ScoringRuleDayHeatmap } from '@/components/dashboard/ScoringRuleDayHeatmap';
 
 // KBO /accuracy 페이지의 CalibrationChart/StatCard 를 그대로 옮겨오지 않고 MLB 전용으로
 // 독립 작성 (wave-626, MVP scope — rolling accuracy/brier trend/요일별 등 나머지 섹션은
@@ -44,6 +45,8 @@ interface Strings {
   rollingDesc: string;
   brierTrendTitle: string;
   brierTrendDesc: string;
+  scoringRuleDayTitle: string;
+  scoringRuleDayDesc: string;
   teamTitle: string;
   teamDesc: string;
   teamHeader: string;
@@ -75,6 +78,8 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     rollingDesc: `각 날짜의 직전 ${ROLLING_ACCURACY_WINDOW_DAYS}일 평균 적중률입니다. 한두 경기 운에 흔들리지 않고 모델의 실제 추세를 보여줍니다. 50% 기준선보다 위에 있으면 모델이 동전 던지기보다 낫다는 뜻입니다.`,
     brierTrendTitle: 'Brier Score 추이',
     brierTrendDesc: '주차별 Brier score 변화입니다. 값이 낮을수록 AI 예측이 정확합니다.',
+    scoringRuleDayTitle: '요일별 적중률',
+    scoringRuleDayDesc: '요일별 적중률 매트릭스입니다. N<3 인 요일은 소표본으로 회색 처리됩니다.',
     teamTitle: '팀별 예측 성과',
     teamDesc: '경기 관련 팀 기준. 홈/원정 구분 없이 집계.',
     teamHeader: '팀',
@@ -104,6 +109,8 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     rollingDesc: `Average accuracy over the trailing ${ROLLING_ACCURACY_WINDOW_DAYS} days for each date. Smooths out single-game luck to show the model's real trend. Above the 50% baseline means the model beats a coin flip.`,
     brierTrendTitle: 'Brier Score Trend',
     brierTrendDesc: 'Weekly Brier score over time. Lower is more accurate.',
+    scoringRuleDayTitle: 'Accuracy by Day of Week',
+    scoringRuleDayDesc: 'Accuracy matrix by day of week. Days with N<3 are grayed out as small samples.',
     teamTitle: 'Team Prediction Performance',
     teamDesc: 'Counted for any team involved in the game, home or away.',
     teamHeader: 'Team',
@@ -212,6 +219,7 @@ export function MlbAccuracyDashboard({
   winnerProbBuckets,
   rollingAccuracy,
   brierTrend,
+  scoringRuleDayHeatmap,
   teamRows,
 }: {
   locale: 'ko' | 'en';
@@ -225,6 +233,7 @@ export function MlbAccuracyDashboard({
   winnerProbBuckets: WinnerProbBucket[];
   rollingAccuracy: RollingAccuracyPoint[];
   brierTrend: BrierTrendPoint[];
+  scoringRuleDayHeatmap: ScoringRuleDayCell[];
   teamRows: MlbTeamAccuracyRow[];
 }) {
   const s = STRINGS[locale];
@@ -295,6 +304,16 @@ export function MlbAccuracyDashboard({
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.brierTrendDesc}</p>
           </div>
           <BrierTrendChart data={brierTrend} />
+        </section>
+      )}
+
+      {scoringRuleDayHeatmap.some((c) => c.n > 0) && verifiedN >= 10 && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">{s.scoringRuleDayTitle}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.scoringRuleDayDesc}</p>
+          </div>
+          <ScoringRuleDayHeatmap data={scoringRuleDayHeatmap} />
         </section>
       )}
 

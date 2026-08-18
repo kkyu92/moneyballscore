@@ -55,6 +55,7 @@ export default async function MlbAccuracyPage() {
         winnerProbBuckets={summary.winnerProbBuckets}
         rollingAccuracy={summary.rollingAccuracy}
         brierTrend={summary.brierTrend}
+        scoringRuleDayHeatmap={summary.scoringRuleDayHeatmap}
         teamRows={teamRows}
       />
 

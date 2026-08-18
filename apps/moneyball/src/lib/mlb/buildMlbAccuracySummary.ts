@@ -7,6 +7,7 @@ import {
   type WinnerProbBucket,
   type RollingAccuracyPoint,
   type BrierTrendPoint,
+  type ScoringRuleDayCell,
   bucketize,
   brierScore,
   calibrationGap,
@@ -14,6 +15,7 @@ import {
   buildWinnerProbBuckets,
   buildRollingAccuracy,
   buildBrierTrend,
+  buildScoringRuleDayHeatmap,
 } from '@/lib/accuracy/buildAccuracyData';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
@@ -28,6 +30,7 @@ export interface MlbAccuracySummary {
   winnerProbBuckets: WinnerProbBucket[];
   rollingAccuracy: RollingAccuracyPoint[];
   brierTrend: BrierTrendPoint[];
+  scoringRuleDayHeatmap: ScoringRuleDayCell[];
 }
 
 interface ScheduleFinalRow {
@@ -53,6 +56,7 @@ const EMPTY_SUMMARY: MlbAccuracySummary = {
   winnerProbBuckets: [],
   rollingAccuracy: [],
   brierTrend: [],
+  scoringRuleDayHeatmap: [],
 };
 
 // KBO `predictions.is_correct`/`confidence` 는 DB row 에 이미 채워져 buildAccuracyData
@@ -121,5 +125,6 @@ export async function buildMlbAccuracySummary(locale: 'ko' | 'en' = 'ko'): Promi
     winnerProbBuckets: buildWinnerProbBuckets(rows),
     rollingAccuracy: buildRollingAccuracy(rows),
     brierTrend: buildBrierTrend(rows),
+    scoringRuleDayHeatmap: buildScoringRuleDayHeatmap(rows),
   };
 }
