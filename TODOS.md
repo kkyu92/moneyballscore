@@ -1,5 +1,37 @@
 # TODOS
 
+## ✅ explore-idea(heavy, scoped) — MLB 팀 프로필 타구 프로파일 배지 추가 (cycle 2157, 2026-08-18)
+
+review-code(heavy) monolith 감사 시리즈 소진(analysis/accuracy/home/analysis-game-id
+4개 전부 완료, cycle 2154/2155 retro 명시) + fix-incident 트리거 미충족(CI/deploy
+전부 green, open issue 0, i18n sweep 직접 재검증 결과 신규 gap 0) + explore-idea
+saturation 11/15(<12) 로 진단 결과 explore-idea 자연 선택. TODOS 상단 "다음 X 후보"
+포인터 4건은 cycle 2152가 이미 전부 stale(닫힘) 확인한 전례가 있어 재신뢰하지 않고,
+Explore agent 로 신규 후보를 처음부터 재탐색.
+
+`mlb_team_stats`(migration 044)가 FanGraphs 스크랩으로 pull_pct/cent_pct/oppo_pct/
+gb_pct/fb_pct/hard_hit_pct 등을 매일 채우지만, 유일한 소비 경로(`mlb-pipeline.ts`
+`runPredictFinal`)가 woba/fip/xfip/war/xwoba/barrel_pct 만 select — 이 6개 컬럼은
+스크래핑만 되고 어디에도 렌더되지 않던 dead data(전체 repo grep 확인). `/mlb/team/
+[code]`(KO/EN)에 "타구 프로파일" 섹션으로 신규 노출.
+
+**스케일 버그 회피(코드 작성 중 발견)**: `fangraphs-mlb.ts`가 이 컬럼들을 이미
+0~100 스케일로 저장(`* 100`)하는데, 페이지 기존 `fmtPct()`는 0~1 fraction 가정
+(`Math.round(v*100)`) — 그대로 쓰면 렌더값이 100배 부풀려짐. 신규 `fmtRawPct()`
+헬퍼로 회피. **부가 발견(수정 안 함, 후속 review-code 후보)**: 기존
+`factorAverages.lineupBarrelPct`(predictions.home/away_lineup_barrel_pct 평균)도
+Savant 스크레이퍼가 동일 0~100 스케일로 저장 — 현재 페이지가 이 값에도 `fmtPct()`를
+쓰고 있어 동일 클래스의 표시 버그일 가능성 있음(직접 검증 안 함, 스코프 밖).
+
+buildMlbTeamProfile.ts에 team_code(canonical, mlb_team_stats 저장 컨벤션과 직접
+매칭이라 mlb_schedule 과 달리 StatsAPI alias 정규화 불필요 확인) + 현재 연도 기준
+단건 조회 추가, 신규 테스트 3건(매핑/null/error). lint/type-check/vitest(445 files/
+3870 tests, +3 신규) 전부 clean. main 직접 commit+push(ad97c50b), CI green 실측
+확인(사례 15/18 mitigation 준수).
+
+다음 fire 후보: 위 "부가 발견"(lineupBarrelPct 스케일 검증) 을 review-code 후보로
+남김, 또는 explore-idea saturation 12/15 도달 시 review-code/fix-incident 자연 전환.
+
 ## ✅ review-code(heavy) — analysis/game/[id]/page.tsx postview 사후분석 LLM 실패 fallback dev jargon leak 수정 (cycle 2155, 2026-08-18)
 
 explore-idea 후보(MLB judge-reasoning/postview parity)는 background agent 확인 결과
