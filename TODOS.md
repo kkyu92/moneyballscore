@@ -1,5 +1,27 @@
 # TODOS
 
+## 🟢 operational-analysis(lite) — v1.8 CE/비CE cohort 재측정 (cycle 2191, 2026-08-18)
+
+no forced trigger (open issue 0, approved plan 0, 2-chain lock 없음 —
+직전 8사이클 distinct=4). cycle 2190 explicit reco (explore-idea 또는
+operational-analysis) 중 operational-analysis 선택 — explore-idea 후보
+parity gap (CalibrationChart/RollingAccuracyChart 는 이미 MLB 포팅 완료
+확인, TeamBiasTable/CohortComparisonHeatmap 은 MLB 실시간 standings
+데이터 소스 부재로 1 cycle 범위 밖) vs op-analysis 는 기존
+`scripts/op-analysis-ce-cohort.ts` harness 로 즉시 실행 가능 + 마지막
+발화 cycle 2178 (13 cycle gap, 아직 25-gap trigger 미달이나 "주기적
+갱신 필요" 라는 cycle 2190 own note 반영).
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 결과: 전체 n=316 (CE n=269 /
+비CE n=47, cycle 2146 n=311 대비 +5, 비CE 45일째 완전 동결 — 마지막
+비CE 예측 2026-07-01). CE 53.9%(145/269) vs 비CE 63.8%(30/47) → 격차
+9.9pp (cycle 2146 9.7pp 대비 미세 확대, 3-cycle window 9.7~10.7pp 안정
+범위). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → LLM
+부가가치 우세 방향 3회 연속 재확인. 결론/방향 변화 없음 — 신규 코드
+변경 X, `CLAUDE.md` 예측 엔진 가중치 섹션 cycle 2191 항목만 append.
+CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행) — 재분리 검증은
+여전히 사용자 결정 대기.
+
 ## 🟢 review-code(heavy) — predictions/[date]/page.tsx 감사, 취소경기 적중률 불일치 fix (cycle 2190, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
