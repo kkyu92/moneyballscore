@@ -1,5 +1,26 @@
 # TODOS
 
+## ✅ fix-incident(heavy) — ShareButtons EN i18n 누락 수정 (wave-631, cycle 2147, 2026-08-18)
+
+wave 627~630(헤더 nav/SearchForm/Footer/CookieConsent/ThemeToggle) i18n sweep 종료
+판단(cycle 2144) 이후 본 cycle 진단 단계에서 별도 컴포넌트 계열 재점검 —
+`ShareButtons` 는 `en/mlb/games/[date]/[slug]`, `en/mlb/matchup/[teamA]/[teamB]`
+두 EN page.tsx 가 렌더하지만 isEn prop 자체가 부재해 "공유"/"공유하기"/
+"Twitter에 공유"/"Facebook에 공유"/"링크 복사"/"복사됨!"/"공유 실패" 가
+EN 방문자에게 그대로 노출되던 gap 발견. 동일 drift family 6번째 컴포넌트.
+
+isEn?: boolean(default false) prop 추가 + 두 EN 콜사이트 배선. KO page.tsx
+(analysis/game, matchup, mlb/games, mlb/matchup, predictions, reviews/*)
+6곳은 isEn 미전달 → 기존 KO 동작 그대로. 테스트 신규 1파일 4 assertion.
+lint/tsc/vitest(443 files/3858 tests) 전부 clean. main 직접 commit+push (R4),
+커밋 9a87fa01.
+
+nav i18n sweep 은 layout.tsx 직계 자식(CookieConsent/ThemeToggle/Footer/
+Header/SearchForm) 범위로 종료 판단했으나 `share/` 계열처럼 페이지 레벨에서
+개별 import 되는 공용 컴포넌트는 별도 grep 이 필요했던 사례 — 다음 review-code
+후보: `RelatedLinks`/`EmptyState` 외 EN 라우트에서 쓰이는 공용 컴포넌트 전수
+isEn grep (본 cycle 확인 결과 이 둘은 이미 isEn 무관 = 텍스트 없음, 통과).
+
 ## ✅ review-code(heavy) — CookieConsent/ThemeToggle EN i18n 누락 수정 (wave-630, cycle 2144, 2026-08-18)
 
 cycle 2143 fix-incident(heavy) Footer 수정 후속 후보("layout.tsx 직계 자식
