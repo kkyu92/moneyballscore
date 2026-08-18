@@ -257,6 +257,10 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
         gb_pct: 45.0,
         fb_pct: 35.0,
         hard_hit_pct: 38.7,
+        ld_pct: 21.2,
+        iffb_pct: 9.8,
+        hr_fb_pct: 12.3,
+        launch_angle: 11.4,
       },
     });
     const { buildMlbTeamProfile } = await import('../buildMlbTeamProfile');
@@ -268,6 +272,10 @@ describe('buildMlbTeamProfile — silent drift family `.error` 미체크 회귀 
       gbPct: 45.0,
       fbPct: 35.0,
       hardHitPct: 38.7,
+      ldPct: 21.2,
+      iffbPct: 9.8,
+      hrFbPct: 12.3,
+      launchAngle: 11.4,
     });
   });
 

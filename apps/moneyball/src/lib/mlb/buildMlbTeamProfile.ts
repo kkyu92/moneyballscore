@@ -58,6 +58,10 @@ export interface MlbBattedBallProfile {
   gbPct: number | null;
   fbPct: number | null;
   hardHitPct: number | null;
+  ldPct: number | null;
+  iffbPct: number | null;
+  hrFbPct: number | null;
+  launchAngle: number | null;
 }
 
 export interface MlbTeamProfile {
@@ -125,6 +129,10 @@ interface BattedBallStatsRow {
   gb_pct: number | null;
   fb_pct: number | null;
   hard_hit_pct: number | null;
+  ld_pct: number | null;
+  iffb_pct: number | null;
+  hr_fb_pct: number | null;
+  launch_angle: number | null;
 }
 
 function safeAvg(sum: number, n: number): number | null {
@@ -191,7 +199,7 @@ export async function buildMlbTeamProfile(
   const season = new Date().getFullYear();
   const statsResult = await supabase
     .from('mlb_team_stats')
-    .select('pull_pct, cent_pct, oppo_pct, gb_pct, fb_pct, hard_hit_pct')
+    .select('pull_pct, cent_pct, oppo_pct, gb_pct, fb_pct, hard_hit_pct, ld_pct, iffb_pct, hr_fb_pct, launch_angle')
     .eq('team_code', teamCode)
     .eq('season', season)
     .maybeSingle();
@@ -205,6 +213,10 @@ export async function buildMlbTeamProfile(
         gbPct: battedBall.gb_pct,
         fbPct: battedBall.fb_pct,
         hardHitPct: battedBall.hard_hit_pct,
+        ldPct: battedBall.ld_pct,
+        iffbPct: battedBall.iffb_pct,
+        hrFbPct: battedBall.hr_fb_pct,
+        launchAngle: battedBall.launch_angle,
       }
     : null;
 

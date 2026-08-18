@@ -56,6 +56,9 @@ function fmtElo(v: number | null): string {
 function fmtRawPct(v: number | null): string {
   return v != null ? `${v.toFixed(1)}%` : "-";
 }
+function fmtDegree(v: number | null): string {
+  return v != null ? `${v.toFixed(1)}°` : "-";
+}
 
 export function generateStaticParams() {
   return MLB_TEAMS_PRE_RENDER.map((code) => ({ code }));
@@ -314,6 +317,22 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Hard-Hit%</p>
               <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.hardHitPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">LD%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.ldPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">IFFB%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.iffbPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">HR/FB%</p>
+              <p className="font-mono font-semibold mt-1">{fmtRawPct(profile.battedBallProfile.hrFbPct)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Avg Launch Angle</p>
+              <p className="font-mono font-semibold mt-1">{fmtDegree(profile.battedBallProfile.launchAngle)}</p>
             </div>
           </div>
         </section>
