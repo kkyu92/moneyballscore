@@ -1,5 +1,29 @@
 # TODOS
 
+## ✅ review-code(heavy) — home page.tsx (1081줄) 감사, 버그 미발견 (cycle 2154, 2026-08-18)
+
+review-code(heavy) monolith 감사 시리즈 3번째 (analysis/page.tsx cycle 2149,
+accuracy/page.tsx cycle 2150 에 이어 home page.tsx). fix-incident/explore-idea
+trigger 미충족(CI clean, open issue 0, saturation 10/15 <12) 이라 review-code
+heavy 자연 선택.
+
+전체 1081줄 read — Elo 승률 공식(`1/(1+10^((away-home-HOME_ELO_BONUS)/ELO_DIVIDER))`)
+analysis-data.ts/mlb-elo.ts 와 동일 확인, `??` null-guard 전수(0 값 falsy 오판 없음 —
+wave-521 WAR=0 sentinel 류 버그 부재), MIN_POLL_TOTAL/COMMUNITY_DIVERGE_MIN/
+TOP_STAT_PICK_EDGE_MIN 전부 `@moneyball/shared` import(로컬 하드코딩 없음), CE
+fallback 경로(`debate_fallback_quant`) 도 `buildFinalReasoning` 이
+`reasoning.homeWinProb` 항상 채우는 걸 daily.ts 코드로 직접 확인해 안전 판정.
+
+`packages/shared/src/index.ts:2149` 주석의 "(local copy, no import)" 문구가
+wave-305 fix 이후 stale 해 보였으나, 리포 전역 ~15개 유사 블록이 전부 "발견 당시
+상태" 를 기록하는 historical wave-documentation 컨벤션 — 단독 정정은 컨벤션
+불일치라 보류.
+
+**결론: 코드 변경 0.** 정직한 clean-audit (버그 없으면 억지로 안 만듦, CLAUDE.md
+불필요 리팩토링 금지 원칙). outcome=partial. 다음 fire 후보 = explore-idea
+(monolith 감사 시리즈 소진, small-fix saturation 곧 12 도달 예상) 또는
+fix-incident (CI/이슈 계속 clean 이면 skip).
+
 ## ✅ review-code(lite) — stale "다음 fire 후보" 포인터 4건 재확인, 전부 이미 닫힘 (cycle 2152, 2026-08-18)
 
 open hub-dispatch issue 0건, approved plan 0건 (plan #25 는 phase3_gate_not_passed 로
