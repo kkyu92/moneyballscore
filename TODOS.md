@@ -1,5 +1,36 @@
 # TODOS
 
+## ✅ review-code(heavy) — analysis/game/[id]/page.tsx postview 사후분석 LLM 실패 fallback dev jargon leak 수정 (cycle 2155, 2026-08-18)
+
+explore-idea 후보(MLB judge-reasoning/postview parity)는 background agent 확인 결과
+MLB pipeline 이 debate/postview LLM 스텝 자체를 아예 안 돌려(reasoning/debate_version
+컬럼 항상 NULL) — 전면 신규 백엔드(LLM judge/postview agent) 필요한 large 스코프라
+1 cycle 안 못 담고, CREDIT_EXHAUSTED 로 LLM debate 100% fallback 인 현재 신규 착수
+가치도 낮음(정직한 스코프 판정, 착수 안 함).
+
+대신 리포에 남은 4번째 monolith(analysis/game/[id]/page.tsx, 819줄, 이전 감사에서
+tangential 하게만 다뤄짐)를 review-code(heavy)로 정독 — CREDIT_EXHAUSTED fallback
+경로와 직결된 실제 버그 1건 발견.
+
+`judgeReasoning.ts` 는 pre_game(`debate.ts` "에이전트 토론 불가...") + post_game
+(`postview.ts` "사후 분석 LLM 실패...") 양쪽 fallback 문구를 `FALLBACK_PREFIXES`에
+등록해두고 `presentJudgeReasoningWithFallback()` 로 사용자 안전 텍스트(`FALLBACK_USER_TEXT`)
+스왑하는 헬퍼를 제공하는데, 실제 콜사이트 6곳(page.tsx/predictions/insights/loader/series)
+전부 pre_game verdict.reasoning 경로만 이 헬퍼를 쓰고 post_game judgeReasoning 경로
+(`analysis/game/[id]/page.tsx` → `PostviewPanel`)는 raw 값을 그대로 넘기고 있었음 —
+헬퍼 도입 시 절반만 적용된 silent drift. postview LLM 호출(Anthropic API, CREDIT_EXHAUSTED
+와 동일 실패 원인) 실패 시 "사후 분석 LLM 실패. factor 편향 기반 자동 fallback." 원문이
+"AI 심판 종합 분석" 섹션에 그대로 노출 — CLAUDE.md/메모리 `feedback_ui_copy_no_dev_jargon`
+룰 위반이자 그 파일 자체 헤더 주석이 명시적으로 경고하던 시나리오.
+
+`postviewJudgeReasoning = presentJudgeReasoningWithFallback(postReasoning?.judgeReasoning)`
+계산 후 `PostviewPanel`에 `.text ?? ''` 전달로 수정. 신규 회귀 테스트 1건(source-grep,
+기존 wave-* 컨벤션 정합). lint/tsc/vitest(444 files/3865 tests) 전부 clean. main 직접
+commit+push(8ae3f1e1), CI green 실측 확인(사례 15/18 mitigation 준수).
+
+다음 fire 후보: explore-idea saturation trigger 11/15(<12, 곧 도달 예상) 또는
+fix-incident(CI/이슈 계속 clean 이면 skip).
+
 ## ✅ review-code(heavy) — home page.tsx (1081줄) 감사, 버그 미발견 (cycle 2154, 2026-08-18)
 
 review-code(heavy) monolith 감사 시리즈 3번째 (analysis/page.tsx cycle 2149,
