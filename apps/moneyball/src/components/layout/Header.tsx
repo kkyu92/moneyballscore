@@ -117,6 +117,7 @@ const MLB_NAV: NavItem[] = [
       { href: "/mlb/accuracy", label: "적중 기록", enLabel: "Accuracy Track Record", description: "AI 예측 성과 트래킹", enDescription: "AI prediction performance tracking", icon: "target" },
       { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, enLabel: `${MLB_FACTOR_COUNTS.total} Factors`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, enDescription: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} weights`, icon: "file-text" },
+      { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar", description: "날짜별 경기·예측 한눈에 보기", enDescription: "Games & predictions by date", icon: "calendar" },
     ],
   },
   {
