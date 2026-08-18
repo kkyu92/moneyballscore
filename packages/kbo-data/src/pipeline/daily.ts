@@ -458,11 +458,21 @@ export async function runDailyPipeline(
       // 명시 메시지 ("오늘 검증할 예측 결과가 없습니다") 박제로 사용자 알림 누락
       // 차단. 직전 length>0 가드 silent skip 회피 (운영 silent drift family).
       await notifyResults(targetDate, verifyResults);
-      // verifyResults.length === 0 이어도 flag 는 설정 — 재실행 차단이 목적.
-      await markNotificationFlag(db, targetDate, 'results_sent', {
-        results_sent_at: new Date().toISOString(),
-        results_count: verifyResults.length,
-      });
+      // 사례 32 fix (cycle 2179): verifyResults=0 인데 그날 게임 중 하나라도
+      // final/postponed 로 안 넘어갔으면(KBO 상태 지연/미반영) flag 영구 세우지
+      // 않음 — 다음 날 재실행 허용. 전부 종결(final/postponed) 이거나
+      // verifyResults>0 일 때만 영구 lock (기존 "재실행 차단" 의도 유지).
+      // 미가드 시: 게임이 그날 final 로 안 넘어온 상태에서 한 번 돌면 해당
+      // 날짜가 영구 봉인 — 이후 실제로 final 전환돼도 다시 안 봄 (사례 32).
+      const allGamesTerminal = games.every(
+        (g) => g.status === 'final' || g.status === 'postponed',
+      );
+      if (verifyResults.length > 0 || allGamesTerminal) {
+        await markNotificationFlag(db, targetDate, 'results_sent', {
+          results_sent_at: new Date().toISOString(),
+          results_count: verifyResults.length,
+        });
+      }
     } catch (e) {
       console.error('[Pipeline] notifyResults failed:', errMsg(e));
       Sentry.captureException(e, {

@@ -917,6 +917,47 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       );
       expect(runLog).toBeDefined();
     });
+
+    it('사례 32: verifyResults=0 + 게임 status=scheduled(미종결) → results_sent flag 세우지 않음 (재시도 허용)', async () => {
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      // KBO 상태가 아직 final/postponed 로 안 넘어온 케이스 (예: 폭염 취소
+      // 결정 지연 반영) — games.selectData 빈 배열이라 getVerifyResults 도
+      // 0건. status='scheduled' 는 fetchGames mock 이 결정.
+      vi.mocked(fetchGames).mockResolvedValue([makeGame({ status: 'scheduled' })]);
+
+      const { runDailyPipeline } = await loadPipeline();
+      await runDailyPipeline('2026-04-22', 'verify', 'cron');
+
+      expect(vi.mocked(notifyResults)).toHaveBeenCalledOnce();
+      const flagWrite = mock._calls.find(
+        (c) => c.table === 'daily_notifications'
+          && (c.operations.includes('insert') || c.operations.includes('update')),
+      );
+      expect(flagWrite).toBeUndefined();
+    });
+
+    it('verifyResults=0 이지만 게임 전부 종결(final) → results_sent flag 정상 세움', async () => {
+      const tables = baseTables();
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      // 종결된 게임인데 매칭 prediction 이 없어 verifyResults=0 인 케이스
+      // (예: 예측 미생성) — 이땐 재시도 무의미하므로 flag 정상 lock.
+      vi.mocked(fetchGames).mockResolvedValue([makeGame({ status: 'final' })]);
+
+      const { runDailyPipeline } = await loadPipeline();
+      await runDailyPipeline('2026-04-22', 'verify', 'cron');
+
+      expect(vi.mocked(notifyResults)).toHaveBeenCalledOnce();
+      const flagWrite = mock._calls.find(
+        (c) => c.table === 'daily_notifications'
+          && (c.operations.includes('insert') || c.operations.includes('update')),
+      );
+      expect(flagWrite).toBeDefined();
+    });
   });
 
   describe('notifyPipelineStatus 조건부 발화', () => {
