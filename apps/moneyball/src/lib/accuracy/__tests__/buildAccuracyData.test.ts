@@ -17,6 +17,7 @@ import {
   buildWinnerProbBuckets,
   bucketize,
   calibrationGap,
+  isConfidenceTierInverted,
   SCORING_RULE_HEATMAP_ROWS,
 } from '../buildAccuracyData';
 
@@ -223,6 +224,37 @@ describe('buildConfidenceTiers', () => {
     expect(result[0].accuracy).toBe(1);
     expect(result[1].accuracy).toBe(0);
     expect(result[1].accuracy!).toBeLessThan(result[0].accuracy!);
+  });
+});
+
+describe('isConfidenceTierInverted', () => {
+  it('충분한 표본 + 역전 → true', () => {
+    const low = { accuracy: 0.8, n: 10 };
+    const mid = { accuracy: 0.2, n: 5 };
+    expect(isConfidenceTierInverted(low, mid)).toBe(true);
+  });
+
+  it('mid 표본 부족(n<3) → 역전이어도 false (소표본 노이즈 차단)', () => {
+    const low = { accuracy: 0.8, n: 10 };
+    const mid = { accuracy: 0, n: 1 };
+    expect(isConfidenceTierInverted(low, mid)).toBe(false);
+  });
+
+  it('low 표본 부족(n<5) → 역전이어도 false', () => {
+    const low = { accuracy: 0.8, n: 4 };
+    const mid = { accuracy: 0.2, n: 5 };
+    expect(isConfidenceTierInverted(low, mid)).toBe(false);
+  });
+
+  it('역전 아님 (mid >= low) → false', () => {
+    const low = { accuracy: 0.5, n: 10 };
+    const mid = { accuracy: 0.6, n: 10 };
+    expect(isConfidenceTierInverted(low, mid)).toBe(false);
+  });
+
+  it('accuracy null (표본 0) → false', () => {
+    expect(isConfidenceTierInverted({ accuracy: null, n: 0 }, { accuracy: 0.5, n: 10 })).toBe(false);
+    expect(isConfidenceTierInverted({ accuracy: 0.5, n: 10 }, { accuracy: null, n: 0 })).toBe(false);
   });
 });
 

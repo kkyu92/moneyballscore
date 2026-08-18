@@ -597,6 +597,25 @@ export function buildConfidenceTiers(rows: PredRow[], locale: 'ko' | 'en' = 'ko'
   });
 }
 
+const CONFIDENCE_INVERSION_LOW_MIN_N = 5;
+const CONFIDENCE_INVERSION_MID_MIN_N = 3;
+
+// 소표본 노이즈 방지 (CLAUDE.md '데이터로만 이야기') — 페이지 안 카드 배지 /
+// 요약 문구 양쪽이 동일 가드로 판정하도록 단일 source. n floor 미달이면
+// accuracy 역전이어도 미달 취급.
+export function isConfidenceTierInverted(
+  low: Pick<ConfidenceTier, 'accuracy' | 'n'>,
+  mid: Pick<ConfidenceTier, 'accuracy' | 'n'>,
+): boolean {
+  return (
+    low.accuracy !== null &&
+    mid.accuracy !== null &&
+    low.n >= CONFIDENCE_INVERSION_LOW_MIN_N &&
+    mid.n >= CONFIDENCE_INVERSION_MID_MIN_N &&
+    mid.accuracy < low.accuracy
+  );
+}
+
 export function buildRecentForm(rows: PredRow[], limit = 20): RecentForm {
   const recent = rows.slice(-limit);
   const dots = recent.map((r) => r.is_correct);

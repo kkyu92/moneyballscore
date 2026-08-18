@@ -1,5 +1,26 @@
 # TODOS
 
+## ✅ review-code(heavy) — accuracy/page.tsx 역전 패턴 배지 소표본 노이즈 가드 누락 수정 (cycle 2150, 2026-08-18)
+
+리포 2번째 monolith(`apps/moneyball/src/app/accuracy/page.tsx`, 1204줄, cycle
+2149 analysis/page.tsx 감사 후속) audit — `isInverted`("보통 확신" 역전 패턴 ⚠
+배지) 판정이 페이지 안 두 곳에 각각 다른 엄격도로 중복 구현되어 있었음.
+
+카드별 배지(라인 ~798)는 `mid.accuracy < low.accuracy` 만 확인하고 표본 수
+가드가 아예 없음 — 반면 바로 아래 요약 문구(라인 ~850)는 `low.n>=5 && mid.n>=3`
+가드를 갖고 있음. 결과: mid tier n=1(1경기 표본)에서 우연히 실패하면 카드에
+"역전 패턴 ⚠" 배지가 뜨지만, 그 아래 요약 문구는 표본 부족으로 안 뜨는 모순 UI —
+CLAUDE.md '데이터로만 이야기' 룰(소표본 노이즈로 결론 금지) 위반.
+
+`buildAccuracyData.ts`에 단일 source `isConfidenceTierInverted(low, mid)`
+헬퍼 신규(`CONFIDENCE_INVERSION_LOW_MIN_N=5`/`MID_MIN_N=3`, 기존 요약 문구
+임계값 그대로 승격) 추출 후 page.tsx 두 곳 모두 이걸로 교체 — 중복 로직 제거 +
+가드 통일. 신규 유닛 테스트 5건(역전 감지/low·mid 표본 부족 차단/비역전/null
+accuracy 방어).
+
+lint/type-check/vitest(443 files/3864 tests, +5 신규) 전부 clean. main 직접
+push, CI green 실측 확인(사례 15/18 mitigation 준수).
+
 ## ✅ review-code(heavy) — analysis/page.tsx WAR=0 sentinel 가드 누락 수정 (cycle 2149, 2026-08-18)
 
 2802줄 monolith(`apps/moneyball/src/app/analysis/page.tsx`, 리포 최대 파일)를

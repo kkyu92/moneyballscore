@@ -63,6 +63,7 @@ import {
   buildRollingAccuracy,
   buildWinnerProbBuckets,
   buildScoringRuleWeekHeatmap,
+  isConfidenceTierInverted,
 } from '@/lib/accuracy/buildAccuracyData';
 import { computeCommunityVsAI } from '@/lib/picks/buildCommunityAccuracy';
 import { buildFactorAccuracy, type FactorPredRow } from '@/lib/accuracy/buildFactorAccuracy';
@@ -796,10 +797,8 @@ export default async function AccuracyPage() {
               const pct = tier.accuracy !== null ? Math.round(tier.accuracy * 100) : null;
               const ciPct = tier.n > 0 ? Math.round(tier.ci95Half * 100) : null;
               const isInverted =
-                tier.accuracy !== null &&
-                confidenceTiers[0].accuracy !== null &&
                 tier.label === '보통 확신' &&
-                tier.accuracy < confidenceTiers[0].accuracy;
+                isConfidenceTierInverted(confidenceTiers[0], tier);
               return (
                 <div
                   key={tier.label}
@@ -846,8 +845,7 @@ export default async function AccuracyPage() {
           {(() => {
             const low = confidenceTiers[0];
             const mid = confidenceTiers[1];
-            const isInverted =
-              low.n >= 5 && mid.n >= 3 && mid.accuracy !== null && low.accuracy !== null && mid.accuracy < low.accuracy;
+            const isInverted = isConfidenceTierInverted(low, mid);
             return isInverted ? (
               <p className="text-xs text-warning bg-warning/15 rounded-lg px-3 py-2">
                 보통 확신 예측이 낮은 확신보다 적중률이 낮습니다. AI가 중간 구간에서 과보수하거나
