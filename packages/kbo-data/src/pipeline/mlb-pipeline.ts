@@ -31,8 +31,14 @@ import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
 } from './silent-drift-alert';
-import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode } from '@moneyball/shared';
+import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode, errMsg } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
+import {
+  generateMlbAgentMemories,
+  MLB_MEMORY_PREDICTION_COLUMNS,
+  type MlbPredictionRow,
+  type MlbScheduleRow,
+} from '../agents/mlb-retro';
 
 // mlb_predict_final 실측 데이터 fallback 기본값 — mlb_team_stats row 부재(스크래퍼 미가동/미커버 팀) 시에만 사용.
 // cycle 2057 이전엔 이 값들이 항상, 무조건 쓰였음 (모든 MLB 예측 home_win_prob 고정 0.556 — 사례 20).
@@ -453,7 +459,7 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
   // games!inner 조인은 KBO 전용 (game_id FK) — MLB 에 부적합 (silent drift family fix, cycle 1168).
   const { data: preds, error: pErr } = await db
     .from('predictions')
-    .select('external_game_id, home_win_prob')
+    .select(MLB_MEMORY_PREDICTION_COLUMNS)
     .eq('league', 'mlb')
     .eq('scoring_rule', MLB_SCORING_RULE)
     .eq('mlb_game_date', date);
@@ -463,7 +469,7 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
-  const predList = ((preds ?? []) as Array<{ external_game_id: string; home_win_prob: number }>);
+  const predList = ((preds ?? []) as unknown as MlbPredictionRow[]);
   if (predList.length === 0) {
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
@@ -471,7 +477,7 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
   const externalIds = predList.map((p) => p.external_game_id);
   const { data: schedules, error: sErr } = await db
     .from('mlb_schedule')
-    .select('external_game_id, home_score, away_score, status')
+    .select('external_game_id, home_team_code, away_team_code, home_score, away_score, status')
     .in('external_game_id', externalIds)
     .eq('status', 'final');
 
@@ -481,23 +487,20 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
   }
 
   const scheduleMap = new Map(
-    ((schedules ?? []) as Array<{ external_game_id: string; home_score: number; away_score: number; status: string }>).map((s) => [
-      s.external_game_id,
-      s,
-    ]),
+    ((schedules ?? []) as unknown as MlbScheduleRow[]).map((s) => [s.external_game_id, s]),
   );
 
   const finalRows = predList
     .filter((p) => scheduleMap.has(p.external_game_id))
-    .map((p) => ({ home_win_prob: p.home_win_prob, game: scheduleMap.get(p.external_game_id)! }));
+    .map((p) => ({ pred: p, schedule: scheduleMap.get(p.external_game_id)! }));
 
   if (finalRows.length === 0) {
     return { gamesFound: predList.length, rowsInserted: 0, errors };
   }
 
   const brierInputs: BrierInput[] = finalRows.map((r) => ({
-    predicted: r.home_win_prob,
-    actual: r.game.home_score > r.game.away_score ? 1 : 0,
+    predicted: r.pred.home_win_prob!,
+    actual: r.schedule.home_score! > r.schedule.away_score! ? 1 : 0,
   }));
 
   const brier = computeBrier(brierInputs);
@@ -513,6 +516,14 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
   if (bErr) {
     errors.push(`walk_forward_brier insert: ${bErr.message}`);
     return { gamesFound: finalRows.length, rowsInserted: 0, errors };
+  }
+
+  // agent_memories 학습 — Brier 측정과 동일 final-game 조인 결과 재사용 (신규 cron mode
+  // 없이 배선, cycle 2169). 실패해도 walk-forward 핵심 지표(Brier) 는 이미 기록 완료.
+  try {
+    await generateMlbAgentMemories(db, date, finalRows);
+  } catch (e) {
+    errors.push(`generateMlbAgentMemories: ${errMsg(e)}`);
   }
 
   return { gamesFound: finalRows.length, rowsInserted: 1, errors };

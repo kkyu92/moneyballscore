@@ -70,23 +70,37 @@ function safe(value: number, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+export type MlbFactorContributions = Record<Exclude<keyof typeof MLB_BASE_WEIGHTS, 'home_elo_bonus'>, number>;
+
+/**
+ * homeAdvantage 를 이루는 14개 term 을 개별 노출 (cycle 2169 explore-idea —
+ * MLB rivalry-memory parity 위해 "어느 팩터가 이 예측의 bias 를 이끌었나" 재구성
+ * 필요, computeMlbProbability 는 합산값만 반환해 재사용 불가 → 순수 추출 리팩터).
+ * computeMlbProbability 는 본 함수 합산 + home_elo_bonus 고정항으로 동일 결과 유지.
+ */
+export function computeMlbFactorContributions(input: MlbFactorInputs): MlbFactorContributions {
+  return {
+    sp_fip: -1 * MLB_BASE_WEIGHTS.sp_fip * (safe(input.sp_fip.home) - safe(input.sp_fip.away)),
+    sp_xfip: -1 * MLB_BASE_WEIGHTS.sp_xfip * (safe(input.sp_xfip.home) - safe(input.sp_xfip.away)),
+    lineup_woba: MLB_BASE_WEIGHTS.lineup_woba * (safe(input.lineup_woba.home) - safe(input.lineup_woba.away)) * 5,
+    bullpen_fip: -1 * MLB_BASE_WEIGHTS.bullpen_fip * (safe(input.bullpen_fip.home) - safe(input.bullpen_fip.away)),
+    recent_form: MLB_BASE_WEIGHTS.recent_form * (safe(input.recent_form.home) - safe(input.recent_form.away)) * 0.05,
+    war: MLB_BASE_WEIGHTS.war * (safe(input.war.home) - safe(input.war.away)) * 0.01,
+    head_to_head: MLB_BASE_WEIGHTS.head_to_head * (safe(input.head_to_head.homeWinRate, 0.5) - 0.5),
+    park_factor: MLB_BASE_WEIGHTS.park_factor * (safe(input.park_factor, 1.0) - 1.0),
+    elo: MLB_BASE_WEIGHTS.elo * ((safe(input.elo.home) + HOME_ELO_BONUS_VALUE - safe(input.elo.away)) / ELO_DIVIDER),
+    defense_sfr: MLB_BASE_WEIGHTS.defense_sfr * (safe(input.defense_sfr.home) - safe(input.defense_sfr.away)) * 0.01,
+    lineup_xwoba: MLB_BASE_WEIGHTS.lineup_xwoba * (safe(input.lineup_xwoba.home) - safe(input.lineup_xwoba.away)) * 5,
+    lineup_barrel_pct: MLB_BASE_WEIGHTS.lineup_barrel_pct * (safe(input.lineup_barrel_pct.home) - safe(input.lineup_barrel_pct.away)) * 0.01,
+    sp_xwoba_against: -1 * MLB_BASE_WEIGHTS.sp_xwoba_against * (safe(input.sp_xwoba_against.home) - safe(input.sp_xwoba_against.away)) * 5,
+    woba_std: MLB_BASE_WEIGHTS.woba_std * (safe(input.woba_std.home) - safe(input.woba_std.away)) * 5,
+  };
+}
+
 export function computeMlbProbability(input: MlbFactorInputs): number {
+  const contributions = computeMlbFactorContributions(input);
   const homeAdvantage =
-    -1 * MLB_BASE_WEIGHTS.sp_fip * (safe(input.sp_fip.home) - safe(input.sp_fip.away))
-    + -1 * MLB_BASE_WEIGHTS.sp_xfip * (safe(input.sp_xfip.home) - safe(input.sp_xfip.away))
-    + MLB_BASE_WEIGHTS.lineup_woba * (safe(input.lineup_woba.home) - safe(input.lineup_woba.away)) * 5
-    + -1 * MLB_BASE_WEIGHTS.bullpen_fip * (safe(input.bullpen_fip.home) - safe(input.bullpen_fip.away))
-    + MLB_BASE_WEIGHTS.recent_form * (safe(input.recent_form.home) - safe(input.recent_form.away)) * 0.05
-    + MLB_BASE_WEIGHTS.war * (safe(input.war.home) - safe(input.war.away)) * 0.01
-    + MLB_BASE_WEIGHTS.head_to_head * (safe(input.head_to_head.homeWinRate, 0.5) - 0.5)
-    + MLB_BASE_WEIGHTS.park_factor * (safe(input.park_factor, 1.0) - 1.0)
-    + MLB_BASE_WEIGHTS.elo * ((safe(input.elo.home) + HOME_ELO_BONUS_VALUE - safe(input.elo.away)) / ELO_DIVIDER)
-    + MLB_BASE_WEIGHTS.defense_sfr * (safe(input.defense_sfr.home) - safe(input.defense_sfr.away)) * 0.01
-    + MLB_BASE_WEIGHTS.lineup_xwoba * (safe(input.lineup_xwoba.home) - safe(input.lineup_xwoba.away)) * 5
-    + MLB_BASE_WEIGHTS.lineup_barrel_pct * (safe(input.lineup_barrel_pct.home) - safe(input.lineup_barrel_pct.away)) * 0.01
-    + -1 * MLB_BASE_WEIGHTS.sp_xwoba_against * (safe(input.sp_xwoba_against.home) - safe(input.sp_xwoba_against.away)) * 5
-    + MLB_BASE_WEIGHTS.woba_std * (safe(input.woba_std.home) - safe(input.woba_std.away)) * 5
-    + MLB_BASE_WEIGHTS.home_elo_bonus * 0.5;
+    Object.values(contributions).reduce((sum, v) => sum + v, 0) + MLB_BASE_WEIGHTS.home_elo_bonus * 0.5;
 
   if (!Number.isFinite(homeAdvantage)) return 0.5;
 

@@ -4,6 +4,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
 import { MlbGameOverview } from "@/components/predictions/MlbGameOverview";
 import { MlbHistoricalAnalogMatchup } from "@/components/predictions/MlbHistoricalAnalogMatchup";
+import { MlbRivalryMemorySurface } from "@/components/predictions/MlbRivalryMemorySurface";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
@@ -260,6 +261,13 @@ export default async function GameDetailEn({ params }: PageParams) {
         homeTeam={home}
         awayTeam={away}
         input={waterfallInput}
+        locale="en"
+      />
+
+      <MlbRivalryMemorySurface
+        homeTeam={home}
+        awayTeam={away}
+        asOfDate={date}
         locale="en"
       />
 

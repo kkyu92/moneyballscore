@@ -51,10 +51,11 @@ interface MemoryRow {
 }
 
 export async function fetchMatchupMemories(
-  homeTeam: TeamCode,
-  awayTeam: TeamCode,
+  homeTeam: string,
+  awayTeam: string,
   asOfDate: string,
   limit = RIVALRY_MEMORY_LIMIT,
+  league: "kbo" | "mlb" = "kbo",
 ): Promise<MatchupMemory[]> {
   try {
     const supabase = createMemoryClient();
@@ -62,6 +63,7 @@ export async function fetchMatchupMemories(
       .from("agent_memories")
       .select("team_code, content, confidence, valid_until")
       .eq("memory_type", "matchup")
+      .eq("league", league)
       .in("team_code", [homeTeam, awayTeam])
       .or(`valid_until.is.null,valid_until.gte.${asOfDate}`)
       .order("confidence", { ascending: false })

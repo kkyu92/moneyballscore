@@ -1,5 +1,46 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB rivalry-memory parity 신규 구현 (cycle 2169, 2026-08-18)
+
+cycle 2168 retro "review-code 또는 explore-idea free judgment" 따라 explore-idea 선택
+(review-code(heavy) 3연속 partial 버그 미발견 — diminishing return, cycle 2164 이후
+explore-idea 5 cycle 공백). KBO↔MLB parity 스윕(Feature-Drift Cycle) 지속 — 지난
+사이클들이 HistoricalAnalogMatchup/EN summary 는 이식했지만 `RivalryMemorySurface`
+(agent_memories 기반 라이벌리 메모리 카드)는 미검토 상태였음(cycle 2165 review-code
+가 "다음 explore-idea 가 가치 판단 시 고려 가능"으로 명시적 flag).
+
+**진단 과정에서 발견한 3개 설계 gap** (순수 재사용 불가, 신규 구현 필요했던 이유):
+1. MLB `predictions.is_correct` 는 항상 NULL(의도된 설계, deriveMlbOutcome.ts) —
+   KBO `generateAgentMemories` 는 `is_correct=false` 필터에 의존해 그대로 재사용 불가.
+2. MLB `predictions.factors` JSON 컬럼 자체가 없음 — discrete `home_sp_fip` 등
+   breakdown 컬럼만 저장(cycle 2065). 게다가 이 값들은 KBO factors JSON과 달리
+   0.5 중심 정규화 값이 아니라 raw stat — `buildMemoryForTeam`(NEUTRAL_FACTOR=0.5
+   가정)에 직접 넣으면 무의미한 숫자가 나옴.
+3. MLB 는 verify 모드 자체가 없음(mlb_walk_forward_measure 만 존재) — 신규 cron mode
+   추가는 Cloudflare Worker dispatch 설정도 손대야 해 스코프 밖.
+
+**해결**: `mlb-base.ts` 를 순수 리팩터(computeMlbFactorContributions 신규 export,
+computeMlbProbability 는 동일 결과 유지 — 기존 테스트로 회귀 확인)해 14개 factor
+term 을 개별 노출. 신규 `agents/mlb-retro.ts::generateMlbAgentMemories` 가 persisted
+breakdown 컬럼으로 contribution 재구성(park_factor 는 MLB_TEAMS 실측 재계산) →
+NEUTRAL_FACTOR 중심으로 shift 해 `buildMemoryForTeam` 그대로 재사용. elo/recent_form/
+head_to_head/defense_sfr/sp_xwoba_against/woba_std 는 placeholder-neutral이라 후보에서
+명시적 제외(elo 는 HOME_ELO_BONUS 고정항 때문에 "항상 같은 가짜 신호"가 될 위험이 있어
+별도 제외 처리). 신규 cron 배선 없이 `mlb_walk_forward_measure`(이미 final-game 조인 보유)
+안에 얹어 호출.
+
+프론트: `RivalryMemorySurface.tsx` 에 `league` param 추가(default 'kbo', 하위 호환)
++ 신규 `MlbRivalryMemorySurface.tsx`(ko/en locale) → MLB game detail 페이지 ko/en
+양쪽에 `MlbHistoricalAnalogMatchup` 앞에 배선(KBO 순서 3a→3b 그대로).
+
+**검증**: kbo-data 신규 6 test(mlb-retro) + 기존 mlb-base/mlb-pipeline 전체 회귀
+그린, moneyball 3879 tests 유지, `pnpm run type-check`/`lint` 모노레포 전체 clean.
+현재 agent_memories 에 MLB row 0건(신규 기능이라 당연) — 다음 MLB 오답 경기 발생 시
+walk-forward 크론이 자동 채움, 렌더 즉시 확인은 불가(경기 결과 대기 필요).
+
+**다음 fire 후보**: review-code(heavy) 또는 다른 explore-idea (2-chain lock 없음,
+직전 8사이클 distinct=5 유지 중).
+
 ## 📊 operational-analysis(lite) — CE cohort n=311 정체 원인 규명, 실제 incident 아님 (cycle 2168, 2026-08-18)
 
 open issue/승인 plan 0건 + review-code 11/20(55%) dominance + 3연속 partial(2163/2165/2166)
