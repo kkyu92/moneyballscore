@@ -116,14 +116,14 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
       {topPick && (
         <a
           href={`#pick-${topPick.external_game_id}`}
-          className="inline-flex items-center gap-2 rounded-md border border-brand-400 dark:border-brand-600 bg-brand-50 dark:bg-brand-950/50 px-3 py-1.5 text-sm text-brand-700 dark:text-brand-200 hover:border-brand-500 transition-colors"
+          className="inline-flex items-center gap-2 rounded-md border border-brand-400 dark:border-brand-600 bg-brand-50 dark:bg-[var(--color-surface-card)]/50 px-3 py-1.5 text-sm text-brand-700 dark:text-brand-200 hover:border-brand-500 transition-colors"
         >
           Top pick — {topPick.winnerCode} {topPick.conf}% jump to ↓
         </a>
       )}
 
       {rows.length === 0 ? (
-        <div className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/50 p-6 space-y-3">
+        <div className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-[var(--color-surface-card)]/50 p-6 space-y-3">
           <p className="text-brand-600 dark:text-brand-300">No MLB games found for this date.</p>
           <div className="flex flex-wrap gap-2">
             <Link

@@ -13,7 +13,7 @@ export function LanguageSwitch({ koHref, enHref, current, className = '' }: Lang
   const activeClass =
     'bg-brand-700 text-white border-brand-700 dark:bg-brand-100 dark:text-brand-900 dark:border-brand-100';
   const idleClass =
-    'bg-white text-brand-700 border-brand-200 hover:border-brand-400 dark:bg-brand-950 dark:text-brand-100 dark:border-brand-800 dark:hover:border-brand-600';
+    'bg-white text-brand-700 border-brand-200 hover:border-brand-400 dark:bg-[var(--color-surface-card)] dark:text-brand-100 dark:border-brand-800 dark:hover:border-brand-600';
 
   return (
     <div className={`inline-flex gap-1 ${className}`} aria-label="Language">

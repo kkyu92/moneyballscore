@@ -65,7 +65,7 @@ export default async function MlbHub() {
       </section>
 
       {accuracy.verifiedN > 0 && (
-        <section className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5">
+        <section className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5">
           <div className="flex items-center justify-between gap-3 mb-3">
             <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100">모델 적중률</h2>
             <p className="text-xs text-brand-500">검증 {accuracy.verifiedN}경기</p>
@@ -118,19 +118,19 @@ export default async function MlbHub() {
       )}
 
       <section className="grid md:grid-cols-3 gap-4">
-        <Link href={`/mlb/games/${today}`} className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href={`/mlb/games/${today}`} className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">오늘 경기 ({todayGames?.length ?? 0})</h3>
           <p className="text-xs text-brand-500 mt-1">{TOTAL}팩터 + 예측 확률</p>
         </Link>
-        <Link href="/mlb/standings" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/mlb/standings" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">팀 순위</h3>
           <p className="text-xs text-brand-500 mt-1">AL/NL {MLB_DIVISION_COUNT} 디비전</p>
         </Link>
-        <Link href="/mlb/accuracy" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/mlb/accuracy" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">AI 적중 기록</h3>
           <p className="text-xs text-brand-500 mt-1">정확도·Brier·캘리브레이션·팀별 적중률</p>
         </Link>
-        <Link href="/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/mlb/players" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast deep-dive</h3>
           <p className="text-xs text-brand-500 mt-1">xwOBA / Barrel% / Launch Angle</p>
         </Link>
@@ -142,11 +142,11 @@ export default async function MlbHub() {
           <h3 className="font-bold text-amber-700 dark:text-amber-200">⭐ Postseason bracket</h3>
           <p className="text-xs text-amber-600 mt-1">ETA 2026-09</p>
         </Link>
-        <Link href="/mlb/factors" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/mlb/factors" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">{TOTAL}팩터 설명</h3>
           <p className="text-xs text-brand-500 mt-1">가중치 + 홈팀 어드밴티지</p>
         </Link>
-        <Link href="/mlb/calendar" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/mlb/calendar" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">월별 캘린더</h3>
           <p className="text-xs text-brand-500 mt-1">일별 예측 수 + 적중률 히트맵</p>
         </Link>

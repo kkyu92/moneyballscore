@@ -147,7 +147,7 @@ export default function ChangelogPage() {
           <li
             key={entry.id}
             id={entry.id}
-            className="rounded-xl border border-brand-200 dark:border-brand-800 bg-white dark:bg-brand-950 p-5 sm:p-6 scroll-mt-20"
+            className="rounded-xl border border-brand-200 dark:border-brand-800 bg-white dark:bg-[var(--color-surface-card)] p-5 sm:p-6 scroll-mt-20"
           >
             <header className="mb-3 space-y-1.5">
               <h2 className="text-lg sm:text-xl font-semibold text-brand-900 dark:text-brand-100">
