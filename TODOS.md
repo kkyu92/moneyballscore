@@ -1,5 +1,27 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB rolling 적중률 추세 차트 parity (cycle 2181, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음, review-code
+5연속 partial 근접) — cycle 2180 backlog(잔여 5개: BrierTrendChart/
+ScoringRuleDayHeatmap/RollingAccuracyChart/CohortComparisonHeatmap/
+TeamBiasTable/ModelVersionHistory) 재검토 후 RollingAccuracyChart 선정
+(`buildRollingAccuracy()` 가 scoring_rule/era 종속 없이 PredRow[] 만 받아
+WinnerProbBucketChart 와 동일하게 가장 이식 쉬움).
+
+`buildMlbAccuracySummary()` 에 `rollingAccuracy` 필드 추가(기존
+`buildRollingAccuracy(rows)` 그대로 재사용, 쿼리 중복 없음).
+`RollingAccuracyChart` 에 locale prop 신규(default 'ko', KBO 호출부 무변경) →
+en/mlb/accuracy 영문 렌더(축 라벨/기준선/툴팁 전부 영문) 정상. 테스트 1건
+추가(오늘 날짜 기준 window n=3 non-null 검증), 전체 type-check/lint/
+vitest(447/3888) 통과, main 직접 push(commit 6388a554).
+
+**다음 explore-idea heavy 후보 (backlog 잔여 4개)**: BrierTrendChart(KBO era별
+색상 매핑 의존 — MLB 전용 scoring_rule 색상 체계 필요, 스코프 큼) /
+ScoringRuleDayHeatmap(scoring_rule 축 의존, MLB 버전 정책 확인 필요) /
+CohortComparisonHeatmap(scoring_rule × 주차 — 동일 이유) / TeamBiasTable(MLB
+standings win% 소스 확인 필요) / ModelVersionHistory.
+
 ## ✅ explore-idea(heavy) — MLB 확률 bucket 보정 차트 parity (cycle 2180, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, review-code 5연속 partial cooldown 진입,
