@@ -92,7 +92,6 @@ export interface MatchupProfile {
 interface Row {
   confidence: number | null;
   is_correct: boolean | null;
-  predicted_winner: number | null;
   predicted_winner_team: { code: string | null } | null;
   /** null = pre_game prediction 부재 final 경기. record 카운트는 진행, 예측 정확도 카운트는 skip */
   hasPrediction: boolean;
@@ -104,7 +103,6 @@ interface Row {
     away_score: number | null;
     home_team_id: number | null;
     away_team_id: number | null;
-    winner_team_id: number | null;
     home_team: { id: number; code: string | null } | null;
     away_team: { id: number; code: string | null } | null;
     winner: { code: string | null } | null;
@@ -401,14 +399,12 @@ export async function buildMatchupProfile(
     away_score: number | null;
     home_team_id: number | null;
     away_team_id: number | null;
-    winner_team_id: number | null;
     home_team: { id: number; code: string | null } | null;
     away_team: { id: number; code: string | null } | null;
     winner: { code: string | null } | null;
     predictions: Array<{
       confidence: number | null;
       is_correct: boolean | null;
-      predicted_winner: number | null;
       predicted_winner_team: { code: string | null } | null;
       prediction_type: string | null;
     }> | null;
@@ -419,12 +415,12 @@ export async function buildMatchupProfile(
     .select(
       `
         id, game_date, status, home_score, away_score,
-        home_team_id, away_team_id, winner_team_id,
+        home_team_id, away_team_id,
         home_team:teams!games_home_team_id_fkey(id, code),
         away_team:teams!games_away_team_id_fkey(id, code),
         winner:teams!games_winner_team_id_fkey(code),
         predictions(
-          confidence, is_correct, predicted_winner,
+          confidence, is_correct,
           predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
           prediction_type
         )
@@ -447,7 +443,6 @@ export async function buildMatchupProfile(
     rows.push({
       confidence: pred?.confidence ?? null,
       is_correct: pred?.is_correct ?? null,
-      predicted_winner: pred?.predicted_winner ?? null,
       predicted_winner_team: pred?.predicted_winner_team ?? null,
       hasPrediction: pred !== null,
       game: {
@@ -458,7 +453,6 @@ export async function buildMatchupProfile(
         away_score: g.away_score,
         home_team_id: g.home_team_id,
         away_team_id: g.away_team_id,
-        winner_team_id: g.winner_team_id,
         home_team: g.home_team,
         away_team: g.away_team,
         winner: g.winner,

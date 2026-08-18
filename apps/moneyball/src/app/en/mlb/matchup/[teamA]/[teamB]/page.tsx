@@ -9,6 +9,7 @@ import {
   MATCHUP_RECENT_FORM_GAMES,
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
+  MARGIN_BLOWOUT_THRESHOLD,
   mlbShortTeamName,
   type MlbTeamCode,
 } from "@moneyball/shared";
@@ -48,7 +49,19 @@ interface PageProps {
 }
 
 function buildSummaryEn(profile: Awaited<ReturnType<typeof buildMlbMatchupProfile>>): string {
-  const { teamA, teamB, finalGames, sideStats, predictionAccuracy, streak, avgMargin } = profile;
+  const {
+    teamA,
+    teamB,
+    finalGames,
+    sideStats,
+    predictionAccuracy,
+    streak,
+    avgMargin,
+    recentRecord,
+    blowout,
+    closeGame,
+    homeAwayEdge,
+  } = profile;
   if (finalGames === 0) {
     return `${teamA.shortName} vs ${teamB.shortName} — no completed games this season yet. Results and AI prediction performance will appear here once games are played.`;
   }
@@ -71,6 +84,20 @@ function buildSummaryEn(profile: Awaited<ReturnType<typeof buildMlbMatchupProfil
   }
   if (avgMargin) {
     text += ` Average scoring margin in this matchup is ${avgMargin.avgMargin} runs.`;
+  }
+  if (recentRecord && finalGames > recentRecord.sampleSize) {
+    const { aWins, bWins, sampleSize } = recentRecord;
+    text += ` Over the last ${sampleSize} meetings: ${teamA.shortName} ${aWins} wins, ${teamB.shortName} ${bWins} wins.`;
+  }
+  if (blowout && blowout.count > 0) {
+    text += ` ${blowout.count} of these games were decided by ${MARGIN_BLOWOUT_THRESHOLD}+ runs.`;
+  }
+  if (closeGame && closeGame.count > 0) {
+    text += ` ${closeGame.count} games were decided by a single run.`;
+  }
+  if (homeAwayEdge) {
+    const edgeTeam = homeAwayEdge.teamCode === teamA.code ? teamA : teamB;
+    text += ` ${edgeTeam.shortName} shows a clear home/away split in this matchup: ${homeAwayEdge.homeWins}-${homeAwayEdge.homeGames - homeAwayEdge.homeWins} at home vs ${homeAwayEdge.awayWins}-${homeAwayEdge.awayGames - homeAwayEdge.awayWins} on the road.`;
   }
   return text;
 }
