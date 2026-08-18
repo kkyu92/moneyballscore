@@ -42,21 +42,30 @@ describe('silent drift wave 310 — confToWinProb single source (cycle 1641)', (
     expect(src).not.toMatch(/0\.5 \+ .*confidence \/ 2/);
   });
 
-  it('en/mlb/team/[code]/page.tsx uses confToWinProb', () => {
-    const src = readFileSync(join(ROOT, 'src/app/en/mlb/team/[code]/page.tsx'), 'utf8');
-    expect(src).toContain('confToWinProb');
-    expect(src).not.toMatch(/0\.5 \+ .*confidence \/ 2/);
-  });
-
-  it('mlb/team/[code]/page.tsx uses confToWinProb', () => {
-    const src = readFileSync(join(ROOT, 'src/app/mlb/team/[code]/page.tsx'), 'utf8');
-    expect(src).toContain('confToWinProb');
-    expect(src).not.toMatch(/0\.5 \+ .*confidence \/ 2/);
-  });
-
   it('components/predictions/PredictionCard.tsx uses confToWinProb', () => {
     const src = readFileSync(join(ROOT, 'src/components/predictions/PredictionCard.tsx'), 'utf8');
     expect(src).toContain('confToWinProb');
     expect(src).not.toMatch(/0\.5 \+ confidence \/ 2/);
   });
+});
+
+// wave-310 원래 swept MLB team 페이지도 confToWinProb 강제 대상에 포함했으나,
+// MLB `confidence` (deriveMlbOutcome 산출, 0.5~1 winnerProb 스케일) 는 KBO DB
+// `confidence` 컬럼(0~1, 0=tossup) 과 스케일이 다름 — confToWinProb 는 KBO 스케일
+// 전용이라 MLB 에 적용하면 이중 변환 버그(850%류) 발생. cycle 2160 review-code
+// heavy 가 실측 발견 + 4 페이지(KO/EN team, KO/EN matchup) 전부 fix. 재발 방지 가드.
+describe('silent drift wave 310 정정 (cycle 2160) — MLB confidence 는 confToWinProb 금지', () => {
+  const mlbPages = [
+    'src/app/mlb/team/[code]/page.tsx',
+    'src/app/en/mlb/team/[code]/page.tsx',
+    'src/app/mlb/matchup/[teamA]/[teamB]/page.tsx',
+    'src/app/en/mlb/matchup/[teamA]/[teamB]/page.tsx',
+  ];
+
+  for (const page of mlbPages) {
+    it(`${page} does not use confToWinProb on MLB confidence`, () => {
+      const src = readFileSync(join(ROOT, page), 'utf8');
+      expect(src).not.toContain('confToWinProb');
+    });
+  }
 });

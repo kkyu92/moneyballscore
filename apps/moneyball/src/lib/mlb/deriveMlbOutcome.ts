@@ -16,6 +16,10 @@ export interface MlbOutcomeResult {
   predictedHomeWin: boolean | null;
   actualHomeWin: boolean | null;
   isCorrect: boolean | null;
+  // 0.5~1 스케일 (winnerProbOf 와 동일 shape) — KBO DB `confidence` 컬럼(0~1, 0=tossup)
+  // 과 다른 스케일. `confToWinProb`(DB confidence 전용) 에 넣으면 이중 변환 버그
+  // (cycle 2160 review-code heavy 발견 — MLB team/matchup 4 페이지 850%류 표시 버그).
+  // 렌더 시 이 값 그대로 `* 100` 만 하면 됨.
   confidence: number | null;
 }
 

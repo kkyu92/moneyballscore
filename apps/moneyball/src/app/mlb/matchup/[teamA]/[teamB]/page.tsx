@@ -5,7 +5,6 @@ import {
   SITE_URL,
   ACCURACY_GOOD_RATE,
   ACCURACY_BASELINE,
-  confToWinProb,
   CLOSE_GAME_MARGIN,
   MATCHUP_RECENT_FORM_GAMES,
   MLB_FACTOR_PICK_STRONG,
@@ -444,7 +443,7 @@ function GameTable({ games }: { games: MlbMatchupGame[] }) {
                   {predName ?? "—"}
                   {g.confidence != null && (
                     <span className="text-gray-400 dark:text-gray-500 ml-1">
-                      ({Math.round(confToWinProb(g.confidence) * 100)}%)
+                      ({Math.round(g.confidence * 100)}%)
                     </span>
                   )}
                 </td>

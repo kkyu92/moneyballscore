@@ -10,7 +10,6 @@ import {
   type MlbTeamCode,
   mlbShortTeamName,
   MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE,
-  confToWinProb,
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
 } from "@moneyball/shared";
@@ -445,7 +444,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
                         {predictionLabel}
                         {r.confidence != null && (
                           <span className="text-gray-400 dark:text-gray-500 ml-1">
-                            ({Math.round(confToWinProb(r.confidence) * 100)}%)
+                            ({Math.round(r.confidence * 100)}%)
                           </span>
                         )}
                       </td>
