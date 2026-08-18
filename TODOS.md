@@ -1,5 +1,33 @@
 # TODOS
 
+## 🟢 explore-idea(heavy) — CohortComparisonHeatmap MLB parity (cycle 2193, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음 — 직전
+8사이클 distinct=4, saturation 미충족 9/15) — cycle 2192 next_rec
+(explore-idea 또는 fix-incident) + fix-incident 는 4개 scheduled
+workflow 전부 green + open issue 0 이라 신호 부재 → explore-idea.
+cycle 2186/2189 retro backlog 에 두 번 명시된 "CohortComparisonHeatmap
+MLB parity 후보" 를 채택 — carry-over spec 명확 (lite 모드 기준 충족)
+이나 최근 explore-idea(heavy) 관행 (직접 구현+ship) 따라 진행.
+
+구현: `buildMlbAccuracySummary.ts` 에 기존 `buildScoringRuleWeekHeatmap`
+(KBO `/accuracy` 의 scoring_rule × 주차 cohort heatmap 산출 함수) 재사용
+→ `cohortWeekHeatmap: ScoringRuleWeekCell[]` 필드 추가. 컴포넌트
+`CohortComparisonHeatmap.tsx` 는 완전 data-driven 이라 변경 없이 그대로
+재사용. `MlbAccuracyDashboard.tsx` 에 섹션 추가 (guard: `some(c => c.n
+>= 3)`, KBO `/accuracy` 동일 threshold), ko/en 페이지(`mlb/accuracy`,
+`en/mlb/accuracy`) 양쪽 prop 배선.
+
+`ScoringRuleDayHeatmap` (cycle 2189, 요일 축) 과 동일하게 MLB rows 는
+`scoring_rule` 컬럼을 select 하지 않아 `sr ?? ''` 가 'all' aggregate
+외 어떤 SCORING_RULE_HEATMAP_ROWS 에도 안 매칭 — 'all' 단일 행만 채워지는
+자연 degradation (버그 아님, 기존 day heatmap 과 동일 패턴 확인 후 의도적
+수용). parity 테스트 1건 추가 (day heatmap 테스트와 동일 assertion 구조).
+
+tsc clean, lint clean, 447 test files / 3894 tests green (신규 1건 +).
+커밋 직접 main (배치 push 정책 유지, 29 unpushed 누적 — 사용자 배치 push
+요청 시 일괄 push).
+
 ## 🟢 review-code(heavy) — convergenceRecord.ts 감사, UTC/KST cutoff 불일치 fix (cycle 2192, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, 2-chain lock 없음 — 직전
