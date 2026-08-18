@@ -71,7 +71,7 @@ export default async function MlbHubEn() {
       </section>
 
       {accuracy.verifiedN > 0 && (
-        <section className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5">
+        <section className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5">
           <div className="flex items-center justify-between gap-3 mb-3">
             <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100">Model Accuracy</h2>
             <p className="text-xs text-brand-500">{accuracy.verifiedN} games verified</p>
@@ -117,19 +117,19 @@ export default async function MlbHubEn() {
       )}
 
       <section className="grid md:grid-cols-3 gap-4">
-        <Link href={`/en/mlb/games/${today}`} className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href={`/en/mlb/games/${today}`} className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Today&apos;s Games ({todayGames?.length ?? 0})</h3>
           <p className="text-xs text-brand-500 mt-1">{TOTAL}-factor + prediction confidence</p>
         </Link>
-        <Link href="/en/mlb/standings" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/en/mlb/standings" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Team Standings</h3>
           <p className="text-xs text-brand-500 mt-1">AL/NL {MLB_DIVISION_COUNT} divisions</p>
         </Link>
-        <Link href="/en/mlb/accuracy" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/en/mlb/accuracy" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">AI Track Record</h3>
           <p className="text-xs text-brand-500 mt-1">Accuracy · Brier · calibration · per-team</p>
         </Link>
-        <Link href="/en/mlb/players" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/en/mlb/players" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast Deep-Dive</h3>
           <p className="text-xs text-brand-500 mt-1">xwOBA / Barrel% / Launch Angle</p>
         </Link>
@@ -141,11 +141,11 @@ export default async function MlbHubEn() {
           <h3 className="font-bold text-amber-700 dark:text-amber-200">⭐ Postseason Bracket</h3>
           <p className="text-xs text-amber-600 mt-1">ETA 2026-09</p>
         </Link>
-        <Link href="/en/mlb/factors" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/en/mlb/factors" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">{TOTAL}-Factor Model</h3>
           <p className="text-xs text-brand-500 mt-1">Weights + home-field advantage</p>
         </Link>
-        <Link href="/en/mlb/calendar" className="rounded-xl bg-white dark:bg-brand-950 border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+        <Link href="/en/mlb/calendar" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Monthly Calendar</h3>
           <p className="text-xs text-brand-500 mt-1">Daily prediction count + accuracy heatmap</p>
         </Link>

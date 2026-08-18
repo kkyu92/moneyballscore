@@ -171,7 +171,7 @@ export default function V2ShadowMonitorPage() {
                     {table.rows.map((row, i) => (
                       <tr
                         key={i}
-                        className="odd:bg-white even:bg-brand-50/50 dark:odd:bg-brand-950 dark:even:bg-brand-900/40"
+                        className="odd:bg-white even:bg-brand-50/50 dark:odd:bg-[var(--color-surface-card)] dark:even:bg-brand-900/40"
                       >
                         {row.map((cell, j) => (
                           <td

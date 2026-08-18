@@ -33,7 +33,7 @@ export async function MlbHistoricalAnalogMatchup({
   return (
     <section
       aria-labelledby="mlb-historical-analog-heading"
-      className="rounded-2xl border border-brand-200 dark:border-brand-800 bg-white dark:bg-brand-950 p-4 md:p-6"
+      className="rounded-2xl border border-brand-200 dark:border-brand-800 bg-white dark:bg-[var(--color-surface-card)] p-4 md:p-6"
     >
       <header className="mb-3">
         <h2
