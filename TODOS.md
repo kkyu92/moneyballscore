@@ -1,5 +1,26 @@
 # TODOS
 
+## 🟢 info-architecture-review — MLB matchup 진입점 부재 발견 + fix, 435 pairs 도달 불가 상태 해소 (cycle 2183, 2026-08-18)
+
+trigger 9 (마지막 info-architecture-review 발화 이후 ≥30 사이클, 마지막 fire
+cycle 2153, gap=30 정확 도달) 자동 권장으로 발화. 진단(라우트 신규 추가/breadcrumb
+누락/헤더 메가메뉴/footer sitemap) 결과 대부분 항목은 정상(placeholder 페이지
+breadcrumb 제외는 의도된 설계) — 하지만 `/mlb/matchup/[teamA]/[teamB]`(435 pairs,
+plan #24 Phase 3b) 동적 라우트가 KBO의 `/matchup` 대응 picker/index page 가 없어
+헤더 메가메뉴에도, footer에도, sitemap 정적 목록에도 진입점이 전혀 없었음
+발견(en 버전도 동일 — `/en/mlb/team/page.tsx`는 있는데 `/en/mlb/matchup/page.tsx`는
+부재). sitemap.xml 크롤러 발견 외엔 사용자가 이 435개 페이지에 도달할 방법이 없던
+상태.
+
+**fix**: KBO `/matchup/page.tsx` 패턴 그대로 이식 — `/mlb/matchup/page.tsx` +
+`/en/mlb/matchup/page.tsx` 신규(30×30 격자 + 팀별 바로가기, 기존
+`mlbCanonicalPair` helper 재사용). `MLB_HEAD_TO_HEAD_PAIRS`(=435) 신규 상수
+(`KBO_HEAD_TO_HEAD_PAIRS` wave 107 컨벤션 동일). Header `MLB_NAV`에 "매치업"
+항목 추가. `sitemap.ts` 정적 라우트 2건 추가. `sitemap-mlb.test.ts` 검증
+테스트 2건 추가. 전체 447 test files / 3890 tests green, type-check/lint
+clean. 커밋 직접 main push (branch/PR 미생성 — cycle 2180/2181 직전 feat 커밋과
+동일 패턴 유지, origin 대비 4 commits ahead 누적, 배포는 사용자 요청 시 batch).
+
 ## 🟡 review-code(heavy) — daily_notifications 영구 lock 버그 클래스 family 감사, 신규 버그 미발견 (cycle 2182, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, 2-chain lock 없음, gap-chain 전부
