@@ -1,5 +1,25 @@
 # TODOS
 
+## 🩺 fix-incident(lite) — 20-cycle gap 헬스체크, 신규 incident 0건 (cycle 2167, 2026-08-18)
+
+fix-incident 마지막 발화 cycle 2147 → gap=20 (trigger 7 충족) + open issue/승인 plan
+0건 + 2-chain lock 없음(직전 8사이클 distinct=3) → lite 자동 권장 따라 점검 실행.
+
+점검 항목: (1) `gh run list` 최근 15건 — health-alert/runtime-error-alert/deploy-drift-alert
+scheduled workflow 전부 success, CI Failure Dispatch 전부 skipped(트리거 없음) (2)
+daily-pipeline.yml 은 2026-04-29 GH Actions schedule 영구 비활성화 후 Cloudflare Worker
+cron 이 primary — workflow_dispatch 전용이라 gh run list 공백은 정상 (3) `pipeline_runs`
+REST 조회 (오늘 08-18) — predict 모드 predictions=0 다건 관찰됐으나 `shouldAlertSilentDrift`
+설계상 predict 모드는 게이트 대상 아님(predict_final/verify/postview 만) + 아침 07:18 UTC
+런이 이미 5건 생성 → 후속 predict 런의 0건은 기존 idempotent skip (정상, 사례 11 family
+아님) (4) predict_final/verify 최근 5일(08-13~08-17) predictions=0 반복 관찰 — 이는
+`existingPredictionsCount` coverage 로직상 아침 predict 5건이 이미 충족해 alert 미발화
+= 설계대로 (5) lotto-pick-update 08-07/08-08 failure 2건 발견했으나 cycle 2137 lotto(lite)
+헬스체크에서 이미 확인/회복(08-14~08-15 success 재개, 별도 fix 불필요 — stale 과거 실패).
+
+결론: **신규 incident 없음.** 20-cycle 주기 보정 트리거의 목적(장기 미점검 공백 차단)
+자체가 충족 — 코드 변경 0. gap counter 리셋.
+
 ## 🔍 review-code(heavy) — MLB matchup 라우트 KBO 버그 패턴 이식 점검, 버그 미발견 (cycle 2166, 2026-08-18)
 
 fix-incident(19/20)/op-analysis(20/25)/info-arch(13/30)/lotto(21/30) 전부 gap 미도달 +
