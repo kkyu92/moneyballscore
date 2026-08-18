@@ -1,5 +1,31 @@
 # TODOS
 
+## ✅ review-code(heavy) — MLB 신규 라우트 silent-drift-family 스코프 감사, 버그 미발견 (cycle 2173, 2026-08-18)
+
+cycle 2170 polish-ui carry-over("brand-950 외 다른 미정의 토큰 없는지 전수 grep")
++ cycle 2149/2150 review-code carry-over(소표본 가드 누락 family) 두 축으로 최근
+93 cycle 간 신규 추가된 MLB 라우트(`mlb/standings`, `mlb/calendar`, `mlb/factors`,
+`mlb/matchup/[teamA]/[teamB]`, `mlb/team/[code]`) 스코프 감사.
+
+**색상 토큰 축**: `text-/bg-(blue|green|emerald|purple|indigo...)` grep 5건 발견 →
+KBO parity 대조 결과 전부 정당: `mlb/calendar` accuracyClass 3-tier(brand/yellow/red)
+= KBO `calendar/page.tsx` 와 완전 동일 함수 패턴. `mlb/matchup` yellow-600 rate
+tier = KBO matchup 337행과 동일. `mlb/standings` 파크팩터 orange/blue 배지 +
+`mlb/factors` 가중치 emerald 배지 = KBO 쪽엔 대응 페이지 자체가 없어(KBO
+`teams/page.tsx` 는 파크팩터를 배지 없는 평문으로만 표시) "기존 브랜드 색상에서
+이탈"이 아니라 MLB 전용 신규 semantic — silent drift 요건(기존 컨벤션 대비 이탈)
+불충족.
+
+**소표본 가드 축**: `mlb/team/[code]` 는 `SMALL_SAMPLE_N` 가드 존재. `mlb/matchup`
+predictionAccuracy 표시는 가드 없음 — 그러나 KBO `matchup/page.tsx` 도 동일하게
+가드 없음(대조 결과 106~346행 동일 구조) = MLB 전용 regression 아니라 기존
+KBO/MLB 공통 pre-existing 패턴. 스코프 밖 별도 이슈로 남길 실익 없음(둘 다 동일
+동작이라 이번 사이클 fix 대상 아님).
+
+**결론**: 감사 완료, 신규 버그 0건. carry-over 두 항목(brand-950 후속 grep, 소표본
+가드 family) 모두 이번 사이클로 해소. 다음 review-code(heavy) 후보 없으면 진단
+free judgment.
+
 ## ✅ fix-incident(lite) — 로컬 dev 전역 dynamic route 404 재현+해소, 코드 버그 아님 (cycle 2172, 2026-08-18)
 
 cycle 2171 carry-over("`/mlb/team/LAD` 로컬 404, prod 정상, 조사 필요") 재현 조사.
