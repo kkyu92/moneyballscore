@@ -1,5 +1,35 @@
 # TODOS
 
+## 🟢 review-code(heavy) — convergenceRecord.ts 감사, UTC/KST cutoff 불일치 fix (cycle 2192, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음 — 직전
+8사이클 distinct=4) — cycle 2191 explicit reco (review-code 또는
+fix-incident) + fix-incident 는 4개 scheduled workflow 전부 green + open
+issue 0 이라 신호 부재 → review-code. 대상 파일 = convergenceRecord.ts
+(736줄, wave-546~633 다수 기능 추가/추출 거쳤지만 전체 파일 단독 감사
+기록 없음 — 수치 threshold 로직 밀집 = silent drift family 위험 영역).
+
+발견: `getRecentConvergencePickRecord`/`getConvergencePickStreak` 의
+startDate 미지정 기본 경로가 `new Date(Date.now() - N*86400000)
+.toISOString().slice(0,10)` 로 cutoff 계산 — UTC 캘린더일 기준. 같은
+파일의 `fetchConvergencePickDetailedResults` 는 today 경계를
+`toKSTDateString()` 으로 KST 기준 계산 — cutoff 만 UTC 로 남아있던
+불일치. KST 00:00~08:59 (UTC 15:00~23:59) 구간에 실행되면 cutoff 가
+실제 KST 날짜보다 하루 이르게 계산돼 lookback 윈도우
+(CONVERGENCE_RECORD_LOOKBACK_DAYS=45) 가 최대 1일 더 넓어짐 — "최근 45일
+강수렴 픽 성적"(analysis/game 페이지) 표시치가 실행 시각에 따라
+미세하게 흔들릴 수 있는 silent drift.
+
+packages/shared 에 동일 목적으로 이미 존재하던 `kstDateOffset()`
+(wave 143, not-found 페이지 3파일 중복 통합 시 박제 — 정확히 이 패턴
+차단용) 을 두 콜사이트에 적용해 정정. 나머지 함수 전부 감사 — streak/
+home-away/day-of-week/team-stats 순수 함수 로직, MLB pair 매치업 판정,
+threshold 상수 사용 모두 일관 확인, 추가 버그 미발견.
+
+tsc clean, 447 test files / 3893 tests green (회귀 없음). 커밋
+d13f8584 직접 main (배치 push 정책 유지, 28 unpushed 누적 — 사용자
+요청 시 push).
+
 ## 🟢 operational-analysis(lite) — v1.8 CE/비CE cohort 재측정 (cycle 2191, 2026-08-18)
 
 no forced trigger (open issue 0, approved plan 0, 2-chain lock 없음 —
