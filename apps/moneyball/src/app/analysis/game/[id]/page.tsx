@@ -21,6 +21,7 @@ import {
   FACTOR_PICK_WEIGHT_TOTAL,
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   KBO_DEFAULT_GAME_TIME,
+  HOUR_MS,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
@@ -82,6 +83,7 @@ interface PreGamePrediction {
   is_correct: boolean | null;
   model_version: string | null;
   debate_version: string | null;
+  predicted_at: string | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
   home_sp_xfip: number | null;
@@ -181,7 +183,7 @@ async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> 
       winner:teams!games_winner_team_id_fkey(code),
       predictions(
         prediction_type, predicted_winner, confidence, reasoning, factors,
-        is_correct, model_version, debate_version,
+        is_correct, model_version, debate_version, predicted_at,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba,
         home_bullpen_fip, away_bullpen_fip,
@@ -361,6 +363,11 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     }
   })();
   const startDateIso = `${gameDate}T${(game.game_time || KBO_DEFAULT_GAME_TIME).slice(0, 5)}:00+09:00`;
+  const predictionLeadHours = preGame?.predicted_at
+    ? Math.round(
+        (new Date(startDateIso).getTime() - new Date(preGame.predicted_at).getTime()) / HOUR_MS
+      )
+    : null;
   const sportsEventLd = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
@@ -735,6 +742,15 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                 <>
                   {' · 토론 버전 '}
                   <span className="font-mono">{preGame.debate_version}</span>
+                </>
+              )}
+              {predictionLeadHours !== null && (
+                <>
+                  {' · 경기 '}
+                  <span className="font-mono">
+                    {predictionLeadHours >= 1 ? `${predictionLeadHours}시간` : '1시간 이내'}
+                  </span>
+                  {' 전 예측 생성'}
                 </>
               )}
             </p>
