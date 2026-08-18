@@ -320,6 +320,11 @@ export default async function PredictionDatePage({ params }: Props) {
     (g) => g.status !== 'postponed' && g.predictions[0].is_correct != null,
   );
   const correct = verified.filter((g) => g.predictions[0].is_correct === true);
+  // 취소 경기는 적중으로 집계 (경기 자체 무효, 예측 책임 없음) — buildIntro/
+  // buildArticleJsonLd 와 동일 컨벤션. 페이지 안 모든 적중률 표시가 이 값을
+  // 공유해야 취소 경기 있는 날짜에 서로 다른 % 가 동시에 노출되는 것을 막는다.
+  const correctN = correct.length + cancelled.length;
+  const totalN = verified.length + cancelled.length;
 
   // CREDIT_EXHAUSTED 간소화 모드 감지: 예측 avg confidence ≤ 0.32
   // (CREDIT_EXHAUSTED 시 모든 예측 conf=0.3 고정)
@@ -402,12 +407,12 @@ export default async function PredictionDatePage({ params }: Props) {
           <time dateTime={`${date}T09:00:00+09:00`}>
             {date} {KBO_PREDICT_DAILY_TIME_KST}
           </time>
-          {verified.length > 0 && (
+          {totalN > 0 && (
             <>
               <span aria-hidden>·</span>
               <span className="text-gray-700 dark:text-gray-300">
-                적중률 {Math.round((correct.length / verified.length) * 100)}% ({correct.length}/
-                {verified.length})
+                적중률 {Math.round((correctN / totalN) * 100)}% ({correctN}/
+                {totalN})
               </span>
             </>
           )}
@@ -433,8 +438,8 @@ export default async function PredictionDatePage({ params }: Props) {
 
       <DailyPredictionSummaryBar
         predictedCount={predicted.length}
-        verifiedCount={verified.length}
-        correctCount={correct.length}
+        verifiedCount={totalN}
+        correctCount={correctN}
         topPick={topPick}
       />
 
@@ -587,7 +592,7 @@ export default async function PredictionDatePage({ params }: Props) {
           <ShareButtons
             url={`${SITE_URL}/predictions/${date}`}
             title={`${date} KBO 승부예측`}
-            text={`${date} ${predicted.length}경기 AI 예측${cancelled.length > 0 ? ` (취소 ${cancelled.length})` : ""}${missing.length > 0 ? ` (기록 없음 ${missing.length})` : ""} — 적중률 ${verified.length > 0 ? Math.round((correct.length / verified.length) * 100) : "집계중"}${verified.length > 0 ? "%" : ""}`}
+            text={`${date} ${predicted.length}경기 AI 예측${cancelled.length > 0 ? ` (취소 ${cancelled.length})` : ""}${missing.length > 0 ? ` (기록 없음 ${missing.length})` : ""} — 적중률 ${totalN > 0 ? Math.round((correctN / totalN) * 100) : "집계중"}${totalN > 0 ? "%" : ""}`}
           />
         </footer>
       )}
