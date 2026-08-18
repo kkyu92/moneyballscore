@@ -1,5 +1,34 @@
 # TODOS
 
+## ✅ polish-ui(heavy) — dark mode brand-950 토큰 drift 수정 (cycle 2170, 2026-08-18)
+
+cycle 2169 retro "review-code 또는 polish-ui free judgment" 따라 polish-ui 선택
+(신규 MlbRivalryMemorySurface 디자인 점검 목적 + review-code 3연속 partial 이후
+diminishing return 회피). 실측: agent_memories MLB row 0건이라 해당 컴포넌트는
+현재 렌더 자체가 null(기능 정상, 검증 불가) — 대신 게임 상세 페이지 다크모드
+스크린샷 비교 중 바로 아래 "최근 같은 대결"(HistoricalAnalogMatchup parity) 카드가
+흰 배경으로 남는 실제 회귀를 발견.
+
+**원인**: `globals.css` 색상 스케일은 `brand-50~900` 까지만 정의(DESIGN.md 표에도
+900 까지만 명시) — `brand-950` 은 존재한 적 없는 토큰인데 `dark:bg-brand-950`
+클래스가 11개 파일 23곳에서 사용됨(Tailwind 가 매칭 CSS 변수를 못 찾아 유틸리티
+자체가 생성 안 됨 → 다크모드에서도 라이트모드 배경 그대로 노출). 소스는 KBO
+`HistoricalAnalogMatchup.tsx`(기존 코드, review-code heavy 3연속 감사에서도
+미발견 — 다크모드 실측 스크린샷 없이는 grep 만으로 못 잡는 유형) — MLB parity
+작업(cycle 2164)이 그대로 복사하며 확산(mlb 허브 2개 언어, 게임 상세, changelog,
+LanguageSwitch, v2-shadow-monitor 등).
+
+**해결**: DESIGN.md 가 실제 정의하는 다크모드 카드 배경 토큰 `--color-surface-card`
+(코드베이스 전역 기존 패턴)로 일괄 치환. type-check/lint 클린, 3879 tests 전체
+통과, 다크모드 전/후 스크린샷 실측 확인(게임 상세 + MLB 허브), 라이트모드 회귀 없음.
+PR #2960 squash 머지(eb675e1b).
+
+**교훈**: review-code(heavy) 의 코드 read 기반 감사는 "존재하지 않는 CSS 토큰
+참조"를 grep 으로 잡기 어려움(문법상 유효한 Tailwind 클래스 이름이라 정적으로
+안 튐) — 실측 다크모드 스크린샷 비교가 유일한 발견 경로. polish-ui 의
+디자인 실측 채널이 review-code 의 코드 채널과 다른 버그 클래스를 잡는다는
+근거(silent drift family 신규 sub-pattern).
+
 ## ✅ explore-idea(heavy) — MLB rivalry-memory parity 신규 구현 (cycle 2169, 2026-08-18)
 
 cycle 2168 retro "review-code 또는 explore-idea free judgment" 따라 explore-idea 선택
