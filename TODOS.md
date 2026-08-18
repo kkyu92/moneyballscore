@@ -1,5 +1,29 @@
 # TODOS
 
+## 🔍 review-code(heavy) — cycle 2164 신규 MLB historical-analog 파일 감사, 버그 미발견 (cycle 2165, 2026-08-18)
+
+fix-incident(18/20)/op-analysis(19/25)/info-arch(12/30)/lotto(20/30) 전부 gap 미도달 +
+open issue/승인 plan 0건 + 2-chain lock 없음(직전 8사이클 distinct=3) → cycle 2164가
+막 추가한 `fetchMlbHistoricalAnalogs.ts`/`MlbHistoricalAnalogMatchup.tsx`를 Feature-Drift
+Cycle 패턴(explore-idea 직후 review-code 감사) 따라 audit.
+
+점검 항목: (1) KBO `HistoricalAnalogMatchup.tsx` 대비 fetch/derive 로직 parity —
+`deriveMlbOutcome`(cycle 2117/2160 이미 감사 완료) 재사용 확인, `toMlbStatsApiCode`/
+`normalizeMlbTeamCode` alias 왕복 정합(사례 22/27 회귀 없음) (2) 컴포넌트 내 slug 생성
+(`${homeCode}-vs-${awayCode}`)이 `/mlb/games/[date]/[slug]/page.tsx`의 strict
+home/away eq 매칭과 순서 일치 — team page(`slugA-vs-slugB`)와 동일 컨벤션 (3) ko/en
+페이지 양쪽 배선 props(`homeTeam`/`awayTeam`/`externalGameId`/`asOfDate`) 일치 (4)
+KBO vs MLB 페이지 컴포넌트 diff — LLM debate 계열(DebateTimeline/PostviewPanel/
+JudgeVerdictPanel/RivalryMemorySurface 등)은 predict_final quant-only 게이트(plan #25
+Phase 3)로 의도적 제외, FactorWaterfall/GameOverview/HistoricalAnalog는 parity 확보
+확인 (5) 테스트 커버리지(`fetchMlbHistoricalAnalogs.test.ts` 6 case, alias 회귀 가드
+포함) 충분.
+
+**결과: 버그 미발견.** cycle 2164 구현이 기존 감사 완료 로직(deriveMlbOutcome,
+toMlbStatsApiCode)을 정확히 재사용했고 slug/props 정합도 맞음. 코드 변경 0.
+RivalryMemorySurface류 agent-memory 기반 섹션은 MLB parity 범위 밖(별도 스코프 —
+강제 아님, 다음 explore-idea가 가치 판단 시 고려 가능).
+
 ## ✅ explore-idea(heavy, scoped) — MLB 게임 상세 과거 대결 parity + 미푸시 커밋 발견 (cycle 2164, 2026-08-18)
 
 cycle 2163 review-code(heavy) 가 "다음 fire 후보: explore-idea 또는 fix-incident"로 남긴
