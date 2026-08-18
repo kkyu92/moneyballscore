@@ -578,6 +578,11 @@ export function buildScoringRuleWeekHeatmap(rows: PredRow[], weeksWindow = 4): S
   return out;
 }
 
+// r.confidence 사용 의도적 (resolveWinnerProb 아님) — Sunday cap(SUNDAY_CAP_CONFIDENCE,
+// judge-agent.ts runJudgeAgent)이 confidence 만 낮추고 homeWinProb 는 원본 유지해
+// medium tier 오분류를 막는 설계. brierScore/buildBrierTrend/buildWinnerProbBuckets 가
+// resolveWinnerProb(정밀 calibration 측정용)를 쓰는 것과 별개 목적 — 혼동해서 통일 금지
+// (review-code heavy 감사, cycle 2187).
 export function buildConfidenceTiers(rows: PredRow[], locale: 'ko' | 'en' = 'ko'): ConfidenceTier[] {
   const labels = locale === 'en'
     ? ['Low confidence', 'Medium confidence', 'High confidence']
