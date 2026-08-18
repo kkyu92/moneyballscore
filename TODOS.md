@@ -1,5 +1,29 @@
 # TODOS
 
+## ✅ review-code(heavy) — analysis/page.tsx WAR=0 sentinel 가드 누락 수정 (cycle 2149, 2026-08-18)
+
+2802줄 monolith(`apps/moneyball/src/app/analysis/page.tsx`, 리포 최대 파일)를
+review-code(heavy)로 첫 audit — Explore agent 로 정독(analysis-data.ts 919줄 +
+computeCompositeDuel.ts + factor-explanations.ts 포함) 후 실제 버그 1건 발견.
+
+wave-521("이번 주 남은 경기" 6팩터 배지) 의 WAR 직접 대결 배지만
+`g.homeWar > 0 && g.awayWar > 0` 가드가 빠져 있었음. WAR=0 은 Fancy Stats
+top-50 미수록 sentinel(실측 결측치)인데, 나머지 3곳(wave-508 오늘 AI 예측 /
+computeCompositeDuel / factor-explanations)은 모두 이 가드를 갖고 있음 —
+이번 주 남은 경기 카드만 결측 sentinel(0)을 실제 값(예: 6.0)과 비교해 가짜
+"WAR 우위" 배지를 노출하던 silent drift. 동일 가드 1줄 추가(commit e47b1374)
++ wave-521 테스트 파일에 회귀 assertion 추가.
+
+부가 발견(수정 안 함, 낮은 우선순위 — 후속 후보): `page.tsx` 안 "델타 계산→
+임계 비교→우위팀 렌더" 패턴이 팩터×섹션 조합으로 약 30회 수기 복제되어 있어
+이번 버그의 근본 원인. 공유 `<DuelBadge>` 컴포넌트로 추출하면 향후 동일 class
+버그 재발 차단 가능하나 대규모 리팩터라 별도 cycle 분리 권장. 그 외
+`analysis-data.ts`(`getBestPickOfWeek`/`getUpsetPickOfMonth` 90% 중복,
+`computeCompositeDuel` 인자 조립 3회 복제)는 저위험 저가치라 보류.
+
+lint/type-check/vitest(443 files/3859 tests) 전부 clean. main 직접 push,
+CI green 실측 확인(사례 15/18 mitigation 준수).
+
 ## ✅ polish-ui(heavy) — Elo/FIP 차트 카드 다크모드 배경 버그 수정 (cycle 2148, 2026-08-18)
 
 wave 620대 MLB 신규 섹션(page.tsx 15개 + 컴포넌트 21개, 지난 7일) KBO/MLB
