@@ -1,5 +1,26 @@
 # TODOS
 
+## 🔍 review-code(heavy) — MLB matchup 라우트 KBO 버그 패턴 이식 점검, 버그 미발견 (cycle 2166, 2026-08-18)
+
+fix-incident(19/20)/op-analysis(20/25)/info-arch(13/30)/lotto(21/30) 전부 gap 미도달 +
+open issue/승인 plan 0건 + 2-chain lock 없음(직전 8사이클 distinct=3) → cycle 2165 retro
+"explore-idea or fix-incident free judgment" + cycle 2161이 KBO matchup에서 방금 고친
+버그 2건(dead FK 컬럼 predicted_winner/winner_team_id 미사용 + EN buildSummaryEn() 4개
+절 누락)이 MLB matchup 자매 코드(`buildMlbMatchupProfile.ts`, wave-628 dedup으로 KBO와
+공유 리팩터 이력 있음)에도 있는지 pattern-transfer 점검.
+
+점검 결과: **양쪽 다 미해당.** (1) `buildMlbMatchupProfile.ts`는 DB에서
+predicted_winner/winner_team_id 같은 raw FK 컬럼 자체를 select 안 함 — `home_win_prob`
++ 실제 스코어로 `deriveMlbOutcome()` 직접 derive(cycle 2066 fix) 구조라 dead 컬럼
+자체가 존재 불가. (2) MLB EN summary(`buildSummaryEn()`,
+`en/mlb/matchup/[teamA]/[teamB]/page.tsx`)는 이미 recentRecord/blowout/closeGame/
+homeAwayEdge 4절 모두 포함 — KBO가 최근까지 갖고 있던 누락이 여기엔 없음(별도
+builder라 KBO fix 자동 전파는 안 됐지만 애초에 완전했음). 부수적으로 최신
+미감사 파일(`MlbMatchupConvergencePickRecord.tsx` phase 3c wave-633,
+`computeMlbCompositeDuel.ts` 6팩터 게이트)도 훑음 — netScore 최대치 6
+(woba/bullpen_fip/sp_fip/sp_xfip/war/park_factor) = MLB_FACTOR_PICK_COMPLETE(6)와
+정확히 일치, dead threshold 아님. 코드 변경 0.
+
 ## 🔍 review-code(heavy) — cycle 2164 신규 MLB historical-analog 파일 감사, 버그 미발견 (cycle 2165, 2026-08-18)
 
 fix-incident(18/20)/op-analysis(19/25)/info-arch(12/30)/lotto(20/30) 전부 gap 미도달 +
