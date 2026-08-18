@@ -1,5 +1,30 @@
 # TODOS
 
+## ✅ explore-idea(heavy, scoped) — MLB 게임 상세 과거 대결 parity + 미푸시 커밋 발견 (cycle 2164, 2026-08-18)
+
+cycle 2163 review-code(heavy) 가 "다음 fire 후보: explore-idea 또는 fix-incident"로 남긴
+carry-over 따라 explore-idea 선택. fix-incident/op-analysis/lotto/info-arch 전부 gap
+threshold 미도달(17/18/19/11 각각 20/25/30/30) + CI green + open issue/승인된 plan
+0건이라 순수 신규 스코프 탐색. cycle 2107이 KBO analysis/game/[id] 대비 MLB game
+detail parity를 점검하며 ShareButtons+RelatedLinks만 추가했었는데,
+`HistoricalAnalogMatchup`(같은 두 팀 과거 대결 3건)은 debate/postview류와 달리 순수
+팩트(스케줄+확률) 기반이라 MLB predict_final quant-only 게이트와 무관하게 이식 가능함을
+재확인 — 그동안 검토 대상에서 빠져 있던 진짜 gap.
+
+`fetchMlbHistoricalAnalogs.ts`(mlb_schedule+predictions 조인, buildMlbMatchupProfile.ts의
+or-filter 패턴 재사용 + deriveMlbOutcome 재사용) + `MlbHistoricalAnalogMatchup.tsx`
+(KBO 컴포넌트와 동일 UI, ko/en) 신규. KO/EN game detail 페이지 양쪽 배선 + 회귀 가드
+테스트(신규 파일 1 + 기존 스케줄-쿼리 테스트 2건 확장). vitest 446/3879(+7) / tsc /
+eslint 전부 clean. main 직접 push, CI green 실측 확인(run 32127517749 success).
+
+**부수 발견**: 커밋 전 `git status`에서 cycle 2163의 커밋 2건(policy retro + docs
+todos)이 origin에 push 안 된 상태 발견(origin HEAD가 cycle 2162에 멈춰 있었음) —
+본 cycle 커밋과 함께 push해 해소. cycle 2163이 "코드 변경 0"이라 판단해 push 스텝을
+건너뛴 것으로 추정(R7 자동 머지는 PR 경로 전제라 direct-push 경로엔 명시적 push 스텝이
+없어 silent skip 가능 — 사례 18(cycle 2001 R7 --auto 미실행) 과 유사 계열, direct-push
+cycle에서도 "코드 변경 0"이면 push 자체를 생략하는 실수가 재발 가능하니 다음 review-code
+heavy가 참고).
+
 ## 🔍 review-code(heavy) — 감사 결과 버그 미발견, 건강 확인 (cycle 2163, 2026-08-18)
 
 직전 3연속 review-code(heavy) 가 발견한 silent drift family(Barrel% 스케일,
