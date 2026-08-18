@@ -1,5 +1,30 @@
 # TODOS
 
+## 🟡 review-code(heavy) — silent-drift-family 스코프 감사 3축, 버그 미발견 (cycle 2177, 2026-08-18)
+
+no forced trigger (open issue/approved plan/gap-chain 전부 미충족, 2-chain lock 없음) — 자유
+판단. cycle 2173(색상토큰+소표본가드) 이후 남은 축 3개 감사:
+
+1. **josa() 영문 토큰 받침 lookup gap**: `packages/shared/src/korean.ts` 의
+   `ENGLISH_TOKEN_HAS_BATCHIM` 은 KBO 팀 약어(SSG/KIA/LG/KT/NC/SK) + 세이버메트릭스
+   약어(FIP/XFIP/WOBA/WAR/ELO/SFR) 만 등록 — MLB 팀 short name(Yankees/Dodgers 등) 은
+   미등록이라 `?? false` fallback(받침 없음)으로 처리됨. 현재는 MLB 30팀 short name 이
+   전부 복수형(-s 로 끝남 → 한국어 표기 시 항상 받침 없는 "스/즈" 로 끝남)이라 결과적으로
+   우연히 전부 정답 — **살아있는 버그 아님**, 실사용 josa() 호출부(`MlbGameOverview.tsx`)
+   전수 확인 완료. 향후 도시명/구장명 등 비복수형 영단어에 josa() 를 새로 적용할 경우
+   재검토 필요(현재 그런 호출부 0건, 예방적 수정은 미시행 — "일어날 수 없는 case 방어"
+   회피 원칙 정합).
+2. **MLB convergence pick 소표본 gate**: `getMlbConvergencePickTeamStats` →
+   `computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS)` 로 KBO 와
+   동일 min-picks 필터 적용 확인. `/mlb/team/[code]/page.tsx` 호출부도 strong/complete
+   양쪽 threshold 정상 배선 — drift 없음.
+3. **EN 미러 한국어 누출 grep**: `en/mlb/team/[code]` 2줄, `en/mlb/games/[date]/[slug]`
+   10줄에서 한글 매치 — 전부 개발자 주석(wave 번호/KO page.tsx 대응 설명)이고 렌더링되는
+   사용자 가시 문자열 아님. false positive, drift 아님.
+4. **brand-950 residue**: cycle 2170 fix 이후 전체 재검색 0건 — 완전 정리 확인.
+
+버그 0건 발견 (PARTIAL). josa() gap 은 실사용 영향 없어 fix 없이 문서화만.
+
 ## ✅ explore-idea(heavy) — MLB 팩터별 적중률 테이블 parity (cycle 2176, 2026-08-18)
 
 no forced trigger (open issue/approved plan/gap-chain 전부 미충족) — 자유 판단 진단에서
