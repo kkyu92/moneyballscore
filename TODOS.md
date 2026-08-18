@@ -1,5 +1,30 @@
 # TODOS
 
+## ✅ review-code(heavy) — CookieConsent/ThemeToggle EN i18n 누락 수정 (wave-630, cycle 2144, 2026-08-18)
+
+cycle 2143 fix-incident(heavy) Footer 수정 후속 후보("layout.tsx 직계 자식
+CookieConsent, ThemeToggle 등 전수 isEn grep 완료 확인")를 이번 cycle 진단
+단계에서 처리 — 둘 다 isEn prop 자체가 부재해 /en/* 방문자에게 쿠키 배너
+본문/버튼/aria-label, 테마 토글 aria-label/title 이 KO 그대로 노출되던 gap.
+
+- CookieConsent: isEn prop 추가, 배너 문구/버튼/aria-label EN 치환. href 는
+  /en/privacy 라우트 부재로 /privacy 유지 (Footer legal nav 와 동일 scope).
+- ThemeToggle: isEn prop 추가, aria-label/title EN 치환. NavLinks 가 자체
+  usePathname 으로 isEn 계산해 전달 (SearchForm 과 동일 client-side 계산
+  패턴, prop drilling 없음).
+- layout.tsx: `<CookieConsent isEn={isEn} />` 배선.
+- 테스트 신규 2파일(CookieConsent/ThemeToggle) 6 assertion. lint/tsc/vitest
+  (442 files/3856 tests) 전부 clean. main 직접 commit+push (R4).
+
+MobileNav 는 ThemeToggle 렌더 없음 확인 — layout.tsx 직계 자식 isEn sweep
+완료 판단 (nav i18n sweep wave 627~630 4개 cycle 시리즈 종료).
+
+**부수 발견**: cycle 2143 은 코드 작업(fix+docs commit)이 세션 종료로 retro
+(cycle_state JSON + policy commit)를 못 남기고 끝남 — 본 cycle 진단 단계에서
+발견 후 retroactive 박제 (사례 15 silent retro drift family 재발 evidence
+추가, `~/.develop-cycle/cycles/2143.json` + `policy: cycle-retro 2143`
+commit e77e7744).
+
 ## ✅ fix-incident(heavy) — Footer 전체 EN i18n 누락 수정 (wave-629, cycle 2143, 2026-08-14)
 
 cycle 2142 review-code(heavy) 가 SearchForm i18n 누락을 발견/수정하면서 nav i18n
