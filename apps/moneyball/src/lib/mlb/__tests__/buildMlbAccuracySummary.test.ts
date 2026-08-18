@@ -80,7 +80,7 @@ describe('buildMlbAccuracySummary', () => {
     expect(result.confidenceTiers.length).toBe(3);
     // avgConf(0.7) - acc(0.5) = 0.2 (/mlb/accuracy 보정 오차 카드 정합, wave-626)
     expect(result.gap).toBeCloseTo(0.2, 5);
-    // 둘 다 home_win_prob=0.7 → winnerProb=0.7 → 70-80% bucket 에 2건 모두 (WinnerProbBucketChart parity, cycle 2181)
+    // 둘 다 home_win_prob=0.7 → winnerProb=0.7 → 70-80% bucket 에 2건 모두 (WinnerProbBucketChart parity, cycle 2180)
     const bucket7080 = result.winnerProbBuckets.find((b) => b.label === '70-80%');
     expect(bucket7080?.n).toBe(2);
     expect(bucket7080?.hits).toBe(1);

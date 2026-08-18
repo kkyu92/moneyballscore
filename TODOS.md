@@ -1,5 +1,21 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB 확률 bucket 보정 차트 parity (cycle 2180, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, review-code 5연속 partial cooldown 진입,
+2-chain lock 없음) — cycle 2176 backlog(KBO `/accuracy` 7개 컴포넌트 중 MLB 미구현)
+재검토 후 WinnerProbBucketChart 선정(scoring_rule/era 종속 없어 가장 이식 쉬움).
+
+`buildMlbAccuracySummary()` 기존 PredRow[] 재사용 + `buildWinnerProbBuckets()` 호출로
+`winnerProbBuckets` 필드 추가(쿼리 중복 없음). `WinnerProbBucketChart`에 locale prop
+신규(default 'ko', KBO 호출부 무변경) → en/mlb/accuracy 영문 렌더 정상. 테스트 1건 추가,
+전체 type-check/lint/vitest(447/3887) 통과, main 직접 push(commit febe1de4).
+
+**다음 explore-idea heavy 후보 (backlog 잔여 5개)**: BrierTrendChart(KBO era별 색상
+매핑 의존이라 MLB 이식 시 MLB 전용 scoring_rule 색상 체계 필요 — 스코프 큼) /
+ScoringRuleDayHeatmap / RollingAccuracyChart / CohortComparisonHeatmap / TeamBiasTable
+(MLB standings win% 소스 확인 필요) / ModelVersionHistory.
+
 ## ✅ fix-incident 완료 — verify cron 영구 봉인 버그, KBO 25경기 9일+ scheduled 고착 (cycle 2179, PR #2963)
 
 **사례 32** (`memory/drift-cases.md`) 참조. WebSearch 로 08-05~09 KBO 리그
