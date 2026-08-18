@@ -1,5 +1,44 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB DetailedFactorAnalysis parity (cycle 2171, 2026-08-18)
+
+cycle 2170 retro "review-code 또는 explore-idea free judgment" 따라 시작. KBO
+`/analysis/game/[id]` 임포트를 MLB game-detail 페이지와 diff해 4개 컴포넌트 gap 발견:
+`AgentArgumentBox`/`JudgeVerdictPanel`/`PostviewPanel`/`DebateTimeline`(LLM debate
+파이프라인 산출물 — MLB는 debate 단계 자체가 없어 구조적으로 제외 확인, `mlb-overview.ts`
+주석에 이미 명시됨) + `GameAnalysisProse`(이미 cycle 2104 `MlbGameOverview`로 parity
+완료 — 최초 진단이 놓쳤던 기존 구현) + `DetailedFactorAnalysis`(진짜 gap, MLB는
+raw dl grid만 있고 가중치%/우세 판정/기여도%p/서술 없음).
+
+**당초 계획했던 넓은 스코프(KBO `explainFactor` 급 강도-등급 서술 전체 포팅)는
+자가 검증에서 reject** — KBO 서술 임계 상수(`SP_AVG_FIP_DUEL`/`WAR_STRONG` 등)는
+KBO 리그 평균으로 캘리브레이션된 값이라 MLB에 그대로 재사용하면 리그 평균이 다른
+투수/타자를 잘못된 강도로 서술할 위험(현재 저장소에 MLB 전용 리그평균 상수 0건
+확인). 캘리브레이션 없는 재사용은 domain-incorrect 서술을 만들 Tier 3 리스크로
+판단해 축소.
+
+**실제 구현(Tier 1, 캘리브레이션 불필요)**: `computeMlbWaterfall`이 이미 산출한
+bar(contribution/direction)만 소비하는 사실 비교형 서술로 스코프 축소 — "강함/약함"
+같은 등급 주장 없이 "{label}에서 {team} 우세({pp}%p)"만 생성. 신규
+`packages/kbo-data/src/factors/mlb-factor-detail.ts::buildMlbFactorDetailRows`
+(순수 함수, 신규 계산/DB 조회 없음 — `MlbFactorWaterfallChart`/`MlbGameOverview`와
+동일 input 재사용) + `mlb-overview.ts`의 `toSentence`/`NARRATIVE_MIN_PP` export해
+문구 재사용(GameOverview 요약과 DetailedFactorAnalysis 개별 행이 다른 wording으로
+갈라지는 drift 방지). 신규 `MlbDetailedFactorAnalysis.tsx`가 ko/en MLB game-detail
+페이지의 기존 raw dl 그리드(`FactorRow`, park_factor/home_advantage/final 제외
+7팩터 — cycle 2108 self-sync 패턴 그대로 유지)를 대체.
+
+**검증**: kbo-data 신규 6 test(비대칭/중립/null pair/포맷팅/en locale), 모노레포
+type-check/lint clean, moneyball 3879 tests 유지(회귀 없음). 로컬 dev 서버로 실측
+렌더 시도했으나 `/mlb/team/LAD` 등 내 변경과 무관한 기존 nested dynamic route도
+전부 로컬에서만 404(prod `moneyballscore.vercel.app` 동일 경로는 200) —
+사전 존재하는 로컬 dev 환경 이슈로 확인(내 diff 범위 밖), 다음 fix-incident 후보로
+flag만.
+
+**다음 fire 후보**: 로컬 dev 서버 `/mlb/*` nested dynamic route 404(환경 이슈, prod
+정상) 원인 조사 — fix-incident. MLB 전용 리그평균 캘리브레이션 상수 신규 도출해
+강도-등급 서술(KBO parity 완전판) 확장 여지는 남겨둠(Tier 3, 별도 결정 필요).
+
 ## ✅ polish-ui(heavy) — dark mode brand-950 토큰 drift 수정 (cycle 2170, 2026-08-18)
 
 cycle 2169 retro "review-code 또는 polish-ui free judgment" 따라 polish-ui 선택

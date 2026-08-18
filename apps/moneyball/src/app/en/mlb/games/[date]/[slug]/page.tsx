@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbDetailedFactorAnalysis } from "@/components/predictions/MlbDetailedFactorAnalysis";
 import { MlbFactorWaterfallChart } from "@/components/predictions/MlbFactorWaterfallChart";
 import { MlbGameOverview } from "@/components/predictions/MlbGameOverview";
 import { MlbHistoricalAnalogMatchup } from "@/components/predictions/MlbHistoricalAnalogMatchup";
@@ -243,19 +244,13 @@ export default async function GameDetailEn({ params }: PageParams) {
         locale="en"
       />
 
-      <section>
-        <h2 className="text-lg font-bold mb-3 text-brand-700 dark:text-brand-100">{GAME_DETAIL_FACTOR_ROWS.length} Factor Breakdown</h2>
-        <dl className="grid grid-cols-2 gap-3 text-sm">
-          {GAME_DETAIL_FACTOR_ROWS.map((row) => (
-            <FactorRow
-              key={row.homeKey}
-              label={row.label}
-              home={pred[row.homeKey] as number | null}
-              away={pred[row.awayKey] as number | null}
-            />
-          ))}
-        </dl>
-      </section>
+      <MlbDetailedFactorAnalysis
+        homeTeam={home}
+        awayTeam={away}
+        bars={waterfallBars}
+        values={waterfallInput}
+        locale="en"
+      />
 
       <MlbFactorWaterfallChart
         homeTeam={home}
@@ -299,14 +294,5 @@ export default async function GameDetailEn({ params }: PageParams) {
         return <RelatedLinks title="Related pages" items={items} />;
       })()}
     </main>
-  );
-}
-
-function FactorRow({ label, home, away }: { label: string; home: number | null; away: number | null }) {
-  return (
-    <div className="border border-brand-200 dark:border-brand-800 rounded p-3">
-      <dt className="text-xs text-brand-500 dark:text-brand-400">{label}</dt>
-      <dd className="font-mono mt-1 text-brand-700 dark:text-brand-100">{home ?? '—'} / {away ?? '—'}</dd>
-    </div>
   );
 }
