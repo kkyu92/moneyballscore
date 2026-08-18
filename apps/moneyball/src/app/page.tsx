@@ -382,10 +382,11 @@ async function getTodayDivergenceGame(games: HomeGame[]): Promise<DivergenceGame
 
   const ids = scheduledWithPred.map((g) => g.id);
   const supabase = await createClient();
-  const { data } = await supabase
+  const pollResult = await supabase
     .from('pick_poll_events')
     .select('game_id, pick')
     .in('game_id', ids);
+  const { data } = assertSelectOk(pollResult, 'home.getTodayDivergenceGame');
 
   if (!data || data.length === 0) return null;
 
