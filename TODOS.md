@@ -1,5 +1,28 @@
 # TODOS
 
+## ✅ polish-ui(heavy) — 색상 토큰 drift + MLB IA 결정 문서 stale (cycle 2162, 2026-08-18)
+
+2-chain alternation lock (직전 8 cycle review-code/explore-idea distinct=2) 발동 →
+잠긴 두 chain 제외 후 polish-ui 강제 발화. DESIGN.md 토큰 vs 컴포넌트 grep:
+`FactorWaterfallChart.tsx`/`MlbFactorWaterfallChart.tsx` 의 away-direction 바 색상이
+하드코딩 `#dc2626`(미문서) — DESIGN.md 명시 semantic error 토큰(`#ef4444`,
+`--color-error` CSS var 이미 존재)로 정렬.
+
+grep 확장 중 훨씬 큰 발견: `DESIGN.md ## Future / MLB IA` 섹션 + 결정 1-pager
+(`docs/decisions/mlb-vs-kbo-priority.md`) 가 여전히 cycle 1021 결정("(B) KBO 우선
+강화 / MLB sub-route 박제 금지 lock")을 현재로 서술 중이었으나, cycle ~1450+
+explore-idea(heavy) 다수 fire(plan #24/#25)로 games/team/matchup/factors/standings/
+accuracy/players/calendar/wild-card/postseason 전체 sub-route + en/ 미러가 이미
+구현·배포됨. `Header.tsx` `MLB_NAV` 도 문서 주장("단일 link")과 달리 이미 3-group
+구조. lock 이 escalation 절차(waitlist N≥30/100) 없이 silent superseded — 두 문서
+모두 실측 기준 정정(코드 동작 변경 X, 문서 truth-alignment only).
+
+vitest 445 files/3872 tests + tsc + eslint clean. main 직접 push (`69d89f38`),
+CI green 실측 확인 (`gh run view` poll to completion, cycle 2001 룰 적용).
+
+다음 fire 후보: lock 해제됨 — review-code/explore-idea 자유 판단. fix-incident
+20-gap 근접 (마지막 발화 cycle 2147, cycle 2167 도달 예정).
+
 ## ✅ review-code(heavy) — matchup 영역 carry-over 2건 (cycle 2161, 2026-08-18)
 
 cycle 2160 이 스코프 밖으로 미룬 carry-over 2건을 직접 소진.
