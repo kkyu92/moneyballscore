@@ -1,5 +1,29 @@
 # TODOS
 
+## 🟢 fix-incident — KBO 잔여 9경기 확정 취소 마킹, 사례 33 완전 해소 (cycle 2185, 2026-08-18)
+
+cycle 2184가 남긴 carry-over(6개 날짜 9경기, KBO API가 여전히 'scheduled' 로
+응답해 자동 재검증 불가) 를 이어받아 KBO 공식 뉴스 검색(WebSearch)으로 9경기
+전부 실제 취소 여부를 확인: 2026-07-05 LG-HH/HT-NC(우천), 2026-07-22·07-23
+KT-OB(그라운드 사정 2일 연속), 2026-08-01 LT-SS·NC-HT/2026-08-02 NC-HT/
+2026-08-04 OB-NC·HT-KT(폭염 4경기, KBO 폭염 세칙 첫 적용 구간). 재편성 여부와
+무관하게 해당 날짜 슬롯 경기는 전부 열리지 않았음을 개별 뉴스 기사로 교차
+확인.
+
+**fix**: `scripts/backfill-kbo-confirmed-postponed.ts` 신규(진단/--apply) —
+확인된 9개 game id 를 `games.status='postponed'` + `is_canceled=true` 로
+직접 마킹(KBO API 재조회 없이, 뉴스 확인 결과를 직접 반영). predictions
+테이블 조회 결과 9경기 전부 `is_correct=null`(애초에 채점 미실행)이라 추가
+처리 불필요. `daily_notifications` flag 미변경(Telegram 재알림 방지, cycle
+2184 와 동일 원칙 유지).
+
+**결과**: 사례 33 (cycle 2184 발견 9개 날짜 24경기) 완전 해소 — 이전 사이클
+15경기(3개 날짜, API 재조회로 해소) + 본 사이클 9경기(6개 날짜, 뉴스 확인
+직접 마킹) = 24경기 전부 정합 상태 도달. `pnpm --filter @moneyball/kbo-data
+test`: 88 files / 1139 tests green, type-check(전체 4 패키지) clean. 커밋
+직접 main push (branch/PR 미생성 — cycle 2180 이후 직접 push 패턴 유지,
+origin 대비 누적 ahead, 배포는 사용자 요청 시 batch).
+
 ## 🟢 fix-incident — KBO games.status 영구 'scheduled' 고착 family 발견 + backfill (cycle 2184, 2026-08-18, 사례 33)
 
 no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
