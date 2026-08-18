@@ -1,5 +1,39 @@
 # TODOS
 
+## ✅ review-code(lite) — stale "다음 fire 후보" 포인터 4건 재확인, 전부 이미 닫힘 (cycle 2152, 2026-08-18)
+
+open hub-dispatch issue 0건, approved plan 0건 (plan #25 는 phase3_gate_not_passed 로
+이미 archive). cycle 2151 retro 가 다양성 redirect 로 explore-idea/info-arch 권장 →
+carry-over 를 먼저 확인했으나 후보 4건 전부 이미 shipped 된 stale 포인터였음(실제
+Explore agent 조사 + 직접 코드 확인):
+
+1. **MlbMatchupEloChart 배선** (changelog v0.5.62.37/cycle 2083 이 "다음 explore-idea
+   heavy fire 후보"로 남김) — 실제로는 `ca2e42e0`(plan #25 Phase 2b step 2, TODOS
+   cycle 2085 항목)에서 이미 완료. KO/EN 양쪽 매치업 페이지 배선 확인, 팀코드 정규화
+   (사례 27) 가드 포함, 회귀 테스트 존재. **포인터가 자기 자신보다 2단계 앞선 완료
+   상태를 못 따라간 사례** — changelog 항목이 순서상 Phase 2b step 1(cycle 2083)
+   기준으로 작성돼 같은 날 나중에 완료된 step 2(cycle 2085)를 반영 못 함.
+2. **MLB 개별 경기 waterfall/분석 페이지 parity** (TODOS cycle 2098 항목 "다음
+   explore-idea heavy fire 후보") — cycle 2099 가 이미 "페이지 자체 부재" 진단이
+   틀렸음을 정정(`/mlb/games/[date]/[slug]` 기존 실존)했고, cycle 2104 가 그 페이지에
+   `MlbFactorWaterfallChart` 배선까지 완료. 신규 라우트 불필요했던 gap.
+3. **MLB 허브 적중률 요약 EN 미러** (TODOS cycle 2118 항목 "다음 explore-idea 또는
+   review-code heavy 후보") — 바로 다음 사이클(cycle 2119)이 `buildConfidenceTiers`
+   locale 파라미터 추가로 완료. 포인터 수명 1 cycle.
+4. **헤더 nav locale 버그**(cycle 2139 발견) — cycle 2140(href)+2141(label/aria-label)
+   으로 완료, 그 뒤 SearchForm/CookieConsent/ThemeToggle/ShareButtons 까지 wave-627+
+   후속 i18n sweep 으로 이어져 layout 레벨 공용 컴포넌트(Header/Footer/PWAInstallButton/
+   KofiWidget) 전수 확인 결과 전부 isEn/usePathname 가드 존재 — 이 축 자체가 포화.
+
+**메타 패턴**: 이 리포의 "다음 X 후보" 포인터는 평균 수명 1~2 cycle — 고빈도 fire
+환경(review-code/explore-idea/fix-incident 교대, 하루 20+ cycle)에서 다음 사이클이
+같은 영역을 만지며 자연 소비하는 경우가 대부분. 포인터 자체를 안 지우는 관례가
+누적되며 진단 단계 재확인 비용(본 cycle 은 Explore agent 1회 + 직접 grep 다수)이
+꾸준히 발생 — 단, 오탐(가짜 gap 재작업) 차단 가치가 재확인 비용보다 크다고 판단해
+관례 자체는 유지, 단 확인 즉시 TODOS 에서 "이미 닫힘" 표시로 갱신(본 entry).
+
+코드 변경 0 — 문서 정정만. `pnpm test`/`lint` 재실행 없음(코드 변경 없어 skip).
+
 ## ✅ review-code(heavy) — accuracy/page.tsx 역전 패턴 배지 소표본 노이즈 가드 누락 수정 (cycle 2150, 2026-08-18)
 
 리포 2번째 monolith(`apps/moneyball/src/app/accuracy/page.tsx`, 1204줄, cycle
