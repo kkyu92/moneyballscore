@@ -39,6 +39,8 @@ export {
 } from './pipeline/silent-drift-alert';
 export { runPostviewDaily } from './pipeline/postview-daily';
 export type { PostviewDailyResult } from './pipeline/postview-daily';
+export { buildAccuracyUpdates } from './pipeline/accuracy-update';
+export { computeWinnerTeamId } from './pipeline/winner-id';
 export { syncBatterStats } from './pipeline/sync-batter-stats';
 export type { SyncBatterStatsResult } from './pipeline/sync-batter-stats';
 export { snapshotPitcherStats } from './pipeline/snapshot-pitchers';
