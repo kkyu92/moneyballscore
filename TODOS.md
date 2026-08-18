@@ -1,5 +1,24 @@
 # TODOS
 
+## ✅ explore-idea(heavy) — MLB 팩터별 적중률 테이블 parity (cycle 2176, 2026-08-18)
+
+no forced trigger (open issue/approved plan/gap-chain 전부 미충족) — 자유 판단 진단에서
+KBO `/accuracy` 의 FactorAccuracyTable(팩터별 적중률) 이 MLB `/mlb/accuracy` 엔
+없던 gap 발견. MLB predictions 는 KBO 의 정규화 factors JSONB(0.5 중심) 대신
+home_*/away_* 원본 스탯 플랫 컬럼 저장이라 KBO buildFactorAccuracy 재사용 불가
+(elo/recent_form/head_to_head/defense_sfr 4팩터는 plan #24/#25 기존 결론대로 계속
+제외 — 실데이터 없는 placeholder 재검토 아님).
+
+`buildMlbFactorAccuracy.ts` 신규(home/away 값 직접 비교, 7개 유효 팩터) +
+`FactorAccuracyTable.tsx` sport/locale prop 추가(KBO 호출부 기본값 무변경) +
+`/mlb/accuracy`·`/en/mlb/accuracy` 양쪽 배선. 테스트 8건 신규, 전체
+type-check/lint/vitest(447 files/3887 tests) 통과. PR #2962 머지(cd715282).
+
+**다음 후보(scope 밖, backlog)**: KBO `/accuracy` 의 BrierTrendChart/
+ScoringRuleDayHeatmap/RollingAccuracyChart/WinnerProbBucketChart/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory 도 MLB 미구현 —
+과다확장 회피 위해 이번 사이클은 1개 컴포넌트만 scope.
+
 ## ✅ lotto(lite) — 1237회 OOS 검증 + 1238회 count_smoke (cycle 2175, 2026-08-18)
 
 trigger 6 (마지막 lotto 발화 cycle 2145 → 30-cycle gap 도달) + trigger 3 (직전 1237회
