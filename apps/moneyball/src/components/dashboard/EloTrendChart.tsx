@@ -40,7 +40,7 @@ export function EloTrendChart({ points, teams }: EloTrendChartProps) {
   const yMax = Math.ceil((maxElo + pad) / 10) * 10;
 
   return (
-    <div className="bg-white dark:bg-gray-50 rounded-lg -mx-1 px-1 pt-2 pb-1">
+    <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-lg -mx-1 px-1 pt-2 pb-1">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
           data={points}
