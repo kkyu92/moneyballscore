@@ -1,5 +1,17 @@
 # TODOS
 
+## ✅ fix-incident(lite) — 로컬 dev 전역 dynamic route 404 재현+해소, 코드 버그 아님 (cycle 2172, 2026-08-18)
+
+cycle 2171 carry-over("`/mlb/team/LAD` 로컬 404, prod 정상, 조사 필요") 재현 조사.
+MLB뿐 아니라 KBO 쪽(`/teams/HH`, `/players/1`, `/matchup/HH/LG`)도 동일하게 전부
+404 — valid/invalid 팀코드 무관 = 앱 로직(`notFound()`) 문제가 아니라 라우터 레벨
+미매칭. 원인 = stale Turbopack `.next` 캐시. 캐시 삭제 후 재시작 → 전부 200 정상
+복구, 코드 변경 0. `memory/drift-cases.md` 사례 31 박제(개별 라우트 1개 404 =
+앱 버그 의심 / 여러 무관 라우트 동시 404 = 캐시 의심, 진단 순서 구분).
+
+Tier 3 carry-over(cycle 2171 flag, 미착수): 전체 KBO-parity 강도-등급 서술 MLB
+포팅 — 신규 MLB 리그 평균 캘리브레이션 상수 계산이 선행 조건(현재 0건).
+
 ## ✅ explore-idea(heavy) — MLB DetailedFactorAnalysis parity (cycle 2171, 2026-08-18)
 
 cycle 2170 retro "review-code 또는 explore-idea free judgment" 따라 시작. KBO
