@@ -2,7 +2,7 @@
 
 import { useTheme } from './ThemeProvider';
 
-export function ThemeToggle() {
+export function ThemeToggle({ isEn = false }: { isEn?: boolean }) {
   const { theme, setTheme } = useTheme();
 
   const next = () => {
@@ -12,14 +12,25 @@ export function ThemeToggle() {
   };
 
   const icon = theme === 'dark' ? '\u{1F319}' : theme === 'light' ? '\u{2600}\u{FE0F}' : '\u{1F4BB}';
-  const label = theme === 'dark' ? '다크' : theme === 'light' ? '라이트' : '시스템';
+  const label = isEn
+    ? theme === 'dark'
+      ? 'Dark'
+      : theme === 'light'
+        ? 'Light'
+        : 'System'
+    : theme === 'dark'
+      ? '다크'
+      : theme === 'light'
+        ? '라이트'
+        : '시스템';
+  const ariaLabel = isEn ? `Theme: ${label}` : `테마: ${label}`;
 
   return (
     <button
       onClick={next}
       className="p-2 text-brand-200 hover:text-white transition-colors text-sm"
-      aria-label={`테마: ${label}`}
-      title={`테마: ${label}`}
+      aria-label={ariaLabel}
+      title={ariaLabel}
     >
       {icon}
     </button>

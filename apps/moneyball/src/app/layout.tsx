@@ -155,7 +155,7 @@ export default async function RootLayout({
             {children}
           </main>
           <Footer isEn={isEn} />
-          <CookieConsent />
+          <CookieConsent isEn={isEn} />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

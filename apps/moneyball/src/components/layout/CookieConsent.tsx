@@ -24,7 +24,7 @@ function getVisibleServerSnapshot(): boolean {
   return false;
 }
 
-export function CookieConsent() {
+export function CookieConsent({ isEn = false }: { isEn?: boolean }) {
   const visible = useSyncExternalStore(
     subscribe,
     getVisibleSnapshot,
@@ -58,35 +58,51 @@ export function CookieConsent() {
   return (
     <div
       role="region"
-      aria-label="쿠키 사용 안내"
+      aria-label={isEn ? "Cookie notice" : "쿠키 사용 안내"}
       className="fixed bottom-0 inset-x-0 z-50 border-t border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] shadow-lg"
     >
       <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
         <p className="text-sm text-gray-700 dark:text-gray-200 flex-1">
-          이 사이트는 서비스 개선을 위한 분석 쿠키(Google Analytics)와
-          광고 식별 쿠키를 사용합니다. 자세한 내용은{' '}
-          <Link
-            href="/privacy"
-            className="underline hover:text-brand-600 dark:hover:text-brand-300"
-          >
-            개인정보처리방침
-          </Link>
-          을 확인하세요.
+          {isEn ? (
+            <>
+              This site uses analytics cookies (Google Analytics) and ad
+              identifier cookies to improve our service. See our{' '}
+              <Link
+                href="/privacy"
+                className="underline hover:text-brand-600 dark:hover:text-brand-300"
+              >
+                Privacy Policy
+              </Link>{' '}
+              for details.
+            </>
+          ) : (
+            <>
+              이 사이트는 서비스 개선을 위한 분석 쿠키(Google Analytics)와
+              광고 식별 쿠키를 사용합니다. 자세한 내용은{' '}
+              <Link
+                href="/privacy"
+                className="underline hover:text-brand-600 dark:hover:text-brand-300"
+              >
+                개인정보처리방침
+              </Link>
+              을 확인하세요.
+            </>
+          )}
         </p>
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href="/privacy"
             className="text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-600 transition-colors min-h-[44px] inline-flex items-center"
           >
-            자세히
+            {isEn ? "Learn more" : "자세히"}
           </Link>
           <button
             type="button"
             onClick={dismiss}
             className="text-sm font-semibold px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-            aria-label="쿠키 사용 안내 확인 후 닫기"
+            aria-label={isEn ? "Acknowledge and dismiss cookie notice" : "쿠키 사용 안내 확인 후 닫기"}
           >
-            확인
+            {isEn ? "Got it" : "확인"}
           </button>
         </div>
       </div>

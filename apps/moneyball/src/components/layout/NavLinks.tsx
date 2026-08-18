@@ -17,12 +17,13 @@ export function NavLinks() {
   const pathname = usePathname() ?? "/";
   const league = leagueFromPath(pathname);
   const navItems = localizeNavItems(LEAGUE_NAVS[league], pathname);
+  const isEn = pathname === "/en" || pathname.startsWith("/en/");
 
   return (
     <div data-league={league} className="hidden md:flex items-center gap-5">
       <MegaMenu items={navItems} pathname={pathname} />
       <SearchForm compact />
-      <ThemeToggle />
+      <ThemeToggle isEn={isEn} />
     </div>
   );
 }
