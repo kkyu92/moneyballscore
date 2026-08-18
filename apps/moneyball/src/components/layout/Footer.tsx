@@ -3,17 +3,21 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe (cycle 2022 갱신 — /lotto 최상위 hub 로또 컬럼 추가, 기존 /calendar 패턴과 동일 gap):
+// Sitemap wireframe (cycle 2153 갱신 — MLB 컬럼에 /mlb/accuracy, /mlb/calendar 누락 발견
+// 후 추가: KO/EN 라우트 모두 실존 + 헤더 nav 배선까지 있었으나 footer sitemap 컬럼만
+// 빠져있던 gap, KBO /calendar 는 이미 헤더+footer 양쪽 존재하는 패턴과 불일치했음):
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
 // │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
 // │ /         /picks    /standings /reviews   /method.. /mlb      /lotto     │
 // │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/me. │
 // │ /accuracy            /players   /reviews/m /glossary /mlb/team /lotto/ar │
-// │ /dashboard           /matchup   /reviews/. /change.. /mlb/play..         │
-// │ /insights                        /seasons   /about    /mlb/fact..         │
-// │ /predictions                                /search   /mlb/wc..           │
-// │ /calendar                                             /mlb/post..         │
+// │ /dashboard           /matchup   /reviews/. /change.. /mlb/accu..         │
+// │ /insights                        /seasons   /about    /mlb/play..         │
+// │ /predictions                                /search   /mlb/fact..         │
+// │ /calendar                                             /mlb/cale..         │
+// │                                                        /mlb/wc..           │
+// │                                                        /mlb/post..         │
 // └──────────────────────────────────────────────────────────────────────────┘
 //   Desktop (≥ lg, 1024px) : 5 column grid (always expanded, 7 column wrap to 2 row)
 //   Tablet  (≥ sm, 640px)  : 3 column grid
@@ -93,8 +97,10 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb", label: "오늘 경기", enLabel: "Today's Games" },
       { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings" },
       { href: "/mlb/team", label: "팀 프로필", enLabel: "Team Profiles" },
+      { href: "/mlb/accuracy", label: "AI 적중 기록", enLabel: "Accuracy Track Record" },
       { href: "/mlb/players", label: "Statcast 선수", enLabel: "Statcast Players" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터 가중치`, enLabel: `${MLB_FACTOR_COUNTS.total}-Factor Weights` },
+      { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar" },
       { href: "/mlb/wild-card", label: "Wild Card race", enLabel: "Wild Card Race" },
       { href: "/mlb/postseason", label: "Postseason 브래킷", enLabel: "Postseason Bracket" },
     ],
