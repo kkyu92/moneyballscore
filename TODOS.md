@@ -1,5 +1,21 @@
 # TODOS
 
+## ✅ polish-ui(heavy) — Elo/FIP 차트 카드 다크모드 배경 버그 수정 (cycle 2148, 2026-08-18)
+
+wave 620대 MLB 신규 섹션(page.tsx 15개 + 컴포넌트 21개, 지난 7일) KBO/MLB
+parity 감사 — i18n(isEn/locale)·breadcrumb·design token·구조는 전부 정상
+확인(추가 gap 없음). 감사 중 카드 배경 클래스를 grep 하다 실제 버그 발견:
+`TeamEloChart`/`MatchupEloChart`/`EloTrendChart`/`PitcherFipTrend`(KBO 4개)
++ `MlbTeamEloChart`/`MlbMatchupEloChart`(MLB 포팅 2개) 총 6개 파일이
+`dark:bg-gray-50`(거의 흰색 #f9fafb)를 차트 카드 배경으로 사용 — 다크모드에서
+카드가 밝게 떠 보이는 버그. 앱 전역 72곳이 이미 쓰는
+`dark:bg-[var(--color-surface-card)]`(#151d18, DESIGN.md 다크모드 카드 색)로
+통일. KBO 원본에 있던 버그가 MLB 포팅 시 그대로 복제돼 확산된 사례
+(silent drift family 정합).
+
+CSS 클래스 1줄 × 6파일, 로직/데이터 변경 없음. lint/tsc/vitest
+(443 files/3858 tests) 전부 clean. main 직접 commit+push (R4), 커밋 187b871b.
+
 ## ✅ fix-incident(heavy) — ShareButtons EN i18n 누락 수정 (wave-631, cycle 2147, 2026-08-18)
 
 wave 627~630(헤더 nav/SearchForm/Footer/CookieConsent/ThemeToggle) i18n sweep 종료
