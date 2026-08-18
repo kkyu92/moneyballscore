@@ -1,11 +1,12 @@
 import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
-import type { Bucket, ConfidenceTier, WinnerProbBucket, RollingAccuracyPoint, BrierTrendPoint, ScoringRuleDayCell } from '@/lib/accuracy/buildAccuracyData';
+import type { Bucket, ConfidenceTier, WinnerProbBucket, RollingAccuracyPoint, BrierTrendPoint, ScoringRuleDayCell, ScoringRuleWeekCell } from '@/lib/accuracy/buildAccuracyData';
 import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
 import { WinnerProbBucketChart } from '@/components/dashboard/WinnerProbBucketChart';
 import { RollingAccuracyChart } from '@/components/dashboard/RollingAccuracyChart';
 import { BrierTrendChart } from '@/components/dashboard/BrierTrendChart';
 import { ScoringRuleDayHeatmap } from '@/components/dashboard/ScoringRuleDayHeatmap';
+import { CohortComparisonHeatmap } from '@/components/dashboard/CohortComparisonHeatmap';
 
 // KBO /accuracy 페이지의 CalibrationChart/StatCard 를 그대로 옮겨오지 않고 MLB 전용으로
 // 독립 작성 (wave-626, MVP scope — rolling accuracy/brier trend/요일별 등 나머지 섹션은
@@ -47,6 +48,9 @@ interface Strings {
   brierTrendDesc: string;
   scoringRuleDayTitle: string;
   scoringRuleDayDesc: string;
+  cohortWeekTitle: string;
+  cohortWeekSubLabel: string;
+  cohortWeekDesc: string;
   teamTitle: string;
   teamDesc: string;
   teamHeader: string;
@@ -80,6 +84,9 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     brierTrendDesc: '주차별 Brier score 변화입니다. 값이 낮을수록 AI 예측이 정확합니다.',
     scoringRuleDayTitle: '요일별 적중률',
     scoringRuleDayDesc: '요일별 적중률 매트릭스입니다. N<3 인 요일은 소표본으로 회색 처리됩니다.',
+    cohortWeekTitle: 'cohort × 주차 비교',
+    cohortWeekSubLabel: '최근 4주',
+    cohortWeekDesc: 'scoring_rule (모델 가중치 버전) × 주차 적중률 매트릭스입니다. 요일별 매트릭스의 시간 축 자매 view입니다.',
     teamTitle: '팀별 예측 성과',
     teamDesc: '경기 관련 팀 기준. 홈/원정 구분 없이 집계.',
     teamHeader: '팀',
@@ -111,6 +118,9 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     brierTrendDesc: 'Weekly Brier score over time. Lower is more accurate.',
     scoringRuleDayTitle: 'Accuracy by Day of Week',
     scoringRuleDayDesc: 'Accuracy matrix by day of week. Days with N<3 are grayed out as small samples.',
+    cohortWeekTitle: 'Cohort × Week Comparison',
+    cohortWeekSubLabel: 'Last 4 weeks',
+    cohortWeekDesc: 'Accuracy matrix by scoring_rule (model weight version) × week. Time-axis sister view of the day-of-week matrix.',
     teamTitle: 'Team Prediction Performance',
     teamDesc: 'Counted for any team involved in the game, home or away.',
     teamHeader: 'Team',
@@ -220,6 +230,7 @@ export function MlbAccuracyDashboard({
   rollingAccuracy,
   brierTrend,
   scoringRuleDayHeatmap,
+  cohortWeekHeatmap,
   teamRows,
 }: {
   locale: 'ko' | 'en';
@@ -234,6 +245,7 @@ export function MlbAccuracyDashboard({
   rollingAccuracy: RollingAccuracyPoint[];
   brierTrend: BrierTrendPoint[];
   scoringRuleDayHeatmap: ScoringRuleDayCell[];
+  cohortWeekHeatmap: ScoringRuleWeekCell[];
   teamRows: MlbTeamAccuracyRow[];
 }) {
   const s = STRINGS[locale];
@@ -314,6 +326,17 @@ export function MlbAccuracyDashboard({
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.scoringRuleDayDesc}</p>
           </div>
           <ScoringRuleDayHeatmap data={scoringRuleDayHeatmap} />
+        </section>
+      )}
+
+      {cohortWeekHeatmap.some((c) => c.n >= 3) && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <h2 className="text-lg font-bold">{s.cohortWeekTitle}</h2>
+            <span className="text-xs text-gray-400 dark:text-gray-500">{s.cohortWeekSubLabel}</span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{s.cohortWeekDesc}</p>
+          <CohortComparisonHeatmap data={cohortWeekHeatmap} />
         </section>
       )}
 

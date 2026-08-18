@@ -56,6 +56,7 @@ export default async function EnMlbAccuracyPage() {
         rollingAccuracy={summary.rollingAccuracy}
         brierTrend={summary.brierTrend}
         scoringRuleDayHeatmap={summary.scoringRuleDayHeatmap}
+        cohortWeekHeatmap={summary.cohortWeekHeatmap}
         teamRows={teamRows}
       />
 
