@@ -1,5 +1,38 @@
 # TODOS
 
+## 🟡 review-code(heavy) — daily_notifications 영구 lock 버그 클래스 family 감사, 신규 버그 미발견 (cycle 2182, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음, gap-chain 전부
+미충족) — cycle 2181 explore-idea 백로그 5개(BrierTrendChart/ScoringRuleDayHeatmap/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory) 전부 실측 확인 결과 모두
+차단됨 확인 후(BrierTrendChart/ScoringRuleDayHeatmap/CohortComparisonHeatmap 은
+`SR_COLOR_MAP`/`SR_ORDER`/`VERSION_ORDER` 가 KBO era 하드코딩이라 MLB scoring_rule
+자체가 그 목록에 없어 데이터 있어도 라인 렌더 자체가 안 됨 — "색상 매핑만 추가하면
+된다"던 기존 TODOS 서술보다 스코프 큼. TeamBiasTable 은 `/mlb/standings` 페이지가
+"시즌 순위는 추후 라이브 연동 carry-over" placeholder 라 실제 win% 소스 자체 부재.
+ModelVersionHistory 는 `MLB_PRODUCTION_COHORT_RULES`=단일 rule 이라 "버전 history"
+개념 자체가 무의미), review-code(heavy) 로 전환 — cycle 2179 fix-incident 가 고친
+"verify cron 영구 봉인"(사례 32, `daily.ts` results_sent flag 가 게임 미종결 상태에서
+0-result 로 영구 세워지는 버그) 과 같은 클래스(notification flag 가 불완전 상태에서
+영구 lock)가 형제 flag(`announce_sent`/`summary_sent`) 및 MLB 파이프라인에도
+있는지 family sweep.
+
+**감사 결과 (신규 버그 0건)**: `announce_sent`(daily.ts:267-294) 는 게임 종결 여부와
+무관한 09시 예고라 "미완결 상태" 개념 자체 없음 — 안전. `summary_sent`(daily.ts:
+1190-1258) 는 이미 cycle 884 fix 로 `predict_final` 시 partial(0<n<expected) 도
+"last-chance" 로 명시 트리거 + 그 외 모드는 미달 시 flag 미세팅 skip — 사례 32 와
+같은 조기 영구 lock 경로 없음, 설계 의도대로 정합. MLB 파이프라인
+(`packages/kbo-data/src/pipeline/mlb-pipeline.ts`) 은 `markNotificationFlag`/
+`isNotificationSent` 자체를 쓰지 않음(run-once lock 메커니즘 부재, idempotent
+재실행 설계) — 이 버그 클래스가 애초에 존재할 수 없는 구조. GH Actions 최근 scheduled
+workflow(`health-alert`/`runtime-error-alert`/`deploy-drift-alert`/`heartbeat-stale`)
+30건 전부 success, CI 전부 green — 새 incident 신호 0건.
+
+**결론**: 사례 32 는 `daily.ts` verify 분기 국소 버그였고 형제 flag/MLB 파이프라인
+으로 전파된 흔적 없음 — family sweep 정상 종료(PARTIAL, 코드 변경 0). 다음
+explore-idea heavy 재개 시 BrierTrendChart 등 착수하려면 `SR_ORDER`/`VERSION_ORDER`
+generalize(league 별 order+color prop화) 선행 설계 필요 — 스코프 큰 별도 착수 권장.
+
 ## ✅ explore-idea(heavy) — MLB rolling 적중률 추세 차트 parity (cycle 2181, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, 2-chain lock 없음, review-code
