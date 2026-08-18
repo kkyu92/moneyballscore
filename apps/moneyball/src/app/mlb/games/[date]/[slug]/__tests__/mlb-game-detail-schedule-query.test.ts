@@ -62,4 +62,12 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/mlbCanonicalPair/);
     expect(PAGE_SRC).toMatch(/\/mlb\/team\/\$\{home\}/);
   });
+
+  // cycle 2164 explore-idea: HistoricalAnalogMatchup(analysis/game/[id])은 순수 팩트(스케줄+
+  // 확률)라 debate/postview quant-only 게이트와 무관 — 그동안 parity 대상에서 빠져있었음.
+  it("MlbHistoricalAnalogMatchup 을 렌더한다 (같은 두 팀 과거 대결 parity, cycle 2164)", () => {
+    expect(PAGE_SRC).toMatch(/<MlbHistoricalAnalogMatchup/);
+    expect(PAGE_SRC).toMatch(/externalGameId=\{schedule\.external_game_id\}/);
+    expect(PAGE_SRC).toMatch(/asOfDate=\{date\}/);
+  });
 });

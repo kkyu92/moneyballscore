@@ -55,4 +55,10 @@ describe("en/mlb/games/[date]/[slug] KO parity 회귀 가드 (cycle 2109)", () =
     expect(PAGE_SRC).toMatch(/mlbCanonicalPair/);
     expect(PAGE_SRC).toMatch(/\/en\/mlb\/team\/\$\{home\}/);
   });
+
+  it("MlbHistoricalAnalogMatchup 을 locale='en' 으로 렌더한다 (KO parity, cycle 2164)", () => {
+    expect(PAGE_SRC).toMatch(/<MlbHistoricalAnalogMatchup/);
+    expect(PAGE_SRC).toMatch(/locale="en"/);
+    expect(PAGE_SRC).toMatch(/externalGameId=\{schedule\.external_game_id\}/);
+  });
 });
