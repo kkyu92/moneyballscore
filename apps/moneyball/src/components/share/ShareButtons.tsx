@@ -9,6 +9,8 @@ interface ShareButtonsProps {
   title: string;
   /** Web Share API용 추가 설명 (선택) */
   text?: string;
+  /** /en/* 페이지에서 true — 버튼 라벨/aria-label EN 치환 */
+  isEn?: boolean;
 }
 
 function IconTwitter() {
@@ -85,7 +87,7 @@ function IconLink() {
  * - 모바일: Web Share API (navigator.share)
  * - 데스크톱: Twitter / Facebook intent + 링크 복사
  */
-export function ShareButtons({ url, title, text }: ShareButtonsProps) {
+export function ShareButtons({ url, title, text, isEn = false }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
 
@@ -97,7 +99,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
     } catch (err: unknown) {
       // 사용자 취소(AbortError)는 에러 아님
       if (err instanceof Error && err.name !== "AbortError") {
-        setShareError("공유 실패");
+        setShareError(isEn ? "Share failed" : "공유 실패");
       }
     }
   };
@@ -121,7 +123,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-xs text-gray-500 dark:text-gray-400 mr-1">
-        공유
+        {isEn ? "Share" : "공유"}
       </span>
 
       {hasNativeShare && (
@@ -129,10 +131,10 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
           type="button"
           onClick={handleNativeShare}
           className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
-          aria-label="공유하기"
+          aria-label={isEn ? "Share" : "공유하기"}
         >
           <IconShare />
-          공유
+          {isEn ? "Share" : "공유"}
         </button>
       )}
 
@@ -141,7 +143,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors"
-        aria-label="Twitter에 공유"
+        aria-label={isEn ? "Share on Twitter" : "Twitter에 공유"}
       >
         <IconTwitter />
         Twitter
@@ -152,7 +154,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
-        aria-label="Facebook에 공유"
+        aria-label={isEn ? "Share on Facebook" : "Facebook에 공유"}
       >
         <IconFacebook />
         Facebook
@@ -162,10 +164,10 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
         type="button"
         onClick={handleCopy}
         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
-        aria-label="링크 복사"
+        aria-label={isEn ? "Copy link" : "링크 복사"}
       >
         <IconLink />
-        {copied ? "복사됨!" : "링크 복사"}
+        {copied ? (isEn ? "Copied!" : "복사됨!") : isEn ? "Copy link" : "링크 복사"}
       </button>
 
       {shareError && (

@@ -267,6 +267,7 @@ export default async function GameDetailEn({ params }: PageParams) {
           url={pageUrl}
           title={`${awayFullName} vs ${homeFullName} MLB AI prediction analysis`}
           text={`${date} ${awayFullName} vs ${homeFullName} sabermetrics-based AI analysis`}
+          isEn
         />
       </footer>
 

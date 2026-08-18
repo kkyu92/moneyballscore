@@ -407,6 +407,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
           url={`${SITE_URL}/en${pair.path}`}
           title={`${tA.shortName} vs ${tB.shortName} head-to-head & prediction record`}
           text={summary}
+          isEn
         />
       </footer>
     </article>
