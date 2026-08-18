@@ -1,5 +1,36 @@
 # TODOS
 
+## 🟢 explore-idea(heavy) — MLB Brier Score 추이 차트 parity (cycle 2186, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음) — 직전 cycle 2185 retro 가 남긴 alternation 힌트(explore-idea 또는
+review-code) + cycle 2176 이 남긴 backlog(KBO `/accuracy` 의 BrierTrendChart/
+ScoringRuleDayHeatmap/RollingAccuracyChart/WinnerProbBucketChart/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory 중 MLB 미구현 항목,
+RollingAccuracyChart·WinnerProbBucketChart 는 cycle 2180/2181 이 이미 완료)
+확인 후 BrierTrendChart 를 이번 scope 로 선택.
+
+`buildMlbAccuracySummary()` 가 이미 KBO `PredRow` 형태로 derive 해둔 rows 를
+`buildBrierTrend()` 에 그대로 재사용 — 컴포넌트/함수 신규 작성 없이 데이터
+배선만으로 parity 달성. MLB predictions 는 scoring_rule 버전 분화가 없어
+`BrierTrendChart` 의 `SR_COLOR_MAP`/`SR_ORDER`(KBO 전용 v1.5/v1.6/v1.7-revert
+라벨) 엔 안 걸리고 'all' 단일 라인만 표시 — KBO 전용 로직 변경 없이 자연
+degradation.
+
+`MlbAccuracyDashboard` 에 `brierTrend` prop 추가(길이 3+ 조건부 렌더, KBO
+페이지와 동일 threshold) + KO/EN `/mlb/accuracy`·`/en/mlb/accuracy` 양쪽 배선 +
+회귀 테스트 1건 추가. `pnpm --filter moneyball test`: 447 files/3891 tests
+green, type-check/lint clean. `pnpm --filter @moneyball/kbo-data test`: 88
+files/1139 tests green (회귀 없음 확인). 커밋 직접 main push(`3a23c92c`,
+branch/PR 미생성 — cycle 2180 이후 직접 push 패턴 유지, origin 대비 누적 ahead,
+배포는 사용자 요청 시 batch).
+
+**다음 후보(scope 밖, backlog 잔존)**: ScoringRuleDayHeatmap/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory — TeamBiasTable 은
+MLB 팀 순위(win%) 소스 부재로 KBO 와 동일 방식 이식 어려울 수 있음(사전 확인
+필요), ModelVersionHistory 는 MLB 가 scoring_rule 버전 분화 없어 실효성 낮을
+가능성(다음 explore-idea heavy fire 전 재확인 권장).
+
 ## 🟢 fix-incident — KBO 잔여 9경기 확정 취소 마킹, 사례 33 완전 해소 (cycle 2185, 2026-08-18)
 
 cycle 2184가 남긴 carry-over(6개 날짜 9경기, KBO API가 여전히 'scheduled' 로
