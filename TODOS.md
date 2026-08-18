@@ -1,5 +1,36 @@
 # TODOS
 
+## 🟢 review-code(heavy) — predictions/[date]/page.tsx 감사, 취소경기 적중률 불일치 fix (cycle 2190, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음 — 직전 8사이클 distinct=4, ship-0 미충족) — cycle 2189 explicit reco
+(review-code 또는 fix-incident) + fix-incident 신호 부재(4개 scheduled
+workflow 전부 green, open issue 0) → review-code. 대상 파일 선정 = staleness
+기준: `analysis/page.tsx`·`accuracy/page.tsx` 는 cycle 2149-2150 이미 감사,
+`predictions/[date]/page.tsx` 는 wave-505(cycle ~1872) 이후 318 사이클 미감사
+— 가장 오래됨.
+
+613줄 전체 read 후 신규 버그 1건 발견: 페이지 안 적중률 % 노출 5곳 중
+헤더 통계줄/footer ShareButtons 문구/`DailyPredictionSummaryBar` props 3곳은
+`correct.length / verified.length` (취소 경기 미포함), 나머지 `buildIntro()`/
+`buildArticleJsonLd()` 2곳은 `correctN = correct+cancelled, totalN =
+verified+cancelled` (기존 코드 주석 "취소 경기는 적중으로 집계 — 경기 자체
+무효, 예측 책임 없음" 명시) — 취소 경기 있는 날짜에 같은 페이지 안에서 서로
+다른 적중률 %가 동시 노출되는 실사용자 가시 버그.
+
+`PredictionDatePage` 최상단에 `correctN`/`totalN` 단일 source 도입 → 헤더/
+footer/`DailyPredictionSummaryBar` props 3곳 모두 교체 (`buildIntro`/
+`buildArticleJsonLd` 는 이미 정답이라 변경 X). 회귀 테스트 1건 추가
+(`correctN`/`totalN` 패턴 존재 + `correct.length / verified.length` 패턴
+부재 assert, 기존 파일 소스-grep 테스트 컨벤션 따름).
+
+`pnpm --filter moneyball test`: 447 files/3893 tests green (+1 신규),
+`tsc --noEmit`/lint clean. 커밋 직접 main push(branch/PR 미생성, cycle 2180
+이후 직접 push 패턴 유지, origin 대비 누적 ahead, 배포는 사용자 요청 시 batch).
+
+**다음 후보**: `operational-analysis` v1.8 cohort 재측정 (마지막 발화 cycle
+2178, gap 누적 중) 또는 `explore-idea` (Feature-Drift Cycle 교대).
+
 ## 🟢 explore-idea(heavy) — MLB 요일별 scoring_rule cohort heatmap parity (cycle 2189, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
