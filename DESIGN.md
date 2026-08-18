@@ -130,31 +130,27 @@
 | 2026-07-18 | 팩터 수렴 배지 3-tier 컬러 시스템 박제 (wave-452~456, cycle 1818 design-system) | `isComplete`(10/10) = amber tier (골드 아이덴티티 자연 연장 — 완전수렴 프리미엄 강조). `isWeightStrong`(가중치 강수렴) = brand tier. 기본 수렴 = gray tier. 배지(border+bg+text) + 팩터 칩(bg+text+hover) + 합치 칩(brand-100/900/40) + 상대팀 우세 팩터 칩(gray-100/800/60) 4종 토큰 패턴 정립. amber tier = Tailwind amber 직접 사용 (CSS 변수 `--color-accent` #c5a23e 와 별개 — amber 그라데이션 scale 활용 이유). 전체 spec = `docs/design/convergence-badge-system.md`. |
 | 2026-07-22 | 주간/월간 리뷰 하이라이트 배지 "박빙 적중" purple 3rd-tier 박제 (silent drift family, cycle 1977 polish-ui) | `/reviews/weekly`, `/reviews/monthly` `HighlightCard` 배지 3종: "고확신 적중"(brand-500) / "빗나감·대역전 실패"(red-500, else 분기) / **"박빙 적중"(purple-500) — 유일한 non-brand/non-red 색상**. 도입 커밋(`81f3b83c` 주간, `6db0459c` 월간) 이후 Decisions Log 미기재 상태로 방치 (silent drift). purple = 승패 이분법(성공/실패) 밖의 제3 상태(승부처 박빙) 를 나타내는 의도된 구분색 — wave-452~456 amber tier 와 동일하게 "이분법 밖 추가 tier = 별도 hue 허용" 패턴. 색상 변경 없이 문서화만 보강. 부수적으로 `HighlightCard` 중복 정의(주간/월간 페이지에 동일 함수 2곳) 를 `components/reviews/HighlightCard.tsx` 로 통합 (`showResultSuffix` prop 으로 주간 전용 "· 적중/빗나감" 접미사 분기). |
 
-## Future / MLB IA (spec only, not implemented)
+## MLB IA (implemented — cycle 2162 정정)
 
-> **Status: pending decision** — 활성화 여부는 `docs/decisions/mlb-vs-kbo-priority.md` 결정 wait. 본 section 은 시안 spec only — 페이지 / 라우트 박제 X, DESIGN.md token / motion / contrast 표 같은 결정된 system 과 분리.
+> **stale doc 정정**: 본 section 은 원래(cycle 1021) "spec only, 활성화 전 lock-in" 으로 박제됐고 `docs/decisions/mlb-vs-kbo-priority.md` 는 여전히 "(B) KBO 우선 강화 채택 / MLB sub-route 박제 금지" 로 남아있음. 하지만 실제로는 cycle ~1450+ 부터 explore-idea(heavy) 다수 fire (plan #24/#25 등) 로 MLB sub-route 전부가 이미 구현·배포됨 — lock 이 문서 갱신 없이 silent 하게 superseded. 아래 표는 2026-08-18(cycle 2162) 실측 기준으로 정정.
 
-### Trigger (활성화 조건)
-- MLB 풀 인제스트 결정 (1-pager 사용자 승인) AND
-- `/mlb` waitlist N ≥ 100 또는 30일 경과 (현 `/mlb` hub 박제 success criterion 정합)
-
-### sub-route 시안 (구현 X, KBO 정합 패턴만 박제)
+### sub-route 현황 (실측, `apps/moneyball/src/app/mlb/` + `en/mlb/` 미러 동일 구조)
 | Route | KBO 정합 source | Status |
 |---|---|---|
-| `/mlb` (hub) | `/` (KBO hub) | **현재**: waitlist + sample 1건 only (구현됨) |
-| `/mlb/games/[date]` | `/predictions/[date]` | spec — 일자별 예측 list |
-| `/mlb/games/[date]/[slug]` | `/predictions/[date]/[slug]` | spec — 경기 상세 (10팩터 + AI 토론) |
-| `/mlb/team/[code]` | `/team/[code]` | spec — 팀별 시즌 누적 (30팀 TBD) |
-| `/mlb/factors` | `/factors` (가정) | spec — MLB 팩터 가중치 설명 |
-| `/mlb/standings` | `/standings` | spec — AL/NL 6 division |
+| `/mlb` (hub) | `/` (KBO hub) | 구현됨 |
+| `/mlb/games/[date]`, `/mlb/games/[date]/[slug]` | `/predictions/[date]`, `.../[slug]` | 구현됨 — 일자별 예측 list + 경기 상세 |
+| `/mlb/team/[code]` | `/team/[code]` | 구현됨 — 팀 시즌 프로필 (타구 프로파일/Elo/Barrel% 포함) |
+| `/mlb/matchup/[teamA]/[teamB]` | `/matchup/[teamA]/[teamB]` | 구현됨 (plan #24) |
+| `/mlb/factors` | `/factors` | 구현됨 |
+| `/mlb/standings` | `/standings` | 구현됨 (AL/NL division) |
+| `/mlb/accuracy`, `/mlb/players`, `/mlb/calendar` | 대응 KBO 라우트 | 구현됨 |
+| `/mlb/wild-card`, `/mlb/postseason` | KBO 에 대응 없음 (MLB 고유) | 구현됨 |
 
-### IA 정합 룰 (활성화 시 강제)
-- `LEAGUE_NAVS.mlb` 확장: 현 `[{ href: '/mlb', label: 'MLB 베타' }]` → KBO_NAV 5 group 패턴 정합 (오늘의 경기 / 분석 / 시즌 / 검증 / 정보)
-- `LeagueSelector` pill `mlb` active 시 sub-NAV 그룹화 (현 단일 link → 5 group)
-- Breadcrumb 강제 (`docs/design/ia-hierarchy.md` 룰 정합 — cycle 1020 C2 박제)
-- megamenu 안 MLB 항목 badge "베타" → "정식" 전환 시점 = `/mlb` waitlist trigger 충족 직후
+### IA 정합 룰 — 실측 결과 (원래 "활성화 시 강제" 항목들, 이미 충족)
+- `LEAGUE_NAVS.mlb` = `MLB_NAV` (Header.tsx) — 오늘 / 경기·팀(6 sub-link) / 포스트시즌(2 sub-link) 3-group 구조. "단일 link" 문서 서술은 stale.
+- megamenu "베타" 배지 — 현 Header.tsx 에 존재하지 않음 (이미 제거됨, 전환 시점 불명 — silent).
+- 미구현 잔여: Elo 추이 차트 등 일부 팩터 wiring (plan #24 Phase 2b, `mlb-pipeline.ts` MLB Elo rating 시스템 자체 미구현 — cycle 2057 확인, 별도 scope).
 
-### Lock-in 차단 (cycle 1021 박제)
-- 본 section 박제 = 시안 spec 매핑 용도 only — 활성화 commitment X
-- 사용자 결정 (`docs/decisions/mlb-vs-kbo-priority.md`) 전 라우트 / 페이지 / 컴포넌트 박제 절대 X
-- `/mlb` hub 만 유지 — waitlist demand 측정 단일 source of truth (commitment escalation lock-in 차단, CEO High #3 정합)
+### 참고
+- 결정 문서(`docs/decisions/mlb-vs-kbo-priority.md`) 의 "(A) MLB 풀 인제스트 = 보류" / "MLB sub-route 박제 금지" 조항은 본 section 과 함께 정정 필요 — 별도 커밋에서 처리.
+- CEO High #3 (commitment escalation 차단) 취지 자체는 무효화 X — 단, 실제로는 이미 escalate 된 상태이므로 문서만 현실 정합.

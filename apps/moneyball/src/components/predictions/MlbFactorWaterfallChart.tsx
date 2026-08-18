@@ -116,7 +116,7 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam, locale = "k
                       : bar.direction === "home"
                         ? "var(--color-brand-500)"
                         : bar.direction === "away"
-                          ? "#dc2626"
+                          ? "var(--color-error)"
                           : "var(--color-brand-300)"
                   }
                 />

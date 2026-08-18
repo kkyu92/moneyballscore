@@ -4,7 +4,7 @@
 **Decided at**: 2026-05-28 cycle 1021 후속
 **Created**: 2026-05-28 (cycle 1021, plan #14 C3b)
 **Owner**: 사용자 (kyusikkim@gmail.com)
-**Linked**: `DESIGN.md ## Future / MLB IA` (시안 spec — 본 결정 후 lock 유지), `apps/moneyball/src/app/mlb/page.tsx` (현 waitlist hub 유지)
+**Linked**: `DESIGN.md ## MLB IA` (원래 lock 시안 — cycle 2162 실측 정정, 이미 구현됨), `apps/moneyball/src/app/mlb/page.tsx`
 
 ## 결정 결과
 
@@ -12,7 +12,7 @@
 
 > **v2.0 upgrade 결과 (2026-07-06, cycle 1460)**: n=178 도달 (cycle 1447) + plan #16 2차 fire → DEFAULT vs SHADOW_V20 Brier 차이 0.15% < 1pp → **v1.8 유지 확정**. v2.1-B rejected (Brier 0.4635, n=52). v2.0 전면 재조정 불필요. ← stale (cycle 1460 최종 결정)
 
-**(A) MLB 풀 인제스트 = 보류** — `/mlb` waitlist demand 측정 후 재검토 (N >= 30 또는 N >= 100 충족 시 escalation 룰 정합).
+**(A) MLB 풀 인제스트 = 보류** — `/mlb` waitlist demand 측정 후 재검토 (N >= 30 또는 N >= 100 충족 시 escalation 룰 정합). ← **stale, silently superseded (cycle 2162 정정)**: waitlist N escalation 절차 없이 cycle ~1450+ explore-idea(heavy) 다수 fire (plan #24/#25 등) 가 games/team/matchup/factors/standings/accuracy/players/calendar/wild-card/postseason 전체 sub-route 를 이미 구현·배포함 (실측: `apps/moneyball/src/app/mlb/` + migrations 044-047 mlb_team_stats/schedule/elo). 아래 lock 조항 사실상 무효 — 문서만 미갱신 상태였음. `DESIGN.md ## MLB IA` 도 동일 cycle 정정.
 
 ## 결정 후 자율 진행 영역 (본 메인)
 
@@ -21,9 +21,9 @@
 | v1.8 → v2.0 cohort 박제 | **완료 — v1.8 유지 확정 (cycle 1460, 2026-07-06). n=178 도달 (cycle 1447), Brier diff < 1pp → upgrade 불필요** (plan #14 C1a/C1b + plan #15 C1d/C1e ship 완료 + plan #16 2차 fire 결정) |
 | factor 11/12 forward backtest | 완료 (plan #15 harness fire — n=27 evidence pack ship, cycle 1036) |
 | IA 강화 | 진행 중 (plan #14 C2 Step 2a/2b/4 ship — Radix MegaMenu + axe-core) |
-| `/mlb` hub 유지 | 시안 spec only (DESIGN.md `## Future / MLB IA` 박제 유지) |
+| `/mlb` hub 유지 | ~~시안 spec only~~ 전체 sub-route 구현 완료 (DESIGN.md `## MLB IA`, cycle 2162 정정) |
 | AdSense 심사 | 사용자 영역 (domain 구매 권유 X 룰 정합) |
-| MLB sub-route 박제 | **금지** (commitment escalation 차단 lock 유지) |
+| MLB sub-route 박제 | ~~금지~~ **실측 이미 완료** (cycle 2162 정정 — lock 이 문서 갱신 없이 silent 하게 superseded, 아래 결정 결과 각주 참조) |
 
 ## (A) 보류 escalation 룰
 

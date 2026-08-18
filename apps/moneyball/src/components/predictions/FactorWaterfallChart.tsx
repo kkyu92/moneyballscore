@@ -196,7 +196,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
                       : bar.direction === "home"
                         ? "var(--color-brand-500)"
                         : bar.direction === "away"
-                          ? "#dc2626"
+                          ? "var(--color-error)"
                           : "var(--color-brand-300)"
                   }
                 />
