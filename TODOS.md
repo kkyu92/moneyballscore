@@ -1,5 +1,30 @@
 # TODOS
 
+## ✅ review-code(heavy) — MLB confidence 스케일 이중 변환 버그 (cycle 2160, 2026-08-18)
+
+Explore agent 로 matchup 영역(buildMatchupProfile.ts + matchup 페이지) 스카우팅 —
+KBO 쪽은 dead column 2개(predicted_winner/winner_team_id, 미사용) + EN matchup
+요약 문구 4개 섹션 누락(KO 대비) 발견했으나 스코프 밖(user-facing 영향 없음, 별도
+후속). 대신 스카우팅이 짚어준 confToWinProb 단서를 직접 추적해 실제 버그 확정:
+`deriveMlbOutcome()` 의 `confidence` 는 `Math.max(homeWinProb, 1-homeWinProb)`
+(0.5~1 winnerProb 스케일) 인데, `confToWinProb()` 는 KBO DB `confidence` 컬럼
+(predictor.ts: `|homeWinProb-0.5|*2`, 0~1 tossup=0 스케일) 전용 — cycle 1641
+wave-310 이 "single source 강제" 스윕 때 MLB 페이지도 KBO 와 같은 스케일로 오인
+포함시켜 이중 변환. 결과: 55% 승리확률이 78%로, tossup(50%)도 최소 75%로 표시.
+
+영향 4곳(KO/EN `/mlb/team/[code]`, KO/EN `/mlb/matchup/[teamA]/[teamB]`) 모두
+`confToWinProb(r.confidence)` → `r.confidence` 직접 렌더로 수정 + import 제거.
+wave-310 가드 테스트(`silent-drift-wave-310.test.ts`) 의 MLB 관련 2개 assertion
+(원래 "confToWinProb 써야 함") 을 반대로 정정 + 4페이지 전체 "confToWinProb 쓰면
+안 됨" 가드 신규 추가(재발 차단). `deriveMlbOutcome.ts` confidence 필드에 스케일
+설명 주석 추가.
+
+vitest 3872 passed / tsc·eslint clean / main 직접 push CI green 실측(run 32123117955).
+
+다음 fire 후보: buildMatchupProfile.ts dead column 2개 정리 + EN matchup 요약
+누락 섹션 4개 보강(스코프 밖 carry-over, user-facing 영향 미미 — 낮은 우선순위) /
+open issue / fix-incident 20-cycle gap(cycle 2167 근접) 자유 판단.
+
 ## ✅ explore-idea(heavy, scoped) — MLB 팀 프로필 타구 프로파일 잔여 4필드 추가 (cycle 2159, 2026-08-18)
 
 cycle 2157 이 mlb_team_stats(migration 044) 의 pull/cent/oppo/gb/fb/hard_hit 6개
