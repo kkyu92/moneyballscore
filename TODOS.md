@@ -1,5 +1,37 @@
 # TODOS
 
+## 📊 operational-analysis(lite) — CE cohort n=311 정체 원인 규명, 실제 incident 아님 (cycle 2168, 2026-08-18)
+
+open issue/승인 plan 0건 + review-code 11/20(55%) dominance + 3연속 partial(2163/2165/2166)
+diminishing return + saturation 11/15(<12) → 다양성 redirect 로 operational-analysis 선택.
+직전 fire(cycle 2146) 대비 op-analysis 25-gap 미도달(22)이지만 "데이터 신선도" 축으로
+`op-analysis-ce-cohort.ts` 재실행해 CE/비CE n 이 22 사이클 (여러 날) 째 정체(n=311, CE=264/
+비CE=47 동일)인 원인 조사.
+
+**조사 과정**: predictions 테이블 직접 쿼리 — 오늘(08-18) KBO `scoring_rule='v1.8'` 신규
+row 들이 `debate_version='v1-narrative'`(07:18 UTC 최초 null → 10:11 UTC 갱신 시
+'v1-narrative') 로 찍혀 있어, CE 스크립트의 CE/비CE 분류(CE=null, 비CE='v2-persona4')
+어디에도 안 들어가는 **제3의 값** 발견 — 처음엔 "CE 상태 변화 silent 미반영" 의심.
+
+**실제 원인 (오탐 배제)**: `debate_version='v1-narrative'` row 들의 `reasoning` 필드가
+`isTop`/`inning`/`awayScore`/`homeScore`/`scoreDiff`/`preGameHomeProb`/`adjustedHomeProb`
+키만 가짐 — pre_game LLM debate 예측이 아니라 **경기 중 실시간 win-prob 갱신 write
+경로**(별도 기능, 2026-04-14 부터 존재하는 historical 데이터). 리포 전체 grep(`v1-narrative`)
+결과 현재 코드베이스 어디서도 이 문자열을 참조하지 않음 — 과거/외부 기록일 뿐 현재
+active write path 아님. CE 코호트 스크립트가 이 row 들을 카운트 안 하는 게 **의도대로
+정상 동작**(pre_game 분류 기준과 무관한 데이터가 애초에 안 걸러지는 게 맞음).
+
+n=311 정체 자체도 정상: `op-analysis-ce-cohort.ts` 는 검증 완료(`is_correct` not null)
+예측만 집계 — 오늘 생성된 신규 `v1.8`+`debate_version=null` pre_game row(game_id
+10277~10281, 07:18 UTC)는 경기가 아직 안 끝나 미검증 상태라 당연히 코호트에 안 잡힘.
+CE cohort 성장이 실제로 멈춘 게 아니라 검증 지연(경기 종료 대기)일 뿐.
+
+**결론: incident 아님, 코드 변경 0.** CREDIT_EXHAUSTED 상태 판단(CLAUDE.md "debate 100%
+fallback → conf=0.3")도 이번 조사로는 뒤집히지 않음 — `debate_version='v1-narrative'`
+는 별개 기능의 레거시 데이터라 CE 해소 evidence 아님. 다음 fire 후보: op-analysis
+25-gap 자연 도달 시 재측정(전체 n 재계산) 또는 review-code/explore-idea 자유 판단
+(2-chain dominance 완화 목적 redirect 유지).
+
 ## 🩺 fix-incident(lite) — 20-cycle gap 헬스체크, 신규 incident 0건 (cycle 2167, 2026-08-18)
 
 fix-incident 마지막 발화 cycle 2147 → gap=20 (trigger 7 충족) + open issue/승인 plan
