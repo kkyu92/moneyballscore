@@ -1,5 +1,30 @@
 # TODOS
 
+## ✅ review-code(heavy) — matchup 영역 carry-over 2건 (cycle 2161, 2026-08-18)
+
+cycle 2160 이 스코프 밖으로 미룬 carry-over 2건을 직접 소진.
+
+**dead column 정리**: `buildMatchupProfile.ts`(KBO) 의 `Row.predicted_winner`
+(predictions.predicted_winner FK 원본, select 후 할당만 되고 어디서도 read 안 됨 —
+실제 승자/예측 팀 코드는 `predicted_winner_team.code` embed 로 이미 사용 중)와
+`Row.game.winner_team_id`(games.winner_team_id FK 원본, 마찬가지로 `winner.code`
+embed 가 이미 대체 — FK 자체는 embed 구문(`teams!games_winner_team_id_fkey`)에
+필요하지만 raw 컬럼 select 는 불필요) 2개를 select 문 + 타입 + 할당 3곳에서 제거.
+
+**EN matchup 요약 문장 4개 절 누락**: `/en/mlb/matchup/[teamA]/[teamB]` 의
+`buildSummaryEn()` 이 KO 버전(`packages/shared` 의 `buildMatchupSummaryText`,
+cycle 2071 KBO/MLB 통합)과 달리 recentRecord/blowout/closeGame/homeAwayEdge
+4개 절이 빠져있었음 — `buildMlbMatchupProfile` 이 이미 4개 필드 모두 계산해
+profile 에 담고 있는데 EN 전용 수기 요약 함수만 예전 버전에 멈춰있던 case (KO
+쪽은 shared 함수로 리팩터될 때 자동으로 4개 절을 얻었지만 EN 은 별도 함수라
+누락). 4개 절 영문 추가(recent record / blowout margin / close game / home-away
+split) — `MARGIN_BLOWOUT_THRESHOLD` shared 상수 재사용.
+
+vitest 3872 passed / tsc·eslint clean. main 직접 push 예정, CI green 실측 확인.
+
+다음 fire 후보: open issue / fix-incident 20-cycle gap (cycle 2167 근접, 현재
+2161→2147 gap=14) / review-code 자유 판단.
+
 ## ✅ review-code(heavy) — MLB confidence 스케일 이중 변환 버그 (cycle 2160, 2026-08-18)
 
 Explore agent 로 matchup 영역(buildMatchupProfile.ts + matchup 페이지) 스카우팅 —
