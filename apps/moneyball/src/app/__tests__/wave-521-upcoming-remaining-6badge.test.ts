@@ -4,6 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
   BULLPEN_FIP_DIFF_MIN,
   ELO_GAP_STRONG,
@@ -12,6 +14,11 @@ import {
   RECENT_FORM_DUEL_MIN,
   SP_XFIP_DUEL_MIN,
 } from '@moneyball/shared';
+
+const analysisSrc = readFileSync(
+  join(__dirname, '../analysis/page.tsx'),
+  'utf8',
+);
 
 describe('wave-521 불펜FIP 직접 대결 배지', () => {
   it('|ΔFIP| >= BULLPEN_FIP_DIFF_MIN(1.0) 시 배지 표시', () => {
@@ -103,6 +110,15 @@ describe('wave-521 WAR 직접 대결 배지', () => {
     const awayWar = 22.0;
     const delta = Math.abs(homeWar - awayWar);
     expect(delta.toFixed(1)).toBe('6.5');
+  });
+
+  it('cycle 2149 fix: WAR=0 sentinel(데이터 없음) 가드 — homeWar > 0 && awayWar > 0 조건 존재', () => {
+    // wave-521 최초 구현이 이 가드를 누락 — WAR=0(Fancy Stats 미수록 sentinel)이
+    // 실제 값(예: 6.0)과 비교되어 가짜 우위 배지를 만들던 버그. review-code(heavy) 로 발견+수정.
+    const wave521Idx = analysisSrc.indexOf('wave-521: WAR 직접 대결 배지');
+    const nextBadgeIdx = analysisSrc.indexOf('wave-521', wave521Idx + 1);
+    const warBadgeBlock = analysisSrc.slice(wave521Idx, nextBadgeIdx > -1 ? nextBadgeIdx : wave521Idx + 600);
+    expect(warBadgeBlock).toContain('g.homeWar > 0 && g.awayWar > 0');
   });
 });
 

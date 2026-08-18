@@ -2294,7 +2294,7 @@ export default async function AnalysisIndexPage() {
                                   );
                                 })()}
                                 {/* wave-521: WAR 직접 대결 배지 — |ΔWAR| >= WAR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 */}
-                                {g.homeWar != null && g.awayWar != null && (() => {
+                                {g.homeWar != null && g.awayWar != null && g.homeWar > 0 && g.awayWar > 0 && (() => {
                                   const warDelta = g.homeWar - g.awayWar;
                                   if (Math.abs(warDelta) < WAR_DUEL_MIN) return null;
                                   const warFavoredHome = warDelta > 0;
