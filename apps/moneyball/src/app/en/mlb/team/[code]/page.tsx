@@ -49,8 +49,10 @@ function fmtPct(v: number | null): string {
 function fmtElo(v: number | null): string {
   return v != null ? v.toFixed(0) : "-";
 }
-// mlb_team_stats pull/cent/oppo/gb/fb/hard_hit are already 0-100 scale (fangraphs-mlb.ts
-// `* 100`) — different scale from fmtPct (assumes 0-1 fraction), needs its own formatter.
+// mlb_team_stats pull/cent/oppo/gb/fb/hard_hit, predictions.*_lineup_barrel_pct are already
+// raw percent scale (Baseball Savant brl_percent as-is / fangraphs-mlb.ts `* 100`) — different
+// scale from fmtPct (assumes 0-1 fraction), needs its own formatter. cycle 2158 review-code
+// heavy: lineupBarrelPct was misusing fmtPct (rendered as 850%), moved to fmtRawPct.
 function fmtRawPct(v: number | null): string {
   return v != null ? `${v.toFixed(1)}%` : "-";
 }
@@ -274,7 +276,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">Barrel%</p>
             <p className="font-mono font-semibold mt-1">
-              {fmtPct(profile.factorAverages.lineupBarrelPct)}
+              {fmtRawPct(profile.factorAverages.lineupBarrelPct)}
             </p>
           </div>
         </div>

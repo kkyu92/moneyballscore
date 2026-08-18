@@ -49,8 +49,10 @@ function fmtPct(v: number | null): string {
 function fmtElo(v: number | null): string {
   return v != null ? v.toFixed(0) : "-";
 }
-// mlb_team_stats 의 pull/cent/oppo/gb/fb/hard_hit 는 이미 0~100 스케일로 저장(fangraphs-mlb.ts
-// `* 100`) — fmtPct(0~1 fraction 가정)와 다른 스케일이라 별도 포매터 필요.
+// mlb_team_stats 의 pull/cent/oppo/gb/fb/hard_hit, predictions.*_lineup_barrel_pct 는
+// 이미 raw percent 스케일로 저장(Baseball Savant brl_percent 그대로 / fangraphs-mlb.ts
+// `* 100`) — fmtPct(0~1 fraction 가정)와 다른 스케일이라 별도 포매터 필요. cycle 2158
+// review-code heavy: lineupBarrelPct 가 fmtPct 오용(850% 표시)으로 fmtRawPct 이관.
 function fmtRawPct(v: number | null): string {
   return v != null ? `${v.toFixed(1)}%` : "-";
 }
@@ -272,7 +274,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">Barrel%</p>
             <p className="font-mono font-semibold mt-1">
-              {fmtPct(profile.factorAverages.lineupBarrelPct)}
+              {fmtRawPct(profile.factorAverages.lineupBarrelPct)}
             </p>
           </div>
         </div>
