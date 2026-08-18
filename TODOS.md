@@ -1,5 +1,19 @@
 # TODOS
 
+## 🔍 review-code(heavy) — 감사 결과 버그 미발견, 건강 확인 (cycle 2163, 2026-08-18)
+
+직전 3연속 review-code(heavy) 가 발견한 silent drift family(Barrel% 스케일,
+confidence 이중 변환, matchup dead column) 패턴이 인접 영역에도 있는지 폭넓게
+재점검. confToWinProb 전체 사용처 재검증(`mlb/games/[date]` 의
+`TOP_PICK_MIN_WIN_PCT` 는 임계값 상수 변환용이라 스케일 정상 — false alarm),
+`buildMlbMatchupProfile.ts`/`buildMlbTeamProfile.ts` 전문 감사(KBO 대비 dead
+column 없음), 타구 프로파일 렌더링 null-safety, KO/EN games/[date] parity,
+standings/postseason/wild-card/factors/accuracy quick grep, methodology
+하드코딩 n 재확인 — 전부 이상 없음. vitest 445/3872 + tsc + eslint 전부 clean.
+
+버그 없는데 억지 fix 안 만듦. 코드 변경 0, 커밋 0. 다음 fire 후보: explore-idea
+또는 fix-incident (gap=17, 다음 cycle 20-gap 임박).
+
 ## ✅ polish-ui(heavy) — 색상 토큰 drift + MLB IA 결정 문서 stale (cycle 2162, 2026-08-18)
 
 2-chain alternation lock (직전 8 cycle review-code/explore-idea distinct=2) 발동 →
