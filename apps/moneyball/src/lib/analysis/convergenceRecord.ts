@@ -24,6 +24,7 @@ import {
   type SelectResult,
   normalizeMlbTeamCode,
   toMlbStatsApiCode,
+  kstDateOffset,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel';
@@ -81,9 +82,7 @@ export async function getRecentConvergencePickRecord(
   // wave-584: endDate 지정 시 해당 날짜까지만 조회 (주간 리뷰 수렴 픽 성적 용).
   endDate?: string,
 ): Promise<{ wins: number; losses: number; total: number }> {
-  const cutoff = startDate ?? new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const cutoff = startDate ?? kstDateOffset(CONVERGENCE_RECORD_LOOKBACK_DAYS);
   const effectiveLimit = startDate != null ? Number.MAX_SAFE_INTEGER : limit;
   const results = await fetchConvergencePickResults(cutoff, effectiveLimit, minFactors, endDate);
   const wins = results.filter(r => r).length;
@@ -115,9 +114,7 @@ export async function getConvergencePickStreak(
   startDate?: string,
   endDate?: string,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const cutoff = startDate ?? new Date(Date.now() - CONVERGENCE_RECORD_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const cutoff = startDate ?? kstDateOffset(CONVERGENCE_RECORD_LOOKBACK_DAYS);
   const results = await fetchConvergencePickResults(cutoff, Number.MAX_SAFE_INTEGER, minFactors, endDate);
   return computeConvergenceStreak(results);
 }
