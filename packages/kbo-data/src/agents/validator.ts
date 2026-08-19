@@ -822,6 +822,53 @@ export async function captureJudgeParseFallback(meta: JudgeParseFailureMeta): Pr
   }
 }
 
+export interface CalibrationParseFailureMeta {
+  homeTeam: string;
+  awayTeam: string;
+  textExcerpt: string;
+  errorMessage: string;
+}
+
+// calibration-agent parseResponse catch path 전용 Sentry 채널. judge-agent parseResponse 와
+// 동일 구조 (JSON.parse 실패 시 confidence 없는 all-null CalibrationHint 를 정상 데이터처럼
+// 반환) 지만 cycle 1400 P2 fix 당시 judge-agent 만 captureJudgeParseFallback 로 patch 되고
+// calibration-agent 는 누락 — evaluateAndCaptureAgentFallback (`r.data == null` 검사) 도
+// 감지 못하는 동일 silent family. GameContext 미수신 agent 라 gameId 없음.
+export async function captureCalibrationParseFallback(meta: CalibrationParseFailureMeta): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`calibration_parse_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        calibration_parse_fallback: 'true',
+        agent: 'calibration',
+      },
+      extra: {
+        home_team: meta.homeTeam,
+        away_team: meta.awayTeam,
+        text_excerpt: meta.textExcerpt,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
 export interface RivalryMemoryFailureMeta {
   source: 'fetchRecentH2H' | 'fetchMemories' | 'getRivalryBlock';
   homeTeam: string;

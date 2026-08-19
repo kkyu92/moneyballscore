@@ -1,3 +1,19 @@
+## 🟢 review-code (heavy) — calibration-agent.ts parseResponse silent fallback 정정 (cycle 2281, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 archived/completed/blocked 상태 확인). 2-chain lock 미충족(직전 8사이클 distinct=5: review-code/polish-ui/fix-incident/explore-idea/info-architecture-review). 직전 20사이클 review-code dominance 65%(13/20). 직전 3 cycle(2278/2279/2280) 모두 "review-code(heavy) 잔존 대형 미감사 파일 재탐색" carry-over. lotto(17-gap/30)·op-analysis(16-gap/25)·info-arch(1-gap, 방금 fire) 모두 자체 주기 trigger 미도달.
+
+탐색: `find ... | xargs wc -l` 로 최대 파일 재정렬 후 git log grep 으로 "review-code"/"최초 전체 감사" 커밋 이력 대조 — `agents/validator.ts`(909줄) 가 review-code 이력 0건으로 최우선 후보 확인.
+
+감사: `validator.ts` 전체(909줄) 최초 정독 — 환각숫자/발명선수/금칙어/claim-type 4개 서브체크 + `buildInjectionText`/`maskViolatedReasoning`/`validateFactorAttribution` + 4개 Sentry capture 채널(`notifyValidationViolations`/`captureJudgeParseFallback`/`captureRivalryMemoryFallback`/`captureAgentFallback`). 모든 콜러(team-agent/judge-agent/postview/debate.ts/rivalry-memory.ts) 배선 grep 대조 결과 drift 없음 — cycle 884/981/982/986/1013 다수 과거 하드닝 반영된 상태로 확인.
+
+인접 확장: `debate.ts`(119줄, 3-agent 병렬 실행 오케스트레이터) 로 감사 범위 확장 — `evaluateAndCaptureAgentFallback` 이 `[homeResult, awayResult, judgeResult]` 만 포함하고 `calibResult`(calibration-agent) 는 제외됨을 발견. `calibration-agent.ts` 를 따라가 실제 drift 확인: `parseResponse` catch 블록이 LLM JSON 파싱 실패 시 all-null `CalibrationHint` 를 정상 데이터처럼 반환 — `judge-agent.ts` 의 cycle 1400 lesson P2("parseResponse catch 자체가 fallback 객체를 정상 데이터처럼 반환 → evaluateAndCaptureAgentFallback 의 `r.data == null` 검사 미감지 → 22일 silent")와 완전히 동일한 family. judge-agent 는 당시 patch 됐지만 calibration-agent 는 대상에서 누락돼 지금까지 무방비.
+
+수정: `validator.ts` 에 `captureCalibrationParseFallback` 신규 export (기존 3종 capture 함수와 동일 동적 import + try/catch 패턴). `calibration-agent.ts` `parseResponse` 시그니처에 `homeTeam`/`awayTeam` 추가 + catch 블록에서 호출 + export 전환(judge-agent 패턴 정렬) + 호출부(`runCalibrationAgent`) 갱신. 신규 테스트 3건(`agents-calibration-parse-fallback.test.ts`, judge-agent 의 `agents-judge-parse-fallback.test.ts` 와 동일 mock 패턴).
+
+검증: 89 files/1147 kbo-data tests all pass (신규 3건 포함), `pnpm type-check` clean, `pnpm lint` clean.
+
+다음 후보: review-code(heavy) 잔존 — `analysis-data.ts`(918줄)/`game/[id]/page.tsx`(838줄)/`convergenceRecord.ts`(781줄) 등 review-code 이력 0건 파일 다수 잔존. lotto(18-gap/30)·op-analysis(17-gap/25)·info-arch(2-gap/30) 다양성도 고려 가능.
+
 ## 🟢 info-architecture-review — /mlb/reviews/misses 헤더·푸터 sitemap 배선 누락 정정 (cycle 2280, 2026-08-20)
 
 진단: info-architecture-review 30-cycle 미발화 trigger 도달 (마지막 fire cycle 2250, gap=30 정확 도달). open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked), 2-chain lock 미충족(직전 8사이클 distinct=4: review-code 5/polish-ui 1/fix-incident 1/explore-idea 1). 직전 20사이클 review-code dominance 70%(14/20). cycle 2242 checkpoint 가 이미 IA 전수 조사(breadcrumb/sitemap/en미러/DESIGN.md) 완료해 "gap 없음" 확정했었지만, 그 이후(cycle 2279) 신규 라우트 `/mlb/reviews/misses` 가 추가돼 재검증 필요 시점.
