@@ -1,5 +1,27 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — /mlb/team/[code] division rank 노출 (cycle 2216, 2026-08-19)
+
+open issue 0건, approved plan 0건 (19건 전량 completed/archived, plan #25 archived).
+직전 8사이클 distinct=4 — 2-chain lock 미충족. info-arch/lotto 30-gap 재확인은
+cycle 2213/2215 가 이미 처리해 skip 유지. cycle 2215 next_recommended
+(explore-idea or review-code) 채택.
+
+**carry-over 확인**: cycle 2213 이 MLB 실 standings(buildMlbDivisionStandings)
+구현 후 남긴 next_recommended — "/mlb/team/[code] 페이지가 division rank 를
+새 standings 순서와 일치시킬지 검토" — grep 결과 해당 페이지엔 division rank
+자체가 아예 없어(league/division 라벨만 존재) 불일치가 아니라 순수 기능 gap
+확인. plan#24 dedup 체크리스트(computeMatchupStreak 등) 도 후보로 봤으나 이미
+cycle 2034/2036/2055/2064/2071 에서 전량 완료된 false lead 로 판명, 폐기.
+
+**구현**: `buildMlbStandings.ts` 에 `findMlbTeamDivisionRank()` 신규(standings
+결과에서 팀 rank/total/gamesBehind 추출) + team/[code] header 배지에
+"N위/M팀 · X경기차" 노출. 신규 유닛 테스트 3건(1위 null / 2위 GB 실측 /
+division 밖 팀 null). `pnpm type-check`(4 packages)/`pnpm --filter moneyball
+lint`/vitest(452 files·3922 tests)/kbo-data vitest(88 files·1139 tests) 전체
+통과. PR #2969 → `gh pr merge --squash --auto --delete-branch` → CI green 확인
+후 merge 완료(commit `210f942c`, `gh pr view` 실측 확인).
+
 ## 🟢 operational-analysis (heavy) — CE/비CE cohort 재측정 + op-analysis-ce-cohort.ts stale cycle label fix (cycle 2215, 2026-08-19)
 
 open issue 0건, approved plan 0건. 직전 8사이클 distinct=4 — 2-chain lock 미충족.
