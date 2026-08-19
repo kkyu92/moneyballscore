@@ -60,17 +60,17 @@ export function TeamMatchupCards({
               </span>
             </div>
 
-            {/* 홈/원정 split */}
+            {/* 홈/원정 split (N<3 소표본 — 코드베이스 공통 컨벤션, ScoringRuleDayHeatmap/CohortComparisonHeatmap 대응) */}
             {ha && (
               <div className="text-[11px] text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div className="flex justify-between">
+                <div className={`flex justify-between ${ha.homeN < 3 ? 'opacity-50' : ''}`}>
                   <span>홈</span>
                   <span className="font-mono">
                     {fmtPct(ha.homeAccuracy)}{' '}
                     <span className="text-gray-400 dark:text-gray-500">({ha.homeN})</span>
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className={`flex justify-between ${ha.awayN < 3 ? 'opacity-50' : ''}`}>
                   <span>원정</span>
                   <span className="font-mono">
                     {fmtPct(ha.awayAccuracy)}{' '}
@@ -86,7 +86,7 @@ export function TeamMatchupCards({
                 {opponents.map((m) => (
                   <div
                     key={m.opponentCode}
-                    className={`flex justify-between text-[11px] ${m.n === 1 ? 'opacity-50' : ''}`}
+                    className={`flex justify-between text-[11px] ${m.n < 3 ? 'opacity-50' : ''}`}
                   >
                     <span className="text-gray-600 dark:text-gray-400">
                       vs {shortName(m.opponentCode)}
