@@ -1,5 +1,39 @@
 # TODOS
 
+## 🟢 explore-idea(heavy) — MLB 팀별 상대 강약(matchup)/홈원정 parity (cycle 2196, 2026-08-19)
+
+no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
+직전 8사이클 distinct=4) — cycle 2195 next_recommended_chain 힌트
+(explore-idea or fix-incident) + Feature-Drift Cycle alternation 따라
+explore-idea(heavy) 선택.
+
+deploy-drift-alert 최근 2건 실패를 먼저 조사했으나 (`gh run list` →
+"deploy drift detected — gap 10h") cycle 2194 fix-incident 가 이미
+문서화한 side-effect (CLI 수동 `vercel --prod` 재배포는 git commit
+메타데이터가 없어 `/api/version` 의 `commit_sha` 가 empty — origin/main
+이 다시 git-triggered build 로 배포되기 전까진 drift-check 자체가
+blind) 그대로라 중복 조사 회피, explore-idea 로 전환.
+
+KBO `/accuracy` 페이지엔 `TeamMatchupCards`(팀별 상대 강약 분석: 홈/원정
+split + 상대팀별 적중 breakdown) 가 있는데 MLB accuracy 대시보드엔
+전체 적중률 단순 테이블만 있었음. `buildAllMlbTeamAccuracy()`/
+`buildMlbFactorAccuracy()` 등 선행 인프라는 이미 존재 — 이번 cycle 은
+남은 매칭업 gap 만 채움.
+
+`buildMlbTeamAccuracy.ts` 에 `buildMlbMatchupData()` 추가 (KBO
+`buildMatchupData()` 대응, `mlb_schedule` 직접 컬럼 기반이라 FK join
+불필요). `TeamMatchupCards` 를 KBO 하드코딩(KBO_TEAMS/shortTeamName)
+에서 `teamCodes`/`shortName` prop 주입 방식으로 일반화 — KBO 호출부는
+기존 동작 그대로, MLB `/mlb/accuracy` + `/en/mlb/accuracy` 양쪽에
+신규 연결.
+
+회귀 테스트 5건 추가. `tsc --noEmit` clean + 전체 vitest suite
+3901/3901 pass (447 files) 확인.
+
+PR #2964 → `gh pr merge --squash --auto --delete-branch` (R7) →
+`state=MERGED` 실측 확인 (커밋 `3884f704`, 사례 18/cycle 2001 lesson
+정합 — 완료 서술 전 실제 merge state 확인).
+
 ## 🟢 review-code(heavy) — Brier trend "3주 이상" 게이트 카피/동작 불일치 fix (cycle 2195, 2026-08-19)
 
 no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —

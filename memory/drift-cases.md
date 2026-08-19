@@ -632,3 +632,60 @@ away_score=null` 로 backfill, `daily_notifications.results_sent` 5일치 리셋
   좁히는 함정이 됐음. 실측이 항상 올바른 가설로 이어지는 건 아니고, 두
   환경(dev/prod)의 구조적 차이(런타임 렌더 vs 빌드타임 정적 생성)를 먼저
   이해해야 실측을 올바르게 해석할 수 있다는 교훈
+
+### 사례 33 — 로컬 develop-cycle 작업 디렉토리가 origin/main 대비 1-behind + 40-ahead 로 조용히 divergence, review-code 감사 대상 파일이 실제 배포본 아님 (cycle 2197 review-code heavy 발견+해소)
+
+cycle 2196 explore-idea(heavy) 가 "MLB 팀별 상대 강약/홈원정 parity" 를
+`buildMlbTeamAccuracy.ts`(`buildMlbMatchupData()`) + `TeamMatchupCards.tsx`
+generalize 로 구현·PR #2964 R7 squash-merge 까지 SUCCESS 로 retro 박제했는데,
+cycle 2197 review-code(heavy) 가 그 파일을 감사하려 열어보니 **로컬 워킹
+디렉토리엔 해당 코드가 전혀 없었음** — `TeamMatchupCards.tsx` 는 여전히
+KBO_TEAMS 하드코딩 그대로, `buildMlbTeamAccuracy.ts` 엔 `buildMlbMatchupData`
+자체가 부재. `git fetch && git status` 로 확인한 실제 상태: local main 이
+origin/main 대비 **1 commit behind (스쿼시된 PR #2964 자체) + 40 commit
+ahead** (cycle 2182~2196 구간 fix/docs/retro raw 커밋들 — 이 구간 다른
+cycle들은 `gh pr list --state merged` 로 확인 시 각각 별도 PR(#2955~#2963)
+로 이미 개별 스쿼시 머지되어 origin 엔 반영돼 있었으나, **로컬 main 브랜치
+자체는 매 cycle 이후 한 번도 pull/ff 되지 않아** origin 의 스쿼시 커밋과
+로컬의 원본 커밋이 같은 내용을 서로 다른 해시로 중복 보유한 채 계속 벌어짐.
+
+**핵심 gap**: review-code(heavy) chain 의 전제("메인이 직접 코드 read")가
+로컬 파일이 실제 배포본과 같다는 암묵적 가정에 의존하는데, PR 브랜치+squash
+워크플로 자체가 로컬 main 을 절대 되돌려 갱신하지 않아 이 가정이 깨질 수
+있음. 사례 8/11 류("체크포인트가 실제와 다름")의 변형이지만, 여기선
+체크포인트/메모리가 아니라 **작업 디렉토리 파일 자체**가 stale 소스였다는
+점에서 한 단계 더 근본적 — git log(커밋 메시지)만 봐서는 절대 못 잡음
+(로컬 커밋 메시지도 실제 코드 변경분과 100% 일치해 보였음), 오직
+`git fetch origin && git log HEAD..origin/main` 로 실제 원격 대조해야
+드러남.
+
+**fix (cycle 2197)**: `git fetch origin` → `git merge origin/main` (TODOS.md
+1건 conflict, 양쪽이 동일 cycle 2196 항목을 중복 추가한 것이라 단순 dedup
+후 커밋) → 실제 배포본 파일 확보 확인 (`buildMlbMatchupData`/`TeamMatchupCards`
+generalize 코드 정상 존재, `tsc --noEmit` clean) → 코드 자체엔 새 버그
+없음(구조가 KBO `buildMatchupData` 와 parity 정확, cycle 2117/2160 기존
+버그들도 이미 해소된 상태 확인) → 본 사례 문서화. 40-ahead 커밋 자체는 이번
+cycle 에서 origin 에 push 하지 않음(대량 과거 커밋 일괄 push 는 CI 검증
+우회 리스크 — 별도 후속 검토 필요).
+
+**carry-over (다음 fix-incident/skill-evolution 검토 필요)**:
+1. 로컬 main 의 40-ahead 커밋들을 origin 에 정리 push 할지(예: 별도 브랜치로
+   재구성 후 PR) 아니면 그대로 두고 매 cycle 마다 diagnosis 단계에서
+   `git fetch && git merge` 를 습관화할지 결정 필요.
+2. develop-cycle SKILL.md "세션 시작 시 필수 스캔" 또는 CLAUDE.md 스캔
+   체크리스트에 `git fetch origin -q && git log HEAD..origin/main --oneline`
+   한 줄 추가 검토 — 매 cycle 진단 단계에서 원격 대조를 기계적으로 강제하면
+   본 사례 재발을 진단 즉시 잡을 수 있음.
+3. 이 divergence 가 이번 세션(수동 invocation)에만 국한된 건지, 다른
+   worktree/자동화 경로에서도 반복되는지 다음 발견 시 확인.
+
+**관련 family**:
+- 사례 8/11 (체크포인트 주장 vs 실제 불일치) — 대상이 메모리/체크포인트가
+  아니라 로컬 git 워킹 디렉토리 자체라는 점에서 변형
+- 사례 17 (`gh run list` 로 CI 파이프라인 실 여부 확인 필수) — 여기선 CI/PR
+  자체는 전부 정상 성공했으나, 그 성공이 로컬 checkout 에 반영 안 된다는
+  별개 레이어의 맹점
+- 사례 18 (retro 완료형 서술 vs 실제 미실행) — cycle 2196 retro 는 실제로
+  머지까지 확인하고 정확히 서술했음(사례 18 mitigation 정상 작동, 재발
+  아님) — 다만 "머지됨" 이 "내 로컬에도 반영됨" 을 의미하진 않는다는 새
+  구분선을 드러냄
