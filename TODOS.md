@@ -1,3 +1,13 @@
+## 🟢 review-code (heavy) — packages/kbo-data/src/scrapers/fancy-stats.ts 최초 전체 감사, findPitcher stale line 참조 정정 (cycle 2277, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 [20개 전부 completed/archived/blocked], 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code 6 + polish-ui 1 + explore-idea 1], fix-incident 19-gap/op-analysis 12-gap/lotto 13-gap/info-arch 27-gap 모두 미도달). cycle 2276 carry-over 명시 후보 `fancy-stats.ts`(526줄, 최초 미감사) 선택 — dominance-positive streak(cycle 135 rule) 적용.
+
+실측: 527줄 전체 read. 팀명 매핑(case-insensitive + 한글 폴백)/parseNum NaN fallback 가시화/xfip fallback silent drift 경고/Elo winPct=0.5 stub 경고 — 모두 이미 console.warn 으로 가시화 구현돼 clean. 테이블 인덱스 주석(투수 4/5/6/7, 타자 0/1/2/3)과 실제 코드 일치. 1건 발견: `findPitcher` docstring 이 호출자 위치를 "daily.ts:563-564"로 명시했지만 실제 호출부는 `daily.ts:693-694`(파일 성장에 따른 stale line 참조). 부수 확인(수정 X, scope 밖): Fancy Stats 소스 투수의 `era`/`innings` 하드코딩 0 값이 `snapshot-pitchers.ts` 경유 `pitcher_season_stats` 테이블에 그대로 기록되지만, KBO UI 어느 페이지도 이 컬럼을 조회하지 않아 현재는 dead column — 향후 소비자 추가 시 주의 필요.
+
+수정: docstring 구체 line 번호 제거, "grep 우선" 안내로 정정 (코드 로직 변경 없음). 474 files/4063 tests all pass, `pnpm type-check` clean, lint clean, pre-push CI pass. main 직접 push(2 file 소규모 주석 정정, PR 생략).
+
+다음 후보: review-code(heavy) 대형 미감사 파일 소진 근접 — 잔존 후보 재탐색 필요. 또는 fix-incident(19/20-gap 임박)·op-analysis(12/25-gap)·lotto(13/30-gap)·info-arch(27/30-gap) 다양성 고려.
+
 ## 🟢 review-code (heavy) — packages/kbo-data/src/pipeline/silent-drift-alert.ts 최초 전체 감사, factor anomaly alert 미배선 stale 주석 정정 (cycle 2276, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 [status=approved 매칭 0건, 20개 plan 모두 completed/archived/blocked], 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code 6 + polish-ui 1 + explore-idea 1], fix-incident 18-gap/op-analysis 11-gap/lotto 12-gap/info-arch 26-gap 모두 미도달, ship-0 emergency stop 미충족[직전 10 cycle 모두 success/partial 1건]). cycle 2275 carry-over 명시 후보 2건(`fancy-stats.ts` 526줄 / `silent-drift-alert.ts` 407줄) 중 이름 아이러니(silent drift *alert* 모듈 자체가 silent drift 가능성) 고려해 후자 선택.
