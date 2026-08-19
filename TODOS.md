@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 fix-incident — lotto methodology cutoff percentage 하드코딩 정정 (cycle 2258, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 distinct=4, 나머지 gap trigger 전부 미도달). cycle 2257 retro 가 "review-code(heavy) 신규 grep 소스 필요, 아니면 diversity" 권고 — 대형 파일 재스캔 중 `lotto/methodology/page.tsx`(519줄, 마지막 실질 audit = cycle 1569, 688 cycle 전) 가 다른 lotto 파일들(wave 153/164/170/185 반복 수정) 대비 방치돼 있음을 발견해 착수.
+
+실측: 페이지 2곳 + `apps/moneyball/data/lotto-score-backtest.json` note/limitations 필드에 `top ~0.65%` 하드코딩 발견. `LOTTO_PICK_COUNT`(현재 1000) / `count_valid`(7,700,649) 로 실제 계산하면 top 0.01% — 50~1000배 괴리. 원문 자체(cycle 898 최초 authoring, "50/7.7M" 주석)조차 계산이 틀렸던 것으로 확인(50/7.7M=0.00065%, 0.65% 아님). wave-185(cycle 1350대)가 세트수만 `LOTTO_PICK_COUNT` registry 로 치환했고 옆 percentage 문구는 그대로 방치.
+
+수정: page.tsx 에 `pickCutoffPct = (LOTTO_PICK_COUNT / count_valid * 100).toFixed(2)` 파생값(기존 `ratio` 계산과 동일 패턴) 추가해 2곳 대체. static backtest json 도 현재 값(1000세트 / top 0.01%)으로 정정. `pnpm exec tsc --noEmit` clean, eslint clean, vitest 4059/4059 pass. PR #2990 squash-merge, `state=MERGED` 실측 확인(d6e96a60).
+
+다음 후보: lotto 도메인이 review-code silent drift 새 grep 소스로 확인됨 — `lotto/page.tsx`/`lotto/archive` 계열도 유사 stale 문구 재검토 여지. 또는 lotto chain 자체 30-cycle gap 근접(마지막 fire cycle 2234, cycle 2264 도달).
+
 ## 🟢 review-code (heavy) — cycle 2256 carry-over 대형 파일 4건 감사 완료(전부 clean) (cycle 2257, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, 승인된 unprocessed plan 0건 — plan #27 은 cycle 2256 이 사실상 종결, 자동 매핑 대상 아님. 2-chain lock 미충족 직전 8사이클 distinct=4). cycle 2256 retro 가 "review-code(heavy) 잔여 대형 파일 4건" 을 명시 추천 — 채택.
