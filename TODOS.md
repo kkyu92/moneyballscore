@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — mlb/team/[code]/page.tsx 최초 전체 감사, drift 없음 확인 (cycle 2268, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 9-gap/op-analysis 2-gap/lotto 3-gap/info-arch 17-gap/explore-idea saturation 10/15 모두 미도달). review-code(heavy) 직전 8사이클 6/8 dominance 지속 + TODOS carry-over가 지목한 미감사 대형 파일 — `mlb/team/[code]/page.tsx`(519줄, 최초 감사) 선택.
+
+실측: page.tsx 렌더 로직(팩터 그리드/타구 프로파일/Elo 차트/최근 기록 테이블/division 순위 배지) clean. 지원 파일 전체 read: `buildMlbTeamProfile.ts`(teamGames.sort()가 in-place mutation이라 이후 computeTeamStreak/avgMargin/homeAwayEdge 등에 내림차순 정렬 상태로 전달됨을 확인 — 처음엔 정렬 누락 의심했으나 KBO `buildTeamProfile.ts`와 동일 패턴으로 false lead였음), `buildMlbStandings.ts`(GB 계산/division rank 로직 정상), `deriveMlbOutcome.ts`(스케일 문서화 정확, cycle 2160 이중변환 버그 재발 없음), `convergenceRecord.ts`(favoredTeam이 canonical 코드로 정규화되어 page.tsx의 `.find(s => s.teamCode === code)` 매칭과 정합). `MLB_PRODUCTION_COHORT_RULES`/`toMlbStatsApiCode`/`normalizeMlbTeamCode` 사용도 다른 MLB 파일들과 일관.
+
+결론: 코드 변경 불필요. 이미 cycle 2066/2081/2117/2160/2213/2217 등 다수 후속 fix로 충분히 정합화된 파일 — 신규 drift 0건. `apps/moneyball` 워크스페이스 내부 `vitest run src/lib/mlb` 102/102 pass, `tsc --noEmit` clean. (참고: 리포 루트에서 vitest 직접 실행 시 path alias 미해석으로 false failure 발생 — 워크스페이스 디렉토리 내부에서 실행해야 함, 진단 방법 노트.)
+
+다음 후보: review-code (heavy) 계속 — 남은 미감사 대형 파일 `debug/pipeline/page.tsx`(481줄)/`reviews/monthly/[month]/page.tsx`(481줄)/`debug/factor-correlation/page.tsx`(543줄). 또는 explore-idea (saturation 10/15로 근접, 다음 사이클 자연 trigger 가능성).
+
 ## 🟢 review-code (heavy) — lotto/methodology/page.tsx 최초 감사, 사이트 데이터 3개월 frozen silent drift 발견/수정 (cycle 2267, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 9-gap/op-analysis 2-gap/lotto 3-gap/info-arch 17-gap/explore-idea saturation 10/15 모두 미도달). review-code(heavy) 직전 20사이클 dominance 지속 + 신규 미감사 영역 확장 — `lotto/methodology/page.tsx`(520줄, 최초 감사) 선택.
