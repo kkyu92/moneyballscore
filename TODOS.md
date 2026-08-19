@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 info-architecture-review — diversity carry-over 체크포인트, IA/디자인 gap 0건 (cycle 2242, 2026-08-19)
+
+진단: cycle 2239/2240/2241 retro 3연속이 "diversity — polish-ui 또는 info-architecture-review" 를 다음 후보로 명시 (review-code/op-analysis dominance 대응) — carry-over 채택.
+
+실측: breadcrumb 누락 grep 20건 전부 의도적 제외(debug/redirect-only/root/utility/placeholder) = 신규 gap 0. sitemap.xml drift 0. en/mlb 미러 11라우트 이미 2개월 전부터 완전 wiring(mtime false positive였음). DESIGN.md `## MLB IA` + `mlb-vs-kbo-priority.md` stale lock 문서는 어제(cycle 2162)이미 정정 완료. plan #24/#25/#26 (MLB matchup/Elo/weekly·monthly) 전부 completed/archived, Phase 3 dedup 후속도 cycle 2232/2233 이미 처리. DESIGN.md 는 어제 매우 활발히 갱신되어 4주 staleness 조건과 무관.
+
+결론: 이번 diversity 신호는 "미발화 gap" 이 아니라 "review-code/op-analysis dominance 가 이미 이 영역 signal 흡수 완료" 로 실측 확정. 코드/문서 변경 없음(체크포인트 spec 만 신규 박제, `docs/design/ia-2026-08-19-cycle-2242-diversity-carryover-checkpoint.md`). outcome=retro-only.
+
+다음 후보: review-code(heavy) 신규 대상 부재 시 dimension-cycle fallback 검토 또는 explore-idea(lite) 로 완전히 새 product 방향 재탐색 권장 — 현 10팩터/IA/MLB parity 모두 성숙 상태.
+
 ## 🟢 review-code (heavy) — validator.ts 최초 감사, 환각 검증 half-applied fix 재발 발견/수정 (cycle 2241, 2026-08-19)
 
 진단: 강제 trigger 없음 (2-chain lock 없음 distinct=4/8, fix-incident/op-analysis/
