@@ -1,5 +1,24 @@
 # TODOS
 
+## 🟡 review-code (lite) — health baseline, 강제 trigger 없음 (cycle 2236, 2026-08-19)
+
+진단 결과 어떤 chain 도 강제 발화 조건 미충족 (op-analysis gap=21<25 / info-arch
+gap=11<30 / lotto gap=2<30 / fix-incident gap=1<20 / 2-chain lock 없음 / open
+issue 0건 / plan #26 완전 종결). heavy review-code 가 직전 두 사이클(2232 dedup +
+2233 clean audit) 이미 같은 영역 감사 완료라 재감사 한계효용 낮음 판단 — 직접
+health baseline 측정만 진행 (코드 변경 0).
+
+- type-check: `pnpm type-check` 4/4 packages clean (cached)
+- lint: `pnpm --filter moneyball lint` clean, 0 warnings
+- test: `pnpm test` 463 files / 4005 tests all pass
+- knip 미설치 (N/A)
+- 종합 = 전 카테고리 clean 유지 — 지속 10/10 baseline 은 review-code(heavy) 룰
+  ("10/10 유지 시 heavy 권장, 지표 무관 silent drift 가능성") 발동 근거
+- 다음 review-code(heavy) 후보: `apps/moneyball/src/app/page.tsx`(1082줄, 홈페이지)
+  — analysis/page.tsx(2802줄)/accuracy/page.tsx(1203줄) 는 이미 cycle 2149/2150
+  감사 완료, 홈페이지는 미감사 최대 monolith
+- outcome: retro-only (코드 변경 0, 순수 measurement)
+
 ## 🟢 fix-incident — /lotto/check 프로덕션 빌드 실패 (cycle 2235, 2026-08-19)
 
 deploy-drift-alert 스케줄 workflow 실패 발견 (fix-incident source table 지시대로
