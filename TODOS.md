@@ -1,5 +1,27 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 월간 리뷰 Phase 2 페이지 (plan #26, cycle 2231, 2026-08-19)
+
+Phase 1(weekly, cycle 2229/2230) 이 만든 `fetchMlbPredictionRowsInRange`/MLB factor-insight
+헬퍼/`MLB_FACTOR_WEIGHTS`/`computeMonthRange`(리그 무관) 그대로 재사용해 monthly 버전 ship.
+PR #2978 (squash 4a5ad758). plan #26 전체(Phase 1a+1b+2) 완결 — status
+`phase1_shipped_cycle_2230_phase2_monthly_pending` → `all_phases_shipped_cycle_2231`.
+
+- `/mlb/reviews/monthly` (index, 현재 월 redirect) + `/mlb/reviews/monthly/[month]` (ISR page,
+  opengraph/twitter image, not-found) — MLB weekly Phase 1b 구조 그대로 복제 (신규 데이터
+  레이어 없음)
+- `buildMlbMonthlyReview.ts` 신규 — KBO `buildMonthlyReview.ts` 구조 복제, MLB 데이터 소스 재사용
+- `/mlb/reviews` 허브 페이지에 weekly + monthly 진입 링크 카드 신규 추가 — **발견**: Phase 1b 가
+  hub 페이지에 weekly 링크 자체를 빠뜨렸던 것도 이번에 같이 보강 (plan 문서가 "기존 weekly
+  링크 옆에 monthly 추가"라 가정했으나 실제로 weekly 링크가 아예 없었음)
+- Header/Footer EN-locale exemption: Header 는 `/mlb/reviews/` prefix 가드가 이미 monthly 도
+  자동 커버(코드 변경 불필요), Footer 는 monthly 링크 추가
+- sitemap.ts monthly route 추가 (cycle 2225/2230 패턴 재사용)
+- Phase 3(선택, 후속) — `analyzeFactorAccuracy`/`analyzeMlbFactorAccuracy` dedup (review-code
+  heavy 대상, KBO 회귀 테스트 필수) 는 스코프 밖으로 유지, 후속 review-code fire 후보
+- 테스트: `pnpm --filter moneyball test -- --run` 462 files/4001 tests all pass (+3 files/+11
+  tests, zero regression), typecheck/lint clean
+
 ## 🟢 explore-idea (heavy) — MLB 주간 리뷰 Phase 1b 페이지 (plan #26, cycle 2230, 2026-08-19)
 
 Phase 1a(cycle 2229) 데이터 레이어를 소비하는 페이지 ship. PR #2977 (squash d8ef6343).
