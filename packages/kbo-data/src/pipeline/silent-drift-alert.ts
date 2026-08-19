@@ -14,8 +14,12 @@
 //
 // cycle 1013 (2026-05-28) M-D 확장 — factor anomaly z-score>3 감지 Sentry warning
 // 별도 채널. shadow factor (park_weather, umpire_sz) 활성 후 factor 분포가 비정상
-// 흐름 (예: weather 결측 30%↑ → 모든 park_weather=0.5 stuck) 사전 감지. cohort wiring
-// (M-V2) 의 evidence 누적 + 본 alert 가 함께 작동.
+// 흐름 (예: weather 결측 30%↑ → 모든 park_weather=0.5 stuck) 사전 감지 의도.
+// (cycle 2276 정정) 실제로는 어떤 파이프라인/cron 도 captureFactorAnomalyAlert 를
+// 호출하지 않음 — `/debug/silent-drift` 대시보드는 순수 계산 함수
+// `detectFactorAnomalies` 만 직접 써서 사람이 페이지를 열람할 때만 시각 표시.
+// 본 Sentry alert dispatcher 는 미배선 상태 (테스트도 0건). 자동 감지 원하면
+// daily.ts/mlb-pipeline.ts 등 실제 파이프라인에 caller 추가 필요.
 //
 // cycle 1363 (2026-06-24) explore-idea (heavy) — postview cohort 확장 (spec
 // docs/research/noise-filtering-pipeline-2026-06-24.md 후보 A Tier 1). postview-daily

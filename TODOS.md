@@ -1,3 +1,13 @@
+## 🟢 review-code (heavy) — packages/kbo-data/src/pipeline/silent-drift-alert.ts 최초 전체 감사, factor anomaly alert 미배선 stale 주석 정정 (cycle 2276, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 [status=approved 매칭 0건, 20개 plan 모두 completed/archived/blocked], 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code 6 + polish-ui 1 + explore-idea 1], fix-incident 18-gap/op-analysis 11-gap/lotto 12-gap/info-arch 26-gap 모두 미도달, ship-0 emergency stop 미충족[직전 10 cycle 모두 success/partial 1건]). cycle 2275 carry-over 명시 후보 2건(`fancy-stats.ts` 526줄 / `silent-drift-alert.ts` 407줄) 중 이름 아이러니(silent drift *alert* 모듈 자체가 silent drift 가능성) 고려해 후자 선택.
+
+실측: 407줄 전체 read + 5개 alert dispatcher(`captureSilentDriftAlert`/`captureFactorAnomalyAlert`/`captureCreditExhaustedAlert`/`captureSparsePredictionAlert`/`captureConfidenceFlatAlert`) 전수 caller grep. 4개는 `daily.ts`/`mlb-pipeline.ts`/`postview-daily.ts`에서 정상 호출 확인(clean). `captureFactorAnomalyAlert`(cycle 1013 M-D 확장)만 호출부 0건 + 테스트 0건(`pipeline-silent-drift-alert.test.ts`엔 `shouldAlertSilentDrift`/`shouldConfidenceFlatAlert` 두 describe만 존재) — 완전 dead. 원본 주석("cohort wiring (M-V2)의 evidence 누적 + 본 alert 가 함께 작동")이 실제 작동 중인 것처럼 서술했지만, `/debug/silent-drift` 대시보드는 순수 계산 함수 `detectFactorAnomalies`만 직접 사용(사람이 페이지 열람 시만 시각 표시) — Sentry alert dispatcher 자체는 자동 감지 채널로 한 번도 배선된 적 없음.
+
+수정: 주석만 정정(코드 로직 변경 X, 자동 wiring 신규 구현 X — scope 밖). 실제 파이프라인 caller 추가는 explore-idea/feature 영역으로 분리. `PipelineMode` 대조 결과 `MLB_SCRAPE_MODES` 6개 값 모두 타입과 정합(drift 없음). VERSION 0.5.62.55→56, CHANGELOG.md 신규 entry. 474 files/4063 tests all pass, `tsc --noEmit` clean, lint clean.
+
+다음 후보: review-code(heavy) 계속 시 `fancy-stats.ts`(526줄) 잔존 최초 미감사. 또는 op-analysis(11/25-gap)·lotto(12/30-gap)·fix-incident(18/20-gap) 다양성 고려. **신규 후속(자율 X, carry-over만)**: `captureFactorAnomalyAlert` 를 실제 파이프라인에 wiring할지(자동 z-score 감지 활성화) 여부는 명시적 feature 결정 — explore-idea heavy 후보로 carry.
+
 ## 🟢 review-code (heavy) — packages/shared/src/index.ts 최초 전체 감사, park factor narrative 주석 + dead export 정정 (cycle 2275, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code 6 + polish-ui 1 + explore-idea 1], fix-incident 17-gap/op-analysis 10-gap/lotto 11-gap/info-arch 25-gap 모두 미도달). cycle 2274 carry-over 명시 후보 `packages/shared/src/index.ts`(3390줄, 모노레포 최대 미감사 파일) 선택.

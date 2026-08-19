@@ -1,3 +1,18 @@
+## v0.5.62.56 — 2026-08-20 (cycle 2276, review-code (heavy): packages/kbo-data/src/pipeline/silent-drift-alert.ts 최초 전체 감사 — factor anomaly alert 미배선 stale 주석 정정)
+
+### fix(pipeline): factor anomaly Sentry alert "함께 작동" stale 주석 정정 — 실제론 미배선
+
+`packages/kbo-data/src/pipeline/silent-drift-alert.ts`(407줄, 최초 전체 감사) — 대부분
+clean(각 alert dispatcher 의 caller 전수 확인: `captureSilentDriftAlert`/`captureCreditExhaustedAlert`/
+`captureSparsePredictionAlert`/`captureConfidenceFlatAlert` 모두 `daily.ts`/`mlb-pipeline.ts`/
+`postview-daily.ts` 실제 호출 확인). 단 `captureFactorAnomalyAlert`(cycle 1013 M-D 확장) 는
+export 는 되지만 리포 전체에 호출부 0건 + 테스트 0건 확인. 원본 주석이 "cohort wiring (M-V2)
+의 evidence 누적 + 본 alert 가 함께 작동"이라 서술해 실제 동작 중인 것처럼 읽혔지만,
+`/debug/silent-drift` 대시보드는 순수 계산 함수 `detectFactorAnomalies`만 직접 써서 사람이
+페이지를 열람할 때만 시각 표시할 뿐 — 이 Sentry alert dispatcher 자체는 자동 감지 채널로
+한 번도 배선된 적 없는 상태. 주석을 실제 배선 현황(미배선, 자동 감지 원하면 caller 추가
+필요)에 맞게 정정 (코드 동작 변경 없음, 재구현 아님).
+
 ## v0.5.62.55 — 2026-08-20 (cycle 2275, review-code (heavy): packages/shared/src/index.ts 최초 전체 감사 — park factor narrative stale 주석 + dead export 정정)
 
 ### fix(shared): park factor narrative 경계값 주석 오류 정정 + dead export 제거
