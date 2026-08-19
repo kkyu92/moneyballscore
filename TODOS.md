@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — buildTeamFactorAverages.ts scoring_rule 필터 누락 정정 (#1338 family 3번째) SUCCESS (cycle 2290, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(plan #27 phase1_done/phase2_rejected/phase3_blocked_on_data — unprocessed lookup 대상 제외). 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 12-gap/20, op-analysis 5-gap/25, info-arch 10-gap/30, lotto 26-gap/30 — picks 파일 이미 존재/data 최신이라 신규 작업 불필요). cycle 2289 retro가 지목한 "#1338 family 잔존 미감사 대형 파일 재탐색"을 grep sweep으로 수행.
+
+감사: `prediction_type === 'pre_game'`/`.eq("prediction_type","pre_game")` 사용 전체 파일(~47개) grep → `CURRENT_MODEL_FILTER`/`CURRENT_SCORING_RULE`/`scoring_rule` 부재 파일만 필터링해 후보 축소. `buildTeamAccuracy.ts`/`buildPitcherProfile.ts`/`buildModelTuningInsights.ts`/`buildTeamStrengthSnapshot.ts`/`buildMissReport.ts`/`leaderboard/server.ts` 등은 이미 `CURRENT_MODEL_FILTER`(`.match()`)로 안전 확인(false positive 배제). 남은 후보 2건 중 `buildTeamFactorAverages.ts`(매치업 페이지 팀 팩터 평균 전용 쿼리)를 실제 버그로 확정 — `predictions` select가 `.eq("prediction_type","pre_game")`만 걸고 `scoring_rule` 필터가 전혀 없음. 이건 SQL 레벨 `.eq()` 필터라 매칭되는 모든 row(production v1.8 + shadow v2.1-B-shadow + shadow v2.0-shadow, 셋 다 동일 game_id+prediction_type)를 그대로 반환 — cycle 2288/2289의 JS `.find()` 단일 오염보다 더 심각(게임당 최대 3배 중복 카운트, sampleN 부풀림 + 최근 경기 중복 가중). `buildMlbTeamFactorAverages.ts`(MLB 대응)는 이미 `MLB_PRODUCTION_COHORT_RULES` 필터 적용돼있어 KBO 쪽만 누락된 sibling 불일치로 확정.
+
+수정: `CURRENT_MODEL_FILTER` import + `.match(CURRENT_MODEL_FILTER)` 추가(select 직후, `prediction_type` eq 앞). 기존 mock에 `match()` 체인 추가 + 신규 정적 grep 회귀 테스트(`silent-drift-cycle-2290.test.ts`, cycle 2288 `buildTeamProfile` 패턴 재사용). type-check/lint clean, test 479 files/4080 tests pass. PR #2999 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit 1b2217e7, 사례 18 mitigation 준수).
+
+다음 후보: `insights/series.ts`도 동일하게 scoring_rule 필터 없음이 확인됐으나, shadow row는 LLM debate(`reasoning`) 미기록으로 추정돼 실무 영향이 낮을 가능성 — 다음 review-code(heavy) fire 시 실측 확인 권장. lotto도 gap 27/30로 다음 사이클 근접.
+
 ## ⚪ review-code (heavy) — buildMatchupProfile.ts scoring_rule 필터 누락 정정 (#1338 family 2번째) SUCCESS (cycle 2289, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 11-gap/20, op-analysis 4-gap/25, info-arch 9-gap/30, lotto 25-gap/30 근접). cycle 2288 retro가 지목한 잔존 후보 — `buildMatchupProfile.ts`/`buildMatchupUpcoming.ts` scoring_rule 필터 정합.
