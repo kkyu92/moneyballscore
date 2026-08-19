@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
+import { KBO_USER_AGENT } from '../types';
 
 let lastFetchAt = 0;
 
@@ -26,9 +27,11 @@ interface FgLeaderRow {
 }
 
 // FanGraphs 가 leaderboard 페이지를 Next.js SPA(react-query) 로 전면 개편 —
-// 기존 ASP.NET 시절 `table#LeaderBoard1_dg1_ctl00` 는 서버 렌더 HTML 에 더 이상 존재하지 않음
-// (2026-08-04 HTTP 403 → 2026-08-06 이후 parse fail 로 전환, 15일 연속 mlb_fancy_scrape 무효).
+// 기존 ASP.NET 시절 `table#LeaderBoard1_dg1_ctl00` 는 서버 렌더 HTML 에 더 이상 존재하지 않음.
 // 실 데이터는 `<script id="__NEXT_DATA__">` 안 react-query dehydratedState.queries 에 JSON 으로 내장.
+// (2026-08-04~08-19 HTTP 403 / parse fail 교차 재발, 24/30일 실패 — fetch() 에 User-Agent 미설정이
+// 원인 중 하나로 확인. 형제 스크레이퍼 fangraphs.ts(KBO) 는 처음부터 KBO_USER_AGENT 사용 — 본 파일만
+// 누락돼 있었음. cycle 2278 fix.)
 function extractTeamCode(teamCell: unknown): string | null {
   if (typeof teamCell !== 'string') return null;
   const match = teamCell.match(/>([A-Z]{2,4})<\/a>/);
@@ -73,7 +76,9 @@ async function fetchLeaderRows(season: number, statsParam: FgStatsParam): Promis
   await rateLimit();
 
   const url = `https://www.fangraphs.com/leaders/major-league?pos=all&stats=${statsParam}&lg=all&season=${season}&type=8&team=0,ts&pageitems=2000000000`;
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: { 'User-Agent': KBO_USER_AGENT },
+  });
 
   if (!res.ok) {
     Sentry.captureMessage(`fangraphs-mlb HTTP ${res.status}`, {

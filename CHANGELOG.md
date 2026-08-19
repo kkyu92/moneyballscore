@@ -1,3 +1,16 @@
+## v0.5.62.58 — 2026-08-20 (cycle 2278, fix-incident: mlb_fancy_scrape User-Agent 헤더 누락 정정)
+
+### fix(mlb-pipeline): fangraphs-mlb.ts fetch() User-Agent 헤더 누락 정정 — 24/30일 실패 원인
+
+fix-incident 20-gap trigger 도달(마지막 발화 cycle 2258) — `pipeline_runs` 최근 7일 실측 결과
+`mlb_fancy_scrape` mode 가 최근 30일 중 24일 error(HTTP 403 / parse fail 교차 재발). 코드 확인 결과
+`fangraphs-mlb.ts`의 `fetchLeaderRows` 가 `fetch(url)` 호출 시 헤더를 전혀 지정하지 않음 — 형제
+스크레이퍼 `fangraphs.ts`(KBO 버전)를 포함해 리포 내 모든 다른 fetch 기반 스크레이퍼는
+`KBO_USER_AGENT` 헤더를 처음부터 사용 중이었으나 MLB 버전(cycle 1985 신규 wiring)만 누락. User-Agent
+헤더 추가로 정정(rate limit/파싱 로직 변경 없음). 실패 시 Sentry warning 캡처는 기존에도 정상 작동
+중이었으나(silent 아님), 근본 원인(헤더 누락)은 24일간 미수정 상태였음. 474 files/1144 kbo-data
+tests all pass, `pnpm type-check` clean, lint clean.
+
 ## v0.5.62.57 — 2026-08-20 (cycle 2277, review-code (heavy): packages/kbo-data/src/scrapers/fancy-stats.ts 최초 전체 감사 — findPitcher stale line 참조 정정)
 
 ### fix(kbo-data): findPitcher docstring stale line 번호(daily.ts:563-564) 정정
