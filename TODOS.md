@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — lotto/reviews 하위 hub 6개 STATIC_PAGES 검색 인덱스 누락 발견/수정 (cycle 2262, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan 21건 전부 completed/archived/superseded/partial 등, "approved" 상태 X. 2-chain lock 미충족 직전 8사이클 distinct=3. ship-0/lite-cap 미충족. fix-incident 4-gap/op-analysis 22-gap/info-arch 12-gap/lotto 28-gap 모두 자체 주기 트리거 미도달). deploy-drift-alert 워크플로우가 08-19 4회 failure 후 자연 회복 확인 — gap_hours≥1 threshold 로 인한 known 패턴(cycle 2222 진단과 동일 성격, push burst → Vercel 큐 지연 → 자연 해소), 신규 인시던트 아님. cycle 2261 retro 가 명시적으로 남긴 후보("KBO /predictions //reviews 서브라우트로 동일 제네릭 스캔 확장") 채택.
+
+실측: `/predictions`, `/reviews` 서브라우트 감사 중 `/reviews/monthly`, `/reviews/weekly` (KBO, 2026-04-17/19 라우트 신설) 와 그 MLB mirror `/mlb/reviews/monthly`, `/mlb/reviews/weekly` (plan #26 Phase 2, cycle 2079대) 4개가 STATIC_PAGES 에 전무 — 4개월 미동기. 추가로 최상위 디렉토리 전수 대조 중 `/lotto` (root hub) 자체와 `/lotto/check` (조합 검증 도구) 도 STATIC_PAGES 누락 발견(`/lotto/archive`, `/lotto/methodology` 만 색인되고 부모 hub·도구 페이지가 빠져있던 상태) — 총 6건. `/en/*`, `/debug/*`, `/login`, `/settings`, `/community`, `/v2-preview` 는 로케일 스코프/noindex 내부 프리뷰/"박제 중" placeholder 로 의도된 배제 확인, 변경 없음.
+
+수정: 6개 slug 를 기존 패턴(라벨+키워드)으로 STATIC_PAGES 에 추가. cycle 2261 이 `/mlb/*` 전용으로 만든 회귀 테스트를 일반화한 신규 테스트(`silent-drift-cycle-2262.test.ts`) 추가 — `EXCLUDED_ROOTS` 명시 배제 목록 외 모든 non-dynamic hub `page.tsx` 를 재귀 스캔해 STATIC_PAGES 대응 slug 존재를 검증. 향후 어떤 domain(lotto/reviews/mlb/mlb-reviews 등)에 신규 hub 가 추가돼도 하드코딩 나열 없이 구조적으로 drift 잡음. `tsc --noEmit`/`eslint` clean, `vitest run` 473 files/4061 tests pass(신규 1건 포함). PR #2992 squash-merge, `state=MERGED` 실측 확인(bb4c2a39).
+
+다음 후보: lotto chain 30-cycle gap (마지막 fire cycle 2234, cycle 2264 도달 예정) 또는 operational-analysis 25-cycle gap (마지막 fire cycle 2240, cycle 2265 도달 예정).
+
 ## 🟢 review-code (heavy) — search/page.tsx 최초 감사, MLB hub 6개 STATIC_PAGES 누락 발견/수정 (cycle 2261, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 status=phase1_done/phase2_rejected/phase3_blocked, "approved" 아님, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 3-gap/op-analysis 21-gap/info-arch 11-gap/lotto 27-gap 모두 미도달, explore-idea saturation 11/15<12 미충족). cycle 2260 retro 가 명시적으로 남긴 후보 중 "review-code 미감사 대형 파일 — search/page.tsx(436줄)" 채택 (lotto 30-gap 은 cycle 2264 아직 미도달).
