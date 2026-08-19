@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — sitemap.ts 최초 감사, STATIC_PAGES 와 동일 구조 제네릭 가드 신규 (cycle 2263, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 5-gap/op-analysis 23-gap/info-arch 13-gap/lotto 29-gap 모두 미도달 — lotto 30-gap 은 cycle 2264, op-analysis 25-gap 은 cycle 2265 도달 예정). review-code(heavy) 4연속 success streak (2259~2262, dominance-positive 룰 적용 정상). cycle 2261/2262 가 search/page.tsx STATIC_PAGES 에 적용한 제네릭 스캔 패턴을 동일 구조(신규 hub 추가 시 별도 배열 수동 등록) 파일로 확장 채택.
+
+실측: `sitemap.ts`(423줄) 정적 hub 46개 전수 스캔 후 리터럴 대조 — 6개 apparent 누락(`/accuracy/shadow`, `/v2-shadow-monitor`, `/reviews/{weekly,monthly}`, `/mlb/reviews/{weekly,monthly}`) 전부 코드/주석으로 의도된 제외 확인(noindex `robots: { index: false }` 2건 + `redirect()` 전용 index 페이지 4건, dynamic route 블록이 실제 컨텐츠 URL 커버). 실제 버그 0건 — `sitemap-mlb.test.ts`(214줄)는 하드코딩 `it()` 케이스만 있어 향후 신규 hub 추가 시 STATIC_PAGES 가 겪었던 것과 동일한 수동 갱신 누락 silent drift 에 무방비였던 구조적 gap 확인.
+
+수정: 코드 변경 없음(감사 clean) + 재발 방지 제네릭 회귀 테스트 신규(`silent-drift-cycle-2263.test.ts`) — non-dynamic hub `page.tsx` 전수 스캔 → sitemap.ts 리터럴 엔트리 존재 검증, `redirect()`/`robots: index:false` 패턴은 소스에서 자체 감지해 하드코딩 나열 없이 구조적으로 제외. `tsc --noEmit`/`eslint` clean, `vitest run` 474 files/4062 tests all pass(신규 1건). 커밋 831c6df3 main 직접 push (test-only 소규모 변경, PR 생략).
+
+다음 후보: lotto chain 30-cycle gap (마지막 fire cycle 2234, cycle 2264 도달 예정) 또는 operational-analysis 25-cycle gap (마지막 fire cycle 2240, cycle 2265 도달 예정). cycle 2262 커밋(bb4c2a39)이 VERSION/CHANGELOG bump 를 누락한 이력 gap 은 이번 cycle 에서 소급 수정하지 않음(범위 밖).
+
 ## 🟢 review-code (heavy) — lotto/reviews 하위 hub 6개 STATIC_PAGES 검색 인덱스 누락 발견/수정 (cycle 2262, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan 21건 전부 completed/archived/superseded/partial 등, "approved" 상태 X. 2-chain lock 미충족 직전 8사이클 distinct=3. ship-0/lite-cap 미충족. fix-incident 4-gap/op-analysis 22-gap/info-arch 12-gap/lotto 28-gap 모두 자체 주기 트리거 미도달). deploy-drift-alert 워크플로우가 08-19 4회 failure 후 자연 회복 확인 — gap_hours≥1 threshold 로 인한 known 패턴(cycle 2222 진단과 동일 성격, push burst → Vercel 큐 지연 → 자연 해소), 신규 인시던트 아님. cycle 2261 retro 가 명시적으로 남긴 후보("KBO /predictions //reviews 서브라우트로 동일 제네릭 스캔 확장") 채택.
