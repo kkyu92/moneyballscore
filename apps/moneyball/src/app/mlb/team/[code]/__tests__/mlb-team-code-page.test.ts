@@ -47,6 +47,13 @@ describe("mlb/team/[code]/page.tsx — Plan B Tier C+D Task 4 정합 (cycle 1026
     expect(PAGE_SRC).toMatch(/en:.*\/en\/mlb\/team\//);
     expect(PAGE_SRC).toMatch(/ko:.*\/mlb\/team\//);
   });
+
+  it("cycle 2217 review-code heavy: fmtGamesBehind 이 gb=0 을 '공동 1위' 로 특수 표시하지 않음 — 배지 앞부분에 이미 노출된 positional rank(예: 2위)와 모순 방지", () => {
+    expect(PAGE_SRC).not.toMatch(/return " · 공동 1위"/);
+    expect(PAGE_SRC).toMatch(
+      /function fmtGamesBehind\(gb: number \| null\): string \{\s*if \(gb === null\) return "";\s*return ` · \$\{gb % 1 === 0 \? `\$\{gb\}\.0` : gb\}경기차`;\s*\}/,
+    );
+  });
 });
 
 describe("mlb/team/page.tsx hub — 30팀 division grid", () => {
