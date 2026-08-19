@@ -1,5 +1,28 @@
 # TODOS
 
+## 🟡 operational-analysis (lite) — 주간 checkpoint, 소표본 no-action (cycle 2238, 2026-08-19)
+
+진단: 강제 trigger 없음 (fix-incident gap=3 / lotto gap=4 / info-arch gap=13 /
+op-analysis gap=23<25, threshold 근접 / 2-chain lock 없음 / open issue 0건 /
+unprocessed plan 0건). review-code heavy 는 3대 monolith 감사 완료로 새 후보
+없음(cycle 2237 결론) — explore-idea+review-code 가 직전 20 사이클의 80%
+(16/20) 차지해 다양성 보강 목적으로 op-analysis lite 선택.
+
+- 도중 발견: `gh run list` 로 `op-analysis-weekly` cron 최근 실행(2026-08-17)이
+  `failure` 로 표시 — fix-incident 신호로 보였으나 실제로는 cycle 2154~2155
+  구간에서 이미 완전 해결됨 확인 (`215097fe` gh pr create/merge 503 재시도 로직
+  추가 + `b9dcb633` 로 08-17 데이터 backfill, 둘 다 2026-08-18 17:32 커밋).
+  `gh run list` 최근 결과만 보면 오해 소지 있음 — 실제 커밋 로그 대조 필수
+  (CLAUDE.md R5 정신 재확인, 별도 fix 불필요).
+- `scripts/op-analysis-cohort.ts` 로컬 재실행 (2026-08-19 기준): 전체 n=469
+  (08-17 대비 +5) / v1.8 규칙 n=291 acc 55.0% Brier 0.3429 (08-17: acc 55.2%
+  Brier 0.3436, 안정) / v2.1-B-shadow n=52 acc 51.9% (동결 유지, reject 상태
+  변화 없음). v1.8 유지 확정 재확인, 재조정 근거 없음.
+- 이번 주(월 08-17~) 자체 필터 결과: n=24 (화요일 08-18 경기만 verified, 월요일
+  KBO 휴무 + 오늘 08-19 경기 미검증) / acc 45.8% — 표본 너무 작아 (n=24)
+  하락 신호로 해석 X (plan 자가검증 rubric: 소표본 결정 금지 원칙 적용).
+- outcome: retro-only (코드 변경 0, 측정 + 오해 소지 신호 정정만)
+
 ## 🟢 review-code (heavy) — 홈페이지 monolith 감사, 확정 버그 0건 (cycle 2237, 2026-08-19)
 
 cycle 2236 carry-over 따라 `apps/moneyball/src/app/page.tsx` (1082줄, 미감사 최대
