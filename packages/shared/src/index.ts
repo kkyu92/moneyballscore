@@ -121,6 +121,12 @@ export type TeamCode = keyof typeof KBO_TEAMS;
 export const KBO_TEAM_COUNT = Object.keys(KBO_TEAMS).length;
 
 /**
+ * KBO 포스트시즌(가을야구) 진출 팀 수 — 2015 시즌부터 와일드카드 포함 5팀 체제.
+ * cycle 2287 explore-idea(heavy) — 매직넘버 위젯 신규 (standings 5위/6위 경계 계산용).
+ */
+export const KBO_PLAYOFF_TEAM_COUNT = 5;
+
+/**
  * 구장 유형 분류 임계값 — parkPf ≥ PARK_FACTOR_HITTER_MIN = 타자 친화, ≤ PARK_FACTOR_PITCHER_MAX = 투수 친화.
  * silent drift family wave 298 (cycle 1626) — teams/mlb 8파일 16 occurrence sweep 단일 source.
  * KBO_TEAMS.SS=108 / SK=105 (타자 친화) / WO=92 / LG=95 / OB=95 (투수 친화) 기준 정합.

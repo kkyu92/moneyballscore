@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
+import { computeMagicNumber } from "@/lib/standings/computeMagicNumber";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { EloTrendChart } from "@/components/dashboard/EloTrendChart";
@@ -41,6 +42,17 @@ function formatGB(gb: number | null): string {
   if (gb === null) return "-";
   if (gb === 0) return "0.0";
   return gb % 1 === 0 ? `${gb}.0` : String(gb);
+}
+
+function MagicNumberBadge({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--color-surface-card)] px-3 py-2">
+      <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-lg font-bold tabular-nums text-brand-600 dark:text-brand-400">
+        {value === 0 ? "확정" : value}
+      </span>
+    </div>
+  );
 }
 
 function Recent10({ text }: { text: string }) {
@@ -109,6 +121,24 @@ export default async function StandingsPage() {
           참조.
         </p>
       </header>
+
+      {standings.length >= 2 && (() => {
+        const championshipMN = computeMagicNumber(standings[0], standings[1]);
+        const playoffLeader = standings[KBO_PLAYOFF_TEAM_COUNT - 1];
+        const playoffChaser = standings[KBO_PLAYOFF_TEAM_COUNT];
+        const playoffMN = playoffLeader && playoffChaser ? computeMagicNumber(playoffLeader, playoffChaser) : null;
+        if (championshipMN === null && playoffMN === null) return null;
+        return (
+          <div className="flex flex-wrap gap-2">
+            {championshipMN !== null && (
+              <MagicNumberBadge label={`${shortTeamName(standings[0].teamCode)} 우승 매직넘버`} value={championshipMN} />
+            )}
+            {playoffMN !== null && playoffLeader && (
+              <MagicNumberBadge label={`${shortTeamName(playoffLeader.teamCode)} 가을야구 매직넘버`} value={playoffMN} />
+            )}
+          </div>
+        );
+      })()}
 
       {standings.length === 0 ? (
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-500 dark:text-gray-400">
