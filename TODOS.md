@@ -1,5 +1,37 @@
 # TODOS
 
+## 🟢 review-code(heavy) — 로컬 워킹 디렉토리 origin 대비 divergence 발견+해소 (cycle 2197, 2026-08-19)
+
+no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
+직전 8사이클 distinct=4) — Feature-Drift Cycle alternation (직전 explore-idea
+heavy) + cycle 2195/2196 next_recommended_chain 힌트 양쪽 review-code 지목.
+
+cycle 2196 이 구현·PR #2964 R7 머지까지 SUCCESS 로 retro 박제한 MLB
+`TeamMatchupCards`/`buildMlbMatchupData` 를 감사하려 열어보니 로컬
+워킹 디렉토리엔 해당 코드가 전혀 없었음 (`TeamMatchupCards.tsx` 여전히
+KBO_TEAMS 하드코딩, `buildMlbMatchupData` 부재). `git fetch` 로 확인한
+실제 상태: 로컬 main 이 origin/main 대비 1-behind(스쿼시된 PR #2964)
++ 40-ahead(cycle 2182~2196 raw 커밋 — `gh pr list` 확인 결과 이미
+개별 PR #2955~2963 로 origin 엔 반영돼 있었으나 로컬 main 자체는 한
+번도 pull 안 됨) 로 조용히 divergence.
+
+`git merge origin/main` 로 동기화(TODOS.md 중복 항목 1건 conflict →
+dedup) 후 실제 코드 재확인 — `buildMlbMatchupData()`/`TeamMatchupCards`
+generalize 구조 자체엔 새 버그 없음 (KBO `buildMatchupData()` 와 parity
+정확, cycle 2117/2160 기존 버그도 이미 해소 상태). 본 사례를
+`memory/drift-cases.md` 사례 33 으로 문서화 — 체크포인트/메모리가 아닌
+**git 워킹 디렉토리 자체**가 stale 소스였다는 점에서 사례 8/11/17/18 계열의
+새 변형.
+
+`tsc --noEmit` clean 확인. PR #2965 → `gh pr merge --squash --auto
+--delete-branch` (R7) → `state=MERGED` 실측 확인 (커밋 `f063815f`, 사례
+18 mitigation 적용).
+
+carry-over: 로컬 main 의 잔여 divergence(40+1) 를 이번 cycle 에서 완전
+해소하진 않음(대량 과거 커밋 일괄 push 는 CI 우회 리스크) — 다음
+fix-incident/skill-evolution 이 "매 cycle 진단 단계에 git fetch+merge
+습관화" 여부 결정 필요.
+
 ## 🟢 explore-idea(heavy) — MLB 팀별 상대 강약(matchup)/홈원정 parity (cycle 2196, 2026-08-19)
 
 no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
