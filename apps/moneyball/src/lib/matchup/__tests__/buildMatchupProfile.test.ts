@@ -19,6 +19,7 @@ type GameFixture = {
     predicted_winner: number | null;
     predicted_winner_team: { code: string } | null;
     prediction_type: string;
+    scoring_rule?: string | null;
   }>;
 };
 
@@ -139,6 +140,7 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
             predicted_winner: HT_ID,
             predicted_winner_team: { code: "HT" },
             prediction_type: "pre_game",
+            scoring_rule: "v1.8",
           },
         ],
       },
@@ -225,6 +227,7 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
             predicted_winner: HT_ID,
             predicted_winner_team: { code: "HT" },
             prediction_type: "pre_game",
+            scoring_rule: "v1.8",
           },
         ],
       },
@@ -265,6 +268,7 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
             predicted_winner: HT_ID,
             predicted_winner_team: { code: "HT" },
             prediction_type: "pre_game",
+            scoring_rule: "v1.8",
           },
         ],
       },
@@ -301,6 +305,7 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
             predicted_winner: LG_ID,
             predicted_winner_team: { code: "LG" },
             prediction_type: "pre_game",
+            scoring_rule: "v1.8",
           },
         ],
       },
@@ -327,6 +332,52 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining("pre_game prediction 부재 final 경기 1건"),
     );
+  });
+
+  it("shadow row(scoring_rule≠CURRENT_SCORING_RULE) 동석 시 production row 만 선택 (cycle 2289 silent drift #1338 family)", async () => {
+    const games: GameFixture[] = [
+      {
+        id: 3001,
+        game_date: "2026-04-20",
+        status: "final",
+        home_score: 4,
+        away_score: 2,
+        home_team_id: HT_ID,
+        away_team_id: LG_ID,
+        winner_team_id: HT_ID,
+        home_team: { id: HT_ID, code: "HT" },
+        away_team: { id: LG_ID, code: "LG" },
+        winner: { code: "HT" },
+        predictions: [
+          {
+            // shadow row 가 배열 앞에 위치 — order 미보장 상태 시뮬레이션
+            confidence: 0.51,
+            is_correct: false,
+            predicted_winner: LG_ID,
+            predicted_winner_team: { code: "LG" },
+            prediction_type: "pre_game",
+            scoring_rule: "v2.1-B-shadow",
+          },
+          {
+            confidence: 0.62,
+            is_correct: true,
+            predicted_winner: HT_ID,
+            predicted_winner_team: { code: "HT" },
+            prediction_type: "pre_game",
+            scoring_rule: "v1.8",
+          },
+        ],
+      },
+    ];
+    supabaseMock = makeSupabaseMock(games);
+
+    const { buildMatchupProfile } = await import("../buildMatchupProfile");
+    const pair = canonicalPair("HT", "LG")!;
+    const profile = await buildMatchupProfile(pair);
+
+    expect(profile.games[0].predictedWinnerCode).toBe("HT");
+    expect(profile.predictionAccuracy.verified).toBe(1);
+    expect(profile.predictionAccuracy.correct).toBe(1); // shadow row(is_correct=false) 오염 시 0 이 됐을 값
   });
 });
 

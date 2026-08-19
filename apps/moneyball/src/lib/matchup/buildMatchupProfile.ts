@@ -8,6 +8,7 @@ import {
   computeMatchupHomeAwayEdgeFromGames,
   computeMatchupRecentRecordFromGames,
   computeMatchupStreakFromGames,
+  CURRENT_SCORING_RULE,
   MARGIN_AVG_MIN_GAMES,
   MARGIN_BLOWOUT_MIN_GAMES,
   MARGIN_BLOWOUT_THRESHOLD,
@@ -384,7 +385,11 @@ export async function buildMatchupProfile(
 
   // 두 팀이 맞붙은 경기만 SQL 레벨로 필터링.
   // predictions 는 LEFT embed (`!inner` X) — pre_game prediction 누락 final 경기도 record 카운트 위해.
-  // prediction_type='pre_game' 필터는 JS 레벨에서 적용 (PostgREST 에서 dotted eq + LEFT embed 조합은 모호).
+  // prediction_type='pre_game' + scoring_rule=CURRENT_SCORING_RULE 필터는 JS 레벨에서 적용
+  // (PostgREST 에서 dotted eq + LEFT embed 조합은 모호). scoring_rule 미필터 시 daily.ts 가 매 경기
+  // 동일 prediction_type='pre_game' 으로 함께 insert 하는 shadow(v2.1-B-shadow/v2.0-shadow) row 를
+  // find() 가 임의 순서로 집어 h2h record/정확도가 shadow 값으로 오염될 수 있음 (#1338 family,
+  // buildTeamProfile.ts cycle 2288 fix 와 동일 계열).
   const orFilter =
     `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
     `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
@@ -407,6 +412,7 @@ export async function buildMatchupProfile(
       is_correct: boolean | null;
       predicted_winner_team: { code: string | null } | null;
       prediction_type: string | null;
+      scoring_rule: string | null;
     }> | null;
   };
 
@@ -422,7 +428,7 @@ export async function buildMatchupProfile(
         predictions(
           confidence, is_correct,
           predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
-          prediction_type
+          prediction_type, scoring_rule
         )
       `,
     )
@@ -438,7 +444,11 @@ export async function buildMatchupProfile(
   let missingPredictionFinalCount = 0;
   for (const g of gameRows) {
     const pred =
-      g.predictions?.find((p) => p.prediction_type === "pre_game") ?? null;
+      g.predictions?.find(
+        (p) =>
+          p.prediction_type === "pre_game" &&
+          p.scoring_rule === CURRENT_SCORING_RULE,
+      ) ?? null;
     if (!pred && g.status === "final") missingPredictionFinalCount += 1;
     rows.push({
       confidence: pred?.confidence ?? null,
