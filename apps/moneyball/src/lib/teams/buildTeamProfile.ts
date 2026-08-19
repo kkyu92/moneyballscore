@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES, MARGIN_AVG_MIN_GAMES, MARGIN_BLOWOUT_THRESHOLD, MARGIN_BLOWOUT_MIN_GAMES, MARGIN_CLOSE_GAME_THRESHOLD, MARGIN_CLOSE_GAME_MIN_GAMES, VENUE_SPLIT_MIN_GAMES_PER_VENUE, VENUE_SPLIT_MIN_GAP_PCT } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES, MARGIN_AVG_MIN_GAMES, MARGIN_BLOWOUT_THRESHOLD, MARGIN_BLOWOUT_MIN_GAMES, MARGIN_CLOSE_GAME_THRESHOLD, MARGIN_CLOSE_GAME_MIN_GAMES, VENUE_SPLIT_MIN_GAMES_PER_VENUE, VENUE_SPLIT_MIN_GAP_PCT, CURRENT_SCORING_RULE } from '@moneyball/shared';
 import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -349,6 +349,12 @@ export async function buildTeamProfile(
   // 빈 recentGames/topPitchers 반환되어 사용자가 "이 팀 데이터 없음" 으로 오해
   // (실제로는 DB 오류). predictions!inner inner-join 정합성 (pre_game 없는 game
   // 의도적 제외) 은 그대로, .error 만 fail-loud 로.
+  //
+  // scoring_rule 필터 필수 — shadow-cohort.ts 가 매 경기 production(v1.8) row
+  // 옆에 shadow(v2.1-B-shadow/v2.0-shadow) row 도 동일 prediction_type='pre_game'
+  // 으로 누적 (#1338 family, buildTeamUpcoming.ts/recent/page.tsx 동일 패턴).
+  // 필터 없으면 downstream `predictions?.[0]` 이 정렬 보장 없는 임의 row(프로덕션
+  // 또는 shadow) 를 집어 팀 적중률/팩터 평균이 shadow 모델 값으로 오염될 수 있음.
   const gamesResult = await supabase
     .from("games")
     .select(
@@ -374,7 +380,8 @@ export async function buildTeamProfile(
       `,
     )
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
-    .eq("predictions.prediction_type", "pre_game");
+    .eq("predictions.prediction_type", "pre_game")
+    .eq("predictions.scoring_rule", CURRENT_SCORING_RULE);
 
   const { data } = assertSelectOk(gamesResult, "buildTeamProfile games");
 
