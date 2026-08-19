@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 review-code (heavy) — convergenceRecord.ts 최초 감사, buildAccuracyData.ts dateRange KST 자정 오판 silent drift 발견/수정 (cycle 2248, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=6/8, fix-incident(3)/op-analysis(7)/info-arch(5)/lotto(13) 모두 자체 gap trigger 미도달). cycle 2246/2247 retro 양쪽이 review-code(heavy) 대형 파일 잔여 백로그(convergenceRecord.ts 781줄/buildAccuracyData.ts 772줄/buildTeamProfile.ts 586줄/buildMatchupProfile.ts 579줄/buildMlbMatchupProfile.ts 526줄) 명시 — dominance-positive streak(cycle 135 룰) 인정 하 계속 진행, 첫 미감사 파일 `convergenceRecord.ts` 채택.
+
+실측: `convergenceRecord.ts`(781줄, KBO+MLB 수렴 픽 통계 — 최초 감사)는 이미 600+ wave 반복으로 잘 정비돼 assertSelectOk 전량 적용 + 순수 함수 대부분 테스트 커버 — 문제 없음 확인. 인접 백로그 파일 `buildAccuracyData.ts`(772줄)로 확장 감사 — `buildVersionHistory`의 `dateRange` 표시가 `first.toDateString() === last.toDateString()`(host 런타임 local=UTC 날짜 비교)로 같은-날 여부를 판정하는데, 파일 안 다른 모든 날짜 경계 계산(`buildDayOfWeek`/`buildRollingAccuracy`/`getWeekStart` 등)은 `KST_OFFSET_MS`를 더해 KST 달력일로 비교 — 유일하게 이 지점만 패턴 이탈. KST 자정 근처(예: verified_at 14:00Z~15:30Z = KST 8/19 23:00~8/20 00:30)에 걸친 범위가 같은 UTC 날짜로 오판돼 실제 이틀 범위가 단일 날짜로 조용히 축약되는 silent drift 발견.
+
+수정: `kstDateKey` 헬퍼(파일 기존 KST-shift 패턴 재사용, `new Date(d.getTime()+KST_OFFSET_MS).toISOString().slice(0,10)`)로 비교 방식을 파일 내 다른 함수들과 통일. 회귀 테스트 1건 신규(`buildAccuracyData.test.ts`, KST 자정 경계 케이스: 4/1 23:00~4/2 00:30 KST → "4/1~4/2" 범위 표시 검증). type-check/lint clean, 전체 467 files/4028 tests all pass(+1, zero regression). VERSION 0.5.62.40→0.5.62.41.
+
+다음 후보: review-code(heavy) 잔여 대형 파일(buildTeamProfile.ts 586줄/buildMatchupProfile.ts 579줄/buildMlbMatchupProfile.ts 526줄) 또는 diversity(info-architecture-review — 6-cycle gap, 아직 30 미도달이나 직전 3사이클 연속 diversity 권고 누적).
+
 ## 🟢 polish-ui — /mlb/factors Statcast 배지 emerald 이탈 정정 + version-sync 3-way drift 재발 fix (cycle 2247, 2026-08-20)
 
 진단: 2-chain lock 없음(distinct=5/8). 직전 두 사이클(2245/2246) retro 가 연속 diversity(polish-ui/info-architecture-review) 권고. 각 chain 마지막 fire 갭 측정 결과 fix-incident(3)/op-analysis(7)/info-arch(5)/lotto(13) 모두 자체 trigger 미도달인데, polish-ui 는 마지막 fire cycle 2170(77-cycle gap) + 직전 7일 신규 라우트 다수(mlb/wild-card·calendar·matchup·players·standings·methodology·accuracy·team·predictions·reviews 등 10+) 이후 polish-ui 0회 발화 — 명시적 trigger("신규 라우트 7일 안 추가 후 polish-ui 0회") 충족.

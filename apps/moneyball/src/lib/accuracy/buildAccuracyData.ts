@@ -739,10 +739,14 @@ export function buildVersionHistory(rows: PredRow[]): VersionHistoryRow[] {
         const kst = new Date(d.getTime() + KST_OFFSET_MS);
         return `${kst.getUTCMonth() + 1}/${kst.getUTCDate()}`;
       };
+      // KST 달력일로 비교 (host 런타임 local(=UTC) toDateString() 은 KST 자정 근처
+      // (예: verified_at 14:00Z~15:30Z = KST 23:00~00:30) 를 같은 UTC 날짜로 오판해
+      // 실제 이틀에 걸친 범위를 단일 날짜로 잘못 축약 — silent drift, review-code heavy 감사).
+      const kstDateKey = (d: Date) => new Date(d.getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
       const first = new Date(sorted[0].verified_at);
       const last = new Date(sorted[n - 1].verified_at);
       dateRange =
-        first.toDateString() === last.toDateString()
+        kstDateKey(first) === kstDateKey(last)
           ? kstFmt(first)
           : `${kstFmt(first)}~${kstFmt(last)}`;
     }

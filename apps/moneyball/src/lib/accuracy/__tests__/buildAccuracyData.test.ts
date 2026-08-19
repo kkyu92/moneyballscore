@@ -335,6 +335,19 @@ describe('buildVersionHistory', () => {
     expect(v16.dateRange).toMatch(/^\d+\/\d+$/);
   });
 
+  // cycle 2248 review-code (heavy) — dateRange 가 toDateString()(host local=UTC) 로
+  // 같은-날짜 여부를 판정해 KST 자정 근처(14:00Z~15:30Z = KST 8/19 23:00~8/20 00:30) 를
+  // 같은 UTC 날짜로 오판, 실제 이틀에 걸친 범위를 단일 날짜로 축약하던 silent drift.
+  it('dateRange: 같은 UTC 날짜지만 KST 로는 다른 날 (자정 근처) → 범위(~) 표시', () => {
+    const rows = [
+      vrow(0.6, true, 'v1.6', '2026-04-01T14:00:00Z'), // KST 4/1 23:00
+      vrow(0.6, true, 'v1.6', '2026-04-01T15:30:00Z'), // KST 4/2 00:30
+    ];
+    const result = buildVersionHistory(rows);
+    const v16 = result.find((v) => v.version === 'v1.6')!;
+    expect(v16.dateRange).toBe('4/1~4/2');
+  });
+
   it('Brier 계산: confidence=0.5, is_correct=true → brier=0.25', () => {
     const rows = [vrow(0.5, true, 'v1.7-revert')];
     const result = buildVersionHistory(rows);

@@ -1,3 +1,16 @@
+## v0.5.62.41 — 2026-08-20 (cycle 2248, review-code (heavy): convergenceRecord.ts 최초 감사 — buildAccuracyData.ts dateRange KST 자정 오판 silent drift 발견/수정)
+
+### fix(accuracy): buildVersionHistory dateRange 가 toDateString()(host local=UTC) 로 같은-날 판정 — KST 자정 근처 범위가 단일 날짜로 축약
+
+`convergenceRecord.ts`(781줄, 최초 감사, 이번 사이클에선 문제 없음 — 이미 잘 테스트됨)를 감사하다 인접 대형 파일
+`buildAccuracyData.ts`(772줄)로 확장. `buildVersionHistory`의 dateRange 표시가 `first.toDateString() ===
+last.toDateString()`로 같은 날짜 여부를 판정하는데, 이 함수는 host 런타임 local(=UTC on Vercel) 날짜를 비교 —
+파일 안 다른 모든 날짜 경계 계산(`buildDayOfWeek`/`buildRollingAccuracy`/`getWeekStart` 등)이 `KST_OFFSET_MS`를
+더해 KST 달력일로 비교하는 것과 불일치. KST 자정 근처(예: verified_at 14:00Z~15:30Z = KST 8/19 23:00~8/20 00:30)에
+걸친 범위가 같은 UTC 날짜로 오판돼 실제 이틀 범위가 단일 날짜(8/19)로 조용히 축약되는 silent drift. `kstDateKey`
+헬퍼(파일 기존 KST-shift 패턴 재사용)로 비교 방식 통일. 회귀 테스트 1건 신규(`buildAccuracyData.test.ts`, KST
+자정 경계 케이스). type-check/lint clean, 전체 467 files/4028 tests all pass(+1, zero regression).
+
 ## v0.5.62.40 — 2026-08-20 (cycle 2247, polish-ui: /mlb/factors Statcast 배지 emerald 이탈 정정 + version-sync 3-way drift 재발 fix)
 
 ### fix(design): /mlb/factors Statcast 4팩터 가중치 배지 brand 토큰 정렬
