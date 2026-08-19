@@ -1,5 +1,20 @@
 # TODOS
 
+## 🟢 review-code (heavy) — pearsonCorrelation dedup (plan #26 Phase 3, cycle 2232, 2026-08-19)
+
+plan #26 Phase 3 후속 후보 (cycle 2231 TODOS 박제) — `analyzeFactorAccuracy`
+(dashboard/factor-accuracy.ts) 와 `buildMlbFactorInsights`(reviews/mlb-shared.ts) 가
+byte-identical `pearsonCorrelation` 19줄을 각자 구현 (diff 확인 완료, 완전 동일).
+
+- 신규 `apps/moneyball/src/lib/stats/pearson.ts` 로 추출 + 단위 테스트 4건 신규
+  (`__tests__/pearson.test.ts` — n<2, 완전 양의상관, 완전 음의상관, zero-variance)
+- 양쪽 파일 로컬 함수 삭제 + import 로 교체, 로직 변경 없음 (순수 dedup)
+- `buildMlbFactorAccuracy.ts` 의 3번째 `LOWER_IS_BETTER` Set 은 스코프 밖 유지 — key
+  타입(`FactorKey` 7종 vs `MlbFactorKey` 5종)이 달라 리터럴 중복 아님, 우연히 겹치는
+  비즈니스 규칙(FIP류 lower-is-better)이라 강제 통합 시 두 도메인 결합 위험
+- 테스트: `pnpm --filter moneyball test -- --run` 463 files/4005 tests all pass
+  (+1 file/+4 tests, zero regression), type-check/lint clean
+
 ## 🟢 explore-idea (heavy) — MLB 월간 리뷰 Phase 2 페이지 (plan #26, cycle 2231, 2026-08-19)
 
 Phase 1(weekly, cycle 2229/2230) 이 만든 `fetchMlbPredictionRowsInRange`/MLB factor-insight
