@@ -1,5 +1,37 @@
 # TODOS
 
+## 🟢 review-code (heavy) — daily.ts 최대 미감사 non-UI monolith 감사, gap fix (cycle 2239, 2026-08-19)
+
+진단: 강제 trigger 없음 (fix-incident gap=4/lotto gap=5/info-arch gap=14/
+op-analysis gap=1, 모두 threshold 미달 / 2-chain lock 없음 distinct=5 / open
+issue 0건 / unprocessed plan 0건 — plan 3~24 전부 status:approved 아님).
+breadcrumb 16개 누락 grep 은 전부 top-level/debug/redirect-stub 페이지라
+false lead 확인 (info-arch 액션 없음). DESIGN.md 는 어제 갱신 fresh (design-system
+trigger 없음). 3대 UI monolith(analysis/accuracy/home page.tsx) 는 cycle 2149/
+2150/2237 이미 감사 완료 — `packages/kbo-data/src/pipeline/daily.ts`(1601줄,
+실제 예측 파이프라인 엔트리, non-UI 파일 중 최대) 가 review-code heavy 대상으로
+한 번도 안 감사됐음을 확인해 이번 타겟으로 선정.
+
+- 전체 1601줄 read. 파일 자체는 이미 수십 개 과거 silent drift fix 주석으로
+  매우 방어적으로 짜여있음(assertSelectOk/assertWriteOk 패턴 통일 등)
+- **발견 + fix**: `handleDailySummaryNotification`(1176줄~)의 `expected` 산정
+  (1185)이 `predict_final` GAP 감지(1049, cycle 936 fix)와 동일 개념인데
+  `status !== 'live'` 제외가 누락 — live 경기가 expected 를 부풀리면 predict
+  mode(strict)에서 매 시간 `todayTotal<expected` 로 summary skip 되다
+  predict_final(last-chance)까지 알림이 밀리는 silent delay 가능. 동일 'live'
+  제외 조건 추가로 두 산정 일치 (PR #2980, `b2fce392`, R7 자동 squash 머지 완료
+  — `gh pr view 2980 --json state,mergedAt` 로 MERGED 실측 확인).
+- 저확신 항목 1개 기록(수정 안 함): `isFirstPredictRun`(retention cleanup +
+  morning postview) 가 `getUTCHours()===1` 단발 조건이라 그 시각 cron 이
+  실패하면 그날 cleanup/postview 가 fallback 없이 통째로 skip — 재발 빈도
+  낮고(daily retention 은 다음날 자연 회복) 별도 evidence 없어 이번엔 스코프 밖
+- 검증: `pnpm type-check` 4/4 clean, `pnpm test` 463 files/4005 tests all
+  pass, `pnpm lint` clean (pre-push hook)
+- 다음 review-code(heavy) 후보: `packages/kbo-data/src/agents/validator.ts`
+  (899줄), `packages/kbo-data/src/pipeline/mlb-pipeline.ts`(731줄) — 둘 다
+  non-UI 대형 파일 중 미감사
+- outcome: success
+
 ## 🟡 operational-analysis (lite) — 주간 checkpoint, 소표본 no-action (cycle 2238, 2026-08-19)
 
 진단: 강제 trigger 없음 (fix-incident gap=3 / lotto gap=4 / info-arch gap=13 /
