@@ -1,5 +1,32 @@
 # TODOS
 
+## 🟢 skill-evolution — phase 31 milestone (cycle 2201, 2026-08-19)
+
+cycle 2200 이 trigger 3(`cycle_n % 50 == 0`) 단독 충족해 skill-evolution-pending 마커
+박제 (사례 19 mitigation 5th consecutive OK — cycle 2000 재발 0건 유지). 본 cycle 2201
+이 forced skill-evolution 소비. 직전 20 cycle(2181-2200, 분석 범위 제한 룰 준수)
+측정: review-code 40%(0pp) + explore-idea 30%(+10pp, MLB parity gap 계열 재점화) +
+fix-incident 20%(0pp) + info-arch 5% + op-analysis 5%. alternation pair(review-code+
+explore-idea) 70%(+10pp). success 90%(18/20, partial 2건 모두 review-code — fail/
+interrupted 0건 유지). watch.sh hang kill 0건.
+
+MLB `/accuracy` vs `/mlb/accuracy` parity 3-cycle 체인(2196/2199/2200)으로 완전 종료
+확인. **PASS_ship 누적 재개**: 재구성 비용이 예상보다 저렴(단일 `git log <hash>..HEAD`)
+함을 확인해 1회성 재구성 완료 — `93ddb11d`(cycle 1950 retro)..HEAD = +206 ships,
+직전 확정 누적 ~1388 + 206 = **누적 ~1594 (cycle 2200 기준)**. 이후 매 50-cycle 창마다
+윈도우 실측만 더해 유지 (재구성 반복 불필요, anchor commit hash 하나만 남기면 저비용
+재계산 가능한 게 확인됨).
+
+**변경**: `~/.claude/skills/develop-cycle/SKILL.md` 마이그레이션 path 표 (phase 4 행
+compact 요약 append) + `MIGRATION-PATH.md` (cycle 2200 항목 full append) — global
+skill 파일(repo 밖). repo 안엔 dispatch 기록용 empty commit + PR #2967 (`feat(skill):
+cycle 2200 milestone — skill-evolution 65회 (phase 31)`) squash 머지(`b2196654`)
++ R7 자동 branch 삭제.
+
+**다음 milestone = cycle 2250** (PASS_ship ~1594 누적 유지 + MLB parity 종료 후
+explore-idea redirect monitor + alternation pair 70% 지속 monitor + 사례 19
+mitigation 6th consecutive 확인).
+
 ## 🟢 explore-idea (heavy) — MLB 팀별 예측 편향 분석 parity (cycle 2200, 2026-08-19)
 
 open issue 0건, approved plan 0건(plan 10~24 전량 completed/archived/pending-user-step,
