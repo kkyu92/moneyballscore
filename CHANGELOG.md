@@ -1,3 +1,26 @@
+## v0.5.62.55 — 2026-08-20 (cycle 2275, review-code (heavy): packages/shared/src/index.ts 최초 전체 감사 — park factor narrative stale 주석 + dead export 정정)
+
+### fix(shared): park factor narrative 경계값 주석 오류 정정 + dead export 제거
+
+`packages/shared/src/index.ts`(3390줄, 최초 전체 감사) — 검증 결과 대부분 clean(600+ wave
+누적 정리 이력). 두 건 발견/수정:
+1. `PARK_FACTOR_NARRATIVE_HITTER_MIN` 주석이 "잠실(1.02) 포함 3구장 타자 친화"라 서술했지만
+   실제 비교 연산자는 strict `>`라 잠실(정확히 1.02)은 경계값과 같아 중립 처리됨 — 실제 동작은
+   대구/광주 2구장. 대칭 설계(인천 0.98도 동일하게 strict `<`로 경계 제외)에 맞춰 주석을
+   실제 동작 기준으로 정정 (코드 변경 없음, 경계 대칭 유지).
+2. `PostType` — 최초 커밋(Phase 1)부터 정의됐지만 모노레포 전체에서 단 한 번도 참조된 적
+   없는 dead export 확인 후 제거.
+
+## v0.5.62.54 — 2026-08-20 (cycle 2274, polish-ui (2-chain lock fallback): 골드 accent 하드코딩 hex → CSS 토큰 정정)
+
+### fix(design): 골드 accent 하드코딩 hex → CSS 토큰 정정
+
+`page.tsx`(홈 오늘 경기 위젯, 예측 배지 골드 강조) + `analysis/page.tsx`(팩터 수렴 픽 강도 표시 3곳)가
+DESIGN.md 골드 accent 토큰(`--color-accent`/`--color-accent-light`)이 이미 존재하고
+`TopStatPickCard.tsx`가 전용 회귀 테스트까지 갖춘 확립된 컨벤션임에도 라이트/다크 색상을
+리터럴 hex(`#c5a23e`/`#e2c96b`)로 하드코딩한 사각지대였음. 4곳 전부 `var(--color-accent)`/
+`var(--color-accent-light)` 참조로 정정.
+
 ## v0.5.62.53 — 2026-08-20 (cycle 2273, review-code (heavy): agents/postview.ts 최초 감사 — FactorErrorsBars/PostviewPanel dev jargon leak 정정)
 
 ### fix(analysis): 사후 분석 패널의 raw factor 키 dev jargon leak 정정

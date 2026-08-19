@@ -140,8 +140,9 @@ export const PARK_FACTOR_PITCHER_MAX = 95;
  *   - KBO_TEAMS.parkPf = index-100 형식 (105, 95 등)
  *   - DEFAULT_PARK_FACTORS = decimal ratio 형식 (1.05, 0.95 등)
  *   - narrative 임계는 decimal ratio 기준 더 보수적 값 사용 (1.02 / 0.98)
- *     → 잠실(1.02), 대구(1.03), 광주(1.05) 3구장만 "타자 친화" 표시
- *     → 대전(0.97), 고척(0.95) 2구장만 "투수 친화" 표시
+ *   - 비교 연산자는 strict (>／<) — 임계값 자체와 일치하는 구장은 "중립" 처리 (경계 대칭)
+ *     → 대구(1.03), 광주(1.05) 2구장만 "타자 친화" 표시 (잠실 1.02 는 임계값과 동일해 중립)
+ *     → 대전(0.97), 고척(0.95) 2구장만 "투수 친화" 표시 (인천 0.98 는 임계값과 동일해 중립)
  *
  * 변경 시 factor-explanations.ts park_factor 케이스 narrative 동기 필요.
  *
@@ -256,9 +257,6 @@ export const KBO_STADIUM_COORDS: Record<TeamCode, { lat: number; lng: number }> 
 };
 
 // 경기 상태 — ALL_GAME_STATUSES tuple (line 246+) 로 통합 (cycle 1021 autoplan Eng-C2 fix)
-
-// 포스트 타입
-export type PostType = 'preview' | 'review' | 'weekly' | 'monthly';
 
 // 예측 엔진 가중치 v1.8 — head_to_head 노이즈 감축 + Elo 보상
 //
