@@ -149,13 +149,16 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
   const rows = rawGames as unknown as TodayAllRow[];
 
   // wave-335: 선발투수 배지 — sp_confirmation_log 에서 오늘 선발투수 이름 조회
-  const spResult = await supabase
+  const spResult = (await supabase
     .from('sp_confirmation_log')
     .select('external_game_id, home_sp_name, away_sp_name')
     .eq('game_date', today)
-    .order('observed_at', { ascending: false });
+    .order('observed_at', { ascending: false })) as SelectResult<
+    Array<{ external_game_id: string; home_sp_name: string | null; away_sp_name: string | null }>
+  >;
+  const { data: spRows } = assertSelectOk(spResult, 'analysis getTodayAnalysisData sp_confirmation_log');
   const spMap = new Map<string, { homeSP: string; awaySP: string }>();
-  for (const row of (spResult.data ?? []) as Array<{ external_game_id: string; home_sp_name: string | null; away_sp_name: string | null }>) {
+  for (const row of spRows ?? []) {
     if (!row.external_game_id || spMap.has(row.external_game_id)) continue;
     if (row.home_sp_name && row.away_sp_name) {
       spMap.set(row.external_game_id, { homeSP: row.home_sp_name, awaySP: row.away_sp_name });

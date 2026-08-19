@@ -1,3 +1,18 @@
+## v0.5.62.39 — 2026-08-20 (cycle 2246, review-code (heavy): analysis-data.ts 최초 감사 — sp_confirmation_log select 에러 silent swallow 발견/수정)
+
+### fix(analysis): sp_confirmation_log 조회 assertSelectOk 누락 — 선발투수 배지 에러 silent swallow
+
+`apps/moneyball/src/app/analysis/analysis-data.ts` (915줄) 최초 감사 — daily.ts/validator.ts/mlb-pipeline.ts
+는 이미 review-code(heavy) 로 감사됐지만 이 파일은 처음. `getTodayAnalysisData()` 안 7개 supabase select
+쿼리 중 6개는 모두 `assertSelectOk`(에러 시 throw)를 거치는데, `sp_confirmation_log`(오늘 선발투수 이름 조회,
+wave-335) 쿼리 1개만 `.data ?? []` 로 직접 사용 — RLS 오류/connection 실패 시 예외 없이 조용히 빈 배열로
+처리돼 "선발투수" 배지 전체가 원인 불명으로 사라지는 silent drift 가능성 발견.
+
+`spResult` 를 다른 6개 쿼리와 동일하게 `assertSelectOk` 경유하도록 수정 — 에러 발생 시 명시적 throw (Sentry
+가시화) 로 전환. 신규 회귀 테스트 1건(`silent-drift-cycle-2246.test.ts`) 추가. `pnpm --filter moneyball
+type-check` 통과, `pnpm --filter moneyball exec vitest run` 466 files/4025 tests 전량 통과(+1, zero
+regression), `pnpm --filter moneyball lint` clean. VERSION 0.5.62.38→0.5.62.39.
+
 ## v0.5.62.38 — 2026-08-20 (cycle 2245, explore-idea (heavy): /mlb/methodology 신규 — KBO /methodology parity, LLM 토론 layer 부재 명시)
 
 ### feat(mlb): /mlb/methodology + /en/mlb/methodology 신규 라우트
