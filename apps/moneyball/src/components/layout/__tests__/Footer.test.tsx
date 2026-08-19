@@ -116,4 +116,11 @@ describe("Footer", () => {
     const aiColumn = aiHeading.closest("details") as HTMLElement;
     expect(within(aiColumn).getByRole("link", { name: "Today's Games" })).toHaveAttribute("href", "/");
   });
+
+  it("isEn=true 시 /mlb/reviews 는 EN 미러 부재라 KO href 유지 (cycle 2227 발견 — blanket 치환 시 /en/mlb/reviews 404)", () => {
+    render(<Footer isEn />);
+    const mlbHeading = screen.getByRole("heading", { level: 2, name: "MLB" });
+    const mlbColumn = mlbHeading.closest("details") as HTMLElement;
+    expect(within(mlbColumn).getByRole("link", { name: "Prediction Review" })).toHaveAttribute("href", "/mlb/reviews");
+  });
 });

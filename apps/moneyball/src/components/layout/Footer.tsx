@@ -31,9 +31,12 @@ type FooterColumn = { title: string; enTitle: string; links: FooterLink[] };
 // EN 페이지(/en/mlb/*)에서도 Footer 는 항상 전체 렌더 — MLB column 만 /en 대응 라우트
 // 존재하므로 href 치환 (Header withLocale, cycle 2139 와 동일 패턴). 나머지 column 은
 // 라우트 부재로 href 유지, 텍스트만 번역 (SearchForm, cycle 2142 와 동일 scope 판단).
+// /mlb/reviews 는 예외: EN 미러 페이지 부재 (cycle 2226 Phase 1, 의도적 scope 축소) —
+// blanket 치환 시 /en/mlb/reviews 404 (cycle 2227 review-code(heavy) 발견, Header.tsx 동일 fix).
 function withMlbLocale(href: string, isEn: boolean): string {
   if (!isEn) return href;
   if (href === "/mlb") return "/en/mlb";
+  if (href === "/mlb/reviews") return href;
   return `/en${href}`;
 }
 
