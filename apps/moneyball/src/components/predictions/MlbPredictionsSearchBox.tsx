@@ -69,7 +69,11 @@ function escapeAttr(value: string): string {
   return value.replace(/["\\]/g, '\\$&');
 }
 
-export function MlbPredictionsSearchBox() {
+interface Props {
+  locale?: 'ko' | 'en';
+}
+
+export function MlbPredictionsSearchBox({ locale = 'ko' }: Props = {}) {
   const query = useSyncExternalStore(subscribe, readQuery, getServerSnapshot);
 
   const trimmed = query.trim();
@@ -82,14 +86,14 @@ export function MlbPredictionsSearchBox() {
     if (datePrefix) {
       const safe = escapeAttr(datePrefix);
       hideRule = `[data-prediction-date]:not([data-prediction-date^="${safe}"]){display:none!important;}`;
-      matchHint = `날짜 ${datePrefix}`;
+      matchHint = locale === 'en' ? `Date ${datePrefix}` : `날짜 ${datePrefix}`;
     } else if (teamCode) {
       const safe = escapeAttr(teamCode);
       hideRule = `[data-prediction-teams]:not([data-prediction-teams~="${safe}"]){display:none!important;}`;
       matchHint = `${mlbShortTeamName(teamCode)} (${teamCode})`;
     } else {
       hideRule = `[data-prediction-date]{display:none!important;}`;
-      matchHint = '매칭 없음';
+      matchHint = locale === 'en' ? 'No match' : '매칭 없음';
     }
   }
 
@@ -103,14 +107,16 @@ export function MlbPredictionsSearchBox() {
         />
       )}
       <label className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">검색</span>
+        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
+          {locale === 'en' ? 'Search' : '검색'}
+        </span>
         <input
           type="search"
           value={query}
           onChange={(e) => writeQuery(e.target.value)}
-          placeholder="팀명 또는 날짜 (예: Dodgers, 2026-05)"
+          placeholder={locale === 'en' ? 'Team or date (e.g. Dodgers, 2026-05)' : '팀명 또는 날짜 (예: Dodgers, 2026-05)'}
           className="flex-1 text-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] bg-transparent text-gray-800 dark:text-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-          aria-label="팀명 또는 날짜로 예측 검색"
+          aria-label={locale === 'en' ? 'Search predictions by team or date' : '팀명 또는 날짜로 예측 검색'}
         />
         {trimmed && (
           <span className="text-xs text-gray-500 dark:text-gray-400">

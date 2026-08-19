@@ -317,6 +317,43 @@ describe('/en/mlb/matchup/[teamA]/[teamB] — head-to-head page', () => {
   });
 });
 
+// ── Predictions (/en/mlb/predictions) ────────────────────────────────
+describe('/en/mlb/predictions — prediction history hub (cycle 2220 EN mirror)', () => {
+  const PAGE = src('predictions/page.tsx');
+
+  it('hreflang en/ko parity', () => {
+    expect(PAGE).toMatch(/en:\s*PAGE_URL/);
+    expect(PAGE).toMatch(/ko:\s*`\$\{SITE_URL\}\/mlb\/predictions`/);
+  });
+
+  it('revalidate = 1800 (MLB_LIVE_ISR_SECONDS, Turbopack literal required)', () => {
+    expect(PAGE).toMatch(/export const revalidate = 1800\b/);
+  });
+
+  it('mlb_schedule 2-step 매핑 KO 동일 (silent drift family fix cycle 1168 정합)', () => {
+    expect(PAGE).toMatch(/from\('mlb_schedule'\)/);
+    expect(PAGE).toMatch(/in\('external_game_id', scheduleRows\.map/);
+  });
+
+  it('league=mlb + MLB_PRODUCTION_COHORT_RULES 필터 (CE-fallback family 정합)', () => {
+    expect(PAGE).toMatch(/eq\('league', 'mlb'\)/);
+    expect(PAGE).toMatch(/in\('scoring_rule', MLB_PRODUCTION_COHORT_RULES\)/);
+  });
+
+  it('필터 컴포넌트 전부 locale="en" 전파', () => {
+    expect(PAGE).toMatch(/<MlbPredictionsSearchBox locale="en" \/>/);
+    expect(PAGE).toMatch(/<PredictionsStatusFilter counts=\{counts\} locale="en" \/>/);
+    expect(PAGE).toMatch(/<PredictionsTierFilter counts=\{tierCounts\} locale="en" \/>/);
+    expect(PAGE).toMatch(/<PredictionsMonthFilter months=\{months\} counts=\{monthCounts\} locale="en" \/>/);
+    expect(PAGE).toMatch(/<PredictionsSortControl locale="en" \/>/);
+    expect(PAGE).toMatch(/locale="en"[\s\S]{0,20}\/>/);
+  });
+
+  it('date link href = /en/mlb/games/${d.date}', () => {
+    expect(PAGE).toMatch(/href=\{`\/en\/mlb\/games\/\$\{d\.date\}`\}/);
+  });
+});
+
 // ── Players [id] (/en/mlb/players/[id]) ──────────────────────────────
 describe('/en/mlb/players/[id] — Statcast team profile', () => {
   const PAGE = src('players/[id]/page.tsx');

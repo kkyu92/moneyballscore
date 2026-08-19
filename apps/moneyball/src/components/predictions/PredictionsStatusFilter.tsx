@@ -12,12 +12,19 @@ interface Props {
     verified: number;
     pending: number;
   };
+  locale?: 'ko' | 'en';
 }
 
 const LABELS: Record<StatusFilter, string> = {
   all: '전체',
   verified: '결과 확인 가능',
   pending: '결과 대기 중',
+};
+
+const LABELS_EN: Record<StatusFilter, string> = {
+  all: 'All',
+  verified: 'Result available',
+  pending: 'Awaiting result',
 };
 
 const ORDER: StatusFilter[] = ['all', 'verified', 'pending'];
@@ -53,8 +60,9 @@ function writeFilter(value: StatusFilter): void {
   }
 }
 
-export function PredictionsStatusFilter({ counts }: Props) {
+export function PredictionsStatusFilter({ counts, locale = 'ko' }: Props) {
   const filter = useSyncExternalStore(subscribe, readFilter, getServerSnapshot);
+  const labels = locale === 'en' ? LABELS_EN : LABELS;
 
   const hideSelector =
     filter === 'verified'
@@ -74,7 +82,7 @@ export function PredictionsStatusFilter({ counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          결과
+          {locale === 'en' ? 'Result' : '결과'}
         </span>
         {ORDER.map((key) => {
           const active = filter === key;
@@ -92,7 +100,7 @@ export function PredictionsStatusFilter({ counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}{' '}
+              {labels[key]}{' '}
               <span className="opacity-75">({counts[key]})</span>
             </button>
           );

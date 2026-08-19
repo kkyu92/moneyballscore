@@ -60,16 +60,15 @@ describe("mlb/predictions/page.tsx — KBO /predictions parity MVP", () => {
     expect(PAGE_SRC).toMatch(/data-prediction-teams=\{Array\.from\(d\.teamCodes\)\.join\(' '\)\}/);
   });
 
-  it("EN mirror 미착수 — canonical only, languages alternate 선언 안 함 (존재 안 하는 /en/mlb/predictions 404 방지)", () => {
-    expect(PAGE_SRC).toMatch(/alternates: \{\s*canonical: PAGE_URL,\s*\}/);
-    expect(PAGE_SRC).not.toMatch(/en\/mlb\/predictions/);
+  it("EN mirror 완성 (cycle 2220) — languages alternate 선언, /en/mlb/predictions 참조", () => {
+    expect(PAGE_SRC).toMatch(/languages:\s*\{\s*en:\s*`\$\{SITE_URL\}\/en\/mlb\/predictions`/);
   });
 });
 
 describe("sitemap.ts — /mlb/predictions entry", () => {
-  it("KO entry 존재, EN entry 는 아직 미추가", () => {
+  it("KO + EN entry 둘 다 존재 (cycle 2220 EN mirror)", () => {
     expect(SITEMAP_SRC).toMatch(/\$\{SITE_URL\}\/mlb\/predictions`/);
-    expect(SITEMAP_SRC).not.toMatch(/\$\{SITE_URL\}\/en\/mlb\/predictions`/);
+    expect(SITEMAP_SRC).toMatch(/\$\{SITE_URL\}\/en\/mlb\/predictions`/);
   });
 });
 

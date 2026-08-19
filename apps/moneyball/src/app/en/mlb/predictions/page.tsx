@@ -8,7 +8,6 @@ import {
   pickTierEmoji,
   PREDICTIONS_HISTORY_LIMIT,
   SITE_URL,
-  WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
 } from "@moneyball/shared";
 import Link from "next/link";
@@ -23,33 +22,31 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { accuracyRateColorClass } from "@/lib/accuracy/buildAccuracyData";
 import { deriveMlbOutcome } from "@/lib/mlb/deriveMlbOutcome";
 
-// KBO predictions/page.tsx 의 MLB 변형. KBO 는 `games`(팀 FK) LEFT JOIN predictions 로
-// "미기록"(missing) 날짜까지 잡지만, MLB 는 games 모델을 안 써서 `mlb_schedule` 을 동일
-// 역할(전체 편성 경기 원천)로 두고 predictions 를 external_game_id 로 map — 2-step 조회
-// 패턴(mlb/games/[date]/page.tsx, silent drift family fix cycle 1168)과 동일 사유.
-const PAGE_URL = `${SITE_URL}/mlb/predictions`;
+// /mlb/predictions(KO) 의 EN mirror — 로직은 완전 동일, 문자열만 번역
+// + locale="en" prop 전파. sitemap.ts 의 EN mirror carry-over 항목 처리.
+const PAGE_URL = `${SITE_URL}/en/mlb/predictions`;
 
 export const metadata: Metadata = {
-  title: "MLB 예측 기록",
+  title: "MLB Prediction History",
   description:
-    "MLB 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색.",
+    "Full MLB prediction history — daily confidence tiers and actual results, searchable by date, team, and status.",
   alternates: {
     canonical: PAGE_URL,
     languages: {
-      en: `${SITE_URL}/en/mlb/predictions`,
-      ko: PAGE_URL,
+      en: PAGE_URL,
+      ko: `${SITE_URL}/mlb/predictions`,
     },
   },
   openGraph: {
-    title: "MLB 예측 기록 | MoneyBall Score",
-    description: "MLB 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과.",
+    title: "MLB Prediction History | MoneyBall Score",
+    description: "Full MLB prediction history — daily confidence tiers and actual results.",
     url: PAGE_URL,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB 예측 기록 | MoneyBall Score",
-    description: "MLB 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과.",
+    title: "MLB Prediction History | MoneyBall Score",
+    description: "Full MLB prediction history — daily confidence tiers and actual results.",
   },
 };
 
@@ -98,6 +95,12 @@ function emptyTierCounts(): Record<WinnerConfidenceTier, TierCount> {
 
 const TIER_ORDER: WinnerConfidenceTier[] = ['confident', 'lean', 'tossup'];
 
+const TIER_LABEL_EN: Record<WinnerConfidenceTier, string> = {
+  confident: 'Confident',
+  lean: 'Lean',
+  tossup: 'Toss-up',
+};
+
 async function getMlbPredictionDates(): Promise<DateStat[]> {
   const supabase = await createClient();
 
@@ -106,7 +109,7 @@ async function getMlbPredictionDates(): Promise<DateStat[]> {
     .select('external_game_id, game_date, status, home_team_code, away_team_code, home_score, away_score')
     .order('game_date', { ascending: false })
     .limit(PREDICTIONS_HISTORY_LIMIT);
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'mlbPredictions.getMlbPredictionDates mlb_schedule');
+  const { data: scheduleData } = assertSelectOk(scheduleResult, 'mlbPredictionsEn.getMlbPredictionDates mlb_schedule');
   const scheduleRows = (scheduleData ?? []) as MlbScheduleHistRow[];
   if (scheduleRows.length === 0) return [];
 
@@ -117,7 +120,7 @@ async function getMlbPredictionDates(): Promise<DateStat[]> {
     .eq('league', 'mlb')
     .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
     .in('external_game_id', scheduleRows.map((s) => s.external_game_id));
-  const { data: predData } = assertSelectOk(predResult, 'mlbPredictions.getMlbPredictionDates predictions');
+  const { data: predData } = assertSelectOk(predResult, 'mlbPredictionsEn.getMlbPredictionDates predictions');
   const predByExternalId = new Map<string, MlbPredMiniRow>();
   for (const p of (predData ?? []) as MlbPredMiniRow[]) {
     if (p.external_game_id) predByExternalId.set(p.external_game_id, p);
@@ -173,11 +176,11 @@ async function getMlbPredictionDates(): Promise<DateStat[]> {
     }
   }
 
-  // 예측 있는 날짜만 표시 — 백필/미예측 편성만 있는 과거 날짜는 UX 혼란 (KBO 동일 컨벤션).
+  // 예측 있는 날짜만 표시 — KO 동일 컨벤션.
   return Array.from(dateMap.values()).filter((d) => d.predicted > 0);
 }
 
-export default async function MlbPredictionsPage() {
+export default async function MlbPredictionsPageEn() {
   const dates = await getMlbPredictionDates();
 
   const counts = {
@@ -245,18 +248,19 @@ export default async function MlbPredictionsPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "MLB 예측 기록",
-    description: "MLB 승부예측 전체 기록 — 매일 갱신되는 경기별 신뢰도와 실제 결과를 날짜·팀·상태별로 검색.",
+    name: "MLB Prediction History",
+    description:
+      "Full MLB prediction history — daily confidence tiers and actual results, searchable by date, team, and status.",
     url: PAGE_URL,
-    inLanguage: "ko-KR",
+    inLanguage: "en-US",
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: dates.length,
       itemListElement: dates.slice(0, 30).map((d, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `${SITE_URL}/mlb/games/${d.date}`,
-        name: `${d.date} MLB 예측 ${d.predicted}경기`,
+        url: `${SITE_URL}/en/mlb/games/${d.date}`,
+        name: `${d.date} — ${d.predicted} MLB predictions`,
       })),
     },
   };
@@ -267,9 +271,12 @@ export default async function MlbPredictionsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Breadcrumb items={[{ label: 'MLB 분석', href: '/mlb' }, { label: '예측 기록' }]} />
-      <h1 className="text-3xl font-bold">MLB 예측 기록</h1>
-      <p className="text-gray-500 dark:text-gray-400">날짜별 MLB 승부예측 기록입니다.</p>
+      <Breadcrumb
+        items={[{ label: 'MLB Analysis', href: '/en/mlb' }, { label: 'Prediction History' }]}
+        locale="en"
+      />
+      <h1 className="text-3xl font-bold">MLB Prediction History</h1>
+      <p className="text-gray-500 dark:text-gray-400">Daily MLB prediction history.</p>
 
       {dates.length > 0 && (
         <AccuracyHeaderCard
@@ -279,16 +286,17 @@ export default async function MlbPredictionsPage() {
           recentVerified={recentVerified}
           recentCorrect={recentCorrect}
           tierAccuracy={tierTotals}
+          locale="en"
         />
       )}
 
-      {dates.length > 0 && <MlbPredictionsSearchBox />}
-      {dates.length > 0 && <PredictionsStatusFilter counts={counts} />}
-      {dates.length > 0 && <PredictionsTierFilter counts={tierCounts} />}
+      {dates.length > 0 && <MlbPredictionsSearchBox locale="en" />}
+      {dates.length > 0 && <PredictionsStatusFilter counts={counts} locale="en" />}
+      {dates.length > 0 && <PredictionsTierFilter counts={tierCounts} locale="en" />}
       {months.length > 1 && (
-        <PredictionsMonthFilter months={months} counts={monthCounts} />
+        <PredictionsMonthFilter months={months} counts={monthCounts} locale="en" />
       )}
-      {dates.length > 0 && <PredictionsSortControl />}
+      {dates.length > 0 && <PredictionsSortControl locale="en" />}
 
       {dates.length > 0 ? (
         <div className="flex flex-col gap-2" data-predictions-list>
@@ -300,7 +308,7 @@ export default async function MlbPredictionsPage() {
             return (
               <Link
                 key={d.date}
-                href={`/mlb/games/${d.date}`}
+                href={`/en/mlb/games/${d.date}`}
                 data-prediction-status={status}
                 data-prediction-tiers={tiersPresent}
                 data-prediction-month={d.date.slice(0, 7)}
@@ -313,24 +321,24 @@ export default async function MlbPredictionsPage() {
                     <div>
                       <span className="font-bold text-lg">{d.date}</span>
                       <span className="text-sm text-gray-500 dark:text-gray-400 ml-3">
-                        {d.total}경기 편성
+                        {d.total} games scheduled
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-2">
-                      <span>예측 {d.predicted}</span>
+                      <span>{d.predicted} predicted</span>
                       {tierChips.map((tier) => (
                         <span key={tier} className="text-gray-600 dark:text-gray-300">
-                          · {pickTierEmoji(tier)} {WINNER_TIER_LABEL[tier]} {d.tiers[tier].predicted}
+                          · {pickTierEmoji(tier)} {TIER_LABEL_EN[tier]} {d.tiers[tier].predicted}
                         </span>
                       ))}
                       {d.cancelled > 0 && (
                         <span className="text-gray-400 dark:text-gray-500">
-                          · 취소 {d.cancelled}
+                          · {d.cancelled} cancelled
                         </span>
                       )}
                       {d.missing > 0 && (
                         <span className="text-gray-400 dark:text-gray-500">
-                          · 기록 없음 {d.missing}
+                          · {d.missing} no record
                         </span>
                       )}
                     </div>
@@ -339,10 +347,10 @@ export default async function MlbPredictionsPage() {
                     <div className="text-right">
                       {d.verified > 0 ? (
                         <div className={`text-sm font-bold ${accuracyRateColorClass(accuracy)}`}>
-                          {d.correct}/{d.verified} 적중 ({Math.round(accuracy * 100)}%)
+                          {d.correct}/{d.verified} correct ({Math.round(accuracy * 100)}%)
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-400 dark:text-gray-500">결과 대기</div>
+                        <div className="text-sm text-gray-400 dark:text-gray-500">Awaiting result</div>
                       )}
                       {TIER_ORDER.filter((tier) => d.tiers[tier].verified > 0).map((tier) => {
                         const t = d.tiers[tier];
@@ -358,7 +366,7 @@ export default async function MlbPredictionsPage() {
                                   : "text-red-600 dark:text-red-400"
                             }`}
                           >
-                            {pickTierEmoji(tier)} {WINNER_TIER_LABEL[tier]} {t.correct}/{t.verified} ({Math.round(tierAcc * 100)}%)
+                            {pickTierEmoji(tier)} {TIER_LABEL_EN[tier]} {t.correct}/{t.verified} ({Math.round(tierAcc * 100)}%)
                           </div>
                         );
                       })}
@@ -372,8 +380,8 @@ export default async function MlbPredictionsPage() {
         </div>
       ) : (
         <EmptyState
-          title="예측 기록이 아직 없습니다."
-          description="파이프라인이 실행되면 자동으로 데이터가 채워집니다."
+          title="No prediction history yet."
+          description="Data fills in automatically once the pipeline runs."
         />
       )}
     </div>
