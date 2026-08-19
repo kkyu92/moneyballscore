@@ -1,5 +1,32 @@
 # TODOS
 
+## 🟢 operational-analysis (heavy) — CE 상태 재확인 + debate_version stale default 발견/fix (cycle 2240, 2026-08-19)
+
+진단: 강제 trigger 없음 (모든 gap 미충족, lock 없음, open issue/plan 0건). 직전
+20 cycle review-code+explore-idea 80% 편중 재확인 재발 + 장기 stale carry-over
+("CREDIT_EXHAUSTED 사용자 크레딧 충전 이행 monitor") 실측 검증 가치 판단해
+operational-analysis (heavy) 자율 선택.
+
+- `scripts/op-analysis-ce-cohort.ts` 재실행 결과 total n=316 이 cycle 2191
+  스냅샷과 완전 동일 — 처음엔 "frozen 49 cycle" 로 의심했으나 git log 대조 결과
+  cycle 2191~2240 모두 같은 날(2026-08-19) 몇 시간 내 발생한 사이클이라 정상
+  (KBO 결과 검증 cron 은 1일 1회, 그 사이 새 verified row 없었을 뿐 — false alarm)
+- **핵심 재확인**: pre_game v1.8 예측 8/1~8/19 59/59 전량 `debate_version=NULL`
+  — CREDIT_EXHAUSTED 100% fallback 지속, 기존 narrative 그대로. 결정 불필요.
+- **부수 발견 + fix**: `in_game` 예측(`live.ts` upsert)이 `debate_version` 을
+  명시 안 해 migration 007 의 stale `DEFAULT 'v1-narrative'` (현 코드베이스에
+  존재조차 안 하는 옛 리터럴) 를 조용히 상속 — "debate 있었던 것"처럼 오분류될
+  여지. 실측: 8/10~8/19 in_game 38건 전량 이 값. 현재 모든 consumer가
+  `prediction_type='pre_game'` 선필터라 실질 영향 0 (dormant) 이지만 향후
+  landmine 차단 위해 explicit `debate_version: null` 추가. PR #2981,
+  commit `2cc75f3f`, R7 자동 머지 완료 (`gh pr view 2981 --json state,mergedAt`
+  로 MERGED 실측 확인, mergeCommit `7a47ef25`).
+- 검증: `pnpm type-check` 4/4 clean, `pnpm test` 463 files/4005 tests all
+  pass, `pnpm lint` clean (pre-push hook)
+- 다음 후보: review-code(heavy) — validator.ts(899줄) 또는 mlb-pipeline.ts
+  (731줄), cycle 2239 이미 flagged. 다양성 위해 polish-ui/info-arch/lotto 도
+  검토 가치 (직전 20 cycle review-code+explore-idea 편중 지속)
+
 ## 🟢 review-code (heavy) — daily.ts 최대 미감사 non-UI monolith 감사, gap fix (cycle 2239, 2026-08-19)
 
 진단: 강제 trigger 없음 (fix-incident gap=4/lotto gap=5/info-arch gap=14/
