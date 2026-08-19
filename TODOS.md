@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 polish-ui — 골드 accent 하드코딩 hex → CSS 토큰 정정 (cycle 2274, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건). **2-chain alternation lock 탐지** — 직전 8사이클 distinct=2 (review-code 7회 + explore-idea 1회) → 두 chain 후보 제외 후 재선택. fix-incident 16-gap/op-analysis 9-gap/lotto 10-gap/info-arch 24-gap 모두 강제 임계(20/25/30/30) 미도달, `gh run list` CI 최근 실패 0건(fix-incident 자연 trigger도 부재), lotto 다음 회차(2026-08-22) picks 이미 박제 + 직전 결과 이미 반영. design-system(DESIGN.md/lotto-data 최근 갱신, 4주 미만) 부적합. 강한 자연 trigger 부재 → 락 룰의 "어떤 chain 도 trigger 없으면 polish-ui 강제 발화" 폴백 적용.
+
+실측: DESIGN.md 골드 accent 토큰(`--color-accent: #c5a23e`, `--color-accent-light: #e2c96b`) 존재 확인 후 컴포넌트 전수 grep(`#c5a23e`/`#e2c96b`, og/twitter-image 제외 — satori 렌더 특성상 리터럴 hex 필수라 기존 컨벤션 유지 대상). `TopStatPickCard.tsx`는 이미 `var(--color-accent-light)` 직접 참조 + 전용 회귀 테스트(`.test.tsx`에 하드코딩 hex `not.toContain` 단언)까지 갖춰 "토큰 참조가 확립된 컨벤션"임을 확인. 반면 `page.tsx`(홈 오늘 경기 위젯, 예측 배지 골드 강조)와 `analysis/page.tsx`(팩터 수렴 픽 강도 표시 3곳)는 라이트/다크 모드 색상을 리터럴 hex로 하드코딩 — 컨벤션 사각지대.
+
+수정: 4곳(`page.tsx` 1곳 + `analysis/page.tsx` 3곳) 전부 `text-[#c5a23e]`→`text-[var(--color-accent)]`, `dark:text-[#e2c96b]`→`dark:text-[var(--color-accent-light)]` 정정. 474 files/4063 tests all pass(zero regression), `tsc --noEmit` clean, lint clean, pre-push CI(lint+type-check) pass. VERSION/root+apps package.json 동기화(0.5.62.53→54). main 직접 push, PR 생략(2 file 소규모 토큰 정정).
+
+다음 후보: 2-chain lock 해제(review-code/explore-idea 재활성) 자연 예상 — review-code(heavy) 계속 시 미감사 대형 파일(`packages/shared/src/index.ts` 3390줄 최대, `packages/kbo-data/src/scrapers/fancy-stats.ts` 526줄, `packages/kbo-data/src/pipeline/silent-drift-alert.ts` 407줄) 후보 잔존. 또는 op-analysis(9/25-gap)·lotto(10/30-gap)·fix-incident(16/20-gap) 누적 계속.
+
 ## 🟢 review-code (heavy) — agents/postview.ts 최초 감사, FactorErrorsBars/PostviewPanel dev jargon leak 정정 (cycle 2273, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, fix-incident 15-gap/op-analysis 8-gap/lotto 9-gap/info-arch 23-gap 모두 미도달). cycle 2271 explore-idea saturation + cycle 2272 review-code 대형 파일 소진 결론 → 새 미감사 대상 재탐색. `packages/kbo-data/src/agents/postview.ts`(496줄) — git log 그렙으로 대조한 결과 "최초 감사" 이력 없는 미감사 agent 파일로 확인, 선택.
