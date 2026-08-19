@@ -1,5 +1,6 @@
 'use client';
 
+import { PICKS_STREAK_BADGE_MIN } from '@moneyball/shared';
 import type { WeeklyStats } from '@/lib/picks/buildPicksStats';
 
 interface Props {
@@ -12,7 +13,7 @@ export function WeeklyPicksSummary({ weekly, currentStreak }: Props) {
   const aiRatePct = weekly.aiRate !== null ? Math.round(weekly.aiRate * 100) : null;
 
   const beatAI = myRatePct !== null && aiRatePct !== null && myRatePct > aiRatePct;
-  const hasStreak = currentStreak >= 3;
+  const hasStreak = currentStreak >= PICKS_STREAK_BADGE_MIN;
   const hasBadge = beatAI || hasStreak;
 
   return (

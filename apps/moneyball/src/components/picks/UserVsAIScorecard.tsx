@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
+import { PICKS_STREAK_BADGE_MIN } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import { buildPickEntries, buildPicksStats } from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
@@ -65,7 +66,7 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-bold">AI와 대결</h2>
-          {currentStreak >= 2 && (
+          {currentStreak >= PICKS_STREAK_BADGE_MIN && (
             <span className="text-xs font-semibold bg-accent/15 text-accent dark:text-accent-light px-2 py-0.5 rounded-full tabular-nums">
               🔥 {currentStreak}연속
             </span>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
+import { MIN_LEADERBOARD_PICKS, PICKS_STREAK_BADGE_MIN } from '@moneyball/shared';
 import { LeaderboardTable } from './LeaderboardTable';
 import { LeaderboardJoinModal } from './LeaderboardJoinModal';
 import { LeaderboardSortControl } from './LeaderboardSortControl';
@@ -41,7 +41,7 @@ export function LeaderboardClient({ entries, aiBaseline }: Props) {
     streakSorted.forEach((e, i) => streakRankMap.set(e.device_id, i));
     const sampleRankMap = new Map<string, number>();
     sampleSorted.forEach((e, i) => sampleRankMap.set(e.device_id, i));
-    const streakCohort = entries.filter((e) => e.current_streak >= 2).length;
+    const streakCohort = entries.filter((e) => e.current_streak >= PICKS_STREAK_BADGE_MIN).length;
     return { streakRankMap, sampleRankMap, streakEnabled: streakCohort >= 2 };
   }, [entries]);
 
