@@ -1,4 +1,14 @@
 
+## ⚪ operational-analysis (lite) — 주간 리뷰 + CE cohort 안정 재확인 SUCCESS (cycle 2285, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 archived/completed). 2-chain lock 미충족(직전 8사이클 distinct=4). 직전 4사이클(2281~2284) 연속 review-code(heavy) — cycle 2282/2283/2284 retro가 공통으로 lotto/op-analysis 다양성 전환 추천. lotto는 다음 회차(2026-08-22) picks + 직전(08-15) OOS 이미 완료 확인(파일 존재) — trigger 미해당. op-analysis는 gap 20/25(미도달)이나 diminishing-returns 신호(cycle 2283 review-code가 "drift 없음" 판정) 겹쳐 다양성 우선 선택.
+
+실행(lite, 코드 변경 없음): 이번 주(08-17~08-23) KBO 예측 집계 — n=10 검증완료, 5승5패 50.0%(표본 극소, 결론 보류). `scripts/op-analysis-ce-cohort.ts` 재실행 — 누적 n=321(CE=274/비CE=47, cycle 2265와 완전 동일 수치 — 실제 시간 간격 2.5시간이라 신규 검증 없음, 정상). CE 54.0% vs 비CE 63.8% = 9.8pp 격차 유지(cycle 2191 9.9pp→2146 9.7pp→2265 9.8pp, 안정 범위). overlap 월 통제 격차 10.8pp ≈ 전체 → LLM 부가가치 우세 방향 5회 연속 재확인. 최근 14일 v1.8 전량(56/56) CE(debate_version NULL) — CREDIT_EXHAUSTED 6th recurrence 상태 변화 없음.
+
+skill-evolution trigger 평가: trigger3(2285%50=35) 미충족. trigger5 — 평가대상 review-code, 직전20사이클(2266-2285) 14회 fired, 미충족. marker 박제 안함.
+
+다음 후보: review-code(heavy, 잔존 대형 미감사 파일: mlb-pipeline.ts/buildTeamProfile.ts/buildMatchupProfile.ts) 또는 lotto(21-gap/30 근접).
+
 ## ⚪ review-code (heavy) — daily.ts 최초 전체 감사, weather 백필 assertSelectOk 누락 정정 SUCCESS (cycle 2284, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건. 2-chain lock 미충족(직전 8사이클 distinct=4). 주기 보정 trigger 3종 (lotto 20-gap/30, op-analysis 19-gap/25, fix-incident 6-gap/20) 모두 미도달. cycle 2283 이 "review-code heavy 대형 미감사 파일 pool 소진 임박" 주장했지만 재탐색 결과 `packages/kbo-data/src/pipeline/daily.ts`(1607줄, 핵심 예측 파이프라인, 281개 fix 커밋이 손댄 파일) 가 review-code 이력 0건으로 확인 — 최우선 미감사 대형 파일 재발견 (cycle 2283 결론 정정).
