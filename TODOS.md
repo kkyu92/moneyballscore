@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — analysis/game/[id]/page.tsx scoring_rule 필터 누락 정정 (#1338 family 5번째, sweep 누락 발견) SUCCESS (cycle 2292, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(plan #27 Phase 3 데이터 게이트 재확인 — `user_picks`=1건/`mlb_user_picks`=0건/`mlb_pick_poll_events`=0건, ≥10 임계 미충족으로 계속 보류). 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 14-gap/20, op-analysis 7-gap/25, info-arch 12-gap/30, lotto 28-gap/30 근접이나 미도달). cycle 2291이 "#1338 family sweep 완료"라 선언했으나 재확인 차원에서 review-code(heavy) 대상 재탐색 — `analysis/game/[id]/page.tsx`(838줄, cycle 156 이후 전체 재감사 이력 없음, wave-335~585 30+ feature 누적)를 전체 정독.
+
+발견: `getGameAnalysis`의 predictions select가 **`prediction_type` 필터조차 SQL 레벨에 없이** 전체 row를 가져와 JS `.find(p => p.prediction_type === 'pre_game')`로 하나만 선택 — daily.ts가 매 경기 production(v1.8) insert 직후 shadow(v2.1-B-shadow/v2.0-shadow) row도 동일 prediction_type='pre_game'으로 insert 중(#1338 family)이라, 정렬 없는 `.find()`가 production/shadow 중 임의 row를 선택 가능한 상태. 이 페이지는 심판 판정/에이전트 논거/팩터 해설/waterfall/수렴 픽 배지 전부가 이 값에 의존하는 **최고 트래픽 분석 상세 페이지**라 영향 범위가 다른 family 파일보다 큼.
+
+**cycle 2291 "sweep 완료" 선언 정정**: 그 sweep은 `prediction_type === 'pre_game'`/`.eq("prediction_type","pre_game")` grep 대상을 lib 레이어 위주로 훑었고, `apps/moneyball/src/app/**/page.tsx` 같은 라우트 파일까지 포괄하지 못해 본 파일을 놓침. #1338 family 재발 계보(cycle 2288~2291)에 **6번째 사례**로 추가 — "sweep 완료" 선언은 실제 grep 범위(파일 glob)를 명시하지 않으면 과신될 수 있다는 교훈.
+
+수정: `CURRENT_SCORING_RULE` import + select에 `scoring_rule` 컬럼 추가 + `.find()` predicate에 `p.scoring_rule === CURRENT_SCORING_RULE` 조건 추가(buildMatchupProfile.ts cycle 2289 패턴과 동일 — LEFT embed라 SQL dotted eq 대신 JS 필터 유지). 정적 grep 회귀 테스트(`silent-drift-cycle-2292.test.ts`) 추가. type-check/lint clean, test 481 files/4085 tests pass. PR #3001 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit 0ff3efb3, 사례 18 mitigation 준수).
+
+다음 후보: `apps/moneyball/src/app/**/page.tsx` 전체(라우트 파일)를 대상으로 한 진짜 전수 sweep 재실행 권장 — 이번 발견이 lib 파일만 훑은 sweep의 사각지대였다는 점을 고려하면 다른 route 파일에도 동일 누락 가능성 존재. lotto(gap 28/30, 다음 사이클 도달 예상)도 다양성 후보.
+
 ## ⚪ review-code (heavy) — series.ts scoring_rule 필터 누락 정정 (#1338 family 4번째, sweep 완료) SUCCESS (cycle 2291, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked, unprocessed lookup 대상 제외). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/operational-analysis/explore-idea). 주기 trigger 3종 미도달(fix-incident 13-gap/20, op-analysis 6-gap/25, info-arch 11-gap/30, lotto 27-gap/30 근접이나 미도달). cycle 2290 retro가 지목한 `insights/series.ts` 후속 확인.
