@@ -1,5 +1,31 @@
 # TODOS
 
+## ⚪ review-code (heavy) — /mlb/predictions 신규 코드 감사, drift 0건 (cycle 2219, 2026-08-19)
+
+open issue 0건, approved plan 0건 (19건 전량 completed/archived). 직전 8사이클
+distinct=4 — 2-chain lock 미충족. lotto/info-arch 30-gap 재확인 결과 둘 다 실익
+없음(lotto: 8/22 회차 50세트+8/15 결과 이미 박제, info-arch: MLB 메가메뉴/푸터
+sitemap 컬럼 cycle 2218 커밋에서 이미 동기 완료, breadcrumb 누락 라우트는 전량
+redirect/placeholder/debug 성격이라 실제 gap 아님). Feature-Drift Cycle 패턴
+(explore-idea → review-code 자연 교대) 따라 cycle 2218 신규 `/mlb/predictions`
+hub(377줄) 감사 채택.
+
+**감사 대상**: `apps/moneyball/src/app/mlb/predictions/page.tsx` — mlb_schedule
+2-step 매핑, MLB_PRODUCTION_COHORT_RULES 필터, classifyWinnerProb/
+deriveMlbOutcome null 처리, MlbPredictionsSearchBox 팀코드 정규화, CE-fallback
+배너 부재, revalidate=1800 상수 정합 전부 확인.
+
+**결론**: drift 0건. CE(CREDIT_EXHAUSTED) 배너가 KBO `/predictions` 에는 있고
+MLB 버전엔 없는 점이 처음엔 gap 으로 보였으나, MLB 예측 파이프라인 자체가
+LLM debate 미사용(순수 quant, `packages/kbo-data/src/agents/` grep 결과 MLB
+debate 코드 0건)이라 CE 감지 로직이 애초에 적용 대상 아님 — 의도된 설계.
+`cancelled`+`missing` 이중 카운트도 KBO 원본과 동일 컨벤션(정상). 코드 fix
+없음 — 커밋/PR 없이 retro-only 마감.
+
+**next_recommended**: operational-analysis or explore-idea (review-code 이번
+사이클 포함 최근 8/20사이클 여전히 dominant — Feature-Drift 자연 복귀 전
+다양성 우선 권장).
+
 ## 🟢 explore-idea (heavy) — /mlb/team/[code] division rank 노출 (cycle 2216, 2026-08-19)
 
 open issue 0건, approved plan 0건 (19건 전량 completed/archived, plan #25 archived).
