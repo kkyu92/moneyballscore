@@ -4,9 +4,10 @@ import { HOME_ADVANTAGE, SUPABASE_PAGE_SIZE, WEEKDAY_LABELS_KO } from '@moneybal
 // /debug/factor-correlation — 환경 변수 → 경기 결과 상관 분석
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
 //
-// 2024+2025 시즌 백필 완료 + 2026 진행분 합쳐서 (N ~1458) 경기 환경 요소가
-// 실제로 결과에 영향 주는지 조사. 팩터 가중치 튜닝의 사전 작업 —
-// "모델 상수 가정이 데이터와 일치하나" 검증.
+// 2023 시즌부터 (쿼리 gte '2023-01-01') 2026 진행분까지 전 시즌 누적 —
+// 경기 환경 요소가 실제로 결과에 영향 주는지 조사. 팩터 가중치 튜닝의
+// 사전 작업 — "모델 상수 가정이 데이터와 일치하나" 검증. 정확한 N은
+// 페이지 표본 실측(하단 "표본" 라인) 참조 — 날마다 증가하므로 주석에 고정 수치 박제 X.
 //
 // 다루는 것:
 //   1. Home advantage 실측 — 홈 승률 vs 가정 (HOME_ADVANTAGE @moneyball/shared 단일 source)
@@ -275,7 +276,7 @@ export default async function FactorCorrelationPage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">Factor Correlation</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
-          환경 변수 → 경기 결과 상관 분석 (2025 시즌 + 2026 진행분).
+          환경 변수 → 경기 결과 상관 분석 (2023 시즌 ~ 2026 진행분 누적).
           팩터 가중치 튜닝 전 사전 검증 — 상수 가정이 데이터와 일치하나.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">
@@ -297,7 +298,7 @@ export default async function FactorCorrelationPage() {
           <Stat label="표본 충분성" value={decided >= 500 ? '충분' : '부족'} suffix={`N=${decided}`} />
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
-          홈 어드밴티지 상수는 이 페이지 데이터로 재보정됨. 2024·2023 백필 시 CI 좁아지면 자동 refine 가능.
+          홈 어드밴티지 상수는 2023~2026 누적 표본(위 CI) 기준 재보정됨. 시즌 진행에 따라 표본 누적 시 CI 자동 refine.
         </p>
       </section>
 

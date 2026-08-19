@@ -1,4 +1,25 @@
-## v0.5.62.51 — 2026-08-20 (cycle 2270, review-code (heavy): reviews/monthly/[month]/page.tsx 최초 감사 — 소표본 임계 하드코딩 5 → SMALL_SAMPLE_N 정정)
+## v0.5.62.52 — 2026-08-20 (cycle 2272, review-code (heavy): debug/factor-correlation/page.tsx 최초 감사 — 데이터 범위 주석/UI 문구 stale drift 정정)
+
+### fix(debug): factor-correlation 페이지 데이터 범위 설명이 실제 쿼리와 불일치 정정
+
+`debug/factor-correlation/page.tsx`(543줄, 최초 감사) — 상단 주석이 "2024+2025 시즌
+백필 완료 + 2026 진행분 합쳐서 (N ~1458)"라 서술했지만 실제 쿼리(`gte('game_date',
+'2023-01-01')`)는 이미 2023 시즌부터 포함하고 있었고, DB 실측 결과 2023~2026 누적
+`decided` 표본은 2634건(주석 대비 약 1.8배). 게다가 UI 헤더 문구는 "2025 시즌 +
+2026 진행분"이라 2023/2024를 아예 언급 안 했고, 하단 문구는 "2024·2023 백필 시 CI
+좁아지면 자동 refine 가능"이라 이미 완료된 백필을 미래형으로 서술 — 3곳 모두 실제
+쿼리 범위와 어긋난 stale 문구. 주석/UI 텍스트를 실제 쿼리 범위(2023~2026 누적)에
+맞게 정정, 날마다 변하는 정확한 N은 주석에 고정 수치로 박제하지 않고 페이지 실측
+표시로 위임.
+
+- `apps/moneyball/src/app/debug/factor-correlation/page.tsx`: 상단 주석 + 헤더 문구 +
+  Home Advantage 섹션 하단 문구 3곳 정정
+- `apps/moneyball/src/app/__tests__/silent-drift-wave-240.test.ts` 44/44 pass (기존
+  가드 무관), `tsc --noEmit` clean
+- 이 페이지는 `/debug/*` BASIC auth 뒤 — 사용자 가시 영향은 없으나 운영자가 실제
+  표본 범위를 오인할 수 있는 stale drift
+
+
 
 ### fix(reviews): 월간 리뷰 소표본 게이팅에 하드코딩 `5` 대신 `SMALL_SAMPLE_N` 상수 사용
 
