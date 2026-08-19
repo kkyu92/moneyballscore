@@ -1,5 +1,25 @@
 # TODOS
 
+## 🟢 fix-incident — /lotto/check 프로덕션 빌드 실패 (cycle 2235, 2026-08-19)
+
+deploy-drift-alert 스케줄 workflow 실패 발견 (fix-incident source table 지시대로
+`gh run list` 직접 확인, 20-cycle gap 트리거 미충족이었지만 실제 CI 신호 우선).
+main HEAD 이 production 대비 10-commit 앞섬(gap 1h+) — cb21e154(`/lotto/check`
+신규) 배포부터 매 배포 Error.
+
+- 원인: `loadAllWinners()` 가 `apps/moneyball/data/lotto-data.json` (rules 감사용
+  메타데이터 dict, lotto-data-schema.test.ts 대상) 을 역대 당첨 배열로 오인 —
+  실제 1237회 당첨 배열은 `scripts/lotto-data.json`. 이름 충돌로 object 를
+  `WinnerEntry[]` for-of 순회 → "TypeError: c is not iterable" prerender 실패
+- 수정: WINNERS_PATH_CANDIDATES 를 `scripts/lotto-data.json` (repo-root +
+  package-anchored, 기존 RESULTS_DIR_ROOT/FALLBACK 패턴과 통일) 로 정정
+- 검증: 로컬 `pnpm --filter moneyball build` 재현(수정 전 동일 에러) → 수정 후
+  정상 static 생성, 463 files/4005 tests + type-check 통과, 커밋 658838eb 직접
+  push(main), 신규 배포(mo7us641q) Ready 확인 후 **실측 fire**: `curl
+  /api/version` → commit_sha=658838e 확인 + `curl -o /dev/null -w '%{http_code}'
+  /lotto/check` → 200 (R5 정정 룰 — isolated smoke 아닌 실 프로덕션 확인)
+- outcome: success
+
 ## 🟢 lotto (lite) — 30-cycle gap 감사 (cycle 2234, 2026-08-19)
 
 lotto trigger 6 (30-cycle gap, last fire cycle 2175) + 2-chain alternation lock 탐지
