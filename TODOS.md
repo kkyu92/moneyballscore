@@ -1,5 +1,39 @@
 # TODOS
 
+## 🟢 review-code(heavy) — Brier trend "3주 이상" 게이트 카피/동작 불일치 fix (cycle 2195, 2026-08-19)
+
+no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
+직전 8사이클 distinct=4) — Feature-Drift Cycle alternation (fix-incident
+2194 는 out-of-band incident, 그 전 explore-idea 2193/review-code 2192)
+따라 review-code(heavy) 선택. 최근 4개 explore-idea heavy cycle(2181/
+2186/2189/2193)이 연속 추가한 MLB accuracy 대시보드 위젯 클러스터
+(RollingAccuracyChart/BrierTrendChart/ScoringRuleDayHeatmap/
+CohortComparisonHeatmap) 감사.
+
+먼저 확인한 가설(MLB rows에 scoring_rule 필드 없어 per-rule heatmap
+breakdown 이 깨진다) 은 오탐 — cycle 2189 커밋 메시지가 이미 "자연
+degradation" 으로 명시했고, activeRows/activeSRs 필터가 'all' aggregate
+만 남기는 걸로 이미 우아하게 처리됨 (silent drift wave 255~257 registry
+fix 가 이미 이 패턴 방지).
+
+실제 발견: `buildBrierTrend()` 는 주차마다 'all' + scoring_rule 최소
+2개 point 를 result 배열에 push — result.length 는 실제 주차 수의 2배
+이상. `accuracy/page.tsx`(628줄) + `MlbAccuracyDashboard.tsx`(312줄) +
+`BrierTrendChart.tsx` 내부 가드가 모두 `brierTrend.length >= 3` (총
+point 수) 로 게이트해, UI 카피("3주 이상 검증되면 Brier score 시계열
+그래프가 표시됩니다")와 달리 실제로는 2주차에 이미 차트가 열림 — KBO/MLB
+양쪽 accuracy 대시보드 공유 버그(cycle 1999 이전부터 존재, MLB 이식과
+무관한 pre-existing 이슈).
+
+조치: `countBrierTrendWeeks()` (distinct week/date count) 신규 export
+(`buildAccuracyData.ts`) 후 3개 게이트 지점(`accuracy/page.tsx`,
+`MlbAccuracyDashboard.tsx`, `BrierTrendChart.tsx`) 모두 이걸로 교체.
+회귀 테스트 3건 추가. `tsc --noEmit` clean + 전체 vitest suite
+3897/3897 pass (447 files) 확인.
+
+커밋 `983acd83`. push 는 batch 정책 유지 (사용자 요청 시만, 자율 push
+없음) — local main 지금 origin 대비 36 commit ahead.
+
 ## 🟢 fix-incident(heavy) — deploy-drift-alert 12h+ silent gap, 수동 재배포 (cycle 2194, 2026-08-19)
 
 no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
