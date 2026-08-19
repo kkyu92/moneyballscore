@@ -39,6 +39,7 @@ import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchup
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 
 // plan #24 Phase 1 MVP — KBO /matchup/[teamA]/[teamB] parity 축소판.
 // header + summary + 팀별 성과(sideStats) + 경기 기록 테이블만. elo trend 는 원래 MLB Elo
@@ -209,11 +210,7 @@ export default async function MlbMatchupPage({ params }: PageProps) {
                 className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl p-5 border border-gray-200 dark:border-[var(--color-border)]"
               >
                 <div className="flex items-center gap-2">
-                  <span
-                    className="inline-block w-6 h-6 rounded-full shrink-0"
-                    style={{ backgroundColor: s.teamColor }}
-                    aria-hidden
-                  />
+                  <MlbTeamLogo team={s.teamCode} size={24} className="rounded-full shrink-0" />
                   <p className="text-sm text-gray-500 dark:text-gray-400">{s.teamName}</p>
                 </div>
                 <p className="text-3xl font-bold mt-1">

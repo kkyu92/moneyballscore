@@ -40,6 +40,7 @@ import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchup
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 
 // EN mirror of /mlb/matchup/[teamA]/[teamB] — plan #24 Phase 1 MVP + Phase 2a factor compare.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -257,11 +258,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
                 className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl p-5 border border-gray-200 dark:border-[var(--color-border)]"
               >
                 <div className="flex items-center gap-2">
-                  <span
-                    className="inline-block w-6 h-6 rounded-full shrink-0"
-                    style={{ backgroundColor: s.teamColor }}
-                    aria-hidden
-                  />
+                  <MlbTeamLogo team={s.teamCode} size={24} className="rounded-full shrink-0" />
                   <p className="text-sm text-gray-500 dark:text-gray-400">{s.teamName}</p>
                 </div>
                 <p className="text-3xl font-bold mt-1">
