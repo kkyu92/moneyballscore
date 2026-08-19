@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — debug/factor-correlation/page.tsx 최초 감사, 데이터 범위 stale 주석/UI 문구 정정 (cycle 2272, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=4 [lotto/op-analysis/review-code x5/explore-idea], ship-0/lite-cap 미충족, fix-incident 14-gap/op-analysis 7-gap/lotto 8-gap/info-arch 22-gap 모두 미도달). cycle 2271 explore-idea(lite) saturation 발화 후 신규 후보 없음 결론 + carry-over "review-code(heavy) 복귀 자연" 권고 + TODOS 미감사 대형 파일 목록 잔존 (`debug/factor-correlation/page.tsx`, 543줄) 선택.
+
+실측: 렌더/통계 로직(`ci95`/`makeSplit`/구장·낮밤·요일·기온·바람·강수 split/팀별 홈원정/매치업 매트릭스) clean, `HOME_ADVANTAGE` 단일 source 참조 정상. 상단 주석이 "2024+2025 시즌 백필 완료 + 2026 진행분 합쳐서 (N ~1458)"라 서술했지만 실제 쿼리(`gte('game_date', '2023-01-01')`)는 이미 2023-01-01부터 조회 — DB 직접 조회로 대조한 결과 2023년 734건/2024년 737건/2025년 736건/2026년(진행중) 472건, decided(winner 확정) 총 N=2634 (주석 대비 약 1.8배). UI 헤더 문구는 "환경 변수 → 경기 결과 상관 분석 (2025 시즌 + 2026 진행분)"이라 2023/2024를 아예 언급 안 했고, Home Advantage 섹션 하단 문구는 "2024·2023 백필 시 CI 좁아지면 자동 refine 가능"이라 이미 완료된 백필을 미래형으로 서술 — 3곳 모두 실제 쿼리 범위와 어긋난 stale 텍스트(주석/UI가 backfill 완료 시점 갱신 안 됨).
+
+수정: 3개 텍스트 블록(상단 주석/헤더 문구/하단 문구) 실제 쿼리 범위(2023~2026 누적) 기준 정정. 날마다 증가하는 정확한 N은 주석에 고정 수치로 다시 박제하지 않고 페이지 하단 실측 표시("표본: 완료된 경기 중 승부 확정분 N경기")로 위임(재발 방지 — 고정 수치 주석이 이번 drift의 근본 원인). `silent-drift-wave-240.test.ts` 44/44 pass(이 페이지의 기존 가드는 HOME_ADVANTAGE source note/cycle 470 ref 부재만 검증, 이번 텍스트 변경과 무관), `tsc --noEmit` clean, pre-push lint+type-check pass. VERSION/root+apps package.json atomic 동기화(0.5.62.51→52). `/debug/*` BASIC auth 뒤 페이지라 일반 사용자 영향 없음, 운영자(본인)가 실제 표본 범위를 오인할 수 있는 stale drift 정정. main 직접 push, PR 생략(1 file 텍스트 정정).
+
+다음 후보: review-code (heavy) 계속 — 단, 기존 TODOS 미감사 대형 파일 목록(`reviews/monthly`, `debug/pipeline`, `debug/factor-correlation`)이 전부 소진됨. 다음 사이클은 새 미감사 대상 재탐색(파일 크기/최근 미접촉 라우트 grep) 또는 explore-idea(saturation 재도달 여부 확인) 자연 고려.
+
 ## 🟡 explore-idea (lite) — KBO↔MLB 라우트 parity 재감사, 잔여 gap 전부 구조적 비적용/이미 완결 결론 (cycle 2271, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(전부 completed/blocked/archived). 2-chain lock 미충족(직전 8사이클 distinct=3 [review-code/lotto/op-analysis]). fix-incident 12-gap/op-analysis 5-gap/lotto 6-gap(이미 8/22 50세트 박제됨, gap 무관)/info-arch 20-gap 모두 강제 임계(20/25/30/30) 미도달. **explore-idea saturation trigger 충족** — 직전 15사이클(2256~2270) 중 review-code+fix-incident+polish-ui+info-arch = 12/15 (≥12 임계 도달, review-code 단독 dominance 9/10 유지) → review-code 편중 완화 위해 explore-idea 선택.
