@@ -385,7 +385,7 @@ export async function fetchTeamStats(_season: number): Promise<TeamStats[]> {
 
 // fancy-stats / 파이프라인 default 단일 source — daily.ts 의 동일 magic
 // number 중복 제거 통일.
-// 본 값들은 KBO 평균 baseline (woba 0.320 / fip 4.00 / sfr 0 / elo ELO_NEUTRAL=1500 / winPct ELO_NEUTRAL_WIN_PCT=0.5).
+// 본 값들은 KBO 평균 baseline (woba 0.320 / fip 4.00 / sfr 0 / elo ELO_NEUTRAL=1500 / winPct ELO_NEUTRAL_WIN_PCT=0.5 / totalWar 12 = 타자 WAR 팀 합산 평균).
 // 팀별 데이터 부재 시 진입 — 진입 자체는 silent fallback 위험 신호.
 export const FANCY_STATS_DEFAULTS = {
   woba: 0.320,
@@ -393,6 +393,7 @@ export const FANCY_STATS_DEFAULTS = {
   sfr: 0,
   elo: ELO_NEUTRAL,
   winPct: ELO_NEUTRAL_WIN_PCT,
+  totalWar: 12,
 } as const;
 
 // fancy-stats Elo row silent fallback 측정.

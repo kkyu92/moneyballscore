@@ -640,7 +640,7 @@ export async function runDailyPipeline(
       team: game.homeTeam as TeamCode,
       woba: FANCY_STATS_DEFAULTS.woba,
       bullpenFip: FANCY_STATS_DEFAULTS.fip,
-      totalWar: 12,
+      totalWar: FANCY_STATS_DEFAULTS.totalWar,
       sfr: FANCY_STATS_DEFAULTS.sfr,
     };
     const defaultElo = {
