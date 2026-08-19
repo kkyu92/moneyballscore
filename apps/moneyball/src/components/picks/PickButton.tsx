@@ -7,6 +7,8 @@ import { shortTeamName, type TeamCode, MIN_POLL_TOTAL, COMMUNITY_DIVERGE_MIN } f
 import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
 
+type League = 'kbo' | 'mlb';
+
 const DEVICE_KEY = 'mb_device_id_v1';
 
 function getOrCreateDeviceId(): string {
@@ -22,12 +24,13 @@ function getOrCreateDeviceId(): string {
 }
 
 interface Props {
-  gameId: number;
-  homeTeam: TeamCode;
-  awayTeam: TeamCode;
+  gameId: number | string;
+  homeTeam: TeamCode | string;
+  awayTeam: TeamCode | string;
   aiPredictedWinner?: 'home' | 'away';
   aiWinProb?: number;
   aiTopFactor?: string;
+  league?: League; // 'mlb' 시 mlb-submit/mlb-poll route + 별도 localStorage 키 네임스페이스 (KBO 정수 game_id 와 MLB external_game_id 문자열 값 충돌 방지)
 }
 
 function PollBar({
@@ -84,17 +87,24 @@ function PollBar({
   );
 }
 
-export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor }: Props) {
+export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor, league = 'kbo' }: Props) {
   const { getPick, setPick } = useUserPicks();
-  const current = getPick(gameId);
+  // MLB external_game_id 는 KBO 정수 game_id 와 값 공간이 겹칠 수 있어 (둘 다 숫자 문자열)
+  // localStorage 키 충돌 방지용 네임스페이스 접두어 부여.
+  const storageKey = league === 'mlb' ? `mlb-${gameId}` : gameId;
+  const current = getPick(storageKey);
   const [poll, setPoll] = useState<PickPollEntry | null>(null);
 
   const homeName = shortTeamName(homeTeam) ?? homeTeam;
   const awayName = shortTeamName(awayTeam) ?? awayTeam;
 
+  const pollUrl = league === 'mlb' ? '/api/picks/mlb-poll' : '/api/picks/poll';
+  const submitUrl = league === 'mlb' ? '/api/picks/mlb-submit' : '/api/picks/submit';
+  const submitIdField = league === 'mlb' ? 'external_game_id' : 'game_id';
+
   const fetchPoll = useCallback(() => {
     let cancelled = false;
-    fetch(`/api/picks/poll?ids=${gameId}`)
+    fetch(`${pollUrl}?ids=${gameId}`)
       .then((r) => r.json())
       .then((data: Record<string, PickPollEntry>) => {
         if (!cancelled) {
@@ -110,7 +120,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
     return () => {
       cancelled = true;
     };
-  }, [gameId]);
+  }, [gameId, pollUrl]);
 
   useEffect(() => {
     return fetchPoll();
@@ -118,12 +128,12 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
 
   const handlePick = useCallback(
     (choice: 'home' | 'away') => {
-      setPick(gameId, choice);
+      setPick(storageKey, choice);
       const deviceId = getOrCreateDeviceId();
-      fetch('/api/picks/submit', {
+      fetch(submitUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ game_id: gameId, pick: choice, device_id: deviceId }),
+        body: JSON.stringify({ [submitIdField]: gameId, pick: choice, device_id: deviceId }),
       })
         .then(() => fetchPoll())
         .catch((err) => {
@@ -132,7 +142,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
           });
         });
     },
-    [gameId, setPick, fetchPoll],
+    [gameId, storageKey, setPick, fetchPoll, submitUrl, submitIdField],
   );
 
   const base =

@@ -53,7 +53,7 @@ export function useUserPicks() {
     return cleaned;
   });
 
-  const setPick = useCallback((gameId: number, choice: PickChoice) => {
+  const setPick = useCallback((gameId: number | string, choice: PickChoice) => {
     setPicks((prev) => {
       const next = {
         ...prev,
@@ -65,7 +65,7 @@ export function useUserPicks() {
   }, []);
 
   const getPick = useCallback(
-    (gameId: number): UserPick | undefined => picks[String(gameId)],
+    (gameId: number | string): UserPick | undefined => picks[String(gameId)],
     [picks],
   );
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { PickButton } from '@/components/picks/PickButton';
 
 beforeEach(() => {
@@ -74,5 +74,40 @@ describe('PickButton AI 힌트', () => {
   it('aiWinProb만 있고 aiPredictedWinner 없으면 AI 힌트 미표시', () => {
     render(<PickButton gameId={1} homeTeam="LG" awayTeam="SS" aiWinProb={0.6} />);
     expect(screen.queryByText(/AI 예측/)).toBeNull();
+  });
+});
+
+describe('PickButton league="mlb" — mlb-submit/mlb-poll route + storageKey 네임스페이스', () => {
+  it('poll fetch 시 /api/picks/mlb-poll 호출 (KBO 는 /api/picks/poll)', () => {
+    render(<PickButton gameId="745444" league="mlb" homeTeam="NYY" awayTeam="BOS" />);
+    expect(global.fetch).toHaveBeenCalledWith('/api/picks/mlb-poll?ids=745444');
+  });
+
+  it('kbo (기본값) poll fetch 시 /api/picks/poll 호출', () => {
+    render(<PickButton gameId={5} homeTeam="LG" awayTeam="SS" />);
+    expect(global.fetch).toHaveBeenCalledWith('/api/picks/poll?ids=5');
+  });
+
+  it('픽 클릭 시 /api/picks/mlb-submit 로 external_game_id 필드 전송', () => {
+    render(<PickButton gameId="745444" league="mlb" homeTeam="NYY" awayTeam="BOS" />);
+    fireEvent.click(screen.getByRole('button', { name: /NYY 홈/ }));
+    const submitCall = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.find(
+      (call) => call[0] === '/api/picks/mlb-submit',
+    );
+    expect(submitCall).toBeDefined();
+    const payload = JSON.parse((submitCall![1] as RequestInit).body as string);
+    expect(payload.external_game_id).toBe('745444');
+    expect(payload.pick).toBe('home');
+  });
+
+  it('MLB gameId 가 KBO 정수 game_id 와 값이 같아도 localStorage 키 충돌 없음', () => {
+    // KBO game_id=745444 픽 저장
+    const { unmount } = render(<PickButton gameId={745444} homeTeam="LG" awayTeam="SS" />);
+    fireEvent.click(screen.getByRole('button', { name: /LG 홈/ }));
+    unmount();
+
+    // 동일 숫자 문자열의 MLB external_game_id 는 별도 네임스페이스 — 기존 KBO 픽 상태 영향 없음
+    render(<PickButton gameId="745444" league="mlb" homeTeam="NYY" awayTeam="BOS" />);
+    expect(screen.getByRole('button', { name: /NYY 홈/ })).toHaveAttribute('aria-pressed', 'false');
   });
 });
