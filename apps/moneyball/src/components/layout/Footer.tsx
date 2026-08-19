@@ -104,6 +104,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/matchup", label: "매치업", enLabel: "Matchups" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터 가중치`, enLabel: `${MLB_FACTOR_COUNTS.total}-Factor Weights` },
       { href: "/mlb/predictions", label: "예측 기록", enLabel: "Prediction History" },
+      { href: "/mlb/reviews", label: "예측 리뷰", enLabel: "Prediction Review" },
       { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar" },
       { href: "/mlb/wild-card", label: "Wild Card race", enLabel: "Wild Card Race" },
       { href: "/mlb/postseason", label: "Postseason 브래킷", enLabel: "Postseason Bracket" },
