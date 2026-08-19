@@ -21,18 +21,20 @@ describe("localizeNavItems", () => {
     expect(collectHrefs(result).every((h) => !h.startsWith("/en"))).toBe(true);
   });
 
-  it("EN pathname(/en/mlb/*) → /mlb/reviews 제외 모든 /mlb href 가 /en 접두로 치환", () => {
+  it("EN pathname(/en/mlb/*) → /mlb/reviews(하위 포함) 제외 모든 /mlb href 가 /en 접두로 치환", () => {
     const result = localizeNavItems(LEAGUE_NAVS.mlb, "/en/mlb/standings");
     for (const href of collectHrefs(result)) {
-      if (href === "/mlb/reviews") continue;
+      if (href.startsWith("/mlb/reviews")) continue;
       expect(href.startsWith("/en/mlb") || href === "/en/mlb").toBe(true);
     }
   });
 
-  it("EN pathname → /mlb/reviews 는 EN 미러 부재라 KO href 유지 (cycle 2227 발견 — blanket 치환 시 404)", () => {
+  it("EN pathname → /mlb/reviews(하위 포함) 는 EN 미러 부재라 KO href 유지 (cycle 2227 발견 — blanket 치환 시 404, cycle 2280 misses 추가분도 동일 가드로 커버)", () => {
     const result = localizeNavItems(LEAGUE_NAVS.mlb, "/en/mlb/standings");
     expect(collectHrefs(result)).toContain("/mlb/reviews");
+    expect(collectHrefs(result)).toContain("/mlb/reviews/misses");
     expect(collectHrefs(result)).not.toContain("/en/mlb/reviews");
+    expect(collectHrefs(result)).not.toContain("/en/mlb/reviews/misses");
   });
 
   it("EN pathname=/en/mlb (정확 일치) 도 치환", () => {

@@ -1,3 +1,21 @@
+## v0.5.62.60 — 2026-08-20 (cycle 2280, info-architecture-review: /mlb/reviews/misses 헤더·푸터 sitemap 누락 정정)
+
+### fix(nav): 신규 MLB 라우트 헤더 메가메뉴 + 푸터 sitemap 컬럼 누락 정정
+
+info-architecture-review 30-cycle 미발화 임계 도달(마지막 fire cycle 2250, gap=30). 실측 결과
+cycle 2279 신규 라우트 `/mlb/reviews/misses` 가 Header.tsx `MLB_NAV`/Footer.tsx MLB 컬럼 양쪽에
+배선 누락 — KBO 는 `/reviews`+`/reviews/misses` 헤더·푸터 양쪽 존재, MLB 는 `/mlb/reviews` 허브만
+있고 `/mlb/reviews/misses` direct entry 부재(Footer.tsx 코드 주석에 이미 명시된 반복 패턴 —
+cycle 2153/2225 "MLB 신규 라우트 추가 시 footer sitemap 컬럼 동기 누락" family 재발).
+
+`Header.tsx` MLB_NAV `/mlb/reviews` 다음에 `/mlb/reviews/misses` 항목 추가, `Footer.tsx` MLB
+컬럼에도 동일 추가. `withMlbLocale`/`localizeNavItems` 의 startsWith("/mlb/reviews") 가드가
+이미 하위 경로 전부 커버하도록 설계돼 있어(cycle 2227 주석 확인) 로직 변경 불필요 — 텍스트
+엔트리 추가만. 기존 Header.test.ts EN locale 테스트가 정확 일치(`href === "/mlb/reviews"`)
+조건이라 신규 misses href 를 걸러 실패 — startsWith 조건으로 정정 + misses 케이스 명시
+assertion 추가. Footer.test.tsx 에도 misses EN 유지 assertion 추가. 475 files/4069 tests all
+pass, `tsc --noEmit` clean, lint clean.
+
 ## v0.5.62.59 — 2026-08-20 (cycle 2279, explore-idea (heavy): /mlb/reviews/misses 신규 — KBO 회고 페이지 parity gap)
 
 ### feat(mlb): MLB "크게 빗나간 예측" 회고 페이지 신규

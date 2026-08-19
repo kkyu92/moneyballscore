@@ -1,3 +1,15 @@
+## 🟢 info-architecture-review — /mlb/reviews/misses 헤더·푸터 sitemap 배선 누락 정정 (cycle 2280, 2026-08-20)
+
+진단: info-architecture-review 30-cycle 미발화 trigger 도달 (마지막 fire cycle 2250, gap=30 정확 도달). open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked), 2-chain lock 미충족(직전 8사이클 distinct=4: review-code 5/polish-ui 1/fix-incident 1/explore-idea 1). 직전 20사이클 review-code dominance 70%(14/20). cycle 2242 checkpoint 가 이미 IA 전수 조사(breadcrumb/sitemap/en미러/DESIGN.md) 완료해 "gap 없음" 확정했었지만, 그 이후(cycle 2279) 신규 라우트 `/mlb/reviews/misses` 가 추가돼 재검증 필요 시점.
+
+실측: `grep Breadcrumb` 결과 misses 페이지 자체는 정상 배선. 하지만 Header.tsx `MLB_NAV`/Footer.tsx MLB 컬럼을 KBO_NAV/AI 예측 컬럼과 대조한 결과 KBO 는 `/reviews`+`/reviews/misses` 헤더·푸터 양쪽에 direct entry 존재하는 반면, MLB 는 `/mlb/reviews` 허브 링크만 있고 `/mlb/reviews/misses` 가 양쪽 다 누락 확인. Footer.tsx 코드 주석에 이미 명시된 "MLB 신규 라우트 추가 시 footer sitemap 컬럼 동기 누락" 반복 패턴(cycle 2153/2225 family) 재발.
+
+수정: Header.tsx MLB_NAV + Footer.tsx MLB 컬럼에 `/mlb/reviews/misses` 항목 추가. `withMlbLocale`/`localizeNavItems` 의 startsWith("/mlb/reviews") 가드가 이미 하위 경로 전부 EN 미러 예외 처리하도록 설계돼 있어(cycle 2227) 로직 변경 없이 텍스트 엔트리 추가만으로 충분. 단, Header.test.ts 의 기존 EN locale 테스트가 정확 일치(`href === "/mlb/reviews"`) 조건이라 신규 misses href 를 걸러내지 못해 실패 — startsWith 조건으로 정정 + misses 케이스 explicit assertion 추가. Footer.test.tsx 에도 동일 assertion 추가.
+
+검증: 475 files/4069 tests all pass, `tsc --noEmit` clean, lint clean. VERSION 0.5.62.59→60.
+
+다음 후보: review-code(heavy) 대형 미감사 파일 재탐색 또는 lotto(16/30-gap)/op-analysis(15/25-gap) 다양성. info-arch 는 이번 fix 로 다시 30-cycle 카운트 리셋.
+
 ## 🟢 explore-idea (heavy) — /mlb/reviews/misses 신규, KBO 회고 페이지 parity gap (cycle 2279, 2026-08-20)
 
 진단: explore-idea saturation trigger 충족 (직전 15 사이클 review-code+fix-incident+polish-ui 누적 12회 ≥12, 직전 20 사이클 review-code dominance 75% 15/20). 2-chain lock 미충족(직전 8사이클 distinct=4: explore-idea/review-code/polish-ui/fix-incident). open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked). fix-incident 방금 발화(gap=0)/op-analysis 13-gap/lotto 14-gap/info-arch 28-gap 모두 자체 주기 trigger(25/30/30) 미도달 — cycle 2278 명시 carry-over("lotto/op-analysis/info-arch gap 다양성 또는 review-code 재탐색") 대비 saturation trigger 가 우선 발화 조건으로 명확해 explore-idea 선택.

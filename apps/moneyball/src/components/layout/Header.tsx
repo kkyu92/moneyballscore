@@ -127,6 +127,7 @@ const MLB_NAV: NavItem[] = [
       { href: "/mlb/methodology", label: "예측 방법론", enLabel: "Methodology", description: "데이터 소스 · 정량 모델 · 검증 방법", enDescription: "Data sources, quant model, verification", icon: "file-text" },
       { href: "/mlb/predictions", label: "예측 기록", enLabel: "Prediction History", description: "일자별 예측 아카이브", enDescription: "Daily prediction archive", icon: "file-text" },
       { href: "/mlb/reviews", label: "예측 리뷰", enLabel: "Prediction Review", description: "수렴 픽 스트리크·팀별 분해", enDescription: "Convergence pick streaks & team breakdown", icon: "bar-chart" },
+      { href: "/mlb/reviews/misses", label: "빗나간 예측", enLabel: "Missed Predictions", description: "고확신 오예측 사후 분석", enDescription: "High-confidence miss post-mortems", icon: "target" },
       { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar", description: "날짜별 경기·예측 한눈에 보기", enDescription: "Games & predictions by date", icon: "calendar" },
     ],
   },
