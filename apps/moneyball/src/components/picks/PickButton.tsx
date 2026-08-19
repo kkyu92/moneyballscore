@@ -31,6 +31,7 @@ interface Props {
   aiWinProb?: number;
   aiTopFactor?: string;
   league?: League; // 'mlb' 시 mlb-submit/mlb-poll route + 별도 localStorage 키 네임스페이스 (KBO 정수 game_id 와 MLB external_game_id 문자열 값 충돌 방지)
+  analysisHref?: string; // '분석 보기' 링크 대상. 미지정 시 kbo 는 /analysis/game/{gameId} 기본, mlb 는 링크 미표시 (KBO 전용 라우트 — MLB external_game_id 로 parseInt 하면 엉뚱한 KBO 경기로 연결)
 }
 
 function PollBar({
@@ -87,7 +88,7 @@ function PollBar({
   );
 }
 
-export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor, league = 'kbo' }: Props) {
+export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor, league = 'kbo', analysisHref }: Props) {
   const { getPick, setPick } = useUserPicks();
   // MLB external_game_id 는 KBO 정수 game_id 와 값 공간이 겹칠 수 있어 (둘 다 숫자 문자열)
   // localStorage 키 충돌 방지용 네임스페이스 접두어 부여.
@@ -163,6 +164,8 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
         : 100 - aiProbPct
       : undefined;
 
+  const linkHref = analysisHref ?? (league === 'kbo' ? `/analysis/game/${gameId}` : null);
+
   return (
     <div>
       {aiProbPct != null && aiTeamName != null && (
@@ -175,13 +178,15 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
             <span className="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-semibold px-1.5 py-0.5 rounded text-[11px] shrink-0 tabular-nums">
               {aiProbPct}%
             </span>
-            <Link
-              href={`/analysis/game/${gameId}`}
-              className="ml-auto shrink-0 text-brand-600 dark:text-brand-400 hover:underline"
-              aria-label={`경기 ${gameId} 분석 보기`}
-            >
-              분석 보기 ↗
-            </Link>
+            {linkHref && (
+              <Link
+                href={linkHref}
+                className="ml-auto shrink-0 text-brand-600 dark:text-brand-400 hover:underline"
+                aria-label={`경기 ${gameId} 분석 보기`}
+              >
+                분석 보기 ↗
+              </Link>
+            )}
           </div>
           {aiTopFactor && (
             <p className="text-xs text-gray-400 dark:text-gray-500 truncate">

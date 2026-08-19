@@ -75,6 +75,37 @@ describe('PickButton AI 힌트', () => {
     render(<PickButton gameId={1} homeTeam="LG" awayTeam="SS" aiWinProb={0.6} />);
     expect(screen.queryByText(/AI 예측/)).toBeNull();
   });
+
+  it('league="mlb" + analysisHref 미지정 시 분석 보기 링크 미표시 (KBO 전용 /analysis/game/[id] 오연결 방지)', () => {
+    render(
+      <PickButton
+        gameId="745444"
+        league="mlb"
+        homeTeam="NYY"
+        awayTeam="BOS"
+        aiPredictedWinner="home"
+        aiWinProb={0.6}
+      />
+    );
+    expect(screen.getByText('AI 예측')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /분석 보기/ })).toBeNull();
+  });
+
+  it('league="mlb" + analysisHref 지정 시 해당 href 사용', () => {
+    render(
+      <PickButton
+        gameId="745444"
+        league="mlb"
+        homeTeam="NYY"
+        awayTeam="BOS"
+        aiPredictedWinner="home"
+        aiWinProb={0.6}
+        analysisHref="/mlb/games/2026-08-19/NYY-vs-BOS"
+      />
+    );
+    const link = screen.getByRole('link', { name: /분석 보기/ });
+    expect(link).toHaveAttribute('href', '/mlb/games/2026-08-19/NYY-vs-BOS');
+  });
 });
 
 describe('PickButton league="mlb" — mlb-submit/mlb-poll route + storageKey 네임스페이스', () => {

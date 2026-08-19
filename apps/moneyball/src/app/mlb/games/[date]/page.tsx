@@ -175,6 +175,7 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
                     awayTeam={p.awayCode}
                     aiPredictedWinner={p.winnerCode === p.homeCode ? 'home' : 'away'}
                     aiWinProb={p.homeWinProb}
+                    analysisHref={`/mlb/games/${date}/${p.homeCode}-vs-${p.awayCode}`}
                   />
                 )}
               </li>
