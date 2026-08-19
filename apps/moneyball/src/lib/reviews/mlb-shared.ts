@@ -5,9 +5,11 @@ import { pearsonCorrelation } from "@/lib/stats/pearson";
 import {
   FACTOR_CORR_NEGATIVE_MAX,
   FACTOR_CORR_POSITIVE_MIN,
+  MISS_REPORT_LIMIT,
   MLB_PRODUCTION_COHORT_RULES,
   MLB_TEAMS,
   assertSelectOk,
+  classifyWinnerProb,
   mlbShortTeamName,
   normalizeMlbTeamCode,
   type MlbTeamCode,
@@ -229,7 +231,7 @@ export function buildMlbTeamStats(rows: MlbPredictionRow[]): MlbWeeklyTeamStat[]
 // factors map 이 없어 home/away 원본 값 diff 를 직접 Pearson 상관계수에 태움 — lower-is-better
 // (FIP류) 는 diff 부호 반전(양수=홈 우세로 정규화, buildMlbFactorAccuracy.ts 의 LOWER_IS_BETTER
 // 규칙과 동일 소스).
-const MLB_FACTOR_COLUMN_PAIRS = {
+export const MLB_FACTOR_COLUMN_PAIRS = {
   sp_fip: ["home_sp_fip", "away_sp_fip"],
   sp_xfip: ["home_sp_xfip", "away_sp_xfip"],
   lineup_woba: ["home_lineup_woba", "away_lineup_woba"],
@@ -237,9 +239,9 @@ const MLB_FACTOR_COLUMN_PAIRS = {
   war: ["home_war_total", "away_war_total"],
 } as const;
 
-type MlbFactorKey = keyof typeof MLB_FACTOR_COLUMN_PAIRS;
+export type MlbFactorKey = keyof typeof MLB_FACTOR_COLUMN_PAIRS;
 
-const LOWER_IS_BETTER = new Set<MlbFactorKey>(["sp_fip", "sp_xfip", "bullpen_fip"]);
+export const LOWER_IS_BETTER = new Set<MlbFactorKey>(["sp_fip", "sp_xfip", "bullpen_fip"]);
 
 export function buildMlbFactorInsights(
   rows: MlbPredictionRow[],
@@ -291,4 +293,115 @@ export function buildMlbFactorInsights(
   if (results.length === 0) return { best: null, worst: null };
   const sorted = [...results].sort((a, b) => b.correlation - a.correlation);
   return { best: sorted[0], worst: sorted[sorted.length - 1] };
+}
+
+export interface MlbMissFactorSupport {
+  factor: MlbFactorKey;
+  label: string;
+  // 예측 방향(홈/원정 우세) 기준 diff 크기. 부호는 항상 예측과 같은 방향(양수=예측 뒷받침).
+  supportMagnitude: number;
+}
+
+export interface MlbMissReportItem {
+  externalGameId: string;
+  gameDate: string;
+  homeCode: MlbTeamCode;
+  awayCode: MlbTeamCode;
+  homeName: string;
+  awayName: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictedHomeWin: boolean;
+  winnerProb: number;
+  topSupportingFactors: MlbMissFactorSupport[];
+}
+
+// KBO buildMissReport.ts 대응 — MLB 는 postview 심판 에이전트가 없어(judgeReasoning/
+// factorErrors 컬럼 전량 미생성, postview-daily.ts 는 KBO 전용) 사후 서술 대신 어떤
+// 팩터가 (틀린) 예측 방향을 가장 강하게 뒷받침했는지 정량 계산으로 대체.
+export async function buildMlbMissReport(
+  options: { limit?: number } = {},
+): Promise<MlbMissReportItem[]> {
+  const limit = options.limit ?? MISS_REPORT_LIMIT;
+  const supabase = await createClient();
+
+  const scheduleResult = (await supabase
+    .from("mlb_schedule")
+    .select(
+      "external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code",
+    )
+    .eq("status", "final")) as unknown as SelectResult<MlbScheduleRangeRow[]>;
+  const { data: scheduleData } = assertSelectOk(scheduleResult, "buildMlbMissReport schedule");
+  const scheduleRows = scheduleData ?? [];
+  if (scheduleRows.length === 0) return [];
+
+  const predResult = (await supabase
+    .from("predictions")
+    .select(
+      `
+        external_game_id, home_win_prob,
+        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+        home_war_total, away_war_total
+      `,
+    )
+    .eq("prediction_type", "pre_game")
+    .eq("league", "mlb")
+    .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)) as unknown as SelectResult<MlbPredBreakdownRow[]>;
+  const { data: predData } = assertSelectOk(predResult, "buildMlbMissReport predictions");
+  const predByExternalId = new Map(
+    (predData ?? []).filter((p) => p.external_game_id).map((p) => [p.external_game_id as string, p]),
+  );
+
+  const misses: { row: MlbScheduleRangeRow; pred: MlbPredBreakdownRow; conf: number }[] = [];
+  for (const s of scheduleRows) {
+    const pred = predByExternalId.get(s.external_game_id);
+    if (!pred || pred.home_win_prob == null) continue;
+    if (s.home_score == null || s.away_score == null) continue;
+    if (classifyWinnerProb(pred.home_win_prob) === "tossup") continue;
+
+    const predictedHomeWin = pred.home_win_prob >= 0.5;
+    const actualHomeWin = s.home_score > s.away_score;
+    if (predictedHomeWin === actualHomeWin) continue; // 적중 — miss 아님
+
+    const conf = Math.max(pred.home_win_prob, 1 - pred.home_win_prob);
+    misses.push({ row: s, pred, conf });
+  }
+
+  misses.sort((a, b) => b.conf - a.conf);
+  const top = misses.slice(0, limit);
+
+  return top.map(({ row: s, pred, conf }) => {
+    const predictedHomeWin = pred.home_win_prob! >= 0.5;
+
+    const factorSupports: MlbMissFactorSupport[] = [];
+    for (const key of Object.keys(MLB_FACTOR_COLUMN_PAIRS) as MlbFactorKey[]) {
+      const [homeCol, awayCol] = MLB_FACTOR_COLUMN_PAIRS[key];
+      const homeVal = pred[homeCol as keyof MlbPredBreakdownRow] as number | null;
+      const awayVal = pred[awayCol as keyof MlbPredBreakdownRow] as number | null;
+      if (homeVal == null || awayVal == null) continue;
+      const rawDiff = homeVal - awayVal;
+      // 홈 우세 방향으로 정규화 (lower-is-better 팩터는 부호 반전) 후, 예측 방향과
+      // 일치하는 크기만 "뒷받침" 으로 카운트 (반대 방향이면 오히려 경고 신호이므로 제외).
+      const homeAdvantage = LOWER_IS_BETTER.has(key) ? -rawDiff : rawDiff;
+      const supportMagnitude = predictedHomeWin ? homeAdvantage : -homeAdvantage;
+      if (supportMagnitude <= 0) continue;
+      factorSupports.push({ factor: key, label: FACTOR_LABELS[key] ?? key, supportMagnitude });
+    }
+    factorSupports.sort((a, b) => b.supportMagnitude - a.supportMagnitude);
+
+    return {
+      externalGameId: s.external_game_id,
+      gameDate: s.game_date,
+      homeCode: normalizeMlbTeamCode(s.home_team_code) ?? (s.home_team_code as MlbTeamCode),
+      awayCode: normalizeMlbTeamCode(s.away_team_code) ?? (s.away_team_code as MlbTeamCode),
+      homeName: mlbShortTeamName(s.home_team_code),
+      awayName: mlbShortTeamName(s.away_team_code),
+      homeScore: s.home_score,
+      awayScore: s.away_score,
+      predictedHomeWin,
+      winnerProb: conf,
+      topSupportingFactors: factorSupports.slice(0, 3),
+    };
+  });
 }

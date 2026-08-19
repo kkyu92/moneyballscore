@@ -178,6 +178,7 @@ const STATIC_PAGES: Array<{
   { slug: '/mlb/methodology', label: 'MLB 방법론', keywords: 'mlb methodology 방법론 모델 메이저리그' },
   { slug: '/mlb/matchup', label: 'MLB 매치업', keywords: 'mlb matchup 매치업 vs 대결 메이저리그' },
   { slug: '/mlb/reviews', label: 'MLB 예측 리뷰', keywords: 'mlb reviews 리뷰 review 메이저리그' },
+  { slug: '/mlb/reviews/misses', label: 'MLB 빗나간 예측', keywords: 'mlb reviews misses 빗나간 회고 틀린 메이저리그' },
   { slug: '/mlb/reviews/monthly', label: 'MLB 월간 리뷰', keywords: 'mlb reviews monthly 월간 리뷰 메이저리그' },
   { slug: '/mlb/reviews/weekly', label: 'MLB 주간 리뷰', keywords: 'mlb reviews weekly 주간 리뷰 메이저리그' },
   { slug: '/mlb/calendar', label: 'MLB 캘린더', keywords: 'mlb calendar 캘린더 월별 경기 일정 메이저리그' },

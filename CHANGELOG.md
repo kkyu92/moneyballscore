@@ -1,3 +1,29 @@
+## v0.5.62.59 — 2026-08-20 (cycle 2279, explore-idea (heavy): /mlb/reviews/misses 신규 — KBO 회고 페이지 parity gap)
+
+### feat(mlb): MLB "크게 빗나간 예측" 회고 페이지 신규
+
+explore-idea saturation trigger 충족(직전 15 사이클 중 review-code+fix-incident+polish-ui
+12회) — review-code(heavy) dominance 75%(직전 20 사이클) 재분배 필요 시점에 KBO `/reviews/misses`
+(고확신 실패 사후 분석)의 MLB 대응 페이지가 없다는 gap 발견. MLB `/reviews` 허브는 수렴 픽
+성적/스트리크/팀별 분해만 있고 "빗나간 예측" 전용 회고가 부재(주간/월간 리뷰의
+`MlbHighlightCard`가 개별 경기 배지로만 노출, 전체 시즌 Top N 집계 없음).
+
+MLB 는 KBO와 달리 사후 심판 에이전트(`postview.ts`)가 없어 `judgeReasoning`/`factorErrors`
+컬럼이 전량 미생성(postview-daily.ts 는 KBO 전용) — 동일한 서술형 회고는 불가능해 대안으로
+정량 계산 방식 채택: 5개 팩터(FIP/xFIP/wOBA/불펜FIP/WAR) 중 어떤 것이 (틀린) 예측 방향을
+가장 강하게 뒷받침했는지 계산해 노출. `buildMlbMissReport()`(`lib/reviews/mlb-shared.ts`)
+신규 — `mlb_schedule`(status=final) + `predictions`(league=mlb, scoring_rule 필터) 조인 후
+`classifyWinnerProb` tossup 제외 + `deriveMlbOutcome` 오답 필터 + confidence 내림차순 정렬.
+기존 `MLB_FACTOR_COLUMN_PAIRS`/`LOWER_IS_BETTER`(private) export 전환해 buildMlbFactorInsights와
+동일 소스 재사용(magic-number 중복 방지).
+
+`apps/moneyball/src/app/mlb/reviews/misses/page.tsx` 신규, `/mlb/reviews` 허브에 진입 카드
+추가(KBO `/reviews` 동일 레이아웃), `sitemap.ts` + `search/page.tsx` 엔트리 동기(silent-drift
+cycle 2262/2263 회귀 가드 통과 확인 — 신규 라우트 추가 시 자동 실패하는 정적 리스트 동기화
+테스트). DB 실측: 최종 확정 MLB 827경기 중 고확신(≥55%) 오답 383건 확인 — 빈 페이지 아님.
+신규 테스트 6건(`buildMlbMissReport.test.ts`, supabase mock 패턴은 `buildMlbWeeklyReview.test.ts`
+동일). 475 files/4069 tests all pass, `tsc --noEmit` clean, lint clean.
+
 ## v0.5.62.58 — 2026-08-20 (cycle 2278, fix-incident: mlb_fancy_scrape User-Agent 헤더 누락 정정)
 
 ### fix(mlb-pipeline): fangraphs-mlb.ts fetch() User-Agent 헤더 누락 정정 — 24/30일 실패 원인

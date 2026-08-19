@@ -75,6 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/mlb/accuracy`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
     { url: `${SITE_URL}/mlb/predictions`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/mlb/reviews`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${SITE_URL}/mlb/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     // /mlb/reviews/weekly = redirect-only 페이지 (즉시 /mlb/reviews/weekly/{currentWeekId} 로
     // 308, /reviews/weekly 와 동일 사유) — dynamic block (mlbWeeklyReviewRoutes) 이 실제
     // 컨텐츠 URL 커버 (plan #26 Phase 1b).
