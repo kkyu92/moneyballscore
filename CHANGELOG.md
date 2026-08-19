@@ -1,3 +1,18 @@
+## v0.5.62.48 — 2026-08-20 (cycle 2266, review-code (heavy): methodology/page.tsx 최초 감사 — AI 토론 fallback 미고지 발견/수정)
+
+### fix(methodology): "AI 에이전트 토론" 섹션이 CREDIT_EXHAUSTED fallback 존재 미고지
+
+`methodology/page.tsx`(506줄, 최초 감사) 코드 read 결과 가중치 테이블/데이터소스 라벨은
+`MetricRegistry` 동적 파생이라 clean. 그러나 "AI 에이전트 토론" 섹션이 심판 에이전트의
+±5% 보정이 항상 일어나는 것처럼 무조건 서술 — CREDIT_EXHAUSTED fallback 이 2026-06-06
+이후 지속(8월 100% 누적 CE율, `/accuracy`가 이미 이 비율을 실시간 공개 중)인데 methodology
+페이지엔 캐빗/링크 전무. 사용자가 "AI 3-agent 토론이 항상 일어난다"로 오독 가능.
+
+수정: "AI 에이전트 토론" 섹션 말미에 캐빗 문단 추가 — AI 토론 서버 연결 불가 시 정량
+모델만 사용(사후 학습도 미적용)함을 고지 + `/accuracy` 실시간 비율 링크(기존 페이지
+"실시간 …참조" 패턴과 동일 스타일). type-check/lint clean, 전체 474 files/4062 tests
+all pass.
+
 ## v0.5.62.47 — 2026-08-20 (cycle 2263, review-code (heavy): sitemap.ts 최초 감사 — search STATIC_PAGES 와 동일한 수동 동기 구조 확인, 제네릭 회귀 테스트 신규)
 
 ### test(sitemap): sitemap.ts 정적 hub 커버리지에 STATIC_PAGES(cycle 2262)와 동일한 제네릭 스캔 가드 부재
