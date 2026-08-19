@@ -24,12 +24,13 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 
 // EN 페이지(/en/mlb/*)에서 헤더 nav 가 KO href 를 그대로 써서 클릭 시 KO 페이지로
 // 이탈하던 버그 (cycle 2139 발견) — MLB nav 만 /en 대응 라우트 존재하므로 그것만 치환.
-// /mlb/reviews 는 예외: EN 미러 페이지 부재 (cycle 2226 Phase 1, 의도적 scope 축소) —
-// blanket 치환 시 /en/mlb/reviews 404 (cycle 2227 review-code(heavy) 발견).
+// /mlb/reviews(하위 /mlb/reviews/weekly 포함) 는 예외: EN 미러 페이지 부재 (cycle 2226
+// Phase 1, 의도적 scope 축소 — plan #26 Phase 1b weekly 서브페이지도 KO only 동일 scope) —
+// blanket 치환 시 /en/mlb/reviews(/weekly) 404 (cycle 2227 review-code(heavy) 발견).
 function withLocale(href: string, isEn: boolean): string {
   if (!isEn) return href;
   if (href === "/mlb") return "/en/mlb";
-  if (href === "/mlb/reviews") return href;
+  if (href === "/mlb/reviews" || href.startsWith("/mlb/reviews/")) return href;
   if (href.startsWith("/mlb/")) return `/en${href}`;
   return href;
 }
