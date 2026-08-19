@@ -1,5 +1,24 @@
 # TODOS
 
+## 🟡 explore-idea (lite) — KBO↔MLB 라우트 parity 재감사, 잔여 gap 전부 구조적 비적용/이미 완결 결론 (cycle 2271, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(전부 completed/blocked/archived). 2-chain lock 미충족(직전 8사이클 distinct=3 [review-code/lotto/op-analysis]). fix-incident 12-gap/op-analysis 5-gap/lotto 6-gap(이미 8/22 50세트 박제됨, gap 무관)/info-arch 20-gap 모두 강제 임계(20/25/30/30) 미도달. **explore-idea saturation trigger 충족** — 직전 15사이클(2256~2270) 중 review-code+fix-incident+polish-ui+info-arch = 12/15 (≥12 임계 도달, review-code 단독 dominance 9/10 유지) → review-code 편중 완화 위해 explore-idea 선택.
+
+실측: KBO 전체 top-level 라우트(about/accuracy/analysis/calendar/changelog/community/contact/dashboard/glossary/guide/insights/leaderboard/login/lotto/matchup/methodology/page/picks/players/predictions/privacy/reviews/search/seasons/settings/standings/teams/terms/v2-preview/v2-shadow-monitor) vs MLB 전체(`mlb/`) diff:
+
+- `/leaderboard`, `/picks` — plan #27(cycle 2254~2256)이 이미 감사 완료. Phase1(마이그레이션 050+sync route) shipped, Phase2(개인 픽 이력)는 cycle 2244 fix-incident 가 이미 league-agnostic 배선해놔서 폐기(중복 구현), Phase3(순위 리더보드)는 프로덕션 실측 결과 KBO/MLB 픽 제출 자체가 0~1건이라 무기한 보류(재확인 조건: user_picks 계열 COUNT ≥10).
+- `/matchup` — plan #24(cycle 2050~2079)가 phase 1/2a/3a/3b/3c 전부 완결, 잔여 phase 2b(Elo 팩터)는 MLB Elo 시스템 부재로 blocked → plan #25로 이관 후 archived.
+- `/insights`(AI 심판 토론 아카이브), `/glossary` — cycle 2245 확인: MLB는 순수 quant(에이전트 토론 없음, `mlb_v0.1` 단일 스코어링 룰) 라 `/insights` 대응 불필요, `/glossary`는 `/mlb/factors`가 이미 커버 (rejected).
+- `/search` — MLB 라우트 13개(standings/team/players/factors/wild-card/postseason/predictions/accuracy/methodology/matchup/reviews+monthly+weekly/calendar) 전부 검색 인덱스에 이미 등록 확인, gap 없음.
+- `/analysis`(2802줄, "빅매치 에이전트 토론 + 팩터 수렴 픽 + 이번 주 경기") — 핵심 기능이 에이전트 토론(위 `/insights` rejected 사유와 동일 구조적 이유로 MLB 미보유) 의존이라 단순 포팅 불가, 팩터 수렴 픽 부분만 분리해도 `/mlb/matchup`이 이미 커버(plan #24 Phase 3c). 신규 게인 낮음.
+- `/dashboard`(298줄, "모델 버전별(v1.5~v1.8) 성과 비교 + Elo 추이 + 가중치 분포") — MLB는 스코어링 룰이 `mlb_v0.1` 단일 버전뿐이라 버전 비교 축 자체가 구조적으로 비적용. Elo 추이는 팀별 프로필(`/mlb/team/[code]`)에 이미 개별 노출.
+- `/seasons`(126줄, "2024/2025 정규시즌 + KS 히스토리")— MLB는 앱 도입 이후 단일 시즌(2026)만 추적, 다중 시즌 비교 자체가 아직 데이터 미존재 (자연 시간 경과 후 재검토 대상).
+- `/dashboard`/`/seasons`/`/analysis` 3개 모두 "데이터 부족"이 아니라 "모델 구조(단일 버전/단일 시즌/무-토론)가 KBO와 본질적으로 다름" — plan #27 Phase3 (data-scarcity, 재검토 조건 명확)과는 다른 카테고리의 비적용.
+
+결론: **신규 explore-idea 후속 후보 없음.** MLB parity 커버리지가 이미 충분(구조적으로 불필요한 3건 + 데이터 부족으로 보류된 1건 + 완결 다수) — plan 파일 신규 작성 안 함(spec 가치 없음, 다음 unprocessed-plan lookup 대상 아님). 코드 변경 0. outcome=partial(spec-only 감사 기록).
+
+다음 후보: review-code (heavy) 복귀 자연 (dominance 재확대는 explore-idea 공간 고갈의 자연스러운 결과 — 강제 회피 대상 아님). 또는 dimension-cycle/lotto(추첨 결과 대기)/op-analysis(gap 아직 미도달) 등.
+
 ## 🟢 review-code (heavy) — reviews/monthly/[month]/page.tsx 최초 감사, 소표본 임계 하드코딩 5 → SMALL_SAMPLE_N 정정 (cycle 2270, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code/lotto/op-analysis], ship-0/lite-cap 미충족, fix-incident 11-gap/op-analysis 4-gap/lotto 5-gap/info-arch 19-gap/explore-idea saturation 11/15 모두 미도달). review-code(heavy) 직전 10사이클 9/10 dominance 지속 + TODOS carry-over 미감사 대형 파일 중 사용자 가시 라이브 라우트 `reviews/monthly/[month]/page.tsx`(481줄, 최초 감사) 선택 (`debug/factor-correlation/page.tsx`는 내부 도구 페이지라 후순위).
