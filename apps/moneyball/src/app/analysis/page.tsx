@@ -1708,8 +1708,8 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
-                          {/* wave-367: WAR 직접 대결 배지 */}
-                          {g.homeWar != null && g.awayWar != null && (() => {
+                          {/* wave-367: WAR 직접 대결 배지 · wave-535: WAR=0 data gap guard */}
+                          {g.homeWar != null && g.awayWar != null && g.homeWar > 0 && g.awayWar > 0 && (() => {
                             const gap = g.homeWar - g.awayWar;
                             if (Math.abs(gap) < WAR_DUEL_MIN) return null;
                             const favoredHome = gap > 0;
