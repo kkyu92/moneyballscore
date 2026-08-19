@@ -1,4 +1,22 @@
-## v0.5.62.45 — 2026-08-20 (cycle 2253, review-code (heavy): factor-explanations.ts 최초 감사(clean) — 신뢰도 라벨 marginPp 10/20 하드코딩 silent drift 발견/수정 + 루트 package.json 버전 drift 정정)
+## v0.5.62.46 — 2026-08-20 (cycle 2261, review-code (heavy): search/page.tsx 최초 감사 — MLB 신규 6개 hub 페이지 STATIC_PAGES 검색 인덱스 누락 발견/수정)
+
+### fix(search): STATIC_PAGES 가 wave 9(cycle 1116) 이후 신규 MLB parity hub 6개를 반영 못한 silent drift
+
+`search/page.tsx`(436줄, 최초 감사) 자체 검색 로직(팀/선수/날짜 fuzzy match)은 클린. `STATIC_PAGES`
+배열은 마지막으로 cycle 1116(wave 9)에 MLB 6개(standings/team/players/factors/wild-card/postseason)
++ KBO 3개가 동기됐으나, 그 이후 KBO parity 로 신규 shipped 된 MLB hub 페이지 6개
+(`/mlb/predictions`, `/mlb/accuracy`, `/mlb/methodology`, `/mlb/matchup`, `/mlb/reviews`,
+`/mlb/calendar` — 전부 실제 페이지 + 테스트 존재)가 검색 인덱스에 한 번도 추가되지 않음. 사용자가
+"mlb 예측"/"mlb 방법론" 등으로 검색해도 이 6개 페이지는 결과에 뜨지 않는 silent 기능 누락. `/community`
+(noindex placeholder, 인증 layer 대기 중)는 의도적 제외로 확인 — 정상.
+
+수정: 6개 slug 를 `STATIC_PAGES`에 추가 (KBO 대응 엔트리와 동일 라벨/키워드 패턴). 재발 방지 회귀
+테스트 신규(`silent-drift-cycle-2261.test.ts`) — `/mlb/*` 디렉토리를 스캔해 자체 `page.tsx` 를 가진
+모든 hub 가 `STATIC_PAGES` 에 대응 slug 를 갖는지 제네릭하게 검증 (하드코딩 6개 나열이 아니라 향후
+신규 MLB hub 추가 시에도 자동으로 drift 를 잡음). type-check/lint clean, 전체 472 files/4060 tests
+pass (신규 1건 포함).
+
+
 
 ### fix(analysis): GameAnalysisProse/MlbGameOverview 신뢰도 라벨이 wave-352 단일 source(OVERVIEW_CLOSE_PP/OVERVIEW_DOMINANT_PP) 대신 10/20 재하드코딩
 
