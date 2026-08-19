@@ -60,9 +60,12 @@ function fmtRawPct(v: number | null): string {
 function fmtDegree(v: number | null): string {
   return v != null ? `${v.toFixed(1)}°` : "-";
 }
+// cycle 2217 review-code heavy: gb===0 특수 케이스가 "공동 1위" 로 표시돼 바로 앞
+// {divisionRank.rank}위 (positional rank, 예: 2위) 와 동시 노출 시 "2위 · 공동 1위"
+// 자기모순 문구가 됨 — leader 대비 GB=0 인 팀도 array 정렬상 2위 이하로 밀릴 수 있음
+// (승수 등 tie-break). rank 는 이미 배지 앞부분에 표시되므로 여기선 항상 수치 GB만 표시.
 function fmtGamesBehind(gb: number | null): string {
   if (gb === null) return "";
-  if (gb === 0) return " · 공동 1위";
   return ` · ${gb % 1 === 0 ? `${gb}.0` : gb}경기차`;
 }
 
