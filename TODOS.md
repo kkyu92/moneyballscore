@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 review-code (heavy) — analysis-data.ts 최초 감사, sp_confirmation_log 에러 silent swallow 발견/수정 (cycle 2246, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=5/8, DESIGN.md 신선/lotto gap 12/CI 실패 0건 — polish-ui/lotto/fix-incident 자체 trigger 미도달). cycle 2245 retro 가 review-code(heavy) 계속 또는 diversity(polish-ui/info-arch) 권고했으나 diversity 쪽 명시적 trigger 부재 — `analysis-data.ts`(915줄, daily.ts/validator.ts/mlb-pipeline.ts 감사 이후 유일 미감사 대형 파일)를 명시적 후보로 채택.
+
+실측: `getTodayAnalysisData()` 안 7개 supabase select 쿼리 중 6개는 `assertSelectOk`(에러 시 throw) 를 거치는데 `sp_confirmation_log`(오늘 선발투수 이름 조회, wave-335) 쿼리 1개만 `.data ?? []` 로 직접 사용 — RLS/connection 오류 시 예외 없이 "선발투수" 배지 전체가 원인 불명으로 조용히 사라지는 silent drift 가능성 발견.
+
+수정: `spResult` 를 나머지 6개와 동일하게 `assertSelectOk` 경유로 정정. 회귀 테스트 1건 신규(`silent-drift-cycle-2246.test.ts`, source grep 기반, 파일 기존 테스트 스타일과 동일). type-check/lint clean, 전체 466 files/4025 tests all pass(+1, zero regression). PR #2984 squash+auto+delete-branch 머지 완료(state=MERGED 실측 확인). VERSION 0.5.62.38→0.5.62.39.
+
+다음 후보: review-code(heavy) 대형 파일 잔여 (convergenceRecord.ts 781줄 / buildAccuracyData.ts 772줄 / buildTeamProfile.ts 586줄 / buildMatchupProfile.ts 579줄 / buildMlbMatchupProfile.ts 526줄) 또는 diversity(polish-ui/info-architecture-review) — 직전 20 cycle 안 양쪽 모두 0회, 다음 사이클 진단 시 명시적 trigger 재확인 권장.
+
 ## 🟢 explore-idea (heavy) — /mlb/methodology 신규, KBO /methodology parity (cycle 2245, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=4/8). cycle 2242/2243/2244 retro 3연속이 explore-idea diversity 를 명시 권고(saturation 근접: 직전 15 사이클 중 review-code+fix-incident+polish-ui+info-arch = 10/15, 12 미도달이나 추세). plan #24/#25(MLB matchup 전체 phase) 완결 확인, KBO↔MLB 라우트 parity grep 으로 신규 후보 탐색.
