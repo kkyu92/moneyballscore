@@ -1,3 +1,19 @@
+## 🟢 explore-idea (heavy) — /mlb/reviews/misses 신규, KBO 회고 페이지 parity gap (cycle 2279, 2026-08-20)
+
+진단: explore-idea saturation trigger 충족 (직전 15 사이클 review-code+fix-incident+polish-ui 누적 12회 ≥12, 직전 20 사이클 review-code dominance 75% 15/20). 2-chain lock 미충족(직전 8사이클 distinct=4: explore-idea/review-code/polish-ui/fix-incident). open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked). fix-incident 방금 발화(gap=0)/op-analysis 13-gap/lotto 14-gap/info-arch 28-gap 모두 자체 주기 trigger(25/30/30) 미도달 — cycle 2278 명시 carry-over("lotto/op-analysis/info-arch gap 다양성 또는 review-code 재탐색") 대비 saturation trigger 가 우선 발화 조건으로 명확해 explore-idea 선택.
+
+탐색: `/mlb/reviews` 허브(수렴 픽 성적/스트리크/팀별·홈어웨이·요일별 분해)를 KBO `/reviews` 와 대조 — KBO 만 있는 `/reviews/misses`(고확신 실패 회고) 가 MLB 대응 부재 확인. MLB 주간/월간 리뷰의 `MlbHighlightCard` 는 개별 경기 배지만 노출, 시즌 전체 Top N 집계 없음. DB 실측(직접 supabase 쿼리): 최종 확정 MLB 827경기 중 예측 849건, 고확신(≥55%) 오답 383건 — 페이지가 비지 않을 만큼 표본 충분.
+
+제약 확인: MLB 는 postview 심판 에이전트 부재(`postview-daily.ts` KBO 전용, `judgeReasoning`/`factorErrors` 컬럼 MLB 행 전량 미생성) — KBO 와 동일한 서술형 회고 불가. 대안으로 5팩터(FIP/xFIP/wOBA/불펜FIP/WAR) 중 어떤 것이 (틀린) 예측 방향을 가장 강하게 뒷받침했는지 정량 계산해 노출하는 방식 채택(반대 방향 팩터는 제외).
+
+구현: `buildMlbMissReport()` 신규(`lib/reviews/mlb-shared.ts`) — `mlb_schedule`(status=final) + `predictions`(league=mlb, scoring_rule=MLB_PRODUCTION_COHORT_RULES) 조인, `classifyWinnerProb` tossup 제외 + `deriveMlbOutcome` 오답 필터 + confidence 내림차순 + limit. 기존 `MLB_FACTOR_COLUMN_PAIRS`/`LOWER_IS_BETTER`(mlb-shared.ts 내부 private) export 전환해 `buildMlbFactorInsights` 와 동일 소스 재사용(신규 magic-number 중복 회피). 페이지 `apps/moneyball/src/app/mlb/reviews/misses/page.tsx`(KBO `/reviews/misses` 레이아웃 mirror, `MissesSortControl` 재사용) + `/mlb/reviews` 허브 진입 카드 + `sitemap.ts`/`search/page.tsx` 엔트리 동기(cycle 2262/2263 silent-drift 회귀 가드가 자동 검출·차단해줌 — 실제로 최초 커밋 시 두 가드 모두 fail 후 수정).
+
+검증: 신규 테스트 6건(`buildMlbMissReport.test.ts`, supabase mock 패턴은 기존 `buildMlbWeeklyReview.test.ts` 동일 — schedule/predictions select 실패 시 throw, 적중 예측 제외, tossup 제외, 반대 방향 팩터 제외 + confidence 내림차순 검증). 475 files/4069 tests all pass, `tsc --noEmit` clean, lint clean, pre-push CI pass. VERSION 0.5.62.58→59.
+
+배포: PR #2993 → R7 자동 머지(`gh pr merge --squash --auto --delete-branch`) → `state=MERGED` 실측 확인(mergedAt 2026-08-19T19:38:59Z) 완료.
+
+다음 후보: `/en/mlb/reviews/*` 전체(weekly/monthly/misses)가 아직 영어 미러 부재 — 기존 구조적 gap(신규 아님, 이번 cycle scope 밖). review-code(heavy) 대형 미감사 파일 재탐색 또는 lotto(15/30-gap)·op-analysis(14/25-gap)·info-arch(29/30-gap) 다양성 고려.
+
 ## 🟢 review-code (heavy) — packages/kbo-data/src/scrapers/fancy-stats.ts 최초 전체 감사, findPitcher stale line 참조 정정 (cycle 2277, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 [20개 전부 completed/archived/blocked], 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code 6 + polish-ui 1 + explore-idea 1], fix-incident 19-gap/op-analysis 12-gap/lotto 13-gap/info-arch 27-gap 모두 미도달). cycle 2276 carry-over 명시 후보 `fancy-stats.ts`(526줄, 최초 미감사) 선택 — dominance-positive streak(cycle 135 rule) 적용.
