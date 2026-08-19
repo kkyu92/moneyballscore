@@ -11,6 +11,7 @@ import {
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 
 const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
@@ -123,11 +124,7 @@ export default function MlbWildCardHub() {
                         href={`/mlb/team/${code}`}
                         className="flex items-center gap-2 bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-2 hover:shadow-md hover:border-amber-500/50 transition-all"
                       >
-                        <span
-                          className="inline-block w-4 h-4 rounded-full shrink-0"
-                          style={{ backgroundColor: team.color }}
-                          aria-hidden
-                        />
+                        <MlbTeamLogo team={code} size={16} className="rounded-full shrink-0" />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-semibold truncate">{team.shortName}</p>
                           <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">

@@ -9,6 +9,7 @@ import {
 } from "@moneyball/shared";
 import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -122,11 +123,7 @@ export default function MlbMatchupIndexPage() {
                 href={`/mlb/team/${code}`}
                 className="bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 flex items-center justify-center gap-2 hover:shadow-md transition-shadow"
               >
-                <span
-                  className="inline-block w-4 h-4 rounded-full shrink-0"
-                  style={{ backgroundColor: team.color }}
-                  aria-hidden
-                />
+                <MlbTeamLogo team={code} size={16} className="rounded-full shrink-0" />
                 <span className="text-sm font-medium">{team.shortName}</span>
               </Link>
             );

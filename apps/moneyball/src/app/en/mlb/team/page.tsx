@@ -14,6 +14,7 @@ import {
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -126,11 +127,7 @@ export default function MlbTeamsHubEn() {
                           className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4 hover:shadow-md hover:border-brand-500/50 transition-all space-y-2"
                         >
                           <div className="flex items-center gap-3">
-                            <span
-                              className="inline-block w-8 h-8 rounded-full shrink-0"
-                              style={{ backgroundColor: team.color }}
-                              aria-hidden
-                            />
+                            <MlbTeamLogo team={code} size={32} className="rounded-full shrink-0" />
                             <div className="min-w-0">
                               <p className="font-semibold truncate">{team.shortName}</p>
                               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">

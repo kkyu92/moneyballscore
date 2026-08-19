@@ -10,6 +10,7 @@ import {
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -168,11 +169,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <span
-            className="inline-block w-10 h-10 rounded-full shrink-0"
-            style={{ backgroundColor: team.color }}
-            aria-hidden
-          />
+          <MlbTeamLogo team={id} size={40} className="rounded-full shrink-0" />
           <h1 className="text-3xl md:text-4xl font-bold">{team.name} Statcast</h1>
           <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-600 dark:text-gray-300 font-mono">
             {team.league} {team.division}
