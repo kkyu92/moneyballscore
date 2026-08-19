@@ -47,6 +47,24 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
   const cellMap = new Map<string, ScoringRuleDayCell>();
   for (const c of data) cellMap.set(`${c.scoringRule}__${c.day}`, c);
 
+  // CohortComparisonHeatmap(자매 view)과 동일 패턴 — SCORING_RULE_HEATMAP_ROWS 는
+  // KBO era history 하드코딩이라 데이터에 없는 row(예: MLB league, scoring_rule
+  // 전량 불일치)는 항상 빈 "—" 행으로 렌더될 수 있음. 실제 n>0 cell 있는 row만 표시.
+  const activeRows = SCORING_RULE_HEATMAP_ROWS.filter((sr) =>
+    DAY_ORDER.some((day) => (cellMap.get(`${sr}__${day}`)?.n ?? 0) > 0),
+  );
+
+  if (activeRows.length === 0) {
+    return (
+      <div className="h-32 flex flex-col items-center justify-center text-center">
+        <span className="text-3xl mb-2">📊</span>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          scoring_rule × 요일 매트릭스 데이터 없음.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid="scoring-rule-day-heatmap"
@@ -69,7 +87,7 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
           </tr>
         </thead>
         <tbody>
-          {SCORING_RULE_HEATMAP_ROWS.map((sr) => (
+          {activeRows.map((sr) => (
             <tr key={sr}>
               <td className="px-2 py-2 font-mono text-xs text-neutral-700 dark:text-neutral-200 border-r border-neutral-300 dark:border-neutral-700">
                 {ROW_LABEL[sr] ?? sr}
