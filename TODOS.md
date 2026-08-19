@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 review-code (heavy) — factor-explanations.ts 최초 감사(clean), 신뢰도 라벨 marginPp 10/20 하드코딩 발견/수정 + 루트 package.json version drift 정정 (cycle 2253, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건 — plan #24 전체 phase 완결/closed, 2-chain lock 없음 직전 8사이클 distinct=5, fix-incident/op-analysis/info-arch/lotto 모두 자체 gap trigger 미도달, explore-idea saturation 11/15 <12 미도달). review-code 7연속 success streak(cycle 135 dominance-positive 룰 인정) — TODOS carry-over 명시 후보(`factor-explanations.ts` 409줄) 채택.
+
+실측: `factor-explanations.ts`(409줄, 최초 감사) 자체는 클린 — `buildGameOverview`의 접전/우세 분기는 wave-352(cycle 1694)가 `NEUTRAL_HI`/`WIN_PROB_DOMINANT_HI`에서 파생한 `OVERVIEW_CLOSE_PP`(10)/`OVERVIEW_DOMINANT_PP`(20) 단일 source 사용. 소비 컴포넌트까지 확장 감사 — 정확히 같은 개념(marginPp 기준 신뢰도 라벨)을 `GameAnalysisProse.tsx`(KBO)와 `MlbGameOverview.tsx`(MLB KO+EN 2곳)가 각자 `marginPp < 10`/`< 20` 리터럴로 재하드코딩 — wave-352 "단일 source 격상" 의도가 실제로는 1곳만 적용되고 3개 소비 지점은 dark copy 상태(값은 동일해 지금은 안 보이지만 threshold 튜닝 시 세 곳만 조용히 어긋남). 부수 발견: cycle 2252 커밋(#2987)이 VERSION/`apps/moneyball/package.json`만 bump하고 루트 `package.json`은 `.43`에 멈춰있던 3-way version drift(정확히 `version-sync-guard.test.ts` 가 지키려던 케이스) — `pnpm --filter moneyball exec vitest run` 실행 중 자연 발견.
+
+수정: `OVERVIEW_CLOSE_PP`/`OVERVIEW_DOMINANT_PP` export 후 3개 소비 지점 import 전환 + 루트 `package.json` 버전 동기화(`.45`). 회귀 테스트 1건 신규(`silent-drift-cycle-2253.test.ts`, source grep 기반). type-check/lint clean, 전체 470 files/4049 tests all pass(+5, zero regression). VERSION 0.5.62.44→0.5.62.45. PR #2988 머지 실측 확인(state=MERGED).
+
+다음 후보: review-code(heavy) 미감사 대형 파일 잔여(`buildSeasonSummary.ts` 346줄/`glossary/data.ts` 323줄/`insights/loader.ts` 311줄/`buildMlbTeamAccuracy.ts` 300줄) 또는 diversity(explore-idea — saturation 11/15, 근접 유지).
+
 ## 🔴 review-code (heavy) — buildPicksStats.ts 최초 감사(clean), 🔥 픽 스트릭 배지 threshold 하드코딩(2 vs 3) 발견/수정 (cycle 2252, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 직전 8사이클 distinct=5, fix-incident(8)/op-analysis(12)/lotto(18)/info-arch(2) 모두 자체 gap trigger 미도달, explore-idea saturation 11/15 <12 미도달). cycle 2251 retro 가 "review-code 또는 explore-idea" 권고 + review-code dominance 50%(직전 20사이클) 재확대 지적했지만 explore-idea 신규 redirect source 미확립 상태 — TODOS carry-over 명시 후보(buildPicksStats.ts 410줄 등 미감사 대형 파일) 채택, dominance-positive streak(cycle 135 룰) 인정 하 진행.
