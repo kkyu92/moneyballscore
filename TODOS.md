@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — predictions/page.tsx + predictions/[date]/page.tsx scoring_rule 필터 누락 정정 (#1338 family 6번째, 최고 트래픽 페이지) SUCCESS (cycle 2293, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건. 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 15-gap/20, op-analysis 8-gap/25, info-arch 13-gap/30, lotto 29-gap/30 근접이나 미도달). cycle 2292 retro가 "sweep이 lib 레이어만 커버해 app/**/page.tsx 라우트 파일을 놓쳤다"고 명시 지목 — 실제로 `apps/moneyball/src/app/**/page.tsx` 전체 route 파일을 `prediction_type.*pre_game` grep으로 재sweep.
+
+발견: 47개 파일 grep 후 `CURRENT_MODEL_FILTER`/`CURRENT_SCORING_RULE`/`scoring_rule` 부재 4건(`opengraph-image.tsx`(game/[id]), `predictions/page.tsx`, `predictions/[date]/page.tsx`, `debug/agent-fallback/page.tsx`)으로 축소. 이 중 `predictions/page.tsx`(`getPredictionDates`)와 `predictions/[date]/page.tsx`(`getGamePredictions`) 둘 다 **SQL 레벨 dotted `.eq('predictions.prediction_type','pre_game')`만 걸려있고 scoring_rule 필터가 전혀 없음** — daily.ts가 매 경기 production(v1.8) insert 직후 shadow row(v2.1-B-shadow/v2.0-shadow)도 동일 prediction_type='pre_game'으로 insert 중이라, SQL 레벨 필터가 매칭되는 모든 row(최대 3개)를 그대로 임베드하고 `predictions[0]` 인덱싱이 정렬 보장 없이 production/shadow 중 임의 row를 선택 가능한 상태(cycle 2290 `buildTeamFactorAverages.ts`와 동일 심각도 클래스 — JS `.find()`보다 심각). 이 두 페이지는 **사이트 최고 트래픽 허브**(예측 목록 + 일별 카드)라 지금까지 발견된 #1338 family 파일 중 영향 범위 최대.
+
+수정: 두 파일 모두 `CURRENT_SCORING_RULE` import + select에 `scoring_rule` 컬럼 추가 + `buildMatchupUpcoming.ts` 기존 안전 패턴과 동일한 dotted `.eq("predictions.scoring_rule", CURRENT_SCORING_RULE)` 필터 추가. 정적 grep 회귀 테스트(`silent-drift-cycle-2293.test.ts`) 양쪽 파일에 신규 추가. type-check/lint clean, test 483 files/4091 tests pass. PR #3002 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit 17f20645, 사례 18 mitigation 준수).
+
+review-code(heavy) 6연속 SUCCESS streak(cycle 2288~2293, #1338 family). 잔존 미정정 파일 2건(`opengraph-image.tsx`, `debug/agent-fallback/page.tsx`) — OG 소셜 미리보기/디버그 페이지로 사용자 영향 낮아 이번 사이클 범위 제외, carry-over. 다음 후보: lotto(gap 29/30, 다음 사이클 정확히 도달) 다양성 확보, 또는 review-code(heavy) 잔여 2파일 정리.
+
 ## ⚪ review-code (heavy) — analysis/game/[id]/page.tsx scoring_rule 필터 누락 정정 (#1338 family 5번째, sweep 누락 발견) SUCCESS (cycle 2292, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(plan #27 Phase 3 데이터 게이트 재확인 — `user_picks`=1건/`mlb_user_picks`=0건/`mlb_pick_poll_events`=0건, ≥10 임계 미충족으로 계속 보류). 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 14-gap/20, op-analysis 7-gap/25, info-arch 12-gap/30, lotto 28-gap/30 근접이나 미도달). cycle 2291이 "#1338 family sweep 완료"라 선언했으나 재확인 차원에서 review-code(heavy) 대상 재탐색 — `analysis/game/[id]/page.tsx`(838줄, cycle 156 이후 전체 재감사 이력 없음, wave-335~585 30+ feature 누적)를 전체 정독.
