@@ -32,7 +32,7 @@
 
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
-import { buildAgentContext } from '../context/agent-context';
+import { buildAgentContext, renderMetricsAndRecentFormForLLM } from '../context/agent-context';
 import { MetricRegistry } from '../context/metrics';
 import type { GameContext, TeamArgument } from './types';
 
@@ -462,15 +462,25 @@ export function buildInjectionText(context: GameContext): string {
   const homeFormPct = Math.round(homeRecentForm * 100);
   const awayFormPct = Math.round(awayRecentForm * 100);
 
-  // buildUserMessage 가 prepend 하는 renderContextForLLM(buildAgentContext(...)) 블록은
-  // recent_form/head_to_head 를 .toFixed(1) 소수점 percent 로도 노출 (agent-context.ts
-  // formatMetricLine + "[상대 전적 + 최근 폼]" 줄). 위 정수 반올림만 넣으면 LLM 이 실제
-  // 본 소수점 값을 그대로 인용해도 환각으로 오탐 — 같은 source(buildAgentContext) 로 계산해 동봉.
+  // buildUserMessage 가 prepend 하는 renderContextForLLM(buildAgentContext(...)) 블록 중
+  // "[정량 메트릭]" + "[상대 전적 + 최근 폼]" 두 섹션을 renderMetricsAndRecentFormForLLM 원본으로
+  // 재사용 (agent-context.ts 단일 source — 라인 수동 나열은 metric 추가마다 재동기화 필요해
+  // half-applied fix 재발 위험). cycle 2122 fix 는 recent_form/head_to_head 소수점 percent 만
+  // 수동으로 뽑아 동봉했으나, 같은 블록엔 그 외에도 metric 별 가중치% 표기(예: sp_fip /
+  // lineup_woba 각 "가중치 15.0%" — NUMERIC_WHITELIST 밖 값)와 WAR/SFR 의 반올림 정수 표기
+  // (예: totalWar 18.5 → contextBlock "19", 기존 buildInjectionText 라인은 "18.5"만 보유)가
+  // LLM 에 실제 노출되는데 buildInjectionText 가 놓치고 있었음 — 정당한 인용도
+  // checkHallucinatedNumbers 가 오탐(hard/warn) 할 위험.
+  //
+  // "[도메인 컨텍스트]" 섹션(구장/라이벌리/시즌/시간윈도우 hint)은 의도적으로 제외한다 — 실측
+  // 결과 그 안의 decorative 숫자(예: KBO_PARKS 정적 park_factor 0.95, 시즌 연도/윈도우 일수)가
+  // computeArithmeticDerivatives 의 pairwise 합/차/비 풀에 섞이면 무관한 숫자쌍이 우연히 진짜
+  // 환각 숫자와 일치해 놓치는 사례가 발생(예: "K/9" 라벨에서 추출된 잔재값 "9" + 구장 hint
+  // "0.95" 의 합 = "9.95" 가 실제 환각 9.95 를 검증 통과시킴). 전체 블록을 통째로 동봉하면
+  // 오탐(false positive)은 줄지만 놓침(false negative) 위험이 늘어 순효과가 불확실 — 범위를
+  // 명확한 gap(가중치·반올림 정수)으로 좁혀 검증력 저하 없이 fix.
   const ac = buildAgentContext(context);
-  const decimalLines = [
-    `최근폼(소수) 홈 ${ac.metrics.recent_form?.home}% 원정 ${ac.metrics.recent_form?.away}%`,
-    `상대전적(소수) 홈 ${ac.metrics.head_to_head?.home}% 원정 ${ac.metrics.head_to_head?.away}%`,
-  ];
+  const contextBlockText = renderMetricsAndRecentFormForLLM(ac);
 
   return [
     `경기: ${awayName} @ ${homeName}`,
@@ -479,7 +489,7 @@ export function buildInjectionText(context: GameContext): string {
     `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | ${MetricRegistry.recent_form.ko_name} ${homeFormPct}%`,
     `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | ${MetricRegistry.recent_form.ko_name} ${awayFormPct}%`,
     `${MetricRegistry.head_to_head.ko_name} ${headToHead.wins}승 ${headToHead.losses}패`,
-    ...decimalLines,
+    contextBlockText,
   ].join('\n');
 }
 

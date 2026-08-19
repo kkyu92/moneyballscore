@@ -196,6 +196,34 @@ function formatMetricLine(slug: MetricSlug, obs: MetricObservation): string {
 }
 
 /**
+ * "[정량 메트릭]" + "[상대 전적 + 최근 폼]" 두 섹션만 렌더 — renderContextForLLM 의 하위 조각을
+ * 별도 export. validator.ts buildInjectionText 가 "LLM 에 실제 노출되는 숫자" 재구성 목적으로
+ * 재사용한다 (metric 별 가중치%, WAR/SFR 반올림 정수 표기 등 buildInjectionText 가 수동으로
+ * 놓치던 값들의 single source). "[도메인 컨텍스트]" 섹션(구장/라이벌리/시즌/시간윈도우 hint)은
+ * 의도적으로 제외 — 그 안의 decorative 숫자(예: KBO_PARKS 정적 park_factor, 시즌 연도/윈도우
+ * 일수)가 checkHallucinatedNumbers 의 arithmetic-derivative 풀에 섞이면 무관한 숫자쌍의 합/차/비가
+ * 우연히 실제 환각 숫자와 일치해 false negative 를 유발할 수 있음이 실측으로 확인됨(예: "9"
+ * — K/9 라벨에서 추출된 잔재값 — + 구장 hint 0.95 = 9.95 가 진짜 환각 9.95 를 통과시킴).
+ */
+export function renderMetricsAndRecentFormForLLM(ac: AgentContext): string {
+  const lines: string[] = [];
+
+  lines.push(`[정량 메트릭 — ${KBO_FACTOR_COUNT}팩터]`);
+  for (const slug of Object.keys(ac.metrics) as MetricSlug[]) {
+    const obs = ac.metrics[slug];
+    if (!obs) continue;
+    lines.push(formatMetricLine(slug, obs));
+  }
+  lines.push('');
+
+  lines.push('[상대 전적 + 최근 폼]');
+  lines.push(`  - H2H (${TIME_WINDOWS.h2h_window.ko}): 홈 ${ac.h2h.home_wins}승 / 원정 ${ac.h2h.away_wins}승 (총 ${ac.h2h.total}경기)`);
+  lines.push(`  - 최근 폼 (${TIME_WINDOWS.recent_form.ko}): 홈 ${(ac.home_recent_form * 100).toFixed(1)}% / 원정 ${(ac.away_recent_form * 100).toFixed(1)}%`);
+
+  return lines.join('\n');
+}
+
+/**
  * AgentContext → LLM prompt 안 직접 삽입 가능한 문자열 박제.
  *
  * 구성:
@@ -218,17 +246,7 @@ export function renderContextForLLM(ac: AgentContext): string {
   for (const hint of ac.domain_hints) lines.push(`  - ${hint}`);
   lines.push('');
 
-  lines.push(`[정량 메트릭 — ${KBO_FACTOR_COUNT}팩터]`);
-  for (const slug of Object.keys(ac.metrics) as MetricSlug[]) {
-    const obs = ac.metrics[slug];
-    if (!obs) continue;
-    lines.push(formatMetricLine(slug, obs));
-  }
-  lines.push('');
-
-  lines.push('[상대 전적 + 최근 폼]');
-  lines.push(`  - H2H (${TIME_WINDOWS.h2h_window.ko}): 홈 ${ac.h2h.home_wins}승 / 원정 ${ac.h2h.away_wins}승 (총 ${ac.h2h.total}경기)`);
-  lines.push(`  - 최근 폼 (${TIME_WINDOWS.recent_form.ko}): 홈 ${(ac.home_recent_form * 100).toFixed(1)}% / 원정 ${(ac.away_recent_form * 100).toFixed(1)}%`);
+  lines.push(renderMetricsAndRecentFormForLLM(ac));
 
   return lines.join('\n');
 }

@@ -582,6 +582,39 @@ describe('buildInjectionText', () => {
     const v = checkHallucinatedNumbers('최근폼 65.3% 우위, 상대전적 66.7% 승률 반영', injection);
     expect(v).toHaveLength(0);
   });
+
+  // review-code heavy audit — team-agent buildUserMessage 가 prepend 하는 renderContextForLLM
+  // 블록은 metric 별 가중치%("가중치 15.0%" 등, sp_fip/lineup_woba 는 15% — NUMERIC_WHITELIST
+  // 밖 값)와 WAR/SFR 의 반올림 정수 표기(totalWar 18.5 → contextBlock "19")도 LLM 에 노출한다.
+  // 기존 buildInjectionText 는 이 두 값을 재구성하지 않아 LLM 이 실제 노출된 값을 그대로
+  // 인용해도 환각으로 오탐될 위험이 있었음 — renderMetricsAndRecentFormForLLM 재사용으로 fix.
+  it('metric 가중치%(15.0 등) 인용 시 환각 오탐 없음', () => {
+    const injection = buildInjectionText(makeContext());
+    expect(injection).toContain('15.0%');
+    const v = checkHallucinatedNumbers('가중치 15.0%가 반영된 선발 FIP 3.2 우위', injection);
+    expect(v).toHaveLength(0);
+  });
+
+  it('WAR 반올림 정수(18.5→19) 인용 시 환각 오탐 없음', () => {
+    const injection = buildInjectionText(makeContext());
+    expect(injection).toContain('19');
+    const v = checkHallucinatedNumbers('팀 WAR 19가 원정 15보다 우위', injection);
+    expect(v).toHaveLength(0);
+  });
+
+  // "[도메인 컨텍스트]" 섹션(구장/시즌/윈도우 hint)은 의도적으로 미포함 — 그 안 decorative
+  // 숫자(KBO_PARKS 정적 park_factor 등)가 arithmetic-derivative 풀에 섞이면 무관한 숫자쌍의
+  // 합/차/비가 우연히 진짜 환각 숫자와 일치해 놓치는 사례가 실측됨(예: K/9 라벨 잔재값 "9" +
+  // 구장 hint "0.95" 의 합 = "9.95"). 여러 개의 확실한 환각 숫자는 계속 잡혀야 한다.
+  it('환각 숫자 여러 개는 도메인 hint 미포함 상태에서도 계속 잡힘', () => {
+    const injection = buildInjectionText(makeContext());
+    const v = checkHallucinatedNumbers('FIP 9.91 9.92 9.93 9.94 9.95 9.96 9.97 우위.', injection);
+    expect(v).toHaveLength(1);
+    expect(v[0].severity).toBe('hard');
+    for (const num of ['9.91', '9.92', '9.93', '9.94', '9.95', '9.96', '9.97']) {
+      expect(v[0].detail).toContain(num);
+    }
+  });
 });
 
 // ============================================
