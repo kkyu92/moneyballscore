@@ -1,3 +1,15 @@
+
+## ⚪ review-code (heavy) — daily.ts 최초 전체 감사, weather 백필 assertSelectOk 누락 정정 SUCCESS (cycle 2284, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건. 2-chain lock 미충족(직전 8사이클 distinct=4). 주기 보정 trigger 3종 (lotto 20-gap/30, op-analysis 19-gap/25, fix-incident 6-gap/20) 모두 미도달. cycle 2283 이 "review-code heavy 대형 미감사 파일 pool 소진 임박" 주장했지만 재탐색 결과 `packages/kbo-data/src/pipeline/daily.ts`(1607줄, 핵심 예측 파이프라인, 281개 fix 커밋이 손댄 파일) 가 review-code 이력 0건으로 확인 — 최우선 미감사 대형 파일 재발견 (cycle 2283 결론 정정).
+
+감사: 전체(1607줄) 최초 정독 — announce/predict/predict_final/verify 4개 모드 전체 경로, finish() 불변 보장, Fancy Stats/FanGraphs fetch, debate/quant fallback, shadow row (v2.1-B/v2.0) insert, GAP 감지, summary notification, accuracy 갱신 헬퍼 전부 확인.
+
+발견: `games.weather` 백필 select(1006번대)만 유일하게 `.error` 미체크 — 이 파일 다른 모든 select/update(assertSelectOk/assertWriteOk 20+ 콜사이트)가 fail-loud 인 것과 불일치. DB 에러 시 "이미 weather 있음"으로 오판돼 매 cron 조용히 skip → weather 컬럼 영구 NULL, 완전 무가시. 사례 3/9 family 와 동일 클래스지만 이 파일에서 최초 발견.
+
+수정: assertSelectOk 적용 + try/catch 로 errors[] push (for 루프 중단 방지, throw 시 나머지 게임 예측 중단 위험 회피). 커밋 6a5e2c1d, push 완료. type-check/lint/test(476 files/4070 tests, kbo-data 89/1147) 전부 clean.
+
+다음 후보: daily.ts 는 이제 review 이력 1건 확보. review-code(heavy) 잔존 대형 미감사 파일 재탐색 시 `packages/kbo-data/src/pipeline/mlb-pipeline.ts`(743줄, 이력 0건), `buildTeamProfile.ts`(586줄, 이력 0건), `buildMatchupProfile.ts`(579줄, 이력 0건) 우선 고려. 다양성 축 = lotto(20-gap/30, 근접)·op-analysis(19-gap/25, 근접) 다음 사이클들 자연 도달 예상.
 ## ⚪ review-code (heavy) — convergenceRecord.ts 최초 전체 감사, drift 없음 (cycle 2283, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 archived/completed 상태). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code/fix-incident/explore-idea/info-architecture-review). review-code dominance 65%(13/20) 지속, dominance-positive streak 인정 범위(cycle 135 룰). lotto(19-gap/30)·op-analysis(18-gap/25)·fix-incident(5-gap/20)·info-arch(3-gap/30) 모두 자체 주기 미도달. cycle 2281/2282 carry-over가 review-code(heavy) 잔존 미감사 대형 파일 재탐색 추천.
