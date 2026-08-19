@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   MLB_TEAMS,
-  MLB_DIVISIONS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
   PARK_FACTOR_HITTER_MIN,
@@ -13,13 +12,14 @@ import {
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
+import { buildMlbDivisionStandings } from "@/lib/mlb/buildMlbStandings";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: "MLB AL/NL Standings — 6 Division Standings | MoneyBall Score",
   description:
-    "MLB AL/NL × East/Central/West 6-division team composition and park factor distribution. Live season standings integration coming soon.",
+    "MLB AL/NL × East/Central/West 6-division live W-L standings, GB, and park factors.",
   alternates: {
     canonical: `${SITE_URL}/en/mlb/standings`,
     languages: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "MLB AL/NL Standings — 6 Divisions | MoneyBall Score",
-    description: "AL/NL × East/Central/West 6-division team composition and park factors.",
+    description: "AL/NL × East/Central/West 6-division live W-L standings.",
     url: `${SITE_URL}/en/mlb/standings`,
     type: "website",
     locale: "en_US",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MLB AL/NL Standings — 6 Divisions | MoneyBall Score",
-    description: "AL/NL × East/Central/West 6-division team composition and park factors.",
+    description: "AL/NL × East/Central/West 6-division live W-L standings.",
   },
 };
 
@@ -64,13 +64,20 @@ function parkLabel(tone: "hitter" | "pitcher" | "neutral") {
   return "Neutral";
 }
 
-export default function MlbStandingsHubEn() {
+function formatGB(gb: number | null): string {
+  if (gb === null) return "-";
+  if (gb === 0) return "0.0";
+  return gb % 1 === 0 ? `${gb}.0` : String(gb);
+}
+
+export default async function MlbStandingsHubEn() {
+  const standings = await buildMlbDivisionStandings();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "MLB AL/NL Standings — 6 Divisions",
-    description:
-      "MLB AL/NL × East/Central/West 6-division team composition. Live season W/L standings integration coming soon.",
+    description: "MLB AL/NL × East/Central/West 6-division live W-L standings.",
     url: `${SITE_URL}/en/mlb/standings`,
     inLanguage: "en-US",
     mainEntity: {
@@ -110,10 +117,10 @@ export default function MlbStandingsHubEn() {
       <header className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold">MLB AL/NL Standings</h1>
         <p className="text-gray-500 dark:text-gray-400">
-          AL/NL × East/Central/West {MLB_DIVISION_COUNT} divisions · {MLB_TEAM_COUNT} teams. Live season standings integration coming soon.
+          AL/NL × East/Central/West {MLB_DIVISION_COUNT} divisions · {MLB_TEAM_COUNT} teams. Live W-L standings + GB.
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          Currently shown: team composition + home ballpark park factors. Live season W/L/GB records = pending separate datasource integration.
+          W-L: final games only · GB: gap behind the division leader.
         </p>
       </header>
 
@@ -126,14 +133,15 @@ export default function MlbStandingsHubEn() {
             {leagueName(league)}
           </h2>
           {DIVISIONS.map((division) => {
-            const codes = MLB_DIVISIONS[league][division];
+            const rows = standings[league][division];
             return (
               <div key={`${league}-${division}`} className="space-y-3">
                 <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                   {divisionLabel(league, division)}
                 </h3>
                 <ol className="space-y-2">
-                  {codes.map((code, idx) => {
+                  {rows.map((row, idx) => {
+                    const code = row.teamCode;
                     const team = MLB_TEAMS[code];
                     const tone = parkTone(team.parkPf);
                     return (
@@ -151,8 +159,8 @@ export default function MlbStandingsHubEn() {
                           <MlbTeamLogo team={code} size={24} className="rounded-full shrink-0" />
                           <div className="min-w-0 flex-1">
                             <p className="font-semibold truncate">{team.shortName}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                              {team.city} · {team.stadium}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate font-mono tabular-nums">
+                              {row.wins}-{row.losses} · {row.winPct.toFixed(3).replace(/^0/, "")} · GB {formatGB(row.gamesBehind)}
                             </p>
                           </div>
                           <span
@@ -180,7 +188,7 @@ export default function MlbStandingsHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ Order within each division is alphabetical by team code. Sort will update once live W/L/Win% records are integrated.
+          ※ Order: descending win percentage (Win%) within each division. W-L counts final games only.
         </p>
         <p>
           ※ Park factor: 100 = league neutral, 100+ = hitter-friendly, below 100 = pitcher-friendly. Source: Baseball Savant 5-year average (2020–2024).

@@ -83,8 +83,8 @@ describe('/en/mlb/standings — page', () => {
     expect(PAGE).toMatch(/export const revalidate = 21600\b/);
   });
 
-  it('MLB_DIVISIONS import from @moneyball/shared', () => {
-    expect(PAGE).toMatch(/MLB_DIVISIONS/);
+  it('buildMlbDivisionStandings import (cycle 2213: 실 W-L/GB 집계로 전환, MLB_DIVISIONS 는 builder 내부로 이동)', () => {
+    expect(PAGE).toMatch(/buildMlbDivisionStandings/);
     expect(PAGE).toMatch(/@moneyball\/shared/);
   });
 

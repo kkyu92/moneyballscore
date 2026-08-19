@@ -11,8 +11,8 @@ const SITEMAP_SRC = readFileSync(
 );
 
 describe("mlb/standings/page.tsx — Plan B Tier C+D Task 6 (cycle 1027)", () => {
-  it("MLB_DIVISIONS import + AL/NL × East/Central/West 렌더", () => {
-    expect(PAGE_SRC).toMatch(/MLB_DIVISIONS/);
+  it("buildMlbDivisionStandings 사용 + AL/NL × East/Central/West 렌더 (cycle 2213: 실 W-L/GB 집계로 전환, MLB_DIVISIONS 는 builder 내부로 이동)", () => {
+    expect(PAGE_SRC).toMatch(/buildMlbDivisionStandings/);
     expect(PAGE_SRC).toMatch(/American League/);
     expect(PAGE_SRC).toMatch(/National League/);
   });
