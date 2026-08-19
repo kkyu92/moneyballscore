@@ -350,6 +350,12 @@ export default function LottoHubPage() {
       {/* 관련 링크 */}
       <section className="flex flex-wrap gap-3 pt-2">
         <Link
+          href="/lotto/check"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        >
+          조합 검증 (6번호 입력) →
+        </Link>
+        <Link
           href="/lotto/archive"
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
         >
