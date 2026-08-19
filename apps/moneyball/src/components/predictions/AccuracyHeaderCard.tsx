@@ -19,7 +19,14 @@ interface Props {
     lean: TierStat;
     tossup: TierStat;
   };
+  locale?: 'ko' | 'en';
 }
+
+const TIER_LABEL_EN: Record<'confident' | 'lean' | 'tossup', string> = {
+  confident: 'Confident',
+  lean: 'Lean',
+  tossup: 'Toss-up',
+};
 
 export function AccuracyHeaderCard({
   totalPredicted,
@@ -28,6 +35,7 @@ export function AccuracyHeaderCard({
   recentVerified,
   recentCorrect,
   tierAccuracy,
+  locale = 'ko',
 }: Props) {
   if (totalVerified === 0) return null;
 
@@ -68,7 +76,7 @@ export function AccuracyHeaderCard({
       <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
         <div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            누적 적중률
+            {locale === 'en' ? 'Cumulative Accuracy' : '누적 적중률'}
           </div>
           <div className={`text-3xl font-bold ${colorClass}`}>
             {accuracyPct}
@@ -77,7 +85,7 @@ export function AccuracyHeaderCard({
         </div>
         <div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            검증 완료
+            {locale === 'en' ? 'Verified' : '검증 완료'}
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">
             {totalCorrect}
@@ -88,7 +96,7 @@ export function AccuracyHeaderCard({
         </div>
         <div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            누적 예측
+            {locale === 'en' ? 'Total Predicted' : '누적 예측'}
           </div>
           <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">
             {totalPredicted}
@@ -97,11 +105,15 @@ export function AccuracyHeaderCard({
         {showTrend && (
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              최근 {recentVerified}건
+              {locale === 'en' ? `Last ${recentVerified}` : `최근 ${recentVerified}건`}
             </div>
             <div
               className={`text-2xl font-bold ${trendColorClass}`}
-              title={`최근 ${recentVerified}건 적중률 ${Math.round(recentAccuracy * 100)}%`}
+              title={
+                locale === 'en'
+                  ? `Last ${recentVerified} games accuracy ${Math.round(recentAccuracy * 100)}%`
+                  : `최근 ${recentVerified}건 적중률 ${Math.round(recentAccuracy * 100)}%`
+              }
             >
               {trendSign}
               {deltaPp}
@@ -122,10 +134,13 @@ export function AccuracyHeaderCard({
               <span key={t.key} className="text-xs text-gray-500 dark:text-gray-400">
                 {pickTierEmoji(t.key)}{' '}
                 <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {WINNER_TIER_LABEL[t.key]}
+                  {locale === 'en' ? TIER_LABEL_EN[t.key] : WINNER_TIER_LABEL[t.key]}
                 </span>{' '}
                 <span className={`font-bold ${color}`}>{pct}%</span>
-                <span className="text-gray-400 dark:text-gray-500"> ({t.verified}건)</span>
+                <span className="text-gray-400 dark:text-gray-500">
+                  {' '}
+                  ({t.verified}{locale === 'en' ? '' : '건'})
+                </span>
               </span>
             );
           })}

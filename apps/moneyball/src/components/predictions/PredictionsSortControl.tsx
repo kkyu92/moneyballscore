@@ -11,7 +11,16 @@ const LABELS: Record<SortMode, string> = {
   asc: '오래된 순',
 };
 
+const LABELS_EN: Record<SortMode, string> = {
+  desc: 'Newest first',
+  asc: 'Oldest first',
+};
+
 const ORDER: SortMode[] = ['desc', 'asc'];
+
+interface Props {
+  locale?: 'ko' | 'en';
+}
 
 function subscribe(callback: () => void) {
   if (typeof window === 'undefined') return () => {};
@@ -44,8 +53,9 @@ function writeSort(value: SortMode): void {
   }
 }
 
-export function PredictionsSortControl() {
+export function PredictionsSortControl({ locale = 'ko' }: Props = {}) {
   const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  const labels = locale === 'en' ? LABELS_EN : LABELS;
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3">
@@ -58,7 +68,7 @@ export function PredictionsSortControl() {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          정렬
+          {locale === 'en' ? 'Sort' : '정렬'}
         </span>
         {ORDER.map((key) => {
           const active = sort === key;
@@ -74,7 +84,7 @@ export function PredictionsSortControl() {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}
+              {labels[key]}
             </button>
           );
         })}

@@ -14,7 +14,14 @@ interface Props {
     lean: number;
     tossup: number;
   };
+  locale?: 'ko' | 'en';
 }
+
+const TIER_LABEL_EN: Record<WinnerConfidenceTier, string> = {
+  confident: 'Confident',
+  lean: 'Lean',
+  tossup: 'Toss-up',
+};
 
 const ORDER: TierFilter[] = ['all', 'confident', 'lean', 'tossup'];
 
@@ -49,12 +56,12 @@ function writeFilter(value: TierFilter): void {
   }
 }
 
-function chipLabel(key: TierFilter): string {
-  if (key === 'all') return '전체';
-  return `${pickTierEmoji(key)} ${WINNER_TIER_LABEL[key]}`;
+function chipLabel(key: TierFilter, locale: 'ko' | 'en'): string {
+  if (key === 'all') return locale === 'en' ? 'All' : '전체';
+  return `${pickTierEmoji(key)} ${locale === 'en' ? TIER_LABEL_EN[key] : WINNER_TIER_LABEL[key]}`;
 }
 
-export function PredictionsTierFilter({ counts }: Props) {
+export function PredictionsTierFilter({ counts, locale = 'ko' }: Props) {
   const filter = useSyncExternalStore(subscribe, readFilter, getServerSnapshot);
 
   const hideRule =
@@ -73,7 +80,7 @@ export function PredictionsTierFilter({ counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          티어
+          {locale === 'en' ? 'Tier' : '티어'}
         </span>
         {ORDER.map((key) => {
           const active = filter === key;
@@ -91,7 +98,7 @@ export function PredictionsTierFilter({ counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {chipLabel(key)}{' '}
+              {chipLabel(key, locale)}{' '}
               <span className="opacity-75">({counts[key]})</span>
             </button>
           );

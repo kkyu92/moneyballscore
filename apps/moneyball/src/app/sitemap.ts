@@ -72,7 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/mlb/postseason`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/mlb/calendar`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/mlb/accuracy`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
-    // /mlb/predictions — EN mirror(/en/mlb/predictions) 는 Phase 1 KO 우선 후속(TODOS carry-over).
     { url: `${SITE_URL}/mlb/predictions`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     // /en/mlb/* English mirror static routes
     { url: `${SITE_URL}/en/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
@@ -85,6 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/en/mlb/postseason`, lastModified: now, changeFrequency: 'daily', priority: 0.65 },
     { url: `${SITE_URL}/en/mlb/calendar`, lastModified: now, changeFrequency: 'daily', priority: 0.65 },
     { url: `${SITE_URL}/en/mlb/accuracy`, lastModified: now, changeFrequency: 'daily', priority: 0.65 },
+    { url: `${SITE_URL}/en/mlb/predictions`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },

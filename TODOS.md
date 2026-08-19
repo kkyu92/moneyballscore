@@ -1,5 +1,27 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — /en/mlb/predictions EN mirror (cycle 2220, 2026-08-19)
+
+open issue 0건, approved plan 0건. 직전 8사이클 distinct=4 — lock 미충족. cycle
+2218 explore-idea retro 가 명시적으로 "EN mirror 는 다음 explore-idea 후보로
+carry-over" 박제했고, `sitemap.ts` 에도 "EN mirror(/en/mlb/predictions) 는
+Phase 1 KO 우선 후속(TODOS carry-over)" 주석 존재 — 명확한 carry-over 채택.
+
+**구현**: `/en/mlb/predictions/page.tsx` 신규 (KO 페이지 완전 미러, 문자열만
+번역). KO 페이지가 재사용하는 6개 shared 컴포넌트(MlbPredictionsSearchBox /
+PredictionsStatusFilter / PredictionsTierFilter / PredictionsMonthFilter /
+PredictionsSortControl / AccuracyHeaderCard) 가 전부 한국어 하드코딩이라
+`locale?: 'ko'|'en'` prop(default 'ko') 을 6개 전부에 추가 — KO 호출부 변경
+없이 EN 페이지만 `locale="en"` 전파. Header.tsx 의 `/mlb/*` → `/en/mlb/*`
+generic 치환 로직(cycle 2139/2140)이 이미 존재해 헤더/푸터 nav 는 새 라우트
+추가만으로 자동 정상 연결 확인. KO 페이지 metadata 에 `alternates.languages`
+추가(기존엔 canonical만). sitemap.ts 에 `/en/mlb/predictions` entry 추가.
+기존 KO predictions 테스트의 "EN mirror 미착수" 단정 2건을 반전, en-mlb-pages
+공용 테스트 파일에 predictions 섹션 추가.
+
+**검증**: `pnpm --filter moneyball test` 453 files / 3940 tests 전부 pass,
+`type-check` clean, `lint` clean. PR #TBD → R7 자동 머지 진행.
+
 ## ⚪ review-code (heavy) — /mlb/predictions 신규 코드 감사, drift 0건 (cycle 2219, 2026-08-19)
 
 open issue 0건, approved plan 0건 (19건 전량 completed/archived). 직전 8사이클

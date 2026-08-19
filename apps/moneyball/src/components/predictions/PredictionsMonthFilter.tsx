@@ -9,6 +9,7 @@ const STORAGE_MONTH = 'mb_predictions_month_v1';
 interface Props {
   months: string[];
   counts: Record<string, number>;
+  locale?: 'ko' | 'en';
 }
 
 function subscribe(callback: () => void) {
@@ -42,13 +43,19 @@ function writeFilter(value: MonthFilter): void {
   }
 }
 
-function chipLabel(key: MonthFilter): string {
-  if (key === 'all') return '전체';
+const MONTH_NAMES_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+function chipLabel(key: MonthFilter, locale: 'ko' | 'en'): string {
+  if (key === 'all') return locale === 'en' ? 'All' : '전체';
   const [y, m] = key.split('-');
-  return `${y}년 ${parseInt(m, 10)}월`;
+  const monthNum = parseInt(m, 10);
+  return locale === 'en' ? `${MONTH_NAMES_EN[monthNum - 1]} ${y}` : `${y}년 ${monthNum}월`;
 }
 
-export function PredictionsMonthFilter({ months, counts }: Props) {
+export function PredictionsMonthFilter({ months, counts, locale = 'ko' }: Props) {
   const filter = useSyncExternalStore(subscribe, readFilter, getServerSnapshot);
 
   const order: MonthFilter[] = ['all', ...months];
@@ -68,7 +75,7 @@ export function PredictionsMonthFilter({ months, counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          월별
+          {locale === 'en' ? 'Month' : '월별'}
         </span>
         {order.map((key) => {
           const active = filter === key;
@@ -87,7 +94,7 @@ export function PredictionsMonthFilter({ months, counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {chipLabel(key)} <span className="opacity-75">({count})</span>
+              {chipLabel(key, locale)} <span className="opacity-75">({count})</span>
             </button>
           );
         })}
