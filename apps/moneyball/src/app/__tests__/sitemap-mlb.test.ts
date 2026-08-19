@@ -126,6 +126,14 @@ describe('sitemap MLB URL coverage', () => {
     expect(matchupIndex).toBeDefined();
     expect(matchupIndex?.priority).toBeGreaterThan(0);
   });
+
+  it('includes /mlb/reviews/weekly/[week] dynamic routes (plan #26 Phase 1b — weeklyReviewRoutes(KBO) parity)', async () => {
+    const urls = await sitemap();
+    const mlbWeeklyUrls = urls.filter((u) => /\/mlb\/reviews\/weekly\/\d{4}-W\d{2}$/.test(u.url));
+    expect(mlbWeeklyUrls.length).toBeGreaterThan(0);
+    // 즉시 redirect 인 index (/mlb/reviews/weekly 자체) 는 sitemap 미포함 (/reviews/weekly 와 동일 규칙).
+    expect(urls.find((u) => u.url.endsWith('/mlb/reviews/weekly'))).toBeUndefined();
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {

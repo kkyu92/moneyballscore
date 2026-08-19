@@ -1,0 +1,425 @@
+import type { CSSProperties } from "react";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import {
+  SMALL_SAMPLE_N,
+  mlbShortTeamName,
+  SITE_URL,
+  ACCURACY_GOOD_RATE,
+  WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS,
+} from '@moneyball/shared';
+import { parseWeekId, getRecentWeeks } from "@/lib/reviews/computeWeekRange";
+import {
+  buildMlbWeeklyReview,
+  type MlbWeeklyGameResult,
+} from "@/lib/reviews/buildMlbWeeklyReview";
+import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
+import { WeeklyGamesSortControl } from "@/components/reviews/WeeklyGamesSortControl";
+import { MlbHighlightCard } from "@/components/reviews/MlbHighlightCard";
+import { neutral } from "@/lib/design-tokens";
+
+// reviews/weekly/[week]/page.tsx(KBO) 의 MLB 대응 (plan #26 Phase 1b) — buildMlbWeeklyReview
+// (Phase 1a, cycle 2229) 를 소비. KBO 버전과의 구조적 차이는 두 곳:
+//   1) 수렴 픽(강수렴/완전수렴) 섹션 부재 — getMlbRecentConvergencePickRecord 등 MLB
+//      convergence 함수들은 시즌 전체 스캔만 지원하고 날짜 range 파라미터가 없음
+//      (/mlb/reviews page.tsx cycle 2226 주석 "weekly/monthly 서브페이지는 MLB 주/월
+//      range 유틸 부재라 후속 cycle 과제" 그대로 유효 — 시즌 전체 W-L 을 "주간 성적"
+//      으로 표시하면 오도이므로 의도적으로 생략).
+//   2) 개별 경기 링크 대상이 /analysis/game/[id] 대신 /mlb/games/[date]/[home]-vs-[away]
+//      slug (MLB 는 games 테이블 FK 대신 external_game_id + mlb_schedule 모델, sitemap.ts
+//      mlbGameDetailRoutes 와 동일 slug 규칙).
+export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
+
+interface PageProps {
+  params: Promise<{ week: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { week } = await params;
+  const range = parseWeekId(week);
+  if (!range) return {};
+  const url = `${SITE_URL}/mlb/reviews/weekly/${week}`;
+  const title = `${range.label} MLB 주간 리뷰`;
+  const description = `${range.label} MLB 승부예측 주간 성과 리포트. 적중률, 하이라이트 경기, 팀별 통계, 팩터 인사이트.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "article",
+      publishedTime: `${range.endDate}T23:59:00+09:00`,
+      authors: ["MoneyBall AI"],
+      locale: "ko_KR",
+      siteName: "MoneyBall Score",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
+function GameResultRow({ g, style }: { g: MlbWeeklyGameResult; style?: CSSProperties }) {
+  const correctBadge =
+    g.isCorrect === true ? (
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-brand-500/15 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300">
+        적중
+      </span>
+    ) : g.isCorrect === false ? (
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300">
+        빗나감
+      </span>
+    ) : (
+      <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-400 dark:text-gray-500">
+        미결
+      </span>
+    );
+
+  const confLabel =
+    g.confidence != null
+      ? `${Math.round(g.confidence * 100)}%`
+      : null;
+
+  const predictedWinnerCode =
+    g.predictedHomeWin === null ? null : g.predictedHomeWin ? g.homeCode : g.awayCode;
+
+  return (
+    <Link
+      href={`/mlb/games/${g.gameDate}/${g.homeCode}-vs-${g.awayCode}`}
+      style={style}
+      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-[var(--color-surface-card)] transition-colors group"
+    >
+      <span className="w-14 shrink-0 text-xs text-gray-400 dark:text-gray-500 tabular-nums">
+        {g.gameDate.slice(5).replace('-', '/')}
+      </span>
+      <MlbTeamLogo team={g.awayCode} size={16} className="shrink-0" />
+      <span className="text-gray-600 dark:text-gray-300 w-10 truncate text-xs">
+        {mlbShortTeamName(g.awayCode)}
+      </span>
+      <span className="text-gray-400 dark:text-gray-500 text-xs tabular-nums font-mono mx-0.5">
+        {g.awayScore ?? '-'} : {g.homeScore ?? '-'}
+      </span>
+      <span className="font-medium text-gray-800 dark:text-gray-100 w-10 truncate text-xs">
+        {mlbShortTeamName(g.homeCode)}
+      </span>
+      <MlbTeamLogo team={g.homeCode} size={16} className="shrink-0" />
+      <div className="flex-1" />
+      {predictedWinnerCode && (
+        <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:inline truncate max-w-[5rem]">
+          예측 {mlbShortTeamName(predictedWinnerCode)}{confLabel ? ` ${confLabel}` : ''}
+        </span>
+      )}
+      {correctBadge}
+      <span className="text-gray-300 dark:text-gray-600 text-xs group-hover:text-brand-500 transition-colors">→</span>
+    </Link>
+  );
+}
+
+export default async function MlbWeeklyReviewPage({ params }: PageProps) {
+  const { week } = await params;
+  const range = parseWeekId(week);
+  if (!range) notFound();
+
+  const review = await buildMlbWeeklyReview(range);
+  const url = `${SITE_URL}/mlb/reviews/weekly/${week}`;
+
+  // confidence desc 순위 — date default 도착 순서에서 confidence desc rank 계산.
+  // WeeklyGamesSortControl 이 '확신도순' 활성 시 CSS variable 로 flex order 토글.
+  // confidence null 은 -1 처리 = 마지막 rank. (reviews/weekly/[week]/page.tsx KBO 동일 패턴,
+  // key 만 gameId(number) 대신 externalGameId(string).)
+  const confRankMap = new Map<string, number>();
+  [...review.games]
+    .sort((a, b) => (b.confidence ?? -1) - (a.confidence ?? -1))
+    .forEach((g, idx) => confRankMap.set(g.externalGameId, idx));
+
+  const recent = getRecentWeeks(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS)
+    .filter((w) => w.weekId !== range.weekId)
+    .slice(-3);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `${range.label} MLB 주간 리뷰`,
+    datePublished: `${range.endDate}T23:59:00+09:00`,
+    description: review.summary,
+    articleBody: review.summary,
+    author: {
+      "@type": "Organization",
+      name: "MoneyBall AI",
+    },
+    publisher: { "@type": "Organization", name: "MoneyBall Score" },
+    mainEntityOfPage: url,
+    inLanguage: "ko-KR",
+  };
+
+  const pctLabel = `${Math.round(review.accuracyRate * 100)}%`;
+
+  return (
+    <article className="max-w-4xl mx-auto space-y-8 py-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <Breadcrumb
+        items={[
+          { href: '/mlb/reviews', label: '예측 리뷰' },
+          { href: '/mlb/reviews/weekly', label: '주간' },
+          { label: range.label },
+        ]}
+      />
+
+      <header className="space-y-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+          {range.weekId}
+        </p>
+        <h1 className="text-3xl md:text-4xl font-bold">
+          {range.label} MLB 주간 리뷰
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {range.startDate} ~ {range.endDate} · MoneyBall AI 자동 생성
+        </p>
+      </header>
+
+      <section className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-6">
+        <p className="text-base leading-relaxed text-gray-800 dark:text-gray-100">
+          {review.summary}
+        </p>
+      </section>
+
+      {review.verifiedGames > 0 && (
+        <section
+          aria-labelledby="mlb-weekly-summary-title"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        >
+          <h2 id="mlb-weekly-summary-title" className="sr-only">
+            주간 요약
+          </h2>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">검증 경기</p>
+            <p className="text-3xl font-bold mt-1">
+              {review.verifiedGames}
+              <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
+                경기
+              </span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">적중</p>
+            <p className="text-3xl font-bold text-brand-500 mt-1">
+              {review.correctGames}
+              <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
+                경기
+              </span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">적중률</p>
+            <p
+              className={`text-3xl font-bold mt-1 ${
+                review.accuracyRate >= ACCURACY_GOOD_RATE
+                  ? "text-brand-500"
+                  : review.accuracyRate >= 0.5
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
+              }`}
+            >
+              {pctLabel}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {review.highlights.length > 0 && (
+        <section aria-labelledby="mlb-weekly-highlights-title" className="space-y-4">
+          <h2 id="mlb-weekly-highlights-title" className="text-xl font-bold">
+            하이라이트 경기
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {review.highlights.map((h) => (
+              <MlbHighlightCard key={h.externalGameId} h={h} showResultSuffix />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {review.teamStats.length > 0 && (
+        <section aria-labelledby="mlb-weekly-teams-title" className="space-y-3">
+          <h2 id="mlb-weekly-teams-title" className="text-xl font-bold">
+            팀별 예측 적중률
+          </h2>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-2">
+            {review.teamStats.map((t) => {
+              const pct = Math.round(t.accuracy * 100);
+              const smallSample = t.predicted < SMALL_SAMPLE_N;
+              return (
+                <div
+                  key={t.teamCode}
+                  className="flex items-center gap-3 text-sm"
+                  title={
+                    smallSample
+                      ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
+                      : undefined
+                  }
+                >
+                  <MlbTeamLogo team={t.teamCode} size={20} className="shrink-0" />
+                  <span className="w-24 shrink-0 font-medium">
+                    {t.teamName}
+                  </span>
+                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full"
+                      style={{
+                        width: `${Math.min(100, pct)}%`,
+                        backgroundColor: smallSample ? neutral[400] : t.color,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={`text-xs font-mono w-20 text-right ${
+                      smallSample
+                        ? "text-gray-400 dark:text-gray-500"
+                        : "text-gray-600 dark:text-gray-300"
+                    }`}
+                  >
+                    {pct}% ({t.correct}/{t.predicted})
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {(review.factorInsights.best || review.factorInsights.worst) && (
+        <section aria-labelledby="mlb-weekly-factors-title" className="space-y-3">
+          <h2 id="mlb-weekly-factors-title" className="text-xl font-bold">
+            팩터 인사이트
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {review.factorInsights.best && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs text-brand-500 dark:text-brand-300 font-medium">
+                  가장 잘 맞힌 팩터
+                </p>
+                <p className="text-lg font-bold mt-1">
+                  {review.factorInsights.best.label}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  상관계수 {review.factorInsights.best.correlation.toFixed(2)}
+                  {review.factorInsights.best.directionalAccuracy != null &&
+                    ` · 방향 정확 ${Math.round(
+                      review.factorInsights.best.directionalAccuracy * 100,
+                    )}%`}
+                </p>
+              </div>
+            )}
+            {review.factorInsights.worst && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-red-500/30 p-5">
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                  가장 빗나간 팩터
+                </p>
+                <p className="text-lg font-bold mt-1">
+                  {review.factorInsights.worst.label}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  상관계수 {review.factorInsights.worst.correlation.toFixed(2)}
+                  {review.factorInsights.worst.directionalAccuracy != null &&
+                    ` · 방향 정확 ${Math.round(
+                      review.factorInsights.worst.directionalAccuracy * 100,
+                    )}%`}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {review.games.length > 0 && (
+        <section aria-labelledby="mlb-weekly-games-title" className="space-y-3">
+          <details className="group">
+            <summary
+              id="mlb-weekly-games-title"
+              className="flex items-center justify-between cursor-pointer list-none rounded-xl group-open:rounded-b-none bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] px-5 py-4 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)] transition-colors"
+            >
+              <h2 className="text-base font-bold">
+                이번 주 전체 경기
+                <span className="ml-2 text-sm font-normal text-gray-400 dark:text-gray-500">
+                  {review.games.length}경기
+                </span>
+              </h2>
+              <svg
+                className="w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform group-open:rotate-180"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div className="mt-2 group-open:mt-0 bg-white dark:bg-[var(--color-surface-card)] rounded-xl group-open:rounded-t-none border border-gray-200 dark:border-[var(--color-border)] group-open:border-t-0 overflow-hidden">
+              <WeeklyGamesSortControl />
+              <div className="divide-y divide-gray-100 dark:divide-gray-700/40" data-weekly-games>
+                {review.games.map((g) => {
+                  const cardStyle = {
+                    '--mb-weekly-game-order': confRankMap.get(g.externalGameId) ?? 0,
+                  } as CSSProperties;
+                  return <GameResultRow key={g.externalGameId} g={g} style={cardStyle} />;
+                })}
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
+
+      {!review.hasData && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
+          <span className="text-5xl block mb-4">📅</span>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
+            이 주간에는 MLB 예측 데이터가 없습니다
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+            시즌 중 다른 주간을 확인해주세요.
+          </p>
+        </section>
+      )}
+
+      {recent.length > 0 && (
+        <section className="border-t border-gray-200 dark:border-[var(--color-border)] pt-6">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+            최근 주간 리뷰
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {recent.map((w) => (
+              <Link
+                key={w.weekId}
+                href={`/mlb/reviews/weekly/${w.weekId}`}
+                className="text-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+              >
+                {w.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={url}
+          title={`${range.label} MLB 주간 리뷰`}
+          text={review.summary}
+        />
+      </footer>
+    </article>
+  );
+}
