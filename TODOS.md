@@ -1,5 +1,36 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 수렴 픽 리뷰 허브 /mlb/reviews 신규 (cycle 2226, 2026-08-19)
+
+open issue 0건, approved plan 0건 (19개 전부 completed/archived/superseded 유지). 직전
+8사이클 distinct=4 (explore-idea/review-code×3/fix-incident/info-architecture-review)
+— 2-chain lock 미충족. op-analysis gap 11 (25 미도달), lotto/info-arch 직전 사이클
+처리 완료 — Feature-Drift Cycle 자연 교대 (explore-idea<->review-code) 따라 explore-idea
+선택. cycle 2223/2224/2225 retro 모두 "explore-idea or review-code/op-analysis" 권고.
+
+**발견한 gap**: KBO `/reviews` 는 수렴 픽 전체 성적(강수렴/완전수렴 W-L) + 스트리크(현재+
+최장) + 팀별/홈-어웨이/요일별 분해까지 갖춘 리뷰 허브지만, MLB 쪽엔 이 분석이 어디에도
+없었음 (`/mlb/team/[code]` 는 팀별 수렴 픽 성적만 부분 노출). Header MLB_NAV "경기·팀"
+그룹에도 예측 리뷰 항목 자체가 부재.
+
+**구현 (Phase 1 — 수렴 픽 분석 허브만, weekly/monthly 서브페이지는 MLB 주/월 range
+유틸 부재라 후속 cycle 과제)**:
+- `convergenceRecord.ts`: MLB 내부 함수(`fetchMlbConvergencePickDetailedResults`,
+  `evaluateMlbConvergencePickRow`)가 `favoredHome`/`gameDate` 도 반환하도록 확장 +
+  `game_date desc` 정렬 추가. 신규 export 5종: `getMlbRecentConvergencePickRecord` /
+  `getMlbConvergencePickStreak` / `getMlbConvergencePickBestStreak` /
+  `getMlbConvergencePickHomeAwaySplit` / `getMlbConvergencePickDayOfWeekSplit`
+  (기존 KBO 함수와 1:1 대응, `computeConvergence*` 순수 함수 재사용 — 신규 로직 없음).
+- `ConvergenceTeamStatsBadges` 컴포넌트에 `nameResolver` prop 추가 (기본값
+  `shortTeamName` — KBO 호출부 5곳 시그니처 변경 없음). MLB 는 `mlbShortTeamName` 전달.
+- 신규 `/mlb/reviews/page.tsx` — Breadcrumb, JSON-LD, revalidate=1800 ISR, canonical
+  (en mirror 없음, Phase 1 KO only).
+- Header MLB_NAV + Footer MLB column + `sitemap.ts` 3곳 **같은 커밋에서 동기** —
+  cycle 2225 가 발견한 "MLB 신규 라우트 추가 시 footer sitemap 컬럼 동기 누락" 패턴
+  재발 방지 (이번엔 처음부터 3곳 함께 추가).
+
+전체 스위트 3968개 + lint/type-check pass. `87fa5377` main 직접 push (커밋 정책 R4).
+
 ## 🟢 info-architecture-review (heavy) — MLB footer sitemap /mlb/matchup 누락 fix (cycle 2225, 2026-08-19)
 
 open issue 0건, approved plan 0건 (19개 전부 completed/archived/superseded 상태
