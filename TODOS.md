@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — lotto archive 계열 4파일 "50조합" 하드코딩 정정 (cycle 2259, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — 20개 plan 모두 completed/archived/superseded, 2-chain lock 미충족 직전 8사이클 distinct=4, ship-0 미충족, lite-cap 미충족, review-code trigger 5 표본 20 확보하나 review-code 0회 아님). cycle 2258 retro 가 명시적으로 "lotto/page.tsx·lotto/archive 계열에 유사 stale 문구 재검토 여지" 를 다음 후보로 남겨 채택.
+
+실측: cycle 2258 이 `lotto/methodology/page.tsx` 의 "0.65%" 하드코딩을 고쳤지만 옆 파일들은 미점검 상태였음. grep 결과 `archive/page.tsx`(5곳) + `archive/[date]/page.tsx`(3곳) + `archive/opengraph-image.tsx`(3곳) + `archive/[date]/not-found.tsx`(3곳) = 4파일 14곳에 "50조합"/"50세트" 리터럴 하드코딩 잔존. 실제 최신 archive md 파일(`data/lotto-picks/2026-08-22.md`) 확인 결과 현재 `LOTTO_PICK_COUNT=1000`(wave-185 이후) — 페이지 텍스트만 과거 50세트 시절 문구 그대로 방치된 wave-185 부분 누락 (당시 `lotto/page.tsx` 만 registry 치환하고 archive 계열은 빠짐).
+
+수정: 4파일 모두 `LOTTO_PICK_COUNT` (또는 신규 import) 로 리터럴 치환 (`${LOTTO_PICK_COUNT}조합`). `archive/[date]/page.tsx` 의 stale dev 주석 "전체 45세트 collapse" 도 "전체 나머지 세트 collapse" 로 정정. 부가로 `lotto/methodology/page.tsx` 본문 안 마지막 잔여 "50조합" 1곳(본인 사용 기록 섹션)도 동일 패턴으로 정정. `pnpm exec tsc --noEmit` clean, eslint clean(scoped), `vitest run src/app/lotto` 62/62 pass. 직접 main commit + push, pre-push hook lint+type-check 통과 확인.
+
+다음 후보: `lotto/check/page.tsx` 는 grep 결과 유사 하드코딩 없음(clean) — lotto 도메인 5개 page.tsx + og-image + not-found 전수 점검 완료. 다음은 lotto chain 자체 30-cycle gap 자연 도달(마지막 fire cycle 2234, cycle 2264 도달 예정) 또는 review-code 신규 grep 소스(다른 도메인 registry 상수 재검색) 권장.
+
 ## 🟢 fix-incident — lotto methodology cutoff percentage 하드코딩 정정 (cycle 2258, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 distinct=4, 나머지 gap trigger 전부 미도달). cycle 2257 retro 가 "review-code(heavy) 신규 grep 소스 필요, 아니면 diversity" 권고 — 대형 파일 재스캔 중 `lotto/methodology/page.tsx`(519줄, 마지막 실질 audit = cycle 1569, 688 cycle 전) 가 다른 lotto 파일들(wave 153/164/170/185 반복 수정) 대비 방치돼 있음을 발견해 착수.
