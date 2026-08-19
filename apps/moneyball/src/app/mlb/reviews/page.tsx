@@ -185,6 +185,23 @@ export default async function MlbReviewsPage() {
             ))}
           </div>
         </div>
+
+        <Link
+          href="/mlb/reviews/misses"
+          className="group bg-gradient-to-r from-red-500/5 to-orange-500/5 dark:from-red-500/10 dark:to-orange-500/10 rounded-xl border border-red-500/20 p-5 flex flex-col justify-between hover:border-red-500/50 transition-colors"
+        >
+          <div>
+            <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+              🧭 회고 · 크게 빗나간 예측
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              고확신 실패 사례 모음. (틀린) 예측을 뒷받침했던 팩터 공개.
+            </p>
+          </div>
+          <span className="text-sm font-medium text-red-600 dark:text-red-400 mt-3 group-hover:underline self-start">
+            회고 보기 →
+          </span>
+        </Link>
       </section>
 
       {hasAnyData ? (
