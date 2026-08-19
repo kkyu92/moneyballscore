@@ -1,5 +1,17 @@
 # TODOS
 
+## 🟡 explore-idea (heavy) — plan #27 Phase 2 premise 반증(stale) + Phase 3 데이터 근거 보류 (cycle 2256, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 은 phase1 완료 상태, 자동 매핑 대상 아님. 2-chain lock 미충족 distinct=4/8, saturation 11/15 <12 미도달, fix-incident/op-analysis/info-arch/lotto gap trigger 전부 미도달, lite-cap 미충족). cycle 2255 retro 가 "plan #27 Phase 2 (explore-idea heavy)" 를 명시 추천 — 채택해 착수했으나, 착수 전 코드 재확인 중 premise 자체가 stale 임을 발견.
+
+실측: Phase 2(`/mlb/picks` 개인 이력 페이지) 구현 착수 전 KBO `MyPicksClient`/`buildPicksStats.ts`/`/api/picks/results/route.ts` 를 다시 읽은 결과, **이미 KBO/MLB 통합 픽 이력 조회가 완비돼 있음을 확인**: `/api/picks/results` 는 `mlb-{external_game_id}` 접두 id 를 `fetchMlbPickResults`+`deriveMlbOutcome` 로 이미 처리하고, `buildPickEntries` 도 string id 를 그대로 유지하며 KBO 와 별도 로직(`ai_predicted_home_win`)으로 정확성 판정 — 전용 회귀 테스트 3건까지 존재. 이 배선은 **cycle 2244 fix-incident**("MLB 픽이 KBO 전용 parseInt 매칭에 걸려 gameId=NaN" 수정)가 plan #27 작성(cycle 2254)보다 10 사이클 앞서 이미 완성한 것 — cycle 2254 진단이 "라우트 존재 여부"만 diff 하고 라우트 내부가 이미 리그 무관인지 확인 안 해 생긴 stale premise (드리프트 사례 16 계열). `/picks` 페이지가 로컬스토리지의 KBO+MLB 혼합 픽을 이미 통합 렌더링하므로 전용 `/mlb/picks` 는 중복 구현.
+
+이어서 Phase 3(`/mlb/leaderboard`) 착수 가치도 재검증 — production DB 직접 COUNT 쿼리(service-role): `mlb_pick_poll_events` 총 0건(unique device 0), `mlb_user_picks` 총 0건(nickname 0), KBO `user_picks` baseline 도 총 1건(nickname 1) — **사이트 전체 리더보드 참여가 사실상 0에 수렴**. plan 원문 risk note("리더보드가 장기간 비어 보일 위험")가 실측으로 확정 이상 심각함 확인 — 지금 4-view 인프라를 지어도 몇 달간 빈 페이지.
+
+수정: 코드 변경 없음. `~/.develop-cycle/plans/moneyballscore/27.md` 에 cycle 2256 갱신 섹션 추가 — Phase 2 **폐기**(gap 자체 없음, 이미 해소됨) + Phase 3 **무기한 보류**(재확인 조건: `mlb_user_picks`/KBO `user_picks` COUNT ≥10 성장 시 재평가). plan #27 은 Phase 1 산출물만 유효, 사실상 완결 — 향후 unprocessed-plan lookup 대상에서 제외 권장.
+
+다음 후보: review-code(heavy) 잔여 대형 파일(`buildSeasonSummary.ts` 346줄/`glossary/data.ts` 323줄/`insights/loader.ts` 311줄/`buildMlbTeamAccuracy.ts` 300줄) — plan #27 계열 후속 fire 는 참여 데이터 성장 전까지 불필요.
+
 ## 🟢 explore-idea (heavy) — plan #27 Phase 1: mlb_user_picks 테이블 + nickname sync route (cycle 2255, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 은 spec_only 상태라 자동 매핑 대상 아니지만 자유선택 input 으로 유효, 2-chain lock 미충족 distinct=5/8, saturation 11/15 <12 미도달, fix-incident/op-analysis/info-arch/lotto gap trigger 전부 미도달). cycle 2254 retro 가 "plan #27 Phase 1 (explore-idea heavy) 가 concrete carry-over" 로 명시 추천 — 채택.
