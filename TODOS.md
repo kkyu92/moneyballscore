@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — mlb-pipeline.ts 최초 전체 감사, mlb_team_stats select assertSelectOk 누락 정정 SUCCESS (cycle 2286, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(status: approved 매칭 0건, plan #27 은 Tier3 blocked-on-data spec-only). 2-chain lock 미충족(직전 8사이클 distinct=5: fix-incident/explore-idea/info-arch/review-code/op-analysis). 주기 보정 trigger 3종 모두 미도달 (fix-incident 8-gap/20, op-analysis 1-gap/25, info-arch 6-gap/30, lotto 22-gap/30 — lotto 근접이나 미충족). cycle 2285 retro 가 review-code(heavy) 잔존 대형 미감사 파일로 mlb-pipeline.ts(743줄, 이력 0건) 지목.
+
+감사: 전체(743줄) 최초 정독 — 8개 모드(statsapi_scrape/fancy_scrape/savant_scrape/predict_final/combined_notify/shadow_train/walk_forward_measure/elo_update) 전체 경로 + orchestrator(pipeline_runs insert, silent-drift-alert 연동) 확인.
+
+발견: `runPredictFinal` 의 `mlb_team_stats` select 만 `.error` 미체크 — 바로 6줄 위 `mlb_schedule` select(`gErr` 체크)와 불일치. DB 에러 시 `statsByTeam` 이 빈 Map → 전 팀 `MLB_STAT_DEFAULTS` 로 조용히 fallback, 이 파일 자신의 주석(line 43-44, 사례 20: "cycle 2057 이전엔 이 값들이 항상, 무조건 쓰였음")이 경고하는 실패 모드가 select 에러 경로로도 재발 가능한 상태였음. daily.ts cycle 2284 weather backfill 과 동일 family (assertSelectOk 누락), 다른 파일 최초 발견.
+
+수정: assertSelectOk 적용 + try/catch errors[] push. 커밋 6a662e65, push 완료. type-check/lint/test(476 files/4070 tests) 전부 clean.
+
+다음 후보: review-code(heavy) 잔존 대형 미감사 파일 — buildTeamProfile.ts(586줄)/buildMatchupProfile.ts(579줄)는 cycle 2260 에서 상수/parity 축으로 이미 감사(전체 정독은 아님, 재확인 가치 낮음). 다양성 축 = lotto(23-gap/30, 근접) 다음 사이클 자연 도달 예상.
+
 ## ⚪ operational-analysis (lite) — 주간 리뷰 + CE cohort 안정 재확인 SUCCESS (cycle 2285, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 archived/completed). 2-chain lock 미충족(직전 8사이클 distinct=4). 직전 4사이클(2281~2284) 연속 review-code(heavy) — cycle 2282/2283/2284 retro가 공통으로 lotto/op-analysis 다양성 전환 추천. lotto는 다음 회차(2026-08-22) picks + 직전(08-15) OOS 이미 완료 확인(파일 존재) — trigger 미해당. op-analysis는 gap 20/25(미도달)이나 diminishing-returns 신호(cycle 2283 review-code가 "drift 없음" 판정) 겹쳐 다양성 우선 선택.
