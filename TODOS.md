@@ -1,5 +1,20 @@
 # TODOS
 
+## 🟢 lotto (lite) — 30-cycle gap 감사 (cycle 2234, 2026-08-19)
+
+lotto trigger 6 (30-cycle gap, last fire cycle 2175) + 2-chain alternation lock 탐지
+(직전 8 사이클 explore-idea/review-code distinct=2 → 둘 다 후보 제외) 조합 발화.
+
+- count_smoke: 256 rule 기준 유효 조합 **7,705,415** / 전체 8,145,060 / 제거 5.40% / 106.4s
+  (직전 cycle 1982 baseline 7,700,649 대비 valid_delta **+4,766** — 신규 회차 데이터 유입에
+  따른 통계 자연 이동, rule 변경 없음)
+- new_rules: 0 (rule 추가/제거 없음, 순수 감사 fire)
+- pick_sample: 1238회 (2026-08-22) 50세트 이미 cycle 2231~2233 사이 박제됨
+  (`~/lotto_picks/2026-08-22-50sets.md`, f7d41bf5) — 신규 생성 불필요
+- self_verify: 1237회 (2026-08-15) OOS 이미 검증 완료 (`2026-08-15-result.md`) — 3개 일치
+  1건/50, 기댓값 수준 (무작위 3개+ 확률 ≈1.87%), drift 없음
+- outcome: success (신규 코드 변경 0, 순수 measurement/audit — cycle 1982 패턴 동일)
+
 ## 🟢 review-code (heavy) — pearsonCorrelation dedup (plan #26 Phase 3, cycle 2232, 2026-08-19)
 
 plan #26 Phase 3 후속 후보 (cycle 2231 TODOS 박제) — `analyzeFactorAccuracy`
