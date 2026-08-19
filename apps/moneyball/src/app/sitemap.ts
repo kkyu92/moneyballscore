@@ -103,6 +103,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // /lotto/archive — 회차 list index page. lottoArchiveRoutes 동적 URL 와
     // 별도 layer (index page 자체).
     { url: `${SITE_URL}/lotto/archive`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
+    // /lotto/check — 조합 검증 페이지 (cycle 2250 IA: /lotto hub 에서 링크되고 canonical 도 있지만 sitemap 누락 발견/수정).
+    { url: `${SITE_URL}/lotto/check`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
   ];
 
   // 시즌별 URL (generateStaticParams 에서 2023~2026 정적 생성)

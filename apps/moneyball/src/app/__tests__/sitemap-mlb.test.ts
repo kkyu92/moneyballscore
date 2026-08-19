@@ -141,6 +141,13 @@ describe('sitemap MLB URL coverage', () => {
     // 즉시 redirect 인 index (/mlb/reviews/weekly 자체) 는 sitemap 미포함 (/reviews/weekly 와 동일 규칙).
     expect(urls.find((u) => u.url.endsWith('/mlb/reviews/weekly'))).toBeUndefined();
   });
+
+  it('includes /lotto/check route (cycle 2250 info-arch — /lotto hub 에서 링크 + canonical 존재하지만 sitemap 누락 발견/수정)', async () => {
+    const urls = await sitemap();
+    const lottoCheck = urls.find((u) => u.url.endsWith('/lotto/check'));
+    expect(lottoCheck).toBeDefined();
+    expect(lottoCheck?.priority).toBeGreaterThan(0);
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {
