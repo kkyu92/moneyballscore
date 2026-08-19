@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 polish-ui — /mlb/factors Statcast 배지 emerald 이탈 정정 + version-sync 3-way drift 재발 fix (cycle 2247, 2026-08-20)
+
+진단: 2-chain lock 없음(distinct=5/8). 직전 두 사이클(2245/2246) retro 가 연속 diversity(polish-ui/info-architecture-review) 권고. 각 chain 마지막 fire 갭 측정 결과 fix-incident(3)/op-analysis(7)/info-arch(5)/lotto(13) 모두 자체 trigger 미도달인데, polish-ui 는 마지막 fire cycle 2170(77-cycle gap) + 직전 7일 신규 라우트 다수(mlb/wild-card·calendar·matchup·players·standings·methodology·accuracy·team·predictions·reviews 등 10+) 이후 polish-ui 0회 발화 — 명시적 trigger("신규 라우트 7일 안 추가 후 polish-ui 0회") 충족.
+
+실측: DESIGN.md 토큰 vs 신규 MLB 컴포넌트 grep. `/mlb/factors` 페이지 안 가중치% 배지가 KBO 10팩터 섹션(line 357)은 `bg-brand-50 text-brand-700`, Statcast 4팩터 섹션(line 401)은 `bg-emerald-50 text-emerald-700` — 동일 컴포넌트 패턴인데 색 토큰만 이탈(카드 wrapper 는 양쪽 동일, amber "홈 어드밴티지" 섹션처럼 전체 themed 카드가 아니므로 의도된 구분색 아님). KO+EN 미러 양쪽 동일 버그.
+
+수정: 두 파일(`mlb/factors/page.tsx`, `en/mlb/factors/page.tsx`) emerald→brand 토큰 정렬. 회귀 테스트 2건 신규(`polish-ui-cycle-2247.test.ts`, source grep 기반). 테스트 실행 중 별도 발견: cycle 2246 커밋이 `apps/moneyball/package.json` 만 0.5.62.39 로 올리고 루트 `package.json`/`VERSION` 은 0.5.62.38 잔존 — `version-sync-guard.test.ts`(cycle 2047 도입) 2건 fail. 3개 파일 모두 0.5.62.40 동기화로 같이 fix. type-check/lint clean, 전체 467 files/4027 tests all pass(+2, zero regression).
+
+다음 후보: review-code(heavy) 대형 파일 잔여(convergenceRecord.ts 781줄/buildAccuracyData.ts 772줄/buildTeamProfile.ts 586줄/buildMatchupProfile.ts 579줄/buildMlbMatchupProfile.ts 526줄) 또는 info-architecture-review(트리거 갭 5, 아직 미도달). polish-ui 는 이번 fire 로 갭 리셋 — 다음 diversity 후보는 info-architecture-review 우선 검토 권장.
+
 ## 🔴 review-code (heavy) — analysis-data.ts 최초 감사, sp_confirmation_log 에러 silent swallow 발견/수정 (cycle 2246, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=5/8, DESIGN.md 신선/lotto gap 12/CI 실패 0건 — polish-ui/lotto/fix-incident 자체 trigger 미도달). cycle 2245 retro 가 review-code(heavy) 계속 또는 diversity(polish-ui/info-arch) 권고했으나 diversity 쪽 명시적 trigger 부재 — `analysis-data.ts`(915줄, daily.ts/validator.ts/mlb-pipeline.ts 감사 이후 유일 미감사 대형 파일)를 명시적 후보로 채택.

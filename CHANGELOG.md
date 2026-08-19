@@ -1,3 +1,20 @@
+## v0.5.62.40 — 2026-08-20 (cycle 2247, polish-ui: /mlb/factors Statcast 배지 emerald 이탈 정정 + version-sync 3-way drift 재발 fix)
+
+### fix(design): /mlb/factors Statcast 4팩터 가중치 배지 brand 토큰 정렬
+
+`apps/moneyball/src/app/mlb/factors/page.tsx` + `en/mlb/factors/page.tsx` — 신규 라우트(직전 7일 다수 shipped) polish-ui
+77-cycle gap(마지막 fire cycle 2170) 트리거로 진단. 같은 페이지 안 동일 컴포넌트(가중치% 배지)가 KBO 10팩터 섹션(line
+357)은 `bg-brand-50 text-brand-700`을 쓰는데 Statcast 4팩터 섹션(line 401)만 `bg-emerald-50 text-emerald-700`로 이탈 —
+카드 wrapper 는 양쪽 동일(themed 아님)이라 의도된 구분색이 아닌 silent drift로 판단. brand 토큰으로 통일. 회귀 테스트
+2건 신규(`polish-ui-cycle-2247.test.ts`, source grep 기반).
+
+### fix(build): 루트 package.json + VERSION 이 apps/moneyball/package.json 버전 미동기화 (cycle 2246 누락분)
+
+cycle 2246 커밋이 `apps/moneyball/package.json` 만 0.5.62.39로 올리고 루트 `package.json`(0.5.62.38 잔존)과
+`VERSION`(0.5.62.38 잔존)을 안 올려 `version-sync-guard.test.ts`(cycle 2047 도입) 2건 실패 — 본 사이클 vitest 실행 중
+발견. 3개 파일 모두 0.5.62.40으로 동기화. `pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec
+vitest run` 467 files/4027 tests 전량 통과(+2, zero regression), `pnpm --filter moneyball lint` clean.
+
 ## v0.5.62.39 — 2026-08-20 (cycle 2246, review-code (heavy): analysis-data.ts 최초 감사 — sp_confirmation_log select 에러 silent swallow 발견/수정)
 
 ### fix(analysis): sp_confirmation_log 조회 assertSelectOk 누락 — 선발투수 배지 에러 silent swallow
