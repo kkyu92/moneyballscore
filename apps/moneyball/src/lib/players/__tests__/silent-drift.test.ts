@@ -147,7 +147,7 @@ describe("players lib — cycle 173 silent drift family `.error` 미체크 회�
       (_r, i) => supabaseMock.from.mock.calls[i]?.[0] === "predictions",
     )?.value as Record<string, { mock: { calls: unknown[][] } }> | undefined;
     expect(predsBuilder?.match).toHaveBeenCalledWith(
-      expect.objectContaining({ debate_version: expect.any(String) }),
+      expect.objectContaining({ scoring_rule: expect.any(String) }),
     );
   });
 
@@ -159,7 +159,7 @@ describe("players lib — cycle 173 silent drift family `.error` 미체크 회�
       (_r, i) => supabaseMock.from.mock.calls[i]?.[0] === "predictions",
     )?.value as Record<string, { mock: { calls: unknown[][] } }> | undefined;
     expect(predsBuilder?.match).toHaveBeenCalledWith(
-      expect.objectContaining({ debate_version: expect.any(String) }),
+      expect.objectContaining({ scoring_rule: expect.any(String) }),
     );
   });
 });

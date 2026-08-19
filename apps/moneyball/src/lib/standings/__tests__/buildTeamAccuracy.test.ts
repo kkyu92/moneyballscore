@@ -91,7 +91,7 @@ describe("buildAllTeamAccuracy", () => {
     await buildAllTeamAccuracy();
     const builder = supabaseMock.from.mock.results[0].value;
     expect(builder.match).toHaveBeenCalledWith(
-      expect.objectContaining({ debate_version: expect.any(String) }),
+      expect.objectContaining({ scoring_rule: expect.any(String) }),
     );
   });
 });
