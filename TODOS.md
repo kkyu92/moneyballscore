@@ -1,5 +1,26 @@
 # TODOS
 
+## 🟡 explore-idea (lite) — MLB 주간/월간 리뷰 서브페이지 plan #26 (spec-only) (cycle 2228, 2026-08-19)
+
+open issue 0건, approved plan 0건 (25개 전부 completed/archived/superseded 유지, 본
+cycle 이 26번째 신규 작성). 직전 8사이클 distinct=4 (explore-idea×2/review-code×3/
+fix-incident/info-architecture-review) — 2-chain lock 미충족. fix-incident(gap=6)/
+op-analysis(gap=13)/info-arch(gap=3) 자체 trigger 미도달. lotto 는 구조적 30-cycle-gap
+trigger 는 충족했으나 다음 회차(1234회, 8/22) picks + 직전 회차(1233회) OOS 결과 모두
+이미 8/18에 박제 완료 — 실익 없어 skip.
+
+**carry-over 처리**: cycle 2226 이 `/mlb/reviews` 신규 시 "weekly/monthly 서브페이지는
+MLB 주/월 range 유틸 부재라 후속 cycle 과제"로 남긴 gap 을 rubric(가치/시간비용/risk/
+자율가능/의존성) 재평가. 실측 결과 `computeWeekRange`/`computeMonthRange` 자체는
+리그 무관이라 재사용 가능 확인(당초 서술 부정확) — 하지만 진짜 blocker 는 (1) KBO
+`fetchPredictionRowsInRange` 의 games/teams FK 하드코딩(MLB 는 `mlb_schedule` +
+`external_game_id` 모델로 분리, plan #24 CRITICAL fix 이후 확립된 패턴 재사용 필요)
+(2) `analyzeFactorAccuracy` 의 KBO 10팩터 가중치 하드코딩(MLB 는 6팩터만 유효) — 규모
+자체는 plan #24 Phase 1 MVP 급으로 큼. Tier 3 확정 → `~/.develop-cycle/plans/
+moneyballscore/26.md` 로 분리(status: approved, target_chain: explore-idea, Phase 1
+weekly MVP → Phase 2 monthly → Phase 3 dedup 선택). 이번 cycle 은 spec-only, 코드
+변경 0. 다음 explore-idea fire 시 unprocessed plan lookup 으로 자연 pick-up.
+
 ## 🟢 explore-idea (heavy) — MLB 수렴 픽 리뷰 허브 /mlb/reviews 신규 (cycle 2226, 2026-08-19)
 
 open issue 0건, approved plan 0건 (19개 전부 completed/archived/superseded 유지). 직전
