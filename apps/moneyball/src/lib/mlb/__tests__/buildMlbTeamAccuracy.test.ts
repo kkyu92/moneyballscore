@@ -88,3 +88,60 @@ describe('buildAllMlbTeamAccuracy', () => {
     expect(result).toEqual([]);
   });
 });
+
+describe('buildMlbMatchupData', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('final 경기 없으면 빈 matchups/homeAway', async () => {
+    supabaseMock = makeSupabaseMock({ schedule: [] });
+    const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
+    const result = await buildMlbMatchupData();
+    expect(result).toEqual({ matchups: [], homeAway: [] });
+  });
+
+  it('schedule select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+    supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
+    const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
+    await expect(buildMlbMatchupData()).rejects.toThrow();
+  });
+
+  it('상대전적 양방향 집계 + 홈/원정 split', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', home_team_code: 'BOS', away_team_code: 'NYY', home_score: 1, away_score: 3 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 }, // 홈(NYY) 예측, 홈 승 → 적중
+        { external_game_id: 'g2', home_win_prob: 0.7 }, // 홈(BOS) 예측, 원정 승 → 오답
+      ],
+    });
+    const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
+    const { matchups, homeAway } = await buildMlbMatchupData();
+
+    const nyyVsBos = matchups.find((m) => m.teamCode === 'NYY' && m.opponentCode === 'BOS');
+    const bosVsNyy = matchups.find((m) => m.teamCode === 'BOS' && m.opponentCode === 'NYY');
+    expect(nyyVsBos).toEqual({ teamCode: 'NYY', opponentCode: 'BOS', n: 2, correct: 1, accuracyRate: 0.5 });
+    expect(bosVsNyy).toEqual({ teamCode: 'BOS', opponentCode: 'NYY', n: 2, correct: 1, accuracyRate: 0.5 });
+
+    const haByCode = new Map(homeAway.map((h) => [h.teamCode, h]));
+    expect(haByCode.get('NYY')).toEqual({
+      teamCode: 'NYY', homeN: 1, homeCorrect: 1, homeAccuracy: 1, awayN: 1, awayCorrect: 0, awayAccuracy: 0,
+    });
+    expect(haByCode.get('BOS')).toEqual({
+      teamCode: 'BOS', homeN: 1, homeCorrect: 0, homeAccuracy: 0, awayN: 1, awayCorrect: 1, awayAccuracy: 1,
+    });
+  });
+
+  it('예측 없는 경기는 skip', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 }],
+      preds: [],
+    });
+    const { buildMlbMatchupData } = await import('../buildMlbTeamAccuracy');
+    const result = await buildMlbMatchupData();
+    expect(result).toEqual({ matchups: [], homeAway: [] });
+  });
+});
