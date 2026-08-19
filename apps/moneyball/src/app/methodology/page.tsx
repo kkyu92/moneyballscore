@@ -367,6 +367,15 @@ export default function MethodologyPage() {
           틀리는 패턴은 팀별 메모리에 저장되어 다음 예측 시 프롬프트로 주입.
           모델이 자기 실수를 학습하는 구조입니다.
         </p>
+        <p className="text-xs text-gray-500 dark:text-brand-400">
+          ※ AI 토론 서버에 일시적으로 연결이 안 될 경우 이 단계를 건너뛰고
+          정량 모델 결과만 사용합니다 (사후 학습도 이 경우 적용되지 않음).
+          최근 AI 토론 적용 비율은{" "}
+          <Link href="/accuracy" className="text-brand-500 hover:underline">
+            /accuracy
+          </Link>{" "}
+          페이지에서 실시간 확인 가능.
+        </p>
       </section>
 
       <section id="verification" className="space-y-4 scroll-mt-20">
