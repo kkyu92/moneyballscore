@@ -1,3 +1,23 @@
+## v0.5.62.47 — 2026-08-20 (cycle 2263, review-code (heavy): sitemap.ts 최초 감사 — search STATIC_PAGES 와 동일한 수동 동기 구조 확인, 제네릭 회귀 테스트 신규)
+
+### test(sitemap): sitemap.ts 정적 hub 커버리지에 STATIC_PAGES(cycle 2262)와 동일한 제네릭 스캔 가드 부재
+
+cycle 2261/2262 가 `search/page.tsx`의 `STATIC_PAGES` 배열(수동 나열이라 반복 drift 났던 배열)에
+제네릭 스캔 회귀 테스트를 추가한 뒤, 같은 "신규 hub page.tsx 추가 시 별도 배열에 수동 등록 필요"
+구조를 가진 `sitemap.ts`를 감사. 직접 코드 read 로 전체 non-dynamic hub slug 46개를 스캔해
+`sitemap.ts` 리터럴과 대조한 결과 실제 누락은 0건 — 빠진 6개(`/accuracy/shadow`, `/v2-shadow-monitor`,
+`/reviews/{weekly,monthly}`, `/mlb/reviews/{weekly,monthly}`) 전부 코드/주석으로 확인된 의도적 제외
+(`robots: { index: false }` noindex 내부 archive 2건 + `redirect()` 전용 index 페이지 4건, dynamic
+route 블록이 실제 컨텐츠 URL 을 이미 커버). 현재 상태는 clean이나, `sitemap-mlb.test.ts`(214줄)는
+경로별 하드코딩 `it()` 케이스만 있어 향후 신규 hub 추가 시 `search/page.tsx`가 겪은 것과 동일한
+silent drift(수동 배열 갱신 누락)에 무방비.
+
+수정: 코드 변경 없음(감사 결과 clean) + 재발 방지 목적 제네릭 회귀 테스트 신규
+(`silent-drift-cycle-2263.test.ts`) — 모든 non-dynamic hub `page.tsx`를 스캔해 `sitemap.ts` 리터럴
+엔트리 존재를 검증하되, `redirect()` 전용 페이지와 `robots: { index: false }` noindex 페이지는
+소스 자체에서 패턴 감지해 구조적으로 제외(하드코딩 나열 없이 향후 신규 redirect-only/noindex 페이지도
+자동 인식). type-check/lint clean, 전체 474 files/4062 tests all pass(신규 1건 포함).
+
 ## v0.5.62.46 — 2026-08-20 (cycle 2261, review-code (heavy): search/page.tsx 최초 감사 — MLB 신규 6개 hub 페이지 STATIC_PAGES 검색 인덱스 누락 발견/수정)
 
 ### fix(search): STATIC_PAGES 가 wave 9(cycle 1116) 이후 신규 MLB parity hub 6개를 반영 못한 silent drift
