@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { SITE_URL, MLB_TEAMS, mlbShortTeamName } from "@moneyball/shared";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
-import { buildAllMlbTeamAccuracy, buildMlbMatchupData } from "@/lib/mlb/buildMlbTeamAccuracy";
+import { buildAllMlbTeamAccuracy, buildMlbMatchupData, buildMlbTeamBiasAnalysis } from "@/lib/mlb/buildMlbTeamAccuracy";
 import { buildMlbFactorAccuracy } from "@/lib/mlb/buildMlbFactorAccuracy";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbAccuracyDashboard } from "@/components/accuracy/MlbAccuracyDashboard";
 import { FactorAccuracyTable } from "@/components/accuracy/FactorAccuracyTable";
 import { TeamMatchupCards } from "@/components/accuracy/TeamMatchupCards";
+import { TeamBiasTable } from "@/components/accuracy/TeamBiasTable";
 
 export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -27,12 +28,14 @@ export const metadata: Metadata = {
 };
 
 export default async function EnMlbAccuracyPage() {
-  const [summary, teamRows, matchupData, factorAccuracyRows] = await Promise.all([
+  const [summary, teamRows, matchupData, factorAccuracyRows, biasRows] = await Promise.all([
     buildMlbAccuracySummary('en'),
     buildAllMlbTeamAccuracy(),
     buildMlbMatchupData(),
     buildMlbFactorAccuracy('en'),
+    buildMlbTeamBiasAnalysis(),
   ]);
+  const standingsAvailable = biasRows.some((r) => r.actualWinPct != null);
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
@@ -61,6 +64,25 @@ export default async function EnMlbAccuracyPage() {
         cohortWeekHeatmap={summary.cohortWeekHeatmap}
         teamRows={teamRows}
       />
+
+      {biasRows.length > 0 && (
+        <section id="bias" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
+          <div>
+            <h2 className="text-lg font-bold">Team Prediction Bias</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Shows how much the model over- or under-predicts each team&apos;s wins relative to
+              their actual win rate. A large bias gap is a diagnostic signal for the model.
+            </p>
+          </div>
+          <TeamBiasTable
+            rows={biasRows}
+            standingsAvailable={standingsAvailable}
+            shortName={mlbShortTeamName}
+            locale="en"
+            winPctSourceLabel="completed games this season"
+          />
+        </section>
+      )}
 
       {matchupData.matchups.length > 0 && (
         <section id="matchup" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
