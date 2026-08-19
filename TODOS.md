@@ -1,3 +1,31 @@
+## ⚪ review-code (heavy) — convergenceRecord.ts 최초 전체 감사, drift 없음 (cycle 2283, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 archived/completed 상태). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code/fix-incident/explore-idea/info-architecture-review). review-code dominance 65%(13/20) 지속, dominance-positive streak 인정 범위(cycle 135 룰). lotto(19-gap/30)·op-analysis(18-gap/25)·fix-incident(5-gap/20)·info-arch(3-gap/30) 모두 자체 주기 미도달. cycle 2281/2282 carry-over가 review-code(heavy) 잔존 미감사 대형 파일 재탐색 추천.
+
+탐색: game/[id]/page.tsx(838줄, review 이력 12건)/buildAccuracyData.ts(776줄, 17건)/accuracy/page.tsx(1203줄, 24건)/page.tsx(1082줄, 17건) 모두 이미 다회 감사. `lib/analysis/convergenceRecord.ts`(781줄) 는 review-code 이력 0건 — 최초 전체 감사 최우선 후보로 선정.
+
+감사: 전체(781줄) 최초 정독 — KBO/MLB 양쪽 수렴 픽 기록 조회(팀별/홈어웨이/요일별/streak/H2H) 전체 경로. 모든 Supabase 쿼리(games/mlb_schedule/predictions/teams) `assertSelectOk` 적용 확인 — 누락 0건(cycle 2281/2282 family 재발 없음). MLB duel 계산에 Elo/최근폼 미포함은 `computeMlbCompositeDuel` 설계상 6팩터 한정(MLB_FACTOR_PICK_STRONG/COMPLETE 주석과 일치) — drift 아님. `getMlbConvergencePickHeadToHeadRecord`의 `minFactors` 필수 파라미터(기본값 없음)와 모든 콜러(`mlb/matchup`, `en/mlb/matchup`)의 명시적 `MLB_FACTOR_PICK_STRONG`/`COMPLETE` 전달 확인 — cycle 2070 dead-gate 재발 방지 설계 정상 작동. `computeWinRatePct` 0-division 가능 콜사이트 전부 `total > 0` 가드 또는 `minPicks` 필터링된 non-null 반환값만 사용 확인. color-class 헬퍼 3종(`statColorClass*`) + `computeUpcomingPickGameIds` 등 전부 실사용 확인(dead export 없음).
+
+결론: 이 파일에서 silent drift/부정확한 주석/dead code/불일치 미발견. 코드 변경 없음 — 감사 결과만 박제(재감사 회피용, 다음 review-code heavy가 재탐색할 필요 없도록 이력 남김).
+
+다음 후보: review-code(heavy) 대형 미감사 파일 pool 소진 임박 (781줄 이하는 대부분 이력 보유) — 다음 사이클은 lotto(19-gap/30, 20-gap 근접)·op-analysis(18-gap/25)·fix-incident(5-gap/20) 다양성 우선 고려 권장.
+
+## 🟢 review-code (heavy) — analysis-data.ts getThisWeekRemainingGames elo 쿼리 assertSelectOk 누락 정정 (cycle 2282, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건. 2-chain lock 미충족(직전 8사이클 distinct=5). review-code dominance 지속(fix-incident gap=3/20, lotto gap=17/30, op-analysis gap=16/25 — 모두 자체 주기 미도달). cycle 2281 carry-over가 `analysis-data.ts` 잔존 대형 파일로 지목.
+
+감사: `analysis-data.ts` 전체(918→919줄) 재정독. `getTodayAnalysisData`의 homeRank/awayRank/h2hHomeWins/homeTeamVenue 등 인터페이스 필드가 함수 안에서 채워지지 않는 것처럼 보였으나 page.tsx `gamesWithRank` map 이 별도로 augment — false lead 확인 후 배제.
+
+발견: `getThisWeekRemainingGames` 의 `Promise.all([scheduleResult, eloResult])` 중 `eloResult`(이번 주 남은 경기 Elo/10팩터)가 다른 6개 쿼리와 달리 `assertSelectOk` 검증 없이 `if (eloResult.data)` 로만 분기 — cycle 2281이 같은 파일 `sp_confirmation_log`에서 고친 것과 동일한 family, 같은 파일 안 재발.
+
+수정: `eloResult` 도 `assertSelectOk` 통과 (DB 에러 시 fail-loud). 정적 grep 회귀 테스트 `silent-drift-cycle-2282.test.ts` 추가.
+
+부수 발견: `version-sync-guard` 테스트 fail — cycle 2281 이 VERSION/CHANGELOG 만 0.5.62.61 로 올리고 package.json(root+apps/moneyball) 갱신 누락. 0.5.62.62 로 일괄 정합.
+
+검증: 476 test files / 4070 tests all pass, `pnpm type-check` clean, `pnpm lint` clean. 커밋 16cbaaf2, push 완료.
+
+다음 후보: review-code(heavy) 잔존 — `game/[id]/page.tsx`(838줄)/`convergenceRecord.ts`(781줄)/`buildAccuracyData.ts`(776줄, 이미 review 이력 14건으로 상대적으로 감사 밀도 높음) 등. lotto(18-gap/30)·op-analysis(17-gap/25) 다양성도 고려 가능.
+
 ## 🟢 review-code (heavy) — calibration-agent.ts parseResponse silent fallback 정정 (cycle 2281, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 archived/completed/blocked 상태 확인). 2-chain lock 미충족(직전 8사이클 distinct=5: review-code/polish-ui/fix-incident/explore-idea/info-architecture-review). 직전 20사이클 review-code dominance 65%(13/20). 직전 3 cycle(2278/2279/2280) 모두 "review-code(heavy) 잔존 대형 미감사 파일 재탐색" carry-over. lotto(17-gap/30)·op-analysis(16-gap/25)·info-arch(1-gap, 방금 fire) 모두 자체 주기 trigger 미도달.
