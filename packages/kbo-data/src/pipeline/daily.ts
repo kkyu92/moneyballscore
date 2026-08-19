@@ -1003,12 +1003,23 @@ export async function runDailyPipeline(
     if (coords) {
       const hourStr = game.gameTime?.slice(0, 2);
       const hour = hourStr ? parseInt(hourStr, 10) : 18;
-      const existing = await db
-        .from('games')
-        .select('weather')
-        .eq('id', dbGameId)
-        .single();
-      if (!existing.error && !existing.data?.weather) {
+      // silent drift 가드 — `.error` 미체크 시 DB 에러가 "이미 weather 있음"으로
+      // 오판돼 매 cron 마다 조용히 skip → weather 컬럼 영구 NULL. assertSelectOk
+      // 로 fail-loud, try/catch 로 래핑해 for 루프 중단 없이 errors[] push만.
+      let existingWeather: { weather: unknown } | null = null;
+      try {
+        const existingResult = await db
+          .from('games')
+          .select('weather')
+          .eq('id', dbGameId)
+          .single();
+        ({ data: existingWeather } = assertSelectOk<{ weather: unknown }>(
+          existingResult, 'daily.games.weather.select',
+        ));
+      } catch (e) {
+        errors.push(`games.weather select ${game.homeTeam}v${game.awayTeam}: ${errMsg(e)}`);
+      }
+      if (existingWeather && !existingWeather.weather) {
         const snap = await fetchForecastWeather(coords.lat, coords.lng, targetDate, hour);
         if (snap) {
           // silent drift 가드 — .error 미체크 시 weather 영구 NULL → 날씨-결과
