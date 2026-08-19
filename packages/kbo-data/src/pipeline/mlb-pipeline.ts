@@ -430,7 +430,10 @@ async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: numbe
   // Check milestone
   const hitMilestone = MILESTONE_TRIGGERS.includes(samples.length as typeof MILESTONE_TRIGGERS[number]);
 
-  // Insert shadow training result
+  // Insert shadow training result — cycle 2200대 silent drift audit 발견: 이 테이블이
+  // 전체 migration 역사에 걸쳐 한번도 CREATE 된 적 없어(prod REST 실측: PGRST205
+  // "Could not find the table") 매 fire 시 100% insert 실패 상태로 방치돼있었음.
+  // migration 049 가 이 코드가 이미 쓰는 컬럼 shape 그대로 테이블 생성.
   const { error: sErr } = await db.from('mlb_shadow_train_log').insert({
     date,
     sample_count: samples.length,
@@ -505,7 +508,14 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
 
   const brier = computeBrier(brierInputs);
 
-  const { error: bErr } = await db.from('walk_forward_brier').insert({
+  // cycle 2200대 silent drift audit fix — 기존 'walk_forward_brier' 테이블(036
+  // migration)은 month/cohort_size/brier_base/brier_shadow/delta 컬럼(월간
+  // base-vs-shadow 비교 전용 설계, walkForwardExpanding() 소비 대상)이라 여기서
+  // insert 하려던 date/scoring_rule/brier_score/sample_count 와 전량 컬럼 불일치 —
+  // 매 fire 시 100% insert 실패 상태로 방치돼있었음(PostgREST "column not found").
+  // 코드가 실제 쓰는 일별 로그 shape 에 맞는 전용 테이블 mlb_walk_forward_log 로
+  // 분리 (migration 049).
+  const { error: bErr } = await db.from('mlb_walk_forward_log').insert({
     date,
     league: 'mlb',
     scoring_rule: MLB_SCORING_RULE,
@@ -514,7 +524,7 @@ async function runWalkForwardMeasure(db: DB, date: string): Promise<{ gamesFound
   });
 
   if (bErr) {
-    errors.push(`walk_forward_brier insert: ${bErr.message}`);
+    errors.push(`mlb_walk_forward_log insert: ${bErr.message}`);
     return { gamesFound: finalRows.length, rowsInserted: 0, errors };
   }
 

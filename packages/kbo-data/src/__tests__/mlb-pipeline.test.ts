@@ -150,10 +150,118 @@ describe('runMlbPipeline', () => {
     assertResultShape(result, 'mlb_shadow_train');
   });
 
+  it('mlb_shadow_train — insert target mlb_shadow_train_log (regression: silent drift audit — 이 테이블이 전체 migration 역사에 없어 prod insert 가 매 fire 100% 실패하던 것을 migration 049 로 발견/수정. 존재하지 않는 테이블명으로 다시 새지 않는지 + payload shape 고정)', async () => {
+    const insertedRows: Array<{ table: string; row: Record<string, unknown> }> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const scheduleGames = [{ external_game_id: '5001', home_score: 5, away_score: 2 }];
+    const predRows = [{ external_game_id: '5001', home_win_prob: 0.6 }];
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+              })),
+            })),
+          };
+        }
+        if (table === 'predictions') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                  in: vi.fn(() => Promise.resolve({ data: predRows, error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        return {
+          insert: vi.fn((row: Record<string, unknown>) => {
+            insertedRows.push({ table, row });
+            return Promise.resolve({ error: null });
+          }),
+        };
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_shadow_train', DATE, TRIGGERED_BY);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows_inserted).toBe(1);
+    const call = insertedRows.find((c) => c.table === 'mlb_shadow_train_log');
+    expect(call).toBeDefined();
+    expect(call?.row).toMatchObject({ date: DATE, sample_count: 1 });
+    expect(Object.keys(call!.row)).toEqual(
+      expect.arrayContaining(['date', 'sample_count', 'weights', 'brier', 'accuracy', 'milestone_hit']),
+    );
+  });
+
   it('mlb_walk_forward_measure — throw 없음, result shape 정상', async () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     const result = await runMlbPipeline('mlb_walk_forward_measure', DATE, TRIGGERED_BY);
     assertResultShape(result, 'mlb_walk_forward_measure');
+  });
+
+  it('mlb_walk_forward_measure — insert target mlb_walk_forward_log, 구 walk_forward_brier 로 새지 않음 (regression: silent drift audit — walk_forward_brier 는 month/cohort_size/brier_base/brier_shadow/delta 컬럼 전용 설계(월간 base-vs-shadow 비교)라 이 코드가 쓰던 date/scoring_rule/brier_score/sample_count 와 전량 불일치, 매 fire insert 실패하던 것을 migration 049 로 발견/수정)', async () => {
+    const insertedRows: Array<{ table: string; row: Record<string, unknown> }> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const predRows = [{ external_game_id: '6001', home_win_prob: 0.65 }];
+    const scheduleRows = [
+      { external_game_id: '6001', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2, status: 'final' },
+    ];
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'predictions') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                  eq: vi.fn(() => Promise.resolve({ data: predRows, error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              in: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleRows, error: null })),
+              })),
+            })),
+          };
+        }
+        return {
+          insert: vi.fn((row: Record<string, unknown>) => {
+            insertedRows.push({ table, row });
+            return Promise.resolve({ error: null });
+          }),
+        };
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_walk_forward_measure', DATE, TRIGGERED_BY);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows_inserted).toBe(1);
+    const call = insertedRows.find((c) => c.table === 'mlb_walk_forward_log');
+    expect(call).toBeDefined();
+    expect(call?.row).toMatchObject({
+      date: DATE,
+      league: 'mlb',
+      scoring_rule: 'mlb_v0.1',
+      brier_score: 0.24,
+      sample_count: 1,
+    });
+    expect(insertedRows.some((c) => c.table === 'walk_forward_brier')).toBe(false);
   });
 
   it('mlb_elo_update — throw 없음, result shape 정상 (plan #25 Phase 2, cycle 2082)', async () => {
