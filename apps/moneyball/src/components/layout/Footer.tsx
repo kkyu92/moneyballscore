@@ -100,6 +100,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/accuracy", label: "AI 적중 기록", enLabel: "Accuracy Track Record" },
       { href: "/mlb/players", label: "Statcast 선수", enLabel: "Statcast Players" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터 가중치`, enLabel: `${MLB_FACTOR_COUNTS.total}-Factor Weights` },
+      { href: "/mlb/predictions", label: "예측 기록", enLabel: "Prediction History" },
       { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar" },
       { href: "/mlb/wild-card", label: "Wild Card race", enLabel: "Wild Card Race" },
       { href: "/mlb/postseason", label: "Postseason 브래킷", enLabel: "Postseason Bracket" },
