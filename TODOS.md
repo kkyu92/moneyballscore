@@ -1,5 +1,36 @@
 # TODOS
 
+## 🟢 review-code (heavy) — ScoringRuleDayHeatmap MLB 페이지 phantom KBO 행 fix (cycle 2211, 2026-08-19)
+
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
+TODOS 에 두 번 명시된 backlog("ScoringRuleDayHeatmap.tsx/buildScoringRuleWeekHeatmap
+registry 재확인 미착수", cycle 2186/2189/2210) 채택.
+
+**발견**: `SCORING_RULE_HEATMAP_ROWS`(KBO era history: v1.5/v1.6/v1.7-revert/
+v1.8/v1.8-credit-fail 하드코딩)를 `ScoringRuleDayHeatmap.tsx`가 무조건 전량
+렌더 — 반면 자매 컴포넌트 `CohortComparisonHeatmap.tsx`는 이미 activeRows
+필터(silent drift family wave 257, cycle 1563)로 실 데이터 있는 행만 렌더.
+두 "자매 view" 사이 parity 가 깨져 있었음. MLB predictions 는 단일
+scoring_rule(`mlb_v0.1`)만 써서 KBO 리스트와 전혀 안 겹침 —
+`buildScoringRuleDayHeatmap`이 'all' aggregate 만 채우는 것까지는 이미 테스트로
+문서화(cycle 2189)돼 있었지만, UI 가 그 나머지 5개 빈 row 를 KBO 버전
+라벨(v1.5~v1.8-credit-fail)째로 그대로 렌더 — `/mlb/accuracy` 실측(로컬 dev
+서버 렌더 HTML grep) 으로 실제 노출 확인.
+
+**수정**: `CohortComparisonHeatmap.tsx` 와 동일한 activeRows 필터 적용
+(`SCORING_RULE_HEATMAP_ROWS.filter(sr => 실제 n>0 cell 존재)`). 데이터 없는
+행이면 "데이터 없음" empty state. `buildAccuracyData.ts` 의 stale 주석
+("acc null 표시 처리는 UI 책임" → 실제는 `SMALL_SAMPLE_THRESHOLD` 로 빌더가
+직접 처리)도 정정. 신규 회귀 테스트 2건(`ScoringRuleDayHeatmap.test.tsx`) —
+all-only 데이터는 1행만 / 실 scoring_rule 데이터는 해당 행 렌더.
+
+`pnpm --filter moneyball test`: 450 files/3911 tests green(+1 파일/+2 신규).
+tsc/lint clean + 로컬 dev 서버 실측(`/mlb/accuracy` 200, 렌더 HTML 에
+v1.5/v1.7-revert/v1.8-credit-fail 미노출 확인, "전체" 행만 렌더). 단일
+논리 단위 — main 직접 commit+push(R4/R7, `b74b91e6`).
+
+---
+
 ## 🟢 operational-analysis (heavy) — CURRENT_MODEL_FILTER 배포 후 실효 검증 (cycle 2210, 2026-08-19)
 
 cycle 2209 가 `CURRENT_MODEL_FILTER` (config/model.ts) 를 `debate_version`
