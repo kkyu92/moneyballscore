@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 lotto (lite) — 30-cycle gap trigger 감사, drift 없음 확인 (cycle 2264, 2026-08-20)
+
+진단: 강제 trigger = lotto 하나만 (30-cycle gap 정확 도달, 마지막 fire cycle 2234). open issue 0건, approved plan 0건, 2-chain lock 미충족.
+
+실측: `lotto.ts count` 유효 조합 7,705,415 / 전체 8,145,060 / 제거 5.40% (96.5s) — cycle 2234와 동일 값(1237회차 데이터 불변, 다음 추첨 2026-08-22 토 미도래). `lotto.ts rules` 259개 규칙 전수 확인 fail 0건. `lotto.ts update` 이미 최신(1237회차) 확인. picks `2026-08-22-50sets.md` 이미 존재(cycle 2231-2233 사이 박제). 1237회(2026-08-15) OOS 이미 검증 완료(3개 일치 1/50, 기댓값 수준, N=11 누적 우위 증거 없음).
+
+수정: 코드 변경 없음(순수 measurement, drift 0건). skill-evolution trigger 5개 재평가 — 어느 것도 미충족(trigger3 %50≠0=14, trigger5 review-code 직전 20cycle 11회 fired 정상).
+
+다음 후보: review-code (heavy) 또는 explore-idea (heavy) — lotto gap 재충족까지 30 cycle.
+
 ## 🟢 review-code (heavy) — sitemap.ts 최초 감사, STATIC_PAGES 와 동일 구조 제네릭 가드 신규 (cycle 2263, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 5-gap/op-analysis 23-gap/info-arch 13-gap/lotto 29-gap 모두 미도달 — lotto 30-gap 은 cycle 2264, op-analysis 25-gap 은 cycle 2265 도달 예정). review-code(heavy) 4연속 success streak (2259~2262, dominance-positive 룰 적용 정상). cycle 2261/2262 가 search/page.tsx STATIC_PAGES 에 적용한 제네릭 스캔 패턴을 동일 구조(신규 hub 추가 시 별도 배열 수동 등록) 파일로 확장 채택.
