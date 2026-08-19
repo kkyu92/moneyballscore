@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 review-code (heavy) — buildPicksStats.ts 최초 감사(clean), 🔥 픽 스트릭 배지 threshold 하드코딩(2 vs 3) 발견/수정 (cycle 2252, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 직전 8사이클 distinct=5, fix-incident(8)/op-analysis(12)/lotto(18)/info-arch(2) 모두 자체 gap trigger 미도달, explore-idea saturation 11/15 <12 미도달). cycle 2251 retro 가 "review-code 또는 explore-idea" 권고 + review-code dominance 50%(직전 20사이클) 재확대 지적했지만 explore-idea 신규 redirect source 미확립 상태 — TODOS carry-over 명시 후보(buildPicksStats.ts 410줄 등 미감사 대형 파일) 채택, dominance-positive streak(cycle 135 룰) 인정 하 진행.
+
+실측: `buildPicksStats.ts`(410줄, 최초 감사)의 KST 날짜 처리(`toKSTDate`)는 이미 cycle 2248 `kstDateKey` 패턴과 동일(offset 후 ISO slice) — clean. 소비 컴포넌트까지 확장 감사 — 동일 개념("🔥 N연속" 픽 스트릭 배지)이 `UserVsAIScorecard.tsx`(홈)/`LeaderboardTable.tsx`/`LeaderboardClient.tsx`(리더보드) 3곳은 `currentStreak >= 2`, 같은 `stats.currentStreak` 값을 쓰는 `/picks` 페이지 `WeeklyPicksSummary.tsx` 만 유일하게 `>= 3` 로 어긋남 — single source 부재로 값 desync 된 silent UX drift(스트릭 2인 유저가 홈에서는 배지를 보고 /picks 에서는 못 봄).
+
+수정: `packages/shared`에 `PICKS_STREAK_BADGE_MIN=2`(다수 3곳 값 따라 통일) 신규 상수 추가, 4개 파일 전부 import 전환. 회귀 테스트 1건 신규(`silent-drift-cycle-2252.test.ts`, source grep 기반). type-check/lint clean, 전체 469 files/4044 tests all pass(+9, zero regression). VERSION 0.5.62.43→0.5.62.44. PR #2987 머지 실측 확인(state=MERGED).
+
+다음 후보: review-code(heavy) 미감사 대형 파일 잔여(`factor-explanations.ts` 409줄/`buildSeasonSummary.ts` 346줄/`glossary/data.ts` 323줄/`insights/loader.ts` 311줄/`buildMlbTeamAccuracy.ts` 300줄) 또는 diversity(explore-idea — saturation 11/15 근접, 신규 redirect source 자연 발견 여부 다음 사이클 관찰).
+
 ## 🟢 info-architecture-review — /lotto/check sitemap 누락 발견/수정 (cycle 2250, 2026-08-20)
 
 진단: 강제 trigger 없음이지만 3-cycle 연속(2247/2248/2249) retro 가 info-architecture-review diversity 권고 — dominance-positive streak(review-code heavy) 유지하며도 diversity 자율 선택. `find apps/moneyball/src/app -name page.tsx -mtime -7` 47건 flagged(git checkout mtime 오염 다수) → `git log --since="7 days ago" --diff-filter=A`로 실제 신규 16건 재확인(mlb accuracy/calendar/matchup/methodology/predictions/reviews 계열 + EN 미러 + `/lotto/check`). breadcrumb 누락 0건(전체 mlb/*/page.tsx 보유).
