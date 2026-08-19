@@ -114,6 +114,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/reviews", label: "예측 리뷰", enLabel: "Prediction Review" },
       { href: "/mlb/reviews/weekly", label: "주간 리뷰", enLabel: "Weekly Review" },
       { href: "/mlb/reviews/monthly", label: "월간 리뷰", enLabel: "Monthly Review" },
+      { href: "/mlb/reviews/misses", label: "빗나간 예측", enLabel: "Missed Predictions" },
       { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar" },
       { href: "/mlb/wild-card", label: "Wild Card race", enLabel: "Wild Card Race" },
       { href: "/mlb/postseason", label: "Postseason 브래킷", enLabel: "Postseason Bracket" },

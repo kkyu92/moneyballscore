@@ -122,5 +122,9 @@ describe("Footer", () => {
     const mlbHeading = screen.getByRole("heading", { level: 2, name: "MLB" });
     const mlbColumn = mlbHeading.closest("details") as HTMLElement;
     expect(within(mlbColumn).getByRole("link", { name: "Prediction Review" })).toHaveAttribute("href", "/mlb/reviews");
+    expect(within(mlbColumn).getByRole("link", { name: "Missed Predictions" })).toHaveAttribute(
+      "href",
+      "/mlb/reviews/misses"
+    );
   });
 });
