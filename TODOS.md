@@ -1,5 +1,26 @@
 # TODOS
 
+## 🟢 review-code (heavy) — 확신도별 분석 CI 임계값 20 → STATS_RELIABLE_MIN_N 정합 (cycle 2203, 2026-08-19)
+
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4),
+gap-trigger 전부 미충족, CI green. cycle 2202가 이미 감사한 파일과 겹치지 않게
+`packages/kbo-data/src/agents/validator.ts`(899줄, LLM 환각·발명선수·금칙어 검증기)
++ `apps/moneyball/src/lib/analysis/convergenceRecord.ts`(733줄, 수렴 픽 streak/
+팀별/홈어웨이 성적)를 전체 read — 둘 다 과거 여러 drift fix로 이미 견고, 신규 버그
+없음 확인(validator.ts는 MLB가 team-agent/debate 안 거치는 순수 정량 경로라
+correctly out-of-scope임도 재확인).
+
+**발견**: `apps/moneyball/src/app/accuracy/page.tsx` 안에서 같은 파일이 이미
+import 한 `STATS_RELIABLE_MIN_N`(=30, wave-496/cycle 1862 "3 file 하드코딩 30
+swap" 상수 추출) 을 winRateBucket CI 배지(1165줄)는 참조하는데 confidenceTiers
+CI 배지(827줄)만 여전히 리터럴 `20` 사용 — wave-496 sweep 당시 같은 파일 안
+4번째 지점을 누락한 케이스. TeamBiasTable/TeamMatchupCards 와 동일한
+"상수 도입 후 하드코딩 잔존" silent drift family.
+
+**수정**: `tier.n < 20` → `tier.n < STATS_RELIABLE_MIN_N`. type-check/lint/
+vitest(448/3908) 전부 clean. 단일 파일 1-line 변경 — PR 생략, main 직접
+commit+push (R4/R7, commit `7cebb40f`).
+
 ## 🟢 review-code (heavy) — TeamBiasTable footnote 하드코딩 "n≥5" → SMALL_SAMPLE_N 정정 (cycle 2202, 2026-08-19)
 
 open issue 0건, approved plan 0건(전량 completed/archived/pending-user-step),
