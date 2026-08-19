@@ -145,3 +145,75 @@ describe('buildMlbMatchupData', () => {
     expect(result).toEqual({ matchups: [], homeAway: [] });
   });
 });
+
+describe('buildMlbTeamBiasAnalysis', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('final 경기 없으면 빈 배열', async () => {
+    supabaseMock = makeSupabaseMock({ schedule: [] });
+    const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
+    const result = await buildMlbTeamBiasAnalysis();
+    expect(result).toEqual([]);
+  });
+
+  it('schedule select 실패 시 throw (silent drift family 회귀 가드)', async () => {
+    supabaseMock = makeSupabaseMock({ scheduleError: { message: 'boom' } });
+    const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
+    await expect(buildMlbTeamBiasAnalysis()).rejects.toThrow();
+  });
+
+  it('biasGap = predictedWinRate - actualWinPct, 실제 승패는 mlb_schedule final 스코어로 직접 derive (외부 standings 불필요)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        // NYY 홈 5경기 모두 실제 승리, 예측은 3승만 (predictedWinRate=0.6, actualWinPct=1.0 → biasGap=-0.4)
+        { external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+        { external_game_id: 'g3', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+        { external_game_id: 'g4', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+        { external_game_id: 'g5', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 }, // 홈(NYY) 예측승 → 실제도 승 → 적중
+        { external_game_id: 'g2', home_win_prob: 0.7 },
+        { external_game_id: 'g3', home_win_prob: 0.7 },
+        { external_game_id: 'g4', home_win_prob: 0.3 }, // 원정(BOS) 예측승 → 실제는 홈 승 → 오답
+        { external_game_id: 'g5', home_win_prob: 0.3 },
+      ],
+    });
+    const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
+    const result = await buildMlbTeamBiasAnalysis();
+    const nyy = result.find((r) => r.teamCode === 'NYY');
+    expect(nyy).toBeDefined();
+    expect(nyy!.predictedWinRate).toBeCloseTo(0.6);
+    expect(nyy!.actualWinPct).toBeCloseTo(1.0);
+    expect(nyy!.biasGap).toBeCloseTo(-0.4);
+    // 결과는 |biasGap| 내림차순
+    for (let i = 0; i < result.length - 1; i++) {
+      expect(Math.abs(result[i].biasGap ?? 0)).toBeGreaterThanOrEqual(Math.abs(result[i + 1].biasGap ?? 0));
+    }
+  });
+
+  it('totalN < SMALL_SAMPLE_N(5) → 필터 제거', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+      ],
+      preds: [{ external_game_id: 'g1', home_win_prob: 0.7 }],
+    });
+    const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
+    const result = await buildMlbTeamBiasAnalysis();
+    expect(result).toEqual([]);
+  });
+
+  it('예측 없는 경기는 skip', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 }],
+      preds: [],
+    });
+    const { buildMlbTeamBiasAnalysis } = await import('../buildMlbTeamAccuracy');
+    const result = await buildMlbTeamBiasAnalysis();
+    expect(result).toEqual([]);
+  });
+});
