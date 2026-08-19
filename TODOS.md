@@ -1,5 +1,28 @@
 # TODOS
 
+## 🟢 review-code (heavy) — TeamMatchupCards 소표본 임계값 N<3 컨벤션 정합 (cycle 2199, 2026-08-19)
+
+R4 push 재발 검증 (carry-over) 결과 divergence 0 확인 (cycle 2198 fix 정상 작동).
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
+Feature-Drift Cycle alternation + 직전 2 cycle next_recommended_chain 힌트
+(review-code or explore-idea) 따라 review-code 선택 — 최근 신규 추가된 MLB
+컴포넌트(cycle 2196 TeamMatchupCards) 감사.
+
+**발견**: `TeamMatchupCards.tsx` 가 상대팀 목록은 `n===1` 에만 opacity-50 dimming,
+홈/원정 split 은 표본 크기 무관 항상 진하게 렌더 — `ScoringRuleDayHeatmap`/
+`CohortComparisonHeatmap`/`WinnerProbBucketChart` 등 전체 코드베이스가 일관
+적용 중인 N<3 소표본 컨벤션(CLAUDE.md "데이터로만 이야기")과 불일치. 컴포넌트
+자체 테스트도 0건(신규 추가 이후 미작성).
+
+fix: 상대팀 임계값 `n===1` → `n<3` 정정 + 홈/원정 split(`homeN`/`awayN`)에도
+동일 가드 신규 추가. 회귀 테스트 2건 신규(opponent 소표본 + 홈/원정 소표본).
+`pnpm --filter moneyball exec vitest run`(448 files/3903 tests) + lint +
+type-check(4 packages) 전체 통과 후 main 직접 커밋(#e662ec08) + 즉시 push
+(R4 확장 룰 준수 — 이번 cycle 도 정상 검증).
+
+carry-over: KO `/accuracy` 페이지에서도 동일 컴포넌트 재사용 중이라 KBO
+소표본(N=1~2 매치업 다수 예상) 케이스도 자동 수혜.
+
 ## 🟢 fix-incident — 로컬 워킹 디렉토리 origin divergence 재발 + 근본 원인 fix (cycle 2198, 2026-08-19)
 
 cycle 2197 이 "해소 SUCCESS" 로 박제한 직후 cycle 2198 시작 스캔에서
