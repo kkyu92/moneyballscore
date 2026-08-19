@@ -30,13 +30,16 @@ function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
       error: opts.teamsError ?? null,
     }),
   };
+  const gamesResult = Promise.resolve({
+    data: opts.gamesError ? null : (opts.games ?? []),
+    error: opts.gamesError ?? null,
+  });
   const gamesBuilder = {
     select: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockResolvedValue({
-      data: opts.gamesError ? null : (opts.games ?? []),
-      error: opts.gamesError ?? null,
-    }),
+    eq: vi.fn(() => ({
+      eq: vi.fn(() => gamesResult),
+    })),
   };
   return {
     from: vi.fn((table: string) => {

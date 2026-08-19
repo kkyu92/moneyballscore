@@ -1,4 +1,27 @@
-## v0.5.62.62 — 2026-08-20 (cycle 2282, review-code (heavy): analysis-data.ts getThisWeekRemainingGames elo 쿼리 assertSelectOk 누락 정정)
+## v0.5.62.63 — 2026-08-20 (cycle 2288, review-code (heavy): buildTeamProfile.ts games 쿼리 scoring_rule 필터 누락 정정 — shadow row 오염 차단)
+
+### fix(teams): buildTeamProfile.ts games 쿼리 scoring_rule 미필터 → shadow row 오염 가능 상태 정정
+
+`predictions/[date]/page.tsx`(618줄)와 `teams/[code]/page.tsx`(621줄) — 다음 후보로 지목된 두
+대형 파일 전체 정독. 두 파일 자체와 직접 의존 모듈(`buildTeamUpcoming.ts`, `buildTeamEloTrend.ts`,
+`convergenceRecord.ts`)은 이미 assertSelectOk 전면 적용 완료 상태 확인. 감사 범위를 `teams/[code]`
+하위 나머지 데이터 소스(`buildTeamProfile.ts`)로 확장한 결과 실제 drift 발견.
+
+`buildTeamProfile.ts`의 `games` select가 `predictions!inner(...)`에 `prediction_type='pre_game'`
+필터만 걸고 `scoring_rule` 필터가 아예 없었음 — `shadow-cohort.ts`가 `daily.ts` 파이프라인에서
+매 경기 production(v1.8) row insert 직후 shadow(v2.1-B-shadow/v2.0-shadow) row도 동일
+`prediction_type='pre_game'`으로 누적 중(#1338 family, 같은 디렉토리의 `buildTeamUpcoming.ts`/
+`teams/[code]/recent/page.tsx`는 이미 `CURRENT_SCORING_RULE` 필터로 이 문제를 회피해왔음). 정렬
+없는 `predictions?.[0]`이 production/shadow 중 임의 row를 집어 팀 프로필 페이지의 적중률, 팩터
+평균, 선발 투수 FIP, 최근 경기, 연승/연패, 평균 마진, 홈/원정 편차가 shadow 모델 값으로 오염될
+수 있는 상태 — daily 파이프라인이 shadow insert를 활성 유지 중이라 매일 재발 가능.
+
+`buildTeamProfile.ts` games 쿼리에 `.eq("predictions.scoring_rule", CURRENT_SCORING_RULE)` 추가
+(형제 파일과 동일 컨벤션 정합). 정적 grep 회귀 테스트 `silent-drift-cycle-2288.test.ts` 추가 +
+기존 `buildTeamProfile.test.ts` mock의 단일 `.eq()` 체인을 2단 체인으로 갱신(신규 필터 반영).
+478 files/4077 tests all pass, `pnpm type-check`/`pnpm lint` clean.
+
+
 
 ### fix(analysis): getThisWeekRemainingGames elo/factor 쿼리 assertSelectOk 미적용 silent swallow 정정
 
