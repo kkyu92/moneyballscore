@@ -1,5 +1,30 @@
 # TODOS
 
+## 🟢 review-code (heavy) — TeamBiasTable footnote 하드코딩 "n≥5" → SMALL_SAMPLE_N 정정 (cycle 2202, 2026-08-19)
+
+open issue 0건, approved plan 0건(전량 completed/archived/pending-user-step),
+2-chain lock 없음(직전 8사이클 distinct=4), gap-trigger 미충족(fix-incident/
+op-analysis/info-arch/lotto 전부 최근 발화, CI green). cycle 2200이 신규
+배선한 TeamBiasTable(MLB 팀별 예측 편향 분석)을 review-code(heavy) 대상으로
+선정 — daily.ts results_sent lock 로직(cycle 2179/2199 fix) 재검증도
+병행했으나 실제 버그 없음 확인(games.length===0 조기 return 이 vacuous-truth
+edge case 를 이미 차단).
+
+**발견**: `TeamBiasTable.tsx` footnote(ko/en 양쪽)가 "n≥5 팀만 표시"/
+"Teams with n≥5 only" 를 리터럴 하드코딩. 실제 필터
+(`buildTeamAccuracy.ts`/`buildMlbTeamAccuracy.ts` 양쪽 `.filter(r => r.totalN
+>= SMALL_SAMPLE_N)`)는 `SMALL_SAMPLE_N`(=5) 상수 참조. 코드베이스 5개
+파일(players/page.tsx, teams/[code]/page.tsx, mlb/team/[code]/page.tsx,
+reviews/weekly, reviews/monthly)이 이미 확립한 `${SMALL_SAMPLE_N}` copy
+interpolation 컨벤션과 불일치 — 향후 상수 값 변경 시 이 footnote 만 silent
+하게 stale 해질 silent drift risk (기존 "10팀"/"6개월" 등 하드코딩 주석
+drift family 와 동일 구조).
+
+**수정**: `SMALL_SAMPLE_N` import 추가, ko/en footnote 양쪽 template literal
+로 정정. `pnpm --filter moneyball type-check`/`lint`/`vitest run`(448 files,
+3908 tests) 전부 clean. 단일 파일 3-line 변경 — PR 생략, main 직접 commit+push
+(R4/R7, commit `214097eb`).
+
 ## 🟢 skill-evolution — phase 31 milestone (cycle 2201, 2026-08-19)
 
 cycle 2200 이 trigger 3(`cycle_n % 50 == 0`) 단독 충족해 skill-evolution-pending 마커
