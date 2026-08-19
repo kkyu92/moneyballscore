@@ -1,6 +1,26 @@
 # TODOS
 
-## 🟢 review-code(heavy) — 로컬 워킹 디렉토리 origin 대비 divergence 발견+해소 (cycle 2197, 2026-08-19)
+## 🟢 fix-incident — 로컬 워킹 디렉토리 origin divergence 재발 + 근본 원인 fix (cycle 2198, 2026-08-19)
+
+cycle 2197 이 "해소 SUCCESS" 로 박제한 직후 cycle 2198 시작 스캔에서
+즉시 재발 확인 (local 44-ahead / origin 1-behind, `gh pr list` 대조로
+cycle ≤2196 은 정상 lockstep 이었음을 확인). 근본 원인 = cycle 2197 merge
+후 `git push` 미실행 — CLAUDE.md R4 가 "즉시 commit" 만 명시, push 는
+명시한 적 없었음.
+
+fix: `git fetch` → `git merge origin/main` (TODOS.md 1건 conflict, 서로
+다른 cycle 항목이라 양쪽 유지) → `git push origin main` (pre-push hook
+lint/type-check 통과, `f063815f..e9b58b57` 반영 확인) → **CLAUDE.md R4
+자체 수정** (커밋 직후 push 즉시 실행 의무화) → `memory/drift-cases.md`
+사례 33 후속 기록 (merge 만으론 부족 — merge+push 가 완결) → 두 번째
+커밋도 즉시 push (`e9b58b57..e3248517`).
+
+이전 사례 8/11/17/18/33 계열과 다른 점: 이번엔 증상(divergence) 해소뿐
+아니라 재발 차단 장치(R4 문서 수정)까지 완료 — silent drift family 대응
+시 "이 순간 동기화" 와 "재발 차단" 은 별개 완료 항목이라는 교훈.
+
+carry-over: R4 push 의무화가 실제로 재발을 막는지는 다음 cycle 이 시작
+스캔에서 divergence 0 확인으로 검증.
 
 no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
 직전 8사이클 distinct=4) — Feature-Drift Cycle alternation (직전 explore-idea
