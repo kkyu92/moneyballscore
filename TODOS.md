@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 info-architecture-review — /lotto/check sitemap 누락 발견/수정 (cycle 2250, 2026-08-20)
+
+진단: 강제 trigger 없음이지만 3-cycle 연속(2247/2248/2249) retro 가 info-architecture-review diversity 권고 — dominance-positive streak(review-code heavy) 유지하며도 diversity 자율 선택. `find apps/moneyball/src/app -name page.tsx -mtime -7` 47건 flagged(git checkout mtime 오염 다수) → `git log --since="7 days ago" --diff-filter=A`로 실제 신규 16건 재확인(mlb accuracy/calendar/matchup/methodology/predictions/reviews 계열 + EN 미러 + `/lotto/check`). breadcrumb 누락 0건(전체 mlb/*/page.tsx 보유).
+
+실측: sitemap.ts 전체 대조 — 15/16 은 이미 커버(각 신규 라우트 shipped 사이클에서 sitemap 동시 갱신됨), `/lotto/check`(cb21e154, 조합 검증 페이지) 1건만 누락. 페이지 자체는 canonical URL/OG/breadcrumb 모두 정상, `/lotto` 허브에서도 링크됨 — 사용자 도달은 가능하지만 Googlebot sitemap discovery 경로에서만 조용히 빠진 silent SEO drift.
+
+수정: `sitemap.ts` static routes 에 `/lotto/check` 추가(priority 0.5). 회귀 테스트 1건 신규(`sitemap-mlb.test.ts`). type-check/lint clean, 전체 468 files/4035 tests all pass(+1, zero regression). VERSION 0.5.62.42→0.5.62.43.
+
+다음 후보: review-code(heavy) 미감사 대형 파일(`buildPicksStats.ts` 410줄/`factor-explanations.ts` 409줄/`buildSeasonSummary.ts` 346줄/`glossary/data.ts` 323줄/`insights/loader.ts` 311줄/`buildMlbTeamAccuracy.ts` 300줄) 또는 헤더 메가메뉴·푸터 sitemap 컬럼 IA 점검 후속.
+
 ## 🔴 review-code (heavy) — buildTeamProfile.ts 등 4개 파일 최초 감사(clean), team 페이지 콜드게임/박빙 승부 threshold 하드코딩 발견/수정 (cycle 2249, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=5/8, fix-incident(5)/op-analysis(9)/info-arch(7)/lotto(15) 모두 자체 gap trigger 미도달, lotto 8/22 회차 picks 이미 shipped). cycle 2248 TODOS carry-over 명시 후보(review-code heavy 대형 파일 잔여) 채택 — dominance-positive streak(cycle 135 룰) 인정.

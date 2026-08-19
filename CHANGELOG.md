@@ -1,3 +1,16 @@
+## v0.5.62.43 — 2026-08-20 (cycle 2250, info-architecture-review: 신규 라우트 트리거(직전 7일 16개 page.tsx 신규) — /lotto/check sitemap 누락 발견/수정)
+
+### fix(seo): /lotto/check 페이지가 /lotto 허브에서 링크 + canonical URL 도 있지만 sitemap.ts 정적 라우트에 누락
+
+`cb21e154`(조합 검증 페이지 신규)가 canonical/OG/breadcrumb 는 모두 정상 박제했지만 `sitemap.ts` static routes 갱신을
+누락 — 사용자 도달 가능(허브 링크)하고 검색엔진 canonical 도 선언된 페이지가 Googlebot sitemap discovery 경로에서만
+조용히 빠져있던 silent drift. 3-cycle 연속 diversity 권고(cycle 2247/2248/2249 retro) 따라 진단 chain 을
+info-architecture-review 로 전환 — 신규 라우트 트리거(`find ... -mtime -7` 47건 중 git log 실제 신규 16건 확인,
+`/mlb/accuracy`/`/mlb/calendar`/`/mlb/matchup`/`/mlb/methodology`/`/mlb/predictions`/`/mlb/reviews` 계열 + EN 미러 +
+`/lotto/check` 포함)로 sitemap.ts 전체 대조 — 나머지 15개는 이미 커버, `/lotto/check` 단 1건 누락. `sitemap.ts`
+static routes 에 추가(priority 0.5, `/lotto/methodology` 와 동일 tier). 회귀 테스트 1건 신규(`sitemap-mlb.test.ts`).
+type-check/lint clean, 전체 468 files/4035 tests all pass(+1, zero regression). VERSION 0.5.62.42→0.5.62.43.
+
 ## v0.5.62.42 — 2026-08-20 (cycle 2249, review-code (heavy): buildTeamProfile.ts 등 4개 파일 최초 감사(clean) — team 페이지 3곳 콜드게임/박빙 승부 threshold 하드코딩 silent drift 발견/수정)
 
 ### fix(teams): 팀 상세 페이지(KO/MLB KO/MLB EN) 콜드게임·박빙 승부 문구가 MARGIN_BLOWOUT_THRESHOLD/MARGIN_CLOSE_GAME_THRESHOLD 를 리터럴로 중복
