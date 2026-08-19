@@ -1,5 +1,21 @@
 # TODOS
 
+## 🟢 review-code (heavy) — PickButton 분석 보기 링크 KBO 하드코딩 fix (cycle 2224, 2026-08-19)
+
+cycle 2223 이 신규 MLB 커뮤니티 픽 surface(migration 048, mlb-submit/mlb-poll
+route, PickButton league prop) 를 만들며 pollUrl/submitUrl/submitIdField 는
+league 분기했지만 "분석 보기" Link 는 `/analysis/game/${gameId}` 하드코딩 그대로
+남겨둠. MLB 호출부(`mlb/games/[date]/page.tsx`)는 gameId 로 external_game_id
+(VARCHAR string) 를 넘기는데 `/analysis/game/[id]` 는 KBO 전용(`parseInt(id)`
+→ `games.id` INT PK 조회) — AI 힌트(aiWinProb) 있는 모든 MLB scheduled 경기에서
+엉뚱한 KBO 경기로 연결되거나 404.
+
+**fix**: `PickButton` 에 `analysisHref` optional prop 추가 — 지정 시 사용, 미지정+
+league=mlb 면 링크 미표시(안전, 하드코딩 fallback 제거), league=kbo 는 기존
+`/analysis/game/${gameId}` 유지. MLB 호출부는 이미 존재하는 매치업 상세 경로
+(`/mlb/games/${date}/${home}-vs-${away}`) 를 analysisHref 로 전달. 회귀 테스트
+2건 추가. PR #2974 머지(`ba56729b`, MERGED 실측 확인).
+
 ## 🟢 explore-idea (heavy) — MLB 커뮤니티 픽 참여 (PickButton/poll) KBO parity (cycle 2223, 2026-08-19)
 
 open issue 0건, approved plan 0건 (19개 전부 completed/archived/superseded).
