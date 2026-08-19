@@ -22,6 +22,7 @@ import {
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   KBO_DEFAULT_GAME_TIME,
   HOUR_MS,
+  CURRENT_SCORING_RULE,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
@@ -76,6 +77,7 @@ interface DebateCalibration {
 
 interface PreGamePrediction {
   prediction_type: 'pre_game';
+  scoring_rule: string | null;
   predicted_winner: number | null;
   confidence: number;
   reasoning: { debate?: { verdict?: DebateVerdict; homeArgument?: DebateArgument; awayArgument?: DebateArgument; calibration?: DebateCalibration; quantitativeProb?: number } } | null;
@@ -182,7 +184,7 @@ async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> 
       away_team:teams!games_away_team_id_fkey(code, name_ko),
       winner:teams!games_winner_team_id_fkey(code),
       predictions(
-        prediction_type, predicted_winner, confidence, reasoning, factors,
+        prediction_type, scoring_rule, predicted_winner, confidence, reasoning, factors,
         is_correct, model_version, debate_version, predicted_at,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba,
@@ -219,8 +221,12 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     notFound();
   }
 
+  // scoring_rule 필터 — daily.ts 가 매 경기 production(v1.8) insert 직후 shadow(v2.1-B-shadow/
+  // v2.0-shadow) row 도 동일 prediction_type='pre_game' 으로 insert(#1338 family). 미필터 시
+  // 정렬 없는 .find() 가 임의 row(프로덕션/shadow)를 선택 가능.
   const preGame = game.predictions?.find(
-    (p): p is PreGamePrediction => p.prediction_type === 'pre_game',
+    (p): p is PreGamePrediction =>
+      p.prediction_type === 'pre_game' && p.scoring_rule === CURRENT_SCORING_RULE,
   );
   const postGame = game.predictions?.find(
     (p): p is PostGamePrediction => p.prediction_type === 'post_game',
