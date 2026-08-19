@@ -1,5 +1,39 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 커뮤니티 픽 참여 (PickButton/poll) KBO parity (cycle 2223, 2026-08-19)
+
+open issue 0건, approved plan 0건 (19개 전부 completed/archived/superseded).
+직전 8사이클 distinct=4 (explore-idea/review-code/fix-incident/operational-analysis)
+— 2-chain lock 미충족. lotto(마지막 fire 2175, gap=48)/info-arch(마지막 fire
+2183, gap=40) 둘 다 30-gap 트리거 충족하나 실측 결과 lotto 는 8/22 50세트+8/15
+결과 이미 박제(실익 없음), info-arch 는 실 IA gap 없음(cycle 2221 재확인과 동일
+결론). op-analysis 는 gap=8 로 25-gap 미충족.
+
+**발견한 gap**: KBO `/predictions` 홈페이지엔 PickButton(AI 대 사용자 승부예측 +
+커뮤니티 poll 분포)이 있지만 MLB `/mlb/games/[date]` 는 아예 없었음 — 구조적
+원인 확인: `pick_poll_events`(migration 025)가 `game_id INT REFERENCES
+games(id)` 라 KBO 전용, MLB `external_game_id VARCHAR(20)`(mlb_schedule,
+migration 038)과 타입이 안 맞아 재사용 불가.
+
+**구현**: migration 048 `mlb_pick_poll_events` 신규(025 와 동일 RLS 패턴,
+FK → mlb_schedule.external_game_id) + `/api/picks/mlb-submit` +
+`/api/picks/mlb-poll` route 신규 + `db-constraints.ts` `mlbPickPollEvents`
+추가. `PickButton` 에 `league?: 'kbo'|'mlb'` prop 추가 — mlb 시 mlb-submit/
+mlb-poll route 로 라우팅 + localStorage 키 `mlb-${gameId}` 네임스페이스
+분리(KBO 정수 game_id 와 MLB external_game_id 숫자 문자열 값 공간 충돌 방지).
+`mlb/games/[date]/page.tsx` 에 `status==='scheduled'` 게임만 PickButton 노출
+(KBO 홈페이지와 동일 게이팅). `supabase db push --linked` 로 migration 048
+적용 완료(`migration list --linked` 로 remote=048 확인).
+
+**스코프 밖 (carry-over)**: EN mirror(`/en/mlb/games`) 는 다음 explore-idea
+후보로 이월 — 기존 EN mirror 분리 cycle 패턴(cycle 2218/2220) 과 동일.
+
+**검증**: `pnpm --filter moneyball test` 454 files / 3954 tests green (+14
+신규: mlb-submit route 검증 8건 + PickButton league='mlb' 라우팅/스토리지키
+분리 4건). type-check + lint clean. PR #2973 → `gh pr merge --squash --auto
+--delete-branch` → `gh pr view --json state,mergedAt` 로 MERGED 실측 확인
+(42466d02, 2026-08-19T05:55:33Z).
+
 ## ⚪ review-code (heavy) — /en/mlb/predictions EN mirror 감사, drift 0건 (cycle 2221, 2026-08-19)
 
 open issue 0건, approved plan 0건. 직전 8사이클 distinct=3 (explore-idea/
