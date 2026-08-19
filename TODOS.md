@@ -1,5 +1,51 @@
 # TODOS
 
+## 🟢 fix-incident (heavy) — mlb_schedule.status 재고착(7일) + 근본원인(CF Worker 미배포) 독립 안전망 (cycle 2212, 2026-08-19)
+
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
+lotto 30-cycle gap trigger(gap=37)는 실제 상태 확인 결과 이미 fresh(다음 회차
+픽·직전 회차 OOS 모두 08-18 완료)라 skip, info-arch gap=29(30 미달), MLB
+TeamStrengthGrid/AL·NL 실제 순위 parity 후보 조사 중 더 심각한 라이브 버그 발견해
+전환.
+
+**발견 (artifact-first)**: `/mlb/standings` 실제 W-L 순위 미구현 gap을 조사하다
+`mlb_schedule` 실측 — 2026-08-13~08-19 (7일) 전 경기가 `status='scheduled'`로
+영구 고정, 반면 MLB statsapi 라이브 조회는 정상적으로 `Final` 반환 중(같은 경기로
+직접 확인). `/api/mlb/pipeline` 라우트를 해당 날짜로 직접 curl 호출하니 즉시
+`status='final'`로 정상 갱신 — 라우트/파이프라인 코드 자체는 100% 정상.
+
+**근본원인**: `gh run list --workflow=deploy-cloudflare-worker.yml --log` 로 배포
+이력 확인 — `CLOUDFLARE_API_TOKEN` GH secret 미등록(TODOS cycle 2068/2090에 이미
+문서화, 사용자 액션 대기 중 — `wrangler whoami` 도 본 세션에서 미로그인 확인,
+새 토큰 발급은 Cloudflare 대시보드 필요라 자율 해결 불가) 때문에
+`deploy-cloudflare-worker.yml`이 전체 5회 실행 중 실질 배포 성공 0회. 즉
+`cloudflare-worker/src/worker.ts`의 3일 재스크랩 backfill 로직(`643dba4e`, 사례
+23/24 fix, 08-13 커밋)이 production Worker에 한 번도 반영 안 됨 — 실제 배포본은
+그 이전 "당일 단일 날짜만 스크랩" 구버전으로 추정(매일 정확히 1개 run_date만
+`pipeline_runs`에 기록되는 패턴과 일치). cycle 2090/2131류 후속이 CI 색깔(YAML
+"Fail on missing secret" 승격)만 고쳤을 뿐, 실제 라이브 데이터 공백은 이번에
+처음 실측·해소.
+
+**조치**: (1) 즉시 완화 — 2026-08-13~08-19 7일치를 `/api/mlb/pipeline`
+직접 curl로 재스크랩, 전량 `final` 정상화 확인(08-19는 당일 경기 미종료라
+정상 `scheduled` 잔존). (2) 재발 방지 — 신규
+`.github/workflows/mlb-schedule-status-backfill.yml` 추가: `CLOUDFLARE_API_TOKEN`
+등록 여부와 완전 무관하게 기존 `CRON_SECRET`만으로 Vercel API를 직접 호출,
+매일 UTC 11:47(KST 20:47, Cloudflare scrape 시간대와 안 겹침)에 최근 3일(D,
+D-1, D-2)을 재스크랩하는 독립 안전망. `mlb-pipeline.yml`(수동 전용) 과 다른
+목적 — 이쪽은 schedule 포함 자동 안전망. idempotent upsert라 Worker가 나중에
+재배포돼도 중복 실행 안전, 제거 불필요.
+
+**🔔 사용자 액션 여전히 필요**(변경 없음, cycle 2068/2090부터 반복): 근본 해결은
+`gh secret set CLOUDFLARE_API_TOKEN` 등록. 등록 전까지 Cloudflare Worker 자체는
+계속 구버전 실행 — 본 신규 workflow는 mlb_schedule.status 항목 하나만의 안전망일
+뿐, elo_update/shadow_train 등 worker.ts의 다른 미배포 변경분(643dba4e 이후 전체)
+은 이 fix 범위 밖.
+
+`.github/workflows/mlb-schedule-status-backfill.yml` 신규 1개 파일 — YAML만,
+코드 변경 없음(코드 자체는 이미 정상 동작 확인됨). 회귀 테스트 대상 없음.
+main 직접 commit(R4, 단일 논리 단위).
+
 ## 🟢 review-code (heavy) — ScoringRuleDayHeatmap MLB 페이지 phantom KBO 행 fix (cycle 2211, 2026-08-19)
 
 open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
