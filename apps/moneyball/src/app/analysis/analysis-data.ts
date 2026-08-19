@@ -23,7 +23,6 @@ import {
 import { selectBigMatch, type BigMatchCandidate } from '@moneyball/kbo-data';
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
-import { CURRENT_MODEL_FILTER } from '@/config/model';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
@@ -748,7 +747,6 @@ export async function getPeriodStats(startDate: string, endDate: string): Promis
     .from('predictions')
     .select('is_correct, game:games!predictions_game_id_fkey(game_date)')
     .eq('prediction_type', 'pre_game')
-    .match(CURRENT_MODEL_FILTER)
     .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .not('is_correct', 'is', null)
     .gte('game.game_date', startDate)
@@ -801,7 +799,6 @@ export async function getBestPickOfWeek(startDate: string, endDate: string): Pro
       predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
     `)
     .eq('prediction_type', 'pre_game')
-    .match(CURRENT_MODEL_FILTER)
     .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('is_correct', true)
     .gte('game.game_date', startDate)
@@ -846,7 +843,6 @@ export async function getUpsetPickOfMonth(startDate: string, endDate: string): P
       predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
     `)
     .eq('prediction_type', 'pre_game')
-    .match(CURRENT_MODEL_FILTER)
     .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('is_correct', false)
     .gte('confidence', WINNER_PROB_CONFIDENT)
