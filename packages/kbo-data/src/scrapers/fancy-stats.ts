@@ -504,8 +504,8 @@ export async function fetchEloRatings(_season: number): Promise<(EloRating & { w
  * (KBO 동명이인 / 트레이드 직후 Fancy Stats 미반영 / 입력 team mismatch).
  * xfip fallback / totalWar=0 / winPct=0.5 stub family 와 동일 패턴 —
  * fallback 자체는 유지하되 console.warn 으로 가시화하여 silent 통과 차단.
- * 호출자 daily.ts:563-564 의 PredictionInput.homeSPStats / awaySPStats
- * 흐름과 동작 호환 유지.
+ * 호출자 daily.ts 의 PredictionInput.homeSPStats / awaySPStats
+ * 흐름과 동작 호환 유지 (구체 line 번호는 파일 성장에 따라 stale 가능 — grep 우선).
  */
 export function findPitcher(
   pitchers: PitcherStats[],

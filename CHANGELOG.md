@@ -1,3 +1,16 @@
+## v0.5.62.57 — 2026-08-20 (cycle 2277, review-code (heavy): packages/kbo-data/src/scrapers/fancy-stats.ts 최초 전체 감사 — findPitcher stale line 참조 정정)
+
+### fix(kbo-data): findPitcher docstring stale line 번호(daily.ts:563-564) 정정
+
+`packages/kbo-data/src/scrapers/fancy-stats.ts`(527줄, 최초 전체 감사) — 대부분 clean
+(팀명 매핑/parseNum NaN fallback/xfip fallback/Elo winPct=0.5 stub 모두 console.warn
+가시화 이미 구현, 테이블 인덱스 주석과 실제 코드 일치 확인). `findPitcher` docstring 이
+호출자 위치를 `daily.ts:563-564`로 명시했지만 실제 호출부는 `daily.ts:693-694`로 이동한
+상태(파일 성장에 따른 stale line 참조). 구체 line 번호 대신 "grep 우선" 안내로 정정
+(코드 동작 변경 없음). 부수 확인: Fancy Stats 소스 투수의 `era`/`innings` 하드코딩 0 값은
+현재 `pitcher_season_stats` 테이블에 기록되지만 KBO 화면 어디서도 조회되지 않는 dead
+column(향후 소비자 추가 시 주의 필요, 이번 cycle scope 밖).
+
 ## v0.5.62.56 — 2026-08-20 (cycle 2276, review-code (heavy): packages/kbo-data/src/pipeline/silent-drift-alert.ts 최초 전체 감사 — factor anomaly alert 미배선 stale 주석 정정)
 
 ### fix(pipeline): factor anomaly Sentry alert "함께 작동" stale 주석 정정 — 실제론 미배선
