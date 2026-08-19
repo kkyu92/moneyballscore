@@ -23,6 +23,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { MlbTeamEloChart } from "@/components/teams/MlbTeamEloChart";
 import { MlbTeamConvergencePickRecord } from "@/components/teams/MlbTeamConvergencePickRecord";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 import { captureFallback } from "@/lib/observability/captureFallback";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -121,7 +122,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
 
   const teamUrl = `${SITE_URL}/en/mlb/team/${code}`;
-  const logoUrl = `${SITE_URL}/logos/mlb/${code}.png`;
+  const logoUrl = `${SITE_URL}/logos/mlb/${code}.svg`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SportsTeam",
@@ -164,11 +165,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
 
       <header className="space-y-3 border-b border-gray-200 dark:border-[var(--color-border)] pb-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <span
-            className="inline-block w-10 h-10 rounded-full shrink-0"
-            style={{ backgroundColor: profile.color }}
-            aria-hidden
-          />
+          <MlbTeamLogo team={code} size={40} className="rounded-full shrink-0" />
           <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
           <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-600 dark:text-gray-300 font-mono">
             {profile.league} {profile.division}
