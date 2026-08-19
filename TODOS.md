@@ -1,5 +1,28 @@
 # TODOS
 
+## 🟢 explore-idea (lite) — MLB 팀 목록/상세 페이지 로고 parity 완결 (cycle 2207, 2026-08-19)
+
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
+cycle 2206 next_recommended + TODOS carry-over 명시 우선.
+
+**발견**: cycle 2206이 매치업 페이지 1곳만 처리하고 남긴 잔여 스코프 —
+`mlb/{wild-card,matchup,players,players/[id],standings,team}/page.tsx` KO+EN
+6쌍(12파일) 전부 `backgroundColor: team.color` color-circle `<span>` 그대로.
+
+**수정**: 12파일 전량 `<MlbTeamLogo team={code|id} size={16|24|32|40}
+className="rounded-full shrink-0" />` 교체 + import 추가. size는 기존 원 지름
+그대로(w-4→16px/w-6→24px/w-8→32px/w-10→40px). `MlbMatchupSeasonHeadToHead.tsx`의
+backgroundColor 2곳(teamA/teamB)은 승률 stacked-bar 폭(%) 인코딩 — 로고 아님,
+스코프 제외 확인.
+
+type-check/lint/build 전부 clean + vitest 448/3908 pass + 로컬 dev 서버
+실측(standings/team/players/[id]/en-matchup/wild-card 5개 라우트 타입 200 +
+`/logos/mlb/*.svg` 렌더 확인). 단일 논리 단위 — main 직접 commit+push
+(R4/R7, `eff7699d`). MLB 로고 parity 마이그레이션(cycle 2205 착수) 전 라우트
+완결 — 잔여 placeholder 0건.
+
+---
+
 ## 🟢 explore-idea (lite) — MLB 매치업 페이지 실제 로고 parity (cycle 2206, 2026-08-19)
 
 open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4),
