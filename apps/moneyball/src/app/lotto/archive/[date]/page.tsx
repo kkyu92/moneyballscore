@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
+import { LOTTO_PICK_COUNT, LOTTO_RULE_COUNT, SITE_URL } from "@moneyball/shared";
 import { listArchiveDates, readArchiveVariants } from "@/lib/lotto/archive";
 import { parseLottoPicksMd, ballColor, type LottoSet } from "@/lib/lotto/picks-loader";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -21,8 +21,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { date } = await params;
   const variants = readArchiveVariants(date);
-  const title = variants ? `${date} 50조합 아카이브` : "아카이브 조회 불가";
-  const description = "통계 분석 기반 50조합 기록 (회피 조건 통과 조합). 행동/베팅/구매 권유 X.";
+  const title = variants ? `${date} ${LOTTO_PICK_COUNT}조합 아카이브` : "아카이브 조회 불가";
+  const description = `통계 분석 기반 ${LOTTO_PICK_COUNT}조합 기록 (회피 조건 통과 조합). 행동/베팅/구매 권유 X.`;
   return {
     title,
     description,
@@ -121,7 +121,7 @@ export default async function LottoArchiveDatePage({ params }: Props) {
               제 {parsed.drawNo}회
             </span>
           )}
-          <h1 className="text-xl font-bold text-white">{date} 50조합 기록</h1>
+          <h1 className="text-xl font-bold text-white">{date} {LOTTO_PICK_COUNT}조합 기록</h1>
         </div>
         <p className="text-sm text-white/70">
           {LOTTO_RULE_COUNT}개 통계 규칙 통과 조합 선별 아카이브. OOS 검증 자료.
@@ -158,7 +158,7 @@ export default async function LottoArchiveDatePage({ params }: Props) {
         </section>
       )}
 
-      {/* 전체 45세트 collapse */}
+      {/* 전체 나머지 세트 collapse */}
       {rest.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-lg font-bold">전체 조합</h2>

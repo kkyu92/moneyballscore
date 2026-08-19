@@ -1,10 +1,10 @@
 import { ImageResponse } from "next/og";
-import { LOTTO_RULE_COUNT, SITE_HOST } from "@moneyball/shared";
+import { LOTTO_PICK_COUNT, LOTTO_RULE_COUNT, SITE_HOST } from "@moneyball/shared";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "로또 통계 아카이브 - 토요일 추첨일별 50조합 통계 분석 기록";
+export const alt = `로또 통계 아카이브 - 토요일 추첨일별 ${LOTTO_PICK_COUNT}조합 통계 분석 기록`;
 
 export default function Image() {
   return new ImageResponse(
@@ -60,7 +60,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          토요일 추첨일별 50조합 통계 분석
+          토요일 추첨일별 {LOTTO_PICK_COUNT}조합 통계 분석
         </div>
 
         <div
@@ -71,7 +71,7 @@ export default function Image() {
             gap: 12,
           }}
         >
-          {[`${LOTTO_RULE_COUNT} 회피 규칙`, "50조합", "주간 추첨 기록", "통계 학습 자료"].map((tag) => (
+          {[`${LOTTO_RULE_COUNT} 회피 규칙`, `${LOTTO_PICK_COUNT}조합`, "주간 추첨 기록", "통계 학습 자료"].map((tag) => (
             <div
               key={tag}
               style={{

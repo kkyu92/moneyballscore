@@ -1,11 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { LOTTO_PICK_COUNT } from "@moneyball/shared";
 import { listArchiveDates } from "@/lib/lotto/archive";
 
 export const metadata: Metadata = {
-  title: "해당 회차 50조합 archive 를 찾을 수 없음",
-  description:
-    "요청하신 회차의 50조합 archive 가 존재하지 않거나 잘못된 날짜 형식입니다.",
+  title: `해당 회차 ${LOTTO_PICK_COUNT}조합 archive 를 찾을 수 없음`,
+  description: `요청하신 회차의 ${LOTTO_PICK_COUNT}조합 archive 가 존재하지 않거나 잘못된 날짜 형식입니다.`,
   robots: { index: false, follow: false },
 };
 
@@ -20,7 +20,7 @@ export default function LottoArchiveDateNotFound() {
           해당 회차 archive 가 없습니다
         </h1>
         <p className="text-base text-gray-600 dark:text-gray-300">
-          요청하신 회차의 50조합 archive 가 박제되지 않았거나 잘못된 날짜 형식입니다.
+          요청하신 회차의 {LOTTO_PICK_COUNT}조합 archive 가 박제되지 않았거나 잘못된 날짜 형식입니다.
           <br className="hidden sm:block" />
           아래에서 최근 박제된 회차 archive 를 확인하세요.
         </p>
