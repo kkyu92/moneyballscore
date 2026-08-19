@@ -78,8 +78,8 @@ jobs:
           echo "response_time_ms=$RESPONSE_MS"
 
           if [ -z "$PROD_SHA" ]; then
-            echo "::warning::production VERCEL_GIT_COMMIT_SHA 미주입 (Vercel env 누락 가능성)."
-            exit 0
+            echo "::error::production VERCEL_GIT_COMMIT_SHA 비어있음 (empty string, not just missing) — git 미연동 CLI/manual deploy 로 production 이 교체됐을 가능성 (사례 9/10 family, cycle 2204 실측: dpl 인스펙트 결과 git-main alias 부재 확인). main HEAD 대비 실제 drift 여부 확인 불가 = silent pass 시 사례 9/10 재발 은폐 위험. vercel ls --prod + vercel inspect <id> 로 해당 배포가 git-linked 인지 즉시 확인 권장."
+            exit 1
           fi
 
           if [ "$MAIN_SHA" = "$PROD_SHA" ]; then
