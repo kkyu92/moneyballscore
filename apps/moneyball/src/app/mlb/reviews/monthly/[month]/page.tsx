@@ -1,0 +1,360 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import {
+  SMALL_SAMPLE_N,
+  SITE_URL,
+  ACCURACY_GOOD_RATE,
+  MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
+} from '@moneyball/shared';
+import { parseMonthId, getRecentMonths } from "@/lib/reviews/computeMonthRange";
+import { buildMlbMonthlyReview } from "@/lib/reviews/buildMlbMonthlyReview";
+import { ShareButtons } from "@/components/share/ShareButtons";
+import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
+import { MonthlyTeamStatsSortControl } from "@/components/reviews/MonthlyTeamStatsSortControl";
+import { MlbHighlightCard } from "@/components/reviews/MlbHighlightCard";
+import { neutral } from "@/lib/design-tokens";
+
+// reviews/monthly/[month]/page.tsx(KBO) 의 MLB 대응 (plan #26 Phase 2) — buildMlbMonthlyReview
+// (Phase 1a/1b 데이터 레이어 재사용) 를 소비. mlb/reviews/weekly/[week]/page.tsx(Phase 1b) 와
+// 동일 이유로 수렴 픽(강수렴/완전수렴) 섹션은 생략 — MLB convergence 함수들이 날짜 range
+// 파라미터 없이 시즌 전체 스캔만 지원(주석 참조: mlb-shared.ts, buildMlbWeeklyReview.ts).
+// 개별 경기 리스트도 KBO buildMonthlyReview.ts 와 동일하게 없음(월간은 물량이 커서
+// 하이라이트/팀별/팩터 요약 위주).
+export const revalidate = 3600; // REVIEWS_MONTHLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
+
+interface PageProps {
+  params: Promise<{ month: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { month } = await params;
+  const range = parseMonthId(month);
+  if (!range) return {};
+  const url = `${SITE_URL}/mlb/reviews/monthly/${month}`;
+  const title = `${range.label} MLB 월간 리뷰`;
+  const description = `${range.label} MLB 승부예측 월간 성과 리포트. 적중률, 하이라이트 경기, 팀별 통계, 팩터 인사이트, 전월 대비 변화.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "article",
+      publishedTime: `${range.endDate}T23:59:00+09:00`,
+      authors: ["MoneyBall AI"],
+      locale: "ko_KR",
+      siteName: "MoneyBall Score",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
+
+export default async function MlbMonthlyReviewPage({ params }: PageProps) {
+  const { month } = await params;
+  const range = parseMonthId(month);
+  if (!range) notFound();
+
+  const review = await buildMlbMonthlyReview(range);
+  const url = `${SITE_URL}/mlb/reviews/monthly/${month}`;
+
+  const recent = getRecentMonths(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS)
+    .filter((m) => m.monthId !== range.monthId)
+    .slice(-4);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `${range.label} MLB 월간 리뷰`,
+    datePublished: `${range.endDate}T23:59:00+09:00`,
+    description: review.summary,
+    articleBody: review.summary,
+    author: {
+      "@type": "Organization",
+      name: "MoneyBall AI",
+    },
+    publisher: { "@type": "Organization", name: "MoneyBall Score" },
+    mainEntityOfPage: url,
+    inLanguage: "ko-KR",
+  };
+
+  const pctLabel = `${Math.round(review.accuracyRate * 100)}%`;
+  const prevPctLabel =
+    review.previousAccuracyRate != null
+      ? `${Math.round(review.previousAccuracyRate * 100)}%`
+      : null;
+  const diffPp =
+    review.previousAccuracyRate != null
+      ? Math.round((review.accuracyRate - review.previousAccuracyRate) * 100)
+      : null;
+
+  return (
+    <article className="max-w-4xl mx-auto space-y-8 py-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <Breadcrumb
+        items={[
+          { href: '/mlb/reviews', label: '예측 리뷰' },
+          { href: '/mlb/reviews/monthly', label: '월간' },
+          { label: range.label },
+        ]}
+      />
+
+      <header className="space-y-2 border-b border-gray-200 dark:border-[var(--color-border)] pb-4">
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+          {range.monthId}
+        </p>
+        <h1 className="text-3xl md:text-4xl font-bold">
+          {range.label} MLB 월간 리뷰
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {range.startDate} ~ {range.endDate} · MoneyBall AI 자동 집계
+        </p>
+      </header>
+
+      <section className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-6">
+        <p className="text-base leading-relaxed text-gray-800 dark:text-gray-100">
+          {review.summary}
+        </p>
+      </section>
+
+      {review.verifiedGames > 0 && (
+        <section
+          aria-labelledby="mlb-monthly-summary-title"
+          className="grid grid-cols-1 sm:grid-cols-4 gap-4"
+        >
+          <h2 id="mlb-monthly-summary-title" className="sr-only">
+            월간 요약
+          </h2>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">검증 경기</p>
+            <p className="text-3xl font-bold mt-1">
+              {review.verifiedGames}
+              <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
+                경기
+              </span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">적중</p>
+            <p className="text-3xl font-bold text-brand-500 mt-1">
+              {review.correctGames}
+              <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
+                경기
+              </span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">적중률</p>
+            <p
+              className={`text-3xl font-bold mt-1 ${
+                review.accuracyRate >= ACCURACY_GOOD_RATE
+                  ? "text-brand-500"
+                  : review.accuracyRate >= 0.5
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
+              }`}
+            >
+              {pctLabel}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
+            <p className="text-sm text-gray-500 dark:text-gray-400">전월 대비</p>
+            {prevPctLabel && diffPp !== null ? (
+              <>
+                <p
+                  className={`text-3xl font-bold mt-1 font-mono ${
+                    diffPp > 0
+                      ? "text-brand-500"
+                      : diffPp < 0
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  {diffPp > 0 ? "+" : ""}
+                  {diffPp}%p
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  전월 {prevPctLabel}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                전월 데이터 부족
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {review.highlights.length > 0 && (
+        <section aria-labelledby="mlb-monthly-highlights-title" className="space-y-4">
+          <h2 id="mlb-monthly-highlights-title" className="text-xl font-bold">
+            하이라이트 경기
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {review.highlights.map((h) => (
+              <MlbHighlightCard key={h.externalGameId} h={h} showResultSuffix />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {review.teamStats.length > 0 && (
+        <section aria-labelledby="mlb-monthly-teams-title" className="space-y-3">
+          <h2 id="mlb-monthly-teams-title" className="text-xl font-bold">
+            팀별 월간 예측 적중률
+          </h2>
+          {review.teamStats.length >= 2 && <MonthlyTeamStatsSortControl />}
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-2">
+            {(() => {
+              const sampleRankMap = new Map<string, number>();
+              [...review.teamStats]
+                .sort((a, b) => b.predicted - a.predicted)
+                .forEach((row, idx) => sampleRankMap.set(row.teamCode, idx));
+              return (
+                <div data-monthly-team-stats-list className="space-y-2">
+                  {review.teamStats.map((t) => {
+                    const pct = Math.round(t.accuracy * 100);
+                    const smallSample = t.predicted < SMALL_SAMPLE_N;
+                    const sampleRank = sampleRankMap.get(t.teamCode) ?? 0;
+                    return (
+                      <div
+                        key={t.teamCode}
+                        className="flex items-center gap-3 text-sm"
+                        data-sample-rank={sampleRank}
+                        title={
+                          smallSample
+                            ? `예측 경기가 ${t.predicted}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
+                            : undefined
+                        }
+                      >
+                        <MlbTeamLogo team={t.teamCode} size={20} className="shrink-0" />
+                        <span className="w-24 shrink-0 font-medium">
+                          {t.teamName}
+                        </span>
+                        <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full"
+                            style={{
+                              width: `${Math.min(100, pct)}%`,
+                              backgroundColor: smallSample ? neutral[400] : t.color,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className={`text-xs font-mono w-20 text-right ${
+                            smallSample
+                              ? "text-gray-400 dark:text-gray-500"
+                              : "text-gray-600 dark:text-gray-300"
+                          }`}
+                        >
+                          {pct}% ({t.correct}/{t.predicted})
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+          </div>
+        </section>
+      )}
+
+      {(review.factorInsights.best || review.factorInsights.worst) && (
+        <section aria-labelledby="mlb-monthly-factors-title" className="space-y-3">
+          <h2 id="mlb-monthly-factors-title" className="text-xl font-bold">
+            팩터 인사이트
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {review.factorInsights.best && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs text-brand-500 dark:text-brand-300 font-medium">
+                  가장 잘 맞힌 팩터
+                </p>
+                <p className="text-lg font-bold mt-1">
+                  {review.factorInsights.best.label}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  상관계수 {review.factorInsights.best.correlation.toFixed(2)}
+                  {review.factorInsights.best.directionalAccuracy != null &&
+                    ` · 방향 정확 ${Math.round(
+                      review.factorInsights.best.directionalAccuracy * 100,
+                    )}%`}
+                </p>
+              </div>
+            )}
+            {review.factorInsights.worst && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-red-500/30 p-5">
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                  가장 빗나간 팩터
+                </p>
+                <p className="text-lg font-bold mt-1">
+                  {review.factorInsights.worst.label}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  상관계수 {review.factorInsights.worst.correlation.toFixed(2)}
+                  {review.factorInsights.worst.directionalAccuracy != null &&
+                    ` · 방향 정확 ${Math.round(
+                      review.factorInsights.worst.directionalAccuracy * 100,
+                    )}%`}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {!review.hasData && (
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
+          <span className="text-5xl block mb-4">📆</span>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
+            {range.label}에는 MLB 예측 데이터가 없습니다
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+            다른 월 리뷰를 확인해주세요.
+          </p>
+        </section>
+      )}
+
+      {recent.length > 0 && (
+        <section className="border-t border-gray-200 dark:border-[var(--color-border)] pt-6">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+            최근 월간 리뷰
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {recent.map((m) => (
+              <Link
+                key={m.monthId}
+                href={`/mlb/reviews/monthly/${m.monthId}`}
+                className="text-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+              >
+                {m.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
+        <ShareButtons
+          url={url}
+          title={`${range.label} MLB 월간 리뷰`}
+          text={review.summary}
+        />
+      </footer>
+    </article>
+  );
+}

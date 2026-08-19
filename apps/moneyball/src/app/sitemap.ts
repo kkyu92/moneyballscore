@@ -77,6 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // /mlb/reviews/weekly = redirect-only 페이지 (즉시 /mlb/reviews/weekly/{currentWeekId} 로
     // 308, /reviews/weekly 와 동일 사유) — dynamic block (mlbWeeklyReviewRoutes) 이 실제
     // 컨텐츠 URL 커버 (plan #26 Phase 1b).
+    // /mlb/reviews/monthly = 동일 사유 redirect-only 페이지 (mlbMonthlyReviewRoutes, plan #26 Phase 2).
     // /en/mlb/* English mirror static routes
     { url: `${SITE_URL}/en/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/en/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
@@ -226,6 +227,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/mlb/reviews/weekly/${w.weekId}`,
       lastModified: now,
       changeFrequency: 'weekly',
+      priority: 0.65,
+    }),
+  );
+
+  // 최근 6개월 MLB 월간 리뷰 URL (monthlyReviewRoutes(KBO) 대응, plan #26 Phase 2)
+  const mlbMonthlyReviewRoutes: MetadataRoute.Sitemap = getRecentMonths(6).map(
+    (m) => ({
+      url: `${SITE_URL}/mlb/reviews/monthly/${m.monthId}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
       priority: 0.65,
     }),
   );
@@ -384,6 +395,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...weeklyReviewRoutes,
     ...monthlyReviewRoutes,
     ...mlbWeeklyReviewRoutes,
+    ...mlbMonthlyReviewRoutes,
     ...teamProfileRoutes,
     ...teamRecentRoutes,
     ...mlbTeamProfileRoutes,

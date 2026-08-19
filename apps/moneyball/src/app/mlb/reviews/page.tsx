@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
   SITE_URL,
   mlbShortTeamName,
+  REVIEWS_HUB_RECENT_WEEKS,
+  REVIEWS_HUB_RECENT_MONTHS,
 } from "@moneyball/shared";
+import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
+import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ConvergenceStreakBadges } from "@/components/reviews/ConvergenceStreakBadges";
@@ -51,6 +56,11 @@ export const metadata: Metadata = {
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export default async function MlbReviewsPage() {
+  // reviews/page.tsx(KBO) 의 주간/월간 진입 카드 대응 (plan #26 Phase 2) — weekly(Phase 1b)
+  // 도 hub 진입 링크가 누락돼 있었어서 이번 Phase 2 fire 에서 함께 추가.
+  const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
+  const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
+
   const [
     strongConvergenceRecord,
     completeConvergenceRecord,
@@ -111,6 +121,71 @@ export default async function MlbReviewsPage() {
           강수렴·완전수렴 픽의 전체 성적과 스트리크, 팀별·홈/어웨이·요일별 분해입니다.
         </p>
       </div>
+
+      <section aria-labelledby="mlb-reviews-periodic-title" className="grid gap-4 md:grid-cols-2">
+        <h2 id="mlb-reviews-periodic-title" className="sr-only">
+          주간/월간 리뷰
+        </h2>
+        <div className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-5 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                📅 주간 리뷰
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                매주 하이라이트 · 팀별 성과 · 팩터 인사이트
+              </p>
+            </div>
+            <Link
+              href={`/mlb/reviews/weekly/${recentWeeks[recentWeeks.length - 1].weekId}`}
+              className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline"
+            >
+              이번 주 →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentWeeks.map((w) => (
+              <Link
+                key={w.weekId}
+                href={`/mlb/reviews/weekly/${w.weekId}`}
+                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+              >
+                {w.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-accent/5 to-brand-500/5 dark:from-accent/10 dark:to-brand-500/10 rounded-xl border border-accent/30 p-5 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                📆 월간 리뷰
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                전월 대비 diff · 팀별 통계 · 팩터 인사이트
+              </p>
+            </div>
+            <Link
+              href={`/mlb/reviews/monthly/${recentMonths[recentMonths.length - 1].monthId}`}
+              className="text-sm font-medium text-accent hover:underline"
+            >
+              이번 달 →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentMonths.map((m) => (
+              <Link
+                key={m.monthId}
+                href={`/mlb/reviews/monthly/${m.monthId}`}
+                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-accent hover:text-accent transition-colors"
+              >
+                {m.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {hasAnyData ? (
         <>
