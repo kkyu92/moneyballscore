@@ -1,5 +1,26 @@
 # TODOS
 
+## ⚪ review-code (heavy) — /en/mlb/predictions EN mirror 감사, drift 0건 (cycle 2221, 2026-08-19)
+
+open issue 0건, approved plan 0건. 직전 8사이클 distinct=3 (explore-idea/
+review-code/operational-analysis) — lock 미충족. lotto 30-gap(gap=46)/
+info-arch 30-gap(gap=38) 재확인 결과 둘 다 실익 없음(lotto: 8/22 50세트+8/15
+결과 이미 박제, info-arch: 실 IA gap 없음). Feature-Drift Cycle 패턴에 따라
+cycle 2220 신규 `/en/mlb/predictions` EN mirror + 6개 shared 컴포넌트
+locale prop 주입 감사 채택.
+
+**감사 대상**: `/en/mlb/predictions/page.tsx` (390줄) 를 KO 원본과 라인 대 라인
+비교 — 쿼리/티어분류/날짜필터 로직 완전 동일, 문자열+locale prop 만 차이.
+6개 shared 컴포넌트(MlbPredictionsSearchBox/PredictionsStatusFilter/
+PredictionsSortControl/PredictionsTierFilter/PredictionsMonthFilter/
+AccuracyHeaderCard) 전부 `locale?: 'ko'|'en' = 'ko'` prop 정상 구현 확인 —
+KO 호출부 무변경, EN 라벨 전부 정확, 하드코딩 한국어 누출 없음. Breadcrumb
+locale prop(homeHref `/en/mlb`), sitemap.ts entry, KO↔EN
+`alternates.languages` 상호 링크, en-mlb-pages 테스트 predictions 섹션
+전부 정합 확인.
+
+**결론**: drift 0건. 코드 변경 없음, PR 없음.
+
 ## 🟢 explore-idea (heavy) — /en/mlb/predictions EN mirror (cycle 2220, 2026-08-19)
 
 open issue 0건, approved plan 0건. 직전 8사이클 distinct=4 — lock 미충족. cycle
