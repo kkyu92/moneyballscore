@@ -1,3 +1,27 @@
+## v0.5.62.61 — 2026-08-20 (cycle 2281, review-code (heavy): calibration-agent.ts 최초 전체 감사, parseResponse silent fallback 정정)
+
+### fix(agents): calibration-agent.ts parseResponse JSON 파싱 실패 silent fallback 정정
+
+`packages/kbo-data/src/agents/validator.ts` (909줄, 최초 전체 감사) 부터 시작 — 환각/발명선수/금칙어
+검증 로직, 4개 Sentry capture 채널(`notifyValidationViolations`/`captureJudgeParseFallback`/
+`captureRivalryMemoryFallback`/`captureAgentFallback`) 전부 콜러(team-agent/judge-agent/postview/
+debate/rivalry-memory)와 배선 일치 확인 — drift 없음.
+
+인접 `calibration-agent.ts` (`debate.ts`의 3-agent 병렬 실행 중 하나) 로 감사 범위 확장한 결과
+실제 drift 발견: `parseResponse`의 catch 블록이 LLM JSON 응답 파싱 실패 시 all-null
+`CalibrationHint` 객체를 정상 데이터처럼 반환 — `judge-agent.ts`가 동일 패턴으로 겪었던
+cycle 1400 lesson P2("parseResponse catch 자체가 confidence=0.3 fallback 객체를 정상
+데이터처럼 반환 → evaluateAndCaptureAgentFallback 의 `r.data == null` 검사 미감지 → 22일
+silent")와 완전히 동일한 family. judge-agent 는 당시 `captureJudgeParseFallback` 전용 Sentry
+채널로 patch 됐지만 calibration-agent 는 그 fix 대상에서 누락돼 지금까지 무방비 상태였음.
+
+`validator.ts`에 `captureCalibrationParseFallback` 신규 export (기존 3종 capture 함수와 동일
+동적 import + try/catch 패턴, `calibration_parse_fallback` Sentry tag). `calibration-agent.ts`의
+`parseResponse` 시그니처에 `homeTeam`/`awayTeam` 추가해 catch 블록에서 호출 + 테스트 export 전환
+(judge-agent 패턴과 정렬). 신규 회귀 테스트 3건(`agents-calibration-parse-fallback.test.ts`) —
+JSON 없음/깨진 JSON capture 호출 검증 + 정상 JSON capture 미호출 검증. 89 files/1147 kbo-data
+tests all pass, `pnpm type-check` clean, `pnpm lint` clean.
+
 ## v0.5.62.60 — 2026-08-20 (cycle 2280, info-architecture-review: /mlb/reviews/misses 헤더·푸터 sitemap 누락 정정)
 
 ### fix(nav): 신규 MLB 라우트 헤더 메가메뉴 + 푸터 sitemap 컬럼 누락 정정

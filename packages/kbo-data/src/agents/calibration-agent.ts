@@ -1,7 +1,8 @@
-import { KBO_TEAMS, LLM_MAX_TOKENS_CALIBRATION, shortTeamName } from '@moneyball/shared';
+import { KBO_TEAMS, LLM_MAX_TOKENS_CALIBRATION, errMsg, shortTeamName } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWindowsForLLM } from '../context/domain';
 import { callLLM } from './llm';
+import { captureCalibrationParseFallback } from './validator';
 import type { CalibrationHint, AgentResult } from './types';
 
 const SYSTEM_PROMPT = `당신은 MoneyBall 예측 모델의 회고 분석가입니다.
@@ -109,7 +110,7 @@ function buildUserMessage(
   return msg;
 }
 
-function parseResponse(text: string): CalibrationHint {
+export function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCode): CalibrationHint {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found');
@@ -121,7 +122,16 @@ function parseResponse(text: string): CalibrationHint {
       modelWeakness: parsed.modelWeakness || null,
       adjustmentSuggestion: Math.max(-0.05, Math.min(0.05, Number(parsed.adjustmentSuggestion) || 0)),
     };
-  } catch {
+  } catch (e) {
+    // cycle 1400 lesson P2 (judge-agent) 와 동일 family — 여기 누락돼 있던 갭 (cycle 2281 정정).
+    // catch 자체가 all-null CalibrationHint 를 정상 데이터처럼 반환 → evaluateAndCaptureAgentFallback
+    // (`r.data == null` 검사) 미감지. 별도 Sentry 채널로 명시 capture.
+    void captureCalibrationParseFallback({
+      homeTeam,
+      awayTeam,
+      textExcerpt: text.slice(0, 300),
+      errorMessage: errMsg(e),
+    });
     return {
       recentBias: null,
       teamSpecific: null,
@@ -161,7 +171,7 @@ export async function runCalibrationAgent(
       userMessage: buildUserMessage(homeTeam, awayTeam, history),
       maxTokens: LLM_MAX_TOKENS_CALIBRATION,
     },
-    parseResponse
+    (text) => parseResponse(text, homeTeam, awayTeam)
   );
 }
 
