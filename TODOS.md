@@ -1,5 +1,19 @@
 # TODOS
 
+## 🟢 review-code (heavy) — cycle 2256 carry-over 대형 파일 4건 감사 완료(전부 clean) (cycle 2257, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, 승인된 unprocessed plan 0건 — plan #27 은 cycle 2256 이 사실상 종결, 자동 매핑 대상 아님. 2-chain lock 미충족 직전 8사이클 distinct=4). cycle 2256 retro 가 "review-code(heavy) 잔여 대형 파일 4건" 을 명시 추천 — 채택.
+
+실측: 잔여 미감사 대형 파일 4건 전부 최초 감사 완료 — **전부 clean**, silent drift 미발견:
+- `buildSeasonSummary.ts`(346줄): supabase 페이지네이션/assertSelectOk 이미 통일(cycle 173), KS 시리즈 탐지 로직 자체 검증, 소비 페이지(`/seasons/[year]`)에 threshold 재하드코딩 없음
+- `buildMlbTeamAccuracy.ts`(300줄) + 소비 페이지(`/mlb/accuracy`, `/en/mlb/accuracy`): KBO 대응 함수(`buildTeamAccuracy.ts`)와 SMALL_SAMPLE_N 필터 적용 범위 정확히 대칭(bias 만 필터, accuracy/matchup 은 비필터) — parity 깨짐 없음. `TeamMatchupCards` 공유 컴포넌트로 KBO/MLB 렌더 로직 중복 없음
+- `insights/loader.ts`(311줄): `CURRENT_SCORING_RULE` 단독 필터가 `model-version-labels.ts` 문서화된 의도(baseline 분석은 PRODUCTION_COHORT_RULES 아닌 단일 버전 사용)와 일치 — CE-fallback 혼입 배제는 의도된 설계
+- `glossary/data.ts`(323줄): 전체 10개 팩터 `modelUsage` 가 `DEFAULT_WEIGHTS` 런타임 참조라 하드코딩 재발 구조적으로 불가능(cycle 1296 wave-88 패턴 이미 완비), `GLOSSARY_TERM_COUNT` 도 동적 계산
+
+수정: 코드 변경 없음 — 4건 모두 기존 설계가 이미 정합. cycle 2256 이 남긴 carry-over 목록 완전 소진.
+
+다음 후보: 대형 파일 재스캔 결과 잔여 미감사 후보 없음(`analysis-data.ts`/`buildAccuracyData.ts`/`buildTeamProfile.ts`/`buildMatchupProfile.ts`/`buildMlbMatchupProfile.ts`/`buildMlbTeamProfile.ts`/`convergenceRecord.ts`/`buildPicksStats.ts`/`factor-explanations.ts`/`buildMlbTeamProfile.ts` 모두 최근 cycle 에서 이미 감사·수정 이력 존재) — review-code(heavy) 는 신규 grep 소스(threshold 상수/버전 표기 재검색) 필요 시점, 아니면 diversity(explore-idea saturation 근접 또는 lotto/op-analysis gap 자연 도달) 권장.
+
 ## 🟡 explore-idea (heavy) — plan #27 Phase 2 premise 반증(stale) + Phase 3 데이터 근거 보류 (cycle 2256, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 은 phase1 완료 상태, 자동 매핑 대상 아님. 2-chain lock 미충족 distinct=4/8, saturation 11/15 <12 미도달, fix-incident/op-analysis/info-arch/lotto gap trigger 전부 미도달, lite-cap 미충족). cycle 2255 retro 가 "plan #27 Phase 2 (explore-idea heavy)" 를 명시 추천 — 채택해 착수했으나, 착수 전 코드 재확인 중 premise 자체가 stale 임을 발견.
