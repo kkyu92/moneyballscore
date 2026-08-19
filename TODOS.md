@@ -1,5 +1,26 @@
 # TODOS
 
+## 🟢 operational-analysis (heavy) — CURRENT_MODEL_FILTER 배포 후 실효 검증 (cycle 2210, 2026-08-19)
+
+cycle 2209 가 `CURRENT_MODEL_FILTER` (config/model.ts) 를 `debate_version`
+기준에서 `scoring_rule` 기준으로 정정 (CE fallback row 조용히 배제되던
+문제 fix). 본 cycle 은 그 fix 가 실제 배포 후 프로덕션 DB 에 반영됐는지
+직접 검증 (구현했다고 적힌 것과 실제로 작동하는 것을 대조 — CLAUDE.md
+"체크포인트 주장을 현실과 대조" R5 원칙 적용).
+
+**검증 절차**: 1) `npx vercel ls` 로 최신 프로덕션 배포 확인 — 4분 전 Ready
+(fix commit 70613e68 반영 확인). 2) Vercel preview URL 은 SSO 보호로
+WebFetch 직접 불가 (deployment protection) → 3) 대신 cycle 2209 와 동일
+1회성 스크립트 패턴 (`/tmp/verify-model-filter-fix.ts`, 실행 후 삭제) 으로
+프로덕션과 동일 Supabase DB 직접 쿼리.
+
+**결과**: `scoring_rule='v1.8'` verified count **291건** + `v1.8-credit-fail`
+**25건** = 합계 **316건** (cycle 2209 pre-deploy 측정치와 일치). 최신
+`verified_at` = **2026-08-18** (오늘 기준 최신, 기존 07-01 고정 문제 해소
+확인). 결론: fix 정상 작동, 추가 코드 변경 불필요. 배포/DB 양쪽 실측 완료
+— "구현함" 주장과 "실제 작동함" 사실이 일치하는 드문 명시적 확인 사례로
+기록 (대부분 silent drift 사례는 이 대조를 생략해서 발생).
+
 ## 🔴 review-code (heavy) — CURRENT_MODEL_FILTER CE fallback 실측 7주+ silent 배제 fix (cycle 2209, 2026-08-19)
 
 open issue 0건, approved plan 0건(status: approved 매칭 0), 2-chain lock 없음
