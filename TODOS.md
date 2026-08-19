@@ -1,5 +1,17 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — plan #27 Phase 1: mlb_user_picks 테이블 + nickname sync route (cycle 2255, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 은 spec_only 상태라 자동 매핑 대상 아니지만 자유선택 input 으로 유효, 2-chain lock 미충족 distinct=5/8, saturation 11/15 <12 미도달, fix-incident/op-analysis/info-arch/lotto gap trigger 전부 미도달). cycle 2254 retro 가 "plan #27 Phase 1 (explore-idea heavy) 가 concrete carry-over" 로 명시 추천 — 채택.
+
+실측: 구현 전 KBO `/picks`/`/leaderboard` 실제 아키텍처 재확인 — `/picks`(MyPicksClient) 는 `user_picks` DB 테이블을 전혀 읽지 않고 localStorage(`use-user-picks.ts`) 기반, DB `user_picks`(024) 는 리더보드 "join"(닉네임 등록) 시에만 sync 됨. 그 과정에서 **기존 silent gap 발견**: `PickButton.tsx` 는 이미 MLB 픽을 `mlb-${gameId}` 네임스페이스로 KBO 와 같은 localStorage 키에 저장 중인데, `use-leaderboard.ts` 의 `readLocalPicks()` 가 `Number(id)` 파싱이라 `mlb-` 접두어는 NaN 필터로 조용히 제외 — 크래시 없이 MLB 참여자는 애초 리더보드 join 자체가 불가능했음(스펙 가정이 아니라 실제 코드 버그).
+
+수정: `supabase/migrations/050_mlb_user_picks.sql` 신규(device_id+nickname+external_game_id FK mlb_schedule, KBO 024/025 분리 전례 + MLB 048 RLS 패턴), `db-constraints.ts` mlbUserPicks 추가, `/api/leaderboard/mlb-sync/route.ts` 신규(KBO sync route 의 external_game_id 버전), `use-leaderboard.ts` 에 `readLocalMlbPicks()` + auto-sync/join 양쪽 dual-sync 추가. 신규 테스트 10건(route 8 + hook 2). `pnpm test` 4059/4059 pass, type-check/lint clean, `supabase db push --linked` 적용 확인. PR #2989 squash-merge (e100c6ce).
+
+Phase 2(`/mlb/picks` 개인 이력 페이지)/Phase 3(`/mlb/leaderboard` 순위 뷰, weekly/monthly 는 표본 희소성 이유로 후순위 검토) 는 이번 cycle scope 밖 — Tier 3 원안 그대로 후속 cycle 분산.
+
+다음 후보: plan #27 Phase 2 (explore-idea heavy) 또는 review-code(heavy) 잔여 대형 파일(`buildSeasonSummary.ts` 346줄/`glossary/data.ts` 323줄/`insights/loader.ts` 311줄/`buildMlbTeamAccuracy.ts` 300줄).
+
 ## 🟡 explore-idea (lite, spec-only) — MLB 개인 픽 기록 + 리더보드 gap → plan #27 분리 (cycle 2254, 2026-08-20)
 
 진단: 강제 trigger 없음이지만 explore-idea saturation trigger 충족(직전 15사이클 중 review-code/fix-incident/polish-ui/info-arch 12/15 ≥12) + cycle 2251/2252/2253 retro 3연속 "review-code 또는 explore-idea" 권고 + 2-chain lock 미충족(직전 8사이클 distinct=4, review-code 6/8 dominance 우려) — review-code 6연속(cycle 2246~2253 중 6회) 이후 diversity 자율 선택.
