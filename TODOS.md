@@ -1,5 +1,28 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 주간 리뷰 Phase 1b 페이지 (plan #26, cycle 2230, 2026-08-19)
+
+Phase 1a(cycle 2229) 데이터 레이어를 소비하는 페이지 ship. PR #2977 (squash d8ef6343).
+
+- `/mlb/reviews/weekly` (index, 현재 주 redirect) + `/mlb/reviews/weekly/[week]` (ISR page,
+  opengraph/twitter image, not-found) — KBO `/reviews/weekly` 구조 그대로 복제
+- `MlbHighlightCard.tsx` 신규 컴포넌트 — KBO `HighlightCard` 재사용 불가 확인 후 병렬 구현
+  (`MlbWeeklyHighlight` 필드명 externalGameId/predictedHomeWin 이 KBO gameId/predictedWinnerCode
+  와 달라 shape incompatible)
+- Header/Footer EN-locale exemption `/mlb/reviews/weekly` 로 확장 + sitemap.ts weekly route 추가
+- **의도적 생략**: convergence-pick 시즌 전체 통계(강수렴/완전수렴 W-L, streak) — weekly view 에
+  안 넣음. `convergenceRecord.ts` 확인 결과 관련 함수들이 date-range 파라미터 없이 시즌 전체
+  스캔이라 주간 데이터로 억지 재현 시 실제와 다른 수치 표시 위험 (mlb/reviews 허브 페이지
+  cycle 2226 코멘트에서도 이미 후속 과제로 명시됨)
+- EN 변형 skip (Phase 1 KO only, mlb/reviews 본체 전례 따름)
+- 테스트: `pnpm --filter moneyball test -- --run` 459 files/3990 tests all pass, zero regression
+- plan #26 status: `phase1a_data_layer_shipped_cycle_2229_pending_phase1b` →
+  `phase1_shipped_cycle_2230_phase2_monthly_pending`
+- **다음 fire 후보 (Phase 2, 낮은 증분 비용)**: `buildMlbMonthlyReview.ts` + `monthly/[month]/page.tsx`
+  + index — Phase 1 이 만든 `fetchMlbPredictionRowsInRange`/`analyzeMlbFactorAccuracy`/
+  `MLB_FACTOR_WEIGHTS` 그대로 재사용, `computeMonthRange` import 만 추가. `/mlb/reviews` 허브에
+  weekly/monthly 진입 링크 추가도 함께.
+
 ## 🟢 explore-idea (heavy) — MLB 주간 리뷰 Phase 1a 데이터 레이어 (plan #26, cycle 2229, 2026-08-19)
 
 plan #26 (Tier 3, approved) unprocessed plan lookup 자동 매핑 — target_chain=explore-idea
