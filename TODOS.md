@@ -1,5 +1,24 @@
 # TODOS
 
+## 🟢 review-code (heavy) — 홈페이지 monolith 감사, 확정 버그 0건 (cycle 2237, 2026-08-19)
+
+cycle 2236 carry-over 따라 `apps/moneyball/src/app/page.tsx` (1082줄, 미감사 최대
+monolith) 전체 read. analysis/accuracy 는 이미 cycle 2149/2150 감사 완료 — 이번이
+3대 monolith 마지막.
+
+- 확정 버그 0건 (이전 사이클 sentinel/가드 누락류 재발 없음)
+- 저확신 항목 2개만 기록 (수정 안 함, 근거 불충분):
+  - `selectBigMatchFromGames` 가 `selectTopStatPick` 과 달리 scheduled 상태
+    필터 없음 — 분석 카드 특성상 의도된 설계일 가능성 (라이브 스코어와 무관)
+  - `classifyNoGameReason` 주석 "gap>7d → offseason/break" vs 실제 코드는
+    gap>7 시 무조건 'break' 만 반환 (offseason 은 `!next` 시에만) — doc-only
+- field-priority 차이 (`home_win_prob` vs `reasoning.homeWinProb`) 검증 —
+  daily.ts 파이프라인에서 항상 동시 기록되어 drift 아님 확인
+- 기존 테스트 (silent-drift-wave-234, wave-377-top-pick-badge) 23/23 pass
+- 다음 review-code(heavy) 후보 없음 — analysis/accuracy/page.tsx 3대 monolith
+  모두 감사 완료. 다음 heavy 트리거는 새 drift 신호 발생 시
+- outcome: retro-only (코드 변경 0)
+
 ## 🟡 review-code (lite) — health baseline, 강제 trigger 없음 (cycle 2236, 2026-08-19)
 
 진단 결과 어떤 chain 도 강제 발화 조건 미충족 (op-analysis gap=21<25 / info-arch
