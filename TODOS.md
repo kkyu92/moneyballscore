@@ -1,4 +1,16 @@
 
+## ⚪ explore-idea (heavy) — standings 매직넘버 위젯 신규 SUCCESS (cycle 2287, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 archived/completed/phase-done, plan #27 leaderboard/picks Phase3 blocked_on_data). 2-chain lock 미충족(직전 8사이클 distinct=4: explore-idea/info-arch/review-code/op-analysis). 주기 trigger 3종 미도달(fix-incident 9-gap/20, op-analysis 2-gap/25, info-arch 7-gap/30, lotto 23-gap/30). **improvement saturation trigger 최초 명시 충족** — 직전 15사이클 중 review-code+fix-incident+polish-ui+info-arch = 13/15 (≥12).
+
+배경 조사: plan #27(MLB 개인 픽/리더보드 parity) 재확인 — Phase 1(mlb_user_picks 테이블)만 유효, Phase 2는 이미 구현돼있어 폐기, Phase 3(리더보드 뷰)는 실측(`mlb_user_picks`=0건, `mlb_pick_poll_events`=0건, KBO `user_picks`=1건)으로 무기한 보류 — 사이트 전체 실 트래픽이 극히 낮아 데이터 의존 신규 기능(리더보드류)은 당장 착수 risk 높음 확인.
+
+실행: 대신 신규 DB 쿼리 0건인 저위험 계산 기반 기능 선택 — KBO standings 페이지에 **매직넘버 위젯** 신규. `KBO_PLAYOFF_TEAM_COUNT=5`(가을야구 진출 5팀 체제) 상수 신규(packages/shared) + `computeMagicNumber` 순수 함수(표준 공식 `G - leaderWins - chaserLosses + 1`, 단위테스트 5건) + standings 페이지에 1위(우승)/5위(가을야구 진출선) 경계 매직넘버 배지 2종 렌더. rubric: 가치 medium(시즌 중 시의성 — 8/20 현재 ~120/144경기 진행) / 시간비용 small / risk 0 / 자율가능 yes / 의존성 none → Tier 1 즉시 fire.
+
+검증: type-check/lint clean, test 4075/4075 pass (신규 5건 포함). PR #2996 → `gh pr merge --squash --auto --delete-branch` → **`gh pr view --json state,mergedAt` 로 `state=MERGED` 실측 확인**(commit 18e375e5, 사례 18 mitigation 준수 — "머지 진행" 서술 전 실제 명령 실행 + 결과 확인).
+
+다음 후보: review-code(heavy) 잔존 미감사 대형 파일(`teams/[code]/page.tsx` 621줄, `predictions/[date]/page.tsx` 618줄) 또는 lotto(24-gap/30, 다음 사이클 근접 도달 예상).
+
 ## ⚪ review-code (heavy) — mlb-pipeline.ts 최초 전체 감사, mlb_team_stats select assertSelectOk 누락 정정 SUCCESS (cycle 2286, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(status: approved 매칭 0건, plan #27 은 Tier3 blocked-on-data spec-only). 2-chain lock 미충족(직전 8사이클 distinct=5: fix-incident/explore-idea/info-arch/review-code/op-analysis). 주기 보정 trigger 3종 모두 미도달 (fix-incident 8-gap/20, op-analysis 1-gap/25, info-arch 6-gap/30, lotto 22-gap/30 — lotto 근접이나 미충족). cycle 2285 retro 가 review-code(heavy) 잔존 대형 미감사 파일로 mlb-pipeline.ts(743줄, 이력 0건) 지목.
