@@ -1,5 +1,5 @@
 import { josa, KBO_FACTOR_COUNT, shortTeamName, ELO_NEUTRAL_WIN_PCT, type TeamCode } from '@moneyball/shared';
-import { explainFactor, type FactorRawDetails } from '@/lib/analysis/factor-explanations';
+import { explainFactor, OVERVIEW_CLOSE_PP, OVERVIEW_DOMINANT_PP, type FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS_TECHNICAL } from '@/lib/predictions/factorLabels';
 
 const SUMMARY_FACTOR_KEYS = ['sp_fip', 'lineup_woba', 'elo', 'recent_form'] as const;
@@ -46,7 +46,7 @@ export function GameAnalysisProse({
   const favored = homeWinProb > ELO_NEUTRAL_WIN_PCT ? homeName : awayName;
   const marginPp = Math.round(Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * 200);
   const confidenceLabel =
-    marginPp < 10 ? '박빙의 접전' : marginPp < 20 ? '소폭 우위' : '명확한 우위';
+    marginPp < OVERVIEW_CLOSE_PP ? '박빙의 접전' : marginPp < OVERVIEW_DOMINANT_PP ? '소폭 우위' : '명확한 우위';
 
   if (pitching.length === 0 && batting.length === 0 && situational.length === 0) {
     return null;
