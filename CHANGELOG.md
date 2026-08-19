@@ -1,3 +1,18 @@
+## v0.5.62.42 — 2026-08-20 (cycle 2249, review-code (heavy): buildTeamProfile.ts 등 4개 파일 최초 감사(clean) — team 페이지 3곳 콜드게임/박빙 승부 threshold 하드코딩 silent drift 발견/수정)
+
+### fix(teams): 팀 상세 페이지(KO/MLB KO/MLB EN) 콜드게임·박빙 승부 문구가 MARGIN_BLOWOUT_THRESHOLD/MARGIN_CLOSE_GAME_THRESHOLD 를 리터럴로 중복
+
+`buildTeamProfile.ts`(586줄)/`buildMlbTeamProfile.ts`/`buildMatchupProfile.ts`(579줄)/`buildMlbMatchupProfile.ts`(526줄)/
+`deriveMlbOutcome.ts` 5개 파일 최초 감사 — 모두 이미 여러 차례 review-code(heavy) 로 하드닝됨(fail-loud assertSelectOk,
+KBO/MLB alias 정규화, sort-then-consume 순서), 문제 없음. 소비 페이지까지 확장 감사 — matchup 페이지(`matchup/[teamA]/[teamB]`,
+`mlb/matchup/[teamA]/[teamB]`)는 `profile.summary`(`buildMatchupSummaryText`, threshold 를 파라미터로 전달)를 그대로
+렌더해 single source 지만, team 페이지 3곳(`teams/[code]`, `mlb/team/[code]`, `en/mlb/team/[code]`)은 JSX 안에
+"10점차"/"1점차"/"10+ run margin"/"one-run games" 를 직접 하드코딩 — `MARGIN_BLOWOUT_THRESHOLD`(10)/`MARGIN_CLOSE_GAME_THRESHOLD`(1)
+와 현재는 값이 같지만 single source 가 아니라, 상수가 튜닝되면 필터링 로직은 바뀌어도 문구는 조용히 stale 하게 남는
+silent drift 위험. 3개 파일 모두 상수 import + template literal interpolation 으로 정정. 회귀 테스트 6건 신규
+(`review-code-cycle-2249.test.ts`, source grep 기반 — 하드코딩 리터럴 부재 + 상수 사용 검증). type-check/lint clean,
+전체 468 files/4034 tests all pass(+6, zero regression). VERSION 0.5.62.41→0.5.62.42.
+
 ## v0.5.62.41 — 2026-08-20 (cycle 2248, review-code (heavy): convergenceRecord.ts 최초 감사 — buildAccuracyData.ts dateRange KST 자정 오판 silent drift 발견/수정)
 
 ### fix(accuracy): buildVersionHistory dateRange 가 toDateString()(host local=UTC) 로 같은-날 판정 — KST 자정 근처 범위가 단일 날짜로 축약

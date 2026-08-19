@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 review-code (heavy) — buildTeamProfile.ts 등 4개 파일 최초 감사(clean), team 페이지 콜드게임/박빙 승부 threshold 하드코딩 발견/수정 (cycle 2249, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=5/8, fix-incident(5)/op-analysis(9)/info-arch(7)/lotto(15) 모두 자체 gap trigger 미도달, lotto 8/22 회차 picks 이미 shipped). cycle 2248 TODOS carry-over 명시 후보(review-code heavy 대형 파일 잔여) 채택 — dominance-positive streak(cycle 135 룰) 인정.
+
+실측: `buildTeamProfile.ts`(586줄)/`buildMlbTeamProfile.ts`/`buildMatchupProfile.ts`(579줄)/`buildMlbMatchupProfile.ts`(526줄)/`deriveMlbOutcome.ts` 최초 감사 — 5개 모두 이미 cycle 2034/2036/2040/2055/2064/2066/2071/2081/2117/2160 등 다수 review-code(heavy) 패스로 하드닝됨(fail-loud assertSelectOk, KBO/MLB alias 정규화, sort-then-consume 순서, confidence 스케일 통일) — 문제 없음. 소비 페이지까지 확장 감사한 끝에 발견: matchup 페이지는 `profile.summary`(단일 source 함수가 threshold 를 파라미터로 받음)를 그대로 렌더하지만, team 상세 페이지 3곳(`teams/[code]`, `mlb/team/[code]`, `en/mlb/team/[code]`)은 JSX 안에 "10점차"/"1점차"/"10+ run margin"/"one-run games" 숫자를 직접 하드코딩 — `MARGIN_BLOWOUT_THRESHOLD`/`MARGIN_CLOSE_GAME_THRESHOLD` 상수와 현재 값은 같지만 single source 아님(상수 튜닝 시 필터링은 바뀌는데 문구만 조용히 stale).
+
+수정: 3개 파일 모두 상수 import + template literal interpolation. 회귀 테스트 6건 신규(`review-code-cycle-2249.test.ts`, source grep). type-check/lint clean, 전체 468 files/4034 tests all pass(+6, zero regression). VERSION 0.5.62.41→0.5.62.42.
+
+다음 후보: review-code(heavy) 는 이번 사이클로 team/matchup profile 계열 5개 builder + 소비 페이지 감사 완료 — 다음은 미감사 대형 파일 재탐색(`find apps/moneyball/src -name "*.ts" -not -path "*__tests__*" | xargs wc -l | sort -rn`) 또는 diversity(info-architecture-review — 7-cycle gap, 아직 30 미도달이나 직전 여러 사이클 연속 diversity 권고 누적, 명시적 trigger 재확인 권장).
+
 ## 🔴 review-code (heavy) — convergenceRecord.ts 최초 감사, buildAccuracyData.ts dateRange KST 자정 오판 silent drift 발견/수정 (cycle 2248, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=6/8, fix-incident(3)/op-analysis(7)/info-arch(5)/lotto(13) 모두 자체 gap trigger 미도달). cycle 2246/2247 retro 양쪽이 review-code(heavy) 대형 파일 잔여 백로그(convergenceRecord.ts 781줄/buildAccuracyData.ts 772줄/buildTeamProfile.ts 586줄/buildMatchupProfile.ts 579줄/buildMlbMatchupProfile.ts 526줄) 명시 — dominance-positive streak(cycle 135 룰) 인정 하 계속 진행, 첫 미감사 파일 `convergenceRecord.ts` 채택.

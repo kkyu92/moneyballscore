@@ -13,6 +13,8 @@ import {
   confToWinProb,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
+  MARGIN_BLOWOUT_THRESHOLD,
+  MARGIN_CLOSE_GAME_THRESHOLD,
 } from '@moneyball/shared';
 import { buildTeamProfile } from "@/lib/teams/buildTeamProfile";
 import { buildTeamEloTrend } from "@/lib/teams/buildTeamEloTrend";
@@ -494,10 +496,10 @@ export default async function TeamPage({ params }: PageProps) {
           (profile.closeGame && profile.closeGame.count > 0) ? (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {profile.blowout && profile.blowout.count > 0 &&
-                `콜드게임(10점차 이상) ${profile.blowout.count}회 (${profile.blowout.sampleSize}경기 중)`}
+                `콜드게임(${MARGIN_BLOWOUT_THRESHOLD}점차 이상) ${profile.blowout.count}회 (${profile.blowout.sampleSize}경기 중)`}
               {profile.blowout && profile.blowout.count > 0 && profile.closeGame && profile.closeGame.count > 0 && " · "}
               {profile.closeGame && profile.closeGame.count > 0 &&
-                `박빙 승부(1점차) ${profile.closeGame.count}회 (${profile.closeGame.sampleSize}경기 중)`}
+                `박빙 승부(${MARGIN_CLOSE_GAME_THRESHOLD}점차) ${profile.closeGame.count}회 (${profile.closeGame.sampleSize}경기 중)`}
             </p>
           ) : null}
           {profile.homeAwayEdge && (

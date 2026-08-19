@@ -12,6 +12,8 @@ import {
   MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE,
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
+  MARGIN_BLOWOUT_THRESHOLD,
+  MARGIN_CLOSE_GAME_THRESHOLD,
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
@@ -378,10 +380,10 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           (profile.closeGame && profile.closeGame.count > 0) ? (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {profile.blowout && profile.blowout.count > 0 &&
-                `${profile.blowout.count} blowouts (10+ run margin) out of ${profile.blowout.sampleSize} games`}
+                `${profile.blowout.count} blowouts (${MARGIN_BLOWOUT_THRESHOLD}+ run margin) out of ${profile.blowout.sampleSize} games`}
               {profile.blowout && profile.blowout.count > 0 && profile.closeGame && profile.closeGame.count > 0 && " · "}
               {profile.closeGame && profile.closeGame.count > 0 &&
-                `${profile.closeGame.count} one-run games out of ${profile.closeGame.sampleSize} games`}
+                `${profile.closeGame.count} ${MARGIN_CLOSE_GAME_THRESHOLD}-run games out of ${profile.closeGame.sampleSize} games`}
             </p>
           ) : null}
           {profile.homeAwayEdge && (
