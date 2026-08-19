@@ -54,10 +54,20 @@ export interface WinnerEntry {
   bonus: number;
 }
 
+const WINNERS_PATH_CANDIDATES = [
+  path.join(process.cwd(), "scripts/lotto-data.json"),
+  path.join(process.cwd(), "../../scripts/lotto-data.json"),
+];
+
+function getWinnersPath(): string {
+  for (const p of WINNERS_PATH_CANDIDATES) {
+    if (fs.existsSync(p)) return p;
+  }
+  throw new Error("lotto winners history (scripts/lotto-data.json) not found");
+}
+
 export function loadAllWinners(): { keyToRound: Record<string, WinnerEntry> } {
-  const p1 = path.join(process.cwd(), "apps/moneyball/data/lotto-data.json");
-  const p2 = path.join(process.cwd(), "data/lotto-data.json");
-  const data = JSON.parse(fs.readFileSync(fs.existsSync(p1) ? p1 : p2, "utf-8")) as WinnerEntry[];
+  const data = JSON.parse(fs.readFileSync(getWinnersPath(), "utf-8")) as WinnerEntry[];
   const map: Record<string, WinnerEntry> = {};
   for (const r of data) {
     const key = r.numbers.slice().sort((a, b) => a - b).join(",");
