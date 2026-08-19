@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 review-code (heavy) — mlb-pipeline.ts 최초 감사, 2개 모드 insert 100% silent 실패 발견/수정 (cycle 2243, 2026-08-19)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, gap 미달, 2-chain lock 없음distinct=4/8). cycle 2239/2241 retro 양쪽 모두 `mlb-pipeline.ts`(731줄, validator.ts/daily.ts 감사 후 유일 미감사 non-UI pipeline 파일)를 다음 후보로 명시 — carry-over 채택. cycle 2242 diversity 권고(explore-idea/dimension-cycle)보다 명시적 미감사 대상 존재를 우선.
+
+실측 (prod REST 직접 확인): `runShadowTrain()` 이 insert 하는 `mlb_shadow_train_log` 테이블이 migration 001~048 전체에 걸쳐 한번도 생성된 적 없음(`PGRST205` 실측). `runWalkForwardMeasure()` 는 기존 `walk_forward_brier`(월간 base-vs-shadow 비교 전용 스키마, migration 036)에 date/scoring_rule/brier_score/sample_count(일별 로그) insert 시도 — 컬럼 전량 불일치, orphan 테이블(리포 전체 reader 0건). 두 모드 모두 매 fire 100% insert 실패 상태 방치. mock 기반 테스트(1144건)는 테이블명/컬럼 무관 `{error:null}` 반환이라 이 클래스 버그를 못 잡음.
+
+수정: migration 049(`mlb_shadow_train_log` + `mlb_walk_forward_log` 신규, `walk_forward_brier` 보존) 작성 + `supabase db push --linked` 로 prod 적용 + REST insert/delete 실측 검증. `runWalkForwardMeasure` 타겟을 `mlb_walk_forward_log` 로 정정. 회귀 테스트 2건 추가(테이블명+payload 키 검증, mock shape-only 테스트 한계 보완). type-check 4/4 clean, lint clean, 전체 1144/1144 pass. commit `49346963` 직접 main push (pre-push hook 통과).
+
+다음 후보: diversity 권고(polish-ui/explore-idea/dimension-cycle) 유효 — review-code non-UI pipeline 커버리지 이제 daily.ts/validator.ts/mlb-pipeline.ts 전부 감사 완료. 신규 review-code(heavy) 대상 부재 시 explore-idea 또는 dimension-cycle 자연 전환 권장.
+
 ## 🟢 info-architecture-review — diversity carry-over 체크포인트, IA/디자인 gap 0건 (cycle 2242, 2026-08-19)
 
 진단: cycle 2239/2240/2241 retro 3연속이 "diversity — polish-ui 또는 info-architecture-review" 를 다음 후보로 명시 (review-code/op-analysis dominance 대응) — carry-over 채택.
