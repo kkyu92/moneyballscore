@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟡 explore-idea (lite, spec-only) — MLB 개인 픽 기록 + 리더보드 gap → plan #27 분리 (cycle 2254, 2026-08-20)
+
+진단: 강제 trigger 없음이지만 explore-idea saturation trigger 충족(직전 15사이클 중 review-code/fix-incident/polish-ui/info-arch 12/15 ≥12) + cycle 2251/2252/2253 retro 3연속 "review-code 또는 explore-idea" 권고 + 2-chain lock 미충족(직전 8사이클 distinct=4, review-code 6/8 dominance 우려) — review-code 6연속(cycle 2246~2253 중 6회) 이후 diversity 자율 선택.
+
+실측: cycle 2245 방법론(KBO↔MLB 앱 라우트 전체 diff) 재사용 — `/insights`(디베이트 reasoning, MLB 는 순수 quant 라 불필요 cycle 2245 기존 결론 유지), `/glossary`(`/mlb/factors`가 이미 커버, cycle 2245 rejected 유지) 외 신규 gap 발견: `/picks`(내 픽 기록)와 `/leaderboard`(순위)는 MLB 대응이 전무. MLB는 `mlb_pick_poll_events`(048, cycle 2223)로 익명 집계까지만 있고 nickname 식별 개인 기록 + 순위 경쟁 layer 부재. rubric 5축 평가: 가치 medium / 시간비용 large(신규 테이블+RLS+뷰4종+페이지+컴포넌트, KBO 규모 준함) / risk 2(LeaderboardClient 매개변수화 시 KBO 회귀 가능성) / 자율가능 yes / 의존성 none → **Tier 3 확정**. plan #26(MLB weekly/monthly reviews)과 동일하게 이번 cycle 은 spec-only, 구현 0.
+
+수정: 코드 변경 없음. `~/.develop-cycle/plans/moneyballscore/27.md` 신규 (rubric + baseline + Phase 1~3 분리 제안 + 리스크 노트: MLB 참여 표본 희소성 실측 권장). 다음 fire 시 Phase 1(스키마 설계 결정 + 마이그레이션 + nickname 제출 flow)부터 재평가.
+
+다음 후보: plan #27 Phase 1 (explore-idea heavy) 또는 review-code(heavy) 잔여 대형 파일(`buildSeasonSummary.ts` 346줄/`glossary/data.ts` 323줄/`insights/loader.ts` 311줄/`buildMlbTeamAccuracy.ts` 300줄).
+
 ## 🔴 review-code (heavy) — factor-explanations.ts 최초 감사(clean), 신뢰도 라벨 marginPp 10/20 하드코딩 발견/수정 + 루트 package.json version drift 정정 (cycle 2253, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건 — plan #24 전체 phase 완결/closed, 2-chain lock 없음 직전 8사이클 distinct=5, fix-incident/op-analysis/info-arch/lotto 모두 자체 gap trigger 미도달, explore-idea saturation 11/15 <12 미도달). review-code 7연속 success streak(cycle 135 dominance-positive 룰 인정) — TODOS carry-over 명시 후보(`factor-explanations.ts` 409줄) 채택.
