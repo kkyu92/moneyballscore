@@ -201,6 +201,14 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
         // scoring_rule=NULL → /accuracy + /debug 의 scoring_rule 별 Brier 분석에서
         // in_game row 영구 분류 X.
         scoring_rule: CURRENT_SCORING_RULE,
+        // in_game 경로는 항상 quant-only (LLM debate 호출 X, QUANT_LIVE_VERSION 주석
+        // 참조) — 명시 null 없으면 migration 007 의 stale DB DEFAULT 'v1-narrative'
+        // (2026-04 이전 내러티브 토론 시절 리터럴, 현 코드베이스에 정의조차 없음) 가
+        // 조용히 상속되어 in_game row 를 실제로 없던 debate 가 있었던 것처럼 오분류
+        // (cycle 2240 op-analysis heavy 발견 — 현재 모든 consumer 가 prediction_type=
+        // 'pre_game' 선필터해 실질 영향 0 이지만, 향후 코드가 이 가정 없이 debate_version
+        // 읽을 경우의 landmine 사전 차단).
+        debate_version: null,
         reasoning: {
           preGameHomeProb,
           adjustedHomeProb,
