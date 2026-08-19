@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, confToWinProb, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, confToWinProb, CURRENT_SCORING_RULE, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
 
@@ -130,7 +130,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
       home_sp:players!games_home_sp_id_fkey(name_ko),
       away_sp:players!games_away_sp_id_fkey(name_ko),
       predictions(
-        predicted_winner, confidence, prediction_type,
+        predicted_winner, confidence, prediction_type, scoring_rule,
         home_win_prob,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba,
@@ -146,6 +146,7 @@ async function getGamePredictions(date: string): Promise<DateGame[]> {
     )
     .eq("game_date", date)
     .eq("predictions.prediction_type", "pre_game")
+    .eq("predictions.scoring_rule", CURRENT_SCORING_RULE)
     .order("game_time");
 
   const { data } = assertSelectOk(result, "predictions/[date] getGamePredictions");
