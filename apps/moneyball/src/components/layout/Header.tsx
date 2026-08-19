@@ -124,6 +124,7 @@ const MLB_NAV: NavItem[] = [
       { href: "/mlb/players", label: "Statcast", description: "xwOBA / Barrel% / Launch Angle", icon: "user" },
       { href: "/mlb/matchup", label: "매치업", enLabel: "Matchup", description: "팀간 맞대결 이력 분석", enDescription: "Head-to-head team matchup history", icon: "arrows-swap" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터`, enLabel: `${MLB_FACTOR_COUNTS.total} Factors`, description: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} 가중치`, enDescription: `KBO ${MLB_FACTOR_COUNTS.kbo} + Statcast ${MLB_FACTOR_COUNTS.statcast} weights`, icon: "file-text" },
+      { href: "/mlb/methodology", label: "예측 방법론", enLabel: "Methodology", description: "데이터 소스 · 정량 모델 · 검증 방법", enDescription: "Data sources, quant model, verification", icon: "file-text" },
       { href: "/mlb/predictions", label: "예측 기록", enLabel: "Prediction History", description: "일자별 예측 아카이브", enDescription: "Daily prediction archive", icon: "file-text" },
       { href: "/mlb/reviews", label: "예측 리뷰", enLabel: "Prediction Review", description: "수렴 픽 스트리크·팀별 분해", enDescription: "Convergence pick streaks & team breakdown", icon: "bar-chart" },
       { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar", description: "날짜별 경기·예측 한눈에 보기", enDescription: "Games & predictions by date", icon: "calendar" },

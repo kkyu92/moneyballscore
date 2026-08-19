@@ -1,3 +1,29 @@
+## v0.5.62.38 — 2026-08-20 (cycle 2245, explore-idea (heavy): /mlb/methodology 신규 — KBO /methodology parity, LLM 토론 layer 부재 명시)
+
+### feat(mlb): /mlb/methodology + /en/mlb/methodology 신규 라우트
+
+KBO 는 `/methodology` 에서 전체 예측 프로세스(데이터 소스·가중치 근거·AI 에이전트 토론·검증 방법·모델 진화
+history)를 공개하지만 MLB 는 대응 라우트가 없었음(Footer "도움말" 컬럼에 KBO 만 `/glossary`+`/methodology`+`/guide`
+3종, MLB 컬럼엔 `/mlb/factors` 만 존재 — parity gap). 처음엔 `/mlb/glossary` 를 검토했으나 `/mlb/factors`(14팩터
+가중치+정의+출처 표)가 이미 그 역할을 완전히 커버하고 있어 순수 중복이라 폐기 — 대신 `/mlb/factors` 가 다루지
+않는 영역(전체 프로세스 설명·데이터 소스·검증 방법·한계)에 집중한 `/mlb/methodology` 를 신규 작성.
+
+핵심 차별화 발견: `mlb-pipeline.ts` 실측 확인 결과 MLB 예측엔 KBO 의 judge-agent LLM 토론 layer 가 전혀 없음
+(`debate`/`judge` 호출 0건, `scoring_rule='mlb_v0.1'` 단일 quant-only 버전) — 이 사실을 페이지에 명시해 KBO 와의
+방법론 차이를 투명하게 공개(30팀 435매치업 규모상 매일 LLM 토론 비용이 KBO 10팀 45매치업 대비 비현실적).
+가중치 표는 중복 작성하지 않고 `/mlb/factors` 링크로 위임, Elo K-factor(`MLB_ELO_K=4`/`MLB_ELO_K_POSTSEASON=6`,
+FiveThirtyEight 공개 문헌 인용, plan #25 Phase 1 기존 구현)와 검증(`/mlb/accuracy` 링크)만 신규 서술.
+
+Header MLB 메가메뉴 "경기·팀" 그룹 + Footer MLB 컬럼 + `sitemap.ts`(KO/EN 양쪽) 에 배선. 신규 테스트 6건
+(`mlb-methodology-page.test.ts` — canonical/alternates, `/mlb/factors` 중복 회피 링크, `MLB_SCORING_RULE`
+상수 참조 검증) + `sitemap-mlb.test.ts` 2건 추가. `pnpm --filter @moneyball/shared type-check` /
+`pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec vitest run` 465 files/4024 tests
+전량 통과(+8), `pnpm --filter moneyball lint` clean.
+
+다음 후보: MLB parity 는 `/mlb/factors`/`/mlb/methodology`/`/mlb/reviews`(weekly+monthly)/`/mlb/matchup`/
+`/mlb/team` 6팩터 등 대부분 영역에서 이미 성숙 — 다음 explore-idea 는 신규 product 방향(예: 리더보드 국가
+동기화 MLB 지원, cycle 2244 TODOS Tier 3 carry-over) 또는 diversity(polish-ui/info-arch) 검토 권장.
+
 ## v0.5.62.37 — 2026-08-13 (cycle 2083, explore-idea (heavy): plan #25 Phase 2b step 1 — MLB Elo 히스토리 테이블 + 1회성 backfill, Vercel 배포 일일 100건 quota 소진 발견)
 
 ### feat(mlb): mlb_team_elo_history 신규 — matchup Elo 추이 차트용 팀×경기일 시계열

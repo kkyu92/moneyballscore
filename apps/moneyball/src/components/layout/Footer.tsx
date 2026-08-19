@@ -109,6 +109,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/players", label: "Statcast 선수", enLabel: "Statcast Players" },
       { href: "/mlb/matchup", label: "매치업", enLabel: "Matchups" },
       { href: "/mlb/factors", label: `${MLB_FACTOR_COUNTS.total}팩터 가중치`, enLabel: `${MLB_FACTOR_COUNTS.total}-Factor Weights` },
+      { href: "/mlb/methodology", label: "예측 방법론", enLabel: "Methodology" },
       { href: "/mlb/predictions", label: "예측 기록", enLabel: "Prediction History" },
       { href: "/mlb/reviews", label: "예측 리뷰", enLabel: "Prediction Review" },
       { href: "/mlb/reviews/weekly", label: "주간 리뷰", enLabel: "Weekly Review" },

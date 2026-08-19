@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — /mlb/methodology 신규, KBO /methodology parity (cycle 2245, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=4/8). cycle 2242/2243/2244 retro 3연속이 explore-idea diversity 를 명시 권고(saturation 근접: 직전 15 사이클 중 review-code+fix-incident+polish-ui+info-arch = 10/15, 12 미도달이나 추세). plan #24/#25(MLB matchup 전체 phase) 완결 확인, KBO↔MLB 라우트 parity grep 으로 신규 후보 탐색.
+
+실측: `/mlb/glossary` 를 먼저 검토했으나 기존 `/mlb/factors`(14팩터 가중치+정의+출처, plan #25 이전부터 존재)가 이미 그 역할을 완전히 커버 — 순수 중복이라 폐기. Footer "도움말"(KBO) vs "MLB" 컬럼 비교 결과 KBO 는 `/glossary`+`/methodology`+`/guide` 3종이 있는데 MLB 는 `/mlb/factors` 1종뿐 — `/methodology`(전체 프로세스: 데이터 소스/AI 에이전트 토론/검증 방법/모델 진화 history, 506줄)에 대응하는 MLB 라우트가 진짜 gap. `mlb-pipeline.ts` grep 결과 `debate`/`judge` 호출 0건 확인 — MLB 는 KBO 의 LLM 토론 layer 없이 순수 정량 모델(`scoring_rule='mlb_v0.1'` 단일 버전)만 사용한다는 사실이 사용자에게 투명하게 공개된 적 없었음(신규 콘텐츠, 중복 아님).
+
+수정: `/mlb/methodology` + `/en/mlb/methodology` 신규 — 핵심 원칙(정량 모델, LLM 토론 없음 명시)/데이터 소스(MLB Stats API·Baseball Savant·FanGraphs MLB)/정량 모델(Elo K-factor `MLB_ELO_K`/`MLB_ELO_K_POSTSEASON`, 가중치 표는 `/mlb/factors` 링크로 위임해 중복 회피)/검증 방법(`/mlb/accuracy` 링크)/한계+면책 5섹션. Header MLB 메가메뉴 + Footer MLB 컬럼 + `sitemap.ts`(KO/EN) 배선. 테스트 8건 신규(`mlb-methodology-page.test.ts` 6건 + `sitemap-mlb.test.ts` 2건). `pnpm --filter @moneyball/shared type-check` / `pnpm --filter moneyball type-check` 통과, `pnpm --filter moneyball exec vitest run` 465 files/4024 tests 전량 통과(+8, zero regression), `pnpm --filter moneyball lint` clean. VERSION 0.5.62.37→0.5.62.38.
+
+다음 후보: MLB parity 는 `/mlb/factors`/`/mlb/methodology`/`/mlb/reviews`/`/mlb/matchup`/`/mlb/team` 6팩터 등 대부분 영역 성숙 완료 — 다음 explore-idea 는 리더보드 국가 동기화 MLB 지원(Tier 3, cycle 2244 carry-over, DB 스키마 결정 필요) 또는 신규 product 방향, diversity(polish-ui/info-arch) 검토 권장.
+
 ## 🔴 fix-incident — MLB 픽('mlb-{external_game_id}') /api/picks/results silent drop 수정 (cycle 2244, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=3/8, fix-incident 자체 20-cycle gap 미도달 9<20). cycle 2242/2243 retro 양쪽 모두 explore-idea/dimension-cycle diversity 를 권고했으나, plan #26(MLB 주간/월간 리뷰) 완결 + Phase 3 dedup(pearsonCorrelation)도 cycle 2232 에 이미 처리돼 명시적 신규 explore-idea/review-code 후보가 없음. KBO 라우트 vs MLB 라우트 parity grep 중 `/picks`(내 픽 기록)·`/leaderboard` 가 MLB 미러 부재 발견 → 코드 추적 결과 "미러 부재"가 아니라 **silent 실패**로 확인, fix-incident 로 재분류.

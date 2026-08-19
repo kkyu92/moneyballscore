@@ -127,6 +127,13 @@ describe('sitemap MLB URL coverage', () => {
     expect(matchupIndex?.priority).toBeGreaterThan(0);
   });
 
+  it('includes /mlb/methodology route (cycle 2245 explore-idea — KBO /methodology parity)', async () => {
+    const urls = await sitemap();
+    const methodology = urls.find((u) => u.url.endsWith('/mlb/methodology') && !u.url.includes('/en/'));
+    expect(methodology).toBeDefined();
+    expect(methodology?.priority).toBeGreaterThan(0);
+  });
+
   it('includes /mlb/reviews/weekly/[week] dynamic routes (plan #26 Phase 1b — weeklyReviewRoutes(KBO) parity)', async () => {
     const urls = await sitemap();
     const mlbWeeklyUrls = urls.filter((u) => /\/mlb\/reviews\/weekly\/\d{4}-W\d{2}$/.test(u.url));
@@ -190,5 +197,11 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
     const urls = await sitemap();
     const enMatchupIndex = urls.find((u) => u.url.endsWith('/en/mlb/matchup'));
     expect(enMatchupIndex).toBeDefined();
+  });
+
+  it('/en/mlb/methodology route present (cycle 2245 explore-idea)', async () => {
+    const urls = await sitemap();
+    const enMethodology = urls.find((u) => u.url.endsWith('/en/mlb/methodology'));
+    expect(enMethodology).toBeDefined();
   });
 });
