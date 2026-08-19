@@ -824,7 +824,7 @@ export default async function AccuracyPage() {
                       >
                         {pct}%
                       </p>
-                      {ciPct !== null && tier.n < 20 && (
+                      {ciPct !== null && tier.n < STATS_RELIABLE_MIN_N && (
                         <p className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}% CI</p>
                       )}
                     </>
