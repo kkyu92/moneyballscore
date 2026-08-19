@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — buildMatchupProfile.ts scoring_rule 필터 누락 정정 (#1338 family 2번째) SUCCESS (cycle 2289, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 11-gap/20, op-analysis 4-gap/25, info-arch 9-gap/30, lotto 25-gap/30 근접). cycle 2288 retro가 지목한 잔존 후보 — `buildMatchupProfile.ts`/`buildMatchupUpcoming.ts` scoring_rule 필터 정합.
+
+감사: 두 파일 grep 확인 — `buildMatchupUpcoming.ts`는 이미 `.eq("predictions.scoring_rule", CURRENT_SCORING_RULE)` 적용(안전). `buildMatchupProfile.ts`는 predictions가 LEFT embed(`!inner` X, final 경기 record 카운트 위해 의도적)라 `.find(p => p.prediction_type === "pre_game")`만 JS 레벨 필터 — scoring_rule 미검사. daily.ts가 매 경기 production(v1.8) insert 직후 shadow(v2.1-B-shadow/v2.0-shadow) row도 동일 prediction_type='pre_game'으로 insert 중(#1338 family) → `.find()`가 임의 순서로 shadow row를 집어 대결(H2H) 페이지의 confidence/is_correct/predicted_winner 가 오염 가능한 상태.
+
+수정: `scoring_rule` select 필드 + `GameRow` 타입 추가, `.find()` 조건에 `p.scoring_rule === CURRENT_SCORING_RULE` 추가 (SQL 레벨 dotted eq는 LEFT embed와 모호해서 JS 필터 유지). 주석 갱신. 회귀 가드 테스트 신규 1건(shadow row 동석 시 production만 선택) + 기존 fixture 5건에 `scoring_rule: "v1.8"` 추가(신규 필터로 인한 기존 테스트 breakage 차단). type-check/lint clean, test 478 files/4078 tests pass. PR #2998 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit 64e5241e, 사례 18 mitigation 준수).
+
+다음 후보: lotto(26-gap/30, 다음 사이클 근접) — #1338 family 형제 파일 2건(buildTeamProfile.ts cycle 2288 + buildMatchupProfile.ts 본 cycle) 모두 완료. review-code(heavy) 재선택 시엔 잔존 미감사 대형 파일 재탐색 필요.
+
 ## ⚪ review-code (heavy) — buildTeamProfile.ts scoring_rule 필터 누락 정정, shadow row 오염 차단 SUCCESS (cycle 2288, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 status 없음/completed/archived). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 3종 미도달(fix-incident 10-gap/20, op-analysis 3-gap/25, info-arch 8-gap/30, lotto 24-gap/30 근접). cycle 2286/2287 retro 공통 지목 — 잔존 미감사 대형 파일 `teams/[code]/page.tsx`(621줄)/`predictions/[date]/page.tsx`(618줄).
