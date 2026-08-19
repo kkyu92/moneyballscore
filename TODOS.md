@@ -32,6 +32,16 @@
 
 # TODOS
 
+## 🟢 fix-incident — mlb_fancy_scrape User-Agent 헤더 누락 정정 (cycle 2278, 2026-08-20)
+
+진단: fix-incident 20-gap trigger 도달 (마지막 발화 cycle 2258, 2278-2258=20). `pipeline_runs` 최근 7일/30일 실측 — 먼저 predict 모드 games_found=5/predictions=0 반복 37건 발견했으나 정상 idempotent skip(이미 예측 완료 게임 재조회, 매시 cron 재실행) 패턴으로 확인, 실제 이상 아님. 진짜 이상 = `mlb_fancy_scrape` mode 최근 30일 24/30일 error (HTTP 403 ↔ parse fail 교차 재발, 08-14~08-19 6일 연속 성공 후 08-20 재차 403).
+
+실측: `fangraphs-mlb.ts`의 `fetchLeaderRows`가 `fetch(url)` 호출 시 헤더를 전혀 지정하지 않음 확인. 리포 내 모든 다른 fetch 스크레이퍼(형제 `fangraphs.ts` KBO 버전 포함) 는 처음부터 `KBO_USER_AGENT` 헤더 사용 — MLB 버전(cycle 1985 신규 wiring)만 누락. 기존 파일 상단 주석은 원인을 "FanGraphs SPA 개편으로 인한 구조 변경"으로만 서술했지만 실제로는 헤더 누락이 403 재발의 핵심 원인 중 하나.
+
+수정: `fetch(url)` → `fetch(url, { headers: { 'User-Agent': KBO_USER_AGENT } })` 추가(rate limit/파싱 로직 변경 없음), 상단 주석 근거 갱신. VERSION 0.5.62.57→58, CHANGELOG.md entry. 474 files/4063 tests(moneyball) + 1144 tests(kbo-data) all pass, `pnpm type-check` clean, lint clean, pre-push CI pass. main 직접 push, PR 생략(1 로직 파일 + version bump).
+
+검증 한계: 코드 수정은 확인됐으나 실제 fangraphs.com 이 이 UA 로 더 이상 403 반환 안 하는지는 다음 cron 실행(매일 19:17 UTC 전후) 결과로만 확인 가능 — 이번 cycle 안 fire 검증 불가(cron 스케줄 비동기). 다음 review-code 또는 fix-incident cycle 진단 시 `mlb_fancy_scrape` 최근 실행 status 재확인 필요.
+
 ## 🟢 polish-ui — 골드 accent 하드코딩 hex → CSS 토큰 정정 (cycle 2274, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건). **2-chain alternation lock 탐지** — 직전 8사이클 distinct=2 (review-code 7회 + explore-idea 1회) → 두 chain 후보 제외 후 재선택. fix-incident 16-gap/op-analysis 9-gap/lotto 10-gap/info-arch 24-gap 모두 강제 임계(20/25/30/30) 미도달, `gh run list` CI 최근 실패 0건(fix-incident 자연 trigger도 부재), lotto 다음 회차(2026-08-22) picks 이미 박제 + 직전 결과 이미 반영. design-system(DESIGN.md/lotto-data 최근 갱신, 4주 미만) 부적합. 강한 자연 trigger 부재 → 락 룰의 "어떤 chain 도 trigger 없으면 polish-ui 강제 발화" 폴백 적용.
