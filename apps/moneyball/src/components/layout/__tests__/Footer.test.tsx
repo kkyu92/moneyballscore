@@ -48,6 +48,13 @@ describe("Footer", () => {
     expect(within(lottoColumn).getByRole("link", { name: "아카이브" })).toHaveAttribute("href", "/lotto/archive");
   });
 
+  it("MLB column 에 /mlb/matchup link 박제 (cycle 2225 IA gap fix — 헤더 megamenu·sitemap.xml 엔 있었으나 footer 만 누락)", () => {
+    render(<Footer />);
+    const mlbHeading = screen.getByRole("heading", { level: 2, name: "MLB" });
+    const mlbColumn = mlbHeading.closest("details") as HTMLElement;
+    expect(within(mlbColumn).getByRole("link", { name: "매치업" })).toHaveAttribute("href", "/mlb/matchup");
+  });
+
   it("법적 고지 nav 에 개인정보처리방침 / 이용약관 / 문의 link 박제", () => {
     render(<Footer />);
     const legal = screen.getByRole("navigation", { name: "법적 고지" });
