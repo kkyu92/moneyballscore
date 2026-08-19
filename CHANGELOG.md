@@ -1,3 +1,18 @@
+## v0.5.62.44 — 2026-08-20 (cycle 2252, review-code (heavy): buildPicksStats.ts 최초 감사(clean) — 🔥 픽 스트릭 배지 threshold 하드코딩(2 vs 3) silent drift 발견/수정)
+
+### fix(picks): 홈 UserVsAIScorecard / 리더보드 는 `currentStreak >= 2` 에 🔥 배지, /picks 페이지 WeeklyPicksSummary 만 `>= 3` 로 어긋남
+
+`buildPicksStats.ts`(410줄, 최초 감사)는 KST 날짜 처리(`toKSTDate`)가 이미 cycle 2248 `kstDateKey` 패턴과 동일 방식
+(offset 후 ISO slice)이라 clean — 문제 없음. 소비 컴포넌트까지 확장 감사한 끝에 발견: 동일 개념("🔥 N연속" 픽 스트릭
+배지)이 `UserVsAIScorecard.tsx`(홈)와 `LeaderboardTable.tsx`/`LeaderboardClient.tsx`(리더보드) 3곳은 모두
+`>= 2` 를 하드코딩했지만, 같은 `stats.currentStreak` 값을 쓰는 `/picks` 페이지의 `WeeklyPicksSummary.tsx` 만 유일하게
+`>= 3` 로 어긋나 있었음 — single source 부재로 값이 desync 된 silent drift. 예: 스트릭 2인 유저가 홈에서는 🔥 배지를
+보지만 `/picks` 페이지 주간 요약에서는 (beatAI 도 아니면) 배지가 안 뜨는 UX 불일치. `packages/shared`에
+`PICKS_STREAK_BADGE_MIN = 2`(다수 3곳 값 따라 통일) 신규 상수 추가 후 4개 파일(`UserVsAIScorecard.tsx`/
+`WeeklyPicksSummary.tsx`/`LeaderboardClient.tsx`/`LeaderboardTable.tsx`) 전부 import 전환. 회귀 테스트 1건
+신규(`silent-drift-cycle-2252.test.ts`, source grep 기반 — 하드코딩 리터럴 부재 + 상수 사용 검증). type-check/lint
+clean, 전체 469 files/4044 tests all pass(+9, zero regression). VERSION 0.5.62.43→0.5.62.44.
+
 ## v0.5.62.43 — 2026-08-20 (cycle 2250, info-architecture-review: 신규 라우트 트리거(직전 7일 16개 page.tsx 신규) — /lotto/check sitemap 누락 발견/수정)
 
 ### fix(seo): /lotto/check 페이지가 /lotto 허브에서 링크 + canonical URL 도 있지만 sitemap.ts 정적 라우트에 누락

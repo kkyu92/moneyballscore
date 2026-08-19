@@ -1,4 +1,4 @@
-import { MIN_LEADERBOARD_PICKS, USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
+import { MIN_LEADERBOARD_PICKS, PICKS_STREAK_BADGE_MIN, USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
 interface Props {
@@ -55,7 +55,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
         <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-xl px-4 py-3 flex items-center justify-between text-sm font-medium">
           <span className="text-brand-700 dark:text-brand-300">
             내 순위: <span className="font-bold">{myRank}등</span>
-            {myEntry.current_streak >= 2 && (
+            {myEntry.current_streak >= PICKS_STREAK_BADGE_MIN && (
               <span className="ml-2 text-accent dark:text-accent-light">
                 🔥 {myEntry.current_streak}연속
               </span>
@@ -111,7 +111,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
                 {isMe && <span className="ml-1 text-xs text-brand-400">(나)</span>}
               </span>
               <span className="text-right tabular-nums text-xs">
-                {entry.current_streak >= 2 ? (
+                {entry.current_streak >= PICKS_STREAK_BADGE_MIN ? (
                   <span className="text-accent dark:text-accent-light font-semibold">
                     🔥{entry.current_streak}
                   </span>

@@ -988,6 +988,17 @@ export const INSIGHTS_LIMIT = 30;
 export const MIN_LEADERBOARD_PICKS = 5;
 
 /**
+ * "🔥 N연속" 픽 스트릭 배지 최소 표시 기준 — silent drift family (cycle 2252).
+ * 동일 개념(currentStreak/current_streak 기반 fire 배지)이 3곳에서 각각
+ * 하드코딩돼 값이 어긋나 있었음: UserVsAIScorecard.tsx(홈, >=2) /
+ * LeaderboardTable.tsx(내 순위 배너, >=2) / WeeklyPicksSummary.tsx(/picks
+ * 주간 요약, >=3만 유일하게 어긋남 — 같은 유저가 홈에서는 배지를 보고
+ * /picks 페이지에서는 못 보는 silent UX inconsistency). 다수(2곳)를 따라
+ * 2로 통일.
+ */
+export const PICKS_STREAK_BADGE_MIN = 2;
+
+/**
  * 선수 리더보드 표시 인원 — silent drift family wave 288 (cycle 1615).
  * 동일 숫자 10 이 players/page.tsx limit 2 surface + OG image 2 surface +
  * twitter image 2 surface + 메타 description 4 surface = 총 10 occurrence.
