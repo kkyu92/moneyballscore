@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 operational-analysis (lite) — 25-cycle gap trigger 재측정, LLM 부가가치 방향 3-cycle 안정 재확인 (cycle 2265, 2026-08-20)
+
+진단: 강제 trigger = operational-analysis 하나만 (25-cycle gap 정확 도달, 마지막 fire cycle 2240 heavy). open issue 0건, approved plan 0건, 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/fix-incident/lotto), ship-0/lite-cap 미충족.
+
+실측: `scripts/op-analysis-ce-cohort.ts` 재실행 — n=321 (CE n=274 / 비CE n=47, 비CE 완전 동결 지속 — 마지막 비CE 예측 2026-07-01, cycle 2146부터 4개 cycle 연속 47 고정). CE 54.0%(148/274) / 비CE 63.8%(30/47) → 격차 9.8pp (cycle 2191 9.9pp 대비 -0.1pp, 3-cycle window 9.7~10.8pp 안정 범위 유지). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → temporal bias 배제, LLM 부가가치 우세 방향 4회 연속 재확인. Brier CE 0.3509 vs 비CE 0.2534.
+
+수정: 코드 변경 없음(순수 measurement). CREDIT_EXHAUSTED 지속 확인(6th recurrence 상태 변화 없음, 사용자 크레딧 재충전 미이행). 비CE 표본 동결로 재분리 불가 상태 변화 없음 — 사용자 크레딧 충전 전까지 반복 확인만 가능.
+
+다음 후보: review-code (heavy) 또는 explore-idea — op-analysis gap 재충족까지 25 cycle.
+
 ## 🟢 lotto (lite) — 30-cycle gap trigger 감사, drift 없음 확인 (cycle 2264, 2026-08-20)
 
 진단: 강제 trigger = lotto 하나만 (30-cycle gap 정확 도달, 마지막 fire cycle 2234). open issue 0건, approved plan 0건, 2-chain lock 미충족.
