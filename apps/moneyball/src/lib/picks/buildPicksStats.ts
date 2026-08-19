@@ -22,7 +22,7 @@ export interface WeeklyStats {
 }
 
 export interface PickEntry {
-  gameId: number;
+  gameId: number | string;
   game_date: string;
   myPick: 'home' | 'away';
   pickedAt: string;
@@ -74,12 +74,14 @@ export function buildPickEntries(
   picks: UserPicksStore,
   results: PickGameResult[],
 ): PickEntry[] {
-  const resultMap = new Map(results.map((r) => [r.id, r]));
+  // String(id) 로 통일 매칭 — KBO(games.id, number)와 MLB(`mlb-${external_game_id}`,
+  // string)가 같은 picks store 에 공존하고, localStorage 키 자체가 이미 string.
+  const resultMap = new Map(results.map((r) => [String(r.id), r]));
 
   return Object.entries(picks)
     .map(([idStr, pick]) => {
-      const gameId = parseInt(idStr, 10);
-      const r = resultMap.get(gameId);
+      const gameId: number | string = idStr.startsWith('mlb-') ? idStr : parseInt(idStr, 10);
+      const r = resultMap.get(idStr);
 
       const homeTeamName = r?.home_team?.name_ko ?? null;
       const awayTeamName = r?.away_team?.name_ko ?? null;
@@ -100,7 +102,10 @@ export function buildPickEntries(
         if (r.ai_is_correct !== null) {
           aiIsCorrect = r.ai_is_correct;
         }
-        if (r.ai_predicted_winner_id !== null && r.home_team) {
+        if (r.ai_predicted_home_win != null) {
+          // MLB row — team FK 매칭 불가, deriveMlbOutcome 산출 bool 그대로 사용.
+          aiPredictedHome = r.ai_predicted_home_win;
+        } else if (r.ai_predicted_winner_id !== null && r.home_team) {
           aiPredictedHome = r.ai_predicted_winner_id === r.home_team.id;
         }
       }

@@ -30,6 +30,38 @@ function makePicks(entries: Array<[number, 'home' | 'away', string]>): UserPicks
   return store;
 }
 
+// cycle 2244 fix-incident — MLB 픽('mlb-{external_game_id}') 회귀 가드.
+// PickButton 이 league='mlb' 일 때 붙이는 storageKey 네임스페이스(mlb-{id})와 동일.
+function makeMlbResult(
+  externalGameId: string,
+  homeScore: number,
+  awayScore: number,
+  predictedHomeWin: boolean | null = homeScore >= awayScore,
+): PickGameResult {
+  return {
+    id: `mlb-${externalGameId}`,
+    game_date: '2026-08-11',
+    home_score: homeScore,
+    away_score: awayScore,
+    status: 'final',
+    home_team: { id: 0, name_ko: 'Dodgers', code: 'LAD' },
+    away_team: { id: 0, name_ko: 'Giants', code: 'SFG' },
+    ai_predicted_winner_id: null,
+    ai_predicted_home_win: predictedHomeWin,
+    ai_confidence: 0.6,
+    ai_is_correct: predictedHomeWin === null ? null : predictedHomeWin === homeScore > awayScore,
+    ai_factors: null,
+  };
+}
+
+function makeMlbPicks(entries: Array<[string, 'home' | 'away', string]>): UserPicksStore {
+  const store: UserPicksStore = {};
+  for (const [externalGameId, pick, pickedAt] of entries) {
+    store[`mlb-${externalGameId}`] = { pick, pickedAt };
+  }
+  return store;
+}
+
 describe('buildPickEntries', () => {
   it('returns empty array for empty picks', () => {
     expect(buildPickEntries({}, [])).toEqual([]);
@@ -73,6 +105,59 @@ describe('buildPickEntries', () => {
     const entries = buildPickEntries(picks, results);
     expect(entries[0].gameId).toBe(2);
     expect(entries[1].gameId).toBe(1);
+  });
+});
+
+// cycle 2244 fix-incident — MLB 픽이 KBO 전용 parseInt(idStr) 매칭에 걸려 gameId=NaN,
+// resultMap 조회 실패로 team names/score/isResolved 전부 깨져 보이던 회귀 가드.
+describe('buildPickEntries — MLB picks (mlb-{external_game_id})', () => {
+  it('mlb- 접두 픽이 문자열 gameId 그대로 유지되고 NaN 이 되지 않음', () => {
+    const picks = makeMlbPicks([['745444', 'home', '2026-08-11T10:00:00Z']]);
+    const results = [makeMlbResult('745444', 5, 2)];
+    const entries = buildPickEntries(picks, results);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].gameId).toBe('mlb-745444');
+    expect(Number.isNaN(entries[0].gameId)).toBe(false);
+  });
+
+  it('mlb 결과 매칭 시 팀명/스코어/isResolved 정상 채워짐 (이전엔 전부 null/false)', () => {
+    const picks = makeMlbPicks([['745444', 'home', '2026-08-11T10:00:00Z']]);
+    const results = [makeMlbResult('745444', 5, 2)];
+    const entries = buildPickEntries(picks, results);
+    expect(entries[0].homeTeamName).toBe('Dodgers');
+    expect(entries[0].awayTeamName).toBe('Giants');
+    expect(entries[0].isResolved).toBe(true);
+    expect(entries[0].myIsCorrect).toBe(true); // home 픽, home 승
+  });
+
+  it('ai_predicted_home_win 필드로 aiIsCorrect 판정 (KBO 의 id-equality 방식 대신)', () => {
+    const picks = makeMlbPicks([['745444', 'away', '2026-08-11T10:00:00Z']]);
+    const results = [makeMlbResult('745444', 5, 2, true)]; // AI predicted home, home won
+    const entries = buildPickEntries(picks, results);
+    expect(entries[0].aiIsCorrect).toBe(true);
+    expect(entries[0].myIsCorrect).toBe(false); // away 픽인데 home 승
+  });
+
+  it('KBO 와 MLB 픽 혼합 시 서로 매칭 충돌 없음', () => {
+    const picks = {
+      ...makePicks([[1, 'home', '2026-05-10T10:00:00Z']]),
+      ...makeMlbPicks([['745444', 'away', '2026-08-11T10:00:00Z']]),
+    };
+    const results = [makeResult(1, 5, 3), makeMlbResult('745444', 2, 5, false)];
+    const entries = buildPickEntries(picks, results);
+    expect(entries).toHaveLength(2);
+    const kbo = entries.find((e) => e.gameId === 1);
+    const mlb = entries.find((e) => e.gameId === 'mlb-745444');
+    expect(kbo?.isResolved).toBe(true);
+    expect(mlb?.isResolved).toBe(true);
+    expect(mlb?.myIsCorrect).toBe(true); // away 픽, away 승
+  });
+
+  it('결과 없는 mlb 픽은 KBO 와 동일하게 unresolved 처리 (NaN 매칭 오탐 없음)', () => {
+    const picks = makeMlbPicks([['999999', 'home', '2026-08-11T10:00:00Z']]);
+    const entries = buildPickEntries(picks, []);
+    expect(entries[0].isResolved).toBe(false);
+    expect(entries[0].homeTeamName).toBeNull();
   });
 });
 
