@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — series.ts scoring_rule 필터 누락 정정 (#1338 family 4번째, sweep 완료) SUCCESS (cycle 2291, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 completed/archived/blocked, unprocessed lookup 대상 제외). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/operational-analysis/explore-idea). 주기 trigger 3종 미도달(fix-incident 13-gap/20, op-analysis 6-gap/25, info-arch 11-gap/30, lotto 27-gap/30 근접이나 미도달). cycle 2290 retro가 지목한 `insights/series.ts` 후속 확인.
+
+감사: `getSeriesByTopic`의 predictions select가 `.eq("prediction_type","pre_game")`만 걸고 scoring_rule 미필터 확인. shadow-cohort.ts의 shadow row(v2.1-B-shadow/v2.0-shadow)도 order-by created_at desc 대상에 포함되나, daily.ts가 shadow row의 reasoning 필드를 템플릿 문자열(`` `[v2.1-B-shadow quant only] ${finalReasoning}` ``)로 넣어 object가 문자열로 뭉개져 저장 — series.ts의 `ReasoningShape` 파싱(`r?.debate?.verdict`)이 실패해 `presented`가 null이 되어 우연히 걸러지고 있었음(실제 유저 가시 오염 0, 다만 fragile — reasoning 포맷이 나중에 바뀌면 silent leak 재발 가능).
+
+수정: `CURRENT_MODEL_FILTER` import + `.match(CURRENT_MODEL_FILTER)` 추가(sibling 컨벤션 정합, defense-in-depth). 정적 grep 회귀 테스트(`silent-drift-cycle-2291.test.ts`) 추가. type-check/lint clean, test 480 files/4082 tests pass. PR #3000 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit 411dea9d, 사례 18 mitigation 준수).
+
+**#1338 family sweep 완료 확인**: `prediction_type='pre_game'` 사용 전체 파일(35개, __tests__ 제외) 재검sweep → `CURRENT_MODEL_FILTER`/`CURRENT_SCORING_RULE`/`scoring_rule` 부재 파일 0건. cycle 2288(buildTeamProfile)~2291(series) 4개 파일 순차 fix로 형제 파일 전부 정합 완료.
+
+다음 후보: lotto(gap 28/30, 다음 사이클 근접 도달 예상) — diversity 확보. review-code(heavy) #1338 family sweep 종료로 신규 대형 미감사 영역 재탐색 필요 시점.
+
 ## ⚪ review-code (heavy) — buildTeamFactorAverages.ts scoring_rule 필터 누락 정정 (#1338 family 3번째) SUCCESS (cycle 2290, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(plan #27 phase1_done/phase2_rejected/phase3_blocked_on_data — unprocessed lookup 대상 제외). 2-chain lock 미충족(직전 8사이클 distinct=3). 주기 trigger 3종 미도달(fix-incident 12-gap/20, op-analysis 5-gap/25, info-arch 10-gap/30, lotto 26-gap/30 — picks 파일 이미 존재/data 최신이라 신규 작업 불필요). cycle 2289 retro가 지목한 "#1338 family 잔존 미감사 대형 파일 재탐색"을 grep sweep으로 수행.
