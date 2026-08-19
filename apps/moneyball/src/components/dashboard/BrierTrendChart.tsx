@@ -14,7 +14,7 @@ import {
 
 import { CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY } from "@moneyball/shared";
 
-import type { BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
+import { countBrierTrendWeeks, type BrierTrendPoint } from "@/lib/accuracy/buildAccuracyData";
 import { brand, chartCursorTint, neutral, semantic } from "@/lib/design-tokens";
 import { ChartTooltip } from "./ChartTooltip";
 
@@ -45,7 +45,7 @@ interface PivotRow {
 }
 
 export function BrierTrendChart({ data }: BrierTrendChartProps) {
-  if (data.length < 3) {
+  if (countBrierTrendWeeks(data) < 3) {
     return (
       <div className="h-64 flex flex-col items-center justify-center text-center">
         <span className="text-4xl mb-3">📈</span>

@@ -434,6 +434,15 @@ export function buildBrierTrend(rows: PredRow[]): BrierTrendPoint[] {
   return result;
 }
 
+// buildBrierTrend 는 주차마다 'all' + 실제 scoring_rule 최소 2개 point 를 밀어넣어
+// result.length 가 주차 수의 2배 이상 — "3주 이상 검증" UI 카피(accuracy/page.tsx,
+// MlbAccuracyDashboard.tsx)가 brierTrend.length>=3 으로 게이트하면 실제 2주차에 이미
+// 열려 카피와 동작이 어긋남 (review-code heavy 감사, cycle 2195). distinct week(date)
+// 수로 세야 카피와 일치.
+export function countBrierTrendWeeks(data: BrierTrendPoint[]): number {
+  return new Set(data.map((p) => p.date)).size;
+}
+
 // totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean. Brier 보다 직관적.
 export interface RollingAccuracyPoint {
   date: string;

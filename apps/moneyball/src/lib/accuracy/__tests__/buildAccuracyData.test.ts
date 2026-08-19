@@ -17,6 +17,7 @@ import {
   buildWinnerProbBuckets,
   bucketize,
   calibrationGap,
+  countBrierTrendWeeks,
   isConfidenceTierInverted,
   SCORING_RULE_HEATMAP_ROWS,
 } from '../buildAccuracyData';
@@ -434,6 +435,37 @@ describe('buildBrierTrend', () => {
     expect(allCell?.n).toBe(2);
     expect(v18Cell?.n).toBe(2);
     expect(allCell?.brier).toBeCloseTo(v18Cell!.brier!);
+  });
+});
+
+// review-code (heavy) 감사, cycle 2195 — buildBrierTrend 는 주차마다 'all' + scoring_rule
+// 최소 2개 point 를 밀어넣어 result.length 가 실제 주차 수의 2배. accuracy/page.tsx +
+// MlbAccuracyDashboard.tsx 의 "3주 이상 검증" 카피가 과거 brierTrend.length>=3 으로
+// 게이트해 실제 2주차에 이미 열리는 불일치 (silent copy/behavior drift) — countBrierTrendWeeks
+// 로 distinct week 만 세도록 정정.
+describe('countBrierTrendWeeks', () => {
+  it('빈 배열 → 0', () => {
+    expect(countBrierTrendWeeks([])).toBe(0);
+  });
+
+  it('2주 데이터 (각 주 all+scoring_rule 2 point) → 4 point 지만 week count 는 2', () => {
+    const rows = [
+      { confidence: 0.6, is_correct: true, verified_at: '2026-05-04T01:00:00Z', scoring_rule: 'v1.8' },
+      { confidence: 0.6, is_correct: false, verified_at: '2026-05-11T01:00:00Z', scoring_rule: 'v1.8' },
+    ];
+    const result = buildBrierTrend(rows);
+    expect(result.length).toBe(4);
+    expect(countBrierTrendWeeks(result)).toBe(2);
+  });
+
+  it('3주 데이터 → week count 3 (UI "3주 이상" 카피와 일치)', () => {
+    const rows = [
+      { confidence: 0.6, is_correct: true, verified_at: '2026-05-04T01:00:00Z', scoring_rule: 'v1.8' },
+      { confidence: 0.6, is_correct: false, verified_at: '2026-05-11T01:00:00Z', scoring_rule: 'v1.8' },
+      { confidence: 0.6, is_correct: true, verified_at: '2026-05-18T01:00:00Z', scoring_rule: 'v1.8' },
+    ];
+    const result = buildBrierTrend(rows);
+    expect(countBrierTrendWeeks(result)).toBe(3);
   });
 });
 

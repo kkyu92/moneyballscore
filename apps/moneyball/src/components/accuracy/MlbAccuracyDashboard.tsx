@@ -1,6 +1,6 @@
 import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
-import type { Bucket, ConfidenceTier, WinnerProbBucket, RollingAccuracyPoint, BrierTrendPoint, ScoringRuleDayCell, ScoringRuleWeekCell } from '@/lib/accuracy/buildAccuracyData';
+import { countBrierTrendWeeks, type Bucket, type ConfidenceTier, type WinnerProbBucket, type RollingAccuracyPoint, type BrierTrendPoint, type ScoringRuleDayCell, type ScoringRuleWeekCell } from '@/lib/accuracy/buildAccuracyData';
 import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
 import { WinnerProbBucketChart } from '@/components/dashboard/WinnerProbBucketChart';
 import { RollingAccuracyChart } from '@/components/dashboard/RollingAccuracyChart';
@@ -309,7 +309,7 @@ export function MlbAccuracyDashboard({
         </section>
       )}
 
-      {brierTrend.length >= 3 && (
+      {countBrierTrendWeeks(brierTrend) >= 3 && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div>
             <h2 className="text-lg font-bold">{s.brierTrendTitle}</h2>
