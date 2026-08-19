@@ -13,6 +13,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { KBO_TEAMS, assertSelectOk, INSIGHTS_SERIES_LIMIT, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
+import { CURRENT_MODEL_FILTER } from "@/config/model";
 
 const TEAM_CODES = Object.keys(KBO_TEAMS) as TeamCode[];
 const TEAM_CODE_SET = new Set<string>(TEAM_CODES.map((c) => c.toLowerCase()));
@@ -121,6 +122,7 @@ export async function getSeriesByTopic(
     .select(
       "is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
+    .match(CURRENT_MODEL_FILTER)
     .eq("prediction_type", "pre_game")
     .order("created_at", { ascending: false })
     .limit(limit * 3);
