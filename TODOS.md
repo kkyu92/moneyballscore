@@ -1,5 +1,15 @@
 # TODOS
 
+## 🔴 fix-incident — MLB 픽('mlb-{external_game_id}') /api/picks/results silent drop 수정 (cycle 2244, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue/approved plan 0건, 2-chain lock 없음 distinct=3/8, fix-incident 자체 20-cycle gap 미도달 9<20). cycle 2242/2243 retro 양쪽 모두 explore-idea/dimension-cycle diversity 를 권고했으나, plan #26(MLB 주간/월간 리뷰) 완결 + Phase 3 dedup(pearsonCorrelation)도 cycle 2232 에 이미 처리돼 명시적 신규 explore-idea/review-code 후보가 없음. KBO 라우트 vs MLB 라우트 parity grep 중 `/picks`(내 픽 기록)·`/leaderboard` 가 MLB 미러 부재 발견 → 코드 추적 결과 "미러 부재"가 아니라 **silent 실패**로 확인, fix-incident 로 재분류.
+
+실측: `PickButton`(league='mlb')은 localStorage `mb_user_picks_v1` 에 `mlb-{external_game_id}` 문자열 키로 픽을 정상 저장하지만, `/api/picks/results` (`parseInt(s,10)` 필터)와 `buildPickEntries`(`parseInt(idStr,10)`) 양쪽 모두 KBO 정수 game_id 만 가정 — `parseInt('mlb-745444',10)` === `NaN` 이라 MLB 픽이 매 요청 100% 드롭. "내 픽 기록" 페이지에서 MLB 픽은 팀명 null, 영구 "대기중"(isResolved 항상 false), `gameId=NaN` React key 충돌(여러 MLB row 가 있어도 1개만 렌더)로 나타남. 리더보드 국가 동기화(`lib/leaderboard/use-leaderboard.ts` `readLocalPicks` `Number(id)` 필터)도 동일 클래스 버그로 MLB 픽을 서버에 전혀 동기화 안 함 — 이건 `mlb_pick_poll_events`(migration 048) 선례처럼 별도 테이블/스키마가 필요한 더 큰 범위라 이번 fix 스코프 밖(Tier 3)으로 명시 유지.
+
+수정: `/api/picks/results/route.ts` 가 ids 를 KBO 숫자군과 `mlb-` 접두 문자열군으로 분리해 각각 조회 — MLB 는 `mlb_schedule` + `predictions`(`prediction_type='pre_game' AND league='mlb' AND scoring_rule IN MLB_PRODUCTION_COHORT_RULES`, `mlb-shared.ts fetchMlbPredictionRowsInRange` 와 동일 join 패턴 재사용) 조회 후 `deriveMlbOutcome` 으로 승자/정오 직접 산출(MLB predictions 행은 `predicted_winner`/`is_correct` 컬럼이 전량 NULL — team FK 매칭이 애초에 안 맞음). `PickGameResult.id: number → number | string`, 신규 `ai_predicted_home_win`(MLB 전용 bool, id-equality 매칭 우회) 필드 추가. `buildPicksStats.ts` 는 resultMap 을 `String(id)` 키로 통일해 KBO/MLB 양쪽 매칭. 테스트 11건 신규(route.test.ts 6건 + buildPicksStats.test.ts 5건 — NaN 미발생/팀명·스코어 정상 채움/ai_predicted_home_win 판정/KBO+MLB 혼합 무충돌/미매칭 unresolved). type-check/lint clean, 전체 464 files/4016 tests all pass (+11, zero regression). commit `a08e9f96` 직접 main push (pre-push hook 통과).
+
+다음 후보: 리더보드 국가 동기화 MLB 지원(Tier 3, DB 스키마 결정 필요 — `mlb_pick_poll_events` 패턴처럼 별도 테이블 또는 `leaderboard` 관련 테이블 컬럼 타입 변경) 은 명시적 후속 과제로 carry-over. 그 외 신규 explore-idea/review-code 후보 부재 시 dimension-cycle fallback 또는 diversity(polish-ui/info-arch) 자연 검토 권장.
+
 ## 🔴 review-code (heavy) — mlb-pipeline.ts 최초 감사, 2개 모드 insert 100% silent 실패 발견/수정 (cycle 2243, 2026-08-19)
 
 진단: 강제 trigger 없음 (open issue/approved plan 0건, gap 미달, 2-chain lock 없음distinct=4/8). cycle 2239/2241 retro 양쪽 모두 `mlb-pipeline.ts`(731줄, validator.ts/daily.ts 감사 후 유일 미감사 non-UI pipeline 파일)를 다음 후보로 명시 — carry-over 채택. cycle 2242 diversity 권고(explore-idea/dimension-cycle)보다 명시적 미감사 대상 존재를 우선.
