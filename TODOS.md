@@ -1,5 +1,36 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 팀 로고 placeholder + JSON-LD 404 정정 (cycle 2205, 2026-08-19)
+
+open issue 0건, approved plan 0건(plan #24/#25 모두 completed/archived), 2-chain
+lock 없음(직전 8사이클 distinct=4), gap-trigger 전부 미충족, CI green. cycle
+2204 next_recommended=explore-idea + review-code 2연속 이후 다양성 차원.
+
+**발견**: `/mlb/team/[code]` (KO+EN 양쪽) JSON-LD `SportsTeam.logo` 가
+`${SITE_URL}/logos/mlb/${code}.png` 참조하는데 실제 파일/디렉토리 자체가
+없음(`apps/moneyball/public/logos/mlb/` 부재) — production 실측
+`curl .../logos/mlb/NYY.png` → 404 확인. KBO `TeamLogo.tsx` 는 실제 로고
+PNG 보유(네이버 KBO CDN, cycle f2e6b241)하지만 MLB 는 처음부터 placeholder
+조차 생성된 적 없음(헤더도 색상 원 div 뿐).
+
+**수정**: `MLB_TEAMS.color`(30팀 각 hex, 사실 데이터·저작권 무관) 기반 SVG
+placeholder 30개 신규(`apps/moneyball/public/logos/mlb/{CODE}.svg`, 원형+
+팀코드 텍스트) — 공식 로고 스크래핑 없이 법적 리스크 회피, KBO
+`TeamLogo.tsx` 원본 설계 코멘트("SVG 플레이스홀더 팀색+약어, 실제 로고는
+동일 파일명 덮어쓰기") 그대로 재현. `MlbTeamLogo.tsx` 신규 컴포넌트
+(`unoptimized` — next.config `dangerouslyAllowSVG` 없이 기본 optimizer가
+로컬 SVG 거부) + KO/EN 헤더 배선 + JSON-LD `logoUrl` 확장자 `.png`→`.svg`
+정정.
+
+type-check/lint/vitest(448/3908) clean + `pnpm build` 성공 + 로컬 dev
+서버 실측(`/mlb/team/LAD` 200 + `<img src="/logos/mlb/LAD.svg">` 렌더 +
+자산 자체 200/`image/svg+xml`). 단일 논리 단위 — PR 생략, main 직접
+commit+push (R4/R7, commit `0b7300c9`).
+
+**다음 explore-idea 후보 (carry-over, 미착수)**: `/mlb/matchup/[teamA]/
+[teamB]` 헤더도 동일 색상-원 placeholder(line ~213) — `MlbTeamLogo` 재사용
+가능한 동일 gap, 본 cycle 스코프 밖(팀 프로필 우선).
+
 ## 🟢 fix-incident — deploy-drift-alert 빈 commit_sha silent pass 차단 (cycle 2204, 2026-08-19)
 
 진단 단계에서 GH Actions scheduled workflow 최근 실행 상태 점검(review-code
