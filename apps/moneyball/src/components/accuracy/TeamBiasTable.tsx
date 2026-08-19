@@ -1,4 +1,4 @@
-import { shortTeamName, TEAM_BIAS_OVERFIT, TEAM_BIAS_HIGHLIGHT, TEAM_BIAS_NEUTRAL } from "@moneyball/shared";
+import { shortTeamName, TEAM_BIAS_OVERFIT, TEAM_BIAS_HIGHLIGHT, TEAM_BIAS_NEUTRAL, SMALL_SAMPLE_N } from "@moneyball/shared";
 
 interface BiasLike {
   teamCode: string;
@@ -19,7 +19,7 @@ const COPY = {
     overfit: "과잉예측",
     underfit: "과소예측",
     footnote: (sourceLabel: string) =>
-      `편향 갭 = 예측 승률 − 실제 승률. +는 과잉예측(더 자주 이긴다고 예측), −는 과소예측. n≥5 팀만 표시. 실제 승률 = ${sourceLabel}.`,
+      `편향 갭 = 예측 승률 − 실제 승률. +는 과잉예측(더 자주 이긴다고 예측), −는 과소예측. n≥${SMALL_SAMPLE_N} 팀만 표시. 실제 승률 = ${sourceLabel}.`,
   },
   en: {
     standingsWarning: "Live standings data is unavailable right now, which limits the actual win rate comparison.",
@@ -31,7 +31,7 @@ const COPY = {
     overfit: "Over-predicted",
     underfit: "Under-predicted",
     footnote: (sourceLabel: string) =>
-      `Bias gap = predicted win rate − actual win rate. + means the model over-predicts wins, − means it under-predicts. Teams with n≥5 only. Actual win rate is based on ${sourceLabel}.`,
+      `Bias gap = predicted win rate − actual win rate. + means the model over-predicts wins, − means it under-predicts. Teams with n≥${SMALL_SAMPLE_N} only. Actual win rate is based on ${sourceLabel}.`,
   },
 };
 
