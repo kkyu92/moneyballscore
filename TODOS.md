@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — agents/postview.ts 최초 감사, FactorErrorsBars/PostviewPanel dev jargon leak 정정 (cycle 2273, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, fix-incident 15-gap/op-analysis 8-gap/lotto 9-gap/info-arch 23-gap 모두 미도달). cycle 2271 explore-idea saturation + cycle 2272 review-code 대형 파일 소진 결론 → 새 미감사 대상 재탐색. `packages/kbo-data/src/agents/postview.ts`(496줄) — git log 그렙으로 대조한 결과 "최초 감사" 이력 없는 미감사 agent 파일로 확인, 선택.
+
+실측: 오케스트레이션 로직(팀 postview 병렬 → 심판 factor-attribution 순차 → validator 검증 → fallback) clean, `canonicalizeFactorKey`/`isWeightedFactor`/`WEIGHTED_FACTOR_BASES` 일관성 정상. 하지만 이 모듈이 생성하는 `factorErrors[].factor`/`TeamPostview.keyFactor`가 정규화된 raw snake_case 키(`bullpen_fip` 등)인데, 이를 렌더하는 `FactorErrorsBars.tsx`(PostviewPanel 경유 `/analysis/game/[id]` 사용자 가시 페이지)가 `@/lib/predictions/factorLabels`의 `FACTOR_LABELS_TECHNICAL` 단일 source를 거치지 않고 raw 키를 그대로 노출 — 동일 데이터 타입을 쓰는 `dashboard/FactorErrorTable.tsx`(한글 라벨 + raw 보조 표시)와 `reviews/misses/page.tsx`(`factorLabel()` 헬퍼 번역)는 이미 정상 처리 중이라, 이 두 컴포넌트만 사각지대였던 dev 용어 leak 확인.
+
+수정: `FactorErrorsBars.tsx`가 `FACTOR_LABELS_TECHNICAL` 조회해 한글 라벨 우선 표시(번역된 경우만 raw 키 mono 보조 병기, aria-label도 한글 기준 정정) + `PostviewPanel.tsx`의 홈/원정 `keyFactor` 표시도 동일 헬퍼로 번역. `FactorErrorsBars.test.tsx`에 canonical 키(`bullpen_fip`→"불펜 FIP") 번역 신규 테스트 1건 추가, 미등록 키 raw fallback 유지 확인. 474 files/4063 tests all pass(+1, zero regression), `tsc --noEmit` clean, lint clean. VERSION/root+apps package.json 동기화(0.5.62.52→53). main 직접 push, PR 생략(3 file 소규모 UI 정정).
+
+다음 후보: review-code (heavy) 계속 — 미감사 대형 파일 후보 재탐색 필요(`packages/shared/src/index.ts` 3390줄 최대 미감사, `packages/kbo-data/src/scrapers/fancy-stats.ts` 526줄, `packages/kbo-data/src/pipeline/silent-drift-alert.ts` 407줄 모두 grep 결과 "최초 감사" 이력 없음). 또는 diversity 고려(op-analysis 8/25-gap, lotto 9/30-gap, fix-incident 15/20-gap 아직 미도달이나 누적 중).
+
 ## 🟢 review-code (heavy) — debug/factor-correlation/page.tsx 최초 감사, 데이터 범위 stale 주석/UI 문구 정정 (cycle 2272, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=4 [lotto/op-analysis/review-code x5/explore-idea], ship-0/lite-cap 미충족, fix-incident 14-gap/op-analysis 7-gap/lotto 8-gap/info-arch 22-gap 모두 미도달). cycle 2271 explore-idea(lite) saturation 발화 후 신규 후보 없음 결론 + carry-over "review-code(heavy) 복귀 자연" 권고 + TODOS 미감사 대형 파일 목록 잔존 (`debug/factor-correlation/page.tsx`, 543줄) 선택.

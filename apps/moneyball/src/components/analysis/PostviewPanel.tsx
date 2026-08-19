@@ -1,5 +1,10 @@
 import { FactorErrorsBars } from './FactorErrorsBars';
 import { KBO_TEAMS, type TeamCode } from '@moneyball/shared';
+import { FACTOR_LABELS_TECHNICAL } from '@/lib/predictions/factorLabels';
+
+function keyFactorLabel(key: string): string {
+  return FACTOR_LABELS_TECHNICAL[key] ?? key;
+}
 
 interface TeamPostview {
   summary: string;
@@ -73,7 +78,7 @@ export function PostviewPanel({
               {awayPostview.keyFactor && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="font-medium">핵심:</span>{' '}
-                  {awayPostview.keyFactor}
+                  {keyFactorLabel(awayPostview.keyFactor)}
                 </p>
               )}
               {awayPostview.missedBy && (
@@ -94,7 +99,7 @@ export function PostviewPanel({
               {homePostview.keyFactor && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="font-medium">핵심:</span>{' '}
-                  {homePostview.keyFactor}
+                  {keyFactorLabel(homePostview.keyFactor)}
                 </p>
               )}
               {homePostview.missedBy && (

@@ -1,3 +1,5 @@
+import { FACTOR_LABELS_TECHNICAL } from '@/lib/predictions/factorLabels';
+
 interface FactorError {
   factor: string;
   predictedBias: number; // -0.5 ~ +0.5
@@ -34,12 +36,19 @@ export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
           ? 'bg-[var(--color-factor-favor)]'
           : 'bg-[var(--color-factor-against)]';
         const biasLabel = bias >= 0 ? `+${bias.toFixed(2)}` : bias.toFixed(2);
+        const translated = FACTOR_LABELS_TECHNICAL[err.factor];
+        const label = translated ?? err.factor;
 
         return (
           <div key={err.factor} className="text-sm">
             <div className="flex justify-between items-baseline mb-1">
-              <span className="font-mono font-medium text-gray-700 dark:text-gray-200">
-                {err.factor}
+              <span className="font-medium text-gray-700 dark:text-gray-200">
+                {label}
+                {translated && (
+                  <span className="ml-2 font-mono text-xs text-gray-400 dark:text-gray-500">
+                    {err.factor}
+                  </span>
+                )}
               </span>
               <span
                 className={`font-mono ${
@@ -54,7 +63,7 @@ export function FactorErrorsBars({ errors }: FactorErrorsBarsProps) {
             <div
               className="bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-2 overflow-hidden"
               role="img"
-              aria-label={`${err.factor} 편향 ${biasLabel}, ${
+              aria-label={`${label} 편향 ${biasLabel}, ${
                 isHomeFavor ? '홈팀 유리' : '원정팀 유리'
               }`}
             >

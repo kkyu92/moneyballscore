@@ -29,7 +29,7 @@ describe('FactorErrorsBars', () => {
     expect(bar).toBeInTheDocument();
   });
 
-  it('factor 이름 표시', () => {
+  it('factor 이름 표시 (미등록 키는 raw fallback)', () => {
     render(
       <FactorErrorsBars
         errors={[
@@ -40,6 +40,14 @@ describe('FactorErrorsBars', () => {
     );
     expect(screen.getByText('home_sp_fip')).toBeInTheDocument();
     expect(screen.getByText('away_lineup_woba')).toBeInTheDocument();
+  });
+
+  it('canonical factor 키는 한글 라벨로 표시 + raw 키는 보조 표시 (dev jargon leak 차단)', () => {
+    render(
+      <FactorErrorsBars errors={[{ factor: 'bullpen_fip', predictedBias: 0.1 }]} />
+    );
+    expect(screen.getByText('불펜 FIP')).toBeInTheDocument();
+    expect(screen.getByText('bullpen_fip')).toBeInTheDocument();
   });
 
   it('편향 수치 +0.08 포맷팅', () => {

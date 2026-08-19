@@ -1,3 +1,27 @@
+## v0.5.62.53 — 2026-08-20 (cycle 2273, review-code (heavy): agents/postview.ts 최초 감사 — FactorErrorsBars/PostviewPanel dev jargon leak 정정)
+
+### fix(analysis): 사후 분석 패널의 raw factor 키 dev jargon leak 정정
+
+`packages/kbo-data/src/agents/postview.ts`(496줄, 최초 감사) — LLM 오케스트레이션 로직(팀
+postview 병렬 실행 → 심판 factor-attribution → validator 검증 → fallback) 자체는 clean,
+`canonicalizeFactorKey`/`isWeightedFactor` 일관성도 정상. 다만 `postview.ts`가 만드는
+`factorErrors[].factor`/`TeamPostview.keyFactor`는 정규화된 raw snake_case 키
+(`bullpen_fip`, `sp_fip` 등)인데, 이 데이터를 사용자 가시 `/analysis/game/[id]` 페이지에
+렌더하는 `FactorErrorsBars`/`PostviewPanel` 컴포넌트가 `@/lib/predictions/factorLabels`의
+`FACTOR_LABELS_TECHNICAL` 단일 source를 거치지 않고 raw 키를 그대로 표시 — 같은 데이터
+타입을 쓰는 `dashboard/FactorErrorTable.tsx`(한글 라벨 + raw 키 보조 표시)와
+`reviews/misses/page.tsx`(`factorLabel()` 헬퍼로 번역)는 이미 올바르게 처리하는데
+`FactorErrorsBars`/`PostviewPanel` 두 곳만 사각지대였던 dev 용어 leak.
+
+- `apps/moneyball/src/components/analysis/FactorErrorsBars.tsx`: `FACTOR_LABELS_TECHNICAL`
+  조회 → 한글 라벨 우선 표시, 번역된 경우만 raw 키를 보조(mono, 작은 글씨)로 병기.
+  aria-label도 한글 라벨 기준으로 정정
+- `apps/moneyball/src/components/analysis/PostviewPanel.tsx`: 홈/원정 postview의
+  `keyFactor` 표시도 동일 헬퍼로 번역
+- `FactorErrorsBars.test.tsx`: 미등록 키 raw fallback 유지 확인 + canonical 키
+  (`bullpen_fip` → "불펜 FIP") 번역 신규 테스트 추가
+- 474 files / 4063 tests all pass (+1, zero regression), `tsc --noEmit` clean, lint clean
+
 ## v0.5.62.52 — 2026-08-20 (cycle 2272, review-code (heavy): debug/factor-correlation/page.tsx 최초 감사 — 데이터 범위 주석/UI 문구 stale drift 정정)
 
 ### fix(debug): factor-correlation 페이지 데이터 범위 설명이 실제 쿼리와 불일치 정정
