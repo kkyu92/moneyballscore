@@ -27,6 +27,7 @@ export const DB_CONSTRAINTS = {
   pickPollEvents: 'device_id,game_id',
   userPicks: 'device_id,game_id',
   mlbPickPollEvents: 'device_id,external_game_id',
+  mlbUserPicks: 'device_id,external_game_id',
 } as const;
 
 export type DbConstraintKey = keyof typeof DB_CONSTRAINTS;

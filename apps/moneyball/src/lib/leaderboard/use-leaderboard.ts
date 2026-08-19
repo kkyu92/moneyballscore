@@ -53,6 +53,27 @@ function readLocalPicks(): Array<{ game_id: number; pick: 'home' | 'away'; picke
   }
 }
 
+const MLB_KEY_PREFIX = 'mlb-';
+
+// PickButton.tsx 가 MLB 픽을 `mlb-${externalGameId}` 로 네임스페이스 저장 (KBO 정수
+// game_id 와 값 공간 충돌 방지) — 이 접두어만 골라 external_game_id 로 복원.
+function readLocalMlbPicks(): Array<{ external_game_id: string; pick: 'home' | 'away'; picked_at: string }> {
+  try {
+    const raw = localStorage.getItem(PICKS_KEY);
+    if (!raw) return [];
+    const parsed: RawPicks = JSON.parse(raw);
+    return Object.entries(parsed)
+      .filter(([id, v]) => id.startsWith(MLB_KEY_PREFIX) && v?.pick && v?.pickedAt)
+      .map(([id, v]) => ({
+        external_game_id: id.slice(MLB_KEY_PREFIX.length),
+        pick: v.pick,
+        picked_at: v.pickedAt,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 export type SyncState = 'idle' | 'syncing' | 'done' | 'error';
 
 export interface LeaderboardState {
@@ -79,16 +100,29 @@ export function useLeaderboard(): LeaderboardState {
     if (!nickname || !deviceId) return;
     // Auto-sync new picks for already-joined users (idempotent — upsert ignores existing)
     const picks = readLocalPicks();
-    if (picks.length === 0) return;
-    void fetch('/api/leaderboard/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_id: deviceId, nickname, picks }),
-    }).catch((err) => {
-      Sentry.captureException(err, {
-        tags: { silent_drift_family: 'wave_166', component: 'use-leaderboard', op: 'leaderboard_auto_sync' },
+    if (picks.length > 0) {
+      void fetch('/api/leaderboard/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_id: deviceId, nickname, picks }),
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { silent_drift_family: 'wave_166', component: 'use-leaderboard', op: 'leaderboard_auto_sync' },
+        });
       });
-    });
+    }
+    const mlbPicks = readLocalMlbPicks();
+    if (mlbPicks.length > 0) {
+      void fetch('/api/leaderboard/mlb-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_id: deviceId, nickname, picks: mlbPicks }),
+      }).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { silent_drift_family: 'wave_166', component: 'use-leaderboard', op: 'leaderboard_mlb_auto_sync' },
+        });
+      });
+    }
   }, [deviceId, nickname]);
 
   const join = useCallback(
@@ -100,19 +134,34 @@ export function useLeaderboard(): LeaderboardState {
       setSyncState('syncing');
 
       const picks = readLocalPicks();
+      const mlbPicks = readLocalMlbPicks();
       try {
-        const res = await fetch('/api/leaderboard/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ device_id: deviceId, nickname: trimmed, picks }),
-        });
+        const [res, mlbRes] = await Promise.all([
+          fetch('/api/leaderboard/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: deviceId, nickname: trimmed, picks }),
+          }),
+          mlbPicks.length > 0
+            ? fetch('/api/leaderboard/mlb-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ device_id: deviceId, nickname: trimmed, picks: mlbPicks }),
+              })
+            : null,
+        ]);
         const json: { synced?: number; error?: string } = await res.json();
-        if (res.ok) {
-          setSyncCount(json.synced ?? 0);
-          setSyncState('done');
-        } else {
+        if (!res.ok) {
           setSyncState('error');
+          return;
         }
+        let total = json.synced ?? 0;
+        if (mlbRes) {
+          const mlbJson: { synced?: number; error?: string } = await mlbRes.json();
+          if (mlbRes.ok) total += mlbJson.synced ?? 0;
+        }
+        setSyncCount(total);
+        setSyncState('done');
       } catch (err) {
         Sentry.captureException(err, {
           tags: { silent_drift_family: 'wave_173', component: 'use-leaderboard', op: 'leaderboard_join_sync' },
