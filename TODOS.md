@@ -3864,3 +3864,36 @@ EN 사용자가 헤더 메가메뉴/푸터에서 "Prediction Review" 클릭 시 
 - 진단 중 진짜 버그 발견: `.github/workflows/deploy-drift-alert.yml` 의 `fetch-depth: 1` (shallow clone) 때문에 `git rev-list --count PROD_SHA..MAIN_SHA` 가 항상 실패 → 모든 알림에서 `commits_ahead=unknown` 으로만 찍힘. "대량 backlog 자연 해소 중" 과 "소수 commit 인데 진짜 멈춤" 을 구분할 유일한 신호가 사라진 상태였음.
 - fix: fetch-depth 0 (전체 history, 68MB/4639 commit — 3분 timeout 안 충분) → commit 69f5ed54, main 직접 push
 - 실측 검증: `gh workflow run` 수동 트리거 후 로그 확인 → `commits_ahead=14` 정상 계산 (이전엔 항상 unknown)
+
+## review-code (heavy) — MLB weekly/monthly review 감사, drift 0건 (cycle 2233)
+
+open issue 0건, approved plan 0건. lock 미충족, 기타 trigger 전부 미충족(fix-incident
+gap=11/20, op-analysis gap=18/25, info-arch gap=8/30, lotto gap=58 지만 cycle 2226
+precedent 로 실익 부재 재확인). 자유 선택: cycle 2232 review-code(heavy) 가
+pearsonCorrelation dedup 만 좁게 다뤄, plan #26 이 신규 배선한 `/mlb/reviews/weekly`,
+`/mlb/reviews/monthly` 전체(데이터 레이어 + 양쪽 상세 페이지)는 아직 일반 drift 감사
+미수행 상태였음 — 형제 라우트 `/mlb/reviews`(hub) 가 cycle 2227 에 nav-locale 버그
+맞은 전례도 있어 감사 대상으로 선정.
+
+**감사 범위**: buildMlbWeeklyReview.ts / buildMlbMonthlyReview.ts / mlb-shared.ts
+(fetchMlbPredictionRowsInRange, buildMlbTeamStats, buildMlbFactorInsights,
+mapMlbRowsToHighlightCandidates) / weekly·monthly `[param]/page.tsx` / not-found /
+opengraph-image / sitemap.ts entries / Header·Footer nav 참조.
+
+**near-miss 조사 (버그 아님으로 확정)**: `mlb-shared.ts` `buildMlbFactorInsights()`
+의 war 팩터 비교가 cycle 2149(e47b1374) 에서 `analysis/page.tsx` 에 추가한
+`homeWar > 0 && awayWar > 0` sentinel 가드를 안 갖고 있음을 발견 — 하지만
+`mlb-pipeline.ts:329-330` (`home_war_total: home?.war ?? null`) 확인 결과 MLB 는
+팀 stats row 부재 시 실제 `null` 저장(주석: "가짜 값 저장 X — null 유지"), KBO 의
+"Fancy Stats top-50 미수록 = 0" 스크래핑 특유의 sentinel 관례와 다름. 즉 이 가드는
+KBO 전용이고 MLB 코드엔 없는 게 맞음(붙였으면 오히려 실제 WAR=0 인 팀을 부당 제외하는
+새 버그였을 것).
+
+**기타 확인**: `buildMlbMonthlyReview.ts` 의 전월비교 fetch 게이트(하드코딩 5) vs
+`buildSummary` 표시 게이트(`MIN_VERIFIED_GAMES_HEDGE`=10) 불일치 — KBO
+`buildMonthlyReview.ts` 원본과 byte-identical 패턴이라 신규 MLB drift 아님. sitemap/
+locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
+
+**결론**: drift 0건, PR/커밋 없음, cycle 2219 와 동일한 "감사했지만 발견 없음" 패턴.
+다음 후보: operational-analysis(gap 19) 또는 fix-incident(gap 12) — 둘 다 자체
+주기 트리거 임계 접근 중.
