@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — search/page.tsx 최초 감사, MLB hub 6개 STATIC_PAGES 누락 발견/수정 (cycle 2261, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 status=phase1_done/phase2_rejected/phase3_blocked, "approved" 아님, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 3-gap/op-analysis 21-gap/info-arch 11-gap/lotto 27-gap 모두 미도달, explore-idea saturation 11/15<12 미충족). cycle 2260 retro 가 명시적으로 남긴 후보 중 "review-code 미감사 대형 파일 — search/page.tsx(436줄)" 채택 (lotto 30-gap 은 cycle 2264 아직 미도달).
+
+실측: `search/page.tsx` 자체 fuzzy 검색 로직(팀/선수/날짜)은 클린. `STATIC_PAGES` 배열의 라우트 존재 여부 전수 검증(34개 slug → page.tsx 존재 확인) 통과. 이어서 `apps/moneyball/src/app` 최상위 디렉토리 목록과 대조해 STATIC_PAGES 밖 라우트 탐색 — `/community` 는 noindex placeholder(15줄, "커뮤니티 박제 중" 인증 layer 대기)라 의도적 제외 정상. `/mlb/*` 하위 디렉토리 전수 대조 결과 `mlb/predictions`/`mlb/accuracy`/`mlb/methodology`/`mlb/matchup`/`mlb/reviews`/`mlb/calendar` 6개가 실제 page.tsx + 테스트까지 존재하는 shipped KBO-parity hub 인데도 STATIC_PAGES 에 전무. git blame 확인 — STATIC_PAGES 마지막 MLB 동기는 cycle 1116(wave 9, "MLB 6 + KBO 3 entry 동기") 이었고, 그 이후(cycle 1116~2261, wave-626/#2983/#2971/#2724 등)에 신규 shipped 된 MLB parity 기능이 검색 인덱스와 한번도 재동기 안 된 silent drift.
+
+수정: 6개 slug 를 KBO 대응 엔트리와 동일 패턴(라벨+키워드)으로 `STATIC_PAGES` 에 추가. 재발 방지 회귀 테스트 신규(`silent-drift-cycle-2261.test.ts`) — 특정 6개 하드코딩 나열이 아니라 `/mlb/*` 디렉토리를 스캔해 자체 `page.tsx` 를 가진 모든 hub 가 STATIC_PAGES 대응 slug 를 갖는지 제네릭 검증 (향후 신규 MLB hub 추가 시 자동으로 drift 잡음 — STATIC_PAGES sync 가 사람이 기억해서 하는 수동 작업이라 반복 drift 났던 근본 원인 구조적 차단). `pnpm exec tsc --noEmit`/`eslint` clean, `vitest run` 472 files/4060 tests pass(신규 1건 포함). PR #2991 squash-merge, `state=MERGED` 실측 확인(e736b3ef).
+
+다음 후보: lotto chain 30-cycle gap (마지막 fire cycle 2234, cycle 2264 도달 예정) 또는 동일 제네릭 스캔 패턴을 다른 도메인(예: `/en/*` 라우트 트리 vs STATIC_PAGES EN 커버리지, 또는 KBO `/predictions`/`/reviews` 하위 서브라우트)으로 확장.
+
 ## 🟢 review-code (heavy) — KBO↔MLB matchup/team-profile 상수 재사용 + KO/EN 리터럴 parity 감사 (전부 clean) (cycle 2260, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 phase1 완료/phase2 반증/phase3 데이터 대기 상태로 "approved" 아님, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 0-gap/op-analysis 20-gap/info-arch 10-gap/lotto 26-gap 모두 미도달). cycle 2259 retro 가 "lotto 30-gap(cycle 2264 예정) 또는 review-code 신규 grep 소스" 를 다음 후보로 남겼고, lotto gap 미도달이라 review-code 신규 grep 소스 채택.
