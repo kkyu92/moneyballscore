@@ -1,3 +1,15 @@
+## 🟢 review-code (heavy) — packages/shared/src/index.ts 최초 전체 감사, park factor narrative 주석 + dead export 정정 (cycle 2275, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code 6 + polish-ui 1 + explore-idea 1], fix-incident 17-gap/op-analysis 10-gap/lotto 11-gap/info-arch 25-gap 모두 미도달). cycle 2274 carry-over 명시 후보 `packages/shared/src/index.ts`(3390줄, 모노레포 최대 미감사 파일) 선택.
+
+실측: Explore agent 전체 read(3390줄) + 본 감사 대상 6항목(stale 주석/dead export/중복 상수/타입 불일치/매직넘버/dev jargon leak) 체계 점검. 600+ wave 누적 정리 이력 덕에 대부분 clean(가중치 합 검증/WEEKDAY_LABELS_KO 통합/MIN_POLL_TOTAL 가드 모두 정상). 2건 발견: (1) `PARK_FACTOR_NARRATIVE_HITTER_MIN` 주석이 "잠실(1.02) 포함 3구장 타자 친화"라 서술했지만 `factor-explanations.ts`의 실제 비교는 strict `>`라 잠실(정확히 1.02, 임계값과 동일)은 중립 처리 — 대칭설계 확인(인천 0.98도 동일하게 strict `<`로 경계 제외되어 자기 comment와 일치) 후 하이터측 주석만 정정(코드 변경 없음). (2) `PostType` — 최초 커밋(Phase 1)부터 정의됐지만 모노레포 전체 grep 결과 단 한 번도 참조 안 된 dead export, 제거.
+
+부수 발견: cycle 2274 커밋이 VERSION/package.json만 bump(0.5.62.54)하고 CHANGELOG.md entry를 누락 — version-sync-guard 테스트 최초 fail로 발견, 누락 entry 소급 작성 후 재통과.
+
+수정: 3개 파일(`packages/shared/src/index.ts` 주석+dead export, `CHANGELOG.md` 2개 entry 소급+신규, `VERSION`/`package.json`/`apps/moneyball/package.json` 0.5.62.55). 474 files/4063 tests all pass, `tsc --noEmit` clean, lint clean, pre-push CI pass. main 직접 push, PR 생략(5 file 소규모 정정).
+
+다음 후보: review-code(heavy) 계속 시 `packages/kbo-data/src/scrapers/fancy-stats.ts`(526줄)/`packages/kbo-data/src/pipeline/silent-drift-alert.ts`(407줄) 둘 다 최초 감사 이력 없음. 또는 fix-incident(18/20-gap 임박)/op-analysis(11/25-gap)/lotto(12/30-gap) diversity 고려.
+
 # TODOS
 
 ## 🟢 polish-ui — 골드 accent 하드코딩 hex → CSS 토큰 정정 (cycle 2274, 2026-08-20)
