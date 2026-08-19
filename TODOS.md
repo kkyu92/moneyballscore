@@ -1,5 +1,29 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 팀별 예측 편향 분석 parity (cycle 2200, 2026-08-19)
+
+open issue 0건, approved plan 0건(plan 10~24 전량 completed/archived/pending-user-step,
+plan 25 archive — MLB Elo 소표본 bootstrap CI overlap 으로 phase3 gate 보류 확정).
+2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/fix-incident).
+직전 2 cycle next_recommended_chain 힌트(explore-idea or fix-incident) + CI green
+(fix-incident trigger 부재) 따라 explore-idea 선택. KBO `/accuracy` vs MLB
+`/mlb/accuracy` 컴포넌트 diff grep 결과 팀별 예측 편향(TeamBiasTable, biasGap =
+예측승률−실제승률) 섹션만 parity gap 으로 확인(FactorAccuracyTable/TeamMatchupCards
+는 이미 완료).
+
+**구현**: `buildMlbTeamBiasAnalysis()` 신규 — KBO 는 `fetchStandings()` 외부
+스크랩으로 실제 승률을 구하지만, MLB 는 `mlb_schedule` 테이블에 이미 완료 경기
+스코어가 있어 별도 스크래퍼 없이 직접 derive(`deriveMlbOutcome` 재사용, 신규
+외부 API 호출 0건 — risk 최소화). `TeamBiasTable` 컴포넌트는 KBO 전용
+`TeamBiasRow`/`shortTeamName` 하드코딩을 `TeamMatchupCards`/`FactorAccuracyTable`
+이미 확립한 패턴(구조적 타입 + `shortName`/`locale` prop, 기본값으로 KBO 호출부
+무변경)으로 일반화. `/mlb/accuracy`+`/en/mlb/accuracy` 양쪽에 bias 섹션 배선
+(KBO 순서 정합: teams→bias→matchup→factor-accuracy).
+
+신규 테스트 5건. `pnpm --filter moneyball type-check`/`lint`/
+`vitest run`(448 files/3908 tests) + `@moneyball/shared`/`@moneyball/kbo-data`
+type-check 전체 통과. PR #2966 squash 머지(`fdce1fbd`) + R7 자동 branch 삭제.
+
 ## 🟢 review-code (heavy) — TeamMatchupCards 소표본 임계값 N<3 컨벤션 정합 (cycle 2199, 2026-08-19)
 
 R4 push 재발 검증 (carry-over) 결과 divergence 0 확인 (cycle 2198 fix 정상 작동).
