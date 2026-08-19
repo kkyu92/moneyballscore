@@ -1,5 +1,24 @@
 # TODOS
 
+## 🟢 operational-analysis (heavy) — CE/비CE cohort 재측정 + op-analysis-ce-cohort.ts stale cycle label fix (cycle 2215, 2026-08-19)
+
+open issue 0건, approved plan 0건. 직전 8사이클 distinct=4 — 2-chain lock 미충족.
+info-arch/lotto 30-gap 트리거 수치상 충족했으나 cycle 2213이 바로 직전에 이미
+재확인·skip 처리해 1 cycle 만에 재확인 실익 없음. cycle 2214 next_recommended
+(operational-analysis or explore-idea) 채택.
+
+**재측정**: `scripts/op-analysis-ce-cohort.ts` 재실행 — n=316 (CE n=269 / 비CE
+n=47), 격차 9.9pp. cycle 2191 (24 cycle 전, 실제 경과 ~14시간)과 수치 동일 —
+verify cron 이 1일 1회라 신규 verified row 미발생, drift 아닌 정상 timing.
+
+**발견 + fix**: 재실행 도중 리포트 헤더/푸터가 실행 시점과 무관하게 항상
+`cycle 1550` 하드코딩 문자열을 출력하는 self-tooling 버그 확인 (cycle
+2115/2146/2191 리포트 전부 동일 stale label). 리포트 소비자가 최신 재측정인지
+과거 cycle 1550 원본인지 혼동할 수 있는 지점 — 라인 138/255/260 수정, 날짜
+(`${today}`)만 표기하고 가짜 cycle 번호/plan 참조 제거. 원본 spec 출처 주석
+(cycle 1547)은 역사 기록이라 유지. 재실행 검증 통과, lint/type-check green.
+Commit `47c0d33c` main 직접 push (self-tooling 소규모 fix, PR 불필요 판단).
+
 ## 🟢 review-code (heavy) — analysis 페이지 CE-fallback 필터 중복 + WAR=0 가드 불일치 (cycle 2214, 2026-08-19)
 
 open issue 0건, approved plan 0건(19건 전량 completed/archived/superseded/completed
