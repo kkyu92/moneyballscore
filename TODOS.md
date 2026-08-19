@@ -1,5 +1,32 @@
 # TODOS
 
+## 🟢 review-code (heavy) — validator.ts 최초 감사, 환각 검증 half-applied fix 재발 발견/수정 (cycle 2241, 2026-08-19)
+
+진단: 강제 trigger 없음 (2-chain lock 없음 distinct=4/8, fix-incident/op-analysis/
+lotto/info-arch 모두 gap 미달, open issue/plan 0건). cycle 2239/2240 retro 양쪽
+모두 validator.ts 를 다음 review-code(heavy) 후보로 명시 flag — carry-over 채택.
+
+- `packages/kbo-data/src/agents/validator.ts` (899줄, agents/ 디렉토리 유일 미감사
+  파일) 서브에이전트 위임 감사.
+- **발견**: cycle 2122 fix 가 `buildInjectionText` 안 `buildUserMessage` prepend
+  블록(recent_form/head_to_head 소수점 percent) 만 수동 동봉했으나, 같은 블록엔
+  metric 별 가중치% ("가중치 15.0%", `NUMERIC_WHITELIST` 밖) 와 WAR/SFR 반올림
+  정수 표기도 LLM 에 노출됨 — 정당한 인용도 `checkHallucinatedNumbers` 오탐 위험
+  (half-applied fix 재발 패턴, silent drift family).
+- **수정**: `renderContextForLLM` 의 "[정량 메트릭]"+"[상대 전적 + 최근 폼]" 섹션을
+  `renderMetricsAndRecentFormForLLM` 으로 추출 (agent-context.ts 단일 source),
+  `buildInjectionText` 재사용 — 수동 라인 나열 제거로 재동기화 누락 구조적 차단.
+  "[도메인 컨텍스트]" 섹션은 의도적 제외 (실측: 구장 hint 0.95 + K/9 잔재값 9 =
+  9.95 가 진짜 환각 9.95 를 통과시키는 false negative 확인).
+- 검증: type-check clean, kbo-data 88 files/1142 tests pass, apps/moneyball
+  silent-drift-wave-225 + agentFallbackStats pass, 신규 회귀 테스트 3건 추가.
+  PR #2982, commit `acc138e2`, R7 자동 머지 완료 (`gh pr view 2982 --json
+  state,mergedAt` 로 MERGED 실측 확인, mergeCommit `0ae406ce`).
+- 다음 후보: review-code(heavy) 가 validator.ts/daily.ts/UI 3대 monolith 모두
+  커버 완료 — 비UI agent/pipeline coverage 포화 근접. polish-ui 또는
+  info-architecture-review (diversity, 44+/16 cycle 무발화, 단 이번 사이클
+  quick check 로는 구체 trigger 미발견 — 깊은 재검토 필요) 또는 explore-idea 고려.
+
 ## 🟢 operational-analysis (heavy) — CE 상태 재확인 + debate_version stale default 발견/fix (cycle 2240, 2026-08-19)
 
 진단: 강제 trigger 없음 (모든 gap 미충족, lock 없음, open issue/plan 0건). 직전
