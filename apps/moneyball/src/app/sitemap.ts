@@ -72,6 +72,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/mlb/postseason`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/mlb/calendar`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/mlb/accuracy`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
+    // /mlb/predictions — EN mirror(/en/mlb/predictions) 는 Phase 1 KO 우선 후속(TODOS carry-over).
+    { url: `${SITE_URL}/mlb/predictions`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     // /en/mlb/* English mirror static routes
     { url: `${SITE_URL}/en/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/en/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },

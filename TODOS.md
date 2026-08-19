@@ -3498,3 +3498,56 @@ buildMlbDivisionStandings의 총 승수 tiebreak로 2위 이하로 밀릴 수 �
 회귀 테스트 1건 추가. type-check(4 packages)/lint/vitest(452 files·3923 tests)
 전체 통과. PR #2970 → `gh pr merge --squash --auto --delete-branch` → `gh pr view`
 실측 확인(state=MERGED, commit 945b1a59).
+
+## 🟢 explore-idea (heavy) — /mlb/predictions 전체 예측 기록 hub 신규 (KBO parity Phase 1, cycle 2218, 2026-08-19)
+
+open issue 0건, approved plan 0건(19건 전량 완료/archived). 2-chain lock 미충족
+(직전 8사이클 distinct=4). lotto(gap=43)/info-arch(gap=35) 30+ 사이클 gap 트리거
+수치상 충족했으나 cycle 2213/2215 가 이미 재확인·skip 처리(구현 완료/cron fresh)
+한 항목이라 3번째 재확인 실익 없어 이번에도 skip. cycle 2217 next_recommended
+(explore-idea or operational-analysis) 채택 — op-analysis 는 cycle 2215 재측정이
+14시간 전이라 즉시 재실행해도 신규 verified row 없이 동일 수치 반복될 게 자명해
+explore-idea 선택.
+
+**발견**: KBO `/predictions`(날짜별 필터/검색/정렬 가능한 전체 예측 기록 hub, 402줄)
+에 대응하는 MLB 라우트가 없음 — `/mlb/games/[date]` 개별 날짜 페이지는 있지만
+전체 날짜를 가로지르는 hub 자체가 부재. `/mlb` 앱 라우트 10개 vs KBO 상응 라우트
+목록 diff 로 발견(`analysis`/`dashboard`/`insights`/`leaderboard`/`picks`/
+`predictions`/`seasons` 7개 후보 중, `insights`는 MLB predictions 에 reasoning
+텍스트 컬럼 자체가 전량 미사용(mlb-pipeline.ts 에 reasoning 필드 없음 — LLM
+디베이트 자체가 MLB 엔 없음)이라 빈 페이지가 될 게 확실해 제외, `seasons`는
+실제 시즌 우승팀 등 사실 콘텐츠 하드코딩이 필요해 조사/할루시네이션 위험이라
+제외, `dashboard`/`leaderboard`/`picks`는 리그 무관 사용자 계정 기능이라 parity
+갭 아님으로 판단해 제외 — `predictions` 만 순수 DB 쿼리로 채울 수 있는 진짜 갭).
+
+**구현**: KBO predictions/page.tsx 를 템플릿으로 MLB 버전 작성.
+- `apps/moneyball/src/app/mlb/predictions/page.tsx` 신규 — KBO 는
+  `games`(팀 FK) LEFT JOIN predictions 로 "미기록" 날짜까지 잡지만, MLB 는
+  games 모델이 없어 `mlb_schedule` 을 동일 역할(전체 편성 경기 원천)로 두고
+  predictions 를 external_game_id 로 map(2-step 조회, mlb/games/[date]/page.tsx
+  와 동일 패턴). `deriveMlbOutcome`(predictions.is_correct 전량 NULL 이라 직접
+  derive) + `classifyWinnerProb`/`WINNER_TIER_LABEL`/`pickTierEmoji`(리그 무관
+  순수 확률 분류라 그대로 재사용) 사용. `MLB_PRODUCTION_COHORT_RULES` 필터로
+  CE-fallback family 정합.
+- KBO 필터 컴포넌트(PredictionsStatusFilter/SortControl/TierFilter/MonthFilter/
+  AccuracyHeaderCard) 5개는 grep 확인 결과 TeamCode 결합 0건이라 그대로 재사용.
+  `PredictionsSearchBox` 만 KBO_TEAMS 결합이라 `MlbPredictionsSearchBox.tsx`
+  신규(별도 storage key `mb_mlb_predictions_search_v1` — KBO/MLB 검색 상태 분리).
+- 헤더 MLB 메가메뉴("경기·팀" 섹션) + 푸터 MLB 컬럼 양쪽 즉시 배선 + sitemap.ts
+  KO entry 추가 — 신규 라우트 nav 배선 누락(cycle 2153/e7518e94 family) 재발
+  차단, 이번엔 첫 커밋부터 포함.
+- CE 배너(KBO `simplifiedMode` 상단 경고)는 미포함 — MLB 파이프라인은 처음부터
+  quant-only(LLM 디베이트 없음)라 CREDIT_EXHAUSTED 영향 자체가 없음, 배너 넣으면
+  오히려 오해 소지.
+
+**Phase 1 스코프 (의도적 축소, 후속 후보)**: EN mirror(`/en/mlb/predictions`)
+는 이번 cycle 미포함 — KO 먼저 검증 후 별도 cycle 에서 병렬 추가하는 기존
+phased 관례(calendar/matchup 등) 따름. metadata 에 `languages: {en: ...}`
+alternate 를 미리 선언하지 않음(존재 안 하는 페이지 hreflang 404 방지 — 반대
+방향 실수도 사례가 있어 이번엔 역방향 점검). sitemap.ts 도 KO entry 만 추가.
+회귀 테스트(`mlb-predictions-page.test.ts`)에 EN 부재 상태를 명시적으로
+assert(음성 케이스)해 다음 cycle 이 EN 추가 시 이 assert 를 갱신하도록 강제.
+
+테스트 11건 신규(정적 grep 방식, mlb-standings-page.test.ts 패턴). type-check
+(4 packages)/lint(moneyball)/`pnpm test`(turbo 전체 4 packages) 전부 통과
+확인 완료 후 커밋.
