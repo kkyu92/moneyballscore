@@ -3726,6 +3726,33 @@ assert(음성 케이스)해 다음 cycle 이 EN 추가 시 이 assert 를 갱신
 (4 packages)/lint(moneyball)/`pnpm test`(turbo 전체 4 packages) 전부 통과
 확인 완료 후 커밋.
 
+## review-code (heavy) — EN nav 블랭킷 치환이 /mlb/reviews 를 존재하지 않는 /en/mlb/reviews 로 404 (cycle 2227)
+
+open issue 0건, approved plan 0건(19건 전량 완료/archived). lock 미충족(직전 8사이클
+distinct=4). lotto 30-gap 트리거 수치상 충족(gap=52)했으나 count 재확인 결과 다음 회차
+(1238회, 08-22) 50세트+직전 회차(1237회) OOS 검증 양쪽 이미 박제 완료 상태(신규 산출물
+없음) — 실익 부재로 skip. cycle 2226 next_recommended(review-code or op-analysis) 채택,
+repo 기존 관례(explore-idea(heavy) 신규 기능 다음 cycle = review-code(heavy) 가 그
+기능 감사)대로 cycle 2226 이 추가한 `/mlb/reviews` 감사.
+
+**발견**: `Header.tsx`의 `withLocale()`과 `Footer.tsx`의 `withMlbLocale()`이 EN
+pathname(`/en/mlb/*`)에서 `/mlb/*` href 를 전부 blanket 으로 `/en/mlb/*` 치환.
+`/mlb/reviews`는 MLB_NAV·Footer MLB column 11개 항목 중 유일하게 EN 미러 페이지가
+없는 라우트(cycle 2226 Phase 1, 의도적 scope 축소 — TODOS.md 에 이미 기록된 결정)라
+EN 사용자가 헤더 메가메뉴/푸터에서 "Prediction Review" 클릭 시 `/en/mlb/reviews`
+404. cycle 2139/2140/2141 과 같은 bug family(nav href 가 실제 EN 라우트 존재 여부와
+불일치) — 그 fix 들이 도입한 바로 그 함수가 이번 신규 라우트 추가로 재발.
+
+**fix**: 두 함수 모두에 `/mlb/reviews` 명시적 예외 추가(href 는 KO 유지, label 텍스트는
+`withLocaleText`/enLabel 로 기존처럼 번역 — Footer 가 non-MLB column 에 이미 쓰던
+"라우트 부재 시 href 유지, 텍스트만 번역" 패턴과 동일). `Header.test.ts`
+"모든 /mlb href 치환" 테스트가 이 예외로 깨져 `/mlb/reviews` 제외하도록 수정 +
+회귀 테스트 신규(Header 1건 + Footer 1건, KO href 유지 + `/en/mlb/reviews` 부재 assert).
+
+`pnpm --filter moneyball exec vitest run` (Header/Footer, 19건) + `pnpm test`(turbo
+전체 4 packages, 3970건) + type-check + lint 전부 통과 확인 후 커밋, main 직접 push
+(PR 미경유 — review-code(heavy) 감사성 1-2 파일 fix 는 기존 관례대로 direct push).
+
 ## fix-incident (lite) — deploy-drift-alert 26h 연속 실패 진단 + commits_ahead 진단 버그 fix (cycle 2222)
 
 - gh run list 로 deploy-drift-alert 워크플로우가 2026-08-15 15:33 ~ 08-18 23:33 26시간 연속 매시간 실패 발견 (이미 08-19 01:50부터 자연 해소)
