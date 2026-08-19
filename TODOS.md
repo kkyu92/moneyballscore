@@ -1,5 +1,38 @@
 # TODOS
 
+## 🟢 review-code (heavy) — analysis 페이지 CE-fallback 필터 중복 + WAR=0 가드 불일치 (cycle 2214, 2026-08-19)
+
+open issue 0건, approved plan 0건(19건 전량 completed/archived/superseded/completed
+status). GH Actions 최근 실패 0건, DESIGN.md 전일 갱신 fresh. 직전 8사이클
+distinct=4 (explore-idea/review-code/operational-analysis/fix-incident) —
+2-chain lock 미충족. info-arch/lotto 는 cycle 2213 에서 이미 재확인 skip 처리.
+next_recommended(cycle 2213) = "review-code or operational-analysis" 채택.
+
+**타겟 선정**: `analysis/page.tsx` (2802줄, 리포 최대 monolith) — 마이그레이션
+히스토리 상 cycle 2150 (~64 cycle 전) 마지막 감사. 그 사이 wave-488~600+ 대량
+기능 추가 누적, 인접 accuracy/page.tsx 에서 cycle 2208~2210 연속으로 같은 class
+(하드코딩/필터 drift) 버그 3건 발견된 전례 — 재감사 근거 충분.
+
+**발견 1 (agent 감사 확인)**: `analysis-data.ts` 의 `getPeriodStats`/
+`getBestPickOfWeek`/`getUpsetPickOfMonth` 3개 함수가 `.match(CURRENT_MODEL_FILTER)`
+(`scoring_rule='v1.8'`) 와 `.in('scoring_rule', PRODUCTION_COHORT_RULES)`
+(`['v1.8','v1.8-credit-fail']`) 를 같은 쿼리에 체이닝 — PostgREST 는 AND 결합이라
+교집합은 `v1.8` 뿐, CE-fallback(`v1.8-credit-fail`) row 를 silent 하게 제외.
+같은 파일 안 다른 4개 함수는 `PRODUCTION_COHORT_RULES` 단독 사용 — 그 컨벤션 위반
+이자 cycle 1984 monolith-extraction 커밋에서부터 존재한 잠복 버그. cycle 2209/2210
+과 동일 CE-fallback silent exclusion family. `.match(CURRENT_MODEL_FILTER)` 제거로
+정정 — "이번 주/이번 달 성적", "베스트 픽", "AI 이변 경기" 섹션 undercount 해소.
+
+**발견 2 (백그라운드 서브에이전트 자연 발견)**: `page.tsx` 의 WAR 직접 대결 배지가
+3곳(wave-367/508/521) 중복 존재 — wave-535 가 "WAR=0 = KBO Fancy Stats top-50
+밖(데이터 미집계), 팀 실력 0 아님" data-gap 가드(`homeWar>0 && awayWar>0`)를
+wave-508/521 에는 적용했지만 wave-367 은 누락. 미랭크 팀(WAR=0) 대 상대팀 WAR 격차가
+`WAR_DUEL_MIN` 넘으면 wave-367 배지만 false "WAR 강세" 표시. 3곳 모두 가드 통일.
+
+**검증**: 회귀 테스트 3건 신규(`silent-drift-wave-2214.test.ts`) + 전체 452
+files/3919 tests green, lint/type-check clean. 커밋 `5748a4c0`, PR #2968
+squash 머지(`808759f6`) + branch 자동 삭제.
+
 ## 🟢 explore-idea (heavy) — /mlb/standings 실 W-L/GB 순위 구현 (cycle 2213, 2026-08-19)
 
 open issue 0건, approved plan 0건(19건 전량 completed/archived/superseded).
