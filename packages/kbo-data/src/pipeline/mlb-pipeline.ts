@@ -31,7 +31,7 @@ import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
 } from './silent-drift-alert';
-import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode, errMsg } from '@moneyball/shared';
+import { ELO_NEUTRAL, MLB_TEAMS, MLB_SCORING_RULE, normalizeMlbTeamCode, errMsg, assertSelectOk } from '@moneyball/shared';
 import { DB_CONSTRAINTS } from './db-constraints';
 import {
   generateMlbAgentMemories,
@@ -265,10 +265,19 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
 
   // mlb_team_stats 실측 조회 (cycle 2057 wiring — mlb_fancy_scrape/mlb_savant_scrape 가 채워둔 값을
   // 이제야 소비. row 부재 팀/컬럼은 MLB_STAT_DEFAULTS fallback — 부분 데이터도 안전.
-  const { data: statsRows } = await db
-    .from('mlb_team_stats')
-    .select('team_code, woba, fip, xfip, war, xwoba, barrel_pct')
-    .eq('season', season);
+  // silent drift 가드 (review-code heavy cycle 2286 발견) — 기존 `.error` 미체크 시 DB 에러가
+  // "team stats row 전부 없음"과 구분 안 돼 모든 팀이 MLB_STAT_DEFAULTS 로 조용히 fallback,
+  // 이 파일 자신의 사례 20 (line 43-44) 과 동일 실패 모드가 select 에러 경로로도 재발 가능했음.
+  let statsRows: MlbTeamStatsRow[] | null = null;
+  try {
+    const statsResult = await db
+      .from('mlb_team_stats')
+      .select('team_code, woba, fip, xfip, war, xwoba, barrel_pct')
+      .eq('season', season);
+    ({ data: statsRows } = assertSelectOk<MlbTeamStatsRow[]>(statsResult, 'mlb-pipeline.mlb_team_stats.select'));
+  } catch (e) {
+    errors.push(`mlb_team_stats select: ${errMsg(e)}`);
+  }
 
   const statsByTeam = new Map<string, MlbTeamStatsRow>();
   for (const row of (statsRows ?? []) as MlbTeamStatsRow[]) {
