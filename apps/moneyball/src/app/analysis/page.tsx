@@ -484,7 +484,7 @@ export default async function AnalysisIndexPage() {
                 // wave-398: 수렴 강도 (|netScore|) — FACTOR_PICK_MIN_FACTORS(7)=임계, FACTOR_PICK_STRONG(8)=강, FACTOR_PICK_COMPLETE(10)=완전수렴
                 const convStrength = Math.abs(pick.compositeDuelScore!);
                 const ratioColorClass = convStrength >= FACTOR_PICK_COMPLETE
-                  ? 'font-mono text-xs text-[var(--color-accent)] dark:text-[#e2c96b]'
+                  ? 'font-mono text-xs text-[var(--color-accent)] dark:text-[var(--color-accent-light)]'
                   : convStrength >= FACTOR_PICK_STRONG
                     ? 'font-mono text-xs text-brand-500 dark:text-brand-400'
                     : 'font-mono text-xs text-gray-500 dark:text-gray-400';
@@ -1217,7 +1217,7 @@ export default async function AnalysisIndexPage() {
                                 isPickGame
                                   ? `font-semibold ${
                                       pickConvStrength >= FACTOR_PICK_COMPLETE
-                                        ? 'text-[var(--color-accent)] dark:text-[#e2c96b]'
+                                        ? 'text-[var(--color-accent)] dark:text-[var(--color-accent-light)]'
                                         : pickConvStrength >= FACTOR_PICK_STRONG
                                           ? 'text-brand-500 dark:text-brand-400'
                                           : 'text-gray-500 dark:text-gray-400'
@@ -2152,7 +2152,7 @@ export default async function AnalysisIndexPage() {
                                 {g.factorFavoredCount != null && (
                                   <p className={`text-xs font-mono mt-0.5 ${
                                     g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_COMPLETE
-                                      ? 'text-[var(--color-accent)] dark:text-[#e2c96b] font-semibold'
+                                      ? 'text-[var(--color-accent)] dark:text-[var(--color-accent-light)] font-semibold'
                                       : g.convergenceNetScore != null && Math.abs(g.convergenceNetScore) >= FACTOR_PICK_STRONG
                                         ? 'text-brand-500 dark:text-brand-400 font-semibold'
                                         : 'text-gray-400 dark:text-gray-500'

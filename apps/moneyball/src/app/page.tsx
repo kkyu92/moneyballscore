@@ -996,7 +996,7 @@ export default async function HomePage() {
                         {g.homeWinPct != null && (
                           <span className={`text-[9px] tabular-nums ml-1 font-medium shrink-0 ${
                             g.isPredicted
-                              ? 'text-[#c5a23e] dark:text-[#e2c96b]'
+                              ? 'text-[var(--color-accent)] dark:text-[var(--color-accent-light)]'
                               : g.homeWinPct >= 0.5
                               ? 'text-brand-600 dark:text-brand-400'
                               : 'text-orange-500 dark:text-orange-400'
