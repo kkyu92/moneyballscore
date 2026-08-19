@@ -1,4 +1,26 @@
-## v0.5.62.49 — 2026-08-20 (cycle 2267, review-code (heavy): lotto/methodology/page.tsx 최초 감사 — site 데이터 파일 3개월 frozen silent drift 발견/수정)
+## v0.5.62.50 — 2026-08-20 (cycle 2269, review-code (heavy): debug/pipeline/page.tsx 최초 감사 — MLB pipeline duration_ms silent 미기록 발견/수정)
+
+### fix(mlb-pipeline): `runMlbPipeline` 이 `pipeline_runs.duration_ms` 를 한 번도 기록하지 않던 문제
+
+`debug/pipeline/page.tsx`(481줄, 최초 감사) 코드 read — 렌더 로직/reject-reason cohort(M16)
+clean. 실 DB 조회(최근 30일 `pipeline_runs`)로 대조한 결과 `mlb_statsapi_scrape` /
+`mlb_fancy_scrape` / `mlb_savant_scrape` / `mlb_predict_final` / `mlb_shadow_train` 등
+모든 MLB mode row 의 `duration_ms` 가 전부 `null` — 대시보드 "평균 duration" 컬럼이
+이 mode 들에서 항상 `0ms` 로 표시됨. Root cause: `packages/kbo-data/src/pipeline/
+mlb-pipeline.ts` 의 `runMlbPipeline` orchestrator 가 KBO `daily.ts` (`duration_ms: durationMs`
+계측 존재) 와 달리 시작 시각을 계측하지 않고 `pipeline_runs.insert()` payload 에
+`duration_ms` 필드 자체를 아예 빠뜨림. `/debug/pipeline` 이 정확히 이런 pipeline 이상을
+잡아내야 하는 모니터링 도구인데 MLB 도입(cycle 1900대) 이후 자기 자신의 계측 공백은
+못 잡고 있던 사례. `mode 별 30일 합계` 테이블/`cron 무료 티어 사용` 추정치 모두 MLB row
+의 duration 을 0 으로 왜곡 반영 중이었음.
+
+수정: `runMlbPipeline` 진입 시 `startedAt = Date.now()` 계측 추가 + insert payload 에
+`duration_ms: Date.now() - startedAt` 필드 추가. `mlb-pipeline.test.ts` 19/19 pass (기존
+mock 이 payload shape 를 엄격히 assert 하지 않아 회귀 가드 없었음 — 신규 assertion 은
+추가하지 않음, 다음 review-code 후속 후보로 carry-over). `packages/kbo-data` 전체
+88 files/1144 tests pass, `apps/moneyball` `tsc --noEmit` clean.
+
+
 
 ### fix(lotto): `apps/moneyball/data/lotto-data.json` 이 cycle 970(2026-05-26) 이후 미갱신 상태로 방치
 

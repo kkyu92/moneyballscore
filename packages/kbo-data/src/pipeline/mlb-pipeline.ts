@@ -632,6 +632,7 @@ export async function runMlbPipeline(
     throw new Error(`unknown mode: ${mode}`);
   }
 
+  const startedAt = Date.now();
   const db = createAdminClient();
 
   let gamesFound = 0;
@@ -709,6 +710,7 @@ export async function runMlbPipeline(
     predictions: rowsInserted,
     errors: hasErrors ? errors : [],
     triggered_by: triggeredBy,
+    duration_ms: Date.now() - startedAt,
   }).then(({ error: e }) => {
     if (e) {
       console.error(`[MLB] pipeline_runs insert failed: ${e.message}`);

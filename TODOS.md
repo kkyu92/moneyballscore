@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — debug/pipeline/page.tsx 최초 감사, MLB pipeline duration_ms silent 미기록 발견/수정 (cycle 2269, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code/lotto/op-analysis], ship-0/lite-cap 미충족, fix-incident 11-gap/op-analysis 4-gap/lotto 5-gap/info-arch 19-gap/explore-idea saturation 10/15 모두 미도달). review-code(heavy) 직전 8사이클 6/8 dominance 지속 + TODOS carry-over 미감사 대형 파일 리스트 중 `debug/pipeline/page.tsx`(481줄, 최초 감사) 선택.
+
+실측: 렌더 로직(mode subtotal/GAP·SP 이벤트/reject-reason cohort M16) clean, `pipelineStats.ts` 헬퍼도 clean. 실 DB 조회(최근 30일 `pipeline_runs`, KBO+MLB 합계 669건)로 대조한 결과 `mlb_statsapi_scrape`(n=98)/`mlb_fancy_scrape`/`mlb_savant_scrape`/`mlb_predict_final`/`mlb_shadow_train`(각 n=30) 모든 MLB mode row 의 `duration_ms` 가 전부 `null` — 대시보드 "평균 duration" 컬럼이 이 mode 들에서 항상 `0ms` 로 표시(KBO `announce`/`predict`/`predict_final`/`verify` 는 4400~8000ms 정상 기록). Root cause: `packages/kbo-data/src/pipeline/mlb-pipeline.ts` 의 `runMlbPipeline` orchestrator 가 KBO `daily.ts`(`duration_ms: durationMs` 계측 존재, line 192)와 달리 시작 시각을 계측하지 않고 `pipeline_runs.insert()` payload(line 703~712)에 `duration_ms` 필드 자체를 아예 빠뜨림. 정확히 이런 pipeline 이상을 monitoring 해야 할 대시보드 자신이 MLB 도입(cycle 1900대) 이후 이 계측 공백을 못 잡고 있던 사례 — silent drift family 신규 계열(MLB parity gap, cycle 2098~2100 유사 계열과 인접).
+
+수정: `runMlbPipeline` 진입 직후 `const startedAt = Date.now();` 추가 + insert payload 에 `duration_ms: Date.now() - startedAt` 필드 추가 (2 line diff). `mlb-pipeline.test.ts` 19/19 pass (기존 mock 이 insert payload shape 를 엄격히 assert 하지 않아 이 결손을 못 잡던 것 확인 — 신규 회귀 assertion은 이번 fix 범위 밖, 다음 review-code 후속 후보로 carry-over만). `packages/kbo-data` 전체 88 files/1144 tests pass, `apps/moneyball` `tsc --noEmit` clean. VERSION/root+apps package.json `scripts/bump-version.sh` 로 atomic 동기화 (0.5.62.49→50, 사례 16 재발 차단). main 직접 push, PR 생략 (2 file 소규모 fix + 버전/체인지로그).
+
+다음 후보: review-code (heavy) 계속 — 남은 미감사 대형 파일 `reviews/monthly/[month]/page.tsx`(481줄)/`debug/factor-correlation/page.tsx`(543줄). 또는 explore-idea (saturation 10/15로 근접, 다음 사이클 자연 trigger 가능성). 또는 mlb-pipeline.test.ts 에 duration_ms 존재 assertion 추가 (이번엔 skip한 회귀 가드).
+
 ## 🟢 review-code (heavy) — mlb/team/[code]/page.tsx 최초 전체 감사, drift 없음 확인 (cycle 2268, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 9-gap/op-analysis 2-gap/lotto 3-gap/info-arch 17-gap/explore-idea saturation 10/15 모두 미도달). review-code(heavy) 직전 8사이클 6/8 dominance 지속 + TODOS carry-over가 지목한 미감사 대형 파일 — `mlb/team/[code]/page.tsx`(519줄, 최초 감사) 선택.
