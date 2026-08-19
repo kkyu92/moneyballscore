@@ -3620,3 +3620,11 @@ assert(음성 케이스)해 다음 cycle 이 EN 추가 시 이 assert 를 갱신
 테스트 11건 신규(정적 grep 방식, mlb-standings-page.test.ts 패턴). type-check
 (4 packages)/lint(moneyball)/`pnpm test`(turbo 전체 4 packages) 전부 통과
 확인 완료 후 커밋.
+
+## fix-incident (lite) — deploy-drift-alert 26h 연속 실패 진단 + commits_ahead 진단 버그 fix (cycle 2222)
+
+- gh run list 로 deploy-drift-alert 워크플로우가 2026-08-15 15:33 ~ 08-18 23:33 26시간 연속 매시간 실패 발견 (이미 08-19 01:50부터 자연 해소)
+- 근본원인: develop-cycle 봇 push burst(115 commit) 가 Vercel 직렬 build queue 를 앞질러 production 이 뒤쳐진 것 — 실제 deploy 고장 아님, 큐가 자연 해소
+- 진단 중 진짜 버그 발견: `.github/workflows/deploy-drift-alert.yml` 의 `fetch-depth: 1` (shallow clone) 때문에 `git rev-list --count PROD_SHA..MAIN_SHA` 가 항상 실패 → 모든 알림에서 `commits_ahead=unknown` 으로만 찍힘. "대량 backlog 자연 해소 중" 과 "소수 commit 인데 진짜 멈춤" 을 구분할 유일한 신호가 사라진 상태였음.
+- fix: fetch-depth 0 (전체 history, 68MB/4639 commit — 3분 timeout 안 충분) → commit 69f5ed54, main 직접 push
+- 실측 검증: `gh workflow run` 수동 트리거 후 로그 확인 → `commits_ahead=14` 정상 계산 (이전엔 항상 unknown)
