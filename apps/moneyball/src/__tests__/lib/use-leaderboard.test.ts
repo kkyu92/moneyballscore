@@ -73,4 +73,50 @@ describe('useLeaderboard', () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it('auto-sync — mlb- 접두어 픽만 있으면 mlb-sync 만 호출 (external_game_id 복원)', async () => {
+    localStorage.setItem(NICKNAME_KEY, 'MlbUser');
+    localStorage.setItem(DEVICE_KEY, '00000000-0000-0000-0000-000000000003');
+    localStorage.setItem(PICKS_KEY, JSON.stringify({
+      'mlb-745444': { pick: 'away', pickedAt: new Date().toISOString() },
+    }));
+
+    const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ synced: 1 }), { status: 200 }),
+    );
+
+    renderHook(() => useLeaderboard());
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+
+    const [url, opts] = fetchSpy.mock.calls[0];
+    expect(url).toBe('/api/leaderboard/mlb-sync');
+    const body = JSON.parse((opts as RequestInit).body as string);
+    expect(body.picks).toHaveLength(1);
+    expect(body.picks[0].external_game_id).toBe('745444');
+  });
+
+  it('join — kbo + mlb 픽 동시 존재 시 양쪽 sync 호출 후 synced 합산', async () => {
+    localStorage.setItem(DEVICE_KEY, '00000000-0000-0000-0000-000000000004');
+    localStorage.setItem(PICKS_KEY, JSON.stringify({
+      '10': { pick: 'home', pickedAt: new Date().toISOString() },
+      'mlb-777123': { pick: 'away', pickedAt: new Date().toISOString() },
+    }));
+
+    const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation((url) => {
+      if (url === '/api/leaderboard/sync') {
+        return Promise.resolve(new Response(JSON.stringify({ synced: 1 }), { status: 200 }));
+      }
+      return Promise.resolve(new Response(JSON.stringify({ synced: 1 }), { status: 200 }));
+    });
+
+    const { result } = renderHook(() => useLeaderboard());
+    await result.current.join('DualUser');
+
+    const urls = fetchSpy.mock.calls.map(([url]) => url);
+    expect(urls).toContain('/api/leaderboard/sync');
+    expect(urls).toContain('/api/leaderboard/mlb-sync');
+
+    await waitFor(() => expect(result.current.syncState).toBe('done'));
+    expect(result.current.syncCount).toBe(2);
+  });
 });

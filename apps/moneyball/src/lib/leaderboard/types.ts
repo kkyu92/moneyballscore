@@ -17,6 +17,17 @@ export interface LeaderboardSyncPayload {
   }>;
 }
 
+// mlb_user_picks(050) — external_game_id VARCHAR 버전 (mlb-sync route 전용).
+export interface MlbLeaderboardSyncPayload {
+  device_id: string;
+  nickname: string;
+  picks: Array<{
+    external_game_id: string;
+    pick: 'home' | 'away';
+    picked_at: string;
+  }>;
+}
+
 // weekly 는 backward compat 위해 유지 (기존 호출처 마이그레이션 대비).
 export type LeaderboardMode = 'weekly' | 'monthly' | 'season' | 'all';
 
