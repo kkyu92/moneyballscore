@@ -135,9 +135,9 @@ async function main() {
 
   const lines: string[] = [];
   const today = new Date().toISOString().slice(0, 10);
-  lines.push(`# op-analysis CE cohort 분석 (${today}, cycle 1550)`);
+  lines.push(`# op-analysis CE cohort 분석 (${today})`);
   lines.push("");
-  lines.push("cycle 1547 spec 축 A — CE(CREDIT_EXHAUSTED) vs 비CE 10.4pp 격차 원인 규명 heavy retrospective.");
+  lines.push("cycle 1547 spec 축 A 원안 — CE(CREDIT_EXHAUSTED) vs 비CE 격차 원인 규명 재측정 harness (매 재실행 시 최신 수치로 갱신).");
   lines.push("");
   lines.push("## CE 판별 기준");
   lines.push("");
@@ -252,12 +252,12 @@ async function main() {
   lines.push("");
   lines.push("### (c) 결론");
   lines.push("");
-  lines.push("- 위 진단 (a) / (b) 조합 검토 → 다음 cycle plan #24 draft input.");
+  lines.push("- 위 진단 (a) / (b) 조합 검토 → 다음 op-analysis 재측정 input.");
 
   lines.push("");
   lines.push("---");
   lines.push("");
-  lines.push("자동 생성 — cycle 1550 op-analysis (heavy). `scripts/op-analysis-ce-cohort.ts`.");
+  lines.push(`자동 생성 (${today}) — op-analysis (heavy). \`scripts/op-analysis-ce-cohort.ts\`.`);
 
   writeFileSync(outPath, lines.join("\n"));
   console.log(`saved: ${outPath}`);
