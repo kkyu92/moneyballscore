@@ -136,6 +136,7 @@ export default function LottoMethodologyPage() {
   ).length;
   const totalFires = lottoData.chain_fire_history.length;
   const ratio = ((lottoData.count_valid / lottoData.total_combinations) * 100).toFixed(2);
+  const pickCutoffPct = ((LOTTO_PICK_COUNT / lottoData.count_valid) * 100).toFixed(2);
   const oosLatest = lottoData.oos_pass_rate[lottoData.oos_pass_rate.length - 1];
   const sparkPoints = buildSparkline(lottoData.rules_history);
   const latestArchiveDate = listArchiveDates()[0] ?? null;
@@ -321,7 +322,7 @@ export default function LottoMethodologyPage() {
                   <>
                     . valid pool 안 추정 top{" "}
                     {oosLatest.winning_score_breakdown.pool_rank_pct.toFixed(2)}% — {LOTTO_PICK_COUNT}세트 cutoff
-                    (top ~0.65%) 미달 = score 모델 약점 candidate.
+                    (top ~{pickCutoffPct}%) 미달 = score 모델 약점 candidate.
                   </>
                 )}
               </p>
@@ -342,7 +343,7 @@ export default function LottoMethodologyPage() {
         </h2>
         <p className="text-sm text-brand-300 leading-relaxed">
           N={formatNumber(scoreBacktest.n_rounds)} 회차 1등 조합 unpopularityScore
-          분포. {LOTTO_PICK_COUNT}세트 추천 모델 cutoff (valid pool 안 top 0.65%) 와 비교 시
+          분포. {LOTTO_PICK_COUNT}세트 추천 모델 cutoff (valid pool 안 top {pickCutoffPct}%) 와 비교 시
           historical 1등 조합 평균이 어느 percentile band 에 분포하는지 확인.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
