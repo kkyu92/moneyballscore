@@ -1,5 +1,29 @@
 # TODOS
 
+## 🟢 info-architecture-review (heavy) — MLB footer sitemap /mlb/matchup 누락 fix (cycle 2225, 2026-08-19)
+
+open issue 0건, approved plan 0건 (19개 전부 completed/archived/superseded 상태
+유지). 직전 8사이클 distinct=3 (review-code/explore-idea/fix-incident) — 2-chain
+lock 미충족. lotto(마지막 fire 2175, gap=50)는 trigger 6 (30-gap) 충족하나 다음
+회차(1234회, 8/22) 50세트 이미 박제됨(8/18) + 직전 회차(1233회 8/15) 결과도 이미
+기록됨(8/18) — 실익 없음. info-architecture-review(마지막 fire 2183, gap=42)도
+trigger 9 (30-gap) 충족 + 라우트 mtime -7 다수 감지(MLB parity 시리즈 35개 파일)
+— 실제 IA gap 존재 확인되어 이 chain 선택.
+
+**발견한 gap**: Header MLB megamenu(`NavLinks.tsx` MLB_NAV)와 `sitemap.ts` 양쪽
+다 `/mlb/matchup` 보유(라우트 실존, KBO 쪽 `/matchup`은 이미 footer 팀·선수
+column에 있음) — 그러나 `Footer.tsx` SITEMAP_COLUMNS 의 MLB column 에만 빠져있던
+gap. cycle 2153 과 동일 family (MLB 신규 라우트 추가 시 footer sitemap 컬럼 동기
+누락 반복 패턴 — 이번엔 `/mlb/matchup` 자체가 오래전부터 라우트/헤더엔 있었으나
+footer 만 누락 상태로 방치돼있던 case).
+
+**fix**: `Footer.tsx` MLB column 링크 배열에 `{ href: "/mlb/matchup", label:
+"매치업", enLabel: "Matchups" }` 추가 + wireframe 주석 갱신. 회귀 테스트 1건
+추가 (Footer MLB column 이 `/mlb/matchup` 링크 렌더 검증). 전체 스위트 3956개
++ Footer 11개 pass, lint/type-check pass. PR #2975 머지(`16c4085c`, MERGED
+실측 확인, squash — auto-merge GraphQL 미허용 repo 설정이라 CI green 확인 후
+수동 merge).
+
 ## 🟢 review-code (heavy) — PickButton 분석 보기 링크 KBO 하드코딩 fix (cycle 2224, 2026-08-19)
 
 cycle 2223 이 신규 MLB 커뮤니티 픽 surface(migration 048, mlb-submit/mlb-poll
