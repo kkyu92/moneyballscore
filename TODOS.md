@@ -1,5 +1,34 @@
 # TODOS
 
+## 🟢 explore-idea (lite) — MLB 매치업 페이지 실제 로고 parity (cycle 2206, 2026-08-19)
+
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4),
+lotto 30-gap trigger 있었으나 cron 자동화(#2943/#2956/#2967 등)로 picks/OOS
+이미 커버됨 — cycle 2205 next_recommended 명시 carry-over 우선.
+
+**발견**: cycle 2205가 `MlbTeamLogo` 컴포넌트를 신규 박제하고 `/mlb/team/[code]`
+헤더에만 배선했지만, `/mlb/matchup/[teamA]/[teamB]` (KO+EN 양쪽) "팀별 성과"
+섹션은 여전히 `backgroundColor: teamColor` color-circle `<span>` 그대로 —
+같은 시각 아이덴티티 갭 잔존.
+
+**수정**: 두 파일(KO/EN) color-circle span → `<MlbTeamLogo team={s.teamCode}
+size={24} className="rounded-full shrink-0" />` 교체 + import 추가. lite
+mode — carry-over spec 명확, office-hours/plan 단계 skip, 직접 구현.
+
+type-check/lint/vitest(448/3908) clean + `pnpm build` 성공 + 로컬 dev 서버
+실측(`/mlb/matchup/LAD/NYY` 200 + `<img src="/logos/mlb/LAD.svg">` +
+`NYY.svg` 렌더). 단일 논리 단위 — main 직접 commit+push (R4/R7, `aac00925`).
+
+**다음 explore-idea 후보 (carry-over, 미착수, 전수 grep 완료)**: MLB 영역
+전반에 `backgroundColor: team.color` 색상 원 placeholder 12+개 잔존 —
+`mlb/{wild-card,matchup,players,players/[id],standings,team}/page.tsx`
+KO+EN 6쌍(12파일) + `MlbMatchupSeasonHeadToHead.tsx`(teamA/teamB) 2곳.
+전부 `MlbTeamLogo` 로 교체 가능(타입 `team.code` → `MlbTeamCode` 확인
+필요). 범위가 커서 이번 cycle(lite) scope 밖 — 다음 explore-idea 또는
+review-code(heavy) 에서 일괄 처리 권장.
+
+---
+
 ## 🟢 explore-idea (heavy) — MLB 팀 로고 placeholder + JSON-LD 404 정정 (cycle 2205, 2026-08-19)
 
 open issue 0건, approved plan 0건(plan #24/#25 모두 completed/archived), 2-chain
