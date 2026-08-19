@@ -3,6 +3,7 @@ import {
   ACCURACY_WARN_RATE,
   classifyWinnerProb,
   MIN_VERIFIED_GAMES_HEDGE,
+  SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import type { MonthRange } from "./computeMonthRange";
 import { getPreviousMonth } from "./computeMonthRange";
@@ -102,7 +103,7 @@ function buildSummary(
     }
   }
 
-  if (topTeam && topTeam.predicted >= 5) {
+  if (topTeam && topTeam.predicted >= SMALL_SAMPLE_N) {
     text += ` 가장 정확했던 팀은 ${topTeam.teamName} (${topTeam.correct}/${topTeam.predicted} · ${Math.round(topTeam.accuracy * 100)}%).`;
   }
 
@@ -132,7 +133,7 @@ export async function buildMlbMonthlyReview(
 
   // 전월 비교
   let previousAccuracyRate: number | null = null;
-  if (verifiedGames >= 5) {
+  if (verifiedGames >= SMALL_SAMPLE_N) {
     const prev = getPreviousMonth(month);
     const prevRows = await fetchMlbPredictionRowsInRange(
       prev.startDate,
@@ -140,7 +141,7 @@ export async function buildMlbMonthlyReview(
       `buildMlbMonthlyReview range ${prev.startDate}~${prev.endDate}`,
     );
     const prevVerified = prevRows.filter((r) => r.isCorrect !== null);
-    if (prevVerified.length >= 5) {
+    if (prevVerified.length >= SMALL_SAMPLE_N) {
       const prevCorrect = prevVerified.filter(
         (r) => r.isCorrect === true,
       ).length;
@@ -150,9 +151,9 @@ export async function buildMlbMonthlyReview(
 
   const highlights = pickHighlights(rows);
   const teamStats = buildMlbTeamStats(rows);
-  const factorInsights = buildMlbFactorInsights(rows, { minSamples: 5 });
+  const factorInsights = buildMlbFactorInsights(rows, { minSamples: SMALL_SAMPLE_N });
   const topTeam =
-    teamStats.find((t) => t.predicted >= 5) ?? teamStats[0] ?? null;
+    teamStats.find((t) => t.predicted >= SMALL_SAMPLE_N) ?? teamStats[0] ?? null;
   const summary = buildSummary(
     month,
     verifiedGames,

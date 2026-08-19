@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — reviews/monthly/[month]/page.tsx 최초 감사, 소표본 임계 하드코딩 5 → SMALL_SAMPLE_N 정정 (cycle 2270, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code/lotto/op-analysis], ship-0/lite-cap 미충족, fix-incident 11-gap/op-analysis 4-gap/lotto 5-gap/info-arch 19-gap/explore-idea saturation 11/15 모두 미도달). review-code(heavy) 직전 10사이클 9/10 dominance 지속 + TODOS carry-over 미감사 대형 파일 중 사용자 가시 라이브 라우트 `reviews/monthly/[month]/page.tsx`(481줄, 최초 감사) 선택 (`debug/factor-correlation/page.tsx`는 내부 도구 페이지라 후순위).
+
+실측: page.tsx 렌더 로직 clean. 지원 파일 전체 read — `buildMonthlyReview.ts`/`computeMonthRange.ts`(UTC 기준 명시적 문서화, KST 아님 — 의도된 설계, weekly와 동일 패턴이라 drift 아님)/`shared.ts`(fetchPredictionRowsInRange fail-loud 가드 정상)/`convergenceRecord.ts`(781줄, page가 호출하는 6개 range-scoped helper — getRecentConvergencePickRecord/getConvergencePickStreak/BestStreak/HomeAwaySplit/DayOfWeekSplit/TeamStats — 전부 startDate/endDate 인자 순서·gte/lte 양끝 inclusive 정합 확인, drift 없음). 발견: `buildMonthlyReview.ts`(KBO)와 `buildMlbMonthlyReview.ts`(MLB) 양쪽에서 "전월 비교 게이팅"(2곳)/"최다 정확 팀 표시 임계"/"팩터 인사이트 minSamples" 총 4곳씩(합 8곳)이 `SMALL_SAMPLE_N`(5) 상수를 import 안 하고 리터럴 `5`로 하드코딩 — 현재 값 우연 일치라 동작 차이 없으나, cycle 91~131 매직넘버 registry sweep(12 surface: lotto/standings/insights/leaderboard/calendar/feed/MLB/teams/players/seasons/predictions/dashboard) 당시 `reviews/` 모듈이 스윕 대상에서 빠져있던 사각지대.
+
+수정: 양쪽 파일에 `SMALL_SAMPLE_N` import 추가 + 리터럴 `5` 8곳 상수 치환 (KBO 4곳 + MLB 4곳, parity 유지). `apps/moneyball` `vitest run src/lib/reviews` 45/45 pass, `tsc --noEmit` clean. VERSION/root+apps package.json `scripts/bump-version.sh` atomic 동기화 (0.5.62.50→51). main 직접 push, PR 생략 (2 file 소규모 상수 치환).
+
+다음 후보: review-code (heavy) 계속 — 남은 미감사 대형 파일 `debug/factor-correlation/page.tsx`(543줄, 내부 도구). 또는 explore-idea (saturation 11/15로 근접, 다음 사이클 자연 trigger 가능성 상승).
+
 ## 🟢 review-code (heavy) — debug/pipeline/page.tsx 최초 감사, MLB pipeline duration_ms silent 미기록 발견/수정 (cycle 2269, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건, 2-chain lock 미충족 직전 8사이클 distinct=3 [review-code/lotto/op-analysis], ship-0/lite-cap 미충족, fix-incident 11-gap/op-analysis 4-gap/lotto 5-gap/info-arch 19-gap/explore-idea saturation 10/15 모두 미도달). review-code(heavy) 직전 8사이클 6/8 dominance 지속 + TODOS carry-over 미감사 대형 파일 리스트 중 `debug/pipeline/page.tsx`(481줄, 최초 감사) 선택.

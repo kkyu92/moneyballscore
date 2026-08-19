@@ -1,3 +1,24 @@
+## v0.5.62.51 — 2026-08-20 (cycle 2270, review-code (heavy): reviews/monthly/[month]/page.tsx 최초 감사 — 소표본 임계 하드코딩 5 → SMALL_SAMPLE_N 정정)
+
+### fix(reviews): 월간 리뷰 소표본 게이팅에 하드코딩 `5` 대신 `SMALL_SAMPLE_N` 상수 사용
+
+`reviews/monthly/[month]/page.tsx`(481줄, 최초 감사) — 렌더 로직/수렴 픽 6개 helper
+(`convergenceRecord.ts` streak/homeAway/dayOfWeek/teamStats) 호출부 clean, 날짜 범위
+`gte`/`lte` 양끝 inclusive 정합 확인. `buildMonthlyReview.ts`(KBO)와 자매 파일
+`buildMlbMonthlyReview.ts`(MLB) 양쪽에서 "전월 대비 비교 게이팅"/"최다 정확 팀 표시
+기준"/"팩터 인사이트 최소 표본" 4곳씩 총 8곳이 `SMALL_SAMPLE_N`(5) 상수를 import하지
+않고 리터럴 `5`로 하드코딩 — 현재 값은 우연히 일치해 동작 차이는 없으나, cycle
+91~131 매직넘버 registry sweep(12개 surface 정규화) 당시 `reviews/` 모듈이 스윕
+대상에서 빠져있던 사각지대. `SMALL_SAMPLE_N` 변경 시 이 8곳만 silent하게 값이
+갈라지는 잠재 drift를 사전 차단.
+
+- `apps/moneyball/src/lib/reviews/buildMonthlyReview.ts`: `SMALL_SAMPLE_N` import,
+  topTeam 표시 임계/전월 비교 게이팅 2곳/`buildFactorInsights` minSamples 리터럴 `5`
+  → 상수 치환
+- `apps/moneyball/src/lib/reviews/buildMlbMonthlyReview.ts`: 동일 4곳 치환 (KBO/MLB
+  parity 유지)
+- `apps/moneyball` `vitest run src/lib/reviews` 45/45 pass, `tsc --noEmit` clean
+
 ## v0.5.62.50 — 2026-08-20 (cycle 2269, review-code (heavy): debug/pipeline/page.tsx 최초 감사 — MLB pipeline duration_ms silent 미기록 발견/수정)
 
 ### fix(mlb-pipeline): `runMlbPipeline` 이 `pipeline_runs.duration_ms` 를 한 번도 기록하지 않던 문제
