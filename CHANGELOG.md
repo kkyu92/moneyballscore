@@ -1,4 +1,26 @@
-## v0.5.62.44 — 2026-08-20 (cycle 2252, review-code (heavy): buildPicksStats.ts 최초 감사(clean) — 🔥 픽 스트릭 배지 threshold 하드코딩(2 vs 3) silent drift 발견/수정)
+## v0.5.62.45 — 2026-08-20 (cycle 2253, review-code (heavy): factor-explanations.ts 최초 감사(clean) — 신뢰도 라벨 marginPp 10/20 하드코딩 silent drift 발견/수정 + 루트 package.json 버전 drift 정정)
+
+### fix(analysis): GameAnalysisProse/MlbGameOverview 신뢰도 라벨이 wave-352 단일 source(OVERVIEW_CLOSE_PP/OVERVIEW_DOMINANT_PP) 대신 10/20 재하드코딩
+
+`factor-explanations.ts`(409줄, 최초 감사) 자체는 클린 — `buildGameOverview`의 요약 문장 분기(접전/우세)는
+이미 wave-352(cycle 1694)가 `NEUTRAL_HI`/`WIN_PROB_DOMINANT_HI`/`NEUTRAL_FACTOR`에서 파생한
+`OVERVIEW_CLOSE_PP`(10)/`OVERVIEW_DOMINANT_PP`(20)를 쓴다. 소비 컴포넌트까지 확장 감사한 끝에 발견:
+정확히 같은 개념(marginPp 기준 "박빙의 접전"/"소폭 우위"/"명확한 우위" 신뢰도 라벨)을 그리는
+`GameAnalysisProse.tsx`(KBO)와 `MlbGameOverview.tsx`(MLB, KO+EN 두 분기)는 파생 상수를 쓰지 않고
+`marginPp < 10` / `marginPp < 20` 리터럴을 각자 재하드코딩 — wave-352가 "단일 source 로 격상"한다고
+명시했지만 실제로는 `buildGameOverview` 한 곳에만 적용되고 세 소비 지점은 여전히 dark copy. 값 자체는
+같아 지금 당장 보이는 버그는 아니지만, `NEUTRAL_HI`/`WIN_PROB_DOMINANT_HI` 튜닝 시 세 곳만 조용히
+어긋나는 silent drift 구조.
+
+수정: `OVERVIEW_CLOSE_PP`/`OVERVIEW_DOMINANT_PP`를 `factor-explanations.ts`에서 export, 3개 지점
+(`GameAnalysisProse.tsx` 1곳 + `MlbGameOverview.tsx` KO/EN 2곳) 모두 리터럴 대신 import 전환. 회귀
+테스트 1건 신규(`silent-drift-cycle-2253.test.ts`, source grep 기반). 부수 발견: cycle 2252 커밋
+(#2987)이 VERSION/`apps/moneyball/package.json`만 `.44`로 bump하고 루트 `package.json`은 `.43`에
+멈춰 있던 3-way version drift(정확히 `version-sync-guard.test.ts`(cycle 2047)가 지키려던 케이스) —
+루트 `package.json`도 함께 `.45`로 동기화해 정정. type-check/lint clean, 전체 470 files/4049 tests
+all pass(+5, zero regression). VERSION 0.5.62.44→0.5.62.45.
+
+
 
 ### fix(picks): 홈 UserVsAIScorecard / 리더보드 는 `currentStreak >= 2` 에 🔥 배지, /picks 페이지 WeeklyPicksSummary 만 `>= 3` 로 어긋남
 

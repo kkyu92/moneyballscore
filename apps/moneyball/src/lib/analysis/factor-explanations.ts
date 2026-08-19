@@ -8,8 +8,8 @@ import {
 // wave-352: buildGameOverview summary 분기 임계 — NEUTRAL_HI / WIN_PROB_DOMINANT_HI 기반 derived.
 // 하드코딩 10 / 20 을 단일 source 로 격상.
 // wave-356: 0.5 → NEUTRAL_FACTOR 단일 source (cycle 1694).
-const OVERVIEW_CLOSE_PP = Math.round((NEUTRAL_HI - NEUTRAL_FACTOR) * FACTOR_CONTRIBUTION_SCALE);
-const OVERVIEW_DOMINANT_PP = Math.round((WIN_PROB_DOMINANT_HI - NEUTRAL_FACTOR) * FACTOR_CONTRIBUTION_SCALE);
+export const OVERVIEW_CLOSE_PP = Math.round((NEUTRAL_HI - NEUTRAL_FACTOR) * FACTOR_CONTRIBUTION_SCALE);
+export const OVERVIEW_DOMINANT_PP = Math.round((WIN_PROB_DOMINANT_HI - NEUTRAL_FACTOR) * FACTOR_CONTRIBUTION_SCALE);
 
 export interface FactorRawDetails {
   homeSPFip?: number | null;
