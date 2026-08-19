@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-05-26T17:00:00Z",
+  "generated_at": "2026-08-20T18:00:00Z",
   "rules_total": 256,
-  "count_valid": 7700649,
+  "count_valid": 7705415,
   "total_combinations": 8145060,
   "rules_history": [
     {
@@ -77,6 +77,66 @@
     {
       "draw": 1227,
       "date": "2026-06-06",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1228,
+      "date": "2026-06-13",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1229,
+      "date": "2026-06-20",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1230,
+      "date": "2026-06-27",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1231,
+      "date": "2026-07-04",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1232,
+      "date": "2026-07-11",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1233,
+      "date": "2026-07-18",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1234,
+      "date": "2026-07-25",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1235,
+      "date": "2026-08-01",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1236,
+      "date": "2026-08-08",
+      "passed": 256,
+      "failed": 0
+    },
+    {
+      "draw": 1237,
+      "date": "2026-08-15",
       "passed": 256,
       "failed": 0
     }
@@ -284,6 +344,270 @@
       "cycle": 970,
       "outcome": "success",
       "date": "2026-05-26",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1001,
+      "outcome": "success",
+      "date": "2026-05-28",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1034,
+      "outcome": "partial",
+      "date": "2026-05-29",
+      "next_recommended": "fix-incident"
+    },
+    {
+      "cycle": 1065,
+      "outcome": "success",
+      "date": "2026-05-31",
+      "next_recommended": "fix-incident"
+    },
+    {
+      "cycle": 1074,
+      "outcome": "success",
+      "date": "2026-05-31",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1105,
+      "outcome": "success",
+      "date": "2026-06-01",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1136,
+      "outcome": "success",
+      "date": "2026-06-02",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1141,
+      "outcome": "success",
+      "date": "2026-06-10",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1163,
+      "outcome": "success",
+      "date": "2026-06-15",
+      "next_recommended": "fix-incident"
+    },
+    {
+      "cycle": 1272,
+      "outcome": "success",
+      "date": "2026-06-19",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1291,
+      "outcome": "partial",
+      "date": "2026-06-20",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1292,
+      "outcome": "success",
+      "date": "2026-06-21",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1322,
+      "outcome": "partial",
+      "date": "2026-06-21",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1354,
+      "outcome": "success",
+      "date": "2026-06-24",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1384,
+      "outcome": "success",
+      "date": "2026-06-25",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1414,
+      "outcome": "success",
+      "date": "2026-06-30",
+      "next_recommended": "operational-analysis"
+    },
+    {
+      "cycle": 1444,
+      "outcome": "success",
+      "date": "2026-07-03",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1462,
+      "outcome": "success",
+      "date": "2026-07-06",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1495,
+      "outcome": "success",
+      "date": "2026-07-07",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1525,
+      "outcome": "success",
+      "date": "2026-07-10",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1543,
+      "outcome": "success",
+      "date": "2026-07-12",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1575,
+      "outcome": "success",
+      "date": "2026-07-13",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1605,
+      "outcome": "partial",
+      "date": "2026-07-13",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1635,
+      "outcome": "partial",
+      "date": "2026-07-14",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1671,
+      "outcome": "success",
+      "date": "2026-07-16",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1703,
+      "outcome": "success",
+      "date": "2026-07-16",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1731,
+      "outcome": "success",
+      "date": "2026-07-17",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1762,
+      "outcome": "success",
+      "date": "2026-07-17",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1794,
+      "outcome": "success",
+      "date": "2026-07-17",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1826,
+      "outcome": "partial",
+      "date": "2026-07-18",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 1857,
+      "outcome": "success",
+      "date": "2026-07-20",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1887,
+      "outcome": "success",
+      "date": "2026-07-20",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1919,
+      "outcome": "success",
+      "date": "2026-07-20",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1952,
+      "outcome": "success",
+      "date": "2026-07-21",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 1982,
+      "outcome": "success",
+      "date": "2026-07-22",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 2003,
+      "outcome": "success",
+      "date": "2026-07-28",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 2012,
+      "outcome": "success",
+      "date": "2026-07-28",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 2041,
+      "outcome": "success",
+      "date": "2026-08-10",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 2073,
+      "outcome": "success",
+      "date": "2026-08-13",
+      "next_recommended": "operational-analysis"
+    },
+    {
+      "cycle": 2106,
+      "outcome": "success",
+      "date": "2026-08-14",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 2137,
+      "outcome": "success",
+      "date": "2026-08-14",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 2145,
+      "outcome": "success",
+      "date": "2026-08-18",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 2175,
+      "outcome": "success",
+      "date": "2026-08-18",
+      "next_recommended": "review-code"
+    },
+    {
+      "cycle": 2234,
+      "outcome": "success",
+      "date": "2026-08-19",
+      "next_recommended": "explore-idea"
+    },
+    {
+      "cycle": 2264,
+      "outcome": "success",
+      "date": "2026-08-20",
       "next_recommended": "review-code"
     }
   ]

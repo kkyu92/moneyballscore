@@ -1,3 +1,24 @@
+## v0.5.62.49 — 2026-08-20 (cycle 2267, review-code (heavy): lotto/methodology/page.tsx 최초 감사 — site 데이터 파일 3개월 frozen silent drift 발견/수정)
+
+### fix(lotto): `apps/moneyball/data/lotto-data.json` 이 cycle 970(2026-05-26) 이후 미갱신 상태로 방치
+
+`lotto/methodology/page.tsx`(520줄, 최초 감사) 코드 read — 가중치/규칙 테이블 렌더 로직은
+clean. 하지만 렌더에 쓰이는 데이터 소스 `apps/moneyball/data/lotto-data.json` 자체가
+`generated_at: 2026-05-26` 로 멈춰 있음을 발견. Root cause: `data(lotto): ... lotto-data.json
+갱신` 커밋들(cycle 1163/1292/1414/1462/1543 등, 45건)이 실제로는 전부 `scripts/lotto-data.json`
+(원시 회차 캐시, 별개 파일)만 수정 — 커밋 메시지가 같은 파일명이라 site JSON 갱신으로
+오인된 상태로 방치. 결과: 공개 `/lotto/methodology` 페이지가 3개월간 유효조합 수
+(7,700,649, 실제 7,705,415) / OOS 검증 4건(1227회까지, 실제 1237회까지 14건) /
+사이클 진행 기록(cycle 970까지, 실제 2264까지 78건 fire)을 모두 구식으로 노출.
+`LOTTO_RULE_COUNT=256` 상수는 `scripts/lotto.ts` RULES 배열(리터럴 241 + ZONES.map 5 +
+끝자리 loop 10 = 256) 대조 결과 정확 — 이 항목은 drift 아님.
+
+수정: `apps/moneyball/data/lotto-data.json` count_valid/generated_at 최신화 +
+누락된 draw 1228~1237 OOS 10건 + chain_fire_history 45건 append (실제 커밋/cycle JSON
+기록 기준 실측치만 사용, 추정 데이터 0건). `lotto-data-schema.test.ts` 17개 pass 확인.
+`VERSION`/root `package.json` 이 이미 이전 사이클(2266)부터 `apps/moneyball/package.json`
+과 어긋나 있던 3-way version guard 실패도 함께 정정 (별개의 작은 누락 — 이번 빌드에 흡수).
+
 ## v0.5.62.48 — 2026-08-20 (cycle 2266, review-code (heavy): methodology/page.tsx 최초 감사 — AI 토론 fallback 미고지 발견/수정)
 
 ### fix(methodology): "AI 에이전트 토론" 섹션이 CREDIT_EXHAUSTED fallback 존재 미고지
