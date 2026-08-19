@@ -20,6 +20,17 @@ name: deploy-drift-alert
 # cycle 907 (plan #11 Step 1) — /api/version response_time_ms threshold 측정 추가:
 # - body.response_time_ms > 2000 시 ::warning:: 별도 출력 (slow degradation
 #   silent skip 차단 — alert fatigue 회피 위해 error 아님 warning 분기)
+#
+# cycle 2222 (fix-incident) — fetch-depth 1→0 fix:
+# - 실측: 2026-08-15~08-18 26시간 연속 ::error:: (deploy-drift-alert 매시간
+#   fail). 근본원인 = develop-cycle 봇 push burst(115 commit) 뒤 Vercel 직렬
+#   빌드 큐가 서서히 caught up (자연 해소, 실제 deploy 고장 아님).
+# - 진짜 버그: fetch-depth=1 shallow clone 이라 PROD_SHA 커밋 오브젝트가
+#   로컬에 없어서 `git rev-list --count PROD_SHA..MAIN_SHA` 항상 실패 →
+#   COMMITS_AHEAD 항상 "unknown" 으로 로그 — 심각도 판단(대량 backlog
+#   catch-up 중 vs 소수 commit 인데 정말 멈춤) 불가능했던 진단 정보 손실.
+# - fix: fetch-depth 0 (전체 history, repo 68MB/4639 commit 규모라 3분
+#   timeout 안 충분) 로 COMMITS_AHEAD 항상 정확히 계산되도록 수정.
 
 on:
   schedule:
@@ -41,7 +52,7 @@ jobs:
       - name: Checkout main HEAD
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Compare main HEAD vs production /api/version
         run: |
