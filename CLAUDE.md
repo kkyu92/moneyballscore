@@ -35,7 +35,7 @@ cat TODOS.md 2>/dev/null | head -30         # 할 일
 **기본 Claude Code 정책**: "NEVER commit unless explicitly asked". 이 프로젝트에선 사용자가 2026-04-23 명시적으로 override — 다음 규칙 적용:
 
 - 논리 단위 완성 시 **묻지 않고 즉시 `git commit`**. "지금 커밋할까요?" 질문 금지.
-- 커밋 후 hash + 한 줄 메시지만 보고 (예: `커밋 a1b2c3d: fix(sentry): alert-rule schema 제거`).
+- **커밋 직후 `git push origin main` 도 즉시 실행** (R4 확장, 2026-08-19 cycle 2198 fix-incident — 사례 33 재발 근본 원인). PR/브랜치 아닌 **직접 main 커밋(policy:/docs:/lesson: retro류)도 push 누락 시 로컬-origin silent divergence 누적** → 다음 사이클(들)이 stale 워킹 디렉토리로 감사·작업 (사례 8/11/17/18/33 계열). push 실패(pre-push hook lint/type-check fail 등) 시 그 자리에서 원인 해결 후 재 push, 다음 커밋으로 미루지 않음.
 - 여러 파일이 누적됐어도 **하나의 논리 단위 = 하나의 커밋**.
 
 **예외 (여전히 사용자 허가 필요)**:

@@ -689,3 +689,31 @@ cycle 에서 origin 에 push 하지 않음(대량 과거 커밋 일괄 push 는 
   머지까지 확인하고 정확히 서술했음(사례 18 mitigation 정상 작동, 재발
   아님) — 다만 "머지됨" 이 "내 로컬에도 반영됨" 을 의미하진 않는다는 새
   구분선을 드러냄
+
+**재발 + 근본 원인 규명 (cycle 2198 fix-incident)**: cycle 2197 이 "해소
+SUCCESS" 로 retro 박제한 직후 cycle 2198 시작 스캔에서 즉시 재발 확인
+(local 44-ahead / origin 1-behind). 원인 = cycle 2197 의 "fix" 가 그 순간의
+divergence 만 merge 로 해소했을 뿐, **merge 후 `git push` 를 실행하지
+않음** — R4 (커밋 정책) 이 "즉시 commit" 만 명시하고 "즉시 push" 는 명시한
+적 없었던 것이 진짜 근본 원인. `gh pr list` 대조 결과 origin 은 사실
+매 cycle 마다 정상적으로 push/PR-merge 돼왔음(cycle ≤2196 까지 로컬-origin
+lockstep 확인) — 유독 cycle 2197 세션에서만 merge commit 이후 push 누락.
+carry-over #1 (40-ahead 정리 방식) 은 "그대로 두고 매 cycle merge 습관화"
+쪽으로 판명 났으나, **merge만으론 부족 — merge 뒤 push 까지가 완결**임을
+확인.
+
+**fix (cycle 2198, 재발 방지 — 이전엔 임시 sync 만, 이번엔 근본 원인 수정)**:
+1. `git fetch` → `git merge origin/main` (TODOS.md 1건 conflict, 서로 다른
+   cycle 항목이라 양쪽 유지 후 커밋) → **`git push origin main`** 즉시 실행
+   (pre-push hook lint/type-check 통과 확인, `f063815f..e9b58b57` 정상 반영)
+2. `CLAUDE.md` R4 규정 자체를 수정 — "커밋 직후 push 도 즉시 실행" 을
+   명문화 (기존엔 "즉시 commit" 만 있고 push 언급 자체가 없었음). 이 문서
+   갱신이 이번 fix 의 핵심 — 단순 sync 반복이 아니라 재발을 구조적으로
+   차단.
+
+**관련 family (추가)**:
+- 본 사례가 사례 8/11/17/18 계열 중 최초로 "root cause 문서 수정"까지
+  도달한 사례 — 이전 발견들(사례 33 최초 cycle 2197)은 그 순간의 증상만
+  해소하고 재발 방지 장치를 남기지 않아 즉시 재발. silent drift family
+  대응 시 "이 순간 상태 동기화" 와 "재발 차단 장치 설치" 를 구분해서 둘
+  다 완료해야 retro 의 SUCCESS 가 유효하다는 교훈.
