@@ -1,5 +1,32 @@
 # TODOS
 
+## 🟢 fix-incident — deploy-drift-alert 빈 commit_sha silent pass 차단 (cycle 2204, 2026-08-19)
+
+진단 단계에서 GH Actions scheduled workflow 최근 실행 상태 점검(review-code
+2연속 후 다양성 확보 차원, fix-incident gap-trigger 는 아직 미충족이었지만
+실제 신호 발견) 중 `deploy-drift-alert` 가 2026-08-18 17:39~23:33 KST 사이
+main-vs-production 10h+ gap 으로 6회 연속 `::error::` 실패 후 01:50 run 이
+"success" 로 표시된 것을 확인. 실제 로그 확인 결과 이 success 는 진짜 drift
+해소가 아니라 `/api/version` 이 200 응답하면서 `commit_sha:""` (빈 문자열)
+을 반환했을 때 워크플로가 타는 `-z "$PROD_SHA"` 분기(`::warning::` + `exit
+0`)를 탄 것.
+
+**근본원인**: `vercel inspect dpl_6TzuEuyVyFQvcyJUstncJz8tnCax` 로 그
+deployment 확인 → `moneyballscore-git-main-kkyu92s-projects.vercel.app`
+alias 부재 (정상 git-push 배포엔 항상 존재) = git 미연동 CLI/manual deploy
+로 production 이 일시 교체됨. main HEAD 대비 실제 drift 여부를 확인할 수
+없는 상태였는데 워크플로는 이를 "env 누락" 으로 오판해 조용히 통과시킴 —
+사례 9/10 silent drift family 재발 (검증 불가능한 production 상태를
+"정상"으로 은폐).
+
+**수정**: `.github/workflows/deploy-drift-alert.yml` 의 빈 PROD_SHA 분기를
+`::warning::` + `exit 0` → `::error::` + `exit 1` 로 변경. 현재 production
+은 이미 정상 git-linked 배포로 자연 복구된 상태(수동 `gh workflow run` 재검증
+확인, run 32210441660 success) — 이 fix 는 재발 시 silent pass 를 막는
+목적. type-check/lint(pre-push hook) clean, YAML syntax 검증 완료. 단일
+workflow 파일 2-line 변경 — PR 생략, main 직접 commit+push (R4/R7, commit
+`73d0f46b`).
+
 ## 🟢 review-code (heavy) — 확신도별 분석 CI 임계값 20 → STATS_RELIABLE_MIN_N 정합 (cycle 2203, 2026-08-19)
 
 open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4),
