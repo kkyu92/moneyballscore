@@ -1182,8 +1182,14 @@ async function handleDailySummaryNotification(
   let stage = 'init';
   try {
     stage = 'expected-calc';
+    // status 'live' 도 expected 제외 — predict_final GAP 감지(cycle 936 fix, 위 라인
+    // 1049)와 동일 개념의 expected 산정인데 'live' 제외가 누락돼있었음. live 경기가
+    // expected 를 부풀리면 todayTotal<expected 로 판정돼 strict mode(predict)에서
+    // summary Telegram 알림이 그날 계속 skip 되고 predict_final(last-chance)까지
+    // 미뤄지는 silent delay 발생 (cycle 2239 review-code heavy 발견).
     const expected = games.filter(
-      (g) => g.status !== 'final' && g.status !== 'postponed' && g.homeSP && g.awaySP,
+      (g) => g.status !== 'final' && g.status !== 'postponed' && g.status !== 'live'
+        && g.homeSP && g.awaySP,
     ).length;
     if (expected === 0) {
       console.log(`[Pipeline] summary skip: expected=0 (no SP-confirmed games)`);
