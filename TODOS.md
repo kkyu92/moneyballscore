@@ -1,5 +1,28 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — MLB 주간 리뷰 Phase 1a 데이터 레이어 (plan #26, cycle 2229, 2026-08-19)
+
+plan #26 (Tier 3, approved) unprocessed plan lookup 자동 매핑 — target_chain=explore-idea
+그대로 fire. 규모가 1 cycle 초과 확실해 plan 자체 체크리스트("Phase 1 을 1a(데이터
+레이어)/1b(page.tsx+nav) 로 쪼개 2회 fire 검토")에 따라 1a 만 이번 cycle 착수.
+
+- `apps/moneyball/src/lib/reviews/mlb-shared.ts` 신규: `fetchMlbPredictionRowsInRange`
+  (mlb_schedule + predictions 두 쿼리 external_game_id 조인, `fetchMlbConvergencePickDetailedResults`
+  패턴 재사용) + `buildMlbTeamStats` + `buildMlbFactorInsights`(home/away diff 기반
+  Pearson 상관계수 — KBO `analyzeFactorAccuracy` 의 0.5중심 normalized factors 가정이
+  MLB 원본 스탯 컬럼엔 안 맞아 병렬 신규 구현, `buildMlbFactorAccuracy.ts` 의
+  LOWER_IS_BETTER 규칙 재사용)
+- `apps/moneyball/src/lib/reviews/buildMlbWeeklyReview.ts` 신규: KBO `buildWeeklyReview.ts`
+  구조 그대로 포팅 (pickHighlights/buildSummary 동일 패턴, `classifyWinnerProb` 리그 무관
+  재사용)
+- 테스트 2개 (`mlb-shared.test.ts` + `buildMlbWeeklyReview.test.ts`) — supabase mock
+  chain (`gte().lte()` schedule + `eq().eq().in().in()` predictions, `buildMlbCalendarHeatmap.test.ts`
+  패턴 재사용), silent-drift 회귀 가드(schedule/predictions select 실패 시 throw) 포함
+- **범위 밖 (Phase 1b, 다음 explore-idea heavy fire 후보)**: `/mlb/reviews/weekly/[week]`
+  page.tsx + index + opengraph/twitter/not-found + Header MLB_NAV + Footer + sitemap.ts
+  동기 + EN 변형 skip(Phase 1 KO only, mlb/reviews 본체 전례 따름)
+- plan #26 status: `approved` → `phase1a_data_layer_shipped_cycle_2229_pending_phase1b`
+
 ## 🟡 explore-idea (lite) — MLB 주간/월간 리뷰 서브페이지 plan #26 (spec-only) (cycle 2228, 2026-08-19)
 
 open issue 0건, approved plan 0건 (25개 전부 completed/archived/superseded 유지, 본
