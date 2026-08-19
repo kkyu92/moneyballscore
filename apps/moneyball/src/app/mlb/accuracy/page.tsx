@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { SITE_URL } from "@moneyball/shared";
+import { SITE_URL, MLB_TEAMS, mlbShortTeamName } from "@moneyball/shared";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
-import { buildAllMlbTeamAccuracy } from "@/lib/mlb/buildMlbTeamAccuracy";
+import { buildAllMlbTeamAccuracy, buildMlbMatchupData } from "@/lib/mlb/buildMlbTeamAccuracy";
 import { buildMlbFactorAccuracy } from "@/lib/mlb/buildMlbFactorAccuracy";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbAccuracyDashboard } from "@/components/accuracy/MlbAccuracyDashboard";
 import { FactorAccuracyTable } from "@/components/accuracy/FactorAccuracyTable";
+import { TeamMatchupCards } from "@/components/accuracy/TeamMatchupCards";
 
 export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -26,9 +27,10 @@ export const metadata: Metadata = {
 };
 
 export default async function MlbAccuracyPage() {
-  const [summary, teamRows, factorAccuracyRows] = await Promise.all([
+  const [summary, teamRows, matchupData, factorAccuracyRows] = await Promise.all([
     buildMlbAccuracySummary('ko'),
     buildAllMlbTeamAccuracy(),
+    buildMlbMatchupData(),
     buildMlbFactorAccuracy('ko'),
   ]);
 
@@ -59,6 +61,25 @@ export default async function MlbAccuracyPage() {
         cohortWeekHeatmap={summary.cohortWeekHeatmap}
         teamRows={teamRows}
       />
+
+      {matchupData.matchups.length > 0 && (
+        <section id="matchup" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
+          <div>
+            <h2 className="text-lg font-bold">팀별 상대 강약 분석</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              각 팀 경기에서 AI가 어떤 상대팀을 만날 때 잘 맞추고 못 맞추는지 분석합니다.
+              n=1 결과는 연하게 표시됩니다 (표본 1건). 홈/원정 적중률은 각 n을 함께 표시합니다.
+            </p>
+          </div>
+          <TeamMatchupCards
+            matchups={matchupData.matchups}
+            homeAway={matchupData.homeAway}
+            teamAccuracy={teamRows}
+            teamCodes={Object.keys(MLB_TEAMS)}
+            shortName={mlbShortTeamName}
+          />
+        </section>
+      )}
 
       {factorAccuracyRows.length > 0 && (
         <section id="factor-accuracy" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
