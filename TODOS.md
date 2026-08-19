@@ -3474,3 +3474,27 @@ cycle 2139 review-code(heavy) 가 발견한 site-wide 버그: `Header.tsx`
 컴포넌트 레벨(`MlbAccuracyDashboard` 등)엔 이미 `STRINGS[ko/en]` 패턴
 있으니 Header 레벨 확장은 후속 explore-idea/polish-ui 후보. aria-label
 ("메뉴"/"검색"/"모바일 메뉴"/"리그 선택")도 동일 국제화 후속 대상.
+
+## 🟢 review-code (heavy) — /mlb/team/[code] division rank 배지 GB=0 자기모순 문구 fix (cycle 2217, 2026-08-19)
+
+open issue 0건, approved plan 0건. 직전 8사이클 distinct=4 — 2-chain lock 미충족.
+cycle 2216 next_recommended (review-code or operational-analysis) 채택, op-analysis
+최근(2215) 발화로 review-code 선택.
+
+**전수 재확인**: cycle 2214가 고친 CURRENT_MODEL_FILTER/PRODUCTION_COHORT_RULES 중복
+필터 + WAR=0 가드 불일치 family — 전체 코드베이스 grep 재확인 결과 잔존 0건 (family
+완전 종료 확정). CURRENT_MODEL_FILTER 단독 사용 11개 파일은 PRODUCTION_COHORT_RULES
+미결합이라 문제 없음(scoring_rule='v1.8' 단일 equality가 CE-fallback row도 포함 —
+decideModelVersion이 성공/실패 양쪽 분기 모두 scoring_rule=CURRENT_SCORING_RULE 고정
+박제하기 때문). WAR duel 3곳 모두 가드 확인.
+
+**신규 발견**: cycle 2216(PR #2969, 본 cycle 시작 40분 전 shipped)이 추가한
+`/mlb/team/[code]` division rank 배지의 `fmtGamesBehind()` 함수가 gb=0을
+"공동 1위"로 특수 표시 — 하지만 배지 앞부분에 이미 `{rank}위/{total}팀` positional
+rank가 노출돼 있어 "2위/5팀 · 공동 1위" 같은 자기모순 문구 발생 가능(GB=0인 팀이
+buildMlbDivisionStandings의 총 승수 tiebreak로 2위 이하로 밀릴 수 있음). "공동 1위"
+특수케이스 제거 → GB=0도 일반 "0.0경기차"로 표시(/mlb/standings 기존 컨벤션과 정합).
+
+회귀 테스트 1건 추가. type-check(4 packages)/lint/vitest(452 files·3923 tests)
+전체 통과. PR #2970 → `gh pr merge --squash --auto --delete-branch` → `gh pr view`
+실측 확인(state=MERGED, commit 945b1a59).
