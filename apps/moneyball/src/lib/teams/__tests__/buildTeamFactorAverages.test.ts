@@ -20,6 +20,7 @@ function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
   };
   const predsBuilder = {
     select: vi.fn().mockReturnThis(),
+    match: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     or: vi.fn().mockResolvedValue({
       data: opts.predsError ? null : (opts.preds ?? []),

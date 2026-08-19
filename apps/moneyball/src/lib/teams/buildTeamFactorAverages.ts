@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   assertSelectOk,
   computeFactorAveragesFromPerspectives,
@@ -94,6 +95,7 @@ export async function buildTeamFactorAverages(
         game:games!inner(home_team_id, away_team_id)
       `,
     )
+    .match(CURRENT_MODEL_FILTER)
     .eq("prediction_type", "pre_game")
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`, {
       foreignTable: "game",
