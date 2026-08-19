@@ -566,11 +566,12 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
       .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .not('home_elo', 'is', null)
       .order('id', { ascending: false })
-      .limit(ANALYSIS_UPCOMING_LIMIT),
+      .limit(ANALYSIS_UPCOMING_LIMIT) as unknown as Promise<SelectResult<unknown[]>>,
   ]);
 
-  const { data: scheduleData } = assertSelectOk(scheduleResult, 'analysis getThisWeekRemainingGames');
+  const { data: scheduleData } = assertSelectOk(scheduleResult, 'analysis getThisWeekRemainingGames schedule');
   if (!scheduleData || scheduleData.length === 0) return [];
+  const { data: eloData } = assertSelectOk(eloResult, 'analysis getThisWeekRemainingGames elo');
 
   const eloMap = new Map<string, number>();
   const modelProbMap = new Map<number, number>(); // wave-313: game_id → home_win_prob
@@ -585,9 +586,9 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
     homeRecentForm: number | null; awayRecentForm: number | null;
   };
   const factorDataMap = new Map<number, FactorData475>();
-  if (eloResult.data) {
+  if (eloData) {
     type EloRow = { game_id: number | null; home_elo: number | null; away_elo: number | null; home_win_prob: number | null; home_sp_fip: number | null; away_sp_fip: number | null; home_sp_xfip: number | null; away_sp_xfip: number | null; home_lineup_woba: number | null; away_lineup_woba: number | null; home_bullpen_fip: number | null; away_bullpen_fip: number | null; home_sfr: number | null; away_sfr: number | null; home_war_total: number | null; away_war_total: number | null; home_recent_form: number | null; away_recent_form: number | null; game: { home_team: { code: string } | null; away_team: { code: string } | null } | null };
-    for (const row of eloResult.data as unknown as EloRow[]) {
+    for (const row of eloData as unknown as EloRow[]) {
       const hc = row.game?.home_team?.code;
       const ac = row.game?.away_team?.code;
       if (hc && row.home_elo != null && !eloMap.has(hc)) eloMap.set(hc, row.home_elo);

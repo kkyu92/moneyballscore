@@ -1,3 +1,20 @@
+## v0.5.62.62 — 2026-08-20 (cycle 2282, review-code (heavy): analysis-data.ts getThisWeekRemainingGames elo 쿼리 assertSelectOk 누락 정정)
+
+### fix(analysis): getThisWeekRemainingGames elo/factor 쿼리 assertSelectOk 미적용 silent swallow 정정
+
+`analysis-data.ts` (918줄) 재감사 — cycle 2281 이 이미 sp_confirmation_log 쿼리에 assertSelectOk
+를 적용했지만, 같은 파일의 `getThisWeekRemainingGames` 안 `Promise.all([scheduleResult, eloResult])`
+두번째 쿼리(`eloResult`, 이번 주 남은 경기의 Elo/10팩터 데이터)는 검증 없이 `if (eloResult.data)`
+로만 분기 — DB 에러 시 `.error` 를 무시하고 `eloMap`/`factorDataMap` 이 조용히 빈 상태로 남아
+"이번 주 남은 경기" 위젯이 크래시나 로그 없이 중립 50% 승률 + 팩터 배지 전무 상태로 저하되는
+silent drift. `eloResult` 도 `assertSelectOk` 로 통과시켜 DB 에러 시 fail-loud 전환.
+
+정적 grep 회귀 테스트 `silent-drift-cycle-2282.test.ts` 추가.
+
+버전 3-way sync 정정: 직전 사이클(2281)이 VERSION/CHANGELOG 만 0.5.62.61 로 올리고
+`package.json` (root + apps/moneyball) 갱신을 누락 — `version-sync-guard` 테스트 fail 로 발견,
+본 사이클 fix 와 함께 0.5.62.62 로 일괄 정합.
+
 ## v0.5.62.61 — 2026-08-20 (cycle 2281, review-code (heavy): calibration-agent.ts 최초 전체 감사, parseResponse silent fallback 정정)
 
 ### fix(agents): calibration-agent.ts parseResponse JSON 파싱 실패 silent fallback 정정
