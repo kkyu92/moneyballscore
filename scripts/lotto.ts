@@ -14,7 +14,7 @@
  * 규칙은 데이터 기반 동적 계산 — 하드코딩 없음.
  */
 
-import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import {
   LOTTO_FETCH_TIMEOUT_CSV_MS,
@@ -1601,11 +1601,39 @@ function unpopularityScore(nums: number[]): number {
 
 interface PickEntry { nums: number[]; score: number; sum: number; odd: number; consec: number; }
 
-function buildCandidates(rounds: LottoRound[], stats: Stats, count: number): { picks: PickEntry[]; poolSize: number; attempts: number } {
+/**
+ * 이전 pick md 파일들에서 이미 발행된 조합 collect.
+ * 매 주차 pick 생성 시 pool 에서 자동 제외 = 재활용 차단 (cycle 2228+ 박제).
+ * 파일 형식: `| N | a b c d e f | ...` (markdown table row).
+ */
+function loadPreviousPicks(currentOutPath: string): Set<string> {
+  const picksDir = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks');
+  const prev = new Set<string>();
+  if (!existsSync(picksDir)) return prev;
+  const currentBase = currentOutPath.split('/').pop();
+  for (const f of readdirSync(picksDir)) {
+    if (!f.endsWith('.md')) continue;
+    if (f === currentBase) continue;   // 오늘 생성 파일 자체는 제외
+    const md = readFileSync(join(picksDir, f), 'utf-8');
+    const rowRe = /^\|\s*\d+\s*\|\s*([0-9]+(?:\s+[0-9]+){5})\s*\|/gm;
+    let m: RegExpExecArray | null;
+    while ((m = rowRe.exec(md)) !== null) {
+      const nums = m[1].split(/\s+/).map(Number);
+      if (nums.length === 6 && nums.every(n => n >= 1 && n <= 45)) {
+        prev.add(nums.slice().sort((a,b)=>a-b).join(','));
+      }
+    }
+  }
+  return prev;
+}
+
+function buildCandidates(rounds: LottoRound[], stats: Stats, count: number, opts?: { excludePicks?: Set<string> }): { picks: PickEntry[]; poolSize: number; attempts: number; excludedByPrevPicks: number } {
   const pastWinners = new Set(rounds.map(r => r.numbers.join(',')));
+  const prevPicks = opts?.excludePicks ?? new Set<string>();
   const candidates: Array<{nums: number[]; score: number}> = [];
   const seen = new Set<string>();
   let attempts = 0;
+  let excludedByPrevPicks = 0;
 
   while (candidates.length < 50_000 && attempts < 2_000_000) {
     attempts++;
@@ -1617,6 +1645,7 @@ function buildCandidates(rounds: LottoRound[], stats: Stats, count: number): { p
     seen.add(key);
     if (!isValid(nums, stats)) continue;
     if (pastWinners.has(key)) continue;
+    if (prevPicks.has(key)) { excludedByPrevPicks++; continue; }
     candidates.push({ nums, score: unpopularityScore(nums) });
   }
 
@@ -1629,19 +1658,20 @@ function buildCandidates(rounds: LottoRound[], stats: Stats, count: number): { p
     odd: oddCount(nums),
     consec: consecPairs(nums),
   }));
-  return { picks, poolSize: candidates.length, attempts };
+  return { picks, poolSize: candidates.length, attempts, excludedByPrevPicks };
 }
 
 function pick(rounds: LottoRound[], stats: Stats, count = 5): void {
   const bar = '═'.repeat(56);
   console.log(`${bar}`);
   console.log(`  추천 번호 ${count}세트`);
-  console.log(`  필터1: 100% 규칙 (${RULES.length}개) / 필터2: 역대 당첨 제외 / 필터3: 기피점수`);
+  console.log(`  필터1: 100% 규칙 (${RULES.length}개) / 필터2: 역대 당첨 제외 / 필터3: 이전 pick 재활용 제외 / 필터4: 기피점수`);
   console.log(`${bar}\n`);
 
-  const { picks, poolSize, attempts } = buildCandidates(rounds, stats, count);
+  const excludePicks = loadPreviousPicks('');   // '' = 모든 pick 파일 제외 (현재 생성 안함)
+  const { picks, poolSize, attempts, excludedByPrevPicks } = buildCandidates(rounds, stats, count, { excludePicks });
 
-  console.log(`  후보 풀: ${poolSize.toLocaleString()}개 (${attempts.toLocaleString()}회 시도)\n`);
+  console.log(`  후보 풀: ${poolSize.toLocaleString()}개 (${attempts.toLocaleString()}회 시도, 재활용 차단 ${excludePicks.size.toLocaleString()}세트 / ${excludedByPrevPicks.toLocaleString()}회 매칭)\n`);
   picks.forEach((p, i) => {
     console.log(
       `  세트 ${i+1}: [${p.nums.map(n=>String(n).padStart(2)).join('  ')}]` +
@@ -1727,7 +1757,9 @@ ${meta.drawDate} 추첨 결과 (${meta.drawNo}회) 확정 후 매칭 수 기록 
 function pickMd(rounds: LottoRound[], stats: Stats): void {
   const targetDate = process.argv[3] ?? nextSaturdayKST();
   const drawNo = process.argv[4] ?? (rounds.length + 1);
-  const { picks, poolSize, attempts } = buildCandidates(rounds, stats, LOTTO_PICK_COUNT);
+  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}.md`);
+  const excludePicks = loadPreviousPicks(outPath);
+  const { picks, poolSize, attempts, excludedByPrevPicks } = buildCandidates(rounds, stats, LOTTO_PICK_COUNT, { excludePicks });
   const { valid, total } = countValid(stats);
   const md = renderPickMarkdown({
     drawDate: targetDate,
@@ -1740,10 +1772,10 @@ function pickMd(rounds: LottoRound[], stats: Stats): void {
     attempts,
     picks,
   });
-  const outPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}.md`);
   writeFileSync(outPath, md);
   console.log(`박제: ${outPath}`);
   console.log(`회차: ${drawNo} / ${picks.length}세트 / 후보 풀 ${poolSize.toLocaleString()}`);
+  console.log(`재활용 차단: 이전 pick ${excludePicks.size.toLocaleString()}세트 제외 (attempts 중 ${excludedByPrevPicks.toLocaleString()}회 매칭)`);
 }
 
 // ─── BALANCED STRATEGY (1등 historical 분포 median ±5 cutoff) ──────────────
@@ -1955,9 +1987,11 @@ ${rowsAll}
 function pickMdMix(rounds: LottoRound[], stats: Stats): void {
   const targetDate = process.argv[3] ?? nextSaturdayKST();
   const drawNo = process.argv[4] ?? (rounds.length + 1);
+  const mixOutPath = join(__dirname, '..', 'apps', 'moneyball', 'data', 'lotto-picks', `${targetDate}-mix.md`);
+  const excludePicks = loadPreviousPicks(mixOutPath);
 
   // 3 source 별 후보 풀 생성
-  const uniqueResult = buildCandidates(rounds, stats, 17);
+  const uniqueResult = buildCandidates(rounds, stats, 17, { excludePicks });
   const moderateResult = buildModerateCandidates(rounds, stats, 17);
   const balancedResult = buildBalancedCandidates(rounds, stats, 16);
 
