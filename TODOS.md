@@ -1,5 +1,32 @@
 # TODOS
 
+## 🟢 explore-idea (heavy) — /mlb/standings 실 W-L/GB 순위 구현 (cycle 2213, 2026-08-19)
+
+open issue 0건, approved plan 0건(19건 전량 completed/archived/superseded).
+2-chain lock 미충족(직전 8사이클 distinct=4). info-arch 30-gap 트리거 충족(gap=30)
+했으나 sitemap.ts 동적 라우트 커버리지·MegaMenu·Footer sitemap 컬럼 모두 이미
+구현돼 있어 실익 낮음 판단해 skip. lotto 30+ gap 도 재확인 결과 cron 으로 이미
+fresh(다음 회차 픽 08-22 + 직전 OOS 08-15 완결). 대신 cycle 2212 key_findings 에
+명시된 "`/mlb/standings` 실 W-L 순위 미구현" carry-over 후보 채택.
+
+**구현**: `/mlb/standings` 는 팀 구성 + 파크팩터만 보여주는 placeholder 였고
+"시즌 W/L/GB 등 라이브 record 는 별도 datasource 통합 시" 문구로 고정. 실제로는
+`mlb_schedule` 이 이미 MLB statsapi 원본 스코어(`home_score`/`away_score`,
+`status='final'`)를 보유(cycle 2212 fix로 신선도 확보) — 별도 스크래퍼 연동 없이
+계산만으로 해소 가능하다고 판단.
+
+신규 `buildMlbDivisionStandings()` (`apps/moneyball/src/lib/mlb/buildMlbStandings.ts`)
+— final 경기를 팀별 집계해 division 별 W-L/win%/GB 산출. StatsAPI alias 코드
+(TB/CWS/KC/SD/SF/AZ/WSH) 는 `normalizeMlbTeamCode` 로 canonical 정합(cycle 2081
+발견 패턴 재사용). 페이지는 win% 내림차순 정렬 + 실제 W-L·GB 렌더로 전환, ko/en
+양쪽 미러 갱신. 기존 source-grep 테스트 2건(`MLB_DIVISIONS` 직접 import 검증)을
+새 아키텍처(MLB_DIVISIONS 가 builder 내부로 이동)에 맞게 수정.
+
+**검증**: 신규 유닛 테스트 5건(정렬/GB 계산/alias 정합/동점 제외/빈 시즌) +
+로컬 dev 서버 실측 — `/mlb/standings` 200 렌더, 실제 W-L(8-1/6-0 등)·win%(.684
+등)·GB(9.5/11.0 등) 정상 노출 확인. 전체 451 files/3916 tests green, lint/type-check
+clean. 커밋 `3de90ac3`, push 완료.
+
 ## 🟢 fix-incident (heavy) — mlb_schedule.status 재고착(7일) + 근본원인(CF Worker 미배포) 독립 안전망 (cycle 2212, 2026-08-19)
 
 open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
