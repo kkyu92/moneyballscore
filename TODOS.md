@@ -1,5 +1,40 @@
 # TODOS
 
+## 🟢 fix-incident(heavy) — deploy-drift-alert 12h+ silent gap, 수동 재배포 (cycle 2194, 2026-08-19)
+
+no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
+직전 8사이클 distinct=3) — `gh run list` 로 fix-incident 소스 (scheduled
+workflow health) 확인 중 `deploy-drift-alert` 가 2026-08-18 14:49 부터
+매시 정각 10건 연속 failure (100% fail rate, 사례 17 cycle 1996 룰:
+scheduled workflow 실패는 `pipeline_runs` DB 와 별개 채널이라 curl 진단
+필수 — 본 케이스가 그 필요성 재확인).
+
+진단: `vercel ls --meta githubCommitSha=<origin/main HEAD>` 조회 결과
+82c6fecd (cycle 2181 retro, `feat(mlb): rolling 적중률 추세 차트 parity`
+코드 변경 포함) 에 대한 배포 기록이 전혀 없음 — Vercel 최신 production
+배포는 de22a6d (cycle 2180 docs 커밋, 같은 push batch 안 중간 커밋)
+에 머물러 있었음. 즉 git push 자체는 origin 에 반영됐으나 (batch-push
+정책 그대로 유지, R4 push 예외 — 자율 push 하지 않음) Vercel 쪽 build
+트리거가 그 push 에 대해 아예 발화하지 않은 것으로 확인 (canceled/skipped
+기록조차 부재 — turbo-ignore 스킵 아님, 웹훅 자체 미착화 추정).
+
+조치: 로컬 main (33 commit ahead, unpushed) 을 건드리지 않고
+`git worktree add /tmp/mbs-prod-deploy origin/main` 으로 origin/main
+HEAD 상태만 분리 체크아웃 → `.vercel/project.json` (root + apps/moneyball)
+복사 → `vercel --prod --yes` 수동 배포. 빌드 성공 + production alias
+갱신 확인 (`/mlb/accuracy` 페이지에 cycle 2181 신규 "rolling" 차트 렌더
+확인 — 코드 자체는 정상 반영). worktree cleanup 완료.
+
+알려진 부작용 (회귀 아님): CLI 수동 배포는 git 커밋 메타데이터를
+싣지 않아 `/api/version` 의 `commit_sha` 가 빈 문자열로 응답 — 다음
+`deploy-drift-alert` 실행 시 PROD_SHA 미주입 분기 (`::warning` + exit 0)
+로 넘어가 RED 는 해소되나 sha 비교 자체는 무력화됨. 근본 원인 (특정
+push 에 대해 Vercel 웹훅이 왜 안 붙었는지) 은 CLI/API 로는 더 이상
+진단 불가 (`gh api repos/.../installation` 401, `/user/installations`
+403 — GitHub App 토큰 필요, dashboard 접근 필요). 다음 batch push 때
+동일 silent skip 재발 여부 monitor 필요 — 재발 시 Vercel dashboard
+Git 연동 설정 재확인이 사용자 영역 carry-over 후보.
+
 ## 🟢 explore-idea(heavy) — CohortComparisonHeatmap MLB parity (cycle 2193, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, 2-chain lock 없음 — 직전
