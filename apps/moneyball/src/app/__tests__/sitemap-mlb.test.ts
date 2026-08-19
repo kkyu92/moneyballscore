@@ -119,6 +119,13 @@ describe('sitemap MLB URL coverage', () => {
     expect(calendar).toBeDefined();
     expect(calendar?.priority).toBeGreaterThan(0);
   });
+
+  it('includes /mlb/matchup index/picker route (cycle 2183 info-arch — 435 dynamic pairs existed but had no discoverable entry point, KBO /matchup parity)', async () => {
+    const urls = await sitemap();
+    const matchupIndex = urls.find((u) => u.url.endsWith('/mlb/matchup') && !u.url.includes('/en/'));
+    expect(matchupIndex).toBeDefined();
+    expect(matchupIndex?.priority).toBeGreaterThan(0);
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {
@@ -169,5 +176,11 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
     const urls = await sitemap();
     const enGameDetail = urls.find((u) => u.url.endsWith('/en/mlb/games/2026-08-01/NYY-vs-BOS'));
     expect(enGameDetail).toBeDefined();
+  });
+
+  it('/en/mlb/matchup index/picker route present (cycle 2183 info-arch)', async () => {
+    const urls = await sitemap();
+    const enMatchupIndex = urls.find((u) => u.url.endsWith('/en/mlb/matchup'));
+    expect(enMatchupIndex).toBeDefined();
   });
 });

@@ -59,6 +59,7 @@ import {
   buildFallbackStats,
   buildFallbackDailyTrend,
   buildBrierTrend,
+  countBrierTrendWeeks,
   buildScoringRuleDayHeatmap,
   buildRollingAccuracy,
   buildWinnerProbBuckets,
@@ -625,7 +626,7 @@ export default async function AccuracyPage() {
       )}
 
       {/* Brier 추세 (scoring_rule 진화 + 주차별) */}
-      {brierTrend.length >= 3 && (
+      {countBrierTrendWeeks(brierTrend) >= 3 && (
         <section
           id="brier-trend"
           className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"

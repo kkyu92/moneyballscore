@@ -107,6 +107,77 @@ describe('buildMlbAccuracySummary', () => {
     expect(todayPoint?.windowAccuracy).toBeCloseTo(2 / 3, 5);
   });
 
+  it('brierTrend — 3주+ 데이터 있으면 주차별 Brier point 산출 (BrierTrendChart parity, cycle 2186)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', game_date: '2026-07-01', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', game_date: '2026-07-08', home_score: 1, away_score: 3 },
+        { external_game_id: 'g3', game_date: '2026-07-15', home_score: 4, away_score: 0 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 },
+        { external_game_id: 'g2', home_win_prob: 0.7 },
+        { external_game_id: 'g3', home_win_prob: 0.6 },
+      ],
+    });
+    const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
+    const result = await buildMlbAccuracySummary();
+    expect(result.brierTrend.length).toBeGreaterThanOrEqual(3);
+    expect(result.brierTrend.every((p) => p.scoringRule === 'all' || p.n > 0)).toBe(true);
+  });
+
+  it('scoringRuleDayHeatmap — MLB rows 는 scoring_rule 없어 all aggregate 만 채워짐 (ScoringRuleDayHeatmap parity, cycle 2189)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', game_date: '2026-08-01', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', game_date: '2026-08-02', home_score: 1, away_score: 3 },
+        { external_game_id: 'g3', game_date: '2026-08-03', home_score: 4, away_score: 0 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 },
+        { external_game_id: 'g2', home_win_prob: 0.7 },
+        { external_game_id: 'g3', home_win_prob: 0.6 },
+      ],
+    });
+    const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
+    const result = await buildMlbAccuracySummary();
+    expect(result.scoringRuleDayHeatmap.length).toBeGreaterThan(0);
+    const allCellsN = result.scoringRuleDayHeatmap
+      .filter((c) => c.scoringRule === 'all')
+      .reduce((sum, c) => sum + c.n, 0);
+    expect(allCellsN).toBe(3);
+    const nonAllCellsN = result.scoringRuleDayHeatmap
+      .filter((c) => c.scoringRule !== 'all')
+      .reduce((sum, c) => sum + c.n, 0);
+    expect(nonAllCellsN).toBe(0);
+  });
+
+  it('cohortWeekHeatmap — MLB rows 는 scoring_rule 없어 all aggregate 만 채워짐 (CohortComparisonHeatmap parity, cycle 2193)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', game_date: '2026-08-01', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', game_date: '2026-08-02', home_score: 1, away_score: 3 },
+        { external_game_id: 'g3', game_date: '2026-08-03', home_score: 4, away_score: 0 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 },
+        { external_game_id: 'g2', home_win_prob: 0.7 },
+        { external_game_id: 'g3', home_win_prob: 0.6 },
+      ],
+    });
+    const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
+    const result = await buildMlbAccuracySummary();
+    expect(result.cohortWeekHeatmap.length).toBeGreaterThan(0);
+    const allCellsN = result.cohortWeekHeatmap
+      .filter((c) => c.scoringRule === 'all')
+      .reduce((sum, c) => sum + c.n, 0);
+    expect(allCellsN).toBe(3);
+    const nonAllCellsN = result.cohortWeekHeatmap
+      .filter((c) => c.scoringRule !== 'all')
+      .reduce((sum, c) => sum + c.n, 0);
+    expect(nonAllCellsN).toBe(0);
+  });
+
   it('예측 없는 경기는 skip (external_game_id 매칭 없음)', async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [{ external_game_id: 'g1', game_date: '2026-08-01', home_score: 5, away_score: 2 }],

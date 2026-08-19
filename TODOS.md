@@ -1,5 +1,411 @@
 # TODOS
 
+## 🟢 review-code(heavy) — Brier trend "3주 이상" 게이트 카피/동작 불일치 fix (cycle 2195, 2026-08-19)
+
+no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
+직전 8사이클 distinct=4) — Feature-Drift Cycle alternation (fix-incident
+2194 는 out-of-band incident, 그 전 explore-idea 2193/review-code 2192)
+따라 review-code(heavy) 선택. 최근 4개 explore-idea heavy cycle(2181/
+2186/2189/2193)이 연속 추가한 MLB accuracy 대시보드 위젯 클러스터
+(RollingAccuracyChart/BrierTrendChart/ScoringRuleDayHeatmap/
+CohortComparisonHeatmap) 감사.
+
+먼저 확인한 가설(MLB rows에 scoring_rule 필드 없어 per-rule heatmap
+breakdown 이 깨진다) 은 오탐 — cycle 2189 커밋 메시지가 이미 "자연
+degradation" 으로 명시했고, activeRows/activeSRs 필터가 'all' aggregate
+만 남기는 걸로 이미 우아하게 처리됨 (silent drift wave 255~257 registry
+fix 가 이미 이 패턴 방지).
+
+실제 발견: `buildBrierTrend()` 는 주차마다 'all' + scoring_rule 최소
+2개 point 를 result 배열에 push — result.length 는 실제 주차 수의 2배
+이상. `accuracy/page.tsx`(628줄) + `MlbAccuracyDashboard.tsx`(312줄) +
+`BrierTrendChart.tsx` 내부 가드가 모두 `brierTrend.length >= 3` (총
+point 수) 로 게이트해, UI 카피("3주 이상 검증되면 Brier score 시계열
+그래프가 표시됩니다")와 달리 실제로는 2주차에 이미 차트가 열림 — KBO/MLB
+양쪽 accuracy 대시보드 공유 버그(cycle 1999 이전부터 존재, MLB 이식과
+무관한 pre-existing 이슈).
+
+조치: `countBrierTrendWeeks()` (distinct week/date count) 신규 export
+(`buildAccuracyData.ts`) 후 3개 게이트 지점(`accuracy/page.tsx`,
+`MlbAccuracyDashboard.tsx`, `BrierTrendChart.tsx`) 모두 이걸로 교체.
+회귀 테스트 3건 추가. `tsc --noEmit` clean + 전체 vitest suite
+3897/3897 pass (447 files) 확인.
+
+커밋 `983acd83`. push 는 batch 정책 유지 (사용자 요청 시만, 자율 push
+없음) — local main 지금 origin 대비 36 commit ahead.
+
+## 🟢 fix-incident(heavy) — deploy-drift-alert 12h+ silent gap, 수동 재배포 (cycle 2194, 2026-08-19)
+
+no forced trigger (open issue 0건, approved plan 0건, 2-chain lock 없음 —
+직전 8사이클 distinct=3) — `gh run list` 로 fix-incident 소스 (scheduled
+workflow health) 확인 중 `deploy-drift-alert` 가 2026-08-18 14:49 부터
+매시 정각 10건 연속 failure (100% fail rate, 사례 17 cycle 1996 룰:
+scheduled workflow 실패는 `pipeline_runs` DB 와 별개 채널이라 curl 진단
+필수 — 본 케이스가 그 필요성 재확인).
+
+진단: `vercel ls --meta githubCommitSha=<origin/main HEAD>` 조회 결과
+82c6fecd (cycle 2181 retro, `feat(mlb): rolling 적중률 추세 차트 parity`
+코드 변경 포함) 에 대한 배포 기록이 전혀 없음 — Vercel 최신 production
+배포는 de22a6d (cycle 2180 docs 커밋, 같은 push batch 안 중간 커밋)
+에 머물러 있었음. 즉 git push 자체는 origin 에 반영됐으나 (batch-push
+정책 그대로 유지, R4 push 예외 — 자율 push 하지 않음) Vercel 쪽 build
+트리거가 그 push 에 대해 아예 발화하지 않은 것으로 확인 (canceled/skipped
+기록조차 부재 — turbo-ignore 스킵 아님, 웹훅 자체 미착화 추정).
+
+조치: 로컬 main (33 commit ahead, unpushed) 을 건드리지 않고
+`git worktree add /tmp/mbs-prod-deploy origin/main` 으로 origin/main
+HEAD 상태만 분리 체크아웃 → `.vercel/project.json` (root + apps/moneyball)
+복사 → `vercel --prod --yes` 수동 배포. 빌드 성공 + production alias
+갱신 확인 (`/mlb/accuracy` 페이지에 cycle 2181 신규 "rolling" 차트 렌더
+확인 — 코드 자체는 정상 반영). worktree cleanup 완료.
+
+알려진 부작용 (회귀 아님): CLI 수동 배포는 git 커밋 메타데이터를
+싣지 않아 `/api/version` 의 `commit_sha` 가 빈 문자열로 응답 — 다음
+`deploy-drift-alert` 실행 시 PROD_SHA 미주입 분기 (`::warning` + exit 0)
+로 넘어가 RED 는 해소되나 sha 비교 자체는 무력화됨. 근본 원인 (특정
+push 에 대해 Vercel 웹훅이 왜 안 붙었는지) 은 CLI/API 로는 더 이상
+진단 불가 (`gh api repos/.../installation` 401, `/user/installations`
+403 — GitHub App 토큰 필요, dashboard 접근 필요). 다음 batch push 때
+동일 silent skip 재발 여부 monitor 필요 — 재발 시 Vercel dashboard
+Git 연동 설정 재확인이 사용자 영역 carry-over 후보.
+
+## 🟢 explore-idea(heavy) — CohortComparisonHeatmap MLB parity (cycle 2193, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음 — 직전
+8사이클 distinct=4, saturation 미충족 9/15) — cycle 2192 next_rec
+(explore-idea 또는 fix-incident) + fix-incident 는 4개 scheduled
+workflow 전부 green + open issue 0 이라 신호 부재 → explore-idea.
+cycle 2186/2189 retro backlog 에 두 번 명시된 "CohortComparisonHeatmap
+MLB parity 후보" 를 채택 — carry-over spec 명확 (lite 모드 기준 충족)
+이나 최근 explore-idea(heavy) 관행 (직접 구현+ship) 따라 진행.
+
+구현: `buildMlbAccuracySummary.ts` 에 기존 `buildScoringRuleWeekHeatmap`
+(KBO `/accuracy` 의 scoring_rule × 주차 cohort heatmap 산출 함수) 재사용
+→ `cohortWeekHeatmap: ScoringRuleWeekCell[]` 필드 추가. 컴포넌트
+`CohortComparisonHeatmap.tsx` 는 완전 data-driven 이라 변경 없이 그대로
+재사용. `MlbAccuracyDashboard.tsx` 에 섹션 추가 (guard: `some(c => c.n
+>= 3)`, KBO `/accuracy` 동일 threshold), ko/en 페이지(`mlb/accuracy`,
+`en/mlb/accuracy`) 양쪽 prop 배선.
+
+`ScoringRuleDayHeatmap` (cycle 2189, 요일 축) 과 동일하게 MLB rows 는
+`scoring_rule` 컬럼을 select 하지 않아 `sr ?? ''` 가 'all' aggregate
+외 어떤 SCORING_RULE_HEATMAP_ROWS 에도 안 매칭 — 'all' 단일 행만 채워지는
+자연 degradation (버그 아님, 기존 day heatmap 과 동일 패턴 확인 후 의도적
+수용). parity 테스트 1건 추가 (day heatmap 테스트와 동일 assertion 구조).
+
+tsc clean, lint clean, 447 test files / 3894 tests green (신규 1건 +).
+커밋 직접 main (배치 push 정책 유지, 29 unpushed 누적 — 사용자 배치 push
+요청 시 일괄 push).
+
+## 🟢 review-code(heavy) — convergenceRecord.ts 감사, UTC/KST cutoff 불일치 fix (cycle 2192, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음 — 직전
+8사이클 distinct=4) — cycle 2191 explicit reco (review-code 또는
+fix-incident) + fix-incident 는 4개 scheduled workflow 전부 green + open
+issue 0 이라 신호 부재 → review-code. 대상 파일 = convergenceRecord.ts
+(736줄, wave-546~633 다수 기능 추가/추출 거쳤지만 전체 파일 단독 감사
+기록 없음 — 수치 threshold 로직 밀집 = silent drift family 위험 영역).
+
+발견: `getRecentConvergencePickRecord`/`getConvergencePickStreak` 의
+startDate 미지정 기본 경로가 `new Date(Date.now() - N*86400000)
+.toISOString().slice(0,10)` 로 cutoff 계산 — UTC 캘린더일 기준. 같은
+파일의 `fetchConvergencePickDetailedResults` 는 today 경계를
+`toKSTDateString()` 으로 KST 기준 계산 — cutoff 만 UTC 로 남아있던
+불일치. KST 00:00~08:59 (UTC 15:00~23:59) 구간에 실행되면 cutoff 가
+실제 KST 날짜보다 하루 이르게 계산돼 lookback 윈도우
+(CONVERGENCE_RECORD_LOOKBACK_DAYS=45) 가 최대 1일 더 넓어짐 — "최근 45일
+강수렴 픽 성적"(analysis/game 페이지) 표시치가 실행 시각에 따라
+미세하게 흔들릴 수 있는 silent drift.
+
+packages/shared 에 동일 목적으로 이미 존재하던 `kstDateOffset()`
+(wave 143, not-found 페이지 3파일 중복 통합 시 박제 — 정확히 이 패턴
+차단용) 을 두 콜사이트에 적용해 정정. 나머지 함수 전부 감사 — streak/
+home-away/day-of-week/team-stats 순수 함수 로직, MLB pair 매치업 판정,
+threshold 상수 사용 모두 일관 확인, 추가 버그 미발견.
+
+tsc clean, 447 test files / 3893 tests green (회귀 없음). 커밋
+d13f8584 직접 main (배치 push 정책 유지, 28 unpushed 누적 — 사용자
+요청 시 push).
+
+## 🟢 operational-analysis(lite) — v1.8 CE/비CE cohort 재측정 (cycle 2191, 2026-08-18)
+
+no forced trigger (open issue 0, approved plan 0, 2-chain lock 없음 —
+직전 8사이클 distinct=4). cycle 2190 explicit reco (explore-idea 또는
+operational-analysis) 중 operational-analysis 선택 — explore-idea 후보
+parity gap (CalibrationChart/RollingAccuracyChart 는 이미 MLB 포팅 완료
+확인, TeamBiasTable/CohortComparisonHeatmap 은 MLB 실시간 standings
+데이터 소스 부재로 1 cycle 범위 밖) vs op-analysis 는 기존
+`scripts/op-analysis-ce-cohort.ts` harness 로 즉시 실행 가능 + 마지막
+발화 cycle 2178 (13 cycle gap, 아직 25-gap trigger 미달이나 "주기적
+갱신 필요" 라는 cycle 2190 own note 반영).
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 결과: 전체 n=316 (CE n=269 /
+비CE n=47, cycle 2146 n=311 대비 +5, 비CE 45일째 완전 동결 — 마지막
+비CE 예측 2026-07-01). CE 53.9%(145/269) vs 비CE 63.8%(30/47) → 격차
+9.9pp (cycle 2146 9.7pp 대비 미세 확대, 3-cycle window 9.7~10.7pp 안정
+범위). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → LLM
+부가가치 우세 방향 3회 연속 재확인. 결론/방향 변화 없음 — 신규 코드
+변경 X, `CLAUDE.md` 예측 엔진 가중치 섹션 cycle 2191 항목만 append.
+CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행) — 재분리 검증은
+여전히 사용자 결정 대기.
+
+## 🟢 review-code(heavy) — predictions/[date]/page.tsx 감사, 취소경기 적중률 불일치 fix (cycle 2190, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음 — 직전 8사이클 distinct=4, ship-0 미충족) — cycle 2189 explicit reco
+(review-code 또는 fix-incident) + fix-incident 신호 부재(4개 scheduled
+workflow 전부 green, open issue 0) → review-code. 대상 파일 선정 = staleness
+기준: `analysis/page.tsx`·`accuracy/page.tsx` 는 cycle 2149-2150 이미 감사,
+`predictions/[date]/page.tsx` 는 wave-505(cycle ~1872) 이후 318 사이클 미감사
+— 가장 오래됨.
+
+613줄 전체 read 후 신규 버그 1건 발견: 페이지 안 적중률 % 노출 5곳 중
+헤더 통계줄/footer ShareButtons 문구/`DailyPredictionSummaryBar` props 3곳은
+`correct.length / verified.length` (취소 경기 미포함), 나머지 `buildIntro()`/
+`buildArticleJsonLd()` 2곳은 `correctN = correct+cancelled, totalN =
+verified+cancelled` (기존 코드 주석 "취소 경기는 적중으로 집계 — 경기 자체
+무효, 예측 책임 없음" 명시) — 취소 경기 있는 날짜에 같은 페이지 안에서 서로
+다른 적중률 %가 동시 노출되는 실사용자 가시 버그.
+
+`PredictionDatePage` 최상단에 `correctN`/`totalN` 단일 source 도입 → 헤더/
+footer/`DailyPredictionSummaryBar` props 3곳 모두 교체 (`buildIntro`/
+`buildArticleJsonLd` 는 이미 정답이라 변경 X). 회귀 테스트 1건 추가
+(`correctN`/`totalN` 패턴 존재 + `correct.length / verified.length` 패턴
+부재 assert, 기존 파일 소스-grep 테스트 컨벤션 따름).
+
+`pnpm --filter moneyball test`: 447 files/3893 tests green (+1 신규),
+`tsc --noEmit`/lint clean. 커밋 직접 main push(branch/PR 미생성, cycle 2180
+이후 직접 push 패턴 유지, origin 대비 누적 ahead, 배포는 사용자 요청 시 batch).
+
+**다음 후보**: `operational-analysis` v1.8 cohort 재측정 (마지막 발화 cycle
+2178, gap 누적 중) 또는 `explore-idea` (Feature-Drift Cycle 교대).
+
+## 🟢 explore-idea(heavy) — MLB 요일별 scoring_rule cohort heatmap parity (cycle 2189, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음 — 직전 8사이클 distinct=4) — cycle 2188 retro alternation 힌트
+(explore-idea 또는 operational-analysis) + cycle 2186 이 남긴 backlog
+(ScoringRuleDayHeatmap/CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory
+중 MLB 미구현) 확인.
+
+TeamBiasTable 은 사전 확인 결과 즉시 제외 확정 — `/mlb/standings` 페이지가
+"시즌 순위는 추후 라이브 연동 carry-over" 라 명시, 실제 win% 소스 자체가 아직
+없음(placeholder). ModelVersionHistory 도 MLB 가 scoring_rule 버전 분화 없어
+스킵 유지. ScoringRuleDayHeatmap 은 BrierTrendChart 와 동일한 자연 degradation
+패턴(MLB PredRow 에 scoring_rule 필드 자체가 없어 `'all'` aggregate 만 채워짐)
+으로 안전하게 이식 가능해 이번 scope 로 선택.
+
+`buildMlbAccuracySummary()` 에 `buildScoringRuleDayHeatmap(rows)` 한 줄
+추가(신규 함수 없음, 기존 KBO 로직 그대로 재사용) → `scoringRuleDayHeatmap`
+필드 노출. `MlbAccuracyDashboard` 에 섹션 추가(조건:
+`scoringRuleDayHeatmap.some(c => c.n > 0) && verifiedN >= 10`, KBO
+`/accuracy` 의 `rows.length >= 10` 문턱과 동일 의도) + KO/EN `/mlb/accuracy`·
+`/en/mlb/accuracy` 양쪽 배선. `ScoringRuleDayHeatmap` 컴포넌트 자체는 KBO
+전용 한글 라벨 하드코딩("소표본"/"전체"/요일명) — locale prop 없음. 기존
+`BrierTrendChart` 도 동일 한계(EN 페이지에도 "전체" 노출) 확인 — 신규 결함
+아닌 기존 컨벤션 유지, 별도 fix 범위 밖.
+
+회귀 테스트 1건 추가(`scoring_rule 없는 MLB row → all aggregate 만 채워짐`
+검증). `pnpm --filter moneyball test`: 447 files/3892 tests green,
+`tsc --noEmit`/lint clean. 커밋 직접 main push(branch/PR 미생성, cycle 2180
+이후 직접 push 패턴 유지, origin 대비 누적 ahead, 배포는 사용자 요청 시 batch).
+
+**다음 후보(scope 밖, backlog 잔존)**: CohortComparisonHeatmap — 동일 자연
+degradation 패턴 적용 가능해 보임(사전 확인 권장), MLB 4주 cohort 비교 wiring.
+
+## 🟢 review-code(heavy) — page.tsx 감사, 신규 버그 1건 fix (cycle 2188, 2026-08-18)
+
+carry-over — cycle 2187 review-code(heavy) 감사 결과 다음 후보로 명시 지목한
+`apps/moneyball/src/app/page.tsx` (1081줄, 홈페이지, 최근 감사 이력 없음) 감사.
+
+`getTodayDivergenceGame` (AI vs 커뮤니티 다이버전스 칩) 의 `pick_poll_events`
+쿼리만 `assertSelectOk` 가드 누락 — 같은 파일 다른 7개 쿼리는 전부 사용 중.
+Supabase 는 `.error` 체크 안 하면 throw 없이 `data=null` 로 silent return —
+호출부 `.catch(captureFallback)` 는 throw 안 하면 절대 안 걸림. 즉 RLS/DB 에러
+발생 시 다이버전스 칩이 알림 없이 그냥 사라짐 (사례 3/6 Supabase silent .error
+family 재발). `assertSelectOk` 추가로 fix (커밋 `6d0b5fa2`).
+
+그 외 홈페이지 전체 read — homeWinProb 필드 우선순위가 함수마다 다름
+(`reasoning.homeWinProb` only / `reasoning ?? home_win_prob` / `home_win_prob ?? reasoning`)
+이 처음엔 silent drift 후보로 보였으나, `daily.ts` `buildFinalReasoning` 이
+`reasoning.homeWinProb` 를 `home_win_prob` 컬럼과 항상 동일값으로 명시 박제하는
+설계(주석 확인) — 두 필드가 항상 같은 값이라 우선순위 차이가 실제 버그로
+이어지지 않음. 재조사 방지 위해 기록만.
+
+`pnpm --filter moneyball test`: 447 files/3891 tests green. `tsc --noEmit` clean.
+Direct main commit (배치 배포 패턴 유지, PR 없음).
+
+**다음 review-code(heavy) 후보**: `ScoringRuleDayHeatmap.tsx`/`buildScoringRuleWeekHeatmap`
+(wave-255/256 registry 정합 재확인) 또는 `apps/moneyball/src/app/analysis/analysis-data.ts`
+(analysis-data.ts 553줄+ home_win_prob join 로직, 최근 wave-313 배선 이후 미감사).
+
+## 🟡 review-code(heavy) — buildAccuracyData.ts 감사, 신규 버그 미발견 (cycle 2187, 2026-08-18)
+
+no forced trigger — 직전 8 사이클 distinct chain=4 (2-chain lock 없음), gap-chain
+전부 미충족. cycle 2186 explore-idea 직후 Feature-Drift Cycle 자연 교대로
+review-code(heavy) 선택. 감사 대상 = `apps/moneyball/src/lib/accuracy/buildAccuracyData.ts`
+(758줄, 최근 BrierTrendChart 배선(cycle 2186)의 핵심 데이터 함수 — 신규 기능 직후
+감사 우선순위).
+
+전체 read 결과 신규 버그 없음. `buildBrierTrend`는 이미 cycle 1999 review-code가
+잡은 "raw confidence 대신 resolveWinnerProb 사용" silent drift fix가 정상 반영됨
+(테스트로 회귀 방지 중, line 406). 유일하게 의심스러웠던 지점 — `buildConfidenceTiers`가
+동일 패턴처럼 `resolveWinnerProb` 아닌 raw `r.confidence`를 그대로 씀 — 은 조사 결과
+버그 아님: `packages/kbo-data/src/agents/judge-agent.ts` `runJudgeAgent`의 Sunday cap
+(`SUNDAY_CAP_CONFIDENCE`)이 `confidence` 필드만 낮추고 `homeWinProb`는 원본 유지하는
+의도된 설계(일요일 medium tier 오분류 방지) — tier 분류는 raw confidence가 맞고,
+Brier score류(정밀 calibration 측정)만 resolveWinnerProb 써야 함. 재조사 방지 위해
+`buildConfidenceTiers` 위에 clarifying comment 추가(커밋 `7da64ac3`).
+
+`pnpm --filter moneyball test`: 447 files/3891 tests green (회귀 없음). 코드 로직
+변경 없음(comment only) — PR/branch 미생성, main 직접 push 없이 커밋만(batch 배포
+패턴 유지).
+
+**다음 review-code(heavy) 후보**: `apps/moneyball/src/app/page.tsx`(1081줄, 홈페이지,
+최근 감사 이력 없음) 또는 `ScoringRuleDayHeatmap.tsx`/`buildScoringRuleWeekHeatmap`
+(wave-255/256 registry 정합 재확인).
+
+## 🟢 explore-idea(heavy) — MLB Brier Score 추이 차트 parity (cycle 2186, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음) — 직전 cycle 2185 retro 가 남긴 alternation 힌트(explore-idea 또는
+review-code) + cycle 2176 이 남긴 backlog(KBO `/accuracy` 의 BrierTrendChart/
+ScoringRuleDayHeatmap/RollingAccuracyChart/WinnerProbBucketChart/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory 중 MLB 미구현 항목,
+RollingAccuracyChart·WinnerProbBucketChart 는 cycle 2180/2181 이 이미 완료)
+확인 후 BrierTrendChart 를 이번 scope 로 선택.
+
+`buildMlbAccuracySummary()` 가 이미 KBO `PredRow` 형태로 derive 해둔 rows 를
+`buildBrierTrend()` 에 그대로 재사용 — 컴포넌트/함수 신규 작성 없이 데이터
+배선만으로 parity 달성. MLB predictions 는 scoring_rule 버전 분화가 없어
+`BrierTrendChart` 의 `SR_COLOR_MAP`/`SR_ORDER`(KBO 전용 v1.5/v1.6/v1.7-revert
+라벨) 엔 안 걸리고 'all' 단일 라인만 표시 — KBO 전용 로직 변경 없이 자연
+degradation.
+
+`MlbAccuracyDashboard` 에 `brierTrend` prop 추가(길이 3+ 조건부 렌더, KBO
+페이지와 동일 threshold) + KO/EN `/mlb/accuracy`·`/en/mlb/accuracy` 양쪽 배선 +
+회귀 테스트 1건 추가. `pnpm --filter moneyball test`: 447 files/3891 tests
+green, type-check/lint clean. `pnpm --filter @moneyball/kbo-data test`: 88
+files/1139 tests green (회귀 없음 확인). 커밋 직접 main push(`3a23c92c`,
+branch/PR 미생성 — cycle 2180 이후 직접 push 패턴 유지, origin 대비 누적 ahead,
+배포는 사용자 요청 시 batch).
+
+**다음 후보(scope 밖, backlog 잔존)**: ScoringRuleDayHeatmap/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory — TeamBiasTable 은
+MLB 팀 순위(win%) 소스 부재로 KBO 와 동일 방식 이식 어려울 수 있음(사전 확인
+필요), ModelVersionHistory 는 MLB 가 scoring_rule 버전 분화 없어 실효성 낮을
+가능성(다음 explore-idea heavy fire 전 재확인 권장).
+
+## 🟢 fix-incident — KBO 잔여 9경기 확정 취소 마킹, 사례 33 완전 해소 (cycle 2185, 2026-08-18)
+
+cycle 2184가 남긴 carry-over(6개 날짜 9경기, KBO API가 여전히 'scheduled' 로
+응답해 자동 재검증 불가) 를 이어받아 KBO 공식 뉴스 검색(WebSearch)으로 9경기
+전부 실제 취소 여부를 확인: 2026-07-05 LG-HH/HT-NC(우천), 2026-07-22·07-23
+KT-OB(그라운드 사정 2일 연속), 2026-08-01 LT-SS·NC-HT/2026-08-02 NC-HT/
+2026-08-04 OB-NC·HT-KT(폭염 4경기, KBO 폭염 세칙 첫 적용 구간). 재편성 여부와
+무관하게 해당 날짜 슬롯 경기는 전부 열리지 않았음을 개별 뉴스 기사로 교차
+확인.
+
+**fix**: `scripts/backfill-kbo-confirmed-postponed.ts` 신규(진단/--apply) —
+확인된 9개 game id 를 `games.status='postponed'` + `is_canceled=true` 로
+직접 마킹(KBO API 재조회 없이, 뉴스 확인 결과를 직접 반영). predictions
+테이블 조회 결과 9경기 전부 `is_correct=null`(애초에 채점 미실행)이라 추가
+처리 불필요. `daily_notifications` flag 미변경(Telegram 재알림 방지, cycle
+2184 와 동일 원칙 유지).
+
+**결과**: 사례 33 (cycle 2184 발견 9개 날짜 24경기) 완전 해소 — 이전 사이클
+15경기(3개 날짜, API 재조회로 해소) + 본 사이클 9경기(6개 날짜, 뉴스 확인
+직접 마킹) = 24경기 전부 정합 상태 도달. `pnpm --filter @moneyball/kbo-data
+test`: 88 files / 1139 tests green, type-check(전체 4 패키지) clean. 커밋
+직접 main push (branch/PR 미생성 — cycle 2180 이후 직접 push 패턴 유지,
+origin 대비 누적 ahead, 배포는 사용자 요청 시 batch).
+
+## 🟢 fix-incident — KBO games.status 영구 'scheduled' 고착 family 발견 + backfill (cycle 2184, 2026-08-18, 사례 33)
+
+no forced trigger (open issue/approved plan 0건, gap-chain 전부 미충족, 2-chain
+lock 없음) — health-check 성격 진단(pipeline_runs 최근 7일 mismatch scan +
+mlb_fancy_scrape 최근 에러 확인) 중 announce/verify mode 의 "predictions=0" 은
+설계상 정상(games_skipped=0 이지만 애초에 예측 안 하는 모드)임을 확인한 뒤,
+`games` 테이블 자체를 직접 스캔해 **status='scheduled' 로 9일+ 고착된 경기가
+2026-04-14~2026-08-04 사이 9개 날짜 24경기** 존재함을 발견. 이는 사례 32
+(cycle 2179, verify cron 이 그날 게임 전부 안 끝나도 results_sent 영구 세우던
+버그)의 **fix 이전 historical fallout** — verify 모드가 구조적으로 "어제" 단
+하루만 재검증하고 과거 날짜로 절대 안 돌아가는 설계라, 한번 세팅되면
+(sealed 든 안 sealed 든) 재시도 기회가 영구히 없음. MLB 쪽엔 이미 동일 버그
+클래스(사례 23, cycle 2067)가 `backfill-mlb-schedule-status.ts` 로 처리된
+전례가 있었으나 KBO 쪽엔 대응 스크립트가 없었음.
+
+**fix**: `scripts/backfill-kbo-stuck-verify.ts` 신규(진단/--apply 모드,
+`backfill-mlb-schedule-status.ts` 패턴 이식) — 대상 날짜별 KBO API 재조회 →
+`games` upsert → 신규 final 경기의 `predictions.is_correct` 재계산
+(`buildAccuracyUpdates` 재사용). `daily_notifications` flag 는 건드리지 않음
+(Telegram 재알림 방지, 순수 데이터 정합성 fix). `computeWinnerTeamId` /
+`buildAccuracyUpdates` 를 `packages/kbo-data/src/index.ts` 에 신규 export
+(기존 daily.ts 내부 전용 함수를 스크립트가 재사용할 수 있도록).
+
+**결과**: 9개 날짜 중 3개(04-14/04-15/04-29, 15경기) 완전 해소, 나머지
+6개 날짜는 KBO API 자체가 여전히 'scheduled' 로 응답(9경기 잔존 — 우천취소
+등으로 재편성 없이 소멸된 경기로 추정, KBO 쪽 자체 데이터 갱신 없인 추가
+자동화 불가). `predictions.is_correct` 19건 신규 계산. `pnpm --filter
+@moneyball/kbo-data test`: 88 files / 1139 tests green, type-check(root +
+app) clean, lint clean. 잔존 9경기는 다음 fix-incident 후속 후보로 carry-over
+(KBO 공식 발표/뉴스로 우천취소 확정 여부 수동 확인 후 postponed 로 직접
+마킹하거나 영구 미해결로 인정).
+
+## 🟢 info-architecture-review — MLB matchup 진입점 부재 발견 + fix, 435 pairs 도달 불가 상태 해소 (cycle 2183, 2026-08-18)
+
+trigger 9 (마지막 info-architecture-review 발화 이후 ≥30 사이클, 마지막 fire
+cycle 2153, gap=30 정확 도달) 자동 권장으로 발화. 진단(라우트 신규 추가/breadcrumb
+누락/헤더 메가메뉴/footer sitemap) 결과 대부분 항목은 정상(placeholder 페이지
+breadcrumb 제외는 의도된 설계) — 하지만 `/mlb/matchup/[teamA]/[teamB]`(435 pairs,
+plan #24 Phase 3b) 동적 라우트가 KBO의 `/matchup` 대응 picker/index page 가 없어
+헤더 메가메뉴에도, footer에도, sitemap 정적 목록에도 진입점이 전혀 없었음
+발견(en 버전도 동일 — `/en/mlb/team/page.tsx`는 있는데 `/en/mlb/matchup/page.tsx`는
+부재). sitemap.xml 크롤러 발견 외엔 사용자가 이 435개 페이지에 도달할 방법이 없던
+상태.
+
+**fix**: KBO `/matchup/page.tsx` 패턴 그대로 이식 — `/mlb/matchup/page.tsx` +
+`/en/mlb/matchup/page.tsx` 신규(30×30 격자 + 팀별 바로가기, 기존
+`mlbCanonicalPair` helper 재사용). `MLB_HEAD_TO_HEAD_PAIRS`(=435) 신규 상수
+(`KBO_HEAD_TO_HEAD_PAIRS` wave 107 컨벤션 동일). Header `MLB_NAV`에 "매치업"
+항목 추가. `sitemap.ts` 정적 라우트 2건 추가. `sitemap-mlb.test.ts` 검증
+테스트 2건 추가. 전체 447 test files / 3890 tests green, type-check/lint
+clean. 커밋 직접 main push (branch/PR 미생성 — cycle 2180/2181 직전 feat 커밋과
+동일 패턴 유지, origin 대비 4 commits ahead 누적, 배포는 사용자 요청 시 batch).
+
+## 🟡 review-code(heavy) — daily_notifications 영구 lock 버그 클래스 family 감사, 신규 버그 미발견 (cycle 2182, 2026-08-18)
+
+no forced trigger (open issue/approved plan 0건, 2-chain lock 없음, gap-chain 전부
+미충족) — cycle 2181 explore-idea 백로그 5개(BrierTrendChart/ScoringRuleDayHeatmap/
+CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory) 전부 실측 확인 결과 모두
+차단됨 확인 후(BrierTrendChart/ScoringRuleDayHeatmap/CohortComparisonHeatmap 은
+`SR_COLOR_MAP`/`SR_ORDER`/`VERSION_ORDER` 가 KBO era 하드코딩이라 MLB scoring_rule
+자체가 그 목록에 없어 데이터 있어도 라인 렌더 자체가 안 됨 — "색상 매핑만 추가하면
+된다"던 기존 TODOS 서술보다 스코프 큼. TeamBiasTable 은 `/mlb/standings` 페이지가
+"시즌 순위는 추후 라이브 연동 carry-over" placeholder 라 실제 win% 소스 자체 부재.
+ModelVersionHistory 는 `MLB_PRODUCTION_COHORT_RULES`=단일 rule 이라 "버전 history"
+개념 자체가 무의미), review-code(heavy) 로 전환 — cycle 2179 fix-incident 가 고친
+"verify cron 영구 봉인"(사례 32, `daily.ts` results_sent flag 가 게임 미종결 상태에서
+0-result 로 영구 세워지는 버그) 과 같은 클래스(notification flag 가 불완전 상태에서
+영구 lock)가 형제 flag(`announce_sent`/`summary_sent`) 및 MLB 파이프라인에도
+있는지 family sweep.
+
+**감사 결과 (신규 버그 0건)**: `announce_sent`(daily.ts:267-294) 는 게임 종결 여부와
+무관한 09시 예고라 "미완결 상태" 개념 자체 없음 — 안전. `summary_sent`(daily.ts:
+1190-1258) 는 이미 cycle 884 fix 로 `predict_final` 시 partial(0<n<expected) 도
+"last-chance" 로 명시 트리거 + 그 외 모드는 미달 시 flag 미세팅 skip — 사례 32 와
+같은 조기 영구 lock 경로 없음, 설계 의도대로 정합. MLB 파이프라인
+(`packages/kbo-data/src/pipeline/mlb-pipeline.ts`) 은 `markNotificationFlag`/
+`isNotificationSent` 자체를 쓰지 않음(run-once lock 메커니즘 부재, idempotent
+재실행 설계) — 이 버그 클래스가 애초에 존재할 수 없는 구조. GH Actions 최근 scheduled
+workflow(`health-alert`/`runtime-error-alert`/`deploy-drift-alert`/`heartbeat-stale`)
+30건 전부 success, CI 전부 green — 새 incident 신호 0건.
+
+**결론**: 사례 32 는 `daily.ts` verify 분기 국소 버그였고 형제 flag/MLB 파이프라인
+으로 전파된 흔적 없음 — family sweep 정상 종료(PARTIAL, 코드 변경 0). 다음
+explore-idea heavy 재개 시 BrierTrendChart 등 착수하려면 `SR_ORDER`/`VERSION_ORDER`
+generalize(league 별 order+color prop화) 선행 설계 필요 — 스코프 큰 별도 착수 권장.
+
 ## ✅ explore-idea(heavy) — MLB rolling 적중률 추세 차트 parity (cycle 2181, 2026-08-18)
 
 no forced trigger (open issue/approved plan 0건, 2-chain lock 없음, review-code

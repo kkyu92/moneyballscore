@@ -64,6 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
     { url: `${SITE_URL}/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
     { url: `${SITE_URL}/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/mlb/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/mlb/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
     { url: `${SITE_URL}/mlb/players`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
     { url: `${SITE_URL}/mlb/factors`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
@@ -74,6 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // /en/mlb/* English mirror static routes
     { url: `${SITE_URL}/en/mlb`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/en/mlb/team`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
+    { url: `${SITE_URL}/en/mlb/matchup`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },
     { url: `${SITE_URL}/en/mlb/standings`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/en/mlb/players`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/en/mlb/factors`, lastModified: now, changeFrequency: 'weekly', priority: 0.65 },

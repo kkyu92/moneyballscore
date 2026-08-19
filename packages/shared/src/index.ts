@@ -44,6 +44,14 @@ export const MLB_AL_TEAM_COUNT =
 export const MLB_NL_TEAM_COUNT =
   Object.values(_MLB_DIVISIONS.NL).reduce((sum, arr) => sum + arr.length, 0);
 
+/**
+ * MLB 팀 간 head-to-head 페어 조합 수 — matchup 허브 (/mlb/matchup index page) "435가지
+ * 맞대결 조합" 하드코딩 sweep 용 단일 source. KBO_HEAD_TO_HEAD_PAIRS (wave 107) 패턴의
+ * MLB 팀 차원 확장. C(MLB_TEAM_COUNT, 2) — MLB_TEAM_COUNT 변경 시 자동 동기.
+ */
+export const MLB_HEAD_TO_HEAD_PAIRS =
+  (MLB_TEAM_COUNT * (MLB_TEAM_COUNT - 1)) / 2;
+
 // 한국어 조사 자동 선택 helper (받침 유무 판별)
 export { hasJongsung, josa, ro } from './korean';
 import { josa, ro } from './korean';

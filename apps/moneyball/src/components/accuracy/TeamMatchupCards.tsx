@@ -1,19 +1,43 @@
 import { shortTeamName, KBO_TEAMS, type TeamCode } from '@moneyball/shared';
-import type { MatchupRow, TeamHomeAwayRow, TeamAccuracyRow } from '@/lib/standings/buildTeamAccuracy';
+
+interface MatchupLike {
+  teamCode: string;
+  opponentCode: string;
+  n: number;
+  correct: number;
+  accuracyRate: number | null;
+}
+interface HomeAwayLike {
+  teamCode: string;
+  homeN: number;
+  homeAccuracy: number | null;
+  awayN: number;
+  awayAccuracy: number | null;
+}
+interface TeamAccuracyLike {
+  teamCode: string;
+  accuracyRate: number | null;
+}
 
 interface Props {
-  matchups: MatchupRow[];
-  homeAway: TeamHomeAwayRow[];
-  teamAccuracy: TeamAccuracyRow[];
+  matchups: MatchupLike[];
+  homeAway: HomeAwayLike[];
+  teamAccuracy: TeamAccuracyLike[];
+  teamCodes?: string[];
+  shortName?: (code: string) => string;
 }
 
 function fmtPct(v: number | null): string {
   return v !== null ? `${(v * 100).toFixed(0)}%` : '—';
 }
 
-export function TeamMatchupCards({ matchups, homeAway, teamAccuracy }: Props) {
-  const teamCodes = Object.keys(KBO_TEAMS) as TeamCode[];
-
+export function TeamMatchupCards({
+  matchups,
+  homeAway,
+  teamAccuracy,
+  teamCodes = Object.keys(KBO_TEAMS) as TeamCode[],
+  shortName = shortTeamName,
+}: Props) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
       {teamCodes.map((teamCode) => {
@@ -30,7 +54,7 @@ export function TeamMatchupCards({ matchups, homeAway, teamAccuracy }: Props) {
           >
             {/* 헤더 */}
             <div className="flex items-baseline justify-between gap-1">
-              <span className="font-bold text-sm">{shortTeamName(teamCode)}</span>
+              <span className="font-bold text-sm">{shortName(teamCode)}</span>
               <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                 {overall ? fmtPct(overall.accuracyRate) : '—'}
               </span>
@@ -65,7 +89,7 @@ export function TeamMatchupCards({ matchups, homeAway, teamAccuracy }: Props) {
                     className={`flex justify-between text-[11px] ${m.n === 1 ? 'opacity-50' : ''}`}
                   >
                     <span className="text-gray-600 dark:text-gray-400">
-                      vs {shortTeamName(m.opponentCode)}
+                      vs {shortName(m.opponentCode)}
                     </span>
                     <span className="font-mono text-gray-700 dark:text-gray-300">
                       {m.correct}/{m.n}
