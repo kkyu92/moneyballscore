@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — methodology/page.tsx 최초 감사, AI 토론 fallback 미고지 발견/수정 (cycle 2266, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 explore-idea 대상이나 phase2/3 자연 종료/데이터 보류라 재매핑 대상 아님, 2-chain lock 미충족 직전 8사이클 distinct=4, ship-0/lite-cap 미충족, fix-incident 8-gap/op-analysis·lotto 방금 리셋/info-arch 16-gap/explore-idea saturation 9/15 모두 미도달). review-code(heavy) 직전 20사이클 11/20(55%) 구조적 dominance 지속 + 다른 chain 자연 trigger 부재 → 신규 미감사 영역 확장.
+
+실측: `methodology/page.tsx`(506줄, 최초 감사) 코드 read — 가중치 테이블/데이터소스 라벨은 `MetricRegistry` 동적 파생이라 clean. "AI 에이전트 토론" 섹션이 "심판 에이전트가 양측 주장을 비교하여 ±5% 보정" 을 항상 일어나는 것처럼 무조건 서술 — 그러나 CLAUDE.md 실측 기준 CREDIT_EXHAUSTED fallback 이 2026-06-06 이후 지속(8월 100% 누적 CE율), `/accuracy` 페이지는 이미 이 fallback 비율을 실시간 공개(`fallbackStats`) 중인데 methodology 페이지엔 캐빗/링크 전무 — 사용자가 "AI 3-agent 토론이 항상 일어난다" 로 오독할 수 있는 사용자 가시 정확성 결함.
+
+수정: "AI 에이전트 토론" 섹션 말미에 캐빗 문단 추가 — AI 토론 서버 연결 불가 시 정량 모델만 사용(사후 학습도 미적용)함을 고지 + `/accuracy` 실시간 비율 링크 (기존 페이지 "실시간 …참조" 패턴과 동일 스타일). `tsc --noEmit`/`eslint` clean, `vitest run` 474 files/4062 tests all pass. 소규모 문서성 수정(1 file) — main 직접 push, PR 생략.
+
+다음 후보: review-code (heavy) 계속 (다른 미감사 대형 파일: `lotto/methodology/page.tsx` 최근 부분 수정만 됨/`debug/pipeline/page.tsx`/`mlb/team/[code]/page.tsx`/`reviews/monthly/[month]/page.tsx`) 또는 explore-idea(2-lock 미충족이나 saturation 9/15로 근접).
+
 ## 🟢 operational-analysis (lite) — 25-cycle gap trigger 재측정, LLM 부가가치 방향 3-cycle 안정 재확인 (cycle 2265, 2026-08-20)
 
 진단: 강제 trigger = operational-analysis 하나만 (25-cycle gap 정확 도달, 마지막 fire cycle 2240 heavy). open issue 0건, approved plan 0건, 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/fix-incident/lotto), ship-0/lite-cap 미충족.
