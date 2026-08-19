@@ -1,5 +1,61 @@
 # TODOS
 
+## 🔴 review-code (heavy) — CURRENT_MODEL_FILTER CE fallback 실측 7주+ silent 배제 fix (cycle 2209, 2026-08-19)
+
+open issue 0건, approved plan 0건(status: approved 매칭 0), 2-chain lock 없음
+(직전 8사이클 distinct=4). explore-idea 후속 후보 재검증 결과(MLB 로고
+placeholder + accuracy dashboard parity) 실제 코드 확인상 이미 전량 완결됨을
+확인(TODOS carry-over 문구가 stale — cycle 2207/2200 커밋에서 이미 처리) —
+review-code(heavy) 로 전환, 후보 파일(`apps/moneyball/src/app/analysis/analysis-data.ts`,
+cycle 2187/2188 이 남긴 "미감사" 후보) 감사 중 인접 파일에서 더 큰 발견.
+
+**발견**: `analysis-data.ts` 는 `PRODUCTION_COHORT_RULES`(scoring_rule)만
+쓰고 `CURRENT_MODEL_FILTER`(config/model.ts)는 안 쓰는데, 같은 디렉토리
+밖 `/accuracy`·`/dashboard`·`/reviews`·leaderboard·players·standings·teams
+등 14개 파일이 `CURRENT_MODEL_FILTER = { debate_version: CURRENT_DEBATE_VERSION }`
+(`.match()`)를 씀. `decideModelVersion`(model-version.ts)은 debate 성공/실패
+양쪽 분기 모두 `scoring_rule: CURRENT_SCORING_RULE`을 박제하지만 `debate_version`은
+실패(=CE fallback) 시 `null` — `.match({debate_version: 'v2-persona4'})`는
+등가 비교라 null row 를 조용히 제외.
+
+DB 실측(`scripts/tmp-check-current-model-filter.ts` 1회성, 삭제 완료):
+`debate_version='v2-persona4'` 필터 verified count = **143**, 전체
+`scoring_rule in (v1.8, v1.8-credit-fail)` verified count = **316**.
+`debate_version` 필터 기준 최신 `verified_at` = **2026-07-01**, 전체 기준
+최신 = **2026-08-18**(오늘) — CE(CREDIT_EXHAUSTED) 100% 지속(2026-06-06~)
+이후 7주+ 동안의 신규 검증 결과가 `/accuracy`(플래그십 "AI 예측 적중 기록"
+페이지) 헤드라인 지표(n/정확도/Brier/캘리브레이션/rolling/브라이어추세/
+요일별 히트맵/cohort 비교) 전체에서 조용히 빠져 있었음 — 페이지는 "실제
+경기 결과 기준 자동 집계"라 표방하지만 실제로는 7주 전 데이터에 고정.
+
+**근본원인 확인**: `shared/model-version-labels.ts` 가 이미 "baseline 분석
+(accuracy/page.tsx / buildAccuracyData) 은 CURRENT_SCORING_RULE 만 사용"
+이라고 문서화(line ~56)했는데 실제 구현(`CURRENT_MODEL_FILTER`)은
+`debate_version` 기준이라 스펙과 구현이 어긋나 있었음. `buildEloTrend.ts`
+(wave-241, 별도 테스트 `buildEloTrend.test.ts` 존재)가 정확히 동일 클래스
+버그를 이미 한 곳에서 scoring_rule 기준으로 고쳤지만 그 fix 가
+`CURRENT_MODEL_FILTER` 자체엔 전파되지 않은 것으로 확인 — silent drift
+family 신규 파생(단일 상수 오정의가 14개 소비처로 부채 전파).
+
+**수정**: `config/model.ts`의 `CURRENT_MODEL_FILTER`를
+`{ debate_version: ... }` → `{ scoring_rule: CURRENT_SCORING_RULE }` 로
+정정(단일 source 변경 → 14개 파일 자동 전파). 검증: 신규 필터 기준 DB
+실측 count=291/316, 최신 verified_at=2026-08-18 확인. 기존
+`debate_version` 키를 검증하던 테스트 2건(`players/__tests__/silent-drift.test.ts`,
+`standings/__tests__/buildTeamAccuracy.test.ts`) `scoring_rule` 로 정정 +
+회귀 테스트 1건 신규(`config/__tests__/model.test.ts`). `CURRENT_DEBATE_VERSION`
+export 자체는 `/dashboard` 페이지 표시용으로 그대로 유지(영향 없음).
+
+`pnpm --filter moneyball test`: 449 files/3909 tests green(+1 신규).
+`tsc --noEmit`/lint clean. 단일 논리 단위 — main 직접 commit+push
+(R4/R7, `70613e68`).
+
+**다음 review-code(heavy) 후보**: `analysis-data.ts` 자체는 이번 감사로
+클린 확인(별도 이슈 없음) — 원래 후보였던 `ScoringRuleDayHeatmap.tsx`/
+`buildScoringRuleWeekHeatmap` registry 재확인은 아직 미착수, backlog 유지.
+
+---
+
 ## 🟢 review-code (heavy) — daily.ts defaultTeamStats.totalWar 매직넘버 정합 (cycle 2208, 2026-08-19)
 
 open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4),
