@@ -31,9 +31,11 @@ type FooterColumn = { title: string; enTitle: string; links: FooterLink[] };
 // EN 페이지(/en/mlb/*)에서도 Footer 는 항상 전체 렌더 — MLB column 만 /en 대응 라우트
 // 존재하므로 href 치환 (Header withLocale, cycle 2139 와 동일 패턴). 나머지 column 은
 // 라우트 부재로 href 유지, 텍스트만 번역 (SearchForm, cycle 2142 와 동일 scope 판단).
-// /mlb/reviews(하위 /mlb/reviews/weekly 포함) 는 예외: EN 미러 페이지 부재 (cycle 2226
-// Phase 1, 의도적 scope 축소 — plan #26 Phase 1b weekly 서브페이지도 KO only 동일 scope) —
-// blanket 치환 시 /en/mlb/reviews(/weekly) 404 (cycle 2227 review-code(heavy) 발견, Header.tsx 동일 fix).
+// /mlb/reviews(하위 /mlb/reviews/weekly, /mlb/reviews/monthly 포함) 는 예외: EN 미러
+// 페이지 부재 (cycle 2226 Phase 1, 의도적 scope 축소 — plan #26 Phase 1b weekly / Phase 2
+// monthly 서브페이지 모두 KO only 동일 scope) — blanket 치환 시 /en/mlb/reviews(/weekly|
+// /monthly) 404 (cycle 2227 review-code(heavy) 발견, Header.tsx 동일 fix). startsWith
+// 가드라 신규 /mlb/reviews/monthly 도 자동 커버됨 — href 문자열만 추가하면 됨.
 function withMlbLocale(href: string, isEn: boolean): string {
   if (!isEn) return href;
   if (href === "/mlb") return "/en/mlb";
@@ -110,6 +112,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
       { href: "/mlb/predictions", label: "예측 기록", enLabel: "Prediction History" },
       { href: "/mlb/reviews", label: "예측 리뷰", enLabel: "Prediction Review" },
       { href: "/mlb/reviews/weekly", label: "주간 리뷰", enLabel: "Weekly Review" },
+      { href: "/mlb/reviews/monthly", label: "월간 리뷰", enLabel: "Monthly Review" },
       { href: "/mlb/calendar", label: "월별 캘린더", enLabel: "Monthly Calendar" },
       { href: "/mlb/wild-card", label: "Wild Card race", enLabel: "Wild Card Race" },
       { href: "/mlb/postseason", label: "Postseason 브래킷", enLabel: "Postseason Bracket" },
