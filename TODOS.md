@@ -1,5 +1,29 @@
 # TODOS
 
+## 🟢 review-code (heavy) — daily.ts defaultTeamStats.totalWar 매직넘버 정합 (cycle 2208, 2026-08-19)
+
+open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4),
+lotto 33-cycle gap trigger 있었으나 cron 자동화(picks 2026-08-22 이미 박제 +
+2026-08-15 result 이미 박제)로 이미 커버 확인 — cycle 2207 next_recommended
+(review-code/operational-analysis) 우선, explore-idea 3연속 스트릭(2205-2207)
+diversity redirect 도 근거.
+
+**발견**: `packages/kbo-data/src/pipeline/daily.ts:643` `defaultTeamStats`
+(팀 stats 완전 누락 시 fallback) 가 woba/bullpenFip/sfr 3개 필드는
+`FANCY_STATS_DEFAULTS`(fancy-stats.ts:390) 단일 source 참조하는데
+totalWar 만 인라인 `12` 매직넘버로 남아 있었음. 해당 상수 블록 주석이
+"daily.ts 의 동일 magic number 중복 제거 통일"을 명시했으나 totalWar 필드
+자체가 그 객체에 없어 리팩터 당시 누락된 것으로 확인 (fix(context)
+wave 219~655 계열과 동일 패턴 — 매치 결과 grep 시 유일 occurrence).
+
+**수정**: `FANCY_STATS_DEFAULTS`에 `totalWar: 12` 추가(주석: "타자 WAR 팀
+합산 평균") + `daily.ts` 참조 변경. 값 동일 — 동작 변경 없음, 단일 source
+정합만. `packages/kbo-data` type-check 3-package clean(shared/kbo-data/moneyball)
++ vitest 88 files 1139 pass. 단일 논리 단위 — main 직접 commit+push
+(R4/R7, `9ad6cbf9`).
+
+---
+
 ## 🟢 explore-idea (lite) — MLB 팀 목록/상세 페이지 로고 parity 완결 (cycle 2207, 2026-08-19)
 
 open issue 0건, approved plan 0건, 2-chain lock 없음(직전 8사이클 distinct=4).
