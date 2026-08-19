@@ -1,5 +1,15 @@
 # TODOS
 
+## 🟢 review-code (heavy) — KBO↔MLB matchup/team-profile 상수 재사용 + KO/EN 리터럴 parity 감사 (전부 clean) (cycle 2260, 2026-08-20)
+
+진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — plan #27 phase1 완료/phase2 반증/phase3 데이터 대기 상태로 "approved" 아님, 2-chain lock 미충족 직전 8사이클 distinct=3, ship-0/lite-cap 미충족, fix-incident 0-gap/op-analysis 20-gap/info-arch 10-gap/lotto 26-gap 모두 미도달). cycle 2259 retro 가 "lotto 30-gap(cycle 2264 예정) 또는 review-code 신규 grep 소스" 를 다음 후보로 남겼고, lotto gap 미도달이라 review-code 신규 grep 소스 채택.
+
+실측: `buildMlbMatchupProfile.ts`(526줄) vs `buildMatchupProfile.ts`(579줄) — cycle 2894~2906대 wave(MARGIN_*/VENUE_SPLIT_*/RECENT_RECORD_WINDOW/WIN_LOSS_STREAK_MIN_LENGTH 단일 source 통합)를 두 파일 모두 동일하게 import, 리터럴 재하드코딩 없음. `buildMlbTeamProfile.ts` 는 KBO `buildTeamProfile.ts` 의 `computeTeamStreak`/`computeTeamAvgMargin`/`computeTeamBlowoutCount`/`computeTeamCloseGameCount`/`computeTeamHomeAwayEdge`/`computeTeamRecentRecord` 를 직접 import(함수+상수 동시 재사용) — 중복 없음. `buildMlbStandings.ts` 는 accuracy 로직 없이 W-L/GB 계산만이라 `SMALL_SAMPLE_N` 부재가 정상. `buildMlbFactorAccuracy.ts` vs `buildFactorAccuracy.ts` 도 `NEUTRAL_FACTOR`/`NEUTRAL_LO`/`NEUTRAL_HI` 동일 source, 별도 필터 상수 불필요 영역. KO/EN 리터럴 diff 4쌍(`mlb/methodology`↔`en/mlb/methodology`, `mlb/accuracy`↔`en/mlb/accuracy`, `mlb/team/[code]`↔`en/mlb/team/[code]`, `mlb/matchup/[teamA]/[teamB]`↔`en/mlb/matchup/[teamA]/[teamB]`) 숫자/퍼센트 리터럴 전수 비교 — 4쌍 모두 0 diff. `mlb/factors` vs `en/mlb/factors` 리터럴 diff 1건("60")은 실제 값 아니고 주석 "silent drift wave 60" 텍스트 — false positive 확인.
+
+결론: 이번 사이클 grep 소스(KBO/MLB 공유 상수 재사용 지점 + KO/EN 페이지 페어 리터럴 diff)는 전부 clean — 코드 변경 0. cycle 2257 패턴(대형 파일 최초 감사 전부 clean)과 동일 — 감사 자체가 결과물, 향후 동일 파일 재감사 불필요 확정.
+
+다음 후보: lotto chain 30-cycle gap (마지막 fire cycle 2234, cycle 2264 도달) 또는 미감사 대형 파일(`app/search/page.tsx` 436줄, `debug/factor-correlation`/`debug/pipeline` — 최근 wave 로 이미 손질돼 낮은 우선순위) / KO/EN diff 방법론을 KBO↔MLB 라우트 전체(`predictions`/`seasons`/`reviews` 등)로 확장.
+
 ## 🟢 review-code (heavy) — lotto archive 계열 4파일 "50조합" 하드코딩 정정 (cycle 2259, 2026-08-20)
 
 진단: 강제 trigger 없음 (open issue 0건, approved plan 0건 — 20개 plan 모두 completed/archived/superseded, 2-chain lock 미충족 직전 8사이클 distinct=4, ship-0 미충족, lite-cap 미충족, review-code trigger 5 표본 20 확보하나 review-code 0회 아님). cycle 2258 retro 가 명시적으로 "lotto/page.tsx·lotto/archive 계열에 유사 stale 문구 재검토 여지" 를 다음 후보로 남겨 채택.
