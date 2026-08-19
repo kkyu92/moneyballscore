@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — buildTeamProfile.ts scoring_rule 필터 누락 정정, shadow row 오염 차단 SUCCESS (cycle 2288, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20개 전부 status 없음/completed/archived). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 3종 미도달(fix-incident 10-gap/20, op-analysis 3-gap/25, info-arch 8-gap/30, lotto 24-gap/30 근접). cycle 2286/2287 retro 공통 지목 — 잔존 미감사 대형 파일 `teams/[code]/page.tsx`(621줄)/`predictions/[date]/page.tsx`(618줄).
+
+감사: 두 파일 전체 정독 — 양쪽 다 assertSelectOk 전면 적용 이미 완료(이전 사이클 감사 흔적). 감사 범위를 `teams/[code]` 직접 의존 모듈(`buildTeamUpcoming.ts`/`buildTeamEloTrend.ts`/`convergenceRecord.ts`)로 확장 — 전부 assertSelectOk + scoring_rule 필터 정합 확인. 마지막으로 `buildTeamProfile.ts`(586줄) 확장 감사.
+
+발견: `buildTeamProfile.ts`의 games select가 `predictions!inner(...)`에 `prediction_type='pre_game'` 필터만 걸고 **scoring_rule 필터가 아예 없음** — `shadow-cohort.ts`가 `daily.ts` 파이프라인에서 매 경기 production(v1.8) insert 직후 shadow(v2.1-B-shadow/v2.0-shadow) row도 동일 prediction_type='pre_game'으로 daily 누적 중(#1338 family). 정렬 없는 `predictions?.[0]`이 production/shadow 중 임의 row를 선택 — 팀 프로필 페이지 적중률/팩터평균/선발FIP/최근기록/연승연패/평균마진/홈원정편차 전부 shadow 모델 값으로 오염 가능한 상태. 같은 디렉토리 `buildTeamUpcoming.ts`/`teams/[code]/recent/page.tsx`는 이미 `CURRENT_SCORING_RULE` 필터로 회피해온 패턴인데 `buildTeamProfile.ts`만 누락 — daily 파이프라인이 shadow insert 활성 유지 중이라 매일 재발 가능한 살아있는 버그.
+
+수정: `.eq("predictions.scoring_rule", CURRENT_SCORING_RULE)` 추가 (형제 파일 컨벤션 정합) + 정적 grep 회귀 테스트(`silent-drift-cycle-2288.test.ts`) 추가 + 기존 `buildTeamProfile.test.ts` mock 단일 `.eq()` 체인을 2단 체인으로 갱신. type-check/lint clean, test 478 files/4077 tests pass. PR #2997 → `gh pr merge --squash --auto --delete-branch` → **`gh pr view --json state,mergedAt` 로 `state=MERGED` 실측 확인**(commit e14defe5, 사례 18 mitigation 준수).
+
+다음 후보: lotto(25-gap/30, 다음 사이클 도달 예상) 또는 review-code(heavy) 잔존 — `buildMatchupProfile.ts`/`buildMatchupUpcoming.ts` scoring_rule 필터 정합 재확인(teams 쪽과 동일 family 가능성).
+
 ## ⚪ explore-idea (heavy) — standings 매직넘버 위젯 신규 SUCCESS (cycle 2287, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20개 전부 archived/completed/phase-done, plan #27 leaderboard/picks Phase3 blocked_on_data). 2-chain lock 미충족(직전 8사이클 distinct=4: explore-idea/info-arch/review-code/op-analysis). 주기 trigger 3종 미도달(fix-incident 9-gap/20, op-analysis 2-gap/25, info-arch 7-gap/30, lotto 23-gap/30). **improvement saturation trigger 최초 명시 충족** — 직전 15사이클 중 review-code+fix-incident+polish-ui+info-arch = 13/15 (≥12).
