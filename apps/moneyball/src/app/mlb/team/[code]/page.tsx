@@ -16,6 +16,7 @@ import {
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
 import { buildMlbTeamEloTrend } from "@/lib/mlb/buildMlbTeamEloTrend";
+import { buildMlbDivisionStandings, findMlbTeamDivisionRank } from "@/lib/mlb/buildMlbStandings";
 import { mlbPairsForTeam } from "@/lib/mlb/mlbCanonicalPair";
 import { getMlbConvergencePickTeamStats } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -58,6 +59,11 @@ function fmtRawPct(v: number | null): string {
 }
 function fmtDegree(v: number | null): string {
   return v != null ? `${v.toFixed(1)}°` : "-";
+}
+function fmtGamesBehind(gb: number | null): string {
+  if (gb === null) return "";
+  if (gb === 0) return " · 공동 1위";
+  return ` · ${gb % 1 === 0 ? `${gb}.0` : gb}경기차`;
 }
 
 export function generateStaticParams() {
@@ -110,16 +116,22 @@ export default async function MlbTeamPage({ params }: PageProps) {
 
   // wave-625: 팀별 강수렴/완전수렴 픽 성적 — matchup 페이지의 두 팀 한정 집계와 별개로
   // 시즌 전체 기준 (TeamConvergencePickRecord KBO wave-607 대응).
-  const [strongTeamStats, completeTeamStats] = await Promise.all([
+  const [strongTeamStats, completeTeamStats, divisionStandings] = await Promise.all([
     getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG).catch((err) =>
       captureFallback(err, [], { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(strong)" }),
     ),
     getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE).catch((err) =>
       captureFallback(err, [], { route: "/mlb/team/[code]", source: "getMlbConvergencePickTeamStats(complete)" }),
     ),
+    buildMlbDivisionStandings().catch((err) =>
+      captureFallback(err, null, { route: "/mlb/team/[code]", source: "buildMlbDivisionStandings" }),
+    ),
   ]);
   const teamStrongStat = strongTeamStats.find((s) => s.teamCode === code);
   const teamCompleteStat = completeTeamStats.find((s) => s.teamCode === code);
+  const divisionRank = divisionStandings
+    ? findMlbTeamDivisionRank(divisionStandings, profile.league, profile.division, code)
+    : null;
 
   const teamUrl = `${SITE_URL}/mlb/team/${code}`;
   const logoUrl = `${SITE_URL}/logos/mlb/${code}.svg`;
@@ -167,6 +179,13 @@ export default async function MlbTeamPage({ params }: PageProps) {
           <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
           <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-[var(--color-surface-card)] text-gray-600 dark:text-gray-300 font-mono">
             {profile.league} {profile.division}
+            {divisionRank && (
+              <>
+                {" "}
+                {divisionRank.rank}위/{divisionRank.total}팀
+                {fmtGamesBehind(divisionRank.gamesBehind)}
+              </>
+            )}
           </span>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-300">

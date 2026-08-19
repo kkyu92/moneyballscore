@@ -96,3 +96,26 @@ export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandings>
   }
   return standings;
 }
+
+export interface MlbTeamDivisionRank {
+  rank: number;
+  total: number;
+  gamesBehind: number | null;
+}
+
+/**
+ * standings 결과에서 특정 팀의 division 내 순위 추출 — /mlb/team/[code] 페이지가
+ * league/division 라벨만 보여주고 실제 순위는 표시하지 않던 gap 해소
+ * (cycle 2213 explore-idea heavy next_recommended carry-over).
+ */
+export function findMlbTeamDivisionRank(
+  standings: MlbDivisionStandings,
+  league: MlbLeagueSide,
+  division: MlbDivisionSide,
+  teamCode: MlbTeamCode,
+): MlbTeamDivisionRank | null {
+  const rows = standings[league][division];
+  const idx = rows.findIndex((r) => r.teamCode === teamCode);
+  if (idx === -1) return null;
+  return { rank: idx + 1, total: rows.length, gamesBehind: rows[idx].gamesBehind };
+}

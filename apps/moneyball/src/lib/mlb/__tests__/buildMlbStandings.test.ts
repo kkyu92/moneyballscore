@@ -97,3 +97,43 @@ describe('buildMlbDivisionStandings', () => {
     expect(nyy.wins + nyy.losses).toBe(0);
   });
 });
+
+describe('findMlbTeamDivisionRank', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('1위 팀은 rank=1, gamesBehind=null', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ home_team_code: 'NYY', away_team_code: 'BAL', home_score: 5, away_score: 2 }],
+    });
+    const { buildMlbDivisionStandings, findMlbTeamDivisionRank } = await import('../buildMlbStandings');
+    const standings = await buildMlbDivisionStandings();
+    const rank = findMlbTeamDivisionRank(standings, 'AL', 'East', 'NYY');
+    expect(rank).toEqual({ rank: 1, total: 5, gamesBehind: null });
+  });
+
+  it('2위 팀은 rank=2 + gamesBehind 실측치', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { home_team_code: 'NYY', away_team_code: 'BAL', home_score: 5, away_score: 2 },
+        { home_team_code: 'NYY', away_team_code: 'BAL', home_score: 4, away_score: 3 },
+        { home_team_code: 'BAL', away_team_code: 'TBR', home_score: 3, away_score: 1 },
+      ],
+    });
+    const { buildMlbDivisionStandings, findMlbTeamDivisionRank } = await import('../buildMlbStandings');
+    const standings = await buildMlbDivisionStandings();
+    const rank = findMlbTeamDivisionRank(standings, 'AL', 'East', 'BAL');
+    expect(rank?.rank).toBe(2);
+    expect(rank?.total).toBe(5);
+    expect(rank?.gamesBehind).toBeCloseTo(1.5, 5);
+  });
+
+  it('teamCode 가 해당 division 소속 아니면 null', async () => {
+    supabaseMock = makeSupabaseMock({ schedule: [] });
+    const { buildMlbDivisionStandings, findMlbTeamDivisionRank } = await import('../buildMlbStandings');
+    const standings = await buildMlbDivisionStandings();
+    const rank = findMlbTeamDivisionRank(standings, 'AL', 'East', 'HOU');
+    expect(rank).toBeNull();
+  });
+});
