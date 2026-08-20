@@ -1,4 +1,14 @@
 
+## ⚪ operational-analysis (lite) — plan #27 Phase 3 데이터 게이트 재확인, 불변 RETRO-ONLY (cycle 2334, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22 (22개 전부 completed/archived/superseded/pending-user, 신규 approved 없음). 2-chain lock 미충족(직전 8사이클 2326-2333 distinct=4: fix-incident/review-code/explore-idea/op-analysis). 주기 trigger 4종 전부 미도달(fix-incident 0/20 방금 발화, op-analysis 2/25, info-arch 24/30, lotto 10/30). `pnpm lint` clean. `.from('predictions')` 46+ 파일 전체 재sweep(scoring_rule/CURRENT_MODEL_FILTER/prediction_type 필터) → 신규 미필터 파일 0건, #1338 family 재발 없음. 신규 `/mlb/analysis` 4-phase 파일(analysis-data.ts/page.tsx, cycle 2315-2333 shipped)도 필터 정상 적용 확인. review-code/explore-idea 모두 즉시 fire 할 신선 target 부재(둘 다 최근 3사이클 연속 "신규 target 재탐색 필요" 권고 반복).
+
+**실행**: plan #27(MLB 개인 픽 리더보드) Phase 3 "무기한 보류" 게이트 조건(KBO `user_picks` 또는 MLB `mlb_user_picks` COUNT ≥10) 재실측 — 프로덕션 DB 직접 쿼리. 결과: KBO 1건 / MLB 0건, cycle 2256 측정과 완전 동일(78 cycle 경과, 변화 0). Phase 3 계속 보류 확정.
+
+**후속 조치**: plan27.md 에 재확인 결과 박제 + 다음 재확인 조건을 "COUNT 자체 매 cycle 재측정" 에서 "트래픽/유입 신호 변화 감지 시" 로 완화(변화 없는 카운트를 반복 재측정하는 비용 방지).
+
+결론: 코드 변경 없음(RETRO-ONLY), 실질 가치 = carry-over 질문 1건 명시적 종결(다음 cycle들이 동일 재확인 반복 안 하도록). 다음 후보: review-code 또는 explore-idea 가 완전히 새로운 unaudited 영역/topic 을 발견하기 전까진 자체 주기 trigger(fix-incident 20 / op-analysis 25 / info-arch 30 / lotto 30) 자연 도달 monitor 우선.
+
 ## 🟢 fix-incident — package.json 버전 drift CI red 정정 SUCCESS (cycle 2333, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2325-2332 distinct=3: review-code/fix-incident/explore-idea/op-analysis). 주기 trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 2/25, info-arch 23/30, lotto 9/30). review-code streak=3(포화 주의, cooldown 미도달). `gh run list` CI 실측 확인(fix-incident 진단 source 1순위) 중 실제 completed failure 2건 발견.
