@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — feed/route.ts `getMlbFeedItems` 신규 코드 감사, drift 0건 RETRO-ONLY (cycle 2330, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 2322-2329 distinct=5: polish-ui/explore-idea/lotto/review-code/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 21/25, info-arch 20/30, lotto 6/30). skill-evolution trigger3(2330%50=30)/trigger5(직전20사이클 표본 20≥10, 평가대상 review-code 8회 — 0회 아님) 둘 다 미충족. ship-0 미충족(직전 10사이클 success 5/retro-only 5, fail 0건). cycle 2329 자체 retro 가 "review-code(신규 getMlbFeedItems 미감사 코드)" 를 다음 후보로 명시 — 자연 매핑.
+
+**감사 대상**: `apps/moneyball/src/app/feed/route.ts` 의 `getMlbFeedItems()` (cycle 2329 신규 추가, 미감사).
+
+**검증 내용**: (1) `MLB_SCORING_RULE`('mlb_v0.1') 단일 값 필터 정합(KBO `PRODUCTION_COHORT_RULES` 배열과 별개 — `model-version-labels.ts` 주석 확인). (2) MLB predictions 는 `prediction_type` 컬럼을 명시적으로 안 쓰지만 DB DEFAULT 'pre_game'(mig 002) 이라 전량 pre_game — #1338 family(prediction_type 미필터 혼입) 패턴 재발 아님, mlb-pipeline.ts 가 predictions insert 전 `delete().eq('league','mlb').eq('mlb_game_date',date).eq('scoring_rule', MLB_SCORING_RULE)` 로 delete-then-insert idempotent 보장 — 중복 row 가능성도 없음. (3) 링크 slug `${homeCode}-vs-${awayCode}` 가 `mlb/games/[date]/page.tsx`(161행) 실제 생성 패턴과 `[slug]/page.tsx`(116행 `slug.split('-vs-')`) 파싱 순서 양쪽 다 일치 확인. (4) `game_datetime_utc` 컬럼이 mig 038 에서 `NOT NULL` — `?? fallback` 은 방어적 코드일 뿐 실제로 항상 schedule 값 사용. (5) `normalizeMlbTeamCode` 실패 시 `continue` 로 안전 스킵, `home_win_prob` null 시 0.5 fallback — 코인플립 표시일 뿐 크래시 없음. (6) 신규 테스트 2건(MLB 항목 렌더링 + predictions 에러 throw) mock 구조 실제 쿼리 체인과 일치 확인. **drift 0건.**
+
+결론: 코드 변경 없음(retro-only). 다음 후보: fix-incident(4/20)/op-analysis(21/25)/info-arch(20/30)/lotto(6/30) 자체 주기 monitor 지속.
+
 ## 🟢 explore-idea (heavy) — /feed RSS 에 MLB 예측 게임 항목 신규 추가 SUCCESS (cycle 2329, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2322-2328 distinct=5: polish-ui/explore-idea/lotto/review-code/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 19/30, lotto 5/30). `gh run list` CI/scheduled workflow 클린 확인 — fix-incident 배제. review-code 직전 8사이클 중 4회(2321/2325/2327/2328) 전부 retro-only drift 0 — 포화 신호로 판단, 회피.
