@@ -1,4 +1,16 @@
 
+## 🟡 operational-analysis (lite) — W34 주간 성과 스냅샷 + MLB is_correct null 오탐 조사 SUCCESS (cycle 2331, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2323-2330 distinct=4: explore-idea/lotto/review-code/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 22/25, info-arch 21/30, lotto 7/30). review-code 직전 5사이클 중 3회 retro-only(streak=3, cooldown 임계 5 미도달이나 반복 0-drift 로 포화 신호). explore-idea 신규 topic 탐색 — KBO 전용 잔여 라우트 `insights`(AI reasoning 아카이브)/`dashboard` 재검토했으나 (1) `insights` = MLB 파이프라인이 debate/judge agent 자체를 호출 안 함(`mlb-pipeline.ts` 에 debate/judge/reasoning 매칭 0건 확인 — reasoning 텍스트 데이터 자체가 없어 아카이브 불가, CE 100% 지속 상황에서 신규 LLM 호출 추가도 의미 없음) (2) `dashboard` = 대부분 `/mlb/accuracy`(적중률/팀별/팩터/캘리브레이션 이미 커버) 와 중복 → 둘 다 기각. explore-idea 재포화 확인 후 op-analysis(lite) 선택(gap 22/25 근접 + 당일 3시간 전 cycle 2309 이후 신선도 재확인 가치).
+
+**실행**: `op-analysis-ce-cohort.ts` 재실행 → 총 n=321(CE 274/비CE 47), cycle 2309(같은 날 ~3시간 전)와 완전 동일 — 스톨 아님, KST 23:00 1일 1회 verify 배치 기준 동일 배치 재측정 결과(정상). 별도 이번 주(2026-W34, 8/17~8/23 KST) KBO v1.8 스냅샷 신규 측정: n=29, 적중률 48.3%(14/29, 소표본 — 단일 결론 금지), confidence 26/29건 0.2 미만 + 3건 0.3 flat, 고확신(≥0.65) 0건 — CE 100% fallback 지속 재확인.
+
+**부수 발견**: "MLB predictions 858건 전량 is_correct NULL" 을 잠재 버그로 의심해 조사 → `deriveMlbOutcome.ts` 헤더 주석(cycle 2117 review-code heavy 통합분)이 이미 "팀 코드 string↔INT FK 불일치로 그 컬럼들을 의도적으로 안 씀, `home_win_prob`+경기결과 read-time derive 가 정상 설계" 라고 명시 — 신규 버그 아님, 기존 감사 완료 아키텍처 재확인(오탐 해소). 코드 변경 없음.
+
+가중치 조정: 불필요 (v1.8 유지 확정 기존 결정 유지). CHANGELOG.md v0.5.62.66 커밋.
+
+결론: data-only 커밋(코드 변경 0). 다음 후보: fix-incident(5/20)/info-arch(21/30)/lotto(7/30) 자체 주기 monitor 또는 review-code(신규 미감사 target 재탐색, streak=3 포화 주의) 또는 explore-idea(당분간 MLB/KBO parity 신규 topic 없음 — 다른 방향 탐색 필요).
+
 ## ⚪ review-code (heavy) — feed/route.ts `getMlbFeedItems` 신규 코드 감사, drift 0건 RETRO-ONLY (cycle 2330, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 2322-2329 distinct=5: polish-ui/explore-idea/lotto/review-code/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 21/25, info-arch 20/30, lotto 6/30). skill-evolution trigger3(2330%50=30)/trigger5(직전20사이클 표본 20≥10, 평가대상 review-code 8회 — 0회 아님) 둘 다 미충족. ship-0 미충족(직전 10사이클 success 5/retro-only 5, fail 0건). cycle 2329 자체 retro 가 "review-code(신규 getMlbFeedItems 미감사 코드)" 를 다음 후보로 명시 — 자연 매핑.

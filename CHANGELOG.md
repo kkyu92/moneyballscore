@@ -1,4 +1,30 @@
-## v0.5.62.65 — 2026-08-20 (cycle 2305, explore-idea (heavy): /mlb/wild-card 라이브 Wild Card race 데이터 통합)
+## v0.5.62.66 — 2026-08-20 (cycle 2331, operational-analysis (lite): W34 주간 성과 스냅샷 + MLB is_correct null 오탐 해소)
+
+### data(weekly-review): 2026-W34 (8/17~8/23, KST) KBO v1.8 스냅샷
+
+- KBO v1.8 이번 주 검증 n=29 / 적중률 48.3% (14/29) — 표본 소표본(<30), 단일 결론 금지
+  (`feedback_data_only_claims` 원칙 유지).
+- 이번 주 검증분 confidence 분포: 29건 중 26건이 0.2 미만(CE fallback quant 원본 그대로
+  통과), 3건만 0.3(CE flat) — 고확신(≥0.65) 예측 0건. CREDIT_EXHAUSTED 100% fallback
+  지속 재확인(신규 아님, CLAUDE.md v1.8 가중치 섹션 기존 서술과 일치).
+- op-analysis-ce-cohort.ts 재실행 결과 총 n=321(CE 274/비CE 47) — cycle 2309(같은 날
+  ~3시간 전) 측정치와 동일. 신규 검증 배치가 KST 23:00 1일 1회이므로 같은 날 재측정 시
+  숫자 불변은 정상(스톨 아님) — cycle 간격이 실제 하루 단위가 아니라 시간 단위로 빨라진
+  현재 페이스(오늘 하루 20+ 사이클) 에서 이 gap-trigger들의 "N-cycle" 단위가 실제 경과
+  시간과 느슨하게만 대응한다는 점 참고용 기록.
+- 가중치 조정: 불필요 (v1.8 유지 확정 기존 결정 유지, `docs 가중치 섹션` 재조정 조건
+  미충족 — n 변화 없음).
+
+### fix(context): MLB `predictions.is_correct` 전량 NULL — 오탐 조사 후 기존 설계 확인
+
+이번 사이클 진단 중 "MLB predictions 858건 전량 verified(is_correct) 0건" 을 실제
+버그로 의심해 조사. `deriveMlbOutcome.ts` 헤더 주석(cycle 2117 review-code heavy
+통합분)이 이미 "MLB 는 팀 코드가 string 이라 INT FK 컬럼과 안 맞아 `is_correct`/
+`predicted_winner`/`confidence` 컬럼을 의도적으로 안 쓰고 `home_win_prob` + 경기
+결과를 read-time derive" 라고 명시 — 신규 버그 아님, 기존 감사 완료 아키텍처 재확인.
+코드 변경 없음.
+
+
 
 ### feat(mlb): /mlb/wild-card 라이브 Wild Card race 데이터 통합
 
