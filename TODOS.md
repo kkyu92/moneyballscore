@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — MLB `/mlb/accuracy` backlog 재확인, 이미 전량 해소 확인 (retro-only) (cycle 2311, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 5/20, op-analysis 2/25, lotto 17/30, info-arch 1/30 — 방금 2310 발화). ship-0 미충족(직전 10사이클 전부 success). cron/CI 최근 30회 실행 전부 성공/skip, 신규 fix-incident 신호 없음. lotto 8/22 50세트 이미 박제됨(트리거 없음).
+
+TODOS 누적 "다음 후보(scope 밖, backlog)" 라인(cycle 2176/2186 등)이 반복 지목한 KBO `/accuracy` 대비 MLB 미구현 컴포넌트(ScoringRuleDayHeatmap/BrierTrendChart/RollingAccuracyChart/WinnerProbBucketChart/CohortComparisonHeatmap/TeamBiasTable/ModelVersionHistory) 실제 배선 상태를 `MlbAccuracyDashboard.tsx` + `/mlb/accuracy/page.tsx` grep으로 전수 재확인.
+
+결과: **ModelVersionHistory 1건만 미구현으로 남고 나머지 6개 전부 이미 배선 완료** — ScoringRuleDayHeatmap/BrierTrendChart/RollingAccuracyChart/WinnerProbBucketChart/CohortComparisonHeatmap 은 `MlbAccuracyDashboard.tsx`에 직접 렌더 확인, TeamBiasTable 은 `buildMlbTeamBiasAnalysis()`(`buildMlbTeamAccuracy.ts`) + `/mlb/accuracy/page.tsx` line 77 배선까지 확인(커밋 `fdce1fbd` wave-634, cycle 2186 backlog 노트 작성 이후 별도 사이클에서 이미 완료됐던 것 — 노트만 안 지워진 정상 backlog 잔여물이지 실제 drift 아님). `deriveMlbOutcome.ts` 재검토도 기존 로직 정상(예전 850% 이중변환 버그는 cycle 2160에 이미 fix됨).
+
+ModelVersionHistory 는 `MLB_PRODUCTION_COHORT_RULES`가 단일 scoring_rule(`MLB_SCORING_RULE`)만 포함 — 버전 분화 자체가 없어 여전히 실효성 낮음(TODOS 기존 평가 유효, 재확인 완료).
+
+결론: 코드 변경 0, PR/커밋 없음. **MLB `/mlb/accuracy` 패리티 backlog 사실상 완전 소진** — 다음 review-code(heavy)가 재검토 불필요. 다음 후보: `apps/moneyball/src/app/page.tsx`(홈, cycle 2308 근처 audit 대상 언급됐으나 미확인) 또는 fix-incident/lotto 자체 주기 monitor(각 gap 5/20, 17/30).
+
 ## ⚪ info-architecture-review — 30-cycle gap 트리거 도달, IA 4신호 전수 확인 결과 drift 0건 (retro-only) SUCCESS (cycle 2310, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21(신규 24/27 모두 Tier3 spec-only, status approved 아님). 2-chain lock 미충족(직전 8사이클 distinct=4). info-architecture-review 마지막 발화 cycle 2280 → 정확히 30-gap 도달(자체 주기 trigger). review-code 직전 20사이클 13/20=65% dominance 도 다양성 확보 근거로 겹침.
