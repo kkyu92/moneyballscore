@@ -1,4 +1,18 @@
 
+## ⚪ explore-idea (heavy) — /mlb/wild-card 라이브 Wild Card race 데이터 통합 SUCCESS (cycle 2305, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(21건 전부 completed/archived/blocked/superseded/pending user step). 주기 trigger 3종 미도달(fix-incident 6-gap/20, op-analysis 19-gap/25, lotto 10-gap/30, info-arch 24-gap/30). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/fix-incident/skill-evolution). h2h family(computeCompositeDuel 전체 call site: analysis-data.ts/page.tsx/game/[id]/page.tsx/convergenceRecord.ts) grep 재확인 — 4곳 모두 cycle 2303/2304 fix 로 이미 정합, MLB computeMlbCompositeDuel 의 h2h 미보유는 설계 의도(mlb-pipeline.ts 미저장) 확인돼 review-code 추가 발견 0건.
+
+improvement saturation trigger 충족(직전 15사이클 중 review-code+fix-incident+polish-ui+info-arch = 12/15) → explore-idea 로 redirect.
+
+carry-over lookup: cycle 2296 CHANGELOG entry(division 매직넘버) 가 명시적으로 "와일드카드 매직넘버는 범위 밖... 별도 cycle 후속 후보로 carry" 를 남겼고, `/mlb/wild-card` 페이지 자체가 "ETA 2026-08" placeholder(오늘 2026-08-20, ETA 도달)로 방치돼있던 것을 확인 — 두 신호가 동일 타겟을 가리켐.
+
+구현: `buildMlbStandings.ts` 에 `buildMlbWildcardStandings()` 신규 — 리그별 division 1위 3팀 제외 pool 을 승률 내림차순 정렬, 컷오프(`MLB_WILDCARD_COUNT`=3번째 팀) 기준 게임차 계산. `computeMagicNumber()` 재사용(KBO standings `playoffMN` 과 동일 패턴: 컷오프 팀 vs 첫 탈락 팀)으로 Wild Card 매직넘버 산출 — 신규 DB 쿼리 0건. `/mlb/wild-card` + `/en/mlb/wild-card` 정적 그리드를 실시간 WC1~3 순위+GB+매직넘버로 교체, ETA 문구 → "박제 완료". wave-240 회귀 테스트가 검증하는 "Header NAV 회수 layer" footer 문구는 유지.
+
+`MLB_WILDCARD_COUNT=3` 신규 상수(packages/shared). 단위 테스트 2건 신규. 490 files/4124 tests all pass, type-check/lint clean. PR #3008 실측 머지 완료(`gh pr view 3008 --json state,mergedAt` → `MERGED`, mergeCommit `fbb2c252`) — 사례 18 교훈 준수. VERSION/CHANGELOG 0.5.62.65 bump(feat 전례 정합) 후 main 직접 커밋(`2bc43556`) + 즉시 push, pre-push hook lint/type-check 통과 확인.
+
+다음 후보: `/mlb/postseason` 브라켓(WC/DS/LCS/WS) — 아직 ETA 2026-09 placeholder, division/wildcard 양쪽 완료 후 자연스러운 다음 IA 갭. 또는 주기 trigger(fix-incident/op-analysis/lotto/info-arch) 도달 대기.
+
 ## ⚪ skill-evolution (forced, trigger-3 milestone) — phase 33 갱신, PR #3005 머지 SUCCESS (cycle 2301, 2026-08-20)
 
 진단: cycle 2300 retro 에서 `skill-evolution-pending` 마커 박제(`2300: 58baec4e...`) — cycle 2301 진단 첫 step 에서 마커 발견, chain_selected 자동 강제 (`skill-evolution`, 메인 자율 X).
