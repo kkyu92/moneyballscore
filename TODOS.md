@@ -1,4 +1,18 @@
 
+## ⚪ skill-evolution (forced, trigger-3 milestone) — phase 33 갱신, PR #3005 머지 SUCCESS (cycle 2301, 2026-08-20)
+
+진단: cycle 2300 retro 에서 `skill-evolution-pending` 마커 박제(`2300: 58baec4e...`) — cycle 2301 진단 첫 step 에서 마커 발견, chain_selected 자동 강제 (`skill-evolution`, 메인 자율 X).
+
+직전 20 cycle(2281-2300) 분포 측정: review-code 관여 16/20=80%(단독 15 + combo 1, 사상 최고치 — #1338 family scoring_rule 필터 sweep 7~10번째 재발 연속: cycle 2295 og-image/agent-fallback, 2297 debug/reliability, 2298 v2-preview + cycle 2299 수렴픽 isCorrect 오판정 + cycle 2300 MIN_POLL_TOTAL 매직넘버) + explore-idea 10%(cycle 2287/2296) + operational-analysis 5%(cycle 2285) + lotto 5%(cycle 2294) + info-arch/polish-ui/design-system/expand-scope/dimension-cycle 0%(영구 opt-out 또는 gap 미도달). success 95%(19/20, 1 partial cycle 2283). alternation pair(review-code+explore-idea) 90%. watch.sh hang kill 0건.
+
+주목할 점: cycle 2295 retro 가 "#1338 family sweep 완전 종료" 를 명시 선언했음에도 그 후 2회(cycle 2297/2298) 추가 재발 — 종료 선언의 신뢰도 자체가 낮음을 시사. 다음 review-code 사이클에서 "종료 선언" 문구 재검토 필요할 수 있음(과신 경계).
+
+PASS_ship 재계산: `40a6fcd2`(cycle 2250 retro)..HEAD(cycle 2300) = +76 ships → 직전 확정 누적치 ~1671 + 76 = **누적 ~1747(cycle 2300 기준)**.
+
+동작: `~/.claude/skills/develop-cycle/SKILL.md` 마이그레이션 table cell 에 phase 33 요약 append + `MIGRATION-PATH.md` 에 상세 섹션(`## cycle 2300 — phase 33`) append. 코드 변경 0건(SKILL 파일은 repo 비추적) — metric-only empty commit(`--allow-empty`) 관례 유지. `develop-cycle/skill-evolution-2300` 브랜치 → PR #3005 → `gh pr merge --squash --auto --delete-branch` 즉시 발화 → CI green 확인 후 **실측 머지 완료**(`gh pr view 3005 --json state,mergedAt` → `MERGED`, mergeCommit `1f80e1d5`) — cycle 2001 사례 18 교훈(완료 서술 전 실측 확인) 준수.
+
+`skill-evolution-pending` 마커 삭제(chain 종료). 다음 milestone = cycle 2350.
+
 ## ⚪ review-code (heavy) — accuracy/page.tsx 전체 재감사 + MIN_POLL_TOTAL 매직넘버 재발 정정 SUCCESS (cycle 2300, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked/superseded). 2-chain lock 미충족(직전 8사이클 distinct=4). 주기 trigger 3종 미도달(fix-incident 1-gap/20, op-analysis 15-gap/25, lotto 6-gap/30, info-arch 20-gap/30). cycle 2300 = 50-milestone(trigger 3 자동 해당).
