@@ -1,4 +1,12 @@
 
+## ⚪ operational-analysis (heavy) — CE cohort 재측정, 완전 불변 확인 RETRO-ONLY (cycle 2336, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(27=phase3 data-blocked 재확인 불필요 — 어제 이미 확인, 28=completed, 22/23=completed). 2-chain lock 미충족(직전 8사이클 2328-2335 distinct=4: review-code/explore-idea/op-analysis/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 2/25, info-arch 26/30, lotto 12/30). `gh run list` CI 전부 green, 배포 실패 0건. review-code/explore-idea 신선 target 광범위 재탐색(wild-card 3중 감사 완료/TeamStrengthGrid 2중 감사 완료/analysis 신규 파일 전부 리뷰 완료/Header·Footer nav 최근 수정 없음) — 5 cycle 연속 "완전 신규 topic 부재" 확정.
+
+**실행**: 위 4개 gap-trigger 전부 미도달 + 완전 신규 target 부재 상태에서 무의미한 busywork 방지 위해 `op-analysis-ce-cohort.ts` 를 gap 무관 선제 재실행(risk=0, 비용=1 DB query) — 결과 **cycle 2309 문서치와 100% 동일**(전체 55.5%(178/321) / CE 54.0%(148/274) / 비CE 63.8%(30/47) / 격차 9.8pp / overlap 통제 10.8pp). 8/17~8/20 (cycle 2309→2336, 27 cycle) 동안 KBO 신규 검증 배치 없음 확인 — 스톨 아님, KST 23:00 1일 1회 배치 주기상 정상.
+
+결론: 코드 변경 없음(RETRO-ONLY). 실질 가치 = "완전 정적 상태" 실측 재확인(negative result도 기록 가치 — 다음 cycle이 동일 재확인 반복 안 하도록). 다음 cycle 은 gap-trigger 자연 도달(fix-incident 4/20·op-analysis 3/25·info-arch 27/30·lotto 13/30) 전까지 review-code/explore-idea 완전 신규 topic 발견 여부만 우선 확인 권고.
+
 ## ⚪ review-code (lite) — /health 721-cycle 미측정 베이스라인 재확인 RETRO-ONLY (cycle 2335, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2327-2334 distinct=4: review-code/explore-idea/fix-incident/op-analysis). 주기 trigger 4종 전부 미도달(fix-incident 0/20 방금 발화, op-analysis 0/25 방금 발화, info-arch 25/30, lotto 11/30). review-code/explore-idea 는 cycle 2332~2334 연속 "신선 target 부재" 재확인 후 이번 cycle 추가 검증(community 페이지=의도적 placeholder, EN mirror KBO 부재=MLB 전용 의도적 설계, convergenceRecord/buildTeamProfile/buildMatchupProfile=최근 #2997/#2998/#3007 로 이미 정정)도 전부 기각 — 4 cycle 연속 확정.
