@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import * as Sentry from "@sentry/nextjs";
-import { assertSelectOk, errMsg, type SelectResult, SITE_HOST } from "@moneyball/shared";
+import { assertSelectOk, errMsg, type SelectResult, SITE_HOST, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
@@ -28,6 +28,7 @@ interface GameOgRow {
   away_team: { code: string } | null;
   predictions: Array<{
     prediction_type: string;
+    scoring_rule: string;
     confidence: number;
     predicted_winner: number | null;
   }> | null;
@@ -42,7 +43,7 @@ async function getGameOg(gameId: number) {
         game_date, home_team_id,
         home_team:teams!games_home_team_id_fkey(code),
         away_team:teams!games_away_team_id_fkey(code),
-        predictions(prediction_type, confidence, predicted_winner)
+        predictions(prediction_type, scoring_rule, confidence, predicted_winner)
       `)
       .eq("id", gameId)
       .maybeSingle()) as SelectResult<GameOgRow>;
@@ -52,7 +53,7 @@ async function getGameOg(gameId: number) {
 
     const game = data as unknown as GameOgRow;
     const preGame = game.predictions?.find(
-      (p) => p.prediction_type === "pre_game",
+      (p) => p.prediction_type === "pre_game" && p.scoring_rule === CURRENT_SCORING_RULE,
     );
 
     const homeCode = game.home_team?.code ?? "";
