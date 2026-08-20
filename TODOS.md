@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — opengraph-image.tsx + debug/agent-fallback/page.tsx scoring_rule 필터 누락 정정 (#1338 family 7번째/8번째, sweep 완전 종료) SUCCESS (cycle 2295, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(전 20건 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code x6 + explore-idea x1 + lotto x1). 주기 trigger 3종 미도달(fix-incident 17-gap/20, op-analysis 10-gap/25, info-arch 15-gap/30, lotto 1-gap/30). cycle 2293 retro가 carry-over로 명시한 저트래픽 잔여 2파일(`opengraph-image.tsx` game/[id], `debug/agent-fallback/page.tsx`) 마무리 처리.
+
+발견 1 (`analysis/game/[id]/opengraph-image.tsx`): `getGameOg`의 `predictions.find(p => p.prediction_type === "pre_game")`가 scoring_rule 미확인 — daily.ts가 동일 game_id에 production(v1.8) + shadow(v2.1-B-shadow/v2.0-shadow) row 모두 prediction_type='pre_game'으로 insert하는 상황에서 정렬 보장 없는 find()가 소셜 공유 OG 이미지에 임의 row 표시 가능 (#1338 family 7번째).
+
+발견 2 (`debug/agent-fallback/page.tsx`, 신규 증상 클래스): `getCohort` 쿼리가 prediction_type만 필터, scoring_rule 미필터 — shadow row의 `reasoning` 필드는 `[v2.1-B-shadow quant only] ...` / `[v2.0-shadow quant only] ...` 형태의 **평문 string**(`agentFallbackStats.ts`가 기대하는 `{debate:{...}}` 객체 아님). 캐스팅 후 `.debate` 접근 시 undefined → hasJudge/hasHome/hasAway 전부 false → shadow row 전량 quantOnly 카테고리로 오분류, LLM 토론 fallback 모니터링 대시보드(fullDebate/agentsFailed/quantOnly rate)가 인위적으로 왜곡. #1338 family 8번째지만 **픽 선택 오류가 아닌 모니터링 metric 오염**이라는 새 증상 형태 — shadow row 오염 패턴이 사용자 가시 페이지뿐 아니라 내부 관측 도구도 침투 가능함을 확인.
+
+수정: opengraph-image.tsx는 select에 `scoring_rule` 추가 + find predicate에 `scoring_rule === CURRENT_SCORING_RULE` 조건. debug 페이지는 daily.ts 기존 shadow 제외 관례(`'.in(scoring_rule, PRODUCTION_COHORT_RULES)'`)를 그대로 재사용 — v1.8 + v1.8-credit-fail(실제 production fallback 상태) 포함, shadow만 제외. 정적 grep 회귀 테스트 양쪽 파일 신규 추가. type-check/lint clean, test 485 files/4096 tests pass. PR #3003 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit dd256498, 사례 18 mitigation 준수).
+
+#1338 family sweep 완전 종료 (총 8건: buildTeamProfile/buildMatchupProfile/buildTeamFactorAverages/series.ts/analysis-game-[id]/predictions-목록·일별/opengraph-image/debug-agent-fallback). review-code(heavy) 7연속 SUCCESS streak(cycle 2288~2295). 직전 8사이클(2288-2295) distinct=2(review-code x7, lotto x1) 도달 — 다음 사이클 2-chain lock 트리거 예상. 다음 후보: explore-idea 또는 잠긴 2 chain 제외 후 자연 선택.
+
 ## ⚪ lotto (lite) — 30-cycle gap 감사, drift 없음 SUCCESS (cycle 2294, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건. 2-chain alternation lock 충족(직전 8사이클 distinct=2: review-code x7 + explore-idea x1) — 두 chain 제외. lotto trigger 6(30-cycle gap, 마지막 fire cycle 2264)이 정확히 도달한 유일한 강제 trigger.
