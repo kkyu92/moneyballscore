@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — `/mlb/analysis` Phase 4 CTA(적중 기록) 신규 코드 감사, drift 0건 (cycle 2321, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 2313-2320 distinct=3: polish-ui/explore-idea/review-code). 주기 trigger 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 10/30, lotto 26/30). skill-evolution trigger3(%50==0) 미도달(2321%50=21). ship-0 미충족(직전 10사이클 success 다수). cycle 2320 next_recommended_chain 이 review-code(heavy, Phase 4 신규 ship 코드 감사) 1순위 명시 — 착수.
+
+감사 범위: (1) `buildMlbAccuracySummary('ko')` 재사용 확인 — page.tsx 신규 import 외 재구현 0, 함수 시그니처/필드명(`verifiedN`/`correctN`/`accuracyRate`) 일치. (2) `accuracyRate` 스케일 — `buildMlbAccuracySummary.ts` L124 `correctN / rows.length` = 0~1 스케일 확정, `* 100` 렌더 정확(cycle 2160 이중 변환 버그 패턴 재발 없음). (3) `MLB_PRODUCTION_COHORT_RULES` cohort 필터 — 기존 재사용 함수 내부에 이미 적용됨(신규 인스턴스 아님, #1338 family 필터 누락류 무관). (4) `tsc --noEmit` 재실행 클린 확인. (5) DB 실측: `mlb_schedule` status=final 827건 + `predictions`(mlb_v0.1) 849건 — CTA 가 항상 "시즌 검증된 경기를 기다리는 중" fallback 만 노출하는 silent 상황 아님(실데이터 확인).
+
+발견: cycle 2317 이 박제한 `getTodayMlbAnalysisRows`(page.tsx)와 `getMlbThisWeekRemainingGames`(analysis-data.ts) 간 duel 계산 중복(computeMlbCompositeDuel 호출 + validEnough 게이팅, ~14줄씩) 재확인 — 두 곳 모두 동일한 `MLB_COMPOSITE_DUEL_MIN_VALID` 상수 참조라 값 drift 위험 없음(하드코딩 중복 아님) + 공유 헬퍼로 뽑으면 기존 smoke test 2건(`plan28-phase1.../plan28-phase2...`)의 `computeMlbCompositeDuel({` 리터럴 가드가 양쪽 파일에서 사라져 깨짐. 실익(코드 14줄 절약) 대비 비용(테스트 계약 변경 + 신규 추상화)이 낮아 리팩터 보류 유지 — 프리매처 abstraction 판단.
+
+결론: drift 0건, 코드 변경 없음(retro-only). plan #28 4-phase 전부 완료 + 신규 코드 3회 연속(2317/2319/2321) 감사 drift 0 — 이 코드 패밀리 review-code 감사는 당분간 포화. 다음 후보: explore-idea(heavy, 신규 topic 재탐색 — plan #28 종료로 Phase2 TeamStrengthGrid MLB 대체설계 또는 완전 새 topic) 우선, 대안으로 자체 주기 gap chain(lotto 26/30 근접) 도 후보.
+
 ## 🟢 explore-idea (heavy) — `/mlb/analysis` MLB AI 적중 기록 CTA, plan #28 Phase 4 SUCCESS (cycle 2320, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 2312-2319 distinct=3: review-code/polish-ui/explore-idea). 주기 trigger 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 10/30, lotto 26/30). skill-evolution trigger5 표본 20(≥10)→review-code 9/20(0 아님)→미충족, trigger3(%50==0) 미도달(2320%50=20). ship-0 미충족(직전 10사이클 success 4건). cycle 2319 next_recommended_chain 이 explore-idea(heavy, plan #28 Phase 4 또는 TeamStrengthGrid 대체설계) 명시 — Phase 4(시즌 성과 + 적중 기록, 소규모 스코프) 우선 착수.
