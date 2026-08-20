@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_HOST } from "@moneyball/shared";
+import { SITE_HOST, MLB_WILDCARD_COUNT } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { MLB_GRADIENT_WILD_CARD_135 } from "@/lib/design-tokens";
 
@@ -62,7 +62,7 @@ export default function EnMlbWildCardOgImage() {
             display: "flex",
           }}
         >
-          AL/NL · 3 spots per league · September game-back · {MLB_FACTOR_COUNTS.total}-factor base
+          AL/NL · {MLB_WILDCARD_COUNT} spots per league · September game-back · {MLB_FACTOR_COUNTS.total}-factor base
         </div>
 
         <div
@@ -73,7 +73,7 @@ export default function EnMlbWildCardOgImage() {
             flexWrap: "wrap",
           }}
         >
-          {["AL 3 spots", "NL 3 spots", "Game-back", "September"].map((label) => (
+          {[`AL ${MLB_WILDCARD_COUNT} spots`, `NL ${MLB_WILDCARD_COUNT} spots`, "Game-back", "September"].map((label) => (
             <div
               key={label}
               style={{
