@@ -9,31 +9,28 @@ import {
   confToWinProb,
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { PickButton } from "@/components/picks/PickButton";
 import { MlbTeamStrengthGrid } from "@/components/analysis/MlbTeamStrengthGrid";
 import { createClient } from "@/lib/supabase/server";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
 import { buildMlbTeamStrengthSnapshot } from "@/lib/mlb/buildMlbTeamStrengthSnapshot";
-import { getCurrentWeek } from "@/lib/reviews/computeWeekRange";
-import { getCurrentMonth } from "@/lib/reviews/computeMonthRange";
 import {
   getTodayMlbAnalysisRows,
   getMlbThisWeekRemainingGames,
   groupMlbGamesByDate,
   getMlbYesterdayResults,
-  getMlbPeriodStats,
-} from "./analysis-data";
+} from "@/app/mlb/analysis/analysis-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
-// KBO predictions/[date] 의 "최고 자신감 픽"(topPick) 과 동일 임계값 (wave-624 parity).
+// KO /mlb/analysis 와 동일 임계값 (wave-624 parity, en 미러도 동일 기준 유지).
 const TOP_PICK_MIN_WIN_PCT = Math.round(confToWinProb(TOP_PICK_CONF_MIN) * 100);
 
 export const metadata: Metadata = {
-  title: "MLB AI 분석 센터 — 오늘 전체 예측 + 빅매치 + 팩터 수렴 픽 | MoneyBall Score",
-  description: "오늘 MLB 전체 경기 AI 분석을 한 곳에서 — 오늘의 빅매치, 팩터 수렴 픽, 오늘 전체 예측.",
+  title: "MLB AI Analysis Hub — Today's Picks, Big Match & Factor Convergence | MoneyBall Score",
+  description:
+    "All of today's MLB AI analysis in one place — today's big match, factor convergence picks, and every prediction.",
   alternates: {
-    canonical: `${SITE_URL}/mlb/analysis`,
+    canonical: `${SITE_URL}/en/mlb/analysis`,
     languages: {
       en: `${SITE_URL}/en/mlb/analysis`,
       ko: `${SITE_URL}/mlb/analysis`,
@@ -41,43 +38,37 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "ko_KR",
+    locale: "en_US",
     siteName: "MoneyBall Score",
-    title: "MLB AI 분석 센터",
-    description: "오늘 MLB 전체 경기 AI 분석 — 빅매치, 팩터 수렴 픽, 오늘 전체 예측.",
-    url: `${SITE_URL}/mlb/analysis`,
+    title: "MLB AI Analysis Hub",
+    description: "Today's MLB AI analysis — big match, factor convergence picks, and every prediction.",
+    url: `${SITE_URL}/en/mlb/analysis`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "MLB AI 분석 센터",
-    description: "오늘 MLB 전체 경기 AI 분석 — 빅매치, 팩터 수렴 픽, 오늘 전체 예측.",
+    title: "MLB AI Analysis Hub",
+    description: "Today's MLB AI analysis — big match, factor convergence picks, and every prediction.",
   },
 };
 
-export default async function MlbAnalysisPage() {
+export default async function MlbAnalysisPageEn() {
   const today = new Date().toISOString().slice(0, 10);
-  const currentWeek = getCurrentWeek();
-  const currentMonth = getCurrentMonth();
   const supabase = await createClient();
-  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats, accuracySummary, teamStrengthRows] = await Promise.all([
+  const [rows, weekRemainingGames, yesterdayGames, accuracySummary, teamStrengthRows] = await Promise.all([
     getTodayMlbAnalysisRows(supabase, today),
     getMlbThisWeekRemainingGames(today),
     getMlbYesterdayResults(),
-    getMlbPeriodStats(currentWeek.startDate, currentWeek.endDate),
-    getMlbPeriodStats(currentMonth.startDate, currentMonth.endDate),
-    buildMlbAccuracySummary('ko'),
+    buildMlbAccuracySummary('en'),
     buildMlbTeamStrengthSnapshot(),
   ]);
   const weekRemainingByDate = groupMlbGamesByDate(weekRemainingGames);
 
-  // wave-624 KBO 대응 — 최고 자신감 픽 = 오늘의 빅매치 (MLB 는 elo/recent_form 미구현이라
-  // KBO selectBigMatch(rivalry/elo-closeness 휴리스틱)를 그대로 쓰면 데이터 부족으로
-  // 무의미(전 경기 동점) — confidence 기반으로 대체, plan #28 Phase 1 스코프 결정).
+  // wave-624 KBO 대응(en 미러) — 최고 자신감 픽 = 오늘의 빅매치, confidence 기반 (KO 동일 로직).
   const topPick = rows
     .filter((p) => p.conf > TOP_PICK_MIN_WIN_PCT)
     .sort((a, b) => b.conf - a.conf)[0];
 
-  // wave-392 KBO 대응 — |netScore| ≥ MLB_FACTOR_PICK_STRONG(5) 인 경기, 최대 우세 순 top N.
+  // wave-392 KBO 대응(en 미러) — |netScore| ≥ MLB_FACTOR_PICK_STRONG(5) 인 경기, 최대 우세 순 top N.
   const factorPickGames = [...rows]
     .filter((g) => g.duelNetScore !== null && Math.abs(g.duelNetScore) >= MLB_FACTOR_PICK_STRONG)
     .sort((a, b) => Math.abs(b.duelNetScore!) - Math.abs(a.duelNetScore!))
@@ -85,25 +76,28 @@ export default async function MlbAnalysisPage() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-8">
-      <Breadcrumb items={[{ label: 'MLB 분석', href: '/mlb' }, { label: '분석 센터' }]} />
+      <Breadcrumb
+        items={[{ label: 'MLB Analysis', href: '/en/mlb' }, { label: 'Analysis Hub' }]}
+        locale="en"
+      />
 
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
-          MLB AI 분석 센터
+          MLB AI Analysis Hub
         </h1>
         <p className="text-sm text-brand-500 mt-1">
-          오늘의 빅매치 · 팩터 수렴 픽 · 전체 AI 예측을 한 곳에서.
+          Today&apos;s big match · factor convergence picks · every AI prediction, all in one place.
         </p>
       </div>
 
       {rows.length === 0 ? (
         <div className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-[var(--color-surface-card)]/50 p-6 space-y-3">
-          <p className="text-brand-600 dark:text-brand-300">오늘 MLB 경기가 없습니다.</p>
+          <p className="text-brand-600 dark:text-brand-300">No MLB games today.</p>
           <Link
-            href="/mlb"
+            href="/en/mlb"
             className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
           >
-            MLB 분석 hub
+            MLB Analysis hub
           </Link>
         </div>
       ) : (
@@ -111,10 +105,10 @@ export default async function MlbAnalysisPage() {
           {topPick && (
             <section className="rounded-xl border border-brand-400 dark:border-brand-600 bg-brand-50 dark:bg-[var(--color-surface-card)]/50 p-5">
               <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-2">
-                ⭐ 오늘의 빅매치
+                ⭐ Today&apos;s Big Match
               </h2>
               <Link
-                href={`/mlb/games/${today}/${topPick.homeCode}-vs-${topPick.awayCode}`}
+                href={`/en/mlb/games/${today}/${topPick.homeCode}-vs-${topPick.awayCode}`}
                 className="flex items-center justify-between"
               >
                 <span className="font-semibold">{topPick.homeCode} vs {topPick.awayCode}</span>
@@ -128,7 +122,7 @@ export default async function MlbAnalysisPage() {
           {factorPickGames.length > 0 && (
             <section>
               <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
-                팩터 수렴 픽{factorPickGames.length > 1 ? ` (${factorPickGames.length}경기)` : ''}
+                Factor Convergence Picks{factorPickGames.length > 1 ? ` (${factorPickGames.length} games)` : ''}
               </h2>
               <ul className="space-y-2">
                 {factorPickGames.map((g) => {
@@ -144,14 +138,14 @@ export default async function MlbAnalysisPage() {
                       }`}
                     >
                       <Link
-                        href={`/mlb/games/${today}/${g.homeCode}-vs-${g.awayCode}`}
+                        href={`/en/mlb/games/${today}/${g.homeCode}-vs-${g.awayCode}`}
                         className="flex items-center justify-between"
                       >
                         <span className="font-semibold">
                           {g.homeCode} vs {g.awayCode}
                         </span>
                         <span className={`text-xs font-medium ${isComplete ? 'text-amber-600 dark:text-amber-400' : 'text-brand-500'}`}>
-                          {isComplete ? '완전수렴' : '강수렴'} · {favoredCode} {Math.abs(g.duelNetScore!)}/{g.duelValidCount}
+                          {isComplete ? 'Full convergence' : 'Strong convergence'} · {favoredCode} {Math.abs(g.duelNetScore!)}/{g.duelValidCount}
                         </span>
                       </Link>
                     </li>
@@ -163,7 +157,7 @@ export default async function MlbAnalysisPage() {
 
           <section>
             <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
-              오늘 전체 예측 ({rows.length}경기)
+              Today&apos;s Full Predictions ({rows.length} games)
             </h2>
             <ul className="space-y-3">
               {rows.map((p) => {
@@ -179,28 +173,17 @@ export default async function MlbAnalysisPage() {
                     }`}
                   >
                     <Link
-                      href={`/mlb/games/${today}/${p.homeCode}-vs-${p.awayCode}`}
+                      href={`/en/mlb/games/${today}/${p.homeCode}-vs-${p.awayCode}`}
                       className="flex items-center justify-between"
                     >
                       <span className="font-semibold">
-                        {isTopPick && <span className="mr-1.5" aria-label="최고 자신감 픽">⭐</span>}
+                        {isTopPick && <span className="mr-1.5" aria-label="Top confidence pick">⭐</span>}
                         {p.homeCode} vs {p.awayCode}
                       </span>
                       <span className="text-sm text-brand-600 dark:text-brand-300">
                         {p.winnerCode} {p.conf}%
                       </span>
                     </Link>
-                    {p.status === 'scheduled' && (
-                      <PickButton
-                        gameId={p.external_game_id}
-                        league="mlb"
-                        homeTeam={p.homeCode}
-                        awayTeam={p.awayCode}
-                        aiPredictedWinner={p.winnerCode === p.homeCode ? 'home' : 'away'}
-                        aiWinProb={p.homeWinProb}
-                        analysisHref={`/mlb/games/${today}/${p.homeCode}-vs-${p.awayCode}`}
-                      />
-                    )}
                   </li>
                 );
               })}
@@ -212,7 +195,7 @@ export default async function MlbAnalysisPage() {
       {weekRemainingByDate.size > 0 && (
         <section>
           <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
-            📆 이번 주 남은 경기 ({weekRemainingGames.length}경기)
+            📆 Remaining Games This Week ({weekRemainingGames.length} games)
           </h2>
           <div className="space-y-4">
             {Array.from(weekRemainingByDate.entries()).map(([date, games]) => (
@@ -236,7 +219,7 @@ export default async function MlbAnalysisPage() {
                         }`}
                       >
                         <Link
-                          href={`/mlb/games/${date}/${g.homeCode}-vs-${g.awayCode}`}
+                          href={`/en/mlb/games/${date}/${g.homeCode}-vs-${g.awayCode}`}
                           className="flex items-center justify-between"
                         >
                           <span className="font-semibold">
@@ -247,7 +230,7 @@ export default async function MlbAnalysisPage() {
                               <span
                                 className={`text-xs font-medium mr-1.5 ${isComplete ? 'text-amber-600 dark:text-amber-400' : 'text-brand-500'}`}
                               >
-                                {isComplete ? '완전수렴' : '강수렴'} · {favoredCode}
+                                {isComplete ? 'Full convergence' : 'Strong convergence'} · {favoredCode}
                               </span>
                             ) : null}
                             {g.winnerCode} {g.conf}%
@@ -264,26 +247,26 @@ export default async function MlbAnalysisPage() {
       )}
 
       {teamStrengthRows.length > 0 && (
-        <section aria-labelledby="mlb-team-strength-title">
+        <section aria-labelledby="mlb-team-strength-title-en">
           <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
-            <h2 id="mlb-team-strength-title" className="text-lg font-bold text-brand-700 dark:text-brand-100">
-              📊 팀 전력 현황
+            <h2 id="mlb-team-strength-title-en" className="text-lg font-bold text-brand-700 dark:text-brand-100">
+              📊 Team Strength Snapshot
             </h2>
-            <Link href="/mlb/standings" className="text-sm text-brand-600 hover:underline">
-              순위표 →
+            <Link href="/en/mlb/standings" className="text-sm text-brand-600 hover:underline">
+              Standings →
             </Link>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-            실제 완료 경기 기준 최근 전적 — 팀 이름 클릭 시 상세 프로필
+            Based on completed games — click a team name for the full profile.
           </p>
-          <MlbTeamStrengthGrid rows={teamStrengthRows} />
+          <MlbTeamStrengthGrid rows={teamStrengthRows} locale="en" />
         </section>
       )}
 
       {yesterdayGames.length > 0 && (
-        <section aria-labelledby="mlb-yesterday-title">
-          <h2 id="mlb-yesterday-title" className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
-            📅 어제 결과 ({yesterdayGames.length}경기)
+        <section aria-labelledby="mlb-yesterday-title-en">
+          <h2 id="mlb-yesterday-title-en" className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
+            📅 Yesterday&apos;s Results ({yesterdayGames.length} games)
           </h2>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {yesterdayGames.map((g) => {
@@ -292,7 +275,7 @@ export default async function MlbAnalysisPage() {
               return (
                 <li key={g.external_game_id} data-yesterday-status={status}>
                   <Link
-                    href={`/mlb/games/${g.gameDate}/${g.homeCode}-vs-${g.awayCode}`}
+                    href={`/en/mlb/games/${g.gameDate}/${g.homeCode}-vs-${g.awayCode}`}
                     className="block rounded-lg border border-brand-200 dark:border-brand-800 p-3 hover:border-brand-400 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -308,12 +291,12 @@ export default async function MlbAnalysisPage() {
                               : "text-brand-500"
                         }`}
                       >
-                        {status === "correct" ? "✅ 적중" : status === "wrong" ? "❌ 실패" : "⏳ 대기"}
+                        {status === "correct" ? "✅ Correct" : status === "wrong" ? "❌ Missed" : "⏳ Pending"}
                       </span>
                     </div>
                     {g.predictedWinnerCode && (
                       <p className="text-xs text-brand-500 mt-1">
-                        예측: {g.predictedWinnerCode} {winnerPct}%
+                        Predicted: {g.predictedWinnerCode} {winnerPct}%
                       </p>
                     )}
                   </Link>
@@ -324,69 +307,23 @@ export default async function MlbAnalysisPage() {
         </section>
       )}
 
-      <section aria-labelledby="mlb-weekly-review-title">
-        <h2 id="mlb-weekly-review-title" className="sr-only">이번 주 MLB 예측 리뷰</h2>
+      <section aria-labelledby="mlb-accuracy-title-en">
+        <h2 id="mlb-accuracy-title-en" className="sr-only">MLB AI Accuracy Track Record</h2>
         <Link
-          href={`/mlb/reviews/weekly/${currentWeek.weekId}`}
-          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
-        >
-          <div className="flex items-start gap-4">
-            <span className="text-2xl shrink-0">📅</span>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                이번 주 MLB 예측 리뷰 →
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {currentWeek.label}
-                {weeklyStats.total > 0
-                  ? ` · ${weeklyStats.total}경기 중 ${weeklyStats.correct}적중 (${Math.round((weeklyStats.correct / weeklyStats.total) * 100)}%)`
-                  : " · 이번 주 검증된 경기를 기다리는 중"}
-              </p>
-            </div>
-          </div>
-        </Link>
-      </section>
-
-      <section aria-labelledby="mlb-monthly-review-title">
-        <h2 id="mlb-monthly-review-title" className="sr-only">이번 달 MLB 예측 리뷰</h2>
-        <Link
-          href={`/mlb/reviews/monthly/${currentMonth.monthId}`}
-          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
-        >
-          <div className="flex items-start gap-4">
-            <span className="text-2xl shrink-0">🗓️</span>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                이번 달 MLB 예측 리뷰 →
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {currentMonth.label}
-                {monthlyStats.total > 0
-                  ? ` · ${monthlyStats.total}경기 중 ${monthlyStats.correct}적중 (${Math.round((monthlyStats.correct / monthlyStats.total) * 100)}%)`
-                  : " · 이번 달 검증된 경기를 기다리는 중"}
-              </p>
-            </div>
-          </div>
-        </Link>
-      </section>
-
-      <section aria-labelledby="mlb-accuracy-title">
-        <h2 id="mlb-accuracy-title" className="sr-only">MLB AI 적중 기록</h2>
-        <Link
-          href="/mlb/accuracy"
+          href="/en/mlb/accuracy"
           className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
         >
           <div className="flex items-start gap-4">
             <span className="text-2xl shrink-0">🎯</span>
             <div className="flex-1">
               <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                MLB AI 적중 기록 →
+                MLB AI Accuracy Track Record →
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {accuracySummary.verifiedN > 0 && accuracySummary.accuracyRate != null
-                  ? `시즌 누적 ${accuracySummary.verifiedN}경기 중 ${accuracySummary.correctN}적중 (${Math.round(accuracySummary.accuracyRate * 100)}%)`
-                  : "시즌 검증된 경기를 기다리는 중"}
-                {" · 캘리브레이션·팀별 성과·팩터 분석까지"}
+                  ? `${accuracySummary.correctN} correct of ${accuracySummary.verifiedN} verified this season (${Math.round(accuracySummary.accuracyRate * 100)}%)`
+                  : "Waiting for verified games this season"}
+                {" · calibration, team breakdowns, and factor analysis"}
               </p>
             </div>
           </div>

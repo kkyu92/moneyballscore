@@ -12,6 +12,11 @@ const page = readFileSync(
   path.resolve(__dirname, '../mlb/analysis/page.tsx'),
   'utf8',
 );
+// getTodayMlbAnalysisRows 는 wave-658(cycle 2338, en 미러 재사용 위해)로 analysis-data.ts 로 이동.
+const analysisData = readFileSync(
+  path.resolve(__dirname, '../mlb/analysis/analysis-data.ts'),
+  'utf8',
+);
 const header = readFileSync(path.resolve(__dirname, '../../components/layout/Header.tsx'), 'utf8');
 const footer = readFileSync(path.resolve(__dirname, '../../components/layout/Footer.tsx'), 'utf8');
 const sitemap = readFileSync(path.resolve(__dirname, '../sitemap.ts'), 'utf8');
@@ -24,13 +29,13 @@ describe('plan #28 Phase 1 — /mlb/analysis 종합 hub MVP', () => {
   });
 
   it('predictions 를 mlb_game_date 로 직접 조회 (games!inner 조인 X — cycle 2114 silent 빈 목록 회피)', () => {
-    expect(page).toContain(".eq('mlb_game_date', date)");
-    expect(page).not.toContain("predictions!inner");
+    expect(analysisData).toContain(".eq('mlb_game_date', date)");
+    expect(analysisData).not.toContain("predictions!inner");
   });
 
   it('computeMlbCompositeDuel 재사용 (plan #24 Phase 3c 인프라, 신규 duel 로직 재작성 X)', () => {
-    expect(page).toContain("import { computeMlbCompositeDuel } from \"@/lib/analysis/computeMlbCompositeDuel\"");
-    expect(page).toContain('computeMlbCompositeDuel({');
+    expect(analysisData).toContain("import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel'");
+    expect(analysisData).toContain('computeMlbCompositeDuel({');
   });
 
   it('오늘의 빅매치 섹션 존재 (confidence 기반 — MLB elo/recent_form 미구현이라 KBO selectBigMatch 미사용)', () => {
@@ -51,8 +56,9 @@ describe('plan #28 Phase 1 — /mlb/analysis 종합 hub MVP', () => {
     expect(page).toContain('isTopPick');
   });
 
-  it('canonical URL /mlb/analysis 배선 (EN 변형은 phased 관례 따라 후속 cycle — 미배선)', () => {
+  it('canonical URL /mlb/analysis 배선 (EN 미러는 wave-658, cycle 2338 로 후속 배선 완료)', () => {
     expect(page).toContain('${SITE_URL}/mlb/analysis');
+    expect(page).toContain('en: `${SITE_URL}/en/mlb/analysis`');
   });
 
   it('헤더 메가메뉴 + 푸터 컬럼 + sitemap.ts 즉시 배선 (cycle 2153 family 재발 차단)', () => {
