@@ -167,6 +167,7 @@ const STATIC_PAGES: Array<{
   { slug: '/reviews/weekly', label: '주간 리뷰', keywords: 'reviews weekly 주간 리뷰' },
   { slug: '/seasons', label: '시즌 history', keywords: 'seasons 시즌 history' },
   { slug: '/mlb', label: 'MLB', keywords: 'mlb 메이저리그 majorleague baseball' },
+  { slug: '/mlb/analysis', label: 'MLB 분석 센터', keywords: 'mlb analysis 분석 센터 빅매치 팩터 수렴 픽 메이저리그' },
   { slug: '/mlb/standings', label: 'MLB 순위', keywords: 'mlb standings al nl division 순위' },
   { slug: '/mlb/team', label: 'MLB 팀', keywords: `mlb team teams ${MLB_TEAM_COUNT}팀 메이저리그` },
   { slug: '/mlb/players', label: 'MLB Statcast', keywords: 'mlb statcast players xwoba barrel launch angle' },

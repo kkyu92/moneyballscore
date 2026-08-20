@@ -118,6 +118,7 @@ const MLB_NAV: NavItem[] = [
     label: "경기·팀",
     enLabel: "Games & Teams",
     items: [
+      { href: "/mlb/analysis", label: "분석 센터", enLabel: "Analysis Hub", description: "오늘의 빅매치·팩터 수렴 픽·전체 예측", enDescription: "Today's big match, factor convergence picks & all predictions", icon: "bar-chart" },
       { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings", description: `${MLB_DIVISION_COUNT} division standings`, icon: "award" },
       { href: "/mlb/team", label: "팀", enLabel: "Teams", description: `${MLB_TEAM_COUNT}팀 시즌 stat`, enDescription: `${MLB_TEAM_COUNT}-team season stats`, icon: "shield" },
       { href: "/mlb/accuracy", label: "적중 기록", enLabel: "Accuracy Track Record", description: "AI 예측 성과 트래킹", enDescription: "AI prediction performance tracking", icon: "target" },

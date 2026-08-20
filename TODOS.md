@@ -1,4 +1,21 @@
 
+## 🟢 explore-idea (heavy) — `/mlb/analysis` 종합 hub MVP ship, plan #28 Phase 1 (cycle 2315, 2026-08-20)
+
+진단: cycle 2314 spec-only plan #28(Tier 3, Phase 1~4 분리) 자연 carry-over. approved plan 조건 미충족(plan #28 status=`spec_only_cycle_2314` custom string, 리터럴 `approved` 아님)이라 unprocessed-plan 자동 lookup 발화 X — TODOS 명시 후보로 메인 자율 선택. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달.
+
+Phase 1 MVP(빅매치/팩터 수렴 픽/오늘 전체 예측 3섹션) 구현: `apps/moneyball/src/app/mlb/analysis/page.tsx` 신규. `predictions` 테이블이 팩터 breakdown 컬럼(home_sp_fip/away_sp_fip/.../home_war_total)을 직접 보유 확인(convergenceRecord.ts 기존 쿼리 패턴 재사용) — 별도 factor 테이블 조인 불필요, 예상보다 단일 cycle 완결 가능 판단.
+
+- `computeMlbCompositeDuel`(plan #24 Phase 3c 기존 인프라) 그대로 재사용, 신규 duel 로직 작성 X.
+- mlb/games/[date]/page.tsx 의 2-step 쿼리 패턴(predictions → mlb_schedule join, cycle 1168 silent drift fix 정합) 동일 재사용.
+- "오늘의 빅매치" = KBO selectBigMatch(rivalry/elo-closeness 휴리스틱) 미사용 결정 — MLB elo/recent_form 전량 null(미구현 4팩터)이라 그대로 쓰면 전 경기 동점 계산이 돼 무의미. wave-624 KBO "최고 자신감 픽" 패턴(confidence 기준)으로 대체. MVP 스코프 결정으로 plan #28 body 에 명시.
+- 팩터 수렴 픽 = `MLB_FACTOR_PICK_STRONG(5)`/`COMPLETE(6)` 2-tier 게이팅(강수렴/완전수렴), `FACTOR_PICK_TOP_GAMES` 공유 상수 재사용(league-neutral count).
+- 헤더 메가메뉴("경기·팀" 섹션) + 푸터 MLB 컬럼 + `sitemap.ts`("/mlb" 바로 뒤, priority 0.85) + `/search` STATIC_PAGES 즉시 배선(cycle 2153/2261/2262 family 재발 차단 — 풀스위트 실행 중 `silent-drift-cycle-2261/2262` 가드 테스트가 search 배선 누락을 즉시 잡아냄, 수정 후 재통과).
+- 신규 grep 기반 smoke test 8건(`plan28-phase1-mlb-analysis-hub.test.ts`) 추가.
+
+검증: `tsc --noEmit` 클린 / `eslint` 클린 / 전체 vitest 491 파일 4132 테스트 all green(신규 8건 포함, 회귀 0건).
+
+결론: Phase 1 MVP 코드 ship 완료, plan #28 status → `phase1_mvp_shipped_cycle_2315`. **범위 밖(scope, 후속 cycle)**: EN 변형(en/mlb/analysis, phased 관례 후속), Phase 2(이번 주 경기 + TeamStrengthGrid MLB 버전, `buildTeamStrengthSnapshot` mlb_schedule 모델 재작성 필요), Phase 3(어제 결과 + 주간/월간 리뷰 요약 임베드), Phase 4(시즌 성과 + 적중 기록 요약 카드).
+
 ## 🟡 explore-idea (lite) — MLB "AI 분석 센터" hub gap plan #28 spec-only (cycle 2314, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21(plan #24/#27 모두 closed). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 4/30, lotto 20/30). explore-idea saturation trigger 정확 충족(직전 15사이클 중 review-code+fix-incident+polish-ui+info-arch=12/15) + 직전 3사이클(2311/2312/2313) 연속 retro-only(review-code×2+polish-ui×1) — 다양성 확보 필요, 자체 retro 모두 "신규 target 소진 조짐" 명시.
