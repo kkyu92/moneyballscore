@@ -19,6 +19,7 @@ const BADGES_SRC = readFileSync(
   "utf8",
 );
 const SITEMAP_SRC = readFileSync(resolve(__dirname, "../../../sitemap.ts"), "utf8");
+const REVIEWS_DATA_SRC = readFileSync(resolve(__dirname, "../reviews-data.ts"), "utf8");
 const HEADER_SRC = readFileSync(
   resolve(__dirname, "../../../../components/layout/Header.tsx"),
   "utf8",
@@ -29,14 +30,15 @@ const FOOTER_SRC = readFileSync(
 );
 
 describe("mlb/reviews/page.tsx — KBO /reviews 수렴 픽 분석 parity (Phase 1)", () => {
-  it("강수렴/완전수렴 record·streak·team stats·home-away·day-of-week 12개 병렬 조회", () => {
-    expect(PAGE_SRC).toMatch(/getMlbRecentConvergencePickRecord\(MLB_FACTOR_PICK_STRONG\)/);
-    expect(PAGE_SRC).toMatch(/getMlbRecentConvergencePickRecord\(MLB_FACTOR_PICK_COMPLETE\)/);
-    expect(PAGE_SRC).toMatch(/getMlbConvergencePickStreak\(MLB_FACTOR_PICK_STRONG\)/);
-    expect(PAGE_SRC).toMatch(/getMlbConvergencePickBestStreak\(MLB_FACTOR_PICK_STRONG\)/);
-    expect(PAGE_SRC).toMatch(/getMlbConvergencePickTeamStats\(MLB_FACTOR_PICK_STRONG\)/);
-    expect(PAGE_SRC).toMatch(/getMlbConvergencePickHomeAwaySplit\(MLB_FACTOR_PICK_STRONG\)/);
-    expect(PAGE_SRC).toMatch(/getMlbConvergencePickDayOfWeekSplit\(MLB_FACTOR_PICK_STRONG\)/);
+  it("강수렴/완전수렴 record·streak·team stats·home-away·day-of-week 12개 병렬 조회 (wave-659: reviews-data.ts 로 이동, ko/en 재사용)", () => {
+    expect(PAGE_SRC).toContain("getMlbReviewsData");
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbRecentConvergencePickRecord\(MLB_FACTOR_PICK_STRONG\)/);
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbRecentConvergencePickRecord\(MLB_FACTOR_PICK_COMPLETE\)/);
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbConvergencePickStreak\(MLB_FACTOR_PICK_STRONG\)/);
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbConvergencePickBestStreak\(MLB_FACTOR_PICK_STRONG\)/);
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbConvergencePickTeamStats\(MLB_FACTOR_PICK_STRONG\)/);
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbConvergencePickHomeAwaySplit\(MLB_FACTOR_PICK_STRONG\)/);
+    expect(REVIEWS_DATA_SRC).toMatch(/getMlbConvergencePickDayOfWeekSplit\(MLB_FACTOR_PICK_STRONG\)/);
   });
 
   it("ConvergenceTeamStatsBadges 에 mlbShortTeamName nameResolver 전달 (KBO shortTeamName 결합 회피)", () => {
@@ -48,9 +50,9 @@ describe("mlb/reviews/page.tsx — KBO /reviews 수렴 픽 분석 parity (Phase 
     expect(PAGE_SRC).toMatch(/export const revalidate = 1800\b/);
   });
 
-  it("canonical /mlb/reviews (en mirror 없음 — Phase 1 KO only)", () => {
+  it("canonical /mlb/reviews + en hreflang (wave-659: en/mlb/reviews 미러 신규)", () => {
     expect(PAGE_SRC).toMatch(/SITE_URL\}\/mlb\/reviews`;/);
-    expect(PAGE_SRC).not.toMatch(/languages:/);
+    expect(PAGE_SRC).toMatch(/languages: \{ en: `\$\{SITE_URL\}\/en\/mlb\/reviews` \}/);
   });
 });
 

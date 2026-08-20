@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { deriveMlbOutcome } from "@/lib/mlb/deriveMlbOutcome";
-import { FACTOR_LABELS } from "@/lib/predictions/factorLabels";
+import { FACTOR_LABELS, FACTOR_LABELS_EN } from "@/lib/predictions/factorLabels";
 import { pearsonCorrelation } from "@/lib/stats/pearson";
 import {
   FACTOR_CORR_NEGATIVE_MAX,
@@ -320,9 +320,10 @@ export interface MlbMissReportItem {
 // factorErrors 컬럼 전량 미생성, postview-daily.ts 는 KBO 전용) 사후 서술 대신 어떤
 // 팩터가 (틀린) 예측 방향을 가장 강하게 뒷받침했는지 정량 계산으로 대체.
 export async function buildMlbMissReport(
-  options: { limit?: number } = {},
+  options: { limit?: number; locale?: "ko" | "en" } = {},
 ): Promise<MlbMissReportItem[]> {
   const limit = options.limit ?? MISS_REPORT_LIMIT;
+  const labels = options.locale === "en" ? FACTOR_LABELS_EN : FACTOR_LABELS;
   const supabase = await createClient();
 
   const scheduleResult = (await supabase
@@ -386,7 +387,7 @@ export async function buildMlbMissReport(
       const homeAdvantage = LOWER_IS_BETTER.has(key) ? -rawDiff : rawDiff;
       const supportMagnitude = predictedHomeWin ? homeAdvantage : -homeAdvantage;
       if (supportMagnitude <= 0) continue;
-      factorSupports.push({ factor: key, label: FACTOR_LABELS[key] ?? key, supportMagnitude });
+      factorSupports.push({ factor: key, label: labels[key] ?? key, supportMagnitude });
     }
     factorSupports.sort((a, b) => b.supportMagnitude - a.supportMagnitude);
 

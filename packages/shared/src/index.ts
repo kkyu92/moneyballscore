@@ -3301,6 +3301,13 @@ export const CONVERGENCE_DAY_OF_WEEK_MIN_PICKS = 3;
 export const WEEKDAY_LABELS_KO = ['일', '월', '화', '수', '목', '금', '토'] as const;
 
 /**
+ * 영문 요일 라벨 (0=Sun ~ 6=Sat, WEEKDAY_LABELS_KO 와 동일 순서 — JS Date.getDay() 인덱스 대응).
+ * en/mlb/reviews 요일별 수렴 픽 배지 (wave-659, cycle 2339) — WEEKDAY_LABELS_EN_MON_FIRST 는
+ * 월요일 시작이라 순서가 달라 이 인덱스 순서엔 재사용 불가, 신규 배열 필요.
+ */
+export const WEEKDAY_LABELS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+/**
  * 한글 요일 라벨 (월요일 시작 — 캘린더 그리드 / 히트맵 열 순서용, WEEKDAY_LABELS_KO 와 별개 순서).
  * review-code(heavy) cycle 1987: calendar/page.tsx / ScoringRuleDayHeatmap.tsx 2곳 독립 중복 정의 통합 —
  * cycle 1980 WEEKDAY_LABELS_KO 통합과 동일 family, 순서만 다름(월요일 시작).

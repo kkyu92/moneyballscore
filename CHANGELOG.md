@@ -1,3 +1,32 @@
+## v0.5.62.69 — 2026-08-20 (cycle 2339, explore-idea (heavy): en/mlb/reviews 영어 미러 신규)
+
+### feat(mlb): `/en/mlb/reviews` + `/en/mlb/reviews/misses` — `/mlb/reviews` 영어 미러 신규 배선
+
+- `/mlb/reviews`(수렴 픽 분석 허브) + `/mlb/reviews/misses`(빗나간 예측 회고) 는
+  cycle 2226/2227 에 Header/Footer `withLocale()` 블랭킷 치환 예외로 처리돼 EN
+  페이지에서 nav 클릭 시 KO 페이지로 이탈하던 의도적 scope 축소 상태였음(plan #26
+  Phase 1/2, weekly/monthly 서브페이지는 여전히 EN 미러 부재). cycle 2338 EN
+  analysis 미러 완성 후 다음 구조적 gap으로 carry-over — 실제 페이지 신규 배선.
+- `getMlbReviewsData`(reviews-data.ts 신규)로 12개 병렬 조회 로직을
+  `mlb/reviews/page.tsx` 에서 추출 — ko/en 양쪽 재사용(analysis-data.ts wave-658
+  동일 DRY 패턴).
+- `ConvergenceStreakBadges`/`ConvergenceTeamStatsBadges`/`ConvergenceHomeAwayBadges`/
+  `ConvergenceDayOfWeekBadges`/`MissesSortControl` 5개 공유 컴포넌트에 `locale`
+  prop 추가(기본값 `'ko'` — 기존 KBO/MLB callsite 시그니처 변경 없음). `WEEKDAY_LABELS_EN`
+  (packages/shared) 신규 — 기존 `WEEKDAY_LABELS_EN_MON_FIRST`(월요일 시작)와 순서가
+  달라 별도 배열 필요.
+- `FACTOR_LABELS_EN`(factorLabels.ts) 신규 10종 — `buildMlbMissReport({ locale })`
+  파라미터로 팩터 레이블 EN/KO 분기(mlb-shared.ts).
+- Header/Footer `withLocale()`/`withMlbLocale()` 예외 범위 축소 — `/mlb/reviews`,
+  `/mlb/reviews/misses` 는 예외 해제(정상 `/en` 치환), `/mlb/reviews/weekly`,
+  `/mlb/reviews/monthly` 는 EN 미러 여전히 부재라 예외 유지.
+- `sitemap.ts` + ko 페이지(index/misses) `alternates.languages` hreflang 양방향
+  배선. 신규 guard test `wave-659-en-mlb-reviews-mirror.test.ts`(en 내부 링크 전부
+  `/en/mlb/*` prefix + withLocale 예외 범위 검증) + 기존 4개 테스트 파일 갱신
+  (mlb-reviews-page/wave-602/Header/Footer — en 미러 부재 가정 stale assertion 정정).
+- `tsc --noEmit`(4패키지 clean) + `eslint`(clean) + `pnpm test`(498 files /
+  4180 tests all green, 신규 8건 포함) 확인.
+
 ## v0.5.62.68 — 2026-08-20 (cycle 2338, explore-idea (heavy): en/mlb/analysis 영어 미러 신규 — 헤더 nav 404 live 버그 해소)
 
 ### feat(mlb): `/en/mlb/analysis` — `/mlb/analysis` 영어 미러 신규 배선

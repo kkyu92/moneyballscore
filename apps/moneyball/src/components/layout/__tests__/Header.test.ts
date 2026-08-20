@@ -21,20 +21,20 @@ describe("localizeNavItems", () => {
     expect(collectHrefs(result).every((h) => !h.startsWith("/en"))).toBe(true);
   });
 
-  it("EN pathname(/en/mlb/*) → /mlb/reviews(하위 포함) 제외 모든 /mlb href 가 /en 접두로 치환", () => {
+  it("EN pathname(/en/mlb/*) → /mlb/reviews/weekly, /mlb/reviews/monthly 제외 모든 /mlb href 가 /en 접두로 치환 (wave-659: reviews/misses 미러 신규)", () => {
     const result = localizeNavItems(LEAGUE_NAVS.mlb, "/en/mlb/standings");
     for (const href of collectHrefs(result)) {
-      if (href.startsWith("/mlb/reviews")) continue;
+      if (href.startsWith("/mlb/reviews/weekly") || href.startsWith("/mlb/reviews/monthly")) continue;
       expect(href.startsWith("/en/mlb") || href === "/en/mlb").toBe(true);
     }
   });
 
-  it("EN pathname → /mlb/reviews(하위 포함) 는 EN 미러 부재라 KO href 유지 (cycle 2227 발견 — blanket 치환 시 404, cycle 2280 misses 추가분도 동일 가드로 커버)", () => {
+  it("EN pathname → /mlb/reviews, /mlb/reviews/misses 는 wave-659 미러 신규로 /en 치환됨 (weekly/monthly 는 EN 미러 여전히 부재라 KO href 유지)", () => {
     const result = localizeNavItems(LEAGUE_NAVS.mlb, "/en/mlb/standings");
-    expect(collectHrefs(result)).toContain("/mlb/reviews");
-    expect(collectHrefs(result)).toContain("/mlb/reviews/misses");
-    expect(collectHrefs(result)).not.toContain("/en/mlb/reviews");
-    expect(collectHrefs(result)).not.toContain("/en/mlb/reviews/misses");
+    expect(collectHrefs(result)).toContain("/en/mlb/reviews");
+    expect(collectHrefs(result)).toContain("/en/mlb/reviews/misses");
+    expect(collectHrefs(result)).not.toContain("/mlb/reviews");
+    expect(collectHrefs(result)).not.toContain("/mlb/reviews/misses");
   });
 
   it("EN pathname=/en/mlb (정확 일치) 도 치환", () => {

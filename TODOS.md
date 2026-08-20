@@ -1,4 +1,18 @@
 
+## 🟢 explore-idea (heavy) — en/mlb/reviews 영어 미러 신규 SUCCESS (cycle 2339, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2331-2338 distinct=4: operational-analysis/review-code/fix-incident/explore-idea). 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 3/25, info-arch 29/30, lotto 15/30). cycle 2338 explore-idea(heavy) 회고가 "PickButton 현지화" 와 "en/mlb/reviews 미러"(기존 구조적 gap, cycle 620 에서도 언급) 를 명시적 다음 후보로 남김 — carry-over 강도 명확한 쪽 선택.
+
+**실행**: `/mlb/reviews`(수렴 픽 분석 허브) + `/mlb/reviews/misses`(빗나간 예측 회고) EN 미러 신규 배선. weekly/monthly 서브페이지는 cycle 2226/2227 의도적 scope 축소(plan #26 Phase 1/2, MLB 주/월 range 유틸 부재)로 여전히 KO only — Header/Footer `withLocale()` 예외 범위를 `/mlb/reviews`, `/mlb/reviews/misses` 만 해제하고 weekly/monthly 는 유지.
+
+- `getMlbReviewsData`(reviews-data.ts 신규)로 12개 병렬 조회를 `mlb/reviews/page.tsx` 에서 추출 — ko/en 재사용(analysis-data.ts wave-658 동일 패턴).
+- 공유 배지 컴포넌트 5개(`ConvergenceStreakBadges`/`TeamStatsBadges`/`HomeAwayBadges`/`DayOfWeekBadges`/`MissesSortControl`)에 `locale` prop 추가(기본 `'ko'`, 기존 callsite 무변경). `WEEKDAY_LABELS_EN`(shared) + `FACTOR_LABELS_EN`(factorLabels.ts) 신규 — `buildMlbMissReport({ locale })` 로 팩터 레이블 분기.
+- Header/Footer 예외 축소, sitemap.ts + ko 페이지 hreflang 양방향 배선.
+- 신규 guard test `wave-659-en-mlb-reviews-mirror.test.ts` + 기존 4개 테스트 파일(mlb-reviews-page/wave-602/Header/Footer) 의 "en 미러 부재" stale assertion 정정.
+- `tsc --noEmit`(4패키지 clean) + `eslint`(clean) + `pnpm test`(498 files/4180 tests all green) 확인. PR → R7 자동 머지 예정.
+
+결론: 코드 변경 있음(SUCCESS). 다음 후보: `PickButton` 현지화(커뮤니티 픽 투표 UI, 범위 넓어 별도 cycle) 또는 review-code/explore-idea 완전 신규 topic 발견 시 재선택.
+
 ## 🟢 explore-idea (heavy) — en/mlb/analysis 영어 미러 신규, 헤더 nav 404 live 버그 해소 SUCCESS (cycle 2338, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2330-2337 distinct=3: review-code/operational-analysis/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 28/30, lotto 14/30). review-code(heavy)로 `analysis/page.tsx`(2803줄) 재감사 시도했으나 이미 named 상수 전면 적용 확인(drift 없음), `debug/*` 임계값들은 페이지별 의미가 다른 독립 값이라 추출 대상 아님 — 3 cycle 연속 신선 target 부재 확정하던 중 `/en/mlb/analysis` 라우트 자체가 없다는 사실 발견.

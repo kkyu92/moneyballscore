@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  MLB_FACTOR_PICK_STRONG,
-  MLB_FACTOR_PICK_COMPLETE,
   SITE_URL,
   mlbShortTeamName,
   REVIEWS_HUB_RECENT_WEEKS,
@@ -16,15 +14,8 @@ import { ConvergenceStreakBadges } from "@/components/reviews/ConvergenceStreakB
 import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
 import { ConvergenceHomeAwayBadges } from "@/components/reviews/ConvergenceHomeAwayBadges";
 import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayOfWeekBadges";
-import {
-  computeWinRatePct,
-  getMlbRecentConvergencePickRecord,
-  getMlbConvergencePickStreak,
-  getMlbConvergencePickBestStreak,
-  getMlbConvergencePickTeamStats,
-  getMlbConvergencePickHomeAwaySplit,
-  getMlbConvergencePickDayOfWeekSplit,
-} from "@/lib/analysis/convergenceRecord";
+import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
+import { getMlbReviewsData } from "./reviews-data";
 
 // KBO /reviews 의 MLB 대응 (cycle 2226, Feature-Drift Cycle 후속) — MLB_NAV "경기·팀"
 // 그룹에 예측 기록(/mlb/predictions)은 있었지만 수렴 픽 분석(팀별/홈-어웨이/요일별/스트리크)이
@@ -37,7 +28,7 @@ export const metadata: Metadata = {
   title: "MLB 예측 결과 리뷰",
   description:
     "MLB 승부예측 수렴 픽 성적 리뷰 — 강수렴·완전수렴 픽 전체 성적, 스트리크, 팀별·홈/어웨이·요일별 분해.",
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { en: `${SITE_URL}/en/mlb/reviews` } },
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -61,7 +52,7 @@ export default async function MlbReviewsPage() {
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
   const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
 
-  const [
+  const {
     strongConvergenceRecord,
     completeConvergenceRecord,
     strongConvergenceStreak,
@@ -74,22 +65,8 @@ export default async function MlbReviewsPage() {
     completeHomeAwaySplit,
     strongDayOfWeekSplit,
     completeDayOfWeekSplit,
-  ] = await Promise.all([
-    getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG),
-    getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_COMPLETE),
-    getMlbConvergencePickStreak(MLB_FACTOR_PICK_STRONG),
-    getMlbConvergencePickBestStreak(MLB_FACTOR_PICK_STRONG),
-    getMlbConvergencePickStreak(MLB_FACTOR_PICK_COMPLETE),
-    getMlbConvergencePickBestStreak(MLB_FACTOR_PICK_COMPLETE),
-    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG),
-    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE),
-    getMlbConvergencePickHomeAwaySplit(MLB_FACTOR_PICK_STRONG),
-    getMlbConvergencePickHomeAwaySplit(MLB_FACTOR_PICK_COMPLETE),
-    getMlbConvergencePickDayOfWeekSplit(MLB_FACTOR_PICK_STRONG),
-    getMlbConvergencePickDayOfWeekSplit(MLB_FACTOR_PICK_COMPLETE),
-  ]);
-
-  const hasAnyData = strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0;
+    hasAnyData,
+  } = await getMlbReviewsData();
 
   const jsonLd = {
     "@context": "https://schema.org",
