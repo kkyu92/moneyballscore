@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — EN 미러 신규 코드(wave-659) drift 감사 clean RETRO-ONLY (cycle 2341, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2333-2340 distinct=5). 주기 trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 1/30 방금 발화, lotto 17/30). cycle 2338/2339 explore-idea(heavy) 2연속 성공 직후 → Feature-Drift Cycle 패턴(explore-idea→review-code 자연 교대) 적용, 방금 배선된 en/mlb/reviews 미러(wave-659) 를 audit target 으로 선택.
+
+**감사 범위**: `reviews-data.ts`(ko/en 공유 fetch 함수) / `en/mlb/reviews/page.tsx` vs `mlb/reviews/page.tsx` 1:1 대조(weekly/monthly 카드 의도적 scope 축소 확인) / `en/mlb/reviews/misses/page.tsx` vs `mlb/reviews/misses/page.tsx` 1:1 대조 / `factorLabels.ts` FACTOR_LABELS ↔ FACTOR_LABELS_EN 10키 매칭 확인 / `WEEKDAY_LABELS_EN` vs `WEEKDAY_LABELS_EN_MON_FIRST` 혼용 없음 확인 / 5개 배지 컴포넌트(`ConvergenceStreakBadges`/`TeamStatsBadges`/`HomeAwayBadges`/`DayOfWeekBadges`/`MissesSortControl`) locale prop 기본값 `'ko'` 하위호환 확인 / `buildMlbMissReport({ locale })` 분기 로직 확인.
+
+검증: `tsc --noEmit`(moneyball 패키지) clean, `wave-658`/`wave-659` guard test 2 files/16 tests all green.
+
+결론: 신규 drift 0건 — cycle 2338/2339 explore-idea(heavy) 자체가 이미 locale 스레딩을 꼼꼼히 마감(기본값 보존, 키 매칭, breadcrumb/hreflang 양방향)해 이번 감사 창에서 신선 발견 없음. 코드 변경 없음(RETRO-ONLY). 다음 review-code 발화는 새 monolith 성장 또는 다른 영역 grep 시 자연 재도달.
+
 ## ⚪ info-architecture-review (lite) — 30-cycle gap 자연 도달, IA 감사 clean RETRO-ONLY (cycle 2340, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2332-2339 distinct=4). 마지막 info-arch 발화 cycle 2310 → gap=30 (trigger 자동 도달, cycle 300 룰). 나머지 주기 trigger 미도달(fix-incident 7/20, op-analysis 4/25, lotto 16/30).
