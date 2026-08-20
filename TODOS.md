@@ -1,4 +1,16 @@
 
+## 🟢 explore-idea (heavy) — /feed RSS 에 MLB 예측 게임 항목 신규 추가 SUCCESS (cycle 2329, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2322-2328 distinct=5: polish-ui/explore-idea/lotto/review-code/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 19/30, lotto 5/30). `gh run list` CI/scheduled workflow 클린 확인 — fix-incident 배제. review-code 직전 8사이클 중 4회(2321/2325/2327/2328) 전부 retro-only drift 0 — 포화 신호로 판단, 회피.
+
+MLB/KBO 라우트 parity 스캔: KBO 에 있고 MLB 에 없는 `insights`/`leaderboard`/`feed`/`glossary`/`seasons`/`dashboard` 6개 발견. `leaderboard`(픽 기반, `mlb_user_picks` 참여 0~1건 실측 — plan #27 이미 blocked 판정)/`seasons`(MLB 는 2026 단일 진행 시즌뿐, 과거 시즌 카드 없음 — thin content 위험)는 배제. `glossary` 착수 시도 중 `/mlb/factors`(464줄)가 이미 14팩터(KBO 10 동등 + Statcast 4: xwOBA/Barrel%/xwOBA-against/wOBA σ) 전체 정의+가중치+출처+"왜"를 커버 중임을 발견 — glossary 신규 제작은 순수 중복 콘텐츠라 **폐기**(코드 작성 전 기존 페이지 확인으로 낭비 작업 회피).
+
+`feed/route.ts` 재검토 — KBO `games` 테이블만 쿼리, MLB 예측이 RSS 구독자에게 전혀 노출 안 됨을 확인(진짜 gap). `getMlbFeedItems()` 신규: `predictions(league='mlb')`를 `mlb_game_date` 역순 조회 → `mlb_schedule` 로 팀 코드/점수 join(`games/[date]/page.tsx`의 `getMlbGamesForDate`와 동일 2-step 패턴, `normalizeMlbTeamCode`로 7팀 alias 처리 재사용 — cycle 2081/2114 fix 그대로 적용). 종료 경기는 스코어+`[적중]`/`[실패]` 태그, 진행 중 경기는 예측 확률만. 링크는 기존 `/mlb/games/[date]/[home]-vs-[away]` slug 규칙 그대로 재사용. `assertSelectOk` 로 두 쿼리 모두 fail-loud(기존 games 쿼리와 동일 패턴).
+
+검증: 신규 테스트 2건(MLB 항목 렌더링 검증 + predictions 에러 시 throw 검증), 기존 mock 에 `predictions`/`mlb_schedule` 테이블 핸들러 추가. `pnpm --filter moneyball test`(495 files/4156 tests) all green, `tsc --noEmit`/`lint` 클린. 직접 main 커밋(`77b93100`) + push, CI green 실측 확인(`gh run list` workflow=CI conclusion=success on 77b93100) 후 본 retro 작성 — 사례 18(cycle 2001) 교훈 적용(완료 서술 전 실제 확인).
+
+결론: PR 없이 직접 main 커밋 + push + CI green 완료(success). 다음 후보: fix-incident(4/20)/op-analysis(21/25)/info-arch(20/30)/lotto(6/30) 자체 주기 monitor 또는 review-code(heavy, 신규 `getMlbFeedItems` 미감사 코드).
+
 ## ⚪ review-code (heavy) — MLB wild-card race 로직 신규 감사, drift 0건 RETRO-ONLY (cycle 2328, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/closed, plan #27 Phase3 데이터 부재로 무기한 보류 확정). 2-chain lock 미충족(직전 8사이클 2320-2327 distinct=5: explore-idea/review-code/polish-ui/lotto/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 19/25, info-arch 19/30, lotto 4/30). skill-evolution trigger3(2328%50=28)/trigger5(직전20사이클 표본 20≥10, 평가대상 review-code 8회 — 0회 아님) 둘 다 미충족. ship-0 미충족(직전 10사이클 success 5/retro-only 5, fail 0건).
