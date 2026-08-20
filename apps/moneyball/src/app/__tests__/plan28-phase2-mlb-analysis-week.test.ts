@@ -4,12 +4,11 @@ import path from 'path';
 import { MLB_ANALYSIS_UPCOMING_LIMIT } from '@moneyball/shared';
 
 // plan #28 Phase 2 (cycle 2316, explore-idea heavy) — "이번 주 남은 경기" 섹션만 착수.
-// TeamStrengthGrid MLB 버전은 이번 cycle 스코프 밖(블로커: MLB recent_form 데이터 소스
+// TeamStrengthGrid MLB 버전은 당시 스코프 밖(블로커: MLB recent_form 데이터 소스
 // 자체 부재 — predictions.home_recent_form/away_recent_form 전량 null, mlb-pipeline.ts
-// 가 저장 안 함. buildTeamStrengthSnapshot 처럼 predictions 팩터 컬럼 재사용 불가 —
-// FormBar 렌더가 요구하는 실데이터가 없어 curl 실측 검증 결과 그대로 포팅 시 전 팀
-// 0%/동일값 렌더되는 무의미한 그리드가 됨. 대체 데이터 소스(mlb_schedule 실제 경기
-// 결과 기반 win rate) 설계는 plan #28 body 후속 후보로 별도 박제 필요).
+// 가 저장 안 함). cycle 2323(explore-idea heavy) 가 대체 데이터 소스(mlb_schedule 실제
+// 완료 경기 기준 win rate, buildMlbTeamStrengthSnapshot.ts)로 후속 구현 완료 —
+// MlbTeamStrengthGrid 로 배선(plan28-phase-team-strength 테스트 참조).
 
 const page = readFileSync(
   path.resolve(__dirname, '../mlb/analysis/page.tsx'),
@@ -49,7 +48,4 @@ describe('plan #28 Phase 2 — /mlb/analysis 이번 주 남은 경기 섹션', (
     expect(page).toContain('weekRemainingByDate');
   });
 
-  it('TeamStrengthGrid MLB 버전 미포함 (recent_form 데이터 소스 부재 블로커, 이번 cycle 스코프 밖)', () => {
-    expect(page).not.toContain('TeamStrengthGrid');
-  });
 });
