@@ -1,4 +1,16 @@
 
+## ⚪ fix-incident — wild-card 라이브 전환 후 stale ETA 문구 잔존 + version 3-way drift 정정 SUCCESS (cycle 2306, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달(fix-incident 8-gap/20, op-analysis 21-gap/25, lotto 12-gap/30, info-arch 26-gap/30). 2-chain lock 미충족(직전 8사이클 distinct=4).
+
+review-code 관점으로 cycle 2305 가 shipped 한 `/mlb/wild-card` 주변을 grep(`ETA 2026-08`) 하다 6개 sibling 파일에 stale 문구 발견: hub 카드(mlb/page.tsx, en/mlb/page.tsx — amber "준비중" 스타일 그대로), OG/twitter 이미지(mlb+en wild-card, "Live ETA 2026-08"), postseason cross-link(mlb+en, "ETA 2026-08"). 기능은 실시간 전환됐지만 그 기능을 가리키는 다른 위치 문구가 안 갱신된 패턴 — shipped-feature cross-reference staleness, silent drift family 신규 하위 유형.
+
+같은 조사 중 root `package.json` version(0.5.62.64)이 VERSION/apps/moneyball/package.json(0.5.62.65) 대비 1건 밀려있어 `version-sync-guard.test.ts`(cycle 2047 신규) 가 FAIL 하던 것도 발견 — 0.5.62.65 로 동기.
+
+수정: hub 카드 2개 → 일반 카드 스타일(white/brand) + "박제 완료"/"Complete" 문구, OG/twitter 4개 → "Live" (ETA 제거), postseason cross-link 2개 → "박제 완료"/"Complete", root package.json version 동기. 490 files/4124 tests all pass(fix 전 1 fail), type-check/lint clean. PR #3009 실측 머지 확인(`gh pr view 3009 --json state,mergedAt` → MERGED, mergeCommit `6f737c37`).
+
+다음 후보: `/mlb/postseason` 자체는 아직 ETA 2026-09 유지(division+wildcard 완료 후 다음 자연 IA 갭). 다음 review-code 사이클에서 cycle 2296 division 매직넘버 등 다른 최근 shipped 기능도 동일 cross-reference staleness 패턴 재확인 여지.
+
 ## ⚪ explore-idea (heavy) — /mlb/wild-card 라이브 Wild Card race 데이터 통합 SUCCESS (cycle 2305, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(21건 전부 completed/archived/blocked/superseded/pending user step). 주기 trigger 3종 미도달(fix-incident 6-gap/20, op-analysis 19-gap/25, lotto 10-gap/30, info-arch 24-gap/30). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/fix-incident/skill-evolution). h2h family(computeCompositeDuel 전체 call site: analysis-data.ts/page.tsx/game/[id]/page.tsx/convergenceRecord.ts) grep 재확인 — 4곳 모두 cycle 2303/2304 fix 로 이미 정합, MLB computeMlbCompositeDuel 의 h2h 미보유는 설계 의도(mlb-pipeline.ts 미저장) 확인돼 review-code 추가 발견 0건.
