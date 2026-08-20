@@ -17,6 +17,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PickButton } from "@/components/picks/PickButton";
 import { createClient } from "@/lib/supabase/server";
 import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
+import { getMlbThisWeekRemainingGames, groupMlbGamesByDate } from "./analysis-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -131,7 +132,11 @@ async function getTodayMlbAnalysisRows(
 export default async function MlbAnalysisPage() {
   const today = new Date().toISOString().slice(0, 10);
   const supabase = await createClient();
-  const rows = await getTodayMlbAnalysisRows(supabase, today);
+  const [rows, weekRemainingGames] = await Promise.all([
+    getTodayMlbAnalysisRows(supabase, today),
+    getMlbThisWeekRemainingGames(today),
+  ]);
+  const weekRemainingByDate = groupMlbGamesByDate(weekRemainingGames);
 
   // wave-624 KBO 대응 — 최고 자신감 픽 = 오늘의 빅매치 (MLB 는 elo/recent_form 미구현이라
   // KBO selectBigMatch(rivalry/elo-closeness 휴리스틱)를 그대로 쓰면 데이터 부족으로
@@ -270,6 +275,60 @@ export default async function MlbAnalysisPage() {
             </ul>
           </section>
         </>
+      )}
+
+      {weekRemainingByDate.size > 0 && (
+        <section>
+          <h2 className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
+            📆 이번 주 남은 경기 ({weekRemainingGames.length}경기)
+          </h2>
+          <div className="space-y-4">
+            {Array.from(weekRemainingByDate.entries()).map(([date, games]) => (
+              <div key={date}>
+                <p className="text-xs font-medium text-brand-500 mb-1.5">{date}</p>
+                <ul className="space-y-2">
+                  {games.map((g) => {
+                    const isComplete =
+                      g.duelNetScore !== null && Math.abs(g.duelNetScore) >= MLB_FACTOR_PICK_COMPLETE;
+                    const isStrong =
+                      g.duelNetScore !== null && Math.abs(g.duelNetScore) >= MLB_FACTOR_PICK_STRONG;
+                    const favoredCode =
+                      g.duelNetScore !== null && g.duelNetScore > 0 ? g.homeCode : g.awayCode;
+                    return (
+                      <li
+                        key={g.external_game_id}
+                        className={`rounded-lg border p-3 ${
+                          isComplete
+                            ? 'border-amber-400 dark:border-amber-600 bg-amber-50/50 dark:bg-amber-900/10'
+                            : 'border-brand-200 dark:border-brand-800'
+                        }`}
+                      >
+                        <Link
+                          href={`/mlb/games/${date}/${g.homeCode}-vs-${g.awayCode}`}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="font-semibold">
+                            {g.homeCode} vs {g.awayCode}
+                          </span>
+                          <span className="text-sm text-brand-600 dark:text-brand-300">
+                            {isStrong ? (
+                              <span
+                                className={`text-xs font-medium mr-1.5 ${isComplete ? 'text-amber-600 dark:text-amber-400' : 'text-brand-500'}`}
+                              >
+                                {isComplete ? '완전수렴' : '강수렴'} · {favoredCode}
+                              </span>
+                            ) : null}
+                            {g.winnerCode} {g.conf}%
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
     </main>
   );

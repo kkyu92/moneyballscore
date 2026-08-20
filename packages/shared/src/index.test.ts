@@ -125,6 +125,7 @@ import {
   LLM_MAX_TOKENS_TEAM,
   LLM_MAX_TOKENS_CALIBRATION,
   ANALYSIS_UPCOMING_LIMIT,
+  MLB_ANALYSIS_UPCOMING_LIMIT,
   FACTOR_PICK_MIN_FACTORS,
   FACTOR_PICK_TOP_GAMES,
   FACTOR_PICK_STRONG,
@@ -720,6 +721,12 @@ describe('winnerProbOf', () => {
 describe('ANALYSIS_UPCOMING_LIMIT — wave-311 single source (cycle 1642)', () => {
   it('ANALYSIS_UPCOMING_LIMIT = 30 (KBO 하루 5경기 × 6일)', () => {
     expect(ANALYSIS_UPCOMING_LIMIT).toBe(30);
+  });
+});
+
+describe('MLB_ANALYSIS_UPCOMING_LIMIT — plan #28 Phase 2 (cycle 2316)', () => {
+  it('MLB_ANALYSIS_UPCOMING_LIMIT = 90 (MLB 하루 15경기 × 6일, ANALYSIS_UPCOMING_LIMIT 과 별개)', () => {
+    expect(MLB_ANALYSIS_UPCOMING_LIMIT).toBe(90);
   });
 });
 

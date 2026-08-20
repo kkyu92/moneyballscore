@@ -1993,6 +1993,13 @@ export const PREDICTIONS_HISTORY_LIMIT = 200;
 export const ANALYSIS_UPCOMING_LIMIT = 30;
 
 /**
+ * MLB 분석 hub 이번 주 남은 경기 쿼리 한도 — plan #28 Phase 2 (cycle 2316).
+ * ANALYSIS_UPCOMING_LIMIT(30, KBO 전용)을 MLB 에 그대로 재사용하면 하루 최대
+ * 15경기(30팀/2) × 6일 = 90 로 언더카운트 가능 — MLB 전용 상수 분리.
+ */
+export const MLB_ANALYSIS_UPCOMING_LIMIT = 90;
+
+/**
  * 팀 전력 스냅샷 쿼리 한도 — silent drift family wave 318 (cycle 1649).
  * 동일 숫자 200 hardcoded 1 surface:
  *   - lib/teams/buildTeamStrengthSnapshot.ts: predictions .limit(200)

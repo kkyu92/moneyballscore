@@ -1,4 +1,16 @@
 
+## 🟢 explore-idea (heavy) — `/mlb/analysis` 이번 주 남은 경기 섹션, plan #28 Phase 2 partial (cycle 2316, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 6/30, lotto 22/30). skill-evolution trigger5 표본 19(≥10)→review-code 10/19(0 아님)→미충족. ship-0 미충족(직전 10사이클 success 6건). plan #28 status=`phase1_mvp_shipped_cycle_2315`(literal `approved` 아니라 unprocessed-plan lookup 자동 발화 X, TODOS 명시 carry-over로 메인 자율 선택) — Phase 2("이번 주 경기 + 팀 strength grid") 착수.
+
+구현: `getMlbThisWeekRemainingGames()`(`apps/moneyball/src/app/mlb/analysis/analysis-data.ts` 신규) — KBO `getThisWeekRemainingGames()` 패턴(computeWeekRange 리그 무관 재사용) + mlb/analysis/page.tsx 기존 2-step 쿼리(predictions→mlb_schedule, cycle 2114/1168 silent drift family 재발 차단) 동일 적용. `MLB_ANALYSIS_UPCOMING_LIMIT=90`(packages/shared) 신규 — 기존 `ANALYSIS_UPCOMING_LIMIT=30`은 KBO 하루 5경기×6일 가정이라 MLB(하루 최대 15경기×6일=90) 재사용 시 언더카운트 우려로 분리. page.tsx 에 "📆 이번 주 남은 경기" 섹션 추가(날짜별 그룹, computeMlbCompositeDuel 재사용 강수렴/완전수렴 배지).
+
+**TeamStrengthGrid MLB 버전은 블로커로 보류**(risk 노트가 명시했던 curl 실측 재검증 필요 지점 실측 결과): MLB predictions.home_recent_form/away_recent_form 컬럼이 전량 null(mlb-pipeline.ts 가 recent_form 팩터를 저장 안 함, buildMlbFactorAccuracy.ts 기존 주석으로 재확인) — TeamStrengthGrid 컴포넌트의 FormBar 는 recentForm 필수 소비라 그대로 포팅 시 전 팀 무의미한 동일값 렌더. 대체 설계(mlb_schedule 실제 완료 경기 기반 win rate)는 plan #28 body 에 다음 cycle 후속 후보로 명시.
+
+검증: `tsc --noEmit` 클린 / `eslint` 클린 / 전체 vitest 492 파일 4139 테스트 all green(신규 7건 포함, 회귀 0건).
+
+결론: Phase 2 코드 ship 완료(부분 — 이번 주 남은 경기만, TeamStrengthGrid 제외), plan #28 status → `phase2_partial_shipped_cycle_2316`. 다음 후속: TeamStrengthGrid MLB 대체 설계 또는 Phase 3(어제 결과+주간/월간 리뷰 요약).
+
 ## 🟢 explore-idea (heavy) — `/mlb/analysis` 종합 hub MVP ship, plan #28 Phase 1 (cycle 2315, 2026-08-20)
 
 진단: cycle 2314 spec-only plan #28(Tier 3, Phase 1~4 분리) 자연 carry-over. approved plan 조건 미충족(plan #28 status=`spec_only_cycle_2314` custom string, 리터럴 `approved` 아님)이라 unprocessed-plan 자동 lookup 발화 X — TODOS 명시 후보로 메인 자율 선택. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달.
