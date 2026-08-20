@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
-import { SITE_URL, MLB_SCORING_RULE, HOME_ADVANTAGE_PCT } from "@moneyball/shared";
+import {
+  SITE_URL,
+  MLB_SCORING_RULE,
+  HOME_ADVANTAGE_PCT,
+  MLB_TEAM_COUNT,
+  MLB_HEAD_TO_HEAD_PAIRS,
+} from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -79,7 +85,7 @@ export default function MlbMethodologyEnPage() {
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           MLB predictions run on a <strong>pure quantitative model</strong>. Unlike KBO, which combines
           sabermetric factors with an AI judge-agent debate layer, MLB skips the LLM debate layer entirely — at
-          30 teams / 435 possible matchups the scale doesn&apos;t fit a daily per-game debate — and derives win
+          {MLB_TEAM_COUNT} teams / {MLB_HEAD_TO_HEAD_PAIRS} possible matchups the scale doesn&apos;t fit a daily per-game debate — and derives win
           probability purely from a weighted sum of {TOTAL} quantitative factors (single{" "}
           <code>scoring_rule=&apos;{MLB_SCORING_RULE}&apos;</code> version, no agent re-judging confidence day to
           day).

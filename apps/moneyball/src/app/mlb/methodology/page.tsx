@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MLB_FACTOR_COUNTS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
-import { SITE_URL, MLB_SCORING_RULE, HOME_ADVANTAGE_PCT } from "@moneyball/shared";
+import {
+  SITE_URL,
+  MLB_SCORING_RULE,
+  HOME_ADVANTAGE_PCT,
+  MLB_TEAM_COUNT,
+  MLB_HEAD_TO_HEAD_PAIRS,
+} from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -75,7 +81,7 @@ export default function MlbMethodologyPage() {
         </h2>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           MLB 예측은 <strong>순수 정량 모델</strong>입니다. KBO 예측이 세이버메트릭스 팩터 + AI 에이전트 토론(judge
-          agent) 두 layer 를 결합하는 것과 달리, MLB 는 30팀 435개 매치업의 규모 때문에 LLM 토론 layer 없이{" "}
+          agent) 두 layer 를 결합하는 것과 달리, MLB 는 {MLB_TEAM_COUNT}팀 {MLB_HEAD_TO_HEAD_PAIRS}개 매치업의 규모 때문에 LLM 토론 layer 없이{" "}
           {TOTAL}개 정량 팩터의 가중 합산만으로 승률을 산출합니다 (<code>scoring_rule=&apos;{MLB_SCORING_RULE}&apos;</code> 단일
           버전, KBO 처럼 매일 confidence 를 재판단하는 agent 개입 없음).
         </p>
