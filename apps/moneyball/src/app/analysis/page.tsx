@@ -80,7 +80,7 @@ import { ThisWeekStatusFilter } from '@/components/analysis/ThisWeekStatusFilter
 import { TeamStrengthGrid } from '@/components/analysis/TeamStrengthGrid';
 import { buildTeamStrengthSnapshot } from '@/lib/teams/buildTeamStrengthSnapshot';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
-import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromIsCorrect, computeWinRatePct, computeWinRateColorClass, computeWinProbPct, computeConvergencePickFlags, statColorClassHigherBetter, statColorClassHigherBetterStrict, statColorClassLowerBetter } from '@/lib/analysis/convergenceRecord';
+import { getRecentConvergencePickRecord, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickTeamStats, getConvergencePickHomeAwaySplit, computeUpcomingPickGameIds, computeWeeklyConvergenceRecord, computeConvergenceRecordFromScores, computeWinRatePct, computeWinRateColorClass, computeWinProbPct, computeConvergencePickFlags, statColorClassHigherBetter, statColorClassHigherBetterStrict, statColorClassLowerBetter } from '@/lib/analysis/convergenceRecord';
 import { FACTOR_LABELS, FACTOR_GLOSSARY_ANCHORS, FACTOR_LABELS_SHORT } from '@/lib/predictions/factorLabels';
 import { canonicalPair } from '@/lib/matchup/canonicalPair';
 import {
@@ -366,10 +366,11 @@ export default async function AnalysisIndexPage() {
   // wave-567: 이번 주 완전수렴 픽 성적 (wave-568: computeWeeklyConvergenceRecord 통합)
   const weeklyCompleteConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_COMPLETE);
 
-  // wave-580: computeConvergenceRecordFromIsCorrect 추출 (wave-579 인라인 reduce → 순수 함수)
-  const yesterdayCompleteConvergenceRecord = computeConvergenceRecordFromIsCorrect(yesterdayGames, FACTOR_PICK_COMPLETE);
+  // wave-580: computeConvergenceRecordFromScores 추출 (wave-579 인라인 reduce → 순수 함수)
+  // cycle 2299 fix: isCorrect(모델 자체 적중) 기반 → homeScore/awayScore 재산출 기반 (수렴 픽과 모델 예측 불일치 시 오표시 정정)
+  const yesterdayCompleteConvergenceRecord = computeConvergenceRecordFromScores(yesterdayGames, FACTOR_PICK_COMPLETE);
   // wave-615: 어제 강수렴 픽 결과 배지 — 완전수렴 wave-579 패턴 강수렴 tier 역동기 (비대칭 gap fix)
-  const yesterdayStrongConvergenceRecord = computeConvergenceRecordFromIsCorrect(yesterdayGames, FACTOR_PICK_STRONG);
+  const yesterdayStrongConvergenceRecord = computeConvergenceRecordFromScores(yesterdayGames, FACTOR_PICK_STRONG);
 
   // wave-531: 이번 주 남은 경기 팀별 수렴 우위 현황 — |convergenceNetScore| ≥ FACTOR_PICK_MIN_FACTORS 인 경기별 우세 팀 집계
   const teamConvergenceCountMap = new Map<TeamCode, number>();

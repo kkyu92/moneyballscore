@@ -760,19 +760,23 @@ export function computeConvergencePickFlags(
   };
 }
 
-// wave-580: isCorrect 사전 집계 기반 수렴 픽 결과 집계 — computeWeeklyConvergenceRecord(homeScore/awayScore) 와 구분
-// isCorrect=null 미종료 경기 제외. total 포함 반환 (어제 배지 표시 조건)
-export function computeConvergenceRecordFromIsCorrect(
-  games: Array<{ convergenceNetScore: number | null; isCorrect: boolean | null }>,
+// wave-580: 수렴 픽 결과 집계 — homeScore/awayScore 로 실제 승자 재산출 (computeWeeklyConvergenceRecord 와 동일 판정)
+// cycle 2299 fix: 과거 isCorrect(모델 자체 예측 적중 여부) 기반 집계는 수렴 픽과 모델 예측이
+// 엇갈리는 경우(modelAgrees=false) "어제 수렴 픽" 배지가 실제와 반대로 표시되는 silent 오류였음.
+// 미종료 경기(homeScore/awayScore null) 제외. total 포함 반환 (어제 배지 표시 조건)
+export function computeConvergenceRecordFromScores(
+  games: Array<{ convergenceNetScore: number | null; homeScore: number | null; awayScore: number | null }>,
   threshold: number,
 ): { wins: number; losses: number; total: number } {
   return games.reduce(
     (acc, g) => {
       if (g.convergenceNetScore === null || Math.abs(g.convergenceNetScore) < threshold) return acc;
-      if (g.isCorrect === null) return acc;
+      if (g.homeScore === null || g.awayScore === null) return acc;
+      const favoredHome = g.convergenceNetScore > 0;
+      const favWon = favoredHome ? g.homeScore > g.awayScore : g.awayScore > g.homeScore;
       return {
-        wins: acc.wins + (g.isCorrect ? 1 : 0),
-        losses: acc.losses + (g.isCorrect ? 0 : 1),
+        wins: acc.wins + (favWon ? 1 : 0),
+        losses: acc.losses + (favWon ? 0 : 1),
         total: acc.total + 1,
       };
     },
