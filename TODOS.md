@@ -1,3 +1,13 @@
+## ⚪ review-code (heavy) — PickButton 현지화(cycle 2342) drift 감사 clean RETRO-ONLY (cycle 2343, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2335-2342 distinct=4). 주기 trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 3/30, lotto 19/30). cycle 2342 explore-idea(heavy) SUCCESS(PickButton locale 배선) 직후 Feature-Drift Cycle 자연 교대 적용, 방금 배선된 코드를 audit target 으로 선택.
+
+**감사 범위**: `PickButton.tsx` STRINGS ko/en 테이블 전체 키 매칭 확인 / `en/mlb/games/[date]` + `en/mlb/analysis` 두 callsite `locale="en"` wiring 정확성 확인 / `PredictionCardLive.tsx`(locale 미threading) 가 KBO 전용 callsite(`page.tsx`, `predictions/[date]`)만 사용하는지 교차 확인 — en 미러 미노출이라 오탐 아님.
+
+검증: `tsc --noEmit`(moneyball) clean, `PickButton.test.tsx` 12/12 passed.
+
+결론: 신규 drift 0건 — cycle 2342 explore-idea(heavy) 자체가 이미 locale 스레딩을 꼼꼼히 마감해 이번 감사 창에서 신선 발견 없음. 코드 변경 없음(RETRO-ONLY). 다음 review-code 발화는 새 monolith 성장 또는 다른 영역 grep 시 자연 재도달.
+
 
 ## 🟢 explore-idea (heavy) — PickButton 현지화, en/mlb 커뮤니티 픽 배선 SUCCESS (cycle 2342, 2026-08-20)
 
