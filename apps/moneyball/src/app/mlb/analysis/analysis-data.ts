@@ -13,6 +13,92 @@ import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel'
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { fetchMlbPredictionRowsInRange } from '@/lib/reviews/mlb-shared';
 
+export interface MlbAnalysisRow {
+  external_game_id: string;
+  homeCode: MlbTeamCode;
+  awayCode: MlbTeamCode;
+  status: string;
+  homeWinProb: number;
+  winnerCode: MlbTeamCode;
+  conf: number;
+  /** wave-390 KBO 대응 — 유효 팩터 ≥ MLB_COMPOSITE_DUEL_MIN_VALID(3) 아니면 null */
+  duelNetScore: number | null;
+  duelValidCount: number;
+}
+
+// MLB 예측은 game_id=NULL(migration 038) — games 테이블과의 inner 조인은 KBO 전용이라
+// 항상 미스매치(silent 빈 목록, cycle 2114 fix-incident). predictions 를
+// mlb_game_date 로 직접 조회 후 mlb_schedule 로 팀 코드 join
+// (mlb/games/[date]/page.tsx 와 동일 2-step 패턴, silent drift family fix cycle 1168).
+// en/mlb/analysis(cycle 2338, explore-idea heavy) 와 공유 위해 mlb/analysis/page.tsx
+// 에서 이 파일로 이동(원래는 page.tsx 로컬 함수 — 중복 로직 방지, DRY).
+export async function getTodayMlbAnalysisRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  date: string,
+): Promise<MlbAnalysisRow[]> {
+  const predResult = await supabase
+    .from('predictions')
+    .select(`
+      external_game_id, home_win_prob,
+      home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+      home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+      home_war_total, away_war_total
+    `)
+    .eq('league', 'mlb')
+    .eq('prediction_type', 'pre_game')
+    .in('scoring_rule', MLB_PRODUCTION_COHORT_RULES)
+    .eq('mlb_game_date', date)
+    .order('external_game_id', { ascending: true });
+  const { data: preds } = assertSelectOk(predResult, 'MlbAnalysis predictions');
+  if (!preds || preds.length === 0) return [];
+
+  const gameIds = preds.map((p) => p.external_game_id);
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_team_code, away_team_code, status')
+    .in('external_game_id', gameIds);
+  const { data: schedules } = assertSelectOk(scheduleResult, 'MlbAnalysis schedule');
+  const scheduleByGameId = new Map((schedules ?? []).map((s) => [s.external_game_id, s]));
+
+  const rows: MlbAnalysisRow[] = [];
+  for (const p of preds) {
+    const schedule = scheduleByGameId.get(p.external_game_id);
+    const homeCode = schedule ? normalizeMlbTeamCode(schedule.home_team_code) : undefined;
+    const awayCode = schedule ? normalizeMlbTeamCode(schedule.away_team_code) : undefined;
+    if (!homeCode || !awayCode) continue;
+    const homeWinProb = p.home_win_prob ?? 0.5;
+
+    // wave-390 KBO 대응 — MLB 6팩터(elo/recent_form/head_to_head/sfr 미구현 제외) composite duel.
+    const duel = computeMlbCompositeDuel({
+      homeCode,
+      homeLineupWoba: p.home_lineup_woba,
+      awayLineupWoba: p.away_lineup_woba,
+      homeBullpenFip: p.home_bullpen_fip,
+      awayBullpenFip: p.away_bullpen_fip,
+      homeSPFip: p.home_sp_fip,
+      awaySPFip: p.away_sp_fip,
+      homeSPXfip: p.home_sp_xfip,
+      awaySPXfip: p.away_sp_xfip,
+      homeWar: p.home_war_total,
+      awayWar: p.away_war_total,
+    });
+    const validEnough = duel.validCount >= MLB_COMPOSITE_DUEL_MIN_VALID;
+
+    rows.push({
+      external_game_id: p.external_game_id,
+      homeCode,
+      awayCode,
+      status: schedule?.status ?? 'scheduled',
+      homeWinProb,
+      winnerCode: homeWinProb >= 0.5 ? homeCode : awayCode,
+      conf: Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100),
+      duelNetScore: validEnough ? duel.netScore : null,
+      duelValidCount: duel.validCount,
+    });
+  }
+  return rows;
+}
+
 export interface MlbUpcomingGame {
   external_game_id: string;
   gameDate: string;

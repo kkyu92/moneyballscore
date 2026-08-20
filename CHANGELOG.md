@@ -1,3 +1,28 @@
+## v0.5.62.68 — 2026-08-20 (cycle 2338, explore-idea (heavy): en/mlb/analysis 영어 미러 신규 — 헤더 nav 404 live 버그 해소)
+
+### feat(mlb): `/en/mlb/analysis` — `/mlb/analysis` 영어 미러 신규 배선
+
+- Header/Footer `withLocale()`(cycle 2139 fix) 는 `/mlb/` prefix 전체를 `/en/mlb/`
+  로 블랭킷 치환(`/mlb/reviews*` 만 예외) 하는데, `/mlb/analysis`(plan #28,
+  cycle 2315~2323 완성) 는 예외 목록에 없어 EN 페이지에서 "Analysis Hub" nav
+  클릭 시 `/en/mlb/analysis` 404 — cycle 2227 이 `/mlb/reviews` 를 예외 처리해
+  고친 것과 동일 family 의 live 버그(review-code/explore-idea 신선 target
+  탐색 중 발견). 예외 추가 대신 실제 페이지를 만들어 해결.
+- `getTodayMlbAnalysisRows`(+ `MlbAnalysisRow`) 를 `mlb/analysis/page.tsx` 로컬
+  함수에서 `analysis-data.ts` 로 이동 — ko/en 양쪽 재사용, 중복 로직 방지(DRY).
+- EN MVP 스코프: 빅매치·팩터 수렴 픽·오늘 전체 예측·이번 주 남은 경기·팀 전력
+  현황·어제 결과·적중 기록 CTA. `PickButton`(커뮤니티 픽 투표 UI, 미현지화)과
+  주간/월간 리뷰 CTA(en/mlb/reviews 미러 부재, 기존 구조적 gap)는 스코프 밖 —
+  KO 버전도 MVP→4-phase 로 점진 확장했던 관례(plan #28) 그대로 적용.
+- `MlbTeamStrengthGrid` 에 `locale?: 'ko' | 'en'` prop 추가 — href prefix
+  (`/mlb/team` → `/en/mlb/team`) + 승/패 문구("연승/연패" → "W/L streak",
+  "최근 N경기 W승 L패" → "Last N: W-L") 현지화.
+- `sitemap.ts` + ko 페이지 `alternates.languages` hreflang 양방향 배선. 신규
+  guard test `wave-658-en-mlb-analysis-mirror.test.ts` (en 내부 링크 전부
+  `/en/mlb/*` prefix 검증 — cycle 2139/2227 family 재발 차단).
+- `tsc --noEmit`(4패키지 clean) + `eslint`(clean) + `pnpm test`(497 files /
+  4172 tests all green, 신규 8건 포함, 기존 3건 갱신) 확인.
+
 ## v0.5.62.67 — 2026-08-20 (cycle 2337, review-code (heavy): silent drift wave 657 — 적중률 yellow 색상 하한 `>= 0.5` 7 callsite 단일 source)
 
 ### fix(context): 적중률 3단계 색상(brand/yellow/red) yellow 하한 `ACCURACY_MID_RATE` 단일 source 추출

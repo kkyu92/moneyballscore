@@ -43,7 +43,8 @@ describe('MLB /analysis 팀 전력 현황 (TeamStrengthGrid 대체 설계)', () 
   });
 
   it('MlbTeamStrengthGrid 가 /mlb/team/[code] 딥링크 + MlbTeamLogo 사용 (KBO TeamStrengthGrid /teams/[code] 대응)', () => {
-    expect(componentFile).toContain('/mlb/team/${row.teamCode}');
+    expect(componentFile).toContain("locale === 'en' ? '/en/mlb/team' : '/mlb/team'");
+    expect(componentFile).toContain('${teamHrefPrefix}/${row.teamCode}');
     expect(componentFile).toContain('MlbTeamLogo');
   });
 

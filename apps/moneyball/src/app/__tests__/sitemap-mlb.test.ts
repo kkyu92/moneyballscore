@@ -167,6 +167,7 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
       '/en/mlb/factors',
       '/en/mlb/wild-card',
       '/en/mlb/postseason',
+      '/en/mlb/analysis',
     ];
     for (const path of enStatic) {
       expect(urls.find((u) => u.url.endsWith(path))).toBeDefined();
