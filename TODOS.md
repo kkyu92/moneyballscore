@@ -1,4 +1,16 @@
 
+## 🟢 fix-incident — baseball-savant.ts User-Agent 헤더 예방적 추가 SUCCESS (cycle 2326, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2318-2325 distinct=4: explore-idea/review-code/polish-ui/lotto). **주기 trigger 6종 중 fix-incident 20-gap 정확 도달**(마지막 fix-incident 발화 cycle 2306, gap=20). op-analysis 17/25, info-arch 16/30, lotto 2/30(방금 리셋) 모두 미도달. skill-evolution trigger3(2326%50=26)/trigger5 둘 다 미충족.
+
+fix-incident lite 진단(pipeline_runs 최근 7일 error rate + git log) 실행: `pipeline_runs` 최근 7일 208건 중 1건 error(0.5%) — `mlb_fancy_scrape` 2026-08-19T19:17:59Z(=08-20 04:17:59 KST) `fetchFangraphsMlbTeams: fangraphs HTTP 403`. git log 대조 결과 이 실패는 cycle 2278(같은 날 04:24:47 KST, 실패 발생 7분 후) 이 이미 fix — User-Agent 헤더 누락이 원인, `fangraphs-mlb.ts`에 `KBO_USER_AGENT` 추가로 해결 완료. 신규 미해결 인시던트 아님.
+
+동일 패턴(fetch 에 User-Agent 미설정) 이 형제 스크레이퍼에도 있는지 grep 스캔 — `baseball-savant.ts`(`fetchExpectedStats`/`fetchStatcastQuality`, 2 fetch() 호출) 가 User-Agent 헤더 0건으로 확인. 해당 scraper 는 07-24~08-10 "parse fail — CSV format 변경" 오류로 17일 연속 실패했다가 08-11부터 9일 연속 success 로 이미 회복(다른 원인, CSV 스키마 변경 — UA 무관)했으나, 근본적으로 UA 헤더 부재 위험군은 동일 — fangraphs-mlb.ts 사례(cycle 2278) 재발 예방 차원에서 `KBO_USER_AGENT` 헤더 예방적 추가.
+
+검증: `pnpm --filter @moneyball/kbo-data test`(89 files/1147 tests) + `tsc --noEmit` + `lint` 클린, 전체 `pnpm test`(495 files/4154 tests) all green. PR #3016 → R7 `--squash --auto --delete-branch` 자동 머지 완료(`a0819071`).
+
+결론: 신규 인시던트 발견 0건(fangraphs-mlb 403 은 cycle 2278 이 이미 해결), 형제 스크레이퍼 예방 조치 1건 ship. 다음 후보: op-analysis(17/25, 8사이클 후 자연 도달) 또는 explore-idea(신규 topic — plan #24 matchup Phase2b 잔여 또는 plan #27 picks/leaderboard Phase3 데이터 블로커 재확인).
+
 ## ⚪ review-code (heavy) — `/mlb/analysis` 팀 전력 현황(TeamStrengthGrid MLB 대체) 신규 코드 감사, drift 0건 RETRO-ONLY (cycle 2325, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(19개 completed/archived + 24 split + 27 blocked + 28 completed). 2-chain lock 미충족(직전 8사이클 2317-2324 distinct=4: review-code/explore-idea/polish-ui/lotto). 주기 trigger 전부 미도달(fix-incident 19/20 — 1사이클 후 자연 도달, op-analysis 16/25, info-arch 15/30, lotto 1/30 방금 리셋). skill-evolution trigger3(2325%50=25)/trigger5(review-code 7/21, 0 아님) 둘 다 미충족. explore-idea saturation 미충족(직전 15사이클 review-code+fix-incident+polish-ui+info-arch=8/15). cycle 2323 이 shipped 한 신규 코드(`buildMlbTeamStrengthSnapshot.ts`+`MlbTeamStrengthGrid.tsx`)가 아직 review-code 감사 대상이 안 된 상태 — plan #28 Phase1~4 를 순차 감사해온 기존 패턴(2317→2319→2321) 그대로 이 마지막 carry-over 코드도 감사.
