@@ -1,4 +1,12 @@
 
+## ⚪ operational-analysis (lite) — 주간 리뷰 + CE cohort 재확인, 코드 변경 없음 SUCCESS (cycle 2309, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달이나 op-analysis 24-gap/25(거의 근접, 임계 1 미달)로 review-code 70% dominance(직전 20사이클 14/20) 다양성 확보 위해 선택. lite 모드(weekly-review → extract-pattern → compound, 코드 변경 X) — CE/HOME_ADVANTAGE 축 B 는 여전히 사용자 결정 대기라 heavy(재가중치) 불필요.
+
+이번 주(8/17 월~8/20 목) KBO v1.8 신규 검증 n=10 (월=KBO 휴식일이라 0건, 화 2/5=40%, 수 3/5=60%, 목 미검증) — 표본 과소로 가중치 판단 근거 없음, 조정 없음. `scripts/op-analysis-ce-cohort.ts` 재실행(전체 n=321, CE n=274/비CE n=47) — CE 54.0% vs 비CE 63.8%, 격차 9.8pp(cycle 2191 9.9pp 대비 미세 축소, 4-cycle window 9.7~10.7pp 안정). overlap 월 통제 격차 10.8pp ≈ 전체 격차 → LLM 부가가치 우세 방향 4회 연속 재확인. 비CE 표본 동결 50일 경과(마지막 신규 예측 2026-07-01), CREDIT_EXHAUSTED 지속 — 사용자 크레딧 재충전 전까지 상태 변화 없음. CLAUDE.md v1.8 calibration 섹션에 cycle 2309 수치 append.
+
+다음 후보: info-arch(29-gap/30, 다음 사이클 도달), lotto(15-gap/30), fix-incident(3-gap/20) 자체 주기 monitor. review-code 재선택 시 postseason(ETA 2026-09 유지, 아직 미도달) 외 신규 target 재탐색 필요(현재 소진 조짐).
+
 ## ⚪ review-code (heavy) — methodology "30팀 435개 매치업" 하드코딩 정정 SUCCESS (cycle 2308, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달(fix-incident 2-gap/20, op-analysis 23-gap/25, lotto 14-gap/30, info-arch 28-gap/30 — 거의 근접). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code/skill-evolution/explore-idea/fix-incident). 직전 20사이클 review-code 14/20=70% dominance 지속.
