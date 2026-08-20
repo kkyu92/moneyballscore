@@ -1,4 +1,16 @@
 
+## 🟡 explore-idea (lite) — MLB "AI 분석 센터" hub gap plan #28 spec-only (cycle 2314, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21(plan #24/#27 모두 closed). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 4/30, lotto 20/30). explore-idea saturation trigger 정확 충족(직전 15사이클 중 review-code+fix-incident+polish-ui+info-arch=12/15) + 직전 3사이클(2311/2312/2313) 연속 retro-only(review-code×2+polish-ui×1) — 다양성 확보 필요, 자체 retro 모두 "신규 target 소진 조짐" 명시.
+
+KBO↔MLB 앱 라우트 top-level diff 재감사(cycle 2245/2254 방법론 재사용). plan #24(MLB matchup)/#27(MLB 픽/리더보드) frontmatter 확인 결과 둘 다 완결(closed) — 신규 unprocessed plan 없음. cycle 2254 진단이 나열했던 7개 후보(analysis/dashboard/insights/leaderboard/picks/predictions/seasons) 중 텍스트 설명에서 유일하게 누락됐던 `analysis` 를 재검토.
+
+**발견**: KBO `/analysis`(2803줄, "AI 분석 센터" — 오늘 전체예측+빅매치+팩터수렴픽+이번주경기+팀strength grid+어제결과+주간/월간 리뷰+시즌성과+적중기록 13개 섹션 단일 hub)에 대응하는 MLB 라우트가 전혀 없음. MLB 는 기능이 3곳(`/mlb/games/[date]` 188줄 단일날짜만/`/mlb/factors` 464줄 정적설명/`/mlb/accuracy` 적중기록 전용)에 분산 — "오늘 접속해서 한 곳에서 전체를 보는" KBO 식 진입점 부재.
+
+2803줄 단일 페이지 규모(convergenceRecord.ts 9개 함수 중 8개 미포팅) 상 1 cycle 완결 불가능 판단 → spec-only. `~/.develop-cycle/plans/moneyballscore/28.md` 로 박제(rubric: 가치 high / 시간비용 large / risk 1 / 자율 yes / 의존성 none, Tier 3, Phase 1~4 분리). plan #24 Phase 3c 가 이미 확립한 재사용 인프라(computeMlbCompositeDuel/MLB_FACTOR_PICK_STRONG·COMPLETE/getMlbConvergencePickHeadToHeadRecord/deriveMlbOutcome 등) 상당수 활용 가능 — Phase 1(MVP: 빅매치+팩터수렴픽+오늘전체예측 3섹션)부터 다음 explore-idea(heavy) fire 후보.
+
+결론: 코드 변경 0, 스펙 파일 1개 신규(plan #28). 다음 후보: fix-incident(8-gap/20)/op-analysis(5-gap/25)/lotto(20-gap/30)/info-arch(4-gap/30) 자체 주기 monitor 또는 explore-idea(heavy) plan #28 Phase 1 착수.
+
 ## ⚪ polish-ui (lite) — DESIGN.md 토큰 vs 컴포넌트 hex 42파일 전수 대조, drift 0건 (retro-only) (cycle 2313, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 7/20, op-analysis 4/25, lotto 19/30, info-arch 3/30). ship-0 미충족(직전 10사이클 success 8/retro-only 2). skill-evolution trigger5 표본=20, review-code 11/20(0 아님)→미충족. review-code(heavy) 직전 2사이클(2311/2312) 연속 retro-only — 신규 target 소진 조짐, 다양성 확보.
