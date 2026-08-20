@@ -1,4 +1,14 @@
 
+## ⚪ review-code (lite) — #1338 family (predictions scoring_rule 필터) 전체 46파일 스윕 완전 종료 확인 RETRO-ONLY (cycle 2332, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2324-2331 distinct=5: lotto/explore-idea/review-code/fix-incident/op-analysis). 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 1/25 방금 발화, info-arch 22/30, lotto 8/30). review-code 직전 5사이클 중 3회 retro-only(streak=3). cycle 2331 retro 가 명시한 carry-over 후보 2건("review-code 신규 target 재탐색") 착수.
+
+**대상 재확인**: cycle ~2298 근처 TODOS 기록에 남아있던 두 carry-over 리드 — (1) `/debug/reliability` scoring_rule/prediction_type 필터 누락, (2) `/v2-preview` 동일 문제 — 둘 다 실제 코드 read 결과 **이미 해결 완료** 확인. `/debug/reliability` 는 커밋 `f7f94f30`(#1338 family 9번째 재발 정정) + 회귀 테스트 `silent-drift-cycle-2297.test.ts` 로 이미 `CURRENT_MODEL_FILTER` + `prediction_type='pre_game'` 필터 적용됨. `/v2-preview` 도 동일하게 이미 필터 적용 + `silent-drift-cycle-2298.test.ts` 회귀 가드 존재. 두 리드 모두 stale(과거 커밋에서 이미 처리된 항목이 TODOS 텍스트에만 남아 재방문된 것).
+
+**확장 스윕**: `.from('predictions')` 쿼리하는 전체 46개 파일(app routes + lib builders, KBO+MLB+en 미러 전부)을 grep 하여 `scoring_rule`/`CURRENT_MODEL_FILTER`/`MLB_SCORING_RULE`/`CURRENT_SCORING_RULE` 참조 여부 전수 확인 → **46/46 전부 필터 참조 존재, 미필터 파일 0건**. #1338 family(9회 이상 재발 반복돼온 패턴)가 이 스코프에서 완전 소진 확인 — 신규 미감사 파일 없음.
+
+결론: 코드 변경 없음(retro-only), 향후 사이클이 동일 stale carry-over 리드를 재방문하지 않도록 "완전 종료" 로 명시적 박제. 다음 후보: fix-incident(6/20)/info-arch(22/30)/lotto(8/30) 자체 주기 monitor 또는 explore-idea(MLB/KBO parity 소진, 완전히 다른 방향 신규 topic 필요) — review-code 는 이 family 소진으로 신규 unaudited target 재탐색 필요(streak=3 포화 주의 지속).
+
 ## 🟡 operational-analysis (lite) — W34 주간 성과 스냅샷 + MLB is_correct null 오탐 조사 SUCCESS (cycle 2331, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2323-2330 distinct=4: explore-idea/lotto/review-code/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 22/25, info-arch 21/30, lotto 7/30). review-code 직전 5사이클 중 3회 retro-only(streak=3, cooldown 임계 5 미도달이나 반복 0-drift 로 포화 신호). explore-idea 신규 topic 탐색 — KBO 전용 잔여 라우트 `insights`(AI reasoning 아카이브)/`dashboard` 재검토했으나 (1) `insights` = MLB 파이프라인이 debate/judge agent 자체를 호출 안 함(`mlb-pipeline.ts` 에 debate/judge/reasoning 매칭 0건 확인 — reasoning 텍스트 데이터 자체가 없어 아카이브 불가, CE 100% 지속 상황에서 신규 LLM 호출 추가도 의미 없음) (2) `dashboard` = 대부분 `/mlb/accuracy`(적중률/팀별/팩터/캘리브레이션 이미 커버) 와 중복 → 둘 다 기각. explore-idea 재포화 확인 후 op-analysis(lite) 선택(gap 22/25 근접 + 당일 3시간 전 cycle 2309 이후 신선도 재확인 가치).
