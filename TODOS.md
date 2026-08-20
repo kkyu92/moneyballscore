@@ -1,4 +1,14 @@
 
+## 🟢 explore-idea (heavy) — `/mlb/analysis` 어제 결과 + 주간/월간 리뷰 CTA, plan #28 Phase 3 SUCCESS (cycle 2318, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 distinct=4). 주기 trigger 전부 미도달(fix-incident 12/20, op-analysis 9/25, info-arch 8/30, lotto 24/30). lite chain cooldown 미충족. ship-0 미충족(직전 10사이클 success 6건 + partial 1건). plan #28 status=`phase2_partial_shipped_cycle_2316`(literal `approved` 아니라 unprocessed-plan 자동 lookup 발화 X, cycle 2317 TODOS 가 명시한 "다음 후속 후보: Phase 3(어제 결과+주간/월간 리뷰 요약)" carry-over로 메인 자율 선택) — Phase 3 착수.
+
+구현: `getMlbYesterdayResults()`/`getMlbPeriodStats()` 신규(`apps/moneyball/src/app/mlb/analysis/analysis-data.ts`) — 기존 `fetchMlbPredictionRowsInRange`(`lib/reviews/mlb-shared.ts`, deriveMlbOutcome 내장) + `getYesterdayKSTDateString()`(league-agnostic) 그대로 재사용, 신규 outcome/날짜 로직 재작성 0. `page.tsx` 에 "📅 어제 결과" 섹션(경기별 스코어 + ✅적중/❌실패/⏳대기 배지 + 예측 승자%) + 주간/월간 리뷰 CTA 카드(`/mlb/reviews/weekly/[week]`, `/mlb/reviews/monthly/[month]` 링크, KBO `getPeriodStats` 대응 경량 집계만 — `buildMlbWeeklyReview`/`buildMlbMonthlyReview` 풀 빌더 미호출) 추가. 베스트픽/업셋픽 카드는 KBO 도 전용 쿼리(게임별 개별 SELECT)라 재사용 불가 + MLB 표본 희소성(plan #27 Phase 3 리스크 노트) 고려해 스코프 밖 유지.
+
+검증: `tsc --noEmit` 클린 / `eslint` 클린 / 신규 smoke test 6건(`plan28-phase3-mlb-analysis-yesterday-review.test.ts`, fetchMlbPredictionRowsInRange 재사용 확인 + deriveMlbOutcome 재구현 금지 가드 + 베스트픽/업셋픽 스코프 밖 가드) + 기존 Phase 1/2 smoke test 15건 회귀 0 + 전체 vitest 493 파일 4145 테스트 all green.
+
+결론: Phase 3 코드 ship 완료, plan #28 status → `phase3_shipped_cycle_2318`. 다음 후속: Phase 2 잔여(TeamStrengthGrid MLB 대체 설계, mlb_schedule 실제 결과 기반 win rate 신규 설계 필요) 또는 Phase 4(시즌 성과 + 적중 기록 — `/mlb/accuracy` 요약 카드 임베드만).
+
 ## ⚪ review-code (heavy) — `/mlb/analysis` 신규 코드 감사, drift 0건 (cycle 2317, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 7/30, lotto 23/30). skill-evolution trigger5 표본 19(≥10)→review-code 9/19(0 아님)→미충족, trigger1 lifetime 8건(과거 소진 판단 유지), trigger2/4 미충족. ship-0 미충족(직전 10사이클 success 6건). 직전 3사이클(2314~2316) 모두 explore-idea — Feature-Drift Cycle 패턴(explore-idea→review-code 자연 교대) 따라 cycle 2315/2316 이 신규 ship 한 `mlb/analysis/page.tsx`+`analysis-data.ts` 감사 착수.

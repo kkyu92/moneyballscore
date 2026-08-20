@@ -4,11 +4,14 @@ import {
   MLB_ANALYSIS_UPCOMING_LIMIT,
   normalizeMlbTeamCode,
   assertSelectOk,
+  mlbShortTeamName,
   type MlbTeamCode,
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel';
+import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
+import { fetchMlbPredictionRowsInRange } from '@/lib/reviews/mlb-shared';
 
 export interface MlbUpcomingGame {
   external_game_id: string;
@@ -129,4 +132,62 @@ export function groupMlbGamesByDate(games: MlbUpcomingGame[]): Map<string, MlbUp
     grouped.set(g.gameDate, list);
   }
   return grouped;
+}
+
+export interface MlbYesterdayGame {
+  external_game_id: string;
+  gameDate: string;
+  homeCode: MlbTeamCode;
+  awayCode: MlbTeamCode;
+  homeName: string;
+  awayName: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  predictedWinnerCode: MlbTeamCode | null;
+  winnerProb: number;
+  isCorrect: boolean | null;
+}
+
+// KBO app/analysis/analysis-data.ts getYesterdayGames() MLB 대응 (plan #28 Phase 3,
+// cycle 2318). mlb-shared.ts fetchMlbPredictionRowsInRange 재사용 — deriveMlbOutcome
+// 별도 구현 금지(mlb-calendar-page.test.ts 가드와 동일 원칙). getYesterdayKSTDateString()
+// 은 KBO/MLB 공통 league-agnostic 헬퍼(순수 날짜 계산) 그대로 재사용.
+export async function getMlbYesterdayResults(): Promise<MlbYesterdayGame[]> {
+  const yesterday = getYesterdayKSTDateString();
+  const rows = await fetchMlbPredictionRowsInRange(
+    yesterday,
+    yesterday,
+    'MlbAnalysis getMlbYesterdayResults',
+  );
+  return rows.map((r) => ({
+    external_game_id: r.external_game_id,
+    gameDate: r.game_date,
+    homeCode: r.home_team_code,
+    awayCode: r.away_team_code,
+    homeName: mlbShortTeamName(r.home_team_code),
+    awayName: mlbShortTeamName(r.away_team_code),
+    homeScore: r.home_score,
+    awayScore: r.away_score,
+    predictedWinnerCode:
+      r.predictedHomeWin === null ? null : r.predictedHomeWin ? r.home_team_code : r.away_team_code,
+    winnerProb: r.confidence ?? 0.5,
+    isCorrect: r.isCorrect,
+  }));
+}
+
+export interface MlbPeriodStats {
+  total: number;
+  correct: number;
+}
+
+// KBO app/analysis/analysis-data.ts getPeriodStats() MLB 대응 — 주간/월간 리뷰 CTA 카드용
+// 경량 집계(buildMlbWeeklyReview/buildMlbMonthlyReview 풀 빌더는 teamStats/factorInsights
+// 까지 계산해 카드 용도엔 과함, KBO 도 동일 이유로 별도 경량 함수 사용).
+export async function getMlbPeriodStats(startDate: string, endDate: string): Promise<MlbPeriodStats> {
+  const rows = await fetchMlbPredictionRowsInRange(startDate, endDate, 'MlbAnalysis getMlbPeriodStats');
+  const finished = rows.filter((r) => r.isCorrect !== null);
+  return {
+    total: finished.length,
+    correct: finished.filter((r) => r.isCorrect === true).length,
+  };
 }
