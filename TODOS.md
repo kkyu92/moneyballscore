@@ -1,4 +1,12 @@
 
+## ⚪ review-code (heavy) — 홈 `page.tsx`(1082줄 monolith) 전수 감사, drift 0건 확인 (retro-only) (cycle 2312, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21(전부 completed/archived/status 미해당). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 6/20, op-analysis 3/25, lotto 18/30, info-arch 2/30 — 방금 2310 발화). ship-0 미충족(직전 10사이클 success 8/retro-only 1/무관). skill-evolution trigger 5 표본=19(≥10) 이나 review-code 미도달(0회 아님) → 미충족. CI 최근 10회 전부 success/skip, fix-incident 신호 없음. cycle 2311 retro 명시적 carry-over("apps/moneyball/src/app/page.tsx 홈, cycle 2308 근처 audit 대상 언급됐으나 미확인") 채택.
+
+`page.tsx` 전체(1082줄) read 후 다음 축 점검: (1) `METHODOLOGY_GROUPS` 6그룹이 `DEFAULT_WEIGHTS` 10개 key 전부 커버하는지(sp_fip/sp_xfip/lineup_woba/bullpen_fip/recent_form/war/head_to_head/park_factor/elo/sfr) — 10/10 매핑 확인, `formatMethodologyWeight` 가 `HOME_ADVANTAGE` 를 마지막 그룹에만 `extra` 로 가산하는 것도 CLAUDE.md v1.8 가중치 정의와 일치. (2) `winProb` 홈/원정 변환 로직(`pred.winner?.code === homeCode ? homeWinProbRaw : 1 - homeWinProbRaw`) — `PredictionCard.tsx` 주석("winProb = 예측 승자의 승리 확률")과 `PredictionCardLive.tsx`(`aiWinProb: props.winProb`) 양쪽 확인 결과 의미론 일치, 사례4(homeCode 반쪽 작동) 계열 재발 아님. (3) `getWeekAheadSchedule`/`getTodayPredictions`/`getYesterdayResults` 의 `created_at` KST↔UTC 경계(`${today}T00:00:00Z`~`T23:59:59Z`) — `KBO_PREDICT_DAILY_TIME_KST='09:00 KST'`(=00:00 UTC) 단일 배치 기준이라 실제로는 안전한 경계, 코드베이스 전역(20개 파일)에서 동일 패턴 기 확립된 컨벤션 — 신규 drift 아님. (4) `classifyNoGameReason` 분기 순서(`break`→`monday_rest`→`unknown`) 주석과 실제 반환 순서 일치.
+
+결론: 코드 변경 0, PR/커밋 없음. 홈페이지 monolith 는 review-code(heavy) 관점에서 현재 clean — 다음 review-code(heavy) 재검토 시 다른 target 필요. 다음 후보: fix-incident(6-gap/20)/lotto(18-gap/30) 자체 주기 monitor 또는 explore-idea(review-code 직전 20사이클 12/20=60% dominance 다양성 확보).
+
 ## ⚪ review-code (heavy) — MLB `/mlb/accuracy` backlog 재확인, 이미 전량 해소 확인 (retro-only) (cycle 2311, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 5/20, op-analysis 2/25, lotto 17/30, info-arch 1/30 — 방금 2310 발화). ship-0 미충족(직전 10사이클 전부 success). cron/CI 최근 30회 실행 전부 성공/skip, 신규 fix-incident 신호 없음. lotto 8/22 50세트 이미 박제됨(트리거 없음).
