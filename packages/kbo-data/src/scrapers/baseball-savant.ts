@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
+import { KBO_USER_AGENT } from '../types';
 
 let lastFetchAt = 0;
 
@@ -11,6 +12,8 @@ async function rateLimit() {
   lastFetchAt = Date.now();
 }
 
+// fetch() 에 User-Agent 미설정 시 403 위험 — 형제 스크레이퍼 fangraphs-mlb.ts 가
+// 동일 원인으로 실패한 사례(cycle 2278) 확인 후 예방적으로 동일 헤더 적용 (cycle 2326).
 export interface SavantTeam {
   teamCode: string;
   xwoba: number;        // 0~0.5
@@ -60,7 +63,7 @@ async function fetchExpectedStats(season: number): Promise<ExpectedStatsRow[]> {
   await rateLimit();
 
   const url = `https://baseballsavant.mlb.com/leaderboard/expected_statistics?type=batter-team&year=${season}&csv=true`;
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: { 'User-Agent': KBO_USER_AGENT } });
 
   if (!res.ok) {
     Sentry.captureMessage(`savant HTTP ${res.status}`, {
@@ -104,7 +107,7 @@ async function fetchStatcastQuality(season: number): Promise<StatcastRow[]> {
   await rateLimit();
 
   const url = `https://baseballsavant.mlb.com/leaderboard/statcast?type=batter-team&year=${season}&csv=true`;
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: { 'User-Agent': KBO_USER_AGENT } });
 
   if (!res.ok) {
     Sentry.captureMessage(`savant HTTP ${res.status}`, {
