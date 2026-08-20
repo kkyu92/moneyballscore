@@ -15,9 +15,11 @@ import {
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PickButton } from "@/components/picks/PickButton";
+import { MlbTeamStrengthGrid } from "@/components/analysis/MlbTeamStrengthGrid";
 import { createClient } from "@/lib/supabase/server";
 import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
+import { buildMlbTeamStrengthSnapshot } from "@/lib/mlb/buildMlbTeamStrengthSnapshot";
 import { getCurrentWeek } from "@/lib/reviews/computeWeekRange";
 import { getCurrentMonth } from "@/lib/reviews/computeMonthRange";
 import {
@@ -142,13 +144,14 @@ export default async function MlbAnalysisPage() {
   const currentWeek = getCurrentWeek();
   const currentMonth = getCurrentMonth();
   const supabase = await createClient();
-  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats, accuracySummary] = await Promise.all([
+  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats, accuracySummary, teamStrengthRows] = await Promise.all([
     getTodayMlbAnalysisRows(supabase, today),
     getMlbThisWeekRemainingGames(today),
     getMlbYesterdayResults(),
     getMlbPeriodStats(currentWeek.startDate, currentWeek.endDate),
     getMlbPeriodStats(currentMonth.startDate, currentMonth.endDate),
     buildMlbAccuracySummary('ko'),
+    buildMlbTeamStrengthSnapshot(),
   ]);
   const weekRemainingByDate = groupMlbGamesByDate(weekRemainingGames);
 
@@ -342,6 +345,23 @@ export default async function MlbAnalysisPage() {
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {teamStrengthRows.length > 0 && (
+        <section aria-labelledby="mlb-team-strength-title">
+          <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+            <h2 id="mlb-team-strength-title" className="text-lg font-bold text-brand-700 dark:text-brand-100">
+              📊 팀 전력 현황
+            </h2>
+            <Link href="/mlb/standings" className="text-sm text-brand-600 hover:underline">
+              순위표 →
+            </Link>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            실제 완료 경기 기준 최근 전적 — 팀 이름 클릭 시 상세 프로필
+          </p>
+          <MlbTeamStrengthGrid rows={teamStrengthRows} />
         </section>
       )}
 

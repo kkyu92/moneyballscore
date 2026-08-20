@@ -1,4 +1,14 @@
 
+## 🟢 explore-idea (heavy) — `/mlb/analysis` 팀 전력 현황(TeamStrengthGrid MLB 대체 설계), plan #28 Phase 2 잔여 SUCCESS (cycle 2323, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음, unprocessed-plan lookup 미매핑). 2-chain lock 미충족(직전 8사이클 2315-2322 distinct=3: explore-idea/review-code/polish-ui). 주기 trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 14/25, info-arch 13/30, lotto 29/30 — 1사이클 후 자연 도달 예상). explore-idea saturation 미충족(직전 15사이클 review-code+fix-incident+polish-ui+info-arch=9/15). skill-evolution trigger3(2323%50=23)/trigger5 둘 다 미충족. ship-0 미충족. cycle 2322 next_recommended = lotto 또는 explore-idea(신규 topic). plan #28 body(`~/.develop-cycle/plans/moneyballscore/28.md`) "Phase 2 진행 상황" 절이 명시적 잔여 항목("TeamStrengthGrid MLB 버전은 블로커로 보류... 대체 데이터 소스: mlb_schedule 실제 완료 경기 결과 기반 최근 N경기 승률 직접 계산... 다음 explore-idea fire 후보로 carry-over")을 남겨둔 걸 발견 — 신규 topic 탐색 대신 이 구체적 carry-over 착수.
+
+구현: `buildMlbTeamStrengthSnapshot.ts`(신규, `lib/mlb/`) — `mlb_schedule`(league=mlb, status=final) 단일 쿼리로 전체 30팀 조회(`buildMlbDivisionStandings` 패턴, 팀별 N+1 회피) 후 팀별 게임 배열 구성, `computeTeamRecentRecord`/`computeTeamStreak`(`lib/teams/buildTeamProfile.ts`, KBO/MLB `StreakGame` 구조 호환 — 파일 자체 주석이 "신규 MLB_ 접두 중복 함수 X" 명시)를 그대로 재사용해 최근 5경기(`RECENT_RECORD_WINDOW`) 승/패 + 연승/연패 계산. `home_elo`/`home_recent_form`(모델 팩터, MLB 쪽 전량 placeholder/null) 전혀 조회하지 않음 — KBO `buildTeamStrengthSnapshot`와 근본적으로 다른 데이터 소스(실제 경기결과 vs 모델 팩터). `MlbTeamStrengthGrid.tsx`(신규, `components/analysis/`) — KBO `TeamStrengthGrid` 와 동일 카드 레이아웃(랭크+로고+팀명, `MlbTeamLogo` 사용) 이지만 Elo 태그 대신 연승/연패 배지 + 승률 바(`TEAM_STRENGTH_FORM_STRONG`/`WEAK` 임계값 재사용) 로 교체. `/mlb/analysis` 페이지에 "📊 팀 전력 현황" 섹션(`/mlb/standings` 딥링크) 신규 배선, "이번 주 남은 경기"와 "어제 결과" 사이에 배치(KBO 순서 정합).
+
+검증: `tsc --noEmit` 클린 / `eslint` 클린(신규 파일 3개 + 수정 파일 2개) / 신규 smoke test 5건(`mlb-analysis-team-strength-grid.test.ts` — 단일쿼리 가드 + 공용 함수 재사용 가드 + 정규화 가드 + 딥링크 가드 + hex 하드코딩 가드) / 기존 `plan28-phase2` 테스트의 stale 가드("TeamStrengthGrid MLB 버전 미포함") 제거·주석 갱신(cycle 2316 당시엔 정확했으나 본 cycle 구현으로 stale 화) / 전체 vitest 495 파일 4154 테스트 all green(회귀 0).
+
+결론: PR 생성 + R7 자동 머지 대상. plan #28 body 에 Phase 2 잔여 해소 기록 추가 — plan #28 완전 종료(4-phase + 잔여 carry-over 전부 완료). 다음 후보: lotto(29/30, 1사이클 후 자연 도달) 또는 review-code(heavy, 신규 코드 3파일 — 이번엔 audit 대상 자체가 이번 cycle 산출물).
+
 ## ⚪ polish-ui — 2-chain lock 발동 강제 전환, breadcrumb/DESIGN.md 토큰 감사 drift 0건 (cycle 2322, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. **2-chain alternation lock 탐지**(직전 8사이클 2314-2321 distinct=2: explore-idea/review-code 순수 교대) — 두 chain 후보 제외, 둘 다 fix-incident 아니므로 lock 적용. 주기 trigger 3종 전부 미도달(fix-incident 16/20, op-analysis 13/25, info-arch 12/30, lotto 28/30 근접). skill-evolution trigger3(2322%50=22)/trigger5(review-code 9/19, 0 아님) 둘 다 미충족. ship-0 미충족.
