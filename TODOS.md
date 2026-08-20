@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — wild-card OG/twitter 이미지 매직넘버 하드코딩 정정 SUCCESS (cycle 2307, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달(fix-incident 1-gap/20 방금 발화, op-analysis 22-gap/25, lotto 13-gap/30, info-arch 27-gap/30). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code/skill-evolution/explore-idea/fix-incident). breadcrumb 누락 grep 은 false positive(전부 순수 redirect stub/debug/login/home — Breadcrumb UI 자체가 없는 게 정상)로 제외.
+
+cycle 2306 이 "cycle 2296 division 매직넘버 등 다른 shipped 기능도 동일 cross-reference staleness 재확인 여지"를 남긴 것을 따라 `/mlb/wild-card` 형제 파일을 조사 — 페이지 본문(`page.tsx`, cycle 2305)은 `MLB_WILDCARD_COUNT` 상수를 전부 사용하는데, 같은 폴더의 `opengraph-image.tsx`/`twitter-image.tsx` (ko+en 4파일)는 "3장"/"AL 3 spots"/"NL 3 spots" 리터럴을 하드코딩 — wave-305/500 매직넘버 family 의 새 하위 사례(페이지는 상수화, 형제 이미지 생성 파일 누락).
+
+수정: 4파일 모두 `MLB_WILDCARD_COUNT` import 추가 + 문자열/배열 리터럴을 상수 참조로 교체. 490 files/4124 tests all pass, type-check/lint clean. PR #3010 실측 머지 확인(`gh pr view 3010 --json state,mergedAt` → MERGED, mergeCommit `11d7ac42`).
+
+다음 후보: `/mlb/postseason` 은 아직 ETA 2026-09 유지(정당 — division/wildcard 완료 후 데이터 자체가 아직 미존재). 다음 review-code 사이클에서 다른 최근 shipped MLB 기능(standings division 매직넘버 등)의 OG/twitter/카드 sibling 파일도 동일 패턴 재확인 여지.
+
 ## ⚪ fix-incident — wild-card 라이브 전환 후 stale ETA 문구 잔존 + version 3-way drift 정정 SUCCESS (cycle 2306, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달(fix-incident 8-gap/20, op-analysis 21-gap/25, lotto 12-gap/30, info-arch 26-gap/30). 2-chain lock 미충족(직전 8사이클 distinct=4).
