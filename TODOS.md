@@ -1,4 +1,20 @@
 
+## ⚪ explore-idea (heavy) — MLB standings division 매직넘버 신규 SUCCESS (cycle 2296, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked, plan#24 closed / plan#27 Phase3 data-blocked라 재활용 불가). **2-chain alternation lock 충족**(직전 8사이클 2288-2295 distinct=2: review-code x7 + lotto x1) — 두 chain 제외. **explore-idea saturation trigger 동시 충족**(직전 15사이클 review-code+fix-incident+polish-ui+info-arch = 12/15 ≥12). fix-incident(17-gap/20)/op-analysis(10-gap/25)/info-arch(15-gap/30) 모두 자체 주기 미도달.
+
+배경: plan#27(MLB picks/leaderboard parity) Phase 3는 실측(mlb_user_picks=0, KBO user_picks=1)으로 무기한 보류 확정 상태 재확인 — 재활용 불가. plan#24는 전체 phase 완결(closed). 두 plan 모두 신규 idea 소스로 부적합 확인 후 코드 직접 read로 신규 갭 탐색.
+
+발견: `/mlb/standings`에 KBO standings(cycle 2287 매직넘버 위젯) 대비 parity 갭 — MLB division 우승 매직넘버 부재. `computeMagicNumber`(KBO 전용으로 작성됐으나 `gamesPerTeam` 파라미터가 이미 일반화)를 division별 리더/2위(`rows[0]`/`rows[1]`, 이미 winPct 내림차순 정렬)에 `MLB_GAMES_PER_TEAM`(162)로 재사용 — 신규 DB 쿼리 0건, 순수 계산.
+
+rubric: 가치 medium(KBO-MLB parity, 시즌 중 시의성) / 시간비용 small / risk 0(기존 검증된 순수 함수 재사용) / 자율가능 yes / 의존성 none → Tier 1 즉시 fire.
+
+수정: 6개 division(AL/NL × East/Central/West) 각각 리더 행에 "지구 우승 매직넘버 N" 또는(확정 시) "지구 우승 확정" 배지 렌더. 와일드카드 매직넘버는 범위 밖(리더/2위 단순 비교로는 계산 불가 — 3장 슬롯 경쟁 로직 필요, 별도 cycle 후속 후보로 carry). `computeMagicNumber.test.ts`에 MLB gamesPerTeam=162 케이스 + `mlb-standings-page.test.ts`에 정적 grep 회귀 테스트 신규 추가. 485 files/4098 tests pass, type-check/lint clean.
+
+PR #3004 → `gh pr merge --squash --auto --delete-branch` → `gh pr view --json state,mergedAt`로 `state=MERGED` 실측 확인(commit d810c364, 사례 18 mitigation 준수).
+
+다음 후보: MLB 와일드카드 매직넘버(3장 슬롯 경쟁 로직 별도 설계 필요) 또는 review-code(heavy) 재탐색(단, 다음 사이클 2-chain lock 재평가 필요 — 직전 8사이클 review-code 비중 여전히 높음) 또는 lotto(2-gap/30).
+
 ## ⚪ review-code (heavy) — opengraph-image.tsx + debug/agent-fallback/page.tsx scoring_rule 필터 누락 정정 (#1338 family 7번째/8번째, sweep 완전 종료) SUCCESS (cycle 2295, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(전 20건 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code x6 + explore-idea x1 + lotto x1). 주기 trigger 3종 미도달(fix-incident 17-gap/20, op-analysis 10-gap/25, info-arch 15-gap/30, lotto 1-gap/30). cycle 2293 retro가 carry-over로 명시한 저트래픽 잔여 2파일(`opengraph-image.tsx` game/[id], `debug/agent-fallback/page.tsx`) 마무리 처리.
