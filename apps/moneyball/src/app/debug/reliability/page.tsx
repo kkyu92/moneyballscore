@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { BRIER_BASELINE, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX } from '@moneyball/shared';
 import { neutral, brand } from '@/lib/design-tokens';
 import { bucketize, brierScore, calibrationGap, resolveWinnerProb, type PredRow, type Bucket } from '@/lib/accuracy/buildAccuracyData';
+import { CURRENT_MODEL_FILTER } from '@/config/model';
 
 // /debug/reliability — 예측 신뢰도 reliability diagram
 // middleware.ts BASIC auth 로 보호됨 (/debug/* matcher)
@@ -200,6 +201,8 @@ export default async function ReliabilityPage() {
   const { data, error } = await db
     .from('predictions')
     .select('confidence, is_correct, verified_at, reasoning->homeWinProb')
+    .match(CURRENT_MODEL_FILTER)
+    .eq('prediction_type', 'pre_game')
     .not('verified_at', 'is', null)
     .not('is_correct', 'is', null)
     .order('verified_at', { ascending: true });
