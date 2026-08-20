@@ -1,4 +1,14 @@
 
+## ⚪ review-code (heavy) — `/mlb/analysis` 신규 코드 감사, drift 0건 (cycle 2317, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 7/30, lotto 23/30). skill-evolution trigger5 표본 19(≥10)→review-code 9/19(0 아님)→미충족, trigger1 lifetime 8건(과거 소진 판단 유지), trigger2/4 미충족. ship-0 미충족(직전 10사이클 success 6건). 직전 3사이클(2314~2316) 모두 explore-idea — Feature-Drift Cycle 패턴(explore-idea→review-code 자연 교대) 따라 cycle 2315/2316 이 신규 ship 한 `mlb/analysis/page.tsx`+`analysis-data.ts` 감사 착수.
+
+감사 범위: `getTodayMlbAnalysisRows`(page.tsx) vs `getMlbThisWeekRemainingGames`(analysis-data.ts) 필드 대조(duel input 11필드 완전 일치), `computeMlbCompositeDuel` 6팩터 게이팅 로직, `TOP_PICK_MIN_WIN_PCT` 단위 정합성(confToWinProb 결과 vs `p.conf` 스케일 — 둘 다 win-prob-pct 0~100, KBO confidence 0~1 스케일과 다른 의도적 재해석 확인), TeamStrengthGrid 블로커 근거(`mlb-pipeline.ts` recent_form 미저장 claim) 실측 재확인 — `packages/kbo-data/src/pipeline/daily.ts`(KBO)만 `home_recent_form`/`away_recent_form` insert, `mlb-pipeline.ts` 는 해당 컬럼 저장 코드 자체 부재(계산용 중립값 50/50 만 로컬 사용) → plan #28 claim 정확.
+
+발견: 두 함수 간 duel 계산 로직 ~50줄 중복(동일 11필드 duel input 구성 + conf/winner 산출) 확인했으나, 기존 grep 스모크 테스트(`plan28-phase1...test.ts` L32-33)가 page.tsx 안 `computeMlbCompositeDuel({` 리터럴 존재를 강제 — 공유 헬퍼로 추출 시 테스트 계약 파괴. 동작 불일치 0건(값 계산 결과 동일) 확인했으므로 리팩터 대신 기록만. 그 외 실제 버그/불일치 0건.
+
+결론: drift 0건, 코드 변경 없음(retro-only). 다음 후속 후보: dedup 리팩터는 스모크 테스트 갱신까지 포함한 별도 cycle 스코프로 분리 검토(낮은 우선순위 — 동작 불일치 없어 시급성 X).
+
 ## 🟢 explore-idea (heavy) — `/mlb/analysis` 이번 주 남은 경기 섹션, plan #28 Phase 2 partial (cycle 2316, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 distinct=5). 주기 trigger 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 6/30, lotto 22/30). skill-evolution trigger5 표본 19(≥10)→review-code 10/19(0 아님)→미충족. ship-0 미충족(직전 10사이클 success 6건). plan #28 status=`phase1_mvp_shipped_cycle_2315`(literal `approved` 아니라 unprocessed-plan lookup 자동 발화 X, TODOS 명시 carry-over로 메인 자율 선택) — Phase 2("이번 주 경기 + 팀 strength grid") 착수.
