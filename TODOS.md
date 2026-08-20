@@ -1,4 +1,19 @@
 
+## 🟢 explore-idea (heavy) — en/mlb/analysis 영어 미러 신규, 헤더 nav 404 live 버그 해소 SUCCESS (cycle 2338, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2330-2337 distinct=3: review-code/operational-analysis/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 28/30, lotto 14/30). review-code(heavy)로 `analysis/page.tsx`(2803줄) 재감사 시도했으나 이미 named 상수 전면 적용 확인(drift 없음), `debug/*` 임계값들은 페이지별 의미가 다른 독립 값이라 추출 대상 아님 — 3 cycle 연속 신선 target 부재 확정하던 중 `/en/mlb/analysis` 라우트 자체가 없다는 사실 발견.
+
+**실행**: 단순 gap이 아니라 실제 live 버그였음 — `Header.tsx`/`Footer.tsx` 의 `withLocale()`(cycle 2139 fix)이 `/mlb/` prefix 전체를 `/en/mlb/` 로 블랭킷 치환(`/mlb/reviews*` 만 예외)하는데 `/mlb/analysis`(plan #28, cycle 2315~2323 완성)는 예외 목록에 없어 EN 페이지에서 "Analysis Hub" nav 클릭 시 404 (cycle 2227이 `/mlb/reviews`를 예외 처리해 고친 것과 동일 family). 예외 추가 대신 실제 페이지를 만들어 해결(explore-idea heavy, office-hours/plan-review 자동 fire 환경이라 skip, spec 직접 작성).
+
+- `getTodayMlbAnalysisRows`(+`MlbAnalysisRow`)를 `mlb/analysis/page.tsx` 로컬 함수에서 `analysis-data.ts`로 이동 — ko/en 양쪽 재사용, 중복 로직 방지.
+- EN MVP 스코프: 빅매치·팩터 수렴 픽·오늘 전체 예측·이번 주 남은 경기·팀 전력 현황·어제 결과·적중 기록 CTA.
+- `PickButton`(커뮤니티 픽 투표 UI, ~10개 하드코딩 한국어 문자열)과 주간/월간 리뷰 CTA(en/mlb/reviews 미러 부재, 기존 구조적 gap — cycle 620 에서도 언급)는 스코프 밖 — KO 버전도 MVP→4-phase 로 점진 확장했던 plan #28 관례 그대로 적용.
+- `MlbTeamStrengthGrid` 에 `locale?: 'ko'|'en'` prop 추가 — href prefix + 승/패 문구("연승/연패" → "W/L streak") 현지화.
+- `sitemap.ts` + ko 페이지 `alternates.languages` hreflang 양방향 배선. 신규 guard test `wave-658-en-mlb-analysis-mirror.test.ts` + 기존 테스트 3건 갱신(analysis-data.ts 이동 반영).
+- `tsc --noEmit`(4패키지 clean) + `eslint`(clean) + `pnpm test`(497 files/4172 tests all green) 확인. PR #3018 → R7 자동 머지(66f57cca).
+
+결론: 코드 변경 있음(SUCCESS). 다음 후보: `PickButton` 현지화(범위 넓어 별도 cycle) 또는 `en/mlb/reviews/*` 미러(기존 구조적 gap) 후속 고려, 아니면 review-code/explore-idea 완전 신규 topic 발견 시 재선택.
+
 ## ⚪ operational-analysis (heavy) — CE cohort 재측정, 완전 불변 확인 RETRO-ONLY (cycle 2336, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(27=phase3 data-blocked 재확인 불필요 — 어제 이미 확인, 28=completed, 22/23=completed). 2-chain lock 미충족(직전 8사이클 2328-2335 distinct=4: review-code/explore-idea/op-analysis/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 2/25, info-arch 26/30, lotto 12/30). `gh run list` CI 전부 green, 배포 실패 0건. review-code/explore-idea 신선 target 광범위 재탐색(wild-card 3중 감사 완료/TeamStrengthGrid 2중 감사 완료/analysis 신규 파일 전부 리뷰 완료/Header·Footer nav 최근 수정 없음) — 5 cycle 연속 "완전 신규 topic 부재" 확정.
