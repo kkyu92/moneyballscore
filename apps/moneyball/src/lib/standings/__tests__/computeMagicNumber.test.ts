@@ -23,4 +23,9 @@ describe("computeMagicNumber", () => {
   it("시즌 초반(잔여 다수) 시 큰 숫자도 정상 반환", () => {
     expect(computeMagicNumber({ wins: 10, losses: 5 }, { wins: 8, losses: 6 }, 144)).toBe(129);
   });
+
+  it("MLB gamesPerTeam=162 (division 매직넘버, cycle 2296 explore-idea heavy 재사용)", () => {
+    // G=162, leader 100승, chaser(2위) 60패 → 162-100-60+1 = 3
+    expect(computeMagicNumber({ wins: 100, losses: 55 }, { wins: 90, losses: 60 }, 162)).toBe(3);
+  });
 });

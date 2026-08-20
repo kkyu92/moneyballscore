@@ -4,6 +4,7 @@ import {
   MLB_TEAMS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
+  MLB_GAMES_PER_TEAM,
   PARK_FACTOR_HITTER_MIN,
   PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
@@ -13,6 +14,7 @@ import {
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 import { buildMlbDivisionStandings } from "@/lib/mlb/buildMlbStandings";
+import { computeMagicNumber } from "@/lib/standings/computeMagicNumber";
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -131,6 +133,8 @@ export default async function MlbStandingsHub() {
           </h2>
           {DIVISIONS.map((division) => {
             const rows = standings[league][division];
+            const divisionMagicNumber =
+              rows.length >= 2 ? computeMagicNumber(rows[0], rows[1], MLB_GAMES_PER_TEAM) : null;
             return (
               <div key={`${league}-${division}`} className="space-y-3">
                 <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
@@ -141,6 +145,7 @@ export default async function MlbStandingsHub() {
                     const code = row.teamCode;
                     const team = MLB_TEAMS[code];
                     const tone = parkTone(team.parkPf);
+                    const showMagicNumber = idx === 0 && divisionMagicNumber !== null;
                     return (
                       <li key={code}>
                         <Link
@@ -159,6 +164,13 @@ export default async function MlbStandingsHub() {
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate font-mono tabular-nums">
                               {row.wins}-{row.losses} · {row.winPct.toFixed(3).replace(/^0/, "")} · GB {formatGB(row.gamesBehind)}
                             </p>
+                            {showMagicNumber && (
+                              <p className="text-xs font-semibold tabular-nums text-brand-600 dark:text-brand-400">
+                                {divisionMagicNumber === 0
+                                  ? "지구 우승 확정"
+                                  : `지구 우승 매직넘버 ${divisionMagicNumber}`}
+                              </p>
+                            )}
                           </div>
                           <span
                             className={
@@ -189,6 +201,9 @@ export default async function MlbStandingsHub() {
         </p>
         <p>
           ※ 파크팩터: 100 = 리그 중립, 100+ 타자 친화, 100- 투수 친화. 출처: Baseball Savant 5-year (2020-2024).
+        </p>
+        <p>
+          ※ 지구 우승 매직넘버: division 1위가 2위를 승수로 앞선 경우만 표시 (와일드카드 매직넘버는 미포함).
         </p>
       </footer>
     </main>
