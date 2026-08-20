@@ -9,6 +9,7 @@ import {
   confToWinProb,
 } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { PickButton } from "@/components/picks/PickButton";
 import { MlbTeamStrengthGrid } from "@/components/analysis/MlbTeamStrengthGrid";
 import { createClient } from "@/lib/supabase/server";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
@@ -184,6 +185,18 @@ export default async function MlbAnalysisPageEn() {
                         {p.winnerCode} {p.conf}%
                       </span>
                     </Link>
+                    {p.status === 'scheduled' && (
+                      <PickButton
+                        gameId={p.external_game_id}
+                        league="mlb"
+                        locale="en"
+                        homeTeam={p.homeCode}
+                        awayTeam={p.awayCode}
+                        aiPredictedWinner={p.winnerCode === p.homeCode ? 'home' : 'away'}
+                        aiWinProb={p.homeWinProb}
+                        analysisHref={`/en/mlb/games/${today}/${p.homeCode}-vs-${p.awayCode}`}
+                      />
+                    )}
                   </li>
                 );
               })}

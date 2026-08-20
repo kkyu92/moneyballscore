@@ -8,9 +8,9 @@ import path from 'path';
 // 은 이미 /mlb/ prefix 전체를 /en/mlb/ 로 blanket 치환하는 규칙(cycle 2139 fix)이라
 // analysis 만 예외 목록에 없어 실제로는 클릭 시 404 나는 live 버그였음(cycle 2227 과
 // 동일 family — 그 때는 반대로 /mlb/reviews 를 예외 처리해 해결). 본 wave 는 예외
-// 추가 대신 실제 페이지를 만들어 해결. PickButton(커뮤니티 픽 투표 UI)과
-// MlbTeamStrengthGrid 의 팀 전력 배지는 en 화 범위 밖 컴포넌트라 전자는 생략,
-// 후자는 locale prop 추가로 해결.
+// 추가 대신 실제 페이지를 만들어 해결. MlbTeamStrengthGrid 는 locale prop 추가로
+// 현지화. PickButton(커뮤니티 픽 투표 UI)은 당시 en 화 범위 밖으로 생략했으나
+// wave-664(cycle 2342, explore-idea heavy)에서 locale prop 추가 + en 페이지 배선 완료.
 
 const koPage = readFileSync(
   path.resolve(__dirname, '../mlb/analysis/page.tsx'),
@@ -57,8 +57,9 @@ describe('wave-658 — /en/mlb/analysis 영어 미러 신규', () => {
     expect(enPage).toContain('<MlbTeamStrengthGrid rows={teamStrengthRows} locale="en" />');
   });
 
-  it('PickButton 은 en 미러 scope 밖 (투표 UI 미현지화) — 의도적 생략', () => {
-    expect(enPage).not.toContain('PickButton');
+  it('PickButton locale="en" 전달 — wave-664 현지화 후속으로 en 미러도 커뮤니티 픽 투표 UI 포함', () => {
+    expect(enPage).toContain('<PickButton');
+    expect(enPage).toContain('locale="en"');
   });
 
   it('buildMlbAccuracySummary("en") locale 인자 전달', () => {

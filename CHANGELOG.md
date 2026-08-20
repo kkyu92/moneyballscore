@@ -1,4 +1,24 @@
-## v0.5.62.69 — 2026-08-20 (cycle 2339, explore-idea (heavy): en/mlb/reviews 영어 미러 신규)
+## v0.5.62.70 — 2026-08-20 (cycle 2342, explore-idea (heavy): PickButton 현지화 — en/mlb 커뮤니티 픽 배선)
+
+### feat(mlb): `PickButton` locale prop + `/en/mlb/games/[date]`, `/en/mlb/analysis` 커뮤니티 픽 투표 UI 배선
+
+- cycle 2338/2341 EN 미러 작업 당시 `PickButton`(커뮤니티 픽 투표 위젯)은 하드코딩 한국어
+  텍스트(홈/원정/내 픽/분석 보기 등)라 en 화 범위 밖으로 명시적 생략됐던 컴포넌트 — cycle 2341
+  retro 가 "PickButton 현지화(넓은 범위, 별도 cycle)" 를 다음 explore-idea 후보로 남김.
+- `PickButton.tsx` 에 `locale?: 'ko' | 'en'` prop 추가(기본 `'ko'`, 기존 callsite 무변경 —
+  wave-659 배지 컴포넌트와 동일 패턴). 버튼 라벨/aria-label/커뮤니티 픽 헤더/참여자 수/AI 예측
+  라벨 전부 `STRINGS[locale]` 테이블로 분기.
+- `/en/mlb/games/[date]` — `status`/`homeWinProb` 필드가 쿼리에서 아예 누락돼 있어(EN 미러
+  최초 배선 당시 픽 UI 자체를 고려 안 함) 추가 후 `status === 'scheduled'` 경기에 `PickButton
+  locale="en"` 배선.
+- `/en/mlb/analysis` — `getTodayMlbAnalysisRows`(analysis-data.ts, ko/en 공유)가 이미
+  `status`/`homeWinProb` 를 포함하고 있어 필드 추가 없이 바로 `PickButton locale="en"` 배선.
+- `/mlb/games/[date]/[slug]`(경기 상세) 및 KBO `predictions/[date]`(다른 이유로
+  `enablePickButton={false}`) 는 원래 KO 도 PickButton 미사용 — scope 밖 확인, 변경 없음.
+- `tsc --noEmit` clean + `eslint` clean + `pnpm test`(498 files/4180 tests all green,
+  wave-658 가드 테스트의 "PickButton en 미러 scope 밖" stale assertion 정정 포함).
+
+
 
 ### feat(mlb): `/en/mlb/reviews` + `/en/mlb/reviews/misses` — `/mlb/reviews` 영어 미러 신규 배선
 

@@ -8,8 +8,50 @@ import { useUserPicks } from '@/hooks/use-user-picks';
 import type { PickPollEntry } from '@/app/api/picks/poll/route';
 
 type League = 'kbo' | 'mlb';
+type Locale = 'ko' | 'en';
 
 const DEVICE_KEY = 'mb_device_id_v1';
+
+const STRINGS = {
+  ko: {
+    communityPick: '커뮤니티 픽',
+    vsAi: '⚡ AI와 반대',
+    participants: (n: number) => `${n}명 참여`,
+    aiPrediction: 'AI 예측',
+    home: '홈',
+    away: '원정',
+    homeButton: (name: string) => `${name} 홈`,
+    awayButton: (name: string) => `${name} 원정`,
+    homePickAria: (name: string) => `${name} 홈팀 픽`,
+    awayPickAria: (name: string) => `${name} 원정팀 픽`,
+    myPick: '내 픽',
+    viewAnalysis: '분석 보기 ↗',
+    viewAnalysisAria: (gameId: string) => `경기 ${gameId} 분석 보기`,
+    topFactor: (factor: string) => `주요 팩터: ${factor}`,
+    countLabel: (n: number) => `${n}명`,
+    joiningSuffix: '참여 중 · 픽 후 결과 공개',
+    joiningNeedMore: (n: number, min: number) => `${n}명 참여 중 · ${min}명 이상 모이면 분포 공개`,
+  },
+  en: {
+    communityPick: 'Community Pick',
+    vsAi: '⚡ vs AI',
+    participants: (n: number) => `${n} votes`,
+    aiPrediction: 'AI Prediction',
+    home: 'HOME',
+    away: 'AWAY',
+    homeButton: (name: string) => `${name} HOME`,
+    awayButton: (name: string) => `${name} AWAY`,
+    homePickAria: (name: string) => `${name} home team pick`,
+    awayPickAria: (name: string) => `${name} away team pick`,
+    myPick: 'My Pick',
+    viewAnalysis: 'View Analysis ↗',
+    viewAnalysisAria: (gameId: string) => `View analysis for game ${gameId}`,
+    topFactor: (factor: string) => `Top factor: ${factor}`,
+    countLabel: (n: number) => `${n}`,
+    joiningSuffix: 'voting · results shown after you pick',
+    joiningNeedMore: (n: number, min: number) => `${n} voting · results shown once ${min}+ join`,
+  },
+} as const;
 
 function getOrCreateDeviceId(): string {
   try {
@@ -32,6 +74,7 @@ interface Props {
   aiTopFactor?: string;
   league?: League; // 'mlb' 시 mlb-submit/mlb-poll route + 별도 localStorage 키 네임스페이스 (KBO 정수 game_id 와 MLB external_game_id 문자열 값 충돌 방지)
   analysisHref?: string; // '분석 보기' 링크 대상. 미지정 시 kbo 는 /analysis/game/{gameId} 기본, mlb 는 링크 미표시 (KBO 전용 라우트 — MLB external_game_id 로 parseInt 하면 엉뚱한 KBO 경기로 연결)
+  locale?: Locale; // 미지정 시 'ko' 기본 (기존 callsite 무변경, wave-659 배지 컴포넌트 동일 패턴)
 }
 
 function PollBar({
@@ -40,12 +83,14 @@ function PollBar({
   homeName,
   awayName,
   aiHomePct,
+  t,
 }: {
   poll: PickPollEntry;
   myPick: 'home' | 'away';
   homeName: string;
   awayName: string;
   aiHomePct?: number;
+  t: (typeof STRINGS)[Locale];
 }) {
   const homePct = poll.total > 0 ? Math.round((poll.home / poll.total) * 100) : 50;
   const awayPct = 100 - homePct;
@@ -55,12 +100,12 @@ function PollBar({
     <div className="mt-2 px-1 space-y-1">
       <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-400">
         <span className="flex items-center gap-1">
-          커뮤니티 픽
+          {t.communityPick}
           {showDivergence && (
-            <span className="text-accent dark:text-accent-light font-medium">⚡ AI와 반대</span>
+            <span className="text-accent dark:text-accent-light font-medium">{t.vsAi}</span>
           )}
         </span>
-        <span>{poll.total}명 참여</span>
+        <span>{t.participants(poll.total)}</span>
       </div>
       <div className="relative h-7 rounded-lg overflow-hidden flex text-xs font-medium">
         <div
@@ -88,7 +133,8 @@ function PollBar({
   );
 }
 
-export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor, league = 'kbo', analysisHref }: Props) {
+export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWinProb, aiTopFactor, league = 'kbo', analysisHref, locale = 'ko' }: Props) {
+  const t = STRINGS[locale];
   const { getPick, setPick } = useUserPicks();
   // MLB external_game_id 는 KBO 정수 game_id 와 값 공간이 겹칠 수 있어 (둘 다 숫자 문자열)
   // localStorage 키 충돌 방지용 네임스페이스 접두어 부여.
@@ -156,7 +202,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
 
   const aiProbPct = aiWinProb != null ? Math.round(aiWinProb * 100) : null;
   const aiTeamName = aiPredictedWinner === 'home' ? homeName : aiPredictedWinner === 'away' ? awayName : null;
-  const aiSideLabel = aiPredictedWinner === 'home' ? '홈' : aiPredictedWinner === 'away' ? '원정' : null;
+  const aiSideLabel = aiPredictedWinner === 'home' ? t.home : aiPredictedWinner === 'away' ? t.away : null;
   const aiHomePct =
     aiProbPct != null
       ? aiPredictedWinner === 'home'
@@ -171,7 +217,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
       {aiProbPct != null && aiTeamName != null && (
         <div className="mt-2 px-1 space-y-0.5">
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="font-semibold text-brand-600 dark:text-brand-400 shrink-0">AI 예측</span>
+            <span className="font-semibold text-brand-600 dark:text-brand-400 shrink-0">{t.aiPrediction}</span>
             <span className="font-semibold text-gray-800 dark:text-gray-200 shrink-0">
               {aiTeamName} {aiSideLabel}
             </span>
@@ -182,38 +228,38 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
               <Link
                 href={linkHref}
                 className="ml-auto shrink-0 text-brand-600 dark:text-brand-400 hover:underline"
-                aria-label={`경기 ${gameId} 분석 보기`}
+                aria-label={t.viewAnalysisAria(String(gameId))}
               >
-                분석 보기 ↗
+                {t.viewAnalysis}
               </Link>
             )}
           </div>
           {aiTopFactor && (
             <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
-              주요 팩터: {aiTopFactor}
+              {t.topFactor(aiTopFactor)}
             </p>
           )}
         </div>
       )}
       <div className="flex items-center gap-2 mt-2 px-1">
-        <span className="text-xs text-gray-400 dark:text-gray-400 shrink-0">내 픽</span>
+        <span className="text-xs text-gray-400 dark:text-gray-400 shrink-0">{t.myPick}</span>
         <button
           type="button"
           onClick={() => handlePick('away')}
           className={`${base} ${current?.pick === 'away' ? active : idle}`}
           aria-pressed={current?.pick === 'away'}
-          aria-label={`${awayName} 원정팀 픽`}
+          aria-label={t.awayPickAria(awayName)}
         >
-          {awayName} 원정
+          {t.awayButton(awayName)}
         </button>
         <button
           type="button"
           onClick={() => handlePick('home')}
           className={`${base} ${current?.pick === 'home' ? active : idle}`}
           aria-pressed={current?.pick === 'home'}
-          aria-label={`${homeName} 홈팀 픽`}
+          aria-label={t.homePickAria(homeName)}
         >
-          {homeName} 홈
+          {t.homeButton(homeName)}
         </button>
       </div>
       {showPoll && (
@@ -223,17 +269,18 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
           homeName={homeName}
           awayName={awayName}
           aiHomePct={aiHomePct}
+          t={t}
         />
       )}
       {!current && poll && poll.total > 0 && (
         <p className="mt-1.5 px-1 text-xs text-gray-500 dark:text-gray-300 flex items-center gap-1">
-          <span className="font-semibold text-brand-600 dark:text-brand-400 tabular-nums">{poll.total}명</span>
-          <span>참여 중 · 픽 후 결과 공개</span>
+          <span className="font-semibold text-brand-600 dark:text-brand-400 tabular-nums">{t.countLabel(poll.total)}</span>
+          <span>{t.joiningSuffix}</span>
         </p>
       )}
       {current && poll && poll.total > 0 && poll.total < MIN_POLL_TOTAL && (
         <p className="mt-1.5 px-1 text-xs text-gray-500 dark:text-gray-300">
-          {poll.total}명 참여 중 · {MIN_POLL_TOTAL}명 이상 모이면 분포 공개
+          {t.joiningNeedMore(poll.total, MIN_POLL_TOTAL)}
         </p>
       )}
     </div>

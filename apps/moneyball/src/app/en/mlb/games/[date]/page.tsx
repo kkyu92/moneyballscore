@@ -8,6 +8,7 @@ import { SITE_URL, MLB_SCORING_RULE, normalizeMlbTeamCode, assertSelectOk, TOP_P
 // of confToWinProb(TOP_PICK_CONF_MIN) (parity, cycle 2131 follow-up).
 const TOP_PICK_MIN_WIN_PCT = Math.round(confToWinProb(TOP_PICK_CONF_MIN) * 100);
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
+import { PickButton } from "@/components/picks/PickButton";
 import { createClient } from "@/lib/supabase/server";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -45,6 +46,8 @@ interface PredictionRow {
   awayCode: string;
   winnerCode: string;
   conf: number;
+  status: string;
+  homeWinProb: number;
 }
 
 // MLB predictions have game_id=NULL (migration 038) — games!inner join is
@@ -69,7 +72,7 @@ async function getMlbGamesForDate(
   const gameIds = preds.map((p) => p.external_game_id);
   const scheduleResult = await supabase
     .from('mlb_schedule')
-    .select('external_game_id, home_team_code, away_team_code')
+    .select('external_game_id, home_team_code, away_team_code, status')
     .in('external_game_id', gameIds);
   const { data: schedules } = assertSelectOk(scheduleResult, 'MlbGamesEn schedule');
   const scheduleByGameId = new Map((schedules ?? []).map((s) => [s.external_game_id, s]));
@@ -87,6 +90,8 @@ async function getMlbGamesForDate(
       awayCode,
       winnerCode: homeWinProb >= 0.5 ? homeCode : awayCode,
       conf: Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100),
+      status: schedule?.status ?? 'scheduled',
+      homeWinProb,
     });
   }
   return rows;
@@ -163,6 +168,18 @@ export default async function MlbGamesEn({ params }: { params: Promise<{ date: s
                     {p.winnerCode} {p.conf}%
                   </span>
                 </Link>
+                {p.status === 'scheduled' && (
+                  <PickButton
+                    gameId={p.external_game_id}
+                    league="mlb"
+                    locale="en"
+                    homeTeam={p.homeCode}
+                    awayTeam={p.awayCode}
+                    aiPredictedWinner={p.winnerCode === p.homeCode ? 'home' : 'away'}
+                    aiWinProb={p.homeWinProb}
+                    analysisHref={`/en/mlb/games/${date}/${p.homeCode}-vs-${p.awayCode}`}
+                  />
+                )}
               </li>
             );
           })}

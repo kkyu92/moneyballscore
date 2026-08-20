@@ -1,4 +1,14 @@
 
+## 🟢 explore-idea (heavy) — PickButton 현지화, en/mlb 커뮤니티 픽 배선 SUCCESS (cycle 2342, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(문자 그대로 `status: approved` 매칭 plan 없음). 2-chain lock 미충족(직전 8사이클 2334-2341 distinct=4: op-analysis/review-code/explore-idea/info-arch). 주기 trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 6/25, info-arch 2/30, lotto 18/30). DESIGN.md mtime 2일 전(design-system 미도달). lotto 다음 회차(2026-08-22) picks 이미 존재, 직전 회차(08-15) 결과도 이미 박제. cycle 2341 review-code(heavy) retro 가 "PickButton 현지화(넓은 범위, 별도 cycle)" 를 명시적 다음 후보로 남김 — carry-over 강도 명확한 쪽 선택.
+
+**실행**: `PickButton.tsx`(커뮤니티 픽 투표 위젯) 하드코딩 한국어 텍스트를 `locale?: 'ko'|'en'` prop + `STRINGS` 테이블로 분기(기본값 `'ko'`, 기존 KBO/MLB callsite 무변경 — wave-659 배지 컴포넌트 동일 패턴). `/en/mlb/games/[date]` 는 `status`/`homeWinProb` 필드가 쿼리에서 아예 누락돼 있어(EN 미러 최초 배선 시 픽 UI 자체 미고려) 추가 후 배선, `/en/mlb/analysis` 는 공유 `getTodayMlbAnalysisRows` 에 필드가 이미 있어 배선만 추가. 두 페이지 모두 `status === 'scheduled'` 경기에 `PickButton locale="en"` 렌더.
+
+검증: `tsc --noEmit` clean, `eslint` clean, `pnpm test`(498 files/4180 tests all green — wave-658 가드 테스트의 "PickButton en 미러 scope 밖" stale assertion 을 새 배선에 맞게 정정 포함). VERSION/CHANGELOG/package.json×2 버전 bump(0.5.62.69→70).
+
+결론: KO/EN 양쪽 커뮤니티 픽 투표 기능 parity 달성. 잔존 backlog: `/mlb/games/[date]/[slug]`(경기 상세) 는 KO 도 원래 PickButton 미사용이라 scope 밖 유지. 다음 explore-idea 후보 = plan #23(LLM 분석 에이전트 context layer, 사용자 review 대기) 또는 신규 topic 자연 발견.
+
 ## ⚪ review-code (heavy) — EN 미러 신규 코드(wave-659) drift 감사 clean RETRO-ONLY (cycle 2341, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2333-2340 distinct=5). 주기 trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 1/30 방금 발화, lotto 17/30). cycle 2338/2339 explore-idea(heavy) 2연속 성공 직후 → Feature-Drift Cycle 패턴(explore-idea→review-code 자연 교대) 적용, 방금 배선된 en/mlb/reviews 미러(wave-659) 를 audit target 으로 선택.
