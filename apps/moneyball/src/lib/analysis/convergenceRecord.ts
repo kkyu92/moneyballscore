@@ -19,6 +19,7 @@ import {
   CONVERGENCE_STREAK_MIN_LENGTH,
   ACCURACY_GOOD_PCT,
   CONVERGENCE_BADGE_LOW_PCT,
+  H2H_MIN_GAMES,
   type TeamCode,
   type MlbTeamCode,
   type SelectResult,
@@ -28,6 +29,7 @@ import {
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel';
+import { getSeasonH2HData } from '@/app/analysis/analysis-data';
 
 interface ConvergenceGameRow {
   id: number;
@@ -220,9 +222,13 @@ async function fetchConvergencePickDetailedResults(
   const { data } = assertSelectOk(gamesResult, 'fetchConvergencePickDetailedResults');
   if (!data) return [];
 
+  // cycle 2304: h2h(상대전적) 누락 시 computeCompositeDuel 이 h2h 팩터를 항상 제외(validCount 최대 9/10)해
+  // FACTOR_PICK_COMPLETE(10) 게이팅이 구조적으로 절대 통과 불가 — 완전수렴 시즌/월간/streak/팀별/홈어웨이
+  // 통계가 전부 silent 0건이던 문제 (cycle 2303 game/[id] 단건 h2h 누락 fix 와 동일 family, 여기는 집계 차원)
+  const h2hMap = await getSeasonH2HData();
   const results: Array<{ favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string }> = [];
   for (const row of data as unknown as ConvergenceGameRow[]) {
-    const evaluated = evaluateConvergencePickRow(row, minFactors);
+    const evaluated = evaluateConvergencePickRow(row, minFactors, h2hMap);
     if (evaluated) results.push(evaluated);
   }
 
@@ -235,12 +241,22 @@ async function fetchConvergencePickDetailedResults(
 function evaluateConvergencePickRow(
   row: ConvergenceGameRow,
   minFactors: number,
+  h2hMap: Map<string, Record<string, number>>,
 ): { favoredTeam: TeamCode; favoredHome: boolean; won: boolean; gameDate: string } | null {
   const pred = row.predictions?.[0];
   if (!pred || row.home_score === null || row.away_score === null) return null;
   const homeCode = row.home_team?.code as TeamCode | undefined;
   const awayCode = row.away_team?.code as TeamCode | undefined;
   if (!homeCode || !awayCode) return null;
+
+  // cycle 2304: page.tsx/game/[id] 와 동일 패턴 — season-to-date 누적 h2h, H2H_MIN_GAMES 미만 시 미반영
+  const [h2hA, h2hB] = [homeCode as string, awayCode as string].sort();
+  const h2hPair = h2hMap.get(`${h2hA}:${h2hB}`) ?? {};
+  const h2hHomeWins = h2hPair[homeCode] ?? 0;
+  const h2hAwayWins = h2hPair[awayCode] ?? 0;
+  const h2hTotal = h2hHomeWins + h2hAwayWins;
+  const h2hHomeArg = h2hTotal >= H2H_MIN_GAMES ? h2hHomeWins : undefined;
+  const h2hAwayArg = h2hTotal >= H2H_MIN_GAMES ? h2hAwayWins : undefined;
 
   const duel = computeCompositeDuel({
     homeCode,
@@ -260,6 +276,8 @@ function evaluateConvergencePickRow(
     awayElo: pred.away_elo ?? undefined,
     homeRecentForm: pred.home_recent_form ?? undefined,
     awayRecentForm: pred.away_recent_form ?? undefined,
+    h2hHomeWins: h2hHomeArg,
+    h2hAwayWins: h2hAwayArg,
   });
 
   if (duel.validCount < COMPOSITE_DUEL_MIN_VALID) return null;
@@ -305,9 +323,11 @@ async function fetchConvergencePickDetailedResultsForPair(
   const { data } = assertSelectOk(gamesResult, `fetchConvergencePickDetailedResultsForPair ${idA} vs ${idB}`);
   if (!data) return [];
 
+  // cycle 2304: h2h 누락 시 FACTOR_PICK_COMPLETE 게이팅 구조적 불가 (evaluateConvergencePickRow 동일 fix)
+  const h2hMap = await getSeasonH2HData();
   const results: Array<{ favoredTeam: TeamCode; won: boolean }> = [];
   for (const row of data as unknown as ConvergenceGameRow[]) {
-    const evaluated = evaluateConvergencePickRow(row, minFactors);
+    const evaluated = evaluateConvergencePickRow(row, minFactors, h2hMap);
     if (evaluated) results.push({ favoredTeam: evaluated.favoredTeam, won: evaluated.won });
   }
 

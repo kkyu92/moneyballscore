@@ -17,6 +17,7 @@ import {
   COMPOSITE_DUEL_MIN_VALID,
   KBO_TEAMS,
   FACTOR_PICK_STRONG,
+  H2H_MIN_GAMES,
   type SelectResult,
   type TeamCode,
 } from '@moneyball/shared';
@@ -521,6 +522,9 @@ export interface UpcomingScheduledGame {
   awaySPXfip: number | null;
   /** wave-537: 수렴 픽 경기 한 줄 요약 (buildGameOverview summary) */
   gameOverviewSummary: string | null;
+  /** cycle 2304: 올 시즌 상대전적 (H2H_MIN_GAMES 미만 시 undefined) — computeCompositeDuel h2h 팩터 입력용 */
+  h2hHomeWins?: number;
+  h2hAwayWins?: number;
 }
 
 export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame[]> {
@@ -535,7 +539,10 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
   const tomorrowStr = tomorrowDate.toISOString().slice(0, 10);
   if (tomorrowStr > currentWeek.endDate) return [];
 
-  const [scheduleResult, eloResult] = await Promise.all([
+  // cycle 2304: h2h(상대전적) 누락 시 computeCompositeDuel 이 h2h 팩터를 항상 제외(validCount 최대 9/10)해
+  // 이번 주 남은 경기 완전수렴(FACTOR_PICK_COMPLETE=10) 게이팅이 구조적으로 절대 통과 불가하던 문제
+  // (cycle 2303 game/[id] 단건 h2h 누락 fix + cycle 2304 convergenceRecord.ts 집계 fix 와 동일 family)
+  const [scheduleResult, eloResult, h2hMap] = await Promise.all([
     supabase
       .from('games')
       .select(`
@@ -567,6 +574,7 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
       .not('home_elo', 'is', null)
       .order('id', { ascending: false })
       .limit(ANALYSIS_UPCOMING_LIMIT) as unknown as Promise<SelectResult<unknown[]>>,
+    getSeasonH2HData(),
   ]);
 
   const { data: scheduleData } = assertSelectOk(scheduleResult, 'analysis getThisWeekRemainingGames schedule');
@@ -627,6 +635,14 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
     let convergenceNetScore: number | null = null;
     let factorFavoredSlugs: string[] | null = null;
     const fd = factorDataMap.get(r.id);
+    // cycle 2304: season-to-date 누적 h2h — page.tsx/game/[id] 동일 패턴, H2H_MIN_GAMES 미만 시 undefined
+    const [h2hA, h2hB] = [homeCode as string, awayCode as string].sort();
+    const h2hPair = h2hMap.get(`${h2hA}:${h2hB}`) ?? {};
+    const h2hHomeWinsRaw = h2hPair[homeCode] ?? 0;
+    const h2hAwayWinsRaw = h2hPair[awayCode] ?? 0;
+    const h2hTotal = h2hHomeWinsRaw + h2hAwayWinsRaw;
+    const h2hHomeWins = h2hTotal >= H2H_MIN_GAMES ? h2hHomeWinsRaw : undefined;
+    const h2hAwayWins = h2hTotal >= H2H_MIN_GAMES ? h2hAwayWinsRaw : undefined;
     if (fd) {
       const duel = computeCompositeDuel({
         homeCode,
@@ -638,6 +654,7 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
         homeWar: fd.homeWar, awayWar: fd.awayWar,
         homeElo: eloMap.get(homeCode), awayElo: eloMap.get(awayCode),
         homeRecentForm: fd.homeRecentForm ?? undefined, awayRecentForm: fd.awayRecentForm ?? undefined,
+        h2hHomeWins, h2hAwayWins,
       });
       if (duel.validCount >= COMPOSITE_DUEL_MIN_VALID) {
         convergenceNetScore = duel.netScore;
@@ -678,6 +695,8 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
       awayRecentForm: fd?.awayRecentForm ?? null,
       homeSPXfip: fd?.homeSpXfip ?? null,
       awaySPXfip: fd?.awaySpXfip ?? null,
+      h2hHomeWins,
+      h2hAwayWins,
       // wave-537: TOP픽/강수렴픽(FACTOR_PICK_STRONG=8) 경기에만 buildGameOverview summary 생성
       // wave-538: FACTOR_PICK_MIN_FACTORS(7) → FACTOR_PICK_STRONG(8) — UI 표시 조건과 일치
       gameOverviewSummary: (() => {
