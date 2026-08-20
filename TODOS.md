@@ -1,4 +1,18 @@
 
+## ⚪ review-code (heavy) — analysis/page.tsx 어제 수렴 픽 배지 isCorrect 오판정 정정 SUCCESS (cycle 2299, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code x5/lotto x1/fix-incident x1/explore-idea x1). 주기 trigger 3종 미도달(op-analysis 13-gap/25, lotto 4-gap/30, info-arch 18-gap/30). #1338 family(scoring_rule 필터 누락) sweep 은 KBO population 전 파일 grep 결과 clean — 구조적 완료 판단. DESIGN.md 2일 전 갱신(비신선 X), "최근 7일 신규 라우트" 신호는 전체 페이지 mtime 일괄 갱신이라 false positive 로 판단해 무시.
+
+review-code(heavy) 재선택 근거: 최대 monolith 2개(analysis/page.tsx 2802줄, accuracy/page.tsx 1203줄)가 마지막 감사된 cycle 2149~2150 이후 148 사이클 경과 + 그 사이 대폭 성장(팩터 배지 wave 다수 반영) — 재감사 due.
+
+Agent 위임 audit 결과(analysis/page.tsx + analysis-data.ts 전체 read): #1338/WAR=0 sentinel/H2H 소표본 가드 모두 기존 정상 확인. 신규 발견 — `convergenceRecord.ts:765` `computeConvergenceRecordFromIsCorrect()` 가 "어제 강수렴/완전수렴 픽" 배지(page.tsx:370,372) 승패를 게임의 `isCorrect`(모델 자체 최종 가중치 예측 적중 여부)로 판정. 그런데 수렴 픽(팩터 단순 다수결)과 모델 예측은 방향이 엇갈릴 수 있음(페이지가 `modelAgrees` 로 이 불일치를 명시적으로 추적) — 엇갈리는 경우 배지가 실제와 반대로 표시되는 silent 오류. 형제 함수 `computeWeeklyConvergenceRecord`/`evaluateConvergencePickRow` 는 이미 homeScore/awayScore 로 실제 승자를 재산출하는 올바른 패턴 — "어제" 배지만 지름길(isCorrect 재사용)을 탄 상태였음.
+
+수정: `computeConvergenceRecordFromIsCorrect` → `computeConvergenceRecordFromScores` 로 개명 + homeScore/awayScore 기반 실제 승자 재산출 로직으로 전환(caller `yesterdayGames` 는 이미 두 필드 보유, 데이터 fetch 변경 불필요). 회귀 테스트(`wave-580-convergence-record-from-is-correct.test.ts`) 를 새 시그니처로 갱신 + 모델/수렴픽 불일치 케이스 신규 추가. 487 files/4105 tests all pass, type-check/lint clean. main 직접 커밋(f2ddc5f6) 후 즉시 push, pre-push hook lint/type-check 통과 확인.
+
+다른 발견(page.tsx:261, `[homeCode, awayCode].sort()` 가 이미 import 된 `canonicalPair()` 헬퍼와 중복) — 낮은 심각도 dead-logic-drift risk 로 낮은 우선순위 후속 후보 carry.
+
+다음 후보: accuracy/page.tsx(1203줄) 별도 재감사 또는 page.tsx:261 canonicalPair 중복 정리 또는 op-analysis(13-gap/25)/lotto(4-gap/30) 자체 주기 monitor.
+
 ## ⚪ fix-incident (lite→review-code(heavy) 전환) — v2-preview scoring_rule 필터 누락 정정 (#1338 family 10번째 재발) SUCCESS (cycle 2298, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked). fix-incident 20-cycle 미발화 gap 도달(마지막 발화 cycle 2278 → 2298, gap=20) — 트리거대로 lite 점검 시작(`gh run list` 스케줄 workflow 최근 실패 확인 + pipeline_runs 대체 신호).
