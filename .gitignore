@@ -52,3 +52,4 @@ apps/moneyball/playwright-report/
 apps/moneyball/blob-report/
 apps/moneyball/playwright/.cache/
 .superpowers/
+.env*
