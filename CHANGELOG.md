@@ -1,3 +1,24 @@
+## v0.5.62.67 — 2026-08-20 (cycle 2337, review-code (heavy): silent drift wave 657 — 적중률 yellow 색상 하한 `>= 0.5` 7 callsite 단일 source)
+
+### fix(context): 적중률 3단계 색상(brand/yellow/red) yellow 하한 `ACCURACY_MID_RATE` 단일 source 추출
+
+- `packages/shared/src/index.ts` 에 `ACCURACY_MID_RATE = 0.5` 신규 상수 (기존
+  `ACCURACY_GOOD_RATE`/`ACCURACY_OK_RATE`/`ACCURACY_WARN_RATE` 패밀리 옆).
+- 팀 프로필 3곳(`teams/[code]`, `mlb/team/[code]`, `en/mlb/team/[code]`) +
+  주간/월간 리뷰 4곳(`reviews/weekly`, `reviews/monthly`, `mlb/reviews/weekly`,
+  `mlb/reviews/monthly`) — 총 7 callsite 가 동일한 `>= 0.5` 를 하드코딩(단일
+  source 부재). `review-code (heavy)` 감사 중 진단(gap-trigger 4종 미도달 +
+  review-code/explore-idea 5 cycle 연속 "신규 target 부재" 확정 후 대체 대상
+  탐색 — 최근 audit 미도달 파일 `reviews/weekly/[week]/page.tsx` 정독 중 발견).
+  wave-360/498 family(같은 파일 내 다른 tier 상수는 이미 추출돼 있었으나 이
+  yellow 하한만 미포함)와 동일한 silent drift 패턴.
+- 신규 guard test `wave-657-accuracy-mid-rate-swap.test.ts` (7 callsite 임포트 +
+  하드코딩 0.5 부재 확인). `accuracy/page.tsx`/`accuracy/shadow/page.tsx` 의
+  `>= 0.5` 는 별개 의미(커뮤니티 정답률 baseline / 홈승 확률 50% 분기)라 스코프
+  제외.
+- `tsc --noEmit`(4패키지 clean) + `eslint`(clean) + `pnpm test`(496 files /
+  4164 tests all green, 신규 7건 포함) 확인.
+
 ## v0.5.62.66 — 2026-08-20 (cycle 2331, operational-analysis (lite): W34 주간 성과 스냅샷 + MLB is_correct null 오탐 해소)
 
 ### data(weekly-review): 2026-W34 (8/17~8/23, KST) KBO v1.8 스냅샷
