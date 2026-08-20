@@ -2,23 +2,26 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   MLB_TEAMS,
-  MLB_DIVISIONS,
   MLB_TEAM_COUNT,
   MLB_DIVISION_COUNT,
   MLB_GAMES_PER_TEAM,
-  type MlbTeamCode,
+  MLB_WILDCARD_COUNT,
   type MlbLeagueSide, SITE_URL
 } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
+import { buildMlbDivisionStandings, buildMlbWildcardStandings, type MlbWildcardRow } from "@/lib/mlb/buildMlbStandings";
+import { computeMagicNumber } from "@/lib/standings/computeMagicNumber";
+
+const FACTOR_TOTAL = MLB_FACTOR_COUNTS.total;
 
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 export const metadata: Metadata = {
   title: "MLB Wild Card Race — AL/NL Wild Card Contenders | MoneyBall Score",
   description:
-    `MLB AL/NL Wild Card race — 3 spots per league. Late-season game-back tracking + ${MLB_FACTOR_COUNTS.total}-factor model base. Live data integration ETA 2026-08.`,
+    `MLB AL/NL Wild Card race — ${MLB_WILDCARD_COUNT} spots per league, live standings + game-back + Magic Number. ${MLB_FACTOR_COUNTS.total}-factor model base.`,
   alternates: {
     canonical: `${SITE_URL}/en/mlb/wild-card`,
     languages: {
@@ -29,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MLB Wild Card Race | MoneyBall Score",
     description:
-      `MLB AL/NL Wild Card 3-spot race + ${MLB_FACTOR_COUNTS.total}-factor model base — Live data ETA 2026-08.`,
+      `MLB AL/NL Wild Card ${MLB_WILDCARD_COUNT}-spot race — live standings + ${FACTOR_TOTAL}-factor model base.`,
     url: `${SITE_URL}/en/mlb/wild-card`,
     type: "website",
     locale: "en_US",
@@ -38,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MLB Wild Card Race | MoneyBall Score",
     description:
-      `MLB AL/NL Wild Card 3-spot race + ${MLB_FACTOR_COUNTS.total}-factor model base — Live data ETA 2026-08.`,
+      `MLB AL/NL Wild Card ${MLB_WILDCARD_COUNT}-spot race — live standings + ${FACTOR_TOTAL}-factor model base.`,
   },
 };
 
@@ -48,15 +51,30 @@ function leagueName(league: MlbLeagueSide) {
   return league === "AL" ? "American League" : "National League";
 }
 
-function leagueAllCodes(league: MlbLeagueSide): MlbTeamCode[] {
-  return [
-    ...MLB_DIVISIONS[league].East,
-    ...MLB_DIVISIONS[league].Central,
-    ...MLB_DIVISIONS[league].West,
-  ];
+function formatWinPct(v: number): string {
+  if (v === 0) return "-.---";
+  return v.toFixed(3).replace(/^0/, "");
 }
 
-export default function MlbWildCardHubEn() {
+function formatWcGB(gb: number | null): string {
+  if (gb === null || gb === 0) return "-";
+  const abs = Math.abs(gb);
+  const formatted = abs % 1 === 0 ? `${abs}.0` : String(abs);
+  return gb < 0 ? `+${formatted}` : formatted;
+}
+
+function WcMagicNumberBadge({ value }: { value: number }) {
+  return (
+    <p className="text-xs font-semibold tabular-nums text-brand-600 dark:text-brand-400">
+      {value === 0 ? "Wild Card berth clinched" : `Wild Card Magic Number ${value}`}
+    </p>
+  );
+}
+
+export default async function MlbWildCardHubEn() {
+  const divisionStandings = await buildMlbDivisionStandings();
+  const wildcardStandings = buildMlbWildcardStandings(divisionStandings);
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 md:py-10 space-y-8">
       <Breadcrumb
@@ -72,10 +90,10 @@ export default function MlbWildCardHubEn() {
           ⭐ MLB Wild Card Race
         </h1>
         <p className="text-base text-gray-600 dark:text-gray-300">
-          AL/NL both leagues — Wild Card 3-spot race. Of the remaining {MLB_TEAM_COUNT - MLB_DIVISION_COUNT} teams outside the {MLB_DIVISION_COUNT} division leaders, 3 per league advance.
+          AL/NL both leagues — Wild Card {MLB_WILDCARD_COUNT}-spot race. Of the teams outside the {MLB_DIVISION_COUNT} division leaders, the top {MLB_WILDCARD_COUNT} by win rate per league advance.
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          ETA 2026-08 — Late-season game-back / Magic Number tracking + {MLB_FACTOR_COUNTS.total}-factor model live data integration.
+          Live standings based on final games · game-back · Magic Number + {FACTOR_TOTAL}-factor model base.
         </p>
       </header>
 
@@ -92,52 +110,78 @@ export default function MlbWildCardHubEn() {
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
           <li>MLB {MLB_GAMES_PER_TEAM}-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
           <li>{MLB_TEAM_COUNT}-team standings (AL/NL × E/C/W {MLB_DIVISION_COUNT} divisions) — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
-          <li>Wild Card 3-spot race tracking + live game-back — <strong>ETA 2026-08</strong></li>
+          <li>Wild Card {MLB_WILDCARD_COUNT}-spot race standings + game-back + Magic Number — <strong>Complete</strong></li>
           <li>Postseason bracket (WC / DS / LCS / WS) visualization — <strong>ETA 2026-09</strong></li>
         </ul>
       </section>
 
-      <section className="space-y-4" aria-labelledby="wc-pool-heading">
+      <section className="space-y-5" aria-labelledby="wc-race-heading">
         <h2
-          id="wc-pool-heading"
+          id="wc-race-heading"
           className="text-xl font-bold border-b border-gray-200 dark:border-[var(--color-border)] pb-2"
         >
-          Wild Card Candidate Pool — Teams Outside Division Leaders
+          Wild Card Race — Teams Outside {MLB_DIVISION_COUNT} Division Leaders
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          3 division leaders per league = automatic playoff berths. Top 3 by win rate among the remaining {MLB_TEAM_COUNT / 2 - 3} = Wild Card spots. This hub shows all {MLB_TEAM_COUNT} team entry paths — live game-back data activates at ETA.
+          3 division leaders per league advance automatically. Among the rest, top {MLB_WILDCARD_COUNT} by win rate = Wild Card berths. GB = relative to the cutoff ({MLB_WILDCARD_COUNT}th place) team (+ = cushion, plain number = games to catch up).
         </p>
         {LEAGUES.map((league) => {
-          const codes = leagueAllCodes(league);
+          const rows: MlbWildcardRow[] = wildcardStandings[league];
+          const cutoff = rows[MLB_WILDCARD_COUNT - 1];
+          const firstOut = rows[MLB_WILDCARD_COUNT];
+          const wcMagicNumber =
+            cutoff && firstOut ? computeMagicNumber(cutoff, firstOut, MLB_GAMES_PER_TEAM) : null;
           return (
-            <div key={league} className="space-y-2" aria-labelledby={`wc-${league}-heading`}>
+            <div key={league} className="space-y-3" aria-labelledby={`wc-${league}-heading`}>
               <h3
                 id={`wc-${league}-heading`}
-                className="text-base font-semibold text-gray-600 dark:text-gray-300"
+                className="text-sm font-semibold text-gray-600 dark:text-gray-300"
               >
-                {leagueName(league)} ({codes.length} teams)
+                {leagueName(league)}
               </h3>
-              <ul className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                {codes.map((code) => {
-                  const team = MLB_TEAMS[code];
+              <ol className="space-y-2">
+                {rows.map((row, idx) => {
+                  const team = MLB_TEAMS[row.teamCode];
+                  const inField = idx < MLB_WILDCARD_COUNT;
+                  const showMagicNumber =
+                    idx === MLB_WILDCARD_COUNT - 1 && wcMagicNumber !== null;
                   return (
-                    <li key={code}>
+                    <li key={row.teamCode}>
                       <Link
-                        href={`/en/mlb/team/${code}`}
-                        className="flex items-center gap-2 bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-2 hover:shadow-md hover:border-amber-500/50 transition-all"
+                        href={`/en/mlb/team/${row.teamCode}`}
+                        className={
+                          "flex items-center gap-3 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border p-3 hover:shadow-md transition-all " +
+                          (inField
+                            ? "border-amber-300 dark:border-amber-700 hover:border-amber-500/70"
+                            : "border-gray-200 dark:border-[var(--color-border)] hover:border-amber-500/50")
+                        }
                       >
-                        <MlbTeamLogo team={code} size={16} className="rounded-full shrink-0" />
+                        <span
+                          aria-hidden
+                          className={
+                            "inline-flex items-center justify-center w-9 h-7 text-xs font-bold rounded-full shrink-0 " +
+                            (inField
+                              ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                              : "bg-gray-100 dark:bg-[var(--color-surface-hover)] text-gray-500 dark:text-gray-400")
+                          }
+                        >
+                          {inField ? `WC${idx + 1}` : idx + 1}
+                        </span>
+                        <MlbTeamLogo team={row.teamCode} size={24} className="rounded-full shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold truncate">{team.shortName}</p>
-                          <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
-                            {team.division}
+                          <p className="font-semibold truncate">{team.shortName}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate font-mono tabular-nums">
+                            {row.wins}-{row.losses} · {formatWinPct(row.winPct)} · GB {formatWcGB(row.wcGamesBehind)}
                           </p>
+                          {showMagicNumber && wcMagicNumber !== null && (
+                            <WcMagicNumberBadge value={wcMagicNumber} />
+                          )}
                         </div>
                       </Link>
                     </li>
                   );
                 })}
-              </ul>
+              </ol>
             </div>
           );
         })}
@@ -145,7 +189,7 @@ export default function MlbWildCardHubEn() {
 
       <footer className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-[var(--color-border)] pt-4 space-y-1">
         <p>
-          ※ Live Wild Card race data integration = ETA 2026-08 (late regular season game-back tracking activates).
+          ※ This hub started as a Header NAV broken-link recovery layer — extended to a live Wild Card race using final mlb_schedule game results (cycle 2305).
         </p>
         <p>
           ※ Related: <Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link> · <Link href="/en/mlb/postseason" className="underline">/en/mlb/postseason</Link> · <Link href="/en/mlb" className="underline">/en/mlb</Link> hub.

@@ -213,6 +213,13 @@ export const MLB_REGULAR_SEASON_GAMES =
   (MLB_TEAM_COUNT * MLB_GAMES_PER_TEAM) / 2;
 
 /**
+ * 리그당 Wild Card 진출 팀 수 — MLB 포스트시즌 규정 상수 (division 1위 3팀 외 3장).
+ * cycle 2305 explore-idea — /mlb/wild-card 라이브 데이터 통합 (division-standings.ts
+ * buildMlbWildcardStandings 단일 source). 규정 변경 시 본 상수 1 라인 갱신.
+ */
+export const MLB_WILDCARD_COUNT = 3;
+
+/**
  * 구장 짧은 이름 — UI 노출용. KBO_TEAMS.stadium 은 정식 명칭이라 UI 에 길고,
  * KBO 공식 API S_NM 은 짧은 지역명 ("대구", "잠실") 을 리턴. Naver basic
  * 응답처럼 stadium 필드가 비어 있을 때 fallback 용 상수.

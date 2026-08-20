@@ -4,6 +4,7 @@ import {
   normalizeMlbTeamCode,
   MLB_DIVISIONS,
   MLB_TEAMS,
+  MLB_WILDCARD_COUNT,
   type MlbTeamCode,
   type MlbLeagueSide,
   type MlbDivisionSide,
@@ -118,4 +119,36 @@ export function findMlbTeamDivisionRank(
   const idx = rows.findIndex((r) => r.teamCode === teamCode);
   if (idx === -1) return null;
   return { rank: idx + 1, total: rows.length, gamesBehind: rows[idx].gamesBehind };
+}
+
+export interface MlbWildcardRow extends MlbStandingsRow {
+  /**
+   * 리그 컷오프(MLB_WILDCARD_COUNT 번째 팀) 기준 게임차. 컷오프 팀=0, 양수=컷오프
+   * 미달(추격 중, 탈락권), 음수=컷오프 확보(여유). division gamesBehind 와 별개 지표.
+   */
+  wcGamesBehind: number | null;
+}
+
+/**
+ * 리그별 Wild Card pool — division 1위 3팀을 제외한 나머지 팀을 승률 내림차순 정렬.
+ * `/mlb/wild-card` 가 "ETA 2026-08" placeholder 로 방치돼있던 실제 라이브 데이터
+ * 갭 해소 (cycle 2296 explore-idea carry-over — division 매직넘버 후속으로 명시된
+ * 미구현 항목). computeMagicNumber 재사용: pool[MLB_WILDCARD_COUNT-1](컷오프) vs
+ * pool[MLB_WILDCARD_COUNT](첫 탈락 팀) 이 KBO standings playoffMN 과 동일 패턴.
+ */
+export function buildMlbWildcardStandings(
+  standings: MlbDivisionStandings,
+): Record<MlbLeagueSide, MlbWildcardRow[]> {
+  const result = {} as Record<MlbLeagueSide, MlbWildcardRow[]>;
+  for (const league of Object.keys(MLB_DIVISIONS) as MlbLeagueSide[]) {
+    const pool = (Object.keys(MLB_DIVISIONS[league]) as MlbDivisionSide[])
+      .flatMap((division) => standings[league][division].slice(1))
+      .sort((a, b) => b.winPct - a.winPct || b.wins - a.wins);
+    const cutoff = pool[MLB_WILDCARD_COUNT - 1];
+    result[league] = pool.map((r) => ({
+      ...r,
+      wcGamesBehind: !cutoff ? null : (cutoff.wins - r.wins + (r.losses - cutoff.losses)) / 2,
+    }));
+  }
+  return result;
 }
