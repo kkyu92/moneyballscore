@@ -102,7 +102,7 @@ export default function MlbWildCardOgImage() {
           }}
         >
           <span>{SITE_HOST}/mlb/wild-card</span>
-          <span>KO · EN · Live ETA 2026-08</span>
+          <span>KO · EN · Live</span>
         </div>
       </div>
     ),

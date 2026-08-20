@@ -131,7 +131,7 @@ export default function MlbPostseasonHubEn() {
         <ul className="text-sm text-amber-900 dark:text-amber-100 space-y-1 list-disc list-inside">
           <li>MLB {MLB_GAMES_PER_TEAM}-game full ingestion + {MLB_FACTOR_COUNTS.total}-factor model — <strong>Complete</strong></li>
           <li>{MLB_TEAM_COUNT}-team standings + season game-back tracking — <strong>Complete</strong> (<Link href="/en/mlb/standings" className="underline">/en/mlb/standings</Link>)</li>
-          <li>Wild Card race tracking — <strong>ETA 2026-08</strong> (<Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link>)</li>
+          <li>Wild Card race tracking — <strong>Complete</strong> (<Link href="/en/mlb/wild-card" className="underline">/en/mlb/wild-card</Link>)</li>
           <li>Postseason bracket + per-series {MLB_FACTOR_COUNTS.total}-factor predictions — <strong>ETA 2026-09</strong></li>
         </ul>
       </section>
