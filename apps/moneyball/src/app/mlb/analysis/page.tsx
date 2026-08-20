@@ -17,6 +17,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PickButton } from "@/components/picks/PickButton";
 import { createClient } from "@/lib/supabase/server";
 import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
+import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
 import { getCurrentWeek } from "@/lib/reviews/computeWeekRange";
 import { getCurrentMonth } from "@/lib/reviews/computeMonthRange";
 import {
@@ -141,12 +142,13 @@ export default async function MlbAnalysisPage() {
   const currentWeek = getCurrentWeek();
   const currentMonth = getCurrentMonth();
   const supabase = await createClient();
-  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats] = await Promise.all([
+  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats, accuracySummary] = await Promise.all([
     getTodayMlbAnalysisRows(supabase, today),
     getMlbThisWeekRemainingGames(today),
     getMlbYesterdayResults(),
     getMlbPeriodStats(currentWeek.startDate, currentWeek.endDate),
     getMlbPeriodStats(currentMonth.startDate, currentMonth.endDate),
+    buildMlbAccuracySummary('ko'),
   ]);
   const weekRemainingByDate = groupMlbGamesByDate(weekRemainingGames);
 
@@ -427,6 +429,29 @@ export default async function MlbAnalysisPage() {
                 {monthlyStats.total > 0
                   ? ` · ${monthlyStats.total}경기 중 ${monthlyStats.correct}적중 (${Math.round((monthlyStats.correct / monthlyStats.total) * 100)}%)`
                   : " · 이번 달 검증된 경기를 기다리는 중"}
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      <section aria-labelledby="mlb-accuracy-title">
+        <h2 id="mlb-accuracy-title" className="sr-only">MLB AI 적중 기록</h2>
+        <Link
+          href="/mlb/accuracy"
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-2xl shrink-0">🎯</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                MLB AI 적중 기록 →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {accuracySummary.verifiedN > 0 && accuracySummary.accuracyRate != null
+                  ? `시즌 누적 ${accuracySummary.verifiedN}경기 중 ${accuracySummary.correctN}적중 (${Math.round(accuracySummary.accuracyRate * 100)}%)`
+                  : "시즌 검증된 경기를 기다리는 중"}
+                {" · 캘리브레이션·팀별 성과·팩터 분석까지"}
               </p>
             </div>
           </div>
