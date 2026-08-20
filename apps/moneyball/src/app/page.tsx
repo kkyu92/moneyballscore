@@ -659,7 +659,7 @@ export default async function HomePage() {
   const todayTierDist = games.reduce(
     (acc, g) => {
       const pred = g.predictions?.[0];
-      const hwp = pred?.home_win_prob ?? pred?.reasoning?.homeWinProb ?? null;
+      const hwp = pred?.reasoning?.homeWinProb ?? pred?.home_win_prob ?? null;
       if (hwp == null) return acc;
       const tier = classifyWinnerProb(hwp);
       acc[tier]++;
