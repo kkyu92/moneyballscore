@@ -5081,3 +5081,13 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 **결론**: drift 0건, PR/커밋 없음, cycle 2219 와 동일한 "감사했지만 발견 없음" 패턴.
 다음 후보: operational-analysis(gap 19) 또는 fix-incident(gap 12) — 둘 다 자체
 주기 트리거 임계 접근 중.
+
+## 🟢 review-code (heavy) — silent drift wave-657 accuracy yellow 하한 단일 source SUCCESS (cycle 2337, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2329-2336 distinct=4). 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 0/25, info-arch 26/30, lotto 12/30). review-code/explore-idea 는 직전 5+ 사이클 연속 "신규 target 부재" 확정된 상태 — 파일 크기+mtime 재정렬로 대체 감사 대상 탐색.
+
+**실행**: `apps/moneyball/src/app/reviews/weekly/[week]/page.tsx`(524줄, 마지막 touch 2026-07-22 = 최오래 미audit 후보) 직접 read 중 3단계(brand/yellow/red) 적중률 색상 배지 yellow 하한이 `>= 0.5` 하드코딩임을 발견. grep 재확인 결과 팀 프로필 3곳(teams/[code], mlb/team/[code], en/mlb/team/[code]) + 주간/월간 리뷰 4곳(reviews/weekly, reviews/monthly, mlb/reviews/weekly, mlb/reviews/monthly) 총 7 callsite 동일 — wave-360/498 family(같은 파일 다른 tier는 이미 상수화됐으나 이 하한만 누락)와 동일 구조. `ACCURACY_MID_RATE=0.5` 신규 상수(`packages/shared`) 추출 + 7 callsite swap + guard test(`wave-657-accuracy-mid-rate-swap.test.ts`, 7건) 신규. `accuracy/page.tsx`/`accuracy/shadow/page.tsx` 의 `>= 0.5` 는 별개 의미(커뮤니티 baseline/홈승 확률 분기)로 스코프 제외.
+
+검증: `tsc --noEmit`(4패키지 clean) / `eslint`(clean) / `pnpm test`(496 files/4164 tests all green, 신규 7건 포함). VERSION/package.json 0.5.62.66→67 bump + CHANGELOG 기록. PR #3017 → `gh pr merge --squash --auto --delete-branch` → `state=MERGED` 실측 확인(commit b83728c7).
+
+결론: "review-code/explore-idea 신규 topic 부재"와 "silent drift 완전 소진"은 다른 명제 — 파일 mtime 기준 재정렬 탐색법이 유효한 반례 발견 경로임을 확인. 다음 cycle 후보: 동일 탐색법 지속 또는 gap-trigger 자연 도달(fix-incident 4/20·op-analysis 1/25·info-arch 27/30·lotto 13/30) monitor.
