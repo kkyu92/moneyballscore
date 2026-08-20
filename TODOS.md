@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — debug/reliability 페이지 scoring_rule + prediction_type 필터 누락 정정 (#1338 family 9번째 재발) SUCCESS (cycle 2297, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code x6 + lotto x1 + explore-idea x1). 주기 trigger 3종 미도달(fix-incident 19-gap/20, op-analysis 12-gap/25, info-arch 17-gap/30, lotto 3-gap/30). cycle 2296 retro 추천대로 review-code(heavy) 재탐색 — #1338 family(analysis/predictions/insights 계열)는 이미 8건 전부 sweep 완료된 상태라 새 sweep 대상 탐색.
+
+발견: `predictions` 테이블 쿼리 전수 grep — `scoring_rule` 미필터 후보 중 `/debug/reliability` (calibration reliability diagram, BASIC auth 보호 내부 도구)가 `.from('predictions')` 쿼리에 `scoring_rule`/`prediction_type` 필터를 아예 걸지 않음 확인. 형제 페이지 `/accuracy`는 동일 population 개념에 `CURRENT_MODEL_FILTER` + `prediction_type='pre_game'` 필터 적용 중 — reliability 페이지만 누락. 실제 영향: 과거 scoring_rule 버전(v1.5~v1.7-revert) + shadow row(v2.0-shadow/v2.1-B-shadow, 평문 string reasoning) + post_game row + **MLB 예측(동일 predictions 테이블 공유, MLB_SCORING_RULE로 구분)까지 전부** calibration 집계에 혼입 — "현재 모델 보정 상태 진단"이라는 페이지 목적과 정면 배치. (`/v2-preview`도 유사하게 scoring_rule 미필터이나 noindex 내부 preview + 이미 v2.1-B rejected 확정 상태라 낮은 우선순위로 이번엔 skip, 후속 후보로 carry.)
+
+수정: `CURRENT_MODEL_FILTER` import + `.match(CURRENT_MODEL_FILTER)` + `.eq('prediction_type', 'pre_game')` 추가 (`/accuracy` 패턴 그대로 이식). 정적 grep 회귀 테스트 신규 추가(`silent-drift-cycle-2297.test.ts`). 486 files/4101 tests pass, type-check/lint clean.
+
+커밋은 branch+PR 없이 main 직접 커밋(f7f94f30) 후 즉시 push — pre-push hook lint/type-check 통과 확인.
+
+다음 후보: `/v2-preview` scoring_rule 미필터 (noindex 내부 preview, 낮은 우선순위) 또는 2-chain lock 재평가(직전 8사이클 review-code 7/8 도달 임박) 후 explore-idea/lotto 다양성 확보.
+
 ## ⚪ explore-idea (heavy) — MLB standings division 매직넘버 신규 SUCCESS (cycle 2296, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked, plan#24 closed / plan#27 Phase3 data-blocked라 재활용 불가). **2-chain alternation lock 충족**(직전 8사이클 2288-2295 distinct=2: review-code x7 + lotto x1) — 두 chain 제외. **explore-idea saturation trigger 동시 충족**(직전 15사이클 review-code+fix-incident+polish-ui+info-arch = 12/15 ≥12). fix-incident(17-gap/20)/op-analysis(10-gap/25)/info-arch(15-gap/30) 모두 자체 주기 미도달.
