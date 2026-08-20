@@ -45,6 +45,12 @@ describe("mlb/standings/page.tsx — Plan B Tier C+D Task 6 (cycle 1027)", () =>
     expect(PAGE_SRC).toMatch(/투수 친화/);
     expect(PAGE_SRC).toMatch(/중립/);
   });
+
+  it("division 매직넘버 — computeMagicNumber(leader, runner-up, MLB_GAMES_PER_TEAM) 재사용 (cycle 2296 explore-idea heavy)", () => {
+    expect(PAGE_SRC).toMatch(/computeMagicNumber\(rows\[0\], rows\[1\], MLB_GAMES_PER_TEAM\)/);
+    expect(PAGE_SRC).toMatch(/지구 우승 매직넘버/);
+    expect(PAGE_SRC).toMatch(/지구 우승 확정/);
+  });
 });
 
 describe("sitemap.ts — /mlb/standings entry", () => {

@@ -1,4 +1,22 @@
-## v0.5.62.63 — 2026-08-20 (cycle 2288, review-code (heavy): buildTeamProfile.ts games 쿼리 scoring_rule 필터 누락 정정 — shadow row 오염 차단)
+## v0.5.62.64 — 2026-08-20 (cycle 2296, explore-idea (heavy): MLB standings division 매직넘버 신규)
+
+### feat(mlb): MLB AL/NL standings division 매직넘버 배지 신규
+
+KBO standings(cycle 2287)에 이어 MLB `/mlb/standings`에도 division 우승 매직넘버 parity 제공.
+`computeMagicNumber`(KBO 전용으로 작성됐으나 `gamesPerTeam` 파라미터가 이미 일반화돼있어
+공식·기존 단위테스트 변경 없이 재사용 가능)를 division 별 1위/2위(`rows[0]`/`rows[1]`, 이미
+winPct 내림차순 정렬)에 `MLB_GAMES_PER_TEAM`(162)로 호출 — 신규 DB 쿼리 0건, 순수 계산.
+
+6개 division(AL/NL × East/Central/West) 각각 리더 행에 "지구 우승 매직넘버 N" 또는(확정 시)
+"지구 우승 확정" 배지 렌더. 와일드카드 매직넘버는 범위 밖(리더/2위 단순 비교로는 계산 불가 —
+3장 와일드카드 슬롯 경쟁 로직 필요, 별도 cycle 후속 후보로 carry).
+
+rubric: 가치 medium(KBO-MLB parity, 시즌 중 시의성) / 시간비용 small / risk 0(기존 검증된 순수
+함수 재사용) / 자율가능 yes / 의존성 none → Tier 1 즉시 fire.
+
+`computeMagicNumber.test.ts`에 MLB gamesPerTeam=162 케이스 추가, `mlb-standings-page.test.ts`에
+정적 grep 회귀 테스트 추가. 485 files/4098 tests all pass, type-check/lint clean.
+
 
 ### fix(teams): buildTeamProfile.ts games 쿼리 scoring_rule 미필터 → shadow row 오염 가능 상태 정정
 
