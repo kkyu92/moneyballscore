@@ -103,6 +103,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     enTitle: "MLB",
     links: [
       { href: "/mlb", label: "오늘 경기", enLabel: "Today's Games" },
+      { href: "/mlb/analysis", label: "분석 센터", enLabel: "Analysis Hub" },
       { href: "/mlb/standings", label: "AL/NL 순위", enLabel: "AL/NL Standings" },
       { href: "/mlb/team", label: "팀 프로필", enLabel: "Team Profiles" },
       { href: "/mlb/accuracy", label: "AI 적중 기록", enLabel: "Accuracy Track Record" },
