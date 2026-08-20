@@ -38,6 +38,7 @@ import {
   ACCURACY_WEAK_RATE,
   BRIER_CALIBRATION_OK_GAP,
   STATS_RELIABLE_MIN_N,
+  MIN_POLL_TOTAL,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -419,12 +420,12 @@ export default async function AccuracyPage() {
       )}
 
       {/* 커뮤니티 vs AI 대결 */}
-      {communityStats.communityGames >= 3 && (
+      {communityStats.communityGames >= MIN_POLL_TOTAL && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
           <div>
             <h2 className="text-lg font-bold">커뮤니티 vs AI 대결</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              3명 이상 참여한 경기 기준 — 커뮤니티 다수결 vs AI 예측 정확도 비교
+              {MIN_POLL_TOTAL}명 이상 참여한 경기 기준 — 커뮤니티 다수결 vs AI 예측 정확도 비교
             </p>
           </div>
           {(() => {
