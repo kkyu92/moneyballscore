@@ -1,4 +1,16 @@
 
+## ⚪ fix-incident (lite→review-code(heavy) 전환) — v2-preview scoring_rule 필터 누락 정정 (#1338 family 10번째 재발) SUCCESS (cycle 2298, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked). fix-incident 20-cycle 미발화 gap 도달(마지막 발화 cycle 2278 → 2298, gap=20) — 트리거대로 lite 점검 시작(`gh run list` 스케줄 workflow 최근 실패 확인 + pipeline_runs 대체 신호).
+
+발견: `deploy-drift-alert` workflow 가 04:50/03:56/03:08/01:49 UTC 4회 연속 실패(gap_hours 4~7) 발견 — 첫 인상은 #9/#10 family 재발(silent deploy 정지) 의심됐으나 실측 결과 **실제 incident 아님**. 원인 재구성: cycle 2292 종료 시점(2026-08-20 21:33:47 UTC) signal `next_n=0`(사용자 이전 batch 완료) → watch.sh 가 정상 idle 대기 → 사용자가 본 `/develop-cycle 46` 호출 전까지 ~8시간 신규 commit 0건 → Vercel 배포도 자연히 0건(배포는 push 트리거) → `deploy-drift-alert` 가 stale production 을 정확히 감지해 알림(설계대로 작동, false positive 아님) → 사이클 재개 후 catch-up 배포 burst 로 자가 해소(현재 production = 최신 commit 근접, `state=success`). 즉 R6 재정의(자율 cron 폐기, 사용자 수동 트리거) 이후 "유휴 대기 = 정상" 상태에서 deploy-drift-alert 가 예상대로 경보 발생시키는 구조 확인 — 알림 자체는 정상 작동이라 수정 대상 아님(향후 alert fatigue 우려 시 유휴 grace window 추가 검토 가능, 이번엔 skip).
+
+실제 조치 대상은 review-code 관점에서 재탐색한 별건: 직전 cycle 2297 retro 가 명시적으로 지목한 carry-over `/v2-preview` 페이지 — predictions 쿼리에 `prediction_type='pre_game'` 만 걸고 `scoring_rule` 필터가 없어 v1.5~v1.7 구버전 + shadow row(v2.0-shadow/v2.1-B-shadow) + MLB(`mlb_v0.1`, 동일 predictions 테이블 공유) row 까지 v1.8 vs v2.1-B 재가중치 시뮬레이션에 혼입 가능한 상태(#1338 family 10번째 재발, `/accuracy` 등과 동일 패턴). CURRENT_SCORING_RULE import 는 이미 있었으나 표시 텍스트에만 쓰이고 쿼리 필터에는 미적용된 상태였음.
+
+수정: `@/config/model`의 `CURRENT_MODEL_FILTER` import + `.match(CURRENT_MODEL_FILTER)` 추가. 정적 grep 회귀 테스트 신규 추가(`silent-drift-cycle-2298.test.ts`). 487 files/4104 tests all pass, type-check/lint clean. main 직접 커밋(0b1822ac) 후 즉시 push, pre-push hook lint/type-check 통과 확인.
+
+다음 후보: #1338 family 신규 sweep 대상 추가 탐색(v2-preview 처리로 사용자 가시 페이지는 거의 소진 — 남은 후보는 낮은 우선순위 내부 도구뿐일 가능성) 또는 2-chain lock 재평가(직전 8사이클 review-code 비중 여전히 높음, 다양성 확보 검토) 또는 op-analysis(13-gap/25)/lotto(4-gap/30) 자체 주기 monitor.
+
 ## ⚪ review-code (heavy) — debug/reliability 페이지 scoring_rule + prediction_type 필터 누락 정정 (#1338 family 9번째 재발) SUCCESS (cycle 2297, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code x6 + lotto x1 + explore-idea x1). 주기 trigger 3종 미도달(fix-incident 19-gap/20, op-analysis 12-gap/25, info-arch 17-gap/30, lotto 3-gap/30). cycle 2296 retro 추천대로 review-code(heavy) 재탐색 — #1338 family(analysis/predictions/insights 계열)는 이미 8건 전부 sweep 완료된 상태라 새 sweep 대상 탐색.
