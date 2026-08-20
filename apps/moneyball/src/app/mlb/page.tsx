@@ -134,9 +134,9 @@ export default async function MlbHub() {
           <h3 className="font-bold text-brand-700 dark:text-brand-100">Statcast deep-dive</h3>
           <p className="text-xs text-brand-500 mt-1">xwOBA / Barrel% / Launch Angle</p>
         </Link>
-        <Link href="/mlb/wild-card" className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 p-5">
-          <h3 className="font-bold text-amber-700 dark:text-amber-200">⭐ Wild Card race</h3>
-          <p className="text-xs text-amber-600 mt-1">ETA 2026-08</p>
+        <Link href="/mlb/wild-card" className="rounded-xl bg-white dark:bg-[var(--color-surface-card)] border border-brand-200 dark:border-brand-800 p-5 hover:border-brand-400 transition-colors">
+          <h3 className="font-bold text-brand-700 dark:text-brand-100">Wild Card race</h3>
+          <p className="text-xs text-brand-500 mt-1">실시간 순위 + GB + 매직넘버</p>
         </Link>
         <Link href="/mlb/postseason" className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 p-5">
           <h3 className="font-bold text-amber-700 dark:text-amber-200">⭐ Postseason bracket</h3>
