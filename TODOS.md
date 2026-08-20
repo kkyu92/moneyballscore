@@ -1,4 +1,18 @@
 
+## ⚪ review-code (heavy) — accuracy/page.tsx 전체 재감사 + MIN_POLL_TOTAL 매직넘버 재발 정정 SUCCESS (cycle 2300, 2026-08-20)
+
+진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked/superseded). 2-chain lock 미충족(직전 8사이클 distinct=4). 주기 trigger 3종 미도달(fix-incident 1-gap/20, op-analysis 15-gap/25, lotto 6-gap/30, info-arch 20-gap/30). cycle 2300 = 50-milestone(trigger 3 자동 해당).
+
+cycle 2299 retro가 명시적으로 지목한 accuracy/page.tsx(1203줄, 마지막 감사 cycle 953 이후 1347 사이클 경과) 재감사 착수. 쿼리 필터 전수 확인(result/predForPoll/buildAllTeamAccuracy/buildMatchupData/buildTeamBiasAnalysis/factorResult) — 모두 CURRENT_MODEL_FILTER 정상 적용, #1338 family 재발 없음. false lead 2건 배제: (1) fallbackResult 쿼리는 scoring_rule 필터 없지만 classifyVersion()이 LLM_ACTIVE_VERSIONS/FALLBACK_VERSIONS set 매칭이라 MLB/구버전 row 자연 제외돼 버그 아님, (2) buildFactorAccuracy.ts의 homeActuallyWon 파생은 모델 자체 예측 방향 재사용이라 어제(cycle 2299) 발견된 수렴픽 배지 버그(독립 신호 혼동)와 다른 클래스로 정상.
+
+cycle 2299 carry-over였던 analysis/page.tsx:261 canonicalPair() 미사용 수동 sort는 producer(getSeasonH2HData)도 동일 plain sort + 팀 코드가 이미 DB 보증 유효값이라 canonicalPair 도입이 불필요한 null-check 복잡도만 추가한다고 최종 판단, 수정 스킵 확정.
+
+실제 발견: accuracy/page.tsx:422 `communityStats.communityGames >= 3` 하드코딩. computeCommunityVsAI()가 이미 MIN_POLL_TOTAL(=3, packages/shared)로 필터링한 값을 페이지에서 재검사하는 중복 매직넘버 — wave-305/wave-500 family(PickButton.tsx/home/page.tsx는 이미 스왑됨)의 미완 sweep 대상. 값이 우연히 일치해 지금까지 동작엔 문제없었지만 MIN_POLL_TOTAL 변경 시 이 게이트만 stale 해지는 silent drift 소지.
+
+수정: MIN_POLL_TOTAL import + 게이트(`>= MIN_POLL_TOTAL`)/안내 문구(`{MIN_POLL_TOTAL}명 이상`) 양쪽 swap. 회귀 테스트 신규(`wave-2300-min-poll-total-swap.test.ts`, wave-305/500 패턴과 동일 read-source-assert 구조). 488 files/4108 tests all pass, type-check/lint clean. main 직접 커밋(1592a186) 후 즉시 push, pre-push hook lint/type-check 통과 확인.
+
+다음 후보: 남은 페이지 매직넘버 sweep 잔여 grep 또는 op-analysis(15-gap/25)/lotto(6-gap/30)/info-arch(20-gap/30) 자체 주기 monitor.
+
 ## ⚪ review-code (heavy) — analysis/page.tsx 어제 수렴 픽 배지 isCorrect 오판정 정정 SUCCESS (cycle 2299, 2026-08-20)
 
 진단: open issue 0건, approved plan 0건(20건 전부 completed/archived/blocked). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code x5/lotto x1/fix-incident x1/explore-idea x1). 주기 trigger 3종 미도달(op-analysis 13-gap/25, lotto 4-gap/30, info-arch 18-gap/30). #1338 family(scoring_rule 필터 누락) sweep 은 KBO population 전 파일 grep 결과 clean — 구조적 완료 판단. DESIGN.md 2일 전 갱신(비신선 X), "최근 7일 신규 라우트" 신호는 전체 페이지 mtime 일괄 갱신이라 false positive 로 판단해 무시.
