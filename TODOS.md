@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — MLB wild-card race 로직 신규 감사, drift 0건 RETRO-ONLY (cycle 2328, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/closed, plan #27 Phase3 데이터 부재로 무기한 보류 확정). 2-chain lock 미충족(직전 8사이클 2320-2327 distinct=5: explore-idea/review-code/polish-ui/lotto/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 19/25, info-arch 19/30, lotto 4/30). skill-evolution trigger3(2328%50=28)/trigger5(직전20사이클 표본 20≥10, 평가대상 review-code 8회 — 0회 아님) 둘 다 미충족. ship-0 미충족(직전 10사이클 success 5/retro-only 5, fail 0건).
+
+explore-idea 신규 topic 부재 확인: plan #24(matchup, split-closed)/#27(picks+leaderboard, Phase1만 유효·Phase2 폐기·Phase3 데이터 근거로 보류 — `mlb_user_picks`/`user_picks` 참여 0~1건 실측, 두 자릿수 성장 전까지 재착수 조건 미충족)/#28(TeamStrengthGrid, 전체 완료) 전부 종료. `/mlb/postseason` ETA 2026-09 아직 미도달.
+
+review-code 신규 target 선정: 최근 2321/2325/2327 이 이미 감사한 analysis/accuracy/teams monolith 와 다른, standings 기반 실시간 로직(시즌 진행 중 clinch/tie-break 케이스가 실제로 발생하는 시점) — `/mlb/wild-card` + `buildMlbStandings.ts`(`buildMlbDivisionStandings`/`buildMlbWildcardStandings`/`findMlbTeamDivisionRank`) + `computeMagicNumber.ts` + `/mlb/postseason`.
+
+**검증 내용**: (1) division standings GB 공식 `(leaderWins - rWins + (rLosses - leaderLeaderLosses))/2` 표준 정합, wildcard pool `.slice(1)` 이 이미 승률 내림차순 정렬된 배열의 0번 인덱스(division 1위)만 제외 — 정렬 순서 보장 확인. (2) wildcard GB 공식 컷오프(`pool[MLB_WILDCARD_COUNT-1]`) 기준 상대값, `formatWcGB`의 `gb<0 → "+"` 표시가 "컷오프 확보 여유"와 부호 정합 확인. (3) `computeMagicNumber(cutoff, firstOut, MLB_GAMES_PER_TEAM)` 파라미터 순서/게이팅(`leader.wins<=chaser.wins → null`) 정상, `MLB_GAMES_PER_TEAM=162` 상수 정합. (4) `normalizeMlbTeamCode` alias 처리(TB/CWS/KC/SD/SF/AZ/WSH) 이미 cycle 2081 fix 반영 확인, `undefined` 팀은 `continue`로 안전 스킵. (5) sitemap.ts KO+EN 양쪽 `/mlb/wild-card`·`/mlb/postseason` entry 존재, Header 메가메뉴/Footer 컬럼 양쪽 배선 확인, `/en/mlb/wild-card`·`/en/mlb/postseason` 실제 라우트 존재(EN 404 family 재발 없음). (6) `/mlb/postseason` 은 순수 정적 placeholder(ROUNDS 설명 텍스트, DB 쿼리 없음) — drift 가능성 자체 없음. **drift 0건.**
+
+결론: 코드 변경 없음(retro-only). 다음 후보: fix-incident(2/20)/op-analysis(19/25)/info-arch(19/30)/lotto(4/30) 자체 주기 monitor 계속 접근 중, 또는 explore-idea 신규 topic 재탐색(fresh idea 명확 후보 부재 — 다음 fire 시 재탐색 필요).
+
 ## ⚪ review-code (lite) — `teams/[code]/page.tsx` 신규 감사, drift 0건 RETRO-ONLY (cycle 2327, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(19 completed/archived + 24 split-closed + 27 phase1-only-closed + 28 completed). 2-chain lock 미충족(직전 8사이클 2320-2326 distinct=5: explore-idea/review-code/polish-ui/lotto/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 0/20 방금 발화, op-analysis 18/25, info-arch 17/30, lotto 3/30). skill-evolution trigger3(2327%50=27)/trigger5(직전20사이클 chain pool 표본 20≥10, opt-out 9개 제외 평가대상 review-code 0회 아님) 둘 다 미충족. ship-0 미충족(직전 10사이클 success 5/retro-only 5, fail 0건).
