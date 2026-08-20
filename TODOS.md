@@ -1,4 +1,14 @@
 
+## 🟢 explore-idea (heavy) — `/mlb/analysis` MLB AI 적중 기록 CTA, plan #28 Phase 4 SUCCESS (cycle 2320, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 2312-2319 distinct=3: review-code/polish-ui/explore-idea). 주기 trigger 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 10/30, lotto 26/30). skill-evolution trigger5 표본 20(≥10)→review-code 9/20(0 아님)→미충족, trigger3(%50==0) 미도달(2320%50=20). ship-0 미충족(직전 10사이클 success 4건). cycle 2319 next_recommended_chain 이 explore-idea(heavy, plan #28 Phase 4 또는 TeamStrengthGrid 대체설계) 명시 — Phase 4(시즌 성과 + 적중 기록, 소규모 스코프) 우선 착수.
+
+구현: `/mlb/analysis` 하단에 "MLB AI 적중 기록" CTA 카드 신규 — 기존 `buildMlbAccuracySummary('ko')`(`/mlb/accuracy` 가 이미 쓰는 함수) 그대로 재사용, verifiedN/correctN/accuracyRate 시즌 누적 수치만 뽑아 `/mlb/accuracy` 딥링크 카드에 임베드. 신규 로직 재작성 0. accuracyRate 는 0~1 스케일(`MlbAccuracyDashboard.tsx` 와 동일 규칙 확인)이라 `* 100` 렌더 — cycle 2160 이중 변환 버그 패턴 재발 없음. 기존 weekly/monthly CTA 카드 스타일(실측 수치 노출)과 통일.
+
+검증: `tsc --noEmit` 클린 / `eslint` 클린 / 신규 smoke test 4건(`plan28-phase4-mlb-analysis-accuracy-cta.test.ts`, buildMlbAccuracySummary 재사용 가드 + /mlb/accuracy 링크 가드 + 스케일 가드 + verifiedN/correctN 노출 가드) + 기존 Phase 1~3 smoke test 회귀 0 + 전체 vitest 494 파일 4149 테스트 all green.
+
+결론: PR #3014 squash merge(c019d726) 완료. plan #28(`/mlb/analysis` KBO parity) 4-phase 전부 완료(Phase 1 MVP → Phase 2 이번 주 경기 partial → Phase 3 어제 결과+리뷰 CTA → Phase 4 적중 기록 CTA). 잔여 = Phase 2 TeamStrengthGrid MLB 대체 설계(mlb_schedule 실제 결과 기반 win rate, 신규 설계 필요)뿐 — 다음 explore-idea fire 후보. plan #28 사실상 종료, 다음 사이클부터 review-code(heavy, 신규 ship 코드 감사) 또는 신규 topic 탐색 권장.
+
 ## ⚪ review-code (heavy) — `/mlb/analysis` Phase 3 신규 코드(어제 결과+리뷰 CTA) 감사, drift 0건 (cycle 2319, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/polish-ui/explore-idea). 주기 trigger 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 9/30, lotto 25/30). skill-evolution trigger5 표본 19(≥10)→review-code 9/19(0 아님)→미충족, trigger3(%50==0) 미도달. ship-0 미충족(직전 10사이클 success 6건). cycle 2318 next_recommended_chain 이 review-code(heavy) 를 1순위로 명시 + cycle 2317 감사가 phase 3 shipped(2318) 이전 코드만 봤으므로 최신 diff 미감사 — Phase 3 신규 코드(`getMlbYesterdayResults`/`getMlbPeriodStats` + page.tsx CTA 섹션) 착수.
