@@ -1,4 +1,14 @@
 
+## ⚪ info-architecture-review — 30-cycle gap 트리거 도달, IA 4신호 전수 확인 결과 drift 0건 (retro-only) SUCCESS (cycle 2310, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21(신규 24/27 모두 Tier3 spec-only, status approved 아님). 2-chain lock 미충족(직전 8사이클 distinct=4). info-architecture-review 마지막 발화 cycle 2280 → 정확히 30-gap 도달(자체 주기 trigger). review-code 직전 20사이클 13/20=65% dominance 도 다양성 확보 근거로 겹침.
+
+4개 IA 신호 전수 확인: (1) breadcrumb 누락 grep → `reviews/weekly`, `reviews/monthly`(KBO+MLB) 4파일 걸렸으나 실제 read 결과 전부 redirect-only stub(`redirect(...)`) — Breadcrumb UI 자체가 없는 게 정상, false positive(cycle 2307 로그인/설정 stub 패턴과 동일). (2) sitemap.ts(79 static entries) vs page.tsx 파일수(97) 불일치 → sitemap.ts 코드 직접 read 결과 원인 전부 문서화된 의도(동적 라우트는 `allPairs()`/`getRecentWeeks()`/`Object.keys(MLB_TEAMS)` 등 런타임 생성이라 1:1 매핑 아님, `/reviews/weekly`·`/reviews/monthly`·`/mlb/reviews/weekly`·`/mlb/reviews/monthly` redirect stub 은 의도적으로 sitemap 제외 — 주석에 명시) — false positive. (3) 헤더 메가메뉴(`Header.tsx` LEAGUE_NAVS) → wild-card(cycle 2296)/postseason(cycle 2296)/매치업 등 최근 shipped MLB 라우트 전부 이미 반영 확인. (4) 푸터 sitemap 컬럼(`Footer.tsx`) → MLB 컬럼도 wild-card/postseason 포함 전부 최신(cycle 2225 마지막 갱신 흔적).
+
+결론: 4개 신호 모두 clean 또는 false positive — "현재 IA 충분" (chain stop 조건의 retro-only 분기). 코드 변경 0. skill-evolution trigger 5개 전부 미충족(trigger 3: 2310%50≠0, trigger 5: review-code 12/20 발화로 미충족). ship-0 emergency stop 미충족(직전 10사이클 전부 success).
+
+다음 후보: review-code(직전 20사이클 65% dominance, sibling-file 매직넘버 family 소진 조짐 — cycle 2308 로그 재확인 필요) 또는 fix-incident(6-gap/20)/lotto(16-gap/30) 자체 주기 monitor. plan #24(MLB matchup, Tier3 부분 shipped)/#27(MLB picks/leaderboard, Tier3 phase1 done) 는 여전히 자율 fire 대상 아님(status 미완료).
+
 ## ⚪ operational-analysis (lite) — 주간 리뷰 + CE cohort 재확인, 코드 변경 없음 SUCCESS (cycle 2309, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달이나 op-analysis 24-gap/25(거의 근접, 임계 1 미달)로 review-code 70% dominance(직전 20사이클 14/20) 다양성 확보 위해 선택. lite 모드(weekly-review → extract-pattern → compound, 코드 변경 X) — CE/HOME_ADVANTAGE 축 B 는 여전히 사용자 결정 대기라 heavy(재가중치) 불필요.
