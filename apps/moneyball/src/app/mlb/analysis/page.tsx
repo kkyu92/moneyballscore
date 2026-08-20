@@ -17,7 +17,14 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PickButton } from "@/components/picks/PickButton";
 import { createClient } from "@/lib/supabase/server";
 import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
-import { getMlbThisWeekRemainingGames, groupMlbGamesByDate } from "./analysis-data";
+import { getCurrentWeek } from "@/lib/reviews/computeWeekRange";
+import { getCurrentMonth } from "@/lib/reviews/computeMonthRange";
+import {
+  getMlbThisWeekRemainingGames,
+  groupMlbGamesByDate,
+  getMlbYesterdayResults,
+  getMlbPeriodStats,
+} from "./analysis-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -131,10 +138,15 @@ async function getTodayMlbAnalysisRows(
 
 export default async function MlbAnalysisPage() {
   const today = new Date().toISOString().slice(0, 10);
+  const currentWeek = getCurrentWeek();
+  const currentMonth = getCurrentMonth();
   const supabase = await createClient();
-  const [rows, weekRemainingGames] = await Promise.all([
+  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats] = await Promise.all([
     getTodayMlbAnalysisRows(supabase, today),
     getMlbThisWeekRemainingGames(today),
+    getMlbYesterdayResults(),
+    getMlbPeriodStats(currentWeek.startDate, currentWeek.endDate),
+    getMlbPeriodStats(currentMonth.startDate, currentMonth.endDate),
   ]);
   const weekRemainingByDate = groupMlbGamesByDate(weekRemainingGames);
 
@@ -330,6 +342,96 @@ export default async function MlbAnalysisPage() {
           </div>
         </section>
       )}
+
+      {yesterdayGames.length > 0 && (
+        <section aria-labelledby="mlb-yesterday-title">
+          <h2 id="mlb-yesterday-title" className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
+            📅 어제 결과 ({yesterdayGames.length}경기)
+          </h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {yesterdayGames.map((g) => {
+              const status = g.isCorrect === true ? "correct" : g.isCorrect === false ? "wrong" : "pending";
+              const winnerPct = Math.round(g.winnerProb * 100);
+              return (
+                <li key={g.external_game_id} data-yesterday-status={status}>
+                  <Link
+                    href={`/mlb/games/${g.gameDate}/${g.homeCode}-vs-${g.awayCode}`}
+                    className="block rounded-lg border border-brand-200 dark:border-brand-800 p-3 hover:border-brand-400 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-semibold truncate">
+                        {g.awayName} {g.awayScore ?? "-"} : {g.homeScore ?? "-"} {g.homeName}
+                      </span>
+                      <span
+                        className={`text-xs font-medium shrink-0 ${
+                          status === "correct"
+                            ? "text-green-600 dark:text-green-400"
+                            : status === "wrong"
+                              ? "text-red-500 dark:text-red-400"
+                              : "text-brand-500"
+                        }`}
+                      >
+                        {status === "correct" ? "✅ 적중" : status === "wrong" ? "❌ 실패" : "⏳ 대기"}
+                      </span>
+                    </div>
+                    {g.predictedWinnerCode && (
+                      <p className="text-xs text-brand-500 mt-1">
+                        예측: {g.predictedWinnerCode} {winnerPct}%
+                      </p>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="mlb-weekly-review-title">
+        <h2 id="mlb-weekly-review-title" className="sr-only">이번 주 MLB 예측 리뷰</h2>
+        <Link
+          href={`/mlb/reviews/weekly/${currentWeek.weekId}`}
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-2xl shrink-0">📅</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                이번 주 MLB 예측 리뷰 →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currentWeek.label}
+                {weeklyStats.total > 0
+                  ? ` · ${weeklyStats.total}경기 중 ${weeklyStats.correct}적중 (${Math.round((weeklyStats.correct / weeklyStats.total) * 100)}%)`
+                  : " · 이번 주 검증된 경기를 기다리는 중"}
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      <section aria-labelledby="mlb-monthly-review-title">
+        <h2 id="mlb-monthly-review-title" className="sr-only">이번 달 MLB 예측 리뷰</h2>
+        <Link
+          href={`/mlb/reviews/monthly/${currentMonth.monthId}`}
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-2xl shrink-0">🗓️</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                이번 달 MLB 예측 리뷰 →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currentMonth.label}
+                {monthlyStats.total > 0
+                  ? ` · ${monthlyStats.total}경기 중 ${monthlyStats.correct}적중 (${Math.round((monthlyStats.correct / monthlyStats.total) * 100)}%)`
+                  : " · 이번 달 검증된 경기를 기다리는 중"}
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
     </main>
   );
 }
