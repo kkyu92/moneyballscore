@@ -24,15 +24,14 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 
 // EN 페이지(/en/mlb/*)에서 헤더 nav 가 KO href 를 그대로 써서 클릭 시 KO 페이지로
 // 이탈하던 버그 (cycle 2139 발견) — MLB nav 만 /en 대응 라우트 존재하므로 그것만 치환.
-// /mlb/reviews(하위 /mlb/reviews/weekly, /mlb/reviews/monthly 포함) 는 예외: EN 미러
-// 페이지 부재 (cycle 2226 Phase 1, 의도적 scope 축소 — plan #26 Phase 1b weekly / Phase 2
-// monthly 서브페이지 모두 KO only 동일 scope) — blanket 치환 시 /en/mlb/reviews(/weekly|
-// /monthly) 404 (cycle 2227 review-code(heavy) 발견). startsWith 가드라 신규
-// /mlb/reviews/monthly 도 별도 코드 수정 없이 자동 커버됨.
+// /mlb/reviews/weekly, /mlb/reviews/monthly 는 예외 유지: EN 미러 페이지 부재 (cycle 2226
+// Phase 1, 의도적 scope 축소 — plan #26 Phase 1b/2 KO only). /mlb/reviews, /mlb/reviews/misses
+// 는 wave-659 (cycle 2339) 에서 EN 미러 신규 배선 — 예외 해제 (cycle 2227 이 /mlb/analysis
+// 를 놓쳐 404 냈던 것과 반대 방향 실수 방지 위해, 신규 미러 fire 시 예외 목록도 함께 갱신).
 function withLocale(href: string, isEn: boolean): string {
   if (!isEn) return href;
   if (href === "/mlb") return "/en/mlb";
-  if (href === "/mlb/reviews" || href.startsWith("/mlb/reviews/")) return href;
+  if (href.startsWith("/mlb/reviews/weekly") || href.startsWith("/mlb/reviews/monthly")) return href;
   if (href.startsWith("/mlb/")) return `/en${href}`;
   return href;
 }

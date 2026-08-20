@@ -73,8 +73,9 @@ describe('wave-602: /reviews/monthly/[month] 수렴 픽 요일별 분리 성적 
     expect(badgesComponentSrc).toContain('★ 완전수렴:');
   });
 
-  it('WEEKDAY_LABELS_KO 로 요일 라벨 표시함', () => {
-    expect(badgesComponentSrc).toContain('WEEKDAY_LABELS_KO[stat.dayIndex]');
+  it('WEEKDAY_LABELS_KO/EN 로 요일 라벨 표시함 (wave-659: locale prop 추가, 기본 ko 유지)', () => {
+    expect(badgesComponentSrc).toContain('labels[stat.dayIndex]');
+    expect(badgesComponentSrc).toContain('const labels = isEn ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_KO;');
   });
 
   it('빈 배열 시 섹션 숨김 가드 존재함', () => {

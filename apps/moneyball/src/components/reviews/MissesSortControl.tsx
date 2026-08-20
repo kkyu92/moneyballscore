@@ -11,6 +11,12 @@ const LABELS: Record<SortMode, string> = {
   recent: '최신순',
 };
 
+// wave-659 (cycle 2339, en/mlb/reviews 미러): EN 라벨.
+const LABELS_EN: Record<SortMode, string> = {
+  confidence: 'By Confidence',
+  recent: 'Most Recent',
+};
+
 const ORDER: SortMode[] = ['confidence', 'recent'];
 
 function subscribe(callback: () => void) {
@@ -44,8 +50,9 @@ function writeSort(value: SortMode): void {
   }
 }
 
-export function MissesSortControl() {
+export function MissesSortControl({ locale = 'ko' }: { locale?: 'ko' | 'en' } = {}) {
   const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  const labels = locale === 'en' ? LABELS_EN : LABELS;
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3">
@@ -58,7 +65,7 @@ export function MissesSortControl() {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          정렬
+          {locale === 'en' ? 'Sort' : '정렬'}
         </span>
         {ORDER.map((key) => {
           const active = sort === key;
@@ -74,7 +81,7 @@ export function MissesSortControl() {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}
+              {labels[key]}
             </button>
           );
         })}
