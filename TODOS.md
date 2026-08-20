@@ -1,4 +1,12 @@
 
+## ⚪ review-code (heavy) — `/mlb/analysis` 팀 전력 현황(TeamStrengthGrid MLB 대체) 신규 코드 감사, drift 0건 RETRO-ONLY (cycle 2325, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(19개 completed/archived + 24 split + 27 blocked + 28 completed). 2-chain lock 미충족(직전 8사이클 2317-2324 distinct=4: review-code/explore-idea/polish-ui/lotto). 주기 trigger 전부 미도달(fix-incident 19/20 — 1사이클 후 자연 도달, op-analysis 16/25, info-arch 15/30, lotto 1/30 방금 리셋). skill-evolution trigger3(2325%50=25)/trigger5(review-code 7/21, 0 아님) 둘 다 미충족. explore-idea saturation 미충족(직전 15사이클 review-code+fix-incident+polish-ui+info-arch=8/15). cycle 2323 이 shipped 한 신규 코드(`buildMlbTeamStrengthSnapshot.ts`+`MlbTeamStrengthGrid.tsx`)가 아직 review-code 감사 대상이 안 된 상태 — plan #28 Phase1~4 를 순차 감사해온 기존 패턴(2317→2319→2321) 그대로 이 마지막 carry-over 코드도 감사.
+
+감사 범위: (1) 단일 쿼리 N+1 회피 확인 — `mlb_schedule` 팀별 루프 쿼리 0건, `buildMlbDivisionStandings` 패턴 정합. (2) `computeTeamRecentRecord`/`computeTeamStreak`(`buildTeamProfile.ts`) 재사용 확인 — `.select()` 호출부에 `home_elo`/`home_recent_form` 컬럼 언급 없음(파일 상단 주석만 설명용 언급, 오탐 없음). (3) `normalizeMlbTeamCode` StatsAPI→canonical 정규화 확인 + `MLB_TEAMS[teamCode].shortName` 조회 안전(정규화 실패 코드는 `if (homeCode)` 가드로 스킵). (4) `/mlb/team/${row.teamCode}` 딥링크 — 리포 전체 동일 패턴(`wild-card`/`matchup`/`standings`/`players` 페이지) 대조, 일치. (5) `TEAM_STRENGTH_FORM_STRONG/WEAK`(0.6/0.4) 재사용 — KBO 는 모델 팩터 `home_recent_form`(연속값) 기준, MLB 는 `wins/sampleSize`(n=2~5 소표본, RECENT_RECORD_MIN_GAMES=2) 기준이라 척도 다르지만 파일 주석에 이미 의도된 대체 설계로 명시(신규 발견 아님). (6) `.order('game_date', desc)` 후 팀별 배열 구성 — 동일 날짜 더블헤더 시 순서 비결정 가능성 존재하나 KBO 원본도 동일 구조(N개 코드베이스 공통 한계, 이번 cycle 신규 도입 아님). (7) smoke test 6건(`mlb-analysis-team-strength-grid.test.ts`) 재실행 all green.
+
+결론: drift 0건, 코드 변경 없음(retro-only). plan #28 전체(4-phase + carryover) 감사 완결 — 이 코드 패밀리 review-code 대상 소진. 다음 후보: fix-incident(19/20, 1사이클 후 자연 도달) 또는 explore-idea(heavy, 신규 topic 재탐색 — plan #24 matchup Phase2b 잔여 또는 plan #27 picks/leaderboard Phase3 데이터 블로커 해소 여부 확인).
+
 ## 🟢 lotto (lite) — 30-cycle 주기 trigger 6 발동, count_smoke/OOS 재확인 SUCCESS (cycle 2324, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 2-chain lock 미충족(직전 8사이클 2316-2323 distinct=3). 주기 trigger: fix-incident 18/20, op-analysis 15/25, info-arch 14/30(모두 미도달) / lotto 30/30 — 마지막 발화(cycle 2294) 이후 정확히 30 사이클 경과, trigger 6 발동.
