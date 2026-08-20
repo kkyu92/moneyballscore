@@ -1,4 +1,16 @@
 
+## ⚪ review-code (heavy) — methodology "30팀 435개 매치업" 하드코딩 정정 SUCCESS (cycle 2308, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달(fix-incident 2-gap/20, op-analysis 23-gap/25, lotto 14-gap/30, info-arch 28-gap/30 — 거의 근접). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code/skill-evolution/explore-idea/fix-incident). 직전 20사이클 review-code 14/20=70% dominance 지속.
+
+cycle 2307 이 wild-card OG/twitter sibling 파일 매직넘버를 잡은 것과 동일 관점으로 다른 MLB 페이지의 팀/디비전/와일드카드 카운트 하드코딩 잔존 여부 재조사. `/mlb/standings` OG 이미지는 이미 `MLB_TEAM_COUNT`/`MLB_DIVISION_COUNT` 상수 사용(clean). `/mlb/postseason` OG "4 라운드"는 MLB 포스트시즌 고정 구조(WC/DS/LCS/WS)라 튜닝 가능한 값이 아니고 대응 상수도 없어 실제 drift 아님(over-abstraction 회피, 수정 안 함).
+
+`packages/shared/src/index.ts` 의 `MLB_HEAD_TO_HEAD_PAIRS` 상수는 정확히 "435가지 맞대결 조합" 하드코딩 sweep 단일 source 목적으로 존재하고 `/mlb/matchup`(ko+en) 페이지는 이미 정상 사용 중인데, `/mlb/methodology`(ko+en) 페이지만 "30팀 435개 매치업"/"30 teams / 435 possible matchups" 를 리터럴 프로즈로 하드코딩 — 상수는 존재하는데 sibling 페이지가 누락된 동일 silent drift family 패턴.
+
+수정: methodology page.tsx(ko+en) 에 `MLB_TEAM_COUNT`+`MLB_HEAD_TO_HEAD_PAIRS` import 추가, 리터럴 숫자 교체. 490 files/4124 tests all pass, type-check/lint clean. 직접 main 커밋+즉시 push (pre-push hook lint/type-check 통과 확인, commit `11ee8d4d`) — 단일 논리 단위 소규모 fix 라 branch+PR 생략.
+
+다음 후보: postseason 은 여전히 "완료 대기"(ETA 2026-09, division/wildcard 완료 후 자연 IA 갭). review-code(heavy) sibling-file 매직넘버 family sweep 은 이번 사이클로 사실상 소진 조짐(신규 target 미발견) — 다음엔 info-architecture-review(28-gap/30, 거의 근접) 또는 다른 chain 전환 권장.
+
 ## ⚪ review-code (heavy) — wild-card OG/twitter 이미지 매직넘버 하드코딩 정정 SUCCESS (cycle 2307, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/21. 주기 trigger 3종 미도달(fix-incident 1-gap/20 방금 발화, op-analysis 22-gap/25, lotto 13-gap/30, info-arch 27-gap/30). 2-chain lock 미충족(직전 8사이클 distinct=4: review-code/skill-evolution/explore-idea/fix-incident). breadcrumb 누락 grep 은 false positive(전부 순수 redirect stub/debug/login/home — Breadcrumb UI 자체가 없는 게 정상)로 제외.
