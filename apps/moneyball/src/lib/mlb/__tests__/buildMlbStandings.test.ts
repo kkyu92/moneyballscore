@@ -137,3 +137,52 @@ describe('findMlbTeamDivisionRank', () => {
     expect(rank).toBeNull();
   });
 });
+
+describe('buildMlbWildcardStandings', () => {
+  function row(teamCode: string, wins: number, losses: number) {
+    const total = wins + losses;
+    return { teamCode, wins, losses, winPct: total > 0 ? wins / total : 0, gamesBehind: null };
+  }
+
+  it('division 1위 3팀 제외한 pool 을 승률 내림차순 정렬 + 컷오프/탈락 게이팅 magic number', async () => {
+    const { buildMlbWildcardStandings } = await import('../buildMlbStandings');
+    const nlZero = { East: [row('ATL', 0, 0)], Central: [row('CHC', 0, 0)], West: [row('LAD', 0, 0)] };
+    const standings = {
+      AL: {
+        East: [row('NYY', 90, 50), row('BAL', 80, 60), row('TOR', 60, 80)],
+        Central: [row('CLE', 85, 55), row('DET', 75, 65), row('KCR', 50, 90)],
+        West: [row('HOU', 95, 45), row('SEA', 72, 68), row('TEX', 65, 75)],
+      },
+      NL: nlZero,
+    } as never;
+
+    const result = buildMlbWildcardStandings(standings);
+    const al = result.AL;
+    // pool = [BAL(.5714), DET(.5357), SEA(.5143), TEX(.4643), TOR(.4286), KCR(.3571)]
+    expect(al.map((r) => r.teamCode)).toEqual(['BAL', 'DET', 'SEA', 'TEX', 'TOR', 'KCR']);
+
+    // 컷오프(MLB_WILDCARD_COUNT=3번째) = SEA. 자기 자신 wcGamesBehind=0.
+    const sea = al.find((r) => r.teamCode === 'SEA')!;
+    expect(sea.wcGamesBehind).toBe(0);
+
+    // BAL(컷오프보다 앞선 팀) = 음수(여유)
+    const bal = al.find((r) => r.teamCode === 'BAL')!;
+    expect(bal.wcGamesBehind).toBeCloseTo(-8, 5);
+
+    // TEX(첫 탈락권) = 양수(추격)
+    const tex = al.find((r) => r.teamCode === 'TEX')!;
+    expect(tex.wcGamesBehind).toBeCloseTo(7, 5);
+  });
+
+  it('pool 이 전부 0-0 이면 magic number 계산 불가(leader<=chaser) → null 아님을 컷오프 게이팅으로 확인', async () => {
+    const { buildMlbWildcardStandings } = await import('../buildMlbStandings');
+    const zeroDivision = [row('A', 0, 0), row('B', 0, 0)];
+    const standings = {
+      AL: { East: zeroDivision, Central: zeroDivision, West: zeroDivision },
+      NL: { East: zeroDivision, Central: zeroDivision, West: zeroDivision },
+    } as never;
+    const result = buildMlbWildcardStandings(standings);
+    // 전부 0-0 이므로 pool 도 전부 0-0, 컷오프 자신도 wcGamesBehind=0
+    expect(result.AL.every((r) => r.wcGamesBehind === 0)).toBe(true);
+  });
+});
