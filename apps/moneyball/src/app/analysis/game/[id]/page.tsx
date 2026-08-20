@@ -23,9 +23,11 @@ import {
   KBO_DEFAULT_GAME_TIME,
   HOUR_MS,
   CURRENT_SCORING_RULE,
+  H2H_MIN_GAMES,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
+import { getSeasonH2HData } from '@/app/analysis/analysis-data';
 import { JudgeVerdictPanel } from '@/components/analysis/JudgeVerdictPanel';
 import { AgentArgumentBox } from '@/components/analysis/AgentArgumentBox';
 import { PostviewPanel } from '@/components/analysis/PostviewPanel';
@@ -309,6 +311,18 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     awayTeamName: awayName,
   });
 
+  // cycle 2303: 올 시즌 상대전적 승수 — analysis/page.tsx(list) wave-333 동일 키 구성.
+  // 누락 시 computeCompositeDuel 이 h2h 팩터를 항상 제외(validCount 최대 9/10)해
+  // FACTOR_PICK_COMPLETE(10) 완전수렴 배지가 이 페이지에서만 구조적으로 발생 불가했던 격차.
+  const h2hMap = await getSeasonH2HData();
+  const [h2hA, h2hB] = [homeTeam as string, awayTeam as string].sort();
+  const h2hPair = h2hMap.get(`${h2hA}:${h2hB}`) ?? {};
+  const h2hHomeWins = h2hPair[homeTeam] ?? 0;
+  const h2hAwayWins = h2hPair[awayTeam] ?? 0;
+  const h2hTotal = h2hHomeWins + h2hAwayWins;
+  const h2hHomeArg = h2hTotal >= H2H_MIN_GAMES ? h2hHomeWins : undefined;
+  const h2hAwayArg = h2hTotal >= H2H_MIN_GAMES ? h2hAwayWins : undefined;
+
   // wave-452: 팩터 수렴 픽 배지 계산
   const convergenceDuel = computeCompositeDuel({
     homeCode: homeTeam,
@@ -328,6 +342,8 @@ export default async function GameAnalysisPage({ params }: PageProps) {
     awayElo: preGame.away_elo ?? undefined,
     homeRecentForm: preGame.home_recent_form ?? undefined,
     awayRecentForm: preGame.away_recent_form ?? undefined,
+    h2hHomeWins: h2hHomeArg,
+    h2hAwayWins: h2hAwayArg,
   });
   const isConvergencePick =
     convergenceDuel.validCount >= COMPOSITE_DUEL_MIN_VALID &&
