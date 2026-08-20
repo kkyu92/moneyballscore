@@ -9,6 +9,8 @@ import {
   FEED_ISR_SECONDS, FEED_GAME_LIMIT, SITE_URL,
   confToWinProb,
   KBO_DEFAULT_GAME_TIME,
+  MLB_SCORING_RULE,
+  normalizeMlbTeamCode,
 } from '@moneyball/shared';
 import { getRecentWeeks } from '@/lib/reviews/computeWeekRange';
 import { getRecentMonths } from '@/lib/reviews/computeMonthRange';
@@ -24,6 +26,87 @@ function escapeXml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
+}
+
+interface MlbFeedPredictionRow {
+  external_game_id: string;
+  home_win_prob: number | null;
+  mlb_game_date: string;
+}
+
+interface MlbFeedScheduleRow {
+  external_game_id: string;
+  home_team_code: string;
+  away_team_code: string;
+  status: string;
+  home_score: number | null;
+  away_score: number | null;
+  game_datetime_utc: string | null;
+}
+
+// KBO games 와 별개 테이블 계열(migration 038) — predictions(league='mlb') 을
+// mlb_game_date 로 직접 조회 후 mlb_schedule 로 팀 코드/점수 join
+// (games/[date]/page.tsx getMlbGamesForDate 와 동일 2-step 패턴).
+async function getMlbFeedItems(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string[]> {
+  const predResult = await supabase
+    .from('predictions')
+    .select('external_game_id, home_win_prob, mlb_game_date')
+    .eq('league', 'mlb')
+    .eq('scoring_rule', MLB_SCORING_RULE)
+    .order('mlb_game_date', { ascending: false })
+    .limit(FEED_GAME_LIMIT);
+  const { data: preds } = assertSelectOk(predResult, 'feed getMlbFeedItems predictions');
+  const predRows = (preds ?? []) as MlbFeedPredictionRow[];
+  if (predRows.length === 0) return [];
+
+  const gameIds = predRows.map((p) => p.external_game_id);
+  const scheduleResult = await supabase
+    .from('mlb_schedule')
+    .select('external_game_id, home_team_code, away_team_code, status, home_score, away_score, game_datetime_utc')
+    .in('external_game_id', gameIds);
+  const { data: schedules } = assertSelectOk(scheduleResult, 'feed getMlbFeedItems schedule');
+  const scheduleByGameId = new Map(
+    ((schedules ?? []) as MlbFeedScheduleRow[]).map((s) => [s.external_game_id, s]),
+  );
+
+  const items: string[] = [];
+  for (const p of predRows) {
+    const schedule = scheduleByGameId.get(p.external_game_id);
+    if (!schedule) continue;
+    const homeCode = normalizeMlbTeamCode(schedule.home_team_code);
+    const awayCode = normalizeMlbTeamCode(schedule.away_team_code);
+    if (!homeCode || !awayCode) continue;
+
+    const homeWinProb = p.home_win_prob ?? 0.5;
+    const winnerCode = homeWinProb >= 0.5 ? homeCode : awayCode;
+    const pct = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
+
+    const isFinal = schedule.status === 'final' && schedule.home_score != null && schedule.away_score != null;
+    let resultTag = '';
+    if (isFinal) {
+      const actualWinner = schedule.home_score! > schedule.away_score! ? homeCode : awayCode;
+      resultTag = actualWinner === winnerCode ? ' [적중]' : ' [실패]';
+    }
+
+    const title = `[MLB] ${awayCode} vs ${homeCode} — ${winnerCode} ${pct}% 승 예측${resultTag}`;
+    const description = isFinal
+      ? `${awayCode} ${schedule.away_score} : ${schedule.home_score} ${homeCode}. AI 예측: ${winnerCode} 승 (${pct}%).`
+      : `${p.mlb_game_date} MLB 경기. AI 예측: ${winnerCode} 승 (${pct}%).`;
+
+    const link = `${SITE_URL}/mlb/games/${p.mlb_game_date}/${homeCode}-vs-${awayCode}`;
+    const pubDate = new Date(schedule.game_datetime_utc ?? `${p.mlb_game_date}T12:00:00+09:00`).toUTCString();
+
+    items.push(`    <item>
+      <title>${escapeXml(title)}</title>
+      <link>${link}</link>
+      <guid isPermaLink="true">${link}</guid>
+      <description>${escapeXml(description)}</description>
+      <pubDate>${pubDate}</pubDate>
+    </item>`);
+  }
+  return items;
 }
 
 export async function GET() {
@@ -47,6 +130,8 @@ export async function GET() {
     .order('game_time', { ascending: true })
     .limit(FEED_GAME_LIMIT);
   const { data: games } = assertSelectOk(gamesResult, 'feed getRssGames');
+
+  const mlbItems = await getMlbFeedItems(supabase);
 
   const reviewItems: string[] = [];
 
@@ -196,6 +281,7 @@ export async function GET() {
     <atom:link href="${SITE_URL}/feed" rel="self" type="application/rss+xml"/>
 ${reviewItems.join('\n')}
 ${items.join('\n')}
+${mlbItems.join('\n')}
   </channel>
 </rss>`;
 
