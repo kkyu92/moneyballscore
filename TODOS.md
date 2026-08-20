@@ -1,4 +1,12 @@
 
+## 🟢 lotto (lite) — 30-cycle 주기 trigger 6 발동, count_smoke/OOS 재확인 SUCCESS (cycle 2324, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/21. 2-chain lock 미충족(직전 8사이클 2316-2323 distinct=3). 주기 trigger: fix-incident 18/20, op-analysis 15/25, info-arch 14/30(모두 미도달) / lotto 30/30 — 마지막 발화(cycle 2294) 이후 정확히 30 사이클 경과, trigger 6 발동.
+
+실행: `pnpm tsx scripts/lotto.ts count` — 유효 조합 7,705,415/8,145,060(5.40% 제거, cycle 2294/2145 baseline과 delta 0 — 1238회(8/22 토) 추첨 미도래로 데이터 무변화). `oos "10,20,23,34,37,40" 1237` — 1237회 실제 당첨번호 256규칙 재검증 PASS 256/FAIL 0(in-sample, 예상대로 clean). 1238회 50세트 picks(`2026-08-22-50sets.md`)는 cycle 2145 박제분 그대로 유지(신규 불필요). 기존 OOS 결론(3개 일치 1/50=2%, 기댓값 대비 우위 증거 없음, N=11) 재확인.
+
+결론: 코드 변경 없음, PR 없음 — 순수 주기 측정. cycle 2294와 완전 동일 상태 반복(다음 추첨 8/22 이후에야 실질 변화 예상). 다음 후보: review-code(heavy) 또는 fix-incident(18/20, 2사이클 후 자연 도달).
+
 ## 🟢 explore-idea (heavy) — `/mlb/analysis` 팀 전력 현황(TeamStrengthGrid MLB 대체 설계), plan #28 Phase 2 잔여 SUCCESS (cycle 2323, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 없음, unprocessed-plan lookup 미매핑). 2-chain lock 미충족(직전 8사이클 2315-2322 distinct=3: explore-idea/review-code/polish-ui). 주기 trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 14/25, info-arch 13/30, lotto 29/30 — 1사이클 후 자연 도달 예상). explore-idea saturation 미충족(직전 15사이클 review-code+fix-incident+polish-ui+info-arch=9/15). skill-evolution trigger3(2323%50=23)/trigger5 둘 다 미충족. ship-0 미충족. cycle 2322 next_recommended = lotto 또는 explore-idea(신규 topic). plan #28 body(`~/.develop-cycle/plans/moneyballscore/28.md`) "Phase 2 진행 상황" 절이 명시적 잔여 항목("TeamStrengthGrid MLB 버전은 블로커로 보류... 대체 데이터 소스: mlb_schedule 실제 완료 경기 결과 기반 최근 N경기 승률 직접 계산... 다음 explore-idea fire 후보로 carry-over")을 남겨둔 걸 발견 — 신규 topic 탐색 대신 이 구체적 carry-over 착수.
