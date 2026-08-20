@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { DAY_MS } from '@moneyball/shared';
+import { DAY_MS, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import {
   buildAgentFallbackCohort,
   type PredictionForFallback,
@@ -30,6 +30,7 @@ async function getCohort() {
     .from('predictions')
     .select('id, created_at, reasoning')
     .eq('prediction_type', 'pre_game')
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .gte('created_at', since)
     .order('created_at', { ascending: false })
     .limit(500);
