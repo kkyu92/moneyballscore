@@ -1,4 +1,16 @@
 
+## ⚪ review-code (lite) — `teams/[code]/page.tsx` 신규 감사, drift 0건 RETRO-ONLY (cycle 2327, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(19 completed/archived + 24 split-closed + 27 phase1-only-closed + 28 completed). 2-chain lock 미충족(직전 8사이클 2320-2326 distinct=5: explore-idea/review-code/polish-ui/lotto/fix-incident). 주기 trigger 4종 전부 미도달(fix-incident 0/20 방금 발화, op-analysis 18/25, info-arch 17/30, lotto 3/30). skill-evolution trigger3(2327%50=27)/trigger5(직전20사이클 chain pool 표본 20≥10, opt-out 9개 제외 평가대상 review-code 0회 아님) 둘 다 미충족. ship-0 미충족(직전 10사이클 success 5/retro-only 5, fail 0건).
+
+`#1338 family`(prediction_type=pre_game 필터만 있고 scoring_rule 미필터 — shadow/구버전/MLB row 혼입) 신규 재발 여부 grep 스캔: `pre_game` 사용 전체 파일 재검토 결과 dashboard/page.tsx, buildModelTuningInsights.ts, buildTeamAccuracy.ts, reviews/page.tsx, insights/series.ts, buildPitcherLeaderboard.ts, buildPitcherProfile.ts, leaderboard/server.ts, buildTeamFactorAverages.ts, buildMissReport.ts, reviews/shared.ts — **전부 `CURRENT_MODEL_FILTER`(wave-656, `scoring_rule` 포함) 사용 확인, 신규 재발 0건**. family sweep 완전 소진 재확인(11번째 재발 없음).
+
+op-analysis CE cohort 스크립트(`scripts/op-analysis-ce-cohort.ts`) 재실행 — 결과 총 n=321(CE 274/비CE 47), cycle 2309 측정치와 **완전 동일**(같은 날짜 내 재실행이라 신규 검증 경기 0건, 정상). 신규 정보 없어 CLAUDE.md 갱신 스킵(중복 기록 방지).
+
+review-code 신규 target 재탐색: `teams/[code]/page.tsx`(621줄, KBO 팀 프로필) 감사 — predictions 직접 쿼리 없음(전량 `buildTeamProfile`/`buildTeamEloTrend`/`buildTeamUpcoming`/`getConvergencePickTeamStats` 위임, 기존 필터 검증 완료 함수), `SMALL_SAMPLE_N` 소표본 가드 적용, Breadcrumb 존재, `captureFallback` 에러 경계 3곳 적용, RelatedLinks/EmptyState 정상. **drift 0건.**
+
+결론: 코드 변경 없음(retro-only). #1338 family 재검증 + teams/[code] 감사 모두 clean. 다음 후보: fix-incident/op-analysis/info-arch/lotto 자체 주기 monitor(각 1/20, 19/25, 18/30, 4/30) 또는 explore-idea(heavy, 신규 topic 재탐색 — plan #24/#27/#28 전부 종료로 fresh topic 필요, `/mlb/postseason`은 여전히 ETA 2026-09 미도달).
+
 ## 🟢 fix-incident — baseball-savant.ts User-Agent 헤더 예방적 추가 SUCCESS (cycle 2326, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2318-2325 distinct=4: explore-idea/review-code/polish-ui/lotto). **주기 trigger 6종 중 fix-incident 20-gap 정확 도달**(마지막 fix-incident 발화 cycle 2306, gap=20). op-analysis 17/25, info-arch 16/30, lotto 2/30(방금 리셋) 모두 미도달. skill-evolution trigger3(2326%50=26)/trigger5 둘 다 미충족.
