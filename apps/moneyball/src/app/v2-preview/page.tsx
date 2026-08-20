@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { assertSelectOk, shortTeamName, NEUTRAL_FACTOR, V2_PROMOTION_COHORT_N, INSIGHTS_LIMIT, type TeamCode, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { CURRENT_MODEL_FILTER } from "@/config/model";
 import {
   V2_1_B_WEIGHTS,
   applyV2_1_BWeights,
@@ -67,6 +68,7 @@ async function getPreviewRows(): Promise<PreviewRow[]> {
       "reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
+    .match(CURRENT_MODEL_FILTER)
     .order("created_at", { ascending: false })
     .limit(LIMIT * 3);
   const { data } = assertSelectOk(result, "v2-preview.getPreviewRows");
