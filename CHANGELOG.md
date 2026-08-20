@@ -1,3 +1,29 @@
+## v0.5.62.65 — 2026-08-20 (cycle 2305, explore-idea (heavy): /mlb/wild-card 라이브 Wild Card race 데이터 통합)
+
+### feat(mlb): /mlb/wild-card 라이브 Wild Card race 데이터 통합
+
+cycle 2296 이 남긴 carry-over("와일드카드 매직넘버는 범위 밖... 별도 cycle 후속 후보")와
+`/mlb/wild-card`/`/en/mlb/wild-card` 페이지 자체의 "ETA 2026-08" placeholder(오늘 ETA 도달)
+양쪽을 해소.
+
+`buildMlbStandings.ts`에 `buildMlbWildcardStandings()` 신규 — 리그별 division 1위 3팀을
+제외한 나머지 팀을 승률 내림차순 정렬한 pool 을 만들고, 컷오프(`MLB_WILDCARD_COUNT`=3번째
+팀) 기준 게임차(`wcGamesBehind`)를 계산. `computeMagicNumber()`를 KBO standings
+`playoffMN`과 동일 패턴(컷오프 팀 vs 첫 탈락 팀)으로 재사용해 Wild Card 매직넘버도 산출 —
+신규 DB 쿼리 0건, 기존 `buildMlbDivisionStandings()` 출력만 재가공.
+
+두 페이지의 정적 "후보 pool 그리드"를 실시간 WC1~3 순위 뱃지 + W-L-승률 + GB + 매직넘버로
+교체. 상태 섹션 문구를 ETA → "박제 완료"로 갱신. Header NAV 회수 layer로 시작했다는 기존
+footer 문구는 유지(wave-240 회귀 테스트 대상).
+
+rubric: 가치 medium(시즌 중 시의성, KBO 가을야구 매직넘버 parity) / 시간비용 small(기존
+standings 데이터 + computeMagicNumber 재사용) / risk 0(신규 계산 함수, 기존 데이터 흐름
+변경 없음) / 자율가능 yes / 의존성 none → Tier 1 즉시 fire.
+
+`MLB_WILDCARD_COUNT=3` 신규 상수(packages/shared). `buildMlbWildcardStandings` 단위
+테스트 2건 신규(정렬+게이팅 케이스, all-zero 케이스). 490 files/4124 tests all pass,
+type-check/lint clean.
+
 ## v0.5.62.64 — 2026-08-20 (cycle 2296, explore-idea (heavy): MLB standings division 매직넘버 신규)
 
 ### feat(mlb): MLB AL/NL standings division 매직넘버 배지 신규
