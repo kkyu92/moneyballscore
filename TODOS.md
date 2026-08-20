@@ -1,4 +1,12 @@
 
+## ⚪ review-code (heavy) — `/mlb/analysis` Phase 3 신규 코드(어제 결과+리뷰 CTA) 감사, drift 0건 (cycle 2319, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 distinct=3: review-code/polish-ui/explore-idea). 주기 trigger 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 9/30, lotto 25/30). skill-evolution trigger5 표본 19(≥10)→review-code 9/19(0 아님)→미충족, trigger3(%50==0) 미도달. ship-0 미충족(직전 10사이클 success 6건). cycle 2318 next_recommended_chain 이 review-code(heavy) 를 1순위로 명시 + cycle 2317 감사가 phase 3 shipped(2318) 이전 코드만 봤으므로 최신 diff 미감사 — Phase 3 신규 코드(`getMlbYesterdayResults`/`getMlbPeriodStats` + page.tsx CTA 섹션) 착수.
+
+감사 범위: (1) `winnerProb: r.confidence ?? 0.5` fallback 도달 가능성 — `deriveMlbOutcome()` 확인 결과 predictedHomeWin/confidence 둘 다 `homeWinProb != null` 조건에서만 non-null 파생되므로 `predictedWinnerCode` null 일 때만 confidence 도 null → page.tsx 의 `g.predictedWinnerCode &&` 렌더 가드가 이미 fallback 분기를 항상 가림(도달 불가, harmless dead default). (2) `/mlb/games/${date}/${homeCode}-vs-${awayCode}` 슬러그 순서 — `[slug]/page.tsx` L116 `slug.split('-vs-')` → `[homeParam, awayParam]` 파싱과 일치, 기존 matchup/team 페이지 동일 컨벤션 재사용 확인. (3) `homeCode`/`awayCode` 코드 스케일 — `fetchMlbPredictionRowsInRange` 내부에서 이미 `normalizeMlbTeamCode()` 적용된 canonical(Baseball-Reference) 코드라 슬러그 라우트 기대값과 일치(원본 StatsAPI 코드 아님). (4) confidence 0.5~1 스케일 `* 100` 렌더 — cycle 2160 이 박제한 "DB confidence(0~1) 전용 `confToWinProb` 이중 변환 버그" 재발 아님, `deriveMlbOutcome().confidence` 는 이미 winnerProb 스케일이라 단순 `* 100` 만 하는 게 맞음(주석에 명시). (5) `currentWeek.weekId`/`currentMonth.monthId` → `/mlb/reviews/weekly/[week]`, `/mlb/reviews/monthly/[month]` 라우트 실존 확인 + 필드명 일치 확인.
+
+결론: drift 0건, 코드 변경 없음(retro-only). Phase 3 코드는 기존 검증된 패턴(mlb-shared.ts 재사용 + canonical 코드 컨벤션 + confidence 스케일 규칙) 을 정확히 따름. 다음 후속 후보: plan #28 Phase 4(시즌 성과 + 적중 기록 `/mlb/accuracy` 요약 카드 임베드) 또는 TeamStrengthGrid MLB 대체 설계(Phase 2 잔여) — 둘 다 explore-idea(heavy) 대상, 다음 사이클 자율 선택.
+
 ## 🟢 explore-idea (heavy) — `/mlb/analysis` 어제 결과 + 주간/월간 리뷰 CTA, plan #28 Phase 3 SUCCESS (cycle 2318, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 distinct=4). 주기 trigger 전부 미도달(fix-incident 12/20, op-analysis 9/25, info-arch 8/30, lotto 24/30). lite chain cooldown 미충족. ship-0 미충족(직전 10사이클 success 6건 + partial 1건). plan #28 status=`phase2_partial_shipped_cycle_2316`(literal `approved` 아니라 unprocessed-plan 자동 lookup 발화 X, cycle 2317 TODOS 가 명시한 "다음 후속 후보: Phase 3(어제 결과+주간/월간 리뷰 요약)" carry-over로 메인 자율 선택) — Phase 3 착수.
