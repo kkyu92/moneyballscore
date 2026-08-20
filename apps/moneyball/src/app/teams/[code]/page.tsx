@@ -10,6 +10,7 @@ import {
   shortTeamName, SITE_URL,
   KBO_OFFICIAL_URL,
   ACCURACY_GOOD_RATE,
+  ACCURACY_MID_RATE,
   confToWinProb,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
@@ -198,7 +199,7 @@ export default async function TeamPage({ params }: PageProps) {
                   ? "text-gray-400 dark:text-gray-500"
                   : (profile.accuracyRate ?? 0) >= ACCURACY_GOOD_RATE
                     ? "text-brand-600 dark:text-brand-400"
-                    : (profile.accuracyRate ?? 0) >= 0.5
+                    : (profile.accuracyRate ?? 0) >= ACCURACY_MID_RATE
                       ? "text-yellow-600 dark:text-yellow-400"
                       : "text-red-600 dark:text-red-400"
               }`}

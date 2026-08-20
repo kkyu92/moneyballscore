@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SMALL_SAMPLE_N, SITE_URL, ACCURACY_GOOD_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
+import { SMALL_SAMPLE_N, SITE_URL, ACCURACY_GOOD_RATE, ACCURACY_MID_RATE, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS } from '@moneyball/shared';
 import { getRecentConvergencePickRecord, computeWinRatePct, getConvergencePickStreak, getConvergencePickBestStreak, getConvergencePickHomeAwaySplit, getConvergencePickDayOfWeekSplit, getConvergencePickTeamStats } from '@/lib/analysis/convergenceRecord';
 import {
   parseMonthId,
@@ -188,7 +188,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
               className={`text-3xl font-bold mt-1 ${
                 review.accuracyRate >= ACCURACY_GOOD_RATE
                   ? "text-brand-600 dark:text-brand-400"
-                  : review.accuracyRate >= 0.5
+                  : review.accuracyRate >= ACCURACY_MID_RATE
                     ? "text-yellow-600 dark:text-yellow-400"
                     : "text-red-600 dark:text-red-400"
               }`}

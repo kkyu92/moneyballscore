@@ -9,7 +9,7 @@ import {
   PARK_FACTOR_PITCHER_MAX,
   type MlbTeamCode,
   mlbShortTeamName,
-  MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE,
+  MLB_GAMES_PER_TEAM, SITE_URL, ACCURACY_GOOD_RATE, ACCURACY_MID_RATE,
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
   MARGIN_BLOWOUT_THRESHOLD,
@@ -206,7 +206,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
                   ? "text-gray-400 dark:text-gray-500"
                   : (profile.accuracyRate ?? 0) >= ACCURACY_GOOD_RATE
                     ? "text-brand-600 dark:text-brand-400"
-                    : (profile.accuracyRate ?? 0) >= 0.5
+                    : (profile.accuracyRate ?? 0) >= ACCURACY_MID_RATE
                       ? "text-yellow-600 dark:text-yellow-400"
                       : "text-red-600 dark:text-red-400"
               }`}

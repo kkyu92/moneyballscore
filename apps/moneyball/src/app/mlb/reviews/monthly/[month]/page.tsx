@@ -5,6 +5,7 @@ import {
   SMALL_SAMPLE_N,
   SITE_URL,
   ACCURACY_GOOD_RATE,
+  ACCURACY_MID_RATE,
   MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
 } from '@moneyball/shared';
 import { parseMonthId, getRecentMonths } from "@/lib/reviews/computeMonthRange";
@@ -162,7 +163,7 @@ export default async function MlbMonthlyReviewPage({ params }: PageProps) {
               className={`text-3xl font-bold mt-1 ${
                 review.accuracyRate >= ACCURACY_GOOD_RATE
                   ? "text-brand-500"
-                  : review.accuracyRate >= 0.5
+                  : review.accuracyRate >= ACCURACY_MID_RATE
                     ? "text-yellow-600 dark:text-yellow-400"
                     : "text-red-600 dark:text-red-400"
               }`}

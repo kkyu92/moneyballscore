@@ -857,6 +857,17 @@ export const ACCURACY_OK_RATE = ACCURACY_OK_PCT / 100;
 export const ACCURACY_WARN_RATE = ACCURACY_WARN_PCT / 100;
 
 /**
+ * 적중률 "중간" 색상 임계 (소수) — accuracyRate >= ACCURACY_MID_RATE 시 yellow,
+ * 미만 시 red. ACCURACY_GOOD_RATE(0.6) 보다 낮은 3단계(brand/yellow/red) 색상용
+ * 하한 — 팀 프로필(teams/[code], mlb/team/[code], en/mlb/team/[code]) + 주간/월간
+ * 리뷰(reviews/weekly, reviews/monthly, mlb/reviews/weekly, mlb/reviews/monthly)
+ * 7 callsite 단일 source.
+ *
+ * silent drift family wave 657 (cycle 2337) — `>= 0.5` hardcoded swap, 7 callsites.
+ */
+export const ACCURACY_MID_RATE = 0.5;
+
+/**
  * 주간 리뷰 "강한 퍼포먼스" 적중률 임계 — accuracyRate >= ACCURACY_STRONG_RATE 시
  * "모델의 이번 주 퍼포먼스가 강했습니다" 텍스트 노출.
  *
