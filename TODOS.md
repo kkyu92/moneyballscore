@@ -1,4 +1,12 @@
 
+## ⚪ info-architecture-review (lite) — 30-cycle gap 자연 도달, IA 감사 clean RETRO-ONLY (cycle 2340, 2026-08-20)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2332-2339 distinct=4). 마지막 info-arch 발화 cycle 2310 → gap=30 (trigger 자동 도달, cycle 300 룰). 나머지 주기 trigger 미도달(fix-incident 7/20, op-analysis 4/25, lotto 16/30).
+
+**감사 범위** (6종): 라우트 신규(git log 14일 — en/mlb/analysis·reviews·misses·matchup·accuracy·calendar·methodology·predictions 등 wave-658/659 신규분 확인) / breadcrumb (en/mlb/reviews, misses, analysis 3개 신규 라우트 전부 `Breadcrumb` 보유) / sitemap.ts 동기 (en/mlb/analysis, en/mlb/reviews, en/mlb/reviews/misses 전부 등록 확인, 동적 라우트 en/mlb/team·matchup·players·games 도 커버) / hreflang alternates (mlb/reviews ↔ en/mlb/reviews canonical+languages 양방향 배선 확인) / 헤더 메가메뉴 (분석 센터·예측 리뷰·빗나간 예측 3개 항목 정상, withLocale 예외 주석 최신 — weekly/monthly 만 의도적 KO-only 유지) / 푸터 sitemap 컬럼 (동일 3항목 정상).
+
+결론: 신규 drift 0건 — cycle 2338/2339 explore-idea(heavy) 2연속이 이미 IA 갭(nav 404 + EN 미러 부재)을 선제 해소해 30-cycle 창 안 신선 발견 없음. 코드 변경 없음(RETRO-ONLY). 다음 info-arch 발화는 cycle 2370(30-gap) 또는 신규 라우트 배선 후 자연 재도달. 잔존 backlog(참고, 별도 chain): PickButton 현지화, en/mlb/reviews weekly/monthly 미러(MLB 주/월 range 유틸 부재로 보류).
+
 ## 🟢 explore-idea (heavy) — en/mlb/reviews 영어 미러 신규 SUCCESS (cycle 2339, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2331-2338 distinct=4: operational-analysis/review-code/fix-incident/explore-idea). 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 3/25, info-arch 29/30, lotto 15/30). cycle 2338 explore-idea(heavy) 회고가 "PickButton 현지화" 와 "en/mlb/reviews 미러"(기존 구조적 gap, cycle 620 에서도 언급) 를 명시적 다음 후보로 남김 — carry-over 강도 명확한 쪽 선택.
