@@ -16,7 +16,7 @@ describe('computeCompositeDuel', () => {
       homeLineupWoba: 0.360,
       awayLineupWoba: 0.330,   // diff 0.030 >= 0.020 → home
       homeSfr: 10,
-      awaySfr: 0,               // diff 10 >= 5 → home
+      awaySfr: -5,              // diff 15 >= 5 → home (nonzero: sfr=0 is a data-gap stub, invalid)
       homeBullpenFip: 3.5,
       awayBullpenFip: 5.0,      // away - home = 1.5 >= 1.0 → home
       homeSPFip: 3.5,
@@ -53,8 +53,8 @@ describe('computeCompositeDuel', () => {
       homeCode: 'LT',
       homeLineupWoba: 0.360,
       awayLineupWoba: 0.330,   // home wOBA win
-      homeSfr: 0,
-      awaySfr: 10,             // away SFR win
+      homeSfr: -5,
+      awaySfr: 10,             // away SFR win (nonzero: sfr=0 is a data-gap stub, invalid)
       homeBullpenFip: 3.5,
       awayBullpenFip: 3.6,    // diff 0.1 < 1.0 → null
       homeSPFip: 3.5,
@@ -66,5 +66,37 @@ describe('computeCompositeDuel', () => {
     });
     expect(result.homeWins).toBeGreaterThanOrEqual(1);
     expect(result.awayWins).toBeGreaterThanOrEqual(1);
+  });
+
+  describe('SFR data gap guard (cycle 2419, WAR wave-535 family)', () => {
+    it('awaySfr=0 (data-gap stub) → sfr factor excluded (not counted as home win)', () => {
+      const result = computeCompositeDuel({
+        homeCode: 'LT',
+        homeSfr: 10,
+        awaySfr: 0,
+      });
+      expect(result.homeWins).toBe(0);
+      expect(result.awayWins).toBe(0);
+    });
+
+    it('homeSfr=0 (data-gap stub) → sfr factor excluded (not counted as away win)', () => {
+      const result = computeCompositeDuel({
+        homeCode: 'LT',
+        homeSfr: 0,
+        awaySfr: 10,
+      });
+      expect(result.homeWins).toBe(0);
+      expect(result.awayWins).toBe(0);
+    });
+
+    it('both nonzero SFR → factor counted normally', () => {
+      const result = computeCompositeDuel({
+        homeCode: 'LT',
+        homeSfr: 10,
+        awaySfr: -5,
+      });
+      expect(result.homeWins).toBe(1);
+      expect(result.homeFavoredSlugs).toContain('sfr');
+    });
   });
 });

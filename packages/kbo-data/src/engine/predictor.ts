@@ -104,7 +104,14 @@ export function predict(input: PredictionInput, opts?: PredictOptions): Predicti
   factors.elo = normalize(input.homeElo.elo, input.awayElo.elo, true);
 
   // 10. 수비 SFR (높을수록 좋음)
-  factors.sfr = normalize(input.homeTeamStats.sfr, input.awayTeamStats.sfr, true);
+  // sfr=0 on one side = Fancy Stats silent-fallback stub (fetchEloRatings `sfr || FANCY_STATS_DEFAULTS.sfr`),
+  // indistinguishable from a genuine league-average team. Asymmetric zero → comparison unfair → neutral
+  // (same family as WAR data gap guard, cycle 1904 wave-533).
+  const homeSfr = input.homeTeamStats.sfr;
+  const awaySfr = input.awayTeamStats.sfr;
+  factors.sfr = (homeSfr !== 0 && awaySfr !== 0)
+    ? normalize(homeSfr, awaySfr, true)
+    : 0.5;
 
   // 11. park_weather (M-F1 cycle 1013 — shadow factor, production weight=0)
   // weather/isDome 결측 시 0.5 neutral. shadow cohort 에서만 효과 발현.

@@ -1123,8 +1123,8 @@ export default async function AnalysisIndexPage() {
                                 </span>
                               );
                             })()}
-                            {/* wave-510: 수비SFR 직접 대결 배지 — |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo/WAR 배지에 수비 배지 추가 */}
-                            {g.homeSfr != null && g.awaySfr != null && (() => {
+                            {/* wave-510: 수비SFR 직접 대결 배지 — |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · SP FIP/wOBA/불펜FIP/Elo/WAR 배지에 수비 배지 추가 · cycle 2419: SFR=0 data gap guard (WAR wave-535 family) */}
+                            {g.homeSfr != null && g.awaySfr != null && g.homeSfr !== 0 && g.awaySfr !== 0 && (() => {
                               const sfrDelta = g.homeSfr - g.awaySfr;
                               if (Math.abs(sfrDelta) < SFR_DUEL_MIN) return null;
                               const sfrFavoredHome = sfrDelta > 0;
@@ -1641,8 +1641,8 @@ export default async function AnalysisIndexPage() {
                               </span>
                             </>
                           )}
-                          {/* wave-357: 수비 SFR 직접 대결 배지 */}
-                          {g.homeSfr != null && g.awaySfr != null && (() => {
+                          {/* wave-357: 수비 SFR 직접 대결 배지 · cycle 2419: SFR=0 data gap guard (WAR wave-535 family) */}
+                          {g.homeSfr != null && g.awaySfr != null && g.homeSfr !== 0 && g.awaySfr !== 0 && (() => {
                             const gap = g.homeSfr - g.awaySfr;
                             if (Math.abs(gap) < SFR_DUEL_MIN) return null;
                             const favoredHome = gap > 0;
@@ -2310,8 +2310,8 @@ export default async function AnalysisIndexPage() {
                                     </span>
                                   );
                                 })()}
-                                {/* wave-521: 수비SFR 직접 대결 배지 — |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 */}
-                                {g.homeSfr != null && g.awaySfr != null && (() => {
+                                {/* wave-521: 수비SFR 직접 대결 배지 — |ΔSFR| >= SFR_DUEL_MIN(5.0) 시 우위 팀명 + 격차 표시 · cycle 2419: SFR=0 data gap guard (WAR wave-535 family) */}
+                                {g.homeSfr != null && g.awaySfr != null && g.homeSfr !== 0 && g.awaySfr !== 0 && (() => {
                                   const sfrDelta = g.homeSfr - g.awaySfr;
                                   if (Math.abs(sfrDelta) < SFR_DUEL_MIN) return null;
                                   const sfrFavoredHome = sfrDelta > 0;

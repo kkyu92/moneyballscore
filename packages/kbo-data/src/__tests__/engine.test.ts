@@ -201,6 +201,41 @@ describe('WAR data gap guard (cycle 1904, wave-533)', () => {
   });
 });
 
+describe('SFR data gap guard (cycle 2419, WAR wave-533 family)', () => {
+  it('홈팀 sfr != 0, 원정팀 sfr = 0 → sfr 팩터 = 0.5 (silent-fallback stub 중립)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 5.3 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 0 },
+    }));
+    expect(result.factors.sfr).toBe(0.5);
+  });
+
+  it('원정팀 sfr != 0, 홈팀 sfr = 0 → sfr 팩터 = 0.5 (silent-fallback stub 중립)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 4.0 },
+    }));
+    expect(result.factors.sfr).toBe(0.5);
+  });
+
+  it('양팀 모두 sfr != 0 → sfr 팩터 정상 계산 (홈팀 우세 시 > 0.5)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 5.0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 2.0 },
+    }));
+    expect(result.factors.sfr).toBeGreaterThan(0.5);
+    expect(result.factors.sfr).toBeLessThan(1.0);
+  });
+
+  it('양팀 모두 sfr = 0 → sfr 팩터 = 0.5 (기존 동작 유지)', () => {
+    const result = predict(makeInput({
+      homeTeamStats: { team: 'LG', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 0 },
+      awayTeamStats: { team: 'OB', woba: 0.330, bullpenFip: 4.0, totalWar: 15, sfr: 0 },
+    }));
+    expect(result.factors.sfr).toBe(0.5);
+  });
+});
+
 describe('predict opts.weights (cycle 1127 plan-v17 candidate N — V2_MODEL_ENABLED swap)', () => {
   it('opts 미지정 → DEFAULT_WEIGHTS 사용 (기존 동작 유지)', () => {
     const baseline = predict(makeInput());
