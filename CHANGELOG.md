@@ -1,3 +1,12 @@
+## v0.5.62.90 — 2026-08-23 (cycle 2429, review-code: WAR/SFR=0 데이터 갭 sentinel이 팀 프로필 평균 집계에 raw 노출되던 것 정정 — family 4th occurrence)
+
+### fix(shared): WAR/SFR=0 (Fancy Stats 데이터 갭 sentinel)이 `computeFactorAveragesFromPerspectives` 팀 관점 평균 집계엔 gap guard 미적용 상태로 방치돼 팀 프로필/매치업 페이지 "평균 SFR/WAR" 표시값이 갭 경기 수만큼 0쪽으로 끌려 내려가던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 4/30, lotto 재충족이나 실측 확인 결과 이미 self-heal 완료 — 6번째 no-op, skip). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 미충족(11/15). cycle 2428 retro 가 제안한 "review-code 남은 monolith sweep" 방향으로 미감사 파일(`buildTeamProfile.ts`, `buildTeamFactorAverages.ts`) 직접 감사.
+- 발견: `predictor.ts`(wave-533/535)와 `computeCompositeDuel.ts` 는 이미 SFR `!== 0` / WAR `> 0` gap guard를 갖고 있으나(2419/2428 에서 확인·보강), 8팩터 평균 단일 source `computeFactorAveragesFromPerspectives`(packages/shared, cycle 2040/2064 통합)는 `v != null` 만 검사해 literal 0(Fancy Stats silent-fallback stub, `fetchEloRatings` `sfr || FANCY_STATS_DEFAULTS.sfr`)을 유효 데이터로 평균에 포함 — `buildTeamProfile.ts`(팀 프로필 페이지) + `buildTeamFactorAverages.ts`(매치업 페이지) 양쪽 callsite 가 이 오염된 평균을 그대로 화면에 표시(`teams/[code]/page.tsx` "평균 SFR"/"평균 WAR" 스탯 카드). MLB 대응 `buildMlbTeamFactorAverages.ts`는 SFR/WAR 필드 자체가 없어 영향 없음.
+- 실행: `computeFactorAveragesFromPerspectives` 안에서 평균 계산 전 sfr===0→null, warTotal<=0→null 로 정규화해 `computeNumericAveragesFromPerspectives`(v != null 필터) 가 자연히 제외하도록 단일 지점에서 수정 — 두 callsite 모두 동시 반영. 회귀 테스트 5건 추가(sfr=0 제외/warTotal<=0 제외/음수 sfr 유효 데이터 유지/전 표본 갭 시 null/다른 팩터 미영향).
+- `pnpm --filter @moneyball/shared test`(217/217, 신규 5건) + `pnpm --filter kbo-data test`(1181/1181) + `pnpm --filter moneyball test`(4209/4209) + 전체 `type-check`/`lint` clean.
+
 ## v0.5.62.89 — 2026-08-23 (cycle 2428, review-code: WAR/SFR=0 데이터 갭 sentinel이 LLM 토론 프롬프트에 raw 노출되던 것 마스킹)
 
 ### fix(agents): WAR/SFR=0 (Fancy Stats 데이터 갭 sentinel)이 정량 엔진(predictor.ts)에선 neutral 처리되지만 LLM 토론 프롬프트엔 raw 0 그대로 노출돼 "팀 WAR 0" 같은 실제 없는 서술을 유발할 수 있던 것을 명시적 갭 표기로 정정
