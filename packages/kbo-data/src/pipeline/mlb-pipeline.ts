@@ -348,6 +348,14 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     const h2hTotal = h2h.wins + h2h.losses;
     const h2hHomeWinRate = h2hTotal > 0 ? h2h.wins / h2hTotal : 0.5;
 
+    // cycle 2402 발견 — sp_fip(12%)/bullpen_fip(10%) 양쪽 다 mlb_team_stats.fip(팀 전체
+    // 투수진 aggregate, FanGraphs) 를 그대로 읽음. KBO 쪽은 sp_fip=실제 선발투수 개인 FIP
+    // (kbo-pitcher.ts) vs bullpen_fip=팀 전체 FIP(fancy-stats.ts) 로 서로 다른 소스인 반면,
+    // MLB 는 선발투수 개인 FIP 데이터 소스 자체가 없어(팀 aggregate 만 존재) 두 팩터가 동일
+    // 값 공유 — mlb-pipeline.test.ts 508/580행이 이 duplicate 값을 이미 명시 assert(의도된
+    // 동작으로 테스트 고정). statsapi-mlb.ts 의 fetchProbablePitchers 가 선발투수 이름/ID 는
+    // 스크레이프하나 개인 FIP 통계 소스가 없어 프로덕션 미연결 상태(선수별 통계 신규 스크레이퍼
+    // 필요 — 별도 스코프).
     const prob = computeMlbProbability({
       sp_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
       sp_xfip: { home: home?.xfip ?? MLB_STAT_DEFAULTS.xfip, away: away?.xfip ?? MLB_STAT_DEFAULTS.xfip },
@@ -361,6 +369,14 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       defense_sfr: { home: 0, away: 0 },
       lineup_xwoba: { home: home?.xwoba ?? MLB_STAT_DEFAULTS.xwoba, away: away?.xwoba ?? MLB_STAT_DEFAULTS.xwoba },
       lineup_barrel_pct: { home: home?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct, away: away?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct },
+      // cycle 2402 발견 — defense_sfr(5%) 과 동일하게 sp_xwoba_against(4%)/woba_std(3%) 도
+      // home/away 양쪽에 항상 동일 상수를 넣어 homeAdvantage 기여도가 구조적으로 항상 0
+      // (diff=0). 단 defense_sfr 은 line 382 주석으로 이미 공개된 known placeholder 인 반면
+      // 이 둘은 그동안 무주석 상태 — Baseball Savant 스크레이퍼(baseball-savant.ts)가
+      // 팀 전체 타격 xwOBA 만 제공하고 "상대 투수 피안타 xwOBA(sp_xwoba_against)"·
+      // "라인업 wOBA 표준편차(woba_std)" 는 별도 데이터 소스가 없어 실측 불가 (신규 스크레이퍼
+      // 필요 — 별도 스코프). 합산 시 defense_sfr 과 동일 원리로 안전(diff=0 → 항상 무영향)하나
+      // MLB_BASE_WEIGHTS 상 7%(4%+3%) 가 defense_sfr 5% 와 마찬가지로 항상 죽어있는 weight.
       sp_xwoba_against: { home: MLB_STAT_DEFAULTS.xwoba, away: MLB_STAT_DEFAULTS.xwoba },
       woba_std: { home: 0.030, away: 0.030 },
     });
