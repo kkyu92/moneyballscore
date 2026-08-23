@@ -1,3 +1,16 @@
+## 🟢 explore-idea (heavy) — 온보딩 3페이지 MLB 인지 갭 해소 SUCCESS (cycle 2347, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2340-2346 distinct=4: info-arch/review-code/explore-idea/lotto). 주기 trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 7/30, lotto 3/30). cycle 2346 review-code(heavy) retro 가 "explore-idea 자연 발견 또는 open issue/plan 재확인" 을 다음 후보로 남김. review-code(heavy) 2연속 clean audit(2343/2346)로 신규 감사 target 소진.
+
+**발견**: KBO↔MLB 구조 parity 는 이미 완결(cycle 2242 checkpoint, 라우트 30+ + en 미러)이나 온보딩 narrative 3페이지(`/about`, `/guide`, `/glossary`)에 MLB 언급이 0건임을 grep 으로 확인 — 신규 사용자가 처음 읽는 문서 어디서도 MLB 섹션 존재를 알 수 없었음.
+
+**실행**: `/guide` "페이지별 활용" 그리드에 MLB 카드 신규(정량 모델 전용, AI 에이전트 토론 미적용 명시) / `/about` 인트로에 MLB 예측 안내 1줄 추가(`MLB_FACTOR_COUNTS.total` 실측 인용, `mlb-pipeline.ts` 확인 후 AI 토론 미적용 정확히 서술) / `/glossary` 헤더에 지표 공통 적용 범위 + MLB 전용 4개 지표(Elo/최근폼/상대전적/수비SFR) 안내.
+
+검증: `tsc --noEmit`(moneyball) clean, `pnpm test`(498 files/4180 tests all green). `/ship` 완주(VERSION 0.5.62.72, CHANGELOG 갱신, main 직접 커밋 push 완료 — commit `bf30d00e`).
+
+결론: 온보딩 문서 MLB 인지 갭 해소 SUCCESS. **주의**: 본 cycle 실행(구현+ship)은 이전 세션에서 이미 완료돼 있었으나 retro 박제(JSON+policy commit) 가 누락된 상태(사례 15 silent retro drift family 재발 가능성)로 본 세션이 발견 — commit body 에 `cycle: 2347` + `subtype: explore-idea` 가 명시돼 있어 evidence 명확, retroactive 정상 박제 진행. 다음 cycle 후보 = review-code(heavy, 방금 배선된 온보딩 3페이지 문구 audit) 또는 신규 topic 자연 발견.
+
+
 ## ⚪ review-code (heavy) — cycle 2345 MLB 주간/월간 수렴 픽 배선 drift 감사 clean RETRO-ONLY (cycle 2346, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2338-2345 distinct=4). 주기 trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 6/30, lotto 2/30). cycle 2345 explore-idea(heavy) retro 가 "review-code(heavy, 방금 배선된 신규 코드 audit — Feature-Drift Cycle 자연 교대)" 를 명시적 다음 후보로 남김.
