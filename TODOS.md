@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — explore-idea(lite) MLB game detail 모델 메타 정보 블록 KBO parity 이식 (cycle 2424, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(29=Tier4 보류 유지). gap trigger: fix-incident 방금 발화(2423), op-analysis 8/25, info-arch 29/30(다음 사이클 도달), lotto 30/30 이지만 실측(count/picks mtime) 재확인 결과 8/22 결과+8/29 50세트 이미 오늘 생성 완료라 재발화 무의미. 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation trigger 충족(직전15 12/15 review-code/fix-incident/polish-ui/info-arch). cycle 2423 자체 retro 가 "predicted_at 실측 채워졌으니 MLB lead-time 배지 이식 가능"을 명시적 carry-over로 남김 — 실측 확인(grep) 결과 진짜 gap.
+
+실행: KBO `analysis/game/[id]/page.tsx` 의 "모델 메타 정보" details 블록(정량 모델 + 토론 버전 + 리드타임, model_version/debate_version/predicted_at 기반)을 MLB `mlb/games/[date]/[slug]/page.tsx` 에 이식 — select 에 3컬럼 추가 + HOUR_MS 기반 predictionLeadHours 계산 + 동일 JSX 블록(factors 그리드는 MLB 는 별도 컴포넌트가 이미 커버해 제외). 회귀 테스트 1건 추가.
+
+결과: 전체 테스트(kbo-data 1176 + moneyball 4209) + eslint + tsc --noEmit clean. PR #3049 squash 머지 완료(main HEAD 95af5f7b).
+
+다음 사이클 추천 = info-architecture-review(29/30, 다음 사이클 도달) 또는 review-code(heavy, 이번에 추가한 predictionLeadHours 계산 KBO 값과 재대조 여지). lotto self-heal 재확인 무의미 패턴 3회 누적(cycle 2392/2422/2424) — chain-evolution 후보로 격상 검토(trigger 를 "다음 실제 추첨일 이후"로 변경).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) telegram notify + cron dispatch alert 감사, clean (cycle 2422, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(전부 completed/rejected/deferred — plan #29 회원인증+커뮤니티는 Tier 4 사용자 영역 보류 유지). gap trigger: lotto 30/30 도달했으나 cycle 2392 가 이미 동일 self-heal 확인(1239회 picks cycle 2344 생성분 + 1238회 OOS 오늘 박제 완료, delta=0) — 재확인해도 상태 불변이라 재실행은 순수 중복. fix-incident 8/20, op-analysis 6/25, info-arch 27/30 전부 미도달. 2-chain lock 미충족(직전8 distinct=4). cycle 2421 이 review-code 4대 monolith 소진 확정한 상태에서, cycle 2392 retro 가 남긴 다음 후보("telegram notification 코드 / cron dispatch handlers") 직접 감사로 전환.
