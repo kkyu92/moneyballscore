@@ -2182,39 +2182,35 @@ export const NICKNAME_MIN_CHARS = 2;
 export const NICKNAME_MAX_CHARS = 12;
 
 /**
- * device_id 최대 길이 — silent drift family wave 303 (cycle 1632).
- * 동일 숫자 64 hardcoded 1 surface:
- *   - app/api/picks/submit/route.ts: device_id.length > 64
+ * device_id 최대 길이 — silent drift family wave 303 (cycle 1632) fix 완료.
+ * app/api/picks/submit/route.ts 가 본 상수를 import 해 사용 (하드코딩 없음).
  *
  * 투표 제출 요청의 device_id 최대 문자 수 (UUID 36자 + 여유). 변경 시 본 상수 1곳만 갱신.
  */
 export const DEVICE_ID_MAX_LENGTH = 64;
 
 /**
- * 커뮤니티 픽 최소 투표 수 — silent drift family wave 305 (cycle 1634).
- * 동일 숫자 3 hardcoded 2 surface:
- *   - lib/picks/buildCommunityAccuracy.ts: if (total < 3) continue  (exported, library)
- *   - components/picks/PickButton.tsx: const MIN_POLL_TOTAL = 3  (local copy, no import)
+ * 커뮤니티 픽 최소 투표 수 — silent drift family wave 305 (cycle 1634) fix 완료.
+ * lib/picks/buildCommunityAccuracy.ts, components/picks/PickButton.tsx 모두 본 상수를
+ * import 해 사용 (하드코딩/로컬 사본 없음).
  *
  * 투표 집계 시 노출 기준: 총 투표수 < 3 이면 분포 비공개. 변경 시 본 상수 1곳만 갱신.
  */
 export const MIN_POLL_TOTAL = 3;
 
 /**
- * AI vs 커뮤니티 픽 괴리 최소 임계 (pp) — silent drift family wave-500 (cycle 1867).
- * 동일 숫자 20 hardcoded 2 surface:
- *   - app/page.tsx: if (delta >= 20) — getDivergenceGame 함수 내 AI vs 커뮤니티 최대 괴리 탐색
- *   - components/picks/PickButton.tsx: Math.abs(aiHomePct - homePct) >= 20 — showDivergence 조건
+ * AI vs 커뮤니티 픽 괴리 최소 임계 (pp) — silent drift family wave-500 (cycle 1867) fix 완료.
+ * app/page.tsx (getDivergenceGame), components/picks/PickButton.tsx (showDivergence) 모두
+ * 본 상수를 import 해 사용 (하드코딩 없음).
  *
  * AI 홈팀 확률 vs 커뮤니티 픽 비율 차이가 이 값 이상이면 괴리 표시. 변경 시 본 상수 1곳만 갱신.
  */
 export const COMMUNITY_DIVERGE_MIN = 20;
 
 /**
- * 캘리브레이션 bucket 폭 — silent drift family wave 305 (cycle 1634).
- * 동일 숫자 0.05 / 0.5 / 10 hardcoded 2 surface:
- *   - lib/accuracy/buildAccuracyData.ts: BUCKET_WIDTH/START/COUNT (bucketize 함수 내)
- *   - app/debug/reliability/page.tsx: BUCKET_WIDTH/START/COUNT (로컬 bucketize 사본)
+ * 캘리브레이션 bucket 폭 — silent drift family wave 305 (cycle 1634) fix 완료.
+ * lib/accuracy/buildAccuracyData.ts(bucketize) 가 유일한 소비처 — app/debug/reliability/page.tsx
+ * 는 로컬 사본 없이 bucketize()를 그대로 import 해 재사용.
  *
  * confidence 0.5~1.0 구간을 10개 5% 폭 bucket 으로 분할. 캘리브레이션 플롯 공통 스키마.
  * 변경 시 두 callsite 자동 동기.
