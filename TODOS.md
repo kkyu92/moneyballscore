@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code family 소진 재확인 + Daily Pipeline false-alarm 해소 + op-analysis n-freeze 원인 정밀 규명 (cycle 2431, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29. gap trigger: fix-incident 8/20, op-analysis 4/25, info-arch 6/30 전부 미도달. lotto 39/30 재충족이나 5회+ no-op 확정(cron self-heal) skip. 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 11/15 미충족. 직전 3연속 review-code(heavy)가 WAR/SFR=0 gap guard family 3/4/5th occurrence 를 고쳤기에 이번 cycle 재그렙(FactorBreakdown 4 usage + Matchup/MlbMatchup/MlbFactorWaterfall 4 컴포넌트) — 신규 occurrence 0건, family 소진 확정.
+
+부가 발견: `gh run list` 로 "Daily KBO Pipeline" GH Actions 최근 실행이 2026-04-28 라 처음엔 4개월 인시던트로 보였으나, workflow 파일 주석 확인 결과 2026-04-29 Cloudflare Workers Cron 으로 의도적 이관 완료(schedule 영구 비활성화 명시) — false alarm, 인시던트 아님.
+
+실행: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행. 결과: 전체 n=332/CE n=285/비CE n=47 — cycle 2361/2427과 완전 동일. 이번엔 Supabase REST 직접 조회로 원인 정밀 규명: count=exact 332건 확인, 최신 verified_at=2026-08-22T14:17 UTC(=23:17 KST), games.game_date=2026-08-22 — 오늘(08-23) 경기는 야간 검증 배치 전이라 미포함. "같은 날 재측정" 추정(cycle 2427)보다 정확한 원인("검증 배치는 경기 종료 후 야간 1회 실행") 확정. 격차 10.1pp, overlap 통제 10.8pp, LLM 부가가치 우세 방향 7회 연속 재확인. 최근 KBO v1.8 예측 전부 debate_version=null 확인 — CREDIT_EXHAUSTED 지속 기존 관측 정합.
+
+결과: 코드 변경 0건. 다음 사이클 추천 = fix-incident(9/20) 또는 info-architecture-review(7/30) gap 순번, 또는 익일 야간 검증 배치 이후 op-analysis 재측정(신규 표본 기대).
+
 ## 🔵 RETRO-ONLY — operational-analysis(lite) CE-cohort 재측정, 동일 표본 재확인 (cycle 2427, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(29=Tier4 보류 유지). gap trigger: fix-incident 4/20, op-analysis 11/25(미도달이나 데이터 신선도 체크 저비용), info-arch 2/30(방금 발화), lotto 35/30 재충족이나 실측(`~/lotto_picks/` mtime, 2026-08-29-50sets.md + 2026-08-22-result.md 모두 오늘 생성) self-heal 완료 확인 — 5번째 no-op 재발이라 skip (cycle 2426 chain-evolution 제안과 정합). 2-chain lock 미충족(직전8 distinct=4). explore-idea 는 saturation trigger(12/15) 충족하나 plan #29 가 이미 "3-source 재탐색 완전 포화, 남은 후보는 Tier4(회원인증/커뮤니티) 뿐" 확정 — 신규 재탐색 무의미 판단, review-code 는 최근 5사이클 중 3회 clean audit(2418/2420/2421/2422/2426) 누적 — 둘 다 저수익 예상. op-analysis(lite) 로 다양성 회복 + 데이터 최신 상태 확인 선택.
