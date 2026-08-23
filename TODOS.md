@@ -1,3 +1,13 @@
+## ✅ SUCCESS — buildTeamProfile.ts/buildMlbTeamProfile.ts teamGames 암묵적 sort-order 의존 fix (cycle 2399, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22(전량 completed/archived/superseded/blocked). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, lotto 7/30, info-arch 4/30). 2-chain lock 미충족(직전8 distinct=5). cycle 2398 retro 가 남긴 미감사 monolith lead(accuracy/page.tsx/buildAccuracyData.ts/buildTeamProfile.ts) 중 buildAccuracyData.ts 는 이미 cycle 2187/2195 감사 완료 확인 후 buildTeamProfile.ts 로 전환.
+
+발견: `computeTeamStreak`/`computeTeamRecentRecord`/`computeTeamAvgMargin`/`computeTeamBlowoutCount`/`computeTeamCloseGameCount`/`computeTeamHomeAwayEdge` 6개 함수 전부 `teamGames` 가 game_date 내림차순임을 전제(docstring 명시)하는데, 그 정렬은 별도 문장이 아니라 `recentGames = teamGames.sort(...).slice(0,8)` 조립문의 `.sort()` in-place mutation 부수효과로만 보장되던 암묵적 의존이었음 — 문장 순서를 바꾸면(예: recentGames 계산을 뒤로 이동) 조용히 깨질 위험. MLB parity 파일 `buildMlbTeamProfile.ts` 에도 동일 패턴 중복 존재.
+
+실행: 양쪽 파일에서 정렬을 독립 문장(`teamGames.sort(...)`)으로 분리, `recentGames`는 정렬된 배열의 `.slice(0,8)`만 수행하도록 정정. `tsc --noEmit`/`eslint`(scoped) clean, `pnpm --filter moneyball test` 500 files/4203 tests green. PR #3045 → R7 자동 머지(95bd0048).
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔여 후보: `accuracy/page.tsx` 1204줄 직접 감사) 또는 gap trigger 순 대기(fix-incident 6/20, op-analysis 7/25, lotto 8/30, info-arch 5/30).
+
 ## ⚪ (retro-only) — review-code(heavy) packages/shared/index.ts + validator.ts 심층감사 clean (cycle 2398, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22(전량 archived/completed/phase-split/blocked). gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 5/25, lotto 6/30, info-arch 3/30). 2-chain lock 미충족(직전8 distinct=6). gh run list 최근 10건 전부 success/skipped(CI green). lite chain cooldown 미충족.
