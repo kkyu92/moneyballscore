@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy) buildAccuracyData.ts 신규 감사, 하드코딩 소표본 임계값 정정 (cycle 2443, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 4/20, op-analysis 12/25, info-arch 18/30, lotto 3/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2442가 반복 타겟 3파일(analysis/page.tsx, accuracy/page.tsx, game/[id]/page.tsx) 완전 소진 확정 + 신규 소스 탐색 추천 — CHANGELOG 언급 빈도 비교로 buildAccuracyData.ts(776줄, 3회 언급) 선정.
+
+발견: `buildRollingAccuracy()`의 `windowAccuracy` 소표본 가드가 같은 파일 `buildScoringRuleDayHeatmap`/`buildScoringRuleWeekHeatmap`이 쓰는 `SMALL_SAMPLE_THRESHOLD`(3) 상수 대신 리터럴 `3`을 직접 사용 — 값은 현재 동일해 동작 변화 없으나 magic number 하드코딩 재발 패턴(wave-500 family 성격), 향후 상수 변경 시 이 줄만 누락될 silent drift 위험.
+
+실행: `n >= 3` → `n >= SMALL_SAMPLE_THRESHOLD` 정정. `pnpm --filter moneyball test`(4217/4217, 기존 회귀 테스트가 n=5 pass/n<3 null 케이스로 값 동일성 확인) + lint/type-check clean. commit 983bb346 직접 main push(R4).
+
+다음 사이클 추천 = operational-analysis(lite, 13/25 근접) 또는 info-architecture-review(19/30 근접) gap 순번 대기.
+
 ## 🔵 RETRO-ONLY — review-code(lite) 클린 스캔, carry-over 3후보 전부 기존 해결 확인 (cycle 2442, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(Tier4 유지, plan#29 게이팅 미충족). gap trigger 전부 미도달(fix-incident 3/20, op-analysis 11/25, info-arch 17/30, lotto 2/30). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 8/15 미충족. `gh run list` — health-alert/runtime-error-alert/deploy-drift-alert 전부 success, CI Failure Dispatch 전부 skipped(정상), 신규 CI 실패 0건.
