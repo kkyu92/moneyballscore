@@ -1,3 +1,17 @@
+## 🟢 explore-idea (heavy) — en/mlb/reviews/weekly 영어 미러 신규 배선 SUCCESS (cycle 2355, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 매칭 없음). 2-chain lock 미충족(직전 8사이클 2347-2354 distinct=4: explore-idea/fix-incident/review-code/skill-evolution). 주기 trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 19/25, info-arch 15/30, lotto 11/30). cycle 2354 retro 명시 "explore-idea 또는 op-analysis/lotto/info-arch 주기 trigger 확인" — 주기 trigger 전부 미도달 확인 후 explore-idea 채택. plan #27(MLB 픽/리더보드) 재확인 결과 `mlb_pick_poll_events` 실측 참여 0건(Supabase 직접 COUNT) — 여전히 blocked, 착수 보류.
+
+**발견**: cycle 620 최초 언급 이후 cycle 2338/2341/2342 retro 가 반복 carry-over 했던 "en/mlb/reviews weekly/monthly 미러 부재" — TODOS 서술("MLB 주/월 range 유틸 부재로 보류")은 stale(plan #26 당시 이미 `computeWeekRange`/`computeMonthRange` league-agnostic 확인됨), 실제로는 단순 미착수. `/mlb/reviews/weekly/[week]`(551줄) 대응 EN 미러가 전혀 없어 `/en/mlb/reviews` 허브도 "index 진입 카드는 스코프 밖"으로 명시적으로 미뤄둔 상태(cycle 2226/2227).
+
+**실행**: `buildMlbWeeklyReview`/`buildMlbFactorInsights`(mlb-shared.ts)에 `locale?: 'ko'|'en'` 파라미터 추가(기본값 `'ko'`, 기존 KO callsite 무변경 — `buildMlbMissReport` 기존 패턴 재사용), `buildSummary` 자연어 문장 EN 분기 신규 작성. `MlbHighlightCard`/`WeeklyGamesSortControl` 도 동일 패턴으로 `locale` prop 추가. `/en/mlb/reviews/weekly`(redirect index) + `/en/mlb/reviews/weekly/[week]`(KO 페이지 전체 mirror) + opengraph-image(이미 영어라 URL 경로만 교체)/twitter-image/not-found 신규. `sitemap.ts` `enMlbWeeklyReviewRoutes`(최근 12주) 추가, `/en/mlb/reviews` 허브에 주간 리뷰 진입 카드 신규 배선. monthly EN 미러는 스코프 밖(별도 cycle 후속, plan #26 phase 분리 관례).
+
+**잡음 발견 겸 정정**: 로컬 테스트 실행 중 `version-sync-guard`(cycle 2047) 실패 발견 — cycle 2354 두 번째 커밋이 `apps/moneyball/package.json`(→0.5.62.76) 만 갱신하고 루트 `package.json`/`VERSION`(0.5.62.75 방치) 갱신을 누락한 3-way drift. 이번 커밋에서 3파일 모두 `0.5.62.77` 로 동기 정정.
+
+검증: `tsc --noEmit`(kbo-data+moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data 90 files/1165 tests + moneyball 499 files/4189 tests all green, version-sync-guard 포함).
+
+결론: MLB 주간 리뷰 KO/EN parity 달성(사상 첫 EN weekly/monthly 계열 미러). 다음 explore-idea 후보 = `/en/mlb/reviews/monthly` 동일 패턴 미러(이번 cycle 과 동일 방법론 재사용, buildMlbMonthlyReview 에도 동일 locale param 추가 필요) 또는 신규 topic 자연 발견.
+
 ## 🟢 fix-incident — MLB waterfall/factor-detail/overview recent_form·head_to_head 표시 동기화 SUCCESS (cycle 2354, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2346-2353) distinct=4(review-code/explore-idea/fix-incident/skill-evolution), 2-chain lock 미충족. cycle 2353 retro가 "waterfall/factor-detail/overview 표시 레이어 동기화가 자연 review-code(heavy) 후속 대상"이라 명시 — cycle 2349→2352 elo 사례와 동일한 read-wiring 후 표시 레이어 미동기 패턴을 그대로 검증.

@@ -9,10 +9,12 @@ import { ConvergenceHomeAwayBadges } from "@/components/reviews/ConvergenceHomeA
 import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayOfWeekBadges";
 import { getMlbReviewsData } from "@/app/mlb/reviews/reviews-data";
 import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
+import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
+import { REVIEWS_HUB_RECENT_WEEKS } from "@moneyball/shared";
 
-// en/mlb/reviews (wave-659, cycle 2339) — KO /mlb/reviews 미러. weekly/monthly 서브페이지는
-// EN 미러 부재(cycle 2226/2227 의도적 scope 축소, plan #26)라 index 진입 카드는 스코프 밖 —
-// 수렴 픽 분석 허브 + 빗나간 예측(misses) 링크만 MVP 로 우선 배선 (analysis 미러 wave-658 동일 관례).
+// en/mlb/reviews (wave-659, cycle 2339) — KO /mlb/reviews 미러. weekly 서브페이지 EN 미러
+// 신규 배선(wave-660, cycle 2355 — cycle 620 최초 언급 이후 다중 cycle carry-over) —
+// monthly 서브페이지는 여전히 스코프 밖(별도 cycle 후속, plan #26 관례상 phase 분리).
 const PAGE_URL = `${SITE_URL}/en/mlb/reviews`;
 
 export const metadata: Metadata = {
@@ -57,6 +59,8 @@ export default async function MlbReviewsPageEn() {
     hasAnyData,
   } = await getMlbReviewsData();
 
+  const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -89,10 +93,40 @@ export default async function MlbReviewsPageEn() {
         </p>
       </div>
 
-      <section aria-labelledby="mlb-reviews-en-misses-title">
-        <h2 id="mlb-reviews-en-misses-title" className="sr-only">
-          Missed predictions
+      <section aria-labelledby="mlb-reviews-en-periodic-title" className="grid gap-4 md:grid-cols-2">
+        <h2 id="mlb-reviews-en-periodic-title" className="sr-only">
+          Weekly review + missed predictions
         </h2>
+        <div className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-5 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                📅 Weekly Review
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Highlights, team performance, and factor insights every week
+              </p>
+            </div>
+            <Link
+              href={`/en/mlb/reviews/weekly/${recentWeeks[recentWeeks.length - 1].weekId}`}
+              className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline"
+            >
+              This week →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentWeeks.map((w) => (
+              <Link
+                key={w.weekId}
+                href={`/en/mlb/reviews/weekly/${w.weekId}`}
+                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
+              >
+                {w.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
         <Link
           href="/en/mlb/reviews/misses"
           className="group bg-gradient-to-r from-red-500/5 to-orange-500/5 dark:from-red-500/10 dark:to-orange-500/10 rounded-xl border border-red-500/20 p-5 flex flex-col justify-between hover:border-red-500/50 transition-colors"
