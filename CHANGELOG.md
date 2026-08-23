@@ -1,3 +1,31 @@
+## v0.5.62.77 — 2026-08-23 (cycle 2355, explore-idea: en/mlb/reviews/weekly 영어 미러 신규 배선)
+
+### feat(mlb): `/en/mlb/reviews/weekly` MLB 주간 리뷰 영어 미러 신규 배선 — cycle 620 최초 언급 이후 다중 cycle carry-over 해소
+
+- 발견: cycle 2338/2341/2342 explore-idea/review-code retro가 반복적으로 "en/mlb/reviews
+  weekly/monthly 미러(MLB 주/월 range 유틸 부재로 보류)" 를 다음 후보로 carry-over — 직접
+  확인 결과 `computeWeekRange.ts`/`computeMonthRange.ts` 는 이미 league-agnostic(plan #26
+  당시 발견)이라 서술이 stale, 실제 미배선 이유는 단순 미착수. `/en/mlb/reviews` 자체도
+  cycle 2226/2227 당시 "weekly/monthly 서브페이지는 EN 미러 부재라 index 진입 카드는 스코프
+  밖" 으로 명시적으로 미룬 상태였음.
+- 실행: `buildMlbWeeklyReview`/`buildMlbFactorInsights`(mlb-shared.ts)에 `locale?: 'ko'|'en'`
+  파라미터 추가(기본값 `'ko'`, 기존 KO callsite 무변경 — `buildMlbMissReport` 기존 패턴과
+  동일), `buildSummary` 자연어 문장 EN 분기 신규 작성. `MlbHighlightCard`/`WeeklyGamesSortControl`
+  에도 동일 패턴으로 `locale` prop 추가(배지/정렬 라벨 번역, badge 원본 3-literal 은 스타일
+  분기 키로 유지). `/en/mlb/reviews/weekly`(redirect index) + `/en/mlb/reviews/weekly/[week]`
+  (KO 페이지 전체 mirror, ConvergenceHomeAwayBadges/ConvergenceTeamStatsBadges 는 기존
+  `locale` prop 재사용) + opengraph-image(이미 영어라 URL 경로만 교체)/twitter-image/not-found
+  신규. `sitemap.ts` 에 `enMlbWeeklyReviewRoutes`(최근 12주) 추가, `/en/mlb/reviews` 허브에
+  주간 리뷰 진입 카드 신규 배선.
+- 스코프: monthly EN 미러는 별도 cycle 후속(plan #26 phase 분리 관례 동일 적용) — 이번
+  cycle 은 weekly 단독.
+- 잡음 발견: cycle 2354 두 번째 커밋이 `apps/moneyball/package.json` 만 갱신하고 루트
+  `package.json`/`VERSION` 갱신을 누락(3-way version-sync-guard drift, cycle 2047 가드
+  테스트가 로컬 실행에서 즉시 검출) — 이번 커밋에서 3파일 모두 `0.5.62.77` 로 동기 정정.
+
+검증: `tsc --noEmit`(kbo-data+moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data
+90 files/1165 tests + moneyball 499 files/4195 tests all green, version-sync-guard 포함).
+
 ## v0.5.62.76 — 2026-08-23 (cycle 2354, fix-incident: MLB waterfall/factor-detail/overview recent_form·head_to_head 표시 동기화)
 
 ### fix(mlb): waterfall/factor-detail/overview 에 실측 recent_form/head_to_head 델타 반영 — cycle 2353 wiring 이후 미동기 silent drop 해소

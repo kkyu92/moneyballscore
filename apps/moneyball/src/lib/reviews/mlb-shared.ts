@@ -245,9 +245,10 @@ export const LOWER_IS_BETTER = new Set<MlbFactorKey>(["sp_fip", "sp_xfip", "bull
 
 export function buildMlbFactorInsights(
   rows: MlbPredictionRow[],
-  options: { minSamples: number },
+  options: { minSamples: number; locale?: "ko" | "en" },
 ): { best: MlbWeeklyFactorInsight | null; worst: MlbWeeklyFactorInsight | null } {
   const { minSamples } = options;
+  const labels = options.locale === "en" ? FACTOR_LABELS_EN : FACTOR_LABELS;
   const finished = rows.filter((r) => r.actualHomeWin !== null);
 
   const results: MlbWeeklyFactorInsight[] = [];
@@ -278,7 +279,7 @@ export function buildMlbFactorInsights(
     const correlation = pearsonCorrelation(diffs, actuals);
     results.push({
       factor: key,
-      label: FACTOR_LABELS[key] ?? key,
+      label: labels[key] ?? key,
       correlation,
       directionalAccuracy: dirN > 0 ? dirCorrect / dirN : null,
       direction:

@@ -97,6 +97,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/en/mlb/analysis`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
     { url: `${SITE_URL}/en/mlb/reviews`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/en/mlb/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    // /en/mlb/reviews/weekly = redirect-only 페이지 (mlb/reviews/weekly 와 동일 사유) —
+    // dynamic block (enMlbWeeklyReviewRoutes) 이 실제 컨텐츠 URL 커버 (wave-660, cycle 2355).
+    // monthly EN 미러는 스코프 밖(별도 cycle 후속) — enMlbMonthlyReviewRoutes 미생성.
     { url: `${SITE_URL}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
@@ -247,6 +250,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.65,
+    }),
+  );
+
+  // 최근 12주 MLB 주간 리뷰 English mirror URL (mlbWeeklyReviewRoutes 대응, wave-660, cycle 2355)
+  const enMlbWeeklyReviewRoutes: MetadataRoute.Sitemap = getRecentWeeks(12).map(
+    (w) => ({
+      url: `${SITE_URL}/en/mlb/reviews/weekly/${w.weekId}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
     }),
   );
 
@@ -405,6 +418,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...monthlyReviewRoutes,
     ...mlbWeeklyReviewRoutes,
     ...mlbMonthlyReviewRoutes,
+    ...enMlbWeeklyReviewRoutes,
     ...teamProfileRoutes,
     ...teamRecentRoutes,
     ...mlbTeamProfileRoutes,

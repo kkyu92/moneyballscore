@@ -11,6 +11,13 @@ const LABELS: Record<SortMode, string> = {
   confidence: '확신도순',
 };
 
+// wave-660 (cycle 2355, en/mlb/reviews/weekly 미러): locale prop 추가 — 기본값 'ko' 라
+// 기존 KO callsite 변경 없음 (localStorage key 는 리그/locale 무관 공용 그대로 유지).
+const LABELS_EN: Record<SortMode, string> = {
+  date: 'By date',
+  confidence: 'By confidence',
+};
+
 const ORDER: SortMode[] = ['date', 'confidence'];
 
 function subscribe(callback: () => void) {
@@ -44,8 +51,9 @@ function writeSort(value: SortMode): void {
   }
 }
 
-export function WeeklyGamesSortControl() {
+export function WeeklyGamesSortControl({ locale = 'ko' }: { locale?: 'ko' | 'en' } = {}) {
   const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  const labels = locale === 'en' ? LABELS_EN : LABELS;
 
   return (
     <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50 dark:bg-[var(--color-surface)]">
@@ -58,7 +66,7 @@ export function WeeklyGamesSortControl() {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          정렬
+          {locale === 'en' ? 'Sort' : '정렬'}
         </span>
         {ORDER.map((key) => {
           const active = sort === key;
@@ -74,7 +82,7 @@ export function WeeklyGamesSortControl() {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}
+              {labels[key]}
             </button>
           );
         })}
