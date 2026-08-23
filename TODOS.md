@@ -1,3 +1,11 @@
+## 🔵 RETRO-ONLY — MLB_BASE_WEIGHTS 완전 wiring 확인 + WAR/SFR family 4th 재확인, 신규 target 0건 (cycle 2436, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(29=Tier4 유지). gap trigger 전부 미도달(fix-incident 13/20, op-analysis 5/25, info-arch 11/30, lotto 44/30 재충족이나 self-heal 완료 확인 — skip). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 10/15 미충족. 직전 3연속(2433~2435) 추천 후보(explore-idea/fix-incident) 양쪽 강한 trigger 부재 상태에서 review-code(heavy)로 미감사 대형 파일(`packages/shared/src/index.ts` 3435줄, `packages/kbo-data/src/factors/mlb-base.ts`) 직접 감사.
+
+실측: (1) `computeFactorAveragesFromPerspectives`(index.ts:2857) — cycle 2429 SFR/WAR gap guard 정상 적용 확인, 추가 occurrence 없음. (2) `MLB_BASE_WEIGHTS` 14팩터(`mlb-base.ts`) 전부 `safe()` wiring 완료 확인(sp_fip/sp_xfip/lineup_woba/bullpen_fip/recent_form/war/head_to_head/park_factor/elo/defense_sfr/lineup_xwoba/lineup_barrel_pct/sp_xwoba_against/woba_std) — cycle 2394 elo/recent_form/head_to_head silent-no-op 수정 이후 잔여 미wiring 없음. (3) `defense_sfr`/`sp_xwoba_against`/`woba_std` MLB placeholder(diff=0 항상 무영향) — cycle 2402 이미 comment 로 명시적 disclosure 확인, 신규 버그 아님(silent 아님, 의도된 placeholder). (4) `FANCY_STATS_DEFAULTS` 전체 필드 재검토 — sfr 만 default=0(ambiguous, family 대상), woba(0.320)/fip(4.00)/elo(neutral)/winPct(neutral)/totalWar(12) 는 nonzero 리그평균 fallback이라 gap-vs-real 구분 문제 자체 없음 — family 범위가 SFR+WAR 두 팩터로 한정됨을 재확인. (5) methodology page 하드코딩 n= grep — `V2_PROMOTION_COHORT_N` 상수 참조뿐, 하드코딩 없음 확인. (6) `gh run list` CI 실패 0건.
+
+결과: 코드 변경 0건. WAR/SFR family 4연속(2432~2436) 소진 재확인 — review-code(heavy) 후속 fire 시 이 family 재검색은 저수익, 신규 파일/영역 우선 권장. skill-evolution trigger 5개 전부 미충족(trigger3 2436%50≠0, trigger5 review-code 표본 내 아래 참조). 다음 사이클 추천 = fix-incident(13/20 gap 진행) 또는 explore-idea(10/15, saturation 근접).
+
 ## 🔵 RETRO-ONLY — CI/파이프라인/lotto self-heal 실측 재확인, 신규 target 0건 (cycle 2433, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(29=Tier4 유지). gap trigger 전부 미도달(fix-incident 10/20, op-analysis 2/25 방금 발화, info-arch 8/30, lotto 41/30 재충족이나 self-heal 이미 완료 확인). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 11/15 미충족.
