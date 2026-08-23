@@ -1,3 +1,11 @@
+## 🟢 operational-analysis(lite) — 이번 주(8/17~8/23) n=21 acc 47.6%, CE 100% 유지 SUCCESS (cycle 2368, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2360-2367) distinct=5(review-code/op-analysis/lotto/fix-incident/info-arch), 2-chain lock 미충족(distinct=5≥3). 주기 trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, info-arch 2/30, lotto 5/30). explore-idea saturation 11/15<12 미충족. 직전 3사이클(2365/2366/2367) 연속 clean-audit RETRO-ONLY(info-arch/review-code lite/review-code heavy) — 감사 target 소진 신호, operational-analysis(lite) 로 방향 전환(측정 전용, 코드 리스크 0).
+
+**측정**: 이번 주(월 8/17 ~ 일 8/23 KST) verified predictions n=21, 적중 10/21=47.6% (전체 baseline ~54~64% 대비 낮음, 단 n=21 극소표본 — 노이즈 수준, 가중치 판단 근거 X). 요일별: 화 2/5(40%) / 수 3/5(60%) / 목 3/5(60%) / 금 2/4(50%) / 토 0/2(0%, n=2 극소). 21건 전부 `scoring_rule='v1.8' AND debate_version IS NULL` = CE(fallback) 100% — CREDIT_EXHAUSTED 지속 재확인, 신규 아님. confidence 값 전부 0.002~0.181 극소(quant raw pass-through, CLAUDE.md P4 패턴대로 0.3 고정 아님) + home_win_prob 전부 0.45~0.59 협소 분포 → 이번 주 경기들 자체가 통계적으로 팽팽한(edge 작은) 매치업 위주였던 것으로 보임(고확신 |prob-0.5|≥0.15 픽 0건). `/reviews/weekly/[week]` 라우트가 DB 기반 자동 렌더 확인(별도 정적 포스트 파일 불필요, `getCurrentWeek()` redirect 구조).
+
+결론: 코드 변경 없음(측정 전용). 가중치 조정 불필요(n=21 << n=150+ 임계, 기존 v1.8 유지 확정 결론과 정합). CE 상태/영향은 CLAUDE.md 예측 엔진 가중치 섹션에 이미 상세 박제 — 이번 주는 그 패턴의 소표본 재확인일 뿐, CHANGELOG 신규 항목 불필요 판단(측정 전용 lite 사이클 관례, cycle 1855/2093 선례 정합). 다음 후보 = 자연 발견 또는 fix-incident(6/20)/info-arch(3/30)/lotto(6/30) 주기 trigger 확인.
+
 ## ⚪ review-code(heavy) — accuracy/page.tsx 감사, 후보 2건 모두 false-positive RETRO-ONLY (cycle 2367, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2359-2366) distinct=6(review-code/op-analysis/lotto/fix-incident/info-arch), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 6/25, info-arch 2/30, lotto 5/30). explore-idea saturation 11/15<12 미충족. CI green(cycle 2362 실패 1건 확인했으나 cycle 2363 version-drift fix 이전 시점 잔여 기록 — 이미 해소된 사안, 현재 HEAD 무관). lotto 다음 회차(8/29) picks 기박제, DESIGN.md 5일 전(미도달). 직전 3사이클(2364/2365/2366) 연속 clean-audit — 감사 target 을 analysis/page.tsx 계열에서 미감사 대형 monolith(accuracy/page.tsx, 1204줄)로 전환.
