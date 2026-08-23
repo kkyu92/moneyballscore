@@ -40,6 +40,12 @@ async function sendMessage(text: string, parseMode: 'HTML' | 'MarkdownV2' = 'HTM
   if (!res.ok) {
     const err = await res.text();
     console.error(`[Telegram] Send failed: ${res.status} ${err}`);
+    // silent_drift_family wave_177 — 호출부(daily.ts) 가 notify* throw 를
+    // 기준으로 *_sent flag 박제 + Sentry capture 를 게이팅. 여기서 !res.ok
+    // 를 삼키면 (network exception 만 propagate) HTTP-level 실패(400/403 등)
+    // 시에도 flag 가 "발송됨"으로 영구 박제되고 Sentry 알림도 없이 사용자만
+    // 알림 미수신 — throw 로 기존 wave_177 게이트에 편입.
+    throw new Error(`Telegram sendMessage failed: ${res.status} ${err}`);
   }
 }
 
