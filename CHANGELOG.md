@@ -1,3 +1,12 @@
+## v0.5.62.94 — 2026-08-23 (cycle 2438, review-code: v2.1-B/v2.0-shadow row reasoning 필드 object stringify silent 버그 수정)
+
+### fix(pipeline): shadow cohort(v2.1-B-shadow/v2.0-shadow) row insert가 `buildFinalReasoning()`의 object 반환값을 template literal로 그대로 interpolate — 매 shadow row마다 `reasoning` 컬럼에 실제 텍스트 대신 literal `"[object Object]"`가 저장되던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 7/25, info-arch 13/30, lotto self-heal 완료). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 9/15 미충족. cycle 2436 review-code(heavy)가 WAR/SFR=0 family 4연속 소진 확정 — 동일 family 재검색 저수익 판단, 신규 미감사 파일(`apps/moneyball/src/app/page.tsx`, 홈페이지 1082줄) 직접 감사로 전환.
+- 발견: `daily.ts`의 v2.1-B-shadow/v2.0-shadow row insert가 `\`[v2.1-B-shadow quant only] \${finalReasoning}\`` 형태로 `finalReasoning`(object, `.reasoning` string 필드 보유)을 template literal에 그대로 interpolate — JS object-to-string 강제변환으로 항상 `"[object Object]"` 저장. cycle 1013(v2.1-B-shadow)/1019(v2.0-shadow) 도입 이후 전 shadow row 영향. `/accuracy/shadow` page는 `pairProbForRow`가 `factors` JSONB로 재계산한 prob만 쓰므로(cycle 1021 hotfix 이미 이 경로로 우회) 표시값 영향은 없었으나, `reasoning` 컬럼 자체는 계속 무의미한 문자열로 오염되는 silent trap — 향후 이 필드를 직접 읽는 디버깅/분석 코드 추가 시 즉시 재현.
+- 실행: 두 callsite 모두 `finalReasoning.reasoning`(실제 quant 서술 문자열)으로 수정. 회귀 테스트 1건 추가(`pipeline-daily.test.ts`) — v2.1-B/v2.0 shadow row 양쪽 reasoning이 `"[object Object]"`를 포함하지 않고 실제 텍스트를 담는지 확인.
+- `pnpm --filter kbo-data test`(1182/1182, 신규 1건) + `pnpm --filter moneyball test`(4217/4217) + 양쪽 `type-check`/`lint` clean.
+
 ## v0.5.62.93 — 2026-08-23 (cycle 2435, review-code: 게임 상세 페이지 SFR=0 데이터 갭이 내러티브에서 실제 수비값처럼 노출되던 것 정정 — WAR/SFR=0 family 6th occurrence)
 
 ### fix(analysis): `factor-explanations.ts`의 `explainFactor()` SFR 케이스가 WAR 케이스와 달리 SFR=0 (Fancy Stats silent-fallback stub, predictor.ts `sfr !== 0` 가드와 동일 의미)에 대한 갭 가드가 없어 게임 상세 페이지(`/analysis/game/[id]`) 및 `GameAnalysisProse` 내러티브에서 "OB 수비가 SFR 2.1점 우위" 처럼 데이터 갭을 실제 수비 우위로 오인시키던 것을 정정
