@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) telegram notify + cron dispatch alert 감사, clean (cycle 2422, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(전부 completed/rejected/deferred — plan #29 회원인증+커뮤니티는 Tier 4 사용자 영역 보류 유지). gap trigger: lotto 30/30 도달했으나 cycle 2392 가 이미 동일 self-heal 확인(1239회 picks cycle 2344 생성분 + 1238회 OOS 오늘 박제 완료, delta=0) — 재확인해도 상태 불변이라 재실행은 순수 중복. fix-incident 8/20, op-analysis 6/25, info-arch 27/30 전부 미도달. 2-chain lock 미충족(직전8 distinct=4). cycle 2421 이 review-code 4대 monolith 소진 확정한 상태에서, cycle 2392 retro 가 남긴 다음 후보("telegram notification 코드 / cron dispatch handlers") 직접 감사로 전환.
+
+감사: `notify/telegram.ts`(257줄, notifyPredictions/notifyResults/notifyAnnounce/notifyPipelineStatus/notifyError 전체) — wave_177 throw 게이트, 취소경기 분리 집계, 0-result 명시 메시지 모두 정상. `notify-status-predicate.ts`(35줄, cycle 1191 wave 20 predicate) — comment/구현 일치 확인. daily.ts 안 notifyPredictions/notifyResults 콜사이트(flag-check → notify → mark-flag 순서, 실패 시 flag 미박제로 재시도 허용) 정상. cron dispatch 4종(`ci-failure-dispatch.yml`/`health-alert.yml`/`deploy-drift-alert.yml`/`runtime-error-alert.yml`) 감사 — ci-failure-dispatch 만 hub `compose-dispatch-payload` 사용(workflow_run trigger, workflows:["CI"] 한정)이고 나머지 3개(health/deploy-drift/runtime-error)는 hub dispatch 미사용, GH Actions 네이티브 exit 1 + 이메일 알림으로 의도적 설계(파일 내 주석에 "Sentry warning + GH Actions email 알림 자동 fire" 명시) — 갭 아닌 확인된 의도.
+
+결과: 신규 버그 0건, 코드 변경 없음. review-code 잔여 target 계속 소진 추세 — telegram/cron dispatch 영역도 clean 확인.
+
+다음 사이클 추천 = gap-trigger 순번 대기(info-arch 27/30, fix-incident 8/20 순). lotto 30-cycle gap trigger 가 self-heal 상태에서 무의미하게 재발화하는 구조적 갭(cycle 2392 재확인 → cycle 2422 재발화, 실제 액션 없이 카운터만 리셋) — 다음 lotto fire(≈cycle 2452 예상) 도 draw 없이 같은 상태면 3연속 no-op, trigger 자체를 "다음 실제 추첨일 이후"로 바꾸는 chain-evolution 후보로 고려.
+
 ## 🔵 RETRO-ONLY — review-code(heavy) analysis-data.ts(KBO+MLB) 완전 감사, clean (cycle 2420, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 4/25, info-arch 25/30, lotto 28/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2419 추천 미감사 monolith `analysis/analysis-data.ts`(938줄) 직접 감사.
