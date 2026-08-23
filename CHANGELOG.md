@@ -1,4 +1,13 @@
-## v0.5.62.83 — 2026-08-23 (cycle 2377, polish-ui(forced): dead 토큰 제거 + DESIGN.md border 문서화)
+## v0.5.62.84 — 2026-08-23 (cycle 2380, polish-ui: 강수렴 배지 dark 색상 페이지 간 불일치 해소)
+
+### fix(design): `analysis/page.tsx` 강수렴 레이블 칩 `dark:bg-brand-900/40` → `dark:bg-brand-800/40` (spec 정합)
+
+- 진단: open issue 0건, approved plan 0/22. review-code 직전 5사이클(2374-2378) non-success streak 5/5 도달로 cooldown 진입(2379~2388, 후보 제외). 직전 8사이클(2372-2379) distinct=3(review-code/explore-idea/polish-ui), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 12/25, info-arch 15/30, lotto 18/30). cycle 2377 polish-ui retro 가 남긴 lead("다음 polish-ui 후보 = convergence-badge-system.md(cycle 1818) 이후 wave-660+ 신규 라우트 배지 스타일 일관성 확인")를 단서로 `docs/design/convergence-badge-system.md` spec 재확인.
+- 발견: spec(25행)이 문서화한 "strong" 3-tier 칩 dark 배경 = `dark:bg-brand-800/40`. `analysis/game/[id]/page.tsx`(wave-463, 완전수렴/강수렴 레이블)는 spec 과 일치(`dark:bg-brand-800/40`)하나, `analysis/page.tsx`(wave-465)는 주석에 "game/[id] wave-463 동일 패턴"이라 명시했음에도 실제 코드가 `dark:bg-brand-900/40`으로 달라 다크모드에서 두 페이지 강수렴 배지 색상 톤이 미세하게 어긋나던 silent drift. 완전수렴(amber) 레이블은 두 페이지 모두 `dark:bg-amber-800/40`로 일치 — 강수렴(brand)만 편차.
+- 실행: `analysis/page.tsx` 해당 1줄 `brand-900/40` → `brand-800/40` 정정. `tsc --noEmit`/`eslint` clean.
+- 후속: convergence-badge-system.md 의 잔여 "다음 cycle 후속 후보"(수렴 배지 컴포넌트 분리 `ConvergenceBadge.tsx`, amber tier CSS 변수화)는 스코프 밖 — 이번 사이클은 spec-vs-코드 색상 편차 1건만 해소.
+
+
 
 ### fix(design): `--color-surface-dark` dead 토큰 제거 + `--color-border` DESIGN.md 문서화
 

@@ -560,7 +560,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                       )}
                       {isStrong && (
-                        <span className="inline-block text-xs px-1 py-0 rounded font-medium bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+                        <span className="inline-block text-xs px-1 py-0 rounded font-medium bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300">
                           강수렴
                         </span>
                       )}
