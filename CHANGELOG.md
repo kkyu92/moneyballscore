@@ -1,4 +1,12 @@
-## v0.5.62.88 — 2026-08-23 (cycle 2419, review-code: SFR=0 data-gap guard 누락 수정 + package.json version drift 정정)
+## v0.5.62.89 — 2026-08-23 (cycle 2428, review-code: WAR/SFR=0 데이터 갭 sentinel이 LLM 토론 프롬프트에 raw 노출되던 것 마스킹)
+
+### fix(agents): WAR/SFR=0 (Fancy Stats 데이터 갭 sentinel)이 정량 엔진(predictor.ts)에선 neutral 처리되지만 LLM 토론 프롬프트엔 raw 0 그대로 노출돼 "팀 WAR 0" 같은 실제 없는 서술을 유발할 수 있던 것을 명시적 갭 표기로 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 1/25, info-arch 3/30, lotto self-heal 완료 6번째 no-op — skip). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 미충족(11/15). 강한 trigger 부재 상태에서 최근 미감사 영역(`packages/kbo-data/src/agents/personas.ts`, 마지막 터치 2026-05-26) 직접 감사 시작.
+- 발견: personas.ts 자체는 정합(팀 wOBA/불펜FIP/WAR/SFR/Elo/최근폼 주입 목록이 team-agent.ts 실제 injection과 일치). 감사를 이어가다 `predictor.ts`(cycle 1904 wave-533 WAR guard, cycle 2419 SFR guard)의 "asymmetric zero = Fancy Stats 데이터 갭 → neutral(0.5)" 처리가 정량 스코어링 엔진(predictor.ts)과 UI duel 배지(computeCompositeDuel.ts)에만 적용돼 있고, 정작 LLM 이 직접 보는 3개 소비처 — `team-agent.ts` buildUserMessage(inline 주입) / `context/agent-context.ts` formatMetricLine(contextBlock 렌더) / `validator.ts` buildInjectionText(환각 검증용 복제본, "team-agent와 동일 소스" 자체 주석) — 는 전부 raw 0 을 그대로 노출하고 있었음. LLM 이 "WAR 0" 을 실제 값으로 인용해도 이는 페르소나가 허용하는 "주입된 수치 직접 인용" 화이트리스트에 해당해 환각 검사도 통과 — 정량 모델의 중립 처리와 LLM 서술 사이 불일치가 은폐된 3rd occurrence.
+- 실행: `agent-context.ts` 에 단일 소스 `formatGapAwareStat(slug, value)` 추가 (war/sfr slug + value===0 시 "데이터 없음(집계 갭)" 반환) — `formatMetricLine`(contextBlock) 적용 + `team-agent.ts` inline 주입 2곳(홈/원정) + `validator.ts` buildInjectionText 2곳(홈/원정) 동일 helper 재사용. validator.ts 자체 주석이 이미 "half-applied fix 재발" 위험을 경고하던 지점이라 3곳 모두 단일 source 로 동기화. 회귀 테스트 5건 추가(team-agent 3건: WAR=0/SFR=0 갭 표기 + 정상값 raw 유지, validator 2건: buildInjectionText WAR/SFR=0 갭 표기 동기 확인).
+- `pnpm --filter kbo-data test`(1181/1181, 신규 5건) + `pnpm --filter moneyball test`(4209/4209) + 양쪽 `type-check`/`lint` clean.
+
 
 ### fix(predict): 수비 SFR=0 (Fancy Stats silent-fallback stub, `sfr || FANCY_STATS_DEFAULTS.sfr`)이 원정/홈 한쪽만 0일 때 실제 평균 수비력으로 오인되어 duel 승패/예측 팩터에 그대로 반영되던 것을 WAR=0 guard(cycle 1904 wave-533/535)와 동일 family 로 중립 처리
 

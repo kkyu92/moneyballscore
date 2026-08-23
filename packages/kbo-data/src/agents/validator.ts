@@ -32,7 +32,7 @@
 
 import type { TeamCode } from '@moneyball/shared';
 import { KBO_TEAMS } from '@moneyball/shared';
-import { buildAgentContext, renderMetricsAndRecentFormForLLM } from '../context/agent-context';
+import { buildAgentContext, renderMetricsAndRecentFormForLLM, formatGapAwareStat } from '../context/agent-context';
 import { MetricRegistry } from '../context/metrics';
 import type { GameContext, TeamArgument } from './types';
 
@@ -486,8 +486,8 @@ export function buildInjectionText(context: GameContext): string {
     `경기: ${awayName} @ ${homeName}`,
     `시간: ${game.gameTime}`,
     `구장: ${game.stadium} / 파크팩터 ${parkFactor}`,
-    `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${homeTeamStats.bullpenFip} | WAR ${homeTeamStats.totalWar} | SFR ${homeTeamStats.sfr} | Elo ${homeElo.elo} | ${MetricRegistry.recent_form.ko_name} ${homeFormPct}%`,
-    `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${awayTeamStats.bullpenFip} | WAR ${awayTeamStats.totalWar} | SFR ${awayTeamStats.sfr} | Elo ${awayElo.elo} | ${MetricRegistry.recent_form.ko_name} ${awayFormPct}%`,
+    `[${homeName}] SP ${spLine(homeSPStats)} | wOBA ${homeTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${homeTeamStats.bullpenFip} | WAR ${formatGapAwareStat('war', homeTeamStats.totalWar)} | SFR ${formatGapAwareStat('sfr', homeTeamStats.sfr)} | Elo ${homeElo.elo} | ${MetricRegistry.recent_form.ko_name} ${homeFormPct}%`,
+    `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${awayTeamStats.bullpenFip} | WAR ${formatGapAwareStat('war', awayTeamStats.totalWar)} | SFR ${formatGapAwareStat('sfr', awayTeamStats.sfr)} | Elo ${awayElo.elo} | ${MetricRegistry.recent_form.ko_name} ${awayFormPct}%`,
     `${MetricRegistry.head_to_head.ko_name} ${headToHead.wins}승 ${headToHead.losses}패`,
     contextBlockText,
   ].join('\n');

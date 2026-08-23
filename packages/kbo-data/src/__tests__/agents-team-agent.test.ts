@@ -85,3 +85,26 @@ describe('buildUserMessage (plan #23 Step 5 wave 44 context layer 통합)', () =
     expect(msg.indexOf('[경기]')).toBeLessThan(msg.indexOf('오늘 경기'));
   });
 });
+
+describe('buildUserMessage — WAR/SFR 데이터 갭 sentinel(0) 마스킹 (cycle 2428, silent drift family)', () => {
+  it('homeTeamStats.totalWar=0 (Fancy Stats top-50 limit gap) — raw 0 대신 갭 표기', () => {
+    const ctx = makeContext();
+    ctx.homeTeamStats.totalWar = 0;
+    const msg = buildUserMessage('LG', ctx);
+    expect(msg).toContain('WAR: 데이터 없음(집계 갭)');
+    expect(msg).not.toMatch(/WAR: 0(?!\.\d)/);
+  });
+
+  it('awayTeamStats.sfr=0 (fetchEloRatings silent-fallback stub) — raw 0 대신 갭 표기', () => {
+    const ctx = makeContext();
+    ctx.awayTeamStats.sfr = 0;
+    const msg = buildUserMessage('LG', ctx);
+    expect(msg).toContain('수비 SFR: 데이터 없음(집계 갭)');
+  });
+
+  it('WAR/SFR 정상값(0 아님) — 기존처럼 raw 숫자 그대로 노출', () => {
+    const msg = buildUserMessage('LG', makeContext());
+    expect(msg).toContain('WAR: 18.5');
+    expect(msg).toContain('수비 SFR: 2.5');
+  });
+});

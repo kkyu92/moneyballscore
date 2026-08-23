@@ -553,6 +553,25 @@ describe('buildInjectionText', () => {
     expect(text).toContain('18:30');
   });
 
+  // cycle 2428 — team-agent buildUserMessage 와 동일 소스 정렬 회귀 가드 (본 함수 자체 주석이
+  // "half-applied fix 재발" 위험 경고). WAR/SFR=0 은 Fancy Stats 데이터 갭 sentinel (predictor.ts
+  // cycle 1904/2419 neutral guard) 이라 raw 0 대신 갭 표기가 team-agent.ts / agent-context.ts 와
+  // 동일하게 buildInjectionText 에도 반영돼야 한다 — 안 그러면 LLM 이 실제 본 문구("데이터 없음")를
+  // 인용해도 injection text 는 여전히 "0" 을 기대해 mismatch 오탐 위험.
+  it('WAR=0 (데이터 갭 sentinel) — raw 0 대신 갭 표기 (team-agent.ts 와 동일 source)', () => {
+    const ctx = makeContext();
+    ctx.homeTeamStats.totalWar = 0;
+    const text = buildInjectionText(ctx);
+    expect(text).toContain('WAR 데이터 없음(집계 갭)');
+  });
+
+  it('SFR=0 (fetchEloRatings silent-fallback stub) — raw 0 대신 갭 표기', () => {
+    const ctx = makeContext();
+    ctx.awayTeamStats.sfr = 0;
+    const text = buildInjectionText(ctx);
+    expect(text).toContain('SFR 데이터 없음(집계 갭)');
+  });
+
   it('recentForm Math.round(form*100)% 포맷 (team-agent buildUserMessage 와 동일)', () => {
     const text = buildInjectionText(makeContext());
     expect(text).toContain('70%');

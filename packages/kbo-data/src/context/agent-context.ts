@@ -188,9 +188,30 @@ export function buildAgentContext(ctx: GameContext, today: Date = new Date()): A
   };
 }
 
+// war/sfr = 0 은 실제 리그 최하위 수치가 아니라 데이터 갭 sentinel:
+// - war: Fancy Stats top-50 limit 으로 팀 전체 WAR 미집계 (predictor.ts cycle 1904 wave-533 neutral guard).
+// - sfr: fetchEloRatings `sfr || FANCY_STATS_DEFAULTS.sfr`(=0) silent-fallback stub, 진짜 리그 평균 팀과 구분 불가
+//   (predictor.ts / computeCompositeDuel.ts cycle 2419 neutral guard).
+// 정량 엔진(predictor.ts)은 이 asymmetric zero 를 이미 neutral(0.5) 처리하지만, LLM 에 노출되는 본 렌더 +
+// team-agent.ts inline 주입 + validator.ts buildInjectionText 복제본은 raw 0 을 그대로 보여줘 "팀 WAR 0"
+// 같은 실제 없는 서술을 유발할 위험이 있었음 — 3개 소비처 전부 본 helper 로 단일화.
+const DATA_GAP_ZERO_SLUGS: ReadonlySet<MetricSlug> = new Set(['war', 'sfr']);
+
+/** war/sfr 값이 데이터 갭 sentinel(0)이면 raw 숫자 대신 명시적 갭 표기. */
+export function formatGapAwareStat(slug: MetricSlug, value: number): string {
+  return DATA_GAP_ZERO_SLUGS.has(slug) && value === 0 ? '데이터 없음(집계 갭)' : String(value);
+}
+
 function formatMetricLine(slug: MetricSlug, obs: MetricObservation): string {
   const m = obs.metric;
-  const fmt = (v: number) => (m.unit === 'percent' ? `${v.toFixed(1)}%` : m.unit === 'elo' || m.unit === 'count' ? v.toFixed(0) : v.toFixed(3));
+  const fmt = (v: number) =>
+    DATA_GAP_ZERO_SLUGS.has(slug) && v === 0
+      ? '데이터 없음(집계 갭)'
+      : m.unit === 'percent'
+        ? `${v.toFixed(1)}%`
+        : m.unit === 'elo' || m.unit === 'count'
+          ? v.toFixed(0)
+          : v.toFixed(3);
   const dirKo = m.direction === 'lower-better' ? '↓' : '↑';
   return `  - ${m.ko_name} (${slug}): 홈 ${fmt(obs.home)} / 원정 ${fmt(obs.away)} [${dirKo} 우수, 가중치 ${(m.weight_v18 * 100).toFixed(1)}%]`;
 }
