@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) analysis-data.ts(KBO+MLB) 완전 감사, clean (cycle 2420, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 4/25, info-arch 25/30, lotto 28/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2419 추천 미감사 monolith `analysis/analysis-data.ts`(938줄) 직접 감사.
+
+감사: KBO analysis-data.ts 전체(938줄) — PRODUCTION_COHORT_RULES 필터 전 쿼리 정상, computeCompositeDuel 중앙 guard(cycle 2419) 재사용 확인. 가설 3건 조사 후 반증: (1) getThisWeekRemainingGames elo/factor 쿼리 league 미필터 — scoring_rule 값 자체(v1.8 계열 vs mlb_v0.1)로 이미 KBO/MLB 완전 분리 (2) getSeasonH2HData games 테이블 league 미필터 — MLB 는 별도 mlb_schedule 테이블 사용이라 games 는 KBO 전용 구조 (3) sibling mlb/analysis/analysis-data.ts(279줄) 동반 감사 — 2-step pattern 정상, SFR 미구현이라 guard 불필요.
+
+결과: 신규 버그 0건, 코드 변경 없음. review-code 잔여 대형 monolith 감사 대상 소진 추세 재확인(KBO+MLB analysis-data.ts 양쪽 완료).
+
+다음 사이클 추천 = gap-trigger 순번 대기(info-arch 25/30, lotto 28/30 임박) 또는 review-code 신규 target 재탐색.
+
 ## 🟢 SUCCESS — review-code(heavy) SFR=0 data-gap guard 누락 수정 + package.json version drift 정정 (cycle 2419, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 3/25, info-arch 24/30, lotto 27/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2417/2418 retro 가 남긴 미감사 monolith `analysis/page.tsx`(2803줄) agent 위임 감사.
