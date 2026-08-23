@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — operational-analysis(lite) CE-cohort 재측정, 동일 표본 재확인 (cycle 2427, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(29=Tier4 보류 유지). gap trigger: fix-incident 4/20, op-analysis 11/25(미도달이나 데이터 신선도 체크 저비용), info-arch 2/30(방금 발화), lotto 35/30 재충족이나 실측(`~/lotto_picks/` mtime, 2026-08-29-50sets.md + 2026-08-22-result.md 모두 오늘 생성) self-heal 완료 확인 — 5번째 no-op 재발이라 skip (cycle 2426 chain-evolution 제안과 정합). 2-chain lock 미충족(직전8 distinct=4). explore-idea 는 saturation trigger(12/15) 충족하나 plan #29 가 이미 "3-source 재탐색 완전 포화, 남은 후보는 Tier4(회원인증/커뮤니티) 뿐" 확정 — 신규 재탐색 무의미 판단, review-code 는 최근 5사이클 중 3회 clean audit(2418/2420/2421/2422/2426) 누적 — 둘 다 저수익 예상. op-analysis(lite) 로 다양성 회복 + 데이터 최신 상태 확인 선택.
+
+실행: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 (cycle 1547 spec 축 A harness). 결과: 전체 n=332 / CE n=285 / 비CE n=47 — **cycle 2361 재측정치와 완전 동일** (66 cycle 경과했으나 신규 표본 0건, 같은 날 05:04 측정이라 일별 예측 배치 사이 자연 정지). CE 53.7%(153/285) / 비CE 63.8%(30/47) → 격차 10.1pp, overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → LLM 부가가치 우세 방향 재확인(6회 연속 이상). 비CE 표본 동결 지속(마지막 예측 2026-07-01), CREDIT_EXHAUSTED 지속.
+
+결과: 코드 변경 0건, 신규 데이터 0건(같은 날 재측정 자연 결과, drift 아님). CLAUDE.md 갱신 skip(수치 delta 없음).
+
+다음 사이클 추천 = 익일 daily-pipeline 이후 op-analysis 재측정(신규 표본 기대) 또는 gap trigger 순번(fix-incident 5/20, info-arch 3/30).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) MLB predictionLeadHours parity 재검증 + lotto trigger chain-evolution 제안 (cycle 2426, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29. gap trigger: fix-incident 3/20, op-analysis 10/25, info-arch 1/30(방금 발화), lotto 34/30 재충족. 2-chain lock 미충족(직전8 distinct=4). cycle 2425 retro 가 명시적으로 review-code(heavy) target 지정(cycle 2424 신규 이식 MLB predictionLeadHours/모델 메타 정보 블록 KBO parity 값 검증).
