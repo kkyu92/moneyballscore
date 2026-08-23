@@ -266,6 +266,15 @@ export default function GuidePage() {
               현재 시즌 KBO {KBO_TEAM_COUNT}팀 순위 + 잔여 경기 예측.
             </p>
           </Link>
+          <Link
+            href="/mlb"
+            className="rounded-lg border border-gray-200 dark:border-brand-700 p-3 hover:border-brand-500 transition-colors bg-white dark:bg-[var(--color-surface)]"
+          >
+            <h3 className="font-semibold mb-1">MLB</h3>
+            <p className="text-xs text-gray-600 dark:text-brand-400">
+              메이저리그 승부예측. 정량 모델 전용 (AI 에이전트 토론 미적용).
+            </p>
+          </Link>
         </div>
       </section>
 

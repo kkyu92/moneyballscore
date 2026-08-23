@@ -1,4 +1,28 @@
-## v0.5.62.71 — 2026-08-23 (cycle 2345, explore-idea (heavy): MLB 주간/월간 리뷰 수렴 픽 섹션 완결)
+## v0.5.62.72 — 2026-08-23 (cycle 2347, explore-idea (heavy): 온보딩 문서 MLB 인지 갭 해소)
+
+### feat(guide): `/about`, `/guide`, `/glossary` 온보딩 3페이지에 MLB 안내 신규
+
+- 진단: open issue 0건, approved plan 0/22, 주기 trigger 4종 전부 미도달, review-code(heavy) 2연속
+  clean audit(2343/2346)로 신규 감사 target 소진. explore-idea 자연 발견을 위해 KBO↔MLB 구조
+  parity 재점검 중, 라우트/IA 는 이미 완결(cycle 2242 checkpoint)이나 **온보딩 narrative 3페이지
+  (`/about`, `/guide`, `/glossary`)에 MLB 언급이 0건**임을 grep 으로 확인 — MLB 는 30+ 라우트를
+  갖춘 완결된 섹션(en 미러 포함)인데도 신규 사용자가 처음 읽는 소개/가이드/용어사전 어디서도
+  존재를 알 수 없었음.
+- `/guide` "페이지별 활용" 그리드에 MLB 카드 신규 (정량 모델 전용, AI 에이전트 토론 미적용 명시).
+- `/about` 인트로에 MLB 예측 안내 1줄 추가 (`MLB_FACTOR_COUNTS.total` 팩터 수 실측 인용, AI 토론
+  미적용 정확히 서술 — MLB pipeline 은 `reasoning`/`debate` 필드 자체를 생성하지 않음을
+  `mlb-pipeline.ts` 확인 후 반영).
+- `/glossary` 헤더에 "지표 대부분 MLB 에도 공통 적용, Elo·최근폼·상대전적·수비SFR 4개는 MLB
+  데이터 미구현이라 KBO 전용" 안내 추가 (`analysisRoutes` 및 `computeMlbCompositeDuel.ts` 주석의
+  "MLB 4팩터 미구현" 사실과 정합).
+
+검증: `tsc --noEmit` clean, `eslint` clean, `pnpm test`(498 files/4180 tests all green — 기존
+가드 영향 없음, 3페이지 모두 신규 테스트 파일 부재).
+
+결론: 온보딩 funnel 이 이제 진실되게 사이트 전체 범위를 반영. 잔존 backlog: `/glossary` 개별
+term 카드마다 "MLB 적용 여부" 배지는 스코프 확대(데이터 구조 변경 필요) — 별도 cycle.
+
+
 
 ### feat(mlb): `/mlb/reviews/weekly/[week]`, `/mlb/reviews/monthly/[month]` 수렴 픽(강수렴/완전수렴) 섹션 신규
 

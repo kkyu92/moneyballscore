@@ -4,6 +4,7 @@ import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT,
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
+  MLB_FACTOR_COUNTS,
 } from "@moneyball/kbo-data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
@@ -226,6 +227,13 @@ export default function AboutPage() {
         <h1 className="text-3xl font-bold mb-2">MoneyBall Score</h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg">
           세이버메트릭스 기반 프로야구 승부예측
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          이하 방법론은 KBO 기준입니다.{' '}
+          <Link href="/mlb" className="text-brand-600 dark:text-brand-300 hover:underline">
+            MLB(메이저리그) 예측
+          </Link>
+          도 별도로 제공하며, 현재는 정량 모델({MLB_FACTOR_COUNTS.total}팩터)만 사용하고 AI 에이전트 토론은 적용하지 않습니다.
         </p>
       </section>
 

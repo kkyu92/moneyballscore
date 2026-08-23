@@ -84,6 +84,16 @@ export default function GlossaryPage() {
           </Link>
           에서 확인하세요.
         </p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          여기 지표 대부분은{' '}
+          <Link
+            href="/mlb"
+            className="text-brand-600 dark:text-brand-300 hover:underline"
+          >
+            MLB 예측
+          </Link>
+          에도 공통 적용됩니다. 단 Elo·최근폼·상대전적·수비SFR 4개는 MLB 쪽 데이터가 아직 없어 KBO 전용입니다.
+        </p>
       </header>
 
       <TableOfContents
