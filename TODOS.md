@@ -1,3 +1,11 @@
+## ⚪ review-code(heavy) — analysis/page.tsx 재감사 신규 target 부재 RETRO-ONLY (cycle 2364, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2356-2363) distinct=6, 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 6/30, lotto 2/30). explore-idea saturation 10/15<12 미충족. CI 최근 2회 `CI Failure Dispatch` skipped=clean(cycle 2363 fix 정상 작동 확인) — 최대 monolith(`analysis/page.tsx` 2803줄, 210 commits 역사) 직접 audit 채택.
+
+**감사**: `renderConvergenceTeamBadgeRow`/`renderConvergenceHomeAwayBadgeRow` 가 팀별·홈어웨이 배지에 소표본 가드 없이 percentage 표시하는 것처럼 보여 의심했으나, 데이터 레이어(`computeConvergenceTeamStats` minPicks=3 / `computeConvergenceHomeAwaySplit` minPicks=5, 홈·어웨이 양쪽 side 모두 체크)에서 이미 필터링 확인 — false alarm. `winnerProbOf` null-safe(0.5 fallback) 정상, `bestPickGameId` 정렬 로직 정상. EN mlb 한글 문자 grep = 거의 전 파일 매치했으나 comment-only(cycle 2363 결론과 동일 재확인, dev 관례).
+
+결론: 코드 변경 없음. 다음 후보 = 자연 발견 또는 fix-incident(1/20)/op-analysis(3/25)/info-arch(6/30)/lotto(2/30) 주기 trigger 확인.
+
 ## 🔵 fix-incident — 3-way version file drift 해소 SUCCESS (cycle 2363, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2355-2362) distinct=6(explore-idea/fix-incident/info-architecture-review/review-code/operational-analysis/lotto), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 5/30, lotto 1/30). EN mlb 페이지 재검증(한글 leak grep) = 전부 comment-only false positive, 신규 코드 이슈 없음 확인 후 `gh run list --limit 10` 로 최근 워크플로 실행 상태 직접 확인 — cycle 2360/2361 두 커밋 모두 CI `Test` 스텝 red 발견.
