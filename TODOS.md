@@ -5527,3 +5527,10 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 **부가 확인**: sitemap.ts(85 url) vs 실제 static page.tsx(79) 카운트 정상 범위(동적 라우프 loop 반영). CREDIT_EXHAUSTED 지속 확인(`scoring_rule='v1.8'` 최근 5건 전부 `debate_version=null`, confidence 0.026~0.7 분산 = 기존 P4 패턴과 일치, 변화 없음).
 
 결론: 코드 변경 없음(retro-only) — 신규 drift 부재를 실측으로 확인한 것 자체가 가치(silent drift family 미재발 확인). 다음 후보: op-analysis(24/25, 1사이클 후 자연 도달) 또는 자연 발견.
+
+## 🟢 (success) — pipeline route.ts debug leftover 제거 (cycle 2388, 2026-08-23)
+
+진단: 직전 5사이클(2383-2387) clean audit. cycle 2387 retro lead(cron API/telegram 미감사) 따라 재탐색.
+발견: `apps/moneyball/src/app/api/pipeline/route.ts` 4개월 방치 debug 코드 — 매 pipeline 응답에 ANTHROPIC_API_KEY prefix 노출(`_debug.keyPrefix`). 2026-04-14 commit 25d9107b 부터 방치.
+실행: `_debug` 블록 제거, direct main commit(42779c83) + push. type-check/lint clean.
+다음 사이클 추천: op-analysis(20/25)/info-arch(23/30)/lotto(26/30) gap 대기, 또는 다른 cron route(mlb/pipeline, revalidate 등) 유사 debug 잔재 grep 확장.
