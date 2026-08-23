@@ -1,3 +1,9 @@
+## ⚪ (retro-only) — 전 소스 clean, cycle 2388 후속 grep도 clean (cycle 2389, 2026-08-23)
+
+진단: cycle 2388 이 pipeline route.ts ANTHROPIC_API_KEY prefix leak 발견 후 추천한 "다른 cron/API route 유사 debug 잔재 재탐색"을 실행 — secret prefix slice/substring, console.log(secret), JSON 응답 내 KEY/SECRET/TOKEN 노출 패턴 grep 전부 0 matches. open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(op-analysis 21/25, info-arch 24/30, lotto 27/30, fix-incident 6/20). 2-chain lock 미충족(직전8 distinct=3: polish-ui/fix-incident/review-code). CI/deploy dispatch 전부 clean. skill-evolution trigger 5종 미충족(milestone 2389%50=39, review-code 직전20 다수 발화, ship-zero 미충족: 2380/2381/2388 success).
+
+다음 사이클 추천 = op-analysis(22/25)/info-arch(25/30)/lotto(28/30) gap 도달 순 대기, 미도달 지속 시 telegram notification 코드 / cron dispatch handlers 재탐색.
+
 ## ⚪ (retro-only) — 전 소스 clean, actionable target 부재 (cycle 2387, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22 (plan22 review-code target 이나 이미 completion_cycle 1224 종결). 주기 gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 19/25, info-arch 22/30, lotto 25/30). 2-chain lock 미충족(직전8 distinct=3). lite chain cooldown 리터럴 재계산 전부 streak=0. CI/lint 전부 clean, DESIGN.md ~45분 전 갱신. review-code 신규 target 재탐색 — scoring_rule CURRENT_SCORING_RULE vs PRODUCTION_COHORT_RULES 용도 분리 재점검(family #1338 유사 패턴 의심) 결과 cycle 2288 가드 테스트로 이미 의도된 설계 확인, 버그 아님.
