@@ -1,3 +1,11 @@
+## 🟢 operational-analysis(heavy) — KBO CE/비CE 격차 5-cycle 연속 재확인 SUCCESS (cycle 2361, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2353-2360) distinct=4(fix-incident/explore-idea/info-architecture-review/review-code), 2-chain lock 미충족. 주기 trigger 4종 중 operational-analysis 만 25/25 gap 도달(마지막 발화 cycle 2336) — 채택. 직전 2회(2334 lite/2336 heavy) 연속 retro-only("완전 정적 상태") 였으나 갭 재도달 시점에 harness 재실행하여 실제 신규 데이터 유무 실측.
+
+**실행**: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행. 전체 n=332 (CE n=285 / 비CE n=47 — 비CE 표본 2026-07-01 이후 신규 0건, 동결 53일 경과). CE 53.7%(153/285) / 비CE 63.8%(30/47) → 격차 10.1pp (cycle 2309 9.8pp 대비 미세 확대, 5-cycle window 9.7~10.8pp 안정 범위 유지). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → LLM 부가가치 우세 방향 5회 연속 재확인. CE n 증가분(274→285, +11) 전부 8월 데이터(8월 CE n=57, acc 56.1%).
+
+결론: 코드 변경 없음(측정 전용). 가중치 재조정/Platt scaling 불필요 결론 유지, CLAUDE.md 예측 엔진 가중치 섹션에 cycle 2361 항목 추가. CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결로 재분리 불가 상태 변화 없음 — 5-cycle 연속 동일 결론, 크레딧 충전 전까지 신규 정보 X. 다음 후보 = 자연 발견 또는 fix-incident(4/20)/info-arch(3/30)/lotto(17/30) 주기 trigger 확인.
+
 ## 🟢 review-code(heavy) — EN mlb/reviews weekly/monthly 날짜 라벨 한글 leak 해소 SUCCESS (cycle 2360, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2352-2359) distinct=4(review-code/fix-incident/explore-idea/info-architecture-review), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20 방금 발화, op-analysis 24/25 근접, info-arch 2/30 방금 리셋, lotto 16/30). CI/deploy 최근 30 run 전부 clean. TODOS Next-Up 신규 리드 없음.

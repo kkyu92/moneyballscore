@@ -1,3 +1,20 @@
+## v0.5.62.81 — 2026-08-23 (cycle 2361, operational-analysis(heavy): KBO CE/비CE 격차 5-cycle 연속 재확인)
+
+### data(op-analysis): CREDIT_EXHAUSTED(CE) vs 비CE 정확도 격차 재측정 — `scripts/op-analysis-ce-cohort.ts`
+
+- 진단: open issue 0건, approved plan 0/22. 직전 8사이클 distinct=4 (2-chain lock 미충족).
+  주기 trigger 4종 중 operational-analysis 만 25/25 gap 도달(마지막 발화 cycle 2336) — 채택.
+  cycle 2336(heavy)/2334(lite) 직전 2회 연속 retro-only(완전 정적 상태) 였으나, 갭 트리거
+  재도달 시점에 harness 재실행하여 신규 데이터 반영 여부 실측.
+- 실행: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행. 전체 n=332 (CE n=285 / 비CE
+  n=47 — 비CE 표본 2026-07-01 이후 신규 0건, 동결 53일 경과). CE 53.7%(153/285) / 비CE
+  63.8%(30/47) → 격차 10.1pp (cycle 2309 9.8pp 대비 미세 확대, 5-cycle window
+  9.7~10.8pp 안정 범위 유지). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 →
+  LLM 부가가치 우세 방향 5회 연속 재확인. CE n 증가분(274→285, +11) 전부 8월 데이터.
+- 결론: 코드 변경 없음(측정 전용). 가중치 재조정/Platt scaling 불필요 결론 유지
+  (`CLAUDE.md` 예측 엔진 가중치 섹션에 cycle 2361 항목 추가). CREDIT_EXHAUSTED 지속
+  (사용자 크레딧 재충전 미이행), 비CE 표본 동결로 재분리 불가 상태 변화 없음.
+
 ## v0.5.62.80 — 2026-08-23 (cycle 2360, review-code(heavy): EN mlb/reviews weekly/monthly 날짜 라벨 한글 leak 해소)
 
 ### fix(mlb): `computeWeekRange.ts`/`computeMonthRange.ts` 의 `range.label` 에 locale 파라미터 추가 — EN 미러 3개 라우트의 title/h1/OG/JSON-LD/breadcrumb/nav 링크에 한글 날짜 라벨이 노출되던 silent i18n drift 해소
