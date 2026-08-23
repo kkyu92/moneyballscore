@@ -50,7 +50,7 @@ function EloDeltaTag({ eloChange }: { eloChange?: number }) {
   return (
     <span
       className={`font-mono text-[10px] tabular-nums ml-1 ${
-        isUp ? 'text-brand-500 dark:text-brand-400' : 'text-red-400 dark:text-red-500'
+        isUp ? 'text-brand-500 dark:text-brand-400' : 'text-red-600 dark:text-red-400'
       }`}
       title={`최근 ${TEAM_STRENGTH_ELO_DELTA_WINDOW}경기 Elo 변화`}
     >

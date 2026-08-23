@@ -15,7 +15,7 @@ function StreakTag({ streak, locale }: { streak: MlbTeamStrengthRow['streak']; l
   return (
     <span
       className={`font-mono text-xs tabular-nums ${
-        isWin ? 'text-brand-500 dark:text-brand-400' : 'text-red-400 dark:text-red-500'
+        isWin ? 'text-brand-500 dark:text-brand-400' : 'text-red-600 dark:text-red-400'
       }`}
     >
       {locale === 'en'

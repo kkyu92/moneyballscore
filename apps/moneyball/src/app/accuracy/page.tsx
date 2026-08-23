@@ -687,7 +687,7 @@ export default async function AccuracyPage() {
                     <td className="py-2 pr-4 text-right font-mono">{w.n}</td>
                     <td className="py-2 pr-4 text-right font-mono">{w.hits}</td>
                     <td
-                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : w.accuracy !== null && w.accuracy < 0.5 ? 'text-red-400 dark:text-red-500' : ''}`}
+                      className={`py-2 text-right font-mono font-semibold ${w.accuracy !== null && w.accuracy >= 0.5 ? 'text-brand-500' : w.accuracy !== null && w.accuracy < 0.5 ? 'text-red-600 dark:text-red-400' : ''}`}
                     >
                       {w.accuracy !== null
                         ? `${(w.accuracy * 100).toFixed(1)}%`
@@ -739,7 +739,7 @@ export default async function AccuracyPage() {
                       acc !== null && acc >= ACCURACY_BASELINE
                         ? 'text-brand-500'
                         : acc !== null && acc < ACCURACY_WEAK_RATE
-                          ? 'text-red-400 dark:text-red-500'
+                          ? 'text-red-600 dark:text-red-400'
                           : ''
                     }`}
                   >
