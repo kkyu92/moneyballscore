@@ -6,6 +6,13 @@
 
 import { DAY_MS, WEEK_MS } from '@moneyball/shared';
 
+export type ReviewRangeLocale = 'ko' | 'en';
+
+const EN_MONTH_ABBR = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
 export interface WeekRange {
   /** ISO 주차 문자열 e.g. "2026-W16" */
   weekId: string;
@@ -53,19 +60,26 @@ function toIsoDate(d: Date): string {
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
 }
 
-function buildLabel(start: Date, end: Date): string {
+function buildLabel(start: Date, end: Date, locale: ReviewRangeLocale = 'ko'): string {
   const y = start.getUTCFullYear();
   const sm = start.getUTCMonth() + 1;
   const sd = start.getUTCDate();
   const em = end.getUTCMonth() + 1;
   const ed = end.getUTCDate();
+  if (locale === 'en') {
+    const endYear = end.getUTCFullYear();
+    if (sm === em) {
+      return `${EN_MONTH_ABBR[sm - 1]} ${sd}–${ed}, ${endYear}`;
+    }
+    return `${EN_MONTH_ABBR[sm - 1]} ${sd} – ${EN_MONTH_ABBR[em - 1]} ${ed}, ${endYear}`;
+  }
   if (sm === em) {
     return `${y}년 ${sm}월 ${sd}일 ~ ${ed}일`;
   }
   return `${y}년 ${sm}월 ${sd}일 ~ ${em}월 ${ed}일`;
 }
 
-export function getWeekRangeFromDate(d: Date): WeekRange {
+export function getWeekRangeFromDate(d: Date, locale: ReviewRangeLocale = 'ko'): WeekRange {
   const monday = toMondayUTC(d);
   const sunday = new Date(monday.getTime() + 6 * DAY_MS);
   const { year, week } = isoWeekParts(monday);
@@ -75,14 +89,14 @@ export function getWeekRangeFromDate(d: Date): WeekRange {
     week,
     startDate: toIsoDate(monday),
     endDate: toIsoDate(sunday),
-    label: buildLabel(monday, sunday),
+    label: buildLabel(monday, sunday, locale),
   };
 }
 
 /**
  * "2026-W16" 형식 파싱. 유효하지 않으면 null.
  */
-export function parseWeekId(weekId: string): WeekRange | null {
+export function parseWeekId(weekId: string, locale: ReviewRangeLocale = 'ko'): WeekRange | null {
   const m = /^(\d{4})-W(\d{2})$/.exec(weekId);
   if (!m) return null;
   const year = Number(m[1]);
@@ -107,22 +121,22 @@ export function parseWeekId(weekId: string): WeekRange | null {
     week,
     startDate: toIsoDate(targetMonday),
     endDate: toIsoDate(sunday),
-    label: buildLabel(targetMonday, sunday),
+    label: buildLabel(targetMonday, sunday, locale),
   };
 }
 
 /** 현재 UTC 기준 주차. */
-export function getCurrentWeek(now: Date = new Date()): WeekRange {
-  return getWeekRangeFromDate(now);
+export function getCurrentWeek(now: Date = new Date(), locale: ReviewRangeLocale = 'ko'): WeekRange {
+  return getWeekRangeFromDate(now, locale);
 }
 
 /** 이전 N주 WeekRange 배열 (오래된 → 최신 순). */
-export function getRecentWeeks(count: number, now: Date = new Date()): WeekRange[] {
+export function getRecentWeeks(count: number, now: Date = new Date(), locale: ReviewRangeLocale = 'ko'): WeekRange[] {
   const out: WeekRange[] = [];
   const base = toMondayUTC(now);
   for (let i = count - 1; i >= 0; i--) {
     const d = new Date(base.getTime() - i * WEEK_MS);
-    out.push(getWeekRangeFromDate(d));
+    out.push(getWeekRangeFromDate(d, locale));
   }
   return out;
 }

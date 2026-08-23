@@ -34,6 +34,18 @@ describe("getWeekRangeFromDate", () => {
     const r = getWeekRangeFromDate(new Date("2026-04-29T00:00:00Z"));
     expect(r.label).toMatch(/4월.*~.*5월/);
   });
+
+  it("locale='en' — 같은 달이면 'Mon D–D, YYYY' (한글 미포함)", () => {
+    const r = getWeekRangeFromDate(new Date("2026-04-15T00:00:00Z"), "en");
+    expect(r.label).toBe("Apr 13–19, 2026");
+    expect(r.label).not.toMatch(/[가-힣]/);
+  });
+
+  it("locale='en' — 월 경계면 'Mon D – Mon D, YYYY'", () => {
+    const r = getWeekRangeFromDate(new Date("2026-04-29T00:00:00Z"), "en");
+    expect(r.label).toBe("Apr 27 – May 3, 2026");
+    expect(r.label).not.toMatch(/[가-힣]/);
+  });
 });
 
 describe("parseWeekId", () => {
@@ -68,6 +80,12 @@ describe("parseWeekId", () => {
     const r2 = parseWeekId(r1.weekId);
     expect(r2?.startDate).toBe(r1.startDate);
     expect(r2?.endDate).toBe(r1.endDate);
+  });
+
+  it("locale='en' 전달 시 라벨도 영문 (한글 미포함)", () => {
+    const r = parseWeekId("2026-W16", "en");
+    expect(r?.label).not.toMatch(/[가-힣]/);
+    expect(r?.label).toContain("2026");
   });
 });
 

@@ -3,6 +3,13 @@
  * KBO 시즌은 달 단위로 구분되지 않지만 블로그 리뷰 · URL 스키마 일관성을 위해 사용.
  */
 
+export type ReviewRangeLocale = 'ko' | 'en';
+
+const EN_MONTH_FULL = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
 export interface MonthRange {
   /** "2026-04" */
   monthId: string;
@@ -24,7 +31,7 @@ function toIsoDate(d: Date): string {
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
 }
 
-function buildMonthRange(year: number, month: number): MonthRange {
+function buildMonthRange(year: number, month: number, locale: ReviewRangeLocale = 'ko'): MonthRange {
   const start = new Date(Date.UTC(year, month - 1, 1));
   // 월의 마지막날: 다음달 0일 = 이번달 말일
   const end = new Date(Date.UTC(year, month, 0));
@@ -34,18 +41,18 @@ function buildMonthRange(year: number, month: number): MonthRange {
     month,
     startDate: toIsoDate(start),
     endDate: toIsoDate(end),
-    label: `${year}년 ${month}월`,
+    label: locale === 'en' ? `${EN_MONTH_FULL[month - 1]} ${year}` : `${year}년 ${month}월`,
   };
 }
 
-export function getMonthRangeFromDate(d: Date): MonthRange {
-  return buildMonthRange(d.getUTCFullYear(), d.getUTCMonth() + 1);
+export function getMonthRangeFromDate(d: Date, locale: ReviewRangeLocale = 'ko'): MonthRange {
+  return buildMonthRange(d.getUTCFullYear(), d.getUTCMonth() + 1, locale);
 }
 
 /**
  * "2026-04" 형식 파싱. 유효하지 않으면 null.
  */
-export function parseMonthId(monthId: string): MonthRange | null {
+export function parseMonthId(monthId: string, locale: ReviewRangeLocale = 'ko'): MonthRange | null {
   const m = /^(\d{4})-(\d{2})$/.exec(monthId);
   if (!m) return null;
   const year = Number(m[1]);
@@ -53,23 +60,23 @@ export function parseMonthId(monthId: string): MonthRange | null {
   if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
   if (month < 1 || month > 12) return null;
   if (year < 2000 || year > 2100) return null;
-  return buildMonthRange(year, month);
+  return buildMonthRange(year, month, locale);
 }
 
-export function getCurrentMonth(now: Date = new Date()): MonthRange {
-  return getMonthRangeFromDate(now);
+export function getCurrentMonth(now: Date = new Date(), locale: ReviewRangeLocale = 'ko'): MonthRange {
+  return getMonthRangeFromDate(now, locale);
 }
 
 /**
  * 이전 N개월 (오래된 → 최신).
  */
-export function getRecentMonths(count: number, now: Date = new Date()): MonthRange[] {
+export function getRecentMonths(count: number, now: Date = new Date(), locale: ReviewRangeLocale = 'ko'): MonthRange[] {
   const base = getMonthRangeFromDate(now);
   const out: MonthRange[] = [];
   for (let i = count - 1; i >= 0; i--) {
     // month는 1-12 기반, Date 생성자는 0-11 기반
     const d = new Date(Date.UTC(base.year, base.month - 1 - i, 1));
-    out.push(getMonthRangeFromDate(d));
+    out.push(getMonthRangeFromDate(d, locale));
   }
   return out;
 }
@@ -77,9 +84,9 @@ export function getRecentMonths(count: number, now: Date = new Date()): MonthRan
 /**
  * 전월 구하기 (1월이면 전년 12월).
  */
-export function getPreviousMonth(current: MonthRange): MonthRange {
+export function getPreviousMonth(current: MonthRange, locale: ReviewRangeLocale = 'ko'): MonthRange {
   if (current.month === 1) {
-    return buildMonthRange(current.year - 1, 12);
+    return buildMonthRange(current.year - 1, 12, locale);
   }
-  return buildMonthRange(current.year, current.month - 1);
+  return buildMonthRange(current.year, current.month - 1, locale);
 }

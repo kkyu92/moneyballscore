@@ -32,6 +32,12 @@ describe("getMonthRangeFromDate", () => {
     expect(r.monthId).toBe("2026-12");
     expect(r.endDate).toBe("2026-12-31");
   });
+
+  it("locale='en' — 'Month YYYY' (한글 미포함)", () => {
+    const r = getMonthRangeFromDate(new Date("2026-04-18T12:00:00Z"), "en");
+    expect(r.label).toBe("April 2026");
+    expect(r.label).not.toMatch(/[가-힣]/);
+  });
 });
 
 describe("parseMonthId", () => {
@@ -53,6 +59,11 @@ describe("parseMonthId", () => {
   it("범위 밖 연도 → null", () => {
     expect(parseMonthId("1999-04")).toBeNull();
     expect(parseMonthId("2101-01")).toBeNull();
+  });
+
+  it("locale='en' 전달 시 라벨도 영문 (한글 미포함)", () => {
+    const r = parseMonthId("2026-04", "en");
+    expect(r?.label).toBe("April 2026");
   });
 });
 
