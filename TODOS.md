@@ -1,3 +1,11 @@
+## 🔍 RETRO-ONLY — review-code(heavy) buildMatchupProfile.ts + predictions/[date]/page.tsx 신규 감사 (cycle 2446, 2026-08-23)
+
+진단: open issue 0, approved plan 0/23(Tier4 유지). gap trigger 전부 미도달(fix-incident 1/20, op-analysis 15/25, info-arch 21/30, lotto 6/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2445 추천(op-analysis/info-arch) 둘 다 gap 미충족 — review-code heavy 신규 타겟 탐색 지속.
+
+발견: buildMatchupProfile.ts(594줄, 13회 언급) — PRODUCTION_COHORT_RULES 필터/assertSelectOk fail-loud/games 정렬 순서 모두 정상. predictions/[date]/page.tsx(619줄, 5회 언급) — winProb 변환(home_win_prob→예측승자 기준)이 PredictionCardLive aiWinProb 용도와 일치, buildIntro/verified 카운트 컨벤션 일관. 양쪽 모두 silent drift 없음, 코드 변경 0.
+
+다음 사이클 추천 = operational-analysis(16/25) 또는 info-architecture-review(22/30) gap 우선순위, 또는 review-code 신규 타겟(teams/[code]/page.tsx, predictions/[date]/page.tsx 5회 미만 언급 파일들) 계속 탐색.
+
 ## ✅ SUCCESS — fix-incident 3-way version drift 재발 정정 (cycle 2445, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 6/20, op-analysis 14/25, info-arch 20/30, lotto 5/30). 2-chain lock 미충족(직전8 distinct=4). `gh run list` 로 main 최근 CI 상태 점검 중 cycle 2443 커밋(#983bb346)의 CI 가 red 임을 발견.
