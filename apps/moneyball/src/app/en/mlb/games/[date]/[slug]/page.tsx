@@ -40,6 +40,7 @@ const GAME_DETAIL_FACTOR_ROWS: Array<{
   { label: "Bullpen FIP", homeKey: "home_bullpen_fip", awayKey: "away_bullpen_fip" },
   { label: "Lineup wOBA", homeKey: "home_lineup_woba", awayKey: "away_lineup_woba" },
   { label: "WAR", homeKey: "home_war_total", awayKey: "away_war_total" },
+  { label: "Elo", homeKey: "home_elo", awayKey: "away_elo" },
   { label: "Lineup xwOBA", homeKey: "home_lineup_xwoba", awayKey: "away_lineup_xwoba" },
   { label: "Barrel%", homeKey: "home_lineup_barrel_pct", awayKey: "away_lineup_barrel_pct" },
 ];
@@ -88,6 +89,8 @@ interface PredictionDetailRow {
   away_lineup_xwoba: number | null;
   home_lineup_barrel_pct: number | null;
   away_lineup_barrel_pct: number | null;
+  home_elo: number | null;
+  away_elo: number | null;
 }
 
 interface ScheduleRow {
@@ -152,7 +155,9 @@ export default async function GameDetailEn({ params }: PageParams) {
       home_lineup_xwoba,
       away_lineup_xwoba,
       home_lineup_barrel_pct,
-      away_lineup_barrel_pct
+      away_lineup_barrel_pct,
+      home_elo,
+      away_elo
     `)
     .eq('league', 'mlb')
     .eq('scoring_rule', MLB_SCORING_RULE)
@@ -203,6 +208,7 @@ export default async function GameDetailEn({ params }: PageParams) {
     war: { home: pred.home_war_total, away: pred.away_war_total },
     lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
     lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
+    elo: { home: pred.home_elo, away: pred.away_elo },
     homeParkPf: MLB_TEAMS[home].parkPf,
     homeWinProb,
   };
