@@ -1,3 +1,13 @@
+## ✅ SUCCESS — MLB sp_xwoba_against/woba_std 7% weight 무주석 always-zero-contribution 공개 (cycle 2402, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 9/25, lotto 10/30, info-arch 7/30). explore-idea saturation 미충족(7/15). TODOS Next-Up 신규 리드 없음. cycle 2394/후속 오늘 이미 fix된 MLB elo(10%)/recent_form+head_to_head(13%) silent-no-op wiring 성공 패턴 이어 mlb-pipeline.ts 잔여 factor input 을 mlb-base.ts(MLB_BASE_WEIGHTS) 대조 직접 감사.
+
+발견: `defense_sfr`(5%)는 이미 mlb-pipeline.ts 주석으로 "MLB 미구현 placeholder(항상 0,0 입력)" 공개돼 있었으나, 동일하게 home/away 양쪽에 항상 같은 상수를 넣어(`sp_xwoba_against: MLB_STAT_DEFAULTS.xwoba` 양쪽 동일, `woba_std: 0.030` 양쪽 동일) diff=0 → homeAdvantage 기여도가 구조적으로 항상 0인 `sp_xwoba_against`(4%)/`woba_std`(3%) 는 그동안 무주석 상태 — 합쳐서 MLB 모델 weight 12%(defense_sfr 5% + 이 둘 7%)가 항상 죽어있는 채로 미공개. 코드 동작 변경은 아님(mlb-base.test.ts 가 diff=0→contribution=0 이미 lock) — 실제 상태를 정확히 서술하는 주석 추가. 부가로 `sp_fip`(12%)/`bullpen_fip`(10%) 도 MLB 는 선발투수 개인 FIP 데이터 소스가 없어 팀 aggregate(`mlb_team_stats.fip`)를 양쪽 공유함(`mlb-pipeline.test.ts` 508/580행 duplicate 값 이미 assert)을 확인, 이유 주석 추가. `statsapi-mlb.ts`의 `fetchProbablePitchers`(선발투수 이름/ID 스크레이프)가 개인 통계 소스 부재로 프로덕션 미연결 상태인 것도 확인 — 신규 스크레이퍼 필요(Tier 3, 별도 스코프, 액션 아이템만 기록).
+
+실행: 코드 동작 변경 없음, 주석 3곳 추가만. `tsc --noEmit` clean, `pnpm --filter kbo-data test` 90 files/1166 tests green, pre-push lint+type-check green. 직접 main commit(docs, R4 — cycle 2400 동일 docs-only 패턴 선례).
+
+다음 사이클 추천 = gap trigger 순 대기(fix-incident 9/20, op-analysis 10/25, lotto 11/30, info-arch 8/30) 또는 review-code(heavy) 계속(잔여 후보: mlb-waterfall.ts, mlb-elo.ts 동일 계열 미검증 가능성).
+
 ## ✅ SUCCESS — shared 상수 4개 stale doc comment 정정 (cycle 2400, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, info-arch 4/30, lotto 7/30). 2-chain lock 미충족(직전8 distinct=5). cycle 2399 retro 가 남긴 미감사 monolith lead 따라 accuracy/page.tsx(1204줄) 직접 감사.
