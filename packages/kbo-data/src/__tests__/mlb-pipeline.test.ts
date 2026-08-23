@@ -594,6 +594,67 @@ describe('runMlbPipeline', () => {
     expect(row.away_lineup_barrel_pct).toBeNull();
   });
 
+  it('mlb_predict_final — model_version/debate_version/predicted_at 명시 박제 (regression: 명시 없으면 model_version 은 DB DEFAULT \'v1.0\'(migration 001 KBO 초기 버전), debate_version 은 stale DB DEFAULT \'v1-narrative\'(migration 007, live.ts cycle 2240 이 in_game 경로에서 이미 차단한 동일 landmine — pre_game 경로인 MLB insert 는 그 fix 범위 밖이라 미차단), predicted_at 은 NULL 로 조용히 상속되어 lead-time 파생값 영구 계산 불가)', async () => {
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const scheduleGames = [
+      { external_game_id: '2002', home_team_code: 'PHI', away_team_code: 'WSN' },
+    ];
+    const statsRows = [
+      { team_code: 'PHI', woba: 0.335, fip: 3.55, xfip: 3.70, war: 30.2, xwoba: 0.340, barrel_pct: 9.8 },
+    ];
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: statsRows, error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const before = Date.now();
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+    const after = Date.now();
+
+    expect(insertedRows.length).toBe(1);
+    const row = insertedRows[0];
+    expect(row.model_version).toBe('mlb_v0.1');
+    expect(row.debate_version).toBeNull();
+    expect(typeof row.predicted_at).toBe('string');
+    const predictedAtMs = new Date(row.predicted_at as string).getTime();
+    expect(predictedAtMs).toBeGreaterThanOrEqual(before);
+    expect(predictedAtMs).toBeLessThanOrEqual(after);
+  });
+
   it('mlb_predict_final — home_team_code 가 StatsAPI 컨벤션(WSH)이고 mlb_team_stats.team_code 는 canonical(WSN)일 때도 실측 팩터 매칭 (regression: cycle 2097 발견 — mlb_team_stats 는 canonical 컨벤션으로 저장돼(DB 실측) statsByTeam 조회를 정규화 없이 raw schedule 코드로 하면 TB/CWS/KC/SD/SF/AZ/WSH 7팀 전량 미스매치 → home_sp_fip 등 전량 NULL. DB 실측: predictions 전체 764건 중 home_sp_fip non-null 1건)', async () => {
     const insertedRows: Array<Record<string, unknown>> = [];
     const { createClient } = await import('@supabase/supabase-js');

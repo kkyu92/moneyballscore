@@ -389,6 +389,16 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       // 승자 정보는 home_win_prob + mlb_schedule.home/away_team_code 로 derive.
       predicted_winner: null,
       scoring_rule: MLB_SCORING_RULE,
+      // model_version 명시 없으면 DB DEFAULT 'v1.0' (migration 001, KBO 초기 버전
+      // literal) 이 조용히 상속 — MLB 는 버전 진화가 없어 MLB_SCORING_RULE 그대로 사용.
+      // debate_version 명시 null 없으면 migration 007 stale DB DEFAULT 'v1-narrative'
+      // 상속 (live.ts cycle 2240 이 in_game 경로에서 이미 발견/차단한 동일 landmine —
+      // pre_game 경로인 본 MLB insert 는 그 fix 범위 밖이라 미차단 상태였음. MLB 는
+      // LLM debate 미구현이라 항상 null). predicted_at 명시 없으면 NULL 유지(daily.ts
+      // KBO pre_game 경로는 명시 박제 — MLB 만 누락돼 lead-time 파생값 항상 계산 불가).
+      model_version: MLB_SCORING_RULE,
+      debate_version: null,
+      predicted_at: new Date().toISOString(),
       // cycle 2065 fix — computeMlbProbability 입력으로만 쓰이고 저장은 안 되던 실측
       // 팩터 값을 breakdown 컬럼에 영속화. buildMlbTeamFactorAverages / computeCompositeDuel
       // MLB 버전(plan #24 Phase 2a/3c)이 이 컬럼을 읽는데 전량 NULL이라 항상 빈 값이었음
