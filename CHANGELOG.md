@@ -1,3 +1,21 @@
+## v0.5.62.79 — 2026-08-23 (cycle 2358, info-architecture-review: EN nav weekly/monthly stale scope-exception 제거)
+
+### fix(nav): Header/Footer `withLocale`/`withMlbLocale` 의 `/mlb/reviews/weekly`, `/mlb/reviews/monthly` stale 예외 해제 — EN 미러 신규 배선(cycle 2355/2356) 이후 미동기 silent nav drift 해소
+
+- 발견: cycle 2358 진단 단계에서 직전 7일 내 신규 라우트 20건(EN 미러 시리즈) 발견하여
+  info-architecture-review trigger(라우트 신규 추가 ≥3/1주) 채택. sitemap/breadcrumb 는 이미
+  동기됐지만 `Header.tsx`/`Footer.tsx` 의 `withLocale`/`withMlbLocale` 헬퍼가 여전히
+  `/mlb/reviews/weekly`, `/mlb/reviews/monthly` 를 "EN 미러 부재(cycle 2226 의도적 scope
+  축소)" 로 blanket 예외 처리 — cycle 2355(weekly)/2356(monthly) 에서 이미 EN 미러가
+  배선됐음에도 주석·로직이 stale 상태로 남아 EN 페이지에서 헤더 메가메뉴·푸터 사이트맵의
+  Weekly/Monthly Review 링크가 KO 라우트로 계속 이탈(cycle 2139/2226 family 재발, `/mlb/reviews`
+  `/mlb/reviews/misses` 는 wave-659(cycle 2339)에서 이미 해제됐던 동일 예외 목록의 잔여 2건).
+- 실행: 양쪽 헬퍼에서 weekly/monthly 특례 분기 제거(이제 다른 `/mlb/*` 라우트와 동일하게
+  `/en` prefix 치환). 관련 테스트 3파일(`Header.test.ts`, `Footer.test.tsx`,
+  `wave-659-en-mlb-reviews-mirror.test.ts`) 의 stale 예외 assertion 도 함께 갱신.
+- 검증: `tsc --noEmit`(전체 workspace) clean, `eslint`(전체) clean, `pnpm test`(moneyball
+  500 files/4198 tests) all green.
+
 ## v0.5.62.78 — 2026-08-23 (cycle 2356, explore-idea: en/mlb/reviews/monthly 영어 미러 신규 배선)
 
 ### feat(mlb): `/en/mlb/reviews/monthly` MLB 월간 리뷰 영어 미러 신규 배선 — cycle 2355 weekly 완료 직후 후속(plan #26 phase 분리 관례)

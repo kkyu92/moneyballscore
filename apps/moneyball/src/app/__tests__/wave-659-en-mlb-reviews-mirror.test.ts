@@ -59,13 +59,13 @@ describe('wave-659 — /en/mlb/reviews 영어 미러 신규', () => {
     expect(koMisses).toContain('buildMlbMissReport({ limit: MISS_REPORT_LIMIT })');
   });
 
-  it('Header/Footer withLocale — /mlb/reviews, /mlb/reviews/misses 는 예외 해제, weekly/monthly 는 예외 유지', () => {
+  it('Header/Footer withLocale — /mlb/reviews, /mlb/reviews/misses 예외 해제 (weekly/monthly 는 cycle 2355/2356 미러 신규로 후속 예외 해제, wave-660)', () => {
     expect(header).not.toMatch(/href === "\/mlb\/reviews" \|\| href\.startsWith\("\/mlb\/reviews\/"\)/);
-    expect(header).toContain('href.startsWith("/mlb/reviews/weekly")');
-    expect(header).toContain('href.startsWith("/mlb/reviews/monthly")');
+    expect(header).not.toContain('href.startsWith("/mlb/reviews/weekly")');
+    expect(header).not.toContain('href.startsWith("/mlb/reviews/monthly")');
     expect(footer).not.toMatch(/href === "\/mlb\/reviews" \|\| href\.startsWith\("\/mlb\/reviews\/"\)/);
-    expect(footer).toContain('href.startsWith("/mlb/reviews/weekly")');
-    expect(footer).toContain('href.startsWith("/mlb/reviews/monthly")');
+    expect(footer).not.toContain('href.startsWith("/mlb/reviews/weekly")');
+    expect(footer).not.toContain('href.startsWith("/mlb/reviews/monthly")');
   });
 
   it('sitemap.ts 즉시 배선 (cycle 2153 family 재발 차단)', () => {

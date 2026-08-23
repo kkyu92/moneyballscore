@@ -117,7 +117,7 @@ describe("Footer", () => {
     expect(within(aiColumn).getByRole("link", { name: "Today's Games" })).toHaveAttribute("href", "/");
   });
 
-  it("isEn=true 시 /mlb/reviews, /mlb/reviews/misses 는 wave-659 미러 신규로 /en 치환됨 (weekly/monthly 는 EN 미러 부재라 KO href 유지)", () => {
+  it("isEn=true 시 /mlb/reviews, /mlb/reviews/misses, /mlb/reviews/weekly, /mlb/reviews/monthly 전부 /en 치환됨 (cycle 2355/2356 미러 신규로 예외 해제)", () => {
     render(<Footer isEn />);
     const mlbHeading = screen.getByRole("heading", { level: 2, name: "MLB" });
     const mlbColumn = mlbHeading.closest("details") as HTMLElement;
@@ -126,7 +126,7 @@ describe("Footer", () => {
       "href",
       "/en/mlb/reviews/misses"
     );
-    expect(within(mlbColumn).getByRole("link", { name: "Weekly Review" })).toHaveAttribute("href", "/mlb/reviews/weekly");
-    expect(within(mlbColumn).getByRole("link", { name: "Monthly Review" })).toHaveAttribute("href", "/mlb/reviews/monthly");
+    expect(within(mlbColumn).getByRole("link", { name: "Weekly Review" })).toHaveAttribute("href", "/en/mlb/reviews/weekly");
+    expect(within(mlbColumn).getByRole("link", { name: "Monthly Review" })).toHaveAttribute("href", "/en/mlb/reviews/monthly");
   });
 });

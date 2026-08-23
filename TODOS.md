@@ -1,3 +1,15 @@
+## 🟢 info-architecture-review — EN nav weekly/monthly stale scope-exception 제거 SUCCESS (cycle 2358, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2350-2357) distinct=4(fix-incident/skill-evolution/review-code/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 22/25, info-arch 18/30, lotto 14/30) — 별도 source 탐색. `git log --diff-filter=A --since="7 days ago" -- '**/page.tsx'` = 신규 라우트 20건(EN 미러 시리즈: analysis/matchup/methodology/predictions/reviews/weekly·monthly 등) → info-architecture-review trigger(라우트 신규 추가 ≥3/1주) 채택.
+
+**발견**: sitemap.ts/breadcrumb 는 이미 동기됐지만 `Header.tsx`/`Footer.tsx` 의 `withLocale`/`withMlbLocale` 헬퍼가 `/mlb/reviews/weekly`, `/mlb/reviews/monthly` 를 여전히 "EN 미러 부재(cycle 2226 의도적 scope 축소)" 로 blanket 예외 처리 — cycle 2355(weekly)/2356(monthly) 에서 이미 EN 미러가 배선됐음에도 주석·로직이 stale 상태로 남아 EN 페이지에서 헤더 메가메뉴·푸터 사이트맵 링크가 여전히 KO 라우트로 이탈. `/mlb/reviews`/`/mlb/reviews/misses` 는 wave-659(cycle 2339)에서 이미 예외 해제됐던 동일 목록의 잔여 2건 — cycle 2339 retro 주석이 "신규 미러 fire 시 예외 목록도 함께 갱신" 이라 명시했음에도 실제 후속 fire(2355/2356) 시점에 갱신 안 됨 (silent drift family, cycle 2153/2225/2339 와 동일 계열 — MLB 신규 라우트 추가 시 nav 헬퍼 동기 누락 반복 패턴).
+
+**실행**: 양쪽 헬퍼에서 weekly/monthly 특례 분기 제거(다른 `/mlb/*` 라우트와 동일하게 `/en` prefix 치환). stale 주석 정정. 관련 테스트 3파일(`Header.test.ts` 2건, `Footer.test.tsx` 1건, `wave-659-en-mlb-reviews-mirror.test.ts` 1건) 의 stale 예외 assertion 갱신.
+
+검증: `tsc --noEmit`(전체 workspace) clean, `eslint`(전체) clean, `pnpm test`(moneyball 500 files/4198 tests) all green.
+
+결론: MLB EN nav 이탈 버그 family 완전 종료(cycle 2139→2225→2339→2358, 4차 재발 후 해소). 다음 후보 = 자연 발견 또는 op-analysis(22/25 gap 근접)/lotto(14/30)/info-arch(18/30, 본 cycle 자체 fire 로 gap 리셋) 주기 trigger 확인.
+
 ## 🔵 fix-incident — predict_final "games_found=5/predictions=0" 6일 연속 패턴 조사 RETRO-ONLY, 실제 인시던트 없음 확인 (cycle 2357, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2350-2356) distinct=4(fix-incident/skill-evolution/review-code/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20 방금 발화, op-analysis 21/25, info-arch 17/30, lotto 13/30). review-code 최근 감사 대상(analysis/page.tsx, accuracy/page.tsx, convergenceRecord.ts, buildAccuracyData.ts, daily.ts) 전부 최근 3일 내 이미 fix 완료 상태라 신규 review-code 타겟 부재. `pipeline_runs` 직접 DB 조회(REST API) 결과 `predict_final` 모드가 8/16~8/22 6일 연속 `games_found=5, predictions=0, skipped_detail reason=not_scheduled` 패턴 반복 — 표면상 사례 11 family(predict_final silent drop) 재발처럼 보여 fix-incident 로 채택.
