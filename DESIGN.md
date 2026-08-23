@@ -54,6 +54,7 @@
 - **Dark mode (Hybrid C):**
   - Surface: #0c0e0d (거의 블랙, 뉴트럴)
   - Card: #151d18 (미세한 그린 틴트)
+  - Border: #1e2b23 (`--color-border`, 다크모드 전용 토큰 — 라이트모드는 Tailwind `border-gray-200` literal 사용, 다크모드만 `dark:border-[var(--color-border)]` 로 그린 틴트)
   - 헤더/푸터: brand-800/900 유지 (그린 아이덴티티)
   - 전략: 배경은 뉴트럴로 빼서 헤더·카드와의 경계를 확보하되, 카드에 그린 틴트를 남겨 브랜드 느낌 유지
 
