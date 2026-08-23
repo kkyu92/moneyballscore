@@ -5706,3 +5706,13 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 점검: op-analysis-ce-cohort.ts(cycle 1547 표준 harness) 재실행 → n=332(CE=285/비CE=47), acc 55.1%(CE 53.7%/비CE 63.8%, 격차 10.1pp) — cycle 2361(오늘, 55 cycle 전) 측정값과 완전 동일. predictions 테이블 직접 조회로 확인: v1.8 신규 row 는 8/18~8/22 매일 14:17 UTC 배치로 계속 verified 중이고 전부 debate_version=null(CE 지속)이지만, cycle 2361 시점 이미 그날 배치가 반영 완료돼 오늘 재실행은 신규 표본 0건 재확인에 그침. CLAUDE.md 갱신 불필요(동일 수치 중복 기록 방지).
 
 다음 사이클 추천 = explore-idea(최근 20 cycle 중 1회로 저조, statsapi-mlb.ts fetchProbablePitchers 개인 투수 통계 소스 Tier 3 candidate 존재) 또는 review-code(heavy) dominance 지속(14/20).
+
+## 🟢 SUCCESS — fix-incident MLB predictions model_version/debate_version/predicted_at stale DB DEFAULT 상속 차단 (cycle 2423, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 9/20, op-analysis 7/25, info-arch 28/30, lotto self-heal). 직전 15 사이클 review-code+fix-incident+polish-ui+info-arch=12/15 → explore-idea improvement-saturation trigger 충족.
+
+탐색: explore-idea 로 KBO analysis/game/[id]/page.tsx 의 "모델 메타 정보" 배지(model_version/debate_version/predicted_at lead-time)를 MLB game detail 페이지에 이식할 수 있는지 조사 → MLB 쪽엔 해당 블록 자체가 없음을 확인 → DB 실측(predictions, scoring_rule='mlb_v0.1')으로 model_version='v1.0', debate_version='v1-narrative'(둘 다 stale DB DEFAULT), predicted_at=NULL 전량 재발 확인. mlb-pipeline.ts predict_final insert 가 3개 컬럼 모두 미명시. live.ts 가 cycle 2240 에 in_game 경로에서 동일 debate_version landmine 을 이미 차단했지만 pre_game 경로(MLB)는 그 fix 범위 밖 — sibling 미차단 family bug.
+
+실행: model_version=MLB_SCORING_RULE('mlb_v0.1'), debate_version=null, predicted_at=new Date().toISOString() 3개 명시 + 회귀 테스트 1건. kbo-data 90/1176 + moneyball 500/4208 tests, tsc, lint 전부 clean. PR #3048 squash 머지(447fdd32).
+
+다음 사이클 추천 = info-architecture-review(28/30 임박) 또는 review-code/explore-idea(MLB game detail 페이지에 KBO "모델 메타 정보" 배지 이식 — predicted_at 이제 실측 채워져 lead-time 계산 가능해짐).
