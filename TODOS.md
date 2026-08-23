@@ -1,3 +1,13 @@
+## ✅ SUCCESS — mlb-waterfall.ts recent_form scale mismatch fix (cycle 2412, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 19/25, info-arch 17/30, lotto 20/30). 2-chain lock 미충족(직전8 distinct=3). cycle 2411 retro 추천 fresh target(mlb-waterfall.ts/mlb-elo.ts) 직접 감사.
+
+발견: mlb-elo.ts 는 clean. mlb-waterfall.ts pairTerms 전 항목을 mlb-base.ts computeMlbFactorContributions 수식과 1:1 대조한 결과 recent_form 만 문제 — DB 저장은 0-1 승률(KBO 동일 컨벤션, fmtPct 가 *100 해 표시)인데 mlb-waterfall.ts/mlb-base.ts 의 recent_form 계약은 mlb-pipeline.ts 가 computeMlbProbability 호출 직전 *100 해 넘기는 0-100 스케일 — KO/EN game-detail page.tsx 양쪽이 DB 원본값을 그대로 waterfallInput 에 넣어 waterfall bar 가 100배 축소, factor-detail 표에 "0.7%" 같은 무의미한 값 표시, AI 개요 서술(NARRATIVE_MIN_PP=0.1pp 임계)에서 recent_form 이 사실상 항상 누락되던 silent 상태(기존 mlb-waterfall.test.ts/mlb-factor-detail.test.ts 는 0-100 값으로 테스트해 이 gap 을 못 잡음).
+
+실행: 양쪽 page.tsx 에서 recent_form pair 를 null-safe *100 변환 후 waterfallInput 구성. 기존 두 페이지 test 파일에 소스-스트링 회귀 가드 2건 추가. `tsc --noEmit`/`eslint`(scoped) clean, `pnpm --filter moneyball test` 500 files/4205 tests green(신규 2건), pre-push lint+type-check(전 패키지) green. 직접 main commit(e8e5ee04) + push.
+
+다음 사이클 추천 = review-code(heavy) 계속(mlb-overview.ts/mlb-shadow-c.ts 잔여 확인) 또는 gap trigger 순 대기(fix-incident 19/20 다음 사이클 도달).
+
 ## ✅ SUCCESS — MLB sp_xwoba_against/woba_std 7% weight 무주석 always-zero-contribution 공개 (cycle 2402, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 9/25, lotto 10/30, info-arch 7/30). explore-idea saturation 미충족(7/15). TODOS Next-Up 신규 리드 없음. cycle 2394/후속 오늘 이미 fix된 MLB elo(10%)/recent_form+head_to_head(13%) silent-no-op wiring 성공 패턴 이어 mlb-pipeline.ts 잔여 factor input 을 mlb-base.ts(MLB_BASE_WEIGHTS) 대조 직접 감사.
