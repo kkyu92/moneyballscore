@@ -132,6 +132,20 @@ describe('notifyAnnounce', () => {
     await notifyAnnounce('2026-04-22', [makeGame()], '16:00');
     expect(calls).toHaveLength(0);
   });
+
+  // silent_drift_family wave_177 — HTTP-level 실패(!res.ok)도 throw 로
+  // 전파돼야 daily.ts 의 *_sent flag 게이팅 + Sentry capture 가 작동.
+  it('Telegram API 가 !res.ok 응답 → throw (flag 게이팅용, silent swallow 금지)', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false, status: 400, statusText: 'Bad Request',
+      text: async () => '{"ok":false,"description":"Bad Request: can\'t parse entities"}',
+    } as unknown as Response);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(
+      notifyAnnounce('2026-04-22', [makeGame()], '16:00'),
+    ).rejects.toThrow('Telegram sendMessage failed: 400');
+  });
 });
 
 describe('notifyPredictions (regression)', () => {
