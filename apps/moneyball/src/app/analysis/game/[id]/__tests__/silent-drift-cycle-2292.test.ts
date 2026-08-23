@@ -12,13 +12,17 @@ describe('silent drift cycle 2292 — analysis/game/[id]/page.tsx predictions �
     expect(block).toMatch(/prediction_type,\s*scoring_rule/);
   });
 
-  it('preGame .find() 가 CURRENT_SCORING_RULE 로 scoring_rule 을 필터링함', () => {
+  // cycle 2407 review-code heavy: CURRENT_SCORING_RULE 단일값 비교 → PRODUCTION_COHORT_RULES
+  // 포함 판정으로 정정 (legacy 'v1.8-credit-fail' production row 도 실제 분석 있음에도
+  // "분석 데이터 없음"으로 오탐되던 문제 fix, model-version-labels.ts 문서상 사용자 가시
+  // layer 는 PRODUCTION_COHORT_RULES 사용이 맞는 cohort).
+  it('preGame .find() 가 PRODUCTION_COHORT_RULES 로 scoring_rule 을 필터링함 (shadow 제외 + legacy credit-fail 포함)', () => {
     const block = SRC.slice(SRC.indexOf('const preGame ='), SRC.indexOf('const postGame ='));
-    expect(block).toMatch(/p\.scoring_rule === CURRENT_SCORING_RULE/);
+    expect(block).toMatch(/PRODUCTION_COHORT_RULES.*\.includes\(p\.scoring_rule\)/s);
   });
 
-  it('CURRENT_SCORING_RULE import 됨', () => {
-    expect(SRC).toMatch(/CURRENT_SCORING_RULE/);
+  it('PRODUCTION_COHORT_RULES import 됨', () => {
+    expect(SRC).toMatch(/PRODUCTION_COHORT_RULES/);
     expect(SRC).toMatch(/from '@moneyball\/shared'/);
   });
 });

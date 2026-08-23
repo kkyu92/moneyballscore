@@ -22,7 +22,7 @@ import {
   CONVERGENCE_BADGE_WEIGHT_STRONG_PCT,
   KBO_DEFAULT_GAME_TIME,
   HOUR_MS,
-  CURRENT_SCORING_RULE,
+  PRODUCTION_COHORT_RULES,
   H2H_MIN_GAMES,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
@@ -226,9 +226,17 @@ export default async function GameAnalysisPage({ params }: PageProps) {
   // scoring_rule 필터 — daily.ts 가 매 경기 production(v1.8) insert 직후 shadow(v2.1-B-shadow/
   // v2.0-shadow) row 도 동일 prediction_type='pre_game' 으로 insert(#1338 family). 미필터 시
   // 정렬 없는 .find() 가 임의 row(프로덕션/shadow)를 선택 가능.
+  // review-code heavy (cycle 2407 첫 심층감사): CURRENT_SCORING_RULE 단일값 비교는 shadow는
+  // 제외하지만 legacy 'v1.8-credit-fail' production row(n=25, model-version-labels.ts 문서상
+  // "사용자 가시 layer"는 PRODUCTION_COHORT_RULES 양쪽 포함이 맞는 cohort)도 함께 걸러내
+  // 해당 경기 상세 페이지가 실제 분석이 있는데도 "분석 데이터 없음"을 렌더하는 오탐이었음.
+  // baseline calibration(accuracy/buildAccuracyData)만 CURRENT_SCORING_RULE 단독 사용이 맞고,
+  // 이 페이지처럼 사용자 가시 콘텐츠는 PRODUCTION_COHORT_RULES 로 판정해야 함.
   const preGame = game.predictions?.find(
     (p): p is PreGamePrediction =>
-      p.prediction_type === 'pre_game' && p.scoring_rule === CURRENT_SCORING_RULE,
+      p.prediction_type === 'pre_game' &&
+      p.scoring_rule != null &&
+      (PRODUCTION_COHORT_RULES as readonly string[]).includes(p.scoring_rule),
   );
   const postGame = game.predictions?.find(
     (p): p is PostGamePrediction => p.prediction_type === 'post_game',
