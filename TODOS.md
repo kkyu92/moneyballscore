@@ -1,3 +1,11 @@
+## ⚪ review-code(heavy) — fancy-stats.ts(526줄) scraper 신규 target 감사, 이슈 미발견 RETRO-ONLY (cycle 2371, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2364-2370) distinct=4(review-code/info-arch/operational-analysis), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 3/25, info-arch 6/30, lotto 9/30). explore-idea saturation 11/15<12 미충족. gh run list 전부 green. DESIGN.md 5일 전(미도달), lotto picks 8/29 기박제. review-code(heavy) 5연속 소진(2364/2366/2367/2369/2370)이 apps/moneyball page.tsx 계열에 집중돼 있었던 점에 착안, 미감사 영역인 packages/kbo-data/src/scrapers 로 감사 범위 전환 — fancy-stats.ts(526줄, scrapers 디렉토리 최대 monolith, validator.ts/postview.ts 는 cycle 2369 기감사) 선정.
+
+**감사**: 전체 527줄 read. `resolveTeamCode` case-insensitive 매칭(2026-04 "Kia Tigers" 대소문자 drift 사고 대응 이미 반영), `parseNumWithFallback`/`console.warn` silent-drift 가시화(empty table / NaN fallback / xfip fallback / winPct=0.5 stub / findPitcher byName team mismatch) 등 다수 계층이 과거 사이클에서 이미 촘촘히 계측돼 있음 확인. 하드코딩 테이블 인덱스(투수 4/5/6/7, 타자 0/3) 의존성도 empty-table warn 으로 커버. 신규 실측 버그 미발견 — 이 파일은 이미 review-code 감사 target 소진 상태(scrapers 영역도 마찬가지).
+
+결론: 코드 변경 없음. review-code 직전 5-cycle window 내 outcome≠success 4/5(2366/2367/2369/2370) — 다음 사이클 review-code 재발화 시 lite-cap 룰(5연속) trigger 임박, 자연 redirect 예상. 다음 후보 = explore-idea(saturation 11/15, 임계 근접) 또는 주기 trigger(fix-incident 9/20, op-analysis 4/25, info-arch 7/30, lotto 10/30) 도달 대기.
+
 ## ⚪ review-code(heavy) — model-comparison MLB 오염 가설 false-positive + KBO/MLB 매직넘버 parity 재확인 RETRO-ONLY (cycle 2370, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked, status="approved" 없음). 직전 8사이클(2362-2369) distinct=5(lotto/fix-incident/review-code/info-arch/operational-analysis), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 2/25, info-arch 5/30, lotto 8/30). explore-idea saturation 10/15<12 미충족. `gh run list --limit 10` 전부 green/skip, gh issue 0건. DESIGN.md 5일 전(미도달), lotto-data.json 오늘 갱신·8/29 picks 기박제(트리거 X). 직전 4사이클(2364/2366/2367/2369) 이미 review-code 감사 target 4연속 소진 확인됨 — 이번엔 `.from('predictions')` 쿼리 49개 파일 전수 재grep으로 #1338 family(scoring_rule/prediction_type 미필터) 잔존 후보 재탐색.
