@@ -1,3 +1,14 @@
+## ⚪ review-code (heavy) — cycle 2345 MLB 주간/월간 수렴 픽 배선 drift 감사 clean RETRO-ONLY (cycle 2346, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2338-2345 distinct=4). 주기 trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 6/30, lotto 2/30). cycle 2345 explore-idea(heavy) retro 가 "review-code(heavy, 방금 배선된 신규 코드 audit — Feature-Drift Cycle 자연 교대)" 를 명시적 다음 후보로 남김.
+
+**감사 범위**: `convergenceRecord.ts` 6함수(`getMlbRecentConvergencePickRecord`/`getMlbConvergencePickStreak`/`getMlbConvergencePickBestStreak`/`getMlbConvergencePickHomeAwaySplit`/`getMlbConvergencePickDayOfWeekSplit`/`getMlbConvergencePickTeamStats`) startDate/endDate 파라미터 추가분을 KBO 대응 함수(wave-584/594/600/602/603)와 1:1 대조 / `weekly/[week]`, `monthly/[month]` page.tsx 양쪽 `Promise.all` 배선 + `range.startDate`/`range.endDate` 전달 정확성 / 배지 컴포넌트(`ConvergenceHomeAwayBadges`/`ConvergenceDayOfWeekBadges`/`ConvergenceTeamStatsBadges`) `nameResolver=mlbShortTeamName` 전달 확인 / `mlb-reviews-page.test.ts` + `mlb-reviews-monthly-page.test.ts` 가드 반전(stale "의도적 생략" → 배선 확인) 정확성 확인.
+
+검증: `tsc --noEmit`(moneyball) clean, `pnpm test`(498 files/4180 tests all green).
+
+결론: 신규 drift 0건 — cycle 2345 explore-idea(heavy) 자체가 KBO 패턴을 정확히 이식해 이번 감사 창에서 신선 발견 없음. 코드 변경 없음(RETRO-ONLY). review-code(heavy) 2회 연속 clean audit(2343/2346) — 다음 발화는 신규 monolith 성장 또는 다른 영역 grep 시 자연 재도달. 다음 cycle 후보 = explore-idea 자연 발견 또는 open issue/plan 재확인.
+
+
 ## 🟢 explore-idea (heavy) — MLB 주간/월간 리뷰 수렴 픽 섹션 완결 SUCCESS (cycle 2345, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 2337-2344 distinct=4: review-code/explore-idea/info-arch/lotto). 주기 trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 9/25, info-arch 5/30, lotto 1/30 방금 리셋). cycle 2342 retro 가 명시한 plan #23(LLM context layer) 후보는 실제로 status=`completed_steps_1_4_shipped_through_cycle_1239_plus_waves_41_54_through_cycle_1246` — cycle 1246 시점 이미 전부 완료된 stale 언급으로 확인. plan#24 dedup 후속 후보(computeMatchupStreak 등)도 이미 cycle 2055/2064 에 완료 확인. 코드베이스 `TODO`/`후속 cycle 과제` grep 결과 `/mlb/reviews/page.tsx` + `weekly/[week]/page.tsx` 주석이 명시한 "MLB convergence 함수 날짜 range 파라미터 부재로 weekly/monthly 수렴 픽 섹션 생략"이 유일한 구체적·검증 가능한 gap으로 확인.
