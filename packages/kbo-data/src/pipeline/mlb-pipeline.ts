@@ -514,8 +514,28 @@ async function runShadowTrain(db: DB, date: string): Promise<{ gamesFound: numbe
 
   const trainResult = trainShadowWeights(samples);
 
-  // Check milestone
-  const hitMilestone = MILESTONE_TRIGGERS.includes(samples.length as typeof MILESTONE_TRIGGERS[number]);
+  // Cumulative milestone check — cycle 2413 silent drift 발견: MILESTONE_TRIGGERS
+  // ([27, 60, 150, 300, 1000, 2430], KBO v1.8→v2.0 n=150 임계 패턴 차용)는 "누적
+  // 학습 표본 수"가 이 값들을 넘는 순간을 포착하려는 의도인데, 기존 코드는 이를
+  // samples.length(하루치 경기 수, MLB 는 하루 최대 15경기)와 직접 비교해 어떤
+  // threshold 도 절대 도달 불가능한 상태로 방치돼있었음(milestone_hit 영구 false).
+  // 누적치 = 기존 mlb_shadow_train_log 전체 sample_count 합 + 이번 fire 표본 수.
+  const { data: priorRows, error: cErr } = await db
+    .from('mlb_shadow_train_log')
+    .select('sample_count')
+    .eq('league', 'mlb');
+
+  if (cErr) {
+    errors.push(`shadow_train cumulative select: ${cErr.message}`);
+    return { gamesFound: gameList.length, rowsInserted: 0, errors };
+  }
+
+  const priorCumulative = ((priorRows ?? []) as Array<{ sample_count: number }>).reduce(
+    (sum, r) => sum + r.sample_count,
+    0,
+  );
+  const newCumulative = priorCumulative + samples.length;
+  const hitMilestone = MILESTONE_TRIGGERS.some((t) => priorCumulative < t && t <= newCumulative);
 
   // Insert shadow training result — cycle 2200대 silent drift audit 발견: 이 테이블이
   // 전체 migration 역사에 걸쳐 한번도 CREATE 된 적 없어(prod REST 실측: PGRST205

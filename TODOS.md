@@ -1,3 +1,13 @@
+## ✅ SUCCESS — mlb_shadow_train_log.milestone_hit 영구 false 수정 (cycle 2413, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 20/25, info-arch 18/30, lotto 21/30). 2-chain lock 미충족(직전8 distinct=3: review-code/polish-ui/explore-idea). cycle 2412 retro 추천 fresh target(mlb-shadow-c.ts/mlb-overview.ts/statsapi-mlb.ts) 직접 감사.
+
+발견: mlb-overview.ts 는 clean(factor 3-set 분류가 mlb-waterfall.ts 의 defense_sfr/sp_xwoba_against/woba_std 제외 설계와 정합, cycle 2402 이미 공개된 사실 재확인). mlb-shadow-c.ts 자체(trainShadowWeights/computeBrier/walkForwardExpanding)도 순수 함수라 clean. 문제는 소비부 `mlb-pipeline.ts` runShadowTrain — `MILESTONE_TRIGGERS.includes(samples.length)` 비교가 `samples.length`(하루치 mlb_schedule final 경기 수, MLB 특성상 최대 ~15경기)와 threshold 값([27,60,150,300,1000,2430], KBO v1.8→v2.0 n=150 누적 패턴 차용해 "누적 학습 표본 수" 도달을 의도)을 직접 비교 — 절대 일치 불가능한 구조. migration 049(mlb_shadow_train_log 테이블 최초 생성) 이후 `milestone_hit` 컬럼이 한번도 true 기록한 적 없이 영구 false.
+
+실행: insert 직전 기존 mlb_shadow_train_log(league='mlb') sample_count 합을 조회해 누적치 계산, `priorCumulative < threshold <= newCumulative` crossing 판정으로 교체. 회귀 가드 2건 추가(미달 시 false / 26+1=27 crossing 시 true). `tsc --noEmit`/`eslint`(scoped) clean, `pnpm --filter kbo-data test` 90 files/1171 tests green(신규 2건 포함), pre-push lint+type-check(전 패키지) 확인 예정.
+
+다음 사이클 추천 = gap trigger 순 대기(fix-incident 20/20 다음 사이클 도달 — trigger 충족 예상) 또는 review-code(heavy) 계속(잔여 후보: statsapi-mlb.ts fetchProbablePitchers는 cycle 2402 Tier 3 스코프 — 신규 스크레이퍼 필요라 review-code 단일 사이클 범위 밖, 별도 explore-idea/expand-scope 후보로 carry).
+
 ## ✅ SUCCESS — mlb-waterfall.ts recent_form scale mismatch fix (cycle 2412, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 19/25, info-arch 17/30, lotto 20/30). 2-chain lock 미충족(직전8 distinct=3). cycle 2411 retro 추천 fresh target(mlb-waterfall.ts/mlb-elo.ts) 직접 감사.

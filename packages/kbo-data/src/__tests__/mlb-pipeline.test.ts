@@ -186,6 +186,17 @@ describe('runMlbPipeline', () => {
             })),
           };
         }
+        if (table === 'mlb_shadow_train_log') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+            insert: vi.fn((row: Record<string, unknown>) => {
+              insertedRows.push({ table, row });
+              return Promise.resolve({ error: null });
+            }),
+          };
+        }
         return {
           insert: vi.fn((row: Record<string, unknown>) => {
             insertedRows.push({ table, row });
@@ -202,10 +213,71 @@ describe('runMlbPipeline', () => {
     expect(result.rows_inserted).toBe(1);
     const call = insertedRows.find((c) => c.table === 'mlb_shadow_train_log');
     expect(call).toBeDefined();
-    expect(call?.row).toMatchObject({ date: DATE, sample_count: 1 });
+    expect(call?.row).toMatchObject({ date: DATE, sample_count: 1, milestone_hit: false });
     expect(Object.keys(call!.row)).toEqual(
       expect.arrayContaining(['date', 'sample_count', 'weights', 'brier', 'accuracy', 'milestone_hit']),
     );
+  });
+
+  it('mlb_shadow_train — milestone_hit true when cumulative sample_count crosses a MILESTONE_TRIGGERS threshold (regression: cycle 2413 silent drift fix — old code compared samples.length, MLB max ~15 games/day, directly against MILESTONE_TRIGGERS so no threshold was ever reachable; fix sums prior mlb_shadow_train_log.sample_count + today\'s samples and checks crossing)', async () => {
+    const insertedRows: Array<{ table: string; row: Record<string, unknown> }> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const scheduleGames = [{ external_game_id: '7001', home_score: 3, away_score: 1 }];
+    const predRows = [{ external_game_id: '7001', home_win_prob: 0.55 }];
+    const priorRows = Array.from({ length: 26 }, () => ({ sample_count: 1 }));
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'predictions') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                  in: vi.fn(() => Promise.resolve({ data: predRows, error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_shadow_train_log') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: priorRows, error: null })),
+            })),
+            insert: vi.fn((row: Record<string, unknown>) => {
+              insertedRows.push({ table, row });
+              return Promise.resolve({ error: null });
+            }),
+          };
+        }
+        return {
+          insert: vi.fn((row: Record<string, unknown>) => {
+            insertedRows.push({ table, row });
+            return Promise.resolve({ error: null });
+          }),
+        };
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_shadow_train', DATE, TRIGGERED_BY);
+
+    expect(result.errors).toHaveLength(0);
+    const call = insertedRows.find((c) => c.table === 'mlb_shadow_train_log');
+    expect(call?.row).toMatchObject({ sample_count: 1, milestone_hit: true });
   });
 
   it('mlb_walk_forward_measure — throw 없음, result shape 정상', async () => {

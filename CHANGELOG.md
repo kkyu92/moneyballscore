@@ -1,3 +1,12 @@
+## v0.5.62.87 — 2026-08-23 (cycle 2413, review-code: MLB shadow-train milestone_hit 영구 false 수정)
+
+### fix(mlb): `mlb_shadow_train_log.milestone_hit` 이 samples.length(하루치, 최대 15경기)와 MILESTONE_TRIGGERS([27,60,150,300,1000,2430])를 직접 비교해 어떤 threshold 도 도달 불가능하던 것을 누적치 비교로 수정
+
+- 진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 20/25, info-arch 18/30, lotto 21/30). 2-chain lock 미충족(직전8 distinct=3). cycle 2412 retro 추천 fresh target(mlb-shadow-c.ts/mlb-overview.ts/statsapi-mlb.ts) 직접 감사.
+- 발견: `mlb-pipeline.ts` `runShadowTrain` 이 `MILESTONE_TRIGGERS.includes(samples.length)` 로 milestone 도달을 판정했는데, `samples.length` 는 이 함수가 매번 단일 `date` 하루치 `mlb_schedule` final 경기 수(MLB 특성상 최대 약 15경기)라 KBO v1.8→v2.0 n=150 패턴을 차용한 threshold 값(27/60/150/300/1000/2430, 모두 "누적 학습 표본 수" 의도)과 절대 일치할 수 없던 구조 — `milestone_hit` 컬럼이 테이블 생성(migration 049) 이후 한번도 true 를 기록한 적 없이 영구 false 로 방치.
+- 실행: insert 직전 `mlb_shadow_train_log`(league='mlb') 기존 `sample_count` 합을 조회해 누적치를 구하고, `priorCumulative < threshold <= newCumulative` 로 crossing 판정하도록 수정. `mlb-overview.ts`(toSentence/buildMlbGameOverview, factor 분류 3-set)는 mlb-waterfall.ts 의 defense_sfr/sp_xwoba_against/woba_std 제외 설계(cycle 2402 이미 공개)와 정합 확인 — clean, 변경 없음. 회귀 가드 2건 추가(누적 미달 시 false / 26+1=27 crossing 시 true). `tsc --noEmit`/`eslint`(scoped) clean, `pnpm --filter kbo-data test` 90 files/1171 tests green(신규 2건).
+- 후속: `statsapi-mlb.ts` `fetchProbablePitchers` 개인 투수 통계 소스 부재(cycle 2402 Tier 3 기록)는 이번 스코프 밖.
+
 ## v0.5.62.86 — 2026-08-23 (cycle 2400, review-code: shared 상수 4개 stale doc comment 정정)
 
 ### docs(shared): DEVICE_ID_MAX_LENGTH/MIN_POLL_TOTAL/COMMUNITY_DIVERGE_MIN/CALIBRATION_BUCKET_WIDTH doc comment가 이미 해소된 drift 를 미해결로 오도 서술 중이던 것 정정
