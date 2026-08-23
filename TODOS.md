@@ -1,3 +1,15 @@
+## 🔵 RETRO-ONLY — pre_game/post_game is_correct null 분리 가설 검증, false alarm 확인 (cycle 2439, 2026-08-23)
+
+진단: open issue 0, approved plan 0/23(status:approved 문자열 매칭 0). gap trigger 전부 미도달(fix-incident 방금 재발화 cycle 2437 gap=2, op-analysis 8/25, info-arch 14/30, lotto self-heal 완료 skip — 오늘 8/29 50세트+8/22 result 이미 cron 처리). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 9/15 미충족. `gh run list` CI 실패 0건, deploy-drift-alert success. review-code WAR/SFR family 4연속 소진 확정 상태 유지 — 직전 2사이클(2436/2438) 추천대로 다양성 redirect 시도, fix-incident 방향에서 실측 진단.
+
+가설: Supabase 직접 조회 시 `predictions` 테이블 `scoring_rule='v1.8'` 중 `is_correct IS NULL` 행이 390건(오늘 제외해도 게임 status='final'인 과거 행 다수, 2026-05-13~08-22 거의 매일 5~11건) 발견 — 최초엔 verify/scoring 파이프라인이 장기간 광범위하게 silent 실패한 것으로 의심(CLAUDE.md 사례 11 predict_final 류 패턴과 유사 형태).
+
+검증: 해당 미검증 행 전부 `prediction_type='post_game'` (postview 회고 분석 row, `postview-daily.ts`가 pre_game 존재+post_game 부재 경기에 사후 생성 — is_correct 대상 자체가 아님, 설계상 정상). `updateAccuracy()`(daily.ts:1563)는 `prediction_type='pre_game'`만 대상으로 하고, `/accuracy` page(accuracy/page.tsx:285-291)의 메인 통계 쿼리도 `.eq('prediction_type','pre_game').not('is_correct','is',null)`로 정확히 필터링 — post_game 행이 통계에 오염되지 않음 확인. `.in(['pre_game','post_game'])` 사용처는 model_version fallback trend 용도뿐, is_correct 무관. **결론: false alarm — 코드 정상, 실제 pre_game cohort는 CLAUDE.md 기록치와 정확히 일치(v1.8 전체 307건 = CE 285건[debate_version null 260 + credit-fail 25] + 비CE 47건, cycle 2361 기록 n=332 그대로 — 78 cycle 동안 진짜 신규 verified 증가 0, cycle 2431의 "n-freeze" 재확인)**.
+
+실행: 코드 변경 0건 (가설 반증). skill-evolution trigger 5개 전부 미충족(trigger3 2439%50≠0, trigger5 review-code 비0회).
+
+다음 사이클 추천 = explore-idea(saturation 9/15→10/15 근접, heavy 권장 — review-code dominance 지속 + op-analysis도 동일 frozen 데이터 반복 저수익) 또는 info-architecture-review(14/30 진행). op-analysis 재측정은 신규 값 없을 것 확실(비CE 표본 47 동결 + CE도 verify 배치가 이 cohort 기준으론 정체) — 다음 fire 시 저수익 예상, 스킵 권장.
+
 ## 🟢 SUCCESS — v2.1-B/v2.0-shadow row reasoning object stringify silent 버그 수정 (cycle 2438, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 1/20 방금 재발화, op-analysis 7/25, info-arch 13/30, lotto self-heal 완료 skip). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 9/15 미충족. cycle 2436 review-code(heavy)가 WAR/SFR family 4연속 소진 확정 — 동일 family 재검색 저수익 판단, 미감사 대형 파일(`apps/moneyball/src/app/page.tsx` 홈페이지 1082줄) 직접 감사로 전환. (부가: cycle 2437 fix-incident의 retro commit + cycle_state JSON 양쪽 부재 관측 — 사례15 silent retro drift 재발이나 실제 코드 작업(root/VERSION drift fix)은 정상 완료 확인, retroactive 박제는 skip.)
