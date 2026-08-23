@@ -1,3 +1,12 @@
+## v0.5.62.96 — 2026-08-23 (cycle 2450, review-code: lotto/methodology 신규 감사 — OOS 표본 caveat 텍스트 stale 정정)
+
+### fix(content): `/lotto/methodology` 페이지 OOS 표본 caveat 문구가 실제 `oos_pass_rate.length` 와 무관하게 `N<10 sample preliminary` 로 하드코딩 — N=14 도달(actionable 임계 N=10 초과, cycle 1842 이미 달성) 이후에도 계속 preliminary 로 오표시되던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 25/30, lotto 10/30). 2-chain lock 미충족(직전8 distinct=3). explore-idea saturation 미충족(11/15). cycle 2449 가 review-code #1338 family 3연속 클린 확정 + 신규 unaudited 영역 재탐색 추천 — CHANGELOG 언급 최소(3회) 파일 비교로 `lotto/methodology/page.tsx`(520줄, KBO/MLB family 와 별개 도메인) 선정.
+- 발견: `oosSampleCaveat` 부재 상태에서 `N&lt;10 sample preliminary — 단일 회차 PASS 로 검증 단정 차단` 문구가 리터럴로 박제 — 실제 `lottoData.oos_pass_rate.length`(14) 는 이미 actionable 임계(N=10, cycle 1842 달성)를 넘었는데도 페이지는 계속 preliminary 로 오표시. `feedback_data_only_claims`(모델·가중치 주장은 실측 숫자로만) 정신에 반하는 stale 텍스트.
+- 실행: `OOS_PRELIMINARY_FLOOR`(5)/`OOS_ACTIONABLE_FLOOR`(10) 상수 + `oosSampleCaveat(n)` 함수로 anecdote/preliminary/actionable 3-tier 문구를 실제 카운트 기반 동적 생성으로 정정.
+- `pnpm --filter moneyball test`(4217/4217) + `type-check`/`lint` clean.
+
 ## v0.5.62.95 — 2026-08-23 (cycle 2443, review-code: buildAccuracyData.ts 신규 감사 — buildRollingAccuracy 하드코딩 소표본 임계값 정정)
 
 ### refactor(lib): `buildRollingAccuracy()`의 `windowAccuracy` 소표본 가드가 `SMALL_SAMPLE_THRESHOLD`(3, 같은 파일 내 이미 존재) 대신 하드코딩 `3` 리터럴을 사용하던 것을 상수 참조로 정정

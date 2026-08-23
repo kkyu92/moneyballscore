@@ -55,6 +55,19 @@ type PercentileMarker = {
   label: string;
 };
 
+const OOS_PRELIMINARY_FLOOR = 5;
+const OOS_ACTIONABLE_FLOOR = 10;
+
+function oosSampleCaveat(n: number): string {
+  if (n < OOS_PRELIMINARY_FLOOR) {
+    return `N=${n} anecdote — 소수 회차 PASS 로 검증 단정 차단.`;
+  }
+  if (n < OOS_ACTIONABLE_FLOOR) {
+    return `N=${n} preliminary (actionable 임계 N=${OOS_ACTIONABLE_FLOOR} 미달) — 검증 단정 차단.`;
+  }
+  return `N=${n} actionable (N≥${OOS_ACTIONABLE_FLOOR}) — 표본 임계 도달, 지속 monitoring 필요.`;
+}
+
 const PERCENTILE_MARKERS: PercentileMarker[] = [
   { key: "p0", label: "top 0%" },
   { key: "p5", label: "top 5%" },
@@ -331,8 +344,8 @@ export default function LottoMethodologyPage() {
         )}
         {oosLatest && (
           <p className="text-xs text-brand-400">
-            최근 회차 ({oosLatest.draw} / {oosLatest.date}) PASS {oosLatest.passed} / FAIL {oosLatest.failed}.
-            N&lt;10 sample preliminary — 단일 회차 PASS 로 검증 단정 차단.
+            최근 회차 ({oosLatest.draw} / {oosLatest.date}) PASS {oosLatest.passed} / FAIL {oosLatest.failed}.{" "}
+            {oosSampleCaveat(lottoData.oos_pass_rate.length)}
           </p>
         )}
       </section>
