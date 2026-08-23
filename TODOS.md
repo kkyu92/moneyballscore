@@ -1,3 +1,11 @@
+## 🟢 polish-ui (forced, 2-chain lock) — dead --color-surface-dark 토큰 제거 + DESIGN.md border 토큰 문서화 SUCCESS (cycle 2377, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2369-2376) chain distinct=2 (review-code 7 / explore-idea 1) → **2-chain alternation lock 탐지** (룰: distinct≤2). 잠긴 두 chain 제외 후 주기 trigger 4종 재확인 — 전부 미도달(fix-incident 14/20, op-analysis 9/25, info-arch 12/30, lotto 15/30). 룰에 따라 polish-ui 강제 발화.
+
+실행: DESIGN.md mtime 4일(미도달, 약한 신호). globals.css `--color-*` 토큰 30개 전수 grep → DESIGN.md 미문서화 후보 확인. `--color-border`(602회 참조) 는 실사용 패턴 확인 결과 다크모드 전용 정상 설계(라이트=Tailwind `border-gray-200` literal, 다크=`var(--color-border)` 그린 틴트) — 버그 아님, 문서 누락만. `--color-surface-dark`(#0f2318) 는 전체 리포 grep 결과 정의 1건 외 참조 0건 — dead token 확인 → 제거. DESIGN.md Dark mode 섹션에 `--color-border` 패턴 설명 추가. `tsc --noEmit` clean, lint/type-check pre-push green.
+
+교훈: twitter-image.tsx 계열 10개 파일의 페이지별 상이한 하드코딩 그라디언트는 cycle 1212 "silent leak family wave 38" 에서 의도적으로 박제된 카테고리별 색상 아이덴티티 — drift 아님(false-positive 배제, 리라이트 안 함). 다음 polish-ui 후보 = convergence-badge-system.md(cycle 1818) 이후 wave-660+ 신규 라우트 배지 스타일 일관성 확인.
+
 ## ⚪ review-code(heavy) — backfill-kbo-confirmed-postponed.ts + backfill-kbo-stuck-verify.ts scripts/ 미감사 영역 감사, 신규 target 부재 RETRO-ONLY (cycle 2376, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2369-2375) distinct=3(review-code/operational-analysis/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 8/25, info-arch 11/30, lotto 14/30). review-code 직전 5사이클(2371-2375) non-success streak=4/5(cooldown 미도달 — 2372 explore-idea 로 스트릭 중간 끊김). gh run list 전부 green/in_progress(red 없음). DESIGN.md 4.8일 전(미도달). 오늘(일요일) 로또 1234회 추첨 이미 완료+결과박제(cycle 2362) + 다음회차(8/29) picks 기박제 — lotto 재발화 불필요. 직전 20사이클(2356-2375) chain 분포: review-code 11 / op-analysis·info-arch·fix-incident·explore-idea 각 2 / lotto 1 — 소진 target 풀(agents/*, page.tsx 계열, scrapers) 대부분 확인 완료. CHANGELOG grep 0건 신선 target = `scripts/` 디렉토리 중 최근 생성(8/18) backfill 스크립트 2건(confirmed-postponed/stuck-verify, cycle 2185/2184 유래, 미감사) 로 감사 범위 전환.

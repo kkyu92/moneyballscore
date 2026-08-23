@@ -1,3 +1,12 @@
+## v0.5.62.83 — 2026-08-23 (cycle 2377, polish-ui(forced): dead 토큰 제거 + DESIGN.md border 문서화)
+
+### fix(design): `--color-surface-dark` dead 토큰 제거 + `--color-border` DESIGN.md 문서화
+
+- 진단: 직전 8사이클(2369-2376) distinct=2 (review-code/explore-idea) → 2-chain alternation lock 탐지. 잠긴 두 chain 제외, 주기 trigger 4종 미도달 → 룰에 따라 polish-ui 강제 발화.
+- 실행: globals.css `--color-*` 30개 토큰 전수 grep, DESIGN.md 대조. `--color-surface-dark`(#0f2318) 전체 리포 참조 0건(정의만 존재) 확인 후 제거. `--color-border`(602회 참조, 다크모드 전용 정상 패턴) DESIGN.md 미문서화 보완.
+- 검토: twitter-image.tsx 10개 파일의 카테고리별 상이한 그라디언트는 cycle 1212 의도적 박제(silent leak family wave 38) — drift 아님, 변경 안 함.
+- `tsc --noEmit` clean, pre-push lint/type-check green.
+
 ## v0.5.62.82 — 2026-08-23 (cycle 2363, fix-incident: 3-way version file drift 해소)
 
 ### fix(ci): root `package.json`/`VERSION` 이 `apps/moneyball/package.json` 대비 2 버전 뒤처진 drift 해소
