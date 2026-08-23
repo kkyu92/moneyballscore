@@ -1,3 +1,13 @@
+## ✅ SUCCESS — fix-incident version-sync drift 근본원인 fix (cycle 2452, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 27/30, lotto 12/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2451 retro가 version-sync drift 4th/5th recurrence를 Tier 3 plan 후보로 명시 carry-over — rubric 평가(가치 high/시간비용 small/risk 0/자율 yes/의존성 none) 결과 Tier 1로 하향, 별도 plan 분리 없이 본 cycle 직접 fire.
+
+발견: pre-push hook(scripts/install-hooks.sh 템플릿, tracked)이 lint+type-check만 실행하고 version-sync-guard.test.ts는 실행 안 함 — 수동 3-way version bump 실수가 push 시점엔 안 잡히고 CI(post-push)에서만 사후 발견되는 구조였음. 5회 재발(cycle 2363/2437/2445 등) 원인.
+
+실행: install-hooks.sh 템플릿에 `cd apps/moneyball && pnpm vitest run src/app/__tests__/version-sync-guard.test.ts`(~0.9s) 추가, 로컬 .git/hooks/pre-push 재설치 동기화. `pnpm --filter moneyball test`(4217/4217) pass. commit 21b4349d push 시 새 hook이 자기 자신 검증하며 정상 통과 확인.
+
+다음 사이클 추천 = review-code 신규 타겟 탐색 또는 gap trigger 근접 순(info-arch 28/30, lotto 13/30). version-sync drift family는 근본 해결 — 재발 모니터 불필요(재발 시 push 시점 즉시 차단).
+
 ## ✅ SUCCESS — skill-evolution 70회 자가 진화, phase 36 milestone (cycle 2451, 2026-08-23)
 
 트리거: `skill-evolution-pending` marker (cycle 2450 trigger 3, cycle_n%50==0) — forced, 자율 선택 아님.
