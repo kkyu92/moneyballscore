@@ -1,3 +1,11 @@
+## ⚪ info-architecture-review — EN mlb reviews 인덱스 breadcrumb grep false-positive 확인 RETRO-ONLY (cycle 2365, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2357-2364) distinct=5(fix-incident/info-arch/review-code/operational-analysis/lotto), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 6/30, lotto 2/30). explore-idea saturation 10/15<12 미충족. lint clean, lotto picks 최신(8/29 회차 기 박제), CI 최근 clean.
+
+**감사**: `en/mlb/*/page.tsx` breadcrumb grep → `en/mlb/reviews/monthly/page.tsx`/`en/mlb/reviews/weekly/page.tsx` 2건 미검출. 열어보니 `redirect()` 전용 스텁(9~10줄, `getCurrentMonth()`/`getCurrentWeek()` 계산 후 즉시 리다이렉트, 렌더 UI 없음) — KO 대응 파일(`mlb/reviews/monthly/page.tsx` 등)도 동일 구조로 breadcrumb 부재 = 의도된 일관성, false alarm. `mlb/accuracy` vs `en/mlb/accuracy` 라이브러리 import 동일(공유 lib 함수 재사용 구조라 KO fix 시 EN 자동 동기) 확인 — drift 위험 낮음. sitemap.ts 존재 확인(105 page.tsx 대비 별도 mismatch 측정은 build 필요, 이번 사이클 범위 밖).
+
+결론: 코드 변경 없음. 다음 후보 = 자연 발견 또는 fix-incident(1/20)/op-analysis(3/25)/info-arch(6/30, 이번 사이클도 gap 미도달 상태에서 source-driven 진단만 수행 — gap 자체는 리셋 X)/lotto(2/30) 주기 trigger 확인.
+
 ## ⚪ review-code(heavy) — analysis/page.tsx 재감사 신규 target 부재 RETRO-ONLY (cycle 2364, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2356-2363) distinct=6, 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 6/30, lotto 2/30). explore-idea saturation 10/15<12 미충족. CI 최근 2회 `CI Failure Dispatch` skipped=clean(cycle 2363 fix 정상 작동 확인) — 최대 monolith(`analysis/page.tsx` 2803줄, 210 commits 역사) 직접 audit 채택.
