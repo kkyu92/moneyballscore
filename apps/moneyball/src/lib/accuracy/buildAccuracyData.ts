@@ -488,7 +488,7 @@ export function buildRollingAccuracy(
       date: dateISO,
       dateLabel: `${Number(m)}/${Number(d)}`,
       windowN: n,
-      windowAccuracy: n >= 3 ? hits / n : null,
+      windowAccuracy: n >= SMALL_SAMPLE_THRESHOLD ? hits / n : null,
     });
   }
   return points;

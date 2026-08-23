@@ -1,3 +1,12 @@
+## v0.5.62.95 — 2026-08-23 (cycle 2443, review-code: buildAccuracyData.ts 신규 감사 — buildRollingAccuracy 하드코딩 소표본 임계값 정정)
+
+### refactor(lib): `buildRollingAccuracy()`의 `windowAccuracy` 소표본 가드가 `SMALL_SAMPLE_THRESHOLD`(3, 같은 파일 내 이미 존재) 대신 하드코딩 `3` 리터럴을 사용하던 것을 상수 참조로 정정
+
+- 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 4/20, op-analysis 12/25, info-arch 18/30, lotto 3/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2442가 review-code 반복 타겟 3파일(analysis/page.tsx, accuracy/page.tsx, game/[id]/page.tsx) 완전 소진 확정 + "완전히 새로운 소스 탐색 필요" 추천 — 미감사 lib 파일 크기/CHANGELOG 언급 빈도 비교(analysis-data.ts 6회, buildTeamProfile.ts 11회, buildAccuracyData.ts 3회) 결과 buildAccuracyData.ts(776줄) 최소 감사 이력으로 선정.
+- 발견: `buildScoringRuleDayHeatmap`/`buildScoringRuleWeekHeatmap`은 소표본 가드에 `SMALL_SAMPLE_THRESHOLD` 상수를 쓰지만, 같은 파일의 `buildRollingAccuracy`만 `n >= 3` 리터럴 직접 사용 — 값 자체는 현재 동일(3)해 동작 변화는 없으나, 프로젝트 반복 패턴(magic number 하드코딩 → 단일 source 상수화, wave-500 MIN_POLL_TOTAL family 등)과 동일 성격의 silent drift 위험(향후 SMALL_SAMPLE_THRESHOLD 변경 시 이 줄만 누락).
+- 실행: `n >= 3` → `n >= SMALL_SAMPLE_THRESHOLD`로 정정. 기존 회귀 테스트(n=5 pass / n<3 null 케이스)가 값 동일성 확인.
+- `pnpm --filter moneyball test`(4217/4217) + `type-check`/`lint` clean.
+
 ## v0.5.62.94 — 2026-08-23 (cycle 2438, review-code: v2.1-B/v2.0-shadow row reasoning 필드 object stringify silent 버그 수정)
 
 ### fix(pipeline): shadow cohort(v2.1-B-shadow/v2.0-shadow) row insert가 `buildFinalReasoning()`의 object 반환값을 template literal로 그대로 interpolate — 매 shadow row마다 `reasoning` 컬럼에 실제 텍스트 대신 literal `"[object Object]"`가 저장되던 것을 정정
