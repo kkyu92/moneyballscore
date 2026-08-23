@@ -1,3 +1,13 @@
+## ⚪ review-code(heavy) — rivalry-memory.ts + hub-dispatch.ts 미감사 영역 감사, 신규 target 부재 RETRO-ONLY (cycle 2373, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2366-2372) distinct=4(review-code/operational-analysis/explore-idea/info-arch), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 5/25, info-arch 8/30, lotto 11/30). explore-idea 직전 사이클(2372)에서 바로 소진 확인. review-code lite-cap streak 미도달(2372 explore-idea 로 스트릭 끊김). gh run list 전부 green. lotto picks 8/29 기박제, DESIGN.md 4.8일 전(미도달). 감사 target 소진 패턴(2364/2366/2367/2369/2370/2371) 이 apps/moneyball page.tsx + scrapers 양쪽 이미 소진 확인됨 — 이번엔 packages/kbo-data/src/agents 중 CHANGELOG grep 상 거의 언급 없는 파일(rivalry-memory.ts 254줄, hub-dispatch.ts 279줄) 로 감사 범위 재전환.
+
+**감사 1 (rivalry-memory.ts)**: 전체 255줄 read. h2h/memories fetch 양쪽 `assertSelectOk`+`captureRivalryMemoryFallback` 로 silent drift 계측 완비(이미 cycle 175/468/545/559/578/939/1241/#2520 8회 거친 파일). truncate 로직(`block.slice(-budget)`, 앞부분 truncate) 의도대로 동작 확인. `.or(and(home.code.eq...))` embedded filter 패턴은 이 파일 유일 사용처이나 전용 테스트 2개(`agents-rivalry-memory.test.ts`, `-silent-drift.test.ts`) 존재 확인 — 신규 이슈 없음.
+
+**감사 2 (hub-dispatch.ts)**: 전체 280줄 read. `composePayload` fingerprint 가 `frames.slice(-1)[0]` (배열 마지막 = 크래시 사이트 프레임) 사용 — 테스트 fixture(`foo.ts:42` 마지막 프레임 기대) 로 의도 확인, 최초 의심(comment "가장 바깥 frame 이 배열 끝" 문구와 실제 Sentry 컨벤션 배치 혼동)은 테스트 대조로 false-positive 확인. `scrubPII` 는 `rawBody` 전체(tags 포함)에 사후 일괄 적용돼 tags 값 raw 노출 우려도 false-positive. 신규 이슈 없음.
+
+결론: 코드 변경 없음. review-code 대상 파일 풀(page.tsx 계열 + scrapers + agents 상위 2개)이 대부분 소진 상태 확인 누적. 다음 후보 = 주기 trigger 도달 대기(fix-incident 11/20, op-analysis 6/25, info-arch 9/30, lotto 12/30) 또는 review-code 잔여 미감사 파일(judge-agent.ts/personas.ts/team-agent.ts/mlb-retro.ts/calibration-agent.ts — CHANGELOG grep 저빈도).
+
 ## ⚪ explore-idea(lite) — 신규 후보 탐색, 전량 already-fixed/blocked-on-data/Tier-3 확인 RETRO-ONLY (cycle 2372, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked, status="approved" 없음). 직전 8사이클(2365-2371) distinct=3(review-code/operational-analysis/info-architecture-review), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 4/25, info-arch 7/30, lotto 10/30). **explore-idea saturation 12/15≥12 충족** — 직전 4사이클(2367~2371) review-code 4연속 RETRO-ONLY(false-positive) 확산이 saturation 을 임계 넘김. gh run list 전부 green/skip. review-code lite-cap streak=4/5(cooldown 미도달, 5 아님).
