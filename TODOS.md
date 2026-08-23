@@ -1,3 +1,15 @@
+## 🟢 review-code(heavy) — EN mlb/reviews weekly/monthly 날짜 라벨 한글 leak 해소 SUCCESS (cycle 2360, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2352-2359) distinct=4(review-code/fix-incident/explore-idea/info-architecture-review), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20 방금 발화, op-analysis 24/25 근접, info-arch 2/30 방금 리셋, lotto 16/30). CI/deploy 최근 30 run 전부 clean. TODOS Next-Up 신규 리드 없음.
+
+**발견**: cycle 2359 review-code(heavy) 가 감사한 agent 파일(validator-logger.ts/personas.ts)과 별개로, wave-660(cycle 2355/2356)에서 신규 배선된 EN mirror 라우트(`/en/mlb/reviews/weekly`, `/en/mlb/reviews/monthly`, 허브 `/en/mlb/reviews`)는 아직 review-code sweep 대상이 아니었음 — Feature-Drift Cycle 패턴(신규 기능 배선 직후 코드 감사)에 따라 해당 코드 직접 read. `computeWeekRange.ts`/`computeMonthRange.ts` 의 `buildLabel`/`buildMonthRange` 가 locale 파라미터 없이 "YYYY년 M월 D일" 한글 포맷을 하드코딩 — EN 3개 페이지의 title/description/OG/JSON-LD headline/h1/breadcrumb/"Recent Weekly·Monthly Reviews" nav 링크에 한글 날짜 문자열이 그대로 노출되던 silent i18n drift 확인(cycle 2358 이 이미 처리한 nav 라우팅 정상화와는 별개 레이어 — 표시 텍스트 자체의 누락).
+
+**실행**: 두 유틸에 `locale: 'ko'|'en'` 파라미터 추가(기본값 `'ko'`, 기존 KO callsite 전부 무변경 — `mlb-shared.ts` 의 `FACTOR_LABELS_EN` 컨벤션과 동일 패턴). EN 전용 3개 파일의 `parseWeekId`/`parseMonthId`/`getRecentWeeks`/`getRecentMonths` 호출부만 `'en'` 로 배선. 신규 회귀 테스트 4건(주/월 range 각 2건, 한글 미포함 assertion) 추가.
+
+검증: `tsc --noEmit`(전체 workspace) clean, `eslint`(전체) clean, `pnpm test`(moneyball 500 files/4203 tests) all green.
+
+결론: EN mlb/reviews 3계층(허브/주간/월간) 날짜 표시 완전 영문화. 다음 후보: 자연 발견 또는 op-analysis(24/25 gap 근접)/info-arch(2/30)/lotto(16/30) 주기 trigger 확인.
+
 ## 🟢 info-architecture-review — EN nav weekly/monthly stale scope-exception 제거 SUCCESS (cycle 2358, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2350-2357) distinct=4(fix-incident/skill-evolution/review-code/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 22/25, info-arch 18/30, lotto 14/30) — 별도 source 탐색. `git log --diff-filter=A --since="7 days ago" -- '**/page.tsx'` = 신규 라우트 20건(EN 미러 시리즈: analysis/matchup/methodology/predictions/reviews/weekly·monthly 등) → info-architecture-review trigger(라우트 신규 추가 ≥3/1주) 채택.

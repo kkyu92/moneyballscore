@@ -1,3 +1,27 @@
+## v0.5.62.80 — 2026-08-23 (cycle 2360, review-code(heavy): EN mlb/reviews weekly/monthly 날짜 라벨 한글 leak 해소)
+
+### fix(mlb): `computeWeekRange.ts`/`computeMonthRange.ts` 의 `range.label` 에 locale 파라미터 추가 — EN 미러 3개 라우트의 title/h1/OG/JSON-LD/breadcrumb/nav 링크에 한글 날짜 라벨이 노출되던 silent i18n drift 해소
+
+- 발견: cycle 2360 진단 단계에서 open issue/approved plan/주기 trigger 전부 미도달 확인 후,
+  직전 cycle(2359) review-code(heavy) 가 감사한 agent 파일들과 별개로 `en/mlb/reviews/weekly`,
+  `en/mlb/reviews/monthly` EN 미러 신규 코드(wave-660, cycle 2355/2356 배선)가 아직 review-code
+  sweep 대상이 아니었음을 확인, Feature-Drift Cycle 패턴(신규 기능 → 후속 코드 감사)에 따라
+  해당 코드 직접 read. `computeWeekRange.ts`/`computeMonthRange.ts` 의 `buildLabel`/
+  `buildMonthRange` 가 locale 무관하게 "YYYY년 M월 D일" 한글 포맷을 하드코딩하고 있어,
+  `/en/mlb/reviews`(허브 최근 주/월 목록), `/en/mlb/reviews/weekly/[week]`,
+  `/en/mlb/reviews/monthly/[month]` 3개 EN 페이지의 title/description/OG/JSON-LD
+  headline/h1/breadcrumb 마지막 항목/"Recent Weekly·Monthly Reviews" nav 링크 텍스트 전부에
+  한글 날짜 문자열이 그대로 노출되고 있었음을 확인(silent i18n drift — nav 라우팅 자체는
+  cycle 2358 에서 이미 정상화됐으나 표시 텍스트 레벨의 누락은 미포착).
+- 실행: 두 유틸에 `locale: 'ko'|'en'` 파라미터 추가(기본값 `'ko'`, 기존 KO callsite 전부
+  무변경 — `mlb-shared.ts` 의 `FACTOR_LABELS_EN` locale 파라미터 컨벤션과 동일 패턴). EN
+  전용 3개 파일(`en/mlb/reviews/page.tsx`, `en/mlb/reviews/weekly/[week]/page.tsx`,
+  `en/mlb/reviews/monthly/[month]/page.tsx`)의 `parseWeekId`/`parseMonthId`/
+  `getRecentWeeks`/`getRecentMonths` 호출부만 `'en'` 로 배선.
+- 검증: `tsc --noEmit`(전체 workspace) clean, `eslint`(전체) clean, `pnpm test`(moneyball
+  500 files/4203 tests) all green. 신규 회귀 테스트 4건(주/월 range 각 2건, 한글 미포함
+  assertion) 추가.
+
 ## v0.5.62.79 — 2026-08-23 (cycle 2358, info-architecture-review: EN nav weekly/monthly stale scope-exception 제거)
 
 ### fix(nav): Header/Footer `withLocale`/`withMlbLocale` 의 `/mlb/reviews/weekly`, `/mlb/reviews/monthly` stale 예외 해제 — EN 미러 신규 배선(cycle 2355/2356) 이후 미동기 silent nav drift 해소
