@@ -1,3 +1,13 @@
+## 🔵 fix-incident — predict_final "games_found=5/predictions=0" 6일 연속 패턴 조사 RETRO-ONLY, 실제 인시던트 없음 확인 (cycle 2357, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2350-2356) distinct=4(fix-incident/skill-evolution/review-code/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20 방금 발화, op-analysis 21/25, info-arch 17/30, lotto 13/30). review-code 최근 감사 대상(analysis/page.tsx, accuracy/page.tsx, convergenceRecord.ts, buildAccuracyData.ts, daily.ts) 전부 최근 3일 내 이미 fix 완료 상태라 신규 review-code 타겟 부재. `pipeline_runs` 직접 DB 조회(REST API) 결과 `predict_final` 모드가 8/16~8/22 6일 연속 `games_found=5, predictions=0, skipped_detail reason=not_scheduled` 패턴 반복 — 표면상 사례 11 family(predict_final silent drop) 재발처럼 보여 fix-incident 로 채택.
+
+**조사 결과 — 실제 인시던트 아님 확인**: `predict` 모드(정시 cron, 하루 여러 회) 가 이미 해당 일자 5경기 대부분/전부를 게임 시작 전 예측 완료(8/18·19·20·21 = 5/5, 8/16 = 4/5, 8/22 = 4/5 — 나머지 1경기는 우천취소로 선발투수 미확정 상태에서 postponed 되어 예측 불필요). `games` 테이블 직접 조인 확인 결과 실제 진행된 경기(status=final)는 100% 예측 존재, postponed 경기 중 선발 미확정 건만 무예측(정상). `predict_final`(22:00 KST, 마지막 기회)이 도달할 때는 모든 경기가 이미 final/postponed 상태라 `shouldPredictGame`(schedule.ts:57)의 `status !== 'scheduled'` 체크가 `already_predicted` 체크(schedule.ts:63)보다 먼저 걸려 전부 `not_scheduled` 로 분류 — **이는 `pipeline-schedule.test.ts` 156-198행에 명시적으로 테스트된 의도된 설계**(이미 예측된 경기라도 live/final 이면 not_scheduled 우선, look-ahead bias 방지 의도로 추정). `daily.ts` 1055행의 별도 gap-check 로직이 이미 `status !== 'final' && !== 'postponed' && !== 'live'` 로 expected 를 계산해 진짜 누락만 잡아내도록 분리 설계됨(cycle 936 fix) — 이번 6일 모두 GAP 알림 없음 확인.
+
+**부가 확인**: `#1338 family`(scoring_rule 필터 누락) 신규 재발 후보 grep — `daily-summary.ts` 1건 매칭됐으나 실제로는 주석 텍스트일 뿐 쿼리 없는 순수 변환 함수, false positive. `toDateString()` KST 자정 오판 패턴 재검색 — 8/20 이미 수정된 1건 외 잔존 0건, family 종료 확인.
+
+결론: 코드 변경 없음 (조사 결과 버그 아님 확인). 다음 cycle 후보 = 자연 발견 또는 op-analysis(22/25 gap 근접)/lotto(14/30)/info-arch(18/30) 주기 trigger 도달 여부 확인.
+
 ## 🟢 explore-idea — en/mlb/reviews/monthly 영어 미러 신규 배선 SUCCESS (cycle 2356, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2348-2355) distinct=4(review-code/fix-incident/skill-evolution/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 16/30, lotto 12/30). saturation 9/15 미충족. cycle 2355 retro 가 "다음 explore-idea 후보 = `/en/mlb/reviews/monthly` 동일 패턴 미러" 로 명시적 carry-over — weekly EN 미러와 완전히 동일 구조라 그대로 재사용.
