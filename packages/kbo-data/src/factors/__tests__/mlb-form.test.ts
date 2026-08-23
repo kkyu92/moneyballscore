@@ -42,6 +42,14 @@ describe('calculateMlbRecentForm', () => {
     const games = [game('TB', 'BOS', 5, 2)];
     expect(calculateMlbRecentForm(games, 'NYY', 10)).toBeNull();
   });
+
+  it('동점 스코어(데이터 이상)는 패 아닌 판정 불가로 제외', () => {
+    const games = [
+      game('NYY', 'BOS', 3, 3), // 동점 — 제외 (패로 오집계 X)
+      game('NYY', 'BOS', 5, 2), // NYY 승
+    ];
+    expect(calculateMlbRecentForm(games, 'NYY', 10)).toBe(1);
+  });
 });
 
 describe('calculateMlbHeadToHead', () => {
@@ -66,5 +74,13 @@ describe('calculateMlbHeadToHead', () => {
   it('스코어 결측 경기 제외', () => {
     const games = [game('NYY', 'BOS', null, null)];
     expect(calculateMlbHeadToHead(games, 'NYY', 'BOS')).toEqual({ wins: 0, losses: 0 });
+  });
+
+  it('동점 스코어(데이터 이상)는 패 아닌 판정 불가로 제외', () => {
+    const games = [
+      game('NYY', 'BOS', 3, 3), // 동점 — 제외 (NYY 패로 오집계 X)
+      game('NYY', 'BOS', 5, 2), // NYY 승
+    ];
+    expect(calculateMlbHeadToHead(games, 'NYY', 'BOS')).toEqual({ wins: 1, losses: 0 });
   });
 });
