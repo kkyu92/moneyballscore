@@ -1,3 +1,11 @@
+## ⚪ (retro-only) — review-code(heavy) packages/shared/index.ts + validator.ts 심층감사 clean (cycle 2398, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22(전량 archived/completed/phase-split/blocked). gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 5/25, lotto 6/30, info-arch 3/30). 2-chain lock 미충족(직전8 distinct=6). gh run list 최근 10건 전부 success/skipped(CI green). lite chain cooldown 미충족.
+
+실행: 신규 monolith target 자연 발견 — `packages/shared/src/index.ts`(3426줄, 미감사 최대 파일) review-code(heavy) 심층 감사. DEFAULT_WEIGHTS(v1.8) CLAUDE.md 문서 값과 100% 일치 확인. TODO/FIXME/제네릭 catch(e) 패턴 0건. classifyWinnerProb/confToWinProb/getKSTWeekRange/getKSTMondayUtcIso 등 날짜·확률 로직 함수 15개 + computeMatchup*/computeSeasonHeadToHead* 등 통합 헬퍼 10개 + WAR/SFR/BULLPEN_FIP 등 배지 임계 상수 30여개 순차 검증 — 전부 실제 callsite(analysis/page.tsx, factor-explanations.ts, computeCompositeDuel.ts)와 정합, 각 상수마다 전용 silent-drift-wave 가드 테스트 기존 존재. `packages/kbo-data/src/agents/validator.ts` Sentry fallback 경로(notifyValidationViolations/evaluateAndCaptureAgentFallback/captureJudgeParseFallback) 도 재확인 — 전부 의도된 try/catch silent-noop(테스트 환경 전용) + 실제 실패 시 Sentry capture 정상 경로.
+
+결론: 코드 변경 없음. 두 파일 모두 기존 silent-drift-wave 가드가 이미 촘촘히 커버 — 신규 drift 없음. 다음 사이클 추천 = fix-incident(5/20)/op-analysis(6/25)/lotto(7/30)/info-arch(4/30) gap 순 대기 또는 미감사 monolith(accuracy/page.tsx 1204줄, buildAccuracyData.ts 776줄, buildTeamProfile.ts 593줄) 자연 발견.
+
 ## ⚪ (retro-only) — cycle 2394 후속 스코프 소진 확인, false lead (cycle 2397, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22. cycle 2394 지정 후속(daily-summary.ts/live.ts 유사 telegram silent-swallow 패턴) 직접 검증 — 둘 다 telegram/sendMessage 호출 자체 없음, 이미 중앙화된 telegram.ts 단일 지점(cycle 2394 fix)이 daily.ts 3개 flag(announce/results/summary_sent) 전부 커버. res.ok grep 전체 재검토 — 나머지는 정상 fallback 패턴. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 4/25, lotto 5/30, info-arch 2/30). 2-chain lock 미충족(직전8 distinct=5).
