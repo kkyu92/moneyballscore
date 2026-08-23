@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import * as Sentry from "@sentry/nextjs";
-import { assertSelectOk, errMsg, type SelectResult, SITE_HOST, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { assertSelectOk, errMsg, type SelectResult, SITE_HOST, PRODUCTION_COHORT_RULES } from "@moneyball/shared";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_GRADIENT_KBO_135 } from "@/lib/design-tokens";
 
@@ -53,7 +53,9 @@ async function getGameOg(gameId: number) {
 
     const game = data as unknown as GameOgRow;
     const preGame = game.predictions?.find(
-      (p) => p.prediction_type === "pre_game" && p.scoring_rule === CURRENT_SCORING_RULE,
+      (p) =>
+        p.prediction_type === "pre_game" &&
+        (PRODUCTION_COHORT_RULES as readonly string[]).includes(p.scoring_rule),
     );
 
     const homeCode = game.home_team?.code ?? "";

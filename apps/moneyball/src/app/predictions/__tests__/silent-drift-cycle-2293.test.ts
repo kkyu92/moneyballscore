@@ -12,13 +12,13 @@ describe('silent drift cycle 2293 — predictions/page.tsx getPredictionDates �
     expect(block).toMatch(/prediction_type,\s*scoring_rule/);
   });
 
-  it('predictions.scoring_rule 이 CURRENT_SCORING_RULE 로 SQL 레벨 필터링됨', () => {
+  it('predictions.scoring_rule 이 PRODUCTION_COHORT_RULES 로 SQL 레벨 필터링됨 (cycle 2411 #1338 family 후속 정정 — CURRENT_SCORING_RULE 단일필터가 legacy v1.8-credit-fail 프로덕션 row 오탐 배제)', () => {
     const block = SRC.slice(SRC.indexOf("from('games')"), SRC.indexOf(".order('game_date'"));
-    expect(block).toMatch(/\.eq\('predictions\.scoring_rule', CURRENT_SCORING_RULE\)/);
+    expect(block).toMatch(/\.in\('predictions\.scoring_rule', PRODUCTION_COHORT_RULES/);
   });
 
-  it('CURRENT_SCORING_RULE import 됨', () => {
-    expect(SRC).toMatch(/CURRENT_SCORING_RULE/);
+  it('PRODUCTION_COHORT_RULES import 됨', () => {
+    expect(SRC).toMatch(/PRODUCTION_COHORT_RULES/);
     expect(SRC).toMatch(/from "@moneyball\/shared"/);
   });
 });

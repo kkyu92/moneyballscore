@@ -3,7 +3,7 @@
  *
  * analysis/game/[id] 안 section.
  *
- * source: games + predictions inner join, status='final', CURRENT_SCORING_RULE filter,
+ * source: games + predictions inner join, status='final', PRODUCTION_COHORT_RULES filter,
  * (home_team_id IN [home, away] AND away_team_id IN [home, away]), 본 게임 제외,
  * order by date desc limit 3.
  *
@@ -14,7 +14,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
-import { shortTeamName, type TeamCode, CURRENT_SCORING_RULE, ANALOG_MATCHUP_LIMIT } from "@moneyball/shared";
+import { shortTeamName, type TeamCode, PRODUCTION_COHORT_RULES, ANALOG_MATCHUP_LIMIT } from "@moneyball/shared";
 
 interface AnalogRow {
   gameId: number;
@@ -80,7 +80,7 @@ export async function fetchHistoricalAnalogs(
       .lt("game_date", asOfDate)
       .neq("id", currentGameId)
       .eq("predictions.prediction_type", "pre_game")
-      .eq("predictions.scoring_rule", CURRENT_SCORING_RULE)
+      .in("predictions.scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])
       .order("game_date", { ascending: false })
       .limit(limit);
 

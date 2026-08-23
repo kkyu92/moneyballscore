@@ -7,7 +7,7 @@ import {
   type TeamCode,
   shortTeamName,
   assertSelectOk,
-  CURRENT_SCORING_RULE,
+  PRODUCTION_COHORT_RULES,
   RECENT_FORM_GAMES,
   SITE_URL,
   confToWinProb,
@@ -19,7 +19,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { RelatedLinks, type RelatedLink } from '@/components/shared/RelatedLinks';
 
 // /teams/[code]/recent — 팀별 최근 N final game + 우리 모델 예측 + 적중/실패.
-// CURRENT_SCORING_RULE filter (shadow row 제외). status='final' 만 표시.
+// PRODUCTION_COHORT_RULES filter (shadow row 제외, legacy credit-fail 프로덕션 row 포함). status='final' 만 표시.
 
 export const revalidate = 1800; // TEAMS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -87,7 +87,7 @@ async function getRecentGames(code: TeamCode): Promise<RecentRow[]> {
   const teamId = (teamRow as { id: number } | null)?.id ?? null;
   if (teamId == null) return [];
 
-  // 최근 10 final game. predictions inner join → pre_game + CURRENT_SCORING_RULE
+  // 최근 10 final game. predictions inner join → pre_game + PRODUCTION_COHORT_RULES
   // row 없는 game 제외 (shadow row #1338 family). assertSelectOk silent drift 감지.
   const gamesResult = await supabase
     .from('games')
@@ -107,7 +107,7 @@ async function getRecentGames(code: TeamCode): Promise<RecentRow[]> {
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
     .eq('status', 'final')
     .eq('predictions.prediction_type', 'pre_game')
-    .eq('predictions.scoring_rule', CURRENT_SCORING_RULE)
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES as readonly string[])
     .order('game_date', { ascending: false })
     .order('game_time', { ascending: false })
     .limit(RECENT_LIMIT);

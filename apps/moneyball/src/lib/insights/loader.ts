@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { assertSelectOk, CURRENT_SCORING_RULE, type TeamCode } from "@moneyball/shared";
+import { assertSelectOk, PRODUCTION_COHORT_RULES, type TeamCode } from "@moneyball/shared";
 import { presentJudgeReasoningWithFallback } from "@/lib/predictions/judgeReasoning";
 
 const DATE_REGEX = /^20[2-9]\d-\d{2}-\d{2}$/;
@@ -182,7 +182,7 @@ export async function listInsightsDates(daysBack = 90): Promise<string[]> {
     .from("predictions")
     .select("games!inner(game_date)")
     .eq("prediction_type", "pre_game")
-    .eq("scoring_rule", CURRENT_SCORING_RULE)
+    .in("scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])
     .gte("games.game_date", sinceStr)
     .order("created_at", { ascending: false })
     .limit(daysBack * 6);
@@ -226,7 +226,7 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
       "is_correct, reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
-    .eq("scoring_rule", CURRENT_SCORING_RULE)
+    .in("scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])
     .eq("games.game_date", date)
     .order("created_at", { ascending: false });
   const { data } = assertSelectOk(result, "insights.getInsightsForDate");

@@ -5,10 +5,10 @@ import {
   CE_DETECT_THRESHOLD,
   CE_MIN_SAMPLES,
   classifyWinnerProb,
-  CURRENT_SCORING_RULE,
   KBO_FACTOR_COUNT,
   pickTierEmoji,
   PREDICTIONS_HISTORY_LIMIT,
+  PRODUCTION_COHORT_RULES,
   SITE_URL,
   WINNER_TIER_LABEL,
   type WinnerConfidenceTier,
@@ -86,7 +86,7 @@ async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode
       'game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code), predictions(id, confidence, is_correct, reasoning, prediction_type, scoring_rule)',
     )
     .eq('predictions.prediction_type', 'pre_game')
-    .eq('predictions.scoring_rule', CURRENT_SCORING_RULE)
+    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES as readonly string[])
     .order('game_date', { ascending: false })
     .limit(PREDICTIONS_HISTORY_LIMIT);
   const { data } = assertSelectOk(result, 'predictions.getPredictionDates');
