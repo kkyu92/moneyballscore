@@ -18,6 +18,7 @@ import {
   toMlbStatsApiCode,
   mlbShortTeamName,
   MLB_TEAMS,
+  HOUR_MS,
   type MlbTeamCode,
 } from "@moneyball/shared";
 import { computeMlbWaterfall, type MetricSlug, type MlbWaterfallInput } from "@moneyball/kbo-data";
@@ -105,6 +106,9 @@ interface PredictionDetailRow {
   home_recent_form: number | null;
   away_recent_form: number | null;
   head_to_head_rate: number | null;
+  model_version: string | null;
+  debate_version: string | null;
+  predicted_at: string | null;
 }
 
 interface ScheduleRow {
@@ -173,7 +177,10 @@ export default async function GameDetail({ params }: PageParams) {
       away_elo,
       home_recent_form,
       away_recent_form,
-      head_to_head_rate
+      head_to_head_rate,
+      model_version,
+      debate_version,
+      predicted_at
     `)
     .eq('league', 'mlb')
     .eq('scoring_rule', MLB_SCORING_RULE)
@@ -191,6 +198,12 @@ export default async function GameDetail({ params }: PageParams) {
   const homeWinProb = pred.home_win_prob ?? 0.5;
   const winnerCode = mlbShortTeamName(homeWinProb >= 0.5 ? home : away);
   const conf = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
+  // KBO analysis/game/[id] 패턴 parity (cycle 2423 fix 로 predicted_at 실측 채워지며 이식 가능해짐).
+  const predictionLeadHours = pred.predicted_at
+    ? Math.round(
+        (new Date(schedule.game_datetime_utc).getTime() - new Date(pred.predicted_at).getTime()) / HOUR_MS
+      )
+    : null;
 
   // SportsEvent 스키마 — KBO analysis/game/[id] 패턴 parity (Google 스포츠 리치 결과 후보).
   const homeFullName = MLB_TEAMS[home].name;
@@ -308,6 +321,34 @@ export default async function GameDetail({ params }: PageParams) {
         externalGameId={schedule.external_game_id}
         asOfDate={date}
       />
+
+      {pred.model_version && (
+        <details className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg px-4 py-2 text-xs">
+          <summary className="cursor-pointer text-gray-500 dark:text-gray-400">
+            모델 메타 정보
+          </summary>
+          <div className="mt-2 space-y-1 text-gray-600 dark:text-gray-300">
+            <p>
+              정량 모델: <span className="font-mono">{pred.model_version}</span>
+              {pred.debate_version && (
+                <>
+                  {' · 토론 버전 '}
+                  <span className="font-mono">{pred.debate_version}</span>
+                </>
+              )}
+              {predictionLeadHours !== null && (
+                <>
+                  {' · 경기 '}
+                  <span className="font-mono">
+                    {predictionLeadHours >= 1 ? `${predictionLeadHours}시간` : '1시간 이내'}
+                  </span>
+                  {' 전 예측 생성'}
+                </>
+              )}
+            </p>
+          </div>
+        </details>
+      )}
 
       <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
         <ShareButtons

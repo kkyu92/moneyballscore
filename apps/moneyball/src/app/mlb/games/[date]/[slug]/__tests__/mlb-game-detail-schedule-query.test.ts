@@ -79,4 +79,16 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/pred\.home_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.home_recent_form\s*\*\s*100/);
     expect(PAGE_SRC).toMatch(/pred\.away_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.away_recent_form\s*\*\s*100/);
   });
+
+  // cycle 2424 explore-idea: KBO analysis/game/[id] 는 model_version/debate_version/
+  // predicted_at 기반 "모델 메타 정보" 블록(정량 모델 + 토론 버전 + 리드타임)이 있었지만
+  // MLB predictions insert 가 이 3컬럼을 명시 안 해 DB DEFAULT 상속(cycle 2423 fix 전까지
+  // predicted_at 항상 NULL) — 표시할 실측값 자체가 없어 parity 대상에서 빠져있었음.
+  // cycle 2423 이 predicted_at 을 실측으로 채우면서 이식 가능해짐.
+  it("model_version/debate_version/predicted_at 을 select + 모델 메타 정보 블록으로 렌더한다 (KBO parity, cycle 2424)", () => {
+    expect(PAGE_SRC).toMatch(/model_version,\s*\n\s*debate_version,\s*\n\s*predicted_at/);
+    expect(PAGE_SRC).toMatch(/모델 메타 정보/);
+    expect(PAGE_SRC).toMatch(/predictionLeadHours/);
+    expect(PAGE_SRC).toMatch(/HOUR_MS/);
+  });
 });
