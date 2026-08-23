@@ -1,3 +1,15 @@
+## ⚪ explore-idea (lite) — 전 chain 소스 재점검, 실제 gap 0건 확인 RETRO-ONLY (cycle 2379, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 archived/completed/blocked). review-code 는 직전 5사이클(2374-2378) non-success streak 5/5 도달로 cooldown 진입(2379~2388, 발화 후보 제외). 직전 8사이클(2371-2378) distinct=3(review-code/explore-idea/polish-ui), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 11/25, info-arch 14/30, lotto 17/30). explore-idea 는 cycle 2372 에서 이미 "전량 소진" 확인.
+
+review-code 가 빠진 자리를 메우기 위해 남은 소스 3건을 직접 재검증:
+
+1. **fix-incident 후보 (`gh run list` scheduled workflow 감사, CLAUDE.md 사례 17 룰)**: `op-analysis-weekly` 워크플로가 2026-08-17 `gh pr create` 단계에서 GitHub API 일시적 503 으로 실패(브랜치 `data/op-analysis-2026-08-17` 생성 후 PR 생성 실패). 그러나 `gh pr list --state all` 확인 결과 PR #2959 가 2026-08-18 이미 merged — 후속 재시도로 자연 복구됨, `apps/moneyball/data/op-analysis/2026-08-17-cohort-split.md` 도 main 에 존재. **실제 인시던트 아님**, 조치 불필요.
+2. **OG/Twitter 이미지 parity 재검증**: `/mlb/analysis`, `/mlb/methodology`, `/mlb/accuracy` 등 다수 MLB 하위 라우트에 자체 `opengraph-image.tsx` 부재 확인했으나, `mlb/opengraph-image.tsx`(세그먼트 레벨) 존재 — Next.js App Router 의 route segment metadata 상속 규칙(가장 가까운 조상 세그먼트 파일 사용)에 따라 정상 상속됨. **gap 아님**, false-positive.
+3. **breadcrumb 재검증**: `mlb/reviews/monthly`, `mlb/reviews/weekly` 가 `grep -L Breadcrumb` 에 걸렸으나 실제로는 redirect-only 페이지(9줄, `getCurrentMonth()` 계산 후 즉시 redirect) — `ia-2026-05-08-redirect-only-routes-sitemap.md` 스펙에 이미 문서화된 카테고리와 동일 패턴, KBO/EN 대응 페이지도 전부 동일 구조. **gap 아님**.
+
+결론: 코드 변경 없음. review-code cooldown 기간(2379~2388) 동안 대체 소스가 실제로는 이미 다 소진/false-positive 상태 — 이번 사이클은 순수 검증 결과 "이상 없음" 확인. 다음 사이클 = review-code cooldown 잔여(9사이클) 동안 주기 gap chain 우선 확인(fix-incident 16/20, op-analysis 11/25, info-arch 14/30, lotto 17/30 — 전부 미도달 지속 시 explore-idea 재탐색 또는 polish-ui 자연 신호 대기).
+
 ## 🟢 polish-ui (forced, 2-chain lock) — dead --color-surface-dark 토큰 제거 + DESIGN.md border 토큰 문서화 SUCCESS (cycle 2377, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2369-2376) chain distinct=2 (review-code 7 / explore-idea 1) → **2-chain alternation lock 탐지** (룰: distinct≤2). 잠긴 두 chain 제외 후 주기 trigger 4종 재확인 — 전부 미도달(fix-incident 14/20, op-analysis 9/25, info-arch 12/30, lotto 15/30). 룰에 따라 polish-ui 강제 발화.
