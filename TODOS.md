@@ -1,3 +1,15 @@
+## ✅ SUCCESS — skill-evolution 70회 자가 진화, phase 36 milestone (cycle 2451, 2026-08-23)
+
+트리거: `skill-evolution-pending` marker (cycle 2450 trigger 3, cycle_n%50==0) — forced, 자율 선택 아님.
+
+phase 36 (2431-2450) 통계: review-code 50%(+30pp, #1338 family 소진 후 신규 타겟 재발견: lotto/methodology, buildMlbMatchupProfile, buildAccuracyData, convergenceRecord/buildTeamProfile) / fix-incident 15%(version-sync drift 4th/5th recurrence cycle 2437/2445) / operational-analysis 10% / none(no-op) 10%(-35pp, saturation 일시적 dip 확정) / polish-ui·lotto·explore-idea 각 5%. alternation pair 55%(+35pp). success 35%(+5pp, missing 1건 cycle 2437). PASS_ship 누적 ~1932(+53). watch hang kill 0건.
+
+신규 carry-over: version-sync drift 근본원인(pre-commit hook/single source-of-truth 부재 추정) Tier 3 plan 후보로 명시적 이월.
+
+실행: SKILL.md 마이그레이션 path 압축 요약 append + MIGRATION-PATH.md phase 36 전체 섹션 append. PR #3054 (`develop-cycle/skill-evolution-2451`) squash 머지(69b7ca63) + marker 제거.
+
+**다음 사이클 추천** = review-code 신규 타겟 계속 탐색 또는 version-sync drift 근본원인 조사(fix-incident), gap trigger 근접 순(info-arch 26/30, lotto 11/30) 대기.
+
 ## ✅ SUCCESS — review-code(heavy) lotto/methodology 신규 감사, OOS 표본 caveat stale 텍스트 정정 (cycle 2450, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 25/30, lotto 10/30). 2-chain lock 미충족(직전8 distinct=3). explore-idea saturation 미충족(11/15). cycle 2449가 #1338 family 3연속 클린 확정 + 신규 unaudited 영역 재탐색 추천 — CHANGELOG 언급 최소(3회) 파일로 lotto/methodology/page.tsx(520줄, KBO/MLB family 와 별개 도메인) 선정.
