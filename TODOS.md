@@ -1,3 +1,16 @@
+## 🟢 fix-incident — MLB recent_form/head_to_head 실측 wiring, 13% 가중치 silent no-op 해소 SUCCESS (cycle 2353, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2345-2352) distinct=4(explore-idea/review-code/fix-incident/skill-evolution), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20 gap, op-analysis 17/25, info-arch 13/30, lotto 9/30). saturation 8/15 미충족. cycle 2349 retro가 "나머지 3팩터(최근폼/상대전적/수비SFR) 계산 로직 구현은 Tier 3 규모 — 별도 plan 분리 검토 대상"이라 남겼으나, 직접 코드 확인 결과 recent_form/head_to_head 는 defense_sfr(KBO 전용 지표, MLB 동등 데이터 소스 자체 부재)과 달리 이미 존재하는 `mlb_schedule`(status='final' 행의 home_score/away_score) 만으로 계산 가능 — 신규 테이블/스크래퍼 불필요한 단순 wiring 누락임을 발견. Elo(cycle 2349)와 동일한 "read-wiring 누락" 패턴이라 이번 cycle 범위로 분리.
+
+**발견**: `runPredictFinal`이 `mlb_schedule`을 오늘 경기 조회에만 쓰고 시즌 종료 경기(최근폼/h2h 파생 소스)는 전혀 조회하지 않아 항상 `recent_form:{home:50,away:50}`(중립), `head_to_head:{homeWinRate:0.5}`(중립) 고정 입력 — `MLB_BASE_WEIGHTS.recent_form`(10%)+`head_to_head`(3%) = 13% 가중치가 모든 MLB 예측에서 상시 no-op. `buildMlbTeamFactorAverages`/`buildMlbTeamProfile`도 이미 `home_recent_form`/`away_recent_form` 컬럼을 읽고 있었지만 상시 NULL이라 평균/프로필 계산에서 늘 제외됐음(elo와 동일 부수 패턴).
+
+**실행**: 신규 순수 함수 `calculateMlbRecentForm`/`calculateMlbHeadToHead`(`factors/mlb-form.ts`, KBO `engine/form.ts`와 동일 계약이나 team_code string 기준) 작성 → `runPredictFinal`이 시즌 종료 경기(당일 이전, leak 방지) 조회 → 최근 10경기 승률 + 시즌 h2h 계산 입력 + `predictions.home_recent_form/away_recent_form/head_to_head_rate` 컬럼(기존 KBO 공용 스키마, migration 001) 양쪽에 실측 반영. 유효 경기 없으면 계산은 중립값 fallback, 영속화는 null(elo와 동일 원칙). 신규 단위 테스트 다수(순수 함수 9건 + 파이프라인 wiring 2건) 추가.
+
+검증: `tsc --noEmit`(kbo-data+moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data 90 files/1161 tests + moneyball 498 files/4180 tests all green).
+
+결론: MLB 모델 실질 개선 SUCCESS. 다음 cycle 후보 = waterfall/factor-detail/overview 표시 레이어 동기화(cycle 2349→2352 elo 사례와 동일 패턴 — review-code(heavy) 자연 후속) 또는 explore-idea 자연 발견. defense_sfr(5%)은 MLB 동등 데이터 소스 부재로 여전히 스코프 밖.
+
+
 ## 🟢 fix-incident — MLB Elo 팩터 실측 wiring, 10% 가중치 silent no-op 해소 SUCCESS (cycle 2349, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(status=approved 매칭 0건). 2-chain lock 미충족(직전 8사이클 2341-2348 distinct=3). 주기 trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 13/25, info-arch 9/30, lotto 5/30). saturation 7/15 미충족. cycle 2348 review-code(heavy) retro가 "4팩터를 실제 예측 가중치에 연결하는 건 별도 op-analysis/plan 필요"라 범위 밖으로 남겼으나, 직접 코드 확인 결과 Elo 하나만은 이미 계산 로직(`mlb-elo.ts`)과 저장 테이블(`mlb_team_elo`, cron `mlb_elo_update`)이 완비돼 있어 단순 read-wiring 누락임을 발견 — 나머지 3팩터(최근폼/상대전적/수비SFR)는 계산 로직 자체가 없어 훨씬 큰 스코프라 이번엔 Elo만 분리.

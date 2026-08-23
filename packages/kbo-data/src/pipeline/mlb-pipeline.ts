@@ -27,6 +27,7 @@ import {
   type BrierInput,
 } from '../factors/mlb-shadow-c';
 import { computeMlbEloRatings, computeMlbEloHistory } from '../factors/mlb-elo';
+import { calculateMlbRecentForm, calculateMlbHeadToHead, type MlbFinishedGameForForm } from '../factors/mlb-form';
 import {
   shouldAlertSilentDrift,
   captureSilentDriftAlert,
@@ -303,6 +304,28 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     eloByTeam.set(row.team_code, row.elo_rating);
   }
 
+  // mlb_schedule 시즌 종료 경기 실측 조회 (cycle 2353 wiring — recent_form/head_to_head
+  // 는 mlb_team_elo 와 달리 별도 저장 테이블 없이 mlb_schedule 자체의 status='final' 행에서
+  // 직접 파생 가능. mlb_schedule 은 이미 status='scheduled' 오늘 경기 조회에 쓰이는 동일
+  // 테이블 — 별도 쿼리로 시즌 종료 경기(당일 이전, leak 방지) 만 추가 조회.
+  // DB order() 대신 클라이언트 sort — mock 체인 단순화 + 어차피 클라이언트 slice 필요.
+  let finishedGames: MlbFinishedGameForForm[] = [];
+  try {
+    const seasonStart = `${season}-01-01`;
+    const finishedResult = await db
+      .from('mlb_schedule')
+      .select('home_team_code, away_team_code, home_score, away_score, game_date')
+      .eq('status', 'final')
+      .gte('game_date', seasonStart)
+      .lt('game_date', date);
+    const { data } = assertSelectOk<
+      Array<MlbFinishedGameForForm & { game_date: string }>
+    >(finishedResult, 'mlb-pipeline.mlb_schedule.finished.select');
+    finishedGames = (data ?? []).slice().sort((a, b) => (a.game_date < b.game_date ? 1 : -1));
+  } catch (e) {
+    errors.push(`mlb_schedule finished select: ${errMsg(e)}`);
+  }
+
   const predictionRows = gameList.map((g) => {
     const homeCanonicalCode = normalizeMlbTeamCode(g.home_team_code);
     const awayCanonicalCode = normalizeMlbTeamCode(g.away_team_code);
@@ -315,14 +338,24 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     const homeElo = eloByTeam.get(g.home_team_code);
     const awayElo = eloByTeam.get(g.away_team_code);
 
+    // cycle 2353 wiring — mlb_schedule status='final' 실측으로 recent_form/head_to_head
+    // 계산. elo 와 동일 null-guard 원칙: 유효 경기 없으면(시즌 초반 등) 중립값 fallback,
+    // 있으면 실측 반영. computeMlbFactorContributions 입력 스케일은 recent_form 이
+    // 0-100(백분율), head_to_head 는 0-1(승률) — mlb-base.ts 계수와 일치.
+    const homeForm = calculateMlbRecentForm(finishedGames, g.home_team_code, 10);
+    const awayForm = calculateMlbRecentForm(finishedGames, g.away_team_code, 10);
+    const h2h = calculateMlbHeadToHead(finishedGames, g.home_team_code, g.away_team_code);
+    const h2hTotal = h2h.wins + h2h.losses;
+    const h2hHomeWinRate = h2hTotal > 0 ? h2h.wins / h2hTotal : 0.5;
+
     const prob = computeMlbProbability({
       sp_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
       sp_xfip: { home: home?.xfip ?? MLB_STAT_DEFAULTS.xfip, away: away?.xfip ?? MLB_STAT_DEFAULTS.xfip },
       lineup_woba: { home: home?.woba ?? MLB_STAT_DEFAULTS.woba, away: away?.woba ?? MLB_STAT_DEFAULTS.woba },
       bullpen_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
-      recent_form: { home: 50, away: 50 },
+      recent_form: { home: (homeForm ?? 0.5) * 100, away: (awayForm ?? 0.5) * 100 },
       war: { home: home?.war ?? MLB_STAT_DEFAULTS.war, away: away?.war ?? MLB_STAT_DEFAULTS.war },
-      head_to_head: { homeWinRate: 0.5 },
+      head_to_head: { homeWinRate: h2hHomeWinRate },
       park_factor: homeParkPf != null ? homeParkPf / 100 : 1.0,
       elo: { home: homeElo ?? ELO_NEUTRAL, away: awayElo ?? ELO_NEUTRAL },
       defense_sfr: { home: 0, away: 0 },
@@ -346,11 +379,11 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       // (사례 21, DB 실측: home_sp_fip 등 non-null count 0/N). team stats row 부재 시
       // MLB_STAT_DEFAULTS 로 대체된 값(가짜)은 저장 X — null 유지해 null-guard 가 유효
       // 팩터 수에서 자연 제외(기존 computeCompositeDuel 설계와 동일 원칙).
-      // recent_form/head_to_head/sfr 은 여전히 MLB 미구현 placeholder(계산 입력용 중립값)라
-      // 미저장 — 실제 데이터 없는 컬럼에 가짜 숫자 심지 않음. elo 는 cycle 2349 wiring 으로
-      // mlb_team_elo 실측을 연결해 계산 입력(위)뿐 아니라 여기서도 real 값 영속화 —
-      // team row 부재(신규 팀/시즌 첫 경기) 시에만 null(가짜 ELO_NEUTRAL 은 저장 X, 다른
-      // 팩터와 동일 원칙).
+      // defense_sfr 은 여전히 MLB 미구현 placeholder(계산 입력용 중립값)라 미저장 —
+      // KBO 전용 지표(SFR)라 MLB 쪽 동등 데이터 소스 자체가 없음(별도 스코프). elo(cycle 2349)
+      // + recent_form/head_to_head(cycle 2353) 는 mlb_team_elo/mlb_schedule 실측을 연결해
+      // 계산 입력(위)뿐 아니라 여기서도 real 값 영속화 — 유효 경기/team row 부재(시즌 초반
+      // 등) 시에만 null(가짜 중립값은 저장 X, 다른 팩터와 동일 원칙).
       home_sp_fip: home?.fip ?? null,
       away_sp_fip: away?.fip ?? null,
       home_sp_xfip: home?.xfip ?? null,
@@ -367,6 +400,9 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       away_lineup_barrel_pct: away?.barrel_pct ?? null,
       home_elo: homeElo ?? null,
       away_elo: awayElo ?? null,
+      home_recent_form: homeForm,
+      away_recent_form: awayForm,
+      head_to_head_rate: h2hTotal > 0 ? h2hHomeWinRate : null,
     };
   });
 

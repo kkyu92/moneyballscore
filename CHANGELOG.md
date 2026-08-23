@@ -1,3 +1,28 @@
+## v0.5.62.75 — 2026-08-23 (cycle 2353, fix-incident: MLB recent_form/head_to_head 실측 wiring)
+
+### fix(mlb): mlb_schedule 시즌 종료 경기 실측으로 recent_form/head_to_head 팩터 계산 — 13% 가중치 silent no-op 해소
+
+- 발견: cycle 2349가 elo(10%)를 mlb_team_elo 실측으로 연결했지만, 나머지 미구현 placeholder 3개
+  (recent_form 10%/head_to_head 3%/defense_sfr 5%) 는 "Tier 3 규모 — 별도 plan 분리" 로 남겨둠.
+  직접 확인 결과 recent_form/head_to_head 는 defense_sfr(KBO 전용 지표, MLB 동등 데이터 소스 자체가
+  없음)과 달리 이미 존재하는 `mlb_schedule`(status='final' 행에 home_score/away_score 보유) 만으로
+  계산 가능 — 신규 테이블/스크래퍼 불필요한 단순 wiring 누락이었음. `runPredictFinal`이 항상
+  `recent_form:{home:50,away:50}`(양팀 동일 중립값), `head_to_head:{homeWinRate:0.5}` 고정 입력해
+  `MLB_BASE_WEIGHTS.recent_form`(10%)+`head_to_head`(3%) = 13% 가중치가 모든 MLB 예측에서 상시
+  no-op(차이항 항상 0)이었음.
+- 수정: `mlb_schedule`에서 시즌 종료 경기(당일 이전, leak 방지) 조회 → 순수 함수
+  `calculateMlbRecentForm`/`calculateMlbHeadToHead`(신규 `factors/mlb-form.ts`, KBO
+  `engine/form.ts`와 동일 계약이나 team_code string 기준)로 최근 10경기 승률 + 시즌 h2h 계산 →
+  계산 입력 및 `predictions.home_recent_form`/`away_recent_form`/`head_to_head_rate`
+  컬럼(기존 KBO 공용 스키마, migration 001) 양쪽에 실측 반영. 유효 경기 없으면(시즌 초반 등)
+  계산 입력은 중립값 fallback 유지, 영속화는 다른 팩터와 동일하게 null.
+- 부수 효과: `buildMlbTeamFactorAverages`/`buildMlbTeamProfile`(둘 다 이미 `home_recent_form`/
+  `away_recent_form` 컬럼을 읽고 있었으나 상시 NULL이라 recent_form 이 항상 평균/프로필에서
+  제외됐음, elo 와 동일 패턴)가 이번 fix로 자연 복구 — 코드 변경 없이 실측 데이터 흐름만 연결.
+- 스코프 밖: waterfall/factor-detail/overview 표시 레이어 동기화(cycle 2349→2352 elo 사례와
+  동일 패턴 — 다음 review-code(heavy) 자연 후속 대상). defense_sfr(5%)은 MLB 동등 데이터
+  소스 부재로 여전히 미구현.
+
 ## v0.5.62.74 — 2026-08-23 (cycle 2349, fix-incident: MLB Elo 팩터 실측 wiring)
 
 ### fix(mlb): mlb_team_elo 실측 Elo 레이팅을 predict_final 에 연결 — 10% 가중치 silent no-op 해소

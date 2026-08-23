@@ -15,6 +15,8 @@ vi.mock('@supabase/supabase-js', () => ({
       eq: vi.fn().mockReturnThis(),
       in: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lt: vi.fn().mockReturnThis(),
     })),
   })),
 }));
@@ -164,6 +166,11 @@ describe('runMlbPipeline', () => {
             select: vi.fn(() => ({
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
+                // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
               })),
             })),
           };
@@ -329,6 +336,8 @@ describe('runMlbPipeline', () => {
       insert: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
       eq: ReturnType<typeof vi.fn>;
+      gte: ReturnType<typeof vi.fn>;
+      lt: ReturnType<typeof vi.fn>;
     };
     const scheduleGames = [
       { external_game_id: '1001', home_team_code: 'PHI', away_team_code: 'BOS' },
@@ -339,6 +348,11 @@ describe('runMlbPipeline', () => {
       select: vi.fn(() => builder),
       delete: vi.fn(() => builder),
       eq: vi.fn(() => builder),
+      // cycle 2353 wiring — 2nd mlb_schedule call(recent_form/head_to_head)이 이 generic
+      // builder 로 fallthrough (mlbScheduleSelected 플래그 소진 후) — gte/lt 는 builder 자체를
+      // 반환해 최종 awaited 값도 builder(무-error/무-data) = 이전과 동일 중립값 결과.
+      gte: vi.fn(() => builder),
+      lt: vi.fn(() => builder),
       insert: vi.fn((rows: unknown) => {
         if (Array.isArray(rows)) {
           insertedRows.push(...(rows as Array<Record<string, unknown>>));
@@ -402,6 +416,11 @@ describe('runMlbPipeline', () => {
             select: vi.fn(() => ({
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
+                // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
               })),
             })),
           };
@@ -460,6 +479,11 @@ describe('runMlbPipeline', () => {
             select: vi.fn(() => ({
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
+                // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
               })),
             })),
           };
@@ -527,6 +551,11 @@ describe('runMlbPipeline', () => {
             select: vi.fn(() => ({
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
+                // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
               })),
             })),
           };
@@ -584,6 +613,11 @@ describe('runMlbPipeline', () => {
             select: vi.fn(() => ({
               eq: vi.fn(() => ({
                 eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                // cycle 2353 wiring — recent_form/head_to_head 실측 조회 (2nd mlb_schedule
+                // call). 기본 빈 배열 = 이전 동작(중립값)과 동일 결과, 회귀 없음.
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
               })),
             })),
           };
@@ -625,6 +659,151 @@ describe('runMlbPipeline', () => {
     // 영속화도 계산 입력과 동일 원칙 — 실측 있으면 실측, 없으면 가짜 숫자 대신 null
     expect(row.home_elo).toBe(1550.5);
     expect(row.away_elo).toBeNull();
+  });
+
+  it('mlb_predict_final — mlb_schedule 시즌 종료 경기 실측 조회 → recent_form/head_to_head 계산 입력 + 컬럼 영속화 (cycle 2353 fix — 사례: recent_form/head_to_head 는 mlb_team_elo 처럼 mlb_schedule 자체 status=final 행에서 파생 가능한데도 predict_final 이 항상 중립값(50/50, 0.5) 고정 입력해 13%(10%+3%) 가중치가 모든 MLB 예측에서 상시 no-op)', async () => {
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    // NYY vs BOS 오늘 경기. 과거: NYY 최근 3전 2승(다른 상대 포함), BOS 최근 2전 전패,
+    // 이 시즌 NYY-BOS h2h 는 1승 1패(홈/원정 뒤바뀐 매치업 포함) — homeWinRate 0.5 예상.
+    const scheduleGames = [
+      { external_game_id: '7001', home_team_code: 'NYY', away_team_code: 'BOS' },
+    ];
+    const finishedGames = [
+      { home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2, game_date: '2026-06-10' }, // NYY win vs BOS (h2h)
+      { home_team_code: 'BOS', away_team_code: 'NYY', home_score: 6, away_score: 1, game_date: '2026-06-08' }, // NYY loss vs BOS (h2h)
+      { home_team_code: 'NYY', away_team_code: 'TB', home_score: 3, away_score: 1, game_date: '2026-06-06' }, // NYY win vs TB
+      { home_team_code: 'BAL', away_team_code: 'BOS', home_score: 4, away_score: 0, game_date: '2026-06-09' }, // BOS loss vs BAL
+    ];
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: finishedGames, error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_elo') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { computeMlbProbability } = await import('../factors/mlb-base');
+    (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mockClear();
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    expect(computeMlbProbability).toHaveBeenCalledTimes(1);
+    const callArgs = (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+      recent_form: { home: number; away: number };
+      head_to_head: { homeWinRate: number };
+    };
+    // NYY 최근 2전(h2h 1승 1패 + TB 1승) = 2/2 among lastN games involving NYY within window
+    expect(callArgs.recent_form.home).toBeCloseTo((2 / 3) * 100, 5);
+    // BOS 최근 2전(h2h 1승 1패 + BAL 1패) = 0/3... 실제 관련 경기 3건 중 1승 → 1/3
+    expect(callArgs.recent_form.away).toBeCloseTo((1 / 3) * 100, 5);
+    expect(callArgs.head_to_head.homeWinRate).toBeCloseTo(0.5, 5);
+
+    expect(insertedRows.length).toBe(1);
+    const row = insertedRows[0];
+    expect(row.home_recent_form).toBeCloseTo(2 / 3, 5);
+    expect(row.away_recent_form).toBeCloseTo(1 / 3, 5);
+    expect(row.head_to_head_rate).toBeCloseTo(0.5, 5);
+  });
+
+  it('mlb_predict_final — 시즌 초반(유효 경기 0건) 시 recent_form/head_to_head 중립값 + null 영속화 (regression guard)', async () => {
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const scheduleGames = [
+      { external_game_id: '8001', home_team_code: 'NYY', away_team_code: 'BOS' },
+    ];
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+                gte: vi.fn(() => ({
+                  lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats' || table === 'mlb_team_elo') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { computeMlbProbability } = await import('../factors/mlb-base');
+    (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mockClear();
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    const callArgs = (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+      recent_form: { home: number; away: number };
+      head_to_head: { homeWinRate: number };
+    };
+    expect(callArgs.recent_form).toEqual({ home: 50, away: 50 });
+    expect(callArgs.head_to_head).toEqual({ homeWinRate: 0.5 });
+
+    expect(insertedRows.length).toBe(1);
+    const row = insertedRows[0];
+    expect(row.home_recent_form).toBeNull();
+    expect(row.away_recent_form).toBeNull();
+    expect(row.head_to_head_rate).toBeNull();
   });
 
   it('mlb_walk_forward_measure — predictions 쿼리 컬럼 mlb_game_date 사용 (silent drift family fix, cycle 1168)', async () => {
