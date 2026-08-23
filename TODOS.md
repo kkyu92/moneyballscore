@@ -1,3 +1,13 @@
+## ⚪ review-code(heavy) — accuracy/page.tsx 감사, 후보 2건 모두 false-positive RETRO-ONLY (cycle 2367, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2359-2366) distinct=6(review-code/op-analysis/lotto/fix-incident/info-arch), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 6/25, info-arch 2/30, lotto 5/30). explore-idea saturation 11/15<12 미충족. CI green(cycle 2362 실패 1건 확인했으나 cycle 2363 version-drift fix 이전 시점 잔여 기록 — 이미 해소된 사안, 현재 HEAD 무관). lotto 다음 회차(8/29) picks 기박제, DESIGN.md 5일 전(미도달). 직전 3사이클(2364/2365/2366) 연속 clean-audit — 감사 target 을 analysis/page.tsx 계열에서 미감사 대형 monolith(accuracy/page.tsx, 1204줄)로 전환.
+
+**감사 시도 1**: Header.tsx `KBO_NAV`(/picks 등) 가 `enLabel`/`enDescription` 필드 없이 `MLB_NAV` 대비 미localize 로 보였으나, KBO 리그는 EN 미러 자체가 존재하지 않음(en/ 은 en/mlb/* 뿐) — `KBO_NAV` 전체가 원래부터 필드 부재, 의도된 구조. false-positive.
+
+**감사 시도 2**: `V18SubCohortPanel`(accuracy/page.tsx:1082-83) 의 `bothMeasured` 게이트가 `STATS_RELIABLE_MIN_N`(30, CI 표기용으로 같은 페이지 2곳에서 사용)이 아닌 하드코딩 `n >= 10` 사용 — 통계적으로 n=10 시 실제 CI(±31%p 추정)가 페이지 자체 문구("±15~25%p")보다 넓어 불일치로 보였으나, `silent-drift-wave-249.test.ts:28-31`(cycle 1553)가 정확히 `n >= 10` 을 명시 assert — 의도된 별도 threshold(delta 노출용 완화 기준 vs CI 표기용 엄격 기준). 수정 시도 전 test 확인 → false-positive, 수정 보류.
+
+결론: 코드 변경 없음, 두 후보 모두 due-diligence 후 의도된 동작 확인(회귀 방지 test 존재 재확인 없이 수정했으면 오히려 wave-249 regression 유발할 뻔한 케이스 — "test 먼저 확인" 원칙 재확인). 다음 후보 = 자연 발견 또는 fix-incident(5/20)/op-analysis(7/25)/info-arch(3/30)/lotto(6/30) 주기 trigger 확인.
+
 ## ⚪ review-code(lite) — /health 10/10 clean, 신규 신호 없음 RETRO-ONLY (cycle 2366, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2358-2365) distinct=6(info-arch/review-code/op-analysis/lotto/fix-incident), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 5/25, info-arch 1/30, lotto 4/30). explore-idea saturation 10/15<12 미충족. CI(2364/2365 push) green 확인, Vercel Deploy Failure Dispatch skipped(배포 정상). 직전 2사이클(2364/2365) 연속 review-code(heavy)/info-arch clean-audit — monolith 재감사 대신 review-code lite(`/health`) 로 전환.
