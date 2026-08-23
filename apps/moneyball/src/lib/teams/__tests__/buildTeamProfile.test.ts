@@ -38,7 +38,7 @@ function makeSupabaseMock(opts: SupabaseMockOptions = {}) {
     select: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnThis(),
     eq: vi.fn(() => ({
-      eq: vi.fn(() => gamesResult),
+      in: vi.fn(() => gamesResult),
     })),
   };
   return {

@@ -8,12 +8,12 @@ import {
   computeMatchupHomeAwayEdgeFromGames,
   computeMatchupRecentRecordFromGames,
   computeMatchupStreakFromGames,
-  CURRENT_SCORING_RULE,
   MARGIN_AVG_MIN_GAMES,
   MARGIN_BLOWOUT_MIN_GAMES,
   MARGIN_BLOWOUT_THRESHOLD,
   MARGIN_CLOSE_GAME_MIN_GAMES,
   MARGIN_CLOSE_GAME_THRESHOLD,
+  PRODUCTION_COHORT_RULES,
   RECENT_RECORD_MIN_GAMES,
   RECENT_RECORD_WINDOW,
   shortTeamName,
@@ -385,11 +385,14 @@ export async function buildMatchupProfile(
 
   // 두 팀이 맞붙은 경기만 SQL 레벨로 필터링.
   // predictions 는 LEFT embed (`!inner` X) — pre_game prediction 누락 final 경기도 record 카운트 위해.
-  // prediction_type='pre_game' + scoring_rule=CURRENT_SCORING_RULE 필터는 JS 레벨에서 적용
+  // prediction_type='pre_game' + scoring_rule∈PRODUCTION_COHORT_RULES 필터는 JS 레벨에서 적용
   // (PostgREST 에서 dotted eq + LEFT embed 조합은 모호). scoring_rule 미필터 시 daily.ts 가 매 경기
   // 동일 prediction_type='pre_game' 으로 함께 insert 하는 shadow(v2.1-B-shadow/v2.0-shadow) row 를
   // find() 가 임의 순서로 집어 h2h record/정확도가 shadow 값으로 오염될 수 있음 (#1338 family,
-  // buildTeamProfile.ts cycle 2288 fix 와 동일 계열).
+  // buildTeamProfile.ts cycle 2288 fix 와 동일 계열). CURRENT_SCORING_RULE 단일값(v1.8)만 매칭 시
+  // legacy v1.8-credit-fail production row 도 함께 오탐 배제됨 — 이 페이지는 baseline calibration
+  // 이 아닌 사용자 가시 매치업 기록이라 PRODUCTION_COHORT_RULES 양쪽 포함이 맞음
+  // (cycle 2408 analysis/game/[id]/page.tsx 동일 정정 계열, cycle 2409 후속).
   const orFilter =
     `and(home_team_id.eq.${idA},away_team_id.eq.${idB}),` +
     `and(home_team_id.eq.${idB},away_team_id.eq.${idA})`;
@@ -447,7 +450,9 @@ export async function buildMatchupProfile(
       g.predictions?.find(
         (p) =>
           p.prediction_type === "pre_game" &&
-          p.scoring_rule === CURRENT_SCORING_RULE,
+          (PRODUCTION_COHORT_RULES as readonly string[]).includes(
+            p.scoring_rule ?? "",
+          ),
       ) ?? null;
     if (!pred && g.status === "final") missingPredictionFinalCount += 1;
     rows.push({

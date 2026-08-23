@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES, MARGIN_AVG_MIN_GAMES, MARGIN_BLOWOUT_THRESHOLD, MARGIN_BLOWOUT_MIN_GAMES, MARGIN_CLOSE_GAME_THRESHOLD, MARGIN_CLOSE_GAME_MIN_GAMES, VENUE_SPLIT_MIN_GAMES_PER_VENUE, VENUE_SPLIT_MIN_GAP_PCT, CURRENT_SCORING_RULE } from '@moneyball/shared';
+import { KBO_TEAMS, type TeamCode, shortTeamName, assertSelectOk, computeAvgMarginFromFinalGames, computeMarginCountFromFinalGames, computeFactorAveragesFromPerspectives, type FactorPerspective, WIN_LOSS_STREAK_MIN_LENGTH, RECENT_RECORD_WINDOW, RECENT_RECORD_MIN_GAMES, MARGIN_AVG_MIN_GAMES, MARGIN_BLOWOUT_THRESHOLD, MARGIN_BLOWOUT_MIN_GAMES, MARGIN_CLOSE_GAME_THRESHOLD, MARGIN_CLOSE_GAME_MIN_GAMES, VENUE_SPLIT_MIN_GAMES_PER_VENUE, VENUE_SPLIT_MIN_GAP_PCT, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
 import { EMPTY_FACTOR_AVERAGES, type TeamFactorAverages } from "./buildTeamFactorAverages";
 
 export interface TeamPitcherRow {
@@ -355,6 +355,10 @@ export async function buildTeamProfile(
   // 으로 누적 (#1338 family, buildTeamUpcoming.ts/recent/page.tsx 동일 패턴).
   // 필터 없으면 downstream `predictions?.[0]` 이 정렬 보장 없는 임의 row(프로덕션
   // 또는 shadow) 를 집어 팀 적중률/팩터 평균이 shadow 모델 값으로 오염될 수 있음.
+  // PRODUCTION_COHORT_RULES(v1.8 + v1.8-credit-fail) 사용 — CURRENT_SCORING_RULE
+  // 단일값은 baseline calibration 전용, 이 페이지는 사용자 가시 팀 프로필이라
+  // legacy credit-fail production row 도 포함해야 함 (cycle 2409, cycle 2408
+  // analysis/game/[id]/page.tsx 동일 정정 계열).
   const gamesResult = await supabase
     .from("games")
     .select(
@@ -381,7 +385,7 @@ export async function buildTeamProfile(
     )
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
     .eq("predictions.prediction_type", "pre_game")
-    .eq("predictions.scoring_rule", CURRENT_SCORING_RULE);
+    .in("predictions.scoring_rule", PRODUCTION_COHORT_RULES);
 
   const { data } = assertSelectOk(gamesResult, "buildTeamProfile games");
 
