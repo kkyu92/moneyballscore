@@ -1,3 +1,15 @@
+## 🟡 PARTIAL — explore-idea(heavy) 회원인증+커뮤니티 ETA 도달 재평가, 보류 권고 plan #29 (cycle 2417, 2026-08-23)
+
+진단: open issue 0, approved plan 0/28. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 1/25, info-arch 22/30, lotto 25/30). 2-chain lock 미충족(직전8 distinct=4: review-code/explore-idea/fix-incident/operational-analysis). explore-idea saturation trigger 충족(직전 15 cycle 13/15). review-code 3연속 clean audit(2413-2415) + op-analysis 신규 표본 0건(2416) 이후 다양성 회복 fire.
+
+발견: EN/KO MLB parity·JSON-LD 구조화 데이터(56 라우트 기존 커버)·TODOS Next-Up 재확인 등 기존 3-source 는 모두 재소진 확인(신규 없음). 대신 `/login`(page.tsx)·`/community`(page.tsx) 둘 다 "📌 박제 중 (ETA 2026-08~09)" placeholder 로 남아있고 오늘이 그 구간 안 — 헤더 `PlaceholderLoginButton.tsx` 도 동일 ETA. Supabase Auth 세션 관리 wiring 리포 안 0건(신규 인프라 필요).
+
+실측(service-role REST count=exact): `user_picks`=1, `mlb_user_picks`=0, `pick_poll_events`=5, `mlb_pick_poll_events`=0 — plan #27(cycle 2334) 측정치와 완전 동일, 83 cycle(수일) 경과했지만 변화 0.
+
+rubric 5축 평가 결과 **Tier 4(사용자 영역)**: risk=3(인증/세션/RLS 자율 단독 구현 부적합) + 자율 가능=no(인증 방식/커뮤니티 범위 결정 필요) + 트래픽 근거 부재(활성 참여 1~5건) 조합 — 이번 cycle 착수 보류 권고. plan #29 작성(`~/.develop-cycle/plans/moneyballscore/29.md`, expiry 2026-10-15) — 재평가 트리거 = KBO 포스트시즌 일정 확정 도달 또는 user_picks/poll COUNT ≥10 성장 또는 사용자 직접 지시.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 target 재탐색) 또는 gap trigger 순번(info-arch 22/30, lotto 25/30 근접).
+
 ## 🔵 RETRO-ONLY — fix-incident(lite) 20-cycle gap trigger 점검, clean (cycle 2414, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22. 2-chain lock 미충족(직전8 distinct=3). fix-incident 20-cycle gap trigger 충족(마지막 발화 cycle 2394).
