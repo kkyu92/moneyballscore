@@ -1,3 +1,15 @@
+## ⚪ review-code(heavy) — model-comparison MLB 오염 가설 false-positive + KBO/MLB 매직넘버 parity 재확인 RETRO-ONLY (cycle 2370, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked, status="approved" 없음). 직전 8사이클(2362-2369) distinct=5(lotto/fix-incident/review-code/info-arch/operational-analysis), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 2/25, info-arch 5/30, lotto 8/30). explore-idea saturation 10/15<12 미충족. `gh run list --limit 10` 전부 green/skip, gh issue 0건. DESIGN.md 5일 전(미도달), lotto-data.json 오늘 갱신·8/29 picks 기박제(트리거 X). 직전 4사이클(2364/2366/2367/2369) 이미 review-code 감사 target 4연속 소진 확인됨 — 이번엔 `.from('predictions')` 쿼리 49개 파일 전수 재grep으로 #1338 family(scoring_rule/prediction_type 미필터) 잔존 후보 재탐색.
+
+**감사 시도 1**: `/debug/model-comparison`(모델버전 진화 비교 대시보드) 쿼리가 `scoring_rule`/`prediction_type` 필터 없이 `games!inner(...)` 조인만 사용 — MLB 예측(`scoring_rule='mlb_v0.1'`) 이 model_version 비교에 혼입될 가능성 의심. 실측: `mlb-pipeline.ts` insert payload에 `game_id` 필드 자체가 없음(`external_game_id`/`mlb_game_date` 별도 컬럼 사용, KBO 전용 `game_id INT REFERENCES games(id)` FK 미설정) → `games!inner` 조인이 MLB row 를 자동 제외(INNER JOIN 특성). false-positive, 수정 불필요.
+
+**감사 시도 2**: TODOS 과거 항목("와일드카드 매직넘버는 범위 밖, 별도 cycle 후속 후보로 carry")이 스테일한지 재확인 — `/mlb/wild-card/page.tsx`(`WcMagicNumberBadge`) + `/standings/page.tsx`(KBO 우승/가을야구 매직넘버) 양쪽 모두 이미 구현 완료 확인. carry-over 항목 자체가 stale(이미 별도 cycle 에서 해소됨, TODOS 미정리) — false-positive.
+
+**감사 시도 3**: plan #28(MLB analysis 4-phase + TeamStrengthGrid) tail 재확인 — "다음 cycle 후속 후보" 전무, cycle 2323 로 완전 종료 확인.
+
+결론: 코드 변경 없음, 3개 감사 시도 모두 false-positive 또는 이미 해소됨 확인(due-diligence 원칙 준수 — game_id FK null 특성을 실측 확인 없이 필터 추가했으면 불필요한 회귀 위험). review-code 감사 target 5연속 사이클(2364/2366/2367/2369/2370) 소진 지속. 다음 사이클은 주기 trigger(fix-incident 8/20, op-analysis 3/25, info-arch 6/30, lotto 9/30) 도달 대기 또는 자연 발견 권장 — review-code 외 chain (explore-idea 신규 아이디어 등) 우선 검토 여지.
+
 ## ⚪ review-code(heavy) — validator.ts/postview.ts/EN misses locale 감사, 신규 target 부재 RETRO-ONLY (cycle 2369, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked, status="approved" 없음). 직전 8사이클(2362-2369 중 2362-2368) distinct=5(lotto/fix-incident/review-code/info-arch/operational-analysis), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 방금 발화, info-arch 4/30, lotto 7/30). explore-idea saturation 10/15<12 미충족. CI/deploy-drift-alert 최근 10 run 전부 green/skip(정상), gh issue 0건. 직전 3사이클(2366/2367/2368) 이미 review-code(lite/heavy) 감사 target 소진 + op-analysis 측정전용 확인 — 이번엔 아직 미감사였던 agent 파일(validator.ts 956줄 최대 monolith, postview.ts)과 최근 신규 기능(lotto/check 페이지, EN mlb/reviews/misses 미러)으로 감사 범위 확장.
