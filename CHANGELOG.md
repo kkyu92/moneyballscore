@@ -1,3 +1,12 @@
+## v0.5.62.91 — 2026-08-23 (cycle 2430, review-code: WAR/SFR=0 데이터 갭 sentinel이 FactorBreakdown 팩터별 stat label 에 raw 노출되던 것 정정 — family 5th occurrence)
+
+### fix(components): WAR/SFR=0 (Fancy Stats 데이터 갭 sentinel)이 `FactorBreakdown` 컴포넌트의 팩터별 "away X · home Y" stat label 텍스트엔 gap guard 미적용 상태로 방치돼 예측 상세(`/predictions/[date]`, `/insights/[date]`) 페이지에서 실제 데이터 갭인데도 "home 0.0" 같은 값을 실제 수치로 오인시키던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 4/30, lotto 37/30 재충족이나 실측 확인 결과(`~/lotto_picks/2026-08-29-50sets.md` + `2026-08-22-result.md` 모두 당일 생성) 이미 self-heal 완료 — 6번째 no-op, skip). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 미충족(11/15). cycle 2429 retro 가 명시한 잔여 미감사 파일(`predictions/[date]/page.tsx`, `teams/[code]/page.tsx`, `matchup/[teamA]/[teamB]/page.tsx`) 직접 감사.
+- 발견: `teams/[code]/page.tsx`는 cycle 2429 에서 이미 수정된 `computeFactorAveragesFromPerspectives` 결과(`profile.factorAverages`)를 그대로 소비해 정합. 그러나 `predictions/[date]/page.tsx` → `FactorBreakdown` 컴포넌트(`insights/[date]/page.tsx` 도 동일 컴포넌트 공유)의 `getStatLabel()` 이 "war"/"sfr" 케이스에서 `pred.home_war_total`/`pred.home_sfr` raw 값을 `!= null` 만 검사해 그대로 텍스트로 노출 — 팩터 막대(bar)는 `predictor.ts` 의 gap guard(WAR: 한쪽이라도 `<=0`, SFR: 한쪽이라도 `===0`)가 이미 적용돼 중립(비슷)으로 정확히 표시되지만, 막대 아래 보조 stat label 텍스트는 별도 raw 값 경로라 "away 2.3 · home 0.0" 처럼 갭을 실제 수치로 오인시키는 불일치 — family 5th occurrence.
+- 실행: `FactorBreakdown.tsx` `getStatLabel()` war/sfr 케이스에 predictor.ts 와 동일한 guard 추가 (war: 양쪽 `> 0`, sfr: 양쪽 `!== 0`) — 조건 미충족 시 statLabel `null` 반환으로 텍스트 자체 숨김(막대의 중립 표시와 정합). 회귀 테스트 4건 추가(war 갭 시 숨김/war 정상 노출/sfr 갭 시 숨김/sfr 음수 정상값 양쪽 존재 시 정상 노출).
+- `pnpm --filter moneyball test`(4213/4213, 신규 4건) + `type-check`/`lint` clean.
+
 ## v0.5.62.90 — 2026-08-23 (cycle 2429, review-code: WAR/SFR=0 데이터 갭 sentinel이 팀 프로필 평균 집계에 raw 노출되던 것 정정 — family 4th occurrence)
 
 ### fix(shared): WAR/SFR=0 (Fancy Stats 데이터 갭 sentinel)이 `computeFactorAveragesFromPerspectives` 팀 관점 평균 집계엔 gap guard 미적용 상태로 방치돼 팀 프로필/매치업 페이지 "평균 SFR/WAR" 표시값이 갭 경기 수만큼 0쪽으로 끌려 내려가던 것을 정정
