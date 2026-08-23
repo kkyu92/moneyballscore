@@ -137,6 +137,8 @@ import {
   MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
   parseRecent10Record,
   computeAvgMarginFromFinalGames,
+  computeFactorAveragesFromPerspectives,
+  type FactorPerspective,
 } from './index';
 
 describe('KBO_TEAMS', () => {
@@ -976,5 +978,60 @@ describe('computeAvgMarginFromFinalGames', () => {
     ];
     expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB, 3)).toBeNull();
     expect(computeAvgMarginFromFinalGames(games, isFinal, scoreA, scoreB, 2)).not.toBeNull();
+  });
+});
+
+describe('computeFactorAveragesFromPerspectives — WAR/SFR=0 data-gap guard (cycle 2429, family 4th occurrence)', () => {
+  const base: FactorPerspective = {
+    spFip: 3.5,
+    spXfip: 3.6,
+    lineupWoba: 0.32,
+    bullpenFip: 4.0,
+    recentForm: 0.5,
+    elo: 1500,
+    sfr: 2,
+    warTotal: 5,
+  };
+
+  it('excludes sfr=0 from the average (Fancy Stats silent-fallback stub, not a real 0)', () => {
+    const result = computeFactorAveragesFromPerspectives([
+      base,
+      { ...base, sfr: 0 },
+    ]);
+    expect(result.sfr).toBe(2);
+    expect(result.warTotal).toBe(5);
+  });
+
+  it('excludes warTotal<=0 from the average (same Fancy Stats data-gap family)', () => {
+    const result = computeFactorAveragesFromPerspectives([
+      base,
+      { ...base, warTotal: 0 },
+    ]);
+    expect(result.warTotal).toBe(5);
+    expect(result.sfr).toBe(2);
+  });
+
+  it('still averages a legitimate negative sfr (only exact 0 is treated as a gap)', () => {
+    const result = computeFactorAveragesFromPerspectives([
+      { ...base, sfr: -1 },
+      { ...base, sfr: 3 },
+    ]);
+    expect(result.sfr).toBe(1);
+  });
+
+  it('returns null when every sample is a data gap', () => {
+    const result = computeFactorAveragesFromPerspectives([
+      { ...base, sfr: 0, warTotal: 0 },
+    ]);
+    expect(result.sfr).toBeNull();
+    expect(result.warTotal).toBeNull();
+    expect(result.sampleN).toBe(1);
+  });
+
+  it('leaves other factors untouched by the gap guard', () => {
+    const result = computeFactorAveragesFromPerspectives([
+      { ...base, spFip: 0 },
+    ]);
+    expect(result.spFip).toBe(0);
   });
 });

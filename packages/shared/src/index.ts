@@ -2852,12 +2852,25 @@ const KBO_FACTOR_FIELDS = [
  * safeAvg)이 독립 중복돼있던 것 통합 (cycle 2040 review-code heavy). 호출부가
  * 각자 쿼리 결과를 팀 관점(isHome 판정 완료) perspective 배열로 매핑해서 전달.
  * 실제 sum/count 누적은 computeNumericAveragesFromPerspectives (cycle 2064) 로 위임.
+ *
+ * cycle 2429 fix (WAR/SFR=0 데이터 갭 family 4th occurrence): sfr/warTotal 은 Fancy
+ * Stats silent-fallback stub (`fetchEloRatings` `sfr || FANCY_STATS_DEFAULTS.sfr`=0)
+ * 이 DB 에 literal 0 으로 저장돼 실제 0 과 구분 불가 — predictor.ts(wave-533/535)와
+ * computeCompositeDuel.ts 가 이미 갖고 있는 gap guard(SFR `!== 0`, WAR `> 0`)를
+ * 여기선 미적용 상태였음. `v != null` 만 검사하는 computeNumericAveragesFromPerspectives
+ * 는 이 0을 유효 데이터로 평균에 포함시켜 팀 프로필 페이지의 "평균 SFR/WAR" 표시값이
+ * 갭 경기 수만큼 0쪽으로 끌려 내려감. 평균 계산 전 gap 값을 null 로 정규화해 제외.
  */
 export function computeFactorAveragesFromPerspectives(
   perspectives: FactorPerspective[],
 ): FactorAveragesResult {
+  const gapNormalized = perspectives.map((p) => ({
+    ...p,
+    sfr: p.sfr === 0 ? null : p.sfr,
+    warTotal: p.warTotal != null && p.warTotal > 0 ? p.warTotal : null,
+  }));
   return computeNumericAveragesFromPerspectives(
-    perspectives,
+    gapNormalized,
     KBO_FACTOR_FIELDS,
   ) as FactorAveragesResult;
 }
