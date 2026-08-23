@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — v2.1-B/v2.0-shadow row reasoning object stringify silent 버그 수정 (cycle 2438, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 1/20 방금 재발화, op-analysis 7/25, info-arch 13/30, lotto self-heal 완료 skip). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 9/15 미충족. cycle 2436 review-code(heavy)가 WAR/SFR family 4연속 소진 확정 — 동일 family 재검색 저수익 판단, 미감사 대형 파일(`apps/moneyball/src/app/page.tsx` 홈페이지 1082줄) 직접 감사로 전환. (부가: cycle 2437 fix-incident의 retro commit + cycle_state JSON 양쪽 부재 관측 — 사례15 silent retro drift 재발이나 실제 코드 작업(root/VERSION drift fix)은 정상 완료 확인, retroactive 박제는 skip.)
+
+발견: 홈페이지 hero selector 3곳(`selectTopStatPick`/`selectBigMatchFromGames`/`getTodayDivergenceGame`)의 2-level fallback(`reasoning.debate.verdict.homeWinProb ?? reasoning.homeWinProb`)이 카드 렌더 경로 3-level fallback(+`home_win_prob`)과 비대칭이나, production reasoning은 `buildFinalReasoning()`이 항상 `homeWinProb` 보장하는 설계라 false positive(버그 아님) 확인. 인접 확장 감사로 `daily.ts`의 v2.1-B-shadow/v2.0-shadow row insert가 `finalReasoning`(object)을 template literal에 직접 interpolate — `reasoning` 컬럼에 실제 텍스트 대신 매번 literal `"[object Object]"` 저장되는 것 발견. cycle 1013(v2.1-B-shadow)/1019(v2.0-shadow) 도입 이후 전체 shadow row 영향. `/accuracy/shadow` page는 `pairProbForRow`가 `factors` JSONB 재계산 경로로 이미 우회(cycle 1021 hotfix)해 표시값엔 영향 없었으나, 컬럼 자체는 계속 무의미한 문자열로 오염되는 silent trap이었음.
+
+실행: `finalReasoning.reasoning`(실제 quant 서술 문자열)으로 두 callsite 수정. 회귀 테스트 1건 신설(`pipeline-daily.test.ts`) — v2.1-B/v2.0 shadow row 양쪽 reasoning이 `"[object Object]"` 미포함 + 실제 텍스트 확인. `pnpm --filter kbo-data test`(1182/1182, 신규 1건) + `pnpm --filter moneyball test`(4217/4217) + 양쪽 `type-check`/`lint` clean. PR #3053 → squash merge `7095e37b` (R7 `--auto` 즉시 성공) + `build: v0.5.62.94` 버전 반영(`42517584`).
+
+다음 사이클 추천 = explore-idea(saturation 9/15→10/15 근접) 또는 op-analysis(7/25 진행). review-code가 최근 다수 사이클 dominant — WAR/SFR family 소진 + 신규 shadow-reasoning family는 1회성(2곳 모두 수정 완료) → 다양성 회복 권장. skill-evolution trigger 5개 전부 미충족.
+
 ## 🔵 RETRO-ONLY — MLB_BASE_WEIGHTS 완전 wiring 확인 + WAR/SFR family 4th 재확인, 신규 target 0건 (cycle 2436, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(29=Tier4 유지). gap trigger 전부 미도달(fix-incident 13/20, op-analysis 5/25, info-arch 11/30, lotto 44/30 재충족이나 self-heal 완료 확인 — skip). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 10/15 미충족. 직전 3연속(2433~2435) 추천 후보(explore-idea/fix-incident) 양쪽 강한 trigger 부재 상태에서 review-code(heavy)로 미감사 대형 파일(`packages/shared/src/index.ts` 3435줄, `packages/kbo-data/src/factors/mlb-base.ts`) 직접 감사.
