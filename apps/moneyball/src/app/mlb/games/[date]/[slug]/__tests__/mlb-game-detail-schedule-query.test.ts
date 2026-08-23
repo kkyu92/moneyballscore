@@ -70,4 +70,13 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/externalGameId=\{schedule\.external_game_id\}/);
     expect(PAGE_SRC).toMatch(/asOfDate=\{date\}/);
   });
+
+  // cycle 2412 review-code heavy: home_recent_form/away_recent_form 은 DB 에 0-1 승률로
+  // 저장(KBO 동일 컨벤션)되지만 mlb-waterfall.ts/mlb-base.ts recent_form 계약은 0-100(백분율)
+  // 스케일 — 그대로 넘기면 waterfall bar/factor-detail 표시가 100배 축소되는 scale mismatch
+  // 였음. *100 변환 없이 원본 컬럼을 그대로 waterfallInput 에 넣는 회귀 차단.
+  it("recent_form 을 waterfallInput 에 0-100 스케일로 변환해 넘긴다 (scale mismatch 회귀 차단)", () => {
+    expect(PAGE_SRC).toMatch(/pred\.home_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.home_recent_form\s*\*\s*100/);
+    expect(PAGE_SRC).toMatch(/pred\.away_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.away_recent_form\s*\*\s*100/);
+  });
 });

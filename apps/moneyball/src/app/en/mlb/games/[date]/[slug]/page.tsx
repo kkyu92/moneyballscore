@@ -216,7 +216,13 @@ export default async function GameDetailEn({ params }: PageParams) {
     bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
     lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
     war: { home: pred.home_war_total, away: pred.away_war_total },
-    recent_form: { home: pred.home_recent_form, away: pred.away_recent_form },
+    // home_recent_form/away_recent_form 은 DB 에 0-1 승률(KBO 와 동일 컨벤션)로 저장되지만
+    // mlb-waterfall.ts/mlb-base.ts 의 recent_form 계약은 mlb-pipeline.ts 가 computeMlbProbability
+    // 호출 직전 *100 해 넘기는 0-100(백분율) 스케일 — KO page.tsx 와 동일 fix (cycle 2412).
+    recent_form: {
+      home: pred.home_recent_form == null ? null : pred.home_recent_form * 100,
+      away: pred.away_recent_form == null ? null : pred.away_recent_form * 100,
+    },
     head_to_head: {
       home: pred.head_to_head_rate,
       away: pred.head_to_head_rate == null ? null : 1 - pred.head_to_head_rate,

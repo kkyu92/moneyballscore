@@ -61,4 +61,12 @@ describe("en/mlb/games/[date]/[slug] KO parity 회귀 가드 (cycle 2109)", () =
     expect(PAGE_SRC).toMatch(/locale="en"/);
     expect(PAGE_SRC).toMatch(/externalGameId=\{schedule\.external_game_id\}/);
   });
+
+  // cycle 2412 review-code heavy: KO page.tsx 와 동일한 recent_form scale mismatch(DB 0-1
+  // 승률을 mlb-waterfall.ts 0-100 계약에 그대로 넘겨 bar/표시값 100배 축소)가 EN 미러에도
+  // 동일하게 존재 — 양쪽 동시 fix, 회귀 차단.
+  it("recent_form 을 waterfallInput 에 0-100 스케일로 변환해 넘긴다 (scale mismatch 회귀 차단, KO parity)", () => {
+    expect(PAGE_SRC).toMatch(/pred\.home_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.home_recent_form\s*\*\s*100/);
+    expect(PAGE_SRC).toMatch(/pred\.away_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.away_recent_form\s*\*\s*100/);
+  });
 });

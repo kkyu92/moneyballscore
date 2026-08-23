@@ -227,7 +227,15 @@ export default async function GameDetail({ params }: PageParams) {
     war: { home: pred.home_war_total, away: pred.away_war_total },
     // head_to_head_rate 는 DB 단일 컬럼(homeWinRate) — mlb-waterfall.ts 계약대로
     // {home: rate, away: 1-rate} 대칭 pair 로 인코딩 (null 이면 양쪽 null 로 bar skip).
-    recent_form: { home: pred.home_recent_form, away: pred.away_recent_form },
+    // home_recent_form/away_recent_form 은 DB 에 0-1 승률(KBO 와 동일 컨벤션, fmtPct 가
+    // *100 해 표시)로 저장되지만, mlb-waterfall.ts/mlb-base.ts 의 recent_form 계약은
+    // mlb-pipeline.ts runPredictFinal 이 computeMlbProbability 호출 직전 *100 해 넘기는
+    // 0-100(백분율) 스케일 — 그대로 넘기면 waterfall bar/상세 테이블 값이 100배 축소되는
+    // scale mismatch (review-code heavy 실측 발견, cycle 2412).
+    recent_form: {
+      home: pred.home_recent_form == null ? null : pred.home_recent_form * 100,
+      away: pred.away_recent_form == null ? null : pred.away_recent_form * 100,
+    },
     head_to_head: {
       home: pred.head_to_head_rate,
       away: pred.head_to_head_rate == null ? null : 1 - pred.head_to_head_rate,
