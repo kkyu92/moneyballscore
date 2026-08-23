@@ -80,7 +80,8 @@ function getStatLabel(
         return `${awayName} ${Math.round(d.awayForm * 100)}% · ${homeName} ${Math.round(d.homeForm * 100)}%`;
       break;
     case "war":
-      if (d.awayWar != null && d.homeWar != null)
+      // totalWar<=0 on either side = Fancy Stats data gap (predictor.ts 동일 guard) — raw 0 노출 금지
+      if (d.awayWar != null && d.homeWar != null && d.awayWar > 0 && d.homeWar > 0)
         return `${awayName} ${d.awayWar.toFixed(1)} · ${homeName} ${d.homeWar.toFixed(1)}`;
       break;
     case "head_to_head":
@@ -99,7 +100,8 @@ function getStatLabel(
         return `${awayName} ${Math.round(d.awayElo)} · ${homeName} ${Math.round(d.homeElo)}`;
       break;
     case "sfr":
-      if (d.awaySfr != null && d.homeSfr != null)
+      // sfr===0 on either side = Fancy Stats silent-fallback stub (predictor.ts 동일 guard) — raw 0 노출 금지
+      if (d.awaySfr != null && d.homeSfr != null && d.awaySfr !== 0 && d.homeSfr !== 0)
         return `${awayName} ${d.awaySfr.toFixed(1)} · ${homeName} ${d.homeSfr.toFixed(1)}`;
       break;
     case "park_weather": {

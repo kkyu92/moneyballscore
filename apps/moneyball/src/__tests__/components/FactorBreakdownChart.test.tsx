@@ -141,6 +141,61 @@ describe("FactorBreakdown — chart variant + shadow factor 11/12", () => {
     expect(contributionPp(0.3, 0.08)).toBeCloseTo(-3.2, 5);
   });
 
+  it("war 데이터 갭 (한쪽 totalWar<=0) 시 raw 0 stat label 숨김 (predictor.ts asymmetric-zero guard 동기)", () => {
+    const { container } = render(
+      <FactorBreakdown
+        factors={PROD_FACTORS}
+        homeTeam="LG"
+        awayTeam="HT"
+        details={{ homeWar: 0, awayWar: 3.2 }}
+      />,
+    );
+    const warRow = container.querySelector('[data-factor="war"]');
+    expect(warRow?.textContent).not.toContain("0.0");
+    expect(warRow?.textContent).not.toContain("3.2");
+  });
+
+  it("war 양쪽 모두 유효(>0) 시 raw stat label 정상 노출", () => {
+    const { container } = render(
+      <FactorBreakdown
+        factors={PROD_FACTORS}
+        homeTeam="LG"
+        awayTeam="HT"
+        details={{ homeWar: 5.1, awayWar: 3.2 }}
+      />,
+    );
+    const warRow = container.querySelector('[data-factor="war"]');
+    expect(warRow?.textContent).toContain("5.1");
+    expect(warRow?.textContent).toContain("3.2");
+  });
+
+  it("sfr 데이터 갭 (한쪽 sfr===0) 시 raw 0 stat label 숨김 (predictor.ts silent-fallback stub guard 동기)", () => {
+    const { container } = render(
+      <FactorBreakdown
+        factors={PROD_FACTORS}
+        homeTeam="LG"
+        awayTeam="HT"
+        details={{ homeSfr: 0, awaySfr: -1.4 }}
+      />,
+    );
+    const sfrRow = container.querySelector('[data-factor="sfr"]');
+    expect(sfrRow?.textContent).not.toContain("-1.4");
+  });
+
+  it("sfr 음수(유효 정상값) 양쪽 존재 시 raw stat label 정상 노출", () => {
+    const { container } = render(
+      <FactorBreakdown
+        factors={PROD_FACTORS}
+        homeTeam="LG"
+        awayTeam="HT"
+        details={{ homeSfr: -0.8, awaySfr: -1.4 }}
+      />,
+    );
+    const sfrRow = container.querySelector('[data-factor="sfr"]');
+    expect(sfrRow?.textContent).toContain("-0.8");
+    expect(sfrRow?.textContent).toContain("-1.4");
+  });
+
   it("RivalryMemorySurface — memories prop 직접 주입 시 3 카드 렌더", async () => {
     const { RivalryMemorySurface } = await import(
       "@/components/predictions/RivalryMemorySurface"
