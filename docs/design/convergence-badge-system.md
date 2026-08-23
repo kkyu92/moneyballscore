@@ -69,6 +69,6 @@ game/[id] 페이지의 `badgeClass` amber (isComplete) 패턴을 분석 목록 �
 
 ## 다음 cycle 후속 후보
 
-- 수렴 배지 컴포넌트 분리 (inline JSX → `ConvergenceBadge.tsx`) — DRY (analysis/game + analysis 2 위치)
-- amber tier bg/text token → CSS 변수화 (`--color-convergence-complete-bg` 등) — DESIGN.md token 정합
-- Reduced-motion 가드: 칩 hover transition 누락 확인
+- 수렴 배지 컴포넌트 분리 (inline JSX → `ConvergenceBadge.tsx`) — DRY (analysis/game + analysis 2 위치). **Tier 3** (large): `analysis/page.tsx` 는 리스트 row 구조(칩만 표시, badgeClass 컨테이너 없음), `analysis/game/[id]/page.tsx` 는 독립 카드 구조 — 단순 JSX 추출이 아니라 두 컨텍스트를 아우르는 컴포넌트 설계 필요. 별도 plan 분리 권장.
+- amber tier bg/text token → CSS 변수화 (`--color-convergence-complete-bg` 등) — DESIGN.md token 정합. **Tier 3** (large): 관련 `brand-500`/`amber-500` 등 색상 literal 이 두 파일에 100+ 회 출현하나 대부분 수렴 배지와 무관한 범용 강조색 재사용 — 배지 전용 치환 시 scope 경계 모호, 별도 plan 분리 권장.
+- ~~Reduced-motion 가드: 칩 hover transition 누락 확인~~ — **cycle 2381 확인 완료, 이미 해소됨**. `globals.css` `@media (prefers-reduced-motion: reduce)` 블록이 `*, *::before, *::after { transition-duration: 0.01ms !important }` 전역 강제 (2026-05-28 W-D 모션 토큰 박제) — 배지 칩 `transition-colors` 도 이 전역 규칙 상속. 개별 가드 불필요, false-positive.
