@@ -1,3 +1,26 @@
+## v0.5.62.78 — 2026-08-23 (cycle 2356, explore-idea: en/mlb/reviews/monthly 영어 미러 신규 배선)
+
+### feat(mlb): `/en/mlb/reviews/monthly` MLB 월간 리뷰 영어 미러 신규 배선 — cycle 2355 weekly 완료 직후 후속(plan #26 phase 분리 관례)
+
+- 발견: cycle 2355 explore-idea retro가 "다음 explore-idea 후보 = `/en/mlb/reviews/monthly`
+  동일 패턴 미러(이번 cycle 과 동일 방법론 재사용, buildMlbMonthlyReview 에도 동일 locale
+  param 추가 필요)" 로 명시적 carry-over — weekly EN 미러와 완전히 동일한 구조(KO 페이지
+  전체 mirror + locale param 배선)라 그대로 재사용.
+- 실행: `buildMlbMonthlyReview.ts` 에 `locale?: 'ko'|'en'` 파라미터 추가(기본값 `'ko'`, 기존
+  KO callsite 무변경), `buildSummary` 자연어 문장 EN 분기 신규 작성, `buildMlbFactorInsights`
+  호출에 locale 전달. `MonthlyTeamStatsSortControl` 에도 `WeeklyGamesSortControl` 과 동일
+  패턴으로 `locale` prop 추가. `/en/mlb/reviews/monthly`(redirect index) + `/en/mlb/reviews/monthly/[month]`
+  (KO 페이지 전체 mirror, ConvergenceHomeAwayBadges/ConvergenceDayOfWeekBadges/ConvergenceTeamStatsBadges/
+  MlbHighlightCard/Breadcrumb 는 기존 `locale` prop 재사용) + opengraph-image(이미 영어라
+  URL 경로만 교체)/twitter-image/not-found 신규. `sitemap.ts` 에 `enMlbMonthlyReviewRoutes`
+  (최근 6개월) 추가 + stale 주석("monthly EN 미러는 스코프 밖") 정정. `/en/mlb/reviews`
+  허브에 월간 리뷰 진입 카드 신규 배선(KO 허브와 동일 구조).
+- 결론: MLB weekly + monthly 리뷰 KO/EN parity 완결(cycle 620 최초 언급 → cycle 2355 weekly
+  → cycle 2356 monthly, 3-cycle 시리즈 종료). 다음 explore-idea 후보 = 자연 발견.
+
+검증: `tsc --noEmit`(kbo-data+moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data
+90 files/1165 tests + moneyball 500 files/4198 tests all green).
+
 ## v0.5.62.77 — 2026-08-23 (cycle 2355, explore-idea: en/mlb/reviews/weekly 영어 미러 신규 배선)
 
 ### feat(mlb): `/en/mlb/reviews/weekly` MLB 주간 리뷰 영어 미러 신규 배선 — cycle 620 최초 언급 이후 다중 cycle carry-over 해소

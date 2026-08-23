@@ -10,11 +10,12 @@ import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayO
 import { getMlbReviewsData } from "@/app/mlb/reviews/reviews-data";
 import { computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
-import { REVIEWS_HUB_RECENT_WEEKS } from "@moneyball/shared";
+import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
+import { REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS } from "@moneyball/shared";
 
 // en/mlb/reviews (wave-659, cycle 2339) — KO /mlb/reviews 미러. weekly 서브페이지 EN 미러
-// 신규 배선(wave-660, cycle 2355 — cycle 620 최초 언급 이후 다중 cycle carry-over) —
-// monthly 서브페이지는 여전히 스코프 밖(별도 cycle 후속, plan #26 관례상 phase 분리).
+// 신규 배선(wave-660, cycle 2355 — cycle 620 최초 언급 이후 다중 cycle carry-over), monthly
+// 서브페이지 EN 미러(cycle 2356 — weekly 완료 직후 후속) 로 KO/EN parity 완결.
 const PAGE_URL = `${SITE_URL}/en/mlb/reviews`;
 
 export const metadata: Metadata = {
@@ -60,6 +61,7 @@ export default async function MlbReviewsPageEn() {
   } = await getMlbReviewsData();
 
   const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
+  const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -122,6 +124,36 @@ export default async function MlbReviewsPageEn() {
                 className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500 hover:text-brand-500 transition-colors"
               >
                 {w.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-accent/5 to-brand-500/5 dark:from-accent/10 dark:to-brand-500/10 rounded-xl border border-accent/30 p-5 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                📆 Monthly Review
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Month-over-month diff, team stats, and factor insights
+              </p>
+            </div>
+            <Link
+              href={`/en/mlb/reviews/monthly/${recentMonths[recentMonths.length - 1].monthId}`}
+              className="text-sm font-medium text-accent hover:underline"
+            >
+              This month →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentMonths.map((m) => (
+              <Link
+                key={m.monthId}
+                href={`/en/mlb/reviews/monthly/${m.monthId}`}
+                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[var(--color-surface-card)] border border-gray-200 dark:border-[var(--color-border)] hover:border-accent hover:text-accent transition-colors"
+              >
+                {m.label}
               </Link>
             ))}
           </div>

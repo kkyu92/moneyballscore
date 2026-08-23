@@ -11,6 +11,13 @@ const LABELS: Record<SortMode, string> = {
   sample: '표본순',
 };
 
+// cycle 2356 (en/mlb/reviews/monthly 미러): locale prop 추가 — 기본값 'ko' 라
+// 기존 KO callsite 무변경 (WeeklyGamesSortControl 과 동일 패턴).
+const LABELS_EN: Record<SortMode, string> = {
+  accuracy: 'By accuracy',
+  sample: 'By sample size',
+};
+
 const ORDER: SortMode[] = ['accuracy', 'sample'];
 
 function subscribe(callback: () => void) {
@@ -49,8 +56,9 @@ const SAMPLE_ORDER_CSS = Array.from(
   (_, i) => `[data-monthly-team-stats-list] [data-sample-rank="${i}"]{order:${i};}`,
 ).join('');
 
-export function MonthlyTeamStatsSortControl() {
+export function MonthlyTeamStatsSortControl({ locale = 'ko' }: { locale?: 'ko' | 'en' } = {}) {
   const sort = useSyncExternalStore(subscribe, readSort, getServerSnapshot);
+  const labels = locale === 'en' ? LABELS_EN : LABELS;
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3">
@@ -63,7 +71,7 @@ export function MonthlyTeamStatsSortControl() {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          정렬
+          {locale === 'en' ? 'Sort' : '정렬'}
         </span>
         {ORDER.map((key) => {
           const active = sort === key;
@@ -79,7 +87,7 @@ export function MonthlyTeamStatsSortControl() {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}
+              {labels[key]}
             </button>
           );
         })}

@@ -97,9 +97,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/en/mlb/analysis`, lastModified: now, changeFrequency: 'daily', priority: 0.85 },
     { url: `${SITE_URL}/en/mlb/reviews`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/en/mlb/reviews/misses`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
-    // /en/mlb/reviews/weekly = redirect-only 페이지 (mlb/reviews/weekly 와 동일 사유) —
-    // dynamic block (enMlbWeeklyReviewRoutes) 이 실제 컨텐츠 URL 커버 (wave-660, cycle 2355).
-    // monthly EN 미러는 스코프 밖(별도 cycle 후속) — enMlbMonthlyReviewRoutes 미생성.
+    // /en/mlb/reviews/weekly, /en/mlb/reviews/monthly = redirect-only 페이지 (mlb/reviews/weekly
+    // 와 동일 사유) — dynamic block (enMlbWeeklyReviewRoutes, wave-660 cycle 2355 /
+    // enMlbMonthlyReviewRoutes, cycle 2356) 이 실제 컨텐츠 URL 커버.
     { url: `${SITE_URL}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
@@ -263,6 +263,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
+  // 최근 6개월 MLB 월간 리뷰 English mirror URL (mlbMonthlyReviewRoutes 대응, cycle 2356)
+  const enMlbMonthlyReviewRoutes: MetadataRoute.Sitemap = getRecentMonths(6).map(
+    (m) => ({
+      url: `${SITE_URL}/en/mlb/reviews/monthly/${m.monthId}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    }),
+  );
+
   // 모든 past + 오늘 경기 /analysis/game/[id] URL + 일자별 /predictions/[date]
   // + 등판 기록 있는 모든 선발 투수 /players/[id] URL
   const analysisRoutes: MetadataRoute.Sitemap = [];
@@ -419,6 +429,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...mlbWeeklyReviewRoutes,
     ...mlbMonthlyReviewRoutes,
     ...enMlbWeeklyReviewRoutes,
+    ...enMlbMonthlyReviewRoutes,
     ...teamProfileRoutes,
     ...teamRecentRoutes,
     ...mlbTeamProfileRoutes,

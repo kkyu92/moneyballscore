@@ -87,29 +87,42 @@ function buildSummary(
   accuracyRate: number,
   previousAccuracyRate: number | null,
   topTeam: MlbWeeklyTeamStat | null,
+  locale: "ko" | "en" = "ko",
 ): string {
+  const isEn = locale === "en";
+
   if (verifiedGames === 0) {
-    return `${month.label}에는 아직 검증된 MLB 예측이 없습니다. 경기가 치러지고 결과가 반영되면 집계가 시작됩니다.`;
+    return isEn
+      ? `No MLB predictions have been verified yet for ${month.label}. The tally begins once games are played and results come in.`
+      : `${month.label}에는 아직 검증된 MLB 예측이 없습니다. 경기가 치러지고 결과가 반영되면 집계가 시작됩니다.`;
   }
 
   const pctLabel = `${Math.round(accuracyRate * 100)}%`;
-  let text = `${month.label} 한 달 동안 총 ${verifiedGames}경기의 MLB 예측을 검증한 결과 ${correctGames}경기 적중 (${pctLabel})했습니다.`;
+  let text = isEn
+    ? `A total of ${verifiedGames} MLB predictions were verified over ${month.label}, with ${correctGames} correct (${pctLabel}).`
+    : `${month.label} 한 달 동안 총 ${verifiedGames}경기의 MLB 예측을 검증한 결과 ${correctGames}경기 적중 (${pctLabel})했습니다.`;
 
   if (previousAccuracyRate != null && verifiedGames >= MIN_VERIFIED_GAMES_HEDGE) {
     const diffPp = Math.round((accuracyRate - previousAccuracyRate) * 100);
     if (diffPp !== 0) {
-      text += ` 전월 대비 ${diffPp > 0 ? "+" : ""}${diffPp}%p.`;
+      text += isEn
+        ? ` ${diffPp > 0 ? "+" : ""}${diffPp}pp vs. the previous month.`
+        : ` 전월 대비 ${diffPp > 0 ? "+" : ""}${diffPp}%p.`;
     }
   }
 
   if (topTeam && topTeam.predicted >= SMALL_SAMPLE_N) {
-    text += ` 가장 정확했던 팀은 ${topTeam.teamName} (${topTeam.correct}/${topTeam.predicted} · ${Math.round(topTeam.accuracy * 100)}%).`;
+    text += isEn
+      ? ` The most accurately predicted team was ${topTeam.teamName} (${topTeam.correct}/${topTeam.predicted} · ${Math.round(topTeam.accuracy * 100)}%).`
+      : ` 가장 정확했던 팀은 ${topTeam.teamName} (${topTeam.correct}/${topTeam.predicted} · ${Math.round(topTeam.accuracy * 100)}%).`;
   }
 
   if (accuracyRate >= ACCURACY_GOOD_RATE) {
-    text += " 모델의 견조한 퍼포먼스가 유지됐습니다.";
+    text += isEn ? " The model held a solid performance this month." : " 모델의 견조한 퍼포먼스가 유지됐습니다.";
   } else if (accuracyRate <= ACCURACY_WARN_RATE) {
-    text += " 변수 많은 달이었으며, 팩터 편향 분석 결과는 다음 튜닝 근거로 축적됩니다.";
+    text += isEn
+      ? " This was a volatile month — the factor bias breakdown below feeds into future tuning."
+      : " 변수 많은 달이었으며, 팩터 편향 분석 결과는 다음 튜닝 근거로 축적됩니다.";
   }
 
   return text;
@@ -117,6 +130,7 @@ function buildSummary(
 
 export async function buildMlbMonthlyReview(
   month: MonthRange,
+  locale: "ko" | "en" = "ko",
 ): Promise<MlbMonthlyReview> {
   const rows = await fetchMlbPredictionRowsInRange(
     month.startDate,
@@ -150,7 +164,7 @@ export async function buildMlbMonthlyReview(
 
   const highlights = pickHighlights(rows);
   const teamStats = buildMlbTeamStats(rows);
-  const factorInsights = buildMlbFactorInsights(rows, { minSamples: SMALL_SAMPLE_N });
+  const factorInsights = buildMlbFactorInsights(rows, { minSamples: SMALL_SAMPLE_N, locale });
   const topTeam =
     teamStats.find((t) => t.predicted >= SMALL_SAMPLE_N) ?? teamStats[0] ?? null;
   const summary = buildSummary(
@@ -160,6 +174,7 @@ export async function buildMlbMonthlyReview(
     accuracyRate,
     previousAccuracyRate,
     topTeam,
+    locale,
   );
 
   return {

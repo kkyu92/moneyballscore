@@ -1,3 +1,13 @@
+## 🟢 explore-idea — en/mlb/reviews/monthly 영어 미러 신규 배선 SUCCESS (cycle 2356, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2348-2355) distinct=4(review-code/fix-incident/skill-evolution/explore-idea), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 16/30, lotto 12/30). saturation 9/15 미충족. cycle 2355 retro 가 "다음 explore-idea 후보 = `/en/mlb/reviews/monthly` 동일 패턴 미러" 로 명시적 carry-over — weekly EN 미러와 완전히 동일 구조라 그대로 재사용.
+
+**실행**: `buildMlbMonthlyReview`에 `locale?: 'ko'|'en'` 파라미터 추가(weekly 와 동일 패턴), `MonthlyTeamStatsSortControl` locale prop 추가. `/en/mlb/reviews/monthly`(redirect) + `/en/mlb/reviews/monthly/[month]`(KO 페이지 전체 mirror) + opengraph-image/twitter-image/not-found 신규. `sitemap.ts` `enMlbMonthlyReviewRoutes`(최근 6개월) 추가 + stale 주석 정정. `/en/mlb/reviews` 허브에 월간 리뷰 진입 카드 신규 배선.
+
+검증: `tsc --noEmit`(kbo-data+moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data 90 files/1165 tests + moneyball 500 files/4198 tests all green).
+
+결론: MLB weekly + monthly 리뷰 KO/EN parity 완결(cycle 620 최초 언급 → cycle 2355 weekly → cycle 2356 monthly, 3-cycle 시리즈 종료). 다음 explore-idea 후보 = 자연 발견 대기.
+
 ## 🟢 explore-idea (heavy) — en/mlb/reviews/weekly 영어 미러 신규 배선 SUCCESS (cycle 2355, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(literal `approved` 매칭 없음). 2-chain lock 미충족(직전 8사이클 2347-2354 distinct=4: explore-idea/fix-incident/review-code/skill-evolution). 주기 trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 19/25, info-arch 15/30, lotto 11/30). cycle 2354 retro 명시 "explore-idea 또는 op-analysis/lotto/info-arch 주기 trigger 확인" — 주기 trigger 전부 미도달 확인 후 explore-idea 채택. plan #27(MLB 픽/리더보드) 재확인 결과 `mlb_pick_poll_events` 실측 참여 0건(Supabase 직접 COUNT) — 여전히 blocked, 착수 보류.
