@@ -1,3 +1,17 @@
+## ⚪ review-code(heavy) — validator.ts/postview.ts/EN misses locale 감사, 신규 target 부재 RETRO-ONLY (cycle 2369, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked, status="approved" 없음). 직전 8사이클(2362-2369 중 2362-2368) distinct=5(lotto/fix-incident/review-code/info-arch/operational-analysis), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 방금 발화, info-arch 4/30, lotto 7/30). explore-idea saturation 10/15<12 미충족. CI/deploy-drift-alert 최근 10 run 전부 green/skip(정상), gh issue 0건. 직전 3사이클(2366/2367/2368) 이미 review-code(lite/heavy) 감사 target 소진 + op-analysis 측정전용 확인 — 이번엔 아직 미감사였던 agent 파일(validator.ts 956줄 최대 monolith, postview.ts)과 최근 신규 기능(lotto/check 페이지, EN mlb/reviews/misses 미러)으로 감사 범위 확장.
+
+**감사 시도 1**: `find apps/moneyball/src/app -name page.tsx -mtime -7` 72건 → git log 기준 실제 신규 라우트 21건(EN mlb 미러 10 + KO 대응 10 + lotto/check 1) 확인, info-architecture-review trigger(1) 조건("7일 안 ≥3") 표면상 충족. `grep -L Breadcrumb` (globstar 적용) 18건 미검출로 재확인했으나 전부 의도된 제외(debug/* 내부 페이지 8건, login/settings/root 자체 헤더 구조, reviews/weekly·monthly index 는 redirect-only 콘텐츠 없음, community 는 미색인 placeholder stub) — cycle 2365 가 이미 확인한 동일 false-positive 패턴 재확인, info-arch 재발화 보류.
+
+**감사 시도 2**: EN mlb/reviews/misses 페이지(신규, wave-659) — `buildMlbMissReport({ locale: "en" })` 로케일 배선 정상 확인 + 전용 회귀 테스트(`wave-659-en-mlb-reviews-mirror.test.ts`) 존재. KO/EN diff 전체 대조 결과 하드코딩 누락 없음, cycle 2360 이 고친 것과 동일 클래스 버그 재발 없음.
+
+**감사 시도 3**: `postview.ts`(496줄, 한글 리터럴 123건) locale 파라미터 부재로 EN 미러 누락처럼 보였으나, postview 는 KBO 전용 사후 판정 에이전트 — KBO 리그는 EN 미러 자체가 존재하지 않음(cycle 2367 이미 확인한 "`KBO_NAV` 전체가 원래부터 EN 필드 부재, 의도된 구조"와 동일 원인) — false-positive.
+
+**감사 시도 4**: `validator.ts`(956줄, agents 디렉토리 최대 monolith) — 최근 커밋(`0ae406ce` 환각검증 half-applied fix 재발 대응)이 이미 이번 감사가 의심했던 가중치%/WAR 인용 오탐 케이스를 정확히 커버, 별도 신규 이슈 미발견.
+
+결론: 코드 변경 없음. 4개 감사 시도 모두 false-positive 또는 이미 해소됨 확인(신규 회귀 유발 없음 — due-diligence 원칙 준수). review-code 감사 target 이 4연속 사이클(2364/2366/2367/2369) 소진 국면 지속 — 다음 사이클은 주기 trigger(fix-incident 7/20, info-arch 5/30, lotto 8/30) 도달 대기 또는 자연 발견 권장.
+
 ## 🟢 operational-analysis(lite) — 이번 주(8/17~8/23) n=21 acc 47.6%, CE 100% 유지 SUCCESS (cycle 2368, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2360-2367) distinct=5(review-code/op-analysis/lotto/fix-incident/info-arch), 2-chain lock 미충족(distinct=5≥3). 주기 trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, info-arch 2/30, lotto 5/30). explore-idea saturation 11/15<12 미충족. 직전 3사이클(2365/2366/2367) 연속 clean-audit RETRO-ONLY(info-arch/review-code lite/review-code heavy) — 감사 target 소진 신호, operational-analysis(lite) 로 방향 전환(측정 전용, 코드 리스크 0).
