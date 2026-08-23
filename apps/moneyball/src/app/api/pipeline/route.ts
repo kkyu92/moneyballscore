@@ -71,13 +71,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return Response.json({
-      ...result,
-      _debug: {
-        hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
-        keyPrefix: process.env.ANTHROPIC_API_KEY?.slice(0, 10) || 'none',
-      },
-    });
+    return Response.json(result);
   } catch (e) {
     const message = errMsg(e);
     console.error('[Pipeline API]', message);
