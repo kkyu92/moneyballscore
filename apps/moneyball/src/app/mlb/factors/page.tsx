@@ -273,8 +273,9 @@ export default function MlbFactorsHub() {
           <code>packages/kbo-data/src/factors/mlb-base.ts</code> 정의. 모델 진화 (n={V2_PROMOTION_COHORT_N} forward cohort 후) 시 갱신.
         </p>
         <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-3 py-2">
-          ⚠ 아래 표 중 최근폼·상대전적·Elo·수비 SFR 4개는 팀/매치업 페이지엔 참고용으로 별도 표시되지만,
+          ⚠ 아래 표 중 최근폼·상대전적·수비 SFR 3개는 팀/매치업 페이지엔 참고용으로 별도 표시되지만,
           실제 예측 승률 계산에는 팀 구분 없는 중립값이 고정 입력되어 아직 반영되지 않습니다 (KBO 버전은 실측 반영).
+          Elo 는 실측 레이팅이 예측 승률 계산에 반영됩니다.
         </p>
       </header>
 

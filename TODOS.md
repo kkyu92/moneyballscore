@@ -1,3 +1,16 @@
+## 🟢 fix-incident — MLB Elo 팩터 실측 wiring, 10% 가중치 silent no-op 해소 SUCCESS (cycle 2349, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(status=approved 매칭 0건). 2-chain lock 미충족(직전 8사이클 2341-2348 distinct=3). 주기 trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 13/25, info-arch 9/30, lotto 5/30). saturation 7/15 미충족. cycle 2348 review-code(heavy) retro가 "4팩터를 실제 예측 가중치에 연결하는 건 별도 op-analysis/plan 필요"라 범위 밖으로 남겼으나, 직접 코드 확인 결과 Elo 하나만은 이미 계산 로직(`mlb-elo.ts`)과 저장 테이블(`mlb_team_elo`, cron `mlb_elo_update`)이 완비돼 있어 단순 read-wiring 누락임을 발견 — 나머지 3팩터(최근폼/상대전적/수비SFR)는 계산 로직 자체가 없어 훨씬 큰 스코프라 이번엔 Elo만 분리.
+
+**발견**: `runPredictFinal`이 `mlb_team_elo`(매일 cron이 갱신)를 전혀 읽지 않고 항상 `ELO_NEUTRAL` 고정 입력 — `MLB_BASE_WEIGHTS.elo`(10%)가 모든 MLB 예측에서 상시 no-op(양팀 동일값 → 차이항 0). `buildMlbTeamFactorAverages`/`buildMlbTeamProfile`도 이미 `home_elo`/`away_elo` 컬럼을 읽고 있었지만 상시 NULL이라 elo가 평균/프로필 계산에서 늘 제외됐음.
+
+**실행**: `mlb_team_elo` season 조회(`assertSelectOk` 가드) → raw team_code 매칭(정규화 불필요, mlb_team_stats와 다른 컨벤션 확인) → 계산 입력 + `predictions.home_elo/away_elo` 컬럼 양쪽에 실측 반영(팀 row 부재 시 계산은 ELO_NEUTRAL fallback, 영속화는 null). 신규 단위 테스트 1건 추가. cycle 2348이 추가한 "/glossary, /mlb/factors, /mlb/methodology" 4팩터 미반영 문구가 Elo 기준 stale해지는 것을 막기 위해 3곳 모두 Elo 제외 + "실측 반영" 갱신.
+
+검증: `tsc --noEmit`(kbo-data + moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data 89 files/1148 tests + moneyball 498 files/4180 tests all green).
+
+결론: MLB 모델 실질 개선 SUCCESS(문서만이 아닌 실제 예측 계산 변경). 다음 cycle 후보 = 나머지 3팩터(최근폼/상대전적/수비SFR) 계산 로직 구현은 Tier 3 규모(신규 계산 로직 + 데이터 흐름 설계 필요) — 별도 plan 분리 검토 대상. 또는 explore-idea 자연 발견.
+
+
 ## 🟢 review-code (heavy) — MLB placeholder 팩터 4개 "데이터 없음" 문구 정정 SUCCESS (cycle 2348, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2340-2347 distinct=4). 주기 trigger 4종 전부 미도달. cycle 2347 explore-idea(heavy)가 온보딩 3페이지에 MLB 안내를 신규 배선한 직후 — Feature-Drift Cycle 패턴(explore-idea 신규 기능 → review-code 즉시 audit)에 따라 방금 배선된 문구를 코드 대조.

@@ -1,3 +1,34 @@
+## v0.5.62.74 — 2026-08-23 (cycle 2349, fix-incident: MLB Elo 팩터 실측 wiring)
+
+### fix(mlb): mlb_team_elo 실측 Elo 레이팅을 predict_final 에 연결 — 10% 가중치 silent no-op 해소
+
+- 발견: cycle 2348 review-code(heavy) audit이 "Elo·최근폼·상대전적·수비SFR 4개는 데이터는 있으나
+  예측 가중치엔 미반영"이라 정리했으나, 4개 중 Elo 만은 실제로 매일 갱신되는 저장 테이블
+  (`mlb_team_elo`, migration 046, `mlb_elo_update` cron 모드가 매 fire 시 `mlb_schedule` final
+  전체를 재생해 upsert)이 이미 존재함에도 `runPredictFinal`(`mlb-pipeline.ts`)이 이 테이블을
+  전혀 읽지 않고 항상 `ELO_NEUTRAL`(1500) 고정값을 양팀에 입력 — `MLB_BASE_WEIGHTS.elo`(10%
+  가중치, KBO 동등)가 모든 MLB 예측에서 상시 no-op(양팀 동일값이라 차이항 = 0)이었음. 나머지
+  3개(최근폼/상대전적/수비SFR)는 계산 로직 자체가 미구현이라 이번 cycle 범위 밖(별도 후속 필요).
+- 수정: `runPredictFinal` 이 `mlb_team_elo`를 season 기준 조회(`assertSelectOk` 가드, mlb_team_stats
+  wiring 과 동일 안전 패턴) → `g.home_team_code`/`g.away_team_code` raw 코드로 직접 매칭(mlb_team_elo
+  는 `runEloUpdate` 가 정규화 없이 원본 코드로 upsert 하므로 mlb_team_stats 의 canonical alias
+  매핑 불필요) → `computeMlbProbability` elo 입력 및 `predictions.home_elo`/`away_elo` 컬럼(기존
+  KBO 공용 스키마, migration 003) 양쪽에 실측 반영. 팀 row 부재(시즌 첫 경기 등) 시 계산 입력은
+  `ELO_NEUTRAL` fallback 유지, 영속화는 가짜 숫자 대신 `null`(다른 팩터와 동일 null-guard 원칙).
+- 부수 효과: `buildMlbTeamFactorAverages`/`buildMlbTeamProfile`(둘 다 이미 `home_elo`/`away_elo`
+  컬럼을 읽고 있었으나 상시 NULL이라 elo 팩터가 항상 평균/프로필에서 제외됐음)가 이번 fix로
+  자연 복구 — 코드 변경 없이 실측 데이터 흐름만 연결.
+- 문서 정정: cycle 2348 이 추가한 "/glossary, /mlb/factors, /mlb/methodology" 의 "4개 팩터
+  미반영" 문구가 Elo 기준 stale 해지는 걸 막기 위해 3곳 모두 Elo 를 목록에서 제외하고 "실측
+  반영됨"으로 갱신(최근폼·상대전적·수비SFR 3개만 미반영 유지).
+- 신규 단위 테스트: `mlb_team_elo` 실측/부재 양쪽 케이스에서 계산 입력 + 영속화 값 검증
+  (`packages/kbo-data/src/__tests__/mlb-pipeline.test.ts`).
+
+검증: `tsc --noEmit`(kbo-data + moneyball) clean, `eslint`(양쪽) clean, `pnpm test`
+(kbo-data 89 files/1148 tests + moneyball 498 files/4180 tests all green).
+
+
+
 ## v0.5.62.73 — 2026-08-23 (cycle 2348, review-code (heavy): MLB placeholder 팩터 4개 문구 정정)
 
 ### fix(mlb): Elo·최근폼·상대전적·수비SFR 4개 "데이터 없음" 문구 → "가중치 미반영" 정정

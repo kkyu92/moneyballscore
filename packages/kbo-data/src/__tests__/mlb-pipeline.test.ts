@@ -557,6 +557,76 @@ describe('runMlbPipeline', () => {
     expect(row.home_lineup_barrel_pct).toBe(7.1);
   });
 
+  it('mlb_predict_final — mlb_team_elo 실측 조회 → elo 계산 입력 + home_elo/away_elo 컬럼 영속화 (cycle 2349 fix — 사례: mlb_elo_update 가 매일 채워온 mlb_team_elo 를 predict_final 이 전혀 읽지 않고 항상 ELO_NEUTRAL 고정 입력해 10% 가중치 elo 팩터가 모든 MLB 예측에서 상시 no-op)', async () => {
+    const insertedRows: Array<Record<string, unknown>> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+
+    // NYY = mlb_team_elo row 보유, BOS = row 부재(시즌 첫 경기 등) — 양쪽 케이스 검증
+    const scheduleGames = [
+      { external_game_id: '5001', home_team_code: 'NYY', away_team_code: 'BOS' },
+    ];
+    const eloRows = [{ team_code: 'NYY', elo_rating: 1550.5 }];
+
+    const predictionsBuilder = {
+      select: vi.fn(() => predictionsBuilder),
+      delete: vi.fn(() => predictionsBuilder),
+      eq: vi.fn(() => predictionsBuilder),
+      insert: vi.fn((rows: unknown) => {
+        if (Array.isArray(rows)) insertedRows.push(...(rows as Array<Record<string, unknown>>));
+        return Promise.resolve({ error: null });
+      }),
+    };
+
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => {
+        if (table === 'mlb_schedule') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                eq: vi.fn(() => Promise.resolve({ data: scheduleGames, error: null })),
+              })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_stats') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            })),
+          };
+        }
+        if (table === 'mlb_team_elo') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => Promise.resolve({ data: eloRows, error: null })),
+            })),
+          };
+        }
+        return predictionsBuilder;
+      }),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { computeMlbProbability } = await import('../factors/mlb-base');
+    (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mockClear();
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_predict_final', DATE, TRIGGERED_BY);
+
+    expect(computeMlbProbability).toHaveBeenCalledTimes(1);
+    const callArgs = (computeMlbProbability as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as {
+      elo: { home: number; away: number };
+    };
+    // NYY(home) = 실측 elo_rating, BOS(away) = row 부재 → ELO_NEUTRAL(1500) fallback
+    expect(callArgs.elo.home).toBe(1550.5);
+    expect(callArgs.elo.away).toBe(1500);
+
+    expect(insertedRows.length).toBe(1);
+    const row = insertedRows[0];
+    // 영속화도 계산 입력과 동일 원칙 — 실측 있으면 실측, 없으면 가짜 숫자 대신 null
+    expect(row.home_elo).toBe(1550.5);
+    expect(row.away_elo).toBeNull();
+  });
+
   it('mlb_walk_forward_measure — predictions 쿼리 컬럼 mlb_game_date 사용 (silent drift family fix, cycle 1168)', async () => {
     const eqCalls: Array<[string, unknown]> = [];
     const fromCalls: string[] = [];

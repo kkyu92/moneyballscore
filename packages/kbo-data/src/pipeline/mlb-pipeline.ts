@@ -284,6 +284,25 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     statsByTeam.set(row.team_code, row);
   }
 
+  // mlb_team_elo 실측 조회 (cycle 2349 wiring — mlb_elo_update 가 채워둔 값을 이제야 소비.
+  // mlb_team_elo.team_code 는 mlb_schedule 원본 코드로 upsert 됨(runEloUpdate 가 정규화 없이
+  // 그대로 씀) — mlb_team_stats 와 달리 canonical alias 매핑 불필요, g.home/away_team_code 로 직결.
+  let eloRows: Array<{ team_code: string; elo_rating: number }> | null = null;
+  try {
+    const eloResult = await db
+      .from('mlb_team_elo')
+      .select('team_code, elo_rating')
+      .eq('season', season);
+    ({ data: eloRows } = assertSelectOk<Array<{ team_code: string; elo_rating: number }>>(eloResult, 'mlb-pipeline.mlb_team_elo.select'));
+  } catch (e) {
+    errors.push(`mlb_team_elo select: ${errMsg(e)}`);
+  }
+
+  const eloByTeam = new Map<string, number>();
+  for (const row of eloRows ?? []) {
+    eloByTeam.set(row.team_code, row.elo_rating);
+  }
+
   const predictionRows = gameList.map((g) => {
     const homeCanonicalCode = normalizeMlbTeamCode(g.home_team_code);
     const awayCanonicalCode = normalizeMlbTeamCode(g.away_team_code);
@@ -293,6 +312,8 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     const home = statsByTeam.get(homeCanonicalCode ?? g.home_team_code);
     const away = statsByTeam.get(awayCanonicalCode ?? g.away_team_code);
     const homeParkPf = homeCanonicalCode ? MLB_TEAMS[homeCanonicalCode].parkPf : undefined;
+    const homeElo = eloByTeam.get(g.home_team_code);
+    const awayElo = eloByTeam.get(g.away_team_code);
 
     const prob = computeMlbProbability({
       sp_fip: { home: home?.fip ?? MLB_STAT_DEFAULTS.fip, away: away?.fip ?? MLB_STAT_DEFAULTS.fip },
@@ -303,7 +324,7 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       war: { home: home?.war ?? MLB_STAT_DEFAULTS.war, away: away?.war ?? MLB_STAT_DEFAULTS.war },
       head_to_head: { homeWinRate: 0.5 },
       park_factor: homeParkPf != null ? homeParkPf / 100 : 1.0,
-      elo: { home: ELO_NEUTRAL, away: ELO_NEUTRAL },
+      elo: { home: homeElo ?? ELO_NEUTRAL, away: awayElo ?? ELO_NEUTRAL },
       defense_sfr: { home: 0, away: 0 },
       lineup_xwoba: { home: home?.xwoba ?? MLB_STAT_DEFAULTS.xwoba, away: away?.xwoba ?? MLB_STAT_DEFAULTS.xwoba },
       lineup_barrel_pct: { home: home?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct, away: away?.barrel_pct ?? MLB_STAT_DEFAULTS.barrelPct },
@@ -325,8 +346,11 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       // (사례 21, DB 실측: home_sp_fip 등 non-null count 0/N). team stats row 부재 시
       // MLB_STAT_DEFAULTS 로 대체된 값(가짜)은 저장 X — null 유지해 null-guard 가 유효
       // 팩터 수에서 자연 제외(기존 computeCompositeDuel 설계와 동일 원칙).
-      // elo/recent_form/head_to_head/sfr 은 MLB 미구현 placeholder(계산 입력용 중립값)라
-      // 계속 미저장 — 실제 데이터 없는 컬럼에 가짜 숫자 심지 않음.
+      // recent_form/head_to_head/sfr 은 여전히 MLB 미구현 placeholder(계산 입력용 중립값)라
+      // 미저장 — 실제 데이터 없는 컬럼에 가짜 숫자 심지 않음. elo 는 cycle 2349 wiring 으로
+      // mlb_team_elo 실측을 연결해 계산 입력(위)뿐 아니라 여기서도 real 값 영속화 —
+      // team row 부재(신규 팀/시즌 첫 경기) 시에만 null(가짜 ELO_NEUTRAL 은 저장 X, 다른
+      // 팩터와 동일 원칙).
       home_sp_fip: home?.fip ?? null,
       away_sp_fip: away?.fip ?? null,
       home_sp_xfip: home?.xfip ?? null,
@@ -341,6 +365,8 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       away_lineup_xwoba: away?.xwoba ?? null,
       home_lineup_barrel_pct: home?.barrel_pct ?? null,
       away_lineup_barrel_pct: away?.barrel_pct ?? null,
+      home_elo: homeElo ?? null,
+      away_elo: awayElo ?? null,
     };
   });
 
