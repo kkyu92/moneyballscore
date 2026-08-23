@@ -13,6 +13,8 @@ describe('buildMlbGameOverview', () => {
       bullpen_fip: { home: 4.0, away: 4.0 },
       lineup_woba: { home: 0.32, away: 0.32 },
       war: { home: 2.0, away: 2.0 },
+      recent_form: { home: 50, away: 50 },
+      head_to_head: { home: 0.5, away: 0.5 },
       lineup_xwoba: { home: 0.32, away: 0.32 },
       lineup_barrel_pct: { home: 8.0, away: 8.0 },
       elo: { home: 1500, away: 1500 },
@@ -36,6 +38,8 @@ describe('buildMlbGameOverview', () => {
       bullpen_fip: { home: 3.2, away: 4.5 },
       lineup_woba: { home: 0.34, away: 0.30 }, // home higher wOBA → home favored
       war: { home: 4.0, away: 1.0 },
+      recent_form: { home: 50, away: 50 },
+      head_to_head: { home: 0.5, away: 0.5 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
       elo: { home: 1500, away: 1500 },
@@ -52,6 +56,29 @@ describe('buildMlbGameOverview', () => {
     expect(overview.situational.some((s) => s.includes(HOME))).toBe(true);
   });
 
+  it('recent_form/head_to_head land in situational, not pitching/batting (cycle 2353 wiring)', () => {
+    const input: MlbWaterfallInput = {
+      sp_fip: { home: 4.0, away: 4.0 },
+      sp_xfip: { home: 4.0, away: 4.0 },
+      bullpen_fip: { home: 4.0, away: 4.0 },
+      lineup_woba: { home: 0.32, away: 0.32 },
+      war: { home: 2.0, away: 2.0 },
+      recent_form: { home: 70, away: 30 },
+      head_to_head: { home: 0.65, away: 0.35 },
+      lineup_xwoba: { home: 0.32, away: 0.32 },
+      lineup_barrel_pct: { home: 8.0, away: 8.0 },
+      elo: { home: 1500, away: 1500 },
+      homeParkPf: 100,
+      homeWinProb: 0.6,
+    };
+    const bars = computeMlbWaterfall(input);
+    const overview = buildMlbGameOverview(bars, HOME, AWAY);
+    expect(overview.pitching).toHaveLength(0);
+    expect(overview.batting).toHaveLength(0);
+    expect(overview.situational.some((s) => s.includes('최근폼'))).toBe(true);
+    expect(overview.situational.some((s) => s.includes('상대전적'))).toBe(true);
+  });
+
   it('skips a factor when its bar is absent (null pair upstream)', () => {
     const bars = computeMlbWaterfall({
       sp_fip: { home: 3.2, away: 4.5 },
@@ -59,6 +86,8 @@ describe('buildMlbGameOverview', () => {
       bullpen_fip: { home: 3.2, away: 4.5 },
       lineup_woba: { home: 0.34, away: 0.30 },
       war: { home: null, away: 2.0 }, // war pair missing → bar skipped upstream
+      recent_form: { home: 50, away: 50 },
+      head_to_head: { home: 0.5, away: 0.5 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
       elo: { home: 1500, away: 1500 },
@@ -76,6 +105,8 @@ describe('buildMlbGameOverview', () => {
       bullpen_fip: { home: 3.2, away: 4.5 },
       lineup_woba: { home: 0.34, away: 0.30 },
       war: { home: 4.0, away: 1.0 },
+      recent_form: { home: 50, away: 50 },
+      head_to_head: { home: 0.5, away: 0.5 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
       elo: { home: 1500, away: 1500 },
@@ -94,6 +125,8 @@ describe('buildMlbGameOverview', () => {
       bullpen_fip: { home: 3.2, away: 4.5 },
       lineup_woba: { home: 0.34, away: 0.30 },
       war: { home: 4.0, away: 1.0 },
+      recent_form: { home: 50, away: 50 },
+      head_to_head: { home: 0.5, away: 0.5 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
       elo: { home: 1500, away: 1500 },

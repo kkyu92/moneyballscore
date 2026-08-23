@@ -45,6 +45,11 @@ const GAME_DETAIL_FACTOR_ROWS: Array<{
   { slug: 'bullpen_fip', homeKey: 'home_bullpen_fip', awayKey: 'away_bullpen_fip' },
   { slug: 'lineup_woba', homeKey: 'home_lineup_woba', awayKey: 'away_lineup_woba' },
   { slug: 'war', homeKey: 'home_war_total', awayKey: 'away_war_total' },
+  { slug: 'recent_form', homeKey: 'home_recent_form', awayKey: 'away_recent_form' },
+  // head_to_head_rate 는 DB 단일 컬럼(homeWinRate) — 이 배열은 length 로만 카운트되고
+  // homeKey/awayKey 실값 자체는 소비 안 함(팩터-상세 표는 buildMlbFactorDetailRows 가
+  // waterfallInput 에서 별도로 pair 인코딩해 렌더, mlb-waterfall.ts 참조).
+  { slug: 'head_to_head', homeKey: 'head_to_head_rate', awayKey: 'head_to_head_rate' },
   { slug: 'elo', homeKey: 'home_elo', awayKey: 'away_elo' },
   { label: '타선 xwOBA', homeKey: 'home_lineup_xwoba', awayKey: 'away_lineup_xwoba', statcast: true },
   { label: 'Barrel%', homeKey: 'home_lineup_barrel_pct', awayKey: 'away_lineup_barrel_pct', statcast: true },
@@ -97,6 +102,9 @@ interface PredictionDetailRow {
   away_lineup_barrel_pct: number | null;
   home_elo: number | null;
   away_elo: number | null;
+  home_recent_form: number | null;
+  away_recent_form: number | null;
+  head_to_head_rate: number | null;
 }
 
 interface ScheduleRow {
@@ -162,7 +170,10 @@ export default async function GameDetail({ params }: PageParams) {
       home_lineup_barrel_pct,
       away_lineup_barrel_pct,
       home_elo,
-      away_elo
+      away_elo,
+      home_recent_form,
+      away_recent_form,
+      head_to_head_rate
     `)
     .eq('league', 'mlb')
     .eq('scoring_rule', MLB_SCORING_RULE)
@@ -214,6 +225,13 @@ export default async function GameDetail({ params }: PageParams) {
     bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
     lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
     war: { home: pred.home_war_total, away: pred.away_war_total },
+    // head_to_head_rate 는 DB 단일 컬럼(homeWinRate) — mlb-waterfall.ts 계약대로
+    // {home: rate, away: 1-rate} 대칭 pair 로 인코딩 (null 이면 양쪽 null 로 bar skip).
+    recent_form: { home: pred.home_recent_form, away: pred.away_recent_form },
+    head_to_head: {
+      home: pred.head_to_head_rate,
+      away: pred.head_to_head_rate == null ? null : 1 - pred.head_to_head_rate,
+    },
     lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
     lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
     elo: { home: pred.home_elo, away: pred.away_elo },

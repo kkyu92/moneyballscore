@@ -14,12 +14,12 @@ import {
 } from '@/lib/teams/buildTeamProfile';
 
 // KBO buildTeamStrengthSnapshot 는 predictions.home_elo/home_recent_form (모델 팩터) 기반 —
-// MLB 는 elo 가 cycle 2349 부터 mlb_team_elo 실측 반영되지만 recent_form 컬럼은 여전히
-// mlb-pipeline.ts 가 저장 자체를 안 해 전량 null(plan #28 Phase 2 조사, cycle 2316) — 두
-// 팩터를 함께 쓰는 모델 팩터 포팅은 여전히 불가능. 대신 mlb_schedule 의 실제 완료 경기
-// 결과로 "진짜 전적" 기준 전력을 계산 (computeTeamRecentRecord/computeTeamStreak 는
-// KBO/MLB StreakGame 구조 호환 재사용, buildTeamProfile.ts:194 주석 정합 — 신규 MLB_
-// 접두 중복 함수 X).
+// MLB 는 elo(cycle 2349)/recent_form(cycle 2353) 모두 mlb_team_elo/mlb_schedule 실측
+// 반영이 됐지만, 이 화면은 "모델 입력값"이 아니라 mlb_schedule 의 실제 완료 경기 결과로
+// "진짜 전적"(최근 5경기 승패 + 연승/연패) 을 별도 계산하는 대체 설계라 그대로 포팅하지
+// 않음(plan #28 Phase 2 조사, cycle 2316 — 목적 자체가 다름, 저장 여부와 무관).
+// computeTeamRecentRecord/computeTeamStreak 는 KBO/MLB StreakGame 구조 호환 재사용,
+// buildTeamProfile.ts:194 주석 정합 — 신규 MLB_ 접두 중복 함수 X).
 
 export interface MlbTeamStrengthRow {
   teamCode: MlbTeamCode;

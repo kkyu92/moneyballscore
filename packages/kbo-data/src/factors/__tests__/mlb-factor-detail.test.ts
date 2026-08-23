@@ -8,6 +8,8 @@ const ASYMMETRIC: MlbWaterfallInput = {
   bullpen_fip: { home: 3.2, away: 4.5 },
   lineup_woba: { home: 0.34, away: 0.30 },
   war: { home: 4.0, away: 1.0 },
+  recent_form: { home: 70, away: 40 },
+  head_to_head: { home: 0.6, away: 0.4 },
   lineup_xwoba: { home: 0.33, away: 0.31 },
   lineup_barrel_pct: { home: 9.0, away: 7.5 },
   elo: { home: 1523, away: 1487 },
@@ -21,6 +23,8 @@ const NEUTRAL: MlbWaterfallInput = {
   bullpen_fip: { home: 4.0, away: 4.0 },
   lineup_woba: { home: 0.32, away: 0.32 },
   war: { home: 2.0, away: 2.0 },
+  recent_form: { home: 50, away: 50 },
+  head_to_head: { home: 0.5, away: 0.5 },
   lineup_xwoba: { home: 0.32, away: 0.32 },
   lineup_barrel_pct: { home: 8.0, away: 8.0 },
   elo: { home: 1500, away: 1500 },
@@ -29,12 +33,26 @@ const NEUTRAL: MlbWaterfallInput = {
 };
 
 describe('buildMlbFactorDetailRows', () => {
-  it('excludes home_advantage/park_factor/final — only the 8 GAME_DETAIL_FACTOR_ROWS keys remain', () => {
+  it('excludes home_advantage/park_factor/final — only the 10 GAME_DETAIL_FACTOR_ROWS keys remain', () => {
     const bars = computeMlbWaterfall(ASYMMETRIC);
     const rows = buildMlbFactorDetailRows(bars, ASYMMETRIC, 'Dodgers', 'Padres');
     expect(rows.map((r) => r.key).sort()).toEqual(
-      ['bullpen_fip', 'elo', 'lineup_barrel_pct', 'lineup_woba', 'lineup_xwoba', 'sp_fip', 'sp_xfip', 'war'].sort(),
+      [
+        'bullpen_fip', 'elo', 'head_to_head', 'lineup_barrel_pct', 'lineup_woba',
+        'lineup_xwoba', 'recent_form', 'sp_fip', 'sp_xfip', 'war',
+      ].sort(),
     );
+  });
+
+  it('recent_form/head_to_head formatted as percentages (cycle 2353 wiring — regression for the silent-drop where these rows were absent from the detail table)', () => {
+    const bars = computeMlbWaterfall(ASYMMETRIC);
+    const rows = buildMlbFactorDetailRows(bars, ASYMMETRIC, 'Dodgers', 'Padres');
+    expect(rows.find((r) => r.key === 'recent_form')?.homeValueLabel).toBe('70.0%');
+    expect(rows.find((r) => r.key === 'recent_form')?.awayValueLabel).toBe('40.0%');
+    expect(rows.find((r) => r.key === 'recent_form')?.favor).toBe('home');
+    expect(rows.find((r) => r.key === 'head_to_head')?.homeValueLabel).toBe('60%');
+    expect(rows.find((r) => r.key === 'head_to_head')?.awayValueLabel).toBe('40%');
+    expect(rows.find((r) => r.key === 'head_to_head')?.favor).toBe('home');
   });
 
   it('elo value formatted with no decimals (Elo rating, not a rate stat)', () => {

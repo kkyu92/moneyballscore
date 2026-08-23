@@ -20,6 +20,8 @@ function formatMlbFactorValue(key: string, value: number | null | undefined): st
   if (key === 'war') return value.toFixed(1);
   if (key === 'lineup_barrel_pct') return `${value.toFixed(1)}%`;
   if (key === 'elo') return value.toFixed(0);
+  if (key === 'recent_form') return `${value.toFixed(1)}%`;
+  if (key === 'head_to_head') return `${(value * 100).toFixed(0)}%`;
   return value.toFixed(2);
 }
 

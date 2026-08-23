@@ -8,6 +8,8 @@ const NEUTRAL: MlbWaterfallInput = {
   bullpen_fip: { home: 4.0, away: 4.0 },
   lineup_woba: { home: 0.32, away: 0.32 },
   war: { home: 2.0, away: 2.0 },
+  recent_form: { home: 50, away: 50 },
+  head_to_head: { home: 0.5, away: 0.5 },
   lineup_xwoba: { home: 0.32, away: 0.32 },
   lineup_barrel_pct: { home: 8.0, away: 8.0 },
   elo: { home: 1500, away: 1500 },
@@ -55,6 +57,8 @@ describe('computeMlbWaterfall', () => {
       bullpen_fip: input.bullpen_fip,
       lineup_woba: input.lineup_woba,
       war: input.war,
+      recent_form: input.recent_form,
+      head_to_head: { home: input.head_to_head.homeWinRate, away: 1 - input.head_to_head.homeWinRate },
       lineup_xwoba: input.lineup_xwoba,
       lineup_barrel_pct: input.lineup_barrel_pct,
       elo: input.elo,
@@ -80,6 +84,36 @@ describe('computeMlbWaterfall', () => {
     expect(eloBar).toBeDefined();
     expect(eloBar!.contribution).toBeCloseTo(0.10 * (1523 - 1487) / 400, 6);
     expect(eloBar!.direction).toBe('home');
+  });
+
+  it('recent_form/head_to_head bars reflect real form/matchup deltas (cycle 2353 wiring — regression for the silent-drop where mlb-pipeline.ts started persisting real values but the waterfall still excluded them from the bar list)', () => {
+    const bars = computeMlbWaterfall({
+      ...NEUTRAL,
+      recent_form: { home: 70, away: 30 },
+      head_to_head: { home: 0.65, away: 0.35 },
+    });
+
+    const recentForm = bars.find((b) => b.factor === 'recent_form');
+    expect(recentForm).toBeDefined();
+    expect(recentForm!.contribution).toBeCloseTo(0.10 * (70 - 30) * 0.05, 6);
+    expect(recentForm!.direction).toBe('home');
+
+    const h2h = bars.find((b) => b.factor === 'head_to_head');
+    expect(h2h).toBeDefined();
+    // head_to_head is encoded as {home: rate, away: 1-rate} — multiplier 0.5 undoes the
+    // 2x from (home-away) so the bar matches mlb-base.ts's weight*(rate-0.5) contract.
+    expect(h2h!.contribution).toBeCloseTo(0.03 * (0.65 - 0.5), 6);
+    expect(h2h!.direction).toBe('home');
+  });
+
+  it('skips recent_form/head_to_head bars when the pair is null (no games yet — no fabrication)', () => {
+    const bars = computeMlbWaterfall({
+      ...NEUTRAL,
+      recent_form: { home: null, away: null },
+      head_to_head: { home: null, away: null },
+    });
+    expect(bars.find((b) => b.factor === 'recent_form')).toBeUndefined();
+    expect(bars.find((b) => b.factor === 'head_to_head')).toBeUndefined();
   });
 
   it('locale="en" produces English bar labels; default/locale="ko" stays Korean', () => {

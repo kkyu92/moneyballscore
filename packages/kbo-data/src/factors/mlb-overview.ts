@@ -8,7 +8,7 @@ import type { MlbWaterfallBar } from './mlb-waterfall';
 
 const PITCHING_FACTORS = new Set(['sp_fip', 'sp_xfip', 'bullpen_fip']);
 const BATTING_FACTORS = new Set(['lineup_woba', 'war', 'lineup_xwoba', 'lineup_barrel_pct']);
-const SITUATIONAL_FACTORS = new Set(['home_advantage', 'park_factor', 'elo']);
+const SITUATIONAL_FACTORS = new Set(['home_advantage', 'park_factor', 'elo', 'recent_form', 'head_to_head']);
 
 // contribution 이 이 pp 미만이면 "우세"로 서술할 만큼 유의미하지 않음 (neutral 처리).
 // mlb-factor-detail.ts(DetailedFactorAnalysis parity)도 동일 임계 재사용 — 두 화면이

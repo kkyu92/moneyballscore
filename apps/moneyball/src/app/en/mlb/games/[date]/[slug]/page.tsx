@@ -40,6 +40,10 @@ const GAME_DETAIL_FACTOR_ROWS: Array<{
   { label: "Bullpen FIP", homeKey: "home_bullpen_fip", awayKey: "away_bullpen_fip" },
   { label: "Lineup wOBA", homeKey: "home_lineup_woba", awayKey: "away_lineup_woba" },
   { label: "WAR", homeKey: "home_war_total", awayKey: "away_war_total" },
+  { label: "Recent Form", homeKey: "home_recent_form", awayKey: "away_recent_form" },
+  // head_to_head_rate is a single DB column (homeWinRate) — this array only feeds a
+  // length count, the real pair-encoding lives in the waterfallInput below.
+  { label: "Head-to-Head", homeKey: "head_to_head_rate", awayKey: "head_to_head_rate" },
   { label: "Elo", homeKey: "home_elo", awayKey: "away_elo" },
   { label: "Lineup xwOBA", homeKey: "home_lineup_xwoba", awayKey: "away_lineup_xwoba" },
   { label: "Barrel%", homeKey: "home_lineup_barrel_pct", awayKey: "away_lineup_barrel_pct" },
@@ -91,6 +95,9 @@ interface PredictionDetailRow {
   away_lineup_barrel_pct: number | null;
   home_elo: number | null;
   away_elo: number | null;
+  home_recent_form: number | null;
+  away_recent_form: number | null;
+  head_to_head_rate: number | null;
 }
 
 interface ScheduleRow {
@@ -157,7 +164,10 @@ export default async function GameDetailEn({ params }: PageParams) {
       home_lineup_barrel_pct,
       away_lineup_barrel_pct,
       home_elo,
-      away_elo
+      away_elo,
+      home_recent_form,
+      away_recent_form,
+      head_to_head_rate
     `)
     .eq('league', 'mlb')
     .eq('scoring_rule', MLB_SCORING_RULE)
@@ -206,6 +216,11 @@ export default async function GameDetailEn({ params }: PageParams) {
     bullpen_fip: { home: pred.home_bullpen_fip, away: pred.away_bullpen_fip },
     lineup_woba: { home: pred.home_lineup_woba, away: pred.away_lineup_woba },
     war: { home: pred.home_war_total, away: pred.away_war_total },
+    recent_form: { home: pred.home_recent_form, away: pred.away_recent_form },
+    head_to_head: {
+      home: pred.head_to_head_rate,
+      away: pred.head_to_head_rate == null ? null : 1 - pred.head_to_head_rate,
+    },
     lineup_xwoba: { home: pred.home_lineup_xwoba, away: pred.away_lineup_xwoba },
     lineup_barrel_pct: { home: pred.home_lineup_barrel_pct, away: pred.away_lineup_barrel_pct },
     elo: { home: pred.home_elo, away: pred.away_elo },
