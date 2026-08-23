@@ -1,6 +1,6 @@
 {
   "name": "moneyball",
-  "version": "0.5.62.75",
+  "version": "0.5.62.76",
   "private": true,
   "scripts": {
     "dev": "next dev",

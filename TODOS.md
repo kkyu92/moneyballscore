@@ -1,3 +1,16 @@
+## 🟢 fix-incident — MLB waterfall/factor-detail/overview recent_form·head_to_head 표시 동기화 SUCCESS (cycle 2354, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 직전 8사이클(2346-2353) distinct=4(review-code/explore-idea/fix-incident/skill-evolution), 2-chain lock 미충족. cycle 2353 retro가 "waterfall/factor-detail/overview 표시 레이어 동기화가 자연 review-code(heavy) 후속 대상"이라 명시 — cycle 2349→2352 elo 사례와 동일한 read-wiring 후 표시 레이어 미동기 패턴을 그대로 검증.
+
+**발견**: `computeMlbWaterfall`/`buildMlbGameOverview`/`buildMlbFactorDetailRows` 가 cycle 2353의 recent_form/head_to_head 실측 wiring 이후에도 여전히 두 팩터를 "항상 중립값" 가정 이전 로직 그대로 bar 계산에서 제외 — elo 가 cycle 2349→2352 사이 겪은 것과 동일한 silent drop. game-detail page.tsx(ko/en) 의 predictions select 도 `home_recent_form`/`away_recent_form`/`head_to_head_rate` 컬럼을 조회하지 않아 waterfallInput 이 항상 undefined.
+
+**실행**: `MlbWaterfallInput` 에 recent_form(기존 pair 형태, multiplier 0.05)/head_to_head(단일 homeWinRate 를 `{home: rate, away: 1-rate}` 대칭 pair 로 인코딩, multiplier 0.5) 필드 추가 → 기존 pairTerms 루프에 편입(신규 분기 없음). `GAME_DETAIL_FACTOR_ROWS`(ko/en) 에 두 행 추가(8→10) + predictions select 확장. `mlb-overview.ts`/`mlb-factor-detail.ts` 에 situational 분류 + 퍼센트 포맷 케이스 추가. `MlbFactorWaterfallChart` 캡션 + `buildMlbTeamStrengthSnapshot.ts` 주석의 "recent_form/head_to_head 미구현" stale 문구 정정.
+
+검증: `tsc --noEmit`(kbo-data+moneyball) clean, `eslint`(양쪽) clean, `pnpm test`(kbo-data 90 files/1165 tests + moneyball 498 files/4180 tests all green).
+
+결론: MLB 모델 표시 레이어 정합성 SUCCESS(계산 로직 자체는 cycle 2353에서 이미 완료, 이번엔 표시 동기화). defense_sfr(5%) 은 여전히 MLB 동등 데이터 소스 부재로 스코프 밖. 다음 cycle 후보 = explore-idea 자연 발견 또는 op-analysis/lotto/info-arch 주기 trigger 도달 여부 확인.
+
+
 ## 🟢 fix-incident — MLB recent_form/head_to_head 실측 wiring, 13% 가중치 silent no-op 해소 SUCCESS (cycle 2353, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2345-2352) distinct=4(explore-idea/review-code/fix-incident/skill-evolution), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 3/20 gap, op-analysis 17/25, info-arch 13/30, lotto 9/30). saturation 8/15 미충족. cycle 2349 retro가 "나머지 3팩터(최근폼/상대전적/수비SFR) 계산 로직 구현은 Tier 3 규모 — 별도 plan 분리 검토 대상"이라 남겼으나, 직접 코드 확인 결과 recent_form/head_to_head 는 defense_sfr(KBO 전용 지표, MLB 동등 데이터 소스 자체 부재)과 달리 이미 존재하는 `mlb_schedule`(status='final' 행의 home_score/away_score) 만으로 계산 가능 — 신규 테이블/스크래퍼 불필요한 단순 wiring 누락임을 발견. Elo(cycle 2349)와 동일한 "read-wiring 누락" 패턴이라 이번 cycle 범위로 분리.

@@ -1,3 +1,23 @@
+## v0.5.62.76 — 2026-08-23 (cycle 2354, fix-incident: MLB waterfall/factor-detail/overview recent_form·head_to_head 표시 동기화)
+
+### fix(mlb): waterfall/factor-detail/overview 에 실측 recent_form/head_to_head 델타 반영 — cycle 2353 wiring 이후 미동기 silent drop 해소
+
+- 발견: cycle 2353이 predict_final 에 recent_form/head_to_head 실측을 연결했지만(cycle 2349
+  elo 와 동일 패턴), `computeMlbWaterfall`/`buildMlbGameOverview`/`buildMlbFactorDetailRows` 는
+  여전히 두 팩터를 "항상 중립값" 가정으로 bar 계산에서 통째로 제외 — cycle 2353 retro가 명시
+  남긴 다음 후보(cycle 2349→2352 elo 사례와 동일한 표시 레이어 미동기).
+- 수정: `MlbWaterfallInput` 에 recent_form/head_to_head pair 필드 추가. head_to_head 는
+  `mlb-base.ts` 계약상 단일 homeWinRate 값이라 `{home: rate, away: 1-rate}` 대칭 pair 로
+  인코딩(multiplier 0.5)해 기존 pairTerms 루프 재사용. `GAME_DETAIL_FACTOR_ROWS`(ko/en)
+  에 두 팩터 행 추가(8→10) + predictions select 에 `home_recent_form`/`away_recent_form`/
+  `head_to_head_rate` 컬럼 추가. `mlb-overview.ts` SITUATIONAL_FACTORS + `mlb-factor-detail.ts`
+  퍼센트 포맷 케이스 추가.
+- 문서: `MlbFactorWaterfallChart` 캡션 + `buildMlbTeamStrengthSnapshot.ts` 주석 "recent_form/
+  head_to_head 미구현" → "실측 반영, defense_sfr 만 미구현" 정정.
+
+검증: tsc --noEmit(kbo-data+moneyball) clean, eslint(양쪽) clean, pnpm test(kbo-data 90
+files/1165 tests + moneyball 498 files/4180 tests all green).
+
 ## v0.5.62.75 — 2026-08-23 (cycle 2353, fix-incident: MLB recent_form/head_to_head 실측 wiring)
 
 ### fix(mlb): mlb_schedule 시즌 종료 경기 실측으로 recent_form/head_to_head 팩터 계산 — 13% 가중치 silent no-op 해소
