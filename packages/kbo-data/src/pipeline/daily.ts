@@ -804,6 +804,7 @@ export async function runDailyPipeline(
     const versionDecision = decideModelVersion({
       hasApiKey: !!process.env.ANTHROPIC_API_KEY,
       debateSucceeded,
+      usingShadowV20Weights: !!productionWeights,
     });
 
     const result = {
@@ -905,9 +906,16 @@ export async function runDailyPipeline(
           });
           if (fallbackErr) {
             console.warn('[Pipeline] llm_fallback_events insert error:', fallbackErr.message);
+            Sentry.captureException(new Error(`llm_fallback_events insert error: ${fallbackErr.message}`), {
+              tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'llm_fallback_events_insert' },
+            });
           }
-        } catch {
-          // silent — llm_fallback_events insert 실패가 prediction 생성 차단 X
+        } catch (e) {
+          // prediction 생성 자체는 차단 X (fire-and-forget) — 관측 record 만 Sentry 가시화
+          console.warn('[Pipeline] llm_fallback_events insert failed:', errMsg(e));
+          Sentry.captureException(e, {
+            tags: { silent_drift_family: 'wave_177', component: 'pipeline-daily', op: 'llm_fallback_events_insert' },
+          });
         }
       })();
     }

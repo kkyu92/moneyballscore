@@ -13,6 +13,7 @@
 
 import {
   CURRENT_SCORING_RULE,
+  SHADOW_V20_SCORING_RULE,
   QUANT_PREGAME_VERSION,
   QUANT_POSTVIEW_VERSION,
   LLM_DEBATE_VERSION,
@@ -46,21 +47,28 @@ export interface ModelVersionDecision {
 export function decideModelVersion({
   hasApiKey,
   debateSucceeded,
+  usingShadowV20Weights = false,
 }: {
   hasApiKey: boolean;
   debateSucceeded: boolean;
+  // SHADOW_V20_WEIGHTS 로 실제 확률을 계산한 row (isV2ModelEnabled()=true, daily.ts:709)
+  // 는 scoring_rule 도 그 사실을 반영해야 함 — 안 그러면 CURRENT_SCORING_RULE('v1.8')
+  // 필터에 의존하는 baseline calibration(/accuracy, CURRENT_MODEL_FILTER)이 다른
+  // 가중치로 계산된 row 를 조용히 섞어 오염시킴. default false = 기존 동작 유지.
+  usingShadowV20Weights?: boolean;
 }): ModelVersionDecision {
+  const scoring_rule = usingShadowV20Weights ? SHADOW_V20_SCORING_RULE : CURRENT_SCORING_RULE;
   if (hasApiKey && debateSucceeded) {
     return {
       model_version: LLM_DEBATE_VERSION,
       debate_version: DEBATE_VERSION_PREGAME,
-      scoring_rule: CURRENT_SCORING_RULE,
+      scoring_rule,
     };
   }
   return {
     model_version: QUANT_PREGAME_VERSION,
     debate_version: null,
-    scoring_rule: CURRENT_SCORING_RULE,
+    scoring_rule,
   };
 }
 

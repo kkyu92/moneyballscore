@@ -4,6 +4,7 @@ import {
   decidePostviewModelVersion,
   CURRENT_SCORING_RULE,
 } from '../pipeline/model-version';
+import { SHADOW_V20_SCORING_RULE } from '@moneyball/shared';
 
 describe('decideModelVersion', () => {
   it('promotes to v2.0-debate when API key present and debate succeeded', () => {
@@ -66,6 +67,33 @@ describe('decideModelVersion', () => {
         expect(d.debate_version).toBe('v2-persona4');
       }
     }
+  });
+
+  // cycle 2405 review-code heavy — isV2ModelEnabled()=true 시 daily.ts 가
+  // SHADOW_V20_WEIGHTS 로 실제 확률을 계산하지만 scoring_rule 은 항상
+  // CURRENT_SCORING_RULE 로 라벨돼 baseline calibration 을 조용히 오염시키던
+  // dormant bug (v1.8 유지 확정 이후 flag default false 라 현재 미노출).
+  it('labels scoring_rule as SHADOW_V20_SCORING_RULE when usingShadowV20Weights=true', () => {
+    expect(
+      decideModelVersion({ hasApiKey: true, debateSucceeded: true, usingShadowV20Weights: true }),
+    ).toEqual({
+      model_version: 'v2.0-debate',
+      debate_version: 'v2-persona4',
+      scoring_rule: SHADOW_V20_SCORING_RULE,
+    });
+    expect(
+      decideModelVersion({ hasApiKey: false, debateSucceeded: false, usingShadowV20Weights: true }),
+    ).toEqual({
+      model_version: 'v1.8',
+      debate_version: null,
+      scoring_rule: SHADOW_V20_SCORING_RULE,
+    });
+  });
+
+  it('defaults to CURRENT_SCORING_RULE when usingShadowV20Weights is omitted', () => {
+    expect(
+      decideModelVersion({ hasApiKey: true, debateSucceeded: true }).scoring_rule,
+    ).toBe(CURRENT_SCORING_RULE);
   });
 });
 
