@@ -1,3 +1,25 @@
+## v0.5.62.82 — 2026-08-23 (cycle 2363, fix-incident: 3-way version file drift 해소)
+
+### fix(ci): root `package.json`/`VERSION` 이 `apps/moneyball/package.json` 대비 2 버전 뒤처진 drift 해소
+
+- 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2355-2362) distinct=6
+  (2-chain lock 미충족). 주기 trigger 4종 전부 미도달. `gh run list --limit 10` 로
+  최근 워크플로 실행 확인 — cycle 2360/2361 두 커밋 모두 CI `Test` 스텝이 red
+  (`version-sync-guard.test.ts` 2건 실패) 로 5~7분 만에 fail 상태였음을 발견.
+- 원인: `docs: cycle 2360/2361 CHANGELOG/TODOS + version bump` 두 커밋이
+  `scripts/bump-version.sh` (VERSION + root package.json + apps/moneyball/package.json
+  3-way atomic sync 전용, cycle 2068/2070 stale 재발 방지 목적으로 이미 존재) 를
+  실행하지 않고 `apps/moneyball/package.json` 만 수동 편집 — root `package.json`/
+  `VERSION` 이 `0.5.62.79` 에 멈추고 moneyball 만 `0.5.62.81` 까지 앞서 나감.
+  R7 자동 머지 정책상 두 커밋 모두 이미 squash 없이 main 에 직접 push 됐던 policy/docs
+  커밋(PR 게이트 없음) 이라 CI red 상태가 사후 감지만 되고 머지 자체는 막히지 않음.
+- 실행: `./scripts/bump-version.sh 0.5.62.81` 로 3개 파일 동기화 후
+  `pnpm --filter moneyball test` 전체 500 files/4203 tests green 확인, 커밋+push.
+  CI Test 스텝 정상 통과 확인.
+- 후속: 스크립트 자체는 정상 작동 확인 완료 — 재발 방지는 "docs: cycle N" 커밋 작성 시
+  반드시 `bump-version.sh` 경유 (수동 JSON 편집 금지) 원칙 재확인. 자동 pre-commit
+  가드 추가는 스코프 밖(별도 review-code 후보로 carry-over).
+
 ## v0.5.62.81 — 2026-08-23 (cycle 2361, operational-analysis(heavy): KBO CE/비CE 격차 5-cycle 연속 재확인)
 
 ### data(op-analysis): CREDIT_EXHAUSTED(CE) vs 비CE 정확도 격차 재측정 — `scripts/op-analysis-ce-cohort.ts`

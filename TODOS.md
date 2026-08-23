@@ -1,3 +1,13 @@
+## 🔵 fix-incident — 3-way version file drift 해소 SUCCESS (cycle 2363, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2355-2362) distinct=6(explore-idea/fix-incident/info-architecture-review/review-code/operational-analysis/lotto), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 5/30, lotto 1/30). EN mlb 페이지 재검증(한글 leak grep) = 전부 comment-only false positive, 신규 코드 이슈 없음 확인 후 `gh run list --limit 10` 로 최근 워크플로 실행 상태 직접 확인 — cycle 2360/2361 두 커밋 모두 CI `Test` 스텝 red 발견.
+
+**원인**: `docs: cycle 2360/2361 CHANGELOG/TODOS + version bump` 두 커밋이 `scripts/bump-version.sh`(VERSION+root package.json+apps/moneyball/package.json 3-way atomic sync 전용, cycle 2068/2070 stale 재발 방지 목적으로 이미 존재) 를 실행하지 않고 `apps/moneyball/package.json` 만 수동 편집 — root `package.json`/`VERSION` 이 `0.5.62.79` 에 멈추고 moneyball 만 `0.5.62.81` 까지 앞서 나감. `version-sync-guard.test.ts`(cycle 2047) 가 이를 정확히 감지해 2 커밋 연속 CI Test red. R7 자동 머지 정책상 두 커밋 모두 PR 게이트 없는 main 직접 push(policy/docs) 라 머지 자체는 막히지 않고 사후 감지만 됨 — 사용자 가시 영향은 없었으나 CI 신호 자체가 무의미해지는 silent quality drift.
+
+**실행**: `./scripts/bump-version.sh 0.5.62.81` 로 3개 파일 동기화 → `pnpm --filter moneyball test` 전체 500 files/4203 tests green 확인 → 커밋+push. CI Test 스텝 정상 통과 재확인.
+
+결론: bump-version.sh 스크립트 자체는 정상 작동 확인(문제는 미사용). 재발 방지 = "docs: cycle N" 커밋 작성 시 반드시 스크립트 경유(수동 JSON 편집 금지) 원칙 재확인. pre-commit 가드 자동화는 스코프 밖 — review-code 후보로 carry-over. 다음 후보 = 자연 발견 또는 op-analysis(3/25)/info-arch(6/30)/lotto(2/30) 주기 trigger 확인.
+
 ## 🟢 operational-analysis(heavy) — KBO CE/비CE 격차 5-cycle 연속 재확인 SUCCESS (cycle 2361, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 직전 8사이클(2353-2360) distinct=4(fix-incident/explore-idea/info-architecture-review/review-code), 2-chain lock 미충족. 주기 trigger 4종 중 operational-analysis 만 25/25 gap 도달(마지막 발화 cycle 2336) — 채택. 직전 2회(2334 lite/2336 heavy) 연속 retro-only("완전 정적 상태") 였으나 갭 재도달 시점에 harness 재실행하여 실제 신규 데이터 유무 실측.
