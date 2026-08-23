@@ -10,6 +10,7 @@ const NEUTRAL: MlbWaterfallInput = {
   war: { home: 2.0, away: 2.0 },
   lineup_xwoba: { home: 0.32, away: 0.32 },
   lineup_barrel_pct: { home: 8.0, away: 8.0 },
+  elo: { home: 1500, away: 1500 },
   homeParkPf: 100,
   homeWinProb: 0.5 + 0.10 * (24 / 400) + 0.10 * 0.5, // formula constant only
 };
@@ -39,7 +40,7 @@ describe('computeMlbWaterfall', () => {
       war: { home: 4.0, away: 1.0 },
       head_to_head: { homeWinRate: 0.5 },
       park_factor: 1.05,
-      elo: { home: 1500, away: 1500 },
+      elo: { home: 1523, away: 1487 },
       defense_sfr: { home: 0, away: 0 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
@@ -56,6 +57,7 @@ describe('computeMlbWaterfall', () => {
       war: input.war,
       lineup_xwoba: input.lineup_xwoba,
       lineup_barrel_pct: input.lineup_barrel_pct,
+      elo: input.elo,
       homeParkPf: 105,
       homeWinProb,
     });
@@ -70,6 +72,14 @@ describe('computeMlbWaterfall', () => {
     const preFinal = bars[bars.length - 2];
     const rawSum = preFinal.end;
     expect(rawSum).toBeGreaterThan(homeWinProb - 1e-6); // asymmetric matchup pushes prob toward clamp ceiling
+  });
+
+  it('elo bar reflects real per-team rating delta (cycle 2349 wiring — regression for the silent-drop bug where asymmetric elo was excluded from the waterfall entirely)', () => {
+    const bars = computeMlbWaterfall({ ...NEUTRAL, elo: { home: 1523, away: 1487 } });
+    const eloBar = bars.find((b) => b.factor === 'elo');
+    expect(eloBar).toBeDefined();
+    expect(eloBar!.contribution).toBeCloseTo(0.10 * (1523 - 1487) / 400, 6);
+    expect(eloBar!.direction).toBe('home');
   });
 
   it('locale="en" produces English bar labels; default/locale="ko" stays Korean', () => {

@@ -15,6 +15,7 @@ describe('buildMlbGameOverview', () => {
       war: { home: 2.0, away: 2.0 },
       lineup_xwoba: { home: 0.32, away: 0.32 },
       lineup_barrel_pct: { home: 8.0, away: 8.0 },
+      elo: { home: 1500, away: 1500 },
       homeParkPf: 100,
       homeWinProb: 0.5,
     };
@@ -37,6 +38,7 @@ describe('buildMlbGameOverview', () => {
       war: { home: 4.0, away: 1.0 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
+      elo: { home: 1500, away: 1500 },
       homeParkPf: 105,
       homeWinProb: 0.62,
     };
@@ -59,6 +61,7 @@ describe('buildMlbGameOverview', () => {
       war: { home: null, away: 2.0 }, // war pair missing → bar skipped upstream
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
+      elo: { home: 1500, away: 1500 },
       homeParkPf: 105,
       homeWinProb: 0.6,
     });
@@ -75,6 +78,7 @@ describe('buildMlbGameOverview', () => {
       war: { home: 4.0, away: 1.0 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
+      elo: { home: 1500, away: 1500 },
       homeParkPf: 105,
       homeWinProb: 0.62,
     });
@@ -92,6 +96,7 @@ describe('buildMlbGameOverview', () => {
       war: { home: 4.0, away: 1.0 },
       lineup_xwoba: { home: 0.33, away: 0.31 },
       lineup_barrel_pct: { home: 9.0, away: 7.5 },
+      elo: { home: 1500, away: 1500 },
       homeParkPf: 105,
       homeWinProb: 0.62,
       locale: 'en',

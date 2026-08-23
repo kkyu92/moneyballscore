@@ -4,11 +4,12 @@ import { MLB_BASE_WEIGHTS } from './mlb-base';
 // MlbFactorWaterfallChart 용 pure 계산 — computeMlbProbability(mlb-base.ts) 의
 // homeAdvantage 항들과 정확히 동일한 계수를 재현해 bar 합 = pred.home_win_prob 보장.
 //
-// recent_form / head_to_head / elo(팀별) / defense_sfr / sp_xwoba_against / woba_std 는
-// mlb-pipeline.ts runPredictFinal 이 항상 중립값(home===away)으로 계산 입력만 하고 저장은
-// 안 하는 미구현 placeholder (plan #25 Phase 3 게이트, cycle 2097/2103 확인) — 기여도가
-// 항상 0이라 waterfall bar 대상에서 제외. elo 항의 HOME_ELO_BONUS 가산분 + 별도
-// home_elo_bonus 가중치는 팀 무관 고정 상수라 "홈 어드밴티지" 단일 bar 로 합산.
+// recent_form / head_to_head / defense_sfr / sp_xwoba_against / woba_std 는 mlb-pipeline.ts
+// runPredictFinal 이 항상 중립값(home===away)으로 계산 입력만 하고 저장은 안 하는 미구현
+// placeholder (plan #25 Phase 3 게이트, cycle 2097/2103 확인) — 기여도가 항상 0이라
+// waterfall bar 대상에서 제외. elo(팀별)는 cycle 2349 부터 mlb_team_elo 실측 반영 —
+// team-invariant 인 HOME_ELO_BONUS 가산분 + home_elo_bonus 가중치만 "홈 어드밴티지"
+// 단일 bar 로 합산하고, team-variant 인 (home-away) 델타는 별도 elo bar 로 분리.
 
 export interface MlbWaterfallPair {
   home: number | null;
@@ -23,6 +24,7 @@ export interface MlbWaterfallInput {
   war: MlbWaterfallPair;
   lineup_xwoba: MlbWaterfallPair;
   lineup_barrel_pct: MlbWaterfallPair;
+  elo: MlbWaterfallPair;
   homeParkPf: number;
   homeWinProb: number;
   locale?: 'ko' | 'en';
@@ -54,6 +56,7 @@ const LABELS: Record<'ko' | 'en', Record<string, string>> = {
     war: 'WAR',
     lineup_xwoba: '타선 xwOBA',
     lineup_barrel_pct: 'Barrel%',
+    elo: 'Elo',
     park_factor: '구장 보정',
     final: '최종 확률',
   },
@@ -66,6 +69,7 @@ const LABELS: Record<'ko' | 'en', Record<string, string>> = {
     war: 'WAR',
     lineup_xwoba: 'Lineup xwOBA',
     lineup_barrel_pct: 'Barrel%',
+    elo: 'Elo',
     park_factor: 'Park Factor',
     final: 'Final Probability',
   },
@@ -110,6 +114,7 @@ export function computeMlbWaterfall(input: MlbWaterfallInput): MlbWaterfallBar[]
     { key: 'war', pair: input.war, multiplier: 0.01, invert: false },
     { key: 'lineup_xwoba', pair: input.lineup_xwoba, multiplier: 5, invert: false },
     { key: 'lineup_barrel_pct', pair: input.lineup_barrel_pct, multiplier: 0.01, invert: false },
+    { key: 'elo', pair: input.elo, multiplier: 1 / ELO_DIVIDER, invert: false },
   ];
 
   for (const term of pairTerms) {

@@ -4,9 +4,9 @@ import path from 'path';
 
 // plan #28 Phase 2 잔여 carry-over(cycle 2316 TODOS "TeamStrengthGrid MLB 대체 설계")
 // 를 cycle 2323(explore-idea heavy) 가 해소. KBO TeamStrengthGrid 는 predictions.home_elo
-// (전량 ELO_NEUTRAL placeholder, plan #25 Elo 미구현 확정)/home_recent_form(전량 null,
-// mlb-pipeline.ts 미저장) 모델 팩터 기반이라 그대로 포팅 불가 — mlb_schedule 실제 완료
-// 경기 결과로 "진짜 전적"(최근 5경기 승패 + 연승/연패) 을 계산하는 대체 설계.
+// (cycle 2349 부터 mlb_team_elo 실측 반영)/home_recent_form(전량 null, mlb-pipeline.ts
+// 미저장) 모델 팩터 기반이라 그대로 포팅 불가(recent_form 미저장 지속) — mlb_schedule
+// 실제 완료 경기 결과로 "진짜 전적"(최근 5경기 승패 + 연승/연패) 을 계산하는 대체 설계.
 
 const buildFile = readFileSync(
   path.resolve(__dirname, '../../lib/mlb/buildMlbTeamStrengthSnapshot.ts'),

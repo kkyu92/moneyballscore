@@ -10,6 +10,7 @@ const ASYMMETRIC: MlbWaterfallInput = {
   war: { home: 4.0, away: 1.0 },
   lineup_xwoba: { home: 0.33, away: 0.31 },
   lineup_barrel_pct: { home: 9.0, away: 7.5 },
+  elo: { home: 1523, away: 1487 },
   homeParkPf: 105,
   homeWinProb: 0.62,
 };
@@ -22,17 +23,26 @@ const NEUTRAL: MlbWaterfallInput = {
   war: { home: 2.0, away: 2.0 },
   lineup_xwoba: { home: 0.32, away: 0.32 },
   lineup_barrel_pct: { home: 8.0, away: 8.0 },
+  elo: { home: 1500, away: 1500 },
   homeParkPf: 100,
   homeWinProb: 0.5,
 };
 
 describe('buildMlbFactorDetailRows', () => {
-  it('excludes home_advantage/park_factor/final — only the 7 GAME_DETAIL_FACTOR_ROWS keys remain', () => {
+  it('excludes home_advantage/park_factor/final — only the 8 GAME_DETAIL_FACTOR_ROWS keys remain', () => {
     const bars = computeMlbWaterfall(ASYMMETRIC);
     const rows = buildMlbFactorDetailRows(bars, ASYMMETRIC, 'Dodgers', 'Padres');
     expect(rows.map((r) => r.key).sort()).toEqual(
-      ['bullpen_fip', 'lineup_barrel_pct', 'lineup_woba', 'lineup_xwoba', 'sp_fip', 'sp_xfip', 'war'].sort(),
+      ['bullpen_fip', 'elo', 'lineup_barrel_pct', 'lineup_woba', 'lineup_xwoba', 'sp_fip', 'sp_xfip', 'war'].sort(),
     );
+  });
+
+  it('elo value formatted with no decimals (Elo rating, not a rate stat)', () => {
+    const bars = computeMlbWaterfall(ASYMMETRIC);
+    const rows = buildMlbFactorDetailRows(bars, ASYMMETRIC, 'Dodgers', 'Padres');
+    expect(rows.find((r) => r.key === 'elo')?.homeValueLabel).toBe('1523');
+    expect(rows.find((r) => r.key === 'elo')?.awayValueLabel).toBe('1487');
+    expect(rows.find((r) => r.key === 'elo')?.favor).toBe('home');
   });
 
   it('home team ahead in sp_fip → favor=home, narrative names home team, positive contribution', () => {
