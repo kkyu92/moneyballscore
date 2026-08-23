@@ -1,3 +1,14 @@
+## 🟢 explore-idea (heavy) — MLB 주간/월간 리뷰 수렴 픽 섹션 완결 SUCCESS (cycle 2345, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(literal `approved` 없음). 2-chain lock 미충족(직전 8사이클 2337-2344 distinct=4: review-code/explore-idea/info-arch/lotto). 주기 trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 9/25, info-arch 5/30, lotto 1/30 방금 리셋). cycle 2342 retro 가 명시한 plan #23(LLM context layer) 후보는 실제로 status=`completed_steps_1_4_shipped_through_cycle_1239_plus_waves_41_54_through_cycle_1246` — cycle 1246 시점 이미 전부 완료된 stale 언급으로 확인. plan#24 dedup 후속 후보(computeMatchupStreak 등)도 이미 cycle 2055/2064 에 완료 확인. 코드베이스 `TODO`/`후속 cycle 과제` grep 결과 `/mlb/reviews/page.tsx` + `weekly/[week]/page.tsx` 주석이 명시한 "MLB convergence 함수 날짜 range 파라미터 부재로 weekly/monthly 수렴 픽 섹션 생략"이 유일한 구체적·검증 가능한 gap으로 확인.
+
+**실행**: `convergenceRecord.ts` 의 `fetchMlbConvergencePickDetailedResults` + 6개 소비 함수(`getMlbRecentConvergencePickRecord`/`getMlbConvergencePickStreak`/`getMlbConvergencePickBestStreak`/`getMlbConvergencePickHomeAwaySplit`/`getMlbConvergencePickDayOfWeekSplit`/`getMlbConvergencePickTeamStats`)에 optional `startDate`/`endDate` 파라미터 추가(KBO wave-584/594/600/602/603 동일 패턴, add-only — 기존 호출부 무변경). `/mlb/reviews/weekly/[week]/page.tsx`, `/mlb/reviews/monthly/[month]/page.tsx` 에 KBO 동일 구조(수렴 픽 W-L 카드 → 스트리크 → 홈/어웨이 배지 → (월간만) 요일별 배지 → 팀별 배지)로 배선, `range.startDate`/`range.endDate` 전달. 배지 컴포넌트는 이미 generic(nameResolver/locale prop, cycle 2226/2339)이라 컴포넌트 자체 변경 없이 재사용.
+
+검증: `mlb-reviews-monthly-page.test.ts` 의 "수렴 픽 섹션 부재 — 의도적 생략" 가드를 배선 확인 가드로 반전. `tsc --noEmit` clean, `eslint` clean, `pnpm test`(498 files/4180 tests all green).
+
+결론: MLB `/mlb/reviews` 3계층(허브/주간/월간) 전체 수렴 픽 분석 parity 완결 — KBO 대비 마지막 남은 구조적 gap 해소. 다음 후보: review-code(heavy, 방금 배선된 신규 코드 audit — Feature-Drift Cycle 자연 교대) 또는 신규 topic 자연 발견.
+
+
 ## ⚪ review-code (heavy) — PickButton 현지화(cycle 2342) drift 감사 clean RETRO-ONLY (cycle 2343, 2026-08-20)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2335-2342 distinct=4). 주기 trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 3/30, lotto 19/30). cycle 2342 explore-idea(heavy) SUCCESS(PickButton locale 배선) 직후 Feature-Drift Cycle 자연 교대 적용, 방금 배선된 코드를 audit target 으로 선택.

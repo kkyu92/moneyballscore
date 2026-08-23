@@ -7,7 +7,19 @@ import {
   ACCURACY_GOOD_RATE,
   ACCURACY_MID_RATE,
   MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS,
+  MLB_FACTOR_PICK_STRONG,
+  MLB_FACTOR_PICK_COMPLETE,
+  mlbShortTeamName,
 } from '@moneyball/shared';
+import {
+  getMlbRecentConvergencePickRecord,
+  computeWinRatePct,
+  getMlbConvergencePickStreak,
+  getMlbConvergencePickBestStreak,
+  getMlbConvergencePickHomeAwaySplit,
+  getMlbConvergencePickDayOfWeekSplit,
+  getMlbConvergencePickTeamStats,
+} from "@/lib/analysis/convergenceRecord";
 import { parseMonthId, getRecentMonths } from "@/lib/reviews/computeMonthRange";
 import { buildMlbMonthlyReview } from "@/lib/reviews/buildMlbMonthlyReview";
 import { ShareButtons } from "@/components/share/ShareButtons";
@@ -15,13 +27,16 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 import { MonthlyTeamStatsSortControl } from "@/components/reviews/MonthlyTeamStatsSortControl";
 import { MlbHighlightCard } from "@/components/reviews/MlbHighlightCard";
+import { ConvergenceTeamStatsBadges } from "@/components/reviews/ConvergenceTeamStatsBadges";
+import { ConvergenceHomeAwayBadges } from "@/components/reviews/ConvergenceHomeAwayBadges";
+import { ConvergenceDayOfWeekBadges } from "@/components/reviews/ConvergenceDayOfWeekBadges";
 import { neutral } from "@/lib/design-tokens";
 
 // reviews/monthly/[month]/page.tsx(KBO) 의 MLB 대응 (plan #26 Phase 2) — buildMlbMonthlyReview
-// (Phase 1a/1b 데이터 레이어 재사용) 를 소비. mlb/reviews/weekly/[week]/page.tsx(Phase 1b) 와
-// 동일 이유로 수렴 픽(강수렴/완전수렴) 섹션은 생략 — MLB convergence 함수들이 날짜 range
-// 파라미터 없이 시즌 전체 스캔만 지원(주석 참조: mlb-shared.ts, buildMlbWeeklyReview.ts).
-// 개별 경기 리스트도 KBO buildMonthlyReview.ts 와 동일하게 없음(월간은 물량이 커서
+// (Phase 1a/1b 데이터 레이어 재사용) 를 소비.
+// (cycle 2345 해소) 수렴 픽(강수렴/완전수렴) 섹션 — MLB convergence 함수에 startDate/endDate
+// 파라미터 추가(convergenceRecord.ts) 후 KBO monthly 와 동일하게 range 한정 조회 배선.
+// 개별 경기 리스트는 KBO buildMonthlyReview.ts 와 동일하게 없음(월간은 물량이 커서
 // 하이라이트/팀별/팩터 요약 위주).
 export const revalidate = 3600; // REVIEWS_MONTHLY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -65,7 +80,37 @@ export default async function MlbMonthlyReviewPage({ params }: PageProps) {
   const range = parseMonthId(month);
   if (!range) notFound();
 
-  const review = await buildMlbMonthlyReview(range);
+  // cycle 2345: 강수렴/완전수렴 픽 월간 성적 — startDate~endDate 범위 한정 (KBO monthly
+  // wave-600/602/603 동일 패턴, MLB convergence 함수 date-range 지원 추가 후 배선).
+  const [
+    review,
+    strongConvergenceRecord,
+    completeConvergenceRecord,
+    strongConvergenceStreak,
+    strongConvergenceBestStreak,
+    completeConvergenceStreak,
+    completeConvergenceBestStreak,
+    strongHomeAwaySplit,
+    completeHomeAwaySplit,
+    strongDayOfWeekSplit,
+    completeDayOfWeekSplit,
+    strongTeamStats,
+    completeTeamStats,
+  ] = await Promise.all([
+    buildMlbMonthlyReview(range),
+    getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getMlbConvergencePickStreak(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getMlbConvergencePickBestStreak(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getMlbConvergencePickStreak(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getMlbConvergencePickBestStreak(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getMlbConvergencePickHomeAwaySplit(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getMlbConvergencePickHomeAwaySplit(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getMlbConvergencePickDayOfWeekSplit(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getMlbConvergencePickDayOfWeekSplit(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_STRONG, range.startDate, range.endDate),
+    getMlbConvergencePickTeamStats(MLB_FACTOR_PICK_COMPLETE, range.startDate, range.endDate),
+  ]);
   const url = `${SITE_URL}/mlb/reviews/monthly/${month}`;
 
   const recent = getRecentMonths(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS)
@@ -199,6 +244,102 @@ export default async function MlbMonthlyReviewPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      {/* cycle 2345: 수렴 픽 월간 성적 — 강수렴/완전수렴 W-L 카드 (KBO monthly wave-586 동일 패턴) */}
+      {(strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0) && (
+        <section aria-labelledby="mlb-monthly-convergence-title" className="space-y-3">
+          <h2 id="mlb-monthly-convergence-title" className="text-xl font-bold">
+            수렴 픽 성적
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {strongConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className="text-2xl font-bold mt-1">
+                  {strongConvergenceRecord.wins}승 {strongConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {strongConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+            {completeConvergenceRecord.total > 0 && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/30 p-5">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className="text-2xl font-bold mt-1">
+                  {completeConvergenceRecord.wins}승 {completeConvergenceRecord.losses}패
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {completeConvergenceRecord.total}경기 ·{' '}
+                  {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* cycle 2345: 수렴 픽 월간 스트리크 (KBO monthly wave-594 동일 패턴) */}
+      {(strongConvergenceStreak !== null || completeConvergenceStreak !== null) && (
+        <section aria-labelledby="mlb-monthly-streak-title" className="space-y-3">
+          <h2 id="mlb-monthly-streak-title" className="text-xl font-bold">
+            수렴 픽 스트리크
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {strongConvergenceStreak !== null && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5">
+                <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wide">강수렴 픽</p>
+                <p className={`text-2xl font-bold mt-1 ${strongConvergenceStreak.type === 'win' ? 'text-amber-500 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}>
+                  {strongConvergenceStreak.type === 'win' ? '🔥' : '❄️'}{' '}
+                  {strongConvergenceStreak.length}연{strongConvergenceStreak.type === 'win' ? '승' : '패'}
+                </p>
+                {strongConvergenceBestStreak !== null && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    이번 달 최장 {strongConvergenceBestStreak.length}연{strongConvergenceBestStreak.type === 'win' ? '승' : '패'}
+                  </p>
+                )}
+              </div>
+            )}
+            {completeConvergenceStreak !== null && (
+              <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-amber-500/30 p-5">
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">★ 완전수렴 픽</p>
+                <p className={`text-2xl font-bold mt-1 ${completeConvergenceStreak.type === 'win' ? 'text-amber-600 dark:text-amber-400' : 'text-sky-500 dark:text-sky-400'}`}>
+                  {completeConvergenceStreak.type === 'win' ? '🔥' : '❄️'}{' '}
+                  {completeConvergenceStreak.length}연{completeConvergenceStreak.type === 'win' ? '승' : '패'}
+                </p>
+                {completeConvergenceBestStreak !== null && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    이번 달 최장 {completeConvergenceBestStreak.length}연{completeConvergenceBestStreak.type === 'win' ? '승' : '패'}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* cycle 2345: 수렴 픽 월간 홈/어웨이 분리 성적 배지 (KBO monthly wave-600 동일 패턴) */}
+      <ConvergenceHomeAwayBadges
+        titleId="mlb-monthly-home-away-title"
+        strongSplit={strongHomeAwaySplit}
+        completeSplit={completeHomeAwaySplit}
+      />
+
+      {/* cycle 2345: 수렴 픽 월간 요일별 분리 성적 배지 (KBO monthly wave-602 동일 패턴) */}
+      <ConvergenceDayOfWeekBadges
+        titleId="mlb-monthly-day-of-week-title"
+        strongSplit={strongDayOfWeekSplit}
+        completeSplit={completeDayOfWeekSplit}
+      />
+
+      {/* cycle 2345: 수렴 픽 월간 팀별 분리 성적 배지 (KBO monthly wave-603 동일 패턴) */}
+      <ConvergenceTeamStatsBadges
+        titleId="mlb-monthly-team-stats-title"
+        strongTeamStats={strongTeamStats}
+        completeTeamStats={completeTeamStats}
+        nameResolver={mlbShortTeamName}
+      />
 
       {review.highlights.length > 0 && (
         <section aria-labelledby="mlb-monthly-highlights-title" className="space-y-4">

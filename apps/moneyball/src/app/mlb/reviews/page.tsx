@@ -20,8 +20,8 @@ import { getMlbReviewsData } from "./reviews-data";
 // KBO /reviews 의 MLB 대응 (cycle 2226, Feature-Drift Cycle 후속) — MLB_NAV "경기·팀"
 // 그룹에 예측 기록(/mlb/predictions)은 있었지만 수렴 픽 분석(팀별/홈-어웨이/요일별/스트리크)이
 // 통째로 빠져있던 gap. 개별 경기 목록은 이미 /mlb/predictions 가 담당하므로 본 페이지는
-// 수렴 픽 분석 허브에 집중 (Phase 1 — weekly/monthly 서브페이지는 MLB 주/월 range 유틸
-// 부재라 후속 cycle 과제).
+// 수렴 픽 분석 허브에 집중 (Phase 1 — weekly/monthly 서브페이지 수렴 픽 섹션은 cycle 2345
+// 에서 MLB convergence 함수에 date-range 파라미터를 추가해 완결).
 const PAGE_URL = `${SITE_URL}/mlb/reviews`;
 
 export const metadata: Metadata = {

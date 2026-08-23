@@ -1,6 +1,6 @@
 // cycle 2226 (explore-idea heavy): /reviews(KBO) 의 MLB 대응 신규 — MLB_NAV "경기·팀"
 // 그룹에 예측 기록은 있었지만 수렴 픽 분석(팀별/홈-어웨이/요일별/스트리크)이 통째로 빠져있던
-// gap. Phase 1 은 수렴 픽 분석 허브만 (weekly/monthly 는 MLB 주/월 range 유틸 부재라 후속).
+// gap. Phase 1 은 수렴 픽 분석 허브만 (weekly/monthly 수렴 픽 섹션은 cycle 2345 에서 완결).
 
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";

@@ -26,11 +26,10 @@ export type {
 
 // buildMonthlyReview.ts(KBO) 의 MLB 대응 (plan #26 Phase 2) — Phase 1a/1b
 // (buildMlbWeeklyReview.ts, mlb-shared.ts) 가 이미 확립한 데이터 레이어를 그대로 재사용,
-// week → month 범위 계산(computeMonthRange, 리그 무관)만 교체. KBO 월간 페이지의
-// 수렴 픽(강수렴/완전수렴) 섹션은 의도적으로 이식하지 않음 — MLB convergence 함수들
-// (getMlbRecentConvergencePickRecord 등)이 시즌 전체 스캔만 지원하고 날짜 range
-// 파라미터가 없어 (weekly Phase 1b page.tsx 주석과 동일 사유), 월간 페이지에 억지로
-// 태우면 오도된 "월간 성적"으로 보일 수 있어 생략.
+// week → month 범위 계산(computeMonthRange, 리그 무관)만 교체. 수렴 픽(강수렴/완전수렴)
+// 섹션은 이 빌더가 아니라 monthly/[month]/page.tsx 가 직접 range.startDate/endDate 로
+// MLB convergence 함수(cycle 2345, date-range 파라미터 추가)를 호출해 렌더 — KBO
+// monthly/[month]/page.tsx 와 동일 배선 위치.
 export interface MlbMonthlyReview {
   month: MonthRange;
   hasData: boolean;

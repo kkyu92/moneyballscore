@@ -479,16 +479,23 @@ function evaluateMlbConvergencePickRow(
 // wave-625: MLB 팀별 시즌 전체 강수렴/완전수렴 픽 성적 — getConvergencePickTeamStats(KBO) 대응.
 // KBO 는 KBO_SEASON_START_DATE 로 조회 범위를 한정하지만 MLB 는 buildMlbAccuracySummary 와
 // 동일 패턴(status='final' 전량 스캔, cutoff 불필요 — MLB 시즌 전체가 이미 KBO 대비 소표본).
+// cycle 2345: startDate/endDate 지정 시 그 범위만 조회 (주간/월간 리뷰 용, KBO
+// fetchConvergencePickDetailedResults wave-584/600 동일 패턴). 미지정 시 기존 동작 (시즌 전체).
 async function fetchMlbConvergencePickDetailedResults(
   minFactors: number,
+  startDate?: string,
+  endDate?: string,
 ): Promise<Array<{ favoredTeam: MlbTeamCode; favoredHome: boolean; won: boolean; gameDate: string }>> {
   const supabase = await createClient();
 
-  const scheduleResult = (await supabase
+  let scheduleQuery = supabase
     .from('mlb_schedule')
     .select('external_game_id, game_date, home_score, away_score, home_team_code, away_team_code')
     .eq('status', 'final')
-    .order('game_date', { ascending: false })) as SelectResult<
+    .order('game_date', { ascending: false });
+  if (startDate != null) scheduleQuery = scheduleQuery.gte('game_date', startDate);
+  if (endDate != null) scheduleQuery = scheduleQuery.lte('game_date', endDate);
+  const scheduleResult = (await scheduleQuery) as SelectResult<
     Array<{
       external_game_id: string;
       game_date: string;
@@ -532,8 +539,12 @@ async function fetchMlbConvergencePickDetailedResults(
  */
 export async function getMlbConvergencePickTeamStats(
   minFactors = MLB_FACTOR_PICK_STRONG,
+  // cycle 2345: startDate/endDate 지정 시 해당 범위만 조회 (주간/월간 리뷰 용, KBO
+  // getConvergencePickTeamStats wave-603 동일 패턴). 미지정 시 기존 동작 (시즌 전체).
+  startDate?: string,
+  endDate?: string,
 ): Promise<Array<{ teamCode: MlbTeamCode; wins: number; losses: number }>> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   return computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS);
 }
 
@@ -558,44 +569,59 @@ export async function getMlbConvergencePickHeadToHeadRecord(
 // 동일하게 시즌 전체(status='final') 스캔 — MLB 시즌 자체가 KBO 대비 소표본이라 cutoff 불필요.
 export async function getMlbRecentConvergencePickRecord(
   minFactors = MLB_FACTOR_PICK_STRONG,
+  // cycle 2345: startDate/endDate 지정 시 해당 범위만 조회 (주간/월간 리뷰 용). 미지정 시 기존 동작 (시즌 전체).
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ wins: number; losses: number; total: number }> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   const wins = results.filter((r) => r.won).length;
   return { wins, losses: results.length - wins, total: results.length };
 }
 
 // cycle 2226: MLB 강수렴 픽 현재 streak — getConvergencePickStreak(KBO) 대응.
 // fetchMlbConvergencePickDetailedResults 가 game_date desc 정렬 반환하므로 그대로 재사용.
+// cycle 2345: startDate/endDate 지정 시 그 범위 내 현재(=범위 마지막) streak (주간/월간 리뷰 용).
 export async function getMlbConvergencePickStreak(
   minFactors = MLB_FACTOR_PICK_STRONG,
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   return computeConvergenceStreak(results.map((r) => r.won));
 }
 
 // cycle 2226: MLB 강수렴 픽 시즌 최장 streak — getConvergencePickBestStreak(KBO) 대응.
+// cycle 2345: startDate/endDate 지정 시 그 범위 내 최장 streak (주간/월간 리뷰 용). 미지정 시 기존 시즌 전체 동작.
 export async function getMlbConvergencePickBestStreak(
   minFactors = MLB_FACTOR_PICK_STRONG,
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
-  // computeConvergenceBestStreak 는 결과를 최신→과거 순서로 순회하며 시즌 전체 최장을 찾으므로
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
+  // computeConvergenceBestStreak 는 결과를 최신→과거 순서로 순회하며 범위 내 최장을 찾으므로
   // 정렬 방향(desc)은 KBO(startDate 오름차순 조회)와 달라도 최댓값 자체엔 영향 없음.
   return computeConvergenceBestStreak(results.map((r) => r.won));
 }
 
 // cycle 2226: MLB 강수렴 픽 홈/어웨이 분리 성적 — getConvergencePickHomeAwaySplit(KBO) 대응.
+// cycle 2345: startDate/endDate 지정 시 해당 범위만 조회 (주간/월간 리뷰 용).
 export async function getMlbConvergencePickHomeAwaySplit(
   minFactors = MLB_FACTOR_PICK_STRONG,
+  startDate?: string,
+  endDate?: string,
 ): Promise<{ home: { wins: number; losses: number }; away: { wins: number; losses: number } } | null> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   return computeConvergenceHomeAwaySplit(results);
 }
 
 // cycle 2226: MLB 강수렴 픽 요일별 분리 성적 — getConvergencePickDayOfWeekSplit(KBO) 대응.
+// cycle 2345: startDate/endDate 지정 시 해당 범위만 조회 (월간 리뷰 용).
 export async function getMlbConvergencePickDayOfWeekSplit(
   minFactors = MLB_FACTOR_PICK_STRONG,
+  startDate?: string,
+  endDate?: string,
 ): Promise<Array<{ dayIndex: number; wins: number; losses: number }>> {
-  const results = await fetchMlbConvergencePickDetailedResults(minFactors);
+  const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
   return computeConvergenceDayOfWeekSplit(results);
 }
 

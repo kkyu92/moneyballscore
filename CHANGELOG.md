@@ -1,4 +1,29 @@
-## v0.5.62.70 — 2026-08-20 (cycle 2342, explore-idea (heavy): PickButton 현지화 — en/mlb 커뮤니티 픽 배선)
+## v0.5.62.71 — 2026-08-23 (cycle 2345, explore-idea (heavy): MLB 주간/월간 리뷰 수렴 픽 섹션 완결)
+
+### feat(mlb): `/mlb/reviews/weekly/[week]`, `/mlb/reviews/monthly/[month]` 수렴 픽(강수렴/완전수렴) 섹션 신규
+
+- `/mlb/reviews/page.tsx`(cycle 2226) 및 weekly/monthly 서브페이지(plan #26 Phase 1b/2, cycle
+  2229~2231) 가 공통으로 "MLB convergence 함수들은 시즌 전체 스캔만 지원하고 날짜 range
+  파라미터가 없어 주간/월간 페이지에 억지로 태우면 오도된 성적으로 보일 수 있어 의도적으로
+  생략" 이라는 stale 주석을 남겨뒀던 gap — KBO `/reviews/weekly`, `/reviews/monthly` 는 이미
+  wave-584/594/600/602/603 에서 `startDate`/`endDate` 파라미터를 지원하는데 MLB 대응 함수만
+  없었던 것.
+- `convergenceRecord.ts` 의 `fetchMlbConvergencePickDetailedResults` 및 이를 소비하는
+  `getMlbRecentConvergencePickRecord`/`getMlbConvergencePickStreak`/`getMlbConvergencePickBestStreak`/
+  `getMlbConvergencePickHomeAwaySplit`/`getMlbConvergencePickDayOfWeekSplit`/
+  `getMlbConvergencePickTeamStats` 6개 함수에 optional `startDate`/`endDate` 파라미터 추가
+  (`mlb_schedule` 쿼리에 `.gte`/`.lte` 조건부 적용) — 미지정 시 기존 시즌 전체 스캔 동작 그대로
+  유지(add-only, 기존 호출부인 `/mlb/reviews`, `/mlb/team/[code]` 등 무변경).
+- `/mlb/reviews/weekly/[week]/page.tsx`, `/mlb/reviews/monthly/[month]/page.tsx` 에 KBO 동일
+  구조(수렴 픽 W-L 카드 → 스트리크 → `ConvergenceHomeAwayBadges` → (월간만)
+  `ConvergenceDayOfWeekBadges` → `ConvergenceTeamStatsBadges`)로 배선, `range.startDate`/
+  `range.endDate` 전달. 배지 컴포넌트들은 이미 generic + `nameResolver`/`locale` prop을
+  지원해(cycle 2226/2339) 추가 컴포넌트 변경 없이 `mlbShortTeamName` 넘기는 것만으로 재사용.
+- `mlb-reviews-monthly-page.test.ts` 의 기존 "수렴 픽 섹션 부재 — 의도적 생략" 가드를 배선
+  확인 가드로 반전.
+- `tsc --noEmit` clean, `eslint` clean, `pnpm test`(498 files/4180 tests all green).
+
+
 
 ### feat(mlb): `PickButton` locale prop + `/en/mlb/games/[date]`, `/en/mlb/analysis` 커뮤니티 픽 투표 UI 배선
 
