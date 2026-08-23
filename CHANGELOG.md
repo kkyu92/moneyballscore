@@ -1,3 +1,12 @@
+## v0.5.62.93 — 2026-08-23 (cycle 2435, review-code: 게임 상세 페이지 SFR=0 데이터 갭이 내러티브에서 실제 수비값처럼 노출되던 것 정정 — WAR/SFR=0 family 6th occurrence)
+
+### fix(analysis): `factor-explanations.ts`의 `explainFactor()` SFR 케이스가 WAR 케이스와 달리 SFR=0 (Fancy Stats silent-fallback stub, predictor.ts `sfr !== 0` 가드와 동일 의미)에 대한 갭 가드가 없어 게임 상세 페이지(`/analysis/game/[id]`) 및 `GameAnalysisProse` 내러티브에서 "OB 수비가 SFR 2.1점 우위" 처럼 데이터 갭을 실제 수비 우위로 오인시키던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 전부 미도달(fix-incident 12/20, op-analysis 4/25, info-arch 10/30). 2-chain lock 미충족(직전8 distinct=4). CI/lint/test 전부 clean, lotto self-heal 확인 완료 — 강한 trigger 부재. review-code(heavy)로 WAR/SFR=0 gap guard family 최근 5회(cycle 2427-2430) 수정 지점(FactorBreakdown/computeFactorAveragesFromPerspectives/predictor.ts) 인접 코드 재확장 감사.
+- 발견: `analysis/game/[id]/page.tsx`가 `factorDetails`를 만들어 `GameAnalysisProse` → `explainFactor()`에 주입. WAR 케이스는 wave-536에서 `homeWar === 0 || awayWar === 0` 갭 가드 + "WAR 미집계 — 예측에서 중립 처리됨" 서술을 이미 갖췄으나, 바로 아래 SFR 케이스는 `!= null`만 검사하고 `=== 0` 갭을 그대로 실제값으로 diff 계산 — predictor.ts의 `factors.sfr = (homeSfr !== 0 && awaySfr !== 0) ? ... : NEUTRAL_FACTOR` 가드와 내러티브가 불일치.
+- 실행: SFR 케이스에 WAR 케이스와 동일한 패턴(`homeSfr === 0 || awaySfr === 0` → "{team} SFR 미집계 — 예측에서 중립 처리됨") 추가. 회귀 테스트 4건 신설(`factor-explanations.test.ts`) — war/sfr 각 갭 케이스 1건 + 정상값 케이스 1건 (기존엔 war/sfr 테스트 자체가 0건이었음).
+- `pnpm --filter moneyball test`(4217/4217, 신규 4건) + `type-check`/`lint` clean.
+
 ## v0.5.62.92 — 2026-08-23 (cycle 2434, polish-ui: 하락/음수 표시 red 색상 light/dark 대비 방향 불일치 4곳 정정)
 
 ### fix(components): light/dark 모드 색상 강도 방향이 dominant 패턴(light=진하게, dark=밝게, `text-red-600 dark:text-red-400`)과 반대(`text-red-400 dark:text-red-500`)로 적용돼 있던 4곳을 정정 — light 모드 white 배경 대비 ~3:1로 WCAG AA(4.5:1) 미달
