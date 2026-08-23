@@ -1,3 +1,17 @@
+## ⚪ explore-idea(lite) — 신규 후보 탐색, 전량 already-fixed/blocked-on-data/Tier-3 확인 RETRO-ONLY (cycle 2372, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked, status="approved" 없음). 직전 8사이클(2365-2371) distinct=3(review-code/operational-analysis/info-architecture-review), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 4/25, info-arch 7/30, lotto 10/30). **explore-idea saturation 12/15≥12 충족** — 직전 4사이클(2367~2371) review-code 4연속 RETRO-ONLY(false-positive) 확산이 saturation 을 임계 넘김. gh run list 전부 green/skip. review-code lite-cap streak=4/5(cooldown 미도달, 5 아님).
+
+**탐색 시도 1**: TODOS line 701(cycle 2295 근방) carry-over — `/debug/reliability` 페이지 `scoring_rule`/`prediction_type` 필터 누락(#1338 family) 재확인 시도 → 실측 결과 이미 해소됨(`f7f94f30 fix(debug): reliability page scoring_rule + prediction_type 필터 누락 정정 (#1338 family 9번째 재발)`, line 204-205 `CURRENT_MODEL_FILTER`+`prediction_type='pre_game'` 확인). stale pointer, false-positive.
+
+**탐색 시도 2**: TODOS cycle 2098/2099/4086 항목 "MLB 개별 경기 debate/verdict/postview parity" (waterfall 만 cycle 2104 완료, 나머지 large scope 로 유보) 재검토 — `mlb-pipeline.ts` 전체에 `debate`/`judge`/`postview`/`reasoning` 필드 자체가 없음(MLB 예측은 LLM debate 파이프라인 자체를 안 태움) 확인. UI parity 문제가 아니라 MLB 전용 LLM 에이전트 파이프라인 신규 구축이 선행돼야 하는 Tier 3(large+dependency) — CREDIT_EXHAUSTED(debate 100% fallback, conf=0.3) 지속 상태에서 신규 LLM 파이프라인 투자는 ROI 낮음, skip 유지.
+
+**탐색 시도 3**: `/community` placeholder("커뮤니티 박제 중, 인증 layer 의존") 재확인 — 의도된 스텁, 인증 레이어 선행 의존 Tier 3, skip.
+
+**탐색 시도 4**: KBO reviews 계열 수렴 배지(ConvergenceStreakBadges/TeamStatsBadges/HomeAwayBadges/DayOfWeekBadges) MLB parity 확인 — KO+EN 양쪽 `/mlb/reviews`, `/mlb/reviews/weekly`, `/mlb/reviews/monthly` 전부 이미 배선 완료(wave-596~606, wave-659 grep 확인). parity 완결.
+
+결론: 코드 변경 없음. cycle 2152 가 이미 명문화한 메타 패턴("다음 X 후보" 포인터 평균 수명 1~2 cycle, 고빈도 fire 환경에서 자연 소비) 재확인 — 이번엔 4건 전부 이미 소비/차단 상태. explore-idea saturation 자체는 충족됐으나 즉시 착수 가능한 bounded 신규 후보 부재(cycle 1017/2334 선례와 동일 결론 class). 다음 사이클 후보 = 주기 gap 도달 chain(fix-incident 10/20, op-analysis 5/25, info-arch 8/30, lotto 11/30) 또는 review-code lite-cap 임박(4/5, 다음 발화 시 5 도달 시 10-cycle cooldown) 고려.
+
 ## ⚪ review-code(heavy) — fancy-stats.ts(526줄) scraper 신규 target 감사, 이슈 미발견 RETRO-ONLY (cycle 2371, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22(전량 completed/archived/blocked). 직전 8사이클(2364-2370) distinct=4(review-code/info-arch/operational-analysis), 2-chain lock 미충족. 주기 trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 3/25, info-arch 6/30, lotto 9/30). explore-idea saturation 11/15<12 미충족. gh run list 전부 green. DESIGN.md 5일 전(미도달), lotto picks 8/29 기박제. review-code(heavy) 5연속 소진(2364/2366/2367/2369/2370)이 apps/moneyball page.tsx 계열에 집중돼 있었던 점에 착안, 미감사 영역인 packages/kbo-data/src/scrapers 로 감사 범위 전환 — fancy-stats.ts(526줄, scrapers 디렉토리 최대 monolith, validator.ts/postview.ts 는 cycle 2369 기감사) 선정.
