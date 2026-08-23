@@ -107,6 +107,56 @@ describe("explainFactor", () => {
   });
 });
 
+describe("explainFactor — WAR/SFR=0 데이터 갭 가드 (family, cycle 2435)", () => {
+  it("war: homeWar=0 → 갭 중립 서술, 실제 격차 계산 안함", () => {
+    const result = explainFactor({
+      key: "war",
+      factorValue: 0.5,
+      details: { homeWar: 0, awayWar: 3.5 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("KIA WAR 미집계");
+    expect(result.narrative).not.toContain("3.5");
+  });
+
+  it("war: 양쪽 정상값 → 기존 격차 서술 정상 노출", () => {
+    const result = explainFactor({
+      key: "war",
+      factorValue: 0.6,
+      details: { homeWar: 4.0, awayWar: 1.0 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("KIA");
+    expect(result.narrative).toContain("3.0");
+  });
+
+  it("sfr: awaySfr=0 → 갭 중립 서술 (predictor.ts !==0 가드와 정합)", () => {
+    const result = explainFactor({
+      key: "sfr",
+      factorValue: 0.5,
+      details: { homeSfr: 2.1, awaySfr: 0 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("NC SFR 미집계");
+    expect(result.narrative).not.toContain("2.1");
+  });
+
+  it("sfr: 양쪽 정상값(음수 포함) → 기존 우위 서술 정상 노출", () => {
+    const result = explainFactor({
+      key: "sfr",
+      factorValue: 0.6,
+      details: { homeSfr: 1.5, awaySfr: -0.8 },
+      homeTeamName: "KIA",
+      awayTeamName: "NC",
+    });
+    expect(result.narrative).toContain("KIA");
+    expect(result.narrative).toContain("2.3");
+  });
+});
+
 describe("explainFactor — Korean particle silent drift 차단", () => {
   it("sp_fip non-neutral: 받침 없는 팀명 → '가'", () => {
     const result = explainFactor({

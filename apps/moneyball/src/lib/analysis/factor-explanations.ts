@@ -265,23 +265,30 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
       awayLabel = fmtSfr(details.awaySfr);
       homeLabel = fmtSfr(details.homeSfr);
       if (details.awaySfr != null && details.homeSfr != null) {
-        const diff = Math.abs(details.awaySfr - details.homeSfr);
-        const better =
-          details.awaySfr > details.homeSfr ? awayTeamName : homeTeamName;
-        const betterSfr =
-          details.awaySfr > details.homeSfr ? details.awaySfr : details.homeSfr;
-        const worserSfr =
-          details.awaySfr < details.homeSfr ? details.awaySfr : details.homeSfr;
-        const sfrQual =
-          betterSfr >= SFR_STRONG
-            ? " (강세 수비)"
-            : worserSfr <= SFR_WEAK
-              ? " (약세 수비)"
-              : "";
-        narrative =
-          favor === "neutral"
-            ? "수비 SFR 차이 미미."
-            : `${better} 수비가 SFR ${diff.toFixed(1)}점 우위${sfrQual}. 실점 방어 기여 높음.`;
+        // wave-536 family (predictor.ts sfr guard, cycle 1904 wave-533 동일):
+        // SFR=0 = Fancy Stats silent-fallback stub, 실제 수비값 아님. 예측 neutral(0.5)과 내러티브 일치.
+        if (details.homeSfr === 0 || details.awaySfr === 0) {
+          const gapTeam = details.homeSfr === 0 ? homeTeamName : awayTeamName;
+          narrative = `${gapTeam} SFR 미집계 — 예측에서 중립 처리됨.`;
+        } else {
+          const diff = Math.abs(details.awaySfr - details.homeSfr);
+          const better =
+            details.awaySfr > details.homeSfr ? awayTeamName : homeTeamName;
+          const betterSfr =
+            details.awaySfr > details.homeSfr ? details.awaySfr : details.homeSfr;
+          const worserSfr =
+            details.awaySfr < details.homeSfr ? details.awaySfr : details.homeSfr;
+          const sfrQual =
+            betterSfr >= SFR_STRONG
+              ? " (강세 수비)"
+              : worserSfr <= SFR_WEAK
+                ? " (약세 수비)"
+                : "";
+          narrative =
+            favor === "neutral"
+              ? "수비 SFR 차이 미미."
+              : `${better} 수비가 SFR ${diff.toFixed(1)}점 우위${sfrQual}. 실점 방어 기여 높음.`;
+        }
       }
       break;
     }
