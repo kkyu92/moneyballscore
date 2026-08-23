@@ -717,3 +717,46 @@ carry-over #1 (40-ahead 정리 방식) 은 "그대로 두고 매 cycle merge 습
   해소하고 재발 방지 장치를 남기지 않아 즉시 재발. silent drift family
   대응 시 "이 순간 상태 동기화" 와 "재발 차단 장치 설치" 를 구분해서 둘
   다 완료해야 retro 의 SUCCESS 가 유효하다는 교훈.
+
+## 사례 20 (cycle 2350 fix-incident): 허브 `lesson-pending` reminder 18건 누적 — version-sync-guard race 미close 백로그
+
+**발견**: cycle 2350 진단 단계에서 `gh issue list --state open` 확인 시
+`hub-dispatch` 라벨 issue 는 0건이었으나, 별도 `lesson-pending` 라벨
+reminder 가 18건 누적 (issue #3021~3038). 허브 `incident-followup.yml`
+(Phase 4a D5) 이 매일 fingerprint 매칭 → 대응하는 `lesson:` commit 없이
+3일 이상 경과한 hub incident 마다 자동 생성. develop-cycle 진단 단계
+체크리스트가 `hub-dispatch` 라벨만 확인하고 `lesson-pending` 라벨은
+누락 — 18건이 조용히 쌓이도록 방치된 구조적 맹점.
+
+**root cause 규명**: 18건 중 14건(`ci-main-*`)이 전부 2026-08-19~20
+(cycle 2246~2281) 구간 동일 원인 — `version-sync-guard.test.ts`
+(사례 사전 정의, cycle 2047 신규) 가 VERSION 파일과
+`apps/moneyball/package.json` 버전 mismatch 를 잡는 가드인데, 그 구간
+fix/policy 커밋이 빠르게 연속되며 VERSION bump 가 package.json bump 와
+같은 커밋에 원자적으로 안 들어간 순간들이 있어 그 사이 커밋의 CI 가
+일시 실패 (`0.5.62.38 vs .39`, `0.5.62.60 vs .61` 등). 2026-08-20 이후
+커밋부터는 VERSION/package.json×2/CHANGELOG 를 한 커밋에 원자적으로
+묶는 관행이 정착돼(커밋 메시지에 "VERSION 0.5.62.X→Y" 또는 "bump
+X→Y" 명시) 재발 0건 — 현재 HEAD 기준 CI 전량 green. 나머지 4건은
+develop-cycle feature branch pre-merge 반복 실패(R7 정책상 CI green
+후에만 squash 머지되므로 브랜치 자체 삭제됨, 최종 머지본은 영향 없음)
++ fingerprint/title 불일치 1건(허브 archive 재처리 라벨링 이슈 추정).
+
+**fix (cycle 2350)**: 18건 모두 원인 규명 코멘트와 함께 close (코드
+수정 불필요 — 이미 자연 해소된 케이스). 코드 자체는 변경 없음(가드
+테스트는 의도대로 작동 중이며 유지).
+
+**carry-over (다음 fix-incident/skill-evolution 검토 필요)**:
+1. develop-cycle 진단 체크리스트의 "open GH issues 우선" 단계가
+   `--label hub-dispatch` 만 확인 — `lesson-pending` 라벨도 함께
+   스캔하도록 skill 갱신 검토(다음 skill-evolution 발화 시 반영 후보).
+2. VERSION 원자적 bump 관행이 "코드 가드"가 아니라 "매 커밋 시 기억"에
+   의존 — 재발 방지 장치가 문서/습관 수준. 향후 pre-commit hook 또는
+   CI 자체에서 VERSION/package.json 자동 sync 스크립트화 검토 여지.
+
+**관련 family**:
+- 사례 15 (develop-cycle 자체 retro/dispatch layer silent) — 여기선
+  허브 dispatch reminder 채널 자체가 진단 스캔 사각지대였다는 변형
+- 사례 17 (`gh run list` 로 CI 파이프라인 실 여부 확인 필수) — 이번엔
+  과거 실패 run 의 근본 원인까지 역추적해 "이미 해소됨" 을 실측 검증한
+  사례
