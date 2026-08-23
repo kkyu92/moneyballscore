@@ -1,3 +1,11 @@
+## ⚪ operational-analysis(lite) — 25-gap 재측정, 데이터 정지 확인 RETRO-ONLY (cycle 2393, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. 주기 gap trigger: op-analysis 마지막 발화 cycle 2368(lite) → 25 사이클 경과, 표에 명시된 "장기 미발화 주기 보정" trigger 충족(lite 자동 권장). 2-chain lock 미충족(직전8 distinct=3: review-code/fix-incident/lotto). fix-incident(3/20)/info-arch(28/30)/lotto(1/30) 나머지 3종 미도달.
+
+측정: 이번 주(8/17~8/23 KST) verified predictions n=21, 적중 10/21=47.6% — cycle 2368 측정치와 완전 동일(n/acc/요일별 분포 전부 identical). 전체 v1.8+v1.8-credit-fail 누적 카운트도 332건으로 cycle 2361 heavy 측정치와 동일 — **cycle 2361→2393 32사이클 동안 신규 verified 예측 0건**. 최근 verified game_date = 2026-08-22(어제)로 파이프라인 자체는 살아있음, 단 develop-cycle 발화 속도가 실제 경기/검증 cadence 보다 훨씬 빨라 짧은 사이클 구간 안엔 새 데이터가 쌓이지 않는 구조적 특성(velocity ~0.2~2건/day 기존 관측과 정합, 버그 아님).
+
+결론: 코드 변경 없음, 가중치 판단 근거 없음(표본 정지). op-analysis 25-gap trigger 자체는 "재측정 실행" 만 요구하지 "새 데이터 존재" 를 보장하지 않음 — 재측정이 stale 임을 확인하는 것 자체가 이번 사이클의 유효 결과. 다음 후보 = info-arch(29/30)/lotto(2/30) 임박 대기 또는 자연 발견.
+
 ## ✅ SUCCESS — hub-dispatch Sentry no-relay 태그 no-op 수정 (cycle 2390, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22, gap trigger 4종 미도달(fix-incident 7/20, op-analysis 22/25, info-arch 25/30, lotto 28/30), 2-chain lock 미충족. cycle 2389 추천대로 cron API routes 재탐색 — `picks/results/route.ts` clean, `hub-dispatch/route.ts` 에서 발견.
