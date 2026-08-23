@@ -21,15 +21,14 @@ describe("localizeNavItems", () => {
     expect(collectHrefs(result).every((h) => !h.startsWith("/en"))).toBe(true);
   });
 
-  it("EN pathname(/en/mlb/*) → /mlb/reviews/weekly, /mlb/reviews/monthly 제외 모든 /mlb href 가 /en 접두로 치환 (wave-659: reviews/misses 미러 신규)", () => {
+  it("EN pathname(/en/mlb/*) → 모든 /mlb href 가 /en 접두로 치환 (cycle 2355/2356: weekly/monthly 미러 신규로 예외 해제)", () => {
     const result = localizeNavItems(LEAGUE_NAVS.mlb, "/en/mlb/standings");
     for (const href of collectHrefs(result)) {
-      if (href.startsWith("/mlb/reviews/weekly") || href.startsWith("/mlb/reviews/monthly")) continue;
       expect(href.startsWith("/en/mlb") || href === "/en/mlb").toBe(true);
     }
   });
 
-  it("EN pathname → /mlb/reviews, /mlb/reviews/misses 는 wave-659 미러 신규로 /en 치환됨 (weekly/monthly 는 EN 미러 여전히 부재라 KO href 유지)", () => {
+  it("EN pathname → /mlb/reviews, /mlb/reviews/misses 전부 /en 치환됨 (Header nav 에는 weekly/monthly 항목 자체가 없음, Footer 쪽은 별도 테스트)", () => {
     const result = localizeNavItems(LEAGUE_NAVS.mlb, "/en/mlb/standings");
     expect(collectHrefs(result)).toContain("/en/mlb/reviews");
     expect(collectHrefs(result)).toContain("/en/mlb/reviews/misses");
