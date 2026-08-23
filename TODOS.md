@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) convergenceRecord.ts + picks/results route + MLB team-code 정규화 재감사, clean (cycle 2418, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 2/25, info-arch 23/30, lotto 26/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2417 추천에 따라 review-code(heavy) 잔여 target 재탐색.
+
+감사: convergenceRecord.ts(831줄) — h2h family fix(cycle 2304) 양쪽 콜사이트(fetchConvergencePickDetailedResults/…ForPair) 정합, MLB/KBO min-picks 상수 공유 의도적(comment 확인). api/picks/results/route.ts — CURRENT_SCORING_RULE 우선 + pre_game fallback + any-pred fallback 3단 체인으로 legacy v1.8-credit-fail row 실제 배제 없음(comment는 다소 misleading하나 동작 정상). MLB team-code 정규화(toMlbStatsApiCode) 전체 콜사이트 5개 파일(convergenceRecord/buildMlbMatchupProfile/fetchMlbHistoricalAnalogs/buildMlbTeamFactorAverages/buildMlbTeamProfile) 재점검 — 전부 정상, cycle 2081 family 재발 없음.
+
+결과: 신규 버그 0건, 코드 변경 없음. review-code 잔여 감사 대상 소진 추세 재확인(cycle 2417 관측과 일치). 미감사 대형 파일 잔존: analysis-data.ts(938줄)/analysis/page.tsx(2803줄).
+
+다음 사이클 추천 = gap-trigger 순번 대기(info-arch 23/30, lotto 26/30 근접) 또는 op-analysis(신규 표본 축적 대기) — diversity 확보 기회.
+
 ## 🟡 PARTIAL — explore-idea(heavy) 회원인증+커뮤니티 ETA 도달 재평가, 보류 권고 plan #29 (cycle 2417, 2026-08-23)
 
 진단: open issue 0, approved plan 0/28. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 1/25, info-arch 22/30, lotto 25/30). 2-chain lock 미충족(직전8 distinct=4: review-code/explore-idea/fix-incident/operational-analysis). explore-idea saturation trigger 충족(직전 15 cycle 13/15). review-code 3연속 clean audit(2413-2415) + op-analysis 신규 표본 0건(2416) 이후 다양성 회복 fire.
