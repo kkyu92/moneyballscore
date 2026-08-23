@@ -949,7 +949,7 @@ export async function runDailyPipeline(
           away_elo: payload.away_elo,
           home_sfr: payload.home_sfr,
           away_sfr: payload.away_sfr,
-          reasoning: `[v2.1-B-shadow quant only] ${finalReasoning}`,
+          reasoning: `[v2.1-B-shadow quant only] ${finalReasoning.reasoning}`,
         },
       });
       if (!shadowResult.ok && shadowResult.reason === 'db_error') {
@@ -993,7 +993,7 @@ export async function runDailyPipeline(
           away_elo: payload.away_elo,
           home_sfr: payload.home_sfr,
           away_sfr: payload.away_sfr,
-          reasoning: `[v2.0-shadow quant only] ${finalReasoning}`,
+          reasoning: `[v2.0-shadow quant only] ${finalReasoning.reasoning}`,
         },
       });
       if (!shadowV20Result.ok && shadowV20Result.reason === 'db_error') {

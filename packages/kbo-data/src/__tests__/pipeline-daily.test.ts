@@ -680,6 +680,53 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
         delete process.env.ANTHROPIC_API_KEY;
       }
     });
+
+    it('shadow row (v2.1-B / v2.0) reasoning 필드 — object stringify 버그 회귀 방지', async () => {
+      const tables = baseTables();
+      tables.players = {
+        single: { data: { id: 999 }, error: null }, // existing player 박제 (find path)
+      };
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T06:30:00Z'));
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({ gameTime: '18:30' }),
+        ]);
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
+
+        expect(result.predictionsGenerated).toBe(1);
+
+        const { SHADOW_SCORING_RULE, SHADOW_V20_SCORING_RULE } = await import('@moneyball/shared');
+
+        const predInserts = mock._calls.filter(
+          (c) => c.table === 'predictions' && c.operations.includes('insert'),
+        );
+        const payloads = predInserts.map((c) => {
+          const idx = c.operations.indexOf('insert');
+          return c.args[idx][0] as Record<string, unknown>;
+        });
+
+        const v21bRow = payloads.find((p) => p.scoring_rule === SHADOW_SCORING_RULE);
+        const v20Row = payloads.find((p) => p.scoring_rule === SHADOW_V20_SCORING_RULE);
+
+        expect(v21bRow).toBeDefined();
+        expect(v20Row).toBeDefined();
+        // buildFinalReasoning() 은 object 반환 — template literal 이 .reasoning (string)
+        // 대신 object 자체를 interpolate 하면 "[object Object]" 로 silent 저장됨.
+        expect(v21bRow!.reasoning).toBe('[v2.1-B-shadow quant only] test');
+        expect(v20Row!.reasoning).toBe('[v2.0-shadow quant only] test');
+        expect(String(v21bRow!.reasoning)).not.toContain('[object Object]');
+        expect(String(v20Row!.reasoning)).not.toContain('[object Object]');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe('predict_final mode (Codex #9 GAP 감지)', () => {
