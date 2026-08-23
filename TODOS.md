@@ -5646,3 +5646,11 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 발견: `apps/moneyball/src/app/api/pipeline/route.ts` 4개월 방치 debug 코드 — 매 pipeline 응답에 ANTHROPIC_API_KEY prefix 노출(`_debug.keyPrefix`). 2026-04-14 commit 25d9107b 부터 방치.
 실행: `_debug` 블록 제거, direct main commit(42779c83) + push. type-check/lint clean.
 다음 사이클 추천: op-analysis(20/25)/info-arch(23/30)/lotto(26/30) gap 대기, 또는 다른 cron route(mlb/pipeline, revalidate 등) 유사 debug 잔재 grep 확장.
+
+## 🔵 RETRO-ONLY — operational-analysis(lite) CE-cohort 재확인, 신규 표본 0건 (cycle 2416, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. 2-chain lock 미충족(직전8 distinct=3). op-analysis gap 23/25 근접 + cycle 2415 retro 명시 추천.
+
+점검: op-analysis-ce-cohort.ts(cycle 1547 표준 harness) 재실행 → n=332(CE=285/비CE=47), acc 55.1%(CE 53.7%/비CE 63.8%, 격차 10.1pp) — cycle 2361(오늘, 55 cycle 전) 측정값과 완전 동일. predictions 테이블 직접 조회로 확인: v1.8 신규 row 는 8/18~8/22 매일 14:17 UTC 배치로 계속 verified 중이고 전부 debate_version=null(CE 지속)이지만, cycle 2361 시점 이미 그날 배치가 반영 완료돼 오늘 재실행은 신규 표본 0건 재확인에 그침. CLAUDE.md 갱신 불필요(동일 수치 중복 기록 방지).
+
+다음 사이클 추천 = explore-idea(최근 20 cycle 중 1회로 저조, statsapi-mlb.ts fetchProbablePitchers 개인 투수 통계 소스 Tier 3 candidate 존재) 또는 review-code(heavy) dominance 지속(14/20).
