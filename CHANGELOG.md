@@ -1,3 +1,11 @@
+## v0.5.62.86 — 2026-08-23 (cycle 2400, review-code: shared 상수 4개 stale doc comment 정정)
+
+### docs(shared): DEVICE_ID_MAX_LENGTH/MIN_POLL_TOTAL/COMMUNITY_DIVERGE_MIN/CALIBRATION_BUCKET_WIDTH doc comment가 이미 해소된 drift 를 미해결로 오도 서술 중이던 것 정정
+
+- 진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, info-arch 4/30, lotto 7/30). 2-chain lock 미충족(직전8 distinct=5). cycle 2399 retro 가 남긴 미감사 monolith lead(accuracy/page.tsx 1204줄) 직접 감사.
+- 발견: accuracy/page.tsx 자체(쿼리 필터, computeCommunityVsAI, buildFactorAccuracy, 상수 사용)는 전부 정합 — 신규 코드 drift 없음. 대신 `packages/shared/src/index.ts` 안 4개 상수 doc comment 가 각각 wave 303/305/500/305(cycle 1632/1634/1867/1634) 당시 "동일 숫자 N hardcoded/로컬 사본" 미해결 상태를 서술한 채 남아있었으나, 실제 코드(`app/api/picks/submit/route.ts`, `components/picks/PickButton.tsx`, `app/page.tsx`, `app/debug/reliability/page.tsx`)는 이미 전부 해당 상수를 shared 에서 import 해 사용 중 — comment 만 과거 wave 시점 그대로 정지된 채, 실제로는 해소된 drift 를 미해결로 오도 서술하던 stale-comment 케이스.
+- 실행: 4개 comment 를 "fix 완료" 서술로 정정 (코드 동작 변경 없음). `pnpm --filter @moneyball/shared type-check` clean, `pnpm --filter @moneyball/shared test` 212 tests green, pre-push lint+type-check(전 패키지) green.
+
 ## v0.5.62.85 — 2026-08-23 (cycle 2390, review-code: hub-dispatch Sentry no-relay 태그 no-op 수정)
 
 ### fix(observability): `/api/hub-dispatch` 재귀 방지 태그가 실제로 붙지 않던 no-op 수정

@@ -1,3 +1,15 @@
+## ✅ SUCCESS — shared 상수 4개 stale doc comment 정정 (cycle 2400, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, info-arch 4/30, lotto 7/30). 2-chain lock 미충족(직전8 distinct=5). cycle 2399 retro 가 남긴 미감사 monolith lead 따라 accuracy/page.tsx(1204줄) 직접 감사.
+
+발견: accuracy/page.tsx 자체는 clean(쿼리 필터/computeCommunityVsAI/buildFactorAccuracy 전부 정합). 감사 도중 packages/shared/src/index.ts 안 `DEVICE_ID_MAX_LENGTH`/`MIN_POLL_TOTAL`/`COMMUNITY_DIVERGE_MIN`/`CALIBRATION_BUCKET_WIDTH` 4개 상수의 doc comment가 각각 wave 303/305/500/305(cycle 1632/1634/1867/1634) 당시 "하드코딩/로컬 사본 미해결" 상태를 서술한 채 방치돼 있었으나, 실제 코드(`PickButton.tsx`/`route.ts`/`page.tsx`/`debug/reliability/page.tsx`)는 이미 전부 해당 상수를 import 해 사용 중 — comment 만 과거 wave 시점에 멈춰 실제로는 해소된 drift 를 미해결로 오도 서술 중이던 케이스.
+
+실행: 4개 comment 를 "fix 완료" 서술로 정정 (코드 동작 변경 없음). `type-check`/`test`(shared 212 tests) clean, pre-push lint+type-check green. 직접 main commit(docs, R4).
+
+milestone: cycle 2400 (`%50==0`) — trigger 3 독립 평가로 skill-evolution-pending marker 박제 (다음 사이클 강제 발화, 사례 19 mitigation).
+
+다음 사이클 = skill-evolution 자동 발화 (marker 감지).
+
 ## ✅ SUCCESS — buildTeamProfile.ts/buildMlbTeamProfile.ts teamGames 암묵적 sort-order 의존 fix (cycle 2399, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22(전량 completed/archived/superseded/blocked). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 6/25, lotto 7/30, info-arch 4/30). 2-chain lock 미충족(직전8 distinct=5). cycle 2398 retro 가 남긴 미감사 monolith lead(accuracy/page.tsx/buildAccuracyData.ts/buildTeamProfile.ts) 중 buildAccuracyData.ts 는 이미 cycle 2187/2195 감사 완료 확인 후 buildTeamProfile.ts 로 전환.
