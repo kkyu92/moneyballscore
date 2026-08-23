@@ -1,3 +1,13 @@
+## v0.5.62.88 — 2026-08-23 (cycle 2419, review-code: SFR=0 data-gap guard 누락 수정 + package.json version drift 정정)
+
+### fix(predict): 수비 SFR=0 (Fancy Stats silent-fallback stub, `sfr || FANCY_STATS_DEFAULTS.sfr`)이 원정/홈 한쪽만 0일 때 실제 평균 수비력으로 오인되어 duel 승패/예측 팩터에 그대로 반영되던 것을 WAR=0 guard(cycle 1904 wave-533/535)와 동일 family 로 중립 처리
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 3/25, info-arch 24/30, lotto 27/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2417/2418 retro 가 남긴 미감사 monolith `analysis/page.tsx`(2803줄) 직접 감사(agent 위임).
+- 발견: `predictor.ts:107` `factors.sfr = normalize(homeSfr, awaySfr, true)` 가 SFR=0 을 실제 리그 평균과 구분 없이 그대로 계산에 사용 — `fetchEloRatings`(`fancy-stats.ts:485`) 의 `sfr || FANCY_STATS_DEFAULTS.sfr`(=0) silent-fallback stub 과 진짜 평균 팀(0)이 원천적으로 구분 불가능한 구조. 동일 파일 WAR 팩터(line 84-90)는 이미 cycle 1904 wave-533 에서 "totalWar=0 on one side = 데이터 갭, asymmetric zero → neutral" guard 를 갖고 있으나 SFR 은 미적용 상태로 방치. `computeCompositeDuel.ts`(sfrResult/valid, line 74-81/160) 와 `analysis/page.tsx` SFR 직접대결 배지 4곳 중 3곳(line 1127/1645/2314, WAR 대응 line 1111/1713/2298 은 모두 `> 0` guard 보유)도 동일 누락.
+- 실행: predictor.ts `factors.sfr` 에 home/awaySfr 중 한쪽이라도 0 이면 neutral(0.5) 처리하는 guard 추가(WAR 과 달리 SFR 은 음수가 정상값이라 `> 0` 대신 `!== 0` 사용). computeCompositeDuel.ts sfrResult/valid 양쪽에 동일 guard 반영. page.tsx 3곳 배지에 WAR 과 동일한 `!== 0` guard 추가. 회귀 테스트 4+3건 추가(predictor SFR data-gap guard 4케이스, computeCompositeDuel SFR guard 3케이스) — 기존 computeCompositeDuel.test.ts 안 sfr=0 을 "유효 승리 팩터"로 encoding 하던 2개 테스트값을 nonzero 로 정정.
+- 부수 발견: `apps/moneyball/package.json`/루트 `package.json` 이 cycle 2413 커밋(VERSION 0.5.62.87 bump)에서 버전 미동기화된 채 0.5.62.86 로 정체 — `version-sync-guard.test.ts`(cycle 2047) 가 이를 정상 탐지해 테스트 fail 상태였음(이번 전까지 scoped test 만 돌려 미발견). 0.5.62.87 로 캐치업 후 본 사이클 버전(0.5.62.88)과 함께 커밋.
+- `pnpm --filter kbo-data test`(1175/1175) + `pnpm --filter moneyball test`(4208/4208) + 양쪽 `type-check`/`lint` clean.
+
 ## v0.5.62.87 — 2026-08-23 (cycle 2413, review-code: MLB shadow-train milestone_hit 영구 false 수정)
 
 ### fix(mlb): `mlb_shadow_train_log.milestone_hit` 이 samples.length(하루치, 최대 15경기)와 MILESTONE_TRIGGERS([27,60,150,300,1000,2430])를 직접 비교해 어떤 threshold 도 도달 불가능하던 것을 누적치 비교로 수정

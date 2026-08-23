@@ -71,8 +71,10 @@ export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult
           : null
       : null;
 
+  // wave-535 대응: SFR=0 은 Fancy Stats silent-fallback stub (fetchEloRatings
+  // `sfr || FANCY_STATS_DEFAULTS.sfr`) 과 구분 불가 — WAR=0 data gap guard 와 동일 family.
   const sfrResult: DuelResult =
-    g.homeSfr != null && g.awaySfr != null
+    g.homeSfr != null && g.awaySfr != null && g.homeSfr !== 0 && g.awaySfr !== 0
       ? g.homeSfr - g.awaySfr >= SFR_DUEL_MIN
         ? 'home'
         : g.awaySfr - g.homeSfr >= SFR_DUEL_MIN
@@ -157,7 +159,7 @@ export function computeCompositeDuel(g: CompositeDuelInput): CompositeDuelResult
   // wave-394: factor entries with slugs for label display
   const factorEntries: Array<{ slug: string; result: DuelResult; valid: boolean }> = [
     { slug: 'lineup_woba', result: wobaResult, valid: g.homeLineupWoba != null && g.awayLineupWoba != null },
-    { slug: 'sfr', result: sfrResult, valid: g.homeSfr != null && g.awaySfr != null },
+    { slug: 'sfr', result: sfrResult, valid: g.homeSfr != null && g.awaySfr != null && g.homeSfr !== 0 && g.awaySfr !== 0 },
     { slug: 'bullpen_fip', result: bullpenResult, valid: g.homeBullpenFip != null && g.awayBullpenFip != null },
     { slug: 'sp_fip', result: spFipResult, valid: g.homeSPFip != null && g.awaySPFip != null },
     { slug: 'war', result: warResult, valid: g.homeWar != null && g.awayWar != null && g.homeWar > 0 && g.awayWar > 0 },
