@@ -342,9 +342,11 @@ export async function buildMlbTeamProfile(
     });
   }
 
-  const recentGames = teamGames
-    .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
-    .slice(0, 8);
+  // 명시적 정렬 — buildTeamProfile.ts (KBO) 동일 패턴 fix (review-code heavy 감사,
+  // cycle 2399): 이전엔 정렬이 recentGames 조립 `.sort()` in-place mutation 부수효과로만
+  // 보장돼 문장 순서 바꾸면 조용히 깨지는 암묵적 의존이었음. 독립 문장으로 분리.
+  teamGames.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+  const recentGames = teamGames.slice(0, 8);
   const streak = computeTeamStreak(teamGames);
   const avgMargin = computeTeamAvgMargin(teamGames);
   const blowout = computeTeamBlowoutCount(teamGames);

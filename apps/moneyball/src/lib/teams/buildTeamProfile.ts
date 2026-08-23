@@ -554,9 +554,13 @@ export async function buildTeamProfile(
     })
     .slice(0, 5);
 
-  const recentGames = teamGames
-    .sort((a, b) => b.gameDate.localeCompare(a.gameDate))
-    .slice(0, 8);
+  // 명시적 정렬 — streak/avgMargin/blowout/closeGame/homeAwayEdge/recentRecord 모두
+  // teamGames 가 game_date 내림차순이어야 함 (각 함수 docstring 계약). 이전엔 이 정렬이
+  // `recentGames` 조립 과정의 `.sort()` in-place mutation 부수효과로만 보장돼 — 아래
+  // 문장들의 실행 순서를 바꾸면 (예: recentGames 계산을 뒤로 옮기면) 조용히 깨지는
+  // 암묵적 의존이었음 (review-code heavy 감사, cycle 2399). 정렬을 독립 문장으로 분리.
+  teamGames.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+  const recentGames = teamGames.slice(0, 8);
   const factorAverages = computeFactorAveragesFromPerspectives(factorPerspectives);
   const streak = computeTeamStreak(teamGames);
   const avgMargin = computeTeamAvgMargin(teamGames);
