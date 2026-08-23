@@ -48,7 +48,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { week } = await params;
-  const range = parseWeekId(week);
+  const range = parseWeekId(week, 'en');
   if (!range) return {};
   const url = `${SITE_URL}/en/mlb/reviews/weekly/${week}`;
   const title = `${range.label} MLB Weekly Review`;
@@ -136,7 +136,7 @@ function GameResultRowEn({ g, style }: { g: MlbWeeklyGameResult; style?: CSSProp
 
 export default async function MlbWeeklyReviewPageEn({ params }: PageProps) {
   const { week } = await params;
-  const range = parseWeekId(week);
+  const range = parseWeekId(week, 'en');
   if (!range) notFound();
 
   const [
@@ -171,7 +171,7 @@ export default async function MlbWeeklyReviewPageEn({ params }: PageProps) {
     .sort((a, b) => (b.confidence ?? -1) - (a.confidence ?? -1))
     .forEach((g, idx) => confRankMap.set(g.externalGameId, idx));
 
-  const recent = getRecentWeeks(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS)
+  const recent = getRecentWeeks(WEEKLY_REVIEW_NAV_LOOKBACK_WEEKS, new Date(), 'en')
     .filter((w) => w.weekId !== range.weekId)
     .slice(-3);
 

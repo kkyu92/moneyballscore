@@ -46,7 +46,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { month } = await params;
-  const range = parseMonthId(month);
+  const range = parseMonthId(month, 'en');
   if (!range) return {};
   const url = `${SITE_URL}/en/mlb/reviews/monthly/${month}`;
   const title = `${range.label} MLB Monthly Review`;
@@ -78,7 +78,7 @@ export async function generateMetadata({
 
 export default async function MlbMonthlyReviewPageEn({ params }: PageProps) {
   const { month } = await params;
-  const range = parseMonthId(month);
+  const range = parseMonthId(month, 'en');
   if (!range) notFound();
 
   const [
@@ -112,7 +112,7 @@ export default async function MlbMonthlyReviewPageEn({ params }: PageProps) {
   ]);
   const url = `${SITE_URL}/en/mlb/reviews/monthly/${month}`;
 
-  const recent = getRecentMonths(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS)
+  const recent = getRecentMonths(MONTHLY_REVIEW_NAV_LOOKBACK_MONTHS, new Date(), 'en')
     .filter((m) => m.monthId !== range.monthId)
     .slice(-4);
 

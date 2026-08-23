@@ -60,8 +60,8 @@ export default async function MlbReviewsPageEn() {
     hasAnyData,
   } = await getMlbReviewsData();
 
-  const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS);
-  const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS);
+  const recentWeeks = getRecentWeeks(REVIEWS_HUB_RECENT_WEEKS, new Date(), 'en');
+  const recentMonths = getRecentMonths(REVIEWS_HUB_RECENT_MONTHS, new Date(), 'en');
 
   const jsonLd = {
     "@context": "https://schema.org",
