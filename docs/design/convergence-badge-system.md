@@ -54,7 +54,7 @@ amber 토큰 vs 커스텀 골드:
 
 - `apps/moneyball/src/app/analysis/game/[id]/page.tsx` (wave-452/454/456/461/463 — 배지+칩 3-tier + 성적라인 + 레이블칩)
 - `apps/moneyball/src/app/analysis/page.tsx` (wave-459/461/465/467 — 목록 수렴 픽 칩 3-tier + 레이블칩 + 섹션 border/bg tier)
-- `apps/moneyball/src/app/predictions/page.tsx` (탑픽 amber 강조)
+- `apps/moneyball/src/app/mlb/analysis/page.tsx`, `apps/moneyball/src/app/mlb/games/[date]/page.tsx` (+ `en/mlb/` parity 페이지 — MLB TOP픽/완전수렴 배지 동일 패턴)
 
 ## wave-467 — 섹션 border/bg tier (2026-07-18, cycle 1828)
 
