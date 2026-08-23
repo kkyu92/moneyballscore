@@ -1,4 +1,28 @@
-## v0.5.62.72 — 2026-08-23 (cycle 2347, explore-idea (heavy): 온보딩 문서 MLB 인지 갭 해소)
+## v0.5.62.73 — 2026-08-23 (cycle 2348, review-code (heavy): MLB placeholder 팩터 4개 문구 정정)
+
+### fix(mlb): Elo·최근폼·상대전적·수비SFR 4개 "데이터 없음" 문구 → "가중치 미반영" 정정
+
+- 감사 대상: cycle 2347 explore-idea(heavy)가 배선한 온보딩 3페이지(`/about`, `/guide`, `/glossary`)
+  중 `/glossary`의 신규 문구 "Elo·최근폼·상대전적·수비SFR 4개는 MLB 쪽 데이터가 아직 없어 KBO
+  전용입니다"를 `mlb-pipeline.ts` / `computeMlbCompositeDuel.ts` 대비 대조.
+- 발견: 이 4개 팩터는 데이터 자체는 실측 존재(`mlb_team_elo`/`mlb_team_elo_history` 테이블 +
+  팀/매치업 페이지의 Elo 추이 차트, 최근 폼 W-L 기록, 시즌별 상대전적 섹션 — 모두 실제 데이터로
+  표시 중)하지만, `mlb-pipeline.ts`의 실제 승률 계산(`computeMlbProbability` 호출부, line 297)은
+  이 4개 입력을 팀 구분 없는 중립값(`recent_form: {50,50}`, `head_to_head: 0.5`,
+  `elo: ELO_NEUTRAL` 양쪽, `defense_sfr: {0,0}`)으로 고정 — "데이터가 없다"가 아니라 "데이터는
+  있으나 예측 가중치 계산에는 아직 연결 안 됨"이 정확한 서술. `/mlb/factors`, `/mlb/methodology`
+  페이지도 동일 4팩터를 실측 출처(FanGraphs MLB Def, statsapi.mlb.com 등)와 함께 가중치 표에
+  나열하면서 이 미반영 사실을 어디에도 disclose 하지 않고 있었음(cycle 2347 이전부터 존재한
+  기존 gap, 이번 audit에서 함께 발견).
+- 정정: `/glossary` 문구를 "팀/매치업 페이지엔 참고용으로 표시되지만 예측 모델의 승률 계산에는
+  아직 반영되지 않아(중립값 고정) KBO 전용"으로 수정. `/mlb/factors` 가중치 표 헤더에 동일 내용
+  경고 배너 추가. `/mlb/methodology` 정량 모델 섹션에 Elo 갱신 로직은 실제 동작하나 그 결과가
+  예측 가중치로 연결되는 건 다음 단계라는 caveat 문장 추가.
+
+검증: `tsc --noEmit`(moneyball) clean, `eslint` clean, `pnpm test`(498 files/4180 tests all
+green — 3페이지 모두 문구 전용 수정, 기존 가드 영향 없음).
+
+
 
 ### feat(guide): `/about`, `/guide`, `/glossary` 온보딩 3페이지에 MLB 안내 신규
 

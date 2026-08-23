@@ -92,7 +92,8 @@ export default function GlossaryPage() {
           >
             MLB 예측
           </Link>
-          에도 공통 적용됩니다. 단 Elo·최근폼·상대전적·수비SFR 4개는 MLB 쪽 데이터가 아직 없어 KBO 전용입니다.
+          에도 공통 적용됩니다. 단 Elo·최근폼·상대전적·수비SFR 4개는 팀/매치업 페이지엔 참고용으로 표시되지만,
+          예측 모델의 승률 계산에는 아직 반영되지 않아(중립값 고정) KBO 전용입니다.
         </p>
       </header>
 

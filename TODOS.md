@@ -1,3 +1,16 @@
+## 🟢 review-code (heavy) — MLB placeholder 팩터 4개 "데이터 없음" 문구 정정 SUCCESS (cycle 2348, 2026-08-23)
+
+진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2340-2347 distinct=4). 주기 trigger 4종 전부 미도달. cycle 2347 explore-idea(heavy)가 온보딩 3페이지에 MLB 안내를 신규 배선한 직후 — Feature-Drift Cycle 패턴(explore-idea 신규 기능 → review-code 즉시 audit)에 따라 방금 배선된 문구를 코드 대조.
+
+**발견**: `/glossary` 신규 문구("Elo·최근폼·상대전적·수비SFR 4개는 MLB 쪽 데이터가 아직 없어 KBO 전용")가 부정확 — 이 4팩터는 실측 데이터가 존재(`mlb_team_elo`/`mlb_team_elo_history` 테이블, 팀/매치업 페이지의 Elo 추이·최근폼 W-L·시즌 상대전적 표시)하지만 `mlb-pipeline.ts`의 실제 승률 계산은 이 4개를 팀 구분 없는 중립값으로 고정 입력(사례: `recent_form:{50,50}`, `head_to_head:0.5`, `elo: ELO_NEUTRAL` 양쪽, `defense_sfr:{0,0}`). "데이터 없음"이 아니라 "데이터는 있으나 가중치 계산엔 미반영"이 정확. `/mlb/factors`+`/mlb/methodology` 페이지도 이 4팩터를 실측 출처와 함께 가중치 표에 나열하면서 미반영 사실을 disclose 안 하고 있던 기존 gap(cycle 2347 이전부터 존재)도 함께 발견.
+
+**실행**: `/glossary` 문구 정정 + `/mlb/factors` 가중치 표 헤더 경고 배너 추가 + `/mlb/methodology` 정량 모델 섹션 caveat 문장 추가.
+
+검증: `tsc --noEmit`(moneyball) clean, `eslint` clean, `pnpm test`(498 files/4180 tests all green).
+
+결론: MLB 예측 모델 신뢰도 관련 문서 정확성 SUCCESS. 다음 cycle 후보 = explore-idea 자연 발견 또는 (더 큰 후속 과제로) 4팩터를 실제 예측 가중치에 연결하는 모델 개선(별도 op-analysis/plan 필요 — 현재는 문서 정확성만 수정, 모델 자체는 변경 없음).
+
+
 ## 🟢 explore-idea (heavy) — 온보딩 3페이지 MLB 인지 갭 해소 SUCCESS (cycle 2347, 2026-08-23)
 
 진단: open issue 0건, approved plan 0/22. 2-chain lock 미충족(직전 8사이클 2340-2346 distinct=4: info-arch/review-code/explore-idea/lotto). 주기 trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 7/30, lotto 3/30). cycle 2346 review-code(heavy) retro 가 "explore-idea 자연 발견 또는 open issue/plan 재확인" 을 다음 후보로 남김. review-code(heavy) 2연속 clean audit(2343/2346)로 신규 감사 target 소진.

@@ -124,6 +124,11 @@ export default function MlbMethodologyPage() {
           실측 어드밴티지(+{HOME_ADVANTAGE_PCT.toFixed(1)}%p)를 가산합니다.
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+          단, 최근폼·상대전적·Elo·수비 SFR 4개는 팀/매치업 페이지엔 참고용으로 표시되지만, 위 승률 계산 자체에는
+          아직 팀 구분 없는 중립값이 고정 입력되어 반영되지 않습니다. Elo 레이팅 갱신 로직은 실제로 동작하지만
+          그 결과값이 예측 가중치로 연결되는 건 다음 단계입니다.
+        </p>
+        <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           가중치 표 전체와 각 팩터의 정의·출처는{" "}
           <Link href="/mlb/factors" className="text-brand-600 dark:text-brand-300 hover:underline">
             /mlb/factors
