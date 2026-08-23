@@ -1,3 +1,19 @@
+## 🔵 RETRO-ONLY — explore-idea(heavy) 3-source 재탐색, 확장 가치 부족 확인 (cycle 2441, 2026-08-23)
+
+진단: open issue 0, approved plan 0/23(Tier4=29). gap trigger 전부 미도달(fix-incident 2/20, op-analysis 10/25, info-arch 16/30, lotto 1/30). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 9/15 미충족. 직전 3사이클(2438/2439/2440) 모두 explore-idea(heavy) 연속 추천 — review-code WAR/SFR family 소진 이후 다양성 redirect 의도로 자율 선택.
+
+탐색 1: `teams/[code]/recent`(KBO 전용, 355줄) MLB parity 조사 — MLB는 `buildMlbTeamProfile()`이 recentGames(최근 8경기)를 메인 프로필 페이지에 이미 inline 표시 중. 신규 `/mlb/team/[code]/recent` 라우트를 만들어도 UI 어디서도 링크 안 됨(KBO 쪽도 sitemap에서만 참조, 팀 프로필 페이지 자체엔 링크 없음) + 기존 inline과 컨텐츠 중복 — 600~700줄 신규 코드 대비 가치 낮음, 스킵.
+
+탐색 2: EN/MLB 라우트 parity 재확인 — `en/mlb/*` 24개 페이지가 `mlb/*` 24개와 1:1 완전 일치. 신규 mirror gap 없음(이미 포화 확정).
+
+탐색 3: convergence badge dark 배경 불일치(2434 cycle 기록 carry-over) 재확인 — `analysis/page.tsx:564`가 `bg-brand-800/40`로 `game/[id]/page.tsx:504-505`와 이미 일치, cycle 2434 fix로 정정 완료 확인. `ConvergenceBadge.tsx` 컴포넌트 분리는 `analysis/page.tsx`(2655줄) + 10+ callsite 걸친 Tier 3 스코프 — 단일 사이클 범위 밖, `/expand-plan` 후보로만 carry.
+
+부가: plan #29(로그인+커뮤니티) 게이팅 재확인 — 포스트시즌 임박(9월말~10월초) 또는 트래픽(user_picks/pick_poll_events) ≥10건 트리거 여전히 미충족(오늘 8/23). Tier4 보류 유지.
+
+결과: 코드/문서 변경 0건 — 3개 탐색 모두 "확장 가치 부족" 결론. skill-evolution trigger 5개 전부 미충족(trigger3 2441%50≠0, trigger5 직전20 표본=16 review-code 8회 evaluated 0-count 아님).
+
+다음 사이클 추천 = info-architecture-review(17/30 진행) 또는 fix-incident(3/20 진행) gap 순 대기, 또는 review-code(heavy)가 convergence badge 컴포넌트 분리를 `analysis/page.tsx` 단일 파일 스코프로 축소 시도(game/[id] 동기화는 후속 분리).
+
 ## 🔵 RETRO-ONLY — lotto 48-cycle gap 점검, self-heal 확인 delta=0 (cycle 2440, 2026-08-23)
 
 진단: open issue 0, approved plan 0/23. gap trigger 재확인 — lotto 마지막 발화 cycle 2392, 48-cycle gap(30 임계 큰 초과). op-analysis 9/25, info-arch 15/30, fix-incident 1/20(방금 재발화) 전부 미도달. 2-chain lock 미충족(직전8 distinct=4: none/polish-ui/review-code/fix-incident). explore-idea saturation 10/15 미충족(≥12 미달). `gh run list` CI 실패 0건.
