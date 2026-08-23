@@ -1,3 +1,11 @@
+## 🔍 RETRO-ONLY — review-code(heavy) buildMlbMatchupProfile.ts 감사 (cycle 2447, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 전부 미도달(fix-incident 2/20, op-analysis 16/25, info-arch 22/30, lotto 7/30). 2-chain lock 미충족(직전8 distinct=4, review-code 4/fix-incident 2/explore-idea 1/lotto 1). cycle 2446 추천대로 review-code heavy 신규 타겟 탐색 지속 — CHANGELOG/git log 언급 최소(1회) 파일로 buildMlbMatchupProfile.ts(526줄) 선정.
+
+발견: `.in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)` + `.eq("prediction_type","pre_game")` 필터가 MLB lib 8개 형제 파일(buildMlbAccuracySummary/buildMlbFactorAccuracy/buildMlbCalendarHeatmap/buildMlbTeamFactorAverages/buildMlbTeamAccuracy×3/fetchMlbHistoricalAnalogs/buildMlbTeamProfile) 전부와 동일 컨벤션 — #1338 family sweep 이미 완전 적용됨. `deriveMlbOutcome`/`mlbCanonicalPair`/`normalizeMlbTeamCode`/`toMlbStatsApiCode` 양방향 alias 변환도 정상, confidence 스케일(0.5~1, `*100` 직접 렌더)도 소비처(`mlb/matchup/[teamA]/[teamB]/page.tsx`)와 일치. silent drift 없음, 코드 변경 0.
+
+다음 사이클 추천 = operational-analysis(lite, 17/25 근접) 또는 info-architecture-review(23/30 근접) gap 순번 대기, 또는 review-code 신규 타겟(convergenceRecord.ts/buildTeamProfile.ts — 언급 9회, mlb team/matchup 나머지 페이지) 계속 탐색.
+
 ## 🔍 RETRO-ONLY — review-code(heavy) buildMatchupProfile.ts + predictions/[date]/page.tsx 신규 감사 (cycle 2446, 2026-08-23)
 
 진단: open issue 0, approved plan 0/23(Tier4 유지). gap trigger 전부 미도달(fix-incident 1/20, op-analysis 15/25, info-arch 21/30, lotto 6/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2445 추천(op-analysis/info-arch) 둘 다 gap 미충족 — review-code heavy 신규 타겟 탐색 지속.
