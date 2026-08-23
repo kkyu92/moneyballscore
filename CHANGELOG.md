@@ -1,3 +1,11 @@
+## v0.5.62.92 — 2026-08-23 (cycle 2434, polish-ui: 하락/음수 표시 red 색상 light/dark 대비 방향 불일치 4곳 정정)
+
+### fix(components): light/dark 모드 색상 강도 방향이 dominant 패턴(light=진하게, dark=밝게, `text-red-600 dark:text-red-400`)과 반대(`text-red-400 dark:text-red-500`)로 적용돼 있던 4곳을 정정 — light 모드 white 배경 대비 ~3:1로 WCAG AA(4.5:1) 미달
+
+- 진단: 직전 8 cycle이 review-code/operational-analysis 2개로 고정된 2-chain alternation lock 탐지 → 두 chain 제외 후 나머지 pool 중 강한 trigger 없어 SKILL.md 지정 fallback `polish-ui` 발화. 체크박스성 발화 방지 위해 DESIGN.md 색상 규칙 vs 실제 코드 grep 대조 실측 진행.
+- 발견: `text-red-600 dark:text-red-400` 패턴이 전체 40+ 곳에서 일관 사용되나, `app/accuracy/page.tsx`(주간 정확도 표 + 팀별 정확도 스파크라인) 2곳과 `components/analysis/TeamStrengthGrid.tsx`(KBO Elo 변화 화살표) / `components/analysis/MlbTeamStrengthGrid.tsx`(MLB 연패 표시) 2곳만 역방향(`text-red-400 dark:text-red-500`) — MLB 컴포넌트는 KBO 원본을 그대로 이식하며 기존 불일치까지 함께 포팅된 것으로 추정.
+- 실행: 4곳 모두 dominant 패턴(`text-red-600 dark:text-red-400`)으로 통일. `pnpm --filter moneyball lint` clean.
+
 ## v0.5.62.91 — 2026-08-23 (cycle 2430, review-code: WAR/SFR=0 데이터 갭 sentinel이 FactorBreakdown 팩터별 stat label 에 raw 노출되던 것 정정 — family 5th occurrence)
 
 ### fix(components): WAR/SFR=0 (Fancy Stats 데이터 갭 sentinel)이 `FactorBreakdown` 컴포넌트의 팩터별 "away X · home Y" stat label 텍스트엔 gap guard 미적용 상태로 방치돼 예측 상세(`/predictions/[date]`, `/insights/[date]`) 페이지에서 실제 데이터 갭인데도 "home 0.0" 같은 값을 실제 수치로 오인시키던 것을 정정
