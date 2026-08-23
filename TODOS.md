@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — lotto 48-cycle gap 점검, self-heal 확인 delta=0 (cycle 2440, 2026-08-23)
+
+진단: open issue 0, approved plan 0/23. gap trigger 재확인 — lotto 마지막 발화 cycle 2392, 48-cycle gap(30 임계 큰 초과). op-analysis 9/25, info-arch 15/30, fix-incident 1/20(방금 재발화) 전부 미도달. 2-chain lock 미충족(직전8 distinct=4: none/polish-ui/review-code/fix-incident). explore-idea saturation 10/15 미충족(≥12 미달). `gh run list` CI 실패 0건.
+
+실행: `pnpm tsx scripts/lotto.ts count` 재실행 — 유효조합 7,705,415/8,145,060 (5.40% 제거) = cycle 2392 실측치와 완전 일치, delta=0. 1239회(8/29) 50세트(`~/lotto_picks/2026-08-29-50sets.md`, cycle 2344 생성) + 1238회(8/22) OOS 검증(`2026-08-22-result.md`, 오늘 8/23 14:10 박제)도 이미 cron self-heal 완료 확인. 신규 rule 후보 없음.
+
+결과: 코드/문서 변경 0건 — 48 cycle 전체가 self-heal 정상 작동 구간이었음 확인(cycle 2392 이후 매주 cron 이 picks+OOS 정상 처리, develop-cycle 수동 개입 불필요했던 것). skill-evolution trigger 5개 전부 미충족(trigger1 cumulative 9건 기존 관행대로 marker 미생성, trigger3 2440%50≠0, trigger5 직전20 sample=17 review-code 9회 evaluated 0-count 아님).
+
+다음 사이클 추천 = explore-idea(heavy, saturation 10/15→11/15 근접 — review-code dominance 지속 + 직전 3사이클 연속 추천) 또는 info-architecture-review(15/30 진행). lotto 자체 trigger 재도달까지 30 cycle 여유 확보(다음 재검토 ~cycle 2422+).
+
 ## 🔵 RETRO-ONLY — pre_game/post_game is_correct null 분리 가설 검증, false alarm 확인 (cycle 2439, 2026-08-23)
 
 진단: open issue 0, approved plan 0/23(status:approved 문자열 매칭 0). gap trigger 전부 미도달(fix-incident 방금 재발화 cycle 2437 gap=2, op-analysis 8/25, info-arch 14/30, lotto self-heal 완료 skip — 오늘 8/29 50세트+8/22 result 이미 cron 처리). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 9/15 미충족. `gh run list` CI 실패 0건, deploy-drift-alert success. review-code WAR/SFR family 4연속 소진 확정 상태 유지 — 직전 2사이클(2436/2438) 추천대로 다양성 redirect 시도, fix-incident 방향에서 실측 진단.
