@@ -1,3 +1,12 @@
+## v0.5.62.85 — 2026-08-23 (cycle 2390, review-code: hub-dispatch Sentry no-relay 태그 no-op 수정)
+
+### fix(observability): `/api/hub-dispatch` 재귀 방지 태그가 실제로 붙지 않던 no-op 수정
+
+- 진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 22/25, info-arch 25/30, lotto 28/30). 2-chain lock 미충족(직전8 distinct=3: none/fix-incident/review-code). lite chain cooldown 미충족. cycle 2389 retro 추천대로 cron API routes 미감사 표면 재탐색 — `picks/results/route.ts` (clean, family #1338 패턴은 cycle 2288 이미 의도 확인) 다음 `hub-dispatch/route.ts` 감사.
+- 발견: 이 route 는 Sentry webhook 을 받아 playbook 허브로 relay 하는데, 이 route 자체가 던진 예외를 Sentry 가 다시 캡처하면 alert rule 이 재귀적으로 이 route 를 다시 호출할 위험이 있어 캡처된 이벤트에 `no-relay=true` 태그를 붙여 alert rule 에서 제외하는 설계(주석 명시, `fp:vercel-deploy-1e80b78` 2026-04-22 사례 대응). 그러나 실제 코드 `Sentry.withScope((s) => s.setTag('no-relay', 'true'))` 는 콜백 안에서 아무 캡처도 하지 않은 채 즉시 scope 를 버려 — 이후 `composePayload`/`toDispatchBody`/GitHub `fetch` 등에서 발생하는 예외(현재 어느 것도 try/catch 로 감싸지 않음)를 Next.js/Sentry 가 자동 캡처할 때 이 임시 scope 는 이미 소멸된 뒤라 태그가 전혀 붙지 않는 순수 no-op. 재귀 방지 메커니즘이 처음부터 작동한 적 없던 silent 설계 결함(2e8ace67 최초 커밋부터).
+- 실행: `Sentry.getCurrentScope().setTag('no-relay', 'true')` 로 교체 — Next.js Sentry 통합이 요청당 유지하는 isolation scope 에 직접 설정해 해당 요청 동안의 모든 캡처(자동/수동)에 태그가 지속되도록 수정. `tsc --noEmit` + `eslint`(scoped) clean, `pnpm --filter moneyball test` 전체 500 files/4203 tests green.
+- 후속: `composePayload`/`toDispatchBody`/GitHub `fetch` 호출부를 명시적 try/catch 로 감싸는 방어적 보강은 이번 스코프 밖(태그 지속 수정만으로 자동 캡처 경로는 이미 해소) — 필요 시 별도 review-code 후보.
+
 ## v0.5.62.84 — 2026-08-23 (cycle 2380, polish-ui: 강수렴 배지 dark 색상 페이지 간 불일치 해소)
 
 ### fix(design): `analysis/page.tsx` 강수렴 레이블 칩 `dark:bg-brand-900/40` → `dark:bg-brand-800/40` (spec 정합)

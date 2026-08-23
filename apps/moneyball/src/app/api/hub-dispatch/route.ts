@@ -60,7 +60,10 @@ export async function POST(
 ): Promise<Response> {
   // Sentry 에 이 요청은 relay 용이라 표시 — 자기 에러는 다른 route 로 빠진
   // 정상 요청과 구분. Sentry rule 에서 `no-relay:true` tag 제외.
-  Sentry.withScope((s) => s.setTag('no-relay', 'true'));
+  // withScope 는 콜백 종료 즉시 scope 를 버려 이후 발생하는 캡처(라우트 핸들러
+  // 예외의 Next.js 자동 캡처 포함)에 태그가 붙지 않는 no-op 이었음 — request 의
+  // isolation scope 에 직접 설정해야 이 요청 동안의 모든 캡처에 태그 지속.
+  Sentry.getCurrentScope().setTag('no-relay', 'true');
 
   const dryRun =
     request.nextUrl.searchParams.get('dry_run') === '1' ||

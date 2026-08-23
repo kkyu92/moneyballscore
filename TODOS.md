@@ -1,3 +1,11 @@
+## ✅ SUCCESS — hub-dispatch Sentry no-relay 태그 no-op 수정 (cycle 2390, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22, gap trigger 4종 미도달(fix-incident 7/20, op-analysis 22/25, info-arch 25/30, lotto 28/30), 2-chain lock 미충족. cycle 2389 추천대로 cron API routes 재탐색 — `picks/results/route.ts` clean, `hub-dispatch/route.ts` 에서 발견.
+
+발견: `Sentry.withScope((s) => s.setTag('no-relay', 'true'))` 가 콜백 안에서 아무것도 캡처하지 않고 즉시 scope 를 버려 재귀 방지 태그가 실제로는 한 번도 붙은 적 없던 no-op(2e8ace67 최초 커밋부터 지속). `Sentry.getCurrentScope().setTag(...)` 로 교체해 요청 isolation scope 에 태그 지속. `tsc`/`eslint`/전체 테스트(500 files/4203 tests) green.
+
+다음 사이클 추천 = op-analysis(23/25)/info-arch(26/30)/lotto(29/30) gap 도달 순 대기. 후속 후보(스코프 밖) = `composePayload`/`toDispatchBody`/GitHub `fetch` 호출부 명시적 try/catch 방어 보강.
+
 ## ⚪ (retro-only) — 전 소스 clean, cycle 2388 후속 grep도 clean (cycle 2389, 2026-08-23)
 
 진단: cycle 2388 이 pipeline route.ts ANTHROPIC_API_KEY prefix leak 발견 후 추천한 "다른 cron/API route 유사 debug 잔재 재탐색"을 실행 — secret prefix slice/substring, console.log(secret), JSON 응답 내 KEY/SECRET/TOKEN 노출 패턴 grep 전부 0 matches. open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(op-analysis 21/25, info-arch 24/30, lotto 27/30, fix-incident 6/20). 2-chain lock 미충족(직전8 distinct=3: polish-ui/fix-incident/review-code). CI/deploy dispatch 전부 clean. skill-evolution trigger 5종 미충족(milestone 2389%50=39, review-code 직전20 다수 발화, ship-zero 미충족: 2380/2381/2388 success).
