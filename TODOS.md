@@ -1,3 +1,15 @@
+## 🔵 RETRO-ONLY — review-code(heavy) MLB predictionLeadHours parity 재검증 + lotto trigger chain-evolution 제안 (cycle 2426, 2026-08-23)
+
+진단: open issue 0, approved plan 0/29. gap trigger: fix-incident 3/20, op-analysis 10/25, info-arch 1/30(방금 발화), lotto 34/30 재충족. 2-chain lock 미충족(직전8 distinct=4). cycle 2425 retro 가 명시적으로 review-code(heavy) target 지정(cycle 2424 신규 이식 MLB predictionLeadHours/모델 메타 정보 블록 KBO parity 값 검증).
+
+감사: KBO `analysis/game/[id]/page.tsx` predictionLeadHours(startDateIso KST +09:00 offset + HOUR_MS 나눗셈) vs MLB `mlb/games/[date]/[slug]/page.tsx`(game_datetime_utc 직접 사용 + 동일 HOUR_MS) 라인 단위 대조 — 로직/null-safety 완전 동일. 게이팅 조건 차이(KBO: `preGame.factors` / MLB: `pred.model_version`)는 MLB 가 factors 그리드를 별도 컴포넌트로 이미 커버하는 의도된 설계(커밋 메시지 명시) — 버그 아님. 신규 버그 0건.
+
+병행 발견: lotto 30-cycle gap trigger 가 cycle 2422/2424 에 이어 재충족했지만 실측(`~/lotto_picks/` mtime) 결과 이미 오늘(8/23) self-heal 완료 확인 — 4번째 no-op 재발. 원인 규명: `.github/workflows/lotto-pick-update.yml`+`lotto-result-update.yml`+`lotto-pick-monitor.yml` 3개 cron 이 develop-cycle 과 독립적으로 매주 자율 처리 중이라 순수 시간경과 기반 trigger(6)이 구조적으로 노후화. chain-evolution 후보 spec 박제(`docs/superpowers/specs/2026-08-23-cycle-2426-followup-chain-evolution-lotto-gap-trigger-redundant.md`) — trigger(6)를 "cron 최근 실행 실패/파일 부재 조건부"로 변경 제안. 실제 SKILL.md 반영은 다음 skill-evolution fire(cycle 2450 예상) 시.
+
+결과: 코드 변경 0건(review-code 감사 clean). chain-evolution 제안 1건 dispatch.
+
+다음 사이클 추천 = fix-incident(4/20) 또는 op-analysis(11/25) — review-code 신규 target 이번 사이클로 소진.
+
 ## 🟢 SUCCESS — explore-idea(lite) MLB game detail 모델 메타 정보 블록 KBO parity 이식 (cycle 2424, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(29=Tier4 보류 유지). gap trigger: fix-incident 방금 발화(2423), op-analysis 8/25, info-arch 29/30(다음 사이클 도달), lotto 30/30 이지만 실측(count/picks mtime) 재확인 결과 8/22 결과+8/29 50세트 이미 오늘 생성 완료라 재발화 무의미. 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation trigger 충족(직전15 12/15 review-code/fix-incident/polish-ui/info-arch). cycle 2423 자체 retro 가 "predicted_at 실측 채워졌으니 MLB lead-time 배지 이식 가능"을 명시적 carry-over로 남김 — 실측 확인(grep) 결과 진짜 gap.
