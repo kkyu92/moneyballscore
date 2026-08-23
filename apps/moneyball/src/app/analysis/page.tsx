@@ -1692,17 +1692,17 @@ export default async function AnalysisIndexPage() {
                               </>
                             );
                           })()}
-                          {/* wave-345: 팀 WAR 배지 */}
+                          {/* wave-345: 팀 WAR 배지 · wave-536(cycle 2407): WAR=0 data gap guard */}
                           {(g.awayWar != null || g.homeWar != null) && (
                             <>
                               <span className="text-gray-300 dark:text-gray-700">·</span>
                               <span className="text-gray-400 dark:text-gray-500">
                                 WAR{' '}
-                                {g.awayWar != null ? (
+                                {g.awayWar != null && g.awayWar > 0 ? (
                                   <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.awayWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
-                                {g.homeWar != null ? (
+                                {g.homeWar != null && g.homeWar > 0 ? (
                                   <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.homeWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
