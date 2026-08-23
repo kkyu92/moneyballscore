@@ -1,3 +1,13 @@
+## ✅ SUCCESS — telegram sendMessage silent-swallow HTTP failure 수정 (cycle 2394, 2026-08-23)
+
+진단: open issue 0, approved plan 0/22. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 1/25, info-arch 29/30 임박, lotto 2/30). 2-chain lock 미충족(직전8 distinct=4). 직전 6/10 사이클 retro-only 반복 — 여러 사이클(2387/2389)이 반복 추천만 하고 실제 미시행 상태였던 `notify/telegram.ts` 를 처음 심층 감사.
+
+발견: `sendMessage()` 가 Telegram API `!res.ok` 실패를 console.error 만 하고 throw 안 함 — `daily.ts` 의 `announce_sent`/`results_sent`/`summary_sent` flag 게이팅 + Sentry `silent_drift_family: wave_177` 캡처가 이 경로에서 전혀 작동 안 함(network exception 만 propagate 되던 기존 게이트의 사각지대). HTTP-level 발송 실패(400 등) 시에도 flag 는 "발송됨"으로 영구 박제되고 Sentry 알림도 없이 사용자만 알림 미수신.
+
+실행: `!res.ok` 분기에 Error throw 추가해 기존 wave_177 게이트에 편입. 회귀 테스트 추가. `tsc`/`eslint` clean, kbo-data 1166/1166 + moneyball 500 files/4203 tests green. PR #3044 → R7 자동 머지(f8aeaf17).
+
+다음 사이클 추천 = info-architecture-review(29/30, 다음 사이클 도달 예상) 또는 lotto(2/30) gap 순 대기. 후속 후보(스코프 밖) = daily-summary.ts/live.ts/silent-drift-alert.ts 등 다른 telegram 호출부에 유사 패턴 있는지 재점검.
+
 ## ⚪ operational-analysis(lite) — 25-gap 재측정, 데이터 정지 확인 RETRO-ONLY (cycle 2393, 2026-08-23)
 
 진단: open issue 0, approved plan 0/22. 주기 gap trigger: op-analysis 마지막 발화 cycle 2368(lite) → 25 사이클 경과, 표에 명시된 "장기 미발화 주기 보정" trigger 충족(lite 자동 권장). 2-chain lock 미충족(직전8 distinct=3: review-code/fix-incident/lotto). fix-incident(3/20)/info-arch(28/30)/lotto(1/30) 나머지 3종 미도달.
