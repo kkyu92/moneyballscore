@@ -312,6 +312,11 @@ function findChampionship(
     else if (g.winner_team_id === idB) winsB++;
   }
 
+  // 동점(우승 미확정) — docstring 명시 계약이나 기존 구현은 이 분기가 없어
+  // winsA<=winsB 이면 무조건 idB 를 우승팀으로 오판정 (KS 진행 중 truncated
+  // 데이터 수집 시 재현 가능한 silent drift).
+  if (winsA === winsB) return null;
+
   const winnerId = winsA > winsB ? idA : idB;
   const loserId = winnerId === idA ? idB : idA;
   const winnerMeta = teamById.get(winnerId);

@@ -1,3 +1,12 @@
+## v0.5.62.97 — 2026-08-24 (cycle 2453, review-code: buildSeasonSummary.ts 신규 감사 — 한국시리즈 동점 우승팀 오판정 정정)
+
+### fix(lib): `findChampionship()`의 docstring 이 "우승 결정 안 난 상태 (동점) → null 반환"을 명시하지만 실제 구현엔 tie 분기가 없어 `winsA <= winsB`이면 무조건 원정팀(idB)을 우승팀으로 오판정하던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 5/25, info-arch 28/30, lotto 13/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 미충족(11/15). cycle 2452가 review-code 신규 타겟 탐색을 추천 — CHANGELOG 언급 0회(감사 이력 없음) 대형 lib 파일 비교(`buildSeasonSummary.ts` 346줄 vs `buildMlbTeamAccuracy.ts` 300줄) 중 KBO 도메인·독자 로직(`findChampionship`) 보유한 전자 선정.
+- 발견: `findChampionship()`이 한국시리즈 최근 4+경기를 팀 쌍 기준 역추적해 우승팀을 판정하는데, docstring 은 "동점 → null" 을 계약으로 명시하나 실제 코드는 `winnerId = winsA > winsB ? idA : idB` 한 줄뿐 — `winsA === winsB`(예: 2-2 truncated 데이터) 시에도 idB 를 우승팀으로 확정. 시즌 데이터 수집이 KS 진행 중 중단되는 edge case 에서 재현 가능한 silent 오판정 (이 프로젝트 전형적 comment-vs-code 패턴).
+- 실행: `winsA === winsB` 조기 `return null` 가드 추가. 회귀 테스트 2건 신설(`silent-drift.test.ts`) — 4경기 2-2 동점 → `championship=null` 확인 + 4경기 3-1 확정 → 정상 판정 유지 확인 (기존엔 `findChampionship`/`buildSeasonSummary` championship 경로 테스트 자체가 0건).
+- `pnpm --filter moneyball test`(4219/4219, 신규 2건) + `type-check`/`lint` clean.
+
 ## v0.5.62.96 — 2026-08-23 (cycle 2450, review-code: lotto/methodology 신규 감사 — OOS 표본 caveat 텍스트 stale 정정)
 
 ### fix(content): `/lotto/methodology` 페이지 OOS 표본 caveat 문구가 실제 `oos_pass_rate.length` 와 무관하게 `N<10 sample preliminary` 로 하드코딩 — N=14 도달(actionable 임계 N=10 초과, cycle 1842 이미 달성) 이후에도 계속 preliminary 로 오표시되던 것을 정정
