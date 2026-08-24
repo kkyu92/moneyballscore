@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) analysis-data.ts 최초 전체 감사, topFactors dead zone 미적용 정정 (cycle 2488, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 4/20, op-analysis 9/25, info-arch 2/30, lotto 10/30). 2-chain lock 미충족(직전 8 distinct=3: review-code/fix-incident/info-architecture-review). explore-idea saturation 12/15 충족이나 3회 소진 확인. UI 계층(`analysis/page.tsx`)은 2480에 감사 완료됐지만 데이터 소스 `analysis/analysis-data.ts`(938줄, 6개 export 함수) 는 review-code 이력 0건 확인 후 최초 전체 감사 착수.
+
+발견: `getTodayAnalysisData` 의 `topFactors`(오늘 경기 카드 "[팩터]: [팀]↑" 배지 source) 계산이 `NEUTRAL_FACTOR`(0.5) 단순 비교만 사용 — `factorLabels.ts` 가 "FactorBreakdown / determineFavor / topFavoringFactors / selectTopFactors 공유 source"로 명시한 `NEUTRAL_LO`(0.45)/`NEUTRAL_HI`(0.55) dead zone 미반영. 코드베이스 내 다른 모든 favor 판정 지점(`determineFavor`, `topFavoringFactors`, `countFavoringFactors`)은 이 dead zone 밖에서만 팀 우세 판정하지만 `analysis-data.ts` 만 예외 — 사실상 중립인 팩터(예: 0.51)도 top-2 안에 들면 "[팀] 우세" 배지로 오표시 가능했음.
+
+실행: `NEUTRAL_HI`/`NEUTRAL_LO` import + topFactors 필터에 dead zone 제외 조건 추가. 회귀 테스트 신규 1건(`silent-drift-cycle-2488.test.ts`). `pnpm type-check`(4 packages clean) + `pnpm test`(507 files/4244 tests) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit(fix, R4).
+
+다음 사이클 추천 = op-analysis(gap 9/25, 임박) 또는 lotto(gap 10/30) 또는 review-code(heavy) 계속(잔존 미감사 data builder — `convergenceRecord.ts`/`buildAccuracyData.ts`/`buildTeamProfile.ts`/`buildMatchupProfile.ts`/`buildMlbMatchupProfile.ts` 등 lib 계층 다수 미감사 확인됨, 좋은 후보 pool).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) mlb/reviews/weekly 계열 감사, 신규 이슈 0건 clean (cycle 2487, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 1/30 — 방금 발화, lotto 9/30). 직전 8 사이클(2479-2486) distinct=4(operational-analysis/review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. **explore-idea saturation trigger 12/15 충족** — 그러나 cycle 2417/2477 두 차례 heavy 탐색이 이미 "actionable gap 소진" 결론(EN/KO parity, JSON-LD, TODOS Next-Up, placeholder auth/community 모두 Tier4/소진 확인). 이번 cycle 도 4th source(공유 버튼 Kakao 부재 — 외부 SDK 키 등록 필요해 자율 불가/Tier4, 관심팀 필터·푸시 알림·PWA manifest·RSS feed 모두 기 구현 확인)까지 재탐색했으나 자율 가능한 신규 후보 없음 재확인. 2485 추천대로 review-code(heavy) 계속 채택 — 잔존 미감사 대상 `mlb/reviews/weekly/[week]/page.tsx`(551줄) + `buildMlbWeeklyReview.ts`(182줄) + `ConvergenceTeamStatsBadges.tsx`/`ConvergenceHomeAwayBadges.tsx` 선정.

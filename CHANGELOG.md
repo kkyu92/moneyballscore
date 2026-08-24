@@ -1,3 +1,12 @@
+## v0.5.62.104 — 2026-08-24 (cycle 2488, review-code (heavy): analysis-data.ts 최초 전체 감사 — topFactors NEUTRAL dead zone 미적용 정정)
+
+### fix(analysis): `getTodayAnalysisData` topFactors 계산에 NEUTRAL_HI/LO dead zone(0.45~0.55) 미적용 — 중립 팩터 오표시 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 4/20, op-analysis 9/25, info-arch 2/30, lotto 10/30). 2-chain lock 미충족(직전 8 distinct=3). explore-idea saturation 12/15 충족되나 3회 소진 확인된 상태(2487 retro). page.tsx UI 계층(analysis/page.tsx)은 2480에 전체 감사됐지만 그 데이터 소스인 `analysis/analysis-data.ts`(938줄, data builder 6개 함수) 자체는 review-code 이력 0건 — 이번 사이클 최초 전체 감사 대상 선정.
+- 발견: `getTodayAnalysisData` 내 `topFactors` 계산(오늘 경기 카드 "[팩터]: [팀]↑" 배지 source)이 `NEUTRAL_FACTOR`(0.5) 단순 비교(`val > 0.5 ? home : away`)만 사용 — `factorLabels.ts` 가 명시적으로 "FactorBreakdown / determineFavor / topFavoringFactors / selectTopFactors 공유 source"로 지정한 `NEUTRAL_LO`(0.45)/`NEUTRAL_HI`(0.55) dead zone 을 반영하지 않음. `determineFavor`(factor-explanations.ts), `topFavoringFactors`/`countFavoringFactors`(factorLabels.ts, PredictionCard/PredictionCardLive 에서 사용)는 모두 이 dead zone 밖에서만 팀 우세로 판정하지만, `analysis-data.ts` 만 예외 — 실질적으로 중립인 팩터 값(예: 0.51, impact 0.01)도 top-2 안에 들면 "[팀] 우세" 배지로 렌더돼 균형 잡힌 경기에서 사실상 중립 신호를 방향성 있는 것처럼 오표시할 수 있었음.
+- 실행: `NEUTRAL_HI`/`NEUTRAL_LO` import 후 topFactors 후보 필터에 `val > NEUTRAL_HI || val < NEUTRAL_LO` 추가 — dead zone 안 팩터는 애초에 후보에서 제외(기존 `topFactors.length > 0` UI 가드가 0건 케이스 이미 처리). 회귀 테스트 신규 추가(`silent-drift-cycle-2488.test.ts`, import + 필터 조건 검증).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(507 files/4244 tests, 기존 505/4240 + 신규 이 사이클 이전 누적분 + 신규 2) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit(fix, R4).
+
 ## v0.5.62.103 — 2026-08-24 (cycle 2480, review-code (heavy): analysis/page.tsx 최초 전체 감사 — 구장 배지 색상 역전 + 가중치 툴팁 하드코딩 정정)
 
 ### fix(analysis): 구장 팩터 배지 색상 반전(오늘 경기 리스트) + "전체 팩터 가중치" 툴팁 하드코딩 `0.85` 정정

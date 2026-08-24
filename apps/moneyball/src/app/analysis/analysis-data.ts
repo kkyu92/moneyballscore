@@ -26,7 +26,7 @@ import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { getCurrentWeek } from '@/lib/reviews/computeWeekRange';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { buildGameOverview } from '@/lib/analysis/factor-explanations';
-import { FACTOR_LABELS } from '@/lib/predictions/factorLabels';
+import { FACTOR_LABELS, NEUTRAL_HI, NEUTRAL_LO } from '@/lib/predictions/factorLabels';
 
 interface TodayAllRow {
   id: number;
@@ -189,8 +189,12 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
 
     const topFactors: TodayGameCard['topFactors'] = [];
     if (pred.factors) {
+      // cycle 2488: NEUTRAL_HI/LO dead zone(0.45~0.55) 미적용 시 사실상 중립인 팩터도
+      // "[팀] 우세" 배지로 오인 표시됨 — determineFavor/topFavoringFactors/countFavoringFactors
+      // (factorLabels.ts 공유 source) 와 동일 dead zone 적용.
       const sorted = Object.entries(pred.factors)
         .filter(([key]) => key in FACTOR_LABELS)
+        .filter(([, val]) => (val as number) > NEUTRAL_HI || (val as number) < NEUTRAL_LO)
         .map(([key, val]) => ({ key, impact: Math.abs((val as number) - NEUTRAL_FACTOR), favorable: (val as number) > NEUTRAL_FACTOR ? homeCode : awayCode }))
         .sort((a, b) => b.impact - a.impact)
         .slice(0, ANALYSIS_TOP_FACTORS_LIMIT);
