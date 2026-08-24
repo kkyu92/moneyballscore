@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) mlb/reviews/weekly 계열 감사, 신규 이슈 0건 clean (cycle 2487, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 1/30 — 방금 발화, lotto 9/30). 직전 8 사이클(2479-2486) distinct=4(operational-analysis/review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. **explore-idea saturation trigger 12/15 충족** — 그러나 cycle 2417/2477 두 차례 heavy 탐색이 이미 "actionable gap 소진" 결론(EN/KO parity, JSON-LD, TODOS Next-Up, placeholder auth/community 모두 Tier4/소진 확인). 이번 cycle 도 4th source(공유 버튼 Kakao 부재 — 외부 SDK 키 등록 필요해 자율 불가/Tier4, 관심팀 필터·푸시 알림·PWA manifest·RSS feed 모두 기 구현 확인)까지 재탐색했으나 자율 가능한 신규 후보 없음 재확인. 2485 추천대로 review-code(heavy) 계속 채택 — 잔존 미감사 대상 `mlb/reviews/weekly/[week]/page.tsx`(551줄) + `buildMlbWeeklyReview.ts`(182줄) + `ConvergenceTeamStatsBadges.tsx`/`ConvergenceHomeAwayBadges.tsx` 선정.
+
+점검: (1) `computeWeekRange.ts` 는 KO/MLB 공유 — cycle 2481 KST 경계 정정이 이미 양쪽에 적용됨, 재발 없음. (2) `weekdayOf` 류 T00:00:00+09:00 오프셋 버그 패턴 전체 재grep(`getUTCDay\|getDay()` 12 hit) — factor-correlation(2485 정정) + monthGrid(2123 정정) 외 전부 `T00:00:00Z` 앵커 또는 동일 timezone 내 구성/판독이라 안전, 신규 재발 0건 확정(family 완전 종료). (3) `pickHighlights`/`buildMlbTeamStats` isCorrect null 필터링 선행 확인 — bigMiss 필터에 unverified row 유입 없음. (4) `ConvergenceTeamStatsBadges` 색상 로직에 소표본 가드 없어 보였으나 `computeConvergenceTeamStats(results, CONVERGENCE_TEAM_STATS_MIN_PICKS)` 가 소스 레벨에서 이미 필터링 — 오탐 아님.
+
+실행: 코드 변경 없음 — 감사 완료, 신규 issue 0건.
+
+다음 사이클 추천 = op-analysis(gap 9/25) 또는 lotto(gap 10/30) 또는 explore-idea(saturation 재확인, 4번째 소진 예상되나 KBO 포스트시즌 근접 시 plan #29 재평가 조건 도달 가능성 monitor).
+
 ## 🔵 RETRO-ONLY — info-architecture-review 30-cycle gap 재확인, 신규 라우트 0건 clean (cycle 2486, 2026-08-24)
 
 진단: info-arch 마지막 발화 cycle 2455 — 31 사이클 재도달(trigger 9), 직전 8 사이클 distinct=4(lotto/operational-analysis/review-code/fix-incident) 2-chain lock 미충족, open issue 0, approved plan 0/23. 전 cycle(2485) retro 가 "2486 fire 예정" 명시 추천대로 info-architecture-review 발화.
