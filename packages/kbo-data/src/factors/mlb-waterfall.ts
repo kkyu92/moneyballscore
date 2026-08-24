@@ -1,4 +1,4 @@
-import { ELO_DIVIDER, HOME_ELO_BONUS, clampWinnerProb } from '@moneyball/shared';
+import { ELO_DIVIDER, HOME_ELO_BONUS, NEUTRAL_FACTOR, clampWinnerProb } from '@moneyball/shared';
 import { MLB_BASE_WEIGHTS } from './mlb-base';
 
 // MlbFactorWaterfallChart 용 pure 계산 — computeMlbProbability(mlb-base.ts) 의
@@ -105,7 +105,7 @@ function bar(
 export function computeMlbWaterfall(input: MlbWaterfallInput): MlbWaterfallBar[] {
   const labels = LABELS[input.locale ?? 'ko'];
   const bars: MlbWaterfallBar[] = [];
-  let cumulative = 0.5;
+  let cumulative = NEUTRAL_FACTOR;
 
   bars.push(bar('home_advantage', labels.home_advantage, HOME_ADVANTAGE_CONSTANT, cumulative));
   cumulative = bars[bars.length - 1].end;
@@ -148,11 +148,11 @@ export function computeMlbWaterfall(input: MlbWaterfallInput): MlbWaterfallBar[]
   bars.push({
     factor: 'final',
     label: labels.final,
-    contribution: finalProb - 0.5,
+    contribution: finalProb - NEUTRAL_FACTOR,
     cumulative: finalProb,
-    base: 0.5,
+    base: NEUTRAL_FACTOR,
     end: finalProb,
-    direction: finalProb >= 0.5 ? 'home' : 'away',
+    direction: finalProb >= NEUTRAL_FACTOR ? 'home' : 'away',
   });
 
   return bars;

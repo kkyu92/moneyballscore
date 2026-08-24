@@ -24,7 +24,7 @@ export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorC
   const marginPp = Math.round(Math.abs(homeWinProb - NEUTRAL_FACTOR) * FACTOR_CONTRIBUTION_SCALE);
 
   if (locale === 'en') {
-    const confidenceLabel = marginPp < OVERVIEW_CLOSE_PP ? 'a close contest' : marginPp < OVERVIEW_DOMINANT_PP ? 'a slight edge' : 'a clear edge';
+    const confidenceLabel = marginPp <= OVERVIEW_CLOSE_PP ? 'a close contest' : marginPp < OVERVIEW_DOMINANT_PP ? 'a slight edge' : 'a clear edge';
     return (
       <section
         aria-labelledby="mlb-prose-summary-title"
@@ -64,7 +64,7 @@ export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorC
     );
   }
 
-  const confidenceLabel = marginPp < OVERVIEW_CLOSE_PP ? '박빙의 접전' : marginPp < OVERVIEW_DOMINANT_PP ? '소폭 우위' : '명확한 우위';
+  const confidenceLabel = marginPp <= OVERVIEW_CLOSE_PP ? '박빙의 접전' : marginPp < OVERVIEW_DOMINANT_PP ? '소폭 우위' : '명확한 우위';
 
   return (
     <section

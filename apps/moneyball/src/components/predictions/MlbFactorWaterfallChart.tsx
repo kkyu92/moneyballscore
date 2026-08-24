@@ -7,7 +7,7 @@
  */
 
 import { computeMlbWaterfall, type MlbWaterfallInput } from "@moneyball/kbo-data";
-import { WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, mlbShortTeamName, type MlbTeamCode } from "@moneyball/shared";
+import { WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, NEUTRAL_FACTOR, mlbShortTeamName, type MlbTeamCode } from "@moneyball/shared";
 import {
   Bar,
   Cell,
@@ -100,7 +100,7 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam, locale = "k
               tick={{ fill: "var(--color-brand-600)", fontSize: 11 }}
               stroke="var(--color-brand-300)"
             />
-            <ReferenceLine x={0.5} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
+            <ReferenceLine x={NEUTRAL_FACTOR} stroke="var(--color-brand-400)" strokeDasharray="3 3" />
             <Tooltip content={<CustomTooltip locale={locale} />} cursor={{ fill: "var(--color-brand-50)" }} />
             <Bar
               dataKey={(d: ReturnType<typeof computeMlbWaterfall>[number]) => [d.base, d.end]}
