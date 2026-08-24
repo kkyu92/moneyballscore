@@ -12,6 +12,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, confToWinProb, PRODUCTION_COHORT_RULES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
+import { computeAdjacentDates } from '@/lib/predictions/adjacentDates';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
 
 interface Props {
@@ -599,15 +600,10 @@ export default async function PredictionDatePage({ params }: Props) {
       )}
 
       {(() => {
-        const d = new Date(`${date}T00:00:00+09:00`);
-        const prev = new Date(d);
-        prev.setUTCDate(prev.getUTCDate() - 1);
-        const next = new Date(d);
-        next.setUTCDate(next.getUTCDate() + 1);
-        const fmt = (x: Date) => x.toISOString().slice(0, 10);
+        const { prev, next } = computeAdjacentDates(date);
         const items: RelatedLink[] = [
-          { href: `/predictions/${fmt(prev)}`, label: '이전 날짜', hint: fmt(prev) },
-          { href: `/predictions/${fmt(next)}`, label: '다음 날짜', hint: fmt(next) },
+          { href: `/predictions/${prev}`, label: '이전 날짜', hint: prev },
+          { href: `/predictions/${next}`, label: '다음 날짜', hint: next },
           { href: '/predictions', label: '예측 hub', hint: '전체 카드 모음' },
           { href: '/accuracy', label: '누적 적중률', hint: '캘리브레이션 + 트렌드' },
           { href: '/reviews', label: '예측 리뷰', hint: '주간 / 월간' },
