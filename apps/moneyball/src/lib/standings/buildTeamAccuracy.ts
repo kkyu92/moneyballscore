@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { assertSelectOk, SMALL_SAMPLE_N, type TeamCode } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 import { fetchStandings, type StandingRow } from "@moneyball/kbo-data";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 export interface TeamAccuracyRow {
   teamCode: TeamCode;
@@ -206,7 +207,9 @@ export async function buildTeamBiasAnalysis(): Promise<TeamBiasRow[]> {
       .match(CURRENT_MODEL_FILTER)
       .eq("prediction_type", "pre_game")
       .not("is_correct", "is", null),
-    fetchStandings().catch((): StandingRow[] => []),
+    fetchStandings().catch((err) =>
+      captureFallback(err, [] as StandingRow[], { route: "buildTeamBiasAnalysis", source: "fetchStandings" }),
+    ),
   ]);
 
   const { data } = assertSelectOk(predResult, "buildTeamBiasAnalysis");

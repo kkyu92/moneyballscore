@@ -68,7 +68,7 @@ function Recent10({ text }: { text: string }) {
 
 export default async function StandingsPage() {
   const [standings, teamAccuracy, eloTrend] = await Promise.all([
-    buildStandings(),
+    buildStandings().catch((err) => captureFallback(err, [], { route: "/standings", source: "buildStandings" })),
     buildAllTeamAccuracy().catch((err) => captureFallback(err, [], { route: "/standings", source: "buildAllTeamAccuracy" })),
     buildEloTrend().catch((err) => captureFallback(err, { points: [], teams: [] }, { route: "/standings", source: "buildEloTrend" })),
   ]);
