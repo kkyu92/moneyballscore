@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) 홈 페이지 이번 주 일정 오늘 예측 KST 경계 정정 (cycle 2537, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 11/20, op-analysis 7/25, info-arch 20/30, lotto 29/30 — 다음 사이클 30 도달 예상). 직전 8사이클 distinct=3(review-code/operational-analysis/explore-idea) — 2-chain lock 없음. cycle 2535 retro carry-over(잔존 대형 파일: `page.tsx` 1090줄/`teams/[code]/page.tsx` 622줄/`predictions/[date]/page.tsx` 615줄) 중 최대 monolith `page.tsx`(홈) 감사.
+
+발견: `getWeekAheadSchedule()` 의 `todayPredResult` 쿼리가 `today`(KST 날짜 문자열)를 `${today}T00:00:00Z`~`${today}T23:59:59Z` (UTC) 로 필터 — 실제 KST 하루는 UTC 전날 15:00~당일 15:00 이라 9시간 어긋남. 예측 배치가 `KBO_PREDICT_DAILY_TIME_KST`(09:00 KST = 00:00 UTC) 근접 실행되므로 cron 지연으로 몇 분만 어긋나도 `todayPredMap` silent 누락 → "이번 주 일정" 카드가 오늘 경기를 풀모델 확률 대신 Elo 추정치로 조용히 대체(wave-242, #2612 최초 도입 시점부터 존재, KST_OFFSET_MS family 신규 변종). `daily.ts:75` 등 코드베이스 기존 관례는 동일 목적에 `Z` 대신 `+09:00` 오프셋 사용 — 이 파일만 유일하게 벗어남 (grep 확인).
+
+실행: `T00:00:00Z`/`T23:59:59Z` → `T00:00:00+09:00`/`T23:59:59+09:00` 로 정정 (2줄). `pnpm type-check`/`pnpm test`(518/4292)/`pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(c738c9eb)+push(R4).
+
+다음 사이클 추천 = lotto(gap 29/30→30/30 도달 예상, trigger 6 충족) 또는 review-code(heavy) 잔존 대형 파일(`teams/[code]/page.tsx` 622줄/`predictions/[date]/page.tsx` 615줄) 계속 재탐색.
+
+---
+
 ## ✅ SUCCESS — explore-idea standings 홈/원정 성적 컬럼 추가 (cycle 2535, 2026-08-24)
 
 진단: 2-chain alternation lock 발동(직전 8사이클 distinct=2: review-code+operational-analysis) — 두 chain 후보 제외. gh run list(CI 실패 0건)/DESIGN.md mtime(1일 전)/breadcrumb grep 모두 신규 trigger 아님. explore-idea saturation trigger(13/15) 충족 + 유일한 실질 trigger라 선택. 직전 5~6회 모두 retro-only 이력이라 general-purpose agent에 순수 신규 탐색 위임(기존 소진 영역 EN/KO parity·JSON-LD·PWA·leaderboard·auth 제외 지시).
