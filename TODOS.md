@@ -1,3 +1,17 @@
+## ✅ SUCCESS — explore-idea(heavy) analysis/page.tsx PickButton parity 추가 (cycle 2540, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. 이미 소진 확정된 영역(EN/KO parity, JSON-LD, PWA, leaderboard, auth, standings 홈/원정 — cycle 2535 shipped, CE 배너 로직 — 최근 review-code 다수 정정, KST 경계 — 최근 review-code 다수 정정, 수렴/직접대결/팩터 배지 시리즈)을 제외하고 "일부 페이지엔 있고 다른 페이지엔 없는" parity gap 재조사.
+
+발견: `PickButton`(투표 제출 + 커뮤니티 분포 + AI 대결 힌트, `components/picks/PickButton.tsx`)은 이미 홈("/")과 `/mlb/analysis`, `/mlb/games/[date]` 에 통합돼 있으나, KBO 사용자가 오늘 경기를 가장 상세히 보는 `/analysis` 페이지("오늘 전체 AI 예측" 섹션)에는 아예 없었음. `predictions/[date]/page.tsx` 는 `enablePickButton={false}`로 명시적 의도 표시(기록 열람 전용)라도, `/analysis` 는 그런 예외 처리조차 없이 컴포넌트 자체가 통째로 누락된 순수 gap. `analysis-data.ts` 의 `games` 쿼리가 애초에 `status` 컬럼을 select 하지 않아 PickButton 의 `scheduled`-only 노출 게이트를 걸 수조차 없는 상태였음(선행 원인).
+
+실행: `analysis-data.ts` `games` select 에 `status` 추가 + `TodayGameCard.status: string | null` 신규 필드(신규 쿼리 없음, 컬럼 1개 추가). `page.tsx` "오늘 전체 AI 예측" 카드 `</Link>` 직후 `g.status === 'scheduled'` 게이트로 `<PickButton gameId/homeTeam/awayTeam/aiPredictedWinner/aiWinProb/aiTopFactor>` 렌더 — AI hint 값은 기존 계산값(`predictedWinnerCode`/`homeWinProb`/`topFactors[0]`) 재사용. 회귀 테스트 `silent-drift-cycle-2540.test.ts` 신규(PickButton import + status 게이트 + status 컬럼 select/필드 전달 각각 source-text 검증).
+
+검증: `pnpm --filter moneyball run type-check` clean + `pnpm --filter moneyball run test`(519 files/4295 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push(R4), 버전 bump 0.5.62.114→115.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 대형 파일: `accuracy/page.tsx` 1220줄, `analysis/game/[id]/page.tsx` 868줄 — cycle 2539 carry-over 미처리) 또는 lotto(gap 2/30, 아직 저신선도).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) predictions/[date]/page.tsx CE 배너 감지 기준 통일 (cycle 2539, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 13/20, op-analysis 9/25, info-arch 22/30, lotto 1/30 — 방금 fire). 직전 8사이클 distinct=3(review-code/explore-idea/lotto) — 2-chain lock 없음. explore-idea saturation 미충족(11/15 <12). cycle 2538 retro carry-over(잔존 대형 파일 `teams/[code]/page.tsx` 622줄/`predictions/[date]/page.tsx` 615줄) 순서대로 감사. `teams/[code]/page.tsx` 는 general-purpose agent 정밀 감사 결과 clean(findings 0) — KST/threshold/CE배너(없음)/cohort filter 모두 canonical 패턴 정합.
