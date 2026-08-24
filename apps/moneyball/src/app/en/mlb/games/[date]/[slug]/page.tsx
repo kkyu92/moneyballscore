@@ -269,6 +269,13 @@ export default async function GameDetailEn({ params }: PageParams) {
     homeWinProb,
   };
   const waterfallBars = computeMlbWaterfall({ ...waterfallInput, locale: 'en' });
+  // KO page.tsx 와 동일 fix (cycle 2509 review-code heavy) — GAME_DETAIL_FACTOR_ROWS.length
+  // 는 모델 최대 팩터 수(항상 10), computeMlbWaterfall 은 팀 데이터 결측 factor bar 를
+  // silent skip 하므로 실제 경기 factorCount 는 더 적을 수 있음. MlbDetailedFactorAnalysis
+  // 제목(rows.length, self-sync)과 모순 방지.
+  const usedFactorCount = waterfallBars.filter(
+    (b) => b.factor !== 'home_advantage' && b.factor !== 'park_factor' && b.factor !== 'final'
+  ).length;
 
   // cycle 2461(KO)/cycle 2467(EN parity) — 팩터 수렴 픽 배지. KO page.tsx 와 동일 게이팅
   // 로직(6팩터만 유효, DEFAULT_WEIGHTS/judge verdict 대응 개념 없음).
@@ -338,7 +345,7 @@ export default async function GameDetailEn({ params }: PageParams) {
         awayTeam={away}
         homeWinProb={homeWinProb}
         bars={waterfallBars}
-        factorCount={GAME_DETAIL_FACTOR_ROWS.length}
+        factorCount={usedFactorCount}
         locale="en"
       />
 

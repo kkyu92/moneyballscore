@@ -270,6 +270,15 @@ export default async function GameDetail({ params }: PageParams) {
     homeWinProb,
   };
   const waterfallBars = computeMlbWaterfall(waterfallInput);
+  // GAME_DETAIL_FACTOR_ROWS.length 는 모델이 지원하는 최대 팩터 수(metadata 용, 항상 10) —
+  // 개별 경기는 elo/war 등 일부 팀 데이터 결측 시 computeMlbWaterfall 이 해당 bar 를 skip
+  // 하므로(mlb-waterfall.ts null 가드) 실제 사용된 팩터 수가 더 적을 수 있음. MlbGameOverview
+  // 프로즈의 "N개 팩터 종합" 클레임은 이 경기에 실제 반영된 수를 써야 MlbDetailedFactorAnalysis
+  // 제목(rows.length, 동일하게 self-sync)과 모순되지 않음 (cycle 2108 claim-vs-render mismatch
+  // family 재발 — review-code heavy, cycle 2509).
+  const usedFactorCount = waterfallBars.filter(
+    (b) => b.factor !== 'home_advantage' && b.factor !== 'park_factor' && b.factor !== 'final'
+  ).length;
 
   // wave-452(KBO)/game/[id] 팩터 수렴 픽 배지 parity — MLB 는 elo/recent_form/head_to_head/sfr
   // 미구현이라 6팩터(lineup_woba/bullpen_fip/sp_fip/sp_xfip/war/park_factor)만 유효, KBO 의
@@ -341,7 +350,7 @@ export default async function GameDetail({ params }: PageParams) {
         awayTeam={away}
         homeWinProb={homeWinProb}
         bars={waterfallBars}
-        factorCount={GAME_DETAIL_FACTOR_ROWS.length}
+        factorCount={usedFactorCount}
       />
 
       {/* cycle 2461 explore-idea: KBO analysis/game/[id] wave-452/478 팩터 수렴 픽 배지 parity —

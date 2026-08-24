@@ -111,4 +111,16 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/팩터 수렴 픽/);
     expect(PAGE_SRC).toMatch(/팩터 균형/);
   });
+
+  // cycle 2509 review-code heavy: MlbGameOverview 프로즈("N개 팩터 종합")가
+  // GAME_DETAIL_FACTOR_ROWS.length(모델 최대 팩터 수, 항상 10)를 그대로 써 특정 경기의
+  // elo/war 등 팀 데이터 결측으로 computeMlbWaterfall 이 factor bar 를 skip 해도 카운트가
+  // 안 줄어듦 — 같은 화면의 MlbDetailedFactorAnalysis 제목(rows.length, self-sync)과
+  // 모순되는 claim-vs-render mismatch (cycle 2108 family 재발). 실제 waterfallBars 기반
+  // 동적 카운트로 정정한 회귀 가드.
+  it("MlbGameOverview factorCount 는 정적 배열 길이가 아닌 실제 waterfallBars 기반 동적 카운트를 쓴다 (claim-vs-render mismatch 회귀 차단, cycle 2509)", () => {
+    expect(PAGE_SRC).toMatch(/const usedFactorCount = waterfallBars\.filter/);
+    expect(PAGE_SRC).toMatch(/factorCount=\{usedFactorCount\}/);
+    expect(PAGE_SRC).not.toMatch(/factorCount=\{GAME_DETAIL_FACTOR_ROWS\.length\}/);
+  });
 });

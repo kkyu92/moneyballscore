@@ -75,4 +75,12 @@ describe("en/mlb/games/[date]/[slug] KO parity 회귀 가드 (cycle 2109)", () =
     expect(PAGE_SRC).toMatch(/home_starter_name,\s*away_starter_name/);
     expect(PAGE_SRC).toMatch(/SP/);
   });
+
+  // cycle 2509 review-code heavy: KO page.tsx 와 동일한 claim-vs-render mismatch fix
+  // (MlbGameOverview factorCount 정적 배열 길이 → 실제 waterfallBars 기반 동적 카운트).
+  it("MlbGameOverview factorCount 는 정적 배열 길이가 아닌 실제 waterfallBars 기반 동적 카운트를 쓴다 (claim-vs-render mismatch 회귀 차단, KO parity, cycle 2509)", () => {
+    expect(PAGE_SRC).toMatch(/const usedFactorCount = waterfallBars\.filter/);
+    expect(PAGE_SRC).toMatch(/factorCount=\{usedFactorCount\}/);
+    expect(PAGE_SRC).not.toMatch(/factorCount=\{GAME_DETAIL_FACTOR_ROWS\.length\}/);
+  });
 });
