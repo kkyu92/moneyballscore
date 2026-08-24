@@ -1,4 +1,4 @@
-import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, shortTeamName, type TeamCode } from '@moneyball/shared';
+import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, shortTeamName, SMALL_SAMPLE_N, type TeamCode } from '@moneyball/shared';
 import type { WeekRange } from "./computeWeekRange";
 import {
   buildFactorInsights,
@@ -130,7 +130,7 @@ export async function buildWeeklyReview(
 
   const highlights = pickHighlights(rows);
   const teamStats = buildTeamStats(rows);
-  const factorInsights = buildFactorInsights(rows, { minSamples: 3 });
+  const factorInsights = buildFactorInsights(rows, { minSamples: SMALL_SAMPLE_N });
   const summary = buildSummary(
     week,
     verifiedGames,

@@ -1,3 +1,12 @@
+## v0.5.62.111 — 2026-08-24 (cycle 2532, review-code (heavy): reviews/weekly factorInsights minSamples 하드코딩 정정)
+
+### fix(context): `buildWeeklyReview.ts`/`buildMlbWeeklyReview.ts` 의 `buildFactorInsights`/`buildMlbFactorInsights` 호출이 `minSamples: 3` 하드코딩 — `buildMonthlyReview.ts`/`buildMlbMonthlyReview.ts` 는 `SMALL_SAMPLE_N`(=5, sweep 51 source-of-truth) 참조 중이라 동일 family 미정정 잔존
+
+- 진단: open issue 0, approved plan 0/29(전부 non-approved status). gap trigger 4종 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 15/30, lotto 24/30). 직전 8사이클 distinct=4(review-code/explore-idea/fix-incident/operational-analysis) — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 직전 4회(2494/2498/2515/2524) 연속 소진 재확인 완료 상태. cycle 2531 retro carry-over("review-code(heavy) 또는 diversity(explore-idea)") 따라 미감사 대형 파일 재탐색 — `reviews/weekly/[week]/page.tsx`/`mlb/reviews/weekly/[week]/page.tsx`(각 524/551줄) 가 fix 이력 0건(git log 전체 grep) 인 유일한 미감사 대형 파일로 확인.
+- 발견: 페이지 자체(jsonLd/breadcrumb/SMALL_SAMPLE_N 팀별 게이트 등)는 clean. 소비하는 `buildWeeklyReview.ts`/`buildMlbWeeklyReview.ts` 가 `buildFactorInsights(rows, { minSamples: 3 })` 하드코딩 사용 — 같은 reviews 그룹의 `buildMonthlyReview.ts`/`buildMlbMonthlyReview.ts` 는 이미 `SMALL_SAMPLE_N`(5) 참조 중이라, weekly 만 더 느슨한 임계(3)로 "가장 잘 맞힌/빗나간 팩터" 섹션을 노출 — monthly 대비 소표본 노이즈 가드 약화.
+- 실행: 양쪽 파일 모두 `SMALL_SAMPLE_N` import 후 `minSamples: 3` → `minSamples: SMALL_SAMPLE_N` 교체. 회귀 테스트 신규 1건(`silent-drift-cycle-2532.test.ts`, weekly/monthly 4파일 cross-check).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(516 files/4285 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(fix, R4).
+
 ## v0.5.62.110 — 2026-08-24 (cycle 2531, review-code (heavy): seasons/page.tsx·not-found.tsx CURRENT_YEAR KST 연도 경계 후속 정정)
 
 ### fix(seasons): `seasons/page.tsx`/`seasons/[year]/not-found.tsx` 의 `CURRENT_YEAR` 가 `new Date().getFullYear()`(서버 로컬/UTC) 사용 — cycle 2514 carry-over 잔여 케이스

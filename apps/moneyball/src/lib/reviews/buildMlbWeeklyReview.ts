@@ -1,4 +1,4 @@
-import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, mlbShortTeamName, type MlbTeamCode } from '@moneyball/shared';
+import { ACCURACY_STRONG_RATE, ACCURACY_WEAK_RATE, classifyWinnerProb, mlbShortTeamName, SMALL_SAMPLE_N, type MlbTeamCode } from '@moneyball/shared';
 import type { WeekRange } from "./computeWeekRange";
 import {
   buildMlbFactorInsights,
@@ -142,7 +142,7 @@ export async function buildMlbWeeklyReview(
 
   const highlights = pickHighlights(rows);
   const teamStats = buildMlbTeamStats(rows);
-  const factorInsights = buildMlbFactorInsights(rows, { minSamples: 3, locale });
+  const factorInsights = buildMlbFactorInsights(rows, { minSamples: SMALL_SAMPLE_N, locale });
   const summary = buildSummary(
     week,
     verifiedGames,
