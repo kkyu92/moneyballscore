@@ -1,3 +1,12 @@
+## v0.5.62.100 — 2026-08-24 (cycle 2474, review-code (heavy): mlb/matchup/[teamA]/[teamB] KBO parity gap — 다음 경기 예측 섹션 부재 해소)
+
+### feat(mlb): `/mlb/matchup/[teamA]/[teamB]` (KO+EN) 에 KBO `/matchup/[teamA]/[teamB]` 대응 "다음 경기 예측" 섹션이 처음부터 부재했던 것을 신규 추가
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 3/25, info-arch 19/30, lotto 34/30 — 실측 확인 결과 `~/lotto_picks/2026-08-29-50sets.md`+`2026-08-22-result.md` 모두 cron self-heal 로 이미 최신, no-op skip). 2-chain lock 미충족(직전8 distinct=3: review-code/explore-idea/operational-analysis). review-code 반복 타겟(accuracy/teams/daily.ts/mlb game-detail 등) 전부 최근 몇 사이클 안 감사 완료 확인 후 인접 monolith `mlb/matchup/[teamA]/[teamB]/page.tsx`(455줄)+EN 미러 대조 감사.
+- 발견: KBO `/matchup/[teamA]/[teamB]` 페이지(cycle 1640 wave-309)는 `buildMatchupUpcoming.ts` 로 두 팀의 예정 경기 + AI 사전예측을 "다음 경기 예측" 섹션으로 노출하지만, MLB `mlb/matchup/[teamA]/[teamB]`(KO+EN) 에는 애초에 이 섹션도 이를 위한 데이터 조회 함수도 존재하지 않았음 — `apps/moneyball/src/lib/mlb/` 전체에 "scheduled" 상태의 MLB 경기 예측을 조회하는 코드가 0건(단일 매치업 페이지 기능 격차가 아니라 리그 전체에 이 기능 자체가 미구현). KBO 대비 MLB 확장 시(plan #24) 이 조각만 이식이 빠졌던 feature parity gap.
+- 실행: `buildMlbMatchupUpcoming.ts` 신규(`mlb_schedule`(status='scheduled', game_date ≥ 오늘 KST) + `predictions`(prediction_type='pre_game', league='mlb', scoring_rule ∈ MLB_PRODUCTION_COHORT_RULES) 조인 — `buildMlbMatchupProfile.ts` 와 동일 컨벤션, `deriveMlbOutcome` 재사용해 `home_win_prob` 로 predictedWinnerCode/confidence derive). KO+EN 매치업 페이지 양쪽에 KBO 섹션과 동일 UI(승률 바 + 팀로고 + 티어 배지, `classifyWinnerProb`/`winnerProbOf`/`pickTierEmoji`/`WINNER_TIER_LABEL` 재사용 — 이미 MLB 컨텍스트에서 사용 중인 league-agnostic 함수) 삽입. 신규 테스트 3건(빈 배열/예측 있음 derive/예측 부재 시 null) 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(504 files/4234 tests 전량 pass) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(feat, R4).
+
 ## v0.5.62.99 — 2026-08-24 (cycle 2472, review-code (heavy): mlb/games/[date]/[slug] EN 미러 최초 전체 감사 — 모델 메타 정보 섹션 통째 누락 정정)
 
 ### fix(i18n): `/en/mlb/games/[date]/[slug]` EN 미러가 KO `page.tsx`의 "모델 메타 정보"(정량 모델 버전 / 토론 버전 / 예측 생성 시점) `<details>` 섹션 전체를 안 갖고 있었고, 우세팀 배너도 `mlbShortTeamName` 없이 raw 팀 코드를 그대로 노출하던 것을 정정

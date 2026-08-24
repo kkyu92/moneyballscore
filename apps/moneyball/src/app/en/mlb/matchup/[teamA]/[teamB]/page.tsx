@@ -10,6 +10,10 @@ import {
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
   MARGIN_BLOWOUT_THRESHOLD,
+  classifyWinnerProb,
+  winnerProbOf,
+  pickTierEmoji,
+  type WinnerConfidenceTier,
   mlbShortTeamName,
   type MlbTeamCode,
 } from "@moneyball/shared";
@@ -21,6 +25,7 @@ import {
   buildMlbMatchupProfile,
   type MlbMatchupGame,
 } from "@/lib/mlb/buildMlbMatchupProfile";
+import { buildMlbMatchupUpcoming } from "@/lib/mlb/buildMlbMatchupUpcoming";
 import {
   buildMlbTeamFactorAverages,
   EMPTY_MLB_FACTOR_AVERAGES,
@@ -44,6 +49,13 @@ import { MlbTeamLogo } from "@/components/shared/MlbTeamLogo";
 
 // EN mirror of /mlb/matchup/[teamA]/[teamB] — plan #24 Phase 1 MVP + Phase 2a factor compare.
 export const revalidate = 3600; // MATCHUP_ISR_SECONDS (Next.js 16 Turbopack: literal required)
+
+// en/mlb/predictions/page.tsx 와 동일 컨벤션 (WINNER_TIER_LABEL 은 KO 라벨만 제공).
+const TIER_LABEL_EN: Record<WinnerConfidenceTier, string> = {
+  confident: "Confident",
+  lean: "Lean",
+  tossup: "Toss-up",
+};
 
 interface PageProps {
   params: Promise<{ teamA: string; teamB: string }>;
@@ -148,7 +160,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
     redirect(`/en${pair.path}`);
   }
 
-  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats, eloTrend] = await Promise.all([
+  const [profile, factorA, factorB, formA, formB, strongH2HStats, completeH2HStats, eloTrend, upcomingMatchup] = await Promise.all([
     buildMlbMatchupProfile(pair),
     buildMlbTeamFactorAverages(pair.codeA).catch((err) =>
       captureFallback(err, EMPTY_MLB_FACTOR_AVERAGES, {
@@ -190,6 +202,12 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
       captureFallback(err, { points: [] }, {
         route: "/en/mlb/matchup/[teamA]/[teamB]",
         source: "buildMlbMatchupEloTrend",
+      }),
+    ),
+    buildMlbMatchupUpcoming(pair).catch((err) =>
+      captureFallback(err, [], {
+        route: "/en/mlb/matchup/[teamA]/[teamB]",
+        source: "buildMlbMatchupUpcoming",
       }),
     ),
   ]);
@@ -241,6 +259,75 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
           <span style={{ color: tB.color }}>{tB.shortName}</span>
         </h1>
       </header>
+
+      {upcomingMatchup.length > 0 && (
+        <section
+          aria-labelledby="mlb-matchup-upcoming-title-en"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-brand-500/30 p-5 space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <h2 id="mlb-matchup-upcoming-title-en" className="text-base font-bold">
+              Next Game Prediction
+            </h2>
+            <span className="text-xs text-brand-500 font-medium">AI Model</span>
+          </div>
+          <div className="space-y-3">
+            {upcomingMatchup.map((u) => {
+              const tier = classifyWinnerProb(u.homeWinProb);
+              const winnerProb = winnerProbOf(u.homeWinProb);
+              const winnerProbPct = Math.round(winnerProb * 100);
+              const homeWinProbPct = u.homeWinProb != null ? Math.round(u.homeWinProb * 100) : 50;
+              const emoji = pickTierEmoji(tier);
+              const tierLabel = TIER_LABEL_EN[tier];
+              return (
+                <div key={u.gameId} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span className="font-mono">{u.gameDate}</span>
+                    <Link
+                      href={`/en/mlb/games/${u.gameDate}/${u.homeCode}-vs-${u.awayCode}`}
+                      className="text-brand-500 hover:text-brand-600 transition-colors"
+                    >
+                      Full analysis →
+                    </Link>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 w-20 justify-end">
+                      <MlbTeamLogo team={u.awayCode} size={16} className="rounded-full shrink-0" />
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">
+                        {mlbShortTeamName(u.awayCode)}
+                      </span>
+                    </div>
+                    <div className="flex-1 h-3 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden relative">
+                      <div
+                        className="absolute inset-y-0 right-0 rounded-full bg-brand-500/70"
+                        style={{ width: `${homeWinProbPct}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 w-20">
+                      <MlbTeamLogo team={u.homeCode} size={16} className="rounded-full shrink-0" />
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">
+                        {mlbShortTeamName(u.homeCode)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400 dark:text-gray-500">Away {100 - homeWinProbPct}%</span>
+                    {u.predictedWinnerCode && (
+                      <span className="font-semibold text-brand-600 dark:text-brand-400">
+                        {emoji} {mlbShortTeamName(u.predictedWinnerCode)} predicted to win{" "}
+                        <span className="text-gray-500 dark:text-gray-400 font-normal">
+                          ({winnerProbPct}% · {tierLabel})
+                        </span>
+                      </span>
+                    )}
+                    <span className="text-gray-400 dark:text-gray-500">Home {homeWinProbPct}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="bg-gradient-to-r from-brand-500/5 to-accent/5 dark:from-brand-500/10 dark:to-accent/10 rounded-xl border border-brand-500/20 p-6">
         <p className="text-base leading-relaxed text-gray-800 dark:text-gray-100">{summary}</p>
