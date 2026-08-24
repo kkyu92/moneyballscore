@@ -8,6 +8,7 @@ import {
   SITE_URL,
   ACCURACY_GOOD_RATE,
   ACCURACY_BASELINE,
+  SMALL_SAMPLE_N,
   MATCHUP_RECENT_FORM_GAMES,
   classifyWinnerProb,
   winnerProbOf,
@@ -332,12 +333,19 @@ export default async function MatchupPage({ params }: PageProps) {
           <div className="flex items-baseline gap-3">
             <p
               className={`text-3xl font-bold font-mono ${
-                (predictionAccuracy.rate ?? 0) >= ACCURACY_GOOD_RATE
-                  ? "text-brand-600 dark:text-brand-400"
-                  : (predictionAccuracy.rate ?? 0) >= ACCURACY_BASELINE
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : "text-red-600 dark:text-red-400"
+                predictionAccuracy.verified < SMALL_SAMPLE_N
+                  ? "text-gray-400 dark:text-gray-500"
+                  : (predictionAccuracy.rate ?? 0) >= ACCURACY_GOOD_RATE
+                    ? "text-brand-600 dark:text-brand-400"
+                    : (predictionAccuracy.rate ?? 0) >= ACCURACY_BASELINE
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
               }`}
+              title={
+                predictionAccuracy.verified < SMALL_SAMPLE_N
+                  ? `검증된 경기가 ${predictionAccuracy.verified}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
+                  : undefined
+              }
             >
               {predictionAccuracy.rate != null
                 ? `${Math.round(predictionAccuracy.rate * 100)}%`
@@ -345,6 +353,9 @@ export default async function MatchupPage({ params }: PageProps) {
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {predictionAccuracy.correct} / {predictionAccuracy.verified}경기
+              {predictionAccuracy.verified < SMALL_SAMPLE_N && (
+                <span className="ml-1 text-gray-400 dark:text-gray-500">· 경기 수 적음</span>
+              )}
             </p>
           </div>
         </section>

@@ -5,6 +5,7 @@ import {
   SITE_URL,
   ACCURACY_GOOD_RATE,
   ACCURACY_BASELINE,
+  SMALL_SAMPLE_N,
   CLOSE_GAME_MARGIN,
   MATCHUP_RECENT_FORM_GAMES,
   MLB_FACTOR_PICK_STRONG,
@@ -431,12 +432,19 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
           <div className="flex items-baseline gap-3">
             <p
               className={`text-3xl font-bold font-mono ${
-                (predictionAccuracy.rate ?? 0) >= ACCURACY_GOOD_RATE
-                  ? "text-brand-600 dark:text-brand-400"
-                  : (predictionAccuracy.rate ?? 0) >= ACCURACY_BASELINE
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : "text-red-600 dark:text-red-400"
+                predictionAccuracy.verified < SMALL_SAMPLE_N
+                  ? "text-gray-400 dark:text-gray-500"
+                  : (predictionAccuracy.rate ?? 0) >= ACCURACY_GOOD_RATE
+                    ? "text-brand-600 dark:text-brand-400"
+                    : (predictionAccuracy.rate ?? 0) >= ACCURACY_BASELINE
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
               }`}
+              title={
+                predictionAccuracy.verified < SMALL_SAMPLE_N
+                  ? `Only ${predictionAccuracy.verified} verified games — treat as reference (reliable at ${SMALL_SAMPLE_N}+)`
+                  : undefined
+              }
             >
               {predictionAccuracy.rate != null
                 ? `${Math.round(predictionAccuracy.rate * 100)}%`
@@ -444,6 +452,9 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {predictionAccuracy.correct} / {predictionAccuracy.verified} games
+              {predictionAccuracy.verified < SMALL_SAMPLE_N && (
+                <span className="ml-1 text-gray-400 dark:text-gray-500">· small sample</span>
+              )}
             </p>
           </div>
         </section>

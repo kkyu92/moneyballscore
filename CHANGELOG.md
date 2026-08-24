@@ -1,3 +1,12 @@
+## v0.5.62.120 — 2026-08-25 (cycle 2545, review-code (heavy): matchup 페이지 3종 "AI 예측 성과" 소표본 게이트 부재)
+
+### fix(matchup): `matchup/[teamA]/[teamB]`, `mlb/matchup/[teamA]/[teamB]`, `en/mlb/matchup/[teamA]/[teamB]` "AI 예측 성과 (이 매치업 한정)" 카드에 소표본(n<5) 흐림 처리 + 안내 신규 — accuracy/analysis 계열 페이지엔 다 있던 관례가 matchup 3종엔 없었음
+
+- 진단: open issue 0, approved plan 0/29. 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/lotto). gap trigger 4종 미도달(fix-incident 19/20, op-analysis 15/25, info-arch 28/30, lotto 7/30). CI 최근 실패 0건. cycle 2544 retro가 소표본 게이트 family(2541~2543) 소진 가능성 명시했으나, 대형 파일 3개(`analysis/page.tsx` 2833줄, `accuracy/page.tsx` 1220줄, `teams/[code]/page.tsx` 622줄) 감사 완료 후 인접 미감사 파일(matchup 페이지 3종) 재탐색.
+- 발견: `teams/[code]/page.tsx`·`mlb/team/[code]/page.tsx`·`en/mlb/team/[code]/page.tsx`는 이미 `SMALL_SAMPLE_N` 게이트(적중률 카드)를 갖고 있는데, 같은 "예측 정확도 색상 강조" 패턴을 쓰는 matchup 페이지 3종(`AI 예측 성과 (이 매치업 한정)` / `AI Prediction Performance`)은 `predictionAccuracy.verified > 0`만 확인하고 `SMALL_SAMPLE_N` import 자체가 없어, 두 팀 간 검증 경기가 1~2건뿐이어도 100%/0%를 브랜드색/빨강으로 그대로 강조 노출.
+- 실행: 3개 파일 각각 `SMALL_SAMPLE_N` import + `predictionAccuracy.verified < SMALL_SAMPLE_N` 시 회색 처리 + title 툴팁 + 인라인 `· 경기 수 적음`(EN `· small sample`) 안내(teams/[code] 관례 재사용). 회귀 테스트 `silent-drift-wave-666.test.ts` 신규(3파일 × 3assertion = 9건).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(524 files/4332 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.119 — 2026-08-25 (cycle 2544, explore-idea (heavy): /mlb/accuracy·/en/mlb/accuracy 커뮤니티 vs AI 대결 섹션 parity 추가)
 
 ### feat(mlb): `/mlb/accuracy` · `/en/mlb/accuracy` 에 "커뮤니티 vs AI 대결" 섹션 신규 — KBO `/accuracy` 에는 있던 픽 투표 다수결 vs AI 정확도 비교가 MLB 쪽엔 부재였던 gap
