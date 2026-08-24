@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code(heavy) mlb/reviews/weekly/[week]/page.tsx 최초 전체 감사, 신규 이슈 0건 (cycle 2520, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23 (전부 completed/archived/spec_only/deferred, status=approved 없음). 2-chain lock 없음(직전 8사이클 2512-2519 distinct=3: review-code/explore-idea/info-arch). gap trigger 미도달(fix-incident 13/20, op-analysis 14/25, lotto 11/30, info-arch 2/30). cycle 2518/2519 carry-over 후보(`en/mlb/matchup` 596줄, `en/mlb/reviews/monthly` 500줄) 재검증 결과 stale — `en/mlb/reviews/monthly/page.tsx`는 실제로 10줄짜리 redirect wrapper(월간 index → 최신 월 리다이렉트)였고, `analysis/page.tsx`(2803줄)는 이미 cycle 2480에서 전체 감사 완료. `find + wc -l` 전체 재스캔 + `최초 전체 감사` grep 교차검증으로 진짜 미감사 타겟 발굴: `mlb/reviews/weekly/[week]/page.tsx`(551줄, git log 3 commit뿐 — plan #26 Phase 1b 신규 라우트 + wave-657 색상 단일화 + cycle 2345 수렴 픽 배선, 전체 감사 이력 0건).
+
+감사 범위: 파일 전체 라인별 read + KO/EN 자매 페이지(`reviews/weekly/[week]`, `en/mlb/reviews/weekly/[week]`) 3-way diff + `convergenceRecord.ts`의 `getMlbRecentConvergencePickRecord` 등 6개 함수 시그니처 대조 + `buildMlbWeeklyReview.ts` vs `buildWeeklyReview.ts`(KBO) 전체 diff + `ConvergenceTeamStatsBadges`/`ConvergenceHomeAwayBadges`/`WeeklyGamesSortControl` 컴포넌트 prop 배선 확인 + jsonLd `inLanguage`/`locale` 필드 + game 링크 slug 생성(`{homeCode}-vs-{awayCode}`)이 `sitemap.ts`의 `mlbGameDetailRoutes` 규칙과 일치하는지 확인.
+
+결과: 신규 이슈 0건. `getMlbRecentConvergencePickRecord` 등이 KBO 버전과 파라미터 개수가 다른 것(KBO는 `limit` 인자 보유, MLB는 없음)은 실제 시즌 표본 차이(MLB 시즌 전체 스캔 vs KBO lookback-days) 를 반영한 의도된 설계(cycle 2226 주석에 명시) — 버그 아님. `buildMlbWeeklyReview(range)` 가 KO 페이지에서 `locale` 인자 없이 호출되는 것도 함수 시그니처 기본값(`"ko"`)과 일치 — EN 미러는 `buildMlbWeeklyReview(range, "en")` 명시 확인. jsonLd `inLanguage: "ko-KR"` 존재(직전 2 사이클 발견된 KO jsonLd 누락 패턴과 달리 이 파일은 처음부터 정상). breadcrumb 라벨 `'예측 리뷰'`(→`/mlb/reviews`)가 hub 페이지 자체 브레드크럼 라벨(`'예측 결과 리뷰'`)과 문구가 다르지만, KBO 원본도 동일 페이지 유형에서 `'리뷰'`/`'예측 리뷰'`/`'예측 결과 리뷰'` 3가지 문구가 이미 혼재(사전 존재 패턴, 이번 사이클 신규 아님) — cosmetic 문구 통일은 별도 polish-ui scope로 남기고 이번엔 손대지 않음(scope creep 회피).
+
+**교훈**: carry-over 후보 리스트는 매번 실측(`wc -l` + 실제 파일 내용 확인)으로 재검증 — 리스트에 적힌 줄수(500줄)만 믿고 진입했으면 10줄 redirect wrapper 를 감사 대상으로 오인할 뻔함(cycle 2518 교훈의 재확인). 전체 감사가 항상 이슈를 발견하는 것은 아님 — 신규 라우트(plan #26)는 애초에 최근 배선이라 drift 누적 기간이 짧아 clean audit 확률이 높음(cycle 2483/2497 패턴과 동일).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사 후보: `en/mlb/matchup/[teamA]/[teamB]` 596줄 — ad-hoc parity fix 다수지만 전체 감사 이력 없음, `mlb/reviews/monthly/[month]` 502줄 + `en/mlb/reviews/monthly/[month]` 500줄 — 신규 라우트라 낮은 확률이지만 미감사, `players/[id]` 323줄 + EN 미러) 또는 operational-analysis(gap 14/25, cycle 2530 경 도달 예상) 또는 lotto(gap 11/30, cycle 2538 경 도달 예상).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) methodology/page.tsx 최초 전체 감사, Sunday cap 신뢰도 raw decimal → % 표시 정정 (cycle 2519, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/info-arch). gap trigger 미도달(fix-incident 13/20, op-analysis 14/25, lotto 11/30, info-arch 2/30). `methodology/page.tsx`(515줄) — 다수 ad-hoc silent-drift 수정(wave-246/247/262/266 등)은 있었으나 line-by-line 전체 감사 이력 0건, 최근 ad-hoc fix 는 cycle 2266(253 사이클 전) — 신선 타겟으로 선정.
