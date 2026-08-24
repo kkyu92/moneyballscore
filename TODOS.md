@@ -1,3 +1,13 @@
+## 🔍 RETRO-ONLY — review-code(heavy) mlb-shared.ts 신규 감사, 버그 없음 확인 (cycle 2460, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 5/30, lotto 20/30). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 근접이나 미충족(11/15). cycle 2459 retro 추천(review-code heavy, 후보: mlb-shared.ts/compareModels.ts/buildTeamAccuracy.ts) 채택 — 가장 큰 미감사 파일 우선.
+
+감사 범위: `mlb-shared.ts`(409줄) 전체 — `fetchMlbPredictionRowsInRange` / `mapMlbRowsToHighlightCandidates` / `buildMlbTeamStats` / `buildMlbFactorInsights` / `buildMlbMissReport` + 소비 파일 전부(`buildMlbWeeklyReview.ts` / `buildMlbMonthlyReview.ts` / `analysis-data.ts` / `mlb/reviews/misses` KO+EN / `api/picks/results/route.ts`).
+
+결론: `MLB_PRODUCTION_COHORT_RULES` scoring_rule 필터(#1338 family fix) 양쪽 쿼리(스케줄 조인 + miss report) 모두 이미 적용됨. `LOWER_IS_BETTER` FIP류 부호 반전 로직 정상. badge 필드는 이 파일에서 항상 null 초기화 후 소비 파일(buildMlbWeeklyReview/MonthlyReview)이 태깅 — 설계된 분리, 버그 아님. KBO 대응 파일과 구조 1:1 대응 확인. 신규 버그 0건, 코드 변경 없음. `pnpm --filter moneyball test` 500 files/4221 tests 전부 green.
+
+다음 사이클 추천 = review-code(heavy, 잔여 후보 — `dashboard/compareModels.ts` 299줄 / `standings/buildTeamAccuracy.ts` 261줄) 또는 explore-idea(saturation trigger 근접 11/15, 다음 사이클 도달 가능성).
+
 ## 🟢 SUCCESS — operational-analysis(lite) 주간 성과 진단, n=26 소표본 확인 (cycle 2459, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 11/25, info-arch 4/30, lotto 19/30). 2-chain lock 미충족(직전8 distinct=5, {skill-evolution,fix-incident,review-code,info-arch,explore-idea}). cycle 2458 retro 1순위 추천(operational-analysis, 10/25 gap) + cycle 2456 "review-code 감사 pool 고갈 경고" 채택 — 다양성 확보 위해 operational-analysis 선택.
