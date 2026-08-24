@@ -1,3 +1,12 @@
+## v0.5.62.107 — 2026-08-24 (cycle 2499, review-code (heavy): accuracy 컴포넌트 최초 전체 감사 — TeamMatchupCards 소표본 threshold 미참조 정정)
+
+### fix(accuracy): `TeamMatchupCards.tsx` 소표본 opacity 처리가 `SMALL_SAMPLE_N`(5, sweep 51 source-of-truth) 대신 하드코딩 `< 3` 사용 — silent drift 정정
+
+- 진단: open issue 0, approved plan 0/22(전부 completed/archived/spec-only-deferred, status=approved 0건). gap trigger 4종 미도달(fix-incident 15/20, op-analysis 20/25, info-arch 13/30, lotto 21/30). 직전 8 사이클 distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 직전 2회(2494/2498) 연속 신규 idea 0건 확인된 상태. 2473 retro 가 미감사 후보로 명시한 `/accuracy` 컴포넌트 계층(`FactorAccuracyTable`/`TeamBiasTable`/`ModelVersionHistory`/`TeamMatchupCards`) 최초 전체 감사 착수.
+- 발견: `TeamMatchupCards.tsx` 의 홈/원정 split + 상대팀 목록 opacity-50 판정이 하드코딩 `n < 3` 사용, 주석은 "ScoringRuleDayHeatmap/CohortComparisonHeatmap 과 동일 컨벤션"이라 주장. 실측 결과 두 파일 모두 이런 threshold 자체가 존재하지 않음(grep 0건) — cycle 2199 도입 당시부터 근거가 부정확했던 코멘트. `TeamBiasTable.tsx`(같은 accuracy 컴포넌트 그룹)는 이미 `SMALL_SAMPLE_N`(5, cycle 2473 이 `CalibrationChart` 에도 통일한 sweep 51 source-of-truth)을 정확히 참조 — `TeamMatchupCards.tsx` 만 미참조 상태였음.
+- 실행: `SMALL_SAMPLE_N` import 후 3곳(`ha.homeN`/`ha.awayN`/`m.n`) 의 `< 3` 을 `< SMALL_SAMPLE_N` 으로 교체 + 부정확한 코멘트 정정. 회귀 테스트(`TeamMatchupCards.test.tsx`) boundary 값을 `SMALL_SAMPLE_N` 참조로 갱신(n=4/5 경계).
+- `pnpm type-check`(4 packages clean) + `pnpm test`(509 files/4250 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(fix, R4).
+
 ## v0.5.62.106 — 2026-08-24 (cycle 2493, review-code (heavy): factor-explanations.ts 최초 전체 감사 — marginPp 하드코딩 * 200 / 0.5 정정)
 
 ### fix(context): `GameAnalysisProse.tsx` / `MlbGameOverview.tsx` 의 marginPp 계산이 `FACTOR_CONTRIBUTION_SCALE`/`NEUTRAL_FACTOR` 단일 source 대신 하드코딩 `* 200` / `- 0.5` 사용 — silent drift 정정

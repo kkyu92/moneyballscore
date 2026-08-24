@@ -1,22 +1,24 @@
 /**
- * TeamMatchupCards unit test — cycle 2199 review-code(heavy).
+ * TeamMatchupCards unit test — cycle 2199 review-code(heavy), threshold 정정 cycle 2499.
  *
- * 의도: 소표본(N<3) 회색 처리 컨벤션(ScoringRuleDayHeatmap/CohortComparisonHeatmap 과 동일)이
- * 이 컴포넌트에도 일관 적용되는지 검증 — 기존엔 상대팀 목록만 n===1 에 opacity-50, 홈/원정
- * split 은 표본 크기 무관 항상 진하게 렌더되던 drift 를 잡는 회귀 테스트.
+ * 의도: 소표본(N<SMALL_SAMPLE_N) 회색 처리가 이 컴포넌트에 일관 적용되는지 검증.
+ * cycle 2499: 하드코딩 `n<3` 이 SMALL_SAMPLE_N(=5, sweep 51 source-of-truth) 미참조 drift 로
+ * 확인돼 정정 — 원 커밋의 "ScoringRuleDayHeatmap/CohortComparisonHeatmap 과 동일 컨벤션" 주석은
+ * 두 파일 모두 이 threshold 를 쓰지 않아 실제로는 부정확한 근거였음.
  */
 
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
+import { SMALL_SAMPLE_N } from "@moneyball/shared";
 import { TeamMatchupCards } from "../TeamMatchupCards";
 
 describe("TeamMatchupCards", () => {
-  it("상대팀 n<3 소표본은 opacity-50, n>=3 은 정상 렌더", () => {
+  it("상대팀 n<SMALL_SAMPLE_N 소표본은 opacity-50, n>=SMALL_SAMPLE_N 은 정상 렌더", () => {
     const { container } = render(
       <TeamMatchupCards
         matchups={[
-          { teamCode: "LG", opponentCode: "KIA", n: 2, correct: 1, accuracyRate: 0.5 },
-          { teamCode: "LG", opponentCode: "SSG", n: 3, correct: 2, accuracyRate: 0.667 },
+          { teamCode: "LG", opponentCode: "KIA", n: SMALL_SAMPLE_N - 1, correct: 1, accuracyRate: 0.5 },
+          { teamCode: "LG", opponentCode: "SSG", n: SMALL_SAMPLE_N, correct: 3, accuracyRate: 0.6 },
         ]}
         homeAway={[]}
         teamAccuracy={[]}
@@ -24,13 +26,13 @@ describe("TeamMatchupCards", () => {
         shortName={(c) => c}
       />,
     );
-    // accuracyRate 내림차순 정렬 — SSG(n=3, 0.667) 먼저, KIA(n=2, 0.5) 다음
+    // accuracyRate 내림차순 정렬 — SSG(n=5, 0.6) 먼저, KIA(n=4, 0.5) 다음
     const rows = container.querySelectorAll(".border-t > div");
     expect(rows[0].className).not.toContain("opacity-50");
     expect(rows[1].className).toContain("opacity-50");
   });
 
-  it("홈/원정 split 도 N<3 소표본 시 opacity-50 (기존엔 표본 크기 무관 항상 진하게 렌더 — drift)", () => {
+  it("홈/원정 split 도 N<SMALL_SAMPLE_N 소표본 시 opacity-50 (기존엔 표본 크기 무관 항상 진하게 렌더 — drift)", () => {
     const { container } = render(
       <TeamMatchupCards
         matchups={[]}
