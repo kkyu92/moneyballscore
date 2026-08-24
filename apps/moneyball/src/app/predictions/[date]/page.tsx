@@ -10,7 +10,7 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, confToWinProb, PRODUCTION_COHORT_RULES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, confToWinProb, PRODUCTION_COHORT_RULES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, SMALL_SAMPLE_N, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { computeAdjacentDates } from '@/lib/predictions/adjacentDates';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
@@ -413,6 +413,11 @@ export default async function PredictionDatePage({ params }: Props) {
               <span className="text-gray-700 dark:text-gray-300">
                 적중률 {Math.round((correctN / totalN) * 100)}% ({correctN}/
                 {totalN})
+                {totalN < SMALL_SAMPLE_N && (
+                  <span className="ml-1 text-gray-400 dark:text-gray-500">
+                    · 소표본(n&lt;{SMALL_SAMPLE_N})
+                  </span>
+                )}
               </span>
             </>
           )}

@@ -1,3 +1,12 @@
+## v0.5.62.122 — 2026-08-25 (cycle 2548, review-code (heavy): `predictions/[date]` 헤더 적중률 소표본 게이트 부재)
+
+### fix(predictions): 날짜별 예측 페이지 헤더 "적중률 N%" 텍스트에 소표본(n<5) 인라인 표시 신규 — accuracy/matchup/homepage 계열엔 다 있던 관례가 일별 예측 페이지 헤더엔 없었음
+
+- 진단: open issue 0, approved plan 0/29(전부 status≠`approved`). 2-chain lock 없음(직전 8사이클 distinct=3: explore-idea/review-code/info-architecture-review). gap trigger 재계산(fix-incident 20+/20 도달했으나 `gh run list` scheduled workflow 전부 success, CI 실패 0건 — negative) + op-analysis 18/25 + info-arch 1/30(cycle 2547 직후 리셋) + lotto 10/30 모두 미도달. cycle 2547 retro가 review-code(heavy) 재탐색 권고.
+- 발견: `predictions/[date]/page.tsx` 헤더의 `적중률 {rate}% ({correctN}/{totalN})` 텍스트는 `SMALL_SAMPLE_N` import 자체가 없어, 하루 1~2경기만 검증된 이른 시각에도 소표본 안내 없이 노출 — matchup/accuracy/WeeklyTrendMini 계열엔 이미 있던 관례 부재.
+- 실행: `SMALL_SAMPLE_N` import + `totalN < SMALL_SAMPLE_N` 조건부로 헤더 스탯 옆에 `· 소표본(n<5)` 인라인 표시 추가 (WeeklyTrendMini 툴팁 관례 재사용). 메타 description/OG/공유 텍스트 3곳(line 215/219/252/595)은 색상 강조 없는 요약 문구라 스코프 밖 유지. 회귀 테스트 `silent-drift-wave-668.test.ts` 신규(3 assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(526 files/4339 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.121 — 2026-08-25 (cycle 2546, review-code (heavy): 홈페이지 "최근 4주 성과" 히어로 통계 소표본 게이트 부재)
 
 ### fix(dashboard): `WeeklyTrendMini` (홈페이지 "최근 4주 성과" 카드) 히어로 % + 막대그래프 색상 + 툴팁에 소표본(n<5) 게이트 신규 — accuracy/analysis/matchup 계열엔 다 있던 관례가 홈페이지 최상단 통계엔 없었음
