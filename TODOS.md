@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 커뮤니티 vs AI 대결 · MLB accuracy 히어로 소표본 게이트 부재 정정 (cycle 2553, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(status: approved 매칭 0건). 2-chain lock 없음(2545-2552 distinct=3: review-code 6 + skill-evolution 1 + info-arch 1). fix-incident 20+/20 gap 도달했으나 `gh run list --limit 10` 재확인 — 최근 10건 전부 success, CI 실패 0건, negative. op-analysis 23/25, info-arch 6/30, lotto 15/30 모두 미도달. cycle 2552 retro가 family 지속 또는 소진 시 explore-idea redirect 명시.
+
+발견: (1) `accuracy/page.tsx`(KBO) 커뮤니티 vs AI 인라인 + 이를 추출한 공유 컴포넌트 `CommunityVsAICard.tsx`(explore-idea cycle 2544, MLB 배선) 모두 AI 정답률(`aiAccuracyWithPoll`)이 `communityGames >= MIN_POLL_TOTAL`(=3) 게이트만 상속받고, 독립적으로 더 적을 수 있는 `aiGamesWithPoll` 자체엔 `SMALL_SAMPLE_N` 게이트 부재 — KBO 원본의 기존 부재가 컴포넌트 추출 시 그대로 계승됨. (2) `MlbAccuracyDashboard.tsx` 히어로 "전체 적중률" StatCard는 `SMALL_SAMPLE_N` import 자체가 없어 verifiedN=1이어도 강조색 노출, 내부 calibration bucket/섹션 게이트는 상수 대신 하드코딩 리터럴 `5` 사용(단일 출처 원칙 위반). family 10번째 연속 재발(cycle 2541/2542/2543/2545/2546/2548/2549/2550/2552/2553).
+
+실행: `accuracy/page.tsx` + `CommunityVsAICard.tsx`(ko/en) AI 정답률 스탯에 `aiGamesWithPoll < SMALL_SAMPLE_N` 조건부 색상/title/인라인 `· 소표본(n<5)` 표시 + `MlbAccuracyDashboard.tsx` 히어로 StatCard 동일 게이트 + 하드코딩 리터럴 2곳 상수 교체. 회귀 테스트 `silent-drift-wave-672.test.ts` 신규(9 assertion).
+
+검증: tsc/lint clean + test(530 files/4364 tests) 통과. 단일 논리 단위 → 직접 main commit(1c781b5b + 버전동기화 66b621ea)+push, pre-push guard(1차 version-sync-guard fail → 루트 package.json/VERSION 누락 발견 → 정정 커밋 후 재push 통과), R4 정합.
+
+다음 사이클 추천 = review-code(heavy, 남은 후보 재탐색 — v2-shadow-monitor/accuracy/shadow 는 noindex 내부 cohort 페이지라 스코프 밖 확인됨. 남은 대형 파일/컴포넌트 감사 지속) 또는 family 10회 누적 소진 판단 시 explore-idea 다양성 redirect (2-chain lock 근접 주의 — review-code 최근 8사이클 중 6회).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 리더보드 AI 적중률 베이스라인 소표본 게이트 부재 정정 (cycle 2552, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(status: approved 매칭 0건). 2-chain lock 없음(2544-2551 distinct=4: explore-idea/review-code/info-arch/skill-evolution). fix-incident 20/20 gap 도달했으나 `gh run list --limit 10` 재확인 — CI 실패 0건, negative. op-analysis 22/25, info-arch 5/30, lotto 14/30 모두 미도달. cycle 2551 retro가 sweep 잔여(leaderboard/seasons/accuracy-shadow/mlb/accuracy) 우선 재확인 명시.
