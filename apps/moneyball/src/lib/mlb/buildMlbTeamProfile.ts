@@ -23,6 +23,7 @@ import {
   computeTeamRecentRecord,
   type TeamRecentRecord,
 } from '@/lib/teams/buildTeamProfile';
+import { computeCurrentKSTYear } from '@/lib/seasons/buildSeasonSummary';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
 export interface MlbTeamRecentGame {
@@ -196,7 +197,7 @@ export async function buildMlbTeamProfile(
 
   // mlb_team_stats.team_code 는 canonical(Baseball-Reference) 컨벤션 — teamCode 파라미터와
   // 동일 컨벤션이라 정규화 없이 직접 매칭(mlb_schedule 과 달리 alias 변환 불필요).
-  const season = new Date().getFullYear();
+  const season = computeCurrentKSTYear();
   const statsResult = await supabase
     .from('mlb_team_stats')
     .select('pull_pct, cent_pct, oppo_pct, gb_pct, fb_pct, hard_hit_pct, ld_pct, iffb_pct, hr_fb_pct, launch_angle')
