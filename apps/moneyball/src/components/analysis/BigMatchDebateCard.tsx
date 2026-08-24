@@ -84,9 +84,9 @@ export function BigMatchDebateCard({
               <strong className="block mb-1 text-brand-700">
                 빅매치 선정 기준
               </strong>
-              오늘 모델이 가장 강하게 예측한 경기입니다. 승리 확률
-              80% 이상 (또는 20% 이하) 으로 한쪽 편을 강하게 본 경기 중
-              확률이 가장 극단적인 한 경기를 자동 선정합니다.
+              오늘 모델이 가장 강하게 예측한 경기입니다. 확신 티어가
+              가장 높은 경기를 우선 선정하고, 확신 경기가 없으면
+              그다음 티어에서 확률이 가장 극단적인 경기를 자동 선정합니다.
             </span>
           </span>
         </div>
@@ -97,7 +97,7 @@ export function BigMatchDebateCard({
           AI 에이전트 토론 대상 경기
         </h2>
         <p className="text-brand-200 text-xs md:text-sm mt-1">
-          오늘 모델이 가장 확신하는 한 경기 — 승률 80%+ 기준
+          오늘 모델이 가장 확신하는 한 경기
         </p>
         {isQuantOnlyFallback && (
           <div className="mt-2">
