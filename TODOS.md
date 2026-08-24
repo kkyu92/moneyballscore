@@ -1,3 +1,18 @@
+## ✅ SUCCESS — review-code(heavy) predictions/insights 컴포넌트 최초 전체 감사, waterfall 정규화 누락 + MLB historical-analog 크래시 위험 정정 (cycle 2502, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/blocked). gap trigger 4종 전부 미도달. cycle 2501(skill-evolution forced milestone) 추천대로 review-code(heavy) 계속, insights/predictions 컴포넌트 디렉토리(25+2파일, 최초 전체 감사)로 전환.
+
+감사(Explore agent 위임 + 직접 검증): predictions/ 25개 파일 + insights/ 2개 파일 + KBO/MLB twin 대응 관계 비교 + 상위 lib(predictor.ts, mlb-waterfall.ts, factor-explanations.ts) 교차 확인. 4건 후보 중 2건 확정 fix:
+
+1. `FactorWaterfallChart.tsx`의 `computeWaterfall()`이 `predictor.ts`의 정규화 공식(`weightedSum/factorTotal`, factorTotal=DEFAULT_WEIGHTS 합=0.85)에서 `/factorTotal` 나눗셈을 누락 — 차트가 표시하는 각 팩터 기여도와 최종 확률이 실제 모델 대비 약 1.18배(=1/0.85) 축소돼 표시됨. 푸터 문구 "가중치 합 = 1.0"도 실제 0.85와 불일치해 근본 원인 확인(작성자가 가중치 합이 1.0이라 잘못 가정하고 정규화를 생략한 것으로 추정). `FACTOR_TOTAL` 상수 도입 후 각 contribution에 나눗셈 적용 + 푸터 문구를 실제 값(85%, 정규화 적용)으로 정정.
+2. `MlbHistoricalAnalogMatchup`은 페이지 안에 `<MlbHistoricalAnalogMatchup />`으로 인라인 렌더되는 async Server Component(page.tsx의 `Promise.all` 밖)인데, 내부 `fetchMlbHistoricalAnalogs()`가 `assertSelectOk` 관례(호출부가 catch 결정)로 throw — 흡수하는 코드가 없어 일시적 Supabase 에러 시 MLB 게임 상세 페이지 전체가 크래시될 위험. KBO twin(`HistoricalAnalogMatchup`)은 이미 동일 상황에서 try/catch + Sentry capture로 graceful degrade하고 있어 비대칭 확인. 첫 시도는 `fetchMlbHistoricalAnalogs` 자체에 try/catch를 넣었으나 기존 회귀 가드 테스트("schedule select 실패 시 throw")가 실패 — 이 테스트는 "assertSelectOk는 호출부가 catch 여부를 결정한다"는 설계 계약을 지키기 위해 의도적으로 작성된 것이었음. 대신 컴포넌트 레벨에서 `.catch(captureFallback)`으로 흡수하도록 위치를 옮겨 fetch 함수의 throw 계약은 유지하면서 페이지 크래시만 차단.
+
+confidence-tier 부등호 불일치(`factor-explanations.ts:397` `<=` vs `GameAnalysisProse.tsx:49`/`MlbGameOverview.tsx:27,67` `<` — 동일 페이지 내 "접전"/"소폭 우위" 라벨 모순 가능)와 `mlb-waterfall.ts`의 `NEUTRAL_FACTOR` 미참조 하드코딩(`0.5` 4곳)은 저심각도로 이번 사이클 scope 제외, 다음 review-code 후보로 이월.
+
+검증: tsc --noEmit clean, eslint clean, vitest 전체 509 files/4250 tests pass(첫 시도 실패 1건 → 재설계 후 전체 pass), pre-push lint+type-check+version-sync-guard pass. PR 없이 direct main push (commit f3de0d17).
+
+다음 사이클 추천 = review-code(heavy) 계속 — confidence-tier 부등호 통일 fix 우선, 또는 insights 디렉토리(AgentVoteCard/DebateTimeline, 이번에 clean 확인)를 지나 components/analysis · components/standings 잔존 영역.
+
 ## ✅ SUCCESS — review-code(heavy) dashboard/standings 컴포넌트 최초 전체 감사, buildStandings silent catch 정정 (cycle 2500, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달. cycle 2499 추천대로 review-code(heavy) 계속, accuracy 컴포넌트 계열 완결 후 dashboard/standings 디렉토리로 전환.
