@@ -1,3 +1,14 @@
+## ✅ SUCCESS — review-code(heavy) confidence label 부등호 불일치 + MLB waterfall NEUTRAL_FACTOR 정합 (cycle 2503, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/blocked). gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 24/25, info-arch 17/30, lotto 25/30). 직전 8 사이클 distinct=4(polish-ui/review-code/explore-idea/skill-evolution) — 2-chain lock 미충족. cycle 2502 retro 가 명시적으로 남긴 carry-over 2건을 그대로 처리(feedback_diagnose_existing_artifacts_first — carry-over 가리키는 파일·라인 우선 read).
+
+1. `factor-explanations.ts:397`(`marginPp <= OVERVIEW_CLOSE_PP`)과 `GameAnalysisProse.tsx:49` / `MlbGameOverview.tsx:27,67`(`marginPp < OVERVIEW_CLOSE_PP`) 사이 부등호 불일치 실측 확인 — marginPp 가 정확히 경계값(10)인 경기는 요약 문구("접전")와 신뢰도 라벨("소폭 우위")이 같은 페이지 안에서 모순 표시됨. 세 곳 모두 `<=` 로 통일해 factor-explanations.ts 를 source of truth 로 정합.
+2. `mlb-waterfall.ts`(computeMlbWaterfall)와 `MlbFactorWaterfallChart.tsx` 의 `0.5` 리터럴 4+1곳(cumulative 시작값, final bar contribution/base/direction, ReferenceLine x축) — KBO 원본 `FactorWaterfallChart.tsx` 는 동일 지점 전부 `NEUTRAL_FACTOR` 상수 사용, MLB twin 만 하드코딩(KBO/MLB twin divergence, silent drift family 재발). `NEUTRAL_FACTOR` 로 치환. 값 자체는 0.5 로 동일해 동작 변화 없음 — 유지보수성 정합만. 알고리즘 계수(line 49 elo home_elo_bonus multiplier, line 128 head_to_head 대칭 인코딩 상쇄항의 0.5)는 "중립 기준점"과 무관한 별개 의미라 미변경(과잉 일반화 회피).
+
+검증: tsc --noEmit clean(4 packages), eslint clean, vitest 전체 509 files/4250 tests pass, pre-push lint+type-check+version-sync-guard pass. PR 없이 direct main push (commit ebec9a0f).
+
+다음 사이클 추천 = review-code(heavy) 계속(carry-over 소진, 신규 미감사 대형 파일 탐색 필요) 또는 op-analysis(gap 24/25 임박 — 다음 사이클 자연 도달).
+
 ## ✅ SUCCESS — review-code(heavy) predictions/insights 컴포넌트 최초 전체 감사, waterfall 정규화 누락 + MLB historical-analog 크래시 위험 정정 (cycle 2502, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/blocked). gap trigger 4종 전부 미도달. cycle 2501(skill-evolution forced milestone) 추천대로 review-code(heavy) 계속, insights/predictions 컴포넌트 디렉토리(25+2파일, 최초 전체 감사)로 전환.
