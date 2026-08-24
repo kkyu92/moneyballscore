@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) MyPicksClient 내/AI 적중률 히어로 소표본 게이트 부재 정정 (cycle 2562, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2554-2561 distinct=3: review-code/operational-analysis/explore-idea). fix-incident negative(`gh run list` 전부 success/skipped). op-analysis(6/25)/info-arch(15/30)/lotto(24/30, 다음 토 picks 이미 존재)/design-system(DESIGN.md 1일 전 갱신) 모두 negative. explore-idea saturation 11/15 미도달. `최초 전체 감사` 전수 grep(66건) 대조 결과 analysis/accuracy/home/predictions/teams/matchup/mlb 주요 라우트 전부 이미 감사 완료 확인 — review-code 메인 후보 saturation 재확인. `apps/moneyball/src/components` 대형 파일 재조사로 신규 타겟 발굴.
+
+발견: `MyPicksClient.tsx`(435줄, 마지막 터치 cycle 1585 — 약 977 사이클 미터치, `최초 전체 감사` 이력 0건. 순수 함수 `buildPicksStats.ts` 만 cycle 2496 감사됨). "내 적중률"/"AI 적중률" 히어로 `StatCard` 가 `stats.myRate`/`aiRate` 를 표본 크기 무관 렌더링 — sub 라인에 원본 분수는 항상 표시되지만, 코드베이스 전역 컨벤션(`AccuracyHeaderCard` cycle 2555/`TeamMatchupCards` cycle 2499 등)이 요구하는 `SMALL_SAMPLE_N` 명시적 소표본 힌트(딤 처리 또는 인라인 라벨)는 부재 — SMALL_SAMPLE_N family 12번째 재발.
+
+실행: `SMALL_SAMPLE_N` import, `StatCard` 에 `smallSample` prop 추가 → `stats.resolved`/`stats.aiResolved` < `SMALL_SAMPLE_N` 시 인라인 "소표본(n<5)" 노출. 회귀 테스트 `silent-drift-wave-674.test.ts` 신규(4 assertion). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(532 files/4371 tests, +1) + `pnpm --filter moneyball lint` clean. VERSION/package.json(root+apps/moneyball) 0.5.62.127 + CHANGELOG 동기화. 단일 논리 단위 → PR 없이 직접 main commit(`0b64c2f3`)+push(R4), pre-push lint/type-check/version-sync-guard 통과.
+
+다음 사이클 추천 = review-code(heavy) 계속 — `apps/moneyball/src/components` 대형 파일 순회가 신규 타겟 발굴에 유효했음이 이번에 입증됐으므로(page-level 라우트는 saturated, component-level 은 미탐색 여지 있음) 동일 방법론으로 `MlbAccuracyDashboard.tsx`/`PredictionCard.tsx`/`FactorBreakdown.tsx` 등 미감사 대형 컴포넌트 순차 재탐색. 대안 = explore-idea(6th 소진 여부, 저가치 우려 지속).
+
+---
+
 ## ✅ SUCCESS — operational-analysis(heavy) MLB Elo backtest 재확인 n=896 (cycle 2561, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(status: approved 매칭 0건 — 전부 completed/archived/deferred). 2-chain lock 없음(직전8=2553-2560 distinct=3: review-code 6+operational-analysis 1+explore-idea 1). fix-incident 20+/20 gap 도달 → `gh run list --limit 10` 재확인, 전부 success/skipped(Vercel/CI Failure Dispatch 는 skipped=무실패) — negative. explore-idea saturation trigger 충족(직전15=2547-2560 중 review-code+fix-incident+polish-ui+info-arch=12/15)했으나 cycle 2554/2557/2559/2560 TODOS 가 반복적으로 "explore-idea 5연속 lite 소진" 명시 — 6th 재확인은 저가치 판단. op-analysis 자체 gap(25-cycle)은 5/25 미도달(마지막 발화 2556)이나, cycle 2558~2560 retro 3연속이 공통 권고한 "op-analysis heavy 새 metric 각도(CE cohort 대신)" 를 따라 gap-trigger 아닌 retro-recommendation 경로로 채택 — plan #25(MLB Elo Phase 3 게이트, cycle 2128 archive, n=747 CI 겹침으로 보류 확정)가 11일 경과 후 재검증 후보로 유효 확인.
