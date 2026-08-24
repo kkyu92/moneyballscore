@@ -1,3 +1,12 @@
+## v0.5.62.128 — 2026-08-25 (cycle 2563, polish-ui: 적중 표시 green→brand 토큰 정렬)
+
+### style(design): `mlb/analysis`(KBO+en 미러) + `DailyPredictionSummaryBar` 적중 표시 green→brand-500 정렬 — "적중=brand-500" family 재발
+
+- 진단: 2-chain lock 탐지(직전 8사이클 2555-2562 distinct=2: review-code 6 + operational-analysis 2) → 두 chain 이번 사이클 후보 제외. fix-incident negative(`gh run list` 전부 success/skipped). op-analysis/review-code lock 제외. design-system negative(DESIGN.md 2일 전 갱신, 4주 미달). info-arch(gap 16/30)/lotto(gap 25/30, 다음 토 picks 이미 존재) 모두 gap 미도달. explore-idea saturation 11/12 미도달(근접). 어떤 chain 도 trigger 미충족 → lock 규칙의 fallback `polish-ui` 강제 발화.
+- 발견: DESIGN.md Decisions Log(2026-05-05/05-20)가 확립한 "적중 표시 = brand-500, 오답/실패 = red" 컨벤션을 grep 대조한 결과 `app/mlb/analysis/page.tsx`(및 `en/mlb/analysis/page.tsx` 미러) "어제 결과" 리스트의 적중 상태 텍스트와 `DailyPredictionSummaryBar.tsx`(최고 자신감 픽 적중 마크 + 적중률 배지)가 Tailwind 기본 `green-*`(브랜드 그린 `#2d6b3f`과 분리된 별개 hue)을 그대로 사용 — cycle 50/65/456/744에 이은 동일 silent drift family 5번째 재발. lotto ball `green` 키(공식 로또 45번대 볼 색상)와 `AgentVoteCard`의 emerald(홈/원정/심판 5-역할 categorical 색상, 박빙-적중 purple 3rd-tier와 동일 "이분법 밖 허용" 패턴)는 의도된 사용으로 확인 후 제외.
+- 실행: 3개 파일 `text-green-600 dark:text-green-400` → `text-brand-600 dark:text-brand-400`, `bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400` → `bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400`. `/debug/*` 내부 전용 페이지는 CLAUDE.md 예외(사용자 비가시)로 범위 제외. DESIGN.md Decisions Log 신규 엔트리 추가. 회귀 테스트 `silent-drift-wave-675.test.ts` 신규(3 assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(533 files/4374 tests, +1) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.127 — 2026-08-25 (cycle 2562, review-code (heavy): `MyPicksClient` 내/AI 적중률 히어로 소표본 게이트 부재)
 
 ### fix(picks): `MyPicksClient.tsx` "내 적중률"/"AI 적중률" 히어로 스탯에 소표본(n<5) 인라인 표시 신규 — SMALL_SAMPLE_N family 12번째 재발

@@ -70,7 +70,7 @@ export function DailyPredictionSummaryBar({
             <span
               className={
                 topPick.isCorrect
-                  ? 'text-green-600 dark:text-green-400'
+                  ? 'text-brand-600 dark:text-brand-400'
                   : 'text-red-500 dark:text-red-400'
               }
               aria-label={topPick.isCorrect ? '적중' : '빗나감'}
@@ -86,7 +86,7 @@ export function DailyPredictionSummaryBar({
         <span
           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-medium ${
             accuracyPct >= ACCURACY_GOOD_PCT
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+              ? 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400'
               : accuracyPct >= ACCURACY_BASELINE_PCT
                 ? 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'

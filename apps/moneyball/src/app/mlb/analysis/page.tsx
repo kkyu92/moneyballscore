@@ -302,7 +302,7 @@ export default async function MlbAnalysisPage() {
                       <span
                         className={`text-xs font-medium shrink-0 ${
                           status === "correct"
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-brand-600 dark:text-brand-400"
                             : status === "wrong"
                               ? "text-red-500 dark:text-red-400"
                               : "text-brand-500"
