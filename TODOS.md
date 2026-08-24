@@ -1,3 +1,15 @@
+## 🔁 RETRO-ONLY — explore-idea(lite) 6th 소진 재확인, 신규 후보 0건 (cycle 2567, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(전부 non-approved). 2-chain lock 없음(직전 8사이클 2559-2566 distinct=3: review-code 6+operational-analysis 1+polish-ui 1). fix-incident gap 41/20 도달 → mandatory 점검: `pipeline_runs` 7일 166건 중 error 3건(`mlb_fancy_scrape` fangraphs HTTP 403, 8/19~21 3일 연속) 이후 8/22부터 자연 회복 지속, 재발 없음 — negative. op-analysis(gap 6/25)/info-arch(gap 20/30)/lotto(gap 29/30)/design-system(DESIGN.md 당일 갱신) 모두 gap 미도달. **explore-idea saturation trigger 12/15 충족**(직전 15사이클 2552-2566: review-code 12+polish-ui 1+operational-analysis 2 — cycle 2554 5th 소진 이후 cooldown N=10(2555-2564) 만료, 재활성 첫 발화).
+
+점검(lite quick-recheck, carry-over 명확 — heavy 재탐색 skip): (1) `find apps/moneyball/src/app -name page.tsx -mtime -14` — 신규 라우트 0건(최근 수정 파일 전부 기존 라우트 review-code/polish-ui 정정 흔적). (2) TODOS.md Next-Up(2026-04-25) 섹션 재확인 — 신규 리드 없음(기존 mcc alias 1-line 사용자 영역 항목만 잔존). (3) GH issue 0건. (4) approved plan 0/23 — 전부 completed/archived/tier4/blocked-on-data, 재개 조건 미충족 재확인.
+
+실행: 코드 변경 없음 — 5연속(cycle 2417/2477/2498/2530대/2554) 소진 확정에 이어 6th 재확인, 신규 후보 0건. cooldown 만료 후 saturation trigger 가 재점화됐지만 candidate pool 자체는 여전히 완전 소진 상태 유지 확인.
+
+다음 사이클 추천 = review-code(heavy, silent drift family sweep 계속 — SMALL_SAMPLE_N/shared-const-shadow family 둘 다 근접 소진, 잔존 대형 컴포넌트 순회) 또는 fix-incident/operational-analysis(gap 근접 시 자동 권장).
+
+---
+
 ## 🔁 RETRO-ONLY — review-code(heavy) shared const shadow 전수 grep + MIN_TEAM_PREDICTIONS family 재점검 (cycle 2566, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23, 2-chain lock 없음(직전8=2559-2565 distinct=3). fix-incident/op-analysis(5/25)/info-arch(19/30)/lotto(28/30)/design-system(당일 갱신) 전부 negative. explore-idea saturation 11/15 미도달. cycle 2565 retro 추천대로 review-code(heavy) 대형 컴포넌트 순회 계속.
