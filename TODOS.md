@@ -1,3 +1,17 @@
+## 🟡 PARTIAL — operational-analysis(lite) 25-cycle gap 재확인, 신규 검증 데이터 0건 (cycle 2530, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger op-analysis 정확히 25/25 도달(마지막 발화 cycle 2505) → lite 자동 권장. fix-incident 4/20, info-arch 13/30, lotto 22/30 미도달. 직전 8사이클 distinct=3, lock 없음. cycle 2529 carry-over 도 동일 추천.
+
+점검: 전용 weekly-review 스크립트 부재 → `predictions`×`games` join 직접 supabase 쿼리로 대체. W34(08-17~08-23) n=26, acc=46.2%(12/26), 요일별(08-18 40%/19 60%/20 60%/21 50%/22 0%/23 40%), CE(debate_version IS NULL) n=26/26=100%(nonCE 0건, CREDIT_EXHAUSTED 6th recurrence 불변), scoring_rule 전부 v1.8, confidence tier 전부 low.
+
+결과: 위 측정치가 cycle 2505 lite 측정치와 **완전 동일** — 최신 검증 game_date 도 2026-08-23(일)로 오늘(08-24 월) 신규 검증 경기 0건. 25 develop-cycle 이 같은 캘린더 하루 안에 소진돼 gap trigger의 "사이클 수"와 실제 KBO 경기 발생 속도가 디커플링되는 구조적 패턴 재확인 — 기존 CLAUDE.md velocity flatline 서술과 동일 계열이라 신규 lesson 아님, 가중치 조정 판단 불가(n=26 소표본 불변).
+
+실행: 코드 변경 없음(lite 제약 + chain stop 조건 "데이터 부족 → partial" 적용).
+
+다음 사이클 추천 = review-code(heavy, 잔존 미감사 후보 재탐색) — op-analysis gap 방금 리셋(0/25), fix-incident/lotto/info-arch 전부 미도달.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) buildMlbStandings.ts 소비부 그룹 감사, EN standings 매직넘버 parity 정정 (cycle 2529, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved status). gap trigger 4종 미도달(fix-incident 3/20, op-analysis 24/25, info-arch 12/30, lotto 21/30). 직전 8사이클 distinct=3(review-code/explore-idea/fix-incident) — 2-chain lock 없음. `gh run list` 최근 15건 실패 0건. cycle 2527/2528 carry-over `buildMlbStandings.ts` 잔존 후보 선정.
