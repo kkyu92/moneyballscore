@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { mlbShortTeamName, type MlbTeamCode } from "@moneyball/shared";
 import { fetchMlbHistoricalAnalogs } from "@/lib/mlb/fetchMlbHistoricalAnalogs";
+import { captureFallback } from "@/lib/observability/captureFallback";
 
 interface Props {
   homeTeam: MlbTeamCode;
@@ -22,7 +23,13 @@ export async function MlbHistoricalAnalogMatchup({
   asOfDate,
   locale = "ko",
 }: Props) {
-  const analogs = await fetchMlbHistoricalAnalogs(homeTeam, awayTeam, externalGameId, asOfDate);
+  // fetchMlbHistoricalAnalogs 는 assertSelectOk 관례상 throw (호출부가 catch 결정 — 회귀 가드
+  // 테스트 존재). 이 컴포넌트는 <MlbHistoricalAnalogMatchup /> 로 JSX 안 인라인 렌더(page.tsx
+  // Promise.all 밖)라 페이지 레벨 .catch() 체이닝 불가 — 여기서 흡수해야 일시적 Supabase 에러가
+  // MLB 게임 상세 페이지 전체를 무너뜨리지 않음 (KBO twin HistoricalAnalogMatchup 과 동일 degrade).
+  const analogs = await fetchMlbHistoricalAnalogs(homeTeam, awayTeam, externalGameId, asOfDate).catch(
+    (err) => captureFallback(err, [], { route: "MlbHistoricalAnalogMatchup", source: "fetchMlbHistoricalAnalogs" }),
+  );
   if (analogs.length === 0) return null;
 
   const homeName = mlbShortTeamName(homeTeam);

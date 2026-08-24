@@ -44,6 +44,11 @@ interface WaterfallBar {
 }
 
 // FACTOR_LABELS map 안 한국어 label 활용. neutral 시 0 contribution.
+// predictor.ts 정합: homeWinProb = NEUTRAL_FACTOR + Σ(factorValue-NEUTRAL_FACTOR)*weight / factorTotal
+// (weightedSum/factorTotal 을 NEUTRAL_FACTOR 기준으로 전개한 식). factorTotal 없이 누적하면
+// 실제 모델 대비 1/factorTotal(≈1.18x, 합계 0.85) 배 과소평가된 확률이 표시됨.
+const FACTOR_TOTAL: number = Object.values(DEFAULT_WEIGHTS).reduce((sum: number, w) => sum + w, 0);
+
 function computeWaterfall(factors: Record<string, number>): WaterfallBar[] {
   const bars: WaterfallBar[] = [];
   let cumulative = NEUTRAL_FACTOR; // neutral start
@@ -67,8 +72,8 @@ function computeWaterfall(factors: Record<string, number>): WaterfallBar[] {
     if (typeof rawValue !== "number" || !Number.isFinite(rawValue)) continue;
     if (weight === 0) continue; // shadow factor skip
 
-    // contribution = (rawValue - NEUTRAL_FACTOR) × weight (home favor 기준)
-    const contribution = (rawValue - NEUTRAL_FACTOR) * weight;
+    // contribution = (rawValue - NEUTRAL_FACTOR) × weight / FACTOR_TOTAL (home favor 기준)
+    const contribution = ((rawValue - NEUTRAL_FACTOR) * weight) / FACTOR_TOTAL;
     const direction: "home" | "away" | "neutral" =
       rawValue > NEUTRAL_HI ? "home" : rawValue < NEUTRAL_LO ? "away" : "neutral";
     const newCumulative = cumulative + contribution;
@@ -206,7 +211,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
         </ResponsiveContainer>
       </div>
       <p className="text-[10px] text-brand-400 dark:text-brand-500 mt-3 text-center">
-        {awayName} @ {homeName} · 가중치 합 = 1.0 / 홈 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}pp 별도 / 최종 [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
+        {awayName} @ {homeName} · 가중치 합 {(FACTOR_TOTAL * 100).toFixed(0)}% (정규화 적용) / 홈 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}pp 별도 / 최종 [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
       </p>
     </section>
   );
