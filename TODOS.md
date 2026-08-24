@@ -1,3 +1,13 @@
+## 🔍 RETRO-ONLY — review-code(heavy) buildPicksStats.ts 신규 감사, 버그 없음 확인 (cycle 2458, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 10/25, info-arch 3/30, lotto 18/30). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation trigger 충족(12/15)이나 cycle 2457이 방금 발화(이번 사이클엔 review-code 재순환). cycle 2456이 "review-code 미감사 후보 pool 고갈 중" 경고했으나 미감사 lib 파일 재조사 결과 `buildPicksStats.ts`(410줄, picks 기능, CHANGELOG 언급 0회) 발견 — 신규 타겟으로 선정.
+
+감사 범위: `buildPickEntries`/`buildPicksStats`/`buildWeeklyStats`/`buildWeeklyHistory`/`buildFactorAgreement` 전체 + 소비 컴포넌트(`MyPicksClient.tsx`).
+
+결론: KBO/MLB 이중 id 매칭(cycle 2244 이미 가드), KST 주간 경계(`getKSTWeekRange`, cycle 457 이미 단일 source 통합), WAR/SFR=0 데이터 갭(predictor.ts 가 이미 0.5 neutral 가드, cycle 1904 wave-533 — 본 파일이 읽는 factor 값 자체가 이미 안전), streak/trend 계산 전부 정상. 별도 테스트 파일 2개(`buildPicksStats.test.ts` + `buildFactorAgreement.test.ts`) 커버리지 충분. 신규 버그 0건, 코드 변경 없음.
+
+다음 사이클 추천 = operational-analysis(10/25, gap 40% 경과) 또는 review-code(heavy, 미감사 후보 잔존 — reviews/mlb-shared.ts 409줄 / dashboard/compareModels.ts 299줄 / standings/buildTeamAccuracy.ts 261줄 등).
+
 ## 🟢 SUCCESS — explore-idea(heavy) MLB 확정 선발투수 이름 game-detail 표시 (cycle 2457, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 9/25, info-arch 2/30, lotto 17/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2454~2456 review-code 3연속 retro-only 로 감사 pool 소진 확인, cycle 2456 retro 명시 추천(explore-idea/op-analysis) 채택.
