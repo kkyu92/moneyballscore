@@ -6739,3 +6739,13 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: 기존 computeCurrentKSTYear export 재사용으로 두 파일 교체(신규 함수/테스트 불필요, 기존 computeSeasonIsOngoing.test.ts 커버). buildMlbTeamProfile.ts 의 getFullYear()(MLB season stats fallback, 함수 스코프+오프시즌 경계 저영향)는 범위 밖 유지 재-carry-over. pnpm type-check(4 packages)/test(515f/4281t)/lint clean. 단일 논리 단위 → PR 없이 main 직접 commit+push(v0.5.62.110, 34e782b1).
 
 다음 사이클 추천 = review-code(heavy) buildMlbTeamProfile.ts getFullYear() 재검토(함수 스코프 재평가 후 실제 영향 재확인) 또는 diversity(explore-idea, 최근 15 중 saturation 근접 재확인 필요) 또는 lotto(gap 23/30 근접).
+
+## ✅ SUCCESS — review-code(heavy) buildMlbTeamProfile.ts season 연도 KST 경계 잔여 정정 (cycle 2536, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 10/20, op-analysis 6/25, info-arch 19/30, lotto 28/30). 직전 8사이클 distinct=3(review-code/operational-analysis/explore-idea), lock 없음. explore-idea saturation 12/15 충족되나 cycle 2535 가 방금 heavy 로 실제 기능(홈/원정 성적 컬럼) ship 완료라 재선정 skip. cycle 2531 retro carry-over("buildMlbTeamProfile.ts getFullYear() 함수 스코프+오프시즌 경계 저영향, 범위 밖 유지 재검토") 재평가로 선정.
+
+발견: `buildMlbTeamProfile.ts` 199행 `new Date().getFullYear()` 는 KST_OFFSET_MS family (cycle 2514/2531 정정분) 와 동일 패턴 — UTC 기준이라 KST 12/31 15:00~23:59 UTC 구간 연도 하루 어긋남. mlb_team_stats.season 조회에 영향.
+
+실행: `computeCurrentKSTYear()` (seasons/buildSeasonSummary.ts export) 재사용으로 교체 — 신규 함수/테스트 불필요. 오프시즌 경계엔 해당 조회 결과가 거의 항상 null 이라 실사용자 영향 낮으나 family 일관성 + 향후 시즌 데이터 조기 적재 시 위험 제거 목적으로 정정. pnpm type-check(4 packages)/test(515f/4292t)/lint clean. 단일 논리 단위 → PR 없이 main 직접 commit+push(55776525).
+
+다음 사이클 추천 = lotto(gap 29/30, 다음 사이클 도달 예상) 또는 review-code(heavy, 잔존 미감사 대형 파일 재탐색) 또는 diversity(explore-idea, saturation 유지 시 재확인).
