@@ -1,3 +1,15 @@
+## ✅ SUCCESS — polish-ui (2-chain lock fallback) 적중 표시 green→brand 토큰 정렬 (cycle 2563, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. **2-chain lock 발동** — 직전 8사이클(2555-2562) distinct chain=2(review-code 6 + operational-analysis 2), 룰 첫 실측 발동. lock 대상 2개 제외 후 나머지 chain 전부 trigger 미충족(fix-incident negative/design-system negative/info-arch gap 16·30/lotto gap 25·30/explore-idea saturation 11·12 근접 미도달) → lock fallback 규칙에 따라 polish-ui 강제 발화.
+
+발견: DESIGN.md Decisions Log "적중 표시 = brand-500"(cycle 50/65/456/744 family) 컨벤션을 green/emerald 전수 grep 대조 — `app/mlb/analysis/page.tsx`(+en 미러) 어제 결과 리스트 + `DailyPredictionSummaryBar.tsx` 최고 자신감 픽 마크·적중률 배지가 Tailwind 기본 green-* 잔존 확인(family 5번째 재발). lotto ball green(공식 45번대 볼 색상)과 `AgentVoteCard` emerald(홈/원정/심판 5-역할 categorical, 박빙-적중 purple 3rd-tier와 동일 "이분법 밖 허용" 패턴)는 의도된 사용으로 확인 후 범위 제외. `/debug/*`도 사용자 비가시 예외로 범위 제외.
+
+실행: 3개 파일 green-*→brand-* 정렬(text-green-600/400→text-brand-600/400, bg-green-50/900→bg-brand-50/900 등). DESIGN.md Decisions Log 신규 엔트리. 회귀 테스트 `silent-drift-wave-675.test.ts` 신규(3 assertion). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(533 files/4374 tests, +1) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(`fd916b2e`)+push(R4), pre-push lint/type-check/version-sync-guard 통과.
+
+다음 사이클 추천 = review-code(heavy) 또는 explore-idea. 2-chain lock 은 이번 사이클로 해소(직전 8사이클에 polish-ui 편입) — 다음 사이클부터 review-code/op-analysis 재개 가능. explore-idea saturation 11/12 근접 유지 중이라 다음 사이클 12/15 도달 시 자연 발화 가능.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) MyPicksClient 내/AI 적중률 히어로 소표본 게이트 부재 정정 (cycle 2562, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2554-2561 distinct=3: review-code/operational-analysis/explore-idea). fix-incident negative(`gh run list` 전부 success/skipped). op-analysis(6/25)/info-arch(15/30)/lotto(24/30, 다음 토 picks 이미 존재)/design-system(DESIGN.md 1일 전 갱신) 모두 negative. explore-idea saturation 11/15 미도달. `최초 전체 감사` 전수 grep(66건) 대조 결과 analysis/accuracy/home/predictions/teams/matchup/mlb 주요 라우트 전부 이미 감사 완료 확인 — review-code 메인 후보 saturation 재확인. `apps/moneyball/src/components` 대형 파일 재조사로 신규 타겟 발굴.
