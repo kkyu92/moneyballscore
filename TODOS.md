@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy) methodology/page.tsx 최초 전체 감사, Sunday cap 신뢰도 raw decimal → % 표시 정정 (cycle 2519, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/info-arch). gap trigger 미도달(fix-incident 13/20, op-analysis 14/25, lotto 11/30, info-arch 2/30). `methodology/page.tsx`(515줄) — 다수 ad-hoc silent-drift 수정(wave-246/247/262/266 등)은 있었으나 line-by-line 전체 감사 이력 0건, 최근 ad-hoc fix 는 cycle 2266(253 사이클 전) — 신선 타겟으로 선정.
+
+확정 이슈: `VERSION_HISTORY` v1.8 항목 문구 "Sunday cap 도입 — 일요일 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 강등" 이 raw decimal(0.55/0.45)을 % 기호 없이 그대로 렌더링 — "일요일 0.55 초과 시 0.45 강등" 처럼 사용자에게 의미 불명확하게 노출. 동일 패턴을 about/page.tsx(FAQ) + guide/page.tsx(티어 설명 + Sunday cap 설명, 3곳)에서도 발견 — 총 3페이지 5 occurrence. `/accuracy` 페이지는 이미 `Math.round(SUNDAY_CAP_CONFIDENCE * 100)}%` 로 정상 포맷 중이었어서 나머지 페이지들의 누락이 두드러짐. WINNER_PROB_LEAN_PCT/WINNER_PROB_CONFIDENT_PCT 는 기존에 registry constant 존재했으나 SUNDAY_CAP_CONFIDENCE 쪽엔 `_PCT` 파생 상수가 없어 3페이지 모두 raw decimal 노출된 것이 근본 원인.
+
+fix: `SUNDAY_CAP_CONFIDENCE_PCT` registry constant 신규 추가 (`WINNER_PROB_LEAN_PCT` 패턴 동일) + about/guide/methodology 3페이지 모두 `*_PCT` constant + `%` 로 교체 + 회귀 테스트(`packages/shared/src/index.test.ts`) 3 assertions 추가.
+
+검증: packages/shared 218 tests, apps/moneyball 514 files/4277 tests 전체 pass, tsc --noEmit clean, eslint clean, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit 004638aa).
+
+**교훈**: registry constant 존재 자체가 drift 방지를 보장하지 않음 — display 포맷(raw decimal vs %) 불일치도 별도 silent drift 하위 유형. `_PCT` 파생 상수가 일부 constant 에만 있고 다른 유사 constant 엔 없는 비대칭도 새로운 그룹 audit 신호.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사 큰 파일: `en/mlb/matchup 페이지` 596줄 — ad-hoc parity fix 다수, `en/mlb/reviews/monthly` 500줄, `players/[id]` 323줄 + EN 미러) 또는 operational-analysis(gap 14/25, cycle 2530 경 도달 예상) 또는 lotto(gap 11/30).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) en/mlb/team/[code] 최초 전체 감사, KO 3페이지 jsonLd inLanguage 누락 정정 (cycle 2518, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 해소(직전 8사이클 distinct=3). gap trigger 미도달(fix-incident 12/20, op-analysis 13/25, lotto 10/30). cycle 2516 carry-over 후보 리스트(`debug/pipeline`/`debug/factor-correlation`/`teams/[code]`/`search/page`) 전부 STALE — 이미 각각 cycle 2269/2272+2485/2470/2261에서 전체 감사 완료된 상태였음. `find + wc -l` 전체 재스캔으로 신선 타겟 발굴: `en/mlb/team/[code]/page.tsx`(602줄, 전체 감사 이력 0건, ad-hoc parity fix 2건만 존재).
