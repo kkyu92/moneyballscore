@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  CE_DETECT_THRESHOLD,
-  CE_MIN_SAMPLES,
   classifyWinnerProb,
   ELO_DISPLAY_NEUTRAL_BAND,
   ELO_NEUTRAL,
@@ -95,6 +93,7 @@ import {
   getBestPickOfWeek,
   getUpsetPickOfMonth,
   getSeasonH2HData,
+  detectSimplifiedMode,
 } from './analysis-data';
 
 export const metadata: Metadata = {
@@ -183,7 +182,7 @@ function renderConvergenceHomeAwayBadgeRow(
 export default async function AnalysisIndexPage() {
   const currentMonth = getCurrentMonth();
   const currentWeek = getCurrentWeek();
-  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord] = await Promise.all([
+  const [todayData, yesterdayGames, thisWeekPreviousGames, thisWeekRemainingGames, weeklyStats, monthlyStats, bestPickOfWeek, bestPickOfMonth, upsetPickOfMonth, teamStrengthRows, standingsRows, h2hMap, recentConvergenceRecord, recentStrongConvergenceRecord, monthlyStrongConvergenceRecord, seasonStrongConvergenceRecord, convergenceStreak, convergenceBestStreak, convergenceTeamStats, convergenceHomeAwaySplit, seasonCompleteConvergenceRecord, completeConvergenceStreak, completeBestStreak, monthlyCompleteConvergenceRecord, completeTeamStats, completeHomeAwaySplit, recentCompleteConvergenceRecord, simplifiedMode] = await Promise.all([
     getTodayAnalysisData(),
     getYesterdayGames(),
     getThisWeekPreviousGames(),
@@ -224,6 +223,9 @@ export default async function AnalysisIndexPage() {
     getConvergencePickHomeAwaySplit(FACTOR_PICK_COMPLETE),
     // wave-575: 완전수렴 픽 직전 N경기 성적 — 강수렴 wave-544 패턴 동기 (FACTOR_PICK_COMPLETE 임계, 날짜 무관 rolling)
     getRecentConvergencePickRecord(CONVERGENCE_RECORD_RECENT_LIMIT, FACTOR_PICK_COMPLETE),
+    // cycle 2534 fix: CREDIT_EXHAUSTED 감지 — todayData.games(오늘 경기만) 평균이 아닌
+    // about/predictions 페이지와 동일한 "날짜 무관 최근 예측 10건" 기준 (KBO 휴식일 배너 누락 정정)
+    detectSimplifiedMode(),
   ]);
 
   // wave-325: 현재 KBO 순위 맵
@@ -337,10 +339,6 @@ export default async function AnalysisIndexPage() {
 
   // wave-405: 이번 주 팩터 수렴 픽 성적 — 종료된 수렴 경기 승/패 집계 (wave-568: computeWeeklyConvergenceRecord 통합)
   const weeklyConvergenceRecord = computeWeeklyConvergenceRecord(thisWeekPreviousGames, FACTOR_PICK_MIN_FACTORS);
-
-  const simplifiedMode =
-    todayData.games.length >= CE_MIN_SAMPLES &&
-    todayData.games.reduce((s, g) => s + g.confidence, 0) / todayData.games.length <= CE_DETECT_THRESHOLD;
 
   const hasAnyModelPrediction = thisWeekRemainingGames.some((g) => g.modelHomeWinProb != null);
 

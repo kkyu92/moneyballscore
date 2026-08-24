@@ -3,6 +3,8 @@ import {
   ANALYSIS_TOP_FACTORS_LIMIT,
   ANALYSIS_UPCOMING_LIMIT,
   assertSelectOk,
+  CE_DETECT_THRESHOLD,
+  CE_MIN_SAMPLES,
   ELO_DIVIDER,
   ELO_NEUTRAL,
   ELO_NEUTRAL_WIN_PCT,
@@ -939,4 +941,27 @@ export async function getSeasonH2HData(): Promise<Map<string, Record<string, num
   }
 
   return pairMap;
+}
+
+// cycle 2534 fix: /analysis 의 simplifiedMode 는 todayData.games (오늘 경기만, 휴식일엔 0건)
+// 평균 confidence 로 CE 를 감지해 KBO 휴식일(월요일 등)엔 CE 진행 중이어도 배너가 절대 뜨지
+// 않던 silent drift. about/page.tsx detectSimplifiedMode + predictions/page.tsx recentConfs 와
+// 동일하게 "날짜 무관 최근 예측 N건" 기준으로 통일 — 세 페이지 모두 같은 날 같은 판정이 나와야 함.
+export async function detectSimplifiedMode(): Promise<boolean> {
+  const supabase = await createClient();
+  const result = (await supabase
+    .from('predictions')
+    .select('confidence')
+    .eq('prediction_type', 'pre_game')
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
+    .order('id', { ascending: false })
+    .limit(10)) as SelectResult<Array<{ confidence: number | null }>>;
+  const { data } = assertSelectOk(result, 'analysis detectSimplifiedMode');
+  const recentConfs = (data ?? [])
+    .map((r) => r.confidence)
+    .filter((c): c is number => c != null);
+  return (
+    recentConfs.length >= CE_MIN_SAMPLES &&
+    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= CE_DETECT_THRESHOLD
+  );
 }

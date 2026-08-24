@@ -14,16 +14,31 @@ describe('silent drift wave 307 — CE detection constants (cycle 1638)', () => 
     expect(CE_MIN_SAMPLES).toBe(3);
   });
 
-  it('analysis/page.tsx imports CE_DETECT_THRESHOLD/CE_MIN_SAMPLES from shared (no hardcoded 0.32)', () => {
+  // cycle 2534: analysis/page.tsx 자체 todayData.games 평균 계산 → analysis-data.ts
+  // detectSimplifiedMode() (about/predictions 와 동일 "날짜 무관 최근 예측 10건" 기준) 로 이전.
+  // CE_DETECT_THRESHOLD/CE_MIN_SAMPLES 는 이제 analysis-data.ts 가 source — page.tsx 는
+  // detectSimplifiedMode import + simplifiedMode 배너 렌더만 담당.
+  it('analysis/page.tsx는 detectSimplifiedMode를 통해 simplifiedMode를 사용 (no hardcoded 0.32, no todayData.games 자체 평균)', () => {
     const src = readFileSync(
       join(ROOT, 'src/app/analysis/page.tsx'),
+      'utf8',
+    );
+    expect(src).toContain('detectSimplifiedMode');
+    expect(src).toContain('simplifiedMode');
+    expect(src).not.toMatch(/<=\s*0\.32/);
+    expect(src).not.toMatch(/>=\s*3\s*&&\s*\n.*reduce.*confidence/s);
+  });
+
+  it('analysis-data.ts의 detectSimplifiedMode가 CE_DETECT_THRESHOLD/CE_MIN_SAMPLES를 shared에서 import (no hardcoded 0.32)', () => {
+    const src = readFileSync(
+      join(ROOT, 'src/app/analysis/analysis-data.ts'),
       'utf8',
     );
     expect(src).toContain('CE_DETECT_THRESHOLD');
     expect(src).toContain('CE_MIN_SAMPLES');
     expect(src).toContain('@moneyball/shared');
+    expect(src).toContain('export async function detectSimplifiedMode');
     expect(src).not.toMatch(/<=\s*0\.32/);
-    expect(src).not.toMatch(/>=\s*3\s*&&\s*\n.*reduce.*confidence/s);
   });
 
   it('predictions/page.tsx imports CE_DETECT_THRESHOLD/CE_MIN_SAMPLES from shared (no hardcoded 0.32)', () => {
