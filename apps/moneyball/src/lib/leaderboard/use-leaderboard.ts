@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
+import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
 
 const DEVICE_KEY = 'mb_device_id_v1';
 const NICKNAME_KEY = 'mb_nickname_v1';
@@ -128,7 +129,7 @@ export function useLeaderboard(): LeaderboardState {
   const join = useCallback(
     async (name: string) => {
       const trimmed = name.trim();
-      if (trimmed.length < 2 || trimmed.length > 12) return;
+      if (trimmed.length < NICKNAME_MIN_CHARS || trimmed.length > NICKNAME_MAX_CHARS) return;
       saveNickname(trimmed);
       setNickname(trimmed);
       setSyncState('syncing');

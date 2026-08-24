@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
 
 interface Props {
   onJoin: (nickname: string) => void;
@@ -19,11 +20,12 @@ export function LeaderboardJoinModal({ onJoin, onClose, loading }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = value.trim();
-    if (trimmed.length < 2 || trimmed.length > 12) return;
+    if (trimmed.length < NICKNAME_MIN_CHARS || trimmed.length > NICKNAME_MAX_CHARS) return;
     onJoin(trimmed);
   };
 
-  const isValid = value.trim().length >= 2 && value.trim().length <= 12;
+  const isValid =
+    value.trim().length >= NICKNAME_MIN_CHARS && value.trim().length <= NICKNAME_MAX_CHARS;
 
   return (
     <div
@@ -46,14 +48,14 @@ export function LeaderboardJoinModal({ onJoin, onClose, loading }: Props) {
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="닉네임 (2~12자)"
-            maxLength={12}
+            placeholder={`닉네임 (${NICKNAME_MIN_CHARS}~${NICKNAME_MAX_CHARS}자)`}
+            maxLength={NICKNAME_MAX_CHARS}
             className="w-full border border-gray-200 dark:border-[var(--color-border)] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[var(--color-surface)] focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            {value.trim().length}/12자
-            {value.trim().length > 0 && value.trim().length < 2 && (
-              <span className="text-error ml-1">최소 2자 필요</span>
+            {value.trim().length}/{NICKNAME_MAX_CHARS}자
+            {value.trim().length > 0 && value.trim().length < NICKNAME_MIN_CHARS && (
+              <span className="text-error ml-1">최소 {NICKNAME_MIN_CHARS}자 필요</span>
             )}
           </p>
           <div className="flex gap-2">
