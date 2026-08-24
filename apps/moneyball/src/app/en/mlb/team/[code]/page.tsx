@@ -18,6 +18,7 @@ import {
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 import { buildMlbTeamProfile } from "@/lib/mlb/buildMlbTeamProfile";
 import { buildMlbTeamEloTrend } from "@/lib/mlb/buildMlbTeamEloTrend";
+import { buildMlbTeamUpcoming } from "@/lib/mlb/buildMlbTeamUpcoming";
 import { mlbPairsForTeam } from "@/lib/mlb/mlbCanonicalPair";
 import { getMlbConvergencePickTeamStats } from "@/lib/analysis/convergenceRecord";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -108,6 +109,9 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
 
   const eloTrend = await buildMlbTeamEloTrend(code).catch((err) =>
     captureFallback(err, { points: [] }, { route: "/en/mlb/team/[code]", source: "buildMlbTeamEloTrend" }),
+  );
+  const upcoming = await buildMlbTeamUpcoming(code).catch((err) =>
+    captureFallback(err, [], { route: "/en/mlb/team/[code]", source: "buildMlbTeamUpcoming" }),
   );
 
   // wave-625: 팀별 강수렴/완전수렴 픽 성적 — matchup 페이지의 두 팀 한정 집계와 별개로
@@ -355,6 +359,84 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
             Season Elo change by game · dotted line = league average
           </p>
           <MlbTeamEloChart points={eloTrend.points} teamCode={code} locale="en" />
+        </section>
+      )}
+
+      {upcoming.length > 0 && (
+        <section
+          aria-labelledby="mlb-team-upcoming-title"
+          className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <h2 id="mlb-team-upcoming-title" className="text-lg font-bold">
+              Upcoming Games · Predictions
+            </h2>
+            <Link
+              href="/en/mlb/predictions"
+              className="text-xs text-brand-500 hover:text-brand-600 transition-colors"
+            >
+              All Predictions →
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
+                  <th className="py-2 pr-3 font-medium">Date</th>
+                  <th className="py-2 pr-3 font-medium">Opponent</th>
+                  <th className="py-2 pr-3 font-medium text-right">Home/Away</th>
+                  <th className="py-2 font-medium text-right">Model Pick</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcoming.map((u) => {
+                  const ourWinProb =
+                    u.homeWinProb != null
+                      ? u.isHome
+                        ? u.homeWinProb
+                        : 1 - u.homeWinProb
+                      : null;
+                  const probPct =
+                    ourWinProb != null ? Math.round(ourWinProb * 100) : null;
+                  const slugA = u.isHome ? code : (u.opponentCode ?? "?");
+                  const slugB = u.isHome ? (u.opponentCode ?? "?") : code;
+                  const detailHref = `/en/mlb/games/${u.gameDate}/${slugA}-vs-${slugB}`;
+                  return (
+                    <tr
+                      key={u.gameId}
+                      className="border-b border-gray-100 dark:border-[var(--color-border)]"
+                    >
+                      <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
+                        <Link href={detailHref} className="hover:text-brand-500">
+                          {u.gameDate}
+                        </Link>
+                      </td>
+                      <td className="py-2 pr-3">
+                        {u.opponentCode ? (
+                          <Link href={`/en/mlb/team/${u.opponentCode}`} className="hover:text-brand-500">
+                            {mlbShortTeamName(u.opponentCode)}
+                          </Link>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="py-2 pr-3 text-xs text-right text-gray-600 dark:text-gray-300">
+                        {u.isHome ? "Home" : "Away"}
+                      </td>
+                      <td className="py-2 text-right text-xs text-gray-700 dark:text-gray-200">
+                        {u.predictedAsWinner ? "This team" : "Opponent"}
+                        {probPct != null && (
+                          <span className="text-gray-400 dark:text-gray-500 ml-1">
+                            ({probPct}%)
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 

@@ -1,3 +1,12 @@
+## v0.5.62.101 — 2026-08-24 (cycle 2475, review-code (heavy): mlb/team/[code] KBO parity gap — 예정 경기 · 예측 섹션 부재 해소)
+
+### feat(mlb): `/mlb/team/[code]` (KO+EN) 에 KBO `/teams/[code]` 대응 "예정 경기 · 예측" 섹션이 부재했던 것을 신규 추가
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 11/20, op-analysis 4/25, info-arch 20/30, lotto self-heal 최신 no-op). 직전 8 사이클 distinct=3(review-code/explore-idea/operational-analysis) — 2-chain lock 미충족. 직전 3 사이클 연속 review-code(heavy) success streak(2472~2474, i18n leak + cross-pipeline 오염 + MLB matchup parity gap) — dominance-positive streak(cycle 135 룰) 인정, 같은 family 계속 탐색. cycle 2474 가 matchup 페이지의 "다음 경기 예측" parity gap 을 해소한 직후라, 동일 family(팀 단위 예정 경기) 존재 여부를 `teams/[code]` vs `mlb/team/[code]` 대조로 재확인.
+- 발견: KBO `teams/[code]/page.tsx` 는 `buildTeamUpcoming.ts` 로 해당 팀의 예정 경기(최대 7경기) + AI 사전예측을 "예정 경기 · 예측" 섹션으로 노출하지만, MLB `mlb/team/[code]`(KO+EN, 각각 cycle 2087/2097/2112/2268/2418 에 이미 감사됐음에도 이 gap 은 그동안 미발견) 에는 이 섹션이 처음부터 부재 — cycle 2474 matchup gap 과 동일 family(팀/매치업 단위 "예정 경기+예측" 기능이 MLB 확장 시(plan #24) 통째로 누락).
+- 실행: `buildMlbTeamUpcoming.ts` 신규(`mlb_schedule`(status='scheduled', game_date ≥ 오늘 KST, 팀 코드 home/away or) + `predictions`(prediction_type='pre_game', league='mlb', scoring_rule ∈ MLB_PRODUCTION_COHORT_RULES) 조인, KBO `TEAM_UPCOMING_LIMIT`(7) 재사용, `deriveMlbOutcome` 으로 home_win_prob 기반 predictedAsWinner/confidence derive — `buildMlbMatchupUpcoming.ts`(cycle 2474) 와 동일 컨벤션). KO+EN 팀 페이지 양쪽 Elo 추이 섹션 직후에 KBO 와 동일 UI(테이블: 일자/상대/홈-원정/모델예측) 삽입. 신규 테스트 4건(빈 배열/홈 예측/원정 예측 반전/예측 부재 시 명시적 fallback).
+- `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests 전량 pass) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(feat, R4).
+
 ## v0.5.62.100 — 2026-08-24 (cycle 2474, review-code (heavy): mlb/matchup/[teamA]/[teamB] KBO parity gap — 다음 경기 예측 섹션 부재 해소)
 
 ### feat(mlb): `/mlb/matchup/[teamA]/[teamB]` (KO+EN) 에 KBO `/matchup/[teamA]/[teamB]` 대응 "다음 경기 예측" 섹션이 처음부터 부재했던 것을 신규 추가
