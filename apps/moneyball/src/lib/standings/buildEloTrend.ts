@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   assertSelectOk,
+  KBO_SEASON_START_DATE,
   KBO_TEAMS,
   PRODUCTION_COHORT_RULES,
   type TeamCode,
@@ -27,7 +28,6 @@ interface EloGameRow {
 }
 
 const TEAM_CODES = Object.keys(KBO_TEAMS) as TeamCode[];
-const SEASON_START = "2026-01-01";
 
 export async function buildEloTrend(): Promise<EloTrendData> {
   const supabase = await createClient();
@@ -40,7 +40,7 @@ export async function buildEloTrend(): Promise<EloTrendData> {
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(home_elo, away_elo)
     `)
-    .gte("game_date", SEASON_START)
+    .gte("game_date", KBO_SEASON_START_DATE)
     .eq("predictions.prediction_type", "pre_game")
     .in("predictions.scoring_rule", [...PRODUCTION_COHORT_RULES])
     .not("predictions.home_elo", "is", null)
