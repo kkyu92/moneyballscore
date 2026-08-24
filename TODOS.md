@@ -6483,3 +6483,15 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 검증: `pnpm type-check`(4 packages clean) + `pnpm test`(512 files/4273 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.108, df407468).
 
 다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사: `about/page.tsx` 427줄, 또는 module-scope `getFullYear()` 사용처 sweep — `seasons/page.tsx`/`not-found.tsx`/`buildMlbTeamProfile.ts`/`buildBatterLeaderboard.ts`/`sitemap.ts`/`snapshot-pitchers`/`sync-batter-stats`) 또는 explore-idea(다양성 회복, 최근 20 cycle 중 2회로 저조) 또는 op-analysis(gap 9/25, 아직 저신선도).
+
+## 🔵 RETRO-ONLY — explore-idea(heavy) 2-chain lock 해소, KBO/MLB debate parity 의도된 설계 확인 (cycle 2515, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 9/20, op-analysis 10/25, info-arch 29/30, lotto 7/30). 직전 8 사이클(2507-2514) distinct=2(review-code+lotto) — **2-chain alternation lock 발동**, review-code(6연속 heavy streak)와 lotto 이번 cycle 후보 제외. 남은 pool 중 trigger 최강(explore-idea saturation 12/15 충족)을 lock 해소 알고리즘대로 채택.
+
+조사: KBO game-detail(`analysis/game/[id]/page.tsx`)에는 있고 MLB game-detail(`mlb/games/[date]/[slug]/page.tsx`)에는 없는 컴포넌트(`AgentArgumentBox`/`DebateTimeline`/`JudgeVerdictPanel`/`PostviewPanel`/`GameAnalysisProse`)를 신규 gap 후보로 조사. 결과: MLB는 `mlb_shadow_train_log` 기반 순수 quant shadow 모델이라 애초에 LLM 에이전트 debate/judge 자체를 실행하지 않음(MLB page는 `debate_version` 필드를 조회하지만 label 표시용일 뿐) — 의도된 아키텍처 차이, autonomous gap 아님.
+
+메타: cycle 2417/2477/2486에 이은 4번째 명시적 "explore-idea heavy no autonomous candidate" 결론. `memory: meta-pattern explore-idea-source-exhaustion` 커밋으로 4-cycle 누적 evidence 별도 dispatch (commit `73daf727`).
+
+실행: 코드 변경 없음 — 조사 완료, 신규 issue 0건.
+
+다음 사이클 추천 = review-code(heavy) 계속(`about/page.tsx` 427줄 미감사, 2-chain lock 재평가 필요) 또는 info-architecture-review(gap 30/30 도달 예상).
