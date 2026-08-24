@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — explore-idea(heavy) plan#29/MLB player Statcast/parity 재확인, 신규 idea 0건 (cycle 2494, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4, plan#29만 spec_only_deferred). 직전 8 사이클 distinct=2(info-architecture-review/review-code) — 2-chain lock 발동, 둘 다 제외. 직전 15 사이클 14/15(review-code+fix-incident+polish-ui+info-arch) — improvement saturation trigger 충족 → explore-idea 자연 발화. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 15/25, lotto 16/30). `gh run list` 최근 8건 전부 success/in_progress, fail 0건.
+
+탐색: (1) plan#29(로그인+커뮤니티 ETA 재평가) 재평가 트리거 3종(포스트시즌 접근/트래픽 두자릿수/사용자 발화) 전부 미충족 — 오늘(8/24) KBO 포스트시즌 아직 미도달, 트래픽 재측정은 plan 자체 권고대로 skip(1일 경과로 변화 극히 낮음, 반복 재측정 비용 낭비 방지). Tier4 보류 유지. (2) `mlb/players/[id]`/`en/mlb/players/[id]` 선수별 Statcast 개별 layer — ETA가 "MLB 풀 인제스트 결정(사용자 영역)" 대기 Tier4, 자율 착수 불가. (3) EN/KO parity — cycle 2477 이미 players/leaderboard/picks/search/related-links 전 영역 탐색 완료, en 라우트는 MLB 전용 의도적 스코프. (4) RSS feed(`app/feed`)/PWA manifest(`app/manifest.ts`)/sitemap 등 표준 기능 이미 전부 존재.
+
+결론: 신규 actionable idea 0건 — 코드 변경 없음, retro-only.
+
+다음 사이클 추천 = operational-analysis(lite, gap 15/25 근접) 또는 lotto(gap 16/30 근접) 또는 review-code(heavy, 2-chain lock 은 직전8 재계산 시 해제 가능).
+
 ## 🟢 SUCCESS — review-code(heavy) factor-explanations.ts 최초 전체 감사 — marginPp 하드코딩 * 200 / 0.5 정정 (cycle 2493, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 9/20, op-analysis 14/25, info-arch 7/30, lotto 15/30). 직전 8 사이클 distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. 2492 추천대로 review-code(heavy) 계속, 잔존 미감사 대형 파일 중 `factor-explanations.ts`(416줄, `/analysis/game/[id]` 팩터 해설·요약 소스, review-code 이력 0건) 선정.
