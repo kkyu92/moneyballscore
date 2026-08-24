@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) predictions/[date]/page.tsx CE 배너 감지 기준 통일 (cycle 2539, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 13/20, op-analysis 9/25, info-arch 22/30, lotto 1/30 — 방금 fire). 직전 8사이클 distinct=3(review-code/explore-idea/lotto) — 2-chain lock 없음. explore-idea saturation 미충족(11/15 <12). cycle 2538 retro carry-over(잔존 대형 파일 `teams/[code]/page.tsx` 622줄/`predictions/[date]/page.tsx` 615줄) 순서대로 감사. `teams/[code]/page.tsx` 는 general-purpose agent 정밀 감사 결과 clean(findings 0) — KST/threshold/CE배너(없음)/cohort filter 모두 canonical 패턴 정합.
+
+발견: `predictions/[date]/page.tsx` 의 CE 배너가 `predicted.slice(0,10)`(그 page date 하루치 games, 최대 5경기)의 평균 confidence 로 판정 — cycle 2534 `analysis/page.tsx` 와 동일 family, 3번째 재발(about/predictions/analysis 이미 수정됨). 예측 3건 미만인 날은 CE 진행 중이어도 배너 항상 억제, 예측 많은 날은 그 날 게임 성향에 좌우돼 실제 CE 상태와 무관.
+
+실행: `analysis-data.ts` export `detectSimplifiedMode()`(날짜 무관 최근 예측 10건 기준) import + 로컬 `recentConfs`/`simplifiedMode` 계산 제거, `CE_DETECT_THRESHOLD`/`CE_MIN_SAMPLES` 미사용 import 제거. `silent-drift-wave-307.test.ts` 갱신(해당 assertion 을 analysis/page.tsx 케이스와 동일 패턴으로 교체). `pnpm tsc --noEmit`/`pnpm test`(518/4292)/`pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(9b144dcc)+push(R4), pre-push hook 통과. 버전 bump 는 최근 2 cycle(2536/2537) 선례 따라 skip.
+
+다음 사이클 추천 = lotto(gap 1/30, 방금 fire — 다음 30-gap 재도달까지 장기) 또는 review-code(heavy) 계속(잔존 대형 파일: `accuracy/page.tsx` 1220줄, `analysis/game/[id]/page.tsx` 868줄 — 아직 미감사 target).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 홈 페이지 이번 주 일정 오늘 예측 KST 경계 정정 (cycle 2537, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 11/20, op-analysis 7/25, info-arch 20/30, lotto 29/30 — 다음 사이클 30 도달 예상). 직전 8사이클 distinct=3(review-code/operational-analysis/explore-idea) — 2-chain lock 없음. cycle 2535 retro carry-over(잔존 대형 파일: `page.tsx` 1090줄/`teams/[code]/page.tsx` 622줄/`predictions/[date]/page.tsx` 615줄) 중 최대 monolith `page.tsx`(홈) 감사.
