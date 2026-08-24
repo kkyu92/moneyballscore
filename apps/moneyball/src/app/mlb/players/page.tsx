@@ -110,6 +110,7 @@ export default function MlbPlayersHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
+    inLanguage: "ko-KR",
     name: `MLB Statcast ${FACTOR_STATCAST} 팩터`,
     description: `MLB ${FACTOR_TOTAL}팩터 본선 안 Statcast ${FACTOR_STATCAST} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 설명 + ${MLB_TEAM_COUNT}팀 측정 status.`,
     url: `${SITE_URL}/mlb/players`,

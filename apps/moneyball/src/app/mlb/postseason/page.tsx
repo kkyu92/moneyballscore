@@ -79,6 +79,7 @@ export default function MlbPostseasonHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
+    inLanguage: "ko-KR",
     name: "MLB Postseason 브라켓",
     description: `MLB Postseason 4 라운드 (Wild Card / Division Series / League Championship / World Series) 브라켓 + ${FACTOR_TOTAL}팩터 본선 시리즈별 예측.`,
     url: `${SITE_URL}/mlb/postseason`,

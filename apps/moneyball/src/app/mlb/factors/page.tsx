@@ -249,6 +249,7 @@ export default function MlbFactorsHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
+    inLanguage: "ko-KR",
     headline: `MLB ${TOTAL}팩터 본선 가중치 + 설명`,
     description:
       `MLB ${TOTAL}팩터 본선 = KBO ${KBO_N} + Statcast ${STAT_N}. 각 팩터의 가중치 / 정의 / 출처 / 적용 방식.`,

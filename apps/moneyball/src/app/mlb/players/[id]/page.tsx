@@ -124,6 +124,7 @@ export default async function MlbPlayersDetailPage({ params }: PageProps) {
     "@type": "SportsTeam",
     "@id": pageUrl,
     url: pageUrl,
+    inLanguage: "ko-KR",
     name: team.name,
     sport: "Baseball",
     description: `${team.name} Statcast ${MLB_FACTOR_COUNTS.statcast} (xwOBA · Barrel% · Hard Hit% · Launch Angle) 측정 + 선수별 layer ETA.`,

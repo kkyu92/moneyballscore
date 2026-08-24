@@ -77,6 +77,7 @@ export default async function MlbStandingsHub() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
+    inLanguage: "ko-KR",
     name: `MLB AL/NL 순위 — ${MLB_DIVISION_COUNT} division`,
     description: `MLB AL/NL × East/Central/West ${MLB_DIVISION_COUNT} division 실시간 W-L 순위.`,
     url: `${SITE_URL}/mlb/standings`,
