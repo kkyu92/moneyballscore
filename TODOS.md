@@ -1,3 +1,11 @@
+## 🔍 RETRO-ONLY — review-code(heavy) teams/[code]/page.tsx 최초 전체 감사, clean (cycle 2470, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/spec_only_deferred). gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 4/25, info-arch 15/30, lotto 30/30 아직 미충족). 2-chain lock 미충족(직전8 distinct=4: review-code/fix-incident/operational-analysis/explore-idea). `gh run list` CI 전부 green, fix-incident 신호 없음. 리포 파일 크기 재조사 → `apps/moneyball/src/app/teams/[code]/page.tsx`(622줄) 가 git log 전수 검색상 "최초 전체 감사" 이력 0건 확인 (index.ts/analysis/accuracy/mlb-pipeline/convergenceRecord/buildAccuracyData/buildMatchupProfile 등 인접 상위 monolith 는 모두 최근 감사 완료) — 신규 unaudited target 으로 선정, 전체 622줄 read.
+
+검증 항목: (1) PARK_FACTOR_HITTER_MIN(105)/PITCHER_MAX(95) 분류 로직 — `teams/page.tsx` 목록 페이지와 동일 임계값·방향 사용 확인, drift 없음. (2) `getConvergencePickTeamStats` → `fetchConvergencePickDetailedResults` 가 PRODUCTION_COHORT_RULES 필터 보유 확인 (#1338 family 재발 아님). (3) `buildTeamUpcoming.ts` 가 `CURRENT_SCORING_RULE` 단일값만 필터 (PRODUCTION_COHORT_RULES 아님) — 그러나 대상이 예정(미래) 경기라 과거 cohort 값이 애초에 존재할 수 없는 범위라 실질 영향 없음 (#1338 family 오탐 배제, 과거 검증 리스트 페이지들과는 성격 다름). (4) SMALL_SAMPLE_N 소표본 hedge, ACCURACY_GOOD_RATE/MID_RATE 색상 분기 모두 shared 상수 정합. 신규 버그 미발견 — clean.
+
+다음 사이클 추천 = operational-analysis(lite, gap 4/25 — 아직 저신선도 가능성 높음, 재확인만 낮은 가치) 또는 explore-idea (다양성 회복, review-code 인접 monolith 거의 소진).
+
 ## 🟢 SUCCESS — review-code(heavy) daily.ts 최초 전체 감사, PipelineMode 크로스 파이프라인 오염 정정 (cycle 2469, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 3/25, info-arch 14/30, lotto 29/30). 2-chain lock 미충족(직전8 distinct=4: explore-idea/review-code/fix-incident/operational-analysis). op-analysis-ce-cohort.ts 재실행 결과 n=337 (cycle 2448/2466 과 완전 동일, 신선 데이터 0) — lite 저가치 판단해 배제. cycle 2468 review-code(lite) health baseline 완료 직후, heavy pool 소진 경고(2458/2460/2462/2465) 대응해 리포 전체 파일 크기 재조사 → `packages/kbo-data/src/pipeline/daily.ts`(1626줄, 리포 최대 파일)가 수십 건 부분 fix commit(cycle 813/864/886/936/1021/1022/1173~1191/1446/1455/1495 등) 대비 "최초 전체 감사" CHANGELOG 이력 0건 확인 — review-code heavy 최우선 신규 타겟으로 선정, 전체 1627줄 read.
