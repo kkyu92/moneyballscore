@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — review-code(heavy) mlb/reviews/monthly/[month]/page.tsx 최초 전체 감사, 신규 이슈 0건 (cycle 2521, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23 (전부 completed/archived/spec_only/deferred, status=approved 없음). 2-chain lock 없음(직전 8사이클 2513-2520 distinct=3: review-code/explore-idea/info-arch). gap trigger 미도달(fix-incident 15/20, op-analysis 16/25, lotto 13/30, info-arch 4/30). TODOS 기존 carry-over 후보(`en/mlb/matchup/[teamA]/[teamB]` 596줄, `mlb/reviews/monthly` 502줄, `mlb/factors`, `lotto/methodology`) 재검증 결과 전부 stale — matchup 페이지 3종은 cycle 2507에 이미 최초 전체 감사 완료(`todayStr` KST fix), `mlb/games`/`mlb/factors`/`lotto/methodology`도 각각 cycle 2509/2512/2511에 완료 확인. `최초 전체 감사` grep 전수 교차검증(60건)으로 진짜 미감사 타겟 발굴: `mlb/reviews/monthly/[month]/page.tsx`(502줄) + EN 미러(500줄) — KBO 원본(`reviews/monthly/[month]`)은 cycle 2270에 감사됐으나 MLB plan #26 Phase 2 신규 라우트는 감사 이력 0건.
+
+감사 범위: KO/EN page.tsx 전체 라인별 read + 3-way 대조 + `buildMlbMonthlyReview.ts`(193줄, summary/highlights/factorInsights 로직) + `computeMonthRange.ts`(KST_OFFSET_MS 처리 — cycle 2510에 이미 wave 145 재발 정정 완료 확인) + jsonLd `inLanguage`/`datePublished` + Breadcrumb/ShareButtons/ConvergenceHomeAwayBadges 등 locale prop 배선 + `sitemap.ts`의 `mlbMonthlyReviewRoutes`/`enMlbMonthlyReviewRoutes` 실제 spread 여부.
+
+결과: 신규 이슈 0건. `SMALL_SAMPLE_N` 하드코딩(cycle 2270에 이미 fix), ISR 매직넘버(wave 133에 이미 REVIEWS_MONTHLY_ISR_SECONDS 통일), KST 월 경계 off-by-one(cycle 2510에 이미 fix) 등 이 도메인에서 반복 재발하던 3대 silent drift family가 모두 이 라우트에도 이미 선반영돼 있음을 확인 — KBO monthly 감사(cycle 2270)와 weekly EN 미러 작업(cycle 2355/2356) 이후 신규 개발된 라우트라 drift 누적 기간이 짧았던 것으로 판단(cycle 2483/2497/2507 패턴과 동일 — "최근 신규 라우트는 clean audit 확률 높음"). jsonLd `datePublished`가 월 진행 중에도 `endDate`(월말) 기준이라 미래 시각 노출되는 패턴은 KBO monthly/양쪽 weekly 리뷰에 이미 동일하게 존재하는 사전 설계(신규 아님, 지적 보류).
+
+**교훈**: carry-over 리스트는 이번에도 대거 stale(4개 후보 모두 이미 감사 완료) — TODOS.md에 적힌 "다음 사이클 추천" 문구가 이전 사이클에서 이미 처리된 항목을 계속 재추천하는 drift 누적 패턴 재확인(cycle 2518/2520 교훈과 동일 계열, 3연속 재발). `git log --all --grep "최초 전체 감사"` 전수 grep이 TODOS 텍스트보다 신뢰도 높은 source — 매 review-code(heavy) 사이클 시작 시 텍스트 추천보다 grep 우선해야.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사 후보: `players/[id]` 323줄 + EN 미러, `mlb/reviews` hub 페이지, `standings`/`leaderboard` 세부 컴포넌트) 또는 fix-incident(gap 15/20, cycle 2526 경 도달) 또는 lotto(gap 13/30, cycle 2538 경 도달).
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) mlb/reviews/weekly/[week]/page.tsx 최초 전체 감사, 신규 이슈 0건 (cycle 2520, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23 (전부 completed/archived/spec_only/deferred, status=approved 없음). 2-chain lock 없음(직전 8사이클 2512-2519 distinct=3: review-code/explore-idea/info-arch). gap trigger 미도달(fix-incident 13/20, op-analysis 14/25, lotto 11/30, info-arch 2/30). cycle 2518/2519 carry-over 후보(`en/mlb/matchup` 596줄, `en/mlb/reviews/monthly` 500줄) 재검증 결과 stale — `en/mlb/reviews/monthly/page.tsx`는 실제로 10줄짜리 redirect wrapper(월간 index → 최신 월 리다이렉트)였고, `analysis/page.tsx`(2803줄)는 이미 cycle 2480에서 전체 감사 완료. `find + wc -l` 전체 재스캔 + `최초 전체 감사` grep 교차검증으로 진짜 미감사 타겟 발굴: `mlb/reviews/weekly/[week]/page.tsx`(551줄, git log 3 commit뿐 — plan #26 Phase 1b 신규 라우트 + wave-657 색상 단일화 + cycle 2345 수렴 픽 배선, 전체 감사 이력 0건).
