@@ -1,3 +1,15 @@
+## 🟢 SUCCESS — explore-idea(heavy) MLB game detail 팩터 수렴 픽 배지 배선, KBO parity (cycle 2461, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 2/25, info-arch 6/30, lotto 21/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 근접이나 미충족(11/15). cycle 2456/2458/2460 review-code(heavy) 3연속 retro-only(버그 없음 확인만 반복) — 다양성 확보 위해 explore-idea 선택.
+
+발견: MLB game detail(`mlb/games/[date]/[slug]/page.tsx`, 391줄)이 KBO `analysis/game/[id]/page.tsx`(868줄)의 팩터 수렴 픽 배지(강수렴/완전수렴 + 최근 적중 기록, wave-452/478)를 렌더하지 않음. `computeMlbCompositeDuel`/`getMlbRecentConvergencePickRecord`/`MLB_FACTOR_PICK_STRONG`/`MLB_FACTOR_PICK_COMPLETE` 인프라는 이미 `mlb/matchup`, `mlb/reviews` 페이지에서 사용 중 — game detail 단건 페이지만 배선 누락된 순수 gap (구조적 비적용 아님, cycle 2271/2410 케이스와 다름).
+
+실행: `computeMlbCompositeDuel`(homeCode/lineupWoba/bullpenFip/spFip/spXfip/war 6팩터, MLB elo/recent_form/head_to_head/sfr 미구현) 결과로 팩터 수렴 픽 배지 + 팩터 균형 배지(비수렴) 렌더. `FACTOR_LABELS_SHORT`/`FACTOR_GLOSSARY_ANCHORS`(용어집 링크)는 슬러그 공유라 그대로 재사용. KBO의 `DEFAULT_WEIGHTS` 가중치%/모델-합치 칩(judge verdict)은 MLB에 대응 개념 없어 의도적 제외 — 완전 parity 아닌 축소 parity.
+
+`pnpm --filter moneyball test`(4222/4222, 신규 1건) + `type-check`/`lint` clean. PR #3063 squash 머지 (`22b67912`).
+
+다음 사이클 추천 = review-code(heavy, 잔여 후보 — `dashboard/compareModels.ts` 299줄 / `standings/buildTeamAccuracy.ts` 261줄) 또는 explore-idea(saturation trigger 12/15 도달 가능성).
+
 ## 🔍 RETRO-ONLY — review-code(heavy) mlb-shared.ts 신규 감사, 버그 없음 확인 (cycle 2460, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 5/30, lotto 20/30). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 근접이나 미충족(11/15). cycle 2459 retro 추천(review-code heavy, 후보: mlb-shared.ts/compareModels.ts/buildTeamAccuracy.ts) 채택 — 가장 큰 미감사 파일 우선.
