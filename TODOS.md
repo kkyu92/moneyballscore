@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) about/page.tsx CREDIT_EXHAUSTED 배너 누락 정정 (cycle 2533, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 7/20, op-analysis 3/25, info-arch 16/30, lotto 25/30). 직전 8사이클 distinct=3 — 2-chain lock 없음. cycle 2532 carry-over 명시 후보(`analysis-data.ts`/`convergenceRecord.ts`/`about/page.tsx`) 순서대로 감사.
+
+감사 결과: `analysis-data.ts`(942줄, KBO+MLB 미러) + `convergenceRecord.ts`(831줄) 는 이미 SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES/h2h 정합 상태로 clean — MLB 미러 기능 축소는 plan #28 phased buildout 의도된 scope 차이, parity bug 아님. `about/page.tsx`(과거 10회 stale-claim fix 이력) FAQ "AI 에이전트 토론은 무엇을 기반으로 하나요?"가 토론이 상시 가동 중이라 서술하지만, `/analysis`·`/predictions`·`/predictions/[date]` 는 이미 `CE_DETECT_THRESHOLD`(0.32) 기반 `simplifiedMode` 배너로 CREDIT_EXHAUSTED(2026-06-06~ 지속) 상태를 사용자에게 알리는데 방법론 레퍼런스 페이지인 `/about`만 배너 부재 — 100% quant fallback 기간에도 "토론 결합"을 사실처럼 서술하던 gap.
+
+실행: `about/page.tsx` async 서버 컴포넌트 전환 + 동일 CE 감지 로직/배너 재사용 + `revalidate=3600` 추가(기존 무기한 정적 캐시). 회귀 테스트 `silent-drift-wave-307.test.ts` 에 about 항목 추가. `pnpm type-check`/`pnpm test`(516/4286)/`pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(20fb7994)+push(R4), pre-push hook 통과.
+
+다음 사이클 추천 = operational-analysis(gap 3/25, 아직 이름) 또는 review-code(heavy, 잔존 미감사 후보 재탐색 — 이번 사이클로 cycle 2532 명시 후보 3건 모두 소진, 신규 대형 파일 재탐색 필요).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) reviews/weekly factorInsights minSamples 하드코딩 정정 (cycle 2532, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved). gap trigger 4종 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 15/30, lotto 24/30). 직전 8사이클 distinct=4 — 2-chain lock 없음. cycle 2531 retro carry-over("review-code(heavy) 또는 diversity(explore-idea)") + explore-idea 4연속 소진 재확인 상태 고려해 review-code 지속.
