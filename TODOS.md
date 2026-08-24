@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) buildTeamProfile.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2491, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 7/20, op-analysis 12/25, info-arch 5/30, lotto 13/30). 직전 8 사이클(2483-2490) distinct=3(review-code/info-architecture-review/fix-incident) — 2-chain lock 미충족. 2490 추천대로 review-code(heavy) 계속, 잔존 미감사 data builder 중 `buildTeamProfile.ts`(601줄, `/teams/[code]` 페이지 데이터 소스 + KBO↔MLB 공유 집계 함수 6개) 선정.
+
+점검: (1) `computeTeamStreak`/`computeTeamAvgMargin`/`computeTeamBlowoutCount`/`computeTeamCloseGameCount`/`computeTeamHomeAwayEdge`/`computeTeamRecentRecord` 6개 export — 모두 `buildMlbTeamProfile.ts` 가 그대로 import 재사용 확인(신규 MLB_ 접두 중복 함수 없음). (2) `teamGames.sort()` 명시적 독립 문장 분리 확인(cycle 2399 정정 유지, KBO/MLB 양쪽 동일 패턴). (3) `PRODUCTION_COHORT_RULES` 필터(`predictions!inner` + `.eq(prediction_type,'pre_game')` + `.in(scoring_rule,...)`) — #1338 family 패턴 정합, 미적용 콜사이트 0건. (4) `assertSelectOk` fail-loud 래핑 — teams/games 양쪽 쿼리 모두 적용, silent fallback 없음. (5) `teams/[code]/page.tsx` 소비부 — avgMargin(시즌 전체)/recentRecord(최근 N경기)/recentGames 테이블(최근 8경기) 3종 라벨이 실제 계산 스코프와 일치, 혼동 표시 없음. (6) MLB 대응 파일(`buildMlbTeamProfile.ts`)과 나란히 비교 — cohort 필터/정렬/재사용 패턴 모두 parity 확인. 신규 이슈 0건.
+
+실행: 코드 변경 없음 — 감사 완료.
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사 대상: `buildMatchupProfile.ts`(594줄) / `buildMlbMatchupProfile.ts`(526줄), 우선순위 크기순) 또는 op-analysis(gap 12/25, 임박) 또는 lotto(gap 13/30) 또는 fix-incident(gap 7/20).
+
 ## 🟢 SUCCESS — review-code(heavy) buildAccuracyData.ts 최초 전체 감사, Version History CURRENT_MODEL_FILTER 오적용 정정 (cycle 2490, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 6/20, op-analysis 11/25, info-arch 4/30, lotto 12/30). 직전 8 사이클 distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. skill-evolution trigger 5개 모두 미충족(trigger3 %50=40, trigger5 review-code 0회 아님). 2489 추천대로 review-code(heavy) 계속, 잔존 미감사 data builder 중 `buildAccuracyData.ts`(776줄, `/accuracy` 페이지 데이터 소스, review-code 이력 0건) 선정.
