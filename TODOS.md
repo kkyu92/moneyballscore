@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) reviews/weekly 주차 경계 UTC→KST 정정 (cycle 2481, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 17/20, op-analysis 2/25, info-arch 26/30, lotto 3/30). 직전 8 사이클 distinct=5(review-code/polish-ui/explore-idea/lotto/operational-analysis) — 2-chain lock 미충족. 직전 15 사이클 review-code+polish-ui=9/15 — explore-idea saturation 미충족. 강한 trigger 부재, cycle 2480 retro 추천대로 review-code(heavy) 계속 — 미감사 대형 파일 중 `reviews/weekly/[week]/page.tsx`(524줄, review-code 이력 0건) 선정.
+
+발견: 페이지 자체(배지 색상/파라미터 순서/컴포넌트 시그니처)는 전부 정합 확인, 대신 의존 유틸 `computeWeekRange.ts`의 `toMondayUTC`가 "현재 시각"의 요일을 raw UTC 기준으로 판정 — `packages/shared`에 이미 존재하는 KST-aware 패턴(`getKSTWeekRange`/`getKSTMondayUtcIso`, 둘 다 KST_OFFSET_MS shift 후 UTC 필드 사용)과 다른 방식으로 별도 구현돼 있었음. 월요일 00:00~09:00 KST(=일요일 15:00~24:00 UTC) 구간에는 `getCurrentWeek()`가 이전 주로 오판정 — `getCurrentWeek` 호출부 8곳(`/reviews/weekly`, `/mlb/reviews/weekly`, `/en/mlb/reviews/weekly`의 각 리다이렉트+not-found, `analysis/page.tsx`, `mlb/analysis/page.tsx`, `analysis-data.ts` 2개) 전부 영향 — CLAUDE.md "날짜는 KST 기준" 원칙 위반. 기존 테스트(`computeWeekRange.test.ts`)는 전부 경계에서 먼 시각만 사용해 이 구간 미검증.
+
+실행: `toMondayUTC`에 `KST_OFFSET_MS` shift 추가(shared의 `getKSTWeekRange`와 동일 원리) — jan4/targetMonday 등 이미 00:00 UTC인 calendar-date 입력은 +9h shift해도 같은 날짜라 회귀 없음(기존 테스트 전부 이 조건 만족, unaffected 확인). 신규 회귀 테스트 2건(월요일 00:30/08:59 KST 경계) 추가. `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4240 tests, 기존 4238 + 신규 2) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit+push (R4).
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사 대형 파일: `page.tsx`(1090줄, 홈 — 마지막 전체 감사 cycle 2438 근처로 추정, 재확인 필요) / `analysis/game/[id]/page.tsx`(868줄) / `mlb/reviews/weekly/[week]/page.tsx`+영문 미러 2건(동일 family — `getCurrentWeek` 호출부라 본 fix로 이미 해소, 재확인만) / `debug/factor-correlation` 계열) 또는 fix-incident(gap 18/20, 근접) 또는 explore-idea(saturation 10/15, 근접).
+
 ## 🟢 SUCCESS — review-code(heavy) analysis/page.tsx 최초 전체 감사, 구장 배지 색상 역전 + 가중치 툴팁 하드코딩 정정 (cycle 2480, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 16/20, op-analysis 1/25 — 직전 사이클 방금 발화, info-arch 25/30, lotto 2/30). 직전 8 사이클 distinct=5(review-code/polish-ui/explore-idea/lotto/operational-analysis) — 2-chain lock 미충족. 직전 15 사이클 saturation 9/15 — explore-idea trigger 미충족. 강한 trigger 부재 상태에서 `apps/moneyball/src/app` 내 최대 monolith 파일 목록 재확인 → `analysis/page.tsx`(2803줄, 마지막 전체 감사 cycle 2149 = 331 사이클 stale) 이 review-code heavy 대상으로 명확 — 최근 5 사이클(2469~2475) 이 daily.ts/accuracy/teams/[code]/mlb 페이지들 최초 전체 감사로 매번 real bug 를 찾은 패턴과 정합.
