@@ -1,4 +1,16 @@
-## 🟢 SUCCESS — fix-incident lesson-pending 6건 close, 사례 20 2차 재발 확인 (cycle 2464, 2026-08-24)
+## 🔍 RETRO-ONLY — review-code(heavy) backtest-manual-weights-run.ts 신규 감사, 비활성 스크립트 clean 확인 (cycle 2465, 2026-08-24)
+
+진단: open issue 0건 (`hub-dispatch` + 전체 open 모두 0). approved plan 0/29 (전부 completed/deferred/archived). gap trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 6/25, info-arch 10/30, lotto 25/30 — picks/result 이미 박제돼 lite 불필요). 2-chain lock 미충족(직전8 distinct=4: explore-idea/review-code/operational-analysis/fix-incident). explore-idea saturation 미충족(11/15). DESIGN.md mtime 1일 전 — design-system 미충족. cycle 2464 retro 1순위 추천(review-code heavy, 잔여 대형 미감사 lib 재탐색) 채택 — pool 고갈 경고(cycle 2462/2463) 대응해 `git log --grep` 로 미감사 후보 재탐색.
+
+감사 범위: `packages/kbo-data/src/pipeline/backtest-manual-weights-run.ts`(429줄) 최초 전체 감사 — H4 검증(manual 가중합 vs logistic 학습) 비교 스크립트. `computeFactors`/`manualScore`/`extract`/`main` 전체 read.
+
+발견: (1) `normalize()` 의 `if (homeVal===0 && awayVal===0) return 0.5` (L99) 가 바로 다음 `if (total===0) return 0.5` (L101) 와 항상 동일 결과 — abs합=0 은 두 값 모두 0 일 때만 가능해 L99 는 완전 redundant dead branch. (2) `computeFactors` 의 `park_factor` (L139-147) 가 pf>1 분기로 1차 계산한 뒤 pf>10 분기가 항상 재계산 override — wayback parkPf 실측 범위(92~108)에서 1차 계산은 100% 폐기되는 죽은 계산.
+
+결론: 두 항목 모두 **최종 출력 값에 영향 없음** (dead code / 중복 조건, 버그 아님). 본 스크립트는 cycle 903(plan #8 M1) 1회성 backtest harness — cron/daily.ts 등 production pipeline 미연결, CLAUDE.md "v2.0 결정 완료(v1.8 유지 확정)" 이후 재실행 이력 없는 비활성 연구 스크립트. 죽은 코드 정리는 실사용 코드 대비 가치 낮고(사용자 지시 "과도한 리팩토링 금지") 프로덕션 영향 0 — 수정 보류. 신규 버그 0건, 코드 변경 없음.
+
+다음 사이클 추천 = operational-analysis(lite, gap 7/25) 또는 review-code(heavy, 잔여 후보 `agents/validator.ts` 67-cycle 재감사 gap 또는 `scrapers/` 미탐색 파일).
+
+
 
 진단: `gh issue list --state open --label hub-dispatch` 0건이나 `lesson-pending` 라벨 issue 6건 발견(#3055~3060, 2026-08-23 21:00 신규 생성). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 5/25, info-arch 9/30, lotto 24/30). 2-chain lock 미충족(직전8 distinct=3). explore-idea saturation 미충족(11/15). approved plan 0/29.
 
