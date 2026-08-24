@@ -1,3 +1,15 @@
+## 🟢 SUCCESS — explore-idea(heavy) MLB 확정 선발투수 이름 game-detail 표시 (cycle 2457, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 9/25, info-arch 2/30, lotto 17/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2454~2456 review-code 3연속 retro-only 로 감사 pool 소진 확인, cycle 2456 retro 명시 추천(explore-idea/op-analysis) 채택.
+
+기존 carry-over lead 재확인 결과 대부분 stale: cycle 2423 "MLB 모델 메타 정보 배지" 는 PR #3049 로 이미 ship, mlb-waterfall.ts/mlb-elo.ts 도 cycle 2412 에 이미 감사 완료. 유효한 잔여 lead = cycle 2416 retro 가 "Tier 3, 별도 스코프" 로 남긴 `statsapi-mlb.ts fetchProbablePitchers`(선발투수 이름/ID 스크레이프, 프로덕션 미연결) — 전체 개인 FIP 스탯 통합은 여전히 large scope 이나, 이미 스크레이프되는 이름만 표시하는 건 KBO wave-335(이름-only 단계)와 동일 패턴으로 분리 가능.
+
+실행: migration 051(`mlb_schedule.home/away_starter_name` 컬럼, `supabase db push --linked` 원격 적용 완료) + `mlb-pipeline.ts` `runStatsApiScrape` 가 `fetchProbablePitchers` 를 best-effort 로 병합(실패해도 schedule upsert 자체는 안 막음, 회귀 테스트 2건) + KO(`mlb/games/[date]/[slug]`)/EN(`en/mlb/games/[date]/[slug]`) game-detail `page.tsx` 양쪽에 "선발 {away} · {home}" 표시(회귀 테스트 각 1건). `kbo-data` 90 files/1184 tests, `moneyball` 500 files/4221 tests 전부 green, `tsc`/`eslint` clean. PR #3062 squash 머지(541d635a).
+
+결론: fetchProbablePitchers 의 "액션 아이템만 기록" carry-over 중 bounded 부분(이름 표시)만 분리 이식 완료. 개인 FIP/xFIP 스탯 소스 통합은 여전히 Tier 3(별도 scope, 데이터 소스 자체 부재)로 미착수.
+
+다음 사이클 추천 = review-code(heavy, 이번 신규 변경 mlb-pipeline.ts 재감사 대상 아님 — 방금 작성+테스트 통과) 또는 operational-analysis(10/25 근접, CE-cohort 재측정 자연 도달 임박).
+
 ## 🔍 RETRO-ONLY — review-code(heavy) buildMlbMatchupProfile.ts 재감사, 이미 포화 감사 확인·신규 버그 없음 (cycle 2456, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 non-approved). explore-idea saturation trigger 충족(12/15)했으나 cycle 2441 이미 동일 소스 15 사이클 전 소진 확인. gap trigger 4종 전부 미도달. 2-chain lock 미충족(직전8 distinct=5). cycle 2452/2453/2454 연속 회고가 `buildMlbMatchupProfile.ts`를 미감사 후보로 3회 반복 지목 — 직접 감사.
