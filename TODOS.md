@@ -1,3 +1,13 @@
+## 🔁 RETRO-ONLY — review-code(heavy) shared const shadow 전수 grep + MIN_TEAM_PREDICTIONS family 재점검 (cycle 2566, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23, 2-chain lock 없음(직전8=2559-2565 distinct=3). fix-incident/op-analysis(5/25)/info-arch(19/30)/lotto(28/30)/design-system(당일 갱신) 전부 negative. explore-idea saturation 11/15 미도달. cycle 2565 retro 추천대로 review-code(heavy) 대형 컴포넌트 순회 계속.
+
+실행: shared export 321개 전수 grep 으로 apps/moneyball 안 프로덕션 코드 재선언(shadow) 스캔 — 0건(전부 test literal match 또는 의도된 V2_1_B_WEIGHTS re-export). `MIN_TEAM_PREDICTIONS` 전수 사용처 재확인(accuracy/page.tsx, dashboard/page.tsx, MlbAccuracyDashboard.tsx, TeamPerformanceChart.tsx) — cycle 2565 fix 이후 전부 공유 상수 일관 사용, family 완전 정합. UserVsAIScorecard/PickButton/FactorBreakdown SMALL_SAMPLE_N family 후보 재점검 — 기존 게이트(MIN_POLL_TOTAL 등) 정상, 신규 drift 없음. `pnpm --filter moneyball run test` 535 files/4381 tests 전체 통과(변경 없음, baseline 확인).
+
+결론: 이번 스윕 신규 fix 없음 — 코드 변경 0, commit 없음. 다음 사이클 추천 = review-code 계속(대형 파일 후보 saturation 근접) 또는 explore-idea(saturation 11/15, 다음 12/15 도달 시 자연 발화).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) MlbAccuracyDashboard 팀 테이블 게이트 로컬 shadow 상수 제거 (cycle 2565, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2557-2564 distinct=3: review-code 6+operational-analysis 1+polish-ui 1). fix-incident negative(`gh run list` 최근 10건 전부 success/skipped). op-analysis(gap 4/25)/design-system(DESIGN.md 당일 갱신)/info-arch(gap 18/30)/lotto 모두 gap 미도달. explore-idea saturation 11/15 미도달. cycle 2562 retro 추천대로 `apps/moneyball/src/components` 대형 파일 순회 계속 — `PredictionCard.tsx`(마지막 터치 cycle 1870, 695 사이클 미터치)/`PredictionCardLive.tsx` 먼저 조사했으나 SMALL_SAMPLE_N family 미해당 확인(단일 경기 신뢰도 표시, 통계 rate 아님 — false positive 회피 후 제외), judgeReasoning fallback 배지 경로도 대조 확인 결과 기존 설계 일관(PredictionCard 내부 judgeReasoning 블록은 애초 배지 미지원, JudgeReasoningCard 만 지원 — drift 아님).
