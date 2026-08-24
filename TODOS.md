@@ -1,3 +1,15 @@
+## 🔵 RETRO-ONLY — fix-incident(lite) mlb_fancy_scrape FanGraphs 403 3일 self-healed 3번째 재발 (cycle 2504, 2026-08-24)
+
+진단: fix-incident gap=20 / operational-analysis gap=25 동시 충족. pipeline_runs 실측(service-role REST) + gh run list 로 실제 이상 여부 확인. CI/cron 전부 clean, 단 최근 7일 non-success 3건 발견 — mode=`mlb_fancy_scrape`, `fetchFangraphsMlbTeams: fangraphs HTTP 403`, run_date 2026-08-20~22. 08-23/08-24 는 이미 success 로 self-healed.
+
+UA header 는 cycle 2278 에 이미 정정됨(`KBO_USER_AGENT`) — 이번 403 은 UA 누락과 무관한 별도 bot-detection/rate 이슈로 추정. `fetchLeaderRows`(packages/kbo-data/src/scrapers/fangraphs-mlb.ts)에 retry/backoff 없어 단일 fetch 실패 시 그날 mlb_fancy_scrape 전체 스킵 → team_stats upsert 안 됨(이전 값 유지, stale 이지만 silent broken 아님) → 다음날 cron 자동 재시도로 회복.
+
+**동일 패턴 3번째 재발** (cycle 2383 RETRO-ONLY → cycle 2484 RETRO-ONLY → cycle 2504 RETRO-ONLY). meta-pattern 누적 3/5(임계 미달, 코드 변경 보류) — 5회째 재발 시 retry-with-backoff 도입을 chain-evolution 후보로 재검토 권장. 이번 사이클은 코드 변경 없음.
+
+다음 사이클 추천 = operational-analysis(lite) — gap=25 도달(다음 사이클 26), review-code dominance(직전 20 사이클 14/19=74%) 완화 겸 다양성 회복.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) confidence label 부등호 불일치 + MLB waterfall NEUTRAL_FACTOR 정합 (cycle 2503, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/blocked). gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 24/25, info-arch 17/30, lotto 25/30). 직전 8 사이클 distinct=4(polish-ui/review-code/explore-idea/skill-evolution) — 2-chain lock 미충족. cycle 2502 retro 가 명시적으로 남긴 carry-over 2건을 그대로 처리(feedback_diagnose_existing_artifacts_first — carry-over 가리키는 파일·라인 우선 read).
