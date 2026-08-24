@@ -99,4 +99,16 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/home_starter_name,\s*away_starter_name/);
     expect(PAGE_SRC).toMatch(/선발/);
   });
+
+  // cycle 2461 explore-idea: KBO analysis/game/[id] wave-452/478 팩터 수렴 픽 배지가 MLB game
+  // detail 단건 페이지엔 없었음 — computeMlbCompositeDuel/getMlbRecentConvergencePickRecord
+  // 인프라 자체는 matchup/reviews 페이지가 이미 사용 중이라 순수 배선 누락.
+  it("computeMlbCompositeDuel + getMlbRecentConvergencePickRecord 로 팩터 수렴 픽 배지를 렌더한다 (KBO parity, cycle 2461)", () => {
+    expect(PAGE_SRC).toMatch(/computeMlbCompositeDuel/);
+    expect(PAGE_SRC).toMatch(/getMlbRecentConvergencePickRecord/);
+    expect(PAGE_SRC).toMatch(/MLB_FACTOR_PICK_STRONG/);
+    expect(PAGE_SRC).toMatch(/MLB_FACTOR_PICK_COMPLETE/);
+    expect(PAGE_SRC).toMatch(/팩터 수렴 픽/);
+    expect(PAGE_SRC).toMatch(/팩터 균형/);
+  });
 });
