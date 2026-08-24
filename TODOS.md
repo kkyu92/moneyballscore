@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — info-architecture-review 30-cycle gap 최초 도달, 감사 결과 신규 이슈 0건 (cycle 2547, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. **2-chain lock 탐지**(직전 8사이클 2539~2546 distinct=2: review-code 6 + explore-idea 2) → 양쪽 제외. 잔여 pool gap 재확인 — fix-incident 20/20 도달했으나 cycle 2546 retro가 "신규 CI 실패/silent skip 신호 발생 시까지 재평가 보류" 명시(negative 확정) → skip. info-architecture-review 30/30 최초 도달(마지막 발화 cycle 2517) → 신선 trigger로 선택.
+
+감사 범위: (1) breadcrumb 누락 라우트 grep 18건 전수 확인 — 전부 false positive(redirect stub 6건: reviews/monthly·weekly KBO/MLB/EN 동일 패턴, noindex 플레이스홀더 4건: community/login/settings/v2 계열, 최상위 인덱스 페이지 나머지). (2) sitemap.ts vs 실제 page.tsx 12건 diff — 전부 의도된 제외(주석으로 문서화됨: redirect-only 중복 인덱싱 방지, v2-shadow-monitor v1.8 확정 후 archive). (3) Header 메가메뉴(KBO_NAV 5-hover-zone 룰 vs MLB_NAV 비교) + Footer 6그룹 — KBO는 "Header=primary path only, Footer=exhaust" 룰 문서화(line 69-71 주석)로 의도된 비대칭, methodology/glossary/guide 등 footer 전용 정상.
+
+결론: IA 구조 이미 양호 — breadcrumb/sitemap/nav 3축 전부 기존 의도된 설계 또는 이미 문서화된 예외. 신규 코드 변경 0건, PR 없음.
+
+다음 사이클: info-architecture-review 카운터 0/30 리셋(cycle 2547 기준). 2-chain lock 여파로 review-code/explore-idea 재개 시점 판단 필요 — 직전 8사이클(2540~2547) 재계산 시 lotto(2538 탈락) 빠지고 distinct 재평가 예정.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 홈페이지 WeeklyTrendMini 히어로 통계 소표본 게이트 부재 (cycle 2546, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(전부 status≠approved). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 재계산 — fix-incident 20/20 도달했으나 `gh run list` scheduled workflow 전부 success + CI 실패 0건이라 실제 인시던트 부재(negative). op-analysis 16/25 / info-arch 29/30 / lotto 8/30 모두 미도달. cycle 2545 retro가 소표본 게이트 family 4-cycle 연속 후 신규 target 재탐색 필요 명시 → 미감사 홈페이지 컴포넌트 재탐색.
