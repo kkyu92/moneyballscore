@@ -1,3 +1,12 @@
+## v0.5.62.109 — 2026-08-24 (cycle 2528, review-code (heavy): accuracy 섹션 렌더 게이트 MIN_TEAM_PREDICTIONS 미참조 정정)
+
+### fix(accuracy): `accuracy/page.tsx` winnerProbBuckets/cohortWeekHeatmap 섹션 렌더 게이트 + `MlbAccuracyDashboard.tsx` cohortWeekHeatmap 게이트가 `MIN_TEAM_PREDICTIONS` 대신 하드코딩 `n >= 3` 사용 — wave-2463 swap 누락분 정정
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 2/20, op-analysis 23/25, lotto 20/30, info-arch 11/30). 직전 8사이클 distinct=3(review-code/explore-idea/fix-incident) — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 직전 4회(2494/2498/2515/2524) 연속 소진 재확인 완료 상태라 skip. 2527 retro carry-over `mlb/buildMlbStandings.ts`(clean 확인) + `accuracy/page.tsx 소비부` 중 후자 감사 착수.
+- 발견: `accuracy/page.tsx` 가 팀별 성과 섹션엔 이미 `MIN_TEAM_PREDICTIONS`(=3, wave-113/wave-2463 single source)를 import·사용 중이면서도, 같은 파일 안 winnerProbBuckets 섹션 렌더 게이트(`b.n >= 3`)와 cohortWeekHeatmap 섹션 렌더 게이트(`c.n >= 3`)는 여전히 하드코딩. MLB parity 컴포넌트(`MlbAccuracyDashboard.tsx`)의 cohortWeekHeatmap 게이트도 동일 하드코딩 중복 — 3곳 모두 wave-2463 이 팀별 표 부분만 swap하고 놓친 동일 family 재발.
+- 실행: 3곳 모두 `MIN_TEAM_PREDICTIONS` 참조로 교체(`MlbAccuracyDashboard.tsx` 는 import 추가). `MIN_TEAM_PREDICTIONS` 상수 주석에 wave-528 적용 surface 추가. 회귀 테스트 신규 1건(`silent-drift-cycle-2528.test.ts`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(515 files/4281 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(fix, R4).
+
 ## v0.5.62.108 — 2026-08-24 (cycle 2514, review-code (heavy): seasons/[year] 최초 전체 감사 — isOngoing/isCurrent KST 연도 경계 off-by-one 정정)
 
 ### fix(seasons): `buildSeasonSummary.ts`/`seasons/[year]/page.tsx` 의 "올해" 판정이 `new Date().getFullYear()`(서버 로컬/UTC) 사용 — KST_OFFSET_MS family 신규 케이스

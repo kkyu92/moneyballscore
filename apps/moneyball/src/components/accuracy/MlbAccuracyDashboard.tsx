@@ -1,4 +1,4 @@
-import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS } from '@moneyball/shared';
+import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS, MIN_TEAM_PREDICTIONS } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import { countBrierTrendWeeks, type Bucket, type ConfidenceTier, type WinnerProbBucket, type RollingAccuracyPoint, type BrierTrendPoint, type ScoringRuleDayCell, type ScoringRuleWeekCell } from '@/lib/accuracy/buildAccuracyData';
 import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
@@ -329,7 +329,7 @@ export function MlbAccuracyDashboard({
         </section>
       )}
 
-      {cohortWeekHeatmap.some((c) => c.n >= 3) && (
+      {cohortWeekHeatmap.some((c) => c.n >= MIN_TEAM_PREDICTIONS) && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <h2 className="text-lg font-bold">{s.cohortWeekTitle}</h2>

@@ -602,7 +602,7 @@ export default async function AccuracyPage() {
       )}
 
       {/* winner prob bucket × 실제 적중률 (calibration evidence) */}
-      {winnerProbBuckets.some((b) => b.n >= 3) && (
+      {winnerProbBuckets.some((b) => b.n >= MIN_TEAM_PREDICTIONS) && (
         <section
           id="winner-prob-bucket"
           className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"
@@ -623,7 +623,7 @@ export default async function AccuracyPage() {
       )}
 
       {/* scoring_rule × 주차 (최근 4주) cohort 비교 */}
-      {cohortWeekHeatmap.some((c) => c.n >= 3) && (
+      {cohortWeekHeatmap.some((c) => c.n >= MIN_TEAM_PREDICTIONS) && (
         <section
           id="cohort-comparison"
           className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3"

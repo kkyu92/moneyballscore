@@ -938,6 +938,11 @@ export const SMALL_SAMPLE_N = 5;
  * (cycle 1329) — dashboard/page.tsx `stats.total >= 3` filter + TeamPerformanceChart
  * UI hedge ("3경기 이상 검증" / "최소 3경기 예측") 단일 source. 본 상수가 single
  * source. 변경 시 차트 빈 상태 라벨 자동 sync.
+ *
+ * silent drift family wave 528 (cycle 2528) — accuracy/page.tsx winnerProbBuckets
+ * 섹션 렌더 게이트 + cohortWeekHeatmap 섹션 렌더 게이트 (KBO `/accuracy` +
+ * MLB `MlbAccuracyDashboard.tsx`) 3곳이 각각 하드코딩 `n >= 3` 사용 — 같은 파일 안
+ * MIN_TEAM_PREDICTIONS 를 이미 다른 섹션(팀별 표)에 import 해 쓰면서도 미참조.
  */
 export const MIN_TEAM_PREDICTIONS = 3;
 
