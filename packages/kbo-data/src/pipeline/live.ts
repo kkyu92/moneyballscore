@@ -8,6 +8,7 @@ import { fetchNaverRecord, toNaverGameId } from '../scrapers/naver-record';
 import { saveGameRecord } from './save-game-record';
 import { extractReasoningHomeWinProb } from '../types';
 import { DB_CONSTRAINTS } from './db-constraints';
+import { computeWinnerTeamId } from './winner-id';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -309,9 +310,13 @@ async function updateGameScore(db: DB, game: LiveGameState) {
     teamMap[t.code] = t.id;
   }
 
-  const winnerId = game.homeScore > game.awayScore
-    ? teamMap[game.homeTeam]
-    : teamMap[game.awayTeam];
+  const winnerId = computeWinnerTeamId(
+    'final',
+    game.homeScore,
+    game.awayScore,
+    teamMap[game.homeTeam],
+    teamMap[game.awayTeam],
+  );
 
   // final 상태 update 가 silent skip 되면 postview trigger / 적중률 verify 모두
   // stale 상태 사용. assertWriteOk fail-loud — 호출 site try/catch wrap 으로 다른
@@ -320,7 +325,7 @@ async function updateGameScore(db: DB, game: LiveGameState) {
     status: 'final',
     home_score: game.homeScore,
     away_score: game.awayScore,
-    winner_team_id: winnerId || null,
+    winner_team_id: winnerId,
     updated_at: new Date().toISOString(),
   }).eq('external_game_id', game.externalGameId);
   assertWriteOk(finalUpdateResult, 'live.updateGameScore.games.final');
