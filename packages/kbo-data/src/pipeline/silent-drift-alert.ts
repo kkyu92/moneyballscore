@@ -27,11 +27,30 @@
 // 이전엔 postview cron silent 시 사용자 가시 채널 부재 (console.log only). 사례 11
 // family 확장 — predict_final / verify / mlb_* 외 postview 도 박제.
 
-import type { PipelineMode } from './daily';
 import { notifyError } from '../notify/telegram';
 
+// 3개 파이프라인(daily.ts=KBO, mlb-pipeline.ts=MLB, postview-daily.ts)이 각자
+// 소유한 mode 리터럴을 모두 받는 cross-pipeline alert 소비자 전용 union. 예전엔
+// daily.ts 의 PipelineMode 를 그대로 import 해 썼는데, 그 타입이 daily.ts 자기
+// 자신도 처리 못 하는 MLB/postview 리터럴까지 억지로 떠안는 역효과(daily.ts 참조)가
+// 있었음 — 이 alert dispatcher 가 진짜 소비처이므로 여기서 직접 소유.
+export type SilentDriftPipelineMode =
+  | 'announce'
+  | 'predict'
+  | 'predict_final'
+  | 'verify'
+  | 'postview'
+  | 'mlb_statsapi_scrape'
+  | 'mlb_fancy_scrape'
+  | 'mlb_savant_scrape'
+  | 'mlb_predict_final'
+  | 'mlb_combined_notify'
+  | 'mlb_shadow_train'
+  | 'mlb_walk_forward_measure'
+  | 'mlb_elo_update';
+
 export interface SilentDriftAlertMeta {
-  mode: PipelineMode;
+  mode: SilentDriftPipelineMode;
   date: string;
   gamesFound: number;
   predictionsGenerated: number;

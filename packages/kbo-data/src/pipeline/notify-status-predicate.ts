@@ -18,10 +18,12 @@
 // already_predicted 는 errors=[] 유지 → 알림 X). 사용자 가시 우선 + spam
 // risk 는 errors[] 비어있는 정상 path 에선 발생 안함.
 
-import type { PipelineMode } from './daily';
-
+// mode 는 실제로는 항상 daily.ts 의 PipelineMode(4종) 만 넘어오지만, 아래 분기가
+// 미인식 문자열을 전부 false 로 방어하는 predicate 라 타입도 string 으로 열어둠 —
+// PipelineMode 로 좁히면 이 함수 자체 방어 로직(announce/mlb_*/기타 = silent)을
+// 테스트할 방법이 타입 레벨에서 막힘.
 export function shouldNotifyPipelineStatus(
-  mode: PipelineMode,
+  mode: string,
   predictionsGenerated: number,
   errorsCount: number,
 ): boolean {

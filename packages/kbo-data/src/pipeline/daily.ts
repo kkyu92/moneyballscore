@@ -118,20 +118,16 @@ async function getOrCreatePlayerId(
   return created.id;
 }
 
+// runDailyPipeline 이 실제로 분기 처리하는 4개 모드만. mlb_*/postview 리터럴은
+// silent-drift-alert.ts 의 SilentDriftPipelineMode(cross-pipeline alert 소비자 전용)로
+// 이전 — 예전엔 여기 섞여 있어 `runDailyPipeline(date, 'postview')` 가 타입체크는
+// 통과하지만 실제로는 'announce'/'verify' 분기 어디에도 안 걸려 predict/predict_final
+// 코드 경로(실 DB insert)로 조용히 fall-through 하는 타입 안전 구멍이었음.
 export type PipelineMode =
   | 'announce'
   | 'predict'
   | 'predict_final'
-  | 'verify'
-  | 'postview'
-  | 'mlb_statsapi_scrape'
-  | 'mlb_fancy_scrape'
-  | 'mlb_savant_scrape'
-  | 'mlb_predict_final'
-  | 'mlb_combined_notify'
-  | 'mlb_shadow_train'
-  | 'mlb_walk_forward_measure'
-  | 'mlb_elo_update';
+  | 'verify';
 
 /**
  * 통합 파이프라인 엔트리.

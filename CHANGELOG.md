@@ -1,3 +1,12 @@
+## v0.5.62.98 — 2026-08-24 (cycle 2469, review-code (heavy): pipeline/daily.ts 최초 전체 감사 — PipelineMode 타입 크로스 파이프라인 오염 정정)
+
+### fix(pipeline): `daily.ts` 가 export 하는 `PipelineMode` 타입이 실제로 처리하는 4개 모드(`announce`/`predict`/`predict_final`/`verify`) 외에 MLB 파이프라인(`mlb-pipeline.ts`) 전용 8개 모드 + `postview` 리터럴까지 떠안고 있어 `runDailyPipeline(date, 'postview')` 같은 잘못된 호출도 타입체크를 통과하던 것을 정정
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/Tier4). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 3/25, info-arch 14/30, lotto 29/30). 2-chain lock 미충족(직전8 distinct=4). op-analysis 재실행(`op-analysis-ce-cohort.ts`) 결과 n=337 cycle 2448/2466 과 완전 동일(신선 데이터 0) — lite 저가치 판단. review-code heavy pool 소진 경고(cycle 2458/2460/2462/2465/2468) 대응해 리포 전체 파일 크기 재조사 → `daily.ts`(1626줄, 리포 최대 파일)가 수십 건 부분 fix 대비 "최초 전체 감사" CHANGELOG 이력 0건 확인 — 최우선 신규 타겟 선정.
+- 발견: `export type PipelineMode`(daily.ts) 이 자기 함수 `runDailyPipeline` 이 실제로 분기하는 4개 모드(announce/predict/predict_final/verify) 외에 `mlb_statsapi_scrape` 등 MLB 8종 + `postview` 를 포함한 13종 union 이었음 — 원인은 `silent-drift-alert.ts` 가 daily.ts/mlb-pipeline.ts/postview-daily.ts 3개 파이프라인 전부에서 호출되는 cross-pipeline alert dispatcher 라 그 `SilentDriftAlertMeta.mode` 필드가 3개 소스 리터럴을 다 받아야 했는데, 이걸 별도 타입으로 안 만들고 daily.ts 의 `PipelineMode` 를 그대로 재사용해 옮겨붙인 것. 결과: `runDailyPipeline` 의 실제 switch 로직은 'announce'/'verify' 만 명시 분기하고 그 외(예: 'postview')는 아무 가드 없이 predict/predict_final 코드 경로(실 DB insert)로 fall-through — 타입 시그니처가 "13개 모드 지원"을 약속하지만 실제로 지원하는 건 4개뿐이라 나머지 9개를 넘기면 조용히 잘못된 동작을 하는 타입 안전 구멍.
+- 실행: daily.ts `PipelineMode` 를 실제 처리 4종으로 축소. `silent-drift-alert.ts` 에 자체 `SilentDriftPipelineMode`(13종 전체) 신규 정의 — 진짜 소비처가 직접 소유. `notify-status-predicate.ts::shouldNotifyPipelineStatus` 는 원래도 미인식 모드 문자열을 전부 false 로 방어하는 순수 predicate(테스트가 'mlb_predict_final' 등으로 이미 방어 로직 검증)라 `mode: string` 으로 완화 — daily.ts 좁힌 타입과 충돌 없이 방어 테스트 유지.
+- `pnpm type-check`(4 packages clean) + `pnpm --filter @moneyball/kbo-data test`(90 files/1184 tests) + `pnpm test`(503 files/4231 tests 전량 pass) + `pnpm lint` clean. 런타임 동작 변경 없음(현재 유일 caller 인 `/api/pipeline` route 는 이미 4개 값만 허용) — 순수 타입 정합성 fix.
+
 ## v0.5.62.97 — 2026-08-24 (cycle 2453, review-code: buildSeasonSummary.ts 신규 감사 — 한국시리즈 동점 우승팀 오판정 정정)
 
 ### fix(lib): `findChampionship()`의 docstring 이 "우승 결정 안 난 상태 (동점) → null 반환"을 명시하지만 실제 구현엔 tie 분기가 없어 `winsA <= winsB`이면 무조건 원정팀(idB)을 우승팀으로 오판정하던 것을 정정
