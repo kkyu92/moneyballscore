@@ -1,3 +1,15 @@
+## 🟢 SUCCESS — review-code(heavy) analysis/page.tsx 최초 전체 감사, 구장 배지 색상 역전 + 가중치 툴팁 하드코딩 정정 (cycle 2480, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 16/20, op-analysis 1/25 — 직전 사이클 방금 발화, info-arch 25/30, lotto 2/30). 직전 8 사이클 distinct=5(review-code/polish-ui/explore-idea/lotto/operational-analysis) — 2-chain lock 미충족. 직전 15 사이클 saturation 9/15 — explore-idea trigger 미충족. 강한 trigger 부재 상태에서 `apps/moneyball/src/app` 내 최대 monolith 파일 목록 재확인 → `analysis/page.tsx`(2803줄, 마지막 전체 감사 cycle 2149 = 331 사이클 stale) 이 review-code heavy 대상으로 명확 — 최근 5 사이클(2469~2475) 이 daily.ts/accuracy/teams/[code]/mlb 페이지들 최초 전체 감사로 매번 real bug 를 찾은 패턴과 정합.
+
+발견 (Explore agent 전체 2803줄 read, 30+ home/away sign 계산 + 모든 division site 재검증 후 2건 확정, 나머지는 false positive 배제):
+1. 오늘 경기 리스트 항목(`:1761-1765`, wave-369) 구장 팩터 배지 색상이 같은 파일 내 동일 조건을 렌더하는 다른 3곳(`:909-925`/`:1196-1214`/`:2246-2264`)과 반전 — 타자친화(orange)/투수친화(brand)로 뒤바뀜. 같은 경기 카드 내 다른 위치에서 같은 구장이 서로 다른 색으로 렌더되는 모순.
+2. `:542` "전체 팩터 가중치" 툴팁이 `FACTOR_PICK_WEIGHT_TOTAL` 상수(바로 두 줄 위 `:508`에서 이미 참조 중) 대신 리터럴 `0.85` 하드코딩 — `DEFAULT_WEIGHTS` 재조정 시 계산값은 자동 갱신되지만 툴팁 텍스트만 stale 하게 남는 silent drift 소지.
+
+실행: 색상 조건 스왑(파일 내 컨벤션 통일) + 툴팁 템플릿 리터럴로 상수 참조 변경. `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests 전량 pass) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit 2건(fix + VERSION 3-way sync 정정, R4) + push(v0.5.62.103).
+
+다음 사이클 추천 = review-code(heavy, 같은 family — `page.tsx`(1090줄)/`predictions/[date]/page.tsx`(619줄) 등 잔존 대형 파일 계속 탐색) 또는 fix-incident(gap 17/20 — 아직 미달) 또는 explore-idea(다양성, saturation 10/15 — 아직 미달이나 근접).
+
 ## 🟡 PARTIAL — operational-analysis(lite) CE cohort 5th zero-change, non-CE 표본 7주+ 동결 (cycle 2479, 2026-08-24)
 
 진단: open issue 0, approved plan 0/22(전부 completed/archived/tier4/deferred, status:approved 없음). gap trigger 4종 미도달(fix-incident 14/20 — CI green 확인, op-analysis 7/25, info-arch 23/30, lotto 0/30 — 직전 사이클 방금 발화). 직전 8 사이클 distinct=5(review-code/operational-analysis/polish-ui/explore-idea/lotto) — 2-chain lock 미충족. 직전 15 사이클 review-code+fix-incident+polish-ui+info-arch=10/15 — explore-idea saturation 미충족. 강한 trigger 부재 상태에서 cycle 2477/2478 양쪽 retro 가 공통 추천한 "operational-analysis(lite) 신선도 재확인" 채택 — review-code 최근 8사이클 중 4회 dominance 완화 목적 겸.
