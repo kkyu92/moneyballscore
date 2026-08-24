@@ -1,3 +1,17 @@
+## 🟢 SUCCESS — review-code(heavy) buildTeamAccuracy.ts 신규 감사, accuracy 페이지 MIN_TEAM_PREDICTIONS 하드코딩 정정 (cycle 2463, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/deferred/spec_only). gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 4/25, info-arch 8/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 미충족(10/15). cycle 2462 retro 1순위 추천(review-code heavy, 잔여 후보 buildTeamAccuracy.ts) 채택. (부수: PR #3065 진단 단계서 CI green 확인 후 auto-merge 완결, 758103fe 이전 d4e9f72c.)
+
+감사 범위: `standings/buildTeamAccuracy.ts`(261줄) `buildAllTeamAccuracy`/`buildMatchupData`/`buildTeamBiasAnalysis` 전체 + 소비 파일(`page.tsx`/`standings/page.tsx`/`accuracy/page.tsx`/`teams/page.tsx`) 전부 대조.
+
+발견: 파일 자체 로직(CURRENT_MODEL_FILTER/SMALL_SAMPLE_N 필터)은 clean. 소비부 `accuracy/page.tsx` 팀별 예측 성과 섹션(안내문/이상치 판정 isOutlier/색상 조건/샘플 부족 게이트)이 `MIN_TEAM_PREDICTIONS`(packages/shared, wave-113/cycle 1329 single source: "팀별 적중률 차트 표시 최소 검증 경기 수") 대신 하드코딩 `3` 을 4곳 중복 사용 — 값(3)은 우연히 일치했지만 상수 변경 시 이 페이지만 stale 하게 남는 silent drift 소지 (`teams/page.tsx`는 이미 `SMALL_SAMPLE_N` 정상 사용, `dashboard/page.tsx`는 `MIN_TEAM_PREDICTIONS` 정상 사용 — accuracy 페이지만 미swap. wave-2300 과 동일 family, 다른 상수).
+
+실행: `MIN_TEAM_PREDICTIONS` import + 4곳 swap (텍스트 안내 + isOutlier 조건 + 색상 조건 + 샘플부족 게이트) + 회귀 테스트(`wave-2463-min-team-predictions-swap.test.ts`) 신설.
+
+`pnpm --filter moneyball test`(4231/4231, 신규 3건) + `type-check`/`lint` clean. PR #3066 squash 머지 (`758103fe`).
+
+다음 사이클 추천 = operational-analysis(lite, gap 5/25 근접) 또는 review-code(heavy, 대형 미감사 lib pool 고갈 근접 — 다양성 확보 권장).
+
 ## 🟢 SUCCESS — explore-idea(heavy) MLB game detail 팩터 수렴 픽 배지 배선, KBO parity (cycle 2461, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 2/25, info-arch 6/30, lotto 21/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 근접이나 미충족(11/15). cycle 2456/2458/2460 review-code(heavy) 3연속 retro-only(버그 없음 확인만 반복) — 다양성 확보 위해 explore-idea 선택.
