@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) mlb/matchup/[teamA]/[teamB] KBO parity gap, 다음 경기 예측 섹션 신규 (cycle 2474, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 3/25, info-arch 19/30, lotto 34/30 — 실측 확인 결과 `~/lotto_picks/2026-08-29-50sets.md`+`2026-08-22-result.md` 모두 cron self-heal 로 이미 최신, no-op skip). 2-chain lock 미충족(직전8 distinct=3: review-code/explore-idea/operational-analysis). 리포 파일 크기 재조사 → review-code 반복 타겟 대부분 최근 수 사이클 안 감사 완료 확인(analysis/accuracy/teams/daily.ts/mlb game-detail 등) 후 인접 monolith `mlb/matchup/[teamA]/[teamB]/page.tsx`(455줄)+EN 미러(508줄) 선정. KBO `/matchup/[teamA]/[teamB]` 와 h2 섹션 수 비교(KBO 7개 vs MLB KO/EN 각 6개) 대조 감사.
+
+발견: KBO `/matchup/[teamA]/[teamB]` 는 `buildMatchupUpcoming.ts` 로 두 팀의 예정 경기 + AI 사전예측을 "다음 경기 예측" 섹션으로 노출(cycle 1640 wave-309)하지만, MLB `mlb/matchup/[teamA]/[teamB]`(KO+EN) 는 이 섹션 자체가 처음부터 부재 — `apps/moneyball/src/lib/mlb/` 디렉토리 전체에 scheduled 상태의 MLB 경기 예측을 조회하는 코드가 0건 확인(단일 페이지 격차가 아니라 리그 전체에 이 기능이 미구현). plan #24 MLB 확장(Phase 1~3c) 당시 KBO 원본의 이 조각만 이식이 빠졌던 feature parity gap.
+
+실행: `buildMlbMatchupUpcoming.ts` 신규(`mlb_schedule`(status='scheduled', game_date ≥ 오늘 KST) + `predictions`(prediction_type='pre_game', league='mlb', scoring_rule ∈ MLB_PRODUCTION_COHORT_RULES) 조인 — `buildMlbMatchupProfile.ts` 동일 컨벤션, `deriveMlbOutcome` 재사용해 `home_win_prob` 로 predictedWinnerCode/confidence derive). KO+EN 매치업 페이지 양쪽에 KBO 섹션과 동일 UI(승률 바 + 팀로고 + 티어 배지, 이미 MLB 컨텍스트(en/mlb/predictions)에서 쓰이는 league-agnostic `classifyWinnerProb`/`winnerProbOf`/`pickTierEmoji`/`WINNER_TIER_LABEL` 재사용) 신규 삽입. 신규 테스트 3건(빈 배열/예측 있음 derive/예측 부재 시 null). `tsc --noEmit`(4 packages clean) + `pnpm test`(504 files/4234 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.100, VERSION 파일 sync 정정 커밋 1건 추가).
+
+다음 사이클 추천 = operational-analysis(lite, gap 4/25 — 여전히 저신선도) 또는 explore-idea(다양성 회복, review-code 3/8 최근 dominance 완화됨) 또는 review-code 계속(다른 MLB 페이지에도 이번과 유사한 "KBO 기능 미이식" 격차 존재 가능성 — team/[code] 등 재점검 여지).
+
 ## 🟢 SUCCESS — review-code(heavy) mlb/games/[date]/[slug] EN 미러 최초 전체 감사, 모델 메타 정보 섹션 누락 정정 (cycle 2472, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 17/30, lotto 32/30 — self-heal 이미 최신, 5th no-op skip). 2-chain lock 미충족(직전8 distinct=4). op-analysis 재실행 시 오늘 4번째 연속 zero-change 예상 — 배제. review-code 반복 타겟 전부 감사 이력 확인 후 `mlb/games/[date]/[slug]/page.tsx`(543줄, context/i18n wave 다수 부분 터치했지만 전용 최초 감사 0건) 선정, KO 원본 read + EN 미러 diff 대조.
