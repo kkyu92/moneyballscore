@@ -22,6 +22,7 @@ import {
   SITE_URL,
   CURRENT_SCORING_RULE,
   DASHBOARD_FACTOR_TOP_N,
+  SMALL_SAMPLE_N,
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
@@ -239,6 +240,9 @@ export default async function DashboardPage() {
             {confidentStat.total > 0
               ? `적중 예측 ${confidentStat.correct}/${confidentStat.total}`
               : '적중 예측 표본 없음'}
+            {confidentStat.total > 0 && confidentStat.total < SMALL_SAMPLE_N && (
+              <> · 소표본(n&lt;{SMALL_SAMPLE_N})</>
+            )}
           </p>
         </div>
       </section>
