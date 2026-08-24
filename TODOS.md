@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) analysis/page.tsx(목록) 팩터 수렴 픽 성적 라인 7개소 소표본 게이트 부재 (cycle 2543, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29(전부 status≠approved). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달(fix-incident 17/20, op-analysis 13/25, info-arch 26/30, lotto 5/30). cycle 2542 retro carry-over(analysis/page.tsx 2803줄, 7개 지점 명시) 감사.
+
+발견: `recentConvergenceRecord`(기본) + `recentStrong`/`monthlyStrong`/`seasonStrong`(강수렴) + `seasonComplete`/`monthlyComplete`/`recentComplete`(완전수렴) 총 7개 라인이 `SMALL_SAMPLE_N` import 없이 승률 %를 그대로 강조 노출. `weekly*`/`yesterday*` 변형은 % 미표시(카운트만)라 범위 제외.
+
+실행: `SMALL_SAMPLE_N` import + 7개 지점 각각 `total < SMALL_SAMPLE_N` 조건부 `opacity-60` + 인라인 `· 소표본(n<5)` 안내(cycle 2541/2542 관례 재사용). 회귀 테스트 `silent-drift-wave-665.test.ts` 신규(7개 변수 게이트 확인).
+
+검증: `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(522 files/4310 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push(R4), 버전 0.5.62.117→118.
+
+accuracy(2541) → game/[id](2542) → 목록(2543) 3-cycle 연속으로 소표본 게이트 family sweep 완료 추정. 다음 사이클 review-code(heavy) 진행 시 신규 target 재탐색 필요 (이 family 소진 가능성 — saturation 시 explore-idea redirect 고려).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) analysis/game/[id]/page.tsx 팩터 수렴 픽 성적 라인 소표본 게이트 부재 (cycle 2542, 2026-08-25)
 
 진단: open issue 0, approved plan 0/29(전부 status≠approved). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달(fix-incident 16/20, op-analysis 12/25, info-arch 25/30, lotto 4/30). CI 실패 0건. cycle 2541 retro carry-over(잔존 대형 파일 `analysis/game/[id]/page.tsx` 868줄) 감사.
