@@ -40,6 +40,7 @@ import {
   STATS_RELIABLE_MIN_N,
   MIN_POLL_TOTAL,
   MIN_TEAM_PREDICTIONS,
+  SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -203,7 +204,7 @@ function CalibrationChart({ buckets }: { buckets: Bucket[] }) {
         const cx = px(b.avgConf);
         const cy = py(b.hitRate);
         const r = Math.max(5, Math.min(16, Math.sqrt(b.n) * 3.5));
-        const small = b.n < 5;
+        const small = b.n < SMALL_SAMPLE_N;
         const colVar = small ? neutral[400] : 'var(--color-brand-500)';
         return (
           <g key={b.lower}>
