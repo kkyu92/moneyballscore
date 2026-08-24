@@ -1,3 +1,13 @@
+## 🟡 PARTIAL — operational-analysis(lite) CE cohort 재측정, n=337 동결 4th 재확인 (cycle 2471, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 5/25, info-arch 16/30, lotto 31/30 — 30-cycle gap 충족했으나 실측 확인 결과 이미 self-heal 완료, 신규 작업 없음). 2-chain lock 미충족(직전8 distinct=4: review-code/fix-incident/operational-analysis/explore-idea). explore-idea 신규 리드 탐색(3-source: `/login`+`/community`+`PlaceholderLoginButton` 는 plan #29 risk=3/자율불가 Tier4 확정 재확인, MLB player Statcast deep-dive placeholder 도 "사용자 영역 ETA" 동일 성격 확인 — 신규 착수 불가) 및 review-code 신규 target 탐색(scrapers/ 디렉토리 max 526줄 fancy-stats.ts 이미 감사 완료(cycle 2277/2371), agents/validator.ts 이미 4회 감사(2122/2241/2281/2369/2398), reviews/weekly·predictions/[date]·factor-correlation·mlb/team/[code]·methodology 전부 감사 이력 확인) — 양쪽 모두 신규 actionable target 소진 확정, op-analysis(lite) 최종 선택.
+
+lotto gap 확인: 마지막 발화 cycle 2440(31-cycle gap 충족)이었으나 `~/lotto_picks/2026-08-29-50sets.md`(1239회, Aug 23 박제) + `2026-08-22-result.md`(1238회 OOS, Aug 23 박제) 모두 cron self-heal 로 이미 최신 — cycle 2440 과 동일 결론이라 재실행 skip (중복 저가치 방지).
+
+실행: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=337 (CE n=290 / 비CE n=47, cycle 2448/2466/2469 와 완전 동일, 4번째 연속 zero-change 확인 — 오늘(2026-08-24) 하루 안 30+ cycle 누적으로 predictions 신규 유입 없음, 예상된 결과). CE 53.4%(155/290) / 비CE 63.8%(30/47) → 격차 10.4pp (cycle 2448 10.4pp 대비 동일). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → LLM 부가가치 우세 방향 재확인(변화 없음). 코드 변경 0.
+
+다음 사이클 추천 = explore-idea 또는 review-code 신규 target 완전 소진 상태 — 다음 실제 진전은 (1) 새 날짜(KST 자정 이후) 신규 predictions 유입 후 op-analysis 재측정 또는 (2) KBO 포스트시즌 진출 시점(plan #29 재평가 트리거) 또는 (3) 사용자 직접 지시. 당분간 review-code/explore-idea 자연 saturation 상태 — skill-evolution trigger 5 미충족(review-code 11/19 존재)이나 다음 cycle 도 유사 저신호 예상.
+
 ## 🔍 RETRO-ONLY — review-code(heavy) teams/[code]/page.tsx 최초 전체 감사, clean (cycle 2470, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/spec_only_deferred). gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 4/25, info-arch 15/30, lotto 30/30 아직 미충족). 2-chain lock 미충족(직전8 distinct=4: review-code/fix-incident/operational-analysis/explore-idea). `gh run list` CI 전부 green, fix-incident 신호 없음. 리포 파일 크기 재조사 → `apps/moneyball/src/app/teams/[code]/page.tsx`(622줄) 가 git log 전수 검색상 "최초 전체 감사" 이력 0건 확인 (index.ts/analysis/accuracy/mlb-pipeline/convergenceRecord/buildAccuracyData/buildMatchupProfile 등 인접 상위 monolith 는 모두 최근 감사 완료) — 신규 unaudited target 으로 선정, 전체 622줄 read.
