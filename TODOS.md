@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) accuracy/page.tsx 팩터별 적중률 표 소표본 게이트 부재 (cycle 2541, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29(전부 archived/completed). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달. cycle 2539/2540 retro carry-over(잔존 대형 파일 `accuracy/page.tsx` 1220줄) 감사.
+
+발견: `accuracy/page.tsx` 자체는 KST/CE배너/cohort-filter 등 기존 재발 family 관점에서 clean(이미 이전 wave 들에서 정정됨). 다만 하위 컴포넌트 `FactorAccuracyTable.tsx`(팩터별 적중률)가 페이지 내 유일하게 소표본 게이트가 없는 표 — 팀별 성과(`MIN_TEAM_PREDICTIONS`)/상대강약(`TeamMatchupCards` `SMALL_SAMPLE_N`)/요일별(`SMALL_SAMPLE_THRESHOLD`)/확신도 티어(`STATS_RELIABLE_MIN_N`)는 전부 소표본 caveat 존재하나 이 표만 n=1 팩터도 100%/0%로 색상 강조.
+
+실행: `SMALL_SAMPLE_N`(5) import + `r.n < SMALL_SAMPLE_N` 행 `opacity-50`(TeamMatchupCards 관례) + KBO/MLB-ko/MLB-en 3 locale `smallSampleNote` footer 안내 추가(로케일 미분기 하드코딩 방지). 회귀 테스트 `silent-drift-wave-663.test.ts` 신규.
+
+검증: `pnpm --filter moneyball run type-check` clean + `pnpm test`(519 files/4296 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push(R4), 버전 0.5.62.115→116(VERSION 파일 sync 는 pre-push guard 포착 후 2번째 커밋).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 대형 파일 `analysis/game/[id]/page.tsx` 868줄 미감사) 또는 explore-idea(heavy)(saturation trigger 재확인 필요).
+
+---
+
 ## ✅ SUCCESS — explore-idea(heavy) analysis/page.tsx PickButton parity 추가 (cycle 2540, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. 이미 소진 확정된 영역(EN/KO parity, JSON-LD, PWA, leaderboard, auth, standings 홈/원정 — cycle 2535 shipped, CE 배너 로직 — 최근 review-code 다수 정정, KST 경계 — 최근 review-code 다수 정정, 수렴/직접대결/팩터 배지 시리즈)을 제외하고 "일부 페이지엔 있고 다른 페이지엔 없는" parity gap 재조사.
