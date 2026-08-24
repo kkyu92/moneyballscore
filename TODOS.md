@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy) game-record-features.ts dead export 2건 정리 (cycle 2560, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2552-2559 distinct=3). fix-incident negative. op-analysis gap 4/25 미도달(2556 heavy 방금 발화) — lite 경로(op-analysis-cohort.ts) 수동 실행 시도했으나 이미 자동 cron 산출물(`2026-08-24-cohort-split.md`)과 100% 동일 확인, 신규 정보 없음(cron 중복 실행 저가치 확인). explore-idea 5연속 lite 소진 유지. design-system/info-arch/lotto negative. cycle 2557~2559 3연속 diversity redirect 권고했으나 대체 chain(explore-idea/op-analysis) 재확인 결과 즉시 저가치 판명 → review-code 잔존 재탐색, cycle 2559 TODOS "가치 낮아 보류" 후보 재평가.
+
+실행: `game-record-features.ts`의 `bullpenAppearancesLastNDays`/`teamRunDiffLastN` — 형제 함수 4개(`bullpenInningsLastNDays`/`teamRunsPerGameLastN`/`teamRunsAllowedPerGameLastN`/`teamHomeRunsLastN`)와 달리 `backtest/loader.ts` 미참조 확정(자체 테스트만 참조). CLAUDE.md "확실히 미사용이면 완전 삭제" 원칙 적용해 함수 2개 + 대응 테스트 2개 삭제. `pnpm --filter @moneyball/kbo-data test`(91 files/1188 tests, -2) + type-check + lint clean. VERSION/package.json(root+apps/moneyball) 0.5.62.126 + CHANGELOG 동기화. 단일 논리 단위 → PR 없이 직접 main commit(`1fff4a84`)+push(R4), pre-push hook 통과.
+
+다음 사이클 추천 = explore-idea(6th 소진 여부 재확인) 또는 operational-analysis heavy(CE cohort 대신 새 metric 각도). op-analysis lite(cohort-split 스크립트 수동 실행)는 cron과 100% 중복이므로 회피.
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) SMALL_SAMPLE_N family 3차 재확인 + 잔여 stale 파일 sweep, 신규 fix 없음 (cycle 2559, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2551-2558 distinct=4). fix-incident gap 33/20 도달 → `gh run list --limit 10` 재확인, 전부 success/skipped — negative. op-analysis(gap 3/25)/info-arch/lotto/design-system 모두 gap 미도달. explore-idea 5연속 lite 소진 재확인(TODOS Next-Up + GH issue 재확인 리드 없음).
