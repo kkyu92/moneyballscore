@@ -1,4 +1,9 @@
-import { MIN_LEADERBOARD_PICKS, PICKS_STREAK_BADGE_MIN, USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
+import {
+  MIN_LEADERBOARD_PICKS,
+  PICKS_STREAK_BADGE_MIN,
+  SMALL_SAMPLE_N,
+  USER_LEADERBOARD_DISPLAY_LIMIT,
+} from '@moneyball/shared';
 import type { AiBaseline, LeaderboardEntry } from '@/lib/leaderboard/types';
 
 interface Props {
@@ -43,6 +48,11 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
         <div className="flex items-center justify-between text-xs px-4 py-2 bg-gray-50 dark:bg-[var(--color-surface-card)]/60 border border-gray-100 dark:border-[var(--color-border)] rounded-lg">
           <span className="text-gray-500 dark:text-gray-400">
             AI 적중률 <span className="text-gray-400 dark:text-gray-500">(n={aiBaseline.total})</span>
+            {aiBaseline.total < SMALL_SAMPLE_N && (
+              <span className="ml-1 text-gray-400 dark:text-gray-500">
+                · 소표본(n&lt;{SMALL_SAMPLE_N})
+              </span>
+            )}
           </span>
           <span className="font-semibold tabular-nums text-gray-700 dark:text-gray-200">
             {aiBaseline.pct}%
