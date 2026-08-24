@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) dashboard/standings 컴포넌트 최초 전체 감사, buildStandings silent catch 정정 (cycle 2500, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달. cycle 2499 추천대로 review-code(heavy) 계속, accuracy 컴포넌트 계열 완결 후 dashboard/standings 디렉토리로 전환.
+
+감사: dashboard 컴포넌트 14개(chart) + factor-accuracy.ts + dashboard/page.tsx + standings 계열 lib 3개. 대부분 clean(ModelTuningInsights 의 "제안 가중치" 계산 로직 doc↔code 일치 확인 등), 단 `buildStandings.ts` 에서 실제 발견: 내부 try/catch 가 `fetchStandings()` 실패를 삼켜 `[]` 리턴 — 호출부(home page.tsx, standings/page.tsx)가 이미 `captureFallback(err, [], {...})` 관측성 wrapper 를 준비해뒀지만 buildStandings() 가 절대 reject 하지 않아 홈페이지 쪽은 죽은 코드, standings/page.tsx 쪽은 wrapper 자체가 없었음. 형제 함수(buildAllTeamAccuracy/buildEloTrend)는 이미 에러 전파+캡처 컨벤션을 따르고 있어 buildStandings 만 예외. KBO 공식 스크래핑 실패(사례 8 referer 차단 재발 가능) 시 두 페이지 순위표가 Sentry 알림 없이 조용히 빈 배열로 표시될 위험 — 대응: 내부 catch 제거(에러 전파) + 호출부 3곳 captureFallback 연결. `buildTeamAccuracy.ts` 의 `buildTeamBiasAnalysis` 내부 동일 fetchStandings 2차 occurrence 도 같은 패턴이라 함께 정정(biasGap 은 null-safe 라 오염값은 없었으나 관측성 공백 동일).
+
+검증: tsc --noEmit clean, vitest 전체 509 files/4250 tests pass, pre-push lint+type-check+version-sync-guard pass. PR 없이 direct main push (commit 4e7ed95b).
+
+milestone(cycle 2500, %50==0) — trigger 3 충족, skill-evolution-pending marker 박제(milestone deferred 2500→2501, 사례 15 mitigation 정상 작동).
+
+다음 사이클 추천 = skill-evolution(marker 처리, 다음 fresh session 자동) 이후 review-code(heavy) 계속(미감사: insights/predictions 컴포넌트 계열) 또는 op-analysis(gap 23/25 임박).
+
 ## 🔵 RETRO-ONLY — explore-idea(heavy) push 알림 carry-over 재평가 + lotto gap 판단 skip, 신규 idea 0건 (cycle 2498, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4/blocked). gap trigger: fix-incident 14/20, op-analysis 19/25, info-arch 12/30 (전부 미도달). lotto 는 마지막 실제 fire cycle 2392 = 106 사이클 경과로 기계적으론 트리거 충족이나, cycle 2426 chain-evolution 증거(4회 연속 no-op 재발, cron self-heal 이 develop-cycle 과 독립적으로 이미 매주 picks/result 처리)를 본 사이클도 실측 재확인(`~/lotto_picks/2026-08-29-50sets.md` 8/23 생성 + `2026-08-22-result.md` 8/23 반영 + `lotto-pick-update.yml`/`lotto-result-update.yml` 최근 실행 전부 success) — 5번째 무의미 재발 방지 위해 본 메인 자율 판단으로 lotto fire skip(트리거 기계적 충족과 실제 개입 필요성 디커플링, 최종 SKILL.md 반영은 다음 skill-evolution 몫). 직전 8 사이클(2490-2497) distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. 직전 15 사이클 14/15(review-code+fix-incident+polish-ui+info-arch) — improvement saturation trigger 충족 → explore-idea 자연 발화.
