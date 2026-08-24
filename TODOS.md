@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) MlbAccuracyDashboard 팀 테이블 게이트 로컬 shadow 상수 제거 (cycle 2565, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2557-2564 distinct=3: review-code 6+operational-analysis 1+polish-ui 1). fix-incident negative(`gh run list` 최근 10건 전부 success/skipped). op-analysis(gap 4/25)/design-system(DESIGN.md 당일 갱신)/info-arch(gap 18/30)/lotto 모두 gap 미도달. explore-idea saturation 11/15 미도달. cycle 2562 retro 추천대로 `apps/moneyball/src/components` 대형 파일 순회 계속 — `PredictionCard.tsx`(마지막 터치 cycle 1870, 695 사이클 미터치)/`PredictionCardLive.tsx` 먼저 조사했으나 SMALL_SAMPLE_N family 미해당 확인(단일 경기 신뢰도 표시, 통계 rate 아님 — false positive 회피 후 제외), judgeReasoning fallback 배지 경로도 대조 확인 결과 기존 설계 일관(PredictionCard 내부 judgeReasoning 블록은 애초 배지 미지원, JudgeReasoningCard 만 지원 — drift 아님).
+
+발견: `MlbAccuracyDashboard.tsx` 가 `@moneyball/shared` 의 `MIN_TEAM_PREDICTIONS`(=3) 를 import 하면서도 팀별 성과 테이블 게이트엔 별도 로컬 `TEAM_TABLE_MIN_N = 3` 상수를 선언해 사용 — cycle 2528 fix 가 같은 파일의 `cohortWeekHeatmap` 섹션은 `MIN_TEAM_PREDICTIONS` 로 swap 했지만 팀 테이블 섹션(라인 388/391)은 놓친 partial fix. 값이 우연히 3=3 이라 지금은 동작 동일하지만 공유 상수가 바뀌면 이 섹션만 silent divergence — MIN_TEAM_PREDICTIONS family 재발.
+
+실행: 로컬 `TEAM_TABLE_MIN_N` 선언 제거 + 사용처 2곳을 `MIN_TEAM_PREDICTIONS` 직접 사용으로 교체(KBO `/accuracy/page.tsx` 팀 테이블과 패턴 정합). 회귀 테스트 `silent-drift-cycle-2565.test.ts` 신규(3 assertion, `app/accuracy/__tests__/` — cycle 2528 테스트와 동일 위치 컨벤션). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(536 files/4384 tests, +3) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(`e79af5d3`)+push(R4), pre-push lint/type-check/version-sync-guard 통과.
+
+다음 사이클 추천 = review-code(heavy) 계속(component-level 대형 파일 순회 유효성 재확인) 또는 explore-idea(saturation 11/15 근접, 다음 사이클 12/15 도달 여부 확인). 2-chain lock 없음 상태 유지 중이라 자연 선택 가능.
+
+---
+
 ## ✅ SUCCESS — polish-ui (2-chain lock fallback) 적중 표시 green→brand 토큰 정렬 (cycle 2563, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. **2-chain lock 발동** — 직전 8사이클(2555-2562) distinct chain=2(review-code 6 + operational-analysis 2), 룰 첫 실측 발동. lock 대상 2개 제외 후 나머지 chain 전부 trigger 미충족(fix-incident negative/design-system negative/info-arch gap 16·30/lotto gap 25·30/explore-idea saturation 11·12 근접 미도달) → lock fallback 규칙에 따라 polish-ui 강제 발화.
