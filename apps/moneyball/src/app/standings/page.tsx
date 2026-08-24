@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, SMALL_SAMPLE_N } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, SMALL_SAMPLE_N, VENUE_RECORD_MIN_GAMES, VENUE_WIN_RATE_HIGH, VENUE_WIN_RATE_LOW } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -62,6 +62,46 @@ function Recent10({ text }: { text: string }) {
       <span className="text-brand-600 dark:text-brand-400">{wins}승</span>
       <span className="text-gray-400 dark:text-gray-500 mx-0.5">·</span>
       <span className="text-red-600 dark:text-red-400">{losses}패</span>
+    </span>
+  );
+}
+
+// wave-488: 홈/원정 성적 — StandingRow.homeWins/homeLosses (column 8, kbo-official scraper) 는 이미 fetch 중이나 테이블에 미노출
+function HomeAwayRecord({ wins, losses, homeWins, homeLosses }: { wins: number; losses: number; homeWins?: number; homeLosses?: number }) {
+  if (homeWins === undefined || homeLosses === undefined) {
+    return <span className="text-gray-300 dark:text-gray-600">-</span>;
+  }
+  const awayWins = Math.max(0, wins - homeWins);
+  const awayLosses = Math.max(0, losses - homeLosses);
+  const homeTotal = homeWins + homeLosses;
+  const awayTotal = awayWins + awayLosses;
+  const homeWinRate = homeTotal > 0 ? homeWins / homeTotal : null;
+  const awayWinRate = awayTotal > 0 ? awayWins / awayTotal : null;
+  return (
+    <span className="tabular-nums text-xs font-mono whitespace-nowrap">
+      {homeTotal >= VENUE_RECORD_MIN_GAMES && homeWinRate !== null ? (
+        <span className={
+          homeWinRate >= VENUE_WIN_RATE_HIGH
+            ? "text-brand-500 dark:text-brand-400"
+            : homeWinRate <= VENUE_WIN_RATE_LOW
+              ? "text-orange-500 dark:text-orange-400"
+              : "text-gray-500 dark:text-gray-400"
+        }>홈{homeWins}승{homeLosses}패</span>
+      ) : (
+        <span className="text-gray-300 dark:text-gray-600">홈-</span>
+      )}
+      <span className="text-gray-300 dark:text-gray-700 mx-0.5">/</span>
+      {awayTotal >= VENUE_RECORD_MIN_GAMES && awayWinRate !== null ? (
+        <span className={
+          awayWinRate >= VENUE_WIN_RATE_HIGH
+            ? "text-brand-500 dark:text-brand-400"
+            : awayWinRate <= VENUE_WIN_RATE_LOW
+              ? "text-orange-500 dark:text-orange-400"
+              : "text-gray-500 dark:text-gray-400"
+        }>원{awayWins}승{awayLosses}패</span>
+      ) : (
+        <span className="text-gray-300 dark:text-gray-600">원-</span>
+      )}
     </span>
   );
 }
@@ -159,6 +199,7 @@ export default async function StandingsPage() {
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">승률</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">게임차</th>
                   <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">최근{RECENT_FORM_GAMES}</th>
+                  <th className="px-3 py-3 text-center font-semibold text-gray-600 dark:text-gray-300" title={`홈/원정 성적 (${VENUE_RECORD_MIN_GAMES}경기 미만은 표본 부족으로 -로 표시)`}>홈/원정</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums" title={`Elo 레이팅 (기준: ${ELO_NEUTRAL})`}>Elo</th>
                 </tr>
               </thead>
@@ -213,6 +254,9 @@ export default async function StandingsPage() {
                       </td>
                       <td className="px-3 py-3 text-center">
                         {row.recent10 ? <Recent10 text={row.recent10} /> : <span className="text-gray-300 dark:text-gray-600">-</span>}
+                      </td>
+                      <td className="px-3 py-3 text-center">
+                        <HomeAwayRecord wins={row.wins} losses={row.losses} homeWins={row.homeWins} homeLosses={row.homeLosses} />
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums font-mono text-xs">
                         {currentElo != null ? (

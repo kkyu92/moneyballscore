@@ -1,3 +1,12 @@
+## v0.5.62.114 — 2026-08-24 (cycle 2535, explore-idea: standings 홈/원정 성적 컬럼 추가)
+
+### feat(standings): `/standings` 테이블에 팀별 홈/원정 성적 컬럼 신규 추가 — `StandingRow.homeWins`/`homeLosses` 는 이미 fetch 중이나 어디서도 표시된 적 없던 필드
+
+- 진단: 2-chain alternation lock 발동 (직전 8사이클 distinct=2: review-code+operational-analysis) → 두 chain 후보 제외. gh run list(CI 실패 0건) / DESIGN.md mtime(1일 전 갱신, stale 아님) / breadcrumb 누락 확인했으나 모두 기존 baseline과 동일해 신규 trigger 아님. explore-idea saturation trigger(직전 15사이클 review-code+fix-incident 13/15) 충족 + 잔여 pool 중 유일한 실질 trigger라 선택. 단, 직전 5회(2417/2477/2486/2494/2498/2515/2524) 모두 retro-only(소진) 이력이라 general-purpose agent 로 EN/KO parity·JSON-LD·PWA·leaderboard·auth 등 기존 소진 영역을 제외한 순수 신규 탐색 위임.
+- 발견: `StandingRow.homeWins`/`homeLosses`(`kbo-official.ts` 컬럼 8 파싱, wave-329 이후 870+ cycle 전부터 존재)는 `analysis/page.tsx`(venueMap/게임카드 배지), `teams/[code]/page.tsx`(homeAwayEdge), `matchup/[teamA]/[teamB]/page.tsx` 에서 재사용되지만, 정작 `/standings` 순위표 자체(경기/승/무/패/승률/게임차/최근10/Elo 8열)에는 한 번도 노출된 적 없음 — 홈/원정 split을 가장 자연스럽게 찾을 법한 위치에 정작 없는 gap.
+- 실행: `HomeAwayRecord` 컴포넌트 신규(`standings/page.tsx`) — `analysis/page.tsx` wave-329/434 와 동일 패턴(원정 = wins - homeWins, `VENUE_RECORD_MIN_GAMES`(7) 미만 표본은 `-` 대시, `VENUE_WIN_RATE_HIGH/LOW` 임계로 색상 강조) 재사용. 신규 DB 쿼리 0건(이미 fetch 중인 `buildStandings()` 필드 재사용). MLB/EN 미러 페이지는 홈/원정 split 데이터 소스 자체가 없어 parity 대상 아님(KBO 전용 필드 확인). 회귀 테스트 `silent-drift-cycle-2535.test.ts` 신규.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(518 files/4292 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.113 — 2026-08-24 (cycle 2534, review-code (heavy): analysis/page.tsx CE 배너 감지 기준 통일)
 
 ### fix(analysis): `/analysis` simplifiedMode(CREDIT_EXHAUSTED 배너) 가 `todayData.games`(오늘 경기만) 평균 confidence 로 판정 — KBO 휴식일/크론 실행 전엔 games.length < CE_MIN_SAMPLES 라 CE 진행 중이어도 배너 절대 안 뜸
