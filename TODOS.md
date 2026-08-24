@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) teams/[code]/recent·players/[id] 적중률 소표본 게이트 부재 정정 (cycle 2549, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(2541-2548 distinct=3). fix-incident 20+/20 도달했으나 `gh run list` 재확인 negative. op-analysis 19/25, lotto 11/30, info-arch 2/30 미도달. cycle 2548 retro carry-over 후보 3건(mlb/reviews/weekly — 이미 게이트 존재, debug/factor-correlation — 이미 CI/N 투명 공개라 스코프 밖, mlb/games/[date]/[slug] — 해당 통계 부재) 전부 소진 확인.
+
+발견: carry-over 소진 후 broader grep sweep(적중률 텍스트 + `SMALL_SAMPLE_N` import 부재 교차) 신규 실행 → `teams/[code]/recent/page.tsx` 헤더 "적중률 N% (n/m)" 및 `players/[id]/page.tsx` "예측 적중률" 카드 둘 다 게이트 부재. `RECENT_FORM_GAMES=10` 상한이라 시즌 초반/검증 미완료 구간 n<5 노출 가능 — family 7번째 연속 재발.
+
+실행: 두 파일 모두 `SMALL_SAMPLE_N` import + 조건부 `· 소표본(n<5)` 인라인 표시 추가. mlb/players/[id]·KBO teams/recent의 MLB 대응 페이지는 해당 통계 자체 부재라 parity 갭 없음(스코프 밖 확인). 회귀 테스트 `silent-drift-wave-669.test.ts` 신규(6 assertion).
+
+검증: tsc/lint clean + test(527 files/4345 tests) 통과. 단일 논리 단위 → 직접 main commit(7d2be288)+push, pre-push guard 통과, R4 정합.
+
+다음 사이클 추천 = review-code(heavy, sweep 리스트 잔여 재확인 — dashboard.tsx confidentStat/teamMap 계산부 등) 또는 family 완전 소진 확인 시 explore-idea 다양성 redirect.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) predictions/[date] 헤더 적중률 소표본 게이트 부재 정정 (cycle 2548, 2026-08-25)
 
 진단: open issue 0, approved plan 0/29. 2-chain lock 없음(직전 8사이클 2540-2547 distinct=3: explore-idea/review-code/info-architecture-review). fix-incident 20+/20 gap 도달했으나 `gh run list` 전 workflow success, CI 실패 0건 재확인 → negative skip. op-analysis 18/25, lotto 10/30 미도달. cycle 2547 retro가 review-code(heavy) 또는 explore-idea 재평가 권고.
