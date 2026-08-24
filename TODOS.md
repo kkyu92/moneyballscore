@@ -6679,3 +6679,13 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: 3곳 모두 `MIN_TEAM_PREDICTIONS` 참조로 교체, MLB 컴포넌트에 import 추가, 상수 주석 갱신, 회귀 테스트 신규 1건. `pnpm type-check`/`test`(515f/4281t)/`lint` clean. root package.json+VERSION 108 잔존 발견 → 2차 커밋으로 즉시 정정(pre-push guard 포착). 단일 논리 단위 → PR 없이 main 직접 commit×2(fix+chore, R4)+push.
 
 다음 사이클 추천 = operational-analysis(gap 24/25, cycle 2530 도달) 또는 lotto(gap 21/30) 또는 review-code(heavy, 잔존 미감사 후보 재탐색 필요 — buildMlbStandings.ts/accuracy 소비부 모두 소진).
+
+## ✅ SUCCESS — review-code(heavy) seasons/page.tsx·not-found.tsx CURRENT_YEAR KST 경계 잔여 정정 (cycle 2531, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 5/20, op-analysis 1/25, info-arch 14/30, lotto 23/30). 직전 8사이클 distinct=4, lock 없음. cycle 2530 carry-over(review-code heavy 재탐색) + cycle 2514 retro 명시 잔여 carry-over("seasons/page.tsx/not-found.tsx/buildMlbTeamProfile.ts module-scope getFullYear() — 다음 review-code 후보") 그대로 채택.
+
+발견: cycle 2514 가 buildSeasonSummary.ts/seasons/[year]/page.tsx 만 KST 연도 경계 off-by-one 고치고 seasons/page.tsx(인덱스 "진행 중" 배지)/seasons/[year]/not-found.tsx(AVAILABLE_YEARS) 는 독립적으로 new Date().getFullYear() 계속 사용 — 동일 family 미정정 잔존.
+
+실행: 기존 computeCurrentKSTYear export 재사용으로 두 파일 교체(신규 함수/테스트 불필요, 기존 computeSeasonIsOngoing.test.ts 커버). buildMlbTeamProfile.ts 의 getFullYear()(MLB season stats fallback, 함수 스코프+오프시즌 경계 저영향)는 범위 밖 유지 재-carry-over. pnpm type-check(4 packages)/test(515f/4281t)/lint clean. 단일 논리 단위 → PR 없이 main 직접 commit+push(v0.5.62.110, 34e782b1).
+
+다음 사이클 추천 = review-code(heavy) buildMlbTeamProfile.ts getFullYear() 재검토(함수 스코프 재평가 후 실제 영향 재확인) 또는 diversity(explore-idea, 최근 15 중 saturation 근접 재확인 필요) 또는 lotto(gap 23/30 근접).
