@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) matchup 페이지 3종 최초 전체 감사, todayStr KST 미적용 정정 (cycle 2507, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/blocked). gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 2/25, info-arch 21/30, lotto 29/30). 직전 8 사이클 distinct=4(2-chain lock 미충족). cycle 2506 추천대로 review-code(heavy) 계속, `app/matchup/[teamA]/[teamB]/page.tsx`(KBO 원본, 547줄, 사전 감사 이력 0건)로 신규 타겟 확장.
+
+1차 가설(오판, 자가 정정): MLB matchup/team 게임 테이블의 `Math.round(g.confidence * 100)`가 KBO 대응 위치(`confToWinProb(g.confidence)`)와 달라 보여 confToWinProb 미적용 버그로 의심 → `silent-drift-wave-310.test.ts` 파일 하단 가드(`silent drift wave 310 정정 cycle 2160`)를 먼저 확인해 MLB `confidence`는 이미 0.5~1 스케일이라 confToWinProb 재적용 시 이중 변환 버그(850%류)가 재발한다는 걸 발견 — 수정 보류(무변경 유지).
+
+실제 확정 이슈: `buildMatchupUpcoming.ts` / `buildMlbMatchupUpcoming.ts`(lib 레이어) 는 "오늘" 계산에 이미 `toKSTDateString()` 사용 중인데, 이를 페이지에서 다시 쓰는 `matchup/[teamA]/[teamB]/page.tsx` 3종(KBO/MLB/EN-MLB) 은 게임 목록을 예정/이번시즌/과거로 분류하는 `todayStr`/`currentYear` 를 raw UTC(`new Date().toISOString().slice(0,10)`, `new Date().getFullYear().toString()`)로 독립 재계산 — KST 새벽 시간대(UTC 전날) 경계에서 분류 오차 가능한 KST_OFFSET_MS family(wave 145) 재발. 3파일 모두 `toKSTDateString()` 단일화 + `currentYear`를 `todayStr.slice(0,4)`로 파생, wave-660 회귀 가드 신규.
+
+검증: tsc --noEmit clean, eslint clean, vitest 전체 510 files/4253 tests pass, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit 76c35904).
+
+다음 사이클 추천 = review-code(heavy) 계속(matchup 감사 완료, 다른 미감사 후보: `mlb/games/[date]/[slug]/page.tsx`, `lotto/methodology/page.tsx`, `mlb/reviews/monthly`, `mlb/factors` 등 잔존) 또는 lotto(gap 29/30 임박 — 다음 사이클 자연 도달).
+
 ## 🔵 RETRO-ONLY — fix-incident(lite) mlb_fancy_scrape FanGraphs 403 3일 self-healed 3번째 재발 (cycle 2504, 2026-08-24)
 
 진단: fix-incident gap=20 / operational-analysis gap=25 동시 충족. pipeline_runs 실측(service-role REST) + gh run list 로 실제 이상 여부 확인. CI/cron 전부 clean, 단 최근 7일 non-success 3건 발견 — mode=`mlb_fancy_scrape`, `fetchFangraphsMlbTeams: fangraphs HTTP 403`, run_date 2026-08-20~22. 08-23/08-24 는 이미 success 로 self-healed.
