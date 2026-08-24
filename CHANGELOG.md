@@ -1,3 +1,12 @@
+## v0.5.62.105 — 2026-08-24 (cycle 2490, review-code (heavy): buildAccuracyData.ts 최초 전체 감사 — Version History CURRENT_MODEL_FILTER 오적용 정정)
+
+### fix(accuracy): `/accuracy` 모델 버전 히스토리 표가 v1.5/v1.6/v1.7-revert/v1.8-credit-fail 실측 데이터를 영구 "수집 중"으로 오표시하던 silent drift 정정
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 6/20, op-analysis 11/25, info-arch 4/30, lotto 12/30). 직전 8 사이클 distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. 잔존 미감사 대형 data builder 중(`buildAccuracyData.ts` 776줄, `/accuracy` 페이지 데이터 소스) 최초 전체 감사 착수 (2489 추천).
+- 발견: `accuracy/page.tsx` 가 단일 `predictions` 쿼리(`CURRENT_MODEL_FILTER` = `scoring_rule='v1.8'` 매치)로 가져온 `rows` 를 `buildVersionHistory(rows)` 에 그대로 전달 — `ModelVersionHistory` 컴포넌트는 `ALL_SCORING_RULES`(v1.5/v1.6/v1.7-revert/v1.8/v1.8-credit-fail 등) 전체 버전 진행사를 보여주도록 설계됐지만, 쿼리 자체가 이미 v1.8 외 scoring_rule 을 배제해 다른 버전은 항상 n=0 → UI 가 "수집 중"으로 렌더. DB 실측 결과 v1.5(n=16)/v1.6(n=46)/v1.7-revert(n=34)/v1.8-credit-fail(n=25) 총 121건의 실제 검증된 예측이 존재해 "수집 중"이 아니라 이미 종료된 과거 버전의 실적 미노출이었음. `CURRENT_MODEL_FILTER` 자체는 baseline 지표(brier/gap/buckets 등) 정합을 위해 v1.8 만 쓰는 것이 문서화된 의도(shared model-version-labels.ts)이나, 그 제약이 성격이 다른 buildVersionHistory 호출까지 전파된 것이 문제.
+- 실행: Version History 전용 쿼리(`versionHistoryResult`, scoring_rule 필터 없음) 를 Promise.all 에 추가 후 `buildVersionHistory(versionHistoryRows)` 로 분리. 회귀 테스트 신규 1건(`silent-drift-cycle-2490.test.ts`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(508 files/4246 tests) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit(fix, R4).
+
 ## v0.5.62.104 — 2026-08-24 (cycle 2488, review-code (heavy): analysis-data.ts 최초 전체 감사 — topFactors NEUTRAL dead zone 미적용 정정)
 
 ### fix(analysis): `getTodayAnalysisData` topFactors 계산에 NEUTRAL_HI/LO dead zone(0.45~0.55) 미적용 — 중립 팩터 오표시 정정

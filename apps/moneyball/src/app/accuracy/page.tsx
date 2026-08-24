@@ -265,11 +265,22 @@ export default async function AccuracyPage() {
   const fallbackWindowStart = new Date(Date.now() - 30 * DAY_MS).toISOString();
   const FALLBACK_TREND_DAYS = 30;
 
-  const [result, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult, factorResult] = await Promise.all([
+  const [result, versionHistoryResult, pollResult, completedGamesResult, predForPoll, teamRows, matchupData, biasRows, fallbackResult, factorResult] = await Promise.all([
     supabase
       .from('predictions')
       .select('confidence, is_correct, verified_at, scoring_rule, model_version, reasoning->homeWinProb')
       .match(CURRENT_MODEL_FILTER)
+      .eq('prediction_type', 'pre_game')
+      .not('verified_at', 'is', null)
+      .not('is_correct', 'is', null)
+      .order('verified_at', { ascending: true }),
+    // 버전 히스토리 테이블(ModelVersionHistory) 전용 — CURRENT_MODEL_FILTER(scoring_rule=v1.8)를
+    // 걸지 않음. `rows`(위 쿼리)는 baseline 정합 위해 v1.8만 담아 v1.5/v1.6/v1.7-revert/
+    // v1.8-credit-fail 실측 데이터(DB 확인 n=16/46/34/25)가 항상 제외돼 Version History
+    // 표가 과거 버전을 영구히 "수집 중"으로 오표시했음 (silent drift, review-code heavy 감사).
+    supabase
+      .from('predictions')
+      .select('confidence, is_correct, verified_at, scoring_rule, model_version, reasoning->homeWinProb')
       .eq('prediction_type', 'pre_game')
       .not('verified_at', 'is', null)
       .not('is_correct', 'is', null)
@@ -315,6 +326,9 @@ export default async function AccuracyPage() {
   const { data } = assertSelectOk(result, 'AccuracyPage');
   const rows = (data ?? []) as PredRow[];
 
+  const { data: versionHistoryData } = assertSelectOk(versionHistoryResult, 'AccuracyPage versionHistory');
+  const versionHistoryRows = (versionHistoryData ?? []) as PredRow[];
+
   const { data: fallbackData } = assertSelectOk(fallbackResult, 'AccuracyPage fallback');
   const fallbackRows = (fallbackData ?? []) as FallbackStatsRow[];
   const fallbackStats = buildFallbackStats(fallbackRows);
@@ -334,7 +348,7 @@ export default async function AccuracyPage() {
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
-  const versionHistory = buildVersionHistory(rows);
+  const versionHistory = buildVersionHistory(versionHistoryRows);
   const v18SubCohort = buildV18SubCohort(rows);
 
   const lastUpdated = rows.length > 0 ? rows[rows.length - 1].verified_at : null;
