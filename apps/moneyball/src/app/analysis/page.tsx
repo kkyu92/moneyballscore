@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { PickButton } from '@/components/picks/PickButton';
 import {
   classifyWinnerProb,
   ELO_DISPLAY_NEUTRAL_BAND,
@@ -1769,6 +1770,29 @@ export default async function AnalysisIndexPage() {
                       );
                     })()}
                   </Link>
+                  {/* cycle 2540: 오늘 예측 투표 — 홈/mlb-analysis 페이지엔 있던 PickButton 이 KBO 분석 페이지(analysis/page.tsx)엔 누락되어 있던 parity gap. 경기 시작 전(status=scheduled)에만 노출 */}
+                  {g.status === 'scheduled' && (
+                    <PickButton
+                      gameId={g.gameId}
+                      homeTeam={g.homeCode}
+                      awayTeam={g.awayCode}
+                      aiPredictedWinner={
+                        g.predictedWinnerCode === g.homeCode
+                          ? 'home'
+                          : g.predictedWinnerCode === g.awayCode
+                            ? 'away'
+                            : undefined
+                      }
+                      aiWinProb={
+                        g.predictedWinnerCode === g.homeCode
+                          ? g.homeWinProb
+                          : g.predictedWinnerCode === g.awayCode
+                            ? 1 - g.homeWinProb
+                            : undefined
+                      }
+                      aiTopFactor={g.topFactors[0]?.label}
+                    />
+                  )}
                   {/* wave-361: 매치업 심층 분석 딥링크 — battle badge 강세 신호 → matchup 상세 연결 (cycle 1699) */}
                   {(() => {
                     const pair = canonicalPair(g.awayCode, g.homeCode);

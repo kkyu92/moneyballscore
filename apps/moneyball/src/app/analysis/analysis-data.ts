@@ -34,6 +34,7 @@ interface TodayAllRow {
   id: number;
   game_time: string | null;
   external_game_id: string | null;
+  status: string | null;
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
@@ -109,6 +110,8 @@ export interface TodayGameCard {
   /** wave-345: 팀 WAR 배지 · wave-444: 팩터 수렴 픽 WAR 행 격차(Δ) 표시 */
   homeWar?: number;
   awayWar?: number;
+  /** cycle 2540: 경기 상태 — 'scheduled' 일 때만 PickButton(투표) 노출 게이트 (home/mlb-analysis parity) */
+  status: string | null;
 }
 
 export interface TodayAnalysisData {
@@ -126,7 +129,7 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
   const gamesResult = (await supabase
     .from('games')
     .select(`
-      id, game_time, external_game_id,
+      id, game_time, external_game_id, status,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
@@ -233,6 +236,7 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
       awaySfr: pred.away_sfr ?? undefined,
       homeWar: pred.home_war_total ?? undefined,
       awayWar: pred.away_war_total ?? undefined,
+      status: game.status,
     });
   }
 

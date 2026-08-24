@@ -1,3 +1,12 @@
+## v0.5.62.115 — 2026-08-24 (cycle 2540, explore-idea: analysis/page.tsx PickButton parity 추가)
+
+### feat(analysis): `/analysis` "오늘 전체 AI 예측" 카드에 PickButton(내 픽 투표) 신규 추가 — 홈("/") · `/mlb/analysis` 양쪽 다 있던 투표 진입점이 KBO 메인 분석 페이지에만 누락
+
+- 진단: open issue 0, approved plan 0/29. 2-chain lock 재평가 필요(직전 8사이클 review-code 우세). explore-idea heavy 배정 — 이미 소진된 영역(EN/KO parity, JSON-LD, PWA, leaderboard, auth, standings 홈/원정, CE 배너 로직, KST 경계, 배지 시리즈)을 제외하고 페이지 간 기능 parity 재조사.
+- 발견: `PickButton` 컴포넌트(투표 제출 + 커뮤니티 분포 + AI 대결 힌트)는 이미 홈("/")과 `/mlb/analysis`, `/mlb/games/[date]` 에 통합돼 있지만, 정작 KBO 사용자가 오늘 경기를 가장 상세히 확인하는 `/analysis` 페이지("오늘 전체 AI 예측" 섹션, 홈페이지와 별개의 독자적 카드 렌더링)에는 빠져 있었음 — `predictions/[date]/page.tsx` 는 의도적으로 `enablePickButton={false}`(기록 열람용, 투표 미대상)이지만 `/analysis` 는 그런 예외 표시가 전혀 없이 그냥 컴포넌트 자체가 없었던 순수 누락.
+- 실행: `analysis-data.ts` 의 `games` 쿼리에 `status` 컬럼 select 추가 + `TodayGameCard.status` 필드 신규 (기존엔 경기 상태를 전혀 조회하지 않아 PickButton 노출 게이트(`scheduled`만) 적용 불가능했음). `page.tsx` 게임 카드 `</Link>` 직후에 `g.status === 'scheduled'` 게이트로 `PickButton` 렌더(홈/mlb-analysis 동일 관례), `aiPredictedWinner`/`aiWinProb`/`aiTopFactor` 는 기존 계산값(`predictedWinnerCode`/`homeWinProb`/`topFactors[0]`) 재사용 — 신규 DB 쿼리 없음(컬럼 1개 추가만). 회귀 테스트 `silent-drift-cycle-2540.test.ts` 신규.
+- `pnpm --filter moneyball run type-check` clean + `pnpm --filter moneyball run test`(519 files/4295 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.114 — 2026-08-24 (cycle 2535, explore-idea: standings 홈/원정 성적 컬럼 추가)
 
 ### feat(standings): `/standings` 테이블에 팀별 홈/원정 성적 컬럼 신규 추가 — `StandingRow.homeWins`/`homeLosses` 는 이미 fetch 중이나 어디서도 표시된 적 없던 필드
