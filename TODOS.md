@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) factor-explanations.ts 최초 전체 감사 — marginPp 하드코딩 * 200 / 0.5 정정 (cycle 2493, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 9/20, op-analysis 14/25, info-arch 7/30, lotto 15/30). 직전 8 사이클 distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. 2492 추천대로 review-code(heavy) 계속, 잔존 미감사 대형 파일 중 `factor-explanations.ts`(416줄, `/analysis/game/[id]` 팩터 해설·요약 소스, review-code 이력 0건) 선정.
+
+발견: 이 파일 자체(`explainFactor`/`buildGameOverview`)는 WAR/SFR=0 데이터 갭 가드, NEUTRAL dead-zone, 상수 단일화(wave-352/356) 등 기존 wave fix 로 이미 견고 — 신규 이슈 없음. 다만 `OVERVIEW_CLOSE_PP`/`OVERVIEW_DOMINANT_PP` threshold 를 소비하는 두 컴포넌트(`GameAnalysisProse.tsx` KBO / `MlbGameOverview.tsx` MLB)를 대조한 결과, 각 컴포넌트가 marginPp 원 계산 자체를 `Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * 200` / `Math.abs(homeWinProb - 0.5) * 200` 로 별도 하드코딩 — cycle 2253 fix(#2988)가 threshold 상수(10/20)만 단일화하고 marginPp 산식 자체는 두 컴포넌트에 중복 하드코딩으로 남김. 현재 `ELO_NEUTRAL_WIN_PCT`(0.5)/`NEUTRAL_FACTOR`(0.5)/`FACTOR_CONTRIBUTION_SCALE`(200) 값이 동일해 지금은 무증상이나, 향후 `FACTOR_CONTRIBUTION_SCALE` 재조정 시 `buildGameOverview` 와 두 컴포넌트 marginPp 가 silent 하게 divergent 해질 위험.
+
+실행: 두 컴포넌트 모두 `FACTOR_CONTRIBUTION_SCALE`(+`MlbGameOverview.tsx` 는 `NEUTRAL_FACTOR` 도) import 후 marginPp 계산을 단일 source 참조로 교체. 회귀 테스트 신규 1건(`silent-drift-cycle-2493.test.ts`). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(509 files/4250 tests) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit+push 완료(96d04f9b). push 시 root package.json 3-way sync 누락을 pre-push guard 가 즉시 감지 → 별도 신규 커밋(7708bf19, amend 미사용)으로 정정 후 재 push 성공.
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사 대상: `buildPicksStats.ts`(410줄, MLB 픽 silent-drop 과거 이력 있어 재점검 가치) / `mlb-shared.ts`(409줄) / `buildMlbTeamProfile.ts`(383줄)) 또는 op-analysis(gap 14/25, 임박).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildMatchupProfile.ts/buildMlbMatchupProfile.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2492, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 8/20, op-analysis 13/25, info-arch 6/30, lotto 14/30). 직전 8 사이클(2484-2491) distinct=3(fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. 2491 추천대로 review-code(heavy) 계속, 잔존 미감사 data builder 중 `buildMatchupProfile.ts`(594줄, `/matchup/[teamA]/[teamB]` 페이지 데이터 소스)와 MLB 대응 `buildMlbMatchupProfile.ts`(526줄) 양쪽 선정.
