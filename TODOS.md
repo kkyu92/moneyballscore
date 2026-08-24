@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) mlb/games/[date]/[slug] EN 미러 최초 전체 감사, 모델 메타 정보 섹션 누락 정정 (cycle 2472, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 17/30, lotto 32/30 — self-heal 이미 최신, 5th no-op skip). 2-chain lock 미충족(직전8 distinct=4). op-analysis 재실행 시 오늘 4번째 연속 zero-change 예상 — 배제. review-code 반복 타겟 전부 감사 이력 확인 후 `mlb/games/[date]/[slug]/page.tsx`(543줄, context/i18n wave 다수 부분 터치했지만 전용 최초 감사 0건) 선정, KO 원본 read + EN 미러 diff 대조.
+
+발견: KO 페이지의 "모델 메타 정보" `<details>`(model_version/debate_version/predictionLeadHours, cycle 2423 도입) 섹션이 EN 미러에 select 쿼리 컬럼 3개부터 통째로 빠져있었음 — i18n silent leak family 의 MLB game-detail 신규 인스턴스. 부수 발견: 우세팀 배너가 KO 는 `mlbShortTeamName`(예: "Yankees") 사용, EN 은 raw 코드(예: "NYY") 노출하던 표시 불일치.
+
+실행: EN 페이지에 3개 컬럼 + `predictionLeadHours` 계산 + KO 와 동일 위치 영문 "Model metadata" 섹션 신규 + winnerCode `mlbShortTeamName` 래핑. `pnpm type-check`(4 packages clean) + `pnpm test`(503 files/4231 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.99).
+
+다음 사이클 추천 = operational-analysis(lite, gap 2/25 — 여전히 저신선도, 재확인만 낮은 가치) 또는 review-code 신규 target 계속 탐색 (i18n silent leak family 패턴이 MLB 신규 페이지들에 반복 재발 가능성 — en/mlb 하위 다른 페이지 대상 우선 점검 여지) 또는 explore-idea(다양성 회복, saturation 미충족 9/15).
+
 ## 🟡 PARTIAL — operational-analysis(lite) CE cohort 재측정, n=337 동결 4th 재확인 (cycle 2471, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 5/25, info-arch 16/30, lotto 31/30 — 30-cycle gap 충족했으나 실측 확인 결과 이미 self-heal 완료, 신규 작업 없음). 2-chain lock 미충족(직전8 distinct=4: review-code/fix-incident/operational-analysis/explore-idea). explore-idea 신규 리드 탐색(3-source: `/login`+`/community`+`PlaceholderLoginButton` 는 plan #29 risk=3/자율불가 Tier4 확정 재확인, MLB player Statcast deep-dive placeholder 도 "사용자 영역 ETA" 동일 성격 확인 — 신규 착수 불가) 및 review-code 신규 target 탐색(scrapers/ 디렉토리 max 526줄 fancy-stats.ts 이미 감사 완료(cycle 2277/2371), agents/validator.ts 이미 4회 감사(2122/2241/2281/2369/2398), reviews/weekly·predictions/[date]·factor-correlation·mlb/team/[code]·methodology 전부 감사 이력 확인) — 양쪽 모두 신규 actionable target 소진 확정, op-analysis(lite) 최종 선택.

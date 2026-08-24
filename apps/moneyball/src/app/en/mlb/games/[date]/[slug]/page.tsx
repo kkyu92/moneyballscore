@@ -22,6 +22,7 @@ import {
   toMlbStatsApiCode,
   mlbShortTeamName,
   MLB_TEAMS,
+  HOUR_MS,
   MLB_COMPOSITE_DUEL_MIN_VALID,
   MLB_FACTOR_PICK_STRONG,
   MLB_FACTOR_PICK_COMPLETE,
@@ -117,6 +118,9 @@ interface PredictionDetailRow {
   home_recent_form: number | null;
   away_recent_form: number | null;
   head_to_head_rate: number | null;
+  model_version: string | null;
+  debate_version: string | null;
+  predicted_at: string | null;
 }
 
 interface ScheduleRow {
@@ -188,7 +192,10 @@ export default async function GameDetailEn({ params }: PageParams) {
       away_elo,
       home_recent_form,
       away_recent_form,
-      head_to_head_rate
+      head_to_head_rate,
+      model_version,
+      debate_version,
+      predicted_at
     `)
     .eq('league', 'mlb')
     .eq('scoring_rule', MLB_SCORING_RULE)
@@ -202,8 +209,15 @@ export default async function GameDetailEn({ params }: PageParams) {
   const home = homeCode;
   const away = awayCode;
   const homeWinProb = pred.home_win_prob ?? 0.5;
-  const winnerCode = homeWinProb >= 0.5 ? home : away;
+  // KO page.tsx 와 동일 — mlbShortTeamName 없이 raw code 를 그대로 노출하던 EN 미러 drift 정정.
+  const winnerCode = mlbShortTeamName(homeWinProb >= 0.5 ? home : away);
   const conf = Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100);
+  // KO page.tsx(cycle 2423) parity — EN 미러에 누락됐던 predicted_at 기반 lead time.
+  const predictionLeadHours = pred.predicted_at
+    ? Math.round(
+        (new Date(schedule.game_datetime_utc).getTime() - new Date(pred.predicted_at).getTime()) / HOUR_MS
+      )
+    : null;
 
   // SportsEvent 스키마 — KO page.tsx(cycle 2099) parity.
   const homeFullName = MLB_TEAMS[home].name;
@@ -460,6 +474,34 @@ export default async function GameDetailEn({ params }: PageParams) {
         asOfDate={date}
         locale="en"
       />
+
+      {pred.model_version && (
+        <details className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg px-4 py-2 text-xs">
+          <summary className="cursor-pointer text-gray-500 dark:text-gray-400">
+            Model metadata
+          </summary>
+          <div className="mt-2 space-y-1 text-gray-600 dark:text-gray-300">
+            <p>
+              Quant model: <span className="font-mono">{pred.model_version}</span>
+              {pred.debate_version && (
+                <>
+                  {' · debate version '}
+                  <span className="font-mono">{pred.debate_version}</span>
+                </>
+              )}
+              {predictionLeadHours !== null && (
+                <>
+                  {' · generated '}
+                  <span className="font-mono">
+                    {predictionLeadHours >= 1 ? `${predictionLeadHours}h` : '<1h'}
+                  </span>
+                  {' before game time'}
+                </>
+              )}
+            </p>
+          </div>
+        </details>
+      )}
 
       <footer className="border-t border-gray-200 dark:border-[var(--color-border)] pt-4">
         <ShareButtons
