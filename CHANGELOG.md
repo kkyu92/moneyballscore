@@ -1,4 +1,11 @@
-## v0.5.62.111 — 2026-08-24 (cycle 2532, review-code (heavy): reviews/weekly factorInsights minSamples 하드코딩 정정)
+## v0.5.62.112 — 2026-08-24 (cycle 2533, review-code (heavy): about/page.tsx CREDIT_EXHAUSTED 배너 누락 정정)
+
+### fix(context): `/about` FAQ "AI 에이전트 토론" 설명이 CREDIT_EXHAUSTED(100% quant fallback) 상태를 사용자에게 알리지 않음 — analysis/predictions 계열엔 이미 배너 존재
+
+- 진단: open issue 0, approved plan 0/29(전부 non-approved). gap trigger 4종 미도달(fix-incident 7/20, op-analysis 3/25, info-arch 16/30, lotto 25/30). 직전 8사이클 distinct=3(review-code/fix-incident/operational-analysis) — 2-chain lock 미충족. cycle 2532 carry-over 명시 후보(`analysis-data.ts`/`convergenceRecord.ts`/`about/page.tsx`) 순서대로 감사.
+- 발견: `apps/moneyball/src/app/analysis/analysis-data.ts`(942줄) + MLB 미러 + `convergenceRecord.ts`(831줄)는 이미 SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES/h2h 등 정합 상태로 clean. `about/page.tsx`(427줄, 과거 10회 stale-claim fix 이력)의 FAQ "AI 에이전트 토론은 무엇을 기반으로 하나요?" 항목은 홈/원정/심판 에이전트 토론이 상시 가동 중이라 서술하지만, `/analysis`·`/predictions`·`/predictions/[date]`는 이미 `CE_DETECT_THRESHOLD`(0.32) 기반 `simplifiedMode` 배너("AI 에이전트 심층 분석이 일시 중단됩니다")로 CREDIT_EXHAUSTED(2026-06-06~ 지속, 6th recurrence) 상태를 사용자에게 알리는데 `/about`(방법론 레퍼런스 페이지)만 이 배너가 빠져 있어 실제로는 100% quant fallback 인 기간에도 "토론 결합" 을 사실인 것처럼 서술.
+- 실행: `about/page.tsx`를 async 서버 컴포넌트로 전환, `predictions` 테이블 최근 10건 confidence 평균 조회로 동일 `simplifiedMode` 감지 로직 재사용(CE_MIN_SAMPLES/CE_DETECT_THRESHOLD) + 동일 배너 UI 추가. `revalidate = 3600` 신규 추가(기존 무기한 정적 캐시 → 배너 신선도 확보). 회귀 테스트는 `silent-drift-wave-307.test.ts`(CE 상수 하드코딩 가드) 에 about 항목 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(516 files/4286 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
 
 ### fix(context): `buildWeeklyReview.ts`/`buildMlbWeeklyReview.ts` 의 `buildFactorInsights`/`buildMlbFactorInsights` 호출이 `minSamples: 3` 하드코딩 — `buildMonthlyReview.ts`/`buildMlbMonthlyReview.ts` 는 `SMALL_SAMPLE_N`(=5, sweep 51 source-of-truth) 참조 중이라 동일 family 미정정 잔존
 

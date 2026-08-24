@@ -1,14 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN_PCT, SUNDAY_CAP_CONFIDENCE_PCT, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS, CURRENT_SCORING_RULE } from "@moneyball/shared";
+import { DEFAULT_WEIGHTS, HOME_ADVANTAGE, HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, HOME_WIN_RATE_CI_PP, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, RECENT_FORM_GAMES, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN_PCT, SUNDAY_CAP_CONFIDENCE_PCT, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, MIN_LEADERBOARD_PICKS, CURRENT_SCORING_RULE, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, PRODUCTION_COHORT_RULES, assertSelectOk, type SelectResult } from "@moneyball/shared";
 import {
   FANGRAPHS_AUX_METRICS,
   MetricRegistry,
   MLB_FACTOR_COUNTS,
 } from "@moneyball/kbo-data";
+import { createClient } from "@/lib/supabase/server";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 import { FACTOR_LABELS_TECHNICAL } from "@/lib/predictions/factorLabels";
+
+export const revalidate = 3600; // ANALYSIS_INDEX_ISR_SECONDS 와 동일 granularity (simplifiedMode 배너 신선도)
+
+// CREDIT_EXHAUSTED 간소화 모드 감지 — analysis/predictions 페이지와 동일 패턴(최근 예측
+// avg confidence ≤ CE_DETECT_THRESHOLD). about 페이지는 "AI 에이전트 토론" 섹션에서 이 메커니즘이
+// 상시 가동 중이라 설명하지만, CREDIT_EXHAUSTED 시 실제로는 100% quant fallback 이라 배지 없이는
+// 사용자가 알 수 없던 gap — /predictions, /predictions/[date], /analysis 는 이미 배너 노출 중.
+async function detectSimplifiedMode(): Promise<boolean> {
+  const supabase = await createClient();
+  const result = (await supabase
+    .from('predictions')
+    .select('confidence')
+    .eq('prediction_type', 'pre_game')
+    .in('scoring_rule', PRODUCTION_COHORT_RULES)
+    .order('id', { ascending: false })
+    .limit(10)) as SelectResult<Array<{ confidence: number | null }>>;
+  const { data } = assertSelectOk(result, 'about detectSimplifiedMode');
+  const recentConfs = (data ?? [])
+    .map((r) => r.confidence)
+    .filter((c): c is number => c != null);
+  return (
+    recentConfs.length >= CE_MIN_SAMPLES &&
+    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= CE_DETECT_THRESHOLD
+  );
+}
 
 const TOC_ITEMS = [
   { id: "model", label: "예측 모델" },
@@ -189,7 +215,8 @@ const FAQS = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const simplifiedMode = await detectSimplifiedMode();
   const activeFactors = FACTORS.filter(
     (f) => (DEFAULT_WEIGHTS[f.key] as number) > 0,
   ).sort(
@@ -223,6 +250,11 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <Breadcrumb items={[{ label: '소개' }]} />
+      {simplifiedMode && (
+        <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+          AI 에이전트 심층 분석이 일시 중단됩니다. 통계 기반 승부예측은 계속 제공됩니다.
+        </div>
+      )}
       <section>
         <h1 className="text-3xl font-bold mb-2">MoneyBall Score</h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg">

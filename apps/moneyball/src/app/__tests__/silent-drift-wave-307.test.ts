@@ -47,4 +47,18 @@ describe('silent drift wave 307 — CE detection constants (cycle 1638)', () => 
     expect(src).toContain('@moneyball/shared');
     expect(src).not.toMatch(/<=\s*0\.32/);
   });
+
+  // cycle 2533: about/page.tsx FAQ 는 AI 에이전트 토론이 상시 가동 중이라 설명하지만
+  // CREDIT_EXHAUSTED 시 100% quant fallback — analysis/predictions 계열과 동일 배너 부재였음.
+  it('about/page.tsx imports CE_DETECT_THRESHOLD/CE_MIN_SAMPLES from shared + renders simplifiedMode banner (no hardcoded 0.32)', () => {
+    const src = readFileSync(
+      join(ROOT, 'src/app/about/page.tsx'),
+      'utf8',
+    );
+    expect(src).toContain('CE_DETECT_THRESHOLD');
+    expect(src).toContain('CE_MIN_SAMPLES');
+    expect(src).toContain('@moneyball/shared');
+    expect(src).toContain('simplifiedMode');
+    expect(src).not.toMatch(/<=\s*0\.32/);
+  });
 });
