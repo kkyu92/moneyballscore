@@ -1,3 +1,13 @@
+## v0.5.62.102 — 2026-08-24 (cycle 2476, polish-ui: MLB game-detail 레이아웃 폭 회귀 + EN 팀 페이지 division rank 배지 누락 정정)
+
+### fix(mlb): game-detail `max-w-3xl` 레이아웃 폭 회귀 + EN 팀 페이지 division rank 배지 KO/EN parity 정정
+
+- 진단: 2-chain lock 탐지(직전 8 사이클 distinct=2: review-code 7 + operational-analysis 1). 잠긴 두 chain 제외 후 나머지 pool(fix-incident 12/20, info-arch 21/30, explore-idea 11/15, lotto 36/30 이지만 self-heal 이미 최신) 모두 trigger 미충족 → 룰(어떤 chain 도 trigger 없으면 polish-ui 강제 발화) 적용. 최근 7일 신규 MLB UI 7개 파일(team/matchup/game-detail KO+EN) 이 design-review 0회 상태였음도 근거.
+- 발견 1(real bug): `mlb/games/[date]/[slug]/page.tsx`(KO+EN) 가 `<main className="max-w-3xl mx-auto px-4 py-6 space-y-6">` 사용 — KBO 원본(`analysis/game/[id]/page.tsx`)과 다른 모든 신규 MLB 페이지(team/matchup)는 전부 `<article className="max-w-4xl mx-auto space-y-6 py-N">` 컨벤션. game-detail 만 ~128px 좁고 여백 다르게 렌더 — team/matchup ↔ game-detail 이동 시 폭이 튀는 시각 회귀.
+- 발견 2(content parity): `mlb/team/[code]/page.tsx` KO 는 `buildMlbDivisionStandings`/`findMlbTeamDivisionRank` 로 헤더에 디비전 순위 배지(`N위/M팀 · N경기차`) 노출하지만, EN 미러는 이 조회/렌더가 통째로 빠져있어 EN 사용자만 순위 정보 미노출.
+- 실행: game-detail KO+EN 모두 `max-w-4xl`/`<article>` 로 통일. EN 팀 페이지에 KO 와 동일한 `buildMlbDivisionStandings`+`findMlbTeamDivisionRank` 조회 및 배지(`N/M · GB N.N`, EN 표준 GB 표기는 `en/mlb/standings` 컨벤션과 일치) 추가.
+- `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests 전량 pass) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(fix, R4).
+
 ## v0.5.62.101 — 2026-08-24 (cycle 2475, review-code (heavy): mlb/team/[code] KBO parity gap — 예정 경기 · 예측 섹션 부재 해소)
 
 ### feat(mlb): `/mlb/team/[code]` (KO+EN) 에 KBO `/teams/[code]` 대응 "예정 경기 · 예측" 섹션이 부재했던 것을 신규 추가

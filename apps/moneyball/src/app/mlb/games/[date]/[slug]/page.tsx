@@ -295,7 +295,7 @@ export default async function GameDetail({ params }: PageParams) {
     : { wins: 0, losses: 0, total: 0 };
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+    <article className="max-w-4xl mx-auto space-y-6 py-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventLd) }}
@@ -537,7 +537,7 @@ export default async function GameDetail({ params }: PageParams) {
         ];
         return <RelatedLinks title="관련 페이지" items={items} />;
       })()}
-    </main>
+    </article>
   );
 }
 
