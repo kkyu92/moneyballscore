@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) mlb/team/[code] KBO parity gap, 예정 경기 · 예측 섹션 신규 (cycle 2475, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 11/20, op-analysis 4/25, info-arch 20/30, lotto self-heal 최신 no-op). 직전 8 사이클 distinct=3(review-code/explore-idea/operational-analysis) — 2-chain lock 미충족. 직전 3 사이클(2472~2474) 연속 review-code(heavy) success streak — dominance-positive streak(cycle 135 룰) 인정, cycle 2474 가 해소한 matchup parity gap 과 같은 family(팀 단위 "예정 경기+예측") 존재 여부를 `teams/[code]` vs `mlb/team/[code]` 대조로 재확인.
+
+발견: KBO `teams/[code]/page.tsx` 는 `buildTeamUpcoming.ts` 로 팀 예정 경기(최대 7경기) + AI 예측을 "예정 경기 · 예측" 섹션으로 노출하지만, MLB `mlb/team/[code]`(KO+EN, cycle 2087/2097/2112/2268/2418 5회 감사됐음에도 이 gap 미발견) 에는 처음부터 부재 — cycle 2474 matchup gap 과 동일 family, plan #24 MLB 확장 시 통째로 누락된 조각.
+
+실행: `buildMlbTeamUpcoming.ts` 신규(`mlb_schedule` + `predictions`(pre_game/mlb/MLB_PRODUCTION_COHORT_RULES) 조인, KBO `TEAM_UPCOMING_LIMIT`(7) 재사용, `deriveMlbOutcome` 으로 home_win_prob 기반 derive — `buildMlbMatchupUpcoming.ts`(cycle 2474) 동일 컨벤션). KO+EN 팀 페이지 Elo 추이 섹션 직후에 KBO 동일 UI 삽입. 신규 테스트 4건(빈 배열/홈 예측/원정 예측 반전/예측 부재 fallback). `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.101).
+
+다음 사이클 추천 = review-code 계속 (같은 family — 다른 MLB 페이지에도 KBO 대비 유사 parity gap 존재 가능성 재점검, 예: mlb/players/[id] vs KBO 원본) 또는 operational-analysis(lite, gap 5/25 — 여전히 저신선도) 또는 explore-idea(다양성 회복, review-code 4/8 dominance 지속).
+
 ## 🟢 SUCCESS — review-code(heavy) mlb/matchup/[teamA]/[teamB] KBO parity gap, 다음 경기 예측 섹션 신규 (cycle 2474, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 3/25, info-arch 19/30, lotto 34/30 — 실측 확인 결과 `~/lotto_picks/2026-08-29-50sets.md`+`2026-08-22-result.md` 모두 cron self-heal 로 이미 최신, no-op skip). 2-chain lock 미충족(직전8 distinct=3: review-code/explore-idea/operational-analysis). 리포 파일 크기 재조사 → review-code 반복 타겟 대부분 최근 수 사이클 안 감사 완료 확인(analysis/accuracy/teams/daily.ts/mlb game-detail 등) 후 인접 monolith `mlb/matchup/[teamA]/[teamB]/page.tsx`(455줄)+EN 미러(508줄) 선정. KBO `/matchup/[teamA]/[teamB]` 와 h2 섹션 수 비교(KBO 7개 vs MLB KO/EN 각 6개) 대조 감사.
