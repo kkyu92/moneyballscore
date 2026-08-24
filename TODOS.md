@@ -1,3 +1,13 @@
+## ⚪ RETRO-ONLY — explore-idea(heavy) 신규 아이디어 탐색, actionable gap 소진 확인 (cycle 2477, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 13/20, op-analysis 6/25 — 직전 4연속 zero-change n=337 동결, info-arch 22/30, lotto self-heal 최신 no-op). 직전 8 사이클 distinct=3(review-code/operational-analysis/polish-ui) — 2-chain lock 미충족. 직전 15 사이클 review-code+fix-incident+polish-ui+info-arch = 12/15 → **explore-idea saturation trigger 충족** — cycle 2476 retro 추천("review-code or explore-idea")과 정합해 explore-idea(heavy) 선택.
+
+탐색 결과 (신규 gap 없음 확인): (1) `mlb/players/[id]` vs KBO `players/[id]` 비교 — MLB 쪽은 Statcast per-player 데이터 자체가 미수집(ETA carry-over, plan #29 Tier4 확정)이라 착수 불가 재확인. (2) `teams/[code]`/`mlb/team/[code]` RelatedLinks·H2H 링크 parity — 이미 양쪽 동일 (`pairsForTeam`/`mlbPairsForTeam`). (3) KBO `/leaderboard`(픽 순위) vs MLB — `mlb_user_picks`(050) Phase 1만 존재, Phase 3(순위 뷰+페이지)는 plan #27 이 cycle 2256 데이터 게이트로 무기한 보류 확정(KBO `user_picks` COUNT=1, MLB COUNT=0, cycle 2334 재확인도 변화 0) — 여전히 데이터 부재로 자율 착수 불가. (4) `/search` 정적 엔트리 — MLB 전 라우트 이미 커버 확인. (5) KBO `/picks` 개인 이력 — plan #27 cycle 2256 이 이미 "MLB `mlb-` 접두 id 도 리그 무관 통합 렌더링 중"임을 확인해 전용 `/mlb/picks` 자체가 불필요 결론남.
+
+결론: 현재 KBO↔MLB feature-parity 탐색 공간이 사실상 소진 — 남은 gap 은 전부 (a) 사용자 영역 데이터 게이트(Statcast per-player, 픽 참여 표본) 대기이거나 (b) 이미 review-code(heavy) 가 최근 5 사이클(2472~2476) 안에 발견·해소함. 코드 변경 0, retro-only 처리.
+
+다음 사이클 추천 = operational-analysis(lite, gap 6/25 — 아직 미달이나 신선도 재확인 겸) 또는 fix-incident(gap 13/20 — 아직 미달, `gh run list` 로 CI 실패 여부만 확인) 또는 review-code(heavy, 다른 미감사 파일 탐색 — 단 saturation 재트리거 유의).
+
 ## 🟢 SUCCESS — review-code(heavy) mlb/team/[code] KBO parity gap, 예정 경기 · 예측 섹션 신규 (cycle 2475, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 11/20, op-analysis 4/25, info-arch 20/30, lotto self-heal 최신 no-op). 직전 8 사이클 distinct=3(review-code/explore-idea/operational-analysis) — 2-chain lock 미충족. 직전 3 사이클(2472~2474) 연속 review-code(heavy) success streak — dominance-positive streak(cycle 135 룰) 인정, cycle 2474 가 해소한 matchup parity gap 과 같은 family(팀 단위 "예정 경기+예측") 존재 여부를 `teams/[code]` vs `mlb/team/[code]` 대조로 재확인.
