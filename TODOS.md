@@ -1,3 +1,13 @@
+## ✅ SUCCESS — operational-analysis(heavy) MLB Elo backtest 재확인 n=896 (cycle 2561, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(status: approved 매칭 0건 — 전부 completed/archived/deferred). 2-chain lock 없음(직전8=2553-2560 distinct=3: review-code 6+operational-analysis 1+explore-idea 1). fix-incident 20+/20 gap 도달 → `gh run list --limit 10` 재확인, 전부 success/skipped(Vercel/CI Failure Dispatch 는 skipped=무실패) — negative. explore-idea saturation trigger 충족(직전15=2547-2560 중 review-code+fix-incident+polish-ui+info-arch=12/15)했으나 cycle 2554/2557/2559/2560 TODOS 가 반복적으로 "explore-idea 5연속 lite 소진" 명시 — 6th 재확인은 저가치 판단. op-analysis 자체 gap(25-cycle)은 5/25 미도달(마지막 발화 2556)이나, cycle 2558~2560 retro 3연속이 공통 권고한 "op-analysis heavy 새 metric 각도(CE cohort 대신)" 를 따라 gap-trigger 아닌 retro-recommendation 경로로 채택 — plan #25(MLB Elo Phase 3 게이트, cycle 2128 archive, n=747 CI 겹침으로 보류 확정)가 11일 경과 후 재검증 후보로 유효 확인.
+
+실행: `scripts/op-analysis-mlb-elo-backtest.ts` 재실행 — `mlb_schedule` final 896건(재생 895건, WARM cohort 743건, cycle 2128 대비 n=747→896/+149). 결과: Elo Brier 0.2480(전체)/0.2475(WARM) vs 홈어드밴티지-only 0.2491/0.2491 — accuracy 방향은 Elo 우세(54.3%/54.6% vs 53.0%) 유지하나 bootstrap 95%CI(2000회) 양쪽 cohort 모두 겹침 = 여전히 통계적 구분 불가, cycle 2128 결론과 동일. 결과 기록 `apps/moneyball/data/op-analysis/2026-08-25-mlb-elo-backtest.md` 신규 + `~/.develop-cycle/plans/moneyballscore/_archive/25.md` frontmatter 에 재확인 노트 append(plan archive 상태 자체는 변경 없음, Phase 3 보류 유지). 코드 변경 없음(순수 데이터 재측정) → 단일 논리 단위로 PR 없이 직접 main commit(`7a89b95b`)+push(R4), pre-push lint/type-check/version-sync-guard 통과.
+
+다음 사이클 추천 = review-code(heavy, SMALL_SAMPLE_N family + dead-code family 양쪽 근접 소진 확인된 상태이나 신규 대형 파일/컴포넌트 sweep 잔여 가능성 재탐색) 또는 explore-idea(6th 소진 여부 — 저가치 반복 우려로 review-code 우선 권장).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) game-record-features.ts dead export 2건 정리 (cycle 2560, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2552-2559 distinct=3). fix-incident negative. op-analysis gap 4/25 미도달(2556 heavy 방금 발화) — lite 경로(op-analysis-cohort.ts) 수동 실행 시도했으나 이미 자동 cron 산출물(`2026-08-24-cohort-split.md`)과 100% 동일 확인, 신규 정보 없음(cron 중복 실행 저가치 확인). explore-idea 5연속 lite 소진 유지. design-system/info-arch/lotto negative. cycle 2557~2559 3연속 diversity redirect 권고했으나 대체 chain(explore-idea/op-analysis) 재확인 결과 즉시 저가치 판명 → review-code 잔존 재탐색, cycle 2559 TODOS "가치 낮아 보류" 후보 재평가.
