@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy) en/mlb/team/[code] 최초 전체 감사, KO 3페이지 jsonLd inLanguage 누락 정정 (cycle 2518, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 해소(직전 8사이클 distinct=3). gap trigger 미도달(fix-incident 12/20, op-analysis 13/25, lotto 10/30). cycle 2516 carry-over 후보 리스트(`debug/pipeline`/`debug/factor-correlation`/`teams/[code]`/`search/page`) 전부 STALE — 이미 각각 cycle 2269/2272+2485/2470/2261에서 전체 감사 완료된 상태였음. `find + wc -l` 전체 재스캔으로 신선 타겟 발굴: `en/mlb/team/[code]/page.tsx`(602줄, 전체 감사 이력 0건, ad-hoc parity fix 2건만 존재).
+
+확정 이슈: EN 버전과 KO 원본(`mlb/team/[code]/page.tsx`) 라인별 대조 결과 구조는 거의 완전 parity이나, jsonLd 의 `inLanguage` 필드가 EN엔 있고("en-US") KO엔 없음. 리포 전체 grep 결과 `mlb/team/[code]` + `mlb/team`(index) + `mlb/matchup/[teamA]/[teamB]` 3개 KO 페이지 모두 동일하게 누락, 해당 EN 미러 3개는 모두 보유 — 과거 parity fix 가 EN 쪽에만 편도 적용된 사례(대부분 다른 KO 페이지는 이미 `inLanguage: "ko-KR"` 보유).
+
+fix: 3개 KO jsonLd 에 `inLanguage: "ko-KR"` 추가(EN 미러와 동일 위치) + 회귀 가드 테스트(`silent-drift-wave-662.test.ts`, 3 assertions) 추가.
+
+검증: vitest 전체 514 files/4277 tests pass, tsc --noEmit clean, eslint clean, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit e0e8b944).
+
+**교훈**: carry-over 후보 리스트를 재검증 없이 재사용하면 stale 될 수 있음 — 다음 review-code(heavy) 진입 시 `wc -l` + git log grep 재확인 필수(본 사이클처럼).
+
+다음 사이클 추천 = review-code(heavy) 계속(재확인 필요 후보: `en/mlb/matchup` 596줄 — ad-hoc parity fix 다수 있었으나 전체 감사 이력 없음, `en/mlb/reviews/monthly` 500줄 — 전체 감사 이력 없음, `analysis/page.tsx` 2803줄 — 주기적 재감사 대상) 또는 operational-analysis(gap 13/25, cycle 2530 경 도달 예상).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) about/page.tsx 최초 전체 감사, 실시간 스코어 갱신 주기 "30초" stale claim 정정 (cycle 2516, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23. gap trigger 4종 미도달(fix-incident 12/20, op-analysis 11/25, info-arch 30/30 — cycle 2517부터 경계 통과 예상, lotto 8/30). cycle 2513~2515 carry-over 추천대로 `about/page.tsx`(427줄, 감사 이력 0건)로 진입.
