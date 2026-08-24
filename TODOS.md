@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) reviews/weekly factorInsights minSamples 하드코딩 정정 (cycle 2532, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 non-approved). gap trigger 4종 미도달(fix-incident 6/20, op-analysis 2/25, info-arch 15/30, lotto 24/30). 직전 8사이클 distinct=4 — 2-chain lock 없음. cycle 2531 retro carry-over("review-code(heavy) 또는 diversity(explore-idea)") + explore-idea 4연속 소진 재확인 상태 고려해 review-code 지속.
+
+감사 범위: fix 이력 0건인 유일한 대형 미감사 파일 `reviews/weekly/[week]/page.tsx`/`mlb/reviews/weekly/[week]/page.tsx`(524/551줄) + 소비 lib.
+
+결과: 페이지 자체는 clean. `buildWeeklyReview.ts`/`buildMlbWeeklyReview.ts` 가 `buildFactorInsights(rows, { minSamples: 3 })` 하드코딩 — 동일 그룹 `buildMonthlyReview.ts`/`buildMlbMonthlyReview.ts` 는 이미 `SMALL_SAMPLE_N`(5) 참조 중이라 weekly 만 더 느슨한 소표본 가드로 팩터 인사이트 노출.
+
+실행: 양쪽 `minSamples: 3` → `SMALL_SAMPLE_N` 교체 + 회귀 테스트 1건(`silent-drift-cycle-2532.test.ts`). `pnpm type-check`/`pnpm test`(516/4285)/`pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(3c041664)+push(R4).
+
+다음 사이클 추천 = operational-analysis(gap 2/25, 아직 이름) 또는 review-code(heavy, 잔존 미감사 후보 재탐색 — `analysis-data.ts`(942줄)/`convergenceRecord.ts`(831줄)/`about/page.tsx`(427줄) 등).
+
+---
+
 ## 🟡 PARTIAL — operational-analysis(lite) 25-cycle gap 재확인, 신규 검증 데이터 0건 (cycle 2530, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger op-analysis 정확히 25/25 도달(마지막 발화 cycle 2505) → lite 자동 권장. fix-incident 4/20, info-arch 13/30, lotto 22/30 미도달. 직전 8사이클 distinct=3, lock 없음. cycle 2529 carry-over 도 동일 추천.
