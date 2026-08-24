@@ -1,4 +1,4 @@
-import { MIN_POLL_TOTAL } from '@moneyball/shared';
+import { MIN_POLL_TOTAL, SMALL_SAMPLE_N } from '@moneyball/shared';
 import type { CommunityVsAIResult } from '@/lib/picks/buildCommunityAccuracy';
 
 interface Strings {
@@ -11,6 +11,8 @@ interface Strings {
   communityLeads: (delta: string) => string;
   aiLeads: (delta: string) => string;
   tie: string;
+  smallSample: (n: number) => string;
+  smallSampleNote: (n: number) => string;
 }
 
 const STRINGS: Record<'ko' | 'en', Strings> = {
@@ -24,6 +26,8 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     communityLeads: (delta) => `커뮤니티가 AI보다 ${delta}%p 앞섭니다`,
     aiLeads: (delta) => `AI가 커뮤니티보다 ${delta}%p 앞섭니다`,
     tie: '커뮤니티와 AI가 동률입니다',
+    smallSample: (n) => ` · 소표본(n<${n})`,
+    smallSampleNote: (n) => `검증된 경기가 적어 참고용입니다 (${n}경기 이상부터 신뢰 가능)`,
   },
   en: {
     title: 'Community vs AI',
@@ -35,6 +39,8 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
     communityLeads: (delta) => `Community leads AI by ${delta}pp`,
     aiLeads: (delta) => `AI leads community by ${delta}pp`,
     tie: 'Community and AI are tied',
+    smallSample: (n) => ` · small sample (n<${n})`,
+    smallSampleNote: (n) => `Few verified games — reference only (reliable from ${n}+ games)`,
   },
 };
 
@@ -96,15 +102,26 @@ export function CommunityVsAICard({ stats, locale = 'ko' }: Props) {
           </p>
           <p
             className={`text-2xl font-bold font-mono ${
-              stats.aiAccuracyWithPoll !== null && stats.aiAccuracyWithPoll >= 0.5
-                ? 'text-brand-500'
-                : 'text-gray-700 dark:text-gray-300'
+              stats.aiGamesWithPoll > 0 && stats.aiGamesWithPoll < SMALL_SAMPLE_N
+                ? 'text-gray-400 dark:text-gray-500'
+                : stats.aiAccuracyWithPoll !== null && stats.aiAccuracyWithPoll >= 0.5
+                  ? 'text-brand-500'
+                  : 'text-gray-700 dark:text-gray-300'
             }`}
+            title={
+              stats.aiGamesWithPoll > 0 && stats.aiGamesWithPoll < SMALL_SAMPLE_N
+                ? t.smallSampleNote(SMALL_SAMPLE_N)
+                : undefined
+            }
           >
             {stats.aiAccuracyWithPoll !== null ? `${(stats.aiAccuracyWithPoll * 100).toFixed(1)}%` : '—'}
           </p>
           <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
-            {stats.aiGamesWithPoll > 0 ? `${stats.aiCorrectWithPoll}/${stats.aiGamesWithPoll} ${t.correctSuffix}` : t.noPrediction}
+            {stats.aiGamesWithPoll > 0
+              ? `${stats.aiCorrectWithPoll}/${stats.aiGamesWithPoll} ${t.correctSuffix}${
+                  stats.aiGamesWithPoll < SMALL_SAMPLE_N ? t.smallSample(SMALL_SAMPLE_N) : ''
+                }`
+              : t.noPrediction}
           </p>
         </div>
       </div>

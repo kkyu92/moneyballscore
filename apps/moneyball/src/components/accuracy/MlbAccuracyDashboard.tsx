@@ -1,4 +1,4 @@
-import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS, MIN_TEAM_PREDICTIONS } from '@moneyball/shared';
+import { mlbShortTeamName, CALIBRATION_AXIS_MIN, CALIBRATION_AXIS_MAX, BRIER_CALIBRATION_OK_GAP, ACCURACY_BASELINE, ROLLING_ACCURACY_WINDOW_DAYS, ROLLING_ACCURACY_TOTAL_DAYS, MIN_TEAM_PREDICTIONS, SMALL_SAMPLE_N } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import { countBrierTrendWeeks, type Bucket, type ConfidenceTier, type WinnerProbBucket, type RollingAccuracyPoint, type BrierTrendPoint, type ScoringRuleDayCell, type ScoringRuleWeekCell } from '@/lib/accuracy/buildAccuracyData';
 import type { MlbTeamAccuracyRow } from '@/lib/mlb/buildMlbTeamAccuracy';
@@ -169,7 +169,7 @@ function MlbCalibrationChart({ buckets, locale }: { buckets: Bucket[]; locale: '
         const cx = px(b.avgConf);
         const cy = py(b.hitRate);
         const r = Math.max(4, Math.min(14, Math.sqrt(b.n) * 3));
-        const small = b.n < 5;
+        const small = b.n < SMALL_SAMPLE_N;
         const colVar = small ? neutral[400] : 'var(--color-brand-500)';
         return (
           <g key={b.lower}>
@@ -257,8 +257,8 @@ export function MlbAccuracyDashboard({
         <StatCard
           label={s.accuracyLabel}
           value={accuracyRate !== null ? `${(accuracyRate * 100).toFixed(1)}%` : '—'}
-          sub={`${correctN}/${verifiedN}`}
-          accent={accuracyRate !== null && accuracyRate >= ACCURACY_BASELINE}
+          sub={`${correctN}/${verifiedN}${verifiedN > 0 && verifiedN < SMALL_SAMPLE_N ? ` ${s.smallSample}` : ''}`}
+          accent={accuracyRate !== null && accuracyRate >= ACCURACY_BASELINE && verifiedN >= SMALL_SAMPLE_N}
         />
         <StatCard label={s.brierLabel} value={brier !== null ? brier.toFixed(3) : '—'} />
         <StatCard
@@ -299,7 +299,7 @@ export function MlbAccuracyDashboard({
         </section>
       )}
 
-      {verifiedN >= 5 && (
+      {verifiedN >= SMALL_SAMPLE_N && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
           <div>
             <h2 className="text-lg font-bold">{s.winnerProbTitle}</h2>
@@ -340,7 +340,7 @@ export function MlbAccuracyDashboard({
         </section>
       )}
 
-      {verifiedN >= 5 && (
+      {verifiedN >= SMALL_SAMPLE_N && (
         <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
           <h2 className="text-lg font-bold">{s.confidenceTitle}</h2>
           <div className="grid grid-cols-3 gap-3">

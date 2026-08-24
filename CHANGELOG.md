@@ -1,3 +1,12 @@
+## v0.5.62.123 — 2026-08-25 (cycle 2553, review-code (heavy): 커뮤니티 vs AI 대결 · MLB accuracy 히어로 소표본 게이트 부재)
+
+### fix(accuracy): "커뮤니티 vs AI 대결" AI 정답률 + MLB accuracy 히어로 전체 적중률 스탯에 소표본(n<5) 게이트 신규 — 다른 계열엔 다 있던 관례가 이 두 곳엔 없었음
+
+- 진단: open issue 0, approved plan 0/23(전부 status≠`approved`). 2-chain lock 없음(직전 8사이클 distinct=3: review-code 6 + skill-evolution 1 + info-arch 1). fix-incident gap 20+/20 도달했으나 `gh run list --limit 10` 재확인 — 최근 10건 전부 success, CI 실패 0건, negative. op-analysis 23/25, info-arch 6/30, lotto 15/30 모두 미도달. cycle 2552 retro가 family 지속 또는 소진 시 explore-idea redirect 명시 — 직전 9-cycle family sweep 잔여 재확인.
+- 발견: (1) `accuracy/page.tsx`(KBO) 커뮤니티 vs AI 인라인 섹션과 이를 추출한 공유 컴포넌트 `CommunityVsAICard.tsx`(explore-idea cycle 2544, MLB 배선) 모두 `communityGames >= MIN_POLL_TOTAL`(=3)만 게이트, AI 정답률(`aiAccuracyWithPoll`)은 독립적으로 더 적은 `aiGamesWithPoll`(3~4건) 기준으로도 `SMALL_SAMPLE_N` 안내 없이 그대로 노출 — KBO 원본에 이미 있던 부재가 컴포넌트 추출 시 그대로 계승. (2) `MlbAccuracyDashboard.tsx` 히어로 "전체 적중률" StatCard는 `SMALL_SAMPLE_N` import 자체가 없어 verifiedN=1이어도 브랜드색 강조 그대로 노출, 내부 calibration bucket/섹션 게이트는 상수 대신 하드코딩 리터럴 `5` 사용(단일 출처 원칙 위반, 값 자체는 현재 일치).
+- 실행: `accuracy/page.tsx` + `CommunityVsAICard.tsx`(ko/en 로케일) AI 정답률 스탯에 `aiGamesWithPoll < SMALL_SAMPLE_N` 조건부 색상/title/인라인 `· 소표본(n<5)` 표시 추가. `MlbAccuracyDashboard.tsx` 히어로 StatCard에 동일 게이트 추가(accent 조건에 `verifiedN >= SMALL_SAMPLE_N` 포함) + 하드코딩 리터럴 `5` 2곳을 `SMALL_SAMPLE_N` 상수로 교체. 회귀 테스트 `silent-drift-wave-672.test.ts` 신규(9 assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(530 files/4364 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.122 — 2026-08-25 (cycle 2548, review-code (heavy): `predictions/[date]` 헤더 적중률 소표본 게이트 부재)
 
 ### fix(predictions): 날짜별 예측 페이지 헤더 "적중률 N%" 텍스트에 소표본(n<5) 인라인 표시 신규 — accuracy/matchup/homepage 계열엔 다 있던 관례가 일별 예측 페이지 헤더엔 없었음

@@ -480,10 +480,17 @@ export default async function AccuracyPage() {
                   </p>
                   <p
                     className={`text-2xl font-bold font-mono ${
-                      communityStats.aiAccuracyWithPoll !== null && communityStats.aiAccuracyWithPoll >= 0.5
-                        ? 'text-brand-500'
-                        : 'text-gray-700 dark:text-gray-300'
+                      communityStats.aiGamesWithPoll > 0 && communityStats.aiGamesWithPoll < SMALL_SAMPLE_N
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : communityStats.aiAccuracyWithPoll !== null && communityStats.aiAccuracyWithPoll >= 0.5
+                          ? 'text-brand-500'
+                          : 'text-gray-700 dark:text-gray-300'
                     }`}
+                    title={
+                      communityStats.aiGamesWithPoll > 0 && communityStats.aiGamesWithPoll < SMALL_SAMPLE_N
+                        ? `검증된 경기가 ${communityStats.aiGamesWithPoll}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
+                        : undefined
+                    }
                   >
                     {communityStats.aiAccuracyWithPoll !== null
                       ? `${(communityStats.aiAccuracyWithPoll * 100).toFixed(1)}%`
@@ -491,7 +498,9 @@ export default async function AccuracyPage() {
                   </p>
                   <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                     {communityStats.aiGamesWithPoll > 0
-                      ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중`
+                      ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중${
+                          communityStats.aiGamesWithPoll < SMALL_SAMPLE_N ? ` · 소표본(n<${SMALL_SAMPLE_N})` : ''
+                        }`
                       : '예측 없음'}
                   </p>
                 </div>
