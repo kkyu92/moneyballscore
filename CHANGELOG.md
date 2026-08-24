@@ -1,3 +1,12 @@
+## v0.5.62.119 — 2026-08-25 (cycle 2544, explore-idea (heavy): /mlb/accuracy·/en/mlb/accuracy 커뮤니티 vs AI 대결 섹션 parity 추가)
+
+### feat(mlb): `/mlb/accuracy` · `/en/mlb/accuracy` 에 "커뮤니티 vs AI 대결" 섹션 신규 — KBO `/accuracy` 에는 있던 픽 투표 다수결 vs AI 정확도 비교가 MLB 쪽엔 부재였던 gap
+
+- 진단: EN/KO route parity, JSON-LD 커버리지, PWA/RSS/공유버튼 등 최근 exhausted 항목 재확인 후 KBO vs MLB 페이지 트리·컴포넌트 사용처 전수 비교(convergence badge, streak, H2H, PickButton 계열). `PickButton`(cycle 2540 이후) 은 이미 양쪽 wired. `mlb_pick_poll_events`/`mlb-poll`/`mlb-submit` API 도 이미 존재해 MLB 커뮤니티 투표 자체는 정상 수집 중이었으나, 그 데이터를 소비하는 화면이 `/mlb/accuracy`·`/en/mlb/accuracy` 어디에도 없어 KBO `/accuracy` 대비 명확한 기능 gap 확인.
+- 발견: KBO `/accuracy` 는 `computeCommunityVsAI`(game_id 정수 키, `pick_poll_events` + `games` 테이블) 로 인라인 섹션을 렌더하지만, MLB 는 `external_game_id`(VARCHAR) 키 + `predictions.is_correct` 전량 NULL(팀이 string 코드라 INT FK 컬럼이 애초에 안 맞음, `deriveMlbOutcome.ts` 기존 주석) 이라 기존 함수를 그대로 재사용 불가 — 별도 구현 필요했던 게 안 만들어진 채 방치.
+- 실행: `computeMlbCommunityVsAI`(`lib/picks/buildCommunityAccuracy.ts`, `deriveMlbOutcome` 로 home_win_prob+실제 스코어에서 AI 정답 여부 derive) + `buildMlbCommunityVsAI`(`lib/mlb/buildMlbCommunityAccuracy.ts`, `mlb_pick_poll_events`+`mlb_schedule`(final)+`predictions`(league=mlb, cohort filter) 조합) + `CommunityVsAICard`(KBO 인라인 UI를 locale-aware 컴포넌트로 추출) 신규 작성, `mlb/accuracy`·`en/mlb/accuracy` 양쪽에 배선. `MIN_POLL_TOTAL`(=3) 미만 소표본은 렌더 안 함(KBO 기존 게이트 그대로 재사용). 단위 테스트 23건 신규(`computeMlbCommunityVsAI` 8건 + `buildMlbCommunityVsAI` 4건 + 기존 KBO 회귀 유지).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(523 files/4323 tests) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.118 — 2026-08-25 (cycle 2543, review-code (heavy): analysis/page.tsx(목록) 팩터 수렴 픽 성적 라인 7개소 소표본 게이트 부재)
 
 ### fix(analysis): `analysis/page.tsx`(목록) 팩터 수렴 픽 rolling/월간/시즌 성적 라인 7개소에 소표본(n<5) 흐림 처리 + 안내 신규 — cycle 2541/2542 이 accuracy 표 · game/[id] 상세 라인에 적용한 것과 동일 관례가 목록 페이지엔 없었음
