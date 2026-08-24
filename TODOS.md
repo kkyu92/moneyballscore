@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) convergenceRecord.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2489, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 5/20, op-analysis 10/25, info-arch 3/30, lotto 11/30). 직전 8 사이클(2481-2488) distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. explore-idea saturation 12/15 재충족이나 이미 3회(cycle 2417/2477 등) 소진 확인돼 재탐색 스킵. op-analysis 는 non-CE 표본 2026-07-01 이후 완전 동결 + 5연속 zero-change 확인(cycle 2479 권고: "재발화 lower priority") — 이번엔 skip. 2488 추천대로 review-code(heavy) 계속, 잔존 미감사 lib 계층 중 최대 크기 `convergenceRecord.ts`(831줄, 6개 export 함수 + KBO/MLB 양쪽 수렴 픽 성적 집계) 선정.
+
+점검: (1) `evaluateConvergencePickRow`(KBO)/`evaluateMlbConvergencePickRow`(MLB) 판정 로직 — composite duel validCount 게이팅 + h2h season-to-date 병합(cycle 2304 fix) 정상. (2) `weekdayIndexOf` — `new Date(y,m-1,d).getDay()` 캘린더 구성요소 직접 조립 방식이라 cycle 2485/2123 이 잡았던 `T00:00:00+09:00 앵커 + getUTCDay()` off-by-one family 자체가 발생 불가능한 안전한 패턴, 재발 없음 확정. (3) `computeWinRatePct` 0-division 가능성 grep — 전체 44개 콜사이트 전부 상위에서 `total>0` 가드(직접 조건문) 또는 `computeConvergenceTeamStats`/`HomeAwaySplit`/`DayOfWeekSplit`(모두 `minPicks` 필터 선행)로 이미 표본 보장, NaN 표시 케이스 없음. (4) h2h 캐시 키 포맷(`getSeasonH2HData` sorted `${a}:${b}`) 과 `evaluateConvergencePickRow` 소비 측 정렬 방식 일치 확인. (5) `PRODUCTION_COHORT_RULES`/`MLB_PRODUCTION_COHORT_RULES` 필터 — cycle 2296-2300 sweep(#1338 family)에서 잡힌 패턴과 동일하게 KBO/MLB 양쪽 전 쿼리에 정상 적용, 미적용 콜사이트 0건. (6) 831줄 대비 wave-tagged 주석 40+ 곳 = 이미 여러 사이클(1997/2070/2081/2226/2299/2304/2345)에 걸쳐 반복 정정된 이력 — 이번 감사는 신규 회귀 재확인 성격에 가까웠음.
+
+실행: 코드 변경 없음 — 감사 완료, 신규 issue 0건.
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사 대상: `buildAccuracyData.ts`(776줄) / `buildTeamProfile.ts`(601줄) / `buildMatchupProfile.ts`(594줄) / `buildMlbMatchupProfile.ts`(526줄), 우선순위 크기순) 또는 op-analysis(gap 10/25, non-CE 동결 지속 확인) 또는 lotto(gap 11/30).
+
 ## 🟢 SUCCESS — review-code(heavy) analysis-data.ts 최초 전체 감사, topFactors dead zone 미적용 정정 (cycle 2488, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 4/20, op-analysis 9/25, info-arch 2/30, lotto 10/30). 2-chain lock 미충족(직전 8 distinct=3: review-code/fix-incident/info-architecture-review). explore-idea saturation 12/15 충족이나 3회 소진 확인. UI 계층(`analysis/page.tsx`)은 2480에 감사 완료됐지만 데이터 소스 `analysis/analysis-data.ts`(938줄, 6개 export 함수) 는 review-code 이력 0건 확인 후 최초 전체 감사 착수.
