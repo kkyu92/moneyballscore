@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 대시보드 시즌·확신구간·적중예측 적중률 소표본 게이트 부재 정정 (cycle 2550, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(status: approved 매칭 0건 — 전부 completed/archived/superseded/pending_user_step 등). 2-chain lock 없음(2542-2549 distinct=3: review-code 6 + info-arch 1 + explore-idea 1). fix-incident 20+/20 gap 도달했으나 `gh run list --limit 10` 재확인 — CI 실패 0건, negative 재확인. op-analysis 20/25, lotto 12/30 미도달. cycle 2549 retro가 sweep 잔여 리스트 중 dashboard.tsx confidentStat/teamMap 계산부 재확인 가치 있다고 명시.
+
+발견: `dashboard.tsx` confidentStat 계산부 확인 중 정작 렌더 계층 두 곳에서 신규 발견 — (1) `AccuracySummary.tsx` 시즌 적중률 총계(`{ratePct}% ({correct}/{total})`)와 확신/애매/박빙 3단계 tier 각 행 모두 `SMALL_SAMPLE_N` import 자체 없이 백분율만 노출, (2) `dashboard/page.tsx` "적중 예측 적중률" 카드(confidentStat)도 동일 부재. teamMap/TeamPerformanceChart 는 `MIN_TEAM_PREDICTIONS`(=3) 별개 필터 존재해 스코프 밖. family 8번째 연속 재발(cycle 2541/2542/2543/2545/2546/2548/2549/2550).
+
+실행: 두 파일 3개 지점(시즌 총계 + tier 3행 + confidentStat 카드) 모두 조건부 "· 소표본(n<5)" 인라인 표시 추가 (predictions/[date] 등 기존 관례 재사용). 회귀 테스트 `silent-drift-wave-670.test.ts` 신규(7 assertion).
+
+검증: tsc/lint clean + test(528 files/4352 tests) 통과. 단일 논리 단위 → 직접 main commit(8ec9ea4f)+push, pre-push guard 통과, R4 정합.
+
+다음 사이클 추천 = review-code(heavy, sweep 잔여 재확인 — guide/insights/calendar/v2-shadow-monitor/changelog/matchup/methodology/leaderboard/about/accuracy-shadow/search/lotto-methodology/seasons/glossary/v2-preview/mlb/accuracy/mlb/reviews/debug/model-comparison/debug/reliability/reviews 중 실측 percentage 표시하는 leaderboard·seasons·accuracy-shadow·mlb/accuracy 우선 재확인 가치) 또는 family 완전 소진 확인 시 explore-idea 다양성 redirect.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) teams/[code]/recent·players/[id] 적중률 소표본 게이트 부재 정정 (cycle 2549, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(2541-2548 distinct=3). fix-incident 20+/20 도달했으나 `gh run list` 재확인 negative. op-analysis 19/25, lotto 11/30, info-arch 2/30 미도달. cycle 2548 retro carry-over 후보 3건(mlb/reviews/weekly — 이미 게이트 존재, debug/factor-correlation — 이미 CI/N 투명 공개라 스코프 밖, mlb/games/[date]/[slug] — 해당 통계 부재) 전부 소진 확인.
