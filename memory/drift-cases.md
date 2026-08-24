@@ -760,3 +760,17 @@ develop-cycle feature branch pre-merge 반복 실패(R7 정책상 CI green
 - 사례 17 (`gh run list` 로 CI 파이프라인 실 여부 확인 필수) — 이번엔
   과거 실패 run 의 근본 원인까지 역추적해 "이미 해소됨" 을 실측 검증한
   사례
+
+**2차 재발 (cycle 2464)**: 동일 fingerprint family (`ci-main-*`, 전부
+2026-08-20 커밋 — 872f4de9/7c58ab68/2c2b6c11/1a58198a/7ab993d8/2bc43556)
+의 lesson-pending reminder 6건(#3055~3060)이 2026-08-23 21:00 새로 생성.
+cycle 2350 이 close 한 #3021~3038 배치와 별개 hub incident 번호
+(#3483~3514) — 같은 2026-08-20 race 구간의 다른 커밋들이 다음날 3일
+경과 기준 순차적으로 reminder 화된 것으로, 신규 recurrence 아님.
+`gh run view <run> --log-failed` 로 6건 전부 `version-sync-guard.test.ts`
+동일 assertion 실패(package.json 버전 1틱 차이) 확인 후 원인 코멘트와
+함께 close. cycle 2437/2445/2452 의 `scripts/bump-version.sh` 원자적
+bump + pre-push hook 도입(2026-08-23) 이후 커밋은 전량 CI green — 근본
+원인은 이미 해소, 이번 6건은 fix 이전 시점 stale reminder 뿐이었음.
+carry-over #1 (lesson-pending 라벨 진단 스캔 추가) 은 아직 미반영 —
+다음 skill-evolution 발화 시 재검토 필요.
