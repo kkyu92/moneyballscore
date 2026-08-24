@@ -6641,3 +6641,13 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: 코드 변경 없음 — 조사 완료, 신규 issue 0건.
 
 다음 사이클 추천 = review-code(heavy) 계속(`about/page.tsx` 427줄 미감사, 2-chain lock 재평가 필요) 또는 info-architecture-review(gap 30/30 도달 예상).
+
+## ✅ SUCCESS — review-code(heavy) accuracy 섹션 렌더 게이트 wave-2463 swap 누락분 정정 (cycle 2528, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 2/20, op-analysis 23/25, lotto 20/30, info-arch 11/30). 직전 8사이클 distinct=3, lock 없음. explore-idea saturation 13/15 충족되나 직전 4회(2494/2498/2515/2524) 연속 소진 재확인 완료라 skip. cycle 2527 carry-over `mlb/buildMlbStandings.ts`(clean 확인) + `accuracy/page.tsx 소비부` 중 후자 선정.
+
+발견: `accuracy/page.tsx` 팀별 성과 섹션은 `MIN_TEAM_PREDICTIONS` import·사용 중인데, 같은 파일 안 winnerProbBuckets/cohortWeekHeatmap 섹션 렌더 게이트는 하드코딩 `n >= 3`. MLB parity `MlbAccuracyDashboard.tsx` cohortWeekHeatmap 게이트도 동일. wave-2463 이 팀별 표만 swap하고 놓친 재발.
+
+실행: 3곳 모두 `MIN_TEAM_PREDICTIONS` 참조로 교체, MLB 컴포넌트에 import 추가, 상수 주석 갱신, 회귀 테스트 신규 1건. `pnpm type-check`/`test`(515f/4281t)/`lint` clean. root package.json+VERSION 108 잔존 발견 → 2차 커밋으로 즉시 정정(pre-push guard 포착). 단일 논리 단위 → PR 없이 main 직접 commit×2(fix+chore, R4)+push.
+
+다음 사이클 추천 = operational-analysis(gap 24/25, cycle 2530 도달) 또는 lotto(gap 21/30) 또는 review-code(heavy, 잔존 미감사 후보 재탐색 필요 — buildMlbStandings.ts/accuracy 소비부 모두 소진).
