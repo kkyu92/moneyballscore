@@ -57,28 +57,6 @@ export function bullpenInningsLastNDays(
   return total;
 }
 
-/**
- * 지난 N일 불펜 투수 등판 인원 합 (중복 허용 — 동일 투수 여러 번 등판도 카운트).
- * 불펜 투수진 과로도 측정.
- */
-export function bullpenAppearancesLastNDays(
-  priorRecords: GameRecordLite[],
-  teamId: number,
-  targetDate: string,
-  days: number,
-): number {
-  const cutoff = shiftDate(targetDate, -days);
-  let total = 0;
-  for (const r of priorRecords) {
-    if (r.gameDate < cutoff || r.gameDate >= targetDate) continue;
-    const isHome = r.homeTeamId === teamId;
-    if (!isHome && r.awayTeamId !== teamId) continue;
-    const pitchers = isHome ? r.pitchersHome : r.pitchersAway;
-    total += Math.max(0, pitchers.length - 1);
-  }
-  return total;
-}
-
 /** 팀의 최근 N경기 (시즌 내) — priorRecords 최신 → 과거 정렬 가정. */
 function getRecentTeamGames(
   priorRecords: GameRecordLite[],
@@ -132,22 +110,6 @@ export function teamRunsAllowedPerGameLastN(
     total += g.homeTeamId === teamId ? g.awayScore : g.homeScore;
   }
   return total / games.length;
-}
-
-/**
- * 팀 최근 N경기 득실차 (run differential).
- * 종합 모멘텀 지표.
- */
-export function teamRunDiffLastN(
-  priorRecords: GameRecordLite[],
-  teamId: number,
-  targetDate: string,
-  n: number,
-): number {
-  return (
-    teamRunsPerGameLastN(priorRecords, teamId, targetDate, n) -
-    teamRunsAllowedPerGameLastN(priorRecords, teamId, targetDate, n)
-  );
 }
 
 /**

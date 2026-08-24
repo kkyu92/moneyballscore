@@ -1,3 +1,11 @@
+## v0.5.62.126 — 2026-08-25 (cycle 2560, review-code (heavy): `game-record-features.ts` dead export 2건 정리)
+
+### refactor(kbo-data): `bullpenAppearancesLastNDays`/`teamRunDiffLastN` dead code 제거
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/operational-analysis). fix-incident negative(`gh run list` 최근 10건 전부 success/skipped). op-analysis gap 4/25 미도달 — CE cohort heavy 방금 발화(2556) + lite cohort-split 스크립트 수동 실행 결과 자동 cron 산출물(`apps/moneyball/data/op-analysis/2026-08-24-cohort-split.md`)과 완전 동일 확인, 신규 정보 없음(cron 중복 실행 회피 교훈). explore-idea 5연속 lite 소진 유지. design-system/info-arch/lotto 모두 gap 미도달. cycle 2557/2558/2559 3연속 review-code SMALL_SAMPLE_N family 재확인 권고에 따라 review-code 잔존 재탐색 — cycle 2559 TODOS 에 "fix 가치 낮아 보류" 로 남아있던 dead export 후보 재검토.
+- 발견: `game-record-features.ts` 의 `bullpenAppearancesLastNDays`/`teamRunDiffLastN` 두 export 가 자체 테스트 파일 외 어디에서도 (특히 production consumer `backtest/loader.ts`) import 되지 않음 확인 — 형제 함수 4개(`bullpenInningsLastNDays`/`teamRunsPerGameLastN`/`teamRunsAllowedPerGameLastN`/`teamHomeRunsLastN`)는 모두 `loader.ts` 에서 실사용 중이라 대조적. CLAUDE.md "확실히 미사용이면 완전 삭제" 원칙 적용.
+- 실행: 두 함수 + 대응 `__tests__/features-game-record.test.ts` describe 블록 삭제(2 테스트 제거). `pnpm --filter @moneyball/kbo-data test`(91 files/1188 tests) + `type-check` + `lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.125 — 2026-08-25 (cycle 2558, review-code (heavy): `agent_memories` 학습 경로 shadow-only 0% factor 미필터)
 
 ### fix(agents): `retro.ts` `buildMemoryForTeam` — `park_weather`/`umpire_sz`(DEFAULT_WEIGHTS weight=0) 가 필터 없이 maxBias 후보에 포함되던 gap 정정

@@ -2,10 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   shiftDate,
   bullpenInningsLastNDays,
-  bullpenAppearancesLastNDays,
   teamRunsPerGameLastN,
   teamRunsAllowedPerGameLastN,
-  teamRunDiffLastN,
   teamHomeRunsLastN,
   type GameRecordLite,
 } from '../features/game-record-features';
@@ -109,20 +107,6 @@ describe('bullpenInningsLastNDays', () => {
   });
 });
 
-describe('bullpenAppearancesLastNDays', () => {
-  it('counts non-starter pitchers in window', () => {
-    const records: GameRecordLite[] = [
-      gameRecord({
-        gameDate: '2026-04-21',
-        homeTeamId: 1,
-        awayTeamId: 2,
-        pitchersHome: [pitcher('SP', '5'), pitcher('A', '2'), pitcher('B', '1'), pitcher('C', '1')],
-      }),
-    ];
-    expect(bullpenAppearancesLastNDays(records, 1, '2026-04-22', 3)).toBe(3);
-  });
-});
-
 describe('teamRunsPerGameLastN', () => {
   it('averages self runs over recent N games', () => {
     const records: GameRecordLite[] = [
@@ -149,15 +133,6 @@ describe('teamRunsAllowedPerGameLastN', () => {
     ];
     // 팀 1: 21일 홈 → allowed 5 / 20일 원정 → allowed 4 = avg 4.5
     expect(teamRunsAllowedPerGameLastN(records, 1, '2026-04-22', 5)).toBeCloseTo(4.5, 2);
-  });
-});
-
-describe('teamRunDiffLastN', () => {
-  it('computes runs - allowed avg', () => {
-    const records: GameRecordLite[] = [
-      gameRecord({ gameDate: '2026-04-21', homeTeamId: 1, awayTeamId: 2, homeScore: 10, awayScore: 2 }),
-    ];
-    expect(teamRunDiffLastN(records, 1, '2026-04-22', 5)).toBe(8);
   });
 });
 
