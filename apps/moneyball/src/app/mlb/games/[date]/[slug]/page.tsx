@@ -117,6 +117,8 @@ interface ScheduleRow {
   away_score: number | null;
   status: string;
   game_datetime_utc: string;
+  home_starter_name: string | null;
+  away_starter_name: string | null;
 }
 
 const MLB_EVENT_STATUS: Record<string, string> = {
@@ -144,7 +146,7 @@ export default async function GameDetail({ params }: PageParams) {
   // + predictions(external_game_id, league='mlb') 조인으로만 조회 가능 (migration 038).
   const scheduleResult = await supabase
     .from('mlb_schedule')
-    .select('external_game_id, home_score, away_score, status, game_datetime_utc')
+    .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
     .eq('game_date', date)
     .eq('home_team_code', dbHomeCode)
     .eq('away_team_code', dbAwayCode)
@@ -276,6 +278,21 @@ export default async function GameDetail({ params }: PageParams) {
       <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         {home} vs {away}
       </h1>
+
+      {/* cycle 2457 explore-idea: KBO analysis/game/[id] wave-335 parity — 개인 FIP 소스는
+          아직 없어(Tier 3) 이름만 표시. fetchProbablePitchers 미확정 경기는 null → 미표시. */}
+      {(schedule.away_starter_name || schedule.home_starter_name) && (
+        <p className="text-xs font-mono text-gray-500 dark:text-gray-400">
+          선발{' '}
+          <span className="text-gray-600 dark:text-gray-300">
+            {schedule.away_starter_name ?? '미확정'}
+          </span>
+          {' · '}
+          <span className="text-gray-600 dark:text-gray-300">
+            {schedule.home_starter_name ?? '미확정'}
+          </span>
+        </p>
+      )}
 
       <section className="rounded-lg bg-brand-50 dark:bg-brand-900 p-5">
         <div className="text-3xl font-bold text-brand-700 dark:text-brand-100">

@@ -31,6 +31,12 @@ vi.mock('../scrapers/statsapi-mlb', () => ({
       status: 'scheduled',
     },
   ]),
+  fetchProbablePitchers: vi.fn().mockResolvedValue({
+    1001: {
+      home: { id: 111, name: 'Gerrit Cole' },
+      away: { id: 222, name: 'Chris Sale' },
+    },
+  }),
 }));
 
 vi.mock('../scrapers/fangraphs-mlb', () => ({
@@ -91,6 +97,41 @@ describe('runMlbPipeline', () => {
     const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
     const result = await runMlbPipeline('mlb_statsapi_scrape', DATE, TRIGGERED_BY);
     assertResultShape(result, 'mlb_statsapi_scrape');
+  });
+
+  it('mlb_statsapi_scrape — fetchProbablePitchers 이름을 mlb_schedule upsert 행에 병합 (cycle 2457 wiring)', async () => {
+    const upsertCalls: Array<{ table: string; rows: unknown }> = [];
+    const { createClient } = await import('@supabase/supabase-js');
+    (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      from: vi.fn((table: string) => ({
+        upsert: vi.fn((rows: unknown) => {
+          upsertCalls.push({ table, rows });
+          return Promise.resolve({ error: null });
+        }),
+        insert: vi.fn().mockResolvedValue({ error: null }),
+      })),
+    } as unknown as ReturnType<typeof createClient>);
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    await runMlbPipeline('mlb_statsapi_scrape', DATE, TRIGGERED_BY);
+
+    const call = upsertCalls.find((c) => c.table === 'mlb_schedule');
+    expect(call).toBeDefined();
+    const row = (call?.rows as Array<{ home_starter_name: string | null; away_starter_name: string | null }>)[0];
+    expect(row.home_starter_name).toBe('Gerrit Cole');
+    expect(row.away_starter_name).toBe('Chris Sale');
+  });
+
+  it('mlb_statsapi_scrape — fetchProbablePitchers 실패해도 schedule upsert 는 진행 (best-effort)', async () => {
+    const { fetchProbablePitchers } = await import('../scrapers/statsapi-mlb');
+    (fetchProbablePitchers as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('boom'));
+
+    const { runMlbPipeline } = await import('../pipeline/mlb-pipeline');
+    const result = await runMlbPipeline('mlb_statsapi_scrape', DATE, TRIGGERED_BY);
+    assertResultShape(result, 'mlb_statsapi_scrape');
+    expect(result.games_found).toBe(1);
+    expect(result.rows_inserted).toBe(1);
+    expect(result.errors).toEqual(expect.arrayContaining([expect.stringContaining('fetchProbablePitchers')]));
   });
 
   it('mlb_fancy_scrape — fetchFangraphsMlbTeams → mlb_team_stats upsert (cycle 1985 wiring)', async () => {
