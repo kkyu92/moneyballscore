@@ -17,6 +17,7 @@ import {
   CLOSE_GAME_MARGIN,
   FACTOR_PICK_STRONG,
   FACTOR_PICK_COMPLETE,
+  toKSTDateString,
 } from '@moneyball/shared';
 import {
   canonicalPair,
@@ -105,8 +106,8 @@ export default async function MatchupPage({ params }: PageProps) {
   ]);
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const currentYear = new Date().getFullYear().toString();
+  const todayStr = toKSTDateString();
+  const currentYear = todayStr.slice(0, 4);
   const upcomingGames = games.filter(
     (g) => g.gameDate > todayStr && g.status !== "final" && g.status !== "postponed",
   ).sort((a, b) => a.gameDate.localeCompare(b.gameDate));

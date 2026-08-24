@@ -15,6 +15,7 @@ import {
   pickTierEmoji,
   type WinnerConfidenceTier,
   mlbShortTeamName,
+  toKSTDateString,
   type MlbTeamCode,
 } from "@moneyball/shared";
 import {
@@ -214,8 +215,8 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
   const { teamA: tA, teamB: tB, sideStats, predictionAccuracy, games } = profile;
   const summary = buildSummaryEn(profile);
 
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const currentYear = new Date().getFullYear().toString();
+  const todayStr = toKSTDateString();
+  const currentYear = todayStr.slice(0, 4);
   const thisYearGames = games
     .filter((g) => g.gameDate.startsWith(currentYear) && (g.status === "final" || g.gameDate <= todayStr))
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate));
