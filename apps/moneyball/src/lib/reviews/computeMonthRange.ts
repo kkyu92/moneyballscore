@@ -3,6 +3,8 @@
  * KBO 시즌은 달 단위로 구분되지 않지만 블로그 리뷰 · URL 스키마 일관성을 위해 사용.
  */
 
+import { KST_OFFSET_MS } from '@moneyball/shared';
+
 export type ReviewRangeLocale = 'ko' | 'en';
 
 const EN_MONTH_FULL = [
@@ -45,8 +47,17 @@ function buildMonthRange(year: number, month: number, locale: ReviewRangeLocale 
   };
 }
 
+/**
+ * "now" 처럼 실제 시각을 넘기는 호출(getCurrentMonth/getRecentMonths)에서 월 경계를
+ * KST 달력 기준으로 판정 — computeWeekRange.ts toMondayUTC 와 동일 패턴(KST_OFFSET_MS
+ * shift 후 UTC 필드 읽기). shift 전엔 매월 말일 UTC 15:00~24:00(= 다음달 KST
+ * 00:00~09:00) 구간에 아직 전월로 오판정되던 KST_OFFSET_MS family(wave 145) 재발 정정
+ * (cycle 2510). buildMonthRange 자체가 만드는 Date.UTC(...,1) 같은 이미 00:00 UTC인
+ * 달력 날짜는 +9h shift 해도 같은 UTC 날짜에 머물러 영향 없음.
+ */
 export function getMonthRangeFromDate(d: Date, locale: ReviewRangeLocale = 'ko'): MonthRange {
-  return buildMonthRange(d.getUTCFullYear(), d.getUTCMonth() + 1, locale);
+  const kst = new Date(d.getTime() + KST_OFFSET_MS);
+  return buildMonthRange(kst.getUTCFullYear(), kst.getUTCMonth() + 1, locale);
 }
 
 /**

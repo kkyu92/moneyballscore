@@ -38,6 +38,18 @@ describe("getMonthRangeFromDate", () => {
     expect(r.label).toBe("April 2026");
     expect(r.label).not.toMatch(/[가-힣]/);
   });
+
+  it("KST 월 경계 00:00~09:00 — UTC 기준이면 전월로 오판정되던 구간, KST 기준 새 달로 정정", () => {
+    // 2026-09-01(화) 00:30 KST = 2026-08-31T15:30:00Z (UTC 기준으로는 아직 8월)
+    const r = getMonthRangeFromDate(new Date("2026-08-31T15:30:00Z"));
+    expect(r.monthId).toBe("2026-09");
+  });
+
+  it("KST 월 경계 08:59 — 여전히 새 달 (UTC 기준 오판정 구간의 마지막 순간)", () => {
+    // 2026-09-01(화) 08:59 KST = 2026-08-31T23:59:00Z
+    const r = getMonthRangeFromDate(new Date("2026-08-31T23:59:00Z"));
+    expect(r.monthId).toBe("2026-09");
+  });
 });
 
 describe("parseMonthId", () => {
