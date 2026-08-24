@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) matchup 페이지 3종 AI 예측 성과 소표본 게이트 부재 (cycle 2545, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29. 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달(fix-incident 19/20, op-analysis 15/25, info-arch 28/30, lotto 7/30). cycle 2544 retro가 accuracy/analysis 계열 소표본 게이트 family(2541~2543) 소진 가능성 명시 → 인접 미감사 파일(matchup 3종) 재탐색.
+
+발견: `teams/[code]`·`mlb/team/[code]`·`en/mlb/team/[code]`는 이미 `SMALL_SAMPLE_N` 게이트 있는데, matchup/[teamA]/[teamB] KBO/MLB/EN-MLB 3종의 "AI 예측 성과(이 매치업 한정)" 카드는 `verified > 0`만 확인해 검증 경기 1~2건에도 100%/0%를 브랜드색/빨강 강조 노출.
+
+실행: 3파일 `SMALL_SAMPLE_N` import + `verified < SMALL_SAMPLE_N` 시 회색 처리 + title 툴팁 + 인라인 `· 경기 수 적음`(EN `· small sample`) 안내(teams/[code] 관례 재사용). 회귀 테스트 `silent-drift-wave-666.test.ts` 신규(3파일×3assertion).
+
+검증: `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(524 files/4332 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push(R4), 버전 0.5.62.119→120.
+
+다음 사이클: 소표본 게이트 family 는 이번까지 4-cycle(2541~2543 accuracy/analysis + 2545 matchup) 연속. 다음 review-code(heavy) 진행 시 신규 target 재탐색 필요(family 소진 재추정) — saturation 시 explore-idea/operational-analysis(gap 15/25) redirect 고려.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) analysis/page.tsx(목록) 팩터 수렴 픽 성적 라인 7개소 소표본 게이트 부재 (cycle 2543, 2026-08-25)
 
 진단: open issue 0, approved plan 0/29(전부 status≠approved). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달(fix-incident 17/20, op-analysis 13/25, info-arch 26/30, lotto 5/30). cycle 2542 retro carry-over(analysis/page.tsx 2803줄, 7개 지점 명시) 감사.
