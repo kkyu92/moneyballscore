@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) mlb/games/[date]/[slug] 최초 전체 감사, factorCount claim-vs-render mismatch 정정 (cycle 2509, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. gap trigger 4종 전부 미도달. cycle 2507/2508 추천대로 review-code(heavy) 계속, carry-over 명시 타겟 `mlb/games/[date]/[slug]/page.tsx`(543줄, 감사 이력 0건)로 전환.
+
+확정 이슈: `MlbGameOverview`(prose "N개 세이버메트릭스 팩터를 종합한...")가 `GAME_DETAIL_FACTOR_ROWS.length`(모델 최대 팩터 수, 항상 10)를 그대로 factorCount 로 사용 — `computeMlbWaterfall`은 팀 데이터 결측(elo/war 등) 시 해당 factor bar 를 silent skip(`if (home==null||away==null) continue`)하는데 이 카운트는 안 줄어듦. 같은 화면의 `MlbDetailedFactorAnalysis` 제목은 `rows.length`(실제 present bar 수)로 이미 self-sync 돼 있어, 데이터 결측 경기에서 두 섹션이 서로 다른 팩터 수를 주장하는 모순 발생 가능(cycle 2108 claim-vs-render mismatch family 재발). KO(`mlb/games`)/EN(`en/mlb/games`) twin 양쪽 모두 `waterfallBars` 기반 동적 `usedFactorCount`(home_advantage/park_factor/final 제외)로 정정, 회귀 가드 테스트 2건 추가.
+
+검증: tsc --noEmit clean, eslint clean, vitest 전체 510 files/4255 tests pass, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit 0916ff88).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사 후보: `lotto/methodology/page.tsx` 533줄, `mlb/reviews/monthly/[month]/page.tsx` 502줄, `mlb/factors/page.tsx` 469줄) 또는 info-arch(gap 23/30)/op-analysis(gap 4/25) 자연 도달 시 다양성 전환.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) matchup 페이지 3종 최초 전체 감사, todayStr KST 미적용 정정 (cycle 2507, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4/blocked). gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 2/25, info-arch 21/30, lotto 29/30). 직전 8 사이클 distinct=4(2-chain lock 미충족). cycle 2506 추천대로 review-code(heavy) 계속, `app/matchup/[teamA]/[teamB]/page.tsx`(KBO 원본, 547줄, 사전 감사 이력 0건)로 신규 타겟 확장.
