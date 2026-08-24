@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — explore-idea(heavy) push 알림 carry-over 재평가 + lotto gap 판단 skip, 신규 idea 0건 (cycle 2498, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4/blocked). gap trigger: fix-incident 14/20, op-analysis 19/25, info-arch 12/30 (전부 미도달). lotto 는 마지막 실제 fire cycle 2392 = 106 사이클 경과로 기계적으론 트리거 충족이나, cycle 2426 chain-evolution 증거(4회 연속 no-op 재발, cron self-heal 이 develop-cycle 과 독립적으로 이미 매주 picks/result 처리)를 본 사이클도 실측 재확인(`~/lotto_picks/2026-08-29-50sets.md` 8/23 생성 + `2026-08-22-result.md` 8/23 반영 + `lotto-pick-update.yml`/`lotto-result-update.yml` 최근 실행 전부 success) — 5번째 무의미 재발 방지 위해 본 메인 자율 판단으로 lotto fire skip(트리거 기계적 충족과 실제 개입 필요성 디커플링, 최종 SKILL.md 반영은 다음 skill-evolution 몫). 직전 8 사이클(2490-2497) distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. 직전 15 사이클 14/15(review-code+fix-incident+polish-ui+info-arch) — improvement saturation trigger 충족 → explore-idea 자연 발화.
+
+탐색: (1) plan#27(MLB 개인픽+리더보드) Phase 3 데이터 게이트 재확인 — KBO `user_picks`/MLB `mlb_user_picks` 모두 cycle 2334 측정과 동일(변화 0), 보류 유지. (2) plan#29(로그인+커뮤니티) 재평가 트리거 3종 전부 미충족, Tier4 보류 유지. (3) 신규 각도 탐색 — `apps/moneyball/public/sw.js` 에 web-push 가 이미 STUB listener 로 존재(`docs/decisions/pwa-web-push-carryover.md`, cycle 1021 c11 박제, 5 PR scope 명세 완비)를 발견하고 fire 조건(DAU 100+ / AdSense 심사 통과 / 사용자 PWA install 요청 / Telegram 대체 필요) 재확인 — DAU 근사치(user_picks=1)로 미충족 확실, AdSense 심사 상태는 사용자 direct 확인 없이 판단 불가(코드상 ca-pub id 존재하나 심사 통과 여부 코드로 확인 불가, `feedback_no_domain_nag` 정책상 사용자에게 먼저 묻지 않음) — 게이트 미충족으로 보류 유지.
+
+결론: 신규 actionable idea 0건 — 코드 변경 없음, retro-only. 3연속 explore-idea 0-idea fire(2477/2494/2498) — 남은 후보 대부분이 트래픽 임계(DAU100+/두자릿수 픽) 게이트에 걸려 자연 대기 상태. 다음 explore-idea fire 전 우선 확인 = 위 게이트 값 변화 여부만 가볍게(재탐색 없이).
+
+다음 사이클 추천 = operational-analysis(lite, gap 19/25 근접) 또는 fix-incident(gap 14/20 근접) 또는 review-code(heavy, 2-chain lock 자연 롤링 해제).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildMlbTeamProfile.ts/mlb-shared.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2497, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(27=phase blocked/28=completed/29=spec_only_deferred, 셋 다 status≠approved). gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 18/25, info-arch 11/30, lotto 19/30). 직전 8 사이클(2489-2496) distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. `gh run list` 최근 10건 전부 success/skipped, fail 0건. cycle 2496 retro 추천대로 review-code(heavy) 계속, 잔존 미감사 대형 파일 `buildMlbTeamProfile.ts`(383줄) + `mlb-shared.ts`(409줄) 선정.
