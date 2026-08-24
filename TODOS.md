@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) mlb/reviews/monthly sibling 대조, computeMonthRange KST 미적용(월경계) 정정 (cycle 2510, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. gap trigger 4종 미도달(fix-incident 4/20, op-analysis 5/25, info-arch 24/30, lotto 2/30). cycle 2509 추천 carry-over 타겟 `mlb/reviews/monthly/[month]/page.tsx`(502줄, 감사 이력 0건)로 진입.
+
+확정 이슈: sibling 파일 `computeWeekRange.ts`(toMondayUTC)는 이미 KST_OFFSET_MS shift로 "월요일 00:00~09:00 KST(=일요일 15:00~24:00 UTC)" 경계 오판정을 정정(주석 명시)했으나, 같은 디렉토리 `computeMonthRange.ts`(getMonthRangeFromDate)는 raw `d.getUTCFullYear()/getUTCMonth()`를 그대로 사용 — 매월 말일 UTC 15:00~24:00(=다음달 KST 00:00~09:00) 구간에 `getCurrentMonth()`/`getRecentMonths()`가 아직 전월로 오판정하는 KST_OFFSET_MS family(wave 145, cycle 2507 재발) 3번째 재발. KBO/MLB/EN 월간 리뷰 nav, sitemap.ts monthly route, feed/route.ts, analysis 페이지 currentMonth 배지 등 15개 이상 호출부 영향.
+
+fix: getMonthRangeFromDate 안에서 KST_OFFSET_MS shift 후 UTC 필드 읽도록 정정(computeWeekRange.ts와 동일 패턴) + boundary 회귀 가드 테스트 2건 추가.
+
+검증: computeMonthRange.test.ts 16/16 pass, tsc --noEmit clean, eslint clean, vitest 전체 510 files/4257 tests pass, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit 2185c21f).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사 후보: `lotto/methodology/page.tsx` 533줄, `mlb/factors/page.tsx` 469줄) — sibling 파일 대조 패턴이 이번에도 유효했으니 다른 date-range 유틸도 재확인 가치 있음.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) mlb/games/[date]/[slug] 최초 전체 감사, factorCount claim-vs-render mismatch 정정 (cycle 2509, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23. gap trigger 4종 전부 미도달. cycle 2507/2508 추천대로 review-code(heavy) 계속, carry-over 명시 타겟 `mlb/games/[date]/[slug]/page.tsx`(543줄, 감사 이력 0건)로 전환.
