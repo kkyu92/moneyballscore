@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy) about/page.tsx 최초 전체 감사, 실시간 스코어 갱신 주기 "30초" stale claim 정정 (cycle 2516, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. gap trigger 4종 미도달(fix-incident 12/20, op-analysis 11/25, info-arch 30/30 — cycle 2517부터 경계 통과 예상, lotto 8/30). cycle 2513~2515 carry-over 추천대로 `about/page.tsx`(427줄, 감사 이력 0건)로 진입.
+
+확정 이슈: "업데이트 주기" 섹션 "경기 중 30초 간격 — 실시간 스코어" 문구가 실제 메커니즘과 불일치. `wrangler.toml` cron 은 `*/10 9-15 * * *`(10분 간격) — GH Actions 최초 버전(Phase 2d, 이관 이전)부터 동일하게 10분 간격이었고, 코드베이스 어디에도 30초 폴링(setInterval/SWR refreshInterval 등) 존재한 적 없음. `git log -S"30초 간격"` 으로 도입 커밋 추적 결과 2026-04-16 최초 작성 시점부터 실측 대조 없이 임의 기재된 값 — 기존 silent drift family(등록 상수 참조 누락, 메커니즘 변경 후 미반영)와 달리 "애초에 부정확했던 claim"이라는 신규 하위 패턴.
+
+부수 확인: "현재 제외된 팩터" 조건부 섹션(`deprecatedFactors.length > 0`)이 dead code로 보일 수 있으나, `FACTORS` 배열이 shadow-only 실험 팩터(park_weather/umpire_sz)를 의도적으로 미포함하고 있어 정상 guard로 확인(버그 아님).
+
+fix: "경기 중 30초 간격" → "경기 중 10분 간격" 정정 + 회귀 가드 테스트(`silent-drift-wave-661.test.ts`) 추가.
+
+검증: vitest 전체 513 files/4274 tests pass, tsc --noEmit clean, eslint clean, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit 56f02c0d).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사 후보: `debug/pipeline` 481줄, `debug/factor-correlation` 547줄, `teams/[code]` 622줄, `search/page` 450줄) 또는 info-architecture-review(gap 30/30, cycle 2517부터 trigger 충족 예상).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) predictions/[date] 최초 전체 감사, 날짜 nav off-by-one 정정 (cycle 2513, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23. gap trigger 4종 미도달(fix-incident 9/20, op-analysis 8/25, info-arch 27/30, lotto 5/30). 직전 4 cycle(2509~2512) review-code(heavy) SUCCESS streak 지속, `predictions/[date]/page.tsx`(619줄, KBO 최고 트래픽 일별 예측 페이지, 감사 이력 0건)로 진입.
