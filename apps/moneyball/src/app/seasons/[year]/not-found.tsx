@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { computeCurrentKSTYear } from "@/lib/seasons/buildSeasonSummary";
 
 export const metadata: Metadata = {
   title: "시즌을 찾을 수 없음",
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = computeCurrentKSTYear();
 const AVAILABLE_YEARS = [CURRENT_YEAR, 2025, 2024, 2023];
 
 export default function SeasonNotFound() {
