@@ -1,3 +1,12 @@
+## v0.5.62.127 — 2026-08-25 (cycle 2562, review-code (heavy): `MyPicksClient` 내/AI 적중률 히어로 소표본 게이트 부재)
+
+### fix(picks): `MyPicksClient.tsx` "내 적중률"/"AI 적중률" 히어로 스탯에 소표본(n<5) 인라인 표시 신규 — SMALL_SAMPLE_N family 12번째 재발
+
+- 진단: open issue 0, approved plan 0/23(전부 status≠`approved`). 2-chain lock 없음(직전 8사이클 distinct=3: review-code/operational-analysis/explore-idea). fix-incident negative(`gh run list` 최근 10건 전부 success/skipped). op-analysis(gap 6/25)/info-arch(gap 15/30)/lotto(gap 24/30, 다음 토 picks 이미 존재) 모두 gap 미도달. explore-idea saturation 11/15 미도달. DESIGN.md 1일 전 갱신 — design-system negative. `최초 전체 감사` 전수 grep(66건)으로 미감사 파일 탐색 — analysis/accuracy/home/predictions/teams/matchup/mlb 라우트 다수 재확인했으나 전부 이미 감사 완료. `apps/moneyball/src/components` 대형 파일 재조사 결과 `MyPicksClient.tsx`(435줄, 마지막 터치 cycle 1585, `최초 전체 감사` 이력 0건 — 순수 함수 `buildPicksStats.ts` 만 cycle 2496 감사됨)를 신규 타겟으로 선정.
+- 발견: "내 적중률"/"AI 적중률" 히어로 `StatCard` 가 `stats.myRate`/`stats.aiRate` 를 표본 크기 무관 렌더링 — sub 라인에 원본 분수("1/1" 등)는 항상 표시되지만, 코드베이스 전역 컨벤션(`AccuracyHeaderCard`/`TeamMatchupCards`/`AccuracySummary` 등)이 요구하는 `SMALL_SAMPLE_N` 명시적 소표본 힌트(딤 처리 또는 인라인 라벨)는 부재 — 분수만으론 평균 사용자에게 "이 %는 불안정" 신호가 전달 안 됨(TeamMatchupCards fix, cycle 2499 선례와 동일 논리).
+- 실행: `SMALL_SAMPLE_N` import, `StatCard` 에 `smallSample` prop 추가 → `stats.resolved < SMALL_SAMPLE_N`(내 적중률)/`stats.aiResolved < SMALL_SAMPLE_N`(AI 적중률) 시 인라인 "소표본(n<5)" 노출. 회귀 테스트 `silent-drift-wave-674.test.ts` 신규(4 assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(532 files/4371 tests, +1) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.126 — 2026-08-25 (cycle 2560, review-code (heavy): `game-record-features.ts` dead export 2건 정리)
 
 ### refactor(kbo-data): `bullpenAppearancesLastNDays`/`teamRunDiffLastN` dead code 제거

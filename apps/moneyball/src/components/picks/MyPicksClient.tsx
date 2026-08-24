@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
-import { MIN_LEADERBOARD_PICKS } from '@moneyball/shared';
+import { MIN_LEADERBOARD_PICKS, SMALL_SAMPLE_N } from '@moneyball/shared';
 import { useUserPicks } from '@/hooks/use-user-picks';
 import {
   buildPickEntries,
@@ -28,7 +28,7 @@ import { FactorAgreementCard } from './FactorAgreementCard';
 import { LeaderboardJoinModal } from '@/components/leaderboard/LeaderboardJoinModal';
 import { useLeaderboard } from '@/lib/leaderboard/use-leaderboard';
 
-function StatCard({ label, value, sub, hero }: { label: string; value: string; sub?: string; hero?: boolean }) {
+function StatCard({ label, value, sub, hero, smallSample }: { label: string; value: string; sub?: string; hero?: boolean; smallSample?: boolean }) {
   return (
     <div className={`bg-white dark:bg-[var(--color-surface-card)] rounded-xl border p-4 text-center ${
       hero
@@ -38,6 +38,9 @@ function StatCard({ label, value, sub, hero }: { label: string; value: string; s
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</p>
       <p className={`font-bold tabular-nums ${hero ? 'text-3xl' : 'text-xl'}`}>{value}</p>
       {sub && <p className="text-xs text-gray-400 dark:text-gray-400 mt-0.5">{sub}</p>}
+      {smallSample && (
+        <p className="text-[11px] text-gray-400 dark:text-gray-500">{`소표본(n<${SMALL_SAMPLE_N})`}</p>
+      )}
     </div>
   );
 }
@@ -244,12 +247,14 @@ export function MyPicksClient() {
           label="내 적중률"
           value={myRateStr}
           sub={stats ? `${stats.myCorrect}/${stats.resolved}` : undefined}
+          smallSample={stats != null && stats.resolved > 0 && stats.resolved < SMALL_SAMPLE_N}
           hero
         />
         <StatCard
           label="AI 적중률"
           value={aiRateStr}
           sub={stats ? `${stats.aiCorrect}/${stats.aiResolved}` : undefined}
+          smallSample={stats != null && stats.aiResolved > 0 && stats.aiResolved < SMALL_SAMPLE_N}
           hero
         />
       </div>
