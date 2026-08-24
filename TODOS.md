@@ -1,3 +1,13 @@
+## 🔍 RETRO-ONLY — review-code(heavy) buildMlbTeamAccuracy.ts 신규 감사, 버그 없음 확인 (cycle 2454, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 6/25, info-arch 29/30 근접, lotto 14/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 미충족(11/15). cycle 2453 retro가 CHANGELOG 언급 0회(신규 감사 대상) `buildMlbTeamAccuracy.ts`(300줄) 를 명시 추천 — 직접 감사.
+
+감사 범위: `buildAllMlbTeamAccuracy` / `buildMlbMatchupData` / `buildMlbTeamBiasAnalysis` 3개 export 함수 + `deriveMlbOutcome.ts` 재사용 로직 + KBO 대응 파일(`buildTeamAccuracy.ts`) 대조.
+
+결론: 코드 변경 없음. 검토 항목 모두 정상 확인 — (1) 3개 함수 전부 `MLB_PRODUCTION_COHORT_RULES` scoring_rule 필터 일관 적용(#1338 family 패턴 재발 없음), (2) `mlb-pipeline.ts` predictions insert 가 delete-then-insert 로 idempotent(중복 external_game_id row 발생 불가 — Map 기반 predByExternalId lookup 의 nondeterministic overwrite 우려는 실제로 발생 불가한 구조), (3) `buildAllMlbTeamAccuracy` 정렬 기준(verifiedN desc)이 KBO 대응(accuracyRate desc)과 다르지만 렌더 컴포넌트(`MlbAccuracyDashboard`)가 순서에 의존하지 않는 단순 테이블 렌더라 영향 없음, (4) small-sample 처리(`TEAM_TABLE_MIN_N` 라벨 치환, `SMALL_SAMPLE_N` bias 필터) 정상 작동. due-diligence 원칙 준수 — 실측 근거 없이 방어적 변경 추가 X (cycle 2493 선례와 동일 패턴).
+
+다음 사이클 추천 = review-code 신규 타겟 계속 탐색(`buildMlbMatchupProfile.ts` 등 잔여 후보) 또는 gap trigger 근접 순(info-arch 29/30 사실상 도달권, lotto 14/30).
+
 ## ✅ SUCCESS — fix-incident version-sync drift 근본원인 fix (cycle 2452, 2026-08-23)
 
 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 27/30, lotto 12/30). 2-chain lock 미충족(직전8 distinct=4). cycle 2451 retro가 version-sync drift 4th/5th recurrence를 Tier 3 plan 후보로 명시 carry-over — rubric 평가(가치 high/시간비용 small/risk 0/자율 yes/의존성 none) 결과 Tier 1로 하향, 별도 plan 분리 없이 본 cycle 직접 fire.
