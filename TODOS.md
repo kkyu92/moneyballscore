@@ -6469,3 +6469,17 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: game-detail KO+EN `max-w-4xl`/`<article>` 통일. EN 팀 페이지에 division rank 배지 추가(`N/M · GB N.N`, en/mlb/standings 의 GB 표기 컨벤션 재사용). `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.102).
 
 다음 사이클 추천 = review-code 계속(같은 family 재확인 — mlb/players/[id] 등 잔여 페이지) 또는 explore-idea(다양성 회복, saturation 11/15 임박) 또는 info-arch(gap 22/30).
+
+## 🟢 SUCCESS — review-code(heavy) seasons/[year] 최초 전체 감사, isOngoing/isCurrent KST 연도 경계 off-by-one 정정 (cycle 2514, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 2/20, op-analysis 9/25, info-arch 27/30, lotto 5/30). 2-chain lock 미충족(직전8 distinct=3: fix-incident/review-code/lotto). review-code(heavy) 6번째 연속 fire(2509~2514) — dominance-positive streak 인정(진짜 trigger: 대형 미감사 monolith 존재).
+
+`teams/[code]/page.tsx`(622줄)를 최우선 후보로 재확인했으나 cycle 2470 이 이미 최초 전체 감사·clean(RETRO-ONLY) 완료 + 이후 변경 이력 0건(`git log 50c7b165..HEAD` 빈 결과) 확인 후 중복 감사 폐기. cycle 2513 이 추천한 나머지 후보(`debug/pipeline`/`debug/factor-correlation`/`search/page`)도 각각 cycle 2269/2485/2261 에 이미 "최초 감사" 커밋 존재 확인 — 실제 미감사 후보는 `seasons/[year]/page.tsx`(433줄)와 `about/page.tsx`(427줄) 뿐이었음. 전자 선정, 전체 read.
+
+발견: `buildSeasonSummary.ts`(isOngoing 판정) / `seasons/[year]/page.tsx`(generateMetadata 의 isCurrent) 가 각각 독립적으로 `new Date().getFullYear()` 사용 — 서버 로컬(Vercel 기본 UTC) 기준이라 KST 12/31 15:00~23:59 UTC(=1/1 00:00~08:59 KST) 구간에 "올해" 판정이 실제 KST 연도보다 하루 늦게 갱신되는 KST_OFFSET_MS family(computeMonthRange/computeAdjacentDates 와 동일 원칙 위반) 신규 케이스. 연 1회 9시간 구간이지만 "진행 중" 배지·시즌 제목·메타 설명이 매년 재발 오표시. (`seasons/page.tsx`/`not-found.tsx`/`buildMlbTeamProfile.ts` 등 module-scope `getFullYear()` 사용처는 배포 시점 1회 평가라 영향 다르고 이번 audit 범위 밖 — 다음 review-code 후보로 carry-over)
+
+실행: `buildSeasonSummary.ts`에 순수 함수 `computeCurrentKSTYear`/`computeSeasonIsOngoing` 추출(`toKSTDateString` 기반, 기존 `computeAdjacentDates`/`computeMonthRange` 추출 패턴 재사용) + `page.tsx` 동일 함수 재사용. 회귀 테스트 6건(`computeSeasonIsOngoing.test.ts`, 일반 케이스 + KST 연도 경계 양방향 + KS 마감 경계).
+
+검증: `pnpm type-check`(4 packages clean) + `pnpm test`(512 files/4273 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.108, df407468).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사: `about/page.tsx` 427줄, 또는 module-scope `getFullYear()` 사용처 sweep — `seasons/page.tsx`/`not-found.tsx`/`buildMlbTeamProfile.ts`/`buildBatterLeaderboard.ts`/`sitemap.ts`/`snapshot-pitchers`/`sync-batter-stats`) 또는 explore-idea(다양성 회복, 최근 20 cycle 중 2회로 저조) 또는 op-analysis(gap 9/25, 아직 저신선도).
