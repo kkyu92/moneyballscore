@@ -1,3 +1,23 @@
+## ✅ SUCCESS — review-code(heavy) players/[id] 3파일 최초 전체 감사, MLB jsonLd inLanguage 5페이지 정정 (cycle 2522, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. gap trigger 미도달(fix-incident 16/20, op-analysis 17/25, lotto 14/30, info-arch 5/30). 직전 8사이클 distinct=3, lock 없음. carry-over 후보 `players/[id]`(323줄) + EN 미러 — 최초 전체 감사 이력 0건 확인 후 선정.
+
+감사 범위: `players/[id]/page.tsx`(KBO, 323줄) + `mlb/players/[id]/page.tsx`(316줄) + `en/mlb/players/[id]/page.tsx`(322줄) 3-way 전체 라인별 read + 대조.
+
+결과: KBO 버전(투수 프로필 — FIP/xFIP/최근등판/팀전적)과 MLB 버전(팀 Statcast placeholder — xwOBA/Barrel%/Hard Hit%/Launch Angle ETA)은 도메인 자체가 다른 페이지(개인 선수 vs 팀 단위)라 애초에 3-way 비교 대상 아님 — 각각 clean. MLB/EN 페어는 구조 동일, 정상.
+
+부수 발견: jsonLd `inLanguage` 필드가 EN 미러엔 전부 존재하나 대응 KO 페이지엔 누락된 패턴을 `mlb/*/page.tsx`(jsonLd 보유 15파일) 전수 grep으로 재검증 — cycle 2518에 team/matchup 2파일만 정정했으나 잔존 5파일(`postseason`/`players` hub/`players/[id]`/`standings`/`factors`) 미처리 확인. `methodology`/`games/[date]/[slug]`는 KO/EN 양쪽 다 없어 비대칭 아님(제외).
+
+fix: 5개 KO jsonLd 에 `inLanguage: "ko-KR"` 추가 (`mlb/team/[code]` 기존 패턴 위치·값 재사용).
+
+검증: apps/moneyball 514 files/4277 tests pass, tsc --noEmit clean, pre-push lint+type-check+version-sync-guard pass. Direct main push (commit 0030a41d).
+
+**교훈**: silent drift 정정이 "발견된 파일만" 국소 fix 로 끝나면 동일 패턴을 공유하는 나머지 파일이 잔존 drift 로 남음(cycle 2518 team/matchup 정정 시 전수 grep 안 해서 5파일 누락). 특정 파일에서 비대칭 패턴 발견 시 그 자리에서 `grep -rl` 전수 스캔으로 형제 파일 전체 확인이 원칙.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사: `mlb/reviews` hub 페이지, `standings`/`leaderboard` 세부 컴포넌트) 또는 fix-incident(gap 17/20, cycle 2526 도달) 또는 operational-analysis(gap 18/25, cycle 2530 도달).
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) mlb/reviews/monthly/[month]/page.tsx 최초 전체 감사, 신규 이슈 0건 (cycle 2521, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23 (전부 completed/archived/spec_only/deferred, status=approved 없음). 2-chain lock 없음(직전 8사이클 2513-2520 distinct=3: review-code/explore-idea/info-arch). gap trigger 미도달(fix-incident 15/20, op-analysis 16/25, lotto 13/30, info-arch 4/30). TODOS 기존 carry-over 후보(`en/mlb/matchup/[teamA]/[teamB]` 596줄, `mlb/reviews/monthly` 502줄, `mlb/factors`, `lotto/methodology`) 재검증 결과 전부 stale — matchup 페이지 3종은 cycle 2507에 이미 최초 전체 감사 완료(`todayStr` KST fix), `mlb/games`/`mlb/factors`/`lotto/methodology`도 각각 cycle 2509/2512/2511에 완료 확인. `최초 전체 감사` grep 전수 교차검증(60건)으로 진짜 미감사 타겟 발굴: `mlb/reviews/monthly/[month]/page.tsx`(502줄) + EN 미러(500줄) — KBO 원본(`reviews/monthly/[month]`)은 cycle 2270에 감사됐으나 MLB plan #26 Phase 2 신규 라우트는 감사 이력 0건.
