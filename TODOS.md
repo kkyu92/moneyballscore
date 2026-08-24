@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — fix-incident(lite) mlb_fancy_scrape 403 3일 self-healed 확인 (cycle 2484, 2026-08-24)
+
+진단: fix-incident gap 20/20 도달(마지막 발화 cycle 2464) — trigger 6 명시 조건 충족, lite 자동 권장. `pipeline_runs` 최근 7일 조회(163 rows) → non-success 3건 전부 `mlb_fancy_scrape` mode, `errors: ["fetchFangraphsMlbTeams: fangraphs HTTP 403"]`, run_date 2026-08-20~08-22 3일 연속.
+
+점검: `fangraphs-mlb.ts` 는 이미 cycle 2278 에 User-Agent 헤더(`KBO_USER_AGENT`) 적용 완료(코드 확인 — 주석에 "2026-08-04~08-19 24/30일 실패" 이력 명시, cycle 2326 재확인 이력도 존재). 이번 3일도 동일 계열 external 사이트 anti-bot 차단으로 판단 — 08-23/08-24 run 은 이미 정상 success 로 self-heal 확인(games_found=30, predictions=30). 다운스트림 영향 확인: `mlb_predict_final` 은 동일 3일(08-19~08-22 run_date) 모두 status=success, predictions 9~15건 정상 생성 — `mlb_team_stats` 가 이전 성공분 stale 값으로 fallback 되어 예측 파이프라인 자체는 무영향(실측 쿼리로 확인, 추측 아님).
+
+실행: 코드 변경 없음 — cycle 2383 과 동일한 "self-healed, 재발성 external 차단, 다운스트림 영향 0" 패턴 3rd recurrence 확인. 코드 수정 불필요 판단.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사: `debug/factor-correlation` 계열) 또는 op-analysis(gap 5/25) 또는 info-arch(gap 29/30, 임박).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) analysis/game/[id]/page.tsx 최초 전체 감사, 신규 issue 0건 (cycle 2483, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 19/20, op-analysis 4/25, info-arch 28/30, lotto 5/30). 직전 8 사이클 distinct=5(review-code/polish-ui/explore-idea/lotto/operational-analysis) — 2-chain lock 미충족. 직전 15 사이클 saturation 11/15 — explore-idea trigger 미충족. lite chain retro-only cap 미충족(최대 streak=1). 강한 trigger 부재, cycle 2482 retro 추천대로 review-code(heavy) 4연속 — 미감사 대형 파일 `analysis/game/[id]/page.tsx`(868줄, review-code 이력 0건) 선정.
