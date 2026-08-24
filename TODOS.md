@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) leaderboard 그룹 최초 전체 감사, 닉네임 길이 하드코딩 정정 (cycle 2525, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 미도달(fix-incident 19/20, op-analysis 20/25, info-arch 8/30, lotto 17/30). 직전 8사이클 distinct=3, lock 없음. cycle 2524 carry-over `standings/leaderboard 세부 컴포넌트` — grep 결과 leaderboard 컴포넌트 그룹(page/Client/Table/SortControl/HallOfFame/JoinModal/server.ts/use-leaderboard.ts/types.ts + sync/mlb-sync route) 최초 전체 감사 이력 0건 확인 후 선정. (standings 쪽은 cycle 2500 dashboard/standings 감사에서 이미 완료 확인.)
+
+감사 범위: 위 11파일 전체 라인별 read.
+
+결과: `LeaderboardJoinModal.tsx`(client validation/placeholder/maxLength) + `use-leaderboard.ts`(join() 재검증)가 각각 독립적으로 닉네임 길이를 하드코딩 `2`/`12` 사용 — 동일 서버 라우트(`sync/route.ts`, `mlb-sync/route.ts`)는 이미 `@moneyball/shared`의 `NICKNAME_MIN_CHARS`/`NICKNAME_MAX_CHARS` 단일 source-of-truth 참조 중. 값이 우연히 일치해 지금은 증상 없으나 상수 변경 시 클라이언트만 조용히 stale 해지는 silent drift family 재발 케이스. 그 외 신규 이슈 0건(HallOfFame/LeaderboardTable/LeaderboardSortControl/server.ts/types.ts 전부 clean).
+
+실행: 두 파일 모두 `@moneyball/shared` import 로 정합(placeholder/maxLength/에러 메시지 포함). `pnpm type-check`(4 packages clean) + `pnpm test`(514 files/4277 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(8cb78198)+push(R4).
+
+다음 사이클 추천 = fix-incident 또는 operational-analysis (gap 각 20/20, 21/25 — 다음 사이클 도달권) 또는 review-code(heavy, 잔존 미감사 후보 재탐색 필요).
+
+---
+
 ## ⚪ RETRO-ONLY — explore-idea 4th consecutive 소진 재확인, 트래픽/plan 무변화 (cycle 2524, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(plan #27/28/29 전부 non-approved — blocked-on-data/completed/deferred). gap trigger 4종 미도달(fix-incident 18/20, op-analysis 19/25, info-arch 7/30, lotto 16/30). 2-chain alternation lock 발동(직전 8사이클 2516-2523 distinct=2: review-code/info-architecture-review) → 둘 다 제외. 잔여 pool 재확인 결과 explore-idea saturation trigger 14/15 최강 → 자연 선택. 단 직전 3회(cycle 2417/2477/2498) heavy sweep + cycle 2515 재확인이 이미 EN/KO parity·jsonLd·TODOS Next-Up·placeholder auth/community·공유버튼/PWA/RSS 전 후보 소진 확정한 상태라, 전면 재탐색 대신 lite quick-recheck 만 수행.
