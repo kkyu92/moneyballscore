@@ -25,6 +25,7 @@ import {
   pickTierEmoji,
   PRODUCTION_COHORT_RULES,
   shortTeamName,
+  SMALL_SAMPLE_N,
   toKSTDateString,
   toKSTDisplayString,
   winnerProbOf,
@@ -1028,6 +1029,7 @@ export default async function HomePage() {
             {standings.slice(0, 5).map((row) => {
               const acc = teamAccuracyMap.get(row.teamCode);
               const pct = acc?.accuracyRate != null ? Math.round(acc.accuracyRate * 100) : null;
+              const isReliable = (acc?.verifiedN ?? 0) >= SMALL_SAMPLE_N;
               return (
                 <Link
                   key={row.teamCode}
@@ -1044,8 +1046,14 @@ export default async function HomePage() {
                     {row.wins}승 {row.losses}패
                   </span>
                   {pct != null && (
-                    <span className="text-xs font-medium text-brand-600 dark:text-brand-400 tabular-nums ml-3">
-                      예측 {pct}%
+                    <span
+                      className={`text-xs font-medium tabular-nums ml-3 ${
+                        isReliable
+                          ? "text-brand-600 dark:text-brand-400"
+                          : "text-gray-400 dark:text-gray-500"
+                      }`}
+                    >
+                      예측 {pct}%{!isReliable && ` (n=${acc?.verifiedN ?? 0})`}
                     </span>
                   )}
                 </Link>

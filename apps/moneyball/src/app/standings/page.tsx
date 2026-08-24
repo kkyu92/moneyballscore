@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record } from "@moneyball/shared";
+import { shortTeamName, KBO_TEAM_COUNT, KBO_PLAYOFF_TEAM_COUNT, KBO_SEASON_YEAR, RECENT_FORM_GAMES, STANDINGS_ISR_HOURS, ELO_NEUTRAL, SITE_URL, parseRecent10Record, SMALL_SAMPLE_N } from "@moneyball/shared";
 import { buildStandings } from "@/lib/standings/buildStandings";
 import { buildAllTeamAccuracy } from "@/lib/standings/buildTeamAccuracy";
 import { buildEloTrend } from "@/lib/standings/buildEloTrend";
@@ -270,6 +270,7 @@ export default async function StandingsPage() {
                 const pct = row.accuracyRate != null ? Math.round(row.accuracyRate * 100) : null;
                 const barWidth = pct ?? 0;
                 const sampleRank = sampleRankMap.get(row.teamCode) ?? 0;
+                const isReliable = row.verifiedN >= SMALL_SAMPLE_N;
                 return (
                   <li
                     key={row.teamCode}
@@ -294,12 +295,17 @@ export default async function StandingsPage() {
                           style={{ width: `${barWidth}%` }}
                         />
                       </div>
-                      <span className="text-sm font-semibold tabular-nums w-10 text-right">
+                      <span
+                        className={`text-sm font-semibold tabular-nums w-10 text-right ${
+                          isReliable ? "" : "text-gray-400 dark:text-gray-500"
+                        }`}
+                      >
                         {pct != null ? `${pct}%` : "-"}
                       </span>
                     </div>
                     <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums shrink-0">
                       {row.correctN}/{row.verifiedN}
+                      {!isReliable && row.verifiedN > 0 && <span className="ml-1">참고용</span>}
                     </span>
                   </li>
                 );
