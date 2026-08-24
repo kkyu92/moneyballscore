@@ -24,6 +24,7 @@ import {
   HOUR_MS,
   PRODUCTION_COHORT_RULES,
   H2H_MIN_GAMES,
+  SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import { computeCompositeDuel } from '@/lib/analysis/computeCompositeDuel';
 import { getRecentConvergencePickRecord, computeWinRatePct } from '@/lib/analysis/convergenceRecord';
@@ -568,14 +569,17 @@ export default async function GameAnalysisPage({ params }: PageProps) {
                 })}
               </div>
             )}
-            {/* wave-461: 수렴 픽 성적 라인 — 최근 N경기 적중 현황 */}
+            {/* wave-461: 수렴 픽 성적 라인 — 최근 N경기 적중 현황 · cycle 2542 (review-code heavy): FactorAccuracyTable(cycle 2541)/TeamMatchupCards 관례 재사용 — n<SMALL_SAMPLE_N(5) 시 흐림 처리 + 안내 (기존엔 이 라인만 소표본 hedge 부재라 n=1 에도 100%/0% 그대로 강조) */}
             {convergenceRecord.total > 0 && (
               <p
-                className="mt-1.5 text-[11px] tabular-nums opacity-60"
+                className={`mt-1.5 text-[11px] tabular-nums ${convergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-40' : 'opacity-60'}`}
                 title={`최근 ${convergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
               >
                 최근 {convergenceRecord.total}경기 {convergenceRecord.wins}승{convergenceRecord.losses}패{' '}
                 ({computeWinRatePct(convergenceRecord.wins, convergenceRecord.total)}%)
+                {convergenceRecord.total < SMALL_SAMPLE_N && (
+                  <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>
+                )}
               </p>
             )}
           </div>

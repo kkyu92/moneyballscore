@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) analysis/game/[id]/page.tsx 팩터 수렴 픽 성적 라인 소표본 게이트 부재 (cycle 2542, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29(전부 status≠approved). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달(fix-incident 16/20, op-analysis 12/25, info-arch 25/30, lotto 4/30). CI 실패 0건. cycle 2541 retro carry-over(잔존 대형 파일 `analysis/game/[id]/page.tsx` 868줄) 감사.
+
+발견: 이 페이지는 #1338 family(scoring_rule 필터) 관점에서 이미 3회 정정된 clean 상태. postGame `.find()` 는 scoring_rule 필터가 없지만 shadow-cohort.ts 가 shadow row 를 prediction_type='pre_game' 만 insert(post_game shadow row 자체 없음) 확인 — false positive, 실질 위험 없음. 대신 wave-461 "팩터 수렴 픽 최근 N경기 적중 현황" 라인이 `SMALL_SAMPLE_N` import 자체가 없어 window(기본 10경기) 표본이 1~2건뿐일 때도 100%/0%를 그대로 강조 — cycle 2541 이 accuracy 표에 적용한 것과 동일한 소표본 게이트 부재. `analysis/page.tsx`(목록) 도 동일 패턴 7개 지점 존재 확인(다음 후속 대상).
+
+실행: `SMALL_SAMPLE_N` import + `convergenceRecord.total < SMALL_SAMPLE_N` 시 `opacity-40`(기존 무조건 `opacity-60` 교체) + 인라인 `· 소표본(n<5)` 안내(FactorAccuracyTable/TeamMatchupCards 관례 재사용). 회귀 테스트 `silent-drift-wave-664.test.ts` 신규.
+
+검증: `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(521 files/4301 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push(R4), 버전 0.5.62.116→117.
+
+다음 사이클 추천 = review-code(heavy) 계속 — `analysis/page.tsx`(목록, 2803줄) 안 동일 소표본 게이트 부재 7개 지점(recent/monthly/season × strong/complete convergence record) 정정.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) accuracy/page.tsx 팩터별 적중률 표 소표본 게이트 부재 (cycle 2541, 2026-08-25)
 
 진단: open issue 0, approved plan 0/29(전부 archived/completed). 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달. cycle 2539/2540 retro carry-over(잔존 대형 파일 `accuracy/page.tsx` 1220줄) 감사.

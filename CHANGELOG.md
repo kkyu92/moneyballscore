@@ -1,3 +1,12 @@
+## v0.5.62.117 — 2026-08-25 (cycle 2542, review-code (heavy): analysis/game/[id]/page.tsx 팩터 수렴 픽 성적 라인 소표본 게이트 부재)
+
+### fix(analysis): `analysis/game/[id]` 팩터 수렴 픽 "최근 N경기 적중 현황" 라인에 소표본(n<5) 흐림 처리 + 안내 신규 — cycle 2541 이 accuracy 표에 적용한 것과 동일 관례가 이 라인엔 없었음
+
+- 진단: open issue 0, approved plan 0/29(전부 status≠`approved`, archived/completed류). 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/lotto). gap trigger 4종 미도달(fix-incident 16/20, op-analysis 12/25, info-arch 25/30, lotto 4/30). CI 최근 실패 0건, DESIGN.md 1일 전 갱신(stale 아님). cycle 2541 retro carry-over(잔존 대형 파일 `analysis/game/[id]/page.tsx` 868줄) 감사.
+- 발견: 이 페이지는 `#1338 family`(scoring_rule 필터) 관점에서 이미 3회 정정된 이력이 있어 그 축은 clean. 대신 wave-461 팩터 수렴 픽 "최근 {N}경기 {승}승{패}패 ({pct}%)" 라인이 `getRecentConvergencePickRecord()`(기본 `CONVERGENCE_RECORD_RECENT_LIMIT`=10 window)의 결과를 그대로 표시 — `SMALL_SAMPLE_N` import 자체가 없어 window 안 표본이 1~2건뿐인 시즌 초반/휴식기 이후에도 100%/0%를 그대로 강조 노출. `analysis/page.tsx`(목록 페이지)의 동일 패턴(7개 지점: recent/monthly/season × strong/complete) 도 동일 부재이나 이번 사이클은 감사 대상 파일(detail page) 1개소만 정정, 목록 페이지는 다음 review-code(heavy) 후속 대상으로 carry-over.
+- 실행: `SMALL_SAMPLE_N` import 추가 + `convergenceRecord.total < SMALL_SAMPLE_N` 시 `opacity-40`(기존 무조건 `opacity-60`을 조건부로 교체) + 인라인 `· 소표본(n<5)` 안내 추가(FactorAccuracyTable/TeamMatchupCards 관례 재사용). 회귀 테스트 `silent-drift-wave-664.test.ts` 신규.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(521 files/4301 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.116 — 2026-08-25 (cycle 2541, review-code (heavy): accuracy/page.tsx 팩터별 적중률 표 소표본 게이트 부재)
 
 ### fix(accuracy): `FactorAccuracyTable` 소표본(n<5) 행에 흐림 처리 + 안내 문구 신규 — `/accuracy` 페이지 내 유일하게 소표본 표시가 빠진 표
