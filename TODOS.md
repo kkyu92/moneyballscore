@@ -7073,3 +7073,8 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 검증: tsc/lint clean + test 523 files/4323 tests(신규 23개) 통과. 2-commit(feat + CHANGELOG fixup, pre-push guard 포착) 직접 main push, R4 정합. 버전 0.5.62.118→119.
 
 다음 사이클 추천 = review-code(heavy, 신규 대형 파일 재탐색 — 소표본 게이트 family 소진 추정) 또는 operational-analysis(gap 14/25, 아직 미도달).
+
+## cycle 2564 (2026-08-25) — review-code (heavy) SUCCESS
+- SMALL_SAMPLE_N family 13번째 재발: /reviews, /seasons/[year], /mlb/reviews, /en/mlb/reviews 4개 페이지 강수렴/완전수렴 W-L 카드가 total>0 만으로 헤드라인 % 노출 (convergenceRecord.ts 빌더 자체 게이트 부재)
+- fix: SMALL_SAMPLE_N(5) import + "· 소표본(n<5)" / "· small sample (n<5)" 배지 4파일 추가, silent-drift-wave-676.test.ts 신규 4 assertion
+- commit 45db51e2, main 직접 push, pnpm test 534 files/4378 tests(+1/+4) 전체 통과
