@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_FACTOR_COUNTS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
 import {
   SITE_URL,
   MLB_SCORING_RULE,
@@ -14,6 +14,11 @@ import { TableOfContents } from "@/components/shared/TableOfContents";
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const TOTAL = MLB_FACTOR_COUNTS.total;
+// MLB_PLACEHOLDER_FACTOR_KEYS(mlb-base.ts) 단일 source — factors 페이지와 동일 배열 참조
+// (cycle 2512 fix, 이전엔 recent_form/head_to_head 를 stale 하게 이 목록에 포함).
+const PLACEHOLDER_WEIGHT_SUM_PCT = Math.round(
+  MLB_PLACEHOLDER_FACTOR_KEYS.reduce((sum, key) => sum + MLB_BASE_WEIGHTS[key], 0) * 100,
+);
 const TITLE_KO = "MLB 예측 방법론 | MoneyBall Score";
 const SUMMARY_KO = `MoneyBall Score 가 MLB 승부예측을 만드는 전체 과정 — 데이터 소스, ${TOTAL}팩터 정량 모델, 검증 방법, KBO 모델과의 차이점.`;
 
@@ -124,9 +129,10 @@ export default function MlbMethodologyPage() {
           실측 어드밴티지(+{HOME_ADVANTAGE_PCT.toFixed(1)}%p)를 가산합니다.
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
-          단, 최근폼·상대전적·수비 SFR 3개는 팀/매치업 페이지엔 참고용으로 표시되지만, 위 승률 계산 자체에는
-          아직 팀 구분 없는 중립값이 고정 입력되어 반영되지 않습니다. Elo 는 위에서 설명한 갱신 로직의 결과값이
-          실제 승률 계산에도 연결되어 있습니다.
+          단, 수비 SFR·선발 xwOBA-against·wOBA 표준편차 3개(합 {PLACEHOLDER_WEIGHT_SUM_PCT}%)는 팀/매치업 페이지엔
+          참고용으로 표시되지만, MLB 전용 데이터 소스가 아직 없어 위 승률 계산 자체에는 팀 구분 없는 중립값이 고정
+          입력되어 반영되지 않습니다 (KBO 버전은 실측 반영). 최근폼·상대전적·Elo 는 실측값이 위 승률 계산에도
+          연결되어 있습니다.
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           가중치 표 전체와 각 팩터의 정의·출처는{" "}

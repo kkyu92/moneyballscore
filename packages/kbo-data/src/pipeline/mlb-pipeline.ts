@@ -388,6 +388,9 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
       // "라인업 wOBA 표준편차(woba_std)" 는 별도 데이터 소스가 없어 실측 불가 (신규 스크레이퍼
       // 필요 — 별도 스코프). 합산 시 defense_sfr 과 동일 원리로 안전(diff=0 → 항상 무영향)하나
       // MLB_BASE_WEIGHTS 상 7%(4%+3%) 가 defense_sfr 5% 와 마찬가지로 항상 죽어있는 weight.
+      // 이 3개 키(defense_sfr/sp_xwoba_against/woba_std) = MLB_PLACEHOLDER_FACTOR_KEYS
+      // (mlb-base.ts) 단일 source — factors/methodology 페이지 배너가 이 배열을 참조
+      // (cycle 2512 fix, 이전엔 recent_form/head_to_head 를 stale 하게 이 목록에 포함).
       sp_xwoba_against: { home: MLB_STAT_DEFAULTS.xwoba, away: MLB_STAT_DEFAULTS.xwoba },
       woba_std: { home: 0.030, away: 0.030 },
     });

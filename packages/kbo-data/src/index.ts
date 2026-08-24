@@ -61,6 +61,7 @@ export {
   MLB_KBO_FACTOR_KEYS,
   MLB_STATCAST_FACTOR_KEYS,
   MLB_FACTOR_COUNTS,
+  MLB_PLACEHOLDER_FACTOR_KEYS,
   HOME_ELO_BONUS_VALUE,
   computeMlbProbability,
 } from './factors/mlb-base';

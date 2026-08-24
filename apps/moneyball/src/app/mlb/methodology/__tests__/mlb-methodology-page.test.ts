@@ -36,3 +36,13 @@ describe('/mlb/methodology + /en/mlb/methodology (cycle 2245 explore-idea — KB
     expect(EN_SRC).toMatch(/locale="en"/);
   });
 });
+
+describe('/mlb/methodology placeholder-factor claim (cycle 2512 silent drift fix)', () => {
+  it('does not claim recent_form/head_to_head are still unwired (wired since cycle 2353)', () => {
+    expect(KO_SRC).not.toContain('최근폼·상대전적·수비 SFR');
+  });
+
+  it('references MLB_PLACEHOLDER_FACTOR_KEYS as single source, not an isolated literal', () => {
+    expect(KO_SRC).toContain('MLB_PLACEHOLDER_FACTOR_KEYS');
+  });
+});

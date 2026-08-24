@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_SHADOW_C_MILESTONES, MetricRegistry } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_SHADOW_C_MILESTONES, MetricRegistry } from "@moneyball/kbo-data";
 import { V2_PROMOTION_COHORT_N, HOME_ADVANTAGE_PCT, RECENT_FORM_GAMES, HOME_ELO_BONUS, HOME_ELO_BONUS_WIN_PROB_PCT, SITE_URL, CURRENT_SCORING_RULE } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 
@@ -230,6 +230,18 @@ function totalWeight(): number {
   return Object.values(MLB_BASE_WEIGHTS).reduce<number>((sum, w) => sum + w, 0);
 }
 
+// MLB_PLACEHOLDER_FACTOR_KEYS(mlb-base.ts) 단일 source 로 배너 문구 도출 — recent_form/
+// head_to_head/elo 가 실측 연결된 후(cycle 2349/2353)에도 배너가 stale 하게 남던 silent
+// drift 재발 차단 (cycle 2512 fix).
+const PLACEHOLDER_ROWS: readonly FactorRow[] = MLB_PLACEHOLDER_FACTOR_KEYS.map(
+  (key) => [...KBO_FACTORS, ...STATCAST_4_FACTORS].find((f) => f.key === key)!,
+);
+const PLACEHOLDER_LABEL_KO = PLACEHOLDER_ROWS.map((f) => f.shortLabel).join("·");
+const PLACEHOLDER_WEIGHT_SUM = MLB_PLACEHOLDER_FACTOR_KEYS.reduce(
+  (sum, key) => sum + MLB_BASE_WEIGHTS[key],
+  0,
+);
+
 export default function MlbFactorsHub() {
   const allFactors: FactorRow[] = [...KBO_FACTORS, ...STATCAST_4_FACTORS];
   const sum = totalWeight();
@@ -273,9 +285,10 @@ export default function MlbFactorsHub() {
           <code>packages/kbo-data/src/factors/mlb-base.ts</code> 정의. 모델 진화 (n={V2_PROMOTION_COHORT_N} forward cohort 후) 시 갱신.
         </p>
         <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-3 py-2">
-          ⚠ 아래 표 중 최근폼·상대전적·수비 SFR 3개는 팀/매치업 페이지엔 참고용으로 별도 표시되지만,
-          실제 예측 승률 계산에는 팀 구분 없는 중립값이 고정 입력되어 아직 반영되지 않습니다 (KBO 버전은 실측 반영).
-          Elo 는 실측 레이팅이 예측 승률 계산에 반영됩니다.
+          ⚠ 아래 표 중 {PLACEHOLDER_LABEL_KO} {MLB_PLACEHOLDER_FACTOR_KEYS.length}개(합 {weightPercent(PLACEHOLDER_WEIGHT_SUM)})는
+          팀/매치업 페이지엔 참고용으로 별도 표시되지만, 실제 예측 승률 계산에는 팀 구분 없는 중립값이 고정 입력되어
+          아직 반영되지 않습니다 (MLB 전용 데이터 소스 부재, KBO 버전은 실측 반영). 최근폼·상대전적·Elo 는 실측값이
+          예측 승률 계산에 반영됩니다.
         </p>
       </header>
 

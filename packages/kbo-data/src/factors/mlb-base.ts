@@ -47,6 +47,18 @@ export const MLB_FACTOR_COUNTS = {
   total: MLB_KBO_FACTOR_KEYS.length + MLB_STATCAST_FACTOR_KEYS.length,
 } as const;
 
+// mlb-pipeline.ts computeMlbProbability 호출부가 home/away 에 항상 동일 상수를 넣어
+// homeAdvantage 기여도가 구조적으로 always diff=0 인 키들 (cycle 2402 발견, MLB 전용
+// 데이터 소스 부재 — 신규 스크레이퍼 필요, 별도 스코프). recent_form/head_to_head 는
+// cycle 2353, elo 는 cycle 2349 에 이미 실측 연결됨 — 이 배열에서 제외.
+// factors/methodology 페이지 배너가 이 배열을 단일 source 로 참조 — 실측 연결 시
+// 이 배열만 갱신하면 두 페이지 자동 동기 (cycle 2512 silent drift 정정 후속).
+export const MLB_PLACEHOLDER_FACTOR_KEYS = [
+  "defense_sfr",
+  "sp_xwoba_against",
+  "woba_std",
+] as const satisfies readonly (keyof typeof MLB_BASE_WEIGHTS)[];
+
 export const HOME_ELO_BONUS_VALUE = HOME_ELO_BONUS;
 
 export interface MlbFactorInputs {
