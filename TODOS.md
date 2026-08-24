@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) buildMlbTeamProfile.ts/mlb-shared.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2497, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(27=phase blocked/28=completed/29=spec_only_deferred, 셋 다 status≠approved). gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 18/25, info-arch 11/30, lotto 19/30). 직전 8 사이클(2489-2496) distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. `gh run list` 최근 10건 전부 success/skipped, fail 0건. cycle 2496 retro 추천대로 review-code(heavy) 계속, 잔존 미감사 대형 파일 `buildMlbTeamProfile.ts`(383줄) + `mlb-shared.ts`(409줄) 선정.
+
+감사 범위: `buildMlbTeamProfile.ts`(teamCode alias 정규화/mlb_schedule+predictions 조인/MLB_PRODUCTION_COHORT_RULES 필터/factorAverages 7종 집계/deriveMlbOutcome 위임) + `mlb-shared.ts`(fetchMlbPredictionRowsInRange/mapMlbRowsToHighlightCandidates/buildMlbTeamStats/buildMlbFactorInsights/buildMlbMissReport, LOWER_IS_BETTER 부호 반전 로직) + 업스트림 `deriveMlbOutcome.ts`(confidence 스케일 0.5~1, KBO confToWinProb 이중변환 방지 주석 확인) + 소비처(buildMlbWeeklyReview.ts/buildMlbMonthlyReview.ts, KBO buildWeeklyReview.ts/buildMonthlyReview.ts 대응 구조와 badge tier 로직 diff 비교 — 정합).
+
+결론: 두 파일 모두 이미 cycle 2066/2081/2117/2160/2399 등 다수 후속 fix 로 정리된 상태 — teamCode alias(StatsAPI↔canonical) 처리, cohort filter, badge 3-tier 로직 전부 KBO 대응 파일과 정합. 신규 actionable 이슈 0건 — 코드 변경 없음, retro-only.
+
+다음 사이클 추천 = fix-incident(gap 14/20 근접) 또는 op-analysis(gap 19/25 근접) 또는 lotto(gap 20/30 근접) 또는 review-code(heavy) 계속(잔존 미감사 파일 재탐색 필요 — 대형 monolith 소진 국면 가능성).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildPicksStats.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2496, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 17/25, info-arch 10/30, lotto 18/30). 직전 8 사이클(2488-2495) distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. cycle 2479 op-analysis(lite) CE cohort 5연속 zero-change(비CE 표본 7주+ 동결) 확인 후 "review-code(heavy) 계속" 권고, 2492/2493 retro 도 동일 추천 — `buildPicksStats.ts`(411줄, MLB 픽 silent-drop 과거 이력 있어 재점검 가치, review-code 이력 0건) 선정.
