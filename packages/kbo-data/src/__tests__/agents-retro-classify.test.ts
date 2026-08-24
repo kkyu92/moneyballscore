@@ -201,6 +201,48 @@ describe('buildMemoryForTeam', () => {
     expect(m!.content).toContain('head_to_head_rate');
   });
 
+  // shadow-only factor (park_weather/umpire_sz, DEFAULT_WEIGHTS weight=0) 는 bias 가 커도
+  // maxBias 후보에서 제외 — postview.ts isWeightedFactor 와 동일 의도 (silent drift 차단)
+  it('shadow-only 0% factor (park_weather) 는 bias 커도 제외 → 남은 weighted factor 선택', () => {
+    const m = buildMemoryForTeam({
+      factors: { park_weather: 0.9, home_sp_fip: 0.52 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: true,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).not.toBeNull();
+    expect(m!.content).toContain('home_sp_fip');
+    expect(m!.content).not.toContain('park_weather');
+  });
+
+  it('shadow-only 0% factor (prefixed) 도 canonicalize 후 제외', () => {
+    const m = buildMemoryForTeam({
+      factors: { home_umpire_sz: 0.85, home_sp_fip: 0.55 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: true,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).not.toBeNull();
+    expect(m!.content).toContain('home_sp_fip');
+    expect(m!.content).not.toContain('umpire_sz');
+  });
+
+  it('shadow-only factor 만 존재 → null (candidate 전부 제외)', () => {
+    const m = buildMemoryForTeam({
+      factors: { park_weather: 0.9, umpire_sz: 0.8 },
+      teamCode: 'LG',
+      teamSide: 'home',
+      teamWon: true,
+      date: '2026-04-15',
+      opponentCode: 'OB',
+    });
+    expect(m).toBeNull();
+  });
+
   it('미등록 factor key → raw key fallback (ko_name X)', () => {
     const m = buildMemoryForTeam({
       factors: { unknown_factor_xyz: 0.7 },

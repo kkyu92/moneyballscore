@@ -1,7 +1,20 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, RETRO_MEMORY_CONFIDENCE, TEAM_BIAS_NEUTRAL } from '@moneyball/shared';
+import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WIN_PROB_BUCKET_MID, CONF_WIN_PROB_BUCKET_HIGH, NEUTRAL_FACTOR, ELO_NEUTRAL_WIN_PCT, RETRO_MEMORY_CONFIDENCE, TEAM_BIAS_NEUTRAL, DEFAULT_WEIGHTS } from '@moneyball/shared';
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
+import { canonicalizeFactorKey } from './postview';
+
+// shadow-only factor (park_weather / umpire_sz — DEFAULT_WEIGHTS 상 weight=0, cycle 1013 M-F1/M-F2)
+// 는 postview.ts 의 isWeightedFactor 가드와 동일 의도로 team memory maxBias 후보에서 제외.
+// 두 factor 모두 현재 symmetric 구현이라 bias 항상 0 (실질 위험 없음)이지만, park-weather.ts /
+// umpire-sz.ts 주석의 "비대칭 도입 시" 시나리오가 실현되면 agent_memories 에 0% factor 가
+// 학습되어 team-agent 프롬프트에 노출 — postview.ts 가 이미 막은 "0% factor 가 LLM reasoning
+// 70% 차지" silent drift family 를 이 경로에서만 재현할 수 있어 사전 차단.
+const ZERO_WEIGHT_FACTOR_BASES = new Set(
+  Object.entries(DEFAULT_WEIGHTS)
+    .filter(([, w]) => (w as number) === 0)
+    .map(([k]) => k)
+);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
@@ -190,6 +203,7 @@ export function buildMemoryForTeam(params: {
   let maxBias = '';
   let maxBiasVal = 0;
   for (const [key, val] of Object.entries(factors)) {
+    if (ZERO_WEIGHT_FACTOR_BASES.has(canonicalizeFactorKey(key))) continue;
     const bias = Math.abs(val - NEUTRAL_FACTOR);
     if (bias > maxBiasVal) {
       maxBiasVal = bias;

@@ -1,3 +1,12 @@
+## v0.5.62.125 — 2026-08-25 (cycle 2558, review-code (heavy): `agent_memories` 학습 경로 shadow-only 0% factor 미필터)
+
+### fix(agents): `retro.ts` `buildMemoryForTeam` — `park_weather`/`umpire_sz`(DEFAULT_WEIGHTS weight=0) 가 필터 없이 maxBias 후보에 포함되던 gap 정정
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 distinct=4: review-code/skill-evolution/explore-idea/operational-analysis). fix-incident gap 32/20 도달 → 마이너 체크: `pipeline_runs` 최근 7일(166건) error 3건 = `mlb_fancy_scrape` fangraphs HTTP 403 3일 연속(8/19~21) 후 8/22부터 자연 회복, 현재 재발 없음 — negative. op-analysis 방금 발화, info-arch/lotto/design-system 모두 negative(breadcrumb "누락" 2건은 placeholder/redirect 전용 페이지라 오탐, DESIGN.md 2일 전 갱신). explore-idea 5연속 소진 + TODOS Next-Up 신규 리드 없음 재확인 → review-code(heavy) 재탐색, SMALL_SAMPLE_N family(11회) 소진 확정 후 신규 영역 탐색.
+- 발견: `postview.ts` 는 cycle 1013 M-F1/M-F2 에서 `isWeightedFactor`(DEFAULT_WEIGHTS weight>0 만) 가드로 "0% factor 가 LLM reasoning 70% 차지" silent drift 를 막았고, MLB 쪽 `mlb-retro.ts` 도 자체 `MEMORY_CANDIDATE_KEYS` 화이트리스트로 elo/placeholder 상수 factor 를 명시적으로 배제 — 그러나 두 함수가 공유하는 `retro.ts` 원본 `buildMemoryForTeam` 은 `Object.entries(factors)` 전체에서 maxBias 를 뽑아, shadow-only factor(`park_weather`/`umpire_sz`, cycle 1013 도입)가 필터 없이 후보에 남아있었음. 현재는 두 factor 모두 symmetric 구현(homeAdj===awayAdj)이라 bias 항상 0 이라 실질 노출은 없었지만, park-weather.ts/umpire-sz.ts 주석의 "비대칭 도입 시" 시나리오가 실현되면 `agent_memories` 에 0% factor 가 학습되어 향후 team-agent 프롬프트에 그대로 노출되는 동일 family 재현 경로였음.
+- 실행: `DEFAULT_WEIGHTS` weight=0 키 집합(`ZERO_WEIGHT_FACTOR_BASES`) + `postview.ts` 의 `canonicalizeFactorKey` 재사용(prefix 유무 무관 매칭)으로 `buildMemoryForTeam` maxBias 루프에 제외 가드 추가. 미등록 factor key(향후 predictor 확장 대비 raw fallback) 는 그대로 허용 — `isWeightedFactor` 전체 재사용 대신 exclude-set 방식으로 기존 fallback 테스트 의도 보존. 회귀 테스트 3건 추가(`agents-retro-classify.test.ts`: 비prefix/prefix shadow factor 제외 + shadow factor 만 있을 때 null).
+- `pnpm --filter @moneyball/kbo-data test`(91 files/1190 tests) + `type-check` + `lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.124 — 2026-08-25 (cycle 2555, review-code (heavy): predictions 페이지 `AccuracyHeaderCard` 누적 적중률 소표본 게이트 부재)
 
 ### fix(predictions): `AccuracyHeaderCard` 헤드라인 "누적 적중률" 스탯에 소표본(n<5) 인라인 표시 신규 — KBO/MLB/영문 predictions 페이지 3곳 공통 사용 컴포넌트에만 관례 부재
