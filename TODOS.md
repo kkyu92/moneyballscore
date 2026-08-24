@@ -1,3 +1,15 @@
+## 🟢 SUCCESS — operational-analysis(lite) 주간 성과 진단, n=26 소표본 확인 (cycle 2459, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 11/25, info-arch 4/30, lotto 19/30). 2-chain lock 미충족(직전8 distinct=5, {skill-evolution,fix-incident,review-code,info-arch,explore-idea}). cycle 2458 retro 1순위 추천(operational-analysis, 10/25 gap) + cycle 2456 "review-code 감사 pool 고갈 경고" 채택 — 다양성 확보 위해 operational-analysis 선택.
+
+모드 선택: 직전 heavy(cycle 2448, CE cohort)가 10 cycle 전 = 데이터 freshness 판단 애매 → lite(`/weekly-review`)로 신선도 우선 확인, 신규 코드 X.
+
+실행: `scripts/op-analysis-ce-cohort.ts` 재실행 결과 cycle 2448 과 완전 동일(n=337/CE 290/비CE 47/격차 10.4pp) — DB 확인 결과 코드 문제 아님, 두 cycle 이 같은 날(2026-08-23 23:32 KST → 2026-08-24 14:36 KST, 15시간) 사이라 KBO 일일 verify cron(매일 23:17 KST 1회)이 아직 안 돈 것. 대신 지난 완결주(2026-08-17~08-23, game_date 기준) 별도 쿼리: n=26, 정확도 46.2% (5경기일 08-18~08-23), 팀별 편차 큼(team 1 0/4, team 6 1/6 vs team 7/8 4/5 each), 확신도 tier: high(|hwp-0.5|≥0.15) n=0 이번 주 부재, mid n=3(100%), low n=23(39.1%).
+
+결론: n=26 = v2.0 결정 임계(n=150) 대비 소표본 — [[feedback_data_only_claims]] 원칙대로 가중치 조정 판단 근거 X. 주간 46.2% 는 장기 60% 대 대비 낮으나 5경기일 노이즈 범위 내 (하한 확인만, 조정 X). CE-cohort n=337 정체는 코드 버그가 아니라 develop-cycle 이 하루 여러 사이클 돌기 때문(cron 1일 1회 vs 사이클 다수/일) — 다음 op-analysis heavy 재측정 시 "직전 재측정과 같은 KST 날짜인지" 먼저 확인해 중복 측정 피할 것.
+
+다음 사이클 추천 = review-code(heavy, 미감사 후보 잔존 — reviews/mlb-shared.ts 409줄 / dashboard/compareModels.ts 299줄 / standings/buildTeamAccuracy.ts 261줄) 또는 explore-idea(saturation trigger 근접).
+
 ## 🔍 RETRO-ONLY — review-code(heavy) buildPicksStats.ts 신규 감사, 버그 없음 확인 (cycle 2458, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 non-approved/Tier4). gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 10/25, info-arch 3/30, lotto 18/30). 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation trigger 충족(12/15)이나 cycle 2457이 방금 발화(이번 사이클엔 review-code 재순환). cycle 2456이 "review-code 미감사 후보 pool 고갈 중" 경고했으나 미감사 lib 파일 재조사 결과 `buildPicksStats.ts`(410줄, picks 기능, CHANGELOG 언급 0회) 발견 — 신규 타겟으로 선정.
