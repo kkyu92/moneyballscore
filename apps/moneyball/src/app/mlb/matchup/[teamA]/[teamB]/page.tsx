@@ -178,6 +178,7 @@ export default async function MlbMatchupPage({ params }: PageProps) {
     "@type": "SportsEvent",
     name: `${tA.shortName} vs ${tB.shortName} 상대전적`,
     description: profile.summary,
+    inLanguage: "ko-KR",
     mainEntityOfPage: `${SITE_URL}${pair.path}`,
     publisher: { "@type": "Organization", name: "MoneyBall Score" },
   };

@@ -149,6 +149,7 @@ export default async function MlbTeamPage({ params }: PageProps) {
     "@type": "SportsTeam",
     "@id": teamUrl,
     url: teamUrl,
+    inLanguage: "ko-KR",
     name: profile.name,
     sport: "Baseball",
     logo: logoUrl,

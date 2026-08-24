@@ -56,6 +56,7 @@ export default function MlbTeamsHub() {
     name: "MLB 팀 프로필",
     description: `MLB ${MLB_TEAM_COUNT}팀 시즌 예측 기록 · ${MLB_FACTOR_COUNTS.total}팩터 · 홈구장 파크팩터`,
     url: `${SITE_URL}/mlb/team`,
+    inLanguage: "ko-KR",
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: MLB_TEAM_COUNT,
