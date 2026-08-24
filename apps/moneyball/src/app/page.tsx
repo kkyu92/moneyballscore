@@ -242,8 +242,8 @@ async function getWeekAheadSchedule(): Promise<WeekGameDay[]> {
       .eq('prediction_type', 'pre_game')
       .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .not('home_win_prob', 'is', null)
-      .gte('created_at', `${today}T00:00:00Z`)
-      .lte('created_at', `${today}T23:59:59Z`)
+      .gte('created_at', `${today}T00:00:00+09:00`)
+      .lte('created_at', `${today}T23:59:59+09:00`)
       .limit(HOME_TODAY_PRED_LIMIT),
   ]);
 
