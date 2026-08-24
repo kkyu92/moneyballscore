@@ -3,6 +3,7 @@ import {
   KBO_TEAMS,
   SUPABASE_PAGE_SIZE,
   assertSelectOk,
+  toKSTDateString,
   type SelectResult,
   type TeamCode,
 } from "@moneyball/shared";
@@ -81,6 +82,22 @@ interface GameRow {
 
 interface TeamMeta { id: number; code: TeamCode; name: string }
 
+/**
+ * KST 기준 "올해" 연도. `now.getFullYear()` 는 서버 로컬(대개 UTC) 기준이라
+ * KST 12/31 15:00~23:59 UTC(=1/1 00:00~08:59 KST) 구간에 연도가 하루 어긋남
+ * (KST_OFFSET_MS family, cycle 2514 review-code heavy).
+ */
+export function computeCurrentKSTYear(now: Date = new Date()): number {
+  return Number(toKSTDateString(now).slice(0, 4));
+}
+
+/** 시즌 진행 여부: 올해(KST) 시즌 + 11월 10일 KST 이전 (KBO KS 마무리 전). */
+export function computeSeasonIsOngoing(year: number, now: Date = new Date()): boolean {
+  const currentYear = computeCurrentKSTYear(now);
+  const ksCutoff = new Date(`${currentYear}-11-10T00:00:00+09:00`);
+  return year === currentYear && now < ksCutoff;
+}
+
 export async function buildSeasonSummary(year: number): Promise<SeasonSummary | null> {
   if (!Number.isInteger(year) || year < 2020 || year > 2100) return null;
   const db = createAdminClient();
@@ -136,11 +153,8 @@ export async function buildSeasonSummary(year: number): Promise<SeasonSummary | 
   const postponedGames = games.filter((g) => g.status === "postponed");
   const scheduledGames = games.filter((g) => g.status === "scheduled" || g.status === "live");
 
-  // 진행 여부: 올해 시즌 + 11월 10일 이전 (KBO KS 마무리 전)
   const now = new Date();
-  const currentYear = now.getFullYear();
-  const ksCutoff = new Date(`${currentYear}-11-10T00:00:00+09:00`);
-  const isOngoing = year === currentYear && now < ksCutoff;
+  const isOngoing = computeSeasonIsOngoing(year, now);
 
   // decided: home_score, away_score 모두 있고 무승부 아님 (winner != null)
   const decided = finalGames.filter(

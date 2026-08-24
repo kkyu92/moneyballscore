@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT } from "@moneyball/shared";
-import { buildSeasonSummary } from "@/lib/seasons/buildSeasonSummary";
+import { buildSeasonSummary, computeCurrentKSTYear } from "@/lib/seasons/buildSeasonSummary";
 import {
   getRecentConvergencePickRecord,
   computeWinRatePct,
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { year } = await params;
   const y = parseInt(year, 10);
   if (!SUPPORTED_YEARS.includes(y)) return {};
-  const isCurrent = y === new Date().getFullYear();
+  const isCurrent = y === computeCurrentKSTYear();
   const title = isCurrent ? `${y} KBO 시즌 (진행 중)` : `${y} KBO 시즌 리뷰`;
   const description = isCurrent
     ? `${y} KBO 정규시즌 진행 상황 — 매일 경기 결과 반영. 팀 순위, 월별 득점 추이, 인상적인 경기.`

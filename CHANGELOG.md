@@ -1,3 +1,12 @@
+## v0.5.62.108 — 2026-08-24 (cycle 2514, review-code (heavy): seasons/[year] 최초 전체 감사 — isOngoing/isCurrent KST 연도 경계 off-by-one 정정)
+
+### fix(seasons): `buildSeasonSummary.ts`/`seasons/[year]/page.tsx` 의 "올해" 판정이 `new Date().getFullYear()`(서버 로컬/UTC) 사용 — KST_OFFSET_MS family 신규 케이스
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4/spec-only-deferred, status=approved 0건). gap trigger 4종 미도달. 직전 8 사이클 distinct=3(fix-incident/review-code/lotto) — 2-chain lock 미충족. `teams/[code]/page.tsx`(622줄)를 대형 미감사 후보로 재확인했으나 cycle 2470 에 이미 최초 전체 감사·clean(RETRO-ONLY) 완료된 파일이었음(변경 이력 0건 확인 후 중복 감사 폐기). cycle 2513 추천 목록(`debug/pipeline`/`debug/factor-correlation`/`search/page`) 도 각각 cycle 2269/2485/2261 에 이미 감사 완료 확인 — 실제 미감사 후보는 `seasons/[year]/page.tsx`(433줄)와 `about/page.tsx`(427줄) 뿐이었음. 전자 선정.
+- 발견: `buildSeasonSummary.ts`(`isOngoing` 판정)와 `seasons/[year]/page.tsx`(`generateMetadata`의 `isCurrent`)가 각각 독립적으로 `new Date().getFullYear()`를 사용 — 서버 로컬(Vercel 기본 UTC) 기준이라 KST 12/31 15:00~23:59 UTC(=1/1 00:00~08:59 KST) 구간에 "올해" 판정이 실제 KST 연도보다 하루 늦게 갱신되는 KST_OFFSET_MS family(computeMonthRange/computeAdjacentDates 와 동일 원칙 위반) 신규 케이스. 연 1회 9시간 구간이지만 "진행 중" 배지·시즌 제목·메타 설명이 틀린 연도로 표시되는 매년 재발 버그.
+- 실행: `buildSeasonSummary.ts`에 순수 함수 `computeCurrentKSTYear`/`computeSeasonIsOngoing` 추출(`toKSTDateString` 기반, 기존 `computeAdjacentDates`/`computeMonthRange` 추출 패턴과 동일) + `page.tsx`가 동일 함수 재사용. 회귀 테스트 6건(`computeSeasonIsOngoing.test.ts`, 일반 케이스 + KST 연도 경계 양방향 + KS 마감 경계).
+- `pnpm type-check`(4 packages clean) + `pnpm test`(512 files/4273 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.107 — 2026-08-24 (cycle 2499, review-code (heavy): accuracy 컴포넌트 최초 전체 감사 — TeamMatchupCards 소표본 threshold 미참조 정정)
 
 ### fix(accuracy): `TeamMatchupCards.tsx` 소표본 opacity 처리가 `SMALL_SAMPLE_N`(5, sweep 51 source-of-truth) 대신 하드코딩 `< 3` 사용 — silent drift 정정
