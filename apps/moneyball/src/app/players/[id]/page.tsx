@@ -7,7 +7,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PitcherFipTrend } from "@/components/players/PitcherFipTrend";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { pairsForTeam } from "@/lib/matchup/canonicalPair";
-import {shortTeamName, SITE_URL } from '@moneyball/shared';
+import {shortTeamName, SITE_URL, SMALL_SAMPLE_N } from '@moneyball/shared';
 
 export const revalidate = 1800; // PLAYERS_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -182,6 +182,9 @@ export default async function PlayerProfilePage({ params }: PageProps) {
             </p>
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
               검증 {profile.verifiedN}경기
+              {profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N
+                ? ` · 소표본(n<${SMALL_SAMPLE_N})`
+                : ''}
             </p>
           </div>
         </div>

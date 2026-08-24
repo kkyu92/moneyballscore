@@ -11,6 +11,7 @@ import {
   RECENT_FORM_GAMES,
   SITE_URL,
   confToWinProb,
+  SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import { createClient } from '@/lib/supabase/server';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
@@ -222,7 +223,11 @@ export default async function TeamRecentPage({ params }: PageProps) {
           {rows.length > 0
             ? `최근 final ${rows.length}경기 예측 결과${
                 accuracyRate !== null
-                  ? ` · 적중률 ${accuracyRate}% (${correctN}/${verifiedRows.length})`
+                  ? ` · 적중률 ${accuracyRate}% (${correctN}/${verifiedRows.length})${
+                      verifiedRows.length < SMALL_SAMPLE_N
+                        ? ` · 소표본(n<${SMALL_SAMPLE_N})`
+                        : ''
+                    }`
                   : ''
               }.`
             : `${teamName}의 최근 final 경기 + 모델 예측 데이터가 아직 없습니다.`}
