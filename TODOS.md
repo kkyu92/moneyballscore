@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 리더보드 AI 적중률 베이스라인 소표본 게이트 부재 정정 (cycle 2552, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(status: approved 매칭 0건). 2-chain lock 없음(2544-2551 distinct=4: explore-idea/review-code/info-arch/skill-evolution). fix-incident 20/20 gap 도달했으나 `gh run list --limit 10` 재확인 — CI 실패 0건, negative. op-analysis 22/25, info-arch 5/30, lotto 14/30 모두 미도달. cycle 2551 retro가 sweep 잔여(leaderboard/seasons/accuracy-shadow/mlb/accuracy) 우선 재확인 명시.
+
+발견: `leaderboard/seasons/accuracy-shadow/mlb-accuracy` page.tsx 4곳은 `SMALL_SAMPLE_N` 미import 이지만, leaderboard 유저 픽 항목(HallOfFame/테이블 행/내 순위)은 leaderboard_* DB view 의 `HAVING COUNT(*) >= 5` 로 이미 구조적 소표본 배제 확인 (스코프 밖). 대신 `LeaderboardTable.tsx` 의 "AI 적중률" 배지(`aiBaseline.pct%`)가 신규 발견 — `fetchAiBaseline()`이 `predictions` 테이블 직접 조회에 HAVING 없어 weekly/monthly 모드 초반엔 n=1~4 노출 가능한데 게이트 부재. family 9번째 연속 재발(cycle 2541/2542/2543/2545/2546/2548/2549/2550/2552). seasons/accuracy-shadow/mlb-accuracy 4곳은 재확인 결과 실제 %텍스트 렌더 자체 없음 또는 이미 별도 컴포넌트 게이트 확인 필요 — 다음 사이클 carry-over.
+
+실행: `LeaderboardTable.tsx` AI 적중률 배지에 조건부 "· 소표본(n<5)" 인라인 표시 추가 (predictions/[date] 등 기존 관례 재사용). 회귀 테스트 `silent-drift-wave-671.test.ts` 신규(3 assertion).
+
+검증: tsc/lint clean + test(529 files/4356 tests) 통과. 단일 논리 단위 → 직접 main commit(8acc024c)+push, pre-push guard 통과, R4 정합.
+
+다음 사이클 추천 = review-code(heavy, seasons/accuracy-shadow/mlb-accuracy 3곳 실제 렌더 계층 재확인 — page.tsx 자체엔 없어도 하위 컴포넌트에 %텍스트 있을 가능성) 또는 family 완전 소진 확인 시 explore-idea 다양성 redirect.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 대시보드 시즌·확신구간·적중예측 적중률 소표본 게이트 부재 정정 (cycle 2550, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(status: approved 매칭 0건 — 전부 completed/archived/superseded/pending_user_step 등). 2-chain lock 없음(2542-2549 distinct=3: review-code 6 + info-arch 1 + explore-idea 1). fix-incident 20+/20 gap 도달했으나 `gh run list --limit 10` 재확인 — CI 실패 0건, negative 재확인. op-analysis 20/25, lotto 12/30 미도달. cycle 2549 retro가 sweep 잔여 리스트 중 dashboard.tsx confidentStat/teamMap 계산부 재확인 가치 있다고 명시.
