@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) buildAccuracyData.ts 최초 전체 감사, Version History CURRENT_MODEL_FILTER 오적용 정정 (cycle 2490, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 6/20, op-analysis 11/25, info-arch 4/30, lotto 12/30). 직전 8 사이클 distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. skill-evolution trigger 5개 모두 미충족(trigger3 %50=40, trigger5 review-code 0회 아님). 2489 추천대로 review-code(heavy) 계속, 잔존 미감사 data builder 중 `buildAccuracyData.ts`(776줄, `/accuracy` 페이지 데이터 소스, review-code 이력 0건) 선정.
+
+발견: `accuracy/page.tsx` 가 `buildVersionHistory(rows)` 호출에서 `CURRENT_MODEL_FILTER`(scoring_rule=v1.8) 로 좁혀진 `rows` 를 그대로 전달 — `ModelVersionHistory` 컴포넌트는 `ALL_SCORING_RULES`(v1.5/v1.6/v1.7-revert/v1.8/v1.8-credit-fail 등) 전체 버전을 보여주도록 설계됐지만 쿼리 자체가 이미 v1.8 외 scoring_rule 을 배제 → 다른 버전은 항상 n=0 이라 UI 가 영구히 "수집 중"으로 렌더. DB 직접 조회로 확인한 실측: v1.5(n=16)/v1.6(n=46)/v1.7-revert(n=34)/v1.8-credit-fail(n=25) 총 121건의 실제 검증된 예측이 존재 — "수집 중"이 아니라 이미 종료된 과거 버전의 실적이 노출되지 않았던 것. `CURRENT_MODEL_FILTER` 자체는 baseline 지표(brier/gap/buckets) 정합을 위해 v1.8 만 쓰는 게 문서화된 의도(shared/model-version-labels.ts)이나, 그 제약이 성격이 다른 buildVersionHistory 호출까지 전파된 것이 문제였음.
+
+실행: scoring_rule 필터 없는 전용 쿼리(`versionHistoryResult`)를 Promise.all 에 추가 → `buildVersionHistory(versionHistoryRows)` 로 분리. 회귀 테스트 신규 1건(`silent-drift-cycle-2490.test.ts`). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(508 files/4246 tests) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit+push 완료(fix, R4). VERSION/package.json/CHANGELOG 3-way 동기 갱신(0.5.62.104→105).
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사 대상: `buildTeamProfile.ts`(601줄) / `buildMatchupProfile.ts`(594줄) / `buildMlbMatchupProfile.ts`(526줄), 우선순위 크기순 — 이번 발견 패턴(baseline 필터가 다목적 함수 호출에 잘못 전파)과 유사한 필터 재사용 버그 재탐색 가치 있음) 또는 op-analysis(gap 11/25) 또는 lotto(gap 12/30).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) convergenceRecord.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2489, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 5/20, op-analysis 10/25, info-arch 3/30, lotto 11/30). 직전 8 사이클(2481-2488) distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. explore-idea saturation 12/15 재충족이나 이미 3회(cycle 2417/2477 등) 소진 확인돼 재탐색 스킵. op-analysis 는 non-CE 표본 2026-07-01 이후 완전 동결 + 5연속 zero-change 확인(cycle 2479 권고: "재발화 lower priority") — 이번엔 skip. 2488 추천대로 review-code(heavy) 계속, 잔존 미감사 lib 계층 중 최대 크기 `convergenceRecord.ts`(831줄, 6개 export 함수 + KBO/MLB 양쪽 수렴 픽 성적 집계) 선정.
