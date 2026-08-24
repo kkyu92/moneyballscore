@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) buildMatchupProfile.ts/buildMlbMatchupProfile.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2492, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 8/20, op-analysis 13/25, info-arch 6/30, lotto 14/30). 직전 8 사이클(2484-2491) distinct=3(fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. 2491 추천대로 review-code(heavy) 계속, 잔존 미감사 data builder 중 `buildMatchupProfile.ts`(594줄, `/matchup/[teamA]/[teamB]` 페이지 데이터 소스)와 MLB 대응 `buildMlbMatchupProfile.ts`(526줄) 양쪽 선정.
+
+점검: (1) `computeMatchupStreak`/`computeMatchupAvgMargin`/`computeMatchupBlowoutCount`/`computeMatchupCloseGameCount`/`computeMatchupHomeAwayEdge`/`computeMatchupRecentRecord` 6개 export — packages/shared 단일 source 위임, KBO/MLB 양쪽 독립 wrapper 재사용 확인 (cycle 2034/2036/2055/2071 통합 이력 유지). (2) `games.sort()` 명시적 독립 문장 분리 확인(cycle 2399 패턴, KBO/MLB 양쪽 동일). (3) 예측 매칭 필터 — KBO는 `predictions.find(prediction_type==='pre_game' && PRODUCTION_COHORT_RULES.includes(scoring_rule))` JS 레벨 필터(주석에 `#1338 family` 명시적 근거), MLB는 `.eq(prediction_type,'pre_game').in(scoring_rule, MLB_PRODUCTION_COHORT_RULES)` DB 레벨 필터 — 양쪽 다 shadow row(v2.1-B-shadow 등) 오염 배제 확인, 미적용 콜사이트 0건. (4) `assertSelectOk` fail-loud 래핑 — teams/games(KBO), mlb_schedule/predictions(MLB) 전 쿼리 적용, silent fallback 없음. (5) 소비부 `matchup/[teamA]/[teamB]/page.tsx` — `profile.streak`/`avgMargin`/`recentRecord`/`blowout`/`closeGame`/`homeAwayEdge` 는 직접 렌더 대신 `buildSummary`(summary 텍스트)에만 소비, page 자체 `closeCount`(CLOSE_GAME_MARGIN<=1 필터, UI 게임 리스트 필터용)와 lib의 `MARGIN_CLOSE_GAME_THRESHOLD`(===1, "박빙 승부" 카운트 통계용) 는 값 동일(둘 다 1)이나 목적이 달라 별도 정의 — 혼동 아님. (6) KBO/MLB 두 파일 나란히 비교 — cohort 필터/정렬/6개 통계 함수 재사용 패턴 모두 parity 확인, MLB 전용 `deriveMlbOutcome`(home_win_prob 기반, cycle 2066 fix 이력) 격리 정상. 신규 이슈 0건.
+
+실행: 코드 변경 없음 — 감사 완료.
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사 대상 축소 — 남은 대형 data builder 재탐색 필요, `find apps/moneyball/src/lib -name "*.ts" -newer <marker>` 또는 wc -l 재정렬 권장) 또는 op-analysis(gap 13/25, 임박) 또는 lotto(gap 14/30, 임박) 또는 fix-incident(gap 8/20).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildTeamProfile.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2491, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 7/20, op-analysis 12/25, info-arch 5/30, lotto 13/30). 직전 8 사이클(2483-2490) distinct=3(review-code/info-architecture-review/fix-incident) — 2-chain lock 미충족. 2490 추천대로 review-code(heavy) 계속, 잔존 미감사 data builder 중 `buildTeamProfile.ts`(601줄, `/teams/[code]` 페이지 데이터 소스 + KBO↔MLB 공유 집계 함수 6개) 선정.
