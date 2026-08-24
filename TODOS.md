@@ -1,3 +1,15 @@
+## ✅ SUCCESS — explore-idea standings 홈/원정 성적 컬럼 추가 (cycle 2535, 2026-08-24)
+
+진단: 2-chain alternation lock 발동(직전 8사이클 distinct=2: review-code+operational-analysis) — 두 chain 후보 제외. gh run list(CI 실패 0건)/DESIGN.md mtime(1일 전)/breadcrumb grep 모두 신규 trigger 아님. explore-idea saturation trigger(13/15) 충족 + 유일한 실질 trigger라 선택. 직전 5~6회 모두 retro-only 이력이라 general-purpose agent에 순수 신규 탐색 위임(기존 소진 영역 EN/KO parity·JSON-LD·PWA·leaderboard·auth 제외 지시).
+
+발견: `StandingRow.homeWins`/`homeLosses`(kbo-official.ts 컬럼 8, wave-329 이후 870+ cycle 전부터 존재)가 `analysis/page.tsx`/`teams/[code]/page.tsx`/`matchup/[teamA]/[teamB]/page.tsx` 에선 재사용되지만 정작 `/standings` 순위표 자체엔 한 번도 노출된 적 없던 gap.
+
+실행: `HomeAwayRecord` 컴포넌트 신규(analysis/page.tsx wave-329/434 와 동일 VENUE_RECORD_MIN_GAMES/VENUE_WIN_RATE_HIGH·LOW 패턴 재사용, 신규 쿼리 0건). MLB/EN 미러는 데이터 소스 자체 없어 parity 대상 아님 확인. `silent-drift-cycle-2535.test.ts` 신규. `pnpm type-check`/`pnpm test`(518/4292)/`pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(70ed3193)+push(R4).
+
+다음 사이클 추천 = review-code(heavy, 잔존 대형 파일: `page.tsx`(1090줄)/`teams/[code]/page.tsx`(622줄)/`predictions/[date]/page.tsx`(615줄)) — 2-chain lock 은 이번 사이클로 해소(distinct 갱신), gap trigger 4종 모두 여전히 미도달(fix-incident 9/20, op-analysis 5/25, info-arch 18/30, lotto 27/30).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) analysis/page.tsx CE 배너 감지 기준 통일 (cycle 2534, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 8/20, op-analysis 4/25, info-arch 17/30, lotto 26/30). 직전 8사이클 distinct=3 — 2-chain lock 없음. explore-idea saturation 충족(13/15)이나 직전 4연속 retro-only 확인 상태라 review-code dominance-positive streak(3연속 success) 지속. cycle 2533 carry-over(신규 대형 파일 재탐색) 따라 최대 monolith `analysis/page.tsx`(2803줄, 마지막 수정 cycle 2480 = 54사이클 공백) 재감사.
