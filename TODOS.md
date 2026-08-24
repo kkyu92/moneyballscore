@@ -1,3 +1,15 @@
+## ✅ SUCCESS — operational-analysis(heavy) CE cohort n=337 7th 연속 재확인, 파이프라인 정상 재검증 (cycle 2556, 2026-08-25)
+
+진단: open issue 0, approved plan 0. 2-chain lock 없음(직전8=2548-2555 distinct=3: review-code/skill-evolution/explore-idea). fix-incident 20+/20 gap 도달했으나 negative(CI 실패 0건). **op-analysis 26/25 gap 도달**(마지막 발화 cycle 2530) + review-code(heavy) dominance(6/8) + cycle 2555 retro의 exhaustion 재판단 요청 → 다양성 확보 겸 op-analysis(heavy) 채택.
+
+발견: `scripts/op-analysis-ce-cohort.ts` 재실행 → 전체 n=337 (CE n=290 / 비CE n=47, 격차 10.4pp) — cycle 2448과 수치 완전 동일. drift 의심 → DB REST 직접 조회로 검증: KBO v1.8 최신 verified_at 2026-08-23 확인(파이프라인 정상 작동), verified pre_game 697건 중 debate_version 은 여전히 null 또는 `v2-persona4` 둘뿐(신규 버전 없음). 수치 동일 원인 = drift 아니라 cycle 2448↔2556 사이 실제 캘린더 경과일이 짧아 신규 KBO 검증 배치가 아직 미반영(cycle 처리 속도 ≫ 실제 경기일 간격).
+
+실행: 코드 변경 없음(측정 재확인 성격) — `CLAUDE.md` CE tracking 문단에 cycle 2556 엔트리 append. LLM 부가가치 우세 결론 7회 연속 재확인. CREDIT_EXHAUSTED·비CE 표본 동결 상태 변화 없음.
+
+다음 사이클 추천 = review-code(heavy, SMALL_SAMPLE_N family 11회 누적 후 잔여 후보 전수 재확인 — 소진 확정 시 explore-idea 다양성 redirect) 또는 explore-idea.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) AccuracyHeaderCard 누적 적중률 소표본 게이트 부재 정정 (cycle 2555, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2547-2554 distinct=4: info-arch/review-code/skill-evolution/explore-idea). fix-incident negative(`gh run list` 최근 10건 전부 success). op-analysis/info-arch/lotto gap 미도달. cycle 2554 explore-idea 5th 소진 확정 후 review-code(heavy) 재탐색 권고.
