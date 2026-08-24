@@ -1,3 +1,13 @@
+## 🔵 RETRO-ONLY — review-code(heavy) buildPicksStats.ts 최초 전체 감사, 신규 이슈 0건 clean (cycle 2496, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 17/25, info-arch 10/30, lotto 18/30). 직전 8 사이클(2488-2495) distinct=3(review-code/explore-idea/polish-ui) — 2-chain lock 미충족. cycle 2479 op-analysis(lite) CE cohort 5연속 zero-change(비CE 표본 7주+ 동결) 확인 후 "review-code(heavy) 계속" 권고, 2492/2493 retro 도 동일 추천 — `buildPicksStats.ts`(411줄, MLB 픽 silent-drop 과거 이력 있어 재점검 가치, review-code 이력 0건) 선정.
+
+감사 범위: `buildPicksStats.ts` 본체(buildPickEntries/buildPicksStats/buildWeeklyStats/buildWeeklyHistory/buildFactorAgreement) + 업스트림 `api/picks/results/route.ts`(ai_predicted_winner_id는 항상 number|null 타입 보장 — `!==null`/`!=null` 혼용은 실제 undefined 유입 경로 없어 무해 확인) + 주요 소비처 5개(UserVsAIScorecard/MyPicksClient/PicksTrendChart/WeeklyPicksSummary/FactorAgreementCard). divergent/agreed 집계 로직(이진 승패 대칭성), KST streak 계산, trend 임계값(RECENT_FORM_GAMES=10=2×PICKS_TREND_HALF) 전부 정합. 기존 테스트(cycle 2244 MLB 회귀 가드 포함 전체 스위트) 케이스가 이미 실측 엣지 대부분 커버.
+
+결론: 신규 actionable 이슈 0건 — 코드 변경 없음, retro-only.
+
+다음 사이클 추천 = review-code(heavy) 계속 (잔존 미감사: `mlb-shared.ts`(409줄) / `buildMlbTeamProfile.ts`(383줄)) 또는 fix-incident(gap 13/20 근접) 또는 op-analysis(비CE 표본 동결 지속 시 6번째 zero-change 재확인 낮은 가치, 재점화 전까지 보류 권장).
+
 ## 🔵 RETRO-ONLY — polish-ui(2-chain lock 강제) 실측 QA(홈/analysis/mlb 모바일 뷰포트), 신규 결함 0건 (cycle 2495, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 16/25, info-arch 9/30, lotto 17/30). 직전 8 사이클(2487-2494) distinct=2(review-code/explore-idea) — 2-chain alternation lock 발동, 둘 다 제외(둘 다 fix-incident 아니라 안전 override 미적용). 잔여 pool 어디에도 자연 trigger 없음 — DESIGN.md mtime 1일(신선), 실제 컴포넌트 hex 색상 grep 전수 확인(OG 이미지 생성기 리터럴/CSS var fallback/브랜드 소셜 컬러 뿐, 토큰 이탈 0건) — polish-ui 강제 발화(lock 룰 명시 fallback).
