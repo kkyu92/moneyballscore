@@ -39,6 +39,7 @@ import {
   BRIER_CALIBRATION_OK_GAP,
   STATS_RELIABLE_MIN_N,
   MIN_POLL_TOTAL,
+  MIN_TEAM_PREDICTIONS,
 } from '@moneyball/shared';
 import { neutral } from '@/lib/design-tokens';
 import {
@@ -882,7 +883,7 @@ export default async function AccuracyPage() {
           <div>
             <h2 className="text-lg font-bold">팀별 예측 성과</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              경기 관련 팀 기준. 홈/원정 구분 없이 집계. N &lt; 3 팀은 샘플 부족 표시.
+              경기 관련 팀 기준. 홈/원정 구분 없이 집계. N &lt; {MIN_TEAM_PREDICTIONS} 팀은 샘플 부족 표시.
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -899,7 +900,7 @@ export default async function AccuracyPage() {
                 {teamRows.map((t) => {
                     const isOutlier =
                       t.accuracyRate !== null &&
-                      t.verifiedN >= 3 &&
+                      t.verifiedN >= MIN_TEAM_PREDICTIONS &&
                       overallAcc - t.accuracyRate > ACC_OUTLIER_GAP;
                     return (
                       <tr
@@ -924,12 +925,12 @@ export default async function AccuracyPage() {
                               ? 'text-brand-500'
                               : isOutlier
                                 ? 'text-warning'
-                                : t.accuracyRate !== null && t.accuracyRate < 0.5 && t.verifiedN >= 3
+                                : t.accuracyRate !== null && t.accuracyRate < 0.5 && t.verifiedN >= MIN_TEAM_PREDICTIONS
                                   ? 'text-red-400'
                                   : ''
                           }`}
                         >
-                          {t.verifiedN < 3
+                          {t.verifiedN < MIN_TEAM_PREDICTIONS
                             ? '(샘플 부족)'
                             : t.accuracyRate !== null
                               ? `${(t.accuracyRate * 100).toFixed(1)}%`
