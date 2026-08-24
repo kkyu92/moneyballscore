@@ -1,3 +1,12 @@
+## v0.5.62.121 — 2026-08-25 (cycle 2546, review-code (heavy): 홈페이지 "최근 4주 성과" 히어로 통계 소표본 게이트 부재)
+
+### fix(dashboard): `WeeklyTrendMini` (홈페이지 "최근 4주 성과" 카드) 히어로 % + 막대그래프 색상 + 툴팁에 소표본(n<5) 게이트 신규 — accuracy/analysis/matchup 계열엔 다 있던 관례가 홈페이지 최상단 통계엔 없었음
+
+- 진단: open issue 0, approved plan 0/23(전부 status≠`approved`). 2-chain lock 없음(직전 8사이클 distinct=3: lotto/review-code/explore-idea). gap trigger 재계산(fix-incident 20/20 도달했으나 `gh run list` scheduled workflow 전부 success, CI 실패 0건 — 실제 인시던트 부재로 lite 체크 negative) + op-analysis 16/25 + info-arch 29/30 + lotto 8/30 모두 미도달. cycle 2545 retro가 소표본 게이트 family 4-cycle 연속 후 신규 target 재탐색 필요 명시 → 아직 감사 안 된 대형 파일(`page.tsx` 홈, `predictions/[date]/page.tsx`) 및 `WeeklyTrendMini` 등 홈페이지 컴포넌트 재탐색.
+- 발견: 홈페이지 본문(`page.tsx`)의 팀별 적중률 등은 이미 `SMALL_SAMPLE_N` 게이트가 있었으나, `getRecentWeeksAccuracy()` 결과를 렌더하는 `WeeklyTrendMini` 컴포넌트는 `barColor()`가 `verified === 0`만 확인(1건이어도 색상 강조), 히어로 `currentPct`(이번 주 %)도 `verified > 0`만 확인해 `SMALL_SAMPLE_N` import 자체가 없었음 — 홈페이지 최상단 노출 통계라 노출 빈도상 다른 케이스보다 영향 큼.
+- 실행: `SMALL_SAMPLE_N` import + `barColor()` 임계 `verified === 0` → `verified < SMALL_SAMPLE_N` 교체 + 히어로 % 텍스트 색상/title 툴팁 조건부(matchup 관례 재사용) + "이번 주" 라벨에 `· 소표본` 인라인 표시 + 막대 툴팁에 `· 소표본(n<5)` 표시 추가. 회귀 테스트 `silent-drift-wave-667.test.ts` 신규(4 assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(525 files/4336 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.120 — 2026-08-25 (cycle 2545, review-code (heavy): matchup 페이지 3종 "AI 예측 성과" 소표본 게이트 부재)
 
 ### fix(matchup): `matchup/[teamA]/[teamB]`, `mlb/matchup/[teamA]/[teamB]`, `en/mlb/matchup/[teamA]/[teamB]` "AI 예측 성과 (이 매치업 한정)" 카드에 소표본(n<5) 흐림 처리 + 안내 신규 — accuracy/analysis 계열 페이지엔 다 있던 관례가 matchup 3종엔 없었음

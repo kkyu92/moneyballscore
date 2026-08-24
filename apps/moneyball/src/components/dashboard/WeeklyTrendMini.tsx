@@ -14,6 +14,7 @@ import {
 import {
   ACCURACY_BASELINE,
   getAccuracyColor,
+  SMALL_SAMPLE_N,
   WINNER_PROB_CONFIDENT,
   WINNER_PROB_LEAN,
 } from "@moneyball/shared";
@@ -33,7 +34,7 @@ interface WeeklyTrendMiniProps {
 }
 
 function barColor(rate: number, verified: number): string {
-  if (verified === 0) return neutral[200];
+  if (verified < SMALL_SAMPLE_N) return neutral[200];
   if (rate >= WINNER_PROB_CONFIDENT) return semantic.success;
   if (rate >= WINNER_PROB_LEAN) return semantic.warning;
   return semantic.error;
@@ -57,6 +58,9 @@ function CustomTooltip({
         <>
           <p className="text-gray-600 dark:text-gray-300 mt-0.5">
             {Math.round(d.rate * 100)}% ({d.correct}/{d.verified})
+            {d.verified < SMALL_SAMPLE_N && (
+              <span className="ml-1 text-gray-400 dark:text-gray-500">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>
+            )}
           </p>
           {d.isCurrent && (
             <p className="text-brand-500 mt-0.5">진행 중</p>
@@ -89,12 +93,24 @@ export function WeeklyTrendMini({ weeks }: WeeklyTrendMiniProps) {
       {currentPct != null ? (
         <div className="flex items-end gap-1.5">
           <span
-            className={`text-4xl font-bold ${getAccuracyColor(currentPct)}`}
+            className={`text-4xl font-bold ${
+              (current?.verified ?? 0) < SMALL_SAMPLE_N
+                ? "text-gray-400 dark:text-gray-500"
+                : getAccuracyColor(currentPct)
+            }`}
+            title={
+              (current?.verified ?? 0) < SMALL_SAMPLE_N
+                ? `검증된 경기가 ${current?.verified ?? 0}경기뿐이라 참고용입니다 (${SMALL_SAMPLE_N}경기 이상부터 신뢰 가능)`
+                : undefined
+            }
           >
             {currentPct}%
           </span>
           <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">
             이번 주
+            {(current?.verified ?? 0) < SMALL_SAMPLE_N && (
+              <span className="ml-1 text-gray-400 dark:text-gray-500">· 소표본</span>
+            )}
           </span>
         </div>
       ) : (
