@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) debug/factor-correlation weekdayOf off-by-one 정정 (cycle 2485, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. gap trigger 4종 미도달(fix-incident 0/20 — 2484 직발화, op-analysis 6/25, info-arch 30/30이나 lookback window 자기 자신 포함해 미충족 — 2486에 fire 예정, lotto 7/30). 직전 8 사이클 distinct=5 — 2-chain lock 미충족. 직전 15 사이클 saturation 11/15 — explore-idea trigger 미충족(임박). 강한 trigger 부재, cycle 2483/2484 추천대로 review-code(heavy) 계속 — 잔존 미감사 대상 `debug/factor-correlation/page.tsx`(544줄, review-code 이력 0건: 과거 커밋 2건은 CSS 제거 + 주석 문구 정정뿐, 데이터 로직 감사 없음) 선정.
+
+발견: 전체 544줄 read. `weekdayOf()` 가 `date + 'T00:00:00+09:00'` 로 파싱 후 `getUTCDay()` 사용 — KST 자정을 "전날 15:00 UTC" 인스턴트로 만들어 **모든 game_date 의 요일이 실제보다 하루 이른 값**으로 계산됨(경계 케이스가 아니라 100% 표본 영향). 실측 확인: `new Date('2026-08-24T00:00:00+09:00').getUTCDay()` → 0(일) 이지만 2026-08-24 실제 요일은 월요일. 동일 계열 버그가 `monthGrid.ts` 주석(explore-idea cycle 2123, mlb/calendar 구현 중 발견된 "실제 프로덕션 버그")에 이미 문서화돼 있고, `apps/moneyball/src/app/page.tsx` 의 `formatKoreanWeekday` 는 이미 UTC 정오 앵커 패턴(`T12:00:00Z` + `getUTCDay()`)으로 수정된 상태 — `factor-correlation` 페이지만 이 정정을 반영 안 한 채 남아있었음. "4. 요일별" 섹션(홈 승률 vs 요일 상관 분석)이 전체 표본에서 하루씩 밀린 요일로 집계되던 상태 — 팩터 튜닝 사전 검증 페이지의 목적(상수 가정 vs 데이터 일치 여부 확인)과 정면으로 배치되는 silent drift.
+
+실행: `weekdayOf()` 를 homepage 와 동일한 UTC 정오 앵커 패턴으로 정정 + export. 회귀 테스트 2건 신규 추가(`2026-08-24` 실제 요일 검증 + 연속 7일 순환 검증). `pnpm type-check`(4 packages clean) + `pnpm test`(506 files/4242 tests, 기존 505/4240 + 신규 2) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit(`d3919819`)+push (R4).
+
+다음 사이클 추천 = info-arch(gap 30/30 도달, 2486 fire 예정) 또는 review-code(heavy) 계속(잔존 미감사: `mlb/reviews/weekly` 계열 재확인 또는 신규 대형 파일 탐색 필요 — 주요 monolith 4건 소진) 또는 explore-idea(saturation 12/15 근접).
+
 ## 🔵 RETRO-ONLY — fix-incident(lite) mlb_fancy_scrape 403 3일 self-healed 확인 (cycle 2484, 2026-08-24)
 
 진단: fix-incident gap 20/20 도달(마지막 발화 cycle 2464) — trigger 6 명시 조건 충족, lite 자동 권장. `pipeline_runs` 최근 7일 조회(163 rows) → non-success 3건 전부 `mlb_fancy_scrape` mode, `errors: ["fetchFangraphsMlbTeams: fangraphs HTTP 403"]`, run_date 2026-08-20~08-22 3일 연속.
