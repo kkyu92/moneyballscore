@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) predictions/[date] 헤더 적중률 소표본 게이트 부재 정정 (cycle 2548, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29. 2-chain lock 없음(직전 8사이클 2540-2547 distinct=3: explore-idea/review-code/info-architecture-review). fix-incident 20+/20 gap 도달했으나 `gh run list` 전 workflow success, CI 실패 0건 재확인 → negative skip. op-analysis 18/25, lotto 10/30 미도달. cycle 2547 retro가 review-code(heavy) 또는 explore-idea 재평가 권고.
+
+발견: `predictions/[date]/page.tsx` 헤더 "적중률 N% (n/m)" 텍스트에 `SMALL_SAMPLE_N` import 자체 없음 — matchup/accuracy/homepage(WeeklyTrendMini) 계열엔 다 있던 관례가 일별 예측 페이지 헤더엔 누락. 하루 1~2경기만 검증된 이른 시각에도 소표본 안내 없이 노출.
+
+실행: `SMALL_SAMPLE_N` import + `totalN < SMALL_SAMPLE_N` 조건부 `· 소표본(n<5)` 인라인 표시 추가(WeeklyTrendMini 관례 재사용). 메타 description/OG/공유 텍스트 3곳(line 215/219/252/595)은 색상 강조 없는 요약 문구라 스코프 밖 유지. 회귀 테스트 `silent-drift-wave-668.test.ts` 신규(3 assertion).
+
+검증: tsc/lint clean + test(526 files/4339 tests) 통과. 단일 논리 단위 → PR 없이 직접 main commit(845f2dea)+push, pre-push guard 통과, R4 정합.
+
+소표본 게이트 family 6번째 연속 발견(cycle 2541/2542/2543/2545/2546/2548). 다음 사이클 추천 = review-code(heavy, family 소진 여부 재확인 — 잔여 후보: `mlb/reviews/weekly/[week]/page.tsx`(이미 부분 존재, 재확인만), `debug/factor-correlation/page.tsx`, `mlb/games/[date]/[slug]/page.tsx`) 또는 explore-idea(소진 확인 시 다양성 redirect).
+
 ## ⚪ RETRO-ONLY — info-architecture-review 30-cycle gap 최초 도달, 감사 결과 신규 이슈 0건 (cycle 2547, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. **2-chain lock 탐지**(직전 8사이클 2539~2546 distinct=2: review-code 6 + explore-idea 2) → 양쪽 제외. 잔여 pool gap 재확인 — fix-incident 20/20 도달했으나 cycle 2546 retro가 "신규 CI 실패/silent skip 신호 발생 시까지 재평가 보류" 명시(negative 확정) → skip. info-architecture-review 30/30 최초 도달(마지막 발화 cycle 2517) → 신선 trigger로 선택.
