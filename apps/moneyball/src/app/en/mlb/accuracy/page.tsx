@@ -3,11 +3,13 @@ import { SITE_URL, MLB_TEAMS, mlbShortTeamName } from "@moneyball/shared";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
 import { buildAllMlbTeamAccuracy, buildMlbMatchupData, buildMlbTeamBiasAnalysis } from "@/lib/mlb/buildMlbTeamAccuracy";
 import { buildMlbFactorAccuracy } from "@/lib/mlb/buildMlbFactorAccuracy";
+import { buildMlbCommunityVsAI } from "@/lib/mlb/buildMlbCommunityAccuracy";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbAccuracyDashboard } from "@/components/accuracy/MlbAccuracyDashboard";
 import { FactorAccuracyTable } from "@/components/accuracy/FactorAccuracyTable";
 import { TeamMatchupCards } from "@/components/accuracy/TeamMatchupCards";
 import { TeamBiasTable } from "@/components/accuracy/TeamBiasTable";
+import { CommunityVsAICard } from "@/components/accuracy/CommunityVsAICard";
 
 export const revalidate = 3600; // ACCURACY_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -28,12 +30,13 @@ export const metadata: Metadata = {
 };
 
 export default async function EnMlbAccuracyPage() {
-  const [summary, teamRows, matchupData, factorAccuracyRows, biasRows] = await Promise.all([
+  const [summary, teamRows, matchupData, factorAccuracyRows, biasRows, communityStats] = await Promise.all([
     buildMlbAccuracySummary('en'),
     buildAllMlbTeamAccuracy(),
     buildMlbMatchupData(),
     buildMlbFactorAccuracy('en'),
     buildMlbTeamBiasAnalysis(),
+    buildMlbCommunityVsAI(),
   ]);
   const standingsAvailable = biasRows.some((r) => r.actualWinPct != null);
 
@@ -64,6 +67,8 @@ export default async function EnMlbAccuracyPage() {
         cohortWeekHeatmap={summary.cohortWeekHeatmap}
         teamRows={teamRows}
       />
+
+      <CommunityVsAICard stats={communityStats} locale="en" />
 
       {biasRows.length > 0 && (
         <section id="bias" className="scroll-mt-20 bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-3">
