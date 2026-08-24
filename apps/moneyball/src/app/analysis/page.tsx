@@ -539,7 +539,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                       )}
                       {/* wave-420: 가중 우위 % — 팩터 수 아닌 가중치 비율로 수렴 강도 표현 */}
-                      <span className="font-mono text-xs text-gray-400 dark:text-gray-500" title="우세 팩터 가중치 합 / 전체 팩터 가중치 (0.85)">
+                      <span className="font-mono text-xs text-gray-400 dark:text-gray-500" title={`우세 팩터 가중치 합 / 전체 팩터 가중치 (${FACTOR_PICK_WEIGHT_TOTAL})`}>
                         가중{favoredWeightPct}%
                       </span>
                       {pick.predictedWinnerCode != null && (
@@ -1759,8 +1759,8 @@ export default async function AnalysisIndexPage() {
                               <>
                                 <span className="text-gray-300 dark:text-gray-700">·</span>
                                 <span className={isHitterFriendly
-                                  ? 'text-orange-500 dark:text-orange-400'
-                                  : 'text-brand-500 dark:text-brand-400'
+                                  ? 'text-brand-500 dark:text-brand-400'
+                                  : 'text-orange-500 dark:text-orange-400'
                                 }>
                                   {city} {isHitterFriendly ? '타자 친화' : '투수 친화'}
                                 </span>

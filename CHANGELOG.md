@@ -1,3 +1,13 @@
+## v0.5.62.103 — 2026-08-24 (cycle 2480, review-code (heavy): analysis/page.tsx 최초 전체 감사 — 구장 배지 색상 역전 + 가중치 툴팁 하드코딩 정정)
+
+### fix(analysis): 구장 팩터 배지 색상 반전(오늘 경기 리스트) + "전체 팩터 가중치" 툴팁 하드코딩 `0.85` 정정
+
+- 진단: open issue 0, approved plan 0/23. gap trigger 4종 미도달(fix-incident 16/20, op-analysis 1/25, info-arch 25/30, lotto 2/30). 직전 8 사이클 distinct=5 — 2-chain lock 미충족. 직전 15 사이클 saturation 9/15 미충족. 강한 trigger 부재 상태에서 `apps/moneyball/src/app` 내 최대 monolith(`analysis/page.tsx`, 2803줄, 마지막 전체 감사 cycle 2149 — 331 사이클 stale) 최초 전체 감사 착수.
+- 발견 1(real bug): 오늘 경기 리스트 항목(`:1761-1765`, wave-369)의 구장 팩터 배지 색상이 같은 파일 내 동일 조건(`parkPf >= PARK_FACTOR_HITTER_MIN`)을 렌더링하는 다른 3곳(`:909-925`/`:1196-1214`/`:2246-2264`)과 반전 — 타자친화 구장을 `orange`(투수친화 색)로, 투수친화를 `brand`(타자친화 색)로 표시. 같은 경기 카드 내 다른 위치에서 같은 구장이 서로 다른 색으로 렌더되는 시각적 모순.
+- 발견 2(silent drift): `:542` 툴팁이 `FACTOR_PICK_WEIGHT_TOTAL`(현재 0.85, `packages/shared`에서 derived) 을 문자열 리터럴 `0.85`로 하드코딩 — 바로 두 줄 위(`:508`)는 이미 상수를 참조해 정확히 계산하는데, `DEFAULT_WEIGHTS` 재조정 시 계산값은 자동 갱신되지만 이 툴팁 텍스트만 stale 하게 남는 silent drift 소지.
+- 실행: 색상 조건 스왑(`isHitterFriendly ? brand : orange`로 통일) + 툴팁을 템플릿 리터럴로 변경해 `FACTOR_PICK_WEIGHT_TOTAL` 참조.
+- `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests 전량 pass) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(fix, R4).
+
 ## v0.5.62.102 — 2026-08-24 (cycle 2476, polish-ui: MLB game-detail 레이아웃 폭 회귀 + EN 팀 페이지 division rank 배지 누락 정정)
 
 ### fix(mlb): game-detail `max-w-3xl` 레이아웃 폭 회귀 + EN 팀 페이지 division rank 배지 KO/EN parity 정정
