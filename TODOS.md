@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code(heavy) mlb/reviews hub 최초 전체 감사, 신규 이슈 0건 (cycle 2523, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23. gap trigger 미도달(fix-incident 17/20, op-analysis 18/25, lotto 15/30, info-arch 6/30). 직전 8사이클 distinct=3, lock 없음. cycle 2522 carry-over `mlb/reviews hub 페이지` — 전수 grep 결과 최초 전체 감사 이력 0건 확인 후 선정.
+
+감사 범위: `mlb/reviews/page.tsx`(254줄, KO hub) + `en/mlb/reviews/page.tsx`(253줄) + `mlb/reviews/misses/page.tsx`(161줄) + `en/mlb/reviews/misses/page.tsx`(166줄) + `reviews-data.ts`(59줄) + `computeWeekRange.ts`(151줄) + `MissesSortControl.tsx`(91줄) 전체 라인별 read + KO/EN 대조.
+
+결과: 신규 이슈 0건. KST 주차 경계(cycle 2481 이미 fix 반영), jsonLd `inLanguage`(양쪽 정상), `MLB_PRODUCTION_COHORT_RULES` scoring_rule 필터(buildMlbMissReport 정상 적용 — #1338 family 재발 없음), sitemap parity(hub/misses KO/EN 4 URL 전부 존재), KO/EN 구조 완전 대칭 — 전부 clean. 최근 신규 개발 라우트(wave-659, cycle 2339)라 drift 누적 기간이 짧았던 패턴(cycle 2483/2497/2507/2520/2521 과 동일 계열).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔존 미감사: `standings`/`leaderboard` 세부 컴포넌트) 또는 fix-incident(gap 18/20, cycle 2525 도달) 또는 operational-analysis(gap 19/25, cycle 2530 도달).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) players/[id] 3파일 최초 전체 감사, MLB jsonLd inLanguage 5페이지 정정 (cycle 2522, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23. gap trigger 미도달(fix-incident 16/20, op-analysis 17/25, lotto 14/30, info-arch 5/30). 직전 8사이클 distinct=3, lock 없음. carry-over 후보 `players/[id]`(323줄) + EN 미러 — 최초 전체 감사 이력 0건 확인 후 선정.
