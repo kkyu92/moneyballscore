@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT } from "@moneyball/shared";
+import { shortTeamName, SITE_URL, FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT, SMALL_SAMPLE_N } from "@moneyball/shared";
 import { buildSeasonSummary, computeCurrentKSTYear } from "@/lib/seasons/buildSeasonSummary";
 import {
   getRecentConvergencePickRecord,
@@ -210,6 +210,7 @@ export default async function SeasonPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {strongConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                  {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                 </p>
               </div>
             )}
@@ -222,6 +223,7 @@ export default async function SeasonPage({ params }: PageProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {completeConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                  {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                 </p>
               </div>
             )}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_URL, mlbShortTeamName } from "@moneyball/shared";
+import { SITE_URL, mlbShortTeamName, SMALL_SAMPLE_N } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ConvergenceStreakBadges } from "@/components/reviews/ConvergenceStreakBadges";
@@ -193,6 +193,7 @@ export default async function MlbReviewsPageEn() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {strongConvergenceRecord.total} games ·{' '}
                     {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% accuracy
+                    {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · small sample (n<${SMALL_SAMPLE_N})`}
                   </p>
                 </div>
               )}
@@ -205,6 +206,7 @@ export default async function MlbReviewsPageEn() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {completeConvergenceRecord.total} games ·{' '}
                     {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% accuracy
+                    {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · small sample (n<${SMALL_SAMPLE_N})`}
                   </p>
                 </div>
               )}

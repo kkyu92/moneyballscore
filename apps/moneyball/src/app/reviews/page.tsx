@@ -8,6 +8,7 @@ import {
   FACTOR_PICK_STRONG, FACTOR_PICK_COMPLETE, CONVERGENCE_RECORD_ALL_LIMIT,
   REVIEWS_HUB_RECENT_WEEKS, REVIEWS_HUB_RECENT_MONTHS,
   KBO_SEASON_YEAR,
+  SMALL_SAMPLE_N,
 } from '@moneyball/shared';
 import Link from "next/link";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
@@ -256,6 +257,7 @@ export default async function ReviewsPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {strongConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                  {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                 </p>
               </div>
             )}
@@ -268,6 +270,7 @@ export default async function ReviewsPage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {completeConvergenceRecord.total}경기 ·{' '}
                   {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                  {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                 </p>
               </div>
             )}

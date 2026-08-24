@@ -5,6 +5,7 @@ import {
   mlbShortTeamName,
   REVIEWS_HUB_RECENT_WEEKS,
   REVIEWS_HUB_RECENT_MONTHS,
+  SMALL_SAMPLE_N,
 } from "@moneyball/shared";
 import { getRecentWeeks } from "@/lib/reviews/computeWeekRange";
 import { getRecentMonths } from "@/lib/reviews/computeMonthRange";
@@ -198,6 +199,7 @@ export default async function MlbReviewsPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {strongConvergenceRecord.total}경기 ·{' '}
                     {computeWinRatePct(strongConvergenceRecord.wins, strongConvergenceRecord.total)}% 적중
+                    {strongConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                   </p>
                 </div>
               )}
@@ -210,6 +212,7 @@ export default async function MlbReviewsPage() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {completeConvergenceRecord.total}경기 ·{' '}
                     {computeWinRatePct(completeConvergenceRecord.wins, completeConvergenceRecord.total)}% 적중
+                    {completeConvergenceRecord.total < SMALL_SAMPLE_N && ` · 소표본(n<${SMALL_SAMPLE_N})`}
                   </p>
                 </div>
               )}
