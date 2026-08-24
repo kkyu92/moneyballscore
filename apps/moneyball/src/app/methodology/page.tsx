@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, KBO_REGULAR_SEASON_GAMES, MLB_REGULAR_SEASON_GAMES, CURRENT_SCORING_RULE, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
+import {HOME_ADVANTAGE_PCT, HOME_WIN_RATE_PCT, HOME_WIN_RATE_SAMPLE_N, KBO_FACTOR_COUNT, KBO_REGULAR_SEASON_GAMES, MLB_REGULAR_SEASON_GAMES, CURRENT_SCORING_RULE, SITE_URL, V2_PROMOTION_COHORT_N, WINNER_PROB_LEAN_PCT, SUNDAY_CAP_CONFIDENCE_PCT, WINNER_PROB_CLAMP_MIN, WINNER_PROB_CLAMP_MAX, BRIER_BASELINE } from "@moneyball/shared";
 import {
   MetricRegistry,
   FANGRAPHS_AUX_METRICS,
@@ -120,7 +120,7 @@ const VERSION_HISTORY = [
     version: "v1.8",
     date: "2026-05-12 ~ 현재",
     change:
-      `head_to_head 5% → 3% (표본 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 ${WINNER_PROB_LEAN} 초과 시 ${SUNDAY_CAP_CONFIDENCE} 강등.`,
+      `head_to_head 5% → 3% (표본 부족 노이즈 인정) + elo 8% → 10% (정보가치 Δ +0.30 최강). Sunday cap 도입 — 일요일 신뢰도 ${WINNER_PROB_LEAN_PCT}% 초과 시 ${SUNDAY_CAP_CONFIDENCE_PCT}% 로 강등.`,
   },
   {
     version: "v2.0 (v2.1-B rejected — v1.8 유지 확정)",

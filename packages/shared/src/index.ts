@@ -748,6 +748,14 @@ export const WINNER_PROB_MID = 0.6;
 export const SUNDAY_CAP_CONFIDENCE = 0.45;
 
 /**
+ * 사용자 가시 % 표시 — SUNDAY_CAP_CONFIDENCE raw decimal(0.45)이 about/methodology/guide
+ * 3 페이지에 %표시 없이 그대로 노출되던 silent drift 정정 (review-code heavy, cycle 2519).
+ * accuracy 페이지는 이미 `Math.round(SUNDAY_CAP_CONFIDENCE * 100)}%` 로 정상 표시 중이었음
+ * — 나머지 3 페이지도 동일 패턴으로 정합.
+ */
+export const SUNDAY_CAP_CONFIDENCE_PCT = Math.round(SUNDAY_CAP_CONFIDENCE * 100);
+
+/**
  * 최고 자신감 픽 표시 최소 confidence 임계 — predictions/[date] 의 top pick 배너에
  * 표시할 예측의 최소 confidence. 0.1 미만(= 55% 미만 실질 win prob) 은 박빙으로
  * 취급 → top pick 후보에서 제외.

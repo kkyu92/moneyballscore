@@ -36,6 +36,8 @@ import {
   WINNER_PROB_CONFIDENT_PCT,
   WINNER_PROB_LEAN,
   WINNER_PROB_LEAN_PCT,
+  SUNDAY_CAP_CONFIDENCE,
+  SUNDAY_CAP_CONFIDENCE_PCT,
   WINNER_PROB_CLAMP_MIN,
   WINNER_PROB_CLAMP_MAX,
   clampWinnerProb,
@@ -755,6 +757,12 @@ describe('classifyWinnerProb (3단계)', () => {
     expect(WINNER_PROB_CONFIDENT_PCT).toBe(65);
     expect(WINNER_PROB_LEAN_PCT).toBe(Math.round(WINNER_PROB_LEAN * 100));
     expect(WINNER_PROB_CONFIDENT_PCT).toBe(Math.round(WINNER_PROB_CONFIDENT * 100));
+  });
+
+  it('SUNDAY_CAP_CONFIDENCE_PCT = 45 derive (silent drift wave — about/methodology/guide raw decimal → % 정합, cycle 2519)', () => {
+    expect(SUNDAY_CAP_CONFIDENCE).toBe(0.45);
+    expect(SUNDAY_CAP_CONFIDENCE_PCT).toBe(45);
+    expect(SUNDAY_CAP_CONFIDENCE_PCT).toBe(Math.round(SUNDAY_CAP_CONFIDENCE * 100));
   });
 
   it('SMALL_SAMPLE_N = 5 (sweep 51 source-of-truth)', () => {

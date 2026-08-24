@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY, SUNDAY_CAP_CONFIDENCE, WINNER_PROB_CONFIDENT, WINNER_PROB_LEAN, BRIER_BASELINE, MIN_LEADERBOARD_PICKS, SITE_URL } from "@moneyball/shared";
+import { KBO_TEAM_COUNT, KBO_PREDICT_DAILY_TIME_KST, CURRENT_SCORING_RULE, PRODUCTION_ERA_HISTORY, SUNDAY_CAP_CONFIDENCE_PCT, WINNER_PROB_CONFIDENT_PCT, WINNER_PROB_LEAN_PCT, BRIER_BASELINE, MIN_LEADERBOARD_PICKS, SITE_URL } from "@moneyball/shared";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { TableOfContents } from "@/components/shared/TableOfContents";
 
@@ -98,8 +98,8 @@ export default function GuidePage() {
           <li className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-2">⓶ 티어 (강한 예측 / 보통 / 박빙)</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              신뢰도 기반 자동 분류. 강한 예측 (≥{WINNER_PROB_CONFIDENT}) · 보통 ({WINNER_PROB_LEAN}~{WINNER_PROB_CONFIDENT}) · 박빙
-              (≤{WINNER_PROB_LEAN}). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합.
+              신뢰도 기반 자동 분류. 강한 예측 (≥{WINNER_PROB_CONFIDENT_PCT}%) · 보통 ({WINNER_PROB_LEAN_PCT}%~{WINNER_PROB_CONFIDENT_PCT}%) · 박빙
+              (≤{WINNER_PROB_LEAN_PCT}%). 박빙 예측은 적중률이 자연히 낮으니 베팅 참고로 부적합.
             </p>
           </li>
           <li className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
@@ -160,7 +160,7 @@ export default function GuidePage() {
             같은 페이지 하단에서 모델 버전별 ({PRODUCTION_ERA_HISTORY.join(" / ")}) /
             요일별 (월~일) / 팀별 ({KBO_TEAM_COUNT}팀) 적중률을 분해해서 확인 가능. 예:
             일요일 경기 적중률이 낮다는 사실을 발견하여 Sunday cap (일요일
-            신뢰도 {SUNDAY_CAP_CONFIDENCE} 강등) 룰을 도입한 evidence 가 이 차트에 있습니다.
+            신뢰도 {SUNDAY_CAP_CONFIDENCE_PCT}% 강등) 룰을 도입한 evidence 가 이 차트에 있습니다.
           </p>
         </div>
       </section>
