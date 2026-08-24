@@ -104,8 +104,11 @@ function makeSplit<K extends string>(
   return rows.sort((x, y) => y.n - x.n);
 }
 
-function weekdayOf(date: string): string {
-  const d = new Date(date + 'T00:00:00+09:00');
+// UTC 정오 앵커 + getUTCDay — `T00:00:00+09:00` 오프셋 파싱은 KST 자정을
+// "전날 15:00 UTC" 인스턴트로 만들어 getUTCDay() 가 하루 이른 요일을 반환한다
+// (동일 계열 실제 버그: monthGrid.ts toUtcDate 주석 — explore-idea cycle 2123).
+export function weekdayOf(date: string): string {
+  const d = new Date(date + 'T12:00:00Z');
   return WEEKDAY_LABELS_KO[d.getUTCDay()];
 }
 
