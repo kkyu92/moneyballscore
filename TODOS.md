@@ -6837,3 +6837,15 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: `pnpm tsx scripts/lotto.ts count` — valid=7,705,415 / total=8,145,060 / removed=5.40% (97.5s). cycle 2478→2508→2538 3연속 완전 동일값 = 256규칙 saturation 구조적 안정 재확인, valid_delta=0. `2026-08-29-50sets.md`(1239회) 이미 cycle 2344 shipped, `2026-08-22-result.md`(1238회 OOS, N=12 cumulative) 이미 완비 — 재생성/재검증 불필요, 다음 OOS 대상(1239회)은 추첨 미도래(오늘 08-24, 추첨 08-29). 신규 코드 변경 없음(측정 only).
 
 다음 사이클 추천 = review-code(heavy, 잔존 대형 미감사 파일 page.tsx(1090줄)/teams/[code]/page.tsx(622줄)/predictions/[date]/page.tsx(615줄) 재탐색) — 2-chain lock 미충족 상태라 자연 재개.
+
+## ✅ SUCCESS — explore-idea(heavy) KBO/MLB 커뮤니티 vs AI 대결 섹션 parity 추가 (cycle 2544, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29. 2-chain lock 없음(직전 8사이클 distinct=3). gap trigger 4종 미도달(fix-incident 18/20, op-analysis 14/25, info-arch 27/30, lotto 6/30). explore-idea saturation 근접 미충족(11/15). cycle 2543 retro가 review-code 소표본 게이트 family 소진 가능성 + explore-idea redirect 권고 → 채택.
+
+발견: KBO `/accuracy` 는 "커뮤니티 vs AI 대결" 섹션(투표 다수결 vs AI 예측 정확도) 존재하나 `/mlb/accuracy`, `/en/mlb/accuracy` 엔 누락. MLB poll 인프라(`mlb_pick_poll_events`, `mlb-poll`/`mlb-submit` API, PickButton)는 이미 라이브였는데 소비 UI만 미구현.
+
+실행: `computeMlbCommunityVsAI`(buildCommunityAccuracy.ts, external_game_id 키 + `deriveMlbOutcome` AI 정답 도출) + `buildMlbCommunityVsAI`(Supabase builder) + `CommunityVsAICard`(locale-aware 공용 컴포넌트, KBO inline JSX 추출) + 양쪽 페이지 wiring. `MIN_POLL_TOTAL=3` KBO 관례 재사용. KBO 원본 미변경.
+
+검증: tsc/lint clean + test 523 files/4323 tests(신규 23개) 통과. 2-commit(feat + CHANGELOG fixup, pre-push guard 포착) 직접 main push, R4 정합. 버전 0.5.62.118→119.
+
+다음 사이클 추천 = review-code(heavy, 신규 대형 파일 재탐색 — 소표본 게이트 family 소진 추정) 또는 operational-analysis(gap 14/25, 아직 미도달).
