@@ -1,3 +1,15 @@
+## 🟢 SUCCESS — fix-incident lesson-pending 6건 close, 사례 20 2차 재발 확인 (cycle 2464, 2026-08-24)
+
+진단: `gh issue list --state open --label hub-dispatch` 0건이나 `lesson-pending` 라벨 issue 6건 발견(#3055~3060, 2026-08-23 21:00 신규 생성). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 5/25, info-arch 9/30, lotto 24/30). 2-chain lock 미충족(직전8 distinct=3). explore-idea saturation 미충족(11/15). approved plan 0/29.
+
+조사: 6건 모두 hub incident(#3483~3514, 2026-08-20 커밋 872f4de9/7c58ab68/2c2b6c11/1a58198a/7ab993d8/2bc43556)의 "3일 무대응" reminder. `gh run view <run_id> --log-failed` 로 6건 run 전부 확인 → 전부 동일 원인: `version-sync-guard.test.ts` assertion 실패 (root/apps package.json 버전 1틱 mismatch). 이미 cycle 2350(lesson 0f102bac, 사례 20)이 규명한 동일 race — 다른 hub incident 번호(#3021~3038 아님)의 2차 배치일 뿐, 신규 recurrence 아님. cycle 2437/2445/2452 `scripts/bump-version.sh`(원자적 VERSION+package.json bump) + pre-push hook 도입 이후(2026-08-23~) CI 전량 green 확인 (`gh run list --branch main` 실측).
+
+실행: 6건 전부 원인 규명 코멘트와 함께 close (코드 수정 불필요 — 근본 원인 이미 fix 완료). `memory/drift-cases.md` 사례 20 에 "2차 재발" 섹션 추가, lesson commit 직접 push (a7e10b62, PR 불필요 — 코드 변경 0).
+
+carry-over: 사례 20 carry-over #1 (develop-cycle 진단 체크리스트에 `lesson-pending` 라벨 스캔 추가) 여전히 미반영 — 다음 skill-evolution 발화 시 재검토 후보로 유지.
+
+다음 사이클 추천 = review-code(heavy, 잔여 대형 미감사 lib 재탐색 필요 — pool 고갈 근접) 또는 operational-analysis(lite, gap 6/25).
+
 ## 🟢 SUCCESS — review-code(heavy) buildTeamAccuracy.ts 신규 감사, accuracy 페이지 MIN_TEAM_PREDICTIONS 하드코딩 정정 (cycle 2463, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/deferred/spec_only). gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 4/25, info-arch 8/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 미충족(10/15). cycle 2462 retro 1순위 추천(review-code heavy, 잔여 후보 buildTeamAccuracy.ts) 채택. (부수: PR #3065 진단 단계서 CI green 확인 후 auto-merge 완결, 758103fe 이전 d4e9f72c.)
