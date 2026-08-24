@@ -10,10 +10,11 @@ import { AnalysisLink } from "@/components/shared/AnalysisLink";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
-import { type TeamCode, shortTeamName, josa, assertSelectOk, CE_DETECT_THRESHOLD, CE_MIN_SAMPLES, confToWinProb, PRODUCTION_COHORT_RULES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
+import { type TeamCode, shortTeamName, josa, assertSelectOk, confToWinProb, PRODUCTION_COHORT_RULES, KBO_DEFAULT_GAME_TIME, KBO_FACTOR_COUNT, KBO_PREDICT_DAILY_TIME_KST, SITE_URL, TOP_PICK_CONF_MIN, WINNER_PROB_CONFIDENT } from '@moneyball/shared';
 import { presentJudgeReasoningWithFallback } from '@/lib/predictions/judgeReasoning';
 import { computeAdjacentDates } from '@/lib/predictions/adjacentDates';
 import { DailyPredictionSummaryBar } from '@/components/predictions/DailyPredictionSummaryBar';
+import { detectSimplifiedMode } from '@/app/analysis/analysis-data';
 
 interface Props {
   params: Promise<{ date: string }>;
@@ -328,15 +329,12 @@ export default async function PredictionDatePage({ params }: Props) {
   const correctN = correct.length + cancelled.length;
   const totalN = verified.length + cancelled.length;
 
-  // CREDIT_EXHAUSTED 간소화 모드 감지: 예측 avg confidence ≤ 0.32
-  // (CREDIT_EXHAUSTED 시 모든 예측 conf=0.3 고정)
-  const recentConfs = predicted
-    .slice(0, 10)
-    .map((g) => g.predictions[0]?.confidence)
-    .filter((c): c is number => c != null);
-  const simplifiedMode =
-    recentConfs.length >= CE_MIN_SAMPLES &&
-    recentConfs.reduce((s, c) => s + c, 0) / recentConfs.length <= CE_DETECT_THRESHOLD;
+  // CREDIT_EXHAUSTED 간소화 모드 감지: 날짜 무관 최근 예측 10건 기준 (cycle 2539 fix —
+  // 이전엔 이 페이지의 date 하루치 games 만으로 판정해 예측 3건 미만인 날은 항상 배너
+  // 억제, 예측 많은 날은 그 날 게임 성향에 좌우돼 실제 CE 상태와 무관한 결과가 나오던
+  // silent drift. about/page.tsx + predictions/page.tsx + analysis/page.tsx 와 동일하게
+  // detectSimplifiedMode() 공유 헬퍼로 통일 — 어느 날짜를 보든 같은 판정이 나와야 함.
+  const simplifiedMode = await detectSimplifiedMode();
 
   // 카드 정렬: 검증완료 → 검증대기 → 기록없음 → 취소. 정렬 안에서는 game_time.
   const sortedGames = [...games].sort((a, b) => {

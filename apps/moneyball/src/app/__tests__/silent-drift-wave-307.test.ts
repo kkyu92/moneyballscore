@@ -52,15 +52,18 @@ describe('silent drift wave 307 — CE detection constants (cycle 1638)', () => 
     expect(src).not.toMatch(/<=\s*0\.32/);
   });
 
-  it('predictions/[date]/page.tsx imports CE_DETECT_THRESHOLD/CE_MIN_SAMPLES from shared (no hardcoded 0.32)', () => {
+  // cycle 2539: predictions/[date]/page.tsx 자체 recentConfs (그 날짜 games 만) 평균 계산 →
+  // analysis-data.ts detectSimplifiedMode() (날짜 무관 최근 예측 10건 기준) 로 이전 —
+  // analysis/page.tsx 와 동일 이유 (그 날 예측 3건 미만이면 배너 항상 억제되던 drift).
+  it('predictions/[date]/page.tsx는 detectSimplifiedMode를 통해 simplifiedMode를 사용 (no hardcoded 0.32, no per-date recentConfs 자체 평균)', () => {
     const src = readFileSync(
       join(ROOT, 'src/app/predictions/[date]/page.tsx'),
       'utf8',
     );
-    expect(src).toContain('CE_DETECT_THRESHOLD');
-    expect(src).toContain('CE_MIN_SAMPLES');
-    expect(src).toContain('@moneyball/shared');
+    expect(src).toContain('detectSimplifiedMode');
+    expect(src).toContain('simplifiedMode');
     expect(src).not.toMatch(/<=\s*0\.32/);
+    expect(src).not.toMatch(/>=\s*3\s*&&\s*\n.*reduce.*confidence/s);
   });
 
   // cycle 2533: about/page.tsx FAQ 는 AI 에이전트 토론이 상시 가동 중이라 설명하지만
