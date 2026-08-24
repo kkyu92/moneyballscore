@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbDetailedFactorAnalysis } from "@/components/predictions/MlbDetailedFactorAnalysis";
@@ -10,6 +11,8 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { createClient } from "@/lib/supabase/server";
+import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
+import { getMlbRecentConvergencePickRecord, computeWinRatePct } from "@/lib/analysis/convergenceRecord";
 import { computeMlbWaterfall, type MlbWaterfallInput } from "@moneyball/kbo-data";
 import {
   assertSelectOk,
@@ -19,8 +22,24 @@ import {
   toMlbStatsApiCode,
   mlbShortTeamName,
   MLB_TEAMS,
+  MLB_COMPOSITE_DUEL_MIN_VALID,
+  MLB_FACTOR_PICK_STRONG,
+  MLB_FACTOR_PICK_COMPLETE,
+  COMPOSITE_DUEL_FACTOR_LABEL_LIMIT,
   type MlbTeamCode,
 } from "@moneyball/shared";
+
+// KO page.tsx FACTOR_LABELS_SHORT(한글)의 EN 대응 — computeMlbCompositeDuel 이 다루는
+// 6팩터(lineup_woba/bullpen_fip/sp_fip/sp_xfip/war/park_factor)만 필요. shortLabel 은
+// en/mlb/factors/page.tsx KBO_FACTORS 표기와 동일 값 사용 (parity).
+const EN_FACTOR_LABELS_SHORT: Record<string, string> = {
+  sp_fip: "SP FIP",
+  sp_xfip: "SP xFIP",
+  lineup_woba: "Lineup wOBA",
+  bullpen_fip: "Bullpen FIP",
+  war: "Team WAR",
+  park_factor: "PF",
+};
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
@@ -237,6 +256,28 @@ export default async function GameDetailEn({ params }: PageParams) {
   };
   const waterfallBars = computeMlbWaterfall({ ...waterfallInput, locale: 'en' });
 
+  // cycle 2461(KO)/cycle 2467(EN parity) — 팩터 수렴 픽 배지. KO page.tsx 와 동일 게이팅
+  // 로직(6팩터만 유효, DEFAULT_WEIGHTS/judge verdict 대응 개념 없음).
+  const convergenceDuel = computeMlbCompositeDuel({
+    homeCode: home,
+    homeLineupWoba: pred.home_lineup_woba,
+    awayLineupWoba: pred.away_lineup_woba,
+    homeBullpenFip: pred.home_bullpen_fip,
+    awayBullpenFip: pred.away_bullpen_fip,
+    homeSPFip: pred.home_sp_fip,
+    awaySPFip: pred.away_sp_fip,
+    homeSPXfip: pred.home_sp_xfip,
+    awaySPXfip: pred.away_sp_xfip,
+    homeWar: pred.home_war_total,
+    awayWar: pred.away_war_total,
+  });
+  const isConvergencePick =
+    convergenceDuel.validCount >= MLB_COMPOSITE_DUEL_MIN_VALID &&
+    Math.abs(convergenceDuel.netScore) >= MLB_FACTOR_PICK_STRONG;
+  const convergenceRecord = isConvergencePick
+    ? await getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG)
+    : { wins: 0, losses: 0, total: 0 };
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
       <script
@@ -286,6 +327,109 @@ export default async function GameDetailEn({ params }: PageParams) {
         factorCount={GAME_DETAIL_FACTOR_ROWS.length}
         locale="en"
       />
+
+      {/* cycle 2461(KO)/cycle 2467(EN parity) — factor convergence pick badge */}
+      {isConvergencePick && (() => {
+        const favoredHome = convergenceDuel.netScore > 0;
+        const hw = convergenceDuel.homeWins;
+        const aw = convergenceDuel.awayWins;
+        const favoredName = mlbShortTeamName(favoredHome ? home : away);
+        const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        const convStrength = Math.abs(convergenceDuel.netScore);
+        const favoredSlugs = favoredHome ? convergenceDuel.homeFavoredSlugs : convergenceDuel.awayFavoredSlugs;
+        const opponentSlugs = favoredHome ? convergenceDuel.awayFavoredSlugs : convergenceDuel.homeFavoredSlugs;
+        const isComplete = convStrength >= MLB_FACTOR_PICK_COMPLETE;
+        const badgeClass = isComplete
+          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50 text-amber-700 dark:text-amber-300'
+          : 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800/50 text-brand-700 dark:text-brand-300';
+        const tierChipClass = isComplete
+          ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300'
+          : 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300';
+        return (
+          <div className={`rounded-lg border px-4 py-2.5 text-sm ${badgeClass}`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">Factor Convergence Pick</span>
+              <span className={`inline-block text-xs px-1.5 py-0 rounded font-semibold ${tierChipClass}`}>
+                {isComplete ? 'Full Convergence' : 'Strong Convergence'}
+              </span>
+              <span className="font-semibold">{favoredName} favored</span>
+              <span className="font-mono text-xs">{ratio}</span>
+              {favoredSlugs.map((slugKey) => {
+                const chipLabel = EN_FACTOR_LABELS_SHORT[slugKey];
+                if (!chipLabel) return null;
+                const chipClass = isComplete
+                  ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
+                  : 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-700/50';
+                return (
+                  <Link
+                    key={slugKey}
+                    href={`/en/mlb/factors#${slugKey}`}
+                    className={`inline-block text-xs px-1.5 py-0.5 rounded transition-colors ${chipClass}`}
+                  >
+                    {chipLabel}
+                  </Link>
+                );
+              })}
+            </div>
+            {!isComplete && opponentSlugs.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {opponentSlugs.map((slugKey) => {
+                  const chipLabel = EN_FACTOR_LABELS_SHORT[slugKey];
+                  if (!chipLabel) return null;
+                  return (
+                    <Link
+                      key={slugKey}
+                      href={`/en/mlb/factors#${slugKey}`}
+                      className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"
+                    >
+                      {chipLabel}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+            {convergenceRecord.total > 0 && (
+              <p
+                className="mt-1.5 text-[11px] tabular-nums opacity-60"
+                title={`Last ${convergenceRecord.total} games factor convergence pick record`}
+              >
+                Last {convergenceRecord.total} games: {convergenceRecord.wins}W-{convergenceRecord.losses}L{' '}
+                ({computeWinRatePct(convergenceRecord.wins, convergenceRecord.total)}%)
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
+      {!isConvergencePick && convergenceDuel.validCount >= MLB_COMPOSITE_DUEL_MIN_VALID && (() => {
+        const favoredHome = convergenceDuel.netScore > 0;
+        const isTied = convergenceDuel.netScore === 0;
+        const hw = convergenceDuel.homeWins;
+        const aw = convergenceDuel.awayWins;
+        const favoredName = isTied ? null : mlbShortTeamName(favoredHome ? home : away);
+        const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        const favoredSlugs = isTied
+          ? []
+          : (favoredHome ? convergenceDuel.homeFavoredSlugs : convergenceDuel.awayFavoredSlugs)
+              .slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT);
+        const factorInline = favoredSlugs.map((s) => EN_FACTOR_LABELS_SHORT[s] ?? s).join('·');
+        return (
+          <div className="rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/30 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">Factor Balance</span>
+              {favoredName ? (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">{favoredName} favored</span>
+              ) : (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">Even</span>
+              )}
+              <span className="font-mono text-xs">Factors {ratio}</span>
+              {factorInline && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorInline})</span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <MlbDetailedFactorAnalysis
         homeTeam={home}
