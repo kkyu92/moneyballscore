@@ -1,3 +1,4 @@
+import { SMALL_SAMPLE_N } from '@moneyball/shared';
 import type { FactorAccuracyRow } from '@/lib/accuracy/buildFactorAccuracy';
 
 function AccuracyBar({ accuracy, baseline }: { accuracy: number; baseline: number }) {
@@ -54,6 +55,7 @@ const COPY = {
       accuracy: '적중률',
       footer: (baselinePct: number, overallN: number) =>
         `∣ 기준선 = 전체 적중률 ${baselinePct}% (v1.8 cohort n=${overallN}) ∣ 홈/원정 = 해당 팩터가 홈/원정팀 유리로 분류된 게임 수`,
+      smallSampleNote: (minN: number) => `∣ 흐리게 표시된 행 = 소표본 (n<${minN})`,
     },
   },
   mlb: {
@@ -74,6 +76,7 @@ const COPY = {
       accuracy: '적중률',
       footer: (baselinePct: number, overallN: number) =>
         `∣ 기준선 = 전체 적중률 ${baselinePct}% (n=${overallN}) ∣ 홈/원정 = 해당 팩터가 홈/원정팀 유리로 분류된 경기 수`,
+      smallSampleNote: (minN: number) => `∣ 흐리게 표시된 행 = 소표본 (n<${minN})`,
     },
     en: {
       note: (baselinePct: number, overallN: number) => (
@@ -92,6 +95,7 @@ const COPY = {
       accuracy: 'Accuracy',
       footer: (baselinePct: number, overallN: number) =>
         `∣ Baseline = overall accuracy ${baselinePct}% (n=${overallN}) ∣ home/away = games where this factor favored the home/away team`,
+      smallSampleNote: (minN: number) => `∣ Dimmed rows = small sample (n<${minN})`,
     },
   },
 } as const;
@@ -130,32 +134,36 @@ export function FactorAccuracyTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
-              <tr
-                key={r.key}
-                className="border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
-              >
-                <td className="py-2.5 pr-3 text-xs text-gray-400 dark:text-gray-600 tabular-nums">{i + 1}</td>
-                <td className="py-2.5 pr-3">
-                  <span className="font-medium">{r.label}</span>
-                  <span className="ml-1.5 text-[10px] text-gray-400 dark:text-gray-600 font-mono">
-                    {r.key}
-                  </span>
-                </td>
-                <td className="py-2.5 pr-4 text-right font-mono text-xs tabular-nums text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                  {r.n} <span className="text-gray-300 dark:text-gray-600">({r.homeN}/{r.awayN})</span>
-                </td>
-                <td className="py-2.5">
-                  <AccuracyBar accuracy={r.accuracy} baseline={overallAcc} />
-                </td>
-              </tr>
-            ))}
+            {rows.map((r, i) => {
+              const small = r.n < SMALL_SAMPLE_N;
+              return (
+                <tr
+                  key={r.key}
+                  className={`border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 ${small ? 'opacity-50' : ''}`}
+                >
+                  <td className="py-2.5 pr-3 text-xs text-gray-400 dark:text-gray-600 tabular-nums">{i + 1}</td>
+                  <td className="py-2.5 pr-3">
+                    <span className="font-medium">{r.label}</span>
+                    <span className="ml-1.5 text-[10px] text-gray-400 dark:text-gray-600 font-mono">
+                      {r.key}
+                    </span>
+                  </td>
+                  <td className="py-2.5 pr-4 text-right font-mono text-xs tabular-nums text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                    {r.n} <span className="text-gray-300 dark:text-gray-600">({r.homeN}/{r.awayN})</span>
+                  </td>
+                  <td className="py-2.5">
+                    <AccuracyBar accuracy={r.accuracy} baseline={overallAcc} />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <p className="text-[10px] text-gray-400 dark:text-gray-600">
         {copy.footer(baselinePct, overallN)}
+        {rows.some((r) => r.n < SMALL_SAMPLE_N) && ` ${copy.smallSampleNote(SMALL_SAMPLE_N)}`}
       </p>
     </div>
   );

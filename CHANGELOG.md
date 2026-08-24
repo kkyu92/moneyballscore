@@ -1,3 +1,12 @@
+## v0.5.62.116 — 2026-08-25 (cycle 2541, review-code (heavy): accuracy/page.tsx 팩터별 적중률 표 소표본 게이트 부재)
+
+### fix(accuracy): `FactorAccuracyTable` 소표본(n<5) 행에 흐림 처리 + 안내 문구 신규 — `/accuracy` 페이지 내 유일하게 소표본 표시가 빠진 표
+
+- 진단: open issue 0, approved plan 0/29(전부 archived/completed/status≠approved). 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/lotto). gap trigger 4종 미도달(fix-incident 14/20, op-analysis 10/25, info-arch 23/30, lotto 2/30). cycle 2539/2540 retro carry-over(잔존 대형 파일 `accuracy/page.tsx` 1220줄) 순서대로 review-code(heavy) 감사.
+- 발견: `accuracy/page.tsx`(및 하위 컴포넌트) 안 팀별 성과 표(`MIN_TEAM_PREDICTIONS`), 팀별 상대 강약(`TeamMatchupCards` — `SMALL_SAMPLE_N`), 요일별 히트맵(`SMALL_SAMPLE_THRESHOLD`), AI 확신도 티어(`STATS_RELIABLE_MIN_N` CI 표시) 등 페이지 내 모든 표가 소표본 caveat 을 갖고 있으나, `FactorAccuracyTable`(팩터별 적중률)만 `SMALL_SAMPLE_N` import 자체가 없어 n=1인 팩터도 100%/0% 정확도로 색상 강조(모델 기여/잡음 가능성)돼 표시 — 페이지 전체 관례에서 벗어난 유일한 예외.
+- 실행: `FactorAccuracyTable.tsx` 에 `SMALL_SAMPLE_N`(5) import + `r.n < SMALL_SAMPLE_N` 행 `opacity-50` 처리(TeamMatchupCards 관례 재사용) + KBO/MLB-ko/MLB-en 3개 locale 별 `smallSampleNote` 안내 문구 footer 에 조건부 추가(로케일 미분기로 하드코딩하면 EN 페이지에 한글 노출되는 2차 버그라 COPY 구조 그대로 확장). 회귀 테스트 `silent-drift-wave-663.test.ts` 신규.
+- `pnpm --filter moneyball run type-check` clean + `pnpm --filter moneyball run test`(519 files/4296 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.115 — 2026-08-24 (cycle 2540, explore-idea: analysis/page.tsx PickButton parity 추가)
 
 ### feat(analysis): `/analysis` "오늘 전체 AI 예측" 카드에 PickButton(내 픽 투표) 신규 추가 — 홈("/") · `/mlb/analysis` 양쪽 다 있던 투표 진입점이 KBO 메인 분석 페이지에만 누락
