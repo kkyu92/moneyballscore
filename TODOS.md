@@ -6113,3 +6113,15 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 - compareModels.ts(299줄) 감사 완료, 논리 버그 없음
 - 호출부 /debug 2개 페이지 중복 dark: className 14곳 fix (PR #3064)
 - 다음 review-code 후보: buildTeamAccuracy.ts(261줄, standings)
+
+## 🟢 SUCCESS — review-code(heavy) accuracy/page.tsx 최초 전체 감사, small-sample 매직넘버 정정 (cycle 2473, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29 (전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 2/25, info-arch 18/30, lotto 2/30). 2-chain lock 미충족(직전8 distinct=3: review-code/operational-analysis/explore-idea). explore-idea saturation 미충족(10/15 <12). MLB EN 미러 i18n silent-leak family 재확인 — cycle 2424 이후 신규 KO-only feat(mlb) 커밋 0건 확인(53e3eb70..HEAD grep) = 해당 family 현재 소진. 리포 대형 파일 재조사(analysis/page.tsx 2803줄 cycle 2407/2364 감사 완료, page.tsx 1090줄 cycle 218 감사, teams/[code] cycle 2470 clean) → `accuracy/page.tsx`(1205줄) 최후 전체 감사 이력이 cycle 289(2184 사이클 전, 사상 최고 stale) 확인 — 신규 target 선정, 전체 1206줄 read.
+
+검증 항목: (1) `CURRENT_MODEL_FILTER`(scoring_rule 기준, wave-656 정정) 메인 쿼리 필터 정합 확인. (2) factorResult 쿼리 `CURRENT_SCORING_RULE` 단일값 필터 — model-version-labels.ts 문서화 의도("baseline 분석은 CURRENT_SCORING_RULE 만 사용")와 일치, #1338 family 오탐 배제. (3) `buildV18SubCohort`/`buildFallbackStats` 로직 CURRENT_SCORING_RULE·LLM_ACTIVE_VERSIONS 동적 참조 확인, 하드코딩 없음.
+
+발견: `CalibrationChart` 컴포넌트의 산점도 dot 소표본 판정이 `b.n < 5` 리터럴 하드코딩 — 동일 패턴(n<5 소표본 hedge)을 위해 이미 shared 에 `SMALL_SAMPLE_N=5`(sweep 51 source-of-truth)가 정의되어 있고 15개+ 다른 페이지(teams/[code], standings, players 등)가 이를 참조 중인데 accuracy/page.tsx 만 미참조 — silent 매직넘버 drift.
+
+실행: `SMALL_SAMPLE_N` import 추가 + `b.n < 5` → `b.n < SMALL_SAMPLE_N` swap. `pnpm type-check`(4 packages clean) + `pnpm lint`(clean) + `pnpm test`(503 files/4231 tests) 클린. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.99).
+
+다음 사이클 추천 = operational-analysis(lite, gap 3/25 — 아직 저신선도) 또는 review-code 신규 target 계속 (accuracy/page.tsx 가 참조하는 buildTeamAccuracy.ts/buildAccuracyData.ts 등 lib 함수 자체는 이미 여러 차례 감사됨, TeamMatchupCards/TeamBiasTable/ModelVersionHistory/FactorAccuracyTable 등 컴포넌트 레벨 미감사 후보) 또는 explore-idea(saturation 10/15 근접, 다양성 회복 고려).
