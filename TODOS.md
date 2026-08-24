@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — review-code(heavy) page.tsx(홈) 최초 전체 감사, BigMatchDebateCard 하드코딩 "80%" 문구 정정 (cycle 2482, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 18/20, op-analysis 3/25, info-arch 27/30, lotto 4/30). 직전 8 사이클 distinct=5 — 2-chain lock 미충족. 직전 15 사이클 saturation 10/15 — explore-idea trigger 미충족. 강한 trigger 부재, cycle 2481 retro 추천대로 review-code(heavy) 3연속 — `page.tsx`(1090줄, 홈, 최초 전체 감사 이력 없음) 선정.
+
+발견: 페이지 자체(winProb 계산/Elo 보너스/주간카드 홈원%/isReliable 게이팅/METHODOLOGY_GROUPS/MIN_POLL_TOTAL 등)는 전부 정합 확인. 대신 직접 렌더하는 `BigMatchDebateCard.tsx:88,100` 이 "승률 80%+ 기준" 을 하드코딩 — 실제 선정 로직(`selectBigMatchFromGames`, page.tsx:572-594)은 티어 우선순위(confident→lean→tossup) fallback 이라 고정 임계값이 없음. commit e930847f(2026-04-22) 시점엔 `HIGH_CONFIDENCE_THRESHOLD`(0.6→80%) 게이팅이 실제 로직이라 문구가 맞았으나, 바로 다음날 ea56cd92 가 현재 로직으로 교체하며 문구만 동기 안 되고 방치 — 해당 상수도 이미 코드베이스에서 제거됨. 반반(tossup) 경기도 선정 가능해 표시된 확률(예: 53%)과 문구(80%+)가 최대 27pp 모순 가능.
+
+실행: 툴팁 + 서브타이틀 문구를 실제 티어 우선순위 로직에 맞게 재작성. `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4240 tests) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit+push (R4).
+
+다음 사이클 추천 = review-code(heavy) 계속 (`analysis/game/[id]/page.tsx`(868줄) 미감사 잔존) 또는 fix-incident(gap 19/20, 임박).
+
 ## 🟢 SUCCESS — review-code(heavy) reviews/weekly 주차 경계 UTC→KST 정정 (cycle 2481, 2026-08-24)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 17/20, op-analysis 2/25, info-arch 26/30, lotto 3/30). 직전 8 사이클 distinct=5(review-code/polish-ui/explore-idea/lotto/operational-analysis) — 2-chain lock 미충족. 직전 15 사이클 review-code+polish-ui=9/15 — explore-idea saturation 미충족. 강한 trigger 부재, cycle 2480 retro 추천대로 review-code(heavy) 계속 — 미감사 대형 파일 중 `reviews/weekly/[week]/page.tsx`(524줄, review-code 이력 0건) 선정.
