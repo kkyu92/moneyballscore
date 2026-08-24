@@ -4,7 +4,7 @@
  * 스키마(`2026-W16`)를 위해 ISO 주차 사용.
  */
 
-import { DAY_MS, WEEK_MS } from '@moneyball/shared';
+import { DAY_MS, WEEK_MS, KST_OFFSET_MS } from '@moneyball/shared';
 
 export type ReviewRangeLocale = 'ko' | 'en';
 
@@ -26,10 +26,19 @@ export interface WeekRange {
   label: string;
 }
 
-/** 입력 Date를 해당 주의 월요일 00:00 UTC로 고정. */
+/**
+ * 입력 Date를 해당 주(KST 기준 요일)의 월요일 00:00 UTC로 고정.
+ *
+ * KST_OFFSET_MS 로 먼저 shift 후 UTC 필드를 읽어 요일을 KST 달력 기준으로 판정 —
+ * "now" 처럼 실제 시각을 넘기는 호출(getWeekRangeFromDate/getRecentWeeks)에서
+ * 월요일 00:00~09:00 KST(= 일요일 15:00~24:00 UTC) 구간에 이전 주로 오판정되던
+ * 버그 정정. jan4/targetMonday 같이 이미 00:00 UTC 인 달력 날짜를 넘기는 호출은
+ * +9h shift 해도 같은 UTC 날짜에 머물러 영향 없음 (CLAUDE.md: 날짜는 KST 기준).
+ */
 function toMondayUTC(d: Date): Date {
+  const kst = new Date(d.getTime() + KST_OFFSET_MS);
   const out = new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+    Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate()),
   );
   const day = out.getUTCDay();
   // day: 0=Sun,1=Mon,...6=Sat → 월요일까지의 offset

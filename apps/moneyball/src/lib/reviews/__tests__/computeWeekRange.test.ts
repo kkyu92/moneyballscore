@@ -46,6 +46,19 @@ describe("getWeekRangeFromDate", () => {
     expect(r.label).toBe("Apr 27 – May 3, 2026");
     expect(r.label).not.toMatch(/[가-힣]/);
   });
+
+  it("KST 월요일 00:00~09:00 경계 — UTC 기준이면 일요일(전 주)로 오판정되던 구간, KST 기준 새 주로 정정", () => {
+    // 2026-08-24(월) 00:30 KST = 2026-08-23T15:30:00Z (일요일 UTC)
+    const r = getWeekRangeFromDate(new Date("2026-08-23T15:30:00Z"));
+    expect(r.startDate).toBe("2026-08-24");
+    expect(r.endDate).toBe("2026-08-30");
+  });
+
+  it("KST 월요일 08:59 — 여전히 새 주 (UTC 기준이면 오판정 구간의 마지막 순간)", () => {
+    // 2026-08-24(월) 08:59 KST = 2026-08-23T23:59:00Z
+    const r = getWeekRangeFromDate(new Date("2026-08-23T23:59:00Z"));
+    expect(r.startDate).toBe("2026-08-24");
+  });
 });
 
 describe("parseWeekId", () => {
