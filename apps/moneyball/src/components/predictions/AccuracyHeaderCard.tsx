@@ -1,4 +1,4 @@
-import { MIN_VERIFIED_GAMES_HEDGE, STATS_RELIABLE_MIN_N, WINNER_TIER_LABEL, pickTierEmoji } from '@moneyball/shared';
+import { MIN_VERIFIED_GAMES_HEDGE, SMALL_SAMPLE_N, STATS_RELIABLE_MIN_N, WINNER_TIER_LABEL, pickTierEmoji } from '@moneyball/shared';
 
 import { accuracyRateColorClass } from '@/lib/accuracy/buildAccuracyData';
 
@@ -82,6 +82,11 @@ export function AccuracyHeaderCard({
             {accuracyPct}
             <span className="text-xl">%</span>
           </div>
+          {totalVerified < SMALL_SAMPLE_N && (
+            <div className="text-[11px] text-gray-400 dark:text-gray-500">
+              {locale === 'en' ? `small sample (n<${SMALL_SAMPLE_N})` : `소표본(n<${SMALL_SAMPLE_N})`}
+            </div>
+          )}
         </div>
         <div>
           <div className="text-xs text-gray-500 dark:text-gray-400">

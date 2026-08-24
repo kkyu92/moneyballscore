@@ -1,3 +1,12 @@
+## v0.5.62.124 — 2026-08-25 (cycle 2555, review-code (heavy): predictions 페이지 `AccuracyHeaderCard` 누적 적중률 소표본 게이트 부재)
+
+### fix(predictions): `AccuracyHeaderCard` 헤드라인 "누적 적중률" 스탯에 소표본(n<5) 인라인 표시 신규 — KBO/MLB/영문 predictions 페이지 3곳 공통 사용 컴포넌트에만 관례 부재
+
+- 진단: open issue 0, approved plan 0/23(전부 status≠`approved`). 2-chain lock 없음(직전 8사이클 distinct=4: review-code 4 + skill-evolution/info-arch/explore-idea 각 1). fix-incident negative(`gh run list` 최근 10건 전부 success), op-analysis/info-arch/lotto 모두 gap 미도달. cycle 2554 explore-idea lite 5th 소진 재확인 후 review-code(heavy) 재탐색 권고.
+- 발견: `AccuracyHeaderCard.tsx`(predictions/mlb-predictions/en-mlb-predictions 3개 라이브 라우트 공통 사용) 헤드라인 "누적 적중률" %는 `MIN_VERIFIED_GAMES_HEDGE`/`STATS_RELIABLE_MIN_N` 게이트가 최근 트렌드·티어 breakdown 표시 여부에만 쓰이고, 메인 % 자체는 `totalVerified===0` 외 어떤 소표본 안내도 없이 노출 — SMALL_SAMPLE_N family 11번째 연속 재발.
+- 실행: `SMALL_SAMPLE_N` import 추가, 헤드라인 % 아래 `totalVerified < SMALL_SAMPLE_N` 조건부 인라인 "소표본(n<5)" 표시 추가(ko/en). 회귀 테스트 `silent-drift-wave-673.test.ts` 신규(3 assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(531 files/4367 tests). 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.123 — 2026-08-25 (cycle 2553, review-code (heavy): 커뮤니티 vs AI 대결 · MLB accuracy 히어로 소표본 게이트 부재)
 
 ### fix(accuracy): "커뮤니티 vs AI 대결" AI 정답률 + MLB accuracy 히어로 전체 적중률 스탯에 소표본(n<5) 게이트 신규 — 다른 계열엔 다 있던 관례가 이 두 곳엔 없었음
