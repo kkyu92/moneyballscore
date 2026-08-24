@@ -6002,3 +6002,8 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: model_version=MLB_SCORING_RULE('mlb_v0.1'), debate_version=null, predicted_at=new Date().toISOString() 3개 명시 + 회귀 테스트 1건. kbo-data 90/1176 + moneyball 500/4208 tests, tsc, lint 전부 clean. PR #3048 squash 머지(447fdd32).
 
 다음 사이클 추천 = info-architecture-review(28/30 임박) 또는 review-code/explore-idea(MLB game detail 페이지에 KBO "모델 메타 정보" 배지 이식 — predicted_at 이제 실측 채워져 lead-time 계산 가능해짐).
+
+## cycle 2462 (review-code heavy)
+- compareModels.ts(299줄) 감사 완료, 논리 버그 없음
+- 호출부 /debug 2개 페이지 중복 dark: className 14곳 fix (PR #3064)
+- 다음 review-code 후보: buildTeamAccuracy.ts(261줄, standings)
