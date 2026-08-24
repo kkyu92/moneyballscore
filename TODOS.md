@@ -1,3 +1,13 @@
+## 🟡 PARTIAL — operational-analysis(lite) CE cohort n=337 재확인, 파이프라인 정상 규명 (cycle 2466, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 7/25, info-arch 11/30, lotto 26/30). 2-chain lock 미충족(직전8 distinct=4). saturation 미충족(11/15). CI 전량 green. cycle 2465 추천(operational-analysis lite) 채택.
+
+실행: `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행 → n=337 (CE 53.4%/155/290, 비CE 63.8%/30/47, 격차 10.4pp) — 같은 날(2026-08-24) cycle 2448(08-23 23:32 KST) 실행 결과와 완전 동일 수치. 신규 verify 0건 원인 직접 조사: `pipeline_runs`/`predictions` 테이블 조회 → 최신 verified_at = 2026-08-23T14:17 UTC (cycle 2448 실행 시점 14:32 KST 이전) — cycle 2448 이후 아직 새 KBO 경기 verify 없었을 뿐, 파이프라인 정지 아님 (정상 야간 공백). 부수 확인: 게임 10734 재예측 3건(shadow/in_game/post_game) 존재하나 pre_game 1건만 is_correct/verified_at 세팅 — cohort 스크립트 dedup 버그 가설 기각(clean).
+
+결론: 수치 변화 없어 CLAUDE.md 갱신 생략(중복 기재 방지). 코드 변경 0.
+
+다음 사이클 추천 = review-code(heavy, 대형 미감사 lib 재탐색) 또는 explore-idea (op-analysis 는 신선 데이터 쌓일 때까지 보류 권장).
+
 ## 🔍 RETRO-ONLY — review-code(heavy) backtest-manual-weights-run.ts 신규 감사, 비활성 스크립트 clean 확인 (cycle 2465, 2026-08-24)
 
 진단: open issue 0건 (`hub-dispatch` + 전체 open 모두 0). approved plan 0/29 (전부 completed/deferred/archived). gap trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 6/25, info-arch 10/30, lotto 25/30 — picks/result 이미 박제돼 lite 불필요). 2-chain lock 미충족(직전8 distinct=4: explore-idea/review-code/operational-analysis/fix-incident). explore-idea saturation 미충족(11/15). DESIGN.md mtime 1일 전 — design-system 미충족. cycle 2464 retro 1순위 추천(review-code heavy, 잔여 대형 미감사 lib 재탐색) 채택 — pool 고갈 경고(cycle 2462/2463) 대응해 `git log --grep` 로 미감사 후보 재탐색.
