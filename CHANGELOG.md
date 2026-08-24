@@ -1,4 +1,13 @@
-## v0.5.62.112 — 2026-08-24 (cycle 2533, review-code (heavy): about/page.tsx CREDIT_EXHAUSTED 배너 누락 정정)
+## v0.5.62.113 — 2026-08-24 (cycle 2534, review-code (heavy): analysis/page.tsx CE 배너 감지 기준 통일)
+
+### fix(analysis): `/analysis` simplifiedMode(CREDIT_EXHAUSTED 배너) 가 `todayData.games`(오늘 경기만) 평균 confidence 로 판정 — KBO 휴식일/크론 실행 전엔 games.length < CE_MIN_SAMPLES 라 CE 진행 중이어도 배너 절대 안 뜸
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 8/20, op-analysis 4/25, info-arch 17/30, lotto 26/30). 직전 8사이클 distinct=3(review-code/fix-incident/operational-analysis) — 2-chain lock 미충족. explore-idea saturation trigger 충족(직전 15사이클 review-code+fix-incident 13/15 ≥12) 이나 직전 4연속(2494/2498/2515/2524) 모두 retro-only(신규 idea 0건) 확인된 상태라 review-code(heavy) dominance-positive streak(2531~2533 3연속 success) 지속 선택. cycle 2533 carry-over("잔존 미감사 대형 파일 재탐색 필요") 따라 fix 이력 0건 대신 최대 monolith(`analysis/page.tsx`, 2803줄, 221 커밋 이력이나 마지막 수정 cycle 2480 = 54사이클 공백) 재감사.
+- 발견: `about/page.tsx`(cycle 2533 신규) / `predictions/page.tsx` / `predictions/[date]/page.tsx`(cycle 20fb7994 직전 커밋) 는 모두 "날짜 무관 최근 예측 10건"(`PRODUCTION_COHORT_RULES`, `order by id desc limit 10`) 기준으로 CE 를 감지하는데, `analysis/page.tsx` 만 `todayData.games`(오늘 경기 전용) 평균으로 계산 — 월요일 등 KBO 휴식일이나 당일 크론 실행 전(games.length 0~2 < CE_MIN_SAMPLES=3)엔 CE 상태와 무관하게 `simplifiedMode=false` 로 하드 고정돼, 같은 날 `/about`·`/predictions` 는 배너를 보여주는데 메인 허브인 `/analysis` 만 배너가 빠지는 날짜별 조건부 drift.
+- 실행: `analysis-data.ts` 에 `detectSimplifiedMode()` 신규(about/predictions 와 동일 쿼리) + `page.tsx` 인라인 `todayData.games` 기반 계산 제거·해당 함수 호출로 교체. `silent-drift-wave-307.test.ts` 갱신(계산 위치 이동 반영) + `silent-drift-cycle-2534.test.ts` 신규.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(517 files/4290 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(059c020e)+push(R4), pre-push hook 통과.
+
+
 
 ### fix(context): `/about` FAQ "AI 에이전트 토론" 설명이 CREDIT_EXHAUSTED(100% quant fallback) 상태를 사용자에게 알리지 않음 — analysis/predictions 계열엔 이미 배너 존재
 

@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) analysis/page.tsx CE 배너 감지 기준 통일 (cycle 2534, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 8/20, op-analysis 4/25, info-arch 17/30, lotto 26/30). 직전 8사이클 distinct=3 — 2-chain lock 없음. explore-idea saturation 충족(13/15)이나 직전 4연속 retro-only 확인 상태라 review-code dominance-positive streak(3연속 success) 지속. cycle 2533 carry-over(신규 대형 파일 재탐색) 따라 최대 monolith `analysis/page.tsx`(2803줄, 마지막 수정 cycle 2480 = 54사이클 공백) 재감사.
+
+발견: `analysis/page.tsx` 의 CREDIT_EXHAUSTED `simplifiedMode` 배너가 `todayData.games`(오늘 경기만) 평균 confidence 로 판정 — `about`/`predictions`/`predictions/[date]` 는 이미 "날짜 무관 최근 예측 10건" 기준인데 `/analysis` 만 오늘 경기 0~2건(KBO 휴식일/크론 실행 전)이면 CE 진행 중이어도 배너 절대 안 뜨는 날짜별 조건부 drift.
+
+실행: `analysis-data.ts` 에 `detectSimplifiedMode()` 신규(about/predictions 동일 쿼리) + `page.tsx` 인라인 계산 제거·교체. `silent-drift-wave-307.test.ts` 갱신 + `silent-drift-cycle-2534.test.ts` 신규. `pnpm type-check`/`pnpm test`(517/4290)/`pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit(059c020e)+push(R4).
+
+다음 사이클 추천 = review-code(heavy, 잔존 대형 파일 재탐색 — `page.tsx`(1090줄)/`teams/[code]/page.tsx`(622줄)/`predictions/[date]/page.tsx`(615줄) 등) 또는 op-analysis(gap 4/25, 아직 미도달) — gap trigger 4종 모두 4~9사이클 남아 다음 자연 도달까진 review-code 지속 예상.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) about/page.tsx CREDIT_EXHAUSTED 배너 누락 정정 (cycle 2533, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 미도달(fix-incident 7/20, op-analysis 3/25, info-arch 16/30, lotto 25/30). 직전 8사이클 distinct=3 — 2-chain lock 없음. cycle 2532 carry-over 명시 후보(`analysis-data.ts`/`convergenceRecord.ts`/`about/page.tsx`) 순서대로 감사.
