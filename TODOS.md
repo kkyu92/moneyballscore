@@ -1,3 +1,13 @@
+## 🟢 SUCCESS — explore-idea(heavy) EN MLB game-detail 팩터 수렴 픽 배지 parity (cycle 2467, 2026-08-24)
+
+진단: open issue 0, approved plan 0/29(전부 Tier4/완료). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 1/25, info-arch 12/30, lotto 27/30). 2-chain lock 미충족(직전8 distinct=4). explore-idea saturation 미충족(11/15). cycle 2465/2466 review-code pool 고갈 경고 재확인 — 4대 monolith + convergenceRecord/buildTeamProfile/buildMatchupProfile/buildMlbMatchupProfile/buildMlbTeamAccuracy/buildAccuracyData/backtest-manual-weights-run/validator.ts/lotto-methodology/teams-[code]/matchup-[teamA] 전부 최근 감사 완료 확인, 신규 actionable target 부재 확정. MLB debate 컴포넌트(JudgeVerdictPanel 등) parity 는 MLB debate_version:null(미구현) + CREDIT_EXHAUSTED 상태라 저가치 판단, 제외.
+
+발견/실행: KO(`/mlb/games/[date]/[slug]`, 543줄) vs EN(`/en/mlb/games/[date]/[slug]`, 341줄) 라인수 diff → cycle 2461 이 KO 전용으로 배선한 팩터 수렴 픽 배지(computeMlbCompositeDuel 기반)가 EN 미러에 완전 누락 확인. `EN_FACTOR_LABELS_SHORT`(en/mlb/factors shortLabel 과 동일 값: SP FIP/SP xFIP/Lineup wOBA/Bullpen FIP/Team WAR/PF) 신규 정의 후 KO와 동일 게이팅 로직(완전수렴/강수렴/균형 3-tier) + JSX 이식 (+144 lines). glossary 링크는 `/en/mlb/factors#{slug}` (기존 KBO_FACTORS id 와 slug 일치 확인).
+
+검증: tsc --noEmit clean / eslint clean / vitest 503 files·4231 tests 전량 pass / pre-push hook(lint+type-check+version-sync-guard) pass / CI green 실측(650575a8) / Vercel deploy dispatch skipped(정상). 단일 파일 low-risk 이식이라 PR 없이 직접 main commit+push.
+
+다음 사이클 추천 = review-code(lite, health baseline — heavy pool 재고갈 확인) 또는 operational-analysis(lite, gap 2/25).
+
 ## 🟡 PARTIAL — operational-analysis(lite) CE cohort n=337 재확인, 파이프라인 정상 규명 (cycle 2466, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 7/25, info-arch 11/30, lotto 26/30). 2-chain lock 미충족(직전8 distinct=4). saturation 미충족(11/15). CI 전량 green. cycle 2465 추천(operational-analysis lite) 채택.
