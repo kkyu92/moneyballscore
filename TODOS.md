@@ -1,3 +1,13 @@
+## 🔍 RETRO-ONLY — review-code(heavy) buildMlbMatchupProfile.ts 재감사, 이미 포화 감사 확인·신규 버그 없음 (cycle 2456, 2026-08-24)
+
+진단: open issue 0, approved plan 0/23(전부 non-approved). explore-idea saturation trigger 충족(12/15)했으나 cycle 2441 이미 동일 소스 15 사이클 전 소진 확인. gap trigger 4종 전부 미도달. 2-chain lock 미충족(직전8 distinct=5). cycle 2452/2453/2454 연속 회고가 `buildMlbMatchupProfile.ts`를 미감사 후보로 3회 반복 지목 — 직접 감사.
+
+감사 범위: `buildMlbMatchupProfile.ts`(300줄) + `deriveMlbOutcome.ts` + `packages/shared` `computeMatchup*FromGames` 3종 + 소비 라우트(`mlb/matchup`, `en/mlb/matchup`) 전체.
+
+결론: 파일 주석 확인 결과 cycle 2055/2066/2071/2081/2117/2160 등 이미 6회 이상 review-code(heavy) 감사·통합을 거친 파일이었음(packages/shared 단일 source 통합, 사례 22 fix, confidence 스케일 버그 fix 등). games.sort(desc) → streak/recentRecord 계산 순서 정합, `MLB_PRODUCTION_COHORT_RULES` 필터 일관 적용, order-independent 계산(blowout/closeGame/homeAwayEdge) 정상 확인. 신규 버그 0건, 코드 변경 없음. 테스트 7/7 pass. 3회 연속 회고 추천 대상이 실제로는 이미 포화 상태 — review-code 미감사 후보 pool 이 예상보다 빠르게 고갈 중.
+
+다음 사이클 추천 = explore-idea(saturation trigger 12/15 충족 상태이나 cycle 2441 재확인이 15 사이클 전이라 재시도 가치 있음) 또는 operational-analysis(8/25, gap 절반 경과, v1.8 cohort 재측정).
+
 ## 🔍 RETRO-ONLY — info-architecture-review 30-cycle gap 재확인, 신규 라우트 5건 전부 clean (cycle 2455, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(Tier4 유지). gap trigger 중 info-arch 만 30/30 도달(trigger 9). 2-chain lock 미충족(직전8 distinct=4).
