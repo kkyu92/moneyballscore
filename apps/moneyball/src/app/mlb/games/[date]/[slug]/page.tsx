@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { MlbDetailedFactorAnalysis } from "@/components/predictions/MlbDetailedFactorAnalysis";
@@ -10,6 +11,9 @@ import { ShareButtons } from "@/components/share/ShareButtons";
 import { RelatedLinks, type RelatedLink } from "@/components/shared/RelatedLinks";
 import { mlbCanonicalPair } from "@/lib/mlb/mlbCanonicalPair";
 import { createClient } from "@/lib/supabase/server";
+import { computeMlbCompositeDuel } from "@/lib/analysis/computeMlbCompositeDuel";
+import { getMlbRecentConvergencePickRecord, computeWinRatePct } from "@/lib/analysis/convergenceRecord";
+import { FACTOR_LABELS_SHORT, FACTOR_GLOSSARY_ANCHORS } from "@/lib/predictions/factorLabels";
 import {
   assertSelectOk,
   SITE_URL,
@@ -19,6 +23,10 @@ import {
   mlbShortTeamName,
   MLB_TEAMS,
   HOUR_MS,
+  MLB_COMPOSITE_DUEL_MIN_VALID,
+  MLB_FACTOR_PICK_STRONG,
+  MLB_FACTOR_PICK_COMPLETE,
+  COMPOSITE_DUEL_FACTOR_LABEL_LIMIT,
   type MlbTeamCode,
 } from "@moneyball/shared";
 import { computeMlbWaterfall, type MetricSlug, type MlbWaterfallInput } from "@moneyball/kbo-data";
@@ -263,6 +271,29 @@ export default async function GameDetail({ params }: PageParams) {
   };
   const waterfallBars = computeMlbWaterfall(waterfallInput);
 
+  // wave-452(KBO)/game/[id] 팩터 수렴 픽 배지 parity — MLB 는 elo/recent_form/head_to_head/sfr
+  // 미구현이라 6팩터(lineup_woba/bullpen_fip/sp_fip/sp_xfip/war/park_factor)만 유효, KBO 의
+  // DEFAULT_WEIGHTS 가중치%/모델-합치 칩(judge verdict 없음)은 MLB 에 대응 개념이 없어 제외.
+  const convergenceDuel = computeMlbCompositeDuel({
+    homeCode: home,
+    homeLineupWoba: pred.home_lineup_woba,
+    awayLineupWoba: pred.away_lineup_woba,
+    homeBullpenFip: pred.home_bullpen_fip,
+    awayBullpenFip: pred.away_bullpen_fip,
+    homeSPFip: pred.home_sp_fip,
+    awaySPFip: pred.away_sp_fip,
+    homeSPXfip: pred.home_sp_xfip,
+    awaySPXfip: pred.away_sp_xfip,
+    homeWar: pred.home_war_total,
+    awayWar: pred.away_war_total,
+  });
+  const isConvergencePick =
+    convergenceDuel.validCount >= MLB_COMPOSITE_DUEL_MIN_VALID &&
+    Math.abs(convergenceDuel.netScore) >= MLB_FACTOR_PICK_STRONG;
+  const convergenceRecord = isConvergencePick
+    ? await getMlbRecentConvergencePickRecord(MLB_FACTOR_PICK_STRONG)
+    : { wins: 0, losses: 0, total: 0 };
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
       <script
@@ -312,6 +343,127 @@ export default async function GameDetail({ params }: PageParams) {
         bars={waterfallBars}
         factorCount={GAME_DETAIL_FACTOR_ROWS.length}
       />
+
+      {/* cycle 2461 explore-idea: KBO analysis/game/[id] wave-452/478 팩터 수렴 픽 배지 parity —
+          MLB 도 computeMlbCompositeDuel/getMlbRecentConvergencePickRecord 인프라는 이미
+          matchup/reviews 페이지에서 사용 중이었는데 game detail 단건 페이지만 미배선. */}
+      {isConvergencePick && (() => {
+        const favoredHome = convergenceDuel.netScore > 0;
+        const hw = convergenceDuel.homeWins;
+        const aw = convergenceDuel.awayWins;
+        const favoredName = mlbShortTeamName(favoredHome ? home : away);
+        const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        const convStrength = Math.abs(convergenceDuel.netScore);
+        const favoredSlugs = favoredHome ? convergenceDuel.homeFavoredSlugs : convergenceDuel.awayFavoredSlugs;
+        const opponentSlugs = favoredHome ? convergenceDuel.awayFavoredSlugs : convergenceDuel.homeFavoredSlugs;
+        const isComplete = convStrength >= MLB_FACTOR_PICK_COMPLETE;
+        const badgeClass = isComplete
+          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50 text-amber-700 dark:text-amber-300'
+          : 'bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800/50 text-brand-700 dark:text-brand-300';
+        const tierChipClass = isComplete
+          ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300'
+          : 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300';
+        return (
+          <div className={`rounded-lg border px-4 py-2.5 text-sm ${badgeClass}`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 수렴 픽</span>
+              <span className={`inline-block text-xs px-1.5 py-0 rounded font-semibold ${tierChipClass}`}>
+                {isComplete ? '완전수렴' : '강수렴'}
+              </span>
+              <span className="font-semibold">{favoredName} 우세</span>
+              <span className="font-mono text-xs">{ratio}</span>
+              {favoredSlugs.map((slugKey) => {
+                const chipLabel = FACTOR_LABELS_SHORT[slugKey];
+                if (!chipLabel) return null;
+                const anchor = FACTOR_GLOSSARY_ANCHORS[slugKey];
+                const chipClass = isComplete
+                  ? 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50'
+                  : 'bg-brand-100 dark:bg-brand-800/40 text-brand-700 dark:text-brand-300 hover:bg-brand-200 dark:hover:bg-brand-700/50';
+                return anchor ? (
+                  <Link
+                    key={slugKey}
+                    href={`/glossary#${anchor}`}
+                    className={`inline-block text-xs px-1.5 py-0.5 rounded transition-colors ${chipClass}`}
+                  >
+                    {chipLabel}
+                  </Link>
+                ) : (
+                  <span
+                    key={slugKey}
+                    className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400"
+                  >
+                    {chipLabel}
+                  </span>
+                );
+              })}
+            </div>
+            {!isComplete && opponentSlugs.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {opponentSlugs.map((slugKey) => {
+                  const chipLabel = FACTOR_LABELS_SHORT[slugKey];
+                  if (!chipLabel) return null;
+                  const anchor = FACTOR_GLOSSARY_ANCHORS[slugKey];
+                  return anchor ? (
+                    <Link
+                      key={slugKey}
+                      href={`/glossary#${anchor}`}
+                      className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"
+                    >
+                      {chipLabel}
+                    </Link>
+                  ) : (
+                    <span
+                      key={slugKey}
+                      className="inline-block text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400"
+                    >
+                      {chipLabel}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            {convergenceRecord.total > 0 && (
+              <p
+                className="mt-1.5 text-[11px] tabular-nums opacity-60"
+                title={`최근 ${convergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
+              >
+                최근 {convergenceRecord.total}경기 {convergenceRecord.wins}승{convergenceRecord.losses}패{' '}
+                ({computeWinRatePct(convergenceRecord.wins, convergenceRecord.total)}%)
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
+      {!isConvergencePick && convergenceDuel.validCount >= MLB_COMPOSITE_DUEL_MIN_VALID && (() => {
+        const favoredHome = convergenceDuel.netScore > 0;
+        const isTied = convergenceDuel.netScore === 0;
+        const hw = convergenceDuel.homeWins;
+        const aw = convergenceDuel.awayWins;
+        const favoredName = isTied ? null : mlbShortTeamName(favoredHome ? home : away);
+        const ratio = favoredHome ? `${hw}:${aw}` : `${aw}:${hw}`;
+        const favoredSlugs = isTied
+          ? []
+          : (favoredHome ? convergenceDuel.homeFavoredSlugs : convergenceDuel.awayFavoredSlugs)
+              .slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT);
+        const factorInline = favoredSlugs.map((s) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
+        return (
+          <div className="rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-800/30 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-xs uppercase tracking-wide opacity-70">팩터 균형</span>
+              {favoredName ? (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">{favoredName} 우세</span>
+              ) : (
+                <span className="font-semibold text-gray-700 dark:text-gray-300">균형</span>
+              )}
+              <span className="font-mono text-xs">팩터 {ratio}</span>
+              {factorInline && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorInline})</span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <MlbDetailedFactorAnalysis
         homeTeam={home}
