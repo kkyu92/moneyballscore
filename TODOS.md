@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code(heavy) SMALL_SAMPLE_N family 3차 재확인 + 잔여 stale 파일 sweep, 신규 fix 없음 (cycle 2559, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2551-2558 distinct=4). fix-incident gap 33/20 도달 → `gh run list --limit 10` 재확인, 전부 success/skipped — negative. op-analysis(gap 3/25)/info-arch/lotto/design-system 모두 gap 미도달. explore-idea 5연속 lite 소진 재확인(TODOS Next-Up + GH issue 재확인 리드 없음).
+
+점검: SMALL_SAMPLE_N family — `analysis/page.tsx`(12개소 게이트 확인), `AccuracySummary.tsx`(confident/lean/tossup 3 tier 전부 `stat.total < SMALL_SAMPLE_N` 게이트), `tierStats.ts`/`buildDailyAccuracy.ts`(순수 집계 함수, 표시 주장 아님), `DailyAccuracyChart.tsx`(자체 `data.length < 3` 가드) — 전부 이미 게이트됨, 3번째 독립 재확인으로 소진 확정. 신규 영역 탐색으로 last-modified 최고령 파일 sweep: `estimateTime.ts`(KBO 전용 — MLB 새벽 게임 우려 가설 세웠으나 PlaceholderCard 는 KBO 전용 사용처만 확인돼 오탐), `backtest/metrics.ts`(Brier/logLoss/calibration 수식 정상), `game-record-features.ts`(look-ahead bias 가드 정상, `teamRunDiffLastN`/`bullpenAppearancesLastNDays` 프로덕션 `loader.ts` 미사용 dead export 발견했으나 fix 가치 낮아 커밋 보류) — 전부 clean.
+
+결론: 이번 사이클 실행 가능한 신규 버그 없음. 코드 변경 없음.
+
+다음 사이클 추천 = explore-idea 또는 operational-analysis (review-code 는 SMALL_SAMPLE_N family + stale-file sweep 양쪽 근접 포화, 다양성 redirect 권고).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) agent_memories 학습 경로 shadow-only 0% factor 미필터 정정 (cycle 2558, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2550-2557 distinct=4). fix-incident gap 32/20 도달 → mandatory 점검: `pipeline_runs` 7일 166건 중 error 3건(`mlb_fancy_scrape` fangraphs HTTP 403, 8/19~21 3일 연속) 이후 8/22부터 자연 회복 지속, 재발 없음 — negative. op-analysis 방금 발화(2556), info-arch(breadcrumb "누락" 2건은 placeholder/redirect 전용 페이지라 오탐)/lotto(다음 토 picks 이미 존재)/design-system(DESIGN.md 2일 전 갱신) 모두 negative. explore-idea 5연속 lite 소진 + TODOS Next-Up 신규 리드 없음 재확인 → review-code(heavy) 재탐색, SMALL_SAMPLE_N family(11회) 소진 확정 후 신규 영역 선정.
