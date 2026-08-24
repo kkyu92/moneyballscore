@@ -1,4 +1,4 @@
-import { josa, mlbShortTeamName, type MlbTeamCode } from '@moneyball/shared';
+import { josa, mlbShortTeamName, NEUTRAL_FACTOR, FACTOR_CONTRIBUTION_SCALE, type MlbTeamCode } from '@moneyball/shared';
 import { buildMlbGameOverview, type MlbWaterfallBar } from '@moneyball/kbo-data';
 import { OVERVIEW_CLOSE_PP, OVERVIEW_DOMINANT_PP } from '@/lib/analysis/factor-explanations';
 
@@ -20,8 +20,8 @@ export function MlbGameOverview({ homeTeam, awayTeam, homeWinProb, bars, factorC
     return null;
   }
 
-  const favored = homeWinProb >= 0.5 ? homeName : awayName;
-  const marginPp = Math.round(Math.abs(homeWinProb - 0.5) * 200);
+  const favored = homeWinProb >= NEUTRAL_FACTOR ? homeName : awayName;
+  const marginPp = Math.round(Math.abs(homeWinProb - NEUTRAL_FACTOR) * FACTOR_CONTRIBUTION_SCALE);
 
   if (locale === 'en') {
     const confidenceLabel = marginPp < OVERVIEW_CLOSE_PP ? 'a close contest' : marginPp < OVERVIEW_DOMINANT_PP ? 'a slight edge' : 'a clear edge';

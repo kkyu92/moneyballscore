@@ -1,3 +1,12 @@
+## v0.5.62.106 — 2026-08-24 (cycle 2493, review-code (heavy): factor-explanations.ts 최초 전체 감사 — marginPp 하드코딩 * 200 / 0.5 정정)
+
+### fix(context): `GameAnalysisProse.tsx` / `MlbGameOverview.tsx` 의 marginPp 계산이 `FACTOR_CONTRIBUTION_SCALE`/`NEUTRAL_FACTOR` 단일 source 대신 하드코딩 `* 200` / `- 0.5` 사용 — silent drift 정정
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 9/20, op-analysis 14/25, info-arch 7/30, lotto 15/30). 직전 8 사이클 distinct=3(review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. 2492 추천대로 review-code(heavy) 계속, 잔존 미감사 대형 파일 중 `factor-explanations.ts`(416줄, `/analysis/game/[id]` + 리스트 카드 전체 팩터 해설·요약 소스, review-code 이력 0건) 선정.
+- 발견: 이 파일이 자체적으로 `OVERVIEW_CLOSE_PP`/`OVERVIEW_DOMINANT_PP` 를 `NEUTRAL_FACTOR`+`FACTOR_CONTRIBUTION_SCALE` 단일 source 로 도출(wave-352/356, cycle 2253 fix 로 소비부 하드코딩 10/20 은 이미 정리됨)함에도, 그 threshold 를 소비하는 두 컴포넌트 — `GameAnalysisProse.tsx`(KBO) / `MlbGameOverview.tsx`(MLB) — 는 marginPp 원 계산 자체를 `Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * 200` / `Math.abs(homeWinProb - 0.5) * 200` 로 별도 하드코딩. `ELO_NEUTRAL_WIN_PCT`(0.5)·`NEUTRAL_FACTOR`(0.5)·`FACTOR_CONTRIBUTION_SCALE`(200) 이 현재 값은 동일하지만, cycle 2253 fix 가 threshold 상수만 단일화하고 marginPp 산식 자체는 두 컴포넌트에 중복 하드코딩으로 남겨 향후 `FACTOR_CONTRIBUTION_SCALE` 또는 `NEUTRAL_FACTOR` 재조정 시 `buildGameOverview`(factor-explanations.ts) 와 두 컴포넌트의 marginPp 가 silent 하게 divergent 해질 위험.
+- 실행: 두 컴포넌트 모두 `FACTOR_CONTRIBUTION_SCALE`(+`MlbGameOverview.tsx` 는 `NEUTRAL_FACTOR` 도) import 후 marginPp 계산을 단일 source 참조로 교체. 회귀 테스트 신규 1건(`silent-drift-cycle-2493.test.ts`, 하드코딩 리터럴 부재 + import 존재 검증).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm test`(509 files/4250 tests) + `pnpm lint` clean. 단일 논리 단위 → main 직접 commit(fix, R4).
+
 ## v0.5.62.105 — 2026-08-24 (cycle 2490, review-code (heavy): buildAccuracyData.ts 최초 전체 감사 — Version History CURRENT_MODEL_FILTER 오적용 정정)
 
 ### fix(accuracy): `/accuracy` 모델 버전 히스토리 표가 v1.5/v1.6/v1.7-revert/v1.8-credit-fail 실측 데이터를 영구 "수집 중"으로 오표시하던 silent drift 정정

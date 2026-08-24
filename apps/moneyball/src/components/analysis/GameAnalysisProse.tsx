@@ -1,4 +1,4 @@
-import { josa, KBO_FACTOR_COUNT, shortTeamName, ELO_NEUTRAL_WIN_PCT, type TeamCode } from '@moneyball/shared';
+import { josa, KBO_FACTOR_COUNT, shortTeamName, ELO_NEUTRAL_WIN_PCT, FACTOR_CONTRIBUTION_SCALE, type TeamCode } from '@moneyball/shared';
 import { explainFactor, OVERVIEW_CLOSE_PP, OVERVIEW_DOMINANT_PP, type FactorRawDetails } from '@/lib/analysis/factor-explanations';
 import { FACTOR_LABELS_TECHNICAL } from '@/lib/predictions/factorLabels';
 
@@ -44,7 +44,7 @@ export function GameAnalysisProse({
     .map((e) => e.narrative);
 
   const favored = homeWinProb > ELO_NEUTRAL_WIN_PCT ? homeName : awayName;
-  const marginPp = Math.round(Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * 200);
+  const marginPp = Math.round(Math.abs(homeWinProb - ELO_NEUTRAL_WIN_PCT) * FACTOR_CONTRIBUTION_SCALE);
   const confidenceLabel =
     marginPp < OVERVIEW_CLOSE_PP ? '박빙의 접전' : marginPp < OVERVIEW_DOMINANT_PP ? '소폭 우위' : '명확한 우위';
 
