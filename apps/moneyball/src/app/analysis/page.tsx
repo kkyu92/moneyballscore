@@ -68,6 +68,7 @@ import {
   TOPFACTOR_IMPACT_MIN_DISPLAY,
   DEFAULT_WEIGHTS,
   parseRecent10Record,
+  SMALL_SAMPLE_N,
   type TeamCode,
 } from '@moneyball/shared';
 import { fetchStandings, type StandingRow } from '@moneyball/kbo-data';
@@ -465,11 +466,12 @@ export default async function AnalysisIndexPage() {
                 )}
                 {recentConvergenceRecord.total > 0 && (
                   <span
-                    className="text-[11px] tabular-nums text-gray-400 dark:text-gray-500"
+                    className={`text-[11px] tabular-nums text-gray-400 dark:text-gray-500 ${recentConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                     title={`최근 ${recentConvergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
                   >
                     최근 {recentConvergenceRecord.total}경기 {recentConvergenceRecord.wins}승{recentConvergenceRecord.losses}패{' '}
                     ({computeWinRatePct(recentConvergenceRecord.wins, recentConvergenceRecord.total)}%)
+                    {recentConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                   </span>
                 )}
               </div>
@@ -1860,32 +1862,35 @@ export default async function AnalysisIndexPage() {
               {/* wave-544: 강수렴 픽 rolling 성적 — 최근 N경기 승/패 + 승률 */}
               {recentStrongConvergenceRecord.total > 0 && (
                 <span
-                  className="text-xs tabular-nums text-gray-500 dark:text-gray-400"
+                  className={`text-xs tabular-nums text-gray-500 dark:text-gray-400 ${recentStrongConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                   title={`최근 ${recentStrongConvergenceRecord.total}경기 강수렴 픽 적중 현황`}
                 >
                   최근 {recentStrongConvergenceRecord.total}경기{' '}
                   {recentStrongConvergenceRecord.wins}승{recentStrongConvergenceRecord.losses}패
                   {' '}({computeWinRatePct(recentStrongConvergenceRecord.wins, recentStrongConvergenceRecord.total)}%)
+                  {recentStrongConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                 </span>
               )}
               {/* wave-546: 이번 달 강수렴 픽 성적 — 월간 전체 집계 */}
               {monthlyStrongConvergenceRecord.total > 0 && (
                 <span
-                  className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                  className={`text-xs tabular-nums text-gray-400 dark:text-gray-500 ${monthlyStrongConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                   title={`이번 달 강수렴 픽 성적 (${currentMonth.label})`}
                 >
                   이달 {monthlyStrongConvergenceRecord.wins}승{monthlyStrongConvergenceRecord.losses}패
                   {' '}({computeWinRatePct(monthlyStrongConvergenceRecord.wins, monthlyStrongConvergenceRecord.total)}%)
+                  {monthlyStrongConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                 </span>
               )}
               {/* wave-548: 이번 시즌 강수렴 픽 성적 — KBO_SEASON_START_DATE 이후 전체 */}
               {seasonStrongConvergenceRecord.total > 0 && (
                 <span
-                  className="text-xs tabular-nums text-gray-300 dark:text-gray-600"
+                  className={`text-xs tabular-nums text-gray-300 dark:text-gray-600 ${seasonStrongConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                   title={`${KBO_SEASON_YEAR} 시즌 전체 강수렴 픽 성적 (${KBO_SEASON_START_DATE} 이후)`}
                 >
                   시즌 {seasonStrongConvergenceRecord.wins}승{seasonStrongConvergenceRecord.losses}패
                   {' '}({computeWinRatePct(seasonStrongConvergenceRecord.wins, seasonStrongConvergenceRecord.total)}%)
+                  {seasonStrongConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                 </span>
               )}
               {/* wave-615: 어제 강수렴 픽 결과 배지 — 완전수렴 wave-579 패턴 강수렴 tier 역동기 */}
@@ -1937,7 +1942,7 @@ export default async function AnalysisIndexPage() {
               <div className="flex flex-wrap items-center gap-1.5 mb-3 -mt-1">
                 <span className="text-xs text-gray-500 dark:text-gray-400">🎯 완전수렴:</span>
                 <span
-                  className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20"
+                  className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-900/20 ${seasonCompleteConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                   title={`${FACTOR_PICK_COMPLETE}팩터 완전수렴 픽 ${seasonCompleteConvergenceRecord.total}경기: ${seasonCompleteConvergenceRecord.wins}승 ${seasonCompleteConvergenceRecord.losses}패 (${pct}%)`}
                 >
                   <span className="text-amber-600 dark:text-amber-400 font-medium">{FACTOR_PICK_COMPLETE}팩터</span>
@@ -1945,6 +1950,7 @@ export default async function AnalysisIndexPage() {
                     {pct}%
                   </span>
                   <span className="text-gray-400 dark:text-gray-500 tabular-nums">({seasonCompleteConvergenceRecord.total}경기)</span>
+                  {seasonCompleteConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                 </span>
                 {/* wave-564: 완전수렴 픽 현재 연속 streak — 2연승 이상 🔥, 2연패 이상 ❄️ (amber-600 = 섹션 내 '10팩터' label 색상 동기, wave-562 패턴) */}
                 {completeConvergenceStreak !== null && (
@@ -1976,22 +1982,24 @@ export default async function AnalysisIndexPage() {
                 {/* wave-569: 이번 달 완전수렴 픽 성적 — 강수렴 wave-546 패턴 동기 */}
                 {monthlyCompleteConvergenceRecord.total > 0 && (
                   <span
-                    className="text-xs tabular-nums text-gray-400 dark:text-gray-500"
+                    className={`text-xs tabular-nums text-gray-400 dark:text-gray-500 ${monthlyCompleteConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                     title={`이번 달 완전수렴 픽 성적 (${currentMonth.label})`}
                   >
                     이달 {monthlyCompleteConvergenceRecord.wins}승{monthlyCompleteConvergenceRecord.losses}패
                     {' '}({computeWinRatePct(monthlyCompleteConvergenceRecord.wins, monthlyCompleteConvergenceRecord.total)}%)
+                    {monthlyCompleteConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                   </span>
                 )}
                 {/* wave-575: 완전수렴 픽 직전 N경기 성적 — 강수렴 wave-544 패턴 동기 (날짜 무관 rolling) */}
                 {recentCompleteConvergenceRecord.total > 0 && (
                   <span
-                    className="text-xs tabular-nums text-gray-500 dark:text-gray-400"
+                    className={`text-xs tabular-nums text-gray-500 dark:text-gray-400 ${recentCompleteConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                     title={`최근 ${recentCompleteConvergenceRecord.total}경기 완전수렴 픽 적중 현황`}
                   >
                     최근 {recentCompleteConvergenceRecord.total}경기{' '}
                     {recentCompleteConvergenceRecord.wins}승{recentCompleteConvergenceRecord.losses}패
                     {' '}({computeWinRatePct(recentCompleteConvergenceRecord.wins, recentCompleteConvergenceRecord.total)}%)
+                    {recentCompleteConvergenceRecord.total < SMALL_SAMPLE_N && <span className="ml-1">· 소표본(n&lt;{SMALL_SAMPLE_N})</span>}
                   </span>
                 )}
                 {/* wave-579: 어제 완전수렴 픽 결과 배지 — 강수렴 wave-550 어제 경기 배지 패턴 동기 */}

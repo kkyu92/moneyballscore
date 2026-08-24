@@ -1,3 +1,12 @@
+## v0.5.62.118 — 2026-08-25 (cycle 2543, review-code (heavy): analysis/page.tsx(목록) 팩터 수렴 픽 성적 라인 7개소 소표본 게이트 부재)
+
+### fix(analysis): `analysis/page.tsx`(목록) 팩터 수렴 픽 rolling/월간/시즌 성적 라인 7개소에 소표본(n<5) 흐림 처리 + 안내 신규 — cycle 2541/2542 이 accuracy 표 · game/[id] 상세 라인에 적용한 것과 동일 관례가 목록 페이지엔 없었음
+
+- 진단: open issue 0, approved plan 0/29(전부 status≠`approved`, archived/completed류). 2-chain lock 없음(직전 8사이클 distinct=3: review-code/explore-idea/lotto). gap trigger 4종 미도달(fix-incident 17/20, op-analysis 13/25, info-arch 26/30, lotto 5/30). cycle 2542 retro carry-over(잔존 대형 파일 `analysis/page.tsx` 2803줄, 7개 지점 명시) 감사.
+- 발견: `recentConvergenceRecord`(기본 수렴 픽) + `recentStrongConvergenceRecord`/`monthlyStrongConvergenceRecord`/`seasonStrongConvergenceRecord`(강수렴) + `seasonCompleteConvergenceRecord`/`monthlyCompleteConvergenceRecord`/`recentCompleteConvergenceRecord`(완전수렴) 총 7개 라인이 `SMALL_SAMPLE_N` import 자체 없이 승률 %를 그대로 강조 노출 — `weeklyXConvergenceRecord`/`yesterdayXConvergenceRecord` 변형은 %를 표시하지 않아(win/loss 카운트만) 이번 감사 범위 제외.
+- 실행: `SMALL_SAMPLE_N` import 1개 추가 + 7개 지점 각각 `total < SMALL_SAMPLE_N` 시 `opacity-60` 조건부 클래스 + 인라인 `· 소표본(n<5)` 안내 추가(FactorAccuracyTable/TeamMatchupCards/cycle 2542 관례 재사용). 회귀 테스트 `silent-drift-wave-665.test.ts` 신규(7개 변수 각각 게이트 확인).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(522 files/4310 tests) + `pnpm --filter moneyball run lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.117 — 2026-08-25 (cycle 2542, review-code (heavy): analysis/game/[id]/page.tsx 팩터 수렴 픽 성적 라인 소표본 게이트 부재)
 
 ### fix(analysis): `analysis/game/[id]` 팩터 수렴 픽 "최근 N경기 적중 현황" 라인에 소표본(n<5) 흐림 처리 + 안내 신규 — cycle 2541 이 accuracy 표에 적용한 것과 동일 관례가 이 라인엔 없었음
