@@ -1,3 +1,13 @@
+## 🟡 PARTIAL — operational-analysis(lite) CE cohort 5th zero-change, non-CE 표본 7주+ 동결 (cycle 2479, 2026-08-24)
+
+진단: open issue 0, approved plan 0/22(전부 completed/archived/tier4/deferred, status:approved 없음). gap trigger 4종 미도달(fix-incident 14/20 — CI green 확인, op-analysis 7/25, info-arch 23/30, lotto 0/30 — 직전 사이클 방금 발화). 직전 8 사이클 distinct=5(review-code/operational-analysis/polish-ui/explore-idea/lotto) — 2-chain lock 미충족. 직전 15 사이클 review-code+fix-incident+polish-ui+info-arch=10/15 — explore-idea saturation 미충족. 강한 trigger 부재 상태에서 cycle 2477/2478 양쪽 retro 가 공통 추천한 "operational-analysis(lite) 신선도 재확인" 채택 — review-code 최근 8사이클 중 4회 dominance 완화 목적 겸.
+
+실행: `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행 (`/tmp/ce-cohort-2479.json`). 결과 = **cycle 2450 측정치와 완전 동일** — 전체 n=337 (CE n=290 / 비CE n=47), CE 53.4%(155/290) / 비CE 63.8%(30/47), 격차 10.4pp, overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 (LLM 부가가치 우세 방향 유지). 비CE 표본 마지막 신규 예측 = 2026-07-01 그대로 (7주+ 완전 동결 지속). **5th 연속 zero-change** (cycle 2361→2415→2450→2471→2479 동일 수치 반복, CREDIT_EXHAUSTED 미해소 지속).
+
+결론: 코드 변경 0, 신규 정보 0 — 반복 확인 자체가 목적인 lite 재측정. non-CE 표본이 완전 동결(2026-07-01 이후 0건)인 한 이 harness 재실행은 매번 동일 수치만 반환 — 사용자 크레딧 재충전 전까지 신규 gap 재분리 불가능한 상태 변화 없음.
+
+다음 사이클 추천 = review-code(heavy, 미감사 파일 계속 탐색) 또는 fix-incident(gap 15/20 — 아직 미달) 또는 explore-idea(다양성, saturation 10/15 아직 미달이나 접근 중). op-analysis 는 non-CE 표본 신규 유입 전까지 재발화 우선순위 낮춤 권장 (동일 수치 6th 반복 방지).
+
 ## ⚪ RETRO-ONLY — explore-idea(heavy) 신규 아이디어 탐색, actionable gap 소진 확인 (cycle 2477, 2026-08-24)
 
 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 13/20, op-analysis 6/25 — 직전 4연속 zero-change n=337 동결, info-arch 22/30, lotto self-heal 최신 no-op). 직전 8 사이클 distinct=3(review-code/operational-analysis/polish-ui) — 2-chain lock 미충족. 직전 15 사이클 review-code+fix-incident+polish-ui+info-arch = 12/15 → **explore-idea saturation trigger 충족** — cycle 2476 retro 추천("review-code or explore-idea")과 정합해 explore-idea(heavy) 선택.
