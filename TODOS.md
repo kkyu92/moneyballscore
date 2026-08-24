@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) AccuracyHeaderCard 누적 적중률 소표본 게이트 부재 정정 (cycle 2555, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2547-2554 distinct=4: info-arch/review-code/skill-evolution/explore-idea). fix-incident negative(`gh run list` 최근 10건 전부 success). op-analysis/info-arch/lotto gap 미도달. cycle 2554 explore-idea 5th 소진 확정 후 review-code(heavy) 재탐색 권고.
+
+발견: `AccuracyHeaderCard.tsx`(predictions/mlb-predictions/en-mlb-predictions 3개 라이브 라우트 공통 사용) 헤드라인 "누적 적중률" %는 트렌드/티어 breakdown 표시 조건에만 `MIN_VERIFIED_GAMES_HEDGE`/`STATS_RELIABLE_MIN_N` 게이트가 걸려있고, 메인 % 자체는 `totalVerified===0` 외 소표본 안내 부재 — SMALL_SAMPLE_N family 11번째 연속 재발.
+
+실행: `SMALL_SAMPLE_N` import + 헤드라인 % 아래 `totalVerified < SMALL_SAMPLE_N` 조건부 인라인 표시(ko/en) 추가. 회귀 테스트 `silent-drift-wave-673.test.ts` 신규(3 assertion). `tsc --noEmit` clean + full test suite(531 files/4367 tests) clean + lint clean. 단일 논리 단위 → 직접 main commit+push (R4, commit e357a25c).
+
+다음 사이클 추천 = review-code(heavy) 잔존 재탐색(family 완전 소진 여부 재판단) 또는 explore-idea(소진 재확인 결과 대비).
+
+---
+
 ## ⚪ RETRO-ONLY — explore-idea(lite) 5th 소진 재확인, 신규 후보 0건 (cycle 2554, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). gap trigger 4종 미도달(fix-incident 20+/20 도달했으나 cycle 2553 `gh run list` 재확인 negative — 이번 cycle 도 재확인, 최근 10건 전부 success/schedule clean 지속, op-analysis 24/25, info-arch 7/30, lotto 16/30). 2-chain lock 미충족(직전8=2546-2553 distinct=3: review-code 6/skill-evolution 1/info-arch 1). **explore-idea saturation trigger 충족(직전15=2540-2553 중 review-code+fix-incident+polish-ui+info-arch=12/15)** + cycle 2553 retro가 "family 10회 누적 소진 판단 시 explore-idea redirect" 명시 — review-code(heavy) 최근 8사이클 중 6회 dominance 실측 확인 후 다양성 회복 위해 explore-idea 채택.
