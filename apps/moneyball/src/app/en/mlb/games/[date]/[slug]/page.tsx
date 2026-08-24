@@ -106,6 +106,8 @@ interface ScheduleRow {
   away_score: number | null;
   status: string;
   game_datetime_utc: string;
+  home_starter_name: string | null;
+  away_starter_name: string | null;
 }
 
 // KO page.tsx(cycle 2099) 와 동일 — SportsEvent JSON-LD eventStatus 매핑.
@@ -134,7 +136,7 @@ export default async function GameDetailEn({ params }: PageParams) {
 
   const scheduleResult = await supabase
     .from('mlb_schedule')
-    .select('external_game_id, home_score, away_score, status, game_datetime_utc')
+    .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
     .eq('game_date', date)
     .eq('home_team_code', dbHomeCode)
     .eq('away_team_code', dbAwayCode)
@@ -250,6 +252,20 @@ export default async function GameDetailEn({ params }: PageParams) {
       <h1 className="text-2xl md:text-3xl font-bold text-brand-700 dark:text-brand-100">
         {home} vs {away}
       </h1>
+
+      {/* cycle 2457 explore-idea — KO page.tsx 와 동일 (parity) */}
+      {(schedule.away_starter_name || schedule.home_starter_name) && (
+        <p className="text-xs font-mono text-gray-500 dark:text-gray-400">
+          SP{' '}
+          <span className="text-gray-600 dark:text-gray-300">
+            {schedule.away_starter_name ?? 'TBD'}
+          </span>
+          {' vs '}
+          <span className="text-gray-600 dark:text-gray-300">
+            {schedule.home_starter_name ?? 'TBD'}
+          </span>
+        </p>
+      )}
 
       <section className="rounded-lg bg-brand-50 dark:bg-brand-900 p-5">
         <div className="text-3xl font-bold text-brand-700 dark:text-brand-100">

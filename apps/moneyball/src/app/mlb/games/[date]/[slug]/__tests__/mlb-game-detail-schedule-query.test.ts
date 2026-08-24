@@ -91,4 +91,12 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/predictionLeadHours/);
     expect(PAGE_SRC).toMatch(/HOUR_MS/);
   });
+
+  // cycle 2457 explore-idea: statsapi-mlb.ts 의 fetchProbablePitchers 가 선발투수 이름을 이미
+  // 반환하지만 어떤 mode 도 소비하지 않아 KBO(analysis/game/[id] wave-335) 대비 완전 미이식
+  // 상태였음 — mlb_schedule.home/away_starter_name(migration 051) select + 표시 회귀 가드.
+  it("home_starter_name/away_starter_name 을 select + 선발 표시로 렌더한다 (KBO parity, cycle 2457)", () => {
+    expect(PAGE_SRC).toMatch(/home_starter_name,\s*away_starter_name/);
+    expect(PAGE_SRC).toMatch(/선발/);
+  });
 });

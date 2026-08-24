@@ -69,4 +69,10 @@ describe("en/mlb/games/[date]/[slug] KO parity 회귀 가드 (cycle 2109)", () =
     expect(PAGE_SRC).toMatch(/pred\.home_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.home_recent_form\s*\*\s*100/);
     expect(PAGE_SRC).toMatch(/pred\.away_recent_form\s*==\s*null\s*\?\s*null\s*:\s*pred\.away_recent_form\s*\*\s*100/);
   });
+
+  // cycle 2457 explore-idea: KO page.tsx home_starter_name/away_starter_name parity.
+  it("home_starter_name/away_starter_name 을 select + 선발 표시로 렌더한다 (KO parity, cycle 2457)", () => {
+    expect(PAGE_SRC).toMatch(/home_starter_name,\s*away_starter_name/);
+    expect(PAGE_SRC).toMatch(/SP/);
+  });
 });

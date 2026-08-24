@@ -15,7 +15,7 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@supabase/supabase-js';
-import { fetchMlbSchedule } from '../scrapers/statsapi-mlb';
+import { fetchMlbSchedule, fetchProbablePitchers } from '../scrapers/statsapi-mlb';
 import { fetchFangraphsMlbTeams } from '../scrapers/fangraphs-mlb';
 import { fetchSavantTeamStatcast } from '../scrapers/baseball-savant';
 import { computeMlbProbability } from '../factors/mlb-base';
@@ -124,6 +124,15 @@ async function runStatsApiScrape(db: DB, date: string): Promise<{ gamesFound: nu
     return { gamesFound: 0, rowsInserted: 0, errors };
   }
 
+  // 선발투수 이름은 best-effort — 실패해도 schedule upsert 자체는 막지 않음
+  // (KBO sp_confirmation_log 와 달리 별도 테이블 없이 mlb_schedule 컬럼으로 직접 저장).
+  let pitchers: Awaited<ReturnType<typeof fetchProbablePitchers>> = {};
+  try {
+    pitchers = await fetchProbablePitchers(date);
+  } catch (e) {
+    errors.push(`fetchProbablePitchers: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
   const rows = games.map((g) => ({
     league: 'mlb',
     external_game_id: String(g.gamePk),
@@ -134,6 +143,8 @@ async function runStatsApiScrape(db: DB, date: string): Promise<{ gamesFound: nu
     status: g.status,
     home_score: g.homeScore ?? null,
     away_score: g.awayScore ?? null,
+    home_starter_name: pitchers[g.gamePk]?.home?.name ?? null,
+    away_starter_name: pitchers[g.gamePk]?.away?.name ?? null,
   }));
 
   const { error } = await db
