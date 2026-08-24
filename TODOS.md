@@ -6145,3 +6145,13 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: `SMALL_SAMPLE_N` import 추가 + `b.n < 5` → `b.n < SMALL_SAMPLE_N` swap. `pnpm type-check`(4 packages clean) + `pnpm lint`(clean) + `pnpm test`(503 files/4231 tests) 클린. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.99).
 
 다음 사이클 추천 = operational-analysis(lite, gap 3/25 — 아직 저신선도) 또는 review-code 신규 target 계속 (accuracy/page.tsx 가 참조하는 buildTeamAccuracy.ts/buildAccuracyData.ts 등 lib 함수 자체는 이미 여러 차례 감사됨, TeamMatchupCards/TeamBiasTable/ModelVersionHistory/FactorAccuracyTable 등 컴포넌트 레벨 미감사 후보) 또는 explore-idea(saturation 10/15 근접, 다양성 회복 고려).
+
+## 🟢 SUCCESS — polish-ui: MLB game-detail 레이아웃 폭 회귀 + EN 팀 페이지 division rank 배지 정정 (cycle 2476, 2026-08-24)
+
+진단: 2-chain lock 탐지(직전 8 사이클 distinct=2: review-code 7/8 + operational-analysis 1/8). 잠긴 두 chain 제외, 나머지 pool 전부 trigger 미충족(fix-incident 12/20, info-arch 21/30, explore-idea saturation 11/15, lotto 36/30 이지만 self-heal 이미 최신 no-op) → 룰(어떤 chain 도 trigger 없으면 polish-ui 강제 발화) 적용. 최근 7일 신규 MLB UI 7개 파일(team/matchup/game-detail KO+EN) design-review 0회 근거 추가.
+
+발견: Explore 에이전트 디자인 감사 결과 (1) `mlb/games/[date]/[slug]/page.tsx`(KO+EN) 가 `max-w-3xl px-4` 사용 — KBO 원본+다른 신규 MLB 페이지(team/matchup) 전부 `max-w-4xl` 컨벤션과 불일치, game-detail 만 ~128px 좁게 렌더되는 시각 회귀. (2) EN `mlb/team/[code]/page.tsx` 에 KO 의 division-rank 배지(`buildMlbDivisionStandings`/`findMlbTeamDivisionRank`)가 통째로 누락 — EN 사용자만 순위 정보 미노출. 그 외 색상/spacing 토큰 drift, Breadcrumb 누락은 0건(clean).
+
+실행: game-detail KO+EN `max-w-4xl`/`<article>` 통일. EN 팀 페이지에 division rank 배지 추가(`N/M · GB N.N`, en/mlb/standings 의 GB 표기 컨벤션 재사용). `pnpm type-check`(4 packages clean) + `pnpm test`(505 files/4238 tests) + `pnpm lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (v0.5.62.102).
+
+다음 사이클 추천 = review-code 계속(같은 family 재확인 — mlb/players/[id] 등 잔여 페이지) 또는 explore-idea(다양성 회복, saturation 11/15 임박) 또는 info-arch(gap 22/30).
