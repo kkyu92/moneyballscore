@@ -132,7 +132,6 @@ const STRINGS: Record<'ko' | 'en', Strings> = {
   },
 };
 
-const TEAM_TABLE_MIN_N = 3; // KBO /accuracy 팀별 테이블과 동일 (샘플 부족 임계, wave-626 정합)
 
 function MlbCalibrationChart({ buckets, locale }: { buckets: Bucket[]; locale: 'ko' | 'en' }) {
   const s = STRINGS[locale];
@@ -385,10 +384,10 @@ export function MlbAccuracyDashboard({
                     <td className="py-2 pr-4 text-right font-mono">{t.correctN}</td>
                     <td
                       className={`py-2 text-right font-mono font-semibold ${
-                        t.accuracyRate !== null && t.accuracyRate >= ACCURACY_BASELINE ? 'text-brand-500' : t.verifiedN >= TEAM_TABLE_MIN_N ? 'text-red-400' : ''
+                        t.accuracyRate !== null && t.accuracyRate >= ACCURACY_BASELINE ? 'text-brand-500' : t.verifiedN >= MIN_TEAM_PREDICTIONS ? 'text-red-400' : ''
                       }`}
                     >
-                      {t.verifiedN < TEAM_TABLE_MIN_N ? s.smallSample : t.accuracyRate !== null ? `${(t.accuracyRate * 100).toFixed(1)}%` : '—'}
+                      {t.verifiedN < MIN_TEAM_PREDICTIONS ? s.smallSample : t.accuracyRate !== null ? `${(t.accuracyRate * 100).toFixed(1)}%` : '—'}
                     </td>
                   </tr>
                 ))}

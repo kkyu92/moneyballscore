@@ -1,3 +1,12 @@
+## v0.5.62.129 — 2026-08-25 (cycle 2565, review-code (heavy): `MlbAccuracyDashboard.tsx` 팀 테이블 게이트 로컬 shadow 상수 제거)
+
+### refactor(accuracy): `MlbAccuracyDashboard.tsx` 팀별 성과 테이블 게이트가 로컬 `TEAM_TABLE_MIN_N=3` 대신 import 된 `MIN_TEAM_PREDICTIONS` 재사용 — MIN_TEAM_PREDICTIONS family 재발
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2557-2564 distinct=3: review-code 6+operational-analysis 1+polish-ui 1). fix-incident negative(`gh run list` 최근 10건 전부 success/skipped). op-analysis(gap 4/25)/design-system(DESIGN.md 당일 갱신)/info-arch(gap 18/30)/lotto 모두 gap 미도달. explore-idea saturation 11/15 미도달. cycle 2562 retro 추천대로 `apps/moneyball/src/components` 대형 파일 순회 계속 — `PredictionCard.tsx`(마지막 터치 cycle 1870, 695 사이클 미터치)/`PredictionCardLive.tsx`/`MlbAccuracyDashboard.tsx` 순차 조사. 앞 둘은 SMALL_SAMPLE_N family 미해당(단일 경기 신뢰도 표시, 통계 rate 아님) 확인 후 제외 — false positive 회피.
+- 발견: `MlbAccuracyDashboard.tsx` 가 `@moneyball/shared` 의 `MIN_TEAM_PREDICTIONS`(=3) 를 import 하면서도 팀별 성과 테이블 게이트(구 라인 388/391)엔 별도 로컬 `const TEAM_TABLE_MIN_N = 3` 를 선언해 사용 — cycle 2528 fix 가 동일 파일의 `cohortWeekHeatmap` 섹션은 `MIN_TEAM_PREDICTIONS` 로 swap 했지만 팀 테이블 섹션은 놓침(같은 파일 안 2개 게이트 중 1개만 정정된 partial fix). 현재 값이 우연히 3=3 이라 동작은 동일하지만 공유 상수가 바뀌면 이 섹션만 silent 하게 divergence — MIN_TEAM_PREDICTIONS/SMALL_SAMPLE_N family 재발 패턴.
+- 실행: 로컬 `TEAM_TABLE_MIN_N` 상수 선언 제거, 사용처 2곳을 `MIN_TEAM_PREDICTIONS` 로 직접 교체(KBO `/accuracy/page.tsx` 팀 테이블과 동일 패턴 정합). 회귀 테스트 `silent-drift-cycle-2565.test.ts` 신규(3 assertion, `app/accuracy/__tests__/` — cycle 2528 테스트와 동일 위치 컨벤션).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(536 files/4384 tests, +3) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.128 — 2026-08-25 (cycle 2563, polish-ui: 적중 표시 green→brand 토큰 정렬)
 
 ### style(design): `mlb/analysis`(KBO+en 미러) + `DailyPredictionSummaryBar` 적중 표시 green→brand-500 정렬 — "적중=brand-500" family 재발
