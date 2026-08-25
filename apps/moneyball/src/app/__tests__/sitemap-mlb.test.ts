@@ -41,9 +41,10 @@ vi.mock('@/lib/insights/loader', () => ({
   listInsightsDates: async () => [],
 }));
 
-vi.mock('@/lib/insights/series', () => ({
-  listSeriesTopics: () => [],
-}));
+vi.mock('@/lib/insights/series', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/insights/series')>('@/lib/insights/series');
+  return { listSeriesTopics: actual.listSeriesTopics };
+});
 
 vi.mock('@/lib/lotto/archive', () => ({
   listArchiveDates: () => [],
@@ -148,6 +149,19 @@ describe('sitemap MLB URL coverage', () => {
     expect(lottoCheck).toBeDefined();
     expect(lottoCheck?.priority).toBeGreaterThan(0);
   });
+
+  it('includes /mlb/reviews/monthly/[month] dynamic routes (plan #26 Phase 2 — monthlyReviewRoutes(KBO) parity, cycle 2580 review-code carry-over: regression coverage 공백)', async () => {
+    const urls = await sitemap();
+    const mlbMonthlyUrls = urls.filter((u) => /\/mlb\/reviews\/monthly\/\d{4}-\d{2}$/.test(u.url) && !u.url.includes('/en/mlb/'));
+    expect(mlbMonthlyUrls.length).toBeGreaterThan(0);
+    expect(urls.find((u) => u.url.endsWith('/mlb/reviews/monthly'))).toBeUndefined();
+  });
+
+  it('includes /insights/series/[topic] 45 canonical team-pair slugs (W-SEO, cycle 2580 review-code carry-over: regression coverage 공백)', async () => {
+    const urls = await sitemap();
+    const seriesUrls = urls.filter((u) => /\/insights\/series\/[a-z]{2,3}-vs-[a-z]{2,3}$/.test(u.url));
+    expect(seriesUrls.length).toBe(45);
+  });
 });
 
 describe('sitemap /en/mlb/* English mirror URL coverage', () => {
@@ -211,5 +225,19 @@ describe('sitemap /en/mlb/* English mirror URL coverage', () => {
     const urls = await sitemap();
     const enMethodology = urls.find((u) => u.url.endsWith('/en/mlb/methodology'));
     expect(enMethodology).toBeDefined();
+  });
+
+  it('/en/mlb/reviews/weekly/[week] mirror routes present (wave-660 cycle 2355 — cycle 2580 review-code carry-over: regression coverage 공백)', async () => {
+    const urls = await sitemap();
+    const enWeeklyUrls = urls.filter((u) => /\/en\/mlb\/reviews\/weekly\/\d{4}-W\d{2}$/.test(u.url));
+    expect(enWeeklyUrls.length).toBeGreaterThan(0);
+    expect(urls.find((u) => u.url.endsWith('/en/mlb/reviews/weekly'))).toBeUndefined();
+  });
+
+  it('/en/mlb/reviews/monthly/[month] mirror routes present (cycle 2356 — cycle 2580 review-code carry-over: regression coverage 공백)', async () => {
+    const urls = await sitemap();
+    const enMonthlyUrls = urls.filter((u) => /\/en\/mlb\/reviews\/monthly\/\d{4}-\d{2}$/.test(u.url));
+    expect(enMonthlyUrls.length).toBeGreaterThan(0);
+    expect(urls.find((u) => u.url.endsWith('/en/mlb/reviews/monthly'))).toBeUndefined();
   });
 });
