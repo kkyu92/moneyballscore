@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 통계 뱃지 border-radius 정정 (cycle 2602, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전20(2583-2602) review-code 12회 지배적이나 나머지 chain 전부 1회+ 발화 — skill-evolution trigger5 미충족. fix-incident negative(gh run list 전부 success/skipped). op-analysis/info-arch/lotto/design-system 전부 gap 미도달. cycle 2600 retro 1순위 추천(review-code heavy) 채택. 참고: cycle 2601(skill-evolution forced) 은 retro commit 은 존재하나 `cycles/2601.json` + `TODOS.md` 엔트리 둘 다 부재 확인 — 기존 "cycle-retro dispatch 자기 검증"(commit 유무만 확인) 보다 넓은 silent skip. 재발 시 mitigation 확장 검토 필요, 본 cycle 은 소급 박제 X(정책).
+
+발견: DESIGN.md border-radius 스펙(sm=4px 뱃지/태그, md=8px 버튼/인풋) 대비 `rounded-md`(6px) 46건 + `rounded-sm`(2px 클래스명) 12건 grep. `analysis/page.tsx` 팩터 수렴 배지(isComplete/isBig, 2026-07-18 박제)는 이미 plain `rounded`(4px) 사용 중인 기존 컨벤션인데, MLB `factors`/`players`/`players/[id]`/`standings`(KBO+EN 미러) 통계 뱃지 + `glossary`/`TableOfContents` 앵커 태그 + `MatchupFactorCompare`/`MlbMatchupFactorCompare` 비교 셀 강조 18곳(10파일)이 `rounded-md`(버튼 tier)를 사용 — 같은 "뱃지" 역할인데 KBO 원본과 MLB 미러 사이 1-notch 이탈.
+
+실행: 18곳 `rounded-md` → `rounded` 치환. DESIGN.md Decisions Log 갱신. `silent-drift-cycle-2602.test.ts` 신규(2 tests). 버튼/인풋/드롭다운/알림박스/캘린더 셀 역할의 잔여 `rounded-md` 33건은 다른 tier(md/버튼) 후보라 스코프 제외 — 명시 이연.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(554 files/4431 tests, +1/+2) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = review-code(heavy) 잔여 rounded-md 33건 후속, 또는 op-analysis(gap 16/25)/info-arch(gap 15/30) 자연 발화 대기.
+
+---
+
 ## ✅ SUCCESS — design-system(최초 발화) micro typography scale 토큰화 (cycle 2599, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2591-2598) distinct=4(review-code 5+polish-ui 1+lotto 1+dimension-cycle 1) — 2-chain lock 없음. fix-incident gap 59+/20 이나 gh run list 전부 success/skipped negative. op-analysis gap 12/25, info-arch gap 11/30 미도달. lotto gap 0(직전 발화). explore-idea saturation 12/15 충족되나 TODOS Next-Up 신규 리드 없음 negative. cycle 2594·2597 review-code(heavy) 가 두 번 연속 typography 임의값(text-[9/10/11px] 193건)을 design-system 후보로 승격 명시 추천 — carry-over evidence 채택. design-system chain 은 cycle 2400~2598 구간 0회 발화(최초 실행).
