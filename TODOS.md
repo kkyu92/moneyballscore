@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 알림박스 border-radius 정정 (cycle 2603, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2596-2603 예정) distinct=5 — 2-chain lock 없음. fix-incident negative(gh run list 전부 success/skipped). op-analysis gap 17/25, info-arch gap 16/30, lotto gap 5/30, design-system(DESIGN.md 방금 갱신) 전부 미도달. explore-idea saturation 11/15 미충족. cycle 2602 retro 1순위 추천("잔여 rounded-md 33건 후속") 채택 — 실제로 남은 33건 중 버튼/인풋/캘린더 셀은 재확인 결과 진짜 md tier(링크형 버튼, 카드형 셀)로 드리프트 아님 확인. 대신 별도 grep(bg-amber/yellow/red-50 + rounded-*)로 "알림박스" 카테고리 전수 비교 → 3건 발견.
+
+발견: amber/yellow 배경 알림박스 ~29곳 중 대다수(rounded-lg 11곳/rounded-xl 15곳)와 달리 3곳만 `rounded-md`(6px, 버튼 tier) 잔존. `accuracy/shadow/page.tsx`+`v2-preview/page.tsx`: role="status" 옐로 박스, `debug/silent-drift/page.tsx`(rounded-xl)와 색상 토큰 완전 동일한데 radius 만 상이. `mlb/factors/page.tsx` MLB placeholder 경고: `TeamBiasTable.tsx`(rounded-lg)와 className 거의 동일(같은 텍스트/배경/패딩)한 인라인 경고 스트립인데 radius 만 상이 — 복붙 후 tier 어긋난 전형적 패턴.
+
+실행: 3곳 각각 쌍둥이 컴포넌트에 맞춰 정렬(role=status 박스 2곳 → `rounded-xl`, 인라인 경고 스트립 1곳 → `rounded-lg`). EN mirror(`en/mlb/factors/page.tsx`) 확인 결과 해당 placeholder 경고 자체가 없어 미러 대상 아님. DESIGN.md Decisions Log 갱신. `silent-drift-cycle-2603.test.ts` 신규(3 tests).
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(555 files/4434 tests, +1/+3) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = op-analysis(gap 18/25)/info-arch(gap 17/30) 자연 발화 대기, 또는 review-code(heavy) 다른 토큰 카테고리(예: shadow scale 미정의 상태 DESIGN.md 보강 여부) 검토.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 통계 뱃지 border-radius 정정 (cycle 2602, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전20(2583-2602) review-code 12회 지배적이나 나머지 chain 전부 1회+ 발화 — skill-evolution trigger5 미충족. fix-incident negative(gh run list 전부 success/skipped). op-analysis/info-arch/lotto/design-system 전부 gap 미도달. cycle 2600 retro 1순위 추천(review-code heavy) 채택. 참고: cycle 2601(skill-evolution forced) 은 retro commit 은 존재하나 `cycles/2601.json` + `TODOS.md` 엔트리 둘 다 부재 확인 — 기존 "cycle-retro dispatch 자기 검증"(commit 유무만 확인) 보다 넓은 silent skip. 재발 시 mitigation 확장 검토 필요, 본 cycle 은 소급 박제 X(정책).
