@@ -119,7 +119,7 @@ export function ScoringRuleDayHeatmap({ data }: ScoringRuleDayHeatmapProps) {
                     title={`${ROW_LABEL[sr] ?? sr} × ${DAY_LABELS_KO[DAY_ORDER.indexOf(day)]}: ${cell.hits}/${cell.n}`}
                   >
                     <div className="text-sm font-semibold">{label}</div>
-                    <div className="text-[10px] opacity-80">{sub}</div>
+                    <div className="text-2xs opacity-80">{sub}</div>
                   </td>
                 );
               })}

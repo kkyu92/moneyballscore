@@ -97,7 +97,7 @@ export function TeamBiasTable({
                   <td className="py-2 pr-3 font-medium">
                     {shortName(r.teamCode)}
                     {label && (
-                      <span className={`ml-1.5 text-[10px] rounded px-1 py-0.5 ${label.cls}`}>
+                      <span className={`ml-1.5 text-2xs rounded px-1 py-0.5 ${label.cls}`}>
                         {label.text}
                       </span>
                     )}

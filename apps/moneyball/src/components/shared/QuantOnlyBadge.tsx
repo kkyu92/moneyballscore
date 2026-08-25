@@ -4,7 +4,7 @@ interface QuantOnlyBadgeProps {
 
 export function QuantOnlyBadge({ variant = 'light' }: QuantOnlyBadgeProps) {
   const base =
-    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border';
+    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-medium border';
   const palette =
     variant === 'dark'
       ? 'bg-amber-500/15 text-amber-200 border-amber-300/40'

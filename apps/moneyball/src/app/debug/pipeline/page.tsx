@@ -450,7 +450,7 @@ export default async function PipelineDashboard() {
                               const summary = summarizeReasons(entries);
                               return summary ? (
                                 <div
-                                  className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5"
+                                  className="text-2xs text-gray-400 dark:text-gray-500 mt-0.5"
                                   title={entries
                                     .map((e) => `${e.game} — ${e.reason}`)
                                     .join('\n')}

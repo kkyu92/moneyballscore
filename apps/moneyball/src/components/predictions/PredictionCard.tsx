@@ -92,7 +92,7 @@ export function PredictionCard({
   return (
     <div className={cardClass}>
       {isBigMatch && (
-        <div className="absolute -top-2.5 left-4 bg-[var(--color-accent)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+        <div className="absolute -top-2.5 left-4 bg-[var(--color-accent)] text-white text-2xs font-bold px-2 py-0.5 rounded-full shadow-sm">
           ⭐ 오늘의 고확신 예측
         </div>
       )}
@@ -102,7 +102,7 @@ export function PredictionCard({
           <span className="text-xs text-gray-500 dark:text-gray-400">{gameTime ?? KBO_DEFAULT_GAME_TIME}</span>
           {isLive && (
             <span
-              className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400 px-1.5 py-0.5 rounded-full"
+              className="inline-flex items-center gap-1 text-2xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400 px-1.5 py-0.5 rounded-full"
               aria-label="진행 중"
             >
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
@@ -110,13 +110,13 @@ export function PredictionCard({
             </span>
           )}
           {isFinal && (
-            <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[var(--color-surface-card)] px-1.5 py-0.5 rounded-full">
+            <span className="text-2xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[var(--color-surface-card)] px-1.5 py-0.5 rounded-full">
               종료
             </span>
           )}
           {isPostponed && (
             <span
-              className="inline-flex items-center gap-1 text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/60 px-1.5 py-0.5 rounded-full"
+              className="inline-flex items-center gap-1 text-2xs font-bold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/60 px-1.5 py-0.5 rounded-full"
               aria-label="경기 취소"
             >
               <span aria-hidden="true">🚫</span>
@@ -173,7 +173,7 @@ export function PredictionCard({
           >
             {shortTeamName(awayTeam)}
             {awayWon && (
-              <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+              <span className="text-3xs font-bold px-1 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                 승
               </span>
             )}
@@ -203,7 +203,7 @@ export function PredictionCard({
             </span>
           </div>
           {/* wave-491: 신뢰도 티어 라벨 — 사용자 즉시 인식 (강한 예측/보통/박빙) */}
-          <p className={`text-[10px] font-medium mt-0.5 ${getConfidenceColor(confidencePct)}`}>
+          <p className={`text-2xs font-medium mt-0.5 ${getConfidenceColor(confidencePct)}`}>
             {getConfidenceTierLabel(confidencePct)}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -228,12 +228,12 @@ export function PredictionCard({
             <span
               aria-label="홈팀"
               title="홈팀"
-              className="text-[9px] font-bold px-1 py-0.5 rounded text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/40"
+              className="text-3xs font-bold px-1 py-0.5 rounded text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/40"
             >
               홈
             </span>
             {homeWon && (
-              <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+              <span className="text-3xs font-bold px-1 py-0.5 rounded bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
                 승
               </span>
             )}
@@ -274,7 +274,7 @@ export function PredictionCard({
                 style={{ width: `${homeWinPct}%` }}
               />
             </div>
-            <div className="flex justify-between mt-0.5 text-[10px] text-gray-400 dark:text-gray-500 leading-none">
+            <div className="flex justify-between mt-0.5 text-2xs text-gray-400 dark:text-gray-500 leading-none">
               <span>원정 {awayWinPct}%</span>
               <span>홈 {homeWinPct}%</span>
             </div>
@@ -358,7 +358,7 @@ export function PredictionCard({
                 {" "}
                 {top.join(" · ")} 우위
                 {showRatio && (
-                  <>{" "}<span className="font-mono text-[10px] text-gray-400 dark:text-gray-500" title={`예측팀 우세 팩터 ${predictedN}개 · 상대팀 우세 팩터 ${otherM}개`}>팩터 {predictedN}:{otherM}</span></>
+                  <>{" "}<span className="font-mono text-2xs text-gray-400 dark:text-gray-500" title={`예측팀 우세 팩터 ${predictedN}개 · 상대팀 우세 팩터 ${otherM}개`}>팩터 {predictedN}:{otherM}</span></>
                 )}
               </p>
             )}

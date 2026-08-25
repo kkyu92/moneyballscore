@@ -399,7 +399,7 @@ export default async function PredictionDatePage({ params }: Props) {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{date} 승부예측</h1>
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-[10px]">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-2xs">
             AI
           </span>
           <span>MoneyBall AI</span>

@@ -104,11 +104,11 @@ export default async function MlbHubEn() {
               return (
                 <div key={tier.label} className="rounded-lg border border-brand-200 dark:border-brand-800 p-3 text-center">
                   <p className="text-[11px] text-brand-500">{tier.label}</p>
-                  <p className="text-[10px] text-brand-400">{tier.range}</p>
+                  <p className="text-2xs text-brand-400">{tier.range}</p>
                   <p className="text-lg font-bold text-brand-700 dark:text-brand-100 mt-1">
                     {pct !== null ? `${pct}%` : "—"}
                   </p>
-                  <p className="text-[10px] text-brand-400">{tier.n > 0 ? `${tier.hits}/${tier.n}` : "No data"}</p>
+                  <p className="text-2xs text-brand-400">{tier.n > 0 ? `${tier.hits}/${tier.n}` : "No data"}</p>
                 </div>
               );
             })}

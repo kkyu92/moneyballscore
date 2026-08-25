@@ -279,7 +279,7 @@ export function MlbMatchupFactorCompare({
                   )}
                   <div className="absolute inset-y-0 left-1/2 w-px bg-gray-300 dark:bg-gray-500 -translate-x-px" />
                 </div>
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-none">
+                <span className="text-2xs text-gray-400 dark:text-gray-500 leading-none">
                   {f.direction === "lower" ? s.lowerBetter : s.higherBetter}
                 </span>
               </div>
@@ -323,7 +323,7 @@ export function MlbMatchupFactorCompare({
                 {ratio}
               </span>
               {favoredLabels.length > 0 && !isTied && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                <span className="text-2xs text-gray-400 dark:text-gray-500">
                   ({favoredLabels.join("·")})
                 </span>
               )}

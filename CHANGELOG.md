@@ -1,3 +1,12 @@
+## v0.5.62.143 — 2026-08-25 (cycle 2599, design-system: text-[9px]/text-[10px] arbitrary value 193건 → --text-3xs/--text-2xs 정식 토큰화)
+
+### style(design): micro typography scale 토큰화 — DESIGN.md 미문서화 arbitrary text size 전면 치환
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2591-2598) distinct=4(review-code 5+polish-ui 1+lotto 1+dimension-cycle 1) — 2-chain lock 없음. review-code streak(non-success)=1, lite cap 미충족. fix-incident gap 59+/20 이나 `gh run list --limit 15` 전부 success/skipped — negative. op-analysis gap 12/25, info-arch gap 11/30, lotto gap 0(cycle 2598 직발화, 8/29 픽스+8/22 결과 이미 박제) — 전부 미도달/최근 처리. explore-idea saturation 12/15 충족되나 TODOS Next-Up 신규 리드 없음 — negative. design-system 은 cycle 2400~2598 구간 0회 발화이나 cycle 2594·2597 review-code(heavy) 가 두 번 연속 "typography 임의값 165(→193)건, 단일 사이클 범위 초과, design-system 후보로 승격 검토" 로 명시 추천 — carry-over evidence 채택.
+- 발견: DESIGN.md Typography Scale 이 xs(12px) 부터 시작하나, 실제 코드에는 `text-[9px]`(26건)/`text-[10px]`(119건)/`text-[11px]`(46건) 총 193건의 arbitrary micro-caption 값이 존재 — Tailwind v4 `@theme` 블록엔 font-size 토큰 자체가 전무(색상/motion 토큰만 정의), 3개 값 모두 미문서화 상태로 30+ 파일에 산발 사용. 9px/10px 는 값이 명확하고 사용빈도 높아(145/193) 즉시 토큰화 안전. 11px(46건)은 3xs(9)/2xs(10)/xs(12) 사이 낀 값이라 신규 토큰 승격 vs 기존 값 흡수가 시각 검토 필요한 결정 — 본 cycle 범위 밖으로 명시 이연.
+- 실행: `globals.css` `@theme inline` 에 `--text-3xs: 0.5625rem`(9px)/`--text-2xs: 0.625rem`(10px) + 대응 line-height 신규 정의. DESIGN.md Scale 에 3xs/2xs 추가 + 11px 미해결 상태 명시. 전체 코드베이스 `text-[9px]`→`text-3xs`, `text-[10px]`→`text-2xs` 픽셀 값 보존 치환(52 파일, 순수 클래스명 교체 — 렌더링 변화 0). `design-system-cycle-2599-micro-typography.test.ts` 신규(토큰 정의 확인 + arbitrary value 잔존 0건 회귀 가드).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(552 files/4428 tests, +1/+2) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.142 — 2026-08-25 (cycle 2595, polish-ui — 2-chain lock fallback: contact 문의 유형 메일 쓰기 버튼 rounded-md → rounded-lg 정렬)
 
 ### fix(design): contact 페이지 메일 쓰기 CTA border-radius 정렬 — primary 버튼 컨벤션 통일

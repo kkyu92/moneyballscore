@@ -611,7 +611,7 @@ export default async function GameAnalysisPage({ params }: PageProps) {
               )}
               <span className="font-mono text-xs">팩터 {ratio}</span>
               {factorInline && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorInline})</span>
+                <span className="text-2xs text-gray-400 dark:text-gray-500">({factorInline})</span>
               )}
             </div>
           </div>

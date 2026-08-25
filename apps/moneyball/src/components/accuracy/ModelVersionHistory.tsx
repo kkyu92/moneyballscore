@@ -54,7 +54,7 @@ export function ModelVersionHistory({ versions }: Props) {
                   <td className="py-2.5 pr-3">
                     <span className="font-mono font-semibold">{v.label}</span>
                     {isActive && (
-                      <span className="ml-1.5 text-[10px] bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded px-1 py-0.5">
+                      <span className="ml-1.5 text-2xs bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded px-1 py-0.5">
                         진행 중
                       </span>
                     )}
@@ -87,7 +87,7 @@ export function ModelVersionHistory({ versions }: Props) {
                           {pct !== null ? `${pct}%` : '—'}
                         </span>
                         {ciPct !== null && (
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}%</span>
+                          <span className="text-2xs text-gray-400 dark:text-gray-500">±{ciPct}%</span>
                         )}
                       </div>
                     )}

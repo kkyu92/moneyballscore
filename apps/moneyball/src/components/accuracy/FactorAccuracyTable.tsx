@@ -144,7 +144,7 @@ export function FactorAccuracyTable({
                   <td className="py-2.5 pr-3 text-xs text-gray-400 dark:text-gray-600 tabular-nums">{i + 1}</td>
                   <td className="py-2.5 pr-3">
                     <span className="font-medium">{r.label}</span>
-                    <span className="ml-1.5 text-[10px] text-gray-400 dark:text-gray-600 font-mono">
+                    <span className="ml-1.5 text-2xs text-gray-400 dark:text-gray-600 font-mono">
                       {r.key}
                     </span>
                   </td>
@@ -161,7 +161,7 @@ export function FactorAccuracyTable({
         </table>
       </div>
 
-      <p className="text-[10px] text-gray-400 dark:text-gray-600">
+      <p className="text-2xs text-gray-400 dark:text-gray-600">
         {copy.footer(baselinePct, overallN)}
         {rows.some((r) => r.n < SMALL_SAMPLE_N) && ` ${copy.smallSampleNote(SMALL_SAMPLE_N)}`}
       </p>

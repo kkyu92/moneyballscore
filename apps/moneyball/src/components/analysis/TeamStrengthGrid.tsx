@@ -28,7 +28,7 @@ function EloTag({ elo }: { elo: number }) {
   return (
     <span className={`font-mono text-xs tabular-nums ${colorClass}`}>
       Elo {Math.round(elo)}
-      <span className="ml-0.5 text-[10px]">
+      <span className="ml-0.5 text-2xs">
         ({sign}
         {Math.round(delta)})
       </span>
@@ -41,7 +41,7 @@ function EloDeltaTag({ eloChange }: { eloChange?: number }) {
   const rounded = Math.round(eloChange);
   if (rounded === 0) {
     return (
-      <span className="font-mono text-[10px] tabular-nums text-gray-400 dark:text-gray-500 ml-1">
+      <span className="font-mono text-2xs tabular-nums text-gray-400 dark:text-gray-500 ml-1">
         {/* TEAM_STRENGTH_ELO_DELTA_WINDOW 경기 기준 변화 없음 */}—
       </span>
     );
@@ -49,7 +49,7 @@ function EloDeltaTag({ eloChange }: { eloChange?: number }) {
   const isUp = rounded > 0;
   return (
     <span
-      className={`font-mono text-[10px] tabular-nums ml-1 ${
+      className={`font-mono text-2xs tabular-nums ml-1 ${
         isUp ? 'text-brand-500 dark:text-brand-400' : 'text-red-600 dark:text-red-400'
       }`}
       title={`최근 ${TEAM_STRENGTH_ELO_DELTA_WINDOW}경기 Elo 변화`}
@@ -78,7 +78,7 @@ function FormBar({ form }: { form: number }) {
   return (
     <div className="mt-1.5">
       <div className="flex items-center justify-between mb-0.5">
-        <span className="text-[10px] text-gray-400 dark:text-gray-500">
+        <span className="text-2xs text-gray-400 dark:text-gray-500">
           최근 {RECENT_FORM_GAMES}경기
         </span>
         <span className={`text-xs font-semibold tabular-nums ${textColor}`}>

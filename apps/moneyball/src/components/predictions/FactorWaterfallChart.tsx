@@ -210,7 +210,7 @@ export function FactorWaterfallChart({ factors, homeTeam, awayTeam }: Props) {
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-[10px] text-brand-400 dark:text-brand-500 mt-3 text-center">
+      <p className="text-2xs text-brand-400 dark:text-brand-500 mt-3 text-center">
         {awayName} @ {homeName} · 가중치 합 {(FACTOR_TOTAL * 100).toFixed(0)}% (정규화 적용) / 홈 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}pp 별도 / 최종 [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
       </p>
     </section>

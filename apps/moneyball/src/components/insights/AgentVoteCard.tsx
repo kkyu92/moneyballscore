@@ -144,7 +144,7 @@ export function AgentVoteCard({
               aria-hidden
             />
           </div>
-          <div className="flex justify-between text-[10px] font-medium opacity-75">
+          <div className="flex justify-between text-2xs font-medium opacity-75">
             <span>
               {awayName} {awayPct}%
             </span>

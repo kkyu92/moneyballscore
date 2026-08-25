@@ -131,10 +131,10 @@ function DailyTrend({
                   title={`hard ${d.hard}건`}
                 />
               </div>
-              <div className="text-[10px] font-mono text-gray-500 dark:text-gray-400">
+              <div className="text-2xs font-mono text-gray-500 dark:text-gray-400">
                 {d.date.slice(5)}
               </div>
-              <div className="text-[10px] text-gray-700 dark:text-gray-300">{d.total}</div>
+              <div className="text-2xs text-gray-700 dark:text-gray-300">{d.total}</div>
             </div>
           );
         })}

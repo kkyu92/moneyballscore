@@ -44,7 +44,7 @@ function RecentRecordBar({ record, locale }: { record: MlbTeamStrengthRow['recen
   return (
     <div className="mt-1.5">
       <div className="flex items-center justify-between mb-0.5">
-        <span className="text-[10px] text-gray-400 dark:text-gray-500">
+        <span className="text-2xs text-gray-400 dark:text-gray-500">
           {locale === 'en'
             ? `Last ${record.sampleSize}: ${record.wins}-${record.losses}`
             : `최근 ${record.sampleSize}경기 ${record.wins}승 ${record.losses}패`}

@@ -32,7 +32,7 @@ export function JudgeReasoningCard({
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-[10px]">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-2xs">
           AI
         </span>
         <span className="font-medium text-gray-700 dark:text-gray-200">심판 에이전트 분석</span>

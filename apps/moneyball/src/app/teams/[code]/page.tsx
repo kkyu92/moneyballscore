@@ -188,7 +188,7 @@ export default async function TeamPage({ params }: PageProps) {
             <p className="text-2xl font-bold mt-1 font-mono">
               {fmtPct(profile.predictedWinRate)}
             </p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
               {profile.predictedWins}/{profile.predictedGames}
             </p>
           </div>
@@ -212,7 +212,7 @@ export default async function TeamPage({ params }: PageProps) {
             >
               {fmtPct(profile.accuracyRate)}
             </p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
               검증 {profile.verifiedN}경기
               {profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N && (
                 <span className="ml-1 text-gray-400 dark:text-gray-500">

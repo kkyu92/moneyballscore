@@ -80,7 +80,7 @@ export function LeagueSelector({
             <span>{isEn && league.enLabel ? league.enLabel : league.label}</span>
             {league.badge && (
               <span
-                className={`rounded-sm px-1 py-px text-[9px] font-bold uppercase tracking-wide ${
+                className={`rounded-sm px-1 py-px text-3xs font-bold uppercase tracking-wide ${
                   isActive
                     ? "bg-brand-800/50 text-accent-light"
                     : "bg-brand-800/40 text-brand-300"

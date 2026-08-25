@@ -86,7 +86,7 @@ export function PlaceholderCard({
             <span
               aria-label="홈팀"
               title="홈팀"
-              className="text-[9px] font-bold px-1 py-0.5 rounded text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/40"
+              className="text-3xs font-bold px-1 py-0.5 rounded text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/40"
             >
               홈
             </span>

@@ -125,7 +125,7 @@ export function MlbFactorWaterfallChart({ input, homeTeam, awayTeam, locale = "k
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-[10px] text-brand-400 dark:text-brand-500 mt-3 text-center">
+      <p className="text-2xs text-brand-400 dark:text-brand-500 mt-3 text-center">
         {awayName} @ {homeName} · {locale === "en" ? "final" : "최종"} [{Math.round(WINNER_PROB_CLAMP_MIN * 100)}%, {Math.round(WINNER_PROB_CLAMP_MAX * 100)}%] clamp
       </p>
     </section>

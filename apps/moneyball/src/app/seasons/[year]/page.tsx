@@ -425,7 +425,7 @@ function ExtremeCard({
                 <span className="font-mono text-gray-400 dark:text-gray-500">{g.homeScore}</span>{" "}
                 {shortTeamName(g.homeCode as never) ?? g.homeCode}
               </div>
-              {g.stadium && <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">{g.stadium}</p>}
+              {g.stadium && <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">{g.stadium}</p>}
             </li>
           ))}
         </ul>

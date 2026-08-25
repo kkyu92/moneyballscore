@@ -430,7 +430,7 @@ export default function LottoMethodologyPage() {
               );
             })}
           </svg>
-          <div className="mt-2 grid grid-cols-3 sm:grid-cols-7 gap-1 text-[10px] text-brand-500">
+          <div className="mt-2 grid grid-cols-3 sm:grid-cols-7 gap-1 text-2xs text-brand-500">
             {dist.markers.map((m) => (
               <div key={`${m.key}-label`} className="text-center">
                 {m.label}

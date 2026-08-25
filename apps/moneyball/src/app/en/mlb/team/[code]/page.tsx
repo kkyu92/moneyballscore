@@ -218,7 +218,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <p className="text-xs text-gray-500 dark:text-gray-400">Predicted Win Rate</p>
             <p className="text-2xl font-bold mt-1 font-mono">{fmtPct(profile.predictedWinRate)}</p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
               {profile.predictedWins}/{profile.predictedGames}
             </p>
           </div>
@@ -242,7 +242,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
             >
               {fmtPct(profile.accuracyRate)}
             </p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
               {profile.verifiedN} verified games
               {profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N && (
                 <span className="ml-1 text-gray-400 dark:text-gray-500">· small sample</span>

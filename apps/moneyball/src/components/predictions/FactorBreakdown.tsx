@@ -197,7 +197,7 @@ export function FactorBreakdown({
       <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">
         예측 근거 (팩터별 분석)
         {chart && (
-          <span className="ml-2 text-[10px] text-gray-400 dark:text-gray-500 font-normal">
+          <span className="ml-2 text-2xs text-gray-400 dark:text-gray-500 font-normal">
             · 기여도 chart 모드
           </span>
         )}
@@ -269,14 +269,14 @@ export function FactorBreakdown({
                   >
                     {labelFor(key)}
                     {isShadow && (
-                      <span className="ml-1 text-[9px] text-[var(--color-factor-neutral)] align-top">
+                      <span className="ml-1 text-3xs text-[var(--color-factor-neutral)] align-top">
                         shadow
                       </span>
                     )}
                   </span>
                 )}
                 {statLabel && (
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
+                  <p className="text-2xs text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
                     {statLabel}
                   </p>
                 )}

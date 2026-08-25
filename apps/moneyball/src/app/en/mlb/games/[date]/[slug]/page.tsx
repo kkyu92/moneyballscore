@@ -445,7 +445,7 @@ export default async function GameDetailEn({ params }: PageParams) {
               )}
               <span className="font-mono text-xs">Factors {ratio}</span>
               {factorInline && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorInline})</span>
+                <span className="text-2xs text-gray-400 dark:text-gray-500">({factorInline})</span>
               )}
             </div>
           </div>

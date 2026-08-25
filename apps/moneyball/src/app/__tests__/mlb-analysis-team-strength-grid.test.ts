@@ -49,7 +49,7 @@ describe('MLB /analysis 팀 전력 현황 (TeamStrengthGrid 대체 설계)', () 
     expect(componentFile).toContain('MlbTeamLogo');
   });
 
-  it('DESIGN.md 토큰 준수 — hex 색상 하드코딩 0건 (KBO TeamStrengthGrid 원본도 text-[10px]/var(--color-*) 브래킷 관례 사용 — 폰트사이즈/CSS변수 브래킷은 기존 관례라 색상 하드코딩만 검사)', () => {
+  it('DESIGN.md 토큰 준수 — hex 색상 하드코딩 0건 (KBO TeamStrengthGrid 원본도 text-2xs/var(--color-*) 브래킷 관례 사용 — 폰트사이즈/CSS변수 브래킷은 기존 관례라 색상 하드코딩만 검사)', () => {
     expect(componentFile).not.toMatch(/#[0-9a-fA-F]{3,6}/);
   });
 

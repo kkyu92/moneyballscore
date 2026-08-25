@@ -185,7 +185,7 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
                   {/* 중앙 구분선 */}
                   <div className="absolute inset-y-0 left-1/2 w-px bg-gray-300 dark:bg-gray-500 -translate-x-px" />
                 </div>
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-none">
+                <span className="text-2xs text-gray-400 dark:text-gray-500 leading-none">
                   {f.direction === "lower" ? "낮을수록 우세" : "높을수록 우세"}
                 </span>
               </div>
@@ -229,7 +229,7 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
               )}
               <span className="font-mono text-xs">팩터 {ratio}</span>
               {factorLabels && !isTied && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500">({factorLabels})</span>
+                <span className="text-2xs text-gray-400 dark:text-gray-500">({factorLabels})</span>
               )}
             </div>
           </div>

@@ -154,7 +154,7 @@ export function DebateTimeline({
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-[10px]">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-2xs">
           AI
         </span>
         <span className="font-medium text-gray-700 dark:text-gray-200">
@@ -172,7 +172,7 @@ export function DebateTimeline({
           <li key={step.key} className="relative pl-8">
             <span
               aria-hidden
-              className={`absolute left-0 top-3 w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center text-[10px] font-bold ${
+              className={`absolute left-0 top-3 w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center text-2xs font-bold ${
                 step.highlight
                   ? "bg-brand-600 border-brand-600 text-white"
                   : "bg-white dark:bg-[var(--color-surface-card)] border-gray-300 dark:border-[var(--color-border)] text-gray-700 dark:text-gray-200"

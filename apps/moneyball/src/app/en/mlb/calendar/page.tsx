@@ -132,7 +132,7 @@ export default async function MlbCalendarPageEn() {
           {weekHeaders.map((day) => (
             <div
               key={day}
-              className="text-[10px] md:text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-1"
+              className="text-2xs md:text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-1"
             >
               {day}
             </div>
@@ -166,10 +166,10 @@ export default async function MlbCalendarPageEn() {
                 <span className="font-medium">{cell.dayOfMonth}</span>
                 {hasData && (
                   <>
-                    <span className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 leading-none">
+                    <span className="text-3xs md:text-2xs text-gray-500 dark:text-gray-400 leading-none">
                       {cell.totalPredictions}g
                     </span>
-                    <span className="text-[9px] md:text-[10px] font-mono leading-none">{badge}</span>
+                    <span className="text-3xs md:text-2xs font-mono leading-none">{badge}</span>
                   </>
                 )}
               </Link>

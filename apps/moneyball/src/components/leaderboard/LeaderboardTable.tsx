@@ -132,7 +132,7 @@ export function LeaderboardTable({ entries, myDeviceId, aiBaseline, streakRankMa
               <span className="text-right tabular-nums">
                 <span className="font-bold">{entry.accuracy_pct}%</span>
                 {delta !== null && (
-                  <span className={`block text-[10px] leading-none mt-0.5 ${deltaClass(delta)}`}>
+                  <span className={`block text-2xs leading-none mt-0.5 ${deltaClass(delta)}`}>
                     {formatDelta(delta)}
                   </span>
                 )}

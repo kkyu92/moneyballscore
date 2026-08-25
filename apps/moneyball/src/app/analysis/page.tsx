@@ -535,7 +535,7 @@ export default async function AnalysisIndexPage() {
                       <span className={ratioColorClass}>{ratio}</span>
                       {/* wave-432: 유효 팩터 수 — 데이터 보유 팩터 수 (최대 10), 타이/null 팩터 맥락 */}
                       {pick.compositeDuelValidCount != null && (
-                        <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500" title={`${pick.compositeDuelValidCount}개 팩터 데이터 기준`}>
+                        <span className="font-mono text-2xs text-gray-400 dark:text-gray-500" title={`${pick.compositeDuelValidCount}개 팩터 데이터 기준`}>
                           ({pick.compositeDuelValidCount}팩터)
                         </span>
                       )}
@@ -647,7 +647,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-446: 선발 FIP 격차(Δ) — SP_FIP_DUEL_MIN(0.5) 이상 시 수치 명시 */}
                         {Math.abs(pick.awaySPFip - pick.homeSPFip) >= SP_FIP_DUEL_MIN && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{Math.abs(pick.awaySPFip - pick.homeSPFip).toFixed(2)}
                           </span>
                         )}
@@ -667,7 +667,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-442: 불펜 FIP 격차(Δ) — BULLPEN_FIP_DIFF_MIN(1.0) 이상 시 수치 명시 */}
                         {Math.abs(pick.awayBullpenFip - pick.homeBullpenFip) >= BULLPEN_FIP_DIFF_MIN && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{Math.abs(pick.awayBullpenFip - pick.homeBullpenFip).toFixed(2)}
                           </span>
                         )}
@@ -687,7 +687,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-442: 타선 wOBA 격차(Δ) — LINEUP_WOBA_DUEL_MIN(0.020) 이상 시 수치 명시 */}
                         {Math.abs(pick.awayLineupWoba - pick.homeLineupWoba) >= LINEUP_WOBA_DUEL_MIN && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{Math.abs(pick.awayLineupWoba - pick.homeLineupWoba).toFixed(3)}
                           </span>
                         )}
@@ -707,7 +707,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-444: Elo 격차(Δ) — ELO_GAP_STRONG(50) 이상 시 수치 명시 */}
                         {Math.abs(pick.awayElo - pick.homeElo) >= ELO_GAP_STRONG && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{Math.round(Math.abs(pick.awayElo - pick.homeElo))}
                           </span>
                         )}
@@ -727,7 +727,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-448: 최근폼 격차(Δ) — RECENT_FORM_DUEL_MIN(0.10) 이상 시 수치 명시 */}
                         {Math.abs(pick.awayRecentForm - pick.homeRecentForm) >= RECENT_FORM_DUEL_MIN && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{(Math.abs(pick.awayRecentForm - pick.homeRecentForm) * 100).toFixed(0)}
                           </span>
                         )}
@@ -747,7 +747,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-444: WAR 격차(Δ) — WAR_DUEL_MIN(5.0) 이상 시 수치 명시 */}
                         {Math.abs(pick.awayWar - pick.homeWar) >= WAR_DUEL_MIN && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{Math.abs(pick.awayWar - pick.homeWar).toFixed(1)}
                           </span>
                         )}
@@ -755,7 +755,7 @@ export default async function AnalysisIndexPage() {
                     )}
                     {/* wave-535: WAR 미집계 배지 — homeWar=0 or awayWar=0 = Fancy Stats top-50 데이터 갭. 예측 WAR neutral(wave-533)과 UI 일치. */}
                     {pick.homeWar != null && pick.awayWar != null && (pick.homeWar === 0 || pick.awayWar === 0) && (
-                      <div className="mt-1 text-[10px] text-gray-400 dark:text-gray-500">
+                      <div className="mt-1 text-2xs text-gray-400 dark:text-gray-500">
                         WAR 미집계{pick.homeWar === 0 && pick.awayWar === 0
                           ? ''
                           : ` (${pick.homeWar === 0 ? shortTeamName(pick.homeCode) : shortTeamName(pick.awayCode)})`}
@@ -772,9 +772,9 @@ export default async function AnalysisIndexPage() {
                         {/* wave-440: 원정 SP FIP-xFIP 갭 방향 (wave-353 일반 카드와 동일 로직) */}
                         {pick.awaySPFip != null && (
                           pick.awaySPXfip - pick.awaySPFip > SP_XFIP_GAP_REGRESS
-                            ? <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                            ? <span className="text-3xs text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
                             : pick.awaySPFip - pick.awaySPXfip > SP_XFIP_GAP_BOUNCE
-                              ? <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                              ? <span className="text-3xs text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
                               : null
                         )}
                         {' · '}
@@ -784,9 +784,9 @@ export default async function AnalysisIndexPage() {
                         {/* wave-440: 홈 SP FIP-xFIP 갭 방향 (wave-353 일반 카드와 동일 로직) */}
                         {pick.homeSPFip != null && (
                           pick.homeSPXfip - pick.homeSPFip > SP_XFIP_GAP_REGRESS
-                            ? <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                            ? <span className="text-3xs text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
                             : pick.homeSPFip - pick.homeSPXfip > SP_XFIP_GAP_BOUNCE
-                              ? <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                              ? <span className="text-3xs text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
                               : null
                         )}
                       </div>
@@ -805,7 +805,7 @@ export default async function AnalysisIndexPage() {
                         </span>
                         {/* wave-446: 수비 SFR 격차(Δ) — SFR_DUEL_MIN(5.0) 이상 시 수치 명시 */}
                         {Math.abs(pick.awaySfr - pick.homeSfr) >= SFR_DUEL_MIN && (
-                          <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                             Δ{Math.abs(pick.awaySfr - pick.homeSfr).toFixed(1)}
                           </span>
                         )}
@@ -841,7 +841,7 @@ export default async function AnalysisIndexPage() {
                             </span>
                             {/* wave-448: 상대전적 비율 격차(Δ) — H2H_DOMINANT_RATE−H2H_WEAK_RATE(0.20) 이상 시 수치 명시 */}
                             {Math.abs(awayRate - homeRate) >= (H2H_DOMINANT_RATE - H2H_WEAK_RATE) && (
-                              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                              <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                                 Δ{(Math.abs(awayRate - homeRate) * 100).toFixed(0)}
                               </span>
                             )}
@@ -928,7 +928,7 @@ export default async function AnalysisIndexPage() {
                           </span>
                           {/* wave-450: PF 편차(Δ) — PARK_FACTOR_DELTA_MIN(3) 이상 시 수치 명시 */}
                           {Math.abs(parkDelta) >= PARK_FACTOR_DELTA_MIN && (
-                            <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500">
+                            <span className="ml-1 text-2xs text-gray-400 dark:text-gray-500">
                               Δ{parkDelta > 0 ? `+${parkDelta}` : parkDelta}
                             </span>
                           )}
@@ -1231,7 +1231,7 @@ export default async function AnalysisIndexPage() {
                                   const slugs = (pickFavoredHome ? g.compositeDuelHomeSlugs : g.compositeDuelAwaySlugs) ?? [];
                                   const factorLabels = slugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT).map((s: string) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
                                   return factorLabels ? (
-                                    <span className="text-[10px] font-sans font-normal">
+                                    <span className="text-2xs font-sans font-normal">
                                       {' '}({factorLabels})
                                     </span>
                                   ) : null;
@@ -1260,7 +1260,7 @@ export default async function AnalysisIndexPage() {
                     </div>
                     {/* wave-323: 승부 확률 바 */}
                     <div className="mt-2 flex items-center gap-1.5">
-                      <span className={`text-[10px] font-mono tabular-nums w-7 shrink-0 text-right ${
+                      <span className={`text-2xs font-mono tabular-nums w-7 shrink-0 text-right ${
                         winnerCode === g.homeCode
                           ? 'text-brand-500 dark:text-brand-400 font-semibold'
                           : 'text-gray-400 dark:text-gray-500'
@@ -1282,7 +1282,7 @@ export default async function AnalysisIndexPage() {
                           style={{ width: `${computeWinProbPct(g.homeWinProb)}%` }}
                         />
                       </div>
-                      <span className={`text-[10px] font-mono tabular-nums w-7 shrink-0 ${
+                      <span className={`text-2xs font-mono tabular-nums w-7 shrink-0 ${
                         winnerCode !== g.homeCode
                           ? 'text-orange-500 dark:text-orange-400 font-semibold'
                           : 'text-gray-400 dark:text-gray-500'
@@ -1304,7 +1304,7 @@ export default async function AnalysisIndexPage() {
                           return (
                             <span
                               key={i}
-                              className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${tierClass}`}
+                              className={`text-2xs font-medium px-2 py-0.5 rounded-full ${tierClass}`}
                             >
                               {f.label}: {shortTeamName(f.favoredCode)}{f.impact >= TOPFACTOR_IMPACT_MIN_DISPLAY ? ` +${impactPp}` : ''}↑
                             </span>
@@ -1329,7 +1329,7 @@ export default async function AnalysisIndexPage() {
                       const homeForm = g.homeRecentForm;
                       const awayForm = g.awayRecentForm;
                       return (
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-[10px] font-mono tabular-nums">
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-2xs font-mono tabular-nums">
                           <span className={`font-sans font-medium ${eloColorClass}`}>{eloLabel}</span>
                           {homeForm !== undefined && awayForm !== undefined && (
                             <>
@@ -1485,31 +1485,31 @@ export default async function AnalysisIndexPage() {
                                 선발{' '}
                                 <span className="text-gray-600 dark:text-gray-300">{g.awaySP ?? '미확정'}</span>
                                 {g.awaySPFip != null && (
-                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.awaySPFip, SP_FIP_STRONG, SP_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>
+                                  <span className={`ml-0.5 font-mono tabular-nums text-2xs ${statColorClassLowerBetter(g.awaySPFip, SP_FIP_STRONG, SP_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>
                                     {g.awaySPFip.toFixed(2)}
                                   </span>
                                 )}
                                 {/* wave-353: 선발 xFIP 갭 배지 (원정) */}
                                 {g.awaySPFip != null && g.awaySPXfip != null && (
                                   g.awaySPXfip - g.awaySPFip > SP_XFIP_GAP_REGRESS ? (
-                                    <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                                    <span className="text-3xs text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
                                   ) : g.awaySPFip - g.awaySPXfip > SP_XFIP_GAP_BOUNCE ? (
-                                    <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                                    <span className="text-3xs text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
                                   ) : null
                                 )}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 <span className="text-gray-600 dark:text-gray-300">{g.homeSP ?? '미확정'}</span>
                                 {g.homeSPFip != null && (
-                                  <span className={`ml-0.5 font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.homeSPFip, SP_FIP_STRONG, SP_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>
+                                  <span className={`ml-0.5 font-mono tabular-nums text-2xs ${statColorClassLowerBetter(g.homeSPFip, SP_FIP_STRONG, SP_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>
                                     {g.homeSPFip.toFixed(2)}
                                   </span>
                                 )}
                                 {/* wave-353: 선발 xFIP 갭 배지 (홈) */}
                                 {g.homeSPFip != null && g.homeSPXfip != null && (
                                   g.homeSPXfip - g.homeSPFip > SP_XFIP_GAP_REGRESS ? (
-                                    <span className="text-[9px] text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
+                                    <span className="text-3xs text-orange-400 dark:text-orange-500" title="xFIP 기준 회귀 가능">↑</span>
                                   ) : g.homeSPFip - g.homeSPXfip > SP_XFIP_GAP_BOUNCE ? (
-                                    <span className="text-[9px] text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
+                                    <span className="text-3xs text-brand-500 dark:text-brand-400" title="xFIP 기준 반등 가능">↓</span>
                                   ) : null
                                 )}
                               </span>
@@ -1596,11 +1596,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 불펜{' '}
                                 {g.awayBullpenFip != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.awayBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayBullpenFip.toFixed(2)}</span>
+                                  <span className={`font-mono tabular-nums text-2xs ${statColorClassLowerBetter(g.awayBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayBullpenFip.toFixed(2)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeBullpenFip != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassLowerBetter(g.homeBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeBullpenFip.toFixed(2)}</span>
+                                  <span className={`font-mono tabular-nums text-2xs ${statColorClassLowerBetter(g.homeBullpenFip, BULLPEN_FIP_STRONG, BULLPEN_FIP_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeBullpenFip.toFixed(2)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
@@ -1632,11 +1632,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 수비{' '}
                                 {g.awaySfr != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.awaySfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awaySfr >= 0 ? '+' : ''}{g.awaySfr.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-2xs ${statColorClassHigherBetter(g.awaySfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awaySfr >= 0 ? '+' : ''}{g.awaySfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeSfr != null ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.homeSfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-2xs ${statColorClassHigherBetter(g.homeSfr, SFR_STRONG, SFR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeSfr >= 0 ? '+' : ''}{g.homeSfr.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
@@ -1686,7 +1686,7 @@ export default async function AnalysisIndexPage() {
                                   {favoredName} {count}팩터 우세
                                 </span>
                                 {factorInline && (
-                                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                                  <span className="text-2xs text-gray-400 dark:text-gray-500">
                                     {' '}({factorInline})
                                   </span>
                                 )}
@@ -1700,11 +1700,11 @@ export default async function AnalysisIndexPage() {
                               <span className="text-gray-400 dark:text-gray-500">
                                 WAR{' '}
                                 {g.awayWar != null && g.awayWar > 0 ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.awayWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayWar.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-2xs ${statColorClassHigherBetter(g.awayWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.awayWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="mx-0.5 text-gray-300 dark:text-gray-700">/</span>
                                 {g.homeWar != null && g.homeWar > 0 ? (
-                                  <span className={`font-mono tabular-nums text-[10px] ${statColorClassHigherBetter(g.homeWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeWar.toFixed(1)}</span>
+                                  <span className={`font-mono tabular-nums text-2xs ${statColorClassHigherBetter(g.homeWar, WAR_STRONG, WAR_WEAK, 'text-gray-400 dark:text-gray-500')}`}>{g.homeWar.toFixed(1)}</span>
                                 ) : <span className="text-gray-300 dark:text-gray-700">-</span>}
                                 <span className="text-gray-400 dark:text-gray-500"> (원/홈)</span>
                               </span>
@@ -1916,7 +1916,7 @@ export default async function AnalysisIndexPage() {
                 >
                   {shortTeamName(code as TeamCode)}
                   {count > 1 && (
-                    <span className="text-[10px] text-brand-500/70 dark:text-brand-400/70">×{count}</span>
+                    <span className="text-2xs text-brand-500/70 dark:text-brand-400/70">×{count}</span>
                   )}
                 </span>
               ))}
@@ -2195,7 +2195,7 @@ export default async function AnalysisIndexPage() {
                                       const slugs = g.factorFavoredSlugs ?? [];
                                       const factorLabels = slugs.slice(0, COMPOSITE_DUEL_FACTOR_LABEL_LIMIT).map((s: string) => FACTOR_LABELS_SHORT[s] ?? s).join('·');
                                       return factorLabels ? (
-                                        <span className="text-[10px] font-sans font-normal">
+                                        <span className="text-2xs font-sans font-normal">
                                           {' '}({factorLabels})
                                         </span>
                                       ) : null;
@@ -2204,7 +2204,7 @@ export default async function AnalysisIndexPage() {
                                 )}
                                 {/* wave-529: 이번 주 남은 경기 수렴 방향 팀명 — TOP픽/강수렴 픽 카드에 팩터가 가리키는 팀 표시 */}
                                 {(isTopUpcomingPick || isStrongUpcomingPick) && g.convergenceNetScore != null && (
-                                  <p className={`text-[10px] font-semibold mt-0.5 ${
+                                  <p className={`text-2xs font-semibold mt-0.5 ${
                                     isTopUpcomingPick
                                       ? 'text-amber-600 dark:text-amber-400'
                                       : 'text-brand-600 dark:text-brand-400'
@@ -2221,7 +2221,7 @@ export default async function AnalysisIndexPage() {
                                   const spFavoredHome = spDelta < 0;
                                   const favoredName = shortTeamName(spFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       spFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2237,7 +2237,7 @@ export default async function AnalysisIndexPage() {
                                   const wobaFavoredHome = wobaDelta > 0;
                                   const favoredName = shortTeamName(wobaFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       wobaFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2264,7 +2264,7 @@ export default async function AnalysisIndexPage() {
                                     ? [h2hHomeWins, h2hAwayWins]
                                     : [h2hAwayWins, h2hHomeWins];
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       h2hFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2283,7 +2283,7 @@ export default async function AnalysisIndexPage() {
                                   const favoredName = shortTeamName(parkFavoredHome ? g.homeCode : g.awayCode);
                                   const parkType = parkFavoredHome ? '타자친화' : '투수친화';
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       parkFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2299,7 +2299,7 @@ export default async function AnalysisIndexPage() {
                                   const bullpenFavoredHome = bullpenDelta < 0;
                                   const favoredName = shortTeamName(bullpenFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       bullpenFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2315,7 +2315,7 @@ export default async function AnalysisIndexPage() {
                                   const eloFavoredHome = eloDelta > 0;
                                   const favoredName = shortTeamName(eloFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       eloFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2331,7 +2331,7 @@ export default async function AnalysisIndexPage() {
                                   const warFavoredHome = warDelta > 0;
                                   const favoredName = shortTeamName(warFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       warFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2347,7 +2347,7 @@ export default async function AnalysisIndexPage() {
                                   const sfrFavoredHome = sfrDelta > 0;
                                   const favoredName = shortTeamName(sfrFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       sfrFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2363,7 +2363,7 @@ export default async function AnalysisIndexPage() {
                                   const formFavoredHome = formDelta > 0;
                                   const favoredName = shortTeamName(formFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       formFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'
@@ -2379,7 +2379,7 @@ export default async function AnalysisIndexPage() {
                                   const xfipFavoredHome = xfipDelta < 0;
                                   const favoredName = shortTeamName(xfipFavoredHome ? g.homeCode : g.awayCode);
                                   return (
-                                    <span className={`text-[10px] font-medium ${
+                                    <span className={`text-2xs font-medium ${
                                       xfipFavoredHome
                                         ? 'text-brand-500 dark:text-brand-400'
                                         : 'text-orange-500 dark:text-orange-400'

@@ -203,7 +203,7 @@ function ResultSection({ result }: { result: LottoResult }) {
           전체 분석 보기 ({LOTTO_RULE_COUNT} 룰 / 차원별 비교)
         </summary>
         <div className="px-4 pb-4 pt-2">
-          <pre className="text-[10px] leading-relaxed whitespace-pre-wrap text-amber-900 dark:text-amber-100 font-mono">
+          <pre className="text-2xs leading-relaxed whitespace-pre-wrap text-amber-900 dark:text-amber-100 font-mono">
             {result.bodyMarkdown}
           </pre>
         </div>

@@ -21,6 +21,8 @@
 - **Code:** Geist Mono
 - **Loading:** Pretendard CDN (jsdelivr), Geist는 next/font/google
 - **Scale:**
+  - 3xs: 9px — 초미니 배지/타임스탬프 (`text-3xs`, cycle 2599 정식 토큰화)
+  - 2xs: 10px — 미니 캡션/보조 라벨 (`text-2xs`, cycle 2599 정식 토큰화. 실사용 최다 빈도)
   - xs: 12px — 캡션, 메타
   - sm: 13px — 카드 라벨
   - base: 15px — 본문
@@ -29,6 +31,7 @@
   - 2xl: 24px — 히어로 서브
   - 3xl: 32px — 히어로 메인
   - 4xl: 36px — 대형 숫자 (적중률 등)
+  - (미해결) text-[11px] 46건 잔존 — 3xs(9)/2xs(10)/xs(12) 사이 낀 값. 신규 토큰 승격 vs 2xs/xs 로 흡수 결정은 시각 검토 필요, cycle 2599 design-system 범위 밖으로 이연
 
 ## Color
 - **Approach:** Restrained — 그린 + 골드 + 뉴트럴. 색은 희소하게, 의미 있을 때만.

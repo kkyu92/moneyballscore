@@ -74,7 +74,7 @@ export function BigMatchDebateCard({
             tabIndex={0}
             aria-label="빅매치 선정 기준 설명"
           >
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-brand-300 text-brand-300 text-[10px] font-bold cursor-help">
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-brand-300 text-brand-300 text-2xs font-bold cursor-help">
               ?
             </span>
             <span

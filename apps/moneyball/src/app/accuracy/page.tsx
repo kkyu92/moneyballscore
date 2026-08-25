@@ -781,7 +781,7 @@ export default async function AccuracyPage() {
                       style={{ height: `${barH}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                  <span className="text-2xs text-gray-400 dark:text-gray-500">
                     {d.n > 0 ? `${d.hits}/${d.n}` : '—'}
                   </span>
                 </div>
@@ -789,7 +789,7 @@ export default async function AccuracyPage() {
             })}
           </div>
           </div>
-          <div className="flex gap-4 text-[10px] text-gray-400 dark:text-gray-500 pt-1">
+          <div className="flex gap-4 text-2xs text-gray-400 dark:text-gray-500 pt-1">
             <span className="flex items-center gap-1">
               <span className="inline-block w-2 h-2 rounded-sm bg-brand-500" />
               ≥55%
@@ -851,7 +851,7 @@ export default async function AccuracyPage() {
                         {pct}%
                       </p>
                       {ciPct !== null && tier.n < STATS_RELIABLE_MIN_N && (
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}% CI</p>
+                        <p className="text-2xs text-gray-400 dark:text-gray-500">±{ciPct}% CI</p>
                       )}
                     </>
                   ) : (
@@ -861,7 +861,7 @@ export default async function AccuracyPage() {
                     {tier.n > 0 ? `${tier.hits}/${tier.n}` : '데이터 없음'}
                   </p>
                   {isInverted && (
-                    <p className="text-[10px] text-warning font-semibold">
+                    <p className="text-2xs text-warning font-semibold">
                       역전 패턴 ⚠
                     </p>
                   )}
@@ -936,7 +936,7 @@ export default async function AccuracyPage() {
                         <td className="py-2 pr-4 font-medium">
                           {shortTeamName(t.teamCode)}
                           {isOutlier && (
-                            <span className="ml-1.5 text-[10px] bg-warning/15 text-warning rounded px-1 py-0.5">
+                            <span className="ml-1.5 text-2xs bg-warning/15 text-warning rounded px-1 py-0.5">
                               이상치
                             </span>
                           )}
@@ -1072,7 +1072,7 @@ function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
                     <div className="w-full h-[2px] bg-amber-200/40 dark:bg-amber-700/30 mt-auto" />
                   )}
                 </div>
-                <span className="text-[9px] text-amber-700/60 dark:text-amber-200/50 mt-1 h-3">
+                <span className="text-3xs text-amber-700/60 dark:text-amber-200/50 mt-1 h-3">
                   {showLabel ? b.dateLabel : ''}
                 </span>
               </div>
@@ -1080,7 +1080,7 @@ function FallbackTrendChart({ trend }: { trend: FallbackDailyBucket[] }) {
           })}
         </div>
       </div>
-      <div className="flex gap-3 text-[10px] text-amber-700/70 dark:text-amber-200/60 pt-1">
+      <div className="flex gap-3 text-2xs text-amber-700/70 dark:text-amber-200/60 pt-1">
         <span className="flex items-center gap-1">
           <span className="inline-block w-2.5 h-2.5 rounded-sm bg-brand-500" />
           AI 토론 활성
@@ -1189,7 +1189,7 @@ function SubCohortCard({
         <div className="flex items-baseline gap-2">
           <p className={`text-3xl font-bold font-mono ${valueCls}`}>{pct}%</p>
           {ciPct !== null && bucket.n < STATS_RELIABLE_MIN_N && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">±{ciPct}%p CI</span>
+            <span className="text-2xs text-gray-400 dark:text-gray-500">±{ciPct}%p CI</span>
           )}
         </div>
       ) : (

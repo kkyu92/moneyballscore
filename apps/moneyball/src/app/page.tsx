@@ -763,7 +763,7 @@ export default async function HomePage() {
                     <span className="flex items-center gap-2">
                       <span className="font-medium text-gray-700 dark:text-gray-200">{todayTierDist[tier]}경기</span>
                       {histPct != null && (
-                        <span className={`text-[10px] ${getAccuracyColor(histPct)}`} title={`${WINNER_TIER_LABEL[tier]} 과거 적중률 ${histPct}% (${stat.correct}/${stat.total})`}>
+                        <span className={`text-2xs ${getAccuracyColor(histPct)}`} title={`${WINNER_TIER_LABEL[tier]} 과거 적중률 ${histPct}% (${stat.correct}/${stat.total})`}>
                           {histPct}%
                         </span>
                       )}
@@ -987,15 +987,15 @@ export default async function HomePage() {
                         <span className="text-gray-600 dark:text-gray-300 w-12 truncate">
                           {shortTeamName(g.awayTeam)}
                         </span>
-                        <span className="text-gray-400 dark:text-gray-500 text-[10px] mx-1">@</span>
+                        <span className="text-gray-400 dark:text-gray-500 text-2xs mx-1">@</span>
                         <span className="font-medium text-gray-800 dark:text-gray-100 w-12 truncate text-right">
                           {shortTeamName(g.homeTeam)}
                         </span>
-                        <span className="text-gray-400 dark:text-gray-500 text-[10px] ml-1.5 tabular-nums shrink-0">
+                        <span className="text-gray-400 dark:text-gray-500 text-2xs ml-1.5 tabular-nums shrink-0">
                           {g.gameTime}
                         </span>
                         {g.homeWinPct != null && (
-                          <span className={`text-[9px] tabular-nums ml-1 font-medium shrink-0 ${
+                          <span className={`text-3xs tabular-nums ml-1 font-medium shrink-0 ${
                             g.isPredicted
                               ? 'text-[var(--color-accent)] dark:text-[var(--color-accent-light)]'
                               : g.homeWinPct >= 0.5

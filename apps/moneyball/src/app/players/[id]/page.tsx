@@ -181,7 +181,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                 ? fmtPct(profile.accuracyRate)
                 : "-"}
             </p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
               검증 {profile.verifiedN}경기
               {profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N
                 ? ` · 소표본(n<${SMALL_SAMPLE_N})`

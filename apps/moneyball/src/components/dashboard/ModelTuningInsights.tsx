@@ -127,7 +127,7 @@ export function ModelTuningInsights({ report }: Props) {
                         {fmtWeightPct(s.proposedWeight)}
                         {deltaPp !== null && deltaPp !== 0 && (
                           <span
-                            className={`ml-1 text-[10px] ${
+                            className={`ml-1 text-2xs ${
                               deltaPp > 0
                                 ? "text-brand-600 dark:text-brand-400"
                                 : "text-red-600 dark:text-red-400"

@@ -230,7 +230,7 @@ export default function MlbPlayersHubEn() {
                             <MlbTeamLogo team={code} size={16} className="rounded-full shrink-0" />
                             <div className="min-w-0 flex-1">
                               <p className="text-xs font-semibold truncate">{team.shortName}</p>
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">
+                              <p className="text-2xs text-gray-400 dark:text-gray-500 truncate">
                                 PF {team.parkPf}
                               </p>
                             </div>
