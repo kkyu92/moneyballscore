@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy) sitemap-mlb.test.ts 회귀 커버리지 공백 메꾸기 (cycle 2580, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2572-2579 distinct=3: review-code 5+explore-idea 1+info-arch 1). fix-incident gap 54 → mandatory 재점검(gh run list 전부 success/skipped) — negative. op-analysis gap 19/25, info-arch gap 3/30, lotto gap 12/30 미도달. explore-idea saturation 재확인 8 cycle 전 negative — skip. cycle 2579 retro 명시적 carry-over(sitemap-mlb.test.ts assertion 공백) 처리.
+
+실행: `sitemap.ts` 가 실제 생성하는 `/mlb/reviews/monthly/[month]`, `/en/mlb/reviews/weekly/[week]`, `/en/mlb/reviews/monthly/[month]`, `/insights/series/[topic]`(45쌍) 4개 라우트 그룹에 assertion 5개 신규 추가. `listSeriesTopics` mock을 `vi.importActual` 로 전환(순수함수라 실측 가능). tsc/lint/test(538/4397, +4) 전부 clean. 단일 논리 단위 2-commit 직접 main push(R4/R7).
+
+다음 사이클 추천 = op-analysis(gap 20/25, 근접) 자연 발화 대기 또는 review-code 잔여 carry-over(`MatchupEloChart`/`MlbMatchupEloChart` 병합 후보, cycle 2579 발견) 처리.
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) 팩터/파이프라인 comment-vs-code drift 3rd family negative (cycle 2578, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8=2570-2577 distinct=3: review-code 6+explore-idea 1+info-arch 1). fix-incident gap 52(마지막 2526) → mandatory 재점검: deploy-drift-alert/health-alert/runtime-error-alert 최근 5회 전부 success — negative. op-analysis gap 17/25, info-arch gap 1/30(직전 발화), lotto gap 10/30 전부 미도달. explore-idea saturation 12/15 재충족되나 cycle 2572 4-source 재확인이 6 cycle 전 negative — 재소진 skip. cycle 2576/2577 carry-over대로 review-code(heavy) 계속, scope는 SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES(둘 다 cycle 2576 negative) 다음 3rd 카테고리로 확장.
