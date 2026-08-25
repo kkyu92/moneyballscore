@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) FactorBreakdown 카드 spacing/배경 drift 정정 (cycle 2594, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(전수 재확인 — 전부 completed/archived/superseded). 직전8(2586-2593) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gh run list 전부 success — negative. op-analysis gap 8/25, lotto gap 26/30(픽스/결과 이미 박제됨) — negative. info-arch gap 7/30 미도달. cycle 2593 carry-over 추천대로 focus-ring axis 스윕 완료 판단 후 spacing axis 신규 정독.
+
+발견: DESIGN.md 카드 gap/padding 스펙 대비 gap-3/gap-4 raw count 혼재는 그리드 밀도별 의도 차이로 판단(Explore 서브에이전트 파견해 raw count 대신 sibling family 단위 재검증). "팩터별 분석" 카드 family(DetailedFactorAnalysis/MlbDetailedFactorAnalysis/FactorBreakdown, 각각 analysis/mlb+en/predictions+insights 라우트) 전부 rounded-xl border p-5 bg-white 인데 FactorBreakdown 만 유일하게 bg-gray-50 + p-4 이탈.
+
+실행: p-4→p-5, bg-gray-50→bg-white 정렬. silent-drift-cycle-2594.test.ts 신규(components/predictions/__tests__). tsc clean + vitest 550/4425(+1/+2) + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7), pre-push guard 통과.
+
+다음 사이클 추천 = spacing axis 잔여 스윕(gap-3/gap-4 family 단위 재검토 여지 있으나 raw count 로는 이번엔 negative 판단) 또는 op-analysis(gap 9/25)/lotto(gap 27/30) 자연 발화 대기.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) focus-ring axis 3건 정렬 (cycle 2593, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2585-2592) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gap 20+/20 재점검(`gh run list --limit 15` 전부 success/skipped) — negative. op-analysis gap 7/25, lotto gap 25/30, info-arch gap 6/30 미도달. explore-idea saturation 14/15 재확인(TODOS Next-Up 신규리드 없음, plan#29 spec_only_deferred, GH issue 0) — negative, 6연속 재소진. cycle 2592 carry-over 추천대로 shadow axis 완료 후 focus-ring axis 신규 정독. 진행 중 선행 fresh process 가 동일 cycle 2593 로 `e337f4c8`(analysis/page.tsx 인라인 링크 outline-offset-1→2) 를 VERSION/CHANGELOG 미동기 상태로 이미 커밋해둔 것 확인 — watch.sh 재시작 경합으로 판단, 동일 cycle 연속으로 흡수.
