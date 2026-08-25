@@ -1,3 +1,12 @@
+## v0.5.62.137 — 2026-08-25 (cycle 2585, review-code (heavy): 주간/월간 리뷰 헤드라인 적중 색상 drift 정정)
+
+### fix(reviews): weekly/monthly 헤드라인 "적중"/"적중률"/"전월 대비" 색상 brand-500 정렬 — 병렬 마이그레이션 drift
+
+- 진단: open issue 0, approved plan 0/23(전부 non-approved). 2-chain lock 없음(직전8=2577-2584 distinct=3: review-code 6+polish-ui 1+info-arch 1). fix-incident gap 21/20 mandatory 재점검(`gh run list --limit 15` 전부 success/skipped/in_progress, CI failure 0건) — negative. op-analysis gap 24/25, lotto gap 17/30, info-arch gap 8/30 미도달. explore-idea saturation 14/15 충족되나 4-source 재확인(TODOS Next-Up = 여전히 사용자 영역 1-line만, plan #29 Tier4 그대로, GH issue 0, 신규라우트 mtime -7 = git checkout 부작용) — negative, 4연속 재소진. DESIGN.md mtime 당일 = 동일 git checkout 부작용. 잔여 chain 전부 미충족 → review-code(heavy) 계속, cycle 2584 carry-over(`reviews/weekly/[week]`(529줄) + `reviews/monthly/[month]`(486줄) 미감사) 정독.
+- 발견: 두 파일 헤드라인 "적중"/"적중률" 스탯 색상이 서로 다름 — weekly = `text-brand-500`(cycle 240 도입) vs monthly = `text-brand-600 dark:text-brand-400`(cycle 250 도입). `git log -S`로 확인한 결과 두 사이클이 각각 독립적으로 `text-green-*` → brand 토큰 마이그레이션을 수행하며 서로 다른 shade 로 landing — DESIGN.md "적중 표시 = brand-500" 문서화 규칙(cycle 50/65/456/744/2563 family) 6번째 재발. monthly "강수렴 픽" 라벨(`text-brand-600 dark:text-brand-400`, line 242/277)은 weekly 와 이미 동일해 범위 밖.
+- 실행: monthly 헤드라인 3곳(적중/적중률/전월 대비, line 178/190/211) `text-brand-600 dark:text-brand-400` → `text-brand-500` 정정 — weekly + 문서 규칙 정렬. `silent-drift-cycle-2585.test.ts` 신규(양쪽 positive assertion + monthly 헤드라인 섹션 내 구 클래스 잔존 0건 negative assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(541 files/4406 tests, +1/+3) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7).
+
 ## v0.5.62.136 — 2026-08-25 (cycle 2583, review-code (heavy): 홈 일반 카드 4곳 rounded-2xl → rounded-xl 정렬)
 
 ### refactor(home): 홈 `page.tsx` 일반 카드 섹션 4곳 border-radius drift 정정 — DESIGN.md 히어로 전용 토큰 이탈

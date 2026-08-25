@@ -175,7 +175,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
           </div>
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">적중</p>
-            <p className="text-3xl font-bold text-brand-600 dark:text-brand-400 mt-1">
+            <p className="text-3xl font-bold text-brand-500 mt-1">
               {review.correctGames}
               <span className="text-sm text-gray-400 dark:text-gray-500 ml-1">
                 경기
@@ -187,7 +187,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
             <p
               className={`text-3xl font-bold mt-1 ${
                 review.accuracyRate >= ACCURACY_GOOD_RATE
-                  ? "text-brand-600 dark:text-brand-400"
+                  ? "text-brand-500"
                   : review.accuracyRate >= ACCURACY_MID_RATE
                     ? "text-yellow-600 dark:text-yellow-400"
                     : "text-red-600 dark:text-red-400"
@@ -208,7 +208,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                 <p
                   className={`text-3xl font-bold mt-1 font-mono ${
                     diffPp > 0
-                      ? "text-brand-600 dark:text-brand-400"
+                      ? "text-brand-500"
                       : diffPp < 0
                         ? "text-red-600 dark:text-red-400"
                         : "text-gray-500 dark:text-gray-400"
