@@ -1,3 +1,12 @@
+## v0.5.62.134 — 2026-08-25 (cycle 2580, review-code (heavy): sitemap-mlb.test.ts 회귀 커버리지 공백 메꾸기)
+
+### test(seo): `sitemap-mlb.test.ts` 에 monthly reviews / en-mlb weekly·monthly mirror / insights series 라우트 assertion 5개 추가 — cycle 2579 carry-over
+
+- 진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 2-chain lock 없음(직전 8사이클 2572-2579 distinct=3: review-code 5+explore-idea 1+info-arch 1). fix-incident gap 54(마지막 2526) → mandatory 재점검: `gh run list --limit 15` 전부 success/skipped, CI failure 0건 — negative. op-analysis gap 19/25, info-arch gap 3/30, lotto gap 12/30 전부 미도달. explore-idea saturation 12/15 재충족되나 cycle 2572 4-source 재확인이 8 cycle 전 negative(TODOS/superpowers specs/GH issue/plan #29 gating 전부 동일 무성장) — 재소진 skip. cycle 2579 retro 명시적 carry-over(`sitemap-mlb.test.ts` 회귀 커버리지 공백) 그대로 처리.
+- 발견: `sitemap.ts` 가 실제 생성하는 `/mlb/reviews/monthly/[month]`(mlbMonthlyReviewRoutes), `/en/mlb/reviews/weekly/[week]`(enMlbWeeklyReviewRoutes, wave-660 cycle 2355), `/en/mlb/reviews/monthly/[month]`(enMlbMonthlyReviewRoutes, cycle 2356), `/insights/series/[topic]`(insightsSeriesRoutes, 45 team-pair) 4개 라우트 그룹이 테스트 파일에 assertion 없이 방치 확인. 앞 3개는 `getRecentWeeks`/`getRecentMonths` 순수함수라 mock 불필요, 이미 존재하는 KBO/mlb weekly 테스트와 동일 패턴으로 즉시 assertion 추가 가능. `insights/series` 는 `listSeriesTopics` mock 이 항상 `[]` 반환하도록 박제돼 있어 실측 불가 상태였음 — 순수함수(DB 의존 없음, KBO_TEAMS 10개 조합 45쌍 고정 생성) 확인 후 `vi.importActual` 로 전환.
+- 실행: `sitemap-mlb.test.ts` 에 5개 assertion 추가(mlb monthly reviews / en-mlb weekly mirror / en-mlb monthly mirror / insights series 45개 + redirect-only index 미노출 재확인 2건 포함) + `listSeriesTopics` mock을 `vi.importActual` 로 전환.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(538 files/4397 tests, +4) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7).
+
 ## v0.5.62.133 — 2026-08-25 (cycle 2579, review-code (heavy): sitemap.ts `/search` robots.txt disallow 모순 제거)
 
 ### fix(seo): `sitemap.ts` 에서 `/search` URL 제거 — robots.ts disallow + page.tsx noindex 메타와 모순되는 인덱싱 시그널
