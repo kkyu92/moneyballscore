@@ -1,3 +1,12 @@
+## v0.5.62.141 — 2026-08-25 (cycle 2594, review-code (heavy): spacing axis 첫 발견 — FactorBreakdown 카드 bg-gray-50/p-4 → bg-white/p-5 정렬)
+
+### fix(predictions): FactorBreakdown 카드 padding/배경 정렬 — 팩터별 분석 family 정렬
+
+- 진단: open issue 0, approved plan 0/23(전수 재확인 — 전부 completed/archived/superseded, status=approved 0건). 직전8(2586-2593) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gh run list 전부 success — negative. op-analysis gap 8/25, lotto gap 26/30(픽스 8/29 + 결과 8/22 이미 박제됨), info-arch gap 7/30 미도달. cycle 2593 carry-over 추천대로 focus-ring axis 스윕 완료(잔여 ring 기반 0건) 판단 후 spacing axis 신규 정독.
+- 발견: DESIGN.md Spacing 스펙(카드 padding 20px=p-5, 카드 gap 16px=gap-4) 대비 gap-3(180)/gap-4(90) 혼재는 그리드 밀도별 의도된 차이로 판단(raw count 만으론 drift 단정 불가 — Explore 서브에이전트로 sibling family 단위 재검증). "팩터별 분석" 카드 family(`DetailedFactorAnalysis.tsx`/`MlbDetailedFactorAnalysis.tsx`/`FactorBreakdown.tsx`, 각각 analysis/mlb+en/predictions+insights 라우트에서 동일 역할) 전부 `rounded-xl border ... p-5` + `bg-white` 인데 `FactorBreakdown.tsx`(`app/predictions/[date]`, `app/insights/[date]` 공용) 만 유일하게 `bg-gray-50` + `p-4` 로 이탈. 두 라우트 모두 standalone 카드로 렌더링(중첩 sub-card 아님) 확인 — 의도된 컴팩트 변형 아님.
+- 실행: `p-4`→`p-5`, `bg-gray-50`→`bg-white` 정렬(sibling 2개와 완전 일치). `silent-drift-cycle-2594.test.ts` 신규(components/predictions/__tests__).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(550 files/4425 tests, +1/+2) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.140 — 2026-08-25 (cycle 2593, review-code (heavy): focus-ring axis 스윕 — offset-1→2 + LeagueSelector ring→outline + dashboard/error.tsx outline-brand-500 누락 3건 정정)
 
 ### fix(a11y): focus-ring axis 3건 정렬 — 인라인 링크 offset / 헤더 LeagueSelector ring→outline / dashboard/error.tsx outline-brand-500 누락

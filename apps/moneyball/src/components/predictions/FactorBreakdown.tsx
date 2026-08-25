@@ -192,7 +192,7 @@ export function FactorBreakdown({
     <div
       id={anchorId}
       data-variant={chart ? "chart" : "default"}
-      className={`bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4${anchorId ? " scroll-mt-20" : ""}`}
+      className={`bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5${anchorId ? " scroll-mt-20" : ""}`}
     >
       <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">
         예측 근거 (팩터별 분석)
