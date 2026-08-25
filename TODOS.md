@@ -1,3 +1,15 @@
+## ✅ SUCCESS — polish-ui(2-chain lock fallback) "오늘의 탑픽" 배지 accent gold 정렬 (cycle 2581, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29. **2-chain alternation lock 발동**(직전8=2573-2580 distinct=2: review-code 7+info-architecture-review 1) → 둘 다 후보 제외. fix-incident gap 55/20 mandatory 재점검(gh run list 전부 success/skipped) — negative. op-analysis gap 20/25, lotto gap 13/30 미도달. explore-idea saturation 12/15 충족되나 4-source(TODOS Next-Up/GH issue/plan gating/신규라우트) 8 cycle 전(2572) 재확인 negative — 재소진 skip. DESIGN.md mtime 당일(git checkout 영향, 실갱신 아님) — design-system negative. 잔여 chain 전부 미충족 → lock fallback 규칙대로 polish-ui 강제.
+
+발견: DESIGN.md "Accent — 빅매치 뱃지, **승률 하이라이트**, 프리미엄 강조" 가 지칭하는 "오늘의 탑픽"(`isTopPick`) 배지가 실제로는 3갈래 색상으로 흩어짐 — KBO `analysis/page.tsx`(wave-377) = amber-300/500, MLB 4미러(`mlb/analysis`+`mlb/games/[date]`+en 2개, wave-624/plan28) = brand-500/400. 같은 파일 바로 위 `isBig`("⭐ 빅매치") 배지는 이미 `var(--color-accent)` 정렬돼 있어 인접 대조군 — 두 배지가 같은 조건분기 트리 안인데 색 체계만 다른 채 방치. amber 는 factor 수렴 10/10 tier(2026-07-18 결정, `isTopUpcomingPick`류 — 별개 개념)와 우연히 겹치는 hue 라 혼동 소지.
+
+실행: 5개 파일(`analysis/page.tsx` + mlb/en mlb 4미러) 전부 `border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20~30`(+텍스트 라벨) 정렬. `wave-624-mlb-games-top-pick.test.ts` 옛 `ring-brand-400` assertion 갱신 + `silent-drift-cycle-2581.test.ts` 신규(5파일). DESIGN.md Decisions Log 항목 추가. tsc/lint/test(539/4402, +1) 전부 clean. 단일 논리 단위 → PR 없이 직접 main push, 단 VERSION/package.json(루트+moneyball) 3-way sync 를 pre-push guard 가 순차 포착해 2개 추가 fix commit 발생(R4/R7, 4-commit).
+
+다음 사이클 추천 = 2-chain lock 해소(이번 cycle 다양성 확보) → review-code(heavy) 또는 info-architecture-review 재개 가능. op-analysis(gap 21/25, 근접) 자연 발화 대기도 유력. 잔여 후보 = 이 cycle 에서 발견했으나 스코프 밖으로 보류한 border-radius 컨벤션(rounded-lg vs rounded-xl, 카드 컨텍스트) 전반 불일치 — 102개 파일 규모라 100+파일 변경 가드 대상, 단일 cycle 강행 부적절. 별도 review-code 또는 design-system heavy 사이클에서 좁은 범위(예: 신규 라우트 4개만) 로 재접근 필요.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) sitemap-mlb.test.ts 회귀 커버리지 공백 메꾸기 (cycle 2580, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2572-2579 distinct=3: review-code 5+explore-idea 1+info-arch 1). fix-incident gap 54 → mandatory 재점검(gh run list 전부 success/skipped) — negative. op-analysis gap 19/25, info-arch gap 3/30, lotto gap 12/30 미도달. explore-idea saturation 재확인 8 cycle 전 negative — skip. cycle 2579 retro 명시적 carry-over(sitemap-mlb.test.ts assertion 공백) 처리.
