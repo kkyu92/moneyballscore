@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) focus-ring axis 3건 정렬 (cycle 2593, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2585-2592) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gap 20+/20 재점검(`gh run list --limit 15` 전부 success/skipped) — negative. op-analysis gap 7/25, lotto gap 25/30, info-arch gap 6/30 미도달. explore-idea saturation 14/15 재확인(TODOS Next-Up 신규리드 없음, plan#29 spec_only_deferred, GH issue 0) — negative, 6연속 재소진. cycle 2592 carry-over 추천대로 shadow axis 완료 후 focus-ring axis 신규 정독. 진행 중 선행 fresh process 가 동일 cycle 2593 로 `e337f4c8`(analysis/page.tsx 인라인 링크 outline-offset-1→2) 를 VERSION/CHANGELOG 미동기 상태로 이미 커밋해둔 것 확인 — watch.sh 재시작 경합으로 판단, 동일 cycle 연속으로 흡수.
+
+발견: DESIGN.md 에 focus-ring 명시 스펙 없음 — 실측 컨벤션 대조(`focus-visible:outline-*` 314건, dominant = outline+outline-2+outline-offset-2+outline-brand-500 71~84건). 이탈 3건: (1) `analysis/page.tsx` 인라인 링크 outline-offset-1(선행 commit 정정 완료). (2) `LeagueSelector.tsx` 만 유일 ring 기반(`ring-2 ring-brand-400`) — 같은 헤더 family(MegaMenu TRIGGER_BASE 주석 "focus-visible: outline-2 outline-brand-500", MobileNav)는 전부 outline 기반. (3) `dashboard/error.tsx` 재시도 버튼이 sibling `app/error.tsx` 와 outline 스택 동일하나 `outline-brand-500` 색상만 누락.
+
+실행: LeagueSelector 를 MegaMenu TRIGGER_BASE 와 동일 outline 스택으로 정렬, dashboard/error.tsx 에 `focus-visible:outline-brand-500` 추가. `silent-drift-cycle-2593.test.ts` 2건 신규(layout/__tests__, dashboard/__tests__). VERSION/package.json/CHANGELOG 3-way sync 로 선행 commit 미동기 회수. `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(549/4423) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7), pre-push guard(lint+type-check+version-sync-guard+smoke test) 통과.
+
+다음 사이클 추천 = focus-ring axis 스윕 완료 추정(잔여 ring 기반 0건, BigMatchDebateCard `outline-white`/MobileNav `outline-offset-[-2px]` 는 의도된 별개 컨벤션 확인) → spacing axis 신규 정독, 또는 op-analysis(gap 8/25)/lotto(gap 26/30) 자연 발화 대기.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) lotto 추첨 결과 카드 border-radius drift 정정 (cycle 2591, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2583-2590) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gap 65/20 도달했으나 `gh run list` 전부 success/skipped — negative. op-analysis gap 5/25, lotto gap 23/30(picks `2026-08-29-50sets.md` + result `2026-08-22-result.md` 이미 박제됨 — trigger negative), info-arch gap 4/30 미도달. explore-idea saturation 14/15 충족되나 cycle 2590 재확인과 동일 negative 지속. cycle 2590 "border-radius/색상 외 축 정독" 추천 대신 border-radius axis 전수 스캔 마무리 우선 판단.
