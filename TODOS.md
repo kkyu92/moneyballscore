@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) lotto 추첨 결과 카드 border-radius drift 정정 (cycle 2591, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2583-2590) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gap 65/20 도달했으나 `gh run list` 전부 success/skipped — negative. op-analysis gap 5/25, lotto gap 23/30(picks `2026-08-29-50sets.md` + result `2026-08-22-result.md` 이미 박제됨 — trigger negative), info-arch gap 4/30 미도달. explore-idea saturation 14/15 충족되나 cycle 2590 재확인과 동일 negative 지속. cycle 2590 "border-radius/색상 외 축 정독" 추천 대신 border-radius axis 전수 스캔 마무리 우선 판단.
+
+발견: `grep rounded-2xl apps/moneyball/src/app` 전수 스캔 — 대부분 히어로 gradient 섹션(brand-800→brand-700, `matchup`/`players`/`accuracy`/`en/mlb` 계열)으로 의도된 컨벤션. `lotto/page.tsx:155` `ResultSection`(추첨 결과 정리 카드, amber 배경 알림 박스)만 `rounded-2xl border-2` 로 landing — 같은 파일 히어로 섹션(line 244)과 혼동 유발. 동일 amber 알림/카드 패턴 쓰는 `accuracy/page.tsx:408`, `en/mlb page.tsx:140`, `wild-card/page.tsx`, `postseason/page.tsx` 등은 전부 `rounded-xl`(lg:12px, 카드 전용). cycle 2583(홈)/cycle 2590(analysis+reviews 허브)에 이은 border-radius drift family 3번째 별개 파일.
+
+실행: `rounded-xl` 로 정렬, `silent-drift-cycle-2591.test.ts` 신규 3건(lotto/__tests__). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(545/4416, +1/+3) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7), CI green 실측 확인(run 32802790501, conclusion=success).
+
+다음 사이클 추천 = border-radius axis 전수 스캔 완료 추정 (남은 rounded-2xl 은 전부 히어로 gradient, 의도적) → spacing/shadow/focus-ring 신규 축 정독, 또는 operational-analysis(gap 5/25)/lotto(gap 23/30) 자연 발화 대기.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) analysis + reviews 허브 빈 상태 카드 border-radius drift 정정 (cycle 2590, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2582-2589) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident 60cycle(2530-2589) 미발화 재확인, `gh run list --limit 10` 전부 success/skipped/in_progress — negative. op-analysis gap 3/25, lotto gap 21/30, info-arch gap 2/30 미도달. explore-idea saturation 14/15 충족되나 4-source 재확인(TODOS Next-Up 신규리드 없음, plan#29 spec_only_deferred, GH issue 0, DESIGN.md mtime 당일=git checkout 부작용) — negative. cycle 2589 carry-over 후보(`misses/page.tsx`, `/analysis` `/insights` 허브) 정독.
