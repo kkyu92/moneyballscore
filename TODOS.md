@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy) reviews weekly/monthly 헤드라인 적중률 소표본 게이트 추가 (cycle 2573, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2565-2572 distinct=3: review-code 5+explore-idea 2+lotto 1). fix-incident gap 20+/20 도달 → mandatory 재점검: `deploy-drift-alert` 8/24 17:44 산발 실패 1건, 8/24 18:56 부터 9연속 success 회복 — negative. op-analysis gap 12/25, info-arch gap 26/30, lotto gap 5/30, explore-idea saturation 11/15, design-system(DESIGN.md 당일 갱신) 전부 미도달. cycle 2572 retro 추천 미감사 후보 순회.
+
+실행: `insights/[date]`(적중률 표시 없음, 대상 아님)·`predictions/[date]`(이미 게이트 적용) 확인 후 negative. `reviews/weekly/[week]`·`reviews/monthly/[month]` 팀별 테이블은 SMALL_SAMPLE_N 게이트 있지만 헤드라인 "적중률"은 표본 무관 렌더링 확인 — SMALL_SAMPLE_N family 14번째 재발. 두 파일 헤드라인에 `verifiedGames < SMALL_SAMPLE_N` 조건부 "소표본(n<5)" 힌트 추가. 회귀 테스트 `silent-drift-cycle-2573.test.ts` 신규(3 assertion). `tsc --noEmit`/`test`(536 files/4384 tests)/`lint` 전부 clean. VERSION 0.5.62.130. PR 없이 직접 main commit+push (R4).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 미감사 후보(en/ 다국어 미러, mlb/insights 계열) 순회 또는 gap 근접 chain(op-analysis 12/25, info-arch 26/30) 자연 발화.
+
+---
+
 ## 🔁 RETRO-ONLY — explore-idea(lite) saturation trigger 12/15 재확인, 신규 후보 없음 (cycle 2572, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 2-chain lock 없음(직전 8사이클 2564-2571 distinct=3: review-code 6+lotto 1+explore-idea 1). fix-incident gap 20+/20 도달 → `gh run list --limit 15` + `--status failure` 재확인: `deploy-drift-alert` 8/23~24 산발 실패 8건이나 8/24 18:56부터 연속 success 자동 회복 지속, 재발 없음 — negative. op-analysis gap 11/25, info-arch gap 25/30, lotto gap 4/30, design-system(DESIGN.md 당일 갱신) 전부 미도달. **explore-idea saturation 직전 15사이클 12/15 충족** (review-code(heavy) 직전 8사이클 6/8 dominance 반영) — 자연 선택, lite quick-recheck 수행(직전 heavy sweep 다수가 이미 후보 소진 확정한 영역이라 전면 재탐색 대신 lite).

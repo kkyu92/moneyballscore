@@ -195,6 +195,11 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
             >
               {pctLabel}
             </p>
+            {review.verifiedGames < SMALL_SAMPLE_N && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                소표본(n&lt;{SMALL_SAMPLE_N})
+              </p>
+            )}
           </div>
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">전월 대비</p>

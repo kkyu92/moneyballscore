@@ -1,3 +1,12 @@
+## v0.5.62.130 — 2026-08-25 (cycle 2573, review-code (heavy): reviews weekly/monthly 헤드라인 적중률 소표본 게이트 추가)
+
+### fix(reviews): `reviews/weekly/[week]` + `reviews/monthly/[month]` 헤드라인 "적중률" 스탯에 소표본(n<5) 인라인 표시 신규 — SMALL_SAMPLE_N family 14번째 재발
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2565-2572 distinct=3: review-code 5+explore-idea 2+lotto 1). fix-incident gap 20+/20 도달 → mandatory 재점검: `gh run list --status failure` 재확인, `deploy-drift-alert` 8/24 17:44 산발 실패 1건이나 8/24 18:56 부터 지속 회복(9연속 success) — negative. op-analysis gap 12/25, info-arch gap 26/30, lotto gap 5/30, explore-idea saturation 11/15, design-system(DESIGN.md 당일 갱신) 전부 미도달. cycle 2572 retro 추천대로 미감사 후보(`insights/[date]`, `predictions/[date]`, `reviews/weekly|monthly`) 순회.
+- 발견: `insights/[date]/page.tsx`(적중률 표시 없음, 대상 아님)와 `predictions/[date]/page.tsx`(SMALL_SAMPLE_N 게이트 이미 적용, cycle 2571 insights/series fix 와 동일 패턴)는 이미 정상. 반면 `reviews/weekly/[week]/page.tsx`·`reviews/monthly/[month]/page.tsx` 는 팀별 성과 테이블(라인 362/352, `smallSample = t.predicted < SMALL_SAMPLE_N`)엔 게이트가 있지만, 페이지 최상단 헤드라인 "적중률"(`review.accuracyRate` 기반 `pctLabel`)엔 표본 크기 무관 렌더링 — 형제 페이지(`predictions/[date]`, `insights/series/[topic]`)와 대조적. ISO 캘린더 주/월 경계(시즌 개막 주 개막일이 주중, 올스타 휴식주, 시즌 종료월 등)엔 `verifiedGames` < 5 가능.
+- 실행: 두 파일 헤드라인 "적중률" `<div>` 안 `review.verifiedGames < SMALL_SAMPLE_N` 조건부 "소표본(n&lt;5)" 인라인 힌트 추가(형제 페이지 문구 컨벤션 재사용). 회귀 테스트 `silent-drift-cycle-2573.test.ts` 신규(3 assertion, `app/reviews/__tests__/`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(536 files/4384 tests) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.129 — 2026-08-25 (cycle 2565, review-code (heavy): `MlbAccuracyDashboard.tsx` 팀 테이블 게이트 로컬 shadow 상수 제거)
 
 ### refactor(accuracy): `MlbAccuracyDashboard.tsx` 팀별 성과 테이블 게이트가 로컬 `TEAM_TABLE_MIN_N=3` 대신 import 된 `MIN_TEAM_PREDICTIONS` 재사용 — MIN_TEAM_PREDICTIONS family 재발
