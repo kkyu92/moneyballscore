@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) reviews weekly/monthly 헤드라인 적중 색상 drift 정정 (cycle 2585, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2577-2584 distinct=3: review-code 6+polish-ui 1+info-arch 1). fix-incident gap 21/20 mandatory 재점검(gh run list 전부 success/skipped/in_progress) — negative. op-analysis gap 24/25, lotto gap 17/30, info-arch gap 8/30 미도달. explore-idea saturation 14/15 4연속 재소진(TODOS Next-Up 사용자영역 1-line만, plan#29 Tier4, GH issue 0). DESIGN.md mtime git checkout 부작용 — negative. cycle 2584 carry-over(reviews weekly/monthly 미감사) 정독.
+
+발견: `reviews/weekly/[week]/page.tsx`(529줄) + `reviews/monthly/[month]/page.tsx`(486줄) 전수 정독 — 헤드라인 "적중"/"적중률"/"전월 대비" 스탯 색상이 weekly=`text-brand-500`(cycle 240 도입) vs monthly=`text-brand-600 dark:text-brand-400`(cycle 250 도입)로 불일치. `git log -S` 확인 결과 두 사이클이 각각 독립적으로 `text-green-*` → brand 토큰 마이그레이션 수행하며 서로 다른 shade로 landing — DESIGN.md "적중 표시 = brand-500" family(cycle 50/65/456/744/2563) 6번째 재발. monthly "강수렴 픽" 라벨은 이미 weekly와 동일해 범위 밖.
+
+실행: monthly 헤드라인 3곳(적중/적중률/전월대비) `text-brand-500` 정렬. `silent-drift-cycle-2585.test.ts` 신규(positive 2 + negative 1 assertion). tsc/lint/vitest(541/4406, +1/+3) 전부 clean. 단일 논리 단위 1-commit 직접 main push(R4/R7), pre-push guard clean, CI green 실측 확인(run 32798841453).
+
+다음 사이클 추천 = operational-analysis(gap 24/25, 근접 — 자연 도달 예상). review-code(heavy) 미감사 후보는 predictions/insights/[date] + HighlightCard family(2584) + weekly/monthly 헤드라인(2585)까지 소진 — 다음 review-code 세션은 새 영역(reviews hub 자체 또는 mlb 계열 review 라우트) 재탐색 필요.
+
+---
+
 ## 🔁 RETRO-ONLY — review-code(heavy) predictions/insights [date] 라우트 + HighlightCard/MlbHighlightCard 정독, 신규 fix 없음 (cycle 2584, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 2-chain lock 없음(직전8=2576-2583 distinct=3: review-code 6+polish-ui 1+info-arch 1). fix-incident gap 정확히 20/20 도달 → mandatory 재점검(`gh run list --limit 15` 전부 success/skipped/in_progress, CI failure 0건) — negative. op-analysis gap 23/25, lotto gap 16/30, info-arch gap 7/30 미도달. explore-idea saturation 14/15 충족되나 4-source 재확인(신규라우트 mtime -7 = 전체 반환, git checkout 부작용 / TODOS Next-Up 신규 리드 없음 / plan #29 Tier4 그대로 / GH issue 0) — negative, 3연속(2567/2572/2584) 재소진 확인. DESIGN.md mtime 당일 = 동일 git checkout 부작용 — design-system negative. 잔여 chain 전부 미충족 → review-code(heavy) dominance-positive streak 정합, cycle 2569/2582 carry-over "미감사 후보"(`insights/[date]`, `predictions/[date]`, `reviews/weekly|monthly/[..]`) 순회 대상 정독.
