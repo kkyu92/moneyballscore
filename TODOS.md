@@ -1,3 +1,13 @@
+## ✅ SUCCESS — info-architecture-review breadcrumb 의도된 누락 문서 drift 정정 (cycle 2577, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain alternation lock 감지(직전 8사이클 2569-2576 distinct=2: review-code 7+explore-idea 1) → 두 chain 후보 제외. info-architecture-review gap = 정확히 30 cycle(마지막 발화 cycle 2547) → trigger 9 자연 충족, lock fallback(polish-ui 강제) 불필요.
+
+실행: `grep -L Breadcrumb` 전 라우트 재점검(18건) — routes mtime -7 signal은 git checkout 광범위 touch로 신뢰 불가 확인 후 배제. 18건 전부 실사 대조: 기존 문서화 11건(`/`, `/debug/*` 8, `/reviews/weekly`, `/reviews/monthly`) 일치. 신규 7건 발견 — `mlb/reviews/weekly`·`mlb/reviews/monthly`·`en/mlb/reviews/weekly`·`en/mlb/reviews/monthly`(KBO 미러와 동일 redirect-only 패턴) + `community`·`login`·`settings`(전부 `robots: noindex`, "박제 중" placeholder, nav 미링크 — `/debug/*`와 동일 성격). 코드 결함 아닌 `docs/design/ia-hierarchy.md` "의도된 누락" 섹션이 cycle 1020 이후 미갱신된 문서 drift로 판명. 7개 라우트 문서 추가 + 자가검증 라인 갱신. docs-only 변경 — lint/type-check/test(pre-push hook) 전부 clean. PR 없이 직접 main commit+push(R4/R7), commit 89475da5.
+
+다음 사이클 추천 = 2-chain lock 해제됨(이번 cycle 다양성 확보) → review-code(heavy) 계속 가능 또는 op-analysis(gap 16/25). 별도 후속 후보 = ia-hierarchy.md "현 사용 라우트" 목록 자체가 mlb/en 도메인 전체 미포함 상태 — 전면 재작성은 이번 스코프 외, 다음 info-arch 사이클 후보로 carry-over.
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES 신규 미감사 지점 0건 (cycle 2576, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2568-2575 distinct=3: review-code 6+lotto 1+explore-idea 1). fix-incident gap 20+/20 도달 → mandatory 재점검: `deploy-drift-alert` 8/24 17:44 이후 신규 실패 0건 — negative. op-analysis gap 15/25, info-arch gap 29/30(임박), lotto gap 8/30(2026-08-29 picks 이미 박제 + 2026-08-22 result 이미 검증 — negative), explore-idea saturation 11/15, DESIGN.md 당일 갱신 전부 미도달. cycle 2575 retro 추천대로 review-code(heavy) 잔여 미감사 후보 순회.
