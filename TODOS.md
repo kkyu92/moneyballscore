@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 버튼/인풋/캘린더셀 border-radius 최종 정리 (cycle 2604, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2596-2603) distinct=5 — 2-chain lock 없음. op-analysis gap 19/25, info-arch gap 18/30, lotto gap 6/30, design-system 전부 미도달. cycle 2603 retro 1순위 추천("잔여 rounded-md 33건 후속") 채택.
+
+**cycle 2603 결론 정정**: 2603은 "버튼/인풋/캘린더 셀은 재확인 결과 진짜 md tier — 드리프트 아님"으로 결론냈으나 오판. Tailwind `rounded-md`는 6px이지 DESIGN.md md tier(8px)가 아님 — DESIGN.md에 이미 있던 `lg: 12px(rounded-xl)`/`xl: 16px(rounded-2xl)` 주석이 "tier명은 Tailwind suffix명보다 1-notch 아래"임을 증명하는데, sm/md 행엔 그 주석이 없어 2603이 이 패턴을 놓침. 실측 재확인 28건(2602/2603 제외분) 중 guide/methodology.tsx(버튼, 이미 rounded-lg 사용 중인 twin), matchup 테이블 wrapper(rounded-lg twin), analysis.tsx notice box(rounded-lg twin), PWAInstallButton/WeeklyTrendMini(작은 팝오버 rounded-lg twin) 등 다수 쌍둥이 비교로 25건이 실제로는 drift임을 확정.
+
+실행: 25건(MLB 분석/게임 hub 링크 버튼 8곳, 캘린더 날짜 셀 6곳, skip-link 1곳, leaderboard 탭 1곳, about 정보박스 1곳, v2-shadow-monitor 3곳, PlaceholderLoginButton/QuantOnlyBadge/SearchForm(2)/navigation-menu 트리거 각 1~2곳) `rounded-md`→`rounded-lg` 정렬. 잔여 3곳(MegaMenu 드롭다운 패널/navigation-menu viewport/SearchClient row-hover)은 대형 드롭다운 패널이라 버튼(rounded-lg) vs 카드(rounded-xl) tier 불명확 — twin 없어 범위 제외, 다음 사이클 후보. DESIGN.md Border radius 스펙에 Tailwind 클래스 매핑 명시 주석 추가(재발 방지) + Decisions Log 갱신. `silent-drift-cycle-2604.test.ts` 신규(5 tests, 전역 rounded-md 잔존 회귀 가드 포함 — 3곳 제외 전체 코드베이스 grep).
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(556 files/4439 tests, +1/+5) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7, pre-push hook lint+type-check+version-sync-guard 통과).
+
+border-radius rounded-md drift family 사실상 소진(cycle 2599 typography 토큰화 → 2602 뱃지 → 2603 알림박스 → 2604 버튼/인풋/캘린더). 다음 사이클 추천 = op-analysis(gap 20/25)/info-arch(gap 19/30) 자연 대기, 또는 review-code(heavy) 신규 카테고리(잔여 3곳 드롭다운 패널 tier 확정, 또는 shadow/focus-ring 스펙 준수 확인).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 알림박스 border-radius 정정 (cycle 2603, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2596-2603 예정) distinct=5 — 2-chain lock 없음. fix-incident negative(gh run list 전부 success/skipped). op-analysis gap 17/25, info-arch gap 16/30, lotto gap 5/30, design-system(DESIGN.md 방금 갱신) 전부 미도달. explore-idea saturation 11/15 미충족. cycle 2602 retro 1순위 추천("잔여 rounded-md 33건 후속") 채택 — 실제로 남은 33건 중 버튼/인풋/캘린더 셀은 재확인 결과 진짜 md tier(링크형 버튼, 카드형 셀)로 드리프트 아님 확인. 대신 별도 grep(bg-amber/yellow/red-50 + rounded-*)로 "알림박스" 카테고리 전수 비교 → 3건 발견.
