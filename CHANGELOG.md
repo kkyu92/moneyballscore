@@ -1,3 +1,12 @@
+## v0.5.62.139 — 2026-08-25 (cycle 2592, review-code (heavy): 빅매치 카드 hover shadow drift 정정 — border-radius axis 완료 후 신규 shadow axis)
+
+### fix(analysis): 오늘의 빅매치 카드 `hover:shadow-xl` → `hover:shadow-md` 정렬 — DESIGN.md 카드 hover 스펙 정정
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2584-2591) distinct=3(review-code 5+op-analysis 1+info-arch 2) — 2-chain lock 없음. fix-incident gap 20+/20 재점검(`gh run list --limit 15` 전부 success/skipped) — negative. op-analysis gap 5/25, lotto gap 23/30, info-arch gap 4/30 미도달. explore-idea saturation 14/15 재확인(TODOS Next-Up 사용자영역만, plan#29 spec_only_deferred, GH issue 0, DESIGN.md mtime 당일=git checkout 부작용) — negative, 5연속 재소진. cycle 2591 carry-over 추천대로 border-radius axis 스윕 완료 판단 후 신규 축(spacing/shadow/focus-ring) 정독.
+- 발견: DESIGN.md Motion 섹션 "카드 hover: transition-shadow (hover:shadow-md)" 대비, 사이트 전체 `hover:shadow-*` 32건 grep — 31건 `hover:shadow-md`(dominant) vs `app/analysis/page.tsx` "오늘의 빅매치" CTA 카드 1건만 `hover:shadow-xl`. 정적 `shadow-*` 클래스도 `shadow-md` 28건 dominant(`shadow-lg` 1건은 skip-link 포커스 상태, 카드 범주 아님 — 범위 밖). 동일 hero-gradient 배경(`from-brand-800 to-brand-700` 계열) 쓰는 `mlb/matchup`/`mlb/accuracy` 헤더는 정적(비클릭) 이라 비교 대상 아니지만, 사이트 유일 인터랙티브 hero 카드가 유일하게 shadow 스펙에서도 이탈 — border-radius family(cycle 2583/2590/2591)와 별개 축, shadow axis 첫 발견.
+- 실행: `hover:shadow-xl` → `hover:shadow-md` 정렬. `silent-drift-cycle-2592.test.ts` 신규(positive + negative assertion).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(546 files/4418 tests, +1/+2) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7).
+
 ## v0.5.62.138 — 2026-08-25 (cycle 2587, info-architecture-review: 로또 `/lotto/check` 헤더 megamenu·footer sitemap 컬럼 누락 정정)
 
 ### fix(nav): `/lotto/check` 를 헤더 로또 megamenu + footer 로또 sitemap 컬럼에 추가 — 3번째 재발 IA gap

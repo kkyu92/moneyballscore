@@ -406,7 +406,7 @@ export default async function AnalysisIndexPage() {
         {todayData.bigMatchId ? (
           <Link
             href={`/analysis/game/${todayData.bigMatchId}`}
-            className="block bg-gradient-to-br from-[var(--color-bg-hero-start)] to-[var(--color-bg-hero-end)] text-white rounded-2xl p-8 hover:shadow-xl transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="block bg-gradient-to-br from-[var(--color-bg-hero-start)] to-[var(--color-bg-hero-end)] text-white rounded-2xl p-8 hover:shadow-md transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {todayData.bigMatchAwayCode && todayData.bigMatchHomeCode && (
               <p className="text-2xl font-bold mb-1">
