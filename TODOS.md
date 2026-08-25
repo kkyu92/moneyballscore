@@ -7220,3 +7220,11 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: SMALL_SAMPLE_N import + verifiedN<5 시 소표본 힌트 span 추가. tsc clean. PR #3068 생성 → R7 --squash --auto --delete-branch → state=MERGED 실측 확인(0aa6087a).
 
 다음 사이클 추천 = review-code(heavy) mlb/insights·en/ 다국어 미러 페이지 순회 계속 또는 operational-analysis(gap 10/25 근접) / info-architecture-review(gap 24/30 근접) 자연 발화.
+
+## ✅ SUCCESS — review-code(heavy) sitemap.ts /search robots.txt disallow 모순 제거 (cycle 2579, 2026-08-25)
+
+발견: cycle 2578까지 review-code(heavy) 3개 카테고리(SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES/factor·pipeline comment-drift) 연속 negative 후 cycle 2578 retro 권고대로 4th 카테고리(sitemap/robots 정합성, 컴포넌트 중복) 순회. Explore agent sweep — `sitemap.ts:54`가 `/search` URL을 인덱싱 대상(weekly, priority 0.5)으로 노출하지만 `robots.ts:18/24/31/38` 전체 UA disallow + `search/page.tsx:38` 자체 noindex 메타 양쪽과 모순. 다른 disallow 경로는 이미 sitemap 미노출 정상 확인. 부가 발견(미처리 carry-over): `sitemap-mlb.test.ts`가 monthly reviews/en-mlb weekly·monthly mirror/insights series 라우트 assertion 부재. 컴포넌트 중복은 대부분 의도적 분리(주석 명시), `MatchupEloChart`/`MlbMatchupEloChart` 1쌍만 90%+ 동일(자체 주석 "props shape 동일") 병합 후보.
+
+실행: `sitemap.ts:54` `/search` entry 제거 + 근거 주석. `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(538 files/4393 tests, 전체 통과, 회귀 없음) + lint clean. VERSION 파일 동기화 누락 pre-push guard 포착 → 2-commit(fix + VERSION sync) 직접 main push (R4). 0.5.62.132→133.
+
+다음 사이클 추천 = review-code(heavy) 후속(sitemap-mlb.test.ts 커버리지 공백 메꾸기) 또는 operational-analysis(gap 19/25 근접).
