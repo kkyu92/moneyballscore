@@ -1,3 +1,13 @@
+## ⚪ RETRO-ONLY — review-code(heavy) SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES 신규 미감사 지점 0건 (cycle 2576, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2568-2575 distinct=3: review-code 6+lotto 1+explore-idea 1). fix-incident gap 20+/20 도달 → mandatory 재점검: `deploy-drift-alert` 8/24 17:44 이후 신규 실패 0건 — negative. op-analysis gap 15/25, info-arch gap 29/30(임박), lotto gap 8/30(2026-08-29 picks 이미 박제 + 2026-08-22 result 이미 검증 — negative), explore-idea saturation 11/15, DESIGN.md 당일 갱신 전부 미도달. cycle 2575 retro 추천대로 review-code(heavy) 잔여 미감사 후보 순회.
+
+실행: `SMALL_SAMPLE_N` 게이트 46개 파일 커버리지 vs `accuracyRate`/`적중률` 텍스트 매칭 70+ 파일 전수 대조. OG-image(`teams/[code]`, `mlb/team/[code]`, `teams` 등) "적중률" 텍스트는 정적 태그 라벨(퍼센트 미노출) 확인 후 제외. `predictions/page.tsx`·`mlb/predictions/page.tsx`(+en 미러)·`accuracy/shadow/page.tsx`·`mlb/games/[date]/[slug]` convergence 위젯은 전부 raw n(분모) 인접 노출 — family 정의(메타/SEO 레이어의 % 단독 노출)와 불일치, 게이트 미적용 정상 확인. `mlb/players/[id]/page.tsx`는 팀 Statcast 페이지(선수 아님) 오탐 확인. `buildMlbMatchupProfile.ts`(8/14 fix)·`buildMlbTeamProfile.ts`(8/24 fix) 모두 `MLB_PRODUCTION_COHORT_RULES` 단일 필터 정상 — KBO `buildMatchupProfile.ts`/`buildTeamProfile.ts`(8/23 `PRODUCTION_COHORT_RULES` 정정)와 별개 네임스페이스로 이미 정합, drift 아님. 신규 미감사 instance 0건 — SMALL_SAMPLE_N family 16회 재발 이후 최초 negative sweep. 실제 발견 없어 코드 변경 강행 X(fabrication 방지).
+
+다음 사이클 추천 = info-arch gap 29/30 → cycle 2577 도달 시 자동 trigger. review-code(heavy) 계속 시 dead-code/주석-코드 불일치 등 다른 silent-drift 카테고리로 scope 확장 필요(두 family 포화 evidence).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 팀/선수 프로필 SEO description 소표본 게이트 (cycle 2575, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2567-2574 distinct=3: review-code 5+explore-idea 2+lotto 1). fix-incident mandatory 재점검(gap 30+): `deploy-drift-alert` 8/24 17:44 이후 6+연속 success, 신규 실패 0건 — negative. op-analysis gap 14/25, info-arch gap 28/30, lotto gap 7/30, explore-idea saturation 11/15, DESIGN.md 당일 갱신 전부 미도달. cycle 2574 retro 추천대로 review-code(heavy) 잔여 미감사 후보 순회.
