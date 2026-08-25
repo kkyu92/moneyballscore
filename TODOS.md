@@ -7362,3 +7362,15 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: `sitemap.ts:54` `/search` entry 제거 + 근거 주석. `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(538 files/4393 tests, 전체 통과, 회귀 없음) + lint clean. VERSION 파일 동기화 누락 pre-push guard 포착 → 2-commit(fix + VERSION sync) 직접 main push (R4). 0.5.62.132→133.
 
 다음 사이클 추천 = review-code(heavy) 후속(sitemap-mlb.test.ts 커버리지 공백 메꾸기) 또는 operational-analysis(gap 19/25 근접).
+
+---
+
+## ✅ SUCCESS — review-code(heavy) 빅매치 카드 hover shadow drift 정정 (cycle 2592, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2584-2591) distinct=3(review-code 5+op-analysis 1+info-arch 2) — 2-chain lock 없음. fix-incident gap 20+/20 재점검(`gh run list` 전부 success/skipped) — negative. op-analysis gap 5/25, lotto gap 23/30, info-arch gap 4/30 미도달. explore-idea saturation 14/15 5연속 재확인 negative(TODOS Next-Up 사용자영역만, plan#29 spec_only_deferred, GH issue 0). cycle 2591 carry-over 추천대로 border-radius axis 스윕 완료 판단 후 신규 축(spacing/shadow/focus-ring) 정독.
+
+발견: DESIGN.md "카드 hover: transition-shadow (hover:shadow-md)" 대비 사이트 전체 `hover:shadow-*` 32건 grep — 31건 `hover:shadow-md` dominant, `app/analysis/page.tsx` 빅매치 CTA 카드 1건만 `hover:shadow-xl`. 정적 `shadow-*` 도 `shadow-md` 28건 dominant(`shadow-lg` 1건은 skip-link 포커스 상태, 카드 범주 아님 — 범위 밖). border-radius family(cycle 2583/2590/2591)와 별개 축, shadow axis 첫 발견.
+
+실행: `hover:shadow-md` 로 정렬, `silent-drift-cycle-2592.test.ts` 신규 2건. `pnpm --filter moneyball exec tsc --noEmit` clean + vitest(546/4418, +1/+2) + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7). 1차 push 시 apps/moneyball/package.json 만 bump하고 루트 package.json+VERSION 누락 → version-sync-guard pre-push hook 이 정상 차단, 즉시 3-way 동기화 후속 커밋(a614ddc5)으로 해결.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 focus-ring axis(`focus-visible:outline` 계열) 신규 정독, 또는 op-analysis(gap 6/25)/lotto(gap 24/30) 자연 대기.
