@@ -182,7 +182,7 @@ export default async function ShadowAccuracyPage() {
         </p>
         <div
           role="status"
-          className="rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200"
+          className="rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200"
         >
           <strong>내부 evidence cohort 입니다.</strong> 실제 예측은{" "}
           <Link href="/predictions" className="underline">예측 기록</Link> 에서 확인하세요.

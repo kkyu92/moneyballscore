@@ -137,7 +137,7 @@ export default async function V2PreviewPage() {
         </p>
         <div
           role="status"
-          className="rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200"
+          className="rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200"
         >
           <strong>내부 시뮬레이션입니다.</strong> 실제 예측은{" "}
           <Link href="/predictions" className="underline">
