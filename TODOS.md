@@ -1,3 +1,15 @@
+## ✅ SUCCESS — polish-ui(2-chain lock fallback) contact 메일 쓰기 CTA border-radius 정정 (cycle 2595, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2587-2594) distinct=2(review-code 7+info-arch 1) → 2-chain lock 탐지(cycle 225 룰). 잠긴 두 chain 제외 후 재평가: fix-incident negative(gh run list 전부 success/skipped), op-analysis gap 9/25, lotto gap 27/30(픽스/결과 이미 박제), design-system negative(DESIGN.md mtime 당일=git checkout 부작용), explore-idea saturation 14/15 재확인(plan#29 여전히 postseason/participation≥10 게이트 미충족) — 전부 negative. 룰에 따라 polish-ui 강제 발화.
+
+발견: 사이트 전역 primary 버튼(bg-brand-500/600) family 13건 전수 확인 — 전부 rounded-lg(DESIGN.md "md: 8px — 버튼, 인풋" 일치). contact/page.tsx 문의 유형 "메일 쓰기" mailto CTA 만 유일하게 rounded-md — 같은 li 컨테이너(rounded-lg)와도, family 전체와도 이탈.
+
+실행: rounded-md→rounded-lg 정렬. silent-drift-cycle-2595.test.ts 신규(app/contact/__tests__). tsc clean + vitest 551/4426(+1/+1) + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7), pre-push guard(lint+type-check+version-sync-guard+smoke) 통과, CI green 실측 확인.
+
+다음 사이클 추천 = review-code(heavy)/info-arch 2-chain lock cooldown(N=1) 적용 중이니 잔여 pool(op-analysis gap 10/25, lotto gap 28/30) 자연 대기 또는 polish-ui 축 신규 정독(typography scale 문서-vs-실제 gap, transition-all 33건 등 미확정 후보 — 이번 cycle엔 risk/scope 판단상 보류).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) FactorBreakdown 카드 spacing/배경 drift 정정 (cycle 2594, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(전수 재확인 — 전부 completed/archived/superseded). 직전8(2586-2593) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gh run list 전부 success — negative. op-analysis gap 8/25, lotto gap 26/30(픽스/결과 이미 박제됨) — negative. info-arch gap 7/30 미도달. cycle 2593 carry-over 추천대로 focus-ring axis 스윕 완료 판단 후 spacing axis 신규 정독.
