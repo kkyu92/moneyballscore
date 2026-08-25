@@ -7452,3 +7452,15 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 실행: `pnpm tsx scripts/lotto.ts count` — valid=7,705,415 / total=8,145,060 / removed=5.40% (96.4s). cycle 2478→2508→2538→2598 4연속 완전 동일값 = 256규칙 saturation 구조적 안정 재확인, valid_delta=0. 2026-08-29 픽 50세트(1239회)는 cycle 2538에 이미 shipped, 2026-08-22 결과(1238회) OOS도 이미 완비 — 다음 추첨(08-29) 미도래로 신규 액션 없음. 신규 코드 변경 없음(측정 only).
 
 다음 사이클 추천 = review-code(heavy, 잔존 typography arbitrary-value sprawl 165건 design-system 후보 검토) 또는 operational-analysis(gap 12/25 근접).
+
+## ✅ SUCCESS — polish-ui(carry-over) text-[11px] 46건 --text-2xs 흡수 (cycle 2600 milestone, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2592-2599) distinct=5(review-code 4+polish-ui 1+dimension-cycle 1+lotto 1+design-system 1) — 2-chain lock 없음. fix-incident negative(gh run list 전부 success/skipped). op-analysis gap 14/25, info-arch gap 13/30 미도달. explore-idea saturation 11/15 미충족. lotto/design-system 둘 다 직발화 직후 gap 낮음. cycle 2599 retro 가 명시 추천한 carry-over(`text-[11px]` 46건, DESIGN.md "미해결" 항목) 채택. **cycle_n % 50 == 0 milestone — trigger 3 (다른 trigger 결과 무관 즉시 마커 박제, cycle 2051 사례19 룰).**
+
+발견: `text-[11px]` 46건(21개 프로덕션 파일) 전수 확인 — 전부 캡션/보조 라벨/티어 텍스트 역할, DESIGN.md 2xs(10px, "미니 캡션/보조 라벨 — 실사용 최다 빈도") 정의와 완전히 동일한 역할. 10px/11px 1px 차이는 시각적으로 무의미 — 신규 토큰 승격 시 3xs/2xs/신규/xs 4단으로 스케일만 파편화.
+
+실행: `text-[11px]` → `text-2xs` 46건 치환(22 파일, 대괄호 라우트 경로(`[id]`/`[date]`/`[slug]`/`[year]`) 포함 — word-splitting glob 오인 최초 실패 후 `grep -rlZ`+NUL+`while read` 로 재시도 해결). DESIGN.md "(미해결)"→"(해결)" 갱신. `polish-ui-cycle-2600-11px-absorption.test.ts` 신규. `pnpm --filter moneyball exec tsc --noEmit` clean + vitest(553/4429, +1/+1) + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro 마지막 step). 다음 사이클(2601) = skill-evolution 강제 발화(자율 X).
+
+다음 사이클 이후 추천 = review-code(heavy) 또는 op-analysis(gap 15/25)/info-arch(gap 14/30) 자연 발화.
