@@ -115,7 +115,7 @@ export default function V2ShadowMonitorPage() {
       </header>
 
       {!latest && (
-        <section className="rounded-md border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-900 px-4 py-6 text-sm text-brand-700 dark:text-brand-200">
+        <section className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-900 px-4 py-6 text-sm text-brand-700 dark:text-brand-200">
           최신 cohort 데이터를 찾을 수 없습니다. 다음 op-analysis 갱신 시
           반영됩니다.
         </section>
@@ -150,7 +150,7 @@ export default function V2ShadowMonitorPage() {
               >
                 {table.heading}
               </h3>
-              <div className="overflow-x-auto rounded-md border border-brand-200 dark:border-brand-800">
+              <div className="overflow-x-auto rounded-lg border border-brand-200 dark:border-brand-800">
                 <table className="min-w-full text-sm">
                   <thead className="bg-brand-50 dark:bg-brand-900 text-brand-700 dark:text-brand-200">
                     <tr>
@@ -201,7 +201,7 @@ export default function V2ShadowMonitorPage() {
         </section>
       )}
 
-      <section className="rounded-md border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-900/40 px-4 py-5 space-y-3 text-sm text-brand-800 dark:text-brand-200">
+      <section className="rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-900/40 px-4 py-5 space-y-3 text-sm text-brand-800 dark:text-brand-200">
         <h2 className="text-base font-semibold text-brand-900 dark:text-brand-100">
           더 자세히 알아보기
         </h2>

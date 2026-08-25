@@ -174,7 +174,7 @@ export default async function CalendarPage() {
               return (
                 <div
                   key={cell.date}
-                  className="aspect-square rounded-md border border-transparent flex flex-col items-center justify-center text-xs opacity-40"
+                  className="aspect-square rounded-lg border border-transparent flex flex-col items-center justify-center text-xs opacity-40"
                 >
                   <span className="text-gray-300 dark:text-gray-700">
                     {cell.dayOfMonth}
@@ -193,7 +193,7 @@ export default async function CalendarPage() {
                 aria-label={`${cell.date} 예측 ${cell.totalPredictions}경기${cell.verifiedN > 0 ? ` 적중률 ${Math.round((cell.correctN / cell.verifiedN) * 100)}%` : ''}`}
                 data-calendar-date={cell.date}
                 data-has-data={hasData ? 'true' : 'false'}
-                className={`aspect-square rounded-md border border-gray-100 dark:border-[var(--color-border)] flex flex-col items-center justify-center gap-0.5 text-xs hover:border-brand-500 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 transition-transform ${cellClass}`}
+                className={`aspect-square rounded-lg border border-gray-100 dark:border-[var(--color-border)] flex flex-col items-center justify-center gap-0.5 text-xs hover:border-brand-500 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 transition-transform ${cellClass}`}
               >
                 <span className="font-medium">{cell.dayOfMonth}</span>
                 {hasData && (

@@ -101,7 +101,7 @@ export default async function MlbAnalysisPage() {
           <p className="text-brand-600 dark:text-brand-300">오늘 MLB 경기가 없습니다.</p>
           <Link
             href="/mlb"
-            className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
           >
             MLB 분석 hub
           </Link>

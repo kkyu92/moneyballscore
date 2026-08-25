@@ -96,7 +96,7 @@ export default async function MlbAnalysisPageEn() {
           <p className="text-brand-600 dark:text-brand-300">No MLB games today.</p>
           <Link
             href="/en/mlb"
-            className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
           >
             MLB Analysis hub
           </Link>

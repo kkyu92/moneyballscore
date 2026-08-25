@@ -5,7 +5,7 @@ export function PlaceholderLoginButton() {
         type="button"
         disabled
         aria-describedby="login-eta-hint"
-        className="px-3 py-1.5 rounded-md bg-brand-100 dark:bg-brand-900 text-brand-400 text-xs cursor-not-allowed opacity-60"
+        className="px-3 py-1.5 rounded-lg bg-brand-100 dark:bg-brand-900 text-brand-400 text-xs cursor-not-allowed opacity-60"
       >
         로그인
       </button>

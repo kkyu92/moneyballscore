@@ -77,11 +77,12 @@
   - Desktop (lg): 3 columns
 - **Max content width:** 1200px (max-w-6xl)
 - **Border radius:**
-  - sm: 4px — 뱃지, 인라인 태그
-  - md: 8px — 버튼, 인풋
-  - lg: 12px — 카드 (rounded-xl)
-  - xl: 16px — 히어로 섹션 (rounded-2xl)
-  - full: 9999px — 팀 로고, 뱃지 (rounded-full)
+  - sm: 4px — 뱃지, 인라인 태그 (Tailwind `rounded`)
+  - md: 8px — 버튼, 인풋 (Tailwind `rounded-lg`)
+  - lg: 12px — 카드 (Tailwind `rounded-xl`)
+  - xl: 16px — 히어로 섹션 (Tailwind `rounded-2xl`)
+  - full: 9999px — 팀 로고, 뱃지 (Tailwind `rounded-full`)
+  - **주의**: Tailwind 자체 `rounded-md`(6px) 클래스는 위 tier 어디에도 대응하지 않음 — 스펙 tier 이름(sm/md/lg/xl)과 Tailwind suffix 이름이 1-notch 밀려 있음 (sm→`rounded`, md→`rounded-lg`, lg→`rounded-xl`, xl→`rounded-2xl`). `rounded-md` 리터럴 사용 발견 시 항상 drift — sm(4px, `rounded`) 또는 md(8px, `rounded-lg`) 중 역할에 맞게 정렬 (cycle 2602/2603/2604 반복 발견).
 
 ## Motion
 - **Approach:** Minimal-functional
@@ -137,6 +138,7 @@
 | 2026-08-25 | "오늘의 탑픽"(`isTopPick`) 배지 3-way drift 정정 → accent gold(`var(--color-accent)`) 통일 | DESIGN.md "Accent — 빅매치 뱃지, **승률 하이라이트**, 프리미엄 강조" 문구가 정확히 지칭하는 배지인데도 실제로는 3갈래로 흩어져 있었음: `app/analysis/page.tsx`(wave-377, KBO 원본) = `amber-300/500` / `mlb/analysis`+`mlb/games/[date]`+`en` 미러 4곳(wave-624, plan28 포팅) = `brand-500/400`. 같은 파일 안 바로 위 `isBig`("⭐ 빅매치") 배지는 이미 `var(--color-accent)` 정렬돼 있어 대조군 역할 — 두 배지가 인접 조건분기인데 색 체계가 서로 다른 채 방치. amber 는 factor 수렴 10/10 tier(2026-07-18 결정, 별개 의미)와 우연히 같은 hue 라 혼동 소지도 있었음. 5개 파일(`analysis/page.tsx` + mlb/en mlb 4미러) 전부 `border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20~30`(+텍스트 라벨) 정렬. `wave-624-mlb-games-top-pick.test.ts` 옛 클래스 assertion 갱신 + `silent-drift-cycle-2581.test.ts` 신규(5파일×2 assertion). cycle 2581 polish-ui (2-chain lock fallback). |
 | 2026-08-25 | 통계 뱃지/태그 border-radius `rounded-md`(6px) → `rounded`(4px) 정렬 (silent drift, cycle 2602 review-code heavy) | Border radius 스펙 sm(4px)=뱃지·태그 / md(8px)=버튼·인풋. `analysis/page.tsx` `isComplete`/`isBig` 팩터 수렴 배지(2026-07-18 박제)는 이미 plain `rounded`(4px) 사용 중인데, MLB `factors`/`players`/`players/[id]`/`standings`(KBO+EN 미러) 통계 값 뱃지 + `glossary`/`TableOfContents` 앵커 태그 + `MatchupFactorCompare`/`MlbMatchupFactorCompare` 비교 셀 강조는 `rounded-md`(6px, 버튼 tier)를 사용 — 같은 "뱃지" 역할인데 KBO 원본과 MLB 미러 사이 1-notch 이탈. 18곳(10파일) `rounded`로 정렬. 버튼/인풋/드롭다운/알림박스/캘린더 셀 역할의 잔여 `rounded-md` 33건은 별도 역할(md tier 후보)이라 범위 제외 — 다음 사이클 후보. `silent-drift-cycle-2602.test.ts` 신규. |
 | 2026-08-25 | 알림박스(notice/warning box) border-radius `rounded-md`(6px) → 카드 tier 정렬 (silent drift, cycle 2603 review-code heavy) | cycle 2602 이 범위 제외한 "알림박스" 후속. amber/yellow 배경 알림박스 ~29곳 중 대다수가 `rounded-lg`(8px)/`rounded-xl`(12px, 스펙상 "카드" tier)를 쓰는데 3곳만 `rounded-md`(6px, 버튼 tier) 잔존 — 각각 직접 대응하는 쌍둥이 컴포넌트와 비교해 1-notch 이탈 확인. `accuracy/shadow/page.tsx`(role="status" 옐로 박스) + `v2-preview/page.tsx`(동일 패턴, `debug/silent-drift/page.tsx` 옐로 박스와 색상 토큰 동일하나 radius 만 상이) → `rounded-xl`. `mlb/factors/page.tsx` MLB placeholder 경고 (`TeamBiasTable.tsx` 와 className 거의 동일한 인라인 텍스트 스트립) → `rounded-lg` (쌍둥이 정렬). `silent-drift-cycle-2603.test.ts` 신규. |
+| 2026-08-25 | 버튼/인풋/캘린더 셀/알림박스 잔여 border-radius `rounded-md`(6px) 25건 → `rounded-lg`(8px, md tier) 정렬 (silent drift 최종 정리, cycle 2604 review-code heavy) | cycle 2602 가 "버튼/인풋/드롭다운/알림박스/캘린더 셀" 33건을 범위 제외로 이연 — 실측 재확인 28건(cycle 2603 3건 처리 후 잔여). 근본원인 규명: Tailwind 자체 `rounded-md`(6px) 는 스펙 tier(sm 4px/md 8px/lg 12px/xl 16px) 어디에도 대응 안 함 — tier 이름과 Tailwind suffix 가 1-notch 밀려있는 네이밍 충돌(Border radius 스펙 섹션에 주의문 추가). 쌍둥이 비교로 25건 확정: MLB 분석/게임 페이지 "hub 바로가기"/"최고 픽" 링크 버튼 8곳(guide/methodology.tsx `rounded-lg` 버튼 패턴과 동일 twin), 캘린더 날짜 셀 6곳(KBO 원본+MLB 미러, interactive cell), `skip-to-content` 링크 1곳, leaderboard 탭 토글 1곳, `about` 정보 박스 1곳(analysis.tsx:390 notice box twin), `v2-shadow-monitor` 섹션 3곳(analysis.tsx notice box + `matchup/[teamA]/[teamB]` 테이블 wrapper twin), `PlaceholderLoginButton`/`QuantOnlyBadge`(작은 팝오버, PWAInstallButton/WeeklyTrendMini twin)/`SearchForm`(인풋+버튼)/`navigation-menu.tsx` 트리거 버튼 각 1~2곳. 잔여 3곳(`MegaMenu.tsx` 드롭다운 패널, `navigation-menu.tsx` viewport 래퍼, `SearchClient.tsx` row-hover)은 "대형 드롭다운 패널" 역할이라 버튼(rounded-lg)/카드(rounded-xl) 어느 tier 인지 twin 불명확 — 범위 제외, 다음 사이클 후보. `silent-drift-cycle-2604.test.ts` 신규. |
 
 ## MLB IA (implemented — cycle 2162 정정)
 

@@ -43,7 +43,7 @@ export function SearchForm({ initialQuery = '', compact = false }: Props) {
         aria-label={isEn ? 'Search query' : '검색어'}
         className={
           compact
-            ? 'w-36 sm:w-48 text-sm bg-brand-700/40 placeholder:text-brand-200/60 text-white border border-brand-700 rounded-md px-3 py-1.5 focus:outline-none focus:border-accent'
+            ? 'w-36 sm:w-48 text-sm bg-brand-700/40 placeholder:text-brand-200/60 text-white border border-brand-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-accent'
             : 'flex-1 min-w-0 px-3 py-2 bg-transparent focus:outline-none text-base'
         }
         autoComplete="off"
@@ -52,7 +52,7 @@ export function SearchForm({ initialQuery = '', compact = false }: Props) {
         type="submit"
         className={
           compact
-            ? 'text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-md px-3 py-1.5 transition-colors'
+            ? 'text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg px-3 py-1.5 transition-colors'
             : 'text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-4 py-2 transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
         }
       >

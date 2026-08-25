@@ -43,7 +43,7 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-[var(--color-surface)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--color-brand-50)] hover:text-[var(--color-brand-700)] focus:bg-[var(--color-brand-50)] focus:text-[var(--color-brand-700)] focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-[var(--color-brand-100)] data-[state=open]:bg-[var(--color-brand-100)] dark:hover:bg-[var(--color-brand-800)] dark:hover:text-[var(--color-brand-100)] dark:focus:bg-[var(--color-brand-800)] dark:focus:text-[var(--color-brand-100)] dark:data-[active]:bg-[var(--color-brand-800)] dark:data-[state=open]:bg-[var(--color-brand-800)]",
+  "group inline-flex h-10 w-max items-center justify-center rounded-lg bg-[var(--color-surface)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--color-brand-50)] hover:text-[var(--color-brand-700)] focus:bg-[var(--color-brand-50)] focus:text-[var(--color-brand-700)] focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-[var(--color-brand-100)] data-[state=open]:bg-[var(--color-brand-100)] dark:hover:bg-[var(--color-brand-800)] dark:hover:text-[var(--color-brand-100)] dark:focus:bg-[var(--color-brand-800)] dark:focus:text-[var(--color-brand-100)] dark:data-[active]:bg-[var(--color-brand-800)] dark:data-[state=open]:bg-[var(--color-brand-800)]",
 );
 
 const NavigationMenuTrigger = React.forwardRef<

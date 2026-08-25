@@ -124,7 +124,7 @@ export default async function LeaderboardPage({
                 role="tab"
                 aria-selected={active}
                 prefetch={false}
-                className={`flex-1 py-1.5 text-sm font-medium rounded-md text-center transition-colors ${
+                className={`flex-1 py-1.5 text-sm font-medium rounded-lg text-center transition-colors ${
                   active
                     ? 'bg-white dark:bg-[var(--color-surface-card)] shadow-sm text-brand-700 dark:text-brand-300'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'

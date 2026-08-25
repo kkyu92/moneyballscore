@@ -120,7 +120,7 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
       {topPick && (
         <a
           href={`#pick-${topPick.external_game_id}`}
-          className="inline-flex items-center gap-2 rounded-md border border-brand-400 dark:border-brand-600 bg-brand-50 dark:bg-[var(--color-surface-card)]/50 px-3 py-1.5 text-sm text-brand-700 dark:text-brand-200 hover:border-brand-500 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border border-brand-400 dark:border-brand-600 bg-brand-50 dark:bg-[var(--color-surface-card)]/50 px-3 py-1.5 text-sm text-brand-700 dark:text-brand-200 hover:border-brand-500 transition-colors"
         >
           최고 자신감 픽 — {topPick.winnerCode} {topPick.conf}% 보러가기 ↓
         </a>
@@ -132,13 +132,13 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
           <div className="flex flex-wrap gap-2">
             <Link
               href="/mlb"
-              className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
             >
               MLB 분석 hub
             </Link>
             <Link
               href="/"
-              className="inline-flex items-center gap-1 rounded-md border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg border border-brand-300 dark:border-brand-700 px-3 py-1.5 text-sm hover:border-brand-500 transition-colors"
             >
               오늘 KBO 분석
             </Link>

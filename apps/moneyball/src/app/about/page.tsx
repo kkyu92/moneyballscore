@@ -336,7 +336,7 @@ export default async function AboutPage() {
               {deprecatedFactors.map((factor) => (
                 <div
                   key={factor.key}
-                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-md border border-gray-200 dark:border-[var(--color-border)] opacity-75"
+                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] opacity-75"
                 >
                   <div className="flex items-center gap-2 min-w-[120px]">
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
