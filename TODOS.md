@@ -1,3 +1,15 @@
+## 🔁 RETRO-ONLY — review-code(heavy) transition-all/typography 축 정독, 신규 fix 없음 (cycle 2597, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2589-2596) distinct=3(review-code 6+polish-ui 1+dimension-cycle 1) — 2-chain lock 해소(cycle 2596 cooldown N=1 만료, 신선 재평가). fix-incident gap 71/20 도달했으나 `gh run list --limit 40` JSON 전수(conclusion) 확인 — success/skipped 외 0건, negative. op-analysis gap 11/25, lotto gap 29/30(픽스 `2026-08-29-50sets.md`+결과 `2026-08-22-result.md` 이미 박제, 데이터 신선 2일) — 둘 다 미도달. info-arch gap 10/30 미도달. explore-idea saturation 13/15 충족되나 TODOS 안 별도 Next-Up 섹션 부재 + GH issue 0 + plan#29 Tier 4(risk=3, 자율 가능 no, 사용자 영역) 재확인 — negative. cycle 2595 carry-over 후보(typography scale 문서-vs-실제 gap, transition-all 33건) 정독.
+
+발견: `transition-all` 33건 중 26건(progress bar `width` 애니메이션 7건 제외)이 카드 hover `hover:shadow-md` + `hover:border-brand-500/50` 동시 변경 패턴으로 KBO/MLB/EN 전체(teams/players/standings/team/wild-card/misses 등)에 걸쳐 광범위하게 일관 — DESIGN.md Motion 섹션엔 "카드 hover: transition-shadow" 단일 속성만 문서화돼 있지만 실제로는 border+shadow 동시 변경이 지배적 컨벤션이라 다수(26/33)를 소수 취급해 되돌리는 게 오히려 위험 — 문서 갭이지 코드 drift 아님. progress-bar 7건은 `width` inline-style 애니메이션 대상이라 `transition-all`이 타당(전용 `transition-width` 유틸 부재). 두 그룹 다 내부 일관 — 수정 대상 없음. 별도로 `text-[Npx]` 임의값 165건 확인(9~11px 마이크로 캡션 다수) — DESIGN.md 타이포 스케일(xs 12px~)에 없는 하위 크기지만 규모(165건, 다수 파일)가 단일 사이클 범위를 초과 — 성급한 전수 수정은 scope creep 위험, design-system 차원 후보로만 기록.
+
+실행 없음 — 코드 변경 0. 안전한 negative 확인 (섣부른 "다수→소수" 오분류 회피).
+
+다음 사이클 추천 = op-analysis(gap 12/25) 또는 lotto(gap 30/30 도달 예상, 회차 갱신 확인 필요) 자연 발화 대기, 또는 typography 임의값 165건 카탈로그를 design-system chain spec 후보로 승격 검토.
+
+---
+
 ## ⚪ PARTIAL (retro-only) — dimension-cycle(2-chain lock fallback) site/acquisition 진단, gap 없음 (cycle 2596, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2588-2595) distinct=2(review-code 7+polish-ui 1) → 2-chain lock 재탐지. 잠긴 두 chain 제외 후 재평가: fix-incident negative(gh run list --limit 30, scheduled workflow health-alert/runtime-error-alert/deploy-drift-alert 전부 success), op-analysis gap 10/25, lotto gap 28/30, info-arch gap 9/30 전부 미도달, explore-idea saturation 14/15 충족되나 plan#29 게이트 미충족 재확인 — negative. 룰 3의 fallback(polish-ui) 자체가 이번엔 locked라 dimension-cycle(site/acquisition) 로 대체 진단.
