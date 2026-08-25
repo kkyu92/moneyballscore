@@ -196,7 +196,7 @@ export default function MlbPlayersHubEn() {
           <h2 id="teams-heading" className="text-xl font-bold">
             {MLB_TEAM_COUNT} Teams
           </h2>
-          <span className="text-xs px-2 py-1 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 shrink-0">
+          <span className="text-xs px-2 py-1 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 shrink-0">
             Team measurements ETA
           </span>
         </div>

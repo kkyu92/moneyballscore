@@ -354,7 +354,7 @@ export default function MlbFactorsHubEn() {
                 <h3 className="font-bold text-brand-700 dark:text-brand-100">
                   {idx + 1}. {factor.label}
                 </h3>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-200 shrink-0 font-mono">
+                <span className="text-xs px-2 py-0.5 rounded bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-200 shrink-0 font-mono">
                   {weightPercent(MLB_BASE_WEIGHTS[factor.key])}
                 </span>
               </div>
@@ -398,7 +398,7 @@ export default function MlbFactorsHubEn() {
                 <h3 className="font-bold text-brand-700 dark:text-brand-100">
                   {idx + 11}. {factor.label}
                 </h3>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-200 shrink-0 font-mono">
+                <span className="text-xs px-2 py-0.5 rounded bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-200 shrink-0 font-mono">
                   {weightPercent(MLB_BASE_WEIGHTS[factor.key])}
                 </span>
               </div>
@@ -430,7 +430,7 @@ export default function MlbFactorsHubEn() {
         >
           <div className="flex items-baseline justify-between gap-2">
             <h3 className="font-bold text-amber-800 dark:text-amber-200">{HOME_BONUS.label}</h3>
-            <span className="text-xs px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 shrink-0 font-mono">
+            <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 shrink-0 font-mono">
               {weightPercent(MLB_BASE_WEIGHTS.home_elo_bonus)}
             </span>
           </div>

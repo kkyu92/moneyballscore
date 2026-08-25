@@ -177,7 +177,7 @@ export default async function MlbStandingsHubEn() {
                           </div>
                           <span
                             className={
-                              "text-xs px-2 py-1 rounded-md shrink-0 " +
+                              "text-xs px-2 py-1 rounded shrink-0 " +
                               (tone === "hitter"
                                 ? "bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
                                 : tone === "pitcher"

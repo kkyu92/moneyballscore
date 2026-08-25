@@ -256,7 +256,7 @@ export function MlbMatchupFactorCompare({
           return (
             <div key={f.key} className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-sm">
               <div
-                className={`text-right font-mono px-2 py-1 rounded-md transition-colors ${
+                className={`text-right font-mono px-2 py-1 rounded transition-colors ${
                   aWins ? "bg-brand-500/10 dark:bg-brand-500/20" : ""
                 } ${aClass}`}
               >
@@ -285,7 +285,7 @@ export function MlbMatchupFactorCompare({
               </div>
 
               <div
-                className={`text-left font-mono px-2 py-1 rounded-md transition-colors ${
+                className={`text-left font-mono px-2 py-1 rounded transition-colors ${
                   bWins ? "bg-brand-500/10 dark:bg-brand-500/20" : ""
                 } ${bClass}`}
               >

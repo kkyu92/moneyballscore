@@ -219,7 +219,7 @@ export default async function MlbPlayersDetailPageEn({ params }: PageProps) {
                 <p className="text-2xl font-mono font-semibold text-gray-300 dark:text-gray-600">
                   —
                 </p>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-mono">
+                <span className="text-xs px-2 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-mono">
                   Measurement ETA
                 </span>
               </div>

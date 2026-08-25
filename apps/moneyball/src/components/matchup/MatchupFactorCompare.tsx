@@ -159,7 +159,7 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
               className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-sm"
             >
               {/* 팀A 수치 — 우세 시 배경 강조 */}
-              <div className={`text-right font-mono px-2 py-1 rounded-md transition-colors ${
+              <div className={`text-right font-mono px-2 py-1 rounded transition-colors ${
                 aWins ? "bg-brand-500/10 dark:bg-brand-500/20" : ""
               } ${aClass}`}>
                 {a != null ? f.format(a) : "-"}
@@ -191,7 +191,7 @@ export function MatchupFactorCompare({ teamA, teamB, factorA, factorB }: Props) 
               </div>
 
               {/* 팀B 수치 — 우세 시 배경 강조 */}
-              <div className={`text-left font-mono px-2 py-1 rounded-md transition-colors ${
+              <div className={`text-left font-mono px-2 py-1 rounded transition-colors ${
                 bWins ? "bg-brand-500/10 dark:bg-brand-500/20" : ""
               } ${bClass}`}>
                 {b != null ? f.format(b) : "-"}

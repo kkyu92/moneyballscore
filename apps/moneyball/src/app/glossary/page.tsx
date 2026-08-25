@@ -115,7 +115,7 @@ export default function GlossaryPage() {
             <li key={e.id}>
               <a
                 href={`#${e.id}`}
-                className="inline-block px-2.5 py-1 text-xs rounded-md bg-gray-100 dark:bg-[var(--color-surface)] text-gray-700 dark:text-gray-200 hover:bg-brand-100 dark:hover:bg-brand-900 hover:text-brand-700 dark:hover:text-brand-200 transition-colors"
+                className="inline-block px-2.5 py-1 text-xs rounded bg-gray-100 dark:bg-[var(--color-surface)] text-gray-700 dark:text-gray-200 hover:bg-brand-100 dark:hover:bg-brand-900 hover:text-brand-700 dark:hover:text-brand-200 transition-colors"
               >
                 {e.abbr}
               </a>
