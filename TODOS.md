@@ -7142,3 +7142,11 @@ locale/nav 스코프도 Phase 1 KO-only 결정과 일관.
 - SMALL_SAMPLE_N family 13번째 재발: /reviews, /seasons/[year], /mlb/reviews, /en/mlb/reviews 4개 페이지 강수렴/완전수렴 W-L 카드가 total>0 만으로 헤드라인 % 노출 (convergenceRecord.ts 빌더 자체 게이트 부재)
 - fix: SMALL_SAMPLE_N(5) import + "· 소표본(n<5)" / "· small sample (n<5)" 배지 4파일 추가, silent-drift-wave-676.test.ts 신규 4 assertion
 - commit 45db51e2, main 직접 push, pnpm test 534 files/4378 tests(+1/+4) 전체 통과
+
+## ✅ SUCCESS — review-code(heavy) insights/series 매치업 적중률 소표본 게이트 정정 (cycle 2571, 2026-08-25)
+
+발견: cycle 2570 추천대로 insights/[date], predictions/[date], reviews/weekly|monthly 미감사 후보 순회. predictions/[date]·reviews/weekly/[week]·reviews/monthly/[month] 는 SMALL_SAMPLE_N 게이트 이미 적용 확인. insights/series/[topic]/page.tsx (팀간 매치업 적중률, verifiedN/correctN) 만 형제 페이지들과 달리 게이트 누락 — silent drift family 재발 확인.
+
+실행: SMALL_SAMPLE_N import + verifiedN<5 시 소표본 힌트 span 추가. tsc clean. PR #3068 생성 → R7 --squash --auto --delete-branch → state=MERGED 실측 확인(0aa6087a).
+
+다음 사이클 추천 = review-code(heavy) mlb/insights·en/ 다국어 미러 페이지 순회 계속 또는 operational-analysis(gap 10/25 근접) / info-architecture-review(gap 24/30 근접) 자연 발화.
