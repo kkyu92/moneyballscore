@@ -419,7 +419,7 @@ export default async function AnalysisIndexPage() {
             <p className="text-lg font-semibold">상세 분석 보기 →</p>
           </Link>
         ) : (
-          <div className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-2xl p-8 text-center text-gray-500 dark:text-gray-400">
+          <div className="bg-gray-50 dark:bg-[var(--color-surface-card)] rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">
             {todayData.bigMatchMode === 'no-games' ? (
               <>
                 <p className="text-4xl mb-2">😴</p>

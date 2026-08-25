@@ -412,7 +412,7 @@ export default async function ReviewsPage() {
           </div>
         </>
       ) : (
-        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
+        <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-10 text-center">
           <span className="text-5xl block mb-4">📊</span>
           <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
             아직 검증된 예측이 없습니다
