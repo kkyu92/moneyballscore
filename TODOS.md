@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy) MatchupEloChart/MlbMatchupEloChart JSX 중복 제거 (cycle 2582, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8=2574-2581 distinct=3: review-code 6+info-arch 1+polish-ui 1). fix-incident gap 56/20 mandatory 재점검(gh run list 전부 success/skipped/in_progress) — negative. op-analysis gap 21/25, lotto gap 14/30 미도달. explore-idea saturation 12/15 충족되나 4-source 재확인(신규라우트 mtime -7 = git checkout 부작용 전체 반환, TODOS Next-Up 신규 리드 없음, GH issue 0) — negative. DESIGN.md mtime 당일 = 동일 git checkout 부작용 — design-system negative. cycle 2579 발견 carry-over(MatchupEloChart/MlbMatchupEloChart 병합 후보) 처리.
+
+실행: `MatchupEloChart.tsx`(112줄, KBO) vs `MlbMatchupEloChart.tsx`(115줄, MLB) diff = type import/명 3곳뿐, JSX/로직 100% 동일 확인(point shape 구조적으로 완전 동일 `{date, eloA, eloB}`). MLB 쪽을 얇은 wrapper 로 전환(115줄→13줄, KBO 컴포넌트에 위임). 데이터 빌더(`buildMlbMatchupEloTrend`)는 MLB 전용 로직(다운샘플 미적용) 존재해 별개 유지 — 병합 대상은 순수 렌더링 JSX만. cycle 2581 이 KBO/MLB 병렬 컴포넌트 색상 drift 버그를 fix 한 직후라, 렌더링 로직 중복 자체가 다음 drift 재발 지점이라는 판단. tsc/lint/test(539/4402, delta 0 — 전용 컴포넌트 테스트 부재) 전부 clean. 단일 논리 단위 1-commit 직접 main push(R4/R7), version-sync guard 추가 fix 불필요(clean push).
+
+다음 사이클 추천 = op-analysis(gap 22/25, 근접) 또는 lotto(gap 15/30) 자연 발화 대기. border-radius 컨벤션(rounded-lg vs rounded-xl, 102파일) 병합 후보는 100+파일 가드 대상이라 좁은 스코프(신규 라우트만)로 재접근 필요 — review-code 또는 design-system heavy 세션 carry-over 유지.
+
+---
+
 ## ✅ SUCCESS — polish-ui(2-chain lock fallback) "오늘의 탑픽" 배지 accent gold 정렬 (cycle 2581, 2026-08-25)
 
 진단: open issue 0, approved plan 0/29. **2-chain alternation lock 발동**(직전8=2573-2580 distinct=2: review-code 7+info-architecture-review 1) → 둘 다 후보 제외. fix-incident gap 55/20 mandatory 재점검(gh run list 전부 success/skipped) — negative. op-analysis gap 20/25, lotto gap 13/30 미도달. explore-idea saturation 12/15 충족되나 4-source(TODOS Next-Up/GH issue/plan gating/신규라우트) 8 cycle 전(2572) 재확인 negative — 재소진 skip. DESIGN.md mtime 당일(git checkout 영향, 실갱신 아님) — design-system negative. 잔여 chain 전부 미충족 → lock fallback 규칙대로 polish-ui 강제.
