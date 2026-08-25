@@ -1,3 +1,13 @@
+## 🔁 RETRO-ONLY — review-code(heavy) predictions/insights [date] 라우트 + HighlightCard/MlbHighlightCard 정독, 신규 fix 없음 (cycle 2584, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 2-chain lock 없음(직전8=2576-2583 distinct=3: review-code 6+polish-ui 1+info-arch 1). fix-incident gap 정확히 20/20 도달 → mandatory 재점검(`gh run list --limit 15` 전부 success/skipped/in_progress, CI failure 0건) — negative. op-analysis gap 23/25, lotto gap 16/30, info-arch gap 7/30 미도달. explore-idea saturation 14/15 충족되나 4-source 재확인(신규라우트 mtime -7 = 전체 반환, git checkout 부작용 / TODOS Next-Up 신규 리드 없음 / plan #29 Tier4 그대로 / GH issue 0) — negative, 3연속(2567/2572/2584) 재소진 확인. DESIGN.md mtime 당일 = 동일 git checkout 부작용 — design-system negative. 잔여 chain 전부 미충족 → review-code(heavy) dominance-positive streak 정합, cycle 2569/2582 carry-over "미감사 후보"(`insights/[date]`, `predictions/[date]`, `reviews/weekly|monthly/[..]`) 순회 대상 정독.
+
+실행: `predictions/[date]/page.tsx`(618줄) — SMALL_SAMPLE_N 게이트/winProb 계산/topPick 로직 전수 확인, `DailyPredictionSummaryBar`(brand-500 "최고 자신감" 배지)가 cycle 2563 문서화된 결정과 일치(cycle 2581 "오늘의 탑픽" accent gold 정정과는 별개 개념·별도 컴포넌트로 혼동 없음) 확인. `insights/[date]/page.tsx`(225줄) + `insightsStatusBadge` 헬퍼 — brand/red/yellow 배지 색상 전부 기존 컨벤션(적중=brand family) 정합, 신규 drift 없음. `HighlightCard`/`MlbHighlightCard`(KBO/MLB 병렬 컴포넌트, cycle 2582 MatchupEloChart 병합과 동일 family 의심) — 필드 shape 상이(gameId:number vs externalGameId:string, predictedWinnerCode vs predictedHomeWin) + 상세 링크 slug 패턴 상이(`/analysis/game/[id]` vs `/mlb/games/[date]/[homeCode]-vs-[awayCode]`)로 실제 병합 불가능 확인(주석에 이미 문서화됨, MatchupEloChart 케이스와 반대로 병합 대상 아님). MLB slug 순서(`homeCode-vs-awayCode`)도 `mlb/games/[date]/page.tsx` 링크 생성 로직과 대조 일치 확인. reviews weekly/monthly [date] 라우트에 rounded-2xl 잔존 0건(cycle 2583 border-radius 스윕 범위 밖 재확인). 4개 파일/헬퍼 전수 정독 후 신규 발견 0건 — 코드 변경 없음.
+
+다음 사이클 추천 = op-analysis(gap 24/25, 근접) 또는 lotto(gap 17/30) 자연 발화 대기. review-code(heavy) 계속 시 미감사 후보 소진(predictions/insights [date] + HighlightCard family 확인 완료) — 다음은 `reviews/weekly/[week]/page.tsx`(529줄)·`reviews/monthly/[month]/page.tsx`(486줄) 본문 전수 정독 필요.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 홈 page.tsx 일반 카드 4곳 border-radius drift 정정 (cycle 2583, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2575-2582 distinct=3: review-code 7+polish-ui 1). fix-incident gap 57/20 mandatory 재점검(gh run list 전부 success/in_progress) — negative. op-analysis gap 22/25, lotto gap 15/30, info-arch gap 6/30 미도달. explore-idea saturation 재확인 8 cycle 전 negative. DESIGN.md mtime 당일 = git checkout 부작용 — design-system negative. cycle 2538/2582 carry-over(대형 미감사 파일 page.tsx 1090줄) 정독.
