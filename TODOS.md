@@ -1,3 +1,13 @@
+## ⚪ RETRO-ONLY — review-code(heavy) 팩터/파이프라인 comment-vs-code drift 3rd family negative (cycle 2578, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8=2570-2577 distinct=3: review-code 6+explore-idea 1+info-arch 1). fix-incident gap 52(마지막 2526) → mandatory 재점검: deploy-drift-alert/health-alert/runtime-error-alert 최근 5회 전부 success — negative. op-analysis gap 17/25, info-arch gap 1/30(직전 발화), lotto gap 10/30 전부 미도달. explore-idea saturation 12/15 재충족되나 cycle 2572 4-source 재확인이 6 cycle 전 negative — 재소진 skip. cycle 2576/2577 carry-over대로 review-code(heavy) 계속, scope는 SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES(둘 다 cycle 2576 negative) 다음 3rd 카테고리로 확장.
+
+실행: 수동 grep(dead code — `types.ts` HOME_SCORE/AWAY_SCORE 등, 이미 "호환성 유지" 의도 명시 확인) + Explore agent 위임(packages/kbo-data/src/factors/*.ts 전체, pipeline/daily.ts 1622줄, engine/predictor.ts, shared/index.ts DEFAULT_WEIGHTS 블록 — weight 값/공식설명/버전참조/TODO/dead-export 5축) 양쪽 전수 read. 실제 comment-vs-code mismatch 0건 — DEFAULT_WEIGHTS 값도 CLAUDE.md v1.8 서술과 완전 일치, orphan export 없음. 3번째 family 도 negative — 코드 변경 강행 X(fabrication 방지).
+
+다음 사이클 추천 = op-analysis(gap 18/25, 아직 미도달) 자연 발화 대기 또는 review-code 4th 카테고리(sitemap/robots 정합성, 컴포넌트 중복) 탐색. review-code 단일 chain 이 3개 서로 다른 family 연속 negative — 동일 chain 반복보다 diversification 신호로 해석 필요.
+
+---
+
 ## ✅ SUCCESS — info-architecture-review breadcrumb 의도된 누락 문서 drift 정정 (cycle 2577, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain alternation lock 감지(직전 8사이클 2569-2576 distinct=2: review-code 7+explore-idea 1) → 두 chain 후보 제외. info-architecture-review gap = 정확히 30 cycle(마지막 발화 cycle 2547) → trigger 9 자연 충족, lock fallback(polish-ui 강제) 불필요.
