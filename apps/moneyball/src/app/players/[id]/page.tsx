@@ -40,7 +40,8 @@ export async function generateMetadata({
   if (!profile) return {};
 
   const title = `${profile.nameKo} — 선수 프로필`;
-  const description = `${profile.teamName ?? "KBO"} 선발 투수 ${profile.nameKo}. 평균 FIP ${fmtFip(profile.avgFip)} · 등판 ${profile.appearances}경기 · 예측 적중률 ${fmtPct(profile.accuracyRate)}.`;
+  const sampleHint = profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (소표본 n<${SMALL_SAMPLE_N})` : "";
+  const description = `${profile.teamName ?? "KBO"} 선발 투수 ${profile.nameKo}. 평균 FIP ${fmtFip(profile.avgFip)} · 등판 ${profile.appearances}경기 · 예측 적중률 ${fmtPct(profile.accuracyRate)}${sampleHint}.`;
 
   return {
     title,
@@ -90,7 +91,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
     name: profile.nameKo,
     alternateName: profile.nameEn ?? undefined,
     jobTitle,
-    description: `KBO ${profile.teamName ?? ""} 선발 투수 ${profile.nameKo} 프로필 — 평균 FIP ${fmtFip(profile.avgFip)}, 등판 ${profile.appearances}경기, 예측 적중률 ${fmtPct(profile.accuracyRate)}.`.replace(/\s+/g, " ").trim(),
+    description: `KBO ${profile.teamName ?? ""} 선발 투수 ${profile.nameKo} 프로필 — 평균 FIP ${fmtFip(profile.avgFip)}, 등판 ${profile.appearances}경기, 예측 적중률 ${fmtPct(profile.accuracyRate)}${profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (소표본 n<${SMALL_SAMPLE_N})` : ""}.`.replace(/\s+/g, " ").trim(),
     nationality: {
       "@type": "Country",
       name: "South Korea",

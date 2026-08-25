@@ -1,3 +1,12 @@
+## v0.5.62.132 — 2026-08-25 (cycle 2575, review-code (heavy): 팀/선수 프로필 SEO description 소표본 게이트 신규 — SMALL_SAMPLE_N family 16번째 재발)
+
+### fix(teams,players): `teams/[code]`, `mlb/team/[code]`, `en/mlb/team/[code]`, `players/[id]` generateMetadata description + JSON-LD description에 소표본(n<5) 조건부 힌트 신규 — 페이지 레이어와 별개의 SEO/소셜 미리보기 레이어 desync
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2567-2574 distinct=3: review-code 5+explore-idea 2+lotto 1). fix-incident mandatory 재점검(gap 30+): `gh run list --status failure` 재확인, `deploy-drift-alert` 마지막 실패 8/24 17:44 이후 6+연속 success 지속 — negative. op-analysis gap 14/25, info-arch gap 28/30, lotto gap 7/30, explore-idea saturation 11/15, DESIGN.md 당일 갱신(design-system 미도달) 전부 미도달. cycle 2574 retro 추천대로 review-code(heavy) 잔여 미감사 후보 순회 — `grep -rl SMALL_SAMPLE_N` 로 게이트 커버리지 전수 매핑, reviews 트리(weekly/monthly index, misses)는 accuracy 헤드라인 자체가 없어 negative, standings.tsx는 이미 `isReliable` 게이트 정상 확인.
+- 발견: `players/[id]/page.tsx` generateMetadata description(`예측 적중률 ${fmtPct(...)}`)이 페이지 본문(라인 176-186, `verifiedN < SMALL_SAMPLE_N` 조건부 "소표본" 힌트)과 달리 표본 크기 무관 raw % 노출 확인. 동일 패턴을 `teams/[code]`(generateMetadata description + JSON-LD description 2곳), `mlb/team/[code]`(JSON-LD description), `en/mlb/team/[code]`(JSON-LD description)에서도 재확인 — 총 4파일 7곳. 페이지 본문은 전부 이미 게이트 적용돼 있었으나 SEO 메타/OG/JSON-LD 레이어만 별도 desync — 검색엔진·소셜 미리보기가 n<5 표본의 오해 소지 있는 % 그대로 인덱싱하는 silent drift, SMALL_SAMPLE_N family 16번째 재발이자 첫 메타데이터 레이어 사례.
+- 실행: 4파일 7곳에 `verifiedN > 0 && verifiedN < SMALL_SAMPLE_N` 조건부 "(소표본 n<5)"/"(small sample n<5)" 접미사 추가 (페이지 본문 문구 컨벤션 재사용). 회귀 테스트 `silent-drift-cycle-2575.test.ts` 신규(6 assertion, `app/teams/__tests__/`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `npx vitest run`(538 files/4393 tests, +1 file/+6) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.131 — 2026-08-25 (cycle 2574, review-code (heavy): en/mlb reviews weekly/monthly 헤드라인 accuracy 소표본 게이트 동기화)
 
 ### fix(reviews): `en/mlb/reviews/weekly/[week]` + `en/mlb/reviews/monthly/[month]` 헤드라인 "Accuracy" 스탯에 소표본(n<5) 인라인 표시 신규 — SMALL_SAMPLE_N family 15번째 재발 (locale mirror desync)

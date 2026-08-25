@@ -71,7 +71,8 @@ export async function generateMetadata({
   const profile = await buildTeamProfile(code);
   if (!profile) return {};
   const title = `${profile.name} — 팀 프로필`;
-  const description = `${profile.name} 시즌 예측 기록 · 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)} · 적중률 ${fmtPct(profile.accuracyRate)} · 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`;
+  const sampleHint = profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (소표본 n<${SMALL_SAMPLE_N})` : "";
+  const description = `${profile.name} 시즌 예측 기록 · 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)} · 적중률 ${fmtPct(profile.accuracyRate)}${sampleHint} · 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`;
 
   return {
     title,
@@ -120,7 +121,7 @@ export default async function TeamPage({ params }: PageProps) {
     name: profile.name,
     sport: "Baseball",
     logo: logoUrl,
-    description: `KBO ${profile.name} 시즌 예측 기록 — 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)}, 적중률 ${fmtPct(profile.accuracyRate)}, 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`.replace(/\s+/g, " ").trim(),
+    description: `KBO ${profile.name} 시즌 예측 기록 — 평균 선발 FIP ${fmtFip(profile.factorAverages.spFip)}, 적중률 ${fmtPct(profile.accuracyRate)}${profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (소표본 n<${SMALL_SAMPLE_N})` : ""}, 홈구장 ${profile.stadium} (파크팩터 ${profile.parkPf}).`.replace(/\s+/g, " ").trim(),
     location: {
       "@type": "Place",
       name: profile.stadium,

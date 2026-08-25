@@ -151,7 +151,7 @@ export default async function MlbTeamPageEn({ params }: PageProps) {
     name: profile.name,
     sport: "Baseball",
     logo: logoUrl,
-    description: `MLB ${profile.name} season predictions — avg SP FIP ${fmtFip(profile.factorAverages.spFip)}, accuracy ${fmtPct(profile.accuracyRate)}, home stadium ${profile.stadium} (park factor ${profile.parkPf}).`,
+    description: `MLB ${profile.name} season predictions — avg SP FIP ${fmtFip(profile.factorAverages.spFip)}, accuracy ${fmtPct(profile.accuracyRate)}${profile.verifiedN > 0 && profile.verifiedN < SMALL_SAMPLE_N ? ` (small sample n<${SMALL_SAMPLE_N})` : ""}, home stadium ${profile.stadium} (park factor ${profile.parkPf}).`,
     location: { "@type": "Place", name: profile.stadium },
     memberOf: {
       "@type": "SportsOrganization",
