@@ -1,3 +1,13 @@
+## 🔁 RETRO-ONLY — review-code(heavy) mlb reviews weekly/monthly 헤드라인 + green-text 잔존 sweep, 신규 fix 없음 (cycle 2589, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 직전8(2581-2588) distinct=4(review-code 5+polish-ui 1+op-analysis 1+info-arch 1) — lock 없음. fix-incident gap 20+/20 재점검(`gh run list --limit 10` 전부 success/skipped/in_progress, CI Failure Dispatch 3건 모두 skipped) — negative. op-analysis gap 3/25, lotto gap 21/30, info-arch gap 2/30 미도달. cycle 2588 carry-over 명시 후보(`mlb/reviews/weekly|monthly [week]/[month]` 헤드라인 적중 색상 KBO family 7번째 재발 여부) 정독.
+
+실행: `mlb/reviews/weekly/[week]/page.tsx`, `mlb/reviews/monthly/[month]/page.tsx`, `en/mlb/reviews/weekly|monthly` 4파일 헤드라인 스탯 컬러 전수 대조 — 전부 이미 `text-brand-500`(KBO weekly/monthly cycle 2585 정정본과 동일 shade), drift 없음 확인. 동일 파일들의 "강수렴 픽" 라벨(`text-brand-600 dark:text-brand-400`)은 KBO/MLB/EN 전체 일관 — cycle 2585 문서화된 의도적 별개 컨벤션, 범위 밖 재확인. 추가로 `text-green-[0-9]` 잔존 전수 grep — 전부 `/debug/*` 내부 관리자 페이지 한정(agent-fallback/pipeline/hallucination/factor-correlation/silent-drift/reliability/deploy-drift), 사용자 가시 라우트 0건 — UI 코드 jargon 예외 규칙(`/debug` 제외) 대상이라 폴리시 범위 밖. 신규 drift 0건 — 코드 변경 없음.
+
+다음 사이클 추천 = op-analysis(gap 3/25, 미도달) 또는 lotto(gap 21/30, 미도달) 자연 발화 대기. review-code(heavy) 계속 시 미감사 후보 소진 — mlb/en 계열 review 헤드라인 + green-text 잔존 확인 완료. 다음은 `misses/page.tsx`(KBO/MLB/EN 3벌) 또는 `/analysis` `/insights` 허브 본문 전수 정독 필요.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) reviews 허브 헤드라인 적중 카운트 색상 drift 정정 (cycle 2588, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2580-2587 distinct=4: review-code/polish-ui/op-analysis/info-arch). fix-incident gap 20+/20 재점검(gh run list 전부 success/skipped/in_progress) — negative. op-analysis gap 2/25, lotto gap 20/30, info-arch gap 1/30 미도달. explore-idea saturation 14/15 충족되나 재확인(TODOS Next-Up 없음, plan#29 spec_only_deferred, GH issue 0) — negative. DESIGN.md mtime 당일 = git checkout 부작용 — negative. cycle 2587 carry-over 후보(reviews hub 자체, mlb 계열 review 라우트) 정독.
