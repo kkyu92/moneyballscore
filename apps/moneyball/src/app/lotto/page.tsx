@@ -152,7 +152,7 @@ function ResultSection({ result }: { result: LottoResult }) {
   ];
   const totalHits = result.tier1 + result.tier2 + result.tier3 + result.tier4 + result.tier5;
   return (
-    <section className="space-y-3 rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-5">
+    <section className="space-y-3 rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-5">
       <div className="flex items-baseline gap-2 flex-wrap">
         <h2 className="text-lg font-bold text-amber-900 dark:text-amber-100">
           {result.drawNo}회 추첨 결과 정리
