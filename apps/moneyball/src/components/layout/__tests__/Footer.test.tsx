@@ -38,12 +38,13 @@ describe("Footer", () => {
     expect(within(aiColumn).getByRole("link", { name: "월별 캘린더" })).toHaveAttribute("href", "/calendar");
   });
 
-  it("로또 column 의 3 link (이번 주 조합 / 통계 방법론 / 아카이브) 박제 — /lotto 최상위 hub 포함 (cycle 2022 IA gap fix)", () => {
+  it("로또 column 의 4 link (이번 주 조합 / 조합 검증 / 통계 방법론 / 아카이브) 박제 — /lotto 최상위 hub 포함 (cycle 2022 IA gap fix, cycle 2587 /lotto/check 추가)", () => {
     render(<Footer />);
     const lottoHeading = screen.getByRole("heading", { level: 2, name: "로또" });
     const lottoColumn = lottoHeading.closest("details") as HTMLElement;
     expect(lottoColumn).not.toBeNull();
     expect(within(lottoColumn).getByRole("link", { name: "이번 주 조합" })).toHaveAttribute("href", "/lotto");
+    expect(within(lottoColumn).getByRole("link", { name: "조합 검증" })).toHaveAttribute("href", "/lotto/check");
     expect(within(lottoColumn).getByRole("link", { name: "통계 방법론" })).toHaveAttribute("href", "/lotto/methodology");
     expect(within(lottoColumn).getByRole("link", { name: "아카이브" })).toHaveAttribute("href", "/lotto/archive");
   });

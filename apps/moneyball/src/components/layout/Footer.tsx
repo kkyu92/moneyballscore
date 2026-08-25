@@ -3,17 +3,18 @@ import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
 
 // IA hierarchy 룰 (docs/design/ia-hierarchy.md) — Footer = exhaust 책임
 //
-// Sitemap wireframe (cycle 2225 갱신 — MLB 컬럼에 /mlb/matchup 누락 발견 후 추가:
-// KO/EN 라우트 + 헤더 megamenu 배선까지 있었으나 footer sitemap 컬럼만 빠져있던 gap,
-// KBO /matchup 은 이미 헤더+footer 양쪽 존재하는 패턴과 불일치했음. cycle 2153 과
-// 동일 family — MLB 신규 라우트 추가 시 footer sitemap 컬럼 동기 누락 반복 패턴):
+// Sitemap wireframe (cycle 2587 갱신 — 로또 컬럼에 /lotto/check 누락 발견 후 추가:
+// cycle 2019(cb21e154)에 신규 배선됐고 /lotto hub 링크 + sitemap.ts(cycle 2250)까지
+// 있었으나 헤더 megamenu + footer sitemap 컬럼 양쪽 빠져있던 gap. cycle 2225(MLB
+// /mlb/matchup) + cycle 2153 과 동일 family — 신규 라우트 추가 시 헤더/footer 동기
+// 누락 반복 패턴, 3번째 재발):
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ AI 예측    커뮤니티    팀·선수     리뷰·시즌    도움말     MLB      로또 │
 // │ ────────  ────────  ────────   ─────────  ────────  ────────  ──────── │
 // │ /         /picks    /standings /reviews   /method.. /mlb      /lotto     │
-// │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/me. │
-// │ /accuracy            /players   /reviews/m /glossary /mlb/team /lotto/ar │
-// │ /dashboard           /matchup   /reviews/. /change.. /mlb/accu..         │
+// │ /analysis /leader.. /teams     /reviews/w /guide    /mlb/st.. /lotto/ch. │
+// │ /accuracy            /players   /reviews/m /glossary /mlb/team /lotto/me. │
+// │ /dashboard           /matchup   /reviews/. /change.. /mlb/accu.. /lotto/ar │
 // │ /insights                        /seasons   /about    /mlb/play..         │
 // │ /predictions                                /search   /mlb/matc..         │
 // │ /calendar                                             /mlb/fact..         │
@@ -122,6 +123,7 @@ const SITEMAP_COLUMNS: FooterColumn[] = [
     enTitle: "Lotto",
     links: [
       { href: "/lotto", label: "이번 주 조합", enLabel: "This Week's Sets" },
+      { href: "/lotto/check", label: "조합 검증", enLabel: "Check My Numbers" },
       { href: "/lotto/methodology", label: "통계 방법론", enLabel: "Methodology" },
       { href: "/lotto/archive", label: "아카이브", enLabel: "Archive" },
     ],

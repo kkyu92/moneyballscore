@@ -1,3 +1,12 @@
+## v0.5.62.138 — 2026-08-25 (cycle 2587, info-architecture-review: 로또 `/lotto/check` 헤더 megamenu·footer sitemap 컬럼 누락 정정)
+
+### fix(nav): `/lotto/check` 를 헤더 로또 megamenu + footer 로또 sitemap 컬럼에 추가 — 3번째 재발 IA gap
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2579-2586) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — 2-chain lock 없음. fix-incident gap 23/20 재점검(`gh run list --limit 15` 전부 success/skipped/in_progress) — negative. op-analysis 방금 발화(gap 1), lotto gap 19/30, info-arch gap 10/30 미도달(주기 trigger 아님). explore-idea saturation 직전15(2572-2586)=13/15 충족되나 4-source 재확인(TODOS Next-Up 사용자영역 1-line, plan#29 Tier4, GH issue 0) 동일 negative. **신규 트리거 발견**: `git log --since="7 days ago" --diff-filter=A` 로 page.tsx 추가 확인 — 최근 7일 내 15개 이상 신규 라우트(EN/MLB 미러 다수 + `/lotto/check` 등) 추가, IA trigger(1) "라우트 신규 추가 ≥3/1주" 충족.
+- 발견: 신규 라우트 breadcrumb/헤더/footer 전수 대조 — mlb 계열(analysis/methodology/reviews/misses 등)은 이미 헤더+footer 정합. `/lotto/check`(cycle 2019 `cb21e154` 배선, `/lotto` hub 링크 존재, sitemap.ts에도 cycle 2250에 이미 추가)만 헤더 `LOTTO_LINKS` megamenu + footer 로또 sitemap 컬럼 양쪽에서 빠짐. cycle 2225(`/mlb/matchup` footer 누락) + cycle 2153 과 동일 family — 신규 라우트 배선 시 헤더/footer 동기 누락 반복 패턴 3번째 재발.
+- 실행: `Header.tsx` LOTTO_LINKS 에 `/lotto/check`(clipboard-check 아이콘) 추가, `Footer.tsx` 로또 컬럼에 동일 링크 추가 + ASCII sitemap wireframe 주석 갱신. `Footer.test.tsx` 로또 컬럼 assertion 3→4 link 로 갱신.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(541 files/4406 tests) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7).
+
 ## v0.5.62.137 — 2026-08-25 (cycle 2585, review-code (heavy): 주간/월간 리뷰 헤드라인 적중 색상 drift 정정)
 
 ### fix(reviews): weekly/monthly 헤드라인 "적중"/"적중률"/"전월 대비" 색상 brand-500 정렬 — 병렬 마이그레이션 drift
