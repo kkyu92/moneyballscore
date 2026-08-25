@@ -1,3 +1,13 @@
+## 🔁 RETRO-ONLY — review-code(heavy) accuracy/page.tsx·analysis/game/[id]/page.tsx SMALL_SAMPLE_N 전수 재점검 + 인접 파일 확장 스팟체크, 신규 fix 없음 (cycle 2570, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 2-chain lock 없음(직전 8사이클 2562-2569 distinct=4: review-code 5+polish-ui 1+explore-idea 1+lotto 1). fix-incident 20+ gap 도달 → mandatory 재점검: `gh run list --limit 10` 전부 success/skipped, 최근 CI failure 0건 — negative. op-analysis gap 9/25, info-arch gap 23/30, lotto gap 2/30(방금 발화), explore-idea saturation 11/15, design-system(DESIGN.md 당일 갱신) 전부 미도달. cycle 2569 retro 추천대로 review-code(heavy) 잔여 대형 파일(`accuracy/page.tsx` 1229줄, `analysis/game/[id]/page.tsx` 872줄) 순회.
+
+실행: 두 파일 SMALL_SAMPLE_N/MIN_TEAM_PREDICTIONS/MIN_POLL_TOTAL/STATS_RELIABLE_MIN_N 게이트 전수 확인 — `accuracy/page.tsx` 캘리브레이션 플롯(소표본 회색 dot)/커뮤니티 비교/팀 편향 테이블/v18 서브코호트 패널/팩터별 적중률 테이블 전부 기존 게이트 정상. `analysis/game/[id]/page.tsx` 수렴 픽 성적 라인은 cycle 2542 에 이미 fix 완료 확인(신규 없음). 두 파일 신규 gap 0건 확인 후 인접 미감사 후보로 확장 — `TeamBiasTable.tsx`/`LeaderboardTable.tsx`/`players/[id]/page.tsx`/`teams/[code]/page.tsx`/`mlb/team/[code]/page.tsx`/`matchup/[teamA]/[teamB]/page.tsx` 6개 파일 전수 grep 재확인, 전부 기존 게이트 정상 적용 확인(신규 발견 0). `LeaderboardTable` 배경 SQL view(`HAVING COUNT(*) >= 5`)도 `MIN_LEADERBOARD_PICKS` guard test(wave 116, index.test.ts:187) 로 이미 방어 확인. 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 미감사 후보(`insights/[date]/page.tsx`, `predictions/[date]/page.tsx`, `reviews/weekly|monthly/[..]/page.tsx`) 순회 또는 gap 근접 chain(op-analysis 9/25, info-arch 23/30) 자연 발화.
+
+---
+
 ## 🔁 RETRO-ONLY — review-code(heavy) analysis/page.tsx(최대 파일) SMALL_SAMPLE_N 전수 재점검, 신규 fix 없음 (cycle 2569, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2561-2568 distinct=5). fix-incident gap 43/20 mandatory 재점검 — `gh run list --status failure` 재확인, deploy-drift-alert 08-23~24 산발 실패 11건이지만 workflow별 시계열 재확인 결과 매 실패 직후 바로 다음 run 성공 회복(isolated self-recovery, 재발 없음) → cycle 2568 결론과 동일 negative 재확인. op-analysis gap 8/25, info-arch gap 22/30, lotto gap 1/30, explore-idea saturation 10/15, design-system(DESIGN.md 당일 갱신) 전부 미도달.
