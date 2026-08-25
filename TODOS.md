@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) reviews 허브 헤드라인 적중 카운트 색상 drift 정정 (cycle 2588, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2580-2587 distinct=4: review-code/polish-ui/op-analysis/info-arch). fix-incident gap 20+/20 재점검(gh run list 전부 success/skipped/in_progress) — negative. op-analysis gap 2/25, lotto gap 20/30, info-arch gap 1/30 미도달. explore-idea saturation 14/15 충족되나 재확인(TODOS Next-Up 없음, plan#29 spec_only_deferred, GH issue 0) — negative. DESIGN.md mtime 당일 = git checkout 부작용 — negative. cycle 2587 carry-over 후보(reviews hub 자체, mlb 계열 review 라우트) 정독.
+
+발견: `reviews/page.tsx`(허브, 430줄) 적중 카운트 헤드라인이 `text-brand-600 dark:text-brand-400` — weekly/monthly(cycle 2585 정정)는 이미 `text-brand-500`. DESIGN.md "적중 표시 = brand-500" family(cycle 50/65/456/744/2563/2585) 7번째 재발. 적중률(rate) 은 `accuracyRateColorClass` 공용 3-tier 함수(brand/yellow/red, predictions/AccuracyHeaderCard/reviews 허브 공유) — 별개 의도 컨벤션 확인, 범위 밖. mlb/reviews, en/mlb/reviews 허브는 요약 stat 카드 자체가 없어 동일 drift 대상 아님.
+
+실행: `text-brand-500` 로 정렬, `silent-drift-cycle-2588.test.ts` 신규(3 assertion). tsc clean + eslint clean + vitest 542/4409 all green(+1 file/+3 tests). 단일 논리 단위 → PR 없이 직접 main commit+push(R4/R7), CI green 실측 확인(run 32800955673).
+
+다음 사이클 추천 = operational-analysis(gap 2/25 아직 이름) 또는 review-code(heavy, 미확인 후보: mlb reviews weekly/monthly [week]/[month] 헤드라인 — KBO 쪽 7번째 재발 family가 MLB 쪽엔 아직 대조 안 됨).
+
+---
+
 ## ✅ SUCCESS — info-architecture-review `/lotto/check` 헤더·footer 누락 정정 (cycle 2587, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2579-2586) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — lock 없음. fix-incident gap 23/20 재점검 negative. op-analysis 방금 발화, lotto gap19/30·info-arch gap10/30 미도달(주기 trigger 아님). explore-idea saturation 13/15 4-source 재확인 negative. **신규 트리거**: `git log --since="7 days ago" --diff-filter=A` 로 page.tsx 15+개 신규 확인 → info-arch trigger(1) "라우트 신규 추가≥3/1주" 충족.
