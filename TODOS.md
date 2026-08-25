@@ -1,3 +1,13 @@
+## ✅ SUCCESS — operational-analysis(heavy) CE cohort 8회 연속 재확인 (cycle 2586, 2026-08-25)
+
+진단: open issue 0, approved plan 0/29. 2-chain alternation lock 발동(직전8=2578-2585 distinct=2: review-code 7+polish-ui 1) — 둘 다 제외. fix-incident 직전25 0회 → gh run list 재확인 negative. op-analysis gap=25(마지막 2561) — 정확히 threshold 도달, mandatory trigger. lock+gap 이중 trigger 일치로 op-analysis(heavy) 채택.
+
+실행: `scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=337(CE 290/비CE 47), 격차 10.4pp, cycle 2556과 완전 동일(8회 연속 재확인). DB 직접 조회로 파이프라인 정상성 확인: league=kbo v1.8 verified 312 + v1.8-credit-fail 25 = 337 일치, 최신 verified_at 2026-08-23(2일 전) — drift 아님, 실제 경과 캘린더 일수 부족(cycle 처리 속도 ≫ 실제 경기일 간격, 기존 패턴 재확인). CLAUDE.md 모델 캘리브레이션 문단에 cycle 2586 엔트리 append. 코드 변경 없음 — 문서 갱신만 direct main commit(R4).
+
+다음 사이클 추천 = review-code(heavy) 또는 explore-idea. 2-chain lock 은 이번 cycle op-analysis 발화로 자연 해소(직전8 재계산 시 distinct≥3). explore-idea saturation 직전15=14/15 근접 — 재확인 대상.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) reviews weekly/monthly 헤드라인 적중 색상 drift 정정 (cycle 2585, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2577-2584 distinct=3: review-code 6+polish-ui 1+info-arch 1). fix-incident gap 21/20 mandatory 재점검(gh run list 전부 success/skipped/in_progress) — negative. op-analysis gap 24/25, lotto gap 17/30, info-arch gap 8/30 미도달. explore-idea saturation 14/15 4연속 재소진(TODOS Next-Up 사용자영역 1-line만, plan#29 Tier4, GH issue 0). DESIGN.md mtime git checkout 부작용 — negative. cycle 2584 carry-over(reviews weekly/monthly 미감사) 정독.
