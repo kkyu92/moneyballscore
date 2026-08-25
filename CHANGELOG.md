@@ -1,3 +1,12 @@
+## v0.5.62.133 — 2026-08-25 (cycle 2579, review-code (heavy): sitemap.ts `/search` robots.txt disallow 모순 제거)
+
+### fix(seo): `sitemap.ts` 에서 `/search` URL 제거 — robots.ts disallow + page.tsx noindex 메타와 모순되는 인덱싱 시그널
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2571-2578 distinct=3: review-code 6+explore-idea 1+info-architecture-review 1). fix-incident gap 53/20 mandatory 재점검 — `gh run list` 최근 15건 전부 success/skipped, CI/lesson dispatch 정상 — negative. op-analysis gap 18/25, lotto gap 11/30, info-arch gap 2/30 전부 미도달. cycle 2576/2577/2578 이 SMALL_SAMPLE_N/PRODUCTION_COHORT_RULES/factor·pipeline comment-drift 3개 카테고리 연속 negative 확인 후 4th 카테고리(sitemap/robots 정합성, 컴포넌트 중복)로 scope 확장.
+- 발견: Explore agent 전수 sweep — `sitemap.ts:54` 가 `/search` 를 인덱싱 대상(weekly, priority 0.5)으로 노출하지만, `robots.ts:18/24/31/38` 전체 UA 대상 disallow 설정 + `search/page.tsx:38` 자체 `robots:{index:false,follow:true}` 메타 양쪽 모두 비인덱싱 지시. 3개 신호 중 sitemap 만 역행 — 모순된 크롤 시그널. 다른 disallow 경로(`/debug/*`, `/login`, `/settings`, `/community`)는 이미 sitemap 미노출 정상. 부가 발견(이번 cycle 미처리, 다음 cycle carry-over): `sitemap-mlb.test.ts` 가 monthly reviews/en-mlb weekly·monthly mirror/insights series 라우트 assertion 부재 — 회귀 커버리지 공백. 컴포넌트 중복은 대부분 의도된 분리(주석 명시), `MatchupEloChart`/`MlbMatchupEloChart` 1쌍만 90%+ 동일(자체 주석 "props shape 동일") — 병합 후보이나 이번 cycle scope 밖.
+- 실행: `sitemap.ts:54` `/search` entry 제거 + 근거 주석 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(538 files/4393 tests, 변경 없음 — 회귀 테스트 미신규, `/search` 미테스트 확인됨) 전체 통과. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.132 — 2026-08-25 (cycle 2575, review-code (heavy): 팀/선수 프로필 SEO description 소표본 게이트 신규 — SMALL_SAMPLE_N family 16번째 재발)
 
 ### fix(teams,players): `teams/[code]`, `mlb/team/[code]`, `en/mlb/team/[code]`, `players/[id]` generateMetadata description + JSON-LD description에 소표본(n<5) 조건부 힌트 신규 — 페이지 레이어와 별개의 SEO/소셜 미리보기 레이어 desync

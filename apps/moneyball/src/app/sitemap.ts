@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // /v2-shadow-monitor — v1.8 유지 확정(2026-07-06) 이후 결론된 실험 archive. noindex 처리 + sitemap 제거 (cycle 1802 IA).
     { url: `${SITE_URL}/insights`, lastModified: now, changeFrequency: 'daily', priority: 0.75 },
     { url: `${SITE_URL}/glossary`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/search`, lastModified: now, changeFrequency: 'weekly', priority: 0.5 },
+    // /search — robots.ts 가 전체 UA 대상 disallow + page.tsx 자체 noindex 메타 설정. sitemap 노출은 모순 (cycle 2579 review-code heavy 4th category).
     { url: `${SITE_URL}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
