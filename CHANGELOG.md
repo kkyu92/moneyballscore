@@ -1,3 +1,12 @@
+## v0.5.62.131 — 2026-08-25 (cycle 2574, review-code (heavy): en/mlb reviews weekly/monthly 헤드라인 accuracy 소표본 게이트 동기화)
+
+### fix(reviews): `en/mlb/reviews/weekly/[week]` + `en/mlb/reviews/monthly/[month]` 헤드라인 "Accuracy" 스탯에 소표본(n<5) 인라인 표시 신규 — SMALL_SAMPLE_N family 15번째 재발 (locale mirror desync)
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전 8사이클 2566-2573 distinct=3: review-code 5+explore-idea 2+lotto 1). fix-incident gap 20+/20 도달 → mandatory 재점검: `gh run list --status failure` 재확인, `deploy-drift-alert` 마지막 실패 8/24 17:44 이후 신규 실패 0건, 9+연속 success 지속 회복 — negative. op-analysis gap 13/25, info-arch gap 27/30, lotto gap 6/30, explore-idea saturation 11/15, design-system(DESIGN.md 당일 갱신) 전부 미도달. cycle 2573 retro 추천대로 en/ 다국어 미러 페이지 순회.
+- 발견: cycle 2573 이 KBO `reviews/weekly/[week]`·`reviews/monthly/[month]` 헤드라인 "적중률"에 `verifiedGames < SMALL_SAMPLE_N` 게이트를 추가했지만, en/mlb 미러 페이지(`en/mlb/reviews/weekly/[week]`, `en/mlb/reviews/monthly/[month]`)는 같은 fix 가 반영 안 됨 — 헤드라인 "Accuracy" 스탯이 표본 크기 무관 렌더링. 두 미러 파일 모두 팀별 성과 테이블(`smallSample = t.predicted < SMALL_SAMPLE_N`)엔 게이트가 있으나 헤드라인엔 부재 — KBO 원본과 en 미러 사이 fix 전파 지연 (locale mirror desync) 패턴, SMALL_SAMPLE_N family 15번째 재발.
+- 실행: 두 파일 헤드라인 "Accuracy" `<p>` 안 `review.verifiedGames < SMALL_SAMPLE_N` 조건부 "Small sample (n&lt;5)" 인라인 힌트 추가 (KBO 원본 문구 영문 번역 컨벤션 재사용). 회귀 테스트 `silent-drift-cycle-2574.test.ts` 신규(3 assertion, `app/en/mlb/reviews/__tests__/`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball run test`(537 files/4387 tests, +1 file/+3) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4).
+
 ## v0.5.62.130 — 2026-08-25 (cycle 2573, review-code (heavy): reviews weekly/monthly 헤드라인 적중률 소표본 게이트 추가)
 
 ### fix(reviews): `reviews/weekly/[week]` + `reviews/monthly/[month]` 헤드라인 "적중률" 스탯에 소표본(n<5) 인라인 표시 신규 — SMALL_SAMPLE_N family 14번째 재발

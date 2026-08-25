@@ -215,6 +215,11 @@ export default async function MlbMonthlyReviewPageEn({ params }: PageProps) {
             >
               {pctLabel}
             </p>
+            {review.verifiedGames < SMALL_SAMPLE_N && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                Small sample (n&lt;{SMALL_SAMPLE_N})
+              </p>
+            )}
           </div>
           <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">vs. last month</p>

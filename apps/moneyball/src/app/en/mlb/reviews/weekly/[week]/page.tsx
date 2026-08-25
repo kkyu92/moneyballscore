@@ -266,6 +266,11 @@ export default async function MlbWeeklyReviewPageEn({ params }: PageProps) {
             >
               {pctLabel}
             </p>
+            {review.verifiedGames < SMALL_SAMPLE_N && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                Small sample (n&lt;{SMALL_SAMPLE_N})
+              </p>
+            )}
           </div>
         </section>
       )}
