@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { KBO_FACTOR_COUNT, KBO_TEAMS, shortTeamName } from "@moneyball/shared";
+import { KBO_FACTOR_COUNT, KBO_TEAMS, SMALL_SAMPLE_N, shortTeamName } from "@moneyball/shared";
 import {
   getSeriesByTopic,
   listSeriesTopics,
@@ -122,6 +122,9 @@ export default async function SeriesTopicPage({ params }: Props) {
             <>
               <span>검증 {verifiedN}경기</span>
               <span>적중률 {rate}% ({correctN}/{verifiedN})</span>
+              {verifiedN < SMALL_SAMPLE_N && (
+                <span>· 소표본(n&lt;{SMALL_SAMPLE_N}, 참고용)</span>
+              )}
             </>
           )}
         </div>
