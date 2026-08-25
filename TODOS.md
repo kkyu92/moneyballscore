@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) analysis + reviews 허브 빈 상태 카드 border-radius drift 정정 (cycle 2590, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2582-2589) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident 60cycle(2530-2589) 미발화 재확인, `gh run list --limit 10` 전부 success/skipped/in_progress — negative. op-analysis gap 3/25, lotto gap 21/30, info-arch gap 2/30 미도달. explore-idea saturation 14/15 충족되나 4-source 재확인(TODOS Next-Up 신규리드 없음, plan#29 spec_only_deferred, GH issue 0, DESIGN.md mtime 당일=git checkout 부작용) — negative. cycle 2589 carry-over 후보(`misses/page.tsx`, `/analysis` `/insights` 허브) 정독.
+
+발견: `misses/page.tsx`(KBO/MLB/EN) 전수 확인 — 이미 `text-brand-500`, drift 없음. `analysis/page.tsx` 는 mlb 계열 twin(`mlb/analysis/page.tsx` 부재, `analysis-data.ts` 만 존재)이라 family 비교 대상 아님. `methodology/page.tsx` "적중률" 카드 = 4개 nav 카드(소개/용어사전/적중률/AI인사이트) 공통 스타일 일관 — false lead. 대신 border-radius 축에서 신규 발견: `analysis/page.tsx`(빈 상태 "오늘 경기 없음") + `reviews/page.tsx`(허브, 빈 상태 "검증된 예측 없음") 카드가 `rounded-2xl`(히어로 전용 토큰, DESIGN.md xl:16px) 로 landing — 동일 패턴 쓰는 `analysis/game/[id]`, `reviews/misses·weekly·monthly`(KBO/MLB/EN 6벌), `debug/hallucination·pipeline` 전부 `rounded-xl`(lg:12px, 카드 전용). cycle 2583(홈 일반 카드 rounded-2xl→rounded-xl) 과 동일 border-radius family 의 별개 파일 재발.
+
+실행: 두 파일 `rounded-xl` 로 정렬, `silent-drift-cycle-2590.test.ts` 신규 2건(analysis/__tests__, reviews/__tests__ 각 2 assertion). `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(544/4413, +2/+4) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7), CI green 실측 확인(run 32802026472, conclusion=success).
+
+다음 사이클 추천 = operational-analysis(gap 3/25) 또는 lotto(gap 21/30) 자연 발화 대기, 또는 review-code(heavy) 계속 시 border-radius/색상 외 축(spacing, shadow, focus-ring) 신규 카테고리 정독.
+
+---
+
 ## 🔁 RETRO-ONLY — review-code(heavy) mlb reviews weekly/monthly 헤드라인 + green-text 잔존 sweep, 신규 fix 없음 (cycle 2589, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23(전부 non-approved 재확인). 직전8(2581-2588) distinct=4(review-code 5+polish-ui 1+op-analysis 1+info-arch 1) — lock 없음. fix-incident gap 20+/20 재점검(`gh run list --limit 10` 전부 success/skipped/in_progress, CI Failure Dispatch 3건 모두 skipped) — negative. op-analysis gap 3/25, lotto gap 21/30, info-arch gap 2/30 미도달. cycle 2588 carry-over 명시 후보(`mlb/reviews/weekly|monthly [week]/[month]` 헤드라인 적중 색상 KBO family 7번째 재발 여부) 정독.
