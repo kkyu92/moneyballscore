@@ -71,7 +71,7 @@ export function LeagueSelector({
             onClick={() => onSelect?.(league.id)}
             data-league={league.id}
             data-active={isActive ? "true" : "false"}
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
               isActive
                 ? "bg-brand-600 text-white shadow-sm"
                 : "bg-brand-700/40 text-brand-200 hover:bg-brand-700 hover:text-white"

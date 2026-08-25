@@ -1,3 +1,12 @@
+## v0.5.62.140 — 2026-08-25 (cycle 2593, review-code (heavy): focus-ring axis 스윕 — offset-1→2 + LeagueSelector ring→outline + dashboard/error.tsx outline-brand-500 누락 3건 정정)
+
+### fix(a11y): focus-ring axis 3건 정렬 — 인라인 링크 offset / 헤더 LeagueSelector ring→outline / dashboard/error.tsx outline-brand-500 누락
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2585-2592) distinct=3(review-code 6+op-analysis 1+info-arch 1) — 2-chain lock 없음. fix-incident gap 20+/20 재점검(`gh run list --limit 15` 전부 success/skipped) — negative. op-analysis gap 7/25, lotto gap 25/30, info-arch gap 6/30 미도달. explore-idea saturation 14/15 재확인(TODOS Next-Up 신규리드 없음, plan#29 spec_only_deferred, GH issue 0, DESIGN.md mtime 당일=git checkout 부작용) — negative, 6연속 재소진. cycle 2592 carry-over 추천대로 shadow axis 완료 후 focus-ring axis 신규 정독.
+- 발견: DESIGN.md 에 focus-ring 명시 스펙 없음 — 실측 컨벤션 대조. `focus-visible:outline-*` 314건 grep, dominant 패턴 = `outline` + `outline-2` + `outline-offset-2` + `outline-brand-500`(71~84건). 이탈 3건: (1) `analysis/page.tsx` line 530 인라인 텍스트 링크만 `outline-offset-1`, 나머지 11건 `offset-2` — 단일 파일 자체 불일치(선행 commit `e337f4c8` 로 정정 완료, VERSION/CHANGELOG 동기 누락 상태로 landing해 본 commit 이 회수). (2) `components/layout/LeagueSelector.tsx`(헤더 리그 탭) 만 유일하게 ring 기반(`focus-visible:ring-2 ring-brand-400`) — 같은 헤더 family(`MegaMenu.tsx` TRIGGER_BASE 주석 "focus-visible: outline-2 outline-brand-500" 명시 + `MobileNav.tsx` 항목들) 는 전부 outline 기반, 다른 ring 기반 잔존 0건. (3) `app/dashboard/error.tsx` 재시도 버튼이 sibling `app/error.tsx`(동일 에러 바운더리 패턴) 와 outline/outline-2/outline-offset-2 는 동일하나 `outline-brand-500` 색상만 누락.
+- 실행: LeagueSelector 를 MegaMenu TRIGGER_BASE 와 동일 `focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500` 로 정렬. dashboard/error.tsx 에 `focus-visible:outline-brand-500` 추가. `silent-drift-cycle-2593.test.ts` 신규 2건(layout/__tests__, dashboard/__tests__) — analysis/__tests__ 쪽은 선행 commit 에 이미 포함.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(549 files/4423 tests, +2/+5 이번 commit 기준) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7). 선행 commit(`e337f4c8`)이 VERSION/package.json/CHANGELOG 동기 없이 landing한 걸 본 commit 이 3-way sync 로 회수(cycle 2592 pre-push guard fix a614ddc5 와 동일 family).
+
 ## v0.5.62.139 — 2026-08-25 (cycle 2592, review-code (heavy): 빅매치 카드 hover shadow drift 정정 — border-radius axis 완료 후 신규 shadow axis)
 
 ### fix(analysis): 오늘의 빅매치 카드 `hover:shadow-xl` → `hover:shadow-md` 정렬 — DESIGN.md 카드 hover 스펙 정정
