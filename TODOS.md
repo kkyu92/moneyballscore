@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) 홈 page.tsx 일반 카드 4곳 border-radius drift 정정 (cycle 2583, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2575-2582 distinct=3: review-code 7+polish-ui 1). fix-incident gap 57/20 mandatory 재점검(gh run list 전부 success/in_progress) — negative. op-analysis gap 22/25, lotto gap 15/30, info-arch gap 6/30 미도달. explore-idea saturation 재확인 8 cycle 전 negative. DESIGN.md mtime 당일 = git checkout 부작용 — design-system negative. cycle 2538/2582 carry-over(대형 미감사 파일 page.tsx 1090줄) 정독.
+
+발견: DESIGN.md border-radius 토큰 스펙(`lg: 12px — 카드(rounded-xl)` / `xl: 16px — 히어로 섹션(rounded-2xl)`) 대비 홈 page.tsx 가 "경기 없음" fallback/"이번 주 일정"/"KBO 팀 순위"/"분석 방법론" 4개 일반 카드에 rounded-2xl 사용 — 같은 파일 "오늘 예측" 카드는 이미 rounded-xl 정합. 사이트 전체 검증: rounded-xl 96파일(카드 dominant) vs rounded-2xl 12파일(전부 브랜드 그라디언트 히어로 헤더 전용, accuracy/matchup/players 3파일 교차 확인) — page.tsx만 4곳 이탈.
+
+실행: 4곳 rounded-2xl → rounded-xl 정정(히어로 플레이스홀더 배너는 유지). silent-drift-cycle-2583.test.ts 신규(정정 확인 + count assertion). border-radius 전면 스윕(102파일)은 100+파일 가드 대상이라 범위 밖 — page.tsx 1파일 좁은 스코프만 처리.
+
+tsc/lint/test(540/4403, +1/+1) 전부 clean. 단일 논리 단위 1-commit 직접 main push(R4/R7), pre-push guard clean.
+
+다음 사이클 추천 = op-analysis(gap 23/25, 근접) 또는 lotto(gap 16/30). border-radius 컨벤션 전면 스윕은 여전히 보류 — 신규 라우트 추가 시점마다 좁은 스코프로 재접근.
+
 ## ✅ SUCCESS — review-code(heavy) MatchupEloChart/MlbMatchupEloChart JSX 중복 제거 (cycle 2582, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8=2574-2581 distinct=3: review-code 6+info-arch 1+polish-ui 1). fix-incident gap 56/20 mandatory 재점검(gh run list 전부 success/skipped/in_progress) — negative. op-analysis gap 21/25, lotto gap 14/30 미도달. explore-idea saturation 12/15 충족되나 4-source 재확인(신규라우트 mtime -7 = git checkout 부작용 전체 반환, TODOS Next-Up 신규 리드 없음, GH issue 0) — negative. DESIGN.md mtime 당일 = 동일 git checkout 부작용 — design-system negative. cycle 2579 발견 carry-over(MatchupEloChart/MlbMatchupEloChart 병합 후보) 처리.
