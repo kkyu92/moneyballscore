@@ -55,8 +55,10 @@
 - `/` (홈) = depth 0, breadcrumb 불필요
 - `/debug/*` 8 라우트 = 내부 운영용, 사용자 visit X
 - `/reviews/weekly` + `/reviews/monthly` = redirect-only (각 `/reviews/weekly/[week]` + `/reviews/monthly/[month]` 으로 redirect). 본 redirect page 자체엔 render X = breadcrumb 박제 X 정상
+- `/mlb/reviews/weekly` + `/mlb/reviews/monthly` + `/en/mlb/reviews/weekly` + `/en/mlb/reviews/monthly` = 위와 동일 redirect-only 패턴 (mlb/en 미러). 본 redirect page 자체엔 render X = breadcrumb 박제 X 정상 (cycle 2577 박제)
+- `/community` / `/login` / `/settings` = "박제 중" placeholder 페이지 (`robots: {index: false, follow: false}`, 인증 layer 의존 2026-08~09 ship 예정). 헤더/푸터 nav 미링크 — `/debug/*` 와 동일 성격 (사용자 visit path 부재) (cycle 2577 박제)
 
-**자가 검증 (cycle 1020)**: 누락 라우트 = 0건. plan #14 C2 Step 3 ("누락 라우트 추가") = 0건 = baseline OK.
+**자가 검증 (cycle 1020, cycle 2577 재검증)**: 누락 라우트 = 0건. plan #14 C2 Step 3 ("누락 라우트 추가") = 0건 = baseline OK. cycle 2577 = 전체 breadcrumb 누락 grep 18건 재대조 — 7건 신규 문서화 (mlb/en 미러 4 + placeholder 3), 나머지 11건 (`/`, `/debug/*` 8, `/reviews/weekly`, `/reviews/monthly`) 기존 문서와 일치. 신규 미문서화 누락 0건.
 
 ## 룰 3 — Footer sitemap (exhaust)
 
