@@ -103,7 +103,7 @@ export default function ContactPage() {
               </div>
               <a
                 href={`mailto:${EMAIL}?subject=${encodeURIComponent(t.prefill)}`}
-                className="shrink-0 text-sm px-3 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 transition-colors text-center"
+                className="shrink-0 text-sm px-3 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors text-center"
               >
                 메일 쓰기
               </a>

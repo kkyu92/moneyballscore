@@ -1,3 +1,12 @@
+## v0.5.62.142 — 2026-08-25 (cycle 2595, polish-ui — 2-chain lock fallback: contact 문의 유형 메일 쓰기 버튼 rounded-md → rounded-lg 정렬)
+
+### fix(design): contact 페이지 메일 쓰기 CTA border-radius 정렬 — primary 버튼 컨벤션 통일
+
+- 진단: open issue 0, approved plan 0/23(전수 재확인 — status=approved 0건). 직전8(2587-2594) distinct=2(review-code 7+info-arch 1) → **2-chain lock 탐지** (cycle 225 룰). 잠긴 두 chain 제외 후 잔여 pool 재평가: fix-incident negative(`gh run list` 전부 success/skipped), op-analysis gap 9/25, lotto gap 27/30(픽스 8/29 + 결과 8/22 이미 박제), design-system negative(DESIGN.md mtime "당일"은 git checkout 부작용, 실제 마지막 편집 커밋은 이전), explore-idea saturation 14/15 재확인(TODOS Next-Up 신규 리드 없음, plan#29 여전히 postseason 접근/participation≥10 게이트 미충족으로 deferred) — negative. 어떤 chain 도 trigger 없음 → 룰에 따라 polish-ui 강제 발화.
+- 발견: 신규 라우트 7일 이내 추가 신호는 `find -mtime` 가 git checkout 부작용으로 신뢰 불가 판단(같은 이유로 이전 cycle들이 negative 처리한 것과 동일 원칙 적용) — 대신 사이트 전역 primary 버튼(`bg-brand-500`/`bg-brand-600`) family 13건 실측: 전부 `rounded-lg`(DESIGN.md "md: 8px — 버튼, 인풋" 스펙과 일치). `contact/page.tsx` 문의 유형 리스트의 "메일 쓰기" CTA(`<a>` mailto 링크)만 유일하게 `rounded-md` — 같은 `<li>` 컨테이너 자체도 `rounded-lg`라 로컬 컨텍스트와도 불일치, family 전체와도 이탈.
+- 실행: `rounded-md` → `rounded-lg` 정렬(family 13건과 완전 일치). `silent-drift-cycle-2595.test.ts` 신규(`app/contact/__tests__`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `npx vitest run`(551 files/4426 tests, +1/+1) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.141 — 2026-08-25 (cycle 2594, review-code (heavy): spacing axis 첫 발견 — FactorBreakdown 카드 bg-gray-50/p-4 → bg-white/p-5 정렬)
 
 ### fix(predictions): FactorBreakdown 카드 padding/배경 정렬 — 팩터별 분석 family 정렬
