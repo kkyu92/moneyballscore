@@ -1005,7 +1005,7 @@ export default async function AnalysisIndexPage() {
                       isBig
                         ? 'bg-white dark:bg-[var(--color-surface-card)] border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20'
                         : isTopPick
-                          ? 'bg-white dark:bg-[var(--color-surface-card)] border-amber-300 dark:border-amber-700/60 ring-1 ring-amber-300/40 dark:ring-amber-700/30'
+                          ? 'bg-white dark:bg-[var(--color-surface-card)] border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20'
                           : isPickModelAgree
                             ? 'bg-white dark:bg-[var(--color-surface-card)] border-brand-300 dark:border-brand-700/60 ring-1 ring-brand-300/30 dark:ring-brand-700/20'
                             : isPickGame
@@ -1026,7 +1026,7 @@ export default async function AnalysisIndexPage() {
                             )}
                             {/* wave-377: 오늘의 탑픽 배지 */}
                             {isTopPick && !isBig && (
-                              <span className="ml-2 text-amber-500 dark:text-amber-400 font-semibold">★ 탑픽</span>
+                              <span className="ml-2 text-[var(--color-accent)] font-semibold">★ 탑픽</span>
                             )}
                             {/* wave-325: 현재 KBO 순위 배지 */}
                             {g.homeRank !== undefined && g.awayRank !== undefined && (

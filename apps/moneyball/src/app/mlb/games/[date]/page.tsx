@@ -154,7 +154,7 @@ export default async function MlbGames({ params }: { params: Promise<{ date: str
                 id={`pick-${p.external_game_id}`}
                 className={`rounded-lg border p-4 transition-colors ${
                   isTopPick
-                    ? 'border-brand-500 dark:border-brand-400 ring-1 ring-brand-400 dark:ring-brand-500'
+                    ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/30'
                     : 'border-brand-200 dark:border-brand-800 hover:border-brand-400'
                 }`}
               >

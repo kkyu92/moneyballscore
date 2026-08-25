@@ -42,7 +42,8 @@ describe('wave-624 — MLB games list top-pick 딥링크 KO/EN parity', () => {
     it(`${label}: isTopPick 하이라이트(⭐ + ring) 존재`, () => {
       expect(page).toContain('isTopPick');
       expect(page).toContain('⭐');
-      expect(page).toContain('ring-1 ring-brand-400');
+      // cycle 2581 polish-ui: 승률 하이라이트 = DESIGN.md accent gold 토큰 정렬 (brand-400 → --color-accent)
+      expect(page).toContain('ring-1 ring-[var(--color-accent)]');
     });
   }
 });

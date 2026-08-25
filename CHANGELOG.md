@@ -1,3 +1,12 @@
+## v0.5.62.135 — 2026-08-25 (cycle 2581, polish-ui — 2-chain lock fallback: "오늘의 탑픽" 배지 accent gold 정렬)
+
+### fix(analysis): "오늘의 탑픽"(`isTopPick`) 배지 3-way 색상 drift 정정 → `var(--color-accent)` 통일
+
+- 진단: open issue 0, approved plan 0/29. **2-chain alternation lock 발동** (직전 8사이클 2573-2580 distinct=2: review-code 7 + info-architecture-review 1) → 둘 다 후보 제외. fix-incident gap 55/20 mandatory 재점검(`gh run list` 최근 15건 전부 success/skipped) — negative. op-analysis gap 20/25, lotto gap 13/30 미도달. explore-idea saturation 12/15 충족되나 TODOS Next-Up/GH issue/plan gating 4-source 재확인이 8 cycle 전(cycle 2572) 이미 negative — 재소진 skip. DESIGN.md mtime 당일(git checkout 영향, 실제 갱신 아님) — design-system negative. 잔여 chain 전부 trigger 미충족 → lock fallback 규칙에 따라 `polish-ui` 강제 채택.
+- 발견: DESIGN.md "Accent — 빅매치 뱃지, **승률 하이라이트**, 프리미엄 강조" 문구가 정확히 지칭하는 배지("오늘의 탑픽")가 실제로는 3갈래로 흩어져 있었음 — `app/analysis/page.tsx`(wave-377, KBO 원본) = `amber-300/500`, `mlb/analysis`+`mlb/games/[date]`+`en` 미러 4곳(wave-624/plan28 포팅) = `brand-500/400`. 같은 파일 바로 위 `isBig`("⭐ 빅매치") 배지는 이미 `var(--color-accent)` 정렬돼 있어 인접 대조군 — 두 배지가 같은 조건분기 트리 안에 있는데 색 체계만 서로 다른 채 방치. amber 는 factor 수렴 10/10 tier(2026-07-18 결정, `isTopUpcomingPick`/`isCompleteUpcomingPick` — 별개 문서화된 의미)와 우연히 겹치는 hue 라 혼동 소지도 있었음.
+- 실행: 5개 파일(`analysis/page.tsx` + `mlb/analysis`, `mlb/games/[date]`, `en/mlb/analysis`, `en/mlb/games/[date]`) 전부 `border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20~30`(+텍스트 라벨) 정렬. `wave-624-mlb-games-top-pick.test.ts` 옛 `ring-brand-400` assertion 갱신 + `silent-drift-cycle-2581.test.ts` 신규(5파일, positive/negative assertion). DESIGN.md Decisions Log 항목 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(539 files/4402 tests, +1 file) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7).
+
 ## v0.5.62.134 — 2026-08-25 (cycle 2580, review-code (heavy): sitemap-mlb.test.ts 회귀 커버리지 공백 메꾸기)
 
 ### test(seo): `sitemap-mlb.test.ts` 에 monthly reviews / en-mlb weekly·monthly mirror / insights series 라우트 assertion 5개 추가 — cycle 2579 carry-over
