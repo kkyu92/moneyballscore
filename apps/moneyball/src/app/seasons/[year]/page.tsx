@@ -343,8 +343,8 @@ export default async function SeasonPage({ params }: PageProps) {
                   />
                 </div>
                 <span className="text-xs font-mono w-16 text-right">{fmtNum(m.avgRuns, 2)}</span>
-                <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500 w-16 text-right">N={m.n}</span>
-                <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500 w-16 text-right">홈{fmtPct(m.homeWinRate, 0)}</span>
+                <span className="text-2xs font-mono text-gray-400 dark:text-gray-500 w-16 text-right">N={m.n}</span>
+                <span className="text-2xs font-mono text-gray-400 dark:text-gray-500 w-16 text-right">홈{fmtPct(m.homeWinRate, 0)}</span>
               </div>
             );
           })}
@@ -375,7 +375,7 @@ function Stat({ label, value, suffix }: { label: string; value: string; suffix?:
     <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-3">
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className="text-2xl font-bold font-mono mt-1">{value}</p>
-      {suffix && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">{suffix}</p>}
+      {suffix && <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">{suffix}</p>}
     </div>
   );
 }

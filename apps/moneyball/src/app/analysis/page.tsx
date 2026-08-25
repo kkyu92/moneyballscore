@@ -460,13 +460,13 @@ export default async function AnalysisIndexPage() {
               <div className="flex items-center gap-2">
                 {/* wave-467: 이번 주 성적 텍스트 — sectionHasComplete 시 amber */}
                 {(weeklyConvergenceRecord.wins + weeklyConvergenceRecord.losses) > 0 && (
-                  <span className={`text-[11px] tabular-nums ${sectionHasComplete ? 'text-amber-700 dark:text-amber-300' : 'text-brand-600 dark:text-brand-400'}`}>
+                  <span className={`text-2xs tabular-nums ${sectionHasComplete ? 'text-amber-700 dark:text-amber-300' : 'text-brand-600 dark:text-brand-400'}`}>
                     이번 주 {weeklyConvergenceRecord.wins}승 {weeklyConvergenceRecord.losses}패
                   </span>
                 )}
                 {recentConvergenceRecord.total > 0 && (
                   <span
-                    className={`text-[11px] tabular-nums text-gray-400 dark:text-gray-500 ${recentConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
+                    className={`text-2xs tabular-nums text-gray-400 dark:text-gray-500 ${recentConvergenceRecord.total < SMALL_SAMPLE_N ? 'opacity-60' : ''}`}
                     title={`최근 ${recentConvergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
                   >
                     최근 {recentConvergenceRecord.total}경기 {recentConvergenceRecord.wins}승{recentConvergenceRecord.losses}패{' '}

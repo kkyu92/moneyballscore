@@ -411,7 +411,7 @@ export default async function GameDetailEn({ params }: PageParams) {
             )}
             {convergenceRecord.total > 0 && (
               <p
-                className="mt-1.5 text-[11px] tabular-nums opacity-60"
+                className="mt-1.5 text-2xs tabular-nums opacity-60"
                 title={`Last ${convergenceRecord.total} games factor convergence pick record`}
               >
                 Last {convergenceRecord.total} games: {convergenceRecord.wins}W-{convergenceRecord.losses}L{' '}

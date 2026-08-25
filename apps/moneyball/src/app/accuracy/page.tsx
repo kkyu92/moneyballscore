@@ -420,7 +420,7 @@ export default async function AccuracyPage() {
           </p>
           <FallbackTrendChart trend={fallbackTrend} />
           {fallbackStats.latestFallbackAt && (
-            <p className="text-[11px] text-amber-700/70 dark:text-amber-200/60 font-mono">
+            <p className="text-2xs text-amber-700/70 dark:text-amber-200/60 font-mono">
               최근 정량 fallback:{' '}
               {new Date(fallbackStats.latestFallbackAt).toLocaleString('ko-KR', {
                 month: 'numeric',
@@ -470,7 +470,7 @@ export default async function AccuracyPage() {
                       ? `${(communityStats.communityAccuracy * 100).toFixed(1)}%`
                       : '—'}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                  <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
                     {communityStats.communityCorrect}/{communityStats.communityGames} 적중
                   </p>
                 </div>
@@ -496,7 +496,7 @@ export default async function AccuracyPage() {
                       ? `${(communityStats.aiAccuracyWithPoll * 100).toFixed(1)}%`
                       : '—'}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                  <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
                     {communityStats.aiGamesWithPoll > 0
                       ? `${communityStats.aiCorrectWithPoll}/${communityStats.aiGamesWithPoll} 적중${
                           communityStats.aiGamesWithPoll < SMALL_SAMPLE_N ? ` · 소표본(n<${SMALL_SAMPLE_N})` : ''
@@ -751,7 +751,7 @@ export default async function AccuracyPage() {
                       : 'bg-red-400 dark:bg-red-500';
               return (
                 <div key={d.day} className="flex flex-col items-center gap-1">
-                  <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                  <span className="text-2xs font-medium text-gray-500 dark:text-gray-400">
                     {d.dayLabel}
                   </span>
                   {d.day === 0 && (
@@ -836,7 +836,7 @@ export default async function AccuracyPage() {
                   }`}
                 >
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{tier.label}</p>
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.range}</p>
+                  <p className="text-2xs text-gray-400 dark:text-gray-500">{tier.range}</p>
                   {pct !== null ? (
                     <>
                       <p
@@ -857,7 +857,7 @@ export default async function AccuracyPage() {
                   ) : (
                     <p className="text-2xl font-bold text-gray-300 dark:text-gray-600">—</p>
                   )}
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500">
+                  <p className="text-2xs text-gray-400 dark:text-gray-500">
                     {tier.n > 0 ? `${tier.hits}/${tier.n}` : '데이터 없음'}
                   </p>
                   {isInverted && (
@@ -1180,11 +1180,11 @@ function SubCohortCard({
     <div className={`rounded-lg border p-4 space-y-2 ${accentCls}`}>
       <div className="flex items-baseline justify-between gap-2 flex-wrap">
         <p className="text-sm font-bold">{label}</p>
-        <span className="text-[11px] text-gray-500 dark:text-gray-400">
+        <span className="text-2xs text-gray-500 dark:text-gray-400">
           {bucket.n}건 ({sharePct}%)
         </span>
       </div>
-      <p className="text-[11px] text-gray-400 dark:text-gray-500 font-mono">{subLabel}</p>
+      <p className="text-2xs text-gray-400 dark:text-gray-500 font-mono">{subLabel}</p>
       {pct !== null ? (
         <div className="flex items-baseline gap-2">
           <p className={`text-3xl font-bold font-mono ${valueCls}`}>{pct}%</p>
@@ -1195,7 +1195,7 @@ function SubCohortCard({
       ) : (
         <p className="text-3xl font-bold font-mono text-gray-300 dark:text-gray-600">—</p>
       )}
-      <p className="text-[11px] text-gray-400 dark:text-gray-500">
+      <p className="text-2xs text-gray-400 dark:text-gray-500">
         {bucket.n > 0 ? `${bucket.hits}/${bucket.n} 적중` : '데이터 없음'}
       </p>
     </div>
@@ -1222,7 +1222,7 @@ function StatCard({
         {value}
       </p>
       {sub && (
-        <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">{sub}</p>
+        <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">{sub}</p>
       )}
     </div>
   );

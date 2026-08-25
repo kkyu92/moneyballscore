@@ -89,7 +89,7 @@ export function CommunityVsAICard({ stats, locale = 'ko' }: Props) {
           >
             {stats.communityAccuracy !== null ? `${(stats.communityAccuracy * 100).toFixed(1)}%` : '—'}
           </p>
-          <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
             {stats.communityCorrect}/{stats.communityGames} {t.correctSuffix}
           </p>
         </div>
@@ -116,7 +116,7 @@ export function CommunityVsAICard({ stats, locale = 'ko' }: Props) {
           >
             {stats.aiAccuracyWithPoll !== null ? `${(stats.aiAccuracyWithPoll * 100).toFixed(1)}%` : '—'}
           </p>
-          <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">
             {stats.aiGamesWithPoll > 0
               ? `${stats.aiCorrectWithPoll}/${stats.aiGamesWithPoll} ${t.correctSuffix}${
                   stats.aiGamesWithPoll < SMALL_SAMPLE_N ? t.smallSample(SMALL_SAMPLE_N) : ''

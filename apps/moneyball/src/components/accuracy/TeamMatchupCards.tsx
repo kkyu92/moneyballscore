@@ -62,7 +62,7 @@ export function TeamMatchupCards({
 
             {/* 홈/원정 split — 소표본(n<SMALL_SAMPLE_N) opacity 처리 */}
             {ha && (
-              <div className="text-[11px] text-gray-500 dark:text-gray-400 space-y-0.5">
+              <div className="text-2xs text-gray-500 dark:text-gray-400 space-y-0.5">
                 <div className={`flex justify-between ${ha.homeN < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}>
                   <span>홈</span>
                   <span className="font-mono">
@@ -86,7 +86,7 @@ export function TeamMatchupCards({
                 {opponents.map((m) => (
                   <div
                     key={m.opponentCode}
-                    className={`flex justify-between text-[11px] ${m.n < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}
+                    className={`flex justify-between text-2xs ${m.n < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}
                   >
                     <span className="text-gray-600 dark:text-gray-400">
                       vs {shortName(m.opponentCode)}

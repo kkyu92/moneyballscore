@@ -433,7 +433,7 @@ export default async function GameDetail({ params }: PageParams) {
             )}
             {convergenceRecord.total > 0 && (
               <p
-                className="mt-1.5 text-[11px] tabular-nums opacity-60"
+                className="mt-1.5 text-2xs tabular-nums opacity-60"
                 title={`최근 ${convergenceRecord.total}경기 팩터 수렴 픽 적중 현황`}
               >
                 최근 {convergenceRecord.total}경기 {convergenceRecord.wins}승{convergenceRecord.losses}패{' '}

@@ -114,7 +114,7 @@ export function AgentVoteCard({
           {meta.icon}
         </span>
         <div className="flex flex-col">
-          <span className="text-[11px] uppercase tracking-wide opacity-80">
+          <span className="text-2xs uppercase tracking-wide opacity-80">
             {meta.label}
           </span>
           <span className="text-sm font-semibold">{winnerLabel}</span>

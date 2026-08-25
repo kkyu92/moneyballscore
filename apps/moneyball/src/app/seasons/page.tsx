@@ -102,7 +102,7 @@ export default function SeasonsIndexPage() {
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold">{s.year} 시즌</h2>
                 {s.ongoing && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[11px] font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-2xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                     진행 중
                   </span>

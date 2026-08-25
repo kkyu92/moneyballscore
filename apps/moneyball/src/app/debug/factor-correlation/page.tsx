@@ -342,7 +342,7 @@ function Stat({
     <div className="bg-gray-50 dark:bg-[var(--color-surface)] rounded-lg p-4">
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${toneClass}`}>{value}</p>
-      {suffix && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">{suffix}</p>}
+      {suffix && <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">{suffix}</p>}
     </div>
   );
 }
@@ -539,7 +539,7 @@ function MatchupMatrix({
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-gray-400 dark:text-gray-500">
+      <p className="text-2xs text-gray-400 dark:text-gray-500">
         값: 홈 승률 % (정수 반올림). hover 로 N 확인.
       </p>
     </section>

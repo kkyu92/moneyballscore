@@ -211,7 +211,7 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className={`text-2xl font-bold font-mono mt-1 ${accent ? 'text-brand-500' : ''}`}>{value}</p>
-      {sub && <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">{sub}</p>}
+      {sub && <p className="text-2xs text-gray-400 dark:text-gray-500 mt-1">{sub}</p>}
     </div>
   );
 }
@@ -348,11 +348,11 @@ export function MlbAccuracyDashboard({
               return (
                 <div key={tier.label} className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 space-y-1 text-center">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{tier.label}</p>
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.range}</p>
+                  <p className="text-2xs text-gray-400 dark:text-gray-500">{tier.range}</p>
                   <p className={`text-2xl font-bold ${pct === null ? 'text-gray-300 dark:text-gray-600' : 'text-brand-600 dark:text-brand-400'}`}>
                     {pct !== null ? `${pct}%` : '—'}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{tier.n > 0 ? `${tier.hits}/${tier.n}` : ''}</p>
+                  <p className="text-2xs text-gray-400 dark:text-gray-500">{tier.n > 0 ? `${tier.hits}/${tier.n}` : ''}</p>
                 </div>
               );
             })}

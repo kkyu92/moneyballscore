@@ -20,7 +20,7 @@ export function QuantOnlyBadge({ variant = 'light' }: QuantOnlyBadgeProps) {
       <span>정량 모델만</span>
       <span
         role="tooltip"
-        className="absolute left-0 top-full mt-1 z-20 hidden group-hover:block group-focus:block w-56 rounded-md border border-amber-300 bg-white p-2 text-[11px] leading-snug text-gray-700 shadow-lg dark:border-amber-700/60 dark:bg-[var(--color-surface-card)] dark:text-gray-200"
+        className="absolute left-0 top-full mt-1 z-20 hidden group-hover:block group-focus:block w-56 rounded-md border border-amber-300 bg-white p-2 text-2xs leading-snug text-gray-700 shadow-lg dark:border-amber-700/60 dark:bg-[var(--color-surface-card)] dark:text-gray-200"
       >
         AI 에이전트 토론이 일시 중단되어 정량 모델 예측만 표시됩니다. 토론 정상화 시 자동 복구됩니다.
       </span>

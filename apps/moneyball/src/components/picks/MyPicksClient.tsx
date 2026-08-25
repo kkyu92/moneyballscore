@@ -39,7 +39,7 @@ function StatCard({ label, value, sub, hero, smallSample }: { label: string; val
       <p className={`font-bold tabular-nums ${hero ? 'text-3xl' : 'text-xl'}`}>{value}</p>
       {sub && <p className="text-xs text-gray-400 dark:text-gray-400 mt-0.5">{sub}</p>}
       {smallSample && (
-        <p className="text-[11px] text-gray-400 dark:text-gray-500">{`소표본(n<${SMALL_SAMPLE_N})`}</p>
+        <p className="text-2xs text-gray-400 dark:text-gray-500">{`소표본(n<${SMALL_SAMPLE_N})`}</p>
       )}
     </div>
   );
@@ -334,7 +334,7 @@ export function MyPicksClient() {
                 <p className={`text-2xl font-bold tabular-nums ${userWins && !tied ? 'text-brand-600 dark:text-brand-400' : ''}`}>
                   {myDivPct}%
                 </p>
-                <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                <p className="text-2xs text-gray-400 dark:text-gray-500 mt-0.5">
                   {stats.divergentMyCorrect}/{stats.divergentResolved}
                 </p>
               </div>
@@ -345,7 +345,7 @@ export function MyPicksClient() {
                 <p className="text-2xl font-bold tabular-nums text-gray-600 dark:text-gray-300">
                   {aiDivPct}%
                 </p>
-                <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                <p className="text-2xs text-gray-400 dark:text-gray-500 mt-0.5">
                   {aiDivCorrect}/{aiDivResolved}
                 </p>
               </div>

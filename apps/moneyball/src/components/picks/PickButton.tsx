@@ -221,7 +221,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
             <span className="font-semibold text-gray-800 dark:text-gray-200 shrink-0">
               {aiTeamName} {aiSideLabel}
             </span>
-            <span className="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-semibold px-1.5 py-0.5 rounded text-[11px] shrink-0 tabular-nums">
+            <span className="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-semibold px-1.5 py-0.5 rounded text-2xs shrink-0 tabular-nums">
               {aiProbPct}%
             </span>
             {linkHref && (

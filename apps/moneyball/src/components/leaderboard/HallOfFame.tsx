@@ -60,7 +60,7 @@ export function HallOfFame({ entries, periodLabel }: Props) {
               <p className="text-lg font-bold tabular-nums text-brand-700 dark:text-brand-300 mt-1">
                 {entry.accuracy_pct}%
               </p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
+              <p className="text-2xs text-gray-400 dark:text-gray-500 tabular-nums">
                 {entry.correct}/{entry.total}
               </p>
             </li>

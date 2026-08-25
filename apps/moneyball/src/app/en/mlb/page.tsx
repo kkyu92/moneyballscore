@@ -88,14 +88,14 @@ export default async function MlbHubEn() {
               >
                 {accuracy.accuracyRate !== null ? `${Math.round(accuracy.accuracyRate * 100)}%` : "—"}
               </p>
-              <p className="text-[11px] text-brand-400 mt-1">{accuracy.correctN}/{accuracy.verifiedN}</p>
+              <p className="text-2xs text-brand-400 mt-1">{accuracy.correctN}/{accuracy.verifiedN}</p>
             </div>
             <div className="rounded-lg border border-brand-200 dark:border-brand-800 p-3 text-center">
               <p className="text-xs text-brand-500 mb-1">Brier Score</p>
               <p className="text-2xl font-bold text-brand-700 dark:text-brand-100">
                 {accuracy.brier !== null ? accuracy.brier.toFixed(3) : "—"}
               </p>
-              <p className="text-[11px] text-brand-400 mt-1">Lower is better</p>
+              <p className="text-2xs text-brand-400 mt-1">Lower is better</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -103,7 +103,7 @@ export default async function MlbHubEn() {
               const pct = tier.accuracy !== null ? Math.round(tier.accuracy * 100) : null;
               return (
                 <div key={tier.label} className="rounded-lg border border-brand-200 dark:border-brand-800 p-3 text-center">
-                  <p className="text-[11px] text-brand-500">{tier.label}</p>
+                  <p className="text-2xs text-brand-500">{tier.label}</p>
                   <p className="text-2xs text-brand-400">{tier.range}</p>
                   <p className="text-lg font-bold text-brand-700 dark:text-brand-100 mt-1">
                     {pct !== null ? `${pct}%` : "—"}

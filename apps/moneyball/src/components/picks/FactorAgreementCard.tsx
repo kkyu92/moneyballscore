@@ -94,7 +94,7 @@ export function FactorAgreementCard({ agreement }: Props) {
         </div>
       )}
 
-      <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-3">
+      <p className="text-2xs text-gray-400 dark:text-gray-500 mt-3">
         팩터 값이 픽 방향과 일치 = 본인 판단이 데이터와 부합하다는 신호. 50% 미만 = AI 가 그
         팩터에서 반대 신호를 더 많이 받는 중.
       </p>
@@ -143,7 +143,7 @@ function FactorRow({ row, tone }: { row: FactorAgreementRow; tone: 'with' | 'aga
       >
         {pct !== null ? `${pct}%` : '—'}
       </span>
-      <span className="text-[11px] text-gray-400 dark:text-gray-500 w-10 text-right shrink-0 tabular-nums">
+      <span className="text-2xs text-gray-400 dark:text-gray-500 w-10 text-right shrink-0 tabular-nums">
         {row.withMyPick}/{denom}
       </span>
     </li>

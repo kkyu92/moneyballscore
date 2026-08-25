@@ -128,7 +128,7 @@ export function TeamBiasTable({
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-gray-400 dark:text-gray-500">
+      <p className="text-2xs text-gray-400 dark:text-gray-500">
         {copy.footnote(sourceLabel)}
       </p>
     </div>

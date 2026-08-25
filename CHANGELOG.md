@@ -1,3 +1,12 @@
+## v0.5.62.144 — 2026-08-25 (cycle 2600 milestone, polish-ui: cycle 2599 이연 text-[11px] 46건 → --text-2xs 흡수)
+
+### style(design): text-[11px] 캡션 46건 시각 검토 → 2xs(10px) 토큰 흡수
+
+- 진단: open issue 0, approved plan 0/23 (전수 재확인). 직전8(2592-2599) distinct=5(review-code 4+polish-ui 1+dimension-cycle 1+lotto 1+design-system 1) — 2-chain lock 없음. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 14/25, info-arch gap 13/30 미도달. explore-idea saturation 11/15 미충족(직전 12/15→11/15 하향). lotto gap 2, design-system gap 1 — 둘 다 직발화 직후. cycle 2599 retro 가 명시 추천한 carry-over(`text-[11px]` 46건, DESIGN.md "미해결" 항목)를 채택. **cycle_n % 50 == 0 milestone 도달 — retro 단계 skill-evolution 마커 강제 박제 (trigger 3, 다른 trigger 결과 무관, cycle 2051 사례19 룰).**
+- 발견: `text-[11px]` 46건(21개 프로덕션 파일, `__tests__` 제외) 실사용 전수 확인 — 전부 서브 라벨/캡션/티어 텍스트 역할(정확도 대시보드 sub-label, 팀 편향 테이블, 배지 hover 텍스트 등). DESIGN.md 2xs(10px) 정의("미니 캡션/보조 라벨 — 실사용 최다 빈도")와 역할이 완전히 동일 — 10px/11px 1px 차이가 시각적으로 구분되는 별도 의미 없음. 신규 토큰 승격 대신 기존 2xs 로 흡수하는 게 스케일 파편화(3xs/2xs/신규/xs 4단 계층 vs 3xs/2xs/xs 3단 유지) 방지에 유리.
+- 실행: `text-[11px]` → `text-2xs` 46건 치환(22개 파일, 대괄호 경로(`[id]`/`[date]`/`[slug]`/`[year]`) 포함 — `for f in $FILES` word-splitting 이 대괄호를 glob으로 오인해 최초 시도 실패, `grep -rlZ` + NUL 구분 + `while read` 로 재시도해 해결). DESIGN.md "(미해결)" 항목을 "(해결)"로 갱신 + 흡수 근거 기록. `polish-ui-cycle-2600-11px-absorption.test.ts` 신규(잔존 0건 회귀 가드).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(553 files/4429 tests, +1/+1) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.143 — 2026-08-25 (cycle 2599, design-system: text-[9px]/text-[10px] arbitrary value 193건 → --text-3xs/--text-2xs 정식 토큰화)
 
 ### style(design): micro typography scale 토큰화 — DESIGN.md 미문서화 arbitrary text size 전면 치환
