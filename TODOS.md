@@ -1,3 +1,15 @@
+## ✅ SUCCESS — info-architecture-review `/lotto/check` 헤더·footer 누락 정정 (cycle 2587, 2026-08-25)
+
+진단: open issue 0, approved plan 0/23. 직전8(2579-2586) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — lock 없음. fix-incident gap 23/20 재점검 negative. op-analysis 방금 발화, lotto gap19/30·info-arch gap10/30 미도달(주기 trigger 아님). explore-idea saturation 13/15 4-source 재확인 negative. **신규 트리거**: `git log --since="7 days ago" --diff-filter=A` 로 page.tsx 15+개 신규 확인 → info-arch trigger(1) "라우트 신규 추가≥3/1주" 충족.
+
+발견: 신규 라우트 전수 breadcrumb/헤더/footer 대조 — mlb 계열은 이미 정합, `/lotto/check`(cycle 2019 배선, hub 링크+sitemap.ts 있음)만 헤더 megamenu + footer 로또 컬럼 양쪽 누락. cycle 2225(/mlb/matchup)+2153과 동일 family 3번째 재발.
+
+실행: Header.tsx LOTTO_LINKS + Footer.tsx 로또 컬럼에 `/lotto/check` 추가, ASCII wireframe 주석 갱신, Footer.test.tsx assertion 3→4 link 갱신. tsc/lint/vitest(541/4406) 전부 clean, 단일 커밋 직접 main push(R4/R7), CI green 실측 확인(run 32800151276).
+
+다음 사이클 추천 = review-code(heavy)(미감사 후보: reviews hub 자체, mlb 계열 review 라우트) 또는 explore-idea(saturation 근접 재확인).
+
+---
+
 ## ✅ SUCCESS — operational-analysis(heavy) CE cohort 8회 연속 재확인 (cycle 2586, 2026-08-25)
 
 진단: open issue 0, approved plan 0/29. 2-chain alternation lock 발동(직전8=2578-2585 distinct=2: review-code 7+polish-ui 1) — 둘 다 제외. fix-incident 직전25 0회 → gh run list 재확인 negative. op-analysis gap=25(마지막 2561) — 정확히 threshold 도달, mandatory trigger. lock+gap 이중 trigger 일치로 op-analysis(heavy) 채택.
