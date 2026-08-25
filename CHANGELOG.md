@@ -1,3 +1,12 @@
+## v0.5.62.136 — 2026-08-25 (cycle 2583, review-code (heavy): 홈 일반 카드 4곳 rounded-2xl → rounded-xl 정렬)
+
+### refactor(home): 홈 `page.tsx` 일반 카드 섹션 4곳 border-radius drift 정정 — DESIGN.md 히어로 전용 토큰 이탈
+
+- 진단: open issue 0, approved plan 0/23. 2-chain lock 없음(직전8=2575-2582 distinct=3: review-code 7 + polish-ui 1). fix-incident gap 57/20 mandatory 재점검(`gh run list` 전부 success/in_progress) — negative. op-analysis gap 22/25, lotto gap 15/30, info-arch gap 6/30 미도달. explore-idea saturation 재확인 8 cycle 전 negative. DESIGN.md mtime 당일 = git checkout 부작용. 잔여 chain 전부 negative → review-code(heavy) dominance-positive streak 정합, cycle 2538/2582 carry-over "대형 미감사 파일" 순회 대상인 홈 `page.tsx`(1090줄) 정독.
+- 발견: DESIGN.md border-radius 토큰 스펙(`lg: 12px — 카드(rounded-xl)` / `xl: 16px — 히어로 섹션(rounded-2xl)`) 대비, 홈 `page.tsx` 가 "경기 없음" fallback / "이번 주 일정" / "KBO 팀 순위" / "분석 방법론" 4개 **일반 카드 섹션**에 `rounded-2xl` 을 사용 — 같은 파일 안 "오늘 예측" 카드(744줄)는 이미 `rounded-xl` 로 정합. 사이트 전체 검증: `rounded-xl` 96파일(카드 dominant 컨벤션) vs `rounded-2xl` 12파일(전부 `bg-gradient-to-r from-brand-800 to-brand-700` 브랜드 히어로 헤더 전용 — accuracy/matchup/players 3개 sibling 페이지로 교차 확인) → 홈 page.tsx 만 4곳 이탈 확인.
+- 실행: 4곳 `rounded-2xl` → `rounded-xl` 정정(히어로 플레이스홀더 배너는 `rounded-2xl` 유지). `silent-drift-cycle-2583.test.ts` 신규(정정 확인 + count assertion). border-radius 컨벤션 전면 스윕(102파일)은 100+파일 가드 대상이라 범위 밖 — 이번 cycle은 page.tsx 1파일 좁은 스코프만 처리.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball test`(540 files/4403 tests, +1/+1) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → PR 없이 직접 main commit+push (R4/R7).
+
 ## v0.5.62.135 — 2026-08-25 (cycle 2581, polish-ui — 2-chain lock fallback: "오늘의 탑픽" 배지 accent gold 정렬)
 
 ### fix(analysis): "오늘의 탑픽"(`isTopPick`) 배지 3-way 색상 drift 정정 → `var(--color-accent)` 통일

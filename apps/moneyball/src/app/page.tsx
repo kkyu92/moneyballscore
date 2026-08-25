@@ -862,7 +862,7 @@ export default async function HomePage() {
             })}
           </div>
         ) : (
-          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6 md:p-8">
+          <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6 md:p-8">
             <div className="text-center mb-6">
               <span className="text-5xl block mb-3">⚾</span>
               <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
@@ -953,7 +953,7 @@ export default async function HomePage() {
 
       {/* 이번 주 경기 일정 */}
       {weekSchedule.length > 0 && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold">이번 주 일정</h2>
             <Link href="/predictions" className="text-xs text-brand-600 hover:underline">
@@ -1018,7 +1018,7 @@ export default async function HomePage() {
       )}
 
       {standings.length > 0 && (
-        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+        <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold">KBO 팀 순위</h2>
             <Link href="/standings" className="text-xs text-brand-600 hover:underline">
@@ -1063,7 +1063,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-2xl border border-gray-200 dark:border-[var(--color-border)] p-6">
+      <section className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">분석 방법론</h2>
           <Link href="/about" className="text-xs text-brand-600 hover:underline">
