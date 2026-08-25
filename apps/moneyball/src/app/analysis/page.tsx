@@ -527,7 +527,7 @@ export default async function AnalysisIndexPage() {
                   <li key={pick.gameId} className="text-sm text-gray-900 dark:text-gray-100">
                     <Link
                       href={`/analysis/game/${pick.gameId}`}
-                      className="flex items-center gap-1.5 flex-wrap hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500"
+                      className="flex items-center gap-1.5 flex-wrap hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                     >
                       <span className={`font-semibold ${favoredHome ? 'text-brand-600 dark:text-brand-400' : 'text-orange-500 dark:text-orange-400'}`}>
                         {favoredName}
