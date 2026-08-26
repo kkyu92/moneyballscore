@@ -1,4 +1,9 @@
 
+## cycle 2648 (2026-08-26) — RETRO-ONLY
+- info-architecture-review: gap trigger 도달(마지막 발화 cycle 2618, 30사이클 경과). open issue 0, approved plan 0/29, 2-chain lock 미충족(직전8 distinct=3).
+- 신규 라우트 0건(`git log bb6423b1..HEAD --diff-filter=A -- '**/page.tsx'`), breadcrumb 누락 18건 전부 `ia-hierarchy.md` 기존 문서 exclusion 과 일치, sitemap 83 vs page.tsx 105 격차도 동적세그먼트/noindex 로 기존 패턴과 동일 — 신규 drift 0건. checkpoint 문서만 박제(`docs/design/ia-2026-08-26-cycle-2648-30-cycle-gap-checkpoint.md`).
+- 다음 추천: fix-incident(gap 3/20) 또는 review-code(heavy) 복귀 — op-analysis(gap 11/25)/lotto(gap 20/30) 는 여유
+
 ## cycle 2647 (2026-08-26) — SUCCESS (retro backfill — 사례 15 family 재발, cycle 2601 자기검증 룰 도입 이후 첫 실제 재발)
 - review-code(heavy): 진단 open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달. 직전 8사이클 distinct=3 — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 유일 carry-over 후보가 이미 cycle 2424/2472 ship 완료 확인돼 폐기.
 - cycle 2514 가 발견한 KST_OFFSET_MS family(서버 로컬 `getFullYear()` 가 UTC 기준이라 KST 12/31 15:00~23:59 UTC 구간 연도 off-by-one) 잔여 사용처 2건(`buildBatterLeaderboard.ts:45`, `sitemap.ts:121`) 정정 — 기존 `computeCurrentKSTYear()` 재사용, 신규 로직 없음. `silent-drift.test.ts` KST 연도 경계 fake-timer 회귀 케이스 추가 (commit c261b07f, v0.5.62.166).
