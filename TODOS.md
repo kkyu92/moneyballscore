@@ -1,4 +1,10 @@
 
+## cycle 2647 (2026-08-26) — SUCCESS (retro backfill — 사례 15 family 재발, cycle 2601 자기검증 룰 도입 이후 첫 실제 재발)
+- review-code(heavy): 진단 open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달. 직전 8사이클 distinct=3 — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 유일 carry-over 후보가 이미 cycle 2424/2472 ship 완료 확인돼 폐기.
+- cycle 2514 가 발견한 KST_OFFSET_MS family(서버 로컬 `getFullYear()` 가 UTC 기준이라 KST 12/31 15:00~23:59 UTC 구간 연도 off-by-one) 잔여 사용처 2건(`buildBatterLeaderboard.ts:45`, `sitemap.ts:121`) 정정 — 기존 `computeCurrentKSTYear()` 재사용, 신규 로직 없음. `silent-drift.test.ts` KST 연도 경계 fake-timer 회귀 케이스 추가 (commit c261b07f, v0.5.62.166).
+- **silent skip 재발 발견**: `policy: cycle-retro 2647` commit + 본 TODOS 엔트리가 원 세션에서 누락된 채 active-cycle 이 dead pid 로 stale 방치 (session 중단). cycle 2601 이 도입한 "cycle-retro dispatch 자기 검증" 룰(signal 작성 직전 grep 확인)이 있었음에도, 세션 자체가 그 지점 도달 전에 끊겨 룰이 발동할 기회가 없었던 케이스 — 룰의 한계(세션 중단 시 검증 지점 자체 미도달) 노출. cycle 2648 진단 단계 첫 step(git log 대조)에서 즉시 감지 + 본 사이클(2648) 안에서 retroactive backfill.
+- 다음 추천: fix-incident(gap 3/20) 또는 info-arch(gap 30/30, 임계 도달) 우선 검토 — op-analysis(gap 11/25)/lotto(gap 20/30) 는 여유
+
 ## cycle 2646 (2026-08-26) — SUCCESS
 - review-code(heavy): 직전8 distinct=4(2-chain lock 미충족) + review-code(heavy) 5연속 SUCCESS streak(2639~2643, dominance-positive 인정) 따라 계속. 1차 타겟 `apps/moneyball/src/app/analysis/game/[id]/page.tsx`(877줄) 서브에이전트 정독 감사 — 이미 cycle 2407/2408·2542 에 감사된 파일로 clean 확인(신규 발견 없음).
 - cycle 2634 retro 가 명시적으로 남긴 미처리 후속("일반 경로 MAX_ATTEMPTS/`llm-deepseek.ts`/`llm-ollama.ts` 동일 off-by-one 존재 여부 확인, 1순위 후보")으로 전환. 확인 결과: 일반경로 `MAX_ATTEMPTS=LLM_RETRY_BACKOFF_MS.length`(확장 없음, 3 유지)는 `llm.ts` 자체 주석("일반 5xx/네트워크 에러는 3 유지")과 `shared/index.ts:1632`("derived .length 패턴 그대로 유지") 양쪽에서 의도된 설계로 명시 — evidence-backed 신뢰성 이슈 부재라 수정 범위 제외(`feedback_data_only_claims` 원칙). `llm-deepseek.ts` 도 529 특수 확장 로직 자체가 없는 동일 설계, `llm-ollama.ts` 는 재시도 로직 부재.
