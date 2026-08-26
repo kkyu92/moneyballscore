@@ -107,6 +107,23 @@ describe("players lib — cycle 173 silent drift family `.error` 미체크 회�
     );
   });
 
+  it("buildBatterLeaderboard 기본 season = KST 연도 (UTC getFullYear() 아님, cycle 2647 review-code heavy)", async () => {
+    vi.useFakeTimers();
+    // UTC 2026-12-31T15:00:00Z = KST 2027-01-01T00:00:00 — getFullYear() 는
+    // 2026 을 반환하지만 KST 기준 실제 연도는 2027.
+    vi.setSystemTime(new Date("2026-12-31T15:00:00Z"));
+    supabaseMock = makeSupabaseMock();
+    const { buildBatterLeaderboard } = await import(
+      "../buildBatterLeaderboard"
+    );
+    await buildBatterLeaderboard();
+    const batterBuilder = supabaseMock.from.mock.results.find(
+      (_r, i) => supabaseMock.from.mock.calls[i]?.[0] === "batter_stats",
+    )?.value as Record<string, { mock: { calls: unknown[][] } }> | undefined;
+    expect(batterBuilder?.eq).toHaveBeenCalledWith("season", 2027);
+    vi.useRealTimers();
+  });
+
   it("buildPitcherLeaderboard predictions select error → assertSelectOk throw", async () => {
     supabaseMock = makeSupabaseMock({
       pitcherPredictionsError: { message: "syntax error" },

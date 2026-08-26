@@ -1,3 +1,12 @@
+## v0.5.62.166 — 2026-08-26 (cycle 2647, review-code(heavy): KST_OFFSET_MS family — buildBatterLeaderboard/sitemap 잔여 getFullYear() off-by-one 정정)
+
+### fix: 서버 로컬(UTC) `getFullYear()` 사용처 2건에 KST 연도 경계 off-by-one 잔존
+
+- 진단: open issue 0, approved plan 0/29(전부 completed/archived/tier4). gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 10/25, info-arch 29/30, lotto 19/30). 직전 8사이클 distinct=3(review-code(heavy)/polish-ui/fix-incident) — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 서브에이전트로 검증한 유일 carry-over 후보(TODOS "MLB game detail 모델 메타 정보 배지 이식")가 이미 cycle 2424/2472 에 KO+EN 양쪽 ship 완료된 stale 후속으로 확인 — explore-idea 재선정 폐기.
+- cycle 2514(review-code heavy) 가 KST_OFFSET_MS family(서버 로컬 `new Date().getFullYear()` 가 UTC 기준이라 KST 12/31 15:00~23:59 UTC 구간에 연도가 하루 어긋남)를 최초 발견하고 `buildSeasonSummary.ts`/`seasons/[year]/page.tsx` 를 고치며 `computeCurrentKSTYear()` 헬퍼 신설, 잔여 사용처(`seasons/page.tsx`/`not-found.tsx`/`buildMlbTeamProfile.ts`/`buildBatterLeaderboard.ts`/`sitemap.ts`)를 다음 review-code 후보로 carry-over. 재확인 결과 앞 3개는 이미 후속 사이클에서 정정됐으나(`computeCurrentKSTYear` import 확인) `buildBatterLeaderboard.ts:45`(`batter_stats.season` 쿼리 필터, 실사용 — 호출부 `players/page.tsx` 가 season 미지정) 와 `sitemap.ts:121`(연도별 시즌 URL priority 티어링)은 여전히 raw `getFullYear()` 미정정 상태로 잔존.
+- 둘 다 기존 `computeCurrentKSTYear()`(`lib/seasons/buildSeasonSummary.ts`) import 재사용으로 정정 — 신규 로직 없음. 회귀 테스트 `players/__tests__/silent-drift.test.ts` 에 KST 연도 경계(UTC 2026-12-31T15:00:00Z → KST 2027) fake timer 케이스 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 569 files/4470 tests green + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.165 — 2026-08-26 (cycle 2646, review-code(heavy): llm.ts 529 확장 attempts 주석 stale 수치 정정)
 
 ### fix: 529 Overloaded 재시도 확장 주석의 attempts 수치가 cycle 2634 fix 이후 stale

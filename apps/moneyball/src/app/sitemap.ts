@@ -8,6 +8,7 @@ import { mlbAllPairs } from '@/lib/mlb/mlbCanonicalPair';
 import { listInsightsDates } from '@/lib/insights/loader';
 import { listSeriesTopics } from '@/lib/insights/series';
 import { listArchiveDates } from '@/lib/lotto/archive';
+import { computeCurrentKSTYear } from '@/lib/seasons/buildSeasonSummary';
 import { KBO_TEAMS, MLB_TEAMS, SITE_URL, assertSelectOk, errMsg, MLB_SCORING_RULE, normalizeMlbTeamCode } from '@moneyball/shared';
 
 // Google Search Console "유형: 알수없음 / 상태: 가져올수없음" 대응.
@@ -118,7 +119,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 시즌별 URL (generateStaticParams 에서 2023~2026 정적 생성)
   // priority: 현재 시즌 0.8 / 직전 시즌 (currentYear-1) 0.7 (recent) / 그 외 0.65 (ancient)
-  const currentYear = now.getFullYear();
+  // now.getFullYear() 는 서버 로컬(UTC) 기준이라 KST 12/31 15:00~23:59 UTC 구간에
+  // 연도가 하루 어긋남 (KST_OFFSET_MS family, cycle 2514 review-code heavy).
+  const currentYear = computeCurrentKSTYear(now);
   const seasonYearRoutes: MetadataRoute.Sitemap = [2023, 2024, 2025, 2026].map((year) => {
     const isCurrent = year === currentYear;
     const isRecent = year === currentYear - 1;

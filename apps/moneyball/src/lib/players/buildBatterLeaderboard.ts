@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { computeCurrentKSTYear } from "@/lib/seasons/buildSeasonSummary";
 import {
   KBO_TEAMS,
   assertSelectOk,
@@ -42,7 +43,9 @@ export async function buildBatterLeaderboard(options: {
   season?: number;
 } = {}): Promise<BatterLeaderboardRow[]> {
   const limit = options.limit ?? 10;
-  const season = options.season ?? new Date().getFullYear();
+  // new Date().getFullYear() 는 서버 로컬(UTC) 기준이라 KST 12/31 15:00~23:59 UTC
+  // 구간에 연도가 하루 어긋남 (KST_OFFSET_MS family, cycle 2514 review-code heavy).
+  const season = options.season ?? computeCurrentKSTYear();
 
   const supabase = await createClient();
   // error 시 fail-loud (기존엔 data=null silent fallback → 빈 leaderboard 위장,
