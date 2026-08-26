@@ -1,4 +1,14 @@
-## v0.5.62.153 — 2026-08-26 (cycle 2622, review-code(heavy): SearchClient.tsx 검색결과 행 hover 다크모드 정렬)
+## v0.5.62.154 — 2026-08-26 (cycle 2623, review-code(heavy): dark:border-gray-N 전역 → --color-border 토큰 정렬)
+
+### fix(design): raw `dark:border-gray-N` 리터럴 sitewide → `dark:border-[var(--color-border)]` 토큰 정렬
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2615-2622) distinct=3(review-code(heavy) 6+info-architecture-review 1+fix-incident 1) — 2-chain lock 미충족. op-analysis gap 15/25, fix-incident gap 8/20, info-arch gap 5/30, lotto gap 25/30, explore-idea saturation 11/15, design-system negative(당일 갱신) — 전부 미도달. ship-0 미충족(직전10 success 6). skill-evolution trigger 5개 미충족(milestone 2623%50≠0, review-code 직전20 non-zero).
+- DESIGN.md:64 문서화된 컨벤션(라이트모드 `border-gray-N` 리터럴 / 다크모드는 `dark:border-[var(--color-border)]` 단일 토큰, cycle 612~728 여러 사이클에 걸쳐 점진 마이그레이션된 패턴) 대비 sitewide grep — raw `dark:border-gray-N` 잔존 65건/23파일 발견. opacity 변형(`/50`,`/40`, cycle 617 확정 보존 대상 — 8건/7파일)은 제외, 나머지 57건/16파일(`app/insights`, `app/standings`, `app/lotto/*`, `app/accuracy/shadow`, `app/v2-preview`, `app/debug/agent-fallback`, `app/debug/silent-drift`, `FactorAccuracyTable` 등)이 순수 미마이그레이션 잔존으로 확정.
+- 실행: perl 기계적 치환(`dark:border-gray-\d+(?!/)` → `dark:border-[var(--color-border)]`, opacity suffix 보존) 57건/16파일. `silent-drift-cycle-2623.test.ts` 신규(sitewide raw 토큰 재발 방지 grep, opacity 변형 명시적 예외 처리 — capture-group 기반, 나이브 negative lookahead의 백트래킹 오탐 회피). `pnpm --filter moneyball type-check` clean + vitest 567 files/4463 tests(+1/+1) green + lint clean. version 153→154 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = op-analysis(gap 16/25)/lotto(gap 26/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색(opacity 변형 border 계열 별도 role 문서화 후보).
+
+
 
 ### fix(design): `SearchClient.tsx` 검색결과 행 hover:bg dark 컨벤션 정렬
 

@@ -46,7 +46,7 @@ function formatGB(gb: number | null): string {
 
 function MagicNumberBadge({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[var(--color-surface-card)] px-3 py-2">
+    <div className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] px-3 py-2">
       <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
       <span className="text-lg font-bold tabular-nums text-brand-600 dark:text-brand-400">
         {value === 0 ? "확정" : value}
@@ -181,15 +181,15 @@ export default async function StandingsPage() {
       })()}
 
       {standings.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-8 text-center text-gray-500 dark:text-gray-400">
           순위 데이터를 불러오는 중입니다. 잠시 후 다시 확인해 주세요.
         </div>
       ) : (
-        <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="rounded-xl border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 dark:bg-[var(--color-surface-card)]/50 border-b border-gray-200 dark:border-gray-700">
+                <tr className="bg-gray-50 dark:bg-[var(--color-surface-card)]/50 border-b border-gray-200 dark:border-[var(--color-border)]">
                   <th className="px-3 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 w-10">순위</th>
                   <th className="px-3 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">팀</th>
                   <th className="px-3 py-3 text-right font-semibold text-gray-600 dark:text-gray-300 tabular-nums">경기</th>

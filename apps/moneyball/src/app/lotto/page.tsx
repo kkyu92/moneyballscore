@@ -91,7 +91,7 @@ function StatTable({ sets }: { sets: LottoSet[] }) {
             {Object.entries(sumBuckets)
               .sort(([a], [b]) => parseInt(a) - parseInt(b))
               .map(([k, v]) => (
-                <tr key={k} className="border-b border-gray-100 dark:border-gray-800">
+                <tr key={k} className="border-b border-gray-100 dark:border-[var(--color-border)]">
                   <td className="py-0.5 text-gray-600 dark:text-gray-400">{k}</td>
                   <td className="py-0.5 text-right tabular-nums">{v}세트</td>
                   <td className="py-0.5 text-right text-gray-400 tabular-nums">
@@ -109,7 +109,7 @@ function StatTable({ sets }: { sets: LottoSet[] }) {
             {Object.entries(oddEvenCounts)
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([k, v]) => (
-                <tr key={k} className="border-b border-gray-100 dark:border-gray-800">
+                <tr key={k} className="border-b border-gray-100 dark:border-[var(--color-border)]">
                   <td className="py-0.5 text-gray-600 dark:text-gray-400">{k}</td>
                   <td className="py-0.5 text-right tabular-nums">{v}세트</td>
                   <td className="py-0.5 text-right text-gray-400 tabular-nums">
@@ -127,7 +127,7 @@ function StatTable({ sets }: { sets: LottoSet[] }) {
             {Object.entries(consecCounts)
               .sort(([a], [b]) => parseInt(a) - parseInt(b))
               .map(([k, v]) => (
-                <tr key={k} className="border-b border-gray-100 dark:border-gray-800">
+                <tr key={k} className="border-b border-gray-100 dark:border-[var(--color-border)]">
                   <td className="py-0.5 text-gray-600 dark:text-gray-400">{k}</td>
                   <td className="py-0.5 text-right tabular-nums">{v}세트</td>
                   <td className="py-0.5 text-right text-gray-400 tabular-nums">
@@ -322,7 +322,7 @@ export default function LottoHubPage() {
       {/* 통계 */}
       <section className="space-y-3">
         <h2 className="text-lg font-bold">{totalCount}세트 분포 통계</h2>
-        <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4">
           <StatTable sets={picks.sets} />
         </div>
       </section>
@@ -333,13 +333,13 @@ export default function LottoHubPage() {
           <h2 className="text-lg font-bold">전체 {totalCount}조합</h2>
           <CopyAllButton sets={picks.sets} />
         </div>
-        <details className="rounded-xl border border-gray-200 dark:border-gray-700">
+        <details className="rounded-xl border border-gray-200 dark:border-[var(--color-border)]">
           <summary className="cursor-pointer px-4 py-3 font-medium text-sm select-none hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl">
             전체 {totalCount}조합 보기 (클릭해서 열기)
           </summary>
           <div className="px-4 pb-4 pt-2 space-y-2">
             {rest.map((set) => (
-              <div key={set.idx} className="py-1.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
+              <div key={set.idx} className="py-1.5 border-b border-gray-100 dark:border-[var(--color-border)] last:border-0">
                 <SetRow set={set} rank={`#${set.idx}`} />
               </div>
             ))}
@@ -351,25 +351,25 @@ export default function LottoHubPage() {
       <section className="flex flex-wrap gap-3 pt-2">
         <Link
           href="/lotto/check"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
         >
           조합 검증 (6번호 입력) →
         </Link>
         <Link
           href="/lotto/archive"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
         >
           이전 회차 아카이브 →
         </Link>
         <Link
           href="/lotto/methodology"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
         >
           통계 방법론 →
         </Link>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
         >
           KBO 예측 보기 →
         </Link>

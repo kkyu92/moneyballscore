@@ -1329,7 +1329,7 @@ export default async function AnalysisIndexPage() {
                       const homeForm = g.homeRecentForm;
                       const awayForm = g.awayRecentForm;
                       return (
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-2xs font-mono tabular-nums">
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-[var(--color-border)] text-2xs font-mono tabular-nums">
                           <span className={`font-sans font-medium ${eloColorClass}`}>{eloLabel}</span>
                           {homeForm !== undefined && awayForm !== undefined && (
                             <>

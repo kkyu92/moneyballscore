@@ -131,7 +131,7 @@ export default async function SeriesTopicPage({ params }: Props) {
       </header>
 
       {entries.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="rounded-lg border border-dashed border-gray-300 dark:border-[var(--color-border)] p-8 text-center text-gray-500 dark:text-gray-400">
           아직 누적된 인사이트가 없습니다. 다음 {team1Name} vs {team2Name} 경기가 발행되면 자동으로 표시됩니다.
         </div>
       ) : (
@@ -139,7 +139,7 @@ export default async function SeriesTopicPage({ params }: Props) {
           {entries.map((e) => (
             <li
               key={e.gameId}
-              className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-[var(--color-surface-card)] p-5 space-y-3"
+              className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-surface-card)] p-5 space-y-3"
             >
               <div className="flex items-center justify-between flex-wrap gap-2 text-sm">
                 <Link
@@ -182,7 +182,7 @@ export default async function SeriesTopicPage({ params }: Props) {
         </ol>
       )}
 
-      <nav aria-label="관련 자료" className="pt-6 border-t border-gray-200 dark:border-gray-800">
+      <nav aria-label="관련 자료" className="pt-6 border-t border-gray-200 dark:border-[var(--color-border)]">
         <div className="flex flex-wrap gap-2 text-sm">
           <Link
             href="/insights"

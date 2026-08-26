@@ -190,17 +190,17 @@ export default async function ShadowAccuracyPage() {
       </header>
 
       <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
           <div className="text-xs text-gray-500 dark:text-gray-400">누적 표본 (n)</div>
           <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{totalN}</div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
           <div className="text-xs text-gray-500 dark:text-gray-400">{CURRENT_SCORING_RULE} 평균 Brier</div>
           <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
             {fmtBrier(avgV18)}
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
           <div className="text-xs text-gray-500 dark:text-gray-400">{SHADOW_SCORING_RULE} 평균 Brier</div>
           <div className={`mt-1 text-2xl font-bold ${deltaClass(totalDelta)}`}>
             {fmtBrier(avgShadow)}
@@ -211,13 +211,13 @@ export default async function ShadowAccuracyPage() {
         </div>
       </section>
 
-      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
         <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
           Shadow 실험 가중치 구성
         </h2>
         <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
           {Object.entries(SHADOW_WEIGHTS).map(([key, weight]) => (
-            <div key={key} className="rounded border border-gray-100 px-3 py-2 dark:border-gray-800">
+            <div key={key} className="rounded border border-gray-100 px-3 py-2 dark:border-[var(--color-border)]">
               <div className="font-mono text-xs text-gray-500 dark:text-gray-400">{key}</div>
               <div className="font-semibold text-gray-900 dark:text-gray-100">
                 {((weight as number) * 100).toFixed(0)}%
@@ -230,7 +230,7 @@ export default async function ShadowAccuracyPage() {
         </p>
       </section>
 
-      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
         <h2 className="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
           Calibration plot (10-bucket)
         </h2>
@@ -261,13 +261,13 @@ export default async function ShadowAccuracyPage() {
           일별 cohort (최대 {DAY_LIMIT}일)
         </h2>
         {daily.length === 0 ? (
-          <div className="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <div className="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-[var(--color-border)] dark:text-gray-400">
             shadow cohort pair 가 아직 박제되지 않았습니다. (daily 파이프라인 fire 후 누적)
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-gray-200 text-left text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              <thead className="border-b border-gray-200 text-left text-xs text-gray-500 dark:border-[var(--color-border)] dark:text-gray-400">
                 <tr>
                   <th className="p-2">날짜</th>
                   <th className="p-2 text-right">n</th>
@@ -284,7 +284,7 @@ export default async function ShadowAccuracyPage() {
                   const shadowAvg = d.shadowBrierSum / d.n;
                   const dayDelta = shadowAvg - v18Avg;
                   return (
-                    <tr key={d.date} className="border-b border-gray-100 dark:border-gray-800">
+                    <tr key={d.date} className="border-b border-gray-100 dark:border-[var(--color-border)]">
                       <td className="p-2 font-mono text-xs">{d.date}</td>
                       <td className="p-2 text-right">{d.n}</td>
                       <td className="p-2 text-right">{fmtBrier(v18Avg)}</td>

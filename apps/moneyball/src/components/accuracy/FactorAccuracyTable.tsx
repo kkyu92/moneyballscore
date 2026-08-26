@@ -126,7 +126,7 @@ export function FactorAccuracyTable({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 dark:border-gray-800">
+            <tr className="border-b border-gray-100 dark:border-[var(--color-border)]">
               <th className="text-left py-2 pr-3 text-xs font-medium text-gray-500 dark:text-gray-400 w-4 tabular-nums">{copy.hash}</th>
               <th className="text-left py-2 pr-3 text-xs font-medium text-gray-500 dark:text-gray-400">{copy.factor}</th>
               <th className="text-right py-2 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">{copy.n}</th>
@@ -139,7 +139,7 @@ export function FactorAccuracyTable({
               return (
                 <tr
                   key={r.key}
-                  className={`border-b border-gray-50 dark:border-gray-900 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 ${small ? 'opacity-50' : ''}`}
+                  className={`border-b border-gray-50 dark:border-[var(--color-border)] hover:bg-gray-50/50 dark:hover:bg-gray-800/30 ${small ? 'opacity-50' : ''}`}
                 >
                   <td className="py-2.5 pr-3 text-xs text-gray-400 dark:text-gray-600 tabular-nums">{i + 1}</td>
                   <td className="py-2.5 pr-3">

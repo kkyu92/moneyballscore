@@ -479,7 +479,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
     <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-[var(--color-border)]">
       <table className="min-w-full text-sm" data-matchup-games>
         <thead>
-          <tr className="bg-gray-50 dark:bg-gray-900/40 border-b-2 border-gray-200 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
+          <tr className="bg-gray-50 dark:bg-gray-900/40 border-b-2 border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
             <th className="py-2.5 px-3 font-semibold">일자</th>
             <th className="py-2.5 px-3 font-semibold">매치</th>
             <th className="py-2.5 px-3 font-semibold text-right">점수</th>

@@ -207,7 +207,7 @@ export default async function SilentDriftDashboard() {
               </div>
             ) : factorTimeline.timeline.rows.length === 0 ? (
               <div
-                className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-6 text-center text-sm text-gray-500 dark:bg-gray-900/30 dark:border-gray-700 dark:text-gray-400"
+                className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-6 text-center text-sm text-gray-500 dark:bg-gray-900/30 dark:border-[var(--color-border)] dark:text-gray-400"
                 data-testid="factor-timeline-empty"
               >
                 7일 안 박제된 predictions 가 없습니다. (daily 파이프라인 fire 후 누적)

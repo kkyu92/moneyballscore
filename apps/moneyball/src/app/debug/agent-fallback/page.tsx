@@ -96,7 +96,7 @@ export default async function AgentFallbackDebugPage() {
             {Object.entries(cohort.errorCategories)
               .sort((a, b) => b[1] - a[1])
               .map(([k, v]) => (
-                <li key={k} className="flex justify-between border-b border-gray-200 dark:border-gray-700 py-1">
+                <li key={k} className="flex justify-between border-b border-gray-200 dark:border-[var(--color-border)] py-1">
                   <span className="font-mono">{k}</span>
                   <span>
                     {v} ({pct(v / cohort.agentsFailed || 0)})
@@ -111,7 +111,7 @@ export default async function AgentFallbackDebugPage() {
         <h2 className="text-lg font-semibold mb-2">일자별 분포</h2>
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="border-b border-gray-300 dark:border-gray-600">
+            <tr className="border-b border-gray-300 dark:border-[var(--color-border)]">
               <th className="text-left py-1">일자</th>
               <th className="text-right">total</th>
               <th className="text-right">full</th>
@@ -122,7 +122,7 @@ export default async function AgentFallbackDebugPage() {
           </thead>
           <tbody>
             {cohort.daily.map((d) => (
-              <tr key={d.date} className="border-b border-gray-200 dark:border-gray-700">
+              <tr key={d.date} className="border-b border-gray-200 dark:border-[var(--color-border)]">
                 <td className="font-mono py-1">{d.date}</td>
                 <td className="text-right">{d.total}</td>
                 <td className="text-right text-green-600 dark:text-green-400">{d.fullDebate}</td>
@@ -139,7 +139,7 @@ export default async function AgentFallbackDebugPage() {
         <h2 className="text-lg font-semibold mb-2">샘플 (직전 {cohort.samples.length}건)</h2>
         <ul className="space-y-1 text-xs font-mono">
           {cohort.samples.map((s) => (
-            <li key={s.id} className="border-b border-gray-200 dark:border-gray-700 py-1">
+            <li key={s.id} className="border-b border-gray-200 dark:border-[var(--color-border)] py-1">
               <span className="text-gray-500">{s.date}</span>{' '}
               <span>id={s.id}</span>{' '}
               <span
@@ -160,7 +160,7 @@ export default async function AgentFallbackDebugPage() {
         </ul>
       </section>
 
-      <footer className="text-xs text-gray-500 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <footer className="text-xs text-gray-500 pt-4 border-t border-gray-200 dark:border-[var(--color-border)]">
         BASIC auth protected (/debug/* matcher). Last refresh: {new Date().toISOString()}.
       </footer>
     </main>
@@ -183,7 +183,7 @@ function Card({ label, value, sub, tone }: CardProps) {
           ? 'text-yellow-600 dark:text-yellow-400'
           : '';
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded p-3">
+    <div className="border border-gray-200 dark:border-[var(--color-border)] rounded p-3">
       <div className="text-xs text-gray-500">{label}</div>
       <div className={`text-2xl font-bold ${toneClass}`}>{value}</div>
       <div className="text-xs text-gray-500">{sub}</div>

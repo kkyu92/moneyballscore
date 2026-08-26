@@ -46,7 +46,7 @@ export function CopyAllButton({ sets, className }: { sets: LottoSet[]; className
       >
         {label}
       </button>
-      <div className="inline-flex text-xs rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="inline-flex text-xs rounded-lg border border-gray-200 dark:border-[var(--color-border)] overflow-hidden">
         <button
           type="button"
           onClick={() => setSep("comma")}

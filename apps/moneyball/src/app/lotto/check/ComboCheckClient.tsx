@@ -89,7 +89,7 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
+      <div className="rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 space-y-4">
         <div className="text-sm text-gray-600 dark:text-gray-400">
           우리 전체 <strong>{totalPickSets.toLocaleString()}세트</strong> · 역대 1등 <strong>{totalWinners.toLocaleString()}회</strong> 기준
         </div>
@@ -110,7 +110,7 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
                   next[i] = e.target.value;
                   setInputs(next);
                 }}
-                className="w-14 h-12 text-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-lg font-semibold"
+                className="w-14 h-12 text-center rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-gray-900 text-lg font-semibold"
                 aria-label={`번호 ${i + 1}`}
               />
             ))}
@@ -132,7 +132,7 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="예: 1,7,13,22,34,45 또는 1 7 13 22 34 45"
-              className="flex-1 h-12 px-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900"
+              className="flex-1 h-12 px-3 rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-gray-900"
             />
             <button
               type="submit"
@@ -173,7 +173,7 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+              <div className="rounded-lg p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-[var(--color-border)]">
                 <div className="text-gray-700 dark:text-gray-300">
                   <span className="font-medium">역대 1등:</span> 일치 없음 (역대 {totalWinners.toLocaleString()}회 중 미출현)
                 </div>
@@ -192,7 +192,7 @@ export function ComboCheckClient({ pickKeys, picksByFile, winnersMap, totalPickS
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+              <div className="rounded-lg p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-[var(--color-border)]">
                 <div className="text-gray-700 dark:text-gray-300">
                   <span className="font-medium">우리 예측:</span> 신규 조합 (전체 {totalPickSets.toLocaleString()}세트 중 미포함)
                 </div>

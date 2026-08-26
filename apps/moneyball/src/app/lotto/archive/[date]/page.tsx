@@ -162,7 +162,7 @@ export default async function LottoArchiveDatePage({ params }: Props) {
       {rest.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-lg font-bold">전체 조합</h2>
-          <details className="rounded-xl border border-gray-200 dark:border-gray-700">
+          <details className="rounded-xl border border-gray-200 dark:border-[var(--color-border)]">
             <summary className="cursor-pointer px-4 py-3 font-medium text-sm select-none hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl">
               나머지 {rest.length}개 조합 보기 (클릭해서 열기)
             </summary>
@@ -176,7 +176,7 @@ export default async function LottoArchiveDatePage({ params }: Props) {
       )}
 
       {/* 관련 링크 */}
-      <footer className="flex flex-wrap gap-3 border-t border-gray-200 dark:border-gray-800 pt-6">
+      <footer className="flex flex-wrap gap-3 border-t border-gray-200 dark:border-[var(--color-border)] pt-6">
         <Link
           href="/lotto"
           className="text-sm hover:underline text-brand-600 dark:text-brand-300"

@@ -188,7 +188,7 @@ export default async function InsightsHubPage() {
       </nav>
 
       {insights.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="rounded-lg border border-dashed border-gray-300 dark:border-[var(--color-border)] p-8 text-center text-gray-500 dark:text-gray-400">
           아직 누적된 AI 인사이트가 없습니다. 다음 경기 예측이 발행되면 자동으로 표시됩니다.
         </div>
       ) : (
@@ -233,7 +233,7 @@ export default async function InsightsHubPage() {
                 {topFactors.length > 0 && (
                   <div
                     data-mini-factor-preview
-                    className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-1.5"
+                    className="pt-3 border-t border-gray-100 dark:border-[var(--color-border)] space-y-1.5"
                   >
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                       상위 팩터 {topFactors.length}

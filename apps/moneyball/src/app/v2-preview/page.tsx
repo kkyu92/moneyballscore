@@ -147,7 +147,7 @@ export default async function V2PreviewPage() {
         </div>
       </header>
 
-      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+      <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 dark:border-[var(--color-border)] dark:bg-gray-900">
         <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
           {CURRENT_SCORING_RULE} vs v2.1-B 가중치
         </h2>
@@ -155,7 +155,7 @@ export default async function V2PreviewPage() {
           {Object.entries(V2_1_B_WEIGHTS).map(([key, weight]) => (
             <div
               key={key}
-              className="rounded border border-gray-100 px-3 py-2 dark:border-gray-800"
+              className="rounded border border-gray-100 px-3 py-2 dark:border-[var(--color-border)]"
             >
               <div className="font-mono text-xs text-gray-500 dark:text-gray-400">{key}</div>
               <div className="font-semibold text-gray-900 dark:text-gray-100">
@@ -176,7 +176,7 @@ export default async function V2PreviewPage() {
           최근 예측 재가중치 시뮬레이션 (최대 {LIMIT}건)
         </h2>
         {rows.length === 0 ? (
-          <div className="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <div className="rounded border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-[var(--color-border)] dark:text-gray-400">
             누적된 pre_game 예측이 없습니다.
           </div>
         ) : (
@@ -188,7 +188,7 @@ export default async function V2PreviewPage() {
               return (
                 <li
                   key={row.gameId}
-                  className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900"
+                  className="rounded-lg border border-gray-200 bg-white p-4 dark:border-[var(--color-border)] dark:bg-gray-900"
                 >
                   <div className="flex flex-wrap items-baseline gap-2 text-sm">
                     <Link
@@ -239,26 +239,26 @@ export default async function V2PreviewPage() {
         )}
       </section>
 
-      <nav aria-label="관련 자료" className="mt-10 border-t border-gray-200 pt-6 dark:border-gray-700">
+      <nav aria-label="관련 자료" className="mt-10 border-t border-gray-200 pt-6 dark:border-[var(--color-border)]">
         <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           관련 자료
         </h2>
         <div className="flex flex-wrap gap-2 text-sm">
           <Link
             href="/methodology"
-            className="rounded-full border border-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-full border border-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-50 dark:border-[var(--color-border)] dark:text-gray-300 dark:hover:bg-gray-800"
           >
             예측 방법론
           </Link>
           <Link
             href="/accuracy"
-            className="rounded-full border border-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-full border border-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-50 dark:border-[var(--color-border)] dark:text-gray-300 dark:hover:bg-gray-800"
           >
             적중률 대시보드
           </Link>
           <Link
             href="/changelog"
-            className="rounded-full border border-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-full border border-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-50 dark:border-[var(--color-border)] dark:text-gray-300 dark:hover:bg-gray-800"
           >
             변경 로그
           </Link>
