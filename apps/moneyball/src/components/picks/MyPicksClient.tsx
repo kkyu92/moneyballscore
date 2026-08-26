@@ -37,7 +37,7 @@ function StatCard({ label, value, sub, hero, smallSample }: { label: string; val
     }`}>
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</p>
       <p className={`font-bold tabular-nums ${hero ? 'text-3xl' : 'text-xl'}`}>{value}</p>
-      {sub && <p className="text-xs text-gray-400 dark:text-gray-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{sub}</p>}
       {smallSample && (
         <p className="text-2xs text-gray-400 dark:text-gray-500">{`소표본(n<${SMALL_SAMPLE_N})`}</p>
       )}

@@ -50,6 +50,10 @@
 - **Accent Light:** #e2c96b
 - **Away:** #c5872a (오렌지) — 원정팀 색상, 다크 그린과 대비
 - **Factor Neutral:** #9ca3af (light, Tailwind gray-400) / #4b5563 (dark, gray-600) — factor 편향 없음 (비슷) 표시. CSS 토큰 `--color-factor-neutral`
+- **Muted text 2-tier (gray, cycle 2619 문서화):** 라이트/다크 모드 간 명도를 역전시켜 두 tier의 대비감을 동일하게 유지
+  - Tier 1 (primary muted, 라벨/캡션): `text-gray-500 dark:text-gray-400`
+  - Tier 2 (secondary muted, 부가 캡션/타임스탬프/placeholder): `text-gray-400 dark:text-gray-500`
+  - `text-gray-400 dark:text-gray-400` (flat, no invert) 는 항상 drift — 다크모드에서 tier 1 수준으로 밝게 보여 의도된 대비 단계가 무너짐
 - **Semantic:** success #10b981, warning #f59e0b, error #ef4444, info #3b82f6
 - **Light mode:**
   - Surface: #f8faf9 (그린 틴트 배경)

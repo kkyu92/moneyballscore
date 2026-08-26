@@ -72,7 +72,7 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
             </span>
           )}
         </div>
-        <span className="text-xs text-gray-400 dark:text-gray-400">로컬 저장 · 로그인 불필요</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">로컬 저장 · 로그인 불필요</span>
       </div>
 
       {hasYesterdayPicks ? (
@@ -81,7 +81,7 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">어제 내 성적</p>
             <p className="text-2xl font-bold text-brand-700 dark:text-brand-300 tabular-nums">
               {yesterdayUserCorrect}
-              <span className="text-base font-normal text-gray-400 dark:text-gray-400">
+              <span className="text-base font-normal text-gray-400 dark:text-gray-500">
                 /{yesterdayPicked.length}
               </span>
             </p>
@@ -90,13 +90,13 @@ export function UserVsAIScorecard({ aiTotal, aiCorrect, yesterdayGames }: Props)
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">어제 AI 성적</p>
             <p className="text-2xl font-bold dark:text-gray-100 tabular-nums">
               {aiYesterdayCorrect}
-              <span className="text-base font-normal text-gray-400 dark:text-gray-400">
+              <span className="text-base font-normal text-gray-400 dark:text-gray-500">
                 /{aiYesterdayWithResult.length}
               </span>
             </p>
           </div>
           <div className="col-span-2 flex items-center justify-between pt-2 border-t border-gray-100 dark:border-[var(--color-border)]">
-            <span className="text-xs text-gray-400 dark:text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-gray-500">
               이번 시즌 AI {aiCorrect}/{aiTotal} ({aiRate}%) · 내 총 픽 {totalPicks}경기
             </span>
             <Link

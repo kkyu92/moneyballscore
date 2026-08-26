@@ -98,7 +98,7 @@ function PollBar({
 
   return (
     <div className="mt-2 px-1 space-y-1">
-      <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-400">
+      <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
         <span className="flex items-center gap-1">
           {t.communityPick}
           {showDivergence && (
@@ -242,7 +242,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
         </div>
       )}
       <div className="flex items-center gap-2 mt-2 px-1">
-        <span className="text-xs text-gray-400 dark:text-gray-400 shrink-0">{t.myPick}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{t.myPick}</span>
         <button
           type="button"
           onClick={() => handlePick('away')}

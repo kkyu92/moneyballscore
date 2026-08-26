@@ -32,7 +32,7 @@ export function WeeklyPicksSummary({ weekly, currentStreak }: Props) {
             <p className="text-xl font-bold tabular-nums">
               {weekly.myCorrect}/{weekly.resolved}
               {myRatePct !== null && (
-                <span className="text-sm font-normal text-gray-400 dark:text-gray-400">
+                <span className="text-sm font-normal text-gray-400 dark:text-gray-500">
                   {' '}({myRatePct}%)
                 </span>
               )}
@@ -55,7 +55,7 @@ export function WeeklyPicksSummary({ weekly, currentStreak }: Props) {
             <p className="text-xl font-bold tabular-nums text-gray-600 dark:text-gray-300">
               {weekly.aiCorrect}/{weekly.aiResolved}
               {aiRatePct !== null && (
-                <span className="text-sm font-normal text-gray-400 dark:text-gray-400">
+                <span className="text-sm font-normal text-gray-400 dark:text-gray-500">
                   {' '}({aiRatePct}%)
                 </span>
               )}

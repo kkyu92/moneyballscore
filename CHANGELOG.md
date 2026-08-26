@@ -1,3 +1,11 @@
+## v0.5.62.150 — 2026-08-26 (cycle 2619, review-code(heavy): picks/ 모듈 muted-text tier-2 다크모드 역전 정렬)
+
+### fix(design): `components/picks/*.tsx` tier-2 muted-text 다크모드 색상 역전 정렬
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2611-2618) distinct=4(review-code 4+dimension-cycle 2+fix-incident 1+info-architecture-review 1) — 2-chain lock 미충족. op-analysis gap 11/25, info-arch gap 1/30(직전 발화), lotto gap 21/30, design-system negative(당일 갱신) — 전부 미도달. explore-idea saturation 12/15 도달했으나 4-source 재확인(신규라우트 -14d 90건=git checkout 부작용/TODOS Next-Up 신규 리드 없음/GH issue 0/plan#29 트래픽 count 미성장·Tier4 유지) — negative, cycle 2617/2618 과 동일 패턴. ship-0 emergency stop 미충족(직전10 success 6/retro-only 4). skill-evolution trigger 5개 전부 미충족(milestone 2619%50≠0, review-code 직전20 non-zero 11회). cycle 2617 carry-over 명시 추천(muted text-gray-500/400 2-tier 역할 분리 문서화) 채택.
+- 발견: 사이트 전체 muted text 관례는 라이트/다크 모드 간 명도를 역전시켜 대비감을 tier 별로 동일하게 유지 — tier 1(primary) `text-gray-500 dark:text-gray-400`, tier 2(secondary) `text-gray-400 dark:text-gray-500`. `text-gray-400 dark:text-gray-400`(flat, no invert) grep 결과 9건 전부 `components/picks/` 모듈(`UserVsAIScorecard.tsx`/`WeeklyPicksSummary.tsx`/`MyPicksClient.tsx`/`PickButton.tsx`)에 집중 — 각 파일 안에서 동일 역할(퍼센트 캡션/타임스탬프/placeholder)의 sibling 라인이 올바르게 `dark:text-gray-500` 로 역전된 것과 직접 대조되는 twin 불일치 확인(예: `WeeklyPicksSummary.tsx` line 30/42/53 정상 vs line 35/58 drift). 다크모드에서 tier 2 텍스트가 tier 1 수준으로 밝게 렌더링되어 의도된 대비 단계 붕괴.
+- 실행: 9곳 `dark:text-gray-400` → `dark:text-gray-500` 정렬. DESIGN.md Color 섹션에 "Muted text 2-tier" 관례 신규 문서화(tier 1/tier 2 + flat-pair drift 규칙 명시). `silent-drift-cycle-2619.test.ts` 신규(picks/ 전역 flat-pair 재발 방지 grep + 4개 파일 개별 assertion, 5 tests). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 563 files/4457 tests(+1/+6) green + lint clean. version 149→150 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.149 — 2026-08-26 (cycle 2613, dimension-cycle(acquisition): /picks sitemap noindex 모순 제거)
 
 ### fix(seo): `/picks` sitemap.ts 노출 — page.tsx noindex 모순 제거
