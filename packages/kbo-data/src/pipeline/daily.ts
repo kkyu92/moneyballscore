@@ -239,17 +239,24 @@ export async function runDailyPipeline(
 
     // CREDIT_EXHAUSTED 감지 — debate fallback silent degradation 알림 (cycle 1446).
     // predictions>0 이라 captureSilentDriftAlert 미발화 구간 → 별도 채널 보완.
-    // predict/predict_final mode 에서 1회만 발화 (최초 발화 cron 에서만).
+    // predict/predict_final mode 에서 1회만 발화 (최초 발화 cron 에서만) —
+    // predict 는 10-21시 매시(최대 12회/일) 재실행되므로 credit_exhausted_sent
+    // flag 로 dedup (cycle 2640 fix — 기존엔 주석만 있고 실제 dedup 장치 부재라
+    // 매 시간 Telegram+Sentry 중복 발화).
     if ((mode === 'predict' || mode === 'predict_final') && result.predictionsGenerated > 0) {
       const creditErrors = result.errors.filter((e) => e.includes('CREDIT_EXHAUSTED'));
       if (creditErrors.length > 0) {
         try {
-          await captureCreditExhaustedAlert({
-            date: targetDate,
-            mode,
-            affectedGames: creditErrors.length,
-            errors: creditErrors,
-          });
+          const alreadySent = await isNotificationSent(db, targetDate, 'credit_exhausted_sent');
+          if (!alreadySent) {
+            await captureCreditExhaustedAlert({
+              date: targetDate,
+              mode,
+              affectedGames: creditErrors.length,
+              errors: creditErrors,
+            });
+            await markNotificationFlag(db, targetDate, 'credit_exhausted_sent');
+          }
         } catch {
           // silent — main path 보호
         }
@@ -1128,7 +1135,7 @@ export async function runDailyPipeline(
  * daily_notifications flag 체크 — 오늘 해당 알림 이미 발송했는지.
  * 동일 cron 이 2회 fire 하는 경우 중복 Telegram 차단용.
  */
-type NotificationFlag = 'summary_sent' | 'announce_sent' | 'results_sent';
+type NotificationFlag = 'summary_sent' | 'announce_sent' | 'results_sent' | 'credit_exhausted_sent';
 
 async function isNotificationSent(
   db: DB, date: string, flag: NotificationFlag,

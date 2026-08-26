@@ -1,4 +1,15 @@
-## v0.5.62.161 — 2026-08-26 (cycle 2639, review-code(heavy): HOME_ELO_BONUS 주석 자기모순 수정)
+## v0.5.62.162 — 2026-08-26 (cycle 2640, review-code(heavy): CREDIT_EXHAUSTED alert 중복발송 dedup 부재 수정)
+
+### fix: daily.ts CREDIT_EXHAUSTED alert 블록 — "1회만 발화" 주석과 달리 실제 dedup 장치 부재
+
+- 진단: open issue 0, approved plan 0/23. 직전8 distinct=5 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 5/20, op-analysis 3/25, info-arch 22/30, lotto 12/30). breadcrumb 미커버 grep 2건(`/community`, `/en/mlb/reviews/monthly`) 발견했으나 확인 결과 둘 다 placeholder(noindex)/순수 redirect 라우트라 breadcrumb 무관 — false positive. 직전 2사이클 retro 가 명시 추천한 미탐색 대형 파일 `packages/kbo-data/src/pipeline/daily.ts`(1622줄, injection-validation 스윕 미대상) 서브에이전트 정독 감사.
+- `finish()` 안 CREDIT_EXHAUSTED alert 블록 주석이 "predict/predict_final mode 에서 1회만 발화 (최초 발화 cron 에서만)" 이라 주장하지만 실제론 dedup 로직 전무 — `captureCreditExhaustedAlert`(`silent-drift-alert.ts`) 자체도 무조건 `Sentry.captureMessage` + `notifyError`(Telegram) 호출. predict mode 는 10-21시 매시(최대 12회/일) 재실행되고 CREDIT_EXHAUSTED 는 2026-06-06 부터 지속 상태(CLAUDE.md 박제)라, 해당 기간 매 predict 실행마다 CREDIT_EXHAUSTED 에러가 있으면 중복 Telegram/Sentry 알림 발송 가능한 구조였음 — announce_sent/results_sent/summary_sent 는 이미 `daily_notifications` idempotent flag 로 dedup 되는데 이 블록만 누락(같은 파일 안 comment/code mismatch, silent-drift family).
+- 수정: migration 052 (`daily_notifications.credit_exhausted_sent` BOOLEAN + `_at` TIMESTAMPTZ) 추가 + `NotificationFlag` 유니온에 `'credit_exhausted_sent'` 추가 + CREDIT_EXHAUSTED 블록을 기존 `isNotificationSent`/`markNotificationFlag` 패턴으로 wiring(alert 발송 전 flag 체크, 발송 후 flag 마킹). 같은 날 반복 predict 실행 시 최초 1회만 발화하도록 실제 코드가 주석 주장과 일치하게 정정.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` + `pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 92 files/1209 tests green + `pnpm lint` clean. migration 052 `supabase db push --linked` 적용 완료. version 161→162 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `analysis/page.tsx`(2833줄) 미탐색 축 / 다양성 전환 시 polish-ui·info-architecture-review(3사이클+ 연속 negative, 신규 trigger 없으면 재확인 스킵 검토) 또는 op-analysis(gap 4/25).
+
+
 
 ### fix: HOME_ELO_BONUS JSDoc 이 같은 블록 안 자체 도출과 다른 값을 인라인 주장하던 계산 오기 수정
 
