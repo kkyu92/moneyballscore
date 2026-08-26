@@ -448,7 +448,7 @@ export function checkClaimTypes(outputText: string): Violation[] {
 // 주입 블록 재구성 (team-agent의 buildUserMessage와 동일 소스)
 // ============================================
 
-export function buildInjectionText(context: GameContext): string {
+export function buildInjectionText(context: GameContext, rivalryBlock = ''): string {
   const { game, homeTeamStats, awayTeamStats, homeSPStats, awaySPStats, homeElo, awayElo, homeRecentForm, awayRecentForm, headToHead, parkFactor } = context;
   const homeName = KBO_TEAMS[game.homeTeam].name;
   const awayName = KBO_TEAMS[game.awayTeam].name;
@@ -482,6 +482,11 @@ export function buildInjectionText(context: GameContext): string {
   const ac = buildAgentContext(context);
   const contextBlockText = renderMetricsAndRecentFormForLLM(ac);
 
+  // rivalry-memory 블록 (getRivalryBlock().promptBlock) — team-agent.buildUserMessage 가
+  // renderContextForLLM 블록과 별개로 맨 끝에 직접 append 하는 실제 LLM 노출 텍스트
+  // (h2h 스코어 + agent_memories.content 숫자). buildAgentContext/renderContextForLLM
+  // 경로를 안 타서 위 contextBlockText 재사용만으로는 커버 안 됨 — 누락 시 팀 에이전트가
+  // 이 블록의 숫자를 정당 인용해도 checkHallucinatedNumbers 가 환각으로 오탐.
   return [
     `경기: ${awayName} @ ${homeName}`,
     `시간: ${game.gameTime}`,
@@ -490,6 +495,7 @@ export function buildInjectionText(context: GameContext): string {
     `[${awayName}] SP ${spLine(awaySPStats)} | wOBA ${awayTeamStats.woba} | ${MetricRegistry.bullpen_fip.ko_name} ${awayTeamStats.bullpenFip} | WAR ${formatGapAwareStat('war', awayTeamStats.totalWar)} | SFR ${formatGapAwareStat('sfr', awayTeamStats.sfr)} | Elo ${awayElo.elo} | ${MetricRegistry.recent_form.ko_name} ${awayFormPct}%`,
     `${MetricRegistry.head_to_head.ko_name} ${headToHead.wins}승 ${headToHead.losses}패`,
     contextBlockText,
+    rivalryBlock,
   ].join('\n');
 }
 
@@ -500,7 +506,8 @@ export function buildInjectionText(context: GameContext): string {
 export function validateTeamArgument(
   arg: TeamArgument,
   context: GameContext,
-  mode: ValidationMode = 'strict'
+  mode: ValidationMode = 'strict',
+  rivalryBlock = ''
 ): ValidationResult {
   const outputText = [
     arg.reasoning,
@@ -509,7 +516,7 @@ export function validateTeamArgument(
     ...arg.opponentWeaknesses,
   ].join(' ');
 
-  const injectionText = buildInjectionText(context);
+  const injectionText = buildInjectionText(context, rivalryBlock);
 
   const rawViolations: Violation[] = [
     ...checkHallucinatedNumbers(outputText, injectionText),

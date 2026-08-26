@@ -1,3 +1,14 @@
+## v0.5.62.156 — 2026-08-26 (cycle 2630, review-code(heavy): 라이벌리 메모리 블록 환각검증 누락 수정)
+
+### fix: team-agent 라이벌리 메모리 블록이 환각 숫자 검증 대상에서 빠져있던 silent gap 수정
+
+- 진단: open issue 0, approved plan 0/23. 직전20 review-code 계열 dominance 60%(12/20) 지속 — 직전 두 사이클(2628/2629)이 색상 토큰·dead-code 두 축 모두 소진 확인하며 다음 후보로 명시한 `packages/kbo-data/src/agents/validator.ts`(956줄, agents/ 디렉토리 최대·미착수 파일) 재조준. polish-ui/info-architecture-review 재점검(breadcrumb 18건/sitemap 대조/신규 라우트 7일)도 cycle 2618/2627 checkpoint 와 동일 결과라 신규 액션 없음 확인 후 review-code(heavy) 선택.
+- Explore agent 전체 파일 정독 + 2차 자가검증(호출부 grep) 결과: `buildInjectionText()`(환각 검증용 "LLM 실제 노출 텍스트" 재구성 함수, cycle 2122/2241 두 차례 team-agent.buildUserMessage 와 동기화된 이력)가 `team-agent.ts`가 실제로 프롬프트 맨 끝에 직접 append하는 라이벌리 메모리 블록(`getRivalryBlock().promptBlock` — 최근 h2h 스코어 + `agent_memories.content` 문자열, `retro.ts`가 기록하는 실제 숫자 포함)을 전혀 반영하지 않음을 확인. `validateTeamArgument(result.data, context, mode)` 호출부(`team-agent.ts:133`)가 이 블록을 validator 에 전달하지 않아, LLM이 이 블록의 숫자(예: 과거 FIP 갭 수치)를 정당하게 인용해도 `checkHallucinatedNumbers`가 "주입 블록에 없는 수치"로 오탐할 위험이 있었음(테스트 미커버 확인). `packages/shared/src/index.ts` dead-code 후보 7건은 재검증 결과 전부 false positive(TS structural typing으로 실사용)였던 것과 대조적으로, 본 건은 실제 검증 gap.
+- 수정: `buildInjectionText(context, rivalryBlock = '')` 2번째 인자 추가해 rivalryBlock 텍스트를 injection text 말미에 포함, `validateTeamArgument(arg, context, mode, rivalryBlock = '')` 4번째 인자로 전달 경로 연결, `team-agent.ts:133` 호출부에서 이미 보유 중이던 `rivalry.promptBlock` 을 넘기도록 수정(신규 API 호출 없음 — 이미 fetch 해둔 값 재사용). `agents-validator.test.ts`에 회귀 가드 7건 신규(agent_memories 소수점 수치 동봉 확인 2건 + 인용 시 환각 오탐 없음/미전달 시 오탐 유지 대조 3건 + `validateTeamArgument` 4번째 인자 레벨 2건 — h2h 스코어 자체는 단일 digit이라 `NUMERIC_WHITELIST`로 이미 통과되는 걸 실측 확인해 테스트 값은 소수점 memory content로 조정).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` 패키지 vitest 91 files/1194 tests(+6) green + `pnpm turbo test` 전체(moneyball 568/4465 불변 + kbo-data/shared/cron) + `pnpm lint` clean. version 155→156 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = review-code(heavy, `judge-agent.ts`/`debate.ts` 등 라이벌리 블록이 team arg reasoning 경유로 judge 프롬프트에도 흘러들어가는지 별도 확인 후보 — 본 사이클은 team-agent 직접 주입 경로만 스코프) 또는 polish-ui/info-architecture-review(둘 다 gap 여유, 다양성 유지).
+
 ## v0.5.62.155 — 2026-08-26 (cycle 2627, polish-ui: Ko-fi 플로팅 위젯 쿠키 배너 겹침 수정)
 
 ### fix(design): Ko-fi 도네이션 위젯이 쿠키 배너/적중률 스탯 카드와 겹치는 문제 수정

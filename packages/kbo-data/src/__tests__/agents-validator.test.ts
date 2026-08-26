@@ -342,6 +342,25 @@ describe('validateTeamArgument 통합', () => {
     expect(WARN_LIMIT).toBe(2);
     expect(WARN_LIMIT_LENIENT).toBe(5);
   });
+
+  // cycle 2630 review-code(heavy) — team-agent.runTeamAgent 는 getRivalryBlock().promptBlock 을
+  // buildUserMessage 에 직접 주입하면서도 기존엔 validateTeamArgument 호출 시 넘기지 않았다.
+  // 4번째 인자로 전달되면 rivalryBlock 수치 인용이 더 이상 환각으로 오탐되지 않아야 한다.
+  // (h2h 스코어처럼 단일 digit 조합은 NUMERIC_WHITELIST 로 이미 통과되므로, 화이트리스트 밖의
+  // agent_memories 소수점 수치로 검증 — sp_fip 갭 등 실제 memory content 포맷과 동일)
+  it('rivalryBlock 4번째 인자 전달 시 agent_memories 소수점 수치 인용 환각 오탐 없음', () => {
+    const rivalryBlock = '## 과거 맥락\n에이전트 학습 메모리 (1개):\n- [LG weakness] 선발 FIP (sp_fip) +2.35 (weakness, vs KIA 2026-08-20)';
+    const arg = makeArg({ reasoning: 'sp_fip +2.35 약점 반영. FIP 3.2 우위' });
+    const result = validateTeamArgument(arg, ctx, 'strict', rivalryBlock);
+    expect(result.ok).toBe(true);
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(false);
+  });
+
+  it('rivalryBlock 미전달 시 동일 인용은 환각 오탐 (fix 이전 회귀 가드)', () => {
+    const arg = makeArg({ reasoning: 'sp_fip +2.35 약점 반영. FIP 3.2 우위' });
+    const result = validateTeamArgument(arg, ctx);
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+  });
 });
 
 // ============================================
@@ -634,6 +653,36 @@ describe('buildInjectionText', () => {
       expect(v[0].detail).toContain(num);
     }
   });
+
+  // cycle 2630 review-code(heavy) — team-agent.buildUserMessage 는 getRivalryBlock().promptBlock
+  // (h2h 스코어 + agent_memories.content 숫자)을 renderContextForLLM 블록과 별개로 맨 끝에 직접
+  // append 해 LLM 에 노출한다. buildInjectionText 가 이 rivalryBlock 인자를 안 받으면 LLM 이
+  // 실제 노출된 메모리 수치를 정당 인용해도 환각으로 오탐된다. (h2h 스코어 자체는 단일 digit
+  // 조합이라 NUMERIC_WHITELIST 로 이미 통과되므로, 화이트리스트 밖의 agent_memories 소수점
+  // 수치로 검증 — 실제 memory content 포맷과 동일)
+  it('rivalryBlock 인자 포함 시 agent_memories 소수점 수치 동봉', () => {
+    const rivalryBlock = '## 과거 맥락\n에이전트 학습 메모리 (1개):\n- [LG weakness] 선발 FIP (sp_fip) +2.35 (weakness, vs KIA 2026-08-20)';
+    const text = buildInjectionText(makeContext(), rivalryBlock);
+    expect(text).toContain('+2.35');
+  });
+
+  it('rivalryBlock 미전달 시 기존 동작 유지 (기본값 빈 문자열)', () => {
+    const text = buildInjectionText(makeContext());
+    expect(text).not.toContain('과거 맥락');
+  });
+
+  it('LLM 이 rivalryBlock 의 agent_memories 소수점 수치 인용 시 환각 오탐 없음 (rivalryBlock 전달)', () => {
+    const rivalryBlock = '## 과거 맥락\n에이전트 학습 메모리 (1개):\n- [LG weakness] 선발 FIP (sp_fip) +2.35 (weakness, vs KIA 2026-08-20)';
+    const injection = buildInjectionText(makeContext(), rivalryBlock);
+    const v = checkHallucinatedNumbers('sp_fip +2.35 약점 반영', injection);
+    expect(v).toHaveLength(0);
+  });
+
+  it('LLM 이 rivalryBlock 수치 인용해도 rivalryBlock 미전달 시엔 환각 오탐 (fix 이전 회귀 가드)', () => {
+    const injection = buildInjectionText(makeContext());
+    const v = checkHallucinatedNumbers('sp_fip +2.35 약점 반영', injection);
+    expect(v.length).toBeGreaterThan(0);
+  });
 });
 
 // ============================================
@@ -921,3 +970,4 @@ describe('KOREAN_FAMILY_NAMES (cycle 132 silent drift 회귀 가드)', () => {
     expect(v[0].detail).toContain('유철수');
   });
 });
+
