@@ -1,3 +1,17 @@
+## ⚪ RETRO-ONLY — fix-incident(lite) 89-cycle gap 점검 + dimension-cycle(acquisition) breadcrumb/RSS lastmod (cycle 2615, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8(2607-2614) distinct=4(review-code 4+op-analysis 1+polish-ui 1+dimension-cycle 2) — 2-chain lock 미충족. **fix-incident 직전 60사이클 0회 발화(마지막=cycle 2526, gap=89) — 20-cycle 주기 보정 trigger(7) 충족, lite 자동 권장.** op-analysis gap 7/25, info-arch gap 28/30, lotto gap 17/30, design-system negative — 전부 미도달. explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 전부 미충족.
+
+점검 1(fix-incident lite): `pipeline_runs` 최근 7일 161행 조회 — non-success 3건 전부 `mlb_fancy_scrape` fangraphs HTTP 403(8/19~8/21 3연속). 상세 조회 결과 8/22부터 latest(8/25, games_found=30/predictions=30)까지 전부 success로 자가 회복 확인. `gh run list` 전부 success/skipped 재확인. 현재 라이브 인시던트 없음 — transient scraper block, 코드 변경 불필요.
+
+점검 2(acquisition 심화, cycle 2613/2614 자체 추천): Breadcrumb 컴포넌트가 BreadcrumbList JSON-LD 자체 emit — 87/105 page.tsx 사용, 미사용 18개는 기존 canonical-누락 18개 리스트와 완전 동일(noindex/debug/redirect-shim 의도) 재확인. `sitemap.ts` + `feed/route.ts`(RSS) lastModified/pubDate 전수 대조 — 동적 라우트 실측 `updated_at` 사용, 정적 라우트 build-time now() 표준 관행, drift 없음.
+
+결론: 이번 사이클 실행 가능한 신규 버그/drift 없음. 코드 변경 없음.
+
+다음 사이클 추천 = op-analysis/info-arch(gap 28/30, 2-cycle 이내 도달)/lotto 자연 대기 또는 review-code(heavy) 신규 축(button height/line-height, cycle 2610 자체 추천) 재탐색.
+
+---
+
 ## ⚪ RETRO-ONLY — dimension-cycle(acquisition): noindex-vs-sitemap 전체 재감사, 신규 drift 0건 (cycle 2614, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23(전부 completed/superseded/archived/spec_only_deferred). 직전8(2606-2613) distinct=4(review-code 5+polish-ui 1+op-analysis 1+dimension-cycle 1) — 2-chain lock 미충족. fix-incident negative(`gh run list` 전부 success/skipped). op-analysis gap 6/25, info-arch gap 27/30, lotto gap 16/30, design-system negative(당일 갱신) — 전부 미도달. explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 전부 미충족. cycle 2613 자체 추천("acquisition 내 다른 각도(내부링크/canonical URL 정규화)") 따라 진입.
