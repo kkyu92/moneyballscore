@@ -67,6 +67,8 @@
 - **Scale:** 2xs(2) xs(4) sm(8) md(16) lg(24) xl(32) 2xl(48) 3xl(64)
 - **Card padding:** 20px (p-5) — 주 콘텐츠 카드 (매치업/예측/통계 카드)
 - **Compact card padding:** 16px (p-4) — 보조 유틸리티 카드 (목차/TOC nav, 알림 요약 박스 등). `terms/page.tsx`·`glossary/page.tsx` TOC nav twin 확인 (cycle 2606 review-code heavy — 213건 카드 wrapper 중 p-4 79건이 drift 아닌 의도된 2번째 tier로 확정)
+- **Generous card padding:** 24px (p-6) — 두 하위 역할 twin 확인 (cycle 2607 review-code heavy, 33건): (a) 장문 콘텐츠 단일 래퍼 페이지 (`about`/`contact`/`privacy`/`terms`/`glossary`/`seasons`) (b) 아이콘+텍스트 CTA 링크 카드 — `analysis/page.tsx` 주간/월간 리뷰·대시보드·적중기록 CTA 4-twin(`text-3xl` 이모지 + `flex-1` 텍스트 구조 동일), `dashboard/page.tsx` 위젯 카드, `AccuracySummary`/`WeeklyTrendMini`/`SearchClient`. 같은 파일(`analysis/page.tsx`) 안 p-4(그리드 리스트 아이템)·p-5(2단 통계 CTA)·p-6(아이콘+텍스트 CTA) 3-tier 공존은 역할별 twin 구조 확인 후 drift 아님으로 확정.
+- **Micro card padding:** 12px (p-3) — 두 하위 역할 (cycle 2607, 24건): (a) 필터/정렬 컨트롤 박스 — 21개 `*SortControl`/`*Filter`/`*SearchBox` 컴포넌트 (`PredictionsSortControl`/`PicksStatusFilter`/`MlbPredictionsSearchBox` 등) (b) 고밀도 리스트/스켈레톤 아이템 — `standings`/`wild-card` 순위표 팀 행, `picks/loading.tsx`·`MyPicksClient.tsx` 스켈레톤 스탯 카드.
 - **Card gap:** 16px (gap-4)
 - **Section gap:** 32px (space-y-8)
 
