@@ -1,3 +1,15 @@
+## ✅ SUCCESS — polish-ui: AgentVoteCard away-color 하드코딩 hex → var(--color-away) 단일 source 정렬 (cycle 2609, 2026-08-26)
+
+진단: open issue 0, approved plan 0/22. 직전8(2601-2608, 2601 missing 제외) distinct=2(review-code 6 + operational-analysis 1) → **2-chain alternation lock 탐지** — review-code/operational-analysis 이번 사이클 후보 제외. fix-incident 재점검(`gh run list --limit 15`) 3연속 negative. info-arch gap 22/30, lotto gap 11/30 미도달. design-system(DESIGN.md 당일 갱신) negative. explore-idea saturation 10/15 미충족. lock 규칙 따라 남은 pool 전부 trigger 부재 → polish-ui 강제 발화.
+
+발견: transition-duration/badge padding/icon square 축 재점검 clean(twin 구조 확인 — wild-card `w-9 h-7` 뱃지는 "WC1" 텍스트용 pill, standings 숫자 뱃지 square와 역할 다른 정상 twin). hardcoded hex 전수 grep 중 `AgentVoteCard.tsx:85` awayColor fallback `"#c5872a"` — 최초 drift 의심 후 `globals.css --color-away` 재사용 확인, **값은 정상**(최초 `brand[300]` 치환 시도는 즉시 원복한 오판). 실제 drift = 참조 방식 — 이 컴포넌트만 10+ 파일이 쓰는 `var(--color-away)` 대신 raw literal 중복 박제(팔레트 변경 시 silent desync 위험).
+
+실행: `awayColor` fallback → `"var(--color-away)"`. `silent-drift-cycle-2609.test.ts` 신규 2건. tsc clean + vitest 559f/4446t green + lint clean. version 145→146 3-way sync. 단일 논리 단위 → 직접 main commit+push(R4/R7 통과, PR #66f0166c).
+
+다음 사이클 추천 = op-analysis gap 25 재도달(2610 근접) 또는 review-code/operational-analysis lock 해제(cooldown N=1) 후 재개, 또는 info-arch(gap 23/30)/lotto(gap 12/30) 자연 대기.
+
+---
+
 ## ✅ SUCCESS — operational-analysis(heavy) CE cohort 9회 연속 재확인 (cycle 2608, 2026-08-26)
 
 진단: open issue 0, approved plan 0/22 (전부 completed/archived/tier4). 직전8(2600-2607) chain_selected = polish-ui 1 + review-code 6 (2601 skill-evolution forced, cycle JSON 파일 부재) → distinct=2 → **2-chain alternation lock 탐지** (review-code/polish-ui 잠금). fix-incident gap 20+/20 재점검(`gh run list --limit 15` + 최근 debug commit 5건 확인) — 전부 CI green/deploy dispatch skipped, 실제 incident 없음 negative. explore-idea saturation 재확인 negative(TODOS Next-Up 없음, approved plan 0건). design-system 최근 발화(cycle 2599, 9 cycle 전) — 신규 trigger 없음. op-analysis gap 22/25(직전 발화 cycle 2586) 근접 미도달이나 lock redirect 후보 중 가장 stale.
