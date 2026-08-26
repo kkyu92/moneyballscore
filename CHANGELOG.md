@@ -1,3 +1,13 @@
+## v0.5.62.153 — 2026-08-26 (cycle 2622, review-code(heavy): SearchClient.tsx 검색결과 행 hover 다크모드 정렬)
+
+### fix(design): `SearchClient.tsx` 검색결과 행 hover:bg dark 컨벤션 정렬
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2614-2621) distinct=4(review-code(heavy) 5+dimension-cycle 1+fix-incident 1+info-architecture-review 1) — 2-chain lock 미충족. op-analysis gap 14/25, fix-incident gap 7/20, info-arch gap 4/30, lotto gap 24/30 — 전부 미도달. DESIGN.md 당일 갱신(design-system negative). explore-idea saturation 11/15 미도달. ship-0 미충족(직전10 success 4/retro-only 6, success 존재). skill-evolution trigger 5개 미충족(milestone 2622%50≠0, chain-evolution 누적 9건 신규분 없음, review-code 직전20 non-zero 14회).
+- arbitrary `text-[Npx]` 축(cycle 239 후보)은 잔여 1건까지 이미 해소돼 소진. `rounded-*`/`duration-*` 축은 이상치 없음. `hover:bg-gray-50 dark:hover:bg-gray-XXX` 조합 sitewide grep — 8개 인스턴스(LeaderboardTable/LeaderboardJoinModal 등, 클릭 가능한 행/버튼 hover) 전부 `dark:hover:bg-gray-800` 계열인데 `SearchClient.tsx` 검색결과 행 링크만 유일하게 `dark:hover:bg-gray-900/40` — 동일 시각적 역할(클릭 가능 행 hover)의 twin 불일치.
+- 실행: `SearchClient.tsx` line 276 `dark:hover:bg-gray-900/40` → `dark:hover:bg-gray-800/40` 정렬. `silent-drift-cycle-2622.test.ts` 신규(sitewide `hover:bg-gray-50`+`dark:hover:bg-gray-900` 조합 재발 방지 grep + SearchClient 특정 assertion, 2 tests). `pnpm --filter moneyball type-check` clean + vitest 566 files/4462 tests(+1/+2) green + lint clean. version 152→153 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+
+
 ## v0.5.62.152 — 2026-08-26 (cycle 2621, review-code(heavy): LiveScoreboard.tsx 홈 배지 font-semibold → font-bold 정렬)
 
 ### fix(design): `LiveScoreboard.tsx` 홈팀 배지 font-weight 컨벤션 정렬
