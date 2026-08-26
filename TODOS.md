@@ -1,3 +1,17 @@
+## ✅ SUCCESS — review-code(heavy) 드롭다운 패널 3곳 border-radius 최종 정렬 (cycle 2605, 2026-08-26)
+
+진단: open issue 0, approved plan 0/22. 직전8(2597-2604) distinct=4 — 2-chain lock 없음. fix-incident 20-cycle gap trigger 충족(79 cycle 미발화) → forced check(gh run list 전부 success, pipeline_runs 최근 20건 전부 status=success errors=[], 최근 7일 debug commit 1건은 이미 fixed) 실행 결과 clean, 실제 incident 없음. op-analysis gap 19/25, info-arch gap 18/30, lotto gap 7/30 전부 미도달. cycle 2604 retro 추천("잔여 3곳 드롭다운 패널 tier 확정") 채택.
+
+발견: cycle 2604가 tier 불명확(버튼 rounded-lg vs 카드 rounded-xl 어느 쪽인지 twin 부재)으로 범위 제외한 `MegaMenu.tsx`(드롭다운 패널)/`navigation-menu.tsx`(viewport 래퍼)/`SearchClient.tsx`(listbox-option row) 3곳을 재조사. border+shadow-lg 플로팅 패널 계열 전수 grep 결과 `PWAInstallButton`/`QuantOnlyBadge`/`WeeklyTrendMini`/`FactorWaterfallChart`/`MlbFactorWaterfallChart` 전부 `rounded-lg` 사용 — MegaMenu·navigation-menu 두 곳(둘 다 `rounded-md`, 서로 twin 관계이자 유일한 이탈)이 drift로 확정. SearchClient row는 `HistoricalAnalogMatchup`/`MlbHistoricalAnalogMatchup`의 `rounded-lg` interactive-row twin과 정렬.
+
+실행: 3곳 `rounded-md`→`rounded-lg` 정렬. `silent-drift-cycle-2604.test.ts`의 "deferred files still use rounded-md" assertion이 obsolete 화되어 제거(전역 clean 단일 assertion으로 통합) + `silent-drift-cycle-2605.test.ts` 신규(3 tests). DESIGN.md Decisions Log 갱신.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball exec vitest run`(557 files/4441 tests, +1/+2) + `pnpm --filter moneyball lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7, pre-push hook lint+type-check+version-sync-guard 통과).
+
+border-radius rounded-md drift family 완전 소진 (cycle 2599 typography 토큰화 → 2602 뱃지 → 2603 알림박스 → 2604 버튼/인풋/캘린더 → 2605 드롭다운 패널, 전역 grep 0건 확인). 다음 사이클 추천 = op-analysis(gap 20/25)/info-arch(gap 19/30) 자연 대기, 또는 review-code(heavy) shadow/focus-ring 카테고리(DESIGN.md에 스펙 자체가 미정의 상태라 review-code 단독 audit 불가 — design-system chain 후보에 가까움).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 버튼/인풋/캘린더셀 border-radius 최종 정리 (cycle 2604, 2026-08-25)
 
 진단: open issue 0, approved plan 0/23. 직전8(2596-2603) distinct=5 — 2-chain lock 없음. op-analysis gap 19/25, info-arch gap 18/30, lotto gap 6/30, design-system 전부 미도달. cycle 2603 retro 1순위 추천("잔여 rounded-md 33건 후속") 채택.
