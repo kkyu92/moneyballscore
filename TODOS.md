@@ -1,4 +1,9 @@
 
+## cycle 2641 (2026-08-26) — SUCCESS
+- review-code(heavy): `apps/moneyball/src/app/analysis/analysis-data.ts`(2833줄 analysis/page.tsx 첫 탐색 축, import chain 따라 발견) `getThisWeekRemainingGames` 정독 감사
+- h2hRate parity gap 발견+수정 — h2hHomeWins/h2hAwayWins 는 이미 계산돼 있는데 `buildGameOverview` 호출 시 h2hRate 미전달, game/[id] 상세페이지는 전달함 → "이번 주 남은 경기" 미리보기에서만 "올 시즌 상대전적" 문장 항상 누락되던 gap. 3줄 diff, 4465 tests + typecheck green (commit 7d39cf0a)
+- 다음 추천: review-code(heavy) 계속 시 analysis-data.ts 나머지 summary builder 함수군, 다양성 전환 시 op-analysis(gap 5/25)
+
 ## cycle 2640 (2026-08-26) — SUCCESS
 - review-code(heavy): `packages/kbo-data/src/pipeline/daily.ts`(1622줄, injection-validation 스윕 미대상 pipeline orchestration monolith) 서브에이전트 정독 감사
 - CREDIT_EXHAUSTED alert 블록 발견+수정 — "1회만 발화" 주석과 달리 dedup 장치 부재(predict mode 매시 최대 12회/일 재실행 + 무조건 Telegram/Sentry 발송, CE 2026-06-06~ 지속 상태라 중복발송 가능). `daily_notifications.credit_exhausted_sent` flag 추가(migration 052) + 기존 announce_sent/results_sent idempotent 패턴 wiring (commit 353242cf)
