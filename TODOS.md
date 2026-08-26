@@ -1,4 +1,14 @@
-## 🔁 RETRO-ONLY — explore-idea(lite): plan #29(로그인+커뮤니티 ETA) 재평가 트리거 재측정 (cycle 2633, 2026-08-26)
+## 🔁 RETRO-ONLY — fix-incident(lite): 20-cycle gap trigger 강제 점검, live 인시던트 없음 (cycle 2635, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8 distinct=7(2-chain lock 미충족). fix-incident 마지막 발화 cycle 2615 → gap=20 정확히 도달, trigger(7) 발동 — `pipeline_runs` 최근 7일 error rate + git log debug commit 강제 점검 수행.
+
+`pipeline_runs` 최근 7일(2026-08-19~08-26) 161건 중 non-success 3건 전부 `mlb_fancy_scrape` — `fetchFangraphsMlbTeams: fangraphs HTTP 403`(08-19/08-20/08-21 3일 연속). 해당 스크래퍼 최근 15건 재조회 결과 08-22부터 08-25까지 4일 연속 success로 자연 회복 확인(원인 = FanGraphs 측 간헐적 anti-bot 차단으로 추정, User-Agent 자체는 cycle 2278 fix로 이미 정정됨 — `fangraphs-mlb.ts` 주석에 "2026-08-04~08-19 24/30일 실패" 히스토리 명시, 이후 재발이지만 익일 cron 재시도로 self-heal). `gh run list` 스케줄 workflow(CI Failure Dispatch / Vercel Deploy Failure Dispatch) 전부 skipped(실패 없음). `git log` debug/hotfix/revert commit 0건.
+
+Live 인시던트 부재 확인 → 코드 변경 없음, RETRO-ONLY. gap trigger 의무 점검은 완료(사례 17 패턴 — CI/CD 별도 신호계열도 `gh run list`로 확인 포함).
+
+다음 사이클 추천 = review-code(heavy) 계속(dominance-positive streak, injection-validation family 소진 후 별도 대형 파일 정독) 또는 op-analysis(직전발화 2626, gap 9/25 아직 여유) 다양성.
+
+---
 
 review-code(heavy) 직전20 60% dominance + injection-validation gap family 완전 소진(team-agent/judge-agent/postview 3경로 전부 cycle 2630~2632 패치, 실 호출부 3곳 재확인 잔여 gap 0) 확인 후 다양성 전환. plan #29 자체 지시 따라 재평가 트리거만 재측정: `user_picks`=1 / `mlb_user_picks`=0 / `pick_poll_events`=5 / `mlb_pick_poll_events`=0 — cycle 2417/2334 측정과 동일, 트래픽 변화 0. 포스트시즌(통상 10월) "직전" 시점도 아직 아님. 트리거 미충족 → Tier 4 보류 유지, 코드 변경 없음.
 
