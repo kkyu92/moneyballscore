@@ -1,4 +1,10 @@
 
+## cycle 2645 (2026-08-26) — SUCCESS
+- fix-incident: 마지막 발화(cycle 2615) 이후 gap 30/20 — 장기 미발화 주기 보정 trigger 충족. `pipeline_runs` 최근 7일 REST 조회 — `mlb_fancy_scrape` mode 가 2026-08-19~21 3일 연속 `fetchFangraphsMlbTeams: fangraphs HTTP 403`(games_found=0), 08-22부터 4일 연속 self-recover.
+- 근본원인 = commit 1936f6a4(cycle 2278 User-Agent 헤더 fix)의 잔여 tail — 재발 코드 fix 불필요. 조사 확장 중 진짜 gap 발견: `silent-drift-alert.ts`의 `shouldAlertSilentDrift`가 `gamesFound<=0` 조기 return 에 걸려 MLB scrape mode가 fetch throw로 `gamesFound:0+errors` 리턴하는 total 실패 케이스를 alert 대상에서 완전히 놓침(Sentry warning만, Telegram 사용자 가시 채널 부재).
+- `MLB_SCRAPE_MODES.has(mode) && gamesFound===0 && errors.length>0 → alert` 분기 추가. "경기 없는 정상 날"(teams.length===0, errors=[])은 `errors.length` 로 구분되어 영향 없음. 테스트 5건 신규(mlb_fancy_scrape/mlb_statsapi_scrape total 실패, 정상 빈 응답 미발화, rowsInserted=0 기존 분기 보존, non-scrape mode 범위 한정). `pnpm --filter kbo-data exec tsc --noEmit` clean + vitest 92 files/1214 tests(+15) green + lint clean (commit 2bc98e20, v0.5.62.164)
+- 다음 추천: info-arch(gap 28/30, 다음 사이클 근접 도달권) 또는 review-code(heavy) 복귀
+
 ## cycle 2644 (2026-08-26) — SUCCESS
 - polish-ui (2-chain lock fallback): 직전 8사이클 distinct=2(review-code(heavy)+operational-analysis(lite)) → 2-chain lock 탐지, 두 chain 제외. fix-incident/info-arch(26/30)/lotto(16/30, 다음회차 picks 이미 박제)/explore-idea 모두 강trigger 부재 → 룰 3번 polish-ui 강제 발화
 - DESIGN.md 타이포 스케일 전역 grep(`text-\[Npx\]`) — `accuracy/page.tsx:758` "일요일 상한" 배지 유일 미토큰 잔여 1건 발견. 3xs(9px) 정의와 역할 일치 → `text-[8px]` → `text-3xs` 정렬 (commit 0acc66eb, v0.5.62.163)
