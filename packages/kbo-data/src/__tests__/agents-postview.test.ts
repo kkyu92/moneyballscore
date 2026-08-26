@@ -445,4 +445,50 @@ describe('runPostview agentsFailed (cycle 384)', () => {
     expect(result.agentsFailed).toBe(true);
     expect(result.agentError).toBe('credit exhausted');
   });
+
+  // cycle 2637 op-analysis 후속 — team-postview 갭. judgeReasoning 은 validateJudgeReasoning
+  // 으로 검증되지만(위 테스트들의 judge mock 은 항상 통과 문구), homePostview/awayPostview
+  // (TEAM_POSTVIEW_SYSTEM haiku 출력) 는 검증 없이 그대로 PostviewPanel 에 노출되던 갭.
+  // team-agent / judge-agent / calibration-agent 를 고쳤던 것과 동일 family — 5번째 사례.
+  it('team postview summary 환각 숫자 3개+ → mask 되어 반환 (validator 미적용 갭 회귀 방지)', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(
+      ok({
+        team: 'LG',
+        summary: '팀은 최근 99경기 중 88승 77패를 기록했다.',
+        keyFactor: 'sp_fip',
+        missedBy: '',
+      })
+    );
+    vi.mocked(callLLM).mockResolvedValueOnce(
+      ok({ team: 'HT', summary: '데이터 기반 사후 분석', keyFactor: 'bullpen_fip', missedBy: '' })
+    );
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ factorErrors: [], reasoning: 'judge OK' }));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.homePostview.summary).toContain('[검증실패:환각숫자]');
+    expect(result.homePostview.summary).not.toContain('99');
+    expect(result.homePostview.summary).not.toContain('88');
+    expect(result.homePostview.summary).not.toContain('77');
+  });
+
+  it('team postview 가 주입된 스코어/pre_game 확률/factor 편향만 인용 → mask 없음 (false positive 회귀 방지)', async () => {
+    vi.mocked(callLLM).mockResolvedValueOnce(
+      ok({
+        team: 'LG',
+        summary: `스코어 ${actual.homeScore} - ${actual.awayScore}로 승리, sp_fip 편향 0.05 유효.`,
+        keyFactor: 'sp_fip',
+        missedBy: '',
+      })
+    );
+    vi.mocked(callLLM).mockResolvedValueOnce(
+      ok({ team: 'HT', summary: '데이터 기반 사후 분석', keyFactor: 'bullpen_fip', missedBy: '' })
+    );
+    vi.mocked(callLLM).mockResolvedValueOnce(ok({ factorErrors: [], reasoning: 'judge OK' }));
+
+    const result = await runPostview(makeContext(), actual, original);
+
+    expect(result.homePostview.summary).not.toContain('[검증실패:환각숫자]');
+    expect(result.homePostview.summary).toContain('sp_fip 편향 0.05');
+  });
 });

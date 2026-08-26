@@ -10,7 +10,7 @@
  * 기존 `pre_game` row는 절대 update 금지 (이력 보존).
  */
 
-import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS, LLM_MAX_TOKENS_POSTVIEW_TEAM, LLM_MAX_TOKENS_POSTVIEW_JUDGE, NEUTRAL_FACTOR } from '@moneyball/shared';
+import { KBO_TEAMS, DEFAULT_WEIGHTS, ACTIVE_FACTOR_KEYS, LLM_MAX_TOKENS_POSTVIEW_TEAM, LLM_MAX_TOKENS_POSTVIEW_JUDGE, NEUTRAL_FACTOR, errMsg } from '@moneyball/shared';
 import type { TeamCode } from '@moneyball/shared';
 import { buildAgentContext, renderContextForLLM } from '../context/agent-context';
 import { MetricRegistry, type MetricSlug } from '../context/metrics';
@@ -23,6 +23,7 @@ import {
   resolveValidationMode,
   evaluateAndCaptureAgentFallback,
 } from './validator';
+import { logValidatorEvent } from './validator-logger';
 import type { GameContext, AgentResult } from './types';
 
 // 가중치 > 0% 인 factor 만 factorErrors 후보 — 0% factor 가 LLM reasoning 의 70% 차지하던 silent drift 차단.
@@ -219,6 +220,26 @@ function parseTeamPostview(text: string, team: TeamCode): TeamPostview {
   }
 }
 
+// buildTeamPostviewMessage 가 실제로 노출하는 team-postview 전용 실측값. 판사용
+// buildPostviewExtraInjection(스코어 + pre_game 확률% + factorLines) 은 team postview
+// 프롬프트에도 동일하게 노출되지만, team postview 는 여기에 더해 `original.reasoning`
+// (pre_game 블로그 논거, 400자 슬라이스) 도 그대로 인용한다 (buildTeamPostviewMessage
+// "pre_game 논거: ..." 줄 참조). 이 텍스트를 injection 에서 빠뜨리면 team postview가
+// 그 안 숫자를 정당 인용해도 checkHallucinatedNumbers 가 환각으로 오탐한다.
+export function buildTeamPostviewExtraInjection(
+  actual: ActualResult,
+  original: OriginalPrediction
+): string {
+  return [buildPostviewExtraInjection(actual, original), original.reasoning.slice(0, 400)].join('\n');
+}
+
+// Validator Layer 1 (cycle 2637 발견 갭) — judge-postview 의 reasoning 은 이미
+// validateJudgeReasoning 으로 검증되지만(runPostview 참조), 이 team-postview 에이전트가
+// 만드는 summary/missedBy 는 검증 없이 그대로 반환되어 apps/moneyball 의
+// /analysis/game/[id] PostviewPanel 에 사용자 가시 텍스트로 직결됐다 — team-agent /
+// judge-agent / calibration-agent 를 고쳤던 것과 동일한 "LLM 텍스트 블록을 만들고도
+// validate* 를 안 태우는" 패턴의 5번째 사례. checkClaimTypes 는 (judge reasoning 검증과
+// 동일 근거로) 자유 서술문 false positive 위험 때문에 skip — validateJudgeReasoning 재사용.
 async function runTeamPostviewAgent(
   team: TeamCode,
   isWinner: boolean,
@@ -226,7 +247,7 @@ async function runTeamPostviewAgent(
   actual: ActualResult,
   original: OriginalPrediction
 ): Promise<AgentResult<TeamPostview>> {
-  return callLLM<TeamPostview>(
+  const result = await callLLM<TeamPostview>(
     {
       model: 'haiku',
       systemPrompt: TEAM_POSTVIEW_SYSTEM,
@@ -235,6 +256,54 @@ async function runTeamPostviewAgent(
     },
     (text) => parseTeamPostview(text, team)
   );
+
+  if (!result.success || !result.data) return result;
+
+  const outputText = [result.data.summary, result.data.missedBy]
+    .filter((s): s is string => Boolean(s))
+    .join(' ');
+  if (!outputText) return result;
+
+  const mode = resolveValidationMode();
+  const validation = validateJudgeReasoning(
+    outputText,
+    context,
+    mode,
+    '',
+    buildTeamPostviewExtraInjection(actual, original)
+  );
+
+  void notifyValidationViolations(validation, {
+    agent: 'team',
+    gameId: context.game.externalGameId ?? null,
+    backend: result.model,
+  });
+
+  if (validation.violations.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gameId = (context.game as any).id ?? null;
+    logValidatorEvent({
+      gameId,
+      teamCode: team,
+      agent: 'team',
+      backend: result.model,
+      passed: validation.ok,
+      violations: validation.violations,
+    }).catch((e) => console.warn('[validator_logs] unexpected error:', errMsg(e)));
+  }
+
+  if (validation.violations.length === 0) return result;
+
+  return {
+    ...result,
+    data: {
+      ...result.data,
+      summary: maskViolatedReasoning(result.data.summary, validation.violations),
+      missedBy: result.data.missedBy
+        ? maskViolatedReasoning(result.data.missedBy, validation.violations)
+        : result.data.missedBy,
+    },
+  };
 }
 
 // ============================================
