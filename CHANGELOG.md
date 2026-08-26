@@ -1,3 +1,11 @@
+## v0.5.62.148 — 2026-08-26 (cycle 2611, review-code(heavy): "AI" 원형 배지 아이콘 크기 w-5 h-5 → w-6 h-6 정렬)
+
+### fix(design): "AI" 아바타 배지 아이콘 크기 역할 정렬
+
+- 진단: open issue 0, approved plan 0/22. 직전8(2603-2610) distinct=3(review-code 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. fix-incident 20+ 사이클 미발화지만 `gh run list --limit 15` 전부 success/skipped, negative. op-analysis gap 3(2608 직발화), info-arch gap 24/30, lotto gap 13/30, design-system negative(DESIGN.md 당일 갱신) — 전부 미도달. skill-evolution trigger 5개 전부 미충족(milestone 2611%50≠0, 직전20 sample=19≥10, review-code만 평가 대상이며 12회 발화로 non-zero). review-code(heavy) 재진입 — cycle 2610 자체 추천대로 아이콘 크기/버튼 높이/line-height 축 신규 탐색.
+- 발견: 아이콘 크기(w-4 h-4/w-5 h-5/w-6 h-6) 전역 재점검 중 "AI" 원형 아바타 배지(`inline-flex items-center justify-center rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-2xs` + "AI" 텍스트) 정확히 동일 역할 3곳 발견 — `DebateTimeline.tsx`/`JudgeReasoningCard.tsx` 는 `w-6 h-6`, `app/predictions/[date]/page.tsx` 헤더만 `w-5 h-5` — 1-notch 이탈. 나머지 icon-square 사용처(순위 뱃지 `w-6 h-6`, 로또 콤보체크 `w-9 h-9` 등)는 역할 상이해 twin 아님, drift 아님 확인. 버튼 높이(h-8/h-9/h-10/h-11) grep은 대부분 `loading.tsx` 스켈레톤 자체 사이즈라 twin 무의미(범위 제외) — line-height(`leading-*`) grep도 페이지별 산문 vs UI 컴포넌트 역할 분기 뚜렷해 drift 없음 확인.
+- 실행: `predictions/[date]/page.tsx` AI 배지 `w-5 h-5` → `w-6 h-6`(2/3 다수결). DESIGN.md Decisions Log 항목 추가. `silent-drift-cycle-2611.test.ts` 신규(w-6 h-6 assert + w-5 h-5 AI 배지 전역 재발 방지 grep). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest green + lint clean. version 147→148 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.147 — 2026-08-26 (cycle 2610, review-code(heavy): MobileNav 아코디언 chevron duration-150 → duration-200 motion 토큰 역할 정렬)
 
 ### fix(design): `MobileNav.tsx` 아코디언 disclosure chevron duration 정렬
