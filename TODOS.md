@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy): MobileNav 아코디언 chevron duration-150 → duration-200 motion 토큰 역할 정렬 (cycle 2610, 2026-08-26)
+
+진단: open issue 0, approved plan 0/22(plan #29 회원인증/커뮤니티는 postseason 접근 또는 참여≥10 트리거 미충족, plan 자체 명시대로 재확인 스킵). 직전8(2602-2609) distinct=3(review-code 6+op-analysis 1+polish-ui 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 2(2608 직발화), info-arch gap 22/30, lotto gap 12/30(8/23 50세트 이미 박제) 미도달. design-system negative(당일 갱신). explore-idea saturation 10/15 미충족. review-code(heavy) 진입 후 gap-*/z-[]/ring-*/rounded-md/hover:shadow 축 재점검 전부 clean, motion duration 축 신규 진입.
+
+발견: hardcoded `duration-150`/`duration-200` literal 사이트 전체 2건뿐. desktop nav(`navigation-menu.tsx`, shadcn vendor) chevron=`duration-200`(DESIGN.md "dropdown open"=--motion-medium 정의와 일치), 모바일 아코디언(`MobileNav.tsx`) chevron=동일 disclosure 역할이면서 `duration-150`(nav hover 용도) — 역할 불일치 확인.
+
+실행: `MobileNav.tsx` chevron duration-150→200. DESIGN.md Motion 섹션 "Disclosure chevron rotate" 항목 추가. `silent-drift-cycle-2610.test.ts` 신규 2건. tsc clean + vitest 560f/4448t green + lint clean. version 146→147 3-way sync. 단일 논리 단위 → 직접 main commit+push(R4/R7 통과, c87819f2).
+
+다음 사이클 추천 = op-analysis gap 25 재도달(2611 근접, 마지막 2608) 또는 info-arch(gap 23/30)/lotto(gap 13/30) 자연 대기, 또는 review-code(heavy) — spacing/border-radius/shadow/focus-ring/typography/motion 축 모두 소진, 다음은 아이콘 크기(w-4/w-5 hierarchy)·버튼 높이(h-9/h-10)·line-height(leading-*) 축 탐색 권장.
+
+---
+
 ## ✅ SUCCESS — polish-ui: AgentVoteCard away-color 하드코딩 hex → var(--color-away) 단일 source 정렬 (cycle 2609, 2026-08-26)
 
 진단: open issue 0, approved plan 0/22. 직전8(2601-2608, 2601 missing 제외) distinct=2(review-code 6 + operational-analysis 1) → **2-chain alternation lock 탐지** — review-code/operational-analysis 이번 사이클 후보 제외. fix-incident 재점검(`gh run list --limit 15`) 3연속 negative. info-arch gap 22/30, lotto gap 11/30 미도달. design-system(DESIGN.md 당일 갱신) negative. explore-idea saturation 10/15 미충족. lock 규칙 따라 남은 pool 전부 trigger 부재 → polish-ui 강제 발화.
