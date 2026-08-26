@@ -1,3 +1,15 @@
+## ✅ SUCCESS — dimension-cycle(acquisition): /picks sitemap.ts noindex 모순 제거 (cycle 2613, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8(2605-2612) distinct=3(review-code 7+op-analysis 1) — 2-chain lock 미충족. fix-incident negative. op-analysis gap 5/25, info-arch gap 26/30, lotto gap 15/30, design-system negative — 전부 미도달. explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 미충족. cycle 2612 retro 명시 추천("review-code 11축 소진, dimension-cycle acquisition 심화 검토") 따라 진입.
+
+발견: canonical(19건 누락 전부 noindex 의도) / JSON-LD / OG·twitter-image 페어링(66/66 완전 매칭) / hreflang languages alternate(en/mlb 2건 미보유, 둘 다 redirect shim 의도) / Header·Footer locale 치환 로직 전부 clean 재확인 중, sitemap.ts를 각 페이지 자체 metadata와 직접 대조 → `/picks`(`robots: {index:false}`, 개인화 "내 픽 기록")가 sitemap.ts에 여전히 등록된 모순 발견 — `/search`가 동일 사유로 cycle 2579에 제거됐던 패턴, 그때 놓친 gap.
+
+실행: `sitemap.ts`에서 `/picks` 제거 + 사유 주석. `sitemap-mlb.test.ts` 회귀 assertion 추가. tsc clean + vitest 561f/4451t green(+1) + lint clean. version 148→149 3-way sync. 단일 논리 단위 → 직접 main commit+push(R4/R7, aed25cc7), CI green 확인.
+
+다음 사이클 추천 = op-analysis/info-arch/lotto 자연 대기(전부 gap 미도달) 또는 acquisition 내 다른 각도(내부링크/canonical URL 정규화) 추가 탐색, 또는 review-code(heavy) 신규 축 재탐색.
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) 신규 축 4종(border-color/tracking/font-weight/muted-text) + acquisition(JSON-LD/metadata) 탐색, 전부 clean (cycle 2612, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8(2604-2611) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 4/25(2608 직발화), info-arch gap 25/30, lotto gap 14/30 — 전부 미도달. design-system negative(DESIGN.md 당일 갱신). explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 전부 미충족(milestone 2612%50≠0, review-code 직전20 non-zero). cycle 2611 retro 명시("spacing/radius/shadow/focus-ring/typography/motion/icon-size 7개 축 모두 clean, 신규 축 발굴 필요 시점 근접") 따라 review-code(heavy) 신규 축 탐색 + acquisition dimension(SEO) 병행 점검.
