@@ -1,4 +1,9 @@
 
+## cycle 2642 (2026-08-26) — SUCCESS
+- review-code(heavy): `apps/moneyball/src/app/analysis/page.tsx`(2833줄, cycle 2639/2641 반복 지목된 미탐색 렌더링 축) 서브에이전트 정독 감사
+- isStrongUpcomingPick silent drift 발견+수정 — 정의/사용처 주석("TOP픽·완전수렴 외 FACTOR_PICK_STRONG 이상")과 달리 실제 코드는 TOP픽만 제외, FACTOR_PICK_COMPLETE(10)>=FACTOR_PICK_STRONG(8) 특성상 비TOP픽 완전수렴 경기에서 "★ 완전수렴"과 "⚡ 픽" 배지 동시 표시되던 gap. `!isCompleteUpcomingPick` 조건 추가 (commit 51e79839)
+- 다음 추천: review-code(heavy) 계속 또는 다양성 전환(op-analysis gap 6/25, IA gap 25/30)
+
 ## cycle 2641 (2026-08-26) — SUCCESS
 - review-code(heavy): `apps/moneyball/src/app/analysis/analysis-data.ts`(2833줄 analysis/page.tsx 첫 탐색 축, import chain 따라 발견) `getThisWeekRemainingGames` 정독 감사
 - h2hRate parity gap 발견+수정 — h2hHomeWins/h2hAwayWins 는 이미 계산돼 있는데 `buildGameOverview` 호출 시 h2hRate 미전달, game/[id] 상세페이지는 전달함 → "이번 주 남은 경기" 미리보기에서만 "올 시즌 상대전적" 문장 항상 누락되던 gap. 3줄 diff, 4465 tests + typecheck green (commit 7d39cf0a)
