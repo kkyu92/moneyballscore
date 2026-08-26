@@ -1,4 +1,9 @@
 
+## cycle 2644 (2026-08-26) — SUCCESS
+- polish-ui (2-chain lock fallback): 직전 8사이클 distinct=2(review-code(heavy)+operational-analysis(lite)) → 2-chain lock 탐지, 두 chain 제외. fix-incident/info-arch(26/30)/lotto(16/30, 다음회차 picks 이미 박제)/explore-idea 모두 강trigger 부재 → 룰 3번 polish-ui 강제 발화
+- DESIGN.md 타이포 스케일 전역 grep(`text-\[Npx\]`) — `accuracy/page.tsx:758` "일요일 상한" 배지 유일 미토큰 잔여 1건 발견. 3xs(9px) 정의와 역할 일치 → `text-[8px]` → `text-3xs` 정렬 (commit 0acc66eb, v0.5.62.163)
+- review-code(heavy) 5연속 SUCCESS streak 이후 첫 diversity 전환. 다음 추천: review-code(heavy) 복귀 또는 info-arch(gap 27/30, 다음 사이클 자연 도달권) / fix-incident(gap 10/20)
+
 ## cycle 2643 (2026-08-26) — SUCCESS
 - review-code(heavy): `apps/moneyball/src/app/accuracy/page.tsx`(1229줄, 이번 sweep family 미탐색 축 — line-count 스캔으로 발견) 서브에이전트 정독 감사
 - 헤더 카피 silent drift 발견+수정 — "시즌 내 모든 검증 완료 예측 기준"이라 주장하지만 실제 모든 통계는 `CURRENT_MODEL_FILTER`(scoring_rule='v1.8')로 필터링돼 이전 버전 예측(v1.5/v1.6/v1.7-revert/v1.8-credit-fail) 조용히 제외. 같은 페이지 FactorAccuracyTable 각주는 이미 "v1.8 cohort" 정확 노출 — 헤더만 자기모순. MLB 자매 페이지는 모델버전 필터 자체가 없어 동일 문구가 정확 — KBO 페이지 카피가 복사 후 미조정된 것으로 판단. "현재 모델 버전의 검증 완료 예측 기준(이전 버전 예측 제외)"으로 정정 (commit 7dafbca0, PR #3069)
