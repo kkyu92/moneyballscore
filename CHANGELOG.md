@@ -1,4 +1,15 @@
-## v0.5.62.164 — 2026-08-26 (cycle 2645, fix-incident: mlb_fancy_scrape total fetch 실패 silent drift alert gap 수정)
+## v0.5.62.165 — 2026-08-26 (cycle 2646, review-code(heavy): llm.ts 529 확장 attempts 주석 stale 수치 정정)
+
+### fix: 529 Overloaded 재시도 확장 주석의 attempts 수치가 cycle 2634 fix 이후 stale
+
+- 진단: 직전 8사이클 distinct=4(review-code/review-code(heavy)/polish-ui/fix-incident) — 2-chain lock 미충족. open issue 0, approved plan 0/23. review-code(heavy) 최근 5연속(2639~2643) SUCCESS streak — dominance-positive 인정 룰 따라 계속 채택. 첫 타겟(game/[id]/page.tsx, 877줄)은 서브에이전트 정독 감사 결과 이미 cycle 2407/2408·2542 에 감사되어 clean(신규 발견 없음) — TODOS 히스토리 재확인 후 cycle 2634 가 명시적으로 남긴 미처리 후속(`llm.ts` MAX_ATTEMPTS 일반경로/`llm-deepseek.ts`/`llm-ollama.ts` 동일 off-by-one 존재 여부 확인, "1순위 후보")으로 전환.
+- 확인 결과: 일반 경로 `MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length`(3, 확장 없음)는 `llm.ts:236` 자체 주석("일반 5xx/네트워크 에러는 3 유지")과 `packages/shared/src/index.ts:1632`("Array length(=3)가 MAX_ATTEMPTS 도출 — derived .length 패턴 그대로 유지") 양쪽에서 의도된 설계로 명시 — evidence-backed 신뢰성 이슈 부재 상태에서 수치 변경은 `feedback_data_only_claims` 원칙 위반이라 범위 제외. `llm-deepseek.ts` 도 동일 패턴(MAX_ATTEMPTS=length, 529 특수 확장 로직 자체가 없음) — 동일하게 의도된 설계, 수정 불필요. `llm-ollama.ts` 는 재시도 로직 자체 부재.
+- 대신 진짜 drift 1건 발견: `llm.ts:236` 주석이 "529 발생 시 maxAttempts 동적 확장 (3 → 4)" 라고 적혀 있지만, cycle 2634 fix 로 `MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length + 1`(4→5)로 이미 바뀐 뒤라 실제 확장값은 5 — 코드 옆 인라인 주석이 자기 파일 안 상수 정의(24~25행)와 불일치하던 stale 수치. "(3 → 5, cycle 2634 fix)"로 정정. 동작 변경 없음, 주석 전용 fix.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean + `agents-llm.test.ts` 29 tests green. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+
+
+
 
 ### fix: MLB scrape mode total fetch 실패 (gamesFound=0) 시 silent drift alert 미발화 gap
 

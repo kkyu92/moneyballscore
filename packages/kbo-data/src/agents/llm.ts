@@ -233,7 +233,7 @@ async function callClaude<T>(
   });
 
   let lastError = 'unknown';
-  // 529 발생 시 maxAttempts 동적 확장 (3 → 4). 일반 5xx / 네트워크 에러는 3 유지.
+  // 529 발생 시 maxAttempts 동적 확장 (3 → 5, cycle 2634 fix). 일반 5xx / 네트워크 에러는 3 유지.
   let maxAttempts: number = MAX_ATTEMPTS;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
