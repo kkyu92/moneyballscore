@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy): 라이벌리 메모리 블록 환각검증 누락 수정 (cycle 2630, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=6). gap trigger 전부 미도달(fix-incident 15/20, op-analysis 4/25, info-arch 12/30, lotto 2/30). 직전20 review-code 계열 dominance 60%(12/20) — cycle 2628/2629 양쪽 추천대로 `validator.ts`(956줄, agents/ 최대·미착수 파일) 재조준. polish-ui(breadcrumb 18건 grep, DESIGN.md 당일 갱신 negative) / info-architecture-review(신규 라우트 mtime -7 전수 false positive, breadcrumb/sitemap 대조 cycle 2618과 동일) 양쪽 재점검했으나 신규 액션 없음 확인 후 배제.
+
+Explore agent로 `validator.ts` 전체 정독 + 2차 자가검증(호출부 grep, git blame) — `buildInjectionText()`(환각 검증용 "LLM 실제 노출 텍스트" 재구성 함수, cycle 2122/2241 두 차례 `team-agent.buildUserMessage`와 동기화된 이력)가 `team-agent.ts`가 프롬프트 맨 끝에 직접 append하는 라이벌리 메모리 블록(`getRivalryBlock().promptBlock` — 최근 h2h 스코어 + `agent_memories.content` 숫자, `retro.ts`가 기록하는 실제 값)을 전혀 반영하지 않음을 확인. `renderContextForLLM(buildAgentContext(...))` 경로를 안 타는 별도 append라 기존 두 차례 fix가 못 잡은 잔여 gap — LLM이 이 블록의 숫자를 정당 인용해도 `checkHallucinatedNumbers`가 환각으로 오탐할 위험(테스트 미커버 확인).
+
+`packages/shared/src/index.ts` dead-code 후보(cycle 2629, 7건 전부 false positive)와 대조적으로 이번은 실제 검증 gap. 수정: `buildInjectionText(context, rivalryBlock='')` + `validateTeamArgument(..., rivalryBlock='')` 파라미터 추가, `team-agent.ts:133` 호출부에서 이미 fetch해둔 `rivalry.promptBlock`을 전달하도록 연결(신규 API 호출 없음). `agents-validator.test.ts` 회귀 가드 6건 신규 — h2h 스코어(단일 digit)는 `NUMERIC_WHITELIST`로 이미 통과됨을 실측 확인해 테스트값은 `agent_memories` 소수점 수치로 조정.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 91 files/1194 tests(+6) green + apps/moneyball vitest 568/4465 불변 + `pnpm lint` clean. version 155→156 3-way sync. 단일 논리 단위 → 직접 main commit(`ae0ecbbb`)+push(R4/R7).
+
+skill-evolution trigger 5개 전부 미충족 — 진행 정상.
+
+다음 사이클 추천 = polish-ui 또는 info-architecture-review(dominance 완화 목적 다양성 유지, 둘 다 gap 여유) 또는 review-code(heavy)를 `judge-agent.ts`/`debate.ts`로 재조준(라이벌리 블록이 team arg reasoning 경유로 judge 프롬프트에도 흘러들어가는 별도 경로 확인 후보 — 본 사이클은 team-agent 직접 주입 경로만 스코프).
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy): dead-code 축 탐색, 7건 전부 false positive 확인 (cycle 2629, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=6). gap trigger 전부 미도달(fix-incident 13/20, op-analysis 2/25, info-arch 10/30, lotto 0/30). 직전20(2609-2628) review-code 계열 dominance 55%(11/20) — cycle 2628 추천대로 dead-code 신규 축 탐색.
