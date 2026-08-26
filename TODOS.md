@@ -1,4 +1,9 @@
 
+## cycle 2640 (2026-08-26) — SUCCESS
+- review-code(heavy): `packages/kbo-data/src/pipeline/daily.ts`(1622줄, injection-validation 스윕 미대상 pipeline orchestration monolith) 서브에이전트 정독 감사
+- CREDIT_EXHAUSTED alert 블록 발견+수정 — "1회만 발화" 주석과 달리 dedup 장치 부재(predict mode 매시 최대 12회/일 재실행 + 무조건 Telegram/Sentry 발송, CE 2026-06-06~ 지속 상태라 중복발송 가능). `daily_notifications.credit_exhausted_sent` flag 추가(migration 052) + 기존 announce_sent/results_sent idempotent 패턴 wiring (commit 353242cf)
+- 다음 추천: review-code(heavy) 계속 시 analysis/page.tsx(2833줄) 미탐색 축, 다양성 전환 시 op-analysis(gap 4/25)
+
 ## cycle 2639 (2026-08-26) — SUCCESS
 - review-code(heavy): `packages/shared/src/index.ts`(3448줄, injection-validation 스윕 미대상 monolith) 서브에이전트 정독 감사 — 대부분 silent-drift-wave 테스트로 이미 견고
 - HOME_ELO_BONUS JSDoc 자기모순 발견+수정 (인라인 11.85 vs 상세도출 10.43, 인접 0.024 prob shift가 실제 HOME_ELO_BONUS_WIN_PROB_PCT=3.4 와 불일치) — 주석 전용 fix, 코드 동작 변경 없음 (commit d46b9116)
