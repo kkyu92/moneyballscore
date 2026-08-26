@@ -228,6 +228,27 @@ describe('callLLM retry/backoff', () => {
     expect(delays.reduce((a, b) => (a as number) + (b as number), 0)).toBe(37500);
   });
 
+  // cycle 2653 — 일반 5xx 경로도 cycle 2634 와 동일 off-by-one 이 있었음
+  // (attempts = backoff.length(3) 이면 마지막 backoff 2000ms 가 실제 sleep 에 안 쓰임).
+  // attempts = backoff.length + 1(=4) 로 고쳐 3개 backoff 전량 소비되는지 회귀 가드.
+  it('cycle 2653: 일반 5xx 4연속 backoff 합 = 3500ms (500+1000+2000 전량 소비)', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () => jsonResponse({ error: 'overloaded' }, 503));
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    await promise;
+
+    const delays = setTimeoutSpy.mock.calls.map((call) => call[1]);
+    expect(delays).toEqual([500, 1000, 2000]);
+    expect(delays.reduce((a, b) => (a as number) + (b as number), 0)).toBe(3500);
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_ATTEMPTS);
+  });
+
   // cycle 986 — 529 → 200 회복 시 확장된 attempt 안 정상 성공 박제
   it('cycle 986: 529 3회 → 4번째 200 회복 → success (확장 attempt 효과 검증)', async () => {
     const fetchMock = vi.fn()

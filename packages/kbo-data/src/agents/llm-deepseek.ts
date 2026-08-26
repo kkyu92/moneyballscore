@@ -19,7 +19,8 @@ import { errMsg, LLM_RETRY_BACKOFF_MS, LLM_TEMPERATURE_JUDGE, LLM_TEMPERATURE_TE
 import type { AgentResult } from './types';
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length;
+// attempts = backoff 개수 + 1 (cycle 2653 fix, llm.ts 와 동일 패턴 — cycle 2634 참조)
+const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length + 1;
 
 interface DeepSeekCallOptions {
   model: 'haiku' | 'sonnet';

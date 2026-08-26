@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-08-26 (cycle 2653, review-code(heavy): 일반 LLM 재시도 경로 off-by-one — cycle 2634 carry-over)
+
+### fix: 일반 5xx/네트워크 재시도 경로도 마지막 backoff 값이 실제 sleep 에 안 쓰임 (529 경로와 동일 패턴)
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 16/25, info-arch 5/30, lotto 25/30). 직전8 distinct=5 — 2-chain lock 미충족. lotto/polish-ui 둘 다 당장 실행 가치 부재(lotto: 8/29 픽 이미 shipped + 데이터 3일 이내 신선, polish-ui: text-[Npx] sprawl 13건 잔존 = 전부 테스트/globals.css 정의부만이라 실질 소진). cycle 2634 retro 가 명시 추천한 "일반 경로(MAX_ATTEMPTS)/llm-deepseek.ts/llm-ollama.ts 동일 off-by-one 존재 여부 확인" carry-over 채택 — 19 사이클 미처리 확인.
+- `llm.ts`(Claude) + `llm-deepseek.ts` 양쪽 `MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length`(3) 이 cycle 2634 에서 529 경로에 고쳤던 것과 동일한 off-by-one — `attempt < maxAttempts - 1` 일 때만 sleep 하므로 마지막 backoff(2000ms) 가 한 번도 실제 대기에 쓰이지 못하고 3번째 시도에서 즉시 실패 반환. 파일 최상단 주석("500ms → 1000ms → 2000ms")과 `packages/shared/src/index.ts` 의 LLM_RETRY_BACKOFF_MS 문서화 주석도 3개 backoff 전량 사용을 전제로 서술돼 있었음(실제 2개만 사용). `llm-ollama.ts` 는 LLM_RETRY_BACKOFF_MS 미사용(재시도 로직 없음) — 스코프 제외.
+- 양쪽 `MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length + 1`(3→4) 로 fencepost 정정. `llm.ts`/`index.ts` 주석 갱신. `agents-llm.test.ts` 에 회귀 가드 신규(setTimeout spy 로 일반 5xx 경로 backoff 합 500+1000+2000=3500ms 전량 소비 직접 검증 — 향후 다시 `.length` 로 되돌리면 즉시 탐지).
+- `pnpm --filter kbo-data exec tsc --noEmit` + `--filter shared` + `--filter moneyball` clean. vitest kbo-data 92 files/1215 tests(+16, 신규 1) green + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.167 — 2026-08-26 (cycle 2650, review-code(heavy): mlb-pipeline.ts 헤더 docstring stale 정정)
 
 ### fix: mlb-pipeline.ts 모듈 헤더 주석이 8-mode 구조/테이블명과 불일치

@@ -5,7 +5,9 @@ import { callDeepSeek } from './llm-deepseek';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
-// 재시도 정책: 3회 시도, 500ms → 1000ms → 2000ms exponential backoff
+// 재시도 정책: 4회 시도 (backoff 3개 전량 소비), 500ms → 1000ms → 2000ms exponential backoff
+// (cycle 2653 fix: attempts = backoff 개수 + 1, cycle 2634 의 529 fix 와 동일 패턴 —
+//  기존 attempts=3 이면 마지막 backoff 2000ms 가 한 번도 sleep 에 쓰이지 않고 즉시 실패)
 // 재시도 대상: 네트워크 에러, 5xx, 429(rate limit)
 // 재시도 제외: 4xx (400/401/403 등 — 요청 자체가 잘못됨)
 // 529 Overloaded 특수 처리 (cycle 986 강화):
@@ -21,7 +23,7 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 // 절반에도 못 미쳤음(529 폭풍 생존율 개선 의도 자체가 무력화된 상태).
 const OVERLOADED_BACKOFF_MS = [2500, 5000, 10000, 20000] as const;
 const OVERLOADED_BACKOFF_MULTIPLIER = 5; // 첫 3 attempt 일반 5xx 대비 배율 — 테스트 호환
-export const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length;
+export const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length + 1;
 export const MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length + 1;
 
 export function backoffMs(attempt: number, status: number): number {

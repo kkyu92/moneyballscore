@@ -1629,7 +1629,10 @@ export const SCRAPER_RATE_LIMIT_FANGRAPHS_KBO_MS = 3000;
  *   - packages/kbo-data/src/agents/llm.ts: Claude (Anthropic) backend
  *   - packages/kbo-data/src/agents/llm-deepseek.ts: DeepSeek backend
  *
- * Array length (=3) 가 MAX_ATTEMPTS 도출 — derived `.length` 패턴 그대로 유지.
+ * Array length + 1 (=4) 이 각 backend 의 MAX_ATTEMPTS 도출 — derived `.length + 1`
+ * 패턴 (cycle 2653 fix: 기존 `.length`(=3) 는 마지막 backoff 2000ms 가 실제 sleep 에
+ * 한 번도 쓰이지 못하고 3번째 시도에서 즉시 실패 — cycle 2634 에서 529 경로에 먼저
+ * 발견·수정된 동일 off-by-one 패턴이 일반 경로에도 있었음).
  * 529 Overloaded 특수 backoff (OVERLOADED_BACKOFF_MS) 는 llm.ts 안 local 유지
  * (Anthropic 전용 capacity 한계). wave 147 (SCRAPER_RATE_LIMIT_*) 와 별도 카테고리
  * (LLM API retry vs 일반 scraper rate-limit) — 같은 silent drift pattern
