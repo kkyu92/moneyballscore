@@ -1,3 +1,13 @@
+## v0.5.62.155 — 2026-08-26 (cycle 2627, polish-ui: Ko-fi 플로팅 위젯 쿠키 배너 겹침 수정)
+
+### fix(design): Ko-fi 도네이션 위젯이 쿠키 배너/적중률 스탯 카드와 겹치는 문제 수정
+
+- 진단: open issue 0, approved plan 0/23. 직전20 chain 분포 review-code 계열 12/20(60%) dominance — cycle 2624/2625 retro 양쪽에서 다양성 redirect 명시 제안 + 자체 rounded-*/shadow-* 토큰 grep 감사 결과 새 twin 불일치 없음(축 소진 확인) → polish-ui 선택. gap trigger 전부 미도달(fix-incident 11/20, op-analysis 0/25 방금발화, info-arch 8/30, lotto 28/30). GH Actions 최근 15건 전부 success/skipped, incident 없음.
+- 전체 사이트 grep 대신 실 브라우저 감사(`gstack browse`, 1280x720 + 375x812)로 라이브 사이트 dogfooding — 홈페이지 첫 화면(스크롤 전)에서 `KofiWidget.tsx` 플로팅 도네이트 버튼(z-index 99999999, 기본 bottom-left 고정)이 쿠키 동의 배너(`CookieConsent.tsx`, 첫 방문 시 노출)뿐 아니라 그 위 "적중률 현황" 시즌 적중률 스탯 카드 숫자까지 가리는 것을 스크린샷으로 확인·재현. 위젯을 배너 높이만큼 밀어올리는 방식(bottom offset 조정)은 모바일(375x812, 배너 높이 141px)에서 위로 밀린 위젯이 스탯 카드와 새로 겹쳐 재발 — 콘텐츠 밀도 높은 홈페이지 특성상 오프셋 미세조정으로는 해결 불가 확인.
+- 실행: 배너 노출 중엔 위젯을 완전히 숨기는 방식으로 전환 — `globals.css`에 기존 `body[data-cookie-shown="true"]` 토글(CookieConsent.tsx가 이미 footer spacer padding 용으로 사용 중이던 패턴 재사용)에 `.floatingchat-container-wrap`/`-mobi` `display: none !important` 규칙 추가. 배너는 일시적 상태(dismiss 시 즉시 사라짐)이므로 위젯은 dismiss 직후 자연 복귀 — 데스크톱/모바일 양쪽 스크린샷으로 겹침 해소 확인 후 적용. `silent-drift-cycle-2627.test.ts` 신규(CSS 규칙 존재 + CookieConsent 토글 의존성 2 tests). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 568 files/4465 tests(+1/+2) green + lint clean. version 154→155 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = op-analysis(gap 1/25)/lotto(gap 29/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색. review-code dominance 완화(직전20 기준 12→11/20으로 소폭 하락 예상).
+
 ## v0.5.62.154 — 2026-08-26 (cycle 2623, review-code(heavy): dark:border-gray-N 전역 → --color-border 토큰 정렬)
 
 ### fix(design): raw `dark:border-gray-N` 리터럴 sitewide → `dark:border-[var(--color-border)]` 토큰 정렬

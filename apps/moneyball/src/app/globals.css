@@ -131,3 +131,12 @@ body[data-cookie-shown="true"] {
     padding-bottom: 5rem;
   }
 }
+
+/* Ko-fi 플로팅 위젯(KofiWidget.tsx, z-index 99999999)이 쿠키 배너 노출 중
+   배너 텍스트/페이지 콘텐츠와 겹침 (cycle 2627 polish-ui 발견 — 375x812 뷰포트
+   기준 배너 높이 141px, 위젯 기본 위치가 배너와 그 위 적중률 스탯 카드를 가림).
+   배너가 짧은 일시적 상태이므로 노출 중엔 숨기고 dismiss 후 자연 복귀. */
+body[data-cookie-shown="true"] .floatingchat-container-wrap,
+body[data-cookie-shown="true"] .floatingchat-container-wrap-mobi {
+  display: none !important;
+}
