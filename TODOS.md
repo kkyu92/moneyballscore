@@ -1,4 +1,11 @@
 
+## cycle 2650 (2026-08-26) — SUCCESS (milestone: 2650%50==0)
+- review-code(heavy): 진단 open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 13/25, info-arch 2/30, lotto 22/30). 직전8 distinct=5 — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 동일 후보(carry-over 부재) cycle 2647/2649 재확인 완료라 skip. CI green, 실패 workflow 0건 — fix-incident 후보 부재. cycle 2649 명시 추천(mlb-pipeline.ts/validator.ts) 채택.
+- validator.ts(1015줄) 서브에이전트 정독 — clean(0 findings). mlb-pipeline.ts(875줄) 헤더 docstring(1~14행) 이 "MLB 7 mode" 서술 + `mlb_shadow_train`/`mlb_walk_forward_measure` 가 구 테이블 `walk_forward_brier`(migration 036, 스키마 불일치로 insert 100% silent 실패 이력) 를 가리키던 채 stale — 실제는 8 mode(`mlb_elo_update` 누락, plan #25 cycle 2082 추가분) + migration 049 `mlb_shadow_train_log`/`mlb_walk_forward_log`. 파일 내부 인라인 주석은 이미 정정돼있고 최상단 요약만 미반영.
+- 헤더 주석 정정(동작 변경 없음, docstring only). `pnpm --filter kbo-data exec tsc --noEmit` clean. commit 7ded4466 + VERSION sync 누락 후속 commit ee641cdc(pre-push version-sync-guard 즉시 검출, v0.5.62.167).
+- **milestone**: cycle 2650 % 50 == 0 — 다른 trigger 결과 무관 즉시 skill-evolution-pending 마커 박제(74th 자가 진화 예정, 다음 사이클 강제 발화). ship-0 emergency stop 미충족(직전10 중 success 7건).
+- 다음 추천: skill-evolution (marker forced) — 다른 chain 자율 선택 X
+
 ## cycle 2649 (2026-08-26) — RETRO-ONLY
 - review-code(heavy): 직전8 distinct=4(2-chain lock 미충족), fix-incident/op-analysis/lotto gap 전부 여유, explore-idea 유일 후보(plan #29 로그인+커뮤니티)는 cycle 2633 checkpoint 16사이클 전 재확인 완료라 반복 재측정 회피 → review-code(heavy) dominance-positive streak 계속.
 - `convergenceRecord.ts`(831줄, KBO/MLB 수렴픽 통계) 신규 정독 — fetch/Streak/BestStreak/TeamStats/HomeAwaySplit/DayOfWeekSplit 함수 + 6개 caller 페이지(analysis/seasons/teams/reviews/monthly/weekly) 호출 인자 순서 전부 대조. drift 0건.
