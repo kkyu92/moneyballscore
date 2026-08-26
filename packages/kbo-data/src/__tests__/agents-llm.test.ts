@@ -183,11 +183,11 @@ describe('callLLM retry/backoff', () => {
     expect(fetchMock).toHaveBeenCalledTimes(MAX_ATTEMPTS);
   });
 
-  // cycle 986 — 529 Overloaded 시 attempts 동적 확장 (3 → 4).
+  // cycle 986 — 529 Overloaded 시 attempts 동적 확장 (3 → 5).
   // evidence: 14d agentsFailed 17건 중 5건 (29.4%) 가 5/19 Anthropic 외부 장애 SERVER_ERROR 529.
-  // 기존 3 attempts (17.5s window) 부족 → 4 attempts (37.5s window) 로 확장하여
-  // capacity 회복 확률 ↑.
-  it('cycle 986: 전부 529 Overloaded → MAX_OVERLOADED_ATTEMPTS (4) 시도', async () => {
+  // 기존 3 attempts (17.5s window) 부족 → 5 attempts (4 backoff 간격: 2.5+5+10+20=37.5s
+  // window) 로 확장하여 capacity 회복 확률 ↑.
+  it('cycle 986: 전부 529 Overloaded → MAX_OVERLOADED_ATTEMPTS (5) 시도', async () => {
     const fetchMock = vi.fn().mockImplementation(async () =>
       jsonResponse({ error: { type: 'overloaded_error', message: 'Overloaded' } }, 529)
     );
@@ -204,6 +204,28 @@ describe('callLLM retry/backoff', () => {
     expect(result.error).toContain('529');
     expect(fetchMock).toHaveBeenCalledTimes(MAX_OVERLOADED_ATTEMPTS);
     expect(MAX_OVERLOADED_ATTEMPTS).toBeGreaterThan(MAX_ATTEMPTS);
+  });
+
+  // cycle 2634 — off-by-one 회귀 가드: attempts = backoff 개수 + 1 이어야 마지막
+  // backoff(20000ms)도 실제 sleep 에 소비됨. attempts = backoff.length 로 되돌아가면
+  // 이 테스트가 17500 을 보고 실패 → 37.5s window 무력화 재발 즉시 탐지.
+  it('cycle 2634: 529 4연속 backoff 합 = 37500ms (마지막 20000ms 도 실제 소비)', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () =>
+      jsonResponse({ error: { type: 'overloaded_error', message: 'Overloaded' } }, 529)
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
+
+    const promise = callLLM(
+      { model: 'haiku', systemPrompt: 's', userMessage: 'u', maxTokens: 100 },
+      (t) => t
+    );
+    await vi.runAllTimersAsync();
+    await promise;
+
+    const delays = setTimeoutSpy.mock.calls.map((call) => call[1]);
+    expect(delays).toEqual([2500, 5000, 10000, 20000]);
+    expect(delays.reduce((a, b) => (a as number) + (b as number), 0)).toBe(37500);
   });
 
   // cycle 986 — 529 → 200 회복 시 확장된 attempt 안 정상 성공 박제

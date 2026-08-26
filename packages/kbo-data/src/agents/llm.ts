@@ -11,13 +11,18 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 // 529 Overloaded 특수 처리 (cycle 986 강화):
 //   - Anthropic capacity 한계 — backoff 5x 곱해 더 길게 대기
 //   - 기본 3 attempts 부족 (2026-05-19 5경기 fallback 재발 evidence)
-//   - 529 단독 attempts 4 로 확장: 2.5s → 5s → 10s → 20s = 총 37.5s window
+//   - 529 단독 attempts 5 로 확장: 2.5s → 5s → 10s → 20s = 총 37.5s window
 //   - 일반 5xx / 429 / 네트워크 에러 = 기존 3 attempts 유지 (overcompensate 회피)
 // 일반 RETRY_BACKOFF_MS = shared 단일 registry (wave 148, cycle 1377).
+// attempts = backoff 개수 + 1 (cycle 2634 fix): backoff N개는 attempt 사이 간격이라
+// N개 backoff 를 모두 소비하려면 attempts 가 N+1 이어야 함. 기존엔 attempts = N 이라
+// 마지막 backoff(20000ms)가 한 번도 실제 sleep 에 쓰이지 않고 그 자리에서 최종 실패
+// 반환 — 실측 대기시간이 2500+5000+10000=17500ms(17.5s)로, 주석이 주장하던 37.5s의
+// 절반에도 못 미쳤음(529 폭풍 생존율 개선 의도 자체가 무력화된 상태).
 const OVERLOADED_BACKOFF_MS = [2500, 5000, 10000, 20000] as const;
 const OVERLOADED_BACKOFF_MULTIPLIER = 5; // 첫 3 attempt 일반 5xx 대비 배율 — 테스트 호환
 export const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length;
-export const MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length;
+export const MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length + 1;
 
 export function backoffMs(attempt: number, status: number): number {
   if (status === 529) {

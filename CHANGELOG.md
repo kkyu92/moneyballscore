@@ -1,3 +1,15 @@
+## v0.5.62.159 — 2026-08-26 (cycle 2634, review-code(heavy): 529 Overloaded 재시도 window 실측 17.5s ≠ 주석 주장 37.5s off-by-one 수정)
+
+### fix: 529 Overloaded 재시도 attempts 가 backoff 배열 길이와 같아 마지막 backoff(20000ms)가 실제 sleep 에 한 번도 안 쓰이던 off-by-one 수정
+
+- 진단: open issue 0, approved plan 0/23. gap trigger 전부 미도달(fix-incident 19/20, op-analysis 8/25, info-arch 16/30, lotto 6/30). 직전8 distinct=6 — 2-chain lock 미충족. DESIGN.md 당일 갱신(polish-ui negative). cycle 2633 explore-idea(lite)가 명시 추천한 신규 축(`retro.ts`/`llm.ts`, validator.ts 환각검증 gap family 완전 소진 이후) 채택.
+- `llm.ts` 직독 — cycle 986 fix 주석("529 단독 attempts 4 로 확장: 2.5s→5s→10s→20s = 총 37.5s window")과 실제 동작 불일치 발견. `MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length`(=4)이고 루프는 `attempt < maxAttempts - 1`일 때만 sleep 하므로, 4회 시도(index 0~3) 중 실제 sleep 은 attempt 0/1/2 3번(2500+5000+10000=17500ms)뿐 — attempt 3(마지막)은 sleep 없이 바로 실패 반환돼 배열의 마지막 값 20000ms 가 사실상 죽은 코드. 2026-05-19 5경기 fallback 재발 evidence 로 "기존 3 attempts(17.5s) 부족 → 확장" 을 명시적으로 의도했는데, 실측 대기시간이 확장 전과 동일한 17.5s 라 529 폭풍 생존율 개선 의도 자체가 무력화된 상태(단순 주석 오기가 아니라 production resilience 실효성 문제).
+- 수정: `MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length + 1`(4→5)로 변경 — backoff N개를 모두 attempt 사이 간격으로 소비하려면 attempts 가 N+1 이어야 하는 표준 fencepost 정정. 테스트가 전부 심볼(`MAX_OVERLOADED_ATTEMPTS`) 참조라 값 변경만으로 기존 회귀 없이 통과. `agents-llm.test.ts`에 `setTimeout` spy 로 실제 backoff 배열 `[2500,5000,10000,20000]` 전량 소비 + 합계 37500ms 를 직접 검증하는 회귀 가드 신규 추가(향후 attempts 를 다시 배열 길이로 되돌리면 이 테스트가 17500 을 보고 즉시 실패).
+- 스코프 판단: 동일 off-by-one 패턴이 일반 경로(`MAX_ATTEMPTS`/`LLM_RETRY_BACKOFF_MS`, 3attempts/1.5s 실측)와 `llm-deepseek.ts`/`llm-ollama.ts` 에도 존재하나, 이들은 "N attempts = Ns window" 식 구체적 evidence-backed 수치 주장이 코드/주석에 명시돼 있지 않아(단순 backoff 스케줄 서술) 이번 fix 스코프에서 제외 — 529 경로만 명시적 주장-실측 불일치(37.5s 주장 vs 17.5s 실측) evidence 있어 단일 논리 단위로 한정.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 91 files/1199 tests(+1) green + lint clean. version 158→159 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = 일반 경로(`MAX_ATTEMPTS`/`LLM_RETRY_BACKOFF_MS`) + `llm-deepseek.ts`/`llm-ollama.ts` 동일 off-by-one 패턴 존재 여부만 확인(evidence 없어 이번엔 스코프 제외했으나 동일 chain 재진입 시 1순위 후보) 또는 polish-ui/info-architecture-review(dominance 완화 다양성).
+
 ## v0.5.62.158 — 2026-08-26 (cycle 2632, review-code(heavy): postview judge 환각검증이 pre_game 전용 주입블록 재사용하던 gap 수정)
 
 ### fix: postview judge reasoning 검증이 actual 스코어/original 승률/factor 편향값을 커버 못 하던 gap 수정
