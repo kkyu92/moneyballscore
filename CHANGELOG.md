@@ -1,3 +1,12 @@
+## v0.5.62.145 — 2026-08-26 (cycle 2606, review-code(heavy): 카드 padding p-4 compact tier DESIGN.md 문서화)
+
+### docs(design): 카드 padding p-4 213건 중 79건 — drift 아닌 의도된 2번째 tier로 확정 + 스펙 문서화
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). fix-incident gap 20/20 도달 → `gh run list --limit 15` 재점검 전부 success/skipped, 실제 incident 없음(negative). op-analysis gap 20/25 미도달 + cycle 2586 retro 명시("CREDIT_EXHAUSTED 해소 전까지 재발화 불필요") — negative. info-arch gap 19/30 미도달. lotto/design-system/polish-ui 각 gap 8/6/7 — 직발화 근접 다수, negative. 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 11/12 근접 미충족. cycle 2605 retro 추천대로 border-radius 소진 후 신규 review-code(heavy) 축 탐색 — shadow(cycle 2592 이미 정렬 clean 재확인)/focus-ring(`focus-visible:outline-*` 86건 전수, brand-500 73건 dominant + outline-white 1건(흰 배경 버튼, 의도) + outline-offset-[-2px] 4건(중첩 메뉴 inset, 의도) — drift 없음 clean) 순서로 negative 확인 후 spacing 축 진입.
+- 발견: DESIGN.md "Card padding: 20px (p-5)" 단일 값 명시 대비 실제 카드 wrapper(`border`+`rounded-xl`) 시그니처 213건 중 p-4 79건 — 최초엔 drift 의심. `terms/page.tsx:213`·`glossary/page.tsx:108` twin 비교(둘 다 동일 className 패턴의 TOC/목차 nav 카드) 확인 결과 p-4 가 무작위 이탈이 아니라 "보조 유틸리티 카드(TOC/알림 요약)" 전용의 일관된 2번째 tier로 사용되고 있음을 확정 — 코드 수정 불필요, 스펙 문서 공백만 보완.
+- 실행: DESIGN.md Spacing 섹션에 "Compact card padding: 16px (p-4)" 항목 추가(용도 + twin 근거 명시). 코드 변경 없음(문서만) — 회귀 테스트 불필요.
+- `pnpm --filter moneyball exec tsc --noEmit` 확인 불필요(문서 전용). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.144 — 2026-08-25 (cycle 2600 milestone, polish-ui: cycle 2599 이연 text-[11px] 46건 → --text-2xs 흡수)
 
 ### style(design): text-[11px] 캡션 46건 시각 검토 → 2xs(10px) 토큰 흡수

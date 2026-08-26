@@ -65,7 +65,8 @@
 - **Base unit:** 8px
 - **Density:** Comfortable
 - **Scale:** 2xs(2) xs(4) sm(8) md(16) lg(24) xl(32) 2xl(48) 3xl(64)
-- **Card padding:** 20px (p-5)
+- **Card padding:** 20px (p-5) — 주 콘텐츠 카드 (매치업/예측/통계 카드)
+- **Compact card padding:** 16px (p-4) — 보조 유틸리티 카드 (목차/TOC nav, 알림 요약 박스 등). `terms/page.tsx`·`glossary/page.tsx` TOC nav twin 확인 (cycle 2606 review-code heavy — 213건 카드 wrapper 중 p-4 79건이 drift 아닌 의도된 2번째 tier로 확정)
 - **Card gap:** 16px (gap-4)
 - **Section gap:** 32px (space-y-8)
 
