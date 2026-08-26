@@ -730,6 +730,9 @@ export async function getThisWeekRemainingGames(): Promise<UpcomingScheduledGame
           awayElo: eloMap.get(awayCode) ?? null,
           homeTeamName,
           awayTeamName,
+          // cycle 2641 fix: h2hRate 미전달로 game/[id] 와 달리 이번 주 남은 경기 미리보기 summary 에서만
+          // "올 시즌 상대전적" 문장이 항상 누락되던 parity gap 정정 (h2hHomeWins/h2hAwayWins 는 위에서 이미 계산됨)
+          h2hRate: h2hHomeWins != null && h2hAwayWins != null ? h2hHomeWins / (h2hHomeWins + h2hAwayWins) : null,
         });
         return summary;
       })(),
