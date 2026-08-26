@@ -296,13 +296,11 @@ function buildSportsEventJsonLd(game: DateGame, date: string) {
     sport: "Baseball",
     homeTeam: { "@type": "SportsTeam", name: homeTeam },
     awayTeam: { "@type": "SportsTeam", name: awayTeam },
-    location: game.stadium
-      ? {
-          "@type": "Place",
-          name: game.stadium,
-          address: { "@type": "PostalAddress", addressCountry: "KR" },
-        }
-      : undefined,
+    location: {
+      "@type": "Place",
+      name: game.stadium ?? "KBO Baseball Stadium",
+      address: { "@type": "PostalAddress", addressCountry: "KR" },
+    },
     url: `${SITE_URL}/analysis/game/${game.id}`,
   };
 }

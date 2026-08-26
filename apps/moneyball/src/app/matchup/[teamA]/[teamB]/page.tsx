@@ -138,8 +138,8 @@ export default async function MatchupPage({ params }: PageProps) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: `${tA.shortName} vs ${tB.shortName} 상대전적`,
+    "@type": "Article",
+    headline: `${tA.shortName} vs ${tB.shortName} 상대전적`,
     description: profile.summary,
     mainEntityOfPage: `${SITE_URL}${pair.path}`,
     publisher: { "@type": "Organization", name: "MoneyBall Score" },

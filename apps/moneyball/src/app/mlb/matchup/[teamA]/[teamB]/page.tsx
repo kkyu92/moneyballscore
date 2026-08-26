@@ -176,8 +176,8 @@ export default async function MlbMatchupPage({ params }: PageProps) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: `${tA.shortName} vs ${tB.shortName} 상대전적`,
+    "@type": "Article",
+    headline: `${tA.shortName} vs ${tB.shortName} 상대전적`,
     description: profile.summary,
     inLanguage: "ko-KR",
     mainEntityOfPage: `${SITE_URL}${pair.path}`,
