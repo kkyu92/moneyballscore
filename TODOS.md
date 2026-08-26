@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy): dark:border-gray-N 전역 → --color-border 토큰 정렬 (cycle 2623, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2615-2622) distinct=3(review-code(heavy) 6+info-architecture-review 1+fix-incident 1) — 2-chain lock 미충족. op-analysis gap 15/25, fix-incident gap 8/20, info-arch gap 5/30, lotto gap 25/30 — 전부 미도달. DESIGN.md 당일 갱신(design-system negative). explore-idea saturation 11/15 미도달(4-source 재확인 불필요, 임계 자체 미도달). ship-0 미충족(직전10 success 6/retro-only 4). skill-evolution trigger 5개 미충족(milestone 2623%50≠0, chain-evolution 누적 신규분 없음, review-code 직전20 non-zero 14회).
+
+icon 사이즈(w-N h-N)·shadow 클래스는 role별 정상 분산 확인(negative). border-gray 계열 sitewide grep 중 DESIGN.md:64 문서화된 컨벤션(라이트 `border-gray-N` 리터럴 / 다크 `dark:border-[var(--color-border)]` 단일 토큰, cycle 612~728 점진 마이그레이션 대상) 대비 raw `dark:border-gray-N` 잔존 65건/23파일 발견 — opacity 변형(`/50`,`/40`, cycle 617 확정 보존 대상, 8건/7파일: `analysis/game/[id]`, `en/mlb`+`mlb` games 상세, `MatchupFactorCompare`×2, `WeeklyGamesSortControl`, `accuracy` 대시선)는 제외, 나머지 57건/16파일(`insights`, `standings`, `lotto/*`, `accuracy/shadow`, `v2-preview`, `debug/agent-fallback`, `debug/silent-drift`, `FactorAccuracyTable`)이 순수 미마이그레이션 잔존으로 확정.
+
+perl 기계적 치환(`dark:border-gray-\d+(?!/)` → `dark:border-[var(--color-border)]`, opacity suffix 보존) 57건/16파일 정렬 + `silent-drift-cycle-2623.test.ts` 신규(sitewide raw 토큰 재발 방지, capture-group 기반 opacity 예외 처리 — naive negative lookahead 백트래킹 오탐 회피). type-check clean + vitest 567 files/4463 tests(+1/+1) green + lint clean. version 153→154. main 직접 push 완료(362fd6f9).
+
+다음 사이클 추천 = op-analysis(gap 16/25)/lotto(gap 26/30) 자연 대기 또는 review-code(heavy) opacity 변형 border 계열(`/50`,`/40`) role 문서화 후보 재탐색. review-code dominance 지속 관찰 필요(직전8 = 6/8 review-code(heavy)).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): SearchClient.tsx 검색결과 행 hover 다크모드 정렬 (cycle 2622, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2614-2621) distinct=4(review-code(heavy) 5+dimension-cycle 1+fix-incident 1+info-architecture-review 1) — 2-chain lock 미충족. op-analysis gap 14/25, fix-incident gap 7/20, info-arch gap 4/30, lotto gap 24/30 — 전부 미도달. DESIGN.md 당일 갱신(design-system negative). explore-idea saturation 11/15 미도달. ship-0 미충족(직전10 success 4/retro-only 6, success 존재). skill-evolution trigger 5개 미충족(milestone 2622%50≠0, chain-evolution 누적 9건 신규분 없음, review-code 직전20 non-zero 14회).
