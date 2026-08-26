@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy): SearchClient.tsx 검색결과 행 hover 다크모드 정렬 (cycle 2622, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2614-2621) distinct=4(review-code(heavy) 5+dimension-cycle 1+fix-incident 1+info-architecture-review 1) — 2-chain lock 미충족. op-analysis gap 14/25, fix-incident gap 7/20, info-arch gap 4/30, lotto gap 24/30 — 전부 미도달. DESIGN.md 당일 갱신(design-system negative). explore-idea saturation 11/15 미도달. ship-0 미충족(직전10 success 4/retro-only 6, success 존재). skill-evolution trigger 5개 미충족(milestone 2622%50≠0, chain-evolution 누적 9건 신규분 없음, review-code 직전20 non-zero 14회).
+
+arbitrary `text-[Npx]` 축(cycle 239 후보)은 잔여 1건까지 이미 해소돼 소진. `rounded-*`/`duration-*` 축은 이상치 없음. `hover:bg-gray-50 dark:hover:bg-gray-XXX` 조합 sitewide grep — 8개 인스턴스(LeaderboardTable/LeaderboardJoinModal 등, 클릭 가능한 행/버튼 hover) 전부 `dark:hover:bg-gray-800` 계열인데 `SearchClient.tsx` 검색결과 행 링크만 유일하게 `dark:hover:bg-gray-900/40` — 동일 시각적 역할(클릭 가능 행 hover)의 twin 불일치. `dark:hover:bg-gray-800/40` 로 정렬 + `silent-drift-cycle-2622.test.ts`(2 tests) 신규. type-check clean + vitest 566 files/4462 tests(+1/+2) green + lint clean. version 152→153. main 직접 push 완료(0c6987ae).
+
+다음 사이클 추천 = op-analysis(gap 15/25)/lotto(gap 25/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색. review-code dominance 지속 관찰 필요.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): LiveScoreboard.tsx 홈 배지 font-semibold → font-bold 정렬 (cycle 2621, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8(2613-2620) distinct=5(review-code 3+dimension-cycle 2+review-code(heavy) 1+info-architecture-review 1+fix-incident 1) — 2-chain lock 미충족. op-analysis gap 13/25, info-arch gap 3/30, lotto gap 23/30, fix-incident gap 6/20 — 전부 미도달. CI 최근 워크플로 전부 success. DESIGN.md 당일 갱신(design-system negative). ship-0 미충족(직전10 success 5). skill-evolution trigger 5개 미충족(chain-evolution 누적 9건 동일, 신규분 없음).
