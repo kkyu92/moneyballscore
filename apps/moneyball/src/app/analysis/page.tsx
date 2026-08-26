@@ -2116,10 +2116,13 @@ export default async function AnalysisIndexPage() {
                         : winPct;
                       // wave-523: 이번 주 수렴 TOP 픽 배지
                       const isTopUpcomingPick = topUpcomingPickGameId !== null && g.gameId === topUpcomingPickGameId;
-                      // wave-525: 강수렴 픽 (TOP픽 제외 FACTOR_PICK_STRONG 이상)
-                      const isStrongUpcomingPick = !isTopUpcomingPick && strongUpcomingPickGameIds.has(g.gameId);
                       // wave-577: 완전수렴 픽 (FACTOR_PICK_COMPLETE 이상)
                       const isCompleteUpcomingPick = completeUpcomingPickGameIds.has(g.gameId);
+                      // wave-525: 강수렴 픽 (TOP픽·완전수렴 제외 FACTOR_PICK_STRONG 이상)
+                      // cycle 2642 fix: FACTOR_PICK_COMPLETE(10) >= FACTOR_PICK_STRONG(8) 이라
+                      // isCompleteUpcomingPick 제외 없이는 완전수렴 경기(비TOP픽)에서 "★ 완전수렴"과 "⚡ 픽"이
+                      // 동시 렌더링 — 본 변수·사용처 주석("TOP픽·완전수렴 외") 과 실제 코드가 불일치하던 gap 정정
+                      const isStrongUpcomingPick = !isTopUpcomingPick && !isCompleteUpcomingPick && strongUpcomingPickGameIds.has(g.gameId);
                       return (
                         <li key={g.gameId}>
                           <Link href={`/analysis/game/${g.gameId}`} className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
