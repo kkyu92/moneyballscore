@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — operational-analysis (lite): 주간 checkpoint, v1.8 유지 재확인 (cycle 2626, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 강제 trigger 없음(fix-incident gap 11/20, op-analysis gap 18/25, info-arch gap 8/30, lotto gap 28/30 — 전부 미도달). 2-chain lock 미충족(직전8 distinct=4). 직전9(2617-2625) review-code 계열 7/9 dominance — 직전 retro 다양성 redirect 제안 채택, op-analysis lite 선택 (heavy는 cycle 2608에 최근 실행, 재측정 실익 낮음).
+
+`op-analysis-weekly` cron 정상 작동 확인 (2026-08-24 PR #3067 auto-merge 성공, 파일 위치 `apps/moneyball/data/op-analysis/` — 과거 `-cohort/` 디렉토리에서 조용히 이동, 마지막 구디렉토리 파일은 2026-06-22 cycle 1340). `scripts/op-analysis-cohort.ts` 로컬 재실행(2026-08-26): 총 n=494(적중 265/53.6%), v1.8 규칙 n=316 acc 54.4% Brier 0.3489 — cycle 2238(08-19, n=291 acc 55.0% Brier 0.3429) 대비 안정, v2.1-B-shadow n=52 동결 유지(reject 상태 변화 없음). v1.8 유지 확정 재확인, 재조정 근거 없음.
+
+winner-centric Brier(0.35 근방) vs CLAUDE.md 추적 중인 home_win_prob 기반 Brier(0.24 근방) 두 지표가 이 cohort script(`op-analysis-cohort.ts`)와 CE-cohort script(`op-analysis-ce-cohort.ts`)에서 서로 다른 산식으로 계산됨을 재확인 — CE fallback 구간 winner-centric 지표가 구조적으로 부풀려지는 기존 Fable plan S2c 결론과 일치, 신규 drift 아님. 코드 변경 없음, CLAUDE.md 갱신 불필요(기존 결론과 완전 정합).
+
+다음 사이클 추천 = review-code(heavy, 신규 축) 또는 다양성 유지 목적 polish-ui/info-arch(gap 8/30, 너무 이름) 재탐색. dominance 완화됨(직전10에 op-analysis 1건 추가).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): dark:border-gray-N/opacity 예외 8곳 role 문서화 (cycle 2625, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8(2617-2624) distinct=4(review-code 5+review-code(heavy) 1+info-arch 1+explore-idea 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 17/25, lotto 27/30, info-arch 7/30). 직전 retro(cycle 2624) 추천 review-code(heavy) 채택.
