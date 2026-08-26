@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy) 카드 padding p-4 compact tier DESIGN.md 문서화 (cycle 2606, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). fix-incident gap 20/20 → `gh run list --limit 15` 재점검 전부 success/skipped, 실제 incident 없음(negative). op-analysis gap 20/25 미도달 + cycle 2586 retro 명시("CREDIT_EXHAUSTED 해소 전까지 재발화 불필요") negative. info-arch gap 19/30 미도달. lotto/design-system/polish-ui 각 gap 8/6/7 미도달. 2-chain lock 미충족(직전8 distinct=5). explore-idea saturation 11/12 근접 미충족. cycle 2605 retro 추천대로 border-radius 소진 후 신규 review-code(heavy) 축(shadow/focus-ring) 탐색.
+
+발견: shadow axis 재점검 clean(cycle 2592에 이미 정렬). focus-ring(`focus-visible:outline-*`) 86건 전수 확인 — brand-500 dominant, outline-white 1건(흰 배경 버튼, 의도)/outline-offset-[-2px] 4건(중첩 메뉴 inset, 의도) 모두 twin 확인된 예외, drift 없음. 카드 wrapper(border+rounded-xl) 213건 padding 분포 확인 결과 p-4 79건 발견 — 최초 drift 의심됐으나 `terms/page.tsx:213`·`glossary/page.tsx:108` twin 비교(둘 다 동일 className의 TOC/목차 nav 카드)로 drift 아닌 의도된 보조 유틸리티 카드 2번째 tier 확정.
+
+실행: DESIGN.md Spacing 섹션에 "Compact card padding: 16px (p-4)" 항목 추가(용도 + twin 근거 명시). 코드 변경 없음(문서 전용) — 회귀 테스트 불필요. version 144→145(root/apps/moneyball package.json + VERSION 3-way sync), CHANGELOG.md 엔트리 추가. 단일 논리 단위 → 직접 main commit+push(R4/R7, pre-push hook lint+type-check+version-sync-guard 통과).
+
+다음 사이클 추천 = op-analysis(gap 21/25)/info-arch(gap 20/30) 자연 대기, 또는 review-code(heavy) p-6(59건)/p-3(22건) tier 맥락 후속 검토.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 드롭다운 패널 3곳 border-radius 최종 정렬 (cycle 2605, 2026-08-26)
 
 진단: open issue 0, approved plan 0/22. 직전8(2597-2604) distinct=4 — 2-chain lock 없음. fix-incident 20-cycle gap trigger 충족(79 cycle 미발화) → forced check(gh run list 전부 success, pipeline_runs 최근 20건 전부 status=success errors=[], 최근 7일 debug commit 1건은 이미 fixed) 실행 결과 clean, 실제 incident 없음. op-analysis gap 19/25, info-arch gap 18/30, lotto gap 7/30 전부 미도달. cycle 2604 retro 추천("잔여 3곳 드롭다운 패널 tier 확정") 채택.
