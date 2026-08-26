@@ -82,7 +82,7 @@ export function AgentVoteCard({
   const homeName = shortTeamName(homeTeam);
   const awayName = shortTeamName(awayTeam);
   const homeColor = KBO_TEAMS[homeTeam]?.color ?? brand[500];
-  const awayColor = KBO_TEAMS[awayTeam]?.color ?? "#c5872a";
+  const awayColor = KBO_TEAMS[awayTeam]?.color ?? "var(--color-away)";
 
   const hasProb = homeWinProb !== null && Number.isFinite(homeWinProb);
   const homePct = hasProb ? Math.round((homeWinProb as number) * 100) : null;

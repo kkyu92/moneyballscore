@@ -1,3 +1,11 @@
+## v0.5.62.146 — 2026-08-26 (cycle 2609, polish-ui: AgentVoteCard away-color 하드코딩 hex → var(--color-away) 단일 source 정렬)
+
+### fix(design): `AgentVoteCard.tsx` awayColor fallback 리터럴 hex 중복 제거
+
+- 진단: open issue 0, approved plan 0/22. 직전8(2601-2608, missing 2601 제외) distinct=2(review-code 6 + operational-analysis 1) → **2-chain alternation lock 탐지** — review-code/operational-analysis 이번 사이클 후보 제외. fix-incident 재점검(`gh run list --limit 15`) 전부 success/skipped, 실제 incident 없음(negative, 3연속). info-arch gap 22/30, lotto gap 11/30 미도달. design-system(DESIGN.md mtime 당일 갱신, 조건 미충족) negative. explore-idea saturation 10/15 미충족. lock 규칙에 따라 남은 pool 전부 trigger 부재 → polish-ui 강제 발화.
+- 발견: transition-duration/badge padding/icon square 축 재점검 clean(twin 구조 확인, drift 없음 — wild-card 뱃지 `w-9 h-7`는 "WC1" 3글자 텍스트용 pill, standings 1-digit 숫자 뱃지 `w-6/w-7 h-7` square와 역할 다른 twin). hardcoded hex 전수 grep(`#[0-9a-fA-F]{6}`) 중 `AgentVoteCard.tsx:85`의 `awayColor` fallback이 `"#c5872a"` 리터럴 — 최초엔 drift 의심됐으나 `globals.css:37 --color-away: #c5872a`로 이미 정의되고 10개+ 파일(`insights/page.tsx`, `about/page.tsx`, `PostviewPanel.tsx`, `AgentArgumentBox.tsx`, `GameOverview.tsx`, `FactorBreakdown.tsx`, `RivalryMemorySurface.tsx` x2, `DetailedFactorAnalysis.tsx` x2, `MlbRivalryMemorySurface.tsx`, `MlbDetailedFactorAnalysis.tsx`)가 `var(--color-away)`로 참조하는 **값 자체는 정상**(색상 오류 아님, 최초 `brand[300]` 치환 시도는 오판이었음 — 즉시 원복). 실제 drift = 값이 아니라 **참조 방식** — 유일하게 이 컴포넌트만 CSS var 대신 raw literal 로 중복 박제(design-tokens.ts 주석의 "단일 source 박제 = silent drift family wave 141 차단" 패턴과 동일 위험군, `--color-away` 팔레트 변경 시 이 컴포넌트만 silent 하게 미반영될 소지).
+- 실행: `awayColor` fallback `"#c5872a"` → `"var(--color-away)"` (inline style은 CSS 커스텀 프로퍼티 정상 resolve). `silent-drift-cycle-2609.test.ts` 신규(fallback 값 assert + `#c5872a` 리터럴 전역 재발 방지 grep 테스트). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 559 files/4446 tests(+1 file/+2 tests) 전부 green + lint clean. version 145→146(root/apps/moneyball package.json + VERSION 3-way sync, `scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7, pre-push hook lint+type-check+version-sync-guard 통과).
+
 ## v0.5.62.145 — 2026-08-26 (cycle 2606, review-code(heavy): 카드 padding p-4 compact tier DESIGN.md 문서화)
 
 ### docs(design): 카드 padding p-4 213건 중 79건 — drift 아닌 의도된 2번째 tier로 확정 + 스펙 문서화
