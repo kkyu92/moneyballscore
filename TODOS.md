@@ -1,3 +1,19 @@
+## ⚪ RETRO-ONLY — review-code(heavy): dead-code 축 탐색, 7건 전부 false positive 확인 (cycle 2629, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=6). gap trigger 전부 미도달(fix-incident 13/20, op-analysis 2/25, info-arch 10/30, lotto 0/30). 직전20(2609-2628) review-code 계열 dominance 55%(11/20) — cycle 2628 추천대로 dead-code 신규 축 탐색.
+
+`pnpm lint` clean(dead-code tool 미설치, knip/ts-prune 부재). Explore agent로 packages/shared/src/index.ts(3448줄, 최대·최고령 파일) 전체 export 365개 grep 기반 사용처 조사 — 7건 "repo 전체 0 참조" + 22건 "index.test.ts 안에서만 참조" 후보 발견.
+
+직접 재검증(grep -n 라인 단위): 7건(FACTOR_ANOMALY_MIN_SAMPLE, AvgMarginResult, MarginCountResult, MatchupStreakResult, MatchupRecentRecordResult, MatchupHomeAwaySplitResult, SeasonHeadToHeadYear) 전부 **false positive** — 이름 기반 grep의 구조적 한계(TS structural typing: 함수 반환 타입으로만 쓰이면 소비 측이 타입명을 import 안 해도 씀). 각 인터페이스를 반환하는 함수(computeAvgMarginFromFinalGames 등)를 재확인 → apps/moneyball/src/lib/{matchup,teams,mlb}/*.ts 전역에서 실사용 확인. 22건(ISR *_HOURS/*_MINUTES)도 false positive — silent-drift-family wave 121/122/123/291(과거 cycle 박제) 이 확립한 "사람이 읽는 HOURS 값 → 코드가 쓰는 SECONDS 값 파생" 단일 source 패턴, index.test.ts 가 파생 공식 자체를 검증하는 의도된 구조.
+
+색상 토큰 축(cycle 2627 소진 확인)에 이어 dead-code 축도 이번 파일 기준 소진 확인 — 실제 dead code 0건, 코드 변경 없음. 두 축 모두 소진되면서 review-code(heavy) 다음 발화는 새 파일/새 각도(예: packages/kbo-data/src/agents/validator.ts 956줄 등) 필요.
+
+skill-evolution trigger 5개 전부 미충족 — 진행 정상.
+
+다음 사이클 추천 = polish-ui(자연 대기) 또는 info-architecture-review(gap 11/30, 여유) — review-code dominance 완화 목적 다양성 유지, 또는 review-code(heavy)를 index.ts 대신 다른 대형 파일로 재조준.
+
+---
+
 ## ✅ SUCCESS — lotto (lite): 30-cycle gap trigger, saturation 5연속 재확인 (cycle 2628, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8(2620-2627) distinct=5 — 2-chain lock 미충족. fix-incident/info-arch/op-analysis gap 전부 미도달. lotto gap 정확히 30/30 도달(마지막 발화 cycle 2598) — trigger 충족.
