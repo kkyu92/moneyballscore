@@ -599,9 +599,11 @@ export const NEUTRAL_FACTOR = 0.5;
  * HOME_ADVANTAGE = probability delta (+1.5pp). Elo logistic 식 안에서는
  * Elo point 가 필요 — 단위 mismatch 시 dimensionally 잘못된 결과.
  *
- * 변환: P(home win) = 1 / (1 + 10^(-x/400)) = 0.515 → x ≈ 11.85 Elo point.
- * 단 +1.5pp = 약 +12 Elo point at neutral (1500 vs 1500). 통상 KBO/MLB 패턴
- * 정합 = 24 Elo point (홈팀 +1.5pp ≈ 0.024 prob shift, 측정 noise 안 정합).
+ * 변환: P(home win) = 1 / (1 + 10^(-x/400)) = 0.515 → x ≈ 10.43 Elo point
+ * (아래 자세한 도출과 동일 값 — 이전에 여기 적혀있던 11.85 는 계산 오기).
+ * 즉 +1.5pp ≈ +10.43 Elo point at neutral (1500 vs 1500). 통상 KBO/MLB 패턴
+ * 정합 = 24 Elo point (홈팀 +24 Elo ≈ +3.4pp prob shift = HOME_ELO_BONUS_WIN_PROB_PCT,
+ * 측정 noise 감안 보수적 확장).
  *
  * 자세한 도출:
  *   solve 1 / (1 + 10^(-x/400)) = 0.515

@@ -1,4 +1,15 @@
-## v0.5.62.160 — 2026-08-26 (cycle 2636, review-code(heavy): calibration-agent 사용자 가시 텍스트 환각검증 전무 gap 수정)
+## v0.5.62.161 — 2026-08-26 (cycle 2639, review-code(heavy): HOME_ELO_BONUS 주석 자기모순 수정)
+
+### fix: HOME_ELO_BONUS JSDoc 이 같은 블록 안 자체 도출과 다른 값을 인라인 주장하던 계산 오기 수정
+
+- 진단: open issue 0, approved plan 0/23. 직전8 distinct=5(review-code 계열 5 + operational-analysis 1 + fix-incident(lite) 1 + explore-idea 1) — 2-chain lock 미충족. 직전15 saturation(review-code+fix-incident+polish-ui+info-arch) 10/15 — 임계 미달. gap trigger 전부 미도달(fix-incident 4/20, op-analysis 2/25, info-arch 21/30, lotto 11/30). DESIGN.md 당일 갱신(polish-ui negative) + breadcrumb 미커버 18건 동일(cycle 2632 대비 변화 없음, info-arch negative). injection-validation family(team/judge/postview×2/calibration) 5곳 전부 소진(cycle 2638) — 직전 2사이클 retro 가 명시 추천한 신규 axis(미탐색 대형 파일) 채택, `packages/shared/src/index.ts`(3448줄, injection-validation 스윕 대상 아니었던 상수 monolith) 서브에이전트 정독 감사.
+- `HOME_ELO_BONUS` JSDoc(596~618줄 부근) 안 인라인 주장 "x ≈ 11.85 Elo point" 가 5줄 아래 같은 블록의 "자세한 도출" 단계별 계산 결과 "x ≈ 10.43 Elo point" 와 불일치 — 동일 방정식(`1/(1+10^(-x/400))=0.515`)을 두 번 풀어 서로 다른 답을 인라인·상세 도출에 각각 적어둔 자기모순. 직접 재계산(`1/0.515≈1.9417 → log10(0.9417)≈-0.02609 → x=10.43`)으로 상세 도출이 맞고 인라인 값이 오기임을 확인. 인접 문장의 "홈팀 +1.5pp ≈ 0.024 prob shift" 도 별도로 아래 정의된 `HOME_ELO_BONUS_WIN_PROB_PCT=3.4`(24 Elo → +3.4pp, 코드/테스트로 이미 고정됨)와 불일치 — 0.024 는 0.034 오기.
+- 수정: 주석 텍스트만 정정(인라인 11.85→10.43, +12 Elo point→+10.43 Elo point, 0.024 prob shift→`HOME_ELO_BONUS_WIN_PROB_PCT` 참조 +3.4pp 로 명시). `HOME_ELO_BONUS=24`/`HOME_ELO_BONUS_WIN_PROB_PCT=3.4` 실제 상수값과 이를 고정하는 기존 테스트(`index.test.ts` silent drift wave 272 가드, `backtest-v2-helpers.test.ts`, `mlb-base.test.ts`)는 전부 이미 정확 — 코드 동작 변경 없음, 주석 전용 fix.
+- `pnpm --filter shared exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 92 files/1209 tests green + `pnpm lint` clean. version 160→161 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `analysis/page.tsx`(2833줄) 또는 `daily.ts`(1622줄) 미탐색 축 / 다양성 전환 시 polish-ui·info-architecture-review 는 3사이클 연속 negative 확인(신규 trigger 없으면 재확인 스킵 검토) — op-analysis(gap 2/25) 또는 dimension-cycle 도 고려.
+
+
 
 ### fix: calibration-agent 의 recentBias/teamSpecific/modelWeakness — team/judge-agent 와 달리 검증 없이 그대로 사용자 노출되던 gap 수정
 
