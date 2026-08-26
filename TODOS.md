@@ -1,3 +1,15 @@
+## ✅ SUCCESS — review-code(heavy): "AI" 원형 배지 아이콘 크기 w-5 h-5 → w-6 h-6 역할 정렬 (cycle 2611, 2026-08-26)
+
+진단: open issue 0, approved plan 0/22. 직전8(2603-2610) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 3, info-arch gap 24/30, lotto gap 13/30, design-system negative(당일 갱신) — 전부 미도달. skill-evolution trigger 5개 전부 미충족(milestone 2611%50≠0, review-code 직전20 non-zero). review-code(heavy) 재진입 — cycle 2610 자체 추천 축(아이콘 크기/버튼 높이/line-height) 신규 탐색.
+
+발견: "AI" 원형 아바타 배지(`inline-flex items-center justify-center rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-2xs` + "AI") 동일 역할 3곳 — `DebateTimeline.tsx`/`JudgeReasoningCard.tsx` `w-6 h-6`, `predictions/[date]/page.tsx` 헤더만 `w-5 h-5` — 1-notch 이탈. 버튼 높이(h-8~h-11)는 대부분 `loading.tsx` 스켈레톤 자체 사이즈라 twin 무의미(범위 제외). line-height(`leading-*`)는 산문 페이지 vs UI 컴포넌트 역할 분기 뚜렷해 drift 없음.
+
+실행: `predictions/[date]/page.tsx` AI 배지 `w-5 h-5`→`w-6 h-6`(2/3 다수결). DESIGN.md Decisions Log 추가. `silent-drift-cycle-2611.test.ts` 신규 2건. tsc clean + vitest 561f/4450t green(+1/+2) + lint clean. version 147→148 3-way sync. 단일 논리 단위 → 직접 main commit+push(R4/R7 통과, c215f13f).
+
+다음 사이클 추천 = op-analysis/info-arch/lotto 자연 대기(전부 gap 미도달), review-code(heavy) 재진입 시 icon-size 축도 소진 — spacing/radius/shadow/focus-ring/typography/motion/icon-size 6개 축 모두 clean, 신규 축 발굴 필요 시점 근접.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): MobileNav 아코디언 chevron duration-150 → duration-200 motion 토큰 역할 정렬 (cycle 2610, 2026-08-26)
 
 진단: open issue 0, approved plan 0/22(plan #29 회원인증/커뮤니티는 postseason 접근 또는 참여≥10 트리거 미충족, plan 자체 명시대로 재확인 스킵). 직전8(2602-2609) distinct=3(review-code 6+op-analysis 1+polish-ui 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 2(2608 직발화), info-arch gap 22/30, lotto gap 12/30(8/23 50세트 이미 박제) 미도달. design-system negative(당일 갱신). explore-idea saturation 10/15 미충족. review-code(heavy) 진입 후 gap-*/z-[]/ring-*/rounded-md/hover:shadow 축 재점검 전부 clean, motion duration 축 신규 진입.
