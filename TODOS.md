@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy): judge 경로 라이벌리 메모리 환각검증 누락 수정 (cycle 2631, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. gap trigger 전부 미도달(fix-incident 16/20, op-analysis 5/25, info-arch 13/30, lotto 3/30). 2-chain lock 미충족(직전8 distinct=6). polish-ui(DESIGN.md 당일 갱신 negative)/info-architecture-review(breadcrumb 목록 cycle 2618과 동일) 재점검 후 신규 액션 없음 확인, cycle 2630이 명시 추천한 후속 스코프(judge-agent.ts/debate.ts가 rivalryBlock을 team-agent 경유로 흘려받는지) 그대로 진행.
+
+`judge-agent.ts` buildUserMessage는 rivalryBlock을 직접 포함하지 않지만, judge가 종합하는 `homeArg.reasoning`/`awayArg.reasoning`(팀 에이전트 LLM 출력)은 cycle 2630 fix 이후 rivalryBlock 수치를 실제로 노출받은 상태 — judge가 그 수치를 정당 인용해 최종 reasoning(블로그 프리뷰 원문)에 반영해도 `validateJudgeReasoning(reasoning, context, mode)`가 `buildInjectionText(context)`를 rivalryBlock 없이 호출해 동일 환각 오탐 gap이 judge 경로에서 재발함을 확인(테스트 미커버).
+
+수정: `validateJudgeReasoning(..., rivalryBlock = '')` 4번째 인자 추가 → `buildInjectionText(context, rivalryBlock)` 연결. `runJudgeAgent(..., context, rivalryBlock = '')` 8번째 인자 추가. `debate.ts`는 team-agent가 fetch한 promptBlock을 반환하지 않아 재사용 불가 — 기존 `Promise.all` 병렬 호출에 `getRivalryBlock(...)` 4번째로 추가해 별도 fetch 후 `runJudgeAgent`에 전달. `agents-validator.test.ts` 회귀 가드 2건 신규.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 91 files/1196 tests(+2) green + apps/moneyball vitest 568/4465 불변 + `pnpm lint` clean. version 156→157 3-way sync. 단일 논리 단위 → 직접 main commit(`94801aa2`)+push(R4/R7).
+
+skill-evolution trigger 5개 전부 미충족 — 진행 정상.
+
+다음 사이클 추천 = polish-ui 또는 info-architecture-review(dominance 완화 목적 다양성 유지, 둘 다 gap 여유) — review-code(heavy)의 rivalry-block 경로(team-agent → judge-agent)는 이번 사이클로 스코프 완료.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): 라이벌리 메모리 블록 환각검증 누락 수정 (cycle 2630, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=6). gap trigger 전부 미도달(fix-incident 15/20, op-analysis 4/25, info-arch 12/30, lotto 2/30). 직전20 review-code 계열 dominance 60%(12/20) — cycle 2628/2629 양쪽 추천대로 `validator.ts`(956줄, agents/ 최대·미착수 파일) 재조준. polish-ui(breadcrumb 18건 grep, DESIGN.md 당일 갱신 negative) / info-architecture-review(신규 라우트 mtime -7 전수 false positive, breadcrumb/sitemap 대조 cycle 2618과 동일) 양쪽 재점검했으나 신규 액션 없음 확인 후 배제.
