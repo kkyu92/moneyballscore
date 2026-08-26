@@ -1,4 +1,11 @@
-## v0.5.62.151 — 2026-08-26 (cycle 2620, review-code(heavy): SearchClient.tsx 그룹 라벨 tracking-wider → tracking-wide 정렬)
+## v0.5.62.152 — 2026-08-26 (cycle 2621, review-code(heavy): LiveScoreboard.tsx 홈 배지 font-semibold → font-bold 정렬)
+
+### fix(design): `LiveScoreboard.tsx` 홈팀 배지 font-weight 컨벤션 정렬
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2613-2620) distinct=5(review-code 3+dimension-cycle 2+review-code(heavy) 1+info-architecture-review 1+fix-incident 1) — 2-chain lock 미충족. op-analysis gap 13/25, info-arch gap 3/30, lotto gap 23/30, fix-incident gap 6/20 — 전부 미도달. CI 최근 워크플로 전부 success. DESIGN.md 당일 갱신(design-system negative). ship-0 미충족(직전10 success 5). skill-evolution trigger 5개 미충족.
+- cycle 2620 carry-over(font-weight 3-tier 축, 표본 396건) 는 사이트 전체 audit 하기엔 role 불명확 + 과대 — 대신 known role(`uppercase tracking-wide` 라벨) 소표본 재검사로 축소, `text-3xs` 롤 배지(px-1 py-0.5 rounded, brand-100/900 bg) 그룹 재검사로 전환. 동일 `aria-label="홈팀"` 배지가 `MiniGameCard.tsx`/`PredictionCard.tsx`/`PlaceholderCard.tsx` 3곳 전부 `font-bold` 인데 `LiveScoreboard.tsx` 만 유일하게 `font-semibold` — twin 불일치 확인(`git blame` 상 `text-[9px]→text-3xs` 토큰화 커밋(cycle 2599 계열)이 font-weight 는 그대로 이관, 원 소스 자체가 최초부터 semibold 였던 걸로 추정). `font-bold` 로 정렬 + `silent-drift-cycle-2621.test.ts`(1 test) 신규. tsc clean + vitest 565 files/4460 tests(+1/+1) green + lint clean. version 151→152. main 직접 push.
+
+
 
 ### fix(design): `SearchClient.tsx` uppercase eyebrow-라벨 tracking 컨벤션 정렬
 

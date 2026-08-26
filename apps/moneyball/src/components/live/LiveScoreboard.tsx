@@ -95,7 +95,7 @@ function ScoreCard({ score }: { score: LiveScore }) {
             {shortTeamName(score.homeTeam as TeamCode) || score.homeTeamName}
           </span>
           <span
-            className="flex-shrink-0 px-1 py-0.5 rounded text-3xs font-semibold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 leading-none"
+            className="flex-shrink-0 px-1 py-0.5 rounded text-3xs font-bold bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 leading-none"
             aria-label="홈팀"
           >
             홈
