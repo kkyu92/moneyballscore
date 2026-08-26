@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy): picks/ muted-text tier-2 다크모드 색상 역전 정렬 (cycle 2619, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8(2611-2618) distinct=4(review-code 4+dimension-cycle 2+fix-incident 1+info-architecture-review 1) — 2-chain lock 미충족. op-analysis gap 11/25, info-arch gap 1/30, lotto gap 21/30, design-system negative — 전부 미도달. explore-idea saturation 12/15 도달했으나 4-source 재확인 negative(신규라우트 90건=git checkout 부작용/TODOS Next-Up 없음/GH issue 0/plan#29 Tier4 유지). ship-0 미충족(직전10 success 6). skill-evolution trigger 5개 미충족.
+
+cycle 2617 carry-over 추천(muted text-gray-500/400 2-tier 문서화) 채택 — 사이트 전체 관례가 라이트/다크 명도 역전으로 tier 별 대비감 유지(tier1 `gray-500 dark:gray-400`, tier2 `gray-400 dark:gray-500`)임을 확인 후, flat pair(`gray-400 dark:gray-400`, no invert) grep 결과 9건 전부 `components/picks/`(UserVsAIScorecard/WeeklyPicksSummary/MyPicksClient/PickButton) 에 집중 — 같은 파일 안 정상 역전된 sibling 라인과 직접 대조되는 twin 불일치 확인(다크모드에서 tier1 수준으로 밝게 렌더링). 9곳 `dark:text-gray-500` 로 정렬 + DESIGN.md Color 섹션 2-tier 관례 신규 문서화 + `silent-drift-cycle-2619.test.ts`(5 tests). tsc clean + vitest 563 files/4457 tests(+1/+6) green + lint clean. version 149→150. main 직접 push 완료(43db1a8a).
+
+다음 사이클 추천 = op-analysis(gap 11/25)/lotto(gap 21/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색.
+
+---
+
 ## ⚪ RETRO-ONLY — info-architecture-review 30-cycle-gap checkpoint, 신규 drift 0건 (cycle 2618, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8(2610-2617) distinct=3(review-code 6+dimension-cycle 1+fix-incident 1) — 2-chain lock 미충족. **info-arch gap 31/30 도달**(마지막 발화 cycle 2587) — trigger 충족, 발화. op-analysis gap 10/25, lotto gap 20/30, design-system negative(당일 갱신) — 미도달.
