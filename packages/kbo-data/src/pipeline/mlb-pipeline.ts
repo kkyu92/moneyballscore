@@ -1,14 +1,15 @@
 // MLB 파이프라인 오케스트레이터
 //
-// Plan C Task 2 — MLB 7 mode 실행 + silent drift alert 연동.
+// Plan C Task 2 — MLB 8 mode 실행 + silent drift alert 연동.
 // mlb_statsapi_scrape: fetchMlbSchedule → games DB upsert (league='mlb').
 // mlb_fancy_scrape: fetchFangraphsMlbTeams → mlb_team_stats upsert (cycle 1985 wiring — 스크래퍼는
 //   이미 구현/테스트됨, 이전엔 pipeline 미연결 stub 이었음).
 // mlb_savant_scrape: fetchSavantTeamStatcast → mlb_team_stats upsert (동일 cycle 1985 wiring).
 // mlb_predict_final: computeMlbProbability → predictions DB insert.
 // mlb_combined_notify: Telegram combined 메시지 (mlb_combined_notify route 통해 발송).
-// mlb_shadow_train: trainShadowWeights → milestone check + walk_forward_brier insert.
-// mlb_walk_forward_measure: computeBrier → walk_forward_brier insert.
+// mlb_shadow_train: trainShadowWeights → milestone check + mlb_shadow_train_log insert (migration 049).
+// mlb_walk_forward_measure: computeBrier → mlb_walk_forward_log insert (migration 049).
+// mlb_elo_update: computeMlbEloRatings/computeMlbEloHistory → mlb_team_elo + mlb_team_elo_history upsert (plan #25 Phase 2, cycle 2082).
 //
 // packages/kbo-data 는 apps/moneyball 를 import 못함 → mlb_combined_notify
 // stub 처리 (API route 에서 직접 처리).

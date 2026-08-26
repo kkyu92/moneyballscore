@@ -1,3 +1,12 @@
+## v0.5.62.167 — 2026-08-26 (cycle 2650, review-code(heavy): mlb-pipeline.ts 헤더 docstring stale 정정)
+
+### fix: mlb-pipeline.ts 모듈 헤더 주석이 8-mode 구조/테이블명과 불일치
+
+- 진단: open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 13/25, info-arch 2/30, lotto 22/30). 직전8 distinct=5 — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 cycle 2647/2649 에서 이미 동일 후보(carry-over 부재) 확인돼 재검토 skip. CI green, `gh run list` scheduled workflow 실패 0건 — fix-incident 후보 부재. review-code(heavy) dominance-positive channel 계속 채택 (cycle 2649 추천).
+- validator.ts(1015줄) + mlb-pipeline.ts(875줄) 서브에이전트 전체 정독 감사 — validator.ts 는 clean(신규 발견 0). mlb-pipeline.ts 헤더 docstring(1~14행) 이 "Plan C Task 2 — MLB 7 mode" 라 적혀있지만 실제 `MlbPipelineMode`/`MLB_MODES` 는 8 mode(`mlb_elo_update` 누락, plan #25 Phase 2 cycle 2082 추가분 미반영). 또 `mlb_shadow_train`/`mlb_walk_forward_measure` 주석이 "walk_forward_brier insert" 라 적혀있지만 실제 insert 대상은 migration 049 로 교체된 `mlb_shadow_train_log`/`mlb_walk_forward_log`(구 테이블 스키마 불일치로 100% silent insert 실패 이력 — 파일 내부 564~648행 인라인 주석엔 이미 반영됐으나 파일 최상단 요약만 stale 유지).
+- 헤더 주석 정정(코드/동작 변경 없음, docstring only) — mode 수 7→8, `mlb_elo_update` 라인 추가, 테이블명 2곳 정정.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.166 — 2026-08-26 (cycle 2647, review-code(heavy): KST_OFFSET_MS family — buildBatterLeaderboard/sitemap 잔여 getFullYear() off-by-one 정정)
 
 ### fix: 서버 로컬(UTC) `getFullYear()` 사용처 2건에 KST 연도 경계 off-by-one 잔존
