@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — review-code(heavy) 신규 축 4종(border-color/tracking/font-weight/muted-text) + acquisition(JSON-LD/metadata) 탐색, 전부 clean (cycle 2612, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8(2604-2611) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 4/25(2608 직발화), info-arch gap 25/30, lotto gap 14/30 — 전부 미도달. design-system negative(DESIGN.md 당일 갱신). explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 전부 미충족(milestone 2612%50≠0, review-code 직전20 non-zero). cycle 2611 retro 명시("spacing/radius/shadow/focus-ring/typography/motion/icon-size 7개 축 모두 clean, 신규 축 발굴 필요 시점 근접") 따라 review-code(heavy) 신규 축 탐색 + acquisition dimension(SEO) 병행 점검.
+
+점검: (1) border color(`border-gray-*` 등) — `border-gray-200` 압도적 단일값, 경쟁 변형 없음 clean. (2) `tracking-*` — uppercase 라벨 `tracking-wide` 일관, `tracking-tight`(Header 로고)·`tracking-wider/-widest`(별도 역할) 분기 뚜렷, drift 없음. (3) `font-(medium|semibold|bold)` — 산문 vs UI 컴포넌트 vs 헤더 role 3분기가 파일마다 자연스럽게 혼재, 단일 role 불일치 사례 못 찾음(과탐 방지 위해 fix 보류). (4) muted text color(`text-gray-400/500` + `dark:text-gray-400/500`) — light-500/dark-400, light-400/dark-500 페어링 일관, drift 없음. (5) acquisition 축: JSON-LD(`application/ld+json`) 커버리지 81개 page.tsx 중 56개 직접 보유 + `layout.tsx` 전역 스키마, 누락 25건 전부 redirect shim(`reviews/monthly|weekly/page.tsx`)·debug 페이지·hub 목록 페이지로 의도된 누락 확인. (6) `generateMetadata`/`metadata` export 누락 12건 — 8건 debug(noindex 대상), 4건(`reviews/{monthly,weekly}/page.tsx` KBO+MLB) 은 현재월 리다이렉트 shim(HTML 렌더 없음)이라 메타데이터 무의미 — 전부 의도된 결과.
+
+결론: 이번 사이클 실행 가능한 신규 버그/drift 없음. 코드 변경 없음. review-code 축 exhaustion 재확인(총 11개 축 clean) + acquisition/SEO 최초 점검도 clean 확정.
+
+다음 사이클 추천 = op-analysis(gap 5/25, 근접 아님) 또는 info-arch(gap 26/30)/lotto(gap 15/30) 자연 대기, 또는 다양성 redirect(dimension-cycle acquisition 심화 — 예: 내부링크 구조, canonical, OG 이미지 세트 재검토) 검토. review-code(heavy) 는 11축 소진 — 신규 fix 없이 재진입 시 저가치, 당분간 회피 권장.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): "AI" 원형 배지 아이콘 크기 w-5 h-5 → w-6 h-6 역할 정렬 (cycle 2611, 2026-08-26)
 
 진단: open issue 0, approved plan 0/22. 직전8(2603-2610) distinct=3(review-code 6+polish-ui 1+op-analysis 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 3, info-arch gap 24/30, lotto gap 13/30, design-system negative(당일 갱신) — 전부 미도달. skill-evolution trigger 5개 전부 미충족(milestone 2611%50≠0, review-code 직전20 non-zero). review-code(heavy) 재진입 — cycle 2610 자체 추천 축(아이콘 크기/버튼 높이/line-height) 신규 탐색.
