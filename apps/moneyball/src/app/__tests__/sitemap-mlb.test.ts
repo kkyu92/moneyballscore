@@ -67,6 +67,11 @@ describe('sitemap MLB URL coverage', () => {
     expect(urls.find((u) => u.url.endsWith('/community'))).toBeUndefined();
   });
 
+  it('does NOT include /picks (noindex page.tsx metadata, same contradiction class as /search cycle 2579, cycle 2613)', async () => {
+    const urls = await sitemap();
+    expect(urls.find((u) => u.url.endsWith('/picks'))).toBeUndefined();
+  });
+
   it('preserves existing KBO routes (regression)', async () => {
     const urls = await sitemap();
     const hasHome = urls.find((u) => u.url === 'https://moneyballscore.vercel.app');

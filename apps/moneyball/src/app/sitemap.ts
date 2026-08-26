@@ -101,7 +101,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 와 동일 사유) — dynamic block (enMlbWeeklyReviewRoutes, wave-660 cycle 2355 /
     // enMlbMonthlyReviewRoutes, cycle 2356) 이 실제 컨텐츠 URL 커버.
     { url: `${SITE_URL}/seasons`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${SITE_URL}/picks`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    // /picks — page.tsx 자체 `robots: { index: false }` (개인화 "내 픽 기록", 색인 가치 0).
+    // sitemap 노출은 모순 (/search 와 동일 패턴, cycle 2579 review-code heavy 4th category — cycle 2613 acquisition sweep 재발견).
     { url: `${SITE_URL}/leaderboard`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     // /lotto hub — weekly 갱신.
     { url: `${SITE_URL}/lotto`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },

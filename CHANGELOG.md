@@ -1,3 +1,11 @@
+## v0.5.62.149 — 2026-08-26 (cycle 2613, dimension-cycle(acquisition): /picks sitemap noindex 모순 제거)
+
+### fix(seo): `/picks` sitemap.ts 노출 — page.tsx noindex 모순 제거
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2605-2612) distinct=3(review-code 7 + operational-analysis 1) — 2-chain lock 미충족. fix-incident negative(전부 success/skipped). op-analysis gap 5/25, info-arch gap 26/30, lotto gap 15/30, design-system negative(당일 갱신) — 전부 미도달. explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 전부 미충족(milestone 2613%50≠0, review-code 직전20 non-zero). cycle 2612 retro 명시("review-code 11축 소진, 재진입 저가치 — op-analysis/info-arch/lotto 자연 대기 또는 dimension-cycle acquisition 심화 검토") 따라 dimension-cycle acquisition(SEO) 심화 진입.
+- 발견: canonical(19건 누락 전부 noindex 의도) / JSON-LD / OG·twitter-image 페어링(66/66 완전 매칭) / hreflang `languages` alternate(en/mlb 24개 중 2개 미보유 — 둘 다 redirect-only shim, 의도됨) / Header·Footer `/mlb`→`/en/mlb` locale 치환 로직(scope 정확) 전부 clean 확인 후, sitemap.ts 전체 staticRoutes 를 각 페이지 자체 metadata 와 대조하는 스크립트 점검에서 `/picks`(`robots: { index: false }`, 개인화 "내 픽 기록")가 sitemap.ts 에 여전히 등록된 것 발견 — `/search` 가 동일 모순으로 cycle 2579 에 sitemap 제거됐던 것과 완전히 같은 패턴, 그때 `/picks` 는 놓쳤던 gap.
+- 실행: `sitemap.ts` staticRoutes 에서 `/picks` 항목 제거 + 사유 주석(`/search` 패턴 참조). `sitemap-mlb.test.ts` 에 회귀 assertion 추가(`/picks` URL 부재 확인). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 561 files/4451 tests green(+1) + lint clean. version 148→149 3-way sync. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.148 — 2026-08-26 (cycle 2611, review-code(heavy): "AI" 원형 배지 아이콘 크기 w-5 h-5 → w-6 h-6 정렬)
 
 ### fix(design): "AI" 아바타 배지 아이콘 크기 역할 정렬
