@@ -1,3 +1,13 @@
+## ✅ SUCCESS — review-code(heavy): dark:border-gray-N/opacity 예외 8곳 role 문서화 (cycle 2625, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8(2617-2624) distinct=4(review-code 5+review-code(heavy) 1+info-arch 1+explore-idea 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 17/25, lotto 27/30, info-arch 7/30). 직전 retro(cycle 2624) 추천 review-code(heavy) 채택.
+
+cycle 2623 전역 마이그레이션(`dark:border-gray-N` → `dark:border-[var(--color-border)]`)이 opacity-suffix 있는 8곳(7파일)을 제외했는데 그 사유가 미문서화 — 다음 사이클이 "미마이그레이션 잔존"으로 재의심할 리스크 확인. 4-역할 twin 그룹 재검증: (1) 팩터 수렴 배지 tri-state(amber/brand/gray, `analysis/game/[id]:492`) (2) 뮤트 정보 패널(`border-gray-700/50`+`bg-gray-800/30` 5곳 100% 동일) (3) 점선 기준선(`accuracy:776` 단독) (4) 커스텀 서피스 디바이더(`WeeklyGamesSortControl:59` 단독) — 전부 내부 일관, drift 아님 확정. 코드 변경 없이 DESIGN.md:64 예외 규칙 신설 + Decisions Log 항목 박제만으로 정리. lint+type-check+3 tests green. main 직접 push 완료(3f840362).
+
+다음 사이클 추천 = op-analysis(gap 18/25)/lotto(gap 28/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색. dominance 관찰: 직전9(2617-2625) review-code 계열 7/9 — 다양성 redirect 고려 필요.
+
+---
+
 ## ⚪ RETRO-ONLY — explore-idea 2-chain lock redirect, 4-source 재확인 negative (cycle 2624, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2616-2623) chain 정규화 = review-code(heavy) 7 + info-architecture-review 1 → distinct=2 → **2-chain alternation lock 발동**, 둘 다 후보 제외. gap trigger 4종 미도달(fix-incident 9/20, op-analysis 16/25, lotto 26/30). DESIGN.md 당일 갱신(design-system negative). 잔여 pool 중 explore-idea saturation trigger 12/15 만 유일 충족 — 자연 선택.
