@@ -1,3 +1,9 @@
+## 🔁 RETRO-ONLY — explore-idea(lite): plan #29(로그인+커뮤니티 ETA) 재평가 트리거 재측정 (cycle 2633, 2026-08-26)
+
+review-code(heavy) 직전20 60% dominance + injection-validation gap family 완전 소진(team-agent/judge-agent/postview 3경로 전부 cycle 2630~2632 패치, 실 호출부 3곳 재확인 잔여 gap 0) 확인 후 다양성 전환. plan #29 자체 지시 따라 재평가 트리거만 재측정: `user_picks`=1 / `mlb_user_picks`=0 / `pick_poll_events`=5 / `mlb_pick_poll_events`=0 — cycle 2417/2334 측정과 동일, 트래픽 변화 0. 포스트시즌(통상 10월) "직전" 시점도 아직 아님. 트리거 미충족 → Tier 4 보류 유지, 코드 변경 없음.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): postview judge 환각검증 pre_game 전용 주입블록 재사용 gap 수정 (cycle 2632, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=5). gap trigger 전부 미도달(fix-incident 17/20, op-analysis 6/25, info-arch 14/30, lotto 4/30). breadcrumb 미커버 18건 전수 재확인 — community(noindex 플레이스홀더)/reviews monthly·weekly 4종(redirect-only stub)/debug/*(내부전용) 전부 의도된 제외, info-arch negative. DESIGN.md 당일 갱신, polish-ui negative. 직전 3사이클 모두 diversity 추천했으나 재확인 negative로 dominance-positive streak 룰(cycle 135) 따라 review-code(heavy) 계속.
