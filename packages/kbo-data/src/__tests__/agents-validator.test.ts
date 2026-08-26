@@ -776,6 +776,25 @@ describe('validateJudgeReasoning', () => {
     const result = validateJudgeReasoning(reasoning, ctx, 'strict');
     expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
   });
+
+  // cycle 2632 review-code(heavy) — postview.ts 의 buildJudgePostviewMessage 는 actual 스코어 /
+  // original.homeWinProb% / factorLines 편향값을 judge 에 직접 노출하지만 buildInjectionText 는
+  // pre_game 전용이라 이 값들이 없다. judge 가 정당 인용해도 5번째 인자(extraContext) 없이는
+  // 환각으로 오탐됐던 갭.
+  it('extraContext 5번째 인자 전달 시 postview 실측값(스코어/승률/편향) 인용 환각 오탐 없음', () => {
+    const ctx = makeContext();
+    const extraContext = '스코어 7 - 3\npre_game 홈 승리확률 65%\nsp_fip: 0.523 (편향 0.023)';
+    const reasoning = 'pre_game은 홈 승리확률 65%로 예측했으나 실제 스코어 7 - 3으로 뒤집혔다. sp_fip 편향 0.023이 과대평가였다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict', '', extraContext);
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(false);
+  });
+
+  it('extraContext 미전달 시 동일 postview 인용은 환각 오탐 (fix 이전 회귀 가드)', () => {
+    const ctx = makeContext();
+    const reasoning = 'pre_game은 홈 승리확률 65%로 예측했으나 실제 스코어 7 - 3으로 뒤집혔다. sp_fip 편향 0.023이 과대평가였다.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+  });
 });
 
 // ============================================

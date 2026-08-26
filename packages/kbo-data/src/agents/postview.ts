@@ -305,6 +305,23 @@ pre_game이 놓친 것: ${awayPv.missedBy}
 양측 postview와 factor 분해를 종합해 factor-level attribution + 블로그용 분석을 작성하세요.`;
 }
 
+// judge-postview 프롬프트(buildJudgePostviewMessage)가 실제로 노출하는 postview 전용 실측값
+// (buildInjectionText 는 pre_game 전용이라 커버 못 하는 값들) — validateJudgeReasoning 의
+// extraContext 로 전달해 환각 오탐 차단.
+export function buildPostviewExtraInjection(
+  actual: ActualResult,
+  original: OriginalPrediction
+): string {
+  const factorLines = Object.entries(original.factors)
+    .map(([k, v]) => `${k}: ${v.toFixed(3)} (편향 ${(v - NEUTRAL_FACTOR).toFixed(3)})`)
+    .join('\n');
+  return [
+    `스코어 ${actual.homeScore} - ${actual.awayScore}`,
+    `pre_game 홈 승리확률 ${Math.round(original.homeWinProb * 100)}%`,
+    factorLines,
+  ].join('\n');
+}
+
 export function parseJudgePostview(text: string): { factorErrors: FactorError[]; reasoning: string } {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -429,10 +446,16 @@ export async function runPostview(
 
   // judgeReasoning 환각/발명/금칙어 검증 + mask. judge-agent.ts (pre-game) 패턴과 동일.
   // postview judgeReasoning 은 /analysis/game/[id] PostviewPanel 에 직접 노출 = 사용자 가시 영역. silent leak 차단.
+  //
+  // extraContext (cycle 2632) — buildJudgePostviewMessage 가 실제로 노출하는 actual 스코어 /
+  // original.homeWinProb% / factorLines 편향값은 buildInjectionText(pre_game 전용) 에 없어
+  // judge 가 이 값들을 정당 인용해도 환각 오탐. postview 전용 실측값을 별도 주입.
   const reasoningValidation = validateJudgeReasoning(
     judgeData.reasoning,
     context,
-    resolveValidationMode()
+    resolveValidationMode(),
+    '',
+    buildPostviewExtraInjection(actual, original)
   );
   void notifyValidationViolations(reasoningValidation, {
     agent: 'judge',

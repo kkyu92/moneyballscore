@@ -448,7 +448,7 @@ export function checkClaimTypes(outputText: string): Violation[] {
 // 주입 블록 재구성 (team-agent의 buildUserMessage와 동일 소스)
 // ============================================
 
-export function buildInjectionText(context: GameContext, rivalryBlock = ''): string {
+export function buildInjectionText(context: GameContext, rivalryBlock = '', extraContext = ''): string {
   const { game, homeTeamStats, awayTeamStats, homeSPStats, awaySPStats, homeElo, awayElo, homeRecentForm, awayRecentForm, headToHead, parkFactor } = context;
   const homeName = KBO_TEAMS[game.homeTeam].name;
   const awayName = KBO_TEAMS[game.awayTeam].name;
@@ -496,6 +496,7 @@ export function buildInjectionText(context: GameContext, rivalryBlock = ''): str
     `${MetricRegistry.head_to_head.ko_name} ${headToHead.wins}승 ${headToHead.losses}패`,
     contextBlockText,
     rivalryBlock,
+    extraContext,
   ].join('\n');
 }
 
@@ -554,13 +555,22 @@ export function validateTeamArgument(
 // h2h 스코어 + agent_memories 숫자) 을 실제로 노출받은 상태(cycle 2630 fix). judge 가 그 숫자를
 // 정당 인용해 최종 reasoning 에 반영해도, 이 함수가 rivalryBlock 없이 buildInjectionText 를 호출하면
 // 동일 환각 오탐 갭이 judge 경로에서 재발한다.
+//
+// extraContext (cycle 2632) — postview.ts 의 judge-postview 경로는 pre_game 과 다른 프롬프트로
+// buildJudgePostviewMessage 가 actual.homeScore/awayScore(실제 스코어), original.homeWinProb
+// (pre_game 홈 승리확률 %), original.factors 편향값(factorLines) 을 직접 노출한다. 이 경로도
+// 동일 validateJudgeReasoning 을 재사용하지만 buildInjectionText 는 pre_game 전용 주입 블록이라
+// 위 세 값이 전혀 없음 — judge 가 "pre_game은 65% 확률로 예측했으나 실제 7-3으로 역전" 처럼
+// 정당 인용해도 checkHallucinatedNumbers 가 환각 오탐. extraContext 로 postview 전용 실측값을
+// 추가 주입해 pre_game 경로(빈 문자열, 동작 불변)와 postview 경로(오탐 차단)를 분리한다.
 export function validateJudgeReasoning(
   reasoning: string,
   context: GameContext,
   mode: ValidationMode = 'strict',
-  rivalryBlock = ''
+  rivalryBlock = '',
+  extraContext = ''
 ): ValidationResult {
-  const injectionText = buildInjectionText(context, rivalryBlock);
+  const injectionText = buildInjectionText(context, rivalryBlock, extraContext);
 
   const rawViolations: Violation[] = [
     ...checkHallucinatedNumbers(reasoning, injectionText),

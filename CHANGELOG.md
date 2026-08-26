@@ -1,3 +1,14 @@
+## v0.5.62.158 — 2026-08-26 (cycle 2632, review-code(heavy): postview judge 환각검증이 pre_game 전용 주입블록 재사용하던 gap 수정)
+
+### fix: postview judge reasoning 검증이 actual 스코어/original 승률/factor 편향값을 커버 못 하던 gap 수정
+
+- 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8 distinct=5(review-code 계열 4 + polish-ui 1 + op-analysis 1 + lotto 1 + explore-idea 1) — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 17/20, op-analysis 6/25, info-arch 14/30, lotto 4/30). DESIGN.md 당일 갱신(polish-ui negative) + breadcrumb 미커버 목록 18건 전수 재확인(community=noindex 플레이스홀더, reviews/monthly·weekly 4종=redirect-only stub, debug/*=내부 전용) — 전부 의도된 제외라 info-arch negative. 직전 3사이클(2629/2630/2631) 모두 `validator.ts` rivalryBlock 경로 fix 후 "polish-ui 또는 info-architecture-review" 추천했으나 양쪽 재확인 negative로, dominance-positive streak 룰(cycle 135)에 따라 review-code(heavy) 계속 진행.
+- `validateJudgeReasoning` 호출부 3곳(judge-agent.ts/postview.ts/그 자체) 전수 확인 중 `postview.ts:432`가 rivalryBlock 경로와 별개로 동일 함수를 pre_game용 기본 인자로만 호출함을 발견. `buildJudgePostviewMessage`(postview.ts:268)는 judge에게 `actual.homeScore`/`actual.awayScore`(실제 스코어), `original.homeWinProb`(pre_game 홈 승리확률 %), `factorLines`(original.factors 편향값, 소수 3자리)를 직접 노출하는데, `buildInjectionText`는 pre_game 컨텍스트 전용이라 이 세 값이 전혀 없음 — judge가 "pre_game은 65% 확률로 예측했으나 실제 7-3 역전, sp_fip 편향 0.023 과대평가"처럼 정당 인용해도 `checkHallucinatedNumbers`가 환각으로 오탐할 gap(테스트 미커버, 스코어 단일 digit은 NUMERIC_WHITELIST로 우연히 통과하지만 원 승률%·편향값은 대부분 미통과 실측 확인).
+- 수정: `buildInjectionText(context, rivalryBlock = '', extraContext = '')` 3번째 인자 추가, `validateJudgeReasoning(..., rivalryBlock = '', extraContext = '')` 5번째 인자로 연결(4번째 rivalryBlock은 cycle 2630/2631 fix 그대로 pre_game 전용 유지 — postview는 항상 빈 문자열 전달해 서로 간섭 없음). `postview.ts`에 `buildPostviewExtraInjection(actual, original)` 신규 export — buildJudgePostviewMessage와 동일 소스(스코어/승률%/factorLines)로 별도 조립해 `validateJudgeReasoning` 호출부에 5번째 인자로 전달. `agents-validator.test.ts`에 회귀 가드 2건 신규(extraContext 전달 시 postview 실측값 인용 오탐 없음 / 미전달 시 오탐 유지 대조).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 91 files/1198 tests(+2) green + `pnpm lint` clean. version 157→158 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = polish-ui 또는 info-architecture-review(dominance 완화 목적 다양성 유지) — 단 양쪽 3사이클 연속 negative 확인됐으므로 신규 trigger 없으면 dimension-cycle 또는 explore-idea 재점검도 고려.
+
 ## v0.5.62.157 — 2026-08-26 (cycle 2631, review-code(heavy): judge 경로 라이벌리 메모리 환각검증 누락 수정)
 
 ### fix: judge-agent reasoning 검증이 rivalryBlock 없이 buildInjectionText 호출하던 잔여 gap 수정
