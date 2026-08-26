@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy): calibration-agent 사용자 가시 텍스트 환각검증 전무 gap 수정 (cycle 2636, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8 distinct=4(lotto/review-code/explore-idea/fix-incident) — 2-chain lock 미충족. gap trigger 전부 미도달. 직전 retro(cycle 2632) 추천 `retro.ts`/`llm.ts` 전문 재확인 — 양쪽 이미 견고, 신규 버그 없음. 인접 파일 `calibration-agent.ts` 확인 중 team/judge-agent 와 달리 validator 호출이 전혀 없는 gap 발견.
+
+`CalibrationHint.recentBias`/`teamSpecific`/`modelWeakness` 는 `/analysis/game/[id]` 페이지 + `DebateTimeline` 컴포넌트에 그대로 노출되는 사용자 가시 텍스트인데, LLM 이 실제 주입받은 `PredictionHistory` 수치와 다른 숫자를 지어내도 아무 검증도 없이 그대로 저장·노출됨 — team/judge/postview 3곳에 이미 존재하는 injection-validation family (cycle 2630~2632) 의 미커버 4번째 지점.
+
+수정: `validateCalibrationHint` 신규(checkHallucinatedNumbers+checkBannedPhrases 재사용) + `buildStatsBlock` 분리(도메인 컨텍스트 decorative 숫자 제외 — 최초 구현에서 전체 buildUserMessage 를 넘겼다가 테스트로 false negative 직접 재현, 발견 즉시 분리) + `maskViolatedReasoning` 필드별 마스킹 wiring(judge-agent 와 동일 패턴, 전체 reject 아님).
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 92 files/1207 tests(+9) green + `pnpm lint` clean. version 159→160 3-way sync. 단일 논리 단위 → 직접 main commit(`b0666dc5`)+push(R4/R7).
+
+skill-evolution trigger 5개 전부 미충족 — 진행 정상.
+
+다음 사이클 추천 = injection-validation family 사실상 전 지점(team/judge/postview/calibration) 소진 — polish-ui/info-architecture-review/op-analysis 다양성 전환 우선 검토 권장.
+
+---
+
 ## 🔁 RETRO-ONLY — fix-incident(lite): 20-cycle gap trigger 강제 점검, live 인시던트 없음 (cycle 2635, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8 distinct=7(2-chain lock 미충족). fix-incident 마지막 발화 cycle 2615 → gap=20 정확히 도달, trigger(7) 발동 — `pipeline_runs` 최근 7일 error rate + git log debug commit 강제 점검 수행.
