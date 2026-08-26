@@ -1,4 +1,11 @@
 
+## cycle 2646 (2026-08-26) — SUCCESS
+- review-code(heavy): 직전8 distinct=4(2-chain lock 미충족) + review-code(heavy) 5연속 SUCCESS streak(2639~2643, dominance-positive 인정) 따라 계속. 1차 타겟 `apps/moneyball/src/app/analysis/game/[id]/page.tsx`(877줄) 서브에이전트 정독 감사 — 이미 cycle 2407/2408·2542 에 감사된 파일로 clean 확인(신규 발견 없음).
+- cycle 2634 retro 가 명시적으로 남긴 미처리 후속("일반 경로 MAX_ATTEMPTS/`llm-deepseek.ts`/`llm-ollama.ts` 동일 off-by-one 존재 여부 확인, 1순위 후보")으로 전환. 확인 결과: 일반경로 `MAX_ATTEMPTS=LLM_RETRY_BACKOFF_MS.length`(확장 없음, 3 유지)는 `llm.ts` 자체 주석("일반 5xx/네트워크 에러는 3 유지")과 `shared/index.ts:1632`("derived .length 패턴 그대로 유지") 양쪽에서 의도된 설계로 명시 — evidence-backed 신뢰성 이슈 부재라 수정 범위 제외(`feedback_data_only_claims` 원칙). `llm-deepseek.ts` 도 529 특수 확장 로직 자체가 없는 동일 설계, `llm-ollama.ts` 는 재시도 로직 부재.
+- 대신 진짜 drift 1건 발견: `llm.ts:236` 인라인 주석 "529 발생 시 maxAttempts 동적 확장 (3 → 4)" 이 cycle 2634 fix(`MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length + 1` = 4→5) 이후 stale — 실제 확장값은 5인데 주석만 옛 값(4) 유지. "(3 → 5, cycle 2634 fix)"로 정정, 동작 변경 없음.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean + `agents-llm.test.ts` 29 tests green. 단일 논리 단위 → 직접 main commit+push(commit 0655d6c3, v0.5.62.165).
+- 다음 추천: info-arch(gap 29/30, 다음 사이클 자연 도달권) 또는 review-code(heavy) 계속(신규 unaudited 대상 재탐색) / op-analysis(gap 10/25)
+
 ## cycle 2645 (2026-08-26) — SUCCESS
 - fix-incident: 마지막 발화(cycle 2615) 이후 gap 30/20 — 장기 미발화 주기 보정 trigger 충족. `pipeline_runs` 최근 7일 REST 조회 — `mlb_fancy_scrape` mode 가 2026-08-19~21 3일 연속 `fetchFangraphsMlbTeams: fangraphs HTTP 403`(games_found=0), 08-22부터 4일 연속 self-recover.
 - 근본원인 = commit 1936f6a4(cycle 2278 User-Agent 헤더 fix)의 잔여 tail — 재발 코드 fix 불필요. 조사 확장 중 진짜 gap 발견: `silent-drift-alert.ts`의 `shouldAlertSilentDrift`가 `gamesFound<=0` 조기 return 에 걸려 MLB scrape mode가 fetch throw로 `gamesFound:0+errors` 리턴하는 total 실패 케이스를 alert 대상에서 완전히 놓침(Sentry warning만, Telegram 사용자 가시 채널 부재).
