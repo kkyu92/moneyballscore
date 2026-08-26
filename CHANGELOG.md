@@ -1,3 +1,11 @@
+## v0.5.62.151 — 2026-08-26 (cycle 2620, review-code(heavy): SearchClient.tsx 그룹 라벨 tracking-wider → tracking-wide 정렬)
+
+### fix(design): `SearchClient.tsx` uppercase eyebrow-라벨 tracking 컨벤션 정렬
+
+- 진단: open issue 0, approved plan 0/23. 직전8(2612-2619) distinct=4(review-code 5+dimension-cycle 2+fix-incident 1+info-architecture-review 1) — 2-chain lock 미충족. op-analysis gap 12/25, info-arch gap 2/30, lotto gap 22/30, design-system negative(당일 갱신) — 전부 미도달. explore-idea saturation 12/15 재도달했으나 4-source 재확인(신규라우트 90건=git checkout 부작용 지속/TODOS Next-Up 없음/GH issue 0/plan#29 여전히 spec_only_deferred Tier4) — negative, cycle 2617/2618/2619 과 동일 패턴. ship-0 emergency stop 미충족(직전10 success 5/retro-only 5, success 존재). skill-evolution trigger 5개 전부 미충족(milestone 2620%50≠0, chain-evolution 누적 9건이나 최근 신규분 없음 판단, review-code 직전20 non-zero 12회).
+- cycle 2619 가 `text-gray-400 dark:text-gray-400` flat-pair 축을 picks/ 스코프로 해결한 뒤, 본 사이클은 sitewide grep 으로 잔여 확인 — flat pair 0건 잔존(테스트 assertion 제외) 확인 후 나머지 review-code(heavy) 후보 축(font-weight 3-tier 396건 표본 과다, tracking-* 11건 소표본) 순회. `tracking-*` 축에서 uppercase eyebrow/섹션-라벨(작은 대문자 스타일 heading) 역할의 10개 인스턴스(DebateTimeline/AgentVoteCard/MlbMatchupFactorCompare/MatchupFactorCompare/MobileNav/LeagueSelector/Footer/ConvergenceStreakBadges x2)가 전부 `tracking-wide` 사용하는데 `SearchClient.tsx` 검색 결과 그룹 라벨(`<h3>` 그룹명+개수) 만 유일하게 `tracking-wider` 사용 — 동일 시각적 역할의 twin 불일치.
+- 실행: `SearchClient.tsx` line 256 `tracking-wider` → `tracking-wide` 정렬. `silent-drift-cycle-2620.test.ts` 신규(sitewide `uppercase`+`tracking-wider` 조합 재발 방지 grep + SearchClient 특정 assertion, 2 tests). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 564 files/4459 tests(+1/+2) green + lint clean. version 150→151 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.150 — 2026-08-26 (cycle 2619, review-code(heavy): picks/ 모듈 muted-text tier-2 다크모드 역전 정렬)
 
 ### fix(design): `components/picks/*.tsx` tier-2 muted-text 다크모드 색상 역전 정렬

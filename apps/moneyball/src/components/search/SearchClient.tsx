@@ -253,7 +253,7 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
               role="presentation"
               className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-4"
             >
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
                 {group.label} ({group.items.length})
               </h3>
               <ul className="divide-y divide-gray-100 dark:divide-gray-800">
