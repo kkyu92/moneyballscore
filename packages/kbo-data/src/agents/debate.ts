@@ -3,6 +3,7 @@ import { runTeamAgent } from './team-agent';
 import { runJudgeAgent } from './judge-agent';
 import { runCalibrationAgent, type PredictionHistory } from './calibration-agent';
 import { evaluateAndCaptureAgentFallback } from './validator';
+import { getRivalryBlock } from './rivalry-memory';
 import type { GameContext, DebateResult, TeamArgument, CalibrationHint } from './types';
 
 /**
@@ -23,10 +24,13 @@ export async function runDebate(
   const startTime = Date.now();
 
   // Step 1: 팀 에이전트 + 회고 에이전트 병렬 실행
-  const [homeResult, awayResult, calibResult] = await Promise.all([
+  // rivalry 는 팀 에이전트 내부에서도 각자 fetch 하지만(team-agent.ts), judge validation 용으로
+  // 여기서 별도 fetch — team-agent 는 promptBlock 을 AgentResult 로 반환하지 않아 재사용 불가.
+  const [homeResult, awayResult, calibResult, rivalry] = await Promise.all([
     runTeamAgent(homeTeam, context),
     runTeamAgent(awayTeam, context),
     runCalibrationAgent(homeTeam, awayTeam, history),
+    getRivalryBlock({ homeTeam, awayTeam, date: context.game.date }),
   ]);
 
   totalTokens += homeResult.tokensUsed + awayResult.tokensUsed + calibResult.tokensUsed;
@@ -66,7 +70,8 @@ export async function runDebate(
     awayArg,
     quantitativeProb,
     calibration,
-    context
+    context,
+    rivalry.promptBlock
   );
 
   totalTokens += judgeResult.tokensUsed;

@@ -548,13 +548,19 @@ export function validateTeamArgument(
 // JudgeVerdict.reasoning = 블로그 본문 자유 텍스트. validateTeamArgument 가 TeamArgument JSON 만
 // 검증하던 갭. 환각 숫자 / 발명 선수 / 금칙어 만 재사용 — claim-type signal 은
 // reasoning 자유 글에 false positive 위험 (블로그 톤은 stat 신호 분포 다름) 으로 skip.
-
+//
+// rivalryBlock (cycle 2631) — judge 는 home/away 두 팀 논거를 종합해 최종 reasoning 을 쓰는데,
+// 각 팀 논거(homeArg.reasoning/awayArg.reasoning) 는 이미 rivalryBlock(getRivalryBlock().promptBlock,
+// h2h 스코어 + agent_memories 숫자) 을 실제로 노출받은 상태(cycle 2630 fix). judge 가 그 숫자를
+// 정당 인용해 최종 reasoning 에 반영해도, 이 함수가 rivalryBlock 없이 buildInjectionText 를 호출하면
+// 동일 환각 오탐 갭이 judge 경로에서 재발한다.
 export function validateJudgeReasoning(
   reasoning: string,
   context: GameContext,
-  mode: ValidationMode = 'strict'
+  mode: ValidationMode = 'strict',
+  rivalryBlock = ''
 ): ValidationResult {
-  const injectionText = buildInjectionText(context);
+  const injectionText = buildInjectionText(context, rivalryBlock);
 
   const rawViolations: Violation[] = [
     ...checkHallucinatedNumbers(reasoning, injectionText),

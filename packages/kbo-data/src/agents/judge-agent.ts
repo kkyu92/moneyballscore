@@ -147,6 +147,8 @@ export function parseResponse(
  *   medium tier(≥WINNER_PROB_LEAN) 오분류 차단 — low tier 명확 배치.
  * - reasoning validation: `validateJudgeReasoning` 위반 시 mask + Sentry tag + `validator_logs` row.
  * - `context` 미전달 (legacy 호출부) 시 두 후처리 모두 skip — 후방 호환.
+ * - `rivalryBlock` (cycle 2631): home/away 팀 논거가 이미 노출받은 rivalry-memory 블록을
+ *   reasoning validation 에도 동봉 — 정당 인용 환각 오탐 차단 (validateTeamArgument 와 동일 패턴).
  */
 export async function runJudgeAgent(
   homeTeam: TeamCode,
@@ -155,7 +157,8 @@ export async function runJudgeAgent(
   awayArg: TeamArgument,
   quantitativeProb: number,
   calibration: CalibrationHint | null,
-  context?: GameContext
+  context?: GameContext,
+  rivalryBlock = ''
 ): Promise<AgentResult<JudgeVerdict>> {
   let result = await callLLM<JudgeVerdict>(
     {
@@ -191,7 +194,7 @@ export async function runJudgeAgent(
   }
 
   const mode = resolveValidationMode();
-  const validation = validateJudgeReasoning(result.data.reasoning, context, mode);
+  const validation = validateJudgeReasoning(result.data.reasoning, context, mode, rivalryBlock);
 
   void notifyValidationViolations(validation, {
     agent: 'judge',

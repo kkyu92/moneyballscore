@@ -757,6 +757,25 @@ describe('validateJudgeReasoning', () => {
     expect(result.ok).toBe(true);
     expect(result.violations).toHaveLength(0);
   });
+
+  // cycle 2631 review-code(heavy) — judge 는 home/away 팀 논거를 종합하는데, 그 논거들은 이미
+  // rivalryBlock(getRivalryBlock().promptBlock) 수치를 실제로 노출받은 상태(cycle 2630 fix).
+  // judge 가 그 수치를 정당 인용해도 4번째 인자 없이는 환각으로 오탐됐던 갭.
+  it('rivalryBlock 4번째 인자 전달 시 agent_memories 소수점 수치 인용 환각 오탐 없음', () => {
+    const ctx = makeContext();
+    const rivalryBlock = '## 과거 맥락\n에이전트 학습 메모리 (1개):\n- [LG weakness] 선발 FIP (sp_fip) +2.35 (weakness, vs KIA 2026-08-20)';
+    const reasoning = 'sp_fip +2.35 약점을 근거로 LG 우세로 판단.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict', rivalryBlock);
+    expect(result.ok).toBe(true);
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(false);
+  });
+
+  it('rivalryBlock 미전달 시 동일 인용은 환각 오탐 (fix 이전 회귀 가드)', () => {
+    const ctx = makeContext();
+    const reasoning = 'sp_fip +2.35 약점을 근거로 LG 우세로 판단.';
+    const result = validateJudgeReasoning(reasoning, ctx, 'strict');
+    expect(result.violations.some((v) => v.type === 'hallucinated_number')).toBe(true);
+  });
 });
 
 // ============================================
