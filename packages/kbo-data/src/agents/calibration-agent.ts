@@ -2,7 +2,14 @@ import { KBO_TEAMS, LLM_MAX_TOKENS_CALIBRATION, errMsg, shortTeamName } from '@m
 import type { TeamCode } from '@moneyball/shared';
 import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWindowsForLLM } from '../context/domain';
 import { callLLM } from './llm';
-import { captureCalibrationParseFallback } from './validator';
+import {
+  captureCalibrationParseFallback,
+  resolveValidationMode,
+  validateCalibrationHint,
+  maskViolatedReasoning,
+  notifyValidationViolations,
+} from './validator';
+import { logValidatorEvent } from './validator-logger';
 import type { CalibrationHint, AgentResult } from './types';
 
 const SYSTEM_PROMPT = `당신은 MoneyBall 예측 모델의 회고 분석가입니다.
@@ -64,19 +71,23 @@ export function buildCalibrationContextBlock(
   return lines.join('\n');
 }
 
-function buildUserMessage(
+/**
+ * [모델 성과 요약] + 관련 팀 적중률 + 최근 예측 결과 — buildUserMessage 가 실제로
+ * LLM 에 넘기는 수치 전부를 담은 블록. validateCalibrationHint 의 injectionText 로도
+ * 재사용 (cycle 2636) — buildCalibrationContextBlock(도메인 hint: 파크팩터/시즌/윈도우
+ * 일수 등 decorative 숫자) 는 의도적으로 제외한다. buildInjectionText 의 "[도메인 컨텍스트]"
+ * 제외 근거(주석 참조, validator.ts:475)와 동일 — decorative 숫자가 arithmetic
+ * derivative pool 에 섞이면 우연히 실제 환각 숫자와 일치해 놓칠 위험.
+ */
+function buildStatsBlock(
   homeTeam: TeamCode,
   awayTeam: TeamCode,
-  history: PredictionHistory,
-  today: Date = new Date()
+  history: PredictionHistory
 ): string {
   const homeName = KBO_TEAMS[homeTeam].name;
   const awayName = KBO_TEAMS[awayTeam].name;
 
-  let msg = `${buildCalibrationContextBlock(homeTeam, awayTeam, today)}\n\n`;
-  msg += `오늘 경기: ${awayName} @ ${homeName}\n\n`;
-
-  msg += `[모델 성과 요약]\n`;
+  let msg = `[모델 성과 요약]\n`;
   msg += `총 예측: ${history.totalPredictions}건\n`;
   msg += `적중: ${history.correctPredictions}건 (${history.totalPredictions > 0 ? Math.round(history.correctPredictions / history.totalPredictions * 100) : 0}%)\n`;
 
@@ -106,6 +117,21 @@ function buildUserMessage(
     }
   }
 
+  return msg;
+}
+
+function buildUserMessage(
+  homeTeam: TeamCode,
+  awayTeam: TeamCode,
+  history: PredictionHistory,
+  today: Date = new Date()
+): string {
+  const homeName = KBO_TEAMS[homeTeam].name;
+  const awayName = KBO_TEAMS[awayTeam].name;
+
+  let msg = `${buildCalibrationContextBlock(homeTeam, awayTeam, today)}\n\n`;
+  msg += `오늘 경기: ${awayName} @ ${homeName}\n\n`;
+  msg += buildStatsBlock(homeTeam, awayTeam, history);
   msg += '\n이 데이터를 바탕으로 오늘 경기 예측에 적용할 보정 힌트를 제공하세요.';
   return msg;
 }
@@ -146,6 +172,11 @@ export function parseResponse(text: string, homeTeam: TeamCode, awayTeam: TeamCo
  *
  * retro.ts (agent_memories 학습) 와 분리.
  * 본 에이전트는 단발 보정값 산출만 담당 — DB write X.
+ *
+ * Validator Layer 1 (cycle 2636): recentBias/teamSpecific/modelWeakness 는
+ * /analysis/game/[id] 페이지에 그대로 노출되는 사용자 가시 텍스트인데도 team-agent /
+ * judge-agent 와 달리 검증이 전혀 없던 갭 — validateCalibrationHint 로 hallucinated
+ * number / banned phrase 검증 후 위반 부분만 mask (judge-agent 와 동일, 전체 reject X).
  */
 export async function runCalibrationAgent(
   homeTeam: TeamCode,
@@ -164,15 +195,52 @@ export async function runCalibrationAgent(
     };
   }
 
-  return callLLM<CalibrationHint>(
+  const userMessage = buildUserMessage(homeTeam, awayTeam, history);
+  const result = await callLLM<CalibrationHint>(
     {
       model: 'haiku',
       systemPrompt: SYSTEM_PROMPT,
-      userMessage: buildUserMessage(homeTeam, awayTeam, history),
+      userMessage,
       maxTokens: LLM_MAX_TOKENS_CALIBRATION,
     },
     (text) => parseResponse(text, homeTeam, awayTeam)
   );
+
+  if (!result.success || !result.data) return result;
+
+  const outputText = [result.data.recentBias, result.data.teamSpecific, result.data.modelWeakness]
+    .filter((s): s is string => Boolean(s))
+    .join(' ');
+  if (!outputText) return result;
+
+  const mode = resolveValidationMode();
+  const statsBlock = buildStatsBlock(homeTeam, awayTeam, history);
+  const validation = validateCalibrationHint(outputText, statsBlock, mode);
+
+  void notifyValidationViolations(validation, { agent: 'calibration', gameId: null, backend: result.model });
+
+  if (validation.violations.length > 0) {
+    logValidatorEvent({
+      gameId: null,
+      teamCode: 'CAL',
+      agent: 'calibration',
+      backend: result.model,
+      passed: validation.ok,
+      violations: validation.violations,
+    }).catch((e) => console.warn('[validator_logs] unexpected error:', errMsg(e)));
+  }
+
+  if (validation.violations.length === 0) return result;
+
+  return {
+    ...result,
+    data: {
+      ...result.data,
+      recentBias: result.data.recentBias ? maskViolatedReasoning(result.data.recentBias, validation.violations) : null,
+      teamSpecific: result.data.teamSpecific ? maskViolatedReasoning(result.data.teamSpecific, validation.violations) : null,
+      modelWeakness: result.data.modelWeakness ? maskViolatedReasoning(result.data.modelWeakness, validation.violations) : null,
+    },
+  };
 }
 
 export type { PredictionHistory };

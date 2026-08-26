@@ -9,6 +9,7 @@ import {
   buildInjectionText,
   resolveValidationMode,
   validateJudgeReasoning,
+  validateCalibrationHint,
   maskViolatedReasoning,
   notifyValidationViolations,
   validateFactorAttribution,
@@ -982,6 +983,39 @@ describe('validateFactorAttribution', () => {
 // cycle 70 — annotateLowWeightFactorAttribution 제거.
 // 사용자 가시 judgeReasoning leak 차단 (dev 용어 factor=foo weight=10% threshold 8%).
 // attribution warning 은 Sentry capture (notifyValidationViolations) 만.
+
+// ============================================
+// cycle 2636 — validateCalibrationHint (calibration-agent 는 team/judge-agent 와 달리
+// 전혀 검증 없이 지나가던 갭). GameContext 없이 순수 텍스트만 받으므로
+// checkInventedPlayerNames/checkClaimTypes 는 재사용 X.
+// ============================================
+describe('validateCalibrationHint', () => {
+  const injection = '총 예측: 12건\n적중: 7건 (58%)\n홈팀 승 예측 적중률: 60%';
+
+  it('주입 데이터 안 숫자만 인용 → ok=true', () => {
+    const result = validateCalibrationHint('최근 12건 중 7건 적중(58%).', injection, 'strict');
+    expect(result.ok).toBe(true);
+    expect(result.violations).toHaveLength(0);
+  });
+
+  it('환각 숫자 3개+ → ok=false hard', () => {
+    const result = validateCalibrationHint('최근 99건 중 88건 적중(77%).', injection, 'strict');
+    expect(result.ok).toBe(false);
+    expect(
+      result.violations.some((v) => v.type === 'hallucinated_number' && v.severity === 'hard')
+    ).toBe(true);
+  });
+
+  it('금칙어 → warn 위반', () => {
+    const result = validateCalibrationHint('LG 왕조의 시대가 도래한다.', injection, 'strict');
+    expect(result.violations.some((v) => v.type === 'banned_phrase')).toBe(true);
+  });
+
+  it('선수명 발명은 체크 대상 아님 (GameContext 부재)', () => {
+    const result = validateCalibrationHint('김철수가 최근 부진하다.', injection, 'strict');
+    expect(result.violations.some((v) => v.type === 'invented_player_name')).toBe(false);
+  });
+});
 
 // ============================================
 // cycle 132 — KOREAN_FAMILY_NAMES 회귀 가드 (silent drift fix)

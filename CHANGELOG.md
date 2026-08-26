@@ -1,3 +1,15 @@
+## v0.5.62.160 — 2026-08-26 (cycle 2636, review-code(heavy): calibration-agent 사용자 가시 텍스트 환각검증 전무 gap 수정)
+
+### fix: calibration-agent 의 recentBias/teamSpecific/modelWeakness — team/judge-agent 와 달리 검증 없이 그대로 사용자 노출되던 gap 수정
+
+- 진단: open issue 0, approved plan 0/23. 직전8 distinct=4(lotto/review-code/explore-idea/fix-incident) — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 21/20 이미 전 사이클 점검 완료, op-analysis 10/25, info-arch 18/30, lotto 8/30). 직전 retro 가 명시 추천한 `retro.ts`/`llm.ts` 전문 재확인 — 양쪽 모두 이미 견고(retro.ts 는 assertSelectOk/assertWriteOk 로 silent fail 차단 완료, llm.ts 는 cycle 2634 off-by-one fix 이후 정상). 인접 파일 확인 중 `calibration-agent.ts` 가 team-agent(`validateTeamArgument`)/judge-agent(`validateJudgeReasoning`) 와 달리 validator 호출이 전혀 없는 gap 발견.
+- `CalibrationHint.recentBias`/`teamSpecific`/`modelWeakness` 는 `/analysis/game/[id]` 페이지와 `DebateTimeline` 컴포넌트에 그대로 렌더링되는 사용자 가시 자유 텍스트인데, LLM 이 실제 주입받은 `PredictionHistory` 수치(총 예측/적중/팀별 적중률)와 다른 숫자를 지어내도 아무 검증 없이 그대로 저장·노출됨 — team/judge-agent 3곳에 이미 존재하는 injection-validation family (cycle 2630~2632) 와 동일 계열의 미커버 4번째 지점.
+- 수정: `validator.ts`에 `validateCalibrationHint(outputText, injectionText, mode)` 신규 export — `checkHallucinatedNumbers`+`checkBannedPhrases` 재사용(GameContext/로스터 없어 `checkInventedPlayerNames`/`checkClaimTypes` 는 validateJudgeReasoning 과 동일 근거로 skip). `ValidationMeta.agent`/`ValidatorAgent` 유니온에 `'calibration'` 추가. `calibration-agent.ts`에 `buildStatsBlock()` 분리(`buildUserMessage`의 `[모델 성과 요약]` 이하 수치 섹션만) — injectionText 로 이 블록만 사용, 도메인 컨텍스트(파크팩터/시즌 등 decorative 숫자, buildInjectionText 가 이미 배제한 것과 동일 이유)는 제외해 arithmetic-derivative false negative 회피(최초 구현에서 buildUserMessage 전체를 넘겨 테스트 1건이 실제로 이 false negative 를 재현 — 발견 즉시 분리). `runCalibrationAgent`가 위반 시 judge-agent 와 동일 패턴(전체 reject 아닌 `maskViolatedReasoning` 필드별 마스킹)으로 처리, `adjustmentSuggestion`(이미 ±5% 클램프)은 그대로 유지.
+- `agents-validator.test.ts`에 `validateCalibrationHint` 단위 테스트 4건, 신규 `agents-calibration-validation.test.ts`에 `runCalibrationAgent` 통합 마스킹 테스트 4건(환각숫자 마스킹/정상 통과/금칙어 필드별 마스킹/텍스트 필드 전부 null 시 skip).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 92 files/1207 tests(+9) green + `pnpm lint` clean. version 159→160 3-way sync(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+다음 사이클 추천 = injection-validation family 사실상 전 지점(team/judge/postview/calibration 4곳) 소진 — polish-ui/info-architecture-review/op-analysis 다양성 전환 우선 검토 권장.
+
 ## v0.5.62.159 — 2026-08-26 (cycle 2634, review-code(heavy): 529 Overloaded 재시도 window 실측 17.5s ≠ 주석 주장 37.5s off-by-one 수정)
 
 ### fix: 529 Overloaded 재시도 attempts 가 backoff 배열 길이와 같아 마지막 backoff(20000ms)가 실제 sleep 에 한 번도 안 쓰이던 off-by-one 수정

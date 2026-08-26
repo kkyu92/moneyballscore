@@ -593,6 +593,42 @@ export function validateJudgeReasoning(
 }
 
 // ============================================
+// validateCalibrationHint
+// ============================================
+//
+// team-agent / judge-agent 는 이미 validator 통과하지만 calibration-agent 는 처음부터
+// 전혀 검증 안 받고 지나가던 갭 (cycle 2636 발견). CalibrationHint.recentBias /
+// teamSpecific / modelWeakness 는 apps/moneyball 의 /analysis/game/[id] 페이지와
+// DebateTimeline 컴포넌트에 그대로 노출되는 사용자 가시 자유 텍스트인데도, LLM 이 실제
+// 주입받은 PredictionHistory 수치(총 예측 수/적중률/팀별 적중률 등)와 다른 숫자를
+// 지어내도 판사/팀 에이전트와 달리 아무 것도 걷러내지 못했다.
+//
+// calibration-agent 는 GameContext(로스터) 를 안 받으므로 checkInventedPlayerNames /
+// checkClaimTypes 는 재사용 불가 — validateJudgeReasoning 이 자유 텍스트 reasoning 에
+// claim-type 체크를 skip 하는 것과 동일 근거로 숫자·금칙어 체크만 재사용한다.
+// injectionText = calibration-agent 의 buildStatsBlock() (PredictionHistory 수치 전용).
+// buildUserMessage() 전체(도메인 컨텍스트 hint 포함)를 넘기면 안 된다 — 파크팩터/시즌
+// 등 decorative 숫자가 arithmetic derivative pool 에 섞여 실제 환각 숫자를 놓치는
+// false negative 발생(buildInjectionText 의 "[도메인 컨텍스트]" 제외 근거와 동일, 위 참조).
+export function validateCalibrationHint(
+  outputText: string,
+  injectionText: string,
+  mode: ValidationMode = 'strict'
+): ValidationResult {
+  const rawViolations: Violation[] = [
+    ...checkHallucinatedNumbers(outputText, injectionText),
+    ...checkBannedPhrases(outputText),
+  ];
+
+  const hardCount = rawViolations.filter((v) => v.severity === 'hard').length;
+  const warnCount = rawViolations.filter((v) => v.severity === 'warn').length;
+
+  const warnLimit = mode === 'lenient' ? WARN_LIMIT_LENIENT : WARN_LIMIT;
+  const ok = hardCount <= HARD_LIMIT && warnCount <= warnLimit;
+  return { ok, violations: rawViolations };
+}
+
+// ============================================
 // maskViolatedReasoning
 // ============================================
 //
@@ -697,7 +733,7 @@ export function validateFactorAttribution(
 // Sentry 미설치 환경 (test / 로컬 ollama) 에선 자동 no-op.
 
 export interface ValidationMeta {
-  agent: 'team' | 'judge';
+  agent: 'team' | 'judge' | 'calibration';
   gameId: string | number | null;
   backend?: string;
 }
