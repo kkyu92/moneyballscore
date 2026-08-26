@@ -1,4 +1,10 @@
 
+## cycle 2649 (2026-08-26) — RETRO-ONLY
+- review-code(heavy): 직전8 distinct=4(2-chain lock 미충족), fix-incident/op-analysis/lotto gap 전부 여유, explore-idea 유일 후보(plan #29 로그인+커뮤니티)는 cycle 2633 checkpoint 16사이클 전 재확인 완료라 반복 재측정 회피 → review-code(heavy) dominance-positive streak 계속.
+- `convergenceRecord.ts`(831줄, KBO/MLB 수렴픽 통계) 신규 정독 — fetch/Streak/BestStreak/TeamStats/HomeAwaySplit/DayOfWeekSplit 함수 + 6개 caller 페이지(analysis/seasons/teams/reviews/monthly/weekly) 호출 인자 순서 전부 대조. drift 0건.
+- `getFullYear()` 잔여 grep(10곳) — 4곳 이미 KST-safe 확인, 나머지 6곳(daily.ts CURRENT_SEASON/snapshot-pitchers.ts/sync-batter-stats.ts/retro.ts/API route 2개)은 season 기본값 용도라 Dec31→Jan1 UTC/KST 경계가 KBO 비시즌(게임 없음)이라 실질 영향 0 — hypothetical-scenario fix 회피(`feedback_data_only_claims` 원칙), 범위 제외.
+- 코드 변경 없음(clean audit). 다음 추천: fix-incident(gap 5/20) 또는 review-code(heavy) 계속(mlb-pipeline.ts/validator.ts 후보) — op-analysis(gap 13/25)/lotto(gap 22/30) 여유
+
 ## cycle 2648 (2026-08-26) — RETRO-ONLY
 - info-architecture-review: gap trigger 도달(마지막 발화 cycle 2618, 30사이클 경과). open issue 0, approved plan 0/29, 2-chain lock 미충족(직전8 distinct=3).
 - 신규 라우트 0건(`git log bb6423b1..HEAD --diff-filter=A -- '**/page.tsx'`), breadcrumb 누락 18건 전부 `ia-hierarchy.md` 기존 문서 exclusion 과 일치, sitemap 83 vs page.tsx 105 격차도 동적세그먼트/noindex 로 기존 패턴과 동일 — 신규 drift 0건. checkpoint 문서만 박제(`docs/design/ia-2026-08-26-cycle-2648-30-cycle-gap-checkpoint.md`).
