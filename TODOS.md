@@ -1,3 +1,13 @@
+## 🔁 RETRO-ONLY — operational-analysis(lite): CE/비CE 재측정 10회 연속 동일 수치 (cycle 2637, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8 distinct=3(review-code/explore-idea/fix-incident) — 2-chain lock 미충족. 직전15 saturation count=11/12(review-code+fix-incident+polish-ui+info-arch) — 임계 근접이나 미충족. 직전 2사이클(2635/2636) retro 가 명시적으로 diversity 권장(injection-validation family 소진) — polish-ui는 DESIGN.md 당일 갱신(negative), info-arch는 gap 19/30(미도달, cycle 2618 checkpoint "IA 충분" 재확정 직후) 대비 op-analysis 는 gap 11/25 지만 데이터 신선도 재확인 가치 있어 lite 선택.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=341 (CE n=294 / 비CE n=47), CE 53.4%(157/294) / 비CE 63.8%(30/47) → 격차 10.4pp. **cycle 2608 수치와 완전 동일** — CE n 증가 0, 비CE 완전 동결 지속(마지막 예측 2026-07-01, 56일+ 경과). LLM 부가가치 우세 결론 10회 연속 재확인. CREDIT_EXHAUSTED 상태 변화 없음(사용자 크레딧 재충전 미이행).
+
+코드 변경 없음, CLAUDE.md 가중치 섹션에 재측정 결과 한 줄 append(RETRO-ONLY). 다음 사이클 추천 = review-code(heavy) 신규 axis 탐색(injection-validation family 소진 후 미탐색 대형 파일: `packages/shared/src/index.ts` 3448줄/`analysis/page.tsx` 2833줄/`daily.ts` 1622줄) 또는 info-architecture-review(gap 20/30 근접).
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): calibration-agent 사용자 가시 텍스트 환각검증 전무 gap 수정 (cycle 2636, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8 distinct=4(lotto/review-code/explore-idea/fix-incident) — 2-chain lock 미충족. gap trigger 전부 미도달. 직전 retro(cycle 2632) 추천 `retro.ts`/`llm.ts` 전문 재확인 — 양쪽 이미 견고, 신규 버그 없음. 인접 파일 `calibration-agent.ts` 확인 중 team/judge-agent 와 달리 validator 호출이 전혀 없는 gap 발견.
