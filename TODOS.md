@@ -1,4 +1,12 @@
 
+## cycle 2653 (2026-08-26) — SUCCESS
+
+- review-code(heavy): 진단 open issue 0, approved plan 0/23(전부 completed/archived). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 16/25, info-arch 5/30, lotto 25/30). 직전8 distinct=5 — 2-chain lock 미충족. lotto(8/29 픽 이미 shipped + 데이터 3일 이내 신선)/polish-ui(text-[Npx] 잔존 13건 전부 테스트파일/globals.css 정의부라 실질 소진) 둘 다 실행 가치 부재 확인 → cycle 2634 retro 가 명시 추천한 carry-over("일반 경로 MAX_ATTEMPTS/llm-deepseek.ts/llm-ollama.ts 동일 off-by-one 확인") 19사이클 미처리 발견, 채택.
+- `llm.ts` + `llm-deepseek.ts` 양쪽 `MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length`(3) 이 cycle 2634 가 529 경로에 고친 것과 동일 off-by-one — 마지막 backoff(2000ms) 가 실제 sleep 에 안 쓰이고 3번째 시도에서 즉시 실패, 파일 최상단 주석/`packages/shared/src/index.ts` 문서화 주석도 3개 backoff 전량 사용을 전제로 서술돼 있었음(실제 2개만 사용). `llm-ollama.ts` 는 LLM_RETRY_BACKOFF_MS 미사용(재시도 로직 자체 없음) — 스코프 제외.
+- 양쪽 `MAX_ATTEMPTS = length+1`(4)로 fencepost 정정. 주석 갱신. `agents-llm.test.ts` 회귀 가드 신규(cycle 2653: 일반 5xx 경로 backoff 합 500+1000+2000=3500ms 전량 소비 직접 검증).
+- `pnpm --filter kbo-data exec tsc --noEmit` + `--filter shared` + `--filter moneyball` clean. vitest kbo-data 92 files/1215 tests(+16, 신규 1) green + lint clean + pre-push hook 통과. version 167→168. commit 6545fe33.
+- 다음 추천: operational-analysis(gap 17/25 근접) 또는 fix-incident(gap 9/20 여유) — review-code(heavy) 직전9 중 5회 dominance, 구체 carry-over 소진됐으니 다양성 전환 검토.
+
 ## cycle 2652 (2026-08-26) — RETRO-ONLY
 
 - review-code(heavy): 진단 open issue 0, approved plan 0/23(전부 completed/archived/deferred). 2nd defense(cycle 2651 retro commit 존재) OK. gap trigger 전부 미도달(fix-incident 7/20, op-analysis 15/25, info-arch 4/30, lotto 24/30). 직전8 distinct=5(polish-ui/fix-incident/review-code/info-arch/skill-evolution) — 2-chain lock 미충족. `gh run list` CI 전부 green, `pipeline_runs` 최근 8건 전부 status=success + errors=[] (window_too_early skip 만 정상 사유). explore-idea saturation(13/15) 충족되나 유일 후보 plan #29(로그인+커뮤니티)는 cycle 2624 재확인 negative(무성장 지속) — 반복 재측정 회피.
