@@ -124,6 +124,46 @@ describe('shouldAlertSilentDrift', () => {
   });
 });
 
+// cycle 2645 fix-incident — MLB scrape mode total fetch 실패 (gamesFound=0 + errors 존재)
+// 감지 gap. mlb_fancy_scrape FanGraphs 403 3일 연속 (2026-08-19~21) 이 기존 로직으론
+// gamesFound<=0 조기 return 에 걸려 alert 대상에서 완전히 빠짐 — Sentry warning 만
+// 존재, Telegram 사용자 가시 채널 부재였던 실제 사례.
+describe('shouldAlertSilentDrift — MLB scrape mode total fetch failure (cycle 2645)', () => {
+  it('mlb_fancy_scrape + gamesFound=0 + errors 존재 → alert (total fetch failure, 403 등)', () => {
+    expect(
+      shouldAlertSilentDrift(
+        makeMeta({ mode: 'mlb_fancy_scrape', gamesFound: 0, errors: ['fetchFangraphsMlbTeams: fangraphs HTTP 403'] }),
+      ),
+    ).toBe(true);
+  });
+
+  it('mlb_statsapi_scrape + gamesFound=0 + errors 존재 → alert (동일 패턴, 다른 mode)', () => {
+    expect(
+      shouldAlertSilentDrift(
+        makeMeta({ mode: 'mlb_statsapi_scrape', gamesFound: 0, errors: ['fetchMlbSchedule: timeout'] }),
+      ),
+    ).toBe(true);
+  });
+
+  it('mlb_fancy_scrape + gamesFound=0 + errors=[] (teams.length===0, 정상 빈 응답) → alert 안 함', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'mlb_fancy_scrape', gamesFound: 0, errors: [] })),
+    ).toBe(false);
+  });
+
+  it('mlb_fancy_scrape + gamesFound>0 (정상 스크레이프) → 기존 rowsInserted=0 분기로 처리 (predictionsGenerated=0 → alert)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'mlb_fancy_scrape', gamesFound: 3, predictionsGenerated: 0, errors: [] })),
+    ).toBe(true);
+  });
+
+  it('non-scrape mode (predict_final) + gamesFound=0 + errors 존재해도 → alert 안 함 (scope 한정, 기존 동작 보존)', () => {
+    expect(
+      shouldAlertSilentDrift(makeMeta({ mode: 'predict_final', gamesFound: 0, errors: ['some error'] })),
+    ).toBe(false);
+  });
+});
+
 describe('shouldConfidenceFlatAlert — P2 aggregate signal', () => {
   it('P2 패턴: 모든 confidence 0.3 flat → alert (spread=0)', () => {
     expect(shouldConfidenceFlatAlert([0.3, 0.3, 0.3, 0.3, 0.3])).toBe(true);

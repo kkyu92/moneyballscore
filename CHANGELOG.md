@@ -1,3 +1,14 @@
+## v0.5.62.164 — 2026-08-26 (cycle 2645, fix-incident: mlb_fancy_scrape total fetch 실패 silent drift alert gap 수정)
+
+### fix: MLB scrape mode total fetch 실패 (gamesFound=0) 시 silent drift alert 미발화 gap
+
+- 진단: fix-incident 마지막 발화(cycle 2615) 이후 gap 30/20 — 장기 미발화 주기 보정 trigger 충족. `pipeline_runs` 최근 7일 error rate 직접 조회 — `mlb_fancy_scrape` mode 가 2026-08-19~21 3일 연속 `fetchFangraphsMlbTeams: fangraphs HTTP 403` 에러(games_found=0, predictions=0), 08-22부터 4일 연속 자동 self-recovery.
+- 서브에이전트 조사 — 근본 원인은 이미 commit 1936f6a4(cycle 2278, User-Agent 헤더 추가)로 해결된 이슈의 잔여 tail이라 재발 코드 fix 불필요. 대신 조사 중 진짜 gap 발견: `silent-drift-alert.ts`의 `shouldAlertSilentDrift`가 최상단에서 `gamesFound<=0 → return false` 조기 리턴 — MLB scrape mode가 fetch 자체에서 throw해 `gamesFound:0 + errors:[...]`로 리턴하는 total 실패 케이스가 이 조기 리턴에 걸려 alert 대상에서 완전히 빠짐. 실제 발화 채널은 `fetchLeaderRows` 내부 저심각도 Sentry warning뿐 — Telegram 사용자 가시 채널 부재로, 3일 연속 실패가 DB 밖에서는 안 보이던 상태.
+- "경기 없는 정상 날"(teams.length===0, errors=[]) 과는 `errors.length>0` 조건으로 구분 — 정상 0건 날은 영향 없음. `MLB_SCRAPE_MODES.has(mode) && gamesFound===0 && errors.length>0 → alert` 분기 추가. 테스트 5건 신규(`mlb_fancy_scrape`/`mlb_statsapi_scrape` total 실패 alert, 정상 빈 응답 미발화, 기존 rowsInserted=0 분기 보존, non-scrape mode 범위 한정 확인).
+- `pnpm --filter kbo-data exec tsc --noEmit` clean + vitest 92 files/1214 tests(+15) green + lint clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+
+
 ## v0.5.62.163 — 2026-08-26 (cycle 2644, polish-ui: accuracy 요일별 페이지 일요일 상한 배지 미토큰화 text-[8px] 정정)
 
 ### fix: 요일별 적중률 "일요일 상한" 배지 폰트크기 DESIGN.md 타이포 스케일 미토큰화

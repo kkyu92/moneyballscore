@@ -76,6 +76,16 @@ const MLB_SCRAPE_MODES = new Set<string>([
 ]);
 
 export function shouldAlertSilentDrift(meta: SilentDriftAlertMeta): boolean {
+  // cycle 2645 fix-incident — MLB scrape mode 가 fetch 자체에서 throw 하면
+  // gamesFound=0 + errors 채워진 채 리턴 (mlb-pipeline.ts runFancyScrape 등).
+  // 아래 공통 gamesFound<=0 조기 return 에 걸려 total fetch 실패가 alert 대상에서
+  // 완전히 빠짐 (mlb_fancy_scrape FanGraphs 403 3일 연속, Sentry warning 만 존재,
+  // Telegram 채널 부재로 사용자 가시 X). "경기 없는 정상 날" (teams.length===0,
+  // errors=[]) 과는 errors.length 로 구분 — 정상 0일은 errors 비어있어 여기 안 걸림.
+  if (MLB_SCRAPE_MODES.has(meta.mode) && meta.gamesFound === 0 && meta.errors.length > 0) {
+    return true;
+  }
+
   if (meta.gamesFound <= 0) return false;
 
   if (meta.mode === 'predict_final') {
