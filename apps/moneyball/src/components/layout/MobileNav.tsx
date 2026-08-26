@@ -100,7 +100,7 @@ export function MobileNav() {
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="opacity-60 transition-transform duration-150 group-data-[state=open]:rotate-180"
+                        className="opacity-60 transition-transform duration-200 group-data-[state=open]:rotate-180"
                         aria-hidden
                       >
                         <polyline points="6 9 12 15 18 9" />

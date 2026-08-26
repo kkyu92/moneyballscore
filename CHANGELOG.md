@@ -1,3 +1,11 @@
+## v0.5.62.147 — 2026-08-26 (cycle 2610, review-code(heavy): MobileNav 아코디언 chevron duration-150 → duration-200 motion 토큰 역할 정렬)
+
+### fix(design): `MobileNav.tsx` 아코디언 disclosure chevron duration 정렬
+
+- 진단: open issue 0, approved plan 0/22(전수 재확인, plan #29 회원인증/커뮤니티는 postseason 접근 또는 참여≥10 트리거 미충족 — 재확인 스킵, plan 자체 명시 원칙). 직전8(2602-2609) distinct=3(review-code 6 + operational-analysis 1 + polish-ui 1) — 2-chain lock 미충족. fix-incident negative(`gh run list --limit 15` 전부 success/skipped). op-analysis gap 2(2608 직발화), info-arch gap 22/30, lotto gap 12/30(다음 회차 50세트 이미 8/23 박제) — 전부 미도달/최근 처리. design-system negative(DESIGN.md 당일 갱신). explore-idea saturation 10/15 미충족. review-code(heavy) 재진입 — 기존 spacing/border-radius/shadow/focus-ring/typography 축 재점검(gap-*, z-[], ring-*, rounded-md 잔존, hover:shadow 변형) 전부 clean(drift 없음, twin 구조 확인) 후 motion duration 축 신규 진입.
+- 발견: `globals.css`+DESIGN.md motion 토큰(`--motion-fast:150ms` nav hover / `--motion-medium:200ms` dropdown open) 대비, 사이트 전체 hardcoded `duration-150`/`duration-200` literal 2건뿐 — desktop nav(`navigation-menu.tsx`, shadcn/radix vendor) chevron 은 `duration-200`(dropdown open 역할과 정합), 모바일 아코디언(`MobileNav.tsx` `Accordion.Trigger` chevron)은 동일한 "열림/닫힘 토글 disclosure indicator" 역할이면서 `duration-150`(nav hover 용도) 사용 — 역할 불일치.
+- 실행: `MobileNav.tsx` chevron `duration-150` → `duration-200`. DESIGN.md Motion 섹션에 "Disclosure chevron rotate" 항목 추가(desktop/모바일 공통 역할 명시). `silent-drift-cycle-2610.test.ts` 신규 2건(chevron duration-200 assert + duration-150 잔존 0건 grep). `pnpm --filter moneyball exec tsc --noEmit` clean + vitest 560 files/4448 tests(+1/+2) green + lint clean. version 146→147 3-way sync. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.146 — 2026-08-26 (cycle 2609, polish-ui: AgentVoteCard away-color 하드코딩 hex → var(--color-away) 단일 source 정렬)
 
 ### fix(design): `AgentVoteCard.tsx` awayColor fallback 리터럴 hex 중복 제거

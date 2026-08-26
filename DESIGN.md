@@ -103,6 +103,7 @@
   - 테마 전환: `transition: background var(--motion-slow), color var(--motion-slow)`
   - 스코어 변경: 없음 (SWR 리렌더 시 즉시 반영, 의도적)
   - **PredictReveal count-up**: 0 → win prob, `var(--motion-medium)` `var(--ease-out)`, requestAnimationFrame 기반
+  - **Disclosure chevron rotate** (desktop nav dropdown + 모바일 아코디언): `duration-200`(`--motion-medium`, "dropdown open" 역할) — cycle 2610 review-code(heavy) 에서 `MobileNav.tsx` 아코디언 chevron 이 `duration-150`(nav hover 용도)을 쓰던 걸 desktop `navigation-menu.tsx` 와 동일 역할로 정렬
 - **Reduced motion 가드**: `@media (prefers-reduced-motion: reduce)` → `--motion-*: 0ms` + 전역 `animation/transition-duration: 0.01ms !important`. PredictReveal 은 `matchMedia` 체크 후 즉시 target 표시.
 
 ## Contrast (WCAG)
