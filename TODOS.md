@@ -1,3 +1,15 @@
+## ✅ SUCCESS — operational-analysis(heavy) CE cohort 9회 연속 재확인 (cycle 2608, 2026-08-26)
+
+진단: open issue 0, approved plan 0/22 (전부 completed/archived/tier4). 직전8(2600-2607) chain_selected = polish-ui 1 + review-code 6 (2601 skill-evolution forced, cycle JSON 파일 부재) → distinct=2 → **2-chain alternation lock 탐지** (review-code/polish-ui 잠금). fix-incident gap 20+/20 재점검(`gh run list --limit 15` + 최근 debug commit 5건 확인) — 전부 CI green/deploy dispatch skipped, 실제 incident 없음 negative. explore-idea saturation 재확인 negative(TODOS Next-Up 없음, approved plan 0건). design-system 최근 발화(cycle 2599, 9 cycle 전) — 신규 trigger 없음. op-analysis gap 22/25(직전 발화 cycle 2586) 근접 미도달이나 lock redirect 후보 중 가장 stale.
+
+발견: lock 으로 review-code/polish-ui 제외 후 남은 pool 재평가 — op-analysis 가 gap 22/25 로 가장 근접. `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행: 전체 n=341 (CE n=294 / 비CE n=47, +4 CE only — 비CE 여전히 완전 동결, 마지막 예측 2026-07-01 이후 56일+ 경과). CE 53.4%(157/294) / 비CE 63.8%(30/47) → 격차 10.4pp 그대로. overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 → LLM 부가가치 우세 결론 9회 연속 재확인(cycle 2309→2361→2448→2556→2586→2608). CREDIT_EXHAUSTED·비CE 동결 상태 변화 없음.
+
+실행: CLAUDE.md 가중치 섹션에 cycle 2608 재측정 문단 append(기존 컨벤션). 코드 변경 없음(측정 전용, DB 조회만) — 회귀 테스트 불필요. 단일 논리 단위 → 직접 main commit+push(R4/R7, pre-push hook lint+type-check 통과).
+
+다음 사이클 추천 = op-analysis gap 25 재도달(2609) 또는 info-arch(gap 22/30)/lotto(gap 11/30) 자연 대기, 또는 review-code(heavy)/polish-ui lock 해제(cooldown N=1) 후 재개.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy) 카드 padding p-6/p-3 tier DESIGN.md 문서화 (cycle 2607, 2026-08-26)
 
 진단: open issue 0, approved plan 0/22. fix-incident gap 20/20 재점검 negative(`gh run list` 전부 success/skipped, 실제 incident 없음). op-analysis gap 21/25, info-arch gap 21/30, lotto gap 9/30 미도달. 직전8(2599-2606) distinct=3, lock 없음. cycle 2606 retro가 명시 추천한 p-6(raw grep 90건)/p-3(raw grep 79건) 사용 맥락 후속 검토.
