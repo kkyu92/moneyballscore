@@ -1,3 +1,19 @@
+## ✅ SUCCESS — review-code(heavy): postview judge 환각검증 pre_game 전용 주입블록 재사용 gap 수정 (cycle 2632, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=5). gap trigger 전부 미도달(fix-incident 17/20, op-analysis 6/25, info-arch 14/30, lotto 4/30). breadcrumb 미커버 18건 전수 재확인 — community(noindex 플레이스홀더)/reviews monthly·weekly 4종(redirect-only stub)/debug/*(내부전용) 전부 의도된 제외, info-arch negative. DESIGN.md 당일 갱신, polish-ui negative. 직전 3사이클 모두 diversity 추천했으나 재확인 negative로 dominance-positive streak 룰(cycle 135) 따라 review-code(heavy) 계속.
+
+`validateJudgeReasoning` 전체 호출부 3곳 확인 중 `postview.ts:432`가 rivalryBlock 경로와 별개 gap 보유 발견: `buildJudgePostviewMessage`는 judge에게 actual 스코어/original.homeWinProb%/factorLines 편향값을 직접 노출하지만 `buildInjectionText`는 pre_game 전용이라 이 값들 없음 — 정당 인용해도 환각 오탐(테스트 미커버, 승률%·편향값 대부분 NUMERIC_WHITELIST 미통과 실측 확인).
+
+수정: `buildInjectionText`/`validateJudgeReasoning`에 `extraContext` 신규 인자(rivalryBlock과 별개, postview는 항상 rivalryBlock='' + extraContext 전달). `postview.ts`에 `buildPostviewExtraInjection` 신규 export. `agents-validator.test.ts` 회귀 가드 2건.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `@moneyball/kbo-data` vitest 91 files/1198 tests(+2) green + `pnpm lint` clean. version 157→158 3-way sync. 단일 논리 단위 → 직접 main commit(`286b78ea`)+push(R4/R7).
+
+skill-evolution trigger 5개 전부 미충족 — 진행 정상.
+
+다음 사이클 추천 = 3사이클 연속 negative였던 polish-ui/info-architecture-review 대신 dimension-cycle 또는 explore-idea 재점검, 또는 review-code(heavy) 나머지 대형 파일(postview.ts 496줄 전체 정독 미완, retro.ts/llm.ts) 계속.
+
+---
+
 ## ✅ SUCCESS — review-code(heavy): judge 경로 라이벌리 메모리 환각검증 누락 수정 (cycle 2631, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. gap trigger 전부 미도달(fix-incident 16/20, op-analysis 5/25, info-arch 13/30, lotto 3/30). 2-chain lock 미충족(직전8 distinct=6). polish-ui(DESIGN.md 당일 갱신 negative)/info-architecture-review(breadcrumb 목록 cycle 2618과 동일) 재점검 후 신규 액션 없음 확인, cycle 2630이 명시 추천한 후속 스코프(judge-agent.ts/debate.ts가 rivalryBlock을 team-agent 경유로 흘려받는지) 그대로 진행.
