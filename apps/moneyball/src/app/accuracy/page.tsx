@@ -365,7 +365,7 @@ export default async function AccuracyPage() {
       <header className="bg-gradient-to-r from-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white space-y-1">
         <h1 className="text-2xl font-bold">AI 적중 기록</h1>
         <p className="text-sm text-white/70">
-          MoneyBall Score AI가 얼마나 정확한지 솔직하게 공개합니다. 시즌 내 모든 검증 완료 예측 기준.
+          MoneyBall Score AI가 얼마나 정확한지 솔직하게 공개합니다. 현재 모델 버전의 검증 완료 예측 기준(이전 버전 예측 제외).
         </p>
         {lastUpdated && (
           <p className="text-xs text-white/50">
