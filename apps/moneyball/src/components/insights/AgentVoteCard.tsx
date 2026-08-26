@@ -109,7 +109,7 @@ export function AgentVoteCard({
       <div className="flex items-center gap-2">
         <span
           aria-hidden
-          className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/80 dark:bg-black/30 text-[12px] font-bold border border-white/60 dark:border-white/10"
+          className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/80 dark:bg-black/30 text-2xs font-bold border border-white/60 dark:border-white/10"
         >
           {meta.icon}
         </span>
