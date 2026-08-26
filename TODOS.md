@@ -1,3 +1,15 @@
+## ⚪ RETRO-ONLY — dimension-cycle(acquisition): noindex-vs-sitemap 전체 재감사, 신규 drift 0건 (cycle 2614, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23(전부 completed/superseded/archived/spec_only_deferred). 직전8(2606-2613) distinct=4(review-code 5+polish-ui 1+op-analysis 1+dimension-cycle 1) — 2-chain lock 미충족. fix-incident negative(`gh run list` 전부 success/skipped). op-analysis gap 6/25, info-arch gap 27/30, lotto gap 16/30, design-system negative(당일 갱신) — 전부 미도달. explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 전부 미충족. cycle 2613 자체 추천("acquisition 내 다른 각도(내부링크/canonical URL 정규화)") 따라 진입.
+
+점검: noindex(`robots: {index:false}`) 보유 전 페이지 grep(login/settings/picks/search/community/debug 7종/v2-shadow-monitor/accuracy-shadow/v2-preview/insights 동적 2종) → sitemap.ts 전수 대조 — `/search`(cycle 2579)·`/picks`(cycle 2613) 기존 fix 이후 잔여 모순 0건, 나머지 전부 sitemap 미등록으로 의도된 결과 재확인. insights/[date]·insights/series/[topic] 동적 noindex(invalid date만) 조건과 sitemap의 `listInsightsDates(90)`/`listSeriesTopics()` 동일 source 사용 확인 — drift 가능성 구조적으로 차단됨. canonical alternates 없는 18개 page.tsx 전부 noindex/debug/redirect-shim 페이지로 의도 확인.
+
+결론: acquisition 축 noindex/canonical 정합성 감사 완전 소진 — 신규 실행 가능 항목 없음. 코드 변경 없음.
+
+다음 사이클 추천 = op-analysis/info-arch/lotto 자연 대기(전부 gap 미도달) 또는 review-code(heavy) 신규 축 재탐색 또는 acquisition 내 미탐색 하위 영역(breadcrumb JSON-LD, RSS/sitemap lastmod 정확도).
+
+---
+
 ## ✅ SUCCESS — dimension-cycle(acquisition): /picks sitemap.ts noindex 모순 제거 (cycle 2613, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 직전8(2605-2612) distinct=3(review-code 7+op-analysis 1) — 2-chain lock 미충족. fix-incident negative. op-analysis gap 5/25, info-arch gap 26/30, lotto gap 15/30, design-system negative — 전부 미도달. explore-idea saturation 11/15 미충족. skill-evolution trigger 5개 미충족. cycle 2612 retro 명시 추천("review-code 11축 소진, dimension-cycle acquisition 심화 검토") 따라 진입.
