@@ -1,4 +1,11 @@
 
+## cycle 2652 (2026-08-26) — RETRO-ONLY
+
+- review-code(heavy): 진단 open issue 0, approved plan 0/23(전부 completed/archived/deferred). 2nd defense(cycle 2651 retro commit 존재) OK. gap trigger 전부 미도달(fix-incident 7/20, op-analysis 15/25, info-arch 4/30, lotto 24/30). 직전8 distinct=5(polish-ui/fix-incident/review-code/info-arch/skill-evolution) — 2-chain lock 미충족. `gh run list` CI 전부 green, `pipeline_runs` 최근 8건 전부 status=success + errors=[] (window_too_early skip 만 정상 사유). explore-idea saturation(13/15) 충족되나 유일 후보 plan #29(로그인+커뮤니티)는 cycle 2624 재확인 negative(무성장 지속) — 반복 재측정 회피.
+- `daily.ts`(1629줄, 파이프라인 최대 단일 파일) 헤더~전체 주석 전수 grep 검토: `DEFAULT_WEIGHTS`/`HOME_ADVANTAGE`(0.015)/`SHADOW_V20_WEIGHTS`(elo 0.13/bullpen_fip 0.14/recent_form 0.13) 수치 CLAUDE.md·`packages/shared/src/index.ts` 와 완전 일치. `credit_exhausted_sent` dedup flag(cycle 2640 fix) 실 코드 존재 재확인. `calibration-agent.ts:218` 에서 `validateCalibrationHint`(cycle 2636 신규) 실제 호출 확인 — injection-validation family(team/judge/postview/calibration) 4 지점 전부 gap 0 재확인.
+- 신규 drift 0건 — clean audit, 코드 변경 없음.
+- 다음 추천: review-code dominance 지속 관찰 또는 lotto(gap 24/30, 근접) 다양성 전환 우선 검토.
+
 ## cycle 2651 (2026-08-26) — SUCCESS (skill-evolution 74회 자가 진화, phase 40)
 
 - skill-evolution(forced): cycle 2650 마커("2650: ee641cdc...") 강제 발화. `/office-hours` skip (자동 fire 환경), 직전 20 cycle(2631-2650) 분석 범위 준수.
