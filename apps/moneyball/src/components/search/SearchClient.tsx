@@ -270,7 +270,7 @@ export function SearchClient({ entries, initialQuery = '' }: Props) {
                         onMouseEnter={() => setActiveIndex(flatIdx)}
                         onClick={() => goToEntry(entry)}
                         className={[
-                          'flex items-center justify-between gap-3 py-2 px-2 rounded-md transition-colors',
+                          'flex items-center justify-between gap-3 py-2 px-2 rounded-lg transition-colors',
                           isActive
                             ? 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-200'
                             : 'hover:bg-gray-50 dark:hover:bg-gray-900/40',

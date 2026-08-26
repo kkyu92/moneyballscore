@@ -68,7 +68,7 @@ export function MegaMenu({ items, pathname }: MegaMenuProps) {
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div
-                  className={`bg-brand-800 border border-brand-700 rounded-md shadow-lg py-1 ${
+                  className={`bg-brand-800 border border-brand-700 rounded-lg shadow-lg py-1 ${
                     item.items.some((sub) => sub.description)
                       ? item.items.length === 5
                         ? "w-[320px]"

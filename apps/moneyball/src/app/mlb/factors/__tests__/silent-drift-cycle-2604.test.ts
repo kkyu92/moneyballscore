@@ -8,7 +8,8 @@ import { join } from "path";
 // `rounded-md` literal is drift by construction. 25 button/input/badge/notice-box/
 // calendar-cell instances aligned to `rounded-lg` (md tier, 8px). 3 large-dropdown
 // -panel instances (MegaMenu / navigation-menu viewport / SearchClient row-hover)
-// explicitly deferred — tier (button vs card) unclear without a twin.
+// were deferred here — tier confirmed + fixed in cycle 2605
+// (silent-drift-cycle-2605.test.ts), so DEFERRED_FILES is now empty.
 const APP_ROOT = join(__dirname, "..", "..", "..", "..", "..");
 const SRC_ROOT = join(APP_ROOT, "src");
 
@@ -29,28 +30,15 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-const DEFERRED_FILES = [
-  "src/components/layout/MegaMenu.tsx",
-  "src/components/ui/navigation-menu.tsx",
-  "src/components/search/SearchClient.tsx",
-];
-
 describe("silent-drift-cycle-2604: remaining rounded-md -> rounded-lg (md tier)", () => {
-  it("no rounded-md literal survives outside the 3 documented deferred files", () => {
+  it("no rounded-md literal survives anywhere in src (cycle 2605 closed the 3 deferred files)", () => {
     const offenders: string[] = [];
     for (const file of walk(SRC_ROOT)) {
       const rel = "src" + file.slice(SRC_ROOT.length);
-      if (DEFERRED_FILES.some((d) => rel.replace(/\\/g, "/") === d)) continue;
       const content = readFileSync(file, "utf-8");
       if (content.includes("rounded-md")) offenders.push(rel);
     }
     expect(offenders).toEqual([]);
-  });
-
-  it("deferred files still use rounded-md (scope-out documented, not silently fixed)", () => {
-    for (const rel of DEFERRED_FILES) {
-      expect(read(rel)).toMatch(/rounded-md/);
-    }
   });
 
   it("MLB analysis/games hub link buttons use rounded-lg", () => {
