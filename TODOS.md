@@ -7991,3 +7991,11 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 `pnpm --filter kbo-data exec tsc --noEmit` clean + vitest 91 files/1199 tests(+1) green + lint clean. version 158→159(`scripts/bump-version.sh`). 단일 논리 단위 → 직접 main commit+push(R4/R7).
 
 다음 사이클 추천 = 일반 경로(`MAX_ATTEMPTS`)/`llm-deepseek.ts`/`llm-ollama.ts` 동일 off-by-one 존재 여부 확인(1순위 후보) 또는 polish-ui/info-architecture-review(dominance 완화 다양성).
+
+## 🔍 RETRO-ONLY — review-code(heavy) postview.ts clean audit (cycle 2654, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 17/25, info-arch 6/30, lotto 26/30). 직전8 distinct=4 — 2-chain lock 미충족. cycle 2653 추천 diversity 후보(polish-ui/info-architecture-review) 조사했으나 둘 다 false positive로 기각: (1) `BigMatchDebateCard.tsx` `focus-visible:outline-white` 1건 — outlier처럼 보였으나 부모 카드가 dark hero(`--color-bg-hero-start/end` = brand-800/700) 배경이라 흰 아웃라인이 실제로 대비 확보되는 의도된 디자인, 나머지 73건(`outline-brand-500`)은 라이트 배경 컨텍스트용이라 서로 다른 정상 케이스. (2) breadcrumb 누락 18개 라우트 grep — 전수 확인 결과 전부 root(`/`)/redirect-only index(`/reviews/monthly`,`/reviews/weekly`)/`robots noindex` stub("박제 중" 안내, community/login/settings)/`/debug/*` 내부 전용이라 실질 IA 갭 없음.
+
+실행: `postview.ts`(588줄, 사후분석 오케스트레이터) 전체 정독 — `canonicalizeFactorKey`/`isWeightedFactor` 일관성, `getZeroWeightRuleJudgePregame`(judge-agent.ts 재사용 확인, dead code 아님) 등 3종 ZERO_WEIGHT helper 참조, JUDGE_POSTVIEW_SYSTEM 프롬프트 예시 factor 키(`bullpen_fip`/`recent_form`) DEFAULT_WEIGHTS 실측 일치, validator layer(팀/심판 양쪽) 정상 연결 — 신규 발견 0건, clean(cycle 2632/2637 에서 이미 손질된 최신 상태). 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄) 정독, 또는 op-analysis(gap 18/25 근접) 자연 대기.
