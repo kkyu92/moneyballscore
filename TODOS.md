@@ -1,3 +1,13 @@
+## ⚪ RETRO-ONLY — info-architecture-review 30-cycle-gap checkpoint, 신규 drift 0건 (cycle 2618, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전8(2610-2617) distinct=3(review-code 6+dimension-cycle 1+fix-incident 1) — 2-chain lock 미충족. **info-arch gap 31/30 도달**(마지막 발화 cycle 2587) — trigger 충족, 발화. op-analysis gap 10/25, lotto gap 20/30, design-system negative(당일 갱신) — 미도달.
+
+cycle 2587(fix commit f41704ed) 이후 `page.tsx` 신규 추가 0건(`git log --diff-filter=A` 확인, 같은 구간 커밋 13건 전부 기존 라우트 수정). breadcrumb 누락 18건 그대로 — `ia-hierarchy.md` 의도된 목록과 완전 일치. sitemap.ts staticRoutes 전수 대조에서 매핑 누락 후보 `/accuracy/shadow`/`/community` 발견했으나 둘 다 `robots: index:false` 확인 — 의도된 제외. 헤더 메가메뉴(LEAGUE_NAVS) 핵심 섹션 배선 확인, `/methodology`/`/about`/`/guide`/`/glossary`/`/changelog` 는 Footer 유틸리티 컬럼 배치(기존 확인된 패턴) — 신규 gap 아님. checkpoint 문서 `docs/design/ia-2026-08-26-cycle-2618-30-cycle-gap-checkpoint.md` 신규 작성. 코드 변경 없음.
+
+다음 사이클 추천 = op-analysis(gap 10/25)/lotto(gap 20/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색(muted text-gray-500/400 2-tier 역할 분리 문서화, cycle 2617 carry-over).
+
+---
+
 ## ⚪ RETRO-ONLY — review-code(heavy) 신규 축 탐색 소진 재확인 (cycle 2617, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23(전부 completed/archived/tier4). 직전8(2609-2616) distinct=4(review-code 4+dimension-cycle 2+polish-ui 1+fix-incident 1) — 2-chain lock 미충족. op-analysis gap 8/25, info-arch gap 29/30, lotto gap 18/30, design-system negative(당일 갱신, git checkout 부작용) — 전부 미도달. **explore-idea saturation trigger 12/15 충족**되나 4-source 재확인(신규라우트 -14d 90건=git checkout 부작용 전체 반환/TODOS Next-Up 신규 리드 없음/GH issue 0/plan#29 트래픽 count 미성장·postseason 미도달 Tier4 유지) — negative, 기존 패턴과 동일. ship-0 emergency stop 미충족(직전10 success 7/retro-only 3). skill-evolution trigger 5개 전부 미충족(milestone 2617%50≠0, review-code 직전20 non-zero).
