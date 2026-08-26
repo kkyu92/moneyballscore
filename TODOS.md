@@ -7999,3 +7999,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 실행: `postview.ts`(588줄, 사후분석 오케스트레이터) 전체 정독 — `canonicalizeFactorKey`/`isWeightedFactor` 일관성, `getZeroWeightRuleJudgePregame`(judge-agent.ts 재사용 확인, dead code 아님) 등 3종 ZERO_WEIGHT helper 참조, JUDGE_POSTVIEW_SYSTEM 프롬프트 예시 factor 키(`bullpen_fip`/`recent_form`) DEFAULT_WEIGHTS 실측 일치, validator layer(팀/심판 양쪽) 정상 연결 — 신규 발견 0건, clean(cycle 2632/2637 에서 이미 손질된 최신 상태). 코드 변경 없음.
 
 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄) 정독, 또는 op-analysis(gap 18/25 근접) 자연 대기.
+
+## 🔍 RETRO-ONLY — review-code(heavy) shared/index.ts clean audit (cycle 2655, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 2nd defense(cycle 2654 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 18/25, info-arch 7/30, lotto 27/30). 직전8 distinct=4 — 2-chain lock 미충족. op-analysis 데이터 동결(cycle 2637 기준 10회 연속 동일 수치, 재측정 저가치) + explore-idea saturation(14/15) 충족되나 유일 후보(plan #29) cycle 2624/2633 재확인 negative — 둘 다 skip. cycle 2654 추천대로 미감사 대형 파일 탐색, `packages/shared/src/index.ts`(3453줄, 리포 최대 단일 파일) 채택.
+
+실행: 서브에이전트(superpowers:code-reviewer) 전체 정독 — `DEFAULT_WEIGHTS`/`HOME_ADVANTAGE`(0.015) CLAUDE.md v1.8 완전 일치, `LLM_RETRY_BACKOFF_MS` 주석의 cycle 2653 fix 서술이 실제 `llm.ts`/`llm-deepseek.ts` 코드와 일치, `PARK_FACTOR_NARRATIVE_*` 경계값이 `kbo-official.ts`의 `DEFAULT_PARK_FACTORS`와 완전 일치, 대칭쌍 상수(STRONG/WEAK, HIGH/LOW) ~15건 산술 검증, `HOME_ELO_BONUS=24`는 기존 wave-272 회귀 테스트가 이미 의도된 값으로 고정 확인, 최근 export 33건 dead-code 스팟체크 전부 실사용처 존재. 신규 drift 0건 — clean audit, 코드 변경 없음.
+
+**패턴 신호**: 직전 6 review-code-family 사이클 중 5회(2648/2649/2652/2654/2655) 가 clean-audit RETRO-ONLY — 대형 파일 반복 스윕의 수확체감 뚜렷. dominance 14/20(70%)와 겹쳐 3연속(2653/2654/2655) diversity 전환 권고 누적.
+
+다음 사이클 추천 = fix-incident(gap 10/20, 실제 incident evidence 재확인 후) 또는 info-architecture-review(gap 7/30 이르지만 checkpoint 재확인) — review-code 편중 완화 우선 검토.
