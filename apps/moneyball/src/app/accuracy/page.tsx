@@ -755,7 +755,7 @@ export default async function AccuracyPage() {
                     {d.dayLabel}
                   </span>
                   {d.day === 0 && (
-                    <span className="text-[8px] leading-none bg-warning/15 text-warning rounded px-0.5 py-0.5 whitespace-nowrap">
+                    <span className="text-3xs leading-none bg-warning/15 text-warning rounded px-0.5 py-0.5 whitespace-nowrap">
                       상한 {Math.round(SUNDAY_CAP_CONFIDENCE * 100)}%
                     </span>
                   )}

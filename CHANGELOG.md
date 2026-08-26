@@ -1,4 +1,13 @@
-## v0.5.62.162 — 2026-08-26 (cycle 2640, review-code(heavy): CREDIT_EXHAUSTED alert 중복발송 dedup 부재 수정)
+## v0.5.62.163 — 2026-08-26 (cycle 2644, polish-ui: accuracy 요일별 페이지 일요일 상한 배지 미토큰화 text-[8px] 정정)
+
+### fix: 요일별 적중률 "일요일 상한" 배지 폰트크기 DESIGN.md 타이포 스케일 미토큰화
+
+- 진단: 2-chain lock 탐지(직전 8 사이클 = review-code(heavy) + operational-analysis(lite) 2종만, distinct=2) → 두 chain 후보 제외. fix-incident(CI 전부 green, open issue 0) / info-arch(gap 26/30 미도달) / lotto(gap 16/30, 다음 회차 8/29 picks 이미 박제됨) / explore-idea(최근 2사이클 내 lite 2회 발화) 모두 강한 trigger 부재 → lock 룰 3번 "trigger 없으면 polish-ui 강제 발화" 적용.
+- DESIGN.md 타이포 스케일 grep(`text-\[[0-9]*px\]` 전역) — `accuracy/page.tsx:758` "일요일 상한 X%" 배지 1곳만 유일한 미토큰 arbitrary px 값(`text-[8px]`) 발견. DESIGN.md 최소 토큰 3xs(9px)="초미니 배지/타임스탬프" 정의와 역할 정확히 일치(같은 컴포넌트 안 형제 요소 `text-2xs`/`text-3xs` 이미 사용 중) — cycle 2599 (`text-[11px]` 46건 → 2xs 흡수) 와 동일 패턴의 미탐색 잔여 1건.
+- `text-[8px]` → `text-3xs`(9px) 정렬. 1px 시각 차이 무의미, 토큰 일관성 확보.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm lint` clean. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
+
 
 ### fix: daily.ts CREDIT_EXHAUSTED alert 블록 — "1회만 발화" 주석과 달리 실제 dedup 장치 부재
 
