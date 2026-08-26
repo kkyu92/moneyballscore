@@ -1,3 +1,15 @@
+## ✅ SUCCESS — polish-ui: Ko-fi 위젯 쿠키 배너/스탯 카드 겹침 수정 (cycle 2627, 2026-08-26)
+
+진단: open issue 0, approved plan 0/23. 직전20 chain review-code 계열 12/20(60%) dominance — cycle 2624/2625 retro 양쪽 다양성 redirect 제안 채택. rounded-*/shadow-* 토큰 sitewide grep 감사로 review-code(heavy) 신규 축 탐색했으나 twin 불일치 미발견(축 소진) → polish-ui 전환. gap trigger 전부 미도달, GH Actions 최근 15건 전부 success/skipped.
+
+전체 grep 대신 실 브라우저 dogfooding(`gstack browse`, 1280x720+375x812)으로 홈페이지 감사 — Ko-fi 도네이트 위젯(z-index 99999999)이 쿠키 동의 배너 및 그 위 "적중률 현황" 스탯 카드를 첫 화면(스크롤 전)에서 가리는 것을 스크린샷으로 확인·재현. 오프셋 조정(bottom 값 상향)은 모바일에서 위젯이 스탯 카드와 재충돌 — 폐기하고 배너 노출 중 위젯 완전 숨김(`display:none`)으로 전환, dismiss 후 자연 복귀.
+
+`globals.css`에 `body[data-cookie-shown="true"]` 토글(기존 footer spacer padding 용 패턴 재사용) 규칙 추가. `silent-drift-cycle-2627.test.ts` 신규(2 tests). tsc clean + vitest 568 files/4465 tests(+1/+2) green + lint clean. version 154→155. main 직접 push 완료(e0215a74).
+
+다음 사이클 추천 = op-analysis(gap 1/25 방금발화)/lotto(gap 29/30) 자연 대기 또는 review-code(heavy) 신규 축 재탐색. review-code dominance 소폭 완화(직전20 기준 12→11/20).
+
+---
+
 ## ⚪ RETRO-ONLY — operational-analysis (lite): 주간 checkpoint, v1.8 유지 재확인 (cycle 2626, 2026-08-26)
 
 진단: open issue 0, approved plan 0/23. 강제 trigger 없음(fix-incident gap 11/20, op-analysis gap 18/25, info-arch gap 8/30, lotto gap 28/30 — 전부 미도달). 2-chain lock 미충족(직전8 distinct=4). 직전9(2617-2625) review-code 계열 7/9 dominance — 직전 retro 다양성 redirect 제안 채택, op-analysis lite 선택 (heavy는 cycle 2608에 최근 실행, 재측정 실익 낮음).
