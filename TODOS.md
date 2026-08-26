@@ -1,4 +1,13 @@
 
+## cycle 2651 (2026-08-26) — SUCCESS (skill-evolution 74회 자가 진화, phase 40)
+
+- skill-evolution(forced): cycle 2650 마커("2650: ee641cdc...") 강제 발화. `/office-hours` skip (자동 fire 환경), 직전 20 cycle(2631-2650) 분석 범위 준수.
+- **phase 40 stats**: review-code(heavy) 70%(+10pp vs phase 39 60%, stale comment/docstring drift 축 — llm.ts 확장수치/KST_OFFSET_MS 잔여/mlb-pipeline.ts 헤더 3건 연속) + fix-incident 10% + explore-idea/op-analysis/polish-ui/info-arch 각 5%. success 75%(15/20, 5 retro-only 전부 정상 clean). watch hang kill 0건(8 consecutive 50-cycle window). PASS_ship ~2231(+38 since 2600).
+- **신규 evidence**: 사례 15 silent retro drift family 4번째 재발(cycle 2647) — phase 39 mitigation(회고 시점 자기 검증)은 세션이 회고 도달 전 끊기면 무력한 사각지대. cycle 2648 이 진단 단계 git log 대조에서 우연 발견 + retroactive backfill.
+- **mitigation 박제**: 2차 방어선 신설 — 매 사이클 진단 첫 단계("직전 3 cycle_state read" 직후)에서 직전 사이클 retro commit 존재를 회고 도달 여부와 무관하게 상시 확인(`git log --grep "cycle-retro $((CYCLE_N-1)) " -F` 0건 시 즉시 backfill). SKILL.md "직전 사이클 retro commit 결손 감지 (2차 방어선)" 절 + MIGRATION-PATH.md phase 40 항목 신규 추가. `pnpm test` 569 files/4470 tests green (smoke).
+- commit `5d1eb3da`(feat(skill), 빈 커밋 — SKILL.md/MIGRATION-PATH.md 는 repo 밖 `~/.claude/skills/develop-cycle/` 위치라 diff 미포함, body 에 phase 40 전체 요약) + push 완료.
+- 다음 추천: review-code dominance 70% 재상승 monitor 또는 fix-incident(gap 여유) — 2차 방어선 실전 작동은 다음 세션-중단 재발 시 검증
+
 ## cycle 2650 (2026-08-26) — SUCCESS (milestone: 2650%50==0)
 - review-code(heavy): 진단 open issue 0, approved plan 0/29. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 13/25, info-arch 2/30, lotto 22/30). 직전8 distinct=5 — 2-chain lock 미충족. explore-idea saturation 13/15 충족되나 동일 후보(carry-over 부재) cycle 2647/2649 재확인 완료라 skip. CI green, 실패 workflow 0건 — fix-incident 후보 부재. cycle 2649 명시 추천(mlb-pipeline.ts/validator.ts) 채택.
 - validator.ts(1015줄) 서브에이전트 정독 — clean(0 findings). mlb-pipeline.ts(875줄) 헤더 docstring(1~14행) 이 "MLB 7 mode" 서술 + `mlb_shadow_train`/`mlb_walk_forward_measure` 가 구 테이블 `walk_forward_brier`(migration 036, 스키마 불일치로 insert 100% silent 실패 이력) 를 가리키던 채 stale — 실제는 8 mode(`mlb_elo_update` 누락, plan #25 cycle 2082 추가분) + migration 049 `mlb_shadow_train_log`/`mlb_walk_forward_log`. 파일 내부 인라인 주석은 이미 정정돼있고 최상단 요약만 미반영.
