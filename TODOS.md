@@ -1,4 +1,12 @@
 
+## cycle 2678 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23. explore-idea saturation(13/15) 재도달했으나 4-source 재확인 negative(plan#29 트리거 미변화 — postseason 아직 안 임박/traffic 무변화 추정, TODOS Next-Up stale, GH issue 0, 신규라우트 92건 git checkout 부작용). fix-incident lite 재점검(`gh run list` 전부 success/skipped) negative. 다양성 전환 실패 → review-code(heavy) dominance-positive streak 정합 재선택. cycle 2677 carry-over 소진 후 최종 커밋일 기준 재정렬 — 가장 오래 미터치(2026-08-14, 18일) 대형 파일 `lib/mlb/buildMlbMatchupProfile.ts`(526줄) 채택.
+- 서브에이전트 전체 정독 + 소비자(mlb/matchup 페이지 2곳) + KBO sibling(`buildMatchupProfile.ts`) 교차검증. CURRENT_SCORING_RULE/KST 처리/confidence 스케일 전부 clean. 유일 발견: `PredRow.prediction_type` select 되지만 미사용(서버 필터는 `.eq()`로 별도 적용) — cycle 2677 과 동일 죽은-select-필드 패턴. 제거.
+- sibling `buildMlbTeamProfile.ts` 에도 동일 패턴 잔존 확인 — 다음 cycle 후보로 carry-over.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, d3020dd0).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(신규 후보: `lib/mlb/buildMlbTeamProfile.ts` 동일 패턴, 또는 `lib/picks/buildPicksStats.ts`/`app/search/page.tsx` 등 2026-08-20 이후 미터치 파일) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2677 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 29/30, lotto 18/30), 직전8 distinct=4(2-chain lock 미충족). cycle 2674/2675/2676 retro 공통 추천(review-code(heavy) 계속) + carry-over 후보 `lib/reviews/buildMissReport.ts`(216줄)/`app/reviews/misses/page.tsx`(249줄) 채택.
