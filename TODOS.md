@@ -1,4 +1,13 @@
 
+## cycle 2712 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2711 추천대로 `analysis-data.ts`(974줄, KBO)/mlb `analysis-data.ts`(279줄) 정독.
+- 서브에이전트 위임 감사 — 전체 export interface/함수 소비처 교차검증. `BestPickCard.confidence`(getBestPickOfWeek/getUpsetPickOfMonth), `MlbUpcomingGame.homeWinProb`/`duelValidCount`(getMlbThisWeekRemainingGames) 모두 계산·리턴되지만 유일 caller(analysis/page.tsx, mlb+en/mlb analysis page.tsx weekRemaining 블록)가 미소비 확인.
+- fix: 3개 필드 인터페이스+계산 로직에서 제거(commit f8d38221). tsc/eslint clean, 관련 테스트 28파일 181건 green.
+- 부가 발견(변경 보류) — `TodayGameCard`의 badge 관련 8개 필드는 `analysis-data.ts`가 실제 계산하지 않고 page.tsx가 즉시 덮어씀(기능 무해, 인터페이스만 오도) / `prediction_type` select 컬럼이 filter 용도로만 선택되고 응답 후 미사용(대역폭만 소모, 저우선). 둘 다 이번 사이클 범위 밖 — 다음 후보로 carry.
+- gap trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 21/25, info-arch 3/30, lotto 23/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`convergenceRecord.ts` 830줄) 정독, 또는 gap trigger 자연 대기.
+
 ## cycle 2711 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2710 추천대로 `buildAccuracyData.ts`(776줄) 정독.
