@@ -1,4 +1,12 @@
 
+## cycle 2676 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 28/30, lotto 17/30), 직전8 distinct=3(review-code(heavy)×6+explore-idea×1+polish-ui×1, 2-chain lock 미충족), 직전20 사이클 chain 분포 전부 ≥1회(cycle49 룰 미충족). cycle 2674/2675 retro 공통 추천 미감사 후보 중 최대 규모 `app/players/page.tsx`(315줄, 2026-07-14 이후 미터치) 채택.
+- 서브에이전트로 전체 정독 + `buildPitcherLeaderboard.ts`/`buildBatterLeaderboard.ts`/`config/model.ts`/`buildSeasonSummary.ts` 교차검증. scoring_rule 필터·KST 시즌 연도는 이전 wave에서 이미 정정 확인(clean). drift 1건: `page.tsx:247` 이 batter `last_synced`(UTC ISO)를 `slice(0,10)` 으로 그대로 잘라 KST 날짜인 척 표시 — 자동 cron은 날짜 경계를 안 넘어 무해하지만 무제한 `workflow_dispatch` 수동 실행(KST 00:00~08:59)시 하루 앞선 날짜 노출 가능한 잠재 버그(compareModels.ts 계열과 동일 UTC-slice-as-KST 패턴).
+- `toKSTDateString()` 로 교체 + `players-page.test.ts` 소스 grep 회귀 가드 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(+1). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, 13a0c37d).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(신규 후보: `lib/reviews/buildMissReport.ts`(216줄)/`app/reviews/misses/page.tsx`(249줄), 두 후보 모두 cycle 2674부터 carry-over 미처리) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2675 (2026-09-01) — SUCCESS
 
 - polish-ui: 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 9/25, info-arch 27/30, lotto 16/30), 직전8 distinct=2(review-code×7+explore-idea×1) → 2-chain alternation lock 발동. review-code/explore-idea 제외 후 다른 trigger 없어 규칙대로 polish-ui 강제 발화.
