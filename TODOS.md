@@ -1,4 +1,13 @@
 
+## cycle 2689 (2026-09-01) — SUCCESS
+
+- lotto(lite): 진단 — 개방 issue 0, approved plan 0/23. gap trigger 재확인: lotto 마지막 발화 cycle 2659, gap=30(≥30 임계 도달) — 30-cycle 미발화 trigger 자연 발화. 직전8 distinct=2(review-code(heavy) 7 + fix-incident(lite) 1, lock 무시 조건 동일).
+- `pnpm tsx scripts/lotto.ts update` → 1239회차 이미 최신. `count` 재측정 = valid 7,705,415/8,145,060(제거 5.40%) — cycle 2659 측정과 완전 동일(valid_delta=0, saturation 안정 7연속).
+- **핵심 발견(cycle 2659 재확인 + 보강)**: `~/lotto_picks/` 레거시 경로(사용자 홈, git 비추적) 기준 50세트 파일이 2026-08-29 이후 미갱신이라 처음엔 "picks 누락"으로 오판, 수동으로 2026-08-29-result.md + 2026-09-05-50sets.md 작성. 이후 실제 자동화 확인 결과 `lotto-pick-update.yml`/`lotto-result-update.yml` cron 이 이미 `apps/moneyball/data/lotto-picks/2026-09-05.md`(1000세트, PR merged) + `apps/moneyball/data/lotto-results/2026-08-29.md`(1239회 결과, 256룰 100% PASS, 4등 2건/5등 24건, PR #3071 merged) 를 정상 생성·머지 완료 — 자동화 완전 정상 작동, 수동 파일은 레거시 관례의 중복 산출물(무해하나 불필요, git 비추적이라 충돌 없음).
+- **SKILL.md drift 후보**: chain pool 진단 source 표의 lotto 항목이 여전히 `~/lotto_picks/<next-saturday>.md` 부재를 trigger 조건으로 명시 — 실제 source of truth 는 repo 내 `apps/moneyball/data/lotto-picks/` (cron 자동화 이관 완료, cycle 1403+). 다음 skill-evolution 발화 시 이 항목 갱신 후보로 carry-over.
+- 코드 변경 없음(진단+검증만) — commit 없음, cycle-retro dispatch 만 진행.
+- 다음 사이클 추천 = review-code(heavy) 복귀 (14/20 dominance-positive streak 유지) 또는 op-analysis(gap 24/25, 다음 사이클 임계 도달 임박) 자연 전환.
+
 ## cycle 2688 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 22/25, info-arch 9/30, lotto 29/30). 직전8 distinct=2(review-code(heavy) 7 + fix-incident(lite) 1) — 2-chain lock 조건 표면상 충족이나 잠긴 chain 중 fix-incident 포함 시 안전 우선 규칙으로 lock 무시. cycle 2687 carry-over 추천대로 review-code(heavy) 계속.
