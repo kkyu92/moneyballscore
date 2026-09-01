@@ -76,18 +76,6 @@ export interface TodayGameCard {
   awayElo?: number;
   homeRecentForm?: number;
   awayRecentForm?: number;
-  /** wave-325: 현재 KBO 순위 배지 · wave-436: 팩터 수렴 픽 순위 표시 */
-  homeRank?: number;
-  awayRank?: number;
-  /** wave-331: 최근 10경기 배지 */
-  homeRecent10?: { wins: number; losses: number };
-  awayRecent10?: { wins: number; losses: number };
-  /** wave-333: 올 시즌 상대전적 배지 (홈팀 기준 승수/패수) · wave-414: 팩터 수렴 픽 대결 행 표시 · wave-428: 패수 추가 */
-  h2hHomeWins?: number;
-  h2hAwayWins?: number;
-  /** wave-329: 홈/원정 시즌 기록 배지 · wave-434: 팩터 수렴 픽 상세 행 */
-  homeTeamVenue?: { homeWins: number; homeLosses: number; awayWins: number; awayLosses: number };
-  awayTeamVenue?: { homeWins: number; homeLosses: number; awayWins: number; awayLosses: number };
   /** wave-335: 선발투수 배지 · wave-438: 팩터 수렴 픽 SP 비수렴 시 이름 표시 */
   homeSP?: string;
   awaySP?: string;
