@@ -38,15 +38,12 @@ interface Row {
   is_correct: boolean | null;
   predicted_winner: number | null;
   game: {
-    home_sp_id: number | null;
-    away_sp_id: number | null;
     home_team_id: number | null;
     away_team_id: number | null;
-    status: string | null;
-    home_sp: { id: number; name_ko: string; team_id: number | null } | null;
-    away_sp: { id: number; name_ko: string; team_id: number | null } | null;
-    home_team: { id: number; code: string } | null;
-    away_team: { id: number; code: string } | null;
+    home_sp: { id: number; name_ko: string } | null;
+    away_sp: { id: number; name_ko: string } | null;
+    home_team: { code: string } | null;
+    away_team: { code: string } | null;
   } | null;
 }
 
@@ -130,11 +127,11 @@ export async function buildPitcherLeaderboard(options: {
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         is_correct, predicted_winner,
         game:games!predictions_game_id_fkey(
-          home_sp_id, away_sp_id, home_team_id, away_team_id, status,
-          home_sp:players!games_home_sp_id_fkey(id, name_ko, team_id),
-          away_sp:players!games_away_sp_id_fkey(id, name_ko, team_id),
-          home_team:teams!games_home_team_id_fkey(id, code),
-          away_team:teams!games_away_team_id_fkey(id, code)
+          home_team_id, away_team_id,
+          home_sp:players!games_home_sp_id_fkey(id, name_ko),
+          away_sp:players!games_away_sp_id_fkey(id, name_ko),
+          home_team:teams!games_home_team_id_fkey(code),
+          away_team:teams!games_away_team_id_fkey(code)
         )
       `,
     )
