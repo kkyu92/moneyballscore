@@ -1,3 +1,13 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2693, review-code(heavy): kbo-official.ts calculateParkFactor 죽은 함수 제거)
+
+### refactor: calculateParkFactor() 완전 죽은 함수 제거
+
+- 진단: 개방 issue 0, approved plan 0/22(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(op-analysis 2/25, info-arch 14/30, lotto 4/30). 직전8 distinct=3(review-code(heavy) 6 + lotto 1 + operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 유일 후보 plan#29(로그인/커뮤니티)가 risk=3+자율불가 Tier4 확정 상태 재확인 → review-code(heavy) 재선택.
+- `buildAccuracyData.ts`(776줄) 전체 정독 — clean(cycle 2670대 이후 이미 다수 정정 상태 재확인). 후속으로 최고령 미터치 대형파일(2026-07-14 이후 미터치) `kbo-official.ts`(323줄) 정독 → `calculateParkFactor()` 완전 죽은 함수 발견. cycle 353 knip cleanup 이 export 키워드만 제거(knip은 미사용 export만 탐지, 미호출 내부 함수는 미탐지)했을 뿐 본문은 그대로 잔존 — 실제 파크팩터는 전부 정적 `DEFAULT_PARK_FACTORS` 테이블 사용, 동적 계산 로직 12줄은 미실행 상태로 방치돼 있었음. 제거.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 92 files/1218 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 5fd0b1c7).
+
+---
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2690, review-code(heavy): convergenceRecord.ts 미소비 id 필드 정리)
 
 ### refactor: fetchMlbConvergencePickDetailedResultsForPair 미소비 id select 필드 제거

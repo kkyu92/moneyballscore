@@ -1,4 +1,12 @@
 
+## cycle 2693 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/22(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(op-analysis 2/25, info-arch 14/30, lotto 4/30). 직전8 distinct=3(review-code(heavy) 6 + lotto 1 + operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 유일 후보 plan#29(로그인/커뮤니티)가 risk=3+자율불가 Tier4 확정 상태 재확인 → review-code(heavy) 재선택.
+- `buildAccuracyData.ts`(776줄, cycle 2690 carry-over 후보) 전체 정독 — clean(이미 다수 정정된 최신 상태 재확인). cycle 2690 carry-over 나머지 후보(`buildTeamProfile.ts`/`buildMatchupProfile.ts`/`analysis-data.ts`)는 git log 확인 결과 최근(2026-08-23~26) 이미 다수 fix 거친 상태라 재감사 낮은 가치 판단, 최고령 미터치 파일 재스캔으로 전환.
+- 커밋일 기준 최고령 미터치(2026-07-14, 이후 무변화) 대형파일 `kbo-official.ts`(323줄, KBO 공식 스크래퍼) 채택 — 서브에이전트 전체 정독 + 소비자 교차검증(daily.ts/postview-daily.ts/backtest.ts/standings 등). `calculateParkFactor()` 완전 죽은 함수 발견: cycle 353 knip cleanup 이 export 키워드만 제거(knip은 미사용 export만 탐지, 미호출 내부 함수는 미탐지)했을 뿐 12줄 본문이 그대로 잔존 — 실제 파크팩터는 전부 정적 `DEFAULT_PARK_FACTORS` 테이블 사용 중. 제거.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 92 files/1218 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 5fd0b1c7).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형파일(`postview-daily.ts` 380줄 2026-07-08, `backtest-v2-helpers.ts` 370줄 2026-07-16 — 둘 다 kbo-official.ts 다음 최고령) 정독, 또는 op-analysis(gap 3/25)/info-arch(gap 15/30)/lotto(gap 5/30) 자연 대기.
+
 ## cycle 2692 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 1/25, info-arch 13/30, lotto 3/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(12/15, review-code+fix-incident+polish-ui+info-arch 계열) 재도달 확인했으나 plan#29(로그인/커뮤니티) 재평가 트리거 여전히 미충족(트래픽 실측 재요구 없이 checkpoint만 반복될 위험) + TODOS Next-Up 신규 후보 부재로 review-code(heavy) 유지 결정.
