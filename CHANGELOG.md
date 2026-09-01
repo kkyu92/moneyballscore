@@ -1,3 +1,11 @@
+## v0.5.62.169 — 2026-09-01 (cycle 2729, review-code(heavy): buildMlbMatchupProfile.ts/buildMatchupProfile.ts 미소비 필드 2개 제거)
+
+### review-code(heavy): matchup profile 전수감사 (cycle 2729, SUCCESS)
+
+- 진단: fix-incident gap 33/20 / lotto gap 40/30 재확인 노이즈만. op-analysis gap 2/25 / info-arch gap 20/30 미도달. cycle 2728 추천대로 `buildMlbMatchupProfile.ts`(522줄) + KBO 대칭 `buildMatchupProfile.ts` 동시 감사.
+- `pair`/`totalGames` 필드 양쪽(KBO+MLB) 프로덕션 무독 확인 후 제거. tsc/eslint clean, 571파일 4483건 green (`f46b3460`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 21/30).
+
 ## v0.5.62.169 — 2026-09-01 (cycle 2728, review-code(heavy): buildTeamProfile.ts 미소비 필드 2개 제거)
 
 ### review-code(heavy): buildTeamProfile.ts 전수감사 (cycle 2728, SUCCESS)

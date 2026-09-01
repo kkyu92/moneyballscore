@@ -1,4 +1,11 @@
 
+## cycle 2729 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 33/20/lotto gap 40/30 재확인 (둘 다 노이즈 지속). op-analysis gap 2/25, info-arch gap 20/30 둘 다 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2728 추천대로 `buildMlbMatchupProfile.ts`(522줄) 선정.
+- 서브에이전트 전수감사 — `MlbMatchupProfile.pair`/`MatchupProfile.pair`(KBO 대칭) 둘 다 프로덕션 caller 무독 + `totalGames`(양쪽) 둘 다 프로덕션 미소비(테스트 assertion만 참조) 2건 발견. 양쪽 대칭이라 KBO 회귀 아닌 원 dead field.
+- fix: 두 파일(MLB+KBO) 인터페이스+반환 객체에서 pair/totalGames 제거 + 연동 테스트 4곳 동기. tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`f46b3460`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 21/30).
+
 ## cycle 2728 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 32/20 재확인(`gh run list` 전부 success, 12연속 무이슈)/lotto gap 39/30 재확인(`2026-09-05-50sets.md` + `2026-08-29-result.md` 둘 다 존재 + lotto-data.json 당일 갱신, cron self-heal 완료 실질 갭 없음) — 둘 다 노이즈만. op-analysis 직전 사이클 fired(gap1)/info-arch gap 19/30 미도달. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. review-code(heavy) 신규 대상 = 미감사 대형 파일 `buildTeamProfile.ts`(598줄).
