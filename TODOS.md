@@ -1,4 +1,12 @@
 
+## cycle 2700 (2026-09-01) — RETRO-ONLY — milestone
+
+- review-code(heavy): 진단 — 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 20/30, lotto 10/30). 직전8 distinct=2(review-code(heavy)+fix-incident) — 2-chain lock 형식상 충족이나 fix-incident 포함 시 안전 우선 무시(룰 명시) → 자유 선택. explore-idea saturation(12/15) 재도달했으나 plan#29 Tier4 재확인. cycle 2699 "대형파일 backlog 소진" 후속 — 파일명 기준 미감사 신규 대상 탐색.
+- `model-version.ts`(102줄) 신규 전체 감사 — cycle 573 이후 추가된 `usingShadowV20Weights` 분기 최초 감사. `decideModelVersion` shadow scoring_rule 계산 정상. `decidePostviewModelVersion` 은 shadow 미지원이나 postview-daily.ts 가 `preGame.scoring_rule ?? versionDecision.scoring_rule` 로 원본 우선 보존 확인 — shadow row silent overwrite 없음. clean.
+- 코드 변경 없음. 대형파일 backlog 소진 후에도 "파일명 기준 미감사" + "신규 분기 소급 감사" 2방향으로 review-code(heavy) 지속 가능 확인.
+- milestone cycle 2700 — trigger 3(cycle_n%50==0) 충족, skill-evolution-pending 마커 박제 → 다음 사이클(2701) skill-evolution 강제 발화.
+- 다음 사이클 추천 = skill-evolution(강제) — MIGRATION-PATH.md phase 41 정리 + SKILL.md 최신 milestone 요약 갱신.
+
 ## cycle 2699 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 20/30, lotto 10/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2698 추천대로 마지막 미감사 대형파일 `glossary/data.ts`(323줄) 채택.

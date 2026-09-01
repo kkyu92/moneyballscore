@@ -1,5 +1,11 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): model-version.ts 신규 전체 감사 + postview scoring_rule shadow row 보존 교차검증 — clean (cycle 2700, milestone)
+
+- 진단: 개방 issue 0, unprocessed plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 20/30, lotto 10/30). 직전8 distinct=2(review-code(heavy) 7 + fix-incident 1) — 2-chain lock 형식상 충족이나 잠긴 chain 중 fix-incident 포함 → 안전 우선 무시(룰 명시). explore-idea saturation(12/15) 재도달했으나 plan#29 Tier4 재확인(postseason 10월 미도달). cycle 2699 "대형파일 audit backlog 소진" 후속 — 파일명 자체가 cycle-retro 이력에 없는 신규 대상 탐색.
+- `model-version.ts`(102줄) 전체 정독 — 이 파일 자체는 cycle 573(JSDoc stale 정정)에서만 다뤄졌고 이후 추가된 `usingShadowV20Weights` 분기(daily.ts:709 SHADOW_V20_WEIGHTS 연동, cycle 573 이후 신규)는 미감사 상태였음. 신규 감사 결과 `decideModelVersion` 의 shadow row scoring_rule 계산 정상, `decidePostviewModelVersion` 은 shadow 개념이 없어 항상 `CURRENT_SCORING_RULE` 반환 — postview-daily.ts:246 upsert 시 `preGame.scoring_rule ?? versionDecision.scoring_rule` 로 원본 pre_game scoring_rule 우선 보존 확인, shadow v20 row 가 postview 단계에서 CURRENT_SCORING_RULE 로 조용히 덮어써지는 silent drift 없음. clean.
+- 코드 변경 없음(감사만) — computed-but-unconsumed 계열 대형파일 backlog 소진 후 review-code(heavy) 는 "파일명 기준 미감사" 신규 탐색 + "신규 분기 로직 소급 감사" 두 방향으로 지속 가능 확인. milestone cycle 2700 — MIGRATION-PATH.md phase 41 정리 대상.
+
 ### review-code(heavy): 마지막 미감사 대형파일 소진 — clean 확정
 
 - 진단: 개방 issue 0, unprocessed plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 20/30, lotto 10/30). 직전8 distinct=3(review-code(heavy) 우세 + fix-incident 1 + operational-analysis 1) — 2-chain lock 미충족. cycle 2698 추천대로 review-code(heavy) 계속, 마지막 미감사 대형파일 `glossary/data.ts`(323줄, 2026-07-03) 채택.
