@@ -215,18 +215,20 @@ export async function fetchHeadToHead(
   return { wins, losses: Math.max(0, losses) };
 }
 
-// 기본 파크팩터 (2025 시즌 기반 추정)
-export const DEFAULT_PARK_FACTORS: Record<string, number> = {
-  '인천SSG랜더스필드': 0.98,
-  '광주-기아 챔피언스 필드': 1.05,
-  '서울종합운동장 야구장': 1.02,  // 잠실
-  '수원KT위즈파크': 1.00,
-  '대구삼성라이온즈파크': 1.03,
-  '부산사직야구장': 1.01,
-  '대전한화생명이글스파크': 0.97,
-  '창원NC파크': 0.99,
-  '서울고척스카이돔': 0.95,
-};
+/**
+ * stadium name → park factor (decimal ratio, 1.0 = 중립). daily.ts/postview-daily.ts
+ * 파이프라인이 예측엔진 입력값(predictor.ts factors.park_factor)으로 소비.
+ *
+ * KBO_TEAMS.parkPf (index-100 형식, @moneyball/shared) 파생 — 과거 이 자리에
+ * "2025 시즌 기반 추정"이라며 별도로 손으로 채운 하드코딩 테이블이 있었으나
+ * KBO_TEAMS.parkPf 와 4개 구장(인천/광주/잠실/대전)에서 타자/투수 친화 방향
+ * 자체가 반대로 어긋나 있었음(cycle 2705 review-code(heavy) 발견) — 예측엔진이
+ * 실제 야구 상식과 반대 부호의 파크팩터를 입력받던 상태. KBO_TEAMS.parkPf 단일
+ * source 로 통일해 재발 차단.
+ */
+export const DEFAULT_PARK_FACTORS: Record<string, number> = Object.fromEntries(
+  Object.values(KBO_TEAMS).map((team) => [team.stadium, team.parkPf / 100]),
+);
 
 export interface StandingRow {
   rank: number;
