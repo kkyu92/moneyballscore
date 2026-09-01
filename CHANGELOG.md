@@ -1,5 +1,12 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### polish-ui: /analysis 팩터 배지 row 카드 밖 텍스트 오버플로우 수정 (cycle 2724, SUCCESS)
+
+- 진단: 2-chain lock 탐지(직전8 사이클 distinct=2 — review-code(heavy) 7 + explore-idea 1). 잠긴 2개 제외 후 fix-incident(gap 20/20, `gh run list` 전부 success/skipped + debug 커밋 0건 → 무이슈 재확인 8연속)/lotto(gap 30/30, 다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal 완료 — 실질 갭 없음) 재확인, op-analysis(8/25)/info-arch(14/30) 미도달, approved plan 0/23 — 잔여 후보 중 강한 trigger 부재 → 룰에 따라 polish-ui 강제 발화.
+- `/design-review` 스크린샷 감사(홈/analysis/picks 3페이지) — analysis 페이지 게임 카드 하단 팩터 배지 row(`page.tsx:1332`, Elo/폼/상대전적/구장/SP/wOBA/불펜FIP/SFR/WAR 등 wave-321~wave-379 걸쳐 누적된 20+개 조건부 배지)가 `flex` (wrap 없음)라 desktop 1280px 뷰포트에서 카드 우측 경계를 넘어 텍스트가 페이지 밖으로 흘러나가는 것 발견 (`Elo 삼성 강세` 배지 left=1295, viewport width=1280).
+- fix: `flex-wrap gap-y-1` 추가(1줄 변경). tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`a149aa84`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 16/30).
+
 ### review-code(heavy): hub-dispatch.ts 미소비 필드 3개 제거 + severity 주석 정정 (cycle 2723, SUCCESS)
 
 - 진단: open issue 0, unprocessed plan 0/22(approved 없음). fix-incident gap 20/20 도달했으나 `gh run list`(전부 success/skipped) + debug 커밋 0건 → 무이슈 재확인(7연속). lotto gap 30/30 도달했으나 다음 회차 picks(`2026-09-05-50sets.md`) + 직전 회차 OOS(`2026-08-29-result.md`) 둘 다 오늘 cron self-heal로 이미 생성 완료 — 실질 갭 없음. op-analysis(gap 8/25)/info-arch(gap 14/30) 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + explore-idea 1) — 2-chain lock 미충족.

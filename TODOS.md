@@ -1,4 +1,11 @@
 
+## cycle 2724 (2026-09-01) — SUCCESS — polish-ui
+
+- 진단: 2-chain lock 탐지(직전8 distinct=2 — review-code(heavy)/explore-idea). 잠긴 2개 제외, fix-incident(gap 20/20 무이슈 재확인 8연속)/lotto(gap 30/30 cron self-heal 완료 실질 갭 없음) 재확인, op-analysis(8/25)/info-arch(14/30) 미도달, approved plan 0/23 — 강한 trigger 없어 룰에 따라 polish-ui 강제 발화.
+- `/design-review` 스크린샷 감사(홈/analysis/picks) — analysis 페이지 게임 카드 팩터 배지 row(`page.tsx:1332`, wave-321~379 누적 20+ 조건부 배지)가 flex nowrap이라 desktop 1280px에서 카드 밖으로 텍스트 오버플로우 발견.
+- fix: `flex-wrap gap-y-1` 추가(1줄). tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`a149aa84`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 16/30).
+
 ## cycle 2723 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/22(approved 없음). fix-incident gap 20/20 도달했으나 debug 커밋 0건 → 무이슈 재확인(7연속). lotto gap 30/30 도달했으나 cron self-heal 완료 — 실질 갭 없음. op-analysis(gap 8/25)/info-arch(gap 14/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족.
