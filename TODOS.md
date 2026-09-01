@@ -1,4 +1,13 @@
 
+## cycle 2718 (2026-09-01) — RETRO-ONLY — explore-idea(lite)
+
+- 진단: open issue 0, unprocessed plan 0/23. 2-chain alternation lock 탐지(직전8 = review-code(heavy) 7 + operational-analysis 1, distinct=2) → 둘 다 후보 제외. fix-incident gap trigger 도달(직전20 0회)했으나 실측 무이슈(`/api/health` overall=ok, `gh run list` 10/10 success/skipped, debug 커밋 0건) — redirect 불가. explore-idea saturation 14/15(역대 최고 근접) 동시 충족 → explore-idea(lite) 자연 선택.
+- plan#29(로그인+커뮤니티 ETA 재평가) 실측 재확인: `user_picks`=1/`mlb_user_picks`=0/`pick_poll_events`=5/`mlb_pick_poll_events`=0 — cycle 2417/2633 측정과 완전 동일, 변화 0. Tier4 보류 유지.
+- 신규 리드 스캔: `/mlb/postseason`·`/mlb/wild-card` ETA "2026-09 라이브 통합" 발견 — 실제 조건은 "정규시즌 종료 직후"(9월 말~10월 초)이며 오늘(9/1)은 시즌 진행 중이라 대진표 자체 미확정, 착수 시기상조로 보류.
+- info-arch(9 사이클 전 checkpoint 재확인, drift 0)/lotto(cron self-heal 확인, 다음 회차 picks 존재+직전 회차 OOS 완료)/polish-ui(컴포넌트 hex 3건 전부 의도된 사용) 재확인 결과 실질 이슈 없음.
+- 코드 변경 없음.
+- 다음 사이클 추천 = 2-chain lock cooldown 만료 → review-code(heavy) rotation 재개(`factor-explanations.ts`/`buildPicksStats.ts`/`buildSeasonSummary.ts`/`compareModels.ts`/`hub-dispatch.ts` 미감사) 또는 info-architecture-review. MLB postseason 재평가 = 정규시즌 종료 확정 시점 도달 시 최우선 후보.
+
 ## cycle 2717 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap trigger 도달(직전20 사이클 0회 발화, cycle 2716 추천대로) — pipeline_runs 최근7일(50/50 success, error 0) + `/api/health`(overall=ok) + runtime-error-alert(23/23 routes ok) + deploy-drift-alert(recent push gap<1h 정상) 전수 진단 → 실제 인시던트 부재 확인. review-code(heavy) redirect.
