@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2672, review-code(heavy): FactorAccuracyTable.tsx 하드코딩 버전 라벨 정정)
+
+### fix: KBO footer 문구가 CURRENT_SCORING_RULE 대신 리터럴 'v1.8' 하드코딩
+
+- 진단: 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 6/25, info-arch 24/30, lotto 13/30), 직전8 distinct=3(2-chain lock 미충족). cycle 2668/2670/2671 retro 공통 추천 미감사 컴포넌트 중 `FactorAccuracyTable.tsx`(170줄) 채택 — `TeamMatchupCards`는 실측 결과 기존 테스트 존재해 제외.
+- 서브에이전트 전체 정독 감사 — KBO footer 문구가 "(v1.8 cohort n=...)" 로 `CURRENT_SCORING_RULE` 값을 리터럴 하드코딩. `BrierTrendChart.tsx`(silent drift wave-260, cycle 1566)에서 이미 한 번 고친 동일 버그 클래스이자 `config/model.ts` "버전 전환 시 체크리스트"가 명시 경고하는 재발 패턴. 오늘은 우연히 `CURRENT_SCORING_RULE==='v1.8'`이라 값이 맞았지만 다음 버전 bump 시 silent stale 확정이었음.
+- `CURRENT_SCORING_RULE` import + 리터럴 교체. 기존 `silent-drift-wave-663.test.ts` import 정규식을 sibling import 허용하도록 완화 + 신규 회귀 가드(`silent-drift-cycle-2672.test.ts`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4475 tests green(+2). 단일 논리 단위 → 직접 main commit+push(R4/R7, 17fbd6fa).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2671, review-code(heavy): MlbAccuracyDashboard.tsx stale MVP-scope 헤더 주석 정정)
 
 ### fix: 헤더 주석이 이미 구현된 6개 섹션을 "후속 wave 후보"로 8개월째 잘못 서술

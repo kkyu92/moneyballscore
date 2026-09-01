@@ -1,4 +1,12 @@
 
+## cycle 2672 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 6/25, info-arch 24/30, lotto 13/30), 직전8 distinct=3(review-code(heavy)6+operational-analysis1+explore-idea1, 2-chain lock 미충족). cycle 2668/2670/2671 retro 공통 추천 미감사 컴포넌트(`TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable`) 실측 재확인 — `TeamMatchupCards`는 이미 테스트 존재(51줄) 확인돼 제외, 나머지 3개 중 최대 규모 `FactorAccuracyTable.tsx`(170줄) 채택.
+- 서브에이전트로 전체 정독 + `buildFactorAccuracy.ts`/`buildMlbFactorAccuracy.ts`/3개 호출부(`accuracy`, `mlb/accuracy`, `en/mlb/accuracy` page.tsx) 교차검증. 실제 drift 1건 발견: KBO footer 문구가 `(v1.8 cohort n=...)` 로 `CURRENT_SCORING_RULE` 값을 리터럴 하드코딩 — `BrierTrendChart.tsx`(silent drift wave-260, cycle 1566)에서 이미 한 번 고친 동일 버그 클래스이자 `config/model.ts` "버전 전환 시 체크리스트"가 명시 경고하는 재발 패턴. 오늘은 우연히 `CURRENT_SCORING_RULE==='v1.8'`이라 값이 맞았지만 다음 버전 bump 시 silent stale 확정. (cohort 필터/SMALL_SAMPLE_N 소표본 hedge/KBO·MLB 팩터키 분리는 전부 정합 확인 — 추가 버그 없음.)
+- `CURRENT_SCORING_RULE` import + 리터럴 교체. 기존 `silent-drift-wave-663.test.ts` 의 import 정규식이 `SMALL_SAMPLE_N` 단독 import만 매칭해 과도하게 엄격 — sibling import 허용하도록 완화. 회귀 가드 신규(`silent-drift-cycle-2672.test.ts`).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4475 tests green(+2). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, 17fbd6fa).
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 미감사 컴포넌트: `TeamBiasTable`/`ModelVersionHistory`, 이 2개는 component-level 테스트 여전히 부재) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2671 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 23/30, lotto 12/30), 직전8 distinct=5(review-code(heavy)4+review-code1+operational-analysis1+fix-incident1+explore-idea1, 2-chain lock 미충족). cycle 2668/2670 retro 가 공통 추천한 미감사 컴포넌트급 후보(`TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable` 또는 `MlbAccuracyDashboard.tsx` 401줄) 중 가장 큰 `MlbAccuracyDashboard.tsx` 채택.
