@@ -173,7 +173,14 @@ function manualScore(
   return clampWinnerProb(weightedSum / weightSum + HOME_ADVANTAGE);
 }
 
-/** v1.5 = 현재 prod DEFAULT_WEIGHTS (cycle 17 회귀 후 박제). */
+/**
+ * "v1.5" 라벨 = cycle 17 명명 잔재 (당시 DEFAULT_WEIGHTS 가 실제 v1.5 였음).
+ * `...DEFAULT_WEIGHTS` 는 spread 시점의 **현재** 값을 그대로 반영 — DEFAULT_WEIGHTS 자체는
+ * v1.5 → v1.6 → v1.7-revert → v1.8 로 계속 진화했으므로, 이 스크립트를 재실행하면
+ * "Manual v1.5" 출력은 실제 최신 DEFAULT_WEIGHTS(예: v1.8) 기준 값이 됨 — 진짜 역사적
+ * v1.5 가중치 재현이 아님. 과거 박제 결과물(`data/backtest-results/*.md`)의 "v1.5" 라벨도
+ * 각 생성 시점의 DEFAULT_WEIGHTS 스냅샷일 뿐 고정된 v1.5 값이 아니다.
+ */
 const WEIGHTS_V15: Record<string, number> = { ...DEFAULT_WEIGHTS };
 
 /** v1.6 = h2h/park/sfr → 0 (Wayback 백테스트 학습 결과). */

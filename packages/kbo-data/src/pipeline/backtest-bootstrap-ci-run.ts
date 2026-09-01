@@ -128,6 +128,9 @@ function manualScore(f: GameFeatures, weights: Record<string, number>): number {
   return clampWinnerProb(weightedSum / weightSum + HOME_ADVANTAGE);
 }
 
+// "v1.5" 라벨 = cycle 17 명명 잔재. `...DEFAULT_WEIGHTS` 는 재실행 시점의 최신 값을
+// 그대로 반영하므로(현재 v1.8) 재실행 결과는 "Cycle 21 결과 박제" 수치와 다를 수 있음 —
+// 진짜 역사적 v1.5 재현이 아니라 spread 시점 DEFAULT_WEIGHTS 스냅샷.
 const WEIGHTS_V15: Record<string, number> = { ...DEFAULT_WEIGHTS };
 const WEIGHTS_V16: Record<string, number> = {
   ...DEFAULT_WEIGHTS,
