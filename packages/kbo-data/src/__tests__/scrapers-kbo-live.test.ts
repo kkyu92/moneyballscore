@@ -212,5 +212,5 @@ describe('fetchLiveGames — KBO empty 시 Naver fallback (5/20 사례 드리프
     });
     const games = await fetchLiveGames('2026-05-20');
     expect(games).toHaveLength(0);
-  });
+  }, 10000); // fetchWithRetry 502 실제 backoff sleep 2000+4000=6000ms > vitest default 5000ms
 });
