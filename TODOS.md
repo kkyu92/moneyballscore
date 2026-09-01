@@ -1,4 +1,12 @@
 
+## cycle 2755 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). pipeline_runs 최근 7일 50건 전부 success. gh run list 실패 0. DESIGN.md 당일 갱신(polish-ui trigger 미충족). fix-incident gap18/20·op-analysis gap7/25·info-arch gap16/30·lotto gap3/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. prev retro 추천 = review-code(heavy) 축 거의 소진.
+- page.tsx 축 소진 확인 후 신규 미감사 축 탐색 — API 라우트(`.select(` 사용 20개 중 5개) 미감사 확인, Explore 서브에이전트 전수 감사.
+- `api/health/route.ts` checkPipeline 의 `pipeline_runs` select `created_at` 이 `.order()` 정렬(select 무관 동작)과 응답 둘 다 미소비 확인. 형제 파일 `health/pipelines/route.ts` 동일 컬럼은 consumed — 대조로 오탐 배제.
+- fix: 1개 파일 select절에서 컬럼 제거. tsc/eslint clean, 572파일 4490건 green. direct main push 성공(version-sync 0.5.62.190).
+- 다음 사이클 추천 = review-code(heavy) API 라우트 축도 소진 — fix-incident gap19/20 근접 monitor 우선, 또는 explore-idea saturation 재점검(plan#29 게이트 트래픽 조건 여전히 미충족 예상).
+
 ## cycle 2754 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=5 — 2-chain lock 미충족. fix-incident gap17/20·op-analysis gap6/25·info-arch gap15/30·lotto gap2/30 전부 미도달. gh run list 실패 0. prev retro 추천 = review-code(heavy) 축 소진 근접.
