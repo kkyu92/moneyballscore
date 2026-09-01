@@ -1,3 +1,14 @@
+## v0.5.62.187 — 2026-09-01 (cycle 2750, review-code(heavy): compareModels PredictionRow.id 미소비 컬럼 제거 SUCCESS)
+
+### review-code(heavy): PredictionRow 공유 타입 소비처 교차 감사 (cycle 2750, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident gap13/20·op-analysis gap23/25·info-arch gap11/30 전부 미도달. explore-idea saturation 4/15 미충족. gh run list 실패 0. **cycle_n % 50 == 0 milestone — skill-evolution trigger 3 충족, 회고 단계에서 marker 박제 예정.**
+- cycle 2749 추천대로 `debug/model-comparison/page.tsx` 가 소비하는 shared `PredictionRow`(compareModels.ts) 타입의 실사용 필드 재검증 — `reviews`/`feed`/`calendar` 등 나머지 8개 파일은 각자 로컬 `PredictionRow`/`*PredictionRow` interface 를 따로 정의해 compareModels.ts 것과 무관(교차 소비 리스크 없음 확인) — 실제 shared type 소비처는 debug/model-comparison 단 1곳.
+- `id` 필드가 `aggregateByModel`/`dailyByModel`/`buildShadowRows` 어디서도 미참조, 유일 소비처인 debug 페이지도 select→interface 매핑만 하고 렌더/키에 미사용 확인.
+- fix: `compareModels.ts` interface + `debug/model-comparison/page.tsx` select절/loadRows 매핑 + `compareModels.test.ts`/`compareModels-shadow.test.ts` fixture 에서 `id` 제거.
+- tsc/eslint clean, 전체 테스트 572파일 4490건 green.
+- 다음 사이클 추천 = skill-evolution (milestone marker) 강제 발화, 또는 fix-incident(gap14/20 monitor).
+
 ## v0.5.62.186 — 2026-09-01 (cycle 2749, review-code(heavy): app 라우트 직접 select 미소비 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): app 라우트 직접 select(non-embed) 미소비 컬럼 전수감사 (cycle 2749, SUCCESS)
