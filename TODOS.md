@@ -1,4 +1,13 @@
 
+## cycle 2688 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 22/25, info-arch 9/30, lotto 29/30). 직전8 distinct=2(review-code(heavy) 7 + fix-incident(lite) 1) — 2-chain lock 조건 표면상 충족이나 잠긴 chain 중 fix-incident 포함 시 안전 우선 규칙으로 lock 무시. cycle 2687 carry-over 추천대로 review-code(heavy) 계속.
+- `silent-drift-alert.ts`(440줄, cycle 2653/2685/2687 3연속 carry-over 미착수) 우선 정독 — captureFactorAnomalyAlert 미배선 상태는 기존 주석(cycle 2276)이 이미 정확 문서화, 신규 drift 없음(clean). `postview.ts`(588줄)/`buildTeamProfile.ts`(601줄) 재확인도 clean.
+- `mlb-shared.ts` 정독 → `buildMlbMissReport()` 의 `mlb_schedule` select 가 `status` 컬럼을 가져오지만 서버측 `.eq("status","final")` 필터로만 쓰이고 JS 루프 재참조 없음 발견 — kbo-live.ts/buildPicksStats.ts 등과 동일 미소비 select 필드 계열 8번째 변종.
+- `buildMlbMissReport` 전용 `MlbMissScheduleRow`(status 제외) 타입 신설해 분리(공유 `MlbScheduleRangeRow` 는 `fetchMlbPredictionRowsInRange` 가 status 실사용이라 유지).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + mlb-shared.test.ts 6 tests + moneyball 571 files/4483 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 8db19c5f).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형파일 재탐색(analysis-data.ts 974줄/convergenceRecord.ts 831줄/buildAccuracyData.ts 776줄 후보) 또는 fix-incident(6/20)/op-analysis(23/25 근접)/lotto(30/30 도달 예상) gap 자연 대기.
+
 ## cycle 2687 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 21/25, info-arch 8/30, lotto 28/30). 직전8 distinct=3(2-chain lock 미충족). 직전20 review-code 계열 70% dominance-positive streak 지속, skill-evolution 마커 부재. cycle 2686 carry-over 추천대로 review-code(heavy) 계속.

@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2688, review-code(heavy): mlb-shared.ts 미소비 status 필드 정리)
+
+### refactor: buildMlbMissReport 미소비 status select 필드 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 22/25, info-arch 9/30, lotto 29/30). 직전8 distinct=2(review-code(heavy) 7 + fix-incident(lite) 1) — 2-chain lock 조건 충족이나 잠긴 chain 중 하나가 fix-incident 라 안전 우선 규칙으로 lock 무시. cycle 2687 carry-over 추천대로 review-code(heavy) 계속 — `silent-drift-alert.ts`(440줄) 정독 우선.
+- `silent-drift-alert.ts` 전체 정독 — 기존 주석(cycle 2276)이 이미 정확히 문서화한 `captureFactorAnomalyAlert` 미배선 상태 재확인, 신규 drift 없음(clean). `postview.ts`(588줄)/`buildTeamProfile.ts`(601줄)도 재확인, clean.
+- `mlb-shared.ts` 정독 → `buildMlbMissReport()` 의 `mlb_schedule` select 가 `status` 컬럼을 가져오지만 서버측 `.eq("status","final")` 필터로만 쓰이고 JS 루프에서 재참조 없음 — 같은 파일의 `fetchMlbPredictionRowsInRange()` 가 공유하는 `MlbScheduleRangeRow` 타입은 `status` 를 실제로 쓰기(`hasFinalScore` 판정) 때문에 그대로 유지, `buildMlbMissReport` 전용 `MlbMissScheduleRow`(status 제외) 신설해 분리. kbo-live.ts/buildPicksStats.ts 등과 동일 미소비 select 필드 계열 8번째 변종.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + mlb-shared.test.ts 6 tests + moneyball 571 files/4483 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 8db19c5f).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2687, review-code(heavy): fancy-stats.ts era/innings stub silent drift 수정)
 
 ### fix: 투수 스탯 merge era/innings stub 0 silent drift 수정
