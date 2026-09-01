@@ -1,6 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { toKSTDateString, assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES } from '@moneyball/shared';
-import type { TeamCode } from '@moneyball/shared';
 import { fetchLiveGames, adjustWinProbability, type LiveGameState } from '../scrapers/kbo-live';
 import { runPostviewDaily } from './postview-daily';
 import { CURRENT_SCORING_RULE, QUANT_LIVE_VERSION } from './model-version';
@@ -90,7 +89,11 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
       date: targetDate,
       liveGames: 0,
       updated: 0,
-      errors: postview.errors,
+      // markGamePostponed / updateGameScore 실패 시 errors 배열에 push 됐던 항목이
+      // postview.errors 로만 덮어써져 silent drop 되던 버그 정정 (cycle 2730 review-code
+      // heavy 발견) — 뒤쪽 return (activeGames.length>0 경로) 은 [...errors, ...postview.errors]
+      // 로 이미 병합하는데 이 이른 return 만 누락돼있었음.
+      errors: [...errors, ...postview.errors],
       postviewsProcessed: postview.processed,
       postviewsSkipped: postview.skipped,
       postviewTokens: postview.totalTokens,
@@ -136,12 +139,12 @@ export async function runLiveUpdate(date?: string): Promise<LiveUpdateResult> {
       // 로 production cohort 만 좁혀 silent drift family 사례 17 차단.
       const preGameResult = await db
         .from('predictions')
-        .select('confidence, reasoning')
+        .select('reasoning')
         .eq('game_id', dbGame.id)
         .eq('prediction_type', 'pre_game')
         .in('scoring_rule', PRODUCTION_COHORT_RULES)
         .maybeSingle();
-      const { data: preGame } = assertSelectOk<{ confidence: number; reasoning: unknown }>(
+      const { data: preGame } = assertSelectOk<{ reasoning: unknown }>(
         preGameResult,
         'live.runLiveUpdate preGame',
       );
