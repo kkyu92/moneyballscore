@@ -8271,3 +8271,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 `pnpm --filter moneyball exec tsc --noEmit` + `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 571/4483 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 39a9eec3).
 
 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄, cycle 2653 carry-over) 정독, 또는 fix-incident(gap 2/20 방금 리셋)/op-analysis(gap 19/25 근접)/lotto(gap 26/30 근접) 자연 대기.
+
+## ✅ SUCCESS — review-code(heavy) convergenceRecord.ts 미소비 id 필드 정리 (cycle 2690, 2026-09-01)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred). 2차 방어선(cycle 2689 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 24/25 근접, info-arch 11/30, lotto 1/30 방금 발화). 직전8 distinct=3(review-code(heavy) 6 + fix-incident(lite) 1 + lotto(lite) 1) — 2-chain lock 미충족. explore-idea saturation 14/15 재도달했으나 4-source 재확인 전부 negative(신규라우트 92건=git checkout mtime 부작용, TODOS Next-Up stale mcc-alias 1-line만, GH issue 0, DESIGN.md 당일 갱신=git checkout 부작용) → review-code(heavy) 재선택.
+
+실행: 최고령 미터치 대형파일 재스캔 → `convergenceRecord.ts`(832줄, 2026-08-23 11:30 최고령) 전체 정독. `fetchMlbConvergencePickDetailedResultsForPair` 의 `mlb_schedule` select 가 `id` 컬럼을 가져오지만 scheduleRows 순회·`evaluateMlbConvergencePickRow` 호출 어디서도 참조되지 않음(external_game_id 로만 매칭) — kbo-live.ts/mlb-shared.ts/buildPicksStats.ts/predictions Row 등과 동일 미소비 select 필드 계열 9번째 발견, 제거. 나머지 함수(getConvergencePick*/getMlbConvergencePick* 전체, h2h 게이팅, streak/팀별/홈어웨이/요일 집계)는 clean.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 2bb1baa1).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`analysis-data.ts`, `buildAccuracyData.ts` 776줄, `buildTeamProfile.ts` 601줄, `buildMatchupProfile.ts` 594줄 후보) 정독, 또는 op-analysis(gap 24/25 임박, 다음 사이클 임계 도달)/fix-incident(7/20)/info-arch(11/30) gap 자연 대기.
