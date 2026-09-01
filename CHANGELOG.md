@@ -1,3 +1,13 @@
+## v0.5.62.191 — 2026-09-01 (cycle 2756, review-code(heavy): 미사용 MLB 선수 프로필 빌더 제거 SUCCESS)
+
+### review-code(heavy): lib/ 빌더 신규 축 감사 (cycle 2756, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap19/20·info-arch gap17/30·lotto gap4/30·op-analysis gap8/25 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0.
+- 직전 API 라우트 축 소진 확인 후 신규 축 탐색 — `lib/` 빌더 함수(`.select(` 사용 35개 파일) 미감사 확인, `lib/mlb/*` 18개 파일 Explore 서브에이전트 전수 감사.
+- 단일 컬럼 미소비 패턴은 이 배치엔 없음(이미 이전 사이클들이 정리한 흔적, `cycle 20xx fix` 주석 다수 확인). 대신 파일 전체가 미참조인 dead code 발견: `buildMlbPlayerProfile.ts` — production 라우트/컴포넌트 어디서도 import 없음, `/mlb/players/[id]` 는 별도 정적 Statcast 용어집이라 무관. 자체 유닛테스트만 소비.
+- fix: 빌더 파일 + 유닛테스트 파일 삭제(392줄). tsc/eslint clean, 571파일 4484건 green(테스트 1파일 6건 감소는 삭제된 테스트 반영, 회귀 아님).
+- 다음 사이클 추천 = fix-incident gap20/20 도달 임박 monitor 우선, 없으면 lib/ 나머지 17개 파일(components/predictions 2 + lib/analysis/dashboard/insights/leaderboard/matchup/players/reviews/seasons/standings/teams 계열) 신규 축 계속 감사.
+
 ## v0.5.62.190 — 2026-09-01 (cycle 2755, review-code(heavy): health API 라우트 미소비 created_at 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): API 라우트 신규 축 감사 (cycle 2755, SUCCESS)
