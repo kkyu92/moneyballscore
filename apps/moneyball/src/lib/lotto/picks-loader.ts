@@ -25,13 +25,11 @@ export interface LottoSet {
   sum: number;
   oddEven: string;
   consecutive: number;
-  avoidScore: number;
 }
 
 export interface LottoPicks {
   date: string;
   drawNo: number | null;
-  generatedAt: string | null;
   sets: LottoSet[];
 }
 
@@ -53,8 +51,7 @@ function parseTable(raw: string): LottoSet[] {
     const sum = parseInt(cols[2], 10) || 0;
     const oddEven = cols[3] ?? "";
     const consecutive = parseInt(cols[4], 10) || 0;
-    const avoidScore = parseFloat(cols[5]) || 0;
-    sets.push({ idx, numbers, sum, oddEven, consecutive, avoidScore });
+    sets.push({ idx, numbers, sum, oddEven, consecutive });
   }
   return sets;
 }
@@ -62,10 +59,8 @@ function parseTable(raw: string): LottoSet[] {
 export function parseLottoPicksMd(raw: string): Omit<LottoPicks, "date"> {
   const drawNoMatch = raw.match(/\((\d{4})회\)/);
   const drawNo = drawNoMatch ? parseInt(drawNoMatch[1], 10) : null;
-  const genMatch = raw.match(/\*\*생성 시각\*\*:\s*(.+)/);
-  const generatedAt = genMatch ? genMatch[1].trim() : null;
   const sets = parseTable(raw);
-  return { drawNo, generatedAt, sets };
+  return { drawNo, sets };
 }
 
 export function getLatestLottoPicks(): LottoPicks | null {
