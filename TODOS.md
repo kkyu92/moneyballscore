@@ -8397,3 +8397,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 2bb1baa1).
 
 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`analysis-data.ts`, `buildAccuracyData.ts` 776줄, `buildTeamProfile.ts` 601줄, `buildMatchupProfile.ts` 594줄 후보) 정독, 또는 op-analysis(gap 24/25 임박, 다음 사이클 임계 도달)/fix-incident(7/20)/info-arch(11/30) gap 자연 대기.
+
+## ✅ SUCCESS — polish-ui(2-chain lock fallback) 미소비 semantic CSS 토큰 제거 (cycle 2706, 2026-09-01)
+
+진단: open issue 0, approved plan 0/23. 2차 방어선(cycle 2705 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 15/25, info-arch 27/30, lotto 17/30). 직전8 distinct=2(review-code(heavy) 7 + skill-evolution 1) — **2-chain alternation lock 발동**. explore-idea saturation(2/15) 미충족, DESIGN.md mtime 당일=git checkout 부작용, breadcrumb 누락 18건은 cycle 2654 에서 이미 전수 확인된 false positive(root/redirect/noindex stub) — 잔여 chain 전부 organic trigger 부재 → polish-ui 강제 발화(lock rule).
+
+실행: DESIGN.md token vs 컴포넌트 grep 계열 탐색 — `globals.css` `@theme` 블록에 정의된 `--color-*` 27개 전수 `var(--color-X)` 참조 카운트 → `--color-success`/`--color-warning`/`--color-info` 0건 검출. Tailwind v4 `@theme inline` 은 CSS var 뿐 아니라 `bg-success`/`text-warning` 류 auto-utility 도 생성하므로 utility-class 사용까지 재검색 → `--color-warning`(Tailwind `bg-warning`/`text-warning`, `accuracy/page.tsx`+`debug/*` 다수 실사용)과 `--color-error`(`var(--color-error)`, `FactorWaterfallChart.tsx`+`MlbFactorWaterfallChart.tsx` 2곳)는 실사용 확인, `--color-success`/`--color-info` 만 CSS/Tailwind 쪽 진짜 소비처 0건 확정(JS 쪽은 `lib/design-tokens.ts` 의 `semantic.success`/`semantic.info` literal 이 recharts SVG prop 전담 — satori/recharts CSS var 미지원이라 애초 별도 source). `--color-success`/`--color-info` 2개 제거, 주석 갱신.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball lint` clean + pre-push hook(type-check+version-sync-guard+vitest 3 tests) green. 단일 논리 단위 → 직접 main commit+push(R4/R7, 6c703ee5).
+
+다음 사이클 추천 = review-code(heavy) 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄, `analysis-data.ts`/`buildAccuracyData.ts`/`buildTeamProfile.ts`/`buildMatchupProfile.ts` carry-over) 정독, 또는 fix-incident(10/20)/op-analysis(15/25)/info-arch(27/30)/lotto(17/30) gap 자연 대기.

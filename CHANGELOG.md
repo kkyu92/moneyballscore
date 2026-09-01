@@ -1,5 +1,12 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### polish-ui(2-chain lock fallback): 미소비 semantic CSS 토큰 제거 (cycle 2706, SUCCESS)
+
+- 직전8 사이클 distinct=2(review-code(heavy) 7 + skill-evolution 1) — 2-chain alternation lock 발동. 잔여 chain pool 진단(gap trigger 4종 전부 미도달, explore-idea saturation 2/15 미충족) 전부 organic trigger 부재 → polish-ui 강제 발화.
+- `globals.css` `@theme` 블록 `--color-success`/`--color-info` 가 CSS var()·Tailwind utility(`bg-success`/`text-info` 류) 어디서도 소비 안 됨을 grep 확인 — 실제 semantic success/info 컬러는 `lib/design-tokens.ts` 의 JS literal(`semantic.success`/`semantic.info`)로만 recharts SVG prop 에 소비(satori/recharts CSS var 미지원이라 별도 literal source 필요). `--color-warning`(Tailwind `bg-warning`/`text-warning` 다수 실사용)과 `--color-error`(`var(--color-error)`, FactorWaterfallChart 2곳)는 CSS 쪽 실사용 있어 유지.
+- tsc --noEmit clean + eslint clean + pre-push hook(type-check + version-sync-guard) 통과. 단일 논리 단위 → 직접 main commit+push(R4/R7, 6c703ee5).
+- 다음 사이클 추천 = review-code(heavy) 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄, `analysis-data.ts`/`buildAccuracyData.ts` 776줄/`buildTeamProfile.ts` 601줄/`buildMatchupProfile.ts` 594줄, cycle 2653/2690 carry-over) 정독, 또는 fix-incident(gap 10/20)/op-analysis(gap 20/25)/info-arch(gap 27/30)/lotto(gap 17/30) 자연 대기.
+
 ### review-code(heavy): DEFAULT_PARK_FACTORS를 KBO_TEAMS.parkPf 단일 source로 통일 (cycle 2705, SUCCESS)
 
 - review-code(heavy) rotation 계속 — cycle 2693 이미 dead-function(`calculateParkFactor`) 제거로 감사된 `kbo-official.ts` 재정독 중 park factor 이중 source drift 발견.
