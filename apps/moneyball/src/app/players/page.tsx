@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {SMALL_SAMPLE_N, type TeamCode, SITE_URL, LEADERBOARD_TOP_N } from "@moneyball/shared";
+import {SMALL_SAMPLE_N, type TeamCode, SITE_URL, LEADERBOARD_TOP_N, toKSTDateString } from "@moneyball/shared";
 import { buildPitcherLeaderboard } from "@/lib/players/buildPitcherLeaderboard";
 import { buildBatterLeaderboard } from "@/lib/players/buildBatterLeaderboard";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -244,7 +244,7 @@ export default async function PlayersIndexPage() {
           </div>
           {batters[0]?.lastSynced && (
             <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
-              최종 동기화 {batters[0].lastSynced.slice(0, 10)}
+              최종 동기화 {toKSTDateString(new Date(batters[0].lastSynced))}
             </span>
           )}
         </div>

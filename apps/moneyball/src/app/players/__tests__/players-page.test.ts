@@ -28,3 +28,10 @@ describe("players PLAYERS_ISR_SECONDS source-of-truth guard (silent drift wave 1
   });
 
 });
+
+describe("players/page.tsx lastSynced KST 변환 guard (review-code heavy cycle 2676)", () => {
+  it("lastSynced UTC ISO string 을 slice(0,10) 으로 직접 자르지 않음 — toKSTDateString 사용", () => {
+    expect(PAGE_SRC).not.toMatch(/lastSynced\.slice\(0,\s*10\)/);
+    expect(PAGE_SRC).toMatch(/toKSTDateString\(new Date\(batters\[0\]\.lastSynced\)\)/);
+  });
+});

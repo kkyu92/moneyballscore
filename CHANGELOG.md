@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2676, review-code(heavy): players/page.tsx lastSynced UTC-slice-as-KST 정정)
+
+### fix: 선수 리더보드 "최종 동기화" 날짜 UTC 슬라이스 → KST 변환
+
+- 진단: 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 28/30, lotto 17/30), 직전8 distinct=3(review-code(heavy)×6 + explore-idea×1 + polish-ui×1, 2-chain lock 미충족). 직전 20 사이클 chain 분포 전부 ≥1회(cycle49 0회 룰 미충족). cycle 2674/2675 retro 공통 추천 미감사 후보(`app/players/page.tsx`/`lib/reviews/buildMissReport.ts`/`app/reviews/misses/page.tsx`) 중 최대 규모 `players/page.tsx`(315줄, 2026-07-14 이후 미터치) 채택.
+- 서브에이전트로 전체 정독 + `buildPitcherLeaderboard.ts`/`buildBatterLeaderboard.ts`/`config/model.ts`/`buildSeasonSummary.ts` 교차검증. scoring_rule 필터·KST 시즌 연도 계산은 이미 이전 wave(656/cycle 2647)에서 정정 완료된 상태 확인(clean). 실제 drift 1건: `page.tsx:247` 이 `batters[0].lastSynced`(UTC ISO, `sync-batter-stats.ts` 가 `new Date().toISOString()` 로 기록)를 `slice(0,10)` 으로 그대로 잘라 KST 날짜인 것처럼 표시 — 자동 cron(`'17 0-14 * * *'` UTC = KST 09:17~23:17)은 날짜 경계를 안 넘어 현재는 무해하지만, 무제한 `workflow_dispatch` 수동 실행이 UTC 15:00~23:59(KST 00:00~08:59 다음날)에 발생하면 하루 앞선 날짜가 그대로 노출되는 잠재 버그(compareModels.ts 계열과 동일 UTC-slice-as-KST 패턴).
+- `@moneyball/shared` 의 `toKSTDateString()` 으로 교체(신규 유틸 추가 없이 기존 함수 재사용). `players-page.test.ts` 에 소스 grep 회귀 가드 추가(slice(0,10) 패턴 부재 + toKSTDateString 사용 확인).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(+1). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2675, polish-ui: MLB OG/twitter gradient family drift 3건 정리)
 
 ### fix: mlb/team + players + factors OG/twitter 이미지 gradient 토큰 불일치 3건
