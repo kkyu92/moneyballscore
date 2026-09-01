@@ -340,11 +340,18 @@ export default async function AccuracyPage() {
   const gap = calibrationGap(rows);
   const buckets = bucketize(rows);
   const weekly = buildWeeklyTrend(rows);
-  const brierTrend = buildBrierTrend(rows);
-  const scoringRuleDayHeatmap = buildScoringRuleDayHeatmap(rows);
+  // BrierTrendChart 가 v1.5/v1.6/v1.7-revert 색상 라인(SR_COLOR_MAP)까지 정의해두고도
+  // `rows`(v1.8만)를 받으면 과거 era 데이터가 전혀 없어 'all'/CURRENT_SCORING_RULE 라인만
+  // 그려짐 — 아래 heatmap 과 동일 root cause (silent drift, review-code heavy 감사 cycle 2670).
+  const brierTrend = buildBrierTrend(versionHistoryRows);
+  // scoring_rule cohort 비교 목적 — versionHistoryRows(unfiltered, 전 era 포함) 사용.
+  // `rows`(CURRENT_MODEL_FILTER=v1.8만)를 쓰면 v1.5/v1.6/v1.7-revert/v1.8-credit-fail
+  // 행이 영구히 n=0 이 돼 cohort 비교 기능이 구조적으로 죽어있었음 (silent drift, review-code
+  // heavy 감사 cycle 2670) — buildVersionHistory 가 이미 겪은 동일 패턴(line 277 주석 참조).
+  const scoringRuleDayHeatmap = buildScoringRuleDayHeatmap(versionHistoryRows);
   const rollingAccuracy = buildRollingAccuracy(rows);
   const winnerProbBuckets = buildWinnerProbBuckets(rows);
-  const cohortWeekHeatmap = buildScoringRuleWeekHeatmap(rows);
+  const cohortWeekHeatmap = buildScoringRuleWeekHeatmap(versionHistoryRows);
   const dow = buildDayOfWeek(rows);
   const recentForm = buildRecentForm(rows);
   const confidenceTiers = buildConfidenceTiers(rows);
