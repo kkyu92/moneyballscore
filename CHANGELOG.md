@@ -1,3 +1,11 @@
+## v0.5.62.170 — 2026-09-01 (cycle 2730, review-code(heavy): live.ts 전수감사 — dead field + silent error drop 버그 수정)
+
+### review-code(heavy): live.ts 전수감사 (cycle 2730, SUCCESS)
+
+- 진단: explore-idea saturation trigger 12/15 충족했으나 4-source 재확인 전부 negative(plan#29 deferred 근거 불변) — dominance-positive streak 인정 하 review-code(heavy) 지속. `packages/kbo-data/src/pipeline/live.ts`(363줄) TODOS 0-mention 최초 감사 대상.
+- 전수감사 3건 발견/수정: (1) `predictions.confidence` select 후 미소비 dead field 제거, (2) `activeGames.length===0` 조기 return 경로가 `postview.errors` 로만 덮어써 `markGamePostponed`/`updateGameScore` 실패 errors 를 silent drop 하던 실버그 — errors 병합으로 수정 (CLAUDE.md R5 doctrine 정합 사례), (3) 미사용 `TeamCode` import 제거. tsc/eslint/vitest(kbo-data 92 files 1218 tests) 전부 green (`058babbb`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상(`agents/retro.ts` 329줄, `agents/llm.ts` 308줄) 또는 info-architecture-review(gap 22/30, 근접).
+
 ## v0.5.62.169 — 2026-09-01 (cycle 2729, review-code(heavy): buildMlbMatchupProfile.ts/buildMatchupProfile.ts 미소비 필드 2개 제거)
 
 ### review-code(heavy): matchup profile 전수감사 (cycle 2729, SUCCESS)

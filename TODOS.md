@@ -1,4 +1,12 @@
 
+## cycle 2730 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 34/20, lotto gap 41/30 재확인 (둘 다 노이즈). op-analysis gap 3/25, info-arch gap 21/30 둘 다 미도달. 직전8 distinct=3 — 2-chain lock 미충족. explore-idea saturation 12/15 충족했으나 4-source 재확인 negative — review-code(heavy) 지속, `live.ts`(363줄) 최초 감사 자연 매핑.
+- 서브에이전트 전수감사 — `predictions.confidence` dead select 1건 + `postview.errors` 로만 덮어써 선행 errors silent drop 하던 실버그 1건(진짜 버그, R5 doctrine 정합) + 미사용 `TeamCode` import 1건 발견/수정.
+- fix: 3건 모두 수정. tsc/eslint/vitest(kbo-data 92 files 1218 tests) 전부 green. main 직접 커밋 + push (`058babbb`).
+- **참고**: 본 사이클 retro dispatch(policy: cycle-retro 2730 커밋 + 본 CHANGELOG/TODOS 엔트리)가 실행 세션 중단으로 silent skip 됐다가 cycle 2731 진단 단계 2차 방어선("직전 사이클 retro commit 결손 감지")에서 발견 후 retroactive backfill (사례 15 family 재발, 5번째).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색(`agents/retro.ts` 329줄, `agents/llm.ts` 308줄) 또는 info-architecture-review(gap 22/30, 근접).
+
 ## cycle 2729 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 33/20/lotto gap 40/30 재확인 (둘 다 노이즈 지속). op-analysis gap 2/25, info-arch gap 20/30 둘 다 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2728 추천대로 `buildMlbMatchupProfile.ts`(522줄) 선정.
