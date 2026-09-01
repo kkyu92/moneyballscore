@@ -275,8 +275,6 @@ describe('buildPicksStats', () => {
     ];
     const entries = buildPickEntries(picks, results);
     const stats = buildPicksStats(entries);
-    expect(stats.agreedResolved).toBe(1);
-    expect(stats.agreedCorrect).toBe(1);
     expect(stats.divergentResolved).toBe(3);
     expect(stats.divergentMyCorrect).toBe(1); // 오직 game 4 에서만
     expect(stats.divergentRate).toBeCloseTo(1 / 3);
@@ -297,7 +295,6 @@ describe('buildPicksStats', () => {
     ];
     const entries = buildPickEntries(picks, results);
     const stats = buildPicksStats(entries);
-    expect(stats.agreedResolved).toBe(1);
     expect(stats.divergentResolved).toBe(0);
     expect(stats.divergentRate).toBeNull();
   });

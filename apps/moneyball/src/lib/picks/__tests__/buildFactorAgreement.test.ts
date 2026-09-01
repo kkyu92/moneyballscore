@@ -64,7 +64,6 @@ describe('buildFactorAgreement', () => {
     const sp = out.byFactor.find((r) => r.factor === 'sp_fip')!;
     expect(sp.withMyPick).toBe(1);
     expect(sp.againstMyPick).toBe(1);
-    expect(sp.neutral).toBe(1);
     expect(sp.total).toBe(3);
     expect(sp.agreementRate).toBe(0.5); // 1 / (1+1)
   });
@@ -89,7 +88,6 @@ describe('buildFactorAgreement', () => {
     ];
     const out = buildFactorAgreement(entries);
     const sp = out.byFactor.find((r) => r.factor === 'sp_fip')!;
-    expect(sp.neutral).toBe(2);
     expect(sp.withMyPick).toBe(0);
     expect(sp.againstMyPick).toBe(0);
     expect(sp.agreementRate).toBeNull(); // 분모 0

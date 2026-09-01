@@ -66,8 +66,6 @@ export interface PicksStats {
   divergentResolved: number; // AI 와 다른 픽 + 결과 확정 (AI 예측 있는 경기만)
   divergentMyCorrect: number; // 그 중 내가 맞은 수
   divergentRate: number | null; // divergentMyCorrect / divergentResolved
-  agreedResolved: number; // AI 와 같은 픽 + 결과 확정
-  agreedCorrect: number; // 그 중 맞은 수 (사용자=AI 이므로 동일)
 }
 
 export function buildPickEntries(
@@ -197,21 +195,15 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     else if (p5 - r5 > PICKS_TREND_THRESHOLD) trend = 'down';
   }
 
-  // divergent / agreed 분기 — AI 예측 있는 경기만 (aiPredictedHome != null)
+  // divergent 분기 — AI 와 다른 픽만 집계, AI 예측 있는 경기만 (aiPredictedHome != null)
   let divergentResolved = 0;
   let divergentMyCorrect = 0;
-  let agreedResolved = 0;
-  let agreedCorrect = 0;
   for (const e of resolved) {
     if (e.aiPredictedHome === null) continue;
     const myPickHome = e.myPick === 'home';
-    const isDivergent = myPickHome !== e.aiPredictedHome;
-    if (isDivergent) {
+    if (myPickHome !== e.aiPredictedHome) {
       divergentResolved++;
       if (e.myIsCorrect === true) divergentMyCorrect++;
-    } else {
-      agreedResolved++;
-      if (e.myIsCorrect === true) agreedCorrect++;
     }
   }
   const divergentRate = divergentResolved > 0 ? divergentMyCorrect / divergentResolved : null;
@@ -231,8 +223,6 @@ export function buildPicksStats(entries: PickEntry[]): PicksStats {
     divergentResolved,
     divergentMyCorrect,
     divergentRate,
-    agreedResolved,
-    agreedCorrect,
   };
 }
 
@@ -315,8 +305,6 @@ export interface FactorAgreementRow {
   withMyPick: number;
   // 반대 (AI 방향) 으로 leaned 한 횟수
   againstMyPick: number;
-  // neutral 횟수
-  neutral: number;
   // 총 측정 횟수 (factors present in entry)
   total: number;
   // withMyPick / (withMyPick + againstMyPick), neutral 제외.
@@ -373,17 +361,13 @@ export function buildFactorAgreement(entries: PickEntry[]): FactorAgreement {
   for (const factor of factorKeys) {
     let withMyPick = 0;
     let againstMyPick = 0;
-    let neutral = 0;
     let total = 0;
     for (const e of candidates) {
       const v = e.aiFactors?.[factor];
       if (typeof v !== 'number' || !Number.isFinite(v)) continue;
       total++;
       const lean = classifyFactorLean(v);
-      if (lean === 'neutral') {
-        neutral++;
-        continue;
-      }
+      if (lean === 'neutral') continue;
       if (lean === e.myPick) withMyPick++;
       else againstMyPick++;
     }
@@ -392,7 +376,6 @@ export function buildFactorAgreement(entries: PickEntry[]): FactorAgreement {
       factor,
       withMyPick,
       againstMyPick,
-      neutral,
       total,
       agreementRate: denom > 0 ? withMyPick / denom : null,
     });
