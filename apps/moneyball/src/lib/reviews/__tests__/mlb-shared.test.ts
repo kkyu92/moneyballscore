@@ -85,9 +85,8 @@ describe('buildMlbFactorInsights', () => {
     ];
     const insights = buildMlbFactorInsights(rows, { minSamples: 3 });
     expect(insights.best).not.toBeNull();
-    expect(insights.best!.factor).toBe('sp_fip');
+    expect(insights.best!.label).toBe('선발 투수력');
     expect(insights.best!.correlation).toBeGreaterThan(0);
-    expect(insights.best!.direction).toBe('positive');
   });
 
   it('actualHomeWin=null 인 행은 표본에서 제외', () => {

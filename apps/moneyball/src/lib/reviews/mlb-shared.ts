@@ -3,8 +3,6 @@ import { deriveMlbOutcome } from "@/lib/mlb/deriveMlbOutcome";
 import { FACTOR_LABELS, FACTOR_LABELS_EN } from "@/lib/predictions/factorLabels";
 import { pearsonCorrelation } from "@/lib/stats/pearson";
 import {
-  FACTOR_CORR_NEGATIVE_MAX,
-  FACTOR_CORR_POSITIVE_MIN,
   MISS_REPORT_LIMIT,
   MLB_PRODUCTION_COHORT_RULES,
   MLB_TEAMS,
@@ -49,11 +47,9 @@ export interface MlbWeeklyTeamStat {
 }
 
 export interface MlbWeeklyFactorInsight {
-  factor: string;
   label: string;
   correlation: number;
   directionalAccuracy: number | null;
-  direction: "positive" | "negative" | "weak";
 }
 
 export interface MlbPredictionRow {
@@ -290,16 +286,9 @@ export function buildMlbFactorInsights(
     if (diffs.length < minSamples) continue;
     const correlation = pearsonCorrelation(diffs, actuals);
     results.push({
-      factor: key,
       label: labels[key] ?? key,
       correlation,
       directionalAccuracy: dirN > 0 ? dirCorrect / dirN : null,
-      direction:
-        correlation >= FACTOR_CORR_POSITIVE_MIN
-          ? "positive"
-          : correlation <= FACTOR_CORR_NEGATIVE_MAX
-            ? "negative"
-            : "weak",
     });
   }
 
@@ -311,8 +300,6 @@ export function buildMlbFactorInsights(
 export interface MlbMissFactorSupport {
   factor: MlbFactorKey;
   label: string;
-  // 예측 방향(홈/원정 우세) 기준 diff 크기. 부호는 항상 예측과 같은 방향(양수=예측 뒷받침).
-  supportMagnitude: number;
 }
 
 export interface MlbMissReportItem {
@@ -388,7 +375,8 @@ export async function buildMlbMissReport(
   return top.map(({ row: s, pred, conf }) => {
     const predictedHomeWin = pred.home_win_prob! >= 0.5;
 
-    const factorSupports: MlbMissFactorSupport[] = [];
+    // supportMagnitude 는 정렬용 내부 키 — 공개 인터페이스(MlbMissFactorSupport)엔 미노출.
+    const factorSupports: (MlbMissFactorSupport & { supportMagnitude: number })[] = [];
     for (const key of Object.keys(MLB_FACTOR_COLUMN_PAIRS) as MlbFactorKey[]) {
       const [homeCol, awayCol] = MLB_FACTOR_COLUMN_PAIRS[key];
       const homeVal = pred[homeCol as keyof MlbPredBreakdownRow] as number | null;
