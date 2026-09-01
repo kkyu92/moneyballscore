@@ -42,7 +42,6 @@ export interface MatchupGame {
 export interface MatchupSideStat {
   teamCode: TeamCode;
   teamName: string;
-  teamColor: string;
   /** 이 팀이 이긴 경기 수 (final 기준) */
   wins: number;
   /** 이 팀이 홈이었을 때 승 */
@@ -110,15 +109,10 @@ interface Row {
   } | null;
 }
 
-function makeSideStat(
-  code: TeamCode,
-  teamName: string,
-  teamColor: string,
-): MatchupSideStat {
+function makeSideStat(code: TeamCode, teamName: string): MatchupSideStat {
   return {
     teamCode: code,
     teamName,
-    teamColor,
     wins: 0,
     homeWins: 0,
     awayWins: 0,
@@ -353,8 +347,8 @@ export async function buildMatchupProfile(
       totalGames: 0,
       finalGames: 0,
       sideStats: {
-        a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
-        b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
+        a: makeSideStat(teamA.code, teamA.shortName),
+        b: makeSideStat(teamB.code, teamB.shortName),
       },
       predictionAccuracy: { verified: 0, correct: 0, rate: null },
       games: [],
@@ -369,8 +363,8 @@ export async function buildMatchupProfile(
         teamB,
         finalGames: 0,
         sideStats: {
-          a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
-          b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
+          a: makeSideStat(teamA.code, teamA.shortName),
+          b: makeSideStat(teamB.code, teamB.shortName),
         },
         predictionAccuracy: { verified: 0, correct: 0, rate: null },
         streak: null,
@@ -480,8 +474,8 @@ export async function buildMatchupProfile(
     );
   }
   const games: MatchupGame[] = [];
-  const sideA = makeSideStat(teamA.code, teamA.shortName, teamA.color);
-  const sideB = makeSideStat(teamB.code, teamB.shortName, teamB.color);
+  const sideA = makeSideStat(teamA.code, teamA.shortName);
+  const sideB = makeSideStat(teamB.code, teamB.shortName);
 
   let verified = 0;
   let correct = 0;

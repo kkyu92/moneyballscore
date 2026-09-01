@@ -49,7 +49,6 @@ export interface MlbMatchupGame {
 export interface MlbMatchupSideStat {
   teamCode: MlbTeamCode;
   teamName: string;
-  teamColor: string;
   /** 이 팀이 이긴 경기 수 (final 기준) */
   wins: number;
   /** 이 팀이 홈이었을 때 승 */
@@ -116,12 +115,10 @@ interface PredRow {
 function makeSideStat(
   code: MlbTeamCode,
   teamName: string,
-  teamColor: string,
 ): MlbMatchupSideStat {
   return {
     teamCode: code,
     teamName,
-    teamColor,
     wins: 0,
     homeWins: 0,
     awayWins: 0,
@@ -345,8 +342,8 @@ export async function buildMlbMatchupProfile(
     totalGames: 0,
     finalGames: 0,
     sideStats: {
-      a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
-      b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
+      a: makeSideStat(teamA.code, teamA.shortName),
+      b: makeSideStat(teamB.code, teamB.shortName),
     },
     predictionAccuracy: { verified: 0, correct: 0, rate: null },
     games: [],
@@ -361,8 +358,8 @@ export async function buildMlbMatchupProfile(
       teamB,
       finalGames: 0,
       sideStats: {
-        a: makeSideStat(teamA.code, teamA.shortName, teamA.color),
-        b: makeSideStat(teamB.code, teamB.shortName, teamB.color),
+        a: makeSideStat(teamA.code, teamA.shortName),
+        b: makeSideStat(teamB.code, teamB.shortName),
       },
       predictionAccuracy: { verified: 0, correct: 0, rate: null },
       streak: null,
@@ -409,8 +406,8 @@ export async function buildMlbMatchupProfile(
   }
 
   const games: MlbMatchupGame[] = [];
-  const sideA = makeSideStat(teamA.code, teamA.shortName, teamA.color);
-  const sideB = makeSideStat(teamB.code, teamB.shortName, teamB.color);
+  const sideA = makeSideStat(teamA.code, teamA.shortName);
+  const sideB = makeSideStat(teamB.code, teamB.shortName);
 
   let verified = 0;
   let correct = 0;
