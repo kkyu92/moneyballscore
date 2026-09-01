@@ -1,3 +1,13 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2695, review-code(heavy): BacktestGame.id 미소비 필드 제거)
+
+### refactor: loadDecidedGames() id select+할당 미소비 필드 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 4/25, info-arch 16/30, lotto 6/30). 직전8 distinct=3(review-code(heavy) 6 + lotto 1 + operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 유일 후보 plan#29(로그인/커뮤니티)가 여전히 risk=3+자율불가 Tier4(postseason 접근 또는 user_picks≥10 재평가 조건 미충족, 오늘 2026-09-01) → review-code(heavy) 재선택. cycle 2694 carry-over 후보 `backtest-grid-run.ts` 재확인 — 이미 자매 파일 cross-check(cycle 2685)로 clean 확정 상태, 다음 후보 `loader.ts` 채택.
+- `packages/kbo-data/src/backtest/loader.ts`(250줄) 전체 정독 + 소비처 교차검증(backtest 파이프라인 7종: grid/logistic/wayback/v3/manual-weights/bootstrap-ci/run + runner.ts + harness.ts) — `loadDecidedGames()` 가 `games.id` 를 select+`BacktestGame.id` 필드에 할당하지만 어느 소비처도 `.id` 참조 없음(전부 season/homeTeamId/homeWon 등으로만 매칭). computed-but-unconsumed 죽은 필드 계열(cycle 2677/2678/2680/2681/2682/2684 "games"/기타 변종) 7번째 발견 — 이번엔 파이프라인 스크립트가 아닌 공유 loader 함수 자체. `BacktestGame` interface + select 컬럼 + 테스트 fixture(`backtest-harness.test.ts`) 동기 제거.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 92 files/1218 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 9f019b18).
+
+---
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2693, review-code(heavy): kbo-official.ts calculateParkFactor 죽은 함수 제거)
 
 ### refactor: calculateParkFactor() 완전 죽은 함수 제거
