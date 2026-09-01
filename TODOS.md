@@ -1,4 +1,12 @@
 
+## cycle 2670 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 22/30, lotto 11/30), 직전8 distinct=4(review-code(heavy)5+fix-incident1+operational-analysis1+explore-idea1, 2-chain lock 미충족). cycle 2668/2669 retro 가 명시 추천한 review-code(heavy) 미감사 대형 파일(`buildAccuracyData.ts`, 776줄) 채택.
+- 서브에이전트로 전체 정독 + 관련 migration/shared 상수/테스트/4개 소비 컴포넌트 교차검증. 진짜 drift 발견: `buildScoringRuleDayHeatmap`/`buildScoringRuleWeekHeatmap`(SCORING_RULE_HEATMAP_ROWS = 'all'+PRODUCTION_ERA_HISTORY+'v1.8-credit-fail' 다중 era 비교 전제 설계) + `buildBrierTrend`(BrierTrendChart 의 SR_COLOR_MAP 이 v1.5/v1.6/v1.7-revert 색상까지 정의) 세 함수 모두 `apps/moneyball/src/app/accuracy/page.tsx` 호출부에서 `CURRENT_MODEL_FILTER`(scoring_rule='v1.8')로 걸러진 `rows` 를 인자로 받아왔음 — 입력에 v1.8 외 scoring_rule 이 전혀 없어 나머지 era cohort 가 영구히 n=0, cohort 비교 기능 자체가 구조적으로 죽어있었음. `buildVersionHistory` 가 동일 문제를 이미 겪고 `versionHistoryRows`(unfiltered)로 교체된 전례(page.tsx:277 주석)가 있었으나 이 세 함수엔 적용되지 않은 잔여 케이스.
+- page.tsx 세 호출부(`buildScoringRuleDayHeatmap`/`buildScoringRuleWeekHeatmap`/`buildBrierTrend`)를 `versionHistoryRows` 로 교체(함수 내부 로직 변경 없음, 데이터 소스만 교체) + 회귀 가드 테스트(`silent-drift-cycle-2670.test.ts`) 신규.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 570 files/4473 tests green(신규 3). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, 81d1d4c3).
+- 다음 사이클 추천 = review-code(heavy) 계속(컴포넌트 레벨 미감사 후보: `TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable`, 또는 대형 파일 `MlbAccuracyDashboard.tsx` 401줄) 또는 fix-incident/info-arch/lotto gap 자연 대기.
+
 ## cycle 2669 (2026-09-01) — RETRO-ONLY
 
 - explore-idea(lite): 진단 — 개방 issue 0, approved plan 0/23(전량 completed/archived/status 없음). gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 3/25, info-arch 21/30, lotto 10/30). 직전8 distinct=3(review-code(heavy)5+operational-analysis2+fix-incident1, 2-chain lock 미충족). **explore-idea saturation trigger 충족**(직전15 review-code/fix-incident/polish-ui/info-arch 합 12/15 ≥12 — review-code 9+fix-incident 2+polish-ui 1) → review-code dominance 다양성 redirect로 자연 채택.

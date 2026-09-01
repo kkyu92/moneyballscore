@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2670, review-code(heavy): scoring_rule cohort 비교 함수 3개 구조적 죽음 fix)
+
+### fix: buildScoringRuleDayHeatmap/WeekHeatmap/buildBrierTrend 가 v1.8-only rows 받아 era cohort 비교 불가
+
+- 진단: 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 22/30, lotto 11/30), 직전8 distinct=4(2-chain lock 미충족). cycle 2668/2669 retro 가 명시 추천한 review-code(heavy) 컴포넌트급 미감사 후보(buildAccuracyData.ts 776줄) 채택.
+- 서브에이전트 전체 정독 감사 — `buildScoringRuleDayHeatmap`/`buildScoringRuleWeekHeatmap`(SCORING_RULE_HEATMAP_ROWS = 'all'+PRODUCTION_ERA_HISTORY+'v1.8-credit-fail' 다중 era 전제 설계) + `buildBrierTrend`(BrierTrendChart 의 SR_COLOR_MAP 이 v1.5/v1.6/v1.7-revert 색상까지 정의) 세 함수 모두 page.tsx 호출부에서 `CURRENT_MODEL_FILTER`(scoring_rule='v1.8')로 걸러진 `rows` 를 받아왔음 — v1.8 외 scoring_rule 이 입력에 전혀 없어 다른 era cohort 는 영구히 n=0, cohort 비교 기능 자체가 구조적으로 죽어있었음. `buildVersionHistory` 가 동일 문제를 이미 겪고 `versionHistoryRows`(unfiltered)로 교체된 전례(page.tsx:277 주석, review-code heavy 이전 감사)가 있었으나 이 세 함수엔 적용되지 않은 잔여 케이스.
+- page.tsx 세 호출부를 `versionHistoryRows` 로 교체(코드 로직 자체 변경 없음, 데이터 소스만 교체). 회귀 가드 테스트(`silent-drift-cycle-2670.test.ts`) 신규.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 570 files/4473 tests green. 단일 논리 단위 → 직접 main commit+push(R4/R7, 81d1d4c3).
+
 ## v0.5.62.168 — 2026-08-26 (cycle 2653, review-code(heavy): 일반 LLM 재시도 경로 off-by-one — cycle 2634 carry-over)
 
 ### fix: 일반 5xx/네트워크 재시도 경로도 마지막 backoff 값이 실제 sleep 에 안 쓰임 (529 경로와 동일 패턴)
