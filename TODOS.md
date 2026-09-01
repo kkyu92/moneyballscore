@@ -1,4 +1,12 @@
 
+## cycle 2705 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2704 추천대로 `kbo-official.ts`(cycle 2693 dead-function 감사 완료) 재정독 중 park factor 이중 source drift 발견.
+- `DEFAULT_PARK_FACTORS`(kbo-official.ts, decimal ratio, "2025 시즌 기반 추정" 하드코딩)와 `KBO_TEAMS.parkPf`(shared/index.ts, index-100, 팀 persona yaml 기반) 대조 — 9개 구장 중 4개(인천SSG/광주기아/잠실LG·OB/대전한화)에서 타자/투수 친화 방향 자체가 반대. 잠실이 최악: KBO_TEAMS 기준 극단적 투수친화(parkPf=95)인데 DEFAULT_PARK_FACTORS는 1.02(중립~약간 타자친화) — predictor.ts factors.park_factor(가중치 4%) 실제 입력이 야구 상식과 반대 부호였음.
+- fix: `DEFAULT_PARK_FACTORS`를 `KBO_TEAMS.parkPf/100` 파생값으로 교체(하드코딩 테이블 제거), 단일 source 통일(commit ff2f8350). tsc clean + eslint clean + vitest kbo-data 92 files/1218 tests 전체 green.
+- gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 14/25, info-arch 26/30, lotto 16/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = review-code(heavy) 멘션횟수 rotation 계속.
+
 ## cycle 2704 (2026-09-01) — SUCCESS — fix-incident
 
 - review-code(heavy) rotation 계속 — cycle 2703 추천대로 `backtest-manual-weights-run.ts`(2회 언급) 전체 정독. 로직 정상(H4 manual vs logistic 비교 ad-hoc 스크립트), `cycle: 903` 하드코딩 메타데이터는 stale 이나 소비처 0건(grep 확인) — 실사용 영향 없어 actionable 아님.

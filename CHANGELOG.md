@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): DEFAULT_PARK_FACTORS를 KBO_TEAMS.parkPf 단일 source로 통일 (cycle 2705, SUCCESS)
+
+- review-code(heavy) rotation 계속 — cycle 2693 이미 dead-function(`calculateParkFactor`) 제거로 감사된 `kbo-official.ts` 재정독 중 park factor 이중 source drift 발견.
+- `DEFAULT_PARK_FACTORS`(kbo-official.ts, stadium명 키, decimal ratio, "2025 시즌 기반 추정" 하드코딩)와 `KBO_TEAMS.parkPf`(shared/index.ts, index-100, 팀 persona yaml 기반 능동 관리) 대조 — 9개 구장 중 4개(인천SSG/광주기아/잠실LG·OB/대전한화)에서 타자/투수 친화 방향 자체가 반대. 잠실이 최악: KBO_TEAMS 기준 KBO 최고 수준 투수친화 구장(parkPf=95)인데 DEFAULT_PARK_FACTORS는 1.02(중립~약간 타자친화). daily.ts pipeline → predictor.ts factors.park_factor(가중치 4%)가 실제 야구 상식과 반대 부호 입력을 받던 상태.
+- fix: `DEFAULT_PARK_FACTORS`를 `KBO_TEAMS.parkPf/100` 파생값으로 교체(하드코딩 테이블 제거), 두 시스템 영구 동기화 — 기존 silent drift family 단일 source 패턴 정합.
+- tsc clean + eslint clean + vitest kbo-data 92 files/1218 tests 전체 green(무변화).
+- 다음 사이클 추천 = review-code(heavy) 멘션횟수 rotation 계속.
+
 ### fix-incident: kbo-live 502 fallback 테스트 timeout 수정 (cycle 2704, SUCCESS)
 
 - review-code(heavy) rotation(`backtest-manual-weights-run.ts` 전체 정독, clean — `cycle: 903` 하드코딩 메타데이터는 소비처 0건이라 actionable 아님) 도중 `npx vitest run packages/kbo-data` 전체 실행에서 `scrapers-kbo-live.test.ts` timeout 실패 재현(2회).
