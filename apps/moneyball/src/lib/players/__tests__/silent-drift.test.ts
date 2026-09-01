@@ -124,6 +124,21 @@ describe("players lib — cycle 173 silent drift family `.error` 미체크 회�
     vi.useRealTimers();
   });
 
+  it("buildBatterLeaderboard — last_synced freshness gte 필터 호출 확인 (cycle 2733 stale-leader 회귀 가드)", async () => {
+    supabaseMock = makeSupabaseMock();
+    const { buildBatterLeaderboard } = await import(
+      "../buildBatterLeaderboard"
+    );
+    await buildBatterLeaderboard();
+    const batterBuilder = supabaseMock.from.mock.results.find(
+      (_r, i) => supabaseMock.from.mock.calls[i]?.[0] === "batter_stats",
+    )?.value as Record<string, { mock: { calls: unknown[][] } }> | undefined;
+    expect(batterBuilder?.gte).toHaveBeenCalledWith(
+      "last_synced",
+      expect.any(String),
+    );
+  });
+
   it("buildPitcherLeaderboard predictions select error → assertSelectOk throw", async () => {
     supabaseMock = makeSupabaseMock({
       pitcherPredictionsError: { message: "syntax error" },

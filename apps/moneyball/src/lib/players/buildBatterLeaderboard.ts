@@ -48,6 +48,13 @@ export async function buildBatterLeaderboard(options: {
   const season = options.season ?? computeCurrentKSTYear();
 
   const supabase = await createClient();
+  // sync-batter-stats 는 Fancy Stats /leaders/ 가 그날 노출한 선수만 upsert —
+  // 선수가 leaders 목록에서 빠지면(슬럼프/부상/랭킹 하락) 그 row 는 두 번 다시
+  // 갱신되지 않고 DB 에 옛 WAR 값으로 영구 고정됨. freshness 필터 없이 WAR desc
+  // 정렬만 하면 수개월 전 값이 현재 1위로 고정 표시되는 실버그(cycle 2733 발견,
+  // 송성문 2026-05-29 값이 2026-09-01까지 #1로 노출).
+  const FRESHNESS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+  const freshSince = new Date(Date.now() - FRESHNESS_WINDOW_MS).toISOString();
   // error 시 fail-loud (기존엔 data=null silent fallback → 빈 leaderboard 위장,
   // 사용자엔 "선수 없음" 으로 보임). 호출 site (page) 가 catch 결정.
   const queryResult = (await supabase
@@ -62,6 +69,7 @@ export async function buildBatterLeaderboard(options: {
       `,
     )
     .eq("season", season)
+    .gte("last_synced", freshSince)
     .order("war", { ascending: false, nullsFirst: false })
     .limit(limit * 2)) as unknown as SelectResult<Row[]>; // position 필터로 일부 제외 대비
 
