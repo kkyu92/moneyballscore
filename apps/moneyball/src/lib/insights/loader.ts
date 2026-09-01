@@ -223,7 +223,7 @@ export async function getInsightsForDate(date: string): Promise<InsightEntry[]> 
   const result = await supabase
     .from("predictions")
     .select(
-      "is_correct, reasoning, factors, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
+      "is_correct, reasoning, factors, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .eq("prediction_type", "pre_game")
     .in("scoring_rule", PRODUCTION_COHORT_RULES as readonly string[])

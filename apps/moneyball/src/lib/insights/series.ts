@@ -120,7 +120,7 @@ export async function getSeriesByTopic(
   const result = await supabase
     .from("predictions")
     .select(
-      "is_correct, reasoning, prediction_type, created_at, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
+      "is_correct, reasoning, games!inner(id, game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
     )
     .match(CURRENT_MODEL_FILTER)
     .eq("prediction_type", "pre_game")
