@@ -55,7 +55,6 @@ function makeGame(overrides: Partial<TeamRecentGame>): TeamRecentGame {
     gameId: 1,
     gameDate: "2026-08-01",
     isHome: true,
-    opponentCode: null,
     opponentName: null,
     predictedAsWinner: false,
     confidence: null,

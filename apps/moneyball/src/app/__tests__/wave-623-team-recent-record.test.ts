@@ -16,7 +16,6 @@ function game(overrides: Partial<TeamRecentGame>): TeamRecentGame {
     gameId: 1,
     gameDate: "2026-07-01",
     isHome: true,
-    opponentCode: "KT",
     opponentName: "KT",
     predictedAsWinner: true,
     confidence: null,

@@ -13,7 +13,6 @@ export interface TeamRecentGame {
   gameId: number;
   gameDate: string;
   isHome: boolean;
-  opponentCode: TeamCode | null;
   opponentName: string | null;
   predictedAsWinner: boolean;
   confidence: number | null;
@@ -278,8 +277,6 @@ interface PredRow {
     away_score: number | null;
     home_team_id: number | null;
     away_team_id: number | null;
-    home_sp_id: number | null;
-    away_sp_id: number | null;
     home_sp: { id: number; name_ko: string } | null;
     away_sp: { id: number; name_ko: string } | null;
     home_team: { code: string | null } | null;
@@ -362,7 +359,7 @@ export async function buildTeamProfile(
     .select(
       `
         id, game_date, status, home_score, away_score,
-        home_team_id, away_team_id, home_sp_id, away_sp_id,
+        home_team_id, away_team_id,
         home_sp:players!games_home_sp_id_fkey(id, name_ko),
         away_sp:players!games_away_sp_id_fkey(id, name_ko),
         home_team:teams!games_home_team_id_fkey(code),
@@ -445,8 +442,6 @@ export async function buildTeamProfile(
         away_score: g.away_score,
         home_team_id: g.home_team_id,
         away_team_id: g.away_team_id,
-        home_sp_id: g.home_sp_id,
-        away_sp_id: g.away_sp_id,
         home_sp: g.home_sp,
         away_sp: g.away_sp,
         home_team: g.home_team,
@@ -528,7 +523,6 @@ export async function buildTeamProfile(
       gameId: g.id,
       gameDate: g.game_date,
       isHome,
-      opponentCode,
       opponentName: opponentCode
         ? (shortTeamName(opponentCode))
         : null,
