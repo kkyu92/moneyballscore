@@ -1,4 +1,11 @@
 
+## cycle 2725 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 20/20(9연속 무이슈)/lotto gap 30/30(cron self-heal 완료 실질 갭 없음) 재확인. op-analysis(9/25)/info-arch(15/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. review-code(heavy) 직전 7파일 rotation 완결 → 신규 대상 재탐색, 미감사 대형 파일 `convergenceRecord.ts`(827줄) 선정.
+- 서브에이전트 전수감사 — `fetchMlbConvergencePickDetailedResultsForPair`의 `favoredHome`/`gameDate` computed-but-unconsumed(KBO 쌍둥이는 이미 narrowing, MLB pair만 누락) + `getMlbConvergencePickBestStreak` stale 정렬 주석(KBO/MLB 둘 다 desc 동일인데 다르다고 주장) 2건 확인.
+- fix: MLB pair 함수 반환 타입 narrowing(형제 whole-league 함수는 그 필드 실사용 중이라 미변경) + 주석 정정. tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`f9bc653b`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상(`buildAccuracyData.ts`/`buildTeamProfile.ts`) 또는 info-architecture-review(gap 16/30).
+
 ## cycle 2724 (2026-09-01) — SUCCESS — polish-ui
 
 - 진단: 2-chain lock 탐지(직전8 distinct=2 — review-code(heavy)/explore-idea). 잠긴 2개 제외, fix-incident(gap 20/20 무이슈 재확인 8연속)/lotto(gap 30/30 cron self-heal 완료 실질 갭 없음) 재확인, op-analysis(8/25)/info-arch(14/30) 미도달, approved plan 0/23 — 강한 trigger 없어 룰에 따라 polish-ui 강제 발화.

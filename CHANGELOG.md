@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): convergenceRecord.ts MLB pair 미소비 필드 제거 + stale 정렬 주석 정정 (cycle 2725, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 20/20 재확인(9연속 무이슈). lotto gap 30/30 재확인(cron self-heal 완료, 실질 갭 없음). op-analysis(9/25)/info-arch(15/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. review-code(heavy) 직전 7파일 rotation(TodayGameCard~hub-dispatch) 완결 상태라 신규 대상 재탐색 — 미감사 대형 파일 중 `convergenceRecord.ts`(827줄, 가장 큼) 선정.
+- 서브에이전트 위임 전수감사 — 2건 확인: `fetchMlbConvergencePickDetailedResultsForPair`가 `favoredHome`/`gameDate` 계산·반환하지만 유일 소비처(`getMlbConvergencePickHeadToHeadRecord` → `computeConvergenceTeamStats`)는 `favoredTeam`/`won`만 읽음(KBO 쌍둥이 함수는 이미 동일 narrowing 적용, MLB pair 버전만 누락) + `getMlbConvergencePickBestStreak` 주석이 "MLB(desc) 정렬이 KBO(오름차순)와 다르다"고 주장했지만 실제론 양쪽 다 `game_date desc` 동일 정렬(스캔 로직 자체가 순서 무관이라 기능 버그는 아니었음, 주장만 오류).
+- fix: MLB pair 함수 반환 타입 narrowing(형제 함수 `fetchMlbConvergencePickDetailedResults`는 그 필드들이 실제 홈/어웨이 분리·요일별 통계에서 소비되므로 미변경) + 주석 정정.
+- tsc/eslint clean, 타겟 329건 + 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`f9bc653b`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상(`buildAccuracyData.ts` 772줄 또는 `buildTeamProfile.ts` 598줄) 또는 info-architecture-review(gap 16/30).
+
 ### polish-ui: /analysis 팩터 배지 row 카드 밖 텍스트 오버플로우 수정 (cycle 2724, SUCCESS)
 
 - 진단: 2-chain lock 탐지(직전8 사이클 distinct=2 — review-code(heavy) 7 + explore-idea 1). 잠긴 2개 제외 후 fix-incident(gap 20/20, `gh run list` 전부 success/skipped + debug 커밋 0건 → 무이슈 재확인 8연속)/lotto(gap 30/30, 다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal 완료 — 실질 갭 없음) 재확인, op-analysis(8/25)/info-arch(14/30) 미도달, approved plan 0/23 — 잔여 후보 중 강한 trigger 부재 → 룰에 따라 polish-ui 강제 발화.
