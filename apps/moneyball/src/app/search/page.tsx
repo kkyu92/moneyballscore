@@ -44,7 +44,7 @@ interface PlayerHit {
   name_ko: string;
   name_en: string | null;
   position: string | null;
-  team: { code: string | null; name_ko: string | null } | null;
+  team: { name_ko: string | null } | null;
 }
 
 interface DateHit {
@@ -77,7 +77,7 @@ async function searchPlayers(q: string): Promise<PlayerHit[]> {
   const result = (await supabase
     .from('players')
     .select(
-      'id, name_ko, name_en, position, team:teams!players_team_id_fkey(code, name_ko)',
+      'id, name_ko, name_en, position, team:teams!players_team_id_fkey(name_ko)',
     )
     .or(`name_ko.ilike.${pattern},name_en.ilike.${pattern}`)
     .limit(SEARCH_PLAYER_RESULT_LIMIT)) as SelectResult<PlayerHit[]>;
@@ -226,7 +226,7 @@ async function buildSearchIndex(): Promise<SearchEntry[]> {
     const supabase = await createClient();
     const playersResult = (await supabase
       .from('players')
-      .select('id, name_ko, name_en, position, team:teams!players_team_id_fkey(code, name_ko)')
+      .select('id, name_ko, name_en, position, team:teams!players_team_id_fkey(name_ko)')
       .order('id', { ascending: false })
       .limit(SEARCH_INDEX_PLAYER_FETCH_LIMIT)) as SelectResult<PlayerHit[]>;
     const { data: players } = assertSelectOk(playersResult, 'search.index.players');

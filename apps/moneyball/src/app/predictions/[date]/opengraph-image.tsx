@@ -37,7 +37,7 @@ async function getStats(date: string): Promise<{
     const result = await supabase
       .from("predictions")
       .select(
-        "confidence, is_correct, prediction_type, scoring_rule, reasoning, winner:teams!predictions_predicted_winner_fkey(code), game:games!predictions_game_id_fkey(game_date, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
+        "is_correct, reasoning, winner:teams!predictions_predicted_winner_fkey(code), game:games!predictions_game_id_fkey(game_date, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code))",
       )
       .eq("prediction_type", "pre_game")
       .in("scoring_rule", PRODUCTION_COHORT_RULES)
@@ -46,10 +46,7 @@ async function getStats(date: string): Promise<{
     const { data } = assertSelectOk(result, "opengraph-image getStats");
 
     interface PredRow {
-      confidence: number;
       is_correct: boolean | null;
-      prediction_type: string;
-      scoring_rule: string;
       reasoning: { homeWinProb?: number } | null;
       winner: { code: string } | null;
       game: { game_date: string; home_team: { code: string } | null; away_team: { code: string } | null } | null;

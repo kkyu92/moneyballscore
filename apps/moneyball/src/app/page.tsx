@@ -71,9 +71,7 @@ export const metadata: Metadata = {
 };
 
 interface HomePrediction {
-  predicted_winner: number | null;
   confidence: number;
-  prediction_type: string;
   reasoning: { debate?: HomeDebate; homeWinProb?: number } | null;
   home_win_prob: number | null;
   home_sp_fip: number | null;
@@ -81,9 +79,7 @@ interface HomePrediction {
   home_lineup_woba: number | null;
   away_lineup_woba: number | null;
   is_correct: boolean | null;
-  actual_winner: number | null;
   factors: Record<string, number> | null;
-  model_version: string | null;
   winner: { code: string | null } | null;
 }
 
@@ -105,9 +101,8 @@ interface HomeGame {
   status: string | null;
   home_score: number | null;
   away_score: number | null;
-  external_game_id: string | null;
-  home_team: { code: string | null; name_ko: string | null } | null;
-  away_team: { code: string | null; name_ko: string | null } | null;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
   home_sp: { name_ko: string | null } | null;
   away_sp: { name_ko: string | null } | null;
   predictions: HomePrediction[];
@@ -145,16 +140,16 @@ async function getTodayPredictions(): Promise<HomeGame[]> {
     .from('games')
     .select(`
       id, game_date, game_time, stadium, status,
-      home_score, away_score, external_game_id,
-      home_team:teams!games_home_team_id_fkey(code, name_ko),
-      away_team:teams!games_away_team_id_fkey(code, name_ko),
+      home_score, away_score,
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
       home_sp:players!games_home_sp_id_fkey(name_ko),
       away_sp:players!games_away_sp_id_fkey(name_ko),
       predictions(
-        predicted_winner, confidence, prediction_type, reasoning,
+        confidence, reasoning,
         home_win_prob,
         home_sp_fip, away_sp_fip, home_lineup_woba, away_lineup_woba,
-        is_correct, actual_winner, factors, model_version,
+        is_correct, factors,
         winner:teams!predictions_predicted_winner_fkey(code)
       )
     `)
@@ -323,7 +318,7 @@ async function getYesterdayResults(): Promise<YesterdayGame[]> {
       id, game_date, home_score, away_score,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
-      predictions(is_correct, winner:teams!predictions_predicted_winner_fkey(code))
+      predictions(is_correct)
     `)
     .eq('game_date', yesterday)
     .eq('status', 'final')

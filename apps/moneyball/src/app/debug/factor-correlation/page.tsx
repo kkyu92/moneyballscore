@@ -33,7 +33,6 @@ function getAdminClient() {
 }
 
 interface GameRow {
-  id: number;
   game_date: string;
   game_time: string | null;
   stadium: string | null;
@@ -151,7 +150,7 @@ export default async function FactorCorrelationPage() {
     const { data: chunk, error: chunkErr } = await db
       .from('games')
       .select(
-        'id, game_date, game_time, stadium, home_team_id, away_team_id, winner_team_id, home_score, away_score, weather',
+        'game_date, game_time, stadium, home_team_id, away_team_id, winner_team_id, home_score, away_score, weather',
       )
       .gte('game_date', '2023-01-01')
       .eq('status', 'final')

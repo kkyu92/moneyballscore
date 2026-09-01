@@ -10,7 +10,6 @@ export interface YesterdayGame {
   away_team: { code: string | null } | null;
   predictions: Array<{
     is_correct: boolean | null;
-    winner: { code: string | null } | null;
   }>;
 }
 

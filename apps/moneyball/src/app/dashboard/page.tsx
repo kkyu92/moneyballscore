@@ -63,7 +63,6 @@ interface OverviewRow {
     home_team: { code: string; color_primary: string | null } | null;
     away_team: { code: string; color_primary: string | null } | null;
   } | null;
-  winner: { code: string; color_primary: string | null } | null;
 }
 
 async function getOverview(): Promise<OverviewRow[]> {
@@ -78,8 +77,7 @@ async function getOverview(): Promise<OverviewRow[]> {
           game_date,
           home_team:teams!games_home_team_id_fkey(code, color_primary),
           away_team:teams!games_away_team_id_fkey(code, color_primary)
-        ),
-        winner:teams!predictions_predicted_winner_fkey(code, color_primary)
+        )
       `,
     )
     .eq("prediction_type", "pre_game")

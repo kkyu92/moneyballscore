@@ -83,7 +83,7 @@ async function getPredictionDates(): Promise<{ dates: DateStat[]; simplifiedMode
   const result = await supabase
     .from('games')
     .select(
-      'game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code), predictions(id, confidence, is_correct, reasoning, prediction_type, scoring_rule)',
+      'game_date, status, home_team:teams!games_home_team_id_fkey(code), away_team:teams!games_away_team_id_fkey(code), predictions(confidence, is_correct, reasoning)',
     )
     .eq('predictions.prediction_type', 'pre_game')
     .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES as readonly string[])

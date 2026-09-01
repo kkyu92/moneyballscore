@@ -14,8 +14,6 @@ export const revalidate = 3600; // CALENDAR_ISR_SECONDS (Next.js 16 Turbopack: l
 
 interface CalendarPredictionRow {
   is_correct: boolean | null;
-  prediction_type: string;
-  scoring_rule: string | null;
   game: { game_date: string } | null;
 }
 
@@ -28,7 +26,7 @@ async function getMonthHeatmap(info: MonthInfo): Promise<DayCell[]> {
   const result = await supabase
     .from('predictions')
     .select(
-      'is_correct, prediction_type, scoring_rule, game:games!predictions_game_id_fkey(game_date)',
+      'is_correct, game:games!predictions_game_id_fkey(game_date)',
     )
     .eq('prediction_type', 'pre_game')
     .in('scoring_rule', PRODUCTION_COHORT_RULES)

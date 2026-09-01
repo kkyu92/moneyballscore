@@ -81,11 +81,8 @@ interface DebateCalibration {
 interface PreGamePrediction {
   prediction_type: 'pre_game';
   scoring_rule: string | null;
-  predicted_winner: number | null;
-  confidence: number;
   reasoning: { debate?: { verdict?: DebateVerdict; homeArgument?: DebateArgument; awayArgument?: DebateArgument; calibration?: DebateCalibration; quantitativeProb?: number } } | null;
   factors: Record<string, number> | null;
-  is_correct: boolean | null;
   model_version: string | null;
   debate_version: string | null;
   predicted_at: string | null;
@@ -131,8 +128,8 @@ interface GameAnalysisRow {
   away_score: number | null;
   home_team_id: number | null;
   away_team_id: number | null;
-  home_team: { code: string | null; name_ko: string | null } | null;
-  away_team: { code: string | null; name_ko: string | null } | null;
+  home_team: { code: string | null } | null;
+  away_team: { code: string | null } | null;
   winner: { code: string | null } | null;
   predictions: AnyPrediction[] | null;
 }
@@ -183,12 +180,12 @@ async function getGameAnalysis(gameId: number): Promise<GameAnalysisRow | null> 
     .select(`
       id, game_date, game_time, stadium, status, home_score, away_score,
       home_team_id, away_team_id,
-      home_team:teams!games_home_team_id_fkey(code, name_ko),
-      away_team:teams!games_away_team_id_fkey(code, name_ko),
+      home_team:teams!games_home_team_id_fkey(code),
+      away_team:teams!games_away_team_id_fkey(code),
       winner:teams!games_winner_team_id_fkey(code),
       predictions(
-        prediction_type, scoring_rule, predicted_winner, confidence, reasoning, factors,
-        is_correct, model_version, debate_version, predicted_at,
+        prediction_type, scoring_rule, reasoning, factors,
+        model_version, debate_version, predicted_at,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba,
         home_bullpen_fip, away_bullpen_fip,

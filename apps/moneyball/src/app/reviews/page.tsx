@@ -44,20 +44,16 @@ export const metadata: Metadata = {
 export const revalidate = 600; // REVIEWS_INDEX_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 interface VerifiedPredictionRow {
-  confidence: number;
   is_correct: boolean | null;
-  prediction_type: string;
   reasoning: { homeWinProb?: number | null } | null;
-  predicted_winner_team: { code: string | null; name_ko: string | null } | null;
+  predicted_winner_team: { code: string | null } | null;
   game: {
     id: number;
     game_date: string;
-    game_time: string | null;
     home_score: number | null;
     away_score: number | null;
-    status: string | null;
-    home_team: { code: string | null; name_ko: string | null } | null;
-    away_team: { code: string | null; name_ko: string | null } | null;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
   } | null;
 }
 
@@ -70,12 +66,12 @@ async function getVerifiedPredictions(): Promise<VerifiedPredictionRow[]> {
   const result = await supabase
     .from('predictions')
     .select(`
-      confidence, is_correct, prediction_type, reasoning,
-      predicted_winner_team:teams!predictions_predicted_winner_fkey(code, name_ko),
+      is_correct, reasoning,
+      predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
       game:games!predictions_game_id_fkey(
-        id, game_date, game_time, home_score, away_score, status,
-        home_team:teams!games_home_team_id_fkey(code, name_ko),
-        away_team:teams!games_away_team_id_fkey(code, name_ko)
+        id, game_date, home_score, away_score,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code)
       )
     `)
     .match(CURRENT_MODEL_FILTER)
