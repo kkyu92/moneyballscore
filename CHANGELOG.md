@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2677, review-code(heavy): buildMissReport.ts 미사용 select 필드 정리)
+
+### refactor: buildMissReport pre_game select 미사용 컬럼(confidence/predicted_winner) 제거
+
+- 진단: 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 29/30, lotto 18/30), 직전8 distinct=4(2-chain lock 미충족). cycle 2674/2675/2676 retro 공통 추천(review-code(heavy) 계속) + carry-over 후보 `lib/reviews/buildMissReport.ts`(216줄)/`app/reviews/misses/page.tsx`(249줄) 채택.
+- 전체 정독 + `MissesSortControl`/OG·twitter 이미지/관련 테스트(`silent-drift.test.ts`/`silent-drift-wave-296/239`) 교차검증 — `game_date` 는 DATE 컬럼(UTC-slice 이슈 대상 아님), `CURRENT_MODEL_FILTER` 사용은 기존 확립된 "현재 모델 스냅샷" 관례(cycle 2673) 정합, revalidate=1800 은 이미 wave-133/175 가드 존재. CE-fallback(`debate_version IS NULL`) 예측이 `reasoning.debate.verdict.homeWinProb` 부재로 tossup 오분류돼 미스 리포트에서 누락되는지 서브에이전트로 정밀 검증했으나 — `debate.ts` judge 실패 시에도 verdict fallback 객체가 quant `homeWinProb` 를 그대로 채워 넣어(구조상 항상 존재) 실제로는 non-issue 확인.
+- 유일한 실제 발견: `PreGameRow`(`confidence`/`predicted_winner`) 두 필드가 select 되지만 함수 어디서도 참조되지 않는 죽은 컬럼(불필요한 payload). select 절 + interface 에서 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화 — 동작 변경 없는 정리라 기존 테스트 그대로 통과). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2676, review-code(heavy): players/page.tsx lastSynced UTC-slice-as-KST 정정)
 
 ### fix: 선수 리더보드 "최종 동기화" 날짜 UTC 슬라이스 → KST 변환

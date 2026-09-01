@@ -41,9 +41,7 @@ export interface MissReportItem {
 
 interface PreGameRow {
   game_id: number;
-  confidence: number | null;
   is_correct: boolean | null;
-  predicted_winner: number | null;
   reasoning: unknown;
   predicted_winner_team: { code: string | null } | null;
   game: {
@@ -115,7 +113,7 @@ export async function buildMissReport(options: {
     .from("predictions")
     .select(
       `
-        game_id, confidence, is_correct, predicted_winner, reasoning,
+        game_id, is_correct, reasoning,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
         game:games!predictions_game_id_fkey(
           id, game_date, status, home_score, away_score, winner_team_id,
