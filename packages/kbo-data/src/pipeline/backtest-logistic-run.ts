@@ -57,12 +57,11 @@ function pct(x: number): string {
 function extractFeatures(
   games: BacktestGame[],
   eloHistory: EloHistory,
-): { X: number[][]; y: number[]; features: GameFeatures[]; games: BacktestGame[] } {
+): { X: number[][]; y: number[]; features: GameFeatures[] } {
   const priorBySeason = new Map<number, FinishedGame[]>();
   const X: number[][] = [];
   const y: number[] = [];
   const features: GameFeatures[] = [];
-  const used: BacktestGame[] = [];
 
   for (const g of games) {
     const prior = priorBySeason.get(g.season) ?? [];
@@ -71,7 +70,6 @@ function extractFeatures(
       X.push(vectorize(f));
       y.push(g.homeWon ? 1 : 0);
       features.push(f);
-      used.push(g);
     }
     prior.unshift({
       home_team_id: g.homeTeamId,
@@ -80,7 +78,7 @@ function extractFeatures(
     });
     priorBySeason.set(g.season, prior);
   }
-  return { X, y, features, games: used };
+  return { X, y, features };
 }
 
 async function main() {
