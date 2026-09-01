@@ -1,3 +1,14 @@
+## v0.5.62.183 — 2026-09-01 (cycle 2746, polish-ui: GameOverview 태그 fallback border dark mode 누락 수정 SUCCESS)
+
+### polish-ui: GameOverview.tsx TAG_STYLES fallback border dark mode 미대응 (cycle 2746, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/22(전부 completed/archived/deferred). 직전8 distinct=2(review-code(heavy)7+info-architecture-review1) — **2-chain lock 탐지 발동** (review-code(heavy)/info-architecture-review 제외). fix-incident gap9/20·op-analysis gap19/25·lotto(9/5 picks+8/29 result 이미 당일 갱신, 노이즈)·explore-idea saturation 3/15 전부 미도달 — 남은 pool 어디도 trigger 없어 lock rule step3 (polish-ui 강제 발화) 적용.
+- DESIGN.md 토큰 vs 컴포넌트 grep 감사: hex color(OG image 전용, 의도된 per-page art — drift 아님) / `text-gray-400 dark:text-gray-400` flat 패턴(0건) / arbitrary `text-[Npx]`(0건) 클린. `border-gray-200` 사용처 70+ 파일 전수 검사(같은 줄에 `dark:border` counterpart 존재 여부) — `GameOverview.tsx` 1곳만 유일하게 dark 대응 없이 flat.
+- `GameOverview.tsx` TAG_STYLES: 4개 entry 중 3개(투수전/타격전/박빙)는 `border-*/30` opacity 패턴으로 라이트/다크 양쪽 자연 적응, fallback(미분류 태그)만 `border-gray-200` 라이트 전용 — 다크모드 카드(`dark:bg-[var(--color-surface-card)]`) 위에서 밝은 회색 테두리가 떠 보임.
+- fix: fallback border `border-gray-200` → `border-gray-400/30` (나머지 3개 entry와 동일 opacity 패턴 통일).
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) 자연 재개(`!inner(` embed 패턴 잔여 app 라우트 6개 재감사) 또는 fix-incident(gap10/20 monitor).
+
 ## v0.5.62.182 — 2026-09-01 (cycle 2745, review-code(heavy): buildMatchupUpcoming/convergenceRecord 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): buildMatchupUpcoming.ts/convergenceRecord.ts 미소비 select 컬럼 (cycle 2745, SUCCESS)
