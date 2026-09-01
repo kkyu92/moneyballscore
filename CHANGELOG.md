@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): buildFallbackStats 미소비 oldestSeenAt 필드 제거 (cycle 2711, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 15/20, op-analysis 20/25, info-arch 2/30 리셋, lotto 22/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2710 추천대로 잔여 미감사 대형파일 rotation, `buildAccuracyData.ts`(776줄) 정독.
+- 전체 정독 — export 함수/상수 22개 소비처 교차검증(accuracyRateColorClass 7파일, bucketize/brierScore/calibrationGap 각 5파일 등 전부 소비 확인). 필드 단위 정밀 검증 중 `FallbackStats.oldestSeenAt`가 `buildFallbackStats()` 안에서 계산·리턴은 되지만 `/accuracy` 페이지(유일 caller)가 `fallbackStats.latestFallbackAt`만 소비하고 `oldestSeenAt`은 앱 전역 grep 0건 확인.
+- fix: `FallbackStats` 인터페이스 + `buildFallbackStats` 계산 로직에서 `oldestSeenAt` 제거(커밋 231634e0). tsc/eslint clean, 관련 테스트 8파일 108건 green(buildAccuracyData 전체 + accuracy 페이지). 단일 논리 단위 → main 직접 commit+push(R4/R7).
+- computed-but-unconsumed 패턴 재발(cycle 2661/2690/2708/2710 계열 연장) — review-code(heavy) 대형파일 rotation 이 이 계열의 주요 검출 채널로 지속 확인. `SMALL_SAMPLE_THRESHOLD`(=3, 로컬 gating 상수)는 외부 미소비지만 shared `SMALL_SAMPLE_N`(=5, 표시용 hedge 임계)와 목적이 달라(내부 null-gating vs UI 경고 배지) drift 아님 — 오탐 배제.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts` 974줄/mlb `analysis-data.ts` 279줄) 정독, 또는 fix-incident(16/20)/op-analysis(21/25)/lotto(23/30) gap 자연 대기.
+
 ### review-code(heavy): buildMatchupProfile.ts/buildMlbMatchupProfile.ts 미소비 teamColor 필드 제거 (cycle 2710, SUCCESS)
 
 - 진단: 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 18/25, info-arch 0/30 리셋, lotto 20/30). 직전8 distinct=3(review-code(heavy) 5 + polish-ui 1 + info-architecture-review 1 + fix-incident sub 1) — 2-chain lock 미충족. cycle 2709 추천대로 잔여 미감사 대형파일 rotation, `buildMatchupProfile.ts`(594줄) 정독.

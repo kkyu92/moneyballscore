@@ -1,4 +1,13 @@
 
+## cycle 2711 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2710 추천대로 `buildAccuracyData.ts`(776줄) 정독.
+- 필드별 소비처 교차검증 중 `FallbackStats.oldestSeenAt`가 계산·리턴은 되지만 유일 caller(`/accuracy` 페이지)가 `latestFallbackAt`만 쓰고 앱 전역 grep 0건 확인.
+- fix: `FallbackStats` 인터페이스 + `buildFallbackStats`에서 `oldestSeenAt` 제거(commit 231634e0). tsc clean + eslint clean + 관련 테스트 8파일 108건 green.
+- `SMALL_SAMPLE_THRESHOLD`(로컬, =3)는 shared `SMALL_SAMPLE_N`(=5)와 목적 다름(null-gating vs UI hedge 배지) 확인 — 오탐 배제, 변경 없음.
+- gap trigger 4종 전부 미도달(fix-incident 15/20, op-analysis 20/25, info-arch 2/30 리셋, lotto 22/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts` 974줄/mlb `analysis-data.ts` 279줄) 정독, 또는 gap trigger 자연 대기.
+
 ## cycle 2710 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2709 추천대로 `buildMatchupProfile.ts`(594줄) 정독.
