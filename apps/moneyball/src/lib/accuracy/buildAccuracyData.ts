@@ -67,7 +67,6 @@ export interface FallbackStats {
   llmActive: number;
   fallback: number;
   fallbackRate: number;
-  oldestSeenAt: string | null;
   latestFallbackAt: string | null;
 }
 
@@ -93,9 +92,7 @@ export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
   let llmActive = 0;
   let fallback = 0;
   let latestFallbackAt: string | null = null;
-  let oldestSeenAt: string | null = null;
   for (const r of rows) {
-    if (!oldestSeenAt || r.predicted_at < oldestSeenAt) oldestSeenAt = r.predicted_at;
     const cls = classifyVersion(r.model_version);
     if (cls === 'llmActive') {
       llmActive++;
@@ -110,7 +107,6 @@ export function buildFallbackStats(rows: FallbackStatsRow[]): FallbackStats {
     llmActive,
     fallback,
     fallbackRate: total > 0 ? fallback / total : 0,
-    oldestSeenAt,
     latestFallbackAt,
   };
 }
