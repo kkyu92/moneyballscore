@@ -1,3 +1,13 @@
+## v0.5.62.173 — 2026-09-01 (cycle 2734, review-code(heavy): MyPicksClient/buildPicksStats.ts 무승부+live-leak 수정 SUCCESS)
+
+### review-code(heavy): buildPicksStats.ts 무승부 asymmetric 오판정 + live-status leak 수정 (cycle 2734, SUCCESS)
+
+- 진단: fix-incident gap 38/20(gh run list 전수 확인 — 전부 completed/success, 실 incident 없음, 노이즈), lotto gap 45/30(다음 회차 picks + 직전 결과 둘 다 당일 최신, 실질 갭 없음), op-analysis gap 7/25·info-arch gap 25/30 둘 다 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + polish-ui 1) — 2-chain lock 미충족. cycle 2732 추천 component-level 후보(`MyPicksClient.tsx`/`FactorAgreement` 소비 lib) 중 최초 전체 감사 대상 `apps/moneyball/src/lib/picks/buildPicksStats.ts`(391줄) 선택.
+- 전수감사 — `myIsCorrect = pick.pick === 'home' ? homeWon : !homeWon` 이 KBO 연장전 무승부(homeScore===awayScore)에서 비대칭 오판정: home 픽은 정상 오답 처리되지만 away 픽은 `!homeWon`(=true)으로 "정답" 오판정. `PredictionCard.tsx`(canonical) 는 `isFinal` 게이트 + 양방향 strict `>` 로 대칭 처리 — 대조로 발견.
+- 같은 파일 `isResolved` 판정이 `r.status` 를 전혀 참조하지 않고 score non-null 만으로 확정 처리 — `packages/kbo-data/src/pipeline/live.ts`(128-133줄)가 `status='live'` 인 동안에도 home_score/away_score 를 갱신해 진행 중 경기가 확정처럼 ✓/✗ 노출되던 leak. `status==='final'` 게이트 추가로 함께 수정(PredictionCard.tsx 대비 정합).
+- fix: `buildPicksStats.ts` isResolved 게이트 + myIsCorrect 대칭 strict 비교로 교체. 회귀 가드 테스트 2건 추가(무승부 대칭 처리 + live leak). tsc/eslint clean, 전체 테스트 571파일 4486건 green. main 직접 커밋+push(`8d704e67`).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 `MlbMatchupFactorCompare.tsx`/`FactorBreakdown.tsx` 컴포넌트 감사 잔존, 또는 info-architecture-review(gap 26/30, 근접).
+
 ## v0.5.62.172 — 2026-09-01 (cycle 2733, polish-ui(2-chain lock fallback): 타자 리더보드 stale WAR 값 freshness 필터 SUCCESS)
 
 ### polish-ui(2-chain lock fallback): batter 리더보드 stale 값 수정 (cycle 2733, SUCCESS)

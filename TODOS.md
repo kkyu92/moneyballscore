@@ -1,4 +1,11 @@
 
+## cycle 2734 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: fix-incident gap 38/20(gh run list 확인, 실 incident 없음 노이즈)/lotto gap 45/30(picks+result 파일 둘 다 당일 최신, 노이즈) 재확인. op-analysis gap 7/25, info-arch gap 25/30 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2732 추천 component-level 후보 중 `apps/moneyball/src/lib/picks/buildPicksStats.ts`(391줄) 최초 전체 감사.
+- 전수감사 발견 2건(같은 root cause): (1) `myIsCorrect` 계산이 `!homeWon` 방식이라 KBO 연장전 무승부에서 away 픽만 "정답" 오판정(home 픽은 정상). `PredictionCard.tsx` canonical(isFinal+양방향 strict `>`) 대비 asymmetric drift. (2) `isResolved` 가 `r.status` 미참조 — `live.ts` 가 status='live' 중에도 스코어 갱신해 진행 중 경기가 확정처럼 노출되던 leak.
+- fix: 두 이슈 모두 `status==='final'` 게이트 + 대칭 strict 비교로 단일 수정. 회귀 가드 테스트 2건 추가. tsc/eslint clean, 571파일 4486건 green. main 직접 커밋+push(`8d704e67`).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 `MlbMatchupFactorCompare.tsx`/`FactorBreakdown.tsx` 컴포넌트 잔존 감사, 또는 info-architecture-review(gap 26/30 근접).
+
 ## cycle 2733 (2026-09-01) — SUCCESS — polish-ui(2-chain lock fallback)
 
 - 진단: 2-chain lock 탐지(직전8 distinct=2 — review-code(heavy) 7 + operational-analysis 1). 잠긴 2개 제외 후 fix-incident(gap 37/20, deploy-drift-alert 1건 확인했으나 gap 1h self-heal noise 재확인)/lotto(다음 회차 picks `2026-09-05-50sets.md` + 직전 회차 `2026-08-29-result.md` 둘 다 당일 최신, 실질 갭 없음) 재확인, info-arch(gap 24/30) 미도달 — 룰에 따라 `/design-review` 강제 발화.
