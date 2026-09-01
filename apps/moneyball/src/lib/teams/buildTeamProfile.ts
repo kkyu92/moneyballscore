@@ -28,7 +28,6 @@ export interface TeamProfile {
   name: string;
   shortName: string;
   stadium: string;
-  color: string;
   parkPf: number;
   parkNote: string;
   predictedGames: number;
@@ -320,7 +319,6 @@ export async function buildTeamProfile(
       name: meta.name,
       shortName: shortTeamName(teamCode),
       stadium: meta.stadium,
-      color: meta.color,
       parkPf: meta.parkPf,
       parkNote: meta.parkNote,
       predictedGames: 0,
@@ -578,7 +576,6 @@ export async function buildTeamProfile(
     name: meta.name,
     shortName: shortTeamName(teamCode),
     stadium: meta.stadium,
-    color: meta.color,
     parkPf: meta.parkPf,
     parkNote: meta.parkNote,
     predictedGames,

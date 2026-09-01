@@ -71,7 +71,6 @@ export interface MlbTeamProfile {
   shortName: string;
   city: string;
   stadium: string;
-  color: string;
   parkPf: number;
   league: 'AL' | 'NL';
   division: 'East' | 'Central' | 'West';
@@ -165,7 +164,6 @@ export async function buildMlbTeamProfile(
     shortName: mlbShortTeamName(teamCode),
     city: meta.city,
     stadium: meta.stadium,
-    color: meta.color,
     parkPf: meta.parkPf,
     league: division.league,
     division: division.division,
