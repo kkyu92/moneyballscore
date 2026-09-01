@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): TodayGameCard 오도 필드 8개 제거 (cycle 2716, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23. gap trigger 4종 미도달(fix-incident 19/20 근접, op-analysis 0/25 리셋, info-arch 6/30, lotto 26/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2712/2713/2714 carry 잔여 중 `TodayGameCard` badge 8필드 오도 이슈 채택.
+- `homeRank`/`awayRank`/`homeRecent10`/`awayRecent10`/`h2hHomeWins`/`h2hAwayWins`/`homeTeamVenue`/`awayTeamVenue` 8필드가 인터페이스에 optional 선언돼있지만 `getTodayAnalysisData()`는 전혀 계산 안 함(항상 undefined) — 유일 caller `analysis/page.tsx`의 `gamesWithRank`가 즉시 재계산·override해 기능 손실은 없었으나 인터페이스가 함수 책임을 오도.
+- fix: 8필드 인터페이스에서 제거(commit e6c4ac72). tsc/eslint clean, 전체 테스트 571파일 4483건 green.
+- declared-but-never-computed 변종(computed-but-unconsumed 계열의 역방향) 재발 확인.
+- 다음 사이클 추천 = matchup/team-profile 수렴픽 카드 컴포넌트 공유화(cycle 2713 carry) 또는 fix-incident gap 자연 도달(20/20) 대기.
+
 ### review-code(heavy): analysis-data.ts 미소비 select 컬럼(prediction_type) 제거 (cycle 2714, SUCCESS)
 
 - 진단: open issue 0, unprocessed plan 0/22(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 23/25, info-arch 5/30, lotto 25/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2713 추천 carry 중 cycle 2712 항목(`prediction_type` select-only 미사용) 채택.

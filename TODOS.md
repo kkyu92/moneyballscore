@@ -1,4 +1,13 @@
 
+## cycle 2716 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. gap trigger 4종 미도달(fix-incident 19/20 근접, op-analysis 0/25 리셋, info-arch 6/30, lotto 26/30). 직전8 distinct=3(review-code(heavy) 6 + op-analysis 1 + info-arch 1) — 2-chain lock 미충족.
+- review-code(heavy) rotation 계속 — cycle 2712/2713/2714 carry 잔여 중 `TodayGameCard` badge 8필드 오도 이슈 채택.
+- `homeRank`/`awayRank`/`homeRecent10`/`awayRecent10`/`h2hHomeWins`/`h2hAwayWins`/`homeTeamVenue`/`awayTeamVenue` 8필드가 `TodayGameCard` 인터페이스에 optional 선언돼있지만 `getTodayAnalysisData()`는 전혀 계산 안 함(항상 undefined) — 유일 caller `analysis/page.tsx`의 `gamesWithRank`가 rankMap/venueMap/recent10Map/h2hMap 기반으로 즉시 재계산·override해 기능 손실은 없었으나 인터페이스가 함수 책임을 오도.
+- fix: 8필드 인터페이스에서 제거(commit e6c4ac72). tsc/eslint clean, 전체 테스트 571파일 4483건 green.
+- declared-but-never-computed 변종(computed-but-unconsumed 계열의 역방향) 재발 확인.
+- 다음 사이클 추천 = matchup/team-profile 수렴픽 카드 컴포넌트 공유화(cycle 2713 carry) 또는 fix-incident gap 자연 도달(20/20) 대기.
+
 ## cycle 2715 (2026-09-01) — SUCCESS — operational-analysis(lite)
 
 - 진단: open issue 0, unprocessed plan 0/23(plan#29 Tier4 유지). 2-chain lock 탐지(직전8 = review-code(heavy) 6 + info-architecture-review 1, distinct=2) → 두 chain 후보 제외.
