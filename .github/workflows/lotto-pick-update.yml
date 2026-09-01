@@ -1,18 +1,18 @@
 name: lotto-pick-update
 
-# 매주 금요일 50조합 markdown 자동 박제 → apps/moneyball/data/lotto-picks/<next-saturday>.md
+# 매주 화요일 1000조합 markdown 자동 박제 → apps/moneyball/data/lotto-picks/<next-saturday>.md
 # multi-fire (3회 시도) — GH Actions schedule 41% skip mitigation (cycle 27 박제)
 # idempotent skip — 이미 박제된 파일 있으면 exit 0
 #
-# cron = '19 0,3,6 * * 5' (UTC 금 00:19 + 03:19 + 06:19 = KST 09:19 + 12:19 + 15:19)
+# cron = '19 0,3,6 * * 2' (UTC 화 00:19 + 03:19 + 06:19 = KST 09:19 + 12:19 + 15:19)
+# - 2026-09-01 사용자 결정: 금 → 화 변경 (다음 토 추첨까지 4일 여유 → 지연 대비 buffer 확대)
 # - sitemap-warmup '37 * * * *' / indexnow-ping '37 0 * * *' / deploy-drift-alert '17 * * * *' 분 겹침 회피
-# - 금요일 다양한 시간대 fire = 토요일 추첨 (20:45 KST) 12+ 시간 전 박제 보장
 #
 # plan #7 Step E 박제 (cycle 885)
 
 on:
   schedule:
-    - cron: '19 0,3,6 * * 5'
+    - cron: '19 0,3,6 * * 2'
   workflow_dispatch:
     inputs:
       target_date:
@@ -120,14 +120,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add apps/moneyball/data/lotto-picks/ scripts/lotto-data.json
-          git commit -m "data(lotto): ${{ steps.target.outputs.target }} 50조합 자동 박제 (cron)" || {
+          git commit -m "data(lotto): ${{ steps.target.outputs.target }} 1000조합 자동 박제 (cron)" || {
             echo "::notice::no changes to commit"
             exit 0
           }
           git push -u origin "$BRANCH"
           PR_URL=$(gh pr create \
-            --title "data(lotto): ${{ steps.target.outputs.target }} 50조합 자동 박제 (cron)" \
-            --body "plan #7 Step E cron 자동 갱신 — 매주 금요일 multi-fire ('19 0,3,6 * * 5'). idempotent skip. AdSense surface risk 0 (archive 만 갱신, /lotto hub 미박제)." \
+            --title "data(lotto): ${{ steps.target.outputs.target }} 1000조합 자동 박제 (cron)" \
+            --body "plan #7 Step E cron 자동 갱신 — 매주 화요일 multi-fire ('19 0,3,6 * * 2'). idempotent skip. AdSense surface risk 0 (archive 만 갱신, /lotto hub 미박제)." \
             --label "automated,lotto" 2>/dev/null || echo "")
           if [ -n "$PR_URL" ]; then
             PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
