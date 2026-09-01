@@ -1,4 +1,12 @@
 
+## cycle 2662 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, CI green(gh run list -10 전부 success/skipped), gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 1/25, info-arch 14/30, lotto 3/30), 직전8 distinct=5(2-chain lock 미충족). explore-idea saturation 12/15 도달했으나 4-source 재확인 negative(TODOS Next-Up 여전히 stale mcc-alias 1-line, GH issue 0, plan#29 Tier4 유지, 신규라우트 91건=git checkout mtime 부작용) — 다수 과거 사이클과 동일 패턴.
+- 강한 외부 신호 부재로 dominance chain(직전20 중 55%) 지속 선택, 최근 미커버 영역(`apps/moneyball/src/lib/analysis/convergenceRecord.ts`, 832줄, feature commit 최종 터치라 review sweep 미포함) 정독.
+- `computeCompositeDuel.ts` 10팩터(lineup_woba/sfr/bullpen_fip/sp_fip/war/elo/recent_form/head_to_head/sp_xfip/park_factor) 구성과 cycle 2304 주석 주장("h2h 누락 시 validCount 최대 9/10") 대조 확인 일치. `MLB_FACTOR_PICK_STRONG(5)`/`COMPLETE(6)` 상수도 인라인 주석과 일치. `getConvergencePickHomeAwaySplit`/`TeamStats`/`DayOfWeekSplit` 호출부 14개 파일 전부 `(minFactors, startDate, endDate)` 인자 순서 정합 확인 — signature drift 0건.
+- 신규 drift 0건 — clean audit, 코드 변경 없음.
+- 다음 사이클 추천 = fix-incident 재확인(gap 5/20) 또는 op-analysis(gap 2/25, 근접) — review-code dominance(12/21) 지속 관찰, 다양성 redirect 자연 시점 근접.
+
 ## cycle 2661 (2026-09-01) — SUCCESS
 
 - operational-analysis (lite): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 중 op-analysis 24/25 근접(미도달) + fix-incident 3/20 + info-arch 13/30 + lotto 2/30 전부 미도달, 직전8 distinct=4(2-chain lock 미충족). 직전 3사이클(2658/2659/2660) 모두 op-analysis 를 next_recommended_chain 으로 지목 — carry-over 채택.
