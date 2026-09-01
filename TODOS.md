@@ -1,4 +1,11 @@
 
+## cycle 2658 (2026-09-01) — SUCCESS
+
+- fix-incident: 진단 중 gap-trigger 미도달 확인 도중 `gh run list` 실측 확인이 main branch CI red (commit `baa946f1` cron 금→화 이관 이후 3커밋 연속 방치) 를 발견. `lotto-routes.test.ts` 가 옛 금요일 cron('19 0,3,6 * * 5') assertion 그대로 남아 stale — 실제 워크플로는 사용자 2026-09-01 결정으로 화요일('19 0,3,6 * * 2') 로 이미 이관됨.
+- root cause 명확(테스트만 안 따라감) 해 `/investigate` 생략, 직접 fix: assertion 정정 + `lotto-pick-monitor.yml` 주석 2곳(스케줄 언급) 동기화.
+- `pnpm test` 전체 569 files/4470 tests green. commit `ad7cd15a` push, CI 실측 재확인 success(3분+ 소요, 폴링 확인).
+- 다음 사이클 추천 = operational-analysis(gap 22/25 근접) 또는 fix-incident 재확인 — gap-trigger 만으론 못 잡는 실제 breakage 를 `gh run list` 실측이 잡은 사례, 습관화 권장.
+
 ## cycle 2657 (2026-09-01) — RETRO-ONLY
 
 - 진단: open issue 0, approved plan 0/23. gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 20/25, info-arch 9/30, lotto 29/30). `gh run list`/`pipeline_runs` 최근 10건 전부 success. 직전8 distinct=2(review-code(heavy) 7 + skill-evolution 1) → **2-chain alternation lock 발동** (cycle 225 룰) — 두 chain 후보에서 제외.
