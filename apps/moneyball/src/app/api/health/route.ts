@@ -30,7 +30,7 @@ async function checkPipeline(): Promise<Check> {
     const supabase = await createClient();
     const result = await supabase
       .from('pipeline_runs')
-      .select('run_date, mode, status, created_at')
+      .select('run_date, mode, status')
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
