@@ -1,5 +1,15 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): convergenceRecord.ts 미소비 select 컬럼(id/game_time/status) 제거 (cycle 2713, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 22/25, info-arch 4/30, lotto 24/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2712 추천대로 `convergenceRecord.ts`(830줄) 정독.
+- 서브에이전트 위임 감사(read-only) — export 함수 36개 전 필드 repo-wide 소비처 교차검증. 인터페이스 필드 자체는 전부 소비 확인(unconsumed 0건) — 이 파일은 이전 계열(teamColor/oldestSeenAt/homeWinProb)과 달리 clean.
+- 대신 select-only-for-filter 계열 dead column 2건 발견: `ConvergenceGameRow.id`/`game_time` (두 KBO fetch 함수 모두 select만 하고 `row.id`/`row.game_time` 미참조 — game_time 은 `.order()` 컬럼명 문자열로만 쓰여 select 자체가 불필요) + `fetchMlbConvergencePickDetailedResultsForPair`의 `status` (sibling 함수가 이미 select 없이 `.eq('status','final')` 필터만으로 동작 확인된 패턴, 여기만 select 잔존).
+- fix: 3개 컬럼 select문 + 타입 정의에서 제거(commit e2102d9b). tsc clean + eslint clean + 전체 테스트 571파일 4483건 green.
+- computed-but-unconsumed 패턴이 이번엔 인터페이스 필드가 아니라 "select-only 미사용 DB 컬럼" 변종으로 재발 — cycle 2712 발견한 `prediction_type` select 미사용 건과 동일 계열.
+- 부가 발견(범위 밖, carry) — `MatchupConvergencePickRecord`/`MlbMatchupConvergencePickRecord`, `TeamConvergencePickRecord`/`MlbTeamConvergencePickRecord` 컴포넌트 쌍이 근사 중복(MLB 쪽만 i18n 레이어 추가되며 구조 drift 중) — reviews-hub 카드들은 이미 공유 컴포넌트로 추출됐지만 matchup/team-profile 카드는 미추출.
+- 다음 사이클 추천 = 부가 발견 2건(matchup/team 카드 컴포넌트 공유화, cycle 2712 `prediction_type`/`TodayGameCard` badge 8필드) 중 택1 정독, 또는 gap trigger 자연 대기.
+
 ### review-code(heavy): BestPickCard.confidence/MlbUpcomingGame.homeWinProb+duelValidCount 미소비 필드 제거 (cycle 2712, SUCCESS)
 
 - 진단: open issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 21/25, info-arch 3/30, lotto 23/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2711 추천대로 `analysis-data.ts`(974줄 KBO)/mlb `analysis-data.ts`(279줄) 정독.

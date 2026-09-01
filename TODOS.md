@@ -1,4 +1,13 @@
 
+## cycle 2713 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2712 추천대로 `convergenceRecord.ts`(830줄) 정독.
+- 서브에이전트 위임 감사 — export 함수 36개 전 필드 repo-wide 소비처 교차검증. 인터페이스 필드 unconsumed 0건(이 파일은 clean) — 대신 select-only-for-filter dead column 2건 발견: `ConvergenceGameRow.id`/`game_time`(select만 되고 미참조, game_time 은 `.order()` 컬럼명 문자열로만 사용) + `fetchMlbConvergencePickDetailedResultsForPair`의 `status`(sibling 함수는 이미 select 없이 필터만 사용).
+- fix: 3개 컬럼 select문+타입에서 제거(commit e2102d9b). tsc/eslint clean, 전체 테스트 571파일 4483건 green.
+- 부가 발견(변경 보류) — matchup/team-profile 수렴픽 카드 컴포넌트 쌍(KBO/MLB)이 근사 중복이며 구조 drift 중(MLB만 i18n 레이어 추가) — reviews-hub 카드는 이미 공유 추출됐지만 이쪽은 미추출. 저우선 carry.
+- gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 22/25, info-arch 4/30, lotto 24/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = 부가 발견(matchup/team 카드 컴포넌트 공유화 또는 cycle 2712 carry 항목) 중 택1, 또는 gap trigger 자연 대기.
+
 ## cycle 2712 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2711 추천대로 `analysis-data.ts`(974줄, KBO)/mlb `analysis-data.ts`(279줄) 정독.
