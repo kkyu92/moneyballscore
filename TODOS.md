@@ -1,4 +1,11 @@
 
+## cycle 2659 (2026-09-01) — SUCCESS
+
+- lotto (lite): 30-cycle 미발화 gap trigger 최초 도달(마지막 발화 cycle 2628, 31 사이클 경과). 다른 gap(op-analysis 22/25, fix-incident 1/20 리셋) 미도달, 직전8 distinct=4 2-chain lock 미충족.
+- `pnpm tsx scripts/lotto.ts count` 재측정: valid=7,705,415/total=8,145,060(5.40% 제거) — cycle 2478/2508/2538/2598/2628 와 완전 동일, 6연속 재확인(valid_delta=0). `rules` 모드로 1~1239회 최신 반영 확인.
+- pick_sample(2026-09-05.md, 1240회 1000세트)/self_verify(2026-08-29.md, 1239회 결과) 둘 다 cron 자동화(lotto-pick-update.yml 화요일 이관)로 이미 최신 — 수동 재생성 불필요. cron 정상 작동 확인이 본 사이클 핵심 성과.
+- 다음 사이클 추천 = operational-analysis(gap 23/25, 근접권) 또는 fix-incident 재확인.
+
 ## cycle 2658 (2026-09-01) — SUCCESS
 
 - fix-incident: 진단 중 gap-trigger 미도달 확인 도중 `gh run list` 실측 확인이 main branch CI red (commit `baa946f1` cron 금→화 이관 이후 3커밋 연속 방치) 를 발견. `lotto-routes.test.ts` 가 옛 금요일 cron('19 0,3,6 * * 5') assertion 그대로 남아 stale — 실제 워크플로는 사용자 2026-09-01 결정으로 화요일('19 0,3,6 * * 2') 로 이미 이관됨.
