@@ -168,7 +168,6 @@ describe('measureFactorCoverage', () => {
 
 describe('runHarness skeleton', () => {
   const game: BacktestGame = {
-    id: 1,
     date: '2025-04-01',
     season: 2025,
     homeTeam: 'LG',

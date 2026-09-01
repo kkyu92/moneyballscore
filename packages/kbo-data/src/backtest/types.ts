@@ -2,7 +2,6 @@ import type { TeamCode } from '@moneyball/shared';
 
 /** DB 에서 로드한 decided 경기 (백테스트 대상). */
 export interface BacktestGame {
-  id: number;
   date: string; // YYYY-MM-DD (KST game_date)
   season: number;
   homeTeam: TeamCode;

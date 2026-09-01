@@ -46,7 +46,7 @@ export async function loadDecidedGames(
       const { data, error } = await db
         .from('games')
         .select(
-          'id, game_date, home_team_id, away_team_id, home_score, away_score, winner_team_id, status',
+          'game_date, home_team_id, away_team_id, home_score, away_score, winner_team_id, status',
         )
         .gte('game_date', `${season}-01-01`)
         .lte('game_date', `${season}-12-31`)
@@ -62,7 +62,6 @@ export async function loadDecidedGames(
         if (!homeCode || !awayCode) continue;
         const homeWon = g.winner_team_id === g.home_team_id;
         out.push({
-          id: g.id as number,
           date: g.game_date as string,
           season,
           homeTeam: homeCode,
