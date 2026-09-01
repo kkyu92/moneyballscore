@@ -1,3 +1,13 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2684, review-code(heavy): picks-loader.ts 미소비 필드 정리)
+
+### refactor: 로또 picks-loader 미소비 필드(avoidScore/generatedAt) 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(op-analysis 18/25, info-arch 5/30, lotto 25/30, fix-incident 방금 발화 gap=0). 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 15/20(75%, dominance-positive streak 정합). cycle 2683 retro 추천대로 review-code(heavy) 복귀, 신규 후보 재탐색.
+- 최고령 미터치 대형파일 재스캔(`git log -1 --date`, 150줄+ lib 파일) → `lib/lotto/picks-loader.ts`(166줄, 2026-06-29 이후 미터치, 최고령) 채택. lotto 영역은 review-code(heavy) 대상으로 처음 편입.
+- 전체 정독 + 소비 라우트 4개(page.tsx/archive/[date]/page.tsx/opengraph-image.tsx/CopyAllButton.tsx) + 테스트 7개 파일 cross-check. `LottoSet.avoidScore`(markdown 표 6번째 컬럼 파싱)와 `LottoPicks.generatedAt`("생성 시각" 라인 파싱) 둘 다 계산은 되지만 어떤 소비자·테스트도 읽지 않음 — cycle 2677/2678/2680(DB select 필드) + 2681/2682(computed 필드)와 같은 죽은 필드 패턴의 markdown-parse 변종, 5번째 발견.
+- 미소비 필드 2개 제거(interface + 파싱 로직). `idx`/`sum`/`oddEven`/`consecutive`는 실사용 확인 후 유지.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 2145b3ba).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2682, review-code(heavy): buildPitcherLeaderboard.ts 미사용 필드 정리)
 
 ### refactor: 투수 리더보드 predictions select 미사용 컬럼(confidence) 제거

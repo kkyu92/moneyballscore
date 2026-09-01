@@ -1,4 +1,12 @@
 
+## cycle 2684 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(op-analysis 18/25, info-arch 5/30, lotto 25/30, fix-incident gap=0 직발화). 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 15/20(75%) dominance-positive streak 정합. cycle 2683 retro 추천대로 review-code(heavy) 복귀.
+- 최고령 미터치 대형파일 재스캔 → `lib/lotto/picks-loader.ts`(166줄, 2026-06-29 이후 미터치, 최고령) 채택 — lotto 영역 review-code(heavy) 최초 편입.
+- `LottoSet.avoidScore`/`LottoPicks.generatedAt` 둘 다 파싱만 되고 소비 라우트 4개·테스트 7개 어디서도 미참조 — cycle 2677/2678/2680/2681/2682 와 동일 죽은 필드 패턴의 markdown-parse 변종, 5번째 발견. 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 2145b3ba).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(lotto 영역 신규 편입 — `lib/lotto/` 하위 다른 파일도 재스캔 후보) 또는 op-analysis(19/25)/info-arch(6/30)/lotto(26/30) gap 자연 대기.
+
 ## cycle 2683 (2026-09-01) — RETRO-ONLY
 
 - fix-incident(lite): 진단 — 개방 issue 0, approved plan 0/22(전부 completed/archived/deferred). fix-incident 마지막 발화 cycle 2663 → gap=20, 주기보정 trigger(7) 정확히 도달. 직전8 distinct=3(2-chain lock 미충족), 직전20 review-code 계열 dominance 지속.
