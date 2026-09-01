@@ -90,6 +90,18 @@ interface MlbScheduleRangeRow {
   away_team_code: string;
 }
 
+// buildMlbMissReport 전용 — status 는 서버측 .eq("status","final") 필터로만 쓰이고
+// JS 단에서 재참조 안 됨 (MlbScheduleRangeRow 와 달리 select 에서도 제외).
+// 미소비 select 필드 패턴 (kbo-live.ts/buildPicksStats.ts 등과 동일 계열, cycle 2688).
+interface MlbMissScheduleRow {
+  external_game_id: string;
+  game_date: string;
+  home_score: number | null;
+  away_score: number | null;
+  home_team_code: string;
+  away_team_code: string;
+}
+
 interface MlbPredBreakdownRow {
   external_game_id: string | null;
   home_win_prob: number | null;
@@ -330,9 +342,9 @@ export async function buildMlbMissReport(
   const scheduleResult = (await supabase
     .from("mlb_schedule")
     .select(
-      "external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code",
+      "external_game_id, game_date, home_score, away_score, home_team_code, away_team_code",
     )
-    .eq("status", "final")) as unknown as SelectResult<MlbScheduleRangeRow[]>;
+    .eq("status", "final")) as unknown as SelectResult<MlbMissScheduleRow[]>;
   const { data: scheduleData } = assertSelectOk(scheduleResult, "buildMlbMissReport schedule");
   const scheduleRows = scheduleData ?? [];
   if (scheduleRows.length === 0) return [];
@@ -355,7 +367,7 @@ export async function buildMlbMissReport(
     (predData ?? []).filter((p) => p.external_game_id).map((p) => [p.external_game_id as string, p]),
   );
 
-  const misses: { row: MlbScheduleRangeRow; pred: MlbPredBreakdownRow; conf: number }[] = [];
+  const misses: { row: MlbMissScheduleRow; pred: MlbPredBreakdownRow; conf: number }[] = [];
   for (const s of scheduleRows) {
     const pred = predByExternalId.get(s.external_game_id);
     if (!pred || pred.home_win_prob == null) continue;
