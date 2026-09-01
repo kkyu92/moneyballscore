@@ -8407,3 +8407,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 `pnpm --filter moneyball exec tsc --noEmit` clean + `pnpm --filter moneyball lint` clean + pre-push hook(type-check+version-sync-guard+vitest 3 tests) green. 단일 논리 단위 → 직접 main commit+push(R4/R7, 6c703ee5).
 
 다음 사이클 추천 = review-code(heavy) 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄, `analysis-data.ts`/`buildAccuracyData.ts`/`buildTeamProfile.ts`/`buildMatchupProfile.ts` carry-over) 정독, 또는 fix-incident(10/20)/op-analysis(15/25)/info-arch(27/30)/lotto(17/30) gap 자연 대기.
+
+## RETRO-ONLY — review-code(heavy) fancy-stats.ts/silent-drift-alert.ts 재감사 clean (cycle 2707, 2026-09-01)
+
+진단: open issue 0, approved plan 0/23. 2차 방어선(cycle 2706 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 16/25, info-arch 28/30, lotto 18/30). 직전8 distinct=3(review-code(heavy) 6 + skill-evolution 1 + polish-ui 1) — 2-chain lock 미충족 → cycle 2706 추천대로 review-code(heavy) carry-over 대형파일 rotation 계속.
+
+실행: `fancy-stats.ts`(526줄) 전체 정독 — FANCY_STATS_DEFAULTS/TEAM_NAME_MAP/FS_TEAM_MAP/findPitcher 전부 단일 source, 이중 정의 drift 없음(FANCY_STATS_DEFAULTS·woba 0.320 값 grep 전체 재확인). `silent-drift-alert.ts`(440줄) 전체 정독 — 5개 alert dispatcher 중 4개(captureSilentDriftAlert/captureCreditExhaustedAlert/captureSparsePredictionAlert/captureConfidenceFlatAlert) 전부 daily.ts/postview-daily.ts/mlb-pipeline.ts 에서 정상 호출 확인, captureFactorAnomalyAlert 미배선은 cycle 2276 에서 이미 문서화된 기존 사실(신규 발견 아님).
+
+두 파일 다 clean — 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildTeamProfile.ts` 601줄, `buildMatchupProfile.ts` 594줄), 또는 fix-incident(12/20)/op-analysis(17/25)/info-arch(29/30 근접)/lotto(19/30) gap 자연 대기.

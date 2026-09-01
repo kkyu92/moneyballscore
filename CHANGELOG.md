@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): fancy-stats.ts / silent-drift-alert.ts 재감사 — clean (cycle 2707, RETRO-ONLY)
+
+- 진단: gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 16/25, info-arch 28/30, lotto 18/30), 2-chain lock 미충족(직전8 distinct=3) → cycle 2706 추천대로 carry-over 대형파일 rotation.
+- `fancy-stats.ts`(526줄) 전체 정독 — FANCY_STATS_DEFAULTS/TEAM_NAME_MAP/FS_TEAM_MAP/findPitcher 전부 단일 source, 이중 정의 drift 없음.
+- `silent-drift-alert.ts`(440줄) 전체 정독 — 5개 alert dispatcher 중 4개 정상 배선 확인, captureFactorAnomalyAlert 미배선은 cycle 2276 기존 문서화 사실(신규 발견 아님).
+- 코드 변경 없음(감사만 — 양쪽 clean).
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildTeamProfile.ts` 601줄, `buildMatchupProfile.ts` 594줄) 정독, 또는 fix-incident(12/20)/op-analysis(17/25)/info-arch(29/30 근접)/lotto(19/30) gap 자연 대기.
+
 ### polish-ui(2-chain lock fallback): 미소비 semantic CSS 토큰 제거 (cycle 2706, SUCCESS)
 
 - 직전8 사이클 distinct=2(review-code(heavy) 7 + skill-evolution 1) — 2-chain alternation lock 발동. 잔여 chain pool 진단(gap trigger 4종 전부 미도달, explore-idea saturation 2/15 미충족) 전부 organic trigger 부재 → polish-ui 강제 발화.
