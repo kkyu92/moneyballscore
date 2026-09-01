@@ -1,5 +1,11 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### info-architecture-review: 30-cycle-gap checkpoint (cycle 2709, RETRO-ONLY)
+
+- 진단: gap trigger 도달(info-arch 마지막 발화 cycle 2679, gap=30). 2-chain lock 미충족(직전8 distinct=4). open issue 0, approved plan 0/23.
+- 신규 라우트 0건(cycle 2679 checkpoint commit 02b0c11c 이후), breadcrumb 누락 18건(기존과 완전 일치, 전부 의도된 noindex/redirect-only/utility 페이지), 헤더 메가메뉴/푸터 sitemap 컬럼 변경 없음.
+- 코드 변경 없음(감사만) — `docs/design/ia-2026-09-01-cycle-2709-30-cycle-gap-checkpoint.md` 박제.
+
 ### review-code(heavy): buildTeamProfile.ts/buildMlbTeamProfile.ts 미소비 color 필드 제거 (cycle 2708, SUCCESS)
 
 - 진단: 개방 issue 0, unprocessed plan 0/23(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 17/25, info-arch 29/30 근접, lotto 19/30). 직전8 distinct=3(review-code(heavy) 6 + skill-evolution 1 + polish-ui 1) — 2-chain lock 미충족. cycle 2707 추천대로 잔여 미감사 대형파일 rotation, `buildTeamProfile.ts`(601줄) 먼저 정독.

@@ -1,4 +1,11 @@
 
+## cycle 2709 (2026-09-01) — RETRO-ONLY — info-architecture-review
+
+- 30-cycle-gap trigger 도달(마지막 발화 cycle 2679, gap=30). open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=4).
+- 신규 라우트 0건(cycle 2679 checkpoint 이후), breadcrumb 누락 18건 기존과 완전 일치(전부 의도됨), 헤더/푸터 변경 없음 — "현 IA 충분" 재확정.
+- 코드 변경 없음. `docs/design/ia-2026-09-01-cycle-2709-30-cycle-gap-checkpoint.md` 박제.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildMatchupProfile.ts` 594줄) 정독, 또는 gap trigger 자연 대기.
+
 ## cycle 2708 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2707 추천대로 잔여 미감사 대형파일 정독, `buildTeamProfile.ts`(601줄) 먼저.
