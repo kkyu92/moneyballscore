@@ -36,7 +36,6 @@ interface Row {
   home_sp_xfip: number | null;
   away_sp_xfip: number | null;
   is_correct: boolean | null;
-  confidence: number | null;
   predicted_winner: number | null;
   game: {
     home_sp_id: number | null;
@@ -129,7 +128,7 @@ export async function buildPitcherLeaderboard(options: {
     .select(
       `
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
-        is_correct, confidence, predicted_winner,
+        is_correct, predicted_winner,
         game:games!predictions_game_id_fkey(
           home_sp_id, away_sp_id, home_team_id, away_team_id, status,
           home_sp:players!games_home_sp_id_fkey(id, name_ko, team_id),
