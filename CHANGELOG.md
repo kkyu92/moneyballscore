@@ -1,3 +1,12 @@
+## v0.5.62.171 — 2026-09-01 (cycle 2731, review-code(heavy): llm.ts 미소비 상수 제거 + cycle 2730 retro dispatch backfill)
+
+### review-code(heavy): llm.ts 전수감사 (cycle 2731, SUCCESS)
+
+- 세션 시작 시 cycle 2730 retro dispatch(policy: cycle-retro 커밋 + CHANGELOG/TODOS 엔트리)가 이전 세션 중단으로 silent skip 된 상태 발견(2차 방어선) — retroactive backfill 먼저 완료(`46c0fafe`/`bb6994b5`/`e4e5f9e2`).
+- cycle 2730 추천 target(`retro.ts`/`llm.ts`) 재확인 — `retro.ts`는 이미 하드닝된 clean 상태, `llm.ts`의 `MAX_ATTEMPTS`/`MAX_OVERLOADED_ATTEMPTS` fencepost는 cycle 2634/2653에 이미 수정 완료. 전수감사 중 `OVERLOADED_BACKOFF_MULTIPLIER` 선언만 되고 어디서도 미참조 상수 1건 발견 — 제거.
+- tsc(kbo-data+moneyball)/eslint clean, vitest kbo-data 92 files 1218 tests + moneyball 3 tests 전부 green (`56479789`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 23/30, 근접).
+
 ## v0.5.62.170 — 2026-09-01 (cycle 2730, review-code(heavy): live.ts 전수감사 — dead field + silent error drop 버그 수정)
 
 ### review-code(heavy): live.ts 전수감사 (cycle 2730, SUCCESS)

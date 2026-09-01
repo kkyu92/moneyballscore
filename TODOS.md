@@ -1,4 +1,12 @@
 
+## cycle 2731 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 세션 시작 시 cycle 2730 retro dispatch silent skip 발견(2차 방어선, active-cycle stale pid) — retroactive backfill 먼저 완료(policy: cycle-retro 2730 + CHANGELOG/TODOS + version bump 2건, 사례 15 family 5번째 재발).
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident/lotto gap ≥20-30 노이즈. op-analysis gap 4/25, info-arch gap 22/30 미도달. 직전8 distinct=3 — 2-chain lock 미충족. saturation 12/15 재도달했으나 4-source 재확인 negative — review-code(heavy) 지속.
+- cycle 2730 추천 target 재확인 — `retro.ts` clean, `llm.ts`의 MAX_ATTEMPTS/MAX_OVERLOADED_ATTEMPTS fencepost는 cycle 2634/2653에 이미 수정 완료(cycle 2730 diagnosis 판단 부정확 정정). 전수감사 중 `OVERLOADED_BACKOFF_MULTIPLIER` 미소비 상수 1건 신규 발견/제거.
+- tsc/eslint clean, vitest kbo-data 92 files 1218 tests + moneyball 3 tests green. main 직접 커밋+push (`56479789`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 23/30, 근접).
+
 ## cycle 2730 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 34/20, lotto gap 41/30 재확인 (둘 다 노이즈). op-analysis gap 3/25, info-arch gap 21/30 둘 다 미도달. 직전8 distinct=3 — 2-chain lock 미충족. explore-idea saturation 12/15 충족했으나 4-source 재확인 negative — review-code(heavy) 지속, `live.ts`(363줄) 최초 감사 자연 매핑.
