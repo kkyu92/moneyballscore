@@ -1,4 +1,13 @@
 
+## cycle 2736 (2026-09-01) — SUCCESS — polish-ui(2-chain lock fallback)
+
+- 진단: 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain lock 충족, 두 chain 후보 제외. fix-incident gap 39/20·lotto gap 47/30 재확인 결과 노이즈(CI 전부 green, lotto picks/result 파일 당일 최신). op-analysis gap 9/25·info-arch gap 27/30 둘 다 미도달(info-arch 는 cycle 2709 checkpoint 대비 신규 라우트 0건 + breadcrumb 18건 동일 확인 후 재확인 skip, dead-end 판단). open issue 0, unprocessed plan 0/23.
+- 잔여 pool trigger 부재 — 룰 3(폴백 = polish-ui) 적용, 단 cycle 2733 재감사 영역(리더보드/lotto/analysis/picks/standings/players) 대신 최근 신설(8/23) 미감사 EN 미러 대상 선택(재-lock 방지).
+- `/mlb/analysis`(KO) vs `en/mlb/analysis`(EN) 대조 — KO 는 "이번 주/이번 달 MLB 예측 리뷰" 링크 카드 2개 보유하나 EN 미러(wave-658, cycle 2338)는 전부 누락. `/en/mlb/reviews/weekly`·`/monthly` 페이지 자체는 정상 존재하지만 hub 진입 경로가 EN 에서만 없던 discoverability gap.
+- fix: `getCurrentWeek/getCurrentMonth(new Date(), 'en')` + `getMlbPeriodStats` 배선, KO 와 동일 2섹션 EN 문구로 추가. 회귀 가드 테스트 1건 추가(`wave-658-en-mlb-analysis-mirror.test.ts`).
+- tsc/eslint clean, 전체 테스트 571파일 4487건 green. main 직접 커밋+push(`55f91e2d` fix + `f3b17be8` VERSION sync, 1차 push 시 version-sync-guard 로 VERSION 파일 누락 발견→재수정).
+- 다음 사이클 추천 = info-architecture-review(gap 28/30, 근접) 또는 review-code(heavy)/polish-ui 자연 재개(N=1 경과, lock 해제).
+
 ## cycle 2735 (2026-09-01) — RETRO-ONLY — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 38/20/lotto gap 46/30 둘 다 노이즈 재확인(CI 전부 green, picks/result 파일 당일 최신). op-analysis gap 8/25, info-arch gap 26/30 둘 다 미도달. 직전8 distinct=3 — 2-chain lock 미충족. explore-idea saturation 14/15 재도달했으나 plan#29 재평가 트리거(트래픽≥10/포스트시즌 임박/사용자 발화) 미충족 — review-code(heavy) 지속.
