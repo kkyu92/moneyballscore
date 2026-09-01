@@ -1,4 +1,12 @@
 
+## cycle 2691 (2026-09-01) — SUCCESS
+
+- operational-analysis(lite): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 재확인: op-analysis 마지막 발화 cycle 2666, gap=25(≥25 임계 정확히 도달) — 25-cycle 미발화 trigger 자연 발화. 직전8 distinct=3(review-code(heavy) 6 + fix-incident(lite) 1 + lotto(lite) 1) — 2-chain lock 미충족.
+- `scripts/op-analysis-ce-cohort.ts` 재실행 — 전체 n=357 (CE n=310 / 비CE n=47), cycle 2666 수치와 완전 동일(신규 verified 예측 0건, 25-cycle 경과에도 배치 미반영 지속). CE 54.5%(169/310) / 비CE 63.8%(30/47) → 격차 9.3pp 그대로, LLM 부가가치 우세 결론 13회 연속 재확인.
+- CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 62일+ 경과) 상태 변화 없음. CLAUDE.md 모델 가중치 섹션에 cycle 2691 엔트리 append (e094720d).
+- 코드 변경 없음(재측정만) — CLAUDE.md 갱신 커밋만 진행.
+- 다음 사이클 추천 = review-code(heavy) 복귀 (미감사 대형파일 재탐색: analysis-data.ts/buildAccuracyData.ts/daily.ts) 또는 fix-incident(gap 8/20)/info-arch(gap 12/30)/lotto(gap 2/30) 자연 대기.
+
 ## cycle 2689 (2026-09-01) — SUCCESS
 
 - lotto(lite): 진단 — 개방 issue 0, approved plan 0/23. gap trigger 재확인: lotto 마지막 발화 cycle 2659, gap=30(≥30 임계 도달) — 30-cycle 미발화 trigger 자연 발화. 직전8 distinct=2(review-code(heavy) 7 + fix-incident(lite) 1, lock 무시 조건 동일).
