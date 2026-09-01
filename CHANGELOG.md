@@ -1,3 +1,13 @@
+## v0.5.62.185 — 2026-09-01 (cycle 2748, operational-analysis(lite): CE/비CE 재측정 16회 연속 동일 SUCCESS)
+
+### operational-analysis(lite): CE cohort 재측정 (cycle 2748, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=2(review-code(heavy)6+polish-ui2) — 2-chain lock 발동, 두 chain 제외. fix-incident gap11/20·op-analysis gap21/25·info-arch gap9/30 전부 미도달. lotto gap≥30 노이즈, explore-idea saturation 4/15 미충족.
+- lock fallback(polish-ui 강제)이 locked pair 안 폴리시-ui 자체 포함으로 불가 — 남은 pool 중 gap 가장 근접한 op-analysis(21/25) lite 재측정 자율 선택.
+- `scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=357 (CE n=310 / 비CE n=47) — cycle 2727 수치와 완전 동일(신규 verified 예측 0건). CE 54.5%(169/310) / 비CE 63.8%(30/47) → 격차 9.3pp, overlap 통제 격차 10.8pp 유지, LLM 부가가치 우세 결론 16회 연속 재확인.
+- CLAUDE.md 예측 엔진 가중치 섹션에 cycle 2748 측정치 append. 코드 변경 없음(retro-only).
+- 다음 사이클 추천 = review-code(heavy) 또는 fix-incident(gap12/20 monitor).
+
 ## v0.5.62.184 — 2026-09-01 (cycle 2747, review-code(heavy): shadow/feed/recent/v2-preview/insights 미소비 select 컬럼 5파일 제거 SUCCESS)
 
 ### review-code(heavy): `!inner(` embed 패턴 잔여 5파일 미소비 select 컬럼 (cycle 2747, SUCCESS)

@@ -1,4 +1,12 @@
 
+## cycle 2748 (2026-09-01) — SUCCESS — operational-analysis(lite)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy)6+polish-ui2) — **2-chain lock 발동**, 두 chain 제외. fix-incident gap11/20·op-analysis gap21/25·info-arch gap9/30 전부 미도달. lotto gap≥30 이지만 9/5 picks+8/29 result cron 당일 갱신(노이즈, 반복 관찰). explore-idea saturation 4/15 미충족. gh run list 실패 0.
+- lock rule step3 (polish-ui 강제) 는 이번엔 locked pair 안에 polish-ui 자신이 포함돼 적용 불가 — 남은 pool 중 trigger 가장 근접한 op-analysis(gap21/25) 선택, lite 재측정 진행.
+- `scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=357 (CE n=310 / 비CE n=47) — cycle 2727 수치와 완전 동일(신규 verified 예측 0건, 5회 연속 동일 n). CE 54.5%(169/310) / 비CE 63.8%(30/47) → 격차 9.3pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp ≈ 유지, LLM 부가가치 우세 결론 16회 연속 재확인.
+- CREDIT_EXHAUSTED·비CE 동결(마지막 예측 2026-07-01, 62일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only), CLAUDE.md 예측 엔진 가중치 섹션에 cycle 2748 측정치 append.
+- 다음 사이클 추천 = review-code(heavy) 또는 fix-incident(gap12/20 monitor) — op-analysis 는 신규 verified 배치 발생 전까지 재측정 낮은 우선순위.
+
 ## cycle 2747 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/22(approved 없음). 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap10/20·op-analysis gap20/25·info-arch gap8/30 전부 미도달. lotto gap≥30 이지만 9/5 picks+8/29 result cron 당일 갱신(노이즈). explore-idea saturation 14/15 충족했으나 approved plan 부재로 review-code(heavy) 유지. gh run list 실패 0.
