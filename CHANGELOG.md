@@ -1,3 +1,14 @@
+## v0.5.62.181 — 2026-09-01 (cycle 2744, review-code(heavy): insights loader/series 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): insights/loader.ts·series.ts 미소비 select 컬럼 (cycle 2744, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4(review-code(heavy)5+polish-ui1+info-architecture-review1+fix-incident1) — 2-chain lock 미충족. fix-incident gap6/20·op-analysis gap17/25·info-arch gap4/30·lotto gap 전부 미도달/노이즈(9/5 picks + 8/29 result cron 당일 자동 갱신). explore-idea saturation 3/15 미충족. gh run list 최근 10건 실패 0. skill-evolution 마커 없음, milestone(2744%50) 미도달 — cycle 2743 추천대로 review-code(heavy) 자연 재개.
+- cycle 2743 추천 대상(apps/moneyball/src/lib 의 나머지 build*.ts 전수) — buildMlbMatchupProfile/buildMlbPlayerProfile(leagues!inner(code) 는 필터 전용이나 embed 최소 컬럼 유지 필요해 제외)/buildTeamStrengthSnapshot/buildMlbTeamStrengthSnapshot/buildPitcherProfile/buildBatterLeaderboard/buildMlbTeamAccuracy/buildTeamAccuracy/buildMlbCommunityAccuracy/buildMlbFactorAccuracy/buildMlbCalendarHeatmap/buildMlbAccuracySummary/buildMlbTeamUpcoming/buildMlbMatchupUpcoming/buildSeasonSummary/buildMlbStandings 전수감사 — 전부 clean(select 필드 전부 소비). build*.ts 패밀리 사실상 소진 확인.
+- 인접 축 전환(build*.ts 외 `!inner(` embed 패턴 파일로 확장) — `insights/loader.ts` (getInsightsForDate) 와 `insights/series.ts` (getSeriesByTopic) 둘 다 predictions select 절에 `prediction_type` + `created_at` 포함, row 처리 루프에서 실사용 0건(필터 `.eq("prediction_type","pre_game")` + 정렬 `.order("created_at")` 는 select 없이도 동작) — scoring_rule/prediction_type select-only-unused 패밀리 신규 파일 2건 확인.
+- fix: 두 파일 select 절에서 `prediction_type`+`created_at` 제거(필터/정렬 전부 유지).
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green(회귀 없음, 필드 제거만이라 순증 0).
+- 다음 사이클 추천 = review-code(heavy) — 나머지 `!inner(`/`games!inner(` embed 패턴 파일(analysis/convergenceRecord.ts 등) 재감사, 또는 op-analysis(gap 18/25 monitor).
+
 ## v0.5.62.180 — 2026-09-01 (cycle 2743, review-code(heavy): buildMatchupProfile/buildTeamProfile/buildMissReport 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): buildMatchupProfile.ts/buildTeamProfile.ts/buildMissReport.ts 미소비 select 컬럼 (cycle 2743, SUCCESS)

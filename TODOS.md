@@ -1,4 +1,13 @@
 
+## cycle 2744 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap6/20·op-analysis gap17/25·info-arch gap4/30 전부 미도달. lotto 노이즈(9/5 picks + 8/29 result cron 당일 자동 갱신). gh run list 실패 0. cycle 2743 추천대로 review-code(heavy) 자연 재개.
+- cycle 2743 추천대로 apps/moneyball/src/lib 나머지 build*.ts 전수감사(15개 파일) — 전부 clean. build*.ts 패밀리 소진 확인.
+- 인접 축 전환(`!inner(` embed 패턴 파일) — `insights/loader.ts`(getInsightsForDate)/`insights/series.ts`(getSeriesByTopic) 둘 다 `prediction_type`+`created_at` select 되지만 필터/정렬 전용, row 데이터로는 미소비.
+- fix: 두 파일 select 절에서 두 컬럼 제거(필터/정렬 유지).
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) — 나머지 `!inner(` embed 패턴 파일(analysis/convergenceRecord.ts 등) 재감사, 또는 op-analysis(gap 18/25 monitor).
+
 ## cycle 2743 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap6/20·op-analysis gap16/25·info-arch gap4/30 전부 미도달. lotto 노이즈(cron 당일 자동 갱신). gh run list 실패 0. cycle 2742 추천대로 review-code(heavy) 자연 재개.
