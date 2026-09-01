@@ -1,4 +1,12 @@
 
+## cycle 2715 (2026-09-01) — SUCCESS — operational-analysis(lite)
+
+- 진단: open issue 0, unprocessed plan 0/23(plan#29 Tier4 유지). 2-chain lock 탐지(직전8 = review-code(heavy) 6 + info-architecture-review 1, distinct=2) → 두 chain 후보 제외.
+- gap trigger 재확인: fix-incident 19/20, op-analysis 24/25(근접), info-arch 6/30, lotto 26/30. explore-idea saturation(13/15) 도달했으나 plan#29 4-source 재확인 negative(로그인/커뮤니티 Tier4 사용자영역 — risk=3/자율불가 유지) → 실행 불가.
+- op-analysis(lite) gap 24/25 근접 + lock redirect 로 자율 선택. `scripts/op-analysis-ce-cohort.ts` 재실행 — n=357(CE 310/비CE 47), cycle 2691과 완전 동일(3-cycle 연속 동일 n, 신규 verified 예측 0건). 격차 9.3pp, overlap 통제 10.8pp 유지 — LLM 부가가치 결론 14회 연속 재확인.
+- CLAUDE.md append(커밋 f949d7ea). 코드 변경 없음(retro-only).
+- 다음 사이클 추천 = review-code(heavy)/info-architecture-review 2-chain lock 해제 후 자연 재개, 또는 fix-incident(19/20)/lotto(26/30) gap 자연 대기.
+
 ## cycle 2714 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2713 추천 carry 중 cycle 2712 항목(`prediction_type` select-only 미사용) 채택.
