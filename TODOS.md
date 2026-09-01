@@ -1,4 +1,12 @@
 
+## cycle 2673 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 25/30, lotto 14/30), 직전8 distinct=4(review-code(heavy)4+operational-analysis1+explore-idea1+review-code2, 2-chain lock 미충족). cycle 2669/2670/2671/2672 retro 공통 추천 미감사 컴포넌트 `TeamBiasTable.tsx`(136줄)/`ModelVersionHistory.tsx`(109줄) 채택 — 남은 미감사 후보 전부 소진.
+- 서브에이전트로 전체 정독 + `buildTeamBiasAnalysis`/`buildMlbTeamBiasAnalysis`/`buildVersionHistory`/`accuracy` page.tsx 데이터 흐름 교차검증. 실제 drift 0건 — `ModelVersionHistory`는 이미 `CURRENT_SCORING_RULE` 정상 import(하드코딩 없음), `TeamBiasTable`은 애초 버전 라벨 미렌더링. cohort 필터도 정상: `buildTeamBiasAnalysis`류는 현재 모델 스냅샷이라 `CURRENT_MODEL_FILTER` 사용이 의도된 설계(era 비교용 `buildVersionHistory`와 다른 목적), page.tsx는 기존 `versionHistoryRows`(unfiltered) 정상 사용 중(cycle 2490 fix + 회귀 가드 존재).
+- 유일한 관찰 = 두 컴포넌트 모두 component-level render 테스트 부재(기존 silent-drift regex 가드만 존재) — review-code(heavy) fix 대상 아님, 향후 expand-scope/테스트 커버리지 후보로만 기록.
+- 코드 변경 없음(clean audit). tsc/lint/vitest 재실행 불필요(변경 없음).
+- 다음 사이클 추천 = review-code(heavy) 미감사 대상 소진됨 — 신규 대형 파일/컴포넌트 재탐색 필요 또는 fix-incident/op-analysis/info-arch/lotto/explore-idea gap 자연 대기.
+
 ## cycle 2672 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 6/25, info-arch 24/30, lotto 13/30), 직전8 distinct=3(review-code(heavy)6+operational-analysis1+explore-idea1, 2-chain lock 미충족). cycle 2668/2670/2671 retro 공통 추천 미감사 컴포넌트(`TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable`) 실측 재확인 — `TeamMatchupCards`는 이미 테스트 존재(51줄) 확인돼 제외, 나머지 3개 중 최대 규모 `FactorAccuracyTable.tsx`(170줄) 채택.
