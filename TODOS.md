@@ -1,4 +1,12 @@
 
+## cycle 2664 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 16/30, lotto 5/30), 직전8 distinct=5(2-chain lock 미충족). 직전20 review-code(heavy) dominance 55%(11/20) 지속 — 강한 외부 신호 부재로 dominance channel 재선택.
+- 대상1 `TeamMatchupCards.tsx`(106줄, 최근 미커버) 정독 — clean, drift 0건. 대상2 `backtest-manual-weights-run.ts`(마지막 터치 2026-07-13, 50일+ 경과) + sibling `backtest-bootstrap-ci-run.ts` 정독 — 실제 drift 발견.
+- `WEIGHTS_V15 = { ...DEFAULT_WEIGHTS }` — DEFAULT_WEIGHTS 는 cycle 17 박제(v1.5) 이후 v1.6→v1.7-revert→v1.8 로 계속 진화했는데 변수명/주석/print label 전부 "v1.5 = 현재 prod DEFAULT_WEIGHTS" 고정 서술. 재실행 시 실제로는 최신(v1.8) 기준 값이 출력되는데 "Manual v1.5" 라 표기 — `data/backtest-results/2026-05-25-manual-weights.md` 등 과거 박제 결과물 라벨 오해 소지.
+- 양쪽 파일에 clarifying 주석 추가(변수명/JSON 스키마 `manual_v15` 등 유지, 동작 변경 없음). `pnpm --filter kbo-data exec tsc --noEmit` clean, pre-push lint+type-check+test 통과 → 직접 main commit+push(R4/R7).
+- 다음 사이클 추천 = operational-analysis(gap 4/25) 또는 fix-incident(gap 2/20) 자연 대기, 또는 review-code(heavy) 대형 미감사 파일 pool 소진 근접 — explore-idea saturation 재확인/다양성 redirect 고려.
+
 ## cycle 2663 (2026-09-01) — RETRO-ONLY
 
 - fix-incident: 진단 — 개방 issue 0, approved plan 0/23, 직전8 distinct=5(2-chain lock 미충족), gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 15/30, lotto 4/30). 직전20 review-code dominance 60%(12/20) 지속 — cycle 2661/2662 next_recommended_chain(fix-incident) carry-over 채택해 다양성 redirect.
