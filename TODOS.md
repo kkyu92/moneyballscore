@@ -1,4 +1,12 @@
 
+## cycle 2740 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap3/20·op-analysis gap13/25·info-arch gap1/30 전부 미도달. lotto gap51/30 노이즈(cron 당일 자동 갱신). gh run list 실패 0. review-code(heavy) 자연 재개.
+- elo-trend 5파일 패밀리 전수감사 clean. 인접 축 — `prediction_type` select-only-unused 컬럼 제거 패밀리(cycle 2714)가 미적용된 buildTeamFactorAverages.ts/buildMlbTeamFactorAverages.ts 발견.
+- fix: 두 파일 select 절+interface 에서 `prediction_type` 제거(서버측 `.eq()` 필터는 유지).
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) 신규 대상(buildTeamRecentForm/buildTeamUpcoming/buildMatchupUpcoming 페어) 또는 op-analysis(gap 14/25 monitor).
+
 ## cycle 2739 (2026-09-01) — RETRO-ONLY — info-architecture-review
 
 - 진단: 직전8 distinct=3(review-code(heavy)5+polish-ui2+fix-incident1) — lock 미충족. info-architecture-review 마지막 발화 cycle 2709 → gap 30/30 정확 도달(cycle 2738 예고).
