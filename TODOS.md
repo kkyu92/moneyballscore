@@ -1,4 +1,13 @@
 
+## cycle 2737 (2026-09-01) — SUCCESS — fix-incident
+
+- 진단: 2-chain lock(직전8 review-code(heavy)6+polish-ui2) 충족, 두 chain 제외. lotto 노이즈, op-analysis gap 10/25·info-arch gap 28/30 미도달(breadcrumb 18건 재확인 결과 전부 redirect stub/debug/placeholder — IA 이슈 아님). explore-idea saturation 충족했으나 plan#29 게이트 미충족. fix-incident gap 20+ 충족 — 기존 채널(gh run list/pipeline_runs) clean 이었으나 처음으로 Sentry API 직접 조회, unresolved 6건 중 2건이 진짜 미해결 버그로 확인.
+- MONEYBALLSCORE-1A(357회): mlb_schedule (date,home,away) 3-eq 조회가 더블헤더(DB 실측 14그룹)에서 row 2개 매칭 → `.maybeSingle()` "multiple rows" throw, 500. KO+EN 양쪽 동일.
+- MONEYBALLSCORE-1B(3회): `normalizeMlbTeamCode ?? (as MlbTeamCode)` fallback 미인식 코드 캐스팅 통과 → `MlbTeamLogo` 의 `MLB_TEAMS[team]` undefined → `.name` 크래시. `buildMlbTeamStats` 는 이미 `?.color ?? '#888'` 방어 있는데 `MlbTeamLogo` 만 누락.
+- fix: 두 game-detail page `.order('game_datetime_utc',{ascending:true}).limit(1)` 추가(결정적 단일 row) + `MlbTeamLogo` optional chaining fallback. 회귀 가드 4건 추가.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green. main 직접 커밋+push(`b9f25eae` fix + `795f95e6` VERSION sync).
+- 다음 사이클 추천 = info-architecture-review(gap 29/30, 근접) 또는 Sentry 잔여 4건 정밀 분류.
+
 ## cycle 2736 (2026-09-01) — SUCCESS — polish-ui(2-chain lock fallback)
 
 - 진단: 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain lock 충족, 두 chain 후보 제외. fix-incident gap 39/20·lotto gap 47/30 재확인 결과 노이즈(CI 전부 green, lotto picks/result 파일 당일 최신). op-analysis gap 9/25·info-arch gap 27/30 둘 다 미도달(info-arch 는 cycle 2709 checkpoint 대비 신규 라우트 0건 + breadcrumb 18건 동일 확인 후 재확인 skip, dead-end 판단). open issue 0, unprocessed plan 0/23.

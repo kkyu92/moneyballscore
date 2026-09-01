@@ -1,3 +1,14 @@
+## v0.5.62.175 — 2026-09-01 (cycle 2737, fix-incident: 더블헤더 schedule 500 + 미인식 team code 로고 크래시 수정 SUCCESS)
+
+### fix-incident: mlb_schedule 더블헤더 multiple-rows 500 + MlbTeamLogo undefined 크래시 (cycle 2737, SUCCESS)
+
+- 진단: 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain lock 충족, 두 chain 후보 제외. lotto 파일 당일 최신(노이즈), op-analysis gap 10/25·info-arch gap 28/30 둘 다 미도달(breadcrumb 누락 18건 재확인 결과 전부 redirect stub/debug/root/placeholder — 실제 IA 이슈 아님). explore-idea saturation 13/15 충족했으나 plan#29(로그인/커뮤니티) 재평가 트리거(포스트시즌 임박/트래픽≥10/사용자 발화) 전부 미충족. fix-incident 는 gap 20+ 충족 — `gh run list`/`pipeline_runs` DB 직접 조회(비-success 0건, silent drift 패턴 0건)로는 clean 이었으나, 이번 cycle 처음으로 Sentry API 직접 조회(기존엔 gh run list/pipeline_runs 두 채널만 확인, Sentry 는 미확인 채널) — unresolved 이슈 6건 중 2건이 CE/known 패턴 아닌 진짜 미해결 버그로 확인.
+- **MONEYBALLSCORE-1A** (357회, 2026-08-18~08-29, GET /(en/)mlb/games/[date]/[slug]): `mlb_schedule` 을 (game_date, home_team_code, away_team_code) 3-eq 로만 조회 — 더블헤더(같은 날 같은 매치업 2경기, DB 실측 14 그룹 확인)에서 row 2개 매칭 시 `.maybeSingle()` 이 "multiple rows" PostgREST 에러로 throw, 페이지 500. KO/EN 양쪽 동일 버그.
+- **MONEYBALLSCORE-1B** (3회, GET /en/mlb/reviews/weekly/[week]): `mlb-shared.ts` 의 `normalizeMlbTeamCode(code) ?? (code as MlbTeamCode)` fallback 이 미인식 코드를 캐스팅으로 통과시키면 `MlbTeamLogo` 의 `MLB_TEAMS[team]` 조회가 undefined 반환 — `teamInfo.name` 접근 크래시. 같은 파일의 `buildMlbTeamStats` 는 이미 `MLB_TEAMS[code]?.color ?? '#888'` 방어 패턴을 쓰는데 `MlbTeamLogo` 만 누락돼있던 inconsistency.
+- fix: (1) 두 game-detail page 모두 `.order('game_datetime_utc', {ascending:true}).limit(1)` 을 `.maybeSingle()` 앞에 추가해 결정적 단일 row(더 이른 경기) 선택. (2) `MlbTeamLogo` 에 optional chaining + fallback(`teamInfo?.name ?? team`) 추가.
+- 회귀 가드 테스트 4건 추가(KO/EN schedule query order+limit 검증 2건, `MlbTeamLogo.test.tsx` 신규 2건). tsc/eslint clean, 전체 테스트 572파일 4491건 green. main 직접 커밋+push(`b9f25eae` fix + `795f95e6` VERSION sync).
+- 다음 사이클 추천 = info-architecture-review(gap 29/30, 근접) 또는 review-code(heavy)/polish-ui 자연 재개(lock 해제 후 1 cycle 경과) 또는 Sentry 잔여 unresolved 4건(prediction_sparse_data/CE/llm_validator_violation/verify_silent_drift, 전부 known CE 패턴으로 판단되나 재확인 가치 있음) 정밀 분류.
+
 ## v0.5.62.174 — 2026-09-01 (cycle 2736, polish-ui(2-chain lock fallback): en/mlb/analysis 주간·월간 리뷰 링크 카드 배선 SUCCESS)
 
 ### polish-ui(2-chain lock fallback): en/mlb/analysis weekly/monthly review 카드 누락 수정 (cycle 2736, SUCCESS)
