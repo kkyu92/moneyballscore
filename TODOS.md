@@ -1,4 +1,11 @@
 
+## cycle 2665 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 16/30, lotto 5/30), 직전8 distinct=5(2-chain lock 미충족). 직전20 review-code(heavy) dominance 60%(12/20) 지속 — 강한 외부 신호 부재로 dominance channel 재선택.
+- 미감사 대상 `buildTeamProfile.ts`(601줄)/`buildMatchupProfile.ts`(594줄, 둘 다 9일 경과) Explore 서브에이전트로 전체 정독. 상수(RECENT_RECORD_WINDOW/WIN_LOSS_STREAK_MIN_LENGTH/MARGIN_BLOWOUT_THRESHOLD 등) 문서화 주장 vs `packages/shared` 실제 값 대조 일치, 8팩터 claim vs `buildTeamFactorAverages.ts` 실제 필드 수 일치, 호출부 전수(`teams/[code]`/`matchup/[teamA]/[teamB]` KBO+MLB+en 미러) arity/순서 정합 확인, TODO/FIXME 0건, dead code 0건.
+- 신규 drift 0건 — clean audit, 코드 변경 없음.
+- 다음 사이클 추천 = operational-analysis(gap 4/25) 또는 fix-incident(gap 2/20) — review-code(heavy) 대형 파일 pool 계속 소진 중, 다양성 redirect 자연 시점 근접.
+
 ## cycle 2664 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 16/30, lotto 5/30), 직전8 distinct=5(2-chain lock 미충족). 직전20 review-code(heavy) dominance 55%(11/20) 지속 — 강한 외부 신호 부재로 dominance channel 재선택.
