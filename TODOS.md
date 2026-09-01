@@ -1,4 +1,11 @@
 
+## cycle 2698 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred/tier4). explore-idea saturation(13/15) 재도달했으나 plan#29(로그인/커뮤니티) Tier4 재확인(risk=3, 자율불가, postseason 10월 미도달). gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 7/25, info-arch 19/30, lotto 9/30). 직전8 distinct≥3 — 2-chain lock 미충족. cycle 2697 추천대로 review-code(heavy) 계속, 미감사 대형파일 중 최고령(`backfill-sp.ts`, 2026-06-24) 채택.
+- `backfill-sp.ts`(300줄) 전체 정독 — `loadTargetGames()` 의 `games.home_team_id`/`away_team_id` select 가 어디서도 미소비(소비처는 Naver 팀명 기반 teamIdMap 만 사용). computed-but-unconsumed select 필드 계열 10번째 변종. 나머지(3단계 매칭 fallback, idempotent 갱신, in-memory cache, assertWriteOk)는 clean.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 92 files/1218 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, e660ec14).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형파일 1개 잔존: `glossary/data.ts`(323줄, 2026-07-03). 또는 fix-incident(gap 3/20)/op-analysis(gap 8/25)/info-arch(gap 20/30)/lotto(gap 10/30) 자연 대기.
+
 ## cycle 2697 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 6/25, info-arch 18/30, lotto 8/30). 직전8 distinct=4(review-code(heavy) 5 + operational-analysis 1 + lotto 1 + fix-incident 1) — 2-chain lock 미충족. cycle 2696 추천대로 review-code(heavy) 계속, 미감사 대형파일 중 최고령(`rivalry-memory.ts`, 2026-06-30) 채택.

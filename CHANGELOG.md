@@ -1,3 +1,13 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2698, review-code(heavy): backfill-sp.ts 미소비 select 필드 제거)
+
+### refactor: loadTargetGames() home/away_team_id 미소비 select 필드 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred/tier4). explore-idea saturation(13/15) 재도달했으나 유일 후보 plan#29(로그인/커뮤니티)가 risk=3+자율불가 Tier4 재확인(오늘 2026-09-01, KBO 포스트시즌 10월 미도달). gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 7/25, info-arch 19/30, lotto 9/30). 직전8 distinct≥3 — 2-chain lock 미충족. cycle 2697 추천대로 review-code(heavy) 계속, 미감사 대형파일 중 최고령(`backfill-sp.ts`, 2026-06-24) 채택.
+- `backfill-sp.ts`(300줄) 전체 정독 — `loadTargetGames()` 의 `games.home_team_id`/`away_team_id` select 가 `GameRow` 인터페이스에 담기지만 소비처(`matchPitcher` 호출부) 는 Naver 팀명 기반 `teamIdMap`(from `ng.homeTeam`/`ng.awayTeam`) 만 사용, `game.home_team_id`/`away_team_id` 참조 0건. computed-but-unconsumed select 필드 계열 10번째 변종. 나머지(3단계 매칭 fallback, idempotent 갱신 조건, in-memory create cache, assertWriteOk fail-loud)는 clean.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 92 files/1218 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, e660ec14).
+
+---
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2697, review-code(heavy): rivalry-memory.ts 미소비 select 필드 제거)
 
 ### refactor: fetchRecentH2H/fetchMemories 미소비 select 필드 제거
