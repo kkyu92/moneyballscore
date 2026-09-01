@@ -1,4 +1,12 @@
 
+## cycle 2704 (2026-09-01) — SUCCESS — fix-incident
+
+- review-code(heavy) rotation 계속 — cycle 2703 추천대로 `backtest-manual-weights-run.ts`(2회 언급) 전체 정독. 로직 정상(H4 manual vs logistic 비교 ad-hoc 스크립트), `cycle: 903` 하드코딩 메타데이터는 stale 이나 소비처 0건(grep 확인) — 실사용 영향 없어 actionable 아님.
+- 감사 중 `npx vitest run packages/kbo-data` 전체 실행 → `scrapers-kbo-live.test.ts` 1건 timeout 실패(재현 2회) 발견. 원인: `fetchWithRetry` 가 502 응답에 실제 backoff sleep(2000ms+4000ms=6000ms) 수행하는데 mock 이 항상 502 반환 — vitest 기본 5000ms timeout 초과. production 로직은 정상(의도된 backoff), 테스트 timeout 만 미반영.
+- fix: 해당 테스트 timeout 5000ms→10000ms 조정(commit f10c33ae). 전체 vitest kbo-data 92 files 재실행 green(1218 tests). tsc clean.
+- gap trigger 4종 전부 미도달(op-analysis 13/25, info-arch 25/30, lotto 15/30 — fix-incident 자체 발화로 0/20 리셋). 직전8 distinct=4 유지.
+- 다음 사이클 추천 = review-code(heavy) 멘션횟수 rotation 계속(kbo-official.ts 4회 등) 또는 gap trigger 자연 대기.
+
 ## cycle 2703 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 12/25, info-arch 24/30, lotto 14/30). 직전8 distinct=4 — 2-chain lock 미충족. computed-but-unconsumed 계열 소진 후 CHANGELOG mention-count 기준 재조사 — `backtest-bootstrap-ci-run.ts`(360줄)/`backtest-v2-helpers.ts`(370줄) 진짜 0회 언급 대상 발견.

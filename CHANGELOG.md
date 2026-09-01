@@ -1,5 +1,11 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### fix-incident: kbo-live 502 fallback 테스트 timeout 수정 (cycle 2704, SUCCESS)
+
+- review-code(heavy) rotation(`backtest-manual-weights-run.ts` 전체 정독, clean — `cycle: 903` 하드코딩 메타데이터는 소비처 0건이라 actionable 아님) 도중 `npx vitest run packages/kbo-data` 전체 실행에서 `scrapers-kbo-live.test.ts` timeout 실패 재현(2회).
+- 원인: `fetchWithRetry`(fetch-with-retry.ts) 가 502 응답에 실제 backoff sleep(attempt1 2000ms + attempt2 4000ms = 6000ms) 수행 — mock 이 매번 502 반환하는 테스트가 vitest 기본 5000ms timeout 초과. production retry 로직 자체는 정상(의도된 backoff), 테스트만 실제 소요시간 미반영.
+- fix: 해당 테스트 timeout 5000ms→10000ms 조정(`packages/kbo-data/src/__tests__/scrapers-kbo-live.test.ts`, commit f10c33ae, main 직접 push). vitest kbo-data 92 files/1218 tests 전체 green 재확인. tsc clean.
+
 ### review-code(heavy): backtest-bootstrap-ci-run.ts / backtest-v2-helpers.ts 신규 감사 — clean (cycle 2703)
 
 - 진단: 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 12/25, info-arch 24/30, lotto 14/30). 직전8 distinct=4 — 2-chain lock 미충족. computed-but-unconsumed 계열 소진 후 CHANGELOG mention-count 기준 재조사 — `backtest-bootstrap-ci-run.ts`(360줄)/`backtest-v2-helpers.ts`(370줄) 진짜 0회 언급 발견.
