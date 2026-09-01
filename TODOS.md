@@ -1,4 +1,13 @@
 
+## cycle 2751 (2026-09-01) — SUCCESS — skill-evolution(forced), 76th, phase 42 milestone
+
+- 진단: skill-evolution-pending 마커 발견 (cycle 2750 이 trigger 3 milestone 로 박제) → chain 자율 선택 없이 skill-evolution 강제 발화. 2차 방어선 확인 — 직전 사이클(2750) retro commit 존재 확인(정상), comm -23 로 2701-2750 50 cycle 구간 결손 0건 재검증.
+- 직전 20 cycle(2731-2750) chain 분포 측정 — review-code(heavy) 70%(14/20, -10pp vs phase 41 80% — dominance 소폭 완화) + polish-ui 15%(2-chain lock fallback 2건+자연 1건) + fix-incident/info-arch/op-analysis 각 5%. success 85%(17/20, 3 retro-only 전부 감사결과 신규이슈 0건 정상 clean). silent drift family 축 확인: computed-but-unconsumed select 필드 계열이 `!inner(` embed → app 라우트 직접 select(12파일) → shared `PredictionRow` 교차 소비처 순 3단계로 확장 후 완결.
+- `~/.claude/skills/develop-cycle/SKILL.md` 마이그레이션 path 표(line 686) phase 42 요약 갱신 + `MIGRATION-PATH.md` phase 42 전체 상세 append. `/office-hours` skip(자동 fire 환경, AskUserQuestion hang 회피) — spec 직접 작성.
+- 코드 변경 없음(SKILL.md 는 리포 밖 글로벌 파일) — lint+type-check+test 전체 green(pre-push hook, 무변화).
+- PASS_ship: cycle 2700(~2262) + 2701-2750 구간 SUCCESS 40건 → 누적 ~2302. watch hang kill 0건(10 consecutive 50-cycle window).
+- 다음 사이클 추천 = review-code(heavy) — 단 3단계 silent-drift 계열 완결로 신규 미감사 축 존재 여부부터 확인, 없으면 fix-incident/op-analysis gap-fill 로 자연 재분산 예상. 다음 milestone = cycle 2800.
+
 ## cycle 2750 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap13/20·op-analysis gap23/25·info-arch gap11/30 전부 미도달. explore-idea saturation 4/15 미충족. gh run list 실패 0. **milestone: cycle_n%50==0 — skill-evolution trigger 3 충족.**
