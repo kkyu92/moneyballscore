@@ -1,4 +1,12 @@
 
+## cycle 2741 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap4/20·op-analysis gap14/25·info-arch gap2/30 전부 미도달. lotto 노이즈(cron 당일 자동 갱신). gh run list 실패 0. cycle 2740 추천대로 review-code(heavy) 자연 재개.
+- cycle 2740 추천 대상 3파일 확인 — buildTeamRecentForm.ts clean. buildTeamUpcoming.ts/buildMatchupUpcoming.ts 는 `prediction_type`+`scoring_rule` 둘 다 select+interface 정의만 있고 `pred.` 루프에서 미소비(서버측 `.eq()` 필터 2건은 이미 걸림) — scoring_rule 동반 미소비는 이번이 첫 확인 사례.
+- fix: 두 파일 select절+interface 에서 `prediction_type`+`scoring_rule` 제거(`.eq()` 필터는 유지).
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) — scoring_rule 단독/동반 미소비 패턴으로 KBO+MLB 나머지 build*.ts 재감사, 또는 op-analysis(gap 15/25 monitor).
+
 ## cycle 2740 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap3/20·op-analysis gap13/25·info-arch gap1/30 전부 미도달. lotto gap51/30 노이즈(cron 당일 자동 갱신). gh run list 실패 0. review-code(heavy) 자연 재개.

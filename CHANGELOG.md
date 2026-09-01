@@ -1,3 +1,13 @@
+## v0.5.62.178 — 2026-09-01 (cycle 2741, review-code(heavy): buildTeamUpcoming/buildMatchupUpcoming 미소비 prediction_type+scoring_rule 제거 SUCCESS)
+
+### review-code(heavy): buildTeamUpcoming.ts/buildMatchupUpcoming.ts 미소비 select 컬럼 (cycle 2741, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 status: approved 아님 — completed/doc_only/미기재). 직전8 distinct=4(review-code(heavy)4+polish-ui2+fix-incident1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap 4/20·op-analysis gap 14/25·info-arch gap 2/30 전부 미도달. lotto 최근 30 사이클 0회지만 cron 자동 갱신 노이즈로 확인 지속. gh run list 최근 10건 실패 0. skill-evolution 마커 없음, milestone(2741%50) 미도달 — cycle 2740 추천대로 review-code(heavy) 자연 재개.
+- cycle 2740 추천 대상(buildTeamRecentForm/buildTeamUpcoming/buildMatchupUpcoming) 확인 — buildTeamRecentForm.ts 는 clean(select 전부 소비). buildTeamUpcoming.ts/buildMatchupUpcoming.ts 둘 다 `predictions` select 절에 `prediction_type`+`scoring_rule` 포함, interface 필드도 정의만 있고 `pred.` 접근 루프에서 둘 다 전혀 안 읽힘 — 서버측 `.eq("predictions.prediction_type","pre_game")` + `.eq("predictions.scoring_rule", CURRENT_SCORING_RULE)` 필터만으로 이미 걸러짐 (동일 select-only-unused 패밀리, cycle 2714/2740 후속 — 이번엔 scoring_rule 도 같은 파일에서 동반 미소비 확인된 첫 사례).
+- fix: 두 파일 모두 select 절 + interface 에서 `prediction_type`, `scoring_rule` 둘 다 제거(서버측 `.eq()` 필터 2건 모두 유지).
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green(회귀 없음, 필드 제거만이라 순증 0).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 계속(scoring_rule 단독/동반 미소비 패턴으로 KBO+MLB 나머지 build*.ts 재감사) 또는 op-analysis(gap 15/25 monitor).
+
 ## v0.5.62.177 — 2026-09-01 (cycle 2740, review-code(heavy): buildTeamFactorAverages/buildMlbTeamFactorAverages 미소비 prediction_type 제거 SUCCESS)
 
 ### review-code(heavy): buildTeamFactorAverages.ts/buildMlbTeamFactorAverages.ts 미소비 select 컬럼 (cycle 2740, SUCCESS)
