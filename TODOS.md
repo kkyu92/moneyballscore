@@ -1,4 +1,12 @@
 
+## cycle 2694 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 3/25, info-arch 15/30, lotto 5/30). 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + lotto 1) — 2-chain lock 미충족. cycle 2693 carry-over 후보 `postview-daily.ts`/`backtest-v2-helpers.ts` 채택.
+- `postview-daily.ts`(380줄) 전체 정독 — clean. assertSelectOk/assertWriteOk fail-loud 정합, shadow row 제외 로직(PRODUCTION_COHORT_RULES) 정확, `estimateHomeWinProb`/`resolveOriginalHomeWinProb` 테스트 커버 확인, `runPostviewDaily` 소비처(daily.ts/live.ts) 정합.
+- `backtest-v2-helpers.ts`(370줄) 전체 정독 — clean. `evaluatePair`/`evaluateThreeWay`/`evaluateFancyElo`/`formatBacktestMarkdown` 전부 `scripts/backtest-v2-candidate.ts` + 테스트에서 소비 확인. `computeEloProb` ↔ `HOME_ELO_BONUS`/`ELO_DIVIDER` cross-ref(shared/index.ts) 정확, 중복 구현 아님.
+- 코드 변경 없음(재감사 2건 clean) — CHANGELOG 갱신 생략(정책상 retro-only는 TODOS만).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형파일 5개 존재: `backtest-grid-run.ts`(252줄, 2026-05-05, 최고령) / `loader.ts`(250줄, 2026-06-24) / `backfill-sp.ts`(300줄, 2026-06-24) / `rivalry-memory.ts`(254줄, 2026-06-30) / `glossary/data.ts`(323줄, 2026-07-03). 또는 fix-incident(gap 12/20)/op-analysis(gap 4/25)/info-arch(gap 16/30)/lotto(gap 6/30) 자연 대기.
+
 ## cycle 2693 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/22(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(op-analysis 2/25, info-arch 14/30, lotto 4/30). 직전8 distinct=3(review-code(heavy) 6 + lotto 1 + operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 유일 후보 plan#29(로그인/커뮤니티)가 risk=3+자율불가 Tier4 확정 상태 재확인 → review-code(heavy) 재선택.
