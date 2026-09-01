@@ -1,4 +1,4 @@
-import { SMALL_SAMPLE_N } from '@moneyball/shared';
+import { CURRENT_SCORING_RULE, SMALL_SAMPLE_N } from '@moneyball/shared';
 import type { FactorAccuracyRow } from '@/lib/accuracy/buildFactorAccuracy';
 
 function AccuracyBar({ accuracy, baseline }: { accuracy: number; baseline: number }) {
@@ -54,7 +54,7 @@ const COPY = {
       n: 'n (홈/원정)',
       accuracy: '적중률',
       footer: (baselinePct: number, overallN: number) =>
-        `∣ 기준선 = 전체 적중률 ${baselinePct}% (v1.8 cohort n=${overallN}) ∣ 홈/원정 = 해당 팩터가 홈/원정팀 유리로 분류된 게임 수`,
+        `∣ 기준선 = 전체 적중률 ${baselinePct}% (${CURRENT_SCORING_RULE} cohort n=${overallN}) ∣ 홈/원정 = 해당 팩터가 홈/원정팀 유리로 분류된 게임 수`,
       smallSampleNote: (minN: number) => `∣ 흐리게 표시된 행 = 소표본 (n<${minN})`,
     },
   },
