@@ -1,4 +1,11 @@
 
+## cycle 2732 (2026-09-01) — RETRO-ONLY — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23 (전부 completed/archived/deferred/spec_only, plan#29 status=spec_only_deferred — approved 아님). fix-incident gap 20+/lotto gap 30+ 재확인 — 둘 다 노이즈(deploy-drift-alert 1건 발견했으나 gap<1h 배포 지연 self-heal 확인, lotto picks/result 파일 둘 다 당일 최신). op-analysis gap 5/25, info-arch gap 23/30 둘 다 미도달. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation 13/15 재도달했으나 plan#29 deferred 근거 불변 — review-code(heavy) 지속.
+- 기존 carry-over 후보(fancy-stats.ts/silent-drift-alert.ts/validator.ts/mlb-pipeline.ts/lotto methodology 등) 전부 TODOS grep 재확인 결과 이미 2~5회씩 재감사 완료된 stale 목록으로 확인 — `find + wc -l` 전체 재스캔 + TODOS 언급 횟수 대조로 진짜 미감사 타겟 발굴: `packages/kbo-data/src/context/agent-context.ts`(273줄, TODOS 언급 1회뿐, 전체 감사 이력 0건).
+- 서브에이전트 전수감사 — `AgentContext` 전 필드를 `team-agent.ts`/`judge-agent.ts`/`postview.ts`/`validator.ts`/`measurement.ts`/`debate.ts` 소비부까지 추적, 5대 재발 버그 계열(dead field/silent error drop/stale comment/scale mismatch/미소비 import) 전부 대조 — `park: ParkContext` 필드가 프로덕션 미소비이나 테스트로 명시 assert 된 의도된 API surface 확인 외 신규 이슈 0건. `pnpm --filter @moneyball/kbo-data exec tsc --noEmit`/`lint`/`vitest run`(context+validator 관련 3 files 156 tests) 전부 green(무변경).
+- 코드 변경 없음(clean audit). 다음 사이클 추천 = review-code(heavy) 계속 시 신규 미감사 타겟 재탐색 필요(component-level: `MlbMatchupFactorCompare.tsx`/`FactorBreakdown.tsx`/`MyPicksClient.tsx` 등 TODOS 언급 1~2회뿐, page-level/lib-level 대비 미탐색 여지 잔존) — 또는 info-arch(gap 24/30, 근접)/op-analysis(gap 6/25) 자연 대기.
+
 ## cycle 2731 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 세션 시작 시 cycle 2730 retro dispatch silent skip 발견(2차 방어선, active-cycle stale pid) — retroactive backfill 먼저 완료(policy: cycle-retro 2730 + CHANGELOG/TODOS + version bump 2건, 사례 15 family 5번째 재발).

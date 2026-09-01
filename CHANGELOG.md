@@ -1,3 +1,11 @@
+## cycle 2732 — 2026-09-01 (review-code(heavy): agent-context.ts 전수감사, RETRO-ONLY)
+
+### review-code(heavy): agent-context.ts 전수감사 (cycle 2732, RETRO-ONLY)
+
+- 기존 review-code(heavy) carry-over 후보 전부 stale(2~5회 재감사 완료) 확인 후 전체 재스캔으로 진짜 미감사 타겟 발굴 — `packages/kbo-data/src/context/agent-context.ts`(273줄) 최초 전체 감사.
+- 5대 재발 버그 계열 전부 대조, 신규 이슈 0건 확인(clean). `park` 필드는 프로덕션 미소비이나 테스트로 명시 assert된 의도된 API — 액션 대상 아님.
+- 코드 변경 없음. tsc/lint/vitest(관련 3 files 156 tests) 전부 green(무변경 확인).
+
 ## v0.5.62.171 — 2026-09-01 (cycle 2731, review-code(heavy): llm.ts 미소비 상수 제거 + cycle 2730 retro dispatch backfill)
 
 ### review-code(heavy): llm.ts 전수감사 (cycle 2731, SUCCESS)
