@@ -1,4 +1,12 @@
 
+## cycle 2750 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap13/20·op-analysis gap23/25·info-arch gap11/30 전부 미도달. explore-idea saturation 4/15 미충족. gh run list 실패 0. **milestone: cycle_n%50==0 — skill-evolution trigger 3 충족.**
+- cycle 2749 추천대로 debug/model-comparison 이 소비하는 shared `PredictionRow`(compareModels.ts) 타입 재검증 — 나머지 8개 소비 후보 파일은 전부 로컬 타입 별도 정의라 무관 확인, 실제 shared type 소비처는 debug 페이지 1곳뿐.
+- `id` 필드가 aggregateByModel/dailyByModel/buildShadowRows 어디서도 미참조 + 유일 소비처도 미사용 확인 → interface/select/loadRows/테스트 fixture 4곳에서 제거.
+- tsc/eslint clean, 전체 테스트 572파일 4490건 green.
+- 회고 단계에서 skill-evolution-pending marker 박제 예정 — 다음 사이클(2751) 강제 skill-evolution 발화.
+
 ## cycle 2749 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident gap12/20·op-analysis gap1/25·info-arch gap10/30 전부 미도달. explore-idea saturation 14/15 충족했으나 plan#29(포스트시즌/트래픽≥10 게이트) 미충족 — review-code(heavy) 자연 재개. gh run list 실패 0.
