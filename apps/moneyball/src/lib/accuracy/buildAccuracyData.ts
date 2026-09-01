@@ -32,7 +32,7 @@ import {
 // 적중률 3-tier color class — accuracy rate 표시 위치 일관 source-of-truth.
 // >= 60% = brand (강한 적중) / >= 50% = yellow (균형) / else = red (저조).
 // asPercent=true 일 때 rate 가 0~100 정수 (예: 65) / false 일 때 0~1 소수 (예: 0.65).
-// caller: AccuracyHeaderCard / predictions/page.tsx tier row / reviews/page.tsx hero stat (sweep 51 통합).
+// caller: AccuracyHeaderCard / predictions/page.tsx (KBO+MLB, ko+en) tier row / reviews/page.tsx hero stat.
 export function accuracyRateColorClass(rate: number, asPercent = false): string {
   const high = asPercent ? ACCURACY_GOOD_PCT : ACCURACY_GOOD_RATE;
   const mid = asPercent ? ACCURACY_BASELINE_PCT : ACCURACY_BASELINE;
@@ -291,7 +291,6 @@ export function buildDayOfWeek(rows: PredRow[]): DayBucket[] {
 export interface ScoringRuleDayCell {
   scoringRule: string;
   day: number; // 0=일,...,6=토
-  dayLabel: string;
   n: number;
   hits: number;
   accuracy: number | null;
@@ -339,7 +338,6 @@ export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[
       out.push({
         scoringRule: sr,
         day,
-        dayLabel: WEEKDAY_LABELS_KO[day],
         n: cell.n,
         hits: cell.hits,
         accuracy: cell.n >= SMALL_SAMPLE_THRESHOLD ? cell.hits / cell.n : null,
@@ -441,7 +439,6 @@ export function countBrierTrendWeeks(data: BrierTrendPoint[]): number {
 
 // totalDays each day = 직전 windowDays (해당 날짜 포함) 적중률 mean. Brier 보다 직관적.
 export interface RollingAccuracyPoint {
-  date: string;
   dateLabel: string;
   windowN: number;
   windowAccuracy: number | null;
@@ -481,7 +478,6 @@ export function buildRollingAccuracy(
     }
     const [, m, d] = dateISO.split('-');
     points.push({
-      date: dateISO,
       dateLabel: `${Number(m)}/${Number(d)}`,
       windowN: n,
       windowAccuracy: n >= SMALL_SAMPLE_THRESHOLD ? hits / n : null,
@@ -492,7 +488,6 @@ export function buildRollingAccuracy(
 
 export interface WinnerProbBucket {
   label: string;
-  range: string;
   min: number;
   max: number;
   n: number;
@@ -502,15 +497,15 @@ export interface WinnerProbBucket {
   ci95Half: number;
 }
 
-const WINNER_PROB_BUCKETS: ReadonlyArray<{ label: string; range: string; min: number; max: number }> = [
-  { label: '50-60%', range: '0.50~0.60', min: 0.5, max: 0.6 },
-  { label: '60-70%', range: '0.60~0.70', min: 0.6, max: 0.7 },
-  { label: '70-80%', range: '0.70~0.80', min: 0.7, max: 0.8 },
-  { label: '80%+', range: '0.80~1.00', min: 0.8, max: 1.01 },
+const WINNER_PROB_BUCKETS: ReadonlyArray<{ label: string; min: number; max: number }> = [
+  { label: '50-60%', min: 0.5, max: 0.6 },
+  { label: '60-70%', min: 0.6, max: 0.7 },
+  { label: '70-80%', min: 0.7, max: 0.8 },
+  { label: '80%+', min: 0.8, max: 1.01 },
 ];
 
 export function buildWinnerProbBuckets(rows: PredRow[]): WinnerProbBucket[] {
-  return WINNER_PROB_BUCKETS.map(({ label, range, min, max }) => {
+  return WINNER_PROB_BUCKETS.map(({ label, min, max }) => {
     const subset = rows.filter((r) => {
       const wp = resolveWinnerProb(r);
       return wp >= min && wp < max;
@@ -520,7 +515,7 @@ export function buildWinnerProbBuckets(rows: PredRow[]): WinnerProbBucket[] {
     const accuracy = n > 0 ? hits / n : null;
     const avgPredicted = n > 0 ? subset.reduce((s, r) => s + resolveWinnerProb(r), 0) / n : null;
     const ci95Half = binomCi95Half(hits, n);
-    return { label, range, min, max, n, hits, accuracy, avgPredicted, ci95Half };
+    return { label, min, max, n, hits, accuracy, avgPredicted, ci95Half };
   });
 }
 

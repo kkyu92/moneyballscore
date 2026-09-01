@@ -17,7 +17,6 @@ function allOnlyCell(day: number, n: number, hits: number): ScoringRuleDayCell {
   return {
     scoringRule: "all",
     day,
-    dayLabel: "",
     n,
     hits,
     accuracy: n > 0 ? hits / n : null,
@@ -41,7 +40,7 @@ describe("ScoringRuleDayHeatmap", () => {
   it("KBO 처럼 여러 scoring_rule 이 실제 데이터를 가지면 해당 행 모두 렌더", () => {
     const data: ScoringRuleDayCell[] = [
       allOnlyCell(1, 5, 3),
-      { scoringRule: "v1.8", day: 1, dayLabel: "", n: 5, hits: 3, accuracy: 0.6 },
+      { scoringRule: "v1.8", day: 1, n: 5, hits: 3, accuracy: 0.6 },
     ];
     const { container } = render(<ScoringRuleDayHeatmap data={data} />);
     const rows = container.querySelectorAll("tbody tr");

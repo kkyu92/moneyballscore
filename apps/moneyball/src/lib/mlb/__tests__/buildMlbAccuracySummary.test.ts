@@ -102,7 +102,7 @@ describe('buildMlbAccuracySummary', () => {
     });
     const { buildMlbAccuracySummary } = await import('../buildMlbAccuracySummary');
     const result = await buildMlbAccuracySummary();
-    const todayPoint = result.rollingAccuracy.find((p) => p.date === today);
+    const todayPoint = result.rollingAccuracy[result.rollingAccuracy.length - 1];
     expect(todayPoint?.windowN).toBe(3);
     expect(todayPoint?.windowAccuracy).toBeCloseTo(2 / 3, 5);
   });
