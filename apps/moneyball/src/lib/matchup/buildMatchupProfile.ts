@@ -55,7 +55,6 @@ export interface MatchupSideStat {
 }
 
 export interface MatchupProfile {
-  pair: MatchupPair;
   teamA: {
     code: TeamCode;
     name: string;
@@ -68,7 +67,6 @@ export interface MatchupProfile {
     shortName: string;
     color: string;
   };
-  totalGames: number;
   finalGames: number;
   sideStats: {
     a: MatchupSideStat;
@@ -341,10 +339,8 @@ export async function buildMatchupProfile(
   if (idA == null || idB == null) {
     // teams row 없어도 빈 프로필 반환
     return {
-      pair,
       teamA,
       teamB,
-      totalGames: 0,
       finalGames: 0,
       sideStats: {
         a: makeSideStat(teamA.code, teamA.shortName),
@@ -542,7 +538,6 @@ export async function buildMatchupProfile(
 
   games.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
 
-  const totalGames = games.length;
   const finalGames = games.filter((g) => g.status === "final").length;
   const rate = verified > 0 ? correct / verified : null;
 
@@ -569,10 +564,8 @@ export async function buildMatchupProfile(
   });
 
   return {
-    pair,
     teamA,
     teamB,
-    totalGames,
     finalGames,
     sideStats,
     predictionAccuracy,

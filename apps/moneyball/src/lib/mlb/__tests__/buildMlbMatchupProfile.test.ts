@@ -198,7 +198,6 @@ describe("buildMlbMatchupProfile — pre_game prediction 누락 final 경기 rec
     const sideNYY = aIsNYY ? profile.sideStats.a : profile.sideStats.b;
     const sideBOS = aIsNYY ? profile.sideStats.b : profile.sideStats.a;
 
-    expect(profile.totalGames).toBe(3);
     expect(profile.finalGames).toBe(2);
     expect(sideNYY.wins).toBe(2);
     expect(sideNYY.homeWins).toBe(1);
@@ -259,7 +258,6 @@ describe("buildMlbMatchupProfile — mlb_schedule row 없음 → 빈 프로필 (
     const pair = mlbCanonicalPair("NYY", "BOS")!;
     const profile = await buildMlbMatchupProfile(pair);
 
-    expect(profile.totalGames).toBe(0);
     expect(profile.finalGames).toBe(0);
     expect(profile.games).toEqual([]);
     expect(profile.streak).toBeNull();
@@ -302,7 +300,6 @@ describe("buildMlbMatchupProfile — StatsAPI 컨벤션 팀 코드 정규화 (re
       "and(home_team_code.eq.NYY,away_team_code.eq.TB),and(home_team_code.eq.TB,away_team_code.eq.NYY)",
     );
 
-    expect(profile.totalGames).toBe(1);
     expect(profile.finalGames).toBe(1);
     expect(profile.games[0].homeCode).toBe("TBR"); // canonical 정규화됨 (raw 'TB' 아님)
     expect(profile.games[0].awayCode).toBe("NYY");

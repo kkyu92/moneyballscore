@@ -320,7 +320,6 @@ describe("buildMatchupProfile — pre_game prediction 누락 final 경기 record
     const sideHT = aIsHT ? profile.sideStats.a : profile.sideStats.b;
     const sideLG = aIsHT ? profile.sideStats.b : profile.sideStats.a;
 
-    expect(profile.totalGames).toBe(3);
     expect(profile.finalGames).toBe(2);
     expect(sideHT.wins).toBe(2); // record 정확 — prediction 없는 final 도 카운트
     expect(sideHT.homeWins).toBe(1);

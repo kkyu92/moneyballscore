@@ -62,7 +62,6 @@ export interface MlbMatchupSideStat {
 }
 
 export interface MlbMatchupProfile {
-  pair: MlbMatchupPair;
   teamA: {
     code: MlbTeamCode;
     name: string;
@@ -75,7 +74,6 @@ export interface MlbMatchupProfile {
     shortName: string;
     color: string;
   };
-  totalGames: number;
   finalGames: number;
   sideStats: {
     a: MlbMatchupSideStat;
@@ -336,10 +334,8 @@ export async function buildMlbMatchupProfile(
   const scheduleRows = scheduleData ?? [];
 
   const emptyResult: MlbMatchupProfile = {
-    pair,
     teamA,
     teamB,
-    totalGames: 0,
     finalGames: 0,
     sideStats: {
       a: makeSideStat(teamA.code, teamA.shortName),
@@ -476,7 +472,6 @@ export async function buildMlbMatchupProfile(
 
   games.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
 
-  const totalGames = games.length;
   const finalGames = games.filter((g) => g.status === "final").length;
   const rate = verified > 0 ? correct / verified : null;
 
@@ -503,10 +498,8 @@ export async function buildMlbMatchupProfile(
   });
 
   return {
-    pair,
     teamA,
     teamB,
-    totalGames,
     finalGames,
     sideStats,
     predictionAccuracy,
