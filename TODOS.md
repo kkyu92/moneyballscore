@@ -1,4 +1,11 @@
 
+## cycle 2680 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 14/25, info-arch 1/30 — 직전 cycle 발화, lotto 21/30), 직전8 distinct=4(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 14/20(70%) dominance-positive streak 정합. cycle 2677/2678 retro 공통 carry-over `lib/mlb/buildMlbTeamProfile.ts`(384줄, 2026-08-24 이후 미터치) 채택.
+- `prediction_type` 이 select 되지만 필터는 이미 `.eq()` 로 서버측 적용, 반환 데이터 미참조(전체 파일 + 6개 소비자 cross-check) — cycle 2677/2678 과 동일 죽은-select-필드 패턴 3번째. select 절 + interface 에서 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, 25e105e8).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(신규 후보: `lib/picks/buildPicksStats.ts`/`app/search/page.tsx`, 둘 다 2026-08-20 이후 미터치) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2679 (2026-09-01) — RETRO-ONLY
 
 - info-architecture-review: 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 재확인(fix-incident 16/20, op-analysis 13/25, lotto 20/30 미도달) + info-arch gap = 31/30 **도달**(마지막 발화 cycle 2648) → trigger 9 발동. 직전8 distinct=3(review-code(heavy)/review-code/polish-ui, 2-chain lock 미충족)이라도 gap trigger 명시적 발화 — review-code(heavy) dominance(직전20 중 14/20) 다양성 전환 겸함.

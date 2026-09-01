@@ -1,3 +1,11 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2680, review-code(heavy): buildMlbTeamProfile.ts 미사용 select 필드 정리)
+
+### refactor: MLB team profile predictions select 미사용 컬럼(prediction_type) 제거
+
+- 진단: 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 14/25, info-arch 1/30 — cycle 2679 직발화, lotto 21/30). 직전8 distinct=4(2-chain lock 미충족). 직전20 chain 분포 review-code(heavy 포함) 14/20(70%) dominance-positive streak 정합. cycle 2677/2678 retro 가 공통 carry-over 로 지목한 `lib/mlb/buildMlbTeamProfile.ts`(384줄, 2026-08-24 이후 미터치) 채택.
+- `prediction_type` 필드가 `predictions` select 절 + `PredRow` interface 에 존재하지만, 필터는 이미 `.eq('prediction_type', 'pre_game')` 로 서버측 적용 — 반환 데이터에서 `pred.prediction_type` 참조 0건(전체 파일 + 6개 소비자 cross-check). cycle 2677 `buildMissReport.ts`/cycle 2678 `buildMlbMatchupProfile.ts` 와 동일한 죽은-select-필드 패턴 3번째 발견. select 절 + interface 에서 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화 — 동작 변경 없는 정리). 단일 논리 단위 → 직접 main commit+push(R4/R7, 25e105e8).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2678, review-code(heavy): buildMlbMatchupProfile.ts 미사용 select 필드 정리)
 
 ### refactor: MLB matchup profile predictions select 미사용 컬럼(prediction_type) 제거
