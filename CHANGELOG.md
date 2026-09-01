@@ -1,5 +1,14 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): factor-explanations.ts 전수감사 clean (cycle 2719, RETRO-ONLY)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap trigger 도달(직전20 사이클 0회 발화) — `/api/health`(overall=ok) + `gh run list`(CI green, Failure Dispatch 전부 skipped) + 최근 debug 커밋 0건 → 실제 인시던트 부재 재확인(cycle 2717/2718과 동일 결론). 직전8 distinct=3 — 2-chain lock 미충족.
+- carry-over(cycle 2717/2718) 미감사 대형파일 목록 중 최대 `factor-explanations.ts`(416줄) 서브에이전트 위임 전수감사.
+- `FactorRawDetails`(18필드)/`FactorExplanation`(9필드)/`GameOverviewInput`(16필드)/상수 2개/함수 2개 전부 repo 전체 grep 교차검증 — computed-but-unconsumed/select-only-unused/declared-but-never-computed/stale-comment 패턴 0건.
+- `analysis-data.ts:702`가 `buildGameOverview()` 반환값 중 `tags`를 discard하는 지점 발견했으나 리스트뷰(summary만 렌더)/상세뷰(tags 렌더) 분리는 의도된 설계로 확인 — 버그 아님.
+- 코드 변경 없음.
+- 다음 사이클 추천 = review-code(heavy) rotation 계속(`buildPicksStats.ts`/`buildSeasonSummary.ts`/`compareModels.ts`/`hub-dispatch.ts` 잔여 4개) 또는 lotto(gap 30/30 다음 사이클 도달) 또는 info-architecture-review(gap 11/30).
+
 ### explore-idea(lite): plan#29 재확인 + postseason 시기상조 판정 (cycle 2718, RETRO-ONLY)
 
 - 진단: 2-chain alternation lock 탐지(직전8 = review-code(heavy) 7 + operational-analysis 1, distinct=2) → 둘 다 후보 제외. fix-incident gap trigger 도달(직전20 0회)했으나 실측 무이슈(`/api/health` overall=ok, `gh run list` 10/10 success/skipped, debug 커밋 0건). explore-idea saturation 14/15(역대 최고 근접) 동시 충족 → explore-idea(lite) 자연 선택.
