@@ -31,7 +31,6 @@ interface UpcomingRow {
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
-    predicted_winner: number | null;
     predicted_winner_team: { code: string | null } | null;
     confidence: number | null;
     home_win_prob: number | null;
@@ -64,7 +63,7 @@ export async function buildMatchupUpcoming(
         home_team:teams!games_home_team_id_fkey(code),
         away_team:teams!games_away_team_id_fkey(code),
         predictions!inner(
-          predicted_winner, confidence, home_win_prob,
+          confidence, home_win_prob,
           predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
         )
       `,

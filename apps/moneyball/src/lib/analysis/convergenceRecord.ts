@@ -38,7 +38,6 @@ interface ConvergenceGameRow {
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
-    prediction_type: string;
     home_elo: number | null;
     away_elo: number | null;
     home_recent_form: number | null;
@@ -197,7 +196,6 @@ async function fetchConvergencePickDetailedResults(
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
-        prediction_type,
         home_elo, away_elo, home_recent_form, away_recent_form,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
@@ -306,7 +304,6 @@ async function fetchConvergencePickDetailedResultsForPair(
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
-        prediction_type, scoring_rule,
         home_elo, away_elo, home_recent_form, away_recent_form,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
