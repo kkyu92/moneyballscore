@@ -107,8 +107,6 @@ async function fetchRecentH2H(
       game_date,
       home_score,
       away_score,
-      winner_team_id,
-      status,
       home:teams!games_home_team_id_fkey(code),
       away:teams!games_away_team_id_fkey(code),
       winner:teams!games_winner_team_id_fkey(code)
@@ -174,7 +172,7 @@ async function fetchMemories(
   // per-source tolerant: try/catch wrapper 안 (h2h 와 분리, 한쪽 fail 시 다른 쪽 살아있음).
   const result = await db
     .from('agent_memories')
-    .select('team_code, memory_type, content, confidence, valid_until')
+    .select('team_code, memory_type, content, confidence')
     .in('team_code', [home, away])
     .gte('valid_until', date)
     .order('confidence', { ascending: false })
