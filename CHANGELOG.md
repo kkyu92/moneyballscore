@@ -1,3 +1,13 @@
+## v0.5.62.174 — 2026-09-01 (cycle 2736, polish-ui(2-chain lock fallback): en/mlb/analysis 주간·월간 리뷰 링크 카드 배선 SUCCESS)
+
+### polish-ui(2-chain lock fallback): en/mlb/analysis weekly/monthly review 카드 누락 수정 (cycle 2736, SUCCESS)
+
+- 진단: 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain lock 충족. review-code(heavy)/polish-ui 둘 다 후보 제외. fix-incident gap 39/20·lotto gap 47/30 재확인 결과 노이즈(gh run list 전부 completed/success, lotto picks/result 파일 둘 다 당일 최신). op-analysis gap 9/25·info-arch gap 27/30 둘 다 미도달 — info-arch 는 cycle 2709 checkpoint 대비 신규 라우트 0건 + breadcrumb 누락 18건 동일(신규 drift 없음, 재확인만으로 retro-only 확정적이라 skip). open issue 0, unprocessed plan 0/23.
+- 잔여 pool 중 진짜 trigger 있는 chain 부재 — 룰 3(어떤 chain 도 trigger 없으면 polish-ui 강제 발화) 적용하되, 직후 재-lock 방지 위해 cycle 2733 이 이미 감사한 영역(타자 리더보드/lotto/analysis/picks/standings/players) 대신 최근 신설(8/23) 미감사 영역인 `/mlb/analysis` 허브 EN 미러 대상.
+- `apps/moneyball/src/app/mlb/analysis/page.tsx`(KO) vs `en/mlb/analysis/page.tsx`(EN) 대조 — KO 는 "이번 주 MLB 예측 리뷰"/"이번 달 MLB 예측 리뷰" 링크 카드 2개(`getMlbPeriodStats` 기반 적중률 요약 포함) 보유하나 EN 미러(wave-658, cycle 2338 신설)는 두 카드 전부 누락. `/en/mlb/reviews/weekly`·`/en/mlb/reviews/monthly` 페이지 자체는 정상 존재·작동하지만 hub 를 통한 진입 경로가 EN 에서만 없어 EN 사용자가 두 리뷰 페이지를 발견할 방법이 없던 discoverability gap.
+- fix: `getCurrentWeek(new Date(), 'en')`/`getCurrentMonth(new Date(), 'en')`(다른 EN 페이지들의 기존 관례와 동일하게 locale 명시 — 기본값 'ko' 라 미명시 시 한글 label 노출 위험) + `getMlbPeriodStats` import 추가, KO 와 동일한 두 섹션(적중률 요약 포함) EN 문구로 배선. `wave-658-en-mlb-analysis-mirror.test.ts` 에 회귀 가드 테스트 1건 추가.
+- tsc/eslint clean, 전체 테스트 571파일 4487건 green(2건 → +2, 신규 항목만 순증).
+
 ## cycle 2735 — 2026-09-01 (review-code(heavy): MlbMatchupFactorCompare/FactorBreakdown/MyPicksClient 전수감사, RETRO-ONLY)
 
 ### review-code(heavy): 컴포넌트 3건 전수감사 (cycle 2735, RETRO-ONLY)
