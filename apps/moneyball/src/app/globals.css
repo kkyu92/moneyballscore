@@ -42,11 +42,13 @@
   --color-bg-hero-start: var(--color-brand-800);    /* hero 그라데이션 시작 */
   --color-bg-hero-end: var(--color-brand-700);      /* hero 그라데이션 끝 */
 
-  /* Semantic status tokens — DESIGN.md "Semantic" 행 정렬 (cycle 520) */
-  --color-success: #10b981;
+  /* Semantic status tokens — DESIGN.md "Semantic" 행 정렬 (cycle 520).
+     success/info 는 CSS var/Tailwind utility 소비처 0건 (실사용은 lib/design-tokens.ts
+     의 semantic.success/semantic.info JS literal — recharts SVG prop 전용) 이라
+     cycle 2706 에서 제거. warning(Tailwind bg-warning/text-warning) + error
+     (var(--color-error), FactorWaterfallChart 2곳) 만 CSS 쪽 실사용 있어 유지. */
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-info: #3b82f6;
 
   /* shadcn token override matching — DESIGN.md brand 정합 (plan #19 Step 0.5, cycle 1042).
      매핑 표 = docs/design/shadcn-token-override.md. Tailwind v4 native CSS variable
