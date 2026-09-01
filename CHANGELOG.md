@@ -1,3 +1,14 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2687, review-code(heavy): fancy-stats.ts era/innings stub silent drift 수정)
+
+### fix: 투수 스탯 merge era/innings stub 0 silent drift 수정
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 21/25, info-arch 8/30, lotto 28/30). 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 70%(14/20) dominance-positive streak 지속. skill-evolution 마커 부재. cycle 2686 carry-over 추천대로 review-code(heavy) 계속 — 미감사 대형파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄) 정독.
+- `fancy-stats.ts` 전체 정독 — `parsePitchersFromHtml()` 이 Fancy Stats HTML 에 era/innings 컬럼이 없어 항상 `era: 0, innings: 0` stub 반환. `fetchPitcherStats()` 의 merge 로직(name@team 키 dedup, Fancy Stats 먼저 push)이 KBO 공식 Basic1(실제 ERA/IP 보유)과 겹치는 투수여도 Fancy Stats stub 값을 그대로 채택 — kbo 배열은 이미 fetch 했음에도 버려짐. 파일 안 기존 xfip fallback / winPct=0.5 stub / totalWar=0 stub silent drift family 와 동일 패턴의 신규 인스턴스(era/innings 변종).
+- 영향: `snapshot-pitchers.ts` 주간 cron 이 `pitcher_stats` 테이블에 상위(WAR>0, `_source='fancy-stats'`) 투수 다수를 era=0/innings=0 으로 저장 중이었음. 현재 다운스트림 소비자는 없음(factor-correlation 분석 재료 목적, 아직 미착수)이라 사용자 가시 영향 0건이나 향후 분석 시 corrupted 데이터로 이어질 silent trap.
+- merge 로직을 `mergePitcherStats()` 순수 함수로 분리(export) + KBO 매칭 시 era/innings 를 실값으로 채우도록 수정, xFIP·WAR·K/9 등 Fancy Stats 고유값은 그대로 보존. 매칭 없으면 기존 stub 0 유지(KBO Basic1 도 top 28 한정이라 완전 보강 불가).
+- 단위 테스트 3건 추가(매칭 시 채움/미매칭 시 stub 유지/KBO 전용 투수 추가) — `pnpm --filter @moneyball/kbo-data exec vitest run scrapers-fancy-stats.test.ts` 22 tests green.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` + `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + kbo-data 92 files/1218 tests + moneyball 571 files/4483 tests 전체 green. 단일 논리 단위 → 직접 main commit+push(R4/R7, ff776db9).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2686, review-code(heavy): kbo-live.ts 미소비 필드 정리)
 
 ### refactor: KBO 라이브 스크래퍼 RawKboLiveGame 미소비 CANCEL_SC_NM 필드 제거

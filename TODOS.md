@@ -1,4 +1,11 @@
 
+## cycle 2687 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 21/25, info-arch 8/30, lotto 28/30). 직전8 distinct=3(2-chain lock 미충족). 직전20 review-code 계열 70% dominance-positive streak 지속, skill-evolution 마커 부재. cycle 2686 carry-over 추천대로 review-code(heavy) 계속.
+- `fancy-stats.ts`(526줄) 정독 → `fetchPitcherStats()` merge 로직이 Fancy Stats stub `era=0/innings=0` 를 KBO 공식 실값(같은 name@team 키)이 있어도 그대로 채택하는 silent drift 발견 — 파일 안 기존 xfip fallback/winPct=0.5 stub family 의 신규 변종(8번째, 이번은 dead-field 정리가 아닌 실제 버그 fix).
+- `mergePitcherStats()` 순수 함수 분리 + KBO 매칭 시 era/innings 채움. 단위 테스트 3건 추가. `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` + `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + kbo-data 1218 tests + moneyball 4483 tests 전체 green. 단일 논리 단위 → 직접 main commit+push(R4/R7, ff776db9).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 `silent-drift-alert.ts`(440줄, cycle 2653/2685/2687 3연속 carry-over 미착수) 정독 우선권, 또는 fix-incident(5/20)/op-analysis(22/25 근접)/lotto(29/30 근접) gap 자연 대기.
+
 ## cycle 2686 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 7/30, lotto 27/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(15/15) 재도달했으나 4-source 재확인 전부 negative(신규라우트 55건=git checkout mtime 부작용, TODOS Next-Up stale, GH issue 0, DESIGN.md 당일 갱신) → review-code(heavy) 재선택.
