@@ -378,7 +378,7 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
   codeA: MlbTeamCode,
   codeB: MlbTeamCode,
   minFactors: number,
-): Promise<Array<{ favoredTeam: MlbTeamCode; favoredHome: boolean; won: boolean; gameDate: string }>> {
+): Promise<Array<{ favoredTeam: MlbTeamCode; won: boolean }>> {
   const supabase = await createClient();
   // mlb_schedule 은 StatsAPI 컨벤션 저장 — canonical(Baseball-Reference) 코드로 그대로 필터링하면
   // 7팀(TBR/CHW/KCR/SDP/SFG/ARI/WSN)에서 항상 0건 매칭(silent empty, cycle 2081).
@@ -427,10 +427,10 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
   );
   const predByExternalId = new Map((predRows ?? []).map((p) => [p.external_game_id, p]));
 
-  const results: Array<{ favoredTeam: MlbTeamCode; favoredHome: boolean; won: boolean; gameDate: string }> = [];
+  const results: Array<{ favoredTeam: MlbTeamCode; won: boolean }> = [];
   for (const row of scheduleRows) {
     const evaluated = evaluateMlbConvergencePickRow(row, predByExternalId.get(row.external_game_id), minFactors);
-    if (evaluated) results.push(evaluated);
+    if (evaluated) results.push({ favoredTeam: evaluated.favoredTeam, won: evaluated.won });
   }
 
   return results;
@@ -594,8 +594,8 @@ export async function getMlbConvergencePickBestStreak(
   endDate?: string,
 ): Promise<{ type: 'win' | 'loss'; length: number } | null> {
   const results = await fetchMlbConvergencePickDetailedResults(minFactors, startDate, endDate);
-  // computeConvergenceBestStreak 는 결과를 최신→과거 순서로 순회하며 범위 내 최장을 찾으므로
-  // 정렬 방향(desc)은 KBO(startDate 오름차순 조회)와 달라도 최댓값 자체엔 영향 없음.
+  // fetchMlbConvergencePickDetailedResults 는 KBO 와 동일하게 game_date desc 로 정렬 반환 —
+  // computeConvergenceBestStreak 는 정렬 순서 무관하게 전체를 스캔해 최장 streak 을 찾으므로 안전.
   return computeConvergenceBestStreak(results.map((r) => r.won));
 }
 
