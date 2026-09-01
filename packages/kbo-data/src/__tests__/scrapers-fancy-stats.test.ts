@@ -5,7 +5,9 @@ import {
   parseBattersFromHtml,
   parsePitchersFromHtml,
   resolveTeamCode,
+  mergePitcherStats,
 } from '../scrapers/fancy-stats';
+import type { PitcherStats } from '../types';
 
 const FIXTURE_PATH = join(
   __dirname,
@@ -181,5 +183,52 @@ describe('resolveTeamCode — case-insensitive 매칭', () => {
 
   it('미지 팀명 → null', () => {
     expect(resolveTeamCode('Unknown Team')).toBeNull();
+  });
+});
+
+describe('mergePitcherStats', () => {
+  const fancyPitcher: PitcherStats = {
+    name: '홍길동',
+    team: 'LG',
+    fip: 3.2,
+    xfip: 3.5,
+    era: 0,
+    innings: 0,
+    war: 2.1,
+    kPer9: 9.5,
+  };
+  const kboPitcher: PitcherStats = {
+    name: '홍길동',
+    team: 'LG',
+    fip: 3.4,
+    xfip: 3.4,
+    era: 3.1,
+    innings: 120.3,
+    war: 0,
+    kPer9: 8.0,
+  };
+
+  it('name@team 일치 시 Fancy Stats stub era/innings 를 KBO 실값으로 채움', () => {
+    const merged = mergePitcherStats([fancyPitcher], [kboPitcher]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].era).toBe(3.1);
+    expect(merged[0].innings).toBe(120.3);
+    // Fancy Stats 고유값(xFIP·WAR·K/9)은 보존
+    expect(merged[0].xfip).toBe(3.5);
+    expect(merged[0].war).toBe(2.1);
+  });
+
+  it('KBO 매칭 없으면 Fancy Stats stub 0 그대로 유지', () => {
+    const other: PitcherStats = { ...kboPitcher, name: '김철수', team: 'HT' };
+    const merged = mergePitcherStats([fancyPitcher], [other]);
+    expect(merged.find((p) => p.name === '홍길동')?.era).toBe(0);
+    expect(merged.find((p) => p.name === '홍길동')?.innings).toBe(0);
+  });
+
+  it('KBO 전용 투수(Fancy Stats 미포함)는 그대로 추가', () => {
+    const kboOnly: PitcherStats = { ...kboPitcher, name: '박신인', team: 'KT' };
+    const merged = mergePitcherStats([fancyPitcher], [kboOnly]);
+    expect(merged).toHaveLength(2);
+    expect(merged.find((p) => p.name === '박신인')?.era).toBe(3.1);
   });
 });

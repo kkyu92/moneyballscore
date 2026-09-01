@@ -197,12 +197,46 @@ async function fetchFancyStatsPitchers(): Promise<PitcherStats[]> {
 }
 
 /**
+ * Fancy Stats + KBO 공식 투수 스탯 merge (순수 함수).
+ *
+ * name@team 키로 중복 제거. Fancy Stats 먼저 넣고, KBO 공식은 신규만 추가.
+ *
+ * era/innings stub 0 silent drift: parsePitchersFromHtml (Fancy Stats) 는
+ * era·innings 컬럼이 없어 항상 0 을 반환 (line 162-163). 같은 name@team 키가
+ * KBO 공식 쪽에 있으면 (Basic1 은 실제 ERA·IP 제공) 그 값으로 채움 —
+ * xfip fallback / winPct=0.5 stub family 와 동일한 "계산은 되지만 값이
+ * stub" silent drift 패턴. KBO 매칭이 없으면 fancy 의 stub 0 그대로 유지
+ * (KBO Basic1 도 top 28 한정이라 완전 보강 불가).
+ */
+export function mergePitcherStats(fancy: PitcherStats[], kbo: PitcherStats[]): PitcherStats[] {
+  const kboByKey = new Map<string, PitcherStats>();
+  for (const p of kbo) kboByKey.set(`${p.name}@${p.team}`, p);
+
+  const seen = new Set<string>();
+  const merged: PitcherStats[] = [];
+  for (const p of fancy) {
+    const key = `${p.name}@${p.team}`;
+    seen.add(key);
+    const kboMatch = kboByKey.get(key);
+    merged.push(kboMatch ? { ...p, era: kboMatch.era, innings: kboMatch.innings } : p);
+  }
+  for (const p of kbo) {
+    const key = `${p.name}@${p.team}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push(p);
+    }
+  }
+  return merged;
+}
+
+/**
  * 투수 시즌 스탯 수집 — Fancy Stats + KBO 공식 merge.
  *
  * Fancy Stats 는 WAR·xFIP·K/9 같은 고급 지표 제공하지만 top 50 리미트.
  * KBO 공식 Basic1 은 28명 + FIP 직접 계산만 가능. 두 소스 교집합은
  * Fancy Stats 값 우선 (xFIP·WAR·K/9 보존), 차집합은 KBO 공식으로 보강
- * 해서 커버리지 최대화.
+ * 해서 커버리지 최대화. era/innings 는 mergePitcherStats 가 KBO 값으로 채움.
  *
  * KBO 공식 호출 실패 시 Fancy Stats 만 반환 (graceful degrade).
  *
@@ -221,22 +255,7 @@ export async function fetchPitcherStats(_season: number): Promise<PitcherStats[]
     console.warn('[fetchPitcherStats] KBO Basic1 fallback skipped:', errMsg(e));
   }
 
-  // name@team 키로 중복 제거. Fancy Stats 먼저 넣고, KBO 공식은 신규만.
-  const seen = new Set<string>();
-  const merged: PitcherStats[] = [];
-  for (const p of fancy) {
-    const key = `${p.name}@${p.team}`;
-    seen.add(key);
-    merged.push(p);
-  }
-  for (const p of kbo) {
-    const key = `${p.name}@${p.team}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      merged.push(p);
-    }
-  }
-  return merged;
+  return mergePitcherStats(fancy, kbo);
 }
 
 /**
