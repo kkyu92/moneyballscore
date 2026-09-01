@@ -1,3 +1,11 @@
+## v0.5.62.169 — 2026-09-01 (cycle 2727, operational-analysis(lite): CE/비CE 격차 15회 연속 재확인)
+
+### operational-analysis(lite): op-analysis-ce-cohort 재측정 (cycle 2727, SUCCESS)
+
+- 진단: 2-chain lock(직전8 review-code(heavy)/polish-ui) 발동 → 둘 다 제외. fix-incident/lotto gap 재확인 무이슈(cron self-heal 완료). info-arch 후보 2건(community/en-mlb-monthly) false positive(정당한 breadcrumb 누락). op-analysis 자율 선택.
+- n=357(CE 310/비CE 47) cycle 2715 대비 완전 동일. 격차 9.3pp, LLM 부가가치 우세 결론 15회 연속 재확인. CLAUDE.md append (`763e9121`).
+- 다음 사이클 추천 = 2-chain lock cooldown 만료 후 review-code(heavy)/polish-ui 자연 재개.
+
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
 ### review-code(heavy): buildAccuracyData.ts 미소비 필드 3개 제거 + 주석 정정 (cycle 2726, SUCCESS)

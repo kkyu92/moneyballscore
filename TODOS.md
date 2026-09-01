@@ -1,4 +1,11 @@
 
+## cycle 2727 (2026-09-01) — SUCCESS — operational-analysis(lite)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 archived/completed/deferred, approved 없음). 직전8 distinct=2(review-code(heavy) 7 + polish-ui 1) → 2-chain lock 발동, 두 chain 후보 제외. fix-incident gap 20/20 재확인(`gh run list` 전부 success/skipped, debug 커밋 0건, 11연속 무이슈)/lotto gap 30/30 재확인(다음 회차 picks `2026-09-05-50sets.md` + 직전 회차 OOS `2026-08-29-result.md` 둘 다 cron self-heal 완료, 실질 갭 없음). info-arch 후보(community/en-mlb-monthly breadcrumb 누락) 확인했으나 둘 다 정당(noindex 플레이스홀더 + 순수 redirect route) — false positive, 실제 IA 갭 없음. op-analysis gap 12/25 미도달이나 2-chain lock redirect + 앞선 무이슈 재확인 이후 자율 선택.
+- `scripts/op-analysis-ce-cohort.ts` 재실행 — n=357(CE 310/비CE 47) cycle 2715 대비 완전 동일(신규 verified 예측 0건, 4회 연속 동일). 격차 9.3pp 그대로, LLM 부가가치 우세 결론 15회 연속 재확인.
+- CLAUDE.md append. 코드 변경 없음. main 직접 커밋 + push (`763e9121`).
+- 다음 사이클 추천 = 2-chain lock cooldown(N=1) 만료 후 review-code(heavy)/polish-ui 중 자연 재개, 또는 fix-incident(gap 재축적)/lotto(gap 재축적) 자연 대기.
+
 ## cycle 2726 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 20/20(10연속 무이슈)/lotto gap 30/30(cron self-heal 완료 실질 갭 없음) 재확인. op-analysis(11/25)/info-arch(17/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2725 추천대로 review-code(heavy) 신규 대상 `buildAccuracyData.ts`(772줄) 선정.
