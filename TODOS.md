@@ -1,4 +1,12 @@
 
+## cycle 2733 (2026-09-01) — SUCCESS — polish-ui(2-chain lock fallback)
+
+- 진단: 2-chain lock 탐지(직전8 distinct=2 — review-code(heavy) 7 + operational-analysis 1). 잠긴 2개 제외 후 fix-incident(gap 37/20, deploy-drift-alert 1건 확인했으나 gap 1h self-heal noise 재확인)/lotto(다음 회차 picks `2026-09-05-50sets.md` + 직전 회차 `2026-08-29-result.md` 둘 다 당일 최신, 실질 갭 없음) 재확인, info-arch(gap 24/30) 미도달 — 룰에 따라 `/design-review` 강제 발화.
+- `/lotto`/`/analysis`/`/picks`/`/standings`/`/players` 시각 감사(desktop+mobile+console) — 대부분 정상(초기 스켈레톤/차트 미렌더는 재확인 결과 hydration 타이밍, 실버그 아님). `/players` 타자 Top10 "최종 동기화 2026-05-29" 발견 — 오늘(9/1) 페이지인데 3개월+ stale 날짜 노출.
+- DB 직접 조회(service-role REST)로 근본 원인 확인: `sync-batter-stats` cron 은 KBO Fancy Stats `/leaders/` 가 그날 노출한 선수만 upsert. 선수가 leaders 목록에서 빠지면(슬럼프/부상/랭킹 변동) 그 row 는 영구 미갱신 — freshness 필터 없이 WAR desc 정렬만 하면 과거 최고 WAR 값이 현재 1위로 영구 고정 노출됨. season 2026 batter_stats 40 rows 중 23 rows가 2026-05-29~07-08 stale, 17 rows만 당일(9/1) 갱신 확인. `송성문`(id=45) row 가 2026-05-29 WAR 8.76 값 그대로 오늘까지 #1 노출.
+- fix: `buildBatterLeaderboard.ts` 쿼리에 `last_synced >= now-7일` gte 필터 추가(stale row 배제). `silent-drift.test.ts` 회귀 가드 테스트 1건 추가(gte 호출 검증). tsc/eslint clean, 전체 테스트 571파일 4484건 green. main 직접 커밋+push(`d7b47e97`).
+- 다음 사이클 추천 = 2-chain lock cooldown 확인(review-code(heavy)/operational-analysis 자연 재개 여부, N=1 경과) 또는 info-architecture-review(gap 25/30, 근접) 또는 `sync-batter-stats` 자체 개선(stale row DB 삭제/TTL cron 추가는 스코프 밖, 후속 review-code 후보).
+
 ## cycle 2732 (2026-09-01) — RETRO-ONLY — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23 (전부 completed/archived/deferred/spec_only, plan#29 status=spec_only_deferred — approved 아님). fix-incident gap 20+/lotto gap 30+ 재확인 — 둘 다 노이즈(deploy-drift-alert 1건 발견했으나 gap<1h 배포 지연 self-heal 확인, lotto picks/result 파일 둘 다 당일 최신). op-analysis gap 5/25, info-arch gap 23/30 둘 다 미도달. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation 13/15 재도달했으나 plan#29 deferred 근거 불변 — review-code(heavy) 지속.

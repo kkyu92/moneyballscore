@@ -1,3 +1,12 @@
+## v0.5.62.172 — 2026-09-01 (cycle 2733, polish-ui(2-chain lock fallback): 타자 리더보드 stale WAR 값 freshness 필터 SUCCESS)
+
+### polish-ui(2-chain lock fallback): batter 리더보드 stale 값 수정 (cycle 2733, SUCCESS)
+
+- 진단: 2-chain lock 발동(직전8 distinct=2 — review-code(heavy) 7 + operational-analysis 1). 잠긴 2개 제외 후 fix-incident(gap 37/20, deploy-drift-alert 1건 확인했으나 gap 1h self-heal noise)/lotto(다음 회차 picks + 직전 회차 result 둘 다 당일 최신, 실질 갭 없음) 재확인, info-arch(gap 24/30) 미도달 — 룰에 따라 `/design-review` 강제 발화.
+- `/lotto`/`/analysis`/`/picks`/`/standings`/`/players` 시각 감사 중 `/players` 타자 Top10 "최종 동기화 2026-05-29" 발견(3개월+ stale, DB 직접 조회로 확인). 원인: `sync-batter-stats` 는 Fancy Stats `/leaders/` 가 그날 노출한 선수만 upsert — 선수가 목록에서 빠지면 그 row 는 영구 미갱신, freshness 필터 없이 WAR desc 정렬만 해 과거 최고 WAR 값(송성문 8.76, 2026-05-29)이 오늘까지 #1로 고정 노출(season 2026 batter_stats 40 rows 중 23 rows stale, 17 rows만 당일 갱신).
+- fix: `buildBatterLeaderboard.ts` 쿼리에 `last_synced >= 7일 이내` gte 필터 추가. 회귀 가드 테스트 1건 추가. tsc/eslint clean, 전체 테스트 571파일 4484건 green. main 직접 커밋 + push (`d7b47e97`).
+- 다음 사이클 추천 = 2-chain lock cooldown 확인(잠긴 review-code(heavy)/operational-analysis 자연 재개 여부) 또는 info-architecture-review(gap 25/30, 근접).
+
 ## cycle 2732 — 2026-09-01 (review-code(heavy): agent-context.ts 전수감사, RETRO-ONLY)
 
 ### review-code(heavy): agent-context.ts 전수감사 (cycle 2732, RETRO-ONLY)
