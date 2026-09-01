@@ -13,7 +13,11 @@
  * (winner_team_id === home_team_id) 와 (p - y)^2 평균.
  */
 
-import { LLM_DEBATE_VERSION, NEUTRAL_FACTOR } from '@moneyball/shared';
+import {
+  KST_OFFSET_MS,
+  LLM_DEBATE_VERSION,
+  NEUTRAL_FACTOR,
+} from '@moneyball/shared';
 
 export interface CalibrationBucket {
   lo: number;
@@ -269,7 +273,13 @@ export interface DailyStat {
 export function dailyByModel(rows: PredictionRow[]): DailyStat[] {
   const buckets = new Map<string, DailyStat>();
   for (const row of rows) {
-    const date = row.created_at.slice(0, 10);
+    // created_at 은 UTC 저장 — KST 자정 경계 row 가 잘못된 날짜로 집계되지
+    // 않도록 KST 보정 후 날짜 추출 (buildAccuracyData.ts 등 기존 관례와 동일).
+    const date = new Date(
+      new Date(row.created_at).getTime() + KST_OFFSET_MS,
+    )
+      .toISOString()
+      .slice(0, 10);
     const scoringRule = row.scoring_rule ?? '(null)';
     const key = `${date}__${scoringRule}__${row.model_version}`;
     const b = buckets.get(key) ?? {

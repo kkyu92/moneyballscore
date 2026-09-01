@@ -40,13 +40,18 @@ describe('wave-251: /debug/model-comparison header text = LLM_DEBATE_VERSION 상
   });
 
   it('header <p> 텍스트: LLM_DEBATE_VERSION interpolation 존재 (2곳)', () => {
-    // "v1.8 ship + {LLM_DEBATE_VERSION} / v2.1-B" 형태 1건
+    // "{CURRENT_SCORING_RULE} ship + {LLM_DEBATE_VERSION} / v2.1-B" 형태 1건
+    // (cycle 2674 review-code heavy: 리터럴 'v1.8' 하드코딩 → CURRENT_SCORING_RULE swap)
     expect(DEBUG_PAGE_SRC).toMatch(
-      /v1\.8 ship \+ \{LLM_DEBATE_VERSION\} \/ v2\.1-B/,
+      /\{CURRENT_SCORING_RULE\} ship \+ \{LLM_DEBATE_VERSION\} \/ v2\.1-B/,
     );
     // "{shadow.length}건 {LLM_DEBATE_VERSION} row" 형태 1건
     expect(DEBUG_PAGE_SRC).toMatch(
       /\{shadow\.length\}건 \{LLM_DEBATE_VERSION\} row/,
     );
+  });
+
+  it('header <p> 텍스트: 하드코딩 리터럴 "v1.8 ship" 제거 (cycle 2674)', () => {
+    expect(DEBUG_PAGE_SRC).not.toMatch(/["'>]v1\.8 ship/);
   });
 });

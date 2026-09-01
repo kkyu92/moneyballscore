@@ -95,7 +95,11 @@ describe('aggregateByModel', () => {
 });
 
 describe('dailyByModel', () => {
-  it('buckets by date + scoring_rule', () => {
+  it('buckets by KST date + scoring_rule', () => {
+    // row 1: 10:00Z + 9h = 19:00 KST 04-22 (same day)
+    // row 2: 18:00Z + 9h = 03:00 KST 04-23 (crosses UTC midnight boundary —
+    //   naive UTC slice(0,10) would wrongly bucket this into 04-22)
+    // row 3: 10:00Z (04-23) + 9h = 19:00 KST 04-23 (same day)
     const rows: PredictionRow[] = [
       row({
         id: 1,
@@ -119,8 +123,12 @@ describe('dailyByModel', () => {
     const daily = dailyByModel(rows);
     expect(daily).toHaveLength(2);
     const d22 = daily.find((d) => d.date === '2026-04-22')!;
-    expect(d22.n).toBe(2);
+    expect(d22.n).toBe(1);
     expect(d22.correct).toBe(1);
-    expect(d22.accuracy).toBeCloseTo(0.5, 3);
+    expect(d22.accuracy).toBeCloseTo(1, 3);
+    const d23 = daily.find((d) => d.date === '2026-04-23')!;
+    expect(d23.n).toBe(2);
+    expect(d23.correct).toBe(1);
+    expect(d23.accuracy).toBeCloseTo(0.5, 3);
   });
 });

@@ -12,7 +12,9 @@
 import { createClient } from '@supabase/supabase-js';
 import {
   BRIER_BASELINE,
+  CURRENT_SCORING_RULE,
   DAY_MS,
+  KST_OFFSET_MS,
   LLM_DEBATE_VERSION,
   SUPABASE_PAGE_SIZE,
 } from '@moneyball/shared';
@@ -95,8 +97,9 @@ export default async function ModelComparisonPage() {
 
   // 날짜 × scoringRule pivot — 최근 14일만 화면 표시
   // server component: 매 요청마다 새 cutoff = 의도된 동작 (server-side dynamic)
+  // daily 의 date 는 KST 기준 버킷 (dailyByModel) — cutoff 도 KST 보정 필요.
   // eslint-disable-next-line react-hooks/purity
-  const cutoff = new Date(Date.now() - 14 * DAY_MS)
+  const cutoff = new Date(Date.now() + KST_OFFSET_MS - 14 * DAY_MS)
     .toISOString()
     .slice(0, 10);
   const recentDaily = daily
@@ -109,7 +112,7 @@ export default async function ModelComparisonPage() {
         <h1 className="text-2xl md:text-3xl font-bold">모델 비교 대시보드</h1>
         <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
           최근 {daysBack}일 · {rows.length}건 · scoring_rule + model_version 조합별
-          성능 측정. 현재 v1.8 ship + {LLM_DEBATE_VERSION} / v2.1-B shadow (rejected Brier 0.4635) 누적 아카이브.
+          성능 측정. 현재 {CURRENT_SCORING_RULE} ship + {LLM_DEBATE_VERSION} / v2.1-B shadow (rejected Brier 0.4635) 누적 아카이브.
         </p>
         {shadow.length > 0 && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
