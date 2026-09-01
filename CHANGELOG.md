@@ -1,4 +1,10 @@
-## v0.5.62.168 — 2026-09-01 (cycle 2698, review-code(heavy): backfill-sp.ts 미소비 select 필드 제거)
+## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
+
+### review-code(heavy): 마지막 미감사 대형파일 소진 — clean 확정
+
+- 진단: 개방 issue 0, unprocessed plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 20/30, lotto 10/30). 직전8 distinct=3(review-code(heavy) 우세 + fix-incident 1 + operational-analysis 1) — 2-chain lock 미충족. cycle 2698 추천대로 review-code(heavy) 계속, 마지막 미감사 대형파일 `glossary/data.ts`(323줄, 2026-07-03) 채택.
+- `glossary/data.ts` 전체 정독 + 소비처(`glossary/page.tsx`, `methodology/page.tsx`) 교차검증 — `GlossaryEntry` 8개 필드(id/abbr/korean/fullName/definition/range/modelUsage/source) 전부 렌더링에서 소비 확인. `DEFAULT_WEIGHTS` 10개 활성 가중치(sp_fip/sp_xfip/lineup_woba/bullpen_fip/recent_form/war/head_to_head/park_factor/elo/sfr) 전부 glossary entry 에 반영, 0-weight placeholder(park_weather/umpire_sz) 는 의도적으로 제외. `GLOSSARY_TERM_COUNT` derived export 도 methodology/glossary 양쪽 정상 소비. computed-but-unconsumed 계열 재발 없음 — clean.
+- 코드 변경 없음(감사만) — cycle 2693~2698 연속 발견된 computed-but-unconsumed select 필드 패턴(10변종)의 대형파일 audit backlog 소진 완료. 다음 review-code(heavy) 라운드는 재감사 rotation 또는 gap trigger(fix-incident/op-analysis/info-arch/lotto) 자연 대기로 전환.
 
 ### refactor: loadTargetGames() home/away_team_id 미소비 select 필드 제거
 
