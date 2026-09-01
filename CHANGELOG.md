@@ -1,5 +1,14 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): buildTeamProfile.ts/buildMlbTeamProfile.ts 미소비 color 필드 제거 (cycle 2708, SUCCESS)
+
+- 진단: 개방 issue 0, unprocessed plan 0/23(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 17/25, info-arch 29/30 근접, lotto 19/30). 직전8 distinct=3(review-code(heavy) 6 + skill-evolution 1 + polish-ui 1) — 2-chain lock 미충족. cycle 2707 추천대로 잔여 미감사 대형파일 rotation, `buildTeamProfile.ts`(601줄) 먼저 정독.
+- `buildTeamProfile.ts` 전체 정독 — DB fail-loud(assertSelectOk), margin/streak/blowout/closeGame/homeAwayEdge/recentRecord 단일 source(cycle 2034/2036/2399 계열), 명시적 정렬 분리(cycle 2399) 등 이미 정합. 필드별 소비처 교차검증 중 `TeamProfile.color`(meta.color 복사)가 `apps/moneyball/src/app/teams/[code]/page.tsx` 어디에서도 소비되지 않음 발견 — 전체 grep 확인 결과 앱 전역 팀 색상 표시(matchup/dashboard/players/reviews 차트 전부)는 `KBO_TEAMS[code].color`/`MLB_TEAMS[code].color` 를 직접 참조, profile 객체 경유 0건.
+- `buildMlbTeamProfile.ts`(MLB 대응 함수) 도 동일 패턴(`MlbTeamProfile.color`) 확인 — 양쪽 인터페이스 + 생성 지점에서 `color` 필드 제거(commit d6620830).
+- tsc clean + eslint clean + 관련 테스트 8파일 59건 green(buildTeamProfile/buildMlbTeamProfile/silent-drift-cycle-2288/wave-618·619·622·623/mlb-team-code-page). 단일 논리 단위 → main 직접 commit+push(R4/R7).
+- computed-but-unconsumed 패턴 재발(cycle 2661/2690 계열 연장) — review-code(heavy) 대형파일 rotation 이 이 계열의 주요 검출 채널로 지속 확인.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildMatchupProfile.ts` 594줄) 정독, 또는 fix-incident(13/20)/op-analysis(18/25)/info-arch(30/30 도달 예정)/lotto(20/30) gap 자연 대기.
+
 ### review-code(heavy): fancy-stats.ts / silent-drift-alert.ts 재감사 — clean (cycle 2707, RETRO-ONLY)
 
 - 진단: gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 16/25, info-arch 28/30, lotto 18/30), 2-chain lock 미충족(직전8 distinct=3) → cycle 2706 추천대로 carry-over 대형파일 rotation.

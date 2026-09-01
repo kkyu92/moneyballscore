@@ -1,4 +1,12 @@
 
+## cycle 2708 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2707 추천대로 잔여 미감사 대형파일 정독, `buildTeamProfile.ts`(601줄) 먼저.
+- 필드별 소비처 교차검증 중 `TeamProfile.color`(meta.color 복사) 가 어느 페이지에서도 소비되지 않음 발견 — 앱 전역 팀 색상은 `KBO_TEAMS[code].color`/`MLB_TEAMS[code].color` 직접 참조, profile 경유 0건(전체 grep 확인). MLB 대응 `MlbTeamProfile.color` 도 동일.
+- fix: 양쪽 인터페이스 + 생성 지점에서 `color` 필드 제거(commit d6620830). tsc clean + eslint clean + 관련 8개 테스트 파일 59건 green.
+- gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 17/25, info-arch 29/30 근접, lotto 19/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildMatchupProfile.ts` 594줄) 정독, 또는 gap trigger 자연 대기.
+
 ## cycle 2705 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2704 추천대로 `kbo-official.ts`(cycle 2693 dead-function 감사 완료) 재정독 중 park factor 이중 source drift 발견.
