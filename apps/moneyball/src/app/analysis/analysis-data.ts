@@ -55,7 +55,6 @@ interface TodayAllRow {
     away_sfr: number | null;
     home_war_total: number | null;
     away_war_total: number | null;
-    prediction_type: string;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
     factors: Record<string, number> | null;
@@ -137,7 +136,7 @@ export async function getTodayAnalysisData(): Promise<TodayAnalysisData> {
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip, home_lineup_woba, away_lineup_woba,
         home_bullpen_fip, away_bullpen_fip, home_sfr, away_sfr,
         home_war_total, away_war_total,
-        prediction_type, reasoning, factors,
+        reasoning, factors,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
       )
     `)
@@ -276,7 +275,6 @@ interface YesterdayGameRow {
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
-    prediction_type: string;
     is_correct: boolean | null;
     reasoning: { homeWinProb?: number | null } | null;
     predicted_winner_team: { code: string | null } | null;
@@ -310,7 +308,7 @@ export async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
-        prediction_type, is_correct, reasoning,
+        is_correct, reasoning,
         home_elo, away_elo, home_recent_form, away_recent_form,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
@@ -393,7 +391,6 @@ interface ThisWeekGameRow {
   home_team: { code: string | null } | null;
   away_team: { code: string | null } | null;
   predictions: Array<{
-    prediction_type: string;
     confidence: number | null;
     is_correct: boolean | null;
     predicted_winner_team: { code: string | null } | null;
@@ -429,7 +426,7 @@ export async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
-        prediction_type, confidence, is_correct,
+        confidence, is_correct,
         home_elo, away_elo, home_recent_form, away_recent_form,
         home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
         home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
