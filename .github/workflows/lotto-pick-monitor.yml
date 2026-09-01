@@ -1,7 +1,7 @@
 name: lotto-pick-monitor
 
 # 매주 토요일 새벽 (KST 02:00 = UTC 금 17:00) markdown 박제 여부 감지.
-# lotto-pick-update.yml (cron '19 0,3,6 * * 5') 3회 fire 모두 실패 시 ::error::
+# lotto-pick-update.yml (cron '19 0,3,6 * * 2', 2026-09-01부터 화요일) 3회 fire 모두 실패 시 ::error::
 #
 # plan #7 Step E 박제 (cycle 885)
 
@@ -29,7 +29,7 @@ jobs:
           FILE="apps/moneyball/data/lotto-picks/${TARGET}.md"
           echo "Checking $FILE"
           if [ ! -f "$FILE" ]; then
-            echo "::error::Lotto pick markdown missing: $FILE — lotto-pick-update.yml 3회 fire (UTC 금 00/03/06:19) 모두 실패 또는 silent skip. 수동 'workflow_dispatch' fire 권장 (lotto-pick-update.yml + target_date=$TARGET)."
+            echo "::error::Lotto pick markdown missing: $FILE — lotto-pick-update.yml 3회 fire (UTC 화 00/03/06:19) 모두 실패 또는 silent skip. 수동 'workflow_dispatch' fire 권장 (lotto-pick-update.yml + target_date=$TARGET)."
             exit 1
           fi
           LINES=$(wc -l < "$FILE")

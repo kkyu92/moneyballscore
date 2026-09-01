@@ -300,9 +300,9 @@ describe("plan #7 Step E — lotto-pick-update cron workflow regression", () => 
   const UPDATE_YAML = join(REPO_ROOT, "../../.github/workflows/lotto-pick-update.yml");
   const MONITOR_YAML = join(REPO_ROOT, "../../.github/workflows/lotto-pick-monitor.yml");
 
-  it("update workflow cron = '19 0,3,6 * * 5' (multi-fire 3회)", () => {
+  it("update workflow cron = '19 0,3,6 * * 2' (multi-fire 3회)", () => {
     const yaml = readFileSync(UPDATE_YAML, "utf-8");
-    expect(yaml).toContain("'19 0,3,6 * * 5'");
+    expect(yaml).toContain("'19 0,3,6 * * 2'");
   });
 
   it("update workflow idempotent skip 가드 박제", () => {
