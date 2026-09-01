@@ -1,4 +1,11 @@
 
+## cycle 2722 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/22(status:approved 없음). fix-incident gap 20/20 도달했으나 `gh run list`(전부 success/skipped) + debug 커밋 0건 → 무이슈 재확인(6연속). lotto gap 30/30 도달했으나 다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal로 오늘 이미 생성 완료 — 실질 갭 없음. 직전8 distinct=3 — 2-chain lock 미충족.
+- carry-over(cycle 2721) 미감사 잔여 2개 중 `compareModels.ts`(309줄) 서브에이전트 위임 전수감사 — `ModelGroupStats.correctCount`(계산+반환되지만 유일 소비처 `debug/model-comparison/page.tsx`는 `.accuracy`만 읽음, 테스트 2개도 미참조) computed-but-unconsumed 발견 + 제거. 내부 누적기 `g.correct`는 유지(accuracy 계산에 계속 사용). JSDoc 전체 검증 — stale comment 0건.
+- tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`be4e2412`).
+- 다음 사이클 추천 = review-code(heavy) rotation 계속(`hub-dispatch.ts` 잔여 1개) 또는 info-architecture-review(gap 14/30).
+
 ## cycle 2721 (2026-09-01) — RETRO-ONLY — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/22. fix-incident gap 20/20 도달했으나 `/api/health`(overall=ok) + `gh run list`(전부 success/skipped) + debug 커밋 0건 → 무이슈 재확인(5연속). lotto gap 30/30 도달했으나 다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal로 오늘 이미 생성 완료 — 실질 갭 없음. 직전8 distinct=3 — 2-chain lock 미충족.
