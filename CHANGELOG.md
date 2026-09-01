@@ -1,3 +1,14 @@
+## v0.5.62.190 — 2026-09-01 (cycle 2755, review-code(heavy): health API 라우트 미소비 created_at 컬럼 제거 SUCCESS)
+
+### review-code(heavy): API 라우트 신규 축 감사 (cycle 2755, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). pipeline_runs 최근 7일 50건 전부 success (fix-incident 신호 부재). gh run list 실패 0. DESIGN.md 당일 갱신(polish-ui mtime trigger 미충족). fix-incident gap18/20·op-analysis gap7/25·info-arch gap16/30·lotto gap3/30 전부 미도달. 직전8 distinct=4(review-code(heavy)5+skill-evolution1+operational-analysis(lite)1+lotto1) — 2-chain lock 미충족.
+- 직전 sweep(embed→app 직접 select→shared PredictionRow→MLB mirror) 모두 page.tsx 축 대상. 신규 미감사 축 = API 라우트(`.select(` 사용 20개 중 5개) — Explore 서브에이전트 전수 감사.
+- `api/health/route.ts` checkPipeline: `pipeline_runs` select 의 `created_at` 이 `.order('created_at')` 정렬 컬럼(select projection 무관하게 동작)과도, 응답 필드와도 무관하게 미소비 확인. 형제 파일 `api/health/pipelines/route.ts` 의 동일 컬럼은 `hoursSince` 계산에 consumed — 대조 확인.
+- picks/mlb-poll, picks/results, picks/poll, health/pipelines 4개 라우트는 전부 clean 확인.
+- fix: 1개 파일 select절에서 미소비 컬럼 제거. tsc/eslint clean, 572파일 4490건 green. direct main push 성공(version-sync 0.5.62.190).
+- 다음 사이클 추천 = review-code(heavy) API 라우트 축도 소진(20개 중 15개 select 미사용, 5개 전부 감사 완료) — fix-incident gap19/20 근접 monitor 우선, 또는 explore-idea saturation 재점검(plan#29 게이트 트래픽≥10/포스트시즌 임박 여전히 미충족 예상).
+
 ## v0.5.62.189 — 2026-09-01 (cycle 2754, review-code(heavy): MLB mirror 라우트 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): MLB mirror 라우트 신규 축 감사 (cycle 2754, SUCCESS)
