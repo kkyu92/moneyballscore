@@ -83,4 +83,10 @@ describe("en/mlb/games/[date]/[slug] KO parity 회귀 가드 (cycle 2109)", () =
     expect(PAGE_SRC).toMatch(/factorCount=\{usedFactorCount\}/);
     expect(PAGE_SRC).not.toMatch(/factorCount=\{GAME_DETAIL_FACTOR_ROWS\.length\}/);
   });
+
+  // cycle 2737 fix-incident: KO page.tsx 와 동일한 더블헤더 multiple-rows throw
+  // (Sentry MONEYBALLSCORE-1A, 357회, 2026-08-18~08-29) — order+limit(1) 로 방지, KO parity.
+  it("mlb_schedule 조회에 order+limit(1) 을 적용해 더블헤더 multiple-rows throw 를 방지한다 (Sentry MONEYBALLSCORE-1A 회귀 차단, KO parity, cycle 2737)", () => {
+    expect(PAGE_SRC).toMatch(/\.order\(['"]game_datetime_utc['"],\s*\{\s*ascending:\s*true\s*\}\)\s*\n\s*\.limit\(1\)\s*\n\s*\.maybeSingle\(\)/);
+  });
 });

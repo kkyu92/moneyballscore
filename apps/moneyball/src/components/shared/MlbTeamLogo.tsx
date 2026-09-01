@@ -13,8 +13,12 @@ interface MlbTeamLogoProps {
  * SVG는 next/image 기본 optimizer 가 next.config images.dangerouslyAllowSVG 없이 거부하므로 unoptimized.
  */
 export function MlbTeamLogo({ team, size = 48, className = '' }: MlbTeamLogoProps) {
+  // normalizeMlbTeamCode 매핑 밖 미인식 코드가 캐스팅으로 통과할 수 있음(mlb-shared.ts
+  // fetchMlbPredictionRowsInRange 의 `?? (code as MlbTeamCode)` fallback) — MLB_TEAMS[team]
+  // 조회 실패 시 undefined.name 크래시(Sentry MONEYBALLSCORE-1B, GET /en/mlb/reviews/weekly/[week])
+  // 방지. buildMlbTeamStats 의 `MLB_TEAMS[code]?.color ?? '#888'` 와 동일 방어 패턴.
   const teamInfo = MLB_TEAMS[team];
-  const alt = `${teamInfo.name} 로고`;
+  const alt = `${teamInfo?.name ?? team} 로고`;
 
   return (
     <Image

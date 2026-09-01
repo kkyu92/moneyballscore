@@ -157,12 +157,19 @@ export default async function GameDetailEn({ params }: PageParams) {
 
   const supabase = await createClient();
 
+  // 더블헤더(같은 날 같은 매치업 2경기)는 (game_date, home, away) 만으로 row 1개를
+  // 특정 못해 .maybeSingle() 이 "multiple rows" 로 throw (Sentry MONEYBALLSCORE-1A,
+  // 357회, 2026-08-18~08-29, KO page.tsx 동일 버그). slug 에 game number 가 없어 완전
+  // disambiguate 불가 — order+limit(1) 로 1경기(더 이른 game_datetime_utc)를 결정적으로
+  // 선택해 500 방지.
   const scheduleResult = await supabase
     .from('mlb_schedule')
     .select('external_game_id, home_score, away_score, status, game_datetime_utc, home_starter_name, away_starter_name')
     .eq('game_date', date)
     .eq('home_team_code', dbHomeCode)
     .eq('away_team_code', dbAwayCode)
+    .order('game_datetime_utc', { ascending: true })
+    .limit(1)
     .maybeSingle();
   const { data: scheduleRaw } = assertSelectOk(scheduleResult, 'MlbGameDetailEn schedule');
   const schedule = scheduleRaw as ScheduleRow | null;

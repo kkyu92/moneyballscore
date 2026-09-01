@@ -123,4 +123,11 @@ describe("mlb/games/[date]/[slug] mlb_schedule 조인 회귀 가드 (cycle 2099)
     expect(PAGE_SRC).toMatch(/factorCount=\{usedFactorCount\}/);
     expect(PAGE_SRC).not.toMatch(/factorCount=\{GAME_DETAIL_FACTOR_ROWS\.length\}/);
   });
+
+  // cycle 2737 fix-incident: 더블헤더(같은 날 같은 매치업 2경기)에서 (game_date, home, away)
+  // 로만 조회하면 mlb_schedule row 가 2개 매칭 — .maybeSingle() 이 "multiple rows" 로 throw
+  // (Sentry MONEYBALLSCORE-1A, 357회, 2026-08-18~08-29). order+limit(1) 로 결정적 단일 row 보장.
+  it("mlb_schedule 조회에 order+limit(1) 을 적용해 더블헤더 multiple-rows throw 를 방지한다 (Sentry MONEYBALLSCORE-1A 회귀 차단, cycle 2737)", () => {
+    expect(PAGE_SRC).toMatch(/\.order\(['"]game_datetime_utc['"],\s*\{\s*ascending:\s*true\s*\}\)\s*\n\s*\.limit\(1\)\s*\n\s*\.maybeSingle\(\)/);
+  });
 });
