@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): analysis-data.ts 미소비 select 컬럼(prediction_type) 제거 (cycle 2714, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/22(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 23/25, info-arch 5/30, lotto 25/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2713 추천 carry 중 cycle 2712 항목(`prediction_type` select-only 미사용) 채택.
+- `getTodayAnalysisData`/`getYesterdayGames`/`getThisWeekPreviousGames` 3개 쿼리 모두 predictions embed select 에 `prediction_type` 포함하지만 row 처리 코드 어디서도 미참조 확인 — 서버측 `.eq('predictions.prediction_type', 'pre_game')` 필터는 select 없이도 동작(cycle 2678 `buildMlbMatchupProfile.ts`/cycle 2680 `buildMlbTeamProfile.ts` 동일 패턴 precedent 확인).
+- fix: 3개 인터페이스 + select절에서 `prediction_type` 제거(commit 5d84bad5). tsc clean + eslint clean + 전체 테스트 571파일 4483건 green.
+- computed-but-unconsumed/select-only-unused 패턴 재발(cycle 2661/2678/2680/2690/2708/2710/2711/2712/2713 계열 연장) — review-code(heavy) 대형파일 rotation 지속 확인.
+- 다음 사이클 추천 = cycle 2712/2713 carry 잔여(`TodayGameCard` badge 8필드 오도 이슈, matchup/team-profile 수렴픽 카드 컴포넌트 공유화) 중 택1, 또는 gap trigger 자연 대기.
+
 ### review-code(heavy): convergenceRecord.ts 미소비 select 컬럼(id/game_time/status) 제거 (cycle 2713, SUCCESS)
 
 - 진단: open issue 0, unprocessed plan 0/23(전부 status≠approved). gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 22/25, info-arch 4/30, lotto 24/30). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2712 추천대로 `convergenceRecord.ts`(830줄) 정독.

@@ -1,4 +1,12 @@
 
+## cycle 2714 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2713 추천 carry 중 cycle 2712 항목(`prediction_type` select-only 미사용) 채택.
+- `getTodayAnalysisData`/`getYesterdayGames`/`getThisWeekPreviousGames` 3개 쿼리 모두 predictions embed select 에 `prediction_type` select 되지만 row 처리 코드 미참조 확인 — 서버측 `.eq('predictions.prediction_type', 'pre_game')` 필터는 select 없이도 동작(cycle 2678/2680 동일 패턴 precedent).
+- fix: 3개 인터페이스+select절에서 제거(commit 5d84bad5). tsc/eslint clean, 전체 테스트 571파일 4483건 green.
+- gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 23/25, info-arch 5/30, lotto 25/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = cycle 2712/2713 carry 잔여(`TodayGameCard` badge 8필드 오도, matchup/team-profile 카드 컴포넌트 공유화) 중 택1, 또는 gap trigger 자연 대기.
+
 ## cycle 2713 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - review-code(heavy) rotation 계속 — cycle 2712 추천대로 `convergenceRecord.ts`(830줄) 정독.
