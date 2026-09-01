@@ -1,4 +1,11 @@
 
+## cycle 2661 (2026-09-01) — SUCCESS
+
+- operational-analysis (lite): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 중 op-analysis 24/25 근접(미도달) + fix-incident 3/20 + info-arch 13/30 + lotto 2/30 전부 미도달, 직전8 distinct=4(2-chain lock 미충족). 직전 3사이클(2658/2659/2660) 모두 op-analysis 를 next_recommended_chain 으로 지목 — carry-over 채택.
+- `scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=357 (CE n=310 / 비CE n=47, +16 CE 증가분 전부 8월 데이터). CE 54.5%(169/310) / 비CE 63.8%(30/47) → 격차 9.3pp (직전 10.4pp 대비 축소, 11회 연속 동일 streak break). overlap 월(05/06/07) 통제 격차는 10.8pp 그대로 — 전체 격차 축소는 8월 CE 표본 편입 효과, LLM 부가가치 우세 방향은 11회 연속 재확인.
+- CLAUDE.md Calibration 현황 섹션에 cycle 2661 측정치 append. CREDIT_EXHAUSTED·비CE 동결(마지막 예측 2026-07-01, 62일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only), 데이터/문서 변경만.
+- 다음 사이클 추천 = fix-incident(gap 4/20) 또는 review-code(heavy, dominance channel 재확인) — op-analysis gap 은 이번 측정으로 리셋(0/25).
+
 ## cycle 2660 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 23/25, info-arch 12/30, lotto 1/30), 직전8 distinct=4(2-chain lock 미충족). 강한 외부 신호 부재로 dominance chain(직전20 중 60%) 지속 선택 — validator.ts(1015줄, LLM 응답 결정론적 검증 layer, 최근 review-code 사이클 미커버) 정독.
