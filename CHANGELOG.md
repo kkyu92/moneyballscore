@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): hub-dispatch.ts 미소비 필드 3개 제거 + severity 주석 정정 (cycle 2723, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/22(approved 없음). fix-incident gap 20/20 도달했으나 `gh run list`(전부 success/skipped) + debug 커밋 0건 → 무이슈 재확인(7연속). lotto gap 30/30 도달했으나 다음 회차 picks(`2026-09-05-50sets.md`) + 직전 회차 OOS(`2026-08-29-result.md`) 둘 다 오늘 cron self-heal로 이미 생성 완료 — 실질 갭 없음. op-analysis(gap 8/25)/info-arch(gap 14/30) 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + explore-idea 1) — 2-chain lock 미충족.
+- carry-over(cycle 2721/2722) 잔여 마지막 파일 `hub-dispatch.ts`(279줄) 서브에이전트 위임 전수감사 — 3건 확인: `SentryWebhookInput.installation`(route.ts에서 파싱만 되고 composePayload 어디서도 미소비) + `event.event_id`/`event.request.headers`(타입 선언만 있고 실제 읽는 곳 없음 — "필요한 것만 나열" JSDoc과 모순) 제거, `HubDispatchPayload.severity` JSDoc "incident 전용"이 실제로는 composePayload가 매번(error-log 포함) 설정하는 동작과 반대라 정정.
+- fix: hub-dispatch.ts/route.ts/hub-dispatch.test.ts 3개 파일. tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`0f61c4c2`).
+- computed-but-unconsumed 패턴 재발(cycle 2661~2723 계열 연장) — review-code(heavy) carry-over rotation 완결(TodayGameCard→mlb-shared→factor-explanations→buildPicksStats→buildSeasonSummary→compareModels→hub-dispatch 7개 전부 감사 완료).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색(대형파일 재스캔) 또는 info-architecture-review(gap 15/30).
+
 ### review-code(heavy): compareModels.ts 미소비 필드 제거 (cycle 2722, SUCCESS)
 
 - 진단: open issue 0, unprocessed plan 0/22(status:approved 없음). fix-incident gap 20/20 도달했으나 `gh run list`(전부 success/skipped) + debug 커밋 0건 → 무이슈 재확인(6연속). lotto gap 30/30 도달했으나 다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal로 오늘 이미 생성 완료 — 실질 갭 없음. 직전8 distinct=3 — 2-chain lock 미충족.

@@ -1,4 +1,12 @@
 
+## cycle 2723 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/22(approved 없음). fix-incident gap 20/20 도달했으나 debug 커밋 0건 → 무이슈 재확인(7연속). lotto gap 30/30 도달했으나 cron self-heal 완료 — 실질 갭 없음. op-analysis(gap 8/25)/info-arch(gap 14/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족.
+- carry-over(cycle 2721/2722) 잔여 마지막 파일 `hub-dispatch.ts`(279줄) 서브에이전트 위임 전수감사 — `installation`/`event_id`/`request.headers` 미소비 필드 제거 + `severity` JSDoc "incident 전용" 정정(실제론 error-log 포함 매번 설정).
+- tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`0f61c4c2`).
+- computed-but-unconsumed rotation 완결 (7개 파일 전부 감사 완료).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 15/30).
+
 ## cycle 2722 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/22(status:approved 없음). fix-incident gap 20/20 도달했으나 `gh run list`(전부 success/skipped) + debug 커밋 0건 → 무이슈 재확인(6연속). lotto gap 30/30 도달했으나 다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal로 오늘 이미 생성 완료 — 실질 갭 없음. 직전8 distinct=3 — 2-chain lock 미충족.
