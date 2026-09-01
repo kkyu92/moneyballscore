@@ -1,4 +1,12 @@
 
+## cycle 2754 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=5 — 2-chain lock 미충족. fix-incident gap17/20·op-analysis gap6/25·info-arch gap15/30·lotto gap2/30 전부 미도달. gh run list 실패 0. prev retro 추천 = review-code(heavy) 축 소진 근접.
+- 3단계 sweep(embed→app 직접 select→shared PredictionRow) 완결 후 신규 축 탐색 — KBO 라우트만 감사됐고 MLB mirror 라우트(mlb/*, en/mlb/*, debug/* 13파일)가 미감사 축으로 확인, Explore 서브에이전트 전수 감사.
+- `en/mlb/games/[date]/[slug]/page.tsx` predictions select `external_game_id`(미소비, schedule 쪽만 실사용) + `debug/pipeline/page.tsx` `PipelineRun.triggered_by`(select('*') 인터페이스만 정의, 미참조) 2건 발견. KO 형제 파일은 이미 clean 확인. 나머지 11개 파일 전부 clean.
+- fix: 2개 파일 interface+select절에서 미소비 컬럼 제거. tsc/eslint clean, 572파일 4490건 green. push 성공(version-sync 0.5.62.189).
+- 다음 사이클 추천 = review-code(heavy) 축 거의 소진 — fix-incident gap18/20 monitor 우선, 또는 explore-idea saturation 재점검(plan#29 게이트 트래픽≥10/포스트시즌 임박 여전히 미충족 예상).
+
 ## cycle 2753 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=5(review-code(heavy)3+polish-ui1+operational-analysis(lite)1+skill-evolution1+lotto1) — 2-chain lock 미충족. fix-incident gap16/20·op-analysis gap5/25·info-arch gap14/30·lotto gap1/30 전부 미도달. gh run list 실패 0, DESIGN.md 당일 갱신(polish-ui trigger 미충족). prev retro 추천 = review-code(heavy).
