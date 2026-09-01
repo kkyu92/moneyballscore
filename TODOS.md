@@ -1,4 +1,14 @@
 
+## cycle 2749 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident gap12/20·op-analysis gap1/25·info-arch gap10/30 전부 미도달. explore-idea saturation 14/15 충족했으나 plan#29(포스트시즌/트래픽≥10 게이트) 미충족 — review-code(heavy) 자연 재개. gh run list 실패 0.
+- cycle 2747 추천대로 `!inner(` embed 패턴 파일 소진 후 다음 대상(app 라우트 직접 predictions/games select) 12개 파일 전수감사 — home page.tsx(2쿼리)/calendar/dashboard/search/analysis-game-[id]/predictions-page/predictions-[date]-page/predictions-[date]-opengraph-image/debug-factor-correlation/mlb-games-[date]-[slug]/reviews 전부에서 미소비 select 컬럼 발견.
+- fix: predicted_winner/actual_winner/model_version/prediction_type(row)/confidence(row)/team.name_ko/scoring_rule(row)/games.id/predictions.external_game_id/winner join 전체 등 12개 파일에서 제거, 필터(.eq/.in)는 전부 유지.
+- 회귀 테스트 2건(cycle 2293 silent-drift #1338 family) 이 구 select 리터럴을 정규식 매칭 — scoring_rule 컬럼이 아닌 필터절(`.in()`) 검증으로 갱신, 중복 assertion 정리.
+- tsc/eslint clean, 전체 테스트 572파일 4490건 green.
+- debug/model-comparison 의 shared `PredictionRow`(compareModels.ts) 타입은 소비처 다수(reviews/feed/picks/mlb 등) 교차 확인 리스크로 이번 사이클엔 skip.
+- 다음 사이클 추천 = review-code(heavy) 계속(PredictionRow 소비처 교차 확인) 또는 fix-incident(gap13/20 monitor).
+
 ## cycle 2748 (2026-09-01) — SUCCESS — operational-analysis(lite)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy)6+polish-ui2) — **2-chain lock 발동**, 두 chain 제외. fix-incident gap11/20·op-analysis gap21/25·info-arch gap9/30 전부 미도달. lotto gap≥30 이지만 9/5 picks+8/29 result cron 당일 갱신(노이즈, 반복 관찰). explore-idea saturation 4/15 미충족. gh run list 실패 0.
