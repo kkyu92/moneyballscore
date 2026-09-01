@@ -1,3 +1,15 @@
+## v0.5.62.184 — 2026-09-01 (cycle 2747, review-code(heavy): shadow/feed/recent/v2-preview/insights 미소비 select 컬럼 5파일 제거 SUCCESS)
+
+### review-code(heavy): `!inner(` embed 패턴 잔여 5파일 미소비 select 컬럼 (cycle 2747, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/22(전부 approved 아님). 직전8 distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미충족. fix-incident gap10/20·op-analysis gap20/25·info-arch gap8/30 전부 미도달. lotto 30-cycle 미발화 gap 이지만 9/5 picks+8/29 result 이미 cron 당일 갱신(노이즈, 반복 관찰). explore-idea saturation 14/15 충족했으나 approved plan 부재 — 직전 다수 사이클과 동일 패턴으로 review-code(heavy) 유지. gh run list 최근 10건 실패 0.
+- cycle 2746 추천대로 `!inner(` embed 패턴 잔여 6파일(accuracy/shadow/page.tsx, debug/model-comparison/page.tsx, feed/route.ts, teams/[code]/recent/page.tsx, v2-preview/page.tsx, page.tsx, insights/page.tsx) 전수감사 — debug/model-comparison/page.tsx 는 clean(compareModels.ts 전 필드 소비 확인), 나머지 5파일서 미소비 컬럼 발견.
+- `accuracy/shadow/page.tsx`: `predicted_winner`(select+interface 정의만, 실사용 0). `feed/route.ts`: predictions embed 의 `predicted_winner`+`prediction_type`(winner join/필터 전용으로 대체 소비). `teams/[code]/recent/page.tsx`: `prediction_type`+`scoring_rule`(둘 다 필터 전용, row 미소비). `v2-preview/page.tsx`: `prediction_type`+`created_at`(필터/정렬 전용, insights/loader.ts·series.ts 와 동일 3번째 변종). `insights/page.tsx`: `confidence`+`prediction_type`+`created_at`(confidence 는 row.confidence 참조 0건, 나머지 둘은 필터/정렬 전용).
+- fix: 5파일 select 절+interface 에서 총 9개 컬럼 참조 제거, 필터/정렬/join 전부 유지.
+- 회귀 테스트 1건(`insights-routes.test.ts` select clause 리터럴 매칭)이 구 select 문자열을 assert — 신규 select 순서에 맞게 갱신.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green(회귀 없음, 필드 제거만이라 순증 0).
+- 다음 사이클 추천 = review-code(heavy) — build*.ts/insights/`!inner(` 계열 소진 확인됨, 다음 축은 app 라우트 직접 select (embed 없는 단순 predictions/games select) 전수 재감사 또는 fix-incident(gap11/20 monitor).
+
 ## v0.5.62.183 — 2026-09-01 (cycle 2746, polish-ui: GameOverview 태그 fallback border dark mode 누락 수정 SUCCESS)
 
 ### polish-ui: GameOverview.tsx TAG_STYLES fallback border dark mode 미대응 (cycle 2746, SUCCESS)

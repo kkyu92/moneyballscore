@@ -1,4 +1,13 @@
 
+## cycle 2747 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/22(approved 없음). 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap10/20·op-analysis gap20/25·info-arch gap8/30 전부 미도달. lotto gap≥30 이지만 9/5 picks+8/29 result cron 당일 갱신(노이즈). explore-idea saturation 14/15 충족했으나 approved plan 부재로 review-code(heavy) 유지. gh run list 실패 0.
+- cycle 2746 추천대로 `!inner(` embed 패턴 잔여 6파일 전수감사 — debug/model-comparison/page.tsx clean, 나머지 5파일(accuracy/shadow, feed/route, teams/[code]/recent, v2-preview, insights) 서 미소비 select 컬럼 9개 발견.
+- fix: predicted_winner(shadow, feed) / prediction_type(feed, recent, v2-preview, insights) / scoring_rule(recent) / created_at(v2-preview, insights) / confidence(insights) — 필터/정렬/join 유지, row 미소비 컬럼만 제거.
+- 회귀 테스트 1건(insights-routes.test.ts select 리터럴) 신규 select 순서로 갱신.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) — app 라우트 직접 select(embed 없는 단순 predictions/games select) 전수 재감사, 또는 fix-incident(gap11/20 monitor).
+
 ## cycle 2746 (2026-09-01) — SUCCESS — polish-ui
 
 - 진단: open issue 0, unprocessed plan 0/22. 직전8 distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 발동, 두 chain 제외. fix-incident gap9/20·op-analysis gap19/25·lotto(노이즈)·explore-idea saturation 3/15 전부 미도달 — lock rule step3(polish-ui 강제) 적용.
