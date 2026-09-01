@@ -1,5 +1,11 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): mlb-waterfall.ts 재감사 — clean (cycle 2702)
+
+- 진단: 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 11/25, info-arch 23/30, lotto 13/30). 직전8 distinct=4 — 2-chain lock 미충족. 대형파일 backlog 재확인 소진 확정(CHANGELOG 10~28회 언급) + 최근 45일 git log 전체 확인 신규 feat 분기 없음 확정 — 방향 전환.
+- TODO/FIXME grep 1건(mlb-waterfall.ts) 발견했으나 cycle 2110/2111 이미 해결된 역사 주석 확인. `mlb-waterfall.ts`(159줄) 전체 재감사 — LABELS(ko/en) vs `MlbWaterfallInput` 10필드 전부 일치, pairTerms 8개 부호(invert 플래그)/multiplier(head_to_head 대칭 인코딩 0.5 상쇄항 포함) 주석과 일치, home/away null 가드 정상, final bar `clampWinnerProb` 정상. computed-but-unconsumed 및 상수 mismatch 재발 없음 — clean, 변경 없음.
+- 다음 review-code(heavy) 라운드 = 소규모 pure 계산 파일 rotation 계속 또는 gap trigger 자연 대기.
+
 ### review-code(heavy): model-version.ts 신규 전체 감사 + postview scoring_rule shadow row 보존 교차검증 — clean (cycle 2700, milestone)
 
 - 진단: 개방 issue 0, unprocessed plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 20/30, lotto 10/30). 직전8 distinct=2(review-code(heavy) 7 + fix-incident 1) — 2-chain lock 형식상 충족이나 잠긴 chain 중 fix-incident 포함 → 안전 우선 무시(룰 명시). explore-idea saturation(12/15) 재도달했으나 plan#29 Tier4 재확인(postseason 10월 미도달). cycle 2699 "대형파일 audit backlog 소진" 후속 — 파일명 자체가 cycle-retro 이력에 없는 신규 대상 탐색.
