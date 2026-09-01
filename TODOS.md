@@ -1,4 +1,13 @@
 
+## cycle 2738 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap1/20·op-analysis gap11/25·info-arch gap29/30(30 미도달) 전부 미충족. lotto gap49/30 재확인 결과 노이즈(9/5 picks + 8/29 result 파일 당일 최신). explore-idea saturation 13/15 충족했으나 plan#29(포스트시즌 10월/트래픽≥10) 미충족 — review-code(heavy) 자연 재개.
+- 최근 5연속(cycle 2630/2631/2632/2636/2638) "환각검증 누락" family 완결(team-agent/judge-agent/calibration-agent/postview 4 injection block 전부 커버 확인) 인접 축 — validator 커버리지가 아닌 **agent 실패 자체의 모니터링 커버리지**를 debate.ts 기준 재점검.
+- `debate.ts` 의 `evaluateAndCaptureAgentFallback([homeResult, awayResult, judgeResult], ...)` 가 설계(#372) 상 calibResult 를 애초 미포함(core 3-agent 스코프, 의도됨). 문제는 calibration-agent 자체 대체 채널 부재 — `parseResponse` catch 의 `captureCalibrationParseFallback` 은 JSON parse 실패만 잡고, `callLLM` 이 파싱 전 실패(네트워크/`CREDIT_EXHAUSTED`/4xx)하면 console.error 도 Sentry 도 전혀 없이 완전 무신호 fallback.
+- fix: `captureCalibrationApiFallback` 신규(`calibration_api_fallback` Sentry tag, 파싱 실패 채널과 분리) + `runCalibrationAgent` 의 `!result.success || !result.data` 분기에서 즉시 capture(fallback 동작 자체는 불변).
+- 회귀 테스트 3건 신규(`agents-calibration-api-fallback.test.ts`). tsc/eslint clean, 전체 테스트 93파일 1221건 green(+3 순증). postview.ts 대조 확인 결과 3-agent 전부 포함, 별도 gap 없음.
+- 다음 사이클 추천 = info-architecture-review(gap 30/30, 다음 사이클 도달) 또는 review-code(heavy) 신규 대상 재탐색.
+
 ## cycle 2737 (2026-09-01) — SUCCESS — fix-incident
 
 - 진단: 2-chain lock(직전8 review-code(heavy)6+polish-ui2) 충족, 두 chain 제외. lotto 노이즈, op-analysis gap 10/25·info-arch gap 28/30 미도달(breadcrumb 18건 재확인 결과 전부 redirect stub/debug/placeholder — IA 이슈 아님). explore-idea saturation 충족했으나 plan#29 게이트 미충족. fix-incident gap 20+ 충족 — 기존 채널(gh run list/pipeline_runs) clean 이었으나 처음으로 Sentry API 직접 조회, unresolved 6건 중 2건이 진짜 미해결 버그로 확인.

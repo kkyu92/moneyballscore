@@ -1,3 +1,15 @@
+## v0.5.62.176 — 2026-09-01 (cycle 2738, review-code(heavy): calibration-agent callLLM API 실패 무신호 gap 수정 SUCCESS)
+
+### review-code(heavy): calibration-agent API 실패 완전 무신호 gap (cycle 2738, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=3(review-code(heavy)/polish-ui/fix-incident 혼재) — 2-chain lock 미충족. fix-incident gap 1/20, op-analysis gap 11/25, info-arch gap 29/30(30 미도달) 전부 미충족. lotto gap 49/30 재확인 결과 노이즈(9/5 picks + 8/29 result 파일 둘 다 당일 최신). explore-idea saturation 13/15 충족했으나 plan#29 재평가 트리거(포스트시즌 통상 10월, 9/1 현재 "9월 말~10월 초" 미도달 + 트래픽 실측 불변) 미충족 — review-code(heavy) 자연 재개.
+- 최근 5연속 픽스(cycle 2630/2631/2632/2636/2638)로 완결된 "환각검증 누락" family(team-agent/judge-agent/calibration-agent/postview 4개 injection block 전부 validateXXX 로 커버 확인) 인접 축을 감사 — validator 커버리지가 아닌 **agent 실패 자체의 모니터링 커버리지**를 debate.ts 기준으로 재점검.
+- `debate.ts` 의 `evaluateAndCaptureAgentFallback([homeResult, awayResult, judgeResult], ...)` 가 애초 설계(#372, cycle 384)부터 calibResult 를 미포함 — home/away/judge 3개 core agent 만 집계하는 의도된 스코프였음. 문제는 calibration-agent 자체에도 대체 채널이 없었던 것: `parseResponse` catch 안의 `captureCalibrationParseFallback` 은 JSON parse 실패만 잡고, `callLLM` 이 파싱 단계 도달 전 실패(네트워크 에러/`CREDIT_EXHAUSTED`/4xx)하면 `console.error` 도 Sentry 도 전혀 없이 `calibResult.data || {...기본값}` fallback 으로 완전 무신호 통과.
+- fix: `validator.ts` 에 `captureCalibrationApiFallback` 신규(파싱 실패 채널과 분리된 `calibration_api_fallback` Sentry tag) + `calibration-agent.ts` 의 `runCalibrationAgent` 에서 `!result.success || !result.data` 분기 진입 시 즉시 capture 후 그대로 반환(기존 fallback 동작 자체는 불변, 가시성만 추가).
+- 회귀 테스트 3건 신규(`agents-calibration-api-fallback.test.ts`): success:false 케이스 / success:true+data:null 케이스 / 정상 성공 시 미호출 케이스.
+- tsc/eslint clean, 전체 테스트 93파일 1221건 green(+3 신규 순증).
+- 다음 사이클 추천 = info-architecture-review(gap 30/30, 다음 사이클 도달) 또는 review-code(heavy) 신규 대상(agentsFailed 집계 패턴이 postview.ts 쪽도 동일 스코프인지 대조는 이번 cycle 확인 완료 — postview 는 home/away/judge 대응 3-agent 전부 포함, 별도 gap 없음).
+
 ## v0.5.62.175 — 2026-09-01 (cycle 2737, fix-incident: 더블헤더 schedule 500 + 미인식 team code 로고 크래시 수정 SUCCESS)
 
 ### fix-incident: mlb_schedule 더블헤더 multiple-rows 500 + MlbTeamLogo undefined 크래시 (cycle 2737, SUCCESS)
