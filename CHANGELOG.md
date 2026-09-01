@@ -1,3 +1,11 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2686, review-code(heavy): kbo-live.ts 미소비 필드 정리)
+
+### refactor: KBO 라이브 스크래퍼 RawKboLiveGame 미소비 CANCEL_SC_NM 필드 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 7/30, lotto 27/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(15/15) 재도달했으나 4-source 재확인 전부 negative(신규라우트 55건=git checkout mtime 부작용, TODOS Next-Up stale, GH issue 0, DESIGN.md 당일 갱신) → review-code(heavy) 재선택.
+- 최고령 미터치 대형파일 순서대로 재검증: `backtest-wayback-run.ts`/`backtest-v3-run.ts`(둘 다 2026-05-04) 정독 — 둘 다 clean(모든 변수 실사용). `big-match.ts`/`personas.ts` 정독 — clean. `scrapers/kbo-live.ts`(2026-05-26, 237줄) 정독 → `RawKboLiveGame.CANCEL_SC_NM` 필드가 `fetchLiveGames()` 안 CANCEL_SC_ID 만으로 취소 판정하고 이 필드는 전혀 미참조 — cycle 2677/2678/2680/2681/2682/2684/2685 와 동일 죽은-select-필드 패턴의 스크래퍼 변종, 7번째 발견. 동명 필드가 있는 `kbo-official.ts` 쪽은 DB 저장(`cancel_sc_nm`)에 실사용 중이라 그대로 유지, kbo-live.ts 전용 interface 에서만 제거.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` + `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 5576b1e0).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2685, review-code(heavy): backtest-logistic-run.ts 미소비 필드 정리)
 
 ### refactor: logistic 백테스트 CLI extractFeatures 미소비 games 필드 제거

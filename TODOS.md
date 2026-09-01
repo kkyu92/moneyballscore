@@ -1,4 +1,11 @@
 
+## cycle 2686 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 20/25, info-arch 7/30, lotto 27/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(15/15) 재도달했으나 4-source 재확인 전부 negative(신규라우트 55건=git checkout mtime 부작용, TODOS Next-Up stale, GH issue 0, DESIGN.md 당일 갱신) → review-code(heavy) 재선택.
+- 최고령 미터치 대형파일 순서대로 재검증: `backtest-wayback-run.ts`/`backtest-v3-run.ts`(둘 다 2026-05-04)/`big-match.ts`/`personas.ts` 전부 clean. `scrapers/kbo-live.ts`(2026-05-26, 237줄) → `RawKboLiveGame.CANCEL_SC_NM` 필드가 `fetchLiveGames()` 안 CANCEL_SC_ID 만으로 취소 판정하고 전혀 미참조 — cycle 2677/2678/2680/2681/2682/2684/2685 와 동일 죽은-select-필드 패턴의 스크래퍼 변종, 7번째 발견. 동명 필드가 있는 `kbo-official.ts` 쪽은 DB 저장에 실사용 중이라 유지, kbo-live.ts 전용 interface 에서만 제거.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` + `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 5576b1e0).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄, cycle 2653/2685 carry-over) 정독, 또는 fix-incident(gap 3/20)/op-analysis(gap 20/25 근접)/lotto(gap 27/30 근접) 자연 대기.
+
 ## cycle 2684 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(op-analysis 18/25, info-arch 5/30, lotto 25/30, fix-incident gap=0 직발화). 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 15/20(75%) dominance-positive streak 정합. cycle 2683 retro 추천대로 review-code(heavy) 복귀.
