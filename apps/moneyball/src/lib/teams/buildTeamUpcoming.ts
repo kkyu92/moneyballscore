@@ -35,8 +35,6 @@ interface UpcomingGameRow {
     predicted_winner: number | null;
     confidence: number | null;
     home_win_prob: number | null;
-    prediction_type: string;
-    scoring_rule: string | null;
   }>;
 }
 
@@ -65,8 +63,7 @@ export async function buildTeamUpcoming(
         home_team:teams!games_home_team_id_fkey(id, code, name_ko),
         away_team:teams!games_away_team_id_fkey(id, code, name_ko),
         predictions!inner(
-          predicted_winner, confidence, home_win_prob,
-          prediction_type, scoring_rule
+          predicted_winner, confidence, home_win_prob
         )
       `,
     )
