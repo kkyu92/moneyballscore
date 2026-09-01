@@ -41,7 +41,6 @@ export interface MissReportItem {
 
 interface PreGameRow {
   game_id: number;
-  is_correct: boolean | null;
   reasoning: unknown;
   predicted_winner_team: { code: string | null } | null;
   game: {
@@ -50,7 +49,6 @@ interface PreGameRow {
     status: string | null;
     home_score: number | null;
     away_score: number | null;
-    winner_team_id: number | null;
     home_team: { code: string | null } | null;
     away_team: { code: string | null } | null;
     winner: { code: string | null } | null;
@@ -113,10 +111,10 @@ export async function buildMissReport(options: {
     .from("predictions")
     .select(
       `
-        game_id, is_correct, reasoning,
+        game_id, reasoning,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
         game:games!predictions_game_id_fkey(
-          id, game_date, status, home_score, away_score, winner_team_id,
+          id, game_date, status, home_score, away_score,
           home_team:teams!games_home_team_id_fkey(code),
           away_team:teams!games_away_team_id_fkey(code),
           winner:teams!games_winner_team_id_fkey(code)

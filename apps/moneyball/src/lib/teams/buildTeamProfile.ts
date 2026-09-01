@@ -373,8 +373,7 @@ export async function buildTeamProfile(
           home_recent_form, away_recent_form,
           home_elo, away_elo,
           home_sfr, away_sfr,
-          home_war_total, away_war_total,
-          prediction_type
+          home_war_total, away_war_total
         )
       `,
     )

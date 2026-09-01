@@ -101,8 +101,8 @@ interface Row {
     away_score: number | null;
     home_team_id: number | null;
     away_team_id: number | null;
-    home_team: { id: number; code: string | null } | null;
-    away_team: { id: number; code: string | null } | null;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
     winner: { code: string | null } | null;
   } | null;
 }
@@ -397,8 +397,8 @@ export async function buildMatchupProfile(
     away_score: number | null;
     home_team_id: number | null;
     away_team_id: number | null;
-    home_team: { id: number; code: string | null } | null;
-    away_team: { id: number; code: string | null } | null;
+    home_team: { code: string | null } | null;
+    away_team: { code: string | null } | null;
     winner: { code: string | null } | null;
     predictions: Array<{
       confidence: number | null;
@@ -415,8 +415,8 @@ export async function buildMatchupProfile(
       `
         id, game_date, status, home_score, away_score,
         home_team_id, away_team_id,
-        home_team:teams!games_home_team_id_fkey(id, code),
-        away_team:teams!games_away_team_id_fkey(id, code),
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code),
         winner:teams!games_winner_team_id_fkey(code),
         predictions(
           confidence, is_correct,
