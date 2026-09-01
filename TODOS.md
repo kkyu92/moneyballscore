@@ -1,4 +1,12 @@
 
+## cycle 2669 (2026-09-01) — RETRO-ONLY
+
+- explore-idea(lite): 진단 — 개방 issue 0, approved plan 0/23(전량 completed/archived/status 없음). gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 3/25, info-arch 21/30, lotto 10/30). 직전8 distinct=3(review-code(heavy)5+operational-analysis2+fix-incident1, 2-chain lock 미충족). **explore-idea saturation trigger 충족**(직전15 review-code/fix-incident/polish-ui/info-arch 합 12/15 ≥12 — review-code 9+fix-incident 2+polish-ui 1) → review-code dominance 다양성 redirect로 자연 채택.
+- lite quick-recheck 수행: TODOS.md Next-Up(7048행) 재확인 — 2026-04-25 시점 사용자 영역 1-line 항목(zshrc mcc alias)만 잔존, 이미 완료된 메커니즘(cycle 41+ 자동 fire 정상 작동 중) 대비 stale, 신규 리드 아님. `find apps/moneyball/src/app -name page.tsx -mtime -14` 는 전체 라우트가 매칭(최근 review-code 대량 정정 커밋 부산물, 신규 라우트 신호 아님 — false positive). 앱 소스 전체 `박제 중/TODO/FIXME/coming soon/준비 중` grep 재실행 — `settings`/`community`/`login`(Supabase Auth 미wiring, Tier4 기존 확인) + `mlb/players/[id]` Statcast 개별 선수 레이어(외부 스크래핑 소스 신규 필요) + `lotto` 주간 placeholder 4건 전부 기존 확인된 external-infra-blocked 항목 재확인, 신규 후보 0건.
+- ~/lotto_picks/ 디렉토리 잔존 파일도 확인했으나 실제 파이프라인은 cycle 2478 이후 repo 내 `apps/moneyball/data/lotto-picks/`·`lotto-results/`로 이전(cron 자동화) — 레거시 위치라 신규 lotto 후속 아님, cycle 2659 검증과 정합.
+- 신규 actionable idea 0건 — 6번째 연속 explore-idea 소진 재확인(cycle 1361/1693/2287/2417/2477/8052 계열과 동일 결론). 코드 변경 없음.
+- 다음 사이클 추천 = review-code(heavy) 계속(컴포넌트 레벨 미감사 후보: `TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable`) 또는 fix-incident/info-arch gap 자연 대기.
+
 ## cycle 2668 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 20/30, lotto 9/30), 직전8 distinct=3(review-code(heavy)5+operational-analysis2+fix-incident1, 2-chain lock 미충족). cycle 2667 retro 의 다양성 redirect 추천(fix-incident/info-architecture-review) 실사 검증 — fix-incident: gh run list 실패 0건/CI green, 실제 버그 신호 부재. info-architecture-review: breadcrumb 누락 grep trigger #2 겉보기 충족했으나 대상 전부(reviews/weekly·monthly KO/MLB/EN 6종, community/login/settings) redirect stub 또는 noindex placeholder 페이지로 확인 — 실제 IA 갭 아님(false positive). 둘 다 실질 trigger 부재 확인 후 review-code(heavy) dominance 유지 — cycle 2666 retro 가 명시 추천한 미감사 대형 파일(`buildAccuracyData.ts`/`daily.ts`) 중 `daily.ts`(1629줄, KBO 파이프라인 핵심, 6일 경과) 채택.
