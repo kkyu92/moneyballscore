@@ -1,3 +1,15 @@
+## v0.5.62.182 — 2026-09-01 (cycle 2745, review-code(heavy): buildMatchupUpcoming/convergenceRecord 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): buildMatchupUpcoming.ts/convergenceRecord.ts 미소비 select 컬럼 (cycle 2745, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/29(전부 completed/archived/deferred/spec_only, approved 없음). 직전8 distinct=3(review-code(heavy)6+info-architecture-review1+fix-incident1) — 2-chain lock 미충족. fix-incident gap8/20·op-analysis gap18/25·info-arch gap6/30 전부 미도달. lotto gap56/30 이지만 9/5 picks 이미 존재+데이터 당일 갱신(노이즈). explore-idea saturation 15/15 충족했으나 approved plan 부재(24/27/28/29 전부 대형 Tier3 spec-only/deferred) + TODOS Next-Up 신규 후보 부재 — 직전 다수 사이클과 동일 패턴으로 review-code(heavy) 유지 결정. gh run list 최근 10건 실패 0.
+- cycle 2744 추천대로 `!inner(` embed 패턴 잔여 파일(analysis/convergenceRecord.ts/matchup/buildMatchupUpcoming.ts/standings/buildEloTrend.ts) 감사 — buildEloTrend.ts 는 clean(home_elo/away_elo 전부 소비).
+- `buildMatchupUpcoming.ts`: predictions select 절의 `predicted_winner`(raw ID) 가 select+interface 정의만 있고 실사용 0건 — `predicted_winner_team.code`(nested join) 만 실제 사용.
+- `convergenceRecord.ts`: 두 쿼리(`fetchConvergencePickDetailedResults`/`fetchConvergencePickDetailedResultsForPair`) 모두 predictions select 절에 `prediction_type` 포함되지만 `.eq("predictions.prediction_type","pre_game")` 필터 전용으로 row 데이터 미소비(scoring_rule/prediction_type select-only-unused 패밀리 연장). 두번째 쿼리는 `scoring_rule` 도 select 되지만 인터페이스에 애초 없고 실사용 0건.
+- fix: `predicted_winner`(buildMatchupUpcoming) + `prediction_type`×2/`scoring_rule`×1(convergenceRecord) select 절+interface 에서 제거, 필터는 전부 유지.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green(회귀 없음, 필드 제거만이라 순증 0).
+- 다음 사이클 추천 = review-code(heavy) — `!inner(` embed 패턴 잔여(accuracy/shadow/page.tsx, debug/model-comparison/page.tsx, feed/route.ts, page.tsx, teams/[code]/recent/page.tsx, v2-preview/page.tsx) 재감사, 또는 op-analysis(gap 19/25 monitor).
+
 ## v0.5.62.181 — 2026-09-01 (cycle 2744, review-code(heavy): insights loader/series 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): insights/loader.ts·series.ts 미소비 select 컬럼 (cycle 2744, SUCCESS)

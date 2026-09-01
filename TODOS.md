@@ -1,4 +1,13 @@
 
+## cycle 2745 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/29(전부 completed/archived/deferred/spec_only, approved 없음). 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap8/20·op-analysis gap18/25·info-arch gap6/30 전부 미도달. lotto gap56/30 이지만 9/5 picks 존재+당일 갱신(노이즈). explore-idea saturation 15/15 충족했으나 approved plan 부재(24/27/28/29 대형 Tier3 spec-only/deferred) — 직전 다수 사이클 동일 패턴으로 review-code(heavy) 유지. gh run list 실패 0.
+- cycle 2744 추천대로 `!inner(` embed 패턴 잔여 3파일(analysis/convergenceRecord.ts/matchup/buildMatchupUpcoming.ts/standings/buildEloTrend.ts) 감사 — buildEloTrend.ts clean, 나머지 2파일 미소비 컬럼 발견.
+- buildMatchupUpcoming.ts: `predicted_winner`(raw ID, predicted_winner_team.code 로 대체 사용) 미소비. convergenceRecord.ts: 두 쿼리 모두 `prediction_type`(필터 전용) + 한 쿼리는 `scoring_rule` 도 select-only-unused.
+- fix: 2파일 select절+interface 에서 4개 컬럼 제거, 필터 전부 유지.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) — `!inner(` embed 패턴 잔여(accuracy/shadow/page.tsx 등 app 라우트 6개) 재감사, 또는 op-analysis(gap 19/25 monitor).
+
 ## cycle 2744 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap6/20·op-analysis gap17/25·info-arch gap4/30 전부 미도달. lotto 노이즈(9/5 picks + 8/29 result cron 당일 자동 갱신). gh run list 실패 0. cycle 2743 추천대로 review-code(heavy) 자연 재개.
