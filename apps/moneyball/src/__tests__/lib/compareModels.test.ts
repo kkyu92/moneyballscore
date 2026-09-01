@@ -12,7 +12,6 @@ function row(
   winnerTeamId: number | null = 1,
 ): PredictionRow {
   return {
-    id: 1,
     model_version: 'v1.6',
     scoring_rule: 'v1.6',
     is_correct: null,
@@ -46,9 +45,9 @@ describe('extractHomeWinProb', () => {
 describe('aggregateByModel', () => {
   it('groups by scoring_rule + model_version', () => {
     const rows: PredictionRow[] = [
-      row({ id: 1, scoring_rule: 'v1.5', model_version: 'v1.5' }),
-      row({ id: 2, scoring_rule: 'v1.5', model_version: 'v1.5' }),
-      row({ id: 3, scoring_rule: 'v1.6', model_version: 'v1.6' }),
+      row({ scoring_rule: 'v1.5', model_version: 'v1.5' }),
+      row({ scoring_rule: 'v1.5', model_version: 'v1.5' }),
+      row({ scoring_rule: 'v1.6', model_version: 'v1.6' }),
     ];
     const stats = aggregateByModel(rows);
     expect(stats).toHaveLength(2);
@@ -61,13 +60,11 @@ describe('aggregateByModel', () => {
   it('computes accuracy + Brier on verified rows', () => {
     const rows: PredictionRow[] = [
       row({
-        id: 1,
         is_correct: true,
         verified_at: '2026-04-22',
         reasoning: { homeWinProb: 0.8 },
       }),
       row({
-        id: 2,
         is_correct: false,
         verified_at: '2026-04-22',
         reasoning: { homeWinProb: 0.3 },
@@ -83,8 +80,8 @@ describe('aggregateByModel', () => {
 
   it('handles missing winner / unverified rows', () => {
     const rows: PredictionRow[] = [
-      row({ id: 1, game: { home_team_id: 1, winner_team_id: null } }),
-      row({ id: 2, is_correct: null, verified_at: null }),
+      row({ game: { home_team_id: 1, winner_team_id: null } }),
+      row({ is_correct: null, verified_at: null }),
     ];
     const stats = aggregateByModel(rows);
     expect(stats[0].n).toBe(2);
@@ -102,19 +99,16 @@ describe('dailyByModel', () => {
     // row 3: 10:00Z (04-23) + 9h = 19:00 KST 04-23 (same day)
     const rows: PredictionRow[] = [
       row({
-        id: 1,
         created_at: '2026-04-22T10:00:00Z',
         is_correct: true,
         verified_at: '2026-04-22',
       }),
       row({
-        id: 2,
         created_at: '2026-04-22T18:00:00Z',
         is_correct: false,
         verified_at: '2026-04-22',
       }),
       row({
-        id: 3,
         created_at: '2026-04-23T10:00:00Z',
         is_correct: true,
         verified_at: '2026-04-23',

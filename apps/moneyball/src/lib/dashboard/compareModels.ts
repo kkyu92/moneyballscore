@@ -43,7 +43,6 @@ export interface ModelGroupStats {
 }
 
 export interface PredictionRow {
-  id: number;
   model_version: string;
   scoring_rule: string | null;
   is_correct: boolean | null;

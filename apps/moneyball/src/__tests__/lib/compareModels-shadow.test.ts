@@ -20,7 +20,6 @@ describe('extractPureQuantProb', () => {
 
 describe('buildShadowRows', () => {
   const base: PredictionRow = {
-    id: 1,
     model_version: 'v2.0-debate',
     scoring_rule: 'v1.6',
     is_correct: false,

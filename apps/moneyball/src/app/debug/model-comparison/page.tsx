@@ -56,7 +56,7 @@ async function loadRows(daysBack: number): Promise<PredictionRow[]> {
     const { data, error } = await db
       .from('predictions')
       .select(
-        `id, model_version, scoring_rule, is_correct, verified_at, created_at, reasoning,
+        `model_version, scoring_rule, is_correct, verified_at, created_at, reasoning,
          game:games!inner(home_team_id, winner_team_id)`,
       )
       .gte('created_at', since)
@@ -69,7 +69,6 @@ async function loadRows(daysBack: number): Promise<PredictionRow[]> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const game = Array.isArray((r as any).game) ? (r as any).game[0] : (r as any).game;
       out.push({
-        id: r.id as number,
         model_version: r.model_version as string,
         scoring_rule: (r.scoring_rule as string | null) ?? null,
         is_correct: r.is_correct as boolean | null,
