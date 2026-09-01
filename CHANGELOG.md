@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): buildPicksStats.ts 미소비 필드 제거 + byFactor 주석 정정 (cycle 2720, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap 도달(직전20 0회)했으나 CI green + 최근 debug fix 커밋 0건 → 무이슈 재확인(4연속). lotto gap 30/30 도달했으나 다음 회차 picks(`2026-09-05-50sets.md`) + 직전 회차 OOS(`2026-08-29-result.md`) 둘 다 오늘 cron self-heal로 이미 생성 완료 — 실질 갭 없음(cycle 2718과 동일 패턴). 직전8 distinct=3 — 2-chain lock 미충족.
+- carry-over(cycle 2719) 잔여 4개 중 최대 `buildPicksStats.ts`(393줄) 서브에이전트 위임 전수감사 — `PickEntry.status`(route.ts에서 계산만 되고 어떤 UI도 미소비, 각 컴포넌트가 isResolved+myIsCorrect로 자체 배지 계산) + `ai_confidence`(PickGameResult 파이프라인 전체에서 repo 어디도 미소비 — KBO `predictions.confidence` select column, MLB `deriveMlbOutcome` confidence 구조분해, PickEntry 전달 경로까지 소급 제거) + `FactorAgreement.byFactor` 독스트링(실제론 ACTIVE_FACTOR_KEYS 제한 없이 entries 안 실제 등장한 key 전부 수집하는 의도된 설계인데 반대로 서술) 3건 확인 + fix.
+- tsc/eslint clean, 전체 테스트 571파일 4483건 green. PR #3073 squash merge(10210387).
+- computed-but-unconsumed 패턴 재발(cycle 2661~2719 계열 연장).
+- 다음 사이클 추천 = review-code(heavy) rotation 계속(`buildSeasonSummary.ts`/`compareModels.ts`/`hub-dispatch.ts` 잔여 3개) 또는 info-architecture-review(gap 12/30).
+
 ### review-code(heavy): factor-explanations.ts 전수감사 clean (cycle 2719, RETRO-ONLY)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap trigger 도달(직전20 사이클 0회 발화) — `/api/health`(overall=ok) + `gh run list`(CI green, Failure Dispatch 전부 skipped) + 최근 debug 커밋 0건 → 실제 인시던트 부재 재확인(cycle 2717/2718과 동일 결론). 직전8 distinct=3 — 2-chain lock 미충족.
