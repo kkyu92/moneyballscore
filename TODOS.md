@@ -1,4 +1,12 @@
 
+## cycle 2663 (2026-09-01) — RETRO-ONLY
+
+- fix-incident: 진단 — 개방 issue 0, approved plan 0/23, 직전8 distinct=5(2-chain lock 미충족), gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 15/30, lotto 4/30). 직전20 review-code dominance 60%(12/20) 지속 — cycle 2661/2662 next_recommended_chain(fix-incident) carry-over 채택해 다양성 redirect.
+- `gh run list -10` 전부 completed success/skipped(CI/lesson dispatch 정상). `scripts/check-v43-health.sh` 재실행 — post_game 301행, agent_memories 66행/팀별 정상 분산, 중복 0건.
+- `pipeline_runs` 최근 10건 실측: id=2618 predict 모드 games_skipped=5(reason=window_too_early) 는 `schedule.ts` 문서화된 정상 skip(hoursUntil 8.2h > windowHours 3h, 10-22시 매정시 재시도 구조라 later cron 이 픽업) — 사례 11(window_too_late 영구누락) 과 다른 케이스, silent drop 아님 확인. `verify` 모드 08-31 games_found=0 은 08-31(월요일) KBO 경기 자체 없음(off day, DB 실측 games 테이블도 0건) — 정상.
+- 신규 incident 0건 — 파이프라인 healthy 확인, 코드 변경 없음.
+- 다음 사이클 추천 = review-code(heavy, dominance 지속 관찰 — 대형 미감사 파일 pool 소진 국면, 컴포넌트 레벨(TeamMatchupCards 등) 재탐색 필요) 또는 op-analysis(gap 3/25)/info-arch(gap 16/30)/lotto(gap 5/30) 자연 대기.
+
 ## cycle 2662 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, CI green(gh run list -10 전부 success/skipped), gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 1/25, info-arch 14/30, lotto 3/30), 직전8 distinct=5(2-chain lock 미충족). explore-idea saturation 12/15 도달했으나 4-source 재확인 negative(TODOS Next-Up 여전히 stale mcc-alias 1-line, GH issue 0, plan#29 Tier4 유지, 신규라우트 91건=git checkout mtime 부작용) — 다수 과거 사이클과 동일 패턴.
