@@ -1,4 +1,12 @@
 
+## cycle 2656 (2026-09-01) — RETRO-ONLY
+
+- 사전조치: 세션 시작 시 미커밋 상태(`.github/workflows/lotto-pick-update.yml` 금→화 cron 변경, 2026-09-01 사용자 결정) 발견 → R4 따라 즉시 commit+push(`baa946f1`). push 과정에서 origin 이 자동화 커밋(lotto pick 1000세트 + op-analysis weekly cohort) 으로 2회 연속 전진 — rebase 로 정합.
+- review-code(heavy): 진단 open issue 0, approved plan 0/23(전부 completed/archived). 2nd defense(cycle 2655 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 19/25, info-arch 8/30, lotto 28/30 — lotto 는 방금 cron 이 2026-09-05 픽 자동 박제라 당장 실행 가치 부재). 직전8 distinct=3(review-code(heavy) 6+skill-evolution 1+info-arch 1) — 2-chain lock 미충족(<=2 아님). `gh run list` 전부 success(op-analysis PR 브랜치의 1건 실패는 이미 merge 완료된 PR #3072 의 stale pre-merge 로그 — 재발 아님). explore-idea saturation 14/15 충족되나 plan #29(로그인+커뮤니티) service-role count 재측정 = user_picks 1 / mlb_user_picks 0 / pick_poll_events 5 / mlb_pick_poll_events 0, cycle 2624/2648 과 완전 동일(무성장 6회 연속 확인) — skip. cycle 2653/2654/2655 3연속 명시 추천한 다양성 전환(fix-incident/info-arch) 도 트리거 자체가 없어 강제 선택 불가 — 결국 review-code(heavy) 잔존 후보(cycle 2654 carry-over: `fancy-stats.ts` 526줄/`silent-drift-alert.ts` 440줄) 채택.
+- `fancy-stats.ts` 전체 정독: FS_TEAM_MAP 매칭/xfip fallback/Elo stub 전부 기존 silent-drift 가시화(`console.warn`) 이미 적용된 상태로 clean. `silent-drift-alert.ts` 전체 정독 + `mlb-pipeline.ts`/`daily.ts` 호출부 대조: `SilentDriftPipelineMode` 8개 mode 전부 `runMlbPipeline` 단일 dispatch(라인 859)로 커버 확인(락킹 없음), `mlb_combined_notify`(stub, gamesFound 항상 0)가 `MLB_SCRAPE_MODES` 밖이라 즉시 `gamesFound<=0` 조기 return 으로 자연 제외 — 의도된 설계(코드 주석과 일치), drift 아님.
+- 신규 drift 0건 — clean audit, 코드 변경 없음(사전조치 ci commit 은 리뷰 대상 외 선행 작업). `pnpm --filter kbo-data exec tsc --noEmit` clean.
+- 다음 사이클 추천 = fix-incident(gap 12/20) 또는 op-analysis(gap 20/25, 다음다음 도달권) 자연 대기 우선 검토 — review-code(heavy) 직전9 중 6회 dominance 지속 + 최근 4회 중 3회 clean audit(2654/2655/2656), 실질 소진 신호 누적 4회째. 트리거 부재로 강제 전환은 불가하나 다음 gap 도달 시 우선 채택 권장.
+
 ## cycle 2653 (2026-08-26) — SUCCESS
 
 - review-code(heavy): 진단 open issue 0, approved plan 0/23(전부 completed/archived). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 16/25, info-arch 5/30, lotto 25/30). 직전8 distinct=5 — 2-chain lock 미충족. lotto(8/29 픽 이미 shipped + 데이터 3일 이내 신선)/polish-ui(text-[Npx] 잔존 13건 전부 테스트파일/globals.css 정의부라 실질 소진) 둘 다 실행 가치 부재 확인 → cycle 2634 retro 가 명시 추천한 carry-over("일반 경로 MAX_ATTEMPTS/llm-deepseek.ts/llm-ollama.ts 동일 off-by-one 확인") 19사이클 미처리 발견, 채택.
