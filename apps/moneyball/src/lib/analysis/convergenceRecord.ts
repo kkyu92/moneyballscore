@@ -392,12 +392,11 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
 
   const scheduleResult = (await supabase
     .from('mlb_schedule')
-    .select('id, external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
+    .select('external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
     .or(orFilter)
     .not('home_score', 'is', null)
     .eq('status', 'final')) as SelectResult<
     Array<{
-      id: number;
       external_game_id: string;
       game_date: string;
       status: string | null;
