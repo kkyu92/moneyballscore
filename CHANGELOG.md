@@ -1,3 +1,14 @@
+## v0.5.62.179 — 2026-09-01 (cycle 2742, review-code(heavy): buildPitcherLeaderboard.ts 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): buildPitcherLeaderboard.ts 미소비 select 컬럼 (cycle 2742, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 completed/archived/deferred류, approved 없음). 직전8 distinct=4(review-code(heavy)5+polish-ui1+fix-incident1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap5/20·op-analysis gap15/25·info-arch gap3/30 전부 미도달. lotto 최근 30 사이클 0회지만 cron 자동 갱신(9/5 picks, 8/29 result) 확인 — 노이즈. gh run list 최근 10건 실패 0. skill-evolution 마커 없음, milestone(2742%50) 미도달 — cycle 2741 추천대로 review-code(heavy) 자연 재개.
+- cycle 2741 추천대로 scoring_rule/prediction_type select-only-unused 패밀리 KBO+MLB 전체 재감사 — `grep .select(...)` 로 prediction_type/scoring_rule 포함 select 절 전수 검색 결과 신규 미소비 사례 0건(postview-daily.ts scoring_rule 은 post_game row 상속용으로 실사용, buildMlbTeamUpcoming/buildMlbMatchupUpcoming 은 애초 select 미포함·필터만 사용) — 해당 패밀리 소진 확인.
+- 인접 축 전환: computed-but-unconsumed select 필드를 prediction_type/scoring_rule 두 컬럼으로 한정하지 않고 넓혀 재감사(buildTeamAccuracy/buildPitcherProfile/buildMlbFactorAccuracy 등 다중 select 파일 직접 read) — `buildPitcherLeaderboard.ts` 의 games nested select(`status`, `home_sp_id`, `away_sp_id`), players nested select(`team_id`), teams nested select(`id`) 모두 select 절+interface 정의만 있고 실사용 0건 확인(팀코드는 `home_team.code`/`away_team.code` 로만 사용, `predictedHomeWin`/`AwayWin` 판정은 `home_team_id`/`away_team_id` 로 별도 처리, `status` 는 어디서도 참조 안 됨).
+- fix: 미소비 5개 컬럼 select 절 + interface 에서 제거.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green(회귀 없음, 필드 제거만이라 순증 0).
+- 다음 사이클 추천 = review-code(heavy) 계속(buildModelTuningInsights/buildMlbTeamProfile/buildTeamProfile/buildMatchupProfile/buildMissReport 등 미감사 multi-line select 파일 잔여) 또는 op-analysis(gap 16/25 monitor).
+
 ## v0.5.62.178 — 2026-09-01 (cycle 2741, review-code(heavy): buildTeamUpcoming/buildMatchupUpcoming 미소비 prediction_type+scoring_rule 제거 SUCCESS)
 
 ### review-code(heavy): buildTeamUpcoming.ts/buildMatchupUpcoming.ts 미소비 select 컬럼 (cycle 2741, SUCCESS)

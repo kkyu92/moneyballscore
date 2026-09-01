@@ -1,4 +1,13 @@
 
+## cycle 2742 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap5/20·op-analysis gap15/25·info-arch gap3/30 전부 미도달. lotto 노이즈(cron 당일 자동 갱신). gh run list 실패 0. cycle 2741 추천대로 review-code(heavy) 자연 재개.
+- scoring_rule/prediction_type select-only-unused 패밀리 전체 재감사 — 신규 사례 0건, 패밀리 소진 확인.
+- 인접 축 전환(다른 컬럼도 포함한 미소비 select 넓은 재감사) — `buildPitcherLeaderboard.ts` 의 `status`/`home_sp_id`/`away_sp_id`(games)/`team_id`(players nested)/`id`(teams nested) 5개 컬럼 select+interface 정의만 있고 실사용 0건 확인.
+- fix: 5개 컬럼 select 절+interface 에서 제거.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) 계속(buildModelTuningInsights/buildMlbTeamProfile/buildTeamProfile/buildMatchupProfile/buildMissReport 등 미감사 multi-line select 파일 잔여) 또는 op-analysis(gap 16/25 monitor).
+
 ## cycle 2741 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap4/20·op-analysis gap14/25·info-arch gap2/30 전부 미도달. lotto 노이즈(cron 당일 자동 갱신). gh run list 실패 0. cycle 2740 추천대로 review-code(heavy) 자연 재개.
