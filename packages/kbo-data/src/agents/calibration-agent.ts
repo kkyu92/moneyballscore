@@ -4,6 +4,7 @@ import { renderParkForLLM, renderRivalryForLLM, renderSeasonForLLM, renderTimeWi
 import { callLLM } from './llm';
 import {
   captureCalibrationParseFallback,
+  captureCalibrationApiFallback,
   resolveValidationMode,
   validateCalibrationHint,
   maskViolatedReasoning,
@@ -206,7 +207,17 @@ export async function runCalibrationAgent(
     (text) => parseResponse(text, homeTeam, awayTeam)
   );
 
-  if (!result.success || !result.data) return result;
+  if (!result.success || !result.data) {
+    // callLLM 이 파싱 단계 도달 전 실패(네트워크/크레딧/4xx) — parseResponse catch 의
+    // captureCalibrationParseFallback 은 여기 도달 못하고, debate.ts 의 agentsFailed 집계도
+    // calibResult 를 애초 설계부터 미포함(#372) — 이 경로는 여태 완전 무신호였던 gap.
+    void captureCalibrationApiFallback({
+      homeTeam,
+      awayTeam,
+      errorMessage: result.error ?? 'unknown',
+    });
+    return result;
+  }
 
   const outputText = [result.data.recentBias, result.data.teamSpecific, result.data.modelWeakness]
     .filter((s): s is string => Boolean(s))

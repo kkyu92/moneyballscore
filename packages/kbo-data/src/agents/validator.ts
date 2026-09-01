@@ -928,6 +928,50 @@ export async function captureCalibrationParseFallback(meta: CalibrationParseFail
   }
 }
 
+export interface CalibrationApiFailureMeta {
+  homeTeam: string;
+  awayTeam: string;
+  errorMessage: string;
+}
+
+// calibration-agent callLLM 자체 실패(네트워크/크레딧/4xx 등, JSON parse 성공 여부와 무관) 전용
+// Sentry 채널. captureCalibrationParseFallback 은 parseResponse catch 안에서만 호출되므로 API
+// 콜이 파싱 단계에 도달하기 전에 실패하면 미도달 — debate.ts 의 evaluateAndCaptureAgentFallback
+// 도 calibResult 를 애초 설계(#372)부터 미포함(core 3-agent 전용)이라 이 경로는 완전 무신호였음.
+export async function captureCalibrationApiFallback(meta: CalibrationApiFailureMeta): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`calibration_api_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        calibration_api_fallback: 'true',
+        agent: 'calibration',
+      },
+      extra: {
+        home_team: meta.homeTeam,
+        away_team: meta.awayTeam,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
 export interface RivalryMemoryFailureMeta {
   source: 'fetchRecentH2H' | 'fetchMemories' | 'getRivalryBlock';
   homeTeam: string;
