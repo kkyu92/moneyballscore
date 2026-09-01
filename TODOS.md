@@ -1,4 +1,13 @@
 
+## cycle 2717 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap trigger 도달(직전20 사이클 0회 발화, cycle 2716 추천대로) — pipeline_runs 최근7일(50/50 success, error 0) + `/api/health`(overall=ok) + runtime-error-alert(23/23 routes ok) + deploy-drift-alert(recent push gap<1h 정상) 전수 진단 → 실제 인시던트 부재 확인. review-code(heavy) redirect.
+- carry-over(cycle 2713) matchup/team-profile 수렴픽 카드 중복 재검토 — KBO `TeamCode` vs MLB `MlbTeamCode` 타입 체계 차이 + i18n 레이어(주석에 명시된 의도)로 판정, 강제 공통화는 불필요한 추상화로 기각.
+- `mlb-shared.ts`(421줄, 미감사) 서브에이전트 위임 감사 + 직접 repo-wide grep 검증 — `MlbWeeklyFactorInsight.factor`/`.direction`(mlb weekly/monthly review 4곳 ko/en 모두 label/correlation/directionalAccuracy만 렌더, 미소비) + `MlbMissFactorSupport.supportMagnitude`(내부 정렬키로만 사용) 3필드 제거.
+- fix: 공개 인터페이스에서 제거, supportMagnitude 는 정렬 전용 내부 intersection 타입으로 분리(commit f8a70baa). tsc/eslint clean, 전체 테스트 571파일 4483건 green.
+- computed-but-unconsumed 패턴 재발(cycle 2661~2716 계열 연장).
+- 다음 사이클 추천 = review-code(heavy) rotation 계속(`factor-explanations.ts`/`buildPicksStats.ts`/`buildSeasonSummary.ts`/`compareModels.ts`/`hub-dispatch.ts` 미감사) 또는 info-architecture-review(gap 9/30).
+
 ## cycle 2716 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. gap trigger 4종 미도달(fix-incident 19/20 근접, op-analysis 0/25 리셋, info-arch 6/30, lotto 26/30). 직전8 distinct=3(review-code(heavy) 6 + op-analysis 1 + info-arch 1) — 2-chain lock 미충족.
