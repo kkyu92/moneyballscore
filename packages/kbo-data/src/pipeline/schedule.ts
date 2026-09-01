@@ -15,7 +15,6 @@ export type ShouldPredictReason =
   | 'not_scheduled'
   | 'sp_unconfirmed'
   | 'already_predicted'
-  | 'debate_fallback'
   | 'ok';
 
 export interface ShouldPredictResult {
