@@ -120,7 +120,6 @@ interface PredRow {
   away_lineup_xwoba: number | null;
   home_lineup_barrel_pct: number | null;
   away_lineup_barrel_pct: number | null;
-  prediction_type: string | null;
 }
 
 interface BattedBallStatsRow {
@@ -250,8 +249,7 @@ export async function buildMlbTeamProfile(
         home_recent_form, away_recent_form,
         home_elo, away_elo,
         home_lineup_xwoba, away_lineup_xwoba,
-        home_lineup_barrel_pct, away_lineup_barrel_pct,
-        prediction_type
+        home_lineup_barrel_pct, away_lineup_barrel_pct
       `,
     )
     .eq('prediction_type', 'pre_game')
