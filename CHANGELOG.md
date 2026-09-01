@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2678, review-code(heavy): buildMlbMatchupProfile.ts 미사용 select 필드 정리)
+
+### refactor: MLB matchup profile predictions select 미사용 컬럼(prediction_type) 제거
+
+- 진단: 개방 issue 0, approved plan 0/23. 4-source explore-idea saturation 재확인(13/15 충족했으나 4-source negative — plan#29 트리거 미변화/TODOS Next-Up stale/GH issue 0/신규라우트 92건 git checkout 부작용) 및 fix-incident lite check(gh run list 전부 success/skipped) negative — 다양성 전환 실패, review-code(heavy) dominance-positive streak 정합 재선택. carry-over 소진(cycle 2677) 이후 최종 커밋일 기준 재정렬 — 가장 오래 미터치(2026-08-14) 대형 파일 `lib/mlb/buildMlbMatchupProfile.ts`(526줄) 채택.
+- 서브에이전트로 전체 정독 + 소비자(`mlb/matchup/[teamA]/[teamB]`/`en/mlb/matchup/[teamA]/[teamB]`) + KBO sibling(`lib/matchup/buildMatchupProfile.ts`) 교차검증. `CURRENT_SCORING_RULE`/`MLB_PRODUCTION_COHORT_RULES` 참조 정상, KST/UTC 날짜 처리 없음(gameDate DATE 컬럼), confidence 0.5~1 스케일 정상(cycle 2160 이중변환 버그 재발 없음) — 전부 clean.
+- 유일한 실제 발견: `PredRow` 인터페이스의 `prediction_type` 필드가 select 되지만(서버 필터는 이미 `.eq()` 로 별도 적용) 함수 어디서도 읽히지 않는 죽은 컬럼 — cycle 2677 buildMissReport.ts 와 동일한 죽은-select-필드 패턴. select 절 + interface 에서 제거. sibling `buildMlbTeamProfile.ts` 에도 동일 패턴 잔존 확인(이번 스코프 밖, 다음 cycle 후보로 carry-over).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화 — 동작 변경 없는 정리). 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2677, review-code(heavy): buildMissReport.ts 미사용 select 필드 정리)
 
 ### refactor: buildMissReport pre_game select 미사용 컬럼(confidence/predicted_winner) 제거

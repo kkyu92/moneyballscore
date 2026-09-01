@@ -111,7 +111,6 @@ interface ScheduleRow {
 interface PredRow {
   external_game_id: string | null;
   home_win_prob: number | null;
-  prediction_type: string | null;
 }
 
 function makeSideStat(
@@ -379,7 +378,7 @@ export async function buildMlbMatchupProfile(
 
   const predResult = (await supabase
     .from("predictions")
-    .select("external_game_id, home_win_prob, prediction_type")
+    .select("external_game_id, home_win_prob")
     .eq("prediction_type", "pre_game")
     .eq("league", "mlb")
     .in("scoring_rule", MLB_PRODUCTION_COHORT_RULES)
