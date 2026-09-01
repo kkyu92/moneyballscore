@@ -1,4 +1,11 @@
 
+## cycle 2660 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 23/25, info-arch 12/30, lotto 1/30), 직전8 distinct=4(2-chain lock 미충족). 강한 외부 신호 부재로 dominance chain(직전20 중 60%) 지속 선택 — validator.ts(1015줄, LLM 응답 결정론적 검증 layer, 최근 review-code 사이클 미커버) 정독.
+- 5개 서브체크(환각숫자/선수명발명/금칙어/claim-type/factor-attribution) + 6개 Sentry/DB capture 헬퍼 전부 실제 호출부(team-agent/judge-agent/postview/calibration-agent/debate/rivalry-memory)에 정상 연결 확인 — 고아 export 0건. team-agent 가 notifyValidationViolations 대신 logValidatorEvent(DB) 쓰는 점은 기존 의도된 채널 분리(Sentry vs DB), drift 아님.
+- 신규 drift 0건 — clean audit, 코드 변경 없음. `pnpm --filter kbo-data exec tsc --noEmit` clean.
+- 다음 사이클 추천 = operational-analysis(gap 24/25, 다음 도달 시 heavy 강제 권장).
+
 ## cycle 2659 (2026-09-01) — SUCCESS
 
 - lotto (lite): 30-cycle 미발화 gap trigger 최초 도달(마지막 발화 cycle 2628, 31 사이클 경과). 다른 gap(op-analysis 22/25, fix-incident 1/20 리셋) 미도달, 직전8 distinct=4 2-chain lock 미충족.
