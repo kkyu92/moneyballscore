@@ -22,7 +22,6 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 // 반환 — 실측 대기시간이 2500+5000+10000=17500ms(17.5s)로, 주석이 주장하던 37.5s의
 // 절반에도 못 미쳤음(529 폭풍 생존율 개선 의도 자체가 무력화된 상태).
 const OVERLOADED_BACKOFF_MS = [2500, 5000, 10000, 20000] as const;
-const OVERLOADED_BACKOFF_MULTIPLIER = 5; // 첫 3 attempt 일반 5xx 대비 배율 — 테스트 호환
 export const MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length + 1;
 export const MAX_OVERLOADED_ATTEMPTS = OVERLOADED_BACKOFF_MS.length + 1;
 
