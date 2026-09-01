@@ -1,4 +1,11 @@
 
+## cycle 2679 (2026-09-01) — RETRO-ONLY
+
+- info-architecture-review: 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 재확인(fix-incident 16/20, op-analysis 13/25, lotto 20/30 미도달) + info-arch gap = 31/30 **도달**(마지막 발화 cycle 2648) → trigger 9 발동. 직전8 distinct=3(review-code(heavy)/review-code/polish-ui, 2-chain lock 미충족)이라도 gap trigger 명시적 발화 — review-code(heavy) dominance(직전20 중 14/20) 다양성 전환 겸함.
+- 신규 라우트 0건(`b50240c6..HEAD --diff-filter=A -- '**/page.tsx'`, 같은 구간 3커밋 전부 기존 라우트 fix), breadcrumb 누락 18건 전부 `ia-hierarchy.md` 기존 exclusion 과 일치, sitemap 83 URL vs 105 page.tsx 격차도 기존 패턴(동적 세그먼트+noindex) 동일 — 신규 drift 0건.
+- checkpoint 문서만 박제(`docs/design/ia-2026-09-01-cycle-2679-30-cycle-gap-checkpoint.md`). 코드 변경 0.
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(신규 후보: `lib/mlb/buildMlbTeamProfile.ts` 동일 죽은-select-필드 패턴, 또는 `lib/picks/buildPicksStats.ts`/`app/search/page.tsx`) 또는 fix-incident/op-analysis/lotto gap 자연 대기.
+
 ## cycle 2678 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23. explore-idea saturation(13/15) 재도달했으나 4-source 재확인 negative(plan#29 트리거 미변화 — postseason 아직 안 임박/traffic 무변화 추정, TODOS Next-Up stale, GH issue 0, 신규라우트 92건 git checkout 부작용). fix-incident lite 재점검(`gh run list` 전부 success/skipped) negative. 다양성 전환 실패 → review-code(heavy) dominance-positive streak 정합 재선택. cycle 2677 carry-over 소진 후 최종 커밋일 기준 재정렬 — 가장 오래 미터치(2026-08-14, 18일) 대형 파일 `lib/mlb/buildMlbMatchupProfile.ts`(526줄) 채택.
