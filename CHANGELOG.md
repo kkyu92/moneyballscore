@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2681, review-code(heavy): buildPicksStats.ts 미소비 필드 정리)
+
+### refactor: 사용자 picks 통계 미소비 필드(agreedResolved/agreedCorrect/neutral) 제거
+
+- 진단: 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 15/25, info-arch 2/30 — cycle 2679 직발화, lotto 22/30). 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 14/20(70%) dominance-positive streak 정합. cycle 2680 next_rec 후보(`lib/picks/buildPicksStats.ts`, 2026-08-20 이후 미터치) 채택.
+- 전체 정독 + 소비 컴포넌트 7개(UserVsAIScorecard/WeeklyPicksSummary/SharePicksButton/WeeklyHistorySection/FactorAgreementCard/MyPicksClient/PicksTrendChart) cross-check. `PicksStats.agreedResolved`/`agreedCorrect` 와 `FactorAgreementRow.neutral` 3개 필드가 계산은 되지만 어떤 소비자도 읽지 않고 단위 테스트에서만 assert됨 — 이전 3개 cycle(2677/2678/2680)의 죽은-DB-select-필드 패턴과 유사하나 이번은 computed 필드(로컬 집계값)라는 차이. `total` 필드는 factor 정렬 키로 실사용 중이라 유지.
+- 미소비 필드 제거 + 관련 loop 단순화(else 분기/카운터 제거) + 테스트 assertion 정리.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 23fcf115).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2680, review-code(heavy): buildMlbTeamProfile.ts 미사용 select 필드 정리)
 
 ### refactor: MLB team profile predictions select 미사용 컬럼(prediction_type) 제거

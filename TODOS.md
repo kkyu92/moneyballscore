@@ -1,4 +1,11 @@
 
+## cycle 2681 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 15/25, info-arch 2/30, lotto 22/30), 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 14/20(70%) dominance-positive streak 정합. cycle 2680 next_rec 후보 `lib/picks/buildPicksStats.ts`(410줄, 2026-08-20 이후 미터치) 채택.
+- 전체 정독 + 소비 컴포넌트 7개 cross-check. `PicksStats.agreedResolved`/`agreedCorrect`(divergent 통계와 같은 loop 부산물) + `FactorAgreementRow.neutral` 3개 필드가 어떤 UI 컴포넌트도 읽지 않고 단위 테스트에서만 assert됨 — computed-but-unconsumed 패턴(이전 3 cycle 의 DB select-필드 패턴과 다른 변종). `total` 은 factor 정렬 키로 실사용 확인 후 유지.
+- 미소비 필드 제거 + loop 단순화 + 테스트 정리. `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 23fcf115).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(신규 후보 재탐색 필요 — cycle 2680 next_rec 소진) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2680 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 14/25, info-arch 1/30 — 직전 cycle 발화, lotto 21/30), 직전8 distinct=4(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 14/20(70%) dominance-positive streak 정합. cycle 2677/2678 retro 공통 carry-over `lib/mlb/buildMlbTeamProfile.ts`(384줄, 2026-08-24 이후 미터치) 채택.
