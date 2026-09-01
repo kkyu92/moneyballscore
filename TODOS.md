@@ -1,4 +1,12 @@
 
+## cycle 2677 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 29/30, lotto 18/30), 직전8 distinct=4(2-chain lock 미충족). cycle 2674/2675/2676 retro 공통 추천(review-code(heavy) 계속) + carry-over 후보 `lib/reviews/buildMissReport.ts`(216줄)/`app/reviews/misses/page.tsx`(249줄) 채택.
+- 전체 정독 + `MissesSortControl`/OG·twitter 이미지/관련 테스트 교차검증. `game_date` DATE 컬럼(UTC-slice 대상 아님), `CURRENT_MODEL_FILTER` 사용 기존 관례(cycle 2673) 정합, revalidate=1800 기존 wave-133/175 가드 존재. CE-fallback(`debate_version IS NULL`) 예측이 `reasoning.debate.verdict.homeWinProb` 부재로 tossup 오분류→미스리포트 누락되는 가설을 서브에이전트로 정밀 검증했으나, `debate.ts` judge 실패 시에도 verdict fallback 이 quant `homeWinProb` 를 그대로 채워 실제로는 non-issue 확인.
+- 유일한 실제 발견: `PreGameRow` 의 `confidence`/`predicted_winner` 두 필드가 select 되지만 함수 어디서도 미사용(죽은 컬럼) — select 절 + interface 에서 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, 3ebb88ba).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능하나 cycle 2674 next_rec 3개 후보(players/page.tsx, buildMissReport.ts, misses/page.tsx) 전부 감사 완료 — 신규 대형 파일 재탐색(최종 커밋일 기준 정렬) 필요, 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2676 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 28/30, lotto 17/30), 직전8 distinct=3(review-code(heavy)×6+explore-idea×1+polish-ui×1, 2-chain lock 미충족), 직전20 사이클 chain 분포 전부 ≥1회(cycle49 룰 미충족). cycle 2674/2675 retro 공통 추천 미감사 후보 중 최대 규모 `app/players/page.tsx`(315줄, 2026-07-14 이후 미터치) 채택.
