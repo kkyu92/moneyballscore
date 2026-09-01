@@ -9,8 +9,9 @@ import { ScoringRuleDayHeatmap } from '@/components/dashboard/ScoringRuleDayHeat
 import { CohortComparisonHeatmap } from '@/components/dashboard/CohortComparisonHeatmap';
 
 // KBO /accuracy 페이지의 CalibrationChart/StatCard 를 그대로 옮겨오지 않고 MLB 전용으로
-// 독립 작성 (wave-626, MVP scope — rolling accuracy/brier trend/요일별 등 나머지 섹션은
-// 후속 wave 후보로 남김). CALIBRATION_AXIS_MIN/MAX 등 상수만 KBO 와 공유.
+// 독립 작성 (wave-626 MVP 시작, 이후 rolling accuracy/brier trend/winner-prob bucket/
+// scoring_rule 요일·주간 heatmap/cohort 비교/team table 순차 추가로 전체 구현 완료).
+// CALIBRATION_AXIS_MIN/MAX 등 상수만 KBO 와 공유.
 const PLOT_SIZE = 320;
 const PAD_LEFT = 48;
 const PAD_BOTTOM = 38;
