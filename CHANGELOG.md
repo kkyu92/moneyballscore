@@ -1,4 +1,11 @@
-## v0.5.62.168 — 2026-09-01 (cycle 2681, review-code(heavy): buildPicksStats.ts 미소비 필드 정리)
+## v0.5.62.168 — 2026-09-01 (cycle 2682, review-code(heavy): buildPitcherLeaderboard.ts 미사용 필드 정리)
+
+### refactor: 투수 리더보드 predictions select 미사용 컬럼(confidence) 제거
+
+- 진단: 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred). gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 16/25, info-arch 3/30, lotto 23/30). 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 15/20(75%) dominance-positive streak 정합. GH Actions 최근 run 실패 0건(CI 정상). DESIGN.md 당일 갱신 — design-system trigger 미충족.
+- 오래 미터치 대형 파일 스캔(`git log -1 --date`) 결과 `lib/players/buildPitcherLeaderboard.ts`(2026-05-18 이후 미터치, 최고령 후보) 채택. `app/search/page.tsx` (cycle 2680 carry-over 후보)는 전체 정독 결과 STATIC_PAGES 슬러그 47개 전부 실제 라우트 존재 확인 + SearchClient.tsx 필드(sub/meta/teamCode) 전부 소비 확인 — drift 0건, 이미 cycle 2620/2622 에서 정리됨.
+- `buildPitcherLeaderboard.ts`: predictions select 절 + `Row` interface 에 `confidence` 존재하나 집계 loop 어디서도 참조 없음(`is_correct`/`predicted_winner` 만 실사용) — cycle 2677/2678/2680 과 동일 죽은-select-필드 패턴 4번째 발견.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 05629a18).
 
 ### refactor: 사용자 picks 통계 미소비 필드(agreedResolved/agreedCorrect/neutral) 제거
 

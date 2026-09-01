@@ -1,4 +1,12 @@
 
+## cycle 2682 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 16/25, info-arch 3/30, lotto 23/30), 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 15/20(75%) dominance-positive streak 정합. GH Actions 최근 run 실패 0건, DESIGN.md 당일 갱신 — 타 trigger 미충족.
+- `app/search/page.tsx`(cycle 2680 carry-over 후보) 전체 정독 — STATIC_PAGES 47개 슬러그 전부 실제 라우트 존재 + SearchClient.tsx 필드 전부 소비 확인, drift 0건(cycle 2620/2622 에서 이미 정리됨). 최고령 미터치 대형파일 재스캔 → `lib/players/buildPitcherLeaderboard.ts`(2026-05-18 이후 미터치) 채택.
+- predictions select 절 + `Row` interface 의 `confidence` 필드가 집계 loop 어디서도 참조 안 됨(`is_correct`/`predicted_winner` 만 실사용) — cycle 2677/2678/2680 과 동일 죽은-select-필드 패턴 4번째 발견. 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 05629a18).
+- 다음 사이클 추천 = review-code(heavy) 계속 가능(신규 후보 재탐색 필요 — search/page.tsx 소진) 또는 fix-incident(19/20 근접)/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2681 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 15/25, info-arch 2/30, lotto 22/30), 직전8 distinct=3(2-chain lock 미충족). 직전20 chain 분포 review-code 계열 14/20(70%) dominance-positive streak 정합. cycle 2680 next_rec 후보 `lib/picks/buildPicksStats.ts`(410줄, 2026-08-20 이후 미터치) 채택.
