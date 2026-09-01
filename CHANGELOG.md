@@ -1,3 +1,11 @@
+## v0.5.62.169 — 2026-09-01 (cycle 2728, review-code(heavy): buildTeamProfile.ts 미소비 필드 2개 제거)
+
+### review-code(heavy): buildTeamProfile.ts 전수감사 (cycle 2728, SUCCESS)
+
+- 진단: fix-incident gap 32/20 / lotto gap 39/30 둘 다 재확인 결과 노이즈만(실질 이슈 0). op-analysis 직전 fired, info-arch 미도달. review-code(heavy) 신규 대상 `buildTeamProfile.ts`(598줄).
+- `home_sp_id`/`away_sp_id` DB select 미소비 + `TeamRecentGame.opponentCode` 미소비 2건 제거. tsc/eslint clean, 571파일 4483건 green (`6aec0188`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색 또는 info-architecture-review(gap 20/30).
+
 ## v0.5.62.169 — 2026-09-01 (cycle 2727, operational-analysis(lite): CE/비CE 격차 15회 연속 재확인)
 
 ### operational-analysis(lite): op-analysis-ce-cohort 재측정 (cycle 2727, SUCCESS)

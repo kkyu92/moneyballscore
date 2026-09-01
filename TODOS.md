@@ -1,4 +1,11 @@
 
+## cycle 2728 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 32/20 재확인(`gh run list` 전부 success, 12연속 무이슈)/lotto gap 39/30 재확인(`2026-09-05-50sets.md` + `2026-08-29-result.md` 둘 다 존재 + lotto-data.json 당일 갱신, cron self-heal 완료 실질 갭 없음) — 둘 다 노이즈만. op-analysis 직전 사이클 fired(gap1)/info-arch gap 19/30 미도달. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. review-code(heavy) 신규 대상 = 미감사 대형 파일 `buildTeamProfile.ts`(598줄).
+- 서브에이전트 전수감사 — `home_sp_id`/`away_sp_id`(DB select + PredRow.game 타입) 미소비(pitcher-of-record 조회는 조인된 home_sp/away_sp.id 사용) + `TeamRecentGame.opponentCode` 미소비(유일 프로덕션 caller `teams/[code]/page.tsx`는 opponentName만 읽음, MLB 대응 타입은 독립 정의라 구조적 대칭 불필요) 2건 발견.
+- fix: 2개 필드 제거 + 연동 fixture 6파일 동기. tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`6aec0188`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색(`buildMlbMatchupProfile.ts` 522줄 등) 또는 info-architecture-review(gap 20/30).
+
 ## cycle 2727 (2026-09-01) — SUCCESS — operational-analysis(lite)
 
 - 진단: open issue 0, unprocessed plan 0/23(전부 archived/completed/deferred, approved 없음). 직전8 distinct=2(review-code(heavy) 7 + polish-ui 1) → 2-chain lock 발동, 두 chain 후보 제외. fix-incident gap 20/20 재확인(`gh run list` 전부 success/skipped, debug 커밋 0건, 11연속 무이슈)/lotto gap 30/30 재확인(다음 회차 picks `2026-09-05-50sets.md` + 직전 회차 OOS `2026-08-29-result.md` 둘 다 cron self-heal 완료, 실질 갭 없음). info-arch 후보(community/en-mlb-monthly breadcrumb 누락) 확인했으나 둘 다 정당(noindex 플레이스홀더 + 순수 redirect route) — false positive, 실제 IA 갭 없음. op-analysis gap 12/25 미도달이나 2-chain lock redirect + 앞선 무이슈 재확인 이후 자율 선택.
