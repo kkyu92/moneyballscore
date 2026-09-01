@@ -1,4 +1,11 @@
 
+## cycle 2666 (2026-09-01) — RETRO-ONLY
+
+- operational-analysis(lite): 진단 — 개방 issue 0, approved plan 0/23, CI green, gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 5/25, info-arch 18/30, lotto 7/30), 직전8 distinct=4(2-chain lock 미충족). review-code(heavy) dominance 11/19(58%) 지속이나 직전 2사이클(2664/2665) clean audit retro-only — 다양성 redirect 선택.
+- `scripts/op-analysis-ce-cohort.ts` 재실행 (cycle 2661 streak break 후 5-cycle 경과, 재측정 가치 판단). 결과: 전체 n=357(CE n=310/비CE n=47) — cycle 2661 수치와 완전 동일, 신규 verified 예측 0건. CE 54.5%(169/310) / 비CE 63.8%(30/47) → 격차 9.3pp 그대로, LLM 부가가치 우세 결론 12회 연속 재확인.
+- CLAUDE.md 모델 가중치 섹션에 cycle 2666 재측정 결과 append. 코드 변경 없음 — CREDIT_EXHAUSTED·비CE 표본 동결 상태 변화 없음.
+- 다음 사이클 추천 = review-code(heavy, 새 미감사 파일 pool 재탐색: `buildAccuracyData.ts`/`analysis-data.ts`/`daily.ts`) 또는 fix-incident(gap 4/20)/info-arch(gap 19/30) 자연 대기.
+
 ## cycle 2665 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 3/25, info-arch 16/30, lotto 5/30), 직전8 distinct=5(2-chain lock 미충족). 직전20 review-code(heavy) dominance 60%(12/20) 지속 — 강한 외부 신호 부재로 dominance channel 재선택.
