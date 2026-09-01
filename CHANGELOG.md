@@ -1,3 +1,16 @@
+## v0.5.62.189 — 2026-09-01 (cycle 2754, review-code(heavy): MLB mirror 라우트 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): MLB mirror 라우트 신규 축 감사 (cycle 2754, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=5(review-code(heavy)4+polish-ui1+operational-analysis(lite)1+skill-evolution1+lotto1) — 2-chain lock 미충족. fix-incident gap17/20·op-analysis gap6/25·info-arch gap15/30·lotto gap2/30 전부 미도달. gh run list 실패 0, CI 정상.
+- 직전 3단계 sweep(`!inner(` embed → app 라우트 직접 select 12파일 → shared `PredictionRow`) 완결 후 미감사 축 탐색 — KBO 라우트만 감사됐고 MLB mirror 라우트(mlb/*, en/mlb/*, debug/* 13개 파일) 는 신규 미감사 축으로 확인, Explore 서브에이전트로 전수 감사.
+- `en/mlb/games/[date]/[slug]/page.tsx`: predictions select 의 `external_game_id` 가 미소비(실사용은 schedule.external_game_id) — KO 형제 파일(`mlb/games/[date]/[slug]/page.tsx`)은 이미 select 에 없어 clean 확인.
+- `debug/pipeline/page.tsx`: `select('*')` 로 받은 `PipelineRun.triggered_by` 필드가 인터페이스 정의만 있고 렌더/계산 미참조.
+- 나머지 11개 파일(mlb/page, mlb/predictions, mlb/games/[date], mlb/analysis/analysis-data, en 미러 3종, debug/agent-fallback, debug/hallucination, debug/reliability, debug/silent-drift) 전부 clean 확인.
+- fix: 2개 파일에서 미소비 컬럼 제거(interface + select절).
+- tsc/eslint clean, 전체 테스트 572파일 4490건 green.
+- 다음 사이클 추천 = review-code(heavy) 축 거의 소진(MLB mirror 신규 발견 2건도 소규모) — fix-incident gap18/20 monitor 우선, 또는 explore-idea saturation 재점검(plan#29 게이트 트래픽≥10/포스트시즌 임박 여전히 미충족 예상).
+
 ## v0.5.62.188 — 2026-09-01 (cycle 2753, review-code(heavy): accuracy/shadow GameField.status 미소비 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): shadow cohort 잔여 컬럼 감사 (cycle 2753, SUCCESS)
