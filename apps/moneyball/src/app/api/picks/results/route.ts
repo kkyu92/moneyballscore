@@ -33,7 +33,6 @@ export interface PickGameResult {
    * undefined/null = KBO row (ai_predicted_winner_id 사용) 또는 미확정.
    */
   ai_predicted_home_win?: boolean | null;
-  ai_confidence: number | null;
   ai_is_correct: boolean | null;
   /**
    * factors map — per-factor home-win prob [0,1] (0.5=중립).
@@ -46,7 +45,6 @@ export interface PickGameResult {
 
 interface PredictionRow {
   predicted_winner: number | null;
-  confidence: number | null;
   is_correct: boolean | null;
   factors: Record<string, number> | null;
   prediction_type: string | null;
@@ -111,7 +109,7 @@ async function fetchMlbPickResults(
   return scheduleRows.map((s) => {
     const pred = predByExternalId.get(s.external_game_id);
     const hasFinalScore = s.status === 'final' && s.home_score != null && s.away_score != null;
-    const { predictedHomeWin, isCorrect, confidence } = deriveMlbOutcome({
+    const { predictedHomeWin, isCorrect } = deriveMlbOutcome({
       homeWinProb: pred?.home_win_prob ?? null,
       hasFinalScore,
       homeScore: s.home_score,
@@ -128,7 +126,6 @@ async function fetchMlbPickResults(
       away_team: { id: 0, name_ko: mlbShortTeamName(s.away_team_code), code: s.away_team_code },
       ai_predicted_winner_id: null,
       ai_predicted_home_win: predictedHomeWin,
-      ai_confidence: confidence,
       ai_is_correct: isCorrect,
       ai_factors: null,
     };
@@ -168,7 +165,7 @@ export async function GET(req: NextRequest) {
         `id, game_date, home_score, away_score, status,
          home_team:home_team_id ( id, name_ko, code ),
          away_team:away_team_id ( id, name_ko, code ),
-         predictions ( predicted_winner, confidence, is_correct, factors, prediction_type, scoring_rule )`,
+         predictions ( predicted_winner, is_correct, factors, prediction_type, scoring_rule )`,
       )
       .in('id', ids);
 
@@ -219,7 +216,6 @@ export async function GET(req: NextRequest) {
         home_team: homeTeam,
         away_team: awayTeam,
         ai_predicted_winner_id: pred?.predicted_winner ?? null,
-        ai_confidence: pred?.confidence ?? null,
         ai_is_correct: pred?.is_correct ?? null,
         ai_factors: pred?.factors ?? null,
       });

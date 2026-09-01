@@ -17,7 +17,6 @@ function makeEntry(
     awayTeamName: '두산',
     homeScore: isResolved ? 5 : null,
     awayScore: isResolved ? 3 : null,
-    status: isResolved ? 'final' : null,
     isResolved,
     myIsCorrect: isResolved ? myPick === 'home' : null,
     aiIsCorrect: isResolved ? aiPredictedHome === true : null,
