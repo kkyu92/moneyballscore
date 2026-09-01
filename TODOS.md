@@ -1,4 +1,11 @@
 
+## cycle 2671 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 5/25, info-arch 23/30, lotto 12/30), 직전8 distinct=5(review-code(heavy)4+review-code1+operational-analysis1+fix-incident1+explore-idea1, 2-chain lock 미충족). cycle 2668/2670 retro 가 공통 추천한 미감사 컴포넌트급 후보(`TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable` 또는 `MlbAccuracyDashboard.tsx` 401줄) 중 가장 큰 `MlbAccuracyDashboard.tsx` 채택.
+- Explore 서브에이전트로 전체 401줄 정독 + `buildAccuracyData.ts`/`buildMlbAccuracySummary.ts`/`buildMlbTeamAccuracy.ts`/shared 상수/`mlb/accuracy`·`en/mlb/accuracy` page.tsx/관련 테스트 교차검증. 실제 drift 1건 발견: 파일 헤더 주석(wave-626, 2026-08-14 최초 커밋)이 "rolling accuracy/brier trend/요일별 등 나머지 섹션은 후속 wave 후보로 남김"이라 서술했으나, 이후 6개 커밋(`febe1de4`/`6388a554`/`3a23c92c`/`4a306bf3`/`6973dd35`/`e79af5d3`+`1c781b5b`)이 winner-prob bucket/rolling accuracy/brier trend/scoring_rule day·week heatmap/cohort 비교/team table 을 순차 구현해 전부 이미 렌더링 중임에도 헤더 주석이 8개월 넘게 갱신되지 않아 파일 본문과 정반대 서술 상태였음. (참고: scoring_rule day/week heatmap 이 MLB 에서 항상 'all' 행만 채워지는 건 cycle 2189/2193 에 이미 발견·테스트 고정된 의도된 동작 — 신규 버그 아님.)
+- 헤더 주석만 정정(로직 변경 없음). `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 570 files/4473 tests green. 단일 논리 단위 → 직접 main commit+push(R4/R7, 343cc066).
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 미감사 컴포넌트: `TeamMatchupCards`/`TeamBiasTable`/`ModelVersionHistory`/`FactorAccuracyTable`, 이 4개는 component-level 테스트도 부재 확인됨) 또는 fix-incident/info-arch/lotto gap 자연 대기.
+
 ## cycle 2670 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 22/30, lotto 11/30), 직전8 distinct=4(review-code(heavy)5+fix-incident1+operational-analysis1+explore-idea1, 2-chain lock 미충족). cycle 2668/2669 retro 가 명시 추천한 review-code(heavy) 미감사 대형 파일(`buildAccuracyData.ts`, 776줄) 채택.

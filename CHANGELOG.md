@@ -1,3 +1,11 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2671, review-code(heavy): MlbAccuracyDashboard.tsx stale MVP-scope 헤더 주석 정정)
+
+### fix: 헤더 주석이 이미 구현된 6개 섹션을 "후속 wave 후보"로 8개월째 잘못 서술
+
+- 진단: 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달, 직전8 distinct=5(2-chain lock 미충족). cycle 2668/2670 retro 공통 추천 미감사 컴포넌트 중 최대 규모 `MlbAccuracyDashboard.tsx`(401줄) 채택.
+- 서브에이전트 전체 정독 감사 — wave-626(2026-08-14) 최초 커밋 헤더 주석("rolling accuracy/brier trend/요일별 등 후속 wave 후보로 남김")이 이후 6개 커밋(winner-prob bucket/rolling accuracy/brier trend/scoring_rule day·week heatmap/cohort 비교/team table)으로 전부 구현·렌더링된 뒤에도 갱신 안 돼 파일 본문과 정반대 서술 상태였음. scoring_rule heatmap MLB 'all'-only 동작은 cycle 2189/2193 기존 검증된 의도 동작이라 별도 버그 아님.
+- 헤더 주석만 정정, 로직 변경 없음. `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 570 files/4473 tests green. 단일 논리 단위 → 직접 main commit+push(R4/R7, 343cc066).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2670, review-code(heavy): scoring_rule cohort 비교 함수 3개 구조적 죽음 fix)
 
 ### fix: buildScoringRuleDayHeatmap/WeekHeatmap/buildBrierTrend 가 v1.8-only rows 받아 era cohort 비교 불가
