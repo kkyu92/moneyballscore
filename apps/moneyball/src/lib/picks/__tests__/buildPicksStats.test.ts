@@ -94,6 +94,34 @@ describe('buildPickEntries', () => {
     expect(entries[0].myIsCorrect).toBe(true);
   });
 
+  // cycle 2734 review-code(heavy) — KBO 연장전 무승부(homeScore===awayScore)
+  // symmetric 처리 회귀 가드. 이전엔 away 픽이 `!homeWon` 로 인해 무승부에도
+  // "정답" 오판정됐던 버그(PredictionCard.tsx canonical isFinal+strict `>` 대비 drift).
+  it('무승부(동점) 경기 — home 픽도 away 픽도 정답 처리 안 됨', () => {
+    const picks = makePicks([
+      [1, 'home', '2026-05-10T10:00:00Z'],
+      [2, 'away', '2026-05-11T10:00:00Z'],
+    ]);
+    const results = [makeResult(1, 3, 3), makeResult(2, 5, 5)];
+    const entries = buildPickEntries(picks, results);
+    expect(entries.find((e) => e.gameId === 1)?.isResolved).toBe(true);
+    expect(entries.find((e) => e.gameId === 1)?.myIsCorrect).toBe(false);
+    expect(entries.find((e) => e.gameId === 2)?.isResolved).toBe(true);
+    expect(entries.find((e) => e.gameId === 2)?.myIsCorrect).toBe(false);
+  });
+
+  // cycle 2734 review-code(heavy) — live.ts 가 status='live' 인 동안에도
+  // home_score/away_score 를 갱신(packages/kbo-data/src/pipeline/live.ts:128-133)하므로
+  // status 체크 없이 score non-null 만으로 isResolved 판정하면 경기 진행 중에도
+  // 확정된 것처럼 ✓/✗ 오노출됨(이후 최종 스코어로 뒤집힐 수 있음).
+  it('진행 중(status=live) 경기는 스코어가 있어도 unresolved 유지', () => {
+    const picks = makePicks([[1, 'home', '2026-05-10T10:00:00Z']]);
+    const results = [{ ...makeResult(1, 5, 2), status: 'live' }];
+    const entries = buildPickEntries(picks, results);
+    expect(entries[0].isResolved).toBe(false);
+    expect(entries[0].myIsCorrect).toBeNull();
+  });
+
   it('sorts entries by pickedAt descending', () => {
     const picks = makePicks([
       [1, 'home', '2026-05-08T10:00:00Z'],

@@ -90,10 +90,12 @@ export function buildPickEntries(
       let aiIsCorrect: boolean | null = null;
       let aiPredictedHome: boolean | null = null;
 
-      if (r && homeScore !== null && awayScore !== null) {
+      if (r && r.status === 'final' && homeScore !== null && awayScore !== null) {
         isResolved = true;
-        const homeWon = homeScore > awayScore;
-        myIsCorrect = pick.pick === 'home' ? homeWon : !homeWon;
+        // 무승부(KBO 연장 동점) symmetric 처리 — PredictionCard.tsx canonical
+        // isFinal + 양방향 strict `>` 패턴 정합. 이전엔 `!homeWon` 이라 away 픽이
+        // 무승부에도 "정답" 으로 오판정(homeWon=false → !homeWon=true).
+        myIsCorrect = pick.pick === 'home' ? homeScore > awayScore : awayScore > homeScore;
 
         if (r.ai_is_correct !== null) {
           aiIsCorrect = r.ai_is_correct;
