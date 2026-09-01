@@ -28,7 +28,7 @@ export interface HubDispatchPayload {
   body: string;
   /** 허브 분기: error-log / incident / lesson. */
   type: 'error-log' | 'incident' | 'lesson';
-  /** incident 전용. warning / error / critical. */
+  /** error-log/incident 공통. 누락 시 warning fallback (mapSeverity 참조). */
   severity?: 'warning' | 'error' | 'critical';
   /** 안정 식별자 — 허브 dedup 의 key. */
   fingerprint: string;
@@ -135,7 +135,6 @@ export function mapSeverity(
  */
 export interface SentryWebhookInput {
   event: {
-    event_id?: string;
     level?: string;
     title?: string;
     message?: string;
@@ -156,12 +155,11 @@ export interface SentryWebhookInput {
         };
       }>;
     };
-    request?: { url?: string; headers?: Record<string, string> };
+    request?: { url?: string };
     tags?: Array<[string, string]>;
     web_url?: string;
   };
   triggered_rule?: string;
-  installation?: { uuid?: string };
 }
 
 /** Sentry exception top-1 stack frame → "file:line in function" 줄 배열. */

@@ -111,7 +111,6 @@ export async function POST(
     parsed = {
       event,
       triggered_rule: raw?.data?.triggered_rule ?? raw?.triggered_rule,
-      installation: raw?.installation,
     };
   } catch (e) {
     return Response.json(

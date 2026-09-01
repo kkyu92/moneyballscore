@@ -89,7 +89,6 @@ describe('mapEventType', () => {
 describe('composePayload', () => {
   const sampleEvent: SentryWebhookInput = {
     event: {
-      event_id: 'abc',
       level: 'error',
       title: 'TypeError: undefined is not a function',
       culprit: 'src/lib/foo.ts in bar',
