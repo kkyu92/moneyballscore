@@ -1,4 +1,12 @@
 
+## cycle 2668 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 2/25, info-arch 20/30, lotto 9/30), 직전8 distinct=3(review-code(heavy)5+operational-analysis2+fix-incident1, 2-chain lock 미충족). cycle 2667 retro 의 다양성 redirect 추천(fix-incident/info-architecture-review) 실사 검증 — fix-incident: gh run list 실패 0건/CI green, 실제 버그 신호 부재. info-architecture-review: breadcrumb 누락 grep trigger #2 겉보기 충족했으나 대상 전부(reviews/weekly·monthly KO/MLB/EN 6종, community/login/settings) redirect stub 또는 noindex placeholder 페이지로 확인 — 실제 IA 갭 아님(false positive). 둘 다 실질 trigger 부재 확인 후 review-code(heavy) dominance 유지 — cycle 2666 retro 가 명시 추천한 미감사 대형 파일(`buildAccuracyData.ts`/`daily.ts`) 중 `daily.ts`(1629줄, KBO 파이프라인 핵심, 6일 경과) 채택.
+- Explore 서브에이전트로 전체 1629줄 정독 + shared/index.ts·schedule.ts·types.ts·관련 migration(004/018/019/034/043/052) 교차검증. PipelineMode 4모드/SHADOW_V20_WEIGHTS/PRODUCTION_COHORT_RULES/feature-flag env명/CONFIDENCE_FLAT_SPREAD_THRESHOLD/테이블·컬럼 참조 전부 정합. TODO/FIXME 0건, dead 함수 0건.
+- 실제 drift 1건 발견: `daily.ts:791` 이 실제 박제하는 skip reason 문자열은 `'debate_fallback_quant'`(cycle 884 D fix 이후 라벨) 인데 `types.ts:199/202` 문서 주석은 구 라벨 `'debate_fallback'` 그대로 stale. `schedule.ts` 의 `ShouldPredictReason` 유니온에도 동일 구 라벨이 멤버로 남아있었으나 `shouldPredictGame()` 은 이 값을 절대 반환하지 않는 dead 멤버로 확인(SkippedGame.reason 은 별도 plain string 필드라 이 타입과 무관 — 서로 다른 두 곳에 같은 stale 문자열이 독립적으로 남은 케이스).
+- `types.ts` 주석 2곳 정정 + `schedule.ts` 미사용 유니온 멤버 제거(동작 변경 없음, 타입/문서 전용). `pnpm --filter kbo-data exec tsc --noEmit` + `--filter shared`/`--filter moneyball` clean, vitest kbo-data 92 files/1215 tests green, pre-push lint+type-check 통과 → 직접 main commit+push(R4/R7, eb01727f).
+- 다음 사이클 추천 = review-code(heavy, `buildAccuracyData.ts` 776줄 잔여) 또는 fix-incident/info-arch gap 자연 대기 — info-arch breadcrumb trigger 는 이번 사이클 실사로 false positive 확정(모두 stub/redirect), 향후 동일 grep 결과 재검토 시 이 회차 결론 재사용 가능.
+
 ## cycle 2667 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 1/25, info-arch 19/30, lotto 8/30), 직전8 distinct=4(2-chain lock 미충족). cycle 2666 retro 의 명시적 추천(review-code(heavy)) 채택, 미감사 pool 재탐색 결과 `fancy-stats.ts`/`silent-drift-alert.ts` 는 cycle 2656 에서 이미 재감사 완료 확인(cycle 2654 추천 stale 정정) — `apps/moneyball/src/app/analysis/analysis-data.ts`(974줄, 미감사) 채택.
