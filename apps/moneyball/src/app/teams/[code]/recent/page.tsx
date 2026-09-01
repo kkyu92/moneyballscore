@@ -56,8 +56,6 @@ interface RecentGameRow {
     predicted_winner: number | null;
     confidence: number | null;
     is_correct: boolean | null;
-    prediction_type: string;
-    scoring_rule: string | null;
   }>;
 }
 
@@ -100,8 +98,7 @@ async function getRecentGames(code: TeamCode): Promise<RecentRow[]> {
         home_team:teams!games_home_team_id_fkey(id, code, name_ko),
         away_team:teams!games_away_team_id_fkey(id, code, name_ko),
         predictions!inner(
-          predicted_winner, confidence, is_correct,
-          prediction_type, scoring_rule
+          predicted_winner, confidence, is_correct
         )
       `,
     )

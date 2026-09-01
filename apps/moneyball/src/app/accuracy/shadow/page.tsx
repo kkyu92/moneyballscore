@@ -41,7 +41,6 @@ interface ShadowRowRaw {
   game_id: number;
   scoring_rule: string;
   reasoning: unknown;
-  predicted_winner: number;
   factors: Record<string, number> | null;
   games: GameField | GameField[] | null;
 }
@@ -73,7 +72,7 @@ async function getCohortPairs(): Promise<CohortPair[]> {
   const result = await supabase
     .from("predictions")
     .select(
-      "game_id, scoring_rule, reasoning, predicted_winner, factors, games!inner(game_date, status, home_team_id, winner_team_id)",
+      "game_id, scoring_rule, reasoning, factors, games!inner(game_date, status, home_team_id, winner_team_id)",
     )
     .in("scoring_rule", [CURRENT_SCORING_RULE, SHADOW_SCORING_RULE])
     .eq("prediction_type", "pre_game")

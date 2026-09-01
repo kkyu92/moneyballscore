@@ -216,7 +216,7 @@ describe("sitemap.ts /insights URL coverage (regression guard)", () => {
 
 describe("/insights hub mini factor preview (plan #5 Step 4 regression guard)", () => {
   it("getRecentInsights select clause includes factors column", () => {
-    expect(HUB_SRC).toMatch(/"confidence,\s*is_correct,\s*reasoning,\s*factors,/);
+    expect(HUB_SRC).toMatch(/"is_correct,\s*reasoning,\s*factors,/);
   });
 
   it("InsightRow interface includes factors Record<string,number> | null", () => {

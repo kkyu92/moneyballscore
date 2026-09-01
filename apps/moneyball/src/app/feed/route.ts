@@ -120,7 +120,7 @@ export async function GET() {
       home_team:teams!games_home_team_id_fkey(code, name_ko),
       away_team:teams!games_away_team_id_fkey(code, name_ko),
       predictions!inner(
-        predicted_winner, confidence, reasoning, prediction_type, is_correct,
+        confidence, reasoning, is_correct,
         winner:teams!predictions_predicted_winner_fkey(code, name_ko)
       )
     `)
@@ -221,10 +221,8 @@ export async function GET() {
     home_team: { code: string | null } | null;
     away_team: { code: string | null } | null;
     predictions: Array<{
-      predicted_winner: number | null;
       confidence: number;
       reasoning: { homeWinProb?: number } | null;
-      prediction_type: string;
       is_correct: boolean | null;
       winner: { code: string | null; name_ko: string | null } | null;
     }>;
