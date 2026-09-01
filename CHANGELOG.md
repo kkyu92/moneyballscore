@@ -1,3 +1,13 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2697, review-code(heavy): rivalry-memory.ts 미소비 select 필드 제거)
+
+### refactor: fetchRecentH2H/fetchMemories 미소비 select 필드 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred/tier4). gap trigger 4종 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 6/25, info-arch 18/30, lotto 8/30). 직전8 distinct=4(review-code(heavy) 5 + operational-analysis 1 + lotto 1 + fix-incident 1) — 2-chain lock 미충족. cycle 2696 fix-incident(lite) 전수점검 clean 이후 추천대로 review-code(heavy) 계속, 최고령 미터치 대형파일 `rivalry-memory.ts`(254줄, 2026-06-30) 채택.
+- `rivalry-memory.ts` 전체 정독 + 소비처 교차검증(team-agent.ts/debate.ts) — `fetchRecentH2H` 의 `winner_team_id`/`status` select 가 조인 alias(`winner:teams(code)`)/필터(`.eq('status','final')`) 전용으로만 쓰이고 매핑 결과 미반영, `fetchMemories` 의 `valid_until` select 도 필터(`.gte('valid_until', date)`) 전용. computed-but-unconsumed select 필드 계열 9번째 변종.
+- `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 92 files/1218 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, de06676a).
+
+---
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2695, review-code(heavy): BacktestGame.id 미소비 필드 제거)
 
 ### refactor: loadDecidedGames() id select+할당 미소비 필드 제거
