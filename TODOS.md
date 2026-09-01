@@ -1,4 +1,11 @@
 
+## cycle 2739 (2026-09-01) — RETRO-ONLY — info-architecture-review
+
+- 진단: 직전8 distinct=3(review-code(heavy)5+polish-ui2+fix-incident1) — lock 미충족. info-architecture-review 마지막 발화 cycle 2709 → gap 30/30 정확 도달(cycle 2738 예고).
+- `763bd49b..HEAD --diff-filter=A -- '**/page.tsx'` 신규 라우트 0건. breadcrumb 누락 18건 동일(debug 8+redirect-only reviews 6+login/settings/community 3+홈). MegaMenu/Footer 불변. sitemap.ts 정적 83+동적 루프 불변.
+- cycle 2679→2709→2739 3연속 "현 IA 충분" 재확정. 코드 변경 0.
+- 다음 사이클 추천 = review-code(heavy)/fix-incident/polish-ui 자연 재개 또는 op-analysis(gap 13/25 monitor).
+
 ## cycle 2738 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=3 — 2-chain lock 미충족. fix-incident gap1/20·op-analysis gap11/25·info-arch gap29/30(30 미도달) 전부 미충족. lotto gap49/30 재확인 결과 노이즈(9/5 picks + 8/29 result 파일 당일 최신). explore-idea saturation 13/15 충족했으나 plan#29(포스트시즌 10월/트래픽≥10) 미충족 — review-code(heavy) 자연 재개.
