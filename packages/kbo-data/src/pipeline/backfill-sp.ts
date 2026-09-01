@@ -142,8 +142,6 @@ async function getOrCreatePitcher(
 interface GameRow {
   id: number;
   external_game_id: string;
-  home_team_id: number;
-  away_team_id: number;
   home_sp_id: number | null;
   away_sp_id: number | null;
 }
@@ -151,7 +149,7 @@ interface GameRow {
 async function loadTargetGames(db: DB, start: string, end: string): Promise<GameRow[]> {
   const { data, error } = await db
     .from('games')
-    .select('id, external_game_id, home_team_id, away_team_id, home_sp_id, away_sp_id')
+    .select('id, external_game_id, home_sp_id, away_sp_id')
     .gte('game_date', start)
     .lte('game_date', end)
     .or('home_sp_id.is.null,away_sp_id.is.null');
