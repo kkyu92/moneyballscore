@@ -97,7 +97,6 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 }
 
 interface PredictionDetailRow {
-  external_game_id: string;
   home_win_prob: number | null;
   home_sp_fip: number | null;
   away_sp_fip: number | null;
@@ -179,7 +178,6 @@ export default async function GameDetailEn({ params }: PageParams) {
   const predResult = await supabase
     .from('predictions')
     .select(`
-      external_game_id,
       home_win_prob,
       home_sp_fip,
       away_sp_fip,

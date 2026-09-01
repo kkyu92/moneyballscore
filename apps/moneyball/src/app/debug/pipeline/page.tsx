@@ -35,7 +35,6 @@ interface PipelineRun {
   errors: string;
   skipped_detail: string | null;
   duration_ms: number;
-  triggered_by: string;
   created_at: string;
 }
 
