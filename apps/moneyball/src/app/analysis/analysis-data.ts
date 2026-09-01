@@ -803,7 +803,6 @@ export interface BestPickCard {
   homeScore: number | null;
   awayScore: number | null;
   predictedWinnerCode: TeamCode;
-  confidence: number;
   homeWinProb: number;
 }
 
@@ -860,7 +859,6 @@ export async function getBestPickOfWeek(startDate: string, endDate: string): Pro
     homeScore: row.game.home_score,
     awayScore: row.game.away_score,
     predictedWinnerCode: winnerCode,
-    confidence: row.confidence ?? ELO_NEUTRAL_WIN_PCT,
     homeWinProb: winnerProbOf(row.reasoning?.homeWinProb),
   };
 }
@@ -905,7 +903,6 @@ export async function getUpsetPickOfMonth(startDate: string, endDate: string): P
     homeScore: row.game.home_score,
     awayScore: row.game.away_score,
     predictedWinnerCode: winnerCode,
-    confidence: row.confidence ?? WINNER_PROB_CONFIDENT,
     homeWinProb: winnerProbOf(row.reasoning?.homeWinProb),
   };
 }

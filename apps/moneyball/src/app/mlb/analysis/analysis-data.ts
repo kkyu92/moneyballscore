@@ -104,11 +104,9 @@ export interface MlbUpcomingGame {
   gameDate: string;
   homeCode: MlbTeamCode;
   awayCode: MlbTeamCode;
-  homeWinProb: number;
   winnerCode: MlbTeamCode;
   conf: number;
   duelNetScore: number | null;
-  duelValidCount: number;
 }
 
 interface UpcomingPredRow {
@@ -200,11 +198,9 @@ export async function getMlbThisWeekRemainingGames(
       gameDate: p.mlb_game_date,
       homeCode,
       awayCode,
-      homeWinProb,
       winnerCode: homeWinProb >= 0.5 ? homeCode : awayCode,
       conf: Math.round((homeWinProb >= 0.5 ? homeWinProb : 1 - homeWinProb) * 100),
       duelNetScore: validEnough ? duel.netScore : null,
-      duelValidCount: duel.validCount,
     });
   }
   return games;
