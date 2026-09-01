@@ -36,7 +36,6 @@ interface PredRow {
   away_sfr: number | null;
   home_war_total: number | null;
   away_war_total: number | null;
-  prediction_type: string | null;
   game: {
     home_team_id: number | null;
     away_team_id: number | null;
@@ -91,7 +90,6 @@ export async function buildTeamFactorAverages(
         home_elo, away_elo,
         home_sfr, away_sfr,
         home_war_total, away_war_total,
-        prediction_type,
         game:games!inner(home_team_id, away_team_id)
       `,
     )
