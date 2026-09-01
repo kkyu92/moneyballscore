@@ -215,23 +215,6 @@ export async function fetchHeadToHead(
   return { wins, losses: Math.max(0, losses) };
 }
 
-/**
- * 구장 파크팩터 (간이 계산)
- * 홈/원정 득점 비율 기반
- */
-function calculateParkFactor(
-  homeRunsAtHome: number,
-  homeRunsAway: number,
-  homeGamesHome: number,
-  homeGamesAway: number
-): number {
-  if (homeGamesHome === 0 || homeGamesAway === 0) return 1.0;
-  const homeAvg = homeRunsAtHome / homeGamesHome;
-  const awayAvg = homeRunsAway / homeGamesAway;
-  if (awayAvg === 0) return 1.0;
-  return homeAvg / awayAvg;
-}
-
 // 기본 파크팩터 (2025 시즌 기반 추정)
 export const DEFAULT_PARK_FACTORS: Record<string, number> = {
   '인천SSG랜더스필드': 0.98,
