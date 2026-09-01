@@ -32,9 +32,7 @@ import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel'
 import { getSeasonH2HData } from '@/app/analysis/analysis-data';
 
 interface ConvergenceGameRow {
-  id: number;
   game_date: string;
-  game_time: string | null;
   home_score: number | null;
   away_score: number | null;
   home_team: { code: string | null } | null;
@@ -195,7 +193,7 @@ async function fetchConvergencePickDetailedResults(
   let query = supabase
     .from('games')
     .select(`
-      id, game_date, game_time, home_score, away_score,
+      game_date, home_score, away_score,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
@@ -304,7 +302,7 @@ async function fetchConvergencePickDetailedResultsForPair(
   const gamesResult = (await supabase
     .from('games')
     .select(`
-      id, game_date, game_time, home_score, away_score,
+      game_date, home_score, away_score,
       home_team:teams!games_home_team_id_fkey(code),
       away_team:teams!games_away_team_id_fkey(code),
       predictions!inner(
@@ -392,14 +390,13 @@ async function fetchMlbConvergencePickDetailedResultsForPair(
 
   const scheduleResult = (await supabase
     .from('mlb_schedule')
-    .select('external_game_id, game_date, status, home_score, away_score, home_team_code, away_team_code')
+    .select('external_game_id, game_date, home_score, away_score, home_team_code, away_team_code')
     .or(orFilter)
     .not('home_score', 'is', null)
     .eq('status', 'final')) as SelectResult<
     Array<{
       external_game_id: string;
       game_date: string;
-      status: string | null;
       home_score: number | null;
       away_score: number | null;
       home_team_code: string;
