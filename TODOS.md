@@ -1,4 +1,13 @@
 
+## cycle 2743 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap6/20·op-analysis gap16/25·info-arch gap4/30 전부 미도달. lotto 노이즈(cron 당일 자동 갱신). gh run list 실패 0. cycle 2742 추천대로 review-code(heavy) 자연 재개.
+- cycle 2742 추천 5파일(buildModelTuningInsights/buildMlbTeamProfile/buildTeamProfile/buildMatchupProfile/buildMissReport) 전수감사 — 2파일 clean, 3파일 미소비 컬럼 발견.
+- buildMatchupProfile.ts: nested team join `id` 컬럼 미소비(코드만 사용). buildTeamProfile.ts: `prediction_type` select 중복(필터는 유지, 인터페이스엔 이미 빠짐). buildMissReport.ts: `is_correct`(필터 전용) + nested `game.winner_team_id`(winner.code 로 대체 사용) 미소비.
+- fix: 3파일 select절+interface 에서 4개 컬럼 제거.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green.
+- 다음 사이클 추천 = review-code(heavy) 계속(KBO/MLB 나머지 build*.ts 미감사 파일 조사) 또는 op-analysis(gap 17/25 monitor).
+
 ## cycle 2742 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. 직전8 distinct=4 — 2-chain lock 미충족. fix-incident gap5/20·op-analysis gap15/25·info-arch gap3/30 전부 미도달. lotto 노이즈(cron 당일 자동 갱신). gh run list 실패 0. cycle 2741 추천대로 review-code(heavy) 자연 재개.

@@ -1,3 +1,16 @@
+## v0.5.62.180 — 2026-09-01 (cycle 2743, review-code(heavy): buildMatchupProfile/buildTeamProfile/buildMissReport 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): buildMatchupProfile.ts/buildTeamProfile.ts/buildMissReport.ts 미소비 select 컬럼 (cycle 2743, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 completed/archived/deferred류, approved 없음). 직전8 distinct=4(review-code(heavy)5+polish-ui1+info-architecture-review1+fix-incident1) — 2-chain lock 미충족. fix-incident gap6/20·op-analysis gap16/25·info-arch gap4/30 전부 미도달. lotto 최근 30 사이클 0회지만 cron 자동 갱신 노이즈로 확인 지속. gh run list 최근 10건 실패 0. skill-evolution 마커 없음, milestone(2743%50=43) 미도달 — cycle 2742 추천대로 review-code(heavy) 자연 재개.
+- cycle 2742 추천 대상(buildModelTuningInsights/buildMlbTeamProfile/buildTeamProfile/buildMatchupProfile/buildMissReport) 5파일 전수감사 — buildModelTuningInsights.ts/buildMlbTeamProfile.ts 는 clean.
+- `buildMatchupProfile.ts`: nested team join(`home_team:teams(...)`, `away_team:teams(...)`) 안 `id` 컬럼이 select+interface 정의만 있고 실제론 `.code` 만 읽힘(homeCode/awayCode 산출) — 2곳(Row/GameRow 인터페이스) 동일 패턴.
+- `buildTeamProfile.ts`: `predictions!inner(...)` select 절의 `prediction_type` 이 GameRow.predictions 인터페이스에 이미 빠져있고 실사용 0 — `.eq("predictions.prediction_type","pre_game")` 필터는 유지, select 중복만 제거(scoring_rule/prediction_type select-only-unused 패밀리 연장).
+- `buildMissReport.ts`: 최상위 `is_correct` 는 `.eq("is_correct", false)` 필터로만 쓰이고 row 자체에서 읽힌 적 없음, nested `game.winner_team_id` 는 `game.winner.code` 로 대체 사용돼 미참조 — 둘 다 select+interface에서 제거.
+- fix: 3파일 총 4개 미소비 컬럼(nested id ×2, prediction_type, is_correct+winner_team_id) select 절+interface 제거, 필터는 전부 유지.
+- tsc/eslint clean, 전체 테스트 572파일 4491건 green(회귀 없음, 필드 제거만이라 순증 0).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 계속(KBO/MLB build*.ts 중 미감사 multi-line select 파일 잔여 조사) 또는 op-analysis(gap 17/25 monitor).
+
 ## v0.5.62.179 — 2026-09-01 (cycle 2742, review-code(heavy): buildPitcherLeaderboard.ts 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): buildPitcherLeaderboard.ts 미소비 select 컬럼 (cycle 2742, SUCCESS)
