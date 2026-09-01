@@ -1,4 +1,12 @@
 
+## cycle 2692 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/29(전부 completed/archived/deferred), gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 1/25, info-arch 13/30, lotto 3/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(12/15, review-code+fix-incident+polish-ui+info-arch 계열) 재도달 확인했으나 plan#29(로그인/커뮤니티) 재평가 트리거 여전히 미충족(트래픽 실측 재요구 없이 checkpoint만 반복될 위험) + TODOS Next-Up 신규 후보 부재로 review-code(heavy) 유지 결정.
+- cycle 2691 carry-over 후보 `silent-drift-alert.ts`(440줄) 전체 정독 — 8개 alert dispatcher 함수 전부 실 호출부와 필드 정합 확인(clean). 유일 발견은 `captureFactorAnomalyAlert` 가 cycle 1013 도입 후 여전히 무배선(호출부 0/테스트 0, 코드 주석이 cycle 2276 시점부터 정확히 이 상태를 문서화 중) — 그러나 주석 자체가 현재 상태와 100% 일치해 "잘못된 문서" 가 아니라 "의도된 대기" 상태라 액션 대상 아님(silent drift 아님).
+- 추가 정독: `agents/validator.ts`(WARN_LIMIT 하드코딩 vs mode-aware — validateFactorAttribution 은 attribution.ok 가 Sentry 알림 전용이라 gating 영향 없어 비버그), `pipeline/mlb-pipeline.ts` MLB_MEMORY_PREDICTION_COLUMNS 15필드 전부 buildMlbFactors 소비 확인, `lib/mlb/buildMlbTeamProfile.ts`(cycle 2680 이미 정리된 상태 재확인, clean), `pipeline/backtest-run.ts`(168줄, 수동 CLI, drift 없음) — 전부 clean, 신규 fix 0건.
+- 코드 변경 없음. `pnpm --filter @moneyball/kbo-data type-check`/`lint` clean 확인(변경 無).
+- 다음 사이클 추천 = review-code(heavy) 계속 시 신규 후보 재탐색 필요(이번 cycle 후보 전부 소진) — `apps/moneyball/src/lib/insights/` 또는 `apps/moneyball/src/app/mlb/` 하위 미감사 대형 파일 재스캔 권장. 또는 fix-incident(gap 10/20)/op-analysis(gap 2/25)/info-arch(gap 14/30)/lotto(gap 4/30) 자연 대기.
+
 ## cycle 2691 (2026-09-01) — SUCCESS
 
 - operational-analysis(lite): 진단 — 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). gap trigger 재확인: op-analysis 마지막 발화 cycle 2666, gap=25(≥25 임계 정확히 도달) — 25-cycle 미발화 trigger 자연 발화. 직전8 distinct=3(review-code(heavy) 6 + fix-incident(lite) 1 + lotto(lite) 1) — 2-chain lock 미충족.
