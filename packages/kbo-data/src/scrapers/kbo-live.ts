@@ -30,7 +30,6 @@ interface RawKboLiveGame {
   T_SCORE_CN?: string | number;
   OUT_CN?: string | number;
   CANCEL_SC_ID?: string | number;
-  CANCEL_SC_NM?: string;
 }
 
 interface KboLiveResponse {
