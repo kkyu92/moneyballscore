@@ -1,3 +1,14 @@
+## v0.5.62.188 — 2026-09-01 (cycle 2753, review-code(heavy): accuracy/shadow GameField.status 미소비 컬럼 제거 SUCCESS)
+
+### review-code(heavy): shadow cohort 잔여 컬럼 감사 (cycle 2753, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=5(review-code(heavy)3+polish-ui1+operational-analysis(lite)1+skill-evolution1+lotto1) — 2-chain lock 미충족. fix-incident gap16/20·op-analysis gap5/25·info-arch gap14/30·lotto gap1/30 전부 미도달. gh run list 실패 0, DESIGN.md 당일 갱신(polish-ui trigger 미충족).
+- insights/dashboard/search 3개 파일 재검증 — 모두 clean (기존 sweep 대상 아님, 신규 확인). Explore 서브에이전트로 accuracy/shadow/page.tsx 의 `getCohortPairs` select 재감사.
+- `games!inner(...)` 의 `status` 컬럼이 `GameField` interface 에만 존재, `homeWin` 계산은 `winner_team_id`/`home_team_id` 만 사용 — status 는 select+interface 정의만 있고 실사용 0 (computed-but-unconsumed, 최근 sweep 11ee9b42/010ae8aa 이 놓친 파일).
+- fix: `accuracy/shadow/page.tsx` interface + select절에서 `status` 제거.
+- tsc/eslint clean, 전체 테스트 572파일 4490건 green.
+- 다음 사이클 추천 = review-code(heavy) 잔여 감사 축 소진 근접 — accuracy/analysis-data/teams/predictions/en-mlb 등은 이번 사이클 확인 결과 clean, 다음은 fix-incident(gap17/20) 또는 새 축 탐색 권장.
+
 ## v0.5.62.187 — 2026-09-01 (cycle 2750, review-code(heavy): compareModels PredictionRow.id 미소비 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): PredictionRow 공유 타입 소비처 교차 감사 (cycle 2750, SUCCESS)
