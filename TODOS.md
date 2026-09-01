@@ -1,4 +1,11 @@
 
+## cycle 2667 (2026-09-01) — RETRO-ONLY
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 1/25, info-arch 19/30, lotto 8/30), 직전8 distinct=4(2-chain lock 미충족). cycle 2666 retro 의 명시적 추천(review-code(heavy)) 채택, 미감사 pool 재탐색 결과 `fancy-stats.ts`/`silent-drift-alert.ts` 는 cycle 2656 에서 이미 재감사 완료 확인(cycle 2654 추천 stale 정정) — `apps/moneyball/src/app/analysis/analysis-data.ts`(974줄, 미감사) 채택.
+- 전체 974줄 직접 정독. FACTOR_PICK_STRONG(8)과 FACTOR_PICK_MIN_FACTORS(7) 이원 사용(gameOverviewSummary vs upcomingConvergenceTeams)이 shared/index.ts 주석과 완전 일치(혼동 아님), computeCompositeDuel h2h optional 파라미터 undefined 처리 정상, PRODUCTION_COHORT_RULES/ELO_NEUTRAL/H2H_MIN_GAMES 등 registry 상수 전부 정합.
+- 신규 drift 0건 — clean audit, 코드 변경 없음.
+- 다음 사이클 추천 = fix-incident 또는 info-architecture-review — review-code(heavy) 대형 파일 pool 지속 소진(최근 6/8 clean audit), dominance 완화 다양성 전환 권고 누적(cycle 2655/2665 동일 권고).
+
 ## cycle 2666 (2026-09-01) — RETRO-ONLY
 
 - operational-analysis(lite): 진단 — 개방 issue 0, approved plan 0/23, CI green, gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 5/25, info-arch 18/30, lotto 7/30), 직전8 distinct=4(2-chain lock 미충족). review-code(heavy) dominance 11/19(58%) 지속이나 직전 2사이클(2664/2665) clean audit retro-only — 다양성 redirect 선택.
