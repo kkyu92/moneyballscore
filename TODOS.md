@@ -8229,3 +8229,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 **패턴 신호**: 직전 6 review-code-family 사이클 중 5회(2648/2649/2652/2654/2655) 가 clean-audit RETRO-ONLY — 대형 파일 반복 스윕의 수확체감 뚜렷. dominance 14/20(70%)와 겹쳐 3연속(2653/2654/2655) diversity 전환 권고 누적.
 
 다음 사이클 추천 = fix-incident(gap 10/20, 실제 incident evidence 재확인 후) 또는 info-architecture-review(gap 7/30 이르지만 checkpoint 재확인) — review-code 편중 완화 우선 검토.
+
+## ✅ SUCCESS — review-code(heavy) backtest-logistic-run.ts 미소비 필드 정리 (cycle 2685, 2026-09-01)
+
+진단: open issue 0, approved plan 0/23(전부 completed/archived/deferred). 2차 방어선(cycle 2684 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 19/25, info-arch 6/30, lotto 26/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(15/15) 도달했으나 4-source 재확인 전부 negative(plan#29 REST count 실측 = cycle 2417 이후 완전 무변화, GH issue 0, TODOS Next-Up 섹션 소멸, 신규라우트 92건=git checkout mtime 부작용) → review-code(heavy) 재선택.
+
+실행: 최고령 미터치 대형파일 재스캔 → `backtest-run.ts`(168줄, 2026-04-21, 최고령) 정독 clean. 동일 연령대 `backtest-logistic-run.ts`(2026-05-04) 후속 정독 — `extractFeatures()` 반환 `games`(used 배열)가 train/test 어디서도 미참조. cycle 2677/2678/2680/2681/2682/2684 와 동일 computed-but-unconsumed 패턴 6번째 발견, 제거. 자매 파일 `backtest-grid-run.ts`의 동명 함수는 clean 확인.
+
+`pnpm --filter moneyball exec tsc --noEmit` + `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 571/4483 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 39a9eec3).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형 파일(`fancy-stats.ts` 526줄, `silent-drift-alert.ts` 440줄, cycle 2653 carry-over) 정독, 또는 fix-incident(gap 2/20 방금 리셋)/op-analysis(gap 19/25 근접)/lotto(gap 26/30 근접) 자연 대기.

@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2685, review-code(heavy): backtest-logistic-run.ts 미소비 필드 정리)
+
+### refactor: logistic 백테스트 CLI extractFeatures 미소비 games 필드 제거
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived/deferred). 2차 방어선(cycle 2684 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 19/25, info-arch 6/30, lotto 26/30). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(15/15) 도달했으나 4-source 재확인 전부 negative(plan#29 REST count 실측 user_picks=1/mlb_user_picks=0/pick_poll_events=5/mlb_pick_poll_events=0 — cycle 2417 이후 완전 무변화, GH issue 0, TODOS Next-Up 섹션 자체 소멸, 신규라우트 92건=git checkout mtime 부작용) → review-code(heavy) 재선택.
+- 최고령 미터치 대형파일 재스캔 → `packages/kbo-data/src/pipeline/backtest-run.ts`(168줄, 2026-04-21, 리포 최고령) 정독했으나 clean(단일 CLI, dead field 없음). 동일 연령대 `backtest-logistic-run.ts`(2026-05-04) 후속 정독.
+- `extractFeatures()` 반환 객체의 `games`(used 배열)가 train/test 어디서도 참조 안 됨(`X`/`y`/`features`만 실사용) — cycle 2677/2678/2680/2681/2682/2684 와 동일 computed-but-unconsumed 죽은 필드 패턴의 backtest CLI 변종, 6번째 발견. 자매 파일 `backtest-grid-run.ts`도 같은 이름의 `extractFeatures` 보유하나 그쪽은 `features`/`outcomes` 둘 다 실사용 확인(clean).
+- `pnpm --filter moneyball exec tsc --noEmit` + `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 571 files/4483 tests green(무변화 — 수기 실행 CLI 스크립트라 테스트 커버리지 자체 없음). 단일 논리 단위 → 직접 main commit+push(R4/R7, 39a9eec3).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2684, review-code(heavy): picks-loader.ts 미소비 필드 정리)
 
 ### refactor: 로또 picks-loader 미소비 필드(avoidScore/generatedAt) 제거
