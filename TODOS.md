@@ -1,4 +1,11 @@
 
+## cycle 2735 (2026-09-01) — RETRO-ONLY — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 38/20/lotto gap 46/30 둘 다 노이즈 재확인(CI 전부 green, picks/result 파일 당일 최신). op-analysis gap 8/25, info-arch gap 26/30 둘 다 미도달. 직전8 distinct=3 — 2-chain lock 미충족. explore-idea saturation 14/15 재도달했으나 plan#29 재평가 트리거(트래픽≥10/포스트시즌 임박/사용자 발화) 미충족 — review-code(heavy) 지속.
+- cycle 2732/2733/2734 반복 추천 component-level 후보 3건 최초 전체 감사: `MlbMatchupFactorCompare.tsx`(338줄)/`FactorBreakdown.tsx`(341줄)/`MyPicksClient.tsx`(440줄). KBO 대응 컴포넌트 대조 + `MetricRegistry`/`DEFAULT_WEIGHTS`/`NEUTRAL_HI`/`NEUTRAL_LO` 정합 확인 + `buildPickEntries`/`deriveMlbOutcome.ts` 소비 경로까지 추적.
+- 5대 재발 버그 계열(dead field/silent error drop/stale comment/scale mismatch/미소비 import) 전부 대조 — 신규 이슈 0건(clean audit). 코드 변경 없음.
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색(현재 확인 후보 3개 소진) 또는 info-architecture-review(gap 27/30, 근접).
+
 ## cycle 2734 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: fix-incident gap 38/20(gh run list 확인, 실 incident 없음 노이즈)/lotto gap 45/30(picks+result 파일 둘 다 당일 최신, 노이즈) 재확인. op-analysis gap 7/25, info-arch gap 25/30 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2732 추천 component-level 후보 중 `apps/moneyball/src/lib/picks/buildPicksStats.ts`(391줄) 최초 전체 감사.

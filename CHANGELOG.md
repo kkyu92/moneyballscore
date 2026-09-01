@@ -1,3 +1,12 @@
+## cycle 2735 — 2026-09-01 (review-code(heavy): MlbMatchupFactorCompare/FactorBreakdown/MyPicksClient 전수감사, RETRO-ONLY)
+
+### review-code(heavy): 컴포넌트 3건 전수감사 (cycle 2735, RETRO-ONLY)
+
+- 진단: open issue 0, unprocessed plan 0/23(전부 completed/archived/deferred). fix-incident gap 38/20·lotto gap 46/30 둘 다 재확인 결과 노이즈(gh run list 전부 completed/success·picks/result 파일 둘 다 당일 최신). op-analysis gap 8/25·info-arch gap 26/30 둘 다 미도달. 직전8 distinct=3(review-code(heavy) 6+polish-ui 1+operational-analysis 1) — 2-chain lock 미충족. explore-idea saturation 14/15 재도달했으나 plan#29(로그인/커뮤니티) 재평가 트리거(트래픽≥10 또는 포스트시즌 임박 또는 사용자 발화) 여전히 미충족 — review-code(heavy) 지속.
+- cycle 2732/2733/2734 반복 추천된 component-level 후보 3건(`MlbMatchupFactorCompare.tsx` 338줄/`FactorBreakdown.tsx` 341줄/`MyPicksClient.tsx` 440줄) 최초 전체 감사. KBO 대응 컴포넌트(`MatchupFactorCompare.tsx`)와 대조, `MetricRegistry` xwoba/barrel slug 부재 주석 실측 재확인(여전히 사실), `DEFAULT_WEIGHTS`/`NEUTRAL_HI`/`NEUTRAL_LO`/`NEUTRAL_FACTOR` 정합 확인, `buildPickEntries`/`deriveMlbOutcome.ts`(MLB tie 불가 — 실제 무승부 없음, KBO 전용 버그와 무관) 까지 소비 경로 추적.
+- 신규 이슈 0건(clean audit) — 5대 재발 버그 계열(dead field/silent error drop/stale comment/scale mismatch/미소비 import) 전부 대조했으나 3개 파일 모두 실제 데이터 흐름과 주석이 일치. 코드 변경 없음.
+- 다음 사이클 추천 = review-code(heavy) 신규 대상 재탐색(현재 확인된 3개 후보 소진) 또는 info-architecture-review(gap 27/30, 근접).
+
 ## v0.5.62.173 — 2026-09-01 (cycle 2734, review-code(heavy): MyPicksClient/buildPicksStats.ts 무승부+live-leak 수정 SUCCESS)
 
 ### review-code(heavy): buildPicksStats.ts 무승부 asymmetric 오판정 + live-status leak 수정 (cycle 2734, SUCCESS)
