@@ -1,5 +1,13 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): buildAccuracyData.ts 미소비 필드 3개 제거 + 주석 정정 (cycle 2726, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap 20/20 재확인(`gh run list` 전부 success/skipped + debug 커밋 0건, 10연속 무이슈)/lotto gap 30/30 재확인(다음 회차 picks + 직전 회차 OOS 둘 다 cron self-heal 완료, 실질 갭 없음). op-analysis(11/25)/info-arch(17/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2725 추천대로 review-code(heavy) 신규 대상 `buildAccuracyData.ts`(772줄, 미감사 최대 파일) 선정.
+- 서브에이전트 위임 전수감사 — 3건 확인: `WinnerProbBucket.range`/`RollingAccuracyPoint.date`/`ScoringRuleDayCell.dayLabel` 모두 계산·반환되지만 유일 소비처(WinnerProbBucketChart/RollingAccuracyChart/ScoringRuleDayHeatmap)가 전부 미참조(각 컴포넌트가 자체 라벨/키 사용) computed-but-unconsumed 확인. `accuracyRateColorClass` JSDoc caller 목록에 mlb/predictions + en/mlb/predictions 페이지 누락(sweep 51 이후 추가된 콜사이트 미반영) 발견.
+- fix: 3개 필드 제거 + JSDoc caller 목록 갱신. 연동 테스트(`ScoringRuleDayHeatmap.test.tsx` dayLabel 리터럴, `buildMlbAccuracySummary.test.ts` find-by-date 어서션) 동기 수정.
+- tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`945930f7`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상(`buildTeamProfile.ts` 598줄) 또는 info-architecture-review(gap 18/30).
+
 ### review-code(heavy): convergenceRecord.ts MLB pair 미소비 필드 제거 + stale 정렬 주석 정정 (cycle 2725, SUCCESS)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 20/20 재확인(9연속 무이슈). lotto gap 30/30 재확인(cron self-heal 완료, 실질 갭 없음). op-analysis(9/25)/info-arch(15/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. review-code(heavy) 직전 7파일 rotation(TodayGameCard~hub-dispatch) 완결 상태라 신규 대상 재탐색 — 미감사 대형 파일 중 `convergenceRecord.ts`(827줄, 가장 큼) 선정.

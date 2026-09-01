@@ -1,4 +1,11 @@
 
+## cycle 2726 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 20/20(10연속 무이슈)/lotto gap 30/30(cron self-heal 완료 실질 갭 없음) 재확인. op-analysis(11/25)/info-arch(17/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. cycle 2725 추천대로 review-code(heavy) 신규 대상 `buildAccuracyData.ts`(772줄) 선정.
+- 서브에이전트 전수감사 — `WinnerProbBucket.range`/`RollingAccuracyPoint.date`/`ScoringRuleDayCell.dayLabel` computed-but-unconsumed 3건 + `accuracyRateColorClass` JSDoc caller 목록 누락(mlb/predictions, en/mlb/predictions) 발견.
+- fix: 3개 필드 제거 + JSDoc 정정 + 연동 테스트 동기. tsc/eslint clean, 전체 테스트 571파일 4483건 green. main 직접 커밋 + push (`945930f7`).
+- 다음 사이클 추천 = review-code(heavy) 신규 대상(`buildTeamProfile.ts` 598줄) 또는 info-architecture-review(gap 18/30).
+
 ## cycle 2725 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23. fix-incident gap 20/20(9연속 무이슈)/lotto gap 30/30(cron self-heal 완료 실질 갭 없음) 재확인. op-analysis(9/25)/info-arch(15/30) 미도달. 직전8 distinct=3 — 2-chain lock 미충족. review-code(heavy) 직전 7파일 rotation 완결 → 신규 대상 재탐색, 미감사 대형 파일 `convergenceRecord.ts`(827줄) 선정.
