@@ -1,4 +1,12 @@
 
+## cycle 2674 (2026-09-01) — SUCCESS
+
+- review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(status: approved 있는 항목 없음), gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 26/30, lotto 15/30), 직전8 distinct=3(2-chain lock 미충족). cycle 2673 이 review-code(heavy) 미감사 컴포넌트 소진을 명시 → 최종 커밋일 기준 재정렬, `lib/dashboard/compareModels.ts`(299줄, 2026-07-16 이후 미터치) 채택.
+- 서브에이전트 전체 정독 + 소비자 3곳(`debug/model-comparison/page.tsx`/`CalibrationPlot.tsx`/`buildShadowCalibration.ts`) 교차검증. drift 2건: `dailyByModel`의 KST 미보정 날짜 버킷(자정 경계 row 하루 앞선 날짜로 오분류) + `/debug/model-comparison` 헤더 하드코딩 리터럴 `'v1.8'`(cycle 2672 동일 클래스, 오늘 우연히 값 일치).
+- 양쪽 fix + consumer cutoff 보정 + 기존 wave-251 regression guard 갱신(하드코딩 리터럴 assert → CURRENT_SCORING_RULE interpolation assert로 교체 + 재발 방지 assertion 추가) + compareModels.test.ts KST 경계 케이스 보강.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4476 tests green(+1). CHANGELOG.md 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7, 75864b42).
+- 다음 사이클 추천 = review-code(heavy) 계속(신규 대형 파일 재탐색 — 이번 발견 기준 "최종 커밋일 정렬"이 유효한 후보 발굴 방법임을 확인, 다음은 `lib/reviews/buildMissReport.ts`(216줄, 2026-07-16)/`app/players/page.tsx`(315줄, 2026-07-14)/`app/reviews/misses/page.tsx`(249줄, 2026-07-17) 후보) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2673 (2026-09-01) — RETRO-ONLY
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 25/30, lotto 14/30), 직전8 distinct=4(review-code(heavy)4+operational-analysis1+explore-idea1+review-code2, 2-chain lock 미충족). cycle 2669/2670/2671/2672 retro 공통 추천 미감사 컴포넌트 `TeamBiasTable.tsx`(136줄)/`ModelVersionHistory.tsx`(109줄) 채택 — 남은 미감사 후보 전부 소진.

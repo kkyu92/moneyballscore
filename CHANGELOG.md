@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2674, review-code(heavy): compareModels.ts KST 자정 경계 + 하드코딩 'v1.8' 정정)
+
+### fix: dailyByModel KST 미보정 날짜 버킷 + /debug/model-comparison 하드코딩 버전 라벨
+
+- 진단: 개방 issue 0, approved plan 0/23(전부 completed/archived, status: approved 없음), gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 26/30, lotto 15/30), 직전8 distinct=3(review-code+operational-analysis+explore-idea, 2-chain lock 미충족). cycle 2673 에서 미감사 컴포넌트 소진 확인 → 신규 대형 파일 재탐색. 최종 커밋일 기준 정렬 결과 `lib/dashboard/compareModels.ts`(299줄, 2026-07-16 이후 미터치) 채택.
+- 서브에이전트 전체 정독 감사 + 3개 소비자(`debug/model-comparison/page.tsx`, `CalibrationPlot.tsx`, `buildShadowCalibration.ts`) 교차검증. 실제 drift 2건: (1) `dailyByModel`(compareModels.ts:272)이 `created_at`(UTC 저장)을 `KST_OFFSET_MS` 보정 없이 `slice(0,10)` 으로 날짜 버킷 — `buildAccuracyData.ts`/`buildPicksStats.ts`/`monthGrid.ts` 등 기존 관례와 불일치하던 잔여 케이스, KST 자정 경계(UTC 15~24시) row 가 하루 앞선 날짜로 잘못 집계됨. (2) `/debug/model-comparison` 헤더 문구가 `CURRENT_SCORING_RULE` 대신 리터럴 `'v1.8'` 하드코딩 — cycle 2672 FactorAccuracyTable.tsx 와 동일 버그 클래스, 오늘은 우연히 값이 맞았지만 다음 버전 bump 시 silent stale 확정.
+- `dailyByModel` KST 보정 추가 + consumer 14일 cutoff 도 동일 보정. 헤더 문구 `CURRENT_SCORING_RULE` 리터럴 교체. 기존 `silent-drift-wave-251.test.ts` 가 하드코딩 리터럴을 그대로 assert하던 걸 갱신 + 재발 방지 assertion 추가, `compareModels.test.ts` dailyByModel 테스트에 KST 경계 케이스 명시.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4476 tests green(+1). 단일 논리 단위 → 직접 main commit+push(R4/R7, 75864b42).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2672, review-code(heavy): FactorAccuracyTable.tsx 하드코딩 버전 라벨 정정)
 
 ### fix: KBO footer 문구가 CURRENT_SCORING_RULE 대신 리터럴 'v1.8' 하드코딩
