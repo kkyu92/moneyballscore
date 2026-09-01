@@ -1,5 +1,14 @@
 ## v0.5.62.169 — 2026-09-01 (cycle 2699, review-code(heavy): glossary/data.ts 재감사 clean)
 
+### review-code(heavy): buildMatchupProfile.ts/buildMlbMatchupProfile.ts 미소비 teamColor 필드 제거 (cycle 2710, SUCCESS)
+
+- 진단: 개방 issue 0, unprocessed plan 0/23. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 18/25, info-arch 0/30 리셋, lotto 20/30). 직전8 distinct=3(review-code(heavy) 5 + polish-ui 1 + info-architecture-review 1 + fix-incident sub 1) — 2-chain lock 미충족. cycle 2709 추천대로 잔여 미감사 대형파일 rotation, `buildMatchupProfile.ts`(594줄) 정독.
+- 전체 정독 — DB fail-loud(assertSelectOk), computeMatchup* 전부 packages/shared 단일 source(cycle 2034/2036/2055/2071 계열), scoring_rule 필터(cycle 2408/2409 계열) 등 이미 정합.
+- 필드별 소비처 교차검증 중 `MatchupSideStat.teamColor`가 매치업 페이지(`matchup/[teamA]/[teamB]/page.tsx`) 팀별 성과 카드 어디에서도 소비되지 않음 발견(teamCode/teamName/wins/homeWins/awayWins/predictedToWin만 렌더링). MLB 대응 `buildMlbMatchupProfile.ts`의 `MlbMatchupSideStat.teamColor`도 동일 패턴(mlb matchup 페이지 grep 0건) — 양쪽 인터페이스 + `makeSideStat` 함수 + 전체 호출부에서 `teamColor` 제거.
+- tsc clean + eslint clean + 관련 테스트 38파일 243건 green(matchup/mlb/teams/wave-610~622/silent-drift-wave-236). 단일 논리 단위 → main 직접 commit+push(R4/R7, 5c0c6314).
+- computed-but-unconsumed 패턴 재발(cycle 2661/2690/2708 계열 연장) — review-code(heavy) 대형파일 rotation 이 이 계열의 주요 검출 채널로 지속 확인.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄) 정독, 또는 fix-incident(6/20)/op-analysis(19/25)/lotto(21/30) gap 자연 대기.
+
 ### info-architecture-review: 30-cycle-gap checkpoint (cycle 2709, RETRO-ONLY)
 
 - 진단: gap trigger 도달(info-arch 마지막 발화 cycle 2679, gap=30). 2-chain lock 미충족(직전8 distinct=4). open issue 0, approved plan 0/23.

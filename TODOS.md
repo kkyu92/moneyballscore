@@ -1,4 +1,12 @@
 
+## cycle 2710 (2026-09-01) — SUCCESS — review-code(heavy)
+
+- review-code(heavy) rotation 계속 — cycle 2709 추천대로 `buildMatchupProfile.ts`(594줄) 정독.
+- 필드별 소비처 교차검증 중 `MatchupSideStat.teamColor`가 매치업 페이지 어디에서도 소비되지 않음 발견(teamCode/teamName/wins 등만 렌더링) — MLB 대응 `MlbMatchupSideStat.teamColor`도 동일 패턴(mlb matchup 페이지 grep 0건).
+- fix: 양쪽 인터페이스 + `makeSideStat` 함수 + 전체 호출부에서 `teamColor` 제거(commit 5c0c6314). tsc clean + eslint clean + 관련 테스트 38파일 243건 green.
+- gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 18/25, info-arch 0/30 리셋, lotto 20/30). 직전8 distinct=3 — 2-chain lock 미충족.
+- 다음 사이클 추천 = review-code(heavy) 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄) 정독, 또는 gap trigger 자연 대기.
+
 ## cycle 2709 (2026-09-01) — RETRO-ONLY — info-architecture-review
 
 - 30-cycle-gap trigger 도달(마지막 발화 cycle 2679, gap=30). open issue 0, approved plan 0/23. 2-chain lock 미충족(직전8 distinct=4).
