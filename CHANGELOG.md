@@ -1,3 +1,16 @@
+## v0.5.62.186 — 2026-09-01 (cycle 2749, review-code(heavy): app 라우트 직접 select 미소비 컬럼 제거 SUCCESS)
+
+### review-code(heavy): app 라우트 직접 select(non-embed) 미소비 컬럼 전수감사 (cycle 2749, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident gap12/20·op-analysis gap1/25·info-arch gap10/30 전부 미도달. explore-idea saturation 14/15 충족했으나 plan#29(포스트시즌/트래픽≥10 게이트) 미충족으로 review-code(heavy) 자연 재개. gh run list 실패 0.
+- cycle 2747 추천대로 `!inner(` embed 패턴 파일 소진 후 다음 대상(app 라우트 직접 predictions/games select) 12개 파일 전수감사.
+- `page.tsx`(홈, 2개 쿼리)/`predictions/[date]/page.tsx`/`predictions/[date]/opengraph-image.tsx`/`predictions/page.tsx`: predicted_winner/actual_winner/model_version/prediction_type(row)/confidence(row)/team.name_ko 등 select+interface 정의만 있고 실사용 0.
+- `calendar/page.tsx`: prediction_type+scoring_rule(둘 다 필터 전용). `dashboard/page.tsx`: winner join(code+color_primary) 전체 미소비. `search/page.tsx`: team.code(name_ko 만 렌더). `analysis/game/[id]/page.tsx`: predicted_winner/confidence/is_correct/team.name_ko. `reviews/page.tsx`: confidence/prediction_type(row)/game_time/status/predicted_winner_team.name_ko/team.name_ko. `debug/factor-correlation/page.tsx`: games.id. `mlb/games/[date]/[slug]/page.tsx`: predictions.external_game_id(schedule 쪽 값으로 필터, pred 쪽은 미소비).
+- fix: 12개 파일 select절+interface 에서 미소비 컬럼 제거, 필터(.eq/.in)는 전부 유지(필터 대상 컬럼이 select 목록에 없어도 PostgREST 정상 작동).
+- 회귀 테스트 2건(cycle 2293 silent-drift #1338 family) 이 구 select 리터럴(`prediction_type,\s*scoring_rule`)을 정규식 매칭 — scoring_rule 컬럼 자체가 아닌 필터절(`.in()`) 존재 검증으로 갱신, 중복 assertion 정리.
+- tsc/eslint clean, 전체 테스트 572파일 4490건 green(회귀 테스트 1건 통합으로 -1).
+- 다음 사이클 추천 = review-code(heavy) — debug/model-comparison 등 shared `PredictionRow`(compareModels.ts) 타입 소비처 다수(reviews/feed/picks 등) 교차 확인 필요(이번 사이클엔 리스크로 skip) 또는 fix-incident(gap13/20 monitor).
+
 ## v0.5.62.185 — 2026-09-01 (cycle 2748, operational-analysis(lite): CE/비CE 재측정 16회 연속 동일 SUCCESS)
 
 ### operational-analysis(lite): CE cohort 재측정 (cycle 2748, SUCCESS)
