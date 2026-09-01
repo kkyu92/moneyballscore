@@ -70,4 +70,12 @@ describe('wave-658 — /en/mlb/analysis 영어 미러 신규', () => {
     expect(header).toContain('/mlb/analysis');
     expect(sitemap).toContain('${SITE_URL}/en/mlb/analysis`');
   });
+
+  it('weekly/monthly review link 카드 en 배선 (cycle 2736 IA fallback — KO 는 wave-624 부터 있었으나 EN 은 최초 en 배선(wave-658) 시 누락돼 EN 사용자가 hub 통해 /en/mlb/reviews/weekly|monthly 진입 불가 상태였음)', () => {
+    expect(enPage).toContain('getCurrentWeek(new Date(), \'en\')');
+    expect(enPage).toContain('getCurrentMonth(new Date(), \'en\')');
+    expect(enPage).toContain('/en/mlb/reviews/weekly/${currentWeek.weekId}');
+    expect(enPage).toContain('/en/mlb/reviews/monthly/${currentMonth.monthId}');
+    expect(enPage).toContain('getMlbPeriodStats');
+  });
 });

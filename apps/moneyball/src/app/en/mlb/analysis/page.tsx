@@ -14,11 +14,14 @@ import { MlbTeamStrengthGrid } from "@/components/analysis/MlbTeamStrengthGrid";
 import { createClient } from "@/lib/supabase/server";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
 import { buildMlbTeamStrengthSnapshot } from "@/lib/mlb/buildMlbTeamStrengthSnapshot";
+import { getCurrentWeek } from "@/lib/reviews/computeWeekRange";
+import { getCurrentMonth } from "@/lib/reviews/computeMonthRange";
 import {
   getTodayMlbAnalysisRows,
   getMlbThisWeekRemainingGames,
   groupMlbGamesByDate,
   getMlbYesterdayResults,
+  getMlbPeriodStats,
 } from "@/app/mlb/analysis/analysis-data";
 
 export const revalidate = 1800; // MLB_LIVE_ISR_SECONDS (Next.js 16 Turbopack: literal required)
@@ -54,11 +57,15 @@ export const metadata: Metadata = {
 
 export default async function MlbAnalysisPageEn() {
   const today = new Date().toISOString().slice(0, 10);
+  const currentWeek = getCurrentWeek(new Date(), 'en');
+  const currentMonth = getCurrentMonth(new Date(), 'en');
   const supabase = await createClient();
-  const [rows, weekRemainingGames, yesterdayGames, accuracySummary, teamStrengthRows] = await Promise.all([
+  const [rows, weekRemainingGames, yesterdayGames, weeklyStats, monthlyStats, accuracySummary, teamStrengthRows] = await Promise.all([
     getTodayMlbAnalysisRows(supabase, today),
     getMlbThisWeekRemainingGames(today),
     getMlbYesterdayResults(),
+    getMlbPeriodStats(currentWeek.startDate, currentWeek.endDate),
+    getMlbPeriodStats(currentMonth.startDate, currentMonth.endDate),
     buildMlbAccuracySummary('en'),
     buildMlbTeamStrengthSnapshot(),
   ]);
@@ -319,6 +326,52 @@ export default async function MlbAnalysisPageEn() {
           </ul>
         </section>
       )}
+
+      <section aria-labelledby="mlb-weekly-review-title-en">
+        <h2 id="mlb-weekly-review-title-en" className="sr-only">This Week&apos;s MLB Prediction Review</h2>
+        <Link
+          href={`/en/mlb/reviews/weekly/${currentWeek.weekId}`}
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-2xl shrink-0">📅</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                This Week&apos;s MLB Prediction Review →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currentWeek.label}
+                {weeklyStats.total > 0
+                  ? ` · ${weeklyStats.correct} correct of ${weeklyStats.total} games (${Math.round((weeklyStats.correct / weeklyStats.total) * 100)}%)`
+                  : " · Waiting for verified games this week"}
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      <section aria-labelledby="mlb-monthly-review-title-en">
+        <h2 id="mlb-monthly-review-title-en" className="sr-only">This Month&apos;s MLB Prediction Review</h2>
+        <Link
+          href={`/en/mlb/reviews/monthly/${currentMonth.monthId}`}
+          className="block bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-5 hover:border-brand-500 dark:hover:border-brand-500 transition-colors"
+        >
+          <div className="flex items-start gap-4">
+            <span className="text-2xl shrink-0">🗓️</span>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                This Month&apos;s MLB Prediction Review →
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {currentMonth.label}
+                {monthlyStats.total > 0
+                  ? ` · ${monthlyStats.correct} correct of ${monthlyStats.total} games (${Math.round((monthlyStats.correct / monthlyStats.total) * 100)}%)`
+                  : " · Waiting for verified games this month"}
+              </p>
+            </div>
+          </div>
+        </Link>
+      </section>
 
       <section aria-labelledby="mlb-accuracy-title-en">
         <h2 id="mlb-accuracy-title-en" className="sr-only">MLB AI Accuracy Track Record</h2>
