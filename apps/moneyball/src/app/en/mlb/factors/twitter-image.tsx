@@ -16,7 +16,7 @@ export default function EnMlbFactorsTwitterImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #1a0f00 0%, #7c2d12 50%, #ea580c 100%)",
+          background: "linear-gradient(135deg, #1a0f0a 0%, #7c2d12 50%, #ea580c 100%)",
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

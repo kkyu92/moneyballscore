@@ -5,7 +5,6 @@ import {
   MLB_GRADIENT_GAMES_INDIGO_135,
   MLB_GRADIENT_NAVY_135,
   MLB_GRADIENT_PLAYERS_GREEN_135,
-  MLB_GRADIENT_PLAYERS_VIOLET_135,
   MLB_GRADIENT_POSTSEASON_135,
   MLB_GRADIENT_STANDINGS_135,
   MLB_GRADIENT_TEAM_SKY_135,
@@ -65,6 +64,8 @@ const GRADIENTS_AND_FILES: Array<{
     value: MLB_GRADIENT_TEAM_SKY_135,
     files: [
       "mlb/games/[date]/opengraph-image.tsx",
+      "mlb/team/opengraph-image.tsx",
+      "mlb/team/twitter-image.tsx",
       "en/mlb/team/opengraph-image.tsx",
       "en/mlb/team/twitter-image.tsx",
       "en/mlb/team/[code]/opengraph-image.tsx",
@@ -72,14 +73,12 @@ const GRADIENTS_AND_FILES: Array<{
     ],
   },
   {
-    const_name: "MLB_GRADIENT_PLAYERS_VIOLET_135",
-    value: MLB_GRADIENT_PLAYERS_VIOLET_135,
-    files: ["mlb/players/opengraph-image.tsx", "mlb/players/twitter-image.tsx"],
-  },
-  {
     const_name: "MLB_GRADIENT_PLAYERS_GREEN_135",
     value: MLB_GRADIENT_PLAYERS_GREEN_135,
     files: [
+      "mlb/players/opengraph-image.tsx",
+      "mlb/players/twitter-image.tsx",
+      "mlb/players/[id]/opengraph-image.tsx",
       "en/mlb/players/opengraph-image.tsx",
       "en/mlb/players/twitter-image.tsx",
       "en/mlb/players/[id]/opengraph-image.tsx",
@@ -105,7 +104,7 @@ const GRADIENTS_AND_FILES: Array<{
 ];
 
 describe("silent drift family wave 144 — MLB/neutral OG gradients consolidated into design-tokens", () => {
-  it("9 gradient constants exported and have 135deg linear-gradient shape", () => {
+  it("8 gradient constants exported and have 135deg linear-gradient shape", () => {
     for (const { const_name, value } of GRADIENTS_AND_FILES) {
       expect(value, `${const_name} value`).toMatch(/^linear-gradient\(135deg, #[0-9a-f]{6} 0%, #[0-9a-f]{6} 50%, #[0-9a-f]{6} 100%\)$/);
     }

@@ -1,3 +1,12 @@
+## v0.5.62.168 — 2026-09-01 (cycle 2675, polish-ui: MLB OG/twitter gradient family drift 3건 정리)
+
+### fix: mlb/team + players + factors OG/twitter 이미지 gradient 토큰 불일치 3건
+
+- 진단: 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 9/25, info-arch 27/30, lotto 16/30). 직전8 사이클 distinct=2(review-code×7 + explore-idea×1) → **2-chain alternation lock 발동**(SKILL.md cycle 225 룰) — review-code/explore-idea 후보 제외, 다른 trigger 없어 규칙대로 polish-ui 강제 발화.
+- 서브에이전트로 DESIGN.md 토큰 체계 + Decisions Log 20건 전체 대조 후 OG/twitter gradient family 재감사(과거 wave-144 가 만든 8종 레지스트리 커버리지 재확인). 실제 drift 3건: (1) `mlb/team/{opengraph,twitter}-image.tsx` 가 `MLB_GRADIENT_TEAM_SKY_135`(en 미러 + `mlb/games/[date]` 가 이미 사용) 대신 다른 블루 리터럴 하드코딩. (2) "선수" OG 패밀리가 동일 role 인데 3갈래 색(KO 보라 / EN 초록 / KO 상세페이지 리터럴 금갈색)로 흩어짐. (3) `mlb/factors` vs `en/mlb/factors` gradient 시작색 1-hex 오탈자(`#1a0f0a` vs `#1a0f00`).
+- (1)(3) 은 토큰/원본값으로 정렬. (2) 는 GREEN 토큰(이미 2/4 곳 사용 중)으로 통일, VIOLET 토큰은 사용처 소진돼 `design-tokens.ts` 에서 제거(9→8종 레지스트리). `silent-drift-wave-144.test.ts` 그룹 파일 목록 갱신(TEAM_SKY +2, PLAYERS_GREEN +3, VIOLET 그룹 삭제).
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4482 tests green(+6). DESIGN.md Decisions Log 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+
 ## v0.5.62.168 — 2026-09-01 (cycle 2674, review-code(heavy): compareModels.ts KST 자정 경계 + 하드코딩 'v1.8' 정정)
 
 ### fix: dailyByModel KST 미보정 날짜 버킷 + /debug/model-comparison 하드코딩 버전 라벨

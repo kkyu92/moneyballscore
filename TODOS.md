@@ -1,4 +1,12 @@
 
+## cycle 2675 (2026-09-01) — SUCCESS
+
+- polish-ui: 진단 — 개방 issue 0, approved plan 0/23, gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 9/25, info-arch 27/30, lotto 16/30), 직전8 distinct=2(review-code×7+explore-idea×1) → 2-chain alternation lock 발동. review-code/explore-idea 제외 후 다른 trigger 없어 규칙대로 polish-ui 강제 발화.
+- 서브에이전트로 DESIGN.md 토큰 체계 + wave-144 OG/twitter gradient 레지스트리(8종) 커버리지 재감사. drift 3건: `mlb/team` og/twitter 가 `MLB_GRADIENT_TEAM_SKY_135`(en 미러 이미 사용) 대신 다른 블루 리터럴 중복 하드코딩 / "선수" OG 패밀리 3갈래 색(KO 보라·EN 초록·KO 상세 리터럴 금갈색) / `mlb/factors` vs `en/mlb/factors` 시작색 1-hex 오탈자.
+- team+factors 는 기존 토큰/원본값으로 정렬, players 는 GREEN 토큰(2/4 이미 사용 중)으로 통일 — VIOLET 토큰 사용처 소진돼 design-tokens.ts 에서 제거(9→8종). `silent-drift-wave-144.test.ts` 그룹 파일 목록 갱신.
+- `pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4482 tests green(+6). CHANGELOG.md + DESIGN.md Decisions Log 갱신. 단일 논리 단위 → 직접 main commit+push(R4/R7).
+- 다음 사이클 추천 = 2-chain lock 해소됐으니 review-code(heavy) 재개 가능(신규 후보: `lib/reviews/buildMissReport.ts`/`app/players/page.tsx`/`app/reviews/misses/page.tsx`, cycle 2674 next_rec carry-over) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## cycle 2674 (2026-09-01) — SUCCESS
 
 - review-code(heavy): 진단 — 개방 issue 0, approved plan 0/23(status: approved 있는 항목 없음), gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 26/30, lotto 15/30), 직전8 distinct=3(2-chain lock 미충족). cycle 2673 이 review-code(heavy) 미감사 컴포넌트 소진을 명시 → 최종 커밋일 기준 재정렬, `lib/dashboard/compareModels.ts`(299줄, 2026-07-16 이후 미터치) 채택.

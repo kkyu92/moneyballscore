@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { MLB_TEAM_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
-import { MLB_GRADIENT_PLAYERS_VIOLET_135 } from "@/lib/design-tokens";
+import { MLB_GRADIENT_PLAYERS_GREEN_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -17,7 +17,7 @@ export default function MlbPlayersHubOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: MLB_GRADIENT_PLAYERS_VIOLET_135,
+          background: MLB_GRADIENT_PLAYERS_GREEN_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { MLB_TEAM_COUNT, MLB_AL_TEAM_COUNT, MLB_NL_TEAM_COUNT, MLB_DIVISION_COUNT, SITE_HOST } from "@moneyball/shared";
 import { MLB_FACTOR_COUNTS } from "@moneyball/kbo-data";
+import { MLB_GRADIENT_TEAM_SKY_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -16,7 +17,7 @@ export default function MlbTeamHubTwitterImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0a1a2f 0%, #1e3a8a 50%, #2563eb 100%)",
+          background: MLB_GRADIENT_TEAM_SKY_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",

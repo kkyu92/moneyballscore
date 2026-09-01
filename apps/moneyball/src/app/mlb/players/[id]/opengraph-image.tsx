@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MLB_TEAMS, type MlbTeamCode, SITE_HOST } from "@moneyball/shared";
+import { MLB_GRADIENT_PLAYERS_GREEN_135 } from "@/lib/design-tokens";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -27,8 +28,7 @@ export default async function Image({ params }: Props) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "linear-gradient(135deg, #2b1f0d 0%, #5c4520 50%, #a07a3f 100%)",
+          background: MLB_GRADIENT_PLAYERS_GREEN_135,
           color: "white",
           padding: "72px 80px",
           fontFamily: "sans-serif",
