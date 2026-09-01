@@ -33,7 +33,6 @@ export interface ModelGroupStats {
   modelVersion: string;
   n: number;
   verifiedN: number;
-  correctCount: number;
   accuracy: number;
   brierN: number;
   brier: number | null;
@@ -238,7 +237,6 @@ export function aggregateByModel(rows: PredictionRow[]): ModelGroupStats[] {
       modelVersion: g.modelVersion,
       n: g.rows.length,
       verifiedN: g.verified,
-      correctCount: g.correct,
       accuracy: g.verified > 0 ? g.correct / g.verified : 0,
       brierN: g.pairs.length,
       brier,
