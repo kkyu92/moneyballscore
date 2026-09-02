@@ -1,4 +1,13 @@
 
+## cycle 2762 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap5/20·op-analysis gap2/25·info-arch gap23/30·lotto gap10/30 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족.
+- 신규 축 = `scripts/` (22개 admin/backfill/op-analysis 스크립트, 이 sweep 최초 감사 대상). packages/kbo-data 축은 cycle 2761에서 소진.
+- Explore 서브에이전트 전수 감사 후 7개 파일 확정 미소비 컬럼 제거: `cohort-cleanup.ts`, `measure-n178-vs-n165.ts`, `op-analysis-ce-cohort.ts`, `op-analysis-mlb-elo-backtest.ts`, `op-analysis-postbreak-full.ts`, `op-analysis-postbreak.ts`, `op-analysis-war-check.ts`.
+- `backtest-v2-candidate.ts`/`export-predictions-tabpfn.ts`/`update-stale-data.ts` 는 row 통째 전달이라 이 파일만으론 검증 불가 — skip 원칙 유지.
+- eslint(scripts) clean, pnpm test 571파일 4484건 green. direct main push.
+- 다음 사이클 추천 = scripts/ 축도 소진 — op-analysis gap monitor(2/25) 또는 신규 미감사 후보(cloudflare-worker/) 재탐색.
+
 ## cycle 2761 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap4/20·op-analysis gap1/25·info-arch gap22/30·lotto gap9/30 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족.
