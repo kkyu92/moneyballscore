@@ -1,4 +1,12 @@
 
+## cycle 2774 (2026-09-02) — RETRO-ONLY — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger: fix-incident 18/20, lotto 23/30, info-arch 5/30, op-analysis gap=1(2773 방금 발화) — 전부 미도달. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건, apps/moneyball tsc --noEmit clean.
+- review-code(heavy) dominance 14/19(직전 19 cycle) 지속 중이나 success streak 정합 (dominance-positive 룰) — 신규 축 `packages/kbo-data/src/agents/validator.ts`(1059줄, agents/ 최대 파일, cycle 2770-2772 lib/app/component sweep 미포함) 전수 감사.
+- general-purpose 서브에이전트 read-only 감사: JSDoc 정합성 / dead code / KBO-MLB parity / test coverage 4개 축. 결과 = silent drift 0건. 모든 JSDoc 이 실제 코드와 일치 확인, exported symbol 전량 실사용 확인, KBO-MLB parity gap 없음(validator.ts 는 KBO LLM debate 전용 — MLB 는 quant-only 파이프라인이라 애초 비교 대상 아님, 버그 아닌 scope 차이). 유일 nit(validateFactorAttribution 의 항상-0 hardCount dead branch)은 cosmetic-only, 수정 보류.
+- 코드 변경 없음(retro-only), 버전 범프 불요.
+- 다음 사이클 추천 = fix-incident(gap 18/20)/lotto(gap 23/30) 자연 대기(dominance 완화 기회) 또는 review-code(heavy) 계속 시 `packages/kbo-data/src/pipeline/daily.ts`(1629줄, 최대 파이프라인 파일) 신규 축 후보.
+
 ## cycle 2773 (2026-09-02) — SUCCESS — operational-analysis(lite)
 
 - 진단: open issue 0, unprocessed plan 0/22(approved 없음). gap trigger: fix-incident 16/20, op-analysis 46/25(도달, 사상 최대 지연 — 직전 발화 cycle 2727), info-arch 4/30, lotto 21/30. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건.
