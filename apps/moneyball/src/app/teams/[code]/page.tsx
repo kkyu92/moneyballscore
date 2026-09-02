@@ -439,7 +439,7 @@ export default async function TeamPage({ params }: PageProps) {
                           </span>
                         )}
                       </td>
-                      <td className="py-2 pr-3">
+                      <td className="py-2 pr-3 whitespace-nowrap">
                         <Link
                           href={`/analysis/game/${u.gameId}`}
                           className="hover:text-brand-500"
@@ -562,7 +562,7 @@ export default async function TeamPage({ params }: PageProps) {
                       <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
                         {r.gameDate}
                       </td>
-                      <td className="py-2 pr-3">
+                      <td className="py-2 pr-3 whitespace-nowrap">
                         <Link
                           href={`/analysis/game/${r.gameId}`}
                           className="hover:text-brand-500"

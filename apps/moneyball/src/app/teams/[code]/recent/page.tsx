@@ -301,7 +301,7 @@ export default async function TeamRecentPage({ params }: PageProps) {
                           {r.gameDate}
                         </Link>
                       </td>
-                      <td className="py-2 pr-3">
+                      <td className="py-2 pr-3 whitespace-nowrap">
                         {r.opponentCode ? (
                           <Link
                             href={`/teams/${r.opponentCode}`}
