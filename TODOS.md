@@ -1,4 +1,16 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy) 미감사 소형 헬퍼 8개 신규 축 감사, 발견 0건 clean (cycle 2799, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/22(approved 없음). 2차 방어선(cycle 2798 retro commit 480a1395) OK. 직전8(2791-2798) 정규화 base chain distinct=3(polish-ui+fix-incident+operational-analysis) — 2-chain lock 미충족. gap trigger: fix-incident 1/20(직전 발화), op-analysis 0/25(직전 발화), info-arch 29/30, lotto 16/30 — 전부 미도달. review-code(heavy) 직전 19-cycle 안 9회 dominance 지속 + cycle 2798 next_recommended 명시 신호로 계속 선택.
+
+cycle 2770 이 이미 감사한 MLB 헬퍼 15개(buildDailyAccuracy.ts 포함) 다음 축 탐색 — git 커밋 1회뿐인(=한 번도 review-code 대상 안 된) apps/moneyball/src/lib 파일군 재검색. buildDailyAccuracy.ts 는 재확인 결과 cycle 2770 감사분과 중복(clean 재확인, 낭비 아님 — 확인 비용 낮음). 신규 후보 8개(statusBadge.ts/monthGrid.ts/computeMagicNumber.ts/mlbCanonicalPair.ts/pearson.ts/estimateTime.ts/adjacentDates.ts/is-origin-allowed.ts) 를 general-purpose 서브에이전트로 전수 감사(select/필드 소비, comment 정합, KBO-MLB parity 4축, 동일 review-code(heavy) 표준 프로토콜).
+
+결과: 8개 전부 clean — dead field 없음, comment 과잉주장 없음, KBO/MLB parity 의도된 차이만 확인(mlbCanonicalPair.ts vs canonicalPair.ts URL prefix만 다름, computeMagicNumber.ts 는 KBO default + MLB explicit override 정상). 코드 변경 없음(retro-only).
+
+skill-evolution trigger 평가: 직전 20-cycle(2780-2799) chain pool 표본 6건 (< 10 임계) → trigger 5 자동 skip. 다른 trigger(1~4) 미충족. emergency stop 미충족(직전 10 사이클 중 success 7건).
+
+다음 사이클 추천 = review-code(heavy) 잔여 후보 고갈 근접(lib/ 안 1-commit 파일 대부분 소진) — 다음 발화 시 apps/moneyball/src/app/api/ 라우트 핸들러 또는 packages/kbo-data/src/scrapers/fancy-stats.ts(545줄, 29 commits — 신규 축 아니나 대형 미감사 가능성) 검토 권장. 또는 lotto(gap 17/30)/info-arch(gap 30/30 근접) 자연 대기.
+
 ## 🟢 SUCCESS — op-analysis(lite) gap trigger 25/25 도달, CE cohort 19회 연속 재확인 + 파이프라인 정상 확인 (cycle 2798, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/22(approved 없음), 2차 방어선(cycle 2797 retro commit 51ec3d20) OK. 직전8(2790-2797) 정규화 base chain distinct=2(polish-ui+fix-incident) — 2-chain lock 조건 충족이나 fix-incident 포함이라 안전 예외로 무시. op-analysis gap trigger 25/25 정확 도달(직전 발화 cycle 2773)이 가장 강한 신호.
