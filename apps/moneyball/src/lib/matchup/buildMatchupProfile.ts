@@ -78,6 +78,12 @@ export interface MatchupProfile {
     rate: number | null;
   };
   games: MatchupGame[];
+  /**
+   * streak/avgMargin/recentRecord/blowout/closeGame/homeAwayEdge: TeamProfile 와
+   * shape-parity 목적으로 개별 필드 보유(테스트 assertion 대상). matchup 페이지는
+   * 이 값들을 직접 렌더하지 않고 `summary` 문장으로 합쳐 표시 — team 페이지처럼
+   * 개별 stat line 렌더가 빠진 게 아니라 의도된 표시 방식 차이.
+   */
   streak: MatchupStreak | null;
   avgMargin: MatchupAvgMargin | null;
   recentRecord: MatchupRecentRecord | null;
@@ -91,8 +97,6 @@ interface Row {
   confidence: number | null;
   is_correct: boolean | null;
   predicted_winner_team: { code: string | null } | null;
-  /** null = pre_game prediction 부재 final 경기. record 카운트는 진행, 예측 정확도 카운트는 skip */
-  hasPrediction: boolean;
   game: {
     id: number;
     game_date: string;
@@ -449,7 +453,6 @@ export async function buildMatchupProfile(
       confidence: pred?.confidence ?? null,
       is_correct: pred?.is_correct ?? null,
       predicted_winner_team: pred?.predicted_winner_team ?? null,
-      hasPrediction: pred !== null,
       game: {
         id: g.id,
         game_date: g.game_date,
