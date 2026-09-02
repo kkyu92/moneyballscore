@@ -199,7 +199,7 @@ vi.mock('@supabase/supabase-js', () => ({
 
 // 실제 테스트에서 per-test mock 주입
 import { createClient } from '@supabase/supabase-js';
-import { fetchGames } from '../scrapers/kbo-official';
+import { fetchGames, fetchRecentForm, fetchHeadToHead } from '../scrapers/kbo-official';
 import { fetchNaverSchedule } from '../scrapers/naver-schedule';
 import {
   fetchPitcherStats, fetchTeamStats, fetchEloRatings,
@@ -733,6 +733,41 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
         expect(v20Row!.reasoning).toBe('[v2.0-shadow quant only] test');
         expect(String(v21bRow!.reasoning)).not.toContain('[object Object]');
         expect(String(v20Row!.reasoning)).not.toContain('[object Object]');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    // cycle 2776 review-code(heavy) — recentForm/h2h 스크래핑 fallback 이 실패해도
+    // errors[] 에 아무것도 안 남아 pipeline_runs.errors 로 진단 불가했던 silent catch.
+    // cycle 2775 verifiedCount 오발화 fix 와 동일 family (silent catch → 진단 불가).
+    it('recentForm/h2h 스크래핑 fallback 실패 → errors[] 에 남음 (silent catch 회귀 방지)', async () => {
+      const tables = baseTables();
+      tables.players = {
+        single: { data: { id: 999 }, error: null },
+      };
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-22T06:30:00Z'));
+
+      try {
+        vi.mocked(fetchGames).mockResolvedValue([
+          makeGame({ gameTime: '18:30' }),
+        ]);
+        vi.mocked(fetchRecentForm).mockRejectedValueOnce(new Error('KBO 스크래핑 timeout'));
+        vi.mocked(fetchHeadToHead).mockRejectedValueOnce(new Error('KBO H2H 500'));
+
+        const { runDailyPipeline } = await loadPipeline();
+        const result = await runDailyPipeline('2026-04-22', 'predict', 'cron');
+
+        // 스크래핑 실패해도 pipeline 은 neutral 기본값으로 계속 진행 (기존 동작 유지)
+        expect(result.predictionsGenerated).toBe(1);
+
+        // 실패 자체는 errors[] 에 남아야 진단 가능
+        expect(result.errors.some((e) => e.includes('recentForm fallback'))).toBe(true);
+        expect(result.errors.some((e) => e.includes('headToHead fallback'))).toBe(true);
       } finally {
         vi.useRealTimers();
       }

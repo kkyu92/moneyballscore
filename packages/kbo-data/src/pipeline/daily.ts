@@ -685,16 +685,28 @@ export async function runDailyPipeline(
     let awayForm = calculateRecentForm(finished, awayTeamIdForForm, 10);
     let h2h = calculateHeadToHead(finished, homeTeamIdForForm, awayTeamIdForForm);
 
-    // DB 데이터 부족 시 (시즌 초기 / 운영 첫 주) KBO 스크래핑 fallback
+    // DB 데이터 부족 시 (시즌 초기 / 운영 첫 주) KBO 스크래핑 fallback.
+    // 스크래핑도 실패하면 neutral 기본값(0.5 / 0승0패)으로 예측은 계속 진행하되,
+    // 실패 자체는 errors[] 에 남겨야 진단 가능 (cycle 2775 verifiedCount 오발화와
+    // 동일 family — silent catch 가 스크래퍼 회귀를 neutral 값으로 완전히 가림).
     if (homeForm === null) {
-      homeForm = await fetchRecentForm(game.homeTeam, CURRENT_SEASON, 10).catch(() => 0.5);
+      homeForm = await fetchRecentForm(game.homeTeam, CURRENT_SEASON, 10).catch((e) => {
+        errors.push(`recentForm fallback ${game.homeTeam}: ${errMsg(e)}`);
+        return 0.5;
+      });
     }
     if (awayForm === null) {
-      awayForm = await fetchRecentForm(game.awayTeam, CURRENT_SEASON, 10).catch(() => 0.5);
+      awayForm = await fetchRecentForm(game.awayTeam, CURRENT_SEASON, 10).catch((e) => {
+        errors.push(`recentForm fallback ${game.awayTeam}: ${errMsg(e)}`);
+        return 0.5;
+      });
     }
     if (h2h.wins + h2h.losses === 0) {
       h2h = await fetchHeadToHead(game.homeTeam, game.awayTeam, CURRENT_SEASON)
-        .catch(() => ({ wins: 0, losses: 0 }));
+        .catch((e) => {
+          errors.push(`headToHead fallback ${game.awayTeam}v${game.homeTeam}: ${errMsg(e)}`);
+          return { wins: 0, losses: 0 };
+        });
     }
 
     const input: PredictionInput = {
