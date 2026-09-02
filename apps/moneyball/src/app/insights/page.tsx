@@ -257,7 +257,7 @@ export default async function InsightsHubPage() {
                             <span className="w-20 shrink-0 text-gray-700 dark:text-gray-300">
                               {f.label}
                             </span>
-                            <span className={`font-medium ${favorColor}`}>
+                            <span className={`font-medium whitespace-nowrap ${favorColor}`}>
                               {favorLabel}
                             </span>
                             <span className="text-gray-400 dark:text-gray-500">

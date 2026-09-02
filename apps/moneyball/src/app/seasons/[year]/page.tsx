@@ -168,11 +168,11 @@ export default async function SeasonPage({ params }: PageProps) {
                     <span className="text-gray-400 dark:text-gray-500 w-16">{idx + 1}차전</span>
                     <span className="text-gray-500 dark:text-gray-400 w-20">{g.date.slice(5)}</span>
                     <span className="text-gray-500 dark:text-gray-400 w-12">{g.stadium ?? ''}</span>
-                    <span className={winnerHome ? 'text-gray-400 dark:text-gray-500' : 'font-semibold'}>
+                    <span className={`whitespace-nowrap ${winnerHome ? 'text-gray-400 dark:text-gray-500' : 'font-semibold'}`}>
                       {shortTeamName(g.awayCode as never) ?? g.awayCode} {g.awayScore}
                     </span>
                     <span className="text-gray-300 dark:text-gray-600">-</span>
-                    <span className={winnerHome ? 'font-semibold' : 'text-gray-400 dark:text-gray-500'}>
+                    <span className={`whitespace-nowrap ${winnerHome ? 'font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
                       {g.homeScore} {shortTeamName(g.homeCode as never) ?? g.homeCode}
                     </span>
                   </li>

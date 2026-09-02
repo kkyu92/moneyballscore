@@ -1034,7 +1034,7 @@ export default async function HomePage() {
                   <span className="text-sm font-bold text-gray-400 dark:text-gray-500 w-5 text-center tabular-nums">
                     {row.rank}
                   </span>
-                  <span className="text-sm font-semibold flex-1 text-gray-900 dark:text-gray-100">
+                  <span className="text-sm font-semibold flex-1 text-gray-900 dark:text-gray-100 whitespace-nowrap">
                     {shortTeamName(row.teamCode)}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">

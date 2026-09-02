@@ -204,7 +204,7 @@ export function DebateTimeline({
             <span className="text-xs uppercase tracking-wide opacity-75">
               최종 결론
             </span>
-            <span className="font-semibold">{verdictWinnerName} 우세</span>
+            <span className="font-semibold whitespace-nowrap">{verdictWinnerName} 우세</span>
             <span className="ml-auto font-mono tabular-nums text-lg">
               {verdictPct}%
             </span>

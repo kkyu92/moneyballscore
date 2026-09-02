@@ -125,7 +125,7 @@ export default function MatchupIndexPage() {
               className="bg-white dark:bg-[var(--color-surface-card)] rounded-lg border border-gray-200 dark:border-[var(--color-border)] p-3 flex items-center justify-center gap-2 hover:shadow-md transition-shadow"
             >
               <TeamLogo team={code} size={24} />
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium whitespace-nowrap">
                 {shortTeamName(code)}
               </span>
             </Link>

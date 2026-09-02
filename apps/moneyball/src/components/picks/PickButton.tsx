@@ -116,7 +116,7 @@ function PollBar({
           }`}
           style={{ width: `${awayPct}%` }}
         >
-          {awayPct >= 20 && `${awayName} ${awayPct}%`}
+          <span className="whitespace-nowrap">{awayPct >= 20 && `${awayName} ${awayPct}%`}</span>
         </div>
         <div
           className={`flex items-center justify-center transition-all h-full ${
@@ -126,7 +126,7 @@ function PollBar({
           }`}
           style={{ width: `${homePct}%` }}
         >
-          {homePct >= 20 && `${homeName} ${homePct}%`}
+          <span className="whitespace-nowrap">{homePct >= 20 && `${homeName} ${homePct}%`}</span>
         </div>
       </div>
     </div>
@@ -193,7 +193,7 @@ export function PickButton({ gameId, homeTeam, awayTeam, aiPredictedWinner, aiWi
   );
 
   const base =
-    'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
+    'flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors min-h-[44px] whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
   const active = 'bg-brand-500 dark:bg-brand-400 text-white border-transparent';
   const idle =
     'border-gray-200 dark:border-[var(--color-border)] text-gray-600 dark:text-gray-300 hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-300';

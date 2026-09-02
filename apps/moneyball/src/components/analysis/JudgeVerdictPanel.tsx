@@ -56,7 +56,7 @@ export function JudgeVerdictPanel({
           <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/20 bg-white/5">
             <TeamLogo team={awayTeam} size={64} className="w-full h-full" />
           </div>
-          <p className="text-sm text-brand-200">{KBO_TEAMS[awayTeam].name}</p>
+          <p className="text-sm text-brand-200 truncate">{KBO_TEAMS[awayTeam].name}</p>
           <p className="text-xs text-brand-300 mt-1">원정</p>
         </div>
 
@@ -66,7 +66,7 @@ export function JudgeVerdictPanel({
           <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white/20 bg-white/5">
             <TeamLogo team={homeTeam} size={64} className="w-full h-full" />
           </div>
-          <p className="text-sm text-brand-200">{KBO_TEAMS[homeTeam].name}</p>
+          <p className="text-sm text-brand-200 truncate">{KBO_TEAMS[homeTeam].name}</p>
           <p className="text-xs text-brand-300 mt-1">홈</p>
         </div>
       </div>

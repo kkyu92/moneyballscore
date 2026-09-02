@@ -1051,7 +1051,7 @@ export default async function AnalysisIndexPage() {
                               const spFavoredHome = spDelta < 0;
                               const favoredName = shortTeamName(spFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   spFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1067,7 +1067,7 @@ export default async function AnalysisIndexPage() {
                               const wobaFavoredHome = wobaDelta > 0;
                               const favoredName = shortTeamName(wobaFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   wobaFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1083,7 +1083,7 @@ export default async function AnalysisIndexPage() {
                               const bullpenFavoredHome = bullpenDelta < 0;
                               const favoredName = shortTeamName(bullpenFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   bullpenFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1099,7 +1099,7 @@ export default async function AnalysisIndexPage() {
                               const eloFavoredHome = eloDelta > 0;
                               const favoredName = shortTeamName(eloFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   eloFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1115,7 +1115,7 @@ export default async function AnalysisIndexPage() {
                               const warFavoredHome = warDelta > 0;
                               const favoredName = shortTeamName(warFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   warFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1131,7 +1131,7 @@ export default async function AnalysisIndexPage() {
                               const sfrFavoredHome = sfrDelta > 0;
                               const favoredName = shortTeamName(sfrFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   sfrFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1147,7 +1147,7 @@ export default async function AnalysisIndexPage() {
                               const formFavoredHome = formDelta > 0;
                               const favoredName = shortTeamName(formFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   formFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1163,7 +1163,7 @@ export default async function AnalysisIndexPage() {
                               const xfipFavoredHome = xfipDelta < 0;
                               const favoredName = shortTeamName(xfipFavoredHome ? g.homeCode : g.awayCode);
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   xfipFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1185,7 +1185,7 @@ export default async function AnalysisIndexPage() {
                                 ? [g.h2hHomeWins, g.h2hAwayWins]
                                 : [g.h2hAwayWins, g.h2hHomeWins];
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   h2hFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -1204,7 +1204,7 @@ export default async function AnalysisIndexPage() {
                               const favoredName = shortTeamName(parkFavoredHome ? g.homeCode : g.awayCode);
                               const parkType = parkFavoredHome ? '타자친화' : '투수친화';
                               return (
-                                <span className={`ml-2 font-medium ${
+                                <span className={`ml-2 font-medium whitespace-nowrap ${
                                   parkFavoredHome
                                     ? 'text-brand-500 dark:text-brand-400'
                                     : 'text-orange-500 dark:text-orange-400'
@@ -2479,7 +2479,7 @@ export default async function AnalysisIndexPage() {
                           )}
                         </p>
                         {winnerName && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
                             예측: {winnerName} {winnerPct}%
                           </p>
                         )}
@@ -2568,7 +2568,7 @@ export default async function AnalysisIndexPage() {
                                   )}
                                 </p>
                                 {winnerName && confPct !== null && (
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
                                     예측: {winnerName} {confPct}%
                                   </p>
                                 )}

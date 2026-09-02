@@ -42,7 +42,7 @@ export function TopStatPickCard({ gameId, homeTeam, awayTeam, homeWinProb, date 
         <span className="text-brand-400 text-sm font-medium mx-1">vs</span>
         <div className="flex items-center gap-2 opacity-60">
           <TeamLogo team={underdogTeam} size={36} />
-          <span className="text-xl font-semibold text-brand-200">{shortTeamName(underdogTeam)}</span>
+          <span className="text-xl font-semibold text-brand-200 whitespace-nowrap">{shortTeamName(underdogTeam)}</span>
         </div>
         <span className="text-2xl font-bold ml-auto text-[var(--color-accent-light)]">
           {pct}%

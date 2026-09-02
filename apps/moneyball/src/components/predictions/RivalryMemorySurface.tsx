@@ -148,7 +148,7 @@ export async function RivalryMemorySurface({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
                     {teamName}
                   </span>
                   <span className="text-2xs font-mono text-gray-400 dark:text-gray-500">

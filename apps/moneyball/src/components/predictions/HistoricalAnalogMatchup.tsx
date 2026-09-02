@@ -173,7 +173,7 @@ export async function HistoricalAnalogMatchup({
                   <span className="text-xs font-mono text-brand-500 dark:text-brand-400 w-20">
                     {a.gameDate}
                   </span>
-                  <span className="text-sm font-semibold text-brand-700 dark:text-brand-200">
+                  <span className="text-sm font-semibold text-brand-700 dark:text-brand-200 whitespace-nowrap">
                     {shortTeamName(a.awayCode)} @ {shortTeamName(a.homeCode)}
                   </span>
                   <span className="text-sm font-mono text-brand-600 dark:text-brand-300">

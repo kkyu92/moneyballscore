@@ -227,7 +227,7 @@ export default async function MatchupPage({ params }: PageProps) {
                       원정 {100 - homeWinProbPct}%
                     </span>
                     {u.predictedWinnerCode && (
-                      <span className="font-semibold text-brand-600 dark:text-brand-400">
+                      <span className="font-semibold text-brand-600 dark:text-brand-400 whitespace-nowrap">
                         {emoji} {shortTeamName(u.predictedWinnerCode)} 승 예측{' '}
                         <span className="text-gray-500 dark:text-gray-400 font-normal">
                           ({winnerProbPct}% · {tierLabel})

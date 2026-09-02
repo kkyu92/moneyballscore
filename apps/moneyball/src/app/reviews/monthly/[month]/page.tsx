@@ -368,7 +368,7 @@ export default async function MonthlyReviewPage({ params }: PageProps) {
                         }
                       >
                         <TeamLogo team={t.teamCode} size={20} className="shrink-0" />
-                        <span className="w-24 shrink-0 font-medium">
+                        <span className="w-24 shrink-0 font-medium truncate">
                           {t.teamName}
                         </span>
                         <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">

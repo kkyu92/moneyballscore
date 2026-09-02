@@ -117,7 +117,7 @@ export function AgentVoteCard({
           <span className="text-2xs uppercase tracking-wide opacity-80">
             {meta.label}
           </span>
-          <span className="text-sm font-semibold">{winnerLabel}</span>
+          <span className="text-sm font-semibold whitespace-nowrap">{winnerLabel}</span>
         </div>
         {homePct !== null && (
           <span className="ml-auto font-mono text-sm tabular-nums opacity-90">
@@ -145,10 +145,10 @@ export function AgentVoteCard({
             />
           </div>
           <div className="flex justify-between text-2xs font-medium opacity-75">
-            <span>
+            <span className="whitespace-nowrap">
               {awayName} {awayPct}%
             </span>
-            <span>
+            <span className="whitespace-nowrap">
               {homeName} {homePct}%
             </span>
           </div>

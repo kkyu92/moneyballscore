@@ -276,7 +276,7 @@ export function FactorBreakdown({
                   </span>
                 )}
                 {statLabel && (
-                  <p className="text-2xs text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
+                  <p className="text-2xs text-gray-400 dark:text-gray-500 leading-tight mt-0.5 break-keep">
                     {statLabel}
                   </p>
                 )}
@@ -310,7 +310,7 @@ export function FactorBreakdown({
                   />
                 )}
               </div>
-              <span className={`text-sm font-medium w-28 shrink-0 ${favorColor}`}>
+              <span className={`text-sm font-medium w-28 shrink-0 truncate ${favorColor}`}>
                 {favorLabel}
               </span>
               {chart && (

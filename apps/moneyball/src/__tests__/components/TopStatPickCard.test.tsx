@@ -77,4 +77,10 @@ describe('TopStatPickCard — cycle 1537 polish-ui wave-238 regression guard', (
     const container = document.querySelector('.opacity-60');
     expect(container).not.toBeNull();
   });
+
+  it('underdogTeam 팀명 span 은 whitespace-nowrap (Korean team-name wrap bug family — ml-auto pct 배지와 압축 경합, TeamMatchupCards.tsx ddd5db47와 동일 패턴)', () => {
+    render(<TopStatPickCard {...defaultProps} />);
+    const underdog = document.querySelector('.text-xl.font-semibold.text-brand-200');
+    expect(underdog?.className).toContain('whitespace-nowrap');
+  });
 });

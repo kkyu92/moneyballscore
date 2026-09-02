@@ -206,7 +206,7 @@ export function PredictionCard({
           <p className={`text-2xs font-medium mt-0.5 ${getConfidenceColor(confidencePct)}`}>
             {getConfidenceTierLabel(confidencePct)}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">
             {shortTeamName(predictedWinner)} 승 예측
           </p>
         </div>

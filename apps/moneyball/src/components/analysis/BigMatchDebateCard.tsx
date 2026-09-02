@@ -112,7 +112,7 @@ export function BigMatchDebateCard({
           <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-2 rounded-full overflow-hidden border-4 border-white/20 bg-white/5">
             <TeamLogo team={awayTeam} size={96} className="w-full h-full" />
           </div>
-          <p className="text-xs md:text-sm text-brand-200">{away.name}</p>
+          <p className="text-xs md:text-sm text-brand-200 whitespace-nowrap">{away.name}</p>
         </div>
 
         <div className="text-xl md:text-3xl font-bold text-brand-300">VS</div>
@@ -121,7 +121,7 @@ export function BigMatchDebateCard({
           <div className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-2 rounded-full overflow-hidden border-4 border-white/20 bg-white/5">
             <TeamLogo team={homeTeam} size={96} className="w-full h-full" />
           </div>
-          <p className="text-xs md:text-sm text-brand-200">{home.name}</p>
+          <p className="text-xs md:text-sm text-brand-200 whitespace-nowrap">{home.name}</p>
         </div>
       </div>
 

@@ -108,6 +108,34 @@ describe('PickButton AI 힌트', () => {
   });
 });
 
+describe('PickButton — Korean team-name wrap guard (12번째 재발 패밀리, TeamMatchupCards.tsx ddd5db47와 동일 패턴)', () => {
+  it('픽 버튼 base 클래스는 whitespace-nowrap (flex-1 버튼 2개 압축 시 한글 팀명 줄바꿈 방지)', () => {
+    render(<PickButton gameId={1} homeTeam="LG" awayTeam="SS" />);
+    const awayButton = screen.getByRole('button', { name: /삼성 원정/ });
+    expect(awayButton.className).toContain('whitespace-nowrap');
+    const homeButton = screen.getByRole('button', { name: /LG 홈/ });
+    expect(homeButton.className).toContain('whitespace-nowrap');
+  });
+
+  it('PollBar 막대 안 "{팀명} {%}" span 은 whitespace-nowrap (percentage-width 막대 압축 방지)', async () => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/api/picks/poll')) {
+        return Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              '1': { total: 5, home: 3, away: 2 },
+            }),
+        } as unknown as Response);
+      }
+      return Promise.resolve({ json: () => Promise.resolve({}) } as unknown as Response);
+    });
+    render(<PickButton gameId={1} homeTeam="LG" awayTeam="SS" />);
+    fireEvent.click(await screen.findByRole('button', { name: /LG 홈/ }));
+    const barText = await screen.findByText(/LG \d+%/);
+    expect(barText.className).toContain('whitespace-nowrap');
+  });
+});
+
 describe('PickButton league="mlb" — mlb-submit/mlb-poll route + storageKey 네임스페이스', () => {
   it('poll fetch 시 /api/picks/mlb-poll 호출 (KBO 는 /api/picks/poll)', () => {
     render(<PickButton gameId="745444" league="mlb" homeTeam="NYY" awayTeam="BOS" />);
