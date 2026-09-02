@@ -80,6 +80,15 @@ vi.mock('../notify/telegram', () => ({
   notifyPipelineStatus: vi.fn().mockResolvedValue(undefined),
 }));
 
+// captureSilentDriftAlert 만 spy — cycle 2775 review-code(heavy) 회귀 방지.
+// captureSilentDriftAlert 자체는 NODE_ENV=test 시 내부에서 no-op 하므로 (Sentry/
+// Telegram 미발화 확인 불가), 대신 daily.ts 가 verify 조기 return 경로에서 어떤
+// verifiedCount 값을 넘기는지를 직접 spy 로 검증한다.
+vi.mock('../pipeline/silent-drift-alert', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../pipeline/silent-drift-alert')>();
+  return { ...actual, captureSilentDriftAlert: vi.fn().mockResolvedValue(undefined) };
+});
+
 // ============================================
 // Supabase chainable mock
 // ============================================
@@ -200,6 +209,7 @@ import {
   notifyError, notifyPipelineStatus,
 } from '../notify/telegram';
 import { updateCalibration, generateAgentMemories } from '../agents/retro';
+import { captureSilentDriftAlert } from '../pipeline/silent-drift-alert';
 
 // dynamic import — mock 설정 이후 로드
 async function loadPipeline() {
@@ -959,10 +969,37 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
       expect(vi.mocked(generateAgentMemories)).not.toHaveBeenCalled();
       expect(vi.mocked(notifyResults)).not.toHaveBeenCalled();
 
+      // cycle 2775 회귀 방지: dedup skip 은 "검증 안 함" 이지 "검증했더니 0건"
+      // 이 아니다 — verifiedCount 는 undefined 여야 shouldAlertSilentDrift 가
+      // false-positive silent-drift alert 를 안 쏜다 (0 이면 알림 오발화).
+      expect(vi.mocked(captureSilentDriftAlert)).toHaveBeenCalledWith(
+        expect.objectContaining({ mode: 'verify', verifiedCount: undefined }),
+      );
+
       const runLog = mock._calls.find(
         (c) => c.table === 'pipeline_runs' && c.operations.includes('insert'),
       );
       expect(runLog).toBeDefined();
+    });
+
+    it('cycle 2775: isNotificationSent(results_sent) throw → verifiedCount undefined 로 finish (false-positive alert 방지)', async () => {
+      const tables = baseTables();
+      tables.daily_notifications = {
+        single: { data: null, error: { message: 'boom', code: 'PGRST000' } },
+      };
+      const mock = createMockSupabase(tables);
+      vi.mocked(createClient).mockReturnValue(mock as never);
+
+      vi.mocked(fetchGames).mockResolvedValue([makeGame({ status: 'final' })]);
+
+      const { runDailyPipeline } = await loadPipeline();
+      const result = await runDailyPipeline('2026-04-22', 'verify', 'cron');
+
+      expect(result.errors.some((e) => e.includes('isNotificationSent results_sent'))).toBe(true);
+      expect(vi.mocked(notifyResults)).not.toHaveBeenCalled();
+      expect(vi.mocked(captureSilentDriftAlert)).toHaveBeenCalledWith(
+        expect.objectContaining({ mode: 'verify', verifiedCount: undefined }),
+      );
     });
 
     it('사례 32: verifyResults=0 + 게임 status=scheduled(미종결) → results_sent flag 세우지 않음 (재시도 허용)', async () => {

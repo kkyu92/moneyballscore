@@ -161,9 +161,15 @@ export async function runDailyPipeline(
   // 가 verifiedCount 안 넘겨 silent drift 감지 영구 no-op (verifiedCount===undefined
   // → 항상 false). cycle 1173~1181 = v1.8 cohort n=90 stable 8 사이클 + 1주+
   // 미인지 결과의 root cause. verify mode 안 verifyResults.length 채워서 finish()
-  // captureSilentDriftAlert 에 전달. mode!=='verify' 시 0 유지 (silent-drift-alert
+  // captureSilentDriftAlert 에 전달. mode!=='verify' 시 undefined 유지 (silent-drift-alert
   // 안 mode 분기가 알아서 무시).
-  const verifiedCount = { value: 0 };
+  //
+  // undefined 초기값 필수 (cycle 2775 review-code(heavy) fix) — verify 블록의
+  // 두 조기 return 경로(results_sent dedup skip / isNotificationSent throw)가
+  // line 458 도달 전에 finish() 호출. 초기값이 0 이면 games.length>0 상황에서
+  // shouldAlertSilentDrift 가 "0 === 0 → 진짜 silent drop" 으로 오판 —
+  // 정상 dedup skip / DB 읽기 hiccup 인데도 Sentry warning + Telegram 오발화.
+  const verifiedCount: { value: number | undefined } = { value: undefined };
 
   // 모든 exit 경로가 통과 — pipeline_runs 로그 + (조건부) Telegram status.
   const finish = async (result: PipelineResult): Promise<PipelineResult> => {
