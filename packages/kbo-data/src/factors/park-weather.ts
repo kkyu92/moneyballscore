@@ -13,7 +13,6 @@
  *
  * 비대칭 미적용 — 라인업 HR 파워 / 구장 orientation 데이터 없음. 양팀 동일 adj 반환.
  * shadow cohort scoring 안 factor → [0, 1] 변환 시 0.5 (neutral) 가 정상.
- * reason 필드는 UI / 디버그 surface 용 (FactorBreakdown).
  */
 
 import type { WeatherSnapshot } from '../scrapers/weather';
@@ -23,8 +22,6 @@ export interface ParkWeatherScore {
   homeAdj: number;
   /** 원정팀 공격 offence multiplicative adj */
   awayAdj: number;
-  /** 사람용 reason (UI / 디버그) */
-  reason: string;
 }
 
 const COLD_TEMP_C = 10;
@@ -54,23 +51,21 @@ export function scoreParkWeather(
   void parkFactor;
 
   if (isDome) {
-    return { homeAdj: 0, awayAdj: 0, reason: '돔구장 (날씨 영향 없음)' };
+    return { homeAdj: 0, awayAdj: 0 };
   }
 
   // weather 결측 → noop
   if (!weather) {
-    return { homeAdj: 0, awayAdj: 0, reason: '날씨 데이터 결측' };
+    return { homeAdj: 0, awayAdj: 0 };
   }
 
   let homeAdj = 0;
   let awayAdj = 0;
-  const reasons: string[] = [];
 
   // 저온 — HR 억제 (양팀 동일)
   if (weather.tempC < COLD_TEMP_C) {
     homeAdj += COLD_HR_ADJ;
     awayAdj += COLD_HR_ADJ;
-    reasons.push(`저온 ${weather.tempC}°C (HR 억제)`);
   }
 
   // 강수 — 양팀 점수 억제 (archive precipMm 기준)
@@ -79,7 +74,6 @@ export function scoreParkWeather(
   if (precip >= RAIN_PRECIP_MM) {
     homeAdj += RAIN_SCORE_ADJ;
     awayAdj += RAIN_SCORE_ADJ;
-    reasons.push(`강수 ${precip}mm (점수 억제)`);
   }
 
   // 외야 방향 바람 — HR 부스트
@@ -93,14 +87,9 @@ export function scoreParkWeather(
   ) {
     homeAdj += WIND_HR_BOOST;
     awayAdj += WIND_HR_BOOST;
-    reasons.push(`외야 바람 ${speed}km/h (HR 부스트)`);
   }
 
-  return {
-    homeAdj,
-    awayAdj,
-    reason: reasons.length > 0 ? reasons.join(', ') : '날씨 중립',
-  };
+  return { homeAdj, awayAdj };
 }
 
 /**
