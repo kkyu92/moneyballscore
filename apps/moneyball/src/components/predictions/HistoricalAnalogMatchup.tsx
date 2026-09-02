@@ -39,7 +39,6 @@ interface QueryRow {
   predictions:
     | {
         is_correct: boolean | null;
-        scoring_rule: string;
         winner: { code: string } | null;
       }[]
     | null;
@@ -72,7 +71,7 @@ export async function fetchHistoricalAnalogs(
          home_team:teams!games_home_team_id_fkey(code),
          away_team:teams!games_away_team_id_fkey(code),
          winner:teams!games_winner_team_id_fkey(code),
-         predictions!inner(is_correct, scoring_rule, winner:teams!predictions_predicted_winner_fkey(code))`,
+         predictions!inner(is_correct, winner:teams!predictions_predicted_winner_fkey(code))`,
       )
       .in("home_team_id", teamIds)
       .in("away_team_id", teamIds)
