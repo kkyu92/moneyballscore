@@ -8990,3 +8990,11 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 두 파일 다 clean — 코드 변경 없음.
 
 다음 사이클 추천 = review-code(heavy) 계속 시 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildTeamProfile.ts` 601줄, `buildMatchupProfile.ts` 594줄), 또는 fix-incident(12/20)/op-analysis(17/25)/info-arch(29/30 근접)/lotto(19/30) gap 자연 대기.
+
+## 🔍 RETRO-ONLY — fix-incident(lite) deploy-drift-alert 7연속 failure 진단 (cycle 2777, 2026-09-02)
+
+진단: open issue 0, approved plan 0/23. gap trigger: fix-incident 20/20 도달(last fire 2757). 직전8 distinct=3(2-chain lock 미충족). gh run list 전 워크플로우 점검 — CI/scheduled 대부분 green. `daily-pipeline.yml`/`live-update.yml` 4개월 미실행은 2026-04-29 Cloudflare Worker cron 이관 문서화된 의도(오탐 배제). `deploy-drift-alert` 워크플로우 2026-09-01 10:03~09-02 04:28 사이 7연속 failure 발견 — 실제 incident 여부 진단 착수.
+
+실행: 실패 로그 분석 → commit `11a76e65`(cycle 2756 retro, 22:28 KST push) 가 gap_hours=15 로 반복 alert. `curl /api/version` + `git log` 커밋시각 diff + `vercel ls --prod` 3중 실측 → 현재 prod=`c87271e6`(main 대비 5커밋 뒤, ~13분 지연=정상), 최근 배포 전부 Ready. 15h 지연 원인 = 해당 시점 develop-cycle 루프 야간 idle(신규 push 없음) 동안 단일 push 가 배포 안 붙잡힌 것으로 추정, 이후 신규 push 재개되며 자연 catch-up(09:34 성공 run 확인). 재발성 시스템 버그 아님 — self-healed, 코드 변경 불필요.
+
+다음 사이클 추천 = review-code(heavy) 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄/`buildTeamProfile.ts` 601줄/`buildMatchupProfile.ts` 594줄) 계속, 또는 op-analysis(5/25)/info-arch(9/30)/lotto(26/30) gap 자연 대기.
