@@ -1,4 +1,12 @@
 
+## cycle 2760 (2026-09-02) — SUCCESS — operational-analysis(lite)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap3/20·info-arch gap21/30·lotto gap8/30 전부 미도달. op-analysis gap=33/25 (마지막 발화 cycle 2727) — trigger 도달. 직전8 distinct=3(review-code 6/lotto 1/fix-incident 1) — 2-chain lock 미충족.
+- `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행. 전체 n=362 (CE n=315 / 비CE n=47) — CE +5 전부 9월 데이터(acc 60.0%).
+- CE 54.6%(172/315) / 비CE 63.8%(30/47) → 격차 9.2pp (cycle 2748 9.3pp 대비 미세 축소). overlap 월(05/06/07) 통제 격차 10.8pp 그대로 — LLM 부가가치 우세 방향 17회 연속 재확인.
+- CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 63일+ 경과) 상태 변화 없음. CLAUDE.md Calibration 섹션에 재측정 결과 append. 코드 변경 없음(retro-only).
+- 다음 사이클 추천 = review-code(heavy) (기본 dominance 축 계속) 또는 fix-incident/info-arch gap monitor.
+
 ## cycle 2759 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap2/20·op-analysis gap11/25·info-arch gap20/30·lotto gap7/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0.
