@@ -1,4 +1,14 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy) 신규 후보 3개 (fancy-stats.ts/picks-results/kbo-scores) 전수 감사, 발견 0건 clean (cycle 2802, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/22(approved 없음), 2차 방어선(cycle 2801 retro commit 1befdb67) OK. 직전8(2794-2801) 정규화 base chain distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 5/20, op-analysis 4/25, info-arch 2/30, lotto 20/30 — lotto 는 2026-09-05 회차 picks 이미 박제 완료, D-7 부재 아님). improvement saturation(explore-idea) 6/15 미충족. cycle 2801 retro 가 명시적으로 review-code(heavy) 재진단 권장 — 가장 강한 lead 로 선택.
+
+packages/kbo-data/src/scrapers/fancy-stats.ts(545줄, 29 commits), apps/moneyball/src/app/api/picks/results/route.ts(236줄, 7 commits), apps/moneyball/src/app/api/kbo-scores/route.ts(147줄, 7 commits) 3개 신규 축 전수 read. 결과: 전부 clean — fancy-stats.ts 는 이미 3차례 silent drift fix(era/innings stub, findPitcher stale 참조, totalWar 하드코딩) 거쳐 comment/코드 정합 확인, picks-results 는 MLB id-prefix/ai_factors null 규약 comment 정확, kbo-scores 는 postponed override 로직 comment 일치. 코드 변경 없음.
+
+skill-evolution trigger 평가: cycle_n % 50 = 2 (미충족), 직전 20-cycle(2783-2802) review-code 8회 발화(trigger5 미충족), 나머지 trigger 미충족. emergency stop 미충족(직전 10 사이클 중 success 9건).
+
+다음 사이클 추천 = gap 근접 chain(lotto 20/30, fix-incident 5/20, op-analysis 4/25) 자연 대기 또는 review-code 잔여 후보(api/hub-dispatch/route.ts 180줄, api/health/pipelines/route.ts 107줄) — 단 3연속 clean 누적으로 diminishing return 신호, 다음 발화 시 polish-ui/design-system 등 다른 chain 우선 고려 권장.
+
 ## 🟡 RETRO-ONLY — review-code(heavy) 미감사 소형 헬퍼 8개 신규 축 감사, 발견 0건 clean (cycle 2799, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/22(approved 없음). 2차 방어선(cycle 2798 retro commit 480a1395) OK. 직전8(2791-2798) 정규화 base chain distinct=3(polish-ui+fix-incident+operational-analysis) — 2-chain lock 미충족. gap trigger: fix-incident 1/20(직전 발화), op-analysis 0/25(직전 발화), info-arch 29/30, lotto 16/30 — 전부 미도달. review-code(heavy) 직전 19-cycle 안 9회 dominance 지속 + cycle 2798 next_recommended 명시 신호로 계속 선택.
