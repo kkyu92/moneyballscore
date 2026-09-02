@@ -1,4 +1,13 @@
 
+## cycle 2763 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap6/20·op-analysis gap3/25·info-arch gap24/30·lotto gap11/30 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족. scripts/·packages/kbo-data 축 소진 후 cloudflare-worker 확인 → select 미사용, 해당 axis 부적용.
+- 신규 축 = CLAUDE.md 규칙 "모든 API 라우트는 CRON_SECRET 또는 API_KEY로 보호" 준수 audit. grep 으로 무보호 route 12개 발견 → general-purpose 서브에이전트 전수 감사(method/I/O/기존 보호/분류).
+- 결과: 12개 전부 intentionally-public(health/version/kbo-scores proxy/picks·leaderboard poll-results) — CRON_SECRET 실제 gap 0건. 단 soft finding 1건: `mlb/waitlist/route.ts` 만 Origin/CSRF layer 보유, 동일 위험군 4곳(`picks/submit`, `picks/mlb-submit`, `leaderboard/sync`, `leaderboard/mlb-sync`) 누락 — 불일치.
+- fix: `isOriginAllowed` 를 `apps/moneyball/src/lib/api/is-origin-allowed.ts` 로 추출(waitlist 중복 제거) + 4개 route 에 동일 403 forbidden 체크 적용 + 4개 테스트 파일 Origin 헤더/forbidden 케이스 6건 추가.
+- tsc/eslint/test 전부 green (571파일 4490건, +6). direct main push.
+- 다음 사이클 추천 = op-analysis gap monitor(3/25) 또는 review-code 신규 품질 축 재탐색(select-column 축 3파일군 완전 소진).
+
 ## cycle 2762 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap5/20·op-analysis gap2/25·info-arch gap23/30·lotto gap10/30 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족.
