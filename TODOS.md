@@ -9108,3 +9108,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 `pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 93 files/1223 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 437f7036).
 
 다음 사이클 추천 = review-code(heavy) 계속 시 잔여 미감사 대형파일(`postview.ts` 588줄 동률 최고령, `buildTeamProfile.ts`/`buildMlbTeamProfile.ts` 등), 또는 lotto(29/30 임박 — 다음 사이클 30 도달 여부 우선 확인).
+
+## 🔵 RETRO-ONLY — review-code(heavy) buildAccuracyData.ts 4축 감사 clean (cycle 2789, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2788 retro commit) OK. gap trigger 4종 전부 미도달(fix-incident 6/20, op-analysis 16/25, info-arch 20/30, lotto 7/30). 직전8 distinct=3(review-code(heavy)/lotto/fix-incident(lite)) — 2-chain lock 미충족. explore-idea saturation(14/15) 재도달했으나 negative context 지속(GH issue 0, TODOS Next-Up 신규 없음) — review-code(heavy) 유지. 직전 4사이클(2785-2788) 전부 next_recommended_chain=review-code(heavy), carry-over 후보 `buildAccuracyData.ts`(767줄, apps/moneyball/src/lib/accuracy/) 채택 — 기존 감사 대상 중 최대 미감사 파일.
+
+general-purpose 서브에이전트 4축 감사(consumer trace / select-vs-read / prefix-leak / comment-vs-code) + parity 확인: 21개 export 전부 소비 확인(SMALL_SAMPLE_THRESHOLD 는 내부만 소비, dead 아님). 본 파일 자체 select 없음(순수 transform layer) — 상류 select(accuracy/page.tsx, debug/reliability/page.tsx) 컬럼 전부 PredRow 필드로 매핑/소비 확인, orphan 없음. home_/away_ prefix 미취급(구조상 axis 해당 없음). 주석/JSDoc 전부(accuracyRateColorClass, FALLBACK/LLM_ACTIVE_VERSIONS split, wave-256 PRODUCTION_ERA_HISTORY, KST 날짜경계 버그회피 등) 코드와 정합. MLB parity = 별도 buildMlbAccuracyData.ts 없이 buildMlbAccuracySummary.ts 가 본 파일 builder 재사용(공유 설계, 의도됨).
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 잔여 후보(`buildMlbTeamProfile.ts` 380줄) 또는 fix-incident(7/20)/op-analysis(17/25)/info-arch(21/30)/lotto(8/30) gap 자연 대기. 5연속 clean(2785-2789)이나 미감사 대형파일 거의 소진 — 다음 사이클 완전 소진 판단 예상.
