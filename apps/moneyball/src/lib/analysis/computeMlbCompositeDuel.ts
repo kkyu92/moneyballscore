@@ -38,8 +38,10 @@ export interface MlbCompositeDuelResult {
 
 /**
  * MLB 버전 composite duel — KBO computeCompositeDuel(analysis/computeCompositeDuel.ts)
- * 병렬 복제 (plan #24 Phase 3c, cycle 2070). MLB 는 elo/recent_form/head_to_head/sfr
- * 4팩터가 미구현(전량 null, mlb-pipeline.ts 가 저장 안 함)이라 남는 6팩터만 집계 —
+ * 병렬 복제 (plan #24 Phase 3c, cycle 2070). elo/recent_form/head_to_head 는 cycle 2353
+ * 이후 mlb-pipeline.ts 가 실제로 저장하지만(home_elo/away_elo/home_recent_form/
+ * away_recent_form/head_to_head_rate) 본 함수 입력에는 아직 배선되지 않았고, sfr(defense_sfr)
+ * 만 MLB 미구현 진짜 placeholder — 그래서 남는 6팩터만 집계 (cycle 2771 review-code heavy 정정).
  * validCount 게이팅은 MLB_COMPOSITE_DUEL_MIN_VALID(3/6) 사용.
  */
 export function computeMlbCompositeDuel(g: MlbCompositeDuelInput): MlbCompositeDuelResult {
