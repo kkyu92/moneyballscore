@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /players 모바일 wrap 버그 발견+수정 (cycle 2792, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 1/25, info-arch 1/30, lotto 1/30). explore-idea saturation(14/15) 재도달했으나 4-source 재확인 전부 negative(TODOS Next-Up stale, GH issue 0, DESIGN.md 당일 갱신). 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화. cycle 2791 next_recommended("다른 라우트: /analysis, /players, /reviews") 따라 미점검 라우트 실브라우저 QA 진행.
+
+`/analysis` 데스크톱+모바일 클린(중간 위치 동의배너는 fixed 요소 full-page 스크린샷 렌더 아티팩트 — 실제 버그 아님, 뷰포트 스크린샷으로 재확인). `/players` 모바일(375px)에서 실제 버그 발견 — 선수명/팀명 테이블 셀에 `whitespace-nowrap` 누락으로 2-3음절 한글이 음절 중간에서 줄바꿈(안우진→"안우\n진", 한화→"한\n화", 삼성→"삼\n성"). `/reviews` 카드 레이아웃 정상(콘솔에 찍힌 hydration 에러는 이전 페이지 잔존 로그로 `console --clear` 후 재확인 결과 없음, false positive).
+
+수정: `apps/moneyball/src/app/players/page.tsx` 투수/타자 테이블 x 이름/팀 4개 `<td>`에 `whitespace-nowrap` 추가 — 앱 내 다른 테이블(matchup, standings)에 이미 있는 기존 패턴과 정합. 로컬 dev 서버로 수정 전/후 스크린샷 비교 검증(안우진/한화/삼성 모두 한 줄로 고정 확인). tsc/eslint clean. main 직커밋+push, CI green(8f0fa7ca).
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료(cycle 2800) 전까지 gap trigger 자연 대기(fix-incident 3/20, op-analysis 2/25, info-arch 2/30, lotto 2/30) 또는 polish-ui 잔여 라우트(/teams, /standings, /matchup) 재확인.
+
 ## 🔵 RETRO-ONLY — polish-ui 강제 fallback, UI 4축 감사 clean (cycle 2790, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2789 retro commit 존재) OK. `retro-drift-check.sh 2740 2789` 전수 재확인 = 50/50 OK, drift 0건. review-code(heavy) 직전5(2785-2789) 전부 outcome=retro-only → lite chain retro-only cap 발동, cooldown N=10 (2790-2799 후보 제외, cycle 2800 재평가). 직전8 distinct=3(review-code(heavy)/lotto/fix-incident(lite)) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 17/25, info-arch 21/30, lotto 8/30). explore-idea saturation(14/15) 재도달했으나 4-source 재확인 전부 negative(TODOS Next-Up = cycle 41 시절 stale 항목뿐, GH issue 0, DESIGN.md 당일 갱신). info-arch breadcrumb grep 18건 그대로 — 전부 기존 의도된 제외(debug 8 + redirect-only reviews 6 + login/settings/community noindex 3 + 홈), 신규 gap 0건. lotto 2026-09-05 50세트 이미 박제(9/1), 신규 작업 불필요. 잔여 chain 전부 organic trigger 부재 → `polish-ui` 강제 발화(TODOS.md cycle 818/1407/2242 선례 정합).
