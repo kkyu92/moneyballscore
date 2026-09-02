@@ -1,4 +1,14 @@
 
+## cycle 2768 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 29/30, lotto 16/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis(lite) 1) — 2-chain lock 미충족.
+- explore-idea saturation(14/15) 재도달했으나 cycle 2766/2767 과 동일 negative(재확인 생략, 신규 organic signal 없음). IA 30-cycle checkpoint(cycle 2739)가 다음 재도달=cycle 2769 명시 — 이번 사이클엔 아직 이름(29/30).
+- review-code(heavy) 직전 carry-over(cycle 2767, convergenceRecord.ts/buildMlbMatchupProfile.ts/buildMlbTeamProfile.ts) 전부 소진됐으나, 방금 감사 완료된 MLB 파일들의 KBO 대응 원본(`buildTeamProfile.ts` 591줄/`buildMatchupProfile.ts` 581줄)이 이 축으로 미검증 상태 — 자연스러운 신규 축으로 선택.
+- general-purpose 서브에이전트 전수 감사: select 컬럼 전부 소비 확인, JSDoc/코멘트 전부 정확(과잉주장 없음). 2건 발견 — (1) `buildMatchupProfile.ts` `Row.hasPrediction` 필드가 계산만 되고 어디서도 안 읽힘(is_correct != null 체크로 이미 대체된 dead field), (2) `MatchupProfile` 의 streak/avgMargin/recentRecord/blowout/closeGame/homeAwayEdge 6개 필드는 dead 아니나(summary 문장에 합쳐져 실제 렌더) team 페이지가 동일 stat 을 개별 라인으로 렌더하는 방식과 표시 방식이 달라 미래 오해 소지 확인.
+- fix: `hasPrediction` 필드 제거(선언+할당 2곳). `MatchupProfile` 인터페이스에 표시 방식 차이 설명 주석 추가(필드 자체는 실사용 중이라 유지).
+- tsc/eslint/test 전부 green(571파일 4491건, 필드 제거만 — 신규 테스트 없음). direct main push(c7723ffc), VERSION 0.5.62.201.
+- 다음 사이클 추천 = info-architecture-review(cycle 2769 자연 30-cycle 재도달 예상) 자연 대기, 또는 review-code(heavy) 계속 시 미감사 대형 파일(`buildAccuracyData.ts` 767줄/`fancy-stats.ts` 545줄) 재탐색.
+
 ## cycle 2767 (2026-09-02) — RETRO-ONLY — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/29(approved 없음, plan#29 여전히 Tier4/보류). gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 28/30, lotto 15/30). 직전8 distinct=3(review-code(heavy) 6 + operational-analysis(lite) 1 + polish-ui 1) — 2-chain lock 미충족.
