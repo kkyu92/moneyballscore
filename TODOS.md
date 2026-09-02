@@ -1,4 +1,14 @@
 
+## ✅ SUCCESS — review-code(heavy) postview.ts keyFactor prefix leak 수정 (cycle 2784, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2783 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 0/20 방금 발화, op-analysis 11/25, info-arch 15/30, lotto 2/30). 직전8 distinct=3(review-code(heavy) 5 + fix-incident(lite) 2 + lotto 1) — 2-chain lock 미충족. 직전 3 cycle(2781/2782/2783) 전부 next_recommended_chain=review-code(heavy) — 최고령 미감사 대형파일 `postview.ts`(588줄, 2026-08-26 동률 최고령) 채택.
+
+실행: `postview.ts`+`postview-daily.ts` 전체 정독. `parseJudgePostview` 는 LLM 이 prompt 룰(no home_/away_ prefix) 어기고 `home_bullpen_fip` 류 prefixed key 를 박제해도 `canonicalizeFactorKey` 로 정규화하지만, 완전히 동일한 hallucination 위험을 가진 `parseTeamPostview` 의 `keyFactor` 필드(TEAM_POSTVIEW_SYSTEM 프롬프트도 동일하게 "prefix 없는 정규화 키" 명시)는 canonicalize 없이 raw 반환 — `PostviewPanel.tsx` 의 `keyFactorLabel(key) = FACTOR_LABELS_TECHNICAL[key] ?? key` 가 no-prefix slug 만 매칭돼 prefixed key 는 lookup miss → raw dev factor key 가 사용자 가시 `/analysis/game/[id]` PostviewPanel UI 에 그대로 leak 되는 경로 발견. judge 경로와 동일하게 `canonicalizeFactorKey` 적용.
+
+`pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 93 files/1223 tests 전체 green. 단일 논리 단위 → 직접 main commit+push(R4/R7, 4b8c533d).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄, `buildTeamProfile.ts` 601줄, `buildMatchupProfile.ts` 594줄), 또는 lotto(3/30)/op-analysis(12/25)/info-arch(16/30)/fix-incident(1/20) gap 자연 대기.
+
 ## 🔵 RETRO-ONLY — fix-incident(lite) 26-cycle gap 강제 점검 clean (cycle 2783, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=3(review-code(heavy) 6 + fix-incident(lite) 1 + lotto 1) — 2-chain lock 미충족. gap trigger 재확인: op-analysis 10/25, info-arch 14/30, lotto 1/30(방금 발화) — 전부 미도달. fix-incident 는 마지막 발화 cycle 2757 대비 gap=26/20 — trigger 충족(20-cycle 주기 보정).
