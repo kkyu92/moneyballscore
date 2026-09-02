@@ -1,4 +1,16 @@
 
+## ✅ SUCCESS — review-code(heavy) getYesterdayGames/getThisWeekPreviousGames h2h 누락 parity gap 정정 (cycle 2778, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2777 retro commit 존재) OK. gap trigger 4종 전부 미도달(op-analysis 5/25, info-arch 9/30, lotto 26/30, fix-incident 방금 발화). 직전8 distinct=3(review-code(heavy) 5 + operational-analysis 1 + fix-incident 2) — 2-chain lock 미충족. cycle 2777 추천대로 review-code(heavy) 대형파일 rotation 계속.
+
+실행: 최고령 미터치 대형파일 `apps/moneyball/src/app/analysis/analysis-data.ts`(956줄) 전체 정독. `getYesterdayGames`/`getThisWeekPreviousGames` 의 composite duel 계산이 주석("H2H 제외")대로 h2h 팩터를 의도적으로 뺀 채 유지되고 있었는데, 동일 h2h 팩터를 `game/[id]`(cycle 2303 fix) · `convergenceRecord.ts`(cycle 2304 fix) · `getThisWeekRemainingGames` 는 이미 season-to-date 로 반영 중 — 같은 완료 경기의 convergenceNetScore 가 `/analysis` 인덱스의 "어제 경기"/"이번 주 지난 경기" 리스트 카드와 `game/[id]` 상세 페이지에서 서로 다르게 표시되는 parity gap 확인 (cycle 2303/2304 h2h family 의 3번째 잔여 사이트).
+
+fix: 두 함수 모두 `getSeasonH2HData()` 를 `Promise.all` 로 병렬 fetch → season-to-date h2h(H2H_MIN_GAMES 미만 시 undefined) 계산 → computeCompositeDuel 에 h2hHomeWins/h2hAwayWins 전달, 기존 3개 사이트와 동일 패턴으로 통일.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean + lint clean + vitest 571 files/4491 tests 전체 green(+8, wave-550 배지 분류 테스트는 netScore 값 자체를 다루지 않아 무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 5effa8bf).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 미감사 대형파일(`buildAccuracyData.ts` 767줄/`buildTeamProfile.ts` 591줄/`buildMatchupProfile.ts` 584줄) 정독, 또는 op-analysis(6/25)/info-arch(10/30)/lotto(27/30) gap 자연 대기.
+
 ## cycle 2776 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger: fix-incident 19/20, op-analysis 3/25, info-arch 7/30, lotto 24/30 — 전부 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 CI 신규 실패 0건.
