@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /standings 모바일 wrap 버그 발견+수정 (cycle 2793, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy) 5 + polish-ui 3) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 20/25, info-arch 24/30, lotto 11/30). 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화. cycle 2792 next_recommended("잔여 라우트: /teams, /standings, /matchup") 따라 실브라우저 QA 진행.
+
+`/teams` 데스크톱+모바일 클린. `/standings` 모바일(375px)에서 실제 버그 발견 — 순위 테이블 팀명 `<td>`에 `whitespace-nowrap` 누락으로 2-3음절 한글 팀명이 음절 중간에서 줄바꿈(두산→"두\n산", 롯데→"롯\n데", 한화→"한\n화", 키움→"키\n움") — cycle 2792 `/players`에서 발견·수정한 동일 패턴 버그가 다른 라우트에서 재발. `/matchup` 그리드 버튼 팀명 전부 한줄 정상.
+
+수정: `apps/moneyball/src/app/standings/page.tsx:236` 팀명 `<td>`에 `whitespace-nowrap` 추가 — 앱 내 다른 테이블(players/matchup)에 이미 있는 기존 패턴과 정합. 로컬 dev 서버로 수정 전/후 스크린샷 비교 검증(두산/롯데/한화/키움 모두 한 줄로 고정 확인). tsc/eslint/test 전부 green. main 직커밋+push, CI green(93ff810e).
+
+다음 사이클 추천 = 동일 whitespace-nowrap 버그 패턴이 2개 라우트 연속 발견됨 — polish-ui 잔여 팀명 렌더 라우트(/predictions, /picks, /insights, /leaderboard) 재확인 또는 review-code(heavy) cooldown 만료(cycle 2800) 전까지 gap trigger 자연 대기(fix-incident 11/20, op-analysis 21/25, info-arch 25/30, lotto 12/30).
+
 ## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /players 모바일 wrap 버그 발견+수정 (cycle 2792, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 1/25, info-arch 1/30, lotto 1/30). explore-idea saturation(14/15) 재도달했으나 4-source 재확인 전부 negative(TODOS Next-Up stale, GH issue 0, DESIGN.md 당일 갱신). 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화. cycle 2791 next_recommended("다른 라우트: /analysis, /players, /reviews") 따라 미점검 라우트 실브라우저 QA 진행.
