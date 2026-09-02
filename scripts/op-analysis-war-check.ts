@@ -8,7 +8,7 @@ async function main() {
   // Based on migration 003, it's team_season_stats.total_war
   const { data, error } = await supabase
     .from("team_season_stats")
-    .select("team_id, season, total_war, last_synced")
+    .select("team_id, total_war, last_synced")
     .eq("season", 2026)
     .order("team_id");
   
@@ -26,7 +26,7 @@ async function main() {
   // Check recent game predictions for war fields
   const { data: recentPreds } = await supabase
     .from("predictions")
-    .select("id, home_war_total, away_war_total, games!inner(game_date, home_team_id, away_team_id)")
+    .select("home_war_total, away_war_total, games!inner(game_date, home_team_id, away_team_id)")
     .gte("games.game_date", "2026-07-16")
     .lte("games.game_date", "2026-07-19")
     .in("scoring_rule", ["v1.8", "v1.8-credit-fail"])

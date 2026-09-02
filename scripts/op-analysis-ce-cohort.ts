@@ -20,14 +20,10 @@ import { writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 
 interface PredRow {
-  id: number;
-  game_id: number;
   is_correct: boolean | null;
   scoring_rule: string | null;
   debate_version: string | null;
   confidence: number | null;
-  verified_at: string | null;
-  reasoning: Record<string, unknown> | null;
   games: {
     game_date: string | null;
     home_team_id: number | null;
@@ -84,7 +80,7 @@ async function main() {
   const { data, error } = await supabase
     .from("predictions")
     .select(
-      "id, game_id, is_correct, scoring_rule, debate_version, confidence, verified_at, reasoning, games(game_date, home_team_id, away_team_id)",
+      "is_correct, scoring_rule, debate_version, confidence, games(game_date, home_team_id, away_team_id)",
     )
     .eq("prediction_type", "pre_game")
     .in("scoring_rule", ["v1.8", "v1.8-credit-fail"])

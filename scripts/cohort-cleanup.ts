@@ -44,10 +44,8 @@ import * as path from 'node:path';
 interface PredRow {
   id: number;
   game_id: number;
-  scoring_rule: string;
   model_version: string | null;
   reasoning: Record<string, unknown> | null;
-  is_correct: boolean | null;
   created_at: string;
 }
 
@@ -107,7 +105,7 @@ async function main(): Promise<void> {
   while (true) {
     const result = await db
       .from('predictions')
-      .select('id, game_id, scoring_rule, model_version, reasoning, is_correct, created_at')
+      .select('id, game_id, model_version, reasoning, created_at')
       .eq('scoring_rule', CURRENT_SCORING_RULE)
       .eq('prediction_type', 'pre_game')
       .order('id', { ascending: true })

@@ -17,7 +17,7 @@ interface DayStat {
 async function main() {
   const { data, error } = await supabase
     .from("predictions")
-    .select(`id, is_correct, confidence, scoring_rule, debate_version, predicted_winner, home_win_prob, games!inner(game_date, home_team_id, away_team_id, home_score, away_score, status)`)
+    .select(`is_correct, scoring_rule, debate_version, games!inner(game_date, home_team_id, away_team_id, home_score, away_score, status)`)
     .eq("league", "kbo")
     .in("scoring_rule", ["v1.8", "v1.8-credit-fail"])
     .not("is_correct", "is", null)

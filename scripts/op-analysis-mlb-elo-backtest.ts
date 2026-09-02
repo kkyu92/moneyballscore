@@ -24,8 +24,6 @@ const MLB_ELO_EXHIBITION_CODES = new Set(['AL', 'NL']);
 const WARM_GAMES_THRESHOLD = 10; // 팀당 최소 재생 경기 수 — cold-start(ELO_NEUTRAL 동률) noise 배제 cohort
 
 interface FinalGameRow {
-  external_game_id: string;
-  game_date: string;
   game_datetime_utc: string;
   home_team_code: string;
   away_team_code: string;
@@ -99,7 +97,7 @@ async function main() {
 
   const { data, error } = await sb
     .from('mlb_schedule')
-    .select('external_game_id, game_date, game_datetime_utc, home_team_code, away_team_code, home_score, away_score')
+    .select('game_datetime_utc, home_team_code, away_team_code, home_score, away_score')
     .eq('status', 'final')
     .order('game_datetime_utc', { ascending: true });
   if (error) throw error;

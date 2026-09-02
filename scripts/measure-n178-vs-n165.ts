@@ -65,7 +65,7 @@ async function main() {
   // 5) predicted_at 기간 분포 (v1.8 시작 5/13 이후)
   const q5 = await sb
     .from("predictions")
-    .select("predicted_at, verified_at, scoring_rule")
+    .select("predicted_at, scoring_rule")
     .eq("prediction_type", "pre_game")
     .not("is_correct", "is", null)
     .order("predicted_at", { ascending: true });

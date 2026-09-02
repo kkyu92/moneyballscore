@@ -18,7 +18,7 @@ async function main() {
   while (true) {
     const { data, error } = await supabase
       .from("predictions")
-      .select(`id, is_correct, confidence, scoring_rule, debate_version, home_win_prob, games!inner(game_date)`)
+      .select(`is_correct, scoring_rule, debate_version, games!inner(game_date)`)
       .eq("league", "kbo")
       .in("scoring_rule", ["v1.8", "v1.8-credit-fail"])
       .not("is_correct", "is", null)
