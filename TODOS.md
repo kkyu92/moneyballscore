@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy) 미감사 API 라우트 5개 신규 축 감사, 발견 0건 clean (cycle 2806, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2805 retro commit 4cecd8e0) OK. 직전8 distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 6/30, lotto 24/30). explore-idea saturation(13/15) 재도달했으나 cycle 2805 재확인과 동일 결론(diminishing return, 경과일 거의 0) — review-code(heavy) 유지, 단 기존 대형파일 백로그(buildAccuracyData/buildTeamProfile/buildMatchupProfile/convergenceRecord/hub-dispatch/health-pipelines/MLB 헬퍼 15개)는 cycle 2805 확정대로 완전 소진 — git commit count 기준(1-2건) 신규 미감사 API 라우트 5개(`picks/mlb-poll`/`revalidate`/`version`/`picks/mlb-submit`/`leaderboard/mlb-sync`) 선택.
+
+감사 결과: 전부 clean. `picks/mlb-poll`/`revalidate`/`version` 은 KBO 대응 라우트와 구조 동일(공개 GET, bearer auth, 공개 상태정보). `picks/mlb-submit`/`leaderboard/mlb-sync` 는 origin 검증 + 입력 검증(길이/enum/UUID 정규식/닉네임 XSS 블랙리스트) + Sentry capture 까지 KBO 대응 라우트(`picks/submit`/`leaderboard/sync`)와 1:1 parity 확인. `DB_CONSTRAINTS.mlbPickPollEvents`/`mlbUserPicks` 가 migration 048/050 UNIQUE 제약과 정확히 일치, `PICKS_POLL_IDS_LIMIT`/`NICKNAME_MIN_CHARS`/`NICKNAME_MAX_CHARS`/`DEVICE_ID_MAX_LENGTH` 상수 전부 정합. `mlb-poll`/`revalidate` 테스트 부재는 KBO 대응 라우트도 동일(기존 패턴, 신규 갭 아님). 코드 변경 없음.
+
+다음 사이클 추천 = gap-fill 후보(lotto 25/30, op-analysis 9/25, info-arch 7/30, fix-incident 4/20) 대기. review-code(heavy) 계속 시 다음 신규 축 탐색 필요(components/ 디렉토리 commit-count 기준 또는 hooks/lib 미커버 영역) — 대형파일 + 저-commit API 라우트 두 축 모두 소진.
+
 ## 🟡 RETRO-ONLY — review-code(heavy) hub-dispatch/health-pipelines 감사, 발견 0건 clean (cycle 2805, 2026-09-02)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2804 retro commit 64bcfd01) OK. 직전8 distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 2/20, op-analysis 7/25, info-arch 5/30, lotto 23/30). explore-idea saturation(13/15) 충족했으나 cycle 2718 재탐색 결과와 동일 블로커(MLB postseason ETA/plan#29 트래픽 무변화, 실제 경과일 1일)라 diminishing return 판단 — cycle 2803 retro 가 명시한 미감사 후보 2건(hub-dispatch/route.ts 180L, health/pipelines/route.ts 107L) 선택.
