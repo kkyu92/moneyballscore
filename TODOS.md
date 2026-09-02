@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy) buildTeamProfile.ts 4축 감사 clean (cycle 2785, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2784 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 12/25, info-arch 16/30, lotto 3/30). 직전8 distinct=3(review-code(heavy) 5 + fix-incident(lite) 2 + lotto 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 plan#29 재평가 트리거 여전히 negative(트래픽 무성장, 포스트시즌 미도달, GH issue 0) — review-code(heavy) 유지. 직전 3사이클(2782-2784) 전부 next_recommended_chain=review-code(heavy) — carry-over 후보 `buildTeamProfile.ts`(591줄) 채택.
+
+general-purpose 서브에이전트 4축 감사(consumer trace / select-vs-read / prefix-leak / comment-vs-code): `TeamProfile` 모든 필드 `team/[code]/page.tsx` 렌더 확인, `games` select() 19개 predictions 컬럼 전부 소비 확인, `home_`/`away_` prefix 는 loop 안에서 이미 canonical unprefixed 필드로 정확히 변환(cycle 2784 postview.ts 패턴과 달리 이 파일은 애초 정상). 주석 9개 블록 전부 현재 코드와 정합. `correctN` 필드는 page 직접 미소비이나 `accuracyRate` 계산(buildTeamProfile.ts:580)에 내부 소비 확인돼 dead field 아님(KBO/MLB API symmetry 필드, MLB parity type 도 동일 필드 보유).
+
+66 tests green(8 test files), tsc/lint clean. 코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 carry-over `buildMatchupProfile.ts`(584줄) 정독, 또는 fix-incident(3/20)/op-analysis(13/25)/info-arch(17/30)/lotto(4/30) gap 자연 대기.
+
 ## ✅ SUCCESS — review-code(heavy) postview.ts keyFactor prefix leak 수정 (cycle 2784, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2783 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 0/20 방금 발화, op-analysis 11/25, info-arch 15/30, lotto 2/30). 직전8 distinct=3(review-code(heavy) 5 + fix-incident(lite) 2 + lotto 1) — 2-chain lock 미충족. 직전 3 cycle(2781/2782/2783) 전부 next_recommended_chain=review-code(heavy) — 최고령 미감사 대형파일 `postview.ts`(588줄, 2026-08-26 동률 최고령) 채택.
