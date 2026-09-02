@@ -68,7 +68,7 @@ export function PlaceholderCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={awayTeam} size={40} />
           </div>
-          <p className="text-sm font-medium">{shortTeamName(awayTeam)}</p>
+          <p className="text-sm font-medium whitespace-nowrap">{shortTeamName(awayTeam)}</p>
         </div>
 
         <div className="px-4 text-center">
@@ -81,7 +81,7 @@ export function PlaceholderCard({
           <div className="flex justify-center mb-1">
             <TeamLogo team={homeTeam} size={40} />
           </div>
-          <p className="text-sm font-semibold inline-flex items-center gap-1.5 justify-center">
+          <p className="text-sm font-semibold inline-flex items-center gap-1.5 justify-center whitespace-nowrap">
             {shortTeamName(homeTeam)}
             <span
               aria-label="홈팀"

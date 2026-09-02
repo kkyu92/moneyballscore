@@ -163,7 +163,7 @@ export function PredictionCard({
             <TeamLogo team={awayTeam} size={40} />
           </div>
           <p
-            className={`text-sm font-medium inline-flex items-center gap-1.5 justify-center ${
+            className={`text-sm font-medium inline-flex items-center gap-1.5 justify-center whitespace-nowrap ${
               awayWon
                 ? "font-bold text-brand-700 dark:text-brand-400"
                 : homeWon
@@ -216,7 +216,7 @@ export function PredictionCard({
             <TeamLogo team={homeTeam} size={40} />
           </div>
           <p
-            className={`text-sm font-semibold inline-flex items-center gap-1.5 justify-center ${
+            className={`text-sm font-semibold inline-flex items-center gap-1.5 justify-center whitespace-nowrap ${
               homeWon
                 ? "font-bold text-brand-700 dark:text-brand-400"
                 : awayWon
