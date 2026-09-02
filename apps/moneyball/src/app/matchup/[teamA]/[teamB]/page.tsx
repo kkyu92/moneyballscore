@@ -525,7 +525,7 @@ function GameTable({ games }: { games: import("@/lib/matchup/buildMatchupProfile
                 <td className="py-2.5 px-3 font-mono text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {g.gameDate}
                 </td>
-                <td className="py-2.5 px-3">
+                <td className="py-2.5 px-3 whitespace-nowrap">
                   <Link
                     href={`/analysis/game/${g.gameId}`}
                     className="text-sm font-medium text-gray-800 dark:text-gray-100 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"

@@ -261,7 +261,7 @@ export default async function PlayerProfilePage({ params }: PageProps) {
                       <td className="py-2 pr-3 font-mono text-xs text-gray-600 dark:text-gray-300">
                         {a.gameDate}
                       </td>
-                      <td className="py-2 pr-3">
+                      <td className="py-2 pr-3 whitespace-nowrap">
                         <Link
                           href={`/analysis/game/${a.gameId}`}
                           className="text-gray-800 dark:text-gray-100 hover:text-brand-500"
