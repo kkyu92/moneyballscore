@@ -233,7 +233,7 @@ export default async function StandingsPage() {
                           {row.rank}
                         </span>
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <Link
                           href={`/teams/${row.teamCode}`}
                           className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
