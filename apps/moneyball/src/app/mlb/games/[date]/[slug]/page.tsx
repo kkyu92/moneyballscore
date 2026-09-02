@@ -42,10 +42,21 @@ interface PageParams {
 // 전체 모델 팩터 총합 상수(14)를 그대로 heading/description 에 써서 표시 숫자와
 // 실제 7행 렌더 mismatch 가 있었음. cycle 2102 가 5→7행으로 늘렸지만 카운트 클레임
 // 자체는 안 고쳐 재발 — 배열 길이로 self-sync 시켜 재재발 차단).
+// NOTE (review-code heavy, cycle 2765): 이 self-sync 는 metadata description 의
+// "N팩터" 카운트 문자열에만 적용 — 실제 렌더 행은 buildMlbFactorDetailRows 가
+// waterfallInput 에서 별도로 구성(mlb-waterfall.ts 참조)해서 아래 slug/label/
+// homeKey/awayKey 필드는 프로그램상 소비되지 않는 문서용 값(길이·statcast 플래그만
+// 실사용). mlb-waterfall.ts 쪽 팩터가 추가/제거돼도 이 배열은 자동 반영 안 되므로
+// 길이(10) 를 수동으로 맞춰줘야 함 — 필드 자체 제거 시 어떤 10팩터인지 문서가 사라져
+// 유지.
 const GAME_DETAIL_FACTOR_ROWS: Array<{
+  /** 문서용 — 프로그램에서 소비되지 않음 (실제 값은 mlb-waterfall.ts 가 별도 구성) */
   slug?: MetricSlug;
+  /** 문서용 — 프로그램에서 소비되지 않음 */
   label?: string;
+  /** 문서용 — 프로그램에서 소비되지 않음 */
   homeKey: keyof PredictionDetailRow;
+  /** 문서용 — 프로그램에서 소비되지 않음 */
   awayKey: keyof PredictionDetailRow;
   statcast?: boolean;
 }> = [

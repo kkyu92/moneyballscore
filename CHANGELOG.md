@@ -1,3 +1,14 @@
+## v0.5.62.199 — 2026-09-02 (cycle 2765, review-code(heavy): mlb/ 대형 route 파일 5개 감사 + misleading comment/copy fix SUCCESS)
+
+### review-code(heavy): apps/moneyball/src/app/mlb 신규 축 감사 (cycle 2765, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap8/20·op-analysis gap5/25·info-arch gap26/30·lotto gap13/30 전부 미도달. 직전8 distinct=3(review-code/fix-incident/operational-analysis) — 2-chain lock 미충족. review-code(heavy) 3연속 success streak(2762-2764) — dominance-positive 인정, 신규 축 = `apps/moneyball/src/app/mlb/` 대형 route 파일 5개(602~502줄, 이 sweep 최초 감사 대상).
+- general-purpose 서브에이전트로 5개 파일(team/[code], games/[date]/[slug], reviews/weekly/[week], matchup/[teamA]/[teamB], reviews/monthly/[month]) 전수 감사. 4개는 데이터 로직을 lib 헬퍼로 위임(이번 사이클 범위 밖, 미검증 명시) — select 컬럼 축은 clean/미검증. games/[date]/[slug]/page.tsx 만 직접 `.select()` 보유(6+22 컬럼) 전부 소비 확인.
+- 확정 finding: `GAME_DETAIL_FACTOR_ROWS` (games/[date]/[slug]/page.tsx:45) 상단 주석이 "배열 길이로 self-sync 시켜 재재발 차단"이라고 과잉 주장 — 실제로는 metadata description 의 "N팩터" 카운트 문자열에만 self-sync 적용되고, 실제 렌더 행은 `mlb-waterfall.ts` 가 별도 구성해 이 배열과 구조적 연결 없음(slug/label/homeKey/awayKey 필드는 `.length`/`.statcast` 외 어디서도 미소비, 프로그램상 dead field — 현재는 두 소스가 우연히 일치해 active mismatch 없음이나 향후 desync 가능성 존재). 주석 정정 + 필드에 "문서용, 미소비" JSDoc 명시(필드 삭제 대신 — 10팩터가 뭔지 문서 가치 보존).
+- 부수 발견: team/[code]/page.tsx:572 EmptyState 문구에 영어 단어 "game" 이 한국어 문장에 그대로 섞여 있어("MLB 162game 시즌...") "경기"로 수정.
+- tsc/eslint/test 전부 green (571파일 4490건, 신규 테스트 없음 — 주석/문구 수정만). direct main push.
+- 다음 사이클 추천 = review-code(heavy) 계속 시 `lib/mlb/build*.ts`/`lib/reviews/build*.ts`/`lib/analysis/convergenceRecord.ts` (이번 사이클 미검증 위임 헬퍼, 실제 select 컬럼 축 소재지) 재탐색 또는 op-analysis(gap 6/25)/fix-incident(gap 9/20)/info-arch(gap 27/30)/lotto(gap 14/30) 자연 대기.
+
 ## v0.5.62.198 — 2026-09-02 (cycle 2763, review-code(heavy): anonymous write endpoint Origin/CSRF 불일치 제거 SUCCESS)
 
 ### review-code(heavy): CRON_SECRET/API_KEY 보호 규칙 audit + Origin 불일치 fix (cycle 2763, SUCCESS)
