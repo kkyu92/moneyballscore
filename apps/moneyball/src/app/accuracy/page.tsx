@@ -940,7 +940,7 @@ export default async function AccuracyPage() {
                           isOutlier ? 'bg-warning/10' : ''
                         }`}
                       >
-                        <td className="py-2 pr-4 font-medium">
+                        <td className="py-2 pr-4 font-medium whitespace-nowrap">
                           {shortTeamName(t.teamCode)}
                           {isOutlier && (
                             <span className="ml-1.5 text-2xs bg-warning/15 text-warning rounded px-1 py-0.5">
