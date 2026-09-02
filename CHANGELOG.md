@@ -1,3 +1,14 @@
+## v0.5.62.196 — 2026-09-02 (cycle 2761, review-code(heavy): packages/kbo-data 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): packages/kbo-data 신규 축 감사 (cycle 2761, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap4/20·op-analysis gap1/25·info-arch gap22/30·lotto gap9/30 전부 미도달. 직전8 distinct=3(review-code/fix-incident/op-analysis) — 2-chain lock 미충족.
+- 직전 sweep(page→API→lib→components, apps/moneyball 전역)이 미소비 select 컬럼 축을 사실상 소진 — 신규 축 = `packages/kbo-data/src/` 백엔드 pipeline/agent 코드(이 특정 sweep 첫 감사 대상).
+- Explore 서브에이전트로 18개 파일(agents/pipeline/backtest/factors) 전수 감사 후 5개 파일에서 확정 미소비 컬럼 발견: `agents/retro.ts`(game_id/predicted_winner/confidence/reasoning + home_score/away_score), `backtest/loader.ts`(status + game embed id), `pipeline/save-game-record.ts`(id), `pipeline/factor-bias-bootstrap-ci.ts`(id/game_id), `pipeline/postview-daily.ts`(id/home_elo/away_elo).
+- `backfill-records.ts` 는 PostgREST 임베디드 필터(`.gte('game.game_date', ...)`)가 select 프로젝션 존재 요구 가능성 있어 제외(런타임 미검증 리스크). `shadow-cohort.ts` 의 `insert().select('id')` 는 제거 시도 시 테스트 4건 실패(select() 자체가 insert 를 awaitable 체인으로 만드는 필수 요소) 확인 후 원복 — 두 사례 모두 이 sweep 의 "확실하지 않으면 skip" 원칙 실증.
+- fix: 5개 파일 select절/interface 에서 미소비 컬럼 제거. tsc/eslint clean, 571파일 4484건 green.
+- 다음 사이클 추천 = op-analysis gap monitor(1/25, 사실상 매 사이클 근접 재측정 후보) 또는 review-code 신규 축 재탐색(packages/kbo-data 축도 사실상 소진 — scripts/ 디렉토리 등 미탐색 영역 확인 필요).
+
 ## v0.5.62.195 — 2026-09-02 (cycle 2760, operational-analysis(lite): CE cohort 재측정 gap=33/25 trigger SUCCESS)
 
 ### operational-analysis(lite): CE cohort 재측정 (cycle 2760, SUCCESS)
