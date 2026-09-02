@@ -1,4 +1,16 @@
 
+## ✅ SUCCESS — review-code(heavy) buildTeamAccuracy/buildMlbTeamAccuracy 4축 감사 (cycle 2780, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger 전부 미도달(fix-incident 3/20, op-analysis 7/25, info-arch 11/30, lotto 28/30 근접). 직전8 distinct=3 — 2-chain lock 미충족. cycle 2779 recommendation(buildTeamProfile.ts/buildMatchupProfile.ts)은 cycle 2768에서 이미 감사 완료된 stale 추천으로 확인해 재작업 회피, 대신 저-touch 신규 페어 `buildTeamAccuracy.ts`(KBO, 7 commits)/`buildMlbTeamAccuracy.ts`(MLB, 3 commits) 신규 선택.
+
+general-purpose 서브에이전트 4축 감사(dead-field/JSDoc/KBO-MLB parity/error-swallowing) — 2건 확정. (1) `MlbTeamBiasRow.actualWinN` 필드가 계산만 되고 유일 소비처(`TeamBiasTable.tsx`의 `BiasLike` interface)엔 구조적으로 없어 dead field. (2) `buildAllMlbTeamAccuracy` 정렬이 `verifiedN` 내림차순(경기수 많은 팀 우선)인데 KBO `buildAllTeamAccuracy`는 `accuracyRate` 내림차순(KBO 테스트로 명시 검증됨, MLB는 order 테스트 없음) — 두 리그 accuracy 페이지 모두 build 함수 반환 순서 그대로 렌더해 팀 정렬 기준이 리그마다 다르게 보이던 무의도 parity gap으로 판단.
+
+fix: `actualWinN` 필드 제거(내부 `actualWinPct` 계산용 accumulator는 유지) + 정렬 기준 `accuracyRate` 내림차순으로 통일 + 회귀 테스트 1건 추가(NYY/BOS/NYM 3팀 fixture로 정렬 기준이 verifiedN 아닌 accuracyRate 임을 명시 검증).
+
+tsc/eslint/vitest 571파일 4492건(+1) 전체 green. 단일 논리 단위 → 직접 main commit+push(R4/R7, cf23c431).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 저-touch 파일(`buildMlbTeamProfile.ts` 515줄/`factor-explanations.ts` 416줄/`buildPicksStats.ts` 393줄) rotation, 또는 lotto(28/30 근접) 자연 대기.
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildAccuracyData.ts 4축 감사 clean (cycle 2779, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23. gap trigger 전부 미도달(fix-incident 0/20 방금 클리어, op-analysis 6/25, info-arch 10/30, lotto 27/30). 직전8 distinct=3 — 2-chain lock 미충족. deploy-drift-alert 최신 run SUCCESS로 cycle 2777 self-heal 재확인.
