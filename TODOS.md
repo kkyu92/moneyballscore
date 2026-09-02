@@ -1,4 +1,13 @@
 
+## cycle 2775 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger: fix-incident 18/20, op-analysis 2/25, info-arch 6/30, lotto 23/30 — 전부 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + info-architecture-review 1) — 2-chain lock 미충족.
+- cycle 2774 자체 carry-over 추천(`packages/kbo-data/src/pipeline/daily.ts`, 1629줄, 최대 파이프라인 파일) 그대로 계승 — git log 확인 결과 무관 fix 1건뿐이라 신선한 sweep 대상.
+- general-purpose 서브에이전트 전수 감사(JSDoc/dead code/KBO-MLB parity/error swallowing 4축). CONFIRMED 1건: verify mode 조기 return 2경로(`results_sent` dedup skip / `isNotificationSent` throw)가 `verifiedCount.value=0` 초기값 그대로 `finish()` 호출 → `shouldAlertSilentDrift` 가 "0===0 → 진짜 silent drop" 으로 오판, 정상 cron 중복 스킵/DB 읽기 hiccup 인데도 Sentry warning + Telegram 알림 오발화. PLAUSIBLE 1건(recent-form/H2H fallback silent catch, 낮은 우선순위 보류).
+- fix: `verifiedCount` 초기값 `0`→`undefined` 변경(대상만 undefined 유지 시 "검증 안 함"과 "검증했더니 0건" 구분). 회귀 테스트 2건 추가(dedup skip 경로 + isNotificationSent throw 경로) — fix revert 시 둘 다 fail 확인 완료.
+- packages/kbo-data 전체 vitest 1222건 green, eslint clean, apps/moneyball tsc clean. direct main push(c87271e6). 버전 범프 불요(pre-push guard green).
+- 다음 사이클 추천 = review-code(heavy) 계속(daily.ts 잔여 축 — PLAUSIBLE finding 후속 또는 mlb-pipeline.ts 대응부 재확인) 또는 fix-incident(gap 19/20)/lotto(gap 24/30) 자연 대기.
+
 ## cycle 2774 (2026-09-02) — RETRO-ONLY — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger: fix-incident 18/20, lotto 23/30, info-arch 5/30, op-analysis gap=1(2773 방금 발화) — 전부 미도달. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건, apps/moneyball tsc --noEmit clean.
