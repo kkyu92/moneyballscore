@@ -1,4 +1,12 @@
 
+## cycle 2773 (2026-09-02) — SUCCESS — operational-analysis(lite)
+
+- 진단: open issue 0, unprocessed plan 0/22(approved 없음). gap trigger: fix-incident 16/20, op-analysis 46/25(도달, 사상 최대 지연 — 직전 발화 cycle 2727), info-arch 4/30, lotto 21/30. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건.
+- op-analysis gap trigger(46-cycle, 임계 25 대비 거의 2배 지연) 도달로 operational-analysis(lite) 선택. `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행.
+- 결과: n=362(CE 315/비CE 47) — cycle 2760과 완전 동일 수치(신규 verified 예측 0건, 13-cycle 경과에도 배치 미반영). CE 54.6%(172/315) / 비CE 63.8%(30/47) → 격차 9.2pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp 유지 — LLM 부가가치 우세 결론 18회 연속 재확인.
+- CLAUDE.md "예측 엔진 가중치" 섹션에 cycle 2773 엔트리 추가(15c56e1b, direct main push). 코드 변경 없음(retro-only), CREDIT_EXHAUSTED·비CE 표본 동결 상태 변화 없음.
+- 다음 사이클 추천 = review-code(heavy) 계속 또는 fix-incident(gap 16/20)/lotto(gap 21/30) 자연 대기. op-analysis 다음 재도달은 cycle 2798(25-cycle) 예상이나 최근 지연 패턴 감안 시 유동적.
+
 ## cycle 2772 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/29(approved 없음). gap trigger 4종 전부 미도달(fix-incident 15/20, op-analysis 12/25, info-arch 3/30, lotto 20/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건, tsc clean.
