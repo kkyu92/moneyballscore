@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /teams 모바일 wrap 버그 3번째 재발 발견+수정 (cycle 2794, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/22(approved 없음). 2차 방어선(cycle 2793 retro commit 존재) OK. 직전8 정규화 base chain distinct=2(review-code 4 + polish-ui 4) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 21/25, info-arch 25/30, lotto 12/30). explore-idea saturation count=14(≥12)이나 4-source 재확인 negative(GH issue 0, DESIGN.md 당일 갱신, 신규라우트 -7d는 git 이력상 mtime 부작용, breadcrumb 18건 전부 기존 의도된 제외). gh run list 확인 = 최근 CI/scheduled workflow 실패 0건. 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화.
+
+cycle 2793 next_recommended(/predictions,/picks,/insights,/leaderboard)를 먼저 확인했으나 전부 `<td>` 자체가 없는 카드 레이아웃 — stale 추천이었음을 확인(재작업 회피). 대신 `<td` grep으로 테이블 보유 라우트 전수 나열 후 미감사 라우트 재탐색 — `/teams/[code]/page.tsx` 2곳(예정경기 테이블, 최근예측기록 테이블)과 `/teams/[code]/recent/page.tsx` 1곳에서 opponentName 렌더 `<td>`에 `whitespace-nowrap` 누락 확인. cycle 2792(/players)·cycle 2793(/standings)에 이은 동일 패턴 3번째 재발.
+
+수정: 3개 `<td>`에 `whitespace-nowrap` 추가. tsc/eslint/test(571파일 4492건) 전부 green. 로컬 dev 서버로 `/teams/HH`, `/teams/HH/recent` 375px 모바일 뷰포트 스크린샷 검증 — 레이아웃 정상(해당 팀 최근 상대가 KT/NC/SSG처럼 이미 짧은 이름이라 실제 wrap 재현은 못 봤으나 defensive fix로 타 테이블과 패턴 정합). 콘솔 HMR/hydration 에러는 dev 환경 잔존 아티팩트(기존 알려진 false positive 패턴, 기능 무관). main 직커밋+push(171a9069), CI green.
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료(cycle 2800) 전까지 gap trigger 자연 대기(fix-incident 12/20, op-analysis 22/25 — 25 임계 근접, info-arch 26/30, lotto 13/30) 또는 polish-ui 잔여 테이블 라우트 재확인(mlb/en 대응 페이지, debug/* 낮은 우선순위).
+
 ## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /standings 모바일 wrap 버그 발견+수정 (cycle 2793, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy) 5 + polish-ui 3) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 20/25, info-arch 24/30, lotto 11/30). 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화. cycle 2792 next_recommended("잔여 라우트: /teams, /standings, /matchup") 따라 실브라우저 QA 진행.
