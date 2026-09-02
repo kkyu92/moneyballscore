@@ -97,6 +97,20 @@ describe("PredictReveal", () => {
     expect(css).toMatch(/--motion-slow:\s*0ms/);
   });
 
+  it("cycle 2766 polish-ui — 테마 전환 transition 실제 구현 + 미소비 easing 토큰(--ease-in/--ease-in-out) 제거", () => {
+    const cssPath = path.resolve(__dirname, "../../app/globals.css");
+    const css = readFileSync(cssPath, "utf-8");
+
+    // DESIGN.md 가 문서로만 주장하던 theme-transition 규칙이 실제로 존재
+    expect(css).toMatch(
+      /transition:\s*\n?\s*background-color var\(--motion-slow\),\s*\n?\s*color var\(--motion-slow\)/,
+    );
+
+    // 실사용 0건이던 easing 토큰 제거 확인 (--ease-out 만 유지)
+    expect(css).not.toMatch(/--ease-in:/);
+    expect(css).not.toMatch(/--ease-in-out:/);
+  });
+
   it("Contrast — 다크 모드 컨테이너 안 PredictReveal 가 DESIGN.md 검증된 토큰만 사용 (자체 색 X)", () => {
     mockMatchMedia(true); // 빠른 finalize
 

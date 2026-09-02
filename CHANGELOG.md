@@ -1,3 +1,14 @@
+## v0.5.62.200 — 2026-09-02 (cycle 2766, polish-ui(2-chain lock fallback): Motion 토큰 과잉주장 문서 발견 + 미소비 easing 토큰 제거 SUCCESS)
+
+### polish-ui(2-chain lock fallback): globals.css motion 토큰 감사 (cycle 2766, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/29(approved 없음). gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 6/25, info-arch 27/30, lotto 14/30). 직전8 distinct=2(review-code(heavy) 7 + operational-analysis(lite) 1) — 2-chain alternation lock 발동, 둘 다 후보 제외. explore-idea saturation(12/15) 도달했으나 4-source 재확인 negative(TODOS Next-Up stale, GH issue 0, plan#29 트래픽 count 무성장 지속, 신규라우트 -7d 는 git 이력상 실제 추가 0건=mtime 부작용) — 잔여 chain 전부 organic trigger 부재 → polish-ui 강제 발화(lock rule).
+- DESIGN.md token vs 실제 컴포넌트 grep 계열 탐색 — `globals.css` Motion 섹션 토큰 6개(`--motion-fast/medium/slow`, `--ease-out/in/in-out`) 전수 실사용처 확인. `--motion-medium`/`--motion-slow`/`--ease-in`/`--ease-in-out` 4개가 CSS 어디에도 `var()` 로 실제 적용된 곳 없음(테스트 assertion·주석·JS 근사치 계산만 존재).
+- 확정 finding: DESIGN.md Motion 섹션 "테마 전환: `transition: background var(--motion-slow), color var(--motion-slow)`" 이 실제로는 `globals.css` `html,body` 규칙에 전혀 구현돼 있지 않았음(배경색만 `var(--color-surface)`, transition property 자체 부재) — 과잉주장 문서. `--ease-in`/`--ease-in-out` 은 exit/reorder 애니메이션이 코드에 아예 없어 실사용 0건(dead token).
+- fix: `html,body` 에 실제 `transition: background-color var(--motion-slow), color var(--motion-slow)` 규칙 추가(문서를 실제화, prefers-reduced-motion 가드가 이미 `--motion-slow: 0ms` 강제로 커버) + `--ease-in`/`--ease-in-out` 제거(`--ease-out` 만 유지 — PredictReveal RAF 곡선이 이 값을 JS 로 수학적 근사, 테스트가 값 정합 assert). DESIGN.md Motion 섹션 + drift-log 표 갱신.
+- `PredictReveal.test.tsx` 에 lock-in 테스트 1건 추가(transition 규칙 실존 + `--ease-in`/`--ease-in-out` 부재 assert). tsc/eslint/test 전부 green (571파일 4491건, +1). direct main push.
+- 다음 사이클 추천 = review-code(heavy) 미감사 대형 파일(`lib/mlb/build*.ts`/`lib/reviews/build*.ts`/`lib/analysis/convergenceRecord.ts` carry-over) 정독, 또는 fix-incident(9/20)/op-analysis(6/25)/info-arch(27/30)/lotto(14/30) gap 자연 대기.
+
 ## v0.5.62.199 — 2026-09-02 (cycle 2765, review-code(heavy): mlb/ 대형 route 파일 5개 감사 + misleading comment/copy fix SUCCESS)
 
 ### review-code(heavy): apps/moneyball/src/app/mlb 신규 축 감사 (cycle 2765, SUCCESS)

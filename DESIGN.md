@@ -94,9 +94,8 @@
 ## Motion
 - **Approach:** Minimal-functional
 - **Easing tokens** (`globals.css` `@theme inline`):
-  - `--ease-out: cubic-bezier(0.16, 1, 0.3, 1)` — enter, reveal
-  - `--ease-in: cubic-bezier(0.7, 0, 0.84, 0)` — exit
-  - `--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)` — move, sort, reorder
+  - `--ease-out: cubic-bezier(0.16, 1, 0.3, 1)` — enter, reveal (PredictReveal RAF 곡선이 JS 로 수학적 근사)
+  - ~~`--ease-in`~~ / ~~`--ease-in-out`~~ — cycle 2766 polish-ui 에서 제거(exit/reorder 애니메이션 미구현, 실사용 0건 확인 후 dead token 정리)
 - **Duration tokens**:
   - `--motion-fast: 150ms` — page transition fade, nav hover
   - `--motion-medium: 200ms` — predict reveal count-up, dropdown open
@@ -104,7 +103,7 @@
 - **Animations**:
   - LIVE 펄스: `animate-pulse` on red dot (실시간 경기)
   - 카드 hover: `transition-shadow` (hover:shadow-md)
-  - 테마 전환: `transition: background var(--motion-slow), color var(--motion-slow)`
+  - 테마 전환: `transition: background-color var(--motion-slow), color var(--motion-slow)` (`html,body`, `globals.css`) — cycle 2766 polish-ui 이전엔 본 줄이 실제 미구현 상태로 문서만 존재(과잉주장 발견 후 구현)
   - 스코어 변경: 없음 (SWR 리렌더 시 즉시 반영, 의도적)
   - **PredictReveal count-up**: 0 → win prob, `var(--motion-medium)` `var(--ease-out)`, requestAnimationFrame 기반
   - **Disclosure chevron rotate** (desktop nav dropdown + 모바일 아코디언): `duration-200`(`--motion-medium`, "dropdown open" 역할) — cycle 2610 review-code(heavy) 에서 `MobileNav.tsx` 아코디언 chevron 이 `duration-150`(nav hover 용도)을 쓰던 걸 desktop `navigation-menu.tsx` 와 동일 역할로 정렬
@@ -151,6 +150,7 @@
 | 2026-08-26 | "AI" 원형 아이콘 배지 크기 `w-5 h-5` → `w-6 h-6` 정렬 (silent drift, cycle 2611 review-code heavy) | 동일 역할 배지(`inline-flex items-center justify-center ... rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300 font-bold text-2xs` + "AI" 텍스트) 3곳 중 `DebateTimeline.tsx`/`JudgeReasoningCard.tsx` 는 `w-6 h-6`, `predictions/[date]/page.tsx` 헤더만 `w-5 h-5` — 1-notch 이탈. 다수결(2/3)인 `w-6 h-6` 로 정렬. 아이콘 크기(w-4/w-5/w-6) 축 전역 재점검 — 나머지 사용처는 역할 상이(팀 순위 원형 뱃지 `w-6 h-6`, 로또 콤보체크 `w-9 h-9` 등)라 twin 아님, drift 아님 확인. |
 | 2026-08-26 | `dark:border-gray-N/opacity` 변형 8곳 role 문서화 (cycle 2623 예외 확정분 재검증, cycle 2625 review-code heavy) | cycle 2623 이 전역 마이그레이션(`dark:border-gray-N` → `dark:border-[var(--color-border)]`)에서 opacity suffix 있는 8곳(7파일)을 제외했지만 그 이유가 문서화 안 돼 있어 다음 사이클이 "미마이그레이션 잔존"으로 재의심할 여지 있었음 — 실제로는 4-역할 twin 그룹으로 전부 내부 일관 확인, drift 아님: (1) **팩터 수렴 배지 tri-state**(`analysis/game/[id]/page.tsx:492`) — amber/brand/gray 3색 모두 `border-{color}-700or800/50` 로 opacity 일관, 2026-07-18 3-tier 시스템 소속이라 단색 토큰 부적합. (2) **뮤트 정보 패널**(`analysis/game/[id]/page.tsx:609`, `en/mlb`+`mlb` games 상세, `MatchupFactorCompare`, `MlbMatchupFactorCompare` — 5곳) — `border-gray-700/50` + `bg-gray-800/30` 조합 5곳 100% 동일, 반투명 배경 위 반투명 보더로 배경 톤에 자연 블렌드 (불투명 토큰 사용 시 배경과 대비 과다). (3) **점선 기준선**(`accuracy/page.tsx:776`) — 단독 사용, `border-gray-500/50` 로 차트 배경 위 은은한 참조선. (4) **커스텀 서피스 디바이더**(`WeeklyGamesSortControl.tsx:59`) — 단독 사용, `bg-[var(--color-surface)]` 위 `border-gray-700/40`. 코드 변경 없음(문서화만) — `--color-border` 단일 토큰 규칙(DESIGN.md:64)은 불투명 배경 위 보더 전용이고, 반투명 배경/오버레이 위 보더는 opacity suffix 를 의도적으로 유지한다는 예외 규칙 신설. |
 | 2026-09-01 | MLB OG/twitter 이미지 gradient family 잔여 drift 3건 정리 (cycle 2675 polish-ui, 2-chain lock fallback) | wave-144(design-tokens 통합, cycle 미상)가 놓친 3곳: (1) `mlb/team/{opengraph,twitter}-image.tsx` 가 `MLB_GRADIENT_TEAM_SKY_135`(en/mlb/team + mlb/games/[date] 가 이미 사용 중) 대신 리터럴 중복(`#0a1a2f`/`#1e3a8a`/`#2563eb`, 다른 블루)을 하드코딩 — 토큰으로 교체. (2) "선수" OG 패밀리가 하나의 role 인데 3갈래(`mlb/players` 보라 VIOLET / `en/mlb/players`+`en/mlb/players/[id]` 초록 GREEN / `mlb/players/[id]` 리터럴 금갈색)로 흩어져 있었음 — GREEN(2/4 이미 사용 중)으로 통일, VIOLET 토큰은 사용처 소진돼 design-tokens.ts 에서 제거(8종 레지스트리로 축소). (3) `mlb/factors` vs `en/mlb/factors` gradient 시작색이 `#1a0f0a` vs `#1a0f00` 로 1-hex 오탈자 차이(같은 날 커밋, KO 가 원본) — KO 값으로 정렬. `silent-drift-wave-144.test.ts` 그룹 재편(TEAM_SKY/GREEN 파일 목록 갱신, VIOLET 그룹 제거) + `tsc`/`lint`/vitest 571 files·4482 tests(+6) green. |
+| 2026-09-02 | Motion 토큰 과잉주장 문서 발견 + 미소비 easing 토큰 정리 (cycle 2766 polish-ui, 2-chain lock fallback) | Motion 섹션(97번 줄 구버전) "테마 전환: `transition: background var(--motion-slow), color var(--motion-slow)`" 이 실제로는 `globals.css` `html,body` 규칙에 전혀 구현돼 있지 않았음(배경색만 `var(--color-surface)`, transition property 자체 부재) — 과잉주장 문서 확정. `--ease-in`/`--ease-in-out` 토큰도 CSS/JS 어디서도 실사용 0건(exit/reorder 애니메이션 미구현) 확인. fix: `html,body` 에 실제 `transition: background-color var(--motion-slow), color var(--motion-slow)` 규칙 추가(문서 실제화) + `--ease-in`/`--ease-in-out` 제거(`--ease-out` 만 유지, PredictReveal JS 근사 곡선 정합 목적으로 실사용). `pnpm --filter moneyball exec tsc --noEmit`/lint/vitest green. |
 
 ## MLB IA (implemented — cycle 2162 정정)
 

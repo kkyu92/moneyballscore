@@ -60,14 +60,15 @@
 
   /* Motion tokens — DESIGN.md "Motion" 섹션 정렬 (W-D, 2-day blast).
      PredictReveal count-up = --motion-medium / page transition = --motion-fast
-     / theme transition = --motion-slow. prefers-reduced-motion: reduce 시
-     0ms 로 강제 (아래 :root override). */
+     / theme transition = --motion-slow (html,body 규칙, 아래). prefers-reduced-motion:
+     reduce 시 0ms 로 강제 (아래 :root override).
+     --ease-in / --ease-in-out 은 cycle 2766 polish-ui 에서 제거(exit/reorder
+     애니메이션 미구현, 실사용 0건) — --ease-out 만 유지(PredictReveal RAF 곡선이
+     이 값을 JS 로 수학적 근사, PredictReveal.test.tsx 가 값 정합 assert). */
   --motion-fast: 150ms;
   --motion-medium: 200ms;
   --motion-slow: 300ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* 다크모드 시맨틱 토큰 오버라이드 — Hybrid C: 뉴트럴 배경 + 그린 틴트 카드 */
@@ -86,6 +87,13 @@
 html,
 body {
   background-color: var(--color-surface);
+  /* 테마 전환 애니메이션 — DESIGN.md Motion "theme transition = --motion-slow"
+     명시 규칙이 그동안 미구현이었음(cycle 2766 polish-ui, 2-chain lock fallback,
+     과잉주장 문서 발견). prefers-reduced-motion 가드(아래 @media)가 --motion-slow
+     0ms 강제로 이미 커버. */
+  transition:
+    background-color var(--motion-slow),
+    color var(--motion-slow);
 }
 
 /* 숫자 정렬 — font-mono 유틸 전부에 tabular-nums 기본 적용. DESIGN.md:
