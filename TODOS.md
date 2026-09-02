@@ -1,4 +1,12 @@
 
+## cycle 2764 (2026-09-02) — RETRO-ONLY — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(plan#29 로그인/커뮤니티 Tier4 postseason 재평가 대기, 조건 미충족). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 25/30, lotto 12/30). 직전8 distinct=3 — 2-chain lock 미충족. explore-idea saturation(12/15) 재도달했으나 plan#29 재평가 조건 여전히 미충족(참여 count<10, postseason 미접근) → 실질 idea source 부재.
+- 직전 3사이클(2761-2763) 모두 review-code(heavy) 연속 — 신규 후보로 `backtest-v2-helpers.ts`(370줄, plan#14 C1b, 미터치 2026-07-16)/`walk-forward-helpers.ts`(147줄, plan#15 C1e, 미터치 2026-05-29) 선정, 전체 정독.
+- 결과: computeEloProb 공식이 `factors/mlb-elo.ts` 의 별도 갱신 로직과 동일 ELO_DIVIDER/HOME_ELO_BONUS 상수 공유(의도된 이중 존재, 주석 정합) 확인. accuracyHit/RULE_DEFINITION_DATE 는 외부 미소비지만 파일 내부(evaluatePair/evaluateThreeWay/formatBacktestMarkdown) 실사용 확인 — dead export 아님. walk-forward-helpers.ts 의 3개 split 함수 전부 `scripts/backtest-v2-candidate.ts` 소비 확인. silent drift/공식 불일치 0건.
+- 코드 변경 없음(clean audit). 커밋 없음.
+- 다음 사이클 추천 = review-code(heavy) 계속 시 `apps/moneyball/src/app/mlb/` 대형 route 파일군(602줄 team/[code] 등, 미대상) 재탐색 또는 op-analysis(gap 5/25)/fix-incident(gap 8/20)/info-arch(gap 26/30)/lotto(gap 13/30) 자연 대기.
+
 ## cycle 2763 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap6/20·op-analysis gap3/25·info-arch gap24/30·lotto gap11/30 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족. scripts/·packages/kbo-data 축 소진 후 cloudflare-worker 확인 → select 미사용, 해당 axis 부적용.
