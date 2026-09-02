@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy) buildMlbMatchupProfile.ts 4축 감사 clean (cycle 2788, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2787 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 15/25, info-arch 19/30, lotto 6/30). 직전8 distinct=3(review-code(heavy) 6 + lotto 1 + fix-incident(lite) 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 negative context 지속(트래픽 무성장, GH issue 0) — review-code(heavy) 유지. 직전 3사이클(2785-2787) 전부 next_recommended_chain=review-code(heavy), carry-over 후보 `buildMlbMatchupProfile.ts`(515줄, apps/moneyball/src/lib/mlb/) 채택.
+
+general-purpose 서브에이전트 4축 감사(consumer trace / select-vs-read / prefix-leak / comment-vs-code) + KBO parity(`buildMatchupProfile.ts` 대조): `streak`/`avgMargin`/`recentRecord`/`blowout`/`closeGame`/`homeAwayEdge` 6개 필드는 KO page 직접 미소비이나 `buildSummary()` 내부 소비 + EN page(`app/en/mlb/matchup/[teamA]/[teamB]/page.tsx`)가 직접 소비 확인(dead 아님). `mlb_schedule`(8컬럼)/`predictions`(2컬럼) select 전부 소비, orphan 없음. `home_`/`away_` raw DB key 는 `normalizeMlbTeamCode` 경유 정규화 후에만 반환 구조 진입 — leak 없음. JSDoc(cycle 2066 FK bug 배경 + home_win_prob 파생 근거) 코드와 정합. KBO/MLB parity = 동일 interface 구조, 차이(FK join vs external_game_id 매칭, SQL vs client-side scoring_rule 필터)는 전부 `deriveMlbOutcome.ts` 문서화 근거로 의도된 차이. 부수: KBO interface 의 "페이지 미직접렌더" 설명 주석이 MLB interface 엔 없음 — 그대로 복사하면 부정확(MLB EN page 는 직접 렌더)해서 미조치.
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 잔여 후보(`buildAccuracyData.ts` 767줄 재검토 또는 `buildMlbTeamProfile.ts` 380줄) 또는 fix-incident(6/20)/op-analysis(16/25)/info-arch(20/30)/lotto(7/30) gap 자연 대기. 4연속 clean(2785-2788)이나 미감사 대형파일 잔존 — 완전 소진 판단 보류.
+
 ## 🔵 RETRO-ONLY — review-code(heavy) convergenceRecord.ts 4축 감사 clean (cycle 2787, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2786 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 14/25, info-arch 18/30, lotto 5/30). 직전8 distinct=3(review-code(heavy)/lotto/fix-incident(lite)) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 negative context 지속(트래픽 무성장, GH issue 0) — review-code(heavy) 유지. 신규 미감사 최대 대형파일 탐색(`find ... wc -l`) → `convergenceRecord.ts`(824줄, apps/moneyball/src/lib/analysis/) 발견 — 기존 감사 대상 전부 능가하는 최대 파일, 완전 미감사 상태 확인.
