@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy) buildMatchupProfile.ts 4축 감사 clean (cycle 2786, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2785 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 13/25, info-arch 17/30, lotto 4/30). 직전8 distinct=3(review-code(heavy) 6 + fix-incident(lite) 1 + lotto 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 재평가 근거 여전히 negative(트래픽 무성장, GH issue 0, 신규 신호 없음) — review-code(heavy) 유지. 직전 3사이클(2783-2785) 카운트 산정 시 chain_selected 문자열 포맷("review-code(heavy)")과 saturation 스크립트 split()[0] 매칭 불일치 확인(본 사이클서 substring 매칭으로 재계산, 13/15 정합) — 다음 skill-evolution 발화 시 스크립트 표기 정합 검토 후보로 기록. 직전 3사이클(2783-2785) 전부 next_recommended_chain=review-code(heavy) — carry-over 후보 `buildMatchupProfile.ts`(584줄) 채택.
+
+general-purpose 서브에이전트 4축 감사(consumer trace / select-vs-read / prefix-leak / comment-vs-code) + KBO-MLB parity. `streak`/`avgMargin`/`recentRecord`/`blowout`/`closeGame`/`homeAwayEdge` 6개 필드는 page.tsx 직접 미소비이나 `buildSummary()` → `buildMatchupSummaryText`(shared) 경유 prose summary 로 전부 소비 확인(dead field 아님, JSDoc 정합). `games`/`teams` select 컬럼 전부 소비. home_/away_ prefix 개념 자체 미존재(axis 해당 없음). 주석 ~10블록 전부 코드와 정합(`PRODUCTION_COHORT_RULES` 배열 사용 근거 포함). `buildMlbMatchupProfile.ts` parity 확인 — `MLB_PRODUCTION_COHORT_RULES` 단일원소 배열로 cross-league leak 없음. 미미한 nit(`games.sort()` 중복, SQL 이미 정렬) 1건 발견했으나 silent drift 아니라 미조치.
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 대형파일(과거 감사 대상 외 신규 축 탐색 필요 — 최근 6사이클 연속 clean/success 로 명백한 candidate 소진 조짐), 또는 fix-incident(4/20)/op-analysis(14/25)/info-arch(18/30)/lotto(5/30) gap 자연 대기.
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildTeamProfile.ts 4축 감사 clean (cycle 2785, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2784 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 12/25, info-arch 16/30, lotto 3/30). 직전8 distinct=3(review-code(heavy) 5 + fix-incident(lite) 2 + lotto 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 plan#29 재평가 트리거 여전히 negative(트래픽 무성장, 포스트시즌 미도달, GH issue 0) — review-code(heavy) 유지. 직전 3사이클(2782-2784) 전부 next_recommended_chain=review-code(heavy) — carry-over 후보 `buildTeamProfile.ts`(591줄) 채택.
