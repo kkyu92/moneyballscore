@@ -1,4 +1,13 @@
 
+## cycle 2761 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap4/20·op-analysis gap1/25·info-arch gap22/30·lotto gap9/30 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족.
+- apps/moneyball 전역 미소비 select 컬럼 sweep 소진 확인 후 신규 축 = `packages/kbo-data/src/` 백엔드 pipeline/agent 코드(agents/pipeline/backtest/factors 18개 파일 전수 감사, 이 sweep 최초 대상).
+- 5개 파일 확정 미소비 컬럼 제거: `agents/retro.ts`, `backtest/loader.ts`, `pipeline/save-game-record.ts`, `pipeline/factor-bias-bootstrap-ci.ts`, `pipeline/postview-daily.ts`.
+- `backfill-records.ts`(PostgREST 임베디드 필터 리스크) + `shadow-cohort.ts`(테스트 4건 실패 확인 후 원복 — `.select('id')` 가 insert 를 awaitable 하게 만드는 필수 체인 요소) 는 skip — "확실하지 않으면 skip" 원칙 실증 2건.
+- tsc/eslint/test 전부 green(571파일 4484건). direct main push.
+- 다음 사이클 추천 = op-analysis gap monitor(1/25, 사실상 매 사이클 근접) 또는 review-code 신규 축 재탐색(packages/kbo-data 축도 사실상 소진).
+
 ## cycle 2760 (2026-09-02) — SUCCESS — operational-analysis(lite)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap3/20·info-arch gap21/30·lotto gap8/30 전부 미도달. op-analysis gap=33/25 (마지막 발화 cycle 2727) — trigger 도달. 직전8 distinct=3(review-code 6/lotto 1/fix-incident 1) — 2-chain lock 미충족.
