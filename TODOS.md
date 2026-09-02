@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — review-code(heavy) hub-dispatch/health-pipelines 감사, 발견 0건 clean (cycle 2805, 2026-09-02)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2804 retro commit 64bcfd01) OK. 직전8 distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 2/20, op-analysis 7/25, info-arch 5/30, lotto 23/30). explore-idea saturation(13/15) 충족했으나 cycle 2718 재탐색 결과와 동일 블로커(MLB postseason ETA/plan#29 트래픽 무변화, 실제 경과일 1일)라 diminishing return 판단 — cycle 2803 retro 가 명시한 미감사 후보 2건(hub-dispatch/route.ts 180L, health/pipelines/route.ts 107L) 선택.
+
+감사 결과: HMAC 검증 + env guard + PII 2중 스크럽(scrubPII/scrubUrlString) 정상. `PIPELINE_STALE_HOURS_DEFAULT=28`/`PIPELINE_PREDICT_STALE_HOURS=15` 중앙화 상수가 cron schedule('17 0-14 * * *') 4개 표면(wrangler.toml/worker.ts/daily-pipeline.yml/index.ts)과 정합, drift 없음. 이론적 edge case 1건(예외 메시지 텍스트 내 임베디드 URL 이 scrubUrlString 미적용) 은 기존 코드 주석에 이미 인지된 위험으로 명시 — 신규 발견 아님. review-code(heavy) 미감사 후보 백로그 소진. pnpm test green(580파일/4515건), 코드 변경 없음.
+
+다음 사이클 추천 = gap-fill 후보(lotto 24/30, op-analysis 8/25, info-arch 6/30) 대기 또는 MLB postseason ETA 조건 변화 시 explore-idea 재검토.
+
 ## 🟢 SUCCESS — Korean team-name wrap bug family 전면 sweep, 20파일/36곳 일괄 수정 (cycle 2804, 2026-09-02)
 
 진단: open issue 0, unprocessed approved plan 0/22. 2차 방어선(cycle 2803 retro commit 9e32cc76) OK. 직전8(2796-2803) distinct=5 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 1/20, op-analysis 6/25, info-arch 4/30, lotto 22/30 — lotto 는 2026-09-05 회차 picks 이미 박제 완료).
