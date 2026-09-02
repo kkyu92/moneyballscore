@@ -1,3 +1,15 @@
+## v0.5.62.194 — 2026-09-02 (cycle 2759, review-code(heavy): HistoricalAnalogMatchup 미소비 scoring_rule 컬럼 제거 SUCCESS)
+
+### review-code(heavy): components/ 신규 축 감사 (cycle 2759, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap2/20·op-analysis gap11/25·info-arch gap20/30·lotto gap7/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0, CI 정상.
+- 직전 sweep(page.tsx→API 라우트→lib/ 빌더 21개) 완결 후 신규 축 = `.select(` 직접 사용 컴포넌트(`apps/moneyball/src/components` 2개), 직접 read 감사.
+- `HistoricalAnalogMatchup.tsx`: predictions embed 의 `scoring_rule` 이 필터(`.in("predictions.scoring_rule", ...)`)에만 쓰이고 반환 select 는 QueryRow/AnalogRow 어디서도 미소비 확인. PostgREST 임베디드 WHERE 는 projection 과 무관하게 동작 확인(과거 사이클 동일 패턴 재사용).
+- `RivalryMemorySurface.tsx`: 4개 select 필드 전부 소비 확인, clean.
+- MLB 대응 파일 `fetchMlbHistoricalAnalogs.ts` 도 함께 대조 — scoring_rule 은 최상위 필터(embed 아님)라 select 대상 자체 아님, PredRow 2필드 전부 소비, clean.
+- fix: 1개 파일 select절/interface 에서 미소비 컬럼 제거. tsc/eslint clean, 571파일 4484건 green. direct main push 후 CI 실측 재확인.
+- 다음 사이클 추천 = components/ 축(select 2개) 소진 — 신규 미감사 후보 재탐색, 또는 info-arch gap 20/30 monitor(다음 사이클 21/30).
+
 ## v0.5.62.193 — 2026-09-02 (cycle 2758, review-code(heavy): lib/reviews·teams 빌더 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): lib/ 빌더 신규 축 감사 (cycle 2758, SUCCESS)
