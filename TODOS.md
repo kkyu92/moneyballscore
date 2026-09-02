@@ -9032,3 +9032,13 @@ milestone 처리: cycle_n=2600 → skill-evolution-pending 마커 박제(retro �
 실행: 실패 로그 분석 → commit `11a76e65`(cycle 2756 retro, 22:28 KST push) 가 gap_hours=15 로 반복 alert. `curl /api/version` + `git log` 커밋시각 diff + `vercel ls --prod` 3중 실측 → 현재 prod=`c87271e6`(main 대비 5커밋 뒤, ~13분 지연=정상), 최근 배포 전부 Ready. 15h 지연 원인 = 해당 시점 develop-cycle 루프 야간 idle(신규 push 없음) 동안 단일 push 가 배포 안 붙잡힌 것으로 추정, 이후 신규 push 재개되며 자연 catch-up(09:34 성공 run 확인). 재발성 시스템 버그 아님 — self-healed, 코드 변경 불필요.
 
 다음 사이클 추천 = review-code(heavy) 미감사 대형파일(`analysis-data.ts`/`buildAccuracyData.ts` 776줄/`buildTeamProfile.ts` 601줄/`buildMatchupProfile.ts` 594줄) 계속, 또는 op-analysis(5/25)/info-arch(9/30)/lotto(26/30) gap 자연 대기.
+
+## ✅ SUCCESS — review-code(heavy) mlb-pipeline.ts silent select-failure Sentry 발화 (cycle 2781, 2026-09-02)
+
+진단: open issue 0, approved plan 0/23. 2차 방어선(cycle 2780 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 8/25, info-arch 12/30, lotto 29/30 임박). 직전8 distinct=3(2-chain lock 미충족). explore-idea saturation(14/15) 재도달했으나 4-source 재확인 전부 negative(GH issue 0, TODOS Next-Up stale, git diff-filter=A 신규파일 0건, plan#29 gating 미충족) → review-code(heavy) 재선택. 최고령 미감사 대형파일 `mlb-pipeline.ts`(875줄, 2026-08-26) 채택.
+
+실행: 전체 정독 — `runPredictFinal` 의 mlb_team_stats/mlb_team_elo/mlb_schedule(finished) select catch 3곳이 `errors[]` push 만 하고 액티브 알림 없음 발견. select 실패해도 predictionRows 는 fallback 기본값(MLB_STAT_DEFAULTS/ELO_NEUTRAL/중립 0.5)으로 계속 insert 되어 rowsInserted>0 유지 → `pipeline_runs.status='success'` + `captureSilentDriftAlert` 도 coverage(predictionsGenerated>=gamesFound)만 체크(errors 내용 무관) → 실제 DB 장애가 완전 silent. 같은 파일 `runEloUpdate` 의 mlb_team_elo_history upsert 실패부(line 739-747 주석)가 이미 이 정확한 blind spot 을 문서화하고 `Sentry.captureException` 직접 호출로 우회한 전례 있어, 동일 패턴을 나머지 3개 catch 블록에 적용(tags: `silent_drift_family: wave_178`).
+
+`pnpm --filter @moneyball/kbo-data exec tsc --noEmit` clean + lint clean + vitest 93 files/1223 tests 전체 green(무변화). 단일 논리 단위 → 직접 main commit+push(R4/R7, 437f7036).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 잔여 미감사 대형파일(`postview.ts` 588줄 동률 최고령, `buildTeamProfile.ts`/`buildMlbTeamProfile.ts` 등), 또는 lotto(29/30 임박 — 다음 사이클 30 도달 여부 우선 확인).
