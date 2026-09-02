@@ -9128,3 +9128,13 @@ general-purpose 서브에이전트 4축 감사(consumer trace / select-vs-read /
 코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
 
 다음 사이클 추천 = review-code(heavy) 잔여 후보(`buildMlbTeamProfile.ts` 380줄) 또는 fix-incident(7/20)/op-analysis(17/25)/info-arch(21/30)/lotto(8/30) gap 자연 대기. 5연속 clean(2785-2789)이나 미감사 대형파일 거의 소진 — 다음 사이클 완전 소진 판단 예상.
+
+## 🔵 RETRO-ONLY — polish-ui(browser-QA) 홈/mlb 실 브라우저 시각 점검 clean (cycle 2791, 2026-09-02)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2790 retro commit) OK. review-code(heavy) 직전5(2785-2789) 전부 retro-only → cooldown N=10 발동(2790-2799 제외). gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 18/25, info-arch 22/30, lotto 9/30). 직전8 distinct=3(2-chain lock 미충족). gh run list 재점검 — `deploy-drift-alert` 7연속 failure(2026-09-01 10:03~09-02 04:28)는 cycle 2777에서 동일 commit(11a76e65)/동일 timeline으로 이미 완전 진단됨(self-healed, 코드 버그 아님) → 중복 조사 회피, fix-incident 재선택 보류. explore-idea saturation(14/15) 재도달했으나 4-source negative 재확인. 직전4사이클(2787-2790) 전부 small-fix 계열이라 expand-scope 조건(1) 충족하나 `/office-hours` 등 interactive 컴포넌트의 자동 fire hang 위험 고려해 회피. 잔여 organic trigger 부재 → polish-ui 강제 발화(cycle 818/1407/2242/2790 선례).
+
+cycle 2790이 정적 grep 감사를 이미 소진했으므로 실제 브라우저(gstack browse) 기반 시각 QA로 각도 전환 — 홈페이지(desktop/mobile/tablet 반응형) + `/mlb` 페이지 렌더 점검. 최초 스크린샷에서 헤더 아래 회색 박스 5개 의심 → clip 재스크린샷으로 실시간 스코어 위젯(팀 로고/시간/스코어) 정상 렌더 확인, 썸네일 축소 렌더링 착시였음(false alarm, 실제 버그 아님). 콘솔 에러 0건(홈/mlb 양쪽). responsive 3단 레이아웃 정상. `/mlb` 모델 적중률 대시보드(54%, Brier 0.249) 정상. 쿠키 동의 배너가 `/mlb` 하단 카드 일부 가림 — fixed 배너 통상 동작(콘텐츠 자체는 존재, 배너 닫으면 노출)으로 actionable 버그 아님.
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료(cycle 2800) 전까지 gap trigger 자연 대기(fix-incident 9/20, op-analysis 19/25, info-arch 23/30, lotto 10/30) 또는 polish-ui 잔여 라우트(`/analysis`, `/players`, `/reviews` 등) 브라우저 QA 이어서.
