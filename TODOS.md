@@ -1,4 +1,12 @@
 
+## cycle 2769 (2026-09-02) — RETRO-ONLY — info-architecture-review
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain alternation lock 발동, 둘 다 후보 제외.
+- 남은 pool 중 info-architecture-review 자체 30-cycle gap trigger 정확히 도달(마지막 발화 cycle 2739, gap=30) — lock 자연 회피.
+- 진단: `git log 2f26912b(cycle 2739 checkpoint)..HEAD --diff-filter=A -- '**/page.tsx'` 0건(114 커밋 구간 전부 review-code(heavy)/fix-incident/polish-ui 대상). breadcrumb 누락 grep 18건 그대로(cycle 2739 baseline 동일). MegaMenu/Footer/sitemap.ts 무변경.
+- 결론: "현 IA 충분" 4연속 재확정(2679→2709→2739→2769). 코드 변경 0. `docs/design/ia-2026-09-02-cycle-2769-30-cycle-gap-checkpoint.md` 박제, direct main push(fb4c7c1c).
+- 다음 사이클 추천 = 2-chain lock 지속 여부 재확인(직전8 재측정) 후 review-code(heavy) 신규 축 재탐색(`buildAccuracyData.ts` 767줄/`fancy-stats.ts` 545줄 미감사) 또는 fix-incident(gap 12/20)/op-analysis(gap 9/25)/lotto(gap 17/30) 자연 대기.
+
 ## cycle 2768 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 8/25, info-arch 29/30, lotto 16/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis(lite) 1) — 2-chain lock 미충족.
