@@ -1,4 +1,14 @@
 
+## cycle 2765 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap 4종(fix-incident 8/20, op-analysis 5/25, info-arch 26/30, lotto 13/30) 전부 미도달. 직전8 distinct=3 — 2-chain lock 미충족. review-code(heavy) 3연속 success streak — dominance-positive 인정.
+- 신규 축 = `apps/moneyball/src/app/mlb/` 대형 route 파일 5개(team/[code] 602줄, games/[date]/[slug] 561줄, reviews/weekly/[week] 551줄, matchup/[teamA]/[teamB] 548줄, reviews/monthly/[month] 502줄) — 이 sweep 최초 감사 대상.
+- general-purpose 서브에이전트 전수 감사: 4개는 데이터 로직을 lib 헬퍼(`lib/mlb/build*.ts`, `lib/reviews/build*.ts`, `lib/analysis/convergenceRecord.ts`)로 위임 — 이번 사이클 범위 밖(미검증 명시, 다음 사이클 후보). games/[date]/[slug] 만 직접 select(6+22 컬럼) 보유 — 전부 소비 확인.
+- 확정 finding: `GAME_DETAIL_FACTOR_ROWS`(games/[date]/[slug]/page.tsx:45) 상단 주석이 "배열 길이로 self-sync 시켜 재재발 차단"이라 과잉 주장 — 실제론 metadata description 의 카운트 문자열만 self-sync 되고, 실제 렌더 행은 `mlb-waterfall.ts` 가 별도 구성해 구조적 연결 없음. slug/label/homeKey/awayKey 필드는 `.length`/`.statcast` 외 미소비 확인(dead field, 현재는 두 소스가 우연히 일치해 active mismatch 없음).
+- fix: 주석 정정 + 필드에 "문서용, 미소비" JSDoc 명시(필드 삭제 대신 — 10팩터 매핑 문서 가치 보존). 부수: `team/[code]/page.tsx:572` EmptyState 문구 영어단어 "game" → "경기".
+- tsc/eslint/test 전부 green(571파일 4490건, 신규 테스트 없음). direct main push (67cd7a07), VERSION 0.5.62.199.
+- 다음 사이클 추천 = review-code(heavy) 계속 시 `lib/mlb/build*.ts`/`lib/reviews/build*.ts`/`lib/analysis/convergenceRecord.ts`(실제 select 컬럼 축 소재지, 이번 사이클 미검증) 재탐색 또는 op-analysis(gap 6/25)/fix-incident(gap 9/20)/info-arch(gap 27/30)/lotto(gap 14/30) 자연 대기.
+
 ## cycle 2764 (2026-09-02) — RETRO-ONLY — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(plan#29 로그인/커뮤니티 Tier4 postseason 재평가 대기, 조건 미충족). gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 4/25, info-arch 25/30, lotto 12/30). 직전8 distinct=3 — 2-chain lock 미충족. explore-idea saturation(12/15) 재도달했으나 plan#29 재평가 조건 여전히 미충족(참여 count<10, postseason 미접근) → 실질 idea source 부재.
