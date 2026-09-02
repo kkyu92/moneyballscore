@@ -1,4 +1,12 @@
 
+## cycle 2759 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap2/20·op-analysis gap11/25·info-arch gap20/30·lotto gap7/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0.
+- 직전 sweep(page.tsx→API 라우트→lib/ 빌더 21개) 완결 후 신규 축 = `.select(` 직접 사용 컴포넌트(`apps/moneyball/src/components` 2개) 감사.
+- `HistoricalAnalogMatchup.tsx`: predictions embed 의 `scoring_rule` 이 필터에만 쓰이고 select 반환값은 미소비 확인(PostgREST 임베디드 WHERE 는 projection 무관 동작). `RivalryMemorySurface.tsx` 는 clean. MLB 대응 `fetchMlbHistoricalAnalogs.ts` 도 대조 확인(clean, scoring_rule 은 최상위 필터라 select 대상 아님).
+- fix: 1개 파일 select절/interface 에서 미소비 컬럼 제거. tsc/eslint clean, 571파일 4484건 green. direct main push 후 CI 실측 재확인(success 확정).
+- 다음 사이클 추천 = components/ 축(select 2개) 소진 — 신규 미감사 후보 재탐색, 또는 info-arch gap 20/30 monitor.
+
 ## cycle 2758 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap1/20·op-analysis gap10/25·info-arch gap19/30·lotto gap6/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0. explore-idea saturation 12/15 충족했으나 plan#29 실측 재확인(user_picks=1/mlb_user_picks=0/pick_poll_events=5/mlb_pick_poll_events=0, cycle 2417/2633 과 동일 변화 0) — 게이트 미충족 유지, review-code 계속.
