@@ -54,7 +54,7 @@ export function TeamMatchupCards({
           >
             {/* 헤더 */}
             <div className="flex items-baseline justify-between gap-1">
-              <span className="font-bold text-sm">{shortName(teamCode)}</span>
+              <span className="font-bold text-sm whitespace-nowrap">{shortName(teamCode)}</span>
               <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                 {overall ? fmtPct(overall.accuracyRate) : '—'}
               </span>
@@ -88,7 +88,7 @@ export function TeamMatchupCards({
                     key={m.opponentCode}
                     className={`flex justify-between text-2xs ${m.n < SMALL_SAMPLE_N ? 'opacity-50' : ''}`}
                   >
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
                       vs {shortName(m.opponentCode)}
                     </span>
                     <span className="font-mono text-gray-700 dark:text-gray-300">

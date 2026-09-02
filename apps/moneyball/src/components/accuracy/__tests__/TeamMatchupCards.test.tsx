@@ -48,4 +48,19 @@ describe("TeamMatchupCards", () => {
     expect(homeRow.className).toContain("opacity-50");
     expect(awayRow.className).not.toContain("opacity-50");
   });
+
+  it("팀명 span 은 whitespace-nowrap — 2col 모바일 grid 좁은 폭에서 한글 단어 중간 줄바꿈 방지 (Korean wrap bug family)", () => {
+    const { container } = render(
+      <TeamMatchupCards
+        matchups={[{ teamCode: "LG", opponentCode: "KIA", n: SMALL_SAMPLE_N, correct: 3, accuracyRate: 0.6 }]}
+        homeAway={[]}
+        teamAccuracy={[]}
+        teamCodes={["LG"]}
+      />,
+    );
+    const header = container.querySelector(".font-bold.text-sm");
+    expect(header?.className).toContain("whitespace-nowrap");
+    const opponentRow = container.querySelector(".text-gray-600.dark\\:text-gray-400");
+    expect(opponentRow?.className).toContain("whitespace-nowrap");
+  });
 });
