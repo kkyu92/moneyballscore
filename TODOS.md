@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — op-analysis(lite) gap trigger 25/25 도달, CE cohort 19회 연속 재확인 + 파이프라인 정상 확인 (cycle 2798, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/22(approved 없음), 2차 방어선(cycle 2797 retro commit 51ec3d20) OK. 직전8(2790-2797) 정규화 base chain distinct=2(polish-ui+fix-incident) — 2-chain lock 조건 충족이나 fix-incident 포함이라 안전 예외로 무시. op-analysis gap trigger 25/25 정확 도달(직전 발화 cycle 2773)이 가장 강한 신호.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 — n=362(CE 315/비CE 47), cycle 2773과 완전 동일 수치(신규 verified 예측 0건). DB 직접 조회로 latest verified_at=2026-09-01(하루 전) 확인 — 파이프라인 정상 작동, drift 아님(cycle 처리 속도가 실제 경기일 간격보다 훨씬 빠른 기존 패턴 재확인). CE 54.6%(172/315) / 비CE 63.8%(30/47) → 격차 9.2pp, overlap 월(05/06/07) 통제 격차 10.8pp 유지. LLM 부가가치 우세 결론 19회 연속 재확인.
+
+CLAUDE.md 모델 섹션 갱신 + direct main push(136a4909). 코드 변경 없음(retro-only 성격이나 문서 갱신 완료로 success 처리).
+
+cycle-retro 자기검증(cycle 2601 룰): 본 커밋 직후 `git log --grep "cycle-retro 2798 "` 확인 예정. 직전 사이클(2797) retro commit도 확인됨(2차 방어선 OK).
+
+다음 사이클 추천 = review-code(heavy) 계속(직전 19-cycle 안 9회 dominance 지속) 또는 lotto(gap 17/30) 자연 대기.
+
 ## 🟢 SUCCESS — Korean 팀명 wrap 버그 family, app/ 넘어 components/ 로 확장 sweep, PredictionCard·PlaceholderCard 10·11번째 재발 발견+수정 (cycle 2797, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음), 2차 방어선(cycle 2796 retro commit 존재) OK. 직전8 정규화 base chain distinct=3(review-code/polish-ui/fix-incident) — 2-chain lock 해제. gap trigger 4종 전부 미도달(op-analysis 24/25 근접, info-arch 28/30, lotto 15/30, fix-incident 직전 발화). CI/scheduled workflow 전부 green.
