@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — Korean 팀명 wrap 버그 family, app/ 넘어 components/ 로 확장 sweep, PredictionCard·PlaceholderCard 10·11번째 재발 발견+수정 (cycle 2797, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음), 2차 방어선(cycle 2796 retro commit 존재) OK. 직전8 정규화 base chain distinct=3(review-code/polish-ui/fix-incident) — 2-chain lock 해제. gap trigger 4종 전부 미도달(op-analysis 24/25 근접, info-arch 28/30, lotto 15/30, fix-incident 직전 발화). CI/scheduled workflow 전부 green.
+
+발견: cycle 2796 이 `apps/moneyball/src/app` 의 `<td>` call site 만 훑었고 `components/` 재사용 카드는 미감사 상태임을 확인. `flex-1` + `shortTeamName(` 동시 출현 5개 파일 중 수동 검사로 `PredictionCard.tsx`(메인 일일 예측 카드, 고트래픽) + `PlaceholderCard.tsx` 2곳에서 기존과 동일한 `.text-center.flex-1` 3열 레이아웃에 `whitespace-nowrap` 누락 확인 — 10·11번째 재발. 나머지 후보(MiniGameCard/LiveScoreboard/YesterdayResultsSection)는 Tailwind `truncate`(nowrap 포함) 이미 적용돼 안전 확인.
+
+수정: 4개 `<p>` 요소에 `whitespace-nowrap` 추가. tsc --noEmit clean, eslint clean, vitest 571파일/4492건 전부 green. main 직커밋+push(da78c732), pre-push lint+type-check+version-sync-guard green.
+
+cycle-retro 자기검증(cycle 2601 룰): `git log --grep "cycle-retro 2797 "` 커밋 존재 확인(51ec3d20). 직전 사이클(2796) retro commit 도 확인됨(2차 방어선 OK).
+
+다음 사이클 추천 = 이번 sweep 으로 app/ + components/ 양쪽 모두 훑었으므로 family 소진 가능성 높음(잔여 call site 는 shrink-0/truncate/inline-flex 로 이미 보호됨 확인). review-code(heavy) gap 8사이클(마지막 발화 2789)·lock 해제 상태라 유효 후보, 또는 op-analysis gap=25 다음 사이클 도달 대기.
+
 ## 🟢 SUCCESS — Korean 팀명 wrap 버그 family 전수 sweep, /accuracy·standings 모바일·seasons 7·8·9번째 재발 발견+수정 (cycle 2796, 2026-09-02)
 
 진단: 직전 세션이 active-cycle 남긴 채 중단됨(pid dead) — f5a6c85f(`/accuracy` wrap fix, 7번째 재발) 는 이미 커밋+push 됐으나 retro 미박제 상태로 발견. blind backfill 대신 `shortTeamName(` 전체 call-site grep sweep 을 apps/moneyball/src/app 전역 실행.
