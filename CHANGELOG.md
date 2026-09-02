@@ -1,3 +1,14 @@
+## v0.5.62.197 — 2026-09-02 (cycle 2762, review-code(heavy): scripts/ 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): scripts/ 신규 축 감사 (cycle 2762, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap5/20·op-analysis gap2/25·info-arch gap23/30·lotto gap10/30 전부 미도달. 직전8 distinct=3(review-code/fix-incident/operational-analysis) — 2-chain lock 미충족. DESIGN.md/lotto-data 최근 갱신, picks 존재 — polish-ui/lotto trigger 없음.
+- 직전 sweep(apps/moneyball 전역 + packages/kbo-data agents/pipeline/backtest/factors) 이 미소비 select 컬럼 축을 소진 — 신규 축 = `scripts/` (22개 admin/backfill/op-analysis 스크립트, 이 sweep 최초 감사 대상).
+- Explore 서브에이전트로 22개 파일 전수 감사 후 7개 파일에서 확정 미소비 컬럼 발견: `cohort-cleanup.ts`(scoring_rule/is_correct), `measure-n178-vs-n165.ts`(verified_at), `op-analysis-ce-cohort.ts`(id/game_id/verified_at/reasoning), `op-analysis-mlb-elo-backtest.ts`(external_game_id/game_date), `op-analysis-postbreak-full.ts`(id/confidence/home_win_prob), `op-analysis-postbreak.ts`(id/confidence/predicted_winner/home_win_prob), `op-analysis-war-check.ts`(season/id).
+- `backtest-v2-candidate.ts`/`export-predictions-tabpfn.ts`/`update-stale-data.ts` 는 row 를 이미 감사된 헬퍼(backtest 모듈/tabpfn-export/analytics)로 통째 전달해 이 파일만으론 검증 불가 — skip. `op-analysis-mlb-elo-backtest.ts`의 `game_datetime_utc` 는 `.order()` 의존이라 low-risk skip.
+- fix: 7개 파일 select절/interface 에서 미소비 컬럼 제거. eslint(scripts) clean, pnpm test 571파일 4484건 green. direct main push.
+- 다음 사이클 추천 = scripts/ 축도 소진 — op-analysis gap monitor(2/25) 또는 신규 미감사 후보(cloudflare-worker/ 등) 재탐색.
+
 ## v0.5.62.196 — 2026-09-02 (cycle 2761, review-code(heavy): packages/kbo-data 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): packages/kbo-data 신규 축 감사 (cycle 2761, SUCCESS)
