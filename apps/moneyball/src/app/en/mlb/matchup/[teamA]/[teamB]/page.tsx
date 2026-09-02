@@ -44,6 +44,7 @@ import { MlbMatchupEloChart } from "@/components/matchup/MlbMatchupEloChart";
 import { MlbMatchupRecentForm } from "@/components/matchup/MlbMatchupRecentForm";
 import { MlbMatchupSeasonHeadToHead } from "@/components/matchup/MlbMatchupSeasonHeadToHead";
 import { MlbMatchupConvergencePickRecord } from "@/components/matchup/MlbMatchupConvergencePickRecord";
+import { MatchupGamesCloseFilter } from "@/components/matchup/MatchupGamesCloseFilter";
 import { captureFallback } from "@/lib/observability/captureFallback";
 import { ShareButtons } from "@/components/share/ShareButtons";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
@@ -224,6 +225,13 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
   const pastGames = games
     .filter((g) => !g.gameDate.startsWith(currentYear) && g.status === "final")
     .sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+  const closeCount = games.filter(
+    (g) =>
+      g.status === "final" &&
+      g.homeScore != null &&
+      g.awayScore != null &&
+      Math.abs(g.homeScore - g.awayScore) <= CLOSE_GAME_MARGIN,
+  ).length;
 
   const otherMatchupsA = mlbPairsForTeam(tA.code).filter((p) => p.path !== pair.path);
   const otherMatchupsB = mlbPairsForTeam(tB.code).filter((p) => p.path !== pair.path);
@@ -469,8 +477,13 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
             Game Log
           </h2>
 
+          <MatchupGamesCloseFilter
+            locale="en"
+            counts={{ all: games.length, close: closeCount }}
+          />
+
           {thisYearGames.length > 0 && (
-            <div>
+            <div data-matchup-section>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                 {currentYear} Season
               </p>
@@ -479,7 +492,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
           )}
 
           {pastGames.length > 0 && (
-            <div>
+            <div data-matchup-section>
               <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
                 Past Seasons
               </p>
@@ -539,7 +552,7 @@ export default async function MlbMatchupPageEn({ params }: PageProps) {
 function GameTable({ games }: { games: MlbMatchupGame[] }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-[var(--color-border)]">
-      <table className="min-w-full text-sm">
+      <table className="min-w-full text-sm" data-matchup-games>
         <thead>
           <tr className="bg-gray-50 dark:bg-gray-900/40 border-b-2 border-gray-200 dark:border-[var(--color-border)] text-left text-xs text-gray-500 dark:text-gray-400">
             <th className="py-2.5 px-3 font-semibold">Date</th>

@@ -11,11 +11,22 @@ interface Props {
     all: number;
     close: number;
   };
+  locale?: 'ko' | 'en';
 }
 
-const LABELS: Record<CloseFilter, string> = {
+const LABELS_KO: Record<CloseFilter, string> = {
   all: '전체',
   close: '박빙만',
+};
+
+const LABELS_EN: Record<CloseFilter, string> = {
+  all: 'All',
+  close: 'Close only',
+};
+
+const CLOSE_GROUP_LABEL: Record<'ko' | 'en', string> = {
+  ko: '접전',
+  en: 'Margin',
 };
 
 const ORDER: CloseFilter[] = ['all', 'close'];
@@ -51,8 +62,9 @@ function writeFilter(value: CloseFilter): void {
   }
 }
 
-export function MatchupGamesCloseFilter({ counts }: Props) {
+export function MatchupGamesCloseFilter({ counts, locale = 'ko' }: Props) {
   const filter = useSyncExternalStore(subscribe, readFilter, getServerSnapshot);
+  const labels = locale === 'en' ? LABELS_EN : LABELS_KO;
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3">
@@ -67,7 +79,7 @@ export function MatchupGamesCloseFilter({ counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          접전
+          {CLOSE_GROUP_LABEL[locale]}
         </span>
         {ORDER.map((key) => {
           const active = filter === key;
@@ -85,7 +97,7 @@ export function MatchupGamesCloseFilter({ counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}{' '}
+              {labels[key]}{' '}
               <span className="opacity-75">({counts[key]})</span>
             </button>
           );

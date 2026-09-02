@@ -13,13 +13,26 @@ interface Props {
     wrong: number;
     pending: number;
   };
+  locale?: 'ko' | 'en';
 }
 
-const LABELS: Record<StatusFilter, string> = {
+const LABELS_KO: Record<StatusFilter, string> = {
   all: '전체',
   correct: '적중',
   wrong: '실패',
   pending: '대기',
+};
+
+const LABELS_EN: Record<StatusFilter, string> = {
+  all: 'All',
+  correct: 'Correct',
+  wrong: 'Missed',
+  pending: 'Pending',
+};
+
+const RESULT_LABEL: Record<'ko' | 'en', string> = {
+  ko: '결과',
+  en: 'Result',
 };
 
 const ORDER: StatusFilter[] = ['all', 'correct', 'wrong', 'pending'];
@@ -61,9 +74,10 @@ function buildHideSelector(filter: StatusFilter): string {
   return others.map((s) => `[data-yesterday-status="${s}"]`).join(',');
 }
 
-export function YesterdayStatusFilter({ counts }: Props) {
+export function YesterdayStatusFilter({ counts, locale = 'ko' }: Props) {
   const filter = useSyncExternalStore(subscribe, readFilter, getServerSnapshot);
   const hideSelector = buildHideSelector(filter);
+  const labels = locale === 'en' ? LABELS_EN : LABELS_KO;
 
   return (
     <div className="bg-white dark:bg-[var(--color-surface-card)] rounded-xl border border-gray-200 dark:border-[var(--color-border)] p-3 mb-3">
@@ -76,7 +90,7 @@ export function YesterdayStatusFilter({ counts }: Props) {
       )}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-gray-600 dark:text-gray-300 mr-1">
-          결과
+          {RESULT_LABEL[locale]}
         </span>
         {ORDER.map((key) => {
           const active = filter === key;
@@ -94,7 +108,7 @@ export function YesterdayStatusFilter({ counts }: Props) {
                   : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-[var(--color-border)] hover:border-brand-500'
               }`}
             >
-              {LABELS[key]}{' '}
+              {labels[key]}{' '}
               <span className="opacity-75">({counts[key]})</span>
             </button>
           );

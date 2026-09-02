@@ -11,6 +11,7 @@ import {
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { PickButton } from "@/components/picks/PickButton";
 import { MlbTeamStrengthGrid } from "@/components/analysis/MlbTeamStrengthGrid";
+import { YesterdayStatusFilter } from "@/components/analysis/YesterdayStatusFilter";
 import { createClient } from "@/lib/supabase/server";
 import { buildMlbAccuracySummary } from "@/lib/mlb/buildMlbAccuracySummary";
 import { buildMlbTeamStrengthSnapshot } from "@/lib/mlb/buildMlbTeamStrengthSnapshot";
@@ -285,6 +286,14 @@ export default async function MlbAnalysisPage() {
           <h2 id="mlb-yesterday-title" className="text-lg font-bold text-brand-700 dark:text-brand-100 mb-3">
             📅 어제 결과 ({yesterdayGames.length}경기)
           </h2>
+          <YesterdayStatusFilter
+            counts={{
+              all: yesterdayGames.length,
+              correct: yesterdayGames.filter((g) => g.isCorrect === true).length,
+              wrong: yesterdayGames.filter((g) => g.isCorrect === false).length,
+              pending: yesterdayGames.filter((g) => g.isCorrect == null).length,
+            }}
+          />
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {yesterdayGames.map((g) => {
               const status = g.isCorrect === true ? "correct" : g.isCorrect === false ? "wrong" : "pending";
