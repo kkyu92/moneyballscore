@@ -1,4 +1,13 @@
 
+## cycle 2767 (2026-09-02) — RETRO-ONLY — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/29(approved 없음, plan#29 여전히 Tier4/보류). gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 7/25, info-arch 28/30, lotto 15/30). 직전8 distinct=3(review-code(heavy) 6 + operational-analysis(lite) 1 + polish-ui 1) — 2-chain lock 미충족.
+- explore-idea saturation(13/15) 재도달했으나 재확인 negative(GH issue 0, plan#29 트래픽 cycle 2417 측정치와 동일 정체 지속, TODOS Next-Up 신규 후보 없음) — cycle 2766 결론과 동일, 신규 organic signal 없음.
+- 직전 3사이클(2764-2766) 중 review-code(heavy) 2회 — cycle 2765 retro carry-over 후보 3개(`lib/mlb/build*.ts`, `lib/reviews/build*.ts`, `lib/analysis/convergenceRecord.ts`) 중 최대 파일 `convergenceRecord.ts`(824줄) + `buildMlbMatchupProfile.ts`(515줄, matchup route 소재) + `buildMlbTeamProfile.ts`(380줄, team/[code] route 소재) 3개 general-purpose 서브에이전트 전수 감사.
+- 결과: 3개 전부 clean. `convergenceRecord.ts` 28개 export 전부 실사용 확인(day-of-week split 헬퍼가 언뜻 test-only로 보였으나 내부적으로 다른 export 통해 소비됨), select 컬럼 KBO/MLB 양쪽 1:1 매핑, 과거 cycle 주석(1997/2304/2070/2081) 전부 현재 코드와 정합. `buildMlbMatchupProfile.ts` 는 모든 export 가 matchup route 직접 렌더 또는 `buildMatchupSummaryText`(packages/shared) 소비 확인, `actualWinnerCode` 는 `buildMlbSeasonHeadToHead` 경유 소비. `buildMlbTeamProfile.ts` 는 `MlbTeamProfile.code`/`correctN` 이 페이지 미소비이나 KBO `TeamProfile` shape parity + 테스트 assertion 존재하는 의도된 필드로 판단, 스코프 밖 리팩터로 미터치.
+- 코드 변경 없음(clean audit, 3파일 사이클 2765 retro carry-over 전부 소진). 커밋 없음.
+- 다음 사이클 추천 = review-code(heavy) 계속 시 신규 후보 재탐색 필요(carry-over 전부 소진, `apps/moneyball/src/lib/insights/` 또는 미감사 대형 route 재스캔 권장) 또는 fix-incident(gap 10/20)/op-analysis(gap 7/25)/info-arch(gap 28/30, 30 근접)/lotto(gap 15/30) 자연 대기.
+
 ## cycle 2766 (2026-09-02) — SUCCESS — polish-ui(2-chain lock fallback)
 
 - 진단: open issue 0, unprocessed plan 0/29(approved 없음). gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 6/25, info-arch 27/30, lotto 14/30). 직전8 distinct=2(review-code(heavy) 7 + operational-analysis(lite) 1) — 2-chain alternation lock 발동, 둘 다 후보 제외.
