@@ -1,3 +1,12 @@
+## v0.5.62.192 — 2026-09-02 (cycle 2757, fix-incident: CI node-version 20→24 pnpm 11 불일치 SUCCESS)
+
+### fix-incident: 3개 workflow node-version 갱신 (cycle 2757, SUCCESS)
+
+- 진단: `gh run list` 최근 10건 확인 — 직전 커밋(94a8e3ec, pnpm 10.33.0→11.25.0 마이그레이션) push 후 main `CI` workflow 즉시 failure. fix-incident gap 20/20 도달(마지막 발화 cycle 2737) — 강한 trigger 일치.
+- 원인: pnpm@11.25.0 은 Node >=22.13 요구. `ci.yml`/`daily-pipeline.yml`/`mlb-pipeline.yml` 3개 workflow 가 `node-version: 20` 고정 — `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite` (pnpm store path 조회 단계에서 실패). 나머지 6개 workflow(`data-refresh-weekly`/`factor-backtest-weekly`/`deploy-cloudflare-worker`/`lotto-pick-update`/`lotto-result-update`/`op-analysis-weekly`)는 이미 `'24'` 로 갱신된 상태 — 이 3개만 pnpm 마이그레이션 커밋 당시 누락.
+- fix: 3개 workflow `node-version: 20` → `'24'` 통일. tsc/eslint clean, 571파일 4484건 green. direct main push(d317065b) 후 CI 실측 재확인 — 신규 run(33608721477) status/conclusion API 직접 폴링으로 success 확정(6m1s, Test 단계 포함 전체 green).
+- 다음 사이클 추천 = review-code(heavy) — lib/ 나머지 17개 파일 신규 축 계속 감사, 또는 explore-idea saturation 재점검(plan#29 조건 여전히 미충족 예상).
+
 ## v0.5.62.191 — 2026-09-01 (cycle 2756, review-code(heavy): 미사용 MLB 선수 프로필 빌더 제거 SUCCESS)
 
 ### review-code(heavy): lib/ 빌더 신규 축 감사 (cycle 2756, SUCCESS)
