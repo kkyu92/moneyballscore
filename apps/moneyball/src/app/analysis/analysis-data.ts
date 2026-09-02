@@ -289,25 +289,28 @@ export async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   const supabase = await createClient();
   const yesterday = getYesterdayKSTDateString();
 
-  const gamesResult = (await supabase
-    .from('games')
-    .select(`
-      id, home_score, away_score,
-      home_team:teams!games_home_team_id_fkey(code),
-      away_team:teams!games_away_team_id_fkey(code),
-      predictions!inner(
-        is_correct, reasoning,
-        home_elo, away_elo, home_recent_form, away_recent_form,
-        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
-        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
-        home_sfr, away_sfr, home_war_total, away_war_total,
-        predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
-      )
-    `)
-    .eq('game_date', yesterday)
-    .eq('predictions.prediction_type', 'pre_game')
-    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
-    .order('game_time', { ascending: true })) as SelectResult<YesterdayGameRow[]>;
+  const [gamesResult, h2hMap] = await Promise.all([
+    supabase
+      .from('games')
+      .select(`
+        id, home_score, away_score,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code),
+        predictions!inner(
+          is_correct, reasoning,
+          home_elo, away_elo, home_recent_form, away_recent_form,
+          home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+          home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+          home_sfr, away_sfr, home_war_total, away_war_total,
+          predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+        )
+      `)
+      .eq('game_date', yesterday)
+      .eq('predictions.prediction_type', 'pre_game')
+      .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
+      .order('game_time', { ascending: true }) as unknown as Promise<SelectResult<YesterdayGameRow[]>>,
+    getSeasonH2HData(),
+  ]);
   const { data } = assertSelectOk(gamesResult, 'analysis getYesterdayGames');
 
   if (!data) return [];
@@ -320,7 +323,17 @@ export async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
     const homeCode = row.home_team?.code as TeamCode | undefined;
     const awayCode = row.away_team?.code as TeamCode | undefined;
     if (!homeCode || !awayCode) continue;
-    // wave-550: 어제 경기에도 팩터 수렴 점수 계산 (ThisWeekPreviousGames 패턴 동일, H2H 제외)
+    // cycle 2778 fix: game/[id](cycle 2303)·convergenceRecord.ts(cycle 2304)·
+    // getThisWeekRemainingGames 는 h2h 를 composite duel 에 포함하는데 어제 경기 리스트만
+    // "H2H 제외" 로 남아있어 같은 완료 경기의 netScore 가 상세페이지와 어제 리스트에서 달리
+    // 표시되던 parity gap — season-to-date h2h 동일 패턴으로 통일.
+    const [h2hA, h2hB] = [homeCode as string, awayCode as string].sort();
+    const h2hPair = h2hMap.get(`${h2hA}:${h2hB}`) ?? {};
+    const h2hHomeWinsRaw = h2hPair[homeCode] ?? 0;
+    const h2hAwayWinsRaw = h2hPair[awayCode] ?? 0;
+    const h2hTotal = h2hHomeWinsRaw + h2hAwayWinsRaw;
+    const h2hHomeWins = h2hTotal >= H2H_MIN_GAMES ? h2hHomeWinsRaw : undefined;
+    const h2hAwayWins = h2hTotal >= H2H_MIN_GAMES ? h2hAwayWinsRaw : undefined;
     const yesterdayDuel = computeCompositeDuel({
       homeCode,
       homeLineupWoba: pred.home_lineup_woba,
@@ -339,6 +352,8 @@ export async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
       awayElo: pred.away_elo ?? undefined,
       homeRecentForm: pred.home_recent_form ?? undefined,
       awayRecentForm: pred.away_recent_form ?? undefined,
+      h2hHomeWins,
+      h2hAwayWins,
     });
     const yesterdayDuelValid = yesterdayDuel.validCount >= COMPOSITE_DUEL_MIN_VALID;
     cards.push({
@@ -407,27 +422,30 @@ export async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
   if (currentWeek.startDate >= yesterday) return [];
 
   const supabase = await createClient();
-  const gamesResult = (await supabase
-    .from('games')
-    .select(`
-      id, game_date, game_time, home_score, away_score,
-      home_team:teams!games_home_team_id_fkey(code),
-      away_team:teams!games_away_team_id_fkey(code),
-      predictions!inner(
-        confidence, is_correct,
-        home_elo, away_elo, home_recent_form, away_recent_form,
-        home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
-        home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
-        home_sfr, away_sfr, home_war_total, away_war_total,
-        predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
-      )
-    `)
-    .gte('game_date', currentWeek.startDate)
-    .lt('game_date', yesterday)
-    .eq('predictions.prediction_type', 'pre_game')
-    .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
-    .order('game_date', { ascending: false })
-    .order('game_time', { ascending: true })) as SelectResult<ThisWeekGameRow[]>;
+  const [gamesResult, h2hMap] = await Promise.all([
+    supabase
+      .from('games')
+      .select(`
+        id, game_date, game_time, home_score, away_score,
+        home_team:teams!games_home_team_id_fkey(code),
+        away_team:teams!games_away_team_id_fkey(code),
+        predictions!inner(
+          confidence, is_correct,
+          home_elo, away_elo, home_recent_form, away_recent_form,
+          home_sp_fip, away_sp_fip, home_sp_xfip, away_sp_xfip,
+          home_lineup_woba, away_lineup_woba, home_bullpen_fip, away_bullpen_fip,
+          home_sfr, away_sfr, home_war_total, away_war_total,
+          predicted_winner_team:teams!predictions_predicted_winner_fkey(code)
+        )
+      `)
+      .gte('game_date', currentWeek.startDate)
+      .lt('game_date', yesterday)
+      .eq('predictions.prediction_type', 'pre_game')
+      .in('predictions.scoring_rule', PRODUCTION_COHORT_RULES)
+      .order('game_date', { ascending: false })
+      .order('game_time', { ascending: true }) as unknown as Promise<SelectResult<ThisWeekGameRow[]>>,
+    getSeasonH2HData(),
+  ]);
 
   const { data } = assertSelectOk(gamesResult, 'analysis getThisWeekPreviousGames');
   if (!data) return [];
@@ -440,7 +458,14 @@ export async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
     const homeCode = row.home_team?.code as TeamCode | undefined;
     const awayCode = row.away_team?.code as TeamCode | undefined;
     if (!homeCode || !awayCode) continue;
-    // wave-405: 이번 주 팩터 수렴 성적 — 과거 경기에도 동일 로직 적용 (H2H 제외)
+    // cycle 2778 fix: getYesterdayGames 와 동일 parity gap — h2h season-to-date 반영으로 통일
+    const [h2hA, h2hB] = [homeCode as string, awayCode as string].sort();
+    const h2hPair = h2hMap.get(`${h2hA}:${h2hB}`) ?? {};
+    const h2hHomeWinsRaw = h2hPair[homeCode] ?? 0;
+    const h2hAwayWinsRaw = h2hPair[awayCode] ?? 0;
+    const h2hTotal = h2hHomeWinsRaw + h2hAwayWinsRaw;
+    const h2hHomeWins = h2hTotal >= H2H_MIN_GAMES ? h2hHomeWinsRaw : undefined;
+    const h2hAwayWins = h2hTotal >= H2H_MIN_GAMES ? h2hAwayWinsRaw : undefined;
     const weekDuel = computeCompositeDuel({
       homeCode,
       homeLineupWoba: pred.home_lineup_woba,
@@ -459,6 +484,8 @@ export async function getThisWeekPreviousGames(): Promise<ThisWeekGameCard[]> {
       awayElo: pred.away_elo ?? undefined,
       homeRecentForm: pred.home_recent_form ?? undefined,
       awayRecentForm: pred.away_recent_form ?? undefined,
+      h2hHomeWins,
+      h2hAwayWins,
     });
     const weekDuelValid = weekDuel.validCount >= COMPOSITE_DUEL_MIN_VALID;
     cards.push({
