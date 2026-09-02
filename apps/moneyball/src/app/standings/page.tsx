@@ -330,7 +330,7 @@ export default async function StandingsPage() {
                       className="flex items-center gap-2 min-w-[6rem] hover:opacity-80 transition-opacity shrink-0"
                     >
                       <TeamLogo team={row.teamCode} size={20} />
-                      <span className="text-sm font-medium">{shortTeamName(row.teamCode)}</span>
+                      <span className="text-sm font-medium whitespace-nowrap">{shortTeamName(row.teamCode)}</span>
                     </Link>
                     <div className="flex-1 flex items-center gap-2">
                       <div className="flex-1 bg-gray-100 dark:bg-[var(--color-surface-card)] rounded-full h-1.5">

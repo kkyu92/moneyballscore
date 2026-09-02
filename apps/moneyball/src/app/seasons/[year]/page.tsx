@@ -300,7 +300,7 @@ export default async function SeasonPage({ params }: PageProps) {
                         <span className="pr-3">
                           <Link href={`/teams/${t.code}`} className="flex items-center gap-2 hover:underline">
                             <TeamLogo team={t.code} size={24} />
-                            <span className="font-medium">{shortTeamName(t.code) ?? t.name}</span>
+                            <span className="font-medium whitespace-nowrap">{shortTeamName(t.code) ?? t.name}</span>
                           </Link>
                         </span>
                         <span className="text-right font-mono">{t.games}</span>
