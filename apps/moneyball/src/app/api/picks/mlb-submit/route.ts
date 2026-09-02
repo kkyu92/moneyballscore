@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { DEVICE_ID_MAX_LENGTH } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,10 @@ export const dynamic = 'force-dynamic';
 // MLB 는 external_game_id VARCHAR(20) (mlb_schedule, migration 038) 이라 타입이
 // 안 맞아 별도 테이블(048 mlb_pick_poll_events) + 별도 route 로 parity 확보.
 export async function POST(req: NextRequest) {
+  if (!isOriginAllowed(req.headers.get('origin'))) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

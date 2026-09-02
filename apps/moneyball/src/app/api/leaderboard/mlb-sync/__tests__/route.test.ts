@@ -18,11 +18,17 @@ vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => makeAdminMock()),
 }));
 
-async function callPost(body: unknown) {
+const ORIGIN = 'https://moneyballscore.vercel.app';
+
+async function callPost(body: unknown, opts: { origin?: string | null } = {}) {
   const { POST } = await import('../route');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (opts.origin !== null) {
+    headers['Origin'] = opts.origin ?? ORIGIN;
+  }
   const req = new Request('http://localhost/api/leaderboard/mlb-sync', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(body),
   });
   return POST(req as never);
@@ -98,10 +104,26 @@ describe('POST /api/leaderboard/mlb-sync', () => {
     const { POST } = await import('../route');
     const req = new Request('http://localhost/api/leaderboard/mlb-sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Origin: ORIGIN },
       body: '{not json',
     });
     const res = await POST(req as never);
     expect(res.status).toBe(400);
+  });
+
+  it('Origin missing → 403 forbidden', async () => {
+    const res = await callPost(
+      { device_id: VALID_DEVICE_ID, nickname: 'Tester', picks: [] },
+      { origin: null },
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it('Origin mismatched (외부 도메인) → 403 forbidden', async () => {
+    const res = await callPost(
+      { device_id: VALID_DEVICE_ID, nickname: 'Tester', picks: [] },
+      { origin: 'https://evil.example.com' },
+    );
+    expect(res.status).toBe(403);
   });
 });

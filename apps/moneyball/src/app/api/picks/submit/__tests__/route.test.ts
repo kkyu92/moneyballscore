@@ -18,11 +18,17 @@ vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => makeAdminMock()),
 }));
 
-async function callPost(body: unknown) {
+const ORIGIN = 'https://moneyballscore.vercel.app';
+
+async function callPost(body: unknown, opts: { origin?: string | null } = {}) {
   const { POST } = await import('../route');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (opts.origin !== null) {
+    headers['Origin'] = opts.origin ?? ORIGIN;
+  }
   const req = new Request('http://localhost/api/picks/submit', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(body),
   });
   return POST(req as never);
@@ -84,5 +90,18 @@ describe('POST /api/picks/submit — 입력 검증', () => {
   it('pick=away 정상 처리', async () => {
     const res = await callPost({ game_id: 99, pick: 'away', device_id: 'device-uuid' });
     expect(res.status).toBe(200);
+  });
+
+  it('Origin missing → 403 forbidden', async () => {
+    const res = await callPost({ game_id: 1, pick: 'home', device_id: 'x' }, { origin: null });
+    expect(res.status).toBe(403);
+  });
+
+  it('Origin mismatched (외부 도메인) → 403 forbidden', async () => {
+    const res = await callPost(
+      { game_id: 1, pick: 'home', device_id: 'x' },
+      { origin: 'https://evil.example.com' },
+    );
+    expect(res.status).toBe(403);
   });
 });

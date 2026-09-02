@@ -3,10 +3,15 @@ import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { DEVICE_ID_MAX_LENGTH } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  if (!isOriginAllowed(req.headers.get('origin'))) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

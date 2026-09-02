@@ -12,28 +12,13 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { SITE_URL } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const ALLOWED_ORIGINS = [
-  SITE_URL,
-  `https://www.${new URL(SITE_URL).host}`,
-];
-
 const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-function isOriginAllowed(origin: string | null): boolean {
-  if (!origin) return false;
-  if (ALLOWED_ORIGINS.includes(origin)) return true;
-  // dev — localhost 임의 port 허용
-  if (process.env.NODE_ENV !== 'production' && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
-    return true;
-  }
-  return false;
-}
 
 export async function POST(req: NextRequest): Promise<Response> {
   // Layer 1 — CSRF / Origin

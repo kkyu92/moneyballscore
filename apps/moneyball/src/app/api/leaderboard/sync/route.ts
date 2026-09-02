@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import { DB_CONSTRAINTS } from '@moneyball/kbo-data';
 import { NICKNAME_MIN_CHARS, NICKNAME_MAX_CHARS } from '@moneyball/shared';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isOriginAllowed } from '@/lib/api/is-origin-allowed';
 import type { LeaderboardSyncPayload } from '@/lib/leaderboard/types';
 
 // 닉네임 검증: NICKNAME_MIN_CHARS~NICKNAME_MAX_CHARS자, 기본 XSS 방지
@@ -19,6 +20,10 @@ function isValidDeviceId(id: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isOriginAllowed(req.headers.get('origin'))) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
+
   let body: LeaderboardSyncPayload;
   try {
     body = await req.json();
