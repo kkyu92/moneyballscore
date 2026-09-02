@@ -1,4 +1,13 @@
 
+## cycle 2770 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/22(approved 없음). gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 1/30 방금 재도달, lotto 18/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족.
+- cycle 2768 retro carry-over(`buildAccuracyData.ts`/`fancy-stats.ts`)가 이미 cycle 2726 등에서 감사 완료된 stale 추천임을 git log 로 확인 후 폐기 — git 커밋 이력 1건뿐(=한 번도 review 대상 안 된) 파일군 새로 탐색해 MLB 헬퍼 15개 신규 후보 확보.
+- general-purpose 서브에이전트 전수 감사(select 컬럼/필드 소비/comment 정합/KBO-MLB parity). 13/15 clean, 2건 발견 — (1) `park-weather.ts` `ParkWeatherScore.reason` dead field + JSDoc 과잉주장, (2) `mlb-shadow-c.ts` `walkForwardExpanding()` 미호출이나 migration 049 코멘트가 이미 의도된 orphan 으로 문서화 — 재조치 불필요 판단.
+- fix: `park-weather.ts` `reason` 필드+계산 로직 제거(`homeAdj`/`awayAdj` 2필드만 반환), 관련 JSDoc 제거. `park-weather.test.ts` 의 reason assertion 전부 제거.
+- tsc/eslint/test 전부 green(571파일 4491건). direct main push, VERSION 0.5.62.202.
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 1-commit 파일군) 또는 fix-incident(gap 13/20)/op-analysis(gap 10/25)/lotto(gap 18/30) 자연 대기. info-arch 다음 재도달 = cycle 2799.
+
 ## cycle 2769 (2026-09-02) — RETRO-ONLY — info-architecture-review
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain alternation lock 발동, 둘 다 후보 제외.
