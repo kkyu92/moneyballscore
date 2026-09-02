@@ -1,3 +1,13 @@
+## v0.5.62.202 — 2026-09-02 (cycle 2770, review-code(heavy): park-weather.ts dead reason field 제거 SUCCESS)
+
+### review-code(heavy): 미감사 MLB 헬퍼 15개 신규 축 감사 (cycle 2770, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/22(approved 없음). gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 1/30 방금 재도달, lotto 18/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. cycle 2768 retro carry-over(`buildAccuracyData.ts`/`fancy-stats.ts`)는 실제로 cycle 2726/기존 fix 로 이미 감사 완료된 stale 추천이었음을 확인(재작업 회피) — git log 로 생성 후 커밋 1건뿐인(=한 번도 review-code 대상이 된 적 없는) 파일군을 새로 탐색해 MLB 헬퍼 15개(`buildMlbFactorAccuracy.ts`/`buildMlbCommunityAccuracy.ts`/`fetchMlbHistoricalAnalogs.ts`/`computeMlbCompositeDuel.ts`/`buildPitcherFipTrend.ts`/`tierStats.ts`/`mlb-shadow-c.ts`/`park-weather.ts`/`buildMlbMatchupUpcoming.ts`/`buildMlbTeamUpcoming.ts`/Elo trend KBO·MLB 페어 4개/`buildDailyAccuracy.ts`) 신규 후보 확보.
+- general-purpose 서브에이전트 전수 감사(select 컬럼 소비/필드 소비/comment 정합/KBO-MLB parity 4축). 13/15 clean. 2건 발견 — (1) `park-weather.ts` `ParkWeatherScore.reason` 필드가 계산만 되고 유일 호출자 `predictor.ts` 가 `parkWeatherFactor()` 경유로 `homeAdj`/`awayAdj` 만 읽어 dead field, JSDoc "reason 필드는 UI/디버그 surface 용(FactorBreakdown)" 도 과잉주장(`FactorBreakdown.tsx` 는 별도 raw weather 필드로 자체 문자열 조립, 이 reason 미참조). (2) `mlb-shadow-c.ts` `walkForwardExpanding()` 이 프로덕션 미호출(주석에서만 언급) — migration 049 코멘트가 이미 "향후 월간 milestone 비교 기능용 의도된 orphan" 이라 명시적으로 문서화한 상태라 재조치 불필요(false positive 처리).
+- fix: `park-weather.ts` `reason` 필드 + 관련 JSDoc/계산 로직 전부 제거(`homeAdj`/`awayAdj` 2필드만 반환). `park-weather.test.ts` 의 `reason` 관련 assertion 전부 제거(구조 변경 없음, 기존 로직 검증 유지).
+- tsc/eslint/test 전부 green (571파일 4491건, 필드 제거만 — 신규 테스트 없음). direct main push.
+- 다음 사이클 추천 = review-code(heavy) 계속 시 잔여 1-commit 파일군(`buildDailyAccuracy.ts` KBO 대응 원본 유무 재확인 등) 또는 fix-incident(gap 13/20)/op-analysis(gap 10/25)/lotto(gap 18/30) 자연 대기, info-arch 는 방금(cycle 2769) 재확인 완료라 다음 재도달은 cycle 2799.
+
 ## v0.5.62.201 — 2026-09-02 (cycle 2768, review-code(heavy): matchup profile dead field 제거 + parity 문서화 SUCCESS)
 
 ### review-code(heavy): buildTeamProfile/buildMatchupProfile 신규 축 감사 (cycle 2768, SUCCESS)
