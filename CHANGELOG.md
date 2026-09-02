@@ -1,3 +1,12 @@
+## v0.5.62.195 — 2026-09-02 (cycle 2760, operational-analysis(lite): CE cohort 재측정 gap=33/25 trigger SUCCESS)
+
+### operational-analysis(lite): CE cohort 재측정 (cycle 2760, SUCCESS)
+
+- 진단: op-analysis gap=33/25 (마지막 발화 cycle 2727) trigger 도달. open issue 0, unprocessed plan 0/23, 2-chain lock 미충족.
+- `scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=362 (CE n=315 / 비CE n=47), CE +5 전부 9월 데이터.
+- CE 54.6%(172/315) / 비CE 63.8%(30/47) → 격차 9.2pp (cycle 2748 9.3pp 대비 미세 축소). overlap 월 통제 격차 10.8pp 그대로 — LLM 부가가치 우세 방향 17회 연속 재확인.
+- CREDIT_EXHAUSTED·비CE 표본 동결 상태 변화 없음. CLAUDE.md Calibration 섹션 append. 코드 변경 없음(retro-only).
+
 ## v0.5.62.194 — 2026-09-02 (cycle 2759, review-code(heavy): HistoricalAnalogMatchup 미소비 scoring_rule 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): components/ 신규 축 감사 (cycle 2759, SUCCESS)
