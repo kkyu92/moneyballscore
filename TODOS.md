@@ -1,4 +1,13 @@
 
+## cycle 2772 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/29(approved 없음). gap trigger 4종 전부 미도달(fix-incident 15/20, op-analysis 12/25, info-arch 3/30, lotto 20/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건, tsc clean.
+- cycle 2771 이 `apps/moneyball/src/lib` 헬퍼 축을 소진했으므로 이번엔 `apps/moneyball/src/app` route + `src/components` 단일-git-커밋 필터로 신규 축 전환 — twitter-image/opengraph-image/not-found/loading boilerplate 제외 후 31개 미감사 파일(page.tsx 9개 + 컴포넌트 22개) 확보.
+- general-purpose 서브에이전트 2조 병렬 전수 감사(15+17파일, prop consumption/JSDoc 정합/KBO-MLB parity/filter option 실배선 여부). 29/31 clean, 2건 발견 — MLB analysis(ko+en)/matchup(ko+en) 4개 라우트가 `data-yesterday-status`/`data-margin-close` DOM 속성을 계산만 하고 KBO 쪽엔 이미 배선된 `YesterdayStatusFilter`/`MatchupGamesCloseFilter` 컴포넌트를 렌더하지 않아 "결과 필터"/"접전만 보기" UI 가 MLB 사용자에게만 없던 parity gap.
+- fix: 두 필터 컴포넌트에 `locale` prop(ko/en 라벨) 추가 후 4개 라우트에 배선(closeCount 계산 + data-matchup-section/data-matchup-games 속성 보강 포함, KBO 페이지 기존 동작 무변경 — locale 기본값 ko).
+- tsc/eslint/vitest 전부 green(571파일 4491건). direct main push(0975ff22). 버전 범프 불요(pre-push guard 기존 0.5.62.202 그대로 통과).
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 미감사 축 재탐색, app/lib 양쪽 소진) 또는 fix-incident(gap 15/20)/op-analysis(gap 12/25)/lotto(gap 20/30) 자연 대기.
+
 ## cycle 2771 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/29(approved 없음). gap trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 2/30, lotto 19/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건.
