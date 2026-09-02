@@ -1,4 +1,12 @@
 
+## cycle 2757 (2026-09-02) — SUCCESS — fix-incident
+
+- 진단: `gh run list` 최근 10건 확인 결과 직전 커밋(94a8e3ec, pnpm 10.33.0→11.25.0 마이그레이션) push 직후 main `CI` workflow 즉시 failure 발견. fix-incident gap 20/20 도달(마지막 발화 cycle 2737) — 강한 trigger 일치, open issue 0/unprocessed plan 0/23 확인 후 이 신호 우선 채택.
+- 원인 규명: `gh run view --log-failed` 로 실제 로그 확인 — pnpm@11.25.0 은 Node >=22.13 요구하는데 `ci.yml`/`daily-pipeline.yml`/`mlb-pipeline.yml` 3개 workflow 만 `node-version: 20` 고정. 나머지 6개는 이미 `'24'`.
+- fix: 3개 workflow node-version 20→'24' 통일. tsc/eslint/test(571파일 4484건) 전부 green. direct main push(d317065b).
+- 검증: push 후 즉시 종료하지 않고 신규 CI run(33608721477) 을 `gh api .../jobs/{id}` 로 단계별 폴링 — Test 단계까지 포함 전체 success 실측 확인(6m1s). "머지/CI 진행" 완료형 서술 전 실제 확인 의무(cycle 2001 lesson) 준수.
+- 다음 사이클 추천 = review-code(heavy) lib/ 나머지 17개 파일 계속 감사, 또는 explore-idea saturation 재점검.
+
 ## cycle 2756 (2026-09-01) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap19/20·info-arch gap17/30·lotto gap4/30·op-analysis gap8/25 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0. prev retro 추천 = fix-incident monitor 또는 explore-idea saturation.
