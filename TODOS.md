@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — Korean team-name wrap bug family 12th recurrence (TeamMatchupCards.tsx) 발견 + 수정 (cycle 2803, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/22(approved 없음), 2차 방어선(cycle 2802 retro commit 428b4a35) OK. 직전8(2795-2802) distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 6/20, op-analysis 5/25, info-arch 3/30, lotto 21/30). cycle 2802 retro 가 review-code(heavy) 3연속 clean 로 diminishing return 명시 지적 — 다른 접근 선택.
+
+review-code(heavy) 파일 단위 read 대신, 이미 11회 재발한 Korean team-name wrap bug family 를 exhaustive grep 으로 재탐색(shortTeamName/KBO_TEAMS[].name 호출부 중 whitespace-nowrap/truncate/break-keep-all 미보유 파일 전수). 37개 후보 중 heading(analysis/game/[id], insights/series/[topic]) 과 auto-sizing pill(DailyPredictionSummaryBar)/opengraph-image(satori) 는 false positive 로 배제. TeamMatchupCards.tsx(/accuracy 페이지, grid-cols-2 모바일 좁은 열, justify-between 헤더 + text-2xs 상대팀 목록) 가 PredictionCard/PlaceholderCard(cycle 2797) 와 동일 narrow-column 패턴 확정.
+
+fix: 헤더 팀명 span + 상대팀 목록 "vs {name}" span 2곳에 whitespace-nowrap 추가. lock-in 테스트 1건 추가(TeamMatchupCards.test.tsx). tsc/eslint/test 전부 green(571파일 4493건, +2). direct main push(ddd5db47).
+
+skill-evolution trigger 평가: cycle_n % 50 = 3(미충족), 직전 20-cycle chain pool 표본 재확인 필요 — 나머지 trigger 미충족. emergency stop 미충족(직전 10 사이클 중 success 다수).
+
+다음 사이클 추천 = gap 근접 chain(lotto 21/30, op-analysis 5/25) 자연 대기 또는 review-code(heavy) 잔여 후보(api/hub-dispatch/route.ts, api/health/pipelines/route.ts) — diminishing return 우려 시 다른 recurring-bug-family sweep(예: 다른 narrow-column UI 패턴) 우선 고려.
+
 ## 🟡 RETRO-ONLY — review-code(heavy) 신규 후보 3개 (fancy-stats.ts/picks-results/kbo-scores) 전수 감사, 발견 0건 clean (cycle 2802, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/22(approved 없음), 2차 방어선(cycle 2801 retro commit 1befdb67) OK. 직전8(2794-2801) 정규화 base chain distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 5/20, op-analysis 4/25, info-arch 2/30, lotto 20/30 — lotto 는 2026-09-05 회차 picks 이미 박제 완료, D-7 부재 아님). improvement saturation(explore-idea) 6/15 미충족. cycle 2801 retro 가 명시적으로 review-code(heavy) 재진단 권장 — 가장 강한 lead 로 선택.
