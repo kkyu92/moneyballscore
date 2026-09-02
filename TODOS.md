@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — Korean team-name wrap bug family 전면 sweep, 20파일/36곳 일괄 수정 (cycle 2804, 2026-09-02)
+
+진단: open issue 0, unprocessed approved plan 0/22. 2차 방어선(cycle 2803 retro commit 9e32cc76) OK. 직전8(2796-2803) distinct=5 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 1/20, op-analysis 6/25, info-arch 4/30, lotto 22/30 — lotto 는 2026-09-05 회차 picks 이미 박제 완료).
+
+cycle 2803 까지 12회 재발한 Korean team-name wrap bug 를 매 사이클 1파일씩 반응형으로 잡던 패턴 중단 — 서브에이전트 위임으로 `shortTeamName`/`.teamName`/`KBO_TEAMS[].name` 호출부 전체(60파일, 302라인) 를 grep 후 개별 read, narrow-column 위험 시그니처(좁은 grid/flex 열 + whitespace-nowrap/truncate/break-keep-all 미보유) 로 일괄 판정.
+
+fix: 20파일 36곳 패치(analysis/page.tsx 12곳 최다, 나머지 insights/matchup/reviews/seasons page + AgentVoteCard/DebateTimeline/PickButton/BigMatchDebateCard/JudgeVerdictPanel/predictions 컴포넌트 다수). 컴포넌트별 lock-in 테스트 + 페이지 라우트는 정적 source-assertion 테스트 추가. ~25곳은 false positive(grid-cols-1 모바일/SEO 문자열/이미 보호됨/auto-sizing pill) 로 미변경. tsc/eslint/test 전부 green(580파일 4515건, +9). direct main push(a7dcd2b0).
+
+판단 보류 5곳(추후 재발 시 우선 재검토): analysis/page.tsx factor-detail block-flow 행, PostviewPanel/BigMatchDebateCard/JudgeReasoningCard/DetailedFactorAnalysis grid-cols-1-모바일 지점, AgentArgumentBox 2-item flex 행 — 이론적 위험 있으나 확립된 squeeze 시그니처 미부합으로 미수정.
+
+skill-evolution trigger 평가: cycle_n % 50 = 4(미충족), 직전 20-cycle review-code 다수 발화(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger 1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 success 다수).
+
+다음 사이클 추천 = gap-fill 후보(lotto 23/30, op-analysis 7/25, info-arch 5/30) 자연 대기. 13번째 wrap bug 재발 시 위 판단 보류 5곳부터 재검토 후 신규 패턴 여부 판단.
+
 ## 🟢 SUCCESS — Korean team-name wrap bug family 12th recurrence (TeamMatchupCards.tsx) 발견 + 수정 (cycle 2803, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/22(approved 없음), 2차 방어선(cycle 2802 retro commit 428b4a35) OK. 직전8(2795-2802) distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 6/20, op-analysis 5/25, info-arch 3/30, lotto 21/30). cycle 2802 retro 가 review-code(heavy) 3연속 clean 로 diminishing return 명시 지적 — 다른 접근 선택.
