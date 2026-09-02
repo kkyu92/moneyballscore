@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /players/[id] + KBO matchup 모바일 wrap 버그 5·6번째 재발 발견+수정 (cycle 2795, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2794 retro commit 존재) OK. 직전8 정규화 base chain distinct=2(review-code 3 + polish-ui 5) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 22/25 — 25 임계 근접, info-arch 26/30, lotto 13/30). explore-idea saturation count=14(≥12)이나 4-source 재확인 negative(GH issue 0, DESIGN.md 당일 갱신, 신규라우트 -7d는 git 이력상 mtime 부작용, breadcrumb 18건 전부 기존 의도된 제외). gh run list 확인 = 최근 CI/scheduled workflow 실패 0건. 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화.
+
+cycle 2794 next_recommended(mlb/en 대응 페이지들) 먼저 점검 — `mlbShortTeamName()` 데이터 직접 grep 확인 결과 영문 팀명("Red Sox"/"Blue Jays" 등)이라 CJK 음절 단위 줄바꿈 버그와 무관함을 코드 근거로 확인(재작업 회피). 대신 `<td` grep 으로 테이블 보유 라우트 전수 재나열 후 미감사 KBO 라우트 재탐색 — `/players/[id]` (투수 상세, opponentName td) 와 `/matchup/[teamA]/[teamB]` (KBO 매치업, `{awayName} vs {homeName}` td) 2곳에서 `whitespace-nowrap` 누락 확인. players/players-list(cycle 2792)·standings(cycle 2793)·teams(cycle 2794)에 이은 5·6번째 재발.
+
+수정: 2개 파일 각 1개 `<td>`에 `whitespace-nowrap` 추가. tsc/eslint/test(571파일 4492건) 전부 green. dev server 기동 후 SSR curl 로 `/players/11`(opponentName=키움) + `/matchup/HH/HT`(KIA vs 한화) 렌더 HTML에 whitespace-nowrap class 실제 적용 확인(스크린샷 대신 SSR HTML 직접 검증). main 직커밋+push(e5abbecb), pre-push lint+type-check green, CI green.
+
+다음 사이클 추천 = review-code(heavy) cooldown 만료 대기(cycle 2800, 직전8 window 자연 회전) 또는 gap trigger 자연 대기(fix-incident 13/20, op-analysis 23/25 — 25 임계 근접, info-arch 27/30, lotto 14/30) 또는 polish-ui 잔여 확인(debug/* 낮은 우선순위, lotto/* 페이지 한글 텍스트 재점검).
+
 ## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /teams 모바일 wrap 버그 3번째 재발 발견+수정 (cycle 2794, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/22(approved 없음). 2차 방어선(cycle 2793 retro commit 존재) OK. 직전8 정규화 base chain distinct=2(review-code 4 + polish-ui 4) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 21/25, info-arch 25/30, lotto 12/30). explore-idea saturation count=14(≥12)이나 4-source 재확인 negative(GH issue 0, DESIGN.md 당일 갱신, 신규라우트 -7d는 git 이력상 mtime 부작용, breadcrumb 18건 전부 기존 의도된 제외). gh run list 확인 = 최근 CI/scheduled workflow 실패 0건. 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화.
