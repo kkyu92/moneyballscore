@@ -207,7 +207,11 @@ function parseTeamPostview(text: string, team: TeamCode): TeamPostview {
     return {
       team,
       summary: String(parsed.summary || '').slice(0, 500),
-      keyFactor: String(parsed.keyFactor || ''),
+      // judge 쪽 parseJudgePostview 와 동일 canonicalize — TEAM_POSTVIEW_SYSTEM 도
+      // "home_/away_ prefix 없는 정규화 키" 를 명시하지만 LLM 이 어겨도 안전망 부재였음.
+      // PostviewPanel 의 keyFactorLabel(FACTOR_LABELS_TECHNICAL[key] ?? key) 가 no-prefix
+      // 키로만 구성돼 prefixed key 는 lookup miss → raw dev key 가 사용자 가시 UI 로 leak.
+      keyFactor: canonicalizeFactorKey(String(parsed.keyFactor || '')),
       missedBy: String(parsed.missedBy || '').slice(0, 300),
     };
   } catch {
