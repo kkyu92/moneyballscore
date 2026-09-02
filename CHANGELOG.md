@@ -1,3 +1,15 @@
+## v0.5.62.193 — 2026-09-02 (cycle 2758, review-code(heavy): lib/reviews·teams 빌더 미소비 select 컬럼 제거 SUCCESS)
+
+### review-code(heavy): lib/ 빌더 신규 축 감사 (cycle 2758, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap1/20(직전 사이클 발화)·op-analysis gap10/25·info-arch gap19/30·lotto gap6/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0, CI 정상. explore-idea saturation 12/15 충족했으나 plan#29 게이트(트래픽≥10 또는 포스트시즌 임박) 재확인 결과 실측 여전히 user_picks=1/mlb_user_picks=0/pick_poll_events=5/mlb_pick_poll_events=0 (cycle 2417/2633 측정과 동일, 변화 0) — 미충족 유지, retro-only 재확인 대신 review-code 계속 진행.
+- 직전 sweep(page.tsx→API 라우트→MLB mirror) 완결 후 신규 축 = `lib/` 나머지 21개 파일(analysis/dashboard/insights/leaderboard/matchup/players/reviews/seasons/standings/teams), Explore 서브에이전트 전수 감사.
+- `lib/reviews/shared.ts`: `predictions.predicted_winner` 원본 스칼라 컬럼 미소비 확인(실사용은 조인된 `predicted_winner_team.code`) — 콜러 2곳(`buildWeeklyReview.ts`/`buildMonthlyReview.ts`) grep 재확인 0건.
+- `lib/teams/buildTeamUpcoming.ts`: `home_team`/`away_team` 조인 객체의 `id` 필드 미소비(실사용은 `code`/`name_ko`만).
+- 나머지 19개 파일 전부 clean 확인(`leaderboard/server.ts`의 `device_id`는 처음엔 의심됐으나 `LeaderboardTable`/`HallOfFame` 등 3개 컴포넌트에서 실제 소비 확인).
+- fix: 2개 파일에서 미소비 컬럼 제거. tsc/eslint clean, 571파일 4484건 green. direct main push 후 CI 실측 재확인(success 확정).
+- 다음 사이클 추천 = `lib/` 축 소진(21개 전부 감사 완료) — 다음 미감사 후보 재탐색 필요(components/ 자체 select 사용 여부 확인 등), 또는 fix-incident/op-analysis gap monitor.
+
 ## v0.5.62.192 — 2026-09-02 (cycle 2757, fix-incident: CI node-version 20→24 pnpm 11 불일치 SUCCESS)
 
 ### fix-incident: 3개 workflow node-version 갱신 (cycle 2757, SUCCESS)

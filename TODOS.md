@@ -1,4 +1,14 @@
 
+## cycle 2758 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap1/20·op-analysis gap10/25·info-arch gap19/30·lotto gap6/30 전부 미도달. 직전8 distinct=4 — 2-chain lock 미충족. gh run list 실패 0. explore-idea saturation 12/15 충족했으나 plan#29 실측 재확인(user_picks=1/mlb_user_picks=0/pick_poll_events=5/mlb_pick_poll_events=0, cycle 2417/2633 과 동일 변화 0) — 게이트 미충족 유지, review-code 계속.
+- 직전 sweep(page.tsx→API 라우트→MLB mirror) 완결 후 신규 축 = `lib/` 나머지 21개 파일, Explore 서브에이전트 전수 감사.
+- `lib/reviews/shared.ts`: `predictions.predicted_winner` 원본 스칼라 미소비(실사용은 조인된 `predicted_winner_team.code`), 콜러 2곳 grep 재확인 0건.
+- `lib/teams/buildTeamUpcoming.ts`: `home_team`/`away_team` 조인 객체 `id` 필드 미소비(실사용은 `code`/`name_ko`만).
+- 나머지 19개 파일 clean 확인.
+- fix: 2개 파일 select절/interface 에서 미소비 컬럼 제거. tsc/eslint clean, 571파일 4484건 green. direct main push 후 CI 실측 재확인(success 확정).
+- 다음 사이클 추천 = `lib/` 축 소진 — 신규 미감사 후보 재탐색(components/ select 사용 여부 등), 또는 fix-incident/op-analysis gap monitor.
+
 ## cycle 2757 (2026-09-02) — SUCCESS — fix-incident
 
 - 진단: `gh run list` 최근 10건 확인 결과 직전 커밋(94a8e3ec, pnpm 10.33.0→11.25.0 마이그레이션) push 직후 main `CI` workflow 즉시 failure 발견. fix-incident gap 20/20 도달(마지막 발화 cycle 2737) — 강한 trigger 일치, open issue 0/unprocessed plan 0/23 확인 후 이 신호 우선 채택.
