@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — Korean 팀명 wrap 버그 family 전수 sweep, /accuracy·standings 모바일·seasons 7·8·9번째 재발 발견+수정 (cycle 2796, 2026-09-02)
+
+진단: 직전 세션이 active-cycle 남긴 채 중단됨(pid dead) — f5a6c85f(`/accuracy` wrap fix, 7번째 재발) 는 이미 커밋+push 됐으나 retro 미박제 상태로 발견. blind backfill 대신 `shortTeamName(` 전체 call-site grep sweep 을 apps/moneyball/src/app 전역 실행.
+
+발견: `/standings` 모바일 카드 뷰(라인 333, cycle 2793 이 고친 데스크톱 테이블과 별개 섹션) + `/seasons/[year]` grid row(1fr 컬럼, 고정폭 없음) 2곳 추가 미수정 확인 — 8·9번째 재발.
+
+수정: 2곳에 `whitespace-nowrap` 추가(f26c8dc6). tsc --noEmit clean, pre-push lint+type-check+test 전부 green. main 직커밋+push.
+
+cycle-retro 자기검증(cycle 2601 룰): `git log --grep "cycle-retro 2796 "` 실측 확인 — 커밋 존재. 직전 사이클(2795) retro commit 도 확인됨(2차 방어선 OK). 2-chain lock 직전8 여전히 review-code(heavy)+polish-ui 계열 유지 — 동일 family 연속이라 lock break 불필요.
+
+다음 사이클 추천 = 본 sweep 이 apps/moneyball/src/app 전체 shortTeamName() call site 를 훑었으므로 family 소진 가능성 높음 — 재sweep 보다는 신규 call site 발생 여부만 확인. review-code(heavy) cooldown 만료(cycle 2800) 자연 대기 또는 gap trigger(fix-incident/op-analysis/info-arch/lotto) 자연 도달 확인.
+
 ## 🟢 SUCCESS — polish-ui 2-chain lock fallback, /players/[id] + KBO matchup 모바일 wrap 버그 5·6번째 재발 발견+수정 (cycle 2795, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2794 retro commit 존재) OK. 직전8 정규화 base chain distinct=2(review-code 3 + polish-ui 5) — 2-chain lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 22/25 — 25 임계 근접, info-arch 26/30, lotto 13/30). explore-idea saturation count=14(≥12)이나 4-source 재확인 negative(GH issue 0, DESIGN.md 당일 갱신, 신규라우트 -7d는 git 이력상 mtime 부작용, breadcrumb 18건 전부 기존 의도된 제외). gh run list 확인 = 최근 CI/scheduled workflow 실패 0건. 잔여 chain 전부 organic trigger 부재 → lock fallback rule(step3) 적용, `polish-ui` 강제 발화.
