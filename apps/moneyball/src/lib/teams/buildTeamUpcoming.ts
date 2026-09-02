@@ -29,8 +29,8 @@ interface UpcomingGameRow {
   stadium: string | null;
   home_team_id: number | null;
   away_team_id: number | null;
-  home_team: { id: number; code: string | null; name_ko: string | null } | null;
-  away_team: { id: number; code: string | null; name_ko: string | null } | null;
+  home_team: { code: string | null; name_ko: string | null } | null;
+  away_team: { code: string | null; name_ko: string | null } | null;
   predictions: Array<{
     predicted_winner: number | null;
     confidence: number | null;
@@ -60,8 +60,8 @@ export async function buildTeamUpcoming(
       `
         id, game_date, game_time, stadium,
         home_team_id, away_team_id,
-        home_team:teams!games_home_team_id_fkey(id, code, name_ko),
-        away_team:teams!games_away_team_id_fkey(id, code, name_ko),
+        home_team:teams!games_home_team_id_fkey(code, name_ko),
+        away_team:teams!games_away_team_id_fkey(code, name_ko),
         predictions!inner(
           predicted_winner, confidence, home_win_prob
         )

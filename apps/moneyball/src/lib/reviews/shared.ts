@@ -51,7 +51,6 @@ export interface PredictionRow {
   is_correct: boolean | null;
   factors: Record<string, number> | null;
   reasoning: { homeWinProb?: number | null } | null;
-  predicted_winner: number | null;
   predicted_winner_team: {
     code: string | null;
   } | null;
@@ -80,7 +79,7 @@ export async function fetchPredictionRowsInRange(
     .from("predictions")
     .select(
       `
-        confidence, is_correct, factors, reasoning, predicted_winner,
+        confidence, is_correct, factors, reasoning,
         predicted_winner_team:teams!predictions_predicted_winner_fkey(code),
         game:games!predictions_game_id_fkey(
           id, game_date, home_score, away_score, status,
