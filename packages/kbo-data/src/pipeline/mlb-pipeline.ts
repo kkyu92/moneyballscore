@@ -290,6 +290,13 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     ({ data: statsRows } = assertSelectOk<MlbTeamStatsRow[]>(statsResult, 'mlb-pipeline.mlb_team_stats.select'));
   } catch (e) {
     errors.push(`mlb_team_stats select: ${errMsg(e)}`);
+    // runEloUpdate 의 mlb_team_elo_history upsert 와 동일 blind spot(line 739-742 주석) —
+    // 이 select 실패해도 predictionRows 는 MLB_STAT_DEFAULTS fallback 으로 계속 insert 되어
+    // rowsInserted>0 유지 → pipeline_runs.status='success' 이고 captureSilentDriftAlert 도
+    // coverage(predictionsGenerated>=gamesFound) 만 보므로 둘 다 이 실패를 못 잡음 (cycle 2781 발견).
+    Sentry.captureException(new Error(`mlb_team_stats select error: ${errMsg(e)}`), {
+      tags: { silent_drift_family: 'wave_178', component: 'pipeline-mlb', op: 'mlb_team_stats_select' },
+    });
   }
 
   const statsByTeam = new Map<string, MlbTeamStatsRow>();
@@ -309,6 +316,11 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     ({ data: eloRows } = assertSelectOk<Array<{ team_code: string; elo_rating: number }>>(eloResult, 'mlb-pipeline.mlb_team_elo.select'));
   } catch (e) {
     errors.push(`mlb_team_elo select: ${errMsg(e)}`);
+    // 동일 blind spot (line 291-296 주석 참조) — ELO_NEUTRAL fallback 으로 계속 insert 되어
+    // pipeline_runs.status/captureSilentDriftAlert 둘 다 이 실패를 못 잡음.
+    Sentry.captureException(new Error(`mlb_team_elo select error: ${errMsg(e)}`), {
+      tags: { silent_drift_family: 'wave_178', component: 'pipeline-mlb', op: 'mlb_team_elo_select' },
+    });
   }
 
   const eloByTeam = new Map<string, number>();
@@ -336,6 +348,11 @@ async function runPredictFinal(db: DB, date: string): Promise<{ gamesFound: numb
     finishedGames = (data ?? []).slice().sort((a, b) => (a.game_date < b.game_date ? 1 : -1));
   } catch (e) {
     errors.push(`mlb_schedule finished select: ${errMsg(e)}`);
+    // 동일 blind spot — recent_form/head_to_head 가 중립값(0.5)으로 계속 insert 되어
+    // pipeline_runs.status/captureSilentDriftAlert 둘 다 이 실패를 못 잡음.
+    Sentry.captureException(new Error(`mlb_schedule finished select error: ${errMsg(e)}`), {
+      tags: { silent_drift_family: 'wave_178', component: 'pipeline-mlb', op: 'mlb_schedule_finished_select' },
+    });
   }
 
   const predictionRows = gameList.map((g) => {
