@@ -68,14 +68,14 @@ export async function saveGameRecord(
   // family). throw → return SaveResult 패턴 깨짐 방지 위해 try/catch wrap 으로 기존
   // error return 로직 유지. 추가: row null 가드 (RLS 등으로 data=[] error=null 시
   // wasUpdated=undefined → inserted true 오판정 차단 — error 명시 return).
-  let data: { id: number; created_at: string; updated_at: string }[] | null = null;
+  let data: { created_at: string; updated_at: string }[] | null = null;
   try {
     const upsertResult = await db
       .from('game_records')
       .upsert(payload, { onConflict: DB_CONSTRAINTS.savedGames })
-      .select('id, created_at, updated_at');
+      .select('created_at, updated_at');
     assertWriteOk(upsertResult, 'save-game-record.game_records.upsert');
-    data = upsertResult.data as { id: number; created_at: string; updated_at: string }[] | null;
+    data = upsertResult.data as { created_at: string; updated_at: string }[] | null;
   } catch (e) {
     return {
       gameId,

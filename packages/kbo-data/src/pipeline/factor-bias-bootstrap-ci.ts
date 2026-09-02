@@ -29,8 +29,6 @@ interface FactorError {
 }
 
 interface PredictionRow {
-  id: string;
-  game_id?: string | null;
   reasoning: { factorErrors?: FactorError[] };
 }
 
@@ -80,7 +78,7 @@ async function main(): Promise<void> {
 
   const { data, error } = await supabase
     .from('predictions')
-    .select('id,game_id,reasoning')
+    .select('reasoning')
     .in('scoring_rule', PRODUCTION_COHORT_RULES)
     .eq('prediction_type', 'post_game')
     .gte('created_at', cutoff)

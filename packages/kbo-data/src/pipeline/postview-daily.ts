@@ -127,19 +127,16 @@ export async function runPostviewDaily(
     // crash → predict/error 3건/7일).
     const preGameResult = await db
       .from('predictions')
-      .select('id, predicted_winner, confidence, factors, reasoning, home_elo, away_elo, scoring_rule')
+      .select('predicted_winner, confidence, factors, reasoning, scoring_rule')
       .eq('game_id', gameId)
       .eq('prediction_type', 'pre_game')
       .in('scoring_rule', PRODUCTION_COHORT_RULES)
       .maybeSingle();
     const { data: preGame } = assertSelectOk<{
-      id: number;
       predicted_winner: number;
       confidence: number;
       factors: unknown;
       reasoning: unknown;
-      home_elo: number | null;
-      away_elo: number | null;
       scoring_rule: string | null;
     }>(preGameResult, 'postview-daily.runPostviewDaily preGame');
 

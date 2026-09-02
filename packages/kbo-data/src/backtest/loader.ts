@@ -46,7 +46,7 @@ export async function loadDecidedGames(
       const { data, error } = await db
         .from('games')
         .select(
-          'game_date, home_team_id, away_team_id, home_score, away_score, winner_team_id, status',
+          'game_date, home_team_id, away_team_id, home_score, away_score, winner_team_id',
         )
         .gte('game_date', `${season}-01-01`)
         .lte('game_date', `${season}-12-31`)
@@ -198,7 +198,7 @@ export async function loadGameRecords(
         .from('game_records')
         .select(
           `game_id, pitchers_home, pitchers_away,
-           game:games!inner(id, game_date, home_team_id, away_team_id, home_score, away_score)`,
+           game:games!inner(game_date, home_team_id, away_team_id, home_score, away_score)`,
         )
         .gte('game.game_date', `${season}-01-01`)
         .lte('game.game_date', `${season}-12-31`)

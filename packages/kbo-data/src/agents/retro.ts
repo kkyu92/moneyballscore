@@ -249,9 +249,9 @@ export async function generateAgentMemories(date: string, dbInjected?: DB) {
   const wrongResult = await db
     .from('predictions')
     .select(`
-      game_id, predicted_winner, confidence, reasoning, factors,
+      factors,
       game:games!predictions_game_id_fkey(
-        id, game_date, home_score, away_score,
+        id, game_date,
         home_team:teams!games_home_team_id_fkey(code),
         away_team:teams!games_away_team_id_fkey(code),
         winner:teams!games_winner_team_id_fkey(code)
