@@ -1,4 +1,12 @@
 
+## cycle 2776 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger: fix-incident 19/20, op-analysis 3/25, info-arch 7/30, lotto 24/30 — 전부 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 CI 신규 실패 0건.
+- cycle 2775 retro 의 PLAUSIBLE carry-over(recent-form/H2H fallback silent catch) 그대로 계승. `packages/kbo-data/src/pipeline/daily.ts:690~697` — DB 데이터 부족 시 KBO 스크래핑 fallback(`fetchRecentForm`/`fetchHeadToHead`)이 실패해도 neutral 기본값(0.5 / 0승0패)으로 조용히 넘어가 `errors[]`/Sentry 어디에도 흔적이 안 남아 스크래퍼 회귀를 진단 불가 — cycle 2775 verifiedCount 오발화와 동일 silent-catch family.
+- fix: 3개 catch 블록 모두 `errors.push(...)` 추가(neutral 기본값 반환 동작 자체는 유지 — pipeline 은 계속 진행, 실패 흔적만 `pipeline_runs.errors` 에 남김). 회귀 테스트 1건 추가(fetchRecentForm/fetchHeadToHead 둘 다 reject → predictionsGenerated=1 유지 + errors[] 에 두 메시지 모두 포함 확인).
+- packages/kbo-data vitest 1223건 green(+1), eslint clean, apps/moneyball tsc clean. direct main push(6d16c489). 버전 범프 불요(pre-push guard green).
+- 다음 사이클 추천 = review-code(heavy) 계속(daily.ts 잔여 축 재탐색 또는 mlb-pipeline.ts 대응부 재확인) 또는 fix-incident(gap 20/20 도달)/lotto(gap 25/30) 자연 대기.
+
 ## cycle 2775 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/23(approved 없음). gap trigger: fix-incident 18/20, op-analysis 2/25, info-arch 6/30, lotto 23/30 — 전부 미도달. 직전8 distinct=3(review-code(heavy) 6 + operational-analysis 1 + info-architecture-review 1) — 2-chain lock 미충족.
