@@ -1,4 +1,13 @@
 
+## cycle 2771 (2026-09-02) — SUCCESS — review-code(heavy)
+
+- 진단: open issue 0, unprocessed plan 0/29(approved 없음). gap trigger 4종 전부 미도달(fix-incident 14/20, op-analysis 11/25, info-arch 2/30, lotto 19/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족. gh run list 최근 10건 CI 신규 실패 0건.
+- cycle 2770 이 stale 추천(buildAccuracyData.ts/fancy-stats.ts) 폐기한 뒤라 신규 축 재탐색 필요 — `apps/moneyball/src/lib` 전역 단일-git-커밋 필터로 11개 미감사 헬퍼 확보(computeMlbCompositeDuel/buildMlbCommunityAccuracy/mlbCanonicalPair/buildMlbTeamEloTrend·buildTeamEloTrend KBO-MLB pair/buildMatchupEloTrend/computeMagicNumber/tierStats/pearson/statusBadge/buildDailyAccuracy).
+- general-purpose 서브에이전트 전수 감사(반환 필드 소비 여부/comment-code 정합/KBO-MLB parity). 10/11 clean, 1건 발견 — `computeMlbCompositeDuel.ts` JSDoc 이 "elo/recent_form/head_to_head/sfr 4팩터 전량 미구현(null)" 이라 주장했으나 `mlb-pipeline.ts:442-446` 확인 결과 elo/recent_form/head_to_head 는 cycle 2353 이후 실제 predictions 컬럼에 저장 중 — 진짜 미구현 placeholder 는 defense_sfr 하나뿐.
+- fix: comment 를 실제 상태로 정정만(로직/팩터 확장 X — 6→9 팩터 확장은 별도 scope 결정으로 보류).
+- tsc/eslint/vitest 전부 green. direct main push(ec3ee0bd). 버전 범프 불요(pre-push guard 기존 0.5.62.202 그대로 통과).
+- 다음 사이클 추천 = review-code(heavy) 계속(app 라우트/컴포넌트 단 미감사 대형 파일 재탐색) 또는 fix-incident(gap 14/20)/op-analysis(gap 11/25)/lotto(gap 19/30) 자연 대기.
+
 ## cycle 2770 (2026-09-02) — SUCCESS — review-code(heavy)
 
 - 진단: open issue 0, unprocessed plan 0/22(approved 없음). gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 10/25, info-arch 1/30 방금 재도달, lotto 18/30). 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + info-architecture-review 1) — 2-chain lock 미충족.
