@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy) buildAccuracyData.ts 4축 감사 clean (cycle 2779, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23. gap trigger 전부 미도달(fix-incident 0/20 방금 클리어, op-analysis 6/25, info-arch 10/30, lotto 27/30). 직전8 distinct=3 — 2-chain lock 미충족. deploy-drift-alert 최신 run SUCCESS로 cycle 2777 self-heal 재확인.
+
+cycle 2778 추천대로 미감사 대형파일 `apps/moneyball/src/lib/accuracy/buildAccuracyData.ts`(767줄) 4축 감사(JSDoc/dead-code/KBO-MLB parity/error-swallowing). 이 파일은 이미 10+ 과거 cycle이 silent-drift를 수정한 흔적이 주석으로 촘촘히 남아있는 상태 — MLB sibling(`buildMlbAccuracySummary.ts`)이 함수 직접 재사용이라 parity gap 없음, try/catch 0개라 error-swallowing 해당없음.
+
+PLAUSIBLE 후보 1건(buildV18SubCohort의 "model_version이 LLM_ACTIVE 아니면 전부 fallback" vs classifyVersion의 "둘 다 아니면 제외" 정의 불일치) 제기됐으나, `accuracy/page.tsx` 쿼리(`prediction_type='pre_game'` + `scoring_rule='v1.8'` 필터)까지 직접 추적 검증한 결과 문제되는 model_version 값('v1.8-live'/'v1.8-postview') 자체가 두 함수 입력에 도달 불가능함을 확인 — false alarm, 코드 변경 없이 clean 종료(cycle 2774 validator.ts 패턴과 동일).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 `buildTeamProfile.ts`(591줄)/`buildMatchupProfile.ts`(584줄) 정독, 또는 op-analysis(7/25)/info-arch(11/30)/lotto(28/30) 자연 대기.
+
 ## ✅ SUCCESS — review-code(heavy) getYesterdayGames/getThisWeekPreviousGames h2h 누락 parity gap 정정 (cycle 2778, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2777 retro commit 존재) OK. gap trigger 4종 전부 미도달(op-analysis 5/25, info-arch 9/30, lotto 26/30, fix-incident 방금 발화). 직전8 distinct=3(review-code(heavy) 5 + operational-analysis 1 + fix-incident 2) — 2-chain lock 미충족. cycle 2777 추천대로 review-code(heavy) 대형파일 rotation 계속.
