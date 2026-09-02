@@ -1,3 +1,15 @@
+## v0.5.62.198 — 2026-09-02 (cycle 2763, review-code(heavy): anonymous write endpoint Origin/CSRF 불일치 제거 SUCCESS)
+
+### review-code(heavy): CRON_SECRET/API_KEY 보호 규칙 audit + Origin 불일치 fix (cycle 2763, SUCCESS)
+
+- 진단: open issue 0, unprocessed plan 0/23(approved 없음). fix-incident gap6/20·op-analysis gap3/25·info-arch gap24/30·lotto gap11/30 전부 미도달. 직전8 distinct=3(review-code/fix-incident/operational-analysis) — 2-chain lock 미충족.
+- CLAUDE.md 규칙 "모든 API 라우트는 CRON_SECRET 또는 API_KEY로 보호" 위반 가능성 확인 — grep 으로 무보호 라우트 12개 발견 후 general-purpose 서브에이전트로 전수 감사(각 라우트 method/I/O/기존 보호장치/분류).
+- 결과 12개 전부 intentionally-public (health/version/kbo-scores proxy/picks poll·results/leaderboard poll — 읽기 전용 또는 client-side anonymous 기능). CRON_SECRET 실제 gap 0건.
+- 단 soft finding 1건 실사용 가치 확인: `mlb/waitlist/route.ts` 만 Origin/CSRF layer 보유, 동일 위험군(anonymous device_id 기반 write) 인 `picks/submit`, `picks/mlb-submit`, `leaderboard/sync`, `leaderboard/mlb-sync` 4곳은 누락 — 불일치.
+- fix: `isOriginAllowed` 를 `apps/moneyball/src/lib/api/is-origin-allowed.ts` 로 추출(waitlist 중복 제거) 후 4개 route 에 동일 Layer 1 체크(403 forbidden) 적용. 4개 테스트 파일에 Origin 헤더 + forbidden 케이스 6건 추가.
+- tsc/eslint/test 전부 green (571 files, 4490 tests, +6). direct main push.
+- 다음 사이클 추천 = op-analysis gap monitor(3/25) 또는 review-code 신규 축 재탐색 (select-column 축은 apps/moneyball·kbo-data·scripts 3파일군 모두 소진, cloudflare-worker 는 select 미사용으로 해당 axis 부적용 확인됨 — 다른 품질 축 필요).
+
 ## v0.5.62.197 — 2026-09-02 (cycle 2762, review-code(heavy): scripts/ 미소비 select 컬럼 제거 SUCCESS)
 
 ### review-code(heavy): scripts/ 신규 축 감사 (cycle 2762, SUCCESS)
