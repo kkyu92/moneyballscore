@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy) convergenceRecord.ts 4축 감사 clean (cycle 2787, 2026-09-02)
+
+진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2786 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 14/25, info-arch 18/30, lotto 5/30). 직전8 distinct=3(review-code(heavy)/lotto/fix-incident(lite)) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 negative context 지속(트래픽 무성장, GH issue 0) — review-code(heavy) 유지. 신규 미감사 최대 대형파일 탐색(`find ... wc -l`) → `convergenceRecord.ts`(824줄, apps/moneyball/src/lib/analysis/) 발견 — 기존 감사 대상 전부 능가하는 최대 파일, 완전 미감사 상태 확인.
+
+general-purpose 서브에이전트 4축 감사(consumer trace / select-vs-read / prefix-leak / comment-vs-code): 29개 export 전부 소비 확인(0-consumer 표시 5개는 자기 파일 `get*` wrapper 가 내부 호출하는 테스트용 pure helper, dead 아님). KBO predictions select(16필드) + MLB predictions select(10필드) 전부 evaluateConvergencePickRow/evaluateMlbConvergencePickRow 안에서 소비, orphan column 없음. `getSeasonH2HData()`(analysis-data.ts) 키 포맷과 본 파일 read 방식 정합. prefix leak 없음(output 전부 구조화 값, raw home_/away_ DB key 미노출 — axis 해당 없음). 주석 전부(cycle 2304 h2h-fix, wave-608/1997 dedup, tie-break) 현재 코드와 정합. MLB parity = 별도 파일 없이 단일 파일 안 KBO+MLB 함수 공존(getConvergencePick*/getMlbConvergencePick*), h2h 파라미터 유무 KBO/MLB 간 정합 확인(computeMlbCompositeDuel h2h 없음 ↔ MLB pair-fetch h2h 생략 일치).
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 잔여 후보(`buildMlbMatchupProfile.ts` 515줄 미감사) 계속, 또는 fix-incident(5/20)/op-analysis(15/25)/info-arch(19/30)/lotto(6/30) gap 자연 대기. 3연속 clean(2785/2786/2787)이나 완전 소진 판단은 보류(실제 미감사 대형파일 잔존).
+
 ## 🔵 RETRO-ONLY — review-code(heavy) buildMatchupProfile.ts 4축 감사 clean (cycle 2786, 2026-09-02)
 
 진단: open issue 0, unprocessed plan 0/23(approved 없음). 2차 방어선(cycle 2785 retro commit 존재) OK. gap trigger 4종 전부 미도달(fix-incident 3/20, op-analysis 13/25, info-arch 17/30, lotto 4/30). 직전8 distinct=3(review-code(heavy) 6 + fix-incident(lite) 1 + lotto 1) — 2-chain lock 미충족. explore-idea saturation(13/15) 재도달했으나 재평가 근거 여전히 negative(트래픽 무성장, GH issue 0, 신규 신호 없음) — review-code(heavy) 유지. 직전 3사이클(2783-2785) 카운트 산정 시 chain_selected 문자열 포맷("review-code(heavy)")과 saturation 스크립트 split()[0] 매칭 불일치 확인(본 사이클서 substring 매칭으로 재계산, 13/15 정합) — 다음 skill-evolution 발화 시 스크립트 표기 정합 검토 후보로 기록. 직전 3사이클(2783-2785) 전부 next_recommended_chain=review-code(heavy) — carry-over 후보 `buildMatchupProfile.ts`(584줄) 채택.
