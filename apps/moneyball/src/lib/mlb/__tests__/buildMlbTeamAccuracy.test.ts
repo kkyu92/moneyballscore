@@ -78,6 +78,24 @@ describe('buildAllMlbTeamAccuracy', () => {
     expect(byCode.get('NYM')).toEqual({ teamCode: 'NYM', verifiedN: 1, correctN: 0, accuracyRate: 0 });
   });
 
+  it('accuracyRate 내림차순 정렬 (KBO buildAllTeamAccuracy 정합, verifiedN 정렬 아님)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 },
+        { external_game_id: 'g2', home_team_code: 'BOS', away_team_code: 'NYM', home_score: 1, away_score: 3 },
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.7 }, // 홈 예측, 홈 승 → 적중
+        { external_game_id: 'g2', home_win_prob: 0.7 }, // 홈 예측, 원정 승 → 오답
+      ],
+    });
+    const { buildAllMlbTeamAccuracy } = await import('../buildMlbTeamAccuracy');
+    const result = await buildAllMlbTeamAccuracy();
+    // NYY accuracyRate=1 (verifiedN=1), BOS accuracyRate=0.5 (verifiedN=2), NYM accuracyRate=0 (verifiedN=1)
+    // verifiedN 내림차순이면 BOS 가 1등이 되지만, accuracyRate 내림차순이면 NYY 가 1등이어야 함
+    expect(result.map((r) => r.teamCode)).toEqual(['NYY', 'BOS', 'NYM']);
+  });
+
   it('예측 없는 경기는 skip (external_game_id 매칭 없음)', async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [{ external_game_id: 'g1', home_team_code: 'NYY', away_team_code: 'BOS', home_score: 5, away_score: 2 }],

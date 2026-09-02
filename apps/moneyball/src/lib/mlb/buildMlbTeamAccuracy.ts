@@ -85,7 +85,7 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
       correctN: v.correctN,
       accuracyRate: v.verifiedN > 0 ? v.correctN / v.verifiedN : null,
     }))
-    .sort((a, b) => b.verifiedN - a.verifiedN || a.teamCode.localeCompare(b.teamCode));
+    .sort((a, b) => (b.accuracyRate ?? -1) - (a.accuracyRate ?? -1) || a.teamCode.localeCompare(b.teamCode));
 }
 
 export interface MlbMatchupRow {
@@ -209,7 +209,6 @@ export interface MlbTeamBiasRow {
   verifiedN: number;
   correctN: number;
   accuracyRate: number | null;
-  actualWinN: number;
   actualWinPct: number | null;
   biasGap: number | null; // predictedWinRate - actualWinPct
 }
@@ -290,7 +289,6 @@ export async function buildMlbTeamBiasAnalysis(): Promise<MlbTeamBiasRow[]> {
         verifiedN,
         correctN,
         accuracyRate: verifiedN > 0 ? correctN / verifiedN : null,
-        actualWinN,
         actualWinPct,
         biasGap,
       };
