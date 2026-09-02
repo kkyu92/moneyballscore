@@ -177,7 +177,7 @@ export default async function PlayersIndexPage() {
                     <td className="py-3 pl-4 pr-3 text-gray-400 dark:text-gray-500 font-mono">
                       {idx + 1}
                     </td>
-                    <td className="py-3 pr-3">
+                    <td className="py-3 pr-3 whitespace-nowrap">
                       <Link
                         href={`/players/${p.playerId}`}
                         className="font-semibold hover:text-brand-500"
@@ -185,7 +185,7 @@ export default async function PlayersIndexPage() {
                         {p.nameKo}
                       </Link>
                     </td>
-                    <td className="py-3 pr-3 text-gray-600 dark:text-gray-300">
+                    <td className="py-3 pr-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
                         {p.teamCode && (
                           <TeamLogo team={p.teamCode as TeamCode} size={20} />
@@ -282,8 +282,10 @@ export default async function PlayersIndexPage() {
                     <td className="py-3 pl-4 pr-3 text-gray-400 dark:text-gray-500 font-mono">
                       {idx + 1}
                     </td>
-                    <td className="py-3 pr-3 font-semibold">{b.nameKo}</td>
-                    <td className="py-3 pr-3 text-gray-600 dark:text-gray-300">
+                    <td className="py-3 pr-3 font-semibold whitespace-nowrap">
+                      {b.nameKo}
+                    </td>
+                    <td className="py-3 pr-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
                         {b.teamCode && (
                           <TeamLogo team={b.teamCode as TeamCode} size={20} />
