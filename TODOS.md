@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): computePredictionHistory teamAccuracy/recentResults 미배선 수정 (cycle 2823, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2822 retro commit 516d0000) OK. 직전8 distinct=4(review-code(heavy) 5 + review-code 1 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 2/25 방금 재발화, info-arch 23/30, lotto 11/30). explore-idea saturation 4/15 미충족. dominance-positive streak 자연 지속(cycle 135 룰) — 새 축 탐색 위해 "생성 후 커밋 1건뿐" 파일 122개 후보 확보.
+
+general-purpose 서브에이전트로 13개 파일(prediction-history.ts/accuracy-update.ts/winner-id.ts/backtest/metrics.ts/brier.ts/buildDailyAccuracy.ts/adjacentDates.ts/captureFallback.ts/is-origin-allowed.ts/kbo-scraper-alert.ts/fetch-with-retry.ts/WebVitalsReporter.tsx/buildMlbTeamEloTrend.ts) 전수 감사. 11개 clean. 확정 발견: `computePredictionHistory()` 가 cycle 133 생성 시점부터 `recentResults: []`/`teamAccuracy: {}` 를 모든 return path 에서 하드코딩 — 유일 프로덕션 caller(`daily.ts` → `agents/debate.ts` → `calibration-agent.ts`) 의 `buildStatsBlock()` 이 이 두 필드를 읽어 "관련 팀 적중률"/"최근 예측 결과" 블록을 LLM 프롬프트에 렌더하는데, 생성 이래 한 번도 렌더된 적 없는 dead field(commit 2c1f48f2 당시 "별도 enhancement" 로 명시된 known gap, 이후 1커밋도 안 건드림). 부차 발견(미조치, 별도 스코프): `fetch-with-retry.ts`(KBO 공용) 와 `statsapi-mlb.ts` 자체 `fetchWithRetry` 가 재시도 정책(상태코드/backoff) 이 서로 다르게 갈라져 있음 — 두 파일 다 거짓 주석은 아니라 comment-drift 축 fix 대상은 아님.
+
+fix: `daily.ts` `getPredictionHistory()` select 에 `home_win_prob`/`game_date` 추가 + team_id→TeamCode 역맵(`reverseTeamMap`) 전달. `computePredictionHistory()` 는 역맵으로 `teamAccuracy`(팀별 관련 예측 적중) + `recentResults`(최근 5건, `actualWinner` 는 is_correct 로 역산) 실제 계산. 하위호환 위해 역맵 인자는 optional default `{}` (미전달 시 기존처럼 빈 상태 — 회귀 없음). 테스트 3건 신규(하위호환 케이스 + teamAccuracy 집계 + recentResults 5건 cap/actualWinner 역산). `pnpm --filter @moneyball/kbo-data test` 93/1226 green(+3), tsc/eslint clean, pre-push green. commit e5b83a89, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 23(미충족), 직전 20-cycle 표본 수 9 < 10(trigger5 skip, 표본 부족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(단일-커밋 파일 후보 ~120개 잔여) 또는 gap-fill 대기(fix-incident 16/20, info-arch 23/30, lotto 11/30 — 전부 5+ cycle 여유).
+
 ## 🟢 SUCCESS — review-code(heavy): umpire-sz 미배선 + mlb-retro stale placeholder comment drift 수정 (cycle 2822, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2821 retro commit 6ce27af5) OK. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 15/20, info-arch 22/30, lotto 10/30, op-analysis 방금 재발화). dominance-positive streak 자연 지속(cycle 135 룰).
