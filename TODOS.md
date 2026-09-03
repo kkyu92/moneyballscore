@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — polish-ui: MLB analysis route loading.tsx 신설 (cycle 2840, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23(status=approved 없음). 2차 방어선(cycle 2839 retro commit 1a684224) OK. 직전8 distinct=2(review-code(heavy) 6 + polish-ui 2) — **2-chain lock 발동**, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 19/25, info-arch 10/30, lotto 28/30). explore-idea saturation 15/15 도달했으나 4-source 재확인 전부 negative(open issue 0, plan approved 0, TODOS Next-Up 섹션 부재/stale, DESIGN.md 어제 갱신 신선) — organic idea 부재로 skip. 잔여 chain 전부 organic trigger 부재 → lock rule 3 fallback = polish-ui (cycle 2792/2502/2839 선례 정합).
+
+general-purpose 서브에이전트에 bounded UI audit 위임(DESIGN.md 먼저 read 지시, cycle 2839 fix 재복제 금지 명시). 결과: color/spacing token drift, 접근성(icon-only 버튼 aria-label), OG 그라디언트 중복 전부 clean 확인 후, `app/mlb/analysis/page.tsx`(및 `en/mlb/analysis` 미러)가 request-time Supabase 쿼리 7건 병렬 실행(revalidate=1800, Suspense 없음)인데 sibling KBO route `app/analysis/page.tsx`는 이미 `loading.tsx` 보유 — MLB 쪽만 부재 확인.
+
+fix: `app/mlb/analysis/loading.tsx` 신설 — 실제 페이지 섹션 구조(브레드크럼/타이틀 → 오늘의 빅매치 카드 → 예측 리스트 5행 → 팀 전력 그리드 6타일 → 주간/월간리뷰+적중기록 CTA 카드 3개) 그대로 미러링, 기존 skeleton 컨벤션(`animate-pulse bg-gray-200 dark:bg-gray-700`) 재사용. en 미러는 cycle 2839 와 동일 이유(repo 안 en/* loading.tsx 선례 0개)로 scope 제외.
+
+`apps/moneyball` type-check clean, lint clean, `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, pre-push green.
+
+skill-evolution trigger 평가: cycle_n % 50 = 40(미충족), 직전20 표본 chain pool 다양(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속 또는 gap-fill 자연 대기(lotto 29/30 최근접, fix-incident 14/20).
+
 ## 🟢 SUCCESS — polish-ui: MLB games route loading.tsx 신설 (cycle 2839, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23(status=approved 없음). 2차 방어선(cycle 2838 retro commit f8c8c252) OK. 직전8 distinct=2(review-code(heavy)+polish-ui) — **2-chain lock 발동**. gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 18/25, info-arch 9/30, lotto 27/30). explore-idea saturation 4/15 미충족. CI 최근 실패 0건(gh run list). DESIGN.md mtime 1일(신선, trigger 아님). lock rule 3(어떤 chain 도 gap trigger 없음) → polish-ui fallback 발화 (cycle 2792-2795 선례 정합).

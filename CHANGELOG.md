@@ -1,3 +1,12 @@
+## v0.5.62.211 — 2026-09-03 (cycle 2840, polish-ui: MLB analysis route loading.tsx 신설 SUCCESS)
+
+### polish-ui: app/mlb/analysis loading skeleton 신설 — 2-chain lock fallback (cycle 2840, SUCCESS)
+
+- 직전 8 사이클 distinct chain=2(review-code(heavy)+polish-ui) 2-chain lock 재발동, gap trigger 4종 전부 미도달, explore-idea saturation 15/15 도달했으나 4-source 재확인 negative → lock rule 3 fallback = polish-ui.
+- general-purpose subagent 감사: `app/mlb/analysis/page.tsx` 가 request-time Supabase 쿼리 7건(revalidate=1800, Suspense 없음) 인데 sibling KBO route `app/analysis/page.tsx` 는 `loading.tsx` 보유, MLB 쪽만 부재.
+- fix: `app/mlb/analysis/loading.tsx` 신설 — 실제 페이지 섹션 구조(빅매치 카드/예측 리스트 5행/팀전력 그리드 6타일/CTA 카드 3개) 미러링, 기존 skeleton 컨벤션 재사용. en 미러는 선례 부재로 scope 제외.
+- `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, type-check/lint clean, pre-push green. R4 직push.
+
 ## v0.5.62.210 — 2026-09-03 (cycle 2839, polish-ui: MLB games route loading.tsx 신설 SUCCESS)
 
 ### polish-ui: app/mlb/games/[date] loading skeleton 신설 — 2-chain lock fallback (cycle 2839, SUCCESS)
