@@ -13,8 +13,8 @@ describe('parseEloTable', () => {
     `;
     const map = parseEloTable(html);
     expect(map.size).toBe(2);
-    expect(map.get('LG')).toEqual({ elo: 1568, woba: 0.33, fip: 3.89, sfr: -0.6 });
-    expect(map.get('HH')).toEqual({ elo: 1453, woba: 0.298, fip: 4.23, sfr: 2.7 });
+    expect(map.get('LG')).toEqual({ woba: 0.33, fip: 3.89, sfr: -0.6 });
+    expect(map.get('HH')).toEqual({ woba: 0.298, fip: 4.23, sfr: 2.7 });
   });
 
   it('ignores non-team rows (header, rank > 10)', () => {

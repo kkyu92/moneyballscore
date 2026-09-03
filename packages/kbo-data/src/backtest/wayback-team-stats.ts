@@ -20,7 +20,6 @@ import { MONEYBALL_BACKTEST_USER_AGENT, type TeamCode } from '@moneyball/shared'
 import { resolveTeamCode } from '../scrapers/fancy-stats';
 
 export interface SeasonTeamStat {
-  elo: number;
   woba: number;
   fip: number;
   sfr: number;
@@ -54,6 +53,8 @@ export function parseEloTable(html: string): SeasonStatsMap {
       const rank = Number(cells[0]);
       if (!Number.isFinite(rank) || rank < 1 || rank > 12) continue;
       const teamName = cells[1];
+      // elo 컬럼은 행 유효성 검증(숫자 4종 전부 finite)에만 쓰고 출력엔 미포함 —
+      // 백테스트 Elo 는 elo-history.ts 의 일별 시계열(getEloAt)이 source of truth.
       const elo = Number(cells[2]);
       const woba = Number(cells[3]);
       const fip = Number(cells[4]);
@@ -61,7 +62,7 @@ export function parseEloTable(html: string): SeasonStatsMap {
       if (![elo, woba, fip, sfr].every(Number.isFinite)) continue;
       const code = resolveTeamCode(teamName);
       if (!code) continue;
-      out.set(code, { elo, woba, fip, sfr });
+      out.set(code, { woba, fip, sfr });
     }
   }
   return out;

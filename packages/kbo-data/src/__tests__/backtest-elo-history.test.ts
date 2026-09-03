@@ -1,26 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseTextBlock, parseEloHistory, getEloAt } from '../backtest/elo-history';
-
-describe('parseTextBlock', () => {
-  it('extracts date + elo from plotly text string', () => {
-    const raw = [
-      'date: 2007-04-06<br />elo: 1501.862<br />team: LG Twins',
-      'date: 2007-04-07<br />elo: 1498.350<br />team: LG Twins',
-      'date: 2007-04-08<br />elo: 1495.353<br />team: LG Twins',
-    ].join('","'); // Plotly JSON-embedded join
-    const pts = parseTextBlock(raw);
-    expect(pts).toHaveLength(3);
-    expect(pts[0]).toEqual({ date: '2007-04-06', elo: 1501.862 });
-    expect(pts[2]).toEqual({ date: '2007-04-08', elo: 1495.353 });
-  });
-
-  it('ignores malformed pieces', () => {
-    const raw = 'date: 2025-03-22<br />elo: 1500.0<br />team: X","garbage';
-    const pts = parseTextBlock(raw);
-    expect(pts.length).toBeGreaterThanOrEqual(1);
-    expect(pts[0].date).toBe('2025-03-22');
-  });
-});
+import { parseEloHistory, getEloAt } from '../backtest/elo-history';
 
 describe('parseEloHistory', () => {
   it('maps trace name → team code with text array', () => {

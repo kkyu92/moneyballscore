@@ -9,7 +9,6 @@ export type {
 export { computeMetrics, buildCalibration } from './metrics';
 export {
   parseEloHistory,
-  parseTextBlock,
   getEloAt,
   fetchEloHistory,
 } from './elo-history';

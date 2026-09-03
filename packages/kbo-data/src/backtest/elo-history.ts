@@ -62,24 +62,6 @@ export function parseEloHistory(html: string): EloHistory {
 }
 
 /**
- * `"date: 2007-04-06<br />elo: 1501.862<br />team: LG Twins","date: 2007-04-07..."`
- * 형태의 escape 된 단일 문자열을 개별 point 로 분리.
- * 입력은 JSON 문자열 내용물 (양 끝 따옴표 이미 제거됨).
- */
-export function parseTextBlock(raw: string): EloPoint[] {
-  // "," 로 split 하면 text 내부 따옴표가 없으므로 안전. 단 각 조각의 시작은 `date:`.
-  const out: EloPoint[] = [];
-  const pieces = raw.split(/","/);
-  for (const p of pieces) {
-    const dateM = p.match(/date:\s*(\d{4}-\d{2}-\d{2})/);
-    const eloM = p.match(/elo:\s*(-?\d+(?:\.\d+)?)/);
-    if (!dateM || !eloM) continue;
-    out.push({ date: dateM[1], elo: parseFloat(eloM[1]) });
-  }
-  return out;
-}
-
-/**
  * 특정 팀의 asOfDate **직전** (exclusive) 최신 Elo 값. 데이터 없으면 null.
  * Binary search 로 O(log n).
  */
