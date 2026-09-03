@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): elo-history parseTextBlock + wayback elo dead field 제거 (cycle 2829, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2828 retro commit 2951f723) OK. 직전8 distinct=4 — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 2/20, op-analysis 8/25, info-arch 29/30, lotto 17/30). dominance-positive streak 자연 지속.
+
+방법론 보정: git 1-commit heuristic 만으론 "미감사" 판별 불가 확인 — 과거 CLEAN 판정 파일은 fix 커밋 없어 git history 1-commit 그대로 남음. CHANGELOG.md/TODOS.md 텍스트 교차검증 병행해 진짜 신규 후보 8개(`backtest/elo-history.ts`/`backtest/logistic.ts`/`backtest/wayback-team-stats.ts`/`pipeline/final-reasoning.ts`/`pipeline/backfill-weather.ts`/`scrapers/kbo-pitcher.ts`/`scrapers/naver-schedule.ts`/`scrapers/umpire.ts`) 확보.
+
+general-purpose 서브에이전트 전수 감사: 6/8 CLEAN, 2건 발견 — (1) `elo-history.ts`의 `parseTextBlock()` export 프로덕션 무호출(자기 자신 단위테스트만 소비) — 죽은 export. (2) `wayback-team-stats.ts`의 `SeasonTeamStat.elo` 필드 파싱만 되고 `loader.ts::buildFeatures()` 미소비 (백테스트 Elo source of truth = `elo-history.ts` 일별 시계열 `getEloAt`).
+
+fix: `parseTextBlock` 제거(본체+barrel export+고아 테스트) + wayback `elo` 필드 제거(row 유효성 검증용 local var는 유지). `pnpm --filter @moneyball/kbo-data test` 93/93파일 1224/1224테스트 green, type-check/lint clean, pre-push green. commit 9fe3dc88, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 29(미충족), 직전20 표본(sample=7, 임계 10 미달로 trigger5 skip), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수: 2823/2824/2826/2829 success).
+
+다음 사이클 추천 = info-architecture-review (gap 30/30 다음 사이클 정확 도달) 또는 review-code(heavy) 계속.
+
 ## ⚪ RETRO-ONLY — review-code(heavy) 신규 8파일 감사 CLEAN (cycle 2828, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2827 retro commit 7149633d) OK. 직전8 distinct=4(review-code(heavy)/operational-analysis/review-code/fix-incident) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 7/25, info-arch 28/30, lotto 16/30). dominance-positive streak 자연 지속(cycle135 룰).
