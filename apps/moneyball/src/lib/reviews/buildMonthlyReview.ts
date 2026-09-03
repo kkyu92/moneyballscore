@@ -18,7 +18,7 @@ import {
   type WeeklyTeamStat,
 } from "./shared";
 
-export interface MonthlyReview {
+interface MonthlyReview {
   month: MonthRange;
   hasData: boolean;
   totalGames: number;

@@ -30,7 +30,7 @@ export type {
 // 섹션은 이 빌더가 아니라 monthly/[month]/page.tsx 가 직접 range.startDate/endDate 로
 // MLB convergence 함수(cycle 2345, date-range 파라미터 추가)를 호출해 렌더 — KBO
 // monthly/[month]/page.tsx 와 동일 배선 위치.
-export interface MlbMonthlyReview {
+interface MlbMonthlyReview {
   month: MonthRange;
   hasData: boolean;
   totalGames: number;

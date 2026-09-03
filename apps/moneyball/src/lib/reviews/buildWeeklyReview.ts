@@ -29,7 +29,7 @@ export interface WeeklyGameResult {
   isCorrect: boolean | null;
 }
 
-export interface WeeklyReview {
+interface WeeklyReview {
   week: WeekRange;
   hasData: boolean;
   totalGames: number;

@@ -11,13 +11,13 @@ import {
   type TeamCode,
 } from '@moneyball/shared';
 
-export interface FactorErrorItem {
+interface FactorErrorItem {
   factor: string;
   predictedBias: number;
   diagnosis: string | null;
 }
 
-export interface MissReportItem {
+interface MissReportItem {
   gameId: number;
   gameDate: string;
   homeCode: TeamCode;

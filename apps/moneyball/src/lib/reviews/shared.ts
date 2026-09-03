@@ -126,7 +126,7 @@ export function mapRowsToHighlightCandidates(
   });
 }
 
-export type TeamStatsSort = "predicted" | "accuracy";
+type TeamStatsSort = "predicted" | "accuracy";
 
 export function buildTeamStats(
   rows: PredictionRow[],

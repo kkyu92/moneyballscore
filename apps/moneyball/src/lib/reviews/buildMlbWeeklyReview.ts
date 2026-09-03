@@ -29,7 +29,7 @@ export interface MlbWeeklyGameResult {
   isCorrect: boolean | null;
 }
 
-export interface MlbWeeklyReview {
+interface MlbWeeklyReview {
   week: WeekRange;
   hasData: boolean;
   totalGames: number;

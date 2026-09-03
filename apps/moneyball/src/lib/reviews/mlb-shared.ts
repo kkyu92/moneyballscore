@@ -247,7 +247,7 @@ export const MLB_FACTOR_COLUMN_PAIRS = {
   war: ["home_war_total", "away_war_total"],
 } as const;
 
-export type MlbFactorKey = keyof typeof MLB_FACTOR_COLUMN_PAIRS;
+type MlbFactorKey = keyof typeof MLB_FACTOR_COLUMN_PAIRS;
 
 export const LOWER_IS_BETTER = new Set<MlbFactorKey>(["sp_fip", "sp_xfip", "bullpen_fip"]);
 
@@ -297,12 +297,12 @@ export function buildMlbFactorInsights(
   return { best: sorted[0], worst: sorted[sorted.length - 1] };
 }
 
-export interface MlbMissFactorSupport {
+interface MlbMissFactorSupport {
   factor: MlbFactorKey;
   label: string;
 }
 
-export interface MlbMissReportItem {
+interface MlbMissReportItem {
   externalGameId: string;
   gameDate: string;
   homeCode: MlbTeamCode;
