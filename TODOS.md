@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic mlb 스코프 30건 (cycle 2853, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2852 retro commit ea928e90) OK. 직전8 distinct=4(fix-incident1+review-code(heavy)5+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 23/30, lotto 11/30). cycle 2852 next_recommended("review-code(heavy) mlb/reviews/teams/dashboard/matchup/debug 등 잔여 스코프") 채택.
+
+apps/moneyball/src/app/mlb + lib/mlb 스코프 exported type/interface 41개 grep(cycle 2850 cwd 버그 재발 방지 — apps/packages/scripts 명시 스코프 + exclude-dir node_modules/.next/.turbo) → 0-external-hit 30개 후보. general-purpose subagent 독립 재검증(재grep + barrel re-export 확인 + 테스트 컨슈머 확인) — 30/30 CONFIRMED_UNEXPORTED, false positive 0건. 14개 파일 export 키워드만 제거(타입 유지).
+
+`pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit 993bf814, R4 직push(PR 생략).
+
+부산물: `apps/moneyball/src/app/mlb/reviews/reviews-data.ts:59` `MlbReviewsData` export 제거 후 file-local 도 미사용(lint warning) — 다음 review-code(heavy) 사이클 죽은 코드 제거 후보.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 스코프: reviews 27, teams 18, dashboard 16, matchup 14, debug 14 — mlb 완료) — gap trigger 4종 전부 미근접.
+
 ## 🟢 SUCCESS — operational-analysis(lite): CE cohort 22회 연속 재확인 (cycle 2852, 2026-09-03)
 
 진단: op-analysis gap=31/25 trigger 도달(직전 발화 cycle 2821, cycle 2841은 2-chain lock redirect 로 별도 자율 선택). 2차 방어선(cycle 2851 retro commit 9b00df45) OK. 직전8 distinct=4(polish-ui1+fix-incident1+review-code(heavy)5+skill-evolution1) — 2-chain lock 미발동.

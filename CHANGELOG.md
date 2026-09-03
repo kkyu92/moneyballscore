@@ -1,5 +1,12 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic mlb 스코프 확장 (cycle 2853, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2852 retro commit ea928e90) OK. 직전8 distinct=4(fix-incident1+review-code(heavy)5+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 23/30, lotto 11/30). cycle 2852 next_recommended("review-code(heavy) mlb/reviews/teams/dashboard/matchup/debug 등 잔여 스코프") 채택.
+- apps/moneyball/src/app/mlb + lib/mlb 스코프 exported type/interface 41개 grep(cycle 2850 cwd 버그 재발 방지 — apps/packages/scripts 명시 스코프 + exclude-dir node_modules/.next/.turbo) → 0-external-hit 30개 후보. general-purpose subagent 독립 재검증(재grep + barrel re-export 확인 + 테스트 컨슈머 확인) — 30/30 CONFIRMED_UNEXPORTED, false positive 0건.
+- 14개 파일 export 키워드만 제거(타입 자체 유지). `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit 993bf814, R4 직push(단일 논리 단위 mechanical export 제거, PR 생략).
+- 부산물: `apps/moneyball/src/app/mlb/reviews/reviews-data.ts:59` `MlbReviewsData` 는 export 제거 후 file-local 도 미사용(lint warning, error 아님 — pre-push 통과) — 다음 review-code(heavy) 사이클 죽은 코드 제거 후보로 관찰만 남김.
+
 ### review-code(heavy): export-but-unused heuristic apps/moneyball/src/lib/accuracy 스코프 확장 + 시딩 방법론 결함 발견 (cycle 2850, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2849 retro commit f925ee78) OK. 직전8 distinct=4(review-code(heavy)5+polish-ui1+fix-incident1+lotto1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 9/25, info-arch 20/30, lotto 8/30). explore-idea saturation 13/15 미충족. cycle 2849 next_recommended("review-code(heavy) pipeline/ 또는 apps/moneyball/src/lib/ 스코프 계속") 채택.
