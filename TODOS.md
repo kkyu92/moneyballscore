@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic insights 스코프 7건 (cycle 2859, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2858 retro commit 0c7c2861) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미근접(fix-incident 14/20, op-analysis 7/25, info-arch 29/30, lotto 17/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2858 next_recommended("review-code(heavy) 계속: insights/players/standings/accuracy/lotto-lib") 채택.
+
+apps/moneyball/src/lib/insights/ 스코프 exported type/interface 8개 grep → DebateTimelineData(app/analysis/game/[id]/page.tsx:654 실사용 확인)만 유지, 나머지 7개 0-external-hit 후보. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + co-located vs cross-directory 테스트 import 구분 + `StatusBadge` 동명 무관 로컬 함수(LiveScoreboard.tsx) 오탐 배제 + `InsightEntry` 테스트 문자열 검사 오탐 배제) — 7/7 CONFIRMED_UNEXPORTED, false positive 0건. export 키워드만 제거: StatusBadge / DebateArgumentSummary / DebateCalibrationSummary / InsightEntry / SeriesTopic / SeriesEntry / TopFactor.
+
+`pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green, lint 0 errors(기존 warning 1건 유지). commit 5a765d03, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 스코프: players/standings/accuracy(부분)/lotto-lib) — gap trigger 4종 전부 미근접, info-arch 29/30 근접 주시.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic debug 스코프 9건 (cycle 2858, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2857 retro commit c0f16c7d) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 6/25, info-arch 28/30, lotto 16/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2857 next_recommended("review-code(heavy) 잔여 스코프: debug") 채택.
