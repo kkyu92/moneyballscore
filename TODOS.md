@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy): 저-commit API 라우트 5개 신규 축 감사 clean (cycle 2810, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2809 retro commit 2eb2f3d3) OK. 직전8 distinct=3(review-code(heavy)/review-code (heavy)/fix-incident 표기 차이 포함, 개념상 2종) — 문자열 기준 스크립트 결과 3으로 lock 미충족. gap trigger 전부 미도달(fix-incident 3/20, op-analysis 12/25, info-arch 10/30, lotto 28/30). explore-idea saturation 13/15 재도달했으나 cycle 2805/2806 과 동일하게 diminishing return 판단 유지 — review-code(heavy) 계속. cycle 2806 이 named backlog 7개(picks/mlb-poll, revalidate, version, picks/mlb-submit, leaderboard/mlb-sync) 를 이미 소진했으므로 다음 commit-count tier(3건)의 API 라우트 5개(`live`/`picks/poll`/`seo/indexnow/ping`/`snapshot-pitchers`/`sync-batter-stats`) 선택.
+
+general-purpose 서브에이전트 전수 감사(select 컬럼 소비/dead field/JSDoc-cron 정합/caller 응답 shape/CRON_SECRET 보호 5축). 5/5 전부 clean. `picks/poll/route.ts` 는 CRON_SECRET 없지만 문제 아님(공개 GET poll 집계, `mlb-poll`과 parity 확인). 스타일 특이사항 1건(버그 아님) — `indexnow-ping.yml` 이 다른 워크플로우와 달리 `PRODUCTION_URL` secret 대신 도메인 하드코딩, 값 자체는 `SITE_HOST`와 일치.
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 4-commit tier API 라우트(`health/pipelines`/`mlb/pipeline`/`mlb/waitlist`) 신규 축, 또는 gap-fill(lotto 28/30 최근접 — 2 cycle 내 도달, fix-incident 3/20, op-analysis 12/25, info-arch 10/30) 자연 대기.
+
 ## 🔵 RETRO-ONLY — review-code(heavy): named backlog 7개 전수 감사 clean (cycle 2809, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2808 retro commit 69129a59) OK. 직전8 distinct=3(skill-evolution/review-code/fix-incident) — 2-chain lock 미충족. cycle 2808 이 남긴 named candidate 7개(ThisWeekStatusFilter/GlossaryCategoryFilter/PicksSortControl/PicksStatusFilter/WeeklyHistorySortControl/MlbDetailedFactorAnalysis/PredictReveal) 전수 감사 — 실 버그 발견 track record(직전 사이클) 있어 같은 축 계속.
