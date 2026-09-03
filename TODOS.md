@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused type/interface 확장, agents/ 19건 (cycle 2848, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2847 retro commit 7fa48340) OK. 직전8 distinct=5(review-code(heavy)3+polish-ui2+op-analysis(lite)1+lotto1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=3/20, op-analysis gap=7/25, info-arch gap=18/30, lotto gap=6/30). explore-idea saturation 5/15 미충족. cycle 2846/2847 next_recommended("review-code(heavy) 잔여 type/interface batch") 채택.
+
+cycle 2847 이 function/const 스코프로 정립한 export-but-unused heuristic 을 type/interface 로 확장. repo 전체 `export type`/`export interface` 스캔 501개 중 grep 0-external-hit 210개로 노이즈 과다(전체 재현) 확인 후, CLAUDE.md 드리프트 사례 이력 보유 디렉토리 packages/kbo-data/src/agents/ (validator.ts 포함) 스코프로 축소 — 19개 후보.
+
+general-purpose subagent 심층 감사: 19개 전부 정의 파일 내부 사용 확인(다른 in-file 함수 시그니처 등) + validator.ts 의 Meta/Result 계열 타입은 연관 함수(notifyValidationViolations/captureAgentFallback/captureJudgeParseFallback/captureCalibrationParseFallback/captureCalibrationApiFallback/captureRivalryMemoryFallback 등)가 postview.ts/judge-agent.ts/calibration-agent.ts/debate.ts/team-agent.ts/mlb-retro.ts 에서 실제 호출되는지 + 전용 테스트 존재까지 추적(SUSPICIOUS_GAP 리스크 우선 파일 특성 고려). 19/19 CONFIRMED_UNEXPORTED, SUSPICIOUS_GAP 0건, TRULY_DEAD 0건, FALSE_POSITIVE 0건 — 전부 `export` 키워드만 제거(타입 자체 유지).
+
+`pnpm --filter kbo-data type-check` clean, test 93/93파일 1220/1220 green. `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. PR #3076, R7 `--squash --auto --delete-branch` 즉시 머지, `gh pr view --json state,mergedAt` state=MERGED 실측 확인(merge commit ebcd7354).
+
+skill-evolution trigger 평가: trigger1 재검증 필요성 발견 — naive `git log --grep "subtype: chain-evolution"` (body 전문 검색) 은 squash 병합 부수 텍스트로 9건 오검출, 실제 `^memory: chain-evolution` subject-line 커밋은 2건뿐(<5, 미충족). trigger2(5연속 fail) 미충족. trigger3(cycle%50=48) 미충족. trigger4(meta-pattern) 미발화. trigger5(직전20 chain pool sample=19, review-code 11회 발화 — 0-fire 아님) 미충족. emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 동일 heuristic 을 packages/kbo-data/src/scrapers/ 또는 backtest/ 디렉토리 스코프로 계속 축소 적용, 또는 gap-fill 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused 신규 heuristic 첫 적용 (cycle 2847, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2846 retro commit c21226ff) OK. 직전8 distinct=5(polish-ui3+review-code(heavy)2+op-analysis(lite)1+lotto(lite)1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=2, op-analysis gap=6, info-arch gap=17, lotto gap=5). explore-idea saturation 13/15 도달했으나 4-source 재확인 negative(open issue 0, plan approved 0, TODOS Next-Up stale, DESIGN.md 신선 26h) — organic idea 부재로 skip. cycle 2846 next_recommended("review-code(heavy) 신규 heuristic") 채택.
