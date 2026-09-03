@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic picks 스코프 1건 (cycle 2867, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user, `status: approved` 0건). 2차 방어선(cycle 2866 retro commit a2c327b6) OK. 직전8(2859-2866) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. fix-incident gap 22/20 초과 도달 — lite 점검: `gh run list` 최근 10건 CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped(실패 없음), 나머지 CI/lesson dispatch 전부 success — 실제 incident 부재 확인 후 정상 종료. op-analysis(15/25)/info-arch(7/30)/lotto(25/30) 전부 미근접. explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2866 next_recommended("review-code(heavy) 계속 — 잔여 스코프 picks(8)/predictions(3)/v2-shadow-monitor(3), 후보 수 많은 순 picks 우선") 채택.
+- apps/moneyball/src/lib/picks/ 스코프 exported type/interface 8개 grep → CommunityVsAIResult/WeeklyStats/PickEntry/WeeklyGroup/PicksStats/FactorAgreementRow/FactorAgreement 7개는 cross-file import(컴포넌트 다수) 확인되어 유지, FactorLean 1개만 buildPicksStats.ts 내부 전용 사용(classifyFactorLean 반환 타입) 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + 테스트 파일 type import 여부 — 유일한 매치는 주석 내 함수명 언급으로 false positive 확인 + packages/ 참조 확인) — 1/1 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거: FactorLean.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 581/581파일 4560/4560 green, lint 0 errors(기존 warning 1건 유지). commit f7653c61, R4 직push(단일 논리 단위, PR 생략).
+
 ### review-code(heavy): export-but-unused heuristic leaderboard 스코프 2건 (cycle 2866, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2865 retro commit 50eb22d7) OK. 직전8(2858-2865) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 21/20 초과했으나 cycle 2865 lite 점검서 이미 incident 부재 확인 완료, op-analysis 14/25, info-arch 6/30, lotto 24/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2865 next_recommended("review-code(heavy) 계속 — leaderboard 또는 picks 우선") 채택.
