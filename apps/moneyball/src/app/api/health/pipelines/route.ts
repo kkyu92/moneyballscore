@@ -12,7 +12,8 @@ export const runtime = 'nodejs';
 
 // Cloudflare Workers Cron '17 0-14 * * *' (UTC 0-14 = KST 9-23) →
 // 4 mode 별 마지막 success 기대 freshness 임계. silent skip detection 강화.
-// MLB Cron '17 18-21,10 * * *' (UTC 18-21 = KST 03-06 새벽 scrape, UTC 10 = KST 19 predict) →
+// MLB Cron '17 18-22,10 * * *' (UTC 18-20 = KST 03-05 새벽 scrape 3회 + UTC 21 = KST 06
+// shadow_train + UTC 22 = KST 07 elo_update + UTC 10 = KST 19 predict_final) →
 // 하루 1회 고정 cadence 6 mode. mlb_combined_notify/mlb_walk_forward_measure 는 수동 dispatch 전용
 // (자동 cron 없음, mlb-pipeline.yml 참조) — staleness 기대치 없어 미포함.
 const PIPELINE_MODES = [
