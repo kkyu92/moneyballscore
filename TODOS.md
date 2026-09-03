@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): umpire-sz 미배선 + mlb-retro stale placeholder comment drift 수정 (cycle 2822, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2821 retro commit 6ce27af5) OK. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 15/20, info-arch 22/30, lotto 10/30, op-analysis 방금 재발화). dominance-positive streak 자연 지속(cycle 135 룰).
+
+cycle 2817 retro carry-over(mlb-retro.ts/umpire-sz.ts/monthGrid.ts/mlbCanonicalPair.ts) 신규 축 general-purpose 서브에이전트 전수 감사. monthGrid.ts/mlbCanonicalPair.ts PASS. 2건 발견: (1) `umpire-sz.ts`/`types.ts` 가 "daily pipeline 이 scoreUmpireSZ() 결과를 PredictionInput.umpireSZScore 에 주입" 이라 서술하지만 실제 caller 전무 — 이 필드는 항상 undefined, shadow cohort(v2.1-B-shadow) 의 umpire_sz factor 는 실측값을 받은 적 없음(항상 neutral 0.5). (2) `mlb-retro.ts` 주석이 "recent_form/head_to_head 는 MLB predict_final 이 항상 placeholder" 라 서술(파일 생성 시점 cycle 2065 엔 사실) 하지만 `mlb-pipeline.ts` 가 cycle 2353 부터 이미 실측 계산+영속화(`home_recent_form`/`head_to_head_rate` 등) — 이 파일(`MlbPredictionRow`/`MEMORY_CANDIDATE_KEYS`)만 그 컬럼을 select 안 해 여전히 neutral placeholder 로 계산.
+
+둘 다 comment-only 정정(코드 로직 변경 없음) — 실제 wiring(daily.ts 에 scoreUmpireSZ 연결, mlb-retro 에 recent_form/head_to_head 픽업 추가)은 학습 신호 자체를 바꾸는 별도 스코프라 이번 사이클 미포함, 주석에 그 사실 명시. `pnpm --filter @moneyball/kbo-data test` 93/1223 green, tsc/eslint clean, pre-push green. commit 2d861222, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 22(미충족), 직전 20-cycle 표본 review-code 다수 발화(trigger5 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 success 다수, retro-only 1건뿐).
+
+다음 사이클 추천 = review-code(heavy) 계속(발견된 2개 wiring 갭은 별도 스코프 carry-over) 또는 gap-fill 대기(fix-incident 15/20, info-arch 22/30, lotto 10/30 — 전부 5+ cycle 여유).
+
 ## 🟢 SUCCESS — operational-analysis(lite): CE cohort 20회 연속 재확인 (cycle 2821, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/22(status:approved 매칭 0건). 2차 방어선(cycle 2820 retro commit 15c8f701) OK. 직전8(2813-2820) distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain alternation lock 발동, 두 chain 후보 제외. 잔여 pool 중 gap trigger: fix-incident 14/20, info-arch 21/30, lotto 9/30 — 전부 미도달. operational-analysis 자체 gap 23/25 로 잔여 chain 중 trigger 가장 근접 → 자율 선택(lock fallback 이 매번 polish-ui 강제하는 패턴 회피 겸).
