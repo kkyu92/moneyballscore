@@ -1,4 +1,12 @@
-## v0.5.62.212 — 2026-09-03 (cycle 2849, review-code(heavy): export-but-unused scrapers/backtest 21건 SUCCESS)
+## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
+
+### review-code(heavy): export-but-unused heuristic apps/moneyball/src/lib/accuracy 스코프 확장 + 시딩 방법론 결함 발견 (cycle 2850, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2849 retro commit f925ee78) OK. 직전8 distinct=4(review-code(heavy)5+polish-ui1+fix-incident1+lotto1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 9/25, info-arch 20/30, lotto 8/30). explore-idea saturation 13/15 미충족. cycle 2849 next_recommended("review-code(heavy) pipeline/ 또는 apps/moneyball/src/lib/ 스코프 계속") 채택.
+- apps/moneyball/src/lib/ 스코프 export type/interface 233개 grep → 시딩 스크립트(xargs -P 병렬 subshell, cwd 미지정)가 cwd 버그로 233개 전부를 "0-external-hit" 오탐 (실제로는 대다수가 .tsx 컴포넌트에서 `import type` 소비 중). 사이즈 관리 위해 20개(lib/accuracy/ 스코프)만 general-purpose subagent 심층 감사에 전달.
+- subagent 독립 재검증(`rg` 재실행 + `.tsx` 컨슈머 grep + 테스트 파일 오탐 배제)이 시딩 오류를 정정: 20개 중 15개 FALSE_POSITIVE(`apps/accuracy/page.tsx`, `debug/reliability/page.tsx`, `components/accuracy/*.tsx`, `components/dashboard/*.tsx`, `lib/mlb/buildMlbAccuracySummary.ts` 등에서 실사용), 5개만 CONFIRMED_UNEXPORTED(`FallbackStats`/`DayBucket`/`WeekBucket`/`RecentForm`/`SubCohortBucket` — 파일 내부 헬퍼 반환 타입, 호출부는 타입 추론만 사용) — `export` 키워드만 제거.
+- **방법론 교훈**: 시딩 grep 은 후보 제안일 뿐, 심층 subagent 감사가 유일한 안전망 — 본 사이클이 그 안전망의 실효성을 실증(잘못된 233개 후보 중 실제 편집은 5개만, mass-edit 사고 회피). 시딩 스크립트 cwd 버그 자체는 재사용 스크립트가 아니라 1회성이라 코드 수정 불필요, 다음 회차 시딩 시 `cd $(git rev-parse --show-toplevel)` 명시 필요성만 기억.
+- `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit a3e70095, R4 직push(단일 논리 단위, 1파일 5줄 diff — PR 생략).
 
 ### review-code(heavy): export-but-unused heuristic scrapers/backtest 스코프 확장 (cycle 2849, SUCCESS)
 

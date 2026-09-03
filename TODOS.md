@@ -1,4 +1,20 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic lib/accuracy 5건 (cycle 2850, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2849 retro commit f925ee78) OK. 직전8 distinct=4(review-code(heavy)5+polish-ui1+fix-incident1+lotto1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=5/20, op-analysis gap=9/25, info-arch gap=20/30, lotto gap=8/30). explore-idea saturation 13/15 미충족. cycle 2849 next_recommended("review-code(heavy) pipeline/ 또는 apps/moneyball/src/lib/ 스코프 계속") 채택.
+
+apps/moneyball/src/lib/ 스코프로 export type/interface heuristic 확장(233개 후보). 본 메인 직접 시딩 스크립트(rg -l -w NAME, xargs -P 병렬)가 cwd 미지정 버그로 233개 전부 오탐(0-external-hit) — 실제로는 대부분 .tsx 컴포넌트가 `import type`으로 소비 중. 관리 가능 크기(lib/accuracy/ 20개)만 general-purpose subagent 심층 감사로 전달.
+
+subagent 독립 재검증: 20개 중 15개 FALSE_POSITIVE(`app/accuracy/page.tsx`, `app/debug/reliability/page.tsx`, `components/accuracy/*.tsx`, `components/dashboard/*.tsx`, `lib/mlb/buildMlbAccuracySummary.ts` 등 실사용 확인) — export 유지. 5개 CONFIRMED_UNEXPORTED(`FallbackStats`/`DayBucket`/`WeekBucket`/`RecentForm`/`SubCohortBucket`, 전부 `buildAccuracyData.ts` 내부 헬퍼 반환 타입) — export 키워드만 제거.
+
+**교훈**: 시딩 grep 은 후보 제안일 뿐, subagent 심층 감사가 실제 안전망 — 이번 사이클이 그 안전망 실효성을 실증(잘못된 233개 후보 중 실제 편집 5개, mass-edit 사고 회피). 시딩 스크립트는 1회성이라 재사용 코드 수정 불필요, 다음 회차 시딩 시 repo root 명시적 `cd` 필요성만 기억.
+
+`pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit a3e70095, R4 직push(단일 논리 단위, 1파일 5줄 diff — PR 생략).
+
+skill-evolution trigger 평가: cycle_n % 50 = 0(**trigger3 milestone 도달 — cycle 2850**). trigger1(chain-evolution subject-line 커밋 <5) 미충족. trigger2(5연속 fail) 미충족. trigger4(meta-pattern) 미발화. trigger5(직전20 chain pool sample≥10, review-code 다수 발화) 미충족. emergency stop 미충족(직전10 전부 success). **trigger3 milestone(50배수) 도달 — 다른 trigger 결과 무관 즉시 marker 박제 의무(cycle 2051 사례 19 정합)**.
+
+다음 사이클 추천 = skill-evolution 강제 발화(milestone marker) — SKILL.md 마이그레이션 path phase 44 갱신 + 최근 50 cycle(2801-2850) 요약.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic scrapers/backtest 21건 (cycle 2849, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2848 retro commit 7400185d) OK. 직전8 distinct=5(review-code(heavy)4+polish-ui1+op-analysis(lite)1+lotto1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=4/20, op-analysis gap=8/25, info-arch gap=19/30, lotto gap=7/30). explore-idea saturation 5/15 미충족. cycle 2848 next_recommended("review-code(heavy) 잔여 type/interface batch — scripts/ 또는 backtest/ 스코프") 채택.
