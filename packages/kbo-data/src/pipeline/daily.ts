@@ -489,7 +489,14 @@ export async function runDailyPipeline(
       });
     }
 
-    return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: 0, gamesSkipped: 0, errors });
+    // pipeline_runs.predictions 는 이전엔 verify mode 전부 하드코딩 0 —
+    // /debug/silent-drift 대시보드(silentDriftStats.ts)가 이 컬럼을 verify
+    // silent drop proxy(games_found>0 && predictions===0)로 재사용하는데,
+    // 항상 0 이라 실제 검증 성공 여부와 무관하게 매 verify run 이 "silent"로
+    // 오판정됐다 (cycle 2832 발견). verifiedCount.value(실제 검증 건수)를 그대로
+    // 반영 — 실시간 Sentry/Telegram 경보(captureSilentDriftAlert)는 이미 별도로
+    // verifiedCount 를 직접 받아 판단하므로(위 237행) 영향 없음.
+    return finish({ date: targetDate, gamesFound: games.length, predictionsGenerated: verifiedCount.value ?? 0, gamesSkipped: 0, errors });
   }
 
   // === predict / predict_final ===

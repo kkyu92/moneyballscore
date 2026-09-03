@@ -7,7 +7,11 @@
 //
 // Import flow: pnpm tsx scripts/import-tabpfn-predictions.ts --input <file.csv>
 // Storage: predictions table, scoring_rule='tabpfn-shadow', reasoning.homeWinProb.
-// Retrieval: /accuracy/shadow page, pairProbForRow 'tabpfn-shadow' path.
+// Retrieval: write-only today (cycle 2832 확인) — /accuracy/shadow 쿼리가
+// scoring_rule in [CURRENT_SCORING_RULE, SHADOW_SCORING_RULE] 만 조회해
+// 'tabpfn-shadow' 는 제외되고, pairProbForRow() 도 'tabpfn-shadow' 분기가
+// 없어 이 flat reasoning.homeWinProb 형태를 못 읽는다. 비교 페이지 연결은
+// 별도 스코프.
 
 import { NEUTRAL_FACTOR } from '@moneyball/shared';
 

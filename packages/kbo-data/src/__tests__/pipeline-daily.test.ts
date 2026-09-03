@@ -966,6 +966,18 @@ describe('runDailyPipeline — mode 분기 + finish() 보장', () => {
         (c) => c.table === 'pipeline_runs' && c.operations.includes('insert'),
       );
       expect(runLog).toBeDefined();
+
+      // cycle 2832 회귀 방지: pipeline_runs.predictions 는 verify mode 완료 시
+      // 하드코딩 0 이 아니라 실제 검증 건수(verifiedCount)를 반영해야 한다.
+      // 이전엔 항상 0 이라 /debug/silent-drift 대시보드가 모든 정상 verify run 을
+      // silent drift 로 오판정했다 (games_found>0 && predictions===0 proxy).
+      // (mock 은 status 필터를 구분 안 해 final+postponed 양쪽 조회가 같은 1행을
+      // 반환 → verifiedCount=2. 핵심 단언은 "0 이 아니다" — 정확한 수치는 mock
+      // stub 특성 반영.)
+      const insertIdx = runLog!.operations.indexOf('insert');
+      const insertPayload = runLog!.args[insertIdx][0] as { predictions: number };
+      expect(insertPayload.predictions).toBe(2);
+      expect(insertPayload.predictions).not.toBe(0);
     });
 
     it('verify 중 compound 루프 실패 → errors 채우지만 finish() 통과', async () => {

@@ -1,9 +1,13 @@
 /**
  * schema.org JSON-LD builders — SportsEvent / SportsTeam / Person / Article / BreadcrumbList.
  *
- * 패턴 정합: 기존 insights/page.tsx / analysis/game/[id]/page.tsx / guide/page.tsx
- * 의 inline JSON-LD 스니펫을 헬퍼로 추출. 신규 라우트는 본 모듈을 통해서만
- * JSON-LD 생성 → schema 일관성 유지.
+ * 실제 사용처 (cycle 2832 확인): `insights/series/[topic]/page.tsx` 만 본 모듈
+ * import. `predictions/[date]/page.tsx` 는 동일 이름(`buildSportsEventJsonLd`/
+ * `buildArticleJsonLd`)의 로컬 함수를 별도로 포크해 사용 중 — 본 모듈 미참조,
+ * 로직도 갈라져 있음(comment-drift, 통합은 별도 스코프). `insights/page.tsx`
+ * (topic 리스트) / `analysis/game/[id]/page.tsx` / `guide/page.tsx` 는 여전히
+ * 자체 inline JSON-LD 유지 — 본 모듈로 추출된 적 없음(위 "패턴 정합" 서술은
+ * 실현 안 된 계획, 코드 기준 stale).
  *
  * 사용 패턴:
  * ```tsx
