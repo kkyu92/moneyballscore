@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — operational-analysis(lite): CE cohort 22회 연속 재확인 (cycle 2852, 2026-09-03)
+
+진단: op-analysis gap=31/25 trigger 도달(직전 발화 cycle 2821, cycle 2841은 2-chain lock redirect 로 별도 자율 선택). 2차 방어선(cycle 2851 retro commit 9b00df45) OK. 직전8 distinct=4(polish-ui1+fix-incident1+review-code(heavy)5+skill-evolution1) — 2-chain lock 미발동.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행 — n=367(CE 320/비CE 47), cycle 2841 수치와 완전 동일(11-cycle 경과에도 신규 verified 예측 0건). CE 55.0%(176/320) / 비CE 63.8%(30/47) → 격차 8.8pp 유지. overlap 월(05/06/07) 통제 격차 10.8pp ≈ 유지, LLM 부가가치 우세 결론 22회 연속 재확인. CREDIT_EXHAUSTED·비CE 표본 동결(마지막 예측 2026-07-01, 64일+ 경과) 상태 변화 없음.
+
+CLAUDE.md 계산 현황 문단 append. commit 2c77cdc1, R4 직push(단일 논리 단위, retro-only). 코드 변경 없음.
+
+다음 사이클 추천 = review-code(heavy) 계속(cycle 2850/2851 TODOS 잔여 export-but-unused 스코프: mlb/reviews/teams/dashboard/matchup/debug 등) — gap trigger 4종 전부 미근접(fix-incident 7/20, info-arch 22/30, lotto 10/30).
+
 ## 🟢 SUCCESS — skill-evolution(forced): phase 44, 78회 자가 진화 (cycle 2851, 2026-09-03)
 
 진단: skill-evolution-pending marker 존재(cycle 2850 trigger3 milestone 박제) — 강제 발화, 메인 자율 X. 2차 방어선(cycle 2850 retro commit aa8ab9f1) OK.
