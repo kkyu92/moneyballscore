@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): statsapi-mlb.ts dead fetchBoxscore export 제거 + 신규 14파일 감사 (cycle 2835, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2834 retro commit 2054704f) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 14/25, info-arch 5/30, lotto 23/30). explore-idea saturation(14/15 도달)이나 4-source 재확인 negative(plan#29 Tier4 사용자대기, GH issue 0, TODOS Next-Up stale) — organic idea 부재로 skip. dominance-positive streak 자연 지속.
+
+cycle 2834 부가관찰(winner-id.ts tie-unaware 패턴이 mlb-historical-bootstrap.ts/statsapi-mlb.ts/PredictionCard.tsx/buildPicksStats.ts에 잔존) 직접 follow-up. `buildPicksStats.ts`는 이미 symmetric tie-handling 정정 완료(주석에 이전 버그 기록) CLEAN 확인. `mlb-historical-bootstrap.ts`는 cycle 2833에서 이미 미배선 상태 문서화 — 재조치 불필요. `statsapi-mlb.ts` `fetchBoxscore`/`MlbBoxscore`는 index.ts 미재export + 자체 테스트만 참조하는 dead export였고, 동일 tie-unaware 인라인 패턴(`homeScore > awayScore ? home : away`) 확인 — 죽은 코드라 live impact는 없었음.
+
+git 1-commit heuristic + TODOS/CHANGELOG 0회 언급 필터로 진짜 미감사 파일 14개(주로 UI filter/sort 컴포넌트군 + `buildMlbMatchupEloTrend.ts` + `lib/utils.ts`) 확보. general-purpose 서브에이전트 전수 감사 — 13/14 CLEAN, `PredictReveal.tsx`(승률 카운트업 reveal 애니메이션, prefers-reduced-motion 가드 + aria-live 포함 완성 컴포넌트) 프로덕션 미배선 발견 — PredictionCard.tsx/PredictionCardLive.tsx 어디에도 wiring 안 됨. 삭제 대신 관찰만 기록(design-system 산출물이라 삭제 부적절, wiring은 여러 프리뷰 컴포넌트에 걸친 넓은 blast radius라 이번 chain 범위 밖 — polish-ui/design-system 후보로 위임).
+
+fix: `fetchBoxscore`/`MlbBoxscore` export + 대응 테스트 2건 삭제. `pnpm --filter @moneyball/kbo-data test` 93/93파일 1220/1220테스트 green(-2, dead code 제거分), type-check/lint clean, pre-push green. commit db1c4267, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 35(미충족), 직전20 표본 review-code 다수(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10: 2826~2835 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 재탐색) 또는 PredictReveal.tsx wiring을 polish-ui/design-system 후보로 검토.
+
 ## ⚪ RETRO-ONLY — review-code(heavy): 신규 8파일(chart-format/logistic-regression/kbo-scraper-alert/buildPitcherFipTrend/accuracy-update/winner-id/reviews-data/buildMlbTeamEloTrend) 감사 CLEAN (cycle 2834, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23(status=approved 매칭 0). 2차 방어선(cycle 2833 retro commit 01066545) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 13/25, info-arch 4/30, lotto 22/30). explore-idea saturation(직전15 중 review-code/fix-incident/polish-ui/info-arch exact-slug 4/15) 미충족. dominance-positive streak 자연 지속(cycle135 룰).
