@@ -10,9 +10,9 @@
 
 import type { Violation } from './validator';
 
-export type ValidatorAgent = 'team' | 'judge' | 'calibration';
+type ValidatorAgent = 'team' | 'judge' | 'calibration';
 
-export interface ValidatorLogEvent {
+interface ValidatorLogEvent {
   gameId: number | null;
   teamCode: string;
   agent: ValidatorAgent;

@@ -34,7 +34,7 @@ export interface RivalryMemoryRow {
   confidence: number;
 }
 
-export interface RivalryBlock {
+interface RivalryBlock {
   recentGames: RivalryGame[];
   memories: RivalryMemoryRow[];
   promptBlock: string;
