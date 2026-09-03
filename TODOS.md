@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): verify-mode pipeline_runs.predictions 하드코딩 0 → silent-drift 대시보드 오판정 수정 (cycle 2832, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2831 retro commit 07effa6b) OK. 직전8 distinct=4(review-code(heavy)/review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 11/25, info-arch 2/30, lotto 20/30). dominance-positive streak 자연 지속(cycle135 룰).
+
+방법론: git 1-commit heuristic 후보를 TODOS.md/CHANGELOG.md 텍스트 교차검증한 결과 매칭 후보 전부 과거 CLEAN 확정 파일(stale candidate)이었음을 재확인 — 대신 TODOS/CHANGELOG 어디에도 이름이 전혀 등장하지 않는(0 hits) 진짜 미감사 파일 8개(`accuracy/shadow-pair-prob.ts`/`dashboard/buildHallucinationStats.ts`/`predictions/v2Predictor.ts`/`seo/json-ld.ts`/`tabpfn-import.ts`/`tabpfn-export.ts`/`debug/factorDeltaStats.ts`/`debug/silentDriftStats.ts`) 확보.
+
+general-purpose 서브에이전트 전수 감사: 4/8 CLEAN, 4건 발견. 가장 심각 — **`debug/silentDriftStats.ts`**: `daily.ts` verify mode 의 모든 종료 경로가 `pipeline_runs.predictions` 를 하드코딩 0 으로 insert(실제 검증 건수는 인메모리 `verifiedCount.value` 에만 존재, DB 영속화 안 됨) → 이 컬럼을 `games_found>0 && predictions===0` silent-drop proxy 로 재사용하는 `/debug/silent-drift` 대시보드가 **정상 verify run 도 전부 silent drift 로 오판정**(자기 목적을 스스로 무력화). 실시간 Sentry/Telegram 경보(`captureSilentDriftAlert`)는 별도로 `verifiedCount` 를 직접 받아 판단해 영향 없음 — 확인. 나머지 3건은 stale comment: `tabpfn-import.ts`(존재하지 않는 `/accuracy/shadow` 조회 경로 서술), `seo/json-ld.ts`(3개 라우트 마이그레이션 주장이지만 실제 미참조, 유일 소비자는 `insights/series/[topic]/page.tsx`뿐), `debug/factorDeltaStats.ts` anomaly 재귀속 로직의 mean-tie 오귀속 가능성(PLAUSIBLE, 별도 스코프 보류).
+
+fix: `daily.ts` verify 완료 경로의 `predictionsGenerated: 0` → `verifiedCount.value ?? 0` 교체 (dedup-skip/조기-에러 경로는 verifiedCount 가 애초 undefined 라 결과 동일). 회귀 테스트 1건 추가. `tabpfn-import.ts`/`seo/json-ld.ts` stale 주석 2건 정정. `pnpm --filter @moneyball/kbo-data test` 93/93파일 1224/1224테스트 green, `pnpm --filter moneyball test` 581/581파일 4527/4527테스트 green, type-check/lint clean 양쪽, pre-push green. commit f0acc24c, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 32(미충족), 직전20(2813-2832) 표본=20(임계 충족) — review-code(단독 평가 대상) 이번 window 내 다수 발화로 trigger5 미충족. meta-pattern/chain-evolution 미발화(trigger1/4 미충족). 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수: 2823/2824/2826/2829/2832).
+
+다음 사이클 추천 = review-code(heavy) 계속(factorDeltaStats mean-tie 재귀속 실측 검증 또는 json-ld.ts predictions/[date] fork 통합 검토) 또는 gap-fill 자연 대기(lotto 20/30, op-analysis 11/25, fix-incident 5/20, info-arch 2/30).
+
 ## ⚪ RETRO-ONLY — review-code(heavy): pipeline/backtest/scraper 신규 8파일 감사 CLEAN (cycle 2831, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2830 retro commit 2b2e6d86) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 10/25, info-arch 1/30, lotto 19/30). dominance-positive streak 자연 지속(cycle135 룰).
