@@ -4,13 +4,13 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-export interface MlbPickPollEntry {
+interface MlbPickPollEntry {
   home: number;
   away: number;
   total: number;
 }
 
-export type MlbPickPollResult = Record<string, MlbPickPollEntry>;
+type MlbPickPollResult = Record<string, MlbPickPollEntry>;
 
 export async function GET(req: NextRequest) {
   const raw = req.nextUrl.searchParams.get('ids');

@@ -27,7 +27,7 @@ const NAVER_TO_TEAM: Record<string, string> = {
   키움: 'WO',
 };
 
-export interface NaverGame {
+interface NaverGame {
   gameId: string;
   homeTeamCode: string;
   awayTeamCode: string;
