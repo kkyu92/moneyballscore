@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused 신규 heuristic 첫 적용 (cycle 2847, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2846 retro commit c21226ff) OK. 직전8 distinct=5(polish-ui3+review-code(heavy)2+op-analysis(lite)1+lotto(lite)1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=2, op-analysis gap=6, info-arch gap=17, lotto gap=5). explore-idea saturation 13/15 도달했으나 4-source 재확인 negative(open issue 0, plan approved 0, TODOS Next-Up stale, DESIGN.md 신선 26h) — organic idea 부재로 skip. cycle 2846 next_recommended("review-code(heavy) 신규 heuristic") 채택.
+
+git 1-commit-file heuristic backlog 거의 소진(2838 시점 12개 → 2846 시점 2개) 확인 후 신규 heuristic 전환: repo 전체 exported function/const/type 중 정의 파일 밖 참조 0건인 심볼 grep 스캔. type/interface 포함 전체 스캔은 200+ 노이즈(내부 전용 prop 타입 등 정상 패턴) → function/const 만 재스캔해 31개로 축소, scripts/ 교차검증으로 5개 제외(brierMean/brierBootstrapCI/COIN_FLIP_BRIER/evaluateThreeWay/scrapeGameUmpires — scripts/ 소비), Next.js 프레임워크 컨벤션 export 2개 제외(generateImageMetadata/onRouterTransitionStart) → 최종 10개 후보.
+
+general-purpose subagent 심층 감사(파일별 전체 read + 동일 파일 내부 사용 여부 + git blame 맥락 + validator.ts/postview.ts 는 CLAUDE.md 드리프트 사례 이력 고려한 "SUSPICIOUS_GAP(누락 버그)" 가능성 별도 판별): 10개 전부 "정의 파일 내부에서 사용 중, 외부 미참조" — 삭제 대상 아님, `export` 키워드만 불필요. 기능 누락(SUSPICIOUS_GAP) 0건. `brierPoint`(brier.ts) / `buildTeamPostviewExtraInjection`+`buildPostviewExtraInjection`(postview.ts) / `captureAgentFallback`+`HALLUCINATED_NUMBER_HARD_THRESHOLD`(validator.ts) / `RULE_DEFINITION_DATE`(backtest-v2-helpers.ts) / `isValidArchiveDate`(archive.ts) / `SMALL_SAMPLE_THRESHOLD`(buildAccuracyData.ts) / `listCohortFiles`(v2-shadow-monitor/loader.ts) / `fetchHistoricalAnalogs`(HistoricalAnalogMatchup.tsx) — 8파일 10건 `export` 키워드 제거.
+
+`pnpm --filter kbo-data test` 93/93파일 1220/1220테스트 green, `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, type-check 양쪽 clean, pre-push green. PR #3075, R7 `--squash --auto --delete-branch` 즉시 머지(merge commit 89097a9e) 실측 확인.
+
+skill-evolution trigger 평가: cycle_n % 50 = 47(미충족), chain-evolution 누적 5건 미도달(trigger1 미충족), 5연속 fail 없음(trigger2 미충족), meta-pattern 미발화(trigger4 미충족), 직전20(2828-2847) chain pool sample≥10·review-code 12회 발화(trigger5 미충족). emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = export-but-unused heuristic 잔여 type/interface 배치(200+ 후보 중 review-code 전용 sub-batch로 계속 축소) 또는 gap-fill 자연 대기(info-arch gap=17/30, lotto gap=5/30 최근접 아님 — 전부 미도달 지속).
+
 ## 🟢 SUCCESS — review-code(heavy): 잔여 2파일 전수 감사 clean (cycle 2846, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23(22 plan 파일 전부 status≠approved). 2차 방어선(cycle 2845 retro commit fceb112b) OK. 직전8 distinct=5(polish-ui3+review-code(heavy)2+op-analysis(lite)1+lotto(lite)1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=1, op-analysis gap=5, info-arch gap=16, lotto gap=4). explore-idea saturation 5/15 미충족. dominance-positive streak 지속(직전20 중 review-code(heavy) 11회) → cycle 2845 next_recommended 채택.
