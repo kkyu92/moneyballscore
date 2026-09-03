@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — fix-incident (review-code(heavy) 감사 유래): health/pipelines MLB 모드 blind spot 수정 (cycle 2811, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2810 retro commit 451f58ea) OK. 2-chain lock 미충족(distinct=3). gap trigger 전부 미도달(fix-incident 4/20, op-analysis 13/25, info-arch 11/30, lotto 29/30). explore-idea saturation 12/15 미충족. cycle 2810 추천 그대로 따라 4-commit tier(`health/pipelines`/`mlb/pipeline`/`mlb/waitlist`) 감사.
+
+general-purpose 서브에이전트 전수 감사 — `mlb/pipeline`/`mlb/waitlist` 는 clean(경미 note만), `health/pipelines` 에서 실제 버그 발견: `PIPELINE_MODES` 가 KBO 4종(announce/predict/predict_final/verify)만 체크하고 MLB 자동 cron 6종(mlb_statsapi_scrape/mlb_fancy_scrape/mlb_savant_scrape/mlb_shadow_train/mlb_elo_update/mlb_predict_final, `mlb-pipeline.ts` 가 `pipeline_runs` 에 기록)은 전혀 미체크 — MLB 파이프라인 전체가 죽어도 `overall: 'ok'` 로 계속 보고.
+
+수정: 6개 MLB 모드 추가(모두 28h 임계, 하루 1회 cadence 정합). `mlb_combined_notify`/`mlb_walk_forward_measure` 는 수동 dispatch 전용(자동 cron 없음)이라 제외. 테스트 갱신(ALL_FRESH fixture + MLB 전용 stale/never 케이스 2개 추가) — 전체 580 test files/4517 tests 통과, type-check clean. main 직push(R4, fix-incident PR 불필요) → CI green 확인 → 배포 후 실제 `curl /api/health/pipelines` 로 라이브 검증.
+
+**검증 중 실제 신규 발견**: fix 배포 직후 `mlb_elo_update` 가 `status: never`(pipeline_runs 0건)로 즉시 잡힘 — fix 가치 실측 증명. 원인 추적: `mlb_elo_update` 모드는 plan #25 Phase 2(cycle 2082) 추가인데, Cloudflare Worker 배포는 cycle 2068/2090 부터 `CLOUDFLARE_API_TOKEN` GH secret 미등록으로 계속 실패(`mlb-schedule-status-backfill.yml` 헤더에 기 문서화) — 즉 현재 배포된 worker 가 elo_update cron 모드 자체를 모른 채 한 번도 fire 못한 구조적 상태. `wrangler whoami` 로컬 인증도 실패 확인(non-interactive, 로그인 필요) — 사용자 Cloudflare 대시보드 액션 필요한 기존 항목, 본 사이클 범위 밖(cost guard: 외부 서비스 인증 자율 금지)이라 손대지 않음. health check 가 이제 이 상태를 정확히 보고하는 것 자체가 본 fix 의 scope.
+
+다음 사이클 추천 = `mlb_elo_update` never 상태는 carry-over 항목(사용자 CLOUDFLARE_API_TOKEN 등록 대기, 자율 재시도 X) — 재부상 시 자율 수정 시도 대신 dispatch 로만 표면화. review-code(heavy) 후보 얇아짐(직전 3사이클 중 2clean+1fix) — gap-fill(lotto 29/30, 1 cycle 내 도달) 또는 explore-idea(saturation 12/15, 근접) 자연 대기.
+
 ## 🔵 RETRO-ONLY — review-code(heavy): 저-commit API 라우트 5개 신규 축 감사 clean (cycle 2810, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2809 retro commit 2eb2f3d3) OK. 직전8 distinct=3(review-code(heavy)/review-code (heavy)/fix-incident 표기 차이 포함, 개념상 2종) — 문자열 기준 스크립트 결과 3으로 lock 미충족. gap trigger 전부 미도달(fix-incident 3/20, op-analysis 12/25, info-arch 10/30, lotto 28/30). explore-idea saturation 13/15 재도달했으나 cycle 2805/2806 과 동일하게 diminishing return 판단 유지 — review-code(heavy) 계속. cycle 2806 이 named backlog 7개(picks/mlb-poll, revalidate, version, picks/mlb-submit, leaderboard/mlb-sync) 를 이미 소진했으므로 다음 commit-count tier(3건)의 API 라우트 5개(`live`/`picks/poll`/`seo/indexnow/ping`/`snapshot-pitchers`/`sync-batter-stats`) 선택.
