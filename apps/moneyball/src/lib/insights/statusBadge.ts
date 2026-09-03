@@ -29,6 +29,12 @@ export function insightsStatusBadge(
       cls: "bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-300",
     };
   }
+  if (status === "live") {
+    return {
+      label: "진행중",
+      cls: "bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+    };
+  }
   if (status === "final") {
     return {
       label: "결과 대기",
