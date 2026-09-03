@@ -72,7 +72,7 @@ export const WARN_LIMIT_LENIENT = 5; // lenient: 6건 이상이면 reject
 // 환각 숫자 hard threshold — count 이상 시 hard, 미만 = warn 강등 (cycle 884).
 // LLM nondeterminism 으로 1~2개 hallucinate 자주 발생 → strict mode 도 1~2개 warn 통과.
 // 3개+ = LLM quality 실제 문제 = hard reject 유지.
-export const HALLUCINATED_NUMBER_HARD_THRESHOLD = 3;
+const HALLUCINATED_NUMBER_HARD_THRESHOLD = 3;
 
 export type ValidationMode = 'strict' | 'lenient';
 
@@ -1019,7 +1019,7 @@ export async function captureRivalryMemoryFallback(meta: RivalryMemoryFailureMet
   }
 }
 
-export async function captureAgentFallback(meta: AgentFailureMeta): Promise<void> {
+async function captureAgentFallback(meta: AgentFailureMeta): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
 
   type SentryModule = {

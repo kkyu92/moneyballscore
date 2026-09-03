@@ -12,7 +12,7 @@ function getArchiveDir(): string {
   return ARCHIVE_DIR;
 }
 
-export function isValidArchiveDate(date: string): boolean {
+function isValidArchiveDate(date: string): boolean {
   if (!DATE_REGEX.test(date)) return false;
   const [y, m, d] = date.split("-").map(Number);
   if (m < 1 || m > 12 || d < 1 || d > 31) return false;

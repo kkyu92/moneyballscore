@@ -8,7 +8,7 @@
 import { DEFAULT_WEIGHTS, ELO_DIVIDER, SHADOW_V20_WEIGHTS, HOME_ADVANTAGE, HOME_ELO_BONUS, GAME_STATUS_FINAL, V2_PROMOTION_COHORT_N, NEUTRAL_FACTOR, clampWinnerProb } from '@moneyball/shared';
 
 /** cycle 231 박제 시점 = 2026-05-12. v1.8 본격 production 시작 = 2026-05-13. */
-export const RULE_DEFINITION_DATE = '2026-05-12';
+const RULE_DEFINITION_DATE = '2026-05-12';
 
 export interface BacktestPredictionRow {
   game_id: number;

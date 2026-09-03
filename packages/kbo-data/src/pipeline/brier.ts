@@ -17,7 +17,7 @@ export interface BrierRow {
 }
 
 /** Single-game Brier: (p − outcome)². */
-export function brierPoint(homeWinProb: number, homeWon: 0 | 1): number {
+function brierPoint(homeWinProb: number, homeWon: 0 | 1): number {
   return (homeWinProb - homeWon) ** 2;
 }
 

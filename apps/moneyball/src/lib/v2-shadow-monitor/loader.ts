@@ -28,7 +28,7 @@ function resolveCohortDir(): string {
   }
 }
 
-export function listCohortFiles(): string[] {
+function listCohortFiles(): string[] {
   const dir = resolveCohortDir();
   return readdirSync(dir)
     .filter((f) => f.endsWith(".md"))
