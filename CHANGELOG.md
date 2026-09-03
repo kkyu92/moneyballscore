@@ -1,5 +1,12 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### polish-ui (2-chain lock fallback): /dashboard OG/twitter 이미지 패리티 갭 수정 (cycle 2870, SUCCESS)
+
+- 진단: 직전8(2862-2869) distinct=2(review-code(heavy)7+operational-analysis(lite)1) — 2-chain lock 발동, 두 chain 제외. fix-incident gap 25/20 초과했으나 `gh run list` 재확인 실제 CI failure 0건(전부 skipped). op-analysis(locked)/info-arch(10/30)/lotto(28/30, 9/5 draw 대비 picks 이미 존재·draw 미도래)/explore-idea(saturation 14/15 나 4-source negative) 전부 미근접 — lock 제외 후 유일 옵션 polish-ui 강제 발화(스킬 규정).
+- cycle 2861 선례 따라 라이브 브라우저 design-review 대신 정적 OG/twitter 이미지 패리티 grep 진행. MLB matchup/analysis(cycle 2861 수정분)는 대칭 확인. community/login/settings/v2-shadow-monitor 무이미지는 robots.ts disallow+noindex 로 의도된 결과. `/dashboard` 만 색인 허용(robots 미포함)+sitemap.xml 등재(priority 0.8)+커스텀 OG 메타(title/description) 인데 opengraph-image.tsx/twitter-image.tsx 부재 확인 — silent SEO parity gap(wave-144/cycle 2861 계열 재발).
+- `dashboard/opengraph-image.tsx`(BRAND_GRADIENT_KBO_135, accuracy 템플릿 동일 구조) + `twitter-image.tsx`(재-export) 신규 생성 + 회귀 테스트 1개 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green(+1파일 +4테스트), lint 0 errors(기존 warning 1건 유지). commit d97e1d88, R4 직push(단일 논리 단위, PR 생략).
+
 ### operational-analysis(lite): CE/비CE 재측정 23회 연속 확인 (cycle 2869, SUCCESS)
 
 - 진단: 직전8(2861-2868) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 발동, 두 chain 후보 제외. fix-incident gap 20+ 나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. explore-idea saturation 15/15 나 4-source 재확인(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 2일 신선) organic idea 부재로 skip. info-arch(8/30)/lotto(26/30, 9/5 draw 대비 picks 이미 존재)/op-analysis 자체(17/25) 전부 미근접 — lock 제외 후 유일한 실행 가능 옵션으로 op-analysis 자율 선택.
