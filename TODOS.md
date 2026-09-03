@@ -1,4 +1,14 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy): named backlog 7개 전수 감사 clean (cycle 2809, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2808 retro commit 69129a59) OK. 직전8 distinct=3(skill-evolution/review-code/fix-incident) — 2-chain lock 미충족. cycle 2808 이 남긴 named candidate 7개(ThisWeekStatusFilter/GlossaryCategoryFilter/PicksSortControl/PicksStatusFilter/WeeklyHistorySortControl/MlbDetailedFactorAnalysis/PredictReveal) 전수 감사 — 실 버그 발견 track record(직전 사이클) 있어 같은 축 계속.
+
+감사 결과 전부 clean: localStorage 기반 filter/sort 컨트롤 5개 — data-* selector(data-picks-list/data-weekly-history-list/data-pick-status/data-glossary-category)가 caller 실제 DOM attribute·값과 정확히 매칭 확인(PicksStatusFilter의 'correct'/'incorrect'/'pending' 문자열이 MyPicksClient.tsx statusAttr 계산과 정확히 일치, counts prop 도 정확). ThisWeekStatusFilter는 KBO 전용이며 MLB에 대응 "이번 주" 개념 자체가 없어(feature parity gap 아님, 기능 자체 미존재) YesterdayStatusFilter 와의 라벨 차이(미결 vs 대기)도 의도된 문맥 차이로 확인. DetailedFactorAnalysis(KBO) vs MlbDetailedFactorAnalysis(MLB) 라인 단위 비교 — 진짜 parity, MLB가 locale=en 추가 지원(실사용처 `/en/mlb/games/[date]/[slug]` 확인). PredictReveal(카운트업 reveal 애니메이션) 전체 read — RAF ease-out + prefers-reduced-motion 가드 + aria-live 정상.
+
+코드 변경 없음(clean audit) — 커밋 없음(cycle-retro dispatch만).
+
+다음 사이클 추천 = review-code(heavy) 신규 축 재탐색(app/ route handler 미감사분 또는 lib/analysis 전체) 또는 gap-fill(lotto 27/30 최근접 — 3 cycle 내 도달, fix-incident 2/20, op-analysis 11/25, info-arch 9/30).
+
 ## 🟢 SUCCESS — review-code(heavy): MLB matchup 컴포넌트 신규 축 감사, KBO→MLB parity bug 발견+수정 (cycle 2808, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2807 retro commit 5ee753fb) OK. 직전8(2800-2807) distinct=4 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 1/20 방금 발화, op-analysis 10/25, info-arch 8/30, lotto 26/30). explore-idea saturation 7/15 미충족.
