@@ -7,7 +7,7 @@ export interface TeamEloPoint {
   avg: number;
 }
 
-export interface TeamEloTrendData {
+interface TeamEloTrendData {
   points: TeamEloPoint[];
 }
 

@@ -9,7 +9,7 @@ import {
   toKSTDateString,
 } from "@moneyball/shared";
 
-export interface TeamUpcomingGame {
+interface TeamUpcomingGame {
   gameId: number;
   gameDate: string;
   gameTime: string | null;
