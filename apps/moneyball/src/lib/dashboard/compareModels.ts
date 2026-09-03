@@ -27,7 +27,7 @@ export interface CalibrationBucket {
   actualRate: number;
 }
 
-export interface ModelGroupStats {
+interface ModelGroupStats {
   key: string;
   scoringRule: string;
   modelVersion: string;
@@ -257,7 +257,7 @@ export function aggregateByModel(rows: PredictionRow[]): ModelGroupStats[] {
 }
 
 /** 날짜 × scoringRule 별 accuracy 시계열. 30일 trend 차트용. */
-export interface DailyStat {
+interface DailyStat {
   date: string;
   scoringRule: string;
   modelVersion: string;

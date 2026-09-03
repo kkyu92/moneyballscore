@@ -1,4 +1,4 @@
-export interface DailyAccuracyInput {
+interface DailyAccuracyInput {
   game_date: string;
   is_correct: boolean;
 }

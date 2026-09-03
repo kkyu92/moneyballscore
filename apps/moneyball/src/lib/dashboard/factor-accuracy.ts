@@ -7,7 +7,7 @@ export interface FactorSample {
   actualHomeWin: 0 | 1;
 }
 
-export interface FactorStat {
+interface FactorStat {
   factor: string;
   n: number;
   meanBias: number; // 평균 signed error (positive = 홈팀 과대 예측)

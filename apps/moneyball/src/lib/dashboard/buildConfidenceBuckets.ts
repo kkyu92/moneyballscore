@@ -5,12 +5,12 @@ import {
   WINNER_PROB_MID,
 } from '@moneyball/shared';
 
-export interface ConfidenceBucketInput {
+interface ConfidenceBucketInput {
   confidence: number;
   is_correct: boolean;
 }
 
-export interface ConfidenceBucket {
+interface ConfidenceBucket {
   label: string;
   min: number;
   max: number;

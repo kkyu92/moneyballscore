@@ -13,7 +13,7 @@ export interface ValidatorLogInput {
   passed?: boolean | null;
 }
 
-export interface CategoryBreakdown {
+interface CategoryBreakdown {
   key: string;
   count: number;
   pct: number;
