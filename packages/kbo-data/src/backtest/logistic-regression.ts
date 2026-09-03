@@ -167,8 +167,25 @@ export function fitWeightedLogistic(
     neutral = 0.5,
   } = opts;
 
-  const X = vectorizeFactors(factorsList, neutral);
-  const y = homeWinList.map((h) => (h ? 1 : 0));
+  // factors 모두 null/missing 인 row 제외 (trainN 계약 — FitResult.trainN JSDoc 정합).
+  // 그런 row 는 X 가 all-zero(mean-centered) 벡터가 되어 bias 만 흔들고 signal 을 희석함.
+  const keepIdx: number[] = [];
+  for (let i = 0; i < factorsList.length; i++) {
+    const f = factorsList[i];
+    const hasSignal = ACTIVE_FACTOR_KEYS.some((key) => {
+      const v = f[key];
+      return typeof v === 'number' && Number.isFinite(v);
+    });
+    if (hasSignal) keepIdx.push(i);
+  }
+  if (keepIdx.length === 0) {
+    throw new Error('fitWeightedLogistic: no rows with valid factor data');
+  }
+  const filteredFactorsList = keepIdx.map((i) => factorsList[i]);
+  const filteredHomeWinList = keepIdx.map((i) => homeWinList[i]);
+
+  const X = vectorizeFactors(filteredFactorsList, neutral);
+  const y = filteredHomeWinList.map((h) => (h ? 1 : 0));
   const d = ACTIVE_FACTOR_KEYS.length;
   const w = new Array(d).fill(0);
   let b = 0;
