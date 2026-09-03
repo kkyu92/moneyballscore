@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): mlb-shadow-c dead export 제거 + mlb-historical-bootstrap 미배선 상태 주석 정정 (cycle 2833, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2832 retro commit 6a0f133a) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 11/25, info-arch 2/30, lotto 20/30). explore-idea saturation(14/15 도달)이나 직전 사이클 4-source 재확인 이미 negative(plan#29 Tier4 사용자 대기, GH issue 0, TODOS Next-Up stale) — organic idea 부재로 재발화 skip. dominance-positive streak 자연 지속.
+
+git 1-commit heuristic 으로 진짜 미감사 파일 8개(`calendar/monthGrid.ts`/`mlb/mlbCanonicalPair.ts`/`supabase/admin.ts`/`supabase/server.ts`/`backtest/runner.ts`/`factors/mlb-shadow-c.ts`/`pipeline/backtest-run.ts`/`scrapers/mlb-historical-bootstrap.ts`) 확보. general-purpose 서브에이전트 전수 감사 — 6/8 CLEAN, 2건 dead-code 발견: (1) `factors/mlb-shadow-c.ts` `walkForwardExpanding()` 단위테스트만 존재, 프로덕션 caller 0건(migration 036 `walk_forward_brier` 테이블 폐기 후 대체 테이블 `mlb_walk_forward_log` 로 이관되면서 처음부터 미배선 상태였던 orphan). (2) `scrapers/mlb-historical-bootstrap.ts` `fetchRetrosheetSeasonGames()` 도입 커밋(e3b7ba79, cycle 1026) "적재" 문구와 달리 DB-write/CLI/cron 전무 연결(grep 0 hit) — 2024-2025 Retrosheet backfill 실제 미실행 상태를 커밋 기록이 오도.
+
+fix: `walkForwardExpanding` 함수 + 대응 테스트 2건 삭제(`MILESTONE_TRIGGERS`/`computeBrier`/`trainShadowWeights` 는 `mlb-pipeline.ts` 실배선 확인돼 유지). `mlb-historical-bootstrap.ts` 헤더에 실제 미배선 상태 명시하는 주석 추가(향후 감사 재오판 방지). `pnpm --filter @moneyball/kbo-data test` 93/93파일 1222/1222테스트 green(-2, dead code 제거分), moneyball type-check clean(미참조 확인), lint clean, pre-push green. commit 5bcc73f2, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 33(미충족), 직전20 표본 review-code 다수(trigger5 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 전부 success 계열).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 후보) 또는 gap-fill 자연 대기(전부 5+ cycle 여유, fix-incident 6/20 최근접).
+
 ## 🟢 SUCCESS — review-code(heavy): verify-mode pipeline_runs.predictions 하드코딩 0 → silent-drift 대시보드 오판정 수정 (cycle 2832, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2831 retro commit 07effa6b) OK. 직전8 distinct=4(review-code(heavy)/review-code/fix-incident/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 11/25, info-arch 2/30, lotto 20/30). dominance-positive streak 자연 지속(cycle135 룰).
