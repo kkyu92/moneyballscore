@@ -12,6 +12,10 @@
  *   - sz_widen_pct = 0 OR sample_n < 30   → noop (league-avg fallback)
  *
  * 비대칭 미적용 — 좌우타선 SZ 차이 / 타선 K% 별도 input 도입 시 비대칭 분기 reserve.
+ *
+ * scoreUmpireSZ() 는 현재 어떤 pipeline caller 도 없음 (daily.ts 가 PredictionInput.umpireSZScore
+ * 를 채우지 않아 미도달, review-code(heavy) cycle 2822 확인). scoreUmpireSZFromRow/umpireSZFactor
+ * 는 테스트에서만 실행됨 — production/shadow 어느 쪽도 sz_widen_pct 실측값을 받은 적 없음.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';

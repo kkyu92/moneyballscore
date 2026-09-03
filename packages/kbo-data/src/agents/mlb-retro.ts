@@ -43,9 +43,14 @@ interface MlbScheduleRow {
 }
 
 // KBO buildMemoryForTeam 컨벤션(NEUTRAL_FACTOR=0.5 중심) 재사용 위해 계산해도 되는
-// factor 만 선정 — recent_form/head_to_head/defense_sfr/sp_xwoba_against/woba_std 는
-// MLB predict_final 이 항상 home=away 동일 placeholder 를 넣어 contribution 이 항상 0
-// (실제 신호 아님, 후보에서 자연 배제). elo 는 예외 — home=away=ELO_NEUTRAL 이라도
+// factor 만 선정. defense_sfr/sp_xwoba_against/woba_std 는 MLB_PLACEHOLDER_FACTOR_KEYS
+// (mlb-base.ts) 에 등록된 구조적 placeholder — contribution 이 항상 0 이라 자연 배제.
+// recent_form/head_to_head 는 mlb-pipeline.ts 가 cycle 2353 부터 이미 실측값을 계산해
+// predictions.home_recent_form/away_recent_form/head_to_head_rate 로 영속화하지만,
+// 이 파일(MlbPredictionRow/MLB_MEMORY_PREDICTION_COLUMNS)은 그 컬럼을 select 하지 않아
+// buildMlbFactors() 가 여전히 home=away=neutral placeholder 로 계산 — 재배선 시
+// MEMORY_CANDIDATE_KEYS 에 추가할 후보군(review-code(heavy) cycle 2822 확인, 별도
+// 스코프). elo 는 이미 실측 연결됐지만 예외 유지 — home=away=ELO_NEUTRAL 이라도
 // HOME_ELO_BONUS 고정항 때문에 contribution 이 0이 아닌 "모든 경기 동일한 상수" 라
 // 팀별 bias 처럼 잘못 뽑힐 위험 → 명시적 제외.
 const MEMORY_CANDIDATE_KEYS = [

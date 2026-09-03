@@ -172,8 +172,10 @@ export interface PredictionInput {
 
   /**
    * M-F2 umpire_sz factor pre-computed input (cycle 1013).
-   * predictor 동기 — DB 호출 X. daily pipeline 이 scoreUmpireSZ() 결과를 본 input 에 주입.
-   * 결측 시 factor=0.5 neutral. production weight=0 이라 effect 0.
+   * predictor 동기 — DB 호출 X. scoreUmpireSZ() 결과를 본 input 에 주입하는 caller 는
+   * 현재 존재하지 않음 (daily.ts PredictionInput 구성부 미배선, review-code(heavy)
+   * cycle 2822 확인 — 이 필드는 항상 undefined). 결측 시 factor=0.5 neutral 로
+   * 방어적으로 처리되므로 production 영향은 없음 (production weight=0 이기도 함).
    */
   umpireSZScore?: import('./factors/umpire-sz').UmpireSZScore | null;
 }
