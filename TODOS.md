@@ -1,4 +1,8 @@
 
+## 🟢 SUCCESS — review-code(heavy): MLB cron comment drift 3/4번째 인스턴스 (GH workflow) 수정 (cycle 2816, 2026-09-03)
+
+cycle 2815 retro carry-over — MLB cron 스케줄 서술 언급 파일 18개 grep 전수 스윕. 16개는 역사적(CHANGELOG/TODOS/memory/docs plan/test fixture)이라 무관. 2개 라이브 drift 발견: `.github/workflows/mlb-pipeline.yml`(stale cron string `18-21,10`→`18-22,10` 누락된 UTC22 elo_update) + `.github/workflows/mlb-schedule-status-backfill.yml`(동일 stale cron string + "scrape(KST 03-06)" 오서술, 실제 KST06=shadow_train). 양쪽 수정, cron 문자열 실제 매핑(KST 03-07 scrape+shadow_train+elo_update, KST19 predict_final)으로 정정. drift family(worker.ts→wrangler.toml→health/pipelines/route.ts→GH workflow 2개) 4개 파일 전부 종결 확인. `pnpm --filter moneyball test` 580파일/4517테스트 green, pre-push green. commit ada4083b, R4 직push.
+
 ## 🟢 SUCCESS — review-code(heavy): picks/results 감사 clean + health/pipelines MLB cron comment drift 2번째 인스턴스 수정 (cycle 2815, 2026-09-03)
 
 picks/results/route.ts(236줄) 5축 감사 clean. 확장 검증 중 health/pipelines/route.ts 가 cycle 2814 fix 대상의 sibling 파일인데 누락됨을 발견 — 동일 MLB cron comment drift family 2번째 인스턴스(stale cron string + UTC21 scrape 오분류 + UTC10 predict 오분류) 수정. grep 전수 스윕으로 drift family 종결 확인. commit d31e882f, R4 직push, pre-push green.
