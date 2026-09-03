@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — polish-ui(2-chain lock fallback): Korean wrap bug family 13th recurrence, FactorBreakdown.tsx 헤더행 발견+수정 (cycle 2818, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2817 retro commit ca86bf39) OK. 직전8 distinct=2(review-code(heavy) 6 + lotto 1) — 2-chain alternation lock 발동, 두 chain 후보 제외. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 20/25, info-arch 18/30, lotto 6/30). explore-idea saturation(14/15) 재도달했으나 4-source 재확인 전부 negative(open issue 0, plan approved 0, TODOS Next-Up cycle-41 시절 stale 1-line, DESIGN.md 어제 갱신). 잔여 chain 전부 organic trigger 부재 → lock fallback rule 적용, `polish-ui` 강제 발화.
+
+cycle 2804 exhaustive sweep(20파일/36곳 수정)이 남긴 "판단 보류 5곳" 먼저 재검증 — AgentArgumentBox/PostviewPanel/BigMatchDebateCard/JudgeReasoningCard 전부 `md:`/`sm:grid-cols-2` 로 모바일 단일 컬럼 확인(narrow squeeze 시그니처 미부합, 안전 재확인), DetailedFactorAnalysis 는 현재 grid 자체가 없어 서술 자체가 stale. Explore 서브에이전트로 KBO 팀명 call site 전체(~70곳) 독립 재sweep 실행 — `FactorBreakdown.tsx:205-207` 헤더 비교행("← {away} 유리" / "{home} 유리 →")이 `flex justify-between` 두 팀명 span 구조에 `md:` rescue 없고 nowrap/truncate/break-keep 도 없는 채 cycle 2804 sweep 과 기존 guard test 양쪽에서 누락된 13번째 재발 확인(같은 파일의 다른 두 지점은 이미 cycle 2804 이전 기수정 + guard test 존재).
+
+fix: 양쪽 span 에 `whitespace-nowrap` 추가. `FactorBreakdown-wrap-guard.test.tsx` 에 헤더행 lock-in 테스트 추가(향후 14번째 재발 방지). `pnpm --filter moneyball test FactorBreakdown` 3/3 green, 전체 581파일/4524테스트(+1) green, tsc clean, pre-push(lint+type-check+version-sync-guard) green. main 직커밋+push(b8818f26).
+
+skill-evolution trigger 평가: cycle_n % 50 = 18(미충족), 직전 20-cycle chain pool 표본 review-code 다수 발화(trigger5 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 중 success 다수).
+
+다음 사이클 추천 = wrap-bug family 13th 재발로 완전 종결 미확정 — 다음 polish-ui 재발화 시 재sweep 우선 고려. gap-fill 후보(fix-incident 12/20, op-analysis 21/25, info-arch 19/30, lotto 7/30) 자연 대기 가능.
+
 ## 🟢 SUCCESS — review-code(heavy): insights statusBadge live 상태 분기 누락 수정 (cycle 2817, 2026-09-03)
 
 1-commit(미감사) 파일군 재탐색 중 `apps/moneyball/src/lib/insights/statusBadge.ts` 발견 — `ALL_GAME_STATUSES`(scheduled/live/final/postponed) 4종 중 `live` 분기가 없어 진행중 경기가 "예정" 으로 잘못 표기(다른 status-aware 컴포넌트는 이미 live 별도 처리 중인 관례와 불일치). `/insights`, `/insights/[date]` 페이지 쿼리가 status 필터 없이 예측 전체를 가져오므로 실제 도달 가능한 사용자 가시 버그. "진행중"(orange) 분기 추가 + 테스트 파일 신규 작성(기존 0개 → 6케이스). `pnpm --filter moneyball test` 581/4523 green, commit ad24d079, R4 직push.
