@@ -9,7 +9,7 @@ import {
 } from "@moneyball/shared";
 import type { MatchupPair } from "./canonicalPair";
 
-export interface MatchupUpcomingGame {
+interface MatchupUpcomingGame {
   gameId: number;
   gameDate: string;
   gameTime: string | null;

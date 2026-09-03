@@ -7,7 +7,7 @@ export interface MatchupEloPoint {
   eloB: number | null;
 }
 
-export interface MatchupEloTrendData {
+interface MatchupEloTrendData {
   points: MatchupEloPoint[];
 }
 

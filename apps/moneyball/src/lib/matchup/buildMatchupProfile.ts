@@ -39,7 +39,7 @@ export interface MatchupGame {
   status: string | null;
 }
 
-export interface MatchupSideStat {
+interface MatchupSideStat {
   teamCode: TeamCode;
   teamName: string;
   /** 이 팀이 이긴 경기 수 (final 기준) */
@@ -54,7 +54,7 @@ export interface MatchupSideStat {
   predictedToWinAndCorrect: number;
 }
 
-export interface MatchupProfile {
+interface MatchupProfile {
   teamA: {
     code: TeamCode;
     name: string;
@@ -123,7 +123,7 @@ function makeSideStat(code: TeamCode, teamName: string): MatchupSideStat {
   };
 }
 
-export interface MatchupStreak {
+interface MatchupStreak {
   teamCode: TeamCode;
   length: number;
 }
@@ -140,7 +140,7 @@ export function computeMatchupStreak(
   return computeMatchupStreakFromGames(games, WIN_LOSS_STREAK_MIN_LENGTH);
 }
 
-export interface MatchupRecentRecord {
+interface MatchupRecentRecord {
   aWins: number;
   bWins: number;
   sampleSize: number;
@@ -167,7 +167,7 @@ export function computeMatchupRecentRecord(
   );
 }
 
-export interface MatchupAvgMargin {
+interface MatchupAvgMargin {
   avgMargin: number;
   sampleSize: number;
 }
@@ -190,7 +190,7 @@ export function computeMatchupAvgMargin(
   );
 }
 
-export interface MatchupBlowoutStats {
+interface MatchupBlowoutStats {
   count: number;
   sampleSize: number;
 }
@@ -215,7 +215,7 @@ export function computeMatchupBlowoutCount(
   );
 }
 
-export interface MatchupCloseGameStats {
+interface MatchupCloseGameStats {
   count: number;
   sampleSize: number;
 }
@@ -240,7 +240,7 @@ export function computeMatchupCloseGameCount(
   );
 }
 
-export interface MatchupHomeAwaySplit {
+interface MatchupHomeAwaySplit {
   teamCode: TeamCode;
   homeWins: number;
   homeGames: number;
