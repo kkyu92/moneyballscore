@@ -1,3 +1,12 @@
+## v0.5.62.208 — 2026-09-03 (cycle 2837, review-code(heavy): SeasonStandingsSortMode dead export 제거 SUCCESS)
+
+### review-code(heavy): 신규 12파일 감사 — dead export 1건 발견/조치 (cycle 2837, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2836 retro commit 7f06142d) OK. 직전8 distinct=3(review-code(heavy)/info-architecture-review/polish-ui) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 16/25, info-arch 7/30, lotto 25/30). explore-idea saturation 5/15 미충족. CI 최근 실패 0건. dominance-positive streak 자연 지속.
+- git 1-commit heuristic + TODOS 0~2회 언급 필터로 진짜 미감사 파일 12개(sort/filter 컴포넌트군 + `lib/utils.ts` + matchup/mlb 빌더 3종) 확보. general-purpose 서브에이전트 전수 감사 — 11/12 CLEAN, `SeasonStandingsSortControl.tsx`의 `SeasonStandingsSortMode` 타입 dead export(리포 전체 소비자 0건, 컴포넌트 자체는 `app/seasons/[year]/page.tsx` 정상 배선) 발견.
+- fix: `SeasonStandingsSortMode` export 키워드 제거. `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, type-check/lint clean, pre-push green. commit a8491541, R4 직push.
+- 다음 사이클 추천 = review-code(heavy) 계속 또는 gap-fill 자연 대기(lotto 25/30 최근접).
+
 ## v0.5.62.207 — 2026-09-03 (cycle 2836, polish-ui: PredictReveal 승률 카운트업 애니메이션 PredictionCard 배선 SUCCESS)
 
 ### polish-ui: 미배선 design-system 컴포넌트 PredictReveal 배선 (cycle 2836, SUCCESS)
