@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — fix-incident: deploy-drift-alert 반복 failure 실 원인 규명 + 수동 재배포 복구 (cycle 2807, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2806 retro commit fe1deb19) OK. 직전8(2799-2806) distinct=4 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 4/20, op-analysis 9/25, info-arch 7/30, lotto 25/30). explore-idea saturation 6/15 미충족. review-code(heavy) 백로그(대형파일+저-commit API 라우트) 양쪽 소진 상태(cycle 2806 명시) — 새 축 필요 시점에 `gh run list` 재점검 결과 `deploy-drift-alert` 7연속 failure(09-01 10:03~09-03 04:20) 재확인. cycle 2777/2791 이 과거 유사 패턴을 "self-healed, 코드 버그 아님"으로 진단 종결했으나, 이번엔 실제 라이브 curl 재현으로 **실제 production drift 진행 중**임을 확인 — 과거 진단을 그대로 재사용하지 않고 재검증.
+
+발견: `vercel ls --prod` + Vercel API(`/v6/deployments`) 조회 결과, main 이 09-02 23:58:17 이후 3커밋(4cecd8e0/12d585a6/fe1deb19, 전부 TODOS.md/policy 문서만 변경 — 코드 diff 0) 을 push 했지만 대응하는 `source: git` 배포가 **하나도 생성되지 않음**(CANCELED/ERROR 조차 아닌 완전 누락 — GitHub→Vercel webhook 미발화). 마지막 정상 git 배포는 09-02 23:55 (commit 64bcfd0). production alias 가 17시간 그 시점에 고정.
+
+조치: `vercel deploy --prod --yes` 수동 재배포(cli source, dpl_fgH5erwfUh) → `moneyballscore.vercel.app` 재-alias. `curl /api/version` 로 commit_sha=fe1deb19(=main HEAD) 일치 확인. `gh workflow run deploy-drift-alert.yml` 수동 트리거 → conclusion=success 실측 확인(fire 1회 PASS).
+
+근본원인: GitHub App→Vercel git-integration webhook 이 09-02 23:58~09-03 04:20 구간 3회 push 전부 silent 미발화(Vercel 배포 목록에 시도 흔적조차 없음 — 코드/vercel.json/ignoreCommand 문제 아님, git 리포 쪽 원인도 아님. 플랫폼 측 webhook delivery 문제로 추정, 재현 불가). 수동 배포로 즉시 복구했으나 재발 가능성은 미지수 — 다음 정상 push 가 `source: git` 배포를 정상 생성하는지 다음 사이클(또는 다음 실제 커밋) 에서 확인 필요.
+
+코드 변경 없음(인프라 수동 복구). 다음 사이클 추천 = 다음 실제 git push 후 `vercel ls --prod` 로 git-source 배포 재개 여부 확인(재발 시 fix-incident 재선정) — 정상 재개 확인되면 이번 건 완전 종결. gap-fill 후보(lotto 26/30, op-analysis 10/25, info-arch 8/30) 도 대기 중.
+
 ## 🟡 RETRO-ONLY — review-code(heavy) 미감사 API 라우트 5개 신규 축 감사, 발견 0건 clean (cycle 2806, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2805 retro commit 4cecd8e0) OK. 직전8 distinct=6 — 2-chain lock 미충족. gap trigger 전부 미도달(fix-incident 3/20, op-analysis 8/25, info-arch 6/30, lotto 24/30). explore-idea saturation(13/15) 재도달했으나 cycle 2805 재확인과 동일 결론(diminishing return, 경과일 거의 0) — review-code(heavy) 유지, 단 기존 대형파일 백로그(buildAccuracyData/buildTeamProfile/buildMatchupProfile/convergenceRecord/hub-dispatch/health-pipelines/MLB 헬퍼 15개)는 cycle 2805 확정대로 완전 소진 — git commit count 기준(1-2건) 신규 미감사 API 라우트 5개(`picks/mlb-poll`/`revalidate`/`version`/`picks/mlb-submit`/`leaderboard/mlb-sync`) 선택.
