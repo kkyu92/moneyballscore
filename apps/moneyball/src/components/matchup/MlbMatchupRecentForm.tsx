@@ -121,7 +121,7 @@ export function MlbMatchupRecentForm({
             className="flex items-center justify-between gap-3 flex-wrap"
           >
             <div className="flex items-center gap-3">
-              <span className="font-semibold text-sm w-12">{name}</span>
+              <span className="font-semibold text-sm w-20 shrink-0">{name}</span>
               <ResultBoxes results={form.results} s={s} />
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-300 font-mono">
