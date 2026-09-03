@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic predictions+v2-shadow-monitor 스코프 4건 (cycle 2868, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2867 retro commit b8f3a4d1) OK. 직전8(2860-2867) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. fix-incident gap 23/20 초과 — `gh run list` 재확인 중 실제 CI failure 발견했으나(cycle 2867 3연속 push 중 superseded stale queued job 이 failure 로 완결) HEAD 로컬 재검증(tsc clean + test 581/581 green) + CI Failure Dispatch 워크플로 전부 skipped 확인 후 실제 incident 부재 확정, 정상 종료. op-analysis 16/25, info-arch 8/30, lotto 26/30 전부 미근접. explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2867 next_recommended("predictions/v2-shadow-monitor 통합 처리") 채택.
+
+apps/moneyball/src/lib/predictions/ + lib/v2-shadow-monitor/ 스코프 exported type/interface 6개 grep → 2개 cross-file import 확인되어 유지, 나머지 4개는 정의 파일 내부 전용 사용만 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인) — 4/4 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거: V2WeightKey / V2PreviewDelta (v2Predictor.ts), CohortTable (parse.ts), CohortFile (loader.ts).
+
+`pnpm --filter moneyball exec tsc --noEmit` clean, test 581/581파일 4560/4560 green, lint 0 errors(기존 warning 1건 유지). commit 0a73b7c6, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 잔여 스코프 소진 근접(api/calendar/changelog/dashboard/debug/insights/matchup/mlb/observability/reviews/seasons/seo/stats/supabase/teams 미탐 다수 잔존) — 계속 가능하나 직전8 distinct=3 유지 위해 다양성(polish-ui/info-architecture-review/lotto gap 26/30 근접) 고려 권장.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic picks 스코프 1건 (cycle 2867, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user). 2차 방어선(cycle 2866 retro commit a2c327b6) OK. 직전8(2859-2866) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. fix-incident gap 22/20 초과(gh run list 재확인 — CI/Deploy Failure Dispatch 전부 skipped, 실제 incident 부재). op-analysis 15/25, info-arch 7/30, lotto 25/30 전부 미근접. explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2866 next_recommended("review-code(heavy) 계속 — picks 우선") 채택.
