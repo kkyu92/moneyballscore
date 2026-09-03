@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic api 스코프 3건 (cycle 2871, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2870 retro commit d9569e2f) OK. 직전8(2863-2870) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미발동. fix-incident gap 20+ (직전 20 cycle 안 0회) — `gh run list` 재확인 중 CI failure 1건(cycle 2867 stale queued job, 기존재 확인분) + deploy-drift-alert 2건(21:41/18:35, gap 7h "3 commit ahead" 경고) 발견. `vercel ls --prod` + `/api/version` 직접 조회로 실측 — prod 는 최신 커밋 2개 뒤에서 정상 순차 배포 진행 중(다수 push 로 인한 자연 catch-up lag, Canceled 배포는 superseded 정상 동작) — 실제 silent drift 아님, 자동 알림의 alert fatigue 케이스로 확정. op-analysis gap 19/25, info-arch gap 11/30, lotto gap 29/30(9/5 draw 대비 picks 이미 존재·draw 미도래), DESIGN.md 1일 신선(design-system 트리거 X) 전부 미근접 — review-code(heavy) dominance-positive streak 룰 따라 신규 스코프로 계속.
+- apps/moneyball/src/app/api/ 스코프 exported type/interface 7개 grep → PickGameResult/PickPollEntry/PickPollResult/LiveScore 4개 cross-file import 확인되어 유지. MlbPickPollEntry/MlbPickPollResult(mlb-poll/route.ts)/NaverGame(kbo-scores/route.ts) 3개는 정의 파일 내부 전용 사용만 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인) — 3/3 CONFIRMED_UNUSED, false positive 0건.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 7f40684c, R4 직push(단일 논리 단위, PR 생략).
+
 ### polish-ui (2-chain lock fallback): /dashboard OG/twitter 이미지 패리티 갭 수정 (cycle 2870, SUCCESS)
 
 - 진단: 직전8(2862-2869) distinct=2(review-code(heavy)7+operational-analysis(lite)1) — 2-chain lock 발동, 두 chain 제외. fix-incident gap 25/20 초과했으나 `gh run list` 재확인 실제 CI failure 0건(전부 skipped). op-analysis(locked)/info-arch(10/30)/lotto(28/30, 9/5 draw 대비 picks 이미 존재·draw 미도래)/explore-idea(saturation 14/15 나 4-source negative) 전부 미근접 — lock 제외 후 유일 옵션 polish-ui 강제 발화(스킬 규정).

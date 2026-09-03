@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic api 스코프 3건 (cycle 2871, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2870 retro commit d9569e2f) OK. 직전8(2863-2870) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미발동. fix-incident gap ≥20(직전 20 cycle 안 0회) 충족 — `gh run list` 재확인 중 CI failure 1건(cycle 2867 stale queued job, 기존 확인분 재발견) + deploy-drift-alert 실패 2건(21:41 gap 7h "3 commit ahead" / 18:35) 발견. `vercel ls --prod` + `curl /api/version` 직접 실측 — production 은 최신 커밋 2개 뒤에서 정상 순차 배포 진행 중(짧은 시간 다수 push 로 인한 자연 catch-up lag, Canceled 배포는 superseded 정상 동작), 실제 silent drift 아님 — alert fatigue 케이스로 확정. op-analysis gap 19/25, info-arch gap 11/30, lotto gap 29/30(9/5 토 draw 대비 picks `2026-09-05-50sets.md` 이미 존재·draw 미도래), DESIGN.md mtime 1일 신선(design-system 트리거 X) 전부 미근접 — review-code(heavy) dominance-positive streak 룰(cycle 135) 따라 신규 스코프로 계속.
+
+apps/moneyball/src/app/api/ 스코프 exported type/interface 7개 grep → PickGameResult(MyPicksClient/UserVsAIScorecard/buildPicksStats 등 다중 cross-file import) / PickPollEntry+PickPollResult(PickButton.tsx) / LiveScore(LiveScoreboard/use-kbo-scores) 4개는 cross-file import 확인되어 유지. MlbPickPollEntry+MlbPickPollResult(picks/mlb-poll/route.ts) / NaverGame(kbo-scores/route.ts, packages/kbo-data 안 동명 별개 심볼과 무관) 3개는 정의 파일 내부 전용 사용만 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인) — 3/3 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 7f40684c, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 잔여 스코프 계속(debug/insights/matchup/mlb/observability/reviews/seasons/seo/stats/supabase/teams/changelog/calendar 다수 미탐) 또는 lotto gap 30/30 도달(9/5 토 draw 당일 — draw 이후 OOS 검증 자연 트리거 예상, 오늘은 draw 전날이라 아직 이름).
+
 ## 🟢 SUCCESS — polish-ui (2-chain lock fallback): /dashboard OG/twitter 이미지 패리티 갭 수정 (cycle 2870, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2869 retro commit f8b9cc9b) OK. 직전8(2862-2869) distinct=2(review-code(heavy)7+operational-analysis(lite)1) — **2-chain lock 발동**. fix-incident gap 25/20 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, in_progress는 정상 push CI) 실제 incident 부재. op-analysis(locked)/info-arch(10/30)/lotto(28/30, 9/5 draw 대비 picks 이미 존재·draw 미도래)/explore-idea(saturation 14/15 나 4-source 재확인 negative: open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 1일 신선) 전부 미근접 — lock 제외 후 유일한 실행 가능 옵션으로 polish-ui 강제 발화(스킬 규정 "trigger 없으면 polish-ui").
