@@ -1,4 +1,8 @@
 
+## 🟢 SUCCESS — review-code(heavy): insights statusBadge live 상태 분기 누락 수정 (cycle 2817, 2026-09-03)
+
+1-commit(미감사) 파일군 재탐색 중 `apps/moneyball/src/lib/insights/statusBadge.ts` 발견 — `ALL_GAME_STATUSES`(scheduled/live/final/postponed) 4종 중 `live` 분기가 없어 진행중 경기가 "예정" 으로 잘못 표기(다른 status-aware 컴포넌트는 이미 live 별도 처리 중인 관례와 불일치). `/insights`, `/insights/[date]` 페이지 쿼리가 status 필터 없이 예측 전체를 가져오므로 실제 도달 가능한 사용자 가시 버그. "진행중"(orange) 분기 추가 + 테스트 파일 신규 작성(기존 0개 → 6케이스). `pnpm --filter moneyball test` 581/4523 green, commit ad24d079, R4 직push.
+
 ## 🟢 SUCCESS — review-code(heavy): MLB cron comment drift 3/4번째 인스턴스 (GH workflow) 수정 (cycle 2816, 2026-09-03)
 
 cycle 2815 retro carry-over — MLB cron 스케줄 서술 언급 파일 18개 grep 전수 스윕. 16개는 역사적(CHANGELOG/TODOS/memory/docs plan/test fixture)이라 무관. 2개 라이브 drift 발견: `.github/workflows/mlb-pipeline.yml`(stale cron string `18-21,10`→`18-22,10` 누락된 UTC22 elo_update) + `.github/workflows/mlb-schedule-status-backfill.yml`(동일 stale cron string + "scrape(KST 03-06)" 오서술, 실제 KST06=shadow_train). 양쪽 수정, cron 문자열 실제 매핑(KST 03-07 scrape+shadow_train+elo_update, KST19 predict_final)으로 정정. drift family(worker.ts→wrangler.toml→health/pipelines/route.ts→GH workflow 2개) 4개 파일 전부 종결 확인. `pnpm --filter moneyball test` 580파일/4517테스트 green, pre-push green. commit ada4083b, R4 직push.
