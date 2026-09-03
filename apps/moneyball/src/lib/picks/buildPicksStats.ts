@@ -296,7 +296,7 @@ export function buildWeeklyHistory(entries: PickEntry[]): WeeklyGroup[] {
 // silent drift family wave 102 — 본 파일 local 재선언 → import 통합.
 // 0.5=중립. >NEUTRAL_HI=홈 favor / <NEUTRAL_LO=원정 favor. 사이 = 중립.
 
-export type FactorLean = 'home' | 'away' | 'neutral';
+type FactorLean = 'home' | 'away' | 'neutral';
 
 export interface FactorAgreementRow {
   factor: string;
