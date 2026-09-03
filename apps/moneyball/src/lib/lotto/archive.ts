@@ -41,15 +41,15 @@ export function listArchiveDates(): string[] {
     .reverse();
 }
 
-export interface ArchiveContent {
+interface ArchiveContent {
   date: string;
   raw: string;
   title: string;
 }
 
-export type ArchiveVariant = "default" | "mix" | "balanced" | "moderate";
+type ArchiveVariant = "default" | "mix" | "balanced" | "moderate";
 
-export interface ArchiveVariants {
+interface ArchiveVariants {
   date: string;
   primary: ArchiveVariant;
   available: ArchiveVariant[];

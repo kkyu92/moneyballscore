@@ -47,7 +47,7 @@ export function loadAllPicks(): { keys: string[]; picksByFile: Record<string, st
   return { keys: Array.from(keySet), picksByFile, totalSets: total };
 }
 
-export interface WinnerEntry {
+interface WinnerEntry {
   round: number;
   date: string;
   numbers: number[];

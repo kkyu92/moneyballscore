@@ -27,7 +27,7 @@ export interface LottoSet {
   consecutive: number;
 }
 
-export interface LottoPicks {
+interface LottoPicks {
   date: string;
   drawNo: number | null;
   sets: LottoSet[];
@@ -150,7 +150,7 @@ export function getLatestLottoResult(): LottoResult | null {
   return { date, ...parsed };
 }
 
-export type LottoBallColor = "yellow" | "blue" | "red" | "gray" | "green";
+type LottoBallColor = "yellow" | "blue" | "red" | "gray" | "green";
 
 export function ballColor(n: number): LottoBallColor {
   if (n <= 10) return "yellow";
