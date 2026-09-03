@@ -75,9 +75,9 @@ function readLocalMlbPicks(): Array<{ external_game_id: string; pick: 'home' | '
   }
 }
 
-export type SyncState = 'idle' | 'syncing' | 'done' | 'error';
+type SyncState = 'idle' | 'syncing' | 'done' | 'error';
 
-export interface LeaderboardState {
+interface LeaderboardState {
   deviceId: string;
   nickname: string | null;
   syncState: SyncState;
