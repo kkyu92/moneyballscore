@@ -130,6 +130,59 @@ describe('buildMlbFactorAccuracy', () => {
     expect(result.find((r) => r.key === 'sp_fip')?.label).toBe('Starter FIP');
   });
 
+  it('elo/recent_form(home/away 쌍) 팩터도 우세 판정 (cycle 2824 wiring 복구)', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', home_score: 5, away_score: 2 }],
+      preds: [
+        {
+          external_game_id: 'g1',
+          home_win_prob: 0.6,
+          home_elo: 1550,
+          away_elo: 1500,
+          home_recent_form: 60,
+          away_recent_form: 40,
+        },
+      ],
+    });
+    const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
+    const result = await buildMlbFactorAccuracy();
+    const elo = result.find((r) => r.key === 'elo');
+    const recentForm = result.find((r) => r.key === 'recent_form');
+    expect(elo?.n).toBe(1);
+    expect(elo?.accuracy).toBe(1);
+    expect(recentForm?.n).toBe(1);
+    expect(recentForm?.accuracy).toBe(1);
+  });
+
+  it('head_to_head_rate(단일값, >0.5 홈 우세) 판정', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [
+        { external_game_id: 'g1', home_score: 5, away_score: 2 }, // 홈 승
+        { external_game_id: 'g2', home_score: 1, away_score: 3 }, // 원정 승
+      ],
+      preds: [
+        { external_game_id: 'g1', home_win_prob: 0.6, head_to_head_rate: 0.7 }, // 홈 우세 예측 → 적중
+        { external_game_id: 'g2', home_win_prob: 0.55, head_to_head_rate: 0.6 }, // 홈 우세 예측 → 오답
+      ],
+    });
+    const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
+    const result = await buildMlbFactorAccuracy();
+    const h2h = result.find((r) => r.key === 'head_to_head');
+    expect(h2h?.n).toBe(2);
+    expect(h2h?.accuracy).toBe(0.5);
+    expect(h2h?.homeN).toBe(2);
+  });
+
+  it('head_to_head_rate=0.5(중립) 또는 null 이면 skip', async () => {
+    supabaseMock = makeSupabaseMock({
+      schedule: [{ external_game_id: 'g1', home_score: 5, away_score: 2 }],
+      preds: [{ external_game_id: 'g1', home_win_prob: 0.6, head_to_head_rate: 0.5 }],
+    });
+    const { buildMlbFactorAccuracy } = await import('../buildMlbFactorAccuracy');
+    const result = await buildMlbFactorAccuracy();
+    expect(result.find((r) => r.key === 'head_to_head')).toBeUndefined();
+  });
+
   it('결과는 accuracy 내림차순 정렬', async () => {
     supabaseMock = makeSupabaseMock({
       schedule: [
