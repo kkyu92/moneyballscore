@@ -8,7 +8,7 @@ import { NEUTRAL_FACTOR } from "@moneyball/shared";
 export const TOP_FACTOR_LIMIT = 3;
 export { NEUTRAL_HI, NEUTRAL_LO };
 
-export interface TopFactor {
+interface TopFactor {
   key: string;
   label: string;
   pct: number;

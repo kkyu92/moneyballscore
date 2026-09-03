@@ -60,7 +60,7 @@ interface ReasoningShape {
   };
 }
 
-export interface DebateArgumentSummary {
+interface DebateArgumentSummary {
   keyFactor: string | null;
   strengths: string[];
   opponentWeaknesses: string[];
@@ -68,7 +68,7 @@ export interface DebateArgumentSummary {
   reasoning: string | null;
 }
 
-export interface DebateCalibrationSummary {
+interface DebateCalibrationSummary {
   recentBias: string | null;
   teamSpecific: string | null;
   modelWeakness: string | null;
@@ -87,7 +87,7 @@ export interface DebateTimelineData {
   calibrationApplied: string | null;
 }
 
-export interface InsightEntry {
+interface InsightEntry {
   gameId: number;
   date: string;
   homeTeam: TeamCode;

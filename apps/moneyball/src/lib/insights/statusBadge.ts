@@ -3,7 +3,7 @@
 // 동일 분기 6종 (취소 / 적중 / 빗나감 / 진행중 / 결과 대기 / 예정) — sweep 52 chain 연장.
 // 진행중(live) 분기는 cycle 2817 추가 (commit ad24d07) — 본 주석 카운트 동기.
 
-export interface StatusBadge {
+interface StatusBadge {
   label: string;
   cls: string;
 }

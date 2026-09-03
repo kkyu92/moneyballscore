@@ -18,13 +18,13 @@ import { CURRENT_MODEL_FILTER } from "@/config/model";
 const TEAM_CODES = Object.keys(KBO_TEAMS) as TeamCode[];
 const TEAM_CODE_SET = new Set<string>(TEAM_CODES.map((c) => c.toLowerCase()));
 
-export interface SeriesTopic {
+interface SeriesTopic {
   team1: TeamCode;
   team2: TeamCode;
   slug: string;
 }
 
-export interface SeriesEntry {
+interface SeriesEntry {
   gameId: number;
   date: string;
   homeTeam: TeamCode;
