@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): 신규 8파일(chart-format/logistic-regression/kbo-scraper-alert/buildPitcherFipTrend/accuracy-update/winner-id/reviews-data/buildMlbTeamEloTrend) 감사 CLEAN (cycle 2834, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23(status=approved 매칭 0). 2차 방어선(cycle 2833 retro commit 01066545) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 7/20, op-analysis 13/25, info-arch 4/30, lotto 22/30). explore-idea saturation(직전15 중 review-code/fix-incident/polish-ui/info-arch exact-slug 4/15) 미충족. dominance-positive streak 자연 지속(cycle135 룰).
+
+git 1-commit heuristic + TODOS/CHANGELOG 0~2회 언급 필터로 진짜 미감사 파일 8개(`dashboard/chart-format.ts`/`backtest/logistic-regression.ts`/`scrapers/kbo-scraper-alert.ts`/`players/buildPitcherFipTrend.ts`/`pipeline/accuracy-update.ts`/`pipeline/winner-id.ts`/`mlb/reviews/reviews-data.ts`/`mlb/buildMlbTeamEloTrend.ts`) 확보 — cycle 2833에서 이미 감사한 6개(monthGrid/mlbCanonicalPair/supabase admin·server/backtest runner/backtest-run)는 제외. general-purpose 서브에이전트 전수 감사 — **8/8 CLEAN**. 전 파일 export 심볼이 프로덕션 호출부에 실배선 확인(logistic-regression.ts만 예외 — scripts/backtest-v2-candidate.ts 수동 CLI harness 용도로 의도된 비자동화, v2.0 가중치 re-fit 기각 결정과 정합). 주석 vs 실제 로직 불일치 0건.
+
+부가 관찰(이번 파일 범위 밖, 액션 없음): `winner-id.ts` 감사 중 tie-unaware 인라인 승자비교 패턴(`homeScore > awayScore ? home : away`)이 `mlb-historical-bootstrap.ts`/`statsapi-mlb.ts`(MLB bootstrap, 비-KBO)와 UI단 `PredictionCard.tsx`/`buildPicksStats.ts`(pick-correctness 표시용, 다른 semantics)에 잔존 발견 — winner-id.ts 자체 버그 아님, MLB tie 처리 감사 시 별도 검토 후보로만 기록.
+
+코드 변경 0건 (CLEAN). skill-evolution trigger 평가: cycle_n % 50 = 34(미충족), 직전20 표본 review-code 다수(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10: 2825~2834 중 success 4건).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 재탐색 또는 winner-id.ts 부가관찰 tie-handling 후속) 또는 gap-fill 자연 대기(전부 5+ cycle 여유, fix-incident 7/20 최근접).
+
 ## 🟢 SUCCESS — review-code(heavy): mlb-shadow-c dead export 제거 + mlb-historical-bootstrap 미배선 상태 주석 정정 (cycle 2833, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2832 retro commit 6a0f133a) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 11/25, info-arch 2/30, lotto 20/30). explore-idea saturation(14/15 도달)이나 직전 사이클 4-source 재확인 이미 negative(plan#29 Tier4 사용자 대기, GH issue 0, TODOS Next-Up stale) — organic idea 부재로 재발화 skip. dominance-positive streak 자연 지속.
