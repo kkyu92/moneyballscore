@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — operational-analysis(lite): CE/비CE 재측정 23회 연속 확인 (cycle 2869, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2868 retro commit d160280a) OK. 직전8(2861-2868) distinct=2(review-code(heavy)7+polish-ui1) — **2-chain lock 발동**. fix-incident gap 20+ 나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. explore-idea saturation 15/15(direct15 전부 improvement chain) 나 4-source 재확인(open issue 0 / plan approved 0/23 / TODOS Next-Up stale / DESIGN.md mtime 2일 신선) organic idea 부재로 skip. info-arch gap 8/30, lotto gap 26/30(9/5 토 추첨 대비 picks `2026-09-05-50sets.md` 이미 존재), op-analysis 자체 gap 17/25 전부 미근접 — lock 제외 후 유일한 실행 가능 옵션으로 op-analysis 자율 선택.
+
+`pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=371 (CE n=324 / 비CE n=47) — CE n 증가분(320→324, +4)이 전부 9월 데이터(9월 CE n=14, acc 57.1%, cycle 2852 시점 9월 n=10 acc 70.0% 대비 소폭 하락). CE 54.6%(177/324) / 비CE 63.8%(30/47) → 격차 9.2pp (cycle 2852 8.8pp 대비 미세 확대). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 유지 → LLM 부가가치 우세 결론 23회 연속 재확인. CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 65일+ 경과) 상태 변화 없음.
+
+CLAUDE.md 예측 엔진 가중치 섹션에 cycle 2869 측정치 append. 코드 변경 없음(retro-only) — 신규 verified 예측 배치가 드물어 반복 재측정만 가능한 상태 유지.
+
+다음 사이클 추천 = 2-chain lock cooldown N=1 만료 후 review-code(heavy) 재개 또는 lotto gap 27/30 근접 관찰(9/5 draw 이후 OOS 검증 트리거 예상).
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic predictions+v2-shadow-monitor 스코프 4건 (cycle 2868, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2867 retro commit b8f3a4d1) OK. 직전8(2860-2867) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. fix-incident gap 23/20 초과 — `gh run list` 재확인 중 실제 CI failure 발견했으나(cycle 2867 3연속 push 중 superseded stale queued job 이 failure 로 완결) HEAD 로컬 재검증(tsc clean + test 581/581 green) + CI Failure Dispatch 워크플로 전부 skipped 확인 후 실제 incident 부재 확정, 정상 종료. op-analysis 16/25, info-arch 8/30, lotto 26/30 전부 미근접. explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2867 next_recommended("predictions/v2-shadow-monitor 통합 처리") 채택.

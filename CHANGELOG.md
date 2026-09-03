@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### operational-analysis(lite): CE/비CE 재측정 23회 연속 확인 (cycle 2869, SUCCESS)
+
+- 진단: 직전8(2861-2868) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 발동, 두 chain 후보 제외. fix-incident gap 20+ 나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. explore-idea saturation 15/15 나 4-source 재확인(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 2일 신선) organic idea 부재로 skip. info-arch(8/30)/lotto(26/30, 9/5 draw 대비 picks 이미 존재)/op-analysis 자체(17/25) 전부 미근접 — lock 제외 후 유일한 실행 가능 옵션으로 op-analysis 자율 선택.
+- `pnpm tsx scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=371 (CE n=324 / 비CE n=47) — CE n 증가분(320→324, +4)이 전부 9월 데이터(9월 CE n=14, acc 57.1%). CE 54.6%(177/324) / 비CE 63.8%(30/47) → 격차 9.2pp (cycle 2852 8.8pp 대비 미세 확대). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 유지 → LLM 부가가치 우세 결론 23회 연속 재확인.
+- CLAUDE.md 예측 엔진 가중치 섹션에 cycle 2869 측정치 append. 코드 변경 없음(retro-only).
+
 ### review-code(heavy): export-but-unused heuristic predictions+v2-shadow-monitor 스코프 4건 (cycle 2868, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2867 retro commit b8f3a4d1) OK. 직전8(2860-2867) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. fix-incident gap 23/20 초과 — `gh run list` 재확인 중 실제 CI failure 발견(cycle 2867 docs 커밋 push, 3개 커밋 연속 push 중 superseded 된 stale queued job 이 failure 로 완결 — job status queued/conclusion null 인데 run-level 은 completed/failure, 실제 코드 결함 아님). HEAD 로컬 재검증(tsc clean + test 581/581 4560/4560 green) 으로 실제 incident 부재 확정, CI Failure Dispatch 워크플로 전부 skipped(자동화 자체도 미escalate) 확인 후 정상 종료. op-analysis(16/25)/info-arch(8/30)/lotto(26/30) 전부 미근접. explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2867 next_recommended("review-code(heavy) 계속 — 잔여 스코프 predictions(3)/v2-shadow-monitor(3) 통합 처리 고려") 채택.
