@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic teams 스코프 4건 (cycle 2855, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2854 retro commit 7a884507) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 3/25, info-arch 25/30, lotto 13/30). cycle 2854 next_recommended("review-code(heavy) 잔여 스코프: teams/dashboard/matchup/debug") 채택.
+- apps/moneyball/src/lib/teams/ 스코프 exported type/interface 18개 grep → 0-external-hit 5개 후보. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + type-inference-only 컨슈머 확인 + co-located vs cross-directory 테스트 import 구분) — 4/5 CONFIRMED_UNEXPORTED, 1건 FALSE_POSITIVE(`TeamRecentGame` — `app/__tests__/wave-618/619/622/623` 4개 cross-directory 테스트 파일이 named import, co-located-test 컨벤션 미적용 케이스로 정확히 걸러냄). 3개 파일 export 키워드만 제거: TeamEloTrendData / TeamPitcherRow / HomeAwayGame / TeamUpcomingGame.
+- `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit b89c1865, R4 직push(단일 논리 단위, PR 생략).
+
 ### review-code(heavy): export-but-unused heuristic mlb 스코프 확장 (cycle 2853, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2852 retro commit ea928e90) OK. 직전8 distinct=4(fix-incident1+review-code(heavy)5+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 8/20, op-analysis 1/25, info-arch 23/30, lotto 11/30). cycle 2852 next_recommended("review-code(heavy) mlb/reviews/teams/dashboard/matchup/debug 등 잔여 스코프") 채택.
