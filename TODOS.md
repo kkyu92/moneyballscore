@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): statusBadge 6종 카운트 + pitcher-snapshot cron 주석 drift 수정 (cycle 2820, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2819 retro commit 00ba9814) OK. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + lotto 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 22/25, info-arch 20/30, lotto 8/30). explore-idea saturation 6/15 미충족. `gh run list` 확인 — 실패 0건.
+
+수동 grep sweep(cron/KST/UTC 주석 vs wrangler.toml/worker.ts 실제 스케줄, API 라우트 auth guard, DEFAULT_WEIGHTS 주석)에서 새 finding 없어 Explore 서브에이전트로 폭 넓은 재sweep 위임(comment-vs-code mismatch 20+ 파일). 2건 확정: (1) `insights/statusBadge.ts` 헤더 주석이 "동일 분기 5종" 이라 서술하지만 cycle 2817(commit ad24d07)이 6번째 분기(진행중/live)를 추가하며 카운트 주석 갱신을 빠뜨림 — 그 fix 의 잔여 절반. (2) `packages/kbo-data/src/pipeline/snapshot-pitchers.ts` 헤더가 스케줄 출처를 `.github/workflows/pitcher-snapshot.yml` 로 서술하지만 실제론 2026-04-30 Cloudflare Worker 이관(`37 * * * *` UTC 토요일 15시 분기) 완료 — yml 은 workflow_dispatch 만 보존. 동일 family(postview-daily.ts/live.ts 기수정)의 미audit 잔여 인스턴스.
+
+두 파일 주석만 정정(코드 로직 변경 없음). `pnpm --filter @moneyball/kbo-data test` 93/1223 green, `pnpm --filter moneyball test` 581/4524 green, pre-push(lint+type-check+version-sync-guard) green. commit c1e506da, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 20(미충족), 직전 20-cycle 표본 review-code 다수 발화(trigger5 표본 조건 충족하되 opt-out 9개 제외한 평가대상 review-code 자체는 0회 아님 — 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 또는 gap-fill 대기(fix-incident 13/20, op-analysis 22/25, info-arch 20/30, lotto 8/30 — 전부 근접 중, 자연 gap 도달 시 그쪽 우선 고려).
+
 ## 🟢 SUCCESS — review-code(heavy): postview-daily.ts 진입점 주석 drift 수정 (cycle 2819, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23 (status:approved 매칭 0건). 2차 방어선(cycle 2818 retro commit 5661e413) OK. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + lotto 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 21/25, info-arch 19/30, lotto 7/30). explore-idea saturation 6/15 미충족. `gh run list` 전수 확인 — 최근 CI/워크플로 실패 0건(fix-incident 신규 trigger 없음).
