@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): supabase 브라우저 client + lotto normalizeCombo dead export 제거 (cycle 2826, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2825 retro commit ec0f91ea) OK. 직전8 distinct=4(review-code(heavy) 3 + polish-ui 1 + operational-analysis 1 + review-code 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 5/25, info-arch 26/30, lotto 14/30). explore-idea saturation 미충족. dominance-positive streak 자연 지속(cycle 135 룰) — cycle 2825 retro 추천 신규 축(supabase/{admin,client,server}.ts, changelog/{parse,renderMarkdown}, debug/4종, lotto/combo-check-data.ts, matchup/mlb head-to-head 페어, mlb 캘린더 heatmap, deriveMlbOutcome) 14파일 감사.
+
+general-purpose 서브에이전트 전수 감사: 12/14 clean. 확정 발견 2건 — (1) `apps/moneyball/src/lib/supabase/client.ts`(`createBrowserClient` 래퍼) 가 repo 전역 zero importer — 4월 RLS 스캐폴딩 커밋 이후 한 번도 배선된 적 없는 dead file. (2) `lotto/combo-check-data.ts`의 `normalizeCombo()` export 도 zero caller — 동일 로직이 `ComboCheckClient.tsx`(`"use client"`, node:fs 미접근 가능이라 원본 import 불가)에 인라인 중복돼 있어 향후 정규화 로직 변경 시 한쪽만 갱신되는 drift 함정.
+
+fix: 두 dead export 모두 삭제(supabase/client.ts 파일 통째 삭제, normalizeCombo 함수만 제거 — ComboCheckClient.tsx 인라인 구현은 이미 정상 동작 중이라 그대로 유지, 신규 추상화 도입 않음). `pnpm --filter moneyball test` 581/581 green, tsc/eslint clean, pre-push green. commit 6078aae8, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 26(미충족), 직전20 표본 review-code 다수(trigger5 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전9 전부 success, 본 cycle success).
+
+다음 사이클 추천 = fix-incident gap 20/20 도달 임박(다음 사이클 재확인) 또는 review-code(heavy) 계속(1-commit 파일 잔여 탐색).
+
 ## ⚪ RETRO-ONLY — explore-idea(lite) saturation redirect negative + review-code(heavy) Elo/upcoming builder family 11파일 감사 CLEAN (cycle 2825, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2824 retro commit e0aaee72) OK. 직전8 distinct=4(review-code(heavy) 5 + review-code 1 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 4/25, info-arch 25/30, lotto 13/30). explore-idea improvement-saturation trigger 충족(직전15 중 13/15) + 107-cycle 미발화 gap(마지막 cycle 2718) — 다양성 redirect lite 재확인 실행.
