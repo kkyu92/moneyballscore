@@ -3,9 +3,9 @@
  *
  * 멱등성 함수 — 어느 진입점에서도 안전하게 호출 가능.
  *
- * 진입점:
- *   1. live-update.yml cron (18:00~00:50 KST, 10분 간격) — 경기 completed 감지 시
- *   2. daily-pipeline.yml 아침 run (15 KST) — 전날 누락 경기 cleanup
+ * 진입점 (2026-04-29 이후 cron 은 cloudflare-worker 이관, .yml 은 workflow_dispatch 전용):
+ *   1. live.ts (cloudflare-worker live-update cron, KST 18:00~00:50 10분 간격) — 경기 completed 감지 시
+ *   2. daily.ts predict mode 당일 첫 cron (cloudflare-worker daily-pipeline cron UTC 01 = KST 10) — 전날 누락 경기 cleanup
  *
  * 동작:
  *   - games.status='final' AND pre_game 예측 존재 AND post_game row 없음 조회
