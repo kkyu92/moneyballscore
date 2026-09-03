@@ -1,3 +1,14 @@
+## v0.5.62.203 — 2026-09-03 (cycle 2817, review-code(heavy): insights statusBadge live 상태 누락 수정 SUCCESS)
+
+### review-code(heavy): insightsStatusBadge live 분기 누락 + 테스트 부재 (cycle 2817, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2816 retro commit a2e70c16) OK. 2-chain lock 미충족(직전8 distinct=3: review-code(heavy) 5 + review-code(lite) 2 + lotto 1 — dominance-positive streak, cycle 135 룰 적용). gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 19/25, info-arch 17/30, lotto 5/30). explore-idea saturation 6/15 미충족.
+- 신규 후보 탐색: git 커밋 1건뿐(=review-code 대상 이력 0)인 파일군 재탐색(`logistic-regression.ts`/`mlb-retro.ts`/`backtest-run.ts`/`umpire-sz.ts` 등) — `logistic-regression.ts`(225줄)는 정독 결과 clean + `backtest-logistic-regression.test.ts`(269줄, 14 케이스) 로 이미 충분히 검증된 상태 확인(flat `src/__tests__/` 컨벤션이라 처음엔 미탐지 — 디렉터리별 `__tests__/` 관례와 혼용 주의).
+- `apps/moneyball/src/lib/insights/statusBadge.ts`(43줄, 테스트 파일 자체 부재) 정독 — `ALL_GAME_STATUSES`(scheduled/live/final/postponed) 4종 중 `live` 분기가 없어 진행중 경기가 default("예정") 로 fall-through. `PlaceholderCard.tsx`/`LiveScoreboard.tsx` 등 다른 status-aware 컴포넌트는 이미 `live` 를 별도 처리("경기 진행중")하는데 `/insights`, `/insights/[date]` 아카이브 페이지만 누락 — `predictions` 쿼리가 status 필터 없이 pre_game 예측 전체를 가져오므로 live 게임 row 도달 가능(실제 사용자 가시 오표기).
+- fix: `status === "live"` 분기 추가("진행중" label, orange 계열 — 기존 "빗나감" red 와 시각 구분). 신규 `statusBadge.test.ts`(6 케이스: postponed/적중/빗나감/live/결과대기/예정) 작성 — 기존 0개였던 테스트 커버리지 확보.
+- `pnpm --filter moneyball test` 581파일/4523테스트 green(+1파일/+6테스트), tsc/eslint clean, pre-push green. commit ad24d079, R4 직push.
+- 다음 사이클 추천 = review-code(heavy) 계속(1-commit 파일군 잔여: `mlb-retro.ts`/`umpire-sz.ts`/`monthGrid.ts`/`mlbCanonicalPair.ts` 등) 또는 gap-fill 자연 대기(전부 5+ cycle 여유).
+
 ## v0.5.62.202 — 2026-09-02 (cycle 2770, review-code(heavy): park-weather.ts dead reason field 제거 SUCCESS)
 
 ### review-code(heavy): 미감사 MLB 헬퍼 15개 신규 축 감사 (cycle 2770, SUCCESS)
