@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — operational-analysis(lite): CE cohort 20회 연속 재확인 (cycle 2821, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/22(status:approved 매칭 0건). 2차 방어선(cycle 2820 retro commit 15c8f701) OK. 직전8(2813-2820) distinct=2(review-code(heavy) 6 + polish-ui 2) — 2-chain alternation lock 발동, 두 chain 후보 제외. 잔여 pool 중 gap trigger: fix-incident 14/20, info-arch 21/30, lotto 9/30 — 전부 미도달. operational-analysis 자체 gap 23/25 로 잔여 chain 중 trigger 가장 근접 → 자율 선택(lock fallback 이 매번 polish-ui 강제하는 패턴 회피 겸).
+
+`scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행 — 전체 n=367(CE n=320/비CE n=47, CE 증가분 +5 전부 9월 데이터 acc 70.0%). CE 55.0%(176/320) / 비CE 63.8%(30/47) → 격차 8.8pp(cycle 2798 9.2pp 대비 축소). overlap 월(05/06/07) 통제 격차는 10.8pp 그대로 유지 — 전체 격차 축소는 9월 CE 표본 호조 편입 효과일 뿐, LLM 부가가치 우세 방향 자체는 20회 연속 재확인. CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 64일+ 경과) 상태 변화 없음.
+
+CLAUDE.md v1.8 calibration 섹션에 cycle 2821 측정치 append. 코드 변경 없음 — commit 3236d505(policy) direct push(R4/R7).
+
+skill-evolution trigger 평가: cycle_n % 50 = 21(미충족), 직전 20-cycle chain pool 표본 review-code 다수 발화(trigger5 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 success 다수).
+
+다음 사이클 추천 = 2-chain lock(review-code/polish-ui) 이 매 사이클 재발동 중 — lock fallback 이 다시 polish-ui 강제 전에 fix-incident(15/20)/info-arch(22/30)/lotto(10/30) gap 자연 도달 여부 우선 확인, 없으면 review-code(heavy) 신규 축 재진단.
+
 ## 🟢 SUCCESS — review-code(heavy): statusBadge 6종 카운트 + pitcher-snapshot cron 주석 drift 수정 (cycle 2820, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2819 retro commit 00ba9814) OK. 직전8 distinct=3(review-code(heavy) 6 + polish-ui 1 + lotto 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 22/25, info-arch 20/30, lotto 8/30). explore-idea saturation 6/15 미충족. `gh run list` 확인 — 실패 0건.
