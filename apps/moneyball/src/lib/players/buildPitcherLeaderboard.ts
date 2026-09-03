@@ -8,7 +8,7 @@ import {
 } from "@moneyball/shared";
 import { CURRENT_MODEL_FILTER } from "@/config/model";
 
-export interface PitcherLeaderboardRow {
+interface PitcherLeaderboardRow {
   playerId: number;
   nameKo: string;
   teamCode: TeamCode | null;

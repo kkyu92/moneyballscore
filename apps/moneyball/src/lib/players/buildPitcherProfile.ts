@@ -25,7 +25,7 @@ export interface PitcherAppearance {
   opponentScore: number | null;
 }
 
-export interface PitcherProfile {
+interface PitcherProfile {
   playerId: number;
   nameKo: string;
   nameEn: string | null;
@@ -43,7 +43,7 @@ export interface PitcherProfile {
   teamRecord: PitcherTeamRecord | null;
 }
 
-export interface PitcherTeamRecord {
+interface PitcherTeamRecord {
   wins: number;
   losses: number;
   sampleSize: number;
