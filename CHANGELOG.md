@@ -1,3 +1,14 @@
+## v0.5.62.206 — 2026-09-03 (cycle 2833, review-code(heavy): mlb-shadow-c dead export 제거 + mlb-historical-bootstrap 미배선 상태 주석 정정 SUCCESS)
+
+### review-code(heavy): 신규 8파일 감사 — dead code 2건 발견/조치 (cycle 2833, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2832 retro commit 6a0f133a) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 5/20, op-analysis 11/25, info-arch 2/30, lotto 20/30). explore-idea saturation(14/15 도달)이나 TODOS 상 직전 사이클 4-source 재확인 이미 negative(plan#29 Tier4 사용자 대기, GH issue 0, TODOS Next-Up stale) — organic idea 부재로 재발화 skip. dominance-positive streak 자연 지속.
+- git 1-commit heuristic + TODOS/CHANGELOG 교차검증으로 진짜 미감사 파일 8개(`calendar/monthGrid.ts`/`mlb/mlbCanonicalPair.ts`/`supabase/admin.ts`/`supabase/server.ts`/`backtest/runner.ts`/`factors/mlb-shadow-c.ts`/`pipeline/backtest-run.ts`/`scrapers/mlb-historical-bootstrap.ts`) 확보.
+- general-purpose 서브에이전트 전수 감사: 6/8 CLEAN, 2건 dead-code 발견 — (1) **`factors/mlb-shadow-c.ts` `walkForwardExpanding()`**: 단위테스트는 있으나 프로덕션 caller 0건. migration 036 `walk_forward_brier` 테이블(월간 base-vs-shadow 비교용, 본 함수 소비 대상으로 설계)이 실제로는 컬럼 불일치로 폐기되고 `mlb_walk_forward_log`(migration 049, 일별 직접 `computeBrier` 방식) 로 대체돼 본 함수는 처음부터 아무 곳에도 배선 안 된 orphan. (2) **`scrapers/mlb-historical-bootstrap.ts` `fetchRetrosheetSeasonGames()`**: 도입 커밋(e3b7ba79, cycle 1026) 제목의 "적재" 문구와 달리 DB-write/CLI/cron 어디에도 연결 안 됨(grep 0 hit) — Retrosheet 2024-2025 히스토리 실제 backfill 미실행 상태를 커밋 기록이 오도.
+- fix: `walkForwardExpanding` 함수 + 대응 테스트 2건 삭제(dead code 제거, `MILESTONE_TRIGGERS`/`computeBrier`/`trainShadowWeights` 는 `mlb-pipeline.ts` 실배선 확인돼 유지). `mlb-historical-bootstrap.ts` 에 실제 미배선 상태 명시하는 헤더 주석 추가(향후 감사가 "적재 완료" 로 재오판 안 하도록).
+- `pnpm --filter @moneyball/kbo-data test` 93/93파일 1222/1222테스트 green(-2, dead code 테스트 제거分), type-check/lint clean. commit 대기, R4 직push 예정.
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 후보) 또는 gap-fill 자연 대기(전부 5+ cycle 여유).
+
 ## v0.5.62.205 — 2026-09-03 (cycle 2832, review-code(heavy): verify-mode pipeline_runs.predictions 하드코딩 0 → silent-drift 대시보드 오판정 수정 SUCCESS)
 
 ### review-code(heavy): TODOS/CHANGELOG 미언급 미감사 파일군 신규 탐색 (cycle 2832, SUCCESS)

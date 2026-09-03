@@ -63,18 +63,3 @@ export function trainShadowWeights(
 
   return { weights, brier, accuracy };
 }
-
-export function walkForwardExpanding(
-  samples: TrainingSample[],
-  monthBoundaries: number[],
-): Array<{ month: number; brier: number; cohortSize: number }> {
-  const results: Array<{ month: number; brier: number; cohortSize: number }> = [];
-  for (let i = 0; i < monthBoundaries.length; i++) {
-    const trainEnd = monthBoundaries[i];
-    const trainSet = samples.slice(0, trainEnd);
-    if (trainSet.length < 10) continue;
-    const { brier } = trainShadowWeights(trainSet);
-    results.push({ month: i, brier, cohortSize: trainEnd });
-  }
-  return results;
-}

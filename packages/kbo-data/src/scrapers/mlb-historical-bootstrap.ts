@@ -10,6 +10,10 @@ export interface HistoricalGame {
   winner: string;
 }
 
+// cycle 2833 silent drift audit — 도입 커밋(e3b7ba79, cycle 1026)의 "적재" 문구와 달리
+// DB-write/CLI/cron 어디에도 연결 안 됨 (grep 0 hit, __tests__ 외 caller 없음).
+// 2024-2025 Retrosheet 히스토리 실제 backfill 은 아직 미실행 상태 — 실행 시
+// 별도 DB-write 경로 + CLI 진입점 신규 필요.
 export async function fetchRetrosheetSeasonGames(season: number): Promise<HistoricalGame[]> {
   const url = `https://www.retrosheet.org/gamelogs/gl${season}.txt`;
   const res = await fetch(url);

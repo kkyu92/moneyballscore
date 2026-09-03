@@ -3,7 +3,6 @@ import {
   trainShadowWeights,
   computeBrier,
   MILESTONE_TRIGGERS,
-  walkForwardExpanding,
   type TrainingSample,
 } from '../mlb-shadow-c';
 
@@ -52,26 +51,5 @@ describe('mlb-shadow-c.trainShadowWeights', () => {
     expect(result.weights).toEqual({});
     expect(result.brier).toBe(0);
     expect(result.accuracy).toBe(0);
-  });
-});
-
-describe('mlb-shadow-c.walkForwardExpanding', () => {
-  it('returns brier per month boundary', () => {
-    const samples: TrainingSample[] = Array.from({ length: 60 }, (_, i) => ({
-      factors: { f: i * 0.01 },
-      homeWon: (i % 2) as 0 | 1,
-    }));
-    const results = walkForwardExpanding(samples, [10, 30, 60]);
-    expect(results.length).toBe(3);
-    expect(results[0]).toMatchObject({ month: 0, cohortSize: 10 });
-  });
-
-  it('skips months with cohort < 10', () => {
-    const samples: TrainingSample[] = Array.from({ length: 5 }, (_, i) => ({
-      factors: { f: i * 0.01 },
-      homeWon: (i % 2) as 0 | 1,
-    }));
-    const results = walkForwardExpanding(samples, [5]);
-    expect(results).toEqual([]);
   });
 });
