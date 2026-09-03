@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy) 신규 8파일 감사 CLEAN (cycle 2828, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2827 retro commit 7149633d) OK. 직전8 distinct=4(review-code(heavy)/operational-analysis/review-code/fix-incident) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 7/25, info-arch 28/30, lotto 16/30). dominance-positive streak 자연 지속(cycle135 룰).
+
+신규 후보 탐색: git history 1-commit(=한 번도 review-code 대상 아닌) lib 파일군 재탐색 — `is-origin-allowed.ts`/`calendar/monthGrid.ts`/`dashboard/buildDailyAccuracy.ts`/`mlb/mlbCanonicalPair.ts`/`observability/captureFallback.ts`/`predictions/adjacentDates.ts`/`supabase/admin.ts`/`supabase/server.ts` 8개 확보.
+
+general-purpose 서브에이전트 전수 감사: 8/8 CLEAN. 모든 export 필드 실제 소비 확인(예: buildDailyAccuracy 의 correct/total 둘 다 툴팁에서 사용), 주석-로직 정합(adjacentDates 의 cycle 2513 버그 서술 = 실제 구현과 일치), dead export/stale comment/wrong logic 0건. `is-origin-allowed.ts` 의 `https://www.${host}` 항목이 커스텀 도메인 미구매 상태라 현재 매칭 안 되는 점 관찰됐으나 보안 구멍 아님(harmless, 도메인 구매 시 자연 활성화) — 조치 불필요. 코드 변경 없음.
+
+skill-evolution trigger 평가: cycle_n % 50 = 28(미충족), 직전20 표본(sample=7, 임계 10 미달로 trigger5 skip), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속(신규 후보 재탐색 필요, 8파일 배치 소진) 또는 gap-fill 자연 대기(info-arch 29/30 임박, lotto 17/30, op-analysis 8/25).
+
 ## ⚪ RETRO-ONLY — fix-incident(lite) 20-cycle gap 주기 점검 CLEAN (cycle 2827, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2826 retro commit b07d3174) OK. 직전8 distinct=2(review-code(heavy) 7 + operational-analysis(lite) 1) — 2-chain alternation lock 발동, 둘 다 후보 제외. gap trigger 재확인: fix-incident 마지막 발화 cycle 2807, gap=20/20 정확 도달 — lock 이 남긴 유일한 강한 trigger 라 자연 선택. op-analysis 6/25, info-arch 27/30, lotto 15/30 전부 미도달.
