@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic players 스코프 4건 (cycle 2862, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2861 retro commit 76eb4723) OK. 직전8(2854-2861) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 10/25, info-arch 2/30, lotto 20/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2861 next_recommended("review-code(heavy) 잔여 스코프: players/standings/accuracy(부분)/lotto-lib") 채택.
+
+apps/moneyball/src/lib/players/ 스코프 exported type/interface 6개 grep → PitcherFipPoint(컴포넌트 prop 실사용) + PitcherAppearance(cross-file import + 테스트 다수) 2개만 유지, 나머지 4개 0-external-hit 후보. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + co-located 테스트 cross-file import 구분 + packages/shared 동명 무관 심볼 확인) — 4/4 CONFIRMED_UNEXPORTED_SAFE, false positive 0건. export 키워드만 제거: BatterLeaderboardRow / PitcherLeaderboardRow / PitcherProfile / PitcherTeamRecord.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean, test 581/581파일 4560/4560 green, lint 0 errors(기존 warning 1건 유지). commit 3df993e9, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 스코프: standings/accuracy(부분)/lotto-lib) — gap trigger 4종 전부 미근접.
+
 ## 🟢 SUCCESS — polish-ui(2-chain lock fallback): mlb/matchup + mlb/analysis OG/twitter image parity 12건 (cycle 2861, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23 (status=approved 매칭 없음, 23건 전부 completed/archived/deferred류). 2차 방어선(cycle 2860 retro commit 8724a0b6) OK. 직전8(2853-2860) distinct=2(review-code(heavy)7+info-architecture-review1) — 2-chain lock 재발동(fix-incident 미포함) → 두 chain 이번 사이클 제외. 잔여 pool gap trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 9/25, lotto 19/30, explore-idea saturation 1/15) — "어떤 chain 도 trigger 없으면 polish-ui 강제 발화" 절차 적용.

@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic players 스코프 4건 (cycle 2862, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2861 retro commit 76eb4723) OK. 직전8(2854-2861) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 17/20, op-analysis 10/25, info-arch 2/30, lotto 20/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2861 next_recommended("review-code(heavy) 잔여 스코프: players/standings/accuracy(부분)/lotto-lib") 채택.
+- apps/moneyball/src/lib/players/ 스코프 exported type/interface 6개 grep → PitcherFipPoint(컴포넌트 prop 실사용) + PitcherAppearance(cross-file import buildPitcherFipTrend.ts + 테스트 다수) 2개만 유지, 나머지 4개 0-external-hit 후보. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + co-located 테스트 cross-file import 구분 + packages/shared 동명 무관 심볼 확인) — 4/4 CONFIRMED_UNEXPORTED_SAFE, false positive 0건. export 키워드만 제거: BatterLeaderboardRow (buildBatterLeaderboard.ts), PitcherLeaderboardRow (buildPitcherLeaderboard.ts), PitcherProfile / PitcherTeamRecord (buildPitcherProfile.ts).
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 581/581파일 4560/4560 green, lint 0 errors(기존 warning 1건 유지). commit 3df993e9, R4 직push(단일 논리 단위, PR 생략).
+
 ### polish-ui(2-chain lock fallback): mlb/matchup + mlb/analysis OG/twitter image parity 12건 (cycle 2861, SUCCESS)
 
 - 진단: 2-chain lock(직전8 review-code(heavy)7+info-architecture-review1) 재발동 → 두 chain 제외, 잔여 pool gap trigger 4종 전부 미도달 → "trigger 없으면 polish-ui 강제" 절차 적용.
