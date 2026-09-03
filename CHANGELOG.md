@@ -1,3 +1,12 @@
+## v0.5.62.210 — 2026-09-03 (cycle 2839, polish-ui: MLB games route loading.tsx 신설 SUCCESS)
+
+### polish-ui: app/mlb/games/[date] loading skeleton 신설 — 2-chain lock fallback (cycle 2839, SUCCESS)
+
+- 직전 8 사이클 distinct chain=2(review-code(heavy)+polish-ui) 2-chain lock 발동, gap trigger 4종 전부 미도달, explore-idea saturation 미충족 → lock rule 3 fallback = polish-ui.
+- general-purpose subagent 감사: `app/mlb/games/[date]/page.tsx` 가 request-time Supabase 쿼리(revalidate=1800, Suspense 없음) 인데 sibling KBO route `app/predictions/[date]` 는 `loading.tsx` 보유, MLB 쪽만 부재.
+- fix: `app/mlb/games/loading.tsx` 신설 — 기존 predictions skeleton 패턴 재사용, MLB 리스트 실제 마크업(단일행 team-code + win%)에 맞게 단순화. en 미러는 repo 안 선례 부재(en/predictions 라우트 자체 없음)로 scope 제외.
+- `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, type-check/lint clean, pre-push green. commit 0cb5283e, R4 직push.
+
 ## v0.5.62.209 — 2026-09-03 (cycle 2838, review-code(heavy): logistic-regression.ts trainN 필터링 누락 fix SUCCESS)
 
 ### review-code(heavy): 신규 6파일 감사 — trainN 계약 위반 버그 1건 발견/조치 (cycle 2838, SUCCESS)

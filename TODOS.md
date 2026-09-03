@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — polish-ui: MLB games route loading.tsx 신설 (cycle 2839, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23(status=approved 없음). 2차 방어선(cycle 2838 retro commit f8c8c252) OK. 직전8 distinct=2(review-code(heavy)+polish-ui) — **2-chain lock 발동**. gap trigger 4종 전부 미도달(fix-incident 12/20, op-analysis 18/25, info-arch 9/30, lotto 27/30). explore-idea saturation 4/15 미충족. CI 최근 실패 0건(gh run list). DESIGN.md mtime 1일(신선, trigger 아님). lock rule 3(어떤 chain 도 gap trigger 없음) → polish-ui fallback 발화 (cycle 2792-2795 선례 정합).
+
+grep 스윕(unwired 컴포넌트/하드코딩 hex)으로는 뚜렷한 candidate 확보 실패 → general-purpose 서브에이전트에 bounded UI audit 위임(DESIGN.md 먼저 read 지시). 결과: `app/mlb/games/[date]/page.tsx` 가 request-time Supabase 쿼리(revalidate=1800, 페이지 안 Suspense 없음)를 하는데 sibling KBO route `app/predictions/[date]` 는 `loading.tsx` 보유(69줄, 헤더+통계카드+필터필+4개 예측카드 스켈레톤) 반면 MLB 쪽(`mlb/games`, `mlb/predictions`, `mlb/analysis`, 전체 `en/mlb/*`)은 5개 KBO loading.tsx 대비 0개 확인.
+
+fix: `app/mlb/games/loading.tsx` 신설(`[date]` 의 parent segment, predictions/loading.tsx 와 동일 위치 패턴) — 기존 skeleton 재사용하되 MLB 리스트 실제 마크업(단일행 team-code + win%, avatar circle/factor footer 없음)에 맞게 단순화. en 미러는 repo 안 선례 부재(en/predictions 라우트 자체 없음)로 scope 제외 — 추가 파일 X.
+
+Next.js 16 문서(`node_modules/next/dist/docs/`) 확인 결과 `loading.tsx` 컨벤션 변경 없음. `apps/moneyball` type-check clean, lint clean, `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, pre-push green. commit 0cb5283e, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 39(미충족), 직전20 표본 chain pool 다양(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수).
+
+다음 사이클 추천 = review-code(heavy) 계속 또는 gap-fill 자연 대기(lotto 28/30 최근접, fix-incident 13/20).
+
 ## 🟢 SUCCESS — review-code(heavy): logistic-regression.ts trainN 필터링 누락 fix + 신규 6파일 감사 (cycle 2838, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23(status=approved 없음, plan#29 만 spec_only_deferred Tier4 사용자대기). 2차 방어선(cycle 2837 retro commit c2e6a862) OK. 직전8 distinct=3(review-code(heavy)/info-architecture-review/polish-ui) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 17/25, info-arch 8/30, lotto 26/30). explore-idea saturation 4/15 미충족. CI 최근 실패 0건(gh run list). dominance-positive streak 자연 지속(직전20 중 review-code(heavy) 다수).
