@@ -14,7 +14,7 @@ async function rateLimit() {
 
 // fetch() 에 User-Agent 미설정 시 403 위험 — 형제 스크레이퍼 fangraphs-mlb.ts 가
 // 동일 원인으로 실패한 사례(cycle 2278) 확인 후 예방적으로 동일 헤더 적용 (cycle 2326).
-export interface SavantTeam {
+interface SavantTeam {
   teamCode: string;
   xwoba: number;        // 0~0.5
   barrelPct: number;    // 0~30

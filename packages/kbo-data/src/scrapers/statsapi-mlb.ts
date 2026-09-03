@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/nextjs';
 import { SCRAPER_RATE_LIMIT_DEFAULT_MS } from '@moneyball/shared';
 
-export interface MlbGame {
+interface MlbGame {
   gamePk: number;
   gameDateUtc: Date;
   homeTeam: string;
@@ -78,12 +78,12 @@ export async function fetchMlbSchedule(dateKst: string): Promise<MlbGame[]> {
   }
 }
 
-export interface ProbablePitcher {
+interface ProbablePitcher {
   id: number;
   name: string;
 }
 
-export type ProbablePitcherMap = Record<number, {
+type ProbablePitcherMap = Record<number, {
   home: ProbablePitcher | null;
   away: ProbablePitcher | null;
 }>;

@@ -42,7 +42,7 @@ export interface NaverPitcherRecord {
   hasPlayerEnd: boolean;
 }
 
-export interface NaverBatterRecord {
+interface NaverBatterRecord {
   name: string;
   playerCode: string;
   batOrder: number; // 타순
@@ -60,7 +60,7 @@ export interface NaverBatterRecord {
   [key: `inn${number}`]: string | undefined;
 }
 
-export interface NaverScoreBoard {
+interface NaverScoreBoard {
   rheb: {
     away: { r: number; h: number; e: number; b: number };
     home: { r: number; h: number; e: number; b: number };
@@ -71,7 +71,7 @@ export interface NaverScoreBoard {
   };
 }
 
-export interface NaverPitchingResult {
+interface NaverPitchingResult {
   pCode: string;
   name: string;
   wls: 'W' | 'L' | 'S' | 'H' | string;
@@ -80,7 +80,7 @@ export interface NaverPitchingResult {
   s: number;
 }
 
-export interface NaverGameInfo {
+interface NaverGameInfo {
   gdate: string; // YYYYMMDD
   gtime: string; // HH:mm
   hCode: string; // KBO 팀 코드 (home)

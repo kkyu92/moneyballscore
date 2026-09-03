@@ -20,7 +20,7 @@
 import { NAVER_BROWSER_USER_AGENT, NAVER_SPORTS_API_BASE } from '@moneyball/shared';
 import { toNaverGameId } from './naver-record';
 
-export interface GameUmpires {
+interface GameUmpires {
   /** 주심 — strike zone bias 의 1차 영향 source */
   main: string;
   /** 1루심 */

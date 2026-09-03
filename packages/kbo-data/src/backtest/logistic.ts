@@ -8,7 +8,7 @@
 import { ELO_DIVIDER } from '@moneyball/shared';
 import type { GameFeatures } from './types';
 
-export interface LogisticModel {
+interface LogisticModel {
   weights: number[];
   intercept: number;
   featureNames: string[];
@@ -16,7 +16,7 @@ export interface LogisticModel {
   finalLoss: number;
 }
 
-export interface TrainOptions {
+interface TrainOptions {
   lambda?: number; // L2 penalty (default 0.01)
   lr?: number; // learning rate (default 0.5)
   maxIter?: number; // default 5000

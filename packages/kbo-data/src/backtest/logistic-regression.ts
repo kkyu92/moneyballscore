@@ -28,7 +28,7 @@ export type FactorKey = (typeof ACTIVE_FACTOR_KEYS)[number];
 export type FactorMap = Partial<Record<FactorKey, number>>;
 export type LearnedWeights = Record<FactorKey, number>;
 
-export interface FitOptions {
+interface FitOptions {
   /** L2 regularization 계수 (default 0.01) */
   lambda?: number;
   /** learning rate (default 0.5) */
@@ -43,7 +43,7 @@ export interface FitOptions {
   neutral?: number;
 }
 
-export interface FitResult {
+interface FitResult {
   /** sum=1 으로 normalize 된 learned weights (DEFAULT_WEIGHTS 형식 정합) */
   weights: LearnedWeights;
   /** raw learned weights (clamp 전 GD 결과) — debug 용 */

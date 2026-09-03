@@ -107,9 +107,9 @@ function buildBaseSnapshot(
 // archive + forecast 두 fetcher 가 동일 4 분기 silent return null 반복하던 패턴을
 // 단일 helper 로 derive — silent drift family scrapers 차원 19번째 진입. 호출 site 가
 // 어느 분기로 fail 했는지 console.warn 으로 가시화 (이전: 4 fail mode 모두 silent null).
-export type WeatherFetchFailReason = 'http_error' | 'no_hourly' | 'idx_not_found' | 'fetch_error';
+type WeatherFetchFailReason = 'http_error' | 'no_hourly' | 'idx_not_found' | 'fetch_error';
 
-export type OpenMeteoFetchResult<H extends BaseHourly> =
+type OpenMeteoFetchResult<H extends BaseHourly> =
   | { ok: true; hourly: H; idx: number }
   | { ok: false; reason: WeatherFetchFailReason; status?: number };
 

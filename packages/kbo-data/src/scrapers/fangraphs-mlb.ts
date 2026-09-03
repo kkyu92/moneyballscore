@@ -12,7 +12,7 @@ async function rateLimit() {
   lastFetchAt = Date.now();
 }
 
-export interface FangraphsMlbTeam {
+interface FangraphsMlbTeam {
   teamCode: string;
   woba: number; fip: number; xfip: number; war: number;
   ldPct: number; gbPct: number; fbPct: number; iffbPct: number;

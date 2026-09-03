@@ -37,7 +37,7 @@ import type { BacktestPredictionRow } from './backtest-v2-helpers';
  */
 export type CvPattern = 'walk-forward' | 'v18-only-rescore' | 'rolling' | 'train-and-test';
 
-export interface SplitResult {
+interface SplitResult {
   pattern: CvPattern;
   train: BacktestPredictionRow[];
   test: BacktestPredictionRow[];

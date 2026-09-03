@@ -92,7 +92,7 @@ export function evaluateFancyElo(
   };
 }
 
-export interface BacktestResult {
+interface BacktestResult {
   cohort_n: number;
   v18_brier: number;
   v18_accuracy: number;
@@ -114,7 +114,7 @@ export interface BacktestResult {
  * - learned weights 절대값 신뢰 X — cross-version factor normalization 위장 risk
  * - 본 결과 = "evidence pack only" 라벨 강제
  */
-export interface ThreeWayResult {
+interface ThreeWayResult {
   test_n: number;
   default_brier: number;
   default_accuracy: number;

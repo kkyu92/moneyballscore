@@ -15,7 +15,7 @@
 // packages/kbo-data 가 @sentry/nextjs 직접 의존 X — 동적 import +
 // try/catch silent fallback 패턴 (silent-drift-alert.ts 와 동일).
 
-export interface KboScraperHtmlAlertMeta {
+interface KboScraperHtmlAlertMeta {
   endpoint: string;
   date: string;
   status: number;

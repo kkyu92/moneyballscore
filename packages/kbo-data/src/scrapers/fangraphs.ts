@@ -12,7 +12,7 @@ const BASE_URL = 'https://www.fangraphs.com/leaders/international/kbo';
 // case-insensitive + 빈 입력 가드 ("Kia Tigers" drift 사고 박제 후속)
 // → fangraphs 도 같은 패턴 자동 상속.
 
-export interface FanGraphsBatterData {
+interface FanGraphsBatterData {
   team: TeamCode;
   wrcPlus: number;
   iso: number;

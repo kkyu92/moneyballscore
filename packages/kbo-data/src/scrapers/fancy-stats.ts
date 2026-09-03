@@ -418,7 +418,7 @@ export const FANCY_STATS_DEFAULTS = {
 // fancy-stats Elo row silent fallback 측정.
 // parseNum 결과가 0/NaN 일 때 || 단락 평가로 fallback 진입 — 진짜 0 vs 데이터 부재 구분 불가.
 // fellBack 시 console.warn 으로 Sentry 가시화.
-export interface FancyStatsFallbacks {
+interface FancyStatsFallbacks {
   elo: boolean;
   woba: boolean;
   fip: boolean;
