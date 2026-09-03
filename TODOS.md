@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic debug 스코프 9건 (cycle 2858, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2857 retro commit c0f16c7d) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 13/20, op-analysis 6/25, info-arch 28/30, lotto 16/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2857 next_recommended("review-code(heavy) 잔여 스코프: debug") 채택.
+
+apps/moneyball/src/lib/debug/ 스코프(factorDeltaStats/agentFallbackStats/pipelineStats/silentDriftStats) exported type/interface 14개 grep → 0-external-hit 9개 후보 (PredictionFactorRow/PredictionForFallback/SkippedEntry/RejectReasonCell/PipelineRunForDrift 5개는 page.tsx·test 실사용 확인되어 유지). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + wave-* 테스트·app/debug 라우트 컨슈머 확인 + memory/docs 산문 언급과 코드 import 구분) — 9/9 CONFIRMED_UNEXPORTED, false positive 0건. 4개 파일 export 키워드만 제거: FactorTimelineRow / FactorTimelineCellAnomaly / FactorTimelineResult / AgentFallbackCohort / AgentFallbackDailyRow / AgentFallbackSample / PipelineRunForStats / SilentDriftEvent / SilentDriftCohort.
+
+`pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green, lint 0 errors(기존 warning 1건 유지). commit 822ce5ab, R4 직push(단일 논리 단위, PR 생략).
+
+debug 스코프 완료(14/14 처리, 9 제거 + 5 유지 확인). mlb/reviews/teams/dashboard/matchup/debug 6개 스코프 완주. 다음 사이클 추천 = review-code(heavy) 계속(신규 미탐색 스코프: insights 4파일/players 4/standings 4/accuracy 3/lotto-lib 4 등) — gap trigger 4종 전부 미근접, info-arch 28/30 근접 주시.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic matchup 스코프 10건 (cycle 2857, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2856 retro commit 711c6434) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 1/25, info-arch 1/30, lotto 1/30, 각각 최근 발화 위치 기준 재측정). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2856 next_recommended("review-code(heavy) 잔여 스코프: matchup/debug") 채택.

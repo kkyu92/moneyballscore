@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic debug 스코프 9건 (cycle 2858, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2857 retro commit c0f16c7d) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미근접. cycle 2857 next_recommended("review-code(heavy) 잔여 스코프: debug") 채택.
+- apps/moneyball/src/lib/debug/ 스코프(factorDeltaStats/agentFallbackStats/pipelineStats/silentDriftStats) exported type/interface 14개 grep → 0-external-hit 9개 후보 (5개는 page.tsx·test 실사용 확인되어 유지). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + wave-* 테스트·app/debug 라우트 컨슈머 확인 + memory/docs 산문 언급과 코드 import 구분) — 9/9 CONFIRMED_UNEXPORTED, false positive 0건. export 키워드만 제거: FactorTimelineRow/FactorTimelineCellAnomaly/FactorTimelineResult (factorDeltaStats.ts), AgentFallbackCohort/AgentFallbackDailyRow/AgentFallbackSample (agentFallbackStats.ts), PipelineRunForStats (pipelineStats.ts), SilentDriftEvent/SilentDriftCohort (silentDriftStats.ts).
+- `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green, lint 0 errors(기존 warning 1건 유지). commit 822ce5ab, R4 직push(단일 논리 단위, PR 생략). debug 스코프 완료(14/14 처리) — mlb/reviews/teams/dashboard/matchup/debug 6개 스코프 완주.
+
 ### review-code(heavy): export-but-unused heuristic matchup 스코프 10건 (cycle 2857, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2856 retro commit 711c6434) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미근접. cycle 2856 next_recommended("review-code(heavy) 잔여 스코프: matchup/debug") 채택.
