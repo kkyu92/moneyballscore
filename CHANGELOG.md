@@ -1,5 +1,12 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### polish-ui(2-chain lock fallback): mlb/matchup + mlb/analysis OG/twitter image parity 12건 (cycle 2861, SUCCESS)
+
+- 진단: 2-chain lock(직전8 review-code(heavy)7+info-architecture-review1) 재발동 → 두 chain 제외, 잔여 pool gap trigger 4종 전부 미도달 → "trigger 없으면 polish-ui 강제" 절차 적용.
+- DESIGN.md 토큰 vs 라우트 grep 중 발견: KBO `/matchup`·`/matchup/[teamA]/[teamB]`·`/analysis` 는 OG/twitter 쌍 존재하나 MLB 패리티 라우트(mlb/en-mlb × matchup 정적/동적 + analysis) 6곳 12파일 완전 누락 — silent SEO leak family(wave-40/144 계열) 신규 재발.
+- 12파일 생성(기존 mlb/team 템플릿 패턴) + design-tokens.ts `MLB_GRADIENT_MATCHUP_135`/`MLB_GRADIENT_ANALYSIS_135` 신규 토큰 2개 + `silent-drift-wave-144.test.ts` 커버리지 확장.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, lint 0 errors, test 581 files/4560 tests green. commit 07750945, R4 직push(PR 생략).
+
 ### info-architecture-review: 30-cycle-gap checkpoint 7연속 재확정 (cycle 2860, RETRO-ONLY)
 
 - 진단: 2-chain lock(직전8 review-code(heavy)7+operational-analysis1, fix-incident 미포함) 발동 → 두 chain 제외, 남은 pool 중 info-arch 30-cycle gap trigger 정확 도달(cycle 2830→2860)로 자연 선택.
