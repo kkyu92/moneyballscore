@@ -1,6 +1,6 @@
 name: mlb-schedule-status-backfill
 
-# Cloudflare Worker cron ('17 18-21,10 * * *')이 mlb_statsapi_scrape 의 primary
+# Cloudflare Worker cron ('17 18-22,10 * * *')이 mlb_statsapi_scrape 의 primary
 # trigger 이지만, CLOUDFLARE_API_TOKEN GH secret 미등록(TODOS.md cycle 2068/2090)으로
 # deploy-cloudflare-worker.yml 가 계속 skip/fail — 즉 worker.ts 의 3일 재스크랩
 # backfill 로직(643dba4e, 사례 23/24 fix)이 실제 production 에 한 번도 반영 안 된 상태.
@@ -15,8 +15,8 @@ name: mlb-schedule-status-backfill
 
 on:
   schedule:
-    # UTC 11:47 = KST 20:47 — Cloudflare Worker scrape(KST 03-06)와 겹치지 않는
-    # 시간대에 하루 한 번, 그날 경기 대부분이 끝난 뒤 재확인.
+    # UTC 11:47 = KST 20:47 — Cloudflare Worker MLB fire 구간(KST 03-07 scrape+shadow_train+elo_update,
+    # KST 19 predict_final)과 겹치지 않는 시간대에 하루 한 번, 그날 경기 대부분이 끝난 뒤 재확인.
     - cron: '47 11 * * *'
   workflow_dispatch:
 

@@ -1,6 +1,6 @@
 name: MLB Pipeline (manual)
 
-# Schedule 없음 — Cloudflare Worker cron ('17 18-21,10 * * *') 이 primary trigger.
+# Schedule 없음 — Cloudflare Worker cron ('17 18-22,10 * * *') 이 primary trigger.
 # 본 workflow 는 수동 재실행/디버그 전용.
 on:
   workflow_dispatch:
