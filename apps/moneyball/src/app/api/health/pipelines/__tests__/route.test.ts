@@ -49,7 +49,20 @@ function isoHoursAgo(hours: number): string {
   return new Date(Date.now() - hours * HOUR_MS).toISOString();
 }
 
-describe('GET /api/health/pipelines (cycle 1135 v18 candidate Z)', () => {
+const ALL_FRESH: Record<string, Row | null> = {
+  announce: { created_at: isoHoursAgo(2) },
+  predict: { created_at: isoHoursAgo(1) },
+  predict_final: { created_at: isoHoursAgo(10) },
+  verify: { created_at: isoHoursAgo(10) },
+  mlb_statsapi_scrape: { created_at: isoHoursAgo(5) },
+  mlb_fancy_scrape: { created_at: isoHoursAgo(5) },
+  mlb_savant_scrape: { created_at: isoHoursAgo(5) },
+  mlb_shadow_train: { created_at: isoHoursAgo(5) },
+  mlb_elo_update: { created_at: isoHoursAgo(5) },
+  mlb_predict_final: { created_at: isoHoursAgo(10) },
+};
+
+describe('GET /api/health/pipelines (cycle 2811 MLB mode 6종 추가)', () => {
   beforeEach(() => {
     perModeData = {};
     perModeError = null;
@@ -60,13 +73,8 @@ describe('GET /api/health/pipelines (cycle 1135 v18 candidate Z)', () => {
     vi.resetModules();
   });
 
-  it('모든 mode fresh → 200 + overall=ok', async () => {
-    perModeData = {
-      announce: { created_at: isoHoursAgo(2) },
-      predict: { created_at: isoHoursAgo(1) },
-      predict_final: { created_at: isoHoursAgo(10) },
-      verify: { created_at: isoHoursAgo(10) },
-    };
+  it('모든 mode (KBO 4 + MLB 6) fresh → 200 + overall=ok', async () => {
+    perModeData = { ...ALL_FRESH };
     const res = await callGet();
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -75,15 +83,16 @@ describe('GET /api/health/pipelines (cycle 1135 v18 candidate Z)', () => {
     expect(body.modes.predict.status).toBe('ok');
     expect(body.modes.predict_final.status).toBe('ok');
     expect(body.modes.verify.status).toBe('ok');
+    expect(body.modes.mlb_statsapi_scrape.status).toBe('ok');
+    expect(body.modes.mlb_fancy_scrape.status).toBe('ok');
+    expect(body.modes.mlb_savant_scrape.status).toBe('ok');
+    expect(body.modes.mlb_shadow_train.status).toBe('ok');
+    expect(body.modes.mlb_elo_update.status).toBe('ok');
+    expect(body.modes.mlb_predict_final.status).toBe('ok');
   });
 
   it('predict stale (16h, threshold 15h) → 200 + overall=degraded', async () => {
-    perModeData = {
-      announce: { created_at: isoHoursAgo(2) },
-      predict: { created_at: isoHoursAgo(16) },
-      predict_final: { created_at: isoHoursAgo(10) },
-      verify: { created_at: isoHoursAgo(10) },
-    };
+    perModeData = { ...ALL_FRESH, predict: { created_at: isoHoursAgo(16) } };
     const res = await callGet();
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -93,18 +102,31 @@ describe('GET /api/health/pipelines (cycle 1135 v18 candidate Z)', () => {
   });
 
   it('verify never (no rows) → degraded + never status', async () => {
-    perModeData = {
-      announce: { created_at: isoHoursAgo(2) },
-      predict: { created_at: isoHoursAgo(1) },
-      predict_final: { created_at: isoHoursAgo(10) },
-      verify: null,
-    };
+    perModeData = { ...ALL_FRESH, verify: null };
     const res = await callGet();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.overall).toBe('degraded');
     expect(body.modes.verify.status).toBe('never');
     expect(body.modes.verify.last_success_at).toBeNull();
+  });
+
+  it('mlb_elo_update stale (30h, threshold 28h) → 200 + overall=degraded (MLB 전용 silent skip 탐지)', async () => {
+    perModeData = { ...ALL_FRESH, mlb_elo_update: { created_at: isoHoursAgo(30) } };
+    const res = await callGet();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.overall).toBe('degraded');
+    expect(body.modes.mlb_elo_update.status).toBe('stale');
+  });
+
+  it('mlb_savant_scrape never (no rows) → degraded + never status', async () => {
+    perModeData = { ...ALL_FRESH, mlb_savant_scrape: null };
+    const res = await callGet();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.overall).toBe('degraded');
+    expect(body.modes.mlb_savant_scrape.status).toBe('never');
   });
 
   it('supabase error → 503 + overall=fail', async () => {
@@ -123,23 +145,13 @@ describe('GET /api/health/pipelines (cycle 1135 v18 candidate Z)', () => {
   });
 
   it('response 항상 cache-control no-store', async () => {
-    perModeData = {
-      announce: { created_at: isoHoursAgo(2) },
-      predict: { created_at: isoHoursAgo(1) },
-      predict_final: { created_at: isoHoursAgo(10) },
-      verify: { created_at: isoHoursAgo(10) },
-    };
+    perModeData = { ...ALL_FRESH };
     const res = await callGet();
     expect(res.headers.get('cache-control')).toContain('no-store');
   });
 
   it('latency_ms + timestamp 필드 박제', async () => {
-    perModeData = {
-      announce: { created_at: isoHoursAgo(2) },
-      predict: { created_at: isoHoursAgo(1) },
-      predict_final: { created_at: isoHoursAgo(10) },
-      verify: { created_at: isoHoursAgo(10) },
-    };
+    perModeData = { ...ALL_FRESH };
     const res = await callGet();
     const body = await res.json();
     expect(typeof body.latency_ms).toBe('number');
