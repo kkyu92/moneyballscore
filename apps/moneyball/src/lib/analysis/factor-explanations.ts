@@ -32,7 +32,7 @@ export interface FactorRawDetails {
   awaySfr?: number | null;
 }
 
-export interface FactorExplanation {
+interface FactorExplanation {
   key: string;
   label: string;
   weightPct: number;
@@ -307,7 +307,7 @@ export function explainFactor(input: ExplainInput): FactorExplanation {
   };
 }
 
-export interface GameOverviewInput {
+interface GameOverviewInput {
   homeWinProb: number;
   homeSPFip?: number | null;
   awaySPFip?: number | null;

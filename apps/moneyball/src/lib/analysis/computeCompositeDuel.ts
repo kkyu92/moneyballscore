@@ -18,7 +18,7 @@ import {
 
 type DuelResult = 'home' | 'away' | null;
 
-export interface CompositeDuelInput {
+interface CompositeDuelInput {
   homeCode: TeamCode;
   homeLineupWoba?: number | null;
   awayLineupWoba?: number | null;
@@ -40,7 +40,7 @@ export interface CompositeDuelInput {
   h2hAwayWins?: number;
 }
 
-export interface CompositeDuelResult {
+interface CompositeDuelResult {
   homeWins: number;
   awayWins: number;
   /** wave-390: 유효 팩터 수 (null/임계 미달 팩터 제외) */

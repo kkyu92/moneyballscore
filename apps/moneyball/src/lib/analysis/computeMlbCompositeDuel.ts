@@ -13,7 +13,7 @@ import {
 
 type DuelResult = 'home' | 'away' | null;
 
-export interface MlbCompositeDuelInput {
+interface MlbCompositeDuelInput {
   homeCode: MlbTeamCode;
   homeLineupWoba?: number | null;
   awayLineupWoba?: number | null;
@@ -27,7 +27,7 @@ export interface MlbCompositeDuelInput {
   awayWar?: number | null;
 }
 
-export interface MlbCompositeDuelResult {
+interface MlbCompositeDuelResult {
   homeWins: number;
   awayWins: number;
   validCount: number;
