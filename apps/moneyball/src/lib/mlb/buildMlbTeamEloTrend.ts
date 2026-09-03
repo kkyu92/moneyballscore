@@ -17,7 +17,7 @@ export interface MlbTeamEloPoint {
   avg: number;
 }
 
-export interface MlbTeamEloTrendData {
+interface MlbTeamEloTrendData {
   points: MlbTeamEloPoint[];
 }
 

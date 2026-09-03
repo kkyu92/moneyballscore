@@ -88,7 +88,7 @@ export async function buildAllMlbTeamAccuracy(): Promise<MlbTeamAccuracyRow[]> {
     .sort((a, b) => (b.accuracyRate ?? -1) - (a.accuracyRate ?? -1) || a.teamCode.localeCompare(b.teamCode));
 }
 
-export interface MlbMatchupRow {
+interface MlbMatchupRow {
   teamCode: MlbTeamCode;
   opponentCode: MlbTeamCode;
   n: number;
@@ -96,7 +96,7 @@ export interface MlbMatchupRow {
   accuracyRate: number | null;
 }
 
-export interface MlbTeamHomeAwayRow {
+interface MlbTeamHomeAwayRow {
   teamCode: MlbTeamCode;
   homeN: number;
   homeCorrect: number;
@@ -201,7 +201,7 @@ export async function buildMlbMatchupData(): Promise<{
   return { matchups, homeAway };
 }
 
-export interface MlbTeamBiasRow {
+interface MlbTeamBiasRow {
   teamCode: MlbTeamCode;
   totalN: number;
   predictedWinN: number;

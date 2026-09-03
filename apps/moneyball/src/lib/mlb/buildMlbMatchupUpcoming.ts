@@ -12,7 +12,7 @@ import {
 import type { MlbMatchupPair } from "./mlbCanonicalPair";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
-export interface MlbMatchupUpcomingGame {
+interface MlbMatchupUpcomingGame {
   gameId: number;
   gameDate: string;
   homeCode: MlbTeamCode;

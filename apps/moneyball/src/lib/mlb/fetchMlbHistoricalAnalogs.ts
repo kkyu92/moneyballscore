@@ -9,7 +9,7 @@ import {
 } from "@moneyball/shared";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
-export interface MlbAnalogGame {
+interface MlbAnalogGame {
   externalGameId: string;
   gameDate: string;
   homeCode: MlbTeamCode;

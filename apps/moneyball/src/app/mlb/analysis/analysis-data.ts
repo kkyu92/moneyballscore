@@ -13,7 +13,7 @@ import { computeMlbCompositeDuel } from '@/lib/analysis/computeMlbCompositeDuel'
 import { getYesterdayKSTDateString } from '@/lib/predictions/yesterdayDate';
 import { fetchMlbPredictionRowsInRange } from '@/lib/reviews/mlb-shared';
 
-export interface MlbAnalysisRow {
+interface MlbAnalysisRow {
   external_game_id: string;
   homeCode: MlbTeamCode;
   awayCode: MlbTeamCode;
@@ -99,7 +99,7 @@ export async function getTodayMlbAnalysisRows(
   return rows;
 }
 
-export interface MlbUpcomingGame {
+interface MlbUpcomingGame {
   external_game_id: string;
   gameDate: string;
   homeCode: MlbTeamCode;
@@ -216,7 +216,7 @@ export function groupMlbGamesByDate(games: MlbUpcomingGame[]): Map<string, MlbUp
   return grouped;
 }
 
-export interface MlbYesterdayGame {
+interface MlbYesterdayGame {
   external_game_id: string;
   gameDate: string;
   homeCode: MlbTeamCode;
@@ -257,7 +257,7 @@ export async function getMlbYesterdayResults(): Promise<MlbYesterdayGame[]> {
   }));
 }
 
-export interface MlbPeriodStats {
+interface MlbPeriodStats {
   total: number;
   correct: number;
 }

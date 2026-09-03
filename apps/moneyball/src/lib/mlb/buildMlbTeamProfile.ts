@@ -26,7 +26,7 @@ import {
 import { computeCurrentKSTYear } from '@/lib/seasons/buildSeasonSummary';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
-export interface MlbTeamRecentGame {
+interface MlbTeamRecentGame {
   gameId: number;
   gameDate: string;
   isHome: boolean;
@@ -52,7 +52,7 @@ export interface MlbTeamFactorAverages {
 
 // mlb_team_stats(migration 044) 가 FanGraphs/Savant 스크랩으로 채우지만 어느 UI 도
 // 소비하지 않던 타구 스프레이/타입 컬럼 — buildMlbTeamProfile 이 시즌 스냅샷째로 노출.
-export interface MlbBattedBallProfile {
+interface MlbBattedBallProfile {
   pullPct: number | null;
   centPct: number | null;
   oppoPct: number | null;
@@ -65,7 +65,7 @@ export interface MlbBattedBallProfile {
   launchAngle: number | null;
 }
 
-export interface MlbTeamProfile {
+interface MlbTeamProfile {
   code: MlbTeamCode;
   name: string;
   shortName: string;

@@ -56,4 +56,4 @@ export async function getMlbReviewsData() {
   };
 }
 
-export type MlbReviewsData = Awaited<ReturnType<typeof getMlbReviewsData>>;
+type MlbReviewsData = Awaited<ReturnType<typeof getMlbReviewsData>>;

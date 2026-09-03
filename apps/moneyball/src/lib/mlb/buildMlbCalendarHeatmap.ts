@@ -6,7 +6,7 @@ import { deriveMlbOutcome } from './deriveMlbOutcome';
 // 주석 참조)이라 KBO calendar/page.tsx 처럼 DB row 를 그대로 못 읽고, mlb_schedule(경기 결과) +
 // predictions(home_win_prob) 조인 후 날짜별로 derive/집계.
 
-export interface MlbCalendarDayAgg {
+interface MlbCalendarDayAgg {
   total: number;
   verified: number;
   correct: number;

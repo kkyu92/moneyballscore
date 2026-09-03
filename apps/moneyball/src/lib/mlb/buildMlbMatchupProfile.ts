@@ -46,7 +46,7 @@ export interface MlbMatchupGame {
   status: string | null;
 }
 
-export interface MlbMatchupSideStat {
+interface MlbMatchupSideStat {
   teamCode: MlbTeamCode;
   teamName: string;
   /** 이 팀이 이긴 경기 수 (final 기준) */
@@ -61,7 +61,7 @@ export interface MlbMatchupSideStat {
   predictedToWinAndCorrect: number;
 }
 
-export interface MlbMatchupProfile {
+interface MlbMatchupProfile {
   teamA: {
     code: MlbTeamCode;
     name: string;
@@ -125,7 +125,7 @@ function makeSideStat(
   };
 }
 
-export interface MlbMatchupStreak {
+interface MlbMatchupStreak {
   teamCode: MlbTeamCode;
   length: number;
 }
@@ -141,7 +141,7 @@ export function computeMlbMatchupStreak(
   return computeMatchupStreakFromGames(games, WIN_LOSS_STREAK_MIN_LENGTH);
 }
 
-export interface MlbMatchupRecentRecord {
+interface MlbMatchupRecentRecord {
   aWins: number;
   bWins: number;
   sampleSize: number;
@@ -166,7 +166,7 @@ export function computeMlbMatchupRecentRecord(
   );
 }
 
-export interface MlbMatchupAvgMargin {
+interface MlbMatchupAvgMargin {
   avgMargin: number;
   sampleSize: number;
 }
@@ -187,7 +187,7 @@ export function computeMlbMatchupAvgMargin(
   );
 }
 
-export interface MlbMatchupBlowoutStats {
+interface MlbMatchupBlowoutStats {
   count: number;
   sampleSize: number;
 }
@@ -209,7 +209,7 @@ export function computeMlbMatchupBlowoutCount(
   );
 }
 
-export interface MlbMatchupCloseGameStats {
+interface MlbMatchupCloseGameStats {
   count: number;
   sampleSize: number;
 }
@@ -231,7 +231,7 @@ export function computeMlbMatchupCloseGameCount(
   );
 }
 
-export interface MlbMatchupHomeAwaySplit {
+interface MlbMatchupHomeAwaySplit {
   teamCode: MlbTeamCode;
   homeWins: number;
   homeGames: number;

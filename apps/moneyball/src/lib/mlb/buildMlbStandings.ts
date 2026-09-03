@@ -16,7 +16,7 @@ import {
 // 해소 — 근거 데이터는 이미 스크래핑되어 있고 (cycle 2212 mlb_schedule.status 재고착
 // fix 로 신선도 확보) 별도 연동 없이 계산만으로 충분.
 
-export interface MlbStandingsRow {
+interface MlbStandingsRow {
   teamCode: MlbTeamCode;
   wins: number;
   losses: number;
@@ -25,7 +25,7 @@ export interface MlbStandingsRow {
   gamesBehind: number | null;
 }
 
-export type MlbDivisionStandings = Record<
+type MlbDivisionStandings = Record<
   MlbLeagueSide,
   Record<MlbDivisionSide, MlbStandingsRow[]>
 >;
@@ -98,7 +98,7 @@ export async function buildMlbDivisionStandings(): Promise<MlbDivisionStandings>
   return standings;
 }
 
-export interface MlbTeamDivisionRank {
+interface MlbTeamDivisionRank {
   rank: number;
   total: number;
   gamesBehind: number | null;

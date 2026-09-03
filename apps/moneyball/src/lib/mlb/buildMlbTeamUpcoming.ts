@@ -11,7 +11,7 @@ import {
 } from "@moneyball/shared";
 import { deriveMlbOutcome } from "./deriveMlbOutcome";
 
-export interface MlbTeamUpcomingGame {
+interface MlbTeamUpcomingGame {
   gameId: number;
   gameDate: string;
   isHome: boolean;

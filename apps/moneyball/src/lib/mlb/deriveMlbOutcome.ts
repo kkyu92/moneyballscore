@@ -5,14 +5,14 @@
  * 설계이지 버그가 아님 — buildMlbTeamProfile.ts/buildMlbMatchupProfile.ts 양쪽이 같은
  * 로직을 따로 구현하고 있던 걸 여기로 통합(cycle 2117 review-code heavy).
  */
-export interface MlbOutcomeInput {
+interface MlbOutcomeInput {
   homeWinProb: number | null | undefined;
   hasFinalScore: boolean;
   homeScore: number | null | undefined;
   awayScore: number | null | undefined;
 }
 
-export interface MlbOutcomeResult {
+interface MlbOutcomeResult {
   predictedHomeWin: boolean | null;
   actualHomeWin: boolean | null;
   isCorrect: boolean | null;

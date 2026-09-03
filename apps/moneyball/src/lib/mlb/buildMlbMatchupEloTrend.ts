@@ -18,7 +18,7 @@ export interface MlbMatchupEloPoint {
   eloB: number | null;
 }
 
-export interface MlbMatchupEloTrendData {
+interface MlbMatchupEloTrendData {
   points: MlbMatchupEloPoint[];
 }
 

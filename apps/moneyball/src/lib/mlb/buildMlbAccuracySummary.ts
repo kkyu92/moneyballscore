@@ -21,7 +21,7 @@ import {
 } from '@/lib/accuracy/buildAccuracyData';
 import { deriveMlbOutcome } from './deriveMlbOutcome';
 
-export interface MlbAccuracySummary {
+interface MlbAccuracySummary {
   verifiedN: number;
   correctN: number;
   accuracyRate: number | null;
