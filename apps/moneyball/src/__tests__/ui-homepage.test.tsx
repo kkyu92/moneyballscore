@@ -106,7 +106,7 @@ describe('PlaceholderCard — status 분기', () => {
     expect(screen.getByText('선발 확정 대기')).toBeInTheDocument();
   });
 
-  it('scheduled + SP 확정 + gameTime 18:30 → 예측 준비중 · 약 16:00 KST 생성', () => {
+  it('scheduled + SP 확정 + gameTime 18:30 → 예측 준비중 · 약 16:17 KST 생성', () => {
     render(
       <PlaceholderCard
         homeTeam="OB"
@@ -118,10 +118,10 @@ describe('PlaceholderCard — status 분기', () => {
       />,
     );
 
-    expect(screen.getByText(/예측 준비중 · 약 16:00 KST 생성/)).toBeInTheDocument();
+    expect(screen.getByText(/예측 준비중 · 약 16:17 KST 생성/)).toBeInTheDocument();
   });
 
-  it('scheduled + SP 확정 + gameTime 14:00 → 예측 준비중 · 약 11:00 KST 생성', () => {
+  it('scheduled + SP 확정 + gameTime 14:00 → 예측 준비중 · 약 11:17 KST 생성', () => {
     render(
       <PlaceholderCard
         homeTeam="LG"
@@ -133,7 +133,7 @@ describe('PlaceholderCard — status 분기', () => {
       />,
     );
 
-    expect(screen.getByText(/예측 준비중 · 약 11:00 KST 생성/)).toBeInTheDocument();
+    expect(screen.getByText(/예측 준비중 · 약 11:17 KST 생성/)).toBeInTheDocument();
   });
 
   it('scheduled + SP 확정 + gameTime 없음 → "예측 준비중" + 기본 "18:30" 표시', () => {
@@ -163,7 +163,7 @@ describe('PlaceholderCard — status 분기', () => {
       />,
     );
 
-    expect(screen.getByText(/예측 준비중 · 약 14:00 KST 생성/)).toBeInTheDocument();
+    expect(screen.getByText(/예측 준비중 · 약 14:17 KST 생성/)).toBeInTheDocument();
   });
 
   it('두 팀 로고 + 팀 약어 (첫 단어) 렌더', () => {
