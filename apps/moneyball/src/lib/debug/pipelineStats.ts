@@ -7,7 +7,7 @@ export interface SkippedEntry {
   reason: string;
 }
 
-export interface PipelineRunForStats {
+interface PipelineRunForStats {
   skipped_detail: string | null;
   games_skipped: number;
 }

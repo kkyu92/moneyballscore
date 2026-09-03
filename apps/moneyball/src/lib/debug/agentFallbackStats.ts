@@ -13,7 +13,7 @@ export interface PredictionForFallback {
   reasoning: unknown;
 }
 
-export interface AgentFallbackCohort {
+interface AgentFallbackCohort {
   windowDays: number;
   total: number;
   fullDebate: number;
@@ -27,7 +27,7 @@ export interface AgentFallbackCohort {
   samples: AgentFallbackSample[];
 }
 
-export interface AgentFallbackDailyRow {
+interface AgentFallbackDailyRow {
   date: string;
   total: number;
   fullDebate: number;
@@ -35,7 +35,7 @@ export interface AgentFallbackDailyRow {
   quantOnly: number;
 }
 
-export interface AgentFallbackSample {
+interface AgentFallbackSample {
   id: number;
   date: string;
   category: 'fullDebate' | 'agentsFailed' | 'quantOnly';

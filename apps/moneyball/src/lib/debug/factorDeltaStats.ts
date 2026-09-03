@@ -14,7 +14,7 @@ import {
   type FactorAnomaly,
 } from '@moneyball/shared';
 
-export interface FactorTimelineRow {
+interface FactorTimelineRow {
   /** 예측 박제 시점 KST date (YYYY-MM-DD) */
   date: string;
   /** scoring_rule (예: 'v1.8' | 'v2.1-B-shadow') */
@@ -25,7 +25,7 @@ export interface FactorTimelineRow {
   n: number;
 }
 
-export interface FactorTimelineCellAnomaly {
+interface FactorTimelineCellAnomaly {
   date: string;
   cohort: string;
   factorKey: string;
@@ -33,7 +33,7 @@ export interface FactorTimelineCellAnomaly {
   value: number;
 }
 
-export interface FactorTimelineResult {
+interface FactorTimelineResult {
   rows: FactorTimelineRow[];
   /** 모든 cohort × factor anomaly 리스트 (z-score>3) — UI 강조 표시용 */
   anomalies: FactorTimelineCellAnomaly[];

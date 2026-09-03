@@ -13,7 +13,7 @@ export interface PipelineRunForDrift {
   // 정확한 verified count 는 별도 query 필요 — 본 helper 는 pipeline_runs 기반 proxy.
 }
 
-export interface SilentDriftEvent {
+interface SilentDriftEvent {
   mode: string; // 'predict_final' | 'verify'
   run_date: string;
   created_at: string;
@@ -22,7 +22,7 @@ export interface SilentDriftEvent {
   alert_type: 'predict_final_silent_drift' | 'verify_silent_drift';
 }
 
-export interface SilentDriftCohort {
+interface SilentDriftCohort {
   totalRuns: number;
   predictFinalRuns: number;
   verifyRuns: number;
