@@ -1,3 +1,11 @@
+## v0.5.62.212 — 2026-09-03 (cycle 2849, review-code(heavy): export-but-unused scrapers/backtest 21건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic scrapers/backtest 스코프 확장 (cycle 2849, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2848 retro commit 7400185d) OK. 직전8 distinct=5(review-code(heavy)4+polish-ui1+op-analysis(lite)1+lotto1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 8/25, info-arch 19/30, lotto 7/30). explore-idea saturation 5/15 미충족. cycle 2848 next_recommended("review-code(heavy) 잔여 scrapers/backtest 스코프") 채택.
+- packages/kbo-data/src/{scrapers,backtest}/ 스코프 exported type/interface 55개 grep → 0-external-hit 23개 후보. general-purpose subagent 전수 감사: 21/23 CONFIRMED_UNEXPORTED(export 키워드만 제거), 1건 FALSE_POSITIVE(CvPattern — scripts/backtest-v2-candidate.ts 가 import, grep 스코프 밖이라 오탐), 1건 SUSPICIOUS_GAP(HistoricalGame — cycle 2833 기 박제 기존 미배선 이슈, 신규 아님, 손대지 않음).
+- `pnpm --filter kbo-data type-check` clean, test 93/93파일 1220/1220 green. `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit e3b638d5, R4 직push(단일 논리 단위 mechanical export 제거, PR 생략).
+
 ## v0.5.62.211 — 2026-09-03 (cycle 2840, polish-ui: MLB analysis route loading.tsx 신설 SUCCESS)
 
 ### polish-ui: app/mlb/analysis loading skeleton 신설 — 2-chain lock fallback (cycle 2840, SUCCESS)

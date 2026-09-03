@@ -1,4 +1,18 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic scrapers/backtest 21건 (cycle 2849, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2848 retro commit 7400185d) OK. 직전8 distinct=5(review-code(heavy)4+polish-ui1+op-analysis(lite)1+lotto1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=4/20, op-analysis gap=8/25, info-arch gap=19/30, lotto gap=7/30). explore-idea saturation 5/15 미충족. cycle 2848 next_recommended("review-code(heavy) 잔여 type/interface batch — scripts/ 또는 backtest/ 스코프") 채택.
+
+packages/kbo-data/src/{scrapers,backtest}/ 스코프로 export-but-unused heuristic 계속 축소 적용. `export type`/`export interface` 55개 grep → 정의 파일 밖 참조 0건 후보 23개 확보.
+
+general-purpose subagent 심층 감사(파일 전체 read + 동일 파일 내부 사용 여부 + `scripts/` + 각 `__tests__` 디렉토리까지 확장 검색): 21/23 CONFIRMED_UNEXPORTED(정의 파일 내부에서만 사용 — `export` 키워드만 제거, 타입 자체 유지) — `BacktestResult`/`ThreeWayResult`(backtest-v2-helpers.ts), `SplitResult`(walk-forward-helpers.ts), `FitOptions`/`FitResult`(logistic-regression.ts), `LogisticModel`/`TrainOptions`(logistic.ts), `FanGraphsBatterData`(fangraphs.ts), `FancyStatsFallbacks`(fancy-stats.ts), `FangraphsMlbTeam`(fangraphs-mlb.ts), `GameUmpires`(umpire.ts), `KboScraperHtmlAlertMeta`(kbo-scraper-alert.ts), `MlbGame`/`ProbablePitcher`/`ProbablePitcherMap`(statsapi-mlb.ts), `NaverBatterRecord`/`NaverGameInfo`/`NaverPitchingResult`/`NaverScoreBoard`(naver-record.ts), `OpenMeteoFetchResult`/`WeatherFetchFailReason`(weather.ts), `SavantTeam`(baseball-savant.ts). 1건 FALSE_POSITIVE — `CvPattern`(walk-forward-helpers.ts): `scripts/backtest-v2-candidate.ts` 가 `type CvPattern` import 중, grep 최초 스코프(`packages/`+`apps/`)가 `scripts/` 미포함해 오탐 — 손대지 않음. 1건 SUSPICIOUS_GAP — `HistoricalGame`(mlb-historical-bootstrap.ts): cycle 2833 이 이미 박제한 기존 미배선 이슈(`fetchRetrosheetSeasonGames` 가 DB-write/CLI/cron 어디에도 안 연결) 재확인, 신규 발견 아님 — 손대지 않음.
+
+`pnpm --filter kbo-data type-check` clean, test 93/93파일 1220/1220 green. `pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green. commit e3b638d5, R4 정책 따라 직접 main push(단일 논리 단위 mechanical export 제거, 13파일 22줄 diff — PR 생략, 사용자 확인 불필요 판단).
+
+skill-evolution trigger 평가: cycle_n % 50 = 49(미충족). chain-evolution subject-line 커밋 <5(trigger1 미충족). 5연속 fail 없음(trigger2 미충족). meta-pattern 미발화(trigger4 미충족). 직전20(2830-2849) chain pool sample≥10, review-code 다수 발화 — 0-fire 아님(trigger5 미충족). emergency stop 미충족(직전10 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 동일 heuristic 을 packages/kbo-data/src/pipeline/ 또는 apps/moneyball/src/lib/ 스코프로 계속 축소 적용, 또는 gap-fill 자연 대기(info-arch gap=19/30, lotto gap=7/30 이 상대적으로 근접).
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused type/interface 확장, agents/ 19건 (cycle 2848, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2847 retro commit 7fa48340) OK. 직전8 distinct=5(review-code(heavy)3+polish-ui2+op-analysis(lite)1+lotto1+fix-incident1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident gap=3/20, op-analysis gap=7/25, info-arch gap=18/30, lotto gap=6/30). explore-idea saturation 5/15 미충족. cycle 2846/2847 next_recommended("review-code(heavy) 잔여 type/interface batch") 채택.
