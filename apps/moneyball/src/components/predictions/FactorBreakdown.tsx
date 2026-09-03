@@ -203,8 +203,8 @@ export function FactorBreakdown({
         )}
       </h4>
       <div className="text-xs text-gray-400 dark:text-gray-500 mb-2 flex justify-between">
-        <span>← {awayName} 유리</span>
-        <span>{homeName} 유리 →</span>
+        <span className="whitespace-nowrap">← {awayName} 유리</span>
+        <span className="whitespace-nowrap">{homeName} 유리 →</span>
       </div>
       <div className="space-y-2">
         {sortedFactors.map(([key, value]) => {

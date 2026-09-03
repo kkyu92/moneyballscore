@@ -36,4 +36,23 @@ describe('FactorBreakdown — Korean team-name wrap guard', () => {
     const favorLabel = container.querySelector('.text-sm.font-medium.w-28.shrink-0');
     expect(favorLabel?.className).toContain('truncate');
   });
+
+  // 13th recurrence (cycle 2818): header "← {away} 유리 / {home} 유리 →" row —
+  // flex justify-between with two Korean-team-name siblings, no md: breakpoint
+  // rescue, missed by both the cycle-2804 sweep and this guard file originally.
+  it('헤더 비교 행("← away 유리" / "home 유리 →") 양쪽 span 은 whitespace-nowrap (flex justify-between, 좁은 폭에서 CJK 중간 줄바꿈 위험)', () => {
+    const { container } = render(
+      <FactorBreakdown
+        factors={{ sp_fip: 0.6 }}
+        homeTeam="LG"
+        awayTeam="HT"
+      />,
+    );
+    const headerRow = container.querySelector('.flex.justify-between.mb-2');
+    const spans = headerRow?.querySelectorAll('span') ?? [];
+    expect(spans.length).toBe(2);
+    spans.forEach((span) => {
+      expect(span.className).toContain('whitespace-nowrap');
+    });
+  });
 });
