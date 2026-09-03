@@ -1,4 +1,12 @@
 
+## 🟡 RETRO-ONLY — info-architecture-review: 30-cycle-gap checkpoint 7연속 재확정 (cycle 2860, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2859 retro commit b2d59689) OK. 직전8(2852-2859) distinct=2(review-code(heavy)7+operational-analysis1) — 2-chain lock 발동(fix-incident 미포함) → 두 chain 제외. 남은 pool 중 info-arch 자체 30-cycle gap trigger 정확 도달(마지막 발화 cycle 2830, gap=30) → 자연 선택.
+
+cycle 2830 checkpoint commit(e30267d8) 이후 diff 대조: 신규 page.tsx 0건, breadcrumb 누락 18건 그대로, MegaMenu/Footer/Header/sitemap.ts 커밋 0건 — "현 IA 충분" 7연속 재확정(2679→2709→2739→2769→2800→2830→2860). 코드 변경 0, checkpoint 문서만(`docs/design/ia-2026-09-04-cycle-2860-30-cycle-gap-checkpoint.md`). commit e110a70f, R4 직push.
+
+2-chain lock 룰이 review-code(heavy) dominance를 정확히 감지·차단하고 정체 chain(info-arch)을 자연 redirect한 첫 실사례 — 룰 설계 의도대로 작동 확인. 다음 사이클 추천 = review-code(heavy) 재개(lock cooldown N=1, 잔여 스코프: players/standings/accuracy(부분)/lotto-lib).
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic insights 스코프 7건 (cycle 2859, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2858 retro commit 0c7c2861) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미근접(fix-incident 14/20, op-analysis 7/25, info-arch 29/30, lotto 17/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2858 next_recommended("review-code(heavy) 계속: insights/players/standings/accuracy/lotto-lib") 채택.

@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### info-architecture-review: 30-cycle-gap checkpoint 7연속 재확정 (cycle 2860, RETRO-ONLY)
+
+- 진단: 2-chain lock(직전8 review-code(heavy)7+operational-analysis1, fix-incident 미포함) 발동 → 두 chain 제외, 남은 pool 중 info-arch 30-cycle gap trigger 정확 도달(cycle 2830→2860)로 자연 선택.
+- cycle 2830 checkpoint(e30267d8) 이후 diff: 신규 page.tsx 0건, breadcrumb 누락 18건 그대로, MegaMenu/Footer/Header/sitemap.ts 커밋 0건 — "현 IA 충분" 7연속 재확정(2679→2709→2739→2769→2800→2830→2860). 코드 변경 0, checkpoint 문서만(`docs/design/ia-2026-09-04-cycle-2860-30-cycle-gap-checkpoint.md`). commit e110a70f, R4 직push.
+- 2-chain lock 룰이 review-code(heavy) dominance를 정확히 감지·차단 + 정체 chain 자연 redirect한 첫 실사례 — 룰 작동 확인.
+
 ### review-code(heavy): export-but-unused heuristic insights 스코프 7건 (cycle 2859, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2858 retro commit 0c7c2861) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미근접(fix-incident 14/20, op-analysis 7/25, info-arch 29/30, lotto 17/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2858 next_recommended("review-code(heavy) 계속: insights/players/standings/accuracy/lotto-lib") 채택.
