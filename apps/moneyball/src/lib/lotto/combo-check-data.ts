@@ -75,7 +75,3 @@ export function loadAllWinners(): { keyToRound: Record<string, WinnerEntry> } {
   }
   return { keyToRound: map };
 }
-
-export function normalizeCombo(nums: number[]): string {
-  return nums.slice().sort((a, b) => a - b).join(",");
-}
