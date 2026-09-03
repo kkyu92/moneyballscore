@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): buildMlbFactorAccuracy 재배선 + estimateTime cron ETA drift 수정 (cycle 2824, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2823 retro commit e8430b47) OK. 직전8(2816-2823) distinct=4(review-code(heavy) 5 + polish-ui 1 + operational-analysis 1 + review-code 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 17/20, info-arch 24/30, lotto 12/30, op-analysis 3/25). explore-idea saturation 4/15 미충족. dominance-positive streak 자연 지속(cycle 135 룰) — cycle 2823 carry-over(single-commit 파일 ~120개 잔여) 이어서 신규 13개 배치(apps/moneyball/src/lib/{matchup,mlb,players,predictions,standings,stats,teams}) 확보.
+
+general-purpose 서브에이전트로 13개 파일 전수 감사. 11개 CLEAN. 확정 발견 2건: (1) `buildMlbFactorAccuracy.ts` 주석이 "elo/recent_form/head_to_head/defense_sfr 4팩터 전부 실데이터 미구현 placeholder" 라 서술 — 실제론 cycle 2349(elo)/2353(recent_form/head_to_head) 부터 `mlb-pipeline.ts` 가 `home_elo`/`away_elo`/`home_recent_form`/`away_recent_form`/`head_to_head_rate` 를 실측 계산해 저장 중(defense_sfr 만 여전히 진짜 placeholder). 이 파일의 `FACTOR_COLUMN_PAIRS` exclusion 이 5주+ 전 stale 가정이라, 라이브 `/mlb/accuracy` 팩터 정확도 테이블에서 이미 실측 가능한 3개 팩터가 계속 누락돼 있었음 → elo/recent_form(home/away 쌍) + head_to_head(0-1 단일값, 0.5 중립 기준) 재배선. (2) `estimateTime.ts` 가 "파이프라인은 매 정시 cron(KST 10-22)" 로 문서화+계산 — 2026-04-29 GH Actions cron 폐지 후 Cloudflare Worker cron `17 0-14 * * *`(KST 09:17-23:17)로 이관된 사실을 4개월+ 반영 못 함. `PlaceholderCard` 의 "예측 준비중 · 약 HH:00 KST 생성" 표시가 실제 파이프라인 발화 시각보다 항상 17분 이르게 표시되던 사용자 가시 버그 → `HH:17 KST` + 09:17 하한 clamp 로 수정.
+
+`pnpm --filter moneyball test` 581/581 green(+5 신규 assertion, ui-homepage.test.tsx 3건 갱신 포함), tsc/eslint clean, pre-push green. commit 78c99daa, PR #3074, R7 자동 머지(--squash --auto --delete-branch) 활성화.
+
+skill-evolution trigger 평가: cycle_n % 50 = 24(미충족), 직전 20-cycle 표본 review-code 다수(trigger5 미충족), meta-pattern/chain-evolution 이번 사이클 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전 10 사이클 전부 success).
+
+다음 사이클 추천 = review-code(heavy) 계속(single-commit 파일 후보 ~92개 잔여) 또는 gap-fill 대기(fix-incident 17/20, info-arch 24/30, lotto 12/30 — 전부 3+ cycle 여유).
+
 ## 🟢 SUCCESS — review-code(heavy): computePredictionHistory teamAccuracy/recentResults 미배선 수정 (cycle 2823, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2822 retro commit 516d0000) OK. 직전8 distinct=4(review-code(heavy) 5 + review-code 1 + polish-ui 1 + operational-analysis 1) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 16/20, op-analysis 2/25 방금 재발화, info-arch 23/30, lotto 11/30). explore-idea saturation 4/15 미충족. dominance-positive streak 자연 지속(cycle 135 룰) — 새 축 탐색 위해 "생성 후 커밋 1건뿐" 파일 122개 후보 확보.
