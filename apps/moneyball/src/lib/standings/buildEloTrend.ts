@@ -12,7 +12,7 @@ export interface EloDataPoint {
   [teamCode: string]: number | string;
 }
 
-export interface EloTrendData {
+interface EloTrendData {
   points: EloDataPoint[];
   teams: TeamCode[];
 }

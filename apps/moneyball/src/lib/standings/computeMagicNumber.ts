@@ -1,6 +1,6 @@
 import { KBO_GAMES_PER_TEAM } from '@moneyball/shared';
 
-export interface MagicNumberTeam {
+interface MagicNumberTeam {
   wins: number;
   losses: number;
 }

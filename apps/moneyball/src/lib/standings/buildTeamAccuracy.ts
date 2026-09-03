@@ -11,7 +11,7 @@ export interface TeamAccuracyRow {
   accuracyRate: number | null;
 }
 
-export interface MatchupRow {
+interface MatchupRow {
   teamCode: TeamCode;
   opponentCode: TeamCode;
   n: number;
@@ -19,7 +19,7 @@ export interface MatchupRow {
   accuracyRate: number | null;
 }
 
-export interface TeamHomeAwayRow {
+interface TeamHomeAwayRow {
   teamCode: TeamCode;
   homeN: number;
   homeCorrect: number;
@@ -46,7 +46,7 @@ interface BiasExtRow {
   } | null;
 }
 
-export interface TeamBiasRow {
+interface TeamBiasRow {
   teamCode: TeamCode;
   totalN: number;
   predictedWinN: number;
