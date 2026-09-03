@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 
-export type SeasonStandingsSortMode = 'winRate' | 'runDiff' | 'sample';
+type SeasonStandingsSortMode = 'winRate' | 'runDiff' | 'sample';
 
 const STORAGE_SORT = 'mb_season_standings_sort_v1';
 
