@@ -117,30 +117,3 @@ export async function fetchProbablePitchers(dateKst: string): Promise<ProbablePi
   }
 }
 
-export interface MlbBoxscore {
-  gamePk: number;
-  homeTeam: string;
-  awayTeam: string;
-  homeScore: number;
-  awayScore: number;
-  winner: string;
-}
-
-export async function fetchBoxscore(gamePk: number): Promise<MlbBoxscore> {
-  const url = `${BASE_URL}/game/${gamePk}/boxscore`;
-  const res = await fetchWithRetry(url);
-  const json = await res.json();
-
-  const home = json.teams.home;
-  const away = json.teams.away;
-  const homeScore = home.teamStats.batting.runs;
-  const awayScore = away.teamStats.batting.runs;
-  const winner = homeScore > awayScore ? home.team.abbreviation : away.team.abbreviation;
-
-  return {
-    gamePk,
-    homeTeam: home.team.abbreviation,
-    awayTeam: away.team.abbreviation,
-    homeScore, awayScore, winner,
-  };
-}
