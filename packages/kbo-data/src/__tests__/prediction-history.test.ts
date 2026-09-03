@@ -129,4 +129,45 @@ describe('computePredictionHistory', () => {
     const result = computePredictionHistory(rows);
     expect(result.homeTeamAccuracy).toBeCloseTo(1.0, 5);
   });
+
+  it('reverseTeamMap 미전달 시 teamAccuracy/recentResults 는 빈 상태 유지 (하위호환)', () => {
+    const rows = [row(1, true, 1, 2), row(1, false, 1, 2)];
+    const result = computePredictionHistory(rows);
+    expect(result.teamAccuracy).toEqual({});
+    expect(result.recentResults).toEqual([]);
+  });
+
+  it('reverseTeamMap 전달 시 teamAccuracy 는 홈/원정 양쪽 팀 코드로 집계 (cycle 2823 wiring fix)', () => {
+    const rows = [
+      { predicted_winner: 1, is_correct: true, game: { home_team_id: 1, away_team_id: 2 } },
+      { predicted_winner: 1, is_correct: false, game: { home_team_id: 1, away_team_id: 2 } },
+      { predicted_winner: 3, is_correct: true, game: { home_team_id: 1, away_team_id: 3 } },
+    ];
+    const result = computePredictionHistory(rows, { 1: 'LG', 2: 'OB', 3: 'HT' } as Record<number, any>);
+    expect(result.teamAccuracy.LG).toEqual({ correct: 2, total: 3 });
+    expect(result.teamAccuracy.OB).toEqual({ correct: 1, total: 2 });
+    expect(result.teamAccuracy.HT).toEqual({ correct: 1, total: 1 });
+  });
+
+  it('reverseTeamMap + game_date 전달 시 recentResults 최대 5건, actualWinner 역산 (cycle 2823 wiring fix)', () => {
+    const rows: PredictionHistoryRow[] = Array.from({ length: 7 }, (_, i) => ({
+      predicted_winner: 1,
+      is_correct: i % 2 === 0,
+      home_win_prob: 0.6,
+      game: { home_team_id: 1, away_team_id: 2, game_date: `2026-09-0${i + 1}` },
+    }));
+    const result = computePredictionHistory(rows, { 1: 'LG', 2: 'OB' } as Record<number, any>);
+    expect(result.recentResults).toHaveLength(5);
+    expect(result.recentResults[0]).toEqual({
+      date: '2026-09-01',
+      homeTeam: 'LG',
+      awayTeam: 'OB',
+      predictedWinner: 'LG',
+      actualWinner: 'LG',
+      isCorrect: true,
+      homeWinProb: 0.6,
+    });
+    // is_correct=false (i=1) → predictedWinner(LG=home) 틀림 → actualWinner = away(OB)
+    expect(result.recentResults[1]).toMatchObject({ isCorrect: false, actualWinner: 'OB' });
+  });
 });

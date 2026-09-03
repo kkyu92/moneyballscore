@@ -771,7 +771,7 @@ export async function runDailyPipeline(
           homeRecentForm: input.homeRecentForm, awayRecentForm: input.awayRecentForm,
           headToHead: input.headToHead, parkFactor: input.parkFactor,
         };
-        const history = await getPredictionHistory(db);
+        const history = await getPredictionHistory(db, teamIdMap);
         const debate = await runDebate(gameContext, quantResult.homeWinProb, history);
         judgeBackend = debate.judgeBackend;
         judgeCreditExhaustedFallback = debate.judgeCreditExhaustedFallback;
@@ -1344,7 +1344,9 @@ async function buildDailySummary(db: DB, dbGameIds: number[]) {
 // 시맨틱과 일치 위해 game.home_team_id / away_team_id 조인 후
 // predicted_winner === home_team_id 분기로 진짜 조건부 적중률 계산. 순수
 // 헬퍼 computePredictionHistory 분리.
-async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
+async function getPredictionHistory(
+  db: DB, teamIdMap: Record<TeamCode, number>,
+): Promise<PredictionHistory> {
   // assertSelectOk 통일 — silent drift 시 predictions=null →
   // computePredictionHistory 빈 배열 → calibration-agent 에 0건 전달 →
   // ±5% 보정 신호 영구 silent drift. fail-loud 로 caller (verify mode) errors[].
@@ -1354,9 +1356,11 @@ async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
     .select(`
       predicted_winner,
       is_correct,
+      home_win_prob,
       game:games!predictions_game_id_fkey(
         home_team_id,
-        away_team_id
+        away_team_id,
+        game_date
       )
     `)
     .eq('prediction_type', 'pre_game')
@@ -1371,6 +1375,7 @@ async function getPredictionHistory(db: DB): Promise<PredictionHistory> {
 
   return computePredictionHistory(
     (predictions ?? []) as unknown as PredictionHistoryRow[],
+    reverseTeamMap(teamIdMap) as Record<number, TeamCode>,
   );
 }
 
