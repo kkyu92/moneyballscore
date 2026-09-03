@@ -62,7 +62,7 @@ export interface FallbackStatsRow {
   predicted_at: string;
 }
 
-export interface FallbackStats {
+interface FallbackStats {
   total: number;
   llmActive: number;
   fallback: number;
@@ -187,7 +187,7 @@ export interface Bucket {
   ci95Half: number;
 }
 
-export interface DayBucket {
+interface DayBucket {
   day: number; // 0=일,1=월,...,6=토
   dayLabel: string;
   n: number;
@@ -195,14 +195,14 @@ export interface DayBucket {
   accuracy: number | null;
 }
 
-export interface WeekBucket {
+interface WeekBucket {
   weekLabel: string;
   n: number;
   hits: number;
   accuracy: number | null;
 }
 
-export interface RecentForm {
+interface RecentForm {
   dots: boolean[];
   hits: number;
   total: number;
@@ -663,7 +663,7 @@ function isScoringRule(s: string): s is ScoringRule {
   return (VERSION_ORDER as readonly string[]).includes(s);
 }
 
-export interface SubCohortBucket {
+interface SubCohortBucket {
   label: string;
   n: number;
   hits: number;
