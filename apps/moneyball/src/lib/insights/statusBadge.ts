@@ -1,6 +1,7 @@
 // /insights hub + daily archive 공용 status badge — sweep 52 통합.
 // 직전 duplicate: apps/moneyball/src/app/insights/page.tsx + apps/moneyball/src/app/insights/[date]/page.tsx 2 위치.
-// 동일 분기 5종 (취소 / 적중 / 빗나감 / 결과 대기 / 예정) — sweep 52 chain 연장.
+// 동일 분기 6종 (취소 / 적중 / 빗나감 / 진행중 / 결과 대기 / 예정) — sweep 52 chain 연장.
+// 진행중(live) 분기는 cycle 2817 추가 (commit ad24d07) — 본 주석 카운트 동기.
 
 export interface StatusBadge {
   label: string;

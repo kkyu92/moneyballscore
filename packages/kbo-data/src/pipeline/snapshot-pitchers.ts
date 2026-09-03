@@ -17,7 +17,10 @@
  *
  * Idempotent: (player_id, season, captured_at) unique. 같은 날 재실행 시 덮어씀.
  *
- * Cron: .github/workflows/pitcher-snapshot.yml — 주간 일요일 KST 00시.
+ * Cron: cloudflare-worker (`37 * * * *` UTC 토요일 15시 조건 분기, KST 일요일 00:37)
+ *   가 runPitcherSnapshot() → /api/snapshot-pitchers POST 호출 (2026-04-30 이관).
+ *   .github/workflows/pitcher-snapshot.yml 은 schedule 키 제거됨, workflow_dispatch
+ *   (수동 trigger) 만 보존.
  *   월 ~4 snapshot, 시즌 말까지 ~30 snapshot 누적. factor-correlation 시점별
  *   분석 + v1.8 cohort 모니터링 재료 (v1.8 유지 확정, cycle 1460).
  */
