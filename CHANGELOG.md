@@ -1,5 +1,12 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic lotto 스코프 6건 (cycle 2864, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2863 retro commit c0ee015c) OK. 직전8(2856-2863) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 19/20, op-analysis 12/25, info-arch 4/30, lotto 22/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2863 next_recommended("review-code(heavy) 잔여 스코프: accuracy(부분)/lotto-lib") 채택.
+- apps/moneyball/src/lib/accuracy/ 스코프 exported type/interface 15개 subagent 독립 검증 — 15/15 KEEP_EXPORTED (전부 app/accuracy/page.tsx, MlbAccuracyDashboard.tsx, dashboard 차트 컴포넌트, lib/mlb/buildMlbAccuracySummary.ts 등 cross-file import 확인) — 이번 스코프는 unused 0건, 스코프 완료 처리.
+- apps/moneyball/src/lib/lotto/ 스코프 exported type/interface 10개 grep → LottoData/LottoScoreBacktest/LottoSet/LottoResult 4개만 cross-file import(주로 app/lotto/page.tsx, methodology/page.tsx, CopyAllButton.tsx) 확인되어 유지, 나머지 6개 0-external-hit 후보. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + co-located 테스트 cross-file import 구분 + scripts/lotto.ts import 여부 확인) — 6/6 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거: WinnerEntry (combo-check-data.ts), ArchiveContent / ArchiveVariant / ArchiveVariants (archive.ts), LottoPicks / LottoBallColor (picks-loader.ts).
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 581/581파일 4560/4560 green, lint 0 errors(기존 warning 1건 유지). commit 34705a5e, R4 직push(단일 논리 단위, PR 생략).
+
 ### review-code(heavy): export-but-unused heuristic standings 스코프 6건 (cycle 2863, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2862 retro commit 2770da59) OK. 직전8(2855-2862) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 18/20, op-analysis 11/25, info-arch 3/30, lotto 21/30). explore-idea saturation 13/15 도달했으나 4-source 재확인 negative(open issue 0, plan approved 0, TODOS Next-Up stale, DESIGN.md 36h 신선, plan#29 트래픽 실측 재확인 — user_picks=1/mlb_user_picks=0/pick_poll_events=5/mlb_pick_poll_events=0, cycle 2417 측정치와 완전 동일 무성장) — organic idea 부재로 skip. cycle 2862 next_recommended("review-code(heavy) 잔여 스코프: standings/accuracy(부분)/lotto-lib") 채택.
