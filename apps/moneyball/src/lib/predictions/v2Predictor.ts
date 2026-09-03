@@ -8,7 +8,7 @@ import { V2_1_B_WEIGHTS as SHARED_V2_1_B_WEIGHTS, clampWinnerProb, NEUTRAL_FACTO
 
 export const V2_1_B_WEIGHTS = SHARED_V2_1_B_WEIGHTS;
 
-export type V2WeightKey = keyof typeof V2_1_B_WEIGHTS;
+type V2WeightKey = keyof typeof V2_1_B_WEIGHTS;
 
 export interface V2PreviewResult {
   homeWinProb: number;
@@ -48,7 +48,7 @@ export function applyV2_1_BWeights(
   return { homeWinProb, weightedSum, factorTotal, appliedFactorCount, missingFactorKeys };
 }
 
-export interface V2PreviewDelta {
+interface V2PreviewDelta {
   v18: number;
   v21b: number;
   deltaPp: number;

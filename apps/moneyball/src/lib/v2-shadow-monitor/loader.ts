@@ -14,7 +14,7 @@ const ROOT_COHORT_DIR = join(
   "op-analysis-cohort",
 );
 
-export interface CohortFile {
+interface CohortFile {
   file: string;
   doc: CohortDoc;
 }

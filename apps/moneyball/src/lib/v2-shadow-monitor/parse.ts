@@ -1,6 +1,6 @@
 // op-analysis-cohort md 파서 — h1 / paragraph / h2 / table 만 처리.
 
-export interface CohortTable {
+interface CohortTable {
   heading: string;
   columns: string[];
   rows: string[][];
