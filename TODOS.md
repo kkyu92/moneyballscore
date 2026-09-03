@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic matchup 스코프 10건 (cycle 2857, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2856 retro commit 711c6434) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 1/20, op-analysis 1/25, info-arch 1/30, lotto 1/30, 각각 최근 발화 위치 기준 재측정). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 all success). cycle 2856 next_recommended("review-code(heavy) 잔여 스코프: matchup/debug") 채택.
+
+apps/moneyball/src/lib/matchup/ 스코프(buildMatchupEloTrend/buildMatchupProfile/buildMatchupUpcoming/buildSeasonHeadToHead/canonicalPair) exported type/interface 14개 grep → 0-external-hit 10개 후보. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + components/matchup·app/matchup 라우트 컨슈머 확인 + wave-* 테스트 확인 + packages/shared 동명 심볼 별개 확인) — 10/10 CONFIRMED_UNEXPORTED, false positive 0건. 3개 파일 export 키워드만 제거: MatchupEloTrendData / MatchupSideStat / MatchupProfile / MatchupStreak / MatchupRecentRecord / MatchupAvgMargin / MatchupBlowoutStats / MatchupCloseGameStats / MatchupHomeAwaySplit / MatchupUpcomingGame.
+
+`pnpm --filter moneyball type-check` clean, test 581/581파일 4528/4528 green, lint 0 errors(기존 warning 1건 유지). commit e74e2180, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 스코프: debug 14) — gap trigger 4종 전부 미근접.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic dashboard 스코프 7건 (cycle 2856, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2855 retro commit 9fed2d03) OK. 직전8 distinct=3(review-code(heavy)6+skill-evolution1+operational-analysis1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 4/25, info-arch 26/30, lotto 14/30). cycle 2855 next_recommended("review-code(heavy) 잔여 스코프: dashboard/matchup/debug") 채택.
