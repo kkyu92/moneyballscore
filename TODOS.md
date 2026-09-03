@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): logistic-regression.ts trainN 필터링 누락 fix + 신규 6파일 감사 (cycle 2838, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23(status=approved 없음, plan#29 만 spec_only_deferred Tier4 사용자대기). 2차 방어선(cycle 2837 retro commit c2e6a862) OK. 직전8 distinct=3(review-code(heavy)/info-architecture-review/polish-ui) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 17/25, info-arch 8/30, lotto 26/30). explore-idea saturation 4/15 미충족. CI 최근 실패 0건(gh run list). dominance-positive streak 자연 지속(직전20 중 review-code(heavy) 다수).
+
+git 1-commit heuristic + TODOS 파일명(확장자 제외) 언급 0회 필터로 미감사 파일 6개(`TeamRecentGamesFilter.tsx`/`WebVitalsReporter.tsx`/`chart-format.ts`/`WeeklyHistorySortControl.tsx`/`lib/utils.ts`/`packages/kbo-data/src/backtest/logistic-regression.ts`) 확보. general-purpose 서브에이전트 전수 감사 — 5/6 CLEAN(wiring/comment/logic 정상 확인), `logistic-regression.ts`의 `fitWeightedLogistic` 이 `FitResult.trainN` JSDoc 계약("factors 모두 null/missing 인 row 제외")을 실제로 지키지 않던 버그 발견 — factor 전부 null/missing row 가 all-zero 벡터로 변환된 채 학습에 그대로 포함(trainN 카운트도 오염).
+
+fix: 학습 전 모든 factor 가 non-finite 인 row 를 필터링(`X`/`y` 양쪽 동일 index 로 필터, `homeWinList` 도 동일 필터 — 함수 파라미터는 이 둘뿐이라 다른 병렬 배열 정합성 이슈 없음 확인). 프로덕션 소비자 0건(파일 헤더 주석상 오프라인 backtest harness/evidence pack 전용, 유닛 테스트만 실제 참조)이라 behavior-visible regression 위험 없음. `pnpm --filter kbo-data test` 93/93파일 1220/1220테스트 green + type-check clean, `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, lint clean, pre-push green. commit 29a42324, R4 직push.
+
+skill-evolution trigger 평가: cycle_n % 50 = 38(미충족), 직전20 표본 chain pool 다양(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수: 2833/2835/2836/2837/2838).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 재탐색) 또는 gap-fill 자연 대기(lotto 26/30 최근접).
+
 ## 🟢 SUCCESS — review-code(heavy): SeasonStandingsSortMode dead export 제거 + 신규 12파일 감사 (cycle 2837, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2836 retro commit 7f06142d) OK. 직전8 distinct=3(review-code(heavy)/info-architecture-review/polish-ui) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 10/20, op-analysis 16/25, info-arch 7/30, lotto 25/30). explore-idea saturation 5/15 미충족. CI 최근 실패 0건(gh run list). dominance-positive streak 자연 지속(직전20 중 12/20).

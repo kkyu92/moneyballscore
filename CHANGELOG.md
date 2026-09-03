@@ -1,3 +1,13 @@
+## v0.5.62.209 — 2026-09-03 (cycle 2838, review-code(heavy): logistic-regression.ts trainN 필터링 누락 fix SUCCESS)
+
+### review-code(heavy): 신규 6파일 감사 — trainN 계약 위반 버그 1건 발견/조치 (cycle 2838, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(status=approved 없음). 2차 방어선(cycle 2837 retro commit c2e6a862) OK. 직전8 distinct=3(review-code(heavy)/info-architecture-review/polish-ui) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 11/20, op-analysis 17/25, info-arch 8/30, lotto 26/30). explore-idea saturation 4/15 미충족. CI 최근 실패 0건. dominance-positive streak 자연 지속(review-code(heavy) 직전20 중 12/20 다수).
+- git 1-commit heuristic + TODOS 파일명(확장자 제외) 언급 0회 필터로 미감사 파일 6개(`TeamRecentGamesFilter.tsx`/`WebVitalsReporter.tsx`/`chart-format.ts`/`WeeklyHistorySortControl.tsx`/`lib/utils.ts`/`backtest/logistic-regression.ts`) 확보. general-purpose 서브에이전트 전수 감사 — 5/6 CLEAN, `logistic-regression.ts`의 `fitWeightedLogistic` 이 `FitResult.trainN` JSDoc 계약("factors 모두 null/missing 인 row 제외")을 실제로는 지키지 않고 있던 버그 발견.
+- fix: 모든 factor 가 null/missing 인 row 를 학습 전 필터링(all-zero 벡터가 bias 만 흔들고 signal 희석하는 문제 차단). 프로덕션 소비자 0건(오프라인 backtest harness 전용, 테스트 파일만 참조)이라 behavior-visible regression 위험 없음. `pnpm --filter kbo-data test` 93/93파일 1220/1220테스트 green, `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green, type-check/lint clean, pre-push green. commit 29a42324, R4 직push.
+- skill-evolution trigger 평가: cycle_n % 50 = 38(미충족), 직전20 표본 chain pool 다양(trigger5 미충족), meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수).
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 재탐색) 또는 gap-fill 자연 대기(lotto 26/30 최근접).
+
 ## v0.5.62.208 — 2026-09-03 (cycle 2837, review-code(heavy): SeasonStandingsSortMode dead export 제거 SUCCESS)
 
 ### review-code(heavy): 신규 12파일 감사 — dead export 1건 발견/조치 (cycle 2837, SUCCESS)
