@@ -1,4 +1,16 @@
 
+## ⚪ RETRO-ONLY — review-code(heavy): pipeline/backtest/scraper 신규 8파일 감사 CLEAN (cycle 2831, 2026-09-03)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2830 retro commit 2b2e6d86) OK. 직전8 distinct=4(review-code(heavy)/fix-incident/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 4/20, op-analysis 10/25, info-arch 1/30, lotto 19/30). dominance-positive streak 자연 지속(cycle135 룰).
+
+신규 후보 탐색: git history 1-commit(=한 번도 review-code 대상 아닌) 파일 23개 확보 — pipeline/backtest/scrapers 핵심 데이터 그룹(silent drift 위험 최고) 8개 선정: `pipeline/brier.ts` / `pipeline/backtest-run.ts` / `pipeline/winner-id.ts` / `pipeline/accuracy-update.ts` / `factors/mlb-shadow-c.ts` / `backtest/runner.ts` / `backtest/metrics.ts` / `scrapers/fetch-with-retry.ts`.
+
+general-purpose 서브에이전트 전수 감사(exported 심볼 repo 전체 grep + 주석 vs 실제 동작 대조): 8/8 CLEAN. 발견 2건은 재확인만(신규 아님) — (1) `mlb-shadow-c.ts`의 `walkForwardExpanding` 프로덕션 무호출은 migration 049 주석에 "향후 월간 milestone 비교용 의도된 orphan" 이미 명시 (2) `fetch-with-retry.ts` 와 `statsapi-mlb.ts` 로컬 버전 중복은 TODOS.md:88 에 이미 "comment-drift 아님, 미조치" 로 triage 완료. 코드 변경 없음.
+
+skill-evolution trigger 평가: cycle_n % 50 = 31(미충족), 직전20 표본=8(임계 10 미달로 trigger5 skip), 이번 사이클 meta-pattern/chain-evolution 미발화(trigger1/4 미충족), 5연속 fail 없음(trigger2 미충족). emergency stop 미충족(직전10 중 success 다수: 2821/2822/2823/2824/2826/2829).
+
+다음 사이클 추천 = review-code(heavy) 계속(apps/moneyball/src/lib/{matchup,players,standings,teams,stats,predictions,mlb}/* 잔여 ~15개 후보) 또는 gap-fill 자연 대기.
+
 ## ⚪ RETRO-ONLY — info-architecture-review: 30-cycle gap checkpoint, 현 IA 충분 6연속 재확정 (cycle 2830, 2026-09-03)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2829 retro commit 7413e7ed) OK. 직전8 distinct=2(review-code(heavy) 7 + fix-incident 1) — 2-chain lock 조건 충족이나 잠긴 chain 중 fix-incident 포함 예외로 lock 무시. info-architecture-review 자체 30-cycle gap trigger 정확 도달(마지막 발화 cycle 2800, gap=30).
