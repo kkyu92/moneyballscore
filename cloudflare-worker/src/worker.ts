@@ -16,9 +16,9 @@
  *     /api/snapshot-pitchers POST → pitcher_stats 주간 시점 snapshot.
  *     cron 슬롯 추가 없이 sitemap-warmup 분기 안에 조건 통합 (4/5 유지).
  *  7) "17 18-22,10 * * *" — MLB pipeline (Plan C Task 4 + plan #25 Phase 2). UTC hour
- *     → mode 결정 후 /api/mlb/pipeline 호출. UTC 18-21 (KST 03-06) scrape 4회 +
- *     UTC 22 (KST 07) elo_update 1회 + UTC 10 (KST 19) predict_final 1회 = 6회/일.
- *     별도 cron slot 소비.
+ *     → mode 결정 후 /api/mlb/pipeline 호출. UTC 18-20 (KST 03-05) scrape 3회 +
+ *     UTC 21 (KST 06) shadow_train 1회 + UTC 22 (KST 07) elo_update 1회 +
+ *     UTC 10 (KST 19) predict_final 1회 = 6회/일. 별도 cron slot 소비.
  *
  * 모든 작업 독립 — 한쪽 실패해도 나머지 정상.
  *
