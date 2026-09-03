@@ -52,3 +52,12 @@ export const MLB_GRADIENT_TEAM_SKY_135 = "linear-gradient(135deg, #082f49 0%, #0
 export const MLB_GRADIENT_PLAYERS_GREEN_135 = "linear-gradient(135deg, #052e16 0%, #14532d 50%, #16a34a 100%)";
 export const MLB_GRADIENT_GAMES_INDIGO_135 = "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)";
 export const NEUTRAL_GRADIENT_135 = "linear-gradient(135deg, #1a1d24 0%, #2d3140 50%, #4a4f63 100%)";
+
+// MLB matchup/analysis OG/twitter gradients (2026-09) — mlb/matchup + mlb/analysis 와
+// en/ mirror 4쌍이 opengraph-image.tsx/twitter-image.tsx 없이 발행돼 SEO 카드가 KBO 원본
+// 대비 누락되던 갭 해소. MATCHUP = KBO 자체 /matchup 의 literal purple(#1a0e2e~#3d2a82,
+// hue≈256~293)과 hue 겹치지 않는 magenta-violet(hue≈296~321) 채택 — 기존 WILD_CARD(hue≈293)
+// 와도 십수도 이상 벌어지도록 100% stop 을 rose 쪽으로 이동. ANALYSIS = 8종 registry +
+// MATCHUP 어디에도 없는 amber(hue≈27) 채택 — AI 분석 허브의 "강조/알림" 톤에 부합.
+export const MLB_GRADIENT_MATCHUP_135 = "linear-gradient(135deg, #2a0e2e 0%, #5c1a66 50%, #c22e8f 100%)";
+export const MLB_GRADIENT_ANALYSIS_135 = "linear-gradient(135deg, #2b1207 0%, #7a3410 50%, #e8720f 100%)";

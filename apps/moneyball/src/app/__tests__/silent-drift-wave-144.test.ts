@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  MLB_GRADIENT_ANALYSIS_135,
   MLB_GRADIENT_GAMES_INDIGO_135,
+  MLB_GRADIENT_MATCHUP_135,
   MLB_GRADIENT_NAVY_135,
   MLB_GRADIENT_PLAYERS_GREEN_135,
   MLB_GRADIENT_POSTSEASON_135,
@@ -101,10 +103,32 @@ const GRADIENTS_AND_FILES: Array<{
       "terms/opengraph-image.tsx",
     ],
   },
+  {
+    const_name: "MLB_GRADIENT_MATCHUP_135",
+    value: MLB_GRADIENT_MATCHUP_135,
+    files: [
+      "mlb/matchup/opengraph-image.tsx",
+      "mlb/matchup/twitter-image.tsx",
+      "en/mlb/matchup/opengraph-image.tsx",
+      "en/mlb/matchup/twitter-image.tsx",
+      "mlb/matchup/[teamA]/[teamB]/opengraph-image.tsx",
+      "en/mlb/matchup/[teamA]/[teamB]/opengraph-image.tsx",
+    ],
+  },
+  {
+    const_name: "MLB_GRADIENT_ANALYSIS_135",
+    value: MLB_GRADIENT_ANALYSIS_135,
+    files: [
+      "mlb/analysis/opengraph-image.tsx",
+      "mlb/analysis/twitter-image.tsx",
+      "en/mlb/analysis/opengraph-image.tsx",
+      "en/mlb/analysis/twitter-image.tsx",
+    ],
+  },
 ];
 
 describe("silent drift family wave 144 — MLB/neutral OG gradients consolidated into design-tokens", () => {
-  it("8 gradient constants exported and have 135deg linear-gradient shape", () => {
+  it("10 gradient constants exported and have 135deg linear-gradient shape", () => {
     for (const { const_name, value } of GRADIENTS_AND_FILES) {
       expect(value, `${const_name} value`).toMatch(/^linear-gradient\(135deg, #[0-9a-f]{6} 0%, #[0-9a-f]{6} 50%, #[0-9a-f]{6} 100%\)$/);
     }
