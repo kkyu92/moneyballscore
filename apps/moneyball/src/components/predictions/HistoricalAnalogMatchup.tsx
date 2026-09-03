@@ -53,7 +53,7 @@ function createPublicClient() {
   );
 }
 
-export async function fetchHistoricalAnalogs(
+async function fetchHistoricalAnalogs(
   homeTeamId: number,
   awayTeamId: number,
   currentGameId: number,

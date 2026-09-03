@@ -300,7 +300,7 @@ export interface ScoringRuleDayCell {
 // registry + 'all' aggregate + 'v1.8-credit-fail' cohort split. 신규 prod era 추가 시
 // PRODUCTION_ERA_HISTORY 한 곳만 갱신 → heatmap 자동 반영. wave-255 (BrierTrendChart) 정합.
 export const SCORING_RULE_HEATMAP_ROWS: readonly string[] = ['all', ...PRODUCTION_ERA_HISTORY, 'v1.8-credit-fail'];
-export const SMALL_SAMPLE_THRESHOLD = 3;
+const SMALL_SAMPLE_THRESHOLD = 3;
 
 export function buildScoringRuleDayHeatmap(rows: PredRow[]): ScoringRuleDayCell[] {
   // (scoringRule, day) → { n, hits } accumulator

@@ -230,7 +230,7 @@ function parseTeamPostview(text: string, team: TeamCode): TeamPostview {
 // (pre_game 블로그 논거, 400자 슬라이스) 도 그대로 인용한다 (buildTeamPostviewMessage
 // "pre_game 논거: ..." 줄 참조). 이 텍스트를 injection 에서 빠뜨리면 team postview가
 // 그 안 숫자를 정당 인용해도 checkHallucinatedNumbers 가 환각으로 오탐한다.
-export function buildTeamPostviewExtraInjection(
+function buildTeamPostviewExtraInjection(
   actual: ActualResult,
   original: OriginalPrediction
 ): string {
@@ -381,7 +381,7 @@ pre_game이 놓친 것: ${awayPv.missedBy}
 // judge-postview 프롬프트(buildJudgePostviewMessage)가 실제로 노출하는 postview 전용 실측값
 // (buildInjectionText 는 pre_game 전용이라 커버 못 하는 값들) — validateJudgeReasoning 의
 // extraContext 로 전달해 환각 오탐 차단.
-export function buildPostviewExtraInjection(
+function buildPostviewExtraInjection(
   actual: ActualResult,
   original: OriginalPrediction
 ): string {
