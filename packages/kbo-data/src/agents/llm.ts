@@ -34,14 +34,14 @@ export function backoffMs(attempt: number, status: number): number {
   return LLM_RETRY_BACKOFF_MS[idx];
 }
 
-export interface LLMCallOptions {
+interface LLMCallOptions {
   model: 'haiku' | 'sonnet';
   systemPrompt: string;
   userMessage: string;
   maxTokens: number;
 }
 
-export type LLMBackend = 'claude' | 'ollama' | 'deepseek';
+type LLMBackend = 'claude' | 'ollama' | 'deepseek';
 
 /**
  * 역할별 백엔드 선택 (Hybrid 지원)

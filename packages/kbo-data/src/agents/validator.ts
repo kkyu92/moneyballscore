@@ -40,9 +40,9 @@ import type { GameContext, TeamArgument } from './types';
 // 타입
 // ============================================
 
-export type ViolationSeverity = 'hard' | 'warn';
+type ViolationSeverity = 'hard' | 'warn';
 
-export type ViolationType =
+type ViolationType =
   | 'hallucinated_number'
   | 'invented_player_name'
   | 'banned_phrase'
@@ -55,7 +55,7 @@ export interface Violation {
   detail: string;
 }
 
-export interface ValidationResult {
+interface ValidationResult {
   ok: boolean;
   violations: Violation[];
 }
@@ -74,7 +74,7 @@ export const WARN_LIMIT_LENIENT = 5; // lenient: 6건 이상이면 reject
 // 3개+ = LLM quality 실제 문제 = hard reject 유지.
 const HALLUCINATED_NUMBER_HARD_THRESHOLD = 3;
 
-export type ValidationMode = 'strict' | 'lenient';
+type ValidationMode = 'strict' | 'lenient';
 
 /**
  * 호출부 mode 결정 헬퍼.
@@ -686,12 +686,12 @@ export function maskViolatedReasoning(
 // attribution warning 은 notifyValidationViolations (Sentry) 에서만 capture —
 // 사용자 가시 judgeReasoning 에 dev 용어 (factor=foo weight=10% threshold 8%) leak 차단.
 
-export interface FactorAttributionInput {
+interface FactorAttributionInput {
   factor: string;
   predictedBias: number;
 }
 
-export interface FactorAttributionResult {
+interface FactorAttributionResult {
   ok: boolean;
   violations: Violation[];
 }
@@ -732,7 +732,7 @@ export function validateFactorAttribution(
 // packages/kbo-data 가 @sentry/nextjs 직접 의존 X — 동적 import + try/catch silent fallback 패턴.
 // Sentry 미설치 환경 (test / 로컬 ollama) 에선 자동 no-op.
 
-export interface ValidationMeta {
+interface ValidationMeta {
   agent: 'team' | 'judge' | 'calibration';
   gameId: string | number | null;
   backend?: string;
@@ -792,7 +792,7 @@ export async function notifyValidationViolations(
 // Cloudflare Workers cron 환경에서 alert 안 잡힘 (CLAUDE.md 드리프트 사례 6 family).
 // notifyValidationViolations 와 동일 동적 import 패턴 — test/local ollama no-op.
 
-export interface AgentFailureMeta {
+interface AgentFailureMeta {
   path: 'pre_game' | 'post_game';
   homeTeam: string;
   awayTeam: string;
@@ -831,7 +831,7 @@ export function evaluateAndCaptureAgentFallback(
   return { agentsFailed, agentError };
 }
 
-export interface JudgeParseFailureMeta {
+interface JudgeParseFailureMeta {
   homeTeam: string;
   awayTeam: string;
   gameId: string | number | null;
@@ -881,7 +881,7 @@ export async function captureJudgeParseFallback(meta: JudgeParseFailureMeta): Pr
   }
 }
 
-export interface CalibrationParseFailureMeta {
+interface CalibrationParseFailureMeta {
   homeTeam: string;
   awayTeam: string;
   textExcerpt: string;
@@ -928,7 +928,7 @@ export async function captureCalibrationParseFallback(meta: CalibrationParseFail
   }
 }
 
-export interface CalibrationApiFailureMeta {
+interface CalibrationApiFailureMeta {
   homeTeam: string;
   awayTeam: string;
   errorMessage: string;
@@ -972,7 +972,7 @@ export async function captureCalibrationApiFallback(meta: CalibrationApiFailureM
   }
 }
 
-export interface RivalryMemoryFailureMeta {
+interface RivalryMemoryFailureMeta {
   source: 'fetchRecentH2H' | 'fetchMemories' | 'getRivalryBlock';
   homeTeam: string;
   awayTeam: string;

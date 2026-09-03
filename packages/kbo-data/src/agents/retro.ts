@@ -101,9 +101,9 @@ export async function updateCalibration(
   return { buckets, monotonic };
 }
 
-export type MemoryType = 'strength' | 'weakness' | 'pattern' | 'matchup';
+type MemoryType = 'strength' | 'weakness' | 'pattern' | 'matchup';
 
-export interface MemoryClassification {
+interface MemoryClassification {
   type: MemoryType;
   content: string;
   confidence: number;
