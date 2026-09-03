@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic leaderboard 스코프 2건 (cycle 2866, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2865 retro commit 50eb22d7) OK. 직전8(2858-2865) distinct=3(review-code(heavy)6+polish-ui1+info-architecture-review1) — 2-chain lock 미발동. gap trigger 4종 전부 미도달(fix-incident 21/20 초과했으나 cycle 2865 lite 점검서 이미 incident 부재 확인 완료, op-analysis 14/25, info-arch 6/30, lotto 24/30). explore-idea saturation 2/15 미충족. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2865 next_recommended("review-code(heavy) 계속 — leaderboard 또는 picks 우선") 채택.
+- apps/moneyball/src/lib/leaderboard/ 스코프 exported type/interface 7개 grep → LeaderboardEntry/LeaderboardSyncPayload/MlbLeaderboardSyncPayload/LeaderboardMode/AiBaseline 5개는 cross-file import(컴포넌트/API route/서버 함수) 확인되어 유지, SyncState/LeaderboardState 2개는 use-leaderboard.ts 내부 전용 사용만 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + 테스트 파일 type import 여부 + `ReturnType<typeof useLeaderboard>` 사용 여부 + packages/ 참조 확인) — 2/2 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거: SyncState / LeaderboardState (use-leaderboard.ts).
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 581/581파일 4560/4560 green, lint 0 errors(기존 warning 1건 유지). commit 9e30fcff, R4 직push(단일 논리 단위, PR 생략).
+
 ### review-code(heavy): export-but-unused heuristic analysis 스코프 6건 (cycle 2865, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user, `status: approved` 0건). 2차 방어선(cycle 2864 retro commit f2d111e6) OK. 직전8(2857-2864) distinct=3(review-code(heavy)6+info-architecture-review1+polish-ui1) — 2-chain lock 미발동. **fix-incident gap trigger 정확 20/20 도달(마지막 발화 cycle 2845)** — lite 점검 실행: `pipeline_runs` 최근 7일 187건 전부 status=success(에러 0%), `gh run list` CI/Vercel Deploy 워크플로 전부 success 또는 skipped(실패 0건), open issue 0건 — 실제 incident 부재 확인 후 정상 종료. op-analysis(13/25)/info-arch(5/30)/lotto(23/30) 전부 미근접. ship-0 emergency stop 미충족(직전10 9 success+1 retro-only). cycle 2864 next_recommended("review-code(heavy) 계속 — analysis 우선") 채택.
