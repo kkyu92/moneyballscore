@@ -9,6 +9,7 @@ import {
 } from "@moneyball/shared";
 import { AnalysisLink } from "../shared/AnalysisLink";
 import { TeamLogo } from "../shared/TeamLogo";
+import { PredictReveal } from "./PredictReveal";
 import type { WeatherSlot } from "@/lib/weather";
 import { FACTOR_LABELS_TECHNICAL, topFavoringFactors, countFavoringFactors } from "@/lib/predictions/factorLabels";
 
@@ -275,8 +276,12 @@ export function PredictionCard({
               />
             </div>
             <div className="flex justify-between mt-0.5 text-2xs text-gray-400 dark:text-gray-500 leading-none">
-              <span>원정 {awayWinPct}%</span>
-              <span>홈 {homeWinPct}%</span>
+              <span>
+                원정 <PredictReveal prob={awayWinPct / 100} />
+              </span>
+              <span>
+                홈 <PredictReveal prob={homeWinPct / 100} />
+              </span>
             </div>
           </div>
         );

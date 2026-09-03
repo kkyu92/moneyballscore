@@ -23,3 +23,22 @@ describe('PredictionCard — Korean team-name wrap guard', () => {
     expect(label?.className).toContain('whitespace-nowrap');
   });
 });
+
+// cycle 2836 polish-ui — 승률 바 (원정/홈 %) 가 PredictReveal 카운트업으로 배선됨
+// (design-system 완성 컴포넌트였으나 어디에도 wiring 안 됐던 상태 — cycle 2835 관찰 후속).
+describe('PredictionCard — 승률 바 PredictReveal 배선', () => {
+  it('원정/홈 % 표시가 PredictReveal (role=status) 를 사용', () => {
+    const { container } = render(
+      <PredictionCard
+        homeTeam="LG"
+        awayTeam="HT"
+        confidence={0.6}
+        predictedWinner="LG"
+        winProb={0.6}
+        status="scheduled"
+      />,
+    );
+    const reveals = container.querySelectorAll('[role="status"]');
+    expect(reveals.length).toBe(2);
+  });
+});

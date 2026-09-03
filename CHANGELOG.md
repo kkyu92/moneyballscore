@@ -1,3 +1,13 @@
+## v0.5.62.207 — 2026-09-03 (cycle 2836, polish-ui: PredictReveal 승률 카운트업 애니메이션 PredictionCard 배선 SUCCESS)
+
+### polish-ui: 미배선 design-system 컴포넌트 PredictReveal 배선 (cycle 2836, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2835 retro commit 079c406c) OK. 직전8 distinct=3(review-code(heavy)/review-code/info-architecture-review) — 2-chain lock 미충족. gap trigger 4종 전부 미도달(fix-incident 9/20, op-analysis 15/25, info-arch 6/30, lotto 24/30). explore-idea saturation 4/15 미충족. CI 최근 실패 0건(gh run list). cycle 2835 관찰 항목(`PredictReveal.tsx` — 승률 카운트업 reveal 애니메이션, prefers-reduced-motion 가드 + aria-live 완성 컴포넌트이나 프로덕션 미배선)을 직접 조치 — review-code(heavy) dominance(직전20 중 14/20)에서 polish-ui 로 자연 전환.
+- `PredictionCard.tsx` 승률 바(원정/홈 %, line 278-279)의 정적 `{awayWinPct}%`/`{homeWinPct}%` 텍스트를 `<PredictReveal prob={.../100} />` 로 교체. `PredictionCardLive.tsx` 가 `PredictionCard` 를 그대로 wrap 하므로 라이브 카드도 함께 적용됨(별도 배선 불필요). className/color 미지정 — 부모 span 의 `text-2xs text-gray-400 dark:text-gray-500` 그대로 상속(컴포넌트 설계 의도인 "자체 색 X" 준수).
+- 회귀 테스트 1건 추가(`PredictionCard-wrap-guard.test.tsx` — winProb 전달 시 `role="status"` PredictReveal 2개(원정/홈) 렌더 확인).
+- `pnpm --filter moneyball test` 581/581파일 4528/4528테스트 green(+1), type-check/lint clean. commit 대기, R4 직push 예정.
+- 다음 사이클 추천 = review-code(heavy) 계속(잔여 단일-커밋 파일 재탐색) 또는 gap-fill 자연 대기(lotto 24/30 최근접).
+
 ## v0.5.62.206 — 2026-09-03 (cycle 2833, review-code(heavy): mlb-shadow-c dead export 제거 + mlb-historical-bootstrap 미배선 상태 주석 정정 SUCCESS)
 
 ### review-code(heavy): 신규 8파일 감사 — dead code 2건 발견/조치 (cycle 2833, SUCCESS)
