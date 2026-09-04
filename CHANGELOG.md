@@ -1,3 +1,15 @@
+## v0.5.62.227 — 2026-09-04 (cycle 2887, review-code(heavy): methodology 페이지 3건 정정 + EN MLB 번역 누락 보강)
+
+### review-code(heavy): methodology/mlb-methodology 페이지 실제 코드 대조 감사 (cycle 2887, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2886 retro commit c4401d7d) OK. 직전8(2879-2886) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 6/20, op-analysis gap 18/25, info-arch gap 27/30, lotto gap 15/30 — 전부 미근접. agents/ 핵심 파일 소진(cycle 2886 완료) 후 cycle 2886 retro 추천대로 사용자 가시 methodology 페이지로 스코프 확장(code-reviewer agent 위임).
+- `apps/moneyball/src/app/methodology/page.tsx` 정규화 범위 서술 오류 — "각 팩터를 -1 ~ +1 범위로 정규화" 라 적혀 있었으나 실제 `predictor.ts` `normalize()` 는 0~1 범위(0.5=우열 없음)로 정규화(docstring 자체도 "0-1 범위로 정규화"). 텍스트 정정.
+- 같은 파일 "Claude 3종 (Haiku × 2 + Sonnet × 1)" 서술 오류 — `debate.ts` 실제 실행은 홈/원정 팀 에이전트(Haiku) + 보정 에이전트(Haiku) + 심판 에이전트(Sonnet) 4개(Haiku×3+Sonnet×1). 보정 에이전트가 페이지에 아예 언급되지 않았던 3-box 구조에 4번째 box 신규 추가.
+- 같은 파일 "심판 에이전트가 정량 모델 결과에 ±5% 보정" — 실제 ±5% 클램프는 `calibration-agent.ts` `adjustmentSuggestion`(과거 이력 회고 힌트, judge 프롬프트에 제안으로만 주입)에 있고 judge 자신은 해당 클램프가 없음(judge 는 `[0.15, 0.85]` 범위 클램프만). 심판 box 서술을 실제 메커니즘(보정 힌트 종합 후 최종 결정)으로 정정.
+- 같은 파일 `WINNER_PROB_CLAMP_MIN`/`MAX` (0.15/0.85, raw 비율) 를 `%` 접미사와 함께 그대로 렌더링해 "0.15% ~ 0.85%" 로 보이던 버그 — 페이지의 다른 모든 수치가 `_PCT` 변환 또는 `*100` 처리되는 패턴과 불일치. `*100` 처리 추가해 "15% ~ 85%" 로 정정.
+- `apps/moneyball/src/app/en/mlb/methodology/page.tsx` 가 KO 버전(`mlb/methodology/page.tsx`)에 있는 placeholder 팩터 공시 문단(수비 SFR/선발 xwOBA-against/wOBA 표준편차 12%가 승률 계산엔 미반영되는 참고용 표시) 을 아예 import 조차 안 해 구조적으로 누락 — 영어 사용자만 14개 팩터가 전부 실측 반영되는 것으로 오인할 수 있는 번역 불일치. `MLB_BASE_WEIGHTS`/`MLB_PLACEHOLDER_FACTOR_KEYS` import + 동일 공시 문단 영문 신규 추가.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball lint` 0 errors(기존 무관 warning 1건 유지).
+
 ## v0.5.62.226 — 2026-09-04 (cycle 2886, review-code(heavy): postview.ts parse silent fallback + agent_memories upsert Sentry 가시성 추가)
 
 ### review-code(heavy): agents/(postview/retro/personas/llm/mlb-retro) 재감사, postview 3-agent family 5번째 gap 발견 (cycle 2886, SUCCESS)

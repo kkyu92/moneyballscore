@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): methodology 페이지 3건 정정 + EN MLB 번역 누락 보강 (cycle 2887, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2886 retro commit c4401d7d) OK. 직전8(2879-2886) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 6/20, op-analysis gap 18/25, info-arch gap 27/30, lotto gap 15/30 — 전부 미근접. agents/ 핵심 파일 소진(cycle 2886 완료) 확정 후 cycle 2886 retro 추천대로 사용자 가시 methodology 페이지로 스코프 확장(code-reviewer agent 위임, methodology/page.tsx + mlb/methodology/page.tsx + en/mlb/methodology/page.tsx 전체 read 지시).
+
+methodology/page.tsx(KBO) 3건 발견: (1) 정규화 범위 "-1~+1" 서술이 실제 `predictor.ts` normalize()(0~1, 0.5=중립)와 불일치, (2) "Haiku×2+Sonnet×1(3종)" 서술이 실제 debate.ts 4-agent 구성(홈/원정/보정 Haiku 3개 + 심판 Sonnet 1개)과 불일치 — 보정 에이전트 자체가 페이지에 미언급, (3) "심판이 ±5% 보정" 서술이 실제로는 calibration-agent.ts 의 adjustmentSuggestion 클램프(judge 에겐 제안으로만 전달, judge 자체 클램프는 [0.15,0.85])라 잘못된 agent 에 귀속. WINNER_PROB_CLAMP_MIN/MAX 도 *100 누락으로 "0.15%~0.85%" 로 렌더링되던 버그 동시 발견.
+
+en/mlb/methodology/page.tsx 는 mlb/methodology/page.tsx(KO) 에 있는 placeholder 팩터(수비 SFR/xwOBA-against/wOBA표준편차, 12%) 공시 문단을 import 조차 안 해 구조적으로 누락 — 영어 사용자만 14팩터 전부 실측 반영으로 오인 가능한 번역 불일치. MLB_BASE_WEIGHTS/MLB_PLACEHOLDER_FACTOR_KEYS import + 동일 문단 신규 추가.
+
+4개 정정 + 보정 에이전트 box 신규 1개, 총 2개 파일 수정. type-check clean, lint 0 errors(무관 warning 1건 유지, kbo-data 코드 변경 없어 test suite 영향 없음). R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = accuracy/page.tsx(1236줄) + lotto/methodology/page.tsx(533줄) 같은 대형 사용자 가시 페이지 계속 재감사, 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): postview.ts parse silent fallback + agent_memories upsert Sentry 가시성 (cycle 2886, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2885 retro commit e3d7f404) OK. 직전8(2878-2885) distinct=3(review-code(heavy)7+polish-ui1) — 2-chain lock 미발동. fix-incident gap 5/20, op-analysis gap 17/25, info-arch gap 26/30, lotto gap 14/30, explore-idea saturation 0/15 — 전부 미근접. cycle 2885 retro 추천대로 agents/ 잔여 파일(postview.ts/retro.ts/personas.ts/llm.ts/mlb-retro.ts) 재감사 — code-reviewer subagent 위임, 5파일 전체 read 지시.
