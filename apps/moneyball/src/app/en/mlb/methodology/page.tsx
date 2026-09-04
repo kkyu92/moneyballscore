@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MLB_FACTOR_COUNTS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
+import { MLB_BASE_WEIGHTS, MLB_FACTOR_COUNTS, MLB_PLACEHOLDER_FACTOR_KEYS, MLB_ELO_K, MLB_ELO_K_POSTSEASON } from "@moneyball/kbo-data";
 import {
   SITE_URL,
   MLB_SCORING_RULE,
@@ -14,6 +14,10 @@ import { TableOfContents } from "@/components/shared/TableOfContents";
 export const revalidate = 21600; // MLB_ISR_SECONDS (Next.js 16 Turbopack: literal required)
 
 const TOTAL = MLB_FACTOR_COUNTS.total;
+// Single source: MLB_PLACEHOLDER_FACTOR_KEYS (mlb-base.ts) — same array the KO page and /mlb/factors use.
+const PLACEHOLDER_WEIGHT_SUM_PCT = Math.round(
+  MLB_PLACEHOLDER_FACTOR_KEYS.reduce((sum, key) => sum + MLB_BASE_WEIGHTS[key], 0) * 100,
+);
 const TITLE_EN = "MLB Prediction Methodology | MoneyBall Score";
 const SUMMARY_EN = `How MoneyBall Score builds MLB game predictions — data sources, ${TOTAL}-factor quantitative model, verification method, and how it differs from the KBO model.`;
 
@@ -130,6 +134,14 @@ export default function MlbMethodologyEnPage() {
           <code>K={MLB_ELO_K_POSTSEASON}</code> in the postseason, values cited from FiveThirtyEight&apos;s published
           MLB Elo model) after every game. Home teams get the same empirically measured home-field bonus as KBO
           (+{HOME_ADVANTAGE_PCT.toFixed(1)}pp).
+        </p>
+        <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+          Note: defensive SFR, starter xwOBA-against, and wOBA standard deviation (
+          {PLACEHOLDER_WEIGHT_SUM_PCT}% combined) are shown for reference on team/matchup
+          pages, but since no MLB-specific data source exists for them yet, a neutral
+          team-agnostic value is fixed in the win-probability calculation above — they
+          don&apos;t actually move the number. Recent form, head-to-head, and Elo are all
+          real measured values feeding into the calculation.
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
           Full weight table, definitions, and sources are on{" "}

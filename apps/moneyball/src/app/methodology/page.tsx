@@ -288,9 +288,9 @@ export default function MethodologyPage() {
           3. {KBO_FACTOR_COUNT}팩터 가중합산 ({CURRENT_SCORING_RULE})
         </h2>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-          각 팩터를 -1 ~ +1 범위로 정규화한 뒤 가중치를 곱해 합산합니다. 결과에
-          홈팀 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}% 를 더하여 최종
-          승률 0 ~ 1 을 산출. 가중치 합계 = {(totalWeight * 100).toFixed(0)}%.
+          각 팩터를 0 ~ 1 범위로 정규화(0.5=우열 없음)한 뒤 가중치를 곱해
+          가중평균을 냅니다. 결과에 홈팀 어드밴티지 +{HOME_ADVANTAGE_PCT.toFixed(1)}%
+          를 더하여 최종 승률 0 ~ 1 을 산출. 가중치 합계 = {(totalWeight * 100).toFixed(0)}%.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -336,7 +336,7 @@ export default function MethodologyPage() {
           4. AI 에이전트 토론
         </h2>
         <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-          정량 모델이 1차 승률을 계산한 뒤 Claude 3종 (Haiku × 2 + Sonnet × 1)
+          정량 모델이 1차 승률을 계산한 뒤 Claude 4종 (Haiku × 3 + Sonnet × 1)
           이 토론을 진행합니다.
         </p>
         <div className="space-y-3">
@@ -355,10 +355,17 @@ export default function MethodologyPage() {
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
+            <h3 className="font-semibold mb-1">보정 에이전트 (Haiku)</h3>
+            <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
+              과거 예측 이력(5경기+)을 회고해 팀별 편향·모델 약점을 최대 ±5%
+              보정 힌트로 산출. 심판에게 제안으로만 전달되며 강제 적용은 아님.
+            </p>
+          </div>
+          <div className="rounded-lg border border-gray-200 dark:border-brand-700 p-4 bg-white dark:bg-[var(--color-surface)]">
             <h3 className="font-semibold mb-1">심판 에이전트 (Sonnet)</h3>
             <p className="text-sm text-gray-700 dark:text-brand-300 leading-relaxed">
-              양측 주장을 비교 (Steelman 원칙) 하여 정량 모델 결과에 ±5% 보정.
-              승률을 {WINNER_PROB_CLAMP_MIN} ~ {WINNER_PROB_CLAMP_MAX} 범위로 제한 (극단 회피).
+              양측 주장 + 보정 힌트를 종합 (Steelman 원칙) 하여 최종 승률 결정.
+              승률을 {(WINNER_PROB_CLAMP_MIN * 100).toFixed(0)}% ~ {(WINNER_PROB_CLAMP_MAX * 100).toFixed(0)}% 범위로 제한 (극단 회피).
             </p>
           </div>
         </div>
