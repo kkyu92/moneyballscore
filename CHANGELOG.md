@@ -1,3 +1,12 @@
+## v0.5.62.239 — 2026-09-04 (cycle 2899, operational-analysis(lite): CE/비CE 격차 재측정)
+
+### operational-analysis(lite): CE/비CE 격차 25회 연속 재확인 (cycle 2899, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2898 retro commit 5da276ea) OK. 직전8(2891-2898) distinct=4(review-code(heavy)5+operational-analysis(lite)1+info-architecture-review1+fix-incident(heavy)1) — 2-chain lock 미충족. fix-incident gap 1(방금 발화), op-analysis gap 47/25 대폭 초과(마지막 발화 cycle 2852)가 가장 오래 미발화 — op-analysis 자체 주기 보정 trigger 로 선택. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan 0/23/TODOS stale/DESIGN.md 신선) skip. info-arch gap 7/30·lotto gap 27/30 미근접.
+- `scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=371 (CE n=324 / 비CE n=47) — cycle 2891 수치와 완전 동일(신규 verified 예측 0건, 8-cycle 경과에도 배치 미반영). CE 54.6%(177/324) / 비CE 63.8%(30/47) → 격차 9.2pp, overlap 월(05/06/07) 통제 격차 10.8pp ≈ 유지 — LLM 부가가치 우세 결론 25회 연속 재확인.
+- DB 직접 조회로 파이프라인 정상 재확인: KBO v1.8 최신 `verified_at` 2026-09-03(전날), 최근 verified 예측 `debate_version` 여전히 null(CE)뿐 — 데이터 drift 아님, cycle 처리 속도가 실제 경기일 간격보다 빨라 신규 검증 배치 미반영 패턴 지속.
+- CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 66일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only) — CLAUDE.md 갱신만.
+
 ## v0.5.62.238 — 2026-09-04 (cycle 2898, fix-incident: deploy-drift-alert 정체 vs backlog-drain 구분)
 
 ### fix-incident: deploy-drift-alert 진짜 정체 vs 정상 backlog-drain 구분 (cycle 2898, SUCCESS)
