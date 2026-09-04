@@ -32,9 +32,9 @@ function normalize(homeVal: number, awayVal: number, higherIsBetter: boolean): n
  * 현 활성 가중치는 packages/shared/src/index.ts DEFAULT_WEIGHTS 단일 출처
  * (sp_fip 0.15 / lineup_woba 0.15 / elo 0.10 / h2h 0.03 / park 0.04 / sfr 0.05 등 ACTIVE_FACTOR_KEYS 모두 활성).
  */
-export type PredictWeights = Readonly<Record<string, number>>;
+type PredictWeights = Readonly<Record<string, number>>;
 
-export interface PredictOptions {
+interface PredictOptions {
   /**
    * 가중치 override. 미지정 시 DEFAULT_WEIGHTS (v1.8).
    * cycle 1127 plan-v17 candidate N Tier 2 — V2_MODEL_ENABLED=true 시 daily.ts 가

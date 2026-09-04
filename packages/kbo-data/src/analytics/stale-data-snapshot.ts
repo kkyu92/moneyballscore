@@ -17,13 +17,13 @@ export interface PredRowMin {
   verified_at: string | null;
 }
 
-export interface StaleSnapshotInput {
+interface StaleSnapshotInput {
   rows: PredRowMin[];
   generatedAt: Date;
   v18Target?: number;
 }
 
-export interface ScoringRuleStat {
+interface ScoringRuleStat {
   rule: string;
   total: number;
   correct: number;
@@ -31,14 +31,14 @@ export interface ScoringRuleStat {
   brier: number;
 }
 
-export interface WeekdayStat {
+interface WeekdayStat {
   weekday: string;
   total: number;
   correct: number;
   acc: number;
 }
 
-export interface StaleSnapshot {
+interface StaleSnapshot {
   generatedAt: string;
   totalVerified: number;
   totalCorrect: number;

@@ -81,7 +81,7 @@ export function extractReasoningHomeWinProb(
  * shouldPredictGame 이 `not_scheduled`/`sp_unconfirmed` 로 skip 할 때
  * pipeline_runs.skipped_detail 에 동봉되어 사후 어느 필드 때문인지 식별.
  */
-export interface RawStatusSnapshot {
+interface RawStatusSnapshot {
   state_sc?: string | null;    // GAME_STATE_SC
   inn_no?: number | null;      // GAME_INN_NO
   cancel_sc_id?: string | null;// CANCEL_SC_ID
