@@ -1,3 +1,12 @@
+## v0.5.62.245 — 2026-09-04 (cycle 2905, review-code(heavy): lib/calendar+observability+api 소규모 스윕, RETRO-ONLY clean)
+
+### review-code(heavy): export-but-unused heuristic lib/calendar·observability·api 스코프 (cycle 2905, SUCCESS retro-only)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/archived/doc_only, approved 0건). 2차 방어선(cycle 2904 retro commit d3d61446) OK. 직전8(2897-2904) distinct=5(review-code(heavy)5+fix-incident(heavy)1+operational-analysis(lite)1+skill-evolution1+lotto(lite)1 — 실제 distinct count) — 2-chain lock 미충족. gap trigger 4종(fix-incident 7/20·op-analysis 6/25·info-arch 13/30·lotto 3/30) 전부 미근접. cycle 2904 추천대로 review-code(heavy) 소규모 스코프 — `lib/calendar`(101줄)·`lib/observability`(10줄)·`lib/api`(17줄) 3개 디렉토리(파일 수 적어 1 사이클 통합 스윕) 선정.
+- exported symbol 전수(6개: `DayCell`/`MonthInfo`/`getKstMonthInfo`/`buildEmptyGrid`/`captureFallback`/`isOriginAllowed`) 메인 직접 grep 검증(repo 전체 실제 참조 대조, 파일 규모 작아 subagent 위임 없이 직접 처리) — 전부 8~70건 외부 참조 확인, **CONFIRMED_UNUSED 0건**. 3개 디렉토리 모두 이미 깨끗한 상태 확인.
+- 코드 변경 없음(retro-only, clean — cycle 2900 lib/accuracy·picks·dashboard 패턴과 동일). lib/mlb(2904)·lib/analysis+teams(2903) 대형 스코프 이후 소규모 잔여 스코프 3개 소진 완료 — review-code(heavy) export-but-unused 스윕이 apps/moneyball/src/lib 하위 전 디렉토리 탐색 사실상 완료.
+- 다음 사이클 추천 = info-architecture-review(gap 14/30, 다음 사이클 도달 임박 아님이나 review-code lib/ 스코프 소진 이후 자연 전환 후보) 또는 1240회 추첨(9/5 21시) 이후 lotto OOS 검증.
+
 ## v0.5.62.244 — 2026-09-04 (cycle 2904, review-code(heavy): export-but-unused lib/mlb 스코프)
 
 ### review-code(heavy): export-but-unused heuristic lib/mlb 스코프 (cycle 2904, SUCCESS)

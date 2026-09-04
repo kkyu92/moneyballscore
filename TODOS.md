@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/calendar+observability+api 소규모 스윕, RETRO-ONLY clean (cycle 2905, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2904 retro commit d3d61446) OK. 직전8(2897-2904) distinct=5 — 2-chain lock 미충족. gap trigger 4종 전부 미근접. cycle 2904 추천대로 review-code(heavy) 소규모 잔여 스코프 — lib/calendar(101줄)+observability(10줄)+api(17줄) 3개 디렉토리 통합 스윕.
+
+exported symbol 전수(6개) 메인 직접 grep 검증 — 전부 실사용 확인, CONFIRMED_UNUSED 0건. 코드 변경 없음(retro-only, clean — cycle 2900 패턴 재확인). lib/mlb(2904)+lib/analysis+teams(2903) 이후 소규모 잔여 스코프까지 소진 — review-code(heavy) export-but-unused 스윕이 apps/moneyball/src/lib 전 디렉토리 탐색 사실상 완료.
+
+다음 사이클 추천 = info-architecture-review(gap 14/30) 또는 1240회 추첨(9/5 21시) 이후 lotto OOS 검증.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused lib/mlb 스코프 (cycle 2904, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2903 retro commit 1f5b1f91) OK. 직전8(2896-2903) distinct=5 — 2-chain lock 미충족. gap trigger 4종 전부 미근접. cycle 2903 추천대로 review-code(heavy) 신규 스코프 — lib/mlb(18개 파일, 2651줄) 선정 + reviews-data.ts carry-over 정리.
