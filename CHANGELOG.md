@@ -1,3 +1,11 @@
+## v0.5.62.236 — 2026-09-04 (cycle 2896, review-code(heavy): export-but-unused components/ 스코프 10건)
+
+### review-code(heavy): export-but-unused heuristic apps/moneyball components/ 스코프 10건 (cycle 2896, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2895 retro commit 4f682190) OK. 직전8(2888-2895) distinct=4(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 15/20·op-analysis 5/25·info-arch 4/30·lotto 24/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale) organic idea 부재로 skip. cycle 2895 추천대로 review-code(heavy) 계속 — kbo-data 패키지 스코프(lib/agents/backtest/scrapers/context/factors/pipeline/root/analytics/engine) 사실상 완전 소진 확인 후 `packages/kbo-data/src/scrapers/`(비-backtest, 6개 export 후보) 1차 탐색 → `HistoricalGame` 1건만 0-external-hit이나, subagent 재검증 결과 cycle 2833 SUSPICIOUS_GAP 기존 박제 항목과 동일(fetchRetrosheetSeasonGames 자체가 DB-write/CLI/cron 미배선인 선행 이슈, 신규 발견 아님, opportunistic 제거 보류) — kbo-data export-but-unused 스코프 확정 소진.
+- 신규 스코프로 `apps/moneyball/src/components/`(178파일, apps/moneyball 쪽 첫 적용) 전환 — exported type/interface 25개 grep → 10개(`RecapPayload`/`PreviewGame`/`PreviewPayload`/`YesterdayGameSummary`/`LeaderboardSortMode`/`TocItem`/`SearchEntryKind`/`CalibrationSeriesData`/`MatchupMemory`/`NavLink`)만 0-external-hit(전부 정의 파일 내부 전용, `components/` 아래 barrel index.ts 부재 확인). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel 부재 확인 + name-collision 배제 + `ComponentProps<typeof X>` 소비 패턴 확인 + 테스트 import 대조) — 10/10 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean, test 94/94파일 1224/1224 green. `pnpm --filter moneyball exec tsc --noEmit` clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit d5db70b4, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.235 — 2026-09-04 (cycle 2895, review-code(heavy): export-but-unused root/analytics/engine 스코프 7건)
 
 ### review-code(heavy): export-but-unused heuristic root/analytics/engine 스코프 7건 (cycle 2895, SUCCESS)

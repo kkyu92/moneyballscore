@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused components/ 스코프 10건 (cycle 2896, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2895 retro commit 4f682190) OK. 직전8(2888-2895) distinct=4(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 15/20·op-analysis 5/25·info-arch 4/30·lotto 24/30) 전부 미근접. explore-idea saturation 14/15 나 organic idea 부재로 skip. cycle 2895 추천대로 review-code(heavy) 계속.
+
+kbo-data 패키지 전체 export-but-unused 스코프(lib/agents/backtest/scrapers/context/factors/pipeline/root/analytics/engine) 확정 소진 — 마지막 탐색 `scrapers/`(비-backtest) `HistoricalGame` 1건은 cycle 2833 기존 SUSPICIOUS_GAP 박제 항목과 동일(fetchRetrosheetSeasonGames 자체 미배선 선행 이슈)이라 opportunistic 제거 보류. apps/moneyball 쪽 첫 적용으로 `components/`(178파일) 스코프 전환 — exported type/interface 25개 중 10개(`RecapPayload`/`PreviewGame`/`PreviewPayload`/`YesterdayGameSummary`/`LeaderboardSortMode`/`TocItem`/`SearchEntryKind`/`CalibrationSeriesData`/`MatchupMemory`/`NavLink`)만 0-external-hit — 전부 정의 파일 내부 전용, barrel 부재 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel 부재 확인 + name-collision 배제 + ComponentProps 소비 패턴 확인 + 테스트 import 대조) — 10/10 CONFIRMED_UNUSED. export 키워드만 제거.
+
+kbo-data type-check clean, test 94/94파일 1224/1224 green. moneyball type-check clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit d5db70b4, R4 직push.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 미스윕 스코프: apps/moneyball/src/app/api/(route.ts 다수, 미확인) 또는 apps/moneyball/src/hooks/·config/ 소형 스코프 — components/ 나머지 파일들도 158개 잔존이나 대부분 export 없음 확인 필요) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused root/analytics/engine 스코프 7건 (cycle 2895, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2894 retro commit dff29266) OK. 직전8(2887-2894) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 재검산(startswith 매칭 버그 수정, 이전 진단 스크립트가 "fix-incident(lite)" 같은 접미사 붙은 값을 못 잡던 문제 발견/수정) — fix-incident 14/20·op-analysis 4/25·info-arch 3/30·lotto 23/30 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative — organic idea 부재로 skip. cycle 2894 추천대로 root files(`types.ts`/`big-match.ts`/`index.ts`) + `analytics/`·`engine/` 착수.
