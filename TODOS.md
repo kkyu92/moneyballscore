@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused pipeline/ 스코프 8건 (cycle 2894, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user-step). 2차 방어선(cycle 2893 retro commit b54f3c8a) OK. 직전8(2886-2893) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 13/20·op-analysis 3/25·info-arch 2/30·lotto 22/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.4h 신선) organic idea 부재로 skip. cycle 2893 next_recommended대로 `packages/kbo-data/src/pipeline/` (28파일, 7950줄, 가장 큰 미탐색 스코프) 착수.
+
+`pipeline/` exported type/interface 27개 grep → 21개 후보 중 8개(`SummaryPrediction`/`ModelVersionDecision`/`FinalReasoning`/`SaveResult`/`SparsePredictionAlertMeta`/`LiveUpdateResult`/`ShouldPredictReason`/`ShouldPredictResult`)만 0-external-hit(전부 정의 파일 내부 함수 시그니처 전용, `packages/kbo-data/src/index.ts` 재export 목록에 부재 확인). general-purpose subagent 독립 재검증(전체 repo 재grep + 3개 barrel index.ts 대조 + name-collision 배제 + 테스트 import 대조, 문서 텍스트 히트는 배제) — 8/8 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+
+kbo-data type-check clean, test 94/94파일 1224/1224 green. moneyball type-check clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit 34dd01da, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 미스윕 스코프: `analytics/`(5)·`engine/`(3)·`features/`(1)·`notify/`(0, 이미 clean)·root files(types.ts/big-match.ts/index.ts 등, 36개) — root files 가 다음 최대 미탐색 스코프) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused factors 스코프 3건 (cycle 2893, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2892 retro commit 9ed3ddcf) OK. 직전8(2885-2892) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 실제 incident 부재/op-analysis 2/25/info-arch 1/30/lotto 21/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative — organic idea 부재로 skip. `lib/`·`agents/`·`scrapers/backtest/` 스코프 소진 확정 후 cycle 2892 추천대로 review-code(heavy) 계속, 신규 미스윕 스코프(`packages/kbo-data/src/{context,factors}/`) 탐색.

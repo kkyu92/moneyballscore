@@ -1,3 +1,11 @@
+## v0.5.62.234 — 2026-09-04 (cycle 2894, review-code(heavy): export-but-unused pipeline/ 스코프 8건)
+
+### review-code(heavy): export-but-unused heuristic pipeline/ 스코프 8건 (cycle 2894, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user-step). 2차 방어선(cycle 2893 retro commit b54f3c8a) OK. 직전8(2886-2893) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 13/20·op-analysis 3/25·info-arch 2/30·lotto 22/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.4h 신선) organic idea 부재로 skip. cycle 2893 next_recommended대로 `packages/kbo-data/src/pipeline/`(28파일, 7950줄, 가장 큰 미탐색 스코프) 착수.
+- `pipeline/` exported type/interface 27개 grep(21개 인터페이스/타입 후보) → 8개(`SummaryPrediction`/`ModelVersionDecision`/`FinalReasoning`/`SaveResult`/`SparsePredictionAlertMeta`/`LiveUpdateResult`/`ShouldPredictReason`/`ShouldPredictResult`)만 0-external-hit(전부 정의 파일 내부 함수 시그니처 전용, `index.ts` 재export 목록 부재 확인). general-purpose subagent 독립 재검증(전체 repo 재grep + 3개 barrel index.ts 대조 + name-collision 배제 + 테스트 import 대조, 문서 텍스트 히트 배제) — 8/8 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean, test 94/94파일 1224/1224 green. `pnpm --filter moneyball exec tsc --noEmit` clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit 34dd01da, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.233 — 2026-09-04 (cycle 2893, review-code(heavy): export-but-unused factors 스코프 3건)
 
 ### review-code(heavy): export-but-unused heuristic factors 스코프 3건 (cycle 2893, SUCCESS)
