@@ -101,7 +101,7 @@ export interface TodayGameCard {
   status: string | null;
 }
 
-export interface TodayAnalysisData {
+interface TodayAnalysisData {
   bigMatchId: number | null;
   bigMatchMode: string | undefined;
   bigMatchHomeCode: TeamCode | null;
@@ -371,7 +371,7 @@ export async function getYesterdayGames(): Promise<YesterdayGameCard[]> {
   return cards;
 }
 
-export interface ThisWeekGameCard {
+interface ThisWeekGameCard {
   gameId: number;
   gameDate: string;
   homeCode: TeamCode;
@@ -807,7 +807,7 @@ export async function getPeriodStats(startDate: string, endDate: string): Promis
   return { total, correct };
 }
 
-export interface BestPickCard {
+interface BestPickCard {
   gameId: number;
   gameDate: string;
   homeCode: TeamCode;
