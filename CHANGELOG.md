@@ -1,3 +1,11 @@
+## v0.5.62.219 — 2026-09-04 (cycle 2879, polish-ui(2-chain lock fallback): matchup loading skeleton 3건 SUCCESS)
+
+### polish-ui(2-chain lock fallback): matchup 라우트 loading.tsx 신설 3건 (cycle 2879, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2878 retro commit 59352de7) OK. 직전8(2871-2878) distinct=2(review-code(heavy)7+lotto1) — **2-chain lock 발동** (review-code(heavy)/lotto 둘 다 후보 제외, cooldown N=1). 잔여 pool 재검토: fix-incident gap 34/20 이나 `gh run list`/`gh run list --json conclusion` 재확인 failure 0건 실제 incident 부재. op-analysis gap 10/25, info-arch gap 19/30 전부 미근접. explore-idea saturation 1/15 미충족. DESIGN.md mtime 1.6일 신선(4주 미만). "신규 라우트 7일 안 ≥3" find 결과는 최근 review-code(heavy) export 제거 리팩터 커밋들이 거의 모든 page.tsx mtime 을 touch 해 발생한 false positive(내용 변경 아닌 refactor 부수효과)로 배제. 어떤 chain 도 실trigger 없어 lock 규칙에 따라 polish-ui 강제 발화.
+- `find apps/moneyball/src/app -name page.tsx` 순회해 loading.tsx 부재 디렉토리 전수 조사 (Next.js loading.tsx 는 하위 트리 상속이라 부모 세그먼트 1개면 충분 — players/loading.tsx 가 players/[id] 커버하는 것과 동일 원리). matchup/[teamA]/[teamB] (KBO, 559줄) + mlb/matchup/[teamA]/[teamB] (560줄) + en/mlb/matchup/[teamA]/[teamB] (620줄) 3개 페이지 모두 9개 병렬 DB fetch(profile/factorA/factorB/formA/formB/upcomingMatchup/strongH2H/completeH2H/eloTrend) 하는 async server component — mlb games/mlb analysis/players/standings 등 기존 loading.tsx 적용 패턴(DB 헤비 dynamic route)과 동일 조건인데 loading.tsx 부재 확인. 3개 파일 3개 세그먼트(matchup/loading.tsx, mlb/matchup/loading.tsx, en/mlb/matchup/loading.tsx)에 동일 skeleton(헤더+4개 섹션 placeholder) 추가 — 3 파일 동일 패턴 단일 논리 단위로 1 commit.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 50f59f79, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.218 — 2026-09-04 (cycle 2878, review-code(heavy): export-but-unused analysis 3건 SUCCESS)
 
 ### review-code(heavy): export-but-unused heuristic analysis 스코프 3건 (cycle 2878, SUCCESS)
