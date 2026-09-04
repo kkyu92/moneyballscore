@@ -1,3 +1,12 @@
+## v0.5.62.222 — 2026-09-04 (cycle 2882, review-code(heavy): export-but-unused hub-dispatch/tabpfn 9건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic hub-dispatch/tabpfn 스코프 9건 (cycle 2882, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(23개 전부 archived/completed/status 진행 중 — approved 0건). 2차 방어선(cycle 2881 retro commit b030e696) OK. 직전8(2874-2881) distinct=3(review-code(heavy)6+polish-ui(2-chain lock fallback)1+fix-incident(lite)1) — 2-chain lock 미발동(distinct 계산 시 괄호 suffix 문자열까지 포함해 3種으로 셈, 실질 lock 없음). fix-incident gap 1/20(직전 cycle 2881 자체 발화), op-analysis gap 13/25, info-arch gap 22/30, lotto gap 10/30, explore-idea saturation 1/15 — 전부 미근접. `gh run list --json conclusion` 재확인 실패 0건.
+- 기존 export-but-unused 스윕이 accuracy/analysis/api/backtest/dashboard/debug/insights/leaderboard/lotto/matchup/mlb/picks/players/reviews/seo·seasons·changelog/standings/teams 스코프를 이미 소진(commit history 전수 확인) — `apps/moneyball/src/lib/matchup/buildMatchupProfile.ts`(584줄)·`buildMlbMatchupProfile.ts`(515줄) 재확인 결과 exported type(`MatchupGame`/`MlbMatchupGame`) 모두 cross-file 사용 확인되어 clean(0건). 신규 미감사 스코프 탐색 — `lib/` 하위 디렉토리 전수 대조로 calendar/observability/predictions/stats/v2-shadow-monitor/feature-flags.ts/hub-dispatch.ts/tabpfn-export.ts/tabpfn-import.ts/weather.ts 발견.
+- 이 중 exported type/interface 후보 grep → calendar(DayCell/MonthInfo)/predictions(V2PreviewResult)/v2-shadow-monitor(CohortDoc)/weather(WeatherSlot)는 repo 전수 grep 상 cross-file 사용(2~4개 파일) 확인되어 스킵. `hub-dispatch.ts`(HubDispatchPayload/HubEventType)+`tabpfn-export.ts`(RowResult/ExtractFactorsResult)+`tabpfn-import.ts`(TabpfnOutputRow/TabpfnParseResult/TabpfnRowDropReason/TabpfnRowResult/TabpfnPredictionInsert) 9개 심볼만 정의 파일 밖 import 0건(scripts/ 포함 전수 grep, PredictionExportRow/DropReason 은 scripts/export-predictions-tabpfn.ts 가 실제 import 하고 있어 후보에서 제외 — 최초 판단 오류 자체 정정). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 + name collision 배제 + 테스트 파일 import 대조) — 9/9 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 6b86e392, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.221 — 2026-09-04 (cycle 2881, fix-incident(lite): 20-cycle 주기보정 재확인 SUCCESS)
 
 ### fix-incident(lite): 20-cycle 주기보정 재확인 (cycle 2881, SUCCESS)

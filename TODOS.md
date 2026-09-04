@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic hub-dispatch/tabpfn 스코프 9건 (cycle 2882, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23(23개 전부 archived/completed 류, approved 0건). 2차 방어선(cycle 2881 retro commit b030e696) OK. 직전8(2874-2881) distinct=3(review-code(heavy)6+polish-ui(2-chain lock fallback)1+fix-incident(lite)1) — 2-chain lock 미발동. fix-incident gap 1/20(직전 cycle 자체 발화), op-analysis 13/25, info-arch 22/30, lotto 10/30, explore-idea saturation 1/15 — 전부 미근접. `gh run list` 재확인 실패 0건.
+
+기존 export-but-unused 스윕이 대부분 스코프(accuracy/analysis/api/dashboard/debug/insights/leaderboard/lotto/matchup/mlb/picks/players/reviews/seo·seasons·changelog/standings/teams) 소진 확인 — matchup(lib) buildMatchupProfile.ts/buildMlbMatchupProfile.ts 재확인은 clean(0건, MatchupGame/MlbMatchupGame 모두 cross-file 사용). `lib/` 하위 디렉토리 전수 대조로 신규 미감사 스코프(calendar/observability/predictions/stats/v2-shadow-monitor/feature-flags.ts/hub-dispatch.ts/tabpfn-export.ts/tabpfn-import.ts/weather.ts) 발견. calendar/predictions/v2-shadow-monitor/weather 는 cross-file 사용 확인되어 스킵. `hub-dispatch.ts`(HubDispatchPayload/HubEventType)+`tabpfn-export.ts`(RowResult/ExtractFactorsResult)+`tabpfn-import.ts`(5개 타입) 9개 심볼만 정의 파일 밖 import 0건 확인(scripts/ 포함 전수 grep — PredictionExportRow/DropReason 은 실제 scripts 에서 import 되어 후보 제외, 최초 판단 자체 정정). general-purpose subagent 독립 재검증 — 9/9 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 6b86e392, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 남은 신규 스코프(calendar/observability/predictions/stats/v2-shadow-monitor/weather — export 자체는 clean 확인됐으나 함수/로직 레벨 silent drift 재감사 여지) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — fix-incident(lite): 20-cycle 주기보정 재확인 (cycle 2881, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2880 retro commit dbc2ad18) OK. 직전8(2873-2880) distinct=2(review-code(heavy)7+polish-ui1) — **2-chain lock 발동**, 둘 다 제외(cooldown N=1). fix-incident 자체 gap 36/20(last fire cycle 2845) — trigger(7) 충족, lite 자동 권장. lock 제외 후 잔여 pool 전수 재확인: op-analysis 12/25, info-arch 21/30(reviews/weekly·monthly breadcrumb 누락은 sitemap.ts 주석상 redirect-only stub — false positive 배제), lotto 9/30(9/5 draw 대비 picks·직전 result 양쪽 이미 완료), explore-idea saturation 1/15, DESIGN.md 1.6일 신선, 신규 라우트 33건은 review-code(heavy) 리팩터 mtime 부수효과(false positive) — 전부 미근접. expand-scope 구조 조건(직전4 전부 small-fix) 형식상 매칭되나 `/office-hours` AskUserQuestion 자동 fire hang 위험으로 미채택. lock 규칙3(트리거 없으면 polish-ui 강제)은 이번엔 polish-ui 자체가 잠긴 chain 이라 자기모순 — non-locked 이며 유효한 fix-incident 자체 gap trigger 우선 채택.
