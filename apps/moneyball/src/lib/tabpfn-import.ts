@@ -17,21 +17,21 @@ import { NEUTRAL_FACTOR } from '@moneyball/shared';
 
 export const TABPFN_OUTPUT_HEADER = 'game_id,tabpfn_home_win_prob';
 
-export type TabpfnOutputRow = {
+type TabpfnOutputRow = {
   game_id: number;
   tabpfn_home_win_prob: number;
 };
 
-export type TabpfnParseResult =
+type TabpfnParseResult =
   | { ok: true; rows: TabpfnOutputRow[] }
   | { ok: false; error: string };
 
-export type TabpfnRowDropReason =
+type TabpfnRowDropReason =
   | 'invalid_game_id'
   | 'invalid_prob'
   | 'prob_out_of_range';
 
-export type TabpfnRowResult =
+type TabpfnRowResult =
   | { ok: true; row: TabpfnOutputRow }
   | { ok: false; reason: TabpfnRowDropReason };
 
@@ -86,7 +86,7 @@ export function parseTabpfnOutputCsv(csv: string): TabpfnParseResult {
 }
 
 /** predictions table upsert shape — subset required for tabpfn-shadow insert. */
-export type TabpfnPredictionInsert = {
+type TabpfnPredictionInsert = {
   game_id: number;
   scoring_rule: 'tabpfn-shadow';
   prediction_type: 'pre_game';

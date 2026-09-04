@@ -62,11 +62,11 @@ export type DropReason =
   | 'no_winner_team_id'
   | 'is_correct_null';
 
-export type RowResult =
+type RowResult =
   | { ok: true; line: string }
   | { ok: false; reason: DropReason };
 
-export type ExtractFactorsResult =
+type ExtractFactorsResult =
   | { ok: true; factors: Record<string, number> }
   | { ok: false; reason: DropReason };
 

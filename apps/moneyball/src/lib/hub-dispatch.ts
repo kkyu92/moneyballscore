@@ -19,7 +19,7 @@ import { scrubUrlString } from '@/sentry-scrub';
  * 허브 `auto-ingest.yml` 이 읽는 client_payload 필수/선택 필드.
  * 변경 시 hub 쪽도 동기화 필요.
  */
-export interface HubDispatchPayload {
+interface HubDispatchPayload {
   /** 워커 레포 (`owner/repo`). */
   source_repo: string;
   /** Issue 제목 재료 (허브가 앞에 "🟡 Inbound raw:" 같은 prefix 붙임). */
@@ -43,7 +43,7 @@ export interface HubDispatchPayload {
 }
 
 /** repository_dispatch event_type (허브 auto-ingest 구독 키). */
-export type HubEventType = 'worker-error' | 'worker-incident' | 'worker-lesson';
+type HubEventType = 'worker-error' | 'worker-incident' | 'worker-lesson';
 
 /** type → event_type 매핑. */
 export function mapEventType(type: HubDispatchPayload['type']): HubEventType {
