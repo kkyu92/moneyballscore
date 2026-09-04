@@ -1,3 +1,11 @@
+## v0.5.62.217 — 2026-09-04 (cycle 2877, review-code(heavy): export-but-unused dashboard 2건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic dashboard 스코프 2건 (cycle 2877, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2876 retro commit 77f6d35e) OK. 직전8(2869-2876) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+lotto1) — 2-chain lock 미발동. fix-incident gap 20+ 나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis gap 24/25, info-arch gap 16/30, lotto gap 4/30 전부 미근접. explore-idea saturation 1/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+- players/standings 스코프 먼저 grep — 전부 cross-file import 확인되어 유지(0건). dashboard 스코프 exported type/interface 9개 grep → ValidatorLogInput/DailyAccuracyPoint/ConfidenceBucketResult/FactorSample/CalibrationBucket/PredictionRow 6개는 cross-file import 확인되어 유지. `DayBucket`+`HallucinationStats`(buildHallucinationStats.ts)는 자기 파일 내부 전용 사용만 확인 — 동명 독립 정의(lib/accuracy/buildAccuracyData.ts 의 로컬 DayBucket, packages/kbo-data/src/context/measurement.ts 의 독립 HallucinationStats)와 착각 없음을 확인. general-purpose subagent 독립 재검증(barrel/index.ts 부재 + 두 동명 정의 비-shadow 확인) — 2/2 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit b66838ff, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.216 — 2026-09-04 (cycle 2876, review-code(heavy): export-but-unused mlb 1건 SUCCESS)
 
 ### review-code(heavy): export-but-unused heuristic mlb 스코프 1건 (cycle 2876, SUCCESS)
