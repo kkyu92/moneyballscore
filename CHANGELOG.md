@@ -1,3 +1,14 @@
+## v0.5.62.226 — 2026-09-04 (cycle 2886, review-code(heavy): postview.ts parse silent fallback + agent_memories upsert Sentry 가시성 추가)
+
+### review-code(heavy): agents/(postview/retro/personas/llm/mlb-retro) 재감사, postview 3-agent family 5번째 gap 발견 (cycle 2886, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2885 retro commit e3d7f404) OK. 직전8(2878-2885) distinct=3(review-code(heavy)7+polish-ui1) — 2-chain lock 미발동. fix-incident gap 5/20, op-analysis gap 17/25, info-arch gap 26/30, lotto gap 14/30, explore-idea saturation 0/15 — 전부 미근접. DESIGN.md 1.6일 신선. cycle 2885 retro 추천대로 agents/ 잔여 파일(postview.ts/retro.ts/personas.ts/llm.ts/mlb-retro.ts) 재감사 착수(code-reviewer agent 위임).
+- `postview.ts` `parseTeamPostview`/`parseJudgePostview` catch 블록이 judge-agent/calibration-agent/team-agent(cycle 1400/2885)와 완전 동일한 구조로 JSON 파싱 실패 시 raw text slice 를 정상 파싱 결과처럼 반환 — `evaluateAndCaptureAgentFallback`(`r.data==null` 검사)도 못 잡는 무신호 경로였음(두 함수 모두 throw 없이 항상 non-null 객체 반환). `validator.ts` 에 `captureTeamPostviewParseFallback`/`captureJudgePostviewParseFallback` 신규 추가 + 양쪽 함수에 `gameId` 파라미터(옵션, 기본값 null — 기존 시그니처 호출부/테스트 호환) 추가해 catch 안에서 호출.
+- `retro.ts`/`mlb-retro.ts` `generateAgentMemories`/`generateMlbAgentMemories` 의 `agent_memories` upsert 실패 catch 가 `console.error` 만 하고 Sentry capture 부재(Cloudflare Workers cron 환경에서 alert 안 잡힘, `captureAgentFallback` 주석과 동일 근거) — `captureAgentMemoryUpsertFallback` 신규 추가(KBO/MLB 양쪽 재사용, `league` 태그로 구분).
+- `llm.ts` `callClaude` 위 docstring "재시도 최대 3회" 가 stale(cycle 2653 fix 당시 파일 상단 주석만 "4회"로 갱신되고 함수 docstring 누락, 실제 `MAX_ATTEMPTS = LLM_RETRY_BACKOFF_MS.length + 1 = 4`) — 4회로 정정.
+- `personas.ts` 는 순수 프롬프트 상수만, 감사 결과 clean.
+- `pnpm --filter @moneyball/kbo-data type-check` clean, `test` 94/94파일 1224/1224 green, `lint` 0 errors, `pnpm --filter moneyball exec tsc --noEmit` clean.
+
 ## v0.5.62.225 — 2026-09-04 (cycle 2885, review-code(heavy): team-agent.ts parseResponse silent fallback fix — judge-agent P2 family 미패치 발견)
 
 ### review-code(heavy): team-agent.ts parseResponse catch silent fallback 패치 (cycle 2885, SUCCESS)

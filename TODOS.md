@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): postview.ts parse silent fallback + agent_memories upsert Sentry 가시성 (cycle 2886, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2885 retro commit e3d7f404) OK. 직전8(2878-2885) distinct=3(review-code(heavy)7+polish-ui1) — 2-chain lock 미발동. fix-incident gap 5/20, op-analysis gap 17/25, info-arch gap 26/30, lotto gap 14/30, explore-idea saturation 0/15 — 전부 미근접. cycle 2885 retro 추천대로 agents/ 잔여 파일(postview.ts/retro.ts/personas.ts/llm.ts/mlb-retro.ts) 재감사 — code-reviewer subagent 위임, 5파일 전체 read 지시.
+
+postview.ts 의 parseTeamPostview/parseJudgePostview 가 team-agent/judge-agent/calibration-agent 와 동일 구조(JSON 파싱 실패 시 generic filler 를 정상 데이터처럼 반환, throw 없어 evaluateAndCaptureAgentFallback 도 못 잡음)의 5번째 사례로 발견 — 3-agent family 가 postview 레이어에도 그대로 존재했음. captureTeamPostviewParseFallback/captureJudgePostviewParseFallback 신규 + gameId optional 파라미터 추가.
+
+retro.ts/mlb-retro.ts 의 agent_memories upsert 실패 catch 가 console.error 만(Sentry 부재) — captureAgentMemoryUpsertFallback 신규(양쪽 재사용). llm.ts callClaude docstring "3회" stale(실제 4회, cycle 2653 파일 상단만 갱신됐던 잔여 미스매치) 정정. personas.ts clean.
+
+type-check/test(1224/1224)/lint/app tsc 전부 clean. R4 직push(단일 논리 단위, PR 생략, commit b311c092).
+
+다음 사이클 추천 = apps/moneyball/src/app/ 라우트 page.tsx 로직 레벨 재감사(agents/ 핵심 파일 8종 전체 소진 확정) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): team-agent.ts parseResponse silent fallback fix (cycle 2885, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2884 retro commit 1fa14366) OK. 직전8(2877-2884) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 4/20, op-analysis 16/25, info-arch 25/30, lotto 13/30, explore-idea saturation 1/15 — 전부 미근접. cycle 2884 retro 추천대로 agents/ 잔여 파일(judge-agent.ts/team-agent.ts/postview.ts/retro.ts/personas.ts/llm.ts) 재감사.
