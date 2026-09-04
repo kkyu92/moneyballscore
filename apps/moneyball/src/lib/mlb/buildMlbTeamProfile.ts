@@ -40,7 +40,7 @@ interface MlbTeamRecentGame {
   status: string | null;
 }
 
-export interface MlbTeamFactorAverages {
+interface MlbTeamFactorAverages {
   spFip: number | null;
   lineupWoba: number | null;
   bullpenFip: number | null;
