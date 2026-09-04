@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): accuracy/lotto-methodology 페이지 사실 오류 2건 정정 (cycle 2888, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2887 retro commit fcc7b6a9) OK. 직전8(2880-2887) distinct=2(review-code(heavy)7+fix-incident(lite)1) — 2-chain lock 조건(distinct≤2) 충족했으나 locked chain 에 fix-incident 포함 → 안전 우선 규칙에 따라 lock 무시. explore-idea saturation 15/15 도달했으나 4-source 재확인 negative(open issue 0, plan approved 0, TODOS Next-Up stale, DESIGN.md 39h 신선) — organic idea 부재로 skip. dominance-positive streak 자연 지속 → cycle 2887 next_recommended 대로 accuracy/page.tsx(1236줄) + lotto/methodology/page.tsx(533줄) 전수 감사(code-reviewer subagent 위임, 소스 대조 지시).
+
+accuracy/page.tsx:1000 서술 오류 — 팀 매치업 카드 dimming 임계값을 "n=1 결과만 연하게 표시"라 적었으나 실제 `TeamMatchupCards.tsx`는 `SMALL_SAMPLE_N=5` 기준으로 n<5 전부(즉 n=1~4) dimming 처리. 사용자가 n=2~4 결과를 충분한 표본으로 오인할 위험 있는 서술 정정.
+
+lotto/methodology/page.tsx:499-502 서술 오류 — 개인 사용 기록 archive를 "비공개 보관 + 검색 색인 차단(noindex)"이라 적었으나, 실제로는 `archive/page.tsx`/`archive/[date]/page.tsx` 양쪽 모두 `index:true` 명시 + `sitemap.ts`에 전체 회차가 색인 등재(코드 주석 "회차별 archive 색인 활성")되어 있어 정반대 상태. 서술을 실제 상태(공개 색인)로 정정하고, 모순되던 내부 링크의 `rel="nofollow"`도 함께 제거.
+
+type-check clean, lint 0 errors(무관 warning 1건 유지), test 582파일/4564건 green. R4 직push(단일 논리 단위, PR 생략, commit cb0a19ae).
+
+다음 사이클 추천 = review-code(heavy) 계속(사용자 가시 대형 페이지 잔여 스코프 탐색) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): methodology 페이지 3건 정정 + EN MLB 번역 누락 보강 (cycle 2887, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2886 retro commit c4401d7d) OK. 직전8(2879-2886) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 6/20, op-analysis gap 18/25, info-arch gap 27/30, lotto gap 15/30 — 전부 미근접. agents/ 핵심 파일 소진(cycle 2886 완료) 확정 후 cycle 2886 retro 추천대로 사용자 가시 methodology 페이지로 스코프 확장(code-reviewer agent 위임, methodology/page.tsx + mlb/methodology/page.tsx + en/mlb/methodology/page.tsx 전체 read 지시).

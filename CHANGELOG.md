@@ -1,3 +1,12 @@
+## v0.5.62.228 — 2026-09-04 (cycle 2888, review-code(heavy): accuracy/lotto-methodology 페이지 사실 오류 2건 정정)
+
+### review-code(heavy): accuracy/lotto-methodology 페이지 실제 코드 대조 감사 (cycle 2888, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2887 retro commit fcc7b6a9) OK. 직전8(2880-2887) distinct=2(review-code(heavy)7+fix-incident(lite)1) — 2-chain lock 조건 충족했으나 locked chain 에 fix-incident 포함되어 lock 무시. explore-idea saturation 15/15 도달했으나 4-source 재확인 negative(open issue 0, plan approved 0, TODOS Next-Up stale, DESIGN.md 39h 신선) — organic idea 부재로 skip. dominance-positive streak 자연 지속 — cycle 2887 추천대로 accuracy/page.tsx(1236줄) + lotto/methodology/page.tsx(533줄) 감사(code-reviewer agent 위임).
+- `apps/moneyball/src/app/accuracy/page.tsx:1000` 팀 매치업 카드 dimming 임계값 서술 "n=1 결과만 연하게 표시" 가 실제 `TeamMatchupCards.tsx` 의 `SMALL_SAMPLE_N=5`(n<5 전부 dimming) 기준과 불일치 — n=2~4 결과를 사용자가 신뢰 가능한 표본으로 오인 가능했던 서술 정정.
+- `apps/moneyball/src/app/lotto/methodology/page.tsx:499-502` 개인 사용 기록 archive 를 "비공개 보관 + 검색 색인 차단(noindex)" 이라 서술하나, `archive/page.tsx` + `archive/[date]/page.tsx` 양쪽 모두 `index:true` 명시 + `sitemap.ts` 에 전체 회차 색인 등재(주석 "회차별 archive 색인 활성") — 실제로는 공개 색인 상태. 서술 정정 + 모순되는 링크의 `rel="nofollow"` 도 제거.
+- `pnpm --filter moneyball type-check` clean, `pnpm --filter moneyball lint` 0 errors(기존 무관 warning 1건 유지), `pnpm --filter moneyball test` 582파일/4564건 green.
+
 ## v0.5.62.227 — 2026-09-04 (cycle 2887, review-code(heavy): methodology 페이지 3건 정정 + EN MLB 번역 누락 보강)
 
 ### review-code(heavy): methodology/mlb-methodology 페이지 실제 코드 대조 감사 (cycle 2887, SUCCESS)
