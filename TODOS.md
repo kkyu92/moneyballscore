@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused lib/mlb 스코프 (cycle 2904, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2903 retro commit 1f5b1f91) OK. 직전8(2896-2903) distinct=5 — 2-chain lock 미충족. gap trigger 4종 전부 미근접. cycle 2903 추천대로 review-code(heavy) 신규 스코프 — lib/mlb(18개 파일, 2651줄) 선정 + reviews-data.ts carry-over 정리.
+
+exported symbol 전수 subagent 독립 검증 → CONFIRMED_UNUSED 6건: `buildMlbMatchupProfile.ts` 내부 helper 6개(자기 파일 안에서만 사용) — de-export 처리. `reviews-data.ts` `MlbReviewsData` type = 진짜 dead code(export 도 안 됐고 참조 0건) → 삭제. tsc clean + test 582/582·4564/4564 green. PR #3079 squash 머지 완료(MERGED 실측 확인, `20b544fc`).
+
+다음 사이클 추천 = review-code(heavy) 계속(api/calendar/observability 소규모 스윕) 또는 info-architecture-review(gap 13/30)/1240회 추첨(9/5 21시) 후 lotto OOS.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused lib/analysis+teams 스코프 (cycle 2903, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2902 retro commit a7269186) OK. 직전8(2895-2902) distinct=5 — 2-chain lock 미충족. gap trigger 4종 전부 미근접. cycle 2900/2901 추천대로 review-code(heavy) 신규 스코프 — lib/analysis(2550줄)+lib/teams(1710줄) 선정.

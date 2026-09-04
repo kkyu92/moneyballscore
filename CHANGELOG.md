@@ -1,3 +1,13 @@
+## v0.5.62.244 — 2026-09-04 (cycle 2904, review-code(heavy): export-but-unused lib/mlb 스코프)
+
+### review-code(heavy): export-but-unused heuristic lib/mlb 스코프 (cycle 2904, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 no-status/completed/doc_only). 2차 방어선(cycle 2903 retro commit 1f5b1f91) OK. 직전8(2896-2903) distinct=5(review-code(heavy)4+fix-incident(heavy)1+operational-analysis(lite)1+skill-evolution1+lotto(lite)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 6/20·op-analysis 5/25·info-arch 12/30·lotto 2/30) 전부 미근접. cycle 2903 추천대로 review-code(heavy) 신규 스코프 — `lib/mlb`(18개 파일, 2651줄, 전 사이클 미탐색) 선정 + carry-over `reviews-data.ts` unused-var 정리.
+- exported symbol 전수(lib/mlb 18개 파일) general-purpose subagent 독립 검증(repo 전체 실제 import 구문 대조). **CONFIRMED_UNUSED 6건**: `buildMlbMatchupProfile.ts` 내부 helper 6개(`computeMlbMatchupStreak`/`computeMlbMatchupRecentRecord`/`computeMlbMatchupAvgMargin`/`computeMlbMatchupBlowoutCount`/`computeMlbMatchupCloseGameCount`/`computeMlbMatchupHomeAwayEdge`) — 자기 파일 안 `buildMlbMatchupProfile()` 에서만 호출, 테스트 파일도 `buildMlbMatchupProfile` 만 import. `export` 키워드 제거(로컬 함수로 유지, 삭제 아님).
+- carry-over: `apps/moneyball/src/app/mlb/reviews/reviews-data.ts:59` `MlbReviewsData` type — export 도 안 됐고 repo 전체 참조 0건(진짜 dead code) 확인 후 선언 자체 삭제.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm test` 582/582 files·4564/4564 tests green, eslint clean. PR #3079 squash 머지(`20b544fc`, `state=MERGED` 실측 확인).
+- 다음 사이클 추천 = review-code(heavy) 계속(api/calendar/observability — 파일 수 적어 소규모 스윕) 또는 info-architecture-review(gap 13/30)/1240회 추첨(9/5 21시) 후 lotto OOS 검증 자연 대기.
+
 ## v0.5.62.243 — 2026-09-04 (cycle 2903, review-code(heavy): export-but-unused lib/analysis+teams 스코프)
 
 ### review-code(heavy): export-but-unused heuristic lib/analysis·lib/teams 스코프 (cycle 2903, SUCCESS)
