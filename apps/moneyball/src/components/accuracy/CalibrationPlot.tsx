@@ -16,7 +16,7 @@ import type { CalibrationBucket } from "@/lib/dashboard/compareModels";
 import { brand, neutral, semantic } from "@/lib/design-tokens";
 import { ChartTooltip } from "@/components/dashboard/ChartTooltip";
 
-export interface CalibrationSeriesData {
+interface CalibrationSeriesData {
   label: string;
   color: string;
   buckets: CalibrationBucket[];

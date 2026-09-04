@@ -8,7 +8,7 @@ import { useUserPicks } from '@/hooks/use-user-picks';
 import { buildPickEntries, buildPicksStats } from '@/lib/picks/buildPicksStats';
 import type { PickGameResult } from '@/app/api/picks/results/route';
 
-export interface YesterdayGameSummary {
+interface YesterdayGameSummary {
   id: number;
   home_score: number | null;
   away_score: number | null;

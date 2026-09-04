@@ -1,11 +1,11 @@
-export interface RecapPayload {
+interface RecapPayload {
   date: string;
   games: number;
   correct: number;
   brier: number;
 }
 
-export interface PreviewGame {
+interface PreviewGame {
   home: string;
   away: string;
   predicted: string;
@@ -13,7 +13,7 @@ export interface PreviewGame {
   bigGame: boolean;
 }
 
-export interface PreviewPayload {
+interface PreviewPayload {
   date: string;
   games: PreviewGame[];
 }

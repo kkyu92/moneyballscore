@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import { USER_LEADERBOARD_DISPLAY_LIMIT } from '@moneyball/shared';
 
-export type LeaderboardSortMode = 'accuracy' | 'streak' | 'sample';
+type LeaderboardSortMode = 'accuracy' | 'streak' | 'sample';
 
 const STORAGE_SORT = 'mb_leaderboard_sort_v1';
 

@@ -7,7 +7,7 @@ import { NavLinks } from "./NavLinks";
 import { LeagueSelector, type League } from "./LeagueSelector";
 import type { NavIconName } from "./nav-icon";
 
-export type NavLink = {
+type NavLink = {
   href: string;
   label: string;
   enLabel?: string;

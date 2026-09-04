@@ -16,7 +16,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import * as Sentry from "@sentry/nextjs";
 import { KBO_TEAMS, shortTeamName, type TeamCode, RIVALRY_MEMORY_LIMIT } from "@moneyball/shared";
 
-export interface MatchupMemory {
+interface MatchupMemory {
   teamCode: TeamCode;
   content: string;
   confidence: number;

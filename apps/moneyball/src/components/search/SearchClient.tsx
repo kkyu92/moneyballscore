@@ -35,7 +35,7 @@ function isTeamCode(code: string | null | undefined): code is TeamCode {
  * a11y: role=combobox + aria-activedescendant + aria-expanded.
  */
 
-export type SearchEntryKind = 'team' | 'player' | 'date' | 'page';
+type SearchEntryKind = 'team' | 'player' | 'date' | 'page';
 
 export interface SearchEntry {
   kind: SearchEntryKind;
