@@ -330,7 +330,7 @@ interface GameOverviewInput {
   h2hRate?: number | null;
 }
 
-export interface GameOverview {
+interface GameOverview {
   tags: string[];
   summary: string;
 }
