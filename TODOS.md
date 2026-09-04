@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic debug 스코프 1건 (cycle 2873, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2872 retro commit 8cec6428) OK. 직전8(2865-2872) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+lotto1) — 2-chain lock 미발동. fix-incident gap 28/20 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, deploy-drift-alert success) 실제 incident 부재. op-analysis gap 21/25, info-arch gap 13/30, lotto gap 1/30(직전 사이클 발화) 전부 미근접. DESIGN.md mtime 1.6일 신선(design-system 트리거 X). explore-idea saturation 3/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 apps/moneyball/src/lib/debug/ 신규 스코프로 계속.
+
+apps/moneyball/src/lib/debug/ 스코프 exported type/interface 5개 grep → PredictionForFallback / PredictionFactorRow / PipelineRunForDrift / RejectReasonCell 4개는 실제 cross-file import(각 page.tsx) 확인되어 유지. SkippedEntry(pipelineStats.ts)는 app/debug/pipeline/page.tsx 안 동명 로컬 interface(line 41)와 이름만 겹치는 false-positive — 실제 import 목록엔 RejectReasonCell 만 존재, SkippedEntry 는 pipelineStats.ts 내부 전용 사용만 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + 테스트 파일 type import 여부) — 1/1 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit ff2c8b15, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 잔여 스코프 계속(insights/matchup/mlb/observability/reviews/seasons/seo/stats/supabase/teams/changelog/calendar 다수 미탐) 또는 lotto gap 근접(2/30, 9/5 토 draw 당일 이후 OOS 검증 자연 트리거 예상).
+
 ## 🟢 SUCCESS — lotto (lite): 30-cycle gap trigger 정확 도달 재검증 (cycle 2872, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2871 retro commit 09d0e634) OK. 직전8(2864-2871) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미발동. fix-incident gap 20/20 도달했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, in_progress는 정상 push CI) 실제 incident 부재. op-analysis 3/25, info-arch 12/30 전부 미근접. lotto gap 30/30 정확 도달(마지막 발화 cycle 2842, cycle 772 주기보정 룰) — 유일하게 정확히 임계 충족.

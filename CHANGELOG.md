@@ -1,5 +1,11 @@
 ## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
 
+### review-code(heavy): export-but-unused heuristic debug 스코프 1건 (cycle 2873, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2872 retro commit 8cec6428) OK. 직전8(2865-2872) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+lotto1) — 2-chain lock 미발동. fix-incident gap 28/20 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, deploy-drift-alert success) 실제 incident 부재. op-analysis gap 21/25, info-arch gap 13/30, lotto gap 1/30(직전 사이클 발화) 전부 미근접. DESIGN.md mtime 1.6일 신선. explore-idea saturation 3/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+- apps/moneyball/src/lib/debug/ 스코프 exported type/interface 5개 grep → PredictionForFallback(agent-fallback/page.tsx)/PredictionFactorRow+PipelineRunForDrift(silent-drift/page.tsx)/RejectReasonCell(pipeline/page.tsx) 4개는 실제 cross-file import 확인되어 유지. SkippedEntry(pipelineStats.ts)는 page.tsx 안 동명 로컬 interface(line 41, import 아님 — 실제 import 목록은 RejectReasonCell 만)와 이름만 겹치는 false-positive 패턴 — 실제 외부 소비자 0건 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + 테스트 파일 type import 여부) — 1/1 CONFIRMED_UNUSED.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit ff2c8b15, R4 직push(단일 논리 단위, PR 생략).
+
 ### lotto (lite): 30-cycle gap trigger 정확 도달 재검증 (cycle 2872, SUCCESS)
 
 - 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2871 retro commit 09d0e634) OK. 직전8(2864-2871) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미발동. fix-incident gap 20/20 도달했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, in_progress는 정상 push CI) 실제 incident 부재. op-analysis 3/25, info-arch 12/30 전부 미근접. lotto gap 30/30 정확 도달(마지막 발화 cycle 2842) — 유일하게 정확히 임계 충족.
