@@ -135,7 +135,7 @@ interface MlbMatchupStreak {
  * (computeMatchupStreakFromGames) — cycle 2055 review-code heavy, KBO
  * computeMatchupStreak 과 독립 중복 통합.
  */
-export function computeMlbMatchupStreak(
+function computeMlbMatchupStreak(
   games: MlbMatchupGame[],
 ): MlbMatchupStreak | null {
   return computeMatchupStreakFromGames(games, WIN_LOSS_STREAK_MIN_LENGTH);
@@ -152,7 +152,7 @@ interface MlbMatchupRecentRecord {
  * (computeMatchupRecentRecordFromGames) — cycle 2055 review-code heavy, KBO
  * computeMatchupRecentRecord 과 독립 중복 통합.
  */
-export function computeMlbMatchupRecentRecord(
+function computeMlbMatchupRecentRecord(
   games: MlbMatchupGame[],
   teamACode: MlbTeamCode,
   teamBCode: MlbTeamCode,
@@ -175,7 +175,7 @@ interface MlbMatchupAvgMargin {
  * 두 팀 맞대결 한정 평균 득점 마진. 계산 로직은 packages/shared 단일 source
  * (computeAvgMarginFromFinalGames) — TeamCode 비의존 generic 이라 KBO 와 그대로 공유.
  */
-export function computeMlbMatchupAvgMargin(
+function computeMlbMatchupAvgMargin(
   games: MlbMatchupGame[],
 ): MlbMatchupAvgMargin | null {
   return computeAvgMarginFromFinalGames(
@@ -196,7 +196,7 @@ interface MlbMatchupBlowoutStats {
  * 두 팀 맞대결 중 대량득점차 경기 횟수. 계산 로직은 packages/shared 단일 source
  * (computeMarginCountFromFinalGames) — TeamCode 비의존 generic 이라 KBO 와 그대로 공유.
  */
-export function computeMlbMatchupBlowoutCount(
+function computeMlbMatchupBlowoutCount(
   games: MlbMatchupGame[],
 ): MlbMatchupBlowoutStats | null {
   return computeMarginCountFromFinalGames(
@@ -218,7 +218,7 @@ interface MlbMatchupCloseGameStats {
  * 두 팀 맞대결 중 박빙 승부 횟수. 계산 로직은 packages/shared 단일 source
  * (computeMarginCountFromFinalGames) — TeamCode 비의존 generic 이라 KBO 와 그대로 공유.
  */
-export function computeMlbMatchupCloseGameCount(
+function computeMlbMatchupCloseGameCount(
   games: MlbMatchupGame[],
 ): MlbMatchupCloseGameStats | null {
   return computeMarginCountFromFinalGames(
@@ -244,7 +244,7 @@ interface MlbMatchupHomeAwaySplit {
  * (computeMatchupHomeAwayEdgeFromGames) — cycle 2055 review-code heavy, KBO
  * computeMatchupHomeAwayEdge 와 독립 중복 통합.
  */
-export function computeMlbMatchupHomeAwayEdge(
+function computeMlbMatchupHomeAwayEdge(
   games: MlbMatchupGame[],
   teamACode: MlbTeamCode,
   teamBCode: MlbTeamCode,
