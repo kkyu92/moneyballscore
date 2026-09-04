@@ -1,3 +1,11 @@
+## v0.5.62.218 — 2026-09-04 (cycle 2878, review-code(heavy): export-but-unused analysis 3건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic analysis 스코프 3건 (cycle 2878, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2877 retro commit 042c2b4c) OK. 직전8(2870-2877) distinct=3(review-code(heavy)6+polish-ui1+lotto1) — 2-chain lock 미발동. fix-incident gap 33/20(last fire cycle 2845) 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis 실측 last fire cycle 2869(gap 9, `(lite)` 문자열 붙은 chain_selected 값이 단순 문자열 split 매칭에서 누락되는 스크립트 버그 발견·본 사이클에서 startswith 매칭으로 재검증해 오탐 배제), info-arch gap 18/30, lotto gap 6/30 전부 미근접. explore-idea saturation 1/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+- accuracy 스코프 먼저 grep(14개 exported type/interface) — 전부 cross-file import 확인되어 유지(0건, clean pass). analysis 스코프(apps/moneyball/src/app/analysis/analysis-data.ts) exported interface 6개 grep → TodayGameCard/YesterdayGameCard/UpcomingScheduledGame 3개는 cross-file import 확인되어 유지. `TodayAnalysisData`+`ThisWeekGameCard`+`BestPickCard` 3개는 해당 함수(getTodayAnalysisData/getThisWeekPreviousGames/getBestPickOfWeek)만 외부 import 되고 타입 자체는 자기 파일 내부 리턴 타입 주석으로만 사용 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + mlb/analysis 동명 파일 name-collision 배제) — 3/3 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit b3cfe47e, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.217 — 2026-09-04 (cycle 2877, review-code(heavy): export-but-unused dashboard 2건 SUCCESS)
 
 ### review-code(heavy): export-but-unused heuristic dashboard 스코프 2건 (cycle 2877, SUCCESS)
