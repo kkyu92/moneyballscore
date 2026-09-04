@@ -3,9 +3,9 @@
 import { useCallback, useState } from 'react';
 import { DAY_MS } from '@moneyball/shared';
 
-export type PickChoice = 'home' | 'away';
+type PickChoice = 'home' | 'away';
 
-export interface UserPick {
+interface UserPick {
   pick: PickChoice;
   pickedAt: string; // ISO 8601 full datetime
 }
