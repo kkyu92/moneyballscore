@@ -1,3 +1,12 @@
+## v0.5.62.223 — 2026-09-04 (cycle 2883, review-code(heavy): calendar/observability/stats/v2-shadow-monitor/weather/predictions 함수 레벨 재감사 clean SUCCESS)
+
+### review-code(heavy): 신규 미감사 lib/ 스코프 함수 레벨 재감사 (cycle 2883, SUCCESS, retro-only)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2882 retro commit 225efb16) OK. 직전8(2875-2882) distinct=3(review-code(heavy)6+polish-ui(2-chain lock fallback)1+fix-incident(lite)1) — 2-chain lock 미발동. fix-incident gap 2/20, op-analysis gap 14/25, info-arch gap 23/30, lotto gap 11/30, explore-idea saturation 1/15 — 전부 미근접. DESIGN.md 1.6일 신선. `gh run list` 재확인 실패 0건. review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속 — cycle 2882 retro 추천 스코프(calendar/observability/predictions/stats/v2-shadow-monitor/weather, export 레벨은 이미 clean 확인됨) 의 함수/로직 레벨 재감사 착수.
+- `observability/captureFallback.ts`(Sentry wrapper, 70건 사용) / `stats/pearson.ts`(pearsonCorrelation, dashboard+reviews/mlb-shared 2곳 + 테스트에서 사용) / `calendar/monthGrid.ts`(KST 달력 grid, toUtcDate 순수 UTC 연산 주석 검증) / `weather.ts`(Open-Meteo 연동, fetchStadiumWeather 1곳 사용) / `v2-shadow-monitor/loader.ts`+`parse.ts`(cohort markdown 파서) / `predictions/` 6개 소파일(yesterdayDate/adjacentDates/estimateTime/tierStats/judgeReasoning/v2Predictor.ts) 전체 read.
+- 추가로 `judgeReasoning.ts`의 fallback prefix 문자열(`'에이전트 토론 불가'`/`'사후 분석 LLM 실패'`)이 실제 `debate.ts:86`/`postview.ts:492` 원본 문자열과 여전히 일치하는지 grep 대조(comment-vs-code drift 패턴 재확인) + debate.ts 의 다른 `reasoning:` 대입 전수 grep(2건 모두 `'정량 모델 기반 분석'` 정상 quant baseline, fallback 아님) — 커버되지 않은 신규 fallback 문자열 부재 확인. `predictions/estimateTime.ts` JSDoc 예시 4건(14:00→11:17 / 18:30→16:17 / 17:00→14:17 / 10:00→09:17)을 실제 계산식(`ceil((startMin-180)/60)` + clamp 9-23)으로 수동 재계산해 전부 일치 확인. `factorLabels.ts` PRODUCTION_SLUGS 10종이 CLAUDE.md v1.8 10팩터 목록과 정확히 일치 확인.
+- 전체 스코프 0건 — export 레벨(cycle 2882) + 함수/로직 레벨(본 cycle) 양쪽 완전 clean 확정. 코드 변경 없음(retro-only). `pnpm --filter moneyball exec tsc --noEmit` 미실행(변경 없음, 참고 스킵).
+
 ## v0.5.62.222 — 2026-09-04 (cycle 2882, review-code(heavy): export-but-unused hub-dispatch/tabpfn 9건 SUCCESS)
 
 ### review-code(heavy): export-but-unused heuristic hub-dispatch/tabpfn 스코프 9건 (cycle 2882, SUCCESS)
