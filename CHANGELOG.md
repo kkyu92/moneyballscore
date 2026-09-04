@@ -1,3 +1,11 @@
+## v0.5.62.215 — 2026-09-04 (cycle 2875, review-code(heavy): export-but-unused reviews 2건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic reviews 스코프 2건 (cycle 2875, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2874 retro commit ae7bb852) OK. 직전8(2867-2874) distinct=4(review-code(heavy)6+operational-analysis(lite)1+polish-ui1+lotto1) — 2-chain lock 미발동. fix-incident gap 30/20 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis gap 23/25, info-arch gap 15/30, lotto gap 3/30 전부 미근접. explore-idea saturation 13/15 도달했으나 4-source 재확인(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 1.59일 신선) organic idea 부재로 skip — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+- apps/moneyball/src/lib/reviews/ 스코프 exported type/interface 13개 grep → MonthRange/WeekRange/MlbWeekly*/Weekly*/PredictionRow/MlbPredictionRow 등 11개는 build*Review.ts 계열 cross-file import(page.tsx 재-export 경유 포함) 확인되어 유지. ReviewRangeLocale(computeMonthRange.ts + computeWeekRange.ts, 각각 독립 정의·서로 미참조)만 자기 파일 내부 함수 파라미터 기본값으로만 사용 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + 테스트 파일 확인 + 타 패키지 name-collision 확인) — 2/2 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 9bf036a4, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.214 — 2026-09-04 (cycle 2874, review-code(heavy): export-but-unused seo/seasons/changelog 10건 SUCCESS)
 
 ### review-code(heavy): export-but-unused heuristic seo/seasons/changelog 스코프 10건 (cycle 2874, SUCCESS)
