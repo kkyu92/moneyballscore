@@ -57,7 +57,7 @@ function renderInline(text: string): ReactNode[] {
   });
 }
 
-export interface Block {
+interface Block {
   kind: 'h3' | 'p' | 'ul' | 'hr';
   lines?: string[];
   items?: { text: string; depth: number }[];

@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
-export interface ChangelogEntry {
+interface ChangelogEntry {
   id: string;
   title: string;
   date: string | null;

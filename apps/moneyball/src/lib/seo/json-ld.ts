@@ -26,7 +26,7 @@ export const ORG_NAME = "Korea Baseball Organization";
 export const ORG_URL = KBO_OFFICIAL_URL;
 
 /** SportsEvent 입력 */
-export interface SportsEventInput {
+interface SportsEventInput {
   gameId: number;
   homeTeam: TeamCode;
   awayTeam: TeamCode;
@@ -90,7 +90,7 @@ export function buildSportsEventJsonLd(input: SportsEventInput) {
 }
 
 /** SportsTeam 입력 */
-export interface SportsTeamInput {
+interface SportsTeamInput {
   team: TeamCode;
   /** explicit URL (else `${SITE_URL}/teams/{code}`) */
   url?: string;
@@ -118,7 +118,7 @@ export function buildSportsTeamJsonLd(input: SportsTeamInput) {
 }
 
 /** Person (player) 입력 */
-export interface PersonInput {
+interface PersonInput {
   name: string;
   /** 포지션 (예: "Pitcher", "First Baseman") */
   jobTitle?: string;
@@ -148,7 +148,7 @@ export function buildPersonJsonLd(input: PersonInput) {
 }
 
 /** Article 입력 */
-export interface ArticleInput {
+interface ArticleInput {
   url: string;
   headline: string;
   description: string;

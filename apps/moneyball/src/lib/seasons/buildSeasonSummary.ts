@@ -8,7 +8,7 @@ import {
   type TeamCode,
 } from "@moneyball/shared";
 
-export interface TeamRecord {
+interface TeamRecord {
   code: TeamCode;
   name: string;
   wins: number;
@@ -21,7 +21,7 @@ export interface TeamRecord {
   games: number;
 }
 
-export interface MonthStat {
+interface MonthStat {
   month: number;
   n: number;
   avgRuns: number;     // total runs per game (both teams)
@@ -40,7 +40,7 @@ export interface ExtremeGame {
   margin: number;      // abs(home - away)
 }
 
-export interface ChampionshipSeries {
+interface ChampionshipSeries {
   winnerCode: TeamCode;
   winnerName: string;
   loserCode: TeamCode;
@@ -49,7 +49,7 @@ export interface ChampionshipSeries {
   games: ExtremeGame[];           // 날짜 오름차순
 }
 
-export interface SeasonSummary {
+interface SeasonSummary {
   season: number;
   isOngoing: boolean;        // 현재 진행 중인 시즌 (올해 & 11월 10일 이전)
   totalGames: number;
