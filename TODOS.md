@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ validator·calibration-agent·rivalry-memory 재감사 clean (cycle 2884, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2883 retro commit 861c7b4d) OK. 직전8(2876-2883) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 3/20, op-analysis 15/25, info-arch 24/30, lotto 12/30, explore-idea saturation 1/15 — 전부 미근접. cycle 2883 retro 추천대로 lib/ 스코프 완전 소진 확정 → packages/kbo-data/src/agents/ (예측 엔진 핵심) 확장.
+
+validator.ts(1059줄, LLM 검증 Layer 1) 전체 read — cycle 884/981/982/986/1400/1425/2122/2630/2631/2632/2636 fix 주석 vs 실제 구현 전수 대조(환각숫자 threshold, 선수명 발명 필터 4종, maskViolatedReasoning truncate 방향). calibration-agent.ts(257줄) — buildStatsBlock injectionText 재사용 근거 + parseResponse/API 실패 fallback 채널 대조. rivalry-memory.ts(253줄) — per-source tolerant 패턴 + buildPromptBlock truncate 방향 대조.
+
+전체 3파일 0건 — 코드 변경 없음(retro-only).
+
+다음 사이클 추천 = review-code(heavy) 계속 시 packages/kbo-data/src/agents/ 잔여 파일(judge-agent.ts/team-agent.ts/postview.ts/retro.ts/personas.ts/llm.ts, 이번 cycle 미포함) 또는 apps/moneyball/src/app/ 라우트 page.tsx 로직 레벨. 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): calendar/observability/stats/v2-shadow-monitor/weather/predictions 함수 레벨 재감사 clean (cycle 2883, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2882 retro commit 225efb16) OK. 직전8(2875-2882) distinct=3(review-code(heavy)6+polish-ui(2-chain lock fallback)1+fix-incident(lite)1) — 2-chain lock 미발동. fix-incident gap 2/20, op-analysis gap 14/25, info-arch gap 23/30, lotto gap 11/30, explore-idea saturation 1/15 — 전부 미근접. dominance-positive streak 따라 cycle 2882 retro 추천 스코프(calendar/observability/predictions/stats/v2-shadow-monitor/weather) 함수/로직 레벨 재감사 착수.

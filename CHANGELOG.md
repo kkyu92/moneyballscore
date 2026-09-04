@@ -1,3 +1,13 @@
+## v0.5.62.224 — 2026-09-04 (cycle 2884, review-code(heavy): packages/kbo-data/src/agents/ validator·calibration-agent·rivalry-memory 재감사 clean SUCCESS)
+
+### review-code(heavy): lib/ 스코프 완전 소진 후 packages/kbo-data/src/agents/ 확장 재감사 (cycle 2884, SUCCESS, retro-only)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2883 retro commit 861c7b4d) OK. 직전8(2876-2883) distinct=3(review-code(heavy)6+polish-ui(2-chain lock fallback)1+fix-incident(lite)1) — 2-chain lock 미발동. fix-incident gap 3/20, op-analysis gap 15/25, info-arch gap 24/30, lotto gap 12/30, explore-idea saturation 1/15 — 전부 미근접. DESIGN.md 1.6일 신선. `gh run list` 재확인 실패 0건. cycle 2883 retro 추천대로 `apps/moneyball/src/lib/` 스코프(export+함수 레벨 양쪽) 완전 소진 확정 상태 — dominance-positive streak(cycle 135 룰) 따라 신규 스코프로 `packages/kbo-data/src/agents/` (예측 엔진 핵심, LLM 에이전트 8종) 확장.
+- `validator.ts`(1059줄, LLM 응답 결정론적 검증 Layer 1 — 환각숫자/발명선수명/금칙어/claim-type 4종 서브체크) 전체 read. cycle 884/981/982/986/1400/1425/2122/2630/2631/2632/2636 각 fix 주석과 실제 구현 대조 — `computeArithmeticDerivatives`(percent 변환 + pairwise 차/합/비 허용), `checkInventedPlayerNames`(한국 성씨 기반 2단계 매칭 + 4종 false-positive 필터), `WARN_LIMIT`/`HALLUCINATED_NUMBER_HARD_THRESHOLD` 주석-코드 일치, `maskViolatedReasoning` truncate 방향 전부 검증 — 불일치 0건.
+- `calibration-agent.ts`(257줄, 보정 힌트 에이전트) — `buildStatsBlock`(validateCalibrationHint injectionText 재사용, 도메인 hint 의도적 제외 근거 validator.ts 주석과 교차 확인 일치) / `parseResponse` catch(cycle 1400 P2 family, captureCalibrationParseFallback) / `runCalibrationAgent` API 실패 경로(captureCalibrationApiFallback, #372 설계 갭 주석) 전부 실제 호출부와 대조 — 불일치 0건.
+- `rivalry-memory.ts`(253줄, h2h+agent_memories 프롬프트 주입) — `fetchRecentH2H`/`fetchMemories` per-source tolerant 패턴(양쪽 독립 try/catch, captureRivalryMemoryFallback) 검증 + `buildPromptBlock` MAX_BLOCK_CHARS truncate 방향("앞부분 생략, 헤더+tail 유지" 주석 vs `block.slice(-budget)` 실제 동작) 수동 대조 — 일치. 불일치 0건.
+- 전체 스코프(agents/ 핵심 3파일, 검증+보정+메모리 레이어) 0건 — 코드 변경 없음(retro-only). `pnpm --filter moneyball exec tsc --noEmit`/test 미실행(변경 없음, 참고 스킵).
+
 ## v0.5.62.223 — 2026-09-04 (cycle 2883, review-code(heavy): calendar/observability/stats/v2-shadow-monitor/weather/predictions 함수 레벨 재감사 clean SUCCESS)
 
 ### review-code(heavy): 신규 미감사 lib/ 스코프 함수 레벨 재감사 (cycle 2883, SUCCESS, retro-only)
