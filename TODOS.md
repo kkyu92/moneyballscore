@@ -1,4 +1,16 @@
 
+## 🔵 RETRO-ONLY — review-code(heavy): export-but-unused lib/accuracy·picks·dashboard 재확인 (cycle 2900, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2899 retro commit 364274e6) OK. active-cycle stale lock 발견(직전 2900 시도 세션 중단, dead pid) — 재점유 후 진행. 직전8(2892-2899) distinct=4 — 2-chain lock 미충족. gap trigger 4종 전부 미근접. cycle 2897/2898 공통 추천대로 lib/accuracy·picks·dashboard 잔여 스코프 착수.
+
+exported interface 29개 subagent 독립 재검증(전체 repo 포함 scripts/packages/tests) → 29/29 전부 실사용 확인, CONFIRMED_UNUSED 0건. 흔한 이름(PredRow/PredictionRow/CalibrationBucket) 동명 로컬 재선언 오탐 위험 실제 import 구문 대조로 배제.
+
+코드 변경 없음(감사 결과 clean). lib/ 하위 미탐색 스코프 다수 확인(analysis/api/calendar/changelog/debug/insights/leaderboard/lotto/matchup/mlb/observability/players/predictions/reviews/seasons/seo/standings/stats/supabase/teams/v2-shadow-monitor + top-level 7파일) — 다음 review-code(heavy) carry-over.
+
+cycle 2900 = 50-milestone → skill-evolution trigger 3 무조건 충족, cycle 2901 skill-evolution 강제 발화 마커 박제 예정.
+
+다음 사이클 추천 = skill-evolution(마커 강제) 우선, 이후 review-code(heavy) lib/ 잔여 스코프 계속 또는 info-architecture-review(gap 9/30)/fix-incident/op-analysis/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — operational-analysis(lite): CE/비CE 격차 25회 연속 재확인 (cycle 2899, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2898 retro commit 5da276ea) OK. 직전8(2891-2898) distinct=4 — 2-chain lock 미충족. fix-incident gap 1(방금 발화) vs op-analysis gap 47/25 대폭 초과(마지막 2852) — 가장 오래 미발화한 op-analysis 선택. explore-idea saturation 14/15 나 4-source 재확인 negative skip. info-arch 7/30·lotto 27/30 미근접.

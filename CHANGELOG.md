@@ -1,3 +1,12 @@
+## v0.5.62.240 — 2026-09-04 (cycle 2900, review-code(heavy): export-but-unused lib/accuracy·picks·dashboard 스코프 재확인)
+
+### review-code(heavy): export-but-unused heuristic lib/accuracy·lib/picks·lib/dashboard 잔여 스코프 (cycle 2900, RETRO-ONLY — clean)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/archived/spec_only). 2차 방어선(cycle 2899 retro commit 364274e6) OK. active-cycle stale lock 발견(직전 cycle 2900 시도가 json 박제 전 세션 중단 — dead pid, 새로 재점유). 직전8(2892-2899) distinct=4(review-code(heavy)5+info-architecture-review1+fix-incident(heavy)1+operational-analysis(lite)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 2/20·op-analysis 1/25·info-arch 8/30·lotto 28/30) 전부 미근접. cycle 2897/2898 공통 추천대로 `lib/accuracy/`·`lib/picks/`·`lib/dashboard/` 잔여 파일 착수.
+- exported interface 29개 grep(buildFactorAccuracy/buildShadowCalibration/buildAccuracyData/buildDailyAccuracy/buildConfidenceBuckets/buildPicksStats/factor-accuracy/compareModels/buildCommunityAccuracy/buildHallucinationStats) → general-purpose subagent 독립 검증(전체 repo — apps/moneyball + packages/ + scripts/ + 테스트 포함) 결과 **29/29 전부 실사용 확인, CONFIRMED_UNUSED 0건**. `PredRow`/`PredictionRow`/`CalibrationBucket` 등 흔한 이름이 scripts/packages 여러 곳에 동명 로컬 interface 로 재선언되어 있어 오탐 위험 있었으나, 실제 `import ... from '@/lib/...'` 구문 대조로 진짜 참조만 카운트해 배제.
+- 코드 변경 없음(감사 결과 이슈 0건, 정상 clean — cycle 2891/2892 계열과 동일 패턴). `lib/` 하위 미탐색 스코프 다수 잔존 확인: `analysis/`/`api/`/`calendar/`/`changelog/`/`debug/`/`insights/`/`leaderboard/`/`lotto/`/`matchup/`/`mlb/`/`observability/`/`players/`/`predictions/`/`reviews/`/`seasons/`/`seo/`/`standings/`/`stats/`/`supabase/`/`teams/`/`v2-shadow-monitor/` + top-level `design-tokens.ts`/`feature-flags.ts`/`hub-dispatch.ts`/`tabpfn-export.ts`/`tabpfn-import.ts`/`utils.ts`/`weather.ts` — 다음 review-code(heavy) carry-over 후보.
+- cycle 2900 = 50-milestone(2900 % 50 == 0) — retro 단계 skill-evolution trigger 3(milestone) 무조건 충족, 다음 사이클(2901) skill-evolution 강제 발화 마커 박제.
+
 ## v0.5.62.239 — 2026-09-04 (cycle 2899, operational-analysis(lite): CE/비CE 격차 재측정)
 
 ### operational-analysis(lite): CE/비CE 격차 25회 연속 재확인 (cycle 2899, SUCCESS)
