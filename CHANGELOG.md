@@ -1,3 +1,11 @@
+## v0.5.62.235 — 2026-09-04 (cycle 2895, review-code(heavy): export-but-unused root/analytics/engine 스코프 7건)
+
+### review-code(heavy): export-but-unused heuristic root/analytics/engine 스코프 7건 (cycle 2895, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user-step). 2차 방어선(cycle 2894 retro commit dff29266) OK. 직전8(2887-2894) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 재검산(startswith 매칭 버그 수정 후): fix-incident 14/20·op-analysis 4/25·info-arch 3/30·lotto 23/30 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.5h 신선) organic idea 부재로 skip. cycle 2894 next_recommended대로 `packages/kbo-data/src/{types.ts,big-match.ts,index.ts}`(root, 36개 export 후보) + `analytics/`(5)·`engine/`(3) 착수.
+- root files exported type/interface 36개 중 index.ts barrel 재export 항목(BigMatchCandidate/BigMatchMode/BigMatchResult 등) 배제 후 순수 후보 17개 재grep → `RawStatusSnapshot`(types.ts) 1건만 0-external-hit. `analytics/`(5) + `engine/`(3) 추가 탐색 → `StaleSnapshotInput`/`ScoringRuleStat`/`WeekdayStat`/`StaleSnapshot`(analytics/stale-data-snapshot.ts, `PredRowMin`은 scripts/update-stale-data.ts 외부 사용 확인되어 제외) + `PredictWeights`/`PredictOptions`(engine/predictor.ts) 6건 추가 — 총 7건. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel index.ts 190줄 전체 대조 + 테스트 import 대조 + name-collision 배제) — 7/7 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean, test 94/94파일 1224/1224 green. `pnpm --filter moneyball exec tsc --noEmit` clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit 880f1a82, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.234 — 2026-09-04 (cycle 2894, review-code(heavy): export-but-unused pipeline/ 스코프 8건)
 
 ### review-code(heavy): export-but-unused heuristic pipeline/ 스코프 8건 (cycle 2894, SUCCESS)

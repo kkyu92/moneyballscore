@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused root/analytics/engine 스코프 7건 (cycle 2895, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2894 retro commit dff29266) OK. 직전8(2887-2894) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 재검산(startswith 매칭 버그 수정, 이전 진단 스크립트가 "fix-incident(lite)" 같은 접미사 붙은 값을 못 잡던 문제 발견/수정) — fix-incident 14/20·op-analysis 4/25·info-arch 3/30·lotto 23/30 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative — organic idea 부재로 skip. cycle 2894 추천대로 root files(`types.ts`/`big-match.ts`/`index.ts`) + `analytics/`·`engine/` 착수.
+
+root 36개 export 후보 중 index.ts barrel 재export 항목 배제 후 17개 순수 후보 재grep → `RawStatusSnapshot` 1건. `analytics/`(5)·`engine/`(3) 추가 탐색 → `PredRowMin`(외부 scripts/update-stale-data.ts 사용 확인, 제외) 빼고 6건 추가 — 총 7건(`RawStatusSnapshot`/`StaleSnapshotInput`/`ScoringRuleStat`/`WeekdayStat`/`StaleSnapshot`/`PredictWeights`/`PredictOptions`). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel 190줄 전체 대조 + 테스트 import 대조 + name-collision 배제) — 7/7 CONFIRMED_UNUSED. export 키워드만 제거.
+
+kbo-data type-check clean, test 94/94파일 1224/1224 green. moneyball type-check clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit 880f1a82, R4 직push.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 미스윕 스코프: `features/`(1, GameRecordLite 외부 사용 확인되어 사실상 소진)·`notify/`(0, clean)·`backtest/`·`scrapers/` 미확인 — 사실상 review-code(heavy) 대형 스코프 거의 소진 국면, 다음은 소형 파일 개별 스윕 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기 권장) 또는 gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused pipeline/ 스코프 8건 (cycle 2894, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user-step). 2차 방어선(cycle 2893 retro commit b54f3c8a) OK. 직전8(2886-2893) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 13/20·op-analysis 3/25·info-arch 2/30·lotto 22/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.4h 신선) organic idea 부재로 skip. cycle 2893 next_recommended대로 `packages/kbo-data/src/pipeline/` (28파일, 7950줄, 가장 큰 미탐색 스코프) 착수.
