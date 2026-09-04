@@ -55,5 +55,3 @@ export async function getMlbReviewsData() {
     hasAnyData: strongConvergenceRecord.total > 0 || completeConvergenceRecord.total > 0,
   };
 }
-
-type MlbReviewsData = Awaited<ReturnType<typeof getMlbReviewsData>>;
