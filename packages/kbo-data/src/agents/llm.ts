@@ -205,7 +205,7 @@ export async function callLLM<T>(
  * Haiku: team-agent (pre-game 팀 논거) + calibration-agent (pre-game calibration 힌트) + postview team-postview-agent (post-game 팀 분석) 3종 (저비용, 빠름)
  * Sonnet: pre-game judge-agent + postview factor-attribution 양쪽 심판 (고품질 판단)
  *
- * 재시도: 네트워크 에러 + 5xx + 429에 대해 최대 3회(500/1000/2000ms backoff).
+ * 재시도: 네트워크 에러 + 5xx + 429에 대해 최대 4회 시도(초기 + 500/1000/2000ms backoff 3회, cycle 2653 fix).
  * 4xx는 즉시 실패(요청 자체가 잘못된 것이라 재시도해도 무의미).
  */
 async function callClaude<T>(

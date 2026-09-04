@@ -11,6 +11,7 @@ import {
 import { computeMlbFactorContributions, type MlbFactorInputs } from '../factors/mlb-base';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 import { addDays, buildMemoryForTeam } from './retro';
+import { captureAgentMemoryUpsertFallback } from './validator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = ReturnType<typeof createClient<any, any, any>>;
@@ -182,6 +183,12 @@ export async function generateMlbAgentMemories(
           `[mlb-retro] agent_memories upsert failed for ${t.code}:`,
           errMsg(e),
         );
+        void captureAgentMemoryUpsertFallback({
+          league: 'mlb',
+          teamCode: t.code,
+          gameId: pred.external_game_id ?? null,
+          errorMessage: errMsg(e),
+        });
       }
     }
   }

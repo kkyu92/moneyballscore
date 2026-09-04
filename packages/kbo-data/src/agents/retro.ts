@@ -3,6 +3,7 @@ import { assertSelectOk, assertWriteOk, errMsg, PRODUCTION_COHORT_RULES, CONF_WI
 import { MetricRegistry, type MetricDefinition } from '../context/metrics';
 import { DB_CONSTRAINTS } from '../pipeline/db-constraints';
 import { canonicalizeFactorKey } from './postview';
+import { captureAgentMemoryUpsertFallback } from './validator';
 
 // shadow-only factor (park_weather / umpire_sz — DEFAULT_WEIGHTS 상 weight=0, cycle 1013 M-F1/M-F2)
 // 는 postview.ts 의 isWeightedFactor 가드와 동일 의도로 team memory maxBias 후보에서 제외.
@@ -323,6 +324,12 @@ export async function generateAgentMemories(date: string, dbInjected?: DB) {
           `[retro] agent_memories upsert failed for ${t.code}:`,
           errMsg(e),
         );
+        void captureAgentMemoryUpsertFallback({
+          league: 'kbo',
+          teamCode: t.code,
+          gameId: game.id ?? null,
+          errorMessage: errMsg(e),
+        });
       }
     }
   }

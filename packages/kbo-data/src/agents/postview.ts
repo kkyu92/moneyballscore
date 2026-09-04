@@ -22,6 +22,8 @@ import {
   notifyValidationViolations,
   resolveValidationMode,
   evaluateAndCaptureAgentFallback,
+  captureTeamPostviewParseFallback,
+  captureJudgePostviewParseFallback,
 } from './validator';
 import { logValidatorEvent } from './validator-logger';
 import type { GameContext, AgentResult } from './types';
@@ -199,7 +201,11 @@ ${isHome ? '홈' : '원정'}팀. 이 경기 ${isWinner ? '승리' : '패배'}.
 ${myName}의 관점에서 왜 ${isWinner ? '이겼는지' : '졌는지'}, pre_game 예측이 무엇을 놓쳤는지 분석하세요.`;
 }
 
-function parseTeamPostview(text: string, team: TeamCode): TeamPostview {
+function parseTeamPostview(
+  text: string,
+  team: TeamCode,
+  gameId: string | number | null = null
+): TeamPostview {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found');
@@ -214,7 +220,16 @@ function parseTeamPostview(text: string, team: TeamCode): TeamPostview {
       keyFactor: canonicalizeFactorKey(String(parsed.keyFactor || '')),
       missedBy: String(parsed.missedBy || '').slice(0, 300),
     };
-  } catch {
+  } catch (e) {
+    // team-agent/judge-agent/calibration-agent 와 동일 silent family (cycle 2886 발견) —
+    // generic filler 를 정상 파싱 결과처럼 반환 → evaluateAndCaptureAgentFallback 의
+    // `r.data == null` 검사가 못 잡음. Sentry 별도 채널로 가시화.
+    void captureTeamPostviewParseFallback({
+      team,
+      gameId,
+      textExcerpt: text.slice(0, 300),
+      errorMessage: errMsg(e),
+    });
     return {
       team,
       summary: text.slice(0, 300),
@@ -258,7 +273,7 @@ async function runTeamPostviewAgent(
       userMessage: buildTeamPostviewMessage(team, isWinner, context, actual, original),
       maxTokens: LLM_MAX_TOKENS_POSTVIEW_TEAM,
     },
-    (text) => parseTeamPostview(text, team)
+    (text) => parseTeamPostview(text, team, context.game.externalGameId ?? null)
   );
 
   if (!result.success || !result.data) return result;
@@ -395,7 +410,10 @@ function buildPostviewExtraInjection(
   ].join('\n');
 }
 
-export function parseJudgePostview(text: string): { factorErrors: FactorError[]; reasoning: string } {
+export function parseJudgePostview(
+  text: string,
+  gameId: string | number | null = null
+): { factorErrors: FactorError[]; reasoning: string } {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found');
@@ -426,7 +444,14 @@ export function parseJudgePostview(text: string): { factorErrors: FactorError[];
       factorErrors,
       reasoning: String(parsed.reasoning || '').slice(0, 1000),
     };
-  } catch {
+  } catch (e) {
+    // parseTeamPostview 와 동일 silent family (cycle 2886 발견) — generic filler 를 정상
+    // 파싱 결과처럼 반환 → evaluateAndCaptureAgentFallback 의 `r.data == null` 검사가 못 잡음.
+    void captureJudgePostviewParseFallback({
+      gameId,
+      textExcerpt: text.slice(0, 300),
+      errorMessage: errMsg(e),
+    });
     return {
       factorErrors: [],
       reasoning: text.slice(0, 500),
@@ -483,7 +508,7 @@ export async function runPostview(
       userMessage: buildJudgePostviewMessage(context, actual, original, homePv, awayPv),
       maxTokens: LLM_MAX_TOKENS_POSTVIEW_JUDGE,
     },
-    parseJudgePostview
+    (text) => parseJudgePostview(text, context.game.externalGameId ?? null)
   );
   totalTokens += judgeResult.tokensUsed;
 

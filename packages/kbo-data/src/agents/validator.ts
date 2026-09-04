@@ -1019,6 +1019,145 @@ export async function captureTeamParseFallback(meta: TeamParseFailureMeta): Prom
   }
 }
 
+interface TeamPostviewParseFailureMeta {
+  team: string;
+  gameId: string | number | null;
+  textExcerpt: string;
+  errorMessage: string;
+}
+
+// postview.ts parseTeamPostview catch path 전용 Sentry 채널. team-agent(captureTeamParseFallback)
+// 와 동일 구조 (JSON.parse 실패 시 raw text slice 를 정상 파싱 결과처럼 반환) 지만 postview 쪽은
+// 미패치 상태였음 — evaluateAndCaptureAgentFallback (`r.data == null` 검사) 도 감지 못함 (parse 함수가
+// 항상 non-null 객체 반환, throw 없음). cycle 2886 review-code(heavy) 발견, team/judge/calibration 과
+// 동일 silent family 의 postview 버전.
+export async function captureTeamPostviewParseFallback(
+  meta: TeamPostviewParseFailureMeta
+): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`team_postview_parse_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        team_postview_parse_fallback: 'true',
+        agent: 'postview-team',
+        team: meta.team,
+      },
+      extra: {
+        game_id: meta.gameId ?? 'unknown',
+        text_excerpt: meta.textExcerpt,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
+interface JudgePostviewParseFailureMeta {
+  gameId: string | number | null;
+  textExcerpt: string;
+  errorMessage: string;
+}
+
+// postview.ts parseJudgePostview catch path 전용 Sentry 채널. captureTeamPostviewParseFallback
+// 과 동일 발견 (cycle 2886 review-code(heavy)).
+export async function captureJudgePostviewParseFallback(
+  meta: JudgePostviewParseFailureMeta
+): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`judge_postview_parse_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        judge_postview_parse_fallback: 'true',
+        agent: 'postview-judge',
+      },
+      extra: {
+        game_id: meta.gameId ?? 'unknown',
+        text_excerpt: meta.textExcerpt,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
+interface AgentMemoryUpsertFailureMeta {
+  league: 'kbo' | 'mlb';
+  teamCode: string;
+  gameId: string | number | null;
+  errorMessage: string;
+}
+
+// retro.ts/mlb-retro.ts generateAgentMemories catch path — 기존 console.error 만으로는
+// Cloudflare Workers cron 환경에서 alert 안 잡힘 (captureAgentFallback 과 동일 근거).
+// per-team tolerant 설계 유지 (throw 안 함, 다음 team/game 계속 진행) — Sentry 가시성만 추가.
+export async function captureAgentMemoryUpsertFallback(
+  meta: AgentMemoryUpsertFailureMeta
+): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`agent_memory_upsert_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        agent_memory_upsert_fallback: 'true',
+        league: meta.league,
+        team: meta.teamCode,
+      },
+      extra: {
+        game_id: meta.gameId ?? 'unknown',
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
 interface RivalryMemoryFailureMeta {
   source: 'fetchRecentH2H' | 'fetchMemories' | 'getRivalryBlock';
   homeTeam: string;
