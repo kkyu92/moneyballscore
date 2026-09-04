@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused heuristic teams 스코프 1건 (cycle 2880, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2879 retro commit b3bd87db) OK. 직전8(2872-2879) distinct=3(review-code(heavy)6+polish-ui1+lotto1) — 2-chain lock 미발동. fix-incident gap 35/20 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis gap 11/25, info-arch gap 20/30, lotto gap 8/30 전부 미근접. explore-idea saturation 1/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+
+`apps/moneyball/src/lib/teams/` 스코프(buildTeamProfile.ts 591줄 최대 미감사 파일 채택) exported type/interface 21개 grep → 20개는 cross-file import(page.tsx/컴포넌트/buildMlbTeamProfile.ts 재사용 등) 확인되어 유지. `TeamProfile`(buildTeamProfile.ts:25)만 자기 파일 내부(함수 리턴 타입 추론)로만 사용 — 외부 어디서도 타입 자체를 이름으로 import 안 함. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + 테스트 파일 확인 + name-collision(MlbTeamProfile) 배제) — 1/1 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+
+`pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 6faa9a16, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 잔여 스코프 계속(matchup(lib) buildMatchupProfile.ts 584줄 다음 최대 미감사 파일) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — polish-ui(2-chain lock fallback): matchup 라우트 loading.tsx 신설 3건 (cycle 2879, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2878 retro commit 59352de7) OK. 직전8(2871-2878) distinct=2(review-code(heavy)7+lotto1) — **2-chain lock 발동**, 둘 다 후보 제외. fix-incident gap 34/20 이나 `gh run list --json conclusion` 재확인 failure 0건 실제 incident 부재. op-analysis gap 10/25, info-arch gap 19/30 미근접. explore-idea saturation 1/15 미충족. DESIGN.md 1.6일 신선. "신규 라우트 7일" find 결과는 review-code(heavy) export 제거 리팩터의 mtime touch 부수효과라 false positive 배제. 어떤 chain 도 실trigger 없어 lock 규칙 따라 polish-ui 강제 발화.
