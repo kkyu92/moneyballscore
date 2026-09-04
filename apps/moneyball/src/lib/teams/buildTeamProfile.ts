@@ -22,7 +22,7 @@ export interface TeamRecentGame {
   status: string | null;
 }
 
-export interface TeamProfile {
+interface TeamProfile {
   code: TeamCode;
   name: string;
   shortName: string;
