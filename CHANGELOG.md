@@ -1,3 +1,12 @@
+## v0.5.62.230 — 2026-09-04 (cycle 2890, polish-ui(2-chain lock fallback): DB-heavy 라우트 17개 loading.tsx 신설)
+
+### polish-ui(2-chain lock fallback): DB-heavy 라우트 17개 loading.tsx 스켈레톤 신설 (cycle 2890, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2889 retro commit 45832b3c) OK. 직전8(2882-2889) distinct=1(review-code(heavy) 100%, 사상 최고 saturation) — 2-chain lock 발동, 이번엔 locked chain 이 review-code(heavy) 단독이라 fix-incident 안전 예외 미적용. fix-incident gap 8/20, op-analysis gap 20/25, info-arch gap 29/30, lotto gap 17/30 전부 미근접. explore-idea saturation 15/15 도달했으나 4-source 재확인 negative(open issue 0/plan approved 0/DESIGN.md 39h 신선/TODOS Next-Up stale). 하드코딩 hex color grep 도 전부 정당(CSS var fallback + 외부 브랜드색) — 실질 drift 없음. 잔여 pool 전부 무trigger → 룰대로 polish-ui 강제 발화.
+- cycle 2879 확립 패턴(design-review = source-grep, 라이브 브라우저 미사용) 그대로 적용. subagent 로 전체 `apps/moneyball/src/app` page.tsx 트리 스캔(약 100개 loading.tsx 부재 디렉토리 중 정적 콘텐츠 페이지 제외) → 2+ 병렬/순차 DB fetch 있는 라우트만 추출(22개 후보) → 그중 4개는 이미 상위 ancestor loading.tsx 로 커버됨(reviews/monthly·weekly, analysis/game/[id], predictions/[date]) 확인 후 제외 → 순수 신규 갭 17개 확정.
+- 6개 아키타입으로 스켈레톤 작성: review-index(mlb/reviews, en/mlb/reviews — 기존 KBO reviews/loading.tsx 그대로 복제, monthly+weekly 양쪽 커버), stat-dashboard(accuracy, mlb/accuracy, en/mlb/accuracy, dashboard, seasons/[year]), team-profile(mlb/team/[code], en/mlb/team/[code], teams/[code]), list-table(mlb/predictions, en/mlb/predictions, teams/[code]/recent), calendar-grid(mlb/calendar, en/mlb/calendar), landing-hub(mlb, en/mlb 인덱스).
+- `tsc --noEmit` clean, `pnpm --filter moneyball lint` 0 errors(기존 무관 warning 1건 유지), `pnpm --filter moneyball test` 582파일/4564건 green. R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.229 — 2026-09-04 (cycle 2889, review-code(heavy): analysis/page.tsx 전수 감사 clean)
 
 ### review-code(heavy): analysis/page.tsx(2836줄) 전수 감사 clean (cycle 2889, SUCCESS)
