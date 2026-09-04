@@ -496,15 +496,13 @@ export default function LottoMethodologyPage() {
       <section id="use" className="scroll-mt-20 space-y-3">
         <h2 className="text-xl font-semibold text-brand-100">본인 사용 기록</h2>
         <p className="text-sm text-brand-300 leading-relaxed">
-          본인이 직접 사용한 {LOTTO_PICK_COUNT}조합 기록 archive 는 별도 페이지에
-          비공개로 보관됩니다. 통계 분석 자료 정체성 보존 + 검색 색인
-          차단 (noindex).
+          본인이 직접 사용한 {LOTTO_PICK_COUNT}조합 기록은 별도 archive 페이지에
+          공개로 보관되며, 통계/분석 학습 자료로 검색 노출됩니다.
         </p>
         {latestArchiveDate ? (
           <p className="text-xs text-brand-400">
             <Link
               href={`/lotto/archive/${latestArchiveDate}`}
-              rel="nofollow"
               className="text-brand-300 underline hover:text-brand-100"
             >
               최근 archive 보기 ({latestArchiveDate}) →
