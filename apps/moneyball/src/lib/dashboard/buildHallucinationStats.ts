@@ -19,14 +19,14 @@ interface CategoryBreakdown {
   pct: number;
 }
 
-export interface DayBucket {
+interface DayBucket {
   date: string;
   hard: number;
   warn: number;
   total: number;
 }
 
-export interface HallucinationStats {
+interface HallucinationStats {
   total: number;
   hardCount: number;
   warnCount: number;
