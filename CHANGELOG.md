@@ -1,3 +1,13 @@
+## v0.5.62.243 — 2026-09-04 (cycle 2903, review-code(heavy): export-but-unused lib/analysis+teams 스코프)
+
+### review-code(heavy): export-but-unused heuristic lib/analysis·lib/teams 스코프 (cycle 2903, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 no-status/completed/doc_only, approved 0건). 2차 방어선(cycle 2902 retro commit a7269186) OK. 직전8(2895-2902) distinct=5(review-code(heavy)4+skill-evolution1+operational-analysis(lite)1+lotto(lite)1+fix-incident(heavy)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 5/20·op-analysis 4/25·info-arch 11/30·lotto 1/30) 전부 미근접. cycle 2900/2901 공통 추천대로 review-code(heavy) 신규 스코프(analysis/api/calendar/mlb/observability/teams 미탐색) 착수 — `lib/analysis`(2550줄)·`lib/teams`(1710줄) 2개 디렉토리 선정.
+- exported symbol 전수(analysis 37개, teams 27개) general-purpose subagent 독립 검증(repo 전체 — apps/packages/scripts/tests 포함 실제 import 구문 대조). **CONFIRMED_UNUSED 1건**: `GameOverview` interface(`factor-explanations.ts:333`, `buildGameOverview` 반환 타입) — 이름으로 import 하는 곳 전무(동명이인 컴포넌트 `components/analysis/GameOverview.tsx` 는 무관 별개 심볼, subagent 초기 오탐 가능성 직접 grep 재검증 배제). lib/teams 는 26/27 전부 실사용 확인, CONFIRMED_UNUSED 0건.
+- `export` 키워드 제거(로컬 타입으로 유지, 삭제 아님 — 함수 반환 타입 annotation 은 계속 필요). `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm test` 582/582 files·4564/4564 tests green. PR #3078 squash 머지(`4c8c787d`, `state=MERGED` 실측 확인).
+- 부수 발견: pre-push lint 에서 `apps/moneyball/src/app/mlb/reviews/reviews-data.ts:59` `MlbReviewsData` unused-var warning 1건 포착(본 cycle 스코프 밖, 다음 review-code(heavy) carry-over 후보로 박제).
+- 다음 사이클 추천 = review-code(heavy) 계속(api/calendar/mlb/observability 미탐색 + `reviews-data.ts` unused-var 정리) 또는 info-architecture-review(gap 12/30)/1240회 추첨(9/5 21시) 후 lotto OOS 검증 자연 대기.
+
 ## v0.5.62.242 — 2026-09-04 (cycle 2902, lotto(lite): count_smoke 재확인 + 1240회 picks 상태 점검)
 
 ### lotto(lite): count_smoke 재확인 + 1240회 대기 상태 점검 (cycle 2902, SUCCESS)
