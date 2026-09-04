@@ -1,3 +1,12 @@
+## v0.5.62.246 — 2026-09-04 (cycle 2906, review-code(heavy): lib/seo export-but-unused de-export)
+
+### review-code(heavy): export-but-unused heuristic lib/seo·stats·supabase·v2-shadow-monitor·changelog·leaderboard 스코프 (cycle 2906, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2905 retro commit 68b5becf) OK. 직전8(2898-2905) distinct=5(review-code(heavy)4+fix-incident(heavy)1+operational-analysis(lite)1+skill-evolution1+lotto(lite)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 8/20·op-analysis 7/25·info-arch 14/30·lotto 4/30) 전부 미근접. cycle 2905 가 "apps/moneyball/src/lib 스윕 사실상 완료"라 결론지었으나 실제 `ls apps/moneyball/src/lib/`로 재확인한 결과 changelog/debug/insights/leaderboard/lotto/matchup/players/predictions/reviews/seasons/seo/standings/stats/supabase/v2-shadow-monitor 등 15개 디렉토리가 여전히 미탐색 — 직전 cycle 결론이 premature 였음을 발견. 소규모 6개(seo 204줄/stats 40줄/supabase 48줄/v2-shadow-monitor 206줄/changelog 521줄/leaderboard 436줄) 선정.
+- exported symbol 전수 general-purpose subagent 독립 검증(repo 전체 실제 import 대조). **CONFIRMED_UNUSED 4건**: `lib/seo/json-ld.ts` 의 `SITE_NAME`/`ORG_NAME`/`ORG_URL`(const)/`BreadcrumbItem`(interface) — repo 어디서도 import 없음, 파일 내부 로직(`buildArticleJsonLd`/`buildSportsEventJsonLd`/`buildSportsTeamJsonLd`/`buildBreadcrumbListJsonLd`)에서만 사용 → export 키워드만 제거(local 유지, 삭제 아님). 나머지 5개 디렉토리(stats/supabase/v2-shadow-monitor/changelog/leaderboard)는 CONFIRMED_UNUSED 0건 — 전부 실사용 확인.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm test` 582/582 files·4564/4564 tests green, eslint clean. PR #3080 squash 머지(`77ba0313`, `state=MERGED` 실측 확인).
+- 다음 사이클 추천 = review-code(heavy) 계속(debug/insights/lotto/matchup/players/predictions/reviews/seasons/standings 미탐색 잔여 9개 디렉토리) 또는 info-architecture-review(gap 15/30) 또는 1240회 추첨(9/5 21시) 이후 lotto OOS 검증.
+
 ## v0.5.62.245 — 2026-09-04 (cycle 2905, review-code(heavy): lib/calendar+observability+api 소규모 스윕, RETRO-ONLY clean)
 
 ### review-code(heavy): export-but-unused heuristic lib/calendar·observability·api 스코프 (cycle 2905, SUCCESS retro-only)
