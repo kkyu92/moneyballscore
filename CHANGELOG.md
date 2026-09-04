@@ -1,3 +1,13 @@
+## v0.5.62.225 — 2026-09-04 (cycle 2885, review-code(heavy): team-agent.ts parseResponse silent fallback fix — judge-agent P2 family 미패치 발견)
+
+### review-code(heavy): team-agent.ts parseResponse catch silent fallback 패치 (cycle 2885, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2884 retro commit 1fa14366) OK. 직전8(2877-2884) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 4/20, op-analysis gap 16/25, info-arch gap 25/30, lotto gap 13/30, explore-idea saturation 1/15 — 전부 미근접. DESIGN.md 1.6일 신선. cycle 2884 retro 추천대로 packages/kbo-data/src/agents/ 잔여 파일(judge-agent.ts/team-agent.ts/postview.ts/retro.ts/personas.ts/llm.ts) 재감사 착수.
+- `judge-agent.ts`/`team-agent.ts` 나란히 read — 두 파일 모두 `parseResponse` catch 블록이 JSON 파싱 실패 시 generic filler 객체를 정상 데이터처럼 반환하는 동일 구조. judge-agent 는 cycle 1400 P2 lesson 으로 `captureJudgeParseFallback` 패치 완료(validator.ts:845 주석)했지만, validator.ts:891-895 주석에 "cycle 1400 P2 fix 당시 judge-agent 만 패치되고 calibration-agent 는 누락"이라 적혀 있으면서도 **team-agent 자체는 이 주석에도 전혀 언급되지 않은 채 미패치 상태로 방치**되어 있음을 발견 — judge(패치)/calibration(패치, 주석에 명시)/team(미패치, 주석에도 부재) 3-agent 중 team 만 완전 누락된 silent family 재발 사례.
+- team-agent 의 fallback(`strengths: ['데이터 분석 중']`, `keyFactor: '종합 전력'`)은 `evaluateAndCaptureAgentFallback`(`r.data == null` 검사)도 통과하고, 환각 숫자/선수명이 아닌 generic 문구라 `validateTeamArgument` 도 통과 — judge/calibration 과 완전히 동일한 무신호 경로였음. 확률 계산에 실제로 쓰이는 team argument 가 조용히 필러로 대체될 수 있는 경로라 review-code(heavy) 범위에서 즉시 수정.
+- `packages/kbo-data/src/agents/validator.ts`: `captureTeamParseFallback` 신규 함수 추가(judge/calibration 동일 구조, `team_parse_fallback` Sentry tag). `packages/kbo-data/src/agents/team-agent.ts`: `parseResponse` 를 `export` + `context?: GameContext` 파라미터 추가(gameId 획득용) + catch 블록에 `captureTeamParseFallback` 호출 삽입. 신규 테스트 `agents-team-parse-fallback.test.ts`(judge-parse-fallback.test.ts 동일 패턴, JSON 없음/깨진 JSON/정상 JSON/context 없음 4 케이스).
+- `pnpm --filter @moneyball/kbo-data type-check` clean, `pnpm --filter @moneyball/kbo-data test` 94/94파일 1224/1224 green(신규 4 테스트 포함), `pnpm --filter @moneyball/kbo-data lint` 0 errors, `pnpm --filter moneyball exec tsc --noEmit` clean.
+
 ## v0.5.62.224 — 2026-09-04 (cycle 2884, review-code(heavy): packages/kbo-data/src/agents/ validator·calibration-agent·rivalry-memory 재감사 clean SUCCESS)
 
 ### review-code(heavy): lib/ 스코프 완전 소진 후 packages/kbo-data/src/agents/ 확장 재감사 (cycle 2884, SUCCESS, retro-only)

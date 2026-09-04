@@ -1,4 +1,16 @@
 
+## 🟢 SUCCESS — review-code(heavy): team-agent.ts parseResponse silent fallback fix (cycle 2885, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2884 retro commit 1fa14366) OK. 직전8(2877-2884) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 4/20, op-analysis 16/25, info-arch 25/30, lotto 13/30, explore-idea saturation 1/15 — 전부 미근접. cycle 2884 retro 추천대로 agents/ 잔여 파일(judge-agent.ts/team-agent.ts/postview.ts/retro.ts/personas.ts/llm.ts) 재감사.
+
+judge-agent.ts/team-agent.ts 나란히 read — 둘 다 parseResponse catch 가 generic filler 를 정상 데이터처럼 반환하는 동일 구조. judge 는 cycle 1400 P2 로 패치됐고 validator.ts 주석에 "calibration-agent 는 누락"이라 적혀 있는데, **team-agent 는 그 주석에도 언급 안 된 채 완전 미패치** 상태 발견 — judge(패치)/calibration(패치)/team(미패치, 이번에 처음 발견) 3-agent 중 유일한 잔존 gap.
+
+validator.ts 에 captureTeamParseFallback 신규 추가(judge/calibration 동일 구조) + team-agent.ts parseResponse export + context 파라미터 추가 + catch 안 capture 호출 삽입. 신규 테스트 agents-team-parse-fallback.test.ts 4케이스.
+
+type-check clean, test 94/94파일 1224/1224(kbo-data) green + tsc(moneyball app) clean, lint 0 errors. commit 예정, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = agents/ 잔여 파일(postview.ts/retro.ts/personas.ts/llm.ts, mlb-retro.ts) 재감사 계속 — 특히 mlb-retro.ts 는 이번 cycle 미포함. 또는 apps/moneyball/src/app/ 라우트 page.tsx 로직 레벨. 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data/src/agents/ validator·calibration-agent·rivalry-memory 재감사 clean (cycle 2884, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2883 retro commit 861c7b4d) OK. 직전8(2876-2883) distinct=3(review-code(heavy)6+polish-ui1+fix-incident1) — 2-chain lock 미발동. fix-incident gap 3/20, op-analysis 15/25, info-arch 24/30, lotto 12/30, explore-idea saturation 1/15 — 전부 미근접. cycle 2883 retro 추천대로 lib/ 스코프 완전 소진 확정 → packages/kbo-data/src/agents/ (예측 엔진 핵심) 확장.

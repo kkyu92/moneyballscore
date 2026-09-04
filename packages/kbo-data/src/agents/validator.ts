@@ -972,6 +972,53 @@ export async function captureCalibrationApiFallback(meta: CalibrationApiFailureM
   }
 }
 
+interface TeamParseFailureMeta {
+  team: string;
+  gameId: string | number | null;
+  textExcerpt: string;
+  errorMessage: string;
+}
+
+// team-agent parseResponse catch path 전용 Sentry 채널. judge-agent(cycle 1400 P2)/
+// calibration-agent 와 동일 구조 (JSON.parse 실패 시 '데이터 분석 중' 등 generic filler
+// TeamArgument 를 정상 데이터처럼 반환) 지만 지금까지 미패치 상태였음 — evaluateAndCaptureAgentFallback
+// (`r.data == null` 검사) 도 감지 못하고, generic filler 텍스트는 validateTeamArgument 환각 체크도
+// 통과해 완전 silent (cycle 2885 review-code(heavy) 발견, 동일 silent family).
+export async function captureTeamParseFallback(meta: TeamParseFailureMeta): Promise<void> {
+  if (process.env.NODE_ENV === 'test') return;
+
+  type SentryModule = {
+    captureException?: (err: unknown, opts: unknown) => void;
+    getClient?: () => unknown;
+  };
+  let Sentry: SentryModule | null = null;
+  try {
+    Sentry = (await import('@sentry/nextjs' as string)) as SentryModule;
+  } catch {
+    return;
+  }
+  if (!Sentry || typeof Sentry.captureException !== 'function') return;
+  if (typeof Sentry.getClient === 'function' && !Sentry.getClient()) return;
+
+  try {
+    Sentry.captureException(new Error(`team_parse_fallback: ${meta.errorMessage}`), {
+      level: 'warning',
+      tags: {
+        team_parse_fallback: 'true',
+        agent: 'team',
+        team: meta.team,
+      },
+      extra: {
+        game_id: meta.gameId ?? 'unknown',
+        text_excerpt: meta.textExcerpt,
+        error_message: meta.errorMessage,
+      },
+    });
+  } catch {
+    // Sentry 호출 자체 실패해도 메인 path 보호
+  }
+}
+
 interface RivalryMemoryFailureMeta {
   source: 'fetchRecentH2H' | 'fetchMemories' | 'getRivalryBlock';
   homeTeam: string;

@@ -4,7 +4,7 @@ import { buildAgentContext, renderContextForLLM, formatGapAwareStat } from '../c
 import { MetricRegistry } from '../context/metrics';
 import { callLLM } from './llm';
 import { BASE_PROMPT, HOME_ROLE, AWAY_ROLE, RESPONSE_FORMAT } from './personas';
-import { validateTeamArgument, resolveValidationMode } from './validator';
+import { validateTeamArgument, resolveValidationMode, captureTeamParseFallback } from './validator';
 import { logValidatorEvent } from './validator-logger';
 import { getRivalryBlock } from './rivalry-memory';
 import type { GameContext, TeamArgument, AgentResult } from './types';
@@ -69,7 +69,7 @@ ${rivalryBlock && rivalryBlock.trim().length > 0 ? '\n' + rivalryBlock + '\n' : 
 ${KBO_TEAMS[myTeam].name}의 관점에서 분석하세요.`;
 }
 
-function parseResponse(text: string, team: TeamCode): TeamArgument {
+export function parseResponse(text: string, team: TeamCode, context?: GameContext): TeamArgument {
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('No JSON found');
@@ -83,7 +83,18 @@ function parseResponse(text: string, team: TeamCode): TeamArgument {
       confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || AGENT_PARSE_CONFIDENCE_DEFAULT)),
       reasoning: String(parsed.reasoning || '').slice(0, 500),
     };
-  } catch {
+  } catch (e) {
+    // cycle 2885: judge-agent(cycle 1400 P2)와 동일 silent family — generic filler 를
+    // 정상 데이터처럼 반환해 evaluateAndCaptureAgentFallback(`r.data == null`)도, validator
+    // 환각 체크도 통과. 별도 Sentry 채널로 명시 capture.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gameId = context ? ((context.game as any).id ?? context.game.externalGameId ?? null) : null;
+    void captureTeamParseFallback({
+      team,
+      gameId,
+      textExcerpt: text.slice(0, 300),
+      errorMessage: errMsg(e),
+    });
     return {
       team,
       strengths: ['데이터 분석 중'],
@@ -123,7 +134,7 @@ export async function runTeamAgent(
       userMessage: buildUserMessage(team, context, rivalry.promptBlock),
       maxTokens: LLM_MAX_TOKENS_TEAM,
     },
-    (text) => parseResponse(text, team)
+    (text) => parseResponse(text, team, context)
   );
 
   // Validator Layer 1 — 성공 응답에만 적용
