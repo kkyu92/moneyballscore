@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — fix-incident: deploy-drift-alert 정체 vs backlog-drain 구분 (cycle 2898, 2026-09-04)
+
+진단: fix-incident gap 53-cycle(마지막 2845)·op-analysis gap 46-cycle(마지막 2852) 둘 다 트리거 크게 초과. `gh workflow list` 전수 점검 중 `deploy-drift-alert` 가 4일간 20회 중 12회(60%) `::error::` 실패 중인 실제 incident 발견 — fix-incident(heavy) 선택.
+
+`/investigate`: 실패 로그의 commits_ahead 값이 두 케이스 모두 최대 15시간 고정. git log 대조 결과 main도 안 움직이고 prod도 안 움직인 진짜 정체 구간 확인(cycle 2222 "backlog drain 자연 해소" 결론만으론 전부 설명 안 됨). 근본원인 = 매 실행이 독립적(state 없음)이라 "지난 1시간 진전 여부" 판별 불가 → alert fatigue.
+
+fix: actions/cache로 직전 실행 prod_sha 저장 + 비교. prod_sha 동일(진전 0)+gap≥3h만 ::error::, 전진 중이면 ::notice::로 다운그레이드. PR #3077 → workflow_dispatch 실측 fire 1회 PASS(cache restore/save 정상) → R7 머지(f350eb48).
+
+다음 사이클 추천 = review-code(heavy) 계속(lib/accuracy/lib/picks/lib/dashboard 잔여 스코프, cycle 2897 carry-over) 또는 op-analysis gap 46-cycle 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused hooks/ 스코프 2건 (cycle 2897, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/spec_only/archived). 2차 방어선(cycle 2896 retro commit 3b0e3072) OK. 직전8(2889-2896) distinct=4(review-code(heavy)5+polish-ui(2-chain lock fallback)1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 16/20·op-analysis 6/25·info-arch 5/30·lotto 25/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.9h 신선) organic idea 부재로 skip. kbo-data 패키지 스코프 확정 소진 상태에서 apps/moneyball 미탐색 소형 스코프(`hooks/`/`config/`/`lib/leaderboard`/`lib/calendar`/`lib/v2-shadow-monitor`/`lib/weather.ts`/`lib/tabpfn-export.ts`/`lib/hub-dispatch.ts`) 착수.

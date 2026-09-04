@@ -1,3 +1,12 @@
+## v0.5.62.238 — 2026-09-04 (cycle 2898, fix-incident: deploy-drift-alert 정체 vs backlog-drain 구분)
+
+### fix-incident: deploy-drift-alert 진짜 정체 vs 정상 backlog-drain 구분 (cycle 2898, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2897 retro commit 681220e8) OK. 직전8 distinct=4, 2-chain lock 미충족. fix-incident gap 53-cycle(마지막 발화 cycle 2845)·operational-analysis gap 46-cycle(마지막 발화 cycle 2852) 둘 다 각 트리거(20/25) 크게 초과 — `gh workflow list` 전수 점검 중 `deploy-drift-alert` 워크플로우가 2026-08-31~09-04 4일간 20회 중 12회(60%) `::error::` 로 실패 중인 실제 incident 발견, fix-incident(heavy) 선택.
+- `/investigate` 로 근본원인 추적: 실패 로그의 `commits_ahead` 값이 두 케이스(prod_sha=`d7410db`/`64bcfd0`) 모두 최대 15시간 동안 완전히 고정 — `git log --since/--until` 로 해당 구간 실제 커밋 활동 대조 결과 main 도 안 움직이고 prod 도 안 움직인 진짜 정체 구간이 확인됨(cycle 2222 결론 "봇 push burst 뒤 Vercel 큐가 자연 caught up" 만으론 전부 설명 안 됨). 매 실행이 독립적(state 없음)이라 "지난 1시간 동안 진전이 있었는지" 판별 불가한 게 근본원인 — backlog가 정상 drain 중인지 진짜 멈췄는지 구분 못하고 매시간 동일 강도 `::error::` 반복(alert fatigue).
+- fix: `actions/cache`(정확한 tag SHA는 `gh api repos/actions/cache/git/refs/tags/v4` 로 실측 확인, 추측 SHA 사용 금지)로 직전 실행의 `prod_sha`를 저장해 이번 실행과 비교하도록 `.github/workflows/deploy-drift-alert.yml` 수정. `prod_sha`가 직전 실행과 동일(진전 0) + `gap_hours >= 3`일 때만 `::error::`(진짜 정체 의심), 전진 중이면 `::notice::`(drain 정상 진행)로 다운그레이드. `gap_hours < 1`은 기존 로직 유지. bash 분기 로직 4개 케이스(gap<1/same+gap≥3/diff-progressing/first-run) 시뮬레이션으로 사전 검증.
+- PR #3077 생성 → `workflow_dispatch --ref <branch>`로 실측 fire 1회 실행(cache restore/save 단계 정상 동작 확인, conclusion=success) → CI green 확인 후 R7 `--squash --auto --delete-branch` 머지(commit f350eb48). `pnpm --filter moneyball exec tsc --noEmit`/lint/test 전체 워크플로우 파일 변경만이라 무관.
+
 ## v0.5.62.237 — 2026-09-04 (cycle 2897, review-code(heavy): export-but-unused hooks/ 스코프 2건)
 
 ### review-code(heavy): export-but-unused heuristic apps/moneyball hooks/ 스코프 2건 (cycle 2897, SUCCESS)
