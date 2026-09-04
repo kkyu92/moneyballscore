@@ -1,4 +1,10 @@
-## v0.5.62.213 — 2026-09-03 (cycle 2850, review-code(heavy): export-but-unused lib/accuracy 5건 SUCCESS, 시딩 스크립트 cwd 버그 발견)
+## v0.5.62.214 — 2026-09-04 (cycle 2874, review-code(heavy): export-but-unused seo/seasons/changelog 10건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic seo/seasons/changelog 스코프 10건 (cycle 2874, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2873 retro commit 584fbc4a) OK. 직전8(2866-2873) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+lotto1) — 2-chain lock 미발동. fix-incident gap 20+ 나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped, health-alert/runtime-error-alert success) 실제 incident 부재. op-analysis gap 22/25, info-arch gap 14/30, lotto gap 2/30 전부 미근접. DESIGN.md mtime 1.58일 신선(design-system 트리거 X). explore-idea saturation 3/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+- insights/matchup/teams 스코프 먼저 grep — 전부 cross-file import 확인되어 유지(0건). seo/json-ld.ts(4)+seasons/buildSeasonSummary.ts(4)+changelog/parse.ts(1)+changelog/renderMarkdown.tsx(1) = 10개 exported type/interface 가 정의 파일 내부 전용 사용만 확인. general-purpose subagent 독립 재검증(전체 repo 재grep + barrel/index.ts 부재 확인 + type-only import 확인 + name-collision 확인) — 10/10 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 68305ec6, R4 직push(단일 논리 단위, PR 생략).
 
 ### review-code(heavy): export-but-unused heuristic debug 스코프 1건 (cycle 2873, SUCCESS)
 
