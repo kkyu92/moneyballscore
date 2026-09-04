@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused factors 스코프 3건 (cycle 2893, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2892 retro commit 9ed3ddcf) OK. 직전8(2885-2892) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 실제 incident 부재/op-analysis 2/25/info-arch 1/30/lotto 21/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative — organic idea 부재로 skip. `lib/`·`agents/`·`scrapers/backtest/` 스코프 소진 확정 후 cycle 2892 추천대로 review-code(heavy) 계속, 신규 미스윕 스코프(`packages/kbo-data/src/{context,factors}/`) 탐색.
+
+`factors/` 스코프 exported type/interface 17개 grep(context/ 16개 병행 탐색, 전부 clean) → `MlbFactorContributions`/`TrainResult`/`ParkWeatherScore` 3개만 0-external-hit(정의 파일 내부 함수 시그니처 전용). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel index.ts 재-export 확인 + name-collision 배제 + 테스트 import 대조) — 3/3 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+
+kbo-data type-check clean, test 94/94파일 1224/1224 green. moneyball type-check clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit 48fa1be8, R4 직push.
+
+다음 사이클 추천 = review-code(heavy) 계속(잔여 미스윕 스코프: `analytics/`(5)·`engine/`(3)·`features/`(1)·`notify/`(0)·`pipeline/`(28)·root files(types.ts/big-match.ts/index.ts, 36개) — pipeline/ 이 가장 큰 미탐색 스코프) 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — info-architecture-review: 30-cycle-gap checkpoint, 8연속 "현 IA 충분" (cycle 2892, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2891 retro commit e87b3314) OK. 직전8(2884-2891) distinct=3(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. fix-incident gap 11/20, lotto gap 20/30 미근접, op-analysis 방금 발화(2891) — 전부 미근접. info-arch gap 32/30 (마지막 발화 cycle 2860) 초과 + 직전 cycle(2891) 명시적 추천 → 선택.

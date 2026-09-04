@@ -1,3 +1,11 @@
+## v0.5.62.233 — 2026-09-04 (cycle 2893, review-code(heavy): export-but-unused factors 스코프 3건)
+
+### review-code(heavy): export-but-unused heuristic factors 스코프 3건 (cycle 2893, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/pending-user-step). 2차 방어선(cycle 2892 retro commit 9ed3ddcf) OK. 직전8(2885-2892) distinct=4(review-code(heavy)5+polish-ui1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. fix-incident gap 20+/20 이나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis gap 2/25, info-arch gap 1/30, lotto gap 21/30 — 전부 미근접. explore-idea saturation 14/15 도달했으나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40h 신선) organic idea 부재로 skip. `apps/moneyball/src/lib/` 스코프는 cycle 2883 완전 소진 확정, `packages/kbo-data/src/agents/`·`scrapers/backtest/`도 각각 cycle 2884-2886/2849 소진 — cycle 2892 next_recommended("review-code(heavy) 계속")대로 신규 미스윕 스코프 탐색(`packages/kbo-data/src/{context,factors,analytics,engine,features,notify,pipeline}/`) 착수.
+- `packages/kbo-data/src/factors/` 스코프 exported type/interface 17개 grep(context/ 16개도 함께 탐색했으나 전부 cross-file import 확인되어 clean) → `MlbFactorContributions`(mlb-base.ts)/`TrainResult`(mlb-shadow-c.ts)/`ParkWeatherScore`(park-weather.ts) 3개만 0-external-hit 후보(전부 정의 파일 내부 함수 시그니처 전용). general-purpose subagent 독립 재검증(전체 repo 재grep + barrel `index.ts` 재-export 확인 + name-collision 배제 + 테스트 파일 import 대조, `TrainResult`의 `docs/superpowers/plans/` md 히트는 plan 문서 텍스트일 뿐 컴파일 코드 아님을 확인) — 3/3 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter kbo-data exec tsc --noEmit` clean, test 94/94파일 1224/1224 green. `pnpm --filter moneyball exec tsc --noEmit` clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. commit 48fa1be8, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.232 — 2026-09-04 (cycle 2892, info-architecture-review: 8연속 "현 IA 충분" 재확정)
 
 ### info-architecture-review: 30-cycle-gap checkpoint, retro-only (cycle 2892, SUCCESS)
