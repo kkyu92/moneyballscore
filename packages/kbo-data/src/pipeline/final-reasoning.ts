@@ -42,7 +42,7 @@ export interface DebatePayload {
   agentError?: string | null;
 }
 
-export interface FinalReasoning {
+interface FinalReasoning {
   predictedWinner: string;
   homeWinProb: number;
   confidence: number;

@@ -14,7 +14,7 @@ import { extractReasoningHomeWinProb } from '../types';
 // 함수. 호출 측이 supabase `.error` 체크 + 명시적 throw + summary.length === 0
 // 가드로 ghost notification 차단.
 
-export type SummaryPrediction = {
+type SummaryPrediction = {
   homeTeam: TeamCode;
   awayTeam: TeamCode;
   predictedWinner: TeamCode;

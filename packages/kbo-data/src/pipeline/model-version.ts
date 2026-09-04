@@ -38,7 +38,7 @@ export {
 } from '@moneyball/shared';
 export type { ModelVersion, DebateVersion, ScoringRule } from '@moneyball/shared';
 
-export interface ModelVersionDecision {
+interface ModelVersionDecision {
   model_version: ModelVersion;
   debate_version: DebateVersion;
   scoring_rule: ScoringRule;

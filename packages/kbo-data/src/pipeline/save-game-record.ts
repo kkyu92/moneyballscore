@@ -11,7 +11,7 @@ import { DB_CONSTRAINTS } from './db-constraints';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any, any, any>;
 
-export interface SaveResult {
+interface SaveResult {
   gameId: number;
   inserted: boolean;
   updated: boolean;

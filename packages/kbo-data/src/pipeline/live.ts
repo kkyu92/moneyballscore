@@ -23,7 +23,7 @@ function createAdminClient(): DB {
   });
 }
 
-export interface LiveUpdateResult {
+interface LiveUpdateResult {
   date: string;
   liveGames: number;
   updated: number;

@@ -9,7 +9,7 @@
 import { HOUR_MS } from '@moneyball/shared';
 import type { ScrapedGame } from '../types';
 
-export type ShouldPredictReason =
+type ShouldPredictReason =
   | 'window_too_early'
   | 'window_too_late'
   | 'not_scheduled'
@@ -17,7 +17,7 @@ export type ShouldPredictReason =
   | 'already_predicted'
   | 'ok';
 
-export interface ShouldPredictResult {
+interface ShouldPredictResult {
   shouldPredict: boolean;
   reason: ShouldPredictReason;
 }

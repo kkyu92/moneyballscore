@@ -271,7 +271,7 @@ export async function captureFactorAnomalyAlert(
 // 데이터 희박 예측은 사실상 coin flip 에 가깝고 도메인 지식 검증 불가.
 // captureFactorAnomalyAlert (z-score 시계열 이상) 와 별개 채널 — 단일 경기 품질 gate.
 
-export interface SparsePredictionAlertMeta {
+interface SparsePredictionAlertMeta {
   date: string;
   game: string; // "LT vs HH" 식 판독용
   cohort: string;
