@@ -31,6 +31,20 @@ name: deploy-drift-alert
 #   catch-up 중 vs 소수 commit 인데 정말 멈춤) 불가능했던 진단 정보 손실.
 # - fix: fetch-depth 0 (전체 history, repo 68MB/4639 commit 규모라 3분
 #   timeout 안 충분) 로 COMMITS_AHEAD 항상 정확히 계산되도록 수정.
+#
+# cycle 2898 (fix-incident) — 연속-실행 progress 비교 추가:
+# - 실측: 2026-08-31~09-04 4일간 20회 중 12회(60%) ::error::. 두 사례 모두
+#   commits_ahead 값이 여러 시간(최대 15h) 동안 완전히 고정 — 진짜 backlog
+#   drain 중이면 시간이 지날수록 prod_sha 가 조금씩 전진해야 하는데, 그 사이
+#   main 도 안 움직였고 prod 도 안 움직인 경우가 섞여 있어 "queue 가 서서히
+#   caught up" (cycle 2222 결론) 만으론 설명 안 됨 — 일부는 실제 정체.
+# - 문제: 매 실행이 독립적(state 없음) 이라 "이번 시간 동안 진전이 있었는지"
+#   판별 불가 — gap_hours 단일 값만 보고 벌크 backlog drain 중(정상)과 진짜
+#   멈춤(비정상)을 구분 못해 매시간 동일 강도 ::error:: 반복 = alert fatigue.
+# - fix: actions/cache 로 직전 실행의 prod_sha 를 저장해 이번 실행과 비교.
+#   prod_sha 가 직전 실행과 동일(지난 1시간 진전 0) + gap_hours >= 3 일 때만
+#   ::error:: (진짜 정체 의심). prod_sha 가 전진 중이면 gap_hours 커도
+#   ::notice:: (drain 진행 중, 정상). gap_hours < 3 은 기존대로 유지.
 
 on:
   schedule:
@@ -53,6 +67,15 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
+
+      - name: Restore previous drift state
+        id: restore-state
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .drift-state
+          key: drift-state-${{ github.run_id }}
+          restore-keys: |
+            drift-state-
 
       - name: Compare main HEAD vs production /api/version
         run: |
@@ -107,9 +130,22 @@ jobs:
           echo "main_short=$MAIN_SHORT prod_short=$(echo $PROD_SHA | cut -c1-7)"
           echo "commits_ahead=$COMMITS_AHEAD gap_hours=$GAP_HOURS"
 
-          if [ "$GAP_HOURS" -ge 1 ]; then
-            echo "::error::deploy drift detected — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch. $COMMITS_AHEAD commit ahead, gap ${GAP_HOURS}h. 사례 9/10 silent drift family 재발 의심 — vercel ls --prod + vercel inspect <id> --logs 진단 권장."
+          PREV_PROD_SHA=$(cat .drift-state 2>/dev/null || echo "")
+          echo "prev_prod_sha=$PREV_PROD_SHA"
+          echo "$PROD_SHA" > .drift-state
+
+          if [ "$GAP_HOURS" -lt 1 ]; then
+            echo "::notice::recent push detected — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch이지만 gap ${GAP_HOURS}h < 1h (deploy in progress). 다음 시간 재검사."
+          elif [ -n "$PREV_PROD_SHA" ] && [ "$PREV_PROD_SHA" = "$PROD_SHA" ] && [ "$GAP_HOURS" -ge 3 ]; then
+            echo "::error::deploy drift detected — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch. $COMMITS_AHEAD commit ahead, gap ${GAP_HOURS}h, prod_sha 직전 실행과 동일(지난 1시간 진전 0) — 정체 의심. 사례 9/10 silent drift family 재발 의심 — vercel ls --prod + vercel inspect <id> --logs 진단 권장."
             exit 1
           else
-            echo "::notice::recent push detected — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch이지만 gap ${GAP_HOURS}h < 1h (deploy in progress). 다음 시간 재검사."
+            echo "::notice::deploy drift 진행 중 — main HEAD ($MAIN_SHORT) vs production ($(echo $PROD_SHA | cut -c1-7)) mismatch, $COMMITS_AHEAD commit ahead, gap ${GAP_HOURS}h. prod_sha 가 직전 실행과 다르거나(진전 중) gap < 3h — backlog drain 정상 진행으로 판단, 다음 시간 재검사."
           fi
+
+      - name: Save drift state
+        if: always()
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .drift-state
+          key: drift-state-${{ github.run_id }}
