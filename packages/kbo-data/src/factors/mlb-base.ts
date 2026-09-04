@@ -82,7 +82,7 @@ function safe(value: number, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
-export type MlbFactorContributions = Record<Exclude<keyof typeof MLB_BASE_WEIGHTS, 'home_elo_bonus'>, number>;
+type MlbFactorContributions = Record<Exclude<keyof typeof MLB_BASE_WEIGHTS, 'home_elo_bonus'>, number>;
 
 /**
  * homeAdvantage 를 이루는 14개 term 을 개별 노출 (cycle 2169 explore-idea —

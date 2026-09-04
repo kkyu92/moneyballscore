@@ -17,7 +17,7 @@
 
 import type { WeatherSnapshot } from '../scrapers/weather';
 
-export interface ParkWeatherScore {
+interface ParkWeatherScore {
   /** 홈팀 공격 offence multiplicative adj (-0.15 ~ +0.10) */
   homeAdj: number;
   /** 원정팀 공격 offence multiplicative adj */

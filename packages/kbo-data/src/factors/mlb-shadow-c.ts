@@ -16,7 +16,7 @@ export function computeBrier(predictions: BrierInput[]): number {
   return sum / predictions.length;
 }
 
-export interface TrainResult {
+interface TrainResult {
   weights: Record<string, number>;
   brier: number;
   accuracy: number;
