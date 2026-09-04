@@ -1,3 +1,11 @@
+## v0.5.62.237 — 2026-09-04 (cycle 2897, review-code(heavy): export-but-unused hooks/ 스코프 2건)
+
+### review-code(heavy): export-but-unused heuristic apps/moneyball hooks/ 스코프 2건 (cycle 2897, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/spec_only/archived, plan #22/24/27/28/29 확인). 2차 방어선(cycle 2896 retro commit 3b0e3072) OK. 직전8(2889-2896) distinct=4(review-code(heavy)5+polish-ui(2-chain lock fallback)1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 16/20·op-analysis 6/25·info-arch 5/30·lotto 25/30) 전부 미근접. explore-idea saturation 14/15 도달했으나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.9h 신선) organic idea 부재로 skip. cycle 2896 next_recommended대로 kbo-data 패키지 전체 스코프 소진 확정 후 apps/moneyball 쪽 미탐색 소형 스코프(`hooks/`/`config/`/`lib/leaderboard`/`lib/calendar`/`lib/v2-shadow-monitor`/`lib/weather.ts`/`lib/tabpfn-export.ts`/`lib/hub-dispatch.ts`) 착수.
+- exported type/interface 15개 grep(hooks 3 + leaderboard/types 5 + calendar 2 + v2-shadow-monitor 1 + weather 1 + tabpfn-export 2 + hub-dispatch 1) → 3개(`PickChoice`/`UserPick`/`DropReason`) 만 0-external-hit 1차 후보. general-purpose subagent 독립 재검증 중 `DropReason`이 `scripts/export-predictions-tabpfn.ts:26`에서 `import type { DropReason }`로 실사용 확인(1차 grep이 `scripts/` 디렉토리를 스캔 범위에서 누락한 false positive) — 제외. `PickChoice`/`UserPick`(apps/moneyball/src/hooks/use-user-picks.ts) 2건만 CONFIRMED_UNUSED(정의 파일 내부 전용, barrel 부재, 테스트 미참조). export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. kbo-data 미변경. commit 예정, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.236 — 2026-09-04 (cycle 2896, review-code(heavy): export-but-unused components/ 스코프 10건)
 
 ### review-code(heavy): export-but-unused heuristic apps/moneyball components/ 스코프 10건 (cycle 2896, SUCCESS)

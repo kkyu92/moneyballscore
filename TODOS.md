@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): export-but-unused hooks/ 스코프 2건 (cycle 2897, 2026-09-04)
+
+진단: open issue 0, unprocessed approved plan 0/23(전부 completed/spec_only/archived). 2차 방어선(cycle 2896 retro commit 3b0e3072) OK. 직전8(2889-2896) distinct=4(review-code(heavy)5+polish-ui(2-chain lock fallback)1+operational-analysis(lite)1+info-architecture-review1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 16/20·op-analysis 6/25·info-arch 5/30·lotto 25/30) 전부 미근접. explore-idea saturation 14/15 나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 40.9h 신선) organic idea 부재로 skip. kbo-data 패키지 스코프 확정 소진 상태에서 apps/moneyball 미탐색 소형 스코프(`hooks/`/`config/`/`lib/leaderboard`/`lib/calendar`/`lib/v2-shadow-monitor`/`lib/weather.ts`/`lib/tabpfn-export.ts`/`lib/hub-dispatch.ts`) 착수.
+
+exported type/interface 15개 grep → 3개(`PickChoice`/`UserPick`/`DropReason`) 1차 후보. subagent 재검증 중 `DropReason`이 `scripts/export-predictions-tabpfn.ts:26`(1차 grep이 `scripts/` 디렉토리 누락해 놓친 false positive)에서 실사용 확인 — 제외. `PickChoice`/`UserPick`(hooks/use-user-picks.ts) 2건만 CONFIRMED_UNUSED. export 키워드만 제거.
+
+moneyball type-check clean, lint 0 errors(기존 무관 warning 1건 유지), test 582/582파일 4564/4564 green. kbo-data 미변경. commit 예정, R4 직push(단일 논리 단위, PR 생략).
+
+다음 사이클 추천 = review-code(heavy) 계속 — 신규 발견 대형 미탐색 스코프: apps/moneyball/src/lib/accuracy/(9개 interface, buildAccuracyData.ts 단일 파일 12개 포함) + lib/picks/(6개, buildPicksStats.ts) + lib/dashboard/ 잔여 파일(buildDailyAccuracy/buildConfidenceBuckets/factor-accuracy/compareModels/buildHallucinationStats, 기존 "dashboard 스코프" 완료분과 별개 파일) — 아직 external-hit 여부 미확인, 다음 cycle 착수 대상. 또는 fix-incident/op-analysis/info-arch/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): export-but-unused components/ 스코프 10건 (cycle 2896, 2026-09-04)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2895 retro commit 4f682190) OK. 직전8(2888-2895) distinct=4(review-code(heavy)6+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 15/20·op-analysis 5/25·info-arch 4/30·lotto 24/30) 전부 미근접. explore-idea saturation 14/15 나 organic idea 부재로 skip. cycle 2895 추천대로 review-code(heavy) 계속.
