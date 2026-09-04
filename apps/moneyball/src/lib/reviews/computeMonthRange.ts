@@ -5,7 +5,7 @@
 
 import { KST_OFFSET_MS } from '@moneyball/shared';
 
-export type ReviewRangeLocale = 'ko' | 'en';
+type ReviewRangeLocale = 'ko' | 'en';
 
 const EN_MONTH_FULL = [
   'January', 'February', 'March', 'April', 'May', 'June',
