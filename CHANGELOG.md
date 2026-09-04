@@ -1,3 +1,11 @@
+## v0.5.62.216 — 2026-09-04 (cycle 2876, review-code(heavy): export-but-unused mlb 1건 SUCCESS)
+
+### review-code(heavy): export-but-unused heuristic mlb 스코프 1건 (cycle 2876, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2875 retro commit 9c6e341f) OK. 직전8(2868-2875) distinct=4(review-code(heavy)5+lotto1+polish-ui1+operational-analysis(lite)1) — 2-chain lock 미발동. fix-incident gap 20/20 정확 도달했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. op-analysis gap 24/25, info-arch gap 16/30, lotto gap 4/30 전부 미근접. explore-idea saturation 2/15 미충족 — review-code(heavy) dominance-positive streak(cycle 135 룰) 따라 계속.
+- insights(1)+matchup(4) 스코프 먼저 grep — 전부 cross-file import 확인되어 유지(0건). mlb 스코프 exported type/interface 10개 grep → 8개는 cross-file import 확인되어 유지. `MlbTeamFactorAverages` 는 buildMlbTeamFactorAverages.ts(외부 사용, 유지) 와 buildMlbTeamProfile.ts(자기 파일 내부 전용) 양쪽 독립 정의 — 후자만 unused. general-purpose subagent 독립 재검증 — 1/1 CONFIRMED_UNUSED, false positive 0건. export 키워드만 제거.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, test 582/582파일 4564/4564 green, lint 0 errors(기존 warning 1건 유지). commit 7a6ec16a, R4 직push(단일 논리 단위, PR 생략).
+
 ## v0.5.62.215 — 2026-09-04 (cycle 2875, review-code(heavy): export-but-unused reviews 2건 SUCCESS)
 
 ### review-code(heavy): export-but-unused heuristic reviews 스코프 2건 (cycle 2875, SUCCESS)
