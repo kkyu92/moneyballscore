@@ -1,3 +1,12 @@
+## v0.5.62.231 — 2026-09-04 (cycle 2891, operational-analysis(lite): CE/비CE 격차 24회 연속 재확인)
+
+### operational-analysis(lite): CE/비CE 격차 24회 연속 재확인, retro-only (cycle 2891, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2890 retro commit 63d28868) OK. 직전8(2883-2890) distinct=2(review-code(heavy)7+polish-ui1) — 2-chain lock 발동, 잠긴 chain 중 fix-incident 미포함이라 안전 예외 미적용 → 두 chain 제외.
+- fix-incident gap 39+/20 초과했으나 `gh run list` 재확인(CI Failure Dispatch 전부 skipped) 실제 incident 부재. info-arch gap 30/30 도달(마지막 발화 cycle 2860). op-analysis gap 38/25 (마지막 발화 cycle 2852, info-arch 보다 더 오래 미발화) — 둘 다 trigger 충족. explore-idea saturation 15/15 도달했으나 4-source 재확인 negative(open issue 0/plan approved 0/TODOS Next-Up stale/DESIGN.md 40h 신선) organic idea 부재로 skip. 더 오래 미발화한 op-analysis 선택.
+- `scripts/op-analysis-ce-cohort.ts` 동일 harness 재실행: 전체 n=371 (CE n=324 / 비CE n=47) — cycle 2869 수치와 완전 동일(신규 verified 예측 0건, 22-cycle 경과에도 배치 미반영). CE 54.6%(177/324) / 비CE 63.8%(30/47) → 격차 9.2pp 그대로, overlap 월(05/06/07) 통제 격차 10.8pp ≈ 유지 — LLM 부가가치 우세 결론 24회 연속 재확인.
+- CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 65일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only). CLAUDE.md 갱신만.
+
 ## v0.5.62.230 — 2026-09-04 (cycle 2890, polish-ui(2-chain lock fallback): DB-heavy 라우트 17개 loading.tsx 신설)
 
 ### polish-ui(2-chain lock fallback): DB-heavy 라우트 17개 loading.tsx 스켈레톤 신설 (cycle 2890, SUCCESS)
