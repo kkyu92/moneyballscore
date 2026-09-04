@@ -2,7 +2,7 @@
 // reason enum: window_too_early / window_too_late / not_scheduled / sp_unconfirmed / already_predicted
 // shouldPredictGame (schedule.ts) reject reason 분포 시각화.
 
-export interface SkippedEntry {
+interface SkippedEntry {
   game: string;
   reason: string;
 }
