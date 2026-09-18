@@ -1,3 +1,13 @@
+## v0.5.62.247 — 2026-09-18 (cycle 2907, review-code(heavy): lib/seasons export-but-unused de-export)
+
+### review-code(heavy): export-but-unused heuristic lib/debug+insights+seasons+standings 스코프 (cycle 2907, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2906 retro commit 26b26f54) OK. 직전8(2899-2906) distinct=4(op-analysis1+review-code(heavy)5+skill-evolution1+lotto1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 9/20·op-analysis 8/25·info-arch 15/30·lotto 5/30) 전부 미근접. `gh run list` 재확인 — CI Failure Dispatch/Vercel Deploy Failure Dispatch 전부 skipped(실제 incident 부재), health-alert/runtime-error-alert/deploy-drift-alert 전부 success. cycle 2906 추천대로 review-code(heavy) 잔여 스코프 계속 — debug(790줄)/insights(827줄)/seasons(557줄)/standings(667줄) 4개 디렉토리 선정(lotto/matchup/players/predictions/reviews 5개는 다음 사이클 이월).
+- exported symbol 전수 general-purpose subagent 독립 검증(repo 전체 실제 import 대조). **CONFIRMED_UNUSED 1건**: `lib/seasons/buildSeasonSummary.ts` 의 `ExtremeGame` interface — `app/seasons/[year]/page.tsx` 에 동명 로컬 type 존재해 grep false-positive 유발했으나 실제 무관한 별개 타입, lib export 자체는 외부 참조 0건. export 키워드만 제거(내부 buildSeasonSummary 로직 계속 사용). debug/insights/standings 3개 디렉토리는 CONFIRMED_UNUSED 0건 — 전부 실사용 확인(insights 의 `TOP_FACTOR_LIMIT`/`NEUTRAL_HI`/`NEUTRAL_LO` 는 test-only consumer 확인, seasons 의 `computeSeasonIsOngoing` 도 test-only consumer 확인 — 둘 다 USED 분류 유지).
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm test` 582/582 files·4564/4564 tests green, eslint clean. PR #3089 squash 머지(`fd41da8f`, `state=MERGED` 실측 확인).
+- 참고: 이번 사이클과 무관하게 직전 세션에서 `data(lotto): 9/5+9/12+9/19 pick + result backfill` (036d1473) + `fix(ci): pnpm 10.33.0 → 11.25.0 workflow 5개 정합` (1b4e5cb0) 이 develop-cycle 흐름 밖에서 이미 커밋됨 — 9/1 pnpm 11 마이그레이션 후 workflow 하드코딩 잔재로 lotto cron 3주간 전량 skip된 것을 수동 backfill + workflow 수정으로 회복한 이력. 본 cycle 진단에서 재확인, 추가 조치 불필요.
+- 다음 사이클 추천 = review-code(heavy) 계속(lotto/matchup/players/predictions/reviews 잔여 5개 디렉토리, reviews 는 2793줄로 단독 스코프 권장) 또는 info-architecture-review(gap 15/30, 다음 사이클 도달 임박 아님) 또는 1242회 추첨(9/19 21시) 이후 lotto OOS 검증.
+
 ## v0.5.62.246 — 2026-09-04 (cycle 2906, review-code(heavy): lib/seo export-but-unused de-export)
 
 ### review-code(heavy): export-but-unused heuristic lib/seo·stats·supabase·v2-shadow-monitor·changelog·leaderboard 스코프 (cycle 2906, SUCCESS)
