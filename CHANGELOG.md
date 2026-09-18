@@ -1,4 +1,14 @@
-## v0.5.62.247 — 2026-09-18 (cycle 2909, review-code(heavy): lib/lotto export-but-unused de-export — lib/ 스윕 1차 종료)
+## v0.5.62.247 — 2026-09-18 (cycle 2910, polish-ui(2-chain lock fallback): /search loading.tsx 신설)
+
+### polish-ui(2-chain lock fallback): /search 라우트 loading.tsx 스켈레톤 신설 (cycle 2910, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(plan #29 재평가 트리거도 미충족 — 실시간 재확인 `user_picks`=1/`mlb_user_picks`=0/`pick_poll_events`=5/`mlb_pick_poll_events`=0, plan #27/29 임계 ≥10 미도달, 83+ cycle 변화 0 지속). 2차 방어선(cycle 2909 retro commit a43c8049) OK. **2-chain alternation lock 발동** — 직전8(2902-2909) distinct=2(`lotto(lite)`1 + `review-code(heavy)`7), 잠긴 chain 에 fix-incident 미포함 → 안전 예외 미적용. gap trigger 4종(fix-incident 11/20·op-analysis 10/25·info-arch 17/30·lotto 잠김 제외) 전부 미근접. explore-idea saturation 12/15 충족했으나 4-source 재확인 negative(open issue 0/plan approved 0/TODOS Next-Up stale/DESIGN.md 16일 신선) organic idea 부재로 skip. 잔여 pool 무trigger → 룰대로 polish-ui 강제 발화.
+- source-grep 조사(라이브 브라우저 미사용, cycle 2879/2890 확립 패턴 재사용): (1) Korean 줄바꿈(`break-keep`) 드리프트 — 최근 수정 컴포넌트(`PredictReveal.tsx` 등) + 기존 패턴 대조, 신규 회귀 0건(12번째 연속 clean). (2) DESIGN.md 토큰 vs 하드코딩 hex — 전수 재확인, 신규 drift 0건(기존 히트 전부 CSS var fallback/외부 브랜드색 기정당 확인 유지). (3) DB 2+ fetch 라우트 loading.tsx 부재 — cycle 2890 17개 스윕 목록과 대조해 미포함 잔여 갭 탐색 → `app/search/page.tsx`(`force-dynamic`, `buildSearchIndex()` Promise.all 2 DB round-trip + 조건부 `searchPlayers()`/`searchDates()`) 가 자기 자신+ancestor 모두 loading.tsx 부재 확인.
+- `app/search/loading.tsx` 신설 — 페이지 자체 레이아웃(`max-w-3xl mx-auto space-y-6 py-4`: breadcrumb bar + title/description + search-input bar + 4-row 결과 리스트 카드) 그대로 스켈레톤화, 기존 `players/loading.tsx`/`accuracy/loading.tsx` 컨벤션(`animate-pulse bg-gray-200 dark:bg-gray-700`) 재사용.
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm --filter moneyball lint` 0 errors, `pnpm test` 582/582파일·4564/4564건 green, pre-push hook(lint+type-check+version-sync-guard) 통과. R4 직push(단일 논리 단위, PR 생략, commit `b724c843`).
+- 다음 사이클 추천 = 2-chain lock cooldown N=1 만료 후 review-code(heavy) 재개(components/ 잔여 158개 미확인분 또는 app/api/route.ts 스코프) 또는 info-architecture-review(gap 18/30) 또는 fix-incident/op-analysis/lotto gap 자연 대기. lock 재발동 주의(재개 직후 distinct 다시 낮아지면 — 특히 lotto 는 1242회 추첨 9/19 21시 임박이라 그 전후 재발화 가능성 높음, review-code 단독 재개 시 즉시 distinct=2 복귀 위험).
+
+
 
 ### review-code(heavy): export-but-unused heuristic lib/lotto+matchup+players+predictions 스코프 (cycle 2909, SUCCESS)
 
