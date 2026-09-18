@@ -1,4 +1,14 @@
 
+## 🟡 PARTIAL — explore-idea(heavy, spec-only): MLB /insights 아카이브 parity plan #30 (cycle 2911, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23(전부 completed/archived/spec-only-deferred). 2차 방어선(cycle 2910 retro commit db2c6d61) OK. **2-chain alternation lock 발동** — 직전8(2903-2910) distinct=2(review-code(heavy)7+polish-ui1), fix-incident 미포함 → 안전 예외 미적용, 둘 다 후보 제외. gap trigger 4종(fix-incident 12/20·op-analysis 11/25·info-arch 18/30·lotto 8/30) 전부 미근접. explore-idea saturation trigger 정확 충족(직전15 12/15) — lock 이 review-code/polish-ui 를 막은 상태에서 유일한 non-locked 실행 가능 옵션.
+
+KBO↔MLB 앱 라우트 top-level diff 재감사(cycle 2245/2254/2314 방법론 재사용) — mlb/team(KBO teams 대응, 이미 존재) 확인 후 잔여 후보로 `/insights`(hub+[date]+series/[topic] 3-page 아카이브) 가 MLB 완전 미이식 확인. KBO 원본 ~1287줄(page.tsx 302+[date] 225+series/[topic] 209+loader.ts 311+series.ts 166+topFactors 34+statusBadge 40) + 전용 테스트 8개 — 단일 cycle 완결 불가능 판단(loader.ts/series.ts 내용도 미확인 상태) → 이번 cycle 은 spec-only, 구현은 후속 cycle(들) phased fire.
+
+`~/.develop-cycle/plans/moneyballscore/30.md` 신규 — self_verification rubric(가치 medium/시간비용 large/risk 1/자율가능 yes/의존성 none) + Tier 3 확정 + Phase 1(hub MVP)~3(series 아카이브) 분리 + 선행 조사 항목(loader.ts/series.ts 상세 read, MLB reasoning JSON 구조 확인) 명시. presentJudgeReasoningWithFallback/selectTopFactors/insightsStatusBadge 3개 순수 함수 재사용 가능 확인, games FK 쿼리는 mlb_schedule 모델 재작성 필요(plan #24 CRITICAL Part1/2 패턴).
+
+다음 사이클 추천 = 2-chain lock cooldown N=1 만료 후 review-code(heavy)/polish-ui 재개 또는 info-architecture-review(gap 19/30) 또는 explore-idea(heavy) plan #30 Phase 1 착수(loader.ts/series.ts 선행 조사부터) 또는 fix-incident/op-analysis/lotto gap 자연 대기. 1242회 로또 추첨(9/19 21시) 임박 — 다음 사이클이 그 이후면 lotto OOS 검증 자연 발화 가능성.
+
 ## 🟢 SUCCESS — polish-ui(2-chain lock fallback): /search 라우트 loading.tsx 스켈레톤 신설 (cycle 2910, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23(plan #29 재평가 트리거 미충족 — 실시간 재확인 user_picks=1/pick_poll_events=5, 임계 ≥10 미도달). 2차 방어선(cycle 2909 retro commit a43c8049) OK. 2-chain alternation lock 발동 — 직전8(2902-2909) distinct=2(lotto(lite)1+review-code(heavy)7), fix-incident 미포함 → 안전 예외 미적용. gap trigger 4종 전부 미근접. explore-idea saturation 12/15 나 4-source 재확인 negative — organic idea 부재로 skip. 잔여 pool 무trigger → 룰대로 polish-ui 강제 발화.

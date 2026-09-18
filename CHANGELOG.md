@@ -1,3 +1,12 @@
+## v0.5.62.247 — 2026-09-18 (cycle 2911, explore-idea(heavy, spec-only): MLB /insights parity plan #30)
+
+### explore-idea(heavy, spec-only): MLB /insights 아카이브 parity plan #30 (cycle 2911, PARTIAL)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2910 retro commit db2c6d61) OK. 2-chain alternation lock 발동(직전8(2903-2910) distinct=2: review-code(heavy)7+polish-ui1) — 둘 다 후보 제외, gap trigger 4종 전부 미근접, explore-idea saturation trigger 정확 충족(12/15) — lock 이 막은 상태의 유일한 non-locked 실행 옵션.
+- KBO↔MLB route parity 재감사(cycle 2245/2254/2314 방법론) — `/insights`(hub+[date]+series/[topic] 3-page, KBO ~1287줄+테스트 8개) MLB 완전 미이식 확인. 단일 cycle 완결 불가능 판단(Tier 3) → spec-only.
+- `~/.develop-cycle/plans/moneyballscore/30.md` 신규 — rubric(가치 medium/시간비용 large/risk 1/자율가능 yes/의존성 none) + Phase 1~3 분리 + 선행 조사 항목(loader.ts/series.ts 내용, MLB reasoning JSON 구조) 명시.
+- 다음 사이클 추천 = 2-chain lock cooldown 만료 후 review-code(heavy)/polish-ui 재개 또는 plan #30 Phase 1 착수 또는 info-architecture-review(gap 19/30) 또는 1242회 로또 추첨(9/19 21시) 이후 lotto OOS.
+
 ## v0.5.62.247 — 2026-09-18 (cycle 2910, polish-ui(2-chain lock fallback): /search loading.tsx 신설)
 
 ### polish-ui(2-chain lock fallback): /search 라우트 loading.tsx 스켈레톤 신설 (cycle 2910, SUCCESS)
