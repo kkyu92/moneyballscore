@@ -1,3 +1,13 @@
+## v0.5.62.247 — 2026-09-18 (cycle 2917, review-code(heavy): components/layout+predictions+shared 감사 — 0 unused, 2차 스윕 완주)
+
+### review-code(heavy): components/layout+predictions+shared export-but-unused 감사 — components/ 2차 스윕 완주 (cycle 2917, SUCCESS-clean)
+
+- 진단: 직전 세션 cycle 2917 hang 재시도 (active-cycle stale pid 86572 dead, cycles/2917.json 부재 확인). open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2916 retro commit 74decf90) OK. 직전8(2909-2916) distinct=4 — 2-chain lock 미충족. gap trigger 재계산(exact-match → startswith 보정, `(lite)`/`(heavy)` 변형 표기 과대 gap 버그 발견): fix-incident 19/20·op-analysis 18/25·info-arch 25/30·lotto 3/30 전부 미충족. cycle 2916 추천대로 잔여 layout(1820)/predictions(3580)/shared(1395, 실측 합계 5617줄) 3개 디렉토리 감사로 스윕 마무리.
+- general-purpose subagent 독립 검증(repo 전체 실제 import+JSX grep) — 68개 exported symbol 전부 CONFIRMED_UNUSED 0건 (layout 21 + predictions 29 + shared 18), 전부 외부 실사용 확인. de-export 대상 없음 — 코드 변경 0.
+- 부수 발견(제거 대상 아님): `layout/PlaceholderLoginButton.tsx` — 테스트만 import, 실제 라우트(`/login`) 미사용이지만 plan #29(login 기능) tier4 deferred 로 이미 추적 중인 의도된 미완성 코드.
+- **components/ 2차 스윕 전체 완주** — cycle 2911~2917, 20개 서브디렉토리 전수 감사, 누적 CONFIRMED_UNUSED 3건(cycle 2912 ui/navigation-menu.tsx, 이미 제거 완료).
+- 다음 사이클 추천 = info-architecture-review(gap 26/30, 근접) 또는 lib/ 3차 스윕 신규 스코프(analysis/api/calendar/mlb/observability/teams 등 미탐색) 또는 1242회 로또 추첨(9/19 21시) 이후 OOS.
+
 ## v0.5.62.247 — 2026-09-18 (cycle 2916, review-code(heavy): components/analysis+dashboard 감사 — 0 unused clean)
 
 ### review-code(heavy): components/analysis+dashboard export-but-unused 감사 (cycle 2916, SUCCESS-clean)

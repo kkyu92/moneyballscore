@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS(clean) — review-code(heavy): components/layout+predictions+shared 감사 — 0 unused, components/ 2차 스윕 완주 (cycle 2917, 2026-09-18)
+
+진단: 직전 세션이 cycle 2917 도중 hang (active-cycle stale pid 86572, dead) — cycle_state 부재 확인 후 재시도. open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2916 retro commit 74decf90) OK. 직전8(2909-2916) distinct=4(review-code5+polish-ui1+lotto1+explore-idea1) — 2-chain lock 미충족. gap trigger 재확인 결과 chain_selected 변형 표기(`fix-incident(lite)` 등) 때문에 exact-match grep 이 과거엔 과대 gap 보고 — startswith 매칭 재계산: fix-incident 19/20·op-analysis 18/25·info-arch 25/30·lotto 3/30 전부 미충족. cycle 2916 추천대로 잔여 layout/predictions/shared 3개 디렉토리(5617줄) 감사로 components/ 2차 스윕 마무리.
+
+general-purpose subagent 독립 검증(repo 전체 실제 import+JSX grep) — 68개 exports 전부 외부 실사용 확인, CONFIRMED_UNUSED 0건. 코드 변경 없음. 부수 발견: `layout/PlaceholderLoginButton.tsx` 는 테스트에서만 import (실제 라우트 미사용) — plan #29 (login 기능) tier4 deferred 상태로 이미 추적 중, dead code 아닌 의도된 미완성 — 제거 대상 아님.
+
+**components/ 2차 스윕 전체 완주** (cycle 2911~2917, 20개 서브디렉토리 전수 감사: glossary/insights/live/notify/players/seasons/standings/share/search/ui → accuracy/reviews/teams → matchup/picks → analysis/dashboard → layout/predictions/shared). 누적 CONFIRMED_UNUSED = 3건 (cycle 2912 ui/navigation-menu.tsx 3개 심볼, 이미 제거 완료). 다음 사이클 추천 = info-architecture-review (gap 26/30, 근접) 또는 lib/ 3차 스윕 신규 스코프 (analysis/api/calendar/mlb/observability/teams 등 미탐색) 또는 1242회 로또 추첨(9/19 21시) 이후 OOS.
+
 ## 🟢 SUCCESS(clean) — review-code(heavy): components/analysis+dashboard 감사 — 0 unused (cycle 2916, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2915 retro commit 89f20ad9) OK. 직전8(2908-2915) distinct=4 — 2-chain lock 미충족. gap trigger 4종+saturation 전부 미근접/미충족. 1242회 로또 추첨(9/19 21시) 미도달. components/ 2차 스윕 계속, analysis(1421)+dashboard(1886) 배치(28 exports) 선정.
