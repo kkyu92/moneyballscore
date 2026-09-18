@@ -1,3 +1,12 @@
+## v0.5.62.252 — 2026-09-18 (cycle 2922, info-architecture-review: 30-cycle gap checkpoint — 9연속 "현 IA 충분")
+
+### info-architecture-review: 30-cycle gap checkpoint (cycle 2922, retro-only)
+
+- 진단: info-arch gap 정확히 30/30 도달(cycle 2892 checkpoint 목표 그대로). 직전8(2914-2921) distinct=3 — 2-chain lock 미충족. 다른 gap 전부 미근접(fix-incident 4/20·op-analysis 23/25·lotto 8/30). open issue 0, approved plan 0/23.
+- cycle 2892 checkpoint 커밋(a66064b8) 이후 88 commits 전수 대조: 신규 라우트 0건, breadcrumb 누락 18건 불변(전부 의도된 noindex/debug/redirect-only), MegaMenu/Footer/Header/sitemap.ts 변경 0건.
+- "현 IA 충분" 9연속 재확정(2679→2709→2739→2769→2800→2830→2860→2892→2922). 코드 변경 없음(checkpoint 문서만). `docs/design/ia-2026-09-18-cycle-2922-30-cycle-gap-checkpoint.md` 박제.
+- 다음 재도달 목표 = cycle 2952 근방.
+
 ## v0.5.62.251 — 2026-09-18 (cycle 2921, review-code(heavy): hooks+config+lib 잔여 소형 스코프 감사 — 2건 제거)
 
 ### review-code(heavy): hooks/config/lib 잔여 소형 스코프 export-but-unused 감사 (cycle 2921, SUCCESS)
