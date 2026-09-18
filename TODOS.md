@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): components/ export-but-unused 2차 스윕 시작 (cycle 2912, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23(plan #30 status=spec_only, approved 아님). 2차 방어선(cycle 2911 retro commit d8f53bcd) OK. 직전8(2904-2911) distinct=3(review-code/polish-ui/explore-idea) — 2-chain lock 미충족. gap trigger 4종(fix-incident 14/20·op-analysis 13/25·info-arch 20/30·lotto 10/30) + explore-idea saturation(10/15) 전부 미근접/미충족. lib/ 1차 스윕 종료(cycle 2909) 후속 추천대로 components/ 2차 스윕 착수.
+
+components/ 20개 서브디렉토리 중 small-dir 배치(glossary/insights/live/notify/players/seasons/standings/share/search/ui, 합계 ~2009줄) 전수 export 심볼 외부 사용 grep 검증. CONFIRMED_UNUSED 3건 — `ui/navigation-menu.tsx`(shadcn 표준 세트): navigationMenuTriggerStyle/NavigationMenuViewport(파일 내부 사용 있으나 외부 import 0건) + NavigationMenuIndicator(내부/외부 전부 미사용). export 키워드만 제거. 나머지 9개 디렉토리 CONFIRMED_UNUSED 0건.
+
+tsc clean + lint 0 errors + test 582/582·4564/4564 green. R4 직push(commit `616ea375`).
+
+다음 사이클 추천 = components/ 2차 스윕 계속(accuracy/analysis/dashboard/layout/matchup/picks/predictions/reviews/shared/teams 잔여 10개 디렉토리, ~14700줄) 또는 info-architecture-review(gap 20/30) 또는 1242회 로또 추첨(9/19 21시) 이후 lotto OOS.
+
 ## 🟡 PARTIAL — explore-idea(heavy, spec-only): MLB /insights 아카이브 parity plan #30 (cycle 2911, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/archived/spec-only-deferred). 2차 방어선(cycle 2910 retro commit db2c6d61) OK. **2-chain alternation lock 발동** — 직전8(2903-2910) distinct=2(review-code(heavy)7+polish-ui1), fix-incident 미포함 → 안전 예외 미적용, 둘 다 후보 제외. gap trigger 4종(fix-incident 12/20·op-analysis 11/25·info-arch 18/30·lotto 8/30) 전부 미근접. explore-idea saturation trigger 정확 충족(직전15 12/15) — lock 이 review-code/polish-ui 를 막은 상태에서 유일한 non-locked 실행 가능 옵션.
