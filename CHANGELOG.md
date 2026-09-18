@@ -1,3 +1,11 @@
+## v0.5.62.254 — 2026-09-18 (cycle 2924, operational-analysis(lite): CE/비CE 격차 26회 연속 재확인)
+
+### operational-analysis(lite): CE/비CE 격차 26회 연속 재확인 (cycle 2924, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/archived/superseded/spec-only). 2차 방어선(cycle 2923 retro commit 9541b7c2) OK. 직전8(2916-2923) distinct=3(review-code(heavy)6+fix-incident(lite)1+info-architecture-review1) — 2-chain lock 미충족. op-analysis gap 정확히 25/25 도달(마지막 발화 cycle 2899) — 다른 gap 전부 미근접(fix-incident 6/20·info-arch 2/30 방금 발화·lotto 10/30).
+- `scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=400 (CE n=353 / 비CE n=47) — CE n 증가분(324→353, +29)이 8월(n=82)+9월(n=43) 데이터 반영. CE 55.0%(194/353) / 비CE 63.8%(30/47) → 격차 8.9pp (cycle 2899 9.2pp 대비 미세 축소). overlap 월(05/06/07) 통제 격차 10.8pp ≈ 전체 격차 유지 — LLM 부가가치 우세 결론 26회 연속 재확인.
+- CREDIT_EXHAUSTED 지속(사용자 크레딧 재충전 미이행), 비CE 표본 동결(마지막 예측 2026-07-01, 79일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only) — CLAUDE.md 갱신만.
+
 ## v0.5.62.253 — 2026-09-18 (cycle 2923, review-code(heavy): packages/kbo-data 신규 스코프 착수 — analytics+features+root 2건 제거)
 
 ### review-code(heavy): packages/kbo-data/src analytics+features+root export-but-unused 감사 (cycle 2923, SUCCESS)

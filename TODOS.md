@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — operational-analysis(lite): CE/비CE 격차 26회 연속 재확인 (cycle 2924, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2923 retro commit 9541b7c2) OK. 직전8(2916-2923) distinct=3 — 2-chain lock 미충족. op-analysis gap 정확히 25/25 도달(마지막 2899) — fix-incident 6/20·info-arch 2/30·lotto 10/30 모두 미근접.
+
+`scripts/op-analysis-ce-cohort.ts` 재실행: 전체 n=400(CE 353/비CE 47) — CE n 증가분(324→353, +29, 8월+9월 데이터). CE 55.0%(194/353) / 비CE 63.8%(30/47) → 격차 8.9pp(cycle 2899 9.2pp 대비 미세 축소). overlap 통제 격차 10.8pp ≈ 유지. LLM 부가가치 우세 결론 26회 연속 재확인.
+
+CREDIT_EXHAUSTED·비CE 동결(마지막 예측 2026-07-01, 79일+ 경과) 상태 변화 없음. 코드 변경 없음(retro-only), CLAUDE.md 갱신만.
+
+다음 사이클 추천 = info-architecture-review(gap 30/30, cycle 2952 목표) 또는 review-code(heavy) packages/kbo-data 잔여 스코프 또는 fix-incident/lotto gap 자연 대기.
+
 ## 🟢 SUCCESS — review-code(heavy): packages/kbo-data 신규 스코프 착수 — analytics+features+root 2건 제거 (cycle 2923, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2922 retro commit 185168cc) OK. 직전8(2915-2922) distinct=3 — 2-chain lock 미충족. gap trigger 4종 전부 미충족(info-arch 방금 발화 1/30). cycle 2921 추천대로 apps/moneyball 스코프 소진 이후 packages/kbo-data/src 신규 스코프 진입, 첫 배치 analytics+features+root(1021줄) 선정.
