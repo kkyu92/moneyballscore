@@ -1,3 +1,11 @@
+## v0.5.62.247 — 2026-09-18 (cycle 2915, review-code(heavy): components/matchup+picks 감사 — 0 unused clean)
+
+### review-code(heavy): components/matchup+picks export-but-unused 감사 (cycle 2915, SUCCESS-clean)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 completed/archived/spec-only-deferred). 2차 방어선(cycle 2914 retro commit 03ffcd3d) OK. 직전8(2907-2914) distinct=4(review-code6+polish-ui1+explore-idea1+lotto1) — 2-chain lock 미충족. gap trigger 4종(fix-incident 17/20·op-analysis 16/25·info-arch 23/30·lotto 1/30 방금 발화) + explore-idea saturation(11/15) 전부 미근접/미충족. 1242회 로또 추첨(9/19 21시) 미도달. cycle 2914 추천대로 components/ 2차 스윕 계속, matchup(1399)+picks(1856) 배치(총 3255줄, 23 exports) 선정.
+- general-purpose subagent 독립 검증(repo 전체 실제 import grep) — 23개 exported symbol 전부 CONFIRMED_UNUSED 0건, 전부 외부 실사용 확인(matchup 10건 app/matchup·app/mlb/matchup 계열, picks 13건 app/picks·app/page·MyPicksClient 계열). de-export 대상 없음 — 코드 변경 0.
+- 잔여 스윕 대상 = analysis(1421)/dashboard(1936)/layout(1820)/predictions(3580)/shared(1395) 5개 디렉토리(~10150줄). 다음 사이클 추천 = components/ 2차 스윕 계속(위 5개 중 배치) 또는 info-architecture-review(gap 24/30) 또는 1242회 로또 추첨(9/19 21시) 이후 lotto OOS.
+
 ## v0.5.62.247 — 2026-09-18 (cycle 2914, lotto(heavy): 1242회 picks 신규 생성 + 1240회 OOS + 1241회 누락 갭 발견)
 
 ### lotto(heavy): 1242회(9/19) picks 신규 + 1240회 OOS 검증 + 1241회 picks 누락 갭 백필 (cycle 2914, SUCCESS)
