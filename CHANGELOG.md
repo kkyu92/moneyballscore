@@ -1,3 +1,13 @@
+## v0.5.62.253 — 2026-09-18 (cycle 2923, review-code(heavy): packages/kbo-data 신규 스코프 착수 — analytics+features+root 2건 제거)
+
+### review-code(heavy): packages/kbo-data/src analytics+features+root export-but-unused 감사 (cycle 2923, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2922 retro commit 185168cc) OK. 직전8(2915-2922) distinct=3(review-code6+fix-incident1+info-arch1) — 2-chain lock 미충족. gap trigger 4종 전부 미충족(fix-incident 5/20·op-analysis 24/25·info-arch 1/30 방금 발화·lotto 9/30, 9/19 21시 추첨 picks 는 이미 `2026-09-19-50sets.md` 로 박제 완료라 draw 전 추가 작업 불필요). cycle 2921 추천대로 apps/moneyball review-code 스코프 소진(components/+lib/+hooks/+config 전체 완주) 이후 신규 스코프로 packages/kbo-data/src 진입 — 첫 배치로 analytics(208)+features(136)+root files(types.ts/big-match.ts/index.ts, 677) 선정(총 1021줄).
+- general-purpose subagent 독립 검증(repo 전체 실제 import grep, index.ts 는 `@moneyball/kbo-data` 공개 배럴이라 apps/moneyball 외부 사용처까지 확인) — CONFIRMED_UNUSED 2건: `index.ts:53` `WEIGHTS as BIG_MATCH_WEIGHTS` re-export alias(원본 `WEIGHTS` 는 `big-match.ts` 내부 `scoreGame` 실사용 + 테스트 직접 import, alias 만 미사용) / `types.ts:221` `interface KBOGameListResponse`(비export, 파일 내부조차 미사용). 나머지 exports 전부(HOME_ELO_BONUS_VALUE, MlbFactorInputs 등 MLB 14팩터 관련 다수 포함) CONFIRMED_USED — 배럴 파일 특성상 apps/moneyball 이 이름으로 직접 안 불러와도 패키지 내부 실사용 확인.
+- comment vs 코드 정합 이상 없음(umpireSZScore/weather 가중치 주석, stale-data-snapshot 크론 연결, KBOGameRaw deprecated 필드 주석 전부 실측 일치 확인).
+- 2개 export 키워드/interface 제거(commit c8a542bb). tsc clean(kbo-data + apps/moneyball 양쪽), test 582/582파일 4564/4564 green.
+- 다음 사이클 추천 = packages/kbo-data 잔여 스코프(agents 4334줄/pipeline 7950줄/backtest 2043줄/scrapers 2634줄/context 913줄/factors 958줄/engine 269줄/notify 257줄 — pipeline·agents 규모 큼, 분할 필요) 계속 감사 또는 info-architecture-review(gap 30-cycle 재도달까지 여유) 또는 1242회 로또(9/19 21시) 추첨 이후 OOS.
+
 ## v0.5.62.252 — 2026-09-18 (cycle 2922, info-architecture-review: 30-cycle gap checkpoint — 9연속 "현 IA 충분")
 
 ### info-architecture-review: 30-cycle gap checkpoint (cycle 2922, retro-only)

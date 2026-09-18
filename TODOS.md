@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): packages/kbo-data 신규 스코프 착수 — analytics+features+root 2건 제거 (cycle 2923, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2922 retro commit 185168cc) OK. 직전8(2915-2922) distinct=3 — 2-chain lock 미충족. gap trigger 4종 전부 미충족(info-arch 방금 발화 1/30). cycle 2921 추천대로 apps/moneyball 스코프 소진 이후 packages/kbo-data/src 신규 스코프 진입, 첫 배치 analytics+features+root(1021줄) 선정.
+
+general-purpose subagent 독립 검증(repo 전체 + index.ts 배럴 외부 사용처 확인) — CONFIRMED_UNUSED 2건: `index.ts` `BIG_MATCH_WEIGHTS` re-export alias(원본 실사용, alias 만 미사용) / `types.ts` `KBOGameListResponse`(비export 완전 미사용). 나머지 전부 CONFIRMED_USED. comment vs 코드 정합 이상 없음. 2건 제거(commit c8a542bb), tsc clean, test 582/582 4564/4564 green.
+
+다음 사이클 추천 = packages/kbo-data 잔여 스코프(pipeline 7950줄/agents 4334줄/scrapers 2634줄/backtest 2043줄/context 913줄/factors 958줄 등, 분할 필요) 계속 감사 또는 info-architecture-review 또는 1242회 로또(9/19 21시) 이후 OOS.
+
 ## 🟢 SUCCESS(retro-only) — info-architecture-review: 30-cycle gap checkpoint — 9연속 "현 IA 충분" (cycle 2922, 2026-09-18)
 
 진단: info-arch gap 정확히 30/30 도달(cycle 2892 checkpoint 목표 그대로). 직전8(2914-2921) distinct=3 — 2-chain lock 미충족. 다른 gap 전부 미근접(fix-incident 4/20·op-analysis 23/25·lotto 8/30). open issue 0, approved plan 0/23.
