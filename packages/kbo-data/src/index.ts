@@ -50,7 +50,6 @@ export type { SnapshotOptions, SnapshotResult } from './pipeline/snapshot-pitche
 export {
   selectBigMatch,
   scoreGame,
-  WEIGHTS as BIG_MATCH_WEIGHTS,
   BIG_MATCH_THRESHOLD,
 } from './big-match';
 export type { BigMatchCandidate, BigMatchResult, BigMatchMode } from './big-match';

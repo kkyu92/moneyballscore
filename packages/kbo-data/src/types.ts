@@ -218,10 +218,6 @@ export interface PipelineResult {
 // KBO 공식 API 응답 타입
 // ============================================
 
-interface KBOGameListResponse {
-  d: string; // JSON string of game array
-}
-
 export interface KBOGameRaw {
   G_ID: string;
   G_DT: string;        // YYYYMMDD
