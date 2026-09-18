@@ -15,7 +15,7 @@
 
 import { NEUTRAL_FACTOR } from '@moneyball/shared';
 
-export const TABPFN_OUTPUT_HEADER = 'game_id,tabpfn_home_win_prob';
+const TABPFN_OUTPUT_HEADER = 'game_id,tabpfn_home_win_prob';
 
 type TabpfnOutputRow = {
   game_id: number;
@@ -35,7 +35,7 @@ type TabpfnRowResult =
   | { ok: true; row: TabpfnOutputRow }
   | { ok: false; reason: TabpfnRowDropReason };
 
-export function parseTabpfnRow(cells: string[]): TabpfnRowResult {
+function parseTabpfnRow(cells: string[]): TabpfnRowResult {
   if (cells.length < 2) return { ok: false, reason: 'invalid_game_id' };
   const gameId = parseInt(cells[0], 10);
   if (!Number.isInteger(gameId) || gameId <= 0) {
