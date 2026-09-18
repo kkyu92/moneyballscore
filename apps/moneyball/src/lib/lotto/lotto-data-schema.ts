@@ -6,7 +6,7 @@ export const RulesHistoryEntrySchema = z.object({
   delta: z.number().int(),
 });
 
-export const MatchDistributionSchema = z.object({
+const MatchDistributionSchema = z.object({
   tier_3: z.number().int().nonnegative(), // 5등 (3개 매칭)
   tier_4: z.number().int().nonnegative(), // 4등 (4개)
   tier_5: z.number().int().nonnegative(), // 3등 (5개)
@@ -17,7 +17,7 @@ export const MatchDistributionSchema = z.object({
   over_perform_ratio: z.number().nonnegative(), // 실제 / random expected
 });
 
-export const WinningScoreBreakdownSchema = z.object({
+const WinningScoreBreakdownSchema = z.object({
   lucky_penalty: z.number(),
   consec_pairs_bonus: z.number(),
   sum_distance: z.number(),
@@ -55,7 +55,7 @@ export const LottoDataSchema = z.object({
   chain_fire_history: z.array(ChainFireHistoryEntrySchema),
 });
 
-export const ScoreStatsSchema = z.object({
+const ScoreStatsSchema = z.object({
   n: z.number().int().nonnegative(),
   min: z.number(),
   max: z.number(),
@@ -63,7 +63,7 @@ export const ScoreStatsSchema = z.object({
   mean: z.number(),
 });
 
-export const ScorePercentilesSchema = z.object({
+const ScorePercentilesSchema = z.object({
   p0: z.number(),
   p5: z.number(),
   p10: z.number(),
