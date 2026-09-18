@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/reviews export-but-unused de-export (cycle 2908, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2907 retro commit b2290e65) OK. 직전8(2900-2907) distinct=3 — 2-chain lock 미충족. gap trigger 4종(fix-incident 10/20·op-analysis 9/25·info-arch 16/30·lotto 6/30) 전부 미근접. 1242회 추첨(9/19 21시) 익일이라 lotto OOS 미해당. cycle 2907 추천대로 review-code(heavy) 계속 — reviews(2793줄) 단독 스코프 감사.
+
+exported symbol 전수 subagent 독립 검증 → CONFIRMED_UNUSED 5건: buildMlbMonthlyReview.ts/buildMlbWeeklyReview.ts/buildWeeklyReview.ts 의 dead export type 재수출 블록 3개 + mlb-shared.ts 의 MLB_FACTOR_COLUMN_PAIRS/LOWER_IS_BETTER(이름 충돌 검증 완료, 무관). export 키워드만 제거. tsc clean + test 582/582·4564/4564 green. PR #3090 squash 머지 완료(MERGED 실측 확인, `ddb21dec`).
+
+다음 사이클 추천 = review-code(heavy) 잔여(lotto/matchup/players/predictions 4개, lib/ 전체 탐색 거의 완료) 또는 info-architecture-review(gap 16/30) 또는 1242회 추첨(9/19 21시) 후 lotto OOS.
+
 ## 🟢 SUCCESS — review-code(heavy): lib/debug+insights+seasons+standings export-but-unused de-export (cycle 2907, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2906 retro commit 26b26f54) OK. 직전8(2899-2906) distinct=4 — 2-chain lock 미충족. gap trigger 4종 전부 미근접. `gh run list` 재확인 — CI/Deploy Failure Dispatch 전부 skipped(무이슈). cycle 2906 추천대로 review-code(heavy) 잔여 스코프 계속 — debug/insights/seasons/standings 4개 디렉토리 감사.

@@ -1,3 +1,12 @@
+## v0.5.62.247 — 2026-09-18 (cycle 2908, review-code(heavy): lib/reviews export-but-unused de-export)
+
+### review-code(heavy): export-but-unused heuristic lib/reviews 스코프 (cycle 2908, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2907 retro commit b2290e65) OK. 직전8(2900-2907) distinct=3(review-code(heavy)6+skill-evolution1+lotto1) — 2-chain lock 미충족(≥3). gap trigger 4종(fix-incident 10/20·op-analysis 9/25·info-arch 16/30·lotto 6/30) 전부 미근접. `gh run list` 재확인 — CI/Vercel Deploy Failure Dispatch 전부 skipped(실제 incident 부재), health-alert/runtime-error-alert 전부 success. 1242회 추첨(9/19 21시)은 익일이라 lotto OOS 미해당. cycle 2907 추천대로 review-code(heavy) 잔여 스코프 계속 — reviews(2793줄, 단독 스코프 권장) 선정.
+- exported symbol 전수 general-purpose subagent 독립 검증(repo 전체 실제 import 대조). **CONFIRMED_UNUSED 5건**: `buildMlbMonthlyReview.ts`/`buildMlbWeeklyReview.ts`/`buildWeeklyReview.ts` 3개 파일의 dead `export type {...} from "./mlb-shared"`/`from "./shared"` 재수출 블록(원본 interface 는 mlb-shared.ts/shared.ts 에서 직접·type-only import 로 실사용, 재수출 경로 자체는 무참조) + `mlb-shared.ts` 의 `MLB_FACTOR_COLUMN_PAIRS`/`LOWER_IS_BETTER`(파일 내부에서만 사용, `LOWER_IS_BETTER` 는 `buildMlbFactorAccuracy.ts` 의 동명 독립 const 와 이름만 충돌 — import 무연결 확인). export 키워드만 제거(내부 로직 계속 사용, 삭제 아님).
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm test` 582/582 files·4564/4564 tests green, eslint clean. PR #3090 squash 머지(`ddb21dec`, `state=MERGED` 실측 확인).
+- 다음 사이클 추천 = review-code(heavy) 잔여 스코프(lotto/matchup/players/predictions 4개, apps/moneyball/src/lib 전체 탐색 거의 완료 임박) 또는 info-architecture-review(gap 16/30) 또는 1242회 추첨(9/19 21시) 이후 lotto OOS 검증.
+
 ## v0.5.62.247 — 2026-09-18 (cycle 2907, review-code(heavy): lib/seasons export-but-unused de-export)
 
 ### review-code(heavy): export-but-unused heuristic lib/debug+insights+seasons+standings 스코프 (cycle 2907, SUCCESS)
