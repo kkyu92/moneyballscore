@@ -28,7 +28,7 @@ interface MonthStat {
   homeWinRate: number;
 }
 
-export interface ExtremeGame {
+interface ExtremeGame {
   id: number;
   date: string;
   homeCode: TeamCode;
