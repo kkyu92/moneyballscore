@@ -1,3 +1,13 @@
+## v0.5.62.251 — 2026-09-18 (cycle 2921, review-code(heavy): hooks+config+lib 잔여 소형 스코프 감사 — 2건 제거)
+
+### review-code(heavy): hooks/config/lib 잔여 소형 스코프 export-but-unused 감사 (cycle 2921, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/spec-only-deferred). 2차 방어선(cycle 2920 retro commit 7ec08715) OK. 직전8(2913-2920) distinct=3(review-code6+lotto1+fix-incident1) — 2-chain lock 미충족. gap trigger 4종 전부 미충족(fix-incident 3/20·op-analysis 22/25·info-arch 29/30(cycle 2892 checkpoint 목표 cycle 2922, 1사이클 이름)·lotto 7/30). explore-idea saturation(직전15 13/15≥12) 충족했으나 4-source 재확인 negative(open issue 0/plan approved 0/23/TODOS Next-Up stale/DESIGN.md 385h 신선) organic idea 부재로 skip. components/+lib/ 3차 스윕 완주 이후 잔여 미탐색 최상위 스코프(hooks/config/lib 소형 파일 12개, 1246줄) 착수.
+- general-purpose subagent 독립 검증(repo 전체 실제 import 재확인, 2차 grep으로 false-positive 배제) — hooks(2)+config(2)+leaderboard(8)+v2-shadow-monitor(3)+weather(2)+tabpfn-export(9)+tabpfn-import(4)+hub-dispatch(7)+design-tokens(16)+feature-flags(5)+utils(1) 도합 61개 exports 중 59개 CONFIRMED_USED, 2개(`TABPFN_OUTPUT_HEADER`/`parseTabpfnRow`, `lib/tabpfn-import.ts` 파일 내부 전용) CONFIRMED_UNUSED. false-positive 1건 포착 후 기각: `v2-shadow-monitor/parse.ts`의 `parseCohortMarkdown`/`CohortDoc` — 최초 grep이 디렉토리 전체를 제외 범위로 잘못 스킵해 미사용처럼 보였으나 재grep으로 `loader.ts`가 `./parse`에서 실제 import 확인.
+- `export` 키워드만 제거(코드 삭제 없음, 파일 내부에서 계속 사용). tsc clean, lint clean, test 582/582파일 4564/4564 green. commit af660359.
+- silent-drift 메모 (비수정, 범위 밖): `lib/tabpfn-import.ts` 헤더 주석이 이미 명시한 기존 gap — `'tabpfn-shadow'` scoring_rule 행이 `/accuracy/shadow` 필터·`pairProbForRow()` 분기 부재로 write-only 상태 유지. 신규 발견 아님.
+- 다음 사이클 추천 = info-architecture-review(gap 30/30, cycle 2922 정확 도달) 또는 1242회 로또 추첨(9/19 21시) 이후 OOS. review-code 스코프는 apps/moneyball 안에서 사실상 소진(components/+lib/+hooks/+config 전체 완주) — 다음 review-code 발화 시 packages/kbo-data 잔여(analytics/engine/features/root files) 또는 apps/moneyball/src/app 라우트 파일 자체(page.tsx/route.ts 내부 로직) 신규 스코프 검토 필요.
+
 ## v0.5.62.250 — 2026-09-18 (cycle 2920, review-code(heavy): lib/observability+teams+mlb 3차 스윕 완주 — 0 unused clean)
 
 ### review-code(heavy): lib/observability+teams+mlb export-but-unused 감사, lib/ 3차 스윕 전체 완주 (cycle 2920, SUCCESS-clean)

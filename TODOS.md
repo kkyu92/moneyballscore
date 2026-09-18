@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): hooks+config+lib 잔여 소형 스코프 — 2건 제거 (cycle 2921, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2920 retro commit 7ec08715) OK. 직전8(2913-2920) distinct=3 — 2-chain lock 미충족. gap trigger 4종 전부 미충족(info-arch 29/30, cycle 2922 목표 1사이클 남음). explore-idea saturation 13/15 충족했으나 4-source negative(organic idea 부재)로 skip. components/+lib/ 3차 스윕 완주 이후 잔여 최상위 소형 스코프(hooks/config/lib 12파일, 1246줄) 착수.
+
+general-purpose subagent 독립 검증 — 61개 exports 중 59 CONFIRMED_USED / 2 CONFIRMED_UNUSED(`TABPFN_OUTPUT_HEADER`/`parseTabpfnRow`, tabpfn-import.ts 내부 전용). false-positive 1건 포착 후 기각(v2-shadow-monitor/parse.ts — 최초 디렉토리 제외 grep 오류, 재검증으로 loader.ts 실사용 확인). export 키워드만 제거, 코드 삭제 없음. tsc/lint clean, test 582/582파일 4564/4564 green. commit af660359.
+
+silent-drift 메모(비수정): tabpfn-import.ts 헤더 주석이 이미 명시한 기존 gap(`'tabpfn-shadow'` 행 write-only, `/accuracy/shadow` 미노출) — 신규 발견 아님.
+
+**apps/moneyball review-code 스코프 사실상 소진** (components/+lib/+hooks/+config 전체 완주). 다음 사이클 추천 = info-architecture-review(gap 30/30, cycle 2922 정확 도달) 또는 1242회 로또(9/19 21시) 이후 OOS. 다음 review-code 발화 시 packages/kbo-data 잔여(analytics/engine/features/root) 또는 app 라우트 내부 로직 신규 스코프 검토.
+
 ## 🟢 SUCCESS(clean) — review-code(heavy): lib/observability+teams+mlb 3차 스윕 완주 — 0 unused (cycle 2920, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2919 retro commit 2e323d0d) OK. 직전8(2912-2919) distinct=3 — 2-chain lock 미충족. gap trigger 4종 전부 미충족/조기(info-arch 28/30, cycle 2922 목표까지 2사이클 남음). cycle 2919 추천대로 lib/ 3차 스윕 잔여(mlb/observability/teams) 착수 — mlb 실측 2651줄(기존 기록 5337줄과 불일치, 재측정값 채택)로 observability+teams 합산 총 ~3758줄, 한 배치로 통합 처리.
