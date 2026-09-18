@@ -1,3 +1,12 @@
+## v0.5.62.249 — 2026-09-18 (cycle 2919, review-code(heavy): lib/analysis+api+calendar 3차 스윕 신규 스코프 — 0 unused clean)
+
+### review-code(heavy): lib/analysis+api+calendar export-but-unused 감사 (cycle 2919, SUCCESS-clean)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2918 retro commit ff7ed90e) OK. 직전8(2911-2918) distinct=4(review-code5+explore-idea1+lotto1+fix-incident1) — 2-chain lock 미충족. gap trigger: fix-incident 1/20(방금 발화)·op-analysis 20/25·info-arch 27/30(cycle 2892 checkpoint 이 "다음 재도달 cycle 2922 근방" 명시 — 3사이클 이르므로 skip)·lotto 5/30 전부 미충족/조기. explore-idea saturation(직전15: review-code11+polish-ui1+fix-incident1=13≥12) 충족했으나 직전 explore-idea(cycle 2911) 산출 plan #30 이 spec-only-deferred 상태로 추가 development 없이 재발화 실익 낮음 — cycle 2918 추천대로 components/ 완주 이후 lib/ 3차 스윕 신규 스코프(analysis/api/calendar/mlb/observability/teams) 착수, 첫 배치로 analysis(2550)+api(17)+calendar(165) 선정(총 2732줄).
+- general-purpose subagent 독립 검증(repo 전체 실제 import+JSX grep) — 40개 exported symbol(analysis 35 + api 1 + calendar 4) 전부 CONFIRMED_UNUSED 0건, 전부 외부 실사용 확인(analysis/page.tsx, mlb 분석 페이지, game/[id]/page.tsx, API 라우트 5개, calendar 페이지 3개 등). 부수 확인: 6개 파일 comment vs 코드 정합 이상 없음. de-export 대상 없음 — 코드 변경 0.
+- tsc clean (apps/moneyball) 확인.
+- 잔여 lib/ 3차 스윕 대상 = mlb(5337, 최대)/observability(52)/teams(1710) 3개 디렉토리(~7099줄). 다음 사이클 추천 = lib/ 3차 스윕 계속(mlb 우선, 규모상 2회 분할 가능) 또는 info-architecture-review(gap 30/30 근방, cycle 2922) 또는 1242회 로또 추첨(9/19 21시) 이후 OOS.
+
 ## v0.5.62.248 — 2026-09-18 (cycle 2918, fix-incident(lite): 20-cycle 주기보정 재확인 SUCCESS)
 
 ### fix-incident(lite): 20-cycle 주기보정 재확인 (cycle 2918, SUCCESS)
