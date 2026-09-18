@@ -18,12 +18,6 @@ import {
   type MlbWeeklyTeamStat,
 } from "./mlb-shared";
 
-export type {
-  MlbWeeklyFactorInsight,
-  MlbWeeklyHighlight,
-  MlbWeeklyTeamStat,
-} from "./mlb-shared";
-
 // buildMonthlyReview.ts(KBO) 의 MLB 대응 (plan #26 Phase 2) — Phase 1a/1b
 // (buildMlbWeeklyReview.ts, mlb-shared.ts) 가 이미 확립한 데이터 레이어를 그대로 재사용,
 // week → month 범위 계산(computeMonthRange, 리그 무관)만 교체. 수렴 픽(강수렴/완전수렴)
