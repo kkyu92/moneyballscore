@@ -1,3 +1,12 @@
+## v0.5.62.250 — 2026-09-18 (cycle 2920, review-code(heavy): lib/observability+teams+mlb 3차 스윕 완주 — 0 unused clean)
+
+### review-code(heavy): lib/observability+teams+mlb export-but-unused 감사, lib/ 3차 스윕 전체 완주 (cycle 2920, SUCCESS-clean)
+
+- 진단: open issue 0, unprocessed approved plan 0/23(전부 archived/completed/spec-only-deferred, plan #29/#30 재평가 조건 미충족 유지). 2차 방어선(cycle 2919 retro commit 2e323d0d) OK. 직전8(2912-2919) distinct=3(review-code6+fix-incident1+lotto1) — 2-chain lock 미충족(≤2 아님). gap trigger 4종 전부 미충족/조기: fix-incident 2/20·op-analysis 21/25·info-arch 28/30(cycle 2892 checkpoint 이 재도달 목표를 cycle 2922 근방으로 명시 — 2사이클 이름)·lotto 6/30. cycle 2919 추천대로 lib/ 3차 스윕 잔여 스코프(mlb/observability/teams) 착수 — 실측 재확인 결과 mlb는 기존 기록(5337줄)과 달리 실제 2651줄(최상위 파일 기준)로 관찰, observability(10)+teams(1097) 포함 총 ~3758줄 — 과거 배치 규모(2700~3300줄대) 범위 안이라 3개 디렉토리 한 배치로 통합 처리, 잔여 스코프 완주.
+- general-purpose subagent 독립 검증(repo 전체 실제 import+JSX grep) — 78개 exported symbol(observability 1 + teams 14 + mlb 63) 전부 CONFIRMED_USED, CONFIRMED_UNUSED 0건. `lib/teams/buildTeamProfile.ts` 14개 export 는 KBO 전용이 아니라 `lib/mlb/buildMlbTeamProfile.ts`/`buildMlbTeamStrengthSnapshot.ts` 가 재사용하는 의도된 공유 로직(파일 주석에 명시). comment vs 코드 정합 이상 없음 — 오히려 `buildMlbFactorAccuracy.ts:9-11` 가 cycle 2824 self-correction 사례로 확인(과거 "4 factors unimplemented" 주석을 실제 wiring 반영해 갱신한 이력). 사소한 네이밍 불일치 1건 발견(비버그, 제거 대상 아님): `buildMlbCommunityAccuracy.ts` 파일이 `buildMlbCommunityVsAI` 함수를 export(파일명과 export 명이 유일하게 불일치하는 케이스, 모든 콜사이트 정상 동작). tsc clean. 코드 변경 없음.
+- **lib/ 3차 스윕 전체 완주** (cycle 2919~2920, 6개 디렉토리 전수 감사: analysis/api/calendar → observability/teams/mlb). 누적 CONFIRMED_UNUSED = 0건 (components/ 2차 스윕과 대조적으로 lib/ 는 전량 실사용 — 라우트보다 계층이 깊어 재사용 빈도가 높은 구조적 특성으로 추정).
+- 다음 사이클 추천 = info-architecture-review(gap 30/30, cycle 2922 도달 목표 — 2사이클 남음) 또는 1242회 로또 추첨(9/19 21시) 이후 OOS 또는 신규 review-code 스코프 탐색(components/+lib/ 양쪽 완주 이후 잔여 스코프 재정의 필요 — hooks/utils/store 등 미탐색 최상위 디렉토리 존재 여부 확인 권장).
+
 ## v0.5.62.249 — 2026-09-18 (cycle 2919, review-code(heavy): lib/analysis+api+calendar 3차 스윕 신규 스코프 — 0 unused clean)
 
 ### review-code(heavy): lib/analysis+api+calendar export-but-unused 감사 (cycle 2919, SUCCESS-clean)

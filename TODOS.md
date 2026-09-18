@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS(clean) — review-code(heavy): lib/observability+teams+mlb 3차 스윕 완주 — 0 unused (cycle 2920, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2919 retro commit 2e323d0d) OK. 직전8(2912-2919) distinct=3 — 2-chain lock 미충족. gap trigger 4종 전부 미충족/조기(info-arch 28/30, cycle 2922 목표까지 2사이클 남음). cycle 2919 추천대로 lib/ 3차 스윕 잔여(mlb/observability/teams) 착수 — mlb 실측 2651줄(기존 기록 5337줄과 불일치, 재측정값 채택)로 observability+teams 합산 총 ~3758줄, 한 배치로 통합 처리.
+
+general-purpose subagent 독립 검증 — 78개 exports 전부 외부 실사용 확인, CONFIRMED_UNUSED 0건. `lib/teams/buildTeamProfile.ts` 는 MLB 모듈이 재사용하는 의도된 공유 로직. comment 정합 이상 없음(오히려 자가 수정 이력 확인). 네이밍 불일치 1건(비버그): `buildMlbCommunityAccuracy.ts`→`buildMlbCommunityVsAI` export. tsc clean. 코드 변경 없음.
+
+**lib/ 3차 스윕 전체 완주** (cycle 2919~2920, analysis/api/calendar/observability/teams/mlb 6개 디렉토리, 누적 CONFIRMED_UNUSED 0건). 다음 사이클 추천 = info-architecture-review(gap 30/30 목표 cycle 2922, 2사이클 남음) 또는 1242회 로또(9/19 21시) 이후 OOS 또는 review-code 신규 스코프 재정의(hooks/utils/store 등 미탐색 디렉토리 확인).
+
 ## 🟢 SUCCESS(clean) — review-code(heavy): lib/analysis+api+calendar 3차 스윕 신규 스코프 — 0 unused (cycle 2919, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2918 retro commit ff7ed90e) OK. 직전8(2911-2918) distinct=4 — 2-chain lock 미충족. gap trigger 4종 전부 미충족/조기(info-arch 27/30, cycle 2892 checkpoint 이 재도달 목표를 cycle 2922 근방으로 명시 — 3사이클 이름). explore-idea saturation 충족(13/15)했으나 직전 산출물(plan #30) 이 spec-only-deferred 상태로 즉시 재발화 실익 낮음. cycle 2918 추천대로 lib/ 3차 스윕 신규 스코프 착수, analysis(2550)+api(17)+calendar(165) 배치(2732줄) 선정.
