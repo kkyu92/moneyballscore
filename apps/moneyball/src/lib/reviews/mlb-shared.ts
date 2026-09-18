@@ -239,7 +239,7 @@ export function buildMlbTeamStats(rows: MlbPredictionRow[]): MlbWeeklyTeamStat[]
 // factors map 이 없어 home/away 원본 값 diff 를 직접 Pearson 상관계수에 태움 — lower-is-better
 // (FIP류) 는 diff 부호 반전(양수=홈 우세로 정규화, buildMlbFactorAccuracy.ts 의 LOWER_IS_BETTER
 // 규칙과 동일 소스).
-export const MLB_FACTOR_COLUMN_PAIRS = {
+const MLB_FACTOR_COLUMN_PAIRS = {
   sp_fip: ["home_sp_fip", "away_sp_fip"],
   sp_xfip: ["home_sp_xfip", "away_sp_xfip"],
   lineup_woba: ["home_lineup_woba", "away_lineup_woba"],
@@ -249,7 +249,7 @@ export const MLB_FACTOR_COLUMN_PAIRS = {
 
 type MlbFactorKey = keyof typeof MLB_FACTOR_COLUMN_PAIRS;
 
-export const LOWER_IS_BETTER = new Set<MlbFactorKey>(["sp_fip", "sp_xfip", "bullpen_fip"]);
+const LOWER_IS_BETTER = new Set<MlbFactorKey>(["sp_fip", "sp_xfip", "bullpen_fip"]);
 
 export function buildMlbFactorInsights(
   rows: MlbPredictionRow[],

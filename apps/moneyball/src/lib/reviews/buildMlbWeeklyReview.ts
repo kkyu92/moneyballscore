@@ -11,12 +11,6 @@ import {
   type MlbWeeklyTeamStat,
 } from "./mlb-shared";
 
-export type {
-  MlbWeeklyFactorInsight,
-  MlbWeeklyHighlight,
-  MlbWeeklyTeamStat,
-} from "./mlb-shared";
-
 export interface MlbWeeklyGameResult {
   externalGameId: string;
   gameDate: string;

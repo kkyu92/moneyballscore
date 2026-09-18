@@ -11,12 +11,6 @@ import {
   type WeeklyTeamStat,
 } from "./shared";
 
-export type {
-  WeeklyFactorInsight,
-  WeeklyHighlight,
-  WeeklyTeamStat,
-} from "./shared";
-
 export interface WeeklyGameResult {
   gameId: number;
   gameDate: string;
