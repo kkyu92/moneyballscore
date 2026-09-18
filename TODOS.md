@@ -1,4 +1,14 @@
 
+## 🟢 SUCCESS — review-code(heavy): lib/lotto+matchup+players+predictions export-but-unused de-export — lib/ 스윕 1차 종료 (cycle 2909, 2026-09-18)
+
+진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2908 retro commit c36f4ae1) OK. 직전8(2901-2908) distinct=3 — 2-chain lock 미충족. gap trigger 4종(fix-incident 11/20·op-analysis 10/25·info-arch 17/30·lotto 7/30) 전부 미근접. cycle 2908 추천대로 review-code(heavy) 잔여 4개 디렉토리(lotto/matchup/players/predictions, 2152줄) 전량 감사.
+
+exported symbol 전수 subagent 독립 검증(68 exports) → CONFIRMED_UNUSED 4건: lib/lotto/lotto-data-schema.ts 의 MatchDistributionSchema/WinningScoreBreakdownSchema/ScoreStatsSchema/ScorePercentilesSchema (전부 동일 파일 sub-schema 합성 only, 외부 import 0건). matchup/players/predictions 3개 디렉토리 CONFIRMED_UNUSED 0건 — 전부 실사용 확인(이름 충돌 2건 검증 완료 무관). export 키워드만 제거. tsc clean + test 582/582·4564/4564 green. PR #3091 squash 머지 완료(MERGED 실측 확인, `146ca9bd`).
+
+**lib/ 전체 export-but-unused 스윕 1차 종료** (cycle 2900~2909, lib/ 하위 전 디렉토리 감사 완료).
+
+다음 사이클 추천 = info-architecture-review(gap 17/30) 또는 1242회 추첨(9/19 21시) 후 lotto OOS 또는 review-code(heavy) 2차 스윕(components/hooks/app 라우트 등 lib/ 외부 스코프).
+
 ## 🟢 SUCCESS — review-code(heavy): lib/reviews export-but-unused de-export (cycle 2908, 2026-09-18)
 
 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2907 retro commit b2290e65) OK. 직전8(2900-2907) distinct=3 — 2-chain lock 미충족. gap trigger 4종(fix-incident 10/20·op-analysis 9/25·info-arch 16/30·lotto 6/30) 전부 미근접. 1242회 추첨(9/19 21시) 익일이라 lotto OOS 미해당. cycle 2907 추천대로 review-code(heavy) 계속 — reviews(2793줄) 단독 스코프 감사.

@@ -1,3 +1,12 @@
+## v0.5.62.247 — 2026-09-18 (cycle 2909, review-code(heavy): lib/lotto export-but-unused de-export — lib/ 스윕 1차 종료)
+
+### review-code(heavy): export-but-unused heuristic lib/lotto+matchup+players+predictions 스코프 (cycle 2909, SUCCESS)
+
+- 진단: open issue 0, unprocessed approved plan 0/23. 2차 방어선(cycle 2908 retro commit c36f4ae1) OK. 직전8(2901-2908) distinct=3(skill-evolution1+lotto(lite)1+review-code(heavy)6) — 2-chain lock 미충족(≥3). gap trigger 4종(fix-incident 11/20·op-analysis 10/25·info-arch 17/30·lotto 7/30) 전부 미근접. 1242회 추첨(9/19 21시)은 익일이라 lotto OOS 미해당. cycle 2908 추천대로 review-code(heavy) 잔여 4개 디렉토리(lotto/matchup/players/predictions, 총 2152줄) 전량 선정 — lib/ export-but-unused 스윕 마지막 라운드.
+- exported symbol 전수 general-purpose subagent 독립 검증(repo 전체 실제 import 대조, 68 exports 검사). **CONFIRMED_UNUSED 4건**: `lib/lotto/lotto-data-schema.ts` 의 `MatchDistributionSchema`/`WinningScoreBreakdownSchema`/`ScoreStatsSchema`/`ScorePercentilesSchema` — 전부 동일 파일 안 sub-schema 합성(`.optional()`)으로만 사용, 외부 import 0건. matchup(17 exports)/players(7 exports)/predictions(23 exports) 3개 디렉토리는 CONFIRMED_UNUSED 0건 — 전부 실사용 확인(factorLabels.ts `FACTOR_LABELS` 는 `app/reviews/misses/page.tsx` 동명 로컬 const 와 이름 충돌 검증 완료 무관, v2Predictor.ts `V2_1_B_WEIGHTS` 도 `packages/shared` 동명 심볼과 무관 확인). export 키워드만 제거(내부 로직 계속 사용).
+- `pnpm --filter moneyball exec tsc --noEmit` clean, `pnpm test` 582/582 files·4564/4564 tests green, eslint clean. PR #3091 squash 머지(`146ca9bd`, `state=MERGED` 실측 확인).
+- **lib/ 전체 export-but-unused 스윕 1차 종료** (cycle 2900~2909, accuracy/analysis/api/calendar/debug/insights/lotto/matchup/mlb/observability/players/predictions/reviews/seasons/seo/standings/stats/supabase/teams/v2-shadow-monitor/changelog/leaderboard 전 디렉토리 감사 완료). 다음 사이클 추천 = info-architecture-review(gap 17/30) 또는 1242회 추첨(9/19 21시) 이후 lotto OOS 검증 또는 review-code(heavy) 2차 스윕(components/hooks/app 라우트 등 lib/ 외부 스코프 신규 탐색).
+
 ## v0.5.62.247 — 2026-09-18 (cycle 2908, review-code(heavy): lib/reviews export-but-unused de-export)
 
 ### review-code(heavy): export-but-unused heuristic lib/reviews 스코프 (cycle 2908, SUCCESS)
