@@ -1,4 +1,12 @@
 
+## 🟢 SUCCESS — review-code(heavy): kbo-data backtest/ + factors/ 재감사 — retro 결손 backfill (cycle 2929, 2026-09-29)
+
+경위: 세션 hang 으로 retro 미박제(active-cycle 마커만 잔존, pid 76050 idle 6.5h). 실제 작업은 정상 merge(PR #3110 backtest dead code 6건+trainLogistic 버그 수정, PR #3111 factors dead export 5건 추가 발견). cycle 2930 진단 단계서 발견해 backfill.
+
+**⚠️ 사용자 확인 필요 — 동시 실행 충돌 의심**: PR #3111 body 가 작업 도중 "동일 scope(factors/)를 다른 프로세스가 동시에 감사해 clean(오판)으로 먼저 push 완료"했다고 기록. 리포 working directory 공유하는 **2개 이상의 develop-cycle 세션이 동시 실행**되고 있었던 것으로 추정됨 — 사용자가 여러 터미널/watch.sh 인스턴스를 동시에 띄운 적 있는지 확인 필요. 방치 시 향후 커밋 충돌/cycle 번호 중복/데이터 유실 위험.
+
+다음 사이클 추천 = review-code(heavy) packages/kbo-data 잔여 스코프(scrapers/agents/pipeline/analytics/features) 계속.
+
 ## 🟢 SUCCESS(retro-only) — review-code(heavy): kbo-data factors/ 감사, clean (cycle 2928, 2026-09-29)
 
 진단: 2-chain lock 미충족(직전8 distinct=4). factors/(958줄, 9파일 mlb-*/park-weather/umpire-sz) 감사 — dead export 0건, comment drift 0건. umpire-sz.ts/park-weather.ts 자체 주석은 cycle 2926 predictor.ts 정정 내용과 이미 정합. 코드 변경 없음.

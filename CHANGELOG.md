@@ -1,3 +1,13 @@
+## v0.5.62.257 — 2026-09-29 (cycle 2929, review-code(heavy): kbo-data backtest/ + factors/ 재감사 — retro 결손 backfill)
+
+### review-code(heavy): backtest/ dead code 6건 제거 + trainLogistic 버그 수정, factors/ dead export 5건 추가 발견 (cycle 2929, SUCCESS — retro backfill)
+
+- **경위**: 본 사이클은 세션 hang 으로 retro(JSON/commit/CHANGELOG)를 남기지 못한 채 active-cycle 마커만 남아 있었음(pid 76050, idle 6시간+, 0 children). 실제 코드 작업은 정상 merge 완료(PR #3110, #3111) — cycle 2930 진단 단계에서 발견해 retroactive 백필.
+- PR #3110: backtest/ dead code 6건 제거(`EloPoint`/`SeasonTeamStat`/`FactorKey` export 제거, `SEASON_SNAPSHOTS`/`fetchSeasonTeamStats` export 제거, `BacktestRow` 완전 삭제) + `trainLogistic()` correctness 버그 수정 — 4-feature 외 입력(vectorizeExtended/V3) 시 `featureNames` 필드가 실제 열과 불일치하던 silent 버그. `TrainOptions.featureNames` 옵션 추가.
+- PR #3111: factors/ 재감사 — dead export 5건 추가 발견(`MlbEloUpdateResult`/`MlbTeamEloState`/`MlbEloHistoryEntry`/`MlbFactorDetailRow`/`MlbGameOverviewNarrative`, 전부 타입/인터페이스). export 키워드만 제거.
+- **⚠️ 동시 실행 충돌 발견**: PR #3111 작업 도중 origin/main 에 별도 프로세스가 동일 scope(factors/)를 "clean, no code change" 로 먼저 push 완료(cycle 2928, commit bfef35f5/#3109)한 것을 확인 — 그 감사는 실제로 5건의 dead export 를 놓쳤음. **리포 working directory 를 공유하는 2개 이상의 develop-cycle 세션이 동시에 실행되고 있었던 것으로 추정** (사용자 확인 필요 — 아래 보고 참조).
+- tsc clean(kbo-data+moneyball), test 94/94파일 1224/1224 green.
+
 ## (no version bump — 2026-09-29, cycle 2928, review-code(heavy): kbo-data factors/ 감사, clean)
 
 ### review-code(heavy): packages/kbo-data factors/(958줄) 감사 — clean, 코드 변경 없음 (cycle 2928, SUCCESS retro-only)
