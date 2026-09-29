@@ -1,3 +1,13 @@
+## v0.5.62.261 — 2026-09-29 (cycle 2933, review-code(heavy): kbo-data pipeline/ 유틸 9파일 감사)
+
+### review-code(heavy): packages/kbo-data pipeline/ 소형 유틸 9파일(405줄) 감사 — dead export 1건 제거 (cycle 2933, SUCCESS)
+
+- 진단: 직전8(2925-2932) distinct=2(review-code+fix-incident) — 2-chain lock 조건 충족했으나 잠긴 chain 중 하나가 fix-incident 라 lock 무시(안전 우선 룰). fix-incident(gap8/20)/op-analysis(gap9/25)/info-arch(gap11/30)/lotto(gap19/30) 전부 미도달. open issue 0, approved plan 0/23. review-code(heavy) 직전20 dominance 지속(직전15 중 14회) — 직전 cycle 추천대로 pipeline/(7950줄, 32파일) 첫 서브스코프로 소형 유틸 9파일(db-error/winner-id/db-constraints/accuracy-update/notify-status-predicate/daily-summary/brier/final-reasoning/schedule) 선택.
+- general-purpose subagent 독립 검증(9파일, 405줄, 전 exported 심볼 repo 전수 grep) — dead export 1건: `db-constraints.ts` 의 `DbConstraintKey` type export (+ index.ts 배럴 re-export) 제거, 외부 소비처 0건 확인(`DB_CONSTRAINTS` const 본체는 15+ 파일에서 계속 사용 중, 파생 type만 dead). comment drift 0건(나머지 8파일 전수 확인, 전부 정확).
+- tsc clean(kbo-data+moneyball), test 582/582파일 4564/4564 green. PR #3115 merge 완료(4974b35b).
+
+다음 사이클 추천 = review-code(heavy) pipeline/ 잔여 스코프(backtest-* 7파일 ~1860줄, 또는 daily.ts 1659줄/mlb-pipeline.ts 892줄 단독 대형파일) 계속 — 단 op-analysis(10/25)/info-arch(12/30)/lotto(20/30) gap 근접 자연 대기도 고려.
+
 ## v0.5.62.260 — 2026-09-29 (cycle 2932, review-code(heavy): kbo-data analytics+features 감사)
 
 ### review-code(heavy): packages/kbo-data analytics/+features/(344줄, 2파일) 감사 — comment drift 1건 정정 (cycle 2932, SUCCESS)
